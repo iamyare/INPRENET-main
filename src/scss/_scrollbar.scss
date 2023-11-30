@@ -1,0 +1,35 @@
+// scrollbar tinkering
+@supports (scrollbar-width: thin) {
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: #1F544A transparent;
+  }
+}
+
+::-webkit-scrollbar {
+  width: .7em;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--cui-body-bg, #fff);
+  border-radius: 100vw;
+  margin-block: .2em;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #999;
+  border: .15em solid var(--cui-body-bg, #fff);
+  border-radius: 100vw;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #1F544A;
+}
+
+.dark-theme::-webkit-scrollbar-thumb {
+  background: #1F544A;
+}
+
+.dark-theme::-webkit-scrollbar-thumb:hover {
+  background: #999;
+}

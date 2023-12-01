@@ -3,12 +3,12 @@ const jwt = require('jsonwebtoken');
 const getToken = (payload) => {
     return jwt.sign({
         data: payload
-    }, 'SECRET', { expiresIn: '1h' });
+    }, process.env.KEY_TOKEN, { expiresIn: '1h' });
 }
 
 const getTokenData = (token) => {
     let data = null;
-    jwt.verify(token, 'SECRET', (err, decoded) => {
+    jwt.verify(token, process.env.KEY_TOKEN, (err, decoded) => {
         if(err) {
             console.log('Error al obtener data del token');
         } else {

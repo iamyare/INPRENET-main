@@ -26,7 +26,6 @@ CREATE TABLE Usuario (
   nombre VARCHAR2(255) NOT NULL,
   correo VARCHAR2(255) NOT NULL,
   contrasena VARCHAR2(255),
-  tipoDeUsuario VARCHAR2(255),
   pregunta_seguridad_1 VARCHAR2(255),
   respuesta_seguridad_1 VARCHAR2(255),
   pregunta_seguridad_2 VARCHAR2(255),
@@ -34,7 +33,7 @@ CREATE TABLE Usuario (
   pregunta_seguridad_3 VARCHAR2(255),
   respuesta_seguridad_3 VARCHAR2(255),
   rol_id NUMBER,
-  estado VARCHAR2(50) DEFAULT 'sin verificar' NOT NULL,
+  estado VARCHAR2(50) DEFAULT 'SIN VERIFICAR' NOT NULL,
   fecha_creacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   fecha_modificacion TIMESTAMP,
   CONSTRAINT fk_rol FOREIGN KEY (rol_id) REFERENCES Rol(id)

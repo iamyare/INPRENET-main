@@ -123,8 +123,7 @@ const confirm = async (req, res) => {
         await connection.execute(updateQuery, ['VERIFICADO', correo, id], { autoCommit: true });
 
         // Redireccionar a la confirmación
-        //console.log("http://127.0.0.1:5501/public/confirm.html");
-       return res.redirect('http://127.0.0.7:5500/public/confirm.html');
+       return res.redirect('http://127.0.0.7:5500/backend/public/confirm.html');
     } catch (error) {
         console.log(error);
         return res.json({

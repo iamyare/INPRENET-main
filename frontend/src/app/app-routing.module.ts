@@ -6,7 +6,7 @@ import { Page404Component } from './views/pages/page404/page404.component';
 import { Page500Component } from './views/pages/page500/page500.component';
 import { LoginComponent } from './views/pages/login/login.component';
 import { RegisterComponent } from './views/pages/register/register.component';
-import { PruebaComponent } from './views/pages/prueba/prueba.component';
+import { PreRegisterComponent } from './views/pages/pre-register/pre-register.component';
 
 const routes: Routes = [
   {
@@ -82,12 +82,13 @@ const routes: Routes = [
     }
   },
   {
-    path: 'prueba',
-    component: PruebaComponent,
+    path: 'pre-register',
+    component: PreRegisterComponent,
     data: {
-      title: 'Prueba'
+      title: 'Pre Register Page'
     }
   }
+  
   /* {path: '**', redirectTo: 'dashboard'} */
 ];
 

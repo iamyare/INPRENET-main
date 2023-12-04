@@ -3,20 +3,13 @@ import { RouterModule, Routes } from '@angular/router';
 import { Page404Component } from './page404/page404.component';
 import { Page500Component } from './page500/page500.component';
 import { LoginComponent } from './login/login.component';
-import { PruebaComponent } from './prueba/prueba.component';
 import { RegisterComponent } from './register/register.component';
+import { PreRegisterComponent } from './pre-register/pre-register.component';
 
 const routes: Routes = [
   {
     path: '404',
     component: Page404Component,
-    data: {
-      title: 'Page 404'
-    }
-  },
-  {
-    path: 'prueba',
-    component: PruebaComponent,
     data: {
       title: 'Page 404'
     }
@@ -40,6 +33,13 @@ const routes: Routes = [
     component: RegisterComponent,
     data: {
       title: 'Register Page'
+    }
+  },
+  {
+    path: 'pre-register',
+    component: PreRegisterComponent,
+    data: {
+      title: 'Pre Register Page'
     }
   }
 ];

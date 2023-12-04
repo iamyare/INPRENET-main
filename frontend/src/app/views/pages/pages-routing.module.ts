@@ -29,7 +29,7 @@ const routes: Routes = [
     }
   },
   {
-    path: 'register',
+    path: 'register/:token',
     component: RegisterComponent,
     data: {
       title: 'Register Page'

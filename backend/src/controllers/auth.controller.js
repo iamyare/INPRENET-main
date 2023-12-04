@@ -8,7 +8,7 @@ const { getConnection } = require('../config/db');
 
 const signUp = async (req, res) => {
     let connection;
-
+    console.log("ENTRO...");
     try {
         // Obtener la data del usuario: nombre, correo, rol y tipo de identificación
         const { nombre, correo, nombreRol, tipoIdentificacion, numeroIdentificacion, archivoidentificacion } = req.body;

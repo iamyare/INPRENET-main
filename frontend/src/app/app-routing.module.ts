@@ -75,7 +75,7 @@ const routes: Routes = [
     }
   },
   {
-    path: 'register',
+    path: 'register/:token',
     component: RegisterComponent,
     data: {
       title: 'Register Page'
@@ -88,7 +88,7 @@ const routes: Routes = [
       title: 'Pre Register Page'
     }
   }
-  
+
   /* {path: '**', redirectTo: 'dashboard'} */
 ];
 

@@ -30,7 +30,7 @@ const sendEmail = async (email, subject, html) => {
 }
 
 const getTemplate = (name, token) => {
-    const enlace = `http://localhost:3000/auth/updateData/${token}`;
+    const enlace = `http://localhost:4200/#/register/${token}`;
     return `
         <head>
             <link rel="stylesheet" href="./style.css">

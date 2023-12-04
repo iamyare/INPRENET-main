@@ -10,8 +10,8 @@ const signUp = async (req, res) => {
     let connection;
 
     try {
-        // Obtener la data del usuario: nombre, correo
-        const { nombre, correo } = req.body;
+        // Obtener la data del usuario: nombre, correo, rol y tipo de identificación
+        const { nombre, correo, nombreRol, tipoIdentificacion, numeroIdentificacion, archivoidentificacion } = req.body;
 
         // Verificar que el usuario no exista
         connection = await getConnection();
@@ -29,20 +29,38 @@ const signUp = async (req, res) => {
             });
         }
 
-        // Generar el código
-        const id = uuidv4();
-        const rol_id = 1;
+        // Obtener el id de rol y tipo de identificación según los parámetros
+        const rolIdMap = {
+            'Administrador': 1,
+            'Oficial de Operacion': 2,
+            'Contador': 3,
+            'Auxiliar': 4
+        };
+
+        const tipoIdentificacionIdMap = {
+            'CARNET RESIDENCIA': 1,
+            'DNI': 2,
+            'NUMERO LICENCIA': 3,
+            'PASAPORTE': 4,
+            'RTN': 5
+        };
+
+        const rol_id_rol = rolIdMap[nombreRol];
+        const fk_id_ident = tipoIdentificacionIdMap[tipoIdentificacion];
 
         // Crear un nuevo usuario
+        const id_usuario = uuidv4();
         const insertUserQuery = `
-            INSERT INTO Usuario (id, nombre, correo, rol_id)
-            VALUES (:id, :nombre, :correo, :rol_id)
+            INSERT INTO Usuario (id_usuario, nombre, correo, rol_id_rol, fk_id_ident)
+            VALUES (:id_usuario, :nombre, :correo, :rol_id_rol, :fk_id_ident)
         `;
-        const userParams = {id, nombre, correo, rol_id };
+
+        const userParams = { id_usuario, nombre, correo, rol_id_rol, fk_id_ident };
         await connection.execute(insertUserQuery, userParams, { autoCommit: true });
 
         // Generar token
-        const token = getToken({ correo, id });
+        const tokenData = { correo, id_usuario };
+        const token = getToken(tokenData);
 
         // Obtener un template
         const template = getTemplate(nombre, token);
@@ -50,11 +68,31 @@ const signUp = async (req, res) => {
         // Enviar el email
         await sendEmail(correo, 'Este es un email de prueba', template);
 
+        // Insertar datos en la tabla empleado
+        const id_empleado = uuidv4();
+        const numero_identificacion = numeroIdentificacion;
+        const archivo_identificacion = archivoidentificacion;
+        const usuario_id_usuario = id_usuario;
+
+        const insertEmpleadoQuery = `
+            INSERT INTO empleado (id_empleado, usuario_id_usuario, numero_identificacion, archivo_identificacion)
+            VALUES (:id_empleado, :usuario_id_usuario, :numero_identificacion, :archivo_identificacion)
+        `;
+
+        const empleadoParams = {
+            id_empleado,
+            usuario_id_usuario,
+            numero_identificacion,
+            archivo_identificacion
+        };
+
+        await connection.execute(insertEmpleadoQuery, empleadoParams, { autoCommit: true });
+
         // Devolver el token en la respuesta
         res.json({
             success: true,
             msg: 'Registrado correctamente',
-            token: token // Añadir el token a la respuesta
+            token: token
         });
     } catch (error) {
         console.error(error);
@@ -99,14 +137,13 @@ const confirm = async (req, res) => {
             });
         }
 
-
-        const { correo, id } = data.data;
+        const { correo, id_usuario } = data.data;
 
         // Verificar existencia del usuario en la base de datos Oracle
         connection = await getConnection();
         const result = await connection.execute(
-            'SELECT * FROM Usuario WHERE correo = :correo AND id = :id',
-            [correo, id],
+            'SELECT * FROM Usuario WHERE correo = :correo AND id_usuario = :id_usuario',
+            [correo, id_usuario],
             { outFormat: oracledb.OUT_FORMAT_OBJECT }
         );
         const user = result.rows[0] || null;
@@ -119,13 +156,13 @@ const confirm = async (req, res) => {
         }
 
         // Actualizar estado del usuario
-        const updateQuery = 'UPDATE Usuario SET estado = :estado WHERE correo = :correo AND id = :id';
-        await connection.execute(updateQuery, ['VERIFICADO', correo, id], { autoCommit: true });
+        const updateQuery = 'UPDATE Usuario SET estado = :estado WHERE correo = :correo AND id_usuario = :id_usuario';
+        await connection.execute(updateQuery, ['ACTIVO', correo, id_usuario], { autoCommit: true });
 
         // Redireccionar a la confirmación
-       return res.redirect('http://127.0.0.7:5500/backend/public/confirm.html');
+        return res.redirect('http://127.0.0.7:5500/backend/public/confirm.html');  // Ajusta la URL según tu necesidad
     } catch (error) {
-        console.log(error);
+        console.error(error);
         return res.json({
             success: false,
             msg: 'Error al confirmar usuario'
@@ -140,8 +177,6 @@ const confirm = async (req, res) => {
         }
     }
 };
-
-
 
 
 module.exports = {

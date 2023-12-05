@@ -32,7 +32,7 @@ CREATE TABLE afiliado (
     telefono_2             VARCHAR2(20 CHAR),
     correo_1               VARCHAR2(40 CHAR),
     correo_2               VARCHAR2(40 CHAR),
-    tipo_id_identificacion VARCHAR2(40 CHAR) NOT NULL,
+    tipo_identificacion_id VARCHAR2(40 CHAR) NOT NULL,
     afiliado_id_afiliado   VARCHAR2(40 CHAR) NOT NULL,
     archivo_identificacion NVARCHAR2(300),
     direccion_residencia   NVARCHAR2(200),
@@ -63,7 +63,7 @@ CREATE UNIQUE INDEX afiliado__idxv1 ON
 
 CREATE UNIQUE INDEX afiliado__idxv4 ON
     afiliado (
-        tipo_id_identificacion
+        tipo_identificacion_id
     ASC );
 
 CREATE UNIQUE INDEX afiliado__idxv2 ON
@@ -84,6 +84,11 @@ CREATE TABLE afiliados_por_banco (
     banco_id_banco3      VARCHAR2(40 CHAR) NOT NULL,
     banco_id_banco2      VARCHAR2(40 CHAR) NOT NULL
 );
+
+CREATE INDEX afiliados_por_banco_banco_fk ON
+    afiliados_por_banco (
+        banco_id_banco
+    ASC );
 
 CREATE INDEX afiliados_por_banco_banco_fk ON
     afiliados_por_banco (
@@ -186,7 +191,7 @@ CREATE TABLE perf_afil_cent_trab (
     sector                 VARCHAR2(40 CHAR),
     numero_acuerdo         VARCHAR2(50 CHAR),
     salario_neto           NUMBER,
-    id_centro_trabajo      VARCHAR2(40 CHAR) NOT NULL,
+    centro_trabajo_id      VARCHAR2(40 CHAR) NOT NULL,
     afiliado_id_afiliado   VARCHAR2(40 CHAR) NOT NULL,
     id_afiliado            VARCHAR2(40 CHAR) NOT NULL
 );
@@ -251,6 +256,7 @@ CREATE TABLE usuario (
     fecha_modificacion     NVARCHAR2(50),
     correo                 NVARCHAR2(200),
     contraseña             NVARCHAR2(200),
+    archivo_id             NVARCHAR2(300),
     rol_id_rol             NVARCHAR2(36) NOT NULL,
     fk_id_ident            VARCHAR2(40 CHAR) NOT NULL
 );
@@ -263,21 +269,7 @@ CREATE UNIQUE INDEX usuario__idx ON
         id_usuario
     ASC );
 
-CREATE UNIQUE INDEX usuario__idxv1 ON
-    usuario (
-        rol_id_rol
-    ASC );
-
-CREATE UNIQUE INDEX usuario__idxv5 ON
-    usuario (
-        fk_id_ident
-    ASC );
-
 ALTER TABLE usuario ADD CONSTRAINT usuario_pk PRIMARY KEY ( id_usuario );
-
-ALTER TABLE afiliados_por_banco
-    ADD CONSTRAINT afil_por_banco_fk FOREIGN KEY ( afiliado_id_afiliado )
-        REFERENCES afiliado ( id_afiliado );
 
 ALTER TABLE afiliado
     ADD CONSTRAINT afiliado_afiliado_fk FOREIGN KEY ( afiliado_id_afiliado )
@@ -292,8 +284,12 @@ ALTER TABLE afiliado
         REFERENCES pais ( id_pais );
 
 ALTER TABLE afiliado
-    ADD CONSTRAINT afiliado_tipo_id_fk FOREIGN KEY ( tipo_id_identificacion )
+    ADD CONSTRAINT afiliado_tipo_id_fk FOREIGN KEY ( tipo_identificacion_id )
         REFERENCES tipo_identificacion ( id_identificacion );
+
+ALTER TABLE afiliados_por_banco
+    ADD CONSTRAINT afiliados_por_ban_afil_fk FOREIGN KEY ( afiliado_id_afiliado )
+        REFERENCES afiliado ( id_afiliado );
 
 ALTER TABLE afiliados_por_banco
     ADD CONSTRAINT afiliados_por_banco_banco_fk FOREIGN KEY ( banco_id_banco )
@@ -324,7 +320,11 @@ ALTER TABLE empleado
         REFERENCES usuario ( id_usuario );
 
 ALTER TABLE perf_afil_cent_trab
-    ADD CONSTRAINT perf_afil_cent_trab_fk FOREIGN KEY ( afiliado_id_afiliado )
+    ADD CONSTRAINT perf_afil_cent_trab_fk FOREIGN KEY ( centro_trabajo_id )
+        REFERENCES centro_trabajo ( id_centro_trabajo );
+
+ALTER TABLE perf_afil_cent_trab
+    ADD CONSTRAINT perf_afil_cent_trab_fkv2 FOREIGN KEY ( afiliado_id_afiliado )
         REFERENCES afiliado ( id_afiliado );
 
 ALTER TABLE provincia
@@ -332,20 +332,17 @@ ALTER TABLE provincia
         REFERENCES pais ( id_pais );
 
 ALTER TABLE referencia_personal
-    ADD CONSTRAINT ref_per_afili_fk FOREIGN KEY ( afiliado_id_afiliado )
+    ADD CONSTRAINT referencia_per_afil_fk FOREIGN KEY ( afiliado_id_afiliado )
         REFERENCES afiliado ( id_afiliado );
-
-ALTER TABLE perf_afil_cent_trab
-    ADD CONSTRAINT trab_cent_trab_fk FOREIGN KEY ( id_centro_trabajo )
-        REFERENCES centro_trabajo ( id_centro_trabajo );
 
 ALTER TABLE usuario
     ADD CONSTRAINT usuario_rol_fk FOREIGN KEY ( rol_id_rol )
         REFERENCES rol ( id_rol );
 
 ALTER TABLE usuario
-    ADD CONSTRAINT usuario_tipo_id_fkv1 FOREIGN KEY ( fk_id_ident )
+    ADD CONSTRAINT usuario_tipo_identificacion_fk FOREIGN KEY ( fk_id_ident )
         REFERENCES tipo_identificacion ( id_identificacion );
+
         
 INSERT INTO "SYSTEM"."TIPO_IDENTIFICACION" (ID_IDENTIFICACION, TIPO_IDENTIFICACION) VALUES ('1', 'CARNET RESIDENCIA');
 INSERT INTO "SYSTEM"."TIPO_IDENTIFICACION" (ID_IDENTIFICACION, TIPO_IDENTIFICACION) VALUES ('2', 'DNI');

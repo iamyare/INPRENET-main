@@ -55,8 +55,6 @@ const signUp = async (req, res) => {
             INSERT INTO usuario (id_usuario,nombre,correo,rol_id_rol,fk_id_ident)
             VALUES ('${id_usuario}', '${nombre}', '${correo}', ${rol_id_rol}, ${fk_id_ident})
         `;
-
-        console.log(insertUserQuery);
         
         //const userParams = { id_usuario, nombre, correo, rol_id_rol, fk_id_ident };
 

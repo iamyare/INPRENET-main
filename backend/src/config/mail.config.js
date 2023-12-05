@@ -18,10 +18,10 @@ let transporter = nodemailer.createTransport({
 const sendEmail = async (email, subject, html) => {
     try {
         await transporter.sendMail({
-            from: `MHCode <${ mail.user }>`,
+            from: `SYSJUB`,
             to: email,
             subject,
-            text: "Hola amigos, suscríbance para más videos",
+            text: "",
             html,
         });
     } catch (error) {

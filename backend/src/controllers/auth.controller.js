@@ -31,10 +31,10 @@ const signUp = async (req, res) => {
 
         // Obtener el id de rol y tipo de identificación según los parámetros
         const rolIdMap = {
-            'Administrador': 1,
-            'Oficial de Operacion': 2,
-            'Contador': 3,
-            'Auxiliar': 4
+            'ADMINISTRADOR': 1,
+            'OFICIAL DE OPERACION': 2,
+            'CONTADOR': 3,
+            'AUXILIAR': 4
         };
 
         const tipoIdentificacionIdMap = {
@@ -50,14 +50,19 @@ const signUp = async (req, res) => {
 
         // Crear un nuevo usuario
         const id_usuario = uuidv4();
+
         const insertUserQuery = `
-            INSERT INTO Usuario (id_usuario, nombre, correo, rol_id_rol, fk_id_ident)
-            VALUES (:id_usuario, :nombre, :correo, :rol_id_rol, :fk_id_ident)
+            INSERT INTO usuario (id_usuario,nombre,correo,rol_id_rol,fk_id_ident)
+            VALUES ('${id_usuario}', '${nombre}', '${correo}', ${rol_id_rol}, ${fk_id_ident})
         `;
 
-        const userParams = { id_usuario, nombre, correo, rol_id_rol, fk_id_ident };
-        await connection.execute(insertUserQuery, userParams, { autoCommit: true });
+        console.log(insertUserQuery);
+        
+        //const userParams = { id_usuario, nombre, correo, rol_id_rol, fk_id_ident };
 
+        const a = await connection.execute(insertUserQuery);
+
+        
         // Generar token
         const tokenData = { correo, id_usuario };
         const token = getToken(tokenData);

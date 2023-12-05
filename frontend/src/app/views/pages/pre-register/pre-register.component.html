@@ -6,21 +6,21 @@
             <c-card class="p-4">
               <c-card-body class="p-4">
                 <form cForm [formGroup]="form">
-                
+
                   <h1>Pre Registro De Cuenta</h1>
                   <p class="text-medium-emphasis">Crear una cuenta De Usuario Para el Sistema</p>
-  
+
                   <c-input-group class="mb-1">
                     <mat-form-field style="width:100%">
                       <mat-label>Correo Electrónico</mat-label>
-                      <input matNativeControl  formControlName="correo" /> 
+                      <input matNativeControl  formControlName="correo" />
                     </mat-form-field>
                   </c-input-group>
 
                   <c-input-group class="mb-1">
                     <mat-form-field style="width:100%">
                       <mat-label>Nombre completo</mat-label>
-                      <input matNativeControl  formControlName="nombrecomp" /> 
+                      <input matNativeControl  formControlName="nombrecomp" />
                     </mat-form-field>
                   </c-input-group>
 
@@ -28,7 +28,7 @@
                     <mat-form-field style="width:100%">
                       <mat-label>Tipo de identificación</mat-label>
                       <select matNativeControl  formControlName="tipoIdent"  >
-                        <option *ngFor="let p of tipoIdent" [value]="p.idIdentificacion" >
+                        <option *ngFor="let p of tipoIdent" [value]="p.value" >
                           {{p.value}}
                         </option>
                       </select>
@@ -38,15 +38,15 @@
                   <c-input-group class="mb-1">
                     <mat-form-field style="width:100%">
                       <mat-label>Número de identificación</mat-label>
-                      <input matNativeControl  formControlName="numeroIden" /> 
+                      <input matNativeControl  formControlName="numeroIden" />
                     </mat-form-field>
                   </c-input-group>
-    
+
                   <c-input-group class="mb-1">
                     <mat-form-field style="width:100%">
                       <mat-label>Tipo de Rol</mat-label>
                       <select matNativeControl  formControlName="rol"  >
-                        <option *ngFor="let p of tipoRol" [value]="p.idRol" >
+                        <option *ngFor="let p of tipoRol" [value]="p.value" >
                           {{p.value}}
                         </option>
                       </select>
@@ -69,8 +69,8 @@
                     </div>
                 </div>
 
-                 
-    
+
+
                   <div class="d-grid">
                     <button cButton [disabled]="form.invalid" style="background: #1F544A; border: 0;" (click)="crearCuenta();">Crear Cuenta</button>
                   </div>
@@ -82,10 +82,10 @@
                 <div>
                   <h2></h2>
                   <p>
-                    
+
                   </p>
                   <button [active]="true" cButton class="mt-3" color="primary" routerLink="/register">
-                    
+
                   </button>
                 </div>
               </c-card-body> -->
@@ -95,4 +95,3 @@
       </c-row>
     </c-container>
   </div>
-  

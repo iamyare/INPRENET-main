@@ -14,6 +14,7 @@ export class AuthService {
 
   crearCuenta(data:any): Observable<any>{
     var url = `${environment.API_URL}/auth/signup`;
+    console.log(data);
 
     return this.http.post<any>(
       url,
@@ -25,5 +26,5 @@ export class AuthService {
         //catchError((err) => this.handlerError2(err))
       )
   }
-  
+
 }

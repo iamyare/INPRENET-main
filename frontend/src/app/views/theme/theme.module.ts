@@ -9,6 +9,8 @@ import { TypographyComponent } from './typography.component';
 
 // Theme Routing
 import { ThemeRoutingModule } from './theme-routing.module';
+import { AfilBancoComponent } from '../pages/afil-banco/afil-banco.component';
+import { SharedModule } from '../shared/shared/shared.module';
 
 @NgModule({
   imports: [
@@ -19,9 +21,11 @@ import { ThemeRoutingModule } from './theme-routing.module';
     UtilitiesModule,
     IconModule,
     NavModule,
-    TabsModule
+    TabsModule,
+    SharedModule
   ],
   declarations: [
+    AfilBancoComponent,
     ColorsComponent,
     ThemeColorComponent,
     TypographyComponent,

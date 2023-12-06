@@ -7,6 +7,7 @@ import { Page500Component } from './views/pages/page500/page500.component';
 import { LoginComponent } from './views/pages/login/login.component';
 import { RegisterComponent } from './views/pages/register/register.component';
 import { PreRegisterComponent } from './views/pages/pre-register/pre-register.component';
+import { AfilBancoComponent } from './views/pages/afil-banco/afil-banco.component';
 
 const routes: Routes = [
   {
@@ -27,7 +28,7 @@ const routes: Routes = [
           import('./views/dashboard/dashboard.module').then((m) => m.DashboardModule)
       },
       {
-        path: 'theme',
+        path: 'Afiliado',
         loadChildren: () =>
           import('./views/theme/theme.module').then((m) => m.ThemeModule)
       },
@@ -87,7 +88,7 @@ const routes: Routes = [
     data: {
       title: 'Pre Register Page'
     }
-  }
+  },
 
   /* {path: '**', redirectTo: 'dashboard'} */
 ];

@@ -10,73 +10,74 @@ async function getCentrosTrabajo(req, res) {
     res.json(result.rows);
   } catch (error) {
     console.error(error.message);
-    res.status(500).json({ error: 'Error en el servidor' });
+    res.status(500).json({ error: 'Error en el servidor al obtener los centros de trabajo.' });
   }
-  }
+}
 
-  const crearCentroTrabajo = async (req, res) => {
-    let connection;
+  async function crearCentroTrabajo(req, res) {
     try {
       const {
         ciudad_id_ciudad,
         nombre,
-        nombre_1,
         telefono_1,
         telefono_2,
         correo_1,
         correo_2,
-        telefono,
+        apoderado_legal,
+        representante_legal,
+        rtn,
+        logo,
+      } = req.body;
+  
+      // Crea un nuevo ID para el centro de trabajo
+      const id = uuidv4();
+  
+      // Crea la consulta SQL INSERT
+      const insertQuery = `
+      INSERT INTO centro_trabajo (
+        id_centro_trabajo,
+        ciudad_id_ciudad,
+        nombre,
+        telefono_1,
+        telefono_2,
+        correo_1,
+        correo_2,
         apoderado_legal,
         representante_legal,
         rtn,
         logo
-      } = req.body;
+      )
+      VALUES (
+        '${id}',
+        '${ciudad_id_ciudad}',
+        '${nombre}',
+        '${telefono_1}',
+        '${telefono_2}',
+        '${correo_1}',
+        '${correo_2}',
+        '${apoderado_legal}',
+        '${representante_legal}',
+        '${rtn}',
+        '${logo}'
+      )
+      
+      `;
   
-      const id_centro_trabajo = uuidv4();
+      // Obtén una conexión a la base de datos
+      const connection = await getConnection();
   
-      connection = await getConnection();
-  
-      const existingCentroQuery = 'SELECT * FROM centro_trabajo WHERE nombre = :nombre';
-      const existingCentroResult = await connection.execute(existingCentroQuery, [nombre]);
-  
-      if (existingCentroResult.rows.length > 0) {
-        return res.status(409).json({ error: 'El centro de trabajo ya existe' });
-      }
-  
-      const insertCentroQuery = `
-        INSERT INTO centro_trabajo (
-          id_centro_trabajo, ciudad_id_ciudad, nombre, nombre_1,
-          telefono_1, telefono_2, correo_1, correo_2, telefono,
-          apoderado_legal, representante_legal, rtn, logo
-        )
-        VALUES (
-          :id_centro_trabajo, :ciudad_id_ciudad, :nombre, :nombre_1,
-          :telefono_1, :telefono_2, :correo_1, :correo_2, :telefono,
-          :apoderado_legal, :representante_legal, :rtn, :logo
-        )`;
-  
-      const insertCentroResult = await connection.execute(insertCentroQuery, [
-        id_centro_trabajo, ciudad_id_ciudad, nombre, nombre_1,
-        telefono_1, telefono_2, correo_1, correo_2, telefono,
-        apoderado_legal, representante_legal, rtn, logo
-      ]);
-  
+      // Confirma la transacción
       await connection.commit();
   
-      res.json({ id_centro_trabajo, message: 'Centro de trabajo creado correctamente' });
+      await connection.close();
+  
+      // Devuelve un mensaje de éxito
+      res.json({ message: 'Centro de trabajo creado correctamente' });
     } catch (error) {
       console.error(error.message);
-      res.status(500).json({ error: 'Error en el servidor' });
-    } finally {
-      if (connection) {
-        try {
-          await connection.close();
-        } catch (closeError) {
-          console.error('Error al cerrar la conexión:', closeError.message);
-        }
-      }
+      res.status(500).json({ error: 'Error en el servidor al crear el centro de trabajo.' });
     }
-  };
+  }
   
 
   async function updateCentroTrabajo(req, res) {

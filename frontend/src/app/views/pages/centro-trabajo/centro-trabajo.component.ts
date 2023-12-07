@@ -1,7 +1,5 @@
-// centro-trabajo.component.ts
-
 import { Component, OnInit } from '@angular/core';
-import { FormBuilder } from '@angular/forms';
+import { FormBuilder, FormGroup } from '@angular/forms';
 import { CentroTrabajoService } from '../../../services/centro-trabajo.service';
 import { MatTableDataSource } from '@angular/material/table';
 
@@ -31,6 +29,17 @@ export class CentroTrabajoComponent implements OnInit {
     'editar'
   ];
 
+  formulario: FormGroup = this.fb.group({
+    nombre: [''],
+    ciudad: [''],
+    correo1: [''],
+    correo2: [''],
+    telefono1: [''],
+    telefono2: [''],
+    apoderadoLegal: [''],
+    representanteLegal: [''],
+  });
+
   constructor(private fb: FormBuilder, private centroTrabajoService: CentroTrabajoService) {}
 
   ngOnInit() {
@@ -40,16 +49,18 @@ export class CentroTrabajoComponent implements OnInit {
   obtenerCentrosTrabajo() {
     this.centroTrabajoService.getCentrosTrabajo().subscribe(
       (data) => {
+        console.log(this.dataSource.data);
+
         this.dataSource.data = data.map((row: any) => ({
           nombre: row[2],
-          telefono1: row[4],
-          telefono2: row[5],
-          correo1: row[6],
-          correo2: row[7],
-          apoderadoLegal: row[8],
-          representanteLegal: row[9],
-          rtn: row[10],
-          logo: row[11],
+          telefono1: row[3],
+          telefono2: row[4],
+          correo1: row[5],
+          correo2: row[6],
+          apoderadoLegal: row[7],
+          representanteLegal: row[8],
+          rtn: row[9],
+          logo: row[10],
         }));
 
         this.totalItems = this.dataSource.data.length;
@@ -67,5 +78,21 @@ export class CentroTrabajoComponent implements OnInit {
 
   editarCentroTrabajo(centroTrabajo: any) {
     console.log('Editar centro de trabajo:', centroTrabajo);
+
+    // Asigna los valores a los campos del formulario
+    this.formulario.patchValue({
+      nombre: centroTrabajo.nombre,
+      ciudad: centroTrabajo.ciudad,
+      correo1: centroTrabajo.correo1,
+      correo2: centroTrabajo.correo2,
+      telefono1: centroTrabajo.telefono1,
+      telefono2: centroTrabajo.telefono2,
+      apoderadoLegal: centroTrabajo.apoderadoLegal,
+      representanteLegal: centroTrabajo.representanteLegal,
+    });
+  }
+
+  limpiarCentroTrabajo(){
+    this.formulario.reset()
   }
 }

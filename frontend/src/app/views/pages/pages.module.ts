@@ -21,7 +21,6 @@ import { BotonarchivosComponent } from '@docs-components/botonarchivos/botonarch
     Page500Component,
     PreRegisterComponent,
     RegisterComponent,
-    
   ],
   imports: [
     CommonModule,

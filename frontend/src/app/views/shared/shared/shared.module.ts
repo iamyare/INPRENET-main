@@ -30,6 +30,7 @@ import {MatRadioModule} from '@angular/material/radio';
 import {MatDialogModule} from '@angular/material/dialog';
 import {MatSelectModule} from '@angular/material/select';
 import { NgScrollbarModule } from 'ngx-scrollbar';
+import { MatTableModule } from '@angular/material/table';
 
 // import {FlexLayoutModule } from '@angular/flex-layout';
 import { MatNativeDateModule } from '@angular/material/core';
@@ -82,6 +83,8 @@ import { BotonarchivosComponent } from '@docs-components/botonarchivos/botonarch
     BadgeModule,
     ListGroupModule,
     NgScrollbarModule,
+    MatTableModule,
+    MatPaginatorModule,
   ],
   exports: [
     ButtonModule,

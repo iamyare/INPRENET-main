@@ -23,7 +23,6 @@ export class AuthService {
         map((res:any) => {
           return res;
         }),
-        //catchError((err) => this.handlerError2(err))
       )
   }
 

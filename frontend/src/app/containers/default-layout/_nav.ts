@@ -38,10 +38,15 @@ export const navItems: INavData[] = [
       },
     ]
   },
+  {
+    name: 'Centro de trabajo',
+    url: '/Afiliado/centro-trabajo',
+    iconComponent: { name: 'cil-drop' }
+  },
   /* {
     name: '',
     url: '',
-     linkProps: { fragment: 'someAnchor' }, 
+     linkProps: { fragment: 'someAnchor' },
     iconComponent: { name: 'cilDollar' }
   },  */
 ];

@@ -4,6 +4,9 @@ import { Routes, RouterModule } from '@angular/router';
 /* import { ColorsComponent } from './colors.component';
 import { TypographyComponent } from './typography.component'; */
 import { AfilBancoComponent } from '../pages/afil-banco/afil-banco.component';
+import { ColorsComponent } from './colors.component';
+import { TypographyComponent } from './typography.component';
+import { CentroTrabajoComponent } from '../pages/centro-trabajo/centro-trabajo.component';
 
 const routes: Routes = [
   {
@@ -36,6 +39,13 @@ const routes: Routes = [
         component: AfilBancoComponent,
         data: {
           title: 'Afiliados a banco',
+        },
+      },
+      {
+        path: 'centro-trabajo',
+        component: CentroTrabajoComponent,
+        data: {
+          title: 'Centro Trabajo',
         },
       },
     ],

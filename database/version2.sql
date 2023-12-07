@@ -16,13 +16,16 @@ DROP TABLE usuario CASCADE CONSTRAINTS;
 
 CREATE TABLE afiliado (
     id_afiliado            VARCHAR2(40 CHAR) NOT NULL,
+    pais_id_pais           VARCHAR2(30 CHAR) NOT NULL,
     pais_id_pais2          VARCHAR2(30 CHAR) NOT NULL,
-    fecha_nacimiento       DATE,
+    tipo_identificacion_id VARCHAR2(40 CHAR) NOT NULL,
+    afiliado_id_afiliado   VARCHAR2(40 CHAR) NOT NULL,
     primer_nombre          NVARCHAR2(40),
     segundo_nombre         NVARCHAR2(40),
     tercer_nombre          VARCHAR2(30 CHAR),
     primer_apellido        VARCHAR2(30 CHAR),
     segundo_apellido       VARCHAR2(30 CHAR),
+    fecha_nacimiento       DATE,
     sexo                   CHAR(1 CHAR),
     cantidad_dependientes  INTEGER,
     cantidad_hijos         INTEGER,
@@ -32,12 +35,9 @@ CREATE TABLE afiliado (
     telefono_2             VARCHAR2(20 CHAR),
     correo_1               VARCHAR2(40 CHAR),
     correo_2               VARCHAR2(40 CHAR),
-    tipo_identificacion_id VARCHAR2(40 CHAR) NOT NULL,
-    afiliado_id_afiliado   VARCHAR2(40 CHAR) NOT NULL,
     archivo_identificacion NVARCHAR2(300),
     direccion_residencia   NVARCHAR2(200),
-    estado                 NVARCHAR2(100),
-    pais_id_pais           VARCHAR2(30 CHAR) NOT NULL
+    estado                 NVARCHAR2(100)
 );
 
 ALTER TABLE afiliado
@@ -75,20 +75,10 @@ ALTER TABLE afiliado ADD CONSTRAINT afiliado_pk PRIMARY KEY ( id_afiliado );
 
 CREATE TABLE afiliados_por_banco (
     id_af_por_banco      VARCHAR2(30 CHAR) NOT NULL,
-    id_afiliado1         VARCHAR2(40 CHAR),
-    id_banco             VARCHAR2(40 CHAR),
-    num_cuenta           VARCHAR2(40 CHAR),
     afiliado_id_afiliado VARCHAR2(40 CHAR) NOT NULL,
-    id_afiliado          VARCHAR2(40 CHAR) NOT NULL,
     banco_id_banco       VARCHAR2(40 CHAR) NOT NULL,
-    banco_id_banco3      VARCHAR2(40 CHAR) NOT NULL,
-    banco_id_banco2      VARCHAR2(40 CHAR) NOT NULL
+    num_cuenta           VARCHAR2(40 CHAR)
 );
-
-CREATE INDEX afiliados_por_banco_banco_fk ON
-    afiliados_por_banco (
-        banco_id_banco
-    ASC );
 
 CREATE INDEX afiliados_por_banco_banco_fk ON
     afiliados_por_banco (
@@ -108,14 +98,13 @@ ALTER TABLE banco ADD CONSTRAINT banco_pk PRIMARY KEY ( id_banco );
 
 CREATE TABLE centro_trabajo (
     id_centro_trabajo   VARCHAR2(40 CHAR) NOT NULL,
+    ciudad_id_ciudad    VARCHAR2(40 CHAR) NOT NULL,
     nombre              VARCHAR2(40 CHAR),
-    id_municipio        VARCHAR2(30 CHAR),
     nombre_1            VARCHAR2(40 CHAR),
     telefono_1          VARCHAR2(30 CHAR),
     telefono_2          VARCHAR2(30 CHAR),
     correo_1            VARCHAR2(40 CHAR),
     correo_2            VARCHAR2(50 CHAR),
-    ciudad_id_ciudad    VARCHAR2(40 CHAR) NOT NULL,
     telefono            NVARCHAR2(10),
     apoderado_legal     NVARCHAR2(50),
     representante_legal NVARCHAR2(50),
@@ -127,18 +116,18 @@ ALTER TABLE centro_trabajo ADD CONSTRAINT centro_trabajo_pk PRIMARY KEY ( id_cen
 
 CREATE TABLE ciudad (
     id_ciudad              VARCHAR2(40 CHAR) NOT NULL,
-    nombre                 VARCHAR2(40 CHAR),
-    provincia_id_provincia VARCHAR2(40 CHAR) NOT NULL
+    provincia_id_provincia VARCHAR2(40 CHAR) NOT NULL,
+    nombre                 VARCHAR2(40 CHAR)
 );
 
 ALTER TABLE ciudad ADD CONSTRAINT municipio_pk PRIMARY KEY ( id_ciudad );
 
 CREATE TABLE empleado (
     id_empleado            NCHAR(36) NOT NULL,
+    usuario_id_usuario     NVARCHAR2(36) NOT NULL,
     nombre_puesto          NVARCHAR2(50),
     numero_empleado        INTEGER,
     telefono_empleado      INTEGER,
-    usuario_id_usuario     NVARCHAR2(36) NOT NULL,
     numero_identificacion  NVARCHAR2(50),
     archivo_identificacion NVARCHAR2(300)
 );
@@ -180,8 +169,8 @@ ALTER TABLE pais ADD CONSTRAINT pais_pk PRIMARY KEY ( id_pais );
 
 CREATE TABLE perf_afil_cent_trab (
     id_perf_afil_cent_trab VARCHAR2(40 CHAR) NOT NULL,
-    id_centro_trabajo1     VARCHAR2(40 CHAR),
-    id_afiliado1           VARCHAR2(40 CHAR),
+    centro_trabajo_id      VARCHAR2(40 CHAR) NOT NULL,
+    afiliado_id_afiliado   VARCHAR2(40 CHAR) NOT NULL,
     cargo                  VARCHAR2(40 CHAR),
     sector_economico       VARCHAR2(40 CHAR),
     actividad_economica    VARCHAR2(40 CHAR),
@@ -190,10 +179,7 @@ CREATE TABLE perf_afil_cent_trab (
     fecha_pago             DATE,
     sector                 VARCHAR2(40 CHAR),
     numero_acuerdo         VARCHAR2(50 CHAR),
-    salario_neto           NUMBER,
-    centro_trabajo_id      VARCHAR2(40 CHAR) NOT NULL,
-    afiliado_id_afiliado   VARCHAR2(40 CHAR) NOT NULL,
-    id_afiliado            VARCHAR2(40 CHAR) NOT NULL
+    salario_neto           NUMBER
 );
 
 ALTER TABLE perf_afil_cent_trab
@@ -203,22 +189,21 @@ ALTER TABLE perf_afil_cent_trab ADD CONSTRAINT perf_afil_cent_trab_pk PRIMARY KE
 
 CREATE TABLE provincia (
     id_provincia VARCHAR2(40 CHAR) NOT NULL,
-    nombre       VARCHAR2(30 CHAR),
-    pais_id_pais VARCHAR2(30 CHAR) NOT NULL
+    pais_id_pais VARCHAR2(30 CHAR) NOT NULL,
+    nombre       VARCHAR2(30 CHAR)
 );
 
 ALTER TABLE provincia ADD CONSTRAINT departamento_pk PRIMARY KEY ( id_provincia );
 
 CREATE TABLE referencia_personal (
     id_ref_personal      VARCHAR2(40 CHAR) NOT NULL,
+    afiliado_id_afiliado VARCHAR2(40 CHAR) NOT NULL,
     nombre               VARCHAR2(30 CHAR),
     direccion            VARCHAR2(50 CHAR),
     parentesco           VARCHAR2(30 CHAR),
     telefono_domicilio   VARCHAR2(20 CHAR),
     telefono_trabajo     VARCHAR2(20 CHAR),
-    telefono_celular     VARCHAR2(20 CHAR),
-    afiliado_id_afiliado VARCHAR2(40 CHAR) NOT NULL,
-    id_afiliado          VARCHAR2(40 CHAR) NOT NULL
+    telefono_celular     VARCHAR2(20 CHAR)
 );
 
 ALTER TABLE referencia_personal ADD CONSTRAINT referencia_personal_pk PRIMARY KEY ( id_ref_personal );
@@ -243,22 +228,22 @@ ALTER TABLE tipo_identificacion ADD CONSTRAINT tipo_identificacion_pk PRIMARY KE
 
 CREATE TABLE usuario (
     id_usuario             NVARCHAR2(36) NOT NULL,
+    rol_id_rol             NVARCHAR2(36) NOT NULL,
+    fk_id_ident            VARCHAR2(40 CHAR) NOT NULL,
     nombre                 VARCHAR2(30 CHAR),
+    correo                 NVARCHAR2(200),
+    contrasena             NVARCHAR2(200),
+    fecha_creacion         NVARCHAR2(50),
+    fecha_verificacion     DATE,
+    fecha_modificacion     NVARCHAR2(50),
+    estado                 NVARCHAR2(50) DEFAULT 'INACTIVO',
+    archivo_id             NVARCHAR2(300),
     pregunta_de_usuario_1  NVARCHAR2(100),
     respuesta_de_usuario_1 NVARCHAR2(100),
     pregunta_de_usuario_2  NVARCHAR2(100),
     respuesta_de_usuario_2 NVARCHAR2(100),
     pregunta_de_usuario_3  NVARCHAR2(100),
-    respuesta_de_usuario_3 NVARCHAR2(100),
-    estado                 NVARCHAR2(50) DEFAULT 'INACTIVO',
-    fecha_creacion         NVARCHAR2(50),
-    fecha_verificacion     DATE,
-    fecha_modificacion     NVARCHAR2(50),
-    correo                 NVARCHAR2(200),
-    contraseña             NVARCHAR2(200),
-    archivo_id             NVARCHAR2(300),
-    rol_id_rol             NVARCHAR2(36) NOT NULL,
-    fk_id_ident            VARCHAR2(40 CHAR) NOT NULL
+    respuesta_de_usuario_3 NVARCHAR2(100)
 );
 
 ALTER TABLE usuario
@@ -293,10 +278,6 @@ ALTER TABLE afiliados_por_banco
 
 ALTER TABLE afiliados_por_banco
     ADD CONSTRAINT afiliados_por_banco_banco_fk FOREIGN KEY ( banco_id_banco )
-        REFERENCES banco ( id_banco );
-
-ALTER TABLE afiliados_por_banco
-    ADD CONSTRAINT afiliados_por_banco_banco_fkv1 FOREIGN KEY ( banco_id_banco3 )
         REFERENCES banco ( id_banco );
 
 ALTER TABLE centro_trabajo
@@ -354,3 +335,47 @@ INSERT INTO "SYSTEM"."ROL" (ID_ROL, NOMBRE) VALUES (N'1', 'Administrador');
 INSERT INTO "SYSTEM"."ROL" (ID_ROL, NOMBRE) VALUES (N'2', 'Oficial de Operacion');
 INSERT INTO "SYSTEM"."ROL" (ID_ROL, NOMBRE) VALUES (N'3', 'Contador');
 INSERT INTO "SYSTEM"."ROL" (ID_ROL, NOMBRE) VALUES (N'4', 'Auxiliar');
+
+--inserción de datos en la tabla pais
+INSERT INTO pais (id_pais, nombre, nacionalidad) VALUES ('1', 'Honduras', 'Hondureña');
+INSERT INTO pais (id_pais, nombre, nacionalidad) VALUES ('2', 'Estados Unidos', 'Estadounidense');
+INSERT INTO pais (id_pais, nombre, nacionalidad) VALUES ('3', 'Canadá', 'Canadiense');
+INSERT INTO pais (id_pais, nombre, nacionalidad) VALUES ('4', 'México', 'Mexicana');
+
+--Inserts de provincia
+INSERT INTO provincia (id_provincia, pais_id_pais, nombre) VALUES ('HN001', '1', 'Atlántida');
+INSERT INTO provincia (id_provincia, pais_id_pais, nombre) VALUES ('HN002', '1', 'Colón');
+INSERT INTO provincia (id_provincia, pais_id_pais, nombre) VALUES ('HN003', '1', 'Comayagua');
+INSERT INTO provincia (id_provincia, pais_id_pais, nombre) VALUES ('HN004', '1', 'Copán');
+INSERT INTO provincia (id_provincia, pais_id_pais, nombre) VALUES ('HN005', '1', 'Cortés');
+INSERT INTO provincia (id_provincia, pais_id_pais, nombre) VALUES ('HN006', '1', 'Choluteca');
+INSERT INTO provincia (id_provincia, pais_id_pais, nombre) VALUES ('HN007', '1', 'El Paraíso');
+INSERT INTO provincia (id_provincia, pais_id_pais, nombre) VALUES ('HN008', '1', 'Francisco Morazán');
+INSERT INTO provincia (id_provincia, pais_id_pais, nombre) VALUES ('HN009', '1', 'Gracias a Dios');
+INSERT INTO provincia (id_provincia, pais_id_pais, nombre) VALUES ('HN010', '1', 'Intibucá');
+INSERT INTO provincia (id_provincia, pais_id_pais, nombre) VALUES ('HN011', '1', 'Islas de la Bahía');
+INSERT INTO provincia (id_provincia, pais_id_pais, nombre) VALUES ('HN012', '1', 'La Paz');
+INSERT INTO provincia (id_provincia, pais_id_pais, nombre) VALUES ('HN013', '1', 'Lempira');
+INSERT INTO provincia (id_provincia, pais_id_pais, nombre) VALUES ('HN014', '1', 'Ocotepeque');
+INSERT INTO provincia (id_provincia, pais_id_pais, nombre) VALUES ('HN015', '1', 'Olancho');
+INSERT INTO provincia (id_provincia, pais_id_pais, nombre) VALUES ('HN016', '1', 'Santa Bárbara');
+INSERT INTO provincia (id_provincia, pais_id_pais, nombre) VALUES ('HN017', '1', 'Valle');
+INSERT INTO provincia (id_provincia, pais_id_pais, nombre) VALUES ('HN018', '1', 'Yoro');
+
+--Ciudades
+INSERT INTO ciudad (id_ciudad, provincia_id_provincia, nombre) VALUES ('C001', 'HN001', 'La Ceiba');
+INSERT INTO ciudad (id_ciudad, provincia_id_provincia, nombre) VALUES ('C002', 'HN002', 'Trujillo');
+INSERT INTO ciudad (id_ciudad, provincia_id_provincia, nombre) VALUES ('C003', 'HN003', 'Comayagua');
+INSERT INTO ciudad (id_ciudad, provincia_id_provincia, nombre) VALUES ('C004', 'HN004', 'Santa Rosa de Copán');
+INSERT INTO ciudad (id_ciudad, provincia_id_provincia, nombre) VALUES ('C005', 'HN005', 'San Pedro Sula');
+INSERT INTO ciudad (id_ciudad, provincia_id_provincia, nombre) VALUES ('C006', 'HN006', 'Choluteca');
+INSERT INTO ciudad (id_ciudad, provincia_id_provincia, nombre) VALUES ('C007', 'HN007', 'Yuscarán');
+INSERT INTO ciudad (id_ciudad, provincia_id_provincia, nombre) VALUES ('C008', 'HN008', 'Tegucigalpa');
+INSERT INTO ciudad (id_ciudad, provincia_id_provincia, nombre) VALUES ('C009', 'HN009', 'Puerto Lempira');
+INSERT INTO ciudad (id_ciudad, provincia_id_provincia, nombre) VALUES ('C011', 'HN011', 'Roatán');
+INSERT INTO ciudad (id_ciudad, provincia_id_provincia, nombre) VALUES ('C012', 'HN012', 'La Paz');
+INSERT INTO ciudad (id_ciudad, provincia_id_provincia, nombre) VALUES ('C013', 'HN013', 'Gracias');
+INSERT INTO ciudad (id_ciudad, provincia_id_provincia, nombre) VALUES ('C014', 'HN014', 'Santa Rosa de Ocotepeque');
+INSERT INTO ciudad (id_ciudad, provincia_id_provincia, nombre) VALUES ('C015', 'HN015', 'Juticalpa');
+INSERT INTO ciudad (id_ciudad, provincia_id_provincia, nombre) VALUES ('C016', 'HN016', 'Santa Bárbara');
+INSERT INTO ciudad (id_ciudad, provincia_id_provincia, nombre) VALUES ('C018', 'HN018', 'Yoro');

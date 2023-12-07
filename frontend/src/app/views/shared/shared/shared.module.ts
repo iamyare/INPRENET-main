@@ -42,6 +42,7 @@ import { BotonarchivosComponent } from '@docs-components/botonarchivos/botonarch
 @NgModule({
   declarations: [],
   imports: [
+    MatNativeDateModule,
     ButtonModule,
     CardModule,
     FormModule,
@@ -87,6 +88,7 @@ import { BotonarchivosComponent } from '@docs-components/botonarchivos/botonarch
     MatPaginatorModule,
   ],
   exports: [
+    MatNativeDateModule,
     ButtonModule,
     CardModule,
     FormModule,

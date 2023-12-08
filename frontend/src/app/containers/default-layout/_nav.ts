@@ -12,41 +12,50 @@ export const navItems: INavData[] = [
   }, */
   {
     title: true,
-    name: 'Afiliado'
+    name: 'Menú Principal'
   },
-  /* {
-    name: 'Colors',
-    url: '/theme/colors',
-    iconComponent: { name: 'cil-drop' }
-  },
+
   {
-    name: 'Typography',
-    url: '/theme/typography',
-    linkProps: { fragment: 'someAnchor' },
-    iconComponent: { name: 'cil-pencil' }
-  },  */
-  {
-    name: 'Datos Generales',
+    name: 'Afiliado', 
     url: '/base',
-    iconComponent: { name: 'cil-puzzle' },
     children: [
       {
         url: '/Afiliado/afil-banco',
-        iconComponent: { name: 'cilDollar' },
-        name: 'Nuevo datos bancarios',
+        /* iconComponent: { name: 'cilDollar' }, */
+        name: 'Nuevo registro',
         /* linkProps: { fragment: 'someAnchor' }, */
       },
+      {
+        name: 'Ver/Editar',
+        children: [
+          {
+            url: '/Afiliado/afil-banco',
+            name: 'Datos generales',
+          },
+          {
+            url: '/Afiliado/afil-banco',
+            name: 'Datos del puesto de trabajo',
+          },
+          {
+            url: '/Afiliado/afil-banco',
+            name: 'Datos bancarios',
+          },
+          {
+            url: '/Afiliado/afil-banco',
+            name: 'Referencias personales',
+          }
+        ]
+      },
+      
     ]
   },
+
   {
     name: 'Centro de trabajo',
     url: '/Afiliado/centro-trabajo',
-    iconComponent: { name: 'cil-drop' }
+    /* iconComponent: { name: 'cil-drop' } */
+    children: [
+      
+    ]
   },
-  /* {
-    name: '',
-    url: '',
-     linkProps: { fragment: 'someAnchor' },
-    iconComponent: { name: 'cilDollar' }
-  },  */
 ];

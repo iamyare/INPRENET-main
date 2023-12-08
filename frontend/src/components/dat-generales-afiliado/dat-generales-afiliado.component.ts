@@ -1,23 +1,29 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, Input, OnInit, Output } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { FormArray, FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 
 @Component({
-  selector: 'app-afil-banco',
-  templateUrl: './afil-banco.component.html',
-  styleUrl: './afil-banco.component.scss'
+  selector: 'app-dat-generales-afiliado',
+  templateUrl: './dat-generales-afiliado.component.html',
+  styleUrl: './dat-generales-afiliado.component.scss'
 })
-export class AfilBancoComponent implements OnInit {
-  form: FormGroup; form1: FormGroup; form2: FormGroup; form3: FormGroup;
-  public formParent: FormGroup = new FormGroup({});
+export class DatGeneralesAfiliadoComponent implements OnInit{
+  @Input()
+  cargo: string = "";
+  
+  @Output()
+  value:string = "Hola";
 
-  Bancos: any = []; tipoIdent: any = []; Sexo: any = []; estadoCivil: any = [];
+  form: FormGroup;
+  
   htmlSTID: string = "Archivo de identificación"
   public archivo: any;
-
-  public cargo: any = "SIIUUUU";
-  public value: any;
   
+  tipoIdent: any = []; Sexo: any = []; estadoCivil: any = [];
+
   constructor( private fb: FormBuilder) {
+    console.log(this.cargo);
+    
     this.form = this.fb.group({
       tipoIdent: ['', [Validators.required]],
       archIdent: ['', [Validators.required]],
@@ -41,42 +47,6 @@ export class AfilBancoComponent implements OnInit {
       correo2: ['', [Validators.required, Validators.email]],
     });
 
-    this.form1 = this.fb.group({
-     centroTrabajo: ['', [Validators.required]],
-     cargo: ['', [Validators.required]],
-     sectorEconomico: ['', [Validators.required]],
-     actividadEconomica: ['', [Validators.required]],
-     claseCliente: ['', [Validators.required]],
-     sector: ['', [Validators.required]],
-     numeroAcuerdo: ['', [Validators.required]],
-     salarioNeto: ['', [Validators.required, Validators.pattern("\^[0-9]{1,8}([\\.][0-9]{2})")]],
-     fechaIngreso: ['', [Validators.required]],
-     fechaPago: ['', [Validators.required]]
-    });
-
-    this.form2 = this.fb.group({
-      nombreBanco: ['', [Validators.required]],
-      numeroCuenta: ['', [Validators.required]],
-    });
-
-    this.form3 = this.fb.group({
-      cantReferPers: ['', [Validators.required, Validators.pattern("[0-9]*")]],
-    });
-
-    this.Bancos = [
-      {
-        "idBanco":1,
-        "value": "Atlántida"
-      },
-      {
-        "idBanco":2,
-        "value": "BAC"
-      },
-      {
-        "idBanco":3,
-        "value": "Ficohosa"
-      }
-    ];
     this.estadoCivil = [
       {
         "idEstadoCivil":1,
@@ -138,56 +108,8 @@ export class AfilBancoComponent implements OnInit {
   }
 
   ngOnInit():void{
-    this.initFormParent();
   }
 
-  initFormParent():void {
-    this.formParent = new FormGroup(
-      {
-        refpers: new FormArray([], [Validators.required])
-      }
-    )
-  }
-
-  initFormRefPers(): FormGroup {
-    return new FormGroup(
-      {
-        nombreRefPers: new FormControl(''),
-        Parentesco: new FormControl(''),
-        direccion: new FormControl(''),
-        telefonoDom: new FormControl(''),
-        telefonoTrab: new FormControl(''),
-        telefonoPers: new FormControl('')
-      }
-    )
-  }
-
-  addSkill(): void{
-    const ref_RefPers = this.formParent.get('refpers') as FormArray;
-    ref_RefPers.push(this.initFormRefPers())
-  }
-
-  getCtrl(key: string, form: FormGroup): any {
-    return form.get(key)
-  }
-
-  addValidation(index: number, key: string): void {
-
-    const refParent = this.formParent.get('refpers') as FormArray;
-    const refSingle = refParent.at(index).get(key) as FormGroup;
-
-    refSingle.setValidators(
-      [
-        Validators.required,
-        Validators.required,
-        Validators.required,
-        Validators.required,
-        Validators.required,
-        Validators.required
-      ]
-    )
-    refSingle.updateValueAndValidity();
-  }
   onFileSelected(event: any) {
     const file = event.target.files[0];
     const fileSize = event.target.files[0].size / 1024 / 1024;
@@ -225,27 +147,12 @@ export class AfilBancoComponent implements OnInit {
     const telefono2 = this.form.value.telefono2;
     const coreo1 = this.form.value.coreo1;
     const coreo2 = this.form.value.coreo2;
-
-    const centroTrabajo = this.form1.value.centroTrabajo;
-    const cargo = this.form1.value.cargo;
-    const sectorEconomico = this.form1.value.sectorEconomico;
-    const actividadEconomica = this.form1.value.actividadEconomica;
-    const claseCliente = this.form1.value.claseCliente;
-    const sector = this.form1.value.sector;
-    const numeroAcuerdo = this.form1.value.numeroAcuerdo;
-    const salarioNeto = this.form1.value.salarioNeto;
-    const fechaIngreso = this.form1.value.fechaIngreso;
-    const fechaPago = this.form1.value.fechaPago;
-
-    const nombreBanco = this.form2.value.nombreBanco;
-    const numeroCuenta = this.form2.value.numeroCuenta;
-
-    console.log(this.formParent.value.refpers);
     
     /* this.authSvc.crearCuenta(data).subscribe((res: any) => {
       console.log(res);
       //this.fakeLoading(res);
     }); */
   }
+
 
 }

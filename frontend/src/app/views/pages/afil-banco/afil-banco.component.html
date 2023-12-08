@@ -1,317 +1,204 @@
 <div class="main-content">
   <div class="col-md-12">
+
+    <app-dat-generales-afiliado [cargo]="cargo"></app-dat-generales-afiliado>
     <div class="card">
-      <div class="card-header card-header-danger tittle">
-        <h4 class="card-title">Datos Generales</h4>
+      <div class="card-header card-header-danger tittle" color="primary">
+        
+        <h4 class="card-title">Datos del puesto de trabajo (Afiliado)</h4>
         <p class="card-category">Completa la información correspondiente</p>
-      </div>  
+      </div>
       <div class="card-body">
-        <form cForm [formGroup]="form">
+        <form [formGroup]="form1">
           <div class="row">
-            <div class="col-md-4">
-              <mat-form-field  class="example-full-width; inputs" appearance="outline">
-                <mat-label>Tipo de identificación</mat-label>
-                <select matNativeControl formControlName="tipoIdent">
-                  <option *ngFor="let p of tipoIdent" [value]="p.value" >
-                    {{p.value}}
-                  </option>
-                </select>
-              </mat-form-field>
-            </div>
-            <div class="col-md-4">
-              <mat-form-field  class="example-full-width; inputs" appearance="outline">
-                <mat-label >Número de Identificación</mat-label>
-                <input  matInput formControlName="numeroIden">
-              </mat-form-field>
-            </div>
-            <div class="col-md-4">
+            <div class="col-md-12">
               <mat-form-field class="example-full-width; inputs" appearance="outline">
-                <mat-label>Archivo de Identificación</mat-label>
-                <input matInput formControlName="archIdent">
+                <mat-label>Centro de Trabajo</mat-label>
+                <input matInput formControlName="centroTrabajo">
+                <!-- <mat-icon matSuffix>sentiment_very_satisfied</mat-icon> -->
               </mat-form-field>
             </div>
           </div>
           <div class="row">
-            <div class="col-md-3">
+            <div class="col-md-4">
               <mat-form-field class="example-full-width; inputs" appearance="outline">
-                <mat-label>Primer Nombre</mat-label>
-                <input matInput formControlName="primerNombre">
+                <mat-label>Cargo que desempeña</mat-label>
+                <input matInput formControlName="cargo">
+                <!-- <mat-icon matSuffix>sentiment_very_satisfied</mat-icon> -->
               </mat-form-field>
             </div>
-            <div class="col-md-3">
+            <div class="col-md-4">
               <mat-form-field class="example-full-width; inputs" appearance="outline">
-                <mat-label>Segundo Nombre</mat-label>
-                <input matInput formControlName="segundoNombre">
-
+                <mat-label>Sector Económico</mat-label>
+                <input matInput formControlName="sectorEconomico">
+                <!-- <mat-icon matSuffix>sentiment_very_satisfied</mat-icon> -->
               </mat-form-field>
             </div>
-            <div class="col-md-3">
+            <div class="col-md-4">
               <mat-form-field class="example-full-width; inputs" appearance="outline">
-                <mat-label>Primer Apellido</mat-label>
-                <input matInput formControlName="primerApellido">
-
-              </mat-form-field>
-            </div>
-            <div class="col-md-3">
-              <mat-form-field class="example-full-width; inputs" appearance="outline">
-                <mat-label>Segundo Apellido</mat-label>
-                <input matInput formControlName="segundoApellido">
-
+                <mat-label>Actividad Económica</mat-label>
+                <input matInput formControlName="actividadEconomica">
+                <!-- <mat-icon matSuffix>sentiment_very_satisfied</mat-icon> -->
               </mat-form-field>
             </div>
           </div>
           <div class="row">
-            <div class="col-md-6">
+            <div class="col-md-4">
               <mat-form-field class="example-full-width; inputs" appearance="outline">
-                <mat-label>Tercer Nombre</mat-label>
-                <input matInput formControlName="tercerNombre">
-
+                <mat-label>Clase cliente</mat-label>
+                <input matInput formControlName="claseCliente">
+                <!-- <mat-icon matSuffix>sentiment_very_satisfied</mat-icon> -->
               </mat-form-field>
             </div>
-            <div class="col-md-6">
+            <div class="col-md-4">
               <mat-form-field class="example-full-width; inputs" appearance="outline">
-                <mat-label>Fecha de Nacimiento</mat-label>
-                <input matInput  formControlName="fechaNacimiento" [matDatepicker]="fechaNac">
+                <mat-label>Sector</mat-label>
+                <input matInput formControlName="sector">
+                <!-- <mat-icon matSuffix>sentiment_very_satisfied</mat-icon> -->
+              </mat-form-field>
+            </div>
+            <div class="col-md-4">
+              <mat-form-field class="example-full-width; inputs" appearance="outline">
+                <mat-label>Número de acuerdo</mat-label>
+                <input matInput formControlName="numeroAcuerdo">
+                <!-- <mat-icon matSuffix>sentiment_very_satisfied</mat-icon> -->
+              </mat-form-field>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-md-4">
+              <mat-form-field class="example-full-width; inputs" appearance="outline">
+                <mat-label>Salario Neto</mat-label>
+                <input matInput formControlName="salarioNeto">
+              </mat-form-field>
+            </div>
+            <div class="col-md-4">
+              <mat-form-field class="example-full-width; inputs" appearance="outline">
+                <mat-label>Fecha de Ingreso</mat-label>
+                <input matInput formControlName="fechaIngreso" [matDatepicker]="fechaIngreso">
                 <mat-hint>MM/DD/YYYY</mat-hint>
-                <mat-datepicker-toggle matIconSuffix [for]="fechaNac"></mat-datepicker-toggle>
-                <mat-datepicker #fechaNac></mat-datepicker>
-              </mat-form-field>
-            </div>
-          </div>
-          <div class="row">
-            <div class="col-md-6">
-              <mat-form-field class="example-full-width; inputs" appearance="outline">
-                <mat-label type="number">Cantidad de dependientes</mat-label>
-                <input matInput type="number" formControlName="cantidadDependientes">
-
-              </mat-form-field>
-            </div>
-            <div class="col-md-6">
-              <mat-form-field class="example-full-width; inputs" appearance="outline">
-                <mat-label>Cantidad de hijos</mat-label>
-                <input matInput type="number" formControlName="cantidadHijos">
-              </mat-form-field>
-            </div>
-          </div>
-          <div class="row">
-            <div class="col-md-6">
-              <mat-form-field class="example-full-width; inputs" appearance="outline"  >
-                <mat-label>Sexo</mat-label>
-                <select matNativeControl  formControlName="Sexo">
-                  <option *ngFor="let p of Sexo" [value]="p.value" >
-                    {{p.value}}
-                  </option>
-                </select>
-              </mat-form-field>
-            </div>
-            <div class="col-md-6">
-              <mat-form-field class="example-full-width; inputs" appearance="outline">
-                <mat-label>Profesión</mat-label>
-                <input matInput formControlName="profesion">
-              </mat-form-field>
-            </div>
-          </div>
-          <div class="row">
-            <div class="col-md-4">
-              <mat-form-field class="example-full-width; inputs"  appearance="outline"  >
-                <mat-label>Estado Civil</mat-label>
-                <select matNativeControl  formControlName="estadoCivil">
-                  <option *ngFor="let p of estadoCivil" [value]="p.value" >
-                    {{p.value}}
-                  </option>
-                </select>
+                <mat-datepicker-toggle matIconSuffix [for]="fechaIngreso"></mat-datepicker-toggle>
+                <mat-datepicker #fechaIngreso></mat-datepicker>
               </mat-form-field>
             </div>
             <div class="col-md-4">
-              <mat-form-field class="example-full-width; inputs"  appearance="outline">
-                <mat-label>Representación</mat-label>
-                <mat-icon matIconSuffix>gavel</mat-icon>
-                <input matInput formControlName="representacion">
-              </mat-form-field>
-            </div>
-            <div class="col-md-4">
-              <mat-form-field class="example-full-width; inputs"  appearance="outline">
-                <mat-label>Estado</mat-label>
-                <input matInput formControlName="estado">
-              </mat-form-field>
-            </div>
-          </div>
-          <div class="row">
-            <div class="col-md-6">
               <mat-form-field class="example-full-width; inputs" appearance="outline">
-                <mat-label>Teléfono principal</mat-label>
-                <mat-icon matIconSuffix>call</mat-icon>
-                <input matInput formControlName="telefono1" >
-              </mat-form-field>
-            </div>
-            <div class="col-md-6">
-              <mat-form-field class="example-full-width; inputs" appearance="outline">
-                <mat-label>Teléfono secundario</mat-label>
-                <mat-icon matIconSuffix>call</mat-icon>
-                <input matInput formControlName="telefono2">
-              </mat-form-field>
-            </div>
-          </div>
-          <div class="row">
-            <div class="col-md-6">
-              <mat-form-field class="example-full-width; inputs" appearance="outline">
-                <mat-label>Correo principal</mat-label>
-                <mat-icon matIconSuffix>email</mat-icon>
-                <input matInput formControlName="correo1">
-              </mat-form-field>
-            </div>
-            <div class="col-md-6">
-              <mat-form-field class="example-full-width; inputs" appearance="outline">
-                <mat-label>Correo secundario</mat-label>
-                <input matInput formControlName="correo2">
-                <mat-icon matIconSuffix>email</mat-icon>
+                <mat-label>Fecha de Pago</mat-label>
+                <input matInput formControlName="fechaPago" [matDatepicker]="fechaPago">
+                <mat-hint>MM/DD/YYYY</mat-hint>
+                <mat-datepicker-toggle matIconSuffix [for]="fechaPago"></mat-datepicker-toggle>
+                <mat-datepicker #fechaPago></mat-datepicker>
               </mat-form-field>
             </div>
           </div>
         </form>
       </div>
 
-      <div class="card" >
-        <div class="card-header card-header-danger tittle" color="primary" >
-          <h4 class="card-title">Datos del puesto de trabajo (Afiliado)</h4>
+      <div class="card">
+        <div class="card-header card-header-danger tittle">
+          <h4 class="card-title">Datos Bancarios</h4>
           <p class="card-category">Completa la información correspondiente</p>
         </div>
         <div class="card-body">
-          <form [formGroup]="form1">
+          <form [formGroup]="form2">
             <div class="row">
-              <div class="col-md-12" >
+              <div class="col-md-6">
                 <mat-form-field class="example-full-width; inputs" appearance="outline">
-                  <mat-label>Centro de Trabajo</mat-label>
-                  <input matInput formControlName="centroTrabajo">
+                  <mat-label>Nombre del Banco</mat-label>
+                  <select matNativeControl formControlName="nombreBanco">
+                    <option *ngFor="let p of Bancos" [value]="p.value">
+                      {{p.value}}
+                    </option>
+                  </select>
+                </mat-form-field>
+              </div>
+              <div class="col-md-6">
+                <mat-form-field class="example-full-width; inputs" appearance="outline">
+                  <mat-label>Número de Cuenta</mat-label>
+                  <input matInput formControlName="numeroCuenta">
                   <!-- <mat-icon matSuffix>sentiment_very_satisfied</mat-icon> -->
-                </mat-form-field>
-              </div>
-            </div>
-            <div class="row">
-              <div class="col-md-4">
-                <mat-form-field class="example-full-width; inputs" appearance="outline">
-                  <mat-label>Cargo que desempeña</mat-label>
-                  <input matInput formControlName="cargo">
-                  <!-- <mat-icon matSuffix>sentiment_very_satisfied</mat-icon> -->
-                </mat-form-field>
-              </div>
-              <div class="col-md-4">
-                <mat-form-field class="example-full-width; inputs" appearance="outline">
-                  <mat-label>Sector Económico</mat-label>
-                  <input matInput formControlName="sectorEconomico">
-                  <!-- <mat-icon matSuffix>sentiment_very_satisfied</mat-icon> -->
-                </mat-form-field>
-              </div>
-              <div class="col-md-4">
-                <mat-form-field class="example-full-width; inputs" appearance="outline">
-                  <mat-label>Actividad Económica</mat-label>
-                  <input matInput formControlName="actividadEconomica">
-                  <!-- <mat-icon matSuffix>sentiment_very_satisfied</mat-icon> -->
-                </mat-form-field>
-              </div>
-            </div>
-            <div class="row">
-              <div class="col-md-4">
-                <mat-form-field class="example-full-width; inputs" appearance="outline">
-                  <mat-label>Clase cliente</mat-label>
-                  <input matInput formControlName="claseCliente">
-                  <!-- <mat-icon matSuffix>sentiment_very_satisfied</mat-icon> -->
-                </mat-form-field>
-              </div>
-              <div class="col-md-4">
-                <mat-form-field class="example-full-width; inputs" appearance="outline">
-                  <mat-label>Sector</mat-label>
-                  <input matInput formControlName="sector">
-                  <!-- <mat-icon matSuffix>sentiment_very_satisfied</mat-icon> -->
-                </mat-form-field>
-              </div>
-              <div class="col-md-4">
-                <mat-form-field class="example-full-width; inputs" appearance="outline">
-                  <mat-label>Número de acuerdo</mat-label>
-                  <input matInput formControlName="numeroAcuerdo">
-                  <!-- <mat-icon matSuffix>sentiment_very_satisfied</mat-icon> -->
-                </mat-form-field>
-              </div>
-            </div>
-            <div class="row">
-              <div class="col-md-4">
-                <mat-form-field class="example-full-width; inputs" appearance="outline">
-                  <mat-label>Salario Neto</mat-label>
-                  <input matInput formControlName="salarioNeto">
-                </mat-form-field>
-              </div>
-              <div class="col-md-4">
-                <mat-form-field class="example-full-width; inputs" appearance="outline">
-                  <mat-label>Fecha de Ingreso</mat-label>
-                  <input matInput formControlName="fechaIngreso" [matDatepicker]="fechaIngreso">
-                  <mat-hint>MM/DD/YYYY</mat-hint>
-                  <mat-datepicker-toggle matIconSuffix [for]="fechaIngreso"></mat-datepicker-toggle>
-                  <mat-datepicker #fechaIngreso></mat-datepicker>
-                </mat-form-field>
-              </div>
-              <div class="col-md-4">
-                <mat-form-field class="example-full-width; inputs" appearance="outline">
-                  <mat-label>Fecha de Pago</mat-label>
-                  <input matInput  formControlName="fechaPago"  [matDatepicker]="fechaPago">
-                  <mat-hint>MM/DD/YYYY</mat-hint>
-                  <mat-datepicker-toggle matIconSuffix [for]="fechaPago"></mat-datepicker-toggle>
-                  <mat-datepicker #fechaPago></mat-datepicker>
                 </mat-form-field>
               </div>
             </div>
           </form>
         </div>
 
-        <div class="card" >
+        <div class="card">
           <div class="card-header card-header-danger tittle">
-            <h4 class="card-title">Datos Bancarios</h4>
+            <h4 class="card-title">Referencias Personales</h4>
             <p class="card-category">Completa la información correspondiente</p>
           </div>
+
           <div class="card-body">
-            <form [formGroup]="form2">
-              <div class="row">
-                <div class="col-md-6">
-                  <mat-form-field class="example-full-width; inputs" appearance="outline"  >
-                    <mat-label>Nombre del Banco</mat-label>
-                    <select matNativeControl  formControlName="nombreBanco">
-                      <option *ngFor="let p of Bancos" [value]="p.value" >
-                        {{p.value}}
-                      </option>
-                    </select>
-                  </mat-form-field>
-                </div>
-                <div class="col-md-6">
-                  <mat-form-field class="example-full-width; inputs" appearance="outline">
-                    <mat-label>Número de Cuenta</mat-label>
-                    <input matInput formControlName="numeroCuenta">
-                    <!-- <mat-icon matSuffix>sentiment_very_satisfied</mat-icon> -->
-                  </mat-form-field>
+            <button mat-button color="primary" (click)="addSkill()">Agregar Referencia Personal</button>
+
+            <form [formGroup]="formParent">
+              <div formArrayName="refpers">
+                <div *ngFor="let skill of getCtrl('refpers', formParent).controls; index as formChild; let i = index">
+                  <h4 class="card-title">Referencia número: {{i+1}}</h4>
+                  <div [formGroupName]="formChild" class="row">
+                    <div class="col-md-6">
+                      <mat-form-field class="example-full-width; inputs" appearance="outline">
+                        <mat-label>Nombre Completo</mat-label>
+                        <input matInput type="text" formControlName="nombreRefPers">
+                      </mat-form-field>
+                    </div>
+                    <div class="col-md-6">
+                      <mat-form-field class="example-full-width; inputs" appearance="outline">
+                        <mat-label>Parentesco</mat-label>
+                        <input matInput type="text" formControlName="Parentesco">
+                      </mat-form-field>
+                    </div>
+                  </div>
+                  <div [formGroupName]="formChild" class="row">
+                    <div class="col-md-6">
+                      <mat-form-field class="example-full-width; inputs" appearance="outline">
+                        <mat-label>Dirección</mat-label>
+                        <input matInput type="text" formControlName="direccion">
+                      </mat-form-field>
+                    </div>
+                    <div class="col-md-6">
+                      <mat-form-field class="example-full-width; inputs" appearance="outline">
+                        <mat-label>Teléfono domicilio</mat-label>
+                        <input matInput type="text" formControlName="telefonoDom">
+                      </mat-form-field>
+                    </div>
+                  </div>
+                  <div [formGroupName]="formChild" class="row">
+                    <div class="col-md-6">
+                      <mat-form-field class="example-full-width; inputs" appearance="outline">
+                        <mat-label>Teléfono trabajo</mat-label>
+                        <input matInput type="text" formControlName="telefonoTrab">
+                      </mat-form-field>
+                    </div>
+                    <div class="col-md-6">
+                      <mat-form-field class="example-full-width; inputs" appearance="outline">
+                        <mat-label>Teléfono personal</mat-label>
+                        <input matInput type="text" formControlName="telefonoPers">
+                      </mat-form-field>
+                    </div>
+                  </div>
+
                 </div>
               </div>
             </form>
           </div>
 
-          <div class="card" >
-            <div class="card-header card-header-danger tittle">
-              <h4 class="card-title">Referencias Personales</h4>
-              <p class="card-category">Completa la información correspondiente</p>
-            </div>
-            <div class="card-body">
-              <form [formGroup]="form3">
-                <div class="row">
-                  <div class="col-md-12">
-                    <mat-form-field class="example-full-width; inputs" appearance="outline">
-                      <mat-label>Cantidad de Referencias Personales</mat-label>
-                      <input matInput type="number" formControlName="cantReferPers">
-                    </mat-form-field>
-                    
-                  </div>
-                </div>
-              </form>
-            </div>
+        </div>,
+
+        <div class="card">
+          <div class="card-header card-header-danger tittle">
+            <h4 class="card-title">Envio de formulario</h4>
+            <p class="card-category">Presione el botón enviar para continuar con el proceso.</p>
           </div>
+
+          <div class="card-body">
+            <button mat-button color="primary" (click)="enviar()">Enviar Formulario</button>
+          </div>
+
         </div>
-      </div>  
+
+      </div>
     </div>
   </div>
 </div>

@@ -34,6 +34,7 @@ import { MatTableModule } from '@angular/material/table';
 
 // import {FlexLayoutModule } from '@angular/flex-layout';
 import { MatNativeDateModule } from '@angular/material/core';
+import { DocsComponentsModule } from '../../../../components/docs-components.module';
 import { BotonarchivosComponent } from '@docs-components/botonarchivos/botonarchivos.component';
 //import { ToastrModule } from 'ngx-toastr';
 // import { NgxMaterialTimepickerModule } from 'ngx-material-timepicker';
@@ -42,6 +43,7 @@ import { BotonarchivosComponent } from '@docs-components/botonarchivos/botonarch
 @NgModule({
   declarations: [],
   imports: [
+    DocsComponentsModule,
     MatNativeDateModule,
     ButtonModule,
     CardModule,
@@ -88,6 +90,7 @@ import { BotonarchivosComponent } from '@docs-components/botonarchivos/botonarch
     MatPaginatorModule,
   ],
   exports: [
+    DocsComponentsModule,
     MatNativeDateModule,
     ButtonModule,
     CardModule,

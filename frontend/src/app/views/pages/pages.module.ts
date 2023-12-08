@@ -27,7 +27,8 @@ import { BotonarchivosComponent } from '@docs-components/botonarchivos/botonarch
     PagesRoutingModule,
     IconModule,
     SharedModule,
-  ]
+  ],
+  exports: []
 })
 export class PagesModule {
 }

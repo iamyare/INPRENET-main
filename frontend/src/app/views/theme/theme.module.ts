@@ -22,8 +22,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatTableModule } from '@angular/material/table';
 import { MatPaginatorModule } from '@angular/material/paginator';
-
-
+import { DatosGenAfilComponent } from '../pages/datos-gen-afil/datos-gen-afil.component';
 
 
 @NgModule({
@@ -51,7 +50,8 @@ import { MatPaginatorModule } from '@angular/material/paginator';
     ColorsComponent,
     ThemeColorComponent,
     TypographyComponent,
-    CentroTrabajoComponent
+    CentroTrabajoComponent,
+    DatosGenAfilComponent
   ]
 })
 export class ThemeModule {

@@ -1,7 +1,7 @@
 <div class="main-content">
   <div class="col-md-12">
     <div class="card">
-      <div class="card-header card-header-danger">
+      <div class="card-header card-header-danger tittle">
         <h4 class="card-title">Datos De Centro De Trabajo</h4>
         <p class="card-category">Completa la información correspondiente</p>
       </div>
@@ -27,28 +27,28 @@
             <div class="col-md-3">
               <mat-form-field class="example-full-width" style="width: 100%" appearance="outline">
                 <mat-label>Correo 1</mat-label>
-                <input matInput placeholder="Correo" formControlName="correo1">
+                <input matInput placeholder="Correo" formControlName="correo_1">
                 <mat-icon matSuffix>email</mat-icon>
               </mat-form-field>
             </div>
             <div class="col-md-3">
               <mat-form-field class="example-full-width" style="width: 100%" appearance="outline">
                 <mat-label>Correo 2</mat-label>
-                <input matInput placeholder="Correo" formControlName="correo2">
+                <input matInput placeholder="Correo" formControlName="correo_2">
                 <mat-icon matSuffix>email</mat-icon>
               </mat-form-field>
             </div>
             <div class="col-md-3">
               <mat-form-field class="example-full-width" style="width: 100%" appearance="outline">
                 <mat-label>Teléfono 1</mat-label>
-                <input matInput placeholder="Teléfono" formControlName="telefono1">
+                <input matInput placeholder="Teléfono" formControlName="telefono_1">
                 <mat-icon matSuffix>contacts</mat-icon>
               </mat-form-field>
             </div>
             <div class="col-md-3">
               <mat-form-field class="example-full-width" style="width: 100%" appearance="outline">
                 <mat-label>Teléfono 2</mat-label>
-                <input matInput placeholder="Teléfono" formControlName="telefono2">
+                <input matInput placeholder="Teléfono" formControlName="telefono_2">
                 <mat-icon matSuffix>contacts</mat-icon>
               </mat-form-field>
             </div>
@@ -56,16 +56,16 @@
           <div class="row">
             <div class="col-md-6">
               <mat-form-field class="example-full-width" style="width: 100%" appearance="outline">
-                <input matInput placeholder="Apoderado Legal" type="text" formControlName="apoderadoLegal">
+                <input matInput placeholder="Apoderado Legal" type="text" formControlName="apoderado_legal">
               </mat-form-field>
             </div>
             <div class="col-md-6">
               <mat-form-field class="example-full-width" style="width: 100%" appearance="outline">
-                <input matInput placeholder="Representante Legal" type="text" formControlName="representanteLegal">
+                <input matInput placeholder="Representante Legal" type="text" formControlName="representante_legal">
               </mat-form-field>
             </div>
           </div>
-          <button mat-raised-button type="submit" class="btn btn-danger pull-right">Update Profile</button>
+          <button mat-raised-button type="submit" class="btn btn-danger pull-right" (click)="agregarCentroTrabajo()">Actualizar</button>
           <button mat-raised-button type="submit" class="btn btn-danger pull-right" (click)="limpiarCentroTrabajo()">Limpiar</button>
         </form>
       </div>
@@ -73,7 +73,7 @@
   </div>
 
   <div class="card">
-    <div class="card-header card-header-danger">
+    <div class="card-header card-header-danger tittle">
       <h4 class="card-title">Centros de trabajo</h4>
     </div>
 
@@ -83,52 +83,62 @@
 
           <ng-container matColumnDef="nombre">
             <th mat-header-cell *matHeaderCellDef>Nombre</th>
-            <td mat-cell *matCellDef="let centroTrabajo">{{ centroTrabajo.nombre }}</td>
+            <td mat-cell *matCellDef="let centroTrabajo; let i = index" [ngClass]="{'fila-impar': i % 2 !== 0, 'fila-par': i % 2 === 0}">
+              {{ centroTrabajo.nombre }}</td>
           </ng-container>
 
-          <ng-container matColumnDef="telefono1">
+          <ng-container matColumnDef="telefono_1">
             <th mat-header-cell *matHeaderCellDef>Teléfono 1</th>
-            <td mat-cell *matCellDef="let centroTrabajo">{{ centroTrabajo.telefono1 }}</td>
+            <td mat-cell *matCellDef="let centroTrabajo; let i = index" [ngClass]="{'fila-impar': i % 2 !== 0, 'fila-par': i % 2 === 0}">
+              {{ centroTrabajo.telefono_1 }}</td>
           </ng-container>
 
-          <ng-container matColumnDef="telefono2">
+          <ng-container matColumnDef="telefono_2">
             <th mat-header-cell *matHeaderCellDef>Teléfono 2</th>
-            <td mat-cell *matCellDef="let centroTrabajo">{{ centroTrabajo.telefono2 }}</td>
+            <td mat-cell *matCellDef="let centroTrabajo; let i = index" [ngClass]="{'fila-impar': i % 2 !== 0, 'fila-par': i % 2 === 0}">
+              {{ centroTrabajo.telefono_2 }}</td>
           </ng-container>
 
-          <ng-container matColumnDef="correo1">
+          <ng-container matColumnDef="correo_1">
             <th mat-header-cell *matHeaderCellDef>Correo 1</th>
-            <td mat-cell *matCellDef="let centroTrabajo">{{ centroTrabajo.correo1 }}</td>
+            <td mat-cell *matCellDef="let centroTrabajo; let i = index" [ngClass]="{'fila-impar': i % 2 !== 0, 'fila-par': i % 2 === 0}">
+              {{ centroTrabajo.correo_1 }}</td>
           </ng-container>
 
-          <ng-container matColumnDef="correo2">
+          <ng-container matColumnDef="correo_2">
             <th mat-header-cell *matHeaderCellDef>Correo 2</th>
-            <td mat-cell *matCellDef="let centroTrabajo">{{ centroTrabajo.correo2 }}</td>
+            <td mat-cell *matCellDef="let centroTrabajo; let i = index" [ngClass]="{'fila-impar': i % 2 !== 0, 'fila-par': i % 2 === 0}">
+              {{ centroTrabajo.correo_2 }}</td>
           </ng-container>
 
-          <ng-container matColumnDef="apoderadoLegal">
+          <ng-container matColumnDef="apoderado_legal">
             <th mat-header-cell *matHeaderCellDef>Apoderado Legal</th>
-            <td mat-cell *matCellDef="let centroTrabajo">{{ centroTrabajo.apoderadoLegal }}</td>
+            <td mat-cell *matCellDef="let centroTrabajo; let i = index" [ngClass]="{'fila-impar': i % 2 !== 0, 'fila-par': i % 2 === 0}">
+              {{ centroTrabajo.apoderado_legal }}</td>
           </ng-container>
 
-          <ng-container matColumnDef="representanteLegal">
+          <ng-container matColumnDef="representante_legal">
             <th mat-header-cell *matHeaderCellDef>Representante Legal</th>
-            <td mat-cell *matCellDef="let centroTrabajo">{{ centroTrabajo.representanteLegal }}</td>
+            <td mat-cell *matCellDef="let centroTrabajo; let i = index" [ngClass]="{'fila-impar': i % 2 !== 0, 'fila-par': i % 2 === 0}">
+              {{ centroTrabajo.representante_legal }}</td>
           </ng-container>
 
           <ng-container matColumnDef="rtn">
             <th mat-header-cell *matHeaderCellDef>RTN</th>
-            <td mat-cell *matCellDef="let centroTrabajo">{{ centroTrabajo.rtn }}</td>
+            <td mat-cell *matCellDef="let centroTrabajo; let i = index" [ngClass]="{'fila-impar': i % 2 !== 0, 'fila-par': i % 2 === 0}">
+              {{ centroTrabajo.rtn }}</td>
           </ng-container>
 
           <ng-container matColumnDef="logo">
             <th mat-header-cell *matHeaderCellDef>Logo</th>
-            <td mat-cell *matCellDef="let centroTrabajo">{{ centroTrabajo.logo }}</td>
+            <td mat-cell *matCellDef="let centroTrabajo; let i = index" [ngClass]="{'fila-impar': i % 2 !== 0, 'fila-par': i % 2 === 0}">
+              {{ centroTrabajo.logo }}</td>
           </ng-container>
 
           <ng-container matColumnDef="editar">
             <th mat-header-cell *matHeaderCellDef>Editar</th>
-            <td mat-cell *matCellDef="let centroTrabajo">
+            <td mat-cell *matCellDef="let centroTrabajo; let i = index" [ngClass]="{'fila-impar': i % 2 !== 0, 'fila-par': i % 2 === 0}">
+
               <button mat-icon-button (click)="editarCentroTrabajo(centroTrabajo)">
                 <mat-icon>edit</mat-icon>
               </button>

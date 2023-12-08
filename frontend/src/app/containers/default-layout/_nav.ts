@@ -16,7 +16,7 @@ export const navItems: INavData[] = [
   },
 
   {
-    name: 'Afiliado', 
+    name: 'Afiliado',
     url: '/base',
     children: [
       {
@@ -29,7 +29,7 @@ export const navItems: INavData[] = [
         name: 'Ver/Editar',
         children: [
           {
-            url: '/Afiliado/afil-banco',
+            url: '/Afiliado/datos-gen-afil',
             name: 'Datos generales',
           },
           {
@@ -46,7 +46,7 @@ export const navItems: INavData[] = [
           }
         ]
       },
-      
+
     ]
   },
 
@@ -55,7 +55,7 @@ export const navItems: INavData[] = [
     url: '/Afiliado/centro-trabajo',
     /* iconComponent: { name: 'cil-drop' } */
     children: [
-      
+
     ]
   },
 ];

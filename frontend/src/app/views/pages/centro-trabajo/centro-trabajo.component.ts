@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup } from '@angular/forms';
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { CentroTrabajoService } from '../../../services/centro-trabajo.service';
 import { MatTableDataSource } from '@angular/material/table';
 
@@ -18,26 +18,26 @@ export class CentroTrabajoComponent implements OnInit {
 
   displayedColumns: string[] = [
     'nombre',
-    'telefono1',
-    'telefono2',
-    'correo1',
-    'correo2',
-    'apoderadoLegal',
-    'representanteLegal',
+    'telefono_1',
+    'telefono_2',
+    'correo_1',
+    'correo_2',
+    'apoderado_legal',
+    'representante_legal',
     'rtn',
     'logo',
     'editar'
   ];
 
   formulario: FormGroup = this.fb.group({
-    nombre: [''],
-    ciudad: [''],
-    correo1: [''],
-    correo2: [''],
-    telefono1: [''],
-    telefono2: [''],
-    apoderadoLegal: [''],
-    representanteLegal: [''],
+    nombre: ['', [Validators.required]],
+    ciudad: ['', [Validators.required]],
+    correo_1: ['', [Validators.required, Validators.email]],
+    correo_2: ['', [Validators.required, Validators.email]],
+    telefono_1: ['', [Validators.required, Validators.pattern("[0-9]*")]],
+    telefono_2: ['', [Validators.required, Validators.pattern("[0-9]*")]],
+    apoderado_legal: ['', [Validators.required]],
+    representante_legal: ['', [Validators.required]],
   });
 
   constructor(private fb: FormBuilder, private centroTrabajoService: CentroTrabajoService) {}
@@ -49,16 +49,14 @@ export class CentroTrabajoComponent implements OnInit {
   obtenerCentrosTrabajo() {
     this.centroTrabajoService.getCentrosTrabajo().subscribe(
       (data) => {
-        console.log(this.dataSource.data);
-
         this.dataSource.data = data.map((row: any) => ({
           nombre: row[2],
-          telefono1: row[3],
-          telefono2: row[4],
-          correo1: row[5],
-          correo2: row[6],
-          apoderadoLegal: row[7],
-          representanteLegal: row[8],
+          telefono_1: row[3],
+          telefono_2: row[4],
+          correo_1: row[5],
+          correo_2: row[6],
+          apoderado_legal: row[7],
+          representante_legal: row[8],
           rtn: row[9],
           logo: row[10],
         }));
@@ -78,21 +76,41 @@ export class CentroTrabajoComponent implements OnInit {
 
   editarCentroTrabajo(centroTrabajo: any) {
     console.log('Editar centro de trabajo:', centroTrabajo);
-
-    // Asigna los valores a los campos del formulario
     this.formulario.patchValue({
       nombre: centroTrabajo.nombre,
       ciudad: centroTrabajo.ciudad,
-      correo1: centroTrabajo.correo1,
-      correo2: centroTrabajo.correo2,
-      telefono1: centroTrabajo.telefono1,
-      telefono2: centroTrabajo.telefono2,
-      apoderadoLegal: centroTrabajo.apoderadoLegal,
-      representanteLegal: centroTrabajo.representanteLegal,
+      correo_1: centroTrabajo.correo_1,
+      correo_2: centroTrabajo.correo_2,
+      telefono_1: centroTrabajo.telefono_1,
+      telefono_2: centroTrabajo.telefono_2,
+      apoderado_legal: centroTrabajo.apoderado_legal,
+      representante_legal: centroTrabajo.representante_legal,
     });
   }
 
-  limpiarCentroTrabajo(){
-    this.formulario.reset()
+  limpiarCentroTrabajo() {
+    this.formulario.reset();
+  }
+
+  agregarCentroTrabajo() {
+    if (this.formulario.valid) {
+      const nuevoCentro = this.formulario.value;
+
+      this.centroTrabajoService.agregarCentroTrabajo(nuevoCentro).subscribe(
+        (response) => {
+
+
+          // Aquí puedes manejar la respuesta del servidor después de agregar el centro de trabajo
+          console.log('Centro de trabajo agregado correctamente:', response);
+          // Luego, puedes recargar la lista de centros de trabajo si es necesario
+          this.obtenerCentrosTrabajo();
+          // También puedes limpiar el formulario
+          this.limpiarCentroTrabajo();
+        },
+        (error) => {
+          console.error('Error al agregar centro de trabajo:', error);
+        }
+      );
+    }
   }
 }

@@ -11,6 +11,11 @@ export class AfiliadoService {
 
   constructor(private http: HttpClient, private router: Router) { }
 
+  getAllAfiliados(): Observable<any> {
+    const url = `${environment.API_URL}/afiliados`;
+    return this.http.get<any>(url);
+  }
+
   agregDatosGen(data:any): Observable<any>{
     var url = `${environment.API_URL}/auth/signup`;
     console.log(data);

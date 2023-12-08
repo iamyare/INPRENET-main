@@ -14,26 +14,27 @@ async function getCentrosTrabajo(req, res) {
   }
 }
 
-  async function crearCentroTrabajo(req, res) {
-    try {
-      const {
-        ciudad_id_ciudad,
-        nombre,
-        telefono_1,
-        telefono_2,
-        correo_1,
-        correo_2,
-        apoderado_legal,
-        representante_legal,
-        rtn,
-        logo,
-      } = req.body;
-  
-      // Crea un nuevo ID para el centro de trabajo
-      const id = uuidv4();
-  
-      // Crea la consulta SQL INSERT
-      const insertQuery = `
+async function crearCentroTrabajo(req, res) {
+  try {
+    const {
+      ciudad_id_ciudad='C001',
+      nombre,
+      telefono_1,
+      telefono_2,
+      correo_1,
+      correo_2,
+      apoderado_legal,
+      representante_legal,
+      rtn,
+      logo,
+    } = req.body;
+
+
+    // Crea un nuevo ID para el centro de trabajo
+    const id = uuidv4();
+
+    // Crea la consulta SQL INSERT
+    const insertQuery = `
       INSERT INTO centro_trabajo (
         id_centro_trabajo,
         ciudad_id_ciudad,
@@ -48,36 +49,52 @@ async function getCentrosTrabajo(req, res) {
         logo
       )
       VALUES (
-        '${id}',
-        '${ciudad_id_ciudad}',
-        '${nombre}',
-        '${telefono_1}',
-        '${telefono_2}',
-        '${correo_1}',
-        '${correo_2}',
-        '${apoderado_legal}',
-        '${representante_legal}',
-        '${rtn}',
-        '${logo}'
+        :id,
+        :ciudad_id_ciudad,
+        :nombre,
+        :telefono_1,
+        :telefono_2,
+        :correo_1,
+        :correo_2,
+        :apoderado_legal,
+        :representante_legal,
+        :rtn,
+        :logo
       )
-      
-      `;
-  
-      // Obtén una conexión a la base de datos
-      const connection = await getConnection();
-  
-      // Confirma la transacción
-      await connection.commit();
-  
-      await connection.close();
-  
-      // Devuelve un mensaje de éxito
-      res.json({ message: 'Centro de trabajo creado correctamente' });
-    } catch (error) {
-      console.error(error.message);
-      res.status(500).json({ error: 'Error en el servidor al crear el centro de trabajo.' });
-    }
+    `;
+
+    // Obtén una conexión a la base de datos
+    const connection = await getConnection();
+
+    // Ejecuta la consulta SQL INSERT
+    const result = await connection.execute(insertQuery, {
+      id,
+      ciudad_id_ciudad,
+      nombre,
+      telefono_1,
+      telefono_2,
+      correo_1,
+      correo_2,
+      apoderado_legal,
+      representante_legal,
+      rtn,
+      logo,
+    });
+
+    // Confirma la transacción
+    await connection.commit();
+
+    // Cierra la conexión
+    await connection.close();
+
+    // Devuelve un mensaje de éxito
+    res.json({ message: 'Centro de trabajo creado correctamente' });
+  } catch (error) {
+    console.error(error.message);
+    res.status(500).json({ error: 'Error en el servidor al crear el centro de trabajo.' });
   }
+}
+
   
 
   async function updateCentroTrabajo(req, res) {

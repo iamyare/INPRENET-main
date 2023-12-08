@@ -1,0 +1,147 @@
+<!-- datos-gen-afil.component.html -->
+<div class="card">
+  <div class="card-header card-header-danger tittle">
+    <h4 class="card-title">Datos De Afiliados</h4>
+  </div>
+
+  <div class="card-body">
+    <div style="overflow-x: auto;">
+
+  <table mat-table [dataSource]="dataSource" class="mat-elevation-z8">
+
+    <!-- País ID Column -->
+    <ng-container matColumnDef="pais_residencia">
+      <th mat-header-cell *matHeaderCellDef>País ID</th>
+      <td mat-cell *matCellDef="let element; let i = index" [ngClass]="{'fila-impar': i % 2 !== 0, 'fila-par': i % 2 === 0}">
+        {{ element.pais_residencia }}</td>
+    </ng-container>
+
+    <!-- País ID 2 Column -->
+    <ng-container matColumnDef="pais_nacionalidad">
+      <th mat-header-cell *matHeaderCellDef>País ID 2</th>
+      <td mat-cell *matCellDef="let element; let i = index" [ngClass]="{'fila-impar': i % 2 !== 0, 'fila-par': i % 2 === 0}">
+        {{ element.pais_nacionalidad }}</td>
+    </ng-container>
+
+    <!-- Tipo Identificación ID Column -->
+    <ng-container matColumnDef="identificacion">
+      <th mat-header-cell *matHeaderCellDef>Tipo Identificación ID</th>
+      <td mat-cell *matCellDef="let element; let i = index" [ngClass]="{'fila-impar': i % 2 !== 0, 'fila-par': i % 2 === 0}">
+        {{ element.identificacion }}</td>
+    </ng-container>
+
+    <!-- Afiliado ID Column -->
+    <ng-container matColumnDef="afiliado_id_afiliado">
+      <th mat-header-cell *matHeaderCellDef>Afiliado ID</th>
+      <td mat-cell *matCellDef="let element">{{ element.afiliado_id_afiliado }}</td>
+    </ng-container>
+
+    <!-- Primer Nombre Column -->
+    <ng-container matColumnDef="nombreCompleto">
+      <th mat-header-cell *matHeaderCellDef>Nombre Completo</th>
+      <td mat-cell *matCellDef="let element">{{ element.primer_nombre + ' ' + element.segundo_nombre + ' ' + element.tercer_nombre + ' ' + element.primer_apellido + ' ' + element.segundo_apellido }}</td>
+    </ng-container>
+
+
+    <!-- Fecha Nacimiento Column -->
+    <ng-container matColumnDef="fecha_nacimiento">
+      <th mat-header-cell *matHeaderCellDef>Fecha Nacimiento</th>
+      <td mat-cell *matCellDef="let element">{{ element.fecha_nacimiento }}</td>
+    </ng-container>
+
+    <!-- Sexo Column -->
+    <ng-container matColumnDef="sexo">
+      <th mat-header-cell *matHeaderCellDef>Sexo</th>
+      <td mat-cell *matCellDef="let element">{{ element.sexo }}</td>
+    </ng-container>
+
+    <!-- Cantidad Dependientes Column -->
+    <ng-container matColumnDef="cantidad_dependientes">
+      <th mat-header-cell *matHeaderCellDef>Cantidad Dependientes</th>
+      <td mat-cell *matCellDef="let element">{{ element.cantidad_dependientes }}</td>
+    </ng-container>
+
+    <!-- Cantidad Hijos Column -->
+    <ng-container matColumnDef="cantidad_hijos">
+      <th mat-header-cell *matHeaderCellDef>Cantidad Hijos</th>
+      <td mat-cell *matCellDef="let element">{{ element.cantidad_hijos }}</td>
+    </ng-container>
+
+    <!-- Profesión Column -->
+    <ng-container matColumnDef="profesion">
+      <th mat-header-cell *matHeaderCellDef>Profesión</th>
+      <td mat-cell *matCellDef="let element">{{ element.profesion }}</td>
+    </ng-container>
+
+    <!-- Representación Column -->
+    <ng-container matColumnDef="representacion">
+      <th mat-header-cell *matHeaderCellDef>Representación</th>
+      <td mat-cell *matCellDef="let element">{{ element.representacion }}</td>
+    </ng-container>
+
+    <!-- Teléfono 1 Column -->
+    <ng-container matColumnDef="telefono_1">
+      <th mat-header-cell *matHeaderCellDef>Teléfono 1</th>
+      <td mat-cell *matCellDef="let element">{{ element.telefono_1 }}</td>
+    </ng-container>
+
+    <!-- Teléfono 2 Column -->
+    <ng-container matColumnDef="telefono_2">
+      <th mat-header-cell *matHeaderCellDef>Teléfono 2</th>
+      <td mat-cell *matCellDef="let element">{{ element.telefono_2 }}</td>
+    </ng-container>
+
+    <!-- Correo 1 Column -->
+    <ng-container matColumnDef="correo_1">
+      <th mat-header-cell *matHeaderCellDef>Correo 1</th>
+      <td mat-cell *matCellDef="let element">{{ element.correo_1 }}</td>
+    </ng-container>
+
+    <!-- Correo 2 Column -->
+    <ng-container matColumnDef="correo_2">
+      <th mat-header-cell *matHeaderCellDef>Correo 2</th>
+      <td mat-cell *matCellDef="let element">{{ element.correo_2 }}</td>
+    </ng-container>
+
+    <!-- Archivo Identificación Column -->
+    <ng-container matColumnDef="archivo_identificacion">
+      <th mat-header-cell *matHeaderCellDef>Archivo Identificación</th>
+      <td mat-cell *matCellDef="let element">{{ element.archivo_identificacion }}</td>
+    </ng-container>
+
+    <!-- Dirección Residencia Column -->
+    <ng-container matColumnDef="direccion_residencia">
+      <th mat-header-cell *matHeaderCellDef>Dirección Residencia</th>
+      <td mat-cell *matCellDef="let element">{{ element.direccion_residencia }}</td>
+    </ng-container>
+
+    <!-- Estado Column -->
+    <ng-container matColumnDef="estado">
+      <th mat-header-cell *matHeaderCellDef>Estado</th>
+      <td mat-cell *matCellDef="let element">{{ element.estado }}</td>
+    </ng-container>
+
+    <ng-container matColumnDef="editar">
+      <th mat-header-cell *matHeaderCellDef>Editar</th>
+      <td mat-cell *matCellDef="let centroTrabajo">
+        <button mat-icon-button (click)="editarCentroTrabajo(centroTrabajo)">
+          <mat-icon>edit</mat-icon>
+        </button>
+      </td>
+    </ng-container>
+
+    <!-- Continuar con más columnas según sea necesario -->
+
+    <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+    <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+  </table>
+</div>
+
+<mat-paginator
+  [length]="totalItems"
+  [pageSize]="pageSize"
+  [pageIndex]="pageIndex"
+  (page)="onPageChange($event)">
+</mat-paginator>
+</div>
+</div>

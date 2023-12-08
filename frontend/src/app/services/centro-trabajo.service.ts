@@ -9,13 +9,16 @@ import { HttpClient } from '@angular/common/http';
 })
 export class CentroTrabajoService {
 
-
   constructor(private http: HttpClient, private router: Router) { }
 
   getCentrosTrabajo(): Observable<any> {
-    var url = `${environment.API_URL}/centrosTrabajo`
+    const url = `${environment.API_URL}/centrosTrabajo`;
     return this.http.get<any>(url);
   }
 
-
+  agregarCentroTrabajo(nuevoCentro: any): Observable<any> {
+    const url = `${environment.API_URL}/centrosTrabajo/nuevoCentro`;
+    console.log(nuevoCentro);
+    return this.http.post<any>(url, nuevoCentro);
+  }
 }

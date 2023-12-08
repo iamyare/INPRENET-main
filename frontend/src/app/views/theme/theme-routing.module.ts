@@ -7,6 +7,7 @@ import { AfilBancoComponent } from '../pages/afil-banco/afil-banco.component';
 import { ColorsComponent } from './colors.component';
 import { TypographyComponent } from './typography.component';
 import { CentroTrabajoComponent } from '../pages/centro-trabajo/centro-trabajo.component';
+import { DatosGenAfilComponent } from '../pages/datos-gen-afil/datos-gen-afil.component';
 
 const routes: Routes = [
   {
@@ -44,6 +45,13 @@ const routes: Routes = [
       {
         path: 'centro-trabajo',
         component: CentroTrabajoComponent,
+        data: {
+          title: 'Centro Trabajo',
+        },
+      },
+      {
+        path: 'datos-gen-afil',
+        component: DatosGenAfilComponent,
         data: {
           title: 'Centro Trabajo',
         },

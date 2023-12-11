@@ -13,12 +13,12 @@ export class DatGeneralesAfiliadoComponent implements OnInit{
   htmlSTID: string = "Archivo de identificación"
   public archivo: any;
   
-  tipoIdent: any = []; Sexo: any = []; estadoCivil: any = [];
+  tipoCotizante: any = []; tipoIdent: any = []; Sexo: any = []; estadoCivil: any = [];
   
   @Input() tipoIdentt?:string
-  @Output() newTipoIdentChange = new EventEmitter<any>()
+  @Output() newDatGenChange = new EventEmitter<any>()
   
-  onTipoIdentChange():void{
+  onDatosGenChange():void{
     const tipoIdent = this.form.value.tipoIdent;
     const archIdent = this.form.value.archIdent;
     const numeroIden = this.form.value.numeroIden;
@@ -35,10 +35,11 @@ export class DatGeneralesAfiliadoComponent implements OnInit{
     const estadoCivil = this.form.value.estadoCivil;
     const representacion = this.form.value.representacion;
     const estado = this.form.value.estado;
+    const cotizante = this.form.value.cotizante;
     const telefono1 = this.form.value.telefono1;
     const telefono2 = this.form.value.telefono2;
-    const coreo1 = this.form.value.coreo1;
-    const coreo2 = this.form.value.coreo2;
+    const correo1 = this.form.value.correo1;
+    const correo2 = this.form.value.correo2;
 
     const data = {
       tipoIdent : tipoIdent,
@@ -57,17 +58,16 @@ export class DatGeneralesAfiliadoComponent implements OnInit{
       estadoCivil : estadoCivil,
       representacion : representacion,
       estado : estado,
+      cotizante : cotizante,
       telefono1 : telefono1,
       telefono2 : telefono2,
-      coreo1 : coreo1,
-      coreo2 : coreo2
+      coreo1 : correo1,
+      coreo2 : correo2
     }
-    this.newTipoIdentChange.emit(data);
+    this.newDatGenChange.emit(data);
   }
   
-
   constructor( private fb: FormBuilder) {
-    
     this.form = this.fb.group({
       tipoIdent: ['', [Validators.required]],
       archIdent: ['', [Validators.required]],
@@ -85,6 +85,7 @@ export class DatGeneralesAfiliadoComponent implements OnInit{
       estadoCivil: ['', [Validators.required]],
       representacion: ['', [Validators.required]],
       estado: ['', [Validators.required]],
+      cotizante: ['', [Validators.required]],
       telefono1: ['', [Validators.required]],
       telefono2: ['', [Validators.required]],
       correo1: ['', [Validators.required, Validators.email]],
@@ -147,6 +148,20 @@ export class DatGeneralesAfiliadoComponent implements OnInit{
       {
         "idIdentificacion":5,
         "value": "RTN"
+      },
+    ];
+    this.tipoCotizante = [
+      {
+        "idCotizante":1,
+        "value": "Afiliado"
+      },
+      {
+        "idCotizante":2,
+        "value": "Beneficiario"
+      },
+      {
+        "idCotizante":3,
+        "value": "Afiliado y Beneficiario"
       },
     ];
   }

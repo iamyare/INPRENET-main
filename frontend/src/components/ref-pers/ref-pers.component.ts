@@ -1,22 +1,33 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { FormArray, FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 
 @Component({
-  selector: 'app-afil-banco',
-  templateUrl: './afil-banco.component.html',
-  styleUrl: './afil-banco.component.scss'
+  selector: 'app-ref-pers',
+  templateUrl: './ref-pers.component.html',
+  styleUrl: './ref-pers.component.scss'
 })
-export class AfilBancoComponent implements OnInit {
+export class RefPersComponent {
+  form3: FormGroup;
   public formParent: FormGroup = new FormGroup({});
-  
+
   Bancos: any = []; tipoIdent: any = []; Sexo: any = []; estadoCivil: any = [];
   htmlSTID: string = "Archivo de identificación"
-
   public archivo: any;
-  datosGen:any; datosPuestTrab:any; datosBanc:any;datosRefPer:any;
-  DatosBancBen:any = []; DatosGenBen:any  = [];
+
+  @Input() nombreComp?:string
+  @Output() newDatRefPerChange = new EventEmitter<any>()
+  
+  onDatosRefPerChange(){
+    const data = this.formParent.value.refpers
+    this.newDatRefPerChange.emit(this.formParent.value.refpers);
+  }
 
   constructor( private fb: FormBuilder) {
+    this.form3 = this.fb.group({
+      cantReferPers: ['', [Validators.required, Validators.pattern("[0-9]*")]],
+    });
+
     this.Bancos = [
       {
         "idBanco":1,
@@ -91,29 +102,6 @@ export class AfilBancoComponent implements OnInit {
     ];
   }
 
-  setDatosGen(datosGen:any){
-    this.datosGen = datosGen;
-  }
-
-  setDatosPuetTrab(datosPuestTrab:any){
-    this.datosPuestTrab = datosPuestTrab;
-  }
-
-  setDatosBanc(datosBanc:any){
-    this.datosBanc = datosBanc;
-  }
-
-  setDatosRefPer(datosRefPer:any){
-    this.datosRefPer = datosRefPer;
-  }
-
-  setDatosGenBen(DatosGenBen:any){
-    this.DatosGenBen.push(DatosGenBen);
-  }
-  setDatosBancBen(DatosBancBen:any){
-    this.DatosBancBen.push(DatosBancBen);
-  }
-
   ngOnInit():void{
     this.initFormParent();
   }
@@ -143,23 +131,36 @@ export class AfilBancoComponent implements OnInit {
     ref_RefPers.push(this.initFormRefPers())
   }
   
-  getCtrl(key: string, form: FormGroup): any {
-    return form.get(key)
-  }
-  
   eliminarRefPer():void{
     const ref_RefPers = this.formParent.get('refpers') as FormArray;
     ref_RefPers.removeAt(-1);
   }
+  
+  getCtrl(key: string, form: FormGroup): any {
+    return form.get(key)
+  }
 
-  enviar(){
-    console.log(this.datosGen);
-    console.log(this.datosPuestTrab);
-    console.log(this.datosBanc);
-    console.log(this.datosRefPer);
+  addValidation(index: number, key: string): void {
 
-    console.log(this.DatosGenBen);
-    console.log(this.DatosBancBen);
+    const refParent = this.formParent.get('refpers') as FormArray;
+    const refSingle = refParent.at(index).get(key) as FormGroup;
+
+    refSingle.setValidators(
+      [
+        Validators.required,
+        Validators.required,
+        Validators.required,
+        Validators.required,
+        Validators.required,
+        Validators.required
+      ]
+    )
+    refSingle.updateValueAndValidity();
+  }
+
+  agregarBeneficiario(): void{
+    const ref_RefPers = this.formParent.get('refpers') as FormArray;
+    ref_RefPers.push(this.initFormRefPers())
   }
 
 }

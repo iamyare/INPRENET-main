@@ -7,7 +7,6 @@ import { IconModule } from '@coreui/icons-angular';
 import { DocsExampleComponent } from './docs-example/docs-example.component';
 import { DocsLinkComponent } from './docs-link/docs-link.component';
 import { DocsCalloutComponent } from './docs-callout/docs-callout.component';
-import { DatGeneralesAfiliadoComponent } from './dat-generales-afiliado/dat-generales-afiliado.component';
 import { LayoutModule } from '@angular/cdk/layout';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
@@ -33,18 +32,29 @@ import { MatTableModule } from '@angular/material/table';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { NgScrollbarModule } from 'ngx-scrollbar';
 
+import { DatGeneralesAfiliadoComponent } from './dat-generales-afiliado/dat-generales-afiliado.component';
+import { DatPuestoTrabComponent } from './dat-puesto-trab/dat-puesto-trab.component';
+import { DatBancComponent } from './dat-banc/dat-banc.component';
+import { RefPersComponent } from './ref-pers/ref-pers.component';
+
 @NgModule({
   declarations: [
     DocsExampleComponent,
     DocsLinkComponent,
     DocsCalloutComponent,
-    DatGeneralesAfiliadoComponent
+    DatGeneralesAfiliadoComponent,
+    DatPuestoTrabComponent,
+    DatBancComponent,
+    RefPersComponent
   ],
   exports: [
     DocsExampleComponent,
     DocsLinkComponent,
     DocsCalloutComponent,
-    DatGeneralesAfiliadoComponent
+    DatGeneralesAfiliadoComponent,
+    DatPuestoTrabComponent,
+    DatBancComponent,
+    RefPersComponent
   ],
   imports: [
     CommonModule,

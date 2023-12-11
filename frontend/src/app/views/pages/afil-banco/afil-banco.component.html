@@ -1,205 +1,51 @@
 <div class="main-content">
   <div class="col-md-12">
 
-    <app-dat-generales-afiliado (newTipoIdentChange)="getParams($event)"></app-dat-generales-afiliado>
-    
+    <app-dat-generales-afiliado (newDatGenChange)="setDatosGen($event)"></app-dat-generales-afiliado>
+    <app-dat-puesto-trab (newDatPuesTChange)="setDatosPuetTrab($event)"></app-dat-puesto-trab>
+    <app-dat-banc (newDatBancChange)="setDatosBanc($event)"></app-dat-banc>
+    <app-ref-pers (newDatRefPerChange)="setDatosRefPer($event)"></app-ref-pers>
+
     <div class="card">
-      <div class="card-header card-header-danger tittle" color="primary">
-        
-        <h4 class="card-title">Datos del puesto de trabajo (Afiliado)</h4>
-        <p class="card-category">Completa la información correspondiente</p>
+      <div class="card-header card-header-danger tittle" style="background: rgb(29, 192, 192);">
+        <h4 class="card-title">Beneficiarios</h4>
+        <p class="card-category">Llene los campos para continuar con el proceso.</p>
+      </div>
+
+      <form [formGroup]="formParent" >
+        <div formArrayName="refpers">
+          <div *ngFor="let skill of getCtrl('refpers', formParent).controls; index as formChild; let i = index">
+            <h4 class="card-title">Beneficiario número: {{i+1}}</h4>
+            <div [formGroupName]="formChild" class="row">
+              <app-dat-generales-afiliado (newDatGenChange)="setDatosGenBen($event)"></app-dat-generales-afiliado>
+            </div>
+            <div [formGroupName]="formChild" class="row">
+              <app-dat-banc (newDatBancChange)="setDatosBancBen($event)"></app-dat-banc>
+            </div>
+
+          </div>
+        </div>
+      </form>
+
+      <div class="card-body">
+        <button mat-button color="primary" (click)="agregarRefPer()">Agregar Beneficiario</button>
       </div>
       <div class="card-body">
-        <form [formGroup]="form1">
-          <div class="row">
-            <div class="col-md-12">
-              <mat-form-field class="example-full-width; inputs" appearance="outline">
-                <mat-label>Centro de Trabajo</mat-label>
-                <input matInput formControlName="centroTrabajo">
-                <!-- <mat-icon matSuffix>sentiment_very_satisfied</mat-icon> -->
-              </mat-form-field>
-            </div>
-          </div>
-          <div class="row">
-            <div class="col-md-4">
-              <mat-form-field class="example-full-width; inputs" appearance="outline">
-                <mat-label>Cargo que desempeña</mat-label>
-                <input matInput formControlName="cargo">
-                <!-- <mat-icon matSuffix>sentiment_very_satisfied</mat-icon> -->
-              </mat-form-field>
-            </div>
-            <div class="col-md-4">
-              <mat-form-field class="example-full-width; inputs" appearance="outline">
-                <mat-label>Sector Económico</mat-label>
-                <input matInput formControlName="sectorEconomico">
-                <!-- <mat-icon matSuffix>sentiment_very_satisfied</mat-icon> -->
-              </mat-form-field>
-            </div>
-            <div class="col-md-4">
-              <mat-form-field class="example-full-width; inputs" appearance="outline">
-                <mat-label>Actividad Económica</mat-label>
-                <input matInput formControlName="actividadEconomica">
-                <!-- <mat-icon matSuffix>sentiment_very_satisfied</mat-icon> -->
-              </mat-form-field>
-            </div>
-          </div>
-          <div class="row">
-            <div class="col-md-4">
-              <mat-form-field class="example-full-width; inputs" appearance="outline">
-                <mat-label>Clase cliente</mat-label>
-                <input matInput formControlName="claseCliente">
-                <!-- <mat-icon matSuffix>sentiment_very_satisfied</mat-icon> -->
-              </mat-form-field>
-            </div>
-            <div class="col-md-4">
-              <mat-form-field class="example-full-width; inputs" appearance="outline">
-                <mat-label>Sector</mat-label>
-                <input matInput formControlName="sector">
-                <!-- <mat-icon matSuffix>sentiment_very_satisfied</mat-icon> -->
-              </mat-form-field>
-            </div>
-            <div class="col-md-4">
-              <mat-form-field class="example-full-width; inputs" appearance="outline">
-                <mat-label>Número de acuerdo</mat-label>
-                <input matInput formControlName="numeroAcuerdo">
-                <!-- <mat-icon matSuffix>sentiment_very_satisfied</mat-icon> -->
-              </mat-form-field>
-            </div>
-          </div>
-          <div class="row">
-            <div class="col-md-4">
-              <mat-form-field class="example-full-width; inputs" appearance="outline">
-                <mat-label>Salario Neto</mat-label>
-                <input matInput formControlName="salarioNeto">
-              </mat-form-field>
-            </div>
-            <div class="col-md-4">
-              <mat-form-field class="example-full-width; inputs" appearance="outline">
-                <mat-label>Fecha de Ingreso</mat-label>
-                <input matInput formControlName="fechaIngreso" [matDatepicker]="fechaIngreso">
-                <mat-hint>MM/DD/YYYY</mat-hint>
-                <mat-datepicker-toggle matIconSuffix [for]="fechaIngreso"></mat-datepicker-toggle>
-                <mat-datepicker #fechaIngreso></mat-datepicker>
-              </mat-form-field>
-            </div>
-            <div class="col-md-4">
-              <mat-form-field class="example-full-width; inputs" appearance="outline">
-                <mat-label>Fecha de Pago</mat-label>
-                <input matInput formControlName="fechaPago" [matDatepicker]="fechaPago">
-                <mat-hint>MM/DD/YYYY</mat-hint>
-                <mat-datepicker-toggle matIconSuffix [for]="fechaPago"></mat-datepicker-toggle>
-                <mat-datepicker #fechaPago></mat-datepicker>
-              </mat-form-field>
-            </div>
-          </div>
-        </form>
+        <button mat-button color="warn" (click)="eliminarRefPer()">Eliminar Beneficiario</button>
       </div>
 
-      <div class="card">
-        <div class="card-header card-header-danger tittle">
-          <h4 class="card-title">Datos Bancarios</h4>
-          <p class="card-category">Completa la información correspondiente</p>
-        </div>
-        <div class="card-body">
-          <form [formGroup]="form2">
-            <div class="row">
-              <div class="col-md-6">
-                <mat-form-field class="example-full-width; inputs" appearance="outline">
-                  <mat-label>Nombre del Banco</mat-label>
-                  <select matNativeControl formControlName="nombreBanco">
-                    <option *ngFor="let p of Bancos" [value]="p.value">
-                      {{p.value}}
-                    </option>
-                  </select>
-                </mat-form-field>
-              </div>
-              <div class="col-md-6">
-                <mat-form-field class="example-full-width; inputs" appearance="outline">
-                  <mat-label>Número de Cuenta</mat-label>
-                  <input matInput formControlName="numeroCuenta">
-                  <!-- <mat-icon matSuffix>sentiment_very_satisfied</mat-icon> -->
-                </mat-form-field>
-              </div>
-            </div>
-          </form>
-        </div>
+    </div>
 
-        <div class="card">
-          <div class="card-header card-header-danger tittle">
-            <h4 class="card-title">Referencias Personales</h4>
-            <p class="card-category">Completa la información correspondiente</p>
-          </div>
-
-          <div class="card-body">
-            <button mat-button color="primary" (click)="addSkill()">Agregar Referencia Personal</button>
-
-            <form [formGroup]="formParent">
-              <div formArrayName="refpers">
-                <div *ngFor="let skill of getCtrl('refpers', formParent).controls; index as formChild; let i = index">
-                  <h4 class="card-title">Referencia número: {{i+1}}</h4>
-                  <div [formGroupName]="formChild" class="row">
-                    <div class="col-md-6">
-                      <mat-form-field class="example-full-width; inputs" appearance="outline">
-                        <mat-label>Nombre Completo</mat-label>
-                        <input matInput type="text" formControlName="nombreRefPers">
-                      </mat-form-field>
-                    </div>
-                    <div class="col-md-6">
-                      <mat-form-field class="example-full-width; inputs" appearance="outline">
-                        <mat-label>Parentesco</mat-label>
-                        <input matInput type="text" formControlName="Parentesco">
-                      </mat-form-field>
-                    </div>
-                  </div>
-                  <div [formGroupName]="formChild" class="row">
-                    <div class="col-md-6">
-                      <mat-form-field class="example-full-width; inputs" appearance="outline">
-                        <mat-label>Dirección</mat-label>
-                        <input matInput type="text" formControlName="direccion">
-                      </mat-form-field>
-                    </div>
-                    <div class="col-md-6">
-                      <mat-form-field class="example-full-width; inputs" appearance="outline">
-                        <mat-label>Teléfono domicilio</mat-label>
-                        <input matInput type="text" formControlName="telefonoDom">
-                      </mat-form-field>
-                    </div>
-                  </div>
-                  <div [formGroupName]="formChild" class="row">
-                    <div class="col-md-6">
-                      <mat-form-field class="example-full-width; inputs" appearance="outline">
-                        <mat-label>Teléfono trabajo</mat-label>
-                        <input matInput type="text" formControlName="telefonoTrab">
-                      </mat-form-field>
-                    </div>
-                    <div class="col-md-6">
-                      <mat-form-field class="example-full-width; inputs" appearance="outline">
-                        <mat-label>Teléfono personal</mat-label>
-                        <input matInput type="text" formControlName="telefonoPers">
-                      </mat-form-field>
-                    </div>
-                  </div>
-
-                </div>
-              </div>
-            </form>
-          </div>
-
-        </div>
-
-        <div class="card">
-          <div class="card-header card-header-danger tittle">
-            <h4 class="card-title">Envio de formulario</h4>
-            <p class="card-category">Presione el botón enviar para continuar con el proceso.</p>
-          </div>
-
-          <div class="card-body">
-            <button mat-button color="primary" (click)="enviar()">Enviar Formulario</button>
-          </div>
-
-        </div>
-
+    <div class="card">
+      <div class="card-header card-header-danger tittle">
+        <h4 class="card-title">Envio de formulario</h4>
+        <p class="card-category">Presione el botón enviar para continuar con el proceso.</p>
       </div>
+
+      <div class="card-body">
+        <button mat-button color="primary" (click)="enviar()">Enviar Formulario</button>
+      </div>
+
     </div>
   </div>
 </div>

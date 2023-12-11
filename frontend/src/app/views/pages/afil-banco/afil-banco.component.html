@@ -1,7 +1,8 @@
 <div class="main-content">
   <div class="col-md-12">
 
-    <app-dat-generales-afiliado [cargo]="cargo"></app-dat-generales-afiliado>
+    <app-dat-generales-afiliado (newTipoIdentChange)="getParams($event)"></app-dat-generales-afiliado>
+    
     <div class="card">
       <div class="card-header card-header-danger tittle" color="primary">
         
@@ -184,7 +185,7 @@
             </form>
           </div>
 
-        </div>,
+        </div>
 
         <div class="card">
           <div class="card-header card-header-danger tittle">

@@ -1,7 +1,11 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { CentroTrabajoService } from '../../../services/centro-trabajo.service';
 import { MatTableDataSource } from '@angular/material/table';
+import { MatDialog } from '@angular/material/dialog';
+import { PageEvent } from '@angular/material/paginator';
+import { MatSnackBar } from '@angular/material/snack-bar';
+import { MatPaginator } from '@angular/material/paginator';
 
 @Component({
   selector: 'app-centro-trabajo',
@@ -9,14 +13,19 @@ import { MatTableDataSource } from '@angular/material/table';
   styleUrls: ['./centro-trabajo.component.scss']
 })
 export class CentroTrabajoComponent implements OnInit {
+
+  nombreBusqueda: string = '';
+  public informacion: any = [];
+
   ELEMENT_DATA: any[] = [];
   dataSource = new MatTableDataSource<any>(this.ELEMENT_DATA);
 
-  pageSize = 10;
-  pageIndex = 0;
-  totalItems = 0;
+  pageSize = 5;
+  desde = 0;
+  hasta: number = this.pageSize;
 
   displayedColumns: string[] = [
+    'indice',
     'nombre',
     'telefono_1',
     'telefono_2',
@@ -40,7 +49,12 @@ export class CentroTrabajoComponent implements OnInit {
     representante_legal: ['', [Validators.required]],
   });
 
-  constructor(private fb: FormBuilder, private centroTrabajoService: CentroTrabajoService) {}
+  @ViewChild(MatPaginator) matPaginator: MatPaginator | undefined;
+
+  constructor(
+    private fb: FormBuilder,
+    private centroTrabajoService: CentroTrabajoService
+  ) {}
 
   ngOnInit() {
     this.obtenerCentrosTrabajo();
@@ -48,20 +62,12 @@ export class CentroTrabajoComponent implements OnInit {
 
   obtenerCentrosTrabajo() {
     this.centroTrabajoService.getCentrosTrabajo().subscribe(
-      (data) => {
-        this.dataSource.data = data.map((row: any) => ({
-          nombre: row[2],
-          telefono_1: row[3],
-          telefono_2: row[4],
-          correo_1: row[5],
-          correo_2: row[6],
-          apoderado_legal: row[7],
-          representante_legal: row[8],
-          rtn: row[9],
-          logo: row[10],
-        }));
-
-        this.totalItems = this.dataSource.data.length;
+      async (res: any) => {
+        if (res.ok) {
+          this.informacion = res.centrosTrabajo;
+          this.dataSource.data = this.informacion; // Actualiza el dataSource
+          this.actualizarPaginador();
+        }
       },
       (error) => {
         console.error('Error al obtener centros de trabajo:', error);
@@ -69,22 +75,17 @@ export class CentroTrabajoComponent implements OnInit {
     );
   }
 
-  onPageChange(event: any) {
-    this.pageIndex = event.pageIndex;
-    this.pageSize = event.pageSize;
-  }
-
   editarCentroTrabajo(centroTrabajo: any) {
     console.log('Editar centro de trabajo:', centroTrabajo);
     this.formulario.patchValue({
-      nombre: centroTrabajo.nombre,
-      ciudad: centroTrabajo.ciudad,
-      correo_1: centroTrabajo.correo_1,
-      correo_2: centroTrabajo.correo_2,
-      telefono_1: centroTrabajo.telefono_1,
-      telefono_2: centroTrabajo.telefono_2,
-      apoderado_legal: centroTrabajo.apoderado_legal,
-      representante_legal: centroTrabajo.representante_legal,
+      nombre: centroTrabajo[2],
+      ciudad: 'Nada aun',
+      telefono_1: centroTrabajo[3],
+      telefono_2: centroTrabajo[4],
+      correo_1: centroTrabajo[5],
+      correo_2: centroTrabajo[6],
+      apoderado_legal: centroTrabajo[7],
+      representante_legal: centroTrabajo[8],
     });
   }
 
@@ -95,22 +96,49 @@ export class CentroTrabajoComponent implements OnInit {
   agregarCentroTrabajo() {
     if (this.formulario.valid) {
       const nuevoCentro = this.formulario.value;
-
       this.centroTrabajoService.agregarCentroTrabajo(nuevoCentro).subscribe(
         (response) => {
-
-
-          // Aquí puedes manejar la respuesta del servidor después de agregar el centro de trabajo
           console.log('Centro de trabajo agregado correctamente:', response);
-          // Luego, puedes recargar la lista de centros de trabajo si es necesario
           this.obtenerCentrosTrabajo();
-          // También puedes limpiar el formulario
           this.limpiarCentroTrabajo();
         },
         (error) => {
           console.error('Error al agregar centro de trabajo:', error);
         }
       );
+    }
+  }
+
+  buscarPorNombre() {
+    if (this.nombreBusqueda.trim() === '') {
+      this.dataSource.filter = '';
+    } else {
+      this.aplicarFiltroNombre();
+    }
+  }
+
+  aplicarFiltroNombre() {
+    this.dataSource.filter = this.nombreBusqueda.trim().toLowerCase();
+  }
+
+  onPageChange(e: PageEvent): void {
+    this.desde = e.pageIndex * e.pageSize;
+    this.hasta = this.desde + e.pageSize;
+
+    const paginatedData = this.informacion.slice(this.desde, this.hasta);
+    this.dataSource.data = paginatedData;
+
+    if (this.nombreBusqueda.trim() !== '') {
+      this.aplicarFiltroNombre();
+    }
+  }
+
+  private actualizarPaginador() {
+    this.pageSize = 5; // Ajusta según tu necesidad
+    this.hasta = this.pageSize;
+
+    if (this.matPaginator) {
+      this.matPaginator.length = this.informacion.length;
     }
   }
 }

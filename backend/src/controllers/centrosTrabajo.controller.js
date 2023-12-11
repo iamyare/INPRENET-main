@@ -4,13 +4,23 @@ const { getConnection } = require('../config/db');
 
 async function getCentrosTrabajo(req, res) {
   try {
+    const query = `
+      SELECT *
+      FROM centro_trabajo
+    `;
+
     const connection = await getConnection();
-    const result = await connection.execute('SELECT * FROM centro_trabajo');
+    const result = await connection.execute(query);
     await connection.close();
-    res.json(result.rows);
+
+    if (result.rows.length === 0) {
+      return res.json({ ok: false, error: 'No se encontró ningún centro de trabajo.' });
+    }
+
+    res.json({ ok: true, centrosTrabajo: result.rows });
   } catch (error) {
     console.error(error.message);
-    res.status(500).json({ error: 'Error en el servidor al obtener los centros de trabajo.' });
+    res.status(500).json({ ok: false, error: 'Error en el servidor al buscar los centros de trabajo.' });
   }
 }
 
@@ -95,6 +105,25 @@ async function crearCentroTrabajo(req, res) {
   }
 }
 
+async function buscarCentroTrabajoPorNombre(req, res) {
+  try {
+    const { nombre } = req.body;
+    if (!nombre) {
+      return res.status(400).json({ error: 'Por favor, proporciona un nombre para la búsqueda.' });
+    }
+    const selectQuery = 'SELECT * FROM centro_trabajo WHERE nombre = :nombre';
+    const connection = await getConnection();
+    const result = await connection.execute(selectQuery, { nombre });
+    await connection.close();
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: 'No se encontró ningún centro de trabajo con el nombre proporcionado.' });
+    }
+    res.json(result.rows[0]);
+  } catch (error) {
+    console.error(error.message);
+    res.status(500).json({ error: 'Error en el servidor al buscar el centro de trabajo por nombre.' });
+  }
+}
   
 
   async function updateCentroTrabajo(req, res) {
@@ -241,4 +270,4 @@ async function crearCentroTrabajo(req, res) {
   }
   
 
-  module.exports = { getCentrosTrabajo, getCentroTrabajoById, updateCentroTrabajo, crearCentroTrabajo };
+  module.exports = { getCentrosTrabajo, getCentroTrabajoById, updateCentroTrabajo, crearCentroTrabajo, buscarCentroTrabajoPorNombre };

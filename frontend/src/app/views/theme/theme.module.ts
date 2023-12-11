@@ -23,6 +23,8 @@ import { MatCardModule } from '@angular/material/card';
 import { MatTableModule } from '@angular/material/table';
 import { MatPaginatorModule } from '@angular/material/paginator';
 import { DatosGenAfilComponent } from '../pages/datos-gen-afil/datos-gen-afil.component';
+import { MatIconModule } from '@angular/material/icon';
+
 
 
 @NgModule({
@@ -42,7 +44,8 @@ import { DatosGenAfilComponent } from '../pages/datos-gen-afil/datos-gen-afil.co
     MatButtonModule,
     MatCardModule,
     MatTableModule,
-    MatPaginatorModule
+    MatPaginatorModule,
+    MatIconModule
 
   ],
   declarations: [

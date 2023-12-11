@@ -74,65 +74,83 @@
 
   <div class="card">
     <div class="card-header card-header-danger tittle">
-      <h4 class="card-title">Centros de trabajo</h4>
+      <div class="row">
+        <div class="col-6">
+          <h4 class="card-title">Centros de trabajo</h4>
+        </div>
+        <div class="col-6">
+          <button mat-raised-button color="primary" (click)="buscarPorNombre()">Buscar por Nombre</button>
+          <input matInput placeholder="Buscar por nombre" [(ngModel)]="nombreBusqueda" class="custom-input"/>
+
+        </div>
+      </div>
     </div>
 
     <div class="card-body">
       <div style="overflow-x: auto;">
-        <table mat-table class="mat-elevation-z8" [dataSource]="dataSource">
+
+
+        <table mat-table class="mat-elevation-z8" [dataSource]="dataSource" >
+
+          <ng-container matColumnDef="indice">
+            <th mat-header-cell *matHeaderCellDef>Índice</th>
+            <td mat-cell *matCellDef="let centroTrabajo; let i = index" [ngClass]="{'fila-impar': i % 2 !== 0, 'fila-par': i % 2 === 0}">
+              {{ i+1 }}</td>
+          </ng-container>
+
 
           <ng-container matColumnDef="nombre">
             <th mat-header-cell *matHeaderCellDef>Nombre</th>
             <td mat-cell *matCellDef="let centroTrabajo; let i = index" [ngClass]="{'fila-impar': i % 2 !== 0, 'fila-par': i % 2 === 0}">
-              {{ centroTrabajo.nombre }}</td>
+              {{ centroTrabajo[2] }}</td>
           </ng-container>
 
           <ng-container matColumnDef="telefono_1">
             <th mat-header-cell *matHeaderCellDef>Teléfono 1</th>
             <td mat-cell *matCellDef="let centroTrabajo; let i = index" [ngClass]="{'fila-impar': i % 2 !== 0, 'fila-par': i % 2 === 0}">
-              {{ centroTrabajo.telefono_1 }}</td>
+              {{ centroTrabajo[3] }}</td>
           </ng-container>
 
           <ng-container matColumnDef="telefono_2">
             <th mat-header-cell *matHeaderCellDef>Teléfono 2</th>
             <td mat-cell *matCellDef="let centroTrabajo; let i = index" [ngClass]="{'fila-impar': i % 2 !== 0, 'fila-par': i % 2 === 0}">
-              {{ centroTrabajo.telefono_2 }}</td>
+              {{ centroTrabajo[4] }}</td>
           </ng-container>
 
           <ng-container matColumnDef="correo_1">
             <th mat-header-cell *matHeaderCellDef>Correo 1</th>
             <td mat-cell *matCellDef="let centroTrabajo; let i = index" [ngClass]="{'fila-impar': i % 2 !== 0, 'fila-par': i % 2 === 0}">
-              {{ centroTrabajo.correo_1 }}</td>
+              {{ centroTrabajo[5] }}</td>
           </ng-container>
 
           <ng-container matColumnDef="correo_2">
             <th mat-header-cell *matHeaderCellDef>Correo 2</th>
             <td mat-cell *matCellDef="let centroTrabajo; let i = index" [ngClass]="{'fila-impar': i % 2 !== 0, 'fila-par': i % 2 === 0}">
-              {{ centroTrabajo.correo_2 }}</td>
+              {{ centroTrabajo[6] }}</td>
           </ng-container>
 
           <ng-container matColumnDef="apoderado_legal">
             <th mat-header-cell *matHeaderCellDef>Apoderado Legal</th>
             <td mat-cell *matCellDef="let centroTrabajo; let i = index" [ngClass]="{'fila-impar': i % 2 !== 0, 'fila-par': i % 2 === 0}">
-              {{ centroTrabajo.apoderado_legal }}</td>
+              {{ centroTrabajo[7] }}</td>
           </ng-container>
 
           <ng-container matColumnDef="representante_legal">
             <th mat-header-cell *matHeaderCellDef>Representante Legal</th>
             <td mat-cell *matCellDef="let centroTrabajo; let i = index" [ngClass]="{'fila-impar': i % 2 !== 0, 'fila-par': i % 2 === 0}">
-              {{ centroTrabajo.representante_legal }}</td>
+              {{ centroTrabajo[8] }}</td>
           </ng-container>
 
           <ng-container matColumnDef="rtn">
             <th mat-header-cell *matHeaderCellDef>RTN</th>
             <td mat-cell *matCellDef="let centroTrabajo; let i = index" [ngClass]="{'fila-impar': i % 2 !== 0, 'fila-par': i % 2 === 0}">
-              {{ centroTrabajo.rtn }}</td>
+              {{ centroTrabajo[9] }}</td>
           </ng-container>
 
           <ng-container matColumnDef="logo">
             <th mat-header-cell *matHeaderCellDef>Logo</th>
             <td mat-cell *matCellDef="let centroTrabajo; let i = index" [ngClass]="{'fila-impar': i % 2 !== 0, 'fila-par': i % 2 === 0}">
-              {{ centroTrabajo.logo }}</td>
+              {{ centroTrabajo[10] }}</td>
           </ng-container>
 
           <ng-container matColumnDef="editar">
@@ -151,12 +169,10 @@
         </table>
       </div>
 
-      <mat-paginator
-        [length]="totalItems"
-        [pageSize]="pageSize"
-        [pageIndex]="pageIndex"
-        (page)="onPageChange($event)">
-      </mat-paginator>
+      <mat-paginator #matPaginator [length]="informacion.length" [pageSize]="pageSize" [pageSizeOptions]="[5, 10, 25]"
+      (page)="onPageChange($event)" aria-label="Select page">
+    </mat-paginator>
+
     </div>
   </div>
 </div>

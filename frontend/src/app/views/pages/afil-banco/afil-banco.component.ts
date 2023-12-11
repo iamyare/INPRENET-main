@@ -7,40 +7,14 @@ import { FormArray, FormBuilder, FormControl, FormGroup, Validators } from '@ang
   styleUrl: './afil-banco.component.scss'
 })
 export class AfilBancoComponent implements OnInit {
-  form: FormGroup; form1: FormGroup; form2: FormGroup; form3: FormGroup;
+  form1: FormGroup; form2: FormGroup; form3: FormGroup;
   public formParent: FormGroup = new FormGroup({});
 
   Bancos: any = []; tipoIdent: any = []; Sexo: any = []; estadoCivil: any = [];
   htmlSTID: string = "Archivo de identificación"
   public archivo: any;
-
-  public cargo: any = "SIIUUUU";
-  public value: any;
-  
+  datosGen:any;
   constructor( private fb: FormBuilder) {
-    this.form = this.fb.group({
-      tipoIdent: ['', [Validators.required]],
-      archIdent: ['', [Validators.required]],
-      numeroIden: ['', [Validators.required]],
-      primerNombre: ['', [Validators.required]],
-      segundoNombre: ['', [Validators.required]],
-      tercerNombre: ['', [Validators.required]],
-      primerApellido: ['', [Validators.required]],
-      segundoApellido: ['', [Validators.required]],
-      fechaNacimiento: ['', [Validators.required]],
-      cantidadDependientes: ['', [Validators.required, Validators.pattern("[0-9]*")]],
-      cantidadHijos: ['', [Validators.required, Validators.pattern("[0-9]*")]],
-      Sexo: ['', [Validators.required]],
-      profesion: ['', [Validators.required]],
-      estadoCivil: ['', [Validators.required]],
-      representacion: ['', [Validators.required]],
-      estado: ['', [Validators.required]],
-      telefono1: ['', [Validators.required]],
-      telefono2: ['', [Validators.required]],
-      correo1: ['', [Validators.required, Validators.email]],
-      correo2: ['', [Validators.required, Validators.email]],
-    });
-
     this.form1 = this.fb.group({
      centroTrabajo: ['', [Validators.required]],
      cargo: ['', [Validators.required]],
@@ -137,6 +111,10 @@ export class AfilBancoComponent implements OnInit {
     ];
   }
 
+  getParams(datosGen:any){
+    this.datosGen = datosGen;
+  }
+
   ngOnInit():void{
     this.initFormParent();
   }
@@ -188,44 +166,10 @@ export class AfilBancoComponent implements OnInit {
     )
     refSingle.updateValueAndValidity();
   }
-  onFileSelected(event: any) {
-    const file = event.target.files[0];
-    const fileSize = event.target.files[0].size / 1024 / 1024;
-
-    if (file) {
-        if (fileSize > 7000) {
-            //this.toastr.error('El archivo no debe superar los 3MB', 'Error');
-            this.htmlSTID = "Identificación";
-            this.form.reset();
-        } else {
-            this.archivo = file
-            this.htmlSTID = event.target.files[0].name;
-        }
-    }
-  }
 
   enviar(){
-    const tipoIdent = this.form.value.tipoIdent;
-    const archIdent = this.form.value.archIdent;
-    const numeroIden = this.form.value.numeroIden;
-    const primerNombre = this.form.value.primerNombre;
-    const segundoNombre = this.form.value.segundoNombre;
-    const tercerNombre = this.form.value.tercerNombre;
-    const primerApellido = this.form.value.primerApellido;
-    const segundoApellido = this.form.value.segundoApellido;
-    const fechaNacimiento = this.form.value.fechaNacimiento;
-    const cantidadDependientes = this.form.value.cantidadDependientes;
-    const cantidadHijos = this.form.value.cantidadHijos;
-    const Sexo = this.form.value.Sexo;
-    const profesion = this.form.value.profesion;
-    const estadoCivil = this.form.value.estadoCivil;
-    const representacion = this.form.value.representacion;
-    const estado = this.form.value.estado;
-    const telefono1 = this.form.value.telefono1;
-    const telefono2 = this.form.value.telefono2;
-    const coreo1 = this.form.value.coreo1;
-    const coreo2 = this.form.value.coreo2;
-
+    console.log(this.datosGen);
+    
     const centroTrabajo = this.form1.value.centroTrabajo;
     const cargo = this.form1.value.cargo;
     const sectorEconomico = this.form1.value.sectorEconomico;
@@ -240,7 +184,7 @@ export class AfilBancoComponent implements OnInit {
     const nombreBanco = this.form2.value.nombreBanco;
     const numeroCuenta = this.form2.value.numeroCuenta;
 
-    console.log(this.formParent.value.refpers);
+    //this.cargo = tipoIdentta;
     
     /* this.authSvc.crearCuenta(data).subscribe((res: any) => {
       console.log(res);

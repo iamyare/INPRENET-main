@@ -4,10 +4,6 @@
   "copyright": "Copyright 2023",
   "license": "",
   "author": "",
-  "config": {
-    "coreui_library_short_version": "4.7",
-    "coreui_library_docs_url": "https://coreui.io/angular/docs/"
-  },
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
@@ -40,6 +36,7 @@
     "chart.js": "^3.9.1",
     "lodash-es": "^4.17.21",
     "ngx-scrollbar": "^13.0.3",
+    "randombytes": "^2.1.0",
     "rxjs": "~7.8.1",
     "tslib": "^2.3.0",
     "zone.js": "~0.14.2"

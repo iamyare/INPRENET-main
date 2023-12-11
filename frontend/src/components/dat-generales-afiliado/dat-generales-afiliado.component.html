@@ -4,12 +4,12 @@
       <p class="card-category">Completa la información correspondiente</p>
     </div>
     <div class="card-body">
-      <form cForm [formGroup]="form">
+      <form cForm [formGroup]="form" (change)="onTipoIdentChange()">
         <div class="row">
           <div class="col-md-4">
             <mat-form-field class="example-full-width; inputs" appearance="outline">
-              <mat-label>Tipo de identificación</mat-label>
-              <select matNativeControl formControlName="tipoIdent">
+              <mat-label>Tipo de identificación</mat-label >
+              <select matNativeControl formControlName="tipoIdent" >
                 <option *ngFor="let p of tipoIdent" [value]="p.value">
                   {{p.value}}
                 </option>

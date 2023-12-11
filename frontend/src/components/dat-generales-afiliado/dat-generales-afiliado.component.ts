@@ -1,4 +1,4 @@
-import { Component, Input, OnInit, Output } from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormArray, FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 
@@ -8,21 +8,65 @@ import { FormArray, FormBuilder, FormControl, FormGroup, Validators } from '@ang
   styleUrl: './dat-generales-afiliado.component.scss'
 })
 export class DatGeneralesAfiliadoComponent implements OnInit{
-  @Input()
-  cargo: string = "";
-  
-  @Output()
-  value:string = "Hola";
-
   form: FormGroup;
   
   htmlSTID: string = "Archivo de identificación"
   public archivo: any;
   
   tipoIdent: any = []; Sexo: any = []; estadoCivil: any = [];
+  
+  @Input() tipoIdentt?:string
+  @Output() newTipoIdentChange = new EventEmitter<any>()
+  
+  onTipoIdentChange():void{
+    const tipoIdent = this.form.value.tipoIdent;
+    const archIdent = this.form.value.archIdent;
+    const numeroIden = this.form.value.numeroIden;
+    const primerNombre = this.form.value.primerNombre;
+    const segundoNombre = this.form.value.segundoNombre;
+    const tercerNombre = this.form.value.tercerNombre;
+    const primerApellido = this.form.value.primerApellido;
+    const segundoApellido = this.form.value.segundoApellido;
+    const fechaNacimiento = this.form.value.fechaNacimiento;
+    const cantidadDependientes = this.form.value.cantidadDependientes;
+    const cantidadHijos = this.form.value.cantidadHijos;
+    const Sexo = this.form.value.Sexo;
+    const profesion = this.form.value.profesion;
+    const estadoCivil = this.form.value.estadoCivil;
+    const representacion = this.form.value.representacion;
+    const estado = this.form.value.estado;
+    const telefono1 = this.form.value.telefono1;
+    const telefono2 = this.form.value.telefono2;
+    const coreo1 = this.form.value.coreo1;
+    const coreo2 = this.form.value.coreo2;
+
+    const data = {
+      tipoIdent : tipoIdent,
+      archIdent : archIdent,
+      numeroIden : numeroIden,
+      primerNombre : primerNombre,
+      segundoNombre : segundoNombre,
+      tercerNombre : tercerNombre,
+      primerApellido : primerApellido,
+      segundoApellido : segundoApellido,
+      fechaNacimiento : fechaNacimiento,
+      cantidadDependientes : cantidadDependientes,
+      cantidadHijos : cantidadHijos,
+      Sexo : Sexo,
+      profesion : profesion,
+      estadoCivil : estadoCivil,
+      representacion : representacion,
+      estado : estado,
+      telefono1 : telefono1,
+      telefono2 : telefono2,
+      coreo1 : coreo1,
+      coreo2 : coreo2
+    }
+    this.newTipoIdentChange.emit(data);
+  }
+  
 
   constructor( private fb: FormBuilder) {
-    console.log(this.cargo);
     
     this.form = this.fb.group({
       tipoIdent: ['', [Validators.required]],
@@ -127,32 +171,12 @@ export class DatGeneralesAfiliadoComponent implements OnInit{
   }
 
   enviar(){
-    const tipoIdent = this.form.value.tipoIdent;
-    const archIdent = this.form.value.archIdent;
-    const numeroIden = this.form.value.numeroIden;
-    const primerNombre = this.form.value.primerNombre;
-    const segundoNombre = this.form.value.segundoNombre;
-    const tercerNombre = this.form.value.tercerNombre;
-    const primerApellido = this.form.value.primerApellido;
-    const segundoApellido = this.form.value.segundoApellido;
-    const fechaNacimiento = this.form.value.fechaNacimiento;
-    const cantidadDependientes = this.form.value.cantidadDependientes;
-    const cantidadHijos = this.form.value.cantidadHijos;
-    const Sexo = this.form.value.Sexo;
-    const profesion = this.form.value.profesion;
-    const estadoCivil = this.form.value.estadoCivil;
-    const representacion = this.form.value.representacion;
-    const estado = this.form.value.estado;
-    const telefono1 = this.form.value.telefono1;
-    const telefono2 = this.form.value.telefono2;
-    const coreo1 = this.form.value.coreo1;
-    const coreo2 = this.form.value.coreo2;
+
     
     /* this.authSvc.crearCuenta(data).subscribe((res: any) => {
       console.log(res);
       //this.fakeLoading(res);
     }); */
   }
-
 
 }

@@ -12,7 +12,7 @@
         <p class="card-category">Llene los campos para continuar con el proceso.</p>
       </div>
 
-      <form [formGroup]="formParent" >
+      <form [formGroup]="formParent">
         <div formArrayName="refpers">
           <div *ngFor="let skill of getCtrl('refpers', formParent).controls; index as formChild; let i = index">
             <h4 class="card-title">Beneficiario número: {{i+1}}</h4>
@@ -27,13 +27,14 @@
         </div>
       </form>
 
-      <div class="card-body">
-        <button mat-button color="primary" (click)="agregarRefPer()">Agregar Beneficiario</button>
+      <div class="row">
+        <div class="col-md-6">
+          <button mat-button color="primary" (click)="agregarRefPer()">Agregar Beneficiario</button>
+        </div>
+        <div class="col-md-6">
+          <button mat-button color="warn" (click)="eliminarRefPer()">Eliminar Beneficiario</button>
+        </div>
       </div>
-      <div class="card-body">
-        <button mat-button color="warn" (click)="eliminarRefPer()">Eliminar Beneficiario</button>
-      </div>
-
     </div>
 
     <div class="card">

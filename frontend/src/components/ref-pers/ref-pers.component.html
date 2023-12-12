@@ -1,64 +1,66 @@
 <div class="card">
-    <div class="card-header card-header-danger tittle" style="background: rgb(29, 192, 192);">
-      <h4 class="card-title">Referencias Personales</h4>
-      <p class="card-category">Completa la información correspondiente</p>
-    </div>
+  <div class="card-header card-header-danger tittle" style="background: rgb(29, 192, 192);">
+    <h4 class="card-title">Referencias Personales</h4>
+    <p class="card-category">Completa la información correspondiente</p>
+  </div>
 
-      <form [formGroup]="formParent" (change)="onDatosRefPerChange()">
-        <div formArrayName="refpers">
-          <div *ngFor="let skill of getCtrl('refpers', formParent).controls; index as formChild; let i = index">
-            <h4 class="card-title">Referencia número: {{i+1}}</h4>
-            <div [formGroupName]="formChild" class="row">
-              <div class="col-md-6">
-                <mat-form-field class="example-full-width; inputs" appearance="outline">
-                  <mat-label>Nombre Completo</mat-label>
-                  <input matInput type="text" formControlName="nombreRefPers">
-                </mat-form-field>
-              </div>
-              <div class="col-md-6">
-                <mat-form-field class="example-full-width; inputs" appearance="outline">
-                  <mat-label>Parentesco</mat-label>
-                  <input matInput type="text" formControlName="Parentesco">
-                </mat-form-field>
-              </div>
-            </div>
-            <div [formGroupName]="formChild" class="row">
-              <div class="col-md-6">
-                <mat-form-field class="example-full-width; inputs" appearance="outline">
-                  <mat-label>Dirección</mat-label>
-                  <input matInput type="text" formControlName="direccion">
-                </mat-form-field>
-              </div>
-              <div class="col-md-6">
-                <mat-form-field class="example-full-width; inputs" appearance="outline">
-                  <mat-label>Teléfono domicilio</mat-label>
-                  <input matInput type="text" formControlName="telefonoDom">
-                </mat-form-field>
-              </div>
-            </div>
-            <div [formGroupName]="formChild" class="row">
-              <div class="col-md-6">
-                <mat-form-field class="example-full-width; inputs" appearance="outline">
-                  <mat-label>Teléfono trabajo</mat-label>
-                  <input matInput type="text" formControlName="telefonoTrab">
-                </mat-form-field>
-              </div>
-              <div class="col-md-6">
-                <mat-form-field class="example-full-width; inputs" appearance="outline">
-                  <mat-label>Teléfono personal</mat-label>
-                  <input matInput type="text" formControlName="telefonoPers">
-                </mat-form-field>
-              </div>
-            </div>
-
+  <form [formGroup]="formParent" (change)="onDatosRefPerChange()">
+    <div formArrayName="refpers">
+      <div *ngFor="let skill of getCtrl('refpers', formParent).controls; index as formChild; let i = index">
+        <h4 class="card-title">Referencia número: {{i+1}}</h4>
+        <div [formGroupName]="formChild" class="row">
+          <div class="col-md-6">
+            <mat-form-field class="example-full-width; inputs" appearance="outline">
+              <mat-label>Nombre Completo</mat-label>
+              <input matInput type="text" formControlName="nombreRefPers">
+            </mat-form-field>
+          </div>
+          <div class="col-md-6">
+            <mat-form-field class="example-full-width; inputs" appearance="outline">
+              <mat-label>Parentesco</mat-label>
+              <input matInput type="text" formControlName="Parentesco">
+            </mat-form-field>
           </div>
         </div>
-      </form>
+        <div [formGroupName]="formChild" class="row">
+          <div class="col-md-6">
+            <mat-form-field class="example-full-width; inputs" appearance="outline">
+              <mat-label>Dirección</mat-label>
+              <input matInput type="text" formControlName="direccion">
+            </mat-form-field>
+          </div>
+          <div class="col-md-6">
+            <mat-form-field class="example-full-width; inputs" appearance="outline">
+              <mat-label>Teléfono domicilio</mat-label>
+              <input matInput type="text" formControlName="telefonoDom">
+            </mat-form-field>
+          </div>
+        </div>
+        <div [formGroupName]="formChild" class="row">
+          <div class="col-md-6">
+            <mat-form-field class="example-full-width; inputs" appearance="outline">
+              <mat-label>Teléfono trabajo</mat-label>
+              <input matInput type="text" formControlName="telefonoTrab">
+            </mat-form-field>
+          </div>
+          <div class="col-md-6">
+            <mat-form-field class="example-full-width; inputs" appearance="outline">
+              <mat-label>Teléfono personal</mat-label>
+              <input matInput type="text" formControlName="telefonoPers">
+            </mat-form-field>
+          </div>
+        </div>
 
-      <div class="card-body">
-        <button mat-button color="primary" (click)="agregarRefPer()">Agregar Referencia Personal</button>
       </div>
-      <div class="card-body">
-        <button mat-button color="warn" (click)="eliminarRefPer()">Eliminar Referencia Personal</button>
-      </div>
+    </div>
+  </form>
+
+  <div class="row">
+    <div class="col-md-6">
+      <button mat-button color="primary" (click)="agregarRefPer()">Agregar Referencia Personal</button>
+    </div>
+    <div class="col-md-6">
+      <button mat-button color="warn" (click)="eliminarRefPer()">Eliminar Referencia Personal</button>
+    </div>
   </div>
+</div>

@@ -79,9 +79,10 @@
           <h4 class="card-title">Centros de trabajo</h4>
         </div>
         <div class="col-6">
-          <button mat-raised-button color="primary" (click)="buscarPorNombre()">Buscar por Nombre</button>
+          <mat-form-field  style="width: 40%" appearance="outline">
           <input matInput placeholder="Buscar por nombre" [(ngModel)]="nombreBusqueda" class="custom-input"/>
-
+        </mat-form-field>
+          <button mat-raised-button color="primary" (click)="buscarPorNombre()"><mat-icon>search</mat-icon></button>
         </div>
       </div>
     </div>

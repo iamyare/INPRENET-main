@@ -1,6 +1,7 @@
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormArray, FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
+import { AfiliadoService } from 'src/app/services/afiliado.service';
 
 @Component({
   selector: 'app-dat-generales-afiliado',
@@ -9,15 +10,17 @@ import { FormArray, FormBuilder, FormControl, FormGroup, Validators } from '@ang
 })
 export class DatGeneralesAfiliadoComponent implements OnInit{
   form: FormGroup;
-  
+
   htmlSTID: string = "Archivo de identificación"
   public archivo: any;
-  
+
+  public dataEdit:any;
+
   tipoCotizante: any = []; tipoIdent: any = []; Sexo: any = []; estadoCivil: any = [];
-  
+
   @Input() tipoIdentt?:string
   @Output() newDatGenChange = new EventEmitter<any>()
-  
+
   onDatosGenChange():void{
     const tipoIdent = this.form.value.tipoIdent;
     const archIdent = this.form.value.archIdent;
@@ -66,8 +69,8 @@ export class DatGeneralesAfiliadoComponent implements OnInit{
     }
     this.newDatGenChange.emit(data);
   }
-  
-  constructor( private fb: FormBuilder) {
+
+  constructor( private fb: FormBuilder, private afiliadoService: AfiliadoService) {
     this.form = this.fb.group({
       tipoIdent: ['', [Validators.required]],
       archIdent: ['', [Validators.required]],
@@ -167,6 +170,34 @@ export class DatGeneralesAfiliadoComponent implements OnInit{
   }
 
   ngOnInit():void{
+    this.afiliadoService.afiliadosEdit.subscribe(data => {
+      //console.log('recibiendo data...',data);
+      this.dataEdit = data
+      console.log(this.dataEdit.data);
+      this.form.patchValue({
+      tipoIdent: 'Pendiente' ,
+      archIdent: this.dataEdit.data.archivo_identificacion,
+      numeroIden:'Pendiente' ,
+      primerNombre: this.dataEdit.data.primer_nombre,
+      segundoNombre: this.dataEdit.data.segundo_apellido ,
+      tercerNombre: this.dataEdit.data.tercer_nombre,
+      primerApellido: this.dataEdit.data.primer_apellido ,
+      segundoApellido: this.dataEdit.data.segundo_apellido ,
+      fechaNacimiento: this.dataEdit.data.fecha_nacimiento,
+      cantidadDependientes: this.dataEdit.data.cantidad_dependientes ,
+      cantidadHijos: this.dataEdit.data.cantidad_hijos ,
+      Sexo: this.dataEdit.data.sexo ,
+      profesion: this.dataEdit.data.profesion ,
+      estadoCivil: 'Pendiente' ,
+      representacion: this.dataEdit.data.representacion ,
+      estado: this.dataEdit.data.estado ,
+      cotizante: 'Pendiente' ,
+      telefono1: this.dataEdit.data.telefono_1 ,
+      telefono2: this.dataEdit.data.telefono_2 ,
+      correo1: this.dataEdit.data.correo_1 ,
+      correo2: this.dataEdit.data.correo_2 ,
+      });
+    })
   }
 
   onFileSelected(event: any) {
@@ -187,7 +218,7 @@ export class DatGeneralesAfiliadoComponent implements OnInit{
 
   enviar(){
 
-    
+
     /* this.authSvc.crearCuenta(data).subscribe((res: any) => {
       console.log(res);
       //this.fakeLoading(res);

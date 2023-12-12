@@ -1,5 +1,5 @@
 import { HttpClient } from '@angular/common/http';
-import { Injectable } from '@angular/core';
+import { EventEmitter, Injectable, Output } from '@angular/core';
 import { Router } from '@angular/router';
 import { Observable, map } from 'rxjs';
 import { environment } from 'src/environments/environment';
@@ -8,6 +8,8 @@ import { environment } from 'src/environments/environment';
   providedIn: 'root'
 })
 export class AfiliadoService {
+
+  @Output() afiliadosEdit: EventEmitter<any> = new EventEmitter();
 
   constructor(private http: HttpClient, private router: Router) { }
 

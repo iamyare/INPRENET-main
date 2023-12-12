@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, Input, OnInit } from '@angular/core';
 import { AfiliadoService } from '../../../services/afiliado.service';
 import { MatTableDataSource } from '@angular/material/table';
 
@@ -83,8 +83,15 @@ export class DatosGenAfilComponent implements OnInit {
     );
   }
 
+
+  @Input() dataEntrante:any ;
   editarCentroTrabajo(centroTrabajo: any) {
-    console.log('Editar centro de trabajo:', centroTrabajo);
+    //console.log('Editar centro de trabajo:', centroTrabajo);
+    this.dataEntrante = centroTrabajo;
+    this.afiliadoService.afiliadosEdit.emit({
+
+      data:this.dataEntrante
+    })
 
   }
 

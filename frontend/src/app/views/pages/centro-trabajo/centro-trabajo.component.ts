@@ -62,10 +62,14 @@ export class CentroTrabajoComponent implements OnInit {
 
   obtenerCentrosTrabajo() {
     this.centroTrabajoService.getCentrosTrabajo().subscribe(
-      async (res: any) => {
+      (res: any) => {
         if (res.ok) {
           this.informacion = res.centrosTrabajo;
-          this.dataSource.data = this.informacion; // Actualiza el dataSource
+
+          // Asignar solo los primeros 5 elementos al dataSource
+          this.dataSource.data = this.informacion.slice(0, this.pageSize);
+
+          // Asegúrate de que el paginador se actualice adecuadamente
           this.actualizarPaginador();
         }
       },
@@ -134,7 +138,7 @@ export class CentroTrabajoComponent implements OnInit {
   }
 
   private actualizarPaginador() {
-    this.pageSize = 5; // Ajusta según tu necesidad
+    this.pageSize = 5;
     this.hasta = this.pageSize;
 
     if (this.matPaginator) {

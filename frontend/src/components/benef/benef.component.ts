@@ -1,33 +1,44 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormArray, FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
+import { generateAddressFormGroup } from '../dat-generales-afiliado/dat-generales-afiliado.component';
+import { generateDatBancFormGroup } from '@docs-components/dat-banc/dat-banc.component';
 
 @Component({
-  selector: 'app-ref-pers',
-  templateUrl: './ref-pers.component.html',
-  styleUrl: './ref-pers.component.scss'
+  selector: 'app-benef',
+  templateUrl: './benef.component.html',
+  styleUrl: './benef.component.scss',
+  changeDetection:ChangeDetectionStrategy.OnPush,
 })
-export class RefPersComponent {
-  form3: FormGroup;
+export class BenefComponent {
   public formParent: FormGroup = new FormGroup({});
-
+  
   Bancos: any = []; tipoIdent: any = []; Sexo: any = []; estadoCivil: any = [];
   htmlSTID: string = "Archivo de identificación"
+  DatosBancBen:any = []; DatosGenBen:any  = [];
+
   public archivo: any;
 
   @Input() nombreComp?:string
-  @Output() newDatRefPerChange = new EventEmitter<any>()
-  
-  onDatosRefPerChange(){
+  @Output() newDatBenChange = new EventEmitter<any>()
+
+  onDatosBenChange(){
     const data = this.formParent.value.refpers
-    this.newDatRefPerChange.emit(this.formParent.value.refpers);
+    this.newDatBenChange.emit(this.formParent.value.refpers);
+  }
+
+  setDatosBancBen(datosBanc:any){
+    this.DatosBancBen = datosBanc;
+  }
+  setDatosBanc(datosBanc:any){
+    this.DatosBancBen = datosBanc;
+  }
+
+  setDatosGenBen(datosGen:any){
+    this.DatosGenBen = datosGen;
   }
 
   constructor( private fb: FormBuilder) {
-    this.form3 = this.fb.group({
-      cantReferPers: ['', [Validators.required, Validators.pattern("[0-9]*")]],
-    });
-
     this.Bancos = [
       {
         "idBanco":1,
@@ -100,15 +111,21 @@ export class RefPersComponent {
         "value": "RTN"
       },
     ];
+    this.formParent = new FormGroup({
+      refpers: new FormArray([], [Validators.required]),
+      benfGroup: generateAddressFormGroup(),
+      DatosBac: generateDatBancFormGroup(),
+    });
   }
 
   ngOnInit():void{
     this.initFormParent();
   }
+
   initFormParent():void {
     this.formParent = new FormGroup(
       {
-        refpers: new FormArray([], [Validators.required])
+        refpers: new FormArray([], [Validators.required]),
       }
     )
   }
@@ -116,17 +133,13 @@ export class RefPersComponent {
   initFormRefPers(): FormGroup {
     return new FormGroup(
       {
-        nombreRefPers: new FormControl(''),
-        Parentesco: new FormControl(''),
-        direccion: new FormControl(''),
-        telefonoDom: new FormControl(''),
-        telefonoTrab: new FormControl(''),
-        telefonoPers: new FormControl('')
+        refpers: new FormControl(''),
+        benfGroup: generateAddressFormGroup(),
+        DatosBac: generateDatBancFormGroup(),
       }
     )
   }
-
-  agregarRefPer(): void{
+  agregarBen(): void{
     const ref_RefPers = this.formParent.get('refpers') as FormArray;
     ref_RefPers.push(this.initFormRefPers())
   }
@@ -138,24 +151,6 @@ export class RefPersComponent {
   
   getCtrl(key: string, form: FormGroup): any {
     return form.get(key)
-  }
-
-  addValidation(index: number, key: string): void {
-
-    const refParent = this.formParent.get('refpers') as FormArray;
-    const refSingle = refParent.at(index).get(key) as FormGroup;
-
-    refSingle.setValidators(
-      [
-        Validators.required,
-        Validators.required,
-        Validators.required,
-        Validators.required,
-        Validators.required,
-        Validators.required
-      ]
-    )
-    refSingle.updateValueAndValidity();
   }
 
 }

@@ -36,6 +36,7 @@ import { DatGeneralesAfiliadoComponent } from './dat-generales-afiliado/dat-gene
 import { DatPuestoTrabComponent } from './dat-puesto-trab/dat-puesto-trab.component';
 import { DatBancComponent } from './dat-banc/dat-banc.component';
 import { RefPersComponent } from './ref-pers/ref-pers.component';
+import { BenefComponent } from './benef/benef.component';
 
 @NgModule({
   declarations: [
@@ -45,6 +46,7 @@ import { RefPersComponent } from './ref-pers/ref-pers.component';
     DatGeneralesAfiliadoComponent,
     DatPuestoTrabComponent,
     DatBancComponent,
+    BenefComponent,
     RefPersComponent
   ],
   exports: [
@@ -54,6 +56,7 @@ import { RefPersComponent } from './ref-pers/ref-pers.component';
     DatGeneralesAfiliadoComponent,
     DatPuestoTrabComponent,
     DatBancComponent,
+    BenefComponent,
     RefPersComponent
   ],
   imports: [

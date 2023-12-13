@@ -1,16 +1,31 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { ControlContainer, FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
+
+export function generateDatBancFormGroup(): FormGroup {
+  return new FormGroup({
+    nombreBanco: new FormControl('', Validators.required),
+    numeroCuenta: new FormControl('', Validators.required)
+  });
+}
 
 @Component({
   selector: 'app-dat-banc',
   templateUrl: './dat-banc.component.html',
-  styleUrl: './dat-banc.component.scss'
+  styleUrl: './dat-banc.component.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  viewProviders: [
+    {
+      provide: ControlContainer,
+      useFactory: () =>
+        inject(ControlContainer, { skipSelf: true, host: true }),
+    },
+  ]
 })
 export class DatBancComponent {
   form2: FormGroup;
   
-  @Input() nombreBanco?:string
+  @Input() groupName = '';
   @Output() newDatBancChange = new EventEmitter<any>()
   
   onDatosBancChange():void{
@@ -30,8 +45,8 @@ export class DatBancComponent {
 
   constructor( private fb: FormBuilder) {
     this.form2 = this.fb.group({
-      nombreBanco: ['', [Validators.required]],
-      numeroCuenta: ['', [Validators.required]],
+      nombreBanco: new FormControl('', Validators.required),
+      numeroCuenta: new FormControl('', Validators.required),
     });
 
     this.Bancos = [

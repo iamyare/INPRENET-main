@@ -1,14 +1,22 @@
-import { Component, OnInit } from '@angular/core';
-import { FormArray, FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
-
+import { ChangeDetectionStrategy, Component, OnInit, inject } from '@angular/core';
+import { ControlContainer, FormArray, FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
+import { generateDatBancFormGroup } from '@docs-components/dat-banc/dat-banc.component';
+import { generateAddressFormGroup } from '@docs-components/dat-generales-afiliado/dat-generales-afiliado.component';
 @Component({
   selector: 'app-afil-banco',
   templateUrl: './afil-banco.component.html',
-  styleUrl: './afil-banco.component.scss'
+  styleUrl: './afil-banco.component.scss',
+  changeDetection:ChangeDetectionStrategy.OnPush,
 })
 export class AfilBancoComponent implements OnInit {
   public formParent: FormGroup = new FormGroup({});
-  
+
+  form = this.fb.group({
+    DatosGenerales: generateAddressFormGroup(),
+    DatosBacAfil: generateDatBancFormGroup(),
+    benfGroup: generateAddressFormGroup(),
+  });
+
   Bancos: any = []; tipoIdent: any = []; Sexo: any = []; estadoCivil: any = [];
   htmlSTID: string = "Archivo de identificación"
 
@@ -107,49 +115,11 @@ export class AfilBancoComponent implements OnInit {
     this.datosRefPer = datosRefPer;
   }
 
-  setDatosGenBen(DatosGenBen:any){
-    this.DatosGenBen.push(DatosGenBen);
-  }
-  setDatosBancBen(DatosBancBen:any){
-    this.DatosBancBen.push(DatosBancBen);
+  setDatosBen(DatosBancBen:any){
+    this.DatosBancBen = DatosBancBen;
   }
 
   ngOnInit():void{
-    this.initFormParent();
-  }
-  initFormParent():void {
-    this.formParent = new FormGroup(
-      {
-        refpers: new FormArray([], [Validators.required])
-      }
-    )
-  }
-
-  initFormRefPers(): FormGroup {
-    return new FormGroup(
-      {
-        nombreRefPers: new FormControl(''),
-        Parentesco: new FormControl(''),
-        direccion: new FormControl(''),
-        telefonoDom: new FormControl(''),
-        telefonoTrab: new FormControl(''),
-        telefonoPers: new FormControl('')
-      }
-    )
-  }
-
-  agregarRefPer(): void{
-    const ref_RefPers = this.formParent.get('refpers') as FormArray;
-    ref_RefPers.push(this.initFormRefPers())
-  }
-  
-  getCtrl(key: string, form: FormGroup): any {
-    return form.get(key)
-  }
-  
-  eliminarRefPer():void{
-    const ref_RefPers = this.formParent.get('refpers') as FormArray;
-    ref_RefPers.removeAt(-1);
   }
 
   enviar(){
@@ -157,9 +127,8 @@ export class AfilBancoComponent implements OnInit {
     console.log(this.datosPuestTrab);
     console.log(this.datosBanc);
     console.log(this.datosRefPer);
-
-    console.log(this.DatosGenBen);
-    console.log(this.DatosBancBen);
+    
+    console.log(this.DatosBancBen); 
   }
 
 }

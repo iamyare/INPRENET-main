@@ -4,7 +4,8 @@
     <p class="card-category">Completa la información correspondiente</p>
   </div>
   <div class="card-body">
-    <form cForm [formGroup]="form" (change)="onDatosGenChange()">
+
+    <fieldset [formGroupName]="groupName" cForm  (change)="onDatosGenChange()">
       <div class="row">
         <div class="col-md-4">
           <mat-form-field class="example-full-width; inputs" appearance="outline">
@@ -194,7 +195,6 @@
           </mat-form-field>
         </div>
       </div>
-
-    </form>
+    </fieldset>    
   </div>
 </div>

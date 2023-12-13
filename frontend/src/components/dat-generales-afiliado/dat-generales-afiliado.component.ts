@@ -1,12 +1,49 @@
-import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import { ChangeDetectionStrategy, Component, EventEmitter, Input, OnInit, Output, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormArray, FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
+import { ControlContainer, FormArray, FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { AfiliadoService } from 'src/app/services/afiliado.service';
+
+export function generateAddressFormGroup(): FormGroup {
+  return new FormGroup({
+    tipoIdent: new FormControl('', Validators.required),
+    archIdent: new FormControl('', Validators.required),
+    numeroIden: new FormControl('', Validators.required),
+    primerNombre: new FormControl('', Validators.required),
+    segundoNombre: new FormControl('', Validators.required),
+    tercerNombre: new FormControl('', Validators.required),
+    primerApellido: new FormControl('', Validators.required),
+    segundoApellido: new FormControl('', Validators.required),
+    fechaNacimiento: new FormControl('', Validators.required),
+    cantidadDependientes: new FormControl('', Validators.required),
+    cantidadHijos: new FormControl('', Validators.required),
+    Sexo: new FormControl('', Validators.required),
+    profesion: new FormControl('', Validators.required),
+    estadoCivil: new FormControl('', Validators.required),
+    representacion: new FormControl('', Validators.required),
+    estado: new FormControl(''),
+    cotizante: new FormControl(''),
+    telefono1: new FormControl(''),
+    telefono2: new FormControl(''),
+    correo1: new FormControl(''),
+    correo2: new FormControl(''),
+    ciudadNacimiento: new FormControl(''),
+    ciudadDomicilio: new FormControl(''),
+    direccionDetallada: new FormControl(''),
+  });
+}
 
 @Component({
   selector: 'app-dat-generales-afiliado',
   templateUrl: './dat-generales-afiliado.component.html',
-  styleUrl: './dat-generales-afiliado.component.scss'
+  styleUrl: './dat-generales-afiliado.component.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  viewProviders: [
+    {
+      provide: ControlContainer,
+      useFactory: () =>
+        inject(ControlContainer, { skipSelf: true, host: true }),
+    },
+  ],
 })
 export class DatGeneralesAfiliadoComponent implements OnInit{
   form: FormGroup;
@@ -17,8 +54,8 @@ export class DatGeneralesAfiliadoComponent implements OnInit{
   public dataEdit:any;
 
   tipoCotizante: any = []; tipoIdent: any = []; Sexo: any = []; estadoCivil: any = [];
-
-  @Input() tipoIdentt?:string
+  
+  @Input() groupName = '';
   @Output() newDatGenChange = new EventEmitter<any>()
 
   onDatosGenChange():void{
@@ -78,30 +115,30 @@ export class DatGeneralesAfiliadoComponent implements OnInit{
 
   constructor( private fb: FormBuilder, private afiliadoService: AfiliadoService) {
     this.form = this.fb.group({
-      tipoIdent: ['', [Validators.required]],
-      archIdent: ['', [Validators.required]],
-      numeroIden: ['', [Validators.required]],
-      primerNombre: ['', [Validators.required]],
-      segundoNombre: ['', [Validators.required]],
-      tercerNombre: ['', [Validators.required]],
-      primerApellido: ['', [Validators.required]],
-      segundoApellido: ['', [Validators.required]],
-      fechaNacimiento: ['', [Validators.required]],
-      cantidadDependientes: ['', [Validators.required, Validators.pattern("[0-9]*")]],
-      cantidadHijos: ['', [Validators.required, Validators.pattern("[0-9]*")]],
-      Sexo: ['', [Validators.required]],
-      profesion: ['', [Validators.required]],
-      estadoCivil: ['', [Validators.required]],
-      representacion: ['', [Validators.required]],
-      estado: ['', [Validators.required]],
-      cotizante: ['', [Validators.required]],
-      telefono1: ['', [Validators.required]],
-      telefono2: ['', [Validators.required]],
-      correo1: ['', [Validators.required, Validators.email]],
-      correo2: ['', [Validators.required, Validators.email]],
-      ciudadNacimiento: ['',[Validators.required]],
-      ciudadDomicilio: ['',[Validators.required]],
-      direccionDetallada: ['',[Validators.required]],
+      tipoIdent: new FormControl('', Validators.required),
+      archIdent: new FormControl('', Validators.required),
+      numeroIden: new FormControl('', Validators.required),
+      primerNombre: new FormControl('', Validators.required),
+      segundoNombre: new FormControl('', Validators.required),
+      tercerNombre: new FormControl('', Validators.required),
+      primerApellido: new FormControl('', Validators.required),
+      segundoApellido: new FormControl('', Validators.required),
+      fechaNacimiento: new FormControl('', Validators.required),
+      cantidadDependientes: new FormControl('', Validators.required),
+      cantidadHijos: new FormControl('', Validators.required),
+      Sexo: new FormControl('', Validators.required),
+      profesion: new FormControl('', Validators.required),
+      estadoCivil: new FormControl('', Validators.required),
+      representacion: new FormControl('', Validators.required),
+      estado: new FormControl(''),
+      cotizante: new FormControl(''),
+      telefono1: new FormControl(''),
+      telefono2: new FormControl(''),
+      correo1: new FormControl(''),
+      correo2: new FormControl(''),
+      ciudadNacimiento: new FormControl(''),
+      ciudadDomicilio: new FormControl(''),
+      direccionDetallada: new FormControl(''),
     });
 
     this.estadoCivil = [
@@ -225,15 +262,6 @@ export class DatGeneralesAfiliadoComponent implements OnInit{
             this.htmlSTID = event.target.files[0].name;
         }
     }
-  }
-
-  enviar(){
-
-
-    /* this.authSvc.crearCuenta(data).subscribe((res: any) => {
-      console.log(res);
-      //this.fakeLoading(res);
-    }); */
   }
 
 }

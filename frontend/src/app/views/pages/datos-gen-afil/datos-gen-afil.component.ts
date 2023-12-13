@@ -2,6 +2,9 @@ import { Component, Input, OnInit, ViewChild } from '@angular/core';
 import { AfiliadoService } from '../../../services/afiliado.service';
 import { MatTableDataSource } from '@angular/material/table';
 import { PageEvent, MatPaginator } from '@angular/material/paginator';
+import { generateAddressFormGroup } from '@docs-components/dat-generales-afiliado/dat-generales-afiliado.component';
+import { generateDatBancFormGroup } from '@docs-components/dat-banc/dat-banc.component';
+import { FormBuilder } from '@angular/forms';
 
 @Component({
   selector: 'app-datos-gen-afil',
@@ -9,6 +12,13 @@ import { PageEvent, MatPaginator } from '@angular/material/paginator';
   styleUrls: ['./datos-gen-afil.component.scss']
 })
 export class DatosGenAfilComponent implements OnInit {
+  datosGen:any;
+  form = this.fb.group({
+    DatosGenerales: generateAddressFormGroup(),
+    DatosBacAfil: generateDatBancFormGroup(),
+    benfGroup: generateAddressFormGroup(),
+  });
+
   @ViewChild(MatPaginator) matPaginator: MatPaginator | undefined;
 
   ELEMENT_DATA: any[] = [];
@@ -26,10 +36,13 @@ export class DatosGenAfilComponent implements OnInit {
 ];
 
 
-constructor(private afiliadoService: AfiliadoService) {}
+constructor(private afiliadoService: AfiliadoService, private fb: FormBuilder) {}
 
 ngOnInit(): void {
   this.obtenerAfiliados();
+}
+setDatosGen(datosGen:any){
+  this.datosGen = datosGen;
 }
 
 obtenerAfiliados() {

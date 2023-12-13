@@ -1,6 +1,7 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, Input, OnInit, ViewChild } from '@angular/core';
 import { AfiliadoService } from '../../../services/afiliado.service';
 import { MatTableDataSource } from '@angular/material/table';
+import { PageEvent, MatPaginator } from '@angular/material/paginator';
 
 @Component({
   selector: 'app-datos-gen-afil',
@@ -8,97 +9,68 @@ import { MatTableDataSource } from '@angular/material/table';
   styleUrls: ['./datos-gen-afil.component.scss']
 })
 export class DatosGenAfilComponent implements OnInit {
+  @ViewChild(MatPaginator) matPaginator: MatPaginator | undefined;
+
   ELEMENT_DATA: any[] = [];
   dataSource = new MatTableDataSource<any>(this.ELEMENT_DATA);
 
+  public informacion: any = [];
+  nombreBusqueda: string = '';
 
-  pageSize = 10;
-  pageIndex = 0;
-  totalItems = 0;
-
-
+  pageSize = 5;
+  desde = 0;
+  hasta: number = this.pageSize;
 
   displayedColumns: string[] = [
-    'pais_residencia',
-    'pais_nacionalidad',
-    'identificacion',
-    'nombreCompleto',
-    'fecha_nacimiento',
-    'sexo',
-    'cantidad_dependientes',
-    'cantidad_hijos',
-    'profesion',
-    'representacion',
-    'telefono_1',
-    'telefono_2',
-    'correo_1',
-    'correo_2',
-    'archivo_identificacion',
-    'direccion_residencia',
-    'estado',
-    'editar'
-  ];
+  'ID_AFILIADO',
+];
 
-  constructor(private afiliadoService: AfiliadoService) {}
 
-  ngOnInit(): void {
-    this.obtenerAfiliados();
-  }
+constructor(private afiliadoService: AfiliadoService) {}
 
-  obtenerAfiliados(): void {
-    this.afiliadoService.getAllAfiliados().subscribe(
-      (data: any[]) => {
-       this.dataSource.data = data.map(item => {
-          return {
-            pais_residencia: item[1],
-            pais_nacionalidad: item[2],
-            identificacion: item[3],
-            primer_nombre: item[5],
-            segundo_nombre: item[6],
-            tercer_nombre: item[7],
-            primer_apellido: item[8],
-            segundo_apellido: item[9],
-            fecha_nacimiento: item[10],
-            sexo: item[11],
-            cantidad_dependientes: item[12],
-            cantidad_hijos: item[13],
-            profesion: item[14],
-            representacion: item[15],
-            telefono_1: item[16],
-            telefono_2: item[17],
-            correo_1: item[18],
-            correo_2: item[19],
-            archivo_identificacion: item[20],
-            direccion_residencia: item[21],
-            estado: item[22],
-          };
-        });
+ngOnInit(): void {
+  this.obtenerAfiliados();
+}
 
-        this.totalItems = this.dataSource.data.length;
-
-      },
-      (error) => {
-        console.error('Error al obtener afiliados', error);
+obtenerAfiliados() {
+  this.afiliadoService.getAllAfiliados().subscribe(
+    (res: any) => {
+      if (res.ok) {
+        this.informacion = res.afiliados;
+        this.dataSource.data = this.informacion.slice(0, this.pageSize);
+        this.actualizarPaginador();
       }
+    },
+    (error) => {
+      console.error('Error al obtener afiliados', error);
+    }
     );
   }
 
-
-  @Input() dataEntrante:any ;
+  @Input() dataEntrante: any;
   editarCentroTrabajo(centroTrabajo: any) {
-    //console.log('Editar centro de trabajo:', centroTrabajo);
     this.dataEntrante = centroTrabajo;
+    console.log(this.dataEntrante);
+
     this.afiliadoService.afiliadosEdit.emit({
-
-      data:this.dataEntrante
-    })
-
+      data: this.dataEntrante
+    });
   }
 
-  onPageChange(event: any) {
-    this.pageIndex = event.pageIndex;
-    this.pageSize = event.pageSize;
+  aplicarFiltroNombre() {
+    this.dataSource.filter = this.nombreBusqueda.trim().toLowerCase();
   }
 
+  onPageChange(e: PageEvent): void {
+    this.desde = e.pageIndex * e.pageSize;
+    this.hasta = this.desde + e.pageSize;
+    this.dataSource.data = this.informacion.slice(this.desde, this.hasta);
+  }
 
+  private actualizarPaginador() {
+    if (this.matPaginator) {
+      this.matPaginator.length = this.informacion.length;
+      this.matPaginator.pageSize = this.pageSize;
+    }
+  }
 }

@@ -43,6 +43,9 @@ export class DatGeneralesAfiliadoComponent implements OnInit{
     const telefono2 = this.form.value.telefono2;
     const correo1 = this.form.value.correo1;
     const correo2 = this.form.value.correo2;
+    const ciudadNacimiento = this.form.value.ciudadNacimiento;
+    const ciudadDomicilio = this.form.value.ciudadDomicilio;
+    const direccionDetallada = this.form.value.direccionDetallada;
 
     const data = {
       tipoIdent : tipoIdent,
@@ -65,7 +68,10 @@ export class DatGeneralesAfiliadoComponent implements OnInit{
       telefono1 : telefono1,
       telefono2 : telefono2,
       coreo1 : correo1,
-      coreo2 : correo2
+      coreo2 : correo2,
+      ciudadNacimiento : ciudadNacimiento,
+      ciudadDomicilio : ciudadDomicilio,
+      direccionDetallada : direccionDetallada
     }
     this.newDatGenChange.emit(data);
   }
@@ -93,6 +99,9 @@ export class DatGeneralesAfiliadoComponent implements OnInit{
       telefono2: ['', [Validators.required]],
       correo1: ['', [Validators.required, Validators.email]],
       correo2: ['', [Validators.required, Validators.email]],
+      ciudadNacimiento: ['',[Validators.required]],
+      ciudadDomicilio: ['',[Validators.required]],
+      direccionDetallada: ['',[Validators.required]],
     });
 
     this.estadoCivil = [
@@ -171,31 +180,33 @@ export class DatGeneralesAfiliadoComponent implements OnInit{
 
   ngOnInit():void{
     this.afiliadoService.afiliadosEdit.subscribe(data => {
-      //console.log('recibiendo data...',data);
       this.dataEdit = data
-      console.log(this.dataEdit.data);
       this.form.patchValue({
-      tipoIdent: 'Pendiente' ,
-      archIdent: this.dataEdit.data.archivo_identificacion,
-      numeroIden:'Pendiente' ,
-      primerNombre: this.dataEdit.data.primer_nombre,
-      segundoNombre: this.dataEdit.data.segundo_apellido ,
-      tercerNombre: this.dataEdit.data.tercer_nombre,
-      primerApellido: this.dataEdit.data.primer_apellido ,
-      segundoApellido: this.dataEdit.data.segundo_apellido ,
-      fechaNacimiento: this.dataEdit.data.fecha_nacimiento,
-      cantidadDependientes: this.dataEdit.data.cantidad_dependientes ,
-      cantidadHijos: this.dataEdit.data.cantidad_hijos ,
-      Sexo: this.dataEdit.data.sexo ,
-      profesion: this.dataEdit.data.profesion ,
-      estadoCivil: 'Pendiente' ,
-      representacion: this.dataEdit.data.representacion ,
-      estado: this.dataEdit.data.estado ,
-      cotizante: 'Pendiente' ,
-      telefono1: this.dataEdit.data.telefono_1 ,
-      telefono2: this.dataEdit.data.telefono_2 ,
-      correo1: this.dataEdit.data.correo_1 ,
-      correo2: this.dataEdit.data.correo_2 ,
+      tipoIdent: this.dataEdit.data.tipoIdent ,
+      archIdent: this.dataEdit.data.ARCHIVO_IDENTIFICACION,
+      numeroIden: this.dataEdit.data.numeroIden,
+      primerNombre: this.dataEdit.data.PRIMER_NOMBRE,
+      segundoNombre: this.dataEdit.data.SEGUNDO_NOMBRE ,
+      tercerNombre: this.dataEdit.data.TERCER_NOMBRE,
+      primerApellido: this.dataEdit.data.PRIMER_APELLIDO ,
+      segundoApellido: this.dataEdit.data.SEGUNDO_APELLIDO ,
+      fechaNacimiento: this.dataEdit.data.FECHA_NACIMIENTO,
+      cantidadDependientes: this.dataEdit.data.CANTIDAD_DEPENDIENTES ,
+      cantidadHijos: this.dataEdit.data.CANTIDAD_HIJOS ,
+      Sexo: this.dataEdit.data.SEXO ,
+      profesion: this.dataEdit.data.PROFESION ,
+      estadoCivil: this.dataEdit.data.estadoCivil ,
+      representacion: this.dataEdit.data.REPRESENTACION ,
+      estado: this.dataEdit.data.ESTADO ,
+      cotizante: this.dataEdit.data.cotizante ,
+      telefono1: this.dataEdit.data.TELEFONO_1 ,
+      telefono2: this.dataEdit.data.TELEFONO_2 ,
+      correo1: this.dataEdit.data.CORREO_1 ,
+      correo2: this.dataEdit.data.CORREO_2 ,
+      ciudadDomicilio : this.dataEdit.data.ciudadDomicilio ,
+      ciudadNacimiento : this.dataEdit.data.ciudadNacimiento,
+      direccionDetallada : this.dataEdit.data.direccionDetallada
+
       });
     })
   }

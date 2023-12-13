@@ -2,9 +2,7 @@ import { Component, OnInit, ViewChild } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { CentroTrabajoService } from '../../../services/centro-trabajo.service';
 import { MatTableDataSource } from '@angular/material/table';
-import { MatDialog } from '@angular/material/dialog';
 import { PageEvent } from '@angular/material/paginator';
-import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatPaginator } from '@angular/material/paginator';
 
 @Component({
@@ -63,13 +61,12 @@ export class CentroTrabajoComponent implements OnInit {
   obtenerCentrosTrabajo() {
     this.centroTrabajoService.getCentrosTrabajo().subscribe(
       (res: any) => {
+
         if (res.ok) {
           this.informacion = res.centrosTrabajo;
 
-          // Asignar solo los primeros 5 elementos al dataSource
           this.dataSource.data = this.informacion.slice(0, this.pageSize);
 
-          // Asegúrate de que el paginador se actualice adecuadamente
           this.actualizarPaginador();
         }
       },

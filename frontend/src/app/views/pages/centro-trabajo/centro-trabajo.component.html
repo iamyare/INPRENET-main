@@ -65,8 +65,8 @@
               </mat-form-field>
             </div>
           </div>
-          <button mat-raised-button type="submit" class="btn btn-danger pull-right" (click)="agregarCentroTrabajo()">Actualizar</button>
-          <button mat-raised-button type="submit" class="btn btn-danger pull-right" (click)="limpiarCentroTrabajo()">Limpiar</button>
+          <button mat-raised-button type="submit" class="btn btn-danger pull-right" (click)="agregarCentroTrabajo()" style="background-color: #628780; color: #ffffff; border-radius: 5px; padding: 10px 20px;">Agregar</button>
+          <button mat-raised-button type="submit" class="btn btn-danger pull-right" (click)="limpiarCentroTrabajo()" style="background-color: #628780; color: #ffffff; border-radius: 5px; padding: 10px 20px;">Limpiar</button>
         </form>
       </div>
     </div>
@@ -95,8 +95,10 @@
 
           <ng-container matColumnDef="indice">
             <th mat-header-cell *matHeaderCellDef>Índice</th>
-            <td mat-cell *matCellDef="let centroTrabajo; let i = index" [ngClass]="{'fila-impar': i % 2 !== 0, 'fila-par': i % 2 === 0}">
-              {{ i+1 }}</td>
+            <td mat-cell *matCellDef="let centroTrabajo; let i = index"
+                [ngClass]="{'fila-impar': i % 2 !== 0, 'fila-par': i % 2 === 0}">
+              {{ desde + i + 1 }}
+            </td>
           </ng-container>
 
 

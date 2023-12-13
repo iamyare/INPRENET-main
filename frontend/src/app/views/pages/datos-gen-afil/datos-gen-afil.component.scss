@@ -1,13 +1,76 @@
-/* datos-gen-afil.component.scss */
-.fila-impar {
-  background-color: #f0f0f0; /* Estilo para filas impares */
-}
-
-.fila-par {
-  background-color: #ffffff; /* Estilo para filas pares */
-}
-
 .tittle {
   color:white;
   background: #628780;
+}
+
+.td-iconos{
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 15px;
+  padding-top: 2rem;
+}
+
+.btn-outline-primary{
+  color: #6BBDD3;
+  border-color:#6BBDD3;
+}
+
+.btn-outline-primary:hover{
+  background-color: white;
+}
+
+.form-control:focus {
+  color: #212529;
+  background-color: #fff;
+  outline: 0;
+  border-color: #6BBDD3;
+  // box-shadow: 0 0 0 0.25rem rgb(217 39 46 / 50%);
+}
+
+.btn-outline-primary:active{
+  background-color: white;
+  border-color: #6BBDD3;
+  // box-shadow: 0 0 0 0.25rem rgb(217 39 46 / 50%);
+}
+
+.btn-outline-primary:focus{
+  // box-shadow: 0 0 0 0.25rem rgb(217 39 46 / 50%);
+}
+
+.btn-success{
+  color: #6BBDD3;
+  font-family: Arial, Helvetica, sans-serif;
+  background-color: white;
+  border-color: white;
+}
+
+.btn{
+  margin-left: 5px;
+  size: 10px;
+}
+
+.tableTitulo{
+font-family: Arial, Helvetica, sans-serif;
+font-size: 25px;
+color: #606060;
+text-align: center;
+margin-bottom: 1rem;
+}
+
+.encabezado{
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 18px;
+  font-weight: 100;
+  color: #606060;
+  width: auto;
+}
+
+.info{
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 15px;
+  padding-top: 2rem;
+}
+
+a{
+  cursor: pointer;
+  text-decoration: none;
 }

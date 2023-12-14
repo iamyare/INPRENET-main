@@ -20,7 +20,7 @@ CREATE TABLE afiliado (
     pais_id_pais2          VARCHAR2(30 CHAR) NOT NULL,
     tipo_identificacion_id VARCHAR2(40 CHAR) NOT NULL,
     afiliado_id_afiliado   VARCHAR2(40 CHAR) NOT NULL,
-    primer_nombre          NVARCHAR2(40),
+    primer_nombire          NVARCHAR2(40),
     segundo_nombre         NVARCHAR2(40),
     tercer_nombre          VARCHAR2(30 CHAR),
     primer_apellido        VARCHAR2(30 CHAR),

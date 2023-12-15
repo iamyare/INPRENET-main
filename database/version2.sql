@@ -19,6 +19,9 @@ CREATE TABLE afiliado (
     pais_id_pais           VARCHAR2(30 CHAR) NOT NULL,
     pais_id_pais2          VARCHAR2(30 CHAR) NOT NULL,
     tipo_identificacion_id VARCHAR2(40 CHAR) NOT NULL,
+    dni   VARCHAR2(40 CHAR) NOT NULL,
+    estado_civil   VARCHAR2(40 CHAR) NOT NULL,
+    tipo_cotizante   VARCHAR2(40 CHAR) NOT NULL,
     afiliado_id_afiliado   VARCHAR2(40 CHAR) NOT NULL,
     primer_nombre          NVARCHAR2(40),
     segundo_nombre         NVARCHAR2(40),
@@ -385,19 +388,23 @@ INSERT INTO centro_trabajo (id_centro_trabajo, ciudad_id_ciudad, nombre, telefon
 VALUES ('CT010', 'C001', 'Escuela de Artes de La Ceiba', '555-1100', '555-1101', 'info@eartesceiba.edu', 'contacto@eartesceiba.edu', 'Fernando Gutiérrez', 'Patricia Solís', 'RTN010', 'logo10.jpg');
 
 --AFILIADO
-INSERT INTO afiliado VALUES ('AF0001', '1', '1', '1', 'AF0001', 'Juan', 'Carlos', 'Eduardo', 'Fernandez', 'Diaz', TO_DATE('1990-03-21', 'YYYY-MM-DD'), 'M', 3, 2, 'Arquitecto', 'POR CUENTA PROPIA', '123-456-7890', '234-567-8901', 'juan.fernandez@email.com', 'carlos.fernandez@email.com', 'doc001.pdf', 'Calle Sol, No. 123, Ciudad', 'Activo');
-INSERT INTO afiliado VALUES ('AF0002', '1', '1', '1', 'AF0002', 'Maria', 'Luisa', NULL, 'Gonzalez', 'Reyes', TO_DATE('1985-07-10', 'YYYY-MM-DD'), 'F', 2, 1, 'Doctora', 'POR TERCEROS', '123-456-7891', '234-567-8902', 'maria.gonzalez@email.com', 'luisa.gonzalez@email.com', 'doc002.pdf', 'Av. Luna, No. 456, Ciudad', 'Activo');
-INSERT INTO afiliado VALUES ('AF0003', '1', '1', '1', 'AF0003', 'Roberto', 'Jose', NULL, 'Martinez', 'Lopez', TO_DATE('1978-11-23', 'YYYY-MM-DD'), 'M', 1, 3, 'Ingeniero', 'POR CUENTA PROPIA', '123-456-7892', '234-567-8903', 'roberto.martinez@email.com', 'jose.martinez@email.com', 'doc003.pdf', 'Calle Estrella, No. 789, Ciudad', 'Activo');
-INSERT INTO afiliado VALUES ('AF0004', '1', '1', '1', 'AF0004', 'Laura', 'Patricia', NULL, 'Sánchez', 'Rodríguez', TO_DATE('1982-05-05', 'YYYY-MM-DD'), 'F', 0, 0, 'Empresaria', 'POR TERCEROS', '123-456-7893', '234-567-8904', 'laura.sanchez@email.com', 'patricia.sanchez@email.com', 'doc004.pdf', 'Calle Río, No. 101, Ciudad', 'Activo');
-INSERT INTO afiliado VALUES ('AF0005', '1', '1', '1', 'AF0005', 'Pedro', 'Andrés', NULL, 'Garcia', 'Quintana', TO_DATE('1972-02-28', 'YYYY-MM-DD'), 'M', 4, 2, 'Abogado', 'POR CUENTA PROPIA', '123-456-7894', '234-567-8905', 'pedro.garcia@email.com', 'andres.garcia@email.com', 'doc005.pdf', 'Calle Mar, No. 202, Ciudad', 'Activo');
-INSERT INTO afiliado VALUES ('AF0006', '1', '1', '1', 'AF0006', 'Sofia', 'Beatriz', NULL, 'Ruiz', 'Morales', TO_DATE('1993-08-15', 'YYYY-MM-DD'), 'F', 1, 0, 'Diseñadora', 'POR TERCEROS', '123-456-7895', '234-567-8906', 'sofia.ruiz@email.com', 'beatriz.ruiz@email.com', 'doc006.pdf', 'Calle Montaña, No. 303, Ciudad', 'Activo');
-INSERT INTO afiliado VALUES ('AF0007', '1', '1', '1', 'AF0007', 'Diego', 'Alonso', NULL, 'Vega', 'Prieto', TO_DATE('1980-09-09', 'YYYY-MM-DD'), 'M', 2, 1, 'Contador', 'POR CUENTA PROPIA', '123-456-7896', '234-567-8907', 'diego.vega@email.com', 'alonso.vega@email.com', 'doc007.pdf', 'Calle Sol, No. 404, Ciudad', 'Activo');
-INSERT INTO afiliado VALUES ('AF0008', '1', '1', '1', 'AF0008', 'Carmen', 'Elena', NULL, 'Ortiz', 'Campos', TO_DATE('1995-12-30', 'YYYY-MM-DD'), 'F', 0, 1, 'Psicóloga', 'POR TERCEROS', '123-456-7897', '234-567-8908', 'carmen.ortiz@email.com', 'elena.ortiz@email.com', 'doc008.pdf', 'Calle Río, No. 505, Ciudad', 'Activo');
-INSERT INTO afiliado VALUES ('AF0009', '1', '1', '1', 'AF0009', 'Francisco', 'Miguel', NULL, 'Navarro', 'Gutierrez', TO_DATE('1988-01-22', 'YYYY-MM-DD'), 'M', 3, 2, 'Profesor', 'POR CUENTA PROPIA', '123-456-7898', '234-567-8909', 'francisco.navarro@email.com', 'miguel.navarro@email.com', 'doc009.pdf', 'Calle Luna, No. 606, Ciudad', 'Activo');
-INSERT INTO afiliado VALUES ('AF0010', '1', '1', '1', 'AF0010', 'Isabel', 'Teresa', NULL, 'Moreno', 'Jiménez', TO_DATE('1979-06-14', 'YYYY-MM-DD'), 'F', 2, 3, 'Bióloga', 'POR TERCEROS', '123-456-7899', '234-567-8910', 'isabel.moreno@email.com', 'teresa.moreno@email.com', 'doc010.pdf', 'Calle Estrella, No. 707, Ciudad', 'Activo');
+INSERT INTO afiliado VALUES ('AF0001', '1', '1', '1', '0801199912341', 'Soltero','Afiliado', 'AF0001', 'Juan', 'Carlos', 'Eduardo', 'Fernandez', 'Diaz', TO_DATE('1990-03-21', 'YYYY-MM-DD'), 'M', 3, 2, 'Arquitecto', 'POR CUENTA PROPIA', '123-456-7890', '234-567-8901', 'juan.fernandez@email.com', 'carlos.fernandez@email.com', 'doc001.pdf', 'Calle Sol, No. 123, Ciudad', 'Activo');
+INSERT INTO afiliado VALUES ('AF0002', '1', '1', '1', '0801199912342','Soltero','Beneficiario', 'AF0002', 'Maria', 'Luisa', NULL, 'Gonzalez', 'Reyes', TO_DATE('1985-07-10', 'YYYY-MM-DD'), 'F', 2, 1, 'Doctora', 'POR TERCEROS', '123-456-7891', '234-567-8902', 'maria.gonzalez@email.com', 'luisa.gonzalez@email.com', 'doc002.pdf', 'Av. Luna, No. 456, Ciudad', 'Activo');
+INSERT INTO afiliado VALUES ('AF0003', '1', '1', '1', '0801199912343', 'Soltero','Afiliado','AF0003', 'Roberto', 'Jose', NULL, 'Martinez', 'Lopez', TO_DATE('1978-11-23', 'YYYY-MM-DD'), 'M', 1, 3, 'Ingeniero', 'POR CUENTA PROPIA', '123-456-7892', '234-567-8903', 'roberto.martinez@email.com', 'jose.martinez@email.com', 'doc003.pdf', 'Calle Estrella, No. 789, Ciudad', 'Activo');
+INSERT INTO afiliado VALUES ('AF0004', '1', '1', '1', '0801199912344', 'Soltero','Beneficiario','AF0004', 'Laura', 'Patricia', NULL, 'Sánchez', 'Rodríguez', TO_DATE('1982-05-05', 'YYYY-MM-DD'), 'F', 0, 0, 'Empresaria', 'POR TERCEROS', '123-456-7893', '234-567-8904', 'laura.sanchez@email.com', 'patricia.sanchez@email.com', 'doc004.pdf', 'Calle Río, No. 101, Ciudad', 'Activo');
+INSERT INTO afiliado VALUES ('AF0005', '1', '1', '1', '0801199912345', 'Soltero','Beneficiario','AF0005', 'Pedro', 'Andrés', NULL, 'Garcia', 'Quintana', TO_DATE('1972-02-28', 'YYYY-MM-DD'), 'M', 4, 2, 'Abogado', 'POR CUENTA PROPIA', '123-456-7894', '234-567-8905', 'pedro.garcia@email.com', 'andres.garcia@email.com', 'doc005.pdf', 'Calle Mar, No. 202, Ciudad', 'Activo');
+INSERT INTO afiliado VALUES ('AF0006', '1', '1', '1', '0801199912346', 'Soltero','Beneficiario','AF0006', 'Sofia', 'Beatriz', NULL, 'Ruiz', 'Morales', TO_DATE('1993-08-15', 'YYYY-MM-DD'), 'F', 1, 0, 'Diseñadora', 'POR TERCEROS', '123-456-7895', '234-567-8906', 'sofia.ruiz@email.com', 'beatriz.ruiz@email.com', 'doc006.pdf', 'Calle Montaña, No. 303, Ciudad', 'Activo');
+INSERT INTO afiliado VALUES ('AF0007', '1', '1', '1', '0801199912347','Soltero','Afiliado', 'AF0007', 'Diego', 'Alonso', NULL, 'Vega', 'Prieto', TO_DATE('1980-09-09', 'YYYY-MM-DD'), 'M', 2, 1, 'Contador', 'POR CUENTA PROPIA', '123-456-7896', '234-567-8907', 'diego.vega@email.com', 'alonso.vega@email.com', 'doc007.pdf', 'Calle Sol, No. 404, Ciudad', 'Activo');
+INSERT INTO afiliado VALUES ('AF0008', '1', '1', '1', '0801199912348','Soltero','Beneficiario', 'AF0008', 'Carmen', 'Elena', NULL, 'Ortiz', 'Campos', TO_DATE('1995-12-30', 'YYYY-MM-DD'), 'F', 0, 1, 'Psicóloga', 'POR TERCEROS', '123-456-7897', '234-567-8908', 'carmen.ortiz@email.com', 'elena.ortiz@email.com', 'doc008.pdf', 'Calle Río, No. 505, Ciudad', 'Activo');
+INSERT INTO afiliado VALUES ('AF0009', '1', '1', '1', '0801199912349','Soltero','Afiliado', 'AF0009', 'Francisco', 'Miguel', NULL, 'Navarro', 'Gutierrez', TO_DATE('1988-01-22', 'YYYY-MM-DD'), 'M', 3, 2, 'Profesor', 'POR CUENTA PROPIA', '123-456-7898', '234-567-8909', 'francisco.navarro@email.com', 'miguel.navarro@email.com', 'doc009.pdf', 'Calle Luna, No. 606, Ciudad', 'Activo');
+INSERT INTO afiliado VALUES ('AF0010', '1', '1', '1', '0801199912312','Soltero','Afiliado', 'AF0010', 'Isabel', 'Teresa', NULL, 'Moreno', 'Jiménez', TO_DATE('1979-06-14', 'YYYY-MM-DD'), 'F', 2, 3, 'Bióloga', 'POR TERCEROS', '123-456-7899', '234-567-8910', 'isabel.moreno@email.com', 'teresa.moreno@email.com', 'doc010.pdf', 'Calle Estrella, No. 707, Ciudad', 'Activo');
 
 --BANCOS
 INSERT INTO "SYSTEM"."BANCO" (ID_BANCO, NOMBRE, COD_BANCO) VALUES ('1', 'ATLANTIDA', '1');
 
 COMMIT;
+
+
+SELECT * FROM AFILIADO INNER JOIN TIPO_IDENTIFICACION ON 
+AFILIADO.TIPO_IDENTIFICACION_ID = TIPO_IDENTIFICACION.ID_IDENTIFICACION;
 

@@ -58,12 +58,35 @@ obtenerAfiliados() {
 
   @Input() dataEntrante: any;
   editarCentroTrabajo(centroTrabajo: any) {
-    this.dataEntrante = centroTrabajo;
-    console.log(this.dataEntrante);
+    this.dataEntrante = centroTrabajo;    
+    this.form.get('DatosGenerales.representacion')?.setValue(this.dataEntrante.REPRESENTACION);
+    this.form.get('DatosGenerales.telefono1')?.setValue(this.dataEntrante.TELEFONO_1);
+    this.form.get('DatosGenerales.telefono2')?.setValue(this.dataEntrante.TELEFONO_2);
+    this.form.get('DatosGenerales.primerNombre')?.setValue(this.dataEntrante.PRIMER_NOMBRE);
+    this.form.get('DatosGenerales.segundoNombre')?.setValue(this.dataEntrante.SEGUNDO_NOMBRE);
+    this.form.get('DatosGenerales.tercerNombre')?.setValue(this.dataEntrante.TERCER_NOMBRE);
+    this.form.get('DatosGenerales.primerApellido')?.setValue(this.dataEntrante.PRIMER_APELLIDO);
+    this.form.get('DatosGenerales.segundoApellido')?.setValue(this.dataEntrante.SEGUNDO_APELLIDO);
+    this.form.get('DatosGenerales.fechaNacimiento')?.setValue(this.dataEntrante.FECHA_NACIMIENTO);
+    this.form.get('DatosGenerales.estado')?.setValue(this.dataEntrante.ESTADO);
+    this.form.get('DatosGenerales.estadoCivil')?.setValue(this.dataEntrante.ESTADO_CIVIL);
+    this.form.get('DatosGenerales.cotizante')?.setValue(this.dataEntrante.TIPO_COTIZANTE);
+    this.form.get('DatosGenerales.Sexo')?.setValue(this.dataEntrante.SEXO);
+    this.form.get('DatosGenerales.profesion')?.setValue(this.dataEntrante.PROFESION);
+    this.form.get('DatosGenerales.cantidadHijos')?.setValue(this.dataEntrante.CANTIDAD_HIJOS);
+    this.form.get('DatosGenerales.cantidadDependientes')?.setValue(this.dataEntrante.CANTIDAD_DEPENDIENTES);
+    this.form.get('DatosGenerales.numeroIden')?.setValue(this.dataEntrante.DNI);
+    this.form.get('DatosGenerales.correo1')?.setValue(this.dataEntrante.CORREO_1);
+    this.form.get('DatosGenerales.correo2')?.setValue(this.dataEntrante.CORREO_2);
+    this.form.get('DatosGenerales.direccionDetallada')?.setValue(this.dataEntrante.DIRECCION_RESIDENCIA);
+    this.form.get('DatosGenerales.tipoIdent')?.setValue(this.dataEntrante.TIPO_IDENTIFICACION);
 
-    this.afiliadoService.afiliadosEdit.emit({
+    this.form.get('DatosGenerales.ciudadNacimiento')?.setValue("");
+    this.form.get('DatosGenerales.ciudadDomicilio')?.setValue("");
+    this.form.get('DatosGenerales.archIdent')?.setValue("");  
+    /* this.afiliadoService.afiliadosEdit.emit({
       data: this.dataEntrante
-    });
+    }); */
   }
 
   aplicarFiltroNombre() {

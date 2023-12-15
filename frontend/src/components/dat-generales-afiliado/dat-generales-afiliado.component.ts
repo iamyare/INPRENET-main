@@ -216,7 +216,7 @@ export class DatGeneralesAfiliadoComponent implements OnInit{
   }
 
   ngOnInit():void{
-    this.afiliadoService.afiliadosEdit.subscribe(data => {
+    /* this.afiliadoService.afiliadosEdit.subscribe(data => {
       this.dataEdit = data
       this.form.patchValue({
       tipoIdent: this.dataEdit.data.tipoIdent ,
@@ -245,7 +245,7 @@ export class DatGeneralesAfiliadoComponent implements OnInit{
       direccionDetallada : this.dataEdit.data.direccionDetallada
 
       });
-    })
+    }) */
   }
 
   onFileSelected(event: any) {

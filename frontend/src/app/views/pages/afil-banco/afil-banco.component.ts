@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, OnInit, inject } from '@angular/core';
-import { ControlContainer, FormArray, FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
+import { FormBuilder, FormGroup } from '@angular/forms';
 import { generateDatBancFormGroup } from '@docs-components/dat-banc/dat-banc.component';
 import { generateAddressFormGroup } from '@docs-components/dat-generales-afiliado/dat-generales-afiliado.component';
 @Component({
@@ -18,11 +18,12 @@ export class AfilBancoComponent implements OnInit {
   });
 
   Bancos: any = []; tipoIdent: any = []; Sexo: any = []; estadoCivil: any = [];
-  htmlSTID: string = "Archivo de identificación"
-
+  
   public archivo: any;
-  datosGen:any; datosPuestTrab:any; datosBanc:any;datosRefPer:any;
-  DatosBancBen:any = []; DatosGenBen:any  = [];
+  htmlSTID: string = "Archivo de identificación";
+
+  datosGen:any; datosPuestTrab:any; datosBanc:any; datosRefPer:any;
+  DatosBancBen:any = [];
 
   constructor( private fb: FormBuilder) {
     this.Bancos = [
@@ -99,7 +100,10 @@ export class AfilBancoComponent implements OnInit {
     ];
   }
 
-  setDatosGen(datosGen:any){
+  ngOnInit():void{
+  }
+
+  setDatosGen(datosGen:any){    
     this.datosGen = datosGen;
   }
 
@@ -118,17 +122,17 @@ export class AfilBancoComponent implements OnInit {
   setDatosBen(DatosBancBen:any){
     this.DatosBancBen = DatosBancBen;
   }
-
-  ngOnInit():void{
-  }
-
-  enviar(){
-    console.log(this.datosGen);
-    console.log(this.datosPuestTrab);
-    console.log(this.datosBanc);
-    console.log(this.datosRefPer);
+  
+  enviar(){  
+    const data = {
+      datosGen: this.form.value.DatosGenerales,
+      datosPuestTrab: this.datosPuestTrab,
+      datosBanc: this.form.value.DatosBacAfil,
+      datosRefPers: this.datosRefPer,
+      datosBenefic: this.DatosBancBen,
+    }
+    console.log(data);
     
-    console.log(this.DatosBancBen); 
   }
 
 }

@@ -5,8 +5,8 @@ const { getConnection } = require('../config/db');
 async function getAllAfiliado(req, res) {
   try {
     const query = `
-      SELECT *
-      FROM afiliado
+    SELECT * FROM afiliado INNER JOIN TIPO_IDENTIFICACION ON 
+    AFILIADO.TIPO_IDENTIFICACION_ID = TIPO_IDENTIFICACION.ID_IDENTIFICACION
     `;
 
     const connection = await getConnection();

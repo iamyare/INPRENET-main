@@ -20,7 +20,7 @@ CREATE TABLE afiliado (
     pais_id_pais2          VARCHAR2(30 CHAR) NOT NULL,
     tipo_identificacion_id VARCHAR2(40 CHAR) NOT NULL,
     afiliado_id_afiliado   VARCHAR2(40 CHAR) NOT NULL,
-    primer_nombire          NVARCHAR2(40),
+    primer_nombre          NVARCHAR2(40),
     segundo_nombre         NVARCHAR2(40),
     tercer_nombre          VARCHAR2(30 CHAR),
     primer_apellido        VARCHAR2(30 CHAR),
@@ -51,30 +51,12 @@ CREATE UNIQUE INDEX afiliado__idx ON
         id_afiliado
     ASC );
 
-CREATE INDEX afiliado__idxv3 ON
-    afiliado (
-        afiliado_id_afiliado
-    ASC );
 
-CREATE UNIQUE INDEX afiliado__idxv1 ON
-    afiliado (
-        pais_id_pais2
-    ASC );
-
-CREATE UNIQUE INDEX afiliado__idxv4 ON
-    afiliado (
-        tipo_identificacion_id
-    ASC );
-
-CREATE UNIQUE INDEX afiliado__idxv2 ON
-    afiliado (
-        pais_id_pais
-    ASC );
 
 ALTER TABLE afiliado ADD CONSTRAINT afiliado_pk PRIMARY KEY ( id_afiliado );
 
 CREATE TABLE afiliados_por_banco (
-    id_af_por_banco      VARCHAR2(30 CHAR) NOT NULL,
+    id_af_por_banco      VARCHAR2(40 CHAR) NOT NULL,
     afiliado_id_afiliado VARCHAR2(40 CHAR) NOT NULL,
     banco_id_banco       VARCHAR2(40 CHAR) NOT NULL,
     num_cuenta           VARCHAR2(40 CHAR)
@@ -169,6 +151,8 @@ CREATE TABLE perf_afil_cent_trab (
     id_perf_afil_cent_trab VARCHAR2(40 CHAR) NOT NULL,
     centro_trabajo_id      VARCHAR2(40 CHAR) NOT NULL,
     afiliado_id_afiliado   VARCHAR2(40 CHAR) NOT NULL,
+    colegio_magisterial    VARCHAR2(30 CHAR),
+    numero_carnet          VARCHAR2(30 CHAR),
     cargo                  VARCHAR2(40 CHAR),
     sector_economico       VARCHAR2(40 CHAR),
     actividad_economica    VARCHAR2(40 CHAR),
@@ -377,3 +361,43 @@ INSERT INTO ciudad (id_ciudad, provincia_id_provincia, nombre) VALUES ('C014', '
 INSERT INTO ciudad (id_ciudad, provincia_id_provincia, nombre) VALUES ('C015', 'HN015', 'Juticalpa');
 INSERT INTO ciudad (id_ciudad, provincia_id_provincia, nombre) VALUES ('C016', 'HN016', 'Santa Bárbara');
 INSERT INTO ciudad (id_ciudad, provincia_id_provincia, nombre) VALUES ('C018', 'HN018', 'Yoro');
+
+--Centros de trabajo
+INSERT INTO centro_trabajo (id_centro_trabajo, ciudad_id_ciudad, nombre, telefono_1, telefono_2, correo_1, correo_2, apoderado_legal, representante_legal, rtn, logo)
+VALUES ('CT001', 'C001', 'Instituto La Ceiba', '555-1010', '555-1011', 'info@institutolaceiba.edu', 'contacto@institutolaceiba.edu', 'Juan Pérez', 'Ana Gómez', 'RTN001', 'logo1.jpg');
+INSERT INTO centro_trabajo (id_centro_trabajo, ciudad_id_ciudad, nombre, telefono_1, telefono_2, correo_1, correo_2, apoderado_legal, representante_legal, rtn, logo)
+VALUES ('CT002', 'C001', 'Colegio Básico Ceiba', '555-1020', '555-1021', 'info@colegiobasicoceiba.edu', 'contacto@colegiobasicoceiba.edu', 'Mario Rossi', 'Laura Díaz', 'RTN002', 'logo2.jpg');
+INSERT INTO centro_trabajo (id_centro_trabajo, ciudad_id_ciudad, nombre, telefono_1, telefono_2, correo_1, correo_2, apoderado_legal, representante_legal, rtn, logo)
+VALUES ('CT003', 'C001', 'Universidad Tecnológica de La Ceiba', '555-1030', '555-1031', 'info@utlaceiba.edu', 'contacto@utlaceiba.edu', 'Carlos López', 'Sofía Martínez', 'RTN003', 'logo3.jpg');
+INSERT INTO centro_trabajo (id_centro_trabajo, ciudad_id_ciudad, nombre, telefono_1, telefono_2, correo_1, correo_2, apoderado_legal, representante_legal, rtn, logo)
+VALUES ('CT004', 'C001', 'Escuela Internacional Ceiba', '555-1040', '555-1041', 'info@escuelaintceiba.edu', 'contacto@escuelaintceiba.edu', 'Pedro Álvarez', 'Carmen Ruiz', 'RTN004', 'logo4.jpg');
+INSERT INTO centro_trabajo (id_centro_trabajo, ciudad_id_ciudad, nombre, telefono_1, telefono_2, correo_1, correo_2, apoderado_legal, representante_legal, rtn, logo)
+VALUES ('CT005', 'C001', 'Centro Educativo Moderno', '555-1050', '555-1051', 'info@cemoderno.edu', 'contacto@cemoderno.edu', 'Luis Fernández', 'María González', 'RTN005', 'logo5.jpg');
+INSERT INTO centro_trabajo (id_centro_trabajo, ciudad_id_ciudad, nombre, telefono_1, telefono_2, correo_1, correo_2, apoderado_legal, representante_legal, rtn, logo)
+VALUES ('CT006', 'C001', 'Preparatoria Ceiba Norte', '555-1060', '555-1061', 'info@prepceibanorte.edu', 'contacto@prepceibanorte.edu', 'Jorge Mendoza', 'Diana Ortiz', 'RTN006', 'logo6.jpg');
+INSERT INTO centro_trabajo (id_centro_trabajo, ciudad_id_ciudad, nombre, telefono_1, telefono_2, correo_1, correo_2, apoderado_legal, representante_legal, rtn, logo)
+VALUES ('CT007', 'C001', 'Academia de Ciencias de La Ceiba', '555-1070', '555-1071', 'info@acadcienciaslc.edu', 'contacto@acadcienciaslc.edu', 'Omar Vargas', 'Beatriz Jiménez', 'RTN007', 'logo7.jpg');
+INSERT INTO centro_trabajo (id_centro_trabajo, ciudad_id_ciudad, nombre, telefono_1, telefono_2, correo_1, correo_2, apoderado_legal, representante_legal, rtn, logo)
+VALUES ('CT008', 'C001', 'Colegio Técnico Ceiba', '555-1080', '555-1081', 'info@colegiotecceiba.edu', 'contacto@colegiotecceiba.edu', 'Ricardo Soto', 'Elena Núñez', 'RTN008', 'logo8.jpg');
+INSERT INTO centro_trabajo (id_centro_trabajo, ciudad_id_ciudad, nombre, telefono_1, telefono_2, correo_1, correo_2, apoderado_legal, representante_legal, rtn, logo)
+VALUES ('CT009', 'C001', 'Instituto Superior Ceiba', '555-1090', '555-1091', 'info@isuperiorceiba.edu', 'contacto@isuperiorceiba.edu', 'Manuel Castro', 'Luisa Fernanda', 'RTN009', 'logo9.jpg');
+INSERT INTO centro_trabajo (id_centro_trabajo, ciudad_id_ciudad, nombre, telefono_1, telefono_2, correo_1, correo_2, apoderado_legal, representante_legal, rtn, logo)
+VALUES ('CT010', 'C001', 'Escuela de Artes de La Ceiba', '555-1100', '555-1101', 'info@eartesceiba.edu', 'contacto@eartesceiba.edu', 'Fernando Gutiérrez', 'Patricia Solís', 'RTN010', 'logo10.jpg');
+
+--AFILIADO
+INSERT INTO afiliado VALUES ('AF0001', '1', '1', '1', 'AF0001', 'Juan', 'Carlos', 'Eduardo', 'Fernandez', 'Diaz', TO_DATE('1990-03-21', 'YYYY-MM-DD'), 'M', 3, 2, 'Arquitecto', 'POR CUENTA PROPIA', '123-456-7890', '234-567-8901', 'juan.fernandez@email.com', 'carlos.fernandez@email.com', 'doc001.pdf', 'Calle Sol, No. 123, Ciudad', 'Activo');
+INSERT INTO afiliado VALUES ('AF0002', '1', '1', '1', 'AF0002', 'Maria', 'Luisa', NULL, 'Gonzalez', 'Reyes', TO_DATE('1985-07-10', 'YYYY-MM-DD'), 'F', 2, 1, 'Doctora', 'POR TERCEROS', '123-456-7891', '234-567-8902', 'maria.gonzalez@email.com', 'luisa.gonzalez@email.com', 'doc002.pdf', 'Av. Luna, No. 456, Ciudad', 'Activo');
+INSERT INTO afiliado VALUES ('AF0003', '1', '1', '1', 'AF0003', 'Roberto', 'Jose', NULL, 'Martinez', 'Lopez', TO_DATE('1978-11-23', 'YYYY-MM-DD'), 'M', 1, 3, 'Ingeniero', 'POR CUENTA PROPIA', '123-456-7892', '234-567-8903', 'roberto.martinez@email.com', 'jose.martinez@email.com', 'doc003.pdf', 'Calle Estrella, No. 789, Ciudad', 'Activo');
+INSERT INTO afiliado VALUES ('AF0004', '1', '1', '1', 'AF0004', 'Laura', 'Patricia', NULL, 'Sánchez', 'Rodríguez', TO_DATE('1982-05-05', 'YYYY-MM-DD'), 'F', 0, 0, 'Empresaria', 'POR TERCEROS', '123-456-7893', '234-567-8904', 'laura.sanchez@email.com', 'patricia.sanchez@email.com', 'doc004.pdf', 'Calle Río, No. 101, Ciudad', 'Activo');
+INSERT INTO afiliado VALUES ('AF0005', '1', '1', '1', 'AF0005', 'Pedro', 'Andrés', NULL, 'Garcia', 'Quintana', TO_DATE('1972-02-28', 'YYYY-MM-DD'), 'M', 4, 2, 'Abogado', 'POR CUENTA PROPIA', '123-456-7894', '234-567-8905', 'pedro.garcia@email.com', 'andres.garcia@email.com', 'doc005.pdf', 'Calle Mar, No. 202, Ciudad', 'Activo');
+INSERT INTO afiliado VALUES ('AF0006', '1', '1', '1', 'AF0006', 'Sofia', 'Beatriz', NULL, 'Ruiz', 'Morales', TO_DATE('1993-08-15', 'YYYY-MM-DD'), 'F', 1, 0, 'Diseñadora', 'POR TERCEROS', '123-456-7895', '234-567-8906', 'sofia.ruiz@email.com', 'beatriz.ruiz@email.com', 'doc006.pdf', 'Calle Montaña, No. 303, Ciudad', 'Activo');
+INSERT INTO afiliado VALUES ('AF0007', '1', '1', '1', 'AF0007', 'Diego', 'Alonso', NULL, 'Vega', 'Prieto', TO_DATE('1980-09-09', 'YYYY-MM-DD'), 'M', 2, 1, 'Contador', 'POR CUENTA PROPIA', '123-456-7896', '234-567-8907', 'diego.vega@email.com', 'alonso.vega@email.com', 'doc007.pdf', 'Calle Sol, No. 404, Ciudad', 'Activo');
+INSERT INTO afiliado VALUES ('AF0008', '1', '1', '1', 'AF0008', 'Carmen', 'Elena', NULL, 'Ortiz', 'Campos', TO_DATE('1995-12-30', 'YYYY-MM-DD'), 'F', 0, 1, 'Psicóloga', 'POR TERCEROS', '123-456-7897', '234-567-8908', 'carmen.ortiz@email.com', 'elena.ortiz@email.com', 'doc008.pdf', 'Calle Río, No. 505, Ciudad', 'Activo');
+INSERT INTO afiliado VALUES ('AF0009', '1', '1', '1', 'AF0009', 'Francisco', 'Miguel', NULL, 'Navarro', 'Gutierrez', TO_DATE('1988-01-22', 'YYYY-MM-DD'), 'M', 3, 2, 'Profesor', 'POR CUENTA PROPIA', '123-456-7898', '234-567-8909', 'francisco.navarro@email.com', 'miguel.navarro@email.com', 'doc009.pdf', 'Calle Luna, No. 606, Ciudad', 'Activo');
+INSERT INTO afiliado VALUES ('AF0010', '1', '1', '1', 'AF0010', 'Isabel', 'Teresa', NULL, 'Moreno', 'Jiménez', TO_DATE('1979-06-14', 'YYYY-MM-DD'), 'F', 2, 3, 'Bióloga', 'POR TERCEROS', '123-456-7899', '234-567-8910', 'isabel.moreno@email.com', 'teresa.moreno@email.com', 'doc010.pdf', 'Calle Estrella, No. 707, Ciudad', 'Activo');
+
+--BANCOS
+INSERT INTO "SYSTEM"."BANCO" (ID_BANCO, NOMBRE, COD_BANCO) VALUES ('1', 'ATLANTIDA', '1');
+
+COMMIT;
+

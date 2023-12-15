@@ -87,6 +87,24 @@
           </mat-form-field>
         </div>
       </div>
+      <div class="row">
+        <div class="col-md-6">
+          <mat-form-field class="example-full-width; inputs" appearance="outline">
+            <mat-label>Colegio Magisterial</mat-label>
+            <input matInput formControlName="colegioMagisterial" [matDatepicker]="colegioMagisterial">
+            <mat-datepicker-toggle matIconSuffix [for]="colegioMagisterial"></mat-datepicker-toggle>
+            <mat-datepicker #colegioMagisterial></mat-datepicker>
+          </mat-form-field>
+        </div>
+        <div class="col-md-6">
+          <mat-form-field class="example-full-width; inputs" appearance="outline">
+            <mat-label>Numero de carnet</mat-label>
+            <input matInput formControlName="numeroCarnet" [matDatepicker]="numeroCarnet">
+            <mat-datepicker-toggle matIconSuffix [for]="numeroCarnet"></mat-datepicker-toggle>
+            <mat-datepicker #numeroCarnet></mat-datepicker>
+          </mat-form-field>
+        </div>
+      </div>
     </form>
   </div>
 </div>

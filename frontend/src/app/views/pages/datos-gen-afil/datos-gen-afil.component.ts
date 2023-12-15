@@ -31,10 +31,6 @@ export class DatosGenAfilComponent implements OnInit {
   desde = 0;
   hasta: number = this.pageSize;
 
-  displayedColumns: string[] = [
-  'ID_AFILIADO',
-];
-
 
 constructor(private afiliadoService: AfiliadoService, private fb: FormBuilder) {}
 

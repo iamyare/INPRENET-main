@@ -11,7 +11,7 @@ export class CentroTrabajoService {
 
   constructor(private http: HttpClient, private router: Router) { }
 
-  getCentrosTrabajo(): Observable<any | void > {
+  getCentrosTrabajo(): Observable<any | void> {
     const url = `${environment.API_URL}/centrosTrabajo`;
     return this.http.get<any>(
       url,

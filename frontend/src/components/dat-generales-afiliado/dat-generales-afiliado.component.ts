@@ -54,7 +54,7 @@ export class DatGeneralesAfiliadoComponent implements OnInit{
   public dataEdit:any;
 
   tipoCotizante: any = []; tipoIdent: any = []; Sexo: any = []; estadoCivil: any = [];
-  
+
   @Input() groupName = '';
   @Output() newDatGenChange = new EventEmitter<any>()
 

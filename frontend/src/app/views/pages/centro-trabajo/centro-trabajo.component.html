@@ -78,104 +78,70 @@
         <div class="col-6">
           <h4 class="card-title">Centros de trabajo</h4>
         </div>
-        <div class="col-6">
+        <!-- <div class="col-6">
           <mat-form-field  style="width: 40%" appearance="outline">
           <input matInput placeholder="Buscar por nombre" [(ngModel)]="nombreBusqueda" class="custom-input"/>
         </mat-form-field>
           <button mat-raised-button color="primary" (click)="buscarPorNombre()"><mat-icon>search</mat-icon></button>
-        </div>
+        </div> -->
       </div>
     </div>
 
     <div class="card-body">
       <div style="overflow-x: auto;">
-
-
-        <table mat-table class="mat-elevation-z8" [dataSource]="dataSource" >
-
-          <ng-container matColumnDef="indice">
-            <th mat-header-cell *matHeaderCellDef>Índice</th>
-            <td mat-cell *matCellDef="let centroTrabajo; let i = index"
-                [ngClass]="{'fila-impar': i % 2 !== 0, 'fila-par': i % 2 === 0}">
-              {{ desde + i + 1 }}
-            </td>
-          </ng-container>
-
-
-          <ng-container matColumnDef="nombre">
-            <th mat-header-cell *matHeaderCellDef>Nombre</th>
-            <td mat-cell *matCellDef="let centroTrabajo; let i = index" [ngClass]="{'fila-impar': i % 2 !== 0, 'fila-par': i % 2 === 0}">
-              {{ centroTrabajo[2] }}</td>
-          </ng-container>
-
-          <ng-container matColumnDef="telefono_1">
-            <th mat-header-cell *matHeaderCellDef>Teléfono 1</th>
-            <td mat-cell *matCellDef="let centroTrabajo; let i = index" [ngClass]="{'fila-impar': i % 2 !== 0, 'fila-par': i % 2 === 0}">
-              {{ centroTrabajo[3] }}</td>
-          </ng-container>
-
-          <ng-container matColumnDef="telefono_2">
-            <th mat-header-cell *matHeaderCellDef>Teléfono 2</th>
-            <td mat-cell *matCellDef="let centroTrabajo; let i = index" [ngClass]="{'fila-impar': i % 2 !== 0, 'fila-par': i % 2 === 0}">
-              {{ centroTrabajo[4] }}</td>
-          </ng-container>
-
-          <ng-container matColumnDef="correo_1">
-            <th mat-header-cell *matHeaderCellDef>Correo 1</th>
-            <td mat-cell *matCellDef="let centroTrabajo; let i = index" [ngClass]="{'fila-impar': i % 2 !== 0, 'fila-par': i % 2 === 0}">
-              {{ centroTrabajo[5] }}</td>
-          </ng-container>
-
-          <ng-container matColumnDef="correo_2">
-            <th mat-header-cell *matHeaderCellDef>Correo 2</th>
-            <td mat-cell *matCellDef="let centroTrabajo; let i = index" [ngClass]="{'fila-impar': i % 2 !== 0, 'fila-par': i % 2 === 0}">
-              {{ centroTrabajo[6] }}</td>
-          </ng-container>
-
-          <ng-container matColumnDef="apoderado_legal">
-            <th mat-header-cell *matHeaderCellDef>Apoderado Legal</th>
-            <td mat-cell *matCellDef="let centroTrabajo; let i = index" [ngClass]="{'fila-impar': i % 2 !== 0, 'fila-par': i % 2 === 0}">
-              {{ centroTrabajo[7] }}</td>
-          </ng-container>
-
-          <ng-container matColumnDef="representante_legal">
-            <th mat-header-cell *matHeaderCellDef>Representante Legal</th>
-            <td mat-cell *matCellDef="let centroTrabajo; let i = index" [ngClass]="{'fila-impar': i % 2 !== 0, 'fila-par': i % 2 === 0}">
-              {{ centroTrabajo[8] }}</td>
-          </ng-container>
-
-          <ng-container matColumnDef="rtn">
-            <th mat-header-cell *matHeaderCellDef>RTN</th>
-            <td mat-cell *matCellDef="let centroTrabajo; let i = index" [ngClass]="{'fila-impar': i % 2 !== 0, 'fila-par': i % 2 === 0}">
-              {{ centroTrabajo[9] }}</td>
-          </ng-container>
-
-          <ng-container matColumnDef="logo">
-            <th mat-header-cell *matHeaderCellDef>Logo</th>
-            <td mat-cell *matCellDef="let centroTrabajo; let i = index" [ngClass]="{'fila-impar': i % 2 !== 0, 'fila-par': i % 2 === 0}">
-              {{ centroTrabajo[10] }}</td>
-          </ng-container>
-
-          <ng-container matColumnDef="editar">
-            <th mat-header-cell *matHeaderCellDef>Editar</th>
-            <td mat-cell *matCellDef="let centroTrabajo; let i = index" [ngClass]="{'fila-impar': i % 2 !== 0, 'fila-par': i % 2 === 0}">
-
-              <button mat-icon-button (click)="editarCentroTrabajo(centroTrabajo)">
+        <table class="table table-striped table-responsive table-borderless">
+          <thead>
+            <tr>
+              <th class="encabezado col-xs-1" scope="col">ID</th>
+              <th class="encabezado col-xs-1" scope="col">CIUDAD RESIDENCIA</th>
+              <th class="encabezado col-xs-1" scope="col">NACIONALIDAD</th>
+              <th class="encabezado col-xs-1" scope="col">TIPO DE IDENTIFICACION</th>
+              <th class="encabezado col-xs-1" scope="col">NOMBRE COMPLETO</th>
+              <th class="encabezado col-xs-1" scope="col">FECHA DE NACIMIENTO</th>
+              <th class="encabezado col-xs-1" scope="col">SEXO</th>
+              <th class="encabezado col-xs-1" scope="col">CANTIDAD DE DEPENDIENTES</th>
+              <th class="encabezado col-xs-1" scope="col">CANTIDAD DE HIJOS</th>
+              <th class="encabezado col-xs-1" scope="col">PROFESION</th>
+              <th class="encabezado col-xs-1" scope="col">REPRESENTACION</th>
+              <th class="encabezado col-xs-1" scope="col">TELEFONO 1</th>
+              <th class="encabezado col-xs-1" scope="col">TELEFONO 2</th>
+              <th class="encabezado col-xs-1" scope="col">CORREO 1</th>
+              <th class="encabezado col-xs-1" scope="col">CORREO 2</th>
+              <th class="encabezado col-xs-1" scope="col">ARCHIVO DE IDENTIFICACION</th>
+              <th class="encabezado col-xs-1" scope="col">DIRECCION</th>
+              <th class="encabezado col-xs-1" scope="col">ESTADO</th>
+              <th class="encabezado col-xs-4" scope="col"></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr class="text-center" *ngFor="let centroTrabajo of informacion">
+              <td class="info">{{centroTrabajo.ID_centroTrabajo}}</td>
+              <td class="info">{{centroTrabajo.TELEFONO_2}}</td>
+              <td class="info">{{centroTrabajo.PAIS_ID_PAIS2}}</td>
+              <td class="info">{{centroTrabajo.TIPO_IDENTIFICACION_ID}}</td>
+              <td class="info">{{centroTrabajo.PRIMER_NOMBRE + ' ' + centroTrabajo.SEGUNDO_NOMBRE + ' ' + centroTrabajo.TERCER_NOMBRE + ' ' + centroTrabajo.PRIMER_APELLIDO + ' ' + centroTrabajo.SEGUNDO_APELLIDO}}</td>
+              <td class="info">{{centroTrabajo.FECHA_NACIMIENTO}}</td>
+              <td class="info">{{centroTrabajo.SEXO}}</td>
+              <td class="info">{{centroTrabajo.CANTIDAD_DEPENDIENTES}}</td>
+              <td class="info">{{centroTrabajo.CANTIDAD_HIJOS}}</td>
+              <td class="info">{{centroTrabajo.PROFESION}}</td>
+              <td class="info">{{centroTrabajo.REPRESENTACION}}</td>
+              <td class="info">{{centroTrabajo.TELEFONO_1}}</td>
+              <td class="info">{{centroTrabajo.TELEFONO_2}}</td>
+              <td class="info">{{centroTrabajo.CORREO_1}}</td>
+              <td class="info">{{centroTrabajo.CORREO_2}}</td>
+              <td class="info">{{centroTrabajo.ARCHIVO_IDENTIFICACION}}</td>
+              <td class="info">{{centroTrabajo.DIRECCION_RESIDENCIA}}</td>
+              <td class="info">{{centroTrabajo.ESTADO}}</td>
+              <td class="info"><button mat-icon-button (click)="editarCentroTrabajo(centroTrabajo)">
                 <mat-icon>edit</mat-icon>
-              </button>
-            </td>
-          </ng-container>
+              </button></td>
+            </tr>
 
-          <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-          <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
-
+          </tbody>
         </table>
       </div>
-
-      <mat-paginator #matPaginator [length]="informacion.length" [pageSize]="pageSize" [pageSizeOptions]="[5, 10, 25]"
-      (page)="onPageChange($event)" aria-label="Select page">
-    </mat-paginator>
-
     </div>
+
   </div>
 </div>

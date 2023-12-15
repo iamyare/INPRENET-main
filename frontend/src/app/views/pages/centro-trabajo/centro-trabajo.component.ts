@@ -1,9 +1,6 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { CentroTrabajoService } from '../../../services/centro-trabajo.service';
-import { MatTableDataSource } from '@angular/material/table';
-import { PageEvent } from '@angular/material/paginator';
-import { MatPaginator } from '@angular/material/paginator';
 
 @Component({
   selector: 'app-centro-trabajo',
@@ -12,29 +9,13 @@ import { MatPaginator } from '@angular/material/paginator';
 })
 export class CentroTrabajoComponent implements OnInit {
 
-  nombreBusqueda: string = '';
+  constructor(
+    private fb: FormBuilder,
+    private centroTrabajoService: CentroTrabajoService
+  ) {}
+
+  //Arreglo donde se guardara los datos traidos de el servicio
   public informacion: any = [];
-
-  ELEMENT_DATA: any[] = [];
-  dataSource = new MatTableDataSource<any>(this.ELEMENT_DATA);
-
-  pageSize = 5;
-  desde = 0;
-  hasta: number = this.pageSize;
-
-  displayedColumns: string[] = [
-    'indice',
-    'nombre',
-    'telefono_1',
-    'telefono_2',
-    'correo_1',
-    'correo_2',
-    'apoderado_legal',
-    'representante_legal',
-    'rtn',
-    'logo',
-    'editar'
-  ];
 
   formulario: FormGroup = this.fb.group({
     nombre: ['', [Validators.required]],
@@ -47,12 +28,7 @@ export class CentroTrabajoComponent implements OnInit {
     representante_legal: ['', [Validators.required]],
   });
 
-  @ViewChild(MatPaginator) matPaginator: MatPaginator | undefined;
 
-  constructor(
-    private fb: FormBuilder,
-    private centroTrabajoService: CentroTrabajoService
-  ) {}
 
   ngOnInit() {
     this.obtenerCentrosTrabajo();
@@ -61,13 +37,10 @@ export class CentroTrabajoComponent implements OnInit {
   obtenerCentrosTrabajo() {
     this.centroTrabajoService.getCentrosTrabajo().subscribe(
       (res: any) => {
-
         if (res.ok) {
-          this.informacion = res.centrosTrabajo;
+          this.informacion = res.centroTrabajo;
+          console.log(this.informacion);
 
-          this.dataSource.data = this.informacion.slice(0, this.pageSize);
-
-          this.actualizarPaginador();
         }
       },
       (error) => {
@@ -107,39 +80,6 @@ export class CentroTrabajoComponent implements OnInit {
           console.error('Error al agregar centro de trabajo:', error);
         }
       );
-    }
-  }
-
-  buscarPorNombre() {
-    if (this.nombreBusqueda.trim() === '') {
-      this.dataSource.filter = '';
-    } else {
-      this.aplicarFiltroNombre();
-    }
-  }
-
-  aplicarFiltroNombre() {
-    this.dataSource.filter = this.nombreBusqueda.trim().toLowerCase();
-  }
-
-  onPageChange(e: PageEvent): void {
-    this.desde = e.pageIndex * e.pageSize;
-    this.hasta = this.desde + e.pageSize;
-
-    const paginatedData = this.informacion.slice(this.desde, this.hasta);
-    this.dataSource.data = paginatedData;
-
-    if (this.nombreBusqueda.trim() !== '') {
-      this.aplicarFiltroNombre();
-    }
-  }
-
-  private actualizarPaginador() {
-    this.pageSize = 5;
-    this.hasta = this.pageSize;
-
-    if (this.matPaginator) {
-      this.matPaginator.length = this.informacion.length;
     }
   }
 }

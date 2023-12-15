@@ -25,6 +25,8 @@ export class DatPuestoTrabComponent {
     const salarioNeto = this.form1.value.salarioNeto;
     const fechaIngreso = this.form1.value.fechaIngreso;
     const fechaPago = this.form1.value.fechaPago;
+    const colegioMagisterial = this.form1.value.colegioMagisterial;
+    const numeroCarnet = this.form1.value.numeroCarnet;
 
     const data = {
       centroTrabajo: centroTrabajo,
@@ -36,7 +38,9 @@ export class DatPuestoTrabComponent {
       numeroAcuerdo:numeroAcuerdo,
       salarioNeto: salarioNeto,
       fechaIngreso: fechaIngreso,
-      fechaPago: fechaPago
+      fechaPago: fechaPago,
+      colegioMagisterial : colegioMagisterial,
+      numeroCarnet : numeroCarnet
     }
 
     this.newDatPuesTChange.emit(data);
@@ -54,12 +58,14 @@ export class DatPuestoTrabComponent {
      numeroAcuerdo: ['', [Validators.required]],
      salarioNeto: ['', [Validators.required, Validators.pattern("\^[0-9]{1,8}([\\.][0-9]{2})")]],
      fechaIngreso: ['', [Validators.required]],
-     fechaPago: ['', [Validators.required]]
+     fechaPago: ['', [Validators.required]],
+     colegioMagisterial: ['', [Validators.required]],
+     numeroCarnet: ['', [Validators.required]],
     });
   }
 
   ngOnInit():void{
   }
-  
+
 
 }

@@ -2,6 +2,7 @@ const { v4: uuidv4 } = require('uuid');
 const { getConnection } = require('../config/db');
 
 
+
 async function getCentrosTrabajo(req, res) {
   try {
     const query = `
@@ -14,13 +15,22 @@ async function getCentrosTrabajo(req, res) {
     await connection.close();
 
     if (result.rows.length === 0) {
-      return res.json({ ok: false, error: 'No se encontró ningún centro de trabajo.' });
+      return res.json({ ok: false, error: 'No se encontró ningún Centro de trabajo.' });
     }
 
-    res.json({ ok: true, centrosTrabajo: result.rows });
+    const centroTrabajo = result.rows.map((row) => {
+      const obj = {};
+      for (let i = 0; i < result.metaData.length; i++) {
+        const columnName = result.metaData[i].name;
+        obj[columnName] = row[i];
+      }
+      return obj;
+    });
+
+    res.json({ ok: true, centroTrabajo });
   } catch (error) {
     console.error(error.message);
-    res.status(500).json({ ok: false, error: 'Error en el servidor al buscar los centros de trabajo.' });
+    res.status(500).json({ ok: false, error: 'Error en el servidor al buscar los Centros de trabajo.' });
   }
 }
 

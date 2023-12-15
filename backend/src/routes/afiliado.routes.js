@@ -1,7 +1,8 @@
 const express = require('express');
 const router = express.Router();
-const { getAllAfiliado } = require('../controllers/afiliado.controller');
+const { getAllAfiliado, createAfiliado} = require('../controllers/afiliado.controller');
 
+router.post('/agregarAfiliado', createAfiliado);
 router.get('/', getAllAfiliado);
 
 

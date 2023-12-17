@@ -52,14 +52,14 @@ export class CentroTrabajoComponent implements OnInit {
   editarCentroTrabajo(centroTrabajo: any) {
     console.log('Editar centro de trabajo:', centroTrabajo);
     this.formulario.patchValue({
-      nombre: centroTrabajo[2],
+      nombre: centroTrabajo.NOMBRE,
       ciudad: 'Nada aun',
-      telefono_1: centroTrabajo[3],
-      telefono_2: centroTrabajo[4],
-      correo_1: centroTrabajo[5],
-      correo_2: centroTrabajo[6],
-      apoderado_legal: centroTrabajo[7],
-      representante_legal: centroTrabajo[8],
+      telefono_1: centroTrabajo.TELEFONO_1,
+      telefono_2: centroTrabajo.TELEFONO_2,
+      correo_1: centroTrabajo.CORREO_1,
+      correo_2: centroTrabajo.CORREO_2,
+      apoderado_legal: centroTrabajo.APODERADO_LEGAL,
+      representante_legal: centroTrabajo.REPRESENTANTE_LEGAL,
     });
   }
 

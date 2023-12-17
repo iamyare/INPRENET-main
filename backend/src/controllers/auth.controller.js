@@ -3,6 +3,7 @@ const oracledb = require('oracledb');
 const { getToken, getTokenData } = require('../config/jwt.config');
 const { getTemplate, sendEmail } = require('../config/mail.config');
 const path = require('path');
+const bcrypt = require('bcrypt');
 
 const { getConnection } = require('../config/db');
 
@@ -55,8 +56,6 @@ const signUp = async (req, res) => {
             INSERT INTO usuario (id_usuario,nombre,correo,rol_id_rol,fk_id_ident)
             VALUES ('${id_usuario}', '${nombre}', '${correo}', ${rol_id_rol}, ${fk_id_ident})
         `;
-        
-        //const userParams = { id_usuario, nombre, correo, rol_id_rol, fk_id_ident };
 
         const a = await connection.execute(insertUserQuery);
 
@@ -123,52 +122,94 @@ const updateData = async(req, res) => {
 }
 
 
-const confirm = async (req, res) => {
+
+const confirmAndUpdateSecurityInfo = async (req, res) => {
+    const saltRounds = 10; // Definir el número de salt rounds para bcrypt
     let connection;
 
     try {
-        // Obtener el token
-        const { token } = req.params;
+        
+        // Obtener datos del cuerpo de la solicitud
+        const {token, contrasena, pregunta_de_usuario_1, respuesta_de_usuario_1, pregunta_de_usuario_2, respuesta_de_usuario_2, pregunta_de_usuario_3, respuesta_de_usuario_3 } = req.body;
 
-        // Verificar la data
+        // Verificar que la contraseña no sea null o undefined
+        if (!contrasena) {
+            return res.status(400).json({
+                success: false,
+                msg: 'La contraseña es requerida'
+            });
+        }
+
+        // Verificar la data del token
         const data = await getTokenData(token);
 
         if (data === null) {
             return res.json({
                 success: false,
-                msg: 'Error al obtener data'
+                msg: 'Error al obtener data del token'
             });
         }
 
         const { correo, id_usuario } = data.data;
 
-        // Verificar existencia del usuario en la base de datos Oracle
+        // Verificar existencia del usuario en la base de datos
         connection = await getConnection();
-        const result = await connection.execute(
+        const userResult = await connection.execute(
             'SELECT * FROM Usuario WHERE correo = :correo AND id_usuario = :id_usuario',
             [correo, id_usuario],
             { outFormat: oracledb.OUT_FORMAT_OBJECT }
         );
-        const user = result.rows[0] || null;
+        const user = userResult.rows[0] || null;
 
         if (user === null) {
             return res.json({
                 success: false,
-                msg: 'Usuario no existe'
+                msg: 'Usuario no encontrado'
             });
         }
 
         // Actualizar estado del usuario
-        const updateQuery = 'UPDATE Usuario SET estado = :estado WHERE correo = :correo AND id_usuario = :id_usuario';
-        await connection.execute(updateQuery, ['ACTIVO', correo, id_usuario], { autoCommit: true });
+        const updateStateQuery = 'UPDATE Usuario SET estado = :estado WHERE correo = :correo AND id_usuario = :id_usuario';
+        await connection.execute(updateStateQuery, ['ACTIVO', correo, id_usuario], { autoCommit: true });
 
-        // Redireccionar a la confirmación
-        return res.redirect('http://127.0.0.7:5500/backend/public/confirm.html');  // Ajusta la URL según tu necesidad
+        // Hash de la contraseña
+        const hashedPassword = await bcrypt.hash(contrasena, saltRounds);
+
+        // Actualizar la información de seguridad del usuario
+        const updateSecurityQuery = `
+            UPDATE Usuario 
+            SET 
+                contrasena = :hashedPassword,
+                pregunta_de_usuario_1 = :pregunta_de_usuario_1, 
+                respuesta_de_usuario_1 = :respuesta_de_usuario_1, 
+                pregunta_de_usuario_2 = :pregunta_de_usuario_2, 
+                respuesta_de_usuario_2 = :respuesta_de_usuario_2, 
+                pregunta_de_usuario_3 = :pregunta_de_usuario_3, 
+                respuesta_de_usuario_3 = :respuesta_de_usuario_3 
+            WHERE id_usuario = :id_usuario
+        `;
+
+        await connection.execute(updateSecurityQuery, {
+            hashedPassword,
+            pregunta_de_usuario_1,
+            respuesta_de_usuario_1,
+            pregunta_de_usuario_2,
+            respuesta_de_usuario_2,
+            pregunta_de_usuario_3,
+            respuesta_de_usuario_3,
+            id_usuario
+        }, { autoCommit: true });
+
+        // Enviar respuesta de éxito
+        res.json({
+            success: true,
+            msg: 'Usuario confirmado y seguridad actualizada'
+        });
     } catch (error) {
         console.error(error);
-        return res.json({
+        res.status(500).json({
             success: false,
-            msg: 'Error al confirmar usuario'
+            msg: 'Error al confirmar usuario y actualizar información de seguridad'
         });
     } finally {
         if (connection) {
@@ -184,6 +225,6 @@ const confirm = async (req, res) => {
 
 module.exports = {
     signUp,
-    confirm,
+    confirmAndUpdateSecurityInfo,
     updateData
 }

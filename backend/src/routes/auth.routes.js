@@ -1,11 +1,11 @@
 const express = require('express');
 const router = express.Router();
-const { signUp, confirm, updateData} = require('../controllers/auth.controller')
+const { signUp, confirmAndUpdateSecurityInfo, updateData} = require('../controllers/auth.controller')
 
 
 router.post('/signup', signUp);
 
-router.get('/confirm/:token', confirm);
+router.put('/confirm', confirmAndUpdateSecurityInfo);
 router.get('/updateData/:token', updateData)
 
 module.exports = router;

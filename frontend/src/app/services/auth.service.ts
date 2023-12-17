@@ -26,4 +26,15 @@ export class AuthService {
       )
   }
 
+  confirmarYActualizarSeguridad(data: any): Observable<any> {
+    const url = `${environment.API_URL}/auth/confirm`;
+    return this.http.put<any>(url, data).pipe(
+      map((res: any) => {
+        return res;
+      }),
+    );
+  }
+
+
+
 }

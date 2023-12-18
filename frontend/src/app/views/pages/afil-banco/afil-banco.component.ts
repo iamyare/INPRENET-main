@@ -2,6 +2,10 @@ import { ChangeDetectionStrategy, Component, OnInit, inject } from '@angular/cor
 import { FormBuilder, FormGroup } from '@angular/forms';
 import { generateDatBancFormGroup } from '@docs-components/dat-banc/dat-banc.component';
 import { generateAddressFormGroup } from '@docs-components/dat-generales-afiliado/dat-generales-afiliado.component';
+import { generatePuestoTrabFormGroup } from '@docs-components/dat-puesto-trab/dat-puesto-trab.component';
+import { forkJoin } from 'rxjs';
+import formatoFechaResol from 'src/app/models/fecha';
+import { AfiliadoService } from 'src/app/services/afiliado.service';
 @Component({
   selector: 'app-afil-banco',
   templateUrl: './afil-banco.component.html',
@@ -14,6 +18,7 @@ export class AfilBancoComponent implements OnInit {
   form = this.fb.group({
     DatosGenerales: generateAddressFormGroup(),
     DatosBacAfil: generateDatBancFormGroup(),
+    DatosPuestoTrab: generatePuestoTrabFormGroup(),
     benfGroup: generateAddressFormGroup(),
   });
 
@@ -25,7 +30,7 @@ export class AfilBancoComponent implements OnInit {
   datosGen:any; datosPuestTrab:any; datosBanc:any; datosRefPer:any;
   DatosBancBen:any = [];
 
-  constructor( private fb: FormBuilder) {
+  constructor( private fb: FormBuilder, private afilService: AfiliadoService) {
     this.Bancos = [
       {
         "idBanco":1,
@@ -103,12 +108,46 @@ export class AfilBancoComponent implements OnInit {
   ngOnInit():void{
   }
 
-  setDatosGen(datosGen:any){    
-    this.datosGen = datosGen;
+  setDatosGen(){    
+    this.form.value.DatosGenerales.tipoIdent = this.form.value.DatosGenerales.tipoIdent;
+    this.form.value.DatosGenerales.archIdent = this.form.value.DatosGenerales.archIdent;
+    this.form.value.DatosGenerales.numeroIden = this.form.value.DatosGenerales.numeroIden;
+    this.form.value.DatosGenerales.primerNombre = this.form.value.DatosGenerales.primerNombre;
+    this.form.value.DatosGenerales.segundoNombre = this.form.value.DatosGenerales.segundoNombre;
+    this.form.value.DatosGenerales.tercerNombre = this.form.value.DatosGenerales.tercerNombre;
+    this.form.value.DatosGenerales.primerApellido = this.form.value.DatosGenerales.primerApellido;
+    this.form.value.DatosGenerales.segundoApellido = this.form.value.DatosGenerales.segundoApellido;
+    this.form.value.DatosGenerales.fechaNacimiento = formatoFechaResol(this.form.value.DatosGenerales.fechaNacimiento);
+    this.form.value.DatosGenerales.cantidadDependientes = this.form.value.DatosGenerales.cantidadDependientes;
+    this.form.value.DatosGenerales.cantidadHijos = this.form.value.DatosGenerales.cantidadHijos;
+    this.form.value.DatosGenerales.Sexo = this.form.value.DatosGenerales.Sexo;
+    this.form.value.DatosGenerales.profesion = this.form.value.DatosGenerales.profesion;
+    this.form.value.DatosGenerales.estadoCivil = this.form.value.DatosGenerales.estadoCivil;
+    this.form.value.DatosGenerales.representacion = this.form.value.DatosGenerales.representacion;
+    this.form.value.DatosGenerales.estado = this.form.value.DatosGenerales.estado;
+    this.form.value.DatosGenerales.cotizante = this.form.value.DatosGenerales.cotizante;
+    this.form.value.DatosGenerales.telefono1 = this.form.value.DatosGenerales.telefono1;
+    this.form.value.DatosGenerales.telefono2 = this.form.value.DatosGenerales.telefono2;
+    this.form.value.DatosGenerales.correo1 = this.form.value.DatosGenerales.correo1;
+    this.form.value.DatosGenerales.correo2 = this.form.value.DatosGenerales.correo2;
+    this.form.value.DatosGenerales.ciudadNacimiento = this.form.value.DatosGenerales.ciudadNacimiento;
+    this.form.value.DatosGenerales.ciudadDomicilio = this.form.value.DatosGenerales.ciudadDomicilio;
+    this.form.value.DatosGenerales.direccionDetallada = this.form.value.DatosGenerales.direccionDetallada;
   }
 
-  setDatosPuetTrab(datosPuestTrab:any){
-    this.datosPuestTrab = datosPuestTrab;
+  setDatosPuetTrab(){    
+    this.form.value.DatosPuestoTrab.centroTrabajo = this.form.value.DatosPuestoTrab.centroTrabajo;
+    this.form.value.DatosPuestoTrab.cargo = this.form.value.DatosPuestoTrab.cargo;
+    this.form.value.DatosPuestoTrab.sectorEconomico = this.form.value.DatosPuestoTrab.sectorEconomico;
+    this.form.value.DatosPuestoTrab.actividadEconomica = this.form.value.DatosPuestoTrab.actividadEconomica;
+    this.form.value.DatosPuestoTrab.claseCliente = this.form.value.DatosPuestoTrab.claseCliente;
+    this.form.value.DatosPuestoTrab.sector = this.form.value.DatosPuestoTrab.sector;
+    this.form.value.DatosPuestoTrab.numeroAcuerdo = this.form.value.DatosPuestoTrab.numeroAcuerdo;
+    this.form.value.DatosPuestoTrab.salarioNeto = this.form.value.DatosPuestoTrab.salarioNeto;
+    this.form.value.DatosPuestoTrab.fechaIngreso = formatoFechaResol(this.form.value.DatosPuestoTrab.fechaIngreso);
+    this.form.value.DatosPuestoTrab.fechaPago = this.form.value.DatosPuestoTrab.fechaPago;
+    this.form.value.DatosPuestoTrab.colegioMagisterial = this.form.value.DatosPuestoTrab.colegioMagisterial;
+    this.form.value.DatosPuestoTrab.numeroCarnet = this.form.value.DatosPuestoTrab.numeroCarnet;
   }
 
   setDatosBanc(datosBanc:any){
@@ -123,16 +162,43 @@ export class AfilBancoComponent implements OnInit {
     this.DatosBancBen = DatosBancBen;
   }
   
-  enviar(){  
+  enviar(){
+      console.log(this.form.value.DatosGenerales)
+      console.log(this.form.value.DatosPuestoTrab)
+      console.log(this.form.value.DatosBacAfil)
+      console.log(this.datosRefPer)
+      console.log(this.DatosBancBen)
+    
+    if (this.form.value.DatosGenerales){
+      console.log(this.form.value.DatosGenerales.fechaNacimiento = formatoFechaResol(this.form.value.DatosGenerales.fechaNacimiento));
+
+    }if (this.form.value.DatosPuestoTrab){
+      this.form.value.DatosPuestoTrab.fechaIngreso = formatoFechaResol(this.form.value.DatosPuestoTrab.fechaIngreso);
+      console.log(this.form.value.DatosPuestoTrab.fechaPago = formatoFechaResol(this.form.value.DatosPuestoTrab.fechaPago));
+
+    }if(this.DatosBancBen.length>=1){
+      for (let i=0 ; i<this.DatosBancBen.length; i++){
+        console.log(this.DatosBancBen[i].benfGroup.fechaNacimiento = formatoFechaResol(this.DatosBancBen[0].benfGroup.fechaNacimiento));
+      }
+    }
+    
     const data = {
       datosGen: this.form.value.DatosGenerales,
-      datosPuestTrab: this.datosPuestTrab,
+      datosPuestTrab: this.form.value.DatosPuestoTrab,
       datosBanc: this.form.value.DatosBacAfil,
       datosRefPers: this.datosRefPer,
       datosBenefic: this.DatosBancBen,
     }
-    console.log(data);
-    
-  }
 
+    const llamada1 = this.afilService.agregarAfiliados(data);
+
+    forkJoin([llamada1]).subscribe(
+      ([datosServicio1]) => {
+        console.log('Datos del Servicio 1:', datosServicio1);
+      },
+      (error) => {
+        console.error(error);
+      }
+    );
+  }
 }

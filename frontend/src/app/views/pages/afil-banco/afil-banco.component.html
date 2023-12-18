@@ -2,11 +2,12 @@
   <div class="col-md-12">
 
     <form [formGroup]="form">
-      <app-dat-generales-afiliado groupName="DatosGenerales" (newDatGenChange)="setDatosGen($event)"></app-dat-generales-afiliado>
-      <app-dat-puesto-trab (newDatPuesTChange)="setDatosPuetTrab($event)"></app-dat-puesto-trab>
+      <app-dat-generales-afiliado groupName="DatosGenerales" (change)="setDatosGen()"></app-dat-generales-afiliado>
+      <app-dat-puesto-trab groupName="DatosPuestoTrab" (change)="setDatosPuetTrab()"></app-dat-puesto-trab>
+
       <app-dat-banc groupName="DatosBacAfil" (newDatBancChange)="setDatosBanc($event)"></app-dat-banc>
+      
       <app-ref-pers (newDatRefPerChange)="setDatosRefPer($event)"></app-ref-pers> 
-  
       <app-benef (newDatBenChange)="setDatosBen($event)"></app-benef> 
     </form>
 

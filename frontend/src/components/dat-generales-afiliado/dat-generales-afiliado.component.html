@@ -5,13 +5,13 @@
   </div>
   <div class="card-body">
 
-    <fieldset [formGroupName]="groupName" cForm  (change)="onDatosGenChange()">
+    <fieldset [formGroupName]="groupName" cForm >
       <div class="row">
         <div class="col-md-4">
           <mat-form-field class="example-full-width; inputs" appearance="outline">
             <mat-label>Tipo de identificación</mat-label>
             <select matNativeControl formControlName="tipoIdent">
-              <option *ngFor="let p of tipoIdent" [value]="p.value">
+              <option *ngFor="let p of tipoIdent" [value]="p.idIdentificacion">
                 {{p.value}}
               </option>
             </select>
@@ -92,16 +92,22 @@
       <div class="row">
         <div class="col-md-4">
           <mat-form-field class="example-full-width; inputs" appearance="outline">
-            <mat-label>Ciudad de nacimiento</mat-label>
-            <input matInput formControlName="ciudadNacimiento">
-            <mat-icon matIconSuffix>location_on</mat-icon>
+            <mat-label>Residencia</mat-label>
+            <select matNativeControl formControlName="ciudadNacimiento">
+              <option *ngFor="let p of paises" [value]="p.idPais">
+                {{p.value}}
+              </option>
+            </select>
           </mat-form-field>
         </div>
         <div class="col-md-4">
           <mat-form-field class="example-full-width; inputs" appearance="outline">
-            <mat-label>Ciudad domicilio</mat-label>
-            <input matInput formControlName="ciudadDomicilio">
-            <mat-icon matIconSuffix>location_on</mat-icon>
+            <mat-label>Departamento</mat-label>
+            <select matNativeControl formControlName="ciudadDomicilio">
+              <option *ngFor="let p of departamentos" [value]="p.idDepartamento">
+                {{p.value}}
+              </option>
+            </select>
           </mat-form-field>
         </div>
         <div class="col-md-4">
@@ -144,14 +150,21 @@
         <div class="col-md-3">
           <mat-form-field class="example-full-width; inputs" appearance="outline">
             <mat-label>Representación</mat-label>
-            <mat-icon matIconSuffix>gavel</mat-icon>
-            <input matInput formControlName="representacion">
+            <select matNativeControl formControlName="representacion">
+              <option *ngFor="let p of representacion" [value]="p.value">
+                {{p.value}}
+              </option>
+            </select>
           </mat-form-field>
         </div>
         <div class="col-md-3">
           <mat-form-field class="example-full-width; inputs" appearance="outline">
             <mat-label>Estado</mat-label>
-            <input matInput formControlName="estado">
+            <select matNativeControl formControlName="estado">
+              <option *ngFor="let p of estado" [value]="p.value">
+                {{p.value}}
+              </option>
+            </select>
           </mat-form-field>
         </div>
         <div class="col-md-3">

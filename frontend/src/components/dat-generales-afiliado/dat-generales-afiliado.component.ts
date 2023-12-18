@@ -2,6 +2,7 @@ import { ChangeDetectionStrategy, Component, EventEmitter, Input, OnInit, Output
 import { CommonModule } from '@angular/common';
 import { ControlContainer, FormArray, FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { AfiliadoService } from 'src/app/services/afiliado.service';
+import formatoFechaResol   from '../../app/models/fecha';
 
 export function generateAddressFormGroup(): FormGroup {
   return new FormGroup({
@@ -53,65 +54,10 @@ export class DatGeneralesAfiliadoComponent implements OnInit{
 
   public dataEdit:any;
 
-  tipoCotizante: any = []; tipoIdent: any = []; Sexo: any = []; estadoCivil: any = [];
-
+  tipoCotizante: any = []; tipoIdent: any = []; Sexo: any = []; estadoCivil: any = []; paises: any = []; departamentos: any = [];
+  representacion: any = [];
+  estado: any = [];
   @Input() groupName = '';
-  @Output() newDatGenChange = new EventEmitter<any>()
-
-  onDatosGenChange():void{
-    const tipoIdent = this.form.value.tipoIdent;
-    const archIdent = this.form.value.archIdent;
-    const numeroIden = this.form.value.numeroIden;
-    const primerNombre = this.form.value.primerNombre;
-    const segundoNombre = this.form.value.segundoNombre;
-    const tercerNombre = this.form.value.tercerNombre;
-    const primerApellido = this.form.value.primerApellido;
-    const segundoApellido = this.form.value.segundoApellido;
-    const fechaNacimiento = this.form.value.fechaNacimiento;
-    const cantidadDependientes = this.form.value.cantidadDependientes;
-    const cantidadHijos = this.form.value.cantidadHijos;
-    const Sexo = this.form.value.Sexo;
-    const profesion = this.form.value.profesion;
-    const estadoCivil = this.form.value.estadoCivil;
-    const representacion = this.form.value.representacion;
-    const estado = this.form.value.estado;
-    const cotizante = this.form.value.cotizante;
-    const telefono1 = this.form.value.telefono1;
-    const telefono2 = this.form.value.telefono2;
-    const correo1 = this.form.value.correo1;
-    const correo2 = this.form.value.correo2;
-    const ciudadNacimiento = this.form.value.ciudadNacimiento;
-    const ciudadDomicilio = this.form.value.ciudadDomicilio;
-    const direccionDetallada = this.form.value.direccionDetallada;
-
-    const data = {
-      tipoIdent : tipoIdent,
-      archIdent : archIdent,
-      numeroIden : numeroIden,
-      primerNombre : primerNombre,
-      segundoNombre : segundoNombre,
-      tercerNombre : tercerNombre,
-      primerApellido : primerApellido,
-      segundoApellido : segundoApellido,
-      fechaNacimiento : fechaNacimiento,
-      cantidadDependientes : cantidadDependientes,
-      cantidadHijos : cantidadHijos,
-      Sexo : Sexo,
-      profesion : profesion,
-      estadoCivil : estadoCivil,
-      representacion : representacion,
-      estado : estado,
-      cotizante : cotizante,
-      telefono1 : telefono1,
-      telefono2 : telefono2,
-      coreo1 : correo1,
-      coreo2 : correo2,
-      ciudadNacimiento : ciudadNacimiento,
-      ciudadDomicilio : ciudadDomicilio,
-      direccionDetallada : direccionDetallada
-    }
-    this.newDatGenChange.emit(data);
-  }
 
   constructor( private fb: FormBuilder, private afiliadoService: AfiliadoService) {
     this.form = this.fb.group({
@@ -167,13 +113,33 @@ export class DatGeneralesAfiliadoComponent implements OnInit{
         "value": "Viudo/a"
       }
     ];
+    this.representacion = [
+      {
+        "idRepresentacion":1,
+        "value": "POR CUENTA PROPIA"
+      },
+      {
+        "idRepresentacion":2,
+        "value": "POR TERCEROS"
+      }
+    ];
+    this.estado = [
+      {
+        "idEstado":1,
+        "value": "FALLECIDO"
+      },
+      {
+        "idEstado":2,
+        "value": "ACTIVO"
+      }
+    ];
     this.Sexo = [
       {
-        "idBanco":1,
+        "idSexo":1,
         "value": "M"
       },
       {
-        "idBanco":2,
+        "idSexo":2,
         "value": "F"
       }
     ];
@@ -213,39 +179,38 @@ export class DatGeneralesAfiliadoComponent implements OnInit{
         "value": "Afiliado y Beneficiario"
       },
     ];
+    this.departamentos = [
+      {
+        "idDepartamento":1,
+        "value": "Francisco Morazan"
+      },
+      {
+        "idDepartamento":2,
+        "value": "Olancho"
+      },
+      {
+        "idDepartamento":3,
+        "value": "Choluteca"
+      },
+    ];
+    this.paises = [
+      {
+        "idPais":1,
+        "value": "Honduras"
+      },
+      {
+        "idPais":2,
+        "value": "El Salvador"
+      },
+      {
+        "idPais":3,
+        "value": "Costa Rica"
+      },
+    ];
   }
 
   ngOnInit():void{
-    /* this.afiliadoService.afiliadosEdit.subscribe(data => {
-      this.dataEdit = data
-      this.form.patchValue({
-      tipoIdent: this.dataEdit.data.tipoIdent ,
-      archIdent: this.dataEdit.data.ARCHIVO_IDENTIFICACION,
-      numeroIden: this.dataEdit.data.numeroIden,
-      primerNombre: this.dataEdit.data.PRIMER_NOMBRE,
-      segundoNombre: this.dataEdit.data.SEGUNDO_NOMBRE ,
-      tercerNombre: this.dataEdit.data.TERCER_NOMBRE,
-      primerApellido: this.dataEdit.data.PRIMER_APELLIDO ,
-      segundoApellido: this.dataEdit.data.SEGUNDO_APELLIDO ,
-      fechaNacimiento: this.dataEdit.data.FECHA_NACIMIENTO,
-      cantidadDependientes: this.dataEdit.data.CANTIDAD_DEPENDIENTES ,
-      cantidadHijos: this.dataEdit.data.CANTIDAD_HIJOS ,
-      Sexo: this.dataEdit.data.SEXO ,
-      profesion: this.dataEdit.data.PROFESION ,
-      estadoCivil: this.dataEdit.data.estadoCivil ,
-      representacion: this.dataEdit.data.REPRESENTACION ,
-      estado: this.dataEdit.data.ESTADO ,
-      cotizante: this.dataEdit.data.cotizante ,
-      telefono1: this.dataEdit.data.TELEFONO_1 ,
-      telefono2: this.dataEdit.data.TELEFONO_2 ,
-      correo1: this.dataEdit.data.CORREO_1 ,
-      correo2: this.dataEdit.data.CORREO_2 ,
-      ciudadDomicilio : this.dataEdit.data.ciudadDomicilio ,
-      ciudadNacimiento : this.dataEdit.data.ciudadNacimiento,
-      direccionDetallada : this.dataEdit.data.direccionDetallada
 
-      });
-    }) */
   }
 
   onFileSelected(event: any) {

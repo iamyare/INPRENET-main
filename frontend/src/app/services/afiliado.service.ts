@@ -24,6 +24,21 @@ export class AfiliadoService {
       );
   }
 
+  agregarAfiliados(data:any): Observable<any>{
+    var url = `${environment.API_URL}/afiliados/agregarAfiliado`;
+    console.log(data);
+
+    return this.http.post<any>(
+      url,
+      data,
+      ).pipe(
+        map((res:any) => {
+          return res;
+        }),
+        //catchError((err) => this.handlerError2(err))
+      )
+  }
+
   agregDatosGen(data:any): Observable<any>{
     var url = `${environment.API_URL}/auth/signup`;
     console.log(data);
@@ -70,6 +85,21 @@ export class AfiliadoService {
   }
 
   agregDatosRefPer(data:any): Observable<any>{
+    var url = `${environment.API_URL}/auth/signup`;
+    console.log(data);
+
+    return this.http.post<any>(
+      url,
+      data,
+      ).pipe(
+        map((res:any) => {
+          return res;
+        }),
+        //catchError((err) => this.handlerError2(err))
+      )
+  }
+
+  agregDatosBeneficiarios(data:any): Observable<any>{
     var url = `${environment.API_URL}/auth/signup`;
     console.log(data);
 

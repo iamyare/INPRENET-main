@@ -5,14 +5,18 @@
     <p class="card-category">Completa la información correspondiente</p>
   </div>
   <div class="card-body">
-    <form [formGroup]="form1" (change)="onDatosPueTraChange()">
+    <fieldset [formGroupName]="groupName" cForm >
       <div class="row">
         <div class="col-md-12">
           <mat-form-field class="example-full-width; inputs" appearance="outline">
             <mat-label>Centro de Trabajo</mat-label>
-            <input matInput formControlName="centroTrabajo">
-            <!-- <mat-icon matSuffix>sentiment_very_satisfied</mat-icon> -->
+            <select matNativeControl formControlName="centroTrabajo">
+              <option *ngFor="let p of centrosTrabajo" [value]="p.idCentroTrabajo">
+                {{p.value}}
+              </option>
+            </select>
           </mat-form-field>
+
         </div>
       </div>
       <div class="row">
@@ -49,8 +53,11 @@
         <div class="col-md-4">
           <mat-form-field class="example-full-width; inputs" appearance="outline">
             <mat-label>Sector</mat-label>
-            <input matInput formControlName="sector">
-            <!-- <mat-icon matSuffix>sentiment_very_satisfied</mat-icon> -->
+            <select matNativeControl formControlName="sector">
+              <option *ngFor="let p of sector" [value]="p.value">
+                {{p.value}}
+              </option>
+            </select>
           </mat-form-field>
         </div>
         <div class="col-md-4">
@@ -91,20 +98,16 @@
         <div class="col-md-6">
           <mat-form-field class="example-full-width; inputs" appearance="outline">
             <mat-label>Colegio Magisterial</mat-label>
-            <input matInput formControlName="colegioMagisterial" [matDatepicker]="colegioMagisterial">
-            <mat-datepicker-toggle matIconSuffix [for]="colegioMagisterial"></mat-datepicker-toggle>
-            <mat-datepicker #colegioMagisterial></mat-datepicker>
+            <input matInput formControlName="colegioMagisterial">
           </mat-form-field>
         </div>
         <div class="col-md-6">
           <mat-form-field class="example-full-width; inputs" appearance="outline">
-            <mat-label>Numero de carnet</mat-label>
-            <input matInput formControlName="numeroCarnet" [matDatepicker]="numeroCarnet">
-            <mat-datepicker-toggle matIconSuffix [for]="numeroCarnet"></mat-datepicker-toggle>
-            <mat-datepicker #numeroCarnet></mat-datepicker>
+            <mat-label>Número de carnet</mat-label>
+            <input matInput formControlName="numeroCarnet">
           </mat-form-field>
         </div>
       </div>
-    </form>
+    </fieldset>
   </div>
 </div>

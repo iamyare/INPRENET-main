@@ -1,0 +1,57 @@
+import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
+import { EmpleadoEmpresa } from "./empleado-empresa.entity";
+
+@Entity()
+export class Empresa {
+
+    @PrimaryGeneratedColumn('uuid')
+    @OneToMany(
+        () => EmpleadoEmpresa,
+        (empleadoEmpresa) => empleadoEmpresa.id_empresa,
+        { cascade: true}
+    )
+    id_empresa : string;
+
+    @Column('varchar2', {
+        unique: true
+    })
+    razon_social : string;
+
+    @Column('varchar2', {
+        unique: true
+    })
+    rtn : string;
+
+    @Column('varchar2', {
+        nullable : false
+    })
+    apoderado_legal : string
+
+    @Column('varchar2', {
+        nullable : false
+    })
+    representante_legal : string
+
+    @Column('varchar2')
+    logo : string
+
+    @Column('varchar2', {
+        nullable : false
+    })
+    direccion : string
+
+    @Column('char', {
+        nullable : false,
+    })
+    telefono_1 : string
+
+    @Column('char')
+    telefono_2 : string
+
+    @Column('varchar2', {
+        nullable : false
+    })
+    correo_electronico
+    
+}
+

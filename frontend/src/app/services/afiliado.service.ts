@@ -26,7 +26,6 @@ export class AfiliadoService {
 
   agregarAfiliados(data:any): Observable<any>{
     var url = `${environment.API_URL}/afiliados/agregarAfiliado`;
-    console.log(data);
 
     return this.http.post<any>(
       url,

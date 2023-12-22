@@ -9,11 +9,30 @@
             <div *ngFor="let skill of getCtrl('refpers', formParent).controls; index as formChild; let i = index">
                 <h4 class="card-title">Beneficiario número: {{i+1}}</h4>
                 <div [formGroupName]="formChild" class="row">
-                <app-dat-generales-afiliado groupName="benfGroup"></app-dat-generales-afiliado>
-                <app-dat-banc groupName="DatosBac" (newDatBancChange)="setDatosBanc($event)"></app-dat-banc>
+                  <app-dat-generales-afiliado groupName="benfGroup" (newDatBenChange)="prueba($event, i); onDatosBenChange()"></app-dat-generales-afiliado>
+                  <app-dat-banc groupName="DatosBac" ></app-dat-banc>
+                  <app-botonarchivos groupName="Archivos"
+                    labelBoton="Descarga el archivo de identificación (beneficiario)"
+                    (setArchivo)="handleArchivoSeleccionado($event)">
+                  </app-botonarchivos>
                 </div>
+        
+                <form [formGroup]="beneficio">
+                  <h3 class="card-title">Beneficio</h3>
+                  <div class="row">
+                    <div class="col-md-6">
+                      <mat-form-field class="example-full-width; inputs" appearance="outline">
+                        <mat-label>Porcentaje de beneficio</mat-label>
+                        <input matInput formControlName="porcBenef" type="number">
+                      </mat-form-field>
+                    </div>
+                    <div class="col-md-6">
+                    </div>
+                  </div>
+                </form>
+
             </div>
-        </div>
+          </div>
     </form>
 
     <div class="row">

@@ -8,103 +8,23 @@ import { FormArray, FormBuilder, FormControl, FormGroup, Validators } from '@ang
   styleUrl: './ref-pers.component.scss'
 })
 export class RefPersComponent {
-  form3: FormGroup;
   public formParent: FormGroup = new FormGroup({});
-
-  Bancos: any = []; tipoIdent: any = []; Sexo: any = []; estadoCivil: any = [];
-  htmlSTID: string = "Archivo de identificación"
-  public archivo: any;
 
   @Input() nombreComp?:string
   @Output() newDatRefPerChange = new EventEmitter<any>()
   
   onDatosRefPerChange(){
-    const data = this.formParent.value.refpers
-    this.newDatRefPerChange.emit(this.formParent.value.refpers);
+    const data = this.formParent
+    this.newDatRefPerChange.emit(data);
   }
 
   constructor( private fb: FormBuilder) {
-    this.form3 = this.fb.group({
-      cantReferPers: ['', [Validators.required, Validators.pattern("[0-9]*")]],
-    });
-
-    this.Bancos = [
-      {
-        "idBanco":1,
-        "value": "Atlántida"
-      },
-      {
-        "idBanco":2,
-        "value": "BAC"
-      },
-      {
-        "idBanco":3,
-        "value": "Ficohosa"
-      }
-    ];
-    this.estadoCivil = [
-      {
-        "idEstadoCivil":1,
-        "value": "Casado/a"
-      },
-      {
-        "idEstadoCivil":2,
-        "value": "Divorciado/a"
-      },
-      {
-        "idEstadoCivil":3,
-        "value": "Separado/a"
-      },
-      {
-        "idEstadoCivil":4,
-        "value": "Soltero/a"
-      },
-      {
-        "idEstadoCivil":5,
-        "value": "Union Libre"
-      },
-      {
-        "idEstadoCivil":6,
-        "value": "Viudo/a"
-      }
-    ];
-    this.Sexo = [
-      {
-        "idBanco":1,
-        "value": "M"
-      },
-      {
-        "idBanco":2,
-        "value": "F"
-      }
-    ];
-    this.tipoIdent = [
-      {
-        "idIdentificacion":1,
-        "value": "DNI"
-      },
-      {
-        "idIdentificacion":2,
-        "value": "PASAPORTE"
-      },
-      {
-        "idIdentificacion":3,
-        "value": "CARNET RESIDENCIA"
-      },
-      {
-        "idIdentificacion":4,
-        "value": "NÚMERO LICENCIA"
-      },
-      {
-        "idIdentificacion":5,
-        "value": "RTN"
-      },
-    ];
   }
 
   ngOnInit():void{
     this.initFormParent();
   }
+
   initFormParent():void {
     this.formParent = new FormGroup(
       {
@@ -116,12 +36,12 @@ export class RefPersComponent {
   initFormRefPers(): FormGroup {
     return new FormGroup(
       {
-        nombreRefPers: new FormControl(''),
-        Parentesco: new FormControl(''),
-        direccion: new FormControl(''),
-        telefonoDom: new FormControl(''),
+        nombreRefPers: new FormControl('', Validators.required),
+        Parentesco: new FormControl('', Validators.required),
+        direccion: new FormControl('', Validators.required),
+        telefonoDom: new FormControl('' ),
         telefonoTrab: new FormControl(''),
-        telefonoPers: new FormControl('')
+        telefonoPers: new FormControl('', Validators.required)
       }
     )
   }

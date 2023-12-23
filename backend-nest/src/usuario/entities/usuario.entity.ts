@@ -1,6 +1,6 @@
 import { Column, Entity, ManyToOne, OneToOne, PrimaryGeneratedColumn, Timestamp } from "typeorm";
 import { Rol } from "./rol.entity";
-import { Empleado } from "src/empresas/entities/empleado.entity";
+import { Empleado } from "src/modules/Empresarial/empresas/entities/empleado.entity";
 
 @Entity()
 export class Usuario {

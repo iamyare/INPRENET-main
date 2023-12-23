@@ -12,6 +12,4 @@ export class TipoIdentificacion {
     @OneToMany(() => Afiliado, afiliado => afiliado.tipoIdentificacion)
     afiliados: Afiliado[];
 
-
-    // Aquí puedes agregar relaciones o métodos adicionales si los necesitas
 }

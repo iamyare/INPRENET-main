@@ -5,10 +5,10 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { PaginationDto } from 'src/common/dtos/pagination.dto';
 import { Usuario } from './entities/usuario.entity';
 import { Repository } from 'typeorm';
-import { Empleado } from 'src/empresas/entities/empleado.entity';
 import { JwtService } from '@nestjs/jwt';
 import { MailService } from 'src/common/services/mail.service';
 import * as bcrypt from 'bcrypt';
+import { Empleado } from 'src/modules/Empresarial/empresas/entities/empleado.entity';
 
 @Injectable()
 export class UsuarioService {

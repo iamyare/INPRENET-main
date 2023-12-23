@@ -5,7 +5,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { Empresa } from './entities/empresa.entity';
 import { EmpleadoEmpresa } from './entities/empleado-empresa.entity';
 import { Empleado } from './entities/empleado.entity';
-import { CentroTrabajo } from './entities/centroTrabajo.entity';
+import { CentroTrabajo } from '../centro-trabajo/entities/centro-trabajo.entity';
 
 @Module({
   controllers: [EmpresasController],
@@ -13,6 +13,5 @@ import { CentroTrabajo } from './entities/centroTrabajo.entity';
   imports: [
     TypeOrmModule.forFeature([Empresa,Empleado,EmpleadoEmpresa,CentroTrabajo])
   ]
-  
 })
 export class EmpresasModule {}

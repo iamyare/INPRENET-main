@@ -152,5 +152,6 @@ export class CreateAfiliadoDto {
     @IsString()
     @IsOptional()
     nombre_centroTrabajo?
+    
 
 }

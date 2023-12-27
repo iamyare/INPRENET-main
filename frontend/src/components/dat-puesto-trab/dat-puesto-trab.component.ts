@@ -1,21 +1,24 @@
 import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ControlContainer, FormArray, FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
+import { DatosEstaticosService } from 'src/app/services/datos-estaticos.service';
 
 export function generatePuestoTrabFormGroup(): FormGroup { 
   return new FormGroup({
-     centroTrabajo: new FormControl('', [Validators.required]),
-     cargo: new FormControl('', [Validators.required]),
-     sectorEconomico: new FormControl('', [Validators.required]),
-     actividadEconomica: new FormControl('', [Validators.required]),
-     claseCliente: new FormControl('', [Validators.required]),
-     sector: new FormControl('', [Validators.required]),
-     numeroAcuerdo: new FormControl('', [Validators.required]),
-     salarioNeto: new FormControl('', [Validators.required, Validators.pattern("\^[0-9]{1,8}([\\.][0-9]{2})?")]),
-     fechaIngreso: new FormControl('', [Validators.required]),
-     fechaPago: new FormControl('', [Validators.required]),
-     colegioMagisterial: new FormControl('', [Validators.required]),
-     numeroCarnet: new FormControl('', [Validators.required]),
+    centroTrabajo: new FormControl('', [Validators.required]),
+    cargo: new FormControl('', [Validators.required]),
+    sectorEconomico: new FormControl('', [Validators.required]),
+    actividadEconomica: new FormControl('', [Validators.required]),
+    claseCliente: new FormControl('', [Validators.required]),
+    sector: new FormControl('', [Validators.required]),
+    numeroAcuerdo: new FormControl('', [Validators.required]),
+    fechaIngreso: new FormControl('', [Validators.required]),
+    colegioMagisterial: new FormControl('', [Validators.required]),
+    numeroCarnet: new FormControl('', [Validators.required]),
+
+    fechaInicio: new FormControl('', Validators.required),
+    fechaFin: new FormControl('', Validators.required),
+    salario: new FormControl('', Validators.required)
   });
 }
 
@@ -33,69 +36,61 @@ export function generatePuestoTrabFormGroup(): FormGroup {
   ],
 })
 export class DatPuestoTrabComponent {
-  form1: FormGroup;
-  datosGen:any;
-  sector: any = [];
-  @Input() groupName = '';
-  @Input() centroTrabajo?:string
+  public formParent: FormGroup = new FormGroup({});
+
+  centrosTrabajo: any = this.datosEstaticos.centrosTrabajo;
+  sector: any = this.datosEstaticos.sector;
+
+  @Output() newDatDatosPuestTrab = new EventEmitter<any>()
   
-  centrosTrabajo: any = [];
-  constructor( private fb: FormBuilder) {
-    this.centrosTrabajo = [
-      {
-        "idCentroTrabajo":1,
-        "value": "Central Vicente Caceres"
-      },
-      {
-        "idCentroTrabajo":2,
-        "value": "IHCI"
-      },
-      {
-        "idCentroTrabajo":3,
-        "value": "UNAH"
-      }
-    ];
-    this.form1 = this.fb.group({
-     centroTrabajo: new FormControl('', [Validators.required]),
-     cargo: new FormControl('', [Validators.required]),
-     sectorEconomico: new FormControl('', [Validators.required]),
-     actividadEconomica: new FormControl('', [Validators.required]),
-     claseCliente: new FormControl('', [Validators.required]),
-     sector: new FormControl('', [Validators.required]),
-     numeroAcuerdo: new FormControl('', [Validators.required]),
-     salarioNeto: new FormControl('', [Validators.required, Validators.pattern("\^[0-9]{1,8}([\\.][0-9]{2})?")]),
-     fechaIngreso: new FormControl('', [Validators.required]),
-     fechaPago: new FormControl('', [Validators.required]),
-     colegioMagisterial: new FormControl('', [Validators.required]),
-     numeroCarnet: new FormControl('', [Validators.required]),
-    });
-    this.sector = [
-      {
-        "idsector":1,
-        "value": "JUBILADO"
-      },
-      {
-        "idsector":2,
-        "value": "PEDAGOGICO"
-      },
-      {
-        "idsector":3,
-        "value": "PRIVADO"
-      },
-      {
-        "idsector":4,
-        "value": "PROHECO"
-      },
-      {
-        "idsector":5,
-        "value": "PUBLICO"
-      }
-    ];
-    
+  onDatosDatosPuestTrab(){
+    const data = this.formParent
+    this.newDatDatosPuestTrab.emit(data);
   }
+
+  constructor( private fb: FormBuilder, private datosEstaticos: DatosEstaticosService) {}
 
   ngOnInit():void{
+    this.initFormParent();
   }
 
+  initFormParent():void {
+    this.formParent = new FormGroup(
+      {
+        refpers: new FormArray([], [Validators.required])
+      }
+    )
+  }
+
+  initFormRefPers(): FormGroup {
+    return new FormGroup(
+      {
+        centroTrabajo: new FormControl('', [Validators.required]),
+        cargo: new FormControl('', [Validators.required]),
+        sectorEconomico: new FormControl('', [Validators.required]),
+        actividadEconomica: new FormControl('', [Validators.required]),
+        claseCliente: new FormControl('', [Validators.required]),
+        sector: new FormControl('', [Validators.required]),
+        numeroAcuerdo: new FormControl('', [Validators.required]),
+        fechaIngreso: new FormControl('', [Validators.required]),
+        colegioMagisterial: new FormControl('', [Validators.required]),
+        numeroCarnet: new FormControl('', [Validators.required]),
+      }
+    )
+  }
+
+  agregarRefPer(): void{
+    const ref_RefPers = this.formParent.get('refpers') as FormArray;
+    ref_RefPers.push(this.initFormRefPers())
+  }
+  
+  eliminarRefPer():void{
+    const ref_RefPers = this.formParent.get('refpers') as FormArray;
+    ref_RefPers.removeAt(-1);
+  }
+  
+  getCtrl(key: string, form: FormGroup): any {
+    return form.get(key)
+  }
 
 }

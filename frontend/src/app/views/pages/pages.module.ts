@@ -11,11 +11,9 @@ import { Page500Component } from './page500/page500.component';
 
 import { PreRegisterComponent } from './pre-register/pre-register.component';
 import { RegisterComponent } from './register/register.component';
-import { BotonarchivosComponent } from '@docs-components/botonarchivos/botonarchivos.component';
 
 @NgModule({
   declarations: [
-    BotonarchivosComponent,
     LoginComponent,
     Page404Component,
     Page500Component,

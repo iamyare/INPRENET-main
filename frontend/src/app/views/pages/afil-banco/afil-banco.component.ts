@@ -1,11 +1,15 @@
-import { ChangeDetectionStrategy, Component, OnInit, inject } from '@angular/core';
-import { FormBuilder, FormGroup } from '@angular/forms';
+import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
+import { FormArray, FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
+import { forkJoin } from 'rxjs';
+
 import { generateDatBancFormGroup } from '@docs-components/dat-banc/dat-banc.component';
 import { generateAddressFormGroup } from '@docs-components/dat-generales-afiliado/dat-generales-afiliado.component';
 import { generatePuestoTrabFormGroup } from '@docs-components/dat-puesto-trab/dat-puesto-trab.component';
-import { forkJoin } from 'rxjs';
+
 import formatoFechaResol from 'src/app/models/fecha';
 import { AfiliadoService } from 'src/app/services/afiliado.service';
+import { generateFormArchivo } from '@docs-components/botonarchivos/botonarchivos.component';
+
 @Component({
   selector: 'app-afil-banco',
   templateUrl: './afil-banco.component.html',
@@ -16,97 +20,33 @@ export class AfilBancoComponent implements OnInit {
   public formParent: FormGroup = new FormGroup({});
 
   form = this.fb.group({
-    DatosGenerales: generateAddressFormGroup(),
-    DatosBacAfil: generateDatBancFormGroup(),
-    DatosPuestoTrab: generatePuestoTrabFormGroup(),
-    benfGroup: generateAddressFormGroup(),
+      DatosGenerales: generateAddressFormGroup(),
+      DatosBacAfil: generateDatBancFormGroup(),
+      DatosPuestoTrab: generatePuestoTrabFormGroup(),
+      benfGroup: generateAddressFormGroup(),
+      Archivos: generateFormArchivo()
   });
-
-  Bancos: any = []; tipoIdent: any = []; Sexo: any = []; estadoCivil: any = [];
+  formReferencias:any = new FormGroup(
+    {
+      refpers: new FormArray([], [Validators.required])
+  });
+  formBeneficiarios:any = new FormGroup(
+    {
+      refpers: new FormArray([], [Validators.required])
+  });
+  formPuestTrab:any = new FormGroup(
+    {
+      refpers: new FormArray([], [Validators.required])
+  });
+  formHistPag:any = new FormGroup(
+    {
+      refpers: new FormArray([], [Validators.required])
+  });
   
-  public archivo: any;
-  htmlSTID: string = "Archivo de identificación";
-
-  datosGen:any; datosPuestTrab:any; datosBanc:any; datosRefPer:any;
   DatosBancBen:any = [];
 
-  constructor( private fb: FormBuilder, private afilService: AfiliadoService) {
-    this.Bancos = [
-      {
-        "idBanco":1,
-        "value": "Atlántida"
-      },
-      {
-        "idBanco":2,
-        "value": "BAC"
-      },
-      {
-        "idBanco":3,
-        "value": "Ficohosa"
-      }
-    ];
-    this.estadoCivil = [
-      {
-        "idEstadoCivil":1,
-        "value": "Casado/a"
-      },
-      {
-        "idEstadoCivil":2,
-        "value": "Divorciado/a"
-      },
-      {
-        "idEstadoCivil":3,
-        "value": "Separado/a"
-      },
-      {
-        "idEstadoCivil":4,
-        "value": "Soltero/a"
-      },
-      {
-        "idEstadoCivil":5,
-        "value": "Union Libre"
-      },
-      {
-        "idEstadoCivil":6,
-        "value": "Viudo/a"
-      }
-    ];
-    this.Sexo = [
-      {
-        "idBanco":1,
-        "value": "M"
-      },
-      {
-        "idBanco":2,
-        "value": "F"
-      }
-    ];
-    this.tipoIdent = [
-      {
-        "idIdentificacion":1,
-        "value": "DNI"
-      },
-      {
-        "idIdentificacion":2,
-        "value": "PASAPORTE"
-      },
-      {
-        "idIdentificacion":3,
-        "value": "CARNET RESIDENCIA"
-      },
-      {
-        "idIdentificacion":4,
-        "value": "NÚMERO LICENCIA"
-      },
-      {
-        "idIdentificacion":5,
-        "value": "RTN"
-      },
-    ];
-  }
-
-  ngOnInit():void{
-  }
+  constructor( private fb: FormBuilder, private afilService: AfiliadoService) {}
+  ngOnInit():void{}
 
   setDatosGen(){    
     this.form.value.DatosGenerales.tipoIdent = this.form.value.DatosGenerales.tipoIdent;
@@ -117,7 +57,7 @@ export class AfilBancoComponent implements OnInit {
     this.form.value.DatosGenerales.tercerNombre = this.form.value.DatosGenerales.tercerNombre;
     this.form.value.DatosGenerales.primerApellido = this.form.value.DatosGenerales.primerApellido;
     this.form.value.DatosGenerales.segundoApellido = this.form.value.DatosGenerales.segundoApellido;
-    this.form.value.DatosGenerales.fechaNacimiento = formatoFechaResol(this.form.value.DatosGenerales.fechaNacimiento);
+    this.form.value.DatosGenerales.fechaNacimiento = this.form.value.DatosGenerales.fechaNacimiento;
     this.form.value.DatosGenerales.cantidadDependientes = this.form.value.DatosGenerales.cantidadDependientes;
     this.form.value.DatosGenerales.cantidadHijos = this.form.value.DatosGenerales.cantidadHijos;
     this.form.value.DatosGenerales.Sexo = this.form.value.DatosGenerales.Sexo;
@@ -134,7 +74,6 @@ export class AfilBancoComponent implements OnInit {
     this.form.value.DatosGenerales.ciudadDomicilio = this.form.value.DatosGenerales.ciudadDomicilio;
     this.form.value.DatosGenerales.direccionDetallada = this.form.value.DatosGenerales.direccionDetallada;
   }
-
   setDatosPuetTrab(){    
     this.form.value.DatosPuestoTrab.centroTrabajo = this.form.value.DatosPuestoTrab.centroTrabajo;
     this.form.value.DatosPuestoTrab.cargo = this.form.value.DatosPuestoTrab.cargo;
@@ -144,53 +83,50 @@ export class AfilBancoComponent implements OnInit {
     this.form.value.DatosPuestoTrab.sector = this.form.value.DatosPuestoTrab.sector;
     this.form.value.DatosPuestoTrab.numeroAcuerdo = this.form.value.DatosPuestoTrab.numeroAcuerdo;
     this.form.value.DatosPuestoTrab.salarioNeto = this.form.value.DatosPuestoTrab.salarioNeto;
-    this.form.value.DatosPuestoTrab.fechaIngreso = formatoFechaResol(this.form.value.DatosPuestoTrab.fechaIngreso);
+    this.form.value.DatosPuestoTrab.fechaIngreso = this.form.value.DatosPuestoTrab.fechaIngreso;
     this.form.value.DatosPuestoTrab.fechaPago = this.form.value.DatosPuestoTrab.fechaPago;
     this.form.value.DatosPuestoTrab.colegioMagisterial = this.form.value.DatosPuestoTrab.colegioMagisterial;
     this.form.value.DatosPuestoTrab.numeroCarnet = this.form.value.DatosPuestoTrab.numeroCarnet;
   }
 
-  setDatosBanc(datosBanc:any){
-    this.datosBanc = datosBanc;
+  setDatosPuetTrab1(datosPuestTrab:any){    
+    this.formPuestTrab = datosPuestTrab 
+  }
+
+  setHistSal(datosHistSal:any){
+    this.formHistPag = datosHistSal 
   }
 
   setDatosRefPer(datosRefPer:any){
-    this.datosRefPer = datosRefPer;
+    this.formReferencias = datosRefPer
   }
-
   setDatosBen(DatosBancBen:any){
-    this.DatosBancBen = DatosBancBen;
+    this.formBeneficiarios = DatosBancBen
   }
-  
-  enviar(){
-      console.log(this.form.value.DatosGenerales)
-      console.log(this.form.value.DatosPuestoTrab)
-      console.log(this.form.value.DatosBacAfil)
-      console.log(this.datosRefPer)
-      console.log(this.DatosBancBen)
-    
-    if (this.form.value.DatosGenerales){
-      console.log(this.form.value.DatosGenerales.fechaNacimiento = formatoFechaResol(this.form.value.DatosGenerales.fechaNacimiento));
 
+  enviar(){
+    if (this.form.value.DatosGenerales){
+      this.form.value.DatosGenerales.fechaNacimiento = formatoFechaResol(this.form.value.DatosGenerales.fechaNacimiento);  
     }if (this.form.value.DatosPuestoTrab){
       this.form.value.DatosPuestoTrab.fechaIngreso = formatoFechaResol(this.form.value.DatosPuestoTrab.fechaIngreso);
-      console.log(this.form.value.DatosPuestoTrab.fechaPago = formatoFechaResol(this.form.value.DatosPuestoTrab.fechaPago));
-
+      this.form.value.DatosPuestoTrab.fechaPago = formatoFechaResol(this.form.value.DatosPuestoTrab.fechaPago);
     }if(this.DatosBancBen.length>=1){
       for (let i=0 ; i<this.DatosBancBen.length; i++){
-        console.log(this.DatosBancBen[i].benfGroup.fechaNacimiento = formatoFechaResol(this.DatosBancBen[0].benfGroup.fechaNacimiento));
+        this.DatosBancBen[i].benfGroup.fechaNacimiento = formatoFechaResol(this.DatosBancBen[i].benfGroup.fechaNacimiento);
       }
     }
-    
+
     const data = {
       datosGen: this.form.value.DatosGenerales,
+      Archivos: this.form.value.Archivos,
       datosPuestTrab: this.form.value.DatosPuestoTrab,
       datosBanc: this.form.value.DatosBacAfil,
-      datosRefPers: this.datosRefPer,
-      datosBenefic: this.DatosBancBen,
+      datosRefPers: this.formReferencias.value.refpers,
+      datosBenefic: this.formBeneficiarios.value.refpers
     }
 
-    const llamada1 = this.afilService.agregarAfiliados(data);
+    console.log(data);
+    /* const llamada1 = this.afilService.agregarAfiliados(data);
 
     forkJoin([llamada1]).subscribe(
       ([datosServicio1]) => {
@@ -199,6 +135,7 @@ export class AfilBancoComponent implements OnInit {
       (error) => {
         console.error(error);
       }
-    );
+    ); */
   }
+
 }

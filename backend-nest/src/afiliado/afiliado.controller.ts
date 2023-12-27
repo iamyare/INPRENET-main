@@ -19,7 +19,7 @@ export class AfiliadoController {
 
   @Get(':id')
   findOne(@Param('id') id: string) {
-    return this.afiliadoService.findOne(+id);
+    return this.afiliadoService.findOne(id);
   }
 
   @Patch(':id')

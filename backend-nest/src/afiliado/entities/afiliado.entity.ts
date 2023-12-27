@@ -5,6 +5,7 @@ import { Pais } from "src/pais/entities/pais.entity";
 import { AfiliadosPorBanco } from "src/banco/entities/afiliados-banco";
 import { TipoIdentificacion } from "src/tipo_identificacion/entities/tipo_identificacion.entity";
 import { Provincia } from "src/pais/entities/provincia";
+import { IsString } from "class-validator";
 
 @Entity()
 export class Afiliado {
@@ -68,6 +69,12 @@ export class Afiliado {
     @Column('varchar2', { length: 200, nullable: false })
     archivo_identificacion: string;
 
+    @Column('varchar2', { length: 40, nullable: false })
+    colegio_magisterial: string;
+
+    @Column('varchar2', { length: 40, nullable: false })
+    numero_carnet: string;
+
     @Column('varchar2', { length: 200, nullable: false })
     direccion_residencia: string;
 
@@ -82,6 +89,7 @@ export class Afiliado {
     referenciasPersonalAfiliado: ReferenciaPersonalAfiliado[];
 
     @ManyToOne(() => Pais, pais => pais.afiliado)
+    @JoinColumn({ name: 'id_pais' })
     pais: Pais;
 
     @OneToMany(() => AfiliadosPorBanco, afiliadosPorBanco => afiliadosPorBanco.afiliado)
@@ -89,15 +97,18 @@ export class Afiliado {
 
 
     @ManyToOne(() => Provincia, provincia => provincia.afiliados)
+    @JoinColumn({ name: 'id_provincia' })
     provincia: Provincia;
 
     // Relación Uno a Muchos consigo mismo
-    @OneToMany(() => Afiliado, afiliado => afiliado.padre)
+    @OneToMany(() => Afiliado, afiliado => afiliado.padreIdAfiliado)
     hijos: Afiliado[];
 
     // Relación Muchos a Uno consigo mismo
     @ManyToOne(() => Afiliado, afiliado => afiliado.hijos)
-    padre: Afiliado;
+    @JoinColumn({ name: 'padreIdAfiliado' })
+    @IsString()
+    padreIdAfiliado: Afiliado;
 
     @ManyToOne(() => TipoIdentificacion, tipoIdentificacion => tipoIdentificacion.afiliados)
     @JoinColumn({ name: 'id_tipo_identificacion' })

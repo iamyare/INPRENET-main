@@ -7,7 +7,7 @@ export class Municipio {
     id_municipio : string;
 
     @Column('varchar2', {nullable: false, length: 30})
-    nombre : string;
+    nombre_municipio : string;
 
     @ManyToOne(() => Provincia, provincia => provincia.municipio)
     provincia : Provincia;

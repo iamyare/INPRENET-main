@@ -56,6 +56,13 @@ const routes: Routes = [
           title: 'Centro Trabajo',
         },
       },
+      {
+        path: 'centro-trabajo',
+        component: CentroTrabajoComponent,
+        data: {
+          title: 'Centro Trabajo',
+        },
+      },
     ],
   },
 ];

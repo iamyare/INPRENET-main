@@ -7,12 +7,22 @@ import { ReferenciaPersonal } from './entities/referencia-personal';
 import { ReferenciaPersonalAfiliado } from './entities/referenciaP-Afiliado';
 import { PerfAfilCentTrab } from './entities/perf_afil_cent_trab';
 import { HistorialSalario } from './entities/historialSalarios.entity';
+import { AfiliadosPorBanco } from 'src/banco/entities/afiliados-banco';
+import { Pais } from 'src/pais/entities/pais.entity';
+import { Provincia } from 'src/pais/entities/provincia';
+import { TipoIdentificacion } from 'src/tipo_identificacion/entities/tipo_identificacion.entity';
+import { CentroTrabajo } from 'src/modules/Empresarial/centro-trabajo/entities/centro-trabajo.entity';
 
 @Module({
   controllers: [AfiliadoController],
   providers: [AfiliadoService],
   imports: [
-    TypeOrmModule.forFeature([Afiliado, PerfAfilCentTrab, ReferenciaPersonalAfiliado, ReferenciaPersonal, HistorialSalario])
+    TypeOrmModule.forFeature([Afiliado, PerfAfilCentTrab,
+                              ReferenciaPersonalAfiliado,
+                              ReferenciaPersonal, HistorialSalario,
+                              AfiliadosPorBanco, Provincia,
+                              Pais, TipoIdentificacion,
+                              CentroTrabajo])
   ]
 
 })

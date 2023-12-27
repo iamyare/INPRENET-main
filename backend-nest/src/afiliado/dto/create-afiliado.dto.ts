@@ -1,4 +1,4 @@
-import { IsEmail, IsOptional, IsString, IsDateString } from "class-validator"
+import { IsEmail, IsOptional, IsString, IsDateString, IsNumber, IsUUID } from "class-validator"
 
 export class CreateAfiliadoDto {
 
@@ -36,11 +36,11 @@ export class CreateAfiliadoDto {
     @IsString()
     sexo : string;
     
-    @IsString()
-    cantidad_dependientes : string;
+    @IsNumber()
+    cantidad_dependientes : number;
     
-    @IsString()
-    cantidad_hijos : string;
+    @IsNumber()
+    cantidad_hijos : number;
     
     @IsString()
     profesion : string;
@@ -81,34 +81,48 @@ export class CreateAfiliadoDto {
     numero_carnet : string;
     
     @IsString()
+    @IsOptional()
     cargo : string;
     
     @IsString()
+    @IsOptional()
     sector_economico : string;
     
     @IsString()
+    @IsOptional()
     actividad_economica : string;
+
+    @IsString()
+    @IsOptional()
+    clase_cliente : string;
     
     @IsDateString()
+    @IsOptional()
     fecha_ingreso : string;
 
     @IsDateString()
+    @IsOptional()
     fecha_pago : string;
     
     @IsString()
+    @IsOptional()
     numero_acuerdo : string;
     
     @IsString()
+    @IsOptional()
     salario_neto : string;
 
     //datos de tabla de referencia personal
     @IsString()
+    @IsOptional()
     nombre : string;
     
     @IsString()
+    @IsOptional()
     direccion : string;
     
     @IsString()
+    @IsOptional()
     parentesco : string;
 
     @IsOptional()
@@ -120,10 +134,24 @@ export class CreateAfiliadoDto {
     telefono_trabajo : string;
     
     @IsString()
+    @IsOptional()
     telefono_celular : string;
 
-    paisIdPais : string;
-    tipoIdentificacionIdIdentificacion : string;
-    provinciaIdProvincia : string;
-    padreIdAfiliado : string;
+    @IsString()
+    @IsOptional()
+    tipo_identificacion?: string;
+
+    @IsString()
+    @IsOptional()
+    nombre_pais?: string;
+
+    @IsString()
+    @IsOptional()
+    nombre_provincia?: string;
+
+    @IsString()
+    @IsOptional()
+    nombre_centroTrabajo?
+    
+
 }

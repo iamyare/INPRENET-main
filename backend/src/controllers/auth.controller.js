@@ -124,7 +124,7 @@ const updateData = async(req, res) => {
 
 
 const confirmAndUpdateSecurityInfo = async (req, res) => {
-    const saltRounds = 10; // Definir el número de salt rounds para bcrypt
+    const saltRounds = 10; 
     let connection;
 
     try {

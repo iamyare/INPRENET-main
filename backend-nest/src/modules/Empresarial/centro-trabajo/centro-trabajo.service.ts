@@ -4,7 +4,7 @@ import { UpdateCentroTrabajoDto } from './dto/update-centro-trabajo.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { CentroTrabajo } from './entities/centro-trabajo.entity';
 import { Repository } from 'typeorm';
-import { Provincia } from 'src/pais/entities/provincia';
+import { Provincia } from 'src/modules/Regional/provincia/entities/provincia.entity';
 
 @Injectable()
 export class CentroTrabajoService {

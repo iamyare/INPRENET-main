@@ -1,5 +1,6 @@
-import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
+import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
 import { PerfAfilCentTrab } from "./perf_afil_cent_trab";
+import { Deduccion } from "src/modules/Planilla/deduccion/entities/deduccion.entity";
 
 @Entity()
 export class HistorialSalario {
@@ -23,5 +24,10 @@ export class HistorialSalario {
     salario: string;
 
     @ManyToOne(() => PerfAfilCentTrab, perfAfilCentTrab => perfAfilCentTrab.historialesSalario)
+    @JoinColumn({ name: 'id_perfAfilCentTrab' })
     perfAfilCentTrab: PerfAfilCentTrab;
+
+    @ManyToOne(() => Deduccion, deduccion => deduccion.historialSalario)
+    @JoinColumn({ name: 'id_deduccion' })
+    deduccion: Deduccion;
 }

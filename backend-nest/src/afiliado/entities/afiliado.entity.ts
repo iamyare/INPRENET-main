@@ -1,11 +1,13 @@
 import { Column, Entity, JoinColumn, ManyToOne, OneToMany, OneToOne, PrimaryGeneratedColumn } from "typeorm";
 import { ReferenciaPersonalAfiliado } from "./referenciaP-Afiliado";
 import { PerfAfilCentTrab } from "./perf_afil_cent_trab";
-import { Pais } from "src/pais/entities/pais.entity";
 import { AfiliadosPorBanco } from "src/banco/entities/afiliados-banco";
-import { TipoIdentificacion } from "src/tipo_identificacion/entities/tipo_identificacion.entity";
-import { Provincia } from "src/pais/entities/provincia";
 import { IsString } from "class-validator";
+import { Provincia } from "src/modules/Regional/provincia/entities/provincia.entity";
+import { Pais } from "src/modules/Regional/pais/entities/pais.entity";
+import { TipoIdentificacion } from "src/modules/tipo_identificacion/entities/tipo_identificacion.entity";
+import { BeneficioPlanilla } from "src/modules/Planilla/beneficio_planilla/entities/beneficio_planilla.entity";
+import { Usuario } from "src/modules/usuario/entities/usuario.entity";
 
 @Entity()
 export class Afiliado {
@@ -81,14 +83,20 @@ export class Afiliado {
     @Column('varchar2', { length: 40, default: 'ACTIVO' })
     estado: string;
 
+    @Column('varchar2', { length: 40, nullable: true })
+    porcentaje: number;
+
     // Relación Uno a Muchos con PerfAfilCentTrab
-    @OneToMany(() => PerfAfilCentTrab, perfAfilCentTrab => perfAfilCentTrab.afiliado)
+    @OneToMany(
+        () => PerfAfilCentTrab,
+        (perfAfilCentTrab) => perfAfilCentTrab.afiliado,
+        { cascade: true })
     perfAfilCentTrabs: PerfAfilCentTrab[];
     
     @OneToMany(() => ReferenciaPersonalAfiliado, referenciaPersonalAfiliado => referenciaPersonalAfiliado.afiliado)
     referenciasPersonalAfiliado: ReferenciaPersonalAfiliado[];
 
-    @ManyToOne(() => Pais, pais => pais.afiliado)
+    @ManyToOne(() => Pais, pais => pais.afiliado, { cascade: true })
     @JoinColumn({ name: 'id_pais' })
     pais: Pais;
 
@@ -96,7 +104,7 @@ export class Afiliado {
     afiliadosPorBanco : AfiliadosPorBanco[];
 
 
-    @ManyToOne(() => Provincia, provincia => provincia.afiliados)
+    @ManyToOne(() => Provincia, provincia => provincia.afiliados, { cascade: true })
     @JoinColumn({ name: 'id_provincia' })
     provincia: Provincia;
 
@@ -105,12 +113,20 @@ export class Afiliado {
     hijos: Afiliado[];
 
     // Relación Muchos a Uno consigo mismo
-    @ManyToOne(() => Afiliado, afiliado => afiliado.hijos)
+    @ManyToOne(() => Afiliado, afiliado => afiliado.hijos, { cascade: true })
     @JoinColumn({ name: 'padreIdAfiliado' })
     @IsString()
     padreIdAfiliado: Afiliado;
 
-    @ManyToOne(() => TipoIdentificacion, tipoIdentificacion => tipoIdentificacion.afiliados)
+    @ManyToOne(() => TipoIdentificacion, tipoIdentificacion => tipoIdentificacion.afiliados, { cascade: true })
     @JoinColumn({ name: 'id_tipo_identificacion' })
     tipoIdentificacion: TipoIdentificacion;
+
+    @OneToMany(() => BeneficioPlanilla, beneficioPlanilla => beneficioPlanilla.afiliado)
+    beneficioPlanilla: BeneficioPlanilla[];
+
+    @OneToOne(() => Usuario, { cascade: true })
+    @JoinColumn({ name: 'id_usuario' })
+    usuario: Usuario;
+   
 }

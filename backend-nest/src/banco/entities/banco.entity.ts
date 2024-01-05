@@ -7,7 +7,7 @@ export class Banco {
     id_banco : string;
 
     @Column('varchar2', {length: 30, nullable: false, unique : true})
-    nombre : string;
+    nombre_banco : string;
     
     @Column('varchar2', {unique: true ,length: 10, nullable: false})
     cod_banco : string;

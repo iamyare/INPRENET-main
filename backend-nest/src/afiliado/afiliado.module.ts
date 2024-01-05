@@ -8,10 +8,11 @@ import { ReferenciaPersonalAfiliado } from './entities/referenciaP-Afiliado';
 import { PerfAfilCentTrab } from './entities/perf_afil_cent_trab';
 import { HistorialSalario } from './entities/historialSalarios.entity';
 import { AfiliadosPorBanco } from 'src/banco/entities/afiliados-banco';
-import { Pais } from 'src/pais/entities/pais.entity';
-import { Provincia } from 'src/pais/entities/provincia';
-import { TipoIdentificacion } from 'src/tipo_identificacion/entities/tipo_identificacion.entity';
 import { CentroTrabajo } from 'src/modules/Empresarial/centro-trabajo/entities/centro-trabajo.entity';
+import { Banco } from 'src/banco/entities/banco.entity';
+import { Provincia } from 'src/modules/Regional/provincia/entities/provincia.entity';
+import { Pais } from 'src/modules/Regional/pais/entities/pais.entity';
+import { TipoIdentificacion } from 'src/modules/tipo_identificacion/entities/tipo_identificacion.entity';
 
 @Module({
   controllers: [AfiliadoController],
@@ -22,7 +23,7 @@ import { CentroTrabajo } from 'src/modules/Empresarial/centro-trabajo/entities/c
                               ReferenciaPersonal, HistorialSalario,
                               AfiliadosPorBanco, Provincia,
                               Pais, TipoIdentificacion,
-                              CentroTrabajo])
+                              CentroTrabajo, Banco])
   ]
 
 })

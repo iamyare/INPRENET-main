@@ -1,7 +1,7 @@
 import { BadRequestException, Injectable, InternalServerErrorException, Logger } from '@nestjs/common';
 import { CreateAfiliadoDto } from './dto/create-afiliado.dto';
 import { UpdateAfiliadoDto } from './dto/update-afiliado.dto';
-import { Repository } from 'typeorm';
+import { Connection, Repository } from 'typeorm';
 import { Afiliado } from './entities/afiliado.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { HistorialSalario } from './entities/historialSalarios.entity';
@@ -9,10 +9,11 @@ import { PerfAfilCentTrab } from './entities/perf_afil_cent_trab';
 import { ReferenciaPersonal } from './entities/referencia-personal';
 import { ReferenciaPersonalAfiliado } from './entities/referenciaP-Afiliado';
 import { AfiliadosPorBanco } from 'src/banco/entities/afiliados-banco';
-import { TipoIdentificacion } from 'src/tipo_identificacion/entities/tipo_identificacion.entity';
-import { Pais } from 'src/pais/entities/pais.entity';
-import { Provincia } from 'src/pais/entities/provincia';
 import { CentroTrabajo } from 'src/modules/Empresarial/centro-trabajo/entities/centro-trabajo.entity';
+import { Banco } from 'src/banco/entities/banco.entity';
+import { Provincia } from 'src/modules/Regional/provincia/entities/provincia.entity';
+import { Pais } from 'src/modules/Regional/pais/entities/pais.entity';
+import { TipoIdentificacion } from 'src/modules/tipo_identificacion/entities/tipo_identificacion.entity';
 
 @Injectable()
 export class AfiliadoService {
@@ -40,67 +41,126 @@ export class AfiliadoService {
     private readonly provinciaRepository: Repository<Provincia>,
     @InjectRepository(CentroTrabajo)
     private readonly centroTrabajoRepository: Repository<CentroTrabajo>,
+    @InjectRepository(Banco)
+    private readonly bancoRepository: Repository<Banco>,
+    private connection: Connection,
   ){}
   
-  async create(createAfiliadoDto: CreateAfiliadoDto) {
+  async create(createAfiliadoDto: CreateAfiliadoDto): Promise<Afiliado> {
+    const queryRunner = this.connection.createQueryRunner();
+
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+
     try {
-      const tipoIdentificacion = await this.tipoIdentificacionRepository.findOneBy({ tipo_identificacion: createAfiliadoDto.tipo_identificacion });
-      if (!tipoIdentificacion) {
-        throw new BadRequestException('Identificacion not found');
-      }
+        // Verifica y encuentra las entidades necesarias para el afiliado principal
+        const tipoIdentificacion = await queryRunner.manager.findOneBy(TipoIdentificacion, { tipo_identificacion: createAfiliadoDto.tipo_identificacion });
+        if (!tipoIdentificacion) {
+            throw new BadRequestException('Identificacion not found');
+        }
 
-      const pais = await this.paisRepository.findOneBy({ nombre_pais: createAfiliadoDto.nombre_pais });
-      if (!pais) {
-        throw new BadRequestException('Pais not found');
-      }
+        const pais = await queryRunner.manager.findOneBy(Pais, { nombre_pais: createAfiliadoDto.nombre_pais });
+        if (!pais) {
+            throw new BadRequestException('Pais not found');
+        }
 
-      const provincia = await this.provinciaRepository.findOneBy({ nombre_provincia: createAfiliadoDto.nombre_provincia });
-      if (!provincia) {
-        throw new BadRequestException('Provincia not found');
-      }
+        const provincia = await queryRunner.manager.findOneBy(Provincia, { nombre_provincia: createAfiliadoDto.nombre_provincia });
+        if (!provincia) {
+            throw new BadRequestException('Provincia not found');
+        }
 
-      // Crear y guardar el nuevo afiliado
-      const newAfiliado = await this.afiliadoRepository.save({
-        ...createAfiliadoDto,
-        tipoIdentificacion,
-        pais,
-        provincia
-      });
+        const banco = await queryRunner.manager.findOneBy(Banco, { nombre_banco: createAfiliadoDto.datosBanc.nombreBanco });
+        if (!banco) {
+            throw new BadRequestException('Banco not found');
+        }
 
-      // Guardar el afiliado
-      const savedAfiliado = await this.afiliadoRepository.save(newAfiliado);
+        // Crear un nuevo registro en AfiliadosPorBanco para el afiliado principal
+        const afiliadoBanco = queryRunner.manager.create(AfiliadosPorBanco, {
+            banco,
+            num_cuenta: createAfiliadoDto.datosBanc.numeroCuenta
+        });
+        await queryRunner.manager.save(afiliadoBanco);
 
-      const centroTrabajo = await this.centroTrabajoRepository.findOneBy({ nombre_Centro_Trabajo: createAfiliadoDto.nombre_centroTrabajo });
-      if (!centroTrabajo) {
-        throw new BadRequestException('CentroTrabajo not found');
-      }
+        // Verificar y encontrar los centros de trabajo para cada perfAfilCentTrab
+        const perfAfilCentTrabs = await Promise.all(createAfiliadoDto.perfAfilCentTrabs.map(async perfAfilCentTrabDto => {
+            const centroTrabajo = await queryRunner.manager.findOneBy(CentroTrabajo, { nombre_Centro_Trabajo: perfAfilCentTrabDto.nombre_centroTrabajo });
+            if (!centroTrabajo) {
+                throw new BadRequestException(`Centro de trabajo no encontrado: ${perfAfilCentTrabDto.nombre_centroTrabajo}`);
+            }
 
-      // Crear registro en PerfAfilCentTrab utilizando createAfiliadoDto
-      const perfAfilCentTrab = this.perfAfilCentTrabRepository.create({
-        ...createAfiliadoDto,
-        centroTrabajo,
-        afiliado: savedAfiliado
-      });
+            return queryRunner.manager.create(PerfAfilCentTrab, {
+                ...perfAfilCentTrabDto,
+                centroTrabajo
+            });
+        }));
 
-      // Guardar el perfil laboral y centro de trabajo
-      await this.perfAfilCentTrabRepository.save(perfAfilCentTrab);
+        // Crear y preparar el nuevo afiliado principal con datos y relaciones
+        const newAfiliado = queryRunner.manager.create(Afiliado, {
+            ...createAfiliadoDto,
+            tipoIdentificacion,
+            pais,
+            provincia,
+            afiliadosPorBanco: [afiliadoBanco],
+            perfAfilCentTrabs,
+        });
+        await queryRunner.manager.save(newAfiliado);
 
-      // Asignar su propio ID como padreIdAfiliado y guardar nuevamente
-      savedAfiliado.padreIdAfiliado = savedAfiliado;
-      await this.afiliadoRepository.save(savedAfiliado);
+        // Crear y asociar afiliados hijos
+        if (createAfiliadoDto.afiliadosRelacionados && createAfiliadoDto.afiliadosRelacionados.length > 0) {
+            for (const hijoDto of createAfiliadoDto.afiliadosRelacionados) {
+                const tipoIdentificacionHijo = await queryRunner.manager.findOneBy(TipoIdentificacion, { tipo_identificacion: hijoDto.tipo_identificacion });
+                if (!tipoIdentificacionHijo) {
+                    throw new BadRequestException('Identificacion not found for related affiliate');
+                }
 
-      // Elimina la referencia circular para la respuesta
-      const responseAfiliado = { ...savedAfiliado, padreIdAfiliado: undefined };
+                const paisHijo = await queryRunner.manager.findOneBy(Pais, { nombre_pais: hijoDto.nombre_pais });
+                if (!paisHijo) {
+                    throw new BadRequestException('Pais not found for related affiliate');
+                }
 
-      return responseAfiliado;
+                const provinciaHijo = await queryRunner.manager.findOneBy(Provincia, { nombre_provincia: hijoDto.nombre_provincia });
+                if (!provinciaHijo) {
+                    throw new BadRequestException('Provincia not found for related affiliate');
+                }
+
+                /* const bancoHijo = await queryRunner.manager.findOneBy(Banco, { nombre_banco: hijoDto.datosBanc.nombreBanco });
+                if (!bancoHijo) {
+                    throw new BadRequestException('Banco not found for related affiliate');
+                }
+
+                const afiliadoBancoHijo = queryRunner.manager.create(AfiliadosPorBanco, {
+                    banco: bancoHijo,
+                    num_cuenta: hijoDto.datosBanc.numeroCuenta
+                });
+                await queryRunner.manager.save(afiliadoBancoHijo); */
+
+                const afiliadoHijo = queryRunner.manager.create(Afiliado, {
+                    ...hijoDto,
+                    tipoIdentificacion: tipoIdentificacionHijo,
+                    pais: paisHijo,
+                    provincia: provinciaHijo,
+                    padreIdAfiliado: newAfiliado
+                    /* ,
+                    afiliadosPorBanco: [afiliadoBancoHijo] */
+                });
+                await queryRunner.manager.save(afiliadoHijo);
+            }
+        }
+
+        await queryRunner.commitTransaction();
+        return newAfiliado;
     } catch (error) {
-      this.handleException(error);
+        await queryRunner.rollbackTransaction();
+        this.handleException(error);
+    } finally {
+        await queryRunner.release();
     }
-    
-  }
+}
+
 
   findAll() {
-    return `This action returns all afiliado`;
+    const afiliado = this.afiliadoRepository.find()
+    return afiliado;
   }
 
   findOne(id: string) {

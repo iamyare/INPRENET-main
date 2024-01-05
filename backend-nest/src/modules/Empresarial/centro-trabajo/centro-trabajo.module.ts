@@ -3,7 +3,7 @@ import { CentroTrabajoService } from './centro-trabajo.service';
 import { CentroTrabajoController } from './centro-trabajo.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { CentroTrabajo } from './entities/centro-trabajo.entity';
-import { Provincia } from 'src/pais/entities/provincia';
+import { Provincia } from 'src/modules/Regional/provincia/entities/provincia.entity';
 
 @Module({
   controllers: [CentroTrabajoController],

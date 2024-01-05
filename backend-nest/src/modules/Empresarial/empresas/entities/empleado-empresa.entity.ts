@@ -14,11 +14,9 @@ export class EmpleadoEmpresa {
     )
     id_empresa : Empresa
 
-    @ManyToOne(
-        () => Empleado,
-        ( empleado ) => empleado.id_empleado
-    )
-    id_empleado : Empresa
+    @ManyToOne(() => Empleado, empleado => empleado.empleadoEmpresa, { cascade: true })
+    @JoinColumn({ name: 'id_empleado' })
+    empleado: Empleado;
 
 
   }

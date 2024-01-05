@@ -1,4 +1,8 @@
-import { IsEmail, IsOptional, IsString, IsDateString, IsNumber, IsUUID } from "class-validator"
+import { Type } from "class-transformer";
+import { IsEmail, IsOptional, IsString, IsDateString, IsNumber, IsUUID, IsArray, ValidateNested, IsObject } from "class-validator"
+import { CreatePerfAfilCentTrabDto } from "./create-perfAfilCentTrabs.dto";
+import { CreateBancoDto } from "src/banco/dto/create-banco.dto";
+import { CreateAfiliadoRelacionadoDto } from "./CreateAfiliadoRelacionadoDto";
 
 export class CreateAfiliadoDto {
 
@@ -73,44 +77,31 @@ export class CreateAfiliadoDto {
     @IsString()
     estado : string;
 
-    //datos de tabla perfil-afil-centro-trab
     @IsString()
     colegio_magisterial : string;
     
     @IsString()
     numero_carnet : string;
-    
-    @IsString()
-    @IsOptional()
-    cargo : string;
-    
-    @IsString()
-    @IsOptional()
-    sector_economico : string;
-    
-    @IsString()
-    @IsOptional()
-    actividad_economica : string;
 
-    @IsString()
-    @IsOptional()
-    clase_cliente : string;
-    
-    @IsDateString()
-    @IsOptional()
-    fecha_ingreso : string;
+    @IsArray()
+    @ValidateNested({ each: true })
+    @Type(() => CreatePerfAfilCentTrabDto)
+    perfAfilCentTrabs?: CreatePerfAfilCentTrabDto[];
 
-    @IsDateString()
-    @IsOptional()
-    fecha_pago : string;
+    //datos de banco
+    @IsObject()
+    @ValidateNested()
+    @Type(() => CreateBancoDto)
+    datosBanc: CreateBancoDto;
+
+    @IsArray()
+    @ValidateNested({ each: true })
+    @Type(() => CreateAfiliadoRelacionadoDto)
+    afiliadosRelacionados: CreateAfiliadoRelacionadoDto[];
+
     
-    @IsString()
-    @IsOptional()
-    numero_acuerdo : string;
     
-    @IsString()
-    @IsOptional()
-    salario_neto : string;
+    
 
     //datos de tabla de referencia personal
     @IsString()
@@ -147,11 +138,17 @@ export class CreateAfiliadoDto {
 
     @IsString()
     @IsOptional()
-    nombre_provincia?: string;
+    nombre_provincia?: string;    
 
-    @IsString()
-    @IsOptional()
-    nombre_centroTrabajo?
-    
 
 }
+
+/* @IsArray()
+    @ValidateNested({ each: true })
+    @Type(() => CreatePerfAfilCentTrabDto)
+    perfAfilCentTrabs: CreatePerfAfilCentTrabDto[]; */
+
+    /* @IsArray()
+    @ValidateNested({ each: true })
+    @Type(() => CreateHistorialTrabajoDto)
+    historialSalario: CreateHistorialTrabajoDto[]; */

@@ -43,7 +43,8 @@ export class EmpresasService {
     } else {
       const queryBuilder = this.empresaRepository.createQueryBuilder('empresa');
       empresa = await queryBuilder
-        .where('"razon_social" = :term OR "rtn" = :term', { term })
+        .where('"razon_social" = :term OR "rtn" = :term',
+         { term })
         .getOne();
     }
     if (!empresa) {

@@ -4,10 +4,10 @@ import { UsuarioController } from './usuario.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Usuario } from './entities/usuario.entity';
 import { Rol } from './entities/rol.entity';
-import { Empleado } from 'src/empresas/entities/empleado.entity';
 import { PassportModule } from '@nestjs/passport';
 import { JwtModule } from '@nestjs/jwt';
 import { CommonModule } from 'src/common/common.module';
+import { Empleado } from 'src/modules/Empresarial/empresas/entities/empleado.entity';
 
 @Module({
   controllers: [UsuarioController],

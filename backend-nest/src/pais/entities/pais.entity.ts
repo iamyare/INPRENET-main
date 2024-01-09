@@ -9,7 +9,7 @@ export class Pais {
     id_pais : string;
 
     @Column('varchar2', { length: 20, nullable: false })
-    nombre : string;
+    nombre_pais : string;
 
     @Column('varchar2', { length: 20, nullable: false })
     nacionalidad : string;

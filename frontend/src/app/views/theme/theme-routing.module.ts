@@ -73,6 +73,13 @@ const routes: Routes = [
           title: 'Ver Planillas',
         },
       },
+      {
+        path: 'centro-trabajo',
+        component: CentroTrabajoComponent,
+        data: {
+          title: 'Centro Trabajo',
+        },
+      },
     ],
   },
 ];

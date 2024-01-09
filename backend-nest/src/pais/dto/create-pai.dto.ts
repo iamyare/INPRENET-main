@@ -1,1 +1,6 @@
-export class CreatePaiDto {}
+import { IsString } from "class-validator";
+
+export class CreatePaiDto {
+
+    
+}

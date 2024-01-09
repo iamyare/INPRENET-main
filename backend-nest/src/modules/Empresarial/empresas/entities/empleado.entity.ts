@@ -1,7 +1,8 @@
-import { Entity, PrimaryGeneratedColumn, Column, OneToMany, OneToOne, JoinColumn } from 'typeorm';
-import { EmpleadoEmpresa } from './empleado-empresa.entity';
-import { Usuario } from '../../usuario/entities/usuario.entity';
-import { TipoIdentificacion } from 'src/tipo_identificacion/entities/tipo_identificacion.entity';
+import { TipoIdentificacion } from "src/tipo_identificacion/entities/tipo_identificacion.entity";
+import { Usuario } from "src/usuario/entities/usuario.entity";
+import { Column, Entity, JoinColumn, OneToMany, OneToOne, PrimaryGeneratedColumn } from "typeorm";
+import { EmpleadoEmpresa } from "./empleado-empresa.entity";
+
 
 @Entity()
 export class Empleado{

@@ -2,7 +2,8 @@ import { Column, Entity, ManyToOne, OneToMany, PrimaryGeneratedColumn } from "ty
 import { Pais } from "./pais.entity";
 import { Municipio } from "./municipio";
 import { Afiliado } from "src/afiliado/entities/afiliado.entity";
-import { CentroTrabajo } from "src/empresas/entities/centroTrabajo.entity";
+import { CentroTrabajo } from "src/modules/Empresarial/centro-trabajo/entities/centro-trabajo.entity";
+
 
 @Entity()
 export class Provincia{
@@ -10,7 +11,7 @@ export class Provincia{
     id_provincia
 
     @Column('varchar2', {length: 30 ,nullable:false})
-    nombre: string
+    nombre_provincia: string
 
     @ManyToOne(() => Pais, pais => pais.provincia)
     pais: Pais;

@@ -40,7 +40,6 @@ export class ProgressplanillComponent {
     this.datosF  = false;
     this.datosA  = false;
     this.newDatBenChange.emit(this.datosG);
-
   }
   prueba2(){
     this.datosG  = false;
@@ -51,7 +50,6 @@ export class ProgressplanillComponent {
     this.datosF  = false;
     this.datosA  = false;
     this.newEstCentrTrab.emit(this.datosCT);
-
   }
   prueba3(){
     this.datosG  = false;

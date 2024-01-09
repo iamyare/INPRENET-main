@@ -19,7 +19,6 @@ export class SubirDeduccionesComponent {
     });
   }
 
-
   ngOnInit() {
     this.form = this.fb.group({
       Archivos: generateFormArchivo(),

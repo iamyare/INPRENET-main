@@ -4,8 +4,6 @@ import { NgModule } from '@angular/core';
 import { CardModule, GridModule, NavModule, UtilitiesModule, TabsModule } from '@coreui/angular';
 import { IconModule } from '@coreui/icons-angular';
 
-import { ColorsComponent, ThemeColorComponent } from './colors.component';
-import { TypographyComponent } from './typography.component';
 
 // Theme Routing
 import { ThemeRoutingModule } from './theme-routing.module';
@@ -22,10 +20,15 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatTableModule } from '@angular/material/table';
 import { MatPaginatorModule } from '@angular/material/paginator';
-import { DatosGenAfilComponent } from '../pages/datos-gen-afil/datos-gen-afil.component';
 import { MatIconModule } from '@angular/material/icon';
 
-
+import { DatosGenAfilComponent } from '../pages/datos-gen-afil/datos-gen-afil.component';
+import { VerDeduccionesComponent } from '../pages/ver-deducciones/ver-deducciones.component';
+import { SubirDeduccionesComponent } from '../pages/subir-deducciones/subir-deducciones.component';
+import { NuevaPlanillaComponent } from '../pages/nueva-planilla/nueva-planilla.component';
+import { VerPlanillasComponent } from '../pages/ver-planillas/ver-planillas.component';
+import { SubirDeduccionesformComponent } from '../pages/subir-deduccionesform/subir-deduccionesform.component';
+/* import { CentroTrabajoPageComponent } from '../pages/centro-trabajo-page/centro-trabajo-page.component' */
 
 @NgModule({
   imports: [
@@ -46,15 +49,18 @@ import { MatIconModule } from '@angular/material/icon';
     MatTableModule,
     MatPaginatorModule,
     MatIconModule
-
+    
   ],
   declarations: [
+    SubirDeduccionesformComponent,
+    VerDeduccionesComponent,
+    SubirDeduccionesComponent,
     AfilBancoComponent,
-    ColorsComponent,
-    ThemeColorComponent,
-    TypographyComponent,
     CentroTrabajoComponent,
-    DatosGenAfilComponent
+    DatosGenAfilComponent,
+    NuevaPlanillaComponent,
+    VerPlanillasComponent
+/*     CentroTrabajoPageComponent */
   ]
 })
 export class ThemeModule {

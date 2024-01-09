@@ -2,6 +2,7 @@ import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { AuthService } from '../../../services/auth.service';
+import { generateFormArchivo } from '@docs-components/botonarchivos/botonarchivos.component';
 
 @Component({
   selector: 'app-pre-register',
@@ -11,8 +12,10 @@ import { AuthService } from '../../../services/auth.service';
 export class PreRegisterComponent {
   form: FormGroup;
 
-  htmlSTID: string = "Archivo de identificación"
-  public archivo: any;
+  formArchivo = this.fb.group({
+    Archivos: generateFormArchivo()
+  })
+  
   tipoIdent: any = [];
   tipoRol: any = [];
 
@@ -21,7 +24,6 @@ export class PreRegisterComponent {
     ) {
 
     this.form = this.fb.group({
-     fileID: ['', [Validators.required]],
      correo: ['', [Validators.required, Validators.email]],
      rol: ['', [Validators.required]],
      tipoIdent: ['', [Validators.required]],
@@ -71,22 +73,6 @@ export class PreRegisterComponent {
    ]
   }
 
-  onFileSelected(event: any) {
-    const file = event.target.files[0];
-    const fileSize = event.target.files[0].size / 1024 / 1024;
-
-    if (file) {
-        if (fileSize > 7000) {
-            //this.toastr.error('El archivo no debe superar los 3MB', 'Error');
-            this.htmlSTID = "Identificación";
-            this.form.reset();
-        } else {
-            this.archivo = file
-            this.htmlSTID = event.target.files[0].name;
-        }
-    }
-  }
-
   crearCuenta(){
     const correo = this.form.value.correo;
     const rol = this.form.value.rol;
@@ -104,13 +90,15 @@ export class PreRegisterComponent {
       'archivoidentificacion' :  "this.archivo"
     }
 
+    console.log(this.formArchivo);
+    
     console.log(data);
 
-    this.authSvc.crearCuenta(data).subscribe((res: any) => {
+    /* this.authSvc.crearCuenta(data).subscribe((res: any) => {
       console.log(res);
 
       //this.fakeLoading(res);
-    });
+    }); */
   }
 
 }

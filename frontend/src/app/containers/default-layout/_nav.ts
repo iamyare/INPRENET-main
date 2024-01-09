@@ -20,13 +20,11 @@ export const navItems: INavData[] = [
     url: '/base',
     children: [
       {
+        name: 'Nuevo',
         url: '/Afiliado/afil-banco',
-        /* iconComponent: { name: 'cilDollar' }, */
-        name: 'Nuevo registro',
-        /* linkProps: { fragment: 'someAnchor' }, */
       },
       {
-        name: 'Ver/Editar',
+        name: 'Ver / Editar (Afiliados)',
         children: [
           {
             url: '/Afiliado/datos-gen-afil',
@@ -34,28 +32,67 @@ export const navItems: INavData[] = [
           },
           {
             url: '/Afiliado/afil-banco',
-            name: 'Datos del puesto de trabajo',
+            name: 'Centros de trabajo',
           },
           {
             url: '/Afiliado/afil-banco',
-            name: 'Datos bancarios',
+            name: 'Historial de salario',
           },
           {
             url: '/Afiliado/afil-banco',
             name: 'Referencias personales',
+          },
+          {
+            url: '/Afiliado/afil-banco',
+            name: 'Beneficiarios',
           }
         ]
       },
-
     ]
   },
-
+  {
+    name: 'Planilla',
+    url: '/base',
+    children: [
+      {
+        url: '/Planilla/subir-deducciones',
+        name: 'Nueva Planilla',
+      },
+      {
+        url: '/Planilla/ver-deducciones',
+        name: 'Ver Planillas',
+      },
+/*       {
+        name: 'subir nueva planilla',
+        url: '/Afiliado/nueva-planilla',
+      },
+      {
+        name: 'Ver planillas',
+        url: '/Afiliado/ver-planillas',
+      }, */
+    ]
+  },
+/* 
   {
     name: 'Centro de trabajo',
     url: '/Afiliado/centro-trabajo',
-    /* iconComponent: { name: 'cil-drop' } */
+     iconComponent: { name: 'cil-drop' } 
     children: [
-
+      {
+        url: '/Afiliado/centro-trabajo',
+        name: 'Nuevo registro',
+         iconComponent: { name: 'cilDollar' }, 
+         linkProps: { fragment: 'someAnchor' }, 
+      },
+      {
+        name: 'Ver / Editar',
+        children: [
+          {
+            url: '/Afiliado/datos-gen-afil',
+            name: 'Datos generales',
+          }
+        ]
+      },
     ]
-  },
+  }, */
 ];

@@ -1,53 +1,63 @@
 <div class="card">
-    <div class="card-header card-header-danger tittle" style="background: rgb(29, 192, 192);">
-      <h4 class="card-title">Historial de Salario</h4>
-      <p class="card-category">Completa la información correspondiente</p>
-    </div>
-  
-    <form [formGroup]="formParent" (change)="onDatosHistSal()">
-      <div formArrayName="refpers">
-        <div *ngFor="let skill of getCtrl('refpers', formParent).controls; index as formChild; let i = index">
-          <h4 class="card-title">Periodo número: {{i+1}}</h4>
-          <div [formGroupName]="formChild" class="row">
-            <div class="col-md-4">
-              <mat-form-field class="example-full-width; inputs" appearance="outline">
-                <mat-label>Centro de Trabajo</mat-label>
-                <select matNativeControl formControlName="centroTrabajo">
-                  <option *ngFor="let p of centrosTrabajo" [value]="p.idCentroTrabajo">
-                    {{p.value}}
-                  </option>
-                </select>
-              </mat-form-field>
-            </div>
-            <div class="col-md-4">
-              <mat-form-field class="example-full-width; inputs" appearance="outline">
-                <mat-label>Fecha Inicio (Pago)</mat-label>
-                <input matInput type="text" formControlName="fechaInicio">
-              </mat-form-field>
-            </div>
-            <div class="col-md-4">
-              <mat-form-field class="example-full-width; inputs" appearance="outline">
-                <mat-label>Fecha Final (Pago)</mat-label>
-                <input matInput type="text" formControlName="fechaFin">
-              </mat-form-field>
-            </div>
-            <div class="col-md-4">
-              <mat-form-field class="example-full-width; inputs" appearance="outline">
-                <mat-label>Salario Neto:</mat-label>
-                <input matInput type="text" formControlName="salario">
-              </mat-form-field>
-            </div>
+  <div class="card-header card-header-danger tittle" style="background: rgb(29, 192, 192);">
+    <h4 class="card-title">Historial de Salario</h4>
+    <p class="card-category">Completa la información correspondiente</p>
+  </div>
+
+  <form [formGroup]="formParent" (change)="onDatosHistSal()">
+    <div formArrayName="refpers">
+      <div *ngFor="let skill of getCtrl('refpers', formParent).controls; index as formChild; let i = index">
+        <h4 class="card-title">Periodo número: {{i+1}}</h4>
+        <div [formGroupName]="formChild" class="row">
+          <div class="col-md-6">
+            <mat-form-field class="example-full-width; inputs" appearance="outline">
+              <mat-label>Centro de Trabajo</mat-label>
+              <select matNativeControl formControlName="centroTrabajo">
+                <option *ngFor="let p of centrosTrabajo" [value]="p.idCentroTrabajo">
+                  {{p.value}}
+                </option>
+              </select>
+            </mat-form-field>
+          </div>
+          <div class="col-md-6">
+            <mat-form-field class="example-full-width; inputs" appearance="outline">
+              <mat-label>Fecha Inicio (Pago)</mat-label>
+              <input matInput formControlName="fechaInicio" [matDatepicker]="fechaInicio">
+              <mat-hint>MM/DD/YYYY</mat-hint>
+              <mat-datepicker-toggle matIconSuffix [for]="fechaInicio"></mat-datepicker-toggle>
+              <mat-datepicker #fechaInicio></mat-datepicker>
+            </mat-form-field>
+
+          </div>
+        </div>
+        <div [formGroupName]="formChild" class="row">
+          <div class="col-md-6">
+            <mat-form-field class="example-full-width; inputs" appearance="outline">
+              <mat-label>Fecha Final (Pago)</mat-label>
+              <input matInput formControlName="fechaFin" [matDatepicker]="fechaFin">
+              <mat-hint>MM/DD/YYYY</mat-hint>
+              <mat-datepicker-toggle matIconSuffix [for]="fechaFin"></mat-datepicker-toggle>
+              <mat-datepicker #fechaFin></mat-datepicker>
+            </mat-form-field>
+
+          </div>
+          <div class="col-md-6">
+            <mat-form-field class="example-full-width; inputs" appearance="outline">
+              <mat-label>Salario Neto:</mat-label>
+              <input matInput type="text" formControlName="salario">
+            </mat-form-field>
           </div>
         </div>
       </div>
-    </form>
-  
-    <div class="row">
-      <div class="col-md-6">
-        <button mat-button color="primary" (click)="agregarRefPer()">Agregar Periodo Pago</button>
-      </div>
-      <div class="col-md-6">
-        <button mat-button color="warn" (click)="eliminarRefPer()">Eliminar Periodo Pago</button>
-      </div>
+    </div>
+  </form>
+
+  <div class="row">
+    <div class="col-md-6">
+      <button mat-button color="primary" (click)="agregarRefPer()">Agregar Periodo Pago</button>
+    </div>
+    <div class="col-md-6">
+      <button mat-button color="warn" (click)="eliminarRefPer()">Eliminar Periodo Pago</button>
     </div>
   </div>
+</div>

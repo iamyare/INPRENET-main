@@ -1,6 +1,5 @@
-
 <form [formGroup]="form">
-  <app-dat-generales-afiliado groupName="DatosGenerales" ></app-dat-generales-afiliado>
+  <app-dat-generales-afiliado groupName="DatosGenerales"></app-dat-generales-afiliado>
 </form>
 
 <div class="card">
@@ -23,22 +22,21 @@
         <tbody>
           <tr class="text-center" *ngFor="let afiliado of informacion">
             <td class="info">{{afiliado.ID_AFILIADO}}</td>
-            <td class="info">{{afiliado.PRIMER_NOMBRE + ' ' + afiliado.SEGUNDO_NOMBRE + ' ' + afiliado.TERCER_NOMBRE + ' ' + afiliado.PRIMER_APELLIDO + ' ' + afiliado.SEGUNDO_APELLIDO}}</td>
+            <td class="info">{{afiliado.PRIMER_NOMBRE + ' ' + afiliado.SEGUNDO_NOMBRE + ' ' + afiliado.TERCER_NOMBRE + '
+              ' + afiliado.PRIMER_APELLIDO + ' ' + afiliado.SEGUNDO_APELLIDO}}</td>
             <td class="info">{{afiliado.DNI}}</td>
-            
+
             <td class="info"><button mat-icon-button (click)="editarCentroTrabajo(afiliado)">
-              <mat-icon>edit</mat-icon>
-            </button></td>
+                <mat-icon>edit</mat-icon>
+              </button></td>
           </tr>
 
         </tbody>
       </table>
-</div>
+    </div>
 
-<mat-paginator #matPaginator [length]="informacion.length" [pageSize]="pageSize" [pageSizeOptions]="[5, 10, 25]"
+    <mat-paginator #matPaginator [length]="informacion.length" [pageSize]="pageSize" [pageSizeOptions]="[5, 10, 25]"
       (page)="onPageChange($event)" aria-label="Select page">
     </mat-paginator>
+  </div>
 </div>
-</div>
-
-

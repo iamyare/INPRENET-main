@@ -1,0 +1,24 @@
+<h1>Planilla</h1>
+
+<form [formGroup]="form" #myForm="ngForm">
+
+
+    <mat-slide-toggle color="primary" formControlName="isChecked" (change)="onChangeToggle()">
+        ¿Desea subir nuevas deducciones?
+    </mat-slide-toggle>
+
+    <app-progressplanill (newDatBenChange)="setEstadoDatGen($event)"
+        [estadoSubDed]="form.get('isChecked')?.value"></app-progressplanill>
+
+    <div class="row" *ngIf="datosA && form.get('isChecked')?.value">
+        <div class="col-md-6">
+            <app-botonarchivos labelBoton="Adjunte excel de deducciones" groupName="Archivos"></app-botonarchivos>
+        </div>
+        <div class="col-md-6">
+            <button mat-button color="primary">Enviar Formulario</button>
+        </div>
+    </div>
+
+
+
+</form>

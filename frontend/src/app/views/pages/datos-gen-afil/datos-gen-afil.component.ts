@@ -22,11 +22,11 @@ export class DatosGenAfilComponent implements OnInit {
   @ViewChild(MatPaginator) matPaginator: MatPaginator | undefined;
 
   ELEMENT_DATA: any[] = [];
-  dataSource = new MatTableDataSource<any>(this.ELEMENT_DATA);
-
   public informacion: any = [];
+  
+  dataSource = new MatTableDataSource<any>(this.ELEMENT_DATA);
+  
   nombreBusqueda: string = '';
-
   pageSize = 5;
   desde = 0;
   hasta: number = this.pageSize;

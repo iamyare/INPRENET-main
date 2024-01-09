@@ -28,8 +28,6 @@ export class CentroTrabajoComponent implements OnInit {
     representante_legal: ['', [Validators.required]],
   });
 
-
-
   ngOnInit() {
     this.obtenerCentrosTrabajo();
   }

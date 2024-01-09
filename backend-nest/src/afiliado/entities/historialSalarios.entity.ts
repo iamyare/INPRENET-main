@@ -23,11 +23,11 @@ export class HistorialSalario {
     })
     salario: string;
 
-    @ManyToOne(() => PerfAfilCentTrab, perfAfilCentTrab => perfAfilCentTrab.historialesSalario)
+    /* @ManyToOne(() => PerfAfilCentTrab, perfAfilCentTrab => perfAfilCentTrab.historialesSalario)
     @JoinColumn({ name: 'id_perfAfilCentTrab' })
-    perfAfilCentTrab: PerfAfilCentTrab;
+    perfAfilCentTrab: PerfAfilCentTrab; */
 
-    @ManyToOne(() => Deduccion, deduccion => deduccion.historialSalario)
+    /* @ManyToOne(() => Deduccion, deduccion => deduccion.historialSalario)
     @JoinColumn({ name: 'id_deduccion' })
-    deduccion: Deduccion;
+    deduccion: Deduccion; */
 }

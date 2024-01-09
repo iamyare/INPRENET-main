@@ -38,6 +38,6 @@ export class PerfAfilCentTrab {
     @JoinColumn({ name: 'id_centroTrabajo' })
     centroTrabajo: CentroTrabajo;
 
-    @OneToMany(() => HistorialSalario, historialSalario => historialSalario.perfAfilCentTrab, { cascade: true })
-    historialesSalario: HistorialSalario[];
+    /* @OneToMany(() => HistorialSalario, historialSalario => historialSalario.perfAfilCentTrab, { cascade: true })
+    historialesSalario: HistorialSalario[]; */
 }

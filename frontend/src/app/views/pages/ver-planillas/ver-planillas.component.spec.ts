@@ -1,20 +1,18 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { DocsLinkComponent } from './docs-link.component';
+import { VerPlanillasComponent } from './ver-planillas.component';
 
-describe('DocsLinkComponent', () => {
-  let component: DocsLinkComponent;
-  let fixture: ComponentFixture<DocsLinkComponent>;
+describe('VerPlanillasComponent', () => {
+  let component: VerPlanillasComponent;
+  let fixture: ComponentFixture<VerPlanillasComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [ DocsLinkComponent ]
+      imports: [VerPlanillasComponent]
     })
     .compileComponents();
-  });
-
-  beforeEach(() => {
-    fixture = TestBed.createComponent(DocsLinkComponent);
+    
+    fixture = TestBed.createComponent(VerPlanillasComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

@@ -1,46 +1,41 @@
 <div class="card">
-    <div class="card-header card-header-danger tittle" style="background: rgb(29, 192, 192);">
-      <h4 class="card-title">Beneficiarios</h4>
-      <p class="card-category">Llene los campos para continuar con el proceso.</p>
+  <div class="card-header card-header-danger tittle" style="background: rgb(29, 192, 192);">
+    <h4 class="card-title">Beneficiarios</h4>
+    <p class="card-category">Llene los campos para continuar con el proceso.</p>
+  </div>
+
+  <form [formGroup]="formParent" (change)="onDatosBenChange()">
+    <div formArrayName="refpers">
+      <div *ngFor="let skill of getCtrl('refpers', formParent).controls; index as formChild; let i = index">
+        <h4 class="card-title">Beneficiario número: {{i+1}}</h4>
+        <div [formGroupName]="formChild" class="row">
+
+          <!-- componente aparte de datos generales -->
+          <app-dat-generales-afiliado groupName="benfGroup"
+            (newDatBenChange)="prueba($event, i); onDatosBenChange()"></app-dat-generales-afiliado>
+
+          <!-- componente aparte de datos bancarios -->
+
+          <!-- <app-dat-banc groupName="DatosBac"></app-dat-banc> -->
+
+          <!-- componente aparte de archivo -->
+          <!--           <app-botonarchivos groupName="Archivos" [labelBoton]="getLabel('refpers', formParent, i)"
+            (setArchivo)="handleArchivoSeleccionado($event, i)">
+          </app-botonarchivos> -->
+          <!-- componente aparte de Beneficio -->
+          <app-beneficio groupName="porcBenef"></app-beneficio>
+        </div>
+
+      </div>
     </div>
+  </form>
 
-    <form [formGroup]="formParent" (change)="onDatosBenChange()">
-        <div formArrayName="refpers">
-            <div *ngFor="let skill of getCtrl('refpers', formParent).controls; index as formChild; let i = index">
-                <h4 class="card-title">Beneficiario número: {{i+1}}</h4>
-                <div [formGroupName]="formChild" class="row">
-                  <app-dat-generales-afiliado groupName="benfGroup" (newDatBenChange)="prueba($event, i); onDatosBenChange()"></app-dat-generales-afiliado>
-                  <app-dat-banc groupName="DatosBac" ></app-dat-banc>
-                  <app-botonarchivos groupName="Archivos"
-                    labelBoton="Descarga el archivo de identificación (beneficiario)"
-                    (setArchivo)="handleArchivoSeleccionado($event)">
-                  </app-botonarchivos>
-                </div>
-        
-                <form [formGroup]="beneficio">
-                  <h3 class="card-title">Beneficio</h3>
-                  <div class="row">
-                    <div class="col-md-6">
-                      <mat-form-field class="example-full-width; inputs" appearance="outline">
-                        <mat-label>Porcentaje de beneficio</mat-label>
-                        <input matInput formControlName="porcBenef" type="number">
-                      </mat-form-field>
-                    </div>
-                    <div class="col-md-6">
-                    </div>
-                  </div>
-                </form>
-
-            </div>
-          </div>
-    </form>
-
-    <div class="row">
-      <div class="col-md-6">
-        <button mat-button color="primary" (click)="agregarBen()">Agregar Beneficiario</button>
-      </div>
-      <div class="col-md-6">
-        <button mat-button color="warn" (click)="eliminarRefPer()">Eliminar Beneficiario</button>
-      </div>
+  <div class="row">
+    <div class="col-md-6">
+      <button mat-button color="primary" (click)="agregarBen()">Agregar Beneficiario</button>
+    </div>
+    <div class="col-md-6">
+      <button mat-button color="warn" (click)="eliminarRefPer()">Eliminar Beneficiario</button>
     </div>
   </div>
+</div>

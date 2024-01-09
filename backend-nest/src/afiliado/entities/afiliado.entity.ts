@@ -8,6 +8,7 @@ import { Pais } from "src/modules/Regional/pais/entities/pais.entity";
 import { TipoIdentificacion } from "src/modules/tipo_identificacion/entities/tipo_identificacion.entity";
 import { BeneficioPlanilla } from "src/modules/Planilla/beneficio_planilla/entities/beneficio_planilla.entity";
 import { Usuario } from "src/modules/usuario/entities/usuario.entity";
+import { DedAfilPlanilla } from "src/modules/Planilla/ded-afil-planilla/entities/ded-afil-planilla.entity";
 
 @Entity()
 export class Afiliado {
@@ -122,11 +123,10 @@ export class Afiliado {
     @JoinColumn({ name: 'id_tipo_identificacion' })
     tipoIdentificacion: TipoIdentificacion;
 
-    @OneToMany(() => BeneficioPlanilla, beneficioPlanilla => beneficioPlanilla.afiliado)
-    beneficioPlanilla: BeneficioPlanilla[];
-
     @OneToOne(() => Usuario, { cascade: true })
     @JoinColumn({ name: 'id_usuario' })
     usuario: Usuario;
-   
+
+    @OneToMany(() => DedAfilPlanilla, dedAfilPlanilla => dedAfilPlanilla.afiliado)
+    dedAfilPlanilla: DedAfilPlanilla[];
 }

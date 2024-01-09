@@ -2,6 +2,7 @@ import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from "t
 import { Planilla } from "../../planilla/entities/planilla.entity";
 import { Beneficio } from "../../beneficio/entities/beneficio.entity";
 import { Afiliado } from "src/afiliado/entities/afiliado.entity";
+import { AfiliadosPorBanco } from "src/banco/entities/afiliados-banco";
 
 @Entity()
 export class BeneficioPlanilla {
@@ -26,7 +27,8 @@ export class BeneficioPlanilla {
     @JoinColumn({ name: 'id_beneficio'})
     beneficio : Beneficio;
 
-    @ManyToOne(() => Afiliado, afiliado => afiliado.beneficioPlanilla, { cascade : true })
-    @JoinColumn({ name: 'id_afiliado'})
-    afiliado : Afiliado;
+    @ManyToOne(() => AfiliadosPorBanco, afiliadosPorBanco => afiliadosPorBanco.beneficioPlanilla, { cascade : true })
+    @JoinColumn({ name: 'id_afiliadosPorBanco'})
+    afiliadosPorBanco : AfiliadosPorBanco;
+
 }

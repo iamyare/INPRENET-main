@@ -1,11 +1,26 @@
 import { Injectable } from '@angular/core';
+import { AfiliadoService } from './afiliado.service';
+import { DireccionService } from './direccion.service';
+import { BancosService } from './bancos.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class DatosEstaticosService {
+  paises: any = []; departamentos: any = []; DatosBancBen:any = [];
+  Bancos: any = [];
 
-  constructor() { }
+  constructor(private afiliadoService: AfiliadoService, public direccionSer: DireccionService,private bancosService: BancosService) { 
+    this.direccionSer.getAllCiudades().subscribe((res: any) => {});
+    this.direccionSer.getAllProvincias().subscribe((res: any) => {});
+    this.direccionSer.getAllPaises().subscribe((res: any) => {
+      this.departamentos = res.paises
+      this.paises = res.paises
+    });
+    this.bancosService.getAllBancos().subscribe((res: any) => {
+      this.Bancos = res.bancos
+    });
+  }
 
   estadoCivil = [
     {
@@ -51,6 +66,10 @@ export class DatosEstaticosService {
     {
       "idEstado":2,
       "value": "ACTIVO"
+    },
+    {
+      "idEstado":3,
+      "value": "INACTIVO"
     }
   ];
   Sexo = [
@@ -98,6 +117,10 @@ export class DatosEstaticosService {
       "idCotizante":3,
       "value": "AFILIADO y BENEFICIARIO"
     },
+    {
+      "idEstado":4,
+      "value": "JUBILADO"
+    }
   ];
 
   centrosTrabajo = [

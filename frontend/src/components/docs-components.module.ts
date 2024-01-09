@@ -5,9 +5,6 @@ import { RouterModule } from '@angular/router';
 import { AvatarModule, BadgeModule, BreadcrumbModule, ButtonGroupModule, ButtonModule, CalloutModule, CardModule, DropdownModule, FooterModule, FormModule, GridModule, HeaderModule, ListGroupModule, NavModule, ProgressModule, SidebarModule, TabsModule, UtilitiesModule } from '@coreui/angular';
 
 import { IconModule } from '@coreui/icons-angular';
-import { DocsExampleComponent } from './docs-example/docs-example.component';
-import { DocsLinkComponent } from './docs-link/docs-link.component';
-import { DocsCalloutComponent } from './docs-callout/docs-callout.component';
 import { LayoutModule } from '@angular/cdk/layout';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
@@ -40,12 +37,16 @@ import { DatBancComponent } from './dat-banc/dat-banc.component';
 import { RefPersComponent } from './ref-pers/ref-pers.component';
 import { BenefComponent } from './benef/benef.component';
 import { BotonarchivosComponent } from './botonarchivos/botonarchivos.component';
+import { ProgressbarComponent } from './progressbar/progressbar.component';
+import { ProgressplanillComponent } from './progressplanill/progressplanill.component';
+import { WebcamModule } from 'ngx-webcam';
+import { BeneficioComponent } from './beneficio/beneficio.component';
 
 @NgModule({
   declarations: [
-    DocsExampleComponent,
-    DocsLinkComponent,
-    DocsCalloutComponent,
+    BeneficioComponent,
+    ProgressplanillComponent,
+    ProgressbarComponent,
     DatGeneralesAfiliadoComponent,
     DatPuestoTrabComponent,
     DatBancComponent,
@@ -55,9 +56,9 @@ import { BotonarchivosComponent } from './botonarchivos/botonarchivos.component'
     HistorialSalarioComponent
   ],
   exports: [
-    DocsExampleComponent,
-    DocsLinkComponent,
-    DocsCalloutComponent,
+    ProgressbarComponent,
+    ProgressplanillComponent,
+    BeneficioComponent,
     DatGeneralesAfiliadoComponent,
     DatPuestoTrabComponent,
     DatBancComponent,
@@ -67,6 +68,7 @@ import { BotonarchivosComponent } from './botonarchivos/botonarchivos.component'
     HistorialSalarioComponent
   ],
   imports: [
+    WebcamModule,
     CommonModule,
     NavModule,
     IconModule,

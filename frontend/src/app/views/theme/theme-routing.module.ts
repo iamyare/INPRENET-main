@@ -1,13 +1,15 @@
 import { NgModule } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
 
-/* import { ColorsComponent } from './colors.component';
-import { TypographyComponent } from './typography.component'; */
 import { AfilBancoComponent } from '../pages/afil-banco/afil-banco.component';
-import { ColorsComponent } from './colors.component';
-import { TypographyComponent } from './typography.component';
 import { CentroTrabajoComponent } from '../pages/centro-trabajo/centro-trabajo.component';
 import { DatosGenAfilComponent } from '../pages/datos-gen-afil/datos-gen-afil.component';
+import { VerDeduccionesComponent } from '../pages/ver-deducciones/ver-deducciones.component';
+import { SubirDeduccionesComponent } from '../pages/subir-deducciones/subir-deducciones.component';
+import { NuevaPlanillaComponent } from '../pages/nueva-planilla/nueva-planilla.component';
+import { VerPlanillasComponent } from '../pages/ver-planillas/ver-planillas.component';
+import { SubirDeduccionesformComponent } from '../pages/subir-deduccionesform/subir-deduccionesform.component';
+/* import { CentroTrabajoPageComponent } from '../pages/centro-trabajo-page/centro-trabajo-page.component'; */
 
 const routes: Routes = [
   {
@@ -21,39 +23,54 @@ const routes: Routes = [
         pathMatch: 'full',
         redirectTo: 'afil-banco',
       },
-      /* {
-        path: 'colors',
-        component: ColorsComponent,
-        data: {
-          title: 'Colors',
-        },
-      }, */
-      /* {
-        path: 'typography',
-        component: TypographyComponent,
-        data: {
-          title: 'Typography',
-        },
-      }, */
       {
         path: 'afil-banco',
         component: AfilBancoComponent,
         data: {
-          title: 'Afiliados a banco',
+          title: 'Nuevo Afiliado',
+        },
+      },
+    ],
+  },
+  {
+    path: '',
+    data: {
+      title: 'Planilla',
+    },
+    children: [
+      {
+        path: 'subir-deducciones',
+        component: SubirDeduccionesComponent,
+        data: {
+          title: 'Subir Deducciones',
         },
       },
       {
-        path: 'centro-trabajo',
-        component: CentroTrabajoComponent,
+        path: 'subir-deduccionesform',
+        component: SubirDeduccionesformComponent,
         data: {
-          title: 'Centro Trabajo',
+          title: 'Subir Deducciones',
         },
       },
       {
-        path: 'datos-gen-afil',
-        component: DatosGenAfilComponent,
+        path: 'ver-deducciones',
+        component: VerDeduccionesComponent,
         data: {
-          title: 'Centro Trabajo',
+          title: 'Ver Deducciones',
+        },
+      },
+      {
+        path: 'nueva-planilla',
+        component: NuevaPlanillaComponent,
+        data: {
+          title: 'Nueva Planilla',
+        },
+      },
+      {
+        path: 'ver-planillas',
+        component: VerPlanillasComponent,
+        data: {
+          title: 'Ver Planillas',
         },
       },
       {
@@ -71,4 +88,4 @@ const routes: Routes = [
   imports: [RouterModule.forChild(routes)],
   exports: [RouterModule],
 })
-export class ThemeRoutingModule {}
+export class ThemeRoutingModule { }

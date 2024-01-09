@@ -5,13 +5,13 @@
   </div>
   <div class="card-body">
 
-    <fieldset [formGroupName]="groupName" cForm >
+    <fieldset [formGroupName]="groupName" cForm>
       <div class="row">
         <div class="col-md-6">
           <mat-form-field class="example-full-width; inputs" appearance="outline">
             <mat-label>Tipo de identificación</mat-label>
             <select matNativeControl formControlName="tipoIdent">
-              <option *ngFor="let p of tipoIdent" [value]="p.idIdentificacion">
+              <option *ngFor="let p of tipoIdent" [value]="p.value">
                 {{p.value}}
               </option>
             </select>
@@ -88,7 +88,7 @@
           <mat-form-field class="example-full-width; inputs" appearance="outline">
             <mat-label>Residencia</mat-label>
             <select matNativeControl formControlName="ciudadDomicilio">
-              <option *ngFor="let p of paises" [value]="p.ID_PAIS">
+              <option *ngFor="let p of paises" [value]="p.NOMBRE">
                 {{p.NOMBRE}}
               </option>
             </select>
@@ -98,7 +98,7 @@
           <mat-form-field class="example-full-width; inputs" appearance="outline">
             <mat-label>Nacionalidad</mat-label>
             <select matNativeControl formControlName="ciudadNacimiento">
-              <option *ngFor="let p of departamentos" [value]="p.ID_PAIS">
+              <option *ngFor="let p of departamentos" [value]="p.NACIONALIDAD">
                 {{p.NACIONALIDAD}}
               </option>
             </select>
@@ -173,6 +173,20 @@
         </div>
       </div>
       <div class="row">
+        <div class="col-md-6">
+          <mat-form-field class="example-full-width; inputs" appearance="outline">
+            <mat-label>Número de carnet</mat-label>
+            <input matInput formControlName="numeroCarnet">
+          </mat-form-field>
+        </div>
+        <div class="col-md-6">
+          <mat-form-field class="example-full-width; inputs" appearance="outline">
+            <mat-label>Colegio Magisterial</mat-label>
+            <input matInput formControlName="colegioMagisterial">
+          </mat-form-field>
+        </div>
+      </div>
+      <div class="row">
         <div class="col-md-3">
           <mat-form-field class="example-full-width; inputs" appearance="outline">
             <mat-label>Teléfono principal</mat-label>
@@ -202,20 +216,7 @@
           </mat-form-field>
         </div>
       </div>
-      <div class="row">
-        <div class="col-md-3">
-          <mat-form-field class="example-full-width; inputs" appearance="outline">
-            <mat-label>Número de carnet</mat-label>
-            <input matInput formControlName="numeroCarnet">
-          </mat-form-field>
-        </div>
-        <div class="col-md-3">
-          <mat-form-field class="example-full-width; inputs" appearance="outline">
-            <mat-label>Colegio Magisterial</mat-label>
-            <input matInput formControlName="colegioMagisterial">
-          </mat-form-field>
-        </div>
-      </div>
-    </fieldset>    
+
+    </fieldset>
   </div>
 </div>

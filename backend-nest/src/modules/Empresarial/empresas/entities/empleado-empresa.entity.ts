@@ -8,15 +8,13 @@ export class EmpleadoEmpresa {
     @PrimaryGeneratedColumn('uuid')
     id: string;
    
-    @ManyToOne(
-        () => Empresa,
-        ( empresa ) => empresa.id_empresa
-    )
-    id_empresa : Empresa
+    @ManyToOne(() => Empresa, (empresa) => empresa.id_empresa)
+    @JoinColumn({ name: 'id_empresa' })
+    id_empresa: Empresa
 
-    @ManyToOne(() => Empleado, empleado => empleado.empleadoEmpresa, { cascade: true })
+    @ManyToOne(() => Empleado, (empleado) => empleado.id_empleado)
     @JoinColumn({ name: 'id_empleado' })
-    empleado: Empleado;
+    id_empleado: Empleado
 
 
   }

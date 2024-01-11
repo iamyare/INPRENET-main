@@ -1,191 +1,166 @@
 /* 
 
-import { BadRequestException, Injectable, InternalServerErrorException, Logger } from '@nestjs/common';
-import { CreateAfiliadoDto } from './dto/create-afiliado.dto';
-import { UpdateAfiliadoDto } from './dto/update-afiliado.dto';
-import { Connection, Repository } from 'typeorm';
-import { Afiliado } from './entities/afiliado.entity';
+import { BadRequestException, Injectable, InternalServerErrorException, Logger, NotFoundException } from '@nestjs/common';
+import { CreateDeduccionDto } from './dto/create-deduccion.dto';
+import { UpdateDeduccionDto } from './dto/update-deduccion.dto';
 import { InjectRepository } from '@nestjs/typeorm';
-import { HistorialSalario } from './entities/historialSalarios.entity';
-import { PerfAfilCentTrab } from './entities/perf_afil_cent_trab';
-import { ReferenciaPersonal } from './entities/referencia-personal';
-import { ReferenciaPersonalAfiliado } from './entities/referenciaP-Afiliado';
-import { AfiliadosPorBanco } from 'src/banco/entities/afiliados-banco';
-import { CentroTrabajo } from 'src/modules/Empresarial/centro-trabajo/entities/centro-trabajo.entity';
-import { Banco } from 'src/banco/entities/banco.entity';
-import { Provincia } from 'src/modules/Regional/provincia/entities/provincia.entity';
-import { Pais } from 'src/modules/Regional/pais/entities/pais.entity';
-import { TipoIdentificacion } from 'src/modules/tipo_identificacion/entities/tipo_identificacion.entity';
+import { Deduccion } from './entities/deduccion.entity';
+import { Repository } from 'typeorm';
+import * as xlsx from 'xlsx';
+import * as fs from 'fs';
+import * as path from 'path';
+import { DetalleDeduccion } from '../detalle-deduccion/entities/detalle-deduccion.entity';
+import { Afiliado } from 'src/afiliado/entities/afiliado.entity';
+import { Institucion } from 'src/modules/Empresarial/institucion/entities/institucion.entity';
 
 @Injectable()
-export class AfiliadoService {
+export class DeduccionService {
 
-  private readonly logger = new Logger(AfiliadoService.name)
+  private readonly logger = new Logger(DeduccionService.name)
 
   constructor(
+    @InjectRepository(DetalleDeduccion)
+    private detalleDeduccionRepository: Repository<DetalleDeduccion>,
     @InjectRepository(Afiliado)
-    private readonly afiliadoRepository : Repository<Afiliado>,
-    @InjectRepository(HistorialSalario)
-    private readonly historialSalarioRepository : Repository<HistorialSalario>,
-    @InjectRepository(PerfAfilCentTrab)
-    private readonly perfAfilCentTrabRepository : Repository<PerfAfilCentTrab>,
-    @InjectRepository(ReferenciaPersonal)
-    private readonly referenciaPersonal : Repository<ReferenciaPersonal>,
-    @InjectRepository(ReferenciaPersonalAfiliado)
-    private readonly referenciaPersonalAfiliadoRepository : Repository<ReferenciaPersonalAfiliado>,
-    @InjectRepository(AfiliadosPorBanco)
-    private readonly AfiliadosPorBancoRepository : Repository<AfiliadosPorBanco>,
-    @InjectRepository(TipoIdentificacion)
-    private readonly tipoIdentificacionRepository: Repository<TipoIdentificacion>,
-    @InjectRepository(Pais)
-    private readonly paisRepository: Repository<Pais>,
-    @InjectRepository(Provincia)
-    private readonly provinciaRepository: Repository<Provincia>,
-    @InjectRepository(CentroTrabajo)
-    private readonly centroTrabajoRepository: Repository<CentroTrabajo>,
-    @InjectRepository(Banco)
-    private readonly bancoRepository: Repository<Banco>,
-    private connection: Connection,
-  ){}
+    private afiliadoRepository: Repository<Afiliado>,
+    @InjectRepository(Deduccion)
+    private deduccionRepository: Repository<Deduccion>,
+    @InjectRepository(Institucion)
+    private institucionRepository: Repository<Institucion>
+  ){
+   
+  }
+
+  async create(createDeduccionDto: CreateDeduccionDto) {
+    const existingDeduccion = await this.deduccionRepository.findOne({
+      where: { descripcion_deduccion: createDeduccionDto.descripcion_deduccion }
+    });
   
-  async create(createAfiliadoDto: CreateAfiliadoDto): Promise<Afiliado> {
-    const queryRunner = this.connection.createQueryRunner();
+    if (existingDeduccion) {
+      throw new BadRequestException('La deducción con esa descripción ya existe');
+    }
+  
+    const deduccion = this.deduccionRepository.create(createDeduccionDto);
+    await this.deduccionRepository.save(deduccion);
+    return deduccion;
+  }
 
-    await queryRunner.connect();
-    await queryRunner.startTransaction();
+  processExcel(fileBuffer: Buffer): any {
+    const workbook = xlsx.read(fileBuffer, { type: 'buffer' });
+    const sheetName = workbook.SheetNames[0];
+    const worksheet = workbook.Sheets[sheetName];
+    return xlsx.utils.sheet_to_json(worksheet);
+  }
 
-    try {
-        // Verifica y encuentra las entidades necesarias para el afiliado principal
-        const tipoIdentificacion = await queryRunner.manager.findOneBy(TipoIdentificacion, { tipo_identificacion: createAfiliadoDto.tipo_identificacion });
-        if (!tipoIdentificacion) {
-            throw new BadRequestException('Identificacion not found');
-        }
 
-        const pais = await queryRunner.manager.findOneBy(Pais, { nombre_pais: createAfiliadoDto.nombre_pais });
-        if (!pais) {
-            throw new BadRequestException('Pais not found');
-        }
+  async saveDetalles(detallesData: any[]): Promise<void> {
+    const failedRows = [];
 
-        const provincia = await queryRunner.manager.findOneBy(Provincia, { nombre_provincia: createAfiliadoDto.nombre_provincia });
-        if (!provincia) {
-            throw new BadRequestException('Provincia not found');
-        }
-
-        const banco = await queryRunner.manager.findOneBy(Banco, { nombre_banco: createAfiliadoDto.datosBanc.nombreBanco });
-        if (!banco) {
-            throw new BadRequestException('Banco not found');
-        }
-
-        // Crear un nuevo registro en AfiliadosPorBanco para el afiliado principal
-        const afiliadoBanco = queryRunner.manager.create(AfiliadosPorBanco, {
-            banco,
-            num_cuenta: createAfiliadoDto.datosBanc.numeroCuenta
+    for (const d of detallesData) {
+      try {
+        const afiliado = await this.afiliadoRepository.findOne({
+          where: { dni: d.DNI },
         });
-        await queryRunner.manager.save(afiliadoBanco);
+        if (!afiliado) {
+          throw new NotFoundException(`Afiliado con DNI ${d.DNI} no encontrado`);
+        }
 
-        // Verificar y encontrar los centros de trabajo para cada perfAfilCentTrab
-        const perfAfilCentTrabs = await Promise.all(createAfiliadoDto.perfAfilCentTrabs.map(async perfAfilCentTrabDto => {
-            const centroTrabajo = await queryRunner.manager.findOneBy(CentroTrabajo, { nombre_Centro_Trabajo: perfAfilCentTrabDto.nombre_centroTrabajo });
-            if (!centroTrabajo) {
-                throw new BadRequestException(`Centro de trabajo no encontrado: ${perfAfilCentTrabDto.nombre_centroTrabajo}`);
-            }
-
-            return queryRunner.manager.create(PerfAfilCentTrab, {
-                ...perfAfilCentTrabDto,
-                centroTrabajo
-            });
-        }));
-
-        // Crear y preparar el nuevo afiliado principal con datos y relaciones
-        const newAfiliado = queryRunner.manager.create(Afiliado, {
-            ...createAfiliadoDto,
-            tipoIdentificacion,
-            pais,
-            provincia,
-            afiliadosPorBanco: [afiliadoBanco],
-            perfAfilCentTrabs,
+        const deduccion = await this.deduccionRepository.findOne({
+          where: { id_deduccion: d.id_deduccion },
         });
-        await queryRunner.manager.save(newAfiliado);
+        if (!deduccion) {
+          throw new NotFoundException(`Deducción con ID ${d.id_deduccion} no encontrada`);
+        }
 
-        // Crear y asociar afiliados hijos
-        if (createAfiliadoDto.afiliadosRelacionados && createAfiliadoDto.afiliadosRelacionados.length > 0) {
-            for (const hijoDto of createAfiliadoDto.afiliadosRelacionados) {
-                const tipoIdentificacionHijo = await queryRunner.manager.findOneBy(TipoIdentificacion, { tipo_identificacion: hijoDto.tipo_identificacion });
-                if (!tipoIdentificacionHijo) {
-                    throw new BadRequestException('Identificacion not found for related affiliate');
-                }
+        const institucion = await this.institucionRepository.findOne({
+          where: { nombre_institucion: d.nombre_institucion },
+        });
+        if (!institucion) {
+          throw new NotFoundException(`Institución con nombre ${d.nombre_institucion} no encontrada`);
+        }
 
-                const paisHijo = await queryRunner.manager.findOneBy(Pais, { nombre_pais: hijoDto.nombre_pais });
-                if (!paisHijo) {
-                    throw new BadRequestException('Pais not found for related affiliate');
-                }
+        const detalle = new DetalleDeduccion();
+        detalle.anio = d.AÑO;
+        detalle.mes = d.MES;
+        detalle.deduccion = deduccion;
+        detalle.monto_deduccion = d.monto_deduccion;
+        detalle.institucion = institucion;
+        detalle.afiliado = afiliado;
 
-                const provinciaHijo = await queryRunner.manager.findOneBy(Provincia, { nombre_provincia: hijoDto.nombre_provincia });
-                if (!provinciaHijo) {
-                    throw new BadRequestException('Provincia not found for related affiliate');
-                }
-
-                const bancoHijo = await queryRunner.manager.findOneBy(Banco, { nombre_banco: hijoDto.datosBanc.nombreBanco });
-                if (!bancoHijo) {
-                    throw new BadRequestException('Banco not found for related affiliate');
-                }
-
-               /*  const afiliadoBancoHijo = queryRunner.manager.create(AfiliadosPorBanco, {
-                    banco: bancoHijo,
-                    num_cuenta: hijoDto.datosBanc.numeroCuenta
-                });
-                await queryRunner.manager.save(afiliadoBancoHijo); 
-
-                const afiliadoHijo = queryRunner.manager.create(Afiliado, {
-                  ...hijoDto,
-                  tipoIdentificacion: tipoIdentificacionHijo,
-                  pais: paisHijo,
-                  provincia: provinciaHijo,
-                  padreIdAfiliado: newAfiliado
-                  /* ,
-                  afiliadosPorBanco: [afiliadoBancoHijo] 
-              });
-              await queryRunner.manager.save(afiliadoHijo);
-          }
+        await this.detalleDeduccionRepository.save(detalle);
+      } catch (error) {
+        this.logger.error(`Failed to save detail: ${JSON.stringify(d)}`, error.stack);
+        failedRows.push({ ...d, error: error.message });
       }
+    }
 
-      await queryRunner.commitTransaction();
-      return newAfiliado;
-  } catch (error) {
-      await queryRunner.rollbackTransaction();
+    if (failedRows.length > 0) {
+      const filePath = this.createFailedRowsExcel(failedRows);
+      this.logger.error(`Failed rows written to Excel file at: ${filePath}`);
+      // Aquí podrías, por ejemplo, mover el archivo a un bucket S3 o enviarlo por email
+    }
+  }
+
+private createFailedRowsExcel(failedRows: any[]): string {
+  const workbook = xlsx.utils.book_new();
+  const worksheet = xlsx.utils.json_to_sheet(failedRows);
+  xlsx.utils.book_append_sheet(workbook, worksheet, 'Failed Rows');
+
+  // Asegúrate de que el directorio 'failed_rows' existe
+  const directory = path.join(__dirname, 'failed_rows');
+  if (!fs.existsSync(directory)) {
+      fs.mkdirSync(directory, { recursive: true });
+  }
+
+  // Define un nombre de archivo único
+  const filePath = path.join(directory, `failed_rows_${Date.now()}.xlsx`);
+
+  // Escribe el archivo Excel en el path especificado
+  xlsx.writeFile(workbook, filePath);
+
+  // Devuelve el path del archivo para su posterior procesamiento
+  return filePath;
+}
+
+  findAll() {
+    return this.deduccionRepository.find()
+  }
+
+  findOne(id: number) {
+    return `This action returns a #${id} deduccion`;
+  }
+
+  async update(id_deduccion: string, updateDeduccionDto: UpdateDeduccionDto) {
+    const deduccion = await this.deduccionRepository.preload({
+      id_deduccion: id_deduccion,
+      ...UpdateDeduccionDto
+    });
+
+    if(!deduccion) throw new NotFoundException(`Deduccion con el id: ${id_deduccion} no funciona`)
+    
+    try{
+      await this.deduccionRepository.save(deduccion);
+      return deduccion;
+    } 
+    catch (error) {
       this.handleException(error);
-  } finally {
-      await queryRunner.release();
+    }
+  }
+
+  remove(id: number) {
+    return `This action removes a #${id} deduccion`;
+  }
+
+  private handleException(error: any): void {
+    this.logger.error(error);
+    if (error.driverError && error.driverError.errorNum === 1) {
+      throw new BadRequestException('La deduccion ya existe');
+    } else {
+      throw new InternalServerErrorException('Ocurrió un error al procesar su solicitud');
+    }
   }
 }
 
-
-findAll() {
-  const afiliado = this.afiliadoRepository.find()
-  return afiliado;
-}
-
-findOne(id: string) {
-  return `This action returns a #${id} afiliado`;
-}
-
-update(id: number, updateAfiliadoDto: UpdateAfiliadoDto) {
-  return `This action updates a #${id} afiliado`;
-}
-
-remove(id: number) {
-  return `This action removes a #${id} afiliado`;
-}
-
-private handleException(error: any): void {
-  this.logger.error(error);
-  if (error.driverError && error.driverError.errorNum === 1) {
-    throw new BadRequestException('Algun dato clave ya existe');
-  } else {
-    throw new InternalServerErrorException('Ocurrió un error al procesar su solicitud');
-  }
-}
-}
 
 
 */

@@ -48,6 +48,6 @@ export class Empleado{
         tipo_identificacion: TipoIdentificacion;
         
 
-        @OneToMany(() => EmpleadoEmpresa, empleadoEmpresa => empleadoEmpresa.empleado)
-        empleadoEmpresa: EmpleadoEmpresa[];
+        @OneToMany(() => EmpleadoEmpresa, empleadoEmpresa => empleadoEmpresa.id_empleado)
+        empleadoEmpresa : EmpleadoEmpresa[];
 }

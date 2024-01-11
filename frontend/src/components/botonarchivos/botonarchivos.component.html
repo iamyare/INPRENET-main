@@ -1,7 +1,7 @@
 <fieldset [formGroupName]="groupName">
   <div class="d-grid" style="width: 100%; position: relative;">
     <div>
-      <input type="file" accept=".pdf" name="Archivos" formControlName="Archivos" #myFile2 [id]="uniqueId + '_input'"
+      <input type="file" name="Archivos" formControlName="Archivos" #myFile2 [id]="uniqueId + '_input'"
         (change)="onFileSelected($event)" class="inputfile inputfile-1" multiple />
 
       <label [for]="uniqueId + '_input'" style="border-radius: 0.3rem;">

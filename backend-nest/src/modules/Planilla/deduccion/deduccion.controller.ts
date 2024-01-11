@@ -1,7 +1,9 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseInterceptors, UploadedFile, Res } from '@nestjs/common';
 import { DeduccionService } from './deduccion.service';
 import { CreateDeduccionDto } from './dto/create-deduccion.dto';
 import { UpdateDeduccionDto } from './dto/update-deduccion.dto';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { Response } from 'express';
 
 @Controller('deduccion')
 export class DeduccionController {
@@ -10,6 +12,23 @@ export class DeduccionController {
   @Post()
   create(@Body() createDeduccionDto: CreateDeduccionDto) {
     return this.deduccionService.create(createDeduccionDto);
+  }
+
+  @Post('upload')
+  @UseInterceptors(FileInterceptor('excel'))
+  async uploadFile(@UploadedFile() file: Express.Multer.File, @Res() res: Response) {
+    if (!file) {
+      return res.status(400).send('No se encontró el archivo');
+    }
+
+    try {
+      const detalles = this.deduccionService.processExcel(file.buffer);
+      await this.deduccionService.saveDetalles(detalles);
+      res.status(201).send('Datos guardados exitosamente');
+    } catch (error) {
+      console.error(error);
+      res.status(500).send('Error al procesar el archivo');
+    }
   }
 
   @Get()

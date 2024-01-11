@@ -14,16 +14,19 @@ import { TipoPlanillaService } from './tipo-planilla/tipo-planilla.service';
 import { Deduccion } from './deduccion/entities/deduccion.entity';
 import { TipoPlanilla } from './tipo-planilla/entities/tipo-planilla.entity';
 import { DeduccionService } from './deduccion/deduccion.service';
-import { DedAfilPlanillaModule } from './ded-afil-planilla/ded-afil-planilla.module';
-import { DedAfilPlanilla } from './ded-afil-planilla/entities/ded-afil-planilla.entity';
-import { DedAfilPlanillaService } from './ded-afil-planilla/ded-afil-planilla.service';
-import { DedAfilPlanillaController } from './ded-afil-planilla/ded-afil-planilla.controller';
+import { DetalleDeduccionController } from './detalle-deduccion/detalle-deduccion.controller';
+import { DetalleDeduccion } from './detalle-deduccion/entities/detalle-deduccion.entity';
+import { DetalleDeduccionService } from './detalle-deduccion/detalle-deduccion.service';
+import { EmpresarialModule } from '../Empresarial/empresarial.module';
+import { Institucion } from '../Empresarial/institucion/entities/institucion.entity';
+import { Afiliado } from 'src/afiliado/entities/afiliado.entity';
 
 @Module({
-  controllers: [PlanillaController, BeneficioController, BeneficioPlanillaController, DeduccionController, DeduccionController, DedAfilPlanillaController],
-  providers: [PlanillaService, BeneficioService, BeneficioPlanillaService, DeduccionService, TipoPlanillaService ,DedAfilPlanillaService],
+  controllers: [PlanillaController, BeneficioController, BeneficioPlanillaController, DeduccionController,
+                DeduccionController, DetalleDeduccionController],
+  providers: [PlanillaService, BeneficioService, BeneficioPlanillaService, DeduccionService,
+              TipoPlanillaService, DetalleDeduccionService],
   imports: [
-    TypeOrmModule.forFeature([Beneficio, BeneficioPlanilla, Planilla, Deduccion, TipoPlanilla, DedAfilPlanilla]),
-    DedAfilPlanillaModule]
+    TypeOrmModule.forFeature([Beneficio, BeneficioPlanilla, Planilla, Deduccion, TipoPlanilla, DetalleDeduccion, Institucion, Afiliado])]
 })
 export class PlanillaModule {}

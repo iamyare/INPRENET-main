@@ -14,6 +14,7 @@ import { Banco } from 'src/banco/entities/banco.entity';
 import { Provincia } from 'src/modules/Regional/provincia/entities/provincia.entity';
 import { Pais } from 'src/modules/Regional/pais/entities/pais.entity';
 import { TipoIdentificacion } from 'src/modules/tipo_identificacion/entities/tipo_identificacion.entity';
+import { CreateAfiliadoTempDto } from './dto/create-afiliado-temp.dto';
 
 @Injectable()
 export class AfiliadoService {
@@ -156,6 +157,16 @@ export class AfiliadoService {
         await queryRunner.release();
     }
 }
+
+    async createTemp(createAfiliadoTempDto: CreateAfiliadoTempDto) {
+        try {
+            const afiliado = this.afiliadoRepository.create(createAfiliadoTempDto)
+            await this.afiliadoRepository.save(afiliado)
+            return afiliado;
+          } catch (error) {
+            this.handleException(error);
+          }
+  }
 
 
   findAll() {

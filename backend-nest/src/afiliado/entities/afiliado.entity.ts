@@ -8,23 +8,23 @@ import { Pais } from "src/modules/Regional/pais/entities/pais.entity";
 import { TipoIdentificacion } from "src/modules/tipo_identificacion/entities/tipo_identificacion.entity";
 import { BeneficioPlanilla } from "src/modules/Planilla/beneficio_planilla/entities/beneficio_planilla.entity";
 import { Usuario } from "src/modules/usuario/entities/usuario.entity";
-import { DedAfilPlanilla } from "src/modules/Planilla/ded-afil-planilla/entities/ded-afil-planilla.entity";
+import { DetalleDeduccion } from "src/modules/Planilla/detalle-deduccion/entities/detalle-deduccion.entity";
 
 @Entity()
 export class Afiliado {
     @PrimaryGeneratedColumn('uuid')
     id_afiliado: string;
 
-    @Column('varchar2', { length: 40, nullable: false, unique: true })
+    @Column('varchar2', { length: 40, nullable: true, unique: true })
     dni: string;
 
-    @Column('varchar2', { length: 40, nullable: false })
+    @Column('varchar2', { length: 40, nullable: true })
     estado_civil: string;
 
-    @Column('varchar2', { length: 40, nullable: false })
+    @Column('varchar2', { length: 40, nullable: true })
     tipo_cotizante: string;
 
-    @Column('varchar2', { length: 40, nullable: false })
+    @Column('varchar2', { length: 40, nullable: true })
     primer_nombre: string;
 
     @Column('varchar2', { length: 40, nullable: true })
@@ -33,58 +33,61 @@ export class Afiliado {
     @Column('varchar2', { length: 40, nullable: true })
     tercer_nombre: string;
 
-    @Column('varchar2', { length: 40, nullable: false })
+    @Column('varchar2', { length: 40, nullable: true })
     primer_apellido: string;
 
     @Column('varchar2', { length: 40, nullable: true })
     segundo_apellido: string;
 
-    @Column('date', { nullable: false })
+    @Column('date', { nullable: true })
     fecha_nacimiento: string;
 
-    @Column('char', { length: 1, nullable: false })
+    @Column('char', { length: 1, nullable: true })
     sexo: string;
 
-    @Column('number', { nullable: false })
+    @Column('number', { nullable: true })
     cantidad_dependientes: number;
 
-    @Column('number', { nullable: false })
+    @Column('number', { nullable: true })
     cantidad_hijos: number;
 
-    @Column('varchar2', { length: 30, nullable: false })
+    @Column('varchar2', { length: 30, nullable: true })
     profesion: string;
 
-    @Column('varchar2', { length: 40, nullable: false })
+    @Column('varchar2', { length: 40, nullable: true })
     representacion: string;
 
-    @Column('varchar2', { length: 12, nullable: false })
+    @Column('varchar2', { length: 12, nullable: true })
     telefono_1: string;
 
     @Column('varchar2', { length: 12, nullable: true })
     telefono_2: string;
 
-    @Column('varchar2', { length: 40, nullable: false })
+    @Column('varchar2', { length: 40, nullable: true })
     correo_1: string;
 
     @Column('varchar2', { length: 40, nullable: true })
     correo_2: string;
 
-    @Column('varchar2', { length: 200, nullable: false })
+    @Column('varchar2', { length: 200, nullable: true })
     archivo_identificacion: string;
 
-    @Column('varchar2', { length: 40, nullable: false })
+    @Column('varchar2', { length: 40, nullable: true })
     colegio_magisterial: string;
 
-    @Column('varchar2', { length: 40, nullable: false })
+    @Column('varchar2', { length: 40, nullable: true })
     numero_carnet: string;
 
-    @Column('varchar2', { length: 200, nullable: false })
+    @Column('varchar2', { length: 200, nullable: true })
     direccion_residencia: string;
 
     @Column('varchar2', { length: 40, default: 'ACTIVO' })
     estado: string;
 
-    @Column('varchar2', { length: 40, nullable: true })
+    @Column('number', { nullable: true})
+    salario_base: number;
+
+    @Column('number', { nullable: true })
     porcentaje: number;
 
     // Relación Uno a Muchos con PerfAfilCentTrab
@@ -127,6 +130,9 @@ export class Afiliado {
     @JoinColumn({ name: 'id_usuario' })
     usuario: Usuario;
 
-    @OneToMany(() => DedAfilPlanilla, dedAfilPlanilla => dedAfilPlanilla.afiliado)
-    dedAfilPlanilla: DedAfilPlanilla[];
+    @OneToMany(() => DetalleDeduccion, detalleDeduccion => detalleDeduccion.afiliado)
+    detalleDeduccion: DetalleDeduccion[];
+
+    /* @OneToMany(() => DeduccionCalculada, deduccionCalculada => deduccionCalculada.afiliado)
+    deduccionCalculada: DeduccionCalculada[]; */
 }

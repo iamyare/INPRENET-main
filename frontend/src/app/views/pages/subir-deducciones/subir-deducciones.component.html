@@ -14,7 +14,7 @@
 
     <div class="row" *ngIf="datosA && form.get('isChecked')?.value">
         <div class="col-md-6">
-            <app-botonarchivos labelBoton="Adjunte excel de deducciones" groupName="Archivos"></app-botonarchivos>
+            <app-botonarchivos labelBoton="Adjunte excel de deducciones" groupName="Archivos" (change)="onFileSelect($event)" accept=".xlsx, .xls"></app-botonarchivos>
         </div>
         <div class="col-md-6">
             <button mat-button color="primary">Enviar Formulario</button>
@@ -24,7 +24,5 @@
 
     <app-inline-editing-one *ngIf="datosTable"></app-inline-editing-one>
 
-
-
-
 </form>
+

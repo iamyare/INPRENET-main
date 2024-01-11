@@ -20,7 +20,7 @@
                             <input type="text" [(ngModel)]="user.name" class="form-control"/>
                         </div>
                         <div *ngIf="!user.isEdit">
-                            {{user.name}}
+                            {{usersArray[i]["COLUMNA 1"]}}
                         </div>
                     </td>
                     <td>{{user.username}}</td>

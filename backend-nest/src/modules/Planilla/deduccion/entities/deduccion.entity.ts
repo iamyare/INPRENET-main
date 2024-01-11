@@ -1,6 +1,6 @@
 import { HistorialSalario } from 'src/afiliado/entities/historialSalarios.entity';
 import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
-import { DedAfilPlanilla } from '../../ded-afil-planilla/entities/ded-afil-planilla.entity';
+import { DetalleDeduccion } from '../../detalle-deduccion/entities/detalle-deduccion.entity';
 
 @Entity()
 export class Deduccion {
@@ -17,9 +17,6 @@ export class Deduccion {
     @Column('number', {nullable: false })
     total_deduccion: number;
 
-    @OneToMany(() => DedAfilPlanilla, dedAfilPlanilla => dedAfilPlanilla.deduccion, { cascade: true })
-    dedAfilPlanilla : DedAfilPlanilla[];
-
-    /* @OneToMany(() => HistorialSalario, historialSalario => historialSalario.deduccion, { cascade: true })
-    historialSalario : HistorialSalario[]; */
+    @OneToMany(() => DetalleDeduccion, detalleDeduccion => detalleDeduccion.deduccion)
+    detalleDeduccion : DetalleDeduccion[];
 }

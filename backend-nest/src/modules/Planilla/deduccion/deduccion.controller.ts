@@ -18,16 +18,16 @@ export class DeduccionController {
   @UseInterceptors(FileInterceptor('excel'))
   async uploadFile(@UploadedFile() file: Express.Multer.File, @Res() res: Response) {
     if (!file) {
-      return res.status(400).send('No se encontró el archivo');
+      return res.status(400).json({ error: 'No se encontró el archivo' });
     }
 
     try {
       const detalles = this.deduccionService.processExcel(file.buffer);
       await this.deduccionService.saveDetalles(detalles);
-      res.status(201).send('Datos guardados exitosamente');
+      res.status(201).json({ mjs: 'Datos Guardados exitosamente' });
     } catch (error) {
       console.error(error);
-      res.status(500).send('Error al procesar el archivo');
+      res.status(400).json({ error: 'Error al procesar el archivo' });
     }
   }
 

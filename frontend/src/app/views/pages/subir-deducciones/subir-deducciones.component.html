@@ -7,14 +7,14 @@
         ¿Desea subir nuevas deducciones?
     </mat-slide-toggle>
 
-    <app-progressplanill (newDatBenChange)="setEstadoDatGen($event)"
-        [estadoSubDed]="form.get('isChecked')?.value"
-        (newEstCentrTrab)="setEstadoTable($event)">
-      </app-progressplanill>
+    <app-progressplanill (newDatBenChange)="setEstadoDatGen($event)" [estadoSubDed]="form.get('isChecked')?.value"
+        (newEstCentrTrab)="setEstadoTable($event)" (newdatosRP)="subirNuevPlan($event)">
+    </app-progressplanill>
 
     <div class="row" *ngIf="datosA && form.get('isChecked')?.value">
         <div class="col-md-6">
-            <app-botonarchivos labelBoton="Adjunte excel de deducciones" groupName="Archivos" (change)="onFileSelect($event)" accept=".xlsx, .xls"></app-botonarchivos>
+            <app-botonarchivos labelBoton="Adjunte excel de deducciones" groupName="ArchivosDed"
+                (change)="onFileSelect($event)" accept=".xlsx, .xls"></app-botonarchivos>
         </div>
         <div class="col-md-6">
             <button mat-button color="primary">Enviar Formulario</button>
@@ -24,5 +24,12 @@
 
     <app-inline-editing-one *ngIf="datosTable"></app-inline-editing-one>
 
+    <div class="row" *ngIf="datosPlan">
+        <div class="col-md-6">
+            <app-botonarchivos labelBoton="Adjunte excel de planillas" groupName="ArchivosPlan"></app-botonarchivos>
+        </div>
+        <div class="col-md-6">
+            <button mat-button color="primary">Enviar Formulario</button>
+        </div>
+    </div>
 </form>
-

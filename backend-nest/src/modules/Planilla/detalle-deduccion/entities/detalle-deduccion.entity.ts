@@ -39,96 +39,46 @@ export class DetalleDeduccion {
     @Column('timestamp', { default: () => 'CURRENT_TIMESTAMP' })
     fecha_aplicado: Date;
 
-    deducciones: any[];
+    datos: any;
     temp: any = []
     @AfterInsert()
     async logSalarioBase() {
-        const valorMinimo = 100; 
-        this.deducciones = [{
+        this.datos = {
             id_afiliado: this.afiliado?.id_afiliado,
-            salario_base: this.afiliado.salario_base - valorMinimo,
-            nombre_institucion: this.institucion?.nombre_institucion, // Asegúrate de que 'nombre' es el campo correcto
+            dni: this.afiliado?.dni,
+            salario_base: this.afiliado.salario_base,
+            nombre_institucion: this.institucion?.nombre_institucion,
             monto_deduccion: this.monto_deduccion
-        }];
+        };
+
+        const asignacion: Asignacion = {
+            nombre_institucion: this.datos.nombre_institucion,
+            montoDeduccion: this.datos.monto_deduccion
+        };
         
-        // Calculando salario neto y asignaciones
-        const resultado = calcularSalarioNeto(this.deducciones, valorMinimo);
-    
-        // Actualizar el arreglo temp con nuevos afiliados o asignaciones
-        this.deducciones.forEach(deduccion => {
-            let afiliadoEncontrado = this.temp.find(afiliado => afiliado.id_afiliado === deduccion.id_afiliado);
-    
-            if (!afiliadoEncontrado) {
-                // Si el afiliado no existe en temp, agregarlo con su primera asignación
-                this.temp.push({
-                    id_afiliado: deduccion.id_afiliado,
-                    asignaciones: [{
-                        nombre_institucion: deduccion.nombre_institucion,
-                        monto_deduccion: deduccion.monto_deduccion
-                    }]
-                });
-            } else {
-                // Si el afiliado ya existe, agregar la nueva asignación a su lista
-                afiliadoEncontrado.asignaciones.push({
-                    nombre_institucion: deduccion.nombre_institucion,
-                    monto_deduccion: deduccion.monto_deduccion
-                });
-            }
-        });
-    
+        let resultados: any = {
+            idAfiliado: this.datos.id_afiliado,
+            salario_base: this.datos.salario_base,
+            deduccion: asignacion
+        };
+
+        this.temp = resultados
+        
     }
 }
 
-interface DeduccionInfo {
+interface DatosInfo {
     id_afiliado: string;
     salario_base: number;
     nombre_institucion: string;
     monto_deduccion: number;
 }
-
+ 
 interface Asignacion {
     nombre_institucion: string;
-    valor_utilizado: number;
-    valor_no_utilizado: number;
+    montoDeduccion: number;
 }
-
-function calcularSalarioNeto(deducciones: DeduccionInfo[], valorMinimo: number): any[] {
-    const resultados: any[] = [];
-
-    deducciones.forEach((deduccion) => {
-        let afiliado = resultados.find(a => a.idAfiliado === deduccion.id_afiliado);
-
-        if (!afiliado) {
-            afiliado = {
-                idAfiliado: deduccion.id_afiliado,
-                salarioRestante: deduccion.salario_base,
-                asignaciones: []
-            };
-            resultados.push(afiliado);
-        }
-
-        const montoDeduccion = Math.min(afiliado.salarioRestante - valorMinimo, deduccion.monto_deduccion);
-        afiliado.salarioRestante -= montoDeduccion;
-        afiliado.salarioRestante = Math.max(afiliado.salarioRestante, valorMinimo);
-
-        const asignacionExistenteIndex = afiliado.asignaciones.findIndex(asignacion => asignacion.nombre_institucion === deduccion.nombre_institucion);
-
-        if (asignacionExistenteIndex !== -1) {
-            afiliado.asignaciones[asignacionExistenteIndex].valor_utilizado += montoDeduccion;
-            afiliado.asignaciones[asignacionExistenteIndex].valor_no_utilizado = deduccion.monto_deduccion;
-        } else {
-            afiliado.asignaciones.push({
-                nombre_institucion: deduccion.nombre_institucion,
-                valor_utilizado: montoDeduccion,
-                valor_no_utilizado: deduccion.monto_deduccion
-            });
-        }
-    });
-
-    return resultados;
-}
-
-
+ 
 
 // Ejemplo de uso
 /* const salarioBase = 5000;

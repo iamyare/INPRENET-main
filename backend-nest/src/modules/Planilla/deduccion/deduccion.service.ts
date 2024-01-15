@@ -51,7 +51,7 @@ export class DeduccionService {
 
   async saveDetalles(detallesData: any[]): Promise<void> {
     const failedRows = [];
-
+    const arrayTemp = [];
     for (const d of detallesData) {
       // Asegúrate de que todos los campos necesarios estén presentes
       const dni = d.DNI ? String(d.DNI).trim() : '';
@@ -60,7 +60,8 @@ export class DeduccionService {
       const montoDeduccion = d.monto_deduccion != null ? d.monto_deduccion : ''; // Asumiendo que puede ser 0
       const anio = d.AÑO != null ? d.AÑO : '';
       const mes = d.MES != null ? d.MES : '';
-
+      const detalle = new DetalleDeduccion();
+      
       // Si alguno de los campos requeridos está vacío, agrega la fila a failedRows
       if (!dni || !idDeduccion || !nombreInstitucion || montoDeduccion === '' || anio === '' || mes === '') {
         failedRows.push({ ...d, error: 'Una o más columnas obligatorias están vacías o son inválidas' });
@@ -86,27 +87,93 @@ export class DeduccionService {
             continue;
         }
 
-        const detalle = new DetalleDeduccion();
         detalle.anio = d.AÑO;
         detalle.mes = d.MES;
         detalle.deduccion = deduccion;
         detalle.monto_deduccion = d.monto_deduccion;
         detalle.institucion = institucion;
         detalle.afiliado = afiliado;
-
-        await this.detalleDeduccionRepository.save(detalle);
+        
+        const temporal = await this.detalleDeduccionRepository.save(detalle);
+        
+        arrayTemp.push(temporal.temp);
+        
       } catch (error) {
         this.logger.error(`Failed to save detail: ${JSON.stringify(d)}`, error.stack);
         failedRows.push({ ...d, error: error.message });
       }
     }
+    
+    const deducciones = this.agruparDeduccionesPorAfiliado(arrayTemp, 100)
+    console.log(JSON.stringify(deducciones, null, 2));
+
     if (failedRows.length > 0) {
-     //console.log(failedRows);
+     /* console.log(failedRows); */
     }
   }
 
-
-
+  // Función para calcular el salario neto para un arreglo de deducciones
+  agruparDeduccionesPorAfiliado(arrayTemp, valorMinimo) {
+    const resultados = {};
+  
+    arrayTemp.forEach((item) => {
+      const idAfiliado = item.idAfiliado;
+      const deduccion = item.deduccion;
+      const salarioBase = Math.max(item.salario_base - valorMinimo, valorMinimo);
+      
+      const deduccions = item.deduccion.montoDeduccion;
+      if (!resultados[idAfiliado]) {
+        resultados[idAfiliado] = {
+          salarioBase: salarioBase,
+          salarioRestante: salarioBase,
+          asignaciones: {},
+        };
+      }
+  
+      let salarioRestante = resultados[idAfiliado].salarioRestante;
+      const asignaciones = resultados[idAfiliado].asignaciones;
+  
+      let montoDeduccion;
+      if (salarioRestante >= valorMinimo) {
+        montoDeduccion = Math.min(salarioRestante, deduccion.montoDeduccion);
+      } else {
+        montoDeduccion = deduccion.montoDeduccion - item.deduccionFinal;
+      }
+  
+      salarioRestante -= montoDeduccion;
+      deduccion.montoDeduccion -= montoDeduccion;
+  
+      const nombreInstitucion = deduccion.nombre_institucion;
+      if (!asignaciones[nombreInstitucion]) {
+        asignaciones[nombreInstitucion] = {
+          montoDeduccion: deduccions,
+          valor_utilizado: 0,
+          valor_no_utilizado: 0,
+        };
+      }
+  
+      asignaciones[nombreInstitucion].montoDeduccion = deduccions;
+      asignaciones[nombreInstitucion].valor_utilizado += montoDeduccion;
+      asignaciones[nombreInstitucion].valor_no_utilizado = Math.abs(asignaciones[nombreInstitucion].montoDeduccion - asignaciones[nombreInstitucion].valor_utilizado) ;
+  
+      resultados[idAfiliado].salarioBase = salarioBase;
+      resultados[idAfiliado].salarioRestante = salarioRestante;
+      resultados[idAfiliado].asignaciones = asignaciones;
+    });
+  
+    Object.values(resultados).forEach((afiliado:any) => {
+      let deduccionFinal = 0;
+  
+      Object.values(afiliado.asignaciones).forEach((asignacion:any) => {
+        deduccionFinal += asignacion.valor_utilizado;
+      });
+  
+      afiliado.deduccionFinal = deduccionFinal;
+    });
+  
+    return resultados;
+  }
+  
   findAll() {
     return this.deduccionRepository.find()
   }

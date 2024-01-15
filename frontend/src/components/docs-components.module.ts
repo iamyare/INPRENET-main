@@ -10,7 +10,7 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatCheckboxModule } from '@angular/material/checkbox';
-import { MatNativeDateModule } from '@angular/material/core';
+import { MAT_DATE_LOCALE, MatNativeDateModule } from '@angular/material/core';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatDialogModule } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -19,7 +19,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatListModule } from '@angular/material/list';
 import { MatMenuModule } from '@angular/material/menu';
-import { MatPaginatorModule } from '@angular/material/paginator';
+import { MatPaginatorIntl, MatPaginatorModule } from '@angular/material/paginator';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatRadioModule } from '@angular/material/radio';
 import { MatSelectModule } from '@angular/material/select';
@@ -41,6 +41,7 @@ import { ProgressbarComponent } from './progressbar/progressbar.component';
 import { ProgressplanillComponent } from './progressplanill/progressplanill.component';
 import { WebcamModule } from 'ngx-webcam';
 import { BeneficioComponent } from './beneficio/beneficio.component';
+import { CustomMatPaginatorIntl } from './inline-editing-one/inline-editing-one.component';
 
 @NgModule({
   declarations: [
@@ -120,7 +121,10 @@ import { BeneficioComponent } from './beneficio/beneficio.component';
     NgScrollbarModule,
     MatTableModule,
     MatPaginatorModule,
-  ]
+  ],
+  providers: [
+    { provide: MatPaginatorIntl, useClass: CustomMatPaginatorIntl },
+  ],
 })
 export class DocsComponentsModule {
 }

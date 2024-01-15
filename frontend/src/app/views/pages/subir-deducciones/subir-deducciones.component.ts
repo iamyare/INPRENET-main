@@ -12,10 +12,12 @@ export class SubirDeduccionesComponent {
   form: FormGroup;
   datosA: boolean = false;
   datosTable: boolean = false;
+  datosPlan:boolean = false
 
   constructor(private fb: FormBuilder, private planillaService: PlanillaService) {
     this.form = this.fb.group({
-      Archivos: generateFormArchivo(),
+      ArchivosDed: generateFormArchivo(),
+      ArchivosPlan: generateFormArchivo(),
       Arch: "",
       isChecked: [false]
     });
@@ -23,7 +25,8 @@ export class SubirDeduccionesComponent {
 
   ngOnInit() {
     this.form = this.fb.group({
-      Archivos: generateFormArchivo(),
+      ArchivosDed: generateFormArchivo(),
+      ArchivosPlan: generateFormArchivo(),
       Arch: "",
       isChecked: [false] // Inicializa el estado del mat-slide-toggle
     });
@@ -35,19 +38,11 @@ export class SubirDeduccionesComponent {
     // Otras acciones según el valor de this.form.get('isChecked').value
   }
 
-  setEstadoDatGen(e: any) {
-    this.datosA = true;
-    this.datosTable = false;
-  }
-
-  setEstadoTable(e: any) {
-    this.datosTable = true;
-    this.datosA = false;
-  }
-
   onFileSelect(event: any): void {
     if (event.target.files.length > 0) {
       const file = event.target.files[0];
+      console.log(file);
+      
       this.planillaService.uploadExcel(file).subscribe(
         response => {
           console.log('Respuesta del servidor:', response);
@@ -59,5 +54,20 @@ export class SubirDeduccionesComponent {
         }
       );
     }
+  }
+  setEstadoDatGen(e:any){
+    this.datosA = true
+    this.datosTable = false
+    this.datosPlan = false 
+  }
+  setEstadoTable(e:any){
+    this.datosTable = true
+    this.datosA = false
+    this.datosPlan = false 
+  }  
+  subirNuevPlan(e:any){    
+    this.datosA = false 
+    this.datosTable = false
+    this.datosPlan = true 
   }
 }

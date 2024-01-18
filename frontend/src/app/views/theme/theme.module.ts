@@ -32,6 +32,7 @@ import { EditarBeneficioComponent } from '../pages/Generales/editar-beneficio/ed
 /* import { CentroTrabajoPageComponent } from '../pages/centro-trabajo-page/centro-trabajo-page.component' */
 import { InlineEditingOneComponent } from '../../../components/inline-editing-one/inline-editing-one.component';
 import { NuevaplanillaComponent } from '../../../components/nuevaplanilla/nuevaplanilla.component';
+import { NuevoTipoPlanillaComponent } from '../pages/Generales/nuevo-tipo-planilla/nuevo-tipo-planilla.component';
 
 @NgModule({
   imports: [
@@ -52,7 +53,6 @@ import { NuevaplanillaComponent } from '../../../components/nuevaplanilla/nuevap
     MatTableModule,
     MatPaginatorModule,
     MatIconModule
-
   ],
   declarations: [
     SubirDeduccionesformComponent,
@@ -65,7 +65,8 @@ import { NuevaplanillaComponent } from '../../../components/nuevaplanilla/nuevap
     InlineEditingOneComponent,
     NuevaplanillaComponent,
     NuevoBeneficioComponent,
-    EditarBeneficioComponent
+    EditarBeneficioComponent,
+    NuevoTipoPlanillaComponent
 /*     CentroTrabajoPageComponent */
   ]
 })

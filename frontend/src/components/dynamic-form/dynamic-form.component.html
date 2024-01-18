@@ -1,0 +1,10 @@
+<form [formGroup]="form">
+  <div *ngFor="let field of fields"> <!-- Asegúrate de usar 'field of fields' -->
+    <mat-form-field appearance="outline">
+      <mat-label>{{field.label}}</mat-label>
+      <input matInput [type]="field.type" [formControlName]="field.name">
+    </mat-form-field>
+
+    <!-- Agrega casos para otros tipos de campos aquí, usando 'field' -->
+  </div>
+</form>

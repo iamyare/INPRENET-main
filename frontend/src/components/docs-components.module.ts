@@ -42,6 +42,7 @@ import { ProgressplanillComponent } from './progressplanill/progressplanill.comp
 import { WebcamModule } from 'ngx-webcam';
 import { BeneficioComponent } from './beneficio/beneficio.component';
 import { CustomMatPaginatorIntl } from './inline-editing-one/inline-editing-one.component';
+import { DynamicFormComponent } from './dynamic-form/dynamic-form.component';
 
 @NgModule({
   declarations: [
@@ -55,7 +56,7 @@ import { CustomMatPaginatorIntl } from './inline-editing-one/inline-editing-one.
     RefPersComponent,
     BotonarchivosComponent,
     HistorialSalarioComponent,
-    
+    DynamicFormComponent
   ],
   exports: [
     ProgressbarComponent,
@@ -68,7 +69,7 @@ import { CustomMatPaginatorIntl } from './inline-editing-one/inline-editing-one.
     RefPersComponent,
     BotonarchivosComponent,
     HistorialSalarioComponent,
-    
+    DynamicFormComponent
   ],
   imports: [
     WebcamModule,

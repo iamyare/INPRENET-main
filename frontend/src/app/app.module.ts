@@ -30,13 +30,11 @@ const APP_CONTAINERS = [
   declarations: [AppComponent, ...APP_CONTAINERS],
   imports: [
     BrowserModule,
-    BrowserAnimationsModule,
     AppRoutingModule,
     HttpClientModule,
     SharedModule,
     FormsModule,
     BrowserAnimationsModule,
-    HttpClientModule,
     ReactiveFormsModule,
     NgbModule
   ],

@@ -54,7 +54,8 @@ import { CustomMatPaginatorIntl } from './inline-editing-one/inline-editing-one.
     BenefComponent,
     RefPersComponent,
     BotonarchivosComponent,
-    HistorialSalarioComponent
+    HistorialSalarioComponent,
+    
   ],
   exports: [
     ProgressbarComponent,
@@ -66,7 +67,8 @@ import { CustomMatPaginatorIntl } from './inline-editing-one/inline-editing-one.
     BenefComponent,
     RefPersComponent,
     BotonarchivosComponent,
-    HistorialSalarioComponent
+    HistorialSalarioComponent,
+    
   ],
   imports: [
     WebcamModule,

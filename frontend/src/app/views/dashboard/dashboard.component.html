@@ -12,58 +12,23 @@
         </button>
         <form [formGroup]="trafficRadioGroup">
           <c-button-group class="float-end me-3" role="group">
-            <input
-              class="btn-check"
-              formControlName="trafficRadio"
-              type="radio"
-              value="Day"
-            />
-            <label
-              (click)="setTrafficPeriod('Day')"
-              cButton
-              cFormCheckLabel
-              color="secondary"
-              variant="outline"
-            >Day</label>
+            <input class="btn-check" formControlName="trafficRadio" type="radio" value="Day" />
+            <label (click)="setTrafficPeriod('Day')" cButton cFormCheckLabel color="secondary"
+              variant="outline">Day</label>
 
-            <input
-              class="btn-check"
-              formControlName="trafficRadio"
-              type="radio"
-              value="Month"
-            />
-            <label
-              (click)="setTrafficPeriod('Month')"
-              cButton
-              cFormCheckLabel
-              color="secondary"
-              variant="outline"
-            >Month</label>
+            <input class="btn-check" formControlName="trafficRadio" type="radio" value="Month" />
+            <label (click)="setTrafficPeriod('Month')" cButton cFormCheckLabel color="secondary"
+              variant="outline">Month</label>
 
-            <input
-              class="btn-check"
-              formControlName="trafficRadio"
-              type="radio"
-              value="Year"
-            />
-            <label
-              (click)="setTrafficPeriod('Year')"
-              cButton
-              cFormCheckLabel
-              color="secondary"
-              variant="outline"
-            >Year</label>
+            <input class="btn-check" formControlName="trafficRadio" type="radio" value="Year" />
+            <label (click)="setTrafficPeriod('Year')" cButton cFormCheckLabel color="secondary"
+              variant="outline">Year</label>
           </c-button-group>
         </form>
       </c-col>
     </c-row>
-    <c-chart
-      [data]="mainChart.data"
-      [height]="300"
-      [ngStyle]="{ 'marginTop.px': 40 }"
-      [options]="mainChart.options"
-      [type]="mainChart.type"
-    >
+    <c-chart [data]="mainChart.data" [height]="300" [ngStyle]="{ 'marginTop.px': 40 }" [options]="mainChart.options"
+      [type]="mainChart.type">
       Main chart
     </c-chart>
   </c-card-body>
@@ -119,17 +84,13 @@
           <c-col md="6" xl="6" xs="12">
             <c-row>
               <c-col sm="6">
-                <div
-                  class="border-start border-start-4 border-start-info py-1 px-3 mb-3"
-                >
+                <div class="border-start border-start-4 border-start-info py-1 px-3 mb-3">
                   <div class="text-medium-emphasis small">New Clients</div>
                   <div class="fs-5 fw-semibold">9,123</div>
                 </div>
               </c-col>
               <c-col sm="6">
-                <div
-                  class="border-start border-start-4 border-start-danger py-1 px-3 mb-3"
-                >
+                <div class="border-start border-start-4 border-start-danger py-1 px-3 mb-3">
                   <div class="text-medium-emphasis small">
                     Recurring Clients
                   </div>
@@ -346,13 +307,7 @@
               </div>
             </div>
             <div class="divider d-flex justify-content-center">
-              <button
-                cButton
-                class="text-muted btn-link"
-                color="transparent"
-                size="sm"
-                type="button"
-              >
+              <button cButton class="text-muted btn-link" color="transparent" size="sm" type="button">
                 <svg cIcon name="cil-options"></svg>
               </button>
             </div>
@@ -367,14 +322,7 @@
     <c-card class="mb-4">
       <c-card-header>Users</c-card-header>
       <c-card-body>
-        <table
-          [hover]="true"
-          [responsive]="true"
-          [striped]="true"
-          align="middle"
-          cTable
-          class="mb-0 border"
-        >
+        <table [hover]="true" [responsive]="true" [striped]="true" align="middle" cTable class="mb-0 border">
           <thead cTableColor="light">
             <tr>
               <th class="text-center">
@@ -390,11 +338,7 @@
           <tbody>
             <tr *ngFor="let user of users; index as i">
               <td class="text-center">
-                <c-avatar
-                  size="md"
-                  src="{{ user.avatar }}"
-                  status="{{ user.status }}"
-                ></c-avatar>
+                <c-avatar size="md" src="{{ user.avatar }}" status="{{ user.status }}"></c-avatar>
               </td>
               <td>
                 <div>{{ user.name }}</div>
@@ -405,13 +349,8 @@
                 </div>
               </td>
               <td class="text-center">
-                <svg
-                  cIcon
-                  id="{{ user.country + user.name }}"
-                  name="cif{{ user.country }}"
-                  size="xl"
-                  title="{{ user.country }}"
-                ></svg>
+                <svg cIcon id="{{ user.country + user.name }}" name="cif{{ user.country }}" size="xl"
+                  title="{{ user.country }}"></svg>
               </td>
               <td>
                 <div class="d-flex justify-content-between">
@@ -425,10 +364,7 @@
                   </div>
                 </div>
                 <c-progress thin>
-                  <c-progress-bar
-                    [value]="user.usage"
-                    color="{{ user.color }}"
-                  ></c-progress-bar>
+                  <c-progress-bar [value]="user.usage" color="{{ user.color }}"></c-progress-bar>
                 </c-progress>
               </td>
               <!-- <td class="text-center">

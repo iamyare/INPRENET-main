@@ -10,11 +10,59 @@ export const navItems: INavData[] = [
       text: 'NEW'
     }
   }, */
+
+  {
+    title: true,
+    name: 'Menú Mantenimiento'
+  },
+  {
+    name: 'Beneficio',
+    url: '/base',
+    children: [
+      {
+        name: 'Nuevo Beneficio',
+        url: '/Beneficio/nuevo-beneficio',
+      },
+      {
+        name: 'Editar Beneficios',
+        url: '/Beneficio/editar-beneficio',
+      },
+
+    ]
+  },
+  {
+    name: 'Deduccion',
+    url: '/base',
+    children: [
+      {
+        name: 'Nueva Deduccion',
+        url: '/Deduccion/nuevo-tipo-deduccion',
+      },
+      {
+        name: 'Editar Deduccion',
+        url: '/Deduccion/editar-tipo-deduccion',
+      },
+  ]
+  },
+  {
+    name: 'Tipo-Planilla',
+    url: '/base',
+    children: [
+      {
+        name: 'Nuevo tipo planilla',
+        url: '/Tipo-Planilla/nuevo-tipo-planilla',
+      },
+      {
+        name: 'Editar tipo planilla',
+        url: '/Tipo-Planilla/editar-tipo-planilla',
+      },
+  ]
+  },
+
   {
     title: true,
     name: 'Menú Principal'
   },
-
   {
     name: 'Afiliado',
     url: '/base',
@@ -55,12 +103,12 @@ export const navItems: INavData[] = [
     url: '/base',
     children: [
       {
-        url: '/Planilla/subir-deducciones',
-        name: 'Nueva Planilla',
+        url: '/Planilla/ver-deducciones',
+        name: 'Ver Deducciones',
       },
       {
-        url: '/Planilla/ver-deducciones',
-        name: 'Ver Planillas',
+        url: '/Planilla/nueva-planilla',
+        name: 'Nueva Planilla',
       },
 /*       {
         name: 'subir nueva planilla',
@@ -72,7 +120,8 @@ export const navItems: INavData[] = [
       }, */
     ]
   },
-/* 
+
+  /* 
   {
     name: 'Centro de trabajo',
     url: '/Afiliado/centro-trabajo',

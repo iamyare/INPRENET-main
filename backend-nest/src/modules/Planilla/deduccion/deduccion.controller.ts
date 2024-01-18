@@ -23,7 +23,9 @@ export class DeduccionController {
 
     try {
       const detalles = this.deduccionService.processExcel(file.buffer);
+
       await this.deduccionService.saveDetalles(detalles);
+      
       res.status(201).json({ mjs: 'Datos Guardados exitosamente' });
     } catch (error) {
       console.error(error);

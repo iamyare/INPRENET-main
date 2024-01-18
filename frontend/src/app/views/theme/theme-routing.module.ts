@@ -1,17 +1,26 @@
 import { NgModule } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
 
-import { AfilBancoComponent } from '../pages/afil-banco/afil-banco.component';
-import { CentroTrabajoComponent } from '../pages/centro-trabajo/centro-trabajo.component';
-import { DatosGenAfilComponent } from '../pages/datos-gen-afil/datos-gen-afil.component';
-import { VerDeduccionesComponent } from '../pages/ver-deducciones/ver-deducciones.component';
-import { SubirDeduccionesComponent } from '../pages/subir-deducciones/subir-deducciones.component';
-import { NuevaPlanillaComponent } from '../pages/nueva-planilla/nueva-planilla.component';
-import { VerPlanillasComponent } from '../pages/ver-planillas/ver-planillas.component';
-import { SubirDeduccionesformComponent } from '../pages/subir-deduccionesform/subir-deduccionesform.component';
+import { AfilBancoComponent } from '../pages/Generales/afil-banco/afil-banco.component';
+import { VerDeduccionesComponent } from '../pages/Generales/ver-deducciones/ver-deducciones.component';
+
+import { VerPlanillasComponent } from '../pages/Generales/ver-planillas/ver-planillas.component';
+import { SubirDeduccionesformComponent } from '../pages/Generales/subir-deduccionesform/subir-deduccionesform.component';
+import { CentroTrabajoComponent } from '../pages/Generales/centro-trabajo/centro-trabajo.component';
+import { NuevaPlanillaComponentP } from '../pages/Generales/nueva-planilla/nueva-planilla.component';
+
+import { NuevoBeneficioComponent } from '../pages/Generales/nuevo-beneficio/nuevo-beneficio.component';
+import { EditarBeneficioComponent } from '../pages/Generales/editar-beneficio/editar-beneficio.component';
+
+import { NuevoTipoDeduccionComponent } from '../pages/Generales/nuevo-tipo-deduccion/nuevo-tipo-deduccion.component';
+import { EditarTipoDeduccionComponent } from '../pages/Generales/editar-tipo-deduccion/editar-tipo-deduccion.component';
+
+import { EditarTipoPlanillaComponent } from '../pages/Generales/editar-tipo-planilla/editar-tipo-planilla.component';
+import { NuevoTipoPlanillaComponent } from '../pages/Generales/nuevo-tipo-planilla/nuevo-tipo-planilla.component';
 /* import { CentroTrabajoPageComponent } from '../pages/centro-trabajo-page/centro-trabajo-page.component'; */
 
 const routes: Routes = [
+  //rutas Afiliado
   {
     path: '',
     data: {
@@ -32,6 +41,7 @@ const routes: Routes = [
       },
     ],
   },
+  //rutas planilla
   {
     path: '',
     data: {
@@ -39,10 +49,10 @@ const routes: Routes = [
     },
     children: [
       {
-        path: 'subir-deducciones',
-        component: SubirDeduccionesComponent,
+        path: 'nueva-planilla',
+        component: NuevaPlanillaComponentP,
         data: {
-          title: 'Subir Deducciones',
+          title: 'Nueva Planilla',
         },
       },
       {
@@ -60,13 +70,6 @@ const routes: Routes = [
         },
       },
       {
-        path: 'nueva-planilla',
-        component: NuevaPlanillaComponent,
-        data: {
-          title: 'Nueva Planilla',
-        },
-      },
-      {
         path: 'ver-planillas',
         component: VerPlanillasComponent,
         data: {
@@ -78,6 +81,90 @@ const routes: Routes = [
         component: CentroTrabajoComponent,
         data: {
           title: 'Centro Trabajo',
+        },
+      },
+    ],
+  },
+  //rutas mantenimiento beneficio
+  {
+    path: '',
+    data: {
+      title: 'Beneficio',
+    },
+    children: [
+      {
+        path: '',
+        pathMatch: 'full',
+        redirectTo: '',
+      },
+      {
+        path: 'nuevo-beneficio',
+        component: NuevoBeneficioComponent,
+        data: {
+          title: 'Nuevo Afiliado',
+        },
+      },
+      {
+        path: 'editar-beneficio',
+        component: EditarBeneficioComponent,
+        data: {
+          title: 'Editar Beneficio',
+        },
+      },
+    ],
+  },
+   //rutas mantenimiento planilla
+  {
+    path: '',
+    data: {
+      title: 'Tipo-Planilla',
+    },
+    children: [
+      {
+        path: '',
+        pathMatch: 'full',
+        redirectTo: '',
+      },
+      {
+        path: 'nuevo-tipo-planilla',
+        component: NuevoTipoPlanillaComponent,
+        data: {
+          title: 'Nuevo Tipo Planilla',
+        },
+      },
+      {
+        path: 'editar-tipo-planilla',
+        component: EditarTipoPlanillaComponent,
+        data: {
+          title: 'Editar Tipo Planilla',
+        },
+      },
+    ],
+  },
+  //rutas mantenimiento deduccion
+  {
+    path: '',
+    data: {
+      title: 'Deduccion',
+    },
+    children: [
+      {
+        path: '',
+        pathMatch: 'full',
+        redirectTo: '',
+      },
+      {
+        path: 'nuevo-tipo-deduccion',
+        component: NuevoTipoDeduccionComponent,
+        data: {
+          title: 'Nuevo Afiliado',
+        },
+      },
+      {
+        path: 'editar-tipo-deduccion',
+        component: EditarTipoDeduccionComponent,
+        data: {
+          title: 'Editar tipo-deduccion',
         },
       },
     ],

@@ -5,9 +5,9 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Deduccion } from './entities/deduccion.entity';
 import { Repository } from 'typeorm';
 import * as xlsx from 'xlsx';
-import { DetalleDeduccion } from '../detalle-deduccion/entities/detalle-deduccion.entity';
 import { Afiliado } from 'src/afiliado/entities/afiliado.entity';
 import { Institucion } from 'src/modules/Empresarial/institucion/entities/institucion.entity';
+import { DetalleDeduccion } from '../detalle-deduccion/entities/detalle-deduccion.entity';
 
 @Injectable()
 export class DeduccionService {
@@ -16,16 +16,14 @@ export class DeduccionService {
 
   constructor(
     @InjectRepository(DetalleDeduccion)
-    private detalleDeduccionRepository: Repository<DetalleDeduccion>,
+    private detalleDeduccionRepository : Repository<DetalleDeduccion>,
     @InjectRepository(Afiliado)
     private afiliadoRepository: Repository<Afiliado>,
     @InjectRepository(Deduccion)
     private deduccionRepository: Repository<Deduccion>,
     @InjectRepository(Institucion)
     private institucionRepository: Repository<Institucion>
-  ){
-   
-  }
+  ){}
 
   async create(createDeduccionDto: CreateDeduccionDto) {
     const existingDeduccion = await this.deduccionRepository.findOne({
@@ -112,30 +110,30 @@ export class DeduccionService {
     }
     console.log("ENTRO")
     const deducciones = this.agruparDeduccionesPorAfiliado(arrayTemp, 100)
-  
+    console.log(JSON.stringify(deducciones,null,2));
+    
     for (let clave in deducciones) {
-      const detalle = new DetalleDeduccion();
       if (deducciones.hasOwnProperty(clave)) {
-        detalle.afiliado = deducciones[clave]; 
-
+        
         let deduccion = deducciones[clave];
         for (let deduccionClave in deduccion) {
           if (deduccionClave === "deducciones") {
-
+            
             for (const key in deduccion[deduccionClave]) {
-              
+              const detalle = new DetalleDeduccion(); 
+              detalle.afiliado = clave; 
+              console.log(deduccion[deduccionClave][key].valor_utilizado);
+
               detalle.anio = deduccion[deduccionClave][key].anio;
               detalle.mes = deduccion[deduccionClave][key].mes;
-              detalle.deduccion = deduccion[deduccionClave];
               detalle.monto_total = deduccion[deduccionClave][key].montoDeduccion;
+
               detalle.institucion = deduccion[deduccionClave][key].institucion;
-              detalle.monto_aplicado = deduccion[deduccionClave][key].valor_aplicado;
+              detalle.monto_aplicado = deduccion[deduccionClave][key].valor_utilizado;
               
-              
+              detalle.deduccion = `${key}`;
               
               await this.detalleDeduccionRepository.save(detalle);
-              
-              /* await this.detalleDeduccionRepository.save(detalle); */
             
             }
           }

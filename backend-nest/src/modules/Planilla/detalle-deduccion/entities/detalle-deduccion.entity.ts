@@ -11,11 +11,11 @@ export class DetalleDeduccion {
     
     @ManyToOne(() => Deduccion, deduccion => deduccion.detalleDeduccion, { cascade: true })
     @JoinColumn({ name: 'id_deduccion' })
-    deduccion: Deduccion;
+    deduccion: string;
     
     @ManyToOne(() => Afiliado, afiliado => afiliado.detalleDeduccion, { cascade: true })
     @JoinColumn({ name: 'id_afiliado' })
-    afiliado: Afiliado;
+    afiliado: string;
     
     @ManyToOne(() => Institucion, institucion => institucion.detalleDeduccion, { cascade: true})
     @JoinColumn({ name: 'id_institucion' })
@@ -38,33 +38,6 @@ export class DetalleDeduccion {
 
     @Column('timestamp', { default: () => 'CURRENT_TIMESTAMP' })
     fecha_aplicado: Date;
-
-    /* datos: any;
-    temp: any = []
-    @AfterInsert()
-    async logSalarioBase() {
-        this.datos = {
-            id_afiliado: this.afiliado?.id_afiliado,
-            dni: this.afiliado?.dni,
-            salario_base: this.afiliado.salario_base,
-            nombre_institucion: this.institucion?.nombre_institucion,
-            monto_deduccion: this.monto_deduccion
-        };
-
-        const asignacion: Asignacion = {
-            nombre_institucion: this.datos.nombre_institucion,
-            montoDeduccion: this.datos.monto_deduccion
-        };
-        
-        let resultados: any = {
-            idAfiliado: this.datos.id_afiliado,
-            salario_base: this.datos.salario_base,
-            deduccion: asignacion
-        };
-
-        this.temp = resultados
-        
-    } */
 }
 
 /* interface DatosInfo {
@@ -72,9 +45,9 @@ export class DetalleDeduccion {
     salario_base: number;
     nombre_institucion: string;
     monto_deduccion: number;
-}
+} */
  
 interface Asignacion {
     nombre_institucion: string;
     montoDeduccion: number;
-} */
+}

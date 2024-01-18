@@ -1,4 +1,4 @@
-import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn, AfterInsert, getRepository, AfterLoad } from 'typeorm';
+import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn, AfterInsert, getRepository, AfterLoad, Unique } from 'typeorm';
 import { Deduccion } from "../../deduccion/entities/deduccion.entity";
 import { Afiliado } from "src/afiliado/entities/afiliado.entity";
 import { Institucion } from "src/modules/Empresarial/institucion/entities/institucion.entity";
@@ -8,16 +8,16 @@ export class DetalleDeduccion {
     
     @PrimaryGeneratedColumn('uuid')
     id_ded_deduccion: string;
-
+    
     @ManyToOne(() => Deduccion, deduccion => deduccion.detalleDeduccion, { cascade: true })
     @JoinColumn({ name: 'id_deduccion' })
     deduccion: Deduccion;
-
+    
     @ManyToOne(() => Afiliado, afiliado => afiliado.detalleDeduccion, { cascade: true })
     @JoinColumn({ name: 'id_afiliado' })
     afiliado: Afiliado;
-
-    @ManyToOne(() => Institucion, institucion => institucion.detalleDeduccion, { cascade: true })
+    
+    @ManyToOne(() => Institucion, institucion => institucion.detalleDeduccion, { cascade: true})
     @JoinColumn({ name: 'id_institucion' })
     institucion: Institucion;
 
@@ -27,19 +27,19 @@ export class DetalleDeduccion {
     @Column('varchar2', { length: 20, nullable: true })
     estado_aplicacion: string;
 
-    @Column('varchar2', { length: 20, nullable: false })
+    @Column('varchar2', { length: 20, nullable: false})
     anio: string;
 
-    @Column('varchar2', { length: 20, nullable: false })
+    @Column('varchar2', { length: 20, nullable: false})
     mes: string;
 
-    @Column('number', {nullable: true })
+    @Column('number', {nullable: true})
     monto_aplicado: number;
 
     @Column('timestamp', { default: () => 'CURRENT_TIMESTAMP' })
     fecha_aplicado: Date;
 
-    datos: any;
+    /* datos: any;
     temp: any = []
     @AfterInsert()
     async logSalarioBase() {
@@ -64,10 +64,10 @@ export class DetalleDeduccion {
 
         this.temp = resultados
         
-    }
+    } */
 }
 
-interface DatosInfo {
+/* interface DatosInfo {
     id_afiliado: string;
     salario_base: number;
     nombre_institucion: string;
@@ -77,44 +77,4 @@ interface DatosInfo {
 interface Asignacion {
     nombre_institucion: string;
     montoDeduccion: number;
-}
- 
-
-// Ejemplo de uso
-/* const salarioBase = 5000;
-const valorMinimo = 100;
-const deducciones = [
-    { nombre: 'Prestamos de inprema', monto: 1000 },
-    { nombre: 'retencion inprema', monto: 2000 },
-    { nombre: 'asociacion de jubilados', monto: 800 }
-];
-
-const resultadoCalculo = calcularSalarioNeto(salarioBase, deducciones, valorMinimo);
-
-console.log('Salario Restante:', resultadoCalculo.salarioRestante);
-console.log('Asignaciones:', resultadoCalculo.asignaciones); */
-
-
-/* 
-function calcularSalarioNeto(deducciones, valorMinimo) {
-    let salarioRestante = deducciones.salario_base;
-    const asignaciones = {};
-
-    deducciones.forEach((deducciones) => {
-        const montoDeduccion = Math.min(salarioRestante - valorMinimo, deducciones.monto_deduccion);
-        salarioRestante -= montoDeduccion;
-       deducciones.monto_deduccion -= montoDeduccion;
-        asignaciones[deducciones.nombre_institucion] = {
-            valor_utilizado: montoDeduccion,
-            valor_no_utilizado: deducciones.monto_deduccion
-        };
-    });
-
-    salarioRestante = Math.max(salarioRestante, valorMinimo);
-
-    console.log(salarioRestante);
-    console.log(valorMinimo);
-    
-
-    // return { salarioRestante, asignaciones }; 
-*/
+} */

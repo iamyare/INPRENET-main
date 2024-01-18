@@ -17,7 +17,6 @@ import { DeduccionService } from './deduccion/deduccion.service';
 import { DetalleDeduccionController } from './detalle-deduccion/detalle-deduccion.controller';
 import { DetalleDeduccion } from './detalle-deduccion/entities/detalle-deduccion.entity';
 import { DetalleDeduccionService } from './detalle-deduccion/detalle-deduccion.service';
-import { EmpresarialModule } from '../Empresarial/empresarial.module';
 import { Institucion } from '../Empresarial/institucion/entities/institucion.entity';
 import { Afiliado } from 'src/afiliado/entities/afiliado.entity';
 

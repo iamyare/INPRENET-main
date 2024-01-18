@@ -6,7 +6,7 @@ import { Observable, BehaviorSubject } from 'rxjs';
   providedIn: 'root'
 })
 export class PlanillaService {
-  private baseUrl = 'http://localhost:3000/api/deduccion/upload';
+  private baseUrl = 'http://localhost:3000/api/detalle-deduccion/upload';
 
   // BehaviorSubject para almacenar y emitir los datos de los usuarios
   private usersSource = new BehaviorSubject<any[]>([]);

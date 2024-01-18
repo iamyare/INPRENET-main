@@ -128,15 +128,15 @@ export class InlineEditingOneComponent implements OnInit, OnDestroy  {
   pageSizeOptions: number[] = [5, 10, 1000,2000,5000,10000];
   pageSize: number = this.pageSizeOptions[0];
   pageIndex: number = 0;
-  
+
   desde = 0; hasta: number = this.pageSize;
 
   currentPage = 0; // Página actual
   initialDisplayCount = 1;  // Número inicial de registros para mostrar
   itemsPerPage = 5;  // Número de resultados por página
-  
+
   @ViewChild(MatPaginator) paginator: MatPaginator | undefined;
-  private destroy$: Subject<void> = new Subject<void>(); // Un observable para gestionar la destrucción del componente  
+  private destroy$: Subject<void> = new Subject<void>(); // Un observable para gestionar la destrucción del componente
   constructor() {
     this.updateSearchResults();
 

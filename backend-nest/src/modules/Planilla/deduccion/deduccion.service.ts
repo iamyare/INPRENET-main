@@ -52,6 +52,7 @@ export class DeduccionService {
   async saveDetalles(detallesData: any[]): Promise<void> {
     const failedRows = [];
     const arrayTemp = [];
+
     for (const d of detallesData) {
       // Asegúrate de que todos los campos necesarios estén presentes
       const dni = d.DNI ? String(d.DNI).trim() : '';
@@ -60,7 +61,7 @@ export class DeduccionService {
       const montoDeduccion = d.monto_deduccion != null ? d.monto_deduccion : ''; // Asumiendo que puede ser 0
       const anio = d.AÑO != null ? d.AÑO : '';
       const mes = d.MES != null ? d.MES : '';
-      const detalle = new DetalleDeduccion();
+      
       
       // Si alguno de los campos requeridos está vacío, agrega la fila a failedRows
       if (!dni || !idDeduccion || !nombreInstitucion || montoDeduccion === '' || anio === '' || mes === '') {
@@ -87,90 +88,134 @@ export class DeduccionService {
             continue;
         }
 
-        detalle.anio = d.AÑO;
-        detalle.mes = d.MES;
-        detalle.deduccion = deduccion;
-        detalle.monto_deduccion = d.monto_deduccion;
-        detalle.institucion = institucion;
-        detalle.afiliado = afiliado;
-        
-        const temporal = await this.detalleDeduccionRepository.save(detalle);
-        
-        arrayTemp.push(temporal.temp);
-        
+      const asignacion: any = {
+          anio: d.AÑO,
+          mes: d.MES,
+          montoDeduccion: d.monto_deduccion,
+          id_deduccion: deduccion.id_deduccion,
+          id_institucion : institucion.id_institucion,
+          nombre_institucion: institucion?.nombre_institucion,
+      };
+      
+      let resultados: any = {
+          idAfiliado: afiliado.id_afiliado,
+          salario_base: afiliado.salario_base,
+          deduccion: asignacion
+      };
+
+      arrayTemp.push(resultados);
+                
       } catch (error) {
         this.logger.error(`Failed to save detail: ${JSON.stringify(d)}`, error.stack);
         failedRows.push({ ...d, error: error.message });
       }
     }
-    
+    console.log("ENTRO")
     const deducciones = this.agruparDeduccionesPorAfiliado(arrayTemp, 100)
-    console.log(JSON.stringify(deducciones, null, 2));
+  
+    for (let clave in deducciones) {
+      const detalle = new DetalleDeduccion();
+      if (deducciones.hasOwnProperty(clave)) {
+        detalle.afiliado = deducciones[clave]; 
 
+        let deduccion = deducciones[clave];
+        for (let deduccionClave in deduccion) {
+          if (deduccionClave === "deducciones") {
+
+            for (const key in deduccion[deduccionClave]) {
+              
+              detalle.anio = deduccion[deduccionClave][key].anio;
+              detalle.mes = deduccion[deduccionClave][key].mes;
+              detalle.deduccion = deduccion[deduccionClave];
+              detalle.monto_deduccion = deduccion[deduccionClave][key].montoDeduccion;
+              detalle.institucion = deduccion[deduccionClave][key].institucion;
+              detalle.monto_aplicado = deduccion[deduccionClave][key].valor_aplicado;
+              
+              
+              
+              await this.detalleDeduccionRepository.save(detalle);
+              
+              /* await this.detalleDeduccionRepository.save(detalle); */
+            
+            }
+          }
+        }
+      }
+    }
+    
     if (failedRows.length > 0) {
      /* console.log(failedRows); */
     }
+
   }
 
   // Función para calcular el salario neto para un arreglo de deducciones
   agruparDeduccionesPorAfiliado(arrayTemp, valorMinimo) {
     const resultados = {};
-  
+ 
     arrayTemp.forEach((item) => {
       const idAfiliado = item.idAfiliado;
       const deduccion = item.deduccion;
       const salarioBase = Math.max(item.salario_base - valorMinimo, valorMinimo);
-      
+     
       const deduccions = item.deduccion.montoDeduccion;
+     
       if (!resultados[idAfiliado]) {
         resultados[idAfiliado] = {
           salarioBase: salarioBase,
           salarioRestante: salarioBase,
-          asignaciones: {},
+          deducciones: {},
         };
       }
-  
+ 
       let salarioRestante = resultados[idAfiliado].salarioRestante;
-      const asignaciones = resultados[idAfiliado].asignaciones;
-  
-      let montoDeduccion;
-      if (salarioRestante >= valorMinimo) {
-        montoDeduccion = Math.min(salarioRestante, deduccion.montoDeduccion);
-      } else {
-        montoDeduccion = deduccion.montoDeduccion - item.deduccionFinal;
-      }
-  
-      salarioRestante -= montoDeduccion;
-      deduccion.montoDeduccion -= montoDeduccion;
-  
-      const nombreInstitucion = deduccion.nombre_institucion;
-      if (!asignaciones[nombreInstitucion]) {
-        asignaciones[nombreInstitucion] = {
+      const deducciones = resultados[idAfiliado].deducciones;
+ 
+      // Buscar si la deducción ya existe en las deducciones
+      /* const nombreInstitucion = deduccion.nombre_institucion; */
+ 
+      if (!deducciones[deduccion.id_deduccion]) {
+        deducciones[deduccion.id_deduccion] = {
+          anio: deduccion.anio,
+          mes: deduccion.mes,
           montoDeduccion: deduccions,
+          institucion: deduccion.id_institucion,
+          nombre_institucion: deduccion.nombre_institucion,
           valor_utilizado: 0,
           valor_no_utilizado: 0,
         };
+      } else {
+        // Si la deducción ya existe, sumar los montos
+        deducciones[deduccion.id_deduccion].montoDeduccion += deduccions;
       }
-  
-      asignaciones[nombreInstitucion].montoDeduccion = deduccions;
-      asignaciones[nombreInstitucion].valor_utilizado += montoDeduccion;
-      asignaciones[nombreInstitucion].valor_no_utilizado = Math.abs(asignaciones[nombreInstitucion].montoDeduccion - asignaciones[nombreInstitucion].valor_utilizado) ;
-  
+ 
+      let montoDeduccion;
+      if (salarioRestante >= valorMinimo) {
+        montoDeduccion = Math.min(salarioRestante, deducciones[deduccion.id_deduccion].montoDeduccion);
+      } else {
+        montoDeduccion = deducciones[deduccion.id_deduccion].montoDeduccion - item.deduccionFinal;
+      }
+ 
+      salarioRestante -= montoDeduccion;
+      deducciones[deduccion.id_deduccion].montoDeduccion = montoDeduccion;
+ 
+      deducciones[deduccion.id_deduccion].valor_utilizado = montoDeduccion;
+      deducciones[deduccion.id_deduccion].valor_no_utilizado = Math.abs(deducciones[deduccion.id_deduccion].montoDeduccion - deducciones[deduccion.id_deduccion].valor_utilizado) ;
+ 
       resultados[idAfiliado].salarioBase = salarioBase;
-      resultados[idAfiliado].salarioRestante = salarioRestante;
-      resultados[idAfiliado].asignaciones = asignaciones;
+      resultados[idAfiliado].deducciones = deducciones;
     });
-  
+ 
     Object.values(resultados).forEach((afiliado:any) => {
       let deduccionFinal = 0;
-  
-      Object.values(afiliado.asignaciones).forEach((asignacion:any) => {
+     
+      Object.values(afiliado.deducciones).forEach((asignacion:any) => {
         deduccionFinal += asignacion.valor_utilizado;
       });
-  
       afiliado.deduccionFinal = deduccionFinal;
+      afiliado.salarioRestante = afiliado.salarioBase - afiliado.deduccionFinal
     });
-  
+   
     return resultados;
   }
   

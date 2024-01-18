@@ -58,7 +58,7 @@ export class DeduccionService {
       const dni = d.DNI ? String(d.DNI).trim() : '';
       const idDeduccion = d.id_deduccion ? String(d.id_deduccion).trim() : '';
       const nombreInstitucion = d.nombre_institucion ? String(d.nombre_institucion).trim() : '';
-      const montoDeduccion = d.monto_deduccion != null ? d.monto_deduccion : ''; // Asumiendo que puede ser 0
+      const montoDeduccion = d.monto_total != null ? d.monto_total : ''; // Asumiendo que puede ser 0
       const anio = d.AÑO != null ? d.AÑO : '';
       const mes = d.MES != null ? d.MES : '';
       
@@ -91,7 +91,7 @@ export class DeduccionService {
       const asignacion: any = {
           anio: d.AÑO,
           mes: d.MES,
-          montoDeduccion: d.monto_deduccion,
+          montoDeduccion: d.monto_total,
           id_deduccion: deduccion.id_deduccion,
           id_institucion : institucion.id_institucion,
           nombre_institucion: institucion?.nombre_institucion,
@@ -127,7 +127,7 @@ export class DeduccionService {
               detalle.anio = deduccion[deduccionClave][key].anio;
               detalle.mes = deduccion[deduccionClave][key].mes;
               detalle.deduccion = deduccion[deduccionClave];
-              detalle.monto_deduccion = deduccion[deduccionClave][key].montoDeduccion;
+              detalle.monto_total = deduccion[deduccionClave][key].montoDeduccion;
               detalle.institucion = deduccion[deduccionClave][key].institucion;
               detalle.monto_aplicado = deduccion[deduccionClave][key].valor_aplicado;
               

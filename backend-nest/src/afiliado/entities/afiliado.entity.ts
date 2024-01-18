@@ -9,6 +9,7 @@ import { TipoIdentificacion } from "src/modules/tipo_identificacion/entities/tip
 import { BeneficioPlanilla } from "src/modules/Planilla/beneficio_planilla/entities/beneficio_planilla.entity";
 import { Usuario } from "src/modules/usuario/entities/usuario.entity";
 import { DetalleDeduccion } from "src/modules/Planilla/detalle-deduccion/entities/detalle-deduccion.entity";
+import { Planilla } from "src/modules/Planilla/planilla/entities/planilla.entity";
 
 @Entity()
 export class Afiliado {
@@ -133,6 +134,9 @@ export class Afiliado {
     @OneToMany(() => DetalleDeduccion, detalleDeduccion => detalleDeduccion.afiliado)
     detalleDeduccion: DetalleDeduccion[];
 
-    /* @OneToMany(() => DeduccionCalculada, deduccionCalculada => deduccionCalculada.afiliado)
-    deduccionCalculada: DeduccionCalculada[]; */
+    @OneToMany(() => Planilla, planilla => planilla.afiliado)
+    planilla: Planilla[];
+
+    @OneToMany(() => BeneficioPlanilla, beneficioPlanilla => beneficioPlanilla.afiliado)
+    beneficioPlanilla: BeneficioPlanilla[];
 }

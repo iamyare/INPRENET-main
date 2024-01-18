@@ -19,16 +19,13 @@ export class BeneficioPlanilla {
     @Column()
     estado: string;
 
-    @ManyToOne(() => Planilla, planilla => planilla.beneficioPlanilla, { cascade : true })
-    @JoinColumn({ name: 'id_planilla'})
-    planilla : Planilla;
-
     @ManyToOne(() => Beneficio, beneficio => beneficio.beneficioPlanilla, { cascade : true })
     @JoinColumn({ name: 'id_beneficio'})
     beneficio : Beneficio;
 
-    @ManyToOne(() => AfiliadosPorBanco, afiliadosPorBanco => afiliadosPorBanco.beneficioPlanilla, { cascade : true })
-    @JoinColumn({ name: 'id_afiliadosPorBanco'})
-    afiliadosPorBanco : AfiliadosPorBanco;
+    @ManyToOne(() => Afiliado, afiliado => afiliado.beneficioPlanilla, { cascade : true })
+    @JoinColumn({ name: 'id_afiliado'})
+    afiliado : Afiliado;
+
 
 }

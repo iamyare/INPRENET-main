@@ -27,12 +27,12 @@ export class DetalleDeduccionService {
   ){}
 
   async create(createDetalleDeduccionDto: CreateDetalleDeduccionDto) {
-    // Verificar si ya existe un registro con los mismos anio, mes, monto_deduccion y monto_aplicado
+    // Verificar si ya existe un registro con los mismos anio, mes, monto_total y monto_aplicado
     const exists = await this.detalleDeduccionRepository.findOne({
       where: {
         anio: createDetalleDeduccionDto.anio,
         mes: createDetalleDeduccionDto.mes,
-        monto_deduccion: createDetalleDeduccionDto.monto_deduccion
+        monto_total: createDetalleDeduccionDto.monto_total
       },
     });
 
@@ -63,7 +63,7 @@ export class DetalleDeduccionService {
       const dni = d.DNI ? String(d.DNI).trim() : '';
       const idDeduccion = d.id_deduccion ? String(d.id_deduccion).trim() : '';
       const nombreInstitucion = d.nombre_institucion ? String(d.nombre_institucion).trim() : '';
-      const montoDeduccion = d.monto_deduccion != null ? d.monto_deduccion : ''; // Asumiendo que puede ser 0
+      const montoDeduccion = d.monto_total != null ? d.monto_total : ''; // Asumiendo que puede ser 0
       const anio = d.AÑO != null ? d.AÑO : '';
       const mes = d.MES != null ? d.MES : '';
       
@@ -96,7 +96,7 @@ export class DetalleDeduccionService {
       const asignacion: any = {
           anio: d.AÑO,
           mes: d.MES,
-          montoDeduccion: d.monto_deduccion,
+          montoDeduccion: d.monto_total,
           id_deduccion: deduccion.id_deduccion,
           id_institucion : institucion.id_institucion,
           nombre_institucion: institucion?.nombre_institucion,
@@ -132,7 +132,7 @@ export class DetalleDeduccionService {
               detalle.anio = deduccion[deduccionClave][key].anio;
               detalle.mes = deduccion[deduccionClave][key].mes;
               detalle.deduccion = deduccion[deduccionClave];
-              detalle.monto_deduccion = deduccion[deduccionClave][key].montoDeduccion;
+              detalle.monto_total = deduccion[deduccionClave][key].montoDeduccion;
               detalle.institucion = deduccion[deduccionClave][key].institucion;
               detalle.monto_aplicado = deduccion[deduccionClave][key].valor_aplicado;
    

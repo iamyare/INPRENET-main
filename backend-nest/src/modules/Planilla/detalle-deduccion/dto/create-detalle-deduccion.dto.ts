@@ -12,7 +12,7 @@ export class CreateDetalleDeduccionDto {
 
     @IsString()
     @Length(1, 20)
-    monto_deduccion: string;
+    monto_total: string;
 
     @IsString()
     @Length(1, 20)

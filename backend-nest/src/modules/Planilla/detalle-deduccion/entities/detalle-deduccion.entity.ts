@@ -22,7 +22,10 @@ export class DetalleDeduccion {
     institucion: Institucion;
 
     @Column('varchar2', { length: 20, nullable: false })
-    monto_deduccion: string;
+    monto_total: string;
+
+    @Column('number', {nullable: true})
+    monto_aplicado: number;
 
     @Column('varchar2', { length: 20, nullable: true })
     estado_aplicacion: string;
@@ -32,9 +35,6 @@ export class DetalleDeduccion {
 
     @Column('varchar2', { length: 20, nullable: false})
     mes: string;
-
-    @Column('number', {nullable: true})
-    monto_aplicado: number;
 
     @Column('timestamp', { default: () => 'CURRENT_TIMESTAMP' })
     fecha_aplicado: Date;

@@ -19,8 +19,5 @@ export class AfiliadosPorBanco {
     @JoinColumn({ name: 'id_afiliado' })
     afiliado : Afiliado;
 
-    @OneToMany(() => BeneficioPlanilla, beneficioPlanilla => beneficioPlanilla.afiliadosPorBanco)
-    beneficioPlanilla: BeneficioPlanilla[];
-
 
 }

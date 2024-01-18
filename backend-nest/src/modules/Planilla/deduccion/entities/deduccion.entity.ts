@@ -11,11 +11,8 @@ export class Deduccion {
     @Column('varchar2', { length: 100, nullable: false })
     descripcion_deduccion : string;
 
-    @Column('varchar2', { length: 20, nullable: true })
-    estado_deduccion : string;
-
-    @Column('number', {nullable: false })
-    total_deduccion: number;
+    @Column('varchar2', { length: 40, nullable: true })
+    tipo_deduccion : string;
 
     @OneToMany(() => DetalleDeduccion, detalleDeduccion => detalleDeduccion.deduccion)
     detalleDeduccion : DetalleDeduccion[];

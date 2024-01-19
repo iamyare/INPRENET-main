@@ -43,6 +43,7 @@ import { WebcamModule } from 'ngx-webcam';
 import { BeneficioComponent } from './beneficio/beneficio.component';
 import { CustomMatPaginatorIntl } from './inline-editing-one/inline-editing-one.component';
 import { DynamicFormComponent } from './dynamic-form/dynamic-form.component';
+import { DynamicTableComponent } from './dynamic-table/dynamic-table.component';
 
 @NgModule({
   declarations: [
@@ -56,7 +57,8 @@ import { DynamicFormComponent } from './dynamic-form/dynamic-form.component';
     RefPersComponent,
     BotonarchivosComponent,
     HistorialSalarioComponent,
-    DynamicFormComponent
+    DynamicFormComponent,
+    DynamicTableComponent
   ],
   exports: [
     ProgressbarComponent,
@@ -69,7 +71,8 @@ import { DynamicFormComponent } from './dynamic-form/dynamic-form.component';
     RefPersComponent,
     BotonarchivosComponent,
     HistorialSalarioComponent,
-    DynamicFormComponent
+    DynamicFormComponent,
+    DynamicTableComponent
   ],
   imports: [
     WebcamModule,

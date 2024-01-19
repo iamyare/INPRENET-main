@@ -182,7 +182,7 @@ export class InlineEditingOneComponent implements OnInit, OnDestroy  {
   itemsPerPage = 5;  // Número de resultados por página
 
   @ViewChild(MatPaginator) paginator: MatPaginator | undefined;
-  private destroy$: Subject<void> = new Subject<void>(); // Un observable para gestionar la destrucción del componente  
+  private destroy$: Subject<void> = new Subject<void>(); // Un observable para gestionar la destrucción del componente
   constructor(private selectionService: SelectionserviceService) {
     this.updateSearchResults();
 
@@ -282,6 +282,6 @@ export class CustomMatPaginatorIntl extends MatPaginatorIntl {
       Math.min(startIndex + pageSize, length) :
       startIndex + pageSize;
 
-    return `${startIndex + 1} - ${endIndex} de ${length}`;
+    return `${startIndex + 1}  de ${length}`;
   };
 }

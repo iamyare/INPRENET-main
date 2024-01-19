@@ -1,40 +1,42 @@
 <div class="card">
   <div class="card-header card-header-danger tittle">
-    <h4 class="card-title">{{titulo}}</h4>
-    <p class="card-category">{{subtitulo}}</p>
+    <h4 class="card-title">{{ titulo }}</h4>
+    <p class="card-category">{{ subtitulo }}</p>
   </div>
   <div class="card-body">
     <form [formGroup]="form" (change)="onDatosBenChange()">
       <div class="container">
         <div class="row">
           <div *ngFor="let field of fields" class="col-md-4">
-            <ng-container *ngIf="field.type !== 'dropdown' && field.type !== 'date'; else customField">
+
+            <!-- Campo de rango de fechas -->
+            <ng-container *ngIf="field.type === 'daterange'; else otherFields">
               <mat-form-field appearance="outline" style="width: 100%;">
-                <mat-label>{{field.label}}</mat-label>
-                <input matInput [type]="field.type" [formControlName]="field.name">
+                <mat-label>{{ field.label }}</mat-label>
+                <mat-date-range-input [rangePicker]="picker">
+                  <input matStartDate placeholder="Fecha de inicio" [formControlName]="field.name">
+                  <input matEndDate placeholder="Fecha de fin">
+                </mat-date-range-input>
+                <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+                <mat-date-range-picker #picker></mat-date-range-picker>
               </mat-form-field>
             </ng-container>
 
-            <ng-template #customField>
-              <ng-container *ngIf="field.type === 'dropdown'; else dateField">
-                <mat-form-field appearance="outline" style="width: 100%;">
-                  <mat-label>{{field.label}}</mat-label>
-                  <mat-select [formControlName]="field.name">
-                    <mat-option *ngFor="let option of field.options" [value]="option.value">
-                      {{option.label}}
-                    </mat-option>
-                  </mat-select>
-                </mat-form-field>
-              </ng-container>
+            <!-- Otros tipos de campos -->
+            <ng-template #otherFields>
+              <mat-form-field appearance="outline" style="width: 100%;">
+                <mat-label>{{ field.label }}</mat-label>
 
-              <ng-template #dateField>
-                <mat-form-field appearance="outline" style="width: 100%;">
-                  <mat-label>{{field.label}}</mat-label>
-                  <input matInput [matDatepicker]="picker" [formControlName]="field.name">
-                  <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
-                  <mat-datepicker #picker></mat-datepicker>
-                </mat-form-field>
-              </ng-template>
+                <!-- Diferentes tipos de input -->
+                <input *ngIf="field.type !== 'dropdown'" matInput [type]="field.type" [formControlName]="field.name">
+
+                <!-- Dropdowns (select) -->
+                <mat-select *ngIf="field.type === 'dropdown'" [formControlName]="field.name">
+                  <mat-option *ngFor="let option of field.options" [value]="option.value">
+                    {{ option.label }}
+                  </mat-option>
+                </mat-select>
+              </mat-form-field>
             </ng-template>
 
           </div>

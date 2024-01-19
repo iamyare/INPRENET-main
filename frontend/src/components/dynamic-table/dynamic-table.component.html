@@ -1,0 +1,19 @@
+<!-- <div class="input-group">
+  <input type="search" class="form-control rounded" placeholder="Buscar Afiliado/Beneficiario" aria-label="Search"
+      aria-describedby="search-addon" [formControl]="formsearch">
+</div> -->
+<table class="table table-striped table-bordered table-hover">
+  <thead>
+    <tr class="text-center">
+      <th *ngFor="let col of columns">{{ col.header }}</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr *ngFor="let row of searchResults | slice:desde:hasta; let i= index">
+      <td *ngFor="let col of columns">{{ getCellValue(row, col) }}</td>
+    </tr>
+  </tbody>
+</table>
+
+<mat-paginator [length]="filas.length" [pageSize]="itemsPerPage" [pageSizeOptions]="[itemsPerPage]"
+    (page)="onPageChange($event)"></mat-paginator>

@@ -33,6 +33,7 @@ import { EditarBeneficioComponent } from '../pages/Generales/editar-beneficio/ed
 import { InlineEditingOneComponent } from '../../../components/inline-editing-one/inline-editing-one.component';
 import { NuevaplanillaComponent } from '../../../components/nuevaplanilla/nuevaplanilla.component';
 import { NuevoTipoPlanillaComponent } from '../pages/Generales/nuevo-tipo-planilla/nuevo-tipo-planilla.component';
+import { EditarTipoPlanillaComponent } from '../pages/Generales/editar-tipo-planilla/editar-tipo-planilla.component';
 
 @NgModule({
   imports: [
@@ -66,7 +67,8 @@ import { NuevoTipoPlanillaComponent } from '../pages/Generales/nuevo-tipo-planil
     NuevaplanillaComponent,
     NuevoBeneficioComponent,
     EditarBeneficioComponent,
-    NuevoTipoPlanillaComponent
+    NuevoTipoPlanillaComponent,
+    EditarTipoPlanillaComponent
 /*     CentroTrabajoPageComponent */
   ]
 })

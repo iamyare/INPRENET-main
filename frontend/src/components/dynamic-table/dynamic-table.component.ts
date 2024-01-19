@@ -85,10 +85,21 @@ export class DynamicTableComponent implements OnInit, OnDestroy{
       .subscribe(results => this.searchResults = results);
   }
 
+  ejecutarAccionBoton(column: TableColumn, row: any) {
+    if (column.buttonAction) {
+      column.buttonAction(row);
+    }
+  }
+
+
 }
 
 interface TableColumn {
   header: string;
   col: string;
   customRender?: (data: any) => string;
+  isButton?: boolean;
+  buttonAction?: (row: any) => void;
+  buttonText?: string;
 }
+

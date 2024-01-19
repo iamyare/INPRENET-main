@@ -9,8 +9,17 @@
     </tr>
   </thead>
   <tbody>
-    <tr *ngFor="let row of searchResults | slice:desde:hasta; let i= index">
-      <td *ngFor="let col of columns">{{ getCellValue(row, col) }}</td>
+    <tr *ngFor="let row of searchResults">
+      <td *ngFor="let col of columns">
+        <ng-container *ngIf="col.isButton">
+          <button mat-raised-button class="btn btn-danger pull-right" *ngIf="col.isButton" (click)="ejecutarAccionBoton(col, row)" style="background-color: #628780; color: #ffffff; border-radius: 5px; padding: 10px 20px;">
+            {{ col.buttonText }}
+          </button>
+        </ng-container>
+        <ng-container *ngIf="!col.isButton">
+          {{ getCellValue(row, col) }}
+        </ng-container>
+      </td>
     </tr>
   </tbody>
 </table>

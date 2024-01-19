@@ -1,4 +1,4 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { FormBuilder, FormGroup, ValidatorFn } from '@angular/forms';
 
 @Component({
@@ -8,13 +8,19 @@ import { FormBuilder, FormGroup, ValidatorFn } from '@angular/forms';
 })
 export class DynamicFormComponent implements OnInit{@Input() fields: FieldConfig[] = [];
   form: FormGroup;
-
+  @Input() titulo = "";
+  @Input() subtitulo = "";
+  @Output() newDatBenChange = new EventEmitter<any>()
   constructor(private fb: FormBuilder) {
     this.form = this.fb.group({});
   }
 
   ngOnInit() {
     this.form = this.createControl();
+  }
+
+  onDatosBenChange() {
+    this.newDatBenChange.emit(this.form);
   }
 
   createControl(): FormGroup {

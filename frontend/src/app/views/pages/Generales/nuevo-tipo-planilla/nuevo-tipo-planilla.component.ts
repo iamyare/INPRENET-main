@@ -16,6 +16,10 @@ export class NuevoTipoPlanillaComponent {
     { type: 'password', label: 'Contraseña', name: 'password', validations: [] },
     { type: 'text', label: 'sisoy', name: 'sisoy', validations: [Validators.email] },
   ];
+
+  obtenerDatos(event:any):any{
+    console.log(event.value);
+  }
 }
 
 interface FieldConfig {

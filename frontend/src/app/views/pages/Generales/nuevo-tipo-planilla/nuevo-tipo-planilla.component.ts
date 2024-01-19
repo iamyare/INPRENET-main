@@ -14,7 +14,21 @@ export class NuevoTipoPlanillaComponent {
     { type: 'email', label: 'Correo Electrónico', name: 'email', validations: [] },
     { type: 'number', label: 'Edad', name: 'edad', validations: [] },
     { type: 'password', label: 'Contraseña', name: 'password', validations: [] },
-    { type: 'text', label: 'sisoy', name: 'sisoy', validations: [Validators.email] },
+    { type: 'date', label: 'sisoy', name: 'sisoy', validations: [] },
+    { type: 'dropdown', label: 'Género', name: 'genero',
+    options: [
+        { label: 'Femenino', value: 'femenino' },
+        { label: 'Masculino', value: 'masculino' },
+        { label: 'Otro', value: 'otro' }
+      ],
+    validations: []
+    },
+    {
+      type: 'date',
+      label: 'Fecha de Nacimiento',
+      name: 'fechaNacimiento',
+      validations: [Validators.required]
+    }
   ];
 
   obtenerDatos(event:any):any{
@@ -26,7 +40,7 @@ interface FieldConfig {
   type: string;
   label: string;
   name: string;
-  value?: any;  // Agrega esta línea
+  value?: any;
   options?: { label: string; value: any }[];
   validations?: ValidatorFn[];
 }

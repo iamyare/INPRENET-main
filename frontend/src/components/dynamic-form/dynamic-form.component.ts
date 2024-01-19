@@ -27,7 +27,7 @@ export class DynamicFormComponent implements OnInit{@Input() fields: FieldConfig
     const group = this.fb.group({});
     this.fields.forEach(field => {
       const control = this.fb.control(
-        field.value ?? '',  // Usa un valor por defecto si `value` no está presente
+        field.value ?? '',
         field.validations
       );
       group.addControl(field.name, control);
@@ -41,7 +41,7 @@ interface FieldConfig {
   type: string;
   label: string;
   name: string;
-  value?: any;  // Agrega esta línea
+  value?: any;
   options?: { label: string; value: any }[];
   validations?: ValidatorFn[];
 }

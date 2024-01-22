@@ -1,0 +1,238 @@
+import { Component } from '@angular/core';
+import { ValidatorFn, Validators } from '@angular/forms';
+
+@Component({
+  selector: 'app-editar-tipo-planilla',
+  templateUrl: './editar-tipo-planilla.component.html',
+  styleUrl: './editar-tipo-planilla.component.scss'
+})
+export class EditarTipoPlanillaComponent {
+
+  myColumns: TableColumn[] = [
+    { header: 'Columna 1', col: 'col1', isEditable: true },
+    { header: 'Columna 2', col: 'col2', isEditable: false, validations: [Validators.required, Validators.min(0), Validators.max(2)]  },
+    { header: 'Columna 3', col: 'col3', isEditable: false },
+    { header: 'Columna 4', col: 'col4', isEditable: true },
+  ];
+
+  filas: any[] = [
+    { col1: '1', col2: 'david', col3: 'MESSI' },
+    { col1: '2', col2: 'Oscar' },
+    { col1: '3', col2: 'dsa' },
+    // Más datos según sea necesario
+  ];
+
+  hacerAlgo(row: any) {
+  console.log('Acción del botón en la fila:', row);
+  // Aquí puedes agregar la lógica que necesites
+}
+}
+
+
+interface TableColumn {
+  header: string;
+  col: string;
+  customRender?: (data: any) => string;
+  isButton?: boolean;
+  buttonAction?: (row: any) => void;
+  buttonText?: string;
+  isEditable?: boolean; // Nueva propiedad
+  validations?: ValidatorFn[];
+}
+
+
+
+/*  {
+      header: 'Acciones',
+      col: 'acciones',
+      isButton: true,
+      buttonText: 'Hacer algo',
+      buttonAction: (row) => this.hacerAlgo(row)
+    } */
+
+
+    <table class="table table-striped table-bordered table-hover">
+  <thead>
+    <tr class="text-center">
+      <th *ngFor="let col of columns">{{ col.header }}</th>
+      <th>Acciones</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr *ngFor="let row of searchResults">
+      <td *ngFor="let col of columns">
+        <ng-container *ngIf="!row.isEditing">
+          {{ getCellValue(row, col) }}
+        </ng-container>
+        <ng-container *ngIf="row.isEditing">
+          <ng-container *ngIf="col.isEditable">
+            <ng-container *ngIf="getFormControl(row, col) as control">
+              <input type="text" [formControl]="control" />
+              <div *ngIf="control.invalid && control.touched" class="error-messages">
+                <!-- Mensajes de error específicos con notación de corchetes y encadenamiento opcional -->
+                <span *ngIf="control.errors?.['required']">Este campo es requerido.</span>
+                <span *ngIf="control.errors?.['max']">Valor máximo excedido.</span>
+                <span *ngIf="control.errors?.['min']">Valor mínimo no alcanzado.</span>
+                <span *ngIf="control.errors?.['maxLength']">Longitud máxima excedida.</span>
+                <!-- Agrega aquí otros mensajes de error según sea necesario -->
+              </div>
+
+            </ng-container>
+            <ng-container *ngIf="!getFormControl(row, col)">
+              <!-- Manejo de la situación donde el FormControl no está disponible -->
+            </ng-container>
+          </ng-container>
+          <ng-container *ngIf="!col.isEditable">
+            {{ getCellValue(row, col) }}
+          </ng-container>
+        </ng-container>
+      </td>
+      <td>
+        <button *ngIf="!row.isEditing" (click)="startEditing(row)">Editar</button>
+        <button *ngIf="row.isEditing" (click)="saveChanges(row)">Guardar</button>
+        <button *ngIf="row.isEditing" (click)="stopEditing(row)">Cancelar</button>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+<mat-paginator [length]="filas.length" [pageSize]="itemsPerPage" [pageSizeOptions]="[itemsPerPage]"
+    (page)="onPageChange($event)"></mat-paginator>
+
+
+    import { Component, Input, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { FormControl, FormBuilder, FormGroup, ValidatorFn, Validators } from '@angular/forms';
+import { MatPaginator } from '@angular/material/paginator';
+import { Observable, Subject, debounceTime, distinctUntilChanged, of, switchMap, takeUntil } from 'rxjs';
+
+interface TableColumn {
+  header: string;
+  col: string;
+  customRender?: (data: any) => string;
+  isButton?: boolean;
+  buttonAction?: (row: any) => void;
+  buttonText?: string;
+  isEditable?: boolean;
+  validations?: ValidatorFn[];
+}
+
+@Component({
+  selector: 'app-dynamic-table',
+  templateUrl: './dynamic-table.component.html',
+  styleUrls: ['./dynamic-table.component.scss']
+})
+export class DynamicTableComponent implements OnInit, OnDestroy {
+  @Input() columns: TableColumn[] = [];
+  @Input() filas: any[] = [];
+  itemsPerPage = 2;
+
+  @ViewChild(MatPaginator) paginator: MatPaginator | undefined;
+  private destroy$: Subject<void> = new Subject<void>();
+
+  formsearch = new FormControl('');
+  currentPage = 0;
+  pageSizeOptions: number[] = [5, 10, 1000, 2000, 5000, 10000];
+  pageSize: number = this.pageSizeOptions[0];
+  searchResults: any = [];
+  desde = 0; hasta: number = this.pageSize;
+
+  editableRows: any[] = [];
+  formGroups: Map<any, FormGroup> = new Map();
+
+  constructor(private fb: FormBuilder) {}
+
+  ngOnInit(): void {
+    this.editableRows = this.filas.map(fila => ({
+      ...fila,
+      isEditing: false
+    }));
+
+    this.filas.forEach(fila => {
+      const group: any = {};
+      this.columns.forEach(col => {
+        if (col.isEditable) {
+          group[col.col] = [fila[col.col], col.validations || []];
+        }
+      });
+      this.formGroups.set(fila, this.fb.group(group));
+    });
+
+    this.formsearch.valueChanges
+      .pipe(
+        debounceTime(300),
+        distinctUntilChanged(),
+        switchMap(query => this.filtrarUsuarios(query)),
+        takeUntil(this.destroy$)
+      )
+      .subscribe(results => {
+        this.searchResults = results;
+        this.currentPage = 0;
+        this.paginator?.firstPage();
+      });
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
+
+  filtrarUsuarios(query: any): Observable<any[]> {
+    let temp: any = [];
+    this.filas.filter(value => {
+      for (const key in value) {
+        if (value.hasOwnProperty(key)) {
+          temp.push(value); break;
+        }
+      }
+    });
+
+    const startIndex = this.currentPage * this.itemsPerPage;
+    return of(temp.slice(startIndex, startIndex + this.itemsPerPage));
+  }
+
+  getCellValue(row: any, column: TableColumn): string {
+    if (column.customRender) {
+      return column.customRender(row);
+    }
+    return row[column.col];
+  }
+
+  onPageChange(event: any): void {
+    this.currentPage = event.pageIndex;
+    this.updateSearchResults();
+  }
+
+  updateSearchResults(): void {
+    this.filtrarUsuarios(this.formsearch.value?.trim())
+      .subscribe(results => this.searchResults = results);
+  }
+
+  ejecutarAccionBoton(column: TableColumn, row: any) {
+    if (column.buttonAction) {
+      column.buttonAction(row);
+    }
+  }
+
+  startEditing(row: any): void {
+    row.isEditing = true;
+  }
+
+  stopEditing(row: any): void {
+    row.isEditing = false;
+  }
+
+  saveChanges(row: any): void {
+    const formGroup = this.formGroups.get(row);
+    if (formGroup && formGroup.valid) {
+      // Lógica para guardar los cambios
+      row.isEditing = false;
+    } else {
+      // Manejo de errores de validación
+    }
+  }
+
+  getFormControl(row: any, column: TableColumn): FormControl | null {
+    const formGroup = this.formGroups.get(row);
+    return formGroup ? formGroup.get(column.col) as FormControl : null;
+  }
+}

@@ -13,7 +13,12 @@
         </ng-container>
         <ng-container *ngIf="row.isEditing">
           <ng-container *ngIf="col.isEditable">
-            <input type="text" [(ngModel)]="row[col.col]" />
+            <input type="text" [formControl]="row[col.col + '_control']" />
+            <div *ngIf="row[col.col + '_control'].invalid && row[col.col + '_control'].touched">
+              <span *ngFor="let error of getControlErrors(row, col)">
+                {{ error }}
+              </span>
+            </div>
           </ng-container>
           <ng-container *ngIf="!col.isEditable">
             {{ getCellValue(row, col) }}
@@ -21,13 +26,12 @@
         </ng-container>
       </td>
       <td>
-        <button mat-raised-button class="btn btn-danger pull-right" *ngIf="!row.isEditing" (click)="startEditing(row)" style="background-color: #628780; color: #ffffff; border-radius: 5px; padding: 10px 20px;">Editar</button>
-        <button mat-raised-button class="btn btn-danger pull-right" *ngIf="row.isEditing" (click)="saveChanges(row)" style="background-color: #628780; color: #ffffff; border-radius: 5px; padding: 10px 20px;">Guardar</button>
-        <button mat-raised-button class="btn btn-danger pull-right" *ngIf="row.isEditing" (click)="stopEditing(row)" style="background-color: #628780; color: #ffffff; border-radius: 5px; padding: 10px 20px;">Cancelar</button>
+        <button mat-raised-button *ngIf="!row.isEditing" (click)="startEditing(row)" style="background-color: #628780; color: #ffffff; border-radius: 5px; padding: 10px 20px;">Editar</button>
+        <button mat-raised-button *ngIf="row.isEditing" (click)="saveChanges(row)" style="background-color: #628780; color: #ffffff; border-radius: 5px; padding: 10px 20px;">Guardar</button>
+        <button mat-raised-button *ngIf="row.isEditing" (click)="stopEditing(row)" style="background-color: #628780; color: #ffffff; border-radius: 5px; padding: 10px 20px;">Cancelar</button>
       </td>
     </tr>
   </tbody>
 </table>
 
-<mat-paginator [length]="filas.length" [pageSize]="itemsPerPage" [pageSizeOptions]="[itemsPerPage]"
-    (page)="onPageChange($event)"></mat-paginator>
+<mat-paginator [length]="filas.length" [pageSize]="itemsPerPage" [pageSizeOptions]="pageSizeOptions" (page)="onPageChange($event)"></mat-paginator>

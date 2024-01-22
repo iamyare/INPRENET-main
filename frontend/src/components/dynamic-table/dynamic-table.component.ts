@@ -1,5 +1,5 @@
 import { Component, Input, OnDestroy, OnInit, ViewChild } from '@angular/core';
-import { FormControl } from '@angular/forms';
+import { FormControl, ValidatorFn } from '@angular/forms';
 import { MatPaginator } from '@angular/material/paginator';
 import { Observable, Subject, debounceTime, distinctUntilChanged, of, switchMap, takeUntil } from 'rxjs';
 
@@ -11,7 +11,7 @@ import { Observable, Subject, debounceTime, distinctUntilChanged, of, switchMap,
 export class DynamicTableComponent implements OnInit, OnDestroy {
   @Input() columns: TableColumn[] = [];
   @Input() filas: any[] = [];
-  itemsPerPage = 2;
+  itemsPerPage = 1;
 
   @ViewChild(MatPaginator) paginator: MatPaginator | undefined;
   private destroy$: Subject<void> = new Subject<void>();
@@ -22,9 +22,6 @@ export class DynamicTableComponent implements OnInit, OnDestroy {
   pageSize: number = this.pageSizeOptions[0];
   searchResults: any = [];
   desde = 0; hasta: number = this.pageSize;
-
-  // Nueva propiedad para manejar las filas con estado de edición
-  editableRows: any[] = [];
 
   constructor() {
     this.updateSearchResults();
@@ -44,7 +41,7 @@ export class DynamicTableComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
-    this.editableRows = this.filas.map(fila => ({
+    this.searchResults = this.filas.map(fila => ({
       ...fila,
       isEditing: false
     }));
@@ -92,8 +89,13 @@ export class DynamicTableComponent implements OnInit, OnDestroy {
     }
   }
 
-  // Funciones para manejar la edición
   startEditing(row: any): void {
+    this.columns.forEach(column => {
+      if (column.isEditable) {
+        const validationRules = column.validationRules || [];
+        row[`${column.col}_control`] = new FormControl(row[column.col], validationRules);
+      }
+    });
     row.isEditing = true;
   }
 
@@ -102,8 +104,49 @@ export class DynamicTableComponent implements OnInit, OnDestroy {
   }
 
   saveChanges(row: any): void {
-    // Lógica para guardar los cambios
-    row.isEditing = false;
+    let isValid = true;
+    this.columns.forEach(column => {
+      if (column.isEditable && row[`${column.col}_control`]) {
+        isValid = isValid && row[`${column.col}_control`].valid;
+      }
+    });
+
+    if (isValid) {
+      // Lógica para guardar los cambios
+      this.columns.forEach(column => {
+        if (column.isEditable) {
+          row[column.col] = row[`${column.col}_control`].value;
+        }
+      });
+      row.isEditing = false;
+    } else {
+      // Manejar caso de datos no válidos
+      console.log('Datos no válidos');
+    }
+  }
+
+  getControlErrors(row: any, column: TableColumn): string[] {
+    const control = row[`${column.col}_control`];
+    if (!control || !control.errors) return [];
+
+    return Object.keys(control.errors).map(errKey => {
+      let message = '';
+      switch (errKey) {
+        case 'required':
+          message = `El campo ${column.header} es obligatorio.`;
+          break;
+        case 'minlength':
+          message = `El campo ${column.header} debe tener al menos ${control.errors['minlength'].requiredLength} caracteres.`;
+          break;
+        case 'maxlength':
+          message = `El campo ${column.header} no puede exceder ${control.errors['maxlength'].requiredLength} caracteres.`;
+          break;
+        // Agrega aquí más casos según las validaciones que uses
+        default:
+          message = `Error en el campo ${column.header}.`;
+      }
+      return message;
+    });
   }
 }
 
@@ -114,5 +157,6 @@ interface TableColumn {
   isButton?: boolean;
   buttonAction?: (row: any) => void;
   buttonText?: string;
-  isEditable?: boolean; // Nueva propiedad
+  isEditable?: boolean;
+  validationRules?: ValidatorFn[];
 }

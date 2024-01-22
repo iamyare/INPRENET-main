@@ -1,38 +1,43 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
+import { ValidatorFn, Validators } from '@angular/forms';
 
 @Component({
   selector: 'app-editar-tipo-planilla',
   templateUrl: './editar-tipo-planilla.component.html',
   styleUrl: './editar-tipo-planilla.component.scss'
 })
-export class EditarTipoPlanillaComponent {
+export class EditarTipoPlanillaComponent implements OnInit{
+  myColumns: TableColumn[] = [];
+  filas: any[] =[];
 
-  myColumns: TableColumn[] = [
-    { header: 'Columna 1', col: 'col1', isEditable: true },
-    { header: 'Columna 2', col: 'col2', isEditable: true },
-    { header: 'Columna 3', col: 'col3', isEditable: false },
-    { header: 'Columna 4', col: 'col4', isEditable: true },
-   /*  {
-      header: 'Acciones',
-      col: 'acciones',
-      isButton: true,
-      buttonText: 'Hacer algo',
-      buttonAction: (row) => this.hacerAlgo(row)
-    } */
-    // Más configuraciones de columnas según sea necesario
-  ];
+  ngOnInit(): void {
+    // Definir las columnas
+    this.myColumns = [
+      {
+        header: 'ID',
+        col: 'id',
+        isEditable: false
+      },
+      {
+        header: 'Nombre',
+        col: 'nombre',
+        isEditable: true,
+        validationRules: [Validators.required, Validators.minLength(3)]
+      },
+      {
+        header: 'Email',
+        col: 'email',
+        isEditable: false
+      }
+    ];
 
-  filas: any[] = [
-    { col1: '1', col2: 'david', col3: 'MESSI' },
-    { col1: '2', col2: 'Oscar' },
-    { col1: '3', col2: 'dsa' },
-    // Más datos según sea necesario
-  ];
-
-  hacerAlgo(row: any) {
-  console.log('Acción del botón en la fila:', row);
-  // Aquí puedes agregar la lógica que necesites
-}
+    // Datos de ejemplo para las filas
+    this.filas = [
+      { id: 1, nombre: 'Juan Perez', email: 'juan@example.com' },
+      { id: 2, nombre: 'Ana Lopez', email: 'ana@example.com' },
+      { id: 3, nombre: 'Carlos García', email: 'carlos@example.com' }
+    ];
+  }
 }
 
 
@@ -44,6 +49,15 @@ interface TableColumn {
   buttonAction?: (row: any) => void;
   buttonText?: string;
   isEditable?: boolean; // Nueva propiedad
+  validationRules?: ValidatorFn[];
 }
 
 
+
+/*  {
+      header: 'Acciones',
+      col: 'acciones',
+      isButton: true,
+      buttonText: 'Hacer algo',
+      buttonAction: (row) => this.hacerAlgo(row)
+    } */

@@ -1,24 +1,29 @@
-<!-- <div class="input-group">
-  <input type="search" class="form-control rounded" placeholder="Buscar Afiliado/Beneficiario" aria-label="Search"
-      aria-describedby="search-addon" [formControl]="formsearch">
-</div> -->
 <table class="table table-striped table-bordered table-hover">
   <thead>
     <tr class="text-center">
       <th *ngFor="let col of columns">{{ col.header }}</th>
+      <th>Acciones</th>
     </tr>
   </thead>
   <tbody>
     <tr *ngFor="let row of searchResults">
       <td *ngFor="let col of columns">
-        <ng-container *ngIf="col.isButton">
-          <button mat-raised-button class="btn btn-danger pull-right" *ngIf="col.isButton" (click)="ejecutarAccionBoton(col, row)" style="background-color: #628780; color: #ffffff; border-radius: 5px; padding: 10px 20px;">
-            {{ col.buttonText }}
-          </button>
-        </ng-container>
-        <ng-container *ngIf="!col.isButton">
+        <ng-container *ngIf="!row.isEditing">
           {{ getCellValue(row, col) }}
         </ng-container>
+        <ng-container *ngIf="row.isEditing">
+          <ng-container *ngIf="col.isEditable">
+            <input type="text" [(ngModel)]="row[col.col]" />
+          </ng-container>
+          <ng-container *ngIf="!col.isEditable">
+            {{ getCellValue(row, col) }}
+          </ng-container>
+        </ng-container>
+      </td>
+      <td>
+        <button mat-raised-button class="btn btn-danger pull-right" *ngIf="!row.isEditing" (click)="startEditing(row)" style="background-color: #628780; color: #ffffff; border-radius: 5px; padding: 10px 20px;">Editar</button>
+        <button mat-raised-button class="btn btn-danger pull-right" *ngIf="row.isEditing" (click)="saveChanges(row)" style="background-color: #628780; color: #ffffff; border-radius: 5px; padding: 10px 20px;">Guardar</button>
+        <button mat-raised-button class="btn btn-danger pull-right" *ngIf="row.isEditing" (click)="stopEditing(row)" style="background-color: #628780; color: #ffffff; border-radius: 5px; padding: 10px 20px;">Cancelar</button>
       </td>
     </tr>
   </tbody>

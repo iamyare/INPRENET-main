@@ -8,17 +8,17 @@ import { Component } from '@angular/core';
 export class EditarTipoPlanillaComponent {
 
   myColumns: TableColumn[] = [
-    { header: 'Columna 1', col: 'col1' },
-    { header: 'Columna 2', col: 'col2' },
-    { header: 'Columna 3', col: 'col3' },
-    { header: 'Columna 4', col: 'col4' },
-    {
+    { header: 'Columna 1', col: 'col1', isEditable: true },
+    { header: 'Columna 2', col: 'col2', isEditable: true },
+    { header: 'Columna 3', col: 'col3', isEditable: false },
+    { header: 'Columna 4', col: 'col4', isEditable: true },
+   /*  {
       header: 'Acciones',
       col: 'acciones',
       isButton: true,
       buttonText: 'Hacer algo',
       buttonAction: (row) => this.hacerAlgo(row)
-    }
+    } */
     // Más configuraciones de columnas según sea necesario
   ];
 
@@ -43,6 +43,7 @@ interface TableColumn {
   isButton?: boolean;
   buttonAction?: (row: any) => void;
   buttonText?: string;
+  isEditable?: boolean; // Nueva propiedad
 }
 
 

@@ -1,31 +1,32 @@
 import { Component, Input, OnDestroy, OnInit, ViewChild } from '@angular/core';
-import { SelectionserviceService } from '../nuevaplanilla/selectionservice.service';
-import { Observable, Subject, debounceTime, distinctUntilChanged, of, switchMap, takeUntil } from 'rxjs';
-import { MatPaginator } from '@angular/material/paginator';
 import { FormControl } from '@angular/forms';
+import { MatPaginator } from '@angular/material/paginator';
+import { Observable, Subject, debounceTime, distinctUntilChanged, of, switchMap, takeUntil } from 'rxjs';
 
 @Component({
   selector: 'app-dynamic-table',
   templateUrl: './dynamic-table.component.html',
-  styleUrl: './dynamic-table.component.scss'
+  styleUrls: ['./dynamic-table.component.scss']
 })
-export class DynamicTableComponent implements OnInit, OnDestroy{
+export class DynamicTableComponent implements OnInit, OnDestroy {
   @Input() columns: TableColumn[] = [];
   @Input() filas: any[] = [];
-  itemsPerPage = 1;
+  itemsPerPage = 2;
 
   @ViewChild(MatPaginator) paginator: MatPaginator | undefined;
   private destroy$: Subject<void> = new Subject<void>();
 
   formsearch = new FormControl('');
   currentPage = 0;
-  pageSizeOptions: number[] = [5, 10, 1000,2000,5000,10000];
+  pageSizeOptions: number[] = [5, 10, 1000, 2000, 5000, 10000];
   pageSize: number = this.pageSizeOptions[0];
-  searchResults: any= [];
+  searchResults: any = [];
   desde = 0; hasta: number = this.pageSize;
 
-  constructor() {
+  // Nueva propiedad para manejar las filas con estado de edición
+  editableRows: any[] = [];
 
+  constructor() {
     this.updateSearchResults();
 
     this.formsearch.valueChanges
@@ -37,35 +38,35 @@ export class DynamicTableComponent implements OnInit, OnDestroy{
       )
       .subscribe(results => {
         this.searchResults = results;
-        this.currentPage = 0;  // Reinicia la página a la primera al cambiar la búsqueda
+        this.currentPage = 0;
         this.paginator?.firstPage();
       });
   }
 
   ngOnInit(): void {
+    this.editableRows = this.filas.map(fila => ({
+      ...fila,
+      isEditing: false
+    }));
   }
+
   ngOnDestroy(): void {
     this.destroy$.next();
     this.destroy$.complete();
   }
 
-   filtrarUsuarios(query: any): Observable<any[]> {
-
-    let temp: any = []
+  filtrarUsuarios(query: any): Observable<any[]> {
+    let temp: any = [];
     this.filas.filter(value => {
       for (const key in value) {
         if (value.hasOwnProperty(key)) {
-          temp.push(value); break
+          temp.push(value); break;
         }
       }
-    }
-   );
+    });
 
-   console.log(temp);
-
-
-      const startIndex = this.currentPage * this.itemsPerPage;
-   return of(temp.slice(startIndex, startIndex + this.itemsPerPage));
+    const startIndex = this.currentPage * this.itemsPerPage;
+    return of(temp.slice(startIndex, startIndex + this.itemsPerPage));
   }
 
   getCellValue(row: any, column: TableColumn): string {
@@ -91,7 +92,19 @@ export class DynamicTableComponent implements OnInit, OnDestroy{
     }
   }
 
+  // Funciones para manejar la edición
+  startEditing(row: any): void {
+    row.isEditing = true;
+  }
 
+  stopEditing(row: any): void {
+    row.isEditing = false;
+  }
+
+  saveChanges(row: any): void {
+    // Lógica para guardar los cambios
+    row.isEditing = false;
+  }
 }
 
 interface TableColumn {
@@ -101,5 +114,5 @@ interface TableColumn {
   isButton?: boolean;
   buttonAction?: (row: any) => void;
   buttonText?: string;
+  isEditable?: boolean; // Nueva propiedad
 }
-

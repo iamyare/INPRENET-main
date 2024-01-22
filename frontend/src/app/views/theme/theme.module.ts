@@ -4,7 +4,6 @@ import { NgModule } from '@angular/core';
 import { CardModule, GridModule, NavModule, UtilitiesModule, TabsModule } from '@coreui/angular';
 import { IconModule } from '@coreui/icons-angular';
 
-
 // Theme Routing
 import { ThemeRoutingModule } from './theme-routing.module';
 import { AfilBancoComponent } from '../pages/Generales/afil-banco/afil-banco.component';
@@ -34,6 +33,7 @@ import { InlineEditingOneComponent } from '../../../components/inline-editing-on
 import { NuevaplanillaComponent } from '../../../components/nuevaplanilla/nuevaplanilla.component';
 import { NuevoTipoPlanillaComponent } from '../pages/Generales/nuevo-tipo-planilla/nuevo-tipo-planilla.component';
 import { EditarTipoPlanillaComponent } from '../pages/Generales/editar-tipo-planilla/editar-tipo-planilla.component';
+import { NuevoTipoDeduccionComponent } from '../pages/Generales/nuevo-tipo-deduccion/nuevo-tipo-deduccion.component';
 
 @NgModule({
   imports: [
@@ -68,7 +68,8 @@ import { EditarTipoPlanillaComponent } from '../pages/Generales/editar-tipo-plan
     NuevoBeneficioComponent,
     EditarBeneficioComponent,
     NuevoTipoPlanillaComponent,
-    EditarTipoPlanillaComponent
+    EditarTipoPlanillaComponent,
+    NuevoTipoDeduccionComponent
 /*     CentroTrabajoPageComponent */
   ]
 })

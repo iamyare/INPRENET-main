@@ -9,11 +9,28 @@ export class Deduccion {
     id_deduccion : string;
 
     @Column('varchar2', { length: 100, nullable: false })
+    nombre_deduccion : string;
+
+    @Column('varchar2', { length: 100, nullable: false })
     descripcion_deduccion : string;
 
-    @Column('varchar2', { length: 40, nullable: true })
+    @Column('varchar2', { length: 40, nullable: false })
     tipo_deduccion : string;
+
+    @Column('number', {nullable: true })
+    prioridad : number;
 
     @OneToMany(() => DetalleDeduccion, detalleDeduccion => detalleDeduccion.deduccion)
     detalleDeduccion : DetalleDeduccion[];
 }
+
+[
+    {
+        id:"",
+        name:""
+    },
+    {
+        id:"",
+        name:""
+    }
+]

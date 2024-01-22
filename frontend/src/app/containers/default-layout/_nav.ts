@@ -103,12 +103,12 @@ export const navItems: INavData[] = [
     url: '/base',
     children: [
       {
-        url: '/Planilla/ver-deducciones',
-        name: 'Ver Deducciones',
-      },
-      {
         url: '/Planilla/nueva-planilla',
         name: 'Nueva Planilla',
+      },
+      {
+        url: '/Planilla/ver-deducciones',
+        name: 'Ver Planillas',
       },
 /*       {
         name: 'subir nueva planilla',
@@ -121,17 +121,17 @@ export const navItems: INavData[] = [
     ]
   },
 
-  /* 
+  /*
   {
     name: 'Centro de trabajo',
     url: '/Afiliado/centro-trabajo',
-     iconComponent: { name: 'cil-drop' } 
+     iconComponent: { name: 'cil-drop' }
     children: [
       {
         url: '/Afiliado/centro-trabajo',
         name: 'Nuevo registro',
-         iconComponent: { name: 'cilDollar' }, 
-         linkProps: { fragment: 'someAnchor' }, 
+         iconComponent: { name: 'cilDollar' },
+         linkProps: { fragment: 'someAnchor' },
       },
       {
         name: 'Ver / Editar',

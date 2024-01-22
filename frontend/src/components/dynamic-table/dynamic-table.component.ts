@@ -11,21 +11,24 @@ import { Observable, Subject, debounceTime, distinctUntilChanged, of, switchMap,
 export class DynamicTableComponent implements OnInit, OnDestroy {
   @Input() columns: TableColumn[] = [];
   @Input() filas: any[] = [];
-  itemsPerPage = 1;
-
   @ViewChild(MatPaginator) paginator: MatPaginator | undefined;
+
   private destroy$: Subject<void> = new Subject<void>();
 
   formsearch = new FormControl('');
-  currentPage = 0;
+  searchResults: any = [];
+
+  itemsPerPage = 2;
   pageSizeOptions: number[] = [5, 10, 1000, 2000, 5000, 10000];
   pageSize: number = this.pageSizeOptions[0];
-  searchResults: any = [];
+  currentPage = 0;
   desde = 0; hasta: number = this.pageSize;
 
-  constructor() {
-    this.updateSearchResults();
+  editingRow: any | null = null;
+  editFormControls: { [rowKey: string]: { [colKey: string]: FormControl } } = {};
+  editableRows: any[] = []
 
+  constructor() {
     this.formsearch.valueChanges
       .pipe(
         debounceTime(300),
@@ -45,6 +48,7 @@ export class DynamicTableComponent implements OnInit, OnDestroy {
       ...fila,
       isEditing: false
     }));
+    this.updateSearchResults();
   }
 
   ngOnDestroy(): void {
@@ -52,18 +56,36 @@ export class DynamicTableComponent implements OnInit, OnDestroy {
     this.destroy$.complete();
   }
 
-  filtrarUsuarios(query: any): Observable<any[]> {
-    let temp: any = [];
-    this.filas.filter(value => {
-      for (const key in value) {
-        if (value.hasOwnProperty(key)) {
-          temp.push(value); break;
+   filtrarUsuarios(query: any): Observable<any[]> {
+     let filteredResults: any = []
+
+     this.filas.filter(value => {
+
+       for (const key in value) {
+         if (value[key].toString().toLowerCase().includes(query.toLowerCase())) {
+          filteredResults.push(value); break
         }
       }
     });
 
     const startIndex = this.currentPage * this.itemsPerPage;
-    return of(temp.slice(startIndex, startIndex + this.itemsPerPage));
+    return of(filteredResults.slice(startIndex, startIndex + this.itemsPerPage));
+  }
+
+  updateSearchResults(): void {
+    this.filtrarUsuarios(this.formsearch.value?.trim())
+      .subscribe(results => {
+        if (results.length != 0){
+          return this.searchResults = results
+        }else{
+          return this.searchResults = this.filas
+        }
+      });
+    }
+
+  onPageChange(event: any): void {
+    this.currentPage = event.pageIndex;
+    this.updateSearchResults();
   }
 
   getCellValue(row: any, column: TableColumn): string {
@@ -73,14 +95,25 @@ export class DynamicTableComponent implements OnInit, OnDestroy {
     return row[column.col];
   }
 
-  onPageChange(event: any): void {
-    this.currentPage = event.pageIndex;
-    this.updateSearchResults();
+  getFormControl(row: any, column: TableColumn): FormControl {
+    if (!this.editFormControls[row]) {
+      this.editFormControls[row] = {};
+    }
+
+    if (!this.editFormControls[row][column.col]) {
+      const control = new FormControl(row[column.col]);
+      this.editFormControls[row][column.col] = control;
+    }
+
+    return this.editFormControls[row][column.col];
   }
 
-  updateSearchResults(): void {
-    this.filtrarUsuarios(this.formsearch.value?.trim())
-      .subscribe(results => this.searchResults = results);
+  toggleEditMode(row: any): void {
+    if (this.editingRow === row) {
+      this.editingRow = null;
+    } else {
+      this.editingRow = row;
+    }
   }
 
   ejecutarAccionBoton(column: TableColumn, row: any) {

@@ -41,7 +41,7 @@ import { ProgressbarComponent } from './progressbar/progressbar.component';
 import { ProgressplanillComponent } from './progressplanill/progressplanill.component';
 import { WebcamModule } from 'ngx-webcam';
 import { BeneficioComponent } from './beneficio/beneficio.component';
-import { CustomMatPaginatorIntl } from './inline-editing-one/inline-editing-one.component';
+import { CustomMatPaginatorIntl } from './shared/paginado';
 import { DynamicFormComponent } from './dynamic-form/dynamic-form.component';
 import { DynamicTableComponent } from './dynamic-table/dynamic-table.component';
 

@@ -1,19 +1,35 @@
-<table class="table table-striped table-bordered table-hover">
+<!-- BUSCADOR -->
+<div style="text-align: right; ">
+  <div class="search-container">
+    <mat-form-field appearance="outline" style="background-color: white;">
+      <mat-label>Buscar</mat-label>
+      <input matInput type="search" [formControl]="formsearch" >
+      <button mat-icon-button matSuffix aria-label="Buscar">
+        <mat-icon>search</mat-icon>
+      </button>
+    </mat-form-field>
+  </div>
+</div>
+
+<!-- DATOS -->
+<table class="custom-table">
   <thead>
     <tr class="text-center">
-      <th *ngFor="let col of columns">{{ col.header }}</th>
-      <th>Acciones</th>
+      <th *ngFor="let col of columns" class="custom-header">{{ col.header }}</th>
+      <th class="custom-header">Acciones</th>
     </tr>
   </thead>
   <tbody>
-    <tr *ngFor="let row of searchResults">
-      <td *ngFor="let col of columns">
+    <tr *ngFor="let row of searchResults" class="custom-row">
+      <td *ngFor="let col of columns" class="custom-cell">
         <ng-container *ngIf="!row.isEditing">
           {{ getCellValue(row, col) }}
         </ng-container>
         <ng-container *ngIf="row.isEditing">
           <ng-container *ngIf="col.isEditable">
-            <input type="text" [formControl]="row[col.col + '_control']" />
+            <mat-form-field class="example-full-width; inputs" style="background-color: white;" appearance="outline">
+              <input matInput [formControl]="row[col.col + '_control']" />
+          </mat-form-field>
             <div *ngIf="row[col.col + '_control'].invalid && row[col.col + '_control'].touched">
               <span *ngFor="let error of getControlErrors(row, col)">
                 {{ error }}

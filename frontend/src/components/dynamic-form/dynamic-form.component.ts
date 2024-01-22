@@ -26,14 +26,31 @@ export class DynamicFormComponent implements OnInit{@Input() fields: FieldConfig
   createControl(): FormGroup {
     const group = this.fb.group({});
     this.fields.forEach(field => {
-      const control = this.fb.control(
-        field.value ?? '',
-        field.validations
-      );
-      group.addControl(field.name, control);
+      if (field.type === 'daterange') {
+        const dateRangeGroup = this.fb.group({
+          start: [field.value?.start || '', field.validations],
+          end: [field.value?.end || '', field.validations]
+        });
+        group.addControl(field.name, dateRangeGroup);
+      } else {
+        const control = this.fb.control(
+          field.value ?? '',
+          field.validations
+        );
+        group.addControl(field.name, control);
+      }
     });
 
     return group;
+  }
+
+  getRangeFormGroup(fieldName: string): FormGroup {
+    const control = this.form.get(fieldName);
+    if (control instanceof FormGroup) {
+      return control;
+    } else {
+      throw new Error(`Control with name '${fieldName}' is not a FormGroup`);
+    }
   }
 }
 
@@ -41,7 +58,8 @@ interface FieldConfig {
   type: string;
   label: string;
   name: string;
-  value?: any;
+  value?: any | { start: Date; end: Date };
   options?: { label: string; value: any }[];
   validations?: ValidatorFn[];
+
 }

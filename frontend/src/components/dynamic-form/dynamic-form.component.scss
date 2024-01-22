@@ -1,6 +1,6 @@
 @import '~@angular/material/prebuilt-themes/deeppurple-amber.css';
 
-body { 
+body {
   font-family: Roboto, Arial, sans-serif;
   margin: 0;
 }
@@ -19,6 +19,6 @@ body {
 }
 
 .tittle {
-  color:white; 
-  background: #628780;
+  color: white !important;;
+  background: #628780 !important;
 }

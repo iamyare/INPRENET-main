@@ -12,6 +12,7 @@ export class NuevoTipoPlanillaComponent {
     { type: 'text', label: 'Nombre de planilla', name: 'nombre_planilla', validations: [] },
     { type: 'text', label: 'Descripcion de planilla', name: 'descripcion', validations: [] },
     { type: 'text', label: 'Estado', name: 'estado', validations: [] },
+    { type: 'daterange', label: 'Periodo', name: 'periodo', validations: []}
   ];
 
 
@@ -24,7 +25,7 @@ interface FieldConfig {
   type: string;
   label: string;
   name: string;
-  value?: any;
+  value?: any | { start: Date; end: Date };
   options?: { label: string; value: any }[];
   validations?: ValidatorFn[];
 }

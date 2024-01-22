@@ -53,7 +53,7 @@ import { EditarTipoPlanillaComponent } from '../pages/Generales/editar-tipo-plan
     MatCardModule,
     MatTableModule,
     MatPaginatorModule,
-    MatIconModule
+    MatIconModule,
   ],
   declarations: [
     SubirDeduccionesformComponent,

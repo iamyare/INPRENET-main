@@ -11,6 +11,7 @@ import { Observable, Subject, debounceTime, distinctUntilChanged, of, switchMap,
 export class DynamicTableComponent implements OnInit, OnDestroy {
   @Input() columns: TableColumn[] = [];
   @Input() filas: any[] = [];
+  @Input() editarFunc: any;
   @ViewChild(MatPaginator) paginator: MatPaginator | undefined;
 
   private destroy$: Subject<void> = new Subject<void>();
@@ -137,6 +138,9 @@ export class DynamicTableComponent implements OnInit, OnDestroy {
   }
 
   saveChanges(row: any): void {
+    this.editarFunc(row)
+
+
     let isValid = true;
     this.columns.forEach(column => {
       if (column.isEditable && row[`${column.col}_control`]) {

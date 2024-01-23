@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { ValidatorFn, Validators } from '@angular/forms';
+import { PlanillaService } from 'src/app/services/planilla.service';
 
 @Component({
   selector: 'app-editar-tipo-planilla',
@@ -9,8 +10,34 @@ import { ValidatorFn, Validators } from '@angular/forms';
 export class EditarTipoPlanillaComponent implements OnInit{
   myColumns: TableColumn[] = [];
   filas: any[] =[];
+  isLoading = true;
+
+  constructor(
+    private planillaService: PlanillaService
+  ){
+
+  }
 
   ngOnInit(): void {
+    this.planillaService.findAllTipoPlanilla().subscribe(
+      (data) => {
+        // Mapeo de datos a la estructura de filas
+        this.filas = data.map((item: any) => {
+          return {
+            id: item.id_tipo_planilla,
+            nombre: item.nombre_planilla,
+            descripcion: item.descripcion || 'No disponible', // manejo de descripciones nulas
+            periodo: `${item.periodoInicio} - ${item.periodoFinalizacion}`
+          };
+        });
+
+        console.log('Datos mapeados para las filas:', this.filas);
+      },
+      (error) => {
+        console.error('Error al obtener datos:', error);
+      }
+    );
+
     // Definir las columnas
     this.myColumns = [
       {
@@ -19,24 +46,28 @@ export class EditarTipoPlanillaComponent implements OnInit{
         isEditable: false
       },
       {
-        header: 'Nombre',
+        header: 'Nombre de planilla',
         col: 'nombre',
         isEditable: true,
         validationRules: [Validators.required, Validators.minLength(3)]
       },
       {
-        header: 'Email',
-        col: 'email',
-        isEditable: false
+        header: 'Descripcion',
+        col: 'descripcion',
+        isEditable: true
+      },
+      {
+        header: 'Periodo',
+        col: 'periodo',
+        isEditable: true
       }
     ];
 
-    // Datos de ejemplo para las filas
-    this.filas = [
-      { id: 1, nombre: 'Juan Perez', email: 'juan@example.com' },
-      { id: 2, nombre: 'Ana Lopez', email: 'ana@example.com' },
-      { id: 3, nombre: 'Carlos García', email: 'carlos@example.com' }
-    ];
+  }
+
+  editar(row:any){
+    console.log('accion del boton en la fila', row);
+
   }
 }
 

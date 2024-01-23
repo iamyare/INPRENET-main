@@ -23,7 +23,7 @@ export class NuevoTipoPlanillaComponent {
   myFormFields: FieldConfig[] = [
     { type: 'daterange', label: 'Periodo', name: 'periodo', validations: [Validators.required]},
     { type: 'text', label: 'Nombre de planilla', name: 'nombre_planilla', validations: [Validators.required,Validators.maxLength(50)] },
-    { type: 'text', label: 'Descripcion de planilla', name: 'descripcion', validations: [] },
+    { type: 'text', label: 'Descripción de planilla', name: 'descripcion', validations: [] },
   ];
 
   obtenerDatos(event:any): any {
@@ -48,23 +48,34 @@ export class NuevoTipoPlanillaComponent {
 
     this.datosFormateados = datosFormateados;
 
-    console.log(datosFormateados);
+    //console.log(datosFormateados);
   }
 
 
 
   insertarDatos(): void {
-    this.planillaService.createTipoPlanilla(this.datosFormateados).subscribe({
-      next: (response) => {
-        console.log('TipoPlanilla creada con éxito', response);
-        this.toastr.success('TipoPlanilla creada con éxito');
-      },
-      error: (error) => {
-        console.error('Error al crear TipoPlanilla', error);
-        this.toastr.error('Error al crear TipoPlanilla');
+  this.planillaService.createTipoPlanilla(this.datosFormateados).subscribe({
+    next: (response) => {
+      console.log('TipoPlanilla creada con éxito', response);
+      this.toastr.success('TipoPlanilla creada con éxito');
+    },
+    error: (error) => {
+      let mensajeError = 'Error desconocido al crear TipoPlanilla';
+
+      // Verifica si el error tiene una estructura específica
+      if (error.error && error.error.message) {
+        mensajeError = error.error.message;
+      } else if (typeof error.error === 'string') {
+        // Para errores que vienen como un string simple
+        mensajeError = error.error;
       }
-    });
-  }
+
+      this.toastr.error(mensajeError);
+    }
+  });
+}
+
+
 
 
 }

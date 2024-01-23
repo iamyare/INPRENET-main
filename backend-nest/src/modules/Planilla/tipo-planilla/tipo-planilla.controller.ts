@@ -1,7 +1,8 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Query } from '@nestjs/common';
 import { TipoPlanillaService } from './tipo-planilla.service';
 import { CreateTipoPlanillaDto } from './dto/create-tipo-planilla.dto';
 import { UpdateTipoPlanillaDto } from './dto/update-tipo-planilla.dto';
+import { PaginationDto } from 'src/common/dtos/pagination.dto';
 
 @Controller('tipo-planilla')
 export class TipoPlanillaController {
@@ -13,8 +14,8 @@ export class TipoPlanillaController {
   }
 
   @Get()
-  findAll() {
-    return this.tipoPlanillaService.findAll();
+  findAll(@Query() paginationDto: PaginationDto) {
+    return this.tipoPlanillaService.findAll(paginationDto);
   }
 
   @Get(':id')

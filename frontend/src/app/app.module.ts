@@ -19,6 +19,7 @@ import { SharedModule } from './views/shared/shared/shared.module'
 import { IconModule, IconSetService } from '@coreui/icons-angular';
 import { HttpClientModule, HttpClient  } from '@angular/common/http';
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
+import { ToastrModule } from 'ngx-toastr';
 
 const APP_CONTAINERS = [
   DefaultFooterComponent,
@@ -36,7 +37,12 @@ const APP_CONTAINERS = [
     FormsModule,
     BrowserAnimationsModule,
     ReactiveFormsModule,
-    NgbModule
+    NgbModule,
+    ToastrModule.forRoot({
+      timeOut: 10000,
+      positionClass: 'toast-bottom-right',
+      preventDuplicates: true,
+    }),
   ],
   providers: [
     {

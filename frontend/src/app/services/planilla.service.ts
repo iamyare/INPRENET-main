@@ -6,7 +6,13 @@ import { Observable, BehaviorSubject } from 'rxjs';
   providedIn: 'root'
 })
 export class PlanillaService {
-  private baseUrl = 'http://localhost:3000/api/detalle-deduccion/upload';
+  private baseUrl = 'http://localhost:3000/api';
+
+
+  // Método para crear una nueva TipoPlanilla
+  createTipoPlanilla(tipoPlanillaData: any): Observable<any> {
+    return this.http.post(`${this.baseUrl}/tipo-planilla`, tipoPlanillaData);
+  }
 
   // BehaviorSubject para almacenar y emitir los datos de los usuarios
   private usersSource = new BehaviorSubject<any[]>([]);
@@ -18,7 +24,7 @@ export class PlanillaService {
     const formData: FormData = new FormData();
     formData.append('excel', file, file.name);
 
-    return this.http.post(this.baseUrl, formData);
+    return this.http.post(`${this.baseUrl}/detalle-deduccion/upload`, formData);
   }
 
   // Método para actualizar los datos de los usuarios

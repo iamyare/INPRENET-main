@@ -1,5 +1,7 @@
 import { Component } from '@angular/core';
 import { ValidatorFn, Validators } from '@angular/forms';
+import { ToastrService } from 'ngx-toastr';
+import { PlanillaService } from 'src/app/services/planilla.service';
 
 @Component({
   selector: 'app-nuevo-tipo-planilla',
@@ -8,17 +10,63 @@ import { ValidatorFn, Validators } from '@angular/forms';
 })
 export class NuevoTipoPlanillaComponent {
 
+  datosFormateados: any;
+
+  constructor(
+    private planillaService: PlanillaService,
+    private toastr: ToastrService
+  ){
+
+  }
+
+
   myFormFields: FieldConfig[] = [
-    { type: 'text', label: 'Nombre de planilla', name: 'nombre_planilla', validations: [] },
+    { type: 'daterange', label: 'Periodo', name: 'periodo', validations: [Validators.required]},
+    { type: 'text', label: 'Nombre de planilla', name: 'nombre_planilla', validations: [Validators.required,Validators.maxLength(50)] },
     { type: 'text', label: 'Descripcion de planilla', name: 'descripcion', validations: [] },
-    { type: 'text', label: 'Estado', name: 'estado', validations: [] },
-    { type: 'daterange', label: 'Periodo', name: 'periodo', validations: []}
   ];
 
+  obtenerDatos(event:any): any {
+    const { periodo, ...otrosDatos } = event.value;
+    const startDate = new Date(periodo.start);
+    const endDate = new Date(periodo.end);
 
-  obtenerDatos(event:any):any{
-    console.log(event.value);
+    const opciones: Intl.DateTimeFormatOptions = {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit'
+    };
+
+    const startDateFormatted = startDate.toLocaleDateString('es', opciones).replace(/\//g, '-');
+    const endDateFormatted = endDate.toLocaleDateString('es', opciones).replace(/\//g, '-');
+
+    const datosFormateados = {
+      ...otrosDatos,
+      periodoInicio: startDateFormatted,
+      periodoFinalizacion: endDateFormatted
+    };
+
+    this.datosFormateados = datosFormateados;
+
+    console.log(datosFormateados);
   }
+
+
+
+  insertarDatos(): void {
+    this.planillaService.createTipoPlanilla(this.datosFormateados).subscribe({
+      next: (response) => {
+        console.log('TipoPlanilla creada con éxito', response);
+        this.toastr.success('TipoPlanilla creada con éxito');
+      },
+      error: (error) => {
+        console.error('Error al crear TipoPlanilla', error);
+        this.toastr.error('Error al crear TipoPlanilla');
+      }
+    });
+  }
+
+
 }
 
 interface FieldConfig {
@@ -29,24 +77,3 @@ interface FieldConfig {
   options?: { label: string; value: any }[];
   validations?: ValidatorFn[];
 }
-
-/* { type: 'text', label: 'Nombre', name: 'nombre', validations: [] },
-  { type: 'text', label: 'Apellido', name: 'apellido', validations: [] },
-  { type: 'email', label: 'Correo Electrónico', name: 'email', validations: [] },
-  { type: 'number', label: 'Edad', name: 'edad', validations: [] },
-  { type: 'password', label: 'Contraseña', name: 'password', validations: [] },
-  { type: 'date', label: 'sisoy', name: 'sisoy', validations: [] },
-  { type: 'dropdown', label: 'Género', name: 'genero',
-  options: [
-      { label: 'Femenino', value: 'femenino' },
-      { label: 'Masculino', value: 'masculino' },
-      { label: 'Otro', value: 'otro' }
-    ],
-  validations: []
-  },
-  {
-    type: 'date',
-    label: 'Fecha de Nacimiento',
-    name: 'fechaNacimiento',
-    validations: [Validators.required]
-  } */

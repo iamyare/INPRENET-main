@@ -19,10 +19,11 @@ import { DetalleDeduccion } from './detalle-deduccion/entities/detalle-deduccion
 import { DetalleDeduccionService } from './detalle-deduccion/detalle-deduccion.service';
 import { Institucion } from '../Empresarial/institucion/entities/institucion.entity';
 import { Afiliado } from 'src/afiliado/entities/afiliado.entity';
+import { TipoPlanillaController } from './tipo-planilla/tipo-planilla.controller';
 
 @Module({
   controllers: [PlanillaController, BeneficioController, BeneficioPlanillaController, DeduccionController,
-                DeduccionController, DetalleDeduccionController],
+                DeduccionController, DetalleDeduccionController,TipoPlanillaController],
   providers: [PlanillaService, BeneficioService, BeneficioPlanillaService, DeduccionService,
               TipoPlanillaService, DetalleDeduccionService],
   imports: [

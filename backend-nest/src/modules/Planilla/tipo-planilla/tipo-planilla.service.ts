@@ -37,13 +37,33 @@ export class TipoPlanillaService {
     });
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} tipoPlanilla`;
+  async findOne(id: string) {
+    const tipoPlanilla = await this.tipoPlanillaRepository.findOne({ where: { id_tipo_planilla: id } });
+    if (!tipoPlanilla) {
+      throw new BadRequestException(`TipoPlanilla con ID ${id} no encontrado.`);
+    }
+    return tipoPlanilla;
   }
+  
 
-  update(id: number, updateTipoPlanillaDto: UpdateTipoPlanillaDto) {
-    return `This action updates a #${id} tipoPlanilla`;
+  async update(id: string, updateTipoPlanillaDto: UpdateTipoPlanillaDto) {
+    const tipoPlanilla = await this.tipoPlanillaRepository.preload({
+      id_tipo_planilla: id, 
+      ...updateTipoPlanillaDto
+    });
+  
+    if (!tipoPlanilla) {
+      throw new BadRequestException(`TipoPlanilla con ID ${id} no encontrado.`);
+    }
+  
+    try {
+      await this.tipoPlanillaRepository.save(tipoPlanilla);
+      return tipoPlanilla;
+    } catch (error) {
+      this.handleException(error);
+    }
   }
+  
 
   remove(id: number) {
     return `This action removes a #${id} tipoPlanilla`;

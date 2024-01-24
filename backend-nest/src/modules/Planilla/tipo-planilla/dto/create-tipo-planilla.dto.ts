@@ -25,7 +25,7 @@ export class CreateTipoPlanillaDto {
 
     
     @IsString({ message: '' })
-    @Length(1, 200, { message: 'El periodo debe estar lleno' })
+    @Length(1, 200, { message: 'El estado debe estar lleno' })
     @IsNotEmpty({ message: '' })
     @IsOptional()
     estado?: string;

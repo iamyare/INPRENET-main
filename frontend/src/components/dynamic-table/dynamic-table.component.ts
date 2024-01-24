@@ -138,7 +138,7 @@ export class DynamicTableComponent implements OnInit, OnDestroy {
   }
 
   saveChanges(row: any): void {
-    this.editarFunc(row)
+
 
 
     let isValid = true;
@@ -156,6 +156,7 @@ export class DynamicTableComponent implements OnInit, OnDestroy {
         }
       });
       row.isEditing = false;
+      this.editarFunc(row)
     } else {
       // Manejar caso de datos no válidos
       console.log('Datos no válidos');

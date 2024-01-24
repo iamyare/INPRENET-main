@@ -23,6 +23,10 @@ export class PlanillaService {
     return this.http.get(`${this.baseUrl}/tipo-planilla`, { params });
   }
 
+  updateTipoPlanilla(id: string, tipoPlanillaData: any): Observable<any> {
+    return this.http.patch(`${this.baseUrl}/tipo-planilla/${id}`, tipoPlanillaData);
+  }
+
   // BehaviorSubject para almacenar y emitir los datos de los usuarios
   private usersSource = new BehaviorSubject<any[]>([]);
   currentUsers = this.usersSource.asObservable();

@@ -20,12 +20,12 @@ export class TipoPlanillaController {
 
   @Get(':id')
   findOne(@Param('id') id: string) {
-    return this.tipoPlanillaService.findOne(+id);
+    return this.tipoPlanillaService.findOne(id);
   }
 
   @Patch(':id')
   update(@Param('id') id: string, @Body() updateTipoPlanillaDto: UpdateTipoPlanillaDto) {
-    return this.tipoPlanillaService.update(+id, updateTipoPlanillaDto);
+    return this.tipoPlanillaService.update(id, updateTipoPlanillaDto);
   }
 
   @Delete(':id')

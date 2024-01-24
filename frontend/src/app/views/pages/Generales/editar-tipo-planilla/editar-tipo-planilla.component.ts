@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { ValidatorFn, Validators } from '@angular/forms';
+import { ToastrService } from 'ngx-toastr';
 import { PlanillaService } from 'src/app/services/planilla.service';
 
 @Component({
@@ -13,7 +14,8 @@ export class EditarTipoPlanillaComponent implements OnInit{
   isLoading = true;
 
   constructor(
-    private planillaService: PlanillaService
+    private planillaService: PlanillaService,
+    private toastr: ToastrService
   ){
 
   }
@@ -49,7 +51,7 @@ export class EditarTipoPlanillaComponent implements OnInit{
         header: 'Nombre de planilla',
         col: 'nombre',
         isEditable: true,
-        validationRules: [Validators.required, Validators.minLength(3)]
+        validationRules: [Validators.required, Validators.minLength(5)]
       },
       {
         header: 'Descripcion',
@@ -59,16 +61,36 @@ export class EditarTipoPlanillaComponent implements OnInit{
       {
         header: 'Periodo',
         col: 'periodo',
-        isEditable: true
+        isEditable: true,
+        validationRules: [Validators.required, Validators.pattern(/^(3[01]|[12][0-9]|0?[1-9])-(1[0-2]|0?[1-9])-\d{4} - (3[01]|[12][0-9]|0?[1-9])-(1[0-2]|0?[1-9])-\d{4}$/)]
       }
     ];
 
   }
 
-  editar(row:any){
-    console.log('accion del boton en la fila', row);
 
-  }
+
+  editar = (row: any) => {
+    const [periodoInicio, periodoFinalizacion] = row.periodo.split(' - ');
+
+    const tipoPlanillaData = {
+      nombre_planilla: row.nombre,
+      descripcion: row.descripcion,
+      periodoInicio: periodoInicio.trim(),
+      periodoFinalizacion: periodoFinalizacion.trim(),
+    };
+
+    this.planillaService.updateTipoPlanilla(row.id, tipoPlanillaData).subscribe(
+      (response) => {
+        this.toastr.success('TipoPlanilla editada con éxito');
+      },
+      (error) => {
+        this.toastr.error('Error al actualizar TipoPlanilla');
+      }
+    );
+  };
+
+
 }
 
 
@@ -82,13 +104,3 @@ interface TableColumn {
   isEditable?: boolean; // Nueva propiedad
   validationRules?: ValidatorFn[];
 }
-
-
-
-/*  {
-      header: 'Acciones',
-      col: 'acciones',
-      isButton: true,
-      buttonText: 'Hacer algo',
-      buttonAction: (row) => this.hacerAlgo(row)
-    } */

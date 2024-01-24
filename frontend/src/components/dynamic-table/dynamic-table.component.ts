@@ -11,20 +11,19 @@ import { Observable, Subject, debounceTime, distinctUntilChanged, of, switchMap,
 export class DynamicTableComponent implements OnInit, OnDestroy {
   @Input() columns: TableColumn[] = [];
   @Input() editarfunc: any;
-  @Input() filas!: any[];
+  @Input() getData: any;
   @Input() editarFunc: any;
   @ViewChild(MatPaginator) paginator: MatPaginator | undefined;
 
   private destroy$: Subject<void> = new Subject<void>();
 
+  filas:any = [];
   formsearch = new FormControl('');
   searchResults: any = [];
 
-  itemsPerPage = 2;
-  pageSizeOptions: number[] = [5, 10, 1000, 2000, 5000, 10000];
-  pageSize: number = this.pageSizeOptions[0];
+  itemsPerPage = 50;  // Número de resultados por página
+  desde = 0; hasta: number = this.itemsPerPage;
   currentPage = 0;
-  desde = 0; hasta: number = this.pageSize;
 
   editingRow: any | null = null;
   editFormControls: { [rowKey: string]: { [colKey: string]: FormControl } } = {};
@@ -52,36 +51,43 @@ export class DynamicTableComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
-    this.loadAllResults();
+    this.ejecutarFuncionAsincrona();
+  }
+
+
+  async ejecutarFuncionAsincrona() {
+    this.filas = await this.getData();
+    this.filtrarUsuarios().subscribe();
   }
 
   filtrarUsuarios(query?: any): Observable<any[]> {
     let filteredResults: any = [];
-    if (!query) {
-      console.log([...filteredResults]);
-      // Si la consulta está vacía, devolver todos los resultados
-      return of(this.filas.slice(this.desde, this.hasta));
-    }
-
-    // Realizar la búsqueda y devolver resultados filtrados
-    this.filas.filter(value => {
-      for (const key in value) {
-        if (value[key]) {
-          if (value[key].toString().toLowerCase().includes(query.toLowerCase())) {
-            filteredResults.push(value);
-            break;
-          }
-        }
-      }
-    });
+    const temp: any = [...this.filas];
 
     const startIndex = this.currentPage * this.itemsPerPage;
-    return of(filteredResults.slice(startIndex, startIndex + this.itemsPerPage));
+    if (!query) {
+      this.hasta = startIndex + this.itemsPerPage
+      this.searchResults = temp.slice(startIndex, this.hasta)
+      return of(this.searchResults.slice(startIndex, this.hasta));
+    } else {
+      // Realizar la búsqueda y devolver resultados filtrados
+      temp.filter((value: { [x: string]: { toString: () => string; }; }) => {
+        for (const key in value) {
+          if (value[key]) {
+            if (value[key].toString().toLowerCase().includes(query.toLowerCase())) {
+              filteredResults.push(value);
+              break;
+            }
+          }
+        }
+      });
+      return of(filteredResults.slice(startIndex, this.currentPage + this.itemsPerPage));
+    }
+
   }
 
   updateSearchResults(): void {
     const query = this.formsearch.value?.trim();
-
     if (query) {
       // Si hay un valor en el buscador, realizar la búsqueda y actualizar resultados
       this.filtrarUsuarios(query).subscribe(results => {
@@ -89,18 +95,8 @@ export class DynamicTableComponent implements OnInit, OnDestroy {
       });
     } else {
       // Si el buscador está vacío, cargar todos los resultados sin filtrar
-      this.loadAllResults();
+      this.ejecutarFuncionAsincrona();
     }
-  }
-
-  private loadAllResults(): void {
-    this.currentPage = 0; // Reiniciar la página a la primera
-    this.filtrarUsuarios().subscribe(allResults => {
-
-
-      this.searchResults = allResults;
-      this.paginator?.firstPage(); // Ir a la primera página
-    });
   }
 
   onPageChange(event: any): void {
@@ -157,9 +153,6 @@ export class DynamicTableComponent implements OnInit, OnDestroy {
   }
 
   saveChanges(row: any): void {
-
-
-
     let isValid = true;
     this.columns.forEach(column => {
       if (column.isEditable && row[`${column.col}_control`]) {

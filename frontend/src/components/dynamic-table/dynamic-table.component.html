@@ -20,7 +20,7 @@
     </tr>
   </thead>
   <tbody>
-    <tr *ngFor="let row of searchResults" class="custom-row">
+    <tr *ngFor="let row of searchResults && searchResults.slice(desde, hasta); let i = index" class="custom-row">
       <td *ngFor="let col of columns" class="custom-cell">
         <ng-container *ngIf="!row.isEditing">
           {{ getCellValue(row, col) }}
@@ -50,4 +50,4 @@
   </tbody>
 </table>
 
-<mat-paginator [length]="filas.length" [pageSize]="itemsPerPage" (page)="onPageChange($event)"></mat-paginator>
+<mat-paginator [length]="filas.length" [pageSize]="itemsPerPage" [pageSizeOptions]="[itemsPerPage]" (page)="onPageChange($event)"></mat-paginator>

@@ -21,25 +21,6 @@ export class EditarTipoPlanillaComponent implements OnInit{
   }
 
   ngOnInit(): void {
-    this.planillaService.findAllTipoPlanilla().subscribe(
-      (data) => {
-        // Mapeo de datos a la estructura de filas
-        this.filas = data.map((item: any) => {
-          return {
-            id: item.id_tipo_planilla,
-            nombre: item.nombre_planilla,
-            descripcion: item.descripcion || 'No disponible', // manejo de descripciones nulas
-            periodo: `${item.periodoInicio} - ${item.periodoFinalizacion}`
-          };
-        });
-
-        console.log('Datos mapeados para las filas:', this.filas);
-      },
-      (error) => {
-        console.error('Error al obtener datos:', error);
-      }
-    );
-
     // Definir las columnas
     this.myColumns = [
       {
@@ -67,6 +48,26 @@ export class EditarTipoPlanillaComponent implements OnInit{
     ];
 
   }
+
+  getFilas = async () => {
+    try {
+      const data = await  this.planillaService.findAllTipoPlanilla().toPromise();
+
+      this.filas = data.map((item: any) => {
+        return {
+          id: item.id_tipo_planilla,
+          nombre: item.nombre_planilla,
+          descripcion: item.descripcion || 'No disponible', // manejo de descripciones nulas
+          periodo: `${item.periodoInicio} - ${item.periodoFinalizacion}`
+        };
+      });
+
+      return this.filas;
+    } catch (error) {
+      console.error("Error al obtener datos de beneficios", error);
+      throw error; // Puedes manejar el error aquí o dejarlo para que se maneje en el componente que llama a esta función
+    }
+  };
 
 
 

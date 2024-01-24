@@ -171,15 +171,9 @@ export class InlineEditingOneComponent implements OnInit, OnDestroy  {
   formsearch = new FormControl('');
   searchResults: any[] = [];
 
-  pageSizeOptions: number[] = [5, 10, 1000,2000,5000,10000];
-  pageSize: number = this.pageSizeOptions[0];
-  pageIndex: number = 0;
-
-  desde = 0; hasta: number = this.pageSize;
-
-  currentPage = 0; // Página actual
-  initialDisplayCount = 1;  // Número inicial de registros para mostrar
   itemsPerPage = 5;  // Número de resultados por página
+  desde = 0; hasta: number = this.itemsPerPage;
+  currentPage = 0; // Página actual  // Número inicial de registros para mostrar
 
   @ViewChild(MatPaginator) paginator: MatPaginator | undefined;
   private destroy$: Subject<void> = new Subject<void>(); // Un observable para gestionar la destrucción del componente
@@ -214,10 +208,7 @@ export class InlineEditingOneComponent implements OnInit, OnDestroy  {
     item.isEdit = true;
   }
 
-  getPages(): number[] {
-    const totalPages = Math.ceil(this.usersArray.length / this.itemsPerPage);
-    return Array.from({ length: totalPages }, (_, index) => index + 1);
-  }
+
 
   filtrarUsuarios(query: any): Observable<any[]> {
     const filteredResults = this.usersArray.filter(user =>

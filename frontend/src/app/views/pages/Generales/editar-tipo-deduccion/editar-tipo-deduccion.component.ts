@@ -17,25 +17,6 @@ export class EditarTipoDeduccionComponent implements OnInit{
     ){}
 
   ngOnInit(): void {
-    this.deduccionesService.getDeducciones().subscribe(
-      (data) => {
-        this.filas = data.map((item: any) => {
-          return {
-            id: item.id_beneficio,
-            nombre_deduccion: item.nombre_deduccion,
-            descripcion_deduccion: item.descripcion_beneficio || 'No disponible',
-            tipo_deduccion: item.tipo_deduccion,
-            prioridad : item.prioridad,
-          };
-        });
-        console.log(this.filas);
-
-      },
-      (error) => {
-        console.error("Error al obtener datos de deducciones", error);
-      }
-    );
-
     this.myColumns = [
       { header: 'Nombre de la Deduccion',
       col: "nombre_deduccion",
@@ -58,6 +39,27 @@ export class EditarTipoDeduccionComponent implements OnInit{
     }
     ];
   }
+
+  getFilas = async () => {
+    try {
+      const data = await this.deduccionesService.getDeducciones().toPromise();
+
+      this.filas = data.map((item: any) => {
+        return {
+          id: item.id_beneficio,
+          nombre_deduccion: item.nombre_deduccion,
+          descripcion_deduccion: item.descripcion_beneficio || 'No disponible',
+          tipo_deduccion: item.tipo_deduccion,
+          prioridad : item.prioridad,
+        };
+      });
+
+      return this.filas;
+    } catch (error) {
+      console.error("Error al obtener datos de beneficios", error);
+      throw error; // Puedes manejar el error aquí o dejarlo para que se maneje en el componente que llama a esta función
+    }
+  };
 
   editar = (row: any) => {
 

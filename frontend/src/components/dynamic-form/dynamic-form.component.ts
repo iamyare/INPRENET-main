@@ -20,6 +20,15 @@ export class DynamicFormComponent implements OnInit{@Input() fields: FieldConfig
   }
 
   onDatosBenChange() {
+    // Convertir los valores de campos de tipo 'number' a números antes de emitir el evento
+
+    /* const formValues = { ...this.form.value };
+    this.fields.forEach(field => {
+      if (field.type === 'number' && formValues[field.name] !== null && formValues[field.name] !== undefined) {
+        formValues[field.name] = +formValues[field.name];
+      }
+    }); */
+
     this.newDatBenChange.emit(this.form);
   }
 
@@ -33,10 +42,17 @@ export class DynamicFormComponent implements OnInit{@Input() fields: FieldConfig
         });
         group.addControl(field.name, dateRangeGroup);
       } else {
-        const control = this.fb.control(
-          field.value ?? '',
-          field.validations
-        );
+        // Modificación aquí
+        const control = field.type === 'number'
+          ? this.fb.control(
+              // Utilizamos el operador + para convertir la cadena a número
+              +field.value || null,
+              field.validations
+            )
+          : this.fb.control(
+              field.value || '',
+              field.validations
+            );
         group.addControl(field.name, control);
       }
     });

@@ -113,6 +113,7 @@
             ],
             "styles": [
               "src/scss/customtheme.scss",
+              "node_modules/ngx-toastr/toastr.css",
               "src/scss/styles.scss"
             ],
             "scripts": []

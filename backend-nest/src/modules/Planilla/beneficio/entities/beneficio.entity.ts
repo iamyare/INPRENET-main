@@ -17,7 +17,13 @@ export class Beneficio {
     estado: string;
 
     @Column()
-    duracion: string;
+    prioridad: number;
+    @Column()
+    anio_duracion: number;
+    @Column()
+    mes_duracion: number;
+    @Column()
+    dia_duracion: number;
 
     @OneToMany(() => BeneficioPlanilla, beneficioPlanilla => beneficioPlanilla.beneficio)
     beneficioPlanilla : BeneficioPlanilla[];

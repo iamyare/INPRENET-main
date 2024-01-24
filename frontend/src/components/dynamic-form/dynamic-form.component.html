@@ -8,6 +8,7 @@
       <div class="container">
         <div class="row">
           <div *ngFor="let field of fields" class="col-md-4">
+
             <!-- Campo de Texto Normal -->
             <ng-container *ngIf="field.type !== 'dropdown' && field.type !== 'date' && field.type !== 'daterange'; else customField">
               <mat-form-field appearance="outline" style="width: 100%;">

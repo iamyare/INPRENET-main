@@ -7,12 +7,12 @@ import { UpdateBeneficioDto } from './dto/update-beneficio.dto';
 export class BeneficioController {
   constructor(private readonly beneficioService: BeneficioService) {}
 
-  @Post()
+  @Post("createTipoBeneficio")
   create(@Body() createBeneficioDto: CreateBeneficioDto) {
     return this.beneficioService.create(createBeneficioDto);
   }
 
-  @Get()
+  @Get("obtenerTiposBeneficios")
   findAll() {
     return this.beneficioService.findAll();
   }

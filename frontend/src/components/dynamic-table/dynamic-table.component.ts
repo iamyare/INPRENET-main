@@ -10,7 +10,8 @@ import { Observable, Subject, debounceTime, distinctUntilChanged, of, switchMap,
 })
 export class DynamicTableComponent implements OnInit, OnDestroy {
   @Input() columns: TableColumn[] = [];
-  @Input() filas: any[] = [];
+  @Input() editarfunc: any;
+  @Input() filas!: any[];
   @Input() editarFunc: any;
   @ViewChild(MatPaginator) paginator: MatPaginator | undefined;
 
@@ -42,14 +43,7 @@ export class DynamicTableComponent implements OnInit, OnDestroy {
         this.currentPage = 0;
         this.paginator?.firstPage();
       });
-  }
 
-  ngOnInit(): void {
-    this.searchResults = this.filas.map(fila => ({
-      ...fila,
-      isEditing: false
-    }));
-    this.updateSearchResults();
   }
 
   ngOnDestroy(): void {
@@ -57,14 +51,26 @@ export class DynamicTableComponent implements OnInit, OnDestroy {
     this.destroy$.complete();
   }
 
-   filtrarUsuarios(query: any): Observable<any[]> {
-     let filteredResults: any = []
+  ngOnInit(): void {
+    this.loadAllResults();
+  }
 
-     this.filas.filter(value => {
+  filtrarUsuarios(query?: any): Observable<any[]> {
+    let filteredResults: any = [];
+    if (!query) {
+      console.log([...filteredResults]);
+      // Si la consulta está vacía, devolver todos los resultados
+      return of(this.filas.slice(this.desde, this.hasta));
+    }
 
-       for (const key in value) {
-         if (value[key].toString().toLowerCase().includes(query.toLowerCase())) {
-          filteredResults.push(value); break
+    // Realizar la búsqueda y devolver resultados filtrados
+    this.filas.filter(value => {
+      for (const key in value) {
+        if (value[key]) {
+          if (value[key].toString().toLowerCase().includes(query.toLowerCase())) {
+            filteredResults.push(value);
+            break;
+          }
         }
       }
     });
@@ -74,15 +80,28 @@ export class DynamicTableComponent implements OnInit, OnDestroy {
   }
 
   updateSearchResults(): void {
-    this.filtrarUsuarios(this.formsearch.value?.trim())
-      .subscribe(results => {
-        if (results.length != 0){
-          return this.searchResults = results
-        }else{
-          return this.searchResults = this.filas
-        }
+    const query = this.formsearch.value?.trim();
+
+    if (query) {
+      // Si hay un valor en el buscador, realizar la búsqueda y actualizar resultados
+      this.filtrarUsuarios(query).subscribe(results => {
+        this.searchResults = results;
       });
+    } else {
+      // Si el buscador está vacío, cargar todos los resultados sin filtrar
+      this.loadAllResults();
     }
+  }
+
+  private loadAllResults(): void {
+    this.currentPage = 0; // Reiniciar la página a la primera
+    this.filtrarUsuarios().subscribe(allResults => {
+
+
+      this.searchResults = allResults;
+      this.paginator?.firstPage(); // Ir a la primera página
+    });
+  }
 
   onPageChange(event: any): void {
     this.currentPage = event.pageIndex;

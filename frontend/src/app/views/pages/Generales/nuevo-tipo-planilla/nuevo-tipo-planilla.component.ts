@@ -27,6 +27,8 @@ export class NuevoTipoPlanillaComponent {
   ];
 
   obtenerDatos(event:any): any {
+    console.log(event);
+
     const { periodo, ...otrosDatos } = event.value;
     const startDate = new Date(periodo.start);
     const endDate = new Date(periodo.end);

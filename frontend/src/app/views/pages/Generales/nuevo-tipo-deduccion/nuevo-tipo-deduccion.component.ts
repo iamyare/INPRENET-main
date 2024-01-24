@@ -1,6 +1,7 @@
 import { Component } from '@angular/core';
 import { ValidatorFn, Validators } from '@angular/forms';
-
+import { DeduccionesService } from 'src/app/services/deducciones.service';
+import { ToastrService } from 'ngx-toastr';
 @Component({
   selector: 'app-nuevo-tipo-deduccion',
   templateUrl: './nuevo-tipo-deduccion.component.html',
@@ -8,9 +9,6 @@ import { ValidatorFn, Validators } from '@angular/forms';
 })
 export class NuevoTipoDeduccionComponent {
   myFormFields: FieldConfig[] = [
-    { type: 'text', label: 'Nombre', name: 'nombre', validations: [] },
-    { type: 'text', label: 'Descripción', name: 'descripcion', validations: [] },
-    { type: 'number', label: 'prioridad', name: 'prioridad', validations: [] },
     { type: 'dropdown', label: 'Tipo de deducción', name: 'tipo_deduccion',
     options: [
         { label: 'Terceros', value: 'Terceros' },
@@ -19,11 +17,44 @@ export class NuevoTipoDeduccionComponent {
       ],
     validations: []
     },
+    { type: 'text', label: 'Nombre', name: 'nombre_deduccion', validations: [] },
+    { type: 'text', label: 'Descripción', name: 'descripcion_deduccion', validations: [] },
+    { type: 'number', label: 'prioridad', name: 'prioridad', validations: [] },
   ];
 
+  data:any
+
+  constructor(private SVCDeduccion:DeduccionesService, private toastr: ToastrService ){}
+
   obtenerDatos(event:any):any{
-    console.log(event.value);
+    this.data = event;
   }
+
+  guardarTipoDeduccion():any{
+    console.log(this.data);
+
+    this.SVCDeduccion.newTipoDeduccion(this.data).subscribe(
+      {
+        next: (response) => {
+          this.toastr.success('tipo de deduccion creado con éxito');
+        },
+        error: (error) => {
+          let mensajeError = 'Error desconocido al crear tipo de deduccion';
+
+          // Verifica si el error tiene una estructura específica
+          if (error.error && error.error.message) {
+            mensajeError = error.error.message;
+          } else if (typeof error.error === 'string') {
+            // Para errores que vienen como un string simple
+            mensajeError = error.error;
+          }
+
+          this.toastr.error(mensajeError);
+        }
+      }
+      );
+  }
+
 }
 
 interface FieldConfig {

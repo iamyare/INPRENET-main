@@ -3,6 +3,18 @@ import { HttpClient } from '@angular/common/http';
 import { Observable, map } from 'rxjs';
 import { environment } from 'src/environments/environment';
 
+/* Pendiente */
+interface TipoDeduccion {
+  nombre_beneficio: string;
+  descripcion_beneficio: string;
+  estado: string;
+  prioridad?: any;
+  anio_duracion: number;
+  mes_duracion: number;
+  dia_duracion: number;
+  periodoInicio: string;
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -11,6 +23,18 @@ export class DeduccionesService {
   private baseUrl = 'http://localhost:3000/api/';
 
   constructor(private http: HttpClient) { }
+
+  newTipoDeduccion(TipoDeduccion:any): Observable<any | void>{
+    var url = `${environment.API_URL}/api/deduccion`;
+    return this.http.post<any>(
+      url,
+      TipoDeduccion,
+      ).pipe(
+        map((res:any) => {
+          return res;
+        })
+      )
+  }
 
   getDetalleDeduccion(): Observable<any> {
     return this.http.get<any>(this.baseUrl + 'detalle-deduccion');

@@ -21,7 +21,8 @@ export class EditarTipoDeduccionComponent implements OnInit{
       { header: 'Nombre de la Deduccion',
       col: "nombre_deduccion",
       isEditable: true,
-      validationRules: [Validators.required, Validators.minLength(3)] },
+      validationRules: [Validators.required, Validators.minLength(3)]
+     },
       {
         header: 'Descripcion del beneficio',
          col: 'descripcion_deduccion',
@@ -30,12 +31,14 @@ export class EditarTipoDeduccionComponent implements OnInit{
       {
         header: 'Tipo de deduccion',
       col: 'tipo_deduccion',
-      isEditable: false
+      isEditable: true,
+      validationRules: [Validators.required, Validators.minLength(3)]
     },
       {
-         header: 'Prioridad',
+      header: 'Prioridad',
       col: 'prioridad',
-      isEditable: true
+      isEditable: true,
+      validationRules: [Validators.required, Validators.pattern(/^[0-9]+$/)]
     }
     ];
   }
@@ -46,9 +49,9 @@ export class EditarTipoDeduccionComponent implements OnInit{
 
       this.filas = data.map((item: any) => {
         return {
-          id: item.id_beneficio,
+          id: item.id_deduccion,
           nombre_deduccion: item.nombre_deduccion,
-          descripcion_deduccion: item.descripcion_beneficio || 'No disponible',
+          descripcion_deduccion: item.descripcion_deduccion || 'No disponible',
           tipo_deduccion: item.tipo_deduccion,
           prioridad : item.prioridad,
         };
@@ -56,14 +59,30 @@ export class EditarTipoDeduccionComponent implements OnInit{
 
       return this.filas;
     } catch (error) {
-      console.error("Error al obtener datos de beneficios", error);
+      console.error("Error al obtener datos de Deducciones", error);
       throw error; // Puedes manejar el error aquí o dejarlo para que se maneje en el componente que llama a esta función
     }
   };
 
   editar = (row: any) => {
 
-  }
+    const deduccionData = {
+      nombre_deduccion: row.nombre_deduccion,
+      descripcion_deduccion: row.descripcion_deduccion,
+      tipo_deduccion: row.tipo_deduccion,
+      prioridad: row.prioridad,
+
+    }
+
+    this.deduccionesService.updateDeduccion(row.id, deduccionData).subscribe(
+      (response) => {
+        this.toastr.success('Deduccion editada con éxito');
+      },
+      (error) => {
+        this.toastr.error('Error al actualizar Deduccion');
+      }
+    );
+  };
 
 
 

@@ -221,23 +221,28 @@ export class DeduccionService {
     return this.deduccionRepository.find()
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} deduccion`;
+  async findOne(id: string) {
+    const deduccion = await this.deduccionRepository.findOne({ where: { id_deduccion: id } });
+    if(!deduccion){
+      throw new BadRequestException(`deduccion con ID ${id} no encontrado.`);
+    }
+    return deduccion;
   }
 
   async update(id_deduccion: string, updateDeduccionDto: UpdateDeduccionDto) {
     const deduccion = await this.deduccionRepository.preload({
-      id_deduccion: id_deduccion,
-      ...UpdateDeduccionDto
+      id_deduccion: id_deduccion, 
+      ...updateDeduccionDto
     });
 
-    if(!deduccion) throw new NotFoundException(`Deduccion con el id: ${id_deduccion} no funciona`)
-    
-    try{
+    if (!deduccion) {
+      throw new BadRequestException(`deduccion con ID ${id_deduccion} no encontrado.`);
+    }
+
+    try {
       await this.deduccionRepository.save(deduccion);
       return deduccion;
-    } 
-    catch (error) {
+    } catch (error) {
       this.handleException(error);
     }
   }

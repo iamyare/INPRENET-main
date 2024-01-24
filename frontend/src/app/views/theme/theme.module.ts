@@ -34,6 +34,7 @@ import { NuevaplanillaComponent } from '../../../components/nuevaplanilla/nuevap
 import { NuevoTipoPlanillaComponent } from '../pages/Generales/nuevo-tipo-planilla/nuevo-tipo-planilla.component';
 import { EditarTipoPlanillaComponent } from '../pages/Generales/editar-tipo-planilla/editar-tipo-planilla.component';
 import { NuevoTipoDeduccionComponent } from '../pages/Generales/nuevo-tipo-deduccion/nuevo-tipo-deduccion.component';
+import { EditarTipoDeduccionComponent } from '../pages/Generales/editar-tipo-deduccion/editar-tipo-deduccion.component';
 
 @NgModule({
   imports: [
@@ -69,7 +70,8 @@ import { NuevoTipoDeduccionComponent } from '../pages/Generales/nuevo-tipo-deduc
     EditarBeneficioComponent,
     NuevoTipoPlanillaComponent,
     EditarTipoPlanillaComponent,
-    NuevoTipoDeduccionComponent
+    NuevoTipoDeduccionComponent,
+    EditarTipoDeduccionComponent
 /*     CentroTrabajoPageComponent */
   ]
 })

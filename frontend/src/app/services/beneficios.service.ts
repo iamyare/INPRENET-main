@@ -62,4 +62,8 @@ export class BeneficiosService {
       );
   }
 
+  updateBeneficio(id: string, beneficioData: any): Observable<any> {
+    return this.http.patch(`${environment.API_URL}/api/beneficio/${id}`, beneficioData);
+  }
+
 }

@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { ValidatorFn, Validators } from '@angular/forms';
+import { ToastrService } from 'ngx-toastr';
 import { BeneficiosService } from 'src/app/services/beneficios.service';
 
 @Component({
@@ -10,19 +11,22 @@ import { BeneficiosService } from 'src/app/services/beneficios.service';
 export class EditarBeneficioComponent implements OnInit {
   public myColumns: TableColumn[] = []
   public filas: any[] = [];
-  isLoading = true;
 
-  constructor (private svcBeneficioServ: BeneficiosService){}
+  constructor (
+    private svcBeneficioServ: BeneficiosService,
+    private toastr: ToastrService
+    ){}
 
   ngOnInit(): void {
     this.svcBeneficioServ.getTipoBeneficio().subscribe(
       (data) => {
         this.filas = data.map((item: any) => {
           return {
-            id_beneficio: item.id_beneficio,
-            nombre_planilla: item.nombre_planilla,
+            id: item.id_beneficio,
+            nombre_beneficio: item.nombre_beneficio,
             descripcion_beneficio: item.descripcion_beneficio || 'No disponible',
             estado: item.estado,
+            prioridad : item.prioridad,
             anio_duracion: item.anio_duracion,
             mes_duracion: item.mes_duracion,
             dia_duracion: item.dia_duracion,
@@ -37,8 +41,13 @@ export class EditarBeneficioComponent implements OnInit {
     );
 
     this.myColumns = [
+     /*  {
+        header: 'ID',
+        col: 'id',
+        isEditable: false
+      }, */
       { header: 'Nombre del Beneficio',
-      col: "id_beneficio",
+      col: "nombre_beneficio",
       isEditable: true,
       validationRules: [Validators.required, Validators.minLength(3)] },
       {
@@ -74,9 +83,28 @@ export class EditarBeneficioComponent implements OnInit {
     ];
   }
 
-  editar(row:any):void{
-    console.log(row);
-  }
+  editar = (row: any) => {
+
+    const beneficioData = {
+      nombre_beneficio: row.nombre_beneficio,
+      descripcion_beneficio: row.descripcion_beneficio,
+      estado: row.estado,
+      prioridad: row.prioridad,
+      anio_duracion: row.anio_duracion,
+      mes_duracion: row.mes_duracion,
+      dia_duracion: row.dia_duracion
+
+    }
+
+    this.svcBeneficioServ.updateBeneficio(row.id, beneficioData).subscribe(
+      (response) => {
+        this.toastr.success('Beneficio editado con éxito');
+      },
+      (error) => {
+        this.toastr.error('Error al actualizar Beneficio');
+      }
+    );
+  };
 
   hacerAlgo(row: any) {
     // Aquí puedes agregar la lógica que necesites

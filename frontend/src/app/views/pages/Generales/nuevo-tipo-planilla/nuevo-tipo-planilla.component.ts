@@ -18,57 +18,57 @@ export class NuevoTipoPlanillaComponent {
   ){
 
   }
-
-
   myFormFields: FieldConfig[] = [
     { type: 'daterange', label: 'Periodo', name: 'periodo', validations: [Validators.required]},
     { type: 'text', label: 'Nombre de planilla', name: 'nombre_planilla', validations: [Validators.required,Validators.maxLength(50)] },
     { type: 'text', label: 'Descripción de planilla', name: 'descripcion', validations: [] },
   ];
 
-  obtenerDatos(event:any): any {
-    console.log(event);
+  obtenerDatos(event: any): any {
+    if (event?.periodo) {
+        const startDate = new Date(event.periodo.start);
+        const endDate = new Date(event.periodo.end);
 
-    const { periodo, ...otrosDatos } = event.value;
-    const startDate = new Date(periodo.start);
-    const endDate = new Date(periodo.end);
+        const opciones: Intl.DateTimeFormatOptions = {
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit'
+        };
 
-    const opciones: Intl.DateTimeFormatOptions = {
-      year: 'numeric',
-      month: '2-digit',
-      day: '2-digit'
-    };
+        const startDateFormatted = startDate.toLocaleDateString('es', opciones).replace(/\//g, '-');
+        const endDateFormatted = endDate.toLocaleDateString('es', opciones).replace(/\//g, '-');
 
-    const startDateFormatted = startDate.toLocaleDateString('es', opciones).replace(/\//g, '-');
-    const endDateFormatted = endDate.toLocaleDateString('es', opciones).replace(/\//g, '-');
+        // Preparar los datos formateados, excluyendo 'periodo'
+        const datosFormateados = {
+            ...event,
+            periodoInicio: startDateFormatted,
+            periodoFinalizacion: endDateFormatted
+        };
 
-    const datosFormateados = {
-      ...otrosDatos,
-      periodoInicio: startDateFormatted,
-      periodoFinalizacion: endDateFormatted
-    };
+        delete datosFormateados.periodo;
 
-    this.datosFormateados = datosFormateados;
+        this.datosFormateados = datosFormateados;
 
-    //console.log(datosFormateados);
-  }
+    } else {
+        console.error('La propiedad periodo no está definida en el evento');
+    }
+}
+
+
 
 
 
   insertarDatos(): void {
   this.planillaService.createTipoPlanilla(this.datosFormateados).subscribe({
     next: (response) => {
-      console.log('TipoPlanilla creada con éxito', response);
       this.toastr.success('TipoPlanilla creada con éxito');
     },
     error: (error) => {
       let mensajeError = 'Error desconocido al crear TipoPlanilla';
 
-      // Verifica si el error tiene una estructura específica
       if (error.error && error.error.message) {
         mensajeError = error.error.message;
       } else if (typeof error.error === 'string') {
-        // Para errores que vienen como un string simple
         mensajeError = error.error;
       }
 
@@ -76,9 +76,6 @@ export class NuevoTipoPlanillaComponent {
     }
   });
 }
-
-
-
 
 }
 

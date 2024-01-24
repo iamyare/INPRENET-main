@@ -19,12 +19,12 @@ export class BeneficioController {
 
   @Get(':id')
   findOne(@Param('id') id: string) {
-    return this.beneficioService.findOne(+id);
+    return this.beneficioService.findOne(id);
   }
 
   @Patch(':id')
   update(@Param('id') id: string, @Body() updateBeneficioDto: UpdateBeneficioDto) {
-    return this.beneficioService.update(+id, updateBeneficioDto);
+    return this.beneficioService.update(id, updateBeneficioDto);
   }
 
   @Delete(':id')

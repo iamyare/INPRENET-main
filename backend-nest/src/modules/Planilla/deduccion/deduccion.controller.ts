@@ -40,7 +40,7 @@ export class DeduccionController {
 
   @Get(':id')
   findOne(@Param('id') id: string) {
-    return this.deduccionService.findOne(+id);
+    return this.deduccionService.findOne(id);
   }
 
   @Patch(':id')

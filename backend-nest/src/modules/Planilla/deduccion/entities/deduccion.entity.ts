@@ -23,14 +23,3 @@ export class Deduccion {
     @OneToMany(() => DetalleDeduccion, detalleDeduccion => detalleDeduccion.deduccion)
     detalleDeduccion : DetalleDeduccion[];
 }
-
-[
-    {
-        id:"",
-        name:""
-    },
-    {
-        id:"",
-        name:""
-    }
-]

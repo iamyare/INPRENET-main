@@ -25,13 +25,33 @@ export class BeneficioService {
     return this.beneficioRepository.find();
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} beneficio`;
+  async findOne(id: string) {
+    const beneficio = await this.beneficioRepository.findOne({ where: { id_beneficio: id } });
+    if(!beneficio){
+      throw new BadRequestException(`beneficio con ID ${id} no encontrado.`);
+    }
+    return beneficio;
+
   }
 
-  update(id: number, updateBeneficioDto: UpdateBeneficioDto) {
-    return `This action updates a #${id} beneficio`;
+  async update(id: string, updateBeneficioDto: UpdateBeneficioDto) {
+    const beneficio = await this.beneficioRepository.preload({
+      id_beneficio: id, 
+      ...updateBeneficioDto
+    });
+
+    if (!beneficio) {
+      throw new BadRequestException(`Beneficio con ID ${id} no encontrado.`);
+    }
+
+    try {
+      await this.beneficioRepository.save(beneficio);
+      return beneficio;
+    } catch (error) {
+      this.handleException(error);
+    }
   }
+
 
   remove(id: number) {
     return `This action removes a #${id} beneficio`;

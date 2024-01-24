@@ -20,17 +20,16 @@ export class DynamicFormComponent implements OnInit{@Input() fields: FieldConfig
   }
 
   onDatosBenChange() {
-    // Convertir los valores de campos de tipo 'number' a números antes de emitir el evento
+  const formValues = { ...this.form.value };
+  this.fields.forEach(field => {
+    if (field.type === 'number' && formValues[field.name] !== null && formValues[field.name] !== undefined) {
+      formValues[field.name] = +formValues[field.name];
+    }
+  });
 
-    /* const formValues = { ...this.form.value };
-    this.fields.forEach(field => {
-      if (field.type === 'number' && formValues[field.name] !== null && formValues[field.name] !== undefined) {
-        formValues[field.name] = +formValues[field.name];
-      }
-    }); */
+  this.newDatBenChange.emit(formValues);
 
-    this.newDatBenChange.emit(this.form);
-  }
+}
 
   createControl(): FormGroup {
     const group = this.fb.group({});

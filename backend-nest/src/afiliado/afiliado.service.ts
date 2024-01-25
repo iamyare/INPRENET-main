@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable, InternalServerErrorException, Logger } from '@nestjs/common';
+import { BadRequestException, Injectable, InternalServerErrorException, Logger, NotFoundException } from '@nestjs/common';
 import { CreateAfiliadoDto } from './dto/create-afiliado.dto';
 import { UpdateAfiliadoDto } from './dto/update-afiliado.dto';
 import { Connection, Repository } from 'typeorm';
@@ -15,6 +15,7 @@ import { Provincia } from 'src/modules/Regional/provincia/entities/provincia.ent
 import { Pais } from 'src/modules/Regional/pais/entities/pais.entity';
 import { TipoIdentificacion } from 'src/modules/tipo_identificacion/entities/tipo_identificacion.entity';
 import { CreateAfiliadoTempDto } from './dto/create-afiliado-temp.dto';
+import { validate as isUUID } from 'uuid';
 
 @Injectable()
 export class AfiliadoService {
@@ -174,8 +175,20 @@ export class AfiliadoService {
     return afiliado;
   }
 
-  findOne(id: string) {
-    return `This action returns a #${id} afiliado`;
+  async findOne(term: string) {
+    let afiliados: Afiliado;
+    if (isUUID(term)) {
+      afiliados = await this.afiliadoRepository.findOneBy({ id_afiliado: term });
+    } else {
+      const queryBuilder = this.afiliadoRepository.createQueryBuilder('afiliado');
+      afiliados = await queryBuilder
+        .where('"dni" = :term', { term })
+        .getOne();
+    }
+    if (!afiliados) {
+      throw new NotFoundException(`afiliado con ${term} no existe`);
+    }
+    return afiliados;
   }
 
   update(id: number, updateAfiliadoDto: UpdateAfiliadoDto) {

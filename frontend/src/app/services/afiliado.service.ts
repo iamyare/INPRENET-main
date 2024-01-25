@@ -24,6 +24,17 @@ export class AfiliadoService {
       );
   }
 
+  getAfilByParam(param:string | number): Observable<any | void> {
+    const url = `${environment.API_URL}/api/afiliado/${param}`;
+    return this.http.get<any>(
+      url,
+      ).pipe(
+        map((res:any) => {
+          return res;
+        })
+      );
+  }
+
   agregarAfiliados(data:any): Observable<any>{
     var url = `${environment.API_URL}/afiliados/agregarAfiliado`;
 

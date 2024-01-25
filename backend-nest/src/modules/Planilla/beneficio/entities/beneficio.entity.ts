@@ -19,6 +19,10 @@ export class Beneficio {
     @Column()
     prioridad: number;
     @Column()
+    monto_beneficio: number;
+    @Column()
+    porcentaje_beneficio: number;
+    @Column()
     anio_duracion: number;
     @Column()
     mes_duracion: number;

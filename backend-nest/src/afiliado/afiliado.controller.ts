@@ -23,9 +23,9 @@ export class AfiliadoController {
     return this.afiliadoService.findAll();
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.afiliadoService.findOne(id);
+  @Get(':term')
+  findOne(@Param('term') term: string) {
+    return this.afiliadoService.findOne(term);
   }
 
   @Patch(':id')

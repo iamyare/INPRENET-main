@@ -44,6 +44,16 @@ export class EditarBeneficioComponent implements OnInit {
       isEditable: true
     },
       {
+         header: 'monto_beneficio',
+      col: 'monto_beneficio',
+      isEditable: true
+    },
+      {
+         header: 'porcentaje_beneficio',
+      col: 'porcentaje_beneficio',
+      isEditable: true
+    },
+      {
         header: 'año de duracion',
       col: 'anio_duracion',
       isEditable: true
@@ -68,6 +78,8 @@ export class EditarBeneficioComponent implements OnInit {
       descripcion_beneficio: row.descripcion_beneficio,
       estado: row.estado,
       prioridad: row.prioridad,
+      monto_beneficio: row.monto_beneficio,
+      porcentaje_beneficio: row.porcentaje_beneficio,
       anio_duracion: row.anio_duracion,
       mes_duracion: row.mes_duracion,
       dia_duracion: row.dia_duracion
@@ -95,6 +107,8 @@ export class EditarBeneficioComponent implements OnInit {
           descripcion_beneficio: item.descripcion_beneficio || 'No disponible',
           estado: item.estado,
           prioridad: item.prioridad,
+          monto_beneficio: item.monto_beneficio,
+          porcentaje_beneficio: item.porcentaje_beneficio,
           anio_duracion: item.anio_duracion,
           mes_duracion: item.mes_duracion,
           dia_duracion: item.dia_duracion,

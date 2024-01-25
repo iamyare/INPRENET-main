@@ -9,14 +9,13 @@ import { SubirDeduccionesformComponent } from '../pages/Generales/subir-deduccio
 import { CentroTrabajoComponent } from '../pages/Generales/centro-trabajo/centro-trabajo.component';
 import { NuevaPlanillaComponentP } from '../pages/Generales/nueva-planilla/nueva-planilla.component';
 
-import { NuevoBeneficioComponent } from '../pages/Generales/nuevo-beneficio/nuevo-beneficio.component';
-import { EditarBeneficioComponent } from '../pages/Generales/editar-beneficio/editar-beneficio.component';
+import { NuevoBeneficioComponent } from '../pages/Mantenimiento/nuevo-beneficio/nuevo-beneficio.component';
+import { EditarBeneficioComponent } from '../pages/Mantenimiento/editar-beneficio/editar-beneficio.component';
+import { NuevoTipoDeduccionComponent } from '../pages/Mantenimiento/nuevo-tipo-deduccion/nuevo-tipo-deduccion.component';
+import { EditarTipoDeduccionComponent } from '../pages/Mantenimiento/editar-tipo-deduccion/editar-tipo-deduccion.component';
+import { EditarTipoPlanillaComponent } from '../pages/Mantenimiento/editar-tipo-planilla/editar-tipo-planilla.component';
+import { NuevoTipoPlanillaComponent } from '../pages/Mantenimiento/nuevo-tipo-planilla/nuevo-tipo-planilla.component';
 
-import { NuevoTipoDeduccionComponent } from '../pages/Generales/nuevo-tipo-deduccion/nuevo-tipo-deduccion.component';
-import { EditarTipoDeduccionComponent } from '../pages/Generales/editar-tipo-deduccion/editar-tipo-deduccion.component';
-
-import { EditarTipoPlanillaComponent } from '../pages/Generales/editar-tipo-planilla/editar-tipo-planilla.component';
-import { NuevoTipoPlanillaComponent } from '../pages/Generales/nuevo-tipo-planilla/nuevo-tipo-planilla.component';
 /* import { CentroTrabajoPageComponent } from '../pages/centro-trabajo-page/centro-trabajo-page.component'; */
 import { NuevoBeneficioAfilComponent } from '../pages/Generales/nuevo-beneficio-afil/nuevo-beneficio-afil.component';
 import { NuevaDeduccionAfilComponent } from '../pages/Generales/nueva-deduccion-afil/nueva-deduccion-afil.component';

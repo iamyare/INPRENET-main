@@ -14,6 +14,10 @@ export class CreateBeneficioDto {
     @IsNumber()
     prioridad: number;
     @IsNumber()
+    monto_beneficio: number;
+    @IsNumber()
+    porcentaje_beneficio: number;
+    @IsNumber()
     anio_duracion: number;
     @IsNumber()
     mes_duracion: number;

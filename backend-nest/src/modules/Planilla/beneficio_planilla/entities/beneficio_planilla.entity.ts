@@ -11,12 +11,9 @@ export class BeneficioPlanilla {
     id_beneficio_planilla : string;
 
     @Column()
-    monto: string;
-
-    @Column()
     periodoPago: string;
 
-    @Column()
+    @Column({default:"NO PAGADO"})
     estado: string;
 
     @ManyToOne(() => Beneficio, beneficio => beneficio.beneficioPlanilla, { cascade : true })

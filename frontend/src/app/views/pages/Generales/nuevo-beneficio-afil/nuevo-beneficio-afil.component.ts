@@ -1,9 +1,8 @@
 import { Component } from '@angular/core';
 import { ValidatorFn, Validators } from '@angular/forms';
-import { ToastrService } from 'ngx-toastr';
+import { ToastrService, ToastrModule } from 'ngx-toastr';
 import { AfiliadoService } from 'src/app/services/afiliado.service';
 import { BeneficiosService } from 'src/app/services/beneficios.service';
-
 @Component({
   selector: 'app-nuevo-beneficio-afil',
   templateUrl: './nuevo-beneficio-afil.component.html',
@@ -24,7 +23,6 @@ export class NuevoBeneficioAfilComponent {
 
   obtenerDatos(event:any):any{
     this.data = event;
-    console.log(this.data);
     this.getFilasAfilById();
   }
 
@@ -34,9 +32,9 @@ export class NuevoBeneficioAfilComponent {
       {
         type: 'dropdown', label: 'Tipo de beneficio', name: 'tipo_beneficio',
         options: this.tiposBeneficios,
-        validations: []
+        validations: [Validators.required]
       },
-      { type: 'text', label: 'DNI', name: 'dni', validations: [] },
+      { type: 'text', label: 'DNI', name: 'dni', validations: [Validators.required, Validators.minLength(13), Validators.maxLength(14)] },
     ];
   }
 
@@ -44,7 +42,7 @@ export class NuevoBeneficioAfilComponent {
     try {
       const data = await this.svcBeneficioServ.getTipoBeneficio().toPromise();
       this.filas = data.map((item: any) => {
-        this.tiposBeneficios.push({ label: `${item.nombre_beneficio}`, value: `${item.id_beneficio}` })
+        this.tiposBeneficios.push({ label: `${item.nombre_beneficio}`, value: `${item.nombre_beneficio}` })
         return {
           id: item.id_beneficio,
           nombre_beneficio: item.nombre_beneficio,
@@ -58,8 +56,6 @@ export class NuevoBeneficioAfilComponent {
           dia_duracion: item.dia_duracion,
         };
       });
-
-
       return this.filas;
     } catch (error) {
       console.error("Error al obtener datos de beneficios", error);
@@ -68,11 +64,40 @@ export class NuevoBeneficioAfilComponent {
   };
 
   getFilasAfilById = async () => {
-      await this.svcAfilServ.getAfilByParam(this.data.dni).subscribe(result => {
-        this.nameAfil = `${result.primer_nombre} ${result.segundo_nombre} ${result.primer_apellido} ${result.segundo_apellido}`
-      }
-      );
+    this.nameAfil = ""
+    try {
+      await this.svcAfilServ.getAfilByParam(this.data.dni).subscribe(
+        {
+          next: (result)=>{
+            if (result.id_afiliado!=""){
+              if (result.segundo_nombre || result.segundo_apellido){
+                this.nameAfil = `${result.primer_nombre} ${result.segundo_nombre} ${result.primer_apellido} ${result.segundo_apellido}`
+              }else if (result.primer_nombre && result.primer_apellido){
+                this.nameAfil = `${result.primer_nombre}  ${result.primer_apellido}`
+              }
+            }
+          },
+          error: (error)=>{
+            /* this.toastr.error(`${error.error.message}`); */
+          }
+        })
+    } catch (error) {
+      console.log(error);
+    }
+  }
 
+  async guardarNTBenef(){
+      if (this.nameAfil!=""){
+        await this.svcBeneficioServ.asigBeneficioAfil(this.data).subscribe(
+          {
+            next: (response)=>{
+              this.toastr.success("se asigno correctamente el beneficio")
+            },
+            error: (error)=>{
+              this.toastr.error(`${error.error.message}`);
+            }
+          })
+      }
   }
 }
 

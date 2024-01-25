@@ -9,7 +9,6 @@ import { FormBuilder, FormGroup, ValidatorFn } from '@angular/forms';
 export class DynamicFormComponent implements OnInit{@Input() fields: FieldConfig[] = [];
   form: FormGroup;
   @Input() titulo = "";
-  @Input() funct:any;
   @Input() subtitulo = "";
   @Output() newDatBenChange = new EventEmitter<any>()
   constructor(private fb: FormBuilder) {

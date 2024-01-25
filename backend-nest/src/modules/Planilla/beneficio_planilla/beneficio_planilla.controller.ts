@@ -8,7 +8,7 @@ export class BeneficioPlanillaController {
   constructor(private readonly beneficioPlanillaService: BeneficioPlanillaService) {}
 
   @Post()
-  create(@Body() createBeneficioPlanillaDto: CreateBeneficioPlanillaDto) {
+  create(@Body() createBeneficioPlanillaDto: any) {
     return this.beneficioPlanillaService.create(createBeneficioPlanillaDto);
   }
 
@@ -17,9 +17,9 @@ export class BeneficioPlanillaController {
     return this.beneficioPlanillaService.findAll();
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.beneficioPlanillaService.findOne(+id);
+  @Get(':term')
+  findOne(@Param('term') term: string) {
+    return this.beneficioPlanillaService.findOne(term);
   }
 
   @Patch(':id')

@@ -10,8 +10,8 @@ export class BeneficioPlanilla {
     @PrimaryGeneratedColumn('uuid')
     id_beneficio_planilla : string;
 
-    @Column()
-    periodoPago: string;
+    @Column({nullable:true})
+    periodoPago?: string;
 
     @Column({default:"NO PAGADO"})
     estado: string;
@@ -23,6 +23,5 @@ export class BeneficioPlanilla {
     @ManyToOne(() => Afiliado, afiliado => afiliado.beneficioPlanilla, { cascade : true })
     @JoinColumn({ name: 'id_afiliado'})
     afiliado : Afiliado;
-
 
 }

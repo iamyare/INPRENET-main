@@ -44,8 +44,7 @@ export class AfiliadoService {
       ).pipe(
         map((res:any) => {
           return res;
-        }),
-        //catchError((err) => this.handlerError2(err))
+        })
       )
   }
 

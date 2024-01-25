@@ -1,9 +1,10 @@
-import { BadRequestException, Injectable, InternalServerErrorException, Logger } from '@nestjs/common';
+import { BadRequestException, Injectable, InternalServerErrorException, Logger, NotFoundException } from '@nestjs/common';
 import { CreateBeneficioDto } from './dto/create-beneficio.dto';
 import { UpdateBeneficioDto } from './dto/update-beneficio.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Beneficio } from './entities/beneficio.entity';
+import { isUUID } from 'class-validator';
 
 @Injectable()
 export class BeneficioService {
@@ -25,13 +26,28 @@ export class BeneficioService {
     return this.beneficioRepository.find();
   }
 
-  async findOne(id: string) {
+/*   async findOne(id: string) {
     const beneficio = await this.beneficioRepository.findOne({ where: { id_beneficio: id } });
     if(!beneficio){
       throw new BadRequestException(`beneficio con ID ${id} no encontrado.`);
     }
     return beneficio;
+  } */
 
+  async findOne(term: string) {
+    let beneficio: Beneficio;
+    if (isUUID(term)) {
+      beneficio = await this.beneficioRepository.findOneBy({ id_beneficio: term,});
+    } else {
+      const queryBuilder = this.beneficioRepository.createQueryBuilder('beneficio');
+      beneficio = await queryBuilder
+        .where('"nombre_beneficio" = :term OR "id_beneficio" = :term', { term } )
+        .getOne();
+    }
+    if (!beneficio) {
+      throw new NotFoundException(`beneficio con ${term}  no encontrado.`);
+    }
+    return beneficio;
   }
 
   async update(id: string, updateBeneficioDto: UpdateBeneficioDto) {

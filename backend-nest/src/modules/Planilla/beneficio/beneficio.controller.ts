@@ -17,9 +17,9 @@ export class BeneficioController {
     return this.beneficioService.findAll();
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.beneficioService.findOne(id);
+  @Get(':term')
+  findOne(@Param('term') term: string) {
+    return this.beneficioService.findOne(term);
   }
 
   @Patch(':id')

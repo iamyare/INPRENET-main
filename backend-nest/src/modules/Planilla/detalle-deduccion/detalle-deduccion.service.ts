@@ -134,7 +134,6 @@ export class DetalleDeduccionService {
         failedRows.push({ ...d, error: error.message });
       }
     }
-    console.log("ENTRO")
     const deducciones = this.agruparDeduccionesPorAfiliado(arrayTemp, 100)
   
     for (let clave in deducciones) {

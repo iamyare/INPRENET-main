@@ -1,5 +1,12 @@
 
-<app-dynamic-form [fields]="myFormFields" titulo="Datos de Beneficio" subtitulo="Completa la informacion correspondiente"
-(newDatBenChange)="obtenerDatos($event)"></app-dynamic-form>
-<label>{{nameAfil}}</label>
-<!-- <p>nuevo-beneficio-afil works!</p> -->
+
+  <h2>{{nameAfil}}</h2>
+
+  <app-dynamic-form [fields]="myFormFields" titulo="Datos de Beneficio" subtitulo="Completa la informacion correspondiente"
+  (newDatBenChange)="obtenerDatos($event)"></app-dynamic-form>
+  <button mat-raised-button (click)="guardarNTBenef()" style="background-color: #628780; color: #ffffff; border-radius: 5px; padding: 10px 20px;">Guardar Beneficio</button>
+
+
+<div>
+
+</div>

@@ -3,16 +3,16 @@ import { IsNotEmpty, IsNumber, IsOptional, IsString, Length } from "class-valida
 export class CreateBeneficioPlanillaDto {
     @IsString()
     @IsOptional()
-    periodoPago: string;
+    periodoPago?: string;
 
     @IsString()
     @IsOptional()
     estado?: string;
 
-    @IsNumber()
-    beneficioPlanilla: number;
+    @IsString()
+    beneficio: string;
 
-    @IsNumber()
-    afiliado: number;
+    @IsString()
+    afiliado: string;
 
 }

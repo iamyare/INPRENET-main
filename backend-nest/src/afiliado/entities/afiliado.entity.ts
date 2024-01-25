@@ -127,9 +127,9 @@ export class Afiliado {
     @JoinColumn({ name: 'id_tipo_identificacion' })
     tipoIdentificacion: TipoIdentificacion;
 
-    @OneToOne(() => Usuario, { cascade: true })
+    /* @OneToOne(() => Usuario, { cascade: true })
     @JoinColumn({ name: 'id_usuario' })
-    usuario: Usuario;
+    usuario: Usuario; */
 
     @OneToMany(() => DetalleDeduccion, detalleDeduccion => detalleDeduccion.afiliado)
     detalleDeduccion: DetalleDeduccion[];

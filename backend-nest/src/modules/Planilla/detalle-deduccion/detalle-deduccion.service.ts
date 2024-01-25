@@ -26,25 +26,44 @@ export class DetalleDeduccionService {
     private institucionRepository: Repository<Institucion>
   ){}
 
-  async create(createDetalleDeduccionDto: CreateDetalleDeduccionDto) {
-    // Verificar si ya existe un registro con los mismos anio, mes, monto_total y monto_aplicado
-    const exists = await this.detalleDeduccionRepository.findOne({
-      where: {
-        anio: createDetalleDeduccionDto.anio,
-        mes: createDetalleDeduccionDto.mes,
-        monto_total: createDetalleDeduccionDto.monto_total
-      },
-    });
-
-    if (exists) {
-      throw new BadRequestException('La deducción con esa descripción ya existe');
-    }
-
-    // Crear y guardar el nuevo registro
-    const nuevoDetalle = this.detalleDeduccionRepository.create(createDetalleDeduccionDto);
+  async create(createDetalleDeduccionDto: CreateDetalleDeduccionDto): Promise<DetalleDeduccion> {
     
-    return this.detalleDeduccionRepository.save(nuevoDetalle);
+    try {
+      const afiliado = await this.afiliadoRepository.findOne({ 
+        where: { dni: createDetalleDeduccionDto.dni }
+      });
+      if (!afiliado) {
+        throw new BadRequestException('Afiliado no encontrado');
+      }
+  
+      const deduccion = await this.deduccionRepository.findOne({ 
+        where: { nombre_deduccion: createDetalleDeduccionDto.nombre_deduccion }
+      });
+      if (!deduccion) {
+        throw new BadRequestException('Deduccion no encontrada');
+      }
+  
+      const institucion = await this.institucionRepository.findOne({ 
+        where: { nombre_institucion: createDetalleDeduccionDto.nombre_institucion }
+      });
+      if (!institucion) {
+        throw new BadRequestException('Institucion no encontrada');
+      }
+      
+      const detalleDeduccion = this.detalleDeduccionRepository.create({
+        afiliado: afiliado,
+        deduccion: deduccion,
+        institucion: institucion,
+        ...createDetalleDeduccionDto,
+      });
+      
+      return await this.detalleDeduccionRepository.save(detalleDeduccion);
+    } catch (error) {
+      this.handleException(error);
+    }
   }
+  
+  
 
   processExcel(fileBuffer: Buffer): any {
     const workbook = xlsx.read(fileBuffer, { type: 'buffer' });
@@ -241,9 +260,20 @@ export class DetalleDeduccionService {
 
   private handleException(error: any): void {
     this.logger.error(error);
-    if (error.driverError && error.driverError.errorNum === 1) {
-      throw new BadRequestException('La deduccion ya existe');
+  
+    // Verifica si el error es un BadRequestException y propaga el mismo
+    if (error instanceof BadRequestException) {
+      throw error;
+    }
+    // Verifica errores específicos de la base de datos o de la lógica de negocio
+    if (error.driverError && error.driverError.errorNum) {
+      // Aquí puedes agregar más condiciones según los códigos de error específicos de tu base de datos
+      if (error.driverError.errorNum === 1) {
+        throw new BadRequestException('La deduccion ya existe');
+      }
+      // Agregar más casos según sea necesario
     } else {
+      // Para cualquier otro tipo de error, lanza una excepción genérica
       throw new InternalServerErrorException('Ocurrió un error al procesar su solicitud');
     }
   }

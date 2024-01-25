@@ -51,6 +51,6 @@ export class Usuario {
     @OneToOne(() => Empleado, empleado => empleado.usuario)
     empleado: Empleado;
 
-    @OneToOne(() => Afiliado, afiliado => afiliado.usuario)
-    afiliado: Afiliado;
+    /* @OneToOne(() => Afiliado, afiliado => afiliado.usuario)
+    afiliado: Afiliado; */
 }

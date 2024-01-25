@@ -39,7 +39,6 @@ export class NuevoBeneficioComponent {
         },
         error: (error) => {
           let mensajeError = 'Error desconocido al crear tipo de beneficio';
-
           // Verifica si el error tiene una estructura específica
           if (error.error && error.error.message) {
             mensajeError = error.error.message;
@@ -47,13 +46,11 @@ export class NuevoBeneficioComponent {
             // Para errores que vienen como un string simple
             mensajeError = error.error;
           }
-
           this.toastr.error(mensajeError);
         }
       }
       );
   }
-
 }
 
 interface FieldConfig {

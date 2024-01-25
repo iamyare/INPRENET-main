@@ -31,7 +31,6 @@ export class NuevoTipoDeduccionComponent {
   }
 
   guardarTipoDeduccion():any{
-    console.log(this.data);
 
     this.SVCDeduccion.newTipoDeduccion(this.data).subscribe(
       {

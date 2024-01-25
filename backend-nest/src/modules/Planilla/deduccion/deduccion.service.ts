@@ -119,7 +119,7 @@ export class DeduccionService {
         for (let deduccionClave in deduccion) {
           if (deduccionClave === "deducciones") {
             
-            for (const key in deduccion[deduccionClave]) {
+            /* for (const key in deduccion[deduccionClave]) {
               const detalle = new DetalleDeduccion(); 
               detalle.afiliado = clave; 
               console.log(deduccion[deduccionClave][key].valor_utilizado);
@@ -135,7 +135,7 @@ export class DeduccionService {
               
               await this.detalleDeduccionRepository.save(detalle);
             
-            }
+            } */
           }
         }
       }

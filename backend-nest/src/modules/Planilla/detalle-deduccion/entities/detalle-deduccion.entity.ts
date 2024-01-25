@@ -11,18 +11,18 @@ export class DetalleDeduccion {
     
     @ManyToOne(() => Deduccion, deduccion => deduccion.detalleDeduccion, { cascade: true })
     @JoinColumn({ name: 'id_deduccion' })
-    deduccion: string;
+    deduccion: Deduccion; // Cambiado de string a Deduccion
     
     @ManyToOne(() => Afiliado, afiliado => afiliado.detalleDeduccion, { cascade: true })
     @JoinColumn({ name: 'id_afiliado' })
-    afiliado: string;
+    afiliado: Afiliado; // Cambiado de string a Afiliado
     
     @ManyToOne(() => Institucion, institucion => institucion.detalleDeduccion, { cascade: true})
     @JoinColumn({ name: 'id_institucion' })
-    institucion: Institucion;
+    institucion: Institucion; // Correcto
 
-    @Column('varchar2', { length: 20, nullable: false })
-    monto_total: string;
+    @Column('number', {nullable: true})
+    monto_total: number;
 
     @Column('number', {nullable: true})
     monto_aplicado: number;
@@ -30,24 +30,12 @@ export class DetalleDeduccion {
     @Column('varchar2', { length: 20, nullable: true })
     estado_aplicacion: string;
 
-    @Column('varchar2', { length: 20, nullable: false})
-    anio: string;
+    @Column('number', {nullable: true})
+    anio: number;
 
-    @Column('varchar2', { length: 20, nullable: false})
-    mes: string;
+    @Column('number', {nullable: true})
+    mes: number;
 
     @Column('timestamp', { default: () => 'CURRENT_TIMESTAMP' })
     fecha_aplicado: Date;
-}
-
-/* interface DatosInfo {
-    id_afiliado: string;
-    salario_base: number;
-    nombre_institucion: string;
-    monto_deduccion: number;
-} */
- 
-interface Asignacion {
-    nombre_institucion: string;
-    montoDeduccion: number;
 }

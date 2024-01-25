@@ -20,8 +20,6 @@ interface TipoDeduccion {
 })
 export class DeduccionesService {
 
-  private baseUrl = 'http://localhost:3000/api/';
-
   constructor(private http: HttpClient) { }
 
   newTipoDeduccion(TipoDeduccion:any): Observable<any | void>{
@@ -36,9 +34,9 @@ export class DeduccionesService {
       )
   }
 
-  getDetalleDeduccion(): Observable<any> {
+  /* getDetalleDeduccion(): Observable<any> {
     return this.http.get<any>(this.baseUrl + 'detalle-deduccion');
-  }
+  } */
 
   getDeducciones(): Observable<any>{
     var url= `${environment.API_URL}/api/deduccion`;
@@ -49,6 +47,22 @@ export class DeduccionesService {
           return res;
         }),
       );
+  }
+
+  getDetalleDeduccion(): Observable<any>{
+    var url= `${environment.API_URL}/api/deduccion`;
+
+    return this.http.get(url,
+      ).pipe(
+        map((res:any) => {
+          return res;
+        }),
+      );
+  }
+
+  createDetalleDeduccion(detalleDeduccion: any): Observable<any> {
+    const url = `${environment.API_URL}/api/detalle-deduccion`;
+    return this.http.post<any>(url, detalleDeduccion);
   }
 
   updateDeduccion(id: string, deduccionData: any): Observable<any> {

@@ -63,7 +63,7 @@ export const navItems: INavData[] = [
     title: true,
     name: 'Menú Principal'
   },
-  {
+  /* {
     name: 'Afiliado',
     url: '/base',
     children: [
@@ -97,7 +97,43 @@ export const navItems: INavData[] = [
         ]
       },
     ]
+  }, */
+
+  {
+    name: 'Afiliado',
+    url: '/base',
+    children: [
+      {
+        name: 'Beneficios',
+        url: '/base',
+        children: [
+          {
+            url: 'Afiliado/Beneficios/nuevo-beneficio-afil',
+            name: 'Nueva Beneficio',
+          },
+          {
+            url: 'Afiliado/Beneficios/Ver-editar-beneficio-afil',
+            name: 'Ver/Editar Beneficio',
+          },
+        ]
+      },
+      {
+        name: 'Deducciones',
+        url: '/base',
+        children: [
+          {
+            url: 'Afiliado/Deducciones/nueva-deduccion-afil',
+            name: 'Nueva Deducción',
+          },
+          {
+            url: 'Afiliado/Deducciones/ver-editar-deduccion-afil',
+            name: 'Ver/editar Deducción',
+          },
+        ]
+      },
+    ]
   },
+
   {
     name: 'Planilla',
     url: '/base',
@@ -107,19 +143,12 @@ export const navItems: INavData[] = [
         name: 'Nueva Planilla',
       },
       {
-        url: '/Planilla/ver-deducciones',
+        url: '/Planilla/ver-planillas',
         name: 'Ver Planillas',
       },
-/*       {
-        name: 'subir nueva planilla',
-        url: '/Afiliado/nueva-planilla',
-      },
-      {
-        name: 'Ver planillas',
-        url: '/Afiliado/ver-planillas',
-      }, */
     ]
   },
+
 
   /*
   {
@@ -144,4 +173,6 @@ export const navItems: INavData[] = [
       },
     ]
   }, */
+
+
 ];

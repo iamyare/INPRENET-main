@@ -18,6 +18,10 @@ import { EditarTipoDeduccionComponent } from '../pages/Generales/editar-tipo-ded
 import { EditarTipoPlanillaComponent } from '../pages/Generales/editar-tipo-planilla/editar-tipo-planilla.component';
 import { NuevoTipoPlanillaComponent } from '../pages/Generales/nuevo-tipo-planilla/nuevo-tipo-planilla.component';
 /* import { CentroTrabajoPageComponent } from '../pages/centro-trabajo-page/centro-trabajo-page.component'; */
+import { NuevoBeneficioAfilComponent } from '../pages/Generales/nuevo-beneficio-afil/nuevo-beneficio-afil.component';
+import { NuevaDeduccionAfilComponent } from '../pages/Generales/nueva-deduccion-afil/nueva-deduccion-afil.component';
+import { VerEditarBeneficioAfilComponent } from '../pages/Generales/ver-editar-beneficio-afil/ver-editar-beneficio-afil.component';
+import { VerEditarDeduccionAfilComponent } from '../pages/Generales/ver-editar-deduccion-afil/ver-editar-deduccion-afil.component';
 
 const routes: Routes = [
   //rutas Afiliado
@@ -37,6 +41,34 @@ const routes: Routes = [
         component: AfilBancoComponent,
         data: {
           title: 'Nuevo Afiliado',
+        },
+      },
+      {
+        path: 'Beneficios/nuevo-beneficio-afil',
+        component: NuevoBeneficioAfilComponent,
+        data: {
+          title: 'Nuevo Beneficio',
+        },
+      },
+      {
+        path: 'Beneficios/Ver-editar-beneficio-afil',
+        component: VerEditarBeneficioAfilComponent,
+        data: {
+          title: 'Ver/editar Beneficio',
+        },
+      },
+      {
+        path: 'Deducciones/nueva-deduccion-afil',
+        component: NuevaDeduccionAfilComponent,
+        data: {
+          title: 'nueva Deducción',
+        },
+      },
+      {
+        path: 'Deducciones/ver-editar-deduccion-afil',
+        component: VerEditarDeduccionAfilComponent,
+        data: {
+          title: 'Ver-editar Deducción',
         },
       },
     ],
@@ -62,13 +94,13 @@ const routes: Routes = [
           title: 'Subir Deducciones',
         },
       },
-      {
+/*       {
         path: 'ver-deducciones',
         component: VerDeduccionesComponent,
         data: {
           title: 'Ver Deducciones',
         },
-      },
+      }, */
       {
         path: 'ver-planillas',
         component: VerPlanillasComponent,

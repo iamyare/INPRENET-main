@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, InternalServerErrorException, Logger, NotFoundException } from '@nestjs/common';
 import { CreateBeneficioPlanillaDto } from './dto/create-beneficio_planilla.dto';
 import { UpdateBeneficioPlanillaDto } from './dto/update-beneficio_planilla.dto';
 import { BeneficioPlanilla } from './entities/beneficio_planilla.entity';
@@ -10,34 +10,50 @@ import { Beneficio } from '../beneficio/entities/beneficio.entity';
 
 @Injectable()
 export class BeneficioPlanillaService {
+  private readonly logger = new Logger(BeneficioPlanillaService.name)
+  
   @InjectRepository(Afiliado)
   private readonly afiliadoRepository : Repository<Afiliado>
-
   @InjectRepository(Beneficio)
   private readonly tipoBeneficioRepository : Repository<Beneficio>
 
   @InjectRepository(BeneficioPlanilla)
   private readonly benAfilRepository : Repository<BeneficioPlanilla>
 
-  async create(createBeneficioPlanillaDto: any): Promise<any> {
+  async create(datos: any): Promise<any> {
+    let afiliado:any;
+    let tipoBeneficio:any;
+
     try {
-      //Buscar y retornar id_afiliado
-      const afiliadoRepository = await this.afiliadoRepository.findOne({
-        where: { dni: createBeneficioPlanillaDto.dni}
-      });
-      
+      if(datos.dni){
+         afiliado = await this.afiliadoRepository.findOne({
+          where: {dni: datos.dni}
+        });
+      }
+      if (!afiliado) {
+        throw new BadRequestException('afiliado no encontrada');
+      }
+
+      else if(datos.tipo_beneficio){
        //Buscar y retornar id_tipobeneficio
-      const tipoBeneficioRepository = await this.tipoBeneficioRepository.findOne({
-        where: { nombre_beneficio: createBeneficioPlanillaDto.tipo_beneficio}
-      });
-
-      const nuevoDetalle = this.benAfilRepository.create(
-        {afiliado: afiliadoRepository, beneficio: tipoBeneficioRepository}
-      );
-
-      return this.benAfilRepository.save(nuevoDetalle);
+        tipoBeneficio = await this.tipoBeneficioRepository.findOne({
+          where: { nombre_beneficio: datos.tipo_beneficio}
+        });
+      }
+      if (!tipoBeneficio) {
+        throw new BadRequestException('tipoBeneficio no encontrada');
+      }
+      
+      if (afiliado && tipoBeneficio){
+       const nuevoDetalle = this.benAfilRepository.create(
+          {afiliado: afiliado, beneficio: tipoBeneficio}
+          );
+          return this.benAfilRepository.save(nuevoDetalle);
+        }else{
+          throw new BadRequestException('error desconocido');
+      }
     } catch (error) {
-      console.log(error);
+      this.handleException(error);
     }
   }
 
@@ -67,5 +83,24 @@ export class BeneficioPlanillaService {
 
   remove(id: number) {
     return `This action removes a #${id} beneficioPlanilla`;
+  }
+
+  private handleException(error: any): void {
+    this.logger.error(error);
+    // Verifica si el error es un BadRequestException y propaga el mismo
+    if (error instanceof BadRequestException) {
+      throw error;
+    }
+    // Verifica errores específicos de la base de datos o de la lógica de negocio
+    if (error.driverError && error.driverError.errorNum) {
+      // Aquí puedes agregar más condiciones según los códigos de error específicos de tu base de datos
+      if (error.driverError.errorNum === 1) {
+        throw new BadRequestException('El beneficio ya fue asignado');
+      }
+      // Agregar más casos según sea necesario
+    } else {
+      // Para cualquier otro tipo de error, lanza una excepción genérica
+      throw new InternalServerErrorException('Ocurrió un error al procesar su solicitud');
+    }
   }
 }

@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { ValidatorFn, Validators } from '@angular/forms';
+import { FormBuilder, FormGroup, ValidatorFn, Validators } from '@angular/forms';
 import { ToastrService, ToastrModule } from 'ngx-toastr';
 import { AfiliadoService } from 'src/app/services/afiliado.service';
 import { BeneficiosService } from 'src/app/services/beneficios.service';
@@ -15,16 +15,31 @@ export class NuevoBeneficioAfilComponent {
   nameAfil:string = ""
   public myFormFields: FieldConfig[] = []
 
+  isChecked = true;
+  formGroup = this._formBuilder.group({
+    enableWifi: '',
+    acceptTerms: ['', Validators.requiredTrue],
+  });
+
   constructor( private svcBeneficioServ: BeneficiosService,
     private svcAfilServ: AfiliadoService,
-    private toastr: ToastrService){
+    private fb: FormBuilder,
+    private toastr: ToastrService,
+    private _formBuilder: FormBuilder
+    ){
     this.obtenerDatos1();
   }
 
-  obtenerDatos(event:any):any{
-    this.data = event;
-    this.getFilasAfilById();
+  alertFormValues(formGroup: FormGroup) {
+    console.log(formGroup);
+
+    alert(JSON.stringify(formGroup.value, null, 2));
   }
+
+  obtenerDatos(event:any):any{
+      this.data = event;
+      this.getFilasAfilById();
+    }
 
   obtenerDatos1():any{
     this.getFilas();
@@ -59,46 +74,63 @@ export class NuevoBeneficioAfilComponent {
       return this.filas;
     } catch (error) {
       console.error("Error al obtener datos de beneficios", error);
-      throw error; // Puedes manejar el error aquí o dejarlo para que se maneje en el componente que llama a esta función
     }
   };
 
   getFilasAfilById = async () => {
     this.nameAfil = ""
-    try {
-      await this.svcAfilServ.getAfilByParam(this.data.dni).subscribe(
-        {
-          next: (result)=>{
-            if (result.id_afiliado!=""){
-              if (result.segundo_nombre || result.segundo_apellido){
-                this.nameAfil = `${result.primer_nombre} ${result.segundo_nombre} ${result.primer_apellido} ${result.segundo_apellido}`
-              }else if (result.primer_nombre && result.primer_apellido){
-                this.nameAfil = `${result.primer_nombre}  ${result.primer_apellido}`
-              }
-            }
-          },
-          error: (error)=>{
-            /* this.toastr.error(`${error.error.message}`); */
-          }
-        })
-    } catch (error) {
-      console.log(error);
+    await this.svcAfilServ.getAfilByParam(this.data.value.dni).subscribe(result => {
+      this.nameAfil = this.unirNombres(result.primer_nombre,result.segundo_nombre, result.tercer_nombre, result.primer_apellido,result.segundo_apellido);
     }
+    );
   }
 
-  async guardarNTBenef(){
-      if (this.nameAfil!=""){
-        await this.svcBeneficioServ.asigBeneficioAfil(this.data).subscribe(
+  unirNombres(
+    primerNombre: string, segundoNombre?: string, tercerNombre?: string,
+    primerApellido?: string, segundoApellido?: string
+  ): string {
+    let partesNombre: any = [primerNombre, segundoNombre, tercerNombre, primerApellido, segundoApellido].filter(Boolean);
+
+    let nombreCompleto: string = partesNombre.join(' ');
+    return nombreCompleto;
+  }
+
+   guardarNTBenef(){
+         this.svcBeneficioServ.asigBeneficioAfil(this.data.value).subscribe(
           {
             next: (response)=>{
               this.toastr.success("se asigno correctamente el beneficio")
             },
             error: (error)=>{
-              this.toastr.error(`${error.error.message}`);
+              let mensajeError = 'Error desconocido al crear Detalle de deduccion';
+              // Verifica si el error tiene una estructura específica
+              if (error.error && error.error.message) {
+                mensajeError = error.error.message;
+              } else if (typeof error.error === 'string') {
+                // Para errores que vienen como un string simple
+                mensajeError = error.error;
+              }
+              this.toastr.error(mensajeError);
             }
           })
-      }
+
   }
+
+  onFileSelect(event: any) {
+    if (event.target.files.length > 0) {
+      const file = event.target.files[0];
+/*       this.deduccionesService.uploadDetalleDeduccion(file).subscribe({
+        next: (res: any) => {
+          console.log('Upload successful', res);
+        },
+        error: (err: any) => {
+          console.error('Upload failed', err);
+        }
+      }); */
+    }
+  }
+
+
 }
 
 interface FieldConfig {

@@ -33,7 +33,7 @@ export class NuevoTipoDeduccionComponent {
 
   guardarTipoDeduccion():any{
 
-    this.SVCDeduccion.newTipoDeduccion(this.data).subscribe(
+    this.SVCDeduccion.newTipoDeduccion(this.data.value).subscribe(
       {
         next: (response) => {
           this.toastr.success('tipo de deduccion creado con éxito');

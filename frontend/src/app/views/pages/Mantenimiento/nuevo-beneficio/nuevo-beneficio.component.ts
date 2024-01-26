@@ -32,7 +32,7 @@ export class NuevoBeneficioComponent {
   }
 
   guardarTipoBeneficio(){
-    this.SVCBeneficios.newTipoBeneficio(this.data).subscribe(
+    this.SVCBeneficios.newTipoBeneficio(this.data.value).subscribe(
       {
         next: (response) => {
           this.toastr.success('tipo de beneficio creado con éxito');

@@ -94,14 +94,26 @@ export class NuevaDeduccionAfilComponent{
   }
 
   getFilasAfilById = async () => {
-    await this.svcAfilServ.getAfilByParam(this.data.dni).subscribe(result => {
-      this.nameAfil = `${result.primer_nombre} ${result.segundo_nombre} ${result.primer_apellido} ${result.segundo_apellido}`
+    await this.svcAfilServ.getAfilByParam(this.data.value.dni).subscribe(result => {
+      this.nameAfil = this.unirNombres(result.primer_nombre,result.segundo_nombre, result.tercer_nombre, result.primer_apellido,result.segundo_apellido);
     }
     );
 }
 
+unirNombres(
+  primerNombre: string, segundoNombre?: string, tercerNombre?: string,
+  primerApellido?: string, segundoApellido?: string
+): string {
+  let partesNombre: any = [primerNombre, segundoNombre, tercerNombre, primerApellido, segundoApellido].filter(Boolean);
+
+  let nombreCompleto: string = partesNombre.join(' ');
+  return nombreCompleto;
+}
+
 guardarDetalleDeduccion(){
-  this.deduccionesService.createDetalleDeduccion(this.data).subscribe(
+  console.log(this.data.value);
+
+  this.deduccionesService.createDetalleDeduccion(this.data.value).subscribe(
     {
       next: (response) => {
         this.toastr.success('Detalle de deduccion creado con éxito');

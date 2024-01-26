@@ -25,27 +25,28 @@ export class NuevoTipoPlanillaComponent {
   ];
 
   obtenerDatos(event: any): any {
-    if (event?.periodo) {
-        const startDate = new Date(event.periodo.start);
-        const endDate = new Date(event.periodo.end);
 
-        const opciones: Intl.DateTimeFormatOptions = {
-            year: 'numeric',
-            month: '2-digit',
-            day: '2-digit'
-        };
+    if (event?.value.periodo) {
+      const startDate = new Date(event.value.periodo.start);
+      const endDate = new Date(event.value.periodo.end);
 
-        const startDateFormatted = startDate.toLocaleDateString('es', opciones).replace(/\//g, '-');
-        const endDateFormatted = endDate.toLocaleDateString('es', opciones).replace(/\//g, '-');
+      const opciones: Intl.DateTimeFormatOptions = {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit'
+      };
 
-        // Preparar los datos formateados, excluyendo 'periodo'
-        const datosFormateados = {
-            ...event,
-            periodoInicio: startDateFormatted,
-            periodoFinalizacion: endDateFormatted
-        };
+      const startDateFormatted = startDate.toLocaleDateString('es', opciones).replace(/\//g, '-');
+      const endDateFormatted = endDate.toLocaleDateString('es', opciones).replace(/\//g, '-');
 
-        delete datosFormateados.periodo;
+      // Preparar los datos formateados, excluyendo 'periodo'
+      const datosFormateados = {
+        ...event.value,
+        periodoInicio: startDateFormatted,
+        periodoFinalizacion: endDateFormatted
+      };
+
+      delete datosFormateados.periodo;
 
         this.datosFormateados = datosFormateados;
 

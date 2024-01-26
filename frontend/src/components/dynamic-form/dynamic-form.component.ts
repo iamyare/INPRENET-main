@@ -17,17 +17,18 @@ export class DynamicFormComponent implements OnInit{@Input() fields: FieldConfig
 
   ngOnInit() {
     this.form = this.createControl();
+    this.newDatBenChange.emit(this.form);
   }
 
   onDatosBenChange() {
   const formValues = { ...this.form.value };
   this.fields.forEach(field => {
     if (field.type === 'number' && formValues[field.name] !== null && formValues[field.name] !== undefined) {
-      formValues[field.name] = +formValues[field.name];
+      this.form.value[field.name] = + formValues[field.name];
     }
   });
 
-  this.newDatBenChange.emit(formValues);
+  this.newDatBenChange.emit(this.form);
 
 }
 

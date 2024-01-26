@@ -37,6 +37,7 @@ import { NuevoTipoDeduccionComponent } from '../pages/Mantenimiento/nuevo-tipo-d
 import { EditarTipoDeduccionComponent } from '../pages/Mantenimiento/editar-tipo-deduccion/editar-tipo-deduccion.component';
 import { NuevoBeneficioAfilComponent } from '../pages/Generales/nuevo-beneficio-afil/nuevo-beneficio-afil.component';
 import { NuevaDeduccionAfilComponent } from '../pages/Generales/nueva-deduccion-afil/nueva-deduccion-afil.component';
+import { VerEditarDeduccionAfilComponent } from '../pages/Generales/ver-editar-deduccion-afil/ver-editar-deduccion-afil.component';
 
 @NgModule({
   imports: [
@@ -75,7 +76,8 @@ import { NuevaDeduccionAfilComponent } from '../pages/Generales/nueva-deduccion-
     NuevoTipoDeduccionComponent,
     EditarTipoDeduccionComponent,
     NuevoBeneficioAfilComponent,
-    NuevaDeduccionAfilComponent
+    NuevaDeduccionAfilComponent,
+    VerEditarDeduccionAfilComponent
 /*     CentroTrabajoPageComponent */
   ]
 })

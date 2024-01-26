@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { Observable, map } from 'rxjs';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
+import { Observable, catchError, map, tap, throwError } from 'rxjs';
 import { environment } from 'src/environments/environment';
 
 /* Pendiente */
@@ -60,6 +60,11 @@ export class DeduccionesService {
       );
   }
 
+  getDetallesCompletos(): Observable<any> {
+    const url = `${environment.API_URL}/api/detalle-deduccion/detalles-completos`;
+    return this.http.get<any>(url);
+  }
+
   createDetalleDeduccion(detalleDeduccion: any): Observable<any> {
     const url = `${environment.API_URL}/api/detalle-deduccion`;
     return this.http.post<any>(url, detalleDeduccion);
@@ -67,5 +72,23 @@ export class DeduccionesService {
 
   updateDeduccion(id: string, deduccionData: any): Observable<any> {
     return this.http.patch(`${environment.API_URL}/api/deduccion/${id}`, deduccionData);
+  }
+
+  uploadDetalleDeduccion(file: File): Observable<any> {
+    const formData: FormData = new FormData();
+    formData.append('excel', file, file.name);
+
+    const url = `${environment.API_URL}/api/detalle-deduccion/upload`;
+
+    return this.http.post<any>(url, formData).pipe(
+      tap(res => console.log('Server Response:', res)),
+      catchError(this.handleError)
+    );
+  }
+
+  private handleError(error: HttpErrorResponse) {
+    // Aquí podrías manejar mejor el error, por ejemplo, mostrando un mensaje al usuario.
+    console.error('An error occurred:', error.error);
+    return throwError(() => new Error('Something bad happened; please try again later.'));
   }
 }

@@ -17,6 +17,9 @@ export class Deduccion {
     @Column('varchar2', { length: 40, nullable: false })
     tipo_deduccion : string;
 
+    @Column('number', {nullable: true, unique: true })
+    codigo_deduccion : number;
+
     @Column('number', {nullable: true })
     prioridad : number;
 

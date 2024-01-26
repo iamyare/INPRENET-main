@@ -11,7 +11,6 @@ import { PlanillaService } from 'src/app/services/planilla.service';
 export class EditarTipoPlanillaComponent implements OnInit{
   myColumns: TableColumn[] = [];
   filas: any[] =[];
-  isLoading = true;
 
   constructor(
     private planillaService: PlanillaService,

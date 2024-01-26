@@ -19,4 +19,7 @@ export class CreateDeduccionDto {
     @IsOptional()
     tipo_deduccion: string;
 
+    @IsNumber()
+    codigo_deduccion: number
+
 }

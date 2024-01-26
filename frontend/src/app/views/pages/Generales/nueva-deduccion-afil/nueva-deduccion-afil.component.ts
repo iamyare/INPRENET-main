@@ -10,13 +10,15 @@ import { InstitucionesService } from '../../../../services/instituciones.service
   templateUrl: './nueva-deduccion-afil.component.html',
   styleUrl: './nueva-deduccion-afil.component.scss'
 })
-export class NuevaDeduccionAfilComponent {
+export class NuevaDeduccionAfilComponent{
   data:any
   filas:any
   tiposDeducciones:any = [];
   instituciones:any = [];
   nameAfil:string = ""
   public myFormFields: FieldConfig[] = []
+
+
 
   constructor(
     private deduccionesService : DeduccionesService,
@@ -26,6 +28,7 @@ export class NuevaDeduccionAfilComponent {
   ){
     this.obtenerDatos1();
   }
+
 
   obtenerDatos(event:any):any{
     this.data = event;
@@ -38,7 +41,7 @@ export class NuevaDeduccionAfilComponent {
     this.myFormFields = [
       { type: 'text', label: 'DNI', name: 'dni', validations: [Validators.required] },
       {
-        type: 'dropdown', label: 'Tipo de deduccion', name: 'nombre_deduccion',
+        type: 'dropdown', label: 'Nombre de deduccion', name: 'nombre_deduccion',
         options: this.tiposDeducciones,
         validations: [Validators.required]
       },
@@ -117,6 +120,22 @@ guardarDetalleDeduccion(){
     }
     );
 }
+
+onFileSelect(event: any) {
+  if (event.target.files.length > 0) {
+    const file = event.target.files[0];
+    this.deduccionesService.uploadDetalleDeduccion(file).subscribe({
+      next: (res) => {
+        console.log('Upload successful', res);
+      },
+      error: (err) => {
+        console.error('Upload failed', err);
+      }
+    });
+  }
+}
+
+
 }
 
 interface FieldConfig {

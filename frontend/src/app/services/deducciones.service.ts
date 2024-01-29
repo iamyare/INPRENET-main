@@ -53,15 +53,6 @@ export class DeduccionesService {
         return this.http.get<any>(url);
       }
 
-      uploadFile(file: File) {
-        const formData: FormData = new FormData();
-        formData.append('file', file, file.name);
-        return this.http.post(`${environment.API_URL}/api/detalle-deduccion/subirArchivo`, formData, {
-          reportProgress: true,
-          observe: 'events'
-        });
-      }
-
       createDetalleDeduccion(detalleDeduccion: any): Observable<any> {
         const url = `${environment.API_URL}/api/detalle-deduccion`;
         return this.http.post<any>(url, detalleDeduccion);
@@ -77,18 +68,6 @@ export class DeduccionesService {
           catchError(this.handleError)
         );
       }
-
-      uploadDetalleDeduccion(file: File): Observable<any> {
-        const formData: FormData = new FormData();
-        formData.append('excel', file, file.name);
-
-        const url = `${environment.API_URL}/api/detalle-deduccion/upload`;
-
-        return this.http.post<any>(url, formData).pipe(
-          tap(res => console.log('Server Response:', res)),
-      catchError(this.handleError)
-    );
-  }
 
   private handleError(error: HttpErrorResponse) {
     // Aquí podrías manejar mejor el error, por ejemplo, mostrando un mensaje al usuario.

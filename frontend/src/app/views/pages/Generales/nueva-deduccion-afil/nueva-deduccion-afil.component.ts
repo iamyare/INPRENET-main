@@ -124,44 +124,7 @@ unirNombres(
   return nombreCompleto;
 }
 
-/* guardarDetalleDeduccion(){
-  console.log(this.data.value);
-
-  this.deduccionesService.createDetalleDeduccion(this.data.value).subscribe(
-    {
-      next: (response) => {
-        this.toastr.success('Detalle de deduccion creado con éxito');
-      },
-      error: (error) => {
-        let mensajeError = 'Error desconocido al crear Detalle de deduccion';
-        // Verifica si el error tiene una estructura específica
-        if (error.error && error.error.message) {
-          mensajeError = error.error.message;
-        } else if (typeof error.error === 'string') {
-          // Para errores que vienen como un string simple
-          mensajeError = error.error;
-        }
-        this.toastr.error(mensajeError);
-      }
-    }
-    );
-}
-
-onFileSelect(event: any) {
-  if (event.target.files.length > 0) {
-    const file = event.target.files[0];
-    this.deduccionesService.uploadDetalleDeduccion(file).subscribe({
-      next: (res) => {
-        console.log('Upload successful', res);
-      },
-      error: (err) => {
-        console.error('Upload failed', err);
-      }
-    });
-  }
-} */
-
-/*  */
+/* Carga de archivos */
   file: File | null = null;
   isUploading = false;
   private cancelUploadSubject = new Subject<void>();
@@ -179,7 +142,6 @@ onFileSelect(event: any) {
     // Asignar el archivo seleccionado a la propiedad 'file' del componente
     this.file = target.files[0];
   }
-
 
   clearFile() {
     this.file = null;
@@ -248,7 +210,6 @@ onFileSelect(event: any) {
 
     reader.readAsBinaryString(this.file as Blob);
   }
-
 
   cancelUpload() {
     if (this.uploadInterval) {

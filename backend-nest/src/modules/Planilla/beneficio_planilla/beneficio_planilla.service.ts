@@ -23,7 +23,8 @@ export class BeneficioPlanillaService {
   async create(datos: any): Promise<any> {
     let afiliado:any;
     let tipoBeneficio:any;
-
+    console.log(datos);
+    
     try {
       if(datos.dni){
          afiliado = await this.afiliadoRepository.findOne({
@@ -46,7 +47,7 @@ export class BeneficioPlanillaService {
       
       if (afiliado && tipoBeneficio){
        const nuevoDetalle = this.benAfilRepository.create(
-          {afiliado: afiliado, beneficio: tipoBeneficio}
+          {afiliado: afiliado, beneficio: tipoBeneficio, periodoInicio:datos.periodoInicio, periodoFinalizacion:datos.periodoFinalizacion}
           );
           return this.benAfilRepository.save(nuevoDetalle);
         }else{

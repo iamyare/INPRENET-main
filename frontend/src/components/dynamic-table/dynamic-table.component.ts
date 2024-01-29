@@ -1,6 +1,7 @@
-import { Component, Input, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { Component, EventEmitter, Input, OnDestroy, OnInit, Output, ViewChild } from '@angular/core';
 import { FormControl, ValidatorFn } from '@angular/forms';
 import { MatPaginator } from '@angular/material/paginator';
+import { SelectionserviceService } from '@docs-components/nuevaplanilla/selectionservice.service';
 import { Observable, Subject, debounceTime, distinctUntilChanged, of, switchMap, takeUntil } from 'rxjs';
 
 @Component({
@@ -9,10 +10,13 @@ import { Observable, Subject, debounceTime, distinctUntilChanged, of, switchMap,
   styleUrls: ['./dynamic-table.component.scss']
 })
 export class DynamicTableComponent implements OnInit, OnDestroy {
-  @Input() columns: TableColumn[] = [];
-  @Input() editarfunc: any;
+  @Input() verOpcEditar: boolean = false;
+  @Output() getElemSeleccionados = new EventEmitter<any>()
+
   @Input() getData: any;
+  @Input() columns: TableColumn[] = [];
   @Input() editarFunc: any;
+
   @ViewChild(MatPaginator) paginator: MatPaginator | undefined;
 
   private destroy$: Subject<void> = new Subject<void>();
@@ -29,7 +33,7 @@ export class DynamicTableComponent implements OnInit, OnDestroy {
   editFormControls: { [rowKey: string]: { [colKey: string]: FormControl } } = {};
   editableRows: any[] = []
 
-  constructor() {
+  constructor(private selectionService: SelectionserviceService) {
     this.formsearch.valueChanges
       .pipe(
         debounceTime(300),
@@ -57,6 +61,8 @@ export class DynamicTableComponent implements OnInit, OnDestroy {
 
   async ejecutarFuncionAsincrona() {
     this.filas = await this.getData();
+    this.filas.map((objeto: any) => ({ ...objeto, isSelected: false }));
+    console.log(this.filas);
     this.filtrarUsuarios().subscribe();
   }
 
@@ -199,6 +205,21 @@ export class DynamicTableComponent implements OnInit, OnDestroy {
       return message;
     });
   }
+
+    // En tu componente
+    onSelectionChange(user: any) {
+      if (user.isSelected) {
+          this.selectionService.addSelectedItem(user);
+      } else {
+          this.selectionService.removeSelectedItem(user);
+      }
+      this.obtenerFilasSeleccionadas();
+    }
+    obtenerFilasSeleccionadas() {
+      const filasSeleccionadas = this.selectionService.getSelectedItems();
+      this.getElemSeleccionados.emit(filasSeleccionadas);
+      console.log(filasSeleccionadas);
+    }
 }
 
 interface TableColumn {

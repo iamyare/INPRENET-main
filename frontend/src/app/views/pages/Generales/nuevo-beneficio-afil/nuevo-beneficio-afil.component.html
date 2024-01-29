@@ -1,16 +1,40 @@
-<form class="example-form" [formGroup]="formGroup" (ngSubmit)="alertFormValues(formGroup)" ngNativeValidate>
+<!-- <form class="example-form" [formGroup]="formGroup" ngNativeValidate>
   <mat-slide-toggle color="primary" formControlName="acceptTerms">¿Desea asignar los beneficios mediante documento de excel?</mat-slide-toggle>
-</form>
+</form> -->
 
 <!-- asignacion de beneficios uno por uno -->
 <div *ngIf="formGroup.invalid">
-  <h2>{{nameAfil}}</h2>
+  <h3>Nombre de Afiliado: {{Afiliado.nameAfil}}</h3>
+  <h3>Estado: {{Afiliado.estado}}</h3>
   <app-dynamic-form [fields]="myFormFields" titulo="Datos de Beneficio" subtitulo="Completa la informacion correspondiente"
   (newDatBenChange)="obtenerDatos($event)"></app-dynamic-form>
-  <button mat-raised-button color="primary" style="color: white;" [disabled]="data.invalid" (click)="guardarNTBenef()" >Guardar Beneficio</button>
+
+  <button mat-raised-button color="primary" style="color: white;" [disabled]="form.invalid" (click)="previsualizarInfoAfil()" >Previsualizar información del afiliado</button>
+
+  <button mat-raised-button color="primary" style="color: white;" [disabled]="form.invalid" (click)="guardarNTBenef()" >Asignar Beneficio</button>
+
+  <div *ngIf="Afiliado.estado == 'FALLECIDO'">
+    <h2>Beneficiarios: </h2>
+    <app-dynamic-table  style="width: 10%;" [columns]="myColumns" [getData]="getFilas"  (verOpcEditar)="true"></app-dynamic-table>
+  </div>
+
 </div>
+
 
 <!-- Asignacion de Beneficios por medio de un excel -->
 <div *ngIf="!formGroup.invalid">
   <input type="file" (change)="onFileSelect($event)">
 </div>
+
+<!--
+      /*
+        Un botón para previsualizar estado del afiliado.
+          Si el afiliado es fallecido, que me muestre todos los beneficiarios: dni, nombre, porcentaje, estado
+            Si uno o varios beneficiario es fallecido podrá editar el porcentaje de los demás, en la pantalla de edición de beneficiarios.
+        Un botón para asignar beneficio Validar que este se active solo cuando le presione el boton de asignar beneficio.
+          ¿Qué beneficios puede asignarse a los beneficiarios?
+          podrá asignarle el beneficio al afiliado si aún dado caso no ha fallecido.
+          si ya ha fallecido podrá asignarle el beneficio a los beneficiarios.
+          si el beneficiario cambia algunna informacion tendra que cambiarlo en otra pantalla no aqui.
+      */
+-->

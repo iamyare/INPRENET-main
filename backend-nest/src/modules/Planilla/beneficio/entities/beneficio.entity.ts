@@ -5,13 +5,13 @@ import { BeneficioPlanilla } from "../../beneficio_planilla/entities/beneficio_p
 export class Beneficio {
 
     @PrimaryGeneratedColumn('uuid')
-    id_beneficio : string;
+    id_beneficio: string;
 
     @Column('varchar2', { length: 30, nullable: false })
-    nombre_beneficio : string;
+    nombre_beneficio: string;
 
     @Column('varchar2', { length: 200, nullable: false })
-    descripcion_beneficio : string;
+    descripcion_beneficio: string;
 
     @Column()
     estado: string;

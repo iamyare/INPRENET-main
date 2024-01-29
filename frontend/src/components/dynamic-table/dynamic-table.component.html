@@ -16,12 +16,14 @@
 <table class="custom-table">
   <thead>
     <tr class="text-center">
+      <th class="custom-header" *ngIf="verOpcEditar"></th>
       <th *ngFor="let col of columns" class="custom-header">{{ col.header }}</th>
       <th class="custom-header">Acciones</th>
     </tr>
   </thead>
   <tbody>
     <tr *ngFor="let row of searchResults && searchResults.slice(desde, hasta); let i = index" class="custom-row">
+      <td *ngIf="verOpcEditar"><input type="checkbox" [(ngModel)]="row.isSelected" (change)="onSelectionChange(row)" /></td>
       <td *ngFor="let col of columns" class="custom-cell">
         <ng-container *ngIf="!row.isEditing">
           {{ getCellValue(row, col) }}

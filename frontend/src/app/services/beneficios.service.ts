@@ -9,12 +9,8 @@ import { ToastrService } from 'ngx-toastr';
 interface TipoBeneficio {
   nombre_beneficio: string;
   descripcion_beneficio: string;
+  numero_rentas_max:number;
   estado: string;
-  prioridad?: any;
-  anio_duracion: number;
-  mes_duracion: number;
-  dia_duracion: number;
-  periodoInicio: string;
 }
 
 @Injectable({

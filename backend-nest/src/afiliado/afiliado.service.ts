@@ -1,9 +1,9 @@
 import { BadRequestException, Injectable, InternalServerErrorException, Logger, NotFoundException } from '@nestjs/common';
 import { CreateAfiliadoDto } from './dto/create-afiliado.dto';
 import { UpdateAfiliadoDto } from './dto/update-afiliado.dto';
-import { Connection, Repository } from 'typeorm';
+import { Connection, EntityManager, Repository } from 'typeorm';
 import { Afiliado } from './entities/afiliado.entity';
-import { InjectRepository } from '@nestjs/typeorm';
+import { InjectEntityManager, InjectRepository } from '@nestjs/typeorm';
 import { HistorialSalario } from './entities/historialSalarios.entity';
 import { PerfAfilCentTrab } from './entities/perf_afil_cent_trab';
 import { ReferenciaPersonal } from './entities/referencia-personal';
@@ -23,8 +23,10 @@ export class AfiliadoService {
   private readonly logger = new Logger(AfiliadoService.name)
 
   constructor(
+    @InjectEntityManager() private readonly entityManager: EntityManager,
+
     @InjectRepository(Afiliado)
-    private readonly afiliadoRepository : Repository<Afiliado>,
+    private readonly afiliadoRepository : Repository<any>,
     @InjectRepository(HistorialSalario)
     private readonly historialSalarioRepository : Repository<HistorialSalario>,
     @InjectRepository(PerfAfilCentTrab)
@@ -182,7 +184,7 @@ export class AfiliadoService {
     } else {
       const queryBuilder = this.afiliadoRepository.createQueryBuilder('afiliado');
       afiliados = await queryBuilder
-        .where('"dni" = :term', { term })
+        .where('"dni" = :term AND "tipo_cotizante" = :tipo_cotizante', { term,tipo_cotizante:"AFILIADO" })
         .getOne();
     }
     if (!afiliados) {
@@ -198,6 +200,47 @@ export class AfiliadoService {
   remove(id: number) {
     return `This action removes a #${id} afiliado`;
   }
+
+  async obtenerBenDeAfil(dniAfil: string): Promise<any> {
+    
+      try {
+        const query = `
+        SELECT "Afil"."dni", "Ben"."dni", "Ben"."primer_nombre", "Ben"."segundo_nombre", "Ben"."tercer_nombre", "Ben"."primer_apellido", "Ben"."segundo_apellido", "Ben"."estado", "Ben"."porcentaje"  
+        FROM "afiliado" "Afil" 
+        FULL OUTER JOIN
+          "afiliado" "Ben" ON "Afil"."id_afiliado" = "Ben"."padreIdAfiliado"
+        WHERE 
+            "Afil"."dni" = ${dniAfil} AND 
+            "Afil"."estado" = 'FALLECIDO'  AND 
+            "Afil"."tipo_cotizante" = 'AFILIADO'
+        `;
+  
+        const beneficios = await this.entityManager.query(query);
+  
+        return beneficios;
+      } catch (error) {
+        this.logger.error(`Error al consultar beneficios: ${error.message}`);
+        throw new Error(`Error al consultar beneficios: ${error.message}`);
+      }
+    }
+  
+    
+/*  afiliados = await queryBuilder
+    .where('"dni" = :term AND estado = :est', { term, est:"FALLECIDO" })
+    .getOne(); */
+    
+/*     
+    console.log(queryBuilder);
+    return queryBuilder */
+/*     return this.afiliadoRepository.find({
+      relations: ['padreIdAfiliado','beneficioPlanilla.beneficio'],
+      where: {
+        dni: "0801200012345",
+        tipo_cotizante: "BENEFICIARIO",
+        beneficioPlanilla.beneficio.: "dsadsa"
+      },
+    }); */
+  
 
   private handleException(error: any): void {
     this.logger.error(error);

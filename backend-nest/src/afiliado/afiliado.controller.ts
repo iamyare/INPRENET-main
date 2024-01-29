@@ -28,6 +28,11 @@ export class AfiliadoController {
     return this.afiliadoService.findOne(term);
   }
 
+  @Get('obtenerBenDeAfil/:dniAfil')
+  async obtenerDatosRelacionados(@Param('dniAfil') dniAfil: string): Promise<any> {
+    return this.afiliadoService.obtenerBenDeAfil(dniAfil);
+  }
+
   @Patch(':id')
   update(@Param('id') id: string, @Body() updateAfiliadoDto: UpdateAfiliadoDto) {
     return this.afiliadoService.update(+id, updateAfiliadoDto);

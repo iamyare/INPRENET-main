@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, ValidatorFn, Validators } from '@angular/forms';
 import { ToastrService, ToastrModule } from 'ngx-toastr';
 import { AfiliadoService } from 'src/app/services/afiliado.service';
@@ -8,55 +8,48 @@ import { BeneficiosService } from 'src/app/services/beneficios.service';
   templateUrl: './nuevo-beneficio-afil.component.html',
   styleUrl: './nuevo-beneficio-afil.component.scss'
 })
-export class NuevoBeneficioAfilComponent {
-  data:any
-  filas:any
+export class NuevoBeneficioAfilComponent implements OnInit{
+  form:any
+  datosFormateados: any;
   tiposBeneficios:any = []
-  nameAfil:string = ""
   public myFormFields: FieldConfig[] = []
+  Afiliado:any = {}
 
-  isChecked = true;
   formGroup = this._formBuilder.group({
-    enableWifi: '',
     acceptTerms: ['', Validators.requiredTrue],
   });
 
-  constructor( private svcBeneficioServ: BeneficiosService,
-    private svcAfilServ: AfiliadoService,
-    private fb: FormBuilder,
-    private toastr: ToastrService,
-    private _formBuilder: FormBuilder
-    ){
-    this.obtenerDatos1();
-  }
 
-  alertFormValues(formGroup: FormGroup) {
-    console.log(formGroup);
+  myColumns:any = []
+  filas:any
 
-    alert(JSON.stringify(formGroup.value, null, 2));
-  }
+  /* isChecked = true; */
 
-  obtenerDatos(event:any):any{
-      this.data = event;
-      this.getFilasAfilById();
-    }
+  constructor(
+    private svcBeneficioServ: BeneficiosService,
+    private svcAfilServ: AfiliadoService, private fb: FormBuilder,
+    private toastr: ToastrService, private _formBuilder: FormBuilder
+  ){}
 
-  obtenerDatos1():any{
-    this.getFilas();
+  ngOnInit(): void {
+    this.getTipoBen();
     this.myFormFields = [
+      { type: 'text', label: 'DNI', name: 'dni', validations: [Validators.required, Validators.minLength(13), Validators.maxLength(14)] },
       {
         type: 'dropdown', label: 'Tipo de beneficio', name: 'tipo_beneficio',
         options: this.tiposBeneficios,
         validations: [Validators.required]
       },
-      { type: 'text', label: 'DNI', name: 'dni', validations: [Validators.required, Validators.minLength(13), Validators.maxLength(14)] },
+      { type: 'number', label: 'monto', name: 'monto', validations: [Validators.required]},
+      { type: 'daterange', label: 'Periodo', name: 'periodo', validations: [Validators.required]},
     ];
   }
 
-  getFilas = async () => {
+  getTipoBen = async () => {
     try {
-      const data = await this.svcBeneficioServ.getTipoBeneficio().toPromise();
-      this.filas = data.map((item: any) => {
+      const beneficios = await this.svcBeneficioServ.getTipoBeneficio().toPromise();
+
+      const tiposBen = beneficios.map((item: any) => {
         this.tiposBeneficios.push({ label: `${item.nombre_beneficio}`, value: `${item.nombre_beneficio}` })
         return {
           id: item.id_beneficio,
@@ -71,18 +64,46 @@ export class NuevoBeneficioAfilComponent {
           dia_duracion: item.dia_duracion,
         };
       });
-      return this.filas;
+
+      return tiposBen;
     } catch (error) {
       console.error("Error al obtener datos de beneficios", error);
     }
   };
 
-  getFilasAfilById = async () => {
-    this.nameAfil = ""
-    await this.svcAfilServ.getAfilByParam(this.data.value.dni).subscribe(result => {
-      this.nameAfil = this.unirNombres(result.primer_nombre,result.segundo_nombre, result.tercer_nombre, result.primer_apellido,result.segundo_apellido);
+  async obtenerDatos(event:any):Promise<any>{
+    this.form = event;
+
+    if (event?.value.periodo) {
+      const startDate = new Date(event.value.periodo.start);
+      const endDate = new Date(event.value.periodo.end);
+
+      const opciones: Intl.DateTimeFormatOptions = {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit'
+      };
+
+      const startDateFormatted = startDate.toLocaleDateString('es', opciones).replace(/\//g, '-');
+      const endDateFormatted = endDate.toLocaleDateString('es', opciones).replace(/\//g, '-');
+      console.log(startDateFormatted);
+      console.log(endDateFormatted);
+
+      // Preparar los datos formateados, excluyendo 'periodo'
+      const datosFormateados = {
+        ...event.value,
+        periodoInicio: startDateFormatted,
+        periodoFinalizacion: endDateFormatted
+      };
+
+      delete datosFormateados.periodo;
+
+        this.datosFormateados = datosFormateados;
+
+    } else {
+        console.error('La propiedad periodo no está definida en el evento');
     }
-    );
+
   }
 
   unirNombres(
@@ -95,25 +116,98 @@ export class NuevoBeneficioAfilComponent {
     return nombreCompleto;
   }
 
-   guardarNTBenef(){
-         this.svcBeneficioServ.asigBeneficioAfil(this.data.value).subscribe(
-          {
-            next: (response)=>{
-              this.toastr.success("se asigno correctamente el beneficio")
-            },
-            error: (error)=>{
-              let mensajeError = 'Error desconocido al crear Detalle de deduccion';
-              // Verifica si el error tiene una estructura específica
-              if (error.error && error.error.message) {
-                mensajeError = error.error.message;
-              } else if (typeof error.error === 'string') {
-                // Para errores que vienen como un string simple
-                mensajeError = error.error;
-              }
-              this.toastr.error(mensajeError);
-            }
-          })
+  async previsualizarInfoAfil(){
+    this.Afiliado.nameAfil = ""
+    if (this.form.value.dni){
+      /* SOLO RETORNA LOS AFILIADOS SIN BENEFICIARIOS Y SIN IMPORTAR EL ESTADO: ACTIVO, FALLECIDO, ETC. */
+      await this.svcAfilServ.getAfilByParam(this.form.value.dni).subscribe(
+        (result) => {
+          this.Afiliado = result
+          this.Afiliado.nameAfil = this.unirNombres(result.primer_nombre,result.segundo_nombre, result.tercer_nombre, result.primer_apellido,result.segundo_apellido);
 
+          //this.toastr.success('TipoPlanilla editada con éxito');
+        },
+        (error) => {
+          this.Afiliado.estado = ""
+          this.toastr.error(`Error: ${error.error.message}`);
+      })
+
+
+    }
+  }
+
+  getColumns = async () => {
+    try {
+
+      await this.svcAfilServ.obtenerBenDeAfil(this.form.value.dni).subscribe(
+        (response) => {
+          const primerObjetoTransformado = this.transformarObjeto(response[0]);
+          this.myColumns = primerObjetoTransformado;
+          //this.toastr.success('TipoPlanilla editada con éxito');
+        },
+        (error) => {
+          //this.toastr.error('Error al actualizar TipoPlanilla');
+      })
+
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+  getFilas = async () => {
+    if (this.Afiliado.estado == "FALLECIDO"){
+      try {
+        await this.getColumns();
+        const data = this.svcAfilServ.obtenerBenDeAfil(this.form.value.dni).toPromise();
+        this.filas = data
+        return this.filas;
+      } catch (error) {
+        console.error("Error al obtener datos de beneficios", error);
+        throw error;
+      }
+      /*
+      Servicio que traera la informacion de los beneficiarios pertenecientes al afiliado anterior sin importar el estado de los beneficiarios.
+      */
+    }
+  };
+
+  transformarObjeto(objeto:any) {
+    return Object.keys(objeto).map(key => {
+      return {
+        header: key,
+        col: key,
+        isEditable: false,
+      };
+    });
+  }
+
+  guardarNTBenef(){
+    /* Asignar al afiliado si no ha fallecido */
+    /* Asignar a los beneficioarios si el afiliado ya fallecio */
+    console.log(this.datosFormateados);
+
+    if (this.Afiliado.estado != "FALLECIDO"){
+      this.svcBeneficioServ.asigBeneficioAfil(this.datosFormateados).subscribe(
+       {
+         next: (response)=>{
+           this.toastr.success("se asigno correctamente el beneficio")
+         },
+         error: (error)=>{
+           let mensajeError = 'Error desconocido al crear Detalle de deduccion';
+           // Verifica si el error tiene una estructura específica
+           if (error.error && error.error.message) {
+             mensajeError = error.error.message;
+           } else if (typeof error.error === 'string') {
+           // Para errores que vienen como un string simple
+             mensajeError = error.error;
+           }
+           this.toastr.error(mensajeError);
+         }
+       })
+    }else{
+      console.log(this.Afiliado);
+      console.log(this.filas);
+    }
   }
 
   onFileSelect(event: any) {
@@ -129,7 +223,6 @@ export class NuevoBeneficioAfilComponent {
       }); */
     }
   }
-
 
 }
 

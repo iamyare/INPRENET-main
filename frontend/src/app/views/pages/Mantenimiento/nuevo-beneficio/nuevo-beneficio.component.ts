@@ -15,6 +15,7 @@ export class NuevoBeneficioComponent {
   myFormFields: FieldConfig[] = [
     { type: 'text', label: 'Nombre de beneficio', name: 'nombre_beneficio', validations: [] },
     { type: 'text', label: 'Descripción de beneficio', name: 'descripcion_beneficio', validations: [] },
+    { type: 'number', label: 'numero de rentas maximas', name: 'numero_rentas_max', validations: [] },
 
     { type: 'dropdown', label: 'Estado', name: 'estado', validations: [], options:[{label:"vitalicio", value:"vitalicio"},
     {label:"definido", value:"Definido"}] }
@@ -25,6 +26,13 @@ export class NuevoBeneficioComponent {
   }
 
   guardarTipoBeneficio(){
+    const formValues = { ...this.data.value };
+    this.myFormFields.forEach(field => {
+      if (field.type === 'number' && formValues[field.name] !== null && formValues[field.name] !== undefined) {
+        this.data.value[field.name] = + formValues[field.name];
+      }
+    });
+
     this.SVCBeneficios.newTipoBeneficio(this.data.value).subscribe(
       {
         next: (response) => {

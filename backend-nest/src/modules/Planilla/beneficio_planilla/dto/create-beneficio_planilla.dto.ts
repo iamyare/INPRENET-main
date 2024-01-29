@@ -15,4 +15,13 @@ export class CreateBeneficioPlanillaDto {
     @IsString()
     afiliado: string;
 
+    @IsString()
+    periodoInicio: string;
+
+    @IsString()
+    periodoFinalizacion: string;
+
+    @IsNumber()
+    monto: number;
+
 }

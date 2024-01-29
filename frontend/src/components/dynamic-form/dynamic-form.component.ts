@@ -6,11 +6,14 @@ import { FormBuilder, FormGroup, ValidatorFn } from '@angular/forms';
   templateUrl: './dynamic-form.component.html',
   styleUrl: './dynamic-form.component.scss'
 })
-export class DynamicFormComponent implements OnInit{@Input() fields: FieldConfig[] = [];
+export class DynamicFormComponent implements OnInit{
   form: FormGroup;
+
+  @Input() fields: FieldConfig[] = [];
   @Input() titulo = "";
   @Input() subtitulo = "";
   @Output() newDatBenChange = new EventEmitter<any>()
+
   constructor(private fb: FormBuilder) {
     this.form = this.fb.group({});
   }
@@ -27,7 +30,6 @@ export class DynamicFormComponent implements OnInit{@Input() fields: FieldConfig
       this.form.value[field.name] = + formValues[field.name];
     }
   });
-
   this.newDatBenChange.emit(this.form);
 
 }

@@ -19,18 +19,25 @@ export class EditarBeneficioComponent implements OnInit {
 
   ngOnInit(): void {
     this.myColumns = [
-      { header: 'Nombre del Beneficio',
-      col: "nombre_beneficio",
-      isEditable: true,
-      validationRules: [Validators.required, Validators.minLength(3)] },
       {
-        header: 'Descripcion del beneficio',
-         col: 'descripcion_beneficio',
-         isEditable: true
+        header: 'Nombre del Beneficio',
+        col: "nombre_beneficio",
+        isEditable: true,
+        validationRules: [Validators.required, Validators.minLength(3)]
       },
       {
-         header: 'estado',
+        header: 'Descripcion del beneficio',
+        col: 'descripcion_beneficio',
+        isEditable: true
+      },
+      {
+      header: 'estado',
       col: 'estado',
+      isEditable: true
+    },
+      {
+      header: 'numero_rentas_max',
+      col: 'numero_rentas_max',
       isEditable: true
     },
     ];
@@ -41,6 +48,7 @@ export class EditarBeneficioComponent implements OnInit {
     const beneficioData = {
       nombre_beneficio: row.nombre_beneficio,
       descripcion_beneficio: row.descripcion_beneficio,
+      numero_rentas_max: row.numero_rentas_max,
       estado: row.estado,
 
     }
@@ -64,6 +72,7 @@ export class EditarBeneficioComponent implements OnInit {
           id: item.id_beneficio,
           nombre_beneficio: item.nombre_beneficio,
           descripcion_beneficio: item.descripcion_beneficio || 'No disponible',
+          numero_rentas_max: item.numero_rentas_max ,
           estado: item.estado
         };
       });

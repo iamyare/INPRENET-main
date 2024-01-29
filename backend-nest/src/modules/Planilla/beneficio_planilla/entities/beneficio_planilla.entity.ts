@@ -10,9 +10,6 @@ export class BeneficioPlanilla {
     @PrimaryGeneratedColumn('uuid')
     id_beneficio_planilla : string;
 
-    @Column({nullable:true})
-    periodoPago?: string;
-
     @Column({default:"NO PAGADO"})
     estado: string;
 

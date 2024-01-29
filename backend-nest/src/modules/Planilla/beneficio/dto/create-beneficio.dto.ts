@@ -10,18 +10,9 @@ export class CreateBeneficioDto {
     
     @IsString()
     estado : string
+
+    @IsNumber()
+    numero_rentas_max : number
     
-    @IsNumber()
-    prioridad: number;
-    @IsNumber()
-    monto_beneficio: number;
-    @IsNumber()
-    porcentaje_beneficio: number;
-    @IsNumber()
-    anio_duracion: number;
-    @IsNumber()
-    mes_duracion: number;
-    @IsNumber()
-    dia_duracion: number;
 
 }

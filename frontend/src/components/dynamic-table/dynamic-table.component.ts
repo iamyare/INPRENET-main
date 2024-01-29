@@ -87,6 +87,7 @@ export class DynamicTableComponent implements OnInit, OnDestroy {
   }
 
   updateSearchResults(): void {
+
     const query = this.formsearch.value?.trim();
     if (query) {
       // Si hay un valor en el buscador, realizar la búsqueda y actualizar resultados

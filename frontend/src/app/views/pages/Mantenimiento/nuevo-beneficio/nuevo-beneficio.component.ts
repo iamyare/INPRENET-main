@@ -17,14 +17,7 @@ export class NuevoBeneficioComponent {
     { type: 'text', label: 'Descripción de beneficio', name: 'descripcion_beneficio', validations: [] },
 
     { type: 'dropdown', label: 'Estado', name: 'estado', validations: [], options:[{label:"vitalicio", value:"vitalicio"},
-    {label:"definido", value:"Definido"}] },
-
-    { type: 'number', label: 'Prioridad', name: 'prioridad', validations: [Validators.pattern("^\\d*\\.?\\d+$")] },
-    { type: 'number', label: 'monto', name: 'monto_beneficio', validations: [Validators.pattern("^\\d*\\.?\\d+$")] },
-    { type: 'number', label: 'porcentaje', name: 'porcentaje_beneficio', validations: [Validators.pattern("^\\d*\\.?\\d+$")] },
-    { type: 'number', label: 'Años de duración', name: 'anio_duracion', validations: [Validators.pattern("^\\d*\\.?\\d+$")]},
-    { type: 'number', label: 'Meses de duración', name: 'mes_duracion', validations: [Validators.pattern("^\\d*\\.?\\d+$")] },
-    { type: 'number', label: 'Dias de duración', name: 'dia_duracion', validations: [Validators.pattern("^\\d*\\.?\\d+$")] }
+    {label:"definido", value:"Definido"}] }
   ];
 
   obtenerDatos(event:any):any{

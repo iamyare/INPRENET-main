@@ -205,6 +205,14 @@ export class DetalleDeduccionService {
     return detalleDeduccion;
   }
 
+  readExcel(buffer: Buffer): any {
+    const workbook = xlsx.read(buffer, { type: 'buffer' });
+    const sheetName = workbook.SheetNames[0];
+    const worksheet = workbook.Sheets[sheetName];
+    const data = xlsx.utils.sheet_to_json(worksheet);
+    return data;
+  }
+
   remove(id: number) {
     return `This action removes a #${id} detalleDeduccion`;
   }

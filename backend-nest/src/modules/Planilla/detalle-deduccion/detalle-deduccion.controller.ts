@@ -32,6 +32,14 @@ export class DetalleDeduccionController {
     }
   }
 
+  @Post('subirArchivo')
+  @UseInterceptors(FileInterceptor('file'))
+  subirFile(@UploadedFile() file: Express.Multer.File) {
+    const data = this.detalleDeduccionService.readExcel(file.buffer);
+    // Procesa los datos según sea necesario
+    return data;
+}
+
   @Get()
   findAll() {
     return this.detalleDeduccionService.findAll();
@@ -52,10 +60,10 @@ export class DetalleDeduccionController {
     return this.detalleDeduccionService.update(+id, updateDetalleDeduccionDto);
   }
 
-  @Patch(':id')
+  @Patch(':id/edit')
   async updateDetalle(@Param('id') id: string, @Body() updateDetalleDeduccionDto: UpdateDetalleDeduccionDto): Promise<DetalleDeduccion> {
-  return this.detalleDeduccionService.editDetalleDeduccion(id, updateDetalleDeduccionDto);
-}
+    return this.detalleDeduccionService.editDetalleDeduccion(id, updateDetalleDeduccionDto);
+  }
 
   @Delete(':id')
   remove(@Param('id') id: string) {

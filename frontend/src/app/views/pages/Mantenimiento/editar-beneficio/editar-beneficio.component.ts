@@ -19,11 +19,6 @@ export class EditarBeneficioComponent implements OnInit {
 
   ngOnInit(): void {
     this.myColumns = [
-     /*  {
-        header: 'ID',
-        col: 'id',
-        isEditable: false
-      }, */
       { header: 'Nombre del Beneficio',
       col: "nombre_beneficio",
       isEditable: true,
@@ -34,40 +29,10 @@ export class EditarBeneficioComponent implements OnInit {
          isEditable: true
       },
       {
-        header: 'Prioridad',
-      col: 'prioridad',
-      isEditable: false
-    },
-      {
          header: 'estado',
       col: 'estado',
       isEditable: true
     },
-      {
-         header: 'monto_beneficio',
-      col: 'monto_beneficio',
-      isEditable: true
-    },
-      {
-         header: 'porcentaje_beneficio',
-      col: 'porcentaje_beneficio',
-      isEditable: true
-    },
-      {
-        header: 'año de duracion',
-      col: 'anio_duracion',
-      isEditable: true
-    },
-      {
-        header: 'mes de duracion',
-      col: 'mes_duracion',
-      isEditable: true
-    },
-      {
-         header: 'dia de duracion',
-      col: 'dia_duracion',
-      isEditable: true
-    }
     ];
   }
 
@@ -77,12 +42,6 @@ export class EditarBeneficioComponent implements OnInit {
       nombre_beneficio: row.nombre_beneficio,
       descripcion_beneficio: row.descripcion_beneficio,
       estado: row.estado,
-      prioridad: row.prioridad,
-      monto_beneficio: row.monto_beneficio,
-      porcentaje_beneficio: row.porcentaje_beneficio,
-      anio_duracion: row.anio_duracion,
-      mes_duracion: row.mes_duracion,
-      dia_duracion: row.dia_duracion
 
     }
 
@@ -105,13 +64,7 @@ export class EditarBeneficioComponent implements OnInit {
           id: item.id_beneficio,
           nombre_beneficio: item.nombre_beneficio,
           descripcion_beneficio: item.descripcion_beneficio || 'No disponible',
-          estado: item.estado,
-          prioridad: item.prioridad,
-          monto_beneficio: item.monto_beneficio,
-          porcentaje_beneficio: item.porcentaje_beneficio,
-          anio_duracion: item.anio_duracion,
-          mes_duracion: item.mes_duracion,
-          dia_duracion: item.dia_duracion,
+          estado: item.estado
         };
       });
 

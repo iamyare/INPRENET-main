@@ -16,6 +16,19 @@ export class BeneficioPlanilla {
     @Column({default:"NO PAGADO"})
     estado: string;
 
+    @Column({nullable:true})
+    modalidad_pago: string;
+
+    @Column({nullable:true})
+    monto: number;
+
+    @Column('varchar2', { length: 200, nullable: false })
+    periodoInicio: string;
+
+    @Column('varchar2', { length: 200, nullable: false })
+    periodoFinalizacion: string;
+
+
     @ManyToOne(() => Beneficio, beneficio => beneficio.beneficioPlanilla, { cascade : true })
     @JoinColumn({ name: 'id_beneficio'})
     beneficio : Beneficio;

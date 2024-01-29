@@ -3,18 +3,6 @@ import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Observable, catchError, map, tap, throwError } from 'rxjs';
 import { environment } from 'src/environments/environment';
 
-/* Pendiente */
-interface TipoDeduccion {
-  nombre_beneficio: string;
-  descripcion_beneficio: string;
-  estado: string;
-  prioridad?: any;
-  anio_duracion: number;
-  mes_duracion: number;
-  dia_duracion: number;
-  periodoInicio: string;
-}
-
 @Injectable({
   providedIn: 'root'
 })
@@ -31,10 +19,10 @@ export class DeduccionesService {
         map((res:any) => {
           return res;
         })
-      )
-  }
+        )
+      }
 
-  /* getDetalleDeduccion(): Observable<any> {
+      /* getDetalleDeduccion(): Observable<any> {
     return this.http.get<any>(this.baseUrl + 'detalle-deduccion');
   } */
 
@@ -46,7 +34,7 @@ export class DeduccionesService {
         map((res:any) => {
           return res;
         }),
-      );
+        );
   }
 
   getDetalleDeduccion(): Observable<any>{
@@ -57,31 +45,47 @@ export class DeduccionesService {
         map((res:any) => {
           return res;
         }),
-      );
-  }
+        );
+      }
 
-  getDetallesCompletos(): Observable<any> {
-    const url = `${environment.API_URL}/api/detalle-deduccion/detalles-completos`;
-    return this.http.get<any>(url);
-  }
+      getDetallesCompletos(): Observable<any> {
+        const url = `${environment.API_URL}/api/detalle-deduccion/detalles-completos`;
+        return this.http.get<any>(url);
+      }
 
-  createDetalleDeduccion(detalleDeduccion: any): Observable<any> {
-    const url = `${environment.API_URL}/api/detalle-deduccion`;
-    return this.http.post<any>(url, detalleDeduccion);
-  }
+      uploadFile(file: File) {
+        const formData: FormData = new FormData();
+        formData.append('file', file, file.name);
+        return this.http.post(`${environment.API_URL}/api/detalle-deduccion/subirArchivo`, formData, {
+          reportProgress: true,
+          observe: 'events'
+        });
+      }
 
-  updateDeduccion(id: string, deduccionData: any): Observable<any> {
-    return this.http.patch(`${environment.API_URL}/api/deduccion/${id}`, deduccionData);
-  }
+      createDetalleDeduccion(detalleDeduccion: any): Observable<any> {
+        const url = `${environment.API_URL}/api/detalle-deduccion`;
+        return this.http.post<any>(url, detalleDeduccion);
+      }
 
-  uploadDetalleDeduccion(file: File): Observable<any> {
-    const formData: FormData = new FormData();
-    formData.append('excel', file, file.name);
+      updateDeduccion(id: string, deduccionData: any): Observable<any> {
+        return this.http.patch(`${environment.API_URL}/api/deduccion/${id}`, deduccionData);
+      }
 
-    const url = `${environment.API_URL}/api/detalle-deduccion/upload`;
+      editDetalleDeduccion(id: string, updateData: any): Observable<any> {
+        const url = `${environment.API_URL}/api/detalle-deduccion/${id}/edit`; // Asegúrate de que esta sea la ruta correcta
+        return this.http.patch(url, updateData).pipe(
+          catchError(this.handleError)
+        );
+      }
 
-    return this.http.post<any>(url, formData).pipe(
-      tap(res => console.log('Server Response:', res)),
+      uploadDetalleDeduccion(file: File): Observable<any> {
+        const formData: FormData = new FormData();
+        formData.append('excel', file, file.name);
+
+        const url = `${environment.API_URL}/api/detalle-deduccion/upload`;
+
+        return this.http.post<any>(url, formData).pipe(
+          tap(res => console.log('Server Response:', res)),
       catchError(this.handleError)
     );
   }
@@ -91,4 +95,16 @@ export class DeduccionesService {
     console.error('An error occurred:', error.error);
     return throwError(() => new Error('Something bad happened; please try again later.'));
   }
+}
+
+/* Pendiente */
+interface TipoDeduccion {
+  nombre_beneficio: string;
+  descripcion_beneficio: string;
+  estado: string;
+  prioridad?: any;
+  anio_duracion: number;
+  mes_duracion: number;
+  dia_duracion: number;
+  periodoInicio: string;
 }

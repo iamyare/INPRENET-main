@@ -1,5 +1,6 @@
 import { DatePipe } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
+import { ToastrService } from 'ngx-toastr';
 import { firstValueFrom } from 'rxjs';
 import { DeduccionesService } from 'src/app/services/deducciones.service';
 import { TableColumn } from 'src/app/views/shared/shared/Interfaces/table-column';
@@ -16,7 +17,8 @@ export class VerEditarDeduccionAfilComponent implements OnInit{
   detallesCompletos: any[] = [];
 
   constructor(private deduccionesService: DeduccionesService,
-    private datePipe: DatePipe) {}
+    private datePipe: DatePipe,
+    private toastr: ToastrService) {}
 
   ngOnInit(): void {
     this.deduccionesService.getDetallesCompletos().subscribe({
@@ -36,17 +38,17 @@ export class VerEditarDeduccionAfilComponent implements OnInit{
       {
         header: 'DNI',
         col : 'dni',
-        isEditable: false
+        isEditable: true
       },
       {
         header: 'Institucion',
         col : 'nombre_institucion',
-        isEditable: false
+        isEditable: true
       },
       {
         header: 'Nombre Deduccion',
         col : 'nombre_deduccion',
-        isEditable: false
+        isEditable: true
       },
       {
         header: 'Año',
@@ -80,6 +82,7 @@ export class VerEditarDeduccionAfilComponent implements OnInit{
         anio: item.anio,
         mes: item.mes,
         monto_total: item.monto_total,
+        id_ded_deduccion: item.id_ded_deduccion
         // Agrega aquí más campos si son necesarios
       })).sort((a: any, b: any) => {
         // Convertimos las fechas a objetos Date para compararlas
@@ -93,14 +96,39 @@ export class VerEditarDeduccionAfilComponent implements OnInit{
       return this.filasT;
     } catch (error) {
       console.error("Error al obtener los detalles completos de deducción", error);
-      throw error; // Manejo del error
+      throw error;
     }
   };
 
 
 
-  editar = (row: any) => [
+  editar = (row: any) => {
+    console.log(row);
 
-  ]
+    console.log("ID del detalle deducción a editar:", row.id_ded_deduccion);
+    // Preparar el objeto con los datos actualizados
+    const updateData = {
+      dni: row.dni,
+      nombre_institucion: row.nombre_institucion,
+      nombre_deduccion: row.nombre_deduccion,
+      monto_total: row.monto_total
+    };
+
+    // Llamar al servicio para actualizar el detalle de deducción, pasando el id_ded_deduccion como parte de la URL
+    this.deduccionesService.editDetalleDeduccion(row.id_ded_deduccion, updateData).subscribe({
+      next: (response) => {
+        console.log('Detalle actualizado con éxito', response);
+        // Aquí podrías, por ejemplo, mostrar un mensaje de éxito con Toastr
+        this.toastr.success('Detalle de deducción editado con éxito');
+        // Opcionalmente, podrías recargar los datos de la tabla o realizar otras acciones tras la actualización exitosa
+      },
+      error: (error) => {
+        console.error('Error actualizando el detalle de deducción', error);
+        // Manejo de errores, por ejemplo, mostrar un mensaje de error con Toastr
+        this.toastr.error('Error al actualizar el detalle de deducción');
+      }
+    });
+  };
+
 
 }

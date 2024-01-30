@@ -11,6 +11,7 @@ import { Page500Component } from './Errores/page500/page500.component';
 
 import { PreRegisterComponent } from './Generales/pre-register/pre-register.component';
 import { RegisterComponent } from './Generales/register/register.component';
+import { NuevaplanillaComponent } from '@docs-components/nuevaplanilla/nuevaplanilla.component';
 
 @NgModule({
   declarations: [

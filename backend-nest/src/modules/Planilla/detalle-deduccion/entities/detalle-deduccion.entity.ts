@@ -9,13 +9,13 @@ export class DetalleDeduccion {
     @PrimaryGeneratedColumn('uuid')
     id_ded_deduccion: string;
     
-    @ManyToOne(() => Deduccion, deduccion => deduccion.detalleDeduccion, { cascade: true })
+    @ManyToOne(() => Deduccion, deduccion => deduccion.detalleDeduccion, { cascade: true})
     @JoinColumn({ name: 'id_deduccion' })
-    deduccion: Deduccion; // Cambiado de string a Deduccion
-    
-    @ManyToOne(() => Afiliado, afiliado => afiliado.detalleDeduccion, { cascade: true })
+    deduccion: Deduccion;
+
+    @ManyToOne(() => Afiliado, afiliado => afiliado.detalleDeduccion, { cascade: true})
     @JoinColumn({ name: 'id_afiliado' })
-    afiliado: Afiliado; // Cambiado de string a Afiliado
+    afiliado: Afiliado;
     
     @ManyToOne(() => Institucion, institucion => institucion.detalleDeduccion, { cascade: true})
     @JoinColumn({ name: 'id_institucion' })
@@ -25,7 +25,7 @@ export class DetalleDeduccion {
     monto_total: number;
 
     @Column('number', {nullable: true})
-    monto_aplicado: number;
+    monto_aplicado: number; 
 
     @Column('varchar2', { length: 20, nullable: true })
     estado_aplicacion: string;

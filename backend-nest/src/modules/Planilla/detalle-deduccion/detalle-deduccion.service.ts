@@ -7,6 +7,7 @@ import { Repository } from 'typeorm';
 import { Afiliado } from 'src/afiliado/entities/afiliado.entity';
 import { Deduccion } from '../deduccion/entities/deduccion.entity';
 import { Institucion } from 'src/modules/Empresarial/institucion/entities/institucion.entity';
+import { DatosIdentificacion } from 'src/afiliado/entities/datos_identificacion';
 import * as xlsx from 'xlsx';
 
 @Injectable()
@@ -22,112 +23,44 @@ export class DetalleDeduccionService {
     @InjectRepository(Deduccion)
     private deduccionRepository: Repository<Deduccion>,
     @InjectRepository(Institucion)
-    private institucionRepository: Repository<Institucion>
+    private institucionRepository: Repository<Institucion>,
+    @InjectRepository(DatosIdentificacion)
+    private datosIdentificacionRepository: Repository<DatosIdentificacion>,
   ){}
 
-  async create(createDetalleDeduccionDto: CreateDetalleDeduccionDto): Promise<DetalleDeduccion> {
-    
-    try {
-      const afiliado = await this.afiliadoRepository.findOne({ 
-        where: { dni: createDetalleDeduccionDto.dni }
-      });
-      if (!afiliado) {
-        throw new BadRequestException('Afiliado no encontrado');
-      }
+  async create(createDto: CreateDetalleDeduccionDto): Promise<DetalleDeduccion> {
+    const { nombre_deduccion, dni, nombre_institucion, ...otrosDatos } = createDto;
   
-      const deduccion = await this.deduccionRepository.findOne({ 
-        where: { nombre_deduccion: createDetalleDeduccionDto.nombre_deduccion }
-      });
-      if (!deduccion) {
-        throw new BadRequestException('Deduccion no encontrada');
-      }
-  
-      const institucion = await this.institucionRepository.findOne({ 
-        where: { nombre_institucion: createDetalleDeduccionDto.nombre_institucion }
-      });
-      if (!institucion) {
-        throw new BadRequestException('Institucion no encontrada');
-      }
-      
-      const detalleDeduccion = this.detalleDeduccionRepository.create({
-        afiliado: afiliado,
-        deduccion: deduccion,
-        institucion: institucion,
-        ...createDetalleDeduccionDto,
-      });
-      
-      return await this.detalleDeduccionRepository.save(detalleDeduccion);
-    } catch (error) {
-      this.handleException(error);
+    const deduccion = await this.deduccionRepository.findOne({ where: { nombre_deduccion } });
+    if (!deduccion) {
+      throw new BadRequestException('La deducción no se encontró en la base de datos.'); 
     }
+  
+    const afiliado = await this.afiliadoRepository.createQueryBuilder('afiliado')
+    .innerJoinAndSelect('afiliado.datosIdentificacion', 'datosIdentificacion')
+    .where('datosIdentificacion.dni = :dni', { dni })
+    .getOne();
+    if (!afiliado) {
+      throw new BadRequestException('El afiliado con el DNI proporcionado no se encontró en la base de datos.');
+    }
+  
+    const institucion = await this.institucionRepository.findOne({ where: { nombre_institucion } });
+    if (!institucion) {
+      throw new BadRequestException('La institución no se encontró en la base de datos.');
+    }
+  
+    const detalleDeduccion = this.detalleDeduccionRepository.create({
+      deduccion,
+      afiliado,
+      institucion,
+      ...otrosDatos
+    });
+  
+    await this.detalleDeduccionRepository.save(detalleDeduccion);
+    return detalleDeduccion;
   }
   
-  processExcel(fileBuffer: Buffer): any {
-    const workbook = xlsx.read(fileBuffer, { type: 'buffer' });
-    const sheetName = workbook.SheetNames[0];
-    const worksheet = workbook.Sheets[sheetName];
-    return xlsx.utils.sheet_to_json(worksheet);
-  }
-
-  async saveDetalles(detallesData: any[]): Promise<void> {
-    const failedRows = [];
   
-    for (const d of detallesData) {
-      // Asegúrate de que todos los campos necesarios estén presentes
-      const año = d.año != null ? d.año : '';
-      const mes = d.mes != null ? d.mes : '';
-      const dni = d.dni ? String(d.dni).trim() : '';
-      const codigoDeduccion = d.codigo_deduccion != null ? d.codigo_deduccion : '';
-      const montoTotal = d.monto_motal != null ? d.monto_motal : ''; // Asumiendo que puede ser 0
-      const nombreInstitucion = d.nombre_institucion ? String(d.nombre_institucion).trim() : '';
-      
-      // Si alguno de los campos requeridos está vacío, agrega la fila a failedRows
-      if (!año || !mes || !dni || !codigoDeduccion || montoTotal === '' || !nombreInstitucion) {
-        failedRows.push({ ...d, error: 'Una o más columnas obligatorias están vacías o son inválidas' });
-        continue; // Continúa con la siguiente fila
-      }
-  
-      try {
-        const afiliado = await this.afiliadoRepository.findOne({ where: { dni } });
-        if (!afiliado) {
-          failedRows.push({ ...d, error: `Afiliado con DNI ${dni} no encontrado` });
-          continue;
-        }
-  
-        const deduccion = await this.deduccionRepository.findOne({ where: { codigo_deduccion: codigoDeduccion } });
-        if (!deduccion) {
-          failedRows.push({ ...d, error: `Deducción con código ${codigoDeduccion} no encontrada` });
-          continue;
-        }
-  
-        const institucion = await this.institucionRepository.findOne({ where: { nombre_institucion: nombreInstitucion } });
-        if (!institucion) {
-          failedRows.push({ ...d, error: `Institución con nombre ${nombreInstitucion} no encontrada` });
-          continue;
-        }
-  
-        const detalleDeduccion = new DetalleDeduccion();
-        detalleDeduccion.anio = año;
-        detalleDeduccion.mes = mes;
-        detalleDeduccion.afiliado = afiliado;
-        detalleDeduccion.deduccion = deduccion;
-        detalleDeduccion.monto_total = montoTotal;
-        detalleDeduccion.institucion = institucion;
-  
-        await this.detalleDeduccionRepository.save(detalleDeduccion);
-        
-      } catch (error) {
-        console.log(`Failed to save detail: ${JSON.stringify(d)}`, error.stack);
-        failedRows.push({ ...d, error: error.message });
-      }
-    }
-    
-    if (failedRows.length > 0) {
-      console.log(`Failed rows: ${JSON.stringify(failedRows)}`);
-      // Aquí podrías manejar las filas fallidas, por ejemplo, guardándolas en un archivo de log,
-      // enviándolas de vuelta al cliente, etc.
-    }
-  }
 
   findAll() {
     const detalleDeduccion = this.detalleDeduccionRepository.find()
@@ -151,7 +84,7 @@ export class DetalleDeduccionService {
       return detalles.map(detalle => ({
         ...detalle,
         nombre_deduccion: detalle.deduccion.nombre_deduccion, // nombre_deduccion de la entidad Deduccion
-        dni: detalle.afiliado.dni, // dni de la entidad Afiliado
+        //dni: detalle.afiliado.dni, // dni de la entidad Afiliado
         nombre_institucion: detalle.institucion.nombre_institucion, // nombre_institucion de la entidad Institucion
       }));
     } catch (error) {
@@ -178,11 +111,11 @@ export class DetalleDeduccionService {
 
     const { dni, nombre_institucion, nombre_deduccion, monto_total } = updateDetalleDeduccionDto;
 
-    if (dni) {
+    /* if (dni) {
       const afiliado = await this.afiliadoRepository.findOne({ where: { dni } });
       if (!afiliado) throw new BadRequestException('Afiliado no encontrado');
       detalleDeduccion.afiliado = afiliado;
-    }
+    } */
 
     if (nombre_institucion) {
       const institucion = await this.institucionRepository.findOne({ where: { nombre_institucion } });
@@ -203,14 +136,6 @@ export class DetalleDeduccionService {
     await this.detalleDeduccionRepository.save(detalleDeduccion);
 
     return detalleDeduccion;
-  }
-
-  readExcel(buffer: Buffer): any {
-    const workbook = xlsx.read(buffer, { type: 'buffer' });
-    const sheetName = workbook.SheetNames[0];
-    const worksheet = workbook.Sheets[sheetName];
-    const data = xlsx.utils.sheet_to_json(worksheet);
-    return data;
   }
 
   remove(id: number) {
@@ -235,6 +160,14 @@ export class DetalleDeduccionService {
       // Para cualquier otro tipo de error, lanza una excepción genérica
       throw new InternalServerErrorException('Ocurrió un error al procesar su solicitud');
     }
+  }
+
+  readExcel(buffer: Buffer): any {
+    const workbook = xlsx.read(buffer, { type: 'buffer' });
+    const sheetName = workbook.SheetNames[0];
+    const worksheet = workbook.Sheets[sheetName];
+    const data = xlsx.utils.sheet_to_json(worksheet);
+    return data;
   }
 }
 

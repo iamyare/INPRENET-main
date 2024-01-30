@@ -13,6 +13,7 @@ import { Banco } from 'src/banco/entities/banco.entity';
 import { Provincia } from 'src/modules/Regional/provincia/entities/provincia.entity';
 import { Pais } from 'src/modules/Regional/pais/entities/pais.entity';
 import { TipoIdentificacion } from 'src/modules/tipo_identificacion/entities/tipo_identificacion.entity';
+import { DatosIdentificacion } from './entities/datos_identificacion';
 
 @Module({
   controllers: [AfiliadoController],
@@ -23,7 +24,7 @@ import { TipoIdentificacion } from 'src/modules/tipo_identificacion/entities/tip
                               ReferenciaPersonal, HistorialSalario,
                               AfiliadosPorBanco, Provincia,
                               Pais, TipoIdentificacion,
-                              CentroTrabajo, Banco])
+                              CentroTrabajo, Banco, DatosIdentificacion])
   ]
 
 })

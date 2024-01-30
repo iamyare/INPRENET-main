@@ -2,7 +2,6 @@ import { Component } from '@angular/core';
 import { FormBuilder, FormGroup } from '@angular/forms';
 import { PlanillaService } from 'src/app/services/planilla.service';
 import { generateFormArchivo } from 'src/components/botonarchivos/botonarchivos.component';
-import { generatePlanillaFormGroup } from 'src/components/nuevaplanilla/nuevaplanilla.component';
 
 @Component({
   selector: 'app-nueva-planilla',
@@ -30,12 +29,12 @@ export class NuevaPlanillaComponentP {
       isChecked: [false] // Inicializa el estado del mat-slide-toggle
     });
     this.formplanilla = this.fb.group({
-      planilla: generatePlanillaFormGroup(),
+      /* planilla: generatePlanillaFormGroup(), */
     });
   }
-  
+
   ngOnInit() {
-    
+
   }
 
   onChangeToggle() {
@@ -48,7 +47,7 @@ export class NuevaPlanillaComponentP {
     if (event.target.files.length > 0) {
       const file = event.target.files[0];
       console.log(file);
-      
+
       this.planillaService.uploadExcel(file).subscribe(
         response => {
           console.log('Respuesta del servidor:', response);
@@ -64,16 +63,16 @@ export class NuevaPlanillaComponentP {
   setEstadoDatGen(e:any){
     this.datosA = true
     this.datosTable = false
-    this.datosPlan = false 
+    this.datosPlan = false
   }
   setEstadoTable(e:any){
     this.datosTable = true
     this.datosA = false
-    this.datosPlan = false 
-  }  
-  subirNuevPlan(e:any){    
-    this.datosA = false 
+    this.datosPlan = false
+  }
+  subirNuevPlan(e:any){
+    this.datosA = false
     this.datosTable = false
-    this.datosPlan = true 
+    this.datosPlan = true
   }
 }

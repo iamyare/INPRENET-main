@@ -14,25 +14,6 @@ export class DeduccionController {
     return this.deduccionService.create(createDeduccionDto);
   }
 
-  @Post('upload')
-  @UseInterceptors(FileInterceptor('excel'))
-  async uploadFile(@UploadedFile() file: Express.Multer.File, @Res() res: Response) {
-    if (!file) {
-      return res.status(400).json({ error: 'No se encontró el archivo' });
-    }
-
-    try {
-      const detalles = this.deduccionService.processExcel(file.buffer);
-
-      await this.deduccionService.saveDetalles(detalles);
-      
-      res.status(201).json({ mjs: 'Datos Guardados exitosamente' });
-    } catch (error) {
-      console.error(error);
-      res.status(400).json({ error: 'Error al procesar el archivo' });
-    }
-  }
-
   @Get()
   findAll() {
     return this.deduccionService.findAll();

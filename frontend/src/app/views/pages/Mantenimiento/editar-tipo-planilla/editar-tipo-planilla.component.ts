@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { ValidatorFn, Validators } from '@angular/forms';
 import { ToastrService } from 'ngx-toastr';
 import { PlanillaService } from 'src/app/services/planilla.service';
+import { TableColumn } from 'src/app/views/shared/shared/Interfaces/table-column';
 
 @Component({
   selector: 'app-editar-tipo-planilla',
@@ -91,16 +92,4 @@ export class EditarTipoPlanillaComponent implements OnInit{
   };
 
 
-}
-
-
-interface TableColumn {
-  header: string;
-  col: string;
-  customRender?: (data: any) => string;
-  isButton?: boolean;
-  buttonAction?: (row: any) => void;
-  buttonText?: string;
-  isEditable?: boolean; // Nueva propiedad
-  validationRules?: ValidatorFn[];
 }

@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Query } from '@nestjs/common';
 import { PlanillaService } from './planilla.service';
 import { CreatePlanillaDto } from './dto/create-planilla.dto';
 import { UpdatePlanillaDto } from './dto/update-planilla.dto';
@@ -10,6 +10,14 @@ export class PlanillaController {
   @Post()
   create(@Body() createPlanillaDto: CreatePlanillaDto) {
     return this.planillaService.create(createPlanillaDto);
+  }
+
+  @Get('deducciones-no-aplicadas')
+  getDeduccionesNoAplicadas(
+    @Query('mes') mes: number,
+    @Query('anio') anio: number
+  ) {
+    return this.planillaService.getDeduccionesNoAplicadas(mes, anio);
   }
 
   @Get()

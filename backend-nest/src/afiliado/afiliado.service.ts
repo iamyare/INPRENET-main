@@ -101,8 +101,6 @@ export class AfiliadoService {
         // Crear y preparar el nuevo afiliado principal con datos y relaciones
         const newAfiliado = queryRunner.manager.create(Afiliado, {
             ...createAfiliadoDto,
-            tipoIdentificacion,
-            pais,
             provincia,
             afiliadosPorBanco: [afiliadoBanco],
             perfAfilCentTrabs,
@@ -140,8 +138,6 @@ export class AfiliadoService {
 
                 const afiliadoHijo = queryRunner.manager.create(Afiliado, {
                     ...hijoDto,
-                    tipoIdentificacion: tipoIdentificacionHijo,
-                    pais: paisHijo,
                     provincia: provinciaHijo,
                     padreIdAfiliado: newAfiliado
                     /* ,

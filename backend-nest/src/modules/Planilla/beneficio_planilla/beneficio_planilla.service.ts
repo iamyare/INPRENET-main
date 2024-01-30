@@ -28,7 +28,7 @@ export class BeneficioPlanillaService {
     try {
       if(datos.dni){
          afiliado = await this.afiliadoRepository.findOne({
-          where: {dni: datos.dni}
+          /* where: {dni: datos.dni} */
         });
       }
       if (!afiliado) {

@@ -1,0 +1,83 @@
+<div class="card">
+  <div class="card-header card-header-danger tittle" style="background: rgb(29, 192, 192);">
+      <h4 class="card-title">Nueva Planilla</h4>
+      <p class="card-category">Llene los campos para continuar con el proceso.</p>
+  </div>
+  <div class="card-body">
+      <fieldset [formGroupName]="groupName">
+          <div class="row">
+              <div class="col-md-6">
+                  <mat-form-field class="example-full-width; inputs" appearance="outline">
+                      <mat-label>cod Planilla</mat-label>
+                      <input matInput formControlName="cod_Planilla" type="number">
+                  </mat-form-field>
+              </div>
+              <div class="col-md-6">
+                  <mat-form-field class="example-full-width; inputs" appearance="outline">
+                      <mat-label>Tipo planilla</mat-label>
+                      <input matInput formControlName="tipo_planilla" type="number">
+                  </mat-form-field>
+              </div>
+          </div>
+          <div class="row">
+              <div class="col-md-6">
+                  <mat-form-field class="example-full-width; inputs" appearance="outline">
+                      <mat-label>Secuencia</mat-label>
+                      <input matInput formControlName="secuencia" type="number">
+                  </mat-form-field>
+              </div>
+              <div class="col-md-6">
+                  <mat-form-field class="example-full-width; inputs" appearance="outline">
+                      <mat-label>Fecha</mat-label>
+                      <input matInput formControlName="fecha" type="number">
+                  </mat-form-field>
+              </div>
+          </div>
+      </fieldset>
+  </div>
+
+  <!--     <div class="row">
+      <div class="col-md-6">
+          <button mat-button color="primary" (click)="EnviarPlanilla()">Enviar Nueva Planilla</button>
+      </div>
+
+  </div> -->
+</div>
+
+<app-inline-editing-one></app-inline-editing-one>
+
+<!--
+
+  import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output, inject } from '@angular/core';
+import { ControlContainer, FormArray, FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
+
+
+export function generatePlanillaFormGroup(datos?:any): FormGroup {
+  return new FormGroup({
+    cod_Planilla: new FormControl(datos?.cod_Planilla, [Validators.required, Validators.pattern("([0-9]+([0-9])?)")]),
+    tipo_planilla: new FormControl(datos?.tipo_planilla, [Validators.required, Validators.pattern("([0-9]+([0-9])?)")]),
+    fecha: new FormControl(datos?.fecha, [Validators.required, Validators.pattern("([0-9]+([0-9])?)")]),
+    secuencia: new FormControl(datos?.secuencia, [Validators.required, Validators.pattern("([0-9]+([0-9])?)")]),
+  });
+}
+
+@Component({
+  selector: 'app-nuevaplanilla',
+  templateUrl: './nuevaplanilla.component.html',
+  styleUrl: './nuevaplanilla.component.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  viewProviders: [
+    {
+      provide: ControlContainer,
+      useFactory: () =>
+        inject(ControlContainer, { skipSelf: true, host: true }),
+    },]
+})
+export class NuevaplanillaComponent {
+  @Input() groupName = ""
+
+  constructor(private fb: FormBuilder) {}
+
+  EnviarPlanilla(datos?:any): void {}
+}
+ -->

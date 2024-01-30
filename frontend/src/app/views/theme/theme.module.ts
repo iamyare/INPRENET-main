@@ -77,7 +77,8 @@ import { VerEditarDeduccionAfilComponent } from '../pages/Generales/ver-editar-d
     EditarTipoDeduccionComponent,
     NuevoBeneficioAfilComponent,
     NuevaDeduccionAfilComponent,
-    VerEditarDeduccionAfilComponent
+    VerEditarDeduccionAfilComponent,
+
 /*     CentroTrabajoPageComponent */
   ]
 })

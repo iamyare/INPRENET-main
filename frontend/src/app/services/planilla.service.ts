@@ -1,18 +1,18 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable, BehaviorSubject } from 'rxjs';
+import { environment } from 'src/environments/environment';
 
 @Injectable({
   providedIn: 'root'
 })
 export class PlanillaService {
-  private baseUrl = 'http://localhost:3000/api';
 
   constructor(private http: HttpClient) { }
 
   // Método para crear una nueva TipoPlanilla
   createTipoPlanilla(tipoPlanillaData: any): Observable<any> {
-    return this.http.post(`${this.baseUrl}/tipo-planilla`, tipoPlanillaData);
+    return this.http.post(`${environment.API_URL}/api/planilla/tipo-planilla`, tipoPlanillaData);
   }
 
   findAllTipoPlanilla(limit: number = 10, offset: number = 0): Observable<any> {
@@ -20,11 +20,21 @@ export class PlanillaService {
       .set('limit', limit.toString())
       .set('offset', offset.toString());
 
-    return this.http.get(`${this.baseUrl}/tipo-planilla`, { params });
+    return this.http.get(`${environment.API_URL}/api/tipo-planilla`, { params });
+  }
+
+  getDeduccionesNoAplicadas(mes: number, anio: number): Observable<any> {
+    // Construye los parámetros de la consulta
+    let params = new HttpParams()
+      .set('mes', mes.toString())
+      .set('anio', anio.toString());
+
+    // Realiza la petición GET al backend con los parámetros
+    return this.http.get(`${environment.API_URL}/api/planilla/deducciones-no-aplicadas`, { params });
   }
 
   updateTipoPlanilla(id: string, tipoPlanillaData: any): Observable<any> {
-    return this.http.patch(`${this.baseUrl}/tipo-planilla/${id}`, tipoPlanillaData);
+    return this.http.patch(`${environment.API_URL}/api/planilla/tipo-planilla/${id}`, tipoPlanillaData);
   }
 
   // BehaviorSubject para almacenar y emitir los datos de los usuarios
@@ -36,7 +46,7 @@ export class PlanillaService {
     const formData: FormData = new FormData();
     formData.append('excel', file, file.name);
 
-    return this.http.post(`${this.baseUrl}/detalle-deduccion/upload`, formData);
+    return this.http.post(`${environment.API_URL}/api/planilla/detalle-deduccion/upload`, formData);
   }
 
   // Método para actualizar los datos de los usuarios

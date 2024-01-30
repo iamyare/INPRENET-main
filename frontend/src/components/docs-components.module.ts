@@ -72,7 +72,7 @@ import { DynamicTableComponent } from './dynamic-table/dynamic-table.component';
     BotonarchivosComponent,
     HistorialSalarioComponent,
     DynamicFormComponent,
-    DynamicTableComponent
+    DynamicTableComponent,
   ],
   imports: [
     WebcamModule,

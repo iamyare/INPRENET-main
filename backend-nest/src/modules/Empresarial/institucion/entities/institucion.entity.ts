@@ -10,9 +10,9 @@ export class Institucion {
     @Column('varchar2', { length: 40, nullable: false })
     nombre_institucion: string;
 
+    @Column('varchar2', { length: 40, nullable: false })
+    tipo_institucion: string;
+
     @OneToMany(() => DetalleDeduccion, detalleDeduccion => detalleDeduccion.institucion)
     detalleDeduccion : DetalleDeduccion[];
-
-   /*  @OneToMany(() => DeduccionCalculada, deduccionCalculada => deduccionCalculada.institucion)
-    deduccionCalculada : DeduccionCalculada[]; */
 }

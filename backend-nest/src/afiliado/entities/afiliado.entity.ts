@@ -4,44 +4,21 @@ import { PerfAfilCentTrab } from "./perf_afil_cent_trab";
 import { AfiliadosPorBanco } from "src/banco/entities/afiliados-banco";
 import { IsString } from "class-validator";
 import { Provincia } from "src/modules/Regional/provincia/entities/provincia.entity";
-import { Pais } from "src/modules/Regional/pais/entities/pais.entity";
-import { TipoIdentificacion } from "src/modules/tipo_identificacion/entities/tipo_identificacion.entity";
 import { BeneficioPlanilla } from "src/modules/Planilla/beneficio_planilla/entities/beneficio_planilla.entity";
-import { Usuario } from "src/modules/usuario/entities/usuario.entity";
 import { DetalleDeduccion } from "src/modules/Planilla/detalle-deduccion/entities/detalle-deduccion.entity";
 import { Planilla } from "src/modules/Planilla/planilla/entities/planilla.entity";
+import { DatosIdentificacion } from "./datos_identificacion";
 
 @Entity()
 export class Afiliado {
     @PrimaryGeneratedColumn('uuid')
     id_afiliado: string;
 
-    @Column('varchar2', { length: 40, nullable: true, unique: true })
-    dni: string;
-
     @Column('varchar2', { length: 40, nullable: true })
     estado_civil: string;
 
     @Column('varchar2', { length: 40, nullable: true })
-    tipo_cotizante: string;
-
-    @Column('varchar2', { length: 40, nullable: true })
-    primer_nombre: string;
-
-    @Column('varchar2', { length: 40, nullable: true })
-    segundo_nombre: string;
-
-    @Column('varchar2', { length: 40, nullable: true })
-    tercer_nombre: string;
-
-    @Column('varchar2', { length: 40, nullable: true })
-    primer_apellido: string;
-
-    @Column('varchar2', { length: 40, nullable: true })
-    segundo_apellido: string;
-
-    @Column('date', { nullable: true })
-    fecha_nacimiento: string;
+    tipo_afiliado: string;
 
     @Column('char', { length: 1, nullable: true })
     sexo: string;
@@ -70,9 +47,6 @@ export class Afiliado {
     @Column('varchar2', { length: 40, nullable: true })
     correo_2: string;
 
-    @Column('varchar2', { length: 200, nullable: true })
-    archivo_identificacion: string;
-
     @Column('varchar2', { length: 40, nullable: true })
     colegio_magisterial: string;
 
@@ -97,13 +71,13 @@ export class Afiliado {
         (perfAfilCentTrab) => perfAfilCentTrab.afiliado,
         { cascade: true })
     perfAfilCentTrabs: PerfAfilCentTrab[];
+
+    @ManyToOne(() => DatosIdentificacion, datosIdentificacion => datosIdentificacion.afiliado, { cascade: true })
+    @JoinColumn({ name: 'id_datos_identificacion' })
+    datosIdentificacion: DatosIdentificacion;
     
     @OneToMany(() => ReferenciaPersonalAfiliado, referenciaPersonalAfiliado => referenciaPersonalAfiliado.afiliado)
     referenciasPersonalAfiliado: ReferenciaPersonalAfiliado[];
-
-    @ManyToOne(() => Pais, pais => pais.afiliado, { cascade: true })
-    @JoinColumn({ name: 'id_pais' })
-    pais: Pais;
 
     @OneToMany(() => AfiliadosPorBanco, afiliadosPorBanco => afiliadosPorBanco.afiliado)
     afiliadosPorBanco : AfiliadosPorBanco[];
@@ -123,13 +97,6 @@ export class Afiliado {
     @IsString()
     padreIdAfiliado: Afiliado;
 
-    @ManyToOne(() => TipoIdentificacion, tipoIdentificacion => tipoIdentificacion.afiliados, { cascade: true })
-    @JoinColumn({ name: 'id_tipo_identificacion' })
-    tipoIdentificacion: TipoIdentificacion;
-
-    /* @OneToOne(() => Usuario, { cascade: true })
-    @JoinColumn({ name: 'id_usuario' })
-    usuario: Usuario; */
 
     @OneToMany(() => DetalleDeduccion, detalleDeduccion => detalleDeduccion.afiliado)
     detalleDeduccion: DetalleDeduccion[];

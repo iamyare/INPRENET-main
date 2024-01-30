@@ -14,7 +14,7 @@ export class AfiliadoService {
   constructor(private http: HttpClient, private router: Router) { }
 
   getAllAfiliados(): Observable<any | void> {
-    const url = `${environment.API_URL}/afiliados`;
+    const url = `${environment.API_URL}/api/afiliado`;
     return this.http.get<any>(
       url,
       ).pipe(

@@ -6,6 +6,7 @@ import { DeduccionesService } from 'src/app/services/deducciones.service';
 import { InstitucionesService } from '../../../../services/instituciones.service';
 import { Subject, takeUntil } from 'rxjs';
 import * as XLSX from 'xlsx';
+import { FieldConfig } from '../../../shared/shared/Interfaces/field-config';
 
 @Component({
   selector: 'app-nueva-deduccion-afil',
@@ -234,11 +235,3 @@ unirNombres(
 
 }
 
-interface FieldConfig {
-  type: string;
-  label: string;
-  name: string;
-  value?: any;
-  options?: { label: string; value: any }[];
-  validations?: ValidatorFn[];
-}

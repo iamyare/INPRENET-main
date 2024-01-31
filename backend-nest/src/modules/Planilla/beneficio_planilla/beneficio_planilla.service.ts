@@ -23,7 +23,6 @@ export class BeneficioPlanillaService {
   async create(datos: any): Promise<any> {
     let afiliado:any;
     let tipoBeneficio:any;
-    console.log(datos);
     
     try {
       if(datos.dni){

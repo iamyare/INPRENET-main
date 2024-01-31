@@ -93,14 +93,14 @@ export class Afiliado {
 
     // Relación Muchos a Uno consigo mismo
     @ManyToOne(() => Afiliado, afiliado => afiliado.hijos, { cascade: true })
-    @JoinColumn({ name: 'padreIdAfiliado' })
+    @JoinColumn({ name: 'id_beneficiario' })
     @IsString()
     padreIdAfiliado: Afiliado;
 
 
     @OneToMany(() => DetalleDeduccion, detalleDeduccion => detalleDeduccion.afiliado)
     detalleDeduccion: DetalleDeduccion[];
-
+    
     @OneToMany(() => Planilla, planilla => planilla.afiliado)
     planilla: Planilla[];
 

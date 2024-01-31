@@ -28,40 +28,32 @@ export class DetalleDeduccionService {
     private datosIdentificacionRepository: Repository<DatosIdentificacion>,
   ){}
 
-  async create(createDto: CreateDetalleDeduccionDto): Promise<DetalleDeduccion> {
-    const { nombre_deduccion, dni, nombre_institucion, ...otrosDatos } = createDto;
-  
-    const deduccion = await this.deduccionRepository.findOne({ where: { nombre_deduccion } });
-    if (!deduccion) {
-      throw new BadRequestException('La deducción no se encontró en la base de datos.'); 
-    }
-  
-    const afiliado = await this.afiliadoRepository.createQueryBuilder('afiliado')
-    .innerJoinAndSelect('afiliado.datosIdentificacion', 'datosIdentificacion')
-    .where('datosIdentificacion.dni = :dni', { dni })
-    .getOne();
-    if (!afiliado) {
-      throw new BadRequestException('El afiliado con el DNI proporcionado no se encontró en la base de datos.');
-    }
-  
-    const institucion = await this.institucionRepository.findOne({ where: { nombre_institucion } });
-    if (!institucion) {
-      throw new BadRequestException('La institución no se encontró en la base de datos.');
-    }
-  
-    const detalleDeduccion = this.detalleDeduccionRepository.create({
-      deduccion,
-      afiliado,
-      institucion,
-      ...otrosDatos
-    });
-  
-    await this.detalleDeduccionRepository.save(detalleDeduccion);
-    return detalleDeduccion;
-  }
-  
-  
+  async create(crearDetalleDeduccionDTO: CreateDetalleDeduccionDto): Promise<DetalleDeduccion> {
+    const { dni, ...detalleData } = crearDetalleDeduccionDTO;
 
+    // Buscar DatosIdentificacion por DNI
+    const datosIdentificacion = await this.datosIdentificacionRepository.findOne({ where: { dni } });
+
+    if (!datosIdentificacion) {
+        throw new Error('No se encontró un afiliado con el DNI proporcionado.');
+    }
+
+    // Buscar Afiliado asociado a DatosIdentificacion
+    const afiliado = '';
+
+    if (!afiliado) {
+        throw new Error('No se encontró un afiliado para los Datos de Identificación proporcionados.');
+    }
+
+    // Crear y guardar el nuevo DetalleDeduccion
+    const nuevoDetalle = this.detalleDeduccionRepository.create({
+        ...detalleData,
+        afiliado: afiliado,
+    });
+
+    return this.detalleDeduccionRepository.save(nuevoDetalle);
+}
+  
   findAll() {
     const detalleDeduccion = this.detalleDeduccionRepository.find()
     return detalleDeduccion;
@@ -70,27 +62,30 @@ export class DetalleDeduccionService {
   async findAllDetailed(): Promise<any[]> {
     try {
       const detalles = await this.detalleDeduccionRepository.find({
-        select: ['id_ded_deduccion', 'monto_total', 'monto_aplicado', 'estado_aplicacion', 'anio', 'mes', 'fecha_aplicado', 'fecha_subida'], // selecciona los campos específicos de detalleDeduccion que deseas
-        relations: ['deduccion', 'afiliado', 'institucion'], // asegúrate de cargar las relaciones
+        select: ['id_ded_deduccion', 'monto_total', 'monto_aplicado', 'estado_aplicacion', 'anio', 'mes', 'fecha_aplicado', 'fecha_subida'], // Selecciona los campos específicos de DetalleDeduccion
+        relations: ['deduccion', 'afiliado', 'institucion', 'afiliado.datosIdentificacion'], // Incluye la relación con DatosIdentificacion
         join: {
           alias: 'detalleDeduccion',
           leftJoinAndSelect: {
             deduccion: 'detalleDeduccion.deduccion',
             afiliado: 'detalleDeduccion.afiliado',
+            datosIdentificacion: 'afiliado.datosIdentificacion', // Une y selecciona DatosIdentificacion
             institucion: 'detalleDeduccion.institucion',
           },
         },
       });
+  
       return detalles.map(detalle => ({
         ...detalle,
-        nombre_deduccion: detalle.deduccion.nombre_deduccion, // nombre_deduccion de la entidad Deduccion
-        //dni: detalle.afiliado.dni, // dni de la entidad Afiliado
-        nombre_institucion: detalle.institucion.nombre_institucion, // nombre_institucion de la entidad Institucion
+        nombre_deduccion: detalle.deduccion.nombre_deduccion, // Nombre de la deducción de la entidad Deduccion
+        dni: detalle.afiliado.datosIdentificacion.dni, // DNI de la entidad DatosIdentificacion
+        nombre_institucion: detalle.institucion.nombre_institucion, // Nombre de la institución de la entidad Institucion
       }));
     } catch (error) {
       this.handleException(error);
     }
   }
+  
 
   findOne(id: number) {
     return `This action returns a #${id} detalleDeduccion`;
@@ -100,43 +95,43 @@ export class DetalleDeduccionService {
     return `This action updates a #${id} detalleDeduccion`;
   }
 
-  async editDetalleDeduccion(id: string, updateDetalleDeduccionDto: UpdateDetalleDeduccionDto): Promise<DetalleDeduccion> {
+  /* async editDetalleDeduccion(id: string, updateDetalleDeduccionDto: UpdateDetalleDeduccionDto): Promise<DetalleDeduccion> {
     const detalleDeduccion = await this.detalleDeduccionRepository.findOne({
-      where: { id_ded_deduccion: id } // Asumiendo que el campo de ID se llama 'id_ded_deduccion' en tu entidad
+      where: { id_ded_deduccion: id }
     });
   
     if (!detalleDeduccion) {
       throw new BadRequestException('Detalle de deducción no encontrado.');
     }
-
-    const { dni, nombre_institucion, nombre_deduccion, monto_total } = updateDetalleDeduccionDto;
-
-    /* if (dni) {
-      const afiliado = await this.afiliadoRepository.findOne({ where: { dni } });
-      if (!afiliado) throw new BadRequestException('Afiliado no encontrado');
-      detalleDeduccion.afiliado = afiliado;
-    } */
-
+  
+    const { nombre_institucion, nombre_deduccion, monto_total, id_datos_identificacion } = updateDetalleDeduccionDto;
+  
     if (nombre_institucion) {
-      const institucion = await this.institucionRepository.findOne({ where: { nombre_institucion } });
-      if (!institucion) throw new BadRequestException('Institución no encontrada');
+      const institucion = await this.institucionRepository.findOne({ where: { nombre_institucion: nombre_institucion } });
+      if (!institucion) throw new BadRequestException('Institución no encontrada.');
       detalleDeduccion.institucion = institucion;
     }
-
+  
     if (nombre_deduccion) {
-      const deduccion = await this.deduccionRepository.findOne({ where: { nombre_deduccion } });
-      if (!deduccion) throw new BadRequestException('Deducción no encontrada');
+      const deduccion = await this.deduccionRepository.findOne({ where: { nombre_deduccion: nombre_deduccion } });
+      if (!deduccion) throw new BadRequestException('Deducción no encontrada.');
       detalleDeduccion.deduccion = deduccion;
     }
-
+  
+    if (id_datos_identificacion) {
+      const afiliado = await this.afiliadoRepository.findOne({ where: { datosIdentificacion: { id_datos_identificacion: id_datos_identificacion } } });
+      if (!afiliado) throw new BadRequestException('Afiliado con los datos de identificación proporcionados no encontrado.');
+      detalleDeduccion.afiliado = afiliado;
+    }
+  
     if (monto_total !== undefined) {
       detalleDeduccion.monto_total = monto_total;
     }
-
+  
     await this.detalleDeduccionRepository.save(detalleDeduccion);
-
+  
     return detalleDeduccion;
-  }
+  } */
 
   remove(id: number) {
     return `This action removes a #${id} detalleDeduccion`;

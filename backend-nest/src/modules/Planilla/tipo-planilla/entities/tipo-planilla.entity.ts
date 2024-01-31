@@ -13,15 +13,15 @@ export class TipoPlanilla {
     @Column('varchar2', { length: 200, nullable: true })
     descripcion: string;
 
-    @Column('varchar2', { length: 200, nullable: false })
+/*     @Column('varchar2', { length: 200, nullable: false })
     periodoInicio: string;
 
     @Column('varchar2', { length: 200, nullable: false })
-    periodoFinalizacion: string;
+    periodoFinalizacion: string; */
 
-    @Column('varchar2', { length: 50, nullable: true })
+/*     @Column('varchar2', { length: 50, nullable: true })
     estado: string;
-
+ */
     @OneToMany(() => Planilla, planilla => planilla.tipoPlanilla)
     planilla: Planilla[];
 }

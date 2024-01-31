@@ -20,13 +20,19 @@ export class Planilla {
     @Column('varchar2', { length: 20, nullable: true })
     estado : string;
 
+    @Column('varchar2', { length: 200, nullable: false })
+    periodoInicio: string;
+
+    @Column('varchar2', { length: 200, nullable: false })
+    periodoFinalizacion: string; 
+
     @ManyToOne(() => TipoPlanilla, tipoPlanilla => tipoPlanilla.planilla)
     @JoinColumn({ name: 'id_tipo_planilla' })
     tipoPlanilla: TipoPlanilla;
 
     @ManyToOne(() => Afiliado, afiliado => afiliado.planilla)
     @JoinColumn({ name: 'id_afiliado' })
-    afiliado: Afiliado;
+    afiliado: Afiliado; 
 
-
+    
 }

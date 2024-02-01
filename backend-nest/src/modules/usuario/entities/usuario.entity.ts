@@ -1,7 +1,7 @@
 import { Column, Entity, JoinColumn, ManyToOne, OneToOne, PrimaryGeneratedColumn, Timestamp } from "typeorm";
 import { Rol } from "./rol.entity";
 import { Empleado } from "src/modules/Empresarial/empresas/entities/empleado.entity";
-import { Afiliado } from "src/afiliado/entities/afiliado.entity";
+/* import { Afiliado } from "src/afiliado/entities/detalle_afiliado.entity"; */
 
 @Entity()
 export class Usuario {

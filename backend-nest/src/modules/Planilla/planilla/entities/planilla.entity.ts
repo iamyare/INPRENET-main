@@ -1,6 +1,9 @@
 import { Column, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 import { TipoPlanilla } from '../../tipo-planilla/entities/tipo-planilla.entity';
-import { Afiliado } from 'src/afiliado/entities/afiliado.entity';
+import { Afiliado } from 'src/afiliado/entities/afiliado';
+import { DetallePlanilla } from './detalle_planilla.entity';
+/* import { Afiliado } from 'src/afiliado/entities/detalle_afiliado.entity';
+import { DatosIdentificacion } from 'src/afiliado/entities/afiliado'; */
 
 @Entity()
 export class Planilla {
@@ -30,9 +33,7 @@ export class Planilla {
     @JoinColumn({ name: 'id_tipo_planilla' })
     tipoPlanilla: TipoPlanilla;
 
-    @ManyToOne(() => Afiliado, afiliado => afiliado.planilla)
-    @JoinColumn({ name: 'id_afiliado' })
-    afiliado: Afiliado; 
+    @OneToMany(() => DetallePlanilla, detallePlanilla => detallePlanilla.planilla)
+    detallePlanilla: DetallePlanilla[];
 
-    
 }

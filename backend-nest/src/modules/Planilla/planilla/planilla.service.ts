@@ -4,8 +4,9 @@ import { UpdatePlanillaDto } from './dto/update-planilla.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { DetalleDeduccion } from '../detalle-deduccion/entities/detalle-deduccion.entity';
 import { Repository } from 'typeorm';
-import { Afiliado } from 'src/afiliado/entities/afiliado.entity';
+/* import { Afiliado } from 'src/afiliado/entities/detalle_afiliado.entity'; */
 import { Institucion } from 'src/modules/Empresarial/institucion/entities/institucion.entity';
+import { Afiliado } from 'src/afiliado/entities/afiliado';
 
 @Injectable()
 export class PlanillaService {

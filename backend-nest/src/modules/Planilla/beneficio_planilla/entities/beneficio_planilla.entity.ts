@@ -1,8 +1,6 @@
 import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
-import { Planilla } from "../../planilla/entities/planilla.entity";
 import { Beneficio } from "../../beneficio/entities/beneficio.entity";
-import { Afiliado } from "src/afiliado/entities/afiliado.entity";
-import { AfiliadosPorBanco } from "src/banco/entities/afiliados-banco";
+import { Afiliado } from "src/afiliado/entities/afiliado";
 
 @Entity()
 export class BeneficioPlanilla {

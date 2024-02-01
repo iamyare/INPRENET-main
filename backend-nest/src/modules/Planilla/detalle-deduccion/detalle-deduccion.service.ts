@@ -4,11 +4,14 @@ import { UpdateDetalleDeduccionDto } from './dto/update-detalle-deduccion.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { DetalleDeduccion } from './entities/detalle-deduccion.entity';
 import { Repository } from 'typeorm';
-import { Afiliado } from 'src/afiliado/entities/afiliado.entity';
+/* import { Afiliado } from 'src/afiliado/entities/detalle_afiliado.entity'; */
 import { Deduccion } from '../deduccion/entities/deduccion.entity';
 import { Institucion } from 'src/modules/Empresarial/institucion/entities/institucion.entity';
-import { DatosIdentificacion } from 'src/afiliado/entities/datos_identificacion';
+/* import { DatosIdentificacion } from 'src/afiliado/entities/afiliado'; */
 import * as xlsx from 'xlsx';
+import { AfiliadoService } from 'src/afiliado/afiliado.service';
+import { Afiliado } from 'src/afiliado/entities/afiliado';
+import { DetalleAfiliado } from 'src/afiliado/entities/detalle_afiliado.entity';
 
 @Injectable()
 export class DetalleDeduccionService {
@@ -24,35 +27,23 @@ export class DetalleDeduccionService {
     private deduccionRepository: Repository<Deduccion>,
     @InjectRepository(Institucion)
     private institucionRepository: Repository<Institucion>,
-    @InjectRepository(DatosIdentificacion)
-    private datosIdentificacionRepository: Repository<DatosIdentificacion>,
+    @InjectRepository(DetalleAfiliado)
+    private DetalleAfiliadoRepository: Repository<DetalleAfiliado>,
+    private readonly afiliadoService: AfiliadoService,
   ){}
 
-  async create(crearDetalleDeduccionDTO: CreateDetalleDeduccionDto): Promise<DetalleDeduccion> {
-    const { dni, ...detalleData } = crearDetalleDeduccionDTO;
+  async create(createDetalleDeduccionDto: CreateDetalleDeduccionDto) {
+    /* const { dni, ...detalleData } = createDetalleDeduccionDto;
 
-    // Buscar DatosIdentificacion por DNI
-    const datosIdentificacion = await this.datosIdentificacionRepository.findOne({ where: { dni } });
+    const afiliado = await this.afiliadoService.findByDni(dni);
 
-    if (!datosIdentificacion) {
-        throw new Error('No se encontró un afiliado con el DNI proporcionado.');
-    }
-
-    // Buscar Afiliado asociado a DatosIdentificacion
-    const afiliado = '';
-
-    if (!afiliado) {
-        throw new Error('No se encontró un afiliado para los Datos de Identificación proporcionados.');
-    }
-
-    // Crear y guardar el nuevo DetalleDeduccion
     const nuevoDetalle = this.detalleDeduccionRepository.create({
-        ...detalleData,
-        afiliado: afiliado,
+      ...detalleData,
+      afiliado,
     });
 
-    return this.detalleDeduccionRepository.save(nuevoDetalle);
-}
+    return this.detalleDeduccionRepository.save(nuevoDetalle); */
+  }
   
   findAll() {
     const detalleDeduccion = this.detalleDeduccionRepository.find()
@@ -78,7 +69,7 @@ export class DetalleDeduccionService {
       return detalles.map(detalle => ({
         ...detalle,
         nombre_deduccion: detalle.deduccion.nombre_deduccion, // Nombre de la deducción de la entidad Deduccion
-        dni: detalle.afiliado.datosIdentificacion.dni, // DNI de la entidad DatosIdentificacion
+        //dni: detalle.afiliado.datosIdentificacion.dni, // DNI de la entidad DatosIdentificacion
         nombre_institucion: detalle.institucion.nombre_institucion, // Nombre de la institución de la entidad Institucion
       }));
     } catch (error) {

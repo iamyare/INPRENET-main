@@ -5,9 +5,10 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Deduccion } from './entities/deduccion.entity';
 import { Repository } from 'typeorm';
 import * as xlsx from 'xlsx';
-import { Afiliado } from 'src/afiliado/entities/afiliado.entity';
+/* import { Afiliado } from 'src/afiliado/entities/detalle_afiliado.entity'; */
 import { Institucion } from 'src/modules/Empresarial/institucion/entities/institucion.entity';
 import { DetalleDeduccion } from '../detalle-deduccion/entities/detalle-deduccion.entity';
+import { Afiliado } from 'src/afiliado/entities/afiliado';
 
 @Injectable()
 export class DeduccionService {

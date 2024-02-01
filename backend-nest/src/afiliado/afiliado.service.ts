@@ -2,12 +2,8 @@ import { BadRequestException, Injectable, InternalServerErrorException, Logger, 
 import { CreateAfiliadoDto } from './dto/create-afiliado.dto';
 import { UpdateAfiliadoDto } from './dto/update-afiliado.dto';
 import { Connection, EntityManager, Repository } from 'typeorm';
-import { Afiliado } from './entities/afiliado.entity';
 import { InjectEntityManager, InjectRepository } from '@nestjs/typeorm';
-import { HistorialSalario } from './entities/historialSalarios.entity';
 import { PerfAfilCentTrab } from './entities/perf_afil_cent_trab';
-import { ReferenciaPersonal } from './entities/referencia-personal';
-import { ReferenciaPersonalAfiliado } from './entities/referenciaP-Afiliado';
 import { AfiliadosPorBanco } from 'src/banco/entities/afiliados-banco';
 import { CentroTrabajo } from 'src/modules/Empresarial/centro-trabajo/entities/centro-trabajo.entity';
 import { Banco } from 'src/banco/entities/banco.entity';
@@ -16,6 +12,8 @@ import { Pais } from 'src/modules/Regional/pais/entities/pais.entity';
 import { TipoIdentificacion } from 'src/modules/tipo_identificacion/entities/tipo_identificacion.entity';
 import { CreateAfiliadoTempDto } from './dto/create-afiliado-temp.dto';
 import { validate as isUUID } from 'uuid';
+import { DetalleAfiliado } from './entities/detalle_afiliado.entity';
+import { Afiliado } from './entities/afiliado';
 
 @Injectable()
 export class AfiliadoService {
@@ -26,27 +24,9 @@ export class AfiliadoService {
     @InjectEntityManager() private readonly entityManager: EntityManager,
 
     @InjectRepository(Afiliado)
-    private readonly afiliadoRepository : Repository<any>,
-    @InjectRepository(HistorialSalario)
-    private readonly historialSalarioRepository : Repository<HistorialSalario>,
-    @InjectRepository(PerfAfilCentTrab)
-    private readonly perfAfilCentTrabRepository : Repository<PerfAfilCentTrab>,
-    @InjectRepository(ReferenciaPersonal)
-    private readonly referenciaPersonal : Repository<ReferenciaPersonal>,
-    @InjectRepository(ReferenciaPersonalAfiliado)
-    private readonly referenciaPersonalAfiliadoRepository : Repository<ReferenciaPersonalAfiliado>,
-    @InjectRepository(AfiliadosPorBanco)
-    private readonly AfiliadosPorBancoRepository : Repository<AfiliadosPorBanco>,
-    @InjectRepository(TipoIdentificacion)
-    private readonly tipoIdentificacionRepository: Repository<TipoIdentificacion>,
-    @InjectRepository(Pais)
-    private readonly paisRepository: Repository<Pais>,
-    @InjectRepository(Provincia)
-    private readonly provinciaRepository: Repository<Provincia>,
-    @InjectRepository(CentroTrabajo)
-    private readonly centroTrabajoRepository: Repository<CentroTrabajo>,
-    @InjectRepository(Banco)
-    private readonly bancoRepository: Repository<Banco>,
+    private readonly afiliadoRepository : Repository<Afiliado>,
+    @InjectRepository(DetalleAfiliado)
+    private datosIdentificacionRepository: Repository<DetalleAfiliado>,
     private connection: Connection,
   ){}
   
@@ -99,13 +79,10 @@ export class AfiliadoService {
         }));
 
         // Crear y preparar el nuevo afiliado principal con datos y relaciones
-        const newAfiliado = queryRunner.manager.create(Afiliado, {
+        /* const newAfiliado = queryRunner.manager.create(Afiliado, {
             ...createAfiliadoDto,
-            provincia,
-            afiliadosPorBanco: [afiliadoBanco],
-            perfAfilCentTrabs,
         });
-        await queryRunner.manager.save(newAfiliado);
+        await queryRunner.manager.save(newAfiliado); */
 
         // Crear y asociar afiliados hijos
         if (createAfiliadoDto.afiliadosRelacionados && createAfiliadoDto.afiliadosRelacionados.length > 0) {
@@ -136,19 +113,13 @@ export class AfiliadoService {
                 });
                 await queryRunner.manager.save(afiliadoBancoHijo); */
 
-                const afiliadoHijo = queryRunner.manager.create(Afiliado, {
-                    ...hijoDto,
-                    provincia: provinciaHijo,
-                    padreIdAfiliado: newAfiliado
-                    /* ,
-                    afiliadosPorBanco: [afiliadoBancoHijo] */
-                });
+                const afiliadoHijo = 'si'
                 await queryRunner.manager.save(afiliadoHijo);
             }
         }
 
         await queryRunner.commitTransaction();
-        return newAfiliado;
+        return ;
     } catch (error) {
         await queryRunner.rollbackTransaction();
         this.handleException(error);
@@ -174,7 +145,7 @@ export class AfiliadoService {
   }
 
   async findOne(term: string) {
-    let afiliados: Afiliado;
+    /* let afiliados: Afiliado;
     if (isUUID(term)) {
       afiliados = await this.afiliadoRepository.findOneBy({ id_afiliado: term });
     } else {
@@ -186,7 +157,7 @@ export class AfiliadoService {
     if (!afiliados) {
       throw new NotFoundException(`afiliado con ${term} no existe`);
     }
-    return afiliados;
+    return afiliados; */
   }
 
   update(id: number, updateAfiliadoDto: UpdateAfiliadoDto) {
@@ -219,6 +190,25 @@ export class AfiliadoService {
         throw new Error(`Error al consultar beneficios: ${error.message}`);
       }
     }
+
+    async findByDni(dni: string) {
+      //const datosIdentificacion = await this.datosIdentificacionRepository.findOne({ where: { dni } });
+      
+     /*  if (!datosIdentificacion) {
+          throw new NotFoundException(`DatosIdentificacion with DNI "${dni}" not found.`);
+      } */
+
+      /* const afiliado = await this.afiliadoRepository.findOne({
+          where: { datosIdentificacion: { id_datos_identificacion: datosIdentificacion.id_datos_identificacion } },
+          relations: ['datosIdentificacion']
+      }); */
+
+      /* if (!afiliado) {
+          throw new NotFoundException(`Afiliado with DatosIdentificacion ID "${datosIdentificacion.id_datos_identificacion}" not found.`);
+      }
+
+      return afiliado; */
+  }
   
     
 /*  afiliados = await queryBuilder

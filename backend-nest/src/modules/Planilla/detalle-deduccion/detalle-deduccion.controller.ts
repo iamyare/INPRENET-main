@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseInterceptors, UploadedFile, Res } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseInterceptors, UploadedFile, Res, HttpCode, HttpStatus } from '@nestjs/common';
 import { DetalleDeduccionService } from './detalle-deduccion.service';
 import { CreateDetalleDeduccionDto } from './dto/create-detalle-deduccion.dto';
 import { UpdateDetalleDeduccionDto } from './dto/update-detalle-deduccion.dto';
@@ -11,11 +11,10 @@ export class DetalleDeduccionController {
   constructor(private readonly detalleDeduccionService: DetalleDeduccionService) {}
 
   @Post()
+  @HttpCode(HttpStatus.CREATED)
   create(@Body() createDetalleDeduccionDto: CreateDetalleDeduccionDto) {
     return this.detalleDeduccionService.create(createDetalleDeduccionDto);
   }
-
-  
 
   @Post('subirArchivo')
   @UseInterceptors(FileInterceptor('file'))
@@ -44,11 +43,6 @@ export class DetalleDeduccionController {
   update(@Param('id') id: string, @Body() updateDetalleDeduccionDto: UpdateDetalleDeduccionDto) {
     return this.detalleDeduccionService.update(+id, updateDetalleDeduccionDto);
   }
-
-  /* @Patch(':id/edit')
-  async updateDetalle(@Param('id') id: string, @Body() updateDetalleDeduccionDto: UpdateDetalleDeduccionDto): Promise<DetalleDeduccion> {
-    return this.detalleDeduccionService.editDetalleDeduccion(id, updateDetalleDeduccionDto);
-  } */
 
   @Delete(':id')
   remove(@Param('id') id: string) {

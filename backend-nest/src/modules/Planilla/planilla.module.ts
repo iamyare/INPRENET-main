@@ -18,16 +18,22 @@ import { DetalleDeduccionController } from './detalle-deduccion/detalle-deduccio
 import { DetalleDeduccion } from './detalle-deduccion/entities/detalle-deduccion.entity';
 import { DetalleDeduccionService } from './detalle-deduccion/detalle-deduccion.service';
 import { Institucion } from '../Empresarial/institucion/entities/institucion.entity';
-import { Afiliado } from 'src/afiliado/entities/afiliado.entity';
+/* import { Afiliado } from 'src/afiliado/entities/detalle_afiliado.entity'; */
+/* import { DatosIdentificacion } from 'src/afiliado/entities/afiliado'; */
 import { TipoPlanillaController } from './tipo-planilla/tipo-planilla.controller';
-import { DatosIdentificacion } from 'src/afiliado/entities/datos_identificacion';
+import { AfiliadoService } from 'src/afiliado/afiliado.service';
+import { AfiliadoController } from 'src/afiliado/afiliado.controller';
+import { Afiliado } from 'src/afiliado/entities/afiliado';
+import { DetalleAfiliado } from 'src/afiliado/entities/detalle_afiliado.entity';
+import { DetallePlanilla } from './planilla/entities/detalle_planilla.entity';
 
 @Module({
   controllers: [PlanillaController, BeneficioController, BeneficioPlanillaController, DeduccionController,
-                DeduccionController, DetalleDeduccionController,TipoPlanillaController],
+                DeduccionController, DetalleDeduccionController,TipoPlanillaController,AfiliadoController ],
   providers: [PlanillaService, BeneficioService, BeneficioPlanillaService, DeduccionService,
-              TipoPlanillaService, DetalleDeduccionService],
+              TipoPlanillaService, DetalleDeduccionService, AfiliadoService],
   imports: [
-    TypeOrmModule.forFeature([Beneficio, BeneficioPlanilla, Planilla, Deduccion, TipoPlanilla, DetalleDeduccion, Institucion, Afiliado, DatosIdentificacion])]
+    TypeOrmModule.forFeature([Beneficio, BeneficioPlanilla, Planilla, Deduccion, TipoPlanilla, DetalleDeduccion, Institucion, Afiliado, DetalleAfiliado,
+    DetallePlanilla]),]
 })
 export class PlanillaModule {}

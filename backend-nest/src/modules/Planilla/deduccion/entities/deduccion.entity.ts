@@ -1,4 +1,3 @@
-import { HistorialSalario } from 'src/afiliado/entities/historialSalarios.entity';
 import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 import { DetalleDeduccion } from '../../detalle-deduccion/entities/detalle-deduccion.entity';
 

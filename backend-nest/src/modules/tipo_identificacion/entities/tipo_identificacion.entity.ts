@@ -1,4 +1,4 @@
-import { DatosIdentificacion } from 'src/afiliado/entities/datos_identificacion';
+import { Afiliado } from 'src/afiliado/entities/afiliado';
 import { Entity, Column, PrimaryGeneratedColumn, OneToOne, OneToMany } from 'typeorm';
 
 @Entity()
@@ -9,7 +9,7 @@ export class TipoIdentificacion {
     @Column('varchar', { length: 40, nullable: true })
     tipo_identificacion: string;
 
-    @OneToMany(() => DatosIdentificacion, datosIdentificacion => datosIdentificacion.tipoIdentificacion)
-    datosIdentificacion: DatosIdentificacion[];
+    @OneToMany(() => Afiliado, afiliado => afiliado.tipoIdentificacion)
+    afiliado: Afiliado[];
 
 }

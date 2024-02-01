@@ -2,7 +2,6 @@ import { IsNumber, IsOptional, IsString, IsUUID, Length, Max, Min, isNumber } fr
 
 export class CreateDetalleDeduccionDto {
     @IsString()
-    @Length(10, 20)
     dni: string; // Asume que el DNI tiene una longitud específica
 
     @IsUUID()
@@ -18,8 +17,6 @@ export class CreateDetalleDeduccionDto {
     monto_total: number;
 
     @IsNumber()
-    @Min(0)
-    @Max(100) // Asumiendo que es un porcentaje o un valor máximo específico
     monto_aplicado: number;
 
     @IsString()

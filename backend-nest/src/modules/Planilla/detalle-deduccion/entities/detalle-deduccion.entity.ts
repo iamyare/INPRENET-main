@@ -1,7 +1,7 @@
 import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn, AfterInsert, getRepository, AfterLoad, Unique } from 'typeorm';
 import { Deduccion } from "../../deduccion/entities/deduccion.entity";
-import { Afiliado } from "src/afiliado/entities/afiliado.entity";
 import { Institucion } from "src/modules/Empresarial/institucion/entities/institucion.entity";
+import { Afiliado } from 'src/afiliado/entities/afiliado';
 
 @Entity()
 export class DetalleDeduccion {

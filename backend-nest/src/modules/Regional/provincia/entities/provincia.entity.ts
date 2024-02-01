@@ -1,8 +1,8 @@
 import { Column, Entity, ManyToOne, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 import { Pais } from "../../pais/entities/pais.entity";
-import { Afiliado } from "src/afiliado/entities/afiliado.entity";
 import { CentroTrabajo } from "src/modules/Empresarial/centro-trabajo/entities/centro-trabajo.entity";
 import { Municipio } from "../../municipio/entities/municipio.entity";
+import { Afiliado } from "src/afiliado/entities/afiliado";
 
 
 @Entity()
@@ -20,7 +20,7 @@ export class Provincia {
     municipio: Municipio[];
 
     @OneToMany(() => Afiliado, afiliado => afiliado.provincia)
-    afiliados: Afiliado[];
+    afiliado: Afiliado[];
 
     @OneToMany(() => CentroTrabajo, centroTrabajo => centroTrabajo.provincia)
     centrosTrabajo: CentroTrabajo[];

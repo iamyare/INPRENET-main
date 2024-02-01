@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, NotFoundException } from '@nestjs/common';
 import { AfiliadoService } from './afiliado.service';
 import { CreateAfiliadoDto } from './dto/create-afiliado.dto';
 import { UpdateAfiliadoDto } from './dto/update-afiliado.dto';
@@ -21,6 +21,11 @@ export class AfiliadoController {
   @Get()
   findAll() {
     return this.afiliadoService.findAll();
+  }
+
+  @Get('/dni/:dni')
+  async findByDni(@Param('dni') dni: string) {
+    return await this.afiliadoService.findByDni(dni);
   }
 
   @Get(':term')

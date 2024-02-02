@@ -1,6 +1,7 @@
-import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
+import { Column, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 import { Beneficio } from "../../beneficio/entities/beneficio.entity";
 import { Afiliado } from "src/afiliado/entities/afiliado";
+import { DetallePlanilla } from "../../planilla/entities/detalle_planilla.entity";
 
 @Entity()
 export class BeneficioPlanilla {
@@ -34,5 +35,8 @@ export class BeneficioPlanilla {
     @ManyToOne(() => Afiliado, afiliado => afiliado.beneficioPlanilla, { cascade : true })
     @JoinColumn({ name: 'id_afiliado'})
     afiliado : Afiliado;
+
+    @OneToMany(() => DetallePlanilla, detallePlanilla => detallePlanilla.beneficioPlanilla)
+    detallePlanilla: DetallePlanilla[];
 
 }

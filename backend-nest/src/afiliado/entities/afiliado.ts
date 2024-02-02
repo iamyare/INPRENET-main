@@ -97,9 +97,6 @@ export class Afiliado {
     @OneToMany(() => DetalleAfiliado, detalleAfiliado => detalleAfiliado.afiliado)
     detalleAfiliado: DetalleAfiliado[];
 
-    @OneToMany(() => DetallePlanilla, detallePlanilla => detallePlanilla.afiliado)
-    detallePlanilla: DetallePlanilla[];
-
     @ManyToOne(() => Provincia, provincia => provincia.afiliado, { cascade: true })
     @JoinColumn({ name: 'id_provincia' })
     provincia: Provincia;

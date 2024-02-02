@@ -41,7 +41,7 @@ export class DetalleDeduccionController {
 
   @Patch(':id')
   update(@Param('id') id: string, @Body() updateDetalleDeduccionDto: UpdateDetalleDeduccionDto) {
-    return this.detalleDeduccionService.update(+id, updateDetalleDeduccionDto);
+    return this.detalleDeduccionService.update(id, updateDetalleDeduccionDto);
   }
 
   @Delete(':id')

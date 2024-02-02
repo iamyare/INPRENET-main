@@ -145,19 +145,23 @@ export class AfiliadoService {
   }
 
   async findOne(term: string) {
-    /* let afiliados: Afiliado;
+    let afiliados: Afiliado;
     if (isUUID(term)) {
-      afiliados = await this.afiliadoRepository.findOneBy({ id_afiliado: term });
+      afiliados = await this.afiliadoRepository.findOne({
+        where: { id_afiliado: term },
+        relations: ['detalleAfiliado'], // Asegúrate de cargar la relación
+      });
     } else {
       const queryBuilder = this.afiliadoRepository.createQueryBuilder('afiliado');
       afiliados = await queryBuilder
-        .where('"dni" = :term AND "tipo_cotizante" = :tipo_cotizante', { term,tipo_cotizante:"AFILIADO" })
+        .leftJoinAndSelect('afiliado.detalleAfiliado', 'detalleAfiliado') // Join con la tabla detalleAfiliado
+        .where('afiliado.dni = :term AND detalleAfiliado.tipo_afiliado = :tipo_afiliado', { term, tipo_afiliado: "AFILIADO" })
         .getOne();
     }
     if (!afiliados) {
-      throw new NotFoundException(`afiliado con ${term} no existe`);
+      throw new NotFoundException(`Afiliado con ${term} no existe`);
     }
-    return afiliados; */
+    return afiliados;
   }
 
   update(id: number, updateAfiliadoDto: UpdateAfiliadoDto) {

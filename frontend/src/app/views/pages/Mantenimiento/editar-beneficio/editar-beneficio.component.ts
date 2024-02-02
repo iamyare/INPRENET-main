@@ -1,105 +1,98 @@
 import { Component, OnInit } from '@angular/core';
-import { ValidatorFn, Validators } from '@angular/forms';
+import { Validators } from '@angular/forms';
 import { ToastrService } from 'ngx-toastr';
 import { BeneficiosService } from 'src/app/services/beneficios.service';
+import { TableColumn } from 'src/app/views/shared/shared/Interfaces/table-column';
 
 @Component({
   selector: 'app-editar-beneficio',
   templateUrl: './editar-beneficio.component.html',
-  styleUrl: './editar-beneficio.component.scss'
+  styleUrls: ['./editar-beneficio.component.scss']
 })
 export class EditarBeneficioComponent implements OnInit {
-  public myColumns: TableColumn[] = []
+  public myColumns: TableColumn[] = [];
   public filas: any[] = [];
+  ejecF: any;
 
-  constructor (
+  constructor(
     private svcBeneficioServ: BeneficiosService,
     private toastr: ToastrService
-    ){}
+  ) {}
 
   ngOnInit(): void {
     this.myColumns = [
       {
         header: 'Nombre del Beneficio',
-        col: "nombre_beneficio",
+        col: 'nombre_beneficio',
         isEditable: true,
         validationRules: [Validators.required, Validators.minLength(3)]
       },
       {
-        header: 'Descripcion del beneficio',
+        header: 'Descripción del beneficio',
         col: 'descripcion_beneficio',
         isEditable: true
       },
       {
-      header: 'estado',
-      col: 'estado',
-      isEditable: true
-    },
+        header: 'Estado',
+        col: 'estado',
+        isEditable: true
+      },
       {
-      header: 'numero_rentas_max',
-      col: 'numero_rentas_max',
-      isEditable: true
-    },
+        header: 'Número máximo de rentas',
+        col: 'numero_rentas_max',
+        isEditable: true
+      },
     ];
+
+    this.getFilas().then(() => this.cargar());
   }
 
   editar = (row: any) => {
-
     const beneficioData = {
       nombre_beneficio: row.nombre_beneficio,
       descripcion_beneficio: row.descripcion_beneficio,
       numero_rentas_max: row.numero_rentas_max,
       estado: row.estado,
-
-    }
+    };
 
     this.svcBeneficioServ.updateBeneficio(row.id, beneficioData).subscribe(
-      (response) => {
+      response => {
         this.toastr.success('Beneficio editado con éxito');
       },
-      (error) => {
-        this.toastr.error('Error al actualizar Beneficio');
+      error => {
+        this.toastr.error('Error al actualizar el beneficio');
       }
     );
   };
 
-  getFilas = async () => {
+  async getFilas() {
     try {
       const data = await this.svcBeneficioServ.getTipoBeneficio().toPromise();
-
-      this.filas = data.map((item: any) => {
-        return {
-          id: item.id_beneficio,
-          nombre_beneficio: item.nombre_beneficio,
-          descripcion_beneficio: item.descripcion_beneficio || 'No disponible',
-          numero_rentas_max: item.numero_rentas_max ,
-          estado: item.estado
-        };
-      });
-
-      return this.filas;
+      this.filas = data.map((item: any) => ({
+        id: item.id_beneficio,
+        nombre_beneficio: item.nombre_beneficio,
+        descripcion_beneficio: item.descripcion_beneficio || 'No disponible',
+        numero_rentas_max: item.numero_rentas_max,
+        estado: item.estado,
+      }));
     } catch (error) {
-      console.error("Error al obtener datos de beneficios", error);
-      throw error; // Puedes manejar el error aquí o dejarlo para que se maneje en el componente que llama a esta función
+      this.toastr.error('Error al cargar los beneficios');
+      console.error('Error al obtener datos de beneficios', error);
     }
-  };
+  }
 
   hacerAlgo(row: any) {
-    // Aquí puedes agregar la lógica que necesites
     console.log('Acción del botón en la fila:', row);
   }
+
+  ejecutarFuncionAsincronaDesdeOtroComponente(funcion: (data: any) => Promise<void>) {
+    this.ejecF = funcion;
+  }
+
+  cargar() {
+    if (this.ejecF) {
+      this.ejecF(this.filas).then(() => {
+      });
+    }
+  }
 }
-
-
-interface TableColumn {
-  header: string;
-  col: string;
-  customRender?: (data: any) => string;
-  isButton?: boolean;
-  buttonAction?: (row: any) => void;
-  buttonText?: string;
-  isEditable?: boolean;// Nueva propiedad
-  validationRules?: ValidatorFn[];
-}
-
-

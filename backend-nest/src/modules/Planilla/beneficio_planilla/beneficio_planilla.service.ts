@@ -5,7 +5,6 @@ import { BeneficioPlanilla } from './entities/beneficio_planilla.entity';
 import { isUUID } from 'class-validator';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { DetalleAfiliado } from 'src/afiliado/entities/detalle_afiliado.entity';
 import { Beneficio } from '../beneficio/entities/beneficio.entity';
 import { Afiliado } from 'src/afiliado/entities/afiliado';
 
@@ -28,7 +27,7 @@ export class BeneficioPlanillaService {
     try {
       if(datos.dni){
          afiliado = await this.afiliadoRepository.findOne({
-          /* where: {dni: datos.dni} */
+          where: {dni: datos.dni}
         });
       }
       if (!afiliado) {
@@ -45,14 +44,14 @@ export class BeneficioPlanillaService {
         throw new BadRequestException('tipoBeneficio no encontrada');
       }
       
-     /*  if (afiliado && tipoBeneficio){
+      if (afiliado && tipoBeneficio){
        const nuevoDetalle = this.benAfilRepository.create(
           {afiliado: afiliado, beneficio: tipoBeneficio, periodoInicio:datos.periodoInicio, periodoFinalizacion:datos.periodoFinalizacion}
           );
           return this.benAfilRepository.save(nuevoDetalle);
         }else{
           throw new BadRequestException('error desconocido');
-      } */
+      }
     } catch (error) {
       this.handleException(error);
     }

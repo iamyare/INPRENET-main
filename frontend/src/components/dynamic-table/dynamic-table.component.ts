@@ -58,6 +58,8 @@ export class DynamicTableComponent implements OnInit, OnDestroy {
   }
 
   public async ejecutarFuncionAsincrona(data:any) {
+    console.log(data);
+
     if (data){
       this.filas = data
       this.filas?.map((objeto: any) => ({ ...objeto, isSelected: false }));

@@ -38,10 +38,4 @@ export class DetalleDeduccion {
 
     @Column('timestamp', { default: () => 'CURRENT_TIMESTAMP' })
     fecha_aplicado: Date;
-
-    @Column({
-        type: 'timestamp',
-        default: () => 'CURRENT_TIMESTAMP',
-    })
-    fecha_subida: Date;
 }

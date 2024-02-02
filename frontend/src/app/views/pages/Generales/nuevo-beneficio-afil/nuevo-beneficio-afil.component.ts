@@ -3,6 +3,7 @@ import { FormBuilder, FormGroup, ValidatorFn, Validators } from '@angular/forms'
 import { ToastrService, ToastrModule } from 'ngx-toastr';
 import { AfiliadoService } from 'src/app/services/afiliado.service';
 import { BeneficiosService } from 'src/app/services/beneficios.service';
+import { FieldConfig } from 'src/app/views/shared/shared/Interfaces/field-config';
 @Component({
   selector: 'app-nuevo-beneficio-afil',
   templateUrl: './nuevo-beneficio-afil.component.html',
@@ -23,8 +24,6 @@ export class NuevoBeneficioAfilComponent implements OnInit{
   myColumns:any = []
   filas:any
 
-  /* isChecked = true; */
-
   constructor(
     private svcBeneficioServ: BeneficiosService,
     private svcAfilServ: AfiliadoService, private fb: FormBuilder,
@@ -35,13 +34,13 @@ export class NuevoBeneficioAfilComponent implements OnInit{
     this.getTipoBen();
     this.myFormFields = [
       { type: 'text', label: 'DNI', name: 'dni', validations: [Validators.required, Validators.minLength(13), Validators.maxLength(14)] },
+      { type: 'daterange', label: 'Periodo', name: 'periodo', validations: [Validators.required]},
       {
         type: 'dropdown', label: 'Tipo de beneficio', name: 'tipo_beneficio',
         options: this.tiposBeneficios,
         validations: [Validators.required]
       },
       { type: 'number', label: 'monto', name: 'monto', validations: [Validators.required]},
-      { type: 'daterange', label: 'Periodo', name: 'periodo', validations: [Validators.required]},
     ];
   }
 
@@ -86,8 +85,6 @@ export class NuevoBeneficioAfilComponent implements OnInit{
 
       const startDateFormatted = startDate.toLocaleDateString('es', opciones).replace(/\//g, '-');
       const endDateFormatted = endDate.toLocaleDateString('es', opciones).replace(/\//g, '-');
-      console.log(startDateFormatted);
-      console.log(endDateFormatted);
 
       // Preparar los datos formateados, excluyendo 'periodo'
       const datosFormateados = {
@@ -223,14 +220,4 @@ export class NuevoBeneficioAfilComponent implements OnInit{
       }); */
     }
   }
-
-}
-
-interface FieldConfig {
-  type: string;
-  label: string;
-  name: string;
-  value?: any;
-  options?: { label: string; value: any }[];
-  validations?: ValidatorFn[];
 }

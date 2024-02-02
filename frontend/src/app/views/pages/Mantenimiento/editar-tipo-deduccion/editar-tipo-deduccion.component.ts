@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { ValidatorFn, Validators } from '@angular/forms';import { ToastrService } from 'ngx-toastr';
 import { DeduccionesService } from '../../../../services/deducciones.service';
+import { TableColumn } from 'src/app/views/shared/shared/Interfaces/table-column';
 
 @Component({
   selector: 'app-editar-tipo-deduccion',
@@ -10,6 +11,7 @@ import { DeduccionesService } from '../../../../services/deducciones.service';
 export class EditarTipoDeduccionComponent implements OnInit{
   public myColumns: TableColumn[] = []
   public filas: any[] = [];
+  ejecF: any;
 
   constructor (
     private deduccionesService: DeduccionesService,
@@ -41,6 +43,8 @@ export class EditarTipoDeduccionComponent implements OnInit{
       validationRules: [Validators.required, Validators.pattern(/^[0-9]+$/)]
     }
     ];
+
+    this.getFilas().then(() => this.cargar());
   }
 
   getFilas = async () => {
@@ -84,17 +88,14 @@ export class EditarTipoDeduccionComponent implements OnInit{
     );
   };
 
+  ejecutarFuncionAsincronaDesdeOtroComponente(funcion: (data: any) => Promise<void>) {
+    this.ejecF = funcion;
+  }
 
-
-}
-
-interface TableColumn {
-  header: string;
-  col: string;
-  customRender?: (data: any) => string;
-  isButton?: boolean;
-  buttonAction?: (row: any) => void;
-  buttonText?: string;
-  isEditable?: boolean;// Nueva propiedad
-  validationRules?: ValidatorFn[];
+  cargar() {
+    if (this.ejecF) {
+      this.ejecF(this.filas).then(() => {
+      });
+    }
+  }
 }

@@ -2,6 +2,7 @@ import { Component } from '@angular/core';
 import { ValidatorFn, Validators } from '@angular/forms';
 import { DeduccionesService } from 'src/app/services/deducciones.service';
 import { ToastrService } from 'ngx-toastr';
+import { FieldConfig } from 'src/app/views/shared/shared/Interfaces/field-config';
 @Component({
   selector: 'app-nuevo-tipo-deduccion',
   templateUrl: './nuevo-tipo-deduccion.component.html',
@@ -55,13 +56,4 @@ export class NuevoTipoDeduccionComponent {
       );
   }
 
-}
-
-interface FieldConfig {
-  type: string;
-  label: string;
-  name: string;
-  value?: any;
-  options?: { label: string; value: any }[];
-  validations?: ValidatorFn[];
 }

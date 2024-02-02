@@ -4,20 +4,19 @@ export class CreateDetalleDeduccionDto {
     @IsString()
     dni: string; // Asume que el DNI tiene una longitud específica
 
-    @IsUUID()
-    @IsOptional()
-    id_deduccion?: string; // Opcional, dependiendo de tu lógica de negocio
+     @IsString()
+    nombre_deduccion: string; // Opcional, dependiendo de tu lógica de negocio
 
-    @IsUUID()
-    @IsOptional()
-    id_institucion?: string; // Opcional, dependiendo de tu lógica de negocio
+    @IsString()
+    nombre_institucion: string; // Opcional, dependiendo de tu lógica de negocio
 
     @IsNumber()
     @Min(0)
     monto_total: number;
 
     @IsNumber()
-    monto_aplicado: number;
+    @IsOptional()
+    monto_aplicado?: number;
 
     @IsString()
     @IsOptional()

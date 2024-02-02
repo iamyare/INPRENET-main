@@ -12,6 +12,7 @@ import { TableColumn } from 'src/app/views/shared/shared/Interfaces/table-column
 export class EditarTipoPlanillaComponent implements OnInit{
   myColumns: TableColumn[] = [];
   filas: any[] =[];
+  ejecF: any;
 
   constructor(
     private planillaService: PlanillaService,
@@ -38,14 +39,10 @@ export class EditarTipoPlanillaComponent implements OnInit{
         header: 'Descripcion',
         col: 'descripcion',
         isEditable: true
-      },
-      {
-        header: 'Periodo',
-        col: 'periodo',
-        isEditable: true,
-        validationRules: [Validators.required, Validators.pattern(/^(3[01]|[12][0-9]|0?[1-9])-(1[0-2]|0?[1-9])-\d{4} - (3[01]|[12][0-9]|0?[1-9])-(1[0-2]|0?[1-9])-\d{4}$/)]
       }
     ];
+
+    this.getFilas().then(() => this.cargar());
 
   }
 
@@ -57,8 +54,7 @@ export class EditarTipoPlanillaComponent implements OnInit{
         return {
           id: item.id_tipo_planilla,
           nombre: item.nombre_planilla,
-          descripcion: item.descripcion || 'No disponible', // manejo de descripciones nulas
-          periodo: `${item.periodoInicio} - ${item.periodoFinalizacion}`
+          descripcion: item.descripcion || 'No disponible'
         };
       });
 
@@ -72,13 +68,9 @@ export class EditarTipoPlanillaComponent implements OnInit{
 
 
   editar = (row: any) => {
-    const [periodoInicio, periodoFinalizacion] = row.periodo.split(' - ');
-
     const tipoPlanillaData = {
       nombre_planilla: row.nombre,
-      descripcion: row.descripcion,
-      periodoInicio: periodoInicio.trim(),
-      periodoFinalizacion: periodoFinalizacion.trim(),
+      descripcion: row.descripcion
     };
 
     this.planillaService.updateTipoPlanilla(row.id, tipoPlanillaData).subscribe(
@@ -90,6 +82,17 @@ export class EditarTipoPlanillaComponent implements OnInit{
       }
     );
   };
+
+  ejecutarFuncionAsincronaDesdeOtroComponente(funcion: (data: any) => Promise<void>) {
+    this.ejecF = funcion;
+  }
+
+  cargar() {
+    if (this.ejecF) {
+      this.ejecF(this.filas).then(() => {
+      });
+    }
+  }
 
 
 }

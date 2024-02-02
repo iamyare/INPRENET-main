@@ -2,6 +2,7 @@ import { Component } from '@angular/core';
 import { ValidatorFn, Validators } from '@angular/forms';
 import { BeneficiosService } from '../../../../services/beneficios.service';
 import { ToastrService } from 'ngx-toastr';
+import { FieldConfig } from 'src/app/views/shared/shared/Interfaces/field-config';
 @Component({
   selector: 'app-nuevo-beneficio',
   templateUrl: './nuevo-beneficio.component.html',
@@ -52,13 +53,4 @@ export class NuevoBeneficioComponent {
       }
       );
   }
-}
-
-interface FieldConfig {
-  type: string;
-  label: string;
-  name: string;
-  value?: any;
-  options?: { label: string; value: any }[];
-  validations?: ValidatorFn[];
 }

@@ -39,7 +39,6 @@ export class NuevaDeduccionAfilComponent{
   }
 
   alertFormValues(formGroup: FormGroup) {
-    console.log(formGroup);
 
     alert(JSON.stringify(formGroup.value, null, 2));
   }
@@ -123,6 +122,27 @@ unirNombres(
 
   let nombreCompleto: string = partesNombre.join(' ');
   return nombreCompleto;
+}
+
+guardarDetalleDeduccion(){
+  this.deduccionesService.createDetalleDeduccion(this.data.value).subscribe(
+    {
+      next: (response) => {
+        this.toastr.success('Detalle de deduccion creado con éxito');
+      },
+      error: (error) => {
+        let mensajeError = 'Error desconocido al crear Detalle de deduccion';
+        // Verifica si el error tiene una estructura específica
+        if (error.error && error.error.message) {
+          mensajeError = error.error.message;
+        } else if (typeof error.error === 'string') {
+          // Para errores que vienen como un string simple
+          mensajeError = error.error;
+        }
+        this.toastr.error(mensajeError);
+      }
+    }
+    );
 }
 
 /* Carga de archivos */

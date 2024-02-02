@@ -27,6 +27,4 @@ export class DetalleAfiliado {
     @JoinColumn({ name: 'id_afiliado' })
     afiliado: Afiliado;
     
-    
-    
 }

@@ -11,22 +11,16 @@ import { TableColumn } from 'src/app/views/shared/shared/Interfaces/table-column
   styleUrl: './nuevaplanilla.component.scss'
 })
 export class NuevaplanillaComponent implements OnInit{
-  //tablas
   myColumns: TableColumn[] = [];
-  filasT: any[] =[];
-
-  //formulario
-  public myFormFields: FieldConfig[] = [];
-  filas:any;
-  tiposPlanilla:any = [];
-  data:any;
-  nameAfil:string = "";
-  formGroup = this._formBuilder.group({
-    enableWifi: '', // Asumo que este campo ya existe por alguna razón específica
-    acceptTerms: ['', Validators.requiredTrue],
-    mes: ['', Validators.required], // Nuevo campo para el mes
-    anio: ['', [Validators.required, Validators.min(2000)]] // Nuevo campo para el año
-  });
+  filasT: any[] = [];
+  myFormFields: FieldConfig[] = [];
+  filas: any;
+  tiposPlanilla: any[] = [];
+  nameAfil: string = "";
+  datosFormateados: any;
+  datosTabl: any;
+  verDat: boolean = false;
+  ejecF: any;
 
   constructor( private _formBuilder: FormBuilder,
     private planillaService : PlanillaService,
@@ -53,12 +47,12 @@ export class NuevaplanillaComponent implements OnInit{
           isEditable: true
         },
         {
-          header: 'Monto Total',
+          header: 'Monto Deduccion Total',
           col: 'monto_total',
           isEditable: true
         },
         {
-          header: 'Monto aplicado',
+          header: 'Monto Deduccion aplicado',
           col: 'monto_aplicado',
           isEditable: true,
           validationRules: [Validators.required, Validators.pattern(/^(3[01]|[12][0-9]|0?[1-9])-(1[0-2]|0?[1-9])-\d{4} - (3[01]|[12][0-9]|0?[1-9])-(1[0-2]|0?[1-9])-\d{4}$/)]
@@ -66,13 +60,44 @@ export class NuevaplanillaComponent implements OnInit{
       ];
     }
 
-    getFilas = async (mes: number, anio: number) => {
+    getTiposPlanillas = async () => {
       try {
-        const mes = 1; // Ejemplo: Enero
-        const anio = 2024;
-        // Asegúrate de pasar los parámetros mes y anio a la función getDeduccionesNoAplicadas
-        const data = await this.planillaService.getDeduccionesNoAplicadas(mes, anio).toPromise();
+        const data = await this.planillaService.findAllTipoPlanilla().toPromise();
+        this.filas = data.map((item: any) => {
+          this.tiposPlanilla.push({ label: `${item.nombre_planilla}`, value: `${item.nombre_planilla}` })
+          return {
+            id: item.id_tipo_planilla,
+            nombre_planilla: item.nombre_planilla,
+            descripcion: item.descripcion || 'No disponible',
+            periodoInicio: item.periodoInicio,
+            periodoFinalizacion: item.periodoFinalizacion,
+            estado: item.estado,
+          };
+        });
+        return this.filas;
+      } catch (error) {
+        console.error("Error al obtener datos de Tipo Planilla", error);
+      }
+    };
 
+    obtenerDatos1():any{
+      this.getTiposPlanillas()
+      this.myFormFields = [
+        { type: 'number', label: 'Codigo De Planilla', name: 'codigo_planilla', validations: [Validators.required, Validators.pattern("^\\d*\\.?\\d+$")] },
+        {
+          type: 'dropdown', label: 'Nombre de Tipo planilla', name: 'nombre_planilla',
+          options: this.tiposPlanilla,
+          validations: [Validators.required]
+        },
+        { type: 'daterange', label: 'Periodo', name: 'periodo', validations: [Validators.required]},
+        { type: 'number', label: 'Secuencia', name: 'secuencia', validations: [Validators.required,Validators.pattern("^\\d*\\.?\\d+$")] },
+      ]
+    }
+
+    getFilas = async (periodoInicio: string, periodoFinalizacion: string) => {
+      try {
+        // Asegúrate de pasar los parámetros mes y anio a la función getDeduccionesNoAplicadas
+        const data = await this.planillaService.getDeduccionesNoAplicadas(periodoInicio, periodoFinalizacion).toPromise();
         this.filasT = data.map((item: any) => {
           return {
             id_afiliado: item.id_afiliado,
@@ -84,6 +109,7 @@ export class NuevaplanillaComponent implements OnInit{
             monto_aplicado: item.monto_aplicado
           };
         });
+
         return this.filasT;
       } catch (error) {
         console.error("Error al obtener datos de deducciones", error);
@@ -91,45 +117,64 @@ export class NuevaplanillaComponent implements OnInit{
       }
     }
 
-    editar = (row: any) => {
-
-    }
-
     obtenerDatos(event:any):any{
-      this.data = event;
+      this.formatRangFech(event)
+      this.datosTabl = []
     }
 
-  obtenerDatos1():any{
-    this.getTiposPlanillas()
-    this.myFormFields = [{
-        type: 'dropdown', label: 'Nombre de Tipo planilla', name: 'nombre_planilla',
-        options: this.tiposPlanilla,
-        validations: [Validators.required]
-      },
-      { type: 'number', label: 'Secuencia', name: 'secuencia', validations: [Validators.required,Validators.pattern("^\\d*\\.?\\d+$")] },
-      { type: 'number', label: 'Codigo De Planilla', name: 'codigo_planilla', validations: [Validators.required, Validators.pattern("^\\d*\\.?\\d+$")] },
-    ]
+    formatRangFech(event:any) {
+      if (event?.value.periodo) {
+        const startDate = new Date(event.value.periodo.start);
+        const endDate = new Date(event.value.periodo.end);
+
+        const opciones: Intl.DateTimeFormatOptions = {
+          year: 'numeric',
+          month: '2-digit',
+          day: '2-digit'
+        };
+
+        const startDateFormatted = startDate.toLocaleDateString('es', opciones).replace(/\//g, '-');
+        const endDateFormatted = endDate.toLocaleDateString('es', opciones).replace(/\//g, '-');
+
+        // Preparar los datos formateados, excluyendo 'periodo'
+        const datosFormateados = {
+          ...event.value,
+          periodoInicio: startDateFormatted,
+          periodoFinalizacion: endDateFormatted
+        };
+
+        delete datosFormateados.periodo;
+
+        this.datosFormateados = datosFormateados;
+
+      } else {
+          console.error('La propiedad periodo no está definida en el evento');
+      }
+    }
+
+  editar = (row: any) => {}
+
+  previsualizarDatos = async () => {
+    if ( this.datosFormateados.periodoInicio != 'Invalid Date' && this.datosFormateados != 'Invalid Date'){
+      this.datosTabl = await this.getFilas(this.datosFormateados.periodoInicio, this.datosFormateados.periodoFinalizacion)
+      this.verDat = true
+      this.filasT = this.datosTabl;
+
+      this.ejecF(this.filasT).then(()=>{})
+
+    }
+
+    return this.datosTabl
   }
 
-  getTiposPlanillas = async () => {
-    try {
-      const data = await this.planillaService.findAllTipoPlanilla().toPromise();
-      this.filas = data.map((item: any) => {
-        this.tiposPlanilla.push({ label: `${item.nombre_planilla}`, value: `${item.nombre_planilla}` })
-        return {
-          id: item.id_tipo_planilla,
-          nombre_planilla: item.nombre_planilla,
-          descripcion: item.descripcion || 'No disponible',
-          periodoInicio: item.periodoInicio,
-          periodoFinalizacion: item.periodoFinalizacion,
-          estado: item.estado,
-        };
-      });
-      return this.filas;
-    } catch (error) {
-      console.error("Error al obtener datos de Tipo Planilla", error);
+  ejecutarFuncionAsincronaDesdeOtroComponente(funcion: (data:any) => Promise<void>) {
+    this.ejecF = funcion;
+  }
+
+  crearPlanilla(){
+    if (this.datosTabl){
+      console.log(this.datosFormateados);
+      console.log(this.datosTabl);
     }
-  };
-
-
+  }
 }

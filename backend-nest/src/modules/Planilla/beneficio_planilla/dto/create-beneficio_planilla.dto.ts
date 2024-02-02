@@ -24,4 +24,7 @@ export class CreateBeneficioPlanillaDto {
     @IsNumber()
     monto: number;
 
+    @IsNumber()
+    num_rentas_aplicadas: number;
+
 }

@@ -14,10 +14,10 @@ export class PlanillaController {
 
   @Get('deducciones-no-aplicadas')
   getDeduccionesNoAplicadas(
-    @Query('mes') mes: number,
-    @Query('anio') anio: number
+    @Query('periodoInicio') periodoInicio: string,
+    @Query('periodoFinalizacion') periodoFinalizacion: string
   ) {
-    return this.planillaService.getDeduccionesNoAplicadas(mes, anio);
+    return this.planillaService.getDeduccionesNoAplicadas(periodoInicio, periodoFinalizacion);
   }
 
   @Get()

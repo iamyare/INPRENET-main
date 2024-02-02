@@ -7,6 +7,7 @@ import { Repository } from 'typeorm';
 /* import { Afiliado } from 'src/afiliado/entities/detalle_afiliado.entity'; */
 import { Institucion } from 'src/modules/Empresarial/institucion/entities/institucion.entity';
 import { Afiliado } from 'src/afiliado/entities/afiliado';
+import { format } from 'date-fns';
 
 @Injectable()
 export class PlanillaService {
@@ -28,7 +29,7 @@ export class PlanillaService {
     return `This action returns all planilla`;
   }
 
-  async getDeduccionesNoAplicadas(mes: number, anio: number): Promise<any> {
+  async getDeduccionesNoAplicadas(periodoInicio: string, periodoFinalizacion: string): Promise<any> {
     const resultado = await this.detalleDeduccionRepository
       .createQueryBuilder('detDed')
       .select('detDed.id_afiliado', 'id_afiliado')
@@ -43,10 +44,12 @@ export class PlanillaService {
       .addSelect('SUM(detDed.monto_aplicado)', 'monto_aplicado')
       .innerJoin(Institucion, 'inst', 'detDed.id_institucion = inst.id_institucion')
       .innerJoin(Afiliado, 'afil', 'afil.id_afiliado = detDed.id_afiliado')
-      .where('detDed.mes = :mes AND detDed.anio = :anio AND detDed.estado_aplicacion = :estado', {
-        mes,
-        anio,
-        estado: 'NO APLICADO',
+      .where(`
+      TO_DATE(CONCAT(detDed.anio, LPAD(detDed.mes, 2, '0')), 'YYYYMM') BETWEEN TO_DATE(:periodoInicio, 'DD-MM-YYYY') AND 
+      TO_DATE(:periodoFinalizacion, 'DD-MM-YYYY')
+      `, {
+        periodoInicio: periodoInicio,
+        periodoFinalizacion: periodoFinalizacion,
       })
       .groupBy('detDed.id_afiliado')
       .addGroupBy('inst.id_institucion')

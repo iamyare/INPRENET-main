@@ -16,6 +16,9 @@ export class BeneficioPlanilla {
 
     @Column({nullable:true})
     monto: number;
+    
+    @Column({nullable:true})
+    num_rentas_aplicadas: number;
 
     @Column('varchar2', { length: 200, nullable: false })
     periodoInicio: string;

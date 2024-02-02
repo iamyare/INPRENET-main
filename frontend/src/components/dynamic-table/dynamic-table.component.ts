@@ -13,7 +13,10 @@ export class DynamicTableComponent implements OnInit, OnDestroy {
   @Input() verOpcEditar: boolean = false;
   @Output() getElemSeleccionados = new EventEmitter<any>()
 
-  @Input() getData: any;
+  @Input() getData?: any;
+  @Input() data?: any;
+  @Output() ejecutarFuncionAsincronaEvent: EventEmitter<(param: any) => Promise<void>> = new EventEmitter<(param: any) => Promise<void>>();
+
   @Input() columns: TableColumn[] = [];
   @Input() editarFunc: any;
 
@@ -54,16 +57,18 @@ export class DynamicTableComponent implements OnInit, OnDestroy {
     this.destroy$.complete();
   }
 
-  ngOnInit(): void {
-    this.ejecutarFuncionAsincrona();
+  public async ejecutarFuncionAsincrona(data:any) {
+    if (data){
+      this.filas = data
+      this.filas?.map((objeto: any) => ({ ...objeto, isSelected: false }));
+    }else{
+      this.filas = await this.getData();
+    }
+    this.filtrarUsuarios().subscribe();
   }
 
-
-  async ejecutarFuncionAsincrona() {
-    this.filas = await this.getData();
-    this.filas.map((objeto: any) => ({ ...objeto, isSelected: false }));
-    console.log(this.filas);
-    this.filtrarUsuarios().subscribe();
+  ngOnInit(): void {
+    this.ejecutarFuncionAsincronaEvent.emit(this.ejecutarFuncionAsincrona.bind(this));
   }
 
   filtrarUsuarios(query?: any): Observable<any[]> {
@@ -102,7 +107,7 @@ export class DynamicTableComponent implements OnInit, OnDestroy {
       });
     } else {
       // Si el buscador está vacío, cargar todos los resultados sin filtrar
-      this.ejecutarFuncionAsincrona();
+      this.ejecutarFuncionAsincrona(this.filas);
     }
   }
 

@@ -1,5 +1,42 @@
-<div *ngIf="formGroup.invalid">
+<!-- <div *ngIf="formGroup.invalid"> -->
+
   <app-dynamic-form [fields]="myFormFields" titulo="Detalles de nueva planilla" subtitulo="Completa la informacion correspondiente"
   (newDatBenChange)="obtenerDatos($event)"></app-dynamic-form>
-  <app-dynamic-table  [verOpcEditar]="true" [columns]="myColumns" [getData]="getFilas" [editarFunc]="editar"></app-dynamic-table>
-</div>
+
+  <button mat-raised-button (click)="previsualizarDatos()" style="background-color: #628780; color: #ffffff; border-radius: 5px; padding: 10px 20px;">Previsualizar Datos</button>
+
+  <button mat-raised-button (click)="crearPlanilla()" style="background-color: #628780; color: #ffffff; border-radius: 5px; padding: 10px 20px;">Crear Planilla</button>
+
+  <div class="container mt-4">
+    <div class="row">
+      <!--
+      <div class="col-md-6">
+        <div >
+         <h1>Beneficios</h1>
+        </div>
+      </div> -->
+      <div class="col-md-12">
+        <!-- Columna 2, Fila 1 -->
+        <div >
+          <h1>Deducciones</h1>
+        </div>
+      </div>
+    </div>
+
+    <div class="row">
+<!--       <div class="col-md-6">
+        <div >
+          <app-dynamic-table  [verOpcEditar]="true" [columns]="myColumns" [data]="filasT" (ejecutarFuncionAsincronaEvent)="ejecutarFuncionAsincronaDesdeOtroComponente($event)" [editarFunc]="editar"></app-dynamic-table>
+        </div>
+      </div> -->
+      <div class="col-md-12">
+        <div >
+          <app-dynamic-table  [verOpcEditar]="true" [columns]="myColumns" [data]="filasT" (ejecutarFuncionAsincronaEvent)="ejecutarFuncionAsincronaDesdeOtroComponente($event)" [editarFunc]="editar"></app-dynamic-table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+
+<!-- </div> -->

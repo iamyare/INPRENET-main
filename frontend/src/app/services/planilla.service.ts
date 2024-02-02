@@ -23,11 +23,12 @@ export class PlanillaService {
     return this.http.get(`${environment.API_URL}/api/tipo-planilla`, { params });
   }
 
-  getDeduccionesNoAplicadas(mes: number, anio: number): Observable<any> {
+  getDeduccionesNoAplicadas(periodoInicio: string, periodoFinalizacion: string): Observable<any> {
+
     // Construye los parámetros de la consulta
     let params = new HttpParams()
-      .set('mes', mes.toString())
-      .set('anio', anio.toString());
+      .set('periodoInicio', periodoInicio)
+      .set('periodoFinalizacion', periodoFinalizacion);
 
     // Realiza la petición GET al backend con los parámetros
     return this.http.get(`${environment.API_URL}/api/planilla/deducciones-no-aplicadas`, { params });

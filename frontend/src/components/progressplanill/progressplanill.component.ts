@@ -29,7 +29,7 @@ export class ProgressplanillComponent {
   datosB:boolean = false;
   datosF:boolean = false;
   datosA:boolean  = false;
-  @Input() estadoSubDed:any = true;
+  @Input() estadoSubDed:boolean = false;
 
   prueba(){
     this.datosG  = true;

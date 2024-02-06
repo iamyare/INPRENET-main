@@ -1,9 +1,11 @@
-import { Component, OnInit} from '@angular/core';
+import { Component, OnInit, ViewChild} from '@angular/core';
 import { FieldConfig } from '../../app/views/shared/shared/Interfaces/field-config';
 import { FormBuilder, Validators } from '@angular/forms';
 import { PlanillaService } from 'src/app/services/planilla.service';
 import { AfiliadoService } from 'src/app/services/afiliado.service';
 import { TableColumn } from 'src/app/views/shared/shared/Interfaces/table-column';
+import { ToastrService } from 'ngx-toastr';
+import { DynamicFormComponent } from '@docs-components/dynamic-form/dynamic-form.component';
 
 @Component({
   selector: 'app-nuevaplanilla',
@@ -11,6 +13,8 @@ import { TableColumn } from 'src/app/views/shared/shared/Interfaces/table-column
   styleUrl: './nuevaplanilla.component.scss'
 })
 export class NuevaplanillaComponent implements OnInit{
+  @ViewChild(DynamicFormComponent) dynamicForm!: DynamicFormComponent;
+
   myFormFields: FieldConfig[] = [];
   filas: any;
   tiposPlanilla: any[] = [];
@@ -18,6 +22,7 @@ export class NuevaplanillaComponent implements OnInit{
 
   constructor( private _formBuilder: FormBuilder,
     private planillaService : PlanillaService,
+    private toastr: ToastrService,
     private svcAfilServ: AfiliadoService) {
       this.obtenerDatos1();
     }
@@ -47,7 +52,7 @@ export class NuevaplanillaComponent implements OnInit{
     obtenerDatos1():any{
       this.getTiposPlanillas()
       this.myFormFields = [
-        { type: 'number', label: 'Codigo De Planilla', name: 'codigo_planilla', validations: [Validators.required, Validators.pattern("^\\d*\\.?\\d+$")] },
+        { type: 'string', label: 'Codigo De Planilla', name: 'codigo_planilla', validations: [Validators.required] },
         {
           type: 'dropdown', label: 'Nombre de Tipo planilla', name: 'nombre_planilla',
           options: this.tiposPlanilla,
@@ -113,6 +118,28 @@ export class NuevaplanillaComponent implements OnInit{
     }
 
   crearPlanilla(){
-      console.log(this.datosFormateados);
+    this.planillaService.createPlanilla(this.datosFormateados).subscribe({
+      next: (response) => {
+        this.toastr.success('Planilla creada con éxito');
+        this.limpiarFormulario();
+      },
+      error: (error) => {
+        let mensajeError = 'Error desconocido al crear TipoPlanilla';
+
+        if (error.error && error.error.message) {
+          mensajeError = error.error.message;
+        } else if (typeof error.error === 'string') {
+          mensajeError = error.error;
+        }
+
+        this.toastr.error(mensajeError);
+      }
+    });
+  }
+  limpiarFormulario(): void {
+    // Utiliza la referencia al componente DynamicFormComponent para resetear el formulario
+    if (this.dynamicForm) {
+      this.dynamicForm.form.reset();
+    }
   }
 }

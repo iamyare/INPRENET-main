@@ -1,3 +1,6 @@
+<app-dynamic-form [fields]="myFormFields" titulo="Detalles de planilla" subtitulo="Completa la informacion correspondiente"
+(newDatBenChange)="obtenerDatos($event)"></app-dynamic-form>
+
 <H2>Afiliados con beneficios y deducciones en el periodo</H2>
 
 <app-dynamic-table  [verOpcEditar]="true" [columns]="myColumnsDed" [data]="filasT" (ejecutarFuncionAsincronaEvent)="ejecutarFuncionAsincronaDesdeOtroComponente($event)" [editarFunc]="editar"></app-dynamic-table>

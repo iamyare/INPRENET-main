@@ -17,16 +17,10 @@ export class NuevaPlanillaComponentP {
   datosHS:boolean = false
 
   constructor(private fb: FormBuilder, private planillaService: PlanillaService) {
-    /* this.form = this.fb.group({
-      ArchivosDed: generateFormArchivo(),
-      ArchivosPlan: generateFormArchivo(),
-      Arch: "",
-      isChecked: [false]
-    }); */
     this.form = this.fb.group({
-      ArchivosDed: generateFormArchivo(),
-      ArchivosPlan: generateFormArchivo(),
-      Arch: "",
+      isChecked: [false]
+    });
+    this.form = this.fb.group({
       isChecked: [false] // Inicializa el estado del mat-slide-toggle
     });
     this.formplanilla = this.fb.group({

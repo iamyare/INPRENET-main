@@ -13,29 +13,29 @@ export class Planilla {
     @PrimaryGeneratedColumn('uuid')
     id_planilla : string
 
-    @Column('varchar2', { length: 36, nullable: false })
+    @Column('varchar2', {  nullable: false })
     codigo_planilla : string;
 
-    @Column('date', { nullable: false })
-    fecha_apertura : string;
+    @Column('date', { nullable: false, default: () => 'SYSDATE' })
+    fecha_apertura: Date;
 
-    @Column('varchar2', { length: 40, nullable: true })
-    secuencia : string;
+    @Column('number')
+    secuencia : number;
 
-    @Column('varchar2', { length: 20, nullable: true })
-    estado : string;
+    @Column('varchar2', { nullable: true, default: 'ACTIVA' })
+    estado: string;
 
-    @Column('varchar2', { length: 200, nullable: false })
+    @Column('varchar2', {  nullable: false })
     periodoInicio: string;
 
-    @Column('varchar2', { length: 200, nullable: false })
+    @Column('varchar2', {  nullable: false })
     periodoFinalizacion: string; 
 
-    @ManyToOne(() => TipoPlanilla, tipoPlanilla => tipoPlanilla.planilla)
+    @ManyToOne(() => TipoPlanilla, tipoPlanilla => tipoPlanilla.planilla,  { cascade: true })
     @JoinColumn({ name: 'id_tipo_planilla' })
     tipoPlanilla: TipoPlanilla;
 
-/*     @OneToMany(() => DetallePlanilla, detallePlanilla => detallePlanilla.planilla)
+    /* @OneToMany(() => DetallePlanilla, detallePlanilla => detallePlanilla.planilla)
     detallePlanilla: DetallePlanilla[]; */
 
     @OneToMany(() => DetalleDeduccion, detalleDeduccion => detalleDeduccion.planilla)

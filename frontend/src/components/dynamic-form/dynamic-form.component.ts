@@ -1,5 +1,6 @@
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { FormBuilder, FormGroup, ValidatorFn } from '@angular/forms';
+import { FieldConfig } from 'src/app/views/shared/shared/Interfaces/field-config';
 
 @Component({
   selector: 'app-dynamic-form',
@@ -72,12 +73,3 @@ export class DynamicFormComponent implements OnInit{
   }
 }
 
-interface FieldConfig {
-  type: string;
-  label: string;
-  name: string;
-  value?: any | { start: Date; end: Date };
-  options?: { label: string; value: any }[];
-  validations?: ValidatorFn[];
-
-}

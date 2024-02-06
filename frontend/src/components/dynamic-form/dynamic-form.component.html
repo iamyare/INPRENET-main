@@ -13,7 +13,7 @@
             <ng-container *ngIf="field.type !== 'dropdown' && field.type !== 'date' && field.type !== 'daterange'; else customField">
               <mat-form-field appearance="outline" style="width: 100%;">
                 <mat-label>{{field.label}}</mat-label>
-                <input matInput [type]="field.type" [formControlName]="field.name">
+                <input matInput [type]="field.type" [formControlName]="field.name" [readonly]="field.readOnly">
               </mat-form-field>
             </ng-container>
 
@@ -23,7 +23,7 @@
               <ng-container *ngIf="field.type === 'dropdown'; else dateField">
                 <mat-form-field appearance="outline" style="width: 100%;">
                   <mat-label>{{field.label}}</mat-label>
-                  <mat-select [formControlName]="field.name">
+                  <mat-select [formControlName]="field.name" [attr.readonly]="field.readOnly">
                     <mat-option *ngFor="let option of field.options" [value]="option.value">
                       {{option.label}}
                     </mat-option>
@@ -37,7 +37,7 @@
                 <ng-container *ngIf="field.type === 'date'; else daterangeField">
                   <mat-form-field appearance="outline" style="width: 100%">
                     <mat-label>{{field.label}}</mat-label>
-                    <input matInput [matDatepicker]="picker" [formControlName]="field.name">
+                    <input [readonly]="field.readOnly" matInput [matDatepicker]="picker" [formControlName]="field.name">
                     <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
                     <mat-datepicker #picker></mat-datepicker>
                   </mat-form-field>
@@ -49,8 +49,8 @@
                   <mat-form-field appearance="outline"  style="width: 100%" class="full-width">
                     <mat-label>{{field.label}}</mat-label>
                     <mat-date-range-input [rangePicker]="picker" [formGroup]="getRangeFormGroup(field.name)">
-                      <input matInput matStartDate placeholder="Inicio" formControlName="start">
-                      <input matInput matEndDate placeholder="Fin" formControlName="end">
+                      <input [readonly]="field.readOnly" matInput matStartDate placeholder="Inicio" formControlName="start">
+                      <input [readonly]="field.readOnly" matInput matEndDate placeholder="Fin" formControlName="end">
                     </mat-date-range-input>
                     <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
                     <mat-date-range-picker #picker></mat-date-range-picker>

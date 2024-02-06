@@ -2,12 +2,12 @@
 
 <form [formGroup]="form" #myForm="ngForm">
 
-    <!-- <mat-slide-toggle color="primary" formControlName="isChecked" (change)="onChangeToggle()">
-        ¿Desea subir nuevas deducciones?
-    </mat-slide-toggle> -->
+    <mat-slide-toggle color="primary" formControlName="isChecked" (change)="onChangeToggle()">
+        ¿Desea crear nueva planilla?
+    </mat-slide-toggle>
 
     <app-progressplanill (newDatBenChange)="setEstadoDatGen($event)" [estadoSubDed]="form.get('isChecked')?.value"
-        (newEstCentrTrab)="setEstadoTable($event)" (newdatosRP)="subirNuevPlan($event)">
+        (newEstCentrTrab)="setEstadoTable($event)" (newdatosRP)="subirNuevPlan($event)" >
     </app-progressplanill>
 
     <!-- <div class="row" *ngIf="datosG && form.get('isChecked')?.value">

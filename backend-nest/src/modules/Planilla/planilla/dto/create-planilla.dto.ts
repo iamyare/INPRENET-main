@@ -1,46 +1,24 @@
-import { IsNotEmpty, IsOptional, IsString, Length } from "class-validator";
+import { IsNotEmpty, IsNumber, IsOptional, IsString, Length } from "class-validator";
 
 export class CreatePlanillaDto {
     @IsString()
-    @Length(0, 200)
-    @IsOptional()
     codigo_planilla: string;
 
-    @IsString()
-    @Length(0, 200)
-    @IsOptional()
-    fecha_apertura: string;
-
-    @IsString()
-    @Length(0, 200)
-    @IsOptional()
-    secuencia: string;
-
-    @IsString()
-    @Length(0, 200)
-    @IsOptional()
-    estado: string;
+    @IsNumber()
+    secuencia: number;
 
     @IsString({ message: '' })
-    @Length(1, 200, { message: 'El periodo debe estar lleno' })
     @IsNotEmpty({ message: '' })
     periodoInicio: string; 
 
     @IsString({ message: '' })
-    @Length(1, 200, { message: 'El periodo debe estar lleno' })
     @IsNotEmpty({ message: '' })
     periodoFinalizacion: string;
 
     @IsString({ message: '' })
-    @Length(1, 200, { message: 'El estado debe estar lleno' })
     @IsNotEmpty({ message: '' })
-    @IsOptional()
-    tipoPlanilla?: string;
+    @IsOptional({ message: '' })
+    nombre_planilla?: string;
 
-    @IsString({ message: '' })
-    @Length(1, 200, { message: 'El estado debe estar lleno' })
-    @IsNotEmpty({ message: '' })
-    @IsOptional()
-    afiliado?: string;
 
 }

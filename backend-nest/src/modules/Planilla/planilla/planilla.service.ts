@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable, InternalServerErrorException, Logger } from '@nestjs/common';
 import { CreatePlanillaDto } from './dto/create-planilla.dto';
 import { UpdatePlanillaDto } from './dto/update-planilla.dto';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -12,29 +12,60 @@ import { DetalleBeneficio } from '../detalle_beneficio/entities/detalle_benefici
 /* import { Afiliado } from 'src/afiliado/entities/detalle_afiliado.entity'; */
 // import { detalleBeneficio } from '../beneficio_planilla/entities/beneficio_planilla.entity';
 import { format } from 'date-fns';
+import { Planilla } from './entities/planilla.entity';
+import { TipoPlanilla } from '../tipo-planilla/entities/tipo-planilla.entity';
 
 @Injectable()
 export class PlanillaService {
+  private readonly logger = new Logger(PlanillaService.name)
 
   constructor(
-  @InjectRepository(DetalleDeduccion)
-  private detalleDeduccionRepository: Repository<DetalleDeduccion>,
+    @InjectRepository(DetalleBeneficio)
+    private detalleBeneficioRepository: Repository<DetalleBeneficio>,
+    @InjectRepository(Afiliado)
+    private afiliadoRepository: Repository<Afiliado>,
 
-  @InjectRepository(DetalleBeneficio)
-  private detalleBeneficioRepository: Repository<DetalleBeneficio>,
-  @InjectRepository(Beneficio)
-  private BeneficioRepository: Repository<Beneficio>,
-  
-  @InjectRepository(Deduccion)
-  private DeduccionRepository: Repository<Deduccion>,
+    @InjectRepository(Planilla)
+    private planillaRepository: Repository<Planilla>,
 
-  @InjectRepository(Afiliado)
-  private afiliadoRepository: Repository<Afiliado>,
-  @InjectRepository(Institucion)
-  private institucionRepository: Repository<Institucion>,){
-   
-  }
-  create(createPlanillaDto: CreatePlanillaDto) {
+    @InjectRepository(TipoPlanilla)
+    private tipoPlanillaRepository: Repository<TipoPlanilla>,
+
+    @InjectRepository(DetalleDeduccion)
+    private detalleDeduccionRepository: Repository<DetalleDeduccion>,
+    @InjectRepository(Beneficio)
+    private BeneficioRepository: Repository<Beneficio>,
+    @InjectRepository(Deduccion)
+    private DeduccionRepository: Repository<Deduccion>,
+    @InjectRepository(Institucion)
+    private institucionRepository: Repository<Institucion>,){};
+    
+  async create(createPlanillaDto: CreatePlanillaDto) {
+    const { codigo_planilla, secuencia, periodoInicio, periodoFinalizacion, nombre_planilla,  } = createPlanillaDto;
+
+    try {
+      const tipoPlanilla = await this.tipoPlanillaRepository.findOneBy({ nombre_planilla: createPlanillaDto.nombre_planilla });
+      
+      if (tipoPlanilla && tipoPlanilla.id_tipo_planilla) {
+
+          const planilla =  this.planillaRepository.create({
+            "codigo_planilla": codigo_planilla,
+            "secuencia": secuencia,
+            "periodoInicio": periodoInicio,
+            "periodoFinalizacion": periodoFinalizacion,
+            "tipoPlanilla": tipoPlanilla
+          })
+          await this.planillaRepository.save(planilla)
+          return planilla;
+        
+      } else {
+          throw new Error("No se encontró ningún tipo de planilla con el nombre proporcionado");
+      }
+      
+      
+    } catch (error) {
+      this.handleException(error);
+    }
     return 'This action adds a new planilla';
   }
 
@@ -105,6 +136,14 @@ export class PlanillaService {
   remove(id: number) {
     return `This action removes a #${id} planilla`;
   }
+  private handleException(error: any): void {
+    this.logger.error(error);
+    if (error.driverError && error.driverError.errorNum === 1) {
+      throw new BadRequestException('Algun dato clave ya existe');
+    } else {
+      throw new InternalServerErrorException('Ocurrió un error al procesar su solicitud');
+    }
+  }
 }
 
 
@@ -120,20 +159,21 @@ export class PlanillaService {
   FROM
       "C##TEST"."afiliado" afil
   LEFT JOIN
-      "C##TEST"."detalle_deduccion" detD ON "C##TEST"."afil"."id_afiliado" = detD."id_afiliado"
+      "C##TEST"."detalle_deduccion" detD ON afil."id_afiliado" = detD."id_afiliado"
   LEFT JOIN
-      "C##TEST"."deduccion" ded ON detD.id_deduccion = ded."id_deduccion"
+      "C##TEST"."deduccion" ded ON detD."id_deduccion" = ded."id_deduccion"
   LEFT JOIN
-      "C##TEST"."beneficio_planilla" detB ON "C##TEST"."afil"."id_afiliado" = detB."id_afiliado"
+      "C##TEST"."detalle_beneficio" detB ON afil."id_afiliado" = detB."id_afiliado"
   LEFT JOIN
-      "C##TEST"."beneficio" ben ON "C##TEST"."detB"."id_beneficio" = ben."id_beneficio"
+      "C##TEST"."beneficio" ben ON detB."id_beneficio" = ben."id_beneficio"
   WHERE
       (
           TO_DATE(detB."periodoInicio", 'DD-MM-YYYY') BETWEEN TO_DATE(SYSDATE, 'DD-MM-YYYY') AND TO_DATE('01-02-2024', 'DD-MM-YYYY')
           AND TO_DATE(detB."periodoFinalizacion", 'DD-MM-YYYY') BETWEEN TO_DATE(SYSDATE, 'DD-MM-YYYY') AND TO_DATE('29-02-2024', 'DD-MM-YYYY')
       )
       OR
-      TO_DATE(CONCAT(detD."anio", LPAD(detD.mes, 2, '0')), 'YYYYMM') BETWEEN TO_DATE('01-02-2024', 'DD-MM-YYYY') AND TO_DATE('29-02-2024', 'DD-MM-YYYY')
+      TO_DATE(CONCAT(detD."anio", LPAD(detD."mes", 2, '0')), 'YYYYMM') BETWEEN TO_DATE('01-02-2024', 'DD-MM-YYYY') AND TO_DATE('29-02-2024', 'DD-MM-YYYY')
   GROUP BY
-      afil."id_afiliado, afil."primer_nombre, afil."dni;
+      afil."id_afiliado", afil."primer_nombre", afil."dni"
+      ;
 */

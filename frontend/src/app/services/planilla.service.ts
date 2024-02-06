@@ -7,12 +7,15 @@ import { environment } from 'src/environments/environment';
   providedIn: 'root'
 })
 export class PlanillaService {
-
   constructor(private http: HttpClient) { }
 
   // Método para crear una nueva TipoPlanilla
   createTipoPlanilla(tipoPlanillaData: any): Observable<any> {
     return this.http.post(`${environment.API_URL}/api/tipo-planilla`, tipoPlanillaData);
+  }
+
+  createPlanilla(tipoPlanillaData: any): Observable<any> {
+    return this.http.post(`${environment.API_URL}/api/planilla`, tipoPlanillaData);
   }
 
   findAllTipoPlanilla(limit: number = 10, offset: number = 0): Observable<any> {
@@ -46,7 +49,7 @@ export class PlanillaService {
   }
 
   updateTipoPlanilla(id: string, tipoPlanillaData: any): Observable<any> {
-    return this.http.patch(`${environment.API_URL}/api/planilla/tipo-planilla/${id}`, tipoPlanillaData);
+    return this.http.patch(`${environment.API_URL}/api/tipo-planilla/${id}`, tipoPlanillaData);
   }
 
   // BehaviorSubject para almacenar y emitir los datos de los usuarios

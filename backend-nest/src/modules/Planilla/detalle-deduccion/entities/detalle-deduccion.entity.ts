@@ -1,4 +1,4 @@
-import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn, AfterInsert, getRepository, AfterLoad, Unique } from 'typeorm';
+import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn, AfterInsert, getRepository, AfterLoad, Unique, OneToMany } from 'typeorm';
 import { Deduccion } from "../../deduccion/entities/deduccion.entity";
 import { Institucion } from "src/modules/Empresarial/institucion/entities/institucion.entity";
 import { Afiliado } from 'src/afiliado/entities/afiliado';
@@ -21,6 +21,9 @@ export class DetalleDeduccion {
     @ManyToOne(() => Institucion, institucion => institucion.detalleDeduccion, { cascade: true})
     @JoinColumn({ name: 'id_institucion' })
     institucion: Institucion; // Correcto
+
+    /* @OneToMany(() => DetallePlanilla, detallePlanilla => detallePlanilla.detalleDeduccion)
+    detallePlanilla: DetallePlanilla[]; */
 
     @Column('number', {nullable: true})
     monto_total: number;

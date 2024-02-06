@@ -1,4 +1,4 @@
-import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
+import { Column, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 import { Beneficio } from "../../beneficio/entities/beneficio.entity";
 import { Afiliado } from "src/afiliado/entities/afiliado";
 import { Planilla } from "../../planilla/entities/planilla.entity";

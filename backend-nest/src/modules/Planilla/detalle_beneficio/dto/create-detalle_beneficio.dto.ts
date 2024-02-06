@@ -1,6 +1,6 @@
 import { IsNotEmpty, IsNumber, IsOptional, IsString, Length } from "class-validator";
 
-export class CreateBeneficioPlanillaDto {
+export class CreateDetalleBeneficioDto {
     @IsString()
     @IsOptional()
     periodoPago?: string;

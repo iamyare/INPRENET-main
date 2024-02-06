@@ -10,7 +10,7 @@
         (newEstCentrTrab)="setEstadoTable($event)" (newdatosRP)="subirNuevPlan($event)">
     </app-progressplanill>
 
-    <div class="row" *ngIf="datosA && form.get('isChecked')?.value">
+    <!-- <div class="row" *ngIf="datosG && form.get('isChecked')?.value">
         <div class="col-md-6">
             <app-botonarchivos labelBoton="Adjunte excel de deducciones" groupName="ArchivosDed"
                 (change)="onFileSelect($event)" accept=".xlsx, .xls"></app-botonarchivos>
@@ -18,13 +18,17 @@
         <div class="col-md-6">
             <button mat-button color="primary">Enviar Formulario</button>
         </div>
-    </div>
+    </div> -->
 
 
     <!-- <app-inline-editing-one *ngIf="datosTable"></app-inline-editing-one> -->
 
-    <form [formGroup]="formplanilla">
-        <app-nuevaplanilla groupName="planilla" *ngIf="datosPlan"></app-nuevaplanilla>
+    <form [formGroup]="formplanilla" *ngIf="datosG">
+        <app-nuevaplanilla groupName="planilla" ></app-nuevaplanilla>
+    </form>
+
+    <form [formGroup]="formplanilla" *ngIf="datosCT">
+         <app-asignacion-afil-plan groupName="planilla" ></app-asignacion-afil-plan>
     </form>
 
     <!-- <div class="row" *ngIf="datosPlan">

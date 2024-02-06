@@ -18,6 +18,7 @@
     <tr class="text-center">
       <th class="custom-header" *ngIf="verOpcEditar"></th>
       <th *ngFor="let col of columns" class="custom-header">{{ col.header }}</th>
+      <th *ngIf="verBotEditar" class="custom-header">Acciones</th>
       <th class="custom-header">Acciones</th>
     </tr>
   </thead>
@@ -44,10 +45,14 @@
           </ng-container>
         </ng-container>
       </td>
-      <td>
+      <td *ngIf="verBotEditar">
         <button mat-raised-button *ngIf="!row.isEditing" (click)="startEditing(row)" style="background-color: #628780; color: #ffffff; border-radius: 5px; padding: 10px 20px;">Editar</button>
         <button mat-raised-button *ngIf="row.isEditing" (click)="saveChanges(row)" style="background-color: #628780; color: #ffffff; border-radius: 5px; padding: 10px 20px;">Guardar</button>
         <button mat-raised-button *ngIf="row.isEditing" (click)="stopEditing(row)" style="background-color: #628780; color: #ffffff; border-radius: 5px; padding: 10px 20px;">Cancelar</button>
+      </td>
+      <td>
+        <button mat-raised-button style="background-color: #628780; color: #ffffff; border-radius: 5px; padding: 10px 20px;">ver deducciones</button>
+        <button mat-raised-button style="background-color: #628780; color: #ffffff; border-radius: 5px; padding: 10px 20px;">ver beneficios</button>
       </td>
     </tr>
   </tbody>

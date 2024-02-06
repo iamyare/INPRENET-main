@@ -2,6 +2,7 @@ import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn, AfterIns
 import { Deduccion } from "../../deduccion/entities/deduccion.entity";
 import { Institucion } from "src/modules/Empresarial/institucion/entities/institucion.entity";
 import { Afiliado } from 'src/afiliado/entities/afiliado';
+import { Planilla } from '../../planilla/entities/planilla.entity';
 
 @Entity()
 export class DetalleDeduccion {
@@ -38,4 +39,8 @@ export class DetalleDeduccion {
 
     @Column('timestamp', { default: () => 'CURRENT_TIMESTAMP' })
     fecha_aplicado: Date;
+
+    @ManyToOne(() => Planilla, planilla => planilla.detalleDeduccion, { cascade: true })
+    @JoinColumn({ name: 'id_planilla' })
+    planilla: Planilla;
 }

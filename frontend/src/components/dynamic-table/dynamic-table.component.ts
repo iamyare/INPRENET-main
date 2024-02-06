@@ -11,6 +11,8 @@ import { Observable, Subject, debounceTime, distinctUntilChanged, of, switchMap,
 })
 export class DynamicTableComponent implements OnInit, OnDestroy {
   @Input() verOpcEditar: boolean = false;
+
+  @Input() verBotEditar: boolean = false;
   @Output() getElemSeleccionados = new EventEmitter<any>()
 
   @Input() getData?: any;
@@ -58,8 +60,6 @@ export class DynamicTableComponent implements OnInit, OnDestroy {
   }
 
   public async ejecutarFuncionAsincrona(data:any) {
-    console.log(data);
-
     if (data){
       this.filas = data
       this.filas?.map((objeto: any) => ({ ...objeto, isSelected: false }));

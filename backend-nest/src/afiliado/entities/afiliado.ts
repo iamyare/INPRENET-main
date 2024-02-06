@@ -3,13 +3,14 @@ import { TipoIdentificacion } from "src/modules/tipo_identificacion/entities/tip
 import { Column, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 import { Provincia } from "src/modules/Regional/provincia/entities/provincia.entity";
 import { Planilla } from "src/modules/Planilla/planilla/entities/planilla.entity";
-import { BeneficioPlanilla } from "src/modules/Planilla/beneficio_planilla/entities/beneficio_planilla.entity";
+
 import { ReferenciaPersonalAfiliado } from "./referenciaP-Afiliado";
 import { AfiliadosPorBanco } from "src/banco/entities/afiliados-banco";
 import { DetalleDeduccion } from "src/modules/Planilla/detalle-deduccion/entities/detalle-deduccion.entity";
 import { PerfAfilCentTrab } from "./perf_afil_cent_trab";
 import { DetalleAfiliado } from "./detalle_afiliado.entity";
 import { DetallePlanilla } from "src/modules/Planilla/planilla/entities/detalle_planilla.entity";
+import { DetalleBeneficio } from "src/modules/Planilla/detalle_beneficio/entities/detalle_beneficio.entity";
  
 @Entity()
 export class Afiliado {
@@ -97,15 +98,15 @@ export class Afiliado {
     @OneToMany(() => DetalleAfiliado, detalleAfiliado => detalleAfiliado.afiliado)
     detalleAfiliado: DetalleAfiliado[];
 
-    @OneToMany(() => DetallePlanilla, detallePlanilla => detallePlanilla.afiliado)
-    detallePlanilla: DetallePlanilla[];
+/*     @OneToMany(() => DetallePlanilla, detallePlanilla => detallePlanilla.afiliado)
+    detallePlanilla: DetallePlanilla[]; */
 
     @ManyToOne(() => Provincia, provincia => provincia.afiliado, { cascade: true })
     @JoinColumn({ name: 'id_provincia' })
     provincia: Provincia;
 
-    @OneToMany(() => BeneficioPlanilla, beneficioPlanilla => beneficioPlanilla.afiliado)
-    beneficioPlanilla: BeneficioPlanilla[];
+    @OneToMany(() => DetalleBeneficio, detalleBeneficio => detalleBeneficio.afiliado)
+    detalleBeneficio: DetalleBeneficio[];
 
     @OneToMany(() => ReferenciaPersonalAfiliado, referenciaPersonalAfiliado => referenciaPersonalAfiliado.afiliado)
     referenciasPersonalAfiliado: ReferenciaPersonalAfiliado[];

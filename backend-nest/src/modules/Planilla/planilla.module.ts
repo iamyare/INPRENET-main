@@ -3,12 +3,9 @@ import { PlanillaService } from './planilla/planilla.service';
 import { PlanillaController } from './planilla/planilla.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Beneficio } from './beneficio/entities/beneficio.entity';
-import { BeneficioPlanilla } from './beneficio_planilla/entities/beneficio_planilla.entity';
 import { Planilla } from './planilla/entities/planilla.entity';
 import { BeneficioController } from './beneficio/beneficio.controller';
 import { BeneficioService } from './beneficio/beneficio.service';
-import { BeneficioPlanillaController } from './beneficio_planilla/beneficio_planilla.controller';
-import { BeneficioPlanillaService } from './beneficio_planilla/beneficio_planilla.service';
 import { DeduccionController } from './deduccion/deduccion.controller';
 import { TipoPlanillaService } from './tipo-planilla/tipo-planilla.service';
 import { Deduccion } from './deduccion/entities/deduccion.entity';
@@ -18,22 +15,28 @@ import { DetalleDeduccionController } from './detalle-deduccion/detalle-deduccio
 import { DetalleDeduccion } from './detalle-deduccion/entities/detalle-deduccion.entity';
 import { DetalleDeduccionService } from './detalle-deduccion/detalle-deduccion.service';
 import { Institucion } from '../Empresarial/institucion/entities/institucion.entity';
-/* import { Afiliado } from 'src/afiliado/entities/detalle_afiliado.entity'; */
-/* import { DatosIdentificacion } from 'src/afiliado/entities/afiliado'; */
 import { TipoPlanillaController } from './tipo-planilla/tipo-planilla.controller';
 import { AfiliadoService } from 'src/afiliado/afiliado.service';
 import { AfiliadoController } from 'src/afiliado/afiliado.controller';
 import { Afiliado } from 'src/afiliado/entities/afiliado';
 import { DetalleAfiliado } from 'src/afiliado/entities/detalle_afiliado.entity';
 import { DetallePlanilla } from './planilla/entities/detalle_planilla.entity';
+import { DetalleBeneficioService } from './detalle_beneficio/detalle_beneficio.service';
+import { DetalleBeneficio } from './detalle_beneficio/entities/detalle_beneficio.entity';
+import { DetalleBeneficioController } from './detalle_beneficio/detalle_beneficio.controller';
+// import { DetalleBeneficio } from './detalle_beneficio/entities/beneficio_planilla.entity';
+// import { DetalleBeneficioController } from './detalle_beneficio/detalle_beneficio.controller';
+// import { DetalleBeneficioService } from './detalle_beneficio/detalle_beneficio.service';
+/* import { Afiliado } from 'src/afiliado/entities/detalle_afiliado.entity'; */
+/* import { DatosIdentificacion } from 'src/afiliado/entities/afiliado'; */
 
 @Module({
-  controllers: [PlanillaController, BeneficioController, BeneficioPlanillaController, DeduccionController,
+  controllers: [PlanillaController, BeneficioController, DetalleBeneficioController, DeduccionController,
                 DeduccionController, DetalleDeduccionController,TipoPlanillaController,AfiliadoController ],
-  providers: [PlanillaService, BeneficioService, BeneficioPlanillaService, DeduccionService,
+  providers: [PlanillaService, BeneficioService, DetalleBeneficioService, DeduccionService,
               TipoPlanillaService, DetalleDeduccionService, AfiliadoService],
   imports: [
-    TypeOrmModule.forFeature([Beneficio, BeneficioPlanilla, Planilla, Deduccion, TipoPlanilla, DetalleDeduccion, Institucion, Afiliado, DetalleAfiliado,
+    TypeOrmModule.forFeature([Beneficio, DetalleBeneficio, Planilla, Deduccion, TipoPlanilla, DetalleDeduccion, Institucion, Afiliado, DetalleAfiliado,
     DetallePlanilla]),]
 })
 export class PlanillaModule {}

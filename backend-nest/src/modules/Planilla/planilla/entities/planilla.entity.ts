@@ -2,6 +2,8 @@ import { Column, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColum
 import { TipoPlanilla } from '../../tipo-planilla/entities/tipo-planilla.entity';
 import { Afiliado } from 'src/afiliado/entities/afiliado';
 import { DetallePlanilla } from './detalle_planilla.entity';
+import { DetalleDeduccion } from '../../detalle-deduccion/entities/detalle-deduccion.entity';
+import { DetalleBeneficio } from '../../detalle_beneficio/entities/detalle_beneficio.entity';
 /* import { Afiliado } from 'src/afiliado/entities/detalle_afiliado.entity';
 import { DatosIdentificacion } from 'src/afiliado/entities/afiliado'; */
 
@@ -33,7 +35,13 @@ export class Planilla {
     @JoinColumn({ name: 'id_tipo_planilla' })
     tipoPlanilla: TipoPlanilla;
 
-    @OneToMany(() => DetallePlanilla, detallePlanilla => detallePlanilla.planilla)
-    detallePlanilla: DetallePlanilla[];
+/*     @OneToMany(() => DetallePlanilla, detallePlanilla => detallePlanilla.planilla)
+    detallePlanilla: DetallePlanilla[]; */
+
+    @OneToMany(() => DetalleDeduccion, detalleDeduccion => detalleDeduccion.planilla)
+    detalleDeduccion: DetalleDeduccion[];
+
+    @OneToMany(() => DetalleBeneficio, detallebeneficio => detallebeneficio.planilla)
+    detallebeneficio: DetalleBeneficio[];
 
 }

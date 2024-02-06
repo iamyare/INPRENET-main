@@ -1,24 +1,26 @@
 import { BadRequestException, Injectable, InternalServerErrorException, Logger, NotFoundException } from '@nestjs/common';
-import { CreateBeneficioPlanillaDto } from './dto/create-beneficio_planilla.dto';
+/* import { CreateBeneficioPlanillaDto } from './dto/create-beneficio_planilla.dto';
 import { UpdateBeneficioPlanillaDto } from './dto/update-beneficio_planilla.dto';
-import { BeneficioPlanilla } from './entities/beneficio_planilla.entity';
+import { BeneficioPlanilla } from './entities/beneficio_planilla.entity'; */
 import { isUUID } from 'class-validator';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Beneficio } from '../beneficio/entities/beneficio.entity';
 import { Afiliado } from 'src/afiliado/entities/afiliado';
+import { DetalleBeneficio } from './entities/detalle_beneficio.entity';
+import { UpdateDetalleBeneficioDto } from './dto/update-detalle_beneficio_planilla.dto';
 
 @Injectable()
-export class BeneficioPlanillaService {
-  private readonly logger = new Logger(BeneficioPlanillaService.name)
+export class DetalleBeneficioService {
+  private readonly logger = new Logger(DetalleBeneficioService.name)
   
   @InjectRepository(Afiliado)
   private readonly afiliadoRepository : Repository<Afiliado>
   @InjectRepository(Beneficio)
   private readonly tipoBeneficioRepository : Repository<Beneficio>
 
-  @InjectRepository(BeneficioPlanilla)
-  private readonly benAfilRepository : Repository<BeneficioPlanilla>
+  @InjectRepository(DetalleBeneficio)
+  private readonly benAfilRepository : Repository<DetalleBeneficio>
 
   async create(datos: any): Promise<any> {
     let afiliado:any;
@@ -62,7 +64,7 @@ export class BeneficioPlanillaService {
   }
 
   async findOne(term: string) {
-    let benAfil: BeneficioPlanilla;
+    let benAfil: DetalleBeneficio;
     if (isUUID(term)) {
       benAfil = await this.benAfilRepository.findOneBy({ id_beneficio_planilla: term });
     } else {
@@ -77,7 +79,7 @@ export class BeneficioPlanillaService {
     return benAfil;
   }
 
-  update(id: number, updateBeneficioPlanillaDto: UpdateBeneficioPlanillaDto) {
+  update(id: number, updateDetalleBeneficioDto: UpdateDetalleBeneficioDto) {
     return `This action updates a #${id} beneficioPlanilla`;
   }
 

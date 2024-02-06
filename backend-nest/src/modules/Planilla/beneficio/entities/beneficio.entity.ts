@@ -1,5 +1,6 @@
 import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
-import { BeneficioPlanilla } from "../../beneficio_planilla/entities/beneficio_planilla.entity";
+import { DetalleBeneficio } from "../../detalle_beneficio/entities/detalle_beneficio.entity";
+
 
 @Entity()
 export class Beneficio {
@@ -21,6 +22,6 @@ export class Beneficio {
 
 
 
-    @OneToMany(() => BeneficioPlanilla, beneficioPlanilla => beneficioPlanilla.beneficio)
-    beneficioPlanilla : BeneficioPlanilla[];
+    @OneToMany(() => DetalleBeneficio, detallebeneficio => detallebeneficio.beneficio)
+    detallebeneficio : DetalleBeneficio[];
 }

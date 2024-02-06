@@ -11,9 +11,10 @@ import { generateFormArchivo } from 'src/components/botonarchivos/botonarchivos.
 export class NuevaPlanillaComponentP {
   form: FormGroup;
   formplanilla: FormGroup;
-  datosA: boolean = false;
-  datosTable: boolean = false;
-  datosPlan:boolean = false
+
+  datosG: boolean = false;
+  datosCT: boolean = false;
+  datosHS:boolean = false
 
   constructor(private fb: FormBuilder, private planillaService: PlanillaService) {
     /* this.form = this.fb.group({
@@ -61,18 +62,18 @@ export class NuevaPlanillaComponentP {
     }
   }
   setEstadoDatGen(e:any){
-    this.datosA = true
-    this.datosTable = false
-    this.datosPlan = false
+    this.datosG = true
+    this.datosCT = false
+    this.datosHS = false
   }
   setEstadoTable(e:any){
-    this.datosTable = true
-    this.datosA = false
-    this.datosPlan = false
+    this.datosCT = true
+    this.datosG = false
+    this.datosHS = false
   }
   subirNuevPlan(e:any){
-    this.datosA = false
-    this.datosTable = false
-    this.datosPlan = true
+    this.datosG = false
+    this.datosCT = false
+    this.datosHS = true
   }
 }

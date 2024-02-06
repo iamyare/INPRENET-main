@@ -19,6 +19,14 @@ export class PlanillaController {
   ) {
     return this.planillaService.getDeduccionesNoAplicadas(periodoInicio, periodoFinalizacion);
   }
+  
+  @Get('beneficios-no-aplicadas')
+  getBeneficiosNoAplicados(
+    @Query('periodoInicio') periodoInicio: string,
+    @Query('periodoFinalizacion') periodoFinalizacion: string
+  ) {
+    return this.planillaService.getBeneficiosNoAplicados(periodoInicio, periodoFinalizacion);
+  }
 
   @Get()
   findAll() {

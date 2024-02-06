@@ -38,6 +38,7 @@ import { EditarTipoDeduccionComponent } from '../pages/Mantenimiento/editar-tipo
 import { NuevoBeneficioAfilComponent } from '../pages/Generales/nuevo-beneficio-afil/nuevo-beneficio-afil.component';
 import { NuevaDeduccionAfilComponent } from '../pages/Generales/nueva-deduccion-afil/nueva-deduccion-afil.component';
 import { VerEditarDeduccionAfilComponent } from '../pages/Generales/ver-editar-deduccion-afil/ver-editar-deduccion-afil.component';
+import { AsignacionAfilPlanComponent } from '../../../components/asignacion-afil-plan/asignacion-afil-plan.component';
 
 @NgModule({
   imports: [
@@ -69,6 +70,7 @@ import { VerEditarDeduccionAfilComponent } from '../pages/Generales/ver-editar-d
     VerPlanillasComponent,
     InlineEditingOneComponent,
     NuevaplanillaComponent,
+    AsignacionAfilPlanComponent,
     NuevoBeneficioComponent,
     EditarBeneficioComponent,
     NuevoTipoPlanillaComponent,

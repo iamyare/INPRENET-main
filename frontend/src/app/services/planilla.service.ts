@@ -34,6 +34,17 @@ export class PlanillaService {
     return this.http.get(`${environment.API_URL}/api/planilla/deducciones-no-aplicadas`, { params });
   }
 
+  getBeneficiosNoAplicadas(periodoInicio: string, periodoFinalizacion: string): Observable<any> {
+
+    // Construye los parámetros de la consulta
+    let params = new HttpParams()
+      .set('periodoInicio', periodoInicio)
+      .set('periodoFinalizacion', periodoFinalizacion);
+
+    // Realiza la petición GET al backend con los parámetros
+    return this.http.get(`${environment.API_URL}/api/planilla/beneficios-no-aplicadas`, { params });
+  }
+
   updateTipoPlanilla(id: string, tipoPlanillaData: any): Observable<any> {
     return this.http.patch(`${environment.API_URL}/api/tipo-planilla/${id}`, tipoPlanillaData);
   }

@@ -1,10 +1,10 @@
 import { Column, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 import { Beneficio } from "../../beneficio/entities/beneficio.entity";
 import { Afiliado } from "src/afiliado/entities/afiliado";
-import { DetallePlanilla } from "../../planilla/entities/detalle_planilla.entity";
+import { Planilla } from "../../planilla/entities/planilla.entity";
 
 @Entity()
-export class BeneficioPlanilla {
+export class DetalleBeneficio {
 
     @PrimaryGeneratedColumn('uuid')
     id_beneficio_planilla : string;
@@ -28,15 +28,16 @@ export class BeneficioPlanilla {
     periodoFinalizacion: string;
 
 
-    @ManyToOne(() => Beneficio, beneficio => beneficio.beneficioPlanilla, { cascade : true })
+    @ManyToOne(() => Beneficio, beneficio => beneficio.detallebeneficio, { cascade : true })
     @JoinColumn({ name: 'id_beneficio'})
     beneficio : Beneficio;
 
-    @ManyToOne(() => Afiliado, afiliado => afiliado.beneficioPlanilla, { cascade : true })
+    @ManyToOne(() => Afiliado, afiliado => afiliado.detalleBeneficio, { cascade : true })
     @JoinColumn({ name: 'id_afiliado'})
     afiliado : Afiliado;
 
-    @OneToMany(() => DetallePlanilla, detallePlanilla => detallePlanilla.beneficioPlanilla)
-    detallePlanilla: DetallePlanilla[];
+    @ManyToOne(() => Planilla, planilla => planilla.detallebeneficio, { cascade: true })
+    @JoinColumn({ name: 'id_planilla' })
+    planilla: Planilla;
 
 }

@@ -11,16 +11,10 @@ import { TableColumn } from 'src/app/views/shared/shared/Interfaces/table-column
   styleUrl: './nuevaplanilla.component.scss'
 })
 export class NuevaplanillaComponent implements OnInit{
-  myColumns: TableColumn[] = [];
-  filasT: any[] = [];
   myFormFields: FieldConfig[] = [];
   filas: any;
   tiposPlanilla: any[] = [];
-  nameAfil: string = "";
   datosFormateados: any;
-  datosTabl: any;
-  verDat: boolean = false;
-  ejecF: any;
 
   constructor( private _formBuilder: FormBuilder,
     private planillaService : PlanillaService,
@@ -28,37 +22,7 @@ export class NuevaplanillaComponent implements OnInit{
       this.obtenerDatos1();
     }
 
-    ngOnInit(): void {
-      this.myColumns = [
-        {
-          header: 'DNI',
-          col: 'dni',
-          isEditable: false,
-          validationRules: [Validators.required, Validators.minLength(5)]
-        },
-        {
-          header: 'Nombre completo',
-          col: 'nombre_completo',
-          isEditable: true
-        },
-        {
-          header: 'Nombre de institucion',
-          col: 'nombre_institucion',
-          isEditable: true
-        },
-        {
-          header: 'Monto Deduccion Total',
-          col: 'monto_total',
-          isEditable: true
-        },
-        {
-          header: 'Monto Deduccion aplicado',
-          col: 'monto_aplicado',
-          isEditable: true,
-          validationRules: [Validators.required, Validators.pattern(/^(3[01]|[12][0-9]|0?[1-9])-(1[0-2]|0?[1-9])-\d{4} - (3[01]|[12][0-9]|0?[1-9])-(1[0-2]|0?[1-9])-\d{4}$/)]
-        }
-      ];
-    }
+    ngOnInit(): void {}
 
     getTiposPlanillas = async () => {
       try {
@@ -94,32 +58,28 @@ export class NuevaplanillaComponent implements OnInit{
       ]
     }
 
-    getFilas = async (periodoInicio: string, periodoFinalizacion: string) => {
+/*     getFilasBenef = async (periodoInicio: string, periodoFinalizacion: string) => {
       try {
         // Asegúrate de pasar los parámetros mes y anio a la función getDeduccionesNoAplicadas
-        const data = await this.planillaService.getDeduccionesNoAplicadas(periodoInicio, periodoFinalizacion).toPromise();
-        this.filasT = data.map((item: any) => {
+        const data = await this.planillaService.getBeneficiosNoAplicadas(periodoInicio, periodoFinalizacion).toPromise();
+        this.filasBen = data.map((item: any) => {
           return {
             id_afiliado: item.id_afiliado,
             nombre_completo: `${item.primer_nombre} ${item.segundo_nombre ? item.segundo_nombre : ''} ${item.primer_apellido} ${item.segundo_apellido}`,
             dni: item.dni,
-            id_institucion: item.id_institucion,
-            nombre_institucion: item.nombre_institucion,
-            monto_total: item.monto_total,
-            monto_aplicado: item.monto_aplicado
+            monto: item.monto
           };
         });
 
-        return this.filasT;
+        return this.filasBen;
       } catch (error) {
         console.error("Error al obtener datos de deducciones", error);
         throw error;
       }
-    }
+    } */
 
     obtenerDatos(event:any):any{
       this.formatRangFech(event)
-      this.datosTabl = []
     }
 
     formatRangFech(event:any) {
@@ -152,29 +112,7 @@ export class NuevaplanillaComponent implements OnInit{
       }
     }
 
-  editar = (row: any) => {}
-
-  previsualizarDatos = async () => {
-    if ( this.datosFormateados.periodoInicio != 'Invalid Date' && this.datosFormateados != 'Invalid Date'){
-      this.datosTabl = await this.getFilas(this.datosFormateados.periodoInicio, this.datosFormateados.periodoFinalizacion)
-      this.verDat = true
-      this.filasT = this.datosTabl;
-
-      this.ejecF(this.filasT).then(()=>{})
-
-    }
-
-    return this.datosTabl
-  }
-
-  ejecutarFuncionAsincronaDesdeOtroComponente(funcion: (data:any) => Promise<void>) {
-    this.ejecF = funcion;
-  }
-
   crearPlanilla(){
-    if (this.datosTabl){
       console.log(this.datosFormateados);
-      console.log(this.datosTabl);
-    }
   }
 }

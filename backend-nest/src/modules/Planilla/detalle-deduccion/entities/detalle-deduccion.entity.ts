@@ -2,7 +2,7 @@ import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn, AfterIns
 import { Deduccion } from "../../deduccion/entities/deduccion.entity";
 import { Institucion } from "src/modules/Empresarial/institucion/entities/institucion.entity";
 import { Afiliado } from 'src/afiliado/entities/afiliado';
-import { DetallePlanilla } from '../../planilla/entities/detalle_planilla.entity';
+import { Planilla } from '../../planilla/entities/planilla.entity';
 
 @Entity()
 export class DetalleDeduccion {
@@ -22,8 +22,8 @@ export class DetalleDeduccion {
     @JoinColumn({ name: 'id_institucion' })
     institucion: Institucion; // Correcto
 
-    @OneToMany(() => DetallePlanilla, detallePlanilla => detallePlanilla.detalleDeduccion)
-    detallePlanilla: DetallePlanilla[];
+    /* @OneToMany(() => DetallePlanilla, detallePlanilla => detallePlanilla.detalleDeduccion)
+    detallePlanilla: DetallePlanilla[]; */
 
     @Column('number', {nullable: true})
     monto_total: number;
@@ -42,4 +42,8 @@ export class DetalleDeduccion {
 
     @Column('timestamp', { default: () => 'CURRENT_TIMESTAMP' })
     fecha_aplicado: Date;
+
+    @ManyToOne(() => Planilla, planilla => planilla.detalleDeduccion, { cascade: true })
+    @JoinColumn({ name: 'id_planilla' })
+    planilla: Planilla;
 }

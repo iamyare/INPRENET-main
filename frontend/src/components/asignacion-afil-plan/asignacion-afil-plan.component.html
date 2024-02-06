@@ -1,0 +1,5 @@
+<H2>Afiliados con beneficios y deducciones en el periodo</H2>
+
+<app-dynamic-table  [verOpcEditar]="true" [columns]="myColumnsDed" [data]="filasT" (ejecutarFuncionAsincronaEvent)="ejecutarFuncionAsincronaDesdeOtroComponente($event)" [editarFunc]="editar"></app-dynamic-table>
+
+<button mat-raised-button style="background-color: #628780; color: #ffffff; border-radius: 5px; padding: 10px 20px;">Asignar a la planilla</button>

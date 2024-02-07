@@ -1,0 +1,10 @@
+<div class="container-fluid" style="position: sticky;">
+    <ul class="list-unstyled multi-steps pointer-cursor">
+        <li (click)="prueba()" [ngClass]="datosG ? 'is-active' : 'inactive'" id="estado">Datos Generales</li>
+        <li (click)="prueba2()" [ngClass]="datosCT ? 'is-active' : 'inactive'">Centros de Trabajo</li>
+        <li (click)="prueba3()" [ngClass]="datosHS ? 'is-active' : 'inactive'">Historial de Salario</li>
+        <li (click)="prueba4()" [ngClass]="datosRP ? 'is-active' : 'inactive'">Referencias Personales</li>
+        <li (click)="prueba5()" [ngClass]="datosB ? 'is-active' : 'inactive'">Beneficiarios</li>
+        <li (click)="prueba6()" [ngClass]="datosF ? 'is-active' : 'inactive'">Finalizar</li>
+    </ul>
+</div>

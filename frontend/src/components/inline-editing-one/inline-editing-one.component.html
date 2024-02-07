@@ -1,0 +1,107 @@
+<h2>Datos sobre beneficios y deducciones por afiliado/beneficiario</h2>
+<div class="input-group">
+    <input type="search" class="form-control rounded" placeholder="Buscar Afiliado/Beneficiario" aria-label="Search"
+        aria-describedby="search-addon" [formControl]="formsearch">
+</div>
+<div class="row">
+    <div class="col-12">
+        <table class="table  table-striped table-bordered table-hover">
+            <thead>
+                <tr class="text-center">
+                    <th></th>
+                    <th>DNI</th>
+                    <th>Nombre Completo</th>
+                    <th>Tipo Persona</th>
+                    <th>Total deducción Terceros</th>
+                    <th>Total deducción Inprema</th>
+                    <th>Total de beneficio</th>
+                    <th style="width: 15%;">Acción</th>
+                    <!-- <th>Institucion</th> -->
+                    <!-- <th>monto_aplicado</th> -->
+                    <!-- <th>fecha_aplicado</th> -->
+                </tr>
+            </thead>
+            <tbody>
+                <tr *ngFor="let user of searchResults | slice:desde:hasta; let i= index">
+                    <td>
+                        <input type="checkbox" [(ngModel)]="user.isSelected" (change)="onSelectionChange(user)" />
+                    </td>
+                    <td>{{user.DNI}}</td>
+                    <td>
+                        <div *ngIf="user.isEdit">
+                            <input type="text" [(ngModel)]="user.Afiliado" class="form-control" />
+                        </div>
+                        <div *ngIf="!user.isEdit">
+                            {{user.Afiliado}}
+                        </div>
+                    </td>
+                    <td>
+                        <div *ngIf="user.isEdit">
+                            <input type="text" [(ngModel)]="user.tipo_persona" class="form-control" />
+                        </div>
+                        <div *ngIf="!user.isEdit">
+                            {{user.tipo_persona}}
+                        </div>
+                    </td>
+                    <!-- <td>{{user.institucion}}</td> -->
+                    <td>
+                        <div *ngIf="user.isEdit">
+                            <input type="text" [(ngModel)]="user.total_deduccion_terc" class="form-control" />
+                        </div>
+                        <div *ngIf="!user.isEdit">
+                            {{user.total_deduccion_terc}}
+                        </div>
+                    </td>
+                    <td>
+                        <div *ngIf="user.isEdit">
+                            <input type="text" [(ngModel)]="user.total_deduccion_inprema" class="form-control" />
+                        </div>
+                        <div *ngIf="!user.isEdit">
+                            {{user.total_deduccion_inprema}}
+                        </div>
+                    </td>
+                    <!--                     <td>
+                        <div *ngIf="user.isEdit">
+                            <input type="text" [(ngModel)]="user.monto_aplicado" class="form-control" />
+                        </div>
+                        <div *ngIf="!user.isEdit">
+                            {{user.monto_aplicado}}
+                        </div>
+                    </td> -->
+                    <td>
+                        <div *ngIf="user.isEdit">
+                            <input type="text" [(ngModel)]="user.monto_TotalBeneficio" class="form-control" />
+                        </div>
+                        <div *ngIf="!user.isEdit">
+                            {{user.monto_TotalBeneficio}}
+                        </div>
+                    </td>
+                    <!-- <td>{{user.fecha_aplicado}}</td> -->
+                    <td style="width: 15%;" class="text-center">
+                        <div *ngIf="user.isEdit">
+                            <button class="btn btn-sm btn-success">Update</button>
+                            <button class="btn btn-sm btn-danger" (click)="user.isEdit = false">Cancel</button>
+                        </div>
+                        <!--                         <div *ngIf="!user.isEdit">
+                            <button class="btn btn-sm btn-success" (click)="onEdit(user)"
+                                style="color: white;">Editar</button>
+                        </div> -->
+                        <div *ngIf="!user.isEdit">
+                            <button class="btn btn-sm btn-success" (click)="onEdit(user)" style="color: white;">ver
+                                deducciones</button>
+                        </div>
+                        <div *ngIf="!user.isEdit">
+                            <button class="btn btn-sm btn-success" (click)="onEdit(user)" style="color: white;">ver
+                                beneficios</button>
+                        </div>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<button class="btn btn-sm btn-primary" (click)="obtenerFilasSeleccionadas()">Generar planilla preliminar</button>
+
+<mat-paginator [length]="usersArray.length" [pageSize]="itemsPerPage" [pageSizeOptions]="[itemsPerPage]"
+    (page)="onPageChange($event)"></mat-paginator>

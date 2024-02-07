@@ -19,7 +19,7 @@ export class MailService {
 
   async sendMail(to: string, subject: string, text: string, html: string): Promise<void> {
     const mailOptions = {
-      from: '"Example Sender" <sender@example.com>',
+      from: '"Registro" <sender@example.com>',
       to: to,
       subject: subject,
       text: text,

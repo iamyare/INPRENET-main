@@ -2,6 +2,15 @@ import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output, inject
 import { ControlContainer, FormArray, FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { DatosEstaticosService } from 'src/app/services/datos-estaticos.service';
 
+export function generateHistSalFormGroup(datos?:any): FormGroup {
+  return new FormGroup({
+    fechaInicio: new FormControl(datos.fechaInicio, Validators.required),
+    fechaFin: new FormControl(datos.fechaFin, Validators.required),
+    salario: new FormControl(datos.salario, Validators.required),
+    centroTrabajo: new FormControl(datos.centroTrabajo, Validators.required),
+  });
+}
+
 @Component({
   selector: 'app-historial-salario',
   templateUrl: './historial-salario.component.html',
@@ -22,7 +31,8 @@ export class HistorialSalarioComponent {
   sector: any = this.datosEstaticos.sector;
 
   @Output() newDatHistSal = new EventEmitter<any>()
-  
+  @Input() datos:any;
+
   onDatosHistSal(){
     const data = this.formParent
     this.newDatHistSal.emit(data);
@@ -32,6 +42,13 @@ export class HistorialSalarioComponent {
 
   ngOnInit():void{
     this.initFormParent();
+
+    if (this.datos.value.refpers.length>0){
+      for (let i of this.datos.value.refpers){
+        this.agregarRefPer(i)
+      }
+    }
+
   }
 
   initFormParent():void {
@@ -43,24 +60,23 @@ export class HistorialSalarioComponent {
   }
 
   initFormRefPers(): FormGroup {
-    return new FormGroup(
-      {
-        fechaInicio: new FormControl('', Validators.required),
-        fechaFin: new FormControl('', Validators.required),
-        salario: new FormControl('', Validators.required),
-        centroTrabajo: new FormControl('', Validators.required),
-      }
-    )
+    return generateHistSalFormGroup();
   }
 
-  agregarRefPer(): void{
+  agregarRefPer(datos?:any): void{
     const ref_RefPers = this.formParent.get('refpers') as FormArray;
-    ref_RefPers.push(this.initFormRefPers())
+    if (datos){
+      ref_RefPers.push(generateHistSalFormGroup(datos))
+    }else {
+      ref_RefPers.push(generateHistSalFormGroup({}))
+    }
   }
   
   eliminarRefPer():void{
     const ref_RefPers = this.formParent.get('refpers') as FormArray;
     ref_RefPers.removeAt(-1);
+    const data = this.formParent
+    this.newDatHistSal.emit(data);
   }
   
   getCtrl(key: string, form: FormGroup): any {

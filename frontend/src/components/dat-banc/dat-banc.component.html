@@ -4,13 +4,13 @@
         <p class="card-category">Completa la información correspondiente</p>
     </div>
     <div class="card-body">
-        <fieldset [formGroupName]="groupName" cForm >
+        <fieldset [formGroupName]="groupName" cForm>
             <div class="row">
                 <div class="col-md-6">
                     <mat-form-field class="example-full-width; inputs" appearance="outline">
                         <mat-label>Nombre del Banco</mat-label>
                         <select matNativeControl formControlName="nombreBanco">
-                            <option *ngFor="let p of Bancos" [value]="p.ID_BANCO">
+                            <option *ngFor="let p of Bancos" [value]="p.NOMBRE">
                                 {{p.NOMBRE}}
                             </option>
                         </select>

@@ -1,7 +1,8 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, NotFoundException } from '@nestjs/common';
 import { AfiliadoService } from './afiliado.service';
 import { CreateAfiliadoDto } from './dto/create-afiliado.dto';
 import { UpdateAfiliadoDto } from './dto/update-afiliado.dto';
+import { CreateAfiliadoTempDto } from './dto/create-afiliado-temp.dto';
 
 @Controller('afiliado')
 export class AfiliadoController {
@@ -12,14 +13,29 @@ export class AfiliadoController {
     return this.afiliadoService.create(createAfiliadoDto);
   }
 
+  @Post('temp')
+  createEspecial(@Body() createAfiliadoTempDto: CreateAfiliadoTempDto) {
+    return this.afiliadoService.createTemp(createAfiliadoTempDto);
+  }
+
   @Get()
   findAll() {
     return this.afiliadoService.findAll();
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.afiliadoService.findOne(id);
+  @Get('/dni/:dni')
+  async findByDni(@Param('dni') dni: string) {
+    return await this.afiliadoService.findByDni(dni);
+  }
+
+  @Get(':term')
+  findOne(@Param('term') term: string) {
+    return this.afiliadoService.findOne(term);
+  }
+
+  @Get('obtenerBenDeAfil/:dniAfil')
+  async obtenerDatosRelacionados(@Param('dniAfil') dniAfil: string): Promise<any> {
+    return this.afiliadoService.obtenerBenDeAfil(dniAfil);
   }
 
   @Patch(':id')

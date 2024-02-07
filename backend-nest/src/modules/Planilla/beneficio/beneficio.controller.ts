@@ -1,0 +1,34 @@
+import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { BeneficioService } from './beneficio.service';
+import { CreateBeneficioDto } from './dto/create-beneficio.dto';
+import { UpdateBeneficioDto } from './dto/update-beneficio.dto';
+
+@Controller('beneficio')
+export class BeneficioController {
+  constructor(private readonly beneficioService: BeneficioService) {}
+
+  @Post("createTipoBeneficio")
+  create(@Body() createBeneficioDto: CreateBeneficioDto) {
+    return this.beneficioService.create(createBeneficioDto);
+  }
+
+  @Get("obtenerTiposBeneficios")
+  findAll() {
+    return this.beneficioService.findAll();
+  }
+
+  @Get(':term')
+  findOne(@Param('term') term: string) {
+    return this.beneficioService.findOne(term);
+  }
+
+  @Patch(':id')
+  update(@Param('id') id: string, @Body() updateBeneficioDto: UpdateBeneficioDto) {
+    return this.beneficioService.update(id, updateBeneficioDto);
+  }
+
+  @Delete(':id')
+  remove(@Param('id') id: string) {
+    return this.beneficioService.remove(+id);
+  }
+}

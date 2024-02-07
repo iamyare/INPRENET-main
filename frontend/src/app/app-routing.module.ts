@@ -2,12 +2,11 @@ import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 
 import { DefaultLayoutComponent } from './containers';
-import { Page404Component } from './views/pages/page404/page404.component';
-import { Page500Component } from './views/pages/page500/page500.component';
-import { LoginComponent } from './views/pages/login/login.component';
-import { RegisterComponent } from './views/pages/register/register.component';
-import { PreRegisterComponent } from './views/pages/pre-register/pre-register.component';
-import { AfilBancoComponent } from './views/pages/afil-banco/afil-banco.component';
+import { Page404Component } from './views/pages/Errores/page404/page404.component';
+import { Page500Component } from './views/pages/Errores/page500/page500.component';
+import { LoginComponent } from './views/pages/Generales/login/login.component';
+import { RegisterComponent } from './views/pages/Generales/register/register.component';
+import { PreRegisterComponent } from './views/pages/Generales/pre-register/pre-register.component';
 
 const routes: Routes = [
   {
@@ -29,6 +28,26 @@ const routes: Routes = [
       },
       {
         path: 'Afiliado',
+        loadChildren: () =>
+          import('./views/theme/theme.module').then((m) => m.ThemeModule)
+      },
+      {
+        path: 'Planilla',
+        loadChildren: () =>
+          import('./views/theme/theme.module').then((m) => m.ThemeModule)
+      },
+      {
+        path: 'Beneficio',
+        loadChildren: () =>
+          import('./views/theme/theme.module').then((m) => m.ThemeModule)
+      },
+      {
+        path: 'Deduccion',
+        loadChildren: () =>
+          import('./views/theme/theme.module').then((m) => m.ThemeModule)
+      },
+      {
+        path: 'Tipo-Planilla',
         loadChildren: () =>
           import('./views/theme/theme.module').then((m) => m.ThemeModule)
       },

@@ -14,7 +14,18 @@ export class AfiliadoService {
   constructor(private http: HttpClient, private router: Router) { }
 
   getAllAfiliados(): Observable<any | void> {
-    const url = `${environment.API_URL}/afiliados`;
+    const url = `${environment.API_URL}/api/afiliado`;
+    return this.http.get<any>(
+      url,
+      ).pipe(
+        map((res:any) => {
+          return res;
+        })
+      );
+  }
+
+  getAfilByParam(param:string | number): Observable<any | void> {
+    const url = `${environment.API_URL}/api/afiliado/${param}`;
     return this.http.get<any>(
       url,
       ).pipe(
@@ -33,8 +44,7 @@ export class AfiliadoService {
       ).pipe(
         map((res:any) => {
           return res;
-        }),
-        //catchError((err) => this.handlerError2(err))
+        })
       )
   }
 
@@ -111,5 +121,17 @@ export class AfiliadoService {
         }),
         //catchError((err) => this.handlerError2(err))
       )
+  }
+
+  /* BENEFICIARIOS */
+  obtenerBenDeAfil(dniAfil:string | number): Observable<any | void> {
+    const url = `${environment.API_URL}/api/afiliado/obtenerBenDeAfil/${dniAfil}`;
+    return this.http.get<any>(
+      url,
+      ).pipe(
+        map((res:any) => {
+          return res;
+        })
+      );
   }
 }

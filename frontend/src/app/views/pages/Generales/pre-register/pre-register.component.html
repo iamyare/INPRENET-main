@@ -1,0 +1,74 @@
+<div class="bg-light min-vh-100 d-flex flex-row align-items-center">
+  <c-container>
+    <c-row class="justify-content-center">
+      <c-col md="12">
+        <c-card-group>
+          <c-card class="p-4">
+            <c-card-body class="p-4">
+              <form cForm [formGroup]="form">
+
+                <h1>Pre Registro De Cuenta</h1>
+                <p class="text-medium-emphasis">Crear una cuenta De Usuario Para el Sistema</p>
+
+                <c-input-group class="mb-1">
+                  <mat-form-field style="width:100%">
+                    <mat-label>Correo Electrónico</mat-label>
+                    <input matNativeControl formControlName="correo" />
+                  </mat-form-field>
+                </c-input-group>
+
+                <c-input-group class="mb-1">
+                  <mat-form-field style="width:100%">
+                    <mat-label>Nombre completo</mat-label>
+                    <input matNativeControl formControlName="nombrecomp" />
+                  </mat-form-field>
+                </c-input-group>
+
+                <c-input-group class="mb-1">
+                  <mat-form-field style="width:100%">
+                    <mat-label>Tipo de identificación</mat-label>
+                    <select matNativeControl formControlName="tipoIdent">
+                      <option *ngFor="let p of tipoIdent" [value]="p.value">
+                        {{p.value}}
+                      </option>
+                    </select>
+                  </mat-form-field>
+                </c-input-group>
+
+                <c-input-group class="mb-1">
+                  <mat-form-field style="width:100%">
+                    <mat-label>Número de identificación</mat-label>
+                    <input matNativeControl formControlName="numeroIden" />
+                  </mat-form-field>
+                </c-input-group>
+
+                <c-input-group class="mb-1">
+                  <mat-form-field style="width:100%">
+                    <mat-label>Tipo de Rol</mat-label>
+                    <select matNativeControl formControlName="rol">
+                      <option *ngFor="let p of tipoRol" [value]="p.value">
+                        {{p.value}}
+                      </option>
+                    </select>
+                  </mat-form-field>
+                </c-input-group>
+
+                <form [formGroup]="formArchivo" #myForm="ngForm">
+                  <app-botonarchivos groupName="Archivos" labelBoton="Archivo de identificación"></app-botonarchivos>
+                </form>
+
+                <div class="d-grid">
+                  <button cButton [disabled]="form.invalid" style="background: #1F544A; border: 0;"
+                    (click)="crearCuenta();">Crear Cuenta</button>
+                </div>
+              </form>
+            </c-card-body>
+          </c-card>
+          <c-card [ngStyle]="{'width.%': 44}" class="text-white py-5" style="background: #1F544A; display: flex; align-items: center; justify-content: center;">
+            <img src="assets/images/inprema2.png" alt="Descripción de la imagen" style="width: 25em; height: 15em;">
+        </c-card>
+        </c-card-group>
+      </c-col>
+    </c-row>
+  </c-container>
+</div>

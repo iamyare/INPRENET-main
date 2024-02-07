@@ -33,5 +33,4 @@ export class CreatePerfAfilCentTrabDto {
     @IsString()
     @IsOptional()
     nombre_centroTrabajo? : string;
-
 }

@@ -3,22 +3,23 @@ import { CommonModule } from '@angular/common';
 import { ControlContainer, FormArray, FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { DatosEstaticosService } from 'src/app/services/datos-estaticos.service';
 
-export function generatePuestoTrabFormGroup(): FormGroup { 
+export function generatePuestoTrabFormGroup(datos?:any): FormGroup {
   return new FormGroup({
-    centroTrabajo: new FormControl('', [Validators.required]),
-    cargo: new FormControl('', [Validators.required]),
-    sectorEconomico: new FormControl('', [Validators.required]),
-    actividadEconomica: new FormControl('', [Validators.required]),
-    claseCliente: new FormControl('', [Validators.required]),
-    sector: new FormControl('', [Validators.required]),
-    numeroAcuerdo: new FormControl('', [Validators.required]),
-    fechaIngreso: new FormControl('', [Validators.required]),
-    colegioMagisterial: new FormControl('', [Validators.required]),
-    numeroCarnet: new FormControl('', [Validators.required]),
+    centroTrabajo: new FormControl(datos.centroTrabajo, [Validators.required]),
+    cargo: new FormControl(datos.cargo, [Validators.required]),
+    sectorEconomico: new FormControl(datos.sectorEconomico, [Validators.required]),
+    actividadEconomica: new FormControl(datos.actividadEconomica, [Validators.required]),
+    claseCliente: new FormControl(datos.claseCliente, [Validators.required]),
+    sector: new FormControl(datos.sector, [Validators.required]),
+    numeroAcuerdo: new FormControl(datos.numeroAcuerdo, [Validators.required]),
+    fechaIngreso: new FormControl(datos.fechaIngreso, [Validators.required]),
+    colegioMagisterial: new FormControl(datos.colegioMagisterial, [Validators.required]),
+    numeroCarnet: new FormControl(datos.numeroCarnet, [Validators.required]),
+    salario: new FormControl(datos.salario, [Validators.required]),
 
-    fechaInicio: new FormControl('', Validators.required),
-    fechaFin: new FormControl('', Validators.required),
-    salario: new FormControl('', Validators.required)
+    fechaInicio: new FormControl(datos.fechaInicio, Validators.required),
+    fechaFin: new FormControl(datos.fechaFin, Validators.required),
+    fechaEgreso: new FormControl(datos.fechaEgreso, Validators.required)
   });
 }
 
@@ -42,6 +43,7 @@ export class DatPuestoTrabComponent {
   sector: any = this.datosEstaticos.sector;
 
   @Output() newDatDatosPuestTrab = new EventEmitter<any>()
+  @Input() datos:any;
   
   onDatosDatosPuestTrab(){
     const data = this.formParent
@@ -52,6 +54,12 @@ export class DatPuestoTrabComponent {
 
   ngOnInit():void{
     this.initFormParent();
+    
+    if (this.datos.value.refpers.length>0){
+      for (let i of this.datos.value.refpers){
+        this.agregarRefPer(i)
+      }
+    }
   }
 
   initFormParent():void {
@@ -59,34 +67,23 @@ export class DatPuestoTrabComponent {
       {
         refpers: new FormArray([], [Validators.required])
       }
-    )
+    );
   }
 
-  initFormRefPers(): FormGroup {
-    return new FormGroup(
-      {
-        centroTrabajo: new FormControl('', [Validators.required]),
-        cargo: new FormControl('', [Validators.required]),
-        sectorEconomico: new FormControl('', [Validators.required]),
-        actividadEconomica: new FormControl('', [Validators.required]),
-        claseCliente: new FormControl('', [Validators.required]),
-        sector: new FormControl('', [Validators.required]),
-        numeroAcuerdo: new FormControl('', [Validators.required]),
-        fechaIngreso: new FormControl('', [Validators.required]),
-        colegioMagisterial: new FormControl('', [Validators.required]),
-        numeroCarnet: new FormControl('', [Validators.required]),
-      }
-    )
-  }
-
-  agregarRefPer(): void{
+  agregarRefPer(datos?:any): void{
     const ref_RefPers = this.formParent.get('refpers') as FormArray;
-    ref_RefPers.push(this.initFormRefPers())
+    if (datos){
+      ref_RefPers.push(generatePuestoTrabFormGroup(datos))
+    }else {
+      ref_RefPers.push(generatePuestoTrabFormGroup({}))
+    }
   }
   
   eliminarRefPer():void{
     const ref_RefPers = this.formParent.get('refpers') as FormArray;
     ref_RefPers.removeAt(-1);
+    const data = this.formParent
+    this.newDatDatosPuestTrab.emit(data);
   }
   
   getCtrl(key: string, form: FormGroup): any {

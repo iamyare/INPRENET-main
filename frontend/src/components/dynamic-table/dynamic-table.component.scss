@@ -1,0 +1,61 @@
+.custom-input-field {
+  background-color: white;
+}
+
+.mat-mdc-form-field {
+  flex-direction: row;
+}
+.search-container {
+  justify-content: flex-end !important;
+}
+
+.white-background-input {
+  background-color: white;
+}
+
+.custom-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 20px;
+}
+
+.custom-header {
+  background-color: #1F544A;
+  color: #ffffff;
+  padding: 10px;
+  text-align: center;
+}
+
+.custom-row {
+  border-bottom: 1px solid #ddd;
+}
+
+.custom-cell {
+  text-align: center;
+  padding: 10px;
+}
+
+.custom-actions {
+  text-align: right;
+}
+
+.btn {
+  border-radius: 5px;
+  padding: 10px 20px;
+  margin-left: 5px;
+}
+
+.btn-primary {
+  background-color: #1F544A;
+  color: #ffffff;
+}
+
+.btn-success {
+  background-color: #5cb85c;
+  color: #ffffff;
+}
+
+.btn-danger {
+  background-color: #d9534f;
+  color: #ffffff;
+}

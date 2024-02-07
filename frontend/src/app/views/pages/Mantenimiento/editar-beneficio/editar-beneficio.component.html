@@ -1,0 +1,11 @@
+<div class="editar-beneficio-container">
+  <app-dynamic-table
+      style="width: 100%;"
+      [columns]="myColumns"
+      [data]="filas"
+      [getData]="getFilas"
+      (ejecutarFuncionAsincronaEvent)="ejecutarFuncionAsincronaDesdeOtroComponente($event)"
+      [verBotEditar]="true"
+      [editarFunc]="editar">
+  </app-dynamic-table>
+</div>

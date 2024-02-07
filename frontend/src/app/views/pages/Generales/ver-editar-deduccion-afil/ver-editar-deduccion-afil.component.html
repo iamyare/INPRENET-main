@@ -1,0 +1,7 @@
+<app-dynamic-table
+  [columns]="myColumns"
+  [data]="filasT"
+  [getData]="getFilas"
+  (ejecutarFuncionAsincronaEvent)="ejecutarFuncionAsincronaDesdeOtroComponente($event)"
+  [editarFunc]="editar">
+</app-dynamic-table>

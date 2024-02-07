@@ -5,12 +5,13 @@ import { EmpleadoEmpresa } from "./empleado-empresa.entity";
 export class Empresa {
 
     @PrimaryGeneratedColumn('uuid')
+    id_empresa : string;
+    
     @OneToMany(
         () => EmpleadoEmpresa,
         (empleadoEmpresa) => empleadoEmpresa.id_empresa,
         { cascade: true}
     )
-    id_empresa : string;
 
     @Column('varchar2', {
         unique: true

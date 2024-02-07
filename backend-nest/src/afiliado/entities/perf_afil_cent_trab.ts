@@ -1,7 +1,7 @@
 import { Column, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn } from "typeorm";
-import { Afiliado } from "./afiliado.entity";
-import { HistorialSalario } from "./historialSalarios.entity";
 import { CentroTrabajo } from "src/modules/Empresarial/centro-trabajo/entities/centro-trabajo.entity";
+import { DetalleAfiliado } from "./detalle_afiliado.entity";
+import { Afiliado } from "./afiliado";
 
 @Entity()
 export class PerfAfilCentTrab {
@@ -31,13 +31,10 @@ export class PerfAfilCentTrab {
 
     // Relación Uno a Muchos con PerfAfilCentTrab
     @ManyToOne(() => Afiliado, afiliado => afiliado.perfAfilCentTrabs)
-    @JoinColumn({ name: 'id_afiliado' })
+    @JoinColumn({ name: 'id_detalle_afiliado' })
     afiliado: Afiliado;
 
     @ManyToOne(() => CentroTrabajo, centroTrabajo => centroTrabajo.perfAfilCentTrabs)
     @JoinColumn({ name: 'id_centroTrabajo' })
     centroTrabajo: CentroTrabajo;
-
-    @OneToMany(() => HistorialSalario, historialSalario => historialSalario.perfAfilCentTrab, { cascade: true })
-    historialesSalario: HistorialSalario[];
 }

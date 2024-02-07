@@ -1,0 +1,66 @@
+<app-progressbar (newDatBenChange)="setEstadoDatGen($event)" (newEstCentrTrab)="setEstadoDatCentTrab($event)"
+  (newdatosHS)="setDatosHS($event)" (newdatosRP)="setDatosReferenc($event)" (newdatosB)="setDatosBenef($event)"
+  (newdatosF)="setDatosF($event)" (newdatosA)="setDatosA($event)"></app-progressbar>
+
+<div class="main-content">
+  <div class="col-md-12">
+    <form [formGroup]="form" #myForm="ngForm" change="getLabel()">
+      <app-dat-generales-afiliado *ngIf="DatosGenerales" groupName="DatosGenerales"></app-dat-generales-afiliado>
+
+      <app-dat-banc *ngIf="DatosGenerales" groupName="DatosBacAfil"></app-dat-banc>
+
+      <app-botonarchivos [labelBoton]="labelBoton1" groupName="Archivos" [datos]="form"
+        (setArchivo)="handleArchivoSeleccionado($event)"></app-botonarchivos>
+
+      <!-- <app-botonarchivos *ngIf="DatosGenerales" groupName="Archivos"
+        labelBoton="Archivo de identificación (Afiliado)"></app-botonarchivos> -->
+    </form>
+
+    <app-dat-puesto-trab *ngIf="DatosPuestoTrab" [datos]="formPuestTrab"
+      (newDatDatosPuestTrab)="setDatosPuetTrab1($event)"></app-dat-puesto-trab>
+    <app-historial-salario *ngIf="DatosHS" [datos]="formHistPag"
+      (newDatHistSal)="setHistSal($event)"></app-historial-salario>
+    <app-ref-pers *ngIf="referenc" [datos]="formReferencias"
+      (newDatRefPerChange)="setDatosRefPer($event)"></app-ref-pers>
+
+    <app-benef *ngIf="benfGroup" [datos]="formBeneficiarios" (newDatBenChange)="setDatosBen($event)"></app-benef>
+
+    <!--     <strong>Datos Generales</strong>
+    {{ form.controls.DatosGenerales.value | json }}
+    <strong>Status:</strong> {{ form.controls.DatosGenerales.status }}
+    <br>
+    <strong>Datos del puesto de trabajo (Afiliado)</strong>
+      {{ form.controls.DatosPuestoTrab.value | json }}
+      <strong>Status:</strong> {{ form.controls.DatosPuestoTrab.status }}
+      <br>
+      <strong>Datos Bancarios</strong>
+      {{ form.controls.DatosBacAfil.value | json }}
+      <strong>Status:</strong> {{ form.controls.DatosBacAfil.status }}
+      <br>
+      <strong>Archivos:</strong>
+      {{ form.controls.Archivos.value | json }}
+      <strong>Status:</strong> {{ form.controls.Archivos.status }}
+      <br>
+      <strong>Datos Referencias:</strong>
+    {{ formReferencias.controls.refpers.value | json }}
+    <strong>Status:</strong> {{ formReferencias.controls.refpers.status }}
+    <strong>Datos Beneficiario:</strong>
+    {{ formBeneficiarios.controls.refpers.value | json }}
+    <strong>Status:</strong> {{ formBeneficiarios.controls.refpers.status }} -->
+
+    <div class="card" *ngIf="datosF">
+      <div class="card-header card-header-danger tittle">
+        <h4 class="card-title">Envio de formulario</h4>
+        <p class="card-category">Presione el botón enviar para continuar con el proceso.</p>
+      </div>
+
+      <div class="card-body">
+        <!-- [disabled]="form.controls.DatosGenerales.invalid || form.controls.DatosPuestoTrab.invalid ||
+        form.controls.DatosBacAfil.invalid || form.controls.Archivos.invalid || formReferencias.controls.refpers.invalid
+        || formBeneficiarios.controls.refpers.invalid" -->
+        <button mat-button color="primary" (click)="enviar()">Enviar Formulario</button>
+      </div>
+
+    </div>
+  </div>
+</div>

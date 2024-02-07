@@ -33,9 +33,14 @@ export class PlanillaController {
     return this.planillaService.findAll();
   }
 
-  @Get(':id')
+/*   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.planillaService.findOne(+id);
+  } */
+
+  @Get(':term')
+  findOne(@Param('term') term: string) {
+    return this.planillaService.findOne(term);
   }
 
   @Patch(':id')

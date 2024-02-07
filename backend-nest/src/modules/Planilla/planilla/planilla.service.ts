@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable, InternalServerErrorException, Logger } from '@nestjs/common';
+import { BadRequestException, Injectable, InternalServerErrorException, Logger, NotFoundException } from '@nestjs/common';
 import { CreatePlanillaDto } from './dto/create-planilla.dto';
 import { UpdatePlanillaDto } from './dto/update-planilla.dto';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -14,6 +14,7 @@ import { DetalleBeneficio } from '../detalle_beneficio/entities/detalle_benefici
 import { format } from 'date-fns';
 import { Planilla } from './entities/planilla.entity';
 import { TipoPlanilla } from '../tipo-planilla/entities/tipo-planilla.entity';
+import { isUUID } from 'class-validator';
 
 @Injectable()
 export class PlanillaService {
@@ -125,8 +126,20 @@ export class PlanillaService {
     return resultado;
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} planilla`;
+  async findOne(term: any) {
+    let Planilla: Planilla;
+    if (isUUID(term)) {
+      Planilla = await this.planillaRepository.findOneBy({ id_planilla: term});
+    } else {
+      const queryBuilder = this.planillaRepository.createQueryBuilder('planilla');
+      Planilla = await queryBuilder
+        .where('"codigo_planilla" = :term AND "estado" = \'ACTIVA\'', { term } )
+        .getOne();
+    }
+    if (!Planilla) {
+      throw new NotFoundException(`planilla con ${term} no encontrado.`);
+    }
+    return Planilla;
   }
 
   update(id: number, updatePlanillaDto: UpdatePlanillaDto) {

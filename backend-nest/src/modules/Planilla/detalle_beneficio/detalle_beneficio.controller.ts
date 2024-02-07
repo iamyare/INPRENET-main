@@ -1,8 +1,7 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Query, BadRequestException } from '@nestjs/common';
 import {  DetalleBeneficioService } from './detalle_beneficio.service';
 import { UpdateDetalleBeneficioDto } from './dto/update-detalle_beneficio_planilla.dto';
-/* import { CreateDetalleBeneficioDto } from './dto/create-beneficio_planilla.dto';
-import { UpdateDetalleBeneficioDto } from './dto/update-beneficio_planilla.dto'; */
+import { DetalleBeneficio } from './entities/detalle_beneficio.entity';
 
 @Controller('beneficio-planilla')
 export class DetalleBeneficioController {
@@ -11,6 +10,23 @@ export class DetalleBeneficioController {
   @Post()
   create(@Body() createDetalleBeneficioDto: any) {
     return this.detallebeneficioService.create(createDetalleBeneficioDto);
+  }
+
+  @Get('por-rango-fecha')
+  async findByDateRange(
+    @Query('fechaInicio') fechaInicio: string,
+    @Query('fechaFin') fechaFin: string,
+    @Query('idAfiliado') idAfiliado: string
+  ): Promise<DetalleBeneficio[]> {
+    const fechaInicioDate = new Date(fechaInicio);
+    const fechaFinDate = new Date(fechaFin);
+
+    // Validar que las fechas y el ID del afiliado sean válidos
+    if (isNaN(fechaInicioDate.getTime()) || isNaN(fechaFinDate.getTime()) || !idAfiliado) {
+      throw new BadRequestException('Los parámetros proporcionados no son válidos.');
+    }
+
+    return this.detallebeneficioService.findByDateRange(fechaInicioDate, fechaFinDate, idAfiliado);
   }
 
   @Get()

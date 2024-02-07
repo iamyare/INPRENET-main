@@ -1,0 +1,10 @@
+<h1 mat-dialog-title>Detalles del Afiliado</h1>
+<div mat-dialog-content>
+  <p>DNI: {{ data.afilData.dni }}</p>
+  <p>Nombre: {{ data.afilData.primer_nombre
+  }}</p>
+  <!-- Agrega más campos según la estructura de tus datos -->
+</div>
+<div mat-dialog-actions>
+  <button mat-button (click)="dialogRef.close()">Cerrar</button>
+</div>

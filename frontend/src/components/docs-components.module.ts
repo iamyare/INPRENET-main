@@ -44,6 +44,7 @@ import { BeneficioComponent } from './beneficio/beneficio.component';
 import { CustomMatPaginatorIntl } from './shared/paginado';
 import { DynamicFormComponent } from './dynamic-form/dynamic-form.component';
 import { DynamicTableComponent } from './dynamic-table/dynamic-table.component';
+import { DynamicDialogComponent } from './dynamic-dialog/dynamic-dialog.component';
 
 @NgModule({
   declarations: [
@@ -59,6 +60,7 @@ import { DynamicTableComponent } from './dynamic-table/dynamic-table.component';
     HistorialSalarioComponent,
     DynamicFormComponent,
     DynamicTableComponent,
+    DynamicDialogComponent
   ],
   exports: [
     ProgressbarComponent,

@@ -1,14 +1,12 @@
 import { BadRequestException, Injectable, InternalServerErrorException, Logger, NotFoundException } from '@nestjs/common';
-/* import { CreateBeneficioPlanillaDto } from './dto/create-beneficio_planilla.dto';
-import { UpdateBeneficioPlanillaDto } from './dto/update-beneficio_planilla.dto';
-import { BeneficioPlanilla } from './entities/beneficio_planilla.entity'; */
 import { isUUID } from 'class-validator';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { LessThanOrEqual, MoreThanOrEqual, Repository } from 'typeorm';
 import { Beneficio } from '../beneficio/entities/beneficio.entity';
 import { Afiliado } from 'src/afiliado/entities/afiliado';
 import { DetalleBeneficio } from './entities/detalle_beneficio.entity';
 import { UpdateDetalleBeneficioDto } from './dto/update-detalle_beneficio_planilla.dto';
+import { CreateDetalleBeneficioDto } from './dto/create-detalle_beneficio.dto';
 
 @Injectable()
 export class DetalleBeneficioService {
@@ -23,40 +21,58 @@ export class DetalleBeneficioService {
   private readonly benAfilRepository : Repository<DetalleBeneficio>
 
   async create(datos: any): Promise<any> {
-    let afiliado:any;
-    let tipoBeneficio:any;
-    
     try {
-      if(datos.dni){
-         afiliado = await this.afiliadoRepository.findOne({
-          where: {dni: datos.dni}
-        });
-      }
+      const afiliado = await this.afiliadoRepository.findOne({
+        where: { dni: datos.dni },
+      });
       if (!afiliado) {
-        throw new BadRequestException('afiliado no encontrada');
+        throw new BadRequestException('Afiliado no encontrado');
       }
 
-      else if(datos.tipo_beneficio){
-       //Buscar y retornar id_tipobeneficio
-        tipoBeneficio = await this.tipoBeneficioRepository.findOne({
-          where: { nombre_beneficio: datos.tipo_beneficio}
-        });
-      }
+      const tipoBeneficio = await this.tipoBeneficioRepository.findOne({
+        where: { nombre_beneficio: datos.tipo_beneficio },
+      });
       if (!tipoBeneficio) {
-        throw new BadRequestException('tipoBeneficio no encontrada');
+        throw new BadRequestException('Tipo de beneficio no encontrado');
       }
-      
-      if (afiliado && tipoBeneficio){
-       const nuevoDetalle = this.benAfilRepository.create(
-          {afiliado: afiliado, beneficio: tipoBeneficio, periodoInicio:datos.periodoInicio, periodoFinalizacion:datos.periodoFinalizacion}
-          );
-          return this.benAfilRepository.save(nuevoDetalle);
-        }else{
-          throw new BadRequestException('error desconocido');
+
+      // Conversión de las fechas
+      const periodoInicio = this.convertirCadenaAFecha(datos.periodoInicio);
+      const periodoFinalizacion = this.convertirCadenaAFecha(datos.periodoFinalizacion);
+
+      // Verificar que las fechas sean válidas
+      if (!periodoInicio || !periodoFinalizacion) {
+        throw new BadRequestException('Formato de fecha inválido. Usa DD-MM-YYYY.');
       }
+
+      // Creación del nuevo detalle de beneficio
+      const nuevoDetalle = this.benAfilRepository.create({
+        afiliado,
+        beneficio: tipoBeneficio,
+        periodoInicio,
+        periodoFinalizacion,
+        monto: datos.monto,
+        estado: datos.estado || 'NO PAGADO',  // Asume un estado por defecto si no se proporciona
+        modalidad_pago: datos.modalidad_pago,
+        num_rentas_aplicadas: datos.num_rentas_aplicadas,
+      });
+
+      return await this.benAfilRepository.save(nuevoDetalle);
     } catch (error) {
       this.handleException(error);
     }
+  }
+
+  private convertirCadenaAFecha(cadena: string): Date | null {
+    const partes = cadena.split('-');
+    if (partes.length === 3) {
+      const [dia, mes, año] = partes.map(parte => parseInt(parte, 10));
+      const fecha = new Date(año, mes - 1, dia);
+      if (!isNaN(fecha.getTime())) {
+        return fecha;
+      }
+    }
+    return null;
   }
 
   findAll() {
@@ -105,4 +121,28 @@ export class DetalleBeneficioService {
       throw new InternalServerErrorException('Ocurrió un error al procesar su solicitud');
     }
   }
+  
+
+  async findByDateRange(fechaInicio: Date, fechaFin: Date, idAfiliado: string): Promise<DetalleBeneficio[]> {
+    if (!fechaInicio || !fechaFin || fechaInicio > fechaFin) {
+      throw new BadRequestException('El rango de fechas proporcionado no es válido.');
+    }
+  
+    try {
+      const detalleBeneficios = await this.benAfilRepository.find({
+        where: {
+          afiliado: { id_afiliado: idAfiliado },
+          periodoInicio: MoreThanOrEqual(fechaInicio),
+          periodoFinalizacion: LessThanOrEqual(fechaFin)
+        }
+      });
+  
+      return detalleBeneficios;
+    } catch (error) {
+      this.handleException(error);
+    }
+  }
+  
+
+
 }

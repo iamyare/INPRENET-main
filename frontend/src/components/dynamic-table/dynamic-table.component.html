@@ -19,7 +19,8 @@
       <th class="custom-header" *ngIf="verOpcEditar"></th>
       <th *ngFor="let col of columns" class="custom-header">{{ col.header }}</th>
       <th *ngIf="verBotEditar" class="custom-header">Acciones</th>
-      <th class="custom-header">Acciones</th>
+      <th *ngIf="mostrarBotonUno" class="custom-header">{{ nombreEncabezadoUno }}</th>
+      <th *ngIf="mostrarBotonDos" class="custom-header">{{ nombreEncabezadoDos }}</th>
     </tr>
   </thead>
   <tbody>
@@ -50,10 +51,17 @@
         <button mat-raised-button *ngIf="row.isEditing" (click)="saveChanges(row)" style="background-color: #628780; color: #ffffff; border-radius: 5px; padding: 10px 20px;">Guardar</button>
         <button mat-raised-button *ngIf="row.isEditing" (click)="stopEditing(row)" style="background-color: #628780; color: #ffffff; border-radius: 5px; padding: 10px 20px;">Cancelar</button>
       </td>
-      <td>
-        <button mat-raised-button style="background-color: #628780; color: #ffffff; border-radius: 5px; padding: 10px 20px;">ver deducciones</button>
-        <button mat-raised-button style="background-color: #628780; color: #ffffff; border-radius: 5px; padding: 10px 20px;">ver beneficios</button>
+      <td *ngIf="mostrarBotonUno">
+        <button *ngIf="mostrarBotonUno" mat-raised-button (click)="ejecutarAccionUno(row)">
+          {{ etiquetaBotonUno }}
+        </button>
       </td>
+      <td *ngIf="mostrarBotonDos">
+        <button *ngIf="mostrarBotonDos" mat-raised-button (click)="ejecutarAccionDos(row)">
+          {{ etiquetaBotonDos }}
+        </button>
+      </td>
+
     </tr>
   </tbody>
 </table>

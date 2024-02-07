@@ -3,6 +3,7 @@ import { FormControl, ValidatorFn } from '@angular/forms';
 import { MatPaginator } from '@angular/material/paginator';
 import { SelectionserviceService } from '@docs-components/nuevaplanilla/selectionservice.service';
 import { Observable, Subject, debounceTime, distinctUntilChanged, of, switchMap, takeUntil } from 'rxjs';
+import { TableColumn } from 'src/app/views/shared/shared/Interfaces/table-column';
 
 @Component({
   selector: 'app-dynamic-table',
@@ -21,6 +22,17 @@ export class DynamicTableComponent implements OnInit, OnDestroy {
 
   @Input() columns: TableColumn[] = [];
   @Input() editarFunc: any;
+
+  @Input() nombreEncabezadoUno: string = ''; // Valor por defecto
+  @Input() mostrarBotonUno: boolean = false;
+  @Input() etiquetaBotonUno: string = '';
+  @Output() accionBotonUno: EventEmitter<any> = new EventEmitter<any>();
+
+  @Input() nombreEncabezadoDos: string = '';
+  @Input() mostrarBotonDos: boolean = false;
+  @Input() etiquetaBotonDos: string = '';
+  @Output() accionBotonDos: EventEmitter<any> = new EventEmitter<any>();
+
 
   @ViewChild(MatPaginator) paginator: MatPaginator | undefined;
 
@@ -227,15 +239,13 @@ export class DynamicTableComponent implements OnInit, OnDestroy {
       this.getElemSeleccionados.emit(filasSeleccionadas);
       console.log(filasSeleccionadas);
     }
-}
 
-interface TableColumn {
-  header: string;
-  col: string;
-  customRender?: (data: any) => string;
-  isButton?: boolean;
-  buttonAction?: (row: any) => void;
-  buttonText?: string;
-  isEditable?: boolean;
-  validationRules?: ValidatorFn[];
+    ejecutarAccionUno(row: any) {
+      this.accionBotonUno.emit(row);
+    }
+
+    ejecutarAccionDos(row: any) {
+      this.accionBotonDos.emit(row);
+    }
+
 }

@@ -21,12 +21,11 @@ export class DetalleBeneficio {
     @Column({nullable:true})
     num_rentas_aplicadas: number;
 
-    @Column('varchar2', { length: 200, nullable: false })
-    periodoInicio: string;
+    @Column({ type: 'date', nullable: false })
+    periodoInicio: Date;
 
-    @Column('varchar2', { length: 200, nullable: false })
-    periodoFinalizacion: string;
-
+    @Column({ type: 'date', nullable: false })
+    periodoFinalizacion: Date;
 
     @ManyToOne(() => Beneficio, beneficio => beneficio.detallebeneficio, { cascade : true })
     @JoinColumn({ name: 'id_beneficio'})

@@ -2,14 +2,12 @@ import { Pais } from "src/modules/Regional/pais/entities/pais.entity";
 import { TipoIdentificacion } from "src/modules/tipo_identificacion/entities/tipo_identificacion.entity";
 import { Column, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 import { Provincia } from "src/modules/Regional/provincia/entities/provincia.entity";
-import { Planilla } from "src/modules/Planilla/planilla/entities/planilla.entity";
 
 import { ReferenciaPersonalAfiliado } from "./referenciaP-Afiliado";
 import { AfiliadosPorBanco } from "src/banco/entities/afiliados-banco";
 import { DetalleDeduccion } from "src/modules/Planilla/detalle-deduccion/entities/detalle-deduccion.entity";
 import { PerfAfilCentTrab } from "./perf_afil_cent_trab";
 import { DetalleAfiliado } from "./detalle_afiliado.entity";
-import { DetallePlanilla } from "src/modules/Planilla/planilla/entities/detalle_planilla.entity";
 import { DetalleBeneficio } from "src/modules/Planilla/detalle_beneficio/entities/detalle_beneficio.entity";
  
 @Entity()
@@ -97,9 +95,6 @@ export class Afiliado {
 
     @OneToMany(() => DetalleAfiliado, detalleAfiliado => detalleAfiliado.afiliado)
     detalleAfiliado: DetalleAfiliado[];
-
-/*     @OneToMany(() => DetallePlanilla, detallePlanilla => detallePlanilla.afiliado)
-    detallePlanilla: DetallePlanilla[]; */
 
     @ManyToOne(() => Provincia, provincia => provincia.afiliado, { cascade: true })
     @JoinColumn({ name: 'id_provincia' })

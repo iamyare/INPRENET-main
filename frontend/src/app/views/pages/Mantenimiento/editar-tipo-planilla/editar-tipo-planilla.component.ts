@@ -94,5 +94,15 @@ export class EditarTipoPlanillaComponent implements OnInit{
     }
   }
 
+  manejarAccionUno(row: any) {
+    console.log(row);
+
+    // Lógica para manejar la acción del primer botón
+  }
+
+  manejarAccionDos(row: any) {
+    // Lógica para manejar la acción del segundo botón
+  }
+
 
 }

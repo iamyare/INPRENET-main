@@ -4,5 +4,13 @@
 [getData]="getFilas"
 (ejecutarFuncionAsincronaEvent)="ejecutarFuncionAsincronaDesdeOtroComponente($event)"
 [verBotEditar]="true"
-[editarFunc]="editar">
+[editarFunc]="editar"
+[mostrarBotonUno]="false"
+[etiquetaBotonUno]="'lkjhgfds'"
+[nombreEncabezadoUno]="'kjhgf'"
+(accionBotonUno)="manejarAccionUno($event)"
+[mostrarBotonDos]="false"
+[nombreEncabezadoDos]="'Beneficios'"
+[etiquetaBotonDos]="'Ver Beneficios'"
+(accionBotonDos)="manejarAccionDos($event)">
 </app-dynamic-table>

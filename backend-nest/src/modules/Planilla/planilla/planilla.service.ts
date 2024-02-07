@@ -9,8 +9,6 @@ import { Afiliado } from 'src/afiliado/entities/afiliado';
 import { Beneficio } from '../beneficio/entities/beneficio.entity';
 import { Deduccion } from '../deduccion/entities/deduccion.entity';
 import { DetalleBeneficio } from '../detalle_beneficio/entities/detalle_beneficio.entity';
-/* import { Afiliado } from 'src/afiliado/entities/detalle_afiliado.entity'; */
-// import { detalleBeneficio } from '../beneficio_planilla/entities/beneficio_planilla.entity';
 import { format } from 'date-fns';
 import { Planilla } from './entities/planilla.entity';
 import { TipoPlanilla } from '../tipo-planilla/entities/tipo-planilla.entity';

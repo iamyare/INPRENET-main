@@ -28,6 +28,7 @@ export class PlanillaController {
     return this.planillaService.getBeneficiosNoAplicados(periodoInicio, periodoFinalizacion);
   }
 
+
   @Get()
   findAll() {
     return this.planillaService.findAll();

@@ -1,6 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, Validators } from '@angular/forms';
 import { ToastrService } from 'ngx-toastr';
+import { MatDialog } from '@angular/material/dialog';
+import { DynamicDialogComponent } from '@docs-components/dynamic-dialog/dynamic-dialog.component';
 import { AfiliadoService } from 'src/app/services/afiliado.service';
 import { PlanillaService } from 'src/app/services/planilla.service';
 import { FieldConfig } from 'src/app/views/shared/shared/Interfaces/field-config';
@@ -28,7 +30,8 @@ export class AsignacionAfilPlanComponent implements OnInit{
   constructor( private _formBuilder: FormBuilder,
     private planillaService : PlanillaService,
     private svcAfilServ: AfiliadoService,
-    private toastr: ToastrService
+    private toastr: ToastrService,
+    public dialog: MatDialog
     ) {
   }
 
@@ -131,7 +134,6 @@ export class AsignacionAfilPlanComponent implements OnInit{
       // Asegúrate de pasar los parámetros mes y anio a la función getDeduccionesNoAplicadas
       const data = await this.planillaService.getDeduccionesNoAplicadas(periodoInicio, periodoFinalizacion).toPromise();
       this.filasT = data.map((item: any) => {
-
         return {
           afil_id_afiliado: item.afil_id_afiliado,
           afil_dni: item.afil_dni,
@@ -139,7 +141,9 @@ export class AsignacionAfilPlanComponent implements OnInit{
           BENEFICIOSIDS: item.BENEFICIOSIDS,
           BENEFICIOSNOMBRES: item.BENEFICIOSNOMBRES,
           DEDUCCIONESIDS: item.DEDUCCIONESIDS,
-          DEDUCCIONESNOMBRES: item.DEDUCCIONESNOMBRES
+          DEDUCCIONESNOMBRES: item.DEDUCCIONESNOMBRES,
+          periodoInicio : periodoInicio,
+          periodoFinalizacion : periodoFinalizacion
         };
       });
 
@@ -155,4 +159,31 @@ export class AsignacionAfilPlanComponent implements OnInit{
   }
 
   editar = (row: any) => {}
+  manejarAccionUno(row: any) {
+    this.svcAfilServ.getAfilByParam(row.afil_dni).subscribe({
+      next: (afilData) => {
+        console.log(afilData);
+        const dialogRef = this.dialog.open(DynamicDialogComponent, {
+          width: '250px', // Ajusta según tus necesidades
+          data: { afilData } // Pasando los datos obtenidos del servicio al dialog
+
+        });
+
+        dialogRef.afterClosed().subscribe(result => {
+          console.log('La modal fue cerrada');
+          // Aquí puedes manejar lo que sucede después de cerrar la modal
+        });
+      },
+      error: (error) => {
+        console.error('Error al obtener datos del afiliado', error);
+        // Manejo de errores, por ejemplo, mostrar un mensaje al usuario
+      }
+    });
+  }
+
+
+  manejarAccionDos(row: any) {
+    // Lógica para manejar la acción del segundo botón
+  }
+
 }

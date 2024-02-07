@@ -3,7 +3,7 @@ import { CreateDetalleDeduccionDto } from './dto/create-detalle-deduccion.dto';
 import { UpdateDetalleDeduccionDto } from './dto/update-detalle-deduccion.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { DetalleDeduccion } from './entities/detalle-deduccion.entity';
-import { Repository } from 'typeorm';
+import { Between, Repository } from 'typeorm';
 import { Deduccion } from '../deduccion/entities/deduccion.entity';
 import { Institucion } from 'src/modules/Empresarial/institucion/entities/institucion.entity';
 import * as xlsx from 'xlsx';
@@ -181,6 +181,27 @@ export class DetalleDeduccionService {
     const data = xlsx.utils.sheet_to_json(worksheet);
     return data;
   }
+
+
+  async findDeduccionesByDateRangeAndAfiliado(
+    mes1: number,
+    mes2: number,
+    año1: number,
+    año2: number,
+    id_afiliado: string
+  ): Promise<DetalleDeduccion[]> {
+    const fechaInicio = new Date(año1, mes1 - 1, 1); // Los meses en JavaScript son de 0 a 11
+    const fechaFin = new Date(año2, mes2, 0); // El día 0 del siguiente mes es el último día del mes actual
+  
+    return this.detalleDeduccionRepository.find({
+      where: {
+        afiliado: { id_afiliado },
+        fecha_aplicado: Between(fechaInicio, fechaFin)
+      },
+      relations: ['afiliado', 'deduccion', 'institucion', 'planilla'] // Asegúrate de incluir todas las relaciones que necesitas en el resultado
+    });
+  }
+  
 }
 
 

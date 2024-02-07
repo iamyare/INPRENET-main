@@ -22,9 +22,6 @@ export class DetalleDeduccion {
     @JoinColumn({ name: 'id_institucion' })
     institucion: Institucion; // Correcto
 
-    /* @OneToMany(() => DetallePlanilla, detallePlanilla => detallePlanilla.detalleDeduccion)
-    detallePlanilla: DetallePlanilla[]; */
-
     @Column('number', {nullable: true})
     monto_total: number;
 

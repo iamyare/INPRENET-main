@@ -93,6 +93,9 @@ export class NuevoBeneficioAfilComponent implements OnInit{
         periodoFinalizacion: endDateFormatted
       };
 
+      console.log(datosFormateados);
+
+
       delete datosFormateados.periodo;
 
         this.datosFormateados = datosFormateados;

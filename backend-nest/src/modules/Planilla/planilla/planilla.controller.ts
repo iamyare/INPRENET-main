@@ -7,6 +7,20 @@ import { UpdatePlanillaDto } from './dto/update-planilla.dto';
 export class PlanillaController {
   constructor(private readonly planillaService: PlanillaService) {}
 
+  @Post('create-view')
+  async createView() {
+    await this.planillaService.createView();
+    return { message: 'Vista creada con éxito' };
+  }
+
+
+  @Post('create-complementary-view')
+  async createComplementaryView() {
+    await this.planillaService.createComplementaryView();
+    return { message: 'Vista complementaria creada con éxito' };
+  }
+
+  
   @Post()
   create(@Body() createPlanillaDto: CreatePlanillaDto) {
     return this.planillaService.create(createPlanillaDto);

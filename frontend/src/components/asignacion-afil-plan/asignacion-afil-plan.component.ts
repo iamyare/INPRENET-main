@@ -49,20 +49,9 @@ export class AsignacionAfilPlanComponent implements OnInit{
         isEditable: true
       },
       {
-        header: 'IDs de beneficios',
-        col: 'BENEFICIOSIDS',
-        isEditable: true
-      },
-      {
         header: 'Nombres de Beneficios',
         col: 'BENEFICIOSNOMBRES',
         isEditable: true
-      },
-      {
-        header: 'deduccionesIds',
-        col: 'DEDUCCIONESIDS',
-        isEditable: true,
-        validationRules: [Validators.required, Validators.pattern(/^(3[01]|[12][0-9]|0?[1-9])-(1[0-2]|0?[1-9])-\d{4} - (3[01]|[12][0-9]|0?[1-9])-(1[0-2]|0?[1-9])-\d{4}$/)]
       },
       {
         header: 'Nombres de deducciones',

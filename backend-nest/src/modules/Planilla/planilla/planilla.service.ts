@@ -155,6 +155,84 @@ export class PlanillaService {
       throw new InternalServerErrorException('Ocurrió un error al procesar su solicitud');
     }
   }
+
+  async createView(): Promise<void> {
+    const createViewQuery = `
+      CREATE OR REPLACE VIEW vista_planilla_ordinaria AS
+      SELECT
+        afil."id_afiliado",
+        afil."dni",
+        afil."primer_nombre",
+        LISTAGG(DISTINCT ben."nombre_beneficio", ',') WITHIN GROUP (ORDER BY ben."id_beneficio") AS beneficiosNombres,
+        LISTAGG(DISTINCT ded."nombre_deduccion", ',') WITHIN GROUP (ORDER BY ded."id_deduccion") AS deduccionesNombres
+      FROM
+        "C##TEST"."afiliado" afil
+      LEFT JOIN
+        "C##TEST"."detalle_deduccion" detD ON afil."id_afiliado" = detD."id_afiliado" AND detD."estado_aplicacion" = 'COBRADA'
+      LEFT JOIN
+        "C##TEST"."deduccion" ded ON detD."id_deduccion" = ded."id_deduccion"
+      LEFT JOIN
+        "C##TEST"."detalle_beneficio" detB ON afil."id_afiliado" = detB."id_afiliado" AND detB."estado" = 'NO PAGADO'
+      LEFT JOIN
+        "C##TEST"."beneficio" ben ON detB."id_beneficio" = ben."id_beneficio"
+      WHERE
+        (TO_DATE(detB."periodoInicio", 'DD-MM-YYYY') BETWEEN TO_DATE(SYSDATE, 'DD-MM-YYYY') AND TO_DATE('01-02-2024', 'DD-MM-YYYY')
+        AND TO_DATE(detB."periodoFinalizacion", 'DD-MM-YYYY') BETWEEN TO_DATE(SYSDATE, 'DD-MM-YYYY') AND TO_DATE('29-02-2024', 'DD-MM-YYYY')
+        AND afil."id_afiliado" = '1' AND detB."estado" = 'NO PAGADO')
+        OR (TO_DATE(CONCAT(detD."anio", LPAD(detD."mes", 2, '0')), 'YYYYMM') BETWEEN TO_DATE('01-02-2024', 'DD-MM-YYYY') AND TO_DATE('29-02-2024', 'DD-MM-YYYY')
+        AND afil."id_afiliado" = '1' AND detD."estado_aplicacion" = 'COBRADA')
+      GROUP BY
+        afil."id_afiliado", afil."primer_nombre", afil."dni"
+    `;
+
+    await this.planillaRepository.query(createViewQuery);
+  }
+
+  async createComplementaryView(): Promise<void> {
+    const createViewQuery = `
+      CREATE OR REPLACE VIEW vista_planilla_complementaria AS
+      SELECT
+        afil."id_afiliado",
+        afil."dni",
+        afil."primer_nombre",
+        LISTAGG(DISTINCT ben."nombre_beneficio", ',') WITHIN GROUP (ORDER BY ben."id_beneficio") AS "beneficiosNombres",
+        LISTAGG(DISTINCT ded."nombre_deduccion", ',') WITHIN GROUP (ORDER BY ded."id_deduccion") AS "deduccionesNombres"
+      FROM
+        "C##TEST"."detalle_beneficio" detBs
+      LEFT JOIN
+        "C##TEST"."afiliado" afil ON afil."id_afiliado" = detBs."id_afiliado"
+      LEFT JOIN
+        "C##TEST"."beneficio" ben ON ben."id_beneficio" = detBs."id_beneficio"
+      LEFT JOIN
+        "C##TEST"."detalle_deduccion" detDs ON afil."id_afiliado" = detDs."id_afiliado"
+      LEFT JOIN
+        "C##TEST"."deduccion" ded ON detDs."id_deduccion" = ded."id_deduccion"
+      WHERE
+        detBs."estado" = 'NO PAGADO' AND detDs."estado_aplicacion" = 'NO COBRADO'
+        AND detBs."id_afiliado" NOT IN (
+            SELECT
+                detB."id_afiliado"
+            FROM
+                "C##TEST"."detalle_beneficio" detB
+            WHERE
+                detB."estado" != 'NO PAGADO'
+        ) AND (
+            detDs."id_afiliado" NOT IN (
+                SELECT detD."id_afiliado"
+                FROM "C##TEST"."detalle_deduccion" detD
+                WHERE "estado_aplicacion" != 'NO COBRADO'
+            )
+        )
+      GROUP BY
+        afil."id_afiliado",
+        afil."dni",
+        afil."primer_nombre"
+    `;
+
+    await this.planillaRepository.query(createViewQuery);
+  }
+
+
 }
 
 

@@ -20,8 +20,6 @@ export class Beneficio {
     @Column('number', { nullable: false })
     numero_rentas_max: number;
 
-
-
     @OneToMany(() => DetalleBeneficio, detallebeneficio => detallebeneficio.beneficio)
     detallebeneficio : DetalleBeneficio[];
 }

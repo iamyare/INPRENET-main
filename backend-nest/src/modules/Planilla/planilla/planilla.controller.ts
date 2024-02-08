@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Query } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Query, Res, BadRequestException, InternalServerErrorException } from '@nestjs/common';
 import { PlanillaService } from './planilla.service';
 import { CreatePlanillaDto } from './dto/create-planilla.dto';
 import { UpdatePlanillaDto } from './dto/update-planilla.dto';
@@ -6,6 +6,29 @@ import { UpdatePlanillaDto } from './dto/update-planilla.dto';
 @Controller('planilla')
 export class PlanillaController {
   constructor(private readonly planillaService: PlanillaService) {}
+
+  @Get('planillaOrdinaria')
+  async obtenerAfilOrdinaria(
+    @Query('periodoInicio') periodoInicio: string,
+    @Query('periodoFinalizacion') periodoFinalizacion: string,
+  ) {
+    if (!periodoInicio || !periodoFinalizacion) {
+      throw new BadRequestException('Los parámetros periodoInicio y periodoFinalizacion son obligatorios');
+    }
+
+    try {
+      return await this.planillaService.obtenerAfilOrdinaria(periodoInicio, periodoFinalizacion);
+    } catch (error) {
+      throw new InternalServerErrorException('Error al obtener el resumen de afiliados');
+    }
+  }
+
+  @Get('planillaComplementatria')
+  
+  async ObtenerAfilComplementaria() {
+    console.log('entro');
+    return this.planillaService.obtenerAfilComplementaria();
+  }
 
   @Post('create-ordinaria-view')
   async createView() {

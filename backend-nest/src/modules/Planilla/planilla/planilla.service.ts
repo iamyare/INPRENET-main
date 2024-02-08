@@ -1,15 +1,14 @@
 import { BadRequestException, Injectable, InternalServerErrorException, Logger, NotFoundException } from '@nestjs/common';
 import { CreatePlanillaDto } from './dto/create-planilla.dto';
 import { UpdatePlanillaDto } from './dto/update-planilla.dto';
-import { InjectRepository } from '@nestjs/typeorm';
+import { InjectEntityManager, InjectRepository } from '@nestjs/typeorm';
 import { DetalleDeduccion } from '../detalle-deduccion/entities/detalle-deduccion.entity';
-import { Repository } from 'typeorm';
+import { EntityManager, Repository } from 'typeorm';
 import { Institucion } from 'src/modules/Empresarial/institucion/entities/institucion.entity';
 import { Afiliado } from 'src/afiliado/entities/afiliado';
 import { Beneficio } from '../beneficio/entities/beneficio.entity';
 import { Deduccion } from '../deduccion/entities/deduccion.entity';
 import { DetalleBeneficio } from '../detalle_beneficio/entities/detalle_beneficio.entity';
-import { format } from 'date-fns';
 import { Planilla } from './entities/planilla.entity';
 import { TipoPlanilla } from '../tipo-planilla/entities/tipo-planilla.entity';
 import { isUUID } from 'class-validator';
@@ -19,17 +18,15 @@ export class PlanillaService {
   private readonly logger = new Logger(PlanillaService.name)
 
   constructor(
+    @InjectEntityManager() private entityManager: EntityManager,
     @InjectRepository(DetalleBeneficio)
     private detalleBeneficioRepository: Repository<DetalleBeneficio>,
     @InjectRepository(Afiliado)
     private afiliadoRepository: Repository<Afiliado>,
-
     @InjectRepository(Planilla)
     private planillaRepository: Repository<Planilla>,
-
     @InjectRepository(TipoPlanilla)
     private tipoPlanillaRepository: Repository<TipoPlanilla>,
-
     @InjectRepository(DetalleDeduccion)
     private detalleDeduccionRepository: Repository<DetalleDeduccion>,
     @InjectRepository(Beneficio)
@@ -37,7 +34,104 @@ export class PlanillaService {
     @InjectRepository(Deduccion)
     private DeduccionRepository: Repository<Deduccion>,
     @InjectRepository(Institucion)
-    private institucionRepository: Repository<Institucion>,){};
+    private institucionRepository: Repository<Institucion>){};
+
+    async obtenerAfilOrdinaria(periodoInicio: string, periodoFinalizacion: string): Promise<any> {
+      const query = `
+      SELECT
+      afil."id_afiliado",
+      afil."dni",
+      afil."primer_nombre",
+      LISTAGG(DISTINCT ben."nombre_beneficio", ',') WITHIN GROUP (ORDER BY ben."id_beneficio") AS "beneficiosNombres",
+      LISTAGG(DISTINCT ded."nombre_deduccion", ',') WITHIN GROUP (ORDER BY ded."id_deduccion") AS "deduccionesNombres"
+    FROM
+      "C##TEST"."afiliado" afil
+    LEFT JOIN
+      "C##TEST"."detalle_beneficio" detBs ON afil."id_afiliado" = detBs."id_afiliado"
+      AND detBs."estado" = 'NO PAGADO'
+      AND TO_DATE(detBs."periodoInicio", 'DD-MM-YYYY') BETWEEN TO_DATE('${periodoInicio}', 'DD-MM-YYYY') AND TO_DATE('${periodoFinalizacion}', 'DD-MM-YYYY')
+      AND TO_DATE(detBs."periodoFinalizacion", 'DD-MM-YYYY') BETWEEN TO_DATE('${periodoInicio}', 'DD-MM-YYYY') AND TO_DATE('${periodoFinalizacion}', 'DD-MM-YYYY')
+    LEFT JOIN
+      "C##TEST"."beneficio" ben ON ben."id_beneficio" = detBs."id_beneficio"
+    LEFT JOIN
+      "C##TEST"."detalle_deduccion" detDs ON afil."id_afiliado" = detDs."id_afiliado"
+      AND detDs."estado_aplicacion" = 'NO COBRADA'
+      AND TO_DATE(CONCAT(detDs."anio", LPAD(detDs."mes", 2, '0')), 'YYYYMM') BETWEEN TO_DATE('${periodoInicio}', 'DD-MM-YYYY') AND TO_DATE('${periodoFinalizacion}', 'DD-MM-YYYY')
+    LEFT JOIN
+      "C##TEST"."deduccion" ded ON ded."id_deduccion" = detDs."id_deduccion"
+    WHERE
+      afil."id_afiliado" IN (
+        SELECT detB."id_afiliado"
+        FROM "C##TEST"."detalle_beneficio" detB
+        WHERE detB."estado" = 'PAGADO'
+        UNION
+        SELECT detD."id_afiliado"
+        FROM "C##TEST"."detalle_deduccion" detD
+        WHERE detD."estado_aplicacion" = 'COBRADA'
+      )
+    GROUP BY
+      afil."id_afiliado",
+      afil."dni",
+      afil."primer_nombre"
+      `;
+  
+      try {
+        return await this.entityManager.query(query);
+      } catch (error) {
+        this.logger.error('Error ejecutando la consulta de obtenerResumenAfiliados', error.stack);
+        throw new InternalServerErrorException('Error al ejecutar la consulta en la base de datos');
+      }
+    }
+
+    async obtenerAfilComplementaria(): Promise<any> {
+      const query = `
+      SELECT
+        afil."id_afiliado",
+        afil."dni",
+        afil."primer_nombre",
+        LISTAGG(DISTINCT ben."nombre_beneficio", ',') WITHIN GROUP (ORDER BY ben."id_beneficio") AS "beneficiosNombres",
+        LISTAGG(DISTINCT ded."nombre_deduccion", ',') WITHIN GROUP (ORDER BY ded."id_deduccion") AS "deduccionesNombres"
+      FROM
+        "C##TEST"."detalle_beneficio" detBs
+      LEFT JOIN
+        "C##TEST"."afiliado" afil ON afil."id_afiliado" = detBs."id_afiliado"
+      LEFT JOIN
+        "C##TEST"."beneficio" ben ON ben."id_beneficio" = detBs."id_beneficio"
+      LEFT JOIN
+        "C##TEST"."detalle_deduccion" detDs ON afil."id_afiliado" = detDs."id_afiliado"
+      LEFT JOIN
+        "C##TEST"."deduccion" ded ON detDs."id_deduccion" = ded."id_deduccion"
+      WHERE
+        detBs."estado" = 'NO PAGADO' AND detDs."estado_aplicacion" = 'NO COBRADO'
+        AND detBs."id_afiliado" NOT IN (
+            SELECT
+                detB."id_afiliado"
+            FROM
+                "C##TEST"."detalle_beneficio" detB
+            WHERE
+                detB."estado" != 'NO PAGADO'
+        ) AND (
+            detDs."id_afiliado" NOT IN (
+                SELECT detD."id_afiliado"
+                FROM "C##TEST"."detalle_deduccion" detD
+                WHERE "estado_aplicacion" != 'NO COBRADO'
+            )
+        )
+      GROUP BY
+        afil."id_afiliado",
+        afil."dni",
+        afil."primer_nombre"
+      `;
+
+      try {
+        return await this.entityManager.query(query);
+      } catch (error) {
+        this.logger.error('Error ejecutando la consulta de obtenerResumenAfiliados', error.stack);
+        throw new InternalServerErrorException('Error al ejecutar la consulta en la base de datos');
+      }
+    }
+    
+    
     
   async create(createPlanillaDto: CreatePlanillaDto) {
     const { codigo_planilla, secuencia, periodoInicio, periodoFinalizacion, nombre_planilla,  } = createPlanillaDto;
@@ -169,34 +263,44 @@ export class PlanillaService {
   }
 
   async createView(): Promise<void> {
-    const createViewQuery = `
+    /* const createViewQuery = `
       CREATE OR REPLACE VIEW vista_planilla_ordinaria AS
       SELECT
-        afil."id_afiliado",
-        afil."dni",
-        afil."primer_nombre",
-        LISTAGG(DISTINCT ben."nombre_beneficio", ',') WITHIN GROUP (ORDER BY ben."id_beneficio") AS beneficiosNombres,
-        LISTAGG(DISTINCT ded."nombre_deduccion", ',') WITHIN GROUP (ORDER BY ded."id_deduccion") AS deduccionesNombres
-      FROM
-        "C##TEST"."afiliado" afil
-      LEFT JOIN
-        "C##TEST"."detalle_deduccion" detD ON afil."id_afiliado" = detD."id_afiliado" AND detD."estado_aplicacion" = 'COBRADA'
-      LEFT JOIN
-        "C##TEST"."deduccion" ded ON detD."id_deduccion" = ded."id_deduccion"
-      LEFT JOIN
-        "C##TEST"."detalle_beneficio" detB ON afil."id_afiliado" = detB."id_afiliado" AND detB."estado" = 'NO PAGADO'
-      LEFT JOIN
-        "C##TEST"."beneficio" ben ON detB."id_beneficio" = ben."id_beneficio"
-      WHERE
-        (TO_DATE(detB."periodoInicio", 'DD-MM-YYYY') BETWEEN TO_DATE(SYSDATE, 'DD-MM-YYYY') AND TO_DATE('01-02-2024', 'DD-MM-YYYY')
-        AND TO_DATE(detB."periodoFinalizacion", 'DD-MM-YYYY') BETWEEN TO_DATE(SYSDATE, 'DD-MM-YYYY') AND TO_DATE('29-02-2024', 'DD-MM-YYYY')
-        AND afil."id_afiliado" = '1' AND detB."estado" = 'NO PAGADO')
-        OR (TO_DATE(CONCAT(detD."anio", LPAD(detD."mes", 2, '0')), 'YYYYMM') BETWEEN TO_DATE('01-02-2024', 'DD-MM-YYYY') AND TO_DATE('29-02-2024', 'DD-MM-YYYY')
-        AND afil."id_afiliado" = '1' AND detD."estado_aplicacion" = 'COBRADA')
-      GROUP BY
-        afil."id_afiliado", afil."primer_nombre", afil."dni"
-    `;
-
+  afil."id_afiliado",
+  afil."dni",
+  afil."primer_nombre",
+  LISTAGG(DISTINCT ben."nombre_beneficio", ',') WITHIN GROUP (ORDER BY ben."id_beneficio") AS "beneficiosNombres",
+  LISTAGG(DISTINCT ded."nombre_deduccion", ',') WITHIN GROUP (ORDER BY ded."id_deduccion") AS "deduccionesNombres"
+FROM
+  "C##TEST"."afiliado" afil
+LEFT JOIN
+  "C##TEST"."detalle_beneficio" detBs ON afil."id_afiliado" = detBs."id_afiliado"
+  AND detBs."estado" = 'NO PAGADO'
+  AND TO_DATE(detBs."periodoInicio", 'DD-MM-YYYY') BETWEEN TO_DATE('${periodoInicio}', 'DD-MM-YYYY') AND TO_DATE('01-01-2025', 'DD-MM-YYYY')
+  AND TO_DATE(detBs."periodoFinalizacion", 'DD-MM-YYYY') BETWEEN TO_DATE('${periodoInicio}', 'DD-MM-YYYY') AND TO_DATE('01-01-2025', 'DD-MM-YYYY')
+LEFT JOIN
+  "C##TEST"."beneficio" ben ON ben."id_beneficio" = detBs."id_beneficio"
+LEFT JOIN
+  "C##TEST"."detalle_deduccion" detDs ON afil."id_afiliado" = detDs."id_afiliado"
+  AND detDs."estado_aplicacion" = 'NO COBRADA'
+  AND TO_DATE(CONCAT(detDs."anio", LPAD(detDs."mes", 2, '0')), 'YYYYMM') BETWEEN TO_DATE('${periodoInicio}', 'DD-MM-YYYY') AND TO_DATE('01-01-2025', 'DD-MM-YYYY')
+LEFT JOIN
+  "C##TEST"."deduccion" ded ON ded."id_deduccion" = detDs."id_deduccion"
+WHERE
+  afil."id_afiliado" IN (
+    SELECT detB."id_afiliado"
+    FROM "C##TEST"."detalle_beneficio" detB
+    WHERE detB."estado" = 'PAGADO'
+    UNION
+    SELECT detD."id_afiliado"
+    FROM "C##TEST"."detalle_deduccion" detD
+    WHERE detD."estado_aplicacion" = 'COBRADA'
+  )
+GROUP BY
+  afil."id_afiliado",
+  afil."dni",
+  afil."primer_nombre";
+    `; */let createViewQuery:any ;
     await this.planillaRepository.query(createViewQuery);
   }
 
@@ -284,6 +388,9 @@ export class PlanillaService {
 
     await this.planillaRepository.query(createViewQuery);
   }
+
+  
+  
 
 
 }

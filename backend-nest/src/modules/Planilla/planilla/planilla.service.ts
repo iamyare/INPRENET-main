@@ -78,7 +78,7 @@ export class PlanillaService {
       try {
         return await this.entityManager.query(query);
       } catch (error) {
-        this.logger.error('Error ejecutando la consulta de obtenerResumenAfiliados', error.stack);
+        this.logger.error('Error ejecutando la consulta de obtenerAfilOrdinaria', error.stack);
         throw new InternalServerErrorException('Error al ejecutar la consulta en la base de datos');
       }
     }
@@ -126,7 +126,39 @@ export class PlanillaService {
       try {
         return await this.entityManager.query(query);
       } catch (error) {
-        this.logger.error('Error ejecutando la consulta de obtenerResumenAfiliados', error.stack);
+        this.logger.error('Error ejecutando la consulta de obtenerAfilComplementaria', error.stack);
+        throw new InternalServerErrorException('Error al ejecutar la consulta en la base de datos');
+      }
+    }
+
+    async obtenerAfilExtraordinaria(): Promise<any> {
+      const query = `
+      SELECT
+  afil."id_afiliado",
+  afil."dni",
+  afil."primer_nombre",
+  LISTAGG(DISTINCT ben."nombre_beneficio", ',') WITHIN GROUP (ORDER BY ben."id_beneficio") AS "beneficiosNombres",
+  LISTAGG(DISTINCT ded."nombre_deduccion", ',') WITHIN GROUP (ORDER BY ded."id_deduccion") AS "deduccionesNombres"
+FROM
+  "C##TEST"."afiliado" afil
+INNER JOIN
+  "C##TEST"."detalle_beneficio" detBs ON afil."id_afiliado" = detBs."id_afiliado" AND detBs."estado" = 'INCOSISTENCIA'
+INNER JOIN
+  "C##TEST"."beneficio" ben ON ben."id_beneficio" = detBs."id_beneficio"
+INNER JOIN
+  "C##TEST"."detalle_deduccion" detDs ON afil."id_afiliado" = detDs."id_afiliado" AND detDs."estado_aplicacion" = 'INCOSISTENCIA'
+INNER JOIN
+  "C##TEST"."deduccion" ded ON ded."id_deduccion" = detDs."id_deduccion"
+GROUP BY
+  afil."id_afiliado",
+  afil."dni",
+  afil."primer_nombre"
+      `;
+
+      try {
+        return await this.entityManager.query(query);
+      } catch (error) {
+        this.logger.error('Error ejecutando la consulta de obtenerAfilExtraordinaria', error.stack);
         throw new InternalServerErrorException('Error al ejecutar la consulta en la base de datos');
       }
     }

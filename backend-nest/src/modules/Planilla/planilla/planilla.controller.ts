@@ -23,13 +23,16 @@ export class PlanillaController {
     }
   }
 
-  @Get('planillaComplementatria')
-  
+  @Get('planillaComplementaria')
   async ObtenerAfilComplementaria() {
-    console.log('entro');
     return this.planillaService.obtenerAfilComplementaria();
   }
 
+  @Get('planillaExtraordinaria')
+  async ObtenerAfilExtraordinaria() {
+    return this.planillaService.obtenerAfilExtraordinaria();
+  }
+ 
   @Post('create-ordinaria-view')
   async createView() {
     await this.planillaService.createView();

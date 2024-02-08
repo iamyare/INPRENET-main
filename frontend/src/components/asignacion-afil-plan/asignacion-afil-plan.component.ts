@@ -20,8 +20,7 @@ export class AsignacionAfilPlanComponent implements OnInit{
 
   myFormFields: FieldConfig[] = [];
   myColumnsDed: TableColumn[] = [];
-  filasT: any[] = [];
-  datosTabl: any;
+  datosTabl:  any[] = [];
 
   verDat: boolean = false;
   ejecF: any;
@@ -76,15 +75,20 @@ export class AsignacionAfilPlanComponent implements OnInit{
   /* Se ejecuta cuando da click en previsualizar datos planilla */
   getPlanilla = async () => {
     try {
-      await this.planillaService.getPlanillaBy(this.datosFormateados.codigo_planilla).subscribe(
+      this.planillaService.getPlanillaBy(this.datosFormateados.codigo_planilla).subscribe(
         {
-          next: (response) => {
-            if (response){
-              this.detallePlanilla = response
+          next: async (response) => {
+            if (response) {
+              this.detallePlanilla = response;
+              this.datosTabl = await this.getFilas(response.periodoInicio, response.periodoFinalizacion);
+              this.verDat = true;
 
-              this.previsualizarDatos(response.periodoInicio, response.periodoFinalizacion);
-              return this.filas;
+            } else {
+              this.detallePlanilla = [];
+              this.datosTabl = [];
+              this.toastr.error(`La planilla con el codigo de planilla: ${this.datosFormateados.codigo_planilla}  no existe `);
             }
+            this.ejecF(this.datosTabl).then(() => { });
           },
           error: (error) => {
             let mensajeError = 'Error desconocido al buscar la planilla';
@@ -108,51 +112,59 @@ export class AsignacionAfilPlanComponent implements OnInit{
     }
   };
 
-  /* Previsualiza los datos en la tabla. */
-  previsualizarDatos = async (periodoInicio:string, periodoFinal:string) => {
-    this.datosTabl = await this.getFilas(periodoInicio, periodoFinal)
-    this.verDat = true
-    this.filasT = this.datosTabl;
-
-    this.ejecF(this.filasT).then(()=>{})
-
-    return this.datosTabl
-  }
-
   getFilas = async (periodoInicio: string, periodoFinalizacion: string) => {
-    /**
-     * validacion con el tipo de planilla para poder traer lis registros para planilla ordinaria, complementaria y extraordinaria.
-    */
-
-    if (this.detallePlanilla.nombre_planilla == "COMPLEMENTARIA"){
-      console.log("consulta para ir a traer los registros de la planilla }complementaria");
-
-    }else if (this.detallePlanilla.nombre_planilla == "ORDINARIA"){
-      console.log("consulta para ir a traer los registros de la planilla ordinaria");
-
-    }else if (this.detallePlanilla.nombre_planilla == "EXTRAORDINARIA"){
-      console.log("consulta para ir a traer los registros de la planilla extraordinaria");
-
-    }
-
+    let dataPlan = []
     try {
-      // Asegúrate de pasar los parámetros mes y anio a la función getDeduccionesNoAplicadas
-      const data = await this.planillaService.getDeduccionesNoAplicadas(periodoInicio, periodoFinalizacion).toPromise();
-      this.filasT = data.map((item: any) => {
-        return {
-          afil_id_afiliado: item.afil_id_afiliado,
-          afil_dni: item.afil_dni,
-          afil_primer_nombre: item.afil_primer_nombre,
-          BENEFICIOSIDS: item.BENEFICIOSIDS,
-          BENEFICIOSNOMBRES: item.BENEFICIOSNOMBRES,
-          DEDUCCIONESIDS: item.DEDUCCIONESIDS,
-          DEDUCCIONESNOMBRES: item.DEDUCCIONESNOMBRES,
-          periodoInicio : periodoInicio,
-          periodoFinalizacion : periodoFinalizacion
-        };
-      });
 
-      return this.filasT;
+      if (this.detallePlanilla.nombre_planilla == "COMPLEMENTARIA"){
+        const data = await this.planillaService.getDatosComplementaria(periodoInicio, periodoFinalizacion).toPromise();
+        dataPlan = data.map((item: any) => {
+          return {
+            afil_id_afiliado: item.afil_id_afiliado,
+            afil_dni: item.afil_dni,
+            afil_primer_nombre: item.afil_primer_nombre,
+            BENEFICIOSIDS: item.BENEFICIOSIDS,
+            BENEFICIOSNOMBRES: item.BENEFICIOSNOMBRES,
+            DEDUCCIONESIDS: item.DEDUCCIONESIDS,
+            DEDUCCIONESNOMBRES: item.DEDUCCIONESNOMBRES,
+            periodoInicio : periodoInicio,
+            periodoFinalizacion : periodoFinalizacion
+          };
+        });
+      }else if (this.detallePlanilla.nombre_planilla == "ORDINARIA"){
+        const data = await this.planillaService.getDatosOrdinaria(periodoInicio, periodoFinalizacion).toPromise();
+        dataPlan = data.map((item: any) => {
+          return {
+            afil_id_afiliado: item.afil_id_afiliado,
+            afil_dni: item.afil_dni,
+            afil_primer_nombre: item.afil_primer_nombre,
+            BENEFICIOSIDS: item.BENEFICIOSIDS,
+            BENEFICIOSNOMBRES: item.BENEFICIOSNOMBRES,
+            DEDUCCIONESIDS: item.DEDUCCIONESIDS,
+            DEDUCCIONESNOMBRES: item.DEDUCCIONESNOMBRES,
+            periodoInicio : periodoInicio,
+            periodoFinalizacion : periodoFinalizacion
+          };
+        });
+      }else if (this.detallePlanilla.nombre_planilla == "EXTRAORDINARIA"){
+        const data = await this.planillaService.getDatosExtraordinaria(periodoInicio, periodoFinalizacion).toPromise();
+        dataPlan = data.map((item: any) => {
+          return {
+            afil_id_afiliado: item.afil_id_afiliado,
+            afil_dni: item.afil_dni,
+            afil_primer_nombre: item.afil_primer_nombre,
+            BENEFICIOSIDS: item.BENEFICIOSIDS,
+            BENEFICIOSNOMBRES: item.BENEFICIOSNOMBRES,
+            DEDUCCIONESIDS: item.DEDUCCIONESIDS,
+            DEDUCCIONESNOMBRES: item.DEDUCCIONESNOMBRES,
+            periodoInicio : periodoInicio,
+            periodoFinalizacion : periodoFinalizacion
+          };
+        });
+
+      }
+
+      return dataPlan;
     } catch (error) {
       console.error("Error al obtener datos de deducciones", error);
       throw error;
@@ -164,6 +176,7 @@ export class AsignacionAfilPlanComponent implements OnInit{
   }
 
   editar = (row: any) => {}
+
   manejarAccionUno(row: any) {
     this.svcAfilServ.getAfilByParam(row.afil_dni).subscribe({
       next: (afilData) => {
@@ -186,9 +199,8 @@ export class AsignacionAfilPlanComponent implements OnInit{
     });
   }
 
-
   manejarAccionDos(row: any) {
-    // Lógica para manejar la acción del segundo botón
+    // Lógica para manejar la acción del segundo botóns
   }
 
 }

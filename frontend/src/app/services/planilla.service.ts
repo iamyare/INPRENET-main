@@ -26,7 +26,7 @@ export class PlanillaService {
     return this.http.get(`${environment.API_URL}/api/tipo-planilla`, { params });
   }
 
-  getDeduccionesNoAplicadas(periodoInicio: string, periodoFinalizacion: string): Observable<any> {
+/*   getDeduccionesNoAplicadas(periodoInicio: string, periodoFinalizacion: string): Observable<any> {
 
     // Construye los parámetros de la consulta
     let params = new HttpParams()
@@ -35,6 +35,29 @@ export class PlanillaService {
 
     // Realiza la petición GET al backend con los parámetros
     return this.http.get(`${environment.API_URL}/api/planilla/deducciones-no-aplicadas`, { params });
+  } */
+
+  getDatosOrdinaria(periodoInicio: string, periodoFinalizacion: string): Observable<any> {
+    let params = new HttpParams()
+      .set('periodoInicio', periodoInicio)
+      .set('periodoFinalizacion', periodoFinalizacion);
+    return this.http.get(`${environment.API_URL}/api/planilla/planillaOrdinaria`, { params });
+  }
+
+  getDatosComplementaria(periodoInicio: string, periodoFinalizacion: string): Observable<any> {
+    /* let params = new HttpParams()
+      .set('periodoInicio', periodoInicio)
+      .set('periodoFinalizacion', periodoFinalizacion);
+ */
+    return this.http.get(`${environment.API_URL}/api/planilla/planillaComplementaria`);
+  }
+
+  getDatosExtraordinaria(periodoInicio: string, periodoFinalizacion: string): Observable<any> {
+/*     let params = new HttpParams()
+      .set('periodoInicio', periodoInicio)
+      .set('periodoFinalizacion', periodoFinalizacion); */
+
+    return this.http.get(`${environment.API_URL}/api/planilla/planillaExtraordinaria`);
   }
 
   getPlanillaBy(codigo_planilla: string): Observable<any> {

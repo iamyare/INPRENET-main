@@ -3,7 +3,7 @@ import { CreateDetalleDeduccionDto } from './dto/create-detalle-deduccion.dto';
 import { UpdateDetalleDeduccionDto } from './dto/update-detalle-deduccion.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { DetalleDeduccion } from './entities/detalle-deduccion.entity';
-import { Between, Repository } from 'typeorm';
+import { Repository } from 'typeorm';
 import { Deduccion } from '../deduccion/entities/deduccion.entity';
 import { Institucion } from 'src/modules/Empresarial/institucion/entities/institucion.entity';
 import * as xlsx from 'xlsx';
@@ -29,6 +29,39 @@ export class DetalleDeduccionService {
     private DetalleAfiliadoRepository: Repository<DetalleAfiliado>,
     private readonly afiliadoService: AfiliadoService,
   ){}
+
+  async findBetweenDates(fechaInicio: Date, fechaFin: Date, idAfiliado: number): Promise<DetalleDeduccion[]> {
+    const mesInicio = fechaInicio.getMonth() + 1;
+    const anioInicio = fechaInicio.getFullYear();
+
+    let mesFin = fechaFin.getMonth() + 1;
+    let anioFin = fechaFin.getFullYear();
+
+    // Ajustar el año y el mes para el final del periodo
+    if (mesFin === 12) {
+        mesFin = 1;
+        anioFin += 1;
+    } else {
+        mesFin += 1;
+    }
+
+    const queryBuilder = this.detalleDeduccionRepository.createQueryBuilder('detalleDeduccion')
+      .where('(detalleDeduccion.anio > :anioInicio OR (detalleDeduccion.anio = :anioInicioEqual AND detalleDeduccion.mes >= :mesInicio))', {
+        anioInicio,
+        anioInicioEqual: anioInicio,
+        mesInicio,
+      })
+      .andWhere('(detalleDeduccion.anio < :anioFin OR (detalleDeduccion.anio = :anioFinEqual AND detalleDeduccion.mes <= :mesFin))', {
+        anioFin,
+        anioFinEqual: anioFin,
+        mesFin,
+      })
+      .andWhere('detalleDeduccion.id_afiliado = :idAfiliado', { idAfiliado });
+
+    return queryBuilder.getMany();
+}
+
+  
 
   async create(createDetalleDeduccionDto: CreateDetalleDeduccionDto) {
     const { dni, nombre_deduccion, nombre_institucion, monto_total, monto_aplicado, estado_aplicacion, anio, mes } = createDetalleDeduccionDto;
@@ -180,26 +213,6 @@ export class DetalleDeduccionService {
     const worksheet = workbook.Sheets[sheetName];
     const data = xlsx.utils.sheet_to_json(worksheet);
     return data;
-  }
-
-
-  async findDeduccionesByDateRangeAndAfiliado(
-    mes1: number,
-    mes2: number,
-    año1: number,
-    año2: number,
-    id_afiliado: string
-  ): Promise<DetalleDeduccion[]> {
-    const fechaInicio = new Date(año1, mes1 - 1, 1); // Los meses en JavaScript son de 0 a 11
-    const fechaFin = new Date(año2, mes2, 0); // El día 0 del siguiente mes es el último día del mes actual
-  
-    return this.detalleDeduccionRepository.find({
-      where: {
-        afiliado: { id_afiliado },
-        fecha_aplicado: Between(fechaInicio, fechaFin)
-      },
-      relations: ['afiliado', 'deduccion', 'institucion', 'planilla'] // Asegúrate de incluir todas las relaciones que necesitas en el resultado
-    });
   }
   
 }

@@ -129,19 +129,19 @@ export class DetalleBeneficioService {
     }
   
     try {
-      const detalleBeneficios = await this.benAfilRepository.find({
+      return await this.benAfilRepository.find({
         where: {
           afiliado: { id_afiliado: idAfiliado },
           periodoInicio: MoreThanOrEqual(fechaInicio),
           periodoFinalizacion: LessThanOrEqual(fechaFin)
         }
       });
-  
-      return detalleBeneficios;
     } catch (error) {
+      // Asegúrate de tener una función handleException que maneje adecuadamente las excepciones
       this.handleException(error);
     }
   }
+  
   
 
 

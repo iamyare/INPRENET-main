@@ -2,32 +2,32 @@ import { Controller, Get, Post, Body, Patch, Param, Delete, Query, BadRequestExc
 import {  DetalleBeneficioService } from './detalle_beneficio.service';
 import { UpdateDetalleBeneficioDto } from './dto/update-detalle_beneficio_planilla.dto';
 import { DetalleBeneficio } from './entities/detalle_beneficio.entity';
+import { CreateDetalleBeneficioDto } from './dto/create-detalle_beneficio.dto';
 
 @Controller('beneficio-planilla')
 export class DetalleBeneficioController {
   constructor(private readonly detallebeneficioService: DetalleBeneficioService) {}
 
   @Post()
-  create(@Body() createDetalleBeneficioDto: any) {
+  create(@Body() createDetalleBeneficioDto: CreateDetalleBeneficioDto) {
     return this.detallebeneficioService.create(createDetalleBeneficioDto);
   }
 
   @Get('por-rango-fecha')
-  async findByDateRange(
-    @Query('fechaInicio') fechaInicio: string,
-    @Query('fechaFin') fechaFin: string,
-    @Query('idAfiliado') idAfiliado: string
-  ): Promise<DetalleBeneficio[]> {
-    const fechaInicioDate = new Date(fechaInicio);
-    const fechaFinDate = new Date(fechaFin);
+async findByDateRange(
+  @Query('fechaInicio') fechaInicioString: string,
+  @Query('fechaFin') fechaFinString: string,
+  @Query('idAfiliado') idAfiliadoString: string
+): Promise<DetalleBeneficio[]> {
+  const fechaInicio = new Date(fechaInicioString);
+  const fechaFin = new Date(fechaFinString);
 
-    // Validar que las fechas y el ID del afiliado sean válidos
-    if (isNaN(fechaInicioDate.getTime()) || isNaN(fechaFinDate.getTime()) || !idAfiliado) {
-      throw new BadRequestException('Los parámetros proporcionados no son válidos.');
-    }
-
-    return this.detallebeneficioService.findByDateRange(fechaInicioDate, fechaFinDate, idAfiliado);
+  if (isNaN(fechaInicio.getTime()) || isNaN(fechaFin.getTime()) || !idAfiliadoString.trim()) {
+    throw new BadRequestException('Los parámetros proporcionados no son válidos.');
   }
+
+  return this.detallebeneficioService.findByDateRange(fechaInicio, fechaFin, idAfiliadoString);
+}
 
   @Get()
   findAll() {

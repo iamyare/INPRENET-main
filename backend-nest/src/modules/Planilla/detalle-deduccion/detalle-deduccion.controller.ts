@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseInterceptors, UploadedFile, Res, HttpCode, HttpStatus, Query } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseInterceptors, UploadedFile, Res, HttpCode, HttpStatus, Query, BadRequestException } from '@nestjs/common';
 import { DetalleDeduccionService } from './detalle-deduccion.service';
 import { CreateDetalleDeduccionDto } from './dto/create-detalle-deduccion.dto';
 import { UpdateDetalleDeduccionDto } from './dto/update-detalle-deduccion.dto';
@@ -9,6 +9,28 @@ import { DetalleDeduccion } from './entities/detalle-deduccion.entity';
 @Controller('detalle-deduccion')
 export class DetalleDeduccionController {
   constructor(private readonly detalleDeduccionService: DetalleDeduccionService) {}
+
+  @Get('por-fecha')
+async findByDates(
+  @Query('fechaInicio') fechaInicioString: string, 
+  @Query('fechaFin') fechaFinString: string,
+  @Query('idAfiliado') idAfiliadoString: string
+) {
+  const fechaInicio = new Date(fechaInicioString);
+  const fechaFin = new Date(fechaFinString);
+  const idAfiliado = parseInt(idAfiliadoString, 10);
+
+  if (isNaN(fechaInicio.getTime()) || isNaN(fechaFin.getTime())) {
+    throw new BadRequestException('Las fechas proporcionadas no son válidas.');
+  }
+
+  if (isNaN(idAfiliado)) {
+    throw new BadRequestException('El ID del afiliado proporcionado no es válido.');
+  }
+
+  return this.detalleDeduccionService.findBetweenDates(fechaInicio, fechaFin, idAfiliado);
+}
+
 
   @Post()
   @HttpCode(HttpStatus.CREATED)
@@ -49,20 +71,5 @@ export class DetalleDeduccionController {
     return this.detalleDeduccionService.remove(+id);
   }
 
-  @Get('/buscar-por-rango')
-buscarPorRango(
-  @Query('mes1') mes1: string,
-  @Query('mes2') mes2: string,
-  @Query('anio1') anio1: string,
-  @Query('anio2') anio2: string,
-  @Query('idAfiliado') idAfiliado: string
-) {
-  return this.detalleDeduccionService.findDeduccionesByDateRangeAndAfiliado(
-    +mes1,
-    +mes2,
-    +anio1,
-    +anio2,
-    idAfiliado
-  );
-}
+  
 }

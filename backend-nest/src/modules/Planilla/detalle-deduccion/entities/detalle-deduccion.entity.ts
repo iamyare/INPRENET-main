@@ -28,7 +28,7 @@ export class DetalleDeduccion {
     @Column('number', {nullable: true})
     monto_aplicado: number; 
 
-    @Column('varchar2', { length: 20, nullable: true })
+    @Column('varchar2', { length: 20, nullable: true, default:"NO COBRADO" })
     estado_aplicacion: string;
 
     @Column('number', {nullable: true})

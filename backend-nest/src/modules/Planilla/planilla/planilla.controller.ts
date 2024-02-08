@@ -7,7 +7,7 @@ import { UpdatePlanillaDto } from './dto/update-planilla.dto';
 export class PlanillaController {
   constructor(private readonly planillaService: PlanillaService) {}
 
-  @Post('create-view')
+  @Post('create-ordinaria-view')
   async createView() {
     await this.planillaService.createView();
     return { message: 'Vista creada con éxito' };
@@ -17,6 +17,12 @@ export class PlanillaController {
   @Post('create-complementary-view')
   async createComplementaryView() {
     await this.planillaService.createComplementaryView();
+    return { message: 'Vista complementaria creada con éxito' };
+  }
+
+  @Post('create-extraordinaria-view')
+  async createExtraOrdinariaView() {
+    await this.planillaService.createExtraOrdinariaView();
     return { message: 'Vista complementaria creada con éxito' };
   }
 
@@ -48,10 +54,12 @@ export class PlanillaController {
     return this.planillaService.findAll();
   }
 
-/*   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.planillaService.findOne(+id);
-  } */
+  /*  
+    @Get(':id')
+    findOne(@Param('id') id: string) {
+      return this.planillaService.findOne(+id);
+    } 
+  */
 
   @Get(':term')
   findOne(@Param('term') term: string) {

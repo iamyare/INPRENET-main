@@ -9,7 +9,7 @@ export class Planilla {
     @PrimaryGeneratedColumn('uuid')
     id_planilla : string
 
-    @Column('varchar2', {  nullable: false })
+    @Column('varchar2', { unique: true,  nullable: false })
     codigo_planilla : string;
 
     @Column('date', { nullable: false, default: () => 'SYSDATE' })

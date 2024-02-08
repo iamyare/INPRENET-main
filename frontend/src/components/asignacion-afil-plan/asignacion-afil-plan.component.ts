@@ -81,6 +81,7 @@ export class AsignacionAfilPlanComponent implements OnInit{
           next: (response) => {
             if (response){
               this.detallePlanilla = response
+
               this.previsualizarDatos(response.periodoInicio, response.periodoFinalizacion);
               return this.filas;
             }
@@ -119,6 +120,21 @@ export class AsignacionAfilPlanComponent implements OnInit{
   }
 
   getFilas = async (periodoInicio: string, periodoFinalizacion: string) => {
+    /**
+     * validacion con el tipo de planilla para poder traer lis registros para planilla ordinaria, complementaria y extraordinaria.
+    */
+
+    if (this.detallePlanilla.nombre_planilla == "COMPLEMENTARIA"){
+      console.log("consulta para ir a traer los registros de la planilla }complementaria");
+
+    }else if (this.detallePlanilla.nombre_planilla == "ORDINARIA"){
+      console.log("consulta para ir a traer los registros de la planilla ordinaria");
+
+    }else if (this.detallePlanilla.nombre_planilla == "EXTRAORDINARIA"){
+      console.log("consulta para ir a traer los registros de la planilla extraordinaria");
+
+    }
+
     try {
       // Asegúrate de pasar los parámetros mes y anio a la función getDeduccionesNoAplicadas
       const data = await this.planillaService.getDeduccionesNoAplicadas(periodoInicio, periodoFinalizacion).toPromise();

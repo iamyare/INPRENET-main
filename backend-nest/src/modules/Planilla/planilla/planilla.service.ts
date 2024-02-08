@@ -126,20 +126,32 @@ export class PlanillaService {
 
   async findOne(term: any) {
     let Planilla: Planilla;
+    
     if (isUUID(term)) {
       Planilla = await this.planillaRepository.findOneBy({ id_planilla: term});
     } else {
-      const queryBuilder = this.planillaRepository.createQueryBuilder('planilla');
-      Planilla = await queryBuilder
-        .where('"codigo_planilla" = :term AND "estado" = \'ACTIVA\'', { term } )
-        .getOne();
+      const queryBuilder = await this.planillaRepository
+      .createQueryBuilder('planilla')
+      .addSelect('planilla.id_planilla', 'id_planilla')
+      .addSelect('planilla.codigo_planilla', 'codigo_planilla')
+      .addSelect('planilla.fecha_apertura', 'fecha_apertura')
+      .addSelect('planilla.secuencia', 'secuencia')
+      .addSelect('planilla.estado', 'estado')
+      .addSelect('planilla.periodoInicio', 'periodoInicio')
+      .addSelect('planilla.periodoFinalizacion', 'periodoFinalizacion')
+      .addSelect('tipP.nombre_planilla', 'nombre_planilla')
+      .innerJoin(TipoPlanilla, 'tipP', 'tipP.id_tipo_planilla = planilla.id_tipo_planilla')
+      .where('planilla.codigo_planilla = :term AND planilla.estado = \'ACTIVA\'', { term } )
+      .getRawMany();
+      return queryBuilder[0];
+      
+      /* Planilla = await queryBuilder */
     }
     if (!Planilla) {
       throw new NotFoundException(`planilla con ${term} no encontrado.`);
     }
-    return Planilla;
   }
-
+  
   update(id: number, updatePlanillaDto: UpdatePlanillaDto) {
     return `This action updates a #${id} planilla`;
   }
@@ -227,6 +239,47 @@ export class PlanillaService {
         afil."id_afiliado",
         afil."dni",
         afil."primer_nombre"
+    `;
+
+    await this.planillaRepository.query(createViewQuery);
+  }
+
+  async createExtraOrdinariaView(): Promise<void> {
+    const createViewQuery = `
+      CREATE OR REPLACE VIEW vista_planilla_extraordinaria AS
+          SELECT
+          afil."id_afiliado",
+          afil."dni",
+          afil."primer_nombre",
+          -- LISTAGG(DISTINCT ben."id_beneficio", ',') WITHIN GROUP (ORDER BY ben."id_beneficio")  beneficiosIds,
+          LISTAGG(DISTINCT ben."nombre_beneficio", ',') WITHIN GROUP (ORDER BY ben."id_beneficio")  beneficiosNombres,
+          -- LISTAGG(DISTINCT ded."id_deduccion", ',') WITHIN GROUP (ORDER BY ded."id_deduccion")  deduccionesIds,
+          LISTAGG(DISTINCT ded."nombre_deduccion", ',') WITHIN GROUP (ORDER BY ded."id_deduccion")  deduccionesNombres
+      FROM
+          "C##TEST"."afiliado" afil
+      LEFT JOIN
+          "C##TEST"."detalle_deduccion" detD ON afil."id_afiliado" = detD."id_afiliado" AND detD."estado_aplicacion" = 'INCONSISTENCIA'
+      LEFT JOIN
+          "C##TEST"."deduccion" ded ON detD."id_deduccion" = ded."id_deduccion"
+      LEFT JOIN
+          "C##TEST"."detalle_beneficio" detB ON afil."id_afiliado" = detB."id_afiliado" AND detB."estado" = 'INCONSISTENCIA' 
+      LEFT JOIN
+          "C##TEST"."beneficio" ben ON detB."id_beneficio" = ben."id_beneficio"
+      WHERE
+          (
+              TO_DATE(detB."periodoInicio", 'DD-MM-YYYY') BETWEEN TO_DATE(SYSDATE, 'DD-MM-YYYY') AND 
+              TO_DATE('01-02-2024', 'DD-MM-YYYY') AND 
+              TO_DATE(detB."periodoFinalizacion", 'DD-MM-YYYY') BETWEEN TO_DATE(SYSDATE, 'DD-MM-YYYY') AND 
+              TO_DATE('29-02-2024', 'DD-MM-YYYY')
+              AND afil."id_afiliado" = '1'  AND detB."estado" = 'INCONSISTENCIA' 
+          ) OR (
+            TO_DATE(CONCAT(detD."anio", LPAD(detD."mes", 2, '0')), 'YYYYMM') BETWEEN TO_DATE('01-02-2024', 'DD-MM-YYYY') AND 
+            TO_DATE('29-02-2024', 'DD-MM-YYYY') AND 
+            afil."id_afiliado" = '1' AND
+            detD."estado_aplicacion" = 'INCONSISTENCIA'
+          )
+      GROUP BY
+          afil."id_afiliado", afil."primer_nombre", afil."dni"
     `;
 
     await this.planillaRepository.query(createViewQuery);

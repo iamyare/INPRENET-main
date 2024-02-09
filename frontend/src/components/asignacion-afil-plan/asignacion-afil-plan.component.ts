@@ -38,23 +38,23 @@ export class AsignacionAfilPlanComponent implements OnInit{
     this.myColumnsDed = [
       {
         header: 'dni',
-        col: 'afil_dni',
+        col: 'dni',
         isEditable: false,
         validationRules: [Validators.required, Validators.minLength(5)]
       },
       {
         header: 'primer_nombre',
-        col: 'afil_primer_nombre',
+        col: 'primer_nombre',
         isEditable: true
       },
       {
         header: 'Nombres de Beneficios',
-        col: 'BENEFICIOSNOMBRES',
+        col: 'beneficiosNombres',
         isEditable: true
       },
       {
         header: 'Nombres de deducciones',
-        col: 'DEDUCCIONESNOMBRES',
+        col: 'deduccionesNombres',
         isEditable: true,
         validationRules: [Validators.required, Validators.pattern(/^(3[01]|[12][0-9]|0?[1-9])-(1[0-2]|0?[1-9])-\d{4} - (3[01]|[12][0-9]|0?[1-9])-(1[0-2]|0?[1-9])-\d{4}$/)]
       }
@@ -120,13 +120,13 @@ export class AsignacionAfilPlanComponent implements OnInit{
         const data = await this.planillaService.getDatosComplementaria(periodoInicio, periodoFinalizacion).toPromise();
         dataPlan = data.map((item: any) => {
           return {
-            afil_id_afiliado: item.afil_id_afiliado,
-            afil_dni: item.afil_dni,
-            afil_primer_nombre: item.afil_primer_nombre,
+            id_afiliado: item.id_afiliado,
+            dni: item.dni,
+            primer_nombre: item.primer_nombre,
             BENEFICIOSIDS: item.BENEFICIOSIDS,
-            BENEFICIOSNOMBRES: item.BENEFICIOSNOMBRES,
+            beneficiosNombres: item.beneficiosNombres,
             DEDUCCIONESIDS: item.DEDUCCIONESIDS,
-            DEDUCCIONESNOMBRES: item.DEDUCCIONESNOMBRES,
+            deduccionesNombres: item.deduccionesNombres,
             periodoInicio : periodoInicio,
             periodoFinalizacion : periodoFinalizacion
           };
@@ -135,13 +135,13 @@ export class AsignacionAfilPlanComponent implements OnInit{
         const data = await this.planillaService.getDatosOrdinaria(periodoInicio, periodoFinalizacion).toPromise();
         dataPlan = data.map((item: any) => {
           return {
-            afil_id_afiliado: item.afil_id_afiliado,
-            afil_dni: item.afil_dni,
-            afil_primer_nombre: item.afil_primer_nombre,
+            id_afiliado: item.id_afiliado,
+            dni: item.dni,
+            primer_nombre: item.primer_nombre,
             BENEFICIOSIDS: item.BENEFICIOSIDS,
-            BENEFICIOSNOMBRES: item.BENEFICIOSNOMBRES,
+            beneficiosNombres: item.beneficiosNombres,
             DEDUCCIONESIDS: item.DEDUCCIONESIDS,
-            DEDUCCIONESNOMBRES: item.DEDUCCIONESNOMBRES,
+            deduccionesNombres: item.deduccionesNombres,
             periodoInicio : periodoInicio,
             periodoFinalizacion : periodoFinalizacion
           };
@@ -150,13 +150,13 @@ export class AsignacionAfilPlanComponent implements OnInit{
         const data = await this.planillaService.getDatosExtraordinaria(periodoInicio, periodoFinalizacion).toPromise();
         dataPlan = data.map((item: any) => {
           return {
-            afil_id_afiliado: item.afil_id_afiliado,
-            afil_dni: item.afil_dni,
-            afil_primer_nombre: item.afil_primer_nombre,
+            id_afiliado: item.id_afiliado,
+            dni: item.dni,
+            primer_nombre: item.primer_nombre,
             BENEFICIOSIDS: item.BENEFICIOSIDS,
-            BENEFICIOSNOMBRES: item.BENEFICIOSNOMBRES,
+            beneficiosNombres: item.beneficiosNombres,
             DEDUCCIONESIDS: item.DEDUCCIONESIDS,
-            DEDUCCIONESNOMBRES: item.DEDUCCIONESNOMBRES,
+            deduccionesNombres: item.deduccionesNombres,
             periodoInicio : periodoInicio,
             periodoFinalizacion : periodoFinalizacion
           };
@@ -178,7 +178,7 @@ export class AsignacionAfilPlanComponent implements OnInit{
   editar = (row: any) => {}
 
   manejarAccionUno(row: any) {
-    this.svcAfilServ.getAfilByParam(row.afil_dni).subscribe({
+    this.svcAfilServ.getAfilByParam(row.dni).subscribe({
       next: (afilData) => {
         console.log(afilData);
         const dialogRef = this.dialog.open(DynamicDialogComponent, {

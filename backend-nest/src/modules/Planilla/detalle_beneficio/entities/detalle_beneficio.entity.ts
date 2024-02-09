@@ -2,15 +2,21 @@ import { Column, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColum
 import { Beneficio } from "../../beneficio/entities/beneficio.entity";
 import { Afiliado } from "src/afiliado/entities/afiliado";
 import { Planilla } from "../../planilla/entities/planilla.entity";
-
+import { IsEnum } from "class-validator";
+enum EstadoEnum {
+    PAGADA = 'PAGADA',
+    NO_PAGADA = 'NO PAGADA',
+    INCONSISTENCIA = 'INCONSISTENCIA'
+}
 @Entity()
 export class DetalleBeneficio {
 
     @PrimaryGeneratedColumn('uuid')
     id_beneficio_planilla : string;
 
-    @Column({default:"NO PAGADO"})
-    estado: string;
+    @Column({default:"NO PAGADA", enum: EstadoEnum})
+    @IsEnum(EstadoEnum)
+    estado: EstadoEnum;
 
     @Column({nullable:true})
     modalidad_pago: string;

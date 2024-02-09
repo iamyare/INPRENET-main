@@ -48,7 +48,7 @@ export class PlanillaService {
       "C##TEST"."afiliado" afil
     LEFT JOIN
       "C##TEST"."detalle_beneficio" detBs ON afil."id_afiliado" = detBs."id_afiliado"
-      AND detBs."estado" = 'NO PAGADO'
+      AND detBs."estado" = 'NO PAGADA'
       AND TO_DATE(detBs."periodoInicio", 'DD-MM-YYYY') BETWEEN TO_DATE('${periodoInicio}', 'DD-MM-YYYY') AND TO_DATE('${periodoFinalizacion}', 'DD-MM-YYYY')
       AND TO_DATE(detBs."periodoFinalizacion", 'DD-MM-YYYY') BETWEEN TO_DATE('${periodoInicio}', 'DD-MM-YYYY') AND TO_DATE('${periodoFinalizacion}', 'DD-MM-YYYY')
     LEFT JOIN
@@ -63,7 +63,7 @@ export class PlanillaService {
       afil."id_afiliado" IN (
         SELECT detB."id_afiliado"
         FROM "C##TEST"."detalle_beneficio" detB
-        WHERE detB."estado" = 'PAGADO'
+        WHERE detB."estado" = 'PAGADA'
         UNION
         SELECT detD."id_afiliado"
         FROM "C##TEST"."detalle_deduccion" detD
@@ -102,19 +102,19 @@ export class PlanillaService {
       LEFT JOIN
         "C##TEST"."deduccion" ded ON detDs."id_deduccion" = ded."id_deduccion"
       WHERE
-        detBs."estado" = 'NO PAGADO' AND detDs."estado_aplicacion" = 'NO COBRADO'
+        detBs."estado" = 'NO PAGADA' AND detDs."estado_aplicacion" = 'NO COBRADA'
         AND detBs."id_afiliado" NOT IN (
             SELECT
                 detB."id_afiliado"
             FROM
                 "C##TEST"."detalle_beneficio" detB
             WHERE
-                detB."estado" != 'NO PAGADO'
+                detB."estado" != 'NO PAGADA'
         ) AND (
             detDs."id_afiliado" NOT IN (
                 SELECT detD."id_afiliado"
                 FROM "C##TEST"."detalle_deduccion" detD
-                WHERE "estado_aplicacion" != 'NO COBRADO'
+                WHERE "estado_aplicacion" != 'NO COBRADA'
             )
         )
       GROUP BY
@@ -307,7 +307,7 @@ FROM
   "C##TEST"."afiliado" afil
 LEFT JOIN
   "C##TEST"."detalle_beneficio" detBs ON afil."id_afiliado" = detBs."id_afiliado"
-  AND detBs."estado" = 'NO PAGADO'
+  AND detBs."estado" = 'NO PAGADA'
   AND TO_DATE(detBs."periodoInicio", 'DD-MM-YYYY') BETWEEN TO_DATE('${periodoInicio}', 'DD-MM-YYYY') AND TO_DATE('01-01-2025', 'DD-MM-YYYY')
   AND TO_DATE(detBs."periodoFinalizacion", 'DD-MM-YYYY') BETWEEN TO_DATE('${periodoInicio}', 'DD-MM-YYYY') AND TO_DATE('01-01-2025', 'DD-MM-YYYY')
 LEFT JOIN
@@ -322,7 +322,7 @@ WHERE
   afil."id_afiliado" IN (
     SELECT detB."id_afiliado"
     FROM "C##TEST"."detalle_beneficio" detB
-    WHERE detB."estado" = 'PAGADO'
+    WHERE detB."estado" = 'PAGADA'
     UNION
     SELECT detD."id_afiliado"
     FROM "C##TEST"."detalle_deduccion" detD
@@ -356,14 +356,14 @@ GROUP BY
       LEFT JOIN
         "C##TEST"."deduccion" ded ON detDs."id_deduccion" = ded."id_deduccion"
       WHERE
-        detBs."estado" = 'NO PAGADO' AND detDs."estado_aplicacion" = 'NO COBRADO'
+        detBs."estado" = 'NO PAGADA' AND detDs."estado_aplicacion" = 'NO COBRADO'
         AND detBs."id_afiliado" NOT IN (
             SELECT
                 detB."id_afiliado"
             FROM
                 "C##TEST"."detalle_beneficio" detB
             WHERE
-                detB."estado" != 'NO PAGADO'
+                detB."estado" != 'NO PAGADA'
         ) AND (
             detDs."id_afiliado" NOT IN (
                 SELECT detD."id_afiliado"

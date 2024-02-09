@@ -3,6 +3,7 @@ import { Deduccion } from "../../deduccion/entities/deduccion.entity";
 import { Institucion } from "src/modules/Empresarial/institucion/entities/institucion.entity";
 import { Afiliado } from 'src/afiliado/entities/afiliado';
 import { Planilla } from '../../planilla/entities/planilla.entity';
+import { IsEnum } from 'class-validator';
 
 @Entity()
 export class DetalleDeduccion {
@@ -28,8 +29,10 @@ export class DetalleDeduccion {
     @Column('number', {nullable: true})
     monto_aplicado: number; 
 
-    @Column('varchar2', { length: 20, nullable: true, default:"NO COBRADO" })
+    @Column('varchar2', { length: 20, nullable: true, default: 'NO COBRADA' })
+    @IsEnum({ values: ['COBRADA', 'NO COBRADA', 'INCONSISTENCIA'] })
     estado_aplicacion: string;
+    
 
     @Column('number', {nullable: true})
     anio: number;

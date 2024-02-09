@@ -1,7 +1,7 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Router } from '@angular/router';
-import { Observable, Subject, map, throwError } from 'rxjs';
+import { Observable, Subject, catchError, map, tap, throwError } from 'rxjs';
 import { environment } from 'src/environments/environment';
 
 import { ToastrService } from 'ngx-toastr';
@@ -20,6 +20,32 @@ export class BeneficiosService {
   private _refresh$ = new Subject<void>();
 
   constructor(private toastr: ToastrService ,private http: HttpClient, private router: Router) {
+  }
+
+  findInconsistentBeneficiosByAfiliado(idAfiliado: string): Observable<any> {
+    const url = `${environment.API_URL}/beneficio-planilla/inconsistencias/${idAfiliado}`;
+    return this.http.get<any>(url).pipe(
+      tap(data => console.log('Inconsistent Beneficios: ', data)),
+      catchError(error => {
+        this.toastr.error('Error al obtener los beneficios inconsistentes');
+        return throwError(() => new Error('Error al obtener los beneficios inconsistentes'));
+      })
+    );
+  }
+
+  // Método para consumir findByDateRange
+  findByDateRange(fechaInicio: string, fechaFin: string, idAfiliado: string): Observable<any> {
+    const params = new HttpParams()
+      .set('fechaInicio', fechaInicio)
+      .set('fechaFin', fechaFin);
+    const url = `${environment.API_URL}/beneficio-planilla/por-rango-fecha/${idAfiliado}`;
+    return this.http.get<any>(url, { params }).pipe(
+      tap(data => console.log('Beneficios por rango de fechas: ', data)),
+      catchError(error => {
+        this.toastr.error('Error al obtener los beneficios por rango de fechas');
+        return throwError(() => new Error('Error al obtener los beneficios por rango de fechas'));
+      })
+    );
   }
 
   get refresh$(){

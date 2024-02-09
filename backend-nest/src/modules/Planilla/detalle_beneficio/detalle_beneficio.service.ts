@@ -1,10 +1,10 @@
 import { BadRequestException, Injectable, InternalServerErrorException, Logger, NotFoundException } from '@nestjs/common';
 import { isUUID } from 'class-validator';
 import { InjectRepository } from '@nestjs/typeorm';
-import { LessThanOrEqual, MoreThanOrEqual, Repository } from 'typeorm';
+import { LessThanOrEqual, MoreThanOrEqual, Not, Repository } from 'typeorm';
 import { Beneficio } from '../beneficio/entities/beneficio.entity';
 import { Afiliado } from 'src/afiliado/entities/afiliado';
-import { DetalleBeneficio } from './entities/detalle_beneficio.entity';
+import { DetalleBeneficio, EstadoEnum } from './entities/detalle_beneficio.entity';
 import { UpdateDetalleBeneficioDto } from './dto/update-detalle_beneficio_planilla.dto';
 import { CreateDetalleBeneficioDto } from './dto/create-detalle_beneficio.dto';
 
@@ -133,14 +133,33 @@ export class DetalleBeneficioService {
         where: {
           afiliado: { id_afiliado: idAfiliado },
           periodoInicio: MoreThanOrEqual(fechaInicio),
-          periodoFinalizacion: LessThanOrEqual(fechaFin)
-        }
+          periodoFinalizacion: LessThanOrEqual(fechaFin),
+          estado: Not(EstadoEnum.INCONSISTENCIA)
+        },
+        relations: ['afiliado', 'beneficio']
       });
     } catch (error) {
-      // Asegúrate de tener una función handleException que maneje adecuadamente las excepciones
-      this.handleException(error);
+      this.logger.error(`Error al buscar detalles de beneficio por rango de fechas y afiliado: ${error.message}`, error.stack);
+      throw new InternalServerErrorException('Error al buscar detalles de beneficio por rango de fechas y afiliado');
     }
   }
+
+
+
+  async findInconsistentBeneficiosByAfiliado(idAfiliado: string) {
+    try {
+      return await this.benAfilRepository.createQueryBuilder('detB')
+        .innerJoinAndSelect('detB.beneficio', 'ben')
+        .where('detB.estado = :estado', { estado: 'INCONSISTENCIA' })
+        .andWhere('detB.afiliado = :idAfiliado', { idAfiliado })
+        .select(['ben.nombre_beneficio', 'detB.monto', 'detB.estado'])
+        .getMany();
+    } catch (error) {
+      this.logger.error(`Error al buscar beneficios inconsistentes por afiliado: ${error.message}`, error.stack);
+      throw new InternalServerErrorException('Error al buscar beneficios inconsistentes por afiliado');
+    }
+  }
+  
   
   
 

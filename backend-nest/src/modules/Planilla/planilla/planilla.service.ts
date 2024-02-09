@@ -38,42 +38,58 @@ export class PlanillaService {
 
     async obtenerAfilOrdinaria(periodoInicio: string, periodoFinalizacion: string): Promise<any> {
       const query = `
-      SELECT
-      afil."id_afiliado",
-      afil."dni",
-      afil."primer_nombre",
-      LISTAGG(DISTINCT ben."nombre_beneficio", ',') WITHIN GROUP (ORDER BY ben."id_beneficio") AS "beneficiosNombres",
-      LISTAGG(DISTINCT ded."nombre_deduccion", ',') WITHIN GROUP (ORDER BY ded."id_deduccion") AS "deduccionesNombres"
-    FROM
-      "C##TEST"."afiliado" afil
-    LEFT JOIN
-      "C##TEST"."detalle_beneficio" detBs ON afil."id_afiliado" = detBs."id_afiliado"
-      AND detBs."estado" = 'NO PAGADA'
-      AND TO_DATE(detBs."periodoInicio", 'DD-MM-YYYY') BETWEEN TO_DATE('${periodoInicio}', 'DD-MM-YYYY') AND TO_DATE('${periodoFinalizacion}', 'DD-MM-YYYY')
-      AND TO_DATE(detBs."periodoFinalizacion", 'DD-MM-YYYY') BETWEEN TO_DATE('${periodoInicio}', 'DD-MM-YYYY') AND TO_DATE('${periodoFinalizacion}', 'DD-MM-YYYY')
-    LEFT JOIN
-      "C##TEST"."beneficio" ben ON ben."id_beneficio" = detBs."id_beneficio"
-    LEFT JOIN
-      "C##TEST"."detalle_deduccion" detDs ON afil."id_afiliado" = detDs."id_afiliado"
-      AND detDs."estado_aplicacion" = 'NO COBRADA'
-      AND TO_DATE(CONCAT(detDs."anio", LPAD(detDs."mes", 2, '0')), 'YYYYMM') BETWEEN TO_DATE('${periodoInicio}', 'DD-MM-YYYY') AND TO_DATE('${periodoFinalizacion}', 'DD-MM-YYYY')
-    LEFT JOIN
-      "C##TEST"."deduccion" ded ON ded."id_deduccion" = detDs."id_deduccion"
-    WHERE
-      afil."id_afiliado" IN (
-        SELECT detB."id_afiliado"
-        FROM "C##TEST"."detalle_beneficio" detB
-        WHERE detB."estado" = 'PAGADA'
-        UNION
-        SELECT detD."id_afiliado"
-        FROM "C##TEST"."detalle_deduccion" detD
-        WHERE detD."estado_aplicacion" = 'COBRADA'
-      )
-    GROUP BY
-      afil."id_afiliado",
-      afil."dni",
-      afil."primer_nombre"
+            SELECT
+            afil."id_afiliado",
+            afil."dni",
+             TRIM(
+              afil."primer_nombre" || ' ' || 
+              COALESCE(afil."segundo_nombre", '') || ' ' || 
+              COALESCE(afil."tercer_nombre", '') || ' ' || 
+              afil."primer_apellido" || ' ' || 
+              COALESCE(afil."segundo_apellido", '')) AS NOMBRE_COMPLETO,
+            LISTAGG(DISTINCT ben."nombre_beneficio", ',') WITHIN GROUP (ORDER BY ben."id_beneficio") AS "beneficiosNombres",
+            LISTAGG(DISTINCT ded."nombre_deduccion", ',') WITHIN GROUP (ORDER BY ded."id_deduccion") AS "deduccionesNombres"
+      FROM
+            "C##TEST"."afiliado" afil
+      LEFT JOIN
+            "C##TEST"."detalle_beneficio" detBs ON afil."id_afiliado" = detBs."id_afiliado"
+            AND detBs."estado" = 'NO PAGADA'
+            AND TO_DATE(detBs."periodoInicio", 'DD/MM/YY') BETWEEN TO_DATE('${periodoInicio}', 'DD-MM-YYYY') AND TO_DATE('${periodoFinalizacion}', 'DD-MM-YYYY')
+            AND TO_DATE(detBs."periodoFinalizacion", 'DD/MM/YY') BETWEEN TO_DATE('${periodoInicio}', 'DD-MM-YYYY') AND TO_DATE('${periodoFinalizacion}', 'DD-MM-YYYY')
+      LEFT JOIN
+            "C##TEST"."beneficio" ben ON ben."id_beneficio" = detBs."id_beneficio"
+      LEFT JOIN
+            "C##TEST"."detalle_deduccion" detDs ON afil."id_afiliado" = detDs."id_afiliado"
+            AND detDs."estado_aplicacion" = 'NO COBRADA'
+            AND TO_DATE(CONCAT(detDs."anio", LPAD(detDs."mes", 2, '0')), 'YYYYMM') BETWEEN TO_DATE('${periodoInicio}', 'DD-MM-YYYY') AND TO_DATE('${periodoFinalizacion}', 'DD-MM-YYYY')
+      LEFT JOIN
+            "C##TEST"."deduccion" ded ON ded."id_deduccion" = detDs."id_deduccion"
+      WHERE
+            afil."id_afiliado" IN (
+              SELECT detB."id_afiliado"
+              FROM "C##TEST"."detalle_beneficio" detB
+              WHERE detB."estado" = 'PAGADA'
+              UNION
+              SELECT detD."id_afiliado"
+              FROM "C##TEST"."detalle_deduccion" detD
+              WHERE detD."estado_aplicacion" = 'COBRADA'
+            )
+      GROUP BY
+            afil."id_afiliado",
+            afil."dni",
+           TRIM(
+              afil."primer_nombre" || ' ' || 
+              COALESCE(afil."segundo_nombre", '') || ' ' || 
+              COALESCE(afil."tercer_nombre", '') || ' ' || 
+              afil."primer_apellido" || ' ' || 
+              COALESCE(afil."segundo_apellido", ''))
+      HAVING
+            COUNT(DISTINCT ben."nombre_beneficio") > 0
+            OR COUNT(DISTINCT ded."nombre_deduccion") > 0
       `;
+
+    console.log(query);
+    
   
       try {
         return await this.entityManager.query(query);
@@ -86,41 +102,56 @@ export class PlanillaService {
     async obtenerAfilComplementaria(): Promise<any> {
       const query = `
       SELECT
-        afil."id_afiliado",
-        afil."dni",
-        afil."primer_nombre",
-        LISTAGG(DISTINCT ben."nombre_beneficio", ',') WITHIN GROUP (ORDER BY ben."id_beneficio") AS "beneficiosNombres",
-        LISTAGG(DISTINCT ded."nombre_deduccion", ',') WITHIN GROUP (ORDER BY ded."id_deduccion") AS "deduccionesNombres"
-      FROM
-        "C##TEST"."detalle_beneficio" detBs
-      LEFT JOIN
-        "C##TEST"."afiliado" afil ON afil."id_afiliado" = detBs."id_afiliado"
-      LEFT JOIN
-        "C##TEST"."beneficio" ben ON ben."id_beneficio" = detBs."id_beneficio"
-      LEFT JOIN
-        "C##TEST"."detalle_deduccion" detDs ON afil."id_afiliado" = detDs."id_afiliado"
-      LEFT JOIN
-        "C##TEST"."deduccion" ded ON detDs."id_deduccion" = ded."id_deduccion"
-      WHERE
-        detBs."estado" = 'NO PAGADA' AND detDs."estado_aplicacion" = 'NO COBRADA'
-        AND detBs."id_afiliado" NOT IN (
-            SELECT
-                detB."id_afiliado"
-            FROM
-                "C##TEST"."detalle_beneficio" detB
-            WHERE
-                detB."estado" != 'NO PAGADA'
-        ) AND (
-            detDs."id_afiliado" NOT IN (
-                SELECT detD."id_afiliado"
-                FROM "C##TEST"."detalle_deduccion" detD
-                WHERE "estado_aplicacion" != 'NO COBRADA'
-            )
-        )
-      GROUP BY
-        afil."id_afiliado",
-        afil."dni",
-        afil."primer_nombre"
+  afil."id_afiliado",
+  afil."dni",
+  TRIM(
+    afil."primer_nombre" || ' ' || 
+    COALESCE(afil."segundo_nombre", '') || ' ' || 
+    COALESCE(afil."tercer_nombre", '') || ' ' || 
+    afil."primer_apellido" || ' ' || 
+    COALESCE(afil."segundo_apellido", '')
+  ) AS NOMBRE_COMPLETO,
+  LISTAGG(DISTINCT ben."nombre_beneficio", ',') WITHIN GROUP (ORDER BY ben."id_beneficio") AS "beneficiosNombres",
+  LISTAGG(DISTINCT ded."nombre_deduccion", ',') WITHIN GROUP (ORDER BY ded."id_deduccion") AS "deduccionesNombres"
+FROM
+  "C##TEST"."detalle_beneficio" detBs
+LEFT JOIN
+  "C##TEST"."afiliado" afil ON afil."id_afiliado" = detBs."id_afiliado"
+LEFT JOIN
+  "C##TEST"."beneficio" ben ON ben."id_beneficio" = detBs."id_beneficio"
+LEFT JOIN
+  "C##TEST"."detalle_deduccion" detDs ON afil."id_afiliado" = detDs."id_afiliado"
+LEFT JOIN
+  "C##TEST"."deduccion" ded ON detDs."id_deduccion" = ded."id_deduccion"
+WHERE
+  detBs."estado" = 'NO PAGADA' AND
+  detDs."estado_aplicacion" = 'NO COBRADA' AND
+  detBs."id_afiliado" NOT IN (
+    SELECT
+      detB."id_afiliado"
+    FROM
+      "C##TEST"."detalle_beneficio" detB
+    WHERE
+      detB."estado" NOT IN ('NO PAGADA', 'INCONSISTENCIA')
+  ) AND (
+    detDs."id_afiliado" NOT IN (
+      SELECT detD."id_afiliado"
+      FROM "C##TEST"."detalle_deduccion" detD
+      WHERE detD."estado_aplicacion" NOT IN ('NO COBRADA', 'INCONSISTENCIA')
+    )
+  ) AND
+  detBs."estado" != 'INCONSISTENCIA' AND
+  detDs."estado_aplicacion" != 'INCONSISTENCIA'
+GROUP BY
+  afil."id_afiliado",
+  afil."dni",
+  TRIM(
+    afil."primer_nombre" || ' ' || 
+    COALESCE(afil."segundo_nombre", '') || ' ' || 
+    COALESCE(afil."tercer_nombre", '') || ' ' || 
+    afil."primer_apellido" || ' ' || 
+    COALESCE(afil."segundo_apellido", '')
+  )
       `;
 
       try {
@@ -134,25 +165,38 @@ export class PlanillaService {
     async obtenerAfilExtraordinaria(): Promise<any> {
       const query = `
       SELECT
-  afil."id_afiliado",
-  afil."dni",
-  afil."primer_nombre",
-  LISTAGG(DISTINCT ben."nombre_beneficio", ',') WITHIN GROUP (ORDER BY ben."id_beneficio") AS "beneficiosNombres",
-  LISTAGG(DISTINCT ded."nombre_deduccion", ',') WITHIN GROUP (ORDER BY ded."id_deduccion") AS "deduccionesNombres"
-FROM
-  "C##TEST"."afiliado" afil
-INNER JOIN
-  "C##TEST"."detalle_beneficio" detBs ON afil."id_afiliado" = detBs."id_afiliado" AND detBs."estado" = 'INCOSISTENCIA'
-INNER JOIN
-  "C##TEST"."beneficio" ben ON ben."id_beneficio" = detBs."id_beneficio"
-INNER JOIN
-  "C##TEST"."detalle_deduccion" detDs ON afil."id_afiliado" = detDs."id_afiliado" AND detDs."estado_aplicacion" = 'INCOSISTENCIA'
-INNER JOIN
-  "C##TEST"."deduccion" ded ON ded."id_deduccion" = detDs."id_deduccion"
-GROUP BY
-  afil."id_afiliado",
-  afil."dni",
-  afil."primer_nombre"
+      afil."id_afiliado",
+      afil."dni",
+      TRIM(
+        afil."primer_nombre" || ' ' || 
+        COALESCE(afil."segundo_nombre", '') || ' ' || 
+        COALESCE(afil."tercer_nombre", '') || ' ' || 
+        afil."primer_apellido" || ' ' || 
+        COALESCE(afil."segundo_apellido", '')) AS NOMBRE_COMPLETO,
+      LISTAGG(DISTINCT ben."nombre_beneficio", ',') WITHIN GROUP (ORDER BY ben."id_beneficio") AS "beneficiosNombres",
+      LISTAGG(DISTINCT ded."nombre_deduccion", ',') WITHIN GROUP (ORDER BY ded."id_deduccion") AS "deduccionesNombres"
+    FROM
+      "C##TEST"."afiliado" afil
+    LEFT JOIN
+      "C##TEST"."detalle_beneficio" detBs ON afil."id_afiliado" = detBs."id_afiliado"
+    LEFT JOIN
+      "C##TEST"."beneficio" ben ON ben."id_beneficio" = detBs."id_beneficio" AND detBs."estado" = 'INCONSISTENCIA'
+    LEFT JOIN
+      "C##TEST"."detalle_deduccion" detDs ON afil."id_afiliado" = detDs."id_afiliado"
+    LEFT JOIN
+      "C##TEST"."deduccion" ded ON ded."id_deduccion" = detDs."id_deduccion" AND detDs."estado_aplicacion" = 'INCONSISTENCIA'
+    WHERE
+      detBs."estado" = 'INCONSISTENCIA'
+      OR detDs."estado_aplicacion" = 'INCONSISTENCIA'
+    GROUP BY
+      afil."id_afiliado",
+      afil."dni",
+      TRIM(
+        afil."primer_nombre" || ' ' || 
+        COALESCE(afil."segundo_nombre", '') || ' ' || 
+        COALESCE(afil."tercer_nombre", '') || ' ' || 
+        afil."primer_apellido" || ' ' || 
+        COALESCE(afil."segundo_apellido", '')) 
       `;
 
       try {
@@ -162,7 +206,6 @@ GROUP BY
         throw new InternalServerErrorException('Error al ejecutar la consulta en la base de datos');
       }
     }
-    
     
     
   async create(createPlanillaDto: CreatePlanillaDto) {
@@ -420,10 +463,6 @@ GROUP BY
 
     await this.planillaRepository.query(createViewQuery);
   }
-
-  
-  
-
 
 }
 

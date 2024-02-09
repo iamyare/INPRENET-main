@@ -1,14 +1,16 @@
-import { Component } from '@angular/core';
+import { Component, ViewChild } from '@angular/core';
 import { ValidatorFn, Validators } from '@angular/forms';
 import { BeneficiosService } from '../../../../services/beneficios.service';
 import { ToastrService } from 'ngx-toastr';
 import { FieldConfig } from 'src/app/views/shared/shared/Interfaces/field-config';
+import { DynamicFormComponent } from '@docs-components/dynamic-form/dynamic-form.component';
 @Component({
   selector: 'app-nuevo-beneficio',
   templateUrl: './nuevo-beneficio.component.html',
   styleUrl: './nuevo-beneficio.component.scss'
 })
 export class NuevoBeneficioComponent {
+  @ViewChild(DynamicFormComponent) dynamicForm!: DynamicFormComponent;
   data:any
 
   constructor(private SVCBeneficios:BeneficiosService, private toastr: ToastrService ,){}
@@ -17,7 +19,6 @@ export class NuevoBeneficioComponent {
     { type: 'text', label: 'Nombre de beneficio', name: 'nombre_beneficio', validations: [] },
     { type: 'text', label: 'Descripción de beneficio', name: 'descripcion_beneficio', validations: [] },
     { type: 'number', label: 'numero de rentas maximas', name: 'numero_rentas_max', validations: [] },
-
     { type: 'dropdown', label: 'Estado', name: 'estado', validations: [], options:[{label:"vitalicio", value:"vitalicio"},
     {label:"definido", value:"Definido"}] }
   ];
@@ -38,6 +39,7 @@ export class NuevoBeneficioComponent {
       {
         next: (response) => {
           this.toastr.success('tipo de beneficio creado con éxito');
+          this.limpiarFormulario();
         },
         error: (error) => {
           let mensajeError = 'Error desconocido al crear tipo de beneficio';
@@ -52,5 +54,12 @@ export class NuevoBeneficioComponent {
         }
       }
       );
+  }
+
+  limpiarFormulario(): void {
+    // Utiliza la referencia al componente DynamicFormComponent para resetear el formulario
+    if (this.dynamicForm) {
+      this.dynamicForm.form.reset();
+    }
   }
 }

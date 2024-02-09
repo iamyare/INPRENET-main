@@ -8,6 +8,7 @@ import { PlanillaService } from 'src/app/services/planilla.service';
 import { FieldConfig } from 'src/app/views/shared/shared/Interfaces/field-config';
 import { TableColumn } from 'src/app/views/shared/shared/Interfaces/table-column';
 import * as moment from 'moment';
+import { DeduccionesService } from 'src/app/services/deducciones.service';
 
 @Component({
   selector: 'app-asignacion-afil-plan',
@@ -15,6 +16,7 @@ import * as moment from 'moment';
   styleUrl: './asignacion-afil-plan.component.scss'
 })
 export class AsignacionAfilPlanComponent implements OnInit{
+  dataPlan : any;
   filas: any;
   tiposPlanilla: any[] = [];
   datosFormateados: any;
@@ -31,7 +33,8 @@ export class AsignacionAfilPlanComponent implements OnInit{
     private planillaService : PlanillaService,
     private svcAfilServ: AfiliadoService,
     private toastr: ToastrService,
-    public dialog: MatDialog
+    public dialog: MatDialog,
+    private deduccionesService : DeduccionesService
     ) {
   }
 
@@ -122,12 +125,11 @@ export class AsignacionAfilPlanComponent implements OnInit{
 }
 
   getFilas = async (periodoInicio: string, periodoFinalizacion: string) => {
-    let dataPlan = []
     try {
 
       if (this.detallePlanilla.nombre_planilla == "COMPLEMENTARIA"){
         const data = await this.planillaService.getDatosComplementaria(periodoInicio, periodoFinalizacion).toPromise();
-        dataPlan = data.map((item: any) => {
+        this.dataPlan = data.map((item: any) => {
           return {
             id_afiliado: item.id_afiliado,
             dni: item.dni,
@@ -142,7 +144,7 @@ export class AsignacionAfilPlanComponent implements OnInit{
         });
       }else if (this.detallePlanilla.nombre_planilla == "ORDINARIA"){
         const data = await this.planillaService.getDatosOrdinaria(periodoInicio, periodoFinalizacion).toPromise();
-        dataPlan = data.map((item: any) => {
+        this.dataPlan = data.map((item: any) => {
           return {
             id_afiliado: item.id_afiliado,
             dni: item.dni,
@@ -157,7 +159,9 @@ export class AsignacionAfilPlanComponent implements OnInit{
         });
       }else if (this.detallePlanilla.nombre_planilla == "EXTRAORDINARIA"){
         const data = await this.planillaService.getDatosExtraordinaria(periodoInicio, periodoFinalizacion).toPromise();
-        dataPlan = data.map((item: any) => {
+        this.dataPlan = data.map((item: any) => {
+          console.log(item);
+
           return {
             id_afiliado: item.id_afiliado,
             dni: item.dni,
@@ -167,13 +171,13 @@ export class AsignacionAfilPlanComponent implements OnInit{
             DEDUCCIONESIDS: item.DEDUCCIONESIDS,
             deduccionesNombres: item.deduccionesNombres,
             periodoInicio : periodoInicio,
-            periodoFinalizacion : periodoFinalizacion
+            periodoFinalizacion : periodoFinalizacion,
           };
         });
 
       }
 
-      return dataPlan;
+      return this.dataPlan;
     } catch (error) {
       console.error("Error al obtener datos de deducciones", error);
       throw error;
@@ -187,26 +191,44 @@ export class AsignacionAfilPlanComponent implements OnInit{
   editar = (row: any) => {}
 
   manejarAccionUno(row: any) {
-    this.svcAfilServ.getAfilByParam(row.dni).subscribe({
-      next: (afilData) => {
-        console.log(afilData);
-        const dialogRef = this.dialog.open(DynamicDialogComponent, {
-          width: '250px', // Ajusta según tus necesidades
-          data: { afilData } // Pasando los datos obtenidos del servicio al dialog
+    console.log('Información de la fila seleccionada:', row);
 
-        });
+    const fechaInicio = this.formatDate(row.periodoInicio);
+    const fechaFin = this.formatDate(row.periodoFinalizacion);
+    const idAfiliado = row.id_afiliado;
 
-        dialogRef.afterClosed().subscribe(result => {
-          console.log('La modal fue cerrada');
-          // Aquí puedes manejar lo que sucede después de cerrar la modal
+    if (this.detallePlanilla.nombre_planilla === 'EXTRAORDINARIA') {
+      console.log('hola');
+
+        // Utilizar findInconsistentDeduccionesByAfiliado si el estado de aplicación es 'INCOSISTENCIA'
+        this.deduccionesService.findInconsistentDeduccionesByAfiliado(idAfiliado).subscribe({
+            next: (response) => {
+                console.log('Datos de deducciones inconsistentes:', response);
+            },
+            error: (error) => {
+                console.error('Error al obtener las deducciones inconsistentes:', error);
+            }
         });
-      },
-      error: (error) => {
-        console.error('Error al obtener datos del afiliado', error);
-        // Manejo de errores, por ejemplo, mostrar un mensaje al usuario
-      }
-    });
+    } else {
+        // Utilizar findByDates en otro caso
+        this.deduccionesService.findByDates(fechaInicio, fechaFin, idAfiliado).subscribe({
+            next: (response) => {
+                console.log('Datos de deducciones:', response);
+            },
+            error: (error) => {
+                console.error('Error al obtener las deducciones:', error);
+            }
+        });
+    }
+}
+
+
+  // Método para formatear la fecha de 'DD-MM-YYYY' a 'YYYY-MM-DD'
+  formatDate(dateStr: string): string {
+    const [day, month, year] = dateStr.split('-');
+    return `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
   }
+
 
   manejarAccionDos(row: any) {
     // Lógica para manejar la acción del segundo botóns

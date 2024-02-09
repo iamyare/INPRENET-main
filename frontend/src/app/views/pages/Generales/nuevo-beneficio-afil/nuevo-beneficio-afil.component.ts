@@ -1,5 +1,6 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
 import { FormBuilder, FormGroup, ValidatorFn, Validators } from '@angular/forms';
+import { DynamicFormComponent } from '@docs-components/dynamic-form/dynamic-form.component';
 import { ToastrService, ToastrModule } from 'ngx-toastr';
 import { AfiliadoService } from 'src/app/services/afiliado.service';
 import { BeneficiosService } from 'src/app/services/beneficios.service';
@@ -10,6 +11,7 @@ import { FieldConfig } from 'src/app/views/shared/shared/Interfaces/field-config
   styleUrl: './nuevo-beneficio-afil.component.scss'
 })
 export class NuevoBeneficioAfilComponent implements OnInit{
+  @ViewChild(DynamicFormComponent) dynamicForm!: DynamicFormComponent;
   form:any
   datosFormateados: any;
   tiposBeneficios:any = []
@@ -190,7 +192,8 @@ export class NuevoBeneficioAfilComponent implements OnInit{
       this.svcBeneficioServ.asigBeneficioAfil(this.datosFormateados).subscribe(
        {
          next: (response)=>{
-           this.toastr.success("se asigno correctamente el beneficio")
+           this.toastr.success("se asigno correctamente el beneficio");
+           this.limpiarFormulario()
          },
          error: (error)=>{
            let mensajeError = 'Error desconocido al crear Detalle de deduccion';
@@ -221,6 +224,13 @@ export class NuevoBeneficioAfilComponent implements OnInit{
           console.error('Upload failed', err);
         }
       }); */
+    }
+  }
+
+  limpiarFormulario(): void {
+    // Utiliza la referencia al componente DynamicFormComponent para resetear el formulario
+    if (this.dynamicForm) {
+      this.dynamicForm.form.reset();
     }
   }
 }

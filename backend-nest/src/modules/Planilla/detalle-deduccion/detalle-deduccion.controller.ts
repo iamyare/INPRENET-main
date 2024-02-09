@@ -10,6 +10,12 @@ import { DetalleDeduccion } from './entities/detalle-deduccion.entity';
 export class DetalleDeduccionController {
   constructor(private readonly detalleDeduccionService: DetalleDeduccionService) {}
 
+  @Get('inconsistencias/:idAfiliado')
+
+async getInconsistencias(@Param('idAfiliado') idAfiliado: string) {
+    return this.detalleDeduccionService.findInconsistentDeduccionesByAfiliado(idAfiliado);
+  }
+
   @Get('por-fecha')
 async findByDates(
   @Query('fechaInicio') fechaInicioString: string, 
@@ -30,6 +36,8 @@ async findByDates(
 
   return this.detalleDeduccionService.findBetweenDates(fechaInicio, fechaFin, idAfiliado);
 }
+
+
 
 
   @Post()

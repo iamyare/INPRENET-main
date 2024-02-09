@@ -1,5 +1,6 @@
-import { Component } from '@angular/core';
+import { Component, ViewChild } from '@angular/core';
 import { FormBuilder, FormGroup } from '@angular/forms';
+import { DynamicFormComponent } from '@docs-components/dynamic-form/dynamic-form.component';
 import { PlanillaService } from 'src/app/services/planilla.service';
 import { generateFormArchivo } from 'src/components/botonarchivos/botonarchivos.component';
 
@@ -9,6 +10,7 @@ import { generateFormArchivo } from 'src/components/botonarchivos/botonarchivos.
   styleUrls: ['./nueva-planilla.component.scss']
 })
 export class NuevaPlanillaComponentP {
+  @ViewChild(DynamicFormComponent) dynamicForm!: DynamicFormComponent;
   form: FormGroup;
   formplanilla: FormGroup;
 
@@ -72,5 +74,12 @@ export class NuevaPlanillaComponentP {
     this.datosG = false
     this.datosCT = false
     this.datosHS = true
+  }
+
+  limpiarFormulario(): void {
+    // Utiliza la referencia al componente DynamicFormComponent para resetear el formulario
+    if (this.dynamicForm) {
+      this.dynamicForm.form.reset();
+    }
   }
 }

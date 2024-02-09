@@ -13,6 +13,11 @@ export class DetalleBeneficioController {
     return this.detallebeneficioService.create(createDetalleBeneficioDto);
   }
 
+  @Get('inconsistencias/:idAfiliado')
+  async getInconsistencias(@Param('idAfiliado') idAfiliado: string) {
+    return this.detallebeneficioService.findInconsistentBeneficiosByAfiliado(idAfiliado);
+  }
+
   @Get('por-rango-fecha')
 async findByDateRange(
   @Query('fechaInicio') fechaInicioString: string,

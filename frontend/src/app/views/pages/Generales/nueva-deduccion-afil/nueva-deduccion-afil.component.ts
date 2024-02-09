@@ -7,6 +7,7 @@ import { InstitucionesService } from '../../../../services/instituciones.service
 import { Subject, takeUntil } from 'rxjs';
 import * as XLSX from 'xlsx';
 import { FieldConfig } from '../../../shared/shared/Interfaces/field-config';
+import { DynamicFormComponent } from '@docs-components/dynamic-form/dynamic-form.component';
 
 @Component({
   selector: 'app-nueva-deduccion-afil',
@@ -14,6 +15,7 @@ import { FieldConfig } from '../../../shared/shared/Interfaces/field-config';
   styleUrl: './nueva-deduccion-afil.component.scss'
 })
 export class NuevaDeduccionAfilComponent{
+  @ViewChild(DynamicFormComponent) dynamicForm!: DynamicFormComponent;
   data:any
   filas:any
   tiposDeducciones:any = [];
@@ -129,6 +131,7 @@ guardarDetalleDeduccion(){
     {
       next: (response) => {
         this.toastr.success('Detalle de deduccion creado con éxito');
+        this.limpiarFormulario()
       },
       error: (error) => {
         let mensajeError = 'Error desconocido al crear Detalle de deduccion';
@@ -250,6 +253,13 @@ guardarDetalleDeduccion(){
     this.file = null;
     if (this.fileInput && this.fileInput.nativeElement) {
       this.fileInput.nativeElement.value = '';
+    }
+  }
+
+  limpiarFormulario(): void {
+    // Utiliza la referencia al componente DynamicFormComponent para resetear el formulario
+    if (this.dynamicForm) {
+      this.dynamicForm.form.reset();
     }
   }
 

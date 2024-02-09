@@ -1,14 +1,16 @@
-import { Component } from '@angular/core';
+import { Component, ViewChild } from '@angular/core';
 import { ValidatorFn, Validators } from '@angular/forms';
 import { DeduccionesService } from 'src/app/services/deducciones.service';
 import { ToastrService } from 'ngx-toastr';
 import { FieldConfig } from 'src/app/views/shared/shared/Interfaces/field-config';
+import { DynamicFormComponent } from '@docs-components/dynamic-form/dynamic-form.component';
 @Component({
   selector: 'app-nuevo-tipo-deduccion',
   templateUrl: './nuevo-tipo-deduccion.component.html',
   styleUrl: './nuevo-tipo-deduccion.component.scss'
 })
 export class NuevoTipoDeduccionComponent {
+  @ViewChild(DynamicFormComponent) dynamicForm!: DynamicFormComponent;
   myFormFields: FieldConfig[] = [
     { type: 'dropdown', label: 'Tipo de deducción', name: 'tipo_deduccion',
     options: [
@@ -38,6 +40,7 @@ export class NuevoTipoDeduccionComponent {
       {
         next: (response) => {
           this.toastr.success('tipo de deduccion creado con éxito');
+          this.limpiarFormulario()
         },
         error: (error) => {
           let mensajeError = 'Error desconocido al crear tipo de deduccion';
@@ -54,6 +57,13 @@ export class NuevoTipoDeduccionComponent {
         }
       }
       );
+  }
+
+  limpiarFormulario(): void {
+    // Utiliza la referencia al componente DynamicFormComponent para resetear el formulario
+    if (this.dynamicForm) {
+      this.dynamicForm.form.reset();
+    }
   }
 
 }

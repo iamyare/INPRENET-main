@@ -3,7 +3,7 @@ import { Beneficio } from "../../beneficio/entities/beneficio.entity";
 import { Afiliado } from "src/afiliado/entities/afiliado";
 import { Planilla } from "../../planilla/entities/planilla.entity";
 import { IsEnum } from "class-validator";
-enum EstadoEnum {
+export enum EstadoEnum {
     PAGADA = 'PAGADA',
     NO_PAGADA = 'NO PAGADA',
     INCONSISTENCIA = 'INCONSISTENCIA'

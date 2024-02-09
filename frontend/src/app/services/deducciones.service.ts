@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpErrorResponse } from '@angular/common/http';
+import { HttpClient, HttpErrorResponse, HttpParams } from '@angular/common/http';
 import { Observable, catchError, map, tap, throwError } from 'rxjs';
 import { environment } from 'src/environments/environment';
 
@@ -20,6 +20,27 @@ export class DeduccionesService {
           return res;
         })
         )
+      }
+
+      findByDates(fechaInicio: string, fechaFin: string, idAfiliado: number): Observable<any> {
+        const params = new HttpParams()
+          .set('fechaInicio', fechaInicio)
+          .set('fechaFin', fechaFin)
+          .set('idAfiliado', idAfiliado.toString());
+
+        return this.http.get(`${environment.API_URL}/api/detalle-deduccion/por-fecha`, { params }).pipe(
+          catchError(this.handleError)
+        );
+      }
+
+
+      findInconsistentDeduccionesByAfiliado(idAfiliado: string): Observable<any> {
+        const url = `${environment.API_URL}/api/detalle-deduccion/inconsistencias/${idAfiliado}`;
+
+        return this.http.get<any>(url).pipe(
+          tap(data => console.log('Inconsistent Deducciones: ', data)),
+          catchError(this.handleError)
+        );
       }
 
       /* getDetalleDeduccion(): Observable<any> {

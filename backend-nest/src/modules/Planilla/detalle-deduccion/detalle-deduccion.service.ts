@@ -56,9 +56,32 @@ export class DetalleDeduccionService {
         anioFinEqual: anioFin,
         mesFin,
       })
-      .andWhere('detalleDeduccion.id_afiliado = :idAfiliado', { idAfiliado });
+      .andWhere('detalleDeduccion.id_afiliado = :idAfiliado', { idAfiliado })
+      .andWhere('detalleDeduccion.estado_aplicacion != :estadoExcluido', { estadoExcluido: 'INCOSISTENCIA' });
 
     return queryBuilder.getMany();
+}
+
+
+async findInconsistentDeduccionesByAfiliado(idAfiliado: string) {
+  try {
+    const query = this.detalleDeduccionRepository.createQueryBuilder('detDs')
+      .innerJoinAndSelect('detDs.deduccion', 'ded')
+      .where('detDs.estado_aplicacion = :estado', { estado: 'INCONSISTENCIA' })
+      .andWhere('detDs.id_afiliado = :idAfiliado', { idAfiliado }) // Asegúrate de que afiliadoId es el nombre correcto de la columna FK en tu entidad DetalleDeduccion
+      .select([
+        'ded.nombre_deduccion',
+        'detDs.monto_total',
+        'detDs.estado_aplicacion',
+        'detDs.anio',
+        'detDs.mes'
+      ]);
+
+    return await query.getMany();
+  } catch (error) {
+    this.logger.error(`Error al buscar deducciones inconsistentes por afiliado: ${error.message}`);
+    throw new InternalServerErrorException('Error al buscar deducciones inconsistentes por afiliado');
+  }
 }
 
   

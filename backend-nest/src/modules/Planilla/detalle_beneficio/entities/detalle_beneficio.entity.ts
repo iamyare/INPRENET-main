@@ -14,9 +14,8 @@ export class DetalleBeneficio {
     @PrimaryGeneratedColumn('uuid')
     id_beneficio_planilla : string;
 
-    @Column({default:"NO PAGADA", enum: EstadoEnum})
-    @IsEnum(EstadoEnum)
-    estado: EstadoEnum;
+    @Column({default:"NO PAGADA", enum: ['NO PAGADA', 'PAGADA']})
+    estado: string;
 
     @Column({nullable:true})
     modalidad_pago: string;

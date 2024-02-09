@@ -39,6 +39,7 @@ import { NuevoBeneficioAfilComponent } from '../pages/Generales/nuevo-beneficio-
 import { NuevaDeduccionAfilComponent } from '../pages/Generales/nueva-deduccion-afil/nueva-deduccion-afil.component';
 import { VerEditarDeduccionAfilComponent } from '../pages/Generales/ver-editar-deduccion-afil/ver-editar-deduccion-afil.component';
 import { AsignacionAfilPlanComponent } from '../../../components/asignacion-afil-plan/asignacion-afil-plan.component';
+import { VerplanprelcompComponent } from '../../../components/verplanprelcomp/verplanprelcomp.component';
 
 @NgModule({
   imports: [
@@ -61,6 +62,7 @@ import { AsignacionAfilPlanComponent } from '../../../components/asignacion-afil
     MatIconModule,
   ],
   declarations: [
+    VerplanprelcompComponent,
     SubirDeduccionesformComponent,
     VerDeduccionesComponent,
     NuevaPlanillaComponentP,

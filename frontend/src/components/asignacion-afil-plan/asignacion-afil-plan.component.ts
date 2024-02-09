@@ -7,6 +7,7 @@ import { AfiliadoService } from 'src/app/services/afiliado.service';
 import { PlanillaService } from 'src/app/services/planilla.service';
 import { FieldConfig } from 'src/app/views/shared/shared/Interfaces/field-config';
 import { TableColumn } from 'src/app/views/shared/shared/Interfaces/table-column';
+import * as moment from 'moment';
 
 @Component({
   selector: 'app-asignacion-afil-plan',
@@ -37,14 +38,14 @@ export class AsignacionAfilPlanComponent implements OnInit{
   ngOnInit(): void {
     this.myColumnsDed = [
       {
-        header: 'dni',
+        header: 'DNI',
         col: 'dni',
         isEditable: false,
         validationRules: [Validators.required, Validators.minLength(5)]
       },
       {
-        header: 'primer_nombre',
-        col: 'primer_nombre',
+        header: 'Nombre Completo',
+        col: 'NOMBRE_COMPLETO',
         isEditable: true
       },
       {
@@ -86,7 +87,7 @@ export class AsignacionAfilPlanComponent implements OnInit{
             } else {
               this.detallePlanilla = [];
               this.datosTabl = [];
-              this.toastr.error(`La planilla con el codigo de planilla: ${this.datosFormateados.codigo_planilla}  no existe `);
+              this.toastr.error(`La planilla con el código de planilla: ${this.datosFormateados.codigo_planilla}  no existe `);
             }
             this.ejecF(this.datosTabl).then(() => { });
           },
@@ -112,6 +113,14 @@ export class AsignacionAfilPlanComponent implements OnInit{
     }
   };
 
+ convertirFecha(fechaStr: string): string {
+    // Parsear la fecha utilizando moment.js
+    const fecha = moment.utc(fechaStr);
+    // Formatear la fecha en el formato deseado
+    const fechaFormateada = fecha.format('DD-MM-YYYY h:mm:ss A');
+    return fechaFormateada;
+}
+
   getFilas = async (periodoInicio: string, periodoFinalizacion: string) => {
     let dataPlan = []
     try {
@@ -122,7 +131,7 @@ export class AsignacionAfilPlanComponent implements OnInit{
           return {
             id_afiliado: item.id_afiliado,
             dni: item.dni,
-            primer_nombre: item.primer_nombre,
+            NOMBRE_COMPLETO: item.NOMBRE_COMPLETO,
             BENEFICIOSIDS: item.BENEFICIOSIDS,
             beneficiosNombres: item.beneficiosNombres,
             DEDUCCIONESIDS: item.DEDUCCIONESIDS,
@@ -137,7 +146,7 @@ export class AsignacionAfilPlanComponent implements OnInit{
           return {
             id_afiliado: item.id_afiliado,
             dni: item.dni,
-            primer_nombre: item.primer_nombre,
+            NOMBRE_COMPLETO: item.NOMBRE_COMPLETO,
             BENEFICIOSIDS: item.BENEFICIOSIDS,
             beneficiosNombres: item.beneficiosNombres,
             DEDUCCIONESIDS: item.DEDUCCIONESIDS,
@@ -152,7 +161,7 @@ export class AsignacionAfilPlanComponent implements OnInit{
           return {
             id_afiliado: item.id_afiliado,
             dni: item.dni,
-            primer_nombre: item.primer_nombre,
+            NOMBRE_COMPLETO: item.NOMBRE_COMPLETO,
             BENEFICIOSIDS: item.BENEFICIOSIDS,
             beneficiosNombres: item.beneficiosNombres,
             DEDUCCIONESIDS: item.DEDUCCIONESIDS,

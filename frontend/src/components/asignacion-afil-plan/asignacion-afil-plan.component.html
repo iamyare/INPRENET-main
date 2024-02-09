@@ -1,51 +1,38 @@
+<div class="container">
+  <app-dynamic-form [fields]="myFormFields" titulo="Detalles de planilla" subtitulo="Completa la informacion correspondiente" (newDatBenChange)="obtenerDatosForm($event)"></app-dynamic-form>
 
+  <button (click)="getPlanilla()" mat-raised-button class="preview-button">Previsualizar datos planilla</button>
 
+  <div class="card-header card-header-danger title" *ngIf="detallePlanilla">
+    <div class="card-body" style="padding: 1%">
+      <h4 class="card-title">Datos generales de la planilla</h4>
+      <table>
+        <tr>
+          <th>Nombre planilla</th>
+          <td>{{detallePlanilla?.nombre_planilla}}</td>
+          <th>Fecha Apertura</th>
+          <td>{{convertirFecha(detallePlanilla?.fecha_apertura)}}</td>
+        </tr>
+        <tr>
+          <th>Secuencia</th>
+          <td>{{detallePlanilla?.secuencia}}</td>
+          <th>Estado</th>
+          <td>{{detallePlanilla?.estado}}</td>
+        </tr>
+        <tr>
+          <th>Periodo Inicio</th>
+          <td>{{detallePlanilla?.periodoInicio}}</td>
+          <th>Periodo Finalización</th>
+          <td>{{detallePlanilla?.periodoFinalizacion}}</td>
+        </tr>
+      </table>
 
-<app-dynamic-form [fields]="myFormFields" titulo="Detalles de planilla" subtitulo="Completa la informacion correspondiente"
-(newDatBenChange)="obtenerDatosForm($event)"></app-dynamic-form>
-
-<button (click)="getPlanilla()" mat-raised-button style="margin: 2% 0% 2% 0%; background-color: #628780; color: #ffffff; border-radius: 5px; padding: 10px 20px;">previsualizar datos planilla</button>
-
-<div class="card-header card-header-danger title" *ngIf="detallePlanilla">
-
-  <div class="card-body" style="background: white;">
-    <h4 class="card-title" style="background: white;">Datos Generales de la planilla</h4>
-    <table >
-      <tr>
-        <th>nombre planilla</th>
-        <td >{{detallePlanilla?.nombre_planilla}}</td>
-        <th>Fecha Apertura</th>
-        <td>{{detallePlanilla?.fecha_apertura}}</td>
-        <th>Secuencia</th>
-        <td>{{detallePlanilla?.secuencia}}</td>
-        <th>Estado</th>
-        <td>{{detallePlanilla?.estado}}</td>
-        <th>Periodo Inicio</th>
-        <td>{{detallePlanilla?.periodoInicio}}</td>
-        <th>Periodo Finalización</th>
-        <td >{{detallePlanilla?.periodoFinalizacion}}</td>
-      </tr>
-    </table>
-
-    <div>
-      <h4 class="card-title" style="background: white;">Afiliados con beneficios y deducciones en el periodo</h4>
-      <app-dynamic-table
-        [verOpcEditar]="true"
-        [columns]="myColumnsDed"
-        [data]="datosTabl"
-        (ejecutarFuncionAsincronaEvent)="ejecutarFuncionAsincronaDesdeOtroComponente($event)"
-        [editarFunc]="editar"
-        [mostrarBotonUno]="true"
-        [etiquetaBotonUno]="'Ver Deducciones'"
-        [nombreEncabezadoUno]="'Deducciones'"
-        (accionBotonUno)="manejarAccionUno($event)"
-        [mostrarBotonDos]="true"
-        [nombreEncabezadoDos]="'Beneficios'"
-        [etiquetaBotonDos]="'Ver Beneficios'"
-        (accionBotonDos)="manejarAccionDos($event)">
-      </app-dynamic-table>
-      <button mat-raised-button style="background-color: #628780; color: #ffffff; border-radius: 5px; padding: 10px 20px;">Asignar a la planilla</button>
+      <h4 class="card-title">Asignación de beneficios y deducciones a la planilla</h4>
+      <div>
+        <app-dynamic-table [verOpcEditar]="true" [columns]="myColumnsDed" [data]="datosTabl" (ejecutarFuncionAsincronaEvent)="ejecutarFuncionAsincronaDesdeOtroComponente($event)" [editarFunc]="editar" [mostrarBotonUno]="true" [etiquetaBotonUno]="'Ver Deducciones'" [nombreEncabezadoUno]="'Deducciones'" (accionBotonUno)="manejarAccionUno($event)" [mostrarBotonDos]="true" [nombreEncabezadoDos]="'Beneficios'" [etiquetaBotonDos]="'Ver Beneficios'" (accionBotonDos)="manejarAccionDos($event)">
+        </app-dynamic-table>
+      </div>
+      <button mat-raised-button class="assign-button">Asignar a la planilla</button>
     </div>
-    </div>
-
+  </div>
 </div>

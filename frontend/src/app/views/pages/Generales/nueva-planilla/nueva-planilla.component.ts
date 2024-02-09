@@ -55,17 +55,20 @@ export class NuevaPlanillaComponentP {
       );
     }
   }
+
   setEstadoDatGen(e:any){
     this.datosG = true
     this.datosCT = false
     this.datosHS = false
   }
+
   setEstadoTable(e:any){
     this.datosCT = true
     this.datosG = false
     this.datosHS = false
   }
-  subirNuevPlan(e:any){
+
+  setEstadoVerPlanP(e:any){
     this.datosG = false
     this.datosCT = false
     this.datosHS = true

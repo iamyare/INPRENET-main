@@ -7,8 +7,22 @@
     </mat-slide-toggle>
 
     <app-progressplanill (newDatBenChange)="setEstadoDatGen($event)" [estadoSubDed]="form.get('isChecked')?.value"
-        (newEstCentrTrab)="setEstadoTable($event)" (newdatosRP)="subirNuevPlan($event)" >
+        (newEstCentrTrab)="setEstadoTable($event)"  (newdatosHS)="setEstadoVerPlanP($event)" >
     </app-progressplanill>
+
+
+    <form [formGroup]="formplanilla" *ngIf="datosG">
+      <app-nuevaplanilla groupName="planilla" ></app-nuevaplanilla>
+    </form>
+
+    <form [formGroup]="formplanilla" *ngIf="datosCT">
+      <app-asignacion-afil-plan groupName="planilla" ></app-asignacion-afil-plan>
+    </form>
+
+    <form [formGroup]="formplanilla" *ngIf="datosHS">
+      <app-verplanprelcomp groupName="planilla" ></app-verplanprelcomp>
+    </form>
+
 
     <!-- <div class="row" *ngIf="datosG && form.get('isChecked')?.value">
         <div class="col-md-6">
@@ -19,18 +33,7 @@
             <button mat-button color="primary">Enviar Formulario</button>
         </div>
     </div> -->
-
-
     <!-- <app-inline-editing-one *ngIf="datosTable"></app-inline-editing-one> -->
-
-    <form [formGroup]="formplanilla" *ngIf="datosG">
-        <app-nuevaplanilla groupName="planilla" ></app-nuevaplanilla>
-    </form>
-
-    <form [formGroup]="formplanilla" *ngIf="datosCT">
-         <app-asignacion-afil-plan groupName="planilla" ></app-asignacion-afil-plan>
-    </form>
-
     <!-- <div class="row" *ngIf="datosPlan">
         <div class="col-md-6">
             <app-botonarchivos labelBoton="Adjunte excel de planillas" groupName="ArchivosPlan"></app-botonarchivos>

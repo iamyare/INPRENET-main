@@ -39,9 +39,9 @@ export class PlanillaService {
     async obtenerAfilOrdinaria(periodoInicio: string, periodoFinalizacion: string): Promise<any> {
       const query = `
       SELECT 
-      COALESCE(deducciones."id_afiliado", beneficios."id_afiliado") AS id_afiliado,
-      COALESCE(deducciones."dni", beneficios."dni") AS dni,
-      COALESCE(deducciones."NOMBRE_COMPLETO", beneficios."NOMBRE_COMPLETO") AS NOMBRE_COMPLETO,
+      COALESCE(deducciones."id_afiliado", beneficios."id_afiliado") AS "id_afiliado",
+      COALESCE(deducciones."dni", beneficios."dni") AS "dni",
+      COALESCE(deducciones."NOMBRE_COMPLETO", beneficios."NOMBRE_COMPLETO") AS "NOMBRE_COMPLETO",
       beneficios."Total Beneficio",
       deducciones."Total Deducciones"
   FROM
@@ -134,9 +134,9 @@ export class PlanillaService {
 
     async obtenerAfilExtraordinaria(): Promise<any> {
       const query = `
-      SELECT COALESCE(deducciones."id_afiliado", beneficios."id_afiliado") AS id_afiliado,
-       COALESCE(deducciones."dni", beneficios."dni") AS dni,
-       COALESCE(deducciones."NOMBRE_COMPLETO", beneficios."NOMBRE_COMPLETO") AS NOMBRE_COMPLETO,
+      SELECT COALESCE(deducciones."id_afiliado", beneficios."id_afiliado") AS "id_afiliado",
+       COALESCE(deducciones."dni", beneficios."dni") AS "dni",
+       COALESCE(deducciones."NOMBRE_COMPLETO", beneficios."NOMBRE_COMPLETO") AS "NOMBRE_COMPLETO",
        beneficios."Total Beneficio",
        deducciones."Total Deducciones"
 FROM
@@ -215,9 +215,9 @@ FULL OUTER JOIN
     async obtenerAfilComplementaria(): Promise<any> {
       const query = `
       SELECT 
-    COALESCE(deducciones."id_afiliado", beneficios."id_afiliado") AS id_afiliado,
-    COALESCE(deducciones."dni", beneficios."dni") AS dni,
-    COALESCE(deducciones."NOMBRE_COMPLETO", beneficios."NOMBRE_COMPLETO") AS NOMBRE_COMPLETO,
+    COALESCE(deducciones."id_afiliado", beneficios."id_afiliado") AS "id_afiliado",
+    COALESCE(deducciones."dni", beneficios."dni") AS "dni",
+    COALESCE(deducciones."NOMBRE_COMPLETO", beneficios."NOMBRE_COMPLETO") AS "NOMBRE_COMPLETO",
     beneficios."Total Beneficio",
     deducciones."Total Deducciones"
 FROM

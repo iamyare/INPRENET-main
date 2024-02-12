@@ -44,7 +44,7 @@ export class AsignacionAfilPlanComponent implements OnInit{
     this.myColumnsDed = [
       {
         header: 'DNI',
-        col: 'DNI',
+        col: 'dni',
         isEditable: false,
         validationRules: [Validators.required, Validators.minLength(5)]
       },
@@ -59,7 +59,7 @@ export class AsignacionAfilPlanComponent implements OnInit{
         isEditable: true
       }, */
       {
-        header: 'Total de Beneficios',
+        header: 'Total de Ingresos',
         col: 'Total Beneficio',
         isEditable: true
       },
@@ -139,7 +139,7 @@ export class AsignacionAfilPlanComponent implements OnInit{
         this.dataPlan = data.map((item: any) => {
           return {
             id_afiliado: item.id_afiliado,
-            DNI: item.DNI,
+            dni: item.dni,
             NOMBRE_COMPLETO: item.NOMBRE_COMPLETO,
             periodoInicio : periodoInicio,
             periodoFinalizacion : periodoFinalizacion,
@@ -155,7 +155,7 @@ export class AsignacionAfilPlanComponent implements OnInit{
         this.dataPlan = data.map((item: any) => {
           return {
             id_afiliado: item.id_afiliado,
-            DNI: item.DNI,
+            dni: item.dni,
             NOMBRE_COMPLETO: item.NOMBRE_COMPLETO,
             "Total Beneficio": item["Total Beneficio"],
             "Total Deducciones": item["Total Deducciones"],
@@ -175,7 +175,7 @@ export class AsignacionAfilPlanComponent implements OnInit{
 
           return {
             id_afiliado: item.id_afiliado,
-            DNI: item.DNI,
+            dni: item.dni,
             NOMBRE_COMPLETO: item.NOMBRE_COMPLETO,
             "Total Beneficio": item["Total Beneficio"],
             "Total Deducciones": item["Total Deducciones"],

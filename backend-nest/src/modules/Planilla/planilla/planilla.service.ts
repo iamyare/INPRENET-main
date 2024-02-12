@@ -88,7 +88,6 @@ export class PlanillaService {
             OR COUNT(DISTINCT ded."nombre_deduccion") > 0
       `;
 
-    console.log(query);
     
   
       try {

@@ -3,42 +3,28 @@ import { DetalleDeduccionService } from './detalle-deduccion.service';
 import { CreateDetalleDeduccionDto } from './dto/create-detalle-deduccion.dto';
 import { UpdateDetalleDeduccionDto } from './dto/update-detalle-deduccion.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { Response } from 'express';
-import { DetalleDeduccion } from './entities/detalle-deduccion.entity';
 
 @Controller('detalle-deduccion')
 export class DetalleDeduccionController {
   constructor(private readonly detalleDeduccionService: DetalleDeduccionService) {}
 
-  @Get('inconsistencias/:idAfiliado')
 
-async getInconsistencias(@Param('idAfiliado') idAfiliado: string) {
+  @Get('/rango-deducciones')
+  async getRangoDetalleDeducciones(
+    @Query('idAfiliado') idAfiliado: string,
+    @Query('fechaInicio') fechaInicio: string,
+    @Query('fechaFin') fechaFin: string
+    ) {
+    if (!idAfiliado || !fechaInicio || !fechaFin) {
+      throw new BadRequestException('El ID del afiliado, la fecha de inicio y la fecha de fin son obligatorios');
+    }
+    return await this.detalleDeduccionService.getRangoDetalleDeducciones(idAfiliado, fechaInicio, fechaFin);
+  }
+
+  @Get('inconsistencias/:idAfiliado')
+    async getInconsistencias(@Param('idAfiliado') idAfiliado: string) {
     return this.detalleDeduccionService.findInconsistentDeduccionesByAfiliado(idAfiliado);
   }
-
-  @Get('por-fecha')
-async findByDates(
-  @Query('fechaInicio') fechaInicioString: string, 
-  @Query('fechaFin') fechaFinString: string,
-  @Query('idAfiliado') idAfiliadoString: string
-) {
-  const fechaInicio = new Date(fechaInicioString);
-  const fechaFin = new Date(fechaFinString);
-  const idAfiliado = parseInt(idAfiliadoString, 10);
-
-  if (isNaN(fechaInicio.getTime()) || isNaN(fechaFin.getTime())) {
-    throw new BadRequestException('Las fechas proporcionadas no son válidas.');
-  }
-
-  if (isNaN(idAfiliado)) {
-    throw new BadRequestException('El ID del afiliado proporcionado no es válido.');
-  }
-
-  return this.detalleDeduccionService.findBetweenDates(fechaInicio, fechaFin, idAfiliado);
-}
-
-
-
 
   @Post()
   @HttpCode(HttpStatus.CREATED)

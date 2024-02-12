@@ -16,9 +16,56 @@ export class DetalleBeneficioService {
   private readonly afiliadoRepository : Repository<Afiliado>
   @InjectRepository(Beneficio)
   private readonly tipoBeneficioRepository : Repository<Beneficio>
-
   @InjectRepository(DetalleBeneficio)
   private readonly benAfilRepository : Repository<DetalleBeneficio>
+
+  async getRangoDetalleBeneficios(idAfiliado: string, fechaInicio: string, fechaFin: string): Promise<any> {
+    console.log(fechaInicio);
+    console.log(fechaFin);
+    
+    const query = `
+      SELECT
+        db."id_beneficio_planilla",
+        db."estado",
+        db."monto",
+        db."modalidad_pago",
+        db."num_rentas_aplicadas",
+        db."periodoInicio",
+        db."periodoFinalizacion",
+        b."nombre_beneficio",
+        afil."id_afiliado",
+        TRIM(
+          afil."primer_nombre" || ' ' || 
+          COALESCE(afil."segundo_nombre", '') || ' ' || 
+          COALESCE(afil."tercer_nombre", '') || ' ' || 
+          afil."primer_apellido" || ' ' || 
+          COALESCE(afil."segundo_apellido", '')
+        ) AS "nombre_completo"
+      FROM
+        "C##TEST"."detalle_beneficio" db
+      JOIN
+        "C##TEST"."beneficio" b ON db."id_beneficio" = b."id_beneficio"
+      JOIN
+        "C##TEST"."afiliado" afil ON db."id_afiliado" = afil."id_afiliado"
+      WHERE
+        db."id_afiliado" = :idAfiliado
+      AND
+        db."estado" = 'NO PAGADA'
+      AND
+        (TO_DATE(db."periodoInicio", 'DD/MM/YY') BETWEEN TO_DATE(:fechaInicio, 'DD-MM-YYYY') AND TO_DATE(:fechaFin, 'DD-MM-YYYY')
+         OR
+         TO_DATE(db."periodoFinalizacion", 'DD/MM/YY') BETWEEN TO_DATE(:fechaInicio, 'DD-MM-YYYY') AND TO_DATE(:fechaFin, 'DD-MM-YYYY'))
+    `;
+
+    try {
+      const parametros = { idAfiliado, fechaInicio, fechaFin };
+      return await this.benAfilRepository.query(query, [idAfiliado, fechaInicio, fechaFin, fechaInicio, fechaFin]);
+    } catch (error) {
+      this.logger.error('Error al obtener los detalles de beneficio', error.stack);
+      throw new InternalServerErrorException('Error al consultar los detalles de beneficio en la base de datos');
+    }
+}
+
 
   async create(datos: any): Promise<any> {
     try {
@@ -121,29 +168,6 @@ export class DetalleBeneficioService {
       throw new InternalServerErrorException('Ocurrió un error al procesar su solicitud');
     }
   }
-  
-
-  async findByDateRange(fechaInicio: Date, fechaFin: Date, idAfiliado: string): Promise<DetalleBeneficio[]> {
-    if (!fechaInicio || !fechaFin || fechaInicio > fechaFin) {
-      throw new BadRequestException('El rango de fechas proporcionado no es válido.');
-    }
-  
-    try {
-      return await this.benAfilRepository.find({
-        where: {
-          afiliado: { id_afiliado: idAfiliado },
-          periodoInicio: MoreThanOrEqual(fechaInicio),
-          periodoFinalizacion: LessThanOrEqual(fechaFin),
-          estado: Not(EstadoEnum.INCONSISTENCIA)
-        },
-        relations: ['afiliado', 'beneficio']
-      });
-    } catch (error) {
-      this.logger.error(`Error al buscar detalles de beneficio por rango de fechas y afiliado: ${error.message}`, error.stack);
-      throw new InternalServerErrorException('Error al buscar detalles de beneficio por rango de fechas y afiliado');
-    }
-  }
-
 
 
   async findInconsistentBeneficiosByAfiliado(idAfiliado: string) {
@@ -152,13 +176,22 @@ export class DetalleBeneficioService {
         .innerJoinAndSelect('detB.beneficio', 'ben')
         .where('detB.estado = :estado', { estado: 'INCONSISTENCIA' })
         .andWhere('detB.afiliado = :idAfiliado', { idAfiliado })
-        .select(['ben.nombre_beneficio', 'detB.monto', 'detB.estado'])
+        .select([
+          'detB.id_beneficio_planilla', // ID del detalle beneficio
+          'detB.periodoInicio',
+          'detB.periodoFinalizacion',
+          'ben.nombre_beneficio',
+          'ben.id_beneficio', // Asumiendo que 'id_beneficio' es el nombre de la columna en la entidad 'beneficio'
+          'detB.monto',
+          'detB.estado'
+        ])
         .getMany();
     } catch (error) {
       this.logger.error(`Error al buscar beneficios inconsistentes por afiliado: ${error.message}`, error.stack);
       throw new InternalServerErrorException('Error al buscar beneficios inconsistentes por afiliado');
     }
   }
+  
   
   
   

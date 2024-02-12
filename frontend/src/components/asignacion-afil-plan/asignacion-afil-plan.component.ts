@@ -9,6 +9,7 @@ import { FieldConfig } from 'src/app/views/shared/shared/Interfaces/field-config
 import { TableColumn } from 'src/app/views/shared/shared/Interfaces/table-column';
 import * as moment from 'moment';
 import { DeduccionesService } from 'src/app/services/deducciones.service';
+import { BeneficiosService } from '../../app/services/beneficios.service';
 
 @Component({
   selector: 'app-asignacion-afil-plan',
@@ -34,7 +35,8 @@ export class AsignacionAfilPlanComponent implements OnInit{
     private svcAfilServ: AfiliadoService,
     private toastr: ToastrService,
     public dialog: MatDialog,
-    private deduccionesService : DeduccionesService
+    private deduccionesService : DeduccionesService,
+    private beneficiosService : BeneficiosService
     ) {
   }
 
@@ -191,47 +193,95 @@ export class AsignacionAfilPlanComponent implements OnInit{
   editar = (row: any) => {}
 
   manejarAccionUno(row: any) {
-    console.log('Información de la fila seleccionada:', row);
+    console.log(row);
 
-    const fechaInicio = this.formatDate(row.periodoInicio);
-    const fechaFin = this.formatDate(row.periodoFinalizacion);
-    const idAfiliado = row.id_afiliado;
+    let logs: any[] = []; // Array para almacenar logs
+
+    logs.push({ message: 'Información de la fila seleccionada:', detail: row });
+
+    // Función auxiliar para abrir el diálogo una vez que todos los datos están listos
+    const openDialog = () => this.dialog.open(DynamicDialogComponent, {
+      width: '50%', // o el ancho que prefieras
+      data: { logs: logs, type: 'deduccion' } // Asegúrate de pasar el 'type' adecuado
+    });
+
 
     if (this.detallePlanilla.nombre_planilla === 'EXTRAORDINARIA') {
-      console.log('hola');
-
-        // Utilizar findInconsistentDeduccionesByAfiliado si el estado de aplicación es 'INCOSISTENCIA'
-        this.deduccionesService.findInconsistentDeduccionesByAfiliado(idAfiliado).subscribe({
-            next: (response) => {
-                console.log('Datos de deducciones inconsistentes:', response);
-            },
-            error: (error) => {
-                console.error('Error al obtener las deducciones inconsistentes:', error);
-            }
-        });
+      // Utilizar findInconsistentDeduccionesByAfiliado si el estado de aplicación es 'INCONSISTENCIA'
+      this.deduccionesService.findInconsistentDeduccionesByAfiliado(row.id_afiliado).subscribe({
+        next: (response) => {
+          logs.push({ message: 'Datos de deducciones inconsistentes:', detail: response });
+          openDialog(); // Abre el Mat Dialog una vez que se recibe la respuesta
+        },
+        error: (error) => {
+          logs.push({ message: 'Error al obtener las deducciones inconsistentes:', detail: error });
+          openDialog(); // Abre el Mat Dialog incluso si hay un error
+        }
+      });
     } else {
-        // Utilizar findByDates en otro caso
-        this.deduccionesService.findByDates(fechaInicio, fechaFin, idAfiliado).subscribe({
-            next: (response) => {
-                console.log('Datos de deducciones:', response);
-            },
-            error: (error) => {
-                console.error('Error al obtener las deducciones:', error);
-            }
-        });
+
+      // Utilizar findByDates en otro caso
+      this.deduccionesService.getDetalleDeduccionesPorRango(row.id_afiliado, row.periodoInicio, row.periodoFinalizacion).subscribe({
+        next: (response) => {
+          logs.push({ message: 'Datos de deducciones:', detail: response });
+          openDialog(); // Abre el Mat Dialog una vez que se recibe la respuesta
+        },
+        error: (error) => {
+          logs.push({ message: 'Error al obtener las deducciones:', detail: error });
+          openDialog(); // Abre el Mat Dialog incluso si hay un error
+        }
+      });
     }
-}
-
-
-  // Método para formatear la fecha de 'DD-MM-YYYY' a 'YYYY-MM-DD'
-  formatDate(dateStr: string): string {
-    const [day, month, year] = dateStr.split('-');
-    return `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
   }
-
 
   manejarAccionDos(row: any) {
-    // Lógica para manejar la acción del segundo botóns
+
+    let logs: any[] = []; // Array para almacenar logs
+    logs.push({ message: 'Información de la fila seleccionada:', detail: row });
+
+    // Función auxiliar para abrir el diálogo una vez que todos los datos están listos
+    const openDialog = () => this.dialog.open(DynamicDialogComponent, {
+      width: '50%', // o el ancho que prefieras
+      data: { logs: logs, type: 'beneficio' } // Asegúrate de pasar el 'type' adecuado
+    });
+
+    if (this.detallePlanilla.nombre_planilla === 'EXTRAORDINARIA') {
+      // Utilizar findInconsistentBeneficiosByAfiliado para beneficios inconsistentes
+      this.beneficiosService.findInconsistentBeneficiosByAfiliado(row.id_afiliado).subscribe({
+        next: (response) => {
+          logs.push({ message: 'Datos de beneficios inconsistentes:', detail: response });
+          openDialog(); // Abre el Mat Dialog una vez que se recibe la respuesta
+        },
+        error: (error) => {
+          logs.push({ message: 'Error al obtener los beneficios inconsistentes:', detail: error });
+          openDialog(); // Abre el Mat Dialog incluso si hay un error
+        }
+      });
+    } else {
+      // Utilizar el servicio de beneficios para obtener el desglose por rango de fechas
+      this.beneficiosService.obtenerDetallesBeneficio(row.id_afiliado, row.periodoInicio, row.periodoFinalizacion).subscribe({
+        next: (response) => {
+          logs.push({ message: 'Datos de beneficios:', detail: response });
+          openDialog(); // Abre el Mat Dialog una vez que se recibe la respuesta
+        },
+        error: (error) => {
+          logs.push({ message: 'Error al obtener los beneficios:', detail: error });
+          openDialog(); // Abre el Mat Dialog incluso si hay un error
+        }
+      });
+    }
   }
+
+
+
+
+
+  openLogDialog(logs: any[]) {
+    this.dialog.open(DynamicDialogComponent, {
+      width: '1000px',
+      data: { logs } // Asegúrate de que esto coincida con la estructura de datos esperada en LogDialogComponent
+    });
+  }
+
 
 }

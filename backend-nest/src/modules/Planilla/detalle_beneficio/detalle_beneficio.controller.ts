@@ -8,6 +8,19 @@ import { CreateDetalleBeneficioDto } from './dto/create-detalle_beneficio.dto';
 export class DetalleBeneficioController {
   constructor(private readonly detallebeneficioService: DetalleBeneficioService) {}
 
+  @Get('/rango-beneficios')
+  async getRangoDetalleBeneficios(
+    @Query('idAfiliado') idAfiliado: string,
+    @Query('fechaInicio') fechaInicio: string,
+    @Query('fechaFin') fechaFin: string
+  ) {
+    if (!idAfiliado || !fechaInicio || !fechaFin) {
+      throw new BadRequestException('El ID del afiliado, la fecha de inicio y la fecha de fin son obligatorios');
+    }
+    return await this.detallebeneficioService.getRangoDetalleBeneficios(idAfiliado, fechaInicio, fechaFin);
+  }
+
+
   @Post()
   create(@Body() createDetalleBeneficioDto: CreateDetalleBeneficioDto) {
     return this.detallebeneficioService.create(createDetalleBeneficioDto);
@@ -17,22 +30,6 @@ export class DetalleBeneficioController {
   async getInconsistencias(@Param('idAfiliado') idAfiliado: string) {
     return this.detallebeneficioService.findInconsistentBeneficiosByAfiliado(idAfiliado);
   }
-
-  @Get('por-rango-fecha')
-async findByDateRange(
-  @Query('fechaInicio') fechaInicioString: string,
-  @Query('fechaFin') fechaFinString: string,
-  @Query('idAfiliado') idAfiliadoString: string
-): Promise<DetalleBeneficio[]> {
-  const fechaInicio = new Date(fechaInicioString);
-  const fechaFin = new Date(fechaFinString);
-
-  if (isNaN(fechaInicio.getTime()) || isNaN(fechaFin.getTime()) || !idAfiliadoString.trim()) {
-    throw new BadRequestException('Los parámetros proporcionados no son válidos.');
-  }
-
-  return this.detallebeneficioService.findByDateRange(fechaInicio, fechaFin, idAfiliadoString);
-}
 
   @Get()
   findAll() {

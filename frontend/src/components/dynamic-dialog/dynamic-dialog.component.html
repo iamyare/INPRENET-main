@@ -1,10 +1,72 @@
-<h1 mat-dialog-title>Detalles del Afiliado</h1>
-<div mat-dialog-content>
-  <p>DNI: {{ data.afilData.dni }}</p>
-  <p>Nombre: {{ data.afilData.primer_nombre
-  }}</p>
-  <!-- Agrega más campos según la estructura de tus datos -->
-</div>
-<div mat-dialog-actions>
-  <button mat-button (click)="dialogRef.close()">Cerrar</button>
-</div>
+<h2 mat-dialog-title>{{ dialogTitle }}</h2>
+<mat-dialog-content class="mat-typography">
+  <div *ngFor="let log of data.logs">
+    <h3>{{ log.message }}</h3>
+    <div *ngIf="isArray(log.detail)">
+      <table *ngIf="log.detail.length > 0" mat-table [dataSource]="log.detail" class="mat-elevation-z8">
+
+        <!-- ID Column -->
+        <ng-container matColumnDef="id_ded_deduccion" *ngIf="displayedColumns.includes('id_ded_deduccion')">
+          <th mat-header-cell *matHeaderCellDef> ID Deducción </th>
+          <td mat-cell *matCellDef="let element"> {{ element.id_ded_deduccion }} </td>
+        </ng-container>
+
+        <ng-container matColumnDef="id_beneficio_planilla" *ngIf="displayedColumns.includes('id_beneficio_planilla')">
+          <th mat-header-cell *matHeaderCellDef> ID Beneficio </th>
+          <td mat-cell *matCellDef="let element"> {{ element.id_beneficio_planilla }} </td>
+        </ng-container>
+
+        <!-- Monto Total Column -->
+        <ng-container matColumnDef="monto_total" *ngIf="displayedColumns.includes('monto_total')">
+          <th mat-header-cell *matHeaderCellDef> Monto Total </th>
+          <td mat-cell *matCellDef="let element"> {{ element.monto_total }} </td>
+        </ng-container>
+
+        <ng-container matColumnDef="monto" *ngIf="displayedColumns.includes('monto')">
+          <th mat-header-cell *matHeaderCellDef> Monto </th>
+          <td mat-cell *matCellDef="let element"> {{ element.monto }} </td>
+        </ng-container>
+
+        <!-- Estado Aplicación Column -->
+        <ng-container matColumnDef="estado_aplicacion" *ngIf="displayedColumns.includes('estado_aplicacion')">
+          <th mat-header-cell *matHeaderCellDef> Estado Aplicación </th>
+          <td mat-cell *matCellDef="let element"> {{ element.estado_aplicacion }} </td>
+        </ng-container>
+
+        <ng-container matColumnDef="estado" *ngIf="displayedColumns.includes('estado')">
+          <th mat-header-cell *matHeaderCellDef> Estado </th>
+          <td mat-cell *matCellDef="let element"> {{ element.estado }} </td>
+        </ng-container>
+
+        <!-- Año Column -->
+        <ng-container matColumnDef="anio" *ngIf="displayedColumns.includes('anio')">
+          <th mat-header-cell *matHeaderCellDef> Año </th>
+          <td mat-cell *matCellDef="let element"> {{ element.anio }} </td>
+        </ng-container>
+
+        <!-- Nombre Beneficio Column -->
+        <ng-container matColumnDef="nombre_beneficio" *ngIf="displayedColumns.includes('nombre_beneficio')">
+          <th mat-header-cell *matHeaderCellDef> Nombre Beneficio </th>
+          <td mat-cell *matCellDef="let element"> {{ element.beneficio.nombre_beneficio }} </td>
+        </ng-container>
+
+        <!-- Periodo Inicio y Finalización Columns -->
+        <ng-container matColumnDef="periodoInicio" *ngIf="displayedColumns.includes('periodoInicio')">
+          <th mat-header-cell *matHeaderCellDef> Periodo Inicio </th>
+          <td mat-cell *matCellDef="let element"> {{ element.periodoInicio }} </td>
+        </ng-container>
+
+        <ng-container matColumnDef="periodoFinalizacion" *ngIf="displayedColumns.includes('periodoFinalizacion')">
+          <th mat-header-cell *matHeaderCellDef> Periodo Finalización </th>
+          <td mat-cell *matCellDef="let element"> {{ element.periodoFinalizacion }} </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+      </table>
+    </div>
+  </div>
+</mat-dialog-content>
+<mat-dialog-actions>
+  <button mat-button [mat-dialog-close]="true">Cerrar</button>
+</mat-dialog-actions>

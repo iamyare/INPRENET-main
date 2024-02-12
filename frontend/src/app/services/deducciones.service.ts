@@ -22,17 +22,17 @@ export class DeduccionesService {
         )
       }
 
-      findByDates(fechaInicio: string, fechaFin: string, idAfiliado: number): Observable<any> {
-        const params = new HttpParams()
+      getDetalleDeduccionesPorRango(idAfiliado: string, fechaInicio: string, fechaFin: string): Observable<any> {
+        // Configurar los parámetros
+        let params = new HttpParams()
+          .set('idAfiliado', idAfiliado)
           .set('fechaInicio', fechaInicio)
-          .set('fechaFin', fechaFin)
-          .set('idAfiliado', idAfiliado.toString());
+          .set('fechaFin', fechaFin);
 
-        return this.http.get(`${environment.API_URL}/api/detalle-deduccion/por-fecha`, { params }).pipe(
+        return this.http.get<any>(`${environment.API_URL}/api/detalle-deduccion/rango-deducciones`, { params }).pipe(
           catchError(this.handleError)
         );
       }
-
 
       findInconsistentDeduccionesByAfiliado(idAfiliado: string): Observable<any> {
         const url = `${environment.API_URL}/api/detalle-deduccion/inconsistencias/${idAfiliado}`;

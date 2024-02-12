@@ -27,40 +27,52 @@ export class DetalleDeduccionService {
     private institucionRepository: Repository<Institucion>,
     @InjectRepository(DetalleAfiliado)
     private DetalleAfiliadoRepository: Repository<DetalleAfiliado>,
-    private readonly afiliadoService: AfiliadoService,
   ){}
 
-  async findBetweenDates(fechaInicio: Date, fechaFin: Date, idAfiliado: number): Promise<DetalleDeduccion[]> {
-    const mesInicio = fechaInicio.getMonth() + 1;
-    const anioInicio = fechaInicio.getFullYear();
-
-    let mesFin = fechaFin.getMonth() + 1;
-    let anioFin = fechaFin.getFullYear();
-
-    // Ajustar el año y el mes para el final del periodo
-    if (mesFin === 12) {
-        mesFin = 1;
-        anioFin += 1;
-    } else {
-        mesFin += 1;
+  async getRangoDetalleDeducciones(idAfiliado: string, fechaInicio: string, fechaFin: string): Promise<any> {
+    const query = `
+      SELECT
+        dd."id_ded_deduccion",
+        dd."monto_total",
+        dd."monto_aplicado",
+        dd."estado_aplicacion",
+        dd."anio",
+        dd."mes",
+        d."nombre_deduccion",
+        afil."id_afiliado",
+        TRIM(
+          afil."primer_nombre" || ' ' || 
+          COALESCE(afil."segundo_nombre", '') || ' ' || 
+          COALESCE(afil."tercer_nombre", '') || ' ' || 
+          afil."primer_apellido" || ' ' || 
+          COALESCE(afil."segundo_apellido", '')
+        ) AS "nombre_completo"
+      FROM
+        "C##TEST"."detalle_deduccion" dd
+      JOIN
+        "C##TEST"."deduccion" d ON dd."id_deduccion" = d."id_deduccion"
+      JOIN
+        "C##TEST"."afiliado" afil ON dd."id_afiliado" = afil."id_afiliado"
+      WHERE
+        dd."id_afiliado" = :idAfiliado
+      AND
+        TO_DATE(CONCAT(dd."anio", LPAD(dd."mes", 2, '0')), 'YYYYMM') BETWEEN TO_DATE(:fechaInicio, 'DD-MM-YYYY') AND TO_DATE(:fechaFin, 'DD-MM-YYYY')
+      AND
+        dd."estado_aplicacion" = 'NO COBRADA'
+    `;
+  
+    try {
+      const parametros :any = {
+        idAfiliado: idAfiliado,
+        fechaInicio: fechaInicio,
+        fechaFin: fechaFin,
+      };
+      return await this.detalleDeduccionRepository.query(query, parametros);
+    } catch (error) {
+      this.logger.error('Error al obtener los detalles de deducción', error.stack);
+      throw new InternalServerErrorException('Error al consultar los detalles de deducción en la base de datos');
     }
-
-    const queryBuilder = this.detalleDeduccionRepository.createQueryBuilder('detalleDeduccion')
-      .where('(detalleDeduccion.anio > :anioInicio OR (detalleDeduccion.anio = :anioInicioEqual AND detalleDeduccion.mes >= :mesInicio))', {
-        anioInicio,
-        anioInicioEqual: anioInicio,
-        mesInicio,
-      })
-      .andWhere('(detalleDeduccion.anio < :anioFin OR (detalleDeduccion.anio = :anioFinEqual AND detalleDeduccion.mes <= :mesFin))', {
-        anioFin,
-        anioFinEqual: anioFin,
-        mesFin,
-      })
-      .andWhere('detalleDeduccion.id_afiliado = :idAfiliado', { idAfiliado })
-      .andWhere('detalleDeduccion.estado_aplicacion != :estadoExcluido', { estadoExcluido: 'INCOSISTENCIA' });
-
-    return queryBuilder.getMany();
-}
+  }
 
 
 async findInconsistentDeduccionesByAfiliado(idAfiliado: string) {

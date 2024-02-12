@@ -22,28 +22,32 @@ export class BeneficiosService {
   constructor(private toastr: ToastrService ,private http: HttpClient, private router: Router) {
   }
 
+  obtenerDetallesBeneficio(idAfiliado: string, fechaInicio: string, fechaFin: string): Observable<any> {
+    // Construir los parámetros de la solicitud HTTP
+    const params = new HttpParams()
+      .set('idAfiliado', idAfiliado)
+      .set('fechaInicio', fechaInicio)
+      .set('fechaFin', fechaFin);
+
+    // Realizar la solicitud GET
+    return this.http.get<any>(`${environment.API_URL}/api/beneficio-planilla/rango-beneficios`, { params }).pipe(
+      tap(() => {
+        this._refresh$.next();
+      }),
+      catchError(error => {
+        this.toastr.error('Hubo un error al obtener los detalles de los beneficios', 'Error');
+        return throwError(() => new Error('Error al obtener los detalles de los beneficios'));
+      })
+    );
+  }
+
   findInconsistentBeneficiosByAfiliado(idAfiliado: string): Observable<any> {
-    const url = `${environment.API_URL}/beneficio-planilla/inconsistencias/${idAfiliado}`;
+    const url = `${environment.API_URL}/api/beneficio-planilla/inconsistencias/${idAfiliado}`;
     return this.http.get<any>(url).pipe(
       tap(data => console.log('Inconsistent Beneficios: ', data)),
       catchError(error => {
         this.toastr.error('Error al obtener los beneficios inconsistentes');
         return throwError(() => new Error('Error al obtener los beneficios inconsistentes'));
-      })
-    );
-  }
-
-  // Método para consumir findByDateRange
-  findByDateRange(fechaInicio: string, fechaFin: string, idAfiliado: string): Observable<any> {
-    const params = new HttpParams()
-      .set('fechaInicio', fechaInicio)
-      .set('fechaFin', fechaFin);
-    const url = `${environment.API_URL}/beneficio-planilla/por-rango-fecha/${idAfiliado}`;
-    return this.http.get<any>(url, { params }).pipe(
-      tap(data => console.log('Beneficios por rango de fechas: ', data)),
-      catchError(error => {
-        this.toastr.error('Error al obtener los beneficios por rango de fechas');
-        return throwError(() => new Error('Error al obtener los beneficios por rango de fechas'));
       })
     );
   }

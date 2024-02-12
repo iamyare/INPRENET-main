@@ -44,7 +44,7 @@ export class AsignacionAfilPlanComponent implements OnInit{
     this.myColumnsDed = [
       {
         header: 'DNI',
-        col: 'dni',
+        col: 'DNI',
         isEditable: false,
         validationRules: [Validators.required, Validators.minLength(5)]
       },
@@ -53,14 +53,19 @@ export class AsignacionAfilPlanComponent implements OnInit{
         col: 'NOMBRE_COMPLETO',
         isEditable: true
       },
+      /* {
+        header: 'Tipo',
+        col: 'tipo_afiliado',
+        isEditable: true
+      }, */
       {
-        header: 'Nombres de Beneficios',
-        col: 'beneficiosNombres',
+        header: 'Total de Beneficios',
+        col: 'Total Beneficio',
         isEditable: true
       },
       {
-        header: 'Nombres de deducciones',
-        col: 'deduccionesNombres',
+        header: 'Total de deducciones',
+        col: 'Total Deducciones',
         isEditable: true,
         validationRules: [Validators.required, Validators.pattern(/^(3[01]|[12][0-9]|0?[1-9])-(1[0-2]|0?[1-9])-\d{4} - (3[01]|[12][0-9]|0?[1-9])-(1[0-2]|0?[1-9])-\d{4}$/)]
       }
@@ -134,14 +139,15 @@ export class AsignacionAfilPlanComponent implements OnInit{
         this.dataPlan = data.map((item: any) => {
           return {
             id_afiliado: item.id_afiliado,
-            dni: item.dni,
+            DNI: item.DNI,
             NOMBRE_COMPLETO: item.NOMBRE_COMPLETO,
+            periodoInicio : periodoInicio,
+            periodoFinalizacion : periodoFinalizacion,
+            "Total Beneficio": item["Total Beneficio"],
+            "Total Deducciones": item["Total Deducciones"],
+            tipo_afiliado: item.tipo_afiliado,
             BENEFICIOSIDS: item.BENEFICIOSIDS,
             beneficiosNombres: item.beneficiosNombres,
-            DEDUCCIONESIDS: item.DEDUCCIONESIDS,
-            deduccionesNombres: item.deduccionesNombres,
-            periodoInicio : periodoInicio,
-            periodoFinalizacion : periodoFinalizacion
           };
         });
       }else if (this.detallePlanilla.nombre_planilla == "ORDINARIA"){
@@ -149,14 +155,17 @@ export class AsignacionAfilPlanComponent implements OnInit{
         this.dataPlan = data.map((item: any) => {
           return {
             id_afiliado: item.id_afiliado,
-            dni: item.dni,
+            DNI: item.DNI,
             NOMBRE_COMPLETO: item.NOMBRE_COMPLETO,
+            "Total Beneficio": item["Total Beneficio"],
+            "Total Deducciones": item["Total Deducciones"],
+            periodoInicio : periodoInicio,
+            periodoFinalizacion : periodoFinalizacion,
+            tipo_afiliado: item.tipo_afiliado,
             BENEFICIOSIDS: item.BENEFICIOSIDS,
             beneficiosNombres: item.beneficiosNombres,
             DEDUCCIONESIDS: item.DEDUCCIONESIDS,
             deduccionesNombres: item.deduccionesNombres,
-            periodoInicio : periodoInicio,
-            periodoFinalizacion : periodoFinalizacion
           };
         });
       }else if (this.detallePlanilla.nombre_planilla == "EXTRAORDINARIA"){
@@ -166,14 +175,17 @@ export class AsignacionAfilPlanComponent implements OnInit{
 
           return {
             id_afiliado: item.id_afiliado,
-            dni: item.dni,
+            DNI: item.DNI,
             NOMBRE_COMPLETO: item.NOMBRE_COMPLETO,
+            "Total Beneficio": item["Total Beneficio"],
+            "Total Deducciones": item["Total Deducciones"],
+            periodoInicio : periodoInicio,
+            periodoFinalizacion : periodoFinalizacion,
+            tipo_afiliado: item.tipo_afiliado,
             BENEFICIOSIDS: item.BENEFICIOSIDS,
             beneficiosNombres: item.beneficiosNombres,
             DEDUCCIONESIDS: item.DEDUCCIONESIDS,
             deduccionesNombres: item.deduccionesNombres,
-            periodoInicio : periodoInicio,
-            periodoFinalizacion : periodoFinalizacion,
           };
         });
 

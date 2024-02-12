@@ -3,7 +3,7 @@
 <form [formGroup]="form" #myForm="ngForm">
 
     <mat-slide-toggle color="primary" formControlName="isChecked" (change)="onChangeToggle()">
-        ¿Desea crear nueva planilla?
+        ¿Desea abrir una nueva planilla?
     </mat-slide-toggle>
 
     <app-progressplanill (newDatBenChange)="setEstadoDatGen($event)" [estadoSubDed]="form.get('isChecked')?.value"

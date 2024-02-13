@@ -1,9 +1,9 @@
 import { Component, OnInit, ViewChild} from '@angular/core';
-import { FieldConfig } from '../../app/views/shared/shared/Interfaces/field-config';
+import { FieldConfig } from '../../app/shared/Interfaces/field-config';
 import { FormBuilder, Validators } from '@angular/forms';
 import { PlanillaService } from 'src/app/services/planilla.service';
 import { AfiliadoService } from 'src/app/services/afiliado.service';
-import { TableColumn } from 'src/app/views/shared/shared/Interfaces/table-column';
+import { TableColumn } from 'src/app/shared/Interfaces/table-column';
 import { ToastrService } from 'ngx-toastr';
 import { DynamicFormComponent } from '@docs-components/dynamic-form/dynamic-form.component';
 

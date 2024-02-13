@@ -4,7 +4,7 @@ import { DynamicFormComponent } from '@docs-components/dynamic-form/dynamic-form
 import { ToastrService, ToastrModule } from 'ngx-toastr';
 import { AfiliadoService } from 'src/app/services/afiliado.service';
 import { BeneficiosService } from 'src/app/services/beneficios.service';
-import { FieldConfig } from 'src/app/views/shared/shared/Interfaces/field-config';
+import { FieldConfig } from 'src/app/shared/Interfaces/field-config';
 @Component({
   selector: 'app-nuevo-beneficio-afil',
   templateUrl: './nuevo-beneficio-afil.component.html',
@@ -125,6 +125,7 @@ export class NuevoBeneficioAfilComponent implements OnInit{
       await this.svcAfilServ.getAfilByParam(this.form.value.dni).subscribe(
         (result) => {
           this.Afiliado = result
+          console.log(this.Afiliado);
           this.Afiliado.nameAfil = this.unirNombres(result.primer_nombre,result.segundo_nombre, result.tercer_nombre, result.primer_apellido,result.segundo_apellido);
 
           //this.toastr.success('TipoPlanilla editada con éxito');
@@ -162,6 +163,8 @@ export class NuevoBeneficioAfilComponent implements OnInit{
         await this.getColumns();
         const data = this.svcAfilServ.obtenerBenDeAfil(this.form.value.dni).toPromise();
         this.filas = data
+
+
         return this.filas;
       } catch (error) {
         console.error("Error al obtener datos de beneficios", error);

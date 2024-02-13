@@ -6,7 +6,7 @@ import { DeduccionesService } from 'src/app/services/deducciones.service';
 import { InstitucionesService } from '../../../../services/instituciones.service';
 import { Subject, takeUntil } from 'rxjs';
 import * as XLSX from 'xlsx';
-import { FieldConfig } from '../../../shared/shared/Interfaces/field-config';
+import { FieldConfig } from '../../../../shared/Interfaces/field-config';
 import { DynamicFormComponent } from '@docs-components/dynamic-form/dynamic-form.component';
 
 @Component({

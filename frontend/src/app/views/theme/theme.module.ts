@@ -7,7 +7,7 @@ import { IconModule } from '@coreui/icons-angular';
 // Theme Routing
 import { ThemeRoutingModule } from './theme-routing.module';
 import { AfilBancoComponent } from '../pages/Generales/afil-banco/afil-banco.component';
-import { SharedModule } from '../shared/shared/shared.module';
+import { SharedModule } from '../../shared/shared.module';
 import { CentroTrabajoComponent } from '../pages/Generales/centro-trabajo/centro-trabajo.component';
 
 import { FormsModule } from '@angular/forms';

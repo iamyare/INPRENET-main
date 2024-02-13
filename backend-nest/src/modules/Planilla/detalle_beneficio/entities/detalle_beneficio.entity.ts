@@ -19,7 +19,7 @@ export class DetalleBeneficio {
     @Column({nullable:true})
     modalidad_pago: string;
 
-    @Column({nullable:true})
+    @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
     monto: number;
     
     @Column({nullable:true})

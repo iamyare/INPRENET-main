@@ -5,9 +5,10 @@ import { MatDialog } from '@angular/material/dialog';
 import { DynamicDialogComponent } from '@docs-components/dynamic-dialog/dynamic-dialog.component';
 import { AfiliadoService } from 'src/app/services/afiliado.service';
 import { PlanillaService } from 'src/app/services/planilla.service';
-import { FieldConfig } from 'src/app/views/shared/shared/Interfaces/field-config';
-import { TableColumn } from 'src/app/views/shared/shared/Interfaces/table-column';
-import * as moment from 'moment';
+import { FieldConfig } from 'src/app/shared/Interfaces/field-config';
+import { TableColumn } from 'src/app/shared/Interfaces/table-column';
+import { convertirFecha } from 'src/app/shared/functions/formatoFecha';
+
 import { DeduccionesService } from 'src/app/services/deducciones.service';
 import { BeneficiosService } from '../../app/services/beneficios.service';
 
@@ -17,6 +18,8 @@ import { BeneficiosService } from '../../app/services/beneficios.service';
   styleUrl: './asignacion-afil-plan.component.scss'
 })
 export class AsignacionAfilPlanComponent implements OnInit{
+  convertirFecha = convertirFecha;
+
   dataPlan : any;
   filas: any;
   tiposPlanilla: any[] = [];
@@ -53,22 +56,22 @@ export class AsignacionAfilPlanComponent implements OnInit{
         col: 'NOMBRE_COMPLETO',
         isEditable: true
       },
-      /* {
-        header: 'Tipo',
-        col: 'tipo_afiliado',
-        isEditable: true
-      }, */
       {
         header: 'Total de Ingresos',
         col: 'Total Beneficio',
         isEditable: true
       },
       {
-        header: 'Total de deducciones',
+        header: 'Total de deducciones aplicadas',
         col: 'Total Deducciones',
         isEditable: true,
         validationRules: [Validators.required, Validators.pattern(/^(3[01]|[12][0-9]|0?[1-9])-(1[0-2]|0?[1-9])-\d{4} - (3[01]|[12][0-9]|0?[1-9])-(1[0-2]|0?[1-9])-\d{4}$/)]
-      }
+      },
+      {
+        header: 'Total',
+        col: 'Total',
+        isEditable: true
+      },
     ];
 
     this.myFormFields = [
@@ -123,13 +126,7 @@ export class AsignacionAfilPlanComponent implements OnInit{
     }
   };
 
- convertirFecha(fechaStr: string): string {
-    // Parsear la fecha utilizando moment.js
-    const fecha = moment.utc(fechaStr);
-    // Formatear la fecha en el formato deseado
-    const fechaFormateada = fecha.format('DD-MM-YYYY h:mm:ss A');
-    return fechaFormateada;
-}
+
 
   getFilas = async (periodoInicio: string, periodoFinalizacion: string) => {
     try {
@@ -145,6 +142,7 @@ export class AsignacionAfilPlanComponent implements OnInit{
             periodoFinalizacion : periodoFinalizacion,
             "Total Beneficio": item["Total Beneficio"],
             "Total Deducciones": item["Total Deducciones"],
+            "Total": item["Total Beneficio"] - item["Total Deducciones"],
             tipo_afiliado: item.tipo_afiliado,
             BENEFICIOSIDS: item.BENEFICIOSIDS,
             beneficiosNombres: item.beneficiosNombres,
@@ -159,6 +157,7 @@ export class AsignacionAfilPlanComponent implements OnInit{
             NOMBRE_COMPLETO: item.NOMBRE_COMPLETO,
             "Total Beneficio": item["Total Beneficio"],
             "Total Deducciones": item["Total Deducciones"],
+            "Total": item["Total Beneficio"] - item["Total Deducciones"],
             periodoInicio : periodoInicio,
             periodoFinalizacion : periodoFinalizacion,
             tipo_afiliado: item.tipo_afiliado,
@@ -177,6 +176,7 @@ export class AsignacionAfilPlanComponent implements OnInit{
             NOMBRE_COMPLETO: item.NOMBRE_COMPLETO,
             "Total Beneficio": item["Total Beneficio"],
             "Total Deducciones": item["Total Deducciones"],
+            "Total": item["Total Beneficio"] - item["Total Deducciones"],
             periodoInicio : periodoInicio,
             periodoFinalizacion : periodoFinalizacion,
             tipo_afiliado: item.tipo_afiliado,

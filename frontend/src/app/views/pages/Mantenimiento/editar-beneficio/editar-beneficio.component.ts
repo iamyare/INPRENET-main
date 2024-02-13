@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { Validators } from '@angular/forms';
 import { ToastrService } from 'ngx-toastr';
 import { BeneficiosService } from 'src/app/services/beneficios.service';
-import { TableColumn } from 'src/app/views/shared/shared/Interfaces/table-column';
+import { TableColumn } from 'src/app/shared/Interfaces/table-column';
 
 @Component({
   selector: 'app-editar-beneficio',

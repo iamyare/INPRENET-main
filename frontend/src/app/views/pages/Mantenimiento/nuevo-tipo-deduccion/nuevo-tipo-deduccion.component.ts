@@ -2,7 +2,7 @@ import { Component, ViewChild } from '@angular/core';
 import { ValidatorFn, Validators } from '@angular/forms';
 import { DeduccionesService } from 'src/app/services/deducciones.service';
 import { ToastrService } from 'ngx-toastr';
-import { FieldConfig } from 'src/app/views/shared/shared/Interfaces/field-config';
+import { FieldConfig } from 'src/app/shared/Interfaces/field-config';
 import { DynamicFormComponent } from '@docs-components/dynamic-form/dynamic-form.component';
 @Component({
   selector: 'app-nuevo-tipo-deduccion',

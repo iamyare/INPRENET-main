@@ -220,13 +220,14 @@ FULL OUTER JOIN
       SELECT 
     COALESCE(deducciones."id_afiliado", beneficios."id_afiliado") AS "id_afiliado",
     COALESCE(deducciones."dni", beneficios."dni") AS "dni",
-    COALESCE(deducciones."NOMBRE_COMPLETO", beneficios."NOMBRE_COMPLETO") AS "NOMBRE_COMPLETO",
+    COALESCE(deducciones."NOMBRE_COMPLETO", beneficios."NOMBRE_COMPLETO") AS NOMBRE_COMPLETO,
     beneficios."Total Beneficio",
     deducciones."Total Deducciones"
 FROM
     (SELECT
         afil."id_afiliado",
         afil."dni",
+        detBs."estado",
         TRIM(
             afil."primer_nombre" || ' ' || 
             COALESCE(afil."segundo_nombre", '') || ' ' || 
@@ -257,6 +258,7 @@ FROM
     GROUP BY
         afil."id_afiliado",
         afil."dni",
+        detBs."estado",
         TRIM(
             afil."primer_nombre" || ' ' || 
             COALESCE(afil."segundo_nombre", '') || ' ' || 
@@ -264,12 +266,12 @@ FROM
             afil."primer_apellido" || ' ' || 
             COALESCE(afil."segundo_apellido", '')
         )
-    )  beneficios
-        
+    ) beneficios
 FULL OUTER JOIN
     (SELECT
         afil."id_afiliado",
         afil."dni",
+        detDs."estado_aplicacion",
         TRIM(
             afil."primer_nombre" || ' ' || 
             COALESCE(afil."segundo_nombre", '') || ' ' || 
@@ -295,18 +297,33 @@ FULL OUTER JOIN
                 WHERE detD."estado_aplicacion" NOT IN ('NO COBRADA', 'INCONSISTENCIA')
             )
         ) AND
-        detDs."estado_aplicacion" != 'INCONSISTENCIA'
+        detDs."estado_aplicacion" != 'INCONSISTENCIA' AND
+        NOT EXISTS (
+            SELECT 1
+            FROM "C##TEST"."detalle_deduccion" detD
+            WHERE detD."id_afiliado" = afil."id_afiliado" AND detD."estado_aplicacion" = 'COBRADA'
+        ) AND
+        NOT EXISTS (
+            SELECT 1
+            FROM "C##TEST"."detalle_beneficio" detB
+            WHERE detB."id_afiliado" = afil."id_afiliado" AND detB."estado" = 'PAGADA'
+        )
     GROUP BY
         afil."id_afiliado",
         afil."dni",
+        detDs."estado_aplicacion",
         TRIM(
             afil."primer_nombre" || ' ' || 
             COALESCE(afil."segundo_nombre", '') || ' ' || 
             COALESCE(afil."tercer_nombre", '') || ' ' || 
             afil."primer_apellido" || ' ' || 
             COALESCE(afil."segundo_apellido", '')
+
         )
     )  deducciones ON deducciones."id_afiliado" = beneficios."id_afiliado"
+    WHERE
+        deducciones."estado_aplicacion" = 'NO COBRADA' AND beneficios."estado" = 'NO PAGADA'
+    
       `;
 
       try {

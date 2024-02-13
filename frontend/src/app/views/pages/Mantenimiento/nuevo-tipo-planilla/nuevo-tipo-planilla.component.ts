@@ -3,7 +3,7 @@ import { ValidatorFn, Validators } from '@angular/forms';
 import { DynamicFormComponent } from '@docs-components/dynamic-form/dynamic-form.component';
 import { ToastrService } from 'ngx-toastr';
 import { PlanillaService } from 'src/app/services/planilla.service';
-import { FieldConfig } from 'src/app/views/shared/shared/Interfaces/field-config';
+import { FieldConfig } from 'src/app/shared/Interfaces/field-config';
 
 @Component({
   selector: 'app-nuevo-tipo-planilla',

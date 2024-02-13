@@ -23,10 +23,10 @@ export class DetalleDeduccion {
     @JoinColumn({ name: 'id_institucion' })
     institucion: Institucion; // Correcto
 
-    @Column('number', {nullable: true})
+    @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
     monto_total: number;
 
-    @Column('number', {nullable: true})
+    @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
     monto_aplicado: number; 
 
     @Column('varchar2', { length: 20, nullable: true, default: 'NO COBRADA' })

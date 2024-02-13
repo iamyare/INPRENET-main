@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { ValidatorFn, Validators } from '@angular/forms';import { ToastrService } from 'ngx-toastr';
 import { DeduccionesService } from '../../../../services/deducciones.service';
-import { TableColumn } from 'src/app/views/shared/shared/Interfaces/table-column';
+import { TableColumn } from 'src/app/shared/Interfaces/table-column';
 
 @Component({
   selector: 'app-editar-tipo-deduccion',

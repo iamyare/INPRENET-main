@@ -92,7 +92,8 @@ async obtenerDetallesBeneficioComplePorAfiliado(idAfiliado: string): Promise<any
       JOIN
         "afiliado" afil ON detB."id_afiliado" = afil."id_afiliado"
       WHERE
-        afil."id_afiliado" = $1 AND
+        afil."id_afiliado" = :1 AND
+        detB."estado" != 'INCONSISTENCIA' AND
         detB."id_afiliado" NOT IN (
           SELECT
             detD."id_afiliado"
@@ -110,10 +111,10 @@ async obtenerDetallesBeneficioComplePorAfiliado(idAfiliado: string): Promise<any
             detB2."estado" = 'PAGADA'
         )
       ORDER BY
-        ben."id_beneficio";
+        ben."id_beneficio"
     `;
 
-    return await this.benAfilRepository.query(query, [idAfiliado]);
+    return await this.benAfilRepository.query(query, [idAfiliado]); // Usando un array para los parámetros
   } catch (error) {
     this.logger.error('Error al obtener detalles de beneficio por afiliado', error.stack);
     throw new InternalServerErrorException('Error al obtener detalles de beneficio por afiliado');
@@ -185,6 +186,8 @@ async obtenerDetallesBeneficioComplePorAfiliado(idAfiliado: string): Promise<any
     if (isUUID(term)) {
       benAfil = await this.benAfilRepository.findOneBy({ id_beneficio_planilla: term });
     } else {
+      console.log('entro aqui');
+      
       const queryBuilder = this.benAfilRepository.createQueryBuilder('afiliado');
       benAfil = await queryBuilder
         .where('"id_beneficio_planilla" = :term', { term })

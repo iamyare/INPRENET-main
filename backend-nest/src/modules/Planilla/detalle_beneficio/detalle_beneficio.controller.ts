@@ -8,6 +8,17 @@ import { CreateDetalleBeneficioDto } from './dto/create-detalle_beneficio.dto';
 export class DetalleBeneficioController {
   constructor(private readonly detallebeneficioService: DetalleBeneficioService) {}
 
+  
+  @Get('/detallesBene-complementaria-afiliado')
+  async obtenerDetallesPorAfiliado(@Query('idAfiliado') idAfiliado: string) {
+    console.log('hola');
+    
+    if (!idAfiliado) {
+      throw new BadRequestException('Se requiere el parámetro idAfiliado');
+    }
+    return this.detallebeneficioService.obtenerDetallesBeneficioComplePorAfiliado(idAfiliado);
+  }
+  
   @Get('/rango-beneficios')
   async getRangoDetalleBeneficios(
     @Query('idAfiliado') idAfiliado: string,
@@ -19,12 +30,6 @@ export class DetalleBeneficioController {
     }
     return await this.detallebeneficioService.getRangoDetalleBeneficios(idAfiliado, fechaInicio, fechaFin);
   }
-
-  @Get('/detalles-complementaria-afiliado/:idAfiliado')
-  async obtenerDetallesPorAfiliado(@Param('idAfiliado') idAfiliado: string) {
-    return this.detallebeneficioService.obtenerDetallesBeneficioComplePorAfiliado(idAfiliado);
-  }
-
 
   @Post()
   create(@Body() createDetalleBeneficioDto: CreateDetalleBeneficioDto) {
@@ -41,11 +46,6 @@ export class DetalleBeneficioController {
     return this.detallebeneficioService.findAll();
   }
 
-  @Get(':term')
-  findOne(@Param('term') term: string) {
-    return this.detallebeneficioService.findOne(term);
-  }
-
   @Patch(':id')
   update(@Param('id') id: string, @Body() updateDetalleBeneficioDto: UpdateDetalleBeneficioDto) {
     return this.detallebeneficioService.update(+id, updateDetalleBeneficioDto);
@@ -54,5 +54,11 @@ export class DetalleBeneficioController {
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.detallebeneficioService.remove(+id);
+  }
+
+
+  @Get(':term')
+  findOne(@Param('term') term: string) {
+    return this.detallebeneficioService.findOne(term);
   }
 }

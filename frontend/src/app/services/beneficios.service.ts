@@ -1,17 +1,10 @@
-import { HttpClient, HttpParams } from '@angular/common/http';
+import { HttpClient, HttpErrorResponse, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Router } from '@angular/router';
 import { Observable, Subject, catchError, map, tap, throwError } from 'rxjs';
 import { environment } from 'src/environments/environment';
 
 import { ToastrService } from 'ngx-toastr';
-
-interface TipoBeneficio {
-  nombre_beneficio: string;
-  descripcion_beneficio: string;
-  numero_rentas_max:number;
-  estado: string;
-}
 
 @Injectable({
   providedIn: 'root'
@@ -41,10 +34,22 @@ export class BeneficiosService {
     );
   }
 
+  obtenerDetallesBeneficioComplePorAfiliado(idAfiliado: string): Observable<any> {
+    const params = new HttpParams().set('idAfiliado', idAfiliado);
+    return this.http.get<any>(`${environment.API_URL}/api/beneficio-planilla/detallesBene-complementaria-afiliado`, { params }).pipe(
+      tap(() => {
+        this._refresh$.next();
+      }),
+      catchError(this.handleError)
+    );
+  }
+
   findInconsistentBeneficiosByAfiliado(idAfiliado: string): Observable<any> {
     const url = `${environment.API_URL}/api/beneficio-planilla/inconsistencias/${idAfiliado}`;
     return this.http.get<any>(url).pipe(
-      tap(data => console.log('Inconsistent Beneficios: ', data)),
+      tap(() => {
+        this._refresh$.next();
+      }),
       catchError(error => {
         this.toastr.error('Error al obtener los beneficios inconsistentes');
         return throwError(() => new Error('Error al obtener los beneficios inconsistentes'));
@@ -105,4 +110,18 @@ export class BeneficiosService {
     return this.http.patch(`${environment.API_URL}/api/beneficio/${id}`, beneficioData);
   }
 
+  private handleError(error: HttpErrorResponse) {
+    // Maneja el error como prefieras, por ejemplo, mostrando una notificación
+    this.toastr.error(error.message, 'Error');
+    return throwError(() => new Error(error.message));
+  }
+
+}
+
+
+interface TipoBeneficio {
+  nombre_beneficio: string;
+  descripcion_beneficio: string;
+  numero_rentas_max:number;
+  estado: string;
 }

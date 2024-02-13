@@ -171,8 +171,6 @@ export class AsignacionAfilPlanComponent implements OnInit{
       }else if (this.detallePlanilla.nombre_planilla == "EXTRAORDINARIA"){
         const data = await this.planillaService.getDatosExtraordinaria(periodoInicio, periodoFinalizacion).toPromise();
         this.dataPlan = data.map((item: any) => {
-          console.log(item);
-
           return {
             id_afiliado: item.id_afiliado,
             dni: item.dni,
@@ -204,20 +202,14 @@ export class AsignacionAfilPlanComponent implements OnInit{
 
   editar = (row: any) => {}
 
-  manejarAccionUno(row: any) {
-    console.log(row);
-
+  manejarAccionDos(row: any) {
     let logs: any[] = []; // Array para almacenar logs
-
     logs.push({ message: 'Información de la fila seleccionada:', detail: row });
-
     // Función auxiliar para abrir el diálogo una vez que todos los datos están listos
     const openDialog = () => this.dialog.open(DynamicDialogComponent, {
       width: '50%', // o el ancho que prefieras
       data: { logs: logs, type: 'deduccion' } // Asegúrate de pasar el 'type' adecuado
     });
-
-
     if (this.detallePlanilla.nombre_planilla === 'EXTRAORDINARIA') {
       // Utilizar findInconsistentDeduccionesByAfiliado si el estado de aplicación es 'INCONSISTENCIA'
       this.deduccionesService.findInconsistentDeduccionesByAfiliado(row.id_afiliado).subscribe({
@@ -230,8 +222,7 @@ export class AsignacionAfilPlanComponent implements OnInit{
           openDialog(); // Abre el Mat Dialog incluso si hay un error
         }
       });
-    } else {
-
+    } else if(this.detallePlanilla.nombre_planilla === 'ORDINARIA') {
       // Utilizar findByDates en otro caso
       this.deduccionesService.getDetalleDeduccionesPorRango(row.id_afiliado, row.periodoInicio, row.periodoFinalizacion).subscribe({
         next: (response) => {
@@ -243,10 +234,21 @@ export class AsignacionAfilPlanComponent implements OnInit{
           openDialog(); // Abre el Mat Dialog incluso si hay un error
         }
       });
+    } else if(this.detallePlanilla.nombre_planilla === 'COMPLEMENTARIA') {
+      this.deduccionesService.obtenerDetallesDeduccionComplePorAfiliado(row.id_afiliado).subscribe({
+        next: (response) => {
+          logs.push({ message: 'Datos de deducciones complementarias:', detail: response });
+          openDialog(); // Abre el Mat Dialog una vez que se recibe la respuesta
+        },
+        error: (error) => {
+          logs.push({ message: 'Error al obtener las deducciones complementarias:', detail: error });
+          openDialog(); // Abre el Mat Dialog incluso si hay un error
+        }
+      });
     }
   }
 
-  manejarAccionDos(row: any) {
+  manejarAccionUno(row: any) {
 
     let logs: any[] = []; // Array para almacenar logs
     logs.push({ message: 'Información de la fila seleccionada:', detail: row });
@@ -269,7 +271,7 @@ export class AsignacionAfilPlanComponent implements OnInit{
           openDialog(); // Abre el Mat Dialog incluso si hay un error
         }
       });
-    } else {
+    } else if(this.detallePlanilla.nombre_planilla === 'ORDINARIA') {
       // Utilizar el servicio de beneficios para obtener el desglose por rango de fechas
       this.beneficiosService.obtenerDetallesBeneficio(row.id_afiliado, row.periodoInicio, row.periodoFinalizacion).subscribe({
         next: (response) => {
@@ -281,12 +283,19 @@ export class AsignacionAfilPlanComponent implements OnInit{
           openDialog(); // Abre el Mat Dialog incluso si hay un error
         }
       });
+    } else if(this.detallePlanilla.nombre_planilla === 'COMPLEMENTARIA') {
+      this.beneficiosService.obtenerDetallesBeneficioComplePorAfiliado(row.id_afiliado).subscribe({
+        next: (response) => {
+          logs.push({ message: 'Datos de deducciones complementarias:', detail: response });
+          openDialog(); // Abre el Mat Dialog una vez que se recibe la respuesta
+        },
+        error: (error) => {
+          logs.push({ message: 'Error al obtener las deducciones complementarias:', detail: error });
+          openDialog(); // Abre el Mat Dialog incluso si hay un error
+        }
+      });
     }
   }
-
-
-
-
 
   openLogDialog(logs: any[]) {
     this.dialog.open(DynamicDialogComponent, {

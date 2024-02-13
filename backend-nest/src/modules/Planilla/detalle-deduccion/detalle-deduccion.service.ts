@@ -83,7 +83,9 @@ async findInconsistentDeduccionesByAfiliado(idAfiliado: string) {
       .andWhere('detDs.id_afiliado = :idAfiliado', { idAfiliado }) // Asegúrate de que afiliadoId es el nombre correcto de la columna FK en tu entidad DetalleDeduccion
       .select([
         'ded.nombre_deduccion',
+        'detDs.id_ded_deduccion',
         'detDs.monto_total',
+        'detDs.monto_aplicado',
         'detDs.estado_aplicacion',
         'detDs.anio',
         'detDs.mes'
@@ -95,6 +97,61 @@ async findInconsistentDeduccionesByAfiliado(idAfiliado: string) {
     throw new InternalServerErrorException('Error al buscar deducciones inconsistentes por afiliado');
   }
 }
+
+async obtenerDetallesDeduccionPorAfiliado(idAfiliado: string): Promise<any[]> {
+  try {
+    const query = `
+      SELECT
+        detD."id_ded_deduccion",
+        detD."monto_total",
+        detD."monto_aplicado",
+        detD."estado_aplicacion",
+        detD."anio",
+        detD."mes",
+        afil."id_afiliado",
+        afil."dni",
+        TRIM(
+            afil."primer_nombre" || ' ' || 
+            COALESCE(afil."segundo_nombre", '') || ' ' || 
+            COALESCE(afil."tercer_nombre", '') || ' ' || 
+            afil."primer_apellido" || ' ' || 
+            COALESCE(afil."segundo_apellido", '')
+        ) AS "nombre_completo",
+        ded."nombre_deduccion",
+        ded."descripcion_deduccion",
+        ded."tipo_deduccion",
+        ded."codigo_deduccion"
+      FROM
+        "detalle_deduccion" detD
+      JOIN
+        "deduccion" ded ON detD."id_deduccion" = ded."id_deduccion"
+      JOIN
+        "afiliado" afil ON detD."id_afiliado" = afil."id_afiliado"
+      WHERE
+        detD."id_afiliado" = :1 AND
+        detD."estado_aplicacion" != 'INCONSISTENCIA' AND
+        detD."id_afiliado" NOT IN (
+            SELECT detD2."id_afiliado"
+            FROM "detalle_deduccion" detD2
+            WHERE detD2."estado_aplicacion" = 'COBRADA'
+        )
+        AND detD."id_afiliado" NOT IN (
+            SELECT detB."id_afiliado"
+            FROM "detalle_beneficio" detB
+            WHERE detB."estado" = 'PAGADA'
+        )
+      ORDER BY
+        afil."id_afiliado",
+        ded."id_deduccion"
+    `;
+
+    return await this.detalleDeduccionRepository.query(query, [idAfiliado]);
+  } catch (error) {
+    this.logger.error('Error al obtener detalles de deduccion por afiliado', error.stack);
+    throw new InternalServerErrorException('Error al obtener detalles de deduccion por afiliado');
+  }
+}
+
 
   
 

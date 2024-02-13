@@ -12,7 +12,6 @@ export class DynamicDialogComponent implements OnInit{
   dialogTitle: string = ''; // Título del diálogo
 
   constructor(@Inject(MAT_DIALOG_DATA) public data: { logs: any[], type: string }) {
-    console.log(data);
   }
 
   ngOnInit() {

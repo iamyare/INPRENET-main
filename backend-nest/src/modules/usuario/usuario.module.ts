@@ -22,7 +22,7 @@ import { TipoIdentificacion } from '../tipo_identificacion/entities/tipo_identif
       imports: [],
       inject: [],
       useFactory : () => {
-        console.log('JWT SECRET', process.env.JWT_SECRET);
+        //console.log('JWT SECRET', process.env.JWT_SECRET);
         
         return {
           secret : process.env.JWT_SECRET,

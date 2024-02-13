@@ -26,6 +26,14 @@ export class DetalleDeduccionController {
     return this.detalleDeduccionService.findInconsistentDeduccionesByAfiliado(idAfiliado);
   }
 
+  @Get('/detallesDeducc-complementaria-afiliado')
+  async obtenerDetallesPorAfiliado(@Query('idAfiliado') idAfiliado: string) {
+    if (!idAfiliado) {
+      throw new BadRequestException('Se requiere el parámetro idAfiliado');
+    }
+    return this.detalleDeduccionService.obtenerDetallesDeduccionPorAfiliado(idAfiliado);
+  }
+
   @Post()
   @HttpCode(HttpStatus.CREATED)
   create(@Body() createDetalleDeduccionDto: CreateDetalleDeduccionDto) {

@@ -22,6 +22,13 @@ export class DeduccionesService {
         )
       }
 
+      obtenerDetallesDeduccionComplePorAfiliado(idAfiliado: string): Observable<any> {
+        const params = new HttpParams().set('idAfiliado', idAfiliado);
+        return this.http.get<any>(`${environment.API_URL}/api/detalle-deduccion/detallesDeducc-complementaria-afiliado`, { params }).pipe(
+          catchError(this.handleError)
+        );
+      }
+
       getDetalleDeduccionesPorRango(idAfiliado: string, fechaInicio: string, fechaFin: string): Observable<any> {
         // Configurar los parámetros
         let params = new HttpParams()
@@ -38,7 +45,6 @@ export class DeduccionesService {
         const url = `${environment.API_URL}/api/detalle-deduccion/inconsistencias/${idAfiliado}`;
 
         return this.http.get<any>(url).pipe(
-          tap(data => console.log('Inconsistent Deducciones: ', data)),
           catchError(this.handleError)
         );
       }

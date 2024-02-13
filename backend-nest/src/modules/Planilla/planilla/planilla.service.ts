@@ -124,6 +124,9 @@ export class PlanillaService {
         HAVING COUNT(DISTINCT ded."nombre_deduccion") > 0)  deducciones ON deducciones."id_afiliado" = beneficios."id_afiliado"
       `;
 
+      console.log(query);
+      
+
       try {
         return await this.entityManager.query(query);
       } catch (error) {

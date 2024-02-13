@@ -20,6 +20,11 @@ export class DetalleBeneficioController {
     return await this.detallebeneficioService.getRangoDetalleBeneficios(idAfiliado, fechaInicio, fechaFin);
   }
 
+  @Get('/detalles-complementaria-afiliado/:idAfiliado')
+  async obtenerDetallesPorAfiliado(@Param('idAfiliado') idAfiliado: string) {
+    return this.detallebeneficioService.obtenerDetallesBeneficioComplePorAfiliado(idAfiliado);
+  }
+
 
   @Post()
   create(@Body() createDetalleBeneficioDto: CreateDetalleBeneficioDto) {

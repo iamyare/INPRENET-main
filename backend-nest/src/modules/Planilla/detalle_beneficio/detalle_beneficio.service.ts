@@ -20,9 +20,6 @@ export class DetalleBeneficioService {
   private readonly benAfilRepository : Repository<DetalleBeneficio>
 
   async getRangoDetalleBeneficios(idAfiliado: string, fechaInicio: string, fechaFin: string): Promise<any> {
-    console.log(fechaInicio);
-    console.log(fechaFin);
-    
     const query = `
       SELECT
         db."id_beneficio_planilla",
@@ -64,6 +61,63 @@ export class DetalleBeneficioService {
       this.logger.error('Error al obtener los detalles de beneficio', error.stack);
       throw new InternalServerErrorException('Error al consultar los detalles de beneficio en la base de datos');
     }
+}
+
+async obtenerDetallesBeneficioComplePorAfiliado(idAfiliado: string): Promise<any[]> {
+  try {
+    const query = `
+      SELECT
+        detB."id_beneficio_planilla",
+        detB."monto",
+        detB."estado",
+        detB."modalidad_pago",
+        detB."num_rentas_aplicadas",
+        detB."periodoInicio",
+        detB."periodoFinalizacion",
+        afil."id_afiliado",
+        afil."dni",
+        TRIM(
+            afil."primer_nombre" || ' ' || 
+            COALESCE(afil."segundo_nombre", '') || ' ' || 
+            COALESCE(afil."tercer_nombre", '') || ' ' || 
+            afil."primer_apellido" || ' ' || 
+            COALESCE(afil."segundo_apellido", '')
+        ) AS "nombre_completo",
+        ben."nombre_beneficio",
+        ben."descripcion_beneficio"
+      FROM
+        "detalle_beneficio" detB
+      JOIN
+        "beneficio" ben ON detB."id_beneficio" = ben."id_beneficio"
+      JOIN
+        "afiliado" afil ON detB."id_afiliado" = afil."id_afiliado"
+      WHERE
+        afil."id_afiliado" = $1 AND
+        detB."id_afiliado" NOT IN (
+          SELECT
+            detD."id_afiliado"
+          FROM
+            "detalle_deduccion" detD
+          WHERE
+            detD."estado_aplicacion" = 'COBRADA'
+        )
+        AND detB."id_afiliado" NOT IN (
+          SELECT
+            detB2."id_afiliado"
+          FROM
+            "detalle_beneficio" detB2
+          WHERE
+            detB2."estado" = 'PAGADA'
+        )
+      ORDER BY
+        ben."id_beneficio";
+    `;
+
+    return await this.benAfilRepository.query(query, [idAfiliado]);
+  } catch (error) {
+    this.logger.error('Error al obtener detalles de beneficio por afiliado', error.stack);
+    throw new InternalServerErrorException('Error al obtener detalles de beneficio por afiliado');
+  }
 }
 
 

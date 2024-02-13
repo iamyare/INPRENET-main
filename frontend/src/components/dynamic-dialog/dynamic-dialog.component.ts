@@ -18,7 +18,8 @@ export class DynamicDialogComponent implements OnInit{
   ngOnInit() {
     // Configurar las columnas y el título basado en el tipo de datos
     if (this.data.type === 'deduccion') {
-      this.displayedColumns = ['id_ded_deduccion', 'monto_total', 'estado_aplicacion', 'anio'];
+      // Añadir 'monto_aplicado' a la lista de columnas mostradas para deducciones
+      this.displayedColumns = ['id_ded_deduccion', 'estado_aplicacion', 'anio', 'monto_aplicado'];
       this.dialogTitle = 'Detalle de Deducciones';
     } else if (this.data.type === 'beneficio') {
       this.displayedColumns = ['id_beneficio_planilla', 'nombre_beneficio', 'monto', 'estado', 'periodoInicio', 'periodoFinalizacion'];

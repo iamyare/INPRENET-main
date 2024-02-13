@@ -17,9 +17,9 @@
         </ng-container>
 
         <!-- Monto Total Column -->
-        <ng-container matColumnDef="monto_total" *ngIf="displayedColumns.includes('monto_total')">
-          <th mat-header-cell *matHeaderCellDef> Monto Total </th>
-          <td mat-cell *matCellDef="let element"> {{ element.monto_total }} </td>
+        <ng-container matColumnDef="monto_aplicado" *ngIf="displayedColumns.includes('monto_aplicado')">
+          <th mat-header-cell *matHeaderCellDef> Monto Aplicado </th>
+          <td mat-cell *matCellDef="let element"> {{ element.monto_aplicado }} </td>
         </ng-container>
 
         <ng-container matColumnDef="monto" *ngIf="displayedColumns.includes('monto')">
@@ -47,7 +47,7 @@
         <!-- Nombre Beneficio Column -->
         <ng-container matColumnDef="nombre_beneficio" *ngIf="displayedColumns.includes('nombre_beneficio')">
           <th mat-header-cell *matHeaderCellDef> Nombre Beneficio </th>
-          <td mat-cell *matCellDef="let element"> {{ element.beneficio.nombre_beneficio }} </td>
+          <td mat-cell *matCellDef="let element"> {{ element.nombre_beneficio }} </td>
         </ng-container>
 
         <!-- Periodo Inicio y Finalización Columns -->

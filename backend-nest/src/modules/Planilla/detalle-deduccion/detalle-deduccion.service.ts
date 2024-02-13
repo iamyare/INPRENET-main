@@ -10,6 +10,7 @@ import * as xlsx from 'xlsx';
 import { AfiliadoService } from 'src/afiliado/afiliado.service';
 import { Afiliado } from 'src/afiliado/entities/afiliado';
 import { DetalleAfiliado } from 'src/afiliado/entities/detalle_afiliado.entity';
+import { Planilla } from '../planilla/entities/planilla.entity';
 
 @Injectable()
 export class DetalleDeduccionService {
@@ -26,7 +27,9 @@ export class DetalleDeduccionService {
     @InjectRepository(Institucion)
     private institucionRepository: Repository<Institucion>,
     @InjectRepository(DetalleAfiliado)
-    private DetalleAfiliadoRepository: Repository<DetalleAfiliado>,
+    private detalleAfiliadoRepository: Repository<DetalleAfiliado>,
+    @InjectRepository(Planilla)
+    private planillaRepository: Repository<Planilla>,
   ){}
 
   async getRangoDetalleDeducciones(idAfiliado: string, fechaInicio: string, fechaFin: string): Promise<any> {
@@ -152,6 +155,22 @@ async obtenerDetallesDeduccionPorAfiliado(idAfiliado: string): Promise<any[]> {
   }
 }
 
+async actualizarPlanillaDeDeduccion(idDedDeduccion: string, codigoPlanilla: string, estadoAplicacion: string): Promise<DetalleDeduccion> {
+  const deduccion = await this.detalleDeduccionRepository.findOneBy({ id_ded_deduccion: idDedDeduccion });
+  if (!deduccion) {
+    throw new NotFoundException(`Deduccion con ID "${idDedDeduccion}" no encontrada`);
+  }
+
+  const planilla = await this.planillaRepository.findOneBy({ codigo_planilla: codigoPlanilla });
+  if (!planilla) {
+    throw new NotFoundException(`Planilla con código "${codigoPlanilla}" no encontrada`);
+  }
+
+  deduccion.planilla = planilla;
+  deduccion.estado_aplicacion = estadoAplicacion; // Actualiza el estado de aplicación
+
+  return this.detalleDeduccionRepository.save(deduccion);
+}
 
   
 

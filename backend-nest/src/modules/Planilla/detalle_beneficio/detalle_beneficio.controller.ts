@@ -30,6 +30,12 @@ export class DetalleBeneficioController {
     }
     return await this.detallebeneficioService.getRangoDetalleBeneficios(idAfiliado, fechaInicio, fechaFin);
   }
+  
+  @Patch('/actualizar-beneficio-planilla')
+  actualizarPlanillaYEstado(@Body() body: { idBeneficioPlanilla: string; codigoPlanilla: string; estado: string }) {
+    const { idBeneficioPlanilla, codigoPlanilla, estado } = body;
+    return this.detallebeneficioService.actualizarPlanillaYEstadoDeBeneficio(idBeneficioPlanilla, codigoPlanilla, estado);
+  }
 
   @Post()
   create(@Body() createDetalleBeneficioDto: CreateDetalleBeneficioDto) {

@@ -7,6 +7,7 @@ import { Afiliado } from 'src/afiliado/entities/afiliado';
 import { DetalleBeneficio, EstadoEnum } from './entities/detalle_beneficio.entity';
 import { UpdateDetalleBeneficioDto } from './dto/update-detalle_beneficio_planilla.dto';
 import { CreateDetalleBeneficioDto } from './dto/create-detalle_beneficio.dto';
+import { Planilla } from '../planilla/entities/planilla.entity';
 
 @Injectable()
 export class DetalleBeneficioService {
@@ -18,6 +19,8 @@ export class DetalleBeneficioService {
   private readonly tipoBeneficioRepository : Repository<Beneficio>
   @InjectRepository(DetalleBeneficio)
   private readonly benAfilRepository : Repository<DetalleBeneficio>
+  @InjectRepository(Planilla)
+  private planillaRepository: Repository<Planilla>
 
   async getRangoDetalleBeneficios(idAfiliado: string, fechaInicio: string, fechaFin: string): Promise<any> {
     const query = `
@@ -121,6 +124,23 @@ async obtenerDetallesBeneficioComplePorAfiliado(idAfiliado: string): Promise<any
   }
 }
 
+async actualizarPlanillaYEstadoDeBeneficio(idBeneficioPlanilla: string, codigoPlanilla: string, estado: string): Promise<DetalleBeneficio> {
+  const beneficio = await this.benAfilRepository.findOneBy({ id_beneficio_planilla: idBeneficioPlanilla });
+  if (!beneficio) {
+    throw new NotFoundException(`DetalleBeneficio con ID "${idBeneficioPlanilla}" no encontrado`);
+  }
+
+  const planilla = await this.planillaRepository.findOneBy({ codigo_planilla: codigoPlanilla });
+  if (!planilla) {
+    throw new NotFoundException(`Planilla con código "${codigoPlanilla}" no encontrada`);
+  }
+
+  beneficio.planilla = planilla;
+  beneficio.estado = estado; // Actualiza el estado
+
+  return this.benAfilRepository.save(beneficio);
+}
+
 
   async create(datos: any): Promise<any> {
     try {
@@ -186,7 +206,6 @@ async obtenerDetallesBeneficioComplePorAfiliado(idAfiliado: string): Promise<any
     if (isUUID(term)) {
       benAfil = await this.benAfilRepository.findOneBy({ id_beneficio_planilla: term });
     } else {
-      console.log('entro aqui');
       
       const queryBuilder = this.benAfilRepository.createQueryBuilder('afiliado');
       benAfil = await queryBuilder

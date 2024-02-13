@@ -33,6 +33,12 @@ export class DetalleDeduccionController {
     }
     return this.detalleDeduccionService.obtenerDetallesDeduccionPorAfiliado(idAfiliado);
   }
+s
+@Patch('/actualizar-deduccion-planilla')
+actualizarPlanilla(@Body() body: { idDedDeduccion: string; codigoPlanilla: string; estadoAplicacion: string }) {
+  const { idDedDeduccion, codigoPlanilla, estadoAplicacion } = body;
+  return this.detalleDeduccionService.actualizarPlanillaDeDeduccion(idDedDeduccion, codigoPlanilla, estadoAplicacion);
+}
 
   @Post()
   @HttpCode(HttpStatus.CREATED)

@@ -155,21 +155,25 @@ async obtenerDetallesDeduccionPorAfiliado(idAfiliado: string): Promise<any[]> {
   }
 }
 
-async actualizarPlanillaDeDeduccion(idDedDeduccion: string, codigoPlanilla: string, estadoAplicacion: string): Promise<DetalleDeduccion> {
-  const deduccion = await this.detalleDeduccionRepository.findOneBy({ id_ded_deduccion: idDedDeduccion });
-  if (!deduccion) {
-    throw new NotFoundException(`Deduccion con ID "${idDedDeduccion}" no encontrada`);
+async actualizarPlanillasYEstadosDeDeducciones(detalles: { idDedDeduccion: string; codigoPlanilla: string; estadoAplicacion: string }[]): Promise<DetalleDeduccion[]> {
+  const resultados = [];
+  for (const { idDedDeduccion, codigoPlanilla, estadoAplicacion } of detalles) {
+    const deduccion = await this.detalleDeduccionRepository.findOneBy({ id_ded_deduccion: idDedDeduccion });
+    if (!deduccion) {
+      throw new NotFoundException(`DetalleDeduccion con ID "${idDedDeduccion}" no encontrado`);
+    }
+
+    const planilla = await this.planillaRepository.findOneBy({ codigo_planilla: codigoPlanilla });
+    if (!planilla) {
+      throw new NotFoundException(`Planilla con código "${codigoPlanilla}" no encontrada`);
+    }
+
+    deduccion.planilla = planilla;
+    deduccion.estado_aplicacion = estadoAplicacion; // Actualiza el estado de aplicación
+
+    resultados.push(await this.detalleDeduccionRepository.save(deduccion));
   }
-
-  const planilla = await this.planillaRepository.findOneBy({ codigo_planilla: codigoPlanilla });
-  if (!planilla) {
-    throw new NotFoundException(`Planilla con código "${codigoPlanilla}" no encontrada`);
-  }
-
-  deduccion.planilla = planilla;
-  deduccion.estado_aplicacion = estadoAplicacion; // Actualiza el estado de aplicación
-
-  return this.detalleDeduccionRepository.save(deduccion);
+  return resultados;
 }
 
   

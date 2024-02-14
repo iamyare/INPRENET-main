@@ -124,21 +124,25 @@ async obtenerDetallesBeneficioComplePorAfiliado(idAfiliado: string): Promise<any
   }
 }
 
-async actualizarPlanillaYEstadoDeBeneficio(idBeneficioPlanilla: string, codigoPlanilla: string, estado: string): Promise<DetalleBeneficio> {
-  const beneficio = await this.benAfilRepository.findOneBy({ id_beneficio_planilla: idBeneficioPlanilla });
-  if (!beneficio) {
-    throw new NotFoundException(`DetalleBeneficio con ID "${idBeneficioPlanilla}" no encontrado`);
+async actualizarPlanillaYEstadoDeBeneficio(detalles: { idBeneficioPlanilla: string; codigoPlanilla: string; estado: string }[]): Promise<DetalleBeneficio[]> {
+  const resultados = [];
+  for (const { idBeneficioPlanilla, codigoPlanilla, estado } of detalles) {
+    const beneficio = await this.benAfilRepository.findOneBy({ id_beneficio_planilla: idBeneficioPlanilla });
+    if (!beneficio) {
+      throw new NotFoundException(`DetalleBeneficio con ID "${idBeneficioPlanilla}" no encontrado`);
+    }
+
+    const planilla = await this.planillaRepository.findOneBy({ codigo_planilla: codigoPlanilla });
+    if (!planilla) {
+      throw new NotFoundException(`Planilla con código "${codigoPlanilla}" no encontrada`);
+    }
+
+    beneficio.planilla = planilla;
+    beneficio.estado = estado; // Actualiza el estado
+
+    resultados.push(await this.benAfilRepository.save(beneficio));
   }
-
-  const planilla = await this.planillaRepository.findOneBy({ codigo_planilla: codigoPlanilla });
-  if (!planilla) {
-    throw new NotFoundException(`Planilla con código "${codigoPlanilla}" no encontrada`);
-  }
-
-  beneficio.planilla = planilla;
-  beneficio.estado = estado; // Actualiza el estado
-
-  return this.benAfilRepository.save(beneficio);
+  return resultados;
 }
 
 

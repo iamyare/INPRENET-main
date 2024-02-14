@@ -22,6 +22,16 @@ export class DeduccionesService {
         )
       }
 
+      ingresarDeduccionPlanilla(detalles: { idDedDeduccion: string; codigoPlanilla: string; estadoAplicacion: string }[]): Observable<any> {
+        const url = `${environment.API_URL}/api/detalle-deduccion/actualizar-deduccion-planilla`; // Asegúrate de usar la URL correcta
+        return this.http.patch(url, detalles).pipe(
+          tap(_ => console.log('Deducciones actualizadas')),
+          catchError(this.handleError)
+        );
+      }
+
+
+
       obtenerDetallesDeduccionComplePorAfiliado(idAfiliado: string): Observable<any> {
         const params = new HttpParams().set('idAfiliado', idAfiliado);
         return this.http.get<any>(`${environment.API_URL}/api/detalle-deduccion/detallesDeducc-complementaria-afiliado`, { params }).pipe(

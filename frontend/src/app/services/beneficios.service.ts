@@ -3,7 +3,6 @@ import { Injectable } from '@angular/core';
 import { Router } from '@angular/router';
 import { Observable, Subject, catchError, map, tap, throwError } from 'rxjs';
 import { environment } from 'src/environments/environment';
-
 import { ToastrService } from 'ngx-toastr';
 
 @Injectable({
@@ -15,7 +14,18 @@ export class BeneficiosService {
   constructor(private toastr: ToastrService ,private http: HttpClient, private router: Router) {
   }
 
-  obtenerDetallesBeneficio(idAfiliado: string, fechaInicio: string, fechaFin: string): Observable<any> {
+  actualizarBeneficiosPlanillas(detalles: { idBeneficioPlanilla: string; codigoPlanilla: string; estado: string }[]): Observable<any> {
+    const url = `${environment.API_URL}/api/beneficio-planilla/actualizar-beneficio-planilla`; // Asegúrate de reemplazar 'ruta-del-endpoint' con la ruta real del endpoint
+    return this.http.patch(url, detalles).pipe(
+      tap(() => {
+        this.toastr.success('Beneficios actualizados correctamente');
+      }),
+      catchError(this.handleError.bind(this))
+    );
+  }
+
+
+  obtenerDetallesOrdinariaBeneficioPorAfil(idAfiliado: string, fechaInicio: string, fechaFin: string): Observable<any> {
     // Construir los parámetros de la solicitud HTTP
     const params = new HttpParams()
       .set('idAfiliado', idAfiliado)
@@ -44,7 +54,7 @@ export class BeneficiosService {
     );
   }
 
-  findInconsistentBeneficiosByAfiliado(idAfiliado: string): Observable<any> {
+  obtenerDetallesExtraordinariaPorAfil(idAfiliado: string): Observable<any> {
     const url = `${environment.API_URL}/api/beneficio-planilla/inconsistencias/${idAfiliado}`;
     return this.http.get<any>(url).pipe(
       tap(() => {

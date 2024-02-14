@@ -18,7 +18,7 @@ export class BeneficiosService {
     const url = `${environment.API_URL}/api/beneficio-planilla/actualizar-beneficio-planilla`; // Asegúrate de reemplazar 'ruta-del-endpoint' con la ruta real del endpoint
     return this.http.patch(url, detalles).pipe(
       tap(() => {
-        this.toastr.success('Beneficios actualizados correctamente');
+        this.toastr.success('Beneficios ingresados correctamente');
       }),
       catchError(this.handleError.bind(this))
     );

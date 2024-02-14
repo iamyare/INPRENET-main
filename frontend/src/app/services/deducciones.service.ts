@@ -2,13 +2,14 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpErrorResponse, HttpParams } from '@angular/common/http';
 import { Observable, catchError, map, tap, throwError } from 'rxjs';
 import { environment } from 'src/environments/environment';
+import { ToastrService } from 'ngx-toastr';
 
 @Injectable({
   providedIn: 'root'
 })
 export class DeduccionesService {
 
-  constructor(private http: HttpClient) { }
+  constructor(private toastr: ToastrService ,private http: HttpClient) { }
 
   newTipoDeduccion(TipoDeduccion:any): Observable<any | void>{
     var url = `${environment.API_URL}/api/deduccion`;
@@ -25,7 +26,9 @@ export class DeduccionesService {
       ingresarDeduccionPlanilla(detalles: { idDedDeduccion: string; codigoPlanilla: string; estadoAplicacion: string }[]): Observable<any> {
         const url = `${environment.API_URL}/api/detalle-deduccion/actualizar-deduccion-planilla`; // Asegúrate de usar la URL correcta
         return this.http.patch(url, detalles).pipe(
-          tap(_ => console.log('Deducciones actualizadas')),
+          tap(() => {
+            this.toastr.success('Deducciones ingresadas correctamente');
+          }),
           catchError(this.handleError)
         );
       }

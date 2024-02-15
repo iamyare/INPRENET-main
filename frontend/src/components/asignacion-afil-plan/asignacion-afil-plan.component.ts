@@ -64,7 +64,7 @@ export class AsignacionAfilPlanComponent implements OnInit{
         isEditable: true
       },
       {
-        header: 'Total de deducciones aplicadas',
+        header: 'Total De Deducciones Aplicadas',
         col: 'Total Deducciones',
         isEditable: true,
         validationRules: [Validators.required, Validators.pattern(/^(3[01]|[12][0-9]|0?[1-9])-(1[0-2]|0?[1-9])-\d{4} - (3[01]|[12][0-9]|0?[1-9])-(1[0-2]|0?[1-9])-\d{4}$/)]
@@ -78,20 +78,20 @@ export class AsignacionAfilPlanComponent implements OnInit{
 
     this.myFormFields = [
       {
-        type: 'string', label: 'Codigo De Planilla', name: 'codigo_planilla', validations: [Validators.required]
+        type: 'string', label: 'Código De Planilla', name: 'codigo_planilla', validations: [Validators.required]
       },
     ]
   }
 
   /* Se ejecuta cuando un valor del formulario cambia */
   obtenerDatosForm(event:any):any{
-    this.datosFormateados = event.value;
+    this.datosFormateados = event;
   }
 
   /* Se ejecuta cuando da click en previsualizar datos planilla */
   getPlanilla = async () => {
     try {
-      this.planillaService.getPlanillaBy(this.datosFormateados.codigo_planilla).subscribe(
+      this.planillaService.getPlanillaBy(this.datosFormateados.value.codigo_planilla).subscribe(
         {
           next: async (response) => {
             if (response) {
@@ -102,7 +102,7 @@ export class AsignacionAfilPlanComponent implements OnInit{
             } else {
               this.detallePlanilla = [];
               this.datosTabl = [];
-              this.toastr.error(`La planilla con el código de planilla: ${this.datosFormateados.codigo_planilla}  no existe `);
+              this.toastr.error(`La planilla con el código de planilla: ${this.datosFormateados.value.codigo_planilla}  no existe `);
             }
             this.ejecF(this.datosTabl).then(() => { });
           },
@@ -202,17 +202,21 @@ export class AsignacionAfilPlanComponent implements OnInit{
 
   editar = (row: any) => {}
 
+  /* Maneja las deducciones */
   manejarAccionDos(row: any) {
     let logs: any[] = []; // Array para almacenar logs
-    logs.push({ message: 'Información de la fila seleccionada:', detail: row });
+    logs.push({ message: `DNI: ${row.dni}`, detail: row });
+    logs.push({ message: `Nombre Completo: ${row.NOMBRE_COMPLETO}`, detail: row });
+
     const openDialog = () => this.dialog.open(DynamicDialogComponent, {
       width: '50%', // o el ancho que prefieras
       data: { logs: logs, type: 'deduccion' } // Asegúrate de pasar el 'type' adecuado
     });
+
     if (this.detallePlanilla.nombre_planilla === 'EXTRAORDINARIA') {
       this.deduccionesService.findInconsistentDeduccionesByAfiliado(row.id_afiliado).subscribe({
         next: (response) => {
-          logs.push({ message: 'Datos de deducciones inconsistentes:', detail: response });
+          logs.push({ message: 'Datos De Deducciones Inconsistentes:', detail: response });
           openDialog();
         },
         error: (error) => {
@@ -220,10 +224,11 @@ export class AsignacionAfilPlanComponent implements OnInit{
           openDialog();
         }
       });
+
     } else if(this.detallePlanilla.nombre_planilla === 'ORDINARIA') {
       this.deduccionesService.getDetalleDeduccionesPorRango(row.id_afiliado, row.periodoInicio, row.periodoFinalizacion).subscribe({
         next: (response) => {
-          logs.push({ message: 'Datos de deducciones:', detail: response });
+          logs.push({ message: 'Datos De Deducciones:', detail: response });
           openDialog();
         },
         error: (error) => {
@@ -231,10 +236,11 @@ export class AsignacionAfilPlanComponent implements OnInit{
           openDialog();
         }
       });
+
     } else if(this.detallePlanilla.nombre_planilla === 'COMPLEMENTARIA') {
       this.deduccionesService.obtenerDetallesDeduccionComplePorAfiliado(row.id_afiliado).subscribe({
         next: (response) => {
-          logs.push({ message: 'Datos de deducciones complementarias:', detail: response });
+          logs.push({ message: 'Datos De Deducciones Complementarias:', detail: response });
           openDialog();
         },
         error: (error) => {
@@ -245,9 +251,13 @@ export class AsignacionAfilPlanComponent implements OnInit{
     }
   }
 
+  /* Maneja los beneficios */
   manejarAccionUno(row: any) {
     let logs: any[] = [];
-    logs.push({ message: 'Información de la fila seleccionada:', detail: row });
+    logs.push({ message: `DNI: ${row.dni}`, detail: row });
+    logs.push({ message: `Nombre Completo: ${row.NOMBRE_COMPLETO}`, detail: row });
+
+    // Función auxiliar para abrir el diálogo una vez que todos los datos están listos
     const openDialog = () => this.dialog.open(DynamicDialogComponent, {
       width: '50%',
       data: { logs: logs, type: 'beneficio' }
@@ -256,18 +266,19 @@ export class AsignacionAfilPlanComponent implements OnInit{
     if (this.detallePlanilla.nombre_planilla === 'EXTRAORDINARIA') {
       this.beneficiosService.obtenerDetallesExtraordinariaPorAfil(row.id_afiliado).subscribe({
         next: (response) => {
-          logs.push({ message: 'Datos de beneficios inconsistentes:', detail: response });
+          logs.push({ message: 'Datos De Beneficios Inconsistentes:', detail: response });
           openDialog();
         },
         error: (error) => {
           logs.push({ message: 'Error al obtener los beneficios inconsistentes:', detail: error });
-          openDialog(); // Abre el Mat Dialog incluso si hay un error
+          openDialog();
         }
       });
+
     } else if(this.detallePlanilla.nombre_planilla === 'ORDINARIA') {
       this.beneficiosService.obtenerDetallesOrdinariaBeneficioPorAfil(row.id_afiliado, row.periodoInicio, row.periodoFinalizacion).subscribe({
         next: (response) => {
-          logs.push({ message: 'Datos de beneficios:', detail: response });
+          logs.push({ message: 'Datos De Beneficios: ', detail: response });
           openDialog();
         },
         error: (error) => {
@@ -275,10 +286,11 @@ export class AsignacionAfilPlanComponent implements OnInit{
           openDialog();
         }
       });
+
     } else if(this.detallePlanilla.nombre_planilla === 'COMPLEMENTARIA') {
       this.beneficiosService.obtenerDetallesBeneficioComplePorAfiliado(row.id_afiliado).subscribe({
         next: (response) => {
-          logs.push({ message: 'Datos de deducciones complementarias:', detail: response });
+          logs.push({ message: 'Datos De Deducciones Complementarias:', detail: response });
           openDialog();
         },
         error: (error) => {
@@ -286,6 +298,7 @@ export class AsignacionAfilPlanComponent implements OnInit{
           openDialog();
         }
       });
+
     }
   }
 
@@ -296,12 +309,14 @@ export class AsignacionAfilPlanComponent implements OnInit{
     });
   }
 
+
   async ingresarDeduccionesPlanilla() {
-    console.log('aqui');
+    let datosFilasDeduccion = [];
 
     try {
+      let promesas: any[] = []
       if (this.detallePlanilla.nombre_planilla === 'EXTRAORDINARIA') {
-        const promesas = this.datosTabl.map(row =>
+        promesas = this.datosTabl.map(row =>
           this.deduccionesService.findInconsistentDeduccionesByAfiliado(row.id_afiliado).toPromise()
             .then(deduccionesInconsistentes => deduccionesInconsistentes)
             .catch(error => {
@@ -309,12 +324,8 @@ export class AsignacionAfilPlanComponent implements OnInit{
               return [];
             })
         );
-        const resultados = await Promise.all(promesas);
-        this.datosFilasDeduccion = resultados.flat();
-        console.log(this.datosFilasDeduccion);
-        await this.actualizarDeducciones(this.datosFilasDeduccion);
       } else if (this.detallePlanilla.nombre_planilla === 'ORDINARIA') {
-        const promesas = this.datosTabl.map(row =>
+         promesas = this.datosTabl.map(row =>
           this.deduccionesService.getDetalleDeduccionesPorRango(row.id_afiliado, row.periodoInicio, row.periodoFinalizacion).toPromise()
             .then(deduccionesOrdinaria => deduccionesOrdinaria)
             .catch(error => {
@@ -322,26 +333,23 @@ export class AsignacionAfilPlanComponent implements OnInit{
               return [];
             })
         );
-        const resultados = await Promise.all(promesas);
-        this.datosFilasDeduccion = resultados.flat();
-        console.log(this.datosFilasDeduccion);
-        await this.actualizarDeducciones(this.datosFilasDeduccion);
       } else if (this.detallePlanilla.nombre_planilla === 'COMPLEMENTARIA') {
-        const promesas = this.datosTabl.map(row =>
+        promesas = this.datosTabl.map(row =>
           this.deduccionesService.obtenerDetallesDeduccionComplePorAfiliado(row.id_afiliado).toPromise()
             .then(deduccionesComplementarios => deduccionesComplementarios)
             .catch(error => {
-              console.error(`Error al obtener detalles de deduccion complementaria para el afiliado ${row.id_afiliado}:`, error);
+              console.error(`Error al obtener detalles de deduccion complementaria para el afiliado ${row.id_afiliado}:, error`);
               return [];
             })
         );
-        const resultados = await Promise.all(promesas);
-        this.datosFilasDeduccion = resultados.flat();
-        console.log(this.datosFilasDeduccion);
-        await this.actualizarDeducciones(this.datosFilasDeduccion);
-      } else {
-        this.datosFilasDeduccion = [...this.datosTabl];
+      }else {
+        datosFilasDeduccion = [...this.datosTabl];
       }
+
+      const resultados = await Promise.all(promesas);
+      datosFilasDeduccion = resultados.flat();
+      await this.actualizarDeducciones(datosFilasDeduccion);
+
     } catch (error) {
       console.error("Error al procesar todas las filas:", error);
     }
@@ -350,9 +358,13 @@ export class AsignacionAfilPlanComponent implements OnInit{
   }
 
   async ingresarBeneficiosPlanilla(){
+    let datosFilasBeneficios = [];
+    let promesas:any[] = [];
+
     try {
+
       if (this.detallePlanilla.nombre_planilla === 'EXTRAORDINARIA') {
-        const promesas = this.datosTabl.map(row =>
+        promesas = this.datosTabl.map(row =>
           this.beneficiosService.obtenerDetallesExtraordinariaPorAfil(row.id_afiliado).toPromise()
             .then(beneficiosInconsistentes => beneficiosInconsistentes)
             .catch(error => {
@@ -360,12 +372,8 @@ export class AsignacionAfilPlanComponent implements OnInit{
               return [];
             })
         );
-        const resultados = await Promise.all(promesas);
-        this.datosFilasBeneficios = resultados.flat();
-        console.log(this.datosFilasBeneficios);
-        await this.actualizarBeneficios(this.datosFilasBeneficios);
       } else if (this.detallePlanilla.nombre_planilla === 'ORDINARIA') {
-        const promesas = this.datosTabl.map(row =>
+        promesas = this.datosTabl.map(row =>
           this.beneficiosService.obtenerDetallesOrdinariaBeneficioPorAfil(row.id_afiliado, row.periodoInicio, row.periodoFinalizacion).toPromise()
             .then(beneficiosOrdinaria => beneficiosOrdinaria)
             .catch(error => {
@@ -373,12 +381,8 @@ export class AsignacionAfilPlanComponent implements OnInit{
               return [];
             })
         );
-        const resultados = await Promise.all(promesas);
-        this.datosFilasBeneficios = resultados.flat();
-        console.log(this.datosFilasBeneficios);
-        await this.actualizarBeneficios(this.datosFilasBeneficios);
       } else if (this.detallePlanilla.nombre_planilla === 'COMPLEMENTARIA') {
-        const promesas = this.datosTabl.map(row =>
+        promesas = this.datosTabl.map(row =>
           this.beneficiosService.obtenerDetallesBeneficioComplePorAfiliado(row.id_afiliado).toPromise()
             .then(beneficiosComplementarios => beneficiosComplementarios)
             .catch(error => {
@@ -386,19 +390,19 @@ export class AsignacionAfilPlanComponent implements OnInit{
               return [];
             })
         );
-        const resultados = await Promise.all(promesas);
-        this.datosFilasBeneficios = resultados.flat();
-        console.log(this.datosFilasBeneficios);
-        await this.actualizarBeneficios(this.datosFilasBeneficios);
       } else {
         this.datosFilasBeneficios = [...this.datosTabl];
       }
+
+      const resultados = await Promise.all(promesas);
+      datosFilasBeneficios = resultados.flat();
+      await this.actualizarBeneficios(datosFilasBeneficios);
+
     } catch (error) {
       console.error("Error al procesar todas las filas:", error);
     }
 
-    return this.datosFilasBeneficios;
-
+    return datosFilasBeneficios;
   }
 
   async actualizarBeneficios(datosFilasBeneficios:any) {
@@ -437,34 +441,33 @@ export class AsignacionAfilPlanComponent implements OnInit{
   }
 
   async procesarPlanilla() {
-    const resultados = await Promise.all([
+
+    let resultados: any[] = []
+
+    resultados = await Promise.all([
+
       this.ingresarDeduccionesPlanilla().catch(error => {
         console.error('Error en ingresarDeduccionesPlanilla:', error);
         return { error: true, message: 'Falló ingresarDeduccionesPlanilla', detalle: error };
       }),
+
       this.ingresarBeneficiosPlanilla().catch(error => {
         console.error('Error en ingresarBeneficiosPlanilla:', error);
         return { error: true, message: 'Falló ingresarBeneficiosPlanilla', detalle: error };
       })
+
     ]);
+
     if (resultados[0].error) {
       console.error('Se encontró un error en deducciones:', resultados[0].detalle);
-    }
-    if (resultados[1].error) {
+    }if (resultados[1]?.error) {
       console.error('Se encontró un error en beneficios:', resultados[1].detalle);
     }
-    if (resultados[0].error || resultados[1].error) {
+
+    if (resultados[0]?.error || resultados[1]?.error) {
       this.toastr.error('Ocurrió un error al procesar la planilla.');
     } else {
       this.toastr.success('Planilla procesada con éxito.');
     }
   }
-
-
-
-
-
-
-
-
 }

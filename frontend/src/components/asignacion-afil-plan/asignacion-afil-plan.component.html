@@ -1,7 +1,7 @@
 <div class="container">
-  <app-dynamic-form [fields]="myFormFields" titulo="Detalles de planilla" subtitulo="Completa la informacion correspondiente" (newDatBenChange)="obtenerDatosForm($event)"></app-dynamic-form>
+  <app-dynamic-form [fields]="myFormFields" titulo="Detalles De Planilla" subtitulo="Completa la información correspondiente" (newDatBenChange)="obtenerDatosForm($event)"></app-dynamic-form>
 
-  <button (click)="getPlanilla()" mat-raised-button class="preview-button">Previsualizar Datos Planilla</button>
+  <button (click)="getPlanilla()" [disabled]="datosFormateados.invalid" mat-raised-button class="preview-button">Previsualizar Datos Planilla</button>
 
   <div class="card-header card-header-danger title" *ngIf="detallePlanilla">
     <div class="card-body" style="padding: 1%">
@@ -28,6 +28,7 @@
       </table>
 
       <h4 class="card-title">Asignación De Beneficios Y Deducciones A La Planilla</h4>
+
       <div>
         <app-dynamic-table
         [verOpcEditar]="false"

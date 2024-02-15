@@ -18,10 +18,10 @@ export class DynamicDialogComponent implements OnInit{
     // Configurar las columnas y el título basado en el tipo de datos
     if (this.data.type === 'deduccion') {
       // Añadir 'monto_aplicado' a la lista de columnas mostradas para deducciones
-      this.displayedColumns = ['id_ded_deduccion', 'estado_aplicacion', 'anio', 'monto_aplicado'];
+      this.displayedColumns = ['nombre_deduccion', 'monto_aplicado'];
       this.dialogTitle = 'Detalle de Deducciones';
     } else if (this.data.type === 'beneficio') {
-      this.displayedColumns = ['id_beneficio_planilla', 'nombre_beneficio', 'monto', 'estado', 'periodoInicio', 'periodoFinalizacion'];
+      this.displayedColumns = ['nombre_beneficio', 'monto'];
       this.dialogTitle = 'Detalle de Beneficios';
     }
   }
@@ -29,7 +29,6 @@ export class DynamicDialogComponent implements OnInit{
   isArray(obj: any): boolean {
     return Array.isArray(obj);
   }
-
 
 
 }

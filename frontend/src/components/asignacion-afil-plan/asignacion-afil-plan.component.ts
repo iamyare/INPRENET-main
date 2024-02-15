@@ -410,7 +410,7 @@ export class AsignacionAfilPlanComponent implements OnInit{
     const detallesParaActualizar = datosFilasBeneficios.map((beneficio:any) => ({
       idBeneficioPlanilla: beneficio.id_beneficio_planilla,
       codigoPlanilla: this.detallePlanilla.codigo_planilla,
-      estado: 'PAGADO'
+      estado: 'PAGADA'
     }));
 
     if (detallesParaActualizar.length > 0) {
@@ -427,7 +427,7 @@ export class AsignacionAfilPlanComponent implements OnInit{
     const detallesParaActualizar = datosFilasDeduccion.map((deduccion:any) => ({
       idDedDeduccion: deduccion.id_ded_deduccion,
       codigoPlanilla: this.detallePlanilla.codigo_planilla,
-      estadoAplicacion: 'COBRADO'
+      estadoAplicacion: 'COBRADA'
     }));
 
 

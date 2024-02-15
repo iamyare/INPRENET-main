@@ -12,6 +12,8 @@ import { DetalleBeneficio } from '../detalle_beneficio/entities/detalle_benefici
 import { Planilla } from './entities/planilla.entity';
 import { TipoPlanilla } from '../tipo-planilla/entities/tipo-planilla.entity';
 import { isUUID } from 'class-validator';
+import { DetalleBeneficioService } from '../detalle_beneficio/detalle_beneficio.service';
+import { DetalleDeduccionService } from '../detalle-deduccion/detalle-deduccion.service';
 
 @Injectable()
 export class PlanillaService {
@@ -34,7 +36,27 @@ export class PlanillaService {
     @InjectRepository(Deduccion)
     private DeduccionRepository: Repository<Deduccion>,
     @InjectRepository(Institucion)
-    private institucionRepository: Repository<Institucion>){};
+    private institucionRepository: Repository<Institucion>,
+    private detalleBeneficioService: DetalleBeneficioService,
+    private detalleDeduccionService: DetalleDeduccionService,){};
+
+    async actualizarBeneficiosYDeduccionesConTransaccion(detallesBeneficios: any[], detallesDeducciones: any[]): Promise<void> {
+      await this.entityManager.transaction(async (transactionalEntityManager) => {
+          try {
+              // Asegúrate de que `detallesBeneficios` y `detallesDeducciones` se traten como arrays
+              for (const detalleBeneficio of detallesBeneficios) {
+                  await this.detalleBeneficioService.actualizarPlanillaYEstadoDeBeneficio([detalleBeneficio], transactionalEntityManager);
+              }
+  
+              for (const detalleDeduccion of detallesDeducciones) {
+                  await this.detalleDeduccionService.actualizarPlanillasYEstadosDeDeducciones([detalleDeduccion], transactionalEntityManager);
+              }
+          } catch (error) {
+              this.logger.error('Error en la transacción para actualizar beneficios y deducciones', error);
+              throw new InternalServerErrorException('Fallo en la actualización de beneficios y deducciones');
+          }
+      });
+  }
 
     async obtenerAfilOrdinaria(periodoInicio: string, periodoFinalizacion: string): Promise<any> {
       const query = `

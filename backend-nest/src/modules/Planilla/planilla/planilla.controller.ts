@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Query, Res, BadRequestException, InternalServerErrorException } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Query, Res, BadRequestException, InternalServerErrorException, HttpCode, HttpStatus } from '@nestjs/common';
 import { PlanillaService } from './planilla.service';
 import { CreatePlanillaDto } from './dto/create-planilla.dto';
 import { UpdatePlanillaDto } from './dto/update-planilla.dto';
@@ -6,6 +6,18 @@ import { UpdatePlanillaDto } from './dto/update-planilla.dto';
 @Controller('planilla')
 export class PlanillaController {
   constructor(private readonly planillaService: PlanillaService) {}
+
+  @Post('/actualizar-transacciones')
+  @HttpCode(HttpStatus.OK)
+  async actualizarBeneficiosYDeducciones(@Body() body: any): Promise<any> {
+    // Aquí, "body" debe contener los detalles necesarios para realizar la actualización
+    // Asegúrate de validar estos datos según sea necesario
+
+    await this.planillaService.actualizarBeneficiosYDeduccionesConTransaccion(body.detallesBeneficios, body.detallesDeducciones);
+
+    // Devuelve una respuesta adecuada
+    return { message: 'Transacción completada con éxito' };
+  }
 
   @Get('planillaOrdinaria')
   async obtenerAfilOrdinaria(

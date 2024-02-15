@@ -1,6 +1,6 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Observable, BehaviorSubject } from 'rxjs';
+import { Observable, BehaviorSubject, catchError } from 'rxjs';
 import { environment } from 'src/environments/environment';
 
 @Injectable({
@@ -8,6 +8,20 @@ import { environment } from 'src/environments/environment';
 })
 export class PlanillaService {
   constructor(private http: HttpClient) { }
+
+  actualizarBeneficiosYDeducciones(detalles: { detallesBeneficios: any[], detallesDeducciones: any[] }): Observable<any> {
+    const url = `${environment.API_URL}/api/planilla/actualizar-transacciones`; // Asegúrate de que la ruta coincida con tu backend
+    return this.http.post(url, detalles).pipe(
+      catchError(this.handleError) // Implementa una función de manejo de errores
+    );
+  }
+
+  private handleError(error: any): Observable<never> {
+    // Aquí puedes implementar tu propia lógica de manejo de errores
+    console.error('An error occurred:', error.error);
+    throw 'Error en la llamada HTTP'; // Modifica esto para manejar el error como prefieras
+  }
+
 
   // Método para crear una nueva TipoPlanilla
   createTipoPlanilla(tipoPlanillaData: any): Observable<any> {

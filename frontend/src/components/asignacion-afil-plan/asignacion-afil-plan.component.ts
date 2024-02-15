@@ -8,7 +8,6 @@ import { PlanillaService } from 'src/app/services/planilla.service';
 import { FieldConfig } from 'src/app/shared/Interfaces/field-config';
 import { TableColumn } from 'src/app/shared/Interfaces/table-column';
 import { convertirFecha } from 'src/app/shared/functions/formatoFecha';
-
 import { DeduccionesService } from 'src/app/services/deducciones.service';
 import { BeneficiosService } from '../../app/services/beneficios.service';
 
@@ -31,6 +30,9 @@ export class AsignacionAfilPlanComponent implements OnInit{
 
   verDat: boolean = false;
   ejecF: any;
+
+  datosFilasDeduccion : any;
+  datosFilasBeneficios : any;
 
   detallePlanilla:any
   constructor( private _formBuilder: FormBuilder,
@@ -126,8 +128,6 @@ export class AsignacionAfilPlanComponent implements OnInit{
     }
   };
 
-
-
   getFilas = async (periodoInicio: string, periodoFinalizacion: string) => {
     try {
 
@@ -217,51 +217,47 @@ export class AsignacionAfilPlanComponent implements OnInit{
         },
         error: (error) => {
           logs.push({ message: 'Error al obtener las deducciones inconsistentes:', detail: error });
-          openDialog(); // Abre el Mat Dialog incluso si hay un error
+          openDialog();
         }
       });
     } else if(this.detallePlanilla.nombre_planilla === 'ORDINARIA') {
-      // Utilizar findByDates en otro caso
       this.deduccionesService.getDetalleDeduccionesPorRango(row.id_afiliado, row.periodoInicio, row.periodoFinalizacion).subscribe({
         next: (response) => {
           logs.push({ message: 'Datos de deducciones:', detail: response });
-          openDialog(); // Abre el Mat Dialog una vez que se recibe la respuesta
+          openDialog();
         },
         error: (error) => {
           logs.push({ message: 'Error al obtener las deducciones:', detail: error });
-          openDialog(); // Abre el Mat Dialog incluso si hay un error
+          openDialog();
         }
       });
     } else if(this.detallePlanilla.nombre_planilla === 'COMPLEMENTARIA') {
       this.deduccionesService.obtenerDetallesDeduccionComplePorAfiliado(row.id_afiliado).subscribe({
         next: (response) => {
           logs.push({ message: 'Datos de deducciones complementarias:', detail: response });
-          openDialog(); // Abre el Mat Dialog una vez que se recibe la respuesta
+          openDialog();
         },
         error: (error) => {
           logs.push({ message: 'Error al obtener las deducciones complementarias:', detail: error });
-          openDialog(); // Abre el Mat Dialog incluso si hay un error
+          openDialog();
         }
       });
     }
   }
 
   manejarAccionUno(row: any) {
-    let logs: any[] = []; // Array para almacenar logs
+    let logs: any[] = [];
     logs.push({ message: 'Información de la fila seleccionada:', detail: row });
-
-    // Función auxiliar para abrir el diálogo una vez que todos los datos están listos
     const openDialog = () => this.dialog.open(DynamicDialogComponent, {
-      width: '50%', // o el ancho que prefieras
-      data: { logs: logs, type: 'beneficio' } // Asegúrate de pasar el 'type' adecuado
+      width: '50%',
+      data: { logs: logs, type: 'beneficio' }
     });
 
     if (this.detallePlanilla.nombre_planilla === 'EXTRAORDINARIA') {
-      // Utilizar findInconsistentBeneficiosByAfiliado para beneficios inconsistentes
       this.beneficiosService.obtenerDetallesExtraordinariaPorAfil(row.id_afiliado).subscribe({
         next: (response) => {
           logs.push({ message: 'Datos de beneficios inconsistentes:', detail: response });
-          openDialog(); // Abre el Mat Dialog una vez que se recibe la respuesta
+          openDialog();
         },
         error: (error) => {
           logs.push({ message: 'Error al obtener los beneficios inconsistentes:', detail: error });
@@ -269,26 +265,25 @@ export class AsignacionAfilPlanComponent implements OnInit{
         }
       });
     } else if(this.detallePlanilla.nombre_planilla === 'ORDINARIA') {
-      // Utilizar el servicio de beneficios para obtener el desglose por rango de fechas
       this.beneficiosService.obtenerDetallesOrdinariaBeneficioPorAfil(row.id_afiliado, row.periodoInicio, row.periodoFinalizacion).subscribe({
         next: (response) => {
           logs.push({ message: 'Datos de beneficios:', detail: response });
-          openDialog(); // Abre el Mat Dialog una vez que se recibe la respuesta
+          openDialog();
         },
         error: (error) => {
           logs.push({ message: 'Error al obtener los beneficios:', detail: error });
-          openDialog(); // Abre el Mat Dialog incluso si hay un error
+          openDialog();
         }
       });
     } else if(this.detallePlanilla.nombre_planilla === 'COMPLEMENTARIA') {
       this.beneficiosService.obtenerDetallesBeneficioComplePorAfiliado(row.id_afiliado).subscribe({
         next: (response) => {
           logs.push({ message: 'Datos de deducciones complementarias:', detail: response });
-          openDialog(); // Abre el Mat Dialog una vez que se recibe la respuesta
+          openDialog();
         },
         error: (error) => {
           logs.push({ message: 'Error al obtener las deducciones complementarias:', detail: error });
-          openDialog(); // Abre el Mat Dialog incluso si hay un error
+          openDialog();
         }
       });
     }
@@ -297,12 +292,13 @@ export class AsignacionAfilPlanComponent implements OnInit{
   openLogDialog(logs: any[]) {
     this.dialog.open(DynamicDialogComponent, {
       width: '1000px',
-      data: { logs } // Asegúrate de que esto coincida con la estructura de datos esperada en LogDialogComponent
+      data: { logs }
     });
   }
 
   async ingresarDeduccionesPlanilla() {
-    let datosFilasDeduccion = [];
+    console.log('aqui');
+
     try {
       if (this.detallePlanilla.nombre_planilla === 'EXTRAORDINARIA') {
         const promesas = this.datosTabl.map(row =>
@@ -314,9 +310,9 @@ export class AsignacionAfilPlanComponent implements OnInit{
             })
         );
         const resultados = await Promise.all(promesas);
-        datosFilasDeduccion = resultados.flat();
-        console.log(datosFilasDeduccion);
-        await this.actualizarDeducciones(datosFilasDeduccion);
+        this.datosFilasDeduccion = resultados.flat();
+        console.log(this.datosFilasDeduccion);
+        await this.actualizarDeducciones(this.datosFilasDeduccion);
       } else if (this.detallePlanilla.nombre_planilla === 'ORDINARIA') {
         const promesas = this.datosTabl.map(row =>
           this.deduccionesService.getDetalleDeduccionesPorRango(row.id_afiliado, row.periodoInicio, row.periodoFinalizacion).toPromise()
@@ -327,9 +323,9 @@ export class AsignacionAfilPlanComponent implements OnInit{
             })
         );
         const resultados = await Promise.all(promesas);
-        datosFilasDeduccion = resultados.flat();
-        console.log(datosFilasDeduccion);
-        await this.actualizarDeducciones(datosFilasDeduccion);
+        this.datosFilasDeduccion = resultados.flat();
+        console.log(this.datosFilasDeduccion);
+        await this.actualizarDeducciones(this.datosFilasDeduccion);
       } else if (this.detallePlanilla.nombre_planilla === 'COMPLEMENTARIA') {
         const promesas = this.datosTabl.map(row =>
           this.deduccionesService.obtenerDetallesDeduccionComplePorAfiliado(row.id_afiliado).toPromise()
@@ -340,21 +336,20 @@ export class AsignacionAfilPlanComponent implements OnInit{
             })
         );
         const resultados = await Promise.all(promesas);
-        datosFilasDeduccion = resultados.flat();
-        console.log(datosFilasDeduccion);
-        await this.actualizarDeducciones(datosFilasDeduccion);
+        this.datosFilasDeduccion = resultados.flat();
+        console.log(this.datosFilasDeduccion);
+        await this.actualizarDeducciones(this.datosFilasDeduccion);
       } else {
-        datosFilasDeduccion = [...this.datosTabl];
+        this.datosFilasDeduccion = [...this.datosTabl];
       }
     } catch (error) {
       console.error("Error al procesar todas las filas:", error);
     }
 
-    return datosFilasDeduccion;
+    return this.datosFilasDeduccion;
   }
 
   async ingresarBeneficiosPlanilla(){
-    let datosFilasBeneficios = [];
     try {
       if (this.detallePlanilla.nombre_planilla === 'EXTRAORDINARIA') {
         const promesas = this.datosTabl.map(row =>
@@ -366,9 +361,9 @@ export class AsignacionAfilPlanComponent implements OnInit{
             })
         );
         const resultados = await Promise.all(promesas);
-        datosFilasBeneficios = resultados.flat();
-        console.log(datosFilasBeneficios);
-        await this.actualizarBeneficios(datosFilasBeneficios);
+        this.datosFilasBeneficios = resultados.flat();
+        console.log(this.datosFilasBeneficios);
+        await this.actualizarBeneficios(this.datosFilasBeneficios);
       } else if (this.detallePlanilla.nombre_planilla === 'ORDINARIA') {
         const promesas = this.datosTabl.map(row =>
           this.beneficiosService.obtenerDetallesOrdinariaBeneficioPorAfil(row.id_afiliado, row.periodoInicio, row.periodoFinalizacion).toPromise()
@@ -379,9 +374,9 @@ export class AsignacionAfilPlanComponent implements OnInit{
             })
         );
         const resultados = await Promise.all(promesas);
-        datosFilasBeneficios = resultados.flat();
-        console.log(datosFilasBeneficios);
-        await this.actualizarBeneficios(datosFilasBeneficios);
+        this.datosFilasBeneficios = resultados.flat();
+        console.log(this.datosFilasBeneficios);
+        await this.actualizarBeneficios(this.datosFilasBeneficios);
       } else if (this.detallePlanilla.nombre_planilla === 'COMPLEMENTARIA') {
         const promesas = this.datosTabl.map(row =>
           this.beneficiosService.obtenerDetallesBeneficioComplePorAfiliado(row.id_afiliado).toPromise()
@@ -392,17 +387,17 @@ export class AsignacionAfilPlanComponent implements OnInit{
             })
         );
         const resultados = await Promise.all(promesas);
-        datosFilasBeneficios = resultados.flat();
-        console.log(datosFilasBeneficios);
-        await this.actualizarBeneficios(datosFilasBeneficios);
+        this.datosFilasBeneficios = resultados.flat();
+        console.log(this.datosFilasBeneficios);
+        await this.actualizarBeneficios(this.datosFilasBeneficios);
       } else {
-        datosFilasBeneficios = [...this.datosTabl];
+        this.datosFilasBeneficios = [...this.datosTabl];
       }
     } catch (error) {
       console.error("Error al procesar todas las filas:", error);
     }
 
-    return datosFilasBeneficios;
+    return this.datosFilasBeneficios;
 
   }
 
@@ -415,8 +410,8 @@ export class AsignacionAfilPlanComponent implements OnInit{
 
     if (detallesParaActualizar.length > 0) {
       try {
-        const resultadosActualizacion = await this.beneficiosService.actualizarBeneficiosPlanillas(detallesParaActualizar).toPromise();
-        console.log('Resultados de la actualización:', resultadosActualizacion);
+        const resultadosActualizacionBeneficios = await this.beneficiosService.actualizarBeneficiosPlanillas(detallesParaActualizar).toPromise();
+        console.log('Resultados de la actualización:', resultadosActualizacionBeneficios);
       } catch (errorActualizacion) {
         console.error('Error al actualizar beneficios y planillas:', errorActualizacion);
       }
@@ -433,13 +428,43 @@ export class AsignacionAfilPlanComponent implements OnInit{
 
     if (detallesParaActualizar.length > 0) {
       try {
-        const resultadosActualizacion = await this.deduccionesService.ingresarDeduccionPlanilla(detallesParaActualizar).toPromise();
-        console.log('Resultados de la actualización:', resultadosActualizacion);
+        const resultadosActualizacionDeducciones = await this.deduccionesService.ingresarDeduccionPlanilla(detallesParaActualizar).toPromise();
+        console.log('Resultados de la actualización:', resultadosActualizacionDeducciones);
       } catch (errorActualizacion) {
         console.error('Error al actualizar beneficios y planillas:', errorActualizacion);
       }
     }
   }
+
+  async procesarPlanilla() {
+    const resultados = await Promise.all([
+      this.ingresarDeduccionesPlanilla().catch(error => {
+        console.error('Error en ingresarDeduccionesPlanilla:', error);
+        return { error: true, message: 'Falló ingresarDeduccionesPlanilla', detalle: error };
+      }),
+      this.ingresarBeneficiosPlanilla().catch(error => {
+        console.error('Error en ingresarBeneficiosPlanilla:', error);
+        return { error: true, message: 'Falló ingresarBeneficiosPlanilla', detalle: error };
+      })
+    ]);
+    if (resultados[0].error) {
+      console.error('Se encontró un error en deducciones:', resultados[0].detalle);
+    }
+    if (resultados[1].error) {
+      console.error('Se encontró un error en beneficios:', resultados[1].detalle);
+    }
+    if (resultados[0].error || resultados[1].error) {
+      this.toastr.error('Ocurrió un error al procesar la planilla.');
+    } else {
+      this.toastr.success('Planilla procesada con éxito.');
+    }
+  }
+
+
+
+
+
+
 
 
 }

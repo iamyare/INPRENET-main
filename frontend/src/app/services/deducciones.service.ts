@@ -43,7 +43,6 @@ export class DeduccionesService {
       }
 
       getDetalleDeduccionesPorRango(idAfiliado: string, fechaInicio: string, fechaFin: string): Observable<any> {
-        // Configurar los parámetros
         let params = new HttpParams()
           .set('idAfiliado', idAfiliado)
           .set('fechaInicio', fechaInicio)

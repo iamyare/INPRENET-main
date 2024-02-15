@@ -1,9 +1,9 @@
 import { BadRequestException, Injectable, Logger, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import { CreateDetalleDeduccionDto } from './dto/create-detalle-deduccion.dto';
 import { UpdateDetalleDeduccionDto } from './dto/update-detalle-deduccion.dto';
-import { InjectRepository } from '@nestjs/typeorm';
+import { InjectEntityManager, InjectRepository } from '@nestjs/typeorm';
 import { DetalleDeduccion } from './entities/detalle-deduccion.entity';
-import { Repository } from 'typeorm';
+import { EntityManager, Repository } from 'typeorm';
 import { Deduccion } from '../deduccion/entities/deduccion.entity';
 import { Institucion } from 'src/modules/Empresarial/institucion/entities/institucion.entity';
 import * as xlsx from 'xlsx';
@@ -30,6 +30,7 @@ export class DetalleDeduccionService {
     private detalleAfiliadoRepository: Repository<DetalleAfiliado>,
     @InjectRepository(Planilla)
     private planillaRepository: Repository<Planilla>,
+    @InjectEntityManager() private readonly entityManager: EntityManager
   ){}
 
   async getRangoDetalleDeducciones(idAfiliado: string, fechaInicio: string, fechaFin: string): Promise<any> {
@@ -155,15 +156,17 @@ async obtenerDetallesDeduccionPorAfiliado(idAfiliado: string): Promise<any[]> {
   }
 }
 
-async actualizarPlanillasYEstadosDeDeducciones(detalles: { idDedDeduccion: string; codigoPlanilla: string; estadoAplicacion: string }[]): Promise<DetalleDeduccion[]> {
+async actualizarPlanillasYEstadosDeDeducciones(detalles: { idDedDeduccion: string; codigoPlanilla: string; estadoAplicacion: string }[], transactionalEntityManager?: EntityManager): Promise<DetalleDeduccion[]> {
   const resultados = [];
+  const entityManager = transactionalEntityManager ? transactionalEntityManager : this.entityManager;
+
   for (const { idDedDeduccion, codigoPlanilla, estadoAplicacion } of detalles) {
-    const deduccion = await this.detalleDeduccionRepository.findOneBy({ id_ded_deduccion: idDedDeduccion });
+    const deduccion = await entityManager.findOne(DetalleDeduccion, { where: { id_ded_deduccion: idDedDeduccion } });
     if (!deduccion) {
       throw new NotFoundException(`DetalleDeduccion con ID "${idDedDeduccion}" no encontrado`);
     }
 
-    const planilla = await this.planillaRepository.findOneBy({ codigo_planilla: codigoPlanilla });
+    const planilla = await entityManager.findOne(Planilla, { where: { codigo_planilla: codigoPlanilla } });
     if (!planilla) {
       throw new NotFoundException(`Planilla con código "${codigoPlanilla}" no encontrada`);
     }
@@ -171,7 +174,7 @@ async actualizarPlanillasYEstadosDeDeducciones(detalles: { idDedDeduccion: strin
     deduccion.planilla = planilla;
     deduccion.estado_aplicacion = estadoAplicacion; // Actualiza el estado de aplicación
 
-    resultados.push(await this.detalleDeduccionRepository.save(deduccion));
+    resultados.push(await entityManager.save(deduccion));
   }
   return resultados;
 }

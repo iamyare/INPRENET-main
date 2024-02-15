@@ -1,7 +1,7 @@
 import { BadRequestException, Injectable, InternalServerErrorException, Logger, NotFoundException } from '@nestjs/common';
 import { isUUID } from 'class-validator';
-import { InjectRepository } from '@nestjs/typeorm';
-import { LessThanOrEqual, MoreThanOrEqual, Not, Repository } from 'typeorm';
+import { InjectEntityManager, InjectRepository } from '@nestjs/typeorm';
+import { EntityManager, LessThanOrEqual, MoreThanOrEqual, Not, Repository } from 'typeorm';
 import { Beneficio } from '../beneficio/entities/beneficio.entity';
 import { Afiliado } from 'src/afiliado/entities/afiliado';
 import { DetalleBeneficio, EstadoEnum } from './entities/detalle_beneficio.entity';
@@ -12,15 +12,22 @@ import { Planilla } from '../planilla/entities/planilla.entity';
 @Injectable()
 export class DetalleBeneficioService {
   private readonly logger = new Logger(DetalleBeneficioService.name)
-  
+
+  constructor(
   @InjectRepository(Afiliado)
-  private readonly afiliadoRepository : Repository<Afiliado>
+  private readonly afiliadoRepository : Repository<Afiliado>,
   @InjectRepository(Beneficio)
-  private readonly tipoBeneficioRepository : Repository<Beneficio>
+  private readonly tipoBeneficioRepository : Repository<Beneficio>,
   @InjectRepository(DetalleBeneficio)
-  private readonly benAfilRepository : Repository<DetalleBeneficio>
+  private readonly benAfilRepository : Repository<DetalleBeneficio>,
   @InjectRepository(Planilla)
-  private planillaRepository: Repository<Planilla>
+  private planillaRepository: Repository<Planilla>,
+  @InjectEntityManager() private readonly entityManager: EntityManager
+  ){
+
+  }
+  
+  
 
   async getRangoDetalleBeneficios(idAfiliado: string, fechaInicio: string, fechaFin: string): Promise<any> {
     const query = `
@@ -124,15 +131,17 @@ async obtenerDetallesBeneficioComplePorAfiliado(idAfiliado: string): Promise<any
   }
 }
 
-async actualizarPlanillaYEstadoDeBeneficio(detalles: { idBeneficioPlanilla: string; codigoPlanilla: string; estado: string }[]): Promise<DetalleBeneficio[]> {
+async actualizarPlanillaYEstadoDeBeneficio(detalles: { idBeneficioPlanilla: string; codigoPlanilla: string; estado: string }[], transactionalEntityManager?: EntityManager): Promise<DetalleBeneficio[]> {
   const resultados = [];
+  const entityManager = transactionalEntityManager ? transactionalEntityManager : this.entityManager;
+
   for (const { idBeneficioPlanilla, codigoPlanilla, estado } of detalles) {
-    const beneficio = await this.benAfilRepository.findOneBy({ id_beneficio_planilla: idBeneficioPlanilla });
+    const beneficio = await entityManager.findOne(DetalleBeneficio, { where: { id_beneficio_planilla: idBeneficioPlanilla } });
     if (!beneficio) {
       throw new NotFoundException(`DetalleBeneficio con ID "${idBeneficioPlanilla}" no encontrado`);
     }
 
-    const planilla = await this.planillaRepository.findOneBy({ codigo_planilla: codigoPlanilla });
+    const planilla = await entityManager.findOne(Planilla, { where: { codigo_planilla: codigoPlanilla } });
     if (!planilla) {
       throw new NotFoundException(`Planilla con código "${codigoPlanilla}" no encontrada`);
     }
@@ -140,7 +149,7 @@ async actualizarPlanillaYEstadoDeBeneficio(detalles: { idBeneficioPlanilla: stri
     beneficio.planilla = planilla;
     beneficio.estado = estado; // Actualiza el estado
 
-    resultados.push(await this.benAfilRepository.save(beneficio));
+    resultados.push(await entityManager.save(beneficio));
   }
   return resultados;
 }

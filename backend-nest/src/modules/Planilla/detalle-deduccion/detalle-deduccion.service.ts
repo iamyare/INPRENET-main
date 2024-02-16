@@ -33,6 +33,39 @@ export class DetalleDeduccionService {
     @InjectEntityManager() private readonly entityManager: EntityManager
   ){}
 
+  async getDetallesDeduccionPorAfiliadoYPlanilla(idAfiliado: string, idPlanilla: string): Promise<any> {
+    const query = `
+      SELECT
+        dd."id_ded_deduccion",
+        dd."id_afiliado",
+        dd."id_deduccion",
+        dd."id_institucion",
+        dd."monto_total",
+        dd."monto_aplicado",
+        dd."estado_aplicacion",
+        dd."anio",
+        dd."mes",
+        dd."fecha_aplicado",
+        dd."id_planilla"
+      FROM
+        "detalle_deduccion" dd
+      WHERE
+        dd."id_afiliado" = :idAfiliado
+        AND dd."id_planilla" = :idPlanilla
+    `;
+  
+    try {
+      // Usar un objeto para pasar los parámetros con nombre
+      const parameters: any = { idAfiliado: idAfiliado, idPlanilla: idPlanilla };
+      const detalleDeducciones = await this.entityManager.query(query, parameters);
+      return detalleDeducciones;
+    } catch (error) {
+      this.logger.error(`Error al obtener detalles de deducción por afiliado y planilla: ${error.message}`, error.stack);
+      throw new InternalServerErrorException('Se produjo un error al obtener los detalles de deducción por afiliado y planilla.');
+    }
+  }
+  
+
   async getRangoDetalleDeducciones(idAfiliado: string, fechaInicio: string, fechaFin: string): Promise<any> {
     const query = `
       SELECT

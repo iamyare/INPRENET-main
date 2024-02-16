@@ -19,6 +19,20 @@ export class PlanillaController {
     return { message: 'Transacción completada con éxito' };
   }
 
+  @Get('preliminar')
+  async ObtenerPlanillaPreliminar(
+    @Query('idPlanilla') idPlanilla: string,
+  ) {
+    if (!idPlanilla) {
+      throw new BadRequestException('Los parámetros idPlanilla son obligatorios');
+    }
+    try {
+      return await this.planillaService.ObtenerPleliminar(idPlanilla);
+    } catch (error) {
+      throw new InternalServerErrorException('Error al obtener planilla preliminar');
+    }
+  }
+
   @Get('planillaOrdinaria')
   async obtenerAfilOrdinaria(
     @Query('periodoInicio') periodoInicio: string,

@@ -26,8 +26,37 @@ export class DetalleBeneficioService {
   ){
 
   }
+
+  async getDetalleBeneficiosPorAfiliadoYPlanilla(idAfiliado: string, idPlanilla: string): Promise<any> {
+    const query = `
+      SELECT
+        db."id_beneficio_planilla",
+        db."id_afiliado",
+        db."id_beneficio",
+        db."estado",
+        db."modalidad_pago",
+        db."monto",
+        db."num_rentas_aplicadas",
+        db."periodoInicio",
+        db."periodoFinalizacion",
+        db."id_planilla"
+      FROM
+        "detalle_beneficio" db
+      WHERE
+        db."id_afiliado" = :idAfiliado
+        AND db."id_planilla" = :idPlanilla
+    `;
+    try {
+      // Asegúrate de pasar los parámetros como un array en el orden en que aparecen en la consulta
+      const detalleBeneficios = await this.entityManager.query(query, [idAfiliado, idPlanilla]);
+      return detalleBeneficios;
+    } catch (error) {
+      this.logger.error(`Error al obtener detalles de beneficio por afiliado y planilla: ${error.message}`, error.stack);
+      throw new InternalServerErrorException('Se produjo un error al obtener los detalles de beneficio por afiliado y planilla.');
+    }
+  }
   
-  
+
 
   async getRangoDetalleBeneficios(idAfiliado: string, fechaInicio: string, fechaFin: string): Promise<any> {
     const query = `

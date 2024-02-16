@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Query, BadRequestException } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Query,Response, BadRequestException, HttpStatus } from '@nestjs/common';
 import {  DetalleBeneficioService } from './detalle_beneficio.service';
 import { UpdateDetalleBeneficioDto } from './dto/update-detalle_beneficio_planilla.dto';
 import { DetalleBeneficio } from './entities/detalle_beneficio.entity';
@@ -8,7 +8,20 @@ import { CreateDetalleBeneficioDto } from './dto/create-detalle_beneficio.dto';
 export class DetalleBeneficioController {
   constructor(private readonly detallebeneficioService: DetalleBeneficioService) {}
 
-  
+  @Get('detallesPreliminar')
+  async getDetalleBeneficiosPreliminar(
+    @Query('idAfiliado') idAfiliado: string,
+    @Query('idPlanilla') idPlanilla: string,
+    @Response() res
+  ) {
+    try {
+      const detalles = await this.detallebeneficioService.getDetalleBeneficiosPorAfiliadoYPlanilla(idAfiliado, idPlanilla);
+      return res.status(HttpStatus.OK).json(detalles);
+    } catch (error) {
+      return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: 'Error al obtener los detalles de beneficio', error: error.message });
+    }
+  }
+
   @Get('/detallesBene-complementaria-afiliado')
   async obtenerDetallesPorAfiliado(@Query('idAfiliado') idAfiliado: string) {
     console.log('hola');

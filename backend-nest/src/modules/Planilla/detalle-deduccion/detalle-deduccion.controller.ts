@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseInterceptors, UploadedFile, Res, HttpCode, HttpStatus, Query, BadRequestException } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseInterceptors, UploadedFile, Response, HttpCode, HttpStatus, Query, BadRequestException } from '@nestjs/common';
 import { DetalleDeduccionService } from './detalle-deduccion.service';
 import { CreateDetalleDeduccionDto } from './dto/create-detalle-deduccion.dto';
 import { UpdateDetalleDeduccionDto } from './dto/update-detalle-deduccion.dto';
@@ -7,6 +7,22 @@ import { FileInterceptor } from '@nestjs/platform-express';
 @Controller('detalle-deduccion')
 export class DetalleDeduccionController {
   constructor(private readonly detalleDeduccionService: DetalleDeduccionService) {}
+  
+
+  @Get('detallesPreliminar')
+  async getDetallesDeduccionPorAfiliadoYPlanilla(
+    @Query('idAfiliado') idAfiliado: string,
+    @Query('idPlanilla') idPlanilla: string,
+    @Response() res
+  ) {
+
+    try {
+      const detalles = await this.detalleDeduccionService.getDetallesDeduccionPorAfiliadoYPlanilla(idAfiliado, idPlanilla);
+      return res.status(HttpStatus.OK).json(detalles);
+    } catch (error) {
+      return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: 'Error al obtener los detalles de deducción', error: error.message });
+    }
+  }
 
 
   @Get('/rango-deducciones')

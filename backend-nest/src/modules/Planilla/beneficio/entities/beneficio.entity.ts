@@ -1,5 +1,4 @@
 import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
-import { DetalleBeneficio } from "../../detalle_beneficio/entities/detalle_beneficio.entity";
 import { DetalleBeneficioAfiliado } from "../../detalle_beneficio/entities/detalle_beneficio_afiliado.entity";
 
 
@@ -13,7 +12,7 @@ export class Beneficio {
     nombre_beneficio: string;
 
     @Column('varchar2', { length: 200, nullable: false })
-    descripcion_beneficio: string;
+    descripcion_beneficio: string; 
 
     @Column()
     periodicidad: string;

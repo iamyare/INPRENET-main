@@ -9,10 +9,9 @@ export class CreateBeneficioDto {
     descripcion_beneficio : string
     
     @IsString()
-    periodicidad : string
+    @IsOptional()
+    periodicidad? : string
 
     @IsNumber()
     numero_rentas_max : number
-    
-
 }

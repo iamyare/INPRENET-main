@@ -33,8 +33,8 @@ export class EditarBeneficioComponent implements OnInit {
         isEditable: true
       },
       {
-        header: 'Estado',
-        col: 'estado',
+        header: 'Periodicidad',
+        col: 'periodicidad',
         isEditable: true
       },
       {
@@ -52,7 +52,7 @@ export class EditarBeneficioComponent implements OnInit {
       nombre_beneficio: row.nombre_beneficio,
       descripcion_beneficio: row.descripcion_beneficio,
       numero_rentas_max: row.numero_rentas_max,
-      estado: row.estado,
+      periodicidad: row.periodicidad,
     };
 
     this.svcBeneficioServ.updateBeneficio(row.id, beneficioData).subscribe(
@@ -73,7 +73,7 @@ export class EditarBeneficioComponent implements OnInit {
         nombre_beneficio: item.nombre_beneficio,
         descripcion_beneficio: item.descripcion_beneficio || 'No disponible',
         numero_rentas_max: item.numero_rentas_max,
-        estado: item.estado,
+        periodicidad: item.periodicidad,
       }));
     } catch (error) {
       this.toastr.error('Error al cargar los beneficios');

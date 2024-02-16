@@ -19,7 +19,7 @@ export class NuevoBeneficioComponent {
     { type: 'text', label: 'Nombre de beneficio', name: 'nombre_beneficio', validations: [] },
     { type: 'text', label: 'Descripción de beneficio', name: 'descripcion_beneficio', validations: [] },
     { type: 'number', label: 'numero de rentas maximas', name: 'numero_rentas_max', validations: [] },
-    { type: 'dropdown', label: 'Estado', name: 'estado', validations: [], options:[{label:"vitalicio", value:"vitalicio"},
+    { type: 'dropdown', label: 'Periodicidad', name: 'periodicidad', validations: [], options:[{label:"vitalicio", value:"vitalicio"},
     {label:"definido", value:"Definido"}] }
   ];
 

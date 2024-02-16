@@ -2,6 +2,7 @@ import { Column, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColum
 import { Beneficio } from "../../beneficio/entities/beneficio.entity";
 import { Afiliado } from "src/afiliado/entities/afiliado";
 import { Planilla } from "../../planilla/entities/planilla.entity";
+import { DetalleBeneficioAfiliado } from "./detalle_beneficio_afiliado.entity";
 export enum EstadoEnum {
     PAGADA = 'PAGADA',
     NO_PAGADA = 'NO PAGADA',
@@ -19,28 +20,28 @@ export class DetalleBeneficio {
     @Column({nullable:true})
     modalidad_pago: string;
 
+    @Column({nullable:true})
+    metodo_pago: string;
+
+    @Column({ type: 'date', nullable: false })
+    fecha_actual: Date;
+
     @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
-    monto: number;
+    montoPorPeriodo: number;
     
     @Column({nullable:true})
     num_rentas_aplicadas: number;
 
-    @Column({ type: 'date', nullable: false })
-    periodoInicio: Date;
-
-    @Column({ type: 'date', nullable: false })
-    periodoFinalizacion: Date;
-
-    @ManyToOne(() => Beneficio, beneficio => beneficio.detallebeneficio, { cascade : true })
-    @JoinColumn({ name: 'id_beneficio'})
-    beneficio : Beneficio;
-
-    @ManyToOne(() => Afiliado, afiliado => afiliado.detalleBeneficio, { cascade : true })
-    @JoinColumn({ name: 'id_afiliado'})
-    afiliado : Afiliado;
+    @Column()
+    monto_por_periodo: number;
 
     @ManyToOne(() => Planilla, planilla => planilla.detallebeneficio, { cascade: true })
     @JoinColumn({ name: 'id_planilla' })
     planilla: Planilla;
+
+
+    @ManyToOne(() => DetalleBeneficioAfiliado, detalleBeneficioAfiliado => detalleBeneficioAfiliado.detalleBeneficio, { cascade: true })
+    @JoinColumn({ name: 'id_beneficio_afiliado' })
+    detalleBeneficioAfiliado: DetalleBeneficioAfiliado;
 
 }

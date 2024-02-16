@@ -1,5 +1,6 @@
 import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 import { DetalleBeneficio } from "../../detalle_beneficio/entities/detalle_beneficio.entity";
+import { DetalleBeneficioAfiliado } from "../../detalle_beneficio/entities/detalle_beneficio_afiliado.entity";
 
 
 @Entity()
@@ -15,11 +16,11 @@ export class Beneficio {
     descripcion_beneficio: string;
 
     @Column()
-    estado: string;
+    periodicidad: string;
 
     @Column('number', { nullable: false })
     numero_rentas_max: number;
 
-    @OneToMany(() => DetalleBeneficio, detallebeneficio => detallebeneficio.beneficio)
-    detallebeneficio : DetalleBeneficio[];
+    @OneToMany(() => DetalleBeneficioAfiliado, detalleBeneficioAfiliado => detalleBeneficioAfiliado.beneficio)
+    detalleBeneficioAfiliado: DetalleBeneficioAfiliado[];
 }

@@ -9,6 +9,7 @@ import { DetalleDeduccion } from "src/modules/Planilla/detalle-deduccion/entitie
 import { PerfAfilCentTrab } from "./perf_afil_cent_trab";
 import { DetalleAfiliado } from "./detalle_afiliado.entity";
 import { DetalleBeneficio } from "src/modules/Planilla/detalle_beneficio/entities/detalle_beneficio.entity";
+import { DetalleBeneficioAfiliado } from "src/modules/Planilla/detalle_beneficio/entities/detalle_beneficio_afiliado.entity";
  
 @Entity()
 export class Afiliado {
@@ -99,10 +100,7 @@ export class Afiliado {
     @ManyToOne(() => Provincia, provincia => provincia.afiliado, { cascade: true })
     @JoinColumn({ name: 'id_provincia' })
     provincia: Provincia;
-
-    @OneToMany(() => DetalleBeneficio, detalleBeneficio => detalleBeneficio.afiliado)
-    detalleBeneficio: DetalleBeneficio[];
-
+    
     @OneToMany(() => ReferenciaPersonalAfiliado, referenciaPersonalAfiliado => referenciaPersonalAfiliado.afiliado)
     referenciasPersonalAfiliado: ReferenciaPersonalAfiliado[];
 
@@ -117,5 +115,8 @@ export class Afiliado {
         (perfAfilCentTrab) => perfAfilCentTrab.afiliado,
         { cascade: true })
     perfAfilCentTrabs: PerfAfilCentTrab[];
+
+    @OneToMany(() => DetalleBeneficioAfiliado, detalleBeneficioAfiliado => detalleBeneficioAfiliado.afiliado, { cascade: true })
+    detalleBeneficioAfiliado: DetalleBeneficioAfiliado[];
 
 }

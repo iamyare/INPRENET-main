@@ -185,7 +185,7 @@ async actualizarPlanillaYEstadoDeBeneficio(detalles: { idBeneficioPlanilla: stri
 
 
   async create(datos: any): Promise<any> {
-    try {
+    /* try {
       const afiliado = await this.afiliadoRepository.findOne({
         where: { dni: datos.dni },
       });
@@ -224,7 +224,7 @@ async actualizarPlanillaYEstadoDeBeneficio(detalles: { idBeneficioPlanilla: stri
       return await this.benAfilRepository.save(nuevoDetalle);
     } catch (error) {
       this.handleException(error);
-    }
+    } */
   }
 
   private convertirCadenaAFecha(cadena: string): Date | null {

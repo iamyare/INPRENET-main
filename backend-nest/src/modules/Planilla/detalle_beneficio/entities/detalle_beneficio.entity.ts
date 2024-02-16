@@ -18,27 +18,20 @@ export class DetalleBeneficio {
     estado: string;
 
     @Column({nullable:true})
-    modalidad_pago: string;
-
-    @Column({nullable:true})
     metodo_pago: string;
 
     @Column({ type: 'date', nullable: false })
     fecha_actual: Date;
 
     @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
-    montoPorPeriodo: number;
+    monto_por_periodo: number;
     
     @Column({nullable:true})
     num_rentas_aplicadas: number;
 
-    @Column()
-    monto_por_periodo: number;
-
     @ManyToOne(() => Planilla, planilla => planilla.detallebeneficio, { cascade: true })
     @JoinColumn({ name: 'id_planilla' })
     planilla: Planilla;
-
 
     @ManyToOne(() => DetalleBeneficioAfiliado, detalleBeneficioAfiliado => detalleBeneficioAfiliado.detalleBeneficio, { cascade: true })
     @JoinColumn({ name: 'id_beneficio_afiliado' })

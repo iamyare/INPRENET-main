@@ -92,7 +92,6 @@ export class DetalleBeneficioService {
          OR
          TO_DATE(db."periodoFinalizacion", 'DD/MM/YY') BETWEEN TO_DATE(:fechaInicio, 'DD-MM-YYYY') AND TO_DATE(:fechaFin, 'DD-MM-YYYY'))
     `;
-
     try {
       const parametros = { idAfiliado, fechaInicio, fechaFin };
       return await this.benAfilRepository.query(query, [idAfiliado, fechaInicio, fechaFin, fechaInicio, fechaFin]);
@@ -152,6 +151,9 @@ async obtenerDetallesBeneficioComplePorAfiliado(idAfiliado: string): Promise<any
       ORDER BY
         ben."id_beneficio"
     `;
+
+    console.log(query);
+    
 
     return await this.benAfilRepository.query(query, [idAfiliado]); // Usando un array para los parámetros
   } catch (error) {

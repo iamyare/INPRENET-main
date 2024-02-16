@@ -61,89 +61,95 @@ export class PlanillaService {
     async obtenerAfilOrdinaria(periodoInicio: string, periodoFinalizacion: string): Promise<any> {
       const query = `
       SELECT
-    COALESCE(deducciones."id_afiliado", beneficios."id_afiliado") AS "id_afiliado",
-    COALESCE(deducciones."dni", beneficios."dni") AS "dni",
-    COALESCE(deducciones."NOMBRE_COMPLETO", beneficios."NOMBRE_COMPLETO") AS "NOMBRE_COMPLETO",
-    beneficios."Total Beneficio",
-    deducciones."Total Deducciones"
-FROM
-    (SELECT
-            afil."id_afiliado",
-            afil."dni",
-            TRIM(
-                afil."primer_nombre" || ' ' ||
-                COALESCE(afil."segundo_nombre", '') || ' ' ||
-                COALESCE(afil."tercer_nombre", '') || ' ' ||
-                afil."primer_apellido" || ' ' ||
-                COALESCE(afil."segundo_apellido", '')) AS NOMBRE_COMPLETO,
-            SUM(detBs."monto") AS "Total Beneficio"
-      FROM
-            "C##TEST"."afiliado" afil
-      INNER JOIN
-            "C##TEST"."detalle_afiliado" detAf ON afil."id_afiliado" = detAf."id_afiliado"
-      LEFT JOIN
-            "C##TEST"."detalle_beneficio" detBs ON afil."id_afiliado" = detBs."id_afiliado"
-            AND detBs."estado" = 'NO PAGADA'
-            AND TO_DATE(detBs."periodoInicio", 'DD/MM/YY') BETWEEN TO_DATE('${periodoInicio}', 'DD-MM-YYYY') AND TO_DATE('${periodoFinalizacion}', 'DD-MM-YYYY')
-            AND TO_DATE(detBs."periodoFinalizacion", 'DD/MM/YY') BETWEEN TO_DATE('${periodoInicio}', 'DD-MM-YYYY') AND TO_DATE('${periodoFinalizacion}', 'DD-MM-YYYY')
-      LEFT JOIN
-            "C##TEST"."beneficio" ben ON ben."id_beneficio" = detBs."id_beneficio"
-      GROUP BY
-            afil."id_afiliado",
-            afil."dni",
-            TRIM(
-                afil."primer_nombre" || ' ' ||
-                COALESCE(afil."segundo_nombre", '') || ' ' ||
-                COALESCE(afil."tercer_nombre", '') || ' ' ||
-                afil."primer_apellido" || ' ' ||
-                COALESCE(afil."segundo_apellido", ''))) beneficios
-
-FULL OUTER JOIN
-    (SELECT
-            afil."id_afiliado",
-            afil."dni",
-            TRIM(
-                afil."primer_nombre" || ' ' ||
-                COALESCE(afil."segundo_nombre", '') || ' ' ||
-                COALESCE(afil."tercer_nombre", '') || ' ' ||
-                afil."primer_apellido" || ' ' ||
-                COALESCE(afil."segundo_apellido", '')) AS NOMBRE_COMPLETO,
-            SUM(detDs."monto_aplicado") AS "Total Deducciones"
-      FROM
-            "C##TEST"."afiliado" afil
-      INNER JOIN
-            "C##TEST"."detalle_afiliado" detAf ON afil."id_afiliado" = detAf."id_afiliado"
-      LEFT JOIN
-            "C##TEST"."detalle_deduccion" detDs ON afil."id_afiliado" = detDs."id_afiliado"
-            AND detDs."estado_aplicacion" = 'NO COBRADA'
-            AND TO_DATE(CONCAT(detDs."anio", LPAD(detDs."mes", 2, '0')), 'YYYYMM') BETWEEN TO_DATE('${periodoInicio}', 'DD-MM-YYYY') AND TO_DATE('${periodoFinalizacion}', 'DD-MM-YYYY')
-      LEFT JOIN
-            "C##TEST"."deduccion" ded ON ded."id_deduccion" = detDs."id_deduccion"
-
-      GROUP BY
-            afil."id_afiliado",
-            afil."dni",
-            TRIM(
-                afil."primer_nombre" || ' ' ||
-                COALESCE(afil."segundo_nombre", '') || ' ' ||
-                COALESCE(afil."tercer_nombre", '') || ' ' ||
-                afil."primer_apellido" || ' ' ||
-                COALESCE(afil."segundo_apellido", ''))) deducciones ON deducciones."id_afiliado" = beneficios."id_afiliado"
-WHERE
-    ((deducciones."id_afiliado" IS NOT NULL AND EXISTS (
-                SELECT detD."id_afiliado"
-                FROM "C##TEST"."detalle_deduccion" detD
-                WHERE  detD."estado_aplicacion" = 'COBRADA' AND 
-                detD."id_afiliado" = deducciones."id_afiliado"
-            ))
-    OR
-    (beneficios."id_afiliado" IS NOT NULL AND EXISTS (
-                SELECT detB."id_afiliado"
-                FROM "C##TEST"."detalle_beneficio" detB
-                WHERE detB."estado" = 'PAGADA' AND 
-                detB."id_afiliado" = beneficios."id_afiliado"
-            ))) AND beneficios."Total Beneficio" IS NOT NULL AND
-            beneficios."Total Beneficio" IS NOT NULL
+      COALESCE(deducciones."id_afiliado", beneficios."id_afiliado") AS "id_afiliado",
+      COALESCE(deducciones."dni", beneficios."dni") AS "dni",
+      COALESCE(deducciones."NOMBRE_COMPLETO", beneficios."NOMBRE_COMPLETO") AS "NOMBRE_COMPLETO",
+      beneficios."Total Beneficio",
+      deducciones."Total Deducciones"
+  FROM
+      (SELECT
+              afil."id_afiliado",
+              afil."dni",
+              TRIM(
+                  afil."primer_nombre" || ' ' ||
+                  COALESCE(afil."segundo_nombre", '') || ' ' ||
+                  COALESCE(afil."tercer_nombre", '') || ' ' ||
+                  afil."primer_apellido" || ' ' ||
+                  COALESCE(afil."segundo_apellido", '')) AS NOMBRE_COMPLETO,
+              SUM(detBs."monto_por_periodo") AS "Total Beneficio"
+        FROM
+              "C##TEST"."afiliado" afil
+        INNER JOIN
+              "C##TEST"."detalle_afiliado" detAf ON afil."id_afiliado" = detAf."id_afiliado"
+              
+        LEFT JOIN
+          "C##TEST"."detalle_beneficio_afiliado" detBA ON afil."id_afiliado" = detBA."id_afiliado" 
+          AND TO_DATE(detBA."periodoInicio", 'DD/MM/YY') BETWEEN TO_DATE('${periodoInicio}', 'DD-MM-YYYY') AND TO_DATE('${periodoFinalizacion}', 'DD-MM-YYYY')
+          AND TO_DATE(detBA."periodoFinalizacion", 'DD/MM/YY') BETWEEN TO_DATE('${periodoInicio}', 'DD-MM-YYYY') AND TO_DATE('${periodoFinalizacion}', 'DD-MM-YYYY')
+        LEFT JOIN
+          "C##TEST"."detalle_beneficio" detBs ON detBA."id_detalle_ben_afil" = detBs."id_beneficio_afiliado"
+          AND detBs."estado" = 'NO PAGADA'
+        LEFT JOIN
+          "C##TEST"."beneficio" ben ON ben."id_beneficio" = detBA."id_beneficio"
+  
+        GROUP BY
+              afil."id_afiliado",
+              afil."dni",
+              TRIM(
+                  afil."primer_nombre" || ' ' ||
+                  COALESCE(afil."segundo_nombre", '') || ' ' ||
+                  COALESCE(afil."tercer_nombre", '') || ' ' ||
+                  afil."primer_apellido" || ' ' ||
+                  COALESCE(afil."segundo_apellido", ''))) beneficios
+  
+  FULL OUTER JOIN
+      (SELECT
+              afil."id_afiliado",
+              afil."dni",
+              TRIM(
+                  afil."primer_nombre" || ' ' ||
+                  COALESCE(afil."segundo_nombre", '') || ' ' ||
+                  COALESCE(afil."tercer_nombre", '') || ' ' ||
+                  afil."primer_apellido" || ' ' ||
+                  COALESCE(afil."segundo_apellido", '')) AS NOMBRE_COMPLETO,
+              SUM(detDs."monto_aplicado") AS "Total Deducciones"
+        FROM
+              "C##TEST"."afiliado" afil
+        INNER JOIN
+              "C##TEST"."detalle_afiliado" detAf ON afil."id_afiliado" = detAf."id_afiliado"
+        LEFT JOIN
+              "C##TEST"."detalle_deduccion" detDs ON afil."id_afiliado" = detDs."id_afiliado"
+              AND detDs."estado_aplicacion" = 'NO COBRADA'
+              AND TO_DATE(CONCAT(detDs."anio", LPAD(detDs."mes", 2, '0')), 'YYYYMM') BETWEEN TO_DATE('${periodoInicio}', 'DD-MM-YYYY') AND TO_DATE('${periodoFinalizacion}', 'DD-MM-YYYY')
+        LEFT JOIN
+              "C##TEST"."deduccion" ded ON ded."id_deduccion" = detDs."id_deduccion"
+  
+        GROUP BY
+              afil."id_afiliado",
+              afil."dni",
+              TRIM(
+                  afil."primer_nombre" || ' ' ||
+                  COALESCE(afil."segundo_nombre", '') || ' ' ||
+                  COALESCE(afil."tercer_nombre", '') || ' ' ||
+                  afil."primer_apellido" || ' ' ||
+                  COALESCE(afil."segundo_apellido", ''))) deducciones ON deducciones."id_afiliado" = beneficios."id_afiliado"
+  WHERE
+      ((deducciones."id_afiliado" IS NOT NULL AND EXISTS (
+                  SELECT detD."id_afiliado"
+                  FROM "C##TEST"."detalle_deduccion" detD
+                  WHERE  detD."estado_aplicacion" = 'COBRADA' AND
+                  detD."id_afiliado" = deducciones."id_afiliado"
+              ))
+      OR
+      (beneficios."id_afiliado" IS NOT NULL AND EXISTS (
+                  SELECT detBA."id_afiliado"
+                  FROM "C##TEST"."detalle_beneficio_afiliado" detBA
+                  LEFT JOIN
+                      "C##TEST"."detalle_beneficio" detBs  ON detBs."id_beneficio_afiliado" = detBA."id_detalle_ben_afil"
+                  WHERE detBs."estado" = 'PAGADA' AND
+                      detBA."id_afiliado" = beneficios."id_afiliado"
+              ))) AND beneficios."Total Beneficio" IS NOT NULL AND
+              beneficios."Total Beneficio" IS NOT NULL
 
       `;
       try {
@@ -171,15 +177,19 @@ FROM
             COALESCE(afil."tercer_nombre", '') || ' ' || 
             afil."primer_apellido" || ' ' || 
             COALESCE(afil."segundo_apellido", '')) AS NOMBRE_COMPLETO,
-            SUM(detBs."monto") AS "Total Beneficio"
+            SUM(detBs."monto_por_periodo") AS "Total Beneficio"
     FROM
         "C##TEST"."afiliado" afil
     INNER JOIN
         "C##TEST"."detalle_afiliado" detAf ON afil."id_afiliado" = detAf."id_afiliado"
+    
     LEFT JOIN
-        "C##TEST"."detalle_beneficio" detBs ON afil."id_afiliado" = detBs."id_afiliado"
+        "C##TEST"."detalle_beneficio_afiliado" detBA ON afil."id_afiliado" = detBA."id_afiliado"
     LEFT JOIN
-        "C##TEST"."beneficio" ben ON ben."id_beneficio" = detBs."id_beneficio" 
+        "C##TEST"."detalle_beneficio" detBs ON detBs."id_beneficio_afiliado" = detBA."id_detalle_ben_afil"
+    LEFT JOIN
+        "C##TEST"."beneficio" ben ON ben."id_beneficio" = detBA."id_beneficio" 
+    
     WHERE
         detBs."estado" = 'INCONSISTENCIA'
     GROUP BY
@@ -189,9 +199,7 @@ FROM
             COALESCE(afil."tercer_nombre", '') || ' ' || 
             afil."primer_apellido" || ' ' || 
             COALESCE(afil."segundo_apellido", '')))  beneficios
-
 FULL OUTER JOIN
-
     (SELECT
         afil."id_afiliado",
         afil."dni",
@@ -254,24 +262,28 @@ FROM
             afil."primer_apellido" || ' ' || 
             COALESCE(afil."segundo_apellido", '')
         ) AS NOMBRE_COMPLETO,
-        SUM(detBs."monto") AS "Total Beneficio"
+        SUM(detBs."monto_por_periodo") AS "Total Beneficio"
     FROM
-        "C##TEST"."detalle_beneficio" detBs
+        "C##TEST"."afiliado" afil
     LEFT JOIN
-        "C##TEST"."afiliado" afil ON afil."id_afiliado" = detBs."id_afiliado"
+        "C##TEST"."detalle_beneficio_afiliado" detBA ON afil."id_afiliado" = detBA."id_afiliado"
+    LEFT JOIN
+        "C##TEST"."detalle_beneficio" detBs  ON detBs."id_beneficio_afiliado" = detBA."id_detalle_ben_afil"
     INNER JOIN
         "C##TEST"."detalle_afiliado" detAf ON afil."id_afiliado" = detAf."id_afiliado"
     LEFT JOIN
-        "C##TEST"."beneficio" ben ON ben."id_beneficio" = detBs."id_beneficio"
+        "C##TEST"."beneficio" ben ON ben."id_beneficio" = detBA."id_beneficio"
     WHERE
         detBs."estado" = 'NO PAGADA' AND
-        detBs."id_afiliado" NOT IN (
+        detBA."id_afiliado" NOT IN (
             SELECT
-                detB."id_afiliado"
+                detBA."id_afiliado"
             FROM
-                "C##TEST"."detalle_beneficio" detB
+                "C##TEST"."detalle_beneficio_afiliado" detBA
+            LEFT JOIN
+                "C##TEST"."detalle_beneficio" detBs  ON detBs."id_beneficio_afiliado" = detBA."id_detalle_ben_afil"
             WHERE
-                detB."estado" NOT IN ('NO PAGADA', 'INCONSISTENCIA')
+                detBs."estado" NOT IN ('NO PAGADA', 'INCONSISTENCIA')
         )  AND
         detBs."estado" != 'INCONSISTENCIA'
     GROUP BY
@@ -324,8 +336,11 @@ FULL OUTER JOIN
         ) AND
         NOT EXISTS (
             SELECT 1
-            FROM "C##TEST"."detalle_beneficio" detB
-            WHERE detB."id_afiliado" = afil."id_afiliado" AND detB."estado" = 'PAGADA'
+                FROM "C##TEST"."detalle_beneficio" detB
+            LEFT JOIN
+                "C##TEST"."detalle_beneficio_afiliado" detBA ON detB."id_beneficio_afiliado" = detBA."id_detalle_ben_afil"
+            WHERE 
+                detBA."id_afiliado" = afil."id_afiliado" AND detB."estado" = 'PAGADA'
         )
     GROUP BY
         afil."id_afiliado",
@@ -482,7 +497,8 @@ FULL OUTER JOIN
       (TO_DATE(CONCAT(detD.anio, LPAD(detD.mes, 2, '0')), 'YYYYMM') BETWEEN TO_DATE('${periodoInicio}', 'DD-MM-YYYY') AND TO_DATE('${periodoFinalizacion}', 'DD-MM-YYYY'))
     `)
     .groupBy('afil.id_afiliado, afil.primer_nombre, afil.dni');
-
+  console.log(queryBuilder.getRawMany());
+  
   return queryBuilder.getRawMany();
   }
 

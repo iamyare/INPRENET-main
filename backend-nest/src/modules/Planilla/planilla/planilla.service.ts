@@ -559,8 +559,8 @@ FULL OUTER JOIN
     }
   }
 
-  async createView(): Promise<void> {
-    /* const createViewQuery = `
+/*   async createView(): Promise<void> {
+    const createViewQuery = `
       CREATE OR REPLACE VIEW vista_planilla_ordinaria AS
       SELECT
   afil."id_afiliado",
@@ -597,11 +597,11 @@ GROUP BY
   afil."id_afiliado",
   afil."dni",
   afil."primer_nombre";
-    `; */let createViewQuery:any ;
+    `; let createViewQuery:any ;
     await this.planillaRepository.query(createViewQuery);
-  }
+  } */
 
-  async createComplementaryView(): Promise<void> {
+/*   async createComplementaryView(): Promise<void> {
     const createViewQuery = `
       CREATE OR REPLACE VIEW vista_planilla_complementaria AS
       SELECT
@@ -684,10 +684,9 @@ GROUP BY
     `;
 
     await this.planillaRepository.query(createViewQuery);
-  }
+  } */
 
 }
-
 
 /*
   SELECT
@@ -719,5 +718,3 @@ GROUP BY
       afil."id_afiliado", afil."primer_nombre", afil."dni"
       ;
 */
-
-

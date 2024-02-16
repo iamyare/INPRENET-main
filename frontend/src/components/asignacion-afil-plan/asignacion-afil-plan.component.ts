@@ -35,7 +35,8 @@ export class AsignacionAfilPlanComponent implements OnInit{
   datosFilasBeneficios : any;
 
   detallePlanilla:any
-  constructor( private _formBuilder: FormBuilder,
+  constructor(
+    private _formBuilder: FormBuilder,
     private planillaService : PlanillaService,
     private svcAfilServ: AfiliadoService,
     private toastr: ToastrService,
@@ -70,7 +71,7 @@ export class AsignacionAfilPlanComponent implements OnInit{
         validationRules: [Validators.required, Validators.pattern(/^(3[01]|[12][0-9]|0?[1-9])-(1[0-2]|0?[1-9])-\d{4} - (3[01]|[12][0-9]|0?[1-9])-(1[0-2]|0?[1-9])-\d{4}$/)]
       },
       {
-        header: 'Total',
+        header: 'Neto',
         col: 'Total',
         isEditable: true
       },

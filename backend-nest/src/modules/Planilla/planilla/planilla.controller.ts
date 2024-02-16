@@ -59,7 +59,7 @@ export class PlanillaController {
     return this.planillaService.obtenerAfilExtraordinaria();
   }
  
-  @Post('create-ordinaria-view')
+  /* @Post('create-ordinaria-view')
   async createView() {
     await this.planillaService.createView();
     return { message: 'Vista creada con éxito' };
@@ -77,7 +77,7 @@ export class PlanillaController {
     await this.planillaService.createExtraOrdinariaView();
     return { message: 'Vista complementaria creada con éxito' };
   }
-
+ */
   
   @Post()
   create(@Body() createPlanillaDto: CreatePlanillaDto) {

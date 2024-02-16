@@ -1,9 +1,10 @@
 import { Type } from "class-transformer";
 import { IsEmail, IsOptional, IsString, IsDateString, IsNumber, IsUUID, IsArray, ValidateNested, IsObject } from "class-validator"
 import { CreatePerfAfilCentTrabDto } from "./create-perfAfilCentTrabs.dto";
-import { CreateBancoDto } from "src/banco/dto/create-banco.dto";
+import { CreateBancoDto } from "src/modules/banco/dto/create-banco.dto";
+import { CreateAfiliadoRelacionadoDto } from "./CreateAfiliadoRelacionadoDto";
 
-export class CreateAfiliadoRelacionadoDto {
+export class CreateAfiliadoDto {
 
     //Datos de tabla Afiliado
     @IsString()
@@ -84,15 +85,48 @@ export class CreateAfiliadoRelacionadoDto {
 
     @IsArray()
     @ValidateNested({ each: true })
-    @IsOptional()
     @Type(() => CreatePerfAfilCentTrabDto)
     perfAfilCentTrabs?: CreatePerfAfilCentTrabDto[];
 
     //datos de banco
-    /* @IsObject()
+    @IsObject()
     @ValidateNested()
     @Type(() => CreateBancoDto)
-    datosBanc: CreateBancoDto; */
+    datosBanc: CreateBancoDto;
+
+    @IsArray()
+    @ValidateNested({ each: true })
+    @Type(() => CreateAfiliadoRelacionadoDto)
+    afiliadosRelacionados: CreateAfiliadoRelacionadoDto[];
+
+    
+    
+    
+
+    //datos de tabla de referencia personal
+    @IsString()
+    @IsOptional()
+    nombre : string;
+    
+    @IsString()
+    @IsOptional()
+    direccion : string;
+    
+    @IsString()
+    @IsOptional()
+    parentesco : string;
+
+    @IsOptional()
+    @IsString()
+    telefono_domicilio : string;
+
+    @IsOptional()
+    @IsString()
+    telefono_trabajo : string;
+    
+    @IsString()
+    @IsOptional()
+    telefono_celular : string;
 
     @IsString()
     @IsOptional()
@@ -104,6 +138,17 @@ export class CreateAfiliadoRelacionadoDto {
 
     @IsString()
     @IsOptional()
-    nombre_provincia?: string;
-    
+    nombre_provincia?: string;    
+
+
 }
+
+/* @IsArray()
+    @ValidateNested({ each: true })
+    @Type(() => CreatePerfAfilCentTrabDto)
+    perfAfilCentTrabs: CreatePerfAfilCentTrabDto[]; */
+
+    /* @IsArray()
+    @ValidateNested({ each: true })
+    @Type(() => CreateHistorialTrabajoDto)
+    historialSalario: CreateHistorialTrabajoDto[]; */

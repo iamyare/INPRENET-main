@@ -7,9 +7,9 @@ import { EntityManager, Repository } from 'typeorm';
 import { Deduccion } from '../deduccion/entities/deduccion.entity';
 import { Institucion } from 'src/modules/Empresarial/institucion/entities/institucion.entity';
 import * as xlsx from 'xlsx';
-import { AfiliadoService } from 'src/afiliado/afiliado.service';
-import { Afiliado } from 'src/afiliado/entities/afiliado';
-import { DetalleAfiliado } from 'src/afiliado/entities/detalle_afiliado.entity';
+import { AfiliadoService } from 'src/modules/afiliado/afiliado.service';
+import { Afiliado } from 'src/modules/afiliado/entities/afiliado';
+import { DetalleAfiliado } from 'src/modules/afiliado/entities/detalle_afiliado.entity';
 import { Planilla } from '../planilla/entities/planilla.entity';
 
 @Injectable()

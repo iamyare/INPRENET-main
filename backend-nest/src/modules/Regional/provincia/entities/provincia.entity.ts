@@ -2,7 +2,7 @@ import { Column, Entity, ManyToOne, OneToMany, PrimaryGeneratedColumn } from "ty
 import { Pais } from "../../pais/entities/pais.entity";
 import { CentroTrabajo } from "src/modules/Empresarial/centro-trabajo/entities/centro-trabajo.entity";
 import { Municipio } from "../../municipio/entities/municipio.entity";
-import { Afiliado } from "src/afiliado/entities/afiliado";
+import { Afiliado } from "src/modules/afiliado/entities/afiliado";
 
 
 @Entity()

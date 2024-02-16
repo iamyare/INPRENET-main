@@ -8,7 +8,7 @@ import * as xlsx from 'xlsx';
 /* import { Afiliado } from 'src/afiliado/entities/detalle_afiliado.entity'; */
 import { Institucion } from 'src/modules/Empresarial/institucion/entities/institucion.entity';
 import { DetalleDeduccion } from '../detalle-deduccion/entities/detalle-deduccion.entity';
-import { Afiliado } from 'src/afiliado/entities/afiliado';
+import { Afiliado } from 'src/modules/afiliado/entities/afiliado';
 
 @Injectable()
 export class DeduccionService {

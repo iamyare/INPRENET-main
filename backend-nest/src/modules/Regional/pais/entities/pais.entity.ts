@@ -1,6 +1,6 @@
 import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 import { Provincia } from "../../provincia/entities/provincia.entity";
-import { Afiliado } from "src/afiliado/entities/afiliado";
+import { Afiliado } from "src/modules/afiliado/entities/afiliado";
 
 @Entity()
 export class Pais {

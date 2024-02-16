@@ -1,4 +1,4 @@
-import { PerfAfilCentTrab } from "src/afiliado/entities/perf_afil_cent_trab";
+import { PerfAfilCentTrab } from "src/modules/afiliado/entities/perf_afil_cent_trab";
 import { Provincia } from "src/modules/Regional/provincia/entities/provincia.entity";
 import { Column, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 

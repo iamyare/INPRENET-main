@@ -4,12 +4,13 @@ import { Column, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColum
 import { Provincia } from "src/modules/Regional/provincia/entities/provincia.entity";
 
 import { ReferenciaPersonalAfiliado } from "./referenciaP-Afiliado";
-import { AfiliadosPorBanco } from "src/banco/entities/afiliados-banco";
+
 import { DetalleDeduccion } from "src/modules/Planilla/detalle-deduccion/entities/detalle-deduccion.entity";
 import { PerfAfilCentTrab } from "./perf_afil_cent_trab";
 import { DetalleAfiliado } from "./detalle_afiliado.entity";
 import { DetalleBeneficio } from "src/modules/Planilla/detalle_beneficio/entities/detalle_beneficio.entity";
 import { DetalleBeneficioAfiliado } from "src/modules/Planilla/detalle_beneficio/entities/detalle_beneficio_afiliado.entity";
+import { AfiliadosPorBanco } from "src/modules/banco/entities/afiliados-banco";
  
 @Entity()
 export class Afiliado {

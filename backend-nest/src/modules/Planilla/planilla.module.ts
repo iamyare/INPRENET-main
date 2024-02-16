@@ -16,10 +16,10 @@ import { DetalleDeduccion } from './detalle-deduccion/entities/detalle-deduccion
 import { DetalleDeduccionService } from './detalle-deduccion/detalle-deduccion.service';
 import { Institucion } from '../Empresarial/institucion/entities/institucion.entity';
 import { TipoPlanillaController } from './tipo-planilla/tipo-planilla.controller';
-import { AfiliadoService } from 'src/afiliado/afiliado.service';
-import { AfiliadoController } from 'src/afiliado/afiliado.controller';
-import { Afiliado } from 'src/afiliado/entities/afiliado';
-import { DetalleAfiliado } from 'src/afiliado/entities/detalle_afiliado.entity';
+import { AfiliadoService } from 'src/modules/afiliado/afiliado.service';
+import { AfiliadoController } from 'src/modules/afiliado/afiliado.controller';
+import { Afiliado } from 'src/modules/afiliado/entities/afiliado';
+import { DetalleAfiliado } from 'src/modules/afiliado/entities/detalle_afiliado.entity';
 import { DetalleBeneficioService } from './detalle_beneficio/detalle_beneficio.service';
 import { DetalleBeneficio } from './detalle_beneficio/entities/detalle_beneficio.entity';
 import { DetalleBeneficioController } from './detalle_beneficio/detalle_beneficio.controller';

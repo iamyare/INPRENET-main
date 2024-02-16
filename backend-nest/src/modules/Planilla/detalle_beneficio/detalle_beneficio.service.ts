@@ -3,7 +3,7 @@ import { isUUID } from 'class-validator';
 import { InjectEntityManager, InjectRepository } from '@nestjs/typeorm';
 import { EntityManager, LessThanOrEqual, MoreThanOrEqual, Not, Repository } from 'typeorm';
 import { Beneficio } from '../beneficio/entities/beneficio.entity';
-import { Afiliado } from 'src/afiliado/entities/afiliado';
+import { Afiliado } from 'src/modules/afiliado/entities/afiliado';
 import { DetalleBeneficio, EstadoEnum } from './entities/detalle_beneficio.entity';
 import { UpdateDetalleBeneficioDto } from './dto/update-detalle_beneficio_planilla.dto';
 import { CreateDetalleBeneficioDto } from './dto/create-detalle_beneficio.dto';

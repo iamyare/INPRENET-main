@@ -1,7 +1,7 @@
 import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn, AfterInsert, getRepository, AfterLoad, Unique, OneToMany } from 'typeorm';
 import { Deduccion } from "../../deduccion/entities/deduccion.entity";
 import { Institucion } from "src/modules/Empresarial/institucion/entities/institucion.entity";
-import { Afiliado } from 'src/afiliado/entities/afiliado';
+import { Afiliado } from 'src/modules/afiliado/entities/afiliado';
 import { Planilla } from '../../planilla/entities/planilla.entity';
 import { IsEnum } from 'class-validator';
 

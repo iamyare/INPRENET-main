@@ -5,7 +5,7 @@ import { InjectEntityManager, InjectRepository } from '@nestjs/typeorm';
 import { DetalleDeduccion } from '../detalle-deduccion/entities/detalle-deduccion.entity';
 import { EntityManager, Repository } from 'typeorm';
 import { Institucion } from 'src/modules/Empresarial/institucion/entities/institucion.entity';
-import { Afiliado } from 'src/afiliado/entities/afiliado';
+import { Afiliado } from 'src/modules/afiliado/entities/afiliado';
 import { Beneficio } from '../beneficio/entities/beneficio.entity';
 import { Deduccion } from '../deduccion/entities/deduccion.entity';
 import { DetalleBeneficio } from '../detalle_beneficio/entities/detalle_beneficio.entity';

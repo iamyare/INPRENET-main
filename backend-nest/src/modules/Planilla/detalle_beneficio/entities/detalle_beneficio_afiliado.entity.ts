@@ -1,7 +1,8 @@
-import { Afiliado } from "src/afiliado/entities/afiliado";
+
 import { Column, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 import { Beneficio } from "../../beneficio/entities/beneficio.entity";
 import { DetalleBeneficio } from "./detalle_beneficio.entity";
+import { Afiliado } from "src/modules/afiliado/entities/afiliado";
 
 @Entity()
 export class DetalleBeneficioAfiliado 

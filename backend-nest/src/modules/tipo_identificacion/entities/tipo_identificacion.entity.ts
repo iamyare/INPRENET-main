@@ -1,4 +1,4 @@
-import { Afiliado } from 'src/afiliado/entities/afiliado';
+import { Afiliado } from 'src/modules/afiliado/entities/afiliado';
 import { Entity, Column, PrimaryGeneratedColumn, OneToOne, OneToMany } from 'typeorm';
 
 @Entity()

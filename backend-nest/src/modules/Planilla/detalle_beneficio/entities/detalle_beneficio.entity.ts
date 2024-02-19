@@ -20,10 +20,17 @@ export class DetalleBeneficio {
     @Column({nullable:true})
     metodo_pago: string;
 
+<<<<<<< HEAD
     @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
+=======
+/*     @Column({ type: 'date', nullable: false })
+    fecha_actual: Date; */
+
+    @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true})
+>>>>>>> 1a5043c79095fa49ec8f4729cfdba24af565e3ea
     monto_por_periodo: number;
     
-    @Column({nullable:true})
+    @Column({nullable:true, default: 0 })
     num_rentas_aplicadas: number;
 
     @ManyToOne(() => Planilla, planilla => planilla.detallebeneficio, { cascade: true })

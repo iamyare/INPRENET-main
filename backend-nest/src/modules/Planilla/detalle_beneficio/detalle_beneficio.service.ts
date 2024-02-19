@@ -79,23 +79,29 @@ export class DetalleBeneficioService {
 
   async getDetalleBeneficiosPorAfiliadoYPlanilla(idAfiliado: string, idPlanilla: string): Promise<any> {
     const query = `
-      SELECT
+    SELECT
         db."id_beneficio_planilla",
-        db."id_afiliado",
-        db."id_beneficio",
+        detBA."id_afiliado",
+        ben."nombre_beneficio",
+        detBA."id_beneficio",
         db."estado",
-        db."modalidad_pago",
-        db."monto",
+        db."metodo_pago",
+        db."monto_por_periodo" AS "monto",
         db."num_rentas_aplicadas",
-        db."periodoInicio",
-        db."periodoFinalizacion",
+        detBA."periodoInicio",
+        detBA."periodoFinalizacion",
         db."id_planilla"
       FROM
         "detalle_beneficio" db
+      INNER JOIN 
+        "detalle_beneficio_afiliado" detBA ON db."id_beneficio_afiliado" = detBA."id_detalle_ben_afil"
+      INNER JOIN 
+        "beneficio" ben ON ben."id_beneficio" = detBA."id_beneficio"
       WHERE
-        db."id_afiliado" = :idAfiliado
+        detBA."id_afiliado" = :idAfiliado
         AND db."id_planilla" = :idPlanilla
     `;
+
     try {
       // Asegúrate de pasar los parámetros como un array en el orden en que aparecen en la consulta
       const detalleBeneficios = await this.entityManager.query(query, [idAfiliado, idPlanilla]);
@@ -356,7 +362,6 @@ async actualizarPlanillaYEstadoDeBeneficio(detalles: { idBeneficioPlanilla: stri
       INNER JOIN "C##TEST"."beneficio" ben ON ben."id_beneficio" = detBA."id_beneficio"
       WHERE detB."estado" = 'INCONSISTENCIA'
     `;
-
     return await this.benAfilRepository.query(query); 
 
       /* return await this.benAfilRepository.createQueryBuilder('detB')

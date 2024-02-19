@@ -64,6 +64,8 @@ export class PlanillaService {
     return this.http.get(`${environment.API_URL}/api/planilla/planillaOrdinaria`, { params });
   }
 
+
+
   getDatosComplementaria(periodoInicio: string, periodoFinalizacion: string): Observable<any> {
     /* let params = new HttpParams()
       .set('periodoInicio', periodoInicio)
@@ -120,5 +122,25 @@ export class PlanillaService {
   // Método para actualizar los datos de los usuarios
   updateUsers(users: any[]) {
     this.usersSource.next(users);
+  }
+
+
+  getPlanillaPrelimiar(idPlanilla: string): Observable<any> {
+    let params = new HttpParams()
+      .set('idPlanilla', idPlanilla)
+    return this.http.get(`${environment.API_URL}/api/planilla/preliminar`, { params });
+  }
+
+  getBeneficiosPrelimiar(idPlanilla: string, idAfiliado: string): Observable<any> {
+    let params = new HttpParams()
+      .set('idAfiliado', idAfiliado)
+      .set('idPlanilla', idPlanilla)
+    return this.http.get(`${environment.API_URL}/api/beneficio-planilla/detallesPreliminar`, { params });
+  }
+  getDeduccionesPrelimiar(idPlanilla: string, idAfiliado: string): Observable<any> {
+    let params = new HttpParams()
+      .set('idAfiliado', idAfiliado)
+      .set('idPlanilla', idPlanilla)
+    return this.http.get(`${environment.API_URL}/api/detalle-deduccion/detallesPreliminar`, { params });
   }
 }

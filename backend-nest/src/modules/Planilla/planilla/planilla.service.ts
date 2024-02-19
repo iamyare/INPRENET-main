@@ -106,8 +106,8 @@ export class PlanillaService {
           "C##TEST"."beneficio" ben ON ben."id_beneficio" = detBA."id_beneficio"
         LEFT JOIN
           "C##TEST"."detalle_beneficio" detBs ON detBA."id_detalle_ben_afil" = detBs."id_beneficio_afiliado"
-          AND detBs."estado" = 'NO PAGADA' AND detBs."num_rentas_aplicadas" <= ben."numero_rentas_max"
-        
+          AND detBs."estado" = 'NO PAGADA' 
+          AND detBs."num_rentas_aplicadas" <= ben."numero_rentas_max"
         GROUP BY
               afil."id_afiliado",
               afil."dni",
@@ -169,8 +169,6 @@ export class PlanillaService {
 
       `;
 
-      console.log(query);
-      
       try {
         return await this.entityManager.query(query);
       } catch (error) {
@@ -205,10 +203,10 @@ FROM
     LEFT JOIN
         "C##TEST"."detalle_beneficio_afiliado" detBA ON afil."id_afiliado" = detBA."id_afiliado"
     LEFT JOIN
-        "C##TEST"."detalle_beneficio" detBs ON detBs."id_beneficio_afiliado" = detBA."id_detalle_ben_afil"
+        "C##TEST"."beneficio" ben ON ben."id_beneficio" = detBA."id_beneficio"
     LEFT JOIN
-        "C##TEST"."beneficio" ben ON ben."id_beneficio" = detBA."id_beneficio" 
-    
+        "C##TEST"."detalle_beneficio" detBs ON detBs."id_beneficio_afiliado" = detBA."id_detalle_ben_afil"
+        AND detBs."num_rentas_aplicadas" <= ben."numero_rentas_max"
     WHERE
         detBs."estado" = 'INCONSISTENCIA'
     GROUP BY
@@ -287,11 +285,12 @@ FROM
     LEFT JOIN
         "C##TEST"."detalle_beneficio_afiliado" detBA ON afil."id_afiliado" = detBA."id_afiliado"
     LEFT JOIN
+        "C##TEST"."beneficio" ben ON ben."id_beneficio" = detBA."id_beneficio"
+    LEFT JOIN
         "C##TEST"."detalle_beneficio" detBs  ON detBs."id_beneficio_afiliado" = detBA."id_detalle_ben_afil"
+        AND detBs."num_rentas_aplicadas" <= ben."numero_rentas_max"
     INNER JOIN
         "C##TEST"."detalle_afiliado" detAf ON afil."id_afiliado" = detAf."id_afiliado"
-    LEFT JOIN
-        "C##TEST"."beneficio" ben ON ben."id_beneficio" = detBA."id_beneficio"
     WHERE
         detBs."estado" = 'NO PAGADA' AND
         detBA."id_afiliado" NOT IN (
@@ -453,7 +452,6 @@ FULL OUTER JOIN
           SUM(COALESCE(detDs."monto_aplicado", 0)) > 0) deducciones
   ON deducciones."id_afiliado" = beneficios."id_afiliado"
       `;
-  
       try {
         const result = await this.entityManager.query(query);
         return result;
@@ -518,7 +516,6 @@ FULL OUTER JOIN
       (TO_DATE(CONCAT(detD.anio, LPAD(detD.mes, 2, '0')), 'YYYYMM') BETWEEN TO_DATE('${periodoInicio}', 'DD-MM-YYYY') AND TO_DATE('${periodoFinalizacion}', 'DD-MM-YYYY'))
     `)
     .groupBy('afil.id_afiliado, afil.primer_nombre, afil.dni');
-
   return queryBuilder.getRawMany();
   }
 
@@ -589,163 +586,4 @@ FULL OUTER JOIN
       throw new InternalServerErrorException('Ocurrió un error al procesar su solicitud');
     }
   }
-
-/*   async createView(): Promise<void> {
-    const createViewQuery = `
-      CREATE OR REPLACE VIEW vista_planilla_ordinaria AS
-      SELECT
-  afil."id_afiliado",
-  afil."dni",
-  afil."primer_nombre",
-  LISTAGG(DISTINCT ben."nombre_beneficio", ',') WITHIN GROUP (ORDER BY ben."id_beneficio") AS "beneficiosNombres",
-  LISTAGG(DISTINCT ded."nombre_deduccion", ',') WITHIN GROUP (ORDER BY ded."id_deduccion") AS "deduccionesNombres"
-FROM
-  "C##TEST"."afiliado" afil
-LEFT JOIN
-  "C##TEST"."detalle_beneficio" detBs ON afil."id_afiliado" = detBs."id_afiliado"
-  AND detBs."estado" = 'NO PAGADA'
-  AND TO_DATE(detBs."periodoInicio", 'DD-MM-YYYY') BETWEEN TO_DATE('${periodoInicio}', 'DD-MM-YYYY') AND TO_DATE('01-01-2025', 'DD-MM-YYYY')
-  AND TO_DATE(detBs."periodoFinalizacion", 'DD-MM-YYYY') BETWEEN TO_DATE('${periodoInicio}', 'DD-MM-YYYY') AND TO_DATE('01-01-2025', 'DD-MM-YYYY')
-LEFT JOIN
-  "C##TEST"."beneficio" ben ON ben."id_beneficio" = detBs."id_beneficio"
-LEFT JOIN
-  "C##TEST"."detalle_deduccion" detDs ON afil."id_afiliado" = detDs."id_afiliado"
-  AND detDs."estado_aplicacion" = 'NO COBRADA'
-  AND TO_DATE(CONCAT(detDs."anio", LPAD(detDs."mes", 2, '0')), 'YYYYMM') BETWEEN TO_DATE('${periodoInicio}', 'DD-MM-YYYY') AND TO_DATE('01-01-2025', 'DD-MM-YYYY')
-LEFT JOIN
-  "C##TEST"."deduccion" ded ON ded."id_deduccion" = detDs."id_deduccion"
-WHERE
-  afil."id_afiliado" IN (
-    SELECT detB."id_afiliado"
-    FROM "C##TEST"."detalle_beneficio" detB
-    WHERE detB."estado" = 'PAGADA'
-    UNION
-    SELECT detD."id_afiliado"
-    FROM "C##TEST"."detalle_deduccion" detD
-    WHERE detD."estado_aplicacion" = 'COBRADA'
-  )
-GROUP BY
-  afil."id_afiliado",
-  afil."dni",
-  afil."primer_nombre";
-    `; let createViewQuery:any ;
-    await this.planillaRepository.query(createViewQuery);
-  } */
-
-/*   async createComplementaryView(): Promise<void> {
-    const createViewQuery = `
-      CREATE OR REPLACE VIEW vista_planilla_complementaria AS
-      SELECT
-        afil."id_afiliado",
-        afil."dni",
-        afil."primer_nombre",
-        LISTAGG(DISTINCT ben."nombre_beneficio", ',') WITHIN GROUP (ORDER BY ben."id_beneficio") AS "beneficiosNombres",
-        LISTAGG(DISTINCT ded."nombre_deduccion", ',') WITHIN GROUP (ORDER BY ded."id_deduccion") AS "deduccionesNombres"
-      FROM
-        "C##TEST"."detalle_beneficio" detBs
-      LEFT JOIN
-        "C##TEST"."afiliado" afil ON afil."id_afiliado" = detBs."id_afiliado"
-      LEFT JOIN
-        "C##TEST"."beneficio" ben ON ben."id_beneficio" = detBs."id_beneficio"
-      LEFT JOIN
-        "C##TEST"."detalle_deduccion" detDs ON afil."id_afiliado" = detDs."id_afiliado"
-      LEFT JOIN
-        "C##TEST"."deduccion" ded ON detDs."id_deduccion" = ded."id_deduccion"
-      WHERE
-        detBs."estado" = 'NO PAGADA' AND detDs."estado_aplicacion" = 'NO COBRADO'
-        AND detBs."id_afiliado" NOT IN (
-            SELECT
-                detB."id_afiliado"
-            FROM
-                "C##TEST"."detalle_beneficio" detB
-            WHERE
-                detB."estado" != 'NO PAGADA'
-        ) AND (
-            detDs."id_afiliado" NOT IN (
-                SELECT detD."id_afiliado"
-                FROM "C##TEST"."detalle_deduccion" detD
-                WHERE "estado_aplicacion" != 'NO COBRADO'
-            )
-        )
-      GROUP BY
-        afil."id_afiliado",
-        afil."dni",
-        afil."primer_nombre"
-    `;
-
-    await this.planillaRepository.query(createViewQuery);
-  }
-
-  async createExtraOrdinariaView(): Promise<void> {
-    const createViewQuery = `
-      CREATE OR REPLACE VIEW vista_planilla_extraordinaria AS
-          SELECT
-          afil."id_afiliado",
-          afil."dni",
-          afil."primer_nombre",
-          -- LISTAGG(DISTINCT ben."id_beneficio", ',') WITHIN GROUP (ORDER BY ben."id_beneficio")  beneficiosIds,
-          LISTAGG(DISTINCT ben."nombre_beneficio", ',') WITHIN GROUP (ORDER BY ben."id_beneficio")  beneficiosNombres,
-          -- LISTAGG(DISTINCT ded."id_deduccion", ',') WITHIN GROUP (ORDER BY ded."id_deduccion")  deduccionesIds,
-          LISTAGG(DISTINCT ded."nombre_deduccion", ',') WITHIN GROUP (ORDER BY ded."id_deduccion")  deduccionesNombres
-      FROM
-          "C##TEST"."afiliado" afil
-      LEFT JOIN
-          "C##TEST"."detalle_deduccion" detD ON afil."id_afiliado" = detD."id_afiliado" AND detD."estado_aplicacion" = 'INCONSISTENCIA'
-      LEFT JOIN
-          "C##TEST"."deduccion" ded ON detD."id_deduccion" = ded."id_deduccion"
-      LEFT JOIN
-          "C##TEST"."detalle_beneficio" detB ON afil."id_afiliado" = detB."id_afiliado" AND detB."estado" = 'INCONSISTENCIA' 
-      LEFT JOIN
-          "C##TEST"."beneficio" ben ON detB."id_beneficio" = ben."id_beneficio"
-      WHERE
-          (
-              TO_DATE(detB."periodoInicio", 'DD-MM-YYYY') BETWEEN TO_DATE(SYSDATE, 'DD-MM-YYYY') AND 
-              TO_DATE('01-02-2024', 'DD-MM-YYYY') AND 
-              TO_DATE(detB."periodoFinalizacion", 'DD-MM-YYYY') BETWEEN TO_DATE(SYSDATE, 'DD-MM-YYYY') AND 
-              TO_DATE('29-02-2024', 'DD-MM-YYYY')
-              AND afil."id_afiliado" = '1'  AND detB."estado" = 'INCONSISTENCIA' 
-          ) OR (
-            TO_DATE(CONCAT(detD."anio", LPAD(detD."mes", 2, '0')), 'YYYYMM') BETWEEN TO_DATE('01-02-2024', 'DD-MM-YYYY') AND 
-            TO_DATE('29-02-2024', 'DD-MM-YYYY') AND 
-            afil."id_afiliado" = '1' AND
-            detD."estado_aplicacion" = 'INCONSISTENCIA'
-          )
-      GROUP BY
-          afil."id_afiliado", afil."primer_nombre", afil."dni"
-    `;
-
-    await this.planillaRepository.query(createViewQuery);
-  } */
-
 }
-
-/*
-  SELECT
-      afil."id_afiliado",
-      afil."dni",
-      afil."primer_nombre",
-      LISTAGG(DISTINCT ben."id_beneficio", ',') WITHIN GROUP (ORDER BY ben."id_beneficio")  beneficiosIds,
-      LISTAGG(DISTINCT ben."nombre_beneficio", ',') WITHIN GROUP (ORDER BY ben."id_beneficio")  beneficiosNombres,
-      LISTAGG(DISTINCT ded."id_deduccion", ',') WITHIN GROUP (ORDER BY ded."id_deduccion")  deduccionesIds,
-      LISTAGG(DISTINCT ded."nombre_deduccion", ',') WITHIN GROUP (ORDER BY ded."id_deduccion")  deduccionesNombres
-  FROM
-      "C##TEST"."afiliado" afil
-  LEFT JOIN
-      "C##TEST"."detalle_deduccion" detD ON afil."id_afiliado" = detD."id_afiliado"
-  LEFT JOIN
-      "C##TEST"."deduccion" ded ON detD."id_deduccion" = ded."id_deduccion"
-  LEFT JOIN
-      "C##TEST"."detalle_beneficio" detB ON afil."id_afiliado" = detB."id_afiliado"
-  LEFT JOIN
-      "C##TEST"."beneficio" ben ON detB."id_beneficio" = ben."id_beneficio"
-  WHERE
-      (
-          TO_DATE(detB."periodoInicio", 'DD-MM-YYYY') BETWEEN TO_DATE(SYSDATE, 'DD-MM-YYYY') AND TO_DATE('${periodoInicio}', 'DD-MM-YYYY')
-          AND TO_DATE(detB."periodoFinalizacion", 'DD-MM-YYYY') BETWEEN TO_DATE(SYSDATE, 'DD-MM-YYYY') AND TO_DATE('${periodoFinalizacion}', 'DD-MM-YYYY')
-      )
-      OR
-      TO_DATE(CONCAT(detD."anio", LPAD(detD."mes", 2, '0')), 'YYYYMM') BETWEEN TO_DATE('${periodoInicio}', 'DD-MM-YYYY') AND TO_DATE('${periodoFinalizacion}', 'DD-MM-YYYY')
-  GROUP BY
-      afil."id_afiliado", afil."primer_nombre", afil."dni"
-      ;
-*/

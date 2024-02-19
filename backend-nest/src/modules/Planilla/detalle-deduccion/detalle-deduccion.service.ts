@@ -35,8 +35,9 @@ export class DetalleDeduccionService {
 
   async getDetallesDeduccionPorAfiliadoYPlanilla(idAfiliado: string, idPlanilla: string): Promise<any> {
     const query = `
-      SELECT
+        SELECT
         dd."id_ded_deduccion",
+        ded."nombre_deduccion",
         dd."id_afiliado",
         dd."id_deduccion",
         dd."id_institucion",
@@ -49,15 +50,18 @@ export class DetalleDeduccionService {
         dd."id_planilla"
       FROM
         "detalle_deduccion" dd
+      INNER JOIN "deduccion" ded ON ded."id_deduccion" = dd."id_deduccion" 
       WHERE
-        dd."id_afiliado" = :idAfiliado
-        AND dd."id_planilla" = :idPlanilla
+        dd."id_afiliado" = '${idAfiliado}'
+        AND dd."id_planilla" = '${idPlanilla}'
     `;
-  
+
     try {
       // Usar un objeto para pasar los parámetros con nombre
-      const parameters: any = { idAfiliado: idAfiliado, idPlanilla: idPlanilla };
-      const detalleDeducciones = await this.entityManager.query(query, parameters);
+      //const parameters: any = { idAfiliado: idAfiliado, idPlanilla: idPlanilla };
+      const detalleDeducciones = await this.entityManager.query(query);
+      console.log(detalleDeducciones);
+      
       return detalleDeducciones;
     } catch (error) {
       this.logger.error(`Error al obtener detalles de deducción por afiliado y planilla: ${error.message}`, error.stack);
@@ -65,7 +69,6 @@ export class DetalleDeduccionService {
     }
   }
   
-
   async getRangoDetalleDeducciones(idAfiliado: string, fechaInicio: string, fechaFin: string): Promise<any> {
     const query = `
       SELECT
@@ -187,10 +190,8 @@ async obtenerDetallesDeduccionPorAfiliado(idAfiliado: string): Promise<any[]> {
     ORDER BY
       afil."id_afiliado",
       ded."id_deduccion"
-  `; 
-
-    console.log(query);
-    
+  `;
+  
     return await this.detalleDeduccionRepository.query(query, [idAfiliado]);
   } catch (error) {
     this.logger.error('Error al obtener detalles de deduccion por afiliado', error.stack);

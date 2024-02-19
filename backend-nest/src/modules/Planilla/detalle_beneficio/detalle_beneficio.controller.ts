@@ -61,11 +61,6 @@ export class DetalleBeneficioController {
     return this.detallebeneficioService.actualizarPlanillaYEstadoDeBeneficio(detalles);
   }
 
-  /* @Post()
-  create(@Body() createDetalleBeneficioDto: CreateDetalleBeneficioDto) {
-    return this.detallebeneficioService.create(createDetalleBeneficioDto);
-  } */
-
   @Get('inconsistencias/:idAfiliado')
   async getInconsistencias(@Param('idAfiliado') idAfiliado: string) {
     return this.detallebeneficioService.findInconsistentBeneficiosByAfiliado(idAfiliado);

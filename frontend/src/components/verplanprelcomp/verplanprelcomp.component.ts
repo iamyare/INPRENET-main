@@ -18,7 +18,7 @@ import { convertirFecha } from 'src/app/shared/functions/formatoFecha';
 })
 export class VerplanprelcompComponent implements OnInit{
   convertirFecha = convertirFecha;
-
+  idPlanilla = ""
   dataPlan : any;
   filas: any;
   tiposPlanilla: any[] = [];
@@ -96,7 +96,12 @@ export class VerplanprelcompComponent implements OnInit{
             next: async (response) => {
               if (response) {
                 this.detallePlanilla = response;
-                /* this.datosTabl = await this.getFilas(response.periodoInicio, response.periodoFinalizacion); */
+                this.datosTabl = await this.getFilas(response.id_planilla);
+                console.log(response);
+
+                this.idPlanilla = response.id_planilla
+                console.log(this.datosTabl);
+
                 this.verDat = true;
 
               } else {
@@ -127,28 +132,10 @@ export class VerplanprelcompComponent implements OnInit{
       }
     };
 
-    getFilas = async (periodoInicio: string, periodoFinalizacion: string) => {
+    getFilas = async (id_planilla: string) => {
       try {
+          const data = await this.planillaService.getPlanillaPrelimiar(id_planilla).toPromise();
 
-        if (this.detallePlanilla.nombre_planilla == "COMPLEMENTARIA"){
-          const data = await this.planillaService.getDatosComplementaria(periodoInicio, periodoFinalizacion).toPromise();
-          this.dataPlan = data.map((item: any) => {
-            return {
-              id_afiliado: item.id_afiliado,
-              dni: item.dni,
-              NOMBRE_COMPLETO: item.NOMBRE_COMPLETO,
-              periodoInicio : periodoInicio,
-              periodoFinalizacion : periodoFinalizacion,
-              "Total Beneficio": item["Total Beneficio"],
-              "Total Deducciones": item["Total Deducciones"],
-              "Total": item["Total Beneficio"] - item["Total Deducciones"],
-              tipo_afiliado: item.tipo_afiliado,
-              BENEFICIOSIDS: item.BENEFICIOSIDS,
-              beneficiosNombres: item.beneficiosNombres,
-            };
-          });
-        }else if (this.detallePlanilla.nombre_planilla == "ORDINARIA"){
-          const data = await this.planillaService.getDatosOrdinaria(periodoInicio, periodoFinalizacion).toPromise();
           this.dataPlan = data.map((item: any) => {
             return {
               id_afiliado: item.id_afiliado,
@@ -157,37 +144,11 @@ export class VerplanprelcompComponent implements OnInit{
               "Total Beneficio": item["Total Beneficio"],
               "Total Deducciones": item["Total Deducciones"],
               "Total": item["Total Beneficio"] - item["Total Deducciones"],
-              periodoInicio : periodoInicio,
-              periodoFinalizacion : periodoFinalizacion,
               tipo_afiliado: item.tipo_afiliado,
               BENEFICIOSIDS: item.BENEFICIOSIDS,
               beneficiosNombres: item.beneficiosNombres,
-              DEDUCCIONESIDS: item.DEDUCCIONESIDS,
-              deduccionesNombres: item.deduccionesNombres,
             };
           });
-        }else if (this.detallePlanilla.nombre_planilla == "EXTRAORDINARIA"){
-          const data = await this.planillaService.getDatosExtraordinaria(periodoInicio, periodoFinalizacion).toPromise();
-          this.dataPlan = data.map((item: any) => {
-            return {
-              id_afiliado: item.id_afiliado,
-              dni: item.dni,
-              NOMBRE_COMPLETO: item.NOMBRE_COMPLETO,
-              "Total Beneficio": item["Total Beneficio"],
-              "Total Deducciones": item["Total Deducciones"],
-              "Total": item["Total Beneficio"] - item["Total Deducciones"],
-              periodoInicio : periodoInicio,
-              periodoFinalizacion : periodoFinalizacion,
-              tipo_afiliado: item.tipo_afiliado,
-              BENEFICIOSIDS: item.BENEFICIOSIDS,
-              beneficiosNombres: item.beneficiosNombres,
-              DEDUCCIONESIDS: item.DEDUCCIONESIDS,
-              deduccionesNombres: item.deduccionesNombres,
-            };
-          });
-
-        }
-
         return this.dataPlan;
       } catch (error) {
         console.error("Error al obtener datos de deducciones", error);
@@ -210,8 +171,7 @@ export class VerplanprelcompComponent implements OnInit{
         data: { logs: logs, type: 'deduccion' } // Asegúrate de pasar el 'type' adecuado
       });
 
-      if (this.detallePlanilla.nombre_planilla === 'EXTRAORDINARIA') {
-        this.deduccionesService.findInconsistentDeduccionesByAfiliado(row.id_afiliado).subscribe({
+        this.planillaService.getDeduccionesPrelimiar(this.idPlanilla, row.id_afiliado ).subscribe({
           next: (response) => {
             logs.push({ message: 'Datos De Deducciones Inconsistentes:', detail: response });
             openDialog();
@@ -222,30 +182,6 @@ export class VerplanprelcompComponent implements OnInit{
           }
         });
 
-      } else if(this.detallePlanilla.nombre_planilla === 'ORDINARIA') {
-        this.deduccionesService.getDetalleDeduccionesPorRango(row.id_afiliado, row.periodoInicio, row.periodoFinalizacion).subscribe({
-          next: (response) => {
-            logs.push({ message: 'Datos De Deducciones:', detail: response });
-            openDialog();
-          },
-          error: (error) => {
-            logs.push({ message: 'Error al obtener las deducciones:', detail: error });
-            openDialog();
-          }
-        });
-
-      } else if(this.detallePlanilla.nombre_planilla === 'COMPLEMENTARIA') {
-        this.deduccionesService.obtenerDetallesDeduccionComplePorAfiliado(row.id_afiliado).subscribe({
-          next: (response) => {
-            logs.push({ message: 'Datos De Deducciones Complementarias:', detail: response });
-            openDialog();
-          },
-          error: (error) => {
-            logs.push({ message: 'Error al obtener las deducciones complementarias:', detail: error });
-            openDialog();
-          }
-        });
-      }
     }
 
     /* Maneja los beneficios */
@@ -260,8 +196,7 @@ export class VerplanprelcompComponent implements OnInit{
         data: { logs: logs, type: 'beneficio' }
       });
 
-      if (this.detallePlanilla.nombre_planilla === 'EXTRAORDINARIA') {
-        this.beneficiosService.obtenerDetallesExtraordinariaPorAfil(row.id_afiliado).subscribe({
+        this.planillaService.getBeneficiosPrelimiar(this.idPlanilla, row.id_afiliado).subscribe({
           next: (response) => {
             logs.push({ message: 'Datos De Beneficios Inconsistentes:', detail: response });
             openDialog();
@@ -272,31 +207,7 @@ export class VerplanprelcompComponent implements OnInit{
           }
         });
 
-      } else if(this.detallePlanilla.nombre_planilla === 'ORDINARIA') {
-        this.beneficiosService.obtenerDetallesOrdinariaBeneficioPorAfil(row.id_afiliado, row.periodoInicio, row.periodoFinalizacion).subscribe({
-          next: (response) => {
-            logs.push({ message: 'Datos De Beneficios: ', detail: response });
-            openDialog();
-          },
-          error: (error) => {
-            logs.push({ message: 'Error al obtener los beneficios:', detail: error });
-            openDialog();
-          }
-        });
 
-      } else if(this.detallePlanilla.nombre_planilla === 'COMPLEMENTARIA') {
-        this.beneficiosService.obtenerDetallesBeneficioComplePorAfiliado(row.id_afiliado).subscribe({
-          next: (response) => {
-            logs.push({ message: 'Datos De Deducciones Complementarias:', detail: response });
-            openDialog();
-          },
-          error: (error) => {
-            logs.push({ message: 'Error al obtener las deducciones complementarias:', detail: error });
-            openDialog();
-          }
-        });
-
-      }
     }
 
     openLogDialog(logs: any[]) {

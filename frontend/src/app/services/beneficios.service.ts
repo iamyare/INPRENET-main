@@ -104,7 +104,7 @@ export class BeneficiosService {
   }
 
   asigBeneficioAfil(data:TipoBeneficio): Observable<any>{
-    var url= `${environment.API_URL}/api/beneficio-planilla`;
+    var url= `${environment.API_URL}/api/beneficio-planilla/nuevoDetalle`;
 
     return this.http.post<TipoBeneficio>(
       url,

@@ -38,11 +38,15 @@ export class NuevoBeneficioAfilComponent implements OnInit{
       { type: 'text', label: 'DNI', name: 'dni', validations: [Validators.required, Validators.minLength(13), Validators.maxLength(14)] },
       { type: 'daterange', label: 'Periodo', name: 'periodo', validations: [Validators.required]},
       {
-        type: 'dropdown', label: 'Tipo de beneficio', name: 'tipo_beneficio',
+        type: 'dropdown', label: 'Tipo de beneficio', name: 'nombre_beneficio',
         options: this.tiposBeneficios,
         validations: [Validators.required]
       },
-      { type: 'number', label: 'monto', name: 'monto', validations: [Validators.required]},
+      { type: 'number', label: 'Monto total', name: 'monto_total', validations: [Validators.required]},
+      { type: 'dropdown', label: 'Metodo de pago', name: 'metodo_pago',
+       options : [{label:'Cheque', value: 'Cheque'}, {label:'Transferencia', value: 'Transferencia' }] ,validations: [Validators.required]},
+      { type: 'number', label: 'Monto por periodo', name: 'monto_por_periodo', validations: [Validators.required]},
+
     ];
   }
 
@@ -94,14 +98,8 @@ export class NuevoBeneficioAfilComponent implements OnInit{
         periodoInicio: startDateFormatted,
         periodoFinalizacion: endDateFormatted
       };
-
-      console.log(datosFormateados);
-
-
       delete datosFormateados.periodo;
-
         this.datosFormateados = datosFormateados;
-
     } else {
         console.error('La propiedad periodo no está definida en el evento');
     }

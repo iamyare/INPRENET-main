@@ -216,7 +216,9 @@ export class AsignacionAfilPlanComponent implements OnInit{
 
     if (this.detallePlanilla.nombre_planilla === 'EXTRAORDINARIA') {
       this.deduccionesService.findInconsistentDeduccionesByAfiliado(row.id_afiliado).subscribe({
+
         next: (response) => {
+          console.log(response);
           logs.push({ message: 'Datos De Deducciones Inconsistentes:', detail: response });
           openDialog();
         },

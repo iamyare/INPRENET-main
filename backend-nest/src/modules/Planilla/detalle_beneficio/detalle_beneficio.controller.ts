@@ -8,6 +8,20 @@ import { CreateDetalleBeneficioDto } from './dto/create-detalle_beneficio.dto';
 export class DetalleBeneficioController {
   constructor(private readonly detallebeneficioService: DetalleBeneficioService) {}
 
+  @Post('nuevoDetalle')
+  async createDetalleBeneficioAfiliado(@Body() createDetalleBeneficioDto: CreateDetalleBeneficioDto) {
+    try {
+      const nuevoDetalle = await this.detallebeneficioService.createDetalleBeneficioAfiliado(createDetalleBeneficioDto);
+      return { 
+        statusCode: HttpStatus.CREATED,
+        message: 'Detalle de beneficio afiliado creado exitosamente',
+        data: nuevoDetalle
+      };
+    } catch (error) {
+      throw new BadRequestException(error.message);
+    }
+  }
+
   @Get('detallesPreliminar')
   async getDetalleBeneficiosPreliminar(
     @Query('idAfiliado') idAfiliado: string,
@@ -49,10 +63,10 @@ export class DetalleBeneficioController {
     return this.detallebeneficioService.actualizarPlanillaYEstadoDeBeneficio(detalles);
   }
 
-  @Post()
+  /* @Post()
   create(@Body() createDetalleBeneficioDto: CreateDetalleBeneficioDto) {
     return this.detallebeneficioService.create(createDetalleBeneficioDto);
-  }
+  } */
 
   @Get('inconsistencias/:idAfiliado')
   async getInconsistencias(@Param('idAfiliado') idAfiliado: string) {

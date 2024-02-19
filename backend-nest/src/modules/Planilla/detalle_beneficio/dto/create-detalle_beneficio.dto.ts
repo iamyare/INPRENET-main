@@ -10,10 +10,10 @@ export class CreateDetalleBeneficioDto {
     estado?: string;
 
     @IsString()
-    beneficio: string;
+    nombre_beneficio: string;
 
     @IsString()
-    afiliado: string;
+    dni: string;
 
     @IsString()
     periodoInicio: string;
@@ -22,9 +22,16 @@ export class CreateDetalleBeneficioDto {
     periodoFinalizacion: string;
 
     @IsNumber()
-    monto: number;
+    monto_total: number;
+
+    @IsOptional()
+    @IsNumber()
+    num_rentas_aplicadas?: number;
 
     @IsNumber()
-    num_rentas_aplicadas: number;
+    monto_por_periodo:number;
+
+    @IsString()
+    metodo_pago: string;
 
 }

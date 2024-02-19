@@ -8,6 +8,7 @@ import { DetalleBeneficio, EstadoEnum } from './entities/detalle_beneficio.entit
 import { UpdateDetalleBeneficioDto } from './dto/update-detalle_beneficio_planilla.dto';
 import { CreateDetalleBeneficioDto } from './dto/create-detalle_beneficio.dto';
 import { Planilla } from '../planilla/entities/planilla.entity';
+import { DetalleBeneficioAfiliado } from './entities/detalle_beneficio_afiliado.entity';
 
 @Injectable()
 export class DetalleBeneficioService {
@@ -22,10 +23,61 @@ export class DetalleBeneficioService {
   private readonly benAfilRepository : Repository<DetalleBeneficio>,
   @InjectRepository(Planilla)
   private planillaRepository: Repository<Planilla>,
+  @InjectRepository(DetalleBeneficioAfiliado)
+  private detalleBeneficioAfiliadoRepository: Repository<DetalleBeneficioAfiliado>,
   @InjectEntityManager() private readonly entityManager: EntityManager
   ){
 
   }
+
+  async createDetalleBeneficioAfiliado(datos: CreateDetalleBeneficioDto): Promise<any> {
+    return await this.entityManager.transaction(async manager => {
+        try {
+            const afiliado = await manager.findOne(Afiliado, { where: { dni: datos.dni } });
+            if (!afiliado) {
+                throw new BadRequestException('Afiliado no encontrado');
+            }
+
+            const beneficio = await manager.findOne(Beneficio, { where: { nombre_beneficio: datos.nombre_beneficio } });
+            if (!beneficio) {
+                throw new BadRequestException('Tipo de beneficio no encontrado');
+            }
+
+            // Asumimos que convertirCadenaAFecha es una función que convierte una cadena de fecha en formato DD-MM-YYYY a un objeto Date
+        const periodoInicio = this.convertirCadenaAFecha(datos.periodoInicio);
+        const periodoFinalizacion = this.convertirCadenaAFecha(datos.periodoFinalizacion);
+
+        // Verificar que las fechas sean válidas
+        if (!periodoInicio || !periodoFinalizacion) {
+            throw new BadRequestException('Formato de fecha inválido. Usa DD-MM-YYYY.');
+        }
+
+        const nuevoDetalleAfiliado = new DetalleBeneficioAfiliado();
+        nuevoDetalleAfiliado.afiliado = afiliado;
+        nuevoDetalleAfiliado.beneficio = beneficio;
+        nuevoDetalleAfiliado.periodoInicio = periodoInicio;
+        nuevoDetalleAfiliado.periodoFinalizacion = periodoFinalizacion;
+        nuevoDetalleAfiliado.monto_total = datos.monto_total;
+
+            const detalleAfiliadoGuardado = await manager.save(nuevoDetalleAfiliado);
+
+            const nuevoDetalleBeneficio = manager.create(DetalleBeneficio, {
+                detalleBeneficioAfiliado: detalleAfiliadoGuardado,
+                metodo_pago: datos.metodo_pago,
+                monto_por_periodo: datos.monto_por_periodo,
+            });
+
+            await manager.save(nuevoDetalleBeneficio);
+
+            return { detalleAfiliadoGuardado, nuevoDetalleBeneficio };
+        } catch (error) {
+            this.logger.error(`Error al crear DetalleBeneficioAfiliado y DetalleBeneficio: ${error.message}`, error.stack);
+            throw new InternalServerErrorException('Error al crear registros, por favor intente más tarde.');
+        }
+    });
+}
+
+
 
   async getDetalleBeneficiosPorAfiliadoYPlanilla(idAfiliado: string, idPlanilla: string): Promise<any> {
     const query = `
@@ -192,8 +244,8 @@ async actualizarPlanillaYEstadoDeBeneficio(detalles: { idBeneficioPlanilla: stri
 }
 
 
-  async create(datos: any): Promise<any> {
-    /* try {
+  /* async create(datos: any): Promise<any> {
+    try {
       const afiliado = await this.afiliadoRepository.findOne({
         where: { dni: datos.dni },
       });
@@ -232,8 +284,8 @@ async actualizarPlanillaYEstadoDeBeneficio(detalles: { idBeneficioPlanilla: stri
       return await this.benAfilRepository.save(nuevoDetalle);
     } catch (error) {
       this.handleException(error);
-    } */
-  }
+    }
+  } */
 
   private convertirCadenaAFecha(cadena: string): Date | null {
     const partes = cadena.split('-');

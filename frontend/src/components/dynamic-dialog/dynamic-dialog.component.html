@@ -18,9 +18,9 @@
           <td mat-cell *matCellDef="let element"> {{ element.id_ded_deduccion }} </td>
         </ng-container>
 
-        <ng-container matColumnDef="nombre_deduccion" *ngIf="displayedColumns.includes('nombre_deduccion')">
+        <ng-container matColumnDef="deduccion" *ngIf="displayedColumns.includes('deduccion')">
           <th mat-header-cell *matHeaderCellDef> Nombre Deduccion </th>
-          <td mat-cell *matCellDef="let element"> {{ element.nombre_deduccion }} </td>
+          <td mat-cell *matCellDef="let element"> {{ element.deduccion.nombre_deduccion }} </td>
         </ng-container>
 
         <ng-container matColumnDef="id_beneficio_planilla" *ngIf="displayedColumns.includes('id_beneficio_planilla')">

@@ -57,7 +57,6 @@ export class NuevoBeneficioComponent {
   }
 
   limpiarFormulario(): void {
-    // Utiliza la referencia al componente DynamicFormComponent para resetear el formulario
     if (this.dynamicForm) {
       this.dynamicForm.form.reset();
     }

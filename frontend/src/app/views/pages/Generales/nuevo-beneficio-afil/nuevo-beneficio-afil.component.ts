@@ -53,7 +53,6 @@ export class NuevoBeneficioAfilComponent implements OnInit{
   getTipoBen = async () => {
     try {
       const beneficios = await this.svcBeneficioServ.getTipoBeneficio().toPromise();
-
       const tiposBen = beneficios.map((item: any) => {
         this.tiposBeneficios.push({ label: `${item.nombre_beneficio}`, value: `${item.nombre_beneficio}` })
         return {
@@ -69,7 +68,6 @@ export class NuevoBeneficioAfilComponent implements OnInit{
           dia_duracion: item.dia_duracion,
         };
       });
-
       return tiposBen;
     } catch (error) {
       console.error("Error al obtener datos de beneficios", error);

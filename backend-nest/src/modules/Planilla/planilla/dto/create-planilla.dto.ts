@@ -20,5 +20,8 @@ export class CreatePlanillaDto {
     @IsOptional({ message: '' })
     nombre_planilla?: string;
 
+    @IsString()
+    fecha_cierre?: any;
+
 
 }

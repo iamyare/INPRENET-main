@@ -120,7 +120,7 @@ export class PlanillaController {
 
   @Patch(':id')
   update(@Param('id') id: string, @Body() updatePlanillaDto: UpdatePlanillaDto) {
-    return this.planillaService.update(+id, updatePlanillaDto);
+    return this.planillaService.update(id, updatePlanillaDto);
   }
 
   @Delete(':id')

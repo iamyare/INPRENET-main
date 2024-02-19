@@ -40,6 +40,22 @@ export class PlanillaService {
     private detalleBeneficioService: DetalleBeneficioService,
     private detalleDeduccionService: DetalleDeduccionService,){};
 
+    async update(id_planilla: string, updatePlanillaDto: UpdatePlanillaDto): Promise<Planilla> {
+      const planilla = await this.planillaRepository.preload({
+          id_planilla: id_planilla,
+          ...updatePlanillaDto
+      });
+  
+      if (!planilla) throw new NotFoundException(`Planilla con el ID: ${id_planilla} no encontrada`);
+  
+      try {
+          await this.planillaRepository.save(planilla);
+          return planilla;
+      } catch (error) {
+          this.handleException(error); // Asegúrate de tener un método para manejar las excepciones
+      }
+  }
+
     async actualizarBeneficiosYDeduccionesConTransaccion(detallesBeneficios: any[], detallesDeducciones: any[]): Promise<void> {
       await this.entityManager.transaction(async (transactionalEntityManager) => {
           try {
@@ -560,10 +576,6 @@ FULL OUTER JOIN
     if (!Planilla) {
       throw new NotFoundException(`planilla con ${term} no encontrado.`);
     }
-  }
-  
-  update(id: number, updatePlanillaDto: UpdatePlanillaDto) {
-    return `This action updates a #${id} planilla`;
   }
 
   remove(id: number) {

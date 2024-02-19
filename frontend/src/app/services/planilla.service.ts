@@ -9,17 +9,23 @@ import { environment } from 'src/environments/environment';
 export class PlanillaService {
   constructor(private http: HttpClient) { }
 
+  updatePlanilla(idPlanilla: string, planillaData: any): Observable<any> {
+    const url = `${environment.API_URL}/api/planilla/${idPlanilla}`;
+    return this.http.put(url, planillaData).pipe(
+      catchError(this.handleError)
+    );
+  }
+
   actualizarBeneficiosYDeducciones(detalles: { detallesBeneficios: any[], detallesDeducciones: any[] }): Observable<any> {
     const url = `${environment.API_URL}/api/planilla/actualizar-transacciones`; // Asegúrate de que la ruta coincida con tu backend
     return this.http.post(url, detalles).pipe(
-      catchError(this.handleError) // Implementa una función de manejo de errores
+      catchError(this.handleError)
     );
   }
 
   private handleError(error: any): Observable<never> {
-    // Aquí puedes implementar tu propia lógica de manejo de errores
     console.error('An error occurred:', error.error);
-    throw 'Error en la llamada HTTP'; // Modifica esto para manejar el error como prefieras
+    throw 'Error en la llamada HTTP';
   }
 
 

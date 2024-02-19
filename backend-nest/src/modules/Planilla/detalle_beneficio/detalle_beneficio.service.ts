@@ -77,8 +77,6 @@ export class DetalleBeneficioService {
     });
 }
 
-
-
   async getDetalleBeneficiosPorAfiliadoYPlanilla(idAfiliado: string, idPlanilla: string): Promise<any> {
     const query = `
       SELECT
@@ -108,8 +106,6 @@ export class DetalleBeneficioService {
     }
   }
   
-
-
   async getRangoDetalleBeneficios(idAfiliado: string, fechaInicio: string, fechaFin: string): Promise<any> {
     const query = `
     SELECT

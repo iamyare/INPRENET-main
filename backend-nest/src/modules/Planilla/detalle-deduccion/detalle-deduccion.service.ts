@@ -128,7 +128,7 @@ async findInconsistentDeduccionesByAfiliado(idAfiliado: string) {
     FROM 
       "C##TEST"."deduccion" ded
     INNER JOIN  
-      "C##TEST"."detalle_deduccion" detD ON ded."id_deduccion" = detD."id_ded_deduccion"
+      "C##TEST"."detalle_deduccion" detD ON ded."id_deduccion" = detD."id_deduccion"
     WHERE 
       detD."estado_aplicacion" = 'INCONSISTENCIA' AND detD."id_afiliado" = '${idAfiliado}'
     `;

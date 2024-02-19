@@ -1,4 +1,4 @@
-import { Component, ViewChild } from '@angular/core';
+import { Component, ViewChild, OnInit } from '@angular/core';
 import { ValidatorFn, Validators } from '@angular/forms';
 import { BeneficiosService } from '../../../../services/beneficios.service';
 import { ToastrService } from 'ngx-toastr';
@@ -9,21 +9,28 @@ import { DynamicFormComponent } from '@docs-components/dynamic-form/dynamic-form
   templateUrl: './nuevo-beneficio.component.html',
   styleUrl: './nuevo-beneficio.component.scss'
 })
-export class NuevoBeneficioComponent {
+export class NuevoBeneficioComponent implements OnInit{
   @ViewChild(DynamicFormComponent) dynamicForm!: DynamicFormComponent;
   data:any
 
+  myFormFields:FieldConfig[] = []
   constructor(private SVCBeneficios:BeneficiosService, private toastr: ToastrService ,){}
 
-  myFormFields: FieldConfig[] = [
-    { type: 'text', label: 'Nombre de beneficio', name: 'nombre_beneficio', validations: [] },
-    { type: 'text', label: 'Descripción de beneficio', name: 'descripcion_beneficio', validations: [] },
-    { type: 'number', label: 'numero de rentas maximas', name: 'numero_rentas_max', validations: [] },
-    { type: 'dropdown', label: 'Periodicidad', name: 'periodicidad', validations: [], options:[{label:"vitalicio", value:"vitalicio"},
-    {label:"definido", value:"Definido"}] }
-  ];
+  ngOnInit(): void {
+    this.myFormFields = [
+      { type: 'text', label: 'Nombre de beneficio', name: 'nombre_beneficio', validations: [Validators.required], hidden:false },
+      { type: 'dropdown', label: 'Periodicidad', name: 'periodicidad', validations: [Validators.required], options:[{label:"vitalicio", value:"vitalicio"}, {label:"definido", value:"Definido"}] , hidden:false},
+      { type: 'text', label: 'Descripción de beneficio', name: 'descripcion_beneficio', validations: [Validators.required], hidden:false},
+      { type: 'number', label: 'Número de rentas máximas', name: 'numero_rentas_max', validations: [], hidden: true},
+    ];
+  }
 
   obtenerDatos(event:any):any{
+    if (event.value.periodicidad == "vitalicio"){
+      this.myFormFields[3].hidden = true
+    }else {
+      this.myFormFields[3].hidden = false
+    }
     this.data = event;
   }
 

@@ -23,7 +23,7 @@ export class NuevoTipoPlanillaComponent {
   }
   myFormFields: FieldConfig[] = [
     { type: 'text', label: 'Nombre de planilla', name: 'nombre_planilla', validations: [Validators.required,Validators.maxLength(50)] },
-    { type: 'text', label: 'Descripción de planilla', name: 'descripcion', validations: [] },
+    { type: 'text', label: 'Descripción de planilla', name: 'descripcion', validations: [Validators.required] },
   ];
 
   obtenerDatos(event: any): any {

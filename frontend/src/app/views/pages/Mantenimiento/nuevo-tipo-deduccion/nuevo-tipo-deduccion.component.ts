@@ -18,12 +18,12 @@ export class NuevoTipoDeduccionComponent {
         { label: 'Inprema', value: 'Inprema' },
         { label: 'Otro', value: 'otro' }
       ],
-    validations: []
+    validations: [Validators.required]
     },
-    { type: 'text', label: 'Nombre', name: 'nombre_deduccion', validations: [] },
-    { type: 'text', label: 'Descripción', name: 'descripcion_deduccion', validations: [] },
-    { type: 'text', label: 'Codigo de deduccion', name: 'codigo_deduccion', validations: [] },
-    { type: 'number', label: 'prioridad', name: 'prioridad', validations: [] },
+    { type: 'text', label: 'Nombre', name: 'nombre_deduccion', validations: [Validators.required] },
+    { type: 'text', label: 'Descripción', name: 'descripcion_deduccion', validations: [Validators.required] },
+    { type: 'text', label: 'Código de deducción', name: 'codigo_deduccion', validations: [Validators.required] },
+    { type: 'number', label: 'Prioridad', name: 'Prioridad', validations: [Validators.required] },
   ];
 
   data:any

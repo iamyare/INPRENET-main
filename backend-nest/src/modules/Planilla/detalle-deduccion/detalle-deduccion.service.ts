@@ -97,6 +97,8 @@ export class DetalleDeduccionService {
       AND
         dd."estado_aplicacion" = 'NO COBRADA'
     `;
+    console.log(query);
+    
   
     try {
       const parametros :any = {
@@ -141,51 +143,54 @@ async findInconsistentDeduccionesByAfiliado(idAfiliado: string) {
 async obtenerDetallesDeduccionPorAfiliado(idAfiliado: string): Promise<any[]> {
   try {
     const query = `
-    SELECT
-    detD."id_ded_deduccion",
-    detD."monto_total",
-    detD."monto_aplicado",
-    detD."estado_aplicacion",
-    detD."anio",
-    detD."mes",
-    afil."id_afiliado",
-    afil."dni",
-    TRIM(
-        afil."primer_nombre" || ' ' || 
-        COALESCE(afil."segundo_nombre", '') || ' ' || 
-        COALESCE(afil."tercer_nombre", '') || ' ' || 
-        afil."primer_apellido" || ' ' || 
-        COALESCE(afil."segundo_apellido", '')
-    ) AS "nombre_completo",
-    ded."nombre_deduccion",
-    ded."descripcion_deduccion",
-    ded."tipo_deduccion",
-    ded."codigo_deduccion"
-  FROM
-    "detalle_deduccion" detD
-  JOIN
-    "deduccion" ded ON detD."id_deduccion" = ded."id_deduccion"
-  JOIN
-    "afiliado" afil ON detD."id_afiliado" = afil."id_afiliado"
-  WHERE
-    detD."id_afiliado" = :1 AND
-    detD."estado_aplicacion" != 'INCONSISTENCIA' AND
-    detD."id_afiliado" NOT IN (
-        SELECT detD2."id_afiliado"
-        FROM "detalle_deduccion" detD2
-        WHERE detD2."estado_aplicacion" = 'COBRADA'
-    )
-    AND detD."id_afiliado" NOT IN (
-        SELECT dedBA."id_afiliado"
-        FROM "detalle_beneficio" detB
-        JOIN
-            "detalle_beneficio_afiliado" dedBA ON detB."id_beneficio_afiliado" = dedBA."id_detalle_ben_afil"
-        WHERE detB."estado" = 'PAGADA'
-    )
-  ORDER BY
-    afil."id_afiliado",
-    ded."id_deduccion"
-    `; 
+      SELECT
+      detD."id_ded_deduccion",
+      detD."monto_total",
+      detD."monto_aplicado",
+      detD."estado_aplicacion",
+      detD."anio",
+      detD."mes",
+      afil."id_afiliado",
+      afil."dni",
+      TRIM(
+          afil."primer_nombre" || ' ' || 
+          COALESCE(afil."segundo_nombre", '') || ' ' || 
+          COALESCE(afil."tercer_nombre", '') || ' ' || 
+          afil."primer_apellido" || ' ' || 
+          COALESCE(afil."segundo_apellido", '')
+      ) AS "nombre_completo",
+      ded."nombre_deduccion",
+      ded."descripcion_deduccion",
+      ded."tipo_deduccion",
+      ded."codigo_deduccion"
+    FROM
+      "detalle_deduccion" detD
+    JOIN
+      "deduccion" ded ON detD."id_deduccion" = ded."id_deduccion"
+    JOIN
+      "afiliado" afil ON detD."id_afiliado" = afil."id_afiliado"
+    WHERE
+      detD."id_afiliado" = :1 AND
+      detD."estado_aplicacion" != 'INCONSISTENCIA' AND
+      detD."id_afiliado" NOT IN (
+          SELECT detD2."id_afiliado"
+          FROM "detalle_deduccion" detD2
+          WHERE detD2."estado_aplicacion" = 'COBRADA'
+      )
+      AND detD."id_afiliado" NOT IN (
+          SELECT dedBA."id_afiliado"
+          FROM "detalle_beneficio" detB
+          JOIN
+              "detalle_beneficio_afiliado" dedBA ON detB."id_beneficio_afiliado" = dedBA."id_detalle_ben_afil"
+          WHERE detB."estado" = 'PAGADA'
+      )
+    ORDER BY
+      afil."id_afiliado",
+      ded."id_deduccion"
+  `; 
+
+    console.log(query);
+    
     return await this.detalleDeduccionRepository.query(query, [idAfiliado]);
   } catch (error) {
     this.logger.error('Error al obtener detalles de deduccion por afiliado', error.stack);

@@ -231,6 +231,8 @@ export class AsignacionAfilPlanComponent implements OnInit{
     } else if(this.detallePlanilla.nombre_planilla === 'ORDINARIA') {
       this.deduccionesService.getDetalleDeduccionesPorRango(row.id_afiliado, row.periodoInicio, row.periodoFinalizacion).subscribe({
         next: (response) => {
+        console.log(response);
+
           logs.push({ message: 'Datos De Deducciones:', detail: response });
           openDialog();
         },
@@ -243,6 +245,7 @@ export class AsignacionAfilPlanComponent implements OnInit{
     } else if(this.detallePlanilla.nombre_planilla === 'COMPLEMENTARIA') {
       this.deduccionesService.obtenerDetallesDeduccionComplePorAfiliado(row.id_afiliado).subscribe({
         next: (response) => {
+          console.log(response);
           logs.push({ message: 'Datos De Deducciones Complementarias:', detail: response });
           openDialog();
         },

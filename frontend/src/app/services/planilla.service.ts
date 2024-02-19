@@ -1,6 +1,6 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Observable, BehaviorSubject, catchError } from 'rxjs';
+import { Observable, BehaviorSubject, catchError, throwError } from 'rxjs';
 import { environment } from 'src/environments/environment';
 
 @Injectable({
@@ -9,10 +9,12 @@ import { environment } from 'src/environments/environment';
 export class PlanillaService {
   constructor(private http: HttpClient) { }
 
-  updatePlanilla(idPlanilla: string, planillaData: any): Observable<any> {
-    const url = `${environment.API_URL}/api/planilla/${idPlanilla}`;
-    return this.http.put(url, planillaData).pipe(
-      catchError(this.handleError)
+  updatePlanilla(idPlanilla: string, datosActualizados: any): Observable<any> {
+    return this.http.patch(`${environment.API_URL}/api/planilla/${idPlanilla}`, datosActualizados).pipe(
+      catchError(error => {
+        console.error('Error al actualizar la planilla', error);
+        return throwError(() => new Error('Error al actualizar la planilla'));
+      })
     );
   }
 

@@ -216,4 +216,26 @@ export class VerplanprelcompComponent implements OnInit{
         data: { logs }
       });
     }
+
+    actualizarFechaCierrePlanilla(): void {
+      const fechaActual = new Date().toISOString().split('T')[0]; // Formato YYYY-MM-DD
+      const estadoActualizado = 'CERRADA'; // O cualquier otro estado que necesites
+
+      const datosActualizados = {
+        fecha_cierre: fechaActual,
+        estado: estadoActualizado
+      };
+
+      this.planillaService.updatePlanilla(this.idPlanilla, datosActualizados).subscribe({
+        next: (data) => {
+          this.toastr.success('Planilla actualizada con éxito');
+          console.log('Planilla actualizada', data);
+        },
+        error: (error) => {
+          this.toastr.error('Error al actualizar la planilla');
+          console.error('Error al actualizar la planilla', error);
+        }
+      });
+    }
+
 }

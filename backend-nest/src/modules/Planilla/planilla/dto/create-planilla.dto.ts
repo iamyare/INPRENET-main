@@ -23,5 +23,9 @@ export class CreatePlanillaDto {
     @IsString()
     fecha_cierre?: any;
 
+    @IsString()
+    estado?: any;
+
+
 
 }

@@ -87,13 +87,13 @@ BEGIN
   IF (mes = :NEW."mes" AND  anio = :NEW."anio") THEN
      IF (v_suma_montos_aplicado + v_monto_total <= GREATEST(montoMinimo, v_salario_base - montoMinimo))   THEN
         :NEW."monto_aplicado" := v_monto_total;
-        :NEW."estado_aplicacion" := 'COBRADO TOTALMENTE';
+        --:NEW."estado_aplicacion" := 'COBRADO TOTALMENTE';
       ELSE
         IF (ABS(v_suma_montos_aplicado - GREATEST(montoMinimo, v_salario_base - montoMinimo)) = 0)   THEN
-          :NEW."estado_aplicacion" := 'NO COBRADO';
+          --:NEW."estado_aplicacion" := 'NO COBRADO';
           :NEW."monto_aplicado" := 0;
         ELSIF (ABS(v_suma_montos_aplicado - GREATEST(montoMinimo, v_salario_base - montoMinimo)) > 0)  THEN
-          :NEW."estado_aplicacion" := 'COBRADO PARCIALMENTE';
+          --:NEW."estado_aplicacion" := 'COBRADO PARCIALMENTE';
           :NEW."monto_aplicado" := ABS(v_suma_montos_aplicado - GREATEST(montoMinimo, v_salario_base - montoMinimo));
         END IF;
       END IF;
@@ -102,14 +102,14 @@ BEGIN
     IF (v_suma_montos_aplicado + v_monto_total <= GREATEST(montoMinimo, v_salario_base - montoMinimo))   THEN
     DBMS_OUTPUT.PUT_LINE('Suma de montos_aplicado: ' || v_suma_montos_aplicado);
         :NEW."monto_aplicado" := v_monto_total;
-        :NEW."estado_aplicacion" := 'COBRADO TOTALMENTE';
+        --:NEW."estado_aplicacion" := 'COBRADO TOTALMENTE';
       ELSE
       DBMS_OUTPUT.PUT_LINE('Suma de montos_aplicado: ' || v_suma_montos_aplicado);
         IF (ABS(v_suma_montos_aplicado - GREATEST(montoMinimo, v_salario_base - montoMinimo)) = 0)   THEN
-          :NEW."estado_aplicacion" := 'NO COBRADO';
+          --:NEW."estado_aplicacion" := 'NO COBRADO';
           :NEW."monto_aplicado" := 0;
         ELSIF (ABS(v_suma_montos_aplicado - GREATEST(montoMinimo, v_salario_base - montoMinimo)) > 0)  THEN
-          :NEW."estado_aplicacion" := 'COBRADO PARCIALMENTE';
+          --:NEW."estado_aplicacion" := 'COBRADO PARCIALMENTE';
           :NEW."monto_aplicado" := ABS(v_suma_montos_aplicado - GREATEST(montoMinimo, v_salario_base - montoMinimo));
         END IF;
       END IF;

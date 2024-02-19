@@ -375,9 +375,8 @@ FULL OUTER JOIN
     )  deducciones ON deducciones."id_afiliado" = beneficios."id_afiliado"
     WHERE
         deducciones."estado_aplicacion" = 'NO COBRADA' AND beneficios."estado" = 'NO PAGADA'
-    
       `;
-
+      
       try {
         return await this.entityManager.query(query);
       } catch (error) {

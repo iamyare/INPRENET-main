@@ -22,7 +22,7 @@ export class NuevoTipoDeduccionComponent {
     },
     { type: 'text', label: 'Nombre', name: 'nombre_deduccion', validations: [] },
     { type: 'text', label: 'Descripción', name: 'descripcion_deduccion', validations: [] },
-    { type: 'number', label: 'Codigo de deduccion', name: 'codigo_deduccion', validations: [] },
+    { type: 'text', label: 'Codigo de deduccion', name: 'codigo_deduccion', validations: [] },
     { type: 'number', label: 'prioridad', name: 'prioridad', validations: [] },
   ];
 

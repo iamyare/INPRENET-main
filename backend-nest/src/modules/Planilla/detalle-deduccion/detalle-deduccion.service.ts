@@ -114,21 +114,24 @@ export class DetalleDeduccionService {
 
 async findInconsistentDeduccionesByAfiliado(idAfiliado: string) {
   try {
-    const query = this.detalleDeduccionRepository.createQueryBuilder('detDs')
-      .innerJoinAndSelect('detDs.deduccion', 'ded')
-      .where('detDs.estado_aplicacion = :estado', { estado: 'INCONSISTENCIA' })
-      .andWhere('detDs.id_afiliado = :idAfiliado', { idAfiliado }) // Asegúrate de que afiliadoId es el nombre correcto de la columna FK en tu entidad DetalleDeduccion
-      .select([
-        'ded.nombre_deduccion',
-        'detDs.id_ded_deduccion',
-        'detDs.monto_total',
-        'detDs.monto_aplicado',
-        'detDs.estado_aplicacion',
-        'detDs.anio',
-        'detDs.mes'
-      ]);
+    const query = `
+    SELECT  
+      ded."nombre_deduccion",
+      detD."id_ded_deduccion",
+      detD."monto_total",
+      detD."monto_aplicado",
+      detD."estado_aplicacion",
+      detD."anio",
+      detD."mes" 
+    FROM 
+      "C##TEST"."deduccion" ded
+    INNER JOIN  
+      "C##TEST"."detalle_deduccion" detD ON ded."id_deduccion" = detD."id_ded_deduccion"
+    WHERE 
+      detD."estado_aplicacion" = 'INCONSISTENCIA' AND detD."id_afiliado" = '${idAfiliado}'
+    `;
 
-    return await query.getMany();
+    return await this.detalleDeduccionRepository.query(query);
   } catch (error) {
     this.logger.error(`Error al buscar deducciones inconsistentes por afiliado: ${error.message}`);
     throw new InternalServerErrorException('Error al buscar deducciones inconsistentes por afiliado');

@@ -38,8 +38,6 @@ export class DetalleBeneficioController {
 
   @Get('/detallesBene-complementaria-afiliado')
   async obtenerDetallesPorAfiliado(@Query('idAfiliado') idAfiliado: string) {
-    console.log('hola');
-    
     if (!idAfiliado) {
       throw new BadRequestException('Se requiere el parámetro idAfiliado');
     }

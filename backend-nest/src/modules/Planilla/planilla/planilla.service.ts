@@ -87,11 +87,11 @@ export class PlanillaService {
           AND TO_DATE(detBA."periodoInicio", 'DD/MM/YY') BETWEEN TO_DATE('${periodoInicio}', 'DD-MM-YYYY') AND TO_DATE('${periodoFinalizacion}', 'DD-MM-YYYY')
           AND TO_DATE(detBA."periodoFinalizacion", 'DD/MM/YY') BETWEEN TO_DATE('${periodoInicio}', 'DD-MM-YYYY') AND TO_DATE('${periodoFinalizacion}', 'DD-MM-YYYY')
         LEFT JOIN
-          "C##TEST"."detalle_beneficio" detBs ON detBA."id_detalle_ben_afil" = detBs."id_beneficio_afiliado"
-          AND detBs."estado" = 'NO PAGADA'
-        LEFT JOIN
           "C##TEST"."beneficio" ben ON ben."id_beneficio" = detBA."id_beneficio"
-  
+        LEFT JOIN
+          "C##TEST"."detalle_beneficio" detBs ON detBA."id_detalle_ben_afil" = detBs."id_beneficio_afiliado"
+          AND detBs."estado" = 'NO PAGADA' AND detBs."num_rentas_aplicadas" <= ben."numero_rentas_max"
+        
         GROUP BY
               afil."id_afiliado",
               afil."dni",
@@ -152,6 +152,9 @@ export class PlanillaService {
               beneficios."Total Beneficio" IS NOT NULL
 
       `;
+
+      console.log(query);
+      
       try {
         return await this.entityManager.query(query);
       } catch (error) {
@@ -499,8 +502,7 @@ FULL OUTER JOIN
       (TO_DATE(CONCAT(detD.anio, LPAD(detD.mes, 2, '0')), 'YYYYMM') BETWEEN TO_DATE('${periodoInicio}', 'DD-MM-YYYY') AND TO_DATE('${periodoFinalizacion}', 'DD-MM-YYYY'))
     `)
     .groupBy('afil.id_afiliado, afil.primer_nombre, afil.dni');
-  console.log(queryBuilder.getRawMany());
-  
+
   return queryBuilder.getRawMany();
   }
 

@@ -210,9 +210,6 @@ async obtenerDetallesBeneficioComplePorAfiliado(idAfiliado: string): Promise<any
         ben."id_beneficio"
     `;
 
-    console.log(query);
-    
-
     return await this.benAfilRepository.query(query, [idAfiliado]); // Usando un array para los parámetros
   } catch (error) {
     this.logger.error('Error al obtener detalles de beneficio por afiliado', error.stack);
@@ -350,8 +347,24 @@ async actualizarPlanillaYEstadoDeBeneficio(detalles: { idBeneficioPlanilla: stri
 
   async findInconsistentBeneficiosByAfiliado(idAfiliado: string) {
     try {
-      return await this.benAfilRepository.createQueryBuilder('detB')
-        .innerJoinAndSelect('detB.beneficio', 'ben')
+      const query = `
+      SELECT detB."id_beneficio_planilla",
+        detBA."periodoInicio",
+        detBA."periodoFinalizacion",
+        ben."nombre_beneficio",
+        ben."id_beneficio",
+        detB."monto_por_periodo" as "monto",
+        detB."estado"
+      FROM "C##TEST"."detalle_beneficio" detB
+      INNER JOIN "C##TEST"."detalle_beneficio_afiliado" detBA ON detB."id_beneficio_afiliado" = detBA."id_detalle_ben_afil"
+      INNER JOIN "C##TEST"."beneficio" ben ON ben."id_beneficio" = detBA."id_beneficio"
+      WHERE detB."estado" = 'INCONSISTENCIA'
+    `;
+
+    return await this.benAfilRepository.query(query); 
+
+      /* return await this.benAfilRepository.createQueryBuilder('detB')
+        .innerJoinAndSelect('detB.beneficiINo', 'ben')
         .where('detB.estado = :estado', { estado: 'INCONSISTENCIA' })
         .andWhere('detB.afiliado = :idAfiliado', { idAfiliado })
         .select([
@@ -363,7 +376,7 @@ async actualizarPlanillaYEstadoDeBeneficio(detalles: { idBeneficioPlanilla: stri
           'detB.monto',
           'detB.estado'
         ])
-        .getMany();
+        .getMany(); */
     } catch (error) {
       this.logger.error(`Error al buscar beneficios inconsistentes por afiliado: ${error.message}`, error.stack);
       throw new InternalServerErrorException('Error al buscar beneficios inconsistentes por afiliado');

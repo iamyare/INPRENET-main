@@ -60,37 +60,39 @@ export class DetalleBeneficioService {
 
   async getRangoDetalleBeneficios(idAfiliado: string, fechaInicio: string, fechaFin: string): Promise<any> {
     const query = `
-      SELECT
-        db."id_beneficio_planilla",
-        db."estado",
-        db."monto",
-        db."modalidad_pago",
-        db."num_rentas_aplicadas",
-        db."periodoInicio",
-        db."periodoFinalizacion",
-        b."nombre_beneficio",
-        afil."id_afiliado",
-        TRIM(
-          afil."primer_nombre" || ' ' || 
-          COALESCE(afil."segundo_nombre", '') || ' ' || 
-          COALESCE(afil."tercer_nombre", '') || ' ' || 
-          afil."primer_apellido" || ' ' || 
-          COALESCE(afil."segundo_apellido", '')
-        ) AS "nombre_completo"
-      FROM
-        "C##TEST"."detalle_beneficio" db
-      JOIN
-        "C##TEST"."beneficio" b ON db."id_beneficio" = b."id_beneficio"
-      JOIN
-        "C##TEST"."afiliado" afil ON db."id_afiliado" = afil."id_afiliado"
-      WHERE
-        db."id_afiliado" = :idAfiliado
-      AND
-        db."estado" = 'NO PAGADA'
-      AND
-        (TO_DATE(db."periodoInicio", 'DD/MM/YY') BETWEEN TO_DATE(:fechaInicio, 'DD-MM-YYYY') AND TO_DATE(:fechaFin, 'DD-MM-YYYY')
-         OR
-         TO_DATE(db."periodoFinalizacion", 'DD/MM/YY') BETWEEN TO_DATE(:fechaInicio, 'DD-MM-YYYY') AND TO_DATE(:fechaFin, 'DD-MM-YYYY'))
+    SELECT
+    db."id_beneficio_planilla",
+    db."estado",
+    db."monto_por_periodo" as "monto",
+    db."metodo_pago",
+    db."num_rentas_aplicadas",
+    detBA."periodoInicio",
+    detBA."periodoFinalizacion",
+    b."nombre_beneficio",
+    afil."id_afiliado",
+    TRIM(
+      afil."primer_nombre" || ' ' ||
+      COALESCE(afil."segundo_nombre", '') || ' ' ||
+      COALESCE(afil."tercer_nombre", '') || ' ' ||
+      afil."primer_apellido" || ' ' ||
+      COALESCE(afil."segundo_apellido", '')
+    ) AS "nombre_completo"
+  FROM
+    "C##TEST"."detalle_beneficio" db
+  JOIN
+    "C##TEST"."detalle_beneficio_afiliado" detBA ON db."id_beneficio_afiliado" = detBA."id_detalle_ben_afil"
+  JOIN
+    "C##TEST"."beneficio" b ON detBA."id_beneficio" = b."id_beneficio"
+  JOIN
+    "C##TEST"."afiliado" afil ON detBA."id_afiliado" = afil."id_afiliado"
+  WHERE
+    detBA."id_afiliado" = :idAfiliado
+  AND
+    db."estado" = 'NO PAGADA'
+  AND
+    (TO_DATE(detBA."periodoInicio", 'DD/MM/YY') BETWEEN TO_DATE(:fechaInicio, 'DD-MM-YYYY') AND TO_DATE(:fechaFin, 'DD-MM-YYYY')
+     OR
+     TO_DATE(detBA."periodoFinalizacion", 'DD/MM/YY') BETWEEN TO_DATE(:fechaInicio, 'DD-MM-YYYY') AND TO_DATE(:fechaFin, 'DD-MM-YYYY'))
     `;
     try {
       const parametros = { idAfiliado, fechaInicio, fechaFin };
@@ -104,35 +106,37 @@ export class DetalleBeneficioService {
 async obtenerDetallesBeneficioComplePorAfiliado(idAfiliado: string): Promise<any[]> {
   try {
     const query = `
-      SELECT
-        detB."id_beneficio_planilla",
-        detB."monto",
-        detB."estado",
-        detB."modalidad_pago",
-        detB."num_rentas_aplicadas",
-        detB."periodoInicio",
-        detB."periodoFinalizacion",
-        afil."id_afiliado",
-        afil."dni",
-        TRIM(
-            afil."primer_nombre" || ' ' || 
-            COALESCE(afil."segundo_nombre", '') || ' ' || 
-            COALESCE(afil."tercer_nombre", '') || ' ' || 
-            afil."primer_apellido" || ' ' || 
-            COALESCE(afil."segundo_apellido", '')
-        ) AS "nombre_completo",
-        ben."nombre_beneficio",
-        ben."descripcion_beneficio"
-      FROM
-        "detalle_beneficio" detB
+    SELECT
+    detB."id_beneficio_planilla",
+    detB."monto_por_periodo" as "monto",
+    detB."estado",
+    detB."metodo_pago",
+    detB."num_rentas_aplicadas",
+    detBA."periodoInicio",
+    detBA."periodoFinalizacion",
+    afil."id_afiliado",
+    afil."dni",
+    TRIM(
+        afil."primer_nombre" || ' ' || 
+        COALESCE(afil."segundo_nombre", '') || ' ' || 
+        COALESCE(afil."tercer_nombre", '') || ' ' || 
+        afil."primer_apellido" || ' ' || 
+        COALESCE(afil."segundo_apellido", '')
+    ) AS "nombre_completo",
+    ben."nombre_beneficio",
+    ben."descripcion_beneficio"
+  FROM
+    "detalle_beneficio" detB
       JOIN
-        "beneficio" ben ON detB."id_beneficio" = ben."id_beneficio"
+        "detalle_beneficio_afiliado" detBA ON detBA."id_detalle_ben_afil" = detB."id_beneficio_afiliado"
       JOIN
-        "afiliado" afil ON detB."id_afiliado" = afil."id_afiliado"
+        "beneficio" ben ON detBA."id_beneficio" = ben."id_beneficio"
+      JOIN
+        "afiliado" afil ON detBA."id_afiliado" = afil."id_afiliado"
       WHERE
         afil."id_afiliado" = :1 AND
         detB."estado" != 'INCONSISTENCIA' AND
-        detB."id_afiliado" NOT IN (
+        detBA."id_afiliado" NOT IN (
           SELECT
             detD."id_afiliado"
           FROM
@@ -140,13 +144,15 @@ async obtenerDetallesBeneficioComplePorAfiliado(idAfiliado: string): Promise<any
           WHERE
             detD."estado_aplicacion" = 'COBRADA'
         )
-        AND detB."id_afiliado" NOT IN (
+        AND detBA."id_afiliado" NOT IN (
           SELECT
-            detB2."id_afiliado"
+            detBA2."id_afiliado"
           FROM
-            "detalle_beneficio" detB2
+            "detalle_beneficio_afiliado" detBA2
+        JOIN
+            "detalle_beneficio" detB ON detBA2."id_detalle_ben_afil" = detB."id_beneficio_afiliado"
           WHERE
-            detB2."estado" = 'PAGADA'
+            detB."estado" = 'PAGADA'
         )
       ORDER BY
         ben."id_beneficio"

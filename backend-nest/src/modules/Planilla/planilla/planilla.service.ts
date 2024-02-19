@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable, InternalServerErrorException, Logger, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, InternalServerErrorException, Logger, NotFoundException, Query } from '@nestjs/common';
 import { CreatePlanillaDto } from './dto/create-planilla.dto';
 import { UpdatePlanillaDto } from './dto/update-planilla.dto';
 import { InjectEntityManager, InjectRepository } from '@nestjs/typeorm';
@@ -370,67 +370,69 @@ FULL OUTER JOIN
 
     async ObtenerPleliminar(idPlanilla: string): Promise<any> {
       const query = `
-        SELECT
-            COALESCE(deducciones."id_afiliado", beneficios."id_afiliado") AS "id_afiliado",
-            COALESCE(deducciones."dni", beneficios."dni") AS "dni",
-            COALESCE(deducciones."NOMBRE_COMPLETO", beneficios."NOMBRE_COMPLETO") AS "NOMBRE_COMPLETO",
-            COALESCE(beneficios."Total Beneficio", 0) AS "Total Beneficio",
-            COALESCE(deducciones."Total Deducciones", 0) AS "Total Deducciones"
-        FROM
-            (SELECT
-                afil."id_afiliado",
-                afil."dni",
-                TRIM(
-                    afil."primer_nombre" || ' ' ||
-                    COALESCE(afil."segundo_nombre", '') || ' ' ||
-                    COALESCE(afil."tercer_nombre", '') || ' ' ||
-                    afil."primer_apellido" || ' ' ||
-                    COALESCE(afil."segundo_apellido", '')) AS "NOMBRE_COMPLETO",
-                SUM(COALESCE(detBs."monto", 0)) AS "Total Beneficio"
-            FROM
-                "C##TEST"."afiliado" afil
-            LEFT JOIN
-                "C##TEST"."detalle_beneficio" detBs ON afil."id_afiliado" = detBs."id_afiliado"
-                AND detBs."id_planilla" = '${idPlanilla}'
-            GROUP BY
-                afil."id_afiliado",
-                afil."dni",
-                TRIM(
-                    afil."primer_nombre" || ' ' ||
-                    COALESCE(afil."segundo_nombre", '') || ' ' ||
-                    COALESCE(afil."tercer_nombre", '') || ' ' ||
-                    afil."primer_apellido" || ' ' ||
-                    COALESCE(afil."segundo_apellido", '')) 
-            HAVING
-                SUM(COALESCE(detBs."monto", 0)) > 0) beneficios
-        FULL OUTER JOIN
-            (SELECT
-                afil."id_afiliado",
-                afil."dni",
-                TRIM(
-                    afil."primer_nombre" || ' ' ||
-                    COALESCE(afil."segundo_nombre", '') || ' ' ||
-                    COALESCE(afil."tercer_nombre", '') || ' ' ||
-                    afil."primer_apellido" || ' ' ||
-                    COALESCE(afil."segundo_apellido", '')) AS "NOMBRE_COMPLETO",
-                SUM(COALESCE(detDs."monto_aplicado", 0)) AS "Total Deducciones"
-            FROM
-                "C##TEST"."afiliado" afil
-            LEFT JOIN
-                "C##TEST"."detalle_deduccion" detDs ON afil."id_afiliado" = detDs."id_afiliado"
-                AND detDs."id_planilla" = '${idPlanilla}'
-            GROUP BY
-                afil."id_afiliado",
-                afil."dni",
-                TRIM(
-                    afil."primer_nombre" || ' ' ||
-                    COALESCE(afil."segundo_nombre", '') || ' ' ||
-                    COALESCE(afil."tercer_nombre", '') || ' ' ||
-                    afil."primer_apellido" || ' ' ||
-                    COALESCE(afil."segundo_apellido", '')) 
-            HAVING
-                SUM(COALESCE(detDs."monto_aplicado", 0)) > 0) deducciones
-        ON deducciones."id_afiliado" = beneficios."id_afiliado"
+      SELECT
+      COALESCE(deducciones."id_afiliado", beneficios."id_afiliado") AS "id_afiliado",
+      COALESCE(deducciones."dni", beneficios."dni") AS "dni",
+      COALESCE(deducciones."NOMBRE_COMPLETO", beneficios."NOMBRE_COMPLETO") AS "NOMBRE_COMPLETO",
+      COALESCE(beneficios."Total Beneficio", 0) AS "Total Beneficio",
+      COALESCE(deducciones."Total Deducciones", 0) AS "Total Deducciones"
+  FROM
+      (SELECT
+          afil."id_afiliado",
+          afil."dni",
+          TRIM(
+              afil."primer_nombre" || ' ' ||
+              COALESCE(afil."segundo_nombre", '') || ' ' ||
+              COALESCE(afil."tercer_nombre", '') || ' ' ||
+              afil."primer_apellido" || ' ' ||
+              COALESCE(afil."segundo_apellido", '')) AS "NOMBRE_COMPLETO",
+          SUM(COALESCE(detBs."monto_por_periodo", 0)) AS "Total Beneficio"
+      FROM
+          "C##TEST"."afiliado" afil
+      LEFT JOIN
+          "C##TEST"."detalle_beneficio_afiliado" detBA ON afil."id_afiliado" = detBA."id_afiliado"
+      LEFT JOIN
+          "C##TEST"."detalle_beneficio" detBs ON detBA."id_detalle_ben_afil" = detBs."id_beneficio_afiliado"
+          AND detBs."id_planilla" = '${idPlanilla}'
+      GROUP BY
+          afil."id_afiliado",
+          afil."dni",
+          TRIM(
+              afil."primer_nombre" || ' ' ||
+              COALESCE(afil."segundo_nombre", '') || ' ' ||
+              COALESCE(afil."tercer_nombre", '') || ' ' ||
+              afil."primer_apellido" || ' ' ||
+              COALESCE(afil."segundo_apellido", '')) 
+      HAVING
+          SUM(COALESCE(detBs."monto_por_periodo", 0)) > 0) beneficios
+  FULL OUTER JOIN
+      (SELECT
+          afil."id_afiliado",
+          afil."dni",
+          TRIM(
+              afil."primer_nombre" || ' ' ||
+              COALESCE(afil."segundo_nombre", '') || ' ' ||
+              COALESCE(afil."tercer_nombre", '') || ' ' ||
+              afil."primer_apellido" || ' ' ||
+              COALESCE(afil."segundo_apellido", '')) AS "NOMBRE_COMPLETO",
+          SUM(COALESCE(detDs."monto_aplicado", 0)) AS "Total Deducciones"
+      FROM
+          "C##TEST"."afiliado" afil
+      LEFT JOIN
+          "C##TEST"."detalle_deduccion" detDs ON afil."id_afiliado" = detDs."id_afiliado"
+          AND detDs."id_planilla" = '${idPlanilla}'
+      GROUP BY
+          afil."id_afiliado",
+          afil."dni",
+          TRIM(
+              afil."primer_nombre" || ' ' ||
+              COALESCE(afil."segundo_nombre", '') || ' ' ||
+              COALESCE(afil."tercer_nombre", '') || ' ' ||
+              afil."primer_apellido" || ' ' ||
+              COALESCE(afil."segundo_apellido", '')) 
+      HAVING
+          SUM(COALESCE(detDs."monto_aplicado", 0)) > 0) deducciones
+  ON deducciones."id_afiliado" = beneficios."id_afiliado"
       `;
   
       try {
@@ -524,7 +526,6 @@ FULL OUTER JOIN
         periodoFinalizacion: periodoFinalizacion,
       })
       .getRawMany();
-
     return resultado;
   }
 

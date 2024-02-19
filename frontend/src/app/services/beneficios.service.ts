@@ -14,6 +14,18 @@ export class BeneficiosService {
   constructor(private toastr: ToastrService ,private http: HttpClient, private router: Router) {
   }
 
+
+actualizarEstado(idPlanilla: string, nuevoEstado: string): Observable<any> {
+  return this.http.patch(`${environment.API_URL}/api/beneficio-planilla/actualizar-estado/${idPlanilla}`, { nuevoEstado })
+    .pipe(
+      catchError(error => {
+        console.error('Error al actualizar el estado', error);
+        return throwError(() => new Error('Error al actualizar el estado'));
+      })
+    );
+}
+
+
   actualizarBeneficiosPlanillas(detalles: { idBeneficioPlanilla: string; codigoPlanilla: string; estado: string }[]): Observable<any> {
     const url = `${environment.API_URL}/api/beneficio-planilla/actualizar-beneficio-planilla`; // Asegúrate de reemplazar 'ruta-del-endpoint' con la ruta real del endpoint
     return this.http.patch(url, detalles).pipe(

@@ -33,6 +33,28 @@ export class DetalleDeduccionService {
     @InjectEntityManager() private readonly entityManager: EntityManager
   ){}
 
+  async actualizarEstadoAplicacionPorPlanilla(idPlanilla: string, nuevoEstado: string): Promise<{ mensaje: string }> {
+    try {
+      const resultado = await this.detalleDeduccionRepository.createQueryBuilder()
+        .update(DetalleDeduccion)
+        .set({ estado_aplicacion: nuevoEstado })
+        .where("planilla.id_planilla = :idPlanilla", { idPlanilla })
+        .execute();
+  
+      if (resultado.affected === 0) {
+        throw new NotFoundException(`No se encontraron detalles de deducción para la planilla con ID ${idPlanilla}`);
+      }
+  
+      const mensaje = `Estado de aplicación actualizado a '${nuevoEstado}' para los detalles de deducción de la planilla con ID ${idPlanilla}`;
+      this.logger.log(mensaje);
+      return { mensaje };
+    } catch (error) {
+      this.logger.error(`Error al actualizar el estado de aplicación para la planilla con ID ${idPlanilla}: ${error.message}`, error.stack);
+      throw new InternalServerErrorException('Se produjo un error al actualizar los estados de aplicación de los detalles de deducción');
+    }
+  }
+  
+
   async getDetallesDeduccionPorAfiliadoYPlanilla(idAfiliado: string, idPlanilla: string): Promise<any> {
     const query = `
         SELECT

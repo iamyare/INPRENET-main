@@ -20,9 +20,6 @@ export class DetalleBeneficio {
     @Column({nullable:true})
     metodo_pago: string;
 
-/*     @Column({ type: 'date', nullable: false })
-    fecha_actual: Date; */
-
     @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
     monto_por_periodo: number;
     

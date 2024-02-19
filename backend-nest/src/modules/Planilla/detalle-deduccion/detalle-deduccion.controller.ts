@@ -1,12 +1,27 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseInterceptors, UploadedFile, Response, HttpCode, HttpStatus, Query, BadRequestException } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseInterceptors, UploadedFile, Response, HttpCode, HttpStatus, Query, BadRequestException, Res, HttpException } from '@nestjs/common';
 import { DetalleDeduccionService } from './detalle-deduccion.service';
 import { CreateDetalleDeduccionDto } from './dto/create-detalle-deduccion.dto';
 import { UpdateDetalleDeduccionDto } from './dto/update-detalle-deduccion.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
 
+
 @Controller('detalle-deduccion')
 export class DetalleDeduccionController {
   constructor(private readonly detalleDeduccionService: DetalleDeduccionService) {}
+  
+  @Patch('actualizar-estado/:idPlanilla')
+  async actualizarEstadoAplicacionPorPlanilla(
+    @Param('idPlanilla') idPlanilla: string,
+    @Body('nuevoEstado') nuevoEstado: string
+  ) {
+    try {
+      const respuesta = await this.detalleDeduccionService.actualizarEstadoAplicacionPorPlanilla(idPlanilla, nuevoEstado);
+      return respuesta; // NestJS automáticamente envolverá esto en una respuesta HTTP 200
+    } catch (error) {
+      throw new HttpException('Error al actualizar el estado', HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+  }
+  
   
 
   @Get('detallesPreliminar')

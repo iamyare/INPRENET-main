@@ -11,6 +11,19 @@ export class DeduccionesService {
 
   constructor(private toastr: ToastrService ,private http: HttpClient) { }
 
+  actualizarEstadoDeduccion(idPlanilla: string, nuevoEstado: string): Observable<any> {
+    return this.http.patch(`${environment.API_URL}/api/detalle-deduccion/actualizar-estado/${idPlanilla}`, { nuevoEstado })
+      .pipe(
+        tap(_ => this.toastr.success('Estado de deducción actualizado con éxito')),
+        catchError(error => {
+          console.error('Error al actualizar el estado de la deducción', error);
+          this.toastr.error('Error al actualizar el estado de la deducción');
+          return throwError(() => new Error('Error al actualizar el estado de la deducción'));
+        })
+      );
+  }
+
+
   newTipoDeduccion(TipoDeduccion:any): Observable<any | void>{
     var url = `${environment.API_URL}/api/deduccion`;
     return this.http.post<any>(

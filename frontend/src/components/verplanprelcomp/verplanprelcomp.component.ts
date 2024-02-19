@@ -35,6 +35,9 @@ export class VerplanprelcompComponent implements OnInit{
   datosFilasBeneficios : any;
   detallePlanilla:any
 
+
+  data: any[] = [];
+
   constructor(
     private _formBuilder: FormBuilder,
     private planillaService : PlanillaService,
@@ -134,9 +137,8 @@ export class VerplanprelcompComponent implements OnInit{
 
     getFilas = async (id_planilla: string) => {
       try {
-          const data = await this.planillaService.getPlanillaPrelimiar(id_planilla).toPromise();
-
-          this.dataPlan = data.map((item: any) => {
+          this.data = await this.planillaService.getPlanillaPrelimiar(id_planilla).toPromise();
+          this.dataPlan = this.data.map((item: any) => {
             return {
               id_afiliado: item.id_afiliado,
               dni: item.dni,
@@ -218,8 +220,8 @@ export class VerplanprelcompComponent implements OnInit{
     }
 
     actualizarFechaCierrePlanilla(): void {
-      const fechaActual = new Date().toISOString().split('T')[0]; // Formato YYYY-MM-DD
-      const estadoActualizado = 'CERRADA'; // O cualquier otro estado que necesites
+      const fechaActual = new Date().toISOString().split('T')[0];
+      const estadoActualizado = 'CERRADA';
 
       const datosActualizados = {
         fecha_cierre: fechaActual,
@@ -237,5 +239,44 @@ export class VerplanprelcompComponent implements OnInit{
         }
       });
     }
+
+    actualizarEstadoDeducciones(nuevoEstado: string) {
+      if (!this.idPlanilla) {
+        this.toastr.error('ID de la planilla no está definido');
+        return;
+      }
+
+      this.deduccionesService.actualizarEstadoDeduccion(this.idPlanilla, nuevoEstado).subscribe({
+        next: _ => this.toastr.success('Estado de todas las deducciones actualizado con éxito'),
+        error: error => {
+          console.error('Error al actualizar el estado de las deducciones', error);
+          this.toastr.error('Error al actualizar el estado de las deducciones');
+        }
+      });
+    }
+
+    actualizarEstadoBeneficios(nuevoEstado: string) {
+      if (!this.idPlanilla) {
+        this.toastr.error('ID de la planilla no está definido');
+        return;
+      }
+
+      this.beneficiosService.actualizarEstado(this.idPlanilla, nuevoEstado).subscribe({
+        next: _ => this.toastr.success('Estado de todos los beneficios actualizado con éxito'),
+        error: error => {
+          console.error('Error al actualizar el estado de los beneficios', error);
+          this.toastr.error('Error al actualizar el estado de los beneficios');
+        }
+      });
+    }
+
+
+    algunaAccion() {
+      this.actualizarFechaCierrePlanilla()
+      this.actualizarEstadoDeducciones('COBRADA');
+      this.actualizarEstadoBeneficios('PAGADA');
+    }
+
+
 
 }

@@ -30,6 +30,24 @@ export class DetalleBeneficioService {
 
   }
 
+  async actualizarEstadoPorPlanilla(idPlanilla: string, nuevoEstado: string): Promise<{ mensaje: string }> {
+    try {
+      const resultado = await this.benAfilRepository.createQueryBuilder()
+        .update(DetalleBeneficio)
+        .set({ estado: nuevoEstado })
+        .where("planilla.id_planilla = :idPlanilla", { idPlanilla })
+        .execute();
+
+      if (resultado.affected === 0) {
+        throw new NotFoundException(`No se encontraron detalles de beneficio para la planilla con ID ${idPlanilla}`);
+      }
+
+      return { mensaje: `Estado actualizado a '${nuevoEstado}' para los detalles de beneficio de la planilla con ID ${idPlanilla}` };
+    } catch (error) {
+      throw new InternalServerErrorException('Se produjo un error al actualizar los estados de los detalles de beneficio');
+    }
+  }
+
   async createDetalleBeneficioAfiliado(datos: CreateDetalleBeneficioDto): Promise<any> {
     return await this.entityManager.transaction(async manager => {
         try {

@@ -8,6 +8,15 @@ import { CreateDetalleBeneficioDto } from './dto/create-detalle_beneficio.dto';
 export class DetalleBeneficioController {
   constructor(private readonly detallebeneficioService: DetalleBeneficioService) {}
 
+  @Patch('actualizar-estado/:idPlanilla')
+  async actualizarEstadoPorPlanilla(
+    @Param('idPlanilla') idPlanilla: string,
+    @Body('nuevoEstado') nuevoEstado: string
+  ) {
+    const respuesta = await this.detallebeneficioService.actualizarEstadoPorPlanilla(idPlanilla, nuevoEstado);
+    return respuesta;
+  }
+
   @Post('nuevoDetalle')
   async createDetalleBeneficioAfiliado(@Body() createDetalleBeneficioDto: CreateDetalleBeneficioDto) {
     try {

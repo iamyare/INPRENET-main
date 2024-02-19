@@ -60,8 +60,6 @@ export class DetalleDeduccionService {
       // Usar un objeto para pasar los parámetros con nombre
       //const parameters: any = { idAfiliado: idAfiliado, idPlanilla: idPlanilla };
       const detalleDeducciones = await this.entityManager.query(query);
-      console.log(detalleDeducciones);
-      
       return detalleDeducciones;
     } catch (error) {
       this.logger.error(`Error al obtener detalles de deducción por afiliado y planilla: ${error.message}`, error.stack);
@@ -100,8 +98,6 @@ export class DetalleDeduccionService {
       AND
         dd."estado_aplicacion" = 'NO COBRADA'
     `;
-    console.log(query);
-    
   
     try {
       const parametros :any = {

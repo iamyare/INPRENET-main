@@ -2,7 +2,7 @@ import { ValidatorFn } from '@angular/forms';
 
 export interface FieldConfig {
   readOnly?: boolean;
-  hidden?: boolean;
+  display: boolean;
   type: string;
   label: string;
   name: string;

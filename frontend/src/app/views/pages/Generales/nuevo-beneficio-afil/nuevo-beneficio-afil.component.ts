@@ -35,17 +35,17 @@ export class NuevoBeneficioAfilComponent implements OnInit{
   ngOnInit(): void {
     this.getTipoBen();
     this.myFormFields = [
-      { type: 'text', label: 'DNI', name: 'dni', validations: [Validators.required, Validators.minLength(13), Validators.maxLength(14)] },
-      { type: 'daterange', label: 'Periodo', name: 'periodo', validations: [Validators.required]},
+      { type: 'text', label: 'DNI', name: 'dni', validations: [Validators.required, Validators.minLength(13), Validators.maxLength(14)], display:true },
+      { type: 'daterange', label: 'Periodo', name: 'periodo', validations: [Validators.required], display:true},
       {
         type: 'dropdown', label: 'Tipo de beneficio', name: 'nombre_beneficio',
         options: this.tiposBeneficios,
-        validations: [Validators.required]
+        validations: [Validators.required], display:true
       },
-      { type: 'number', label: 'Monto total', name: 'monto_total', validations: [Validators.required]},
+      { type: 'number', label: 'Monto total', name: 'monto_total', validations: [Validators.required], display:true},
       { type: 'dropdown', label: 'Metodo de pago', name: 'metodo_pago',
-       options : [{label:'Cheque', value: 'Cheque'}, {label:'Transferencia', value: 'Transferencia' }] ,validations: [Validators.required]},
-      { type: 'number', label: 'Monto por periodo', name: 'monto_por_periodo', validations: [Validators.required]},
+       options : [{label:'Cheque', value: 'Cheque'}, {label:'Transferencia', value: 'Transferencia' }] ,validations: [Validators.required], display:true},
+      { type: 'number', label: 'Monto por periodo', name: 'monto_por_periodo', validations: [Validators.required], display:true},
 
     ];
   }

@@ -17,6 +17,7 @@ export const navItems: INavData[] = [
   },
   {
     name: 'Beneficio',
+    iconComponent: { name: 'cilMoney' },
     url: '/base',
     children: [
       {
@@ -31,29 +32,31 @@ export const navItems: INavData[] = [
     ]
   },
   {
-    name: 'Deduccion',
+    name: 'Deducción',
+    iconComponent: { name: 'cilMoney' },
     url: '/base',
     children: [
       {
-        name: 'Nueva Deduccion',
+        name: 'Nueva Deducción',
         url: '/Deduccion/nuevo-tipo-deduccion',
       },
       {
-        name: 'Editar Deduccion',
+        name: 'Editar Deducción',
         url: '/Deduccion/editar-tipo-deduccion',
       },
   ]
   },
   {
-    name: 'Tipo-Planilla',
+    name: 'Tipo Planilla',
+    iconComponent: { name: 'cilSpreadsheet' },
     url: '/base',
     children: [
       {
-        name: 'Nuevo tipo planilla',
+        name: 'Nuevo Tipo Planilla',
         url: '/Tipo-Planilla/nuevo-tipo-planilla',
       },
       {
-        name: 'Editar tipo planilla',
+        name: 'Editar Tipo Planilla',
         url: '/Tipo-Planilla/editar-tipo-planilla',
       },
   ]
@@ -101,6 +104,7 @@ export const navItems: INavData[] = [
 
   {
     name: 'Afiliado',
+    iconComponent: { name: 'cil-people' },
     url: '/base',
     children: [
       {
@@ -113,7 +117,7 @@ export const navItems: INavData[] = [
         ]
       },
       {
-        name: 'Ver / Editar (Afiliados)',
+        name: 'Ver / Editar',
         children: [
           {
             url: '/Afiliado/datos-gen-afil',
@@ -170,6 +174,7 @@ export const navItems: INavData[] = [
 
   {
     name: 'Planilla',
+    iconComponent: { name: 'cilSpreadsheet' },
     url: '/base',
     children: [
       {

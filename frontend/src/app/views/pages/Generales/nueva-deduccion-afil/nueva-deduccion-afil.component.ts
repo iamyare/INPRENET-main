@@ -55,20 +55,20 @@ export class NuevaDeduccionAfilComponent{
     this.getTiposDeducciones();
     this.getInstituciones();
     this.myFormFields = [
-      { type: 'text', label: 'DNI', name: 'dni', validations: [Validators.required] },
+      { type: 'text', label: 'DNI', name: 'dni', validations: [Validators.required], display:true },
       {
         type: 'dropdown', label: 'Nombre de deduccion', name: 'nombre_deduccion',
         options: this.tiposDeducciones,
-        validations: [Validators.required]
+        validations: [Validators.required], display:true
       },
       {
         type: 'dropdown', label: 'Nombre de institucion', name: 'nombre_institucion',
         options: this.instituciones,
-        validations: [Validators.required,]
+        validations: [Validators.required], display:true
       },
-      { type: 'number', label: 'Monto total', name: 'monto_total', validations: [Validators.required,Validators.pattern("^\\d*\\.?\\d+$")] },
-      { type: 'number', label: 'Año', name: 'anio', validations: [Validators.required, Validators.pattern("^\\d*\\.?\\d+$")] },
-      { type: 'number', label: 'Mes', name: 'mes', validations: [Validators.required ,Validators.pattern("^\\d*\\.?\\d+$")] },
+      { type: 'number', label: 'Monto total', name: 'monto_total', validations: [Validators.required,Validators.pattern("^\\d*\\.?\\d+$")], display:true },
+      { type: 'number', label: 'Año', name: 'anio', validations: [Validators.required, Validators.pattern("^\\d*\\.?\\d+$")], display:true },
+      { type: 'number', label: 'Mes', name: 'mes', validations: [Validators.required ,Validators.pattern("^\\d*\\.?\\d+$")], display:true },
     ];
   }
 

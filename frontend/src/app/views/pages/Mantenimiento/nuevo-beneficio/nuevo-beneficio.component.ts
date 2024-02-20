@@ -18,18 +18,18 @@ export class NuevoBeneficioComponent implements OnInit{
 
   ngOnInit(): void {
     this.myFormFields = [
-      { type: 'text', label: 'Nombre de beneficio', name: 'nombre_beneficio', validations: [Validators.required], hidden:false },
-      { type: 'dropdown', label: 'Periodicidad', name: 'periodicidad', validations: [Validators.required], options:[{label:"vitalicio", value:"vitalicio"}, {label:"definido", value:"Definido"}] , hidden:false},
-      { type: 'text', label: 'Descripción de beneficio', name: 'descripcion_beneficio', validations: [Validators.required], hidden:false},
-      { type: 'number', label: 'Número de rentas máximas', name: 'numero_rentas_max', validations: [], hidden: true},
+      { type: 'text', label: 'Nombre de beneficio', name: 'nombre_beneficio', validations: [Validators.required], display:true },
+      { type: 'text', label: 'Descripción de beneficio', name: 'descripcion_beneficio', validations: [Validators.required], display:true},
+      { type: 'dropdown', label: 'Periodicidad', name: 'periodicidad', validations: [Validators.required], options:[{label:"vitalicio", value:"vitalicio"}, {label:"definido", value:"Definido"}] , display:true},
+      { type: 'number', label: 'Número de rentas máximas', name: 'numero_rentas_max', validations: [], display:false},
     ];
   }
 
   obtenerDatos(event:any):any{
-    if (event.value.periodicidad == "vitalicio"){
-      this.myFormFields[3].hidden = true
+    if (event.value.periodicidad == "Definido"){
+      this.myFormFields[3].display = true
     }else {
-      this.myFormFields[3].hidden = false
+      this.myFormFields[3].display = false
     }
     this.data = event;
   }

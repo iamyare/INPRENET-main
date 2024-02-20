@@ -79,7 +79,7 @@ export class AsignacionAfilPlanComponent implements OnInit{
 
     this.myFormFields = [
       {
-        type: 'string', label: 'Código De Planilla', name: 'codigo_planilla', validations: [Validators.required]
+        type: 'string', label: 'Código De Planilla', name: 'codigo_planilla', validations: [Validators.required], display:true
       },
     ]
   }
@@ -105,7 +105,9 @@ export class AsignacionAfilPlanComponent implements OnInit{
               this.datosTabl = [];
               this.toastr.error(`La planilla con el código de planilla: ${this.datosFormateados.value.codigo_planilla}  no existe `);
             }
-            this.ejecF(this.datosTabl).then(() => { });
+            if (this.ejecF) {
+              this.ejecF(this.datosTabl).then(() => { });
+            }
           },
           error: (error) => {
             let mensajeError = 'Error desconocido al buscar la planilla';

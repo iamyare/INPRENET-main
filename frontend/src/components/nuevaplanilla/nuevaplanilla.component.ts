@@ -52,14 +52,14 @@ export class NuevaplanillaComponent implements OnInit{
     obtenerDatos1():any{
       this.getTiposPlanillas()
       this.myFormFields = [
-        { type: 'string', label: 'Codigo De Planilla', name: 'codigo_planilla', validations: [Validators.required] },
+        { type: 'string', label: 'Codigo De Planilla', name: 'codigo_planilla', validations: [Validators.required] , display:true},
         {
           type: 'dropdown', label: 'Nombre de Tipo planilla', name: 'nombre_planilla',
           options: this.tiposPlanilla,
-          validations: [Validators.required]
+          validations: [Validators.required], display:true
         },
-        { type: 'daterange', label: 'Periodo', name: 'periodo', validations: [Validators.required]},
-        { type: 'number', label: 'Secuencia', name: 'secuencia', validations: [Validators.required,Validators.pattern("^\\d*\\.?\\d+$")] },
+        { type: 'daterange', label: 'Periodo', name: 'periodo', validations: [Validators.required], display:true},
+        { type: 'number', label: 'Secuencia', name: 'secuencia', validations: [Validators.required,Validators.pattern("^\\d*\\.?\\d+$")], display:true },
       ]
     }
 

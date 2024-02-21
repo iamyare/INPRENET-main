@@ -17,7 +17,7 @@ export class Beneficio {
     @Column()
     periodicidad: string;
 
-    @Column('number', { nullable: false })
+    @Column('number', { nullable: false, default:0 })
     numero_rentas_max: number;
 
     @OneToMany(() => DetalleBeneficioAfiliado, detalleBeneficioAfiliado => detalleBeneficioAfiliado.beneficio)

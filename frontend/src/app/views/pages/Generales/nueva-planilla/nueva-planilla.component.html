@@ -6,8 +6,12 @@
         ¿Desea abrir una nueva planilla?
     </mat-slide-toggle>
 
-    <app-progressplanill (newDatBenChange)="setEstadoDatGen($event)" [estadoSubDed]="form.get('isChecked')?.value"
-        (newEstCentrTrab)="setEstadoTable($event)"  (newdatosHS)="setEstadoVerPlanP($event)" >
+    <app-progressplanill
+      (newDatBenChange)="setEstadoDatGen($event)"
+      [estadoSubDed]="form.get('isChecked')?.value"
+      (newEstCentrTrab)="setEstadoTable($event)"
+      (newdatosHS)="setEstadoVerPlanP($event)"
+      (newdatosRP)="setEstadoVerPlanDef($event)" >
     </app-progressplanill>
 
 
@@ -23,6 +27,9 @@
       <app-verplanprelcomp groupName="planilla" ></app-verplanprelcomp>
     </form>
 
+    <form [formGroup]="formplanilla" *ngIf="datosRP">
+      <app-verplancerrada groupName="planilla" ></app-verplancerrada>
+    </form>
 
     <!-- <div class="row" *ngIf="datosG && form.get('isChecked')?.value">
         <div class="col-md-6">
@@ -42,4 +49,5 @@
             <button mat-button color="primary">Enviar Formulario</button>
         </div>
     </div> -->
+
 </form>

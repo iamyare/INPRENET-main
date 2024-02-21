@@ -21,8 +21,8 @@ export class NuevaDeduccionAfilComponent{
   tiposDeducciones:any = [];
   instituciones:any = [];
   nameAfil:string = ""
-  public myFormFields: FieldConfig[] = [];
-  Afiliado:any = {};
+  Afiliado:any
+  public myFormFields: FieldConfig[] = []
 
   isChecked = true;
   formGroup = this._formBuilder.group({
@@ -112,6 +112,7 @@ export class NuevaDeduccionAfilComponent{
 
   getFilasAfilById = async () => {
     await this.svcAfilServ.getAfilByParam(this.data.value.dni).subscribe(result => {
+      this.Afiliado = result;
       this.nameAfil = this.unirNombres(result.primer_nombre,result.segundo_nombre, result.tercer_nombre, result.primer_apellido,result.segundo_apellido);
     }
     );

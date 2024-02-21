@@ -1,26 +1,69 @@
-<form class="example-form" [formGroup]="formGroup" (ngSubmit)="alertFormValues(formGroup)" ngNativeValidate>
-  <mat-slide-toggle color="primary" formControlName="acceptTerms">¿Desea ingresar deducciones de terceros?</mat-slide-toggle>
+<form
+  class="example-form"
+  [formGroup]="formGroup"
+  (ngSubmit)="alertFormValues(formGroup)"
+  ngNativeValidate
+>
+  <mat-slide-toggle color="primary" formControlName="acceptTerms"
+    >¿Desea ingresar deducciones de terceros?</mat-slide-toggle
+  >
 </form>
 
 <div *ngIf="formGroup.invalid">
-  <h3>Nombre de Afiliado: {{Afiliado.nameAfil}}</h3>
-  <h3>Estado: {{Afiliado.estado}}</h3>
-<app-dynamic-form [fields]="myFormFields" titulo="Detalles de deducciones" subtitulo="Completa la informacion correspondiente"
-(newDatBenChange)="obtenerDatos($event)"></app-dynamic-form>
+  <div style="background-color: white">
+    <table>
+      <tr>
+        <th>Nombre de afiliado</th>
+        <td>{{ Afiliado?.nameAfil }}</td>
+        <th>Sexo</th>
+        <td>{{ Afiliado?.sexo }}</td>
+        <th>Dirección de residencia</th>
+        <td>{{ Afiliado?.direccion_residencia }}</td>
+        <th>Estado</th>
+        <td>{{ Afiliado?.estado }}</td>
+        <th>Fecha nacimiento</th>
+        <td>{{ Afiliado?.fecha_nacimiento }}</td>
+        <th>Colegio magisterial</th>
+        <td>{{ Afiliado?.colegio_magisterial }}</td>
+      </tr>
+      <tr>
+        <th>Número de carnet</th>
+        <td>{{ Afiliado?.numero_carnet }}</td>
+        <th>Profesión</th>
+        <td>{{ Afiliado?.profesion }}</td>
+        <th>Teléfono 1</th>
+        <td>{{ Afiliado?.telefono_1 }}</td>
+        <th>Salario base</th>
+        <td>{{ Afiliado?.salario_base }}</td>
+        <th>Estado civil</th>
+        <td>{{ Afiliado?.estado_civil }}</td>
+      </tr>
+    </table>
+  </div>
 
-<button mat-raised-button color="primary" style="color: white;" [disabled]="data.invalid" (click)="previsualizarInfoAfil()" >Previsualizar información del afiliado</button>
-
-<button mat-raised-button color="primary" style="color: white;" [disabled]="data.invalid" (click)="guardarDetalleDeduccion()">Guardar</button>
+  <app-dynamic-form
+    [fields]="myFormFields"
+    titulo="Detalles de deducciones"
+    subtitulo="Completa la informacion correspondiente"
+    (newDatBenChange)="obtenerDatos($event)"
+  ></app-dynamic-form>
+  <button
+    mat-raised-button
+    color="primary"
+    style="color: white"
+    [disabled]="data.invalid"
+    (click)="guardarDetalleDeduccion()"
+  >
+    Guardar
+  </button>
 </div>
-
-
 
 <div *ngIf="!formGroup.invalid">
   <h1>CARGA DE DEDUCCION POR BASE EXCEL</h1>
-  <hr>
+  <hr />
 
   <div class="upload-container">
-    <input type="file" #fileInput (change)="onFileSelected($event)" hidden>
+    <input type="file" #fileInput (change)="onFileSelected($event)" hidden />
 
     <!-- Botón personalizado para agregar archivos -->
     <button class="btn btn-primary" (click)="fileInput.click()">
@@ -44,12 +87,16 @@
 
     <div *ngIf="file" class="file-name-container">
       <div class="file-name-background">{{ file.name }}</div>
-      <div class="file-name-progress" [style.width]="progressValue + '%'">{{ file.name }}</div>
+      <div class="file-name-progress" [style.width]="progressValue + '%'">
+        {{ file.name }}
+      </div>
     </div>
+  </div>
 </div>
 
-</div>
-
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css">
+<link
+  rel="stylesheet"
+  href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css"
+/>
 <!-- <input type="file" (change)="onFileSelect($event)">
 <button mat-raised-button color="primary" style="color: white;" [disabled]="data.invalid" (click)="guardarDetalleDeduccion()">Guardar</button> -->

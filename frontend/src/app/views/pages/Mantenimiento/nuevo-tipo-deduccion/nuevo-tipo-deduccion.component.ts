@@ -12,6 +12,8 @@ import { DynamicFormComponent } from '@docs-components/dynamic-form/dynamic-form
 export class NuevoTipoDeduccionComponent {
   @ViewChild(DynamicFormComponent) dynamicForm!: DynamicFormComponent;
   myFormFields: FieldConfig[] = [
+    { type: 'text', label: 'Nombre', name: 'nombre_deduccion', validations: [Validators.required] , display:true},
+    { type: 'text', label: 'Descripción', name: 'descripcion_deduccion', validations: [Validators.required] , display:true},
     { type: 'dropdown', label: 'Tipo de deducción', name: 'tipo_deduccion',
     options: [
         { label: 'Terceros', value: 'Terceros' },
@@ -20,9 +22,7 @@ export class NuevoTipoDeduccionComponent {
       ],
     validations: [Validators.required], display:true
     },
-    { type: 'text', label: 'Nombre', name: 'nombre_deduccion', validations: [Validators.required] , display:true},
-    { type: 'text', label: 'Descripción', name: 'descripcion_deduccion', validations: [Validators.required] , display:true},
-    { type: 'number', label: 'Código de deducción', name: 'codigo_deduccion', validations: [Validators.required], display:true },
+    { type: 'text', label: 'Código de deducción', name: 'codigo_deduccion', validations: [Validators.required], display:true },
     { type: 'number', label: 'Prioridad', name: 'Prioridad', validations: [Validators.required] , display:true},
   ];
 

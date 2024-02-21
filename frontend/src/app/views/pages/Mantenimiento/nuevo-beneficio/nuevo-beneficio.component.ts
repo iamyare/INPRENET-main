@@ -17,6 +17,7 @@ export class NuevoBeneficioComponent implements OnInit{
   constructor(private SVCBeneficios:BeneficiosService, private toastr: ToastrService ,){}
 
   ngOnInit(): void {
+    /* SI SE MUEVE LA FILA Periodo hay que cambiar la posicion en la funcion obtenerDatos */
     this.myFormFields = [
       { type: 'text', label: 'Nombre de beneficio', name: 'nombre_beneficio', validations: [Validators.required], display:true },
       { type: 'text', label: 'Descripción de beneficio', name: 'descripcion_beneficio', validations: [Validators.required], display:true},

@@ -35,7 +35,21 @@ export class PlanillaController {
       throw new BadRequestException('Los parámetros idPlanilla son obligatorios');
     }
     try {
-      return await this.planillaService.ObtenerPleliminar(idPlanilla);
+      return await this.planillaService.ObtenerPreliminar(idPlanilla);
+    } catch (error) {
+      throw new InternalServerErrorException('Error al obtener planilla preliminar');
+    }
+  }
+
+  @Get('Definitiva/:term')
+  async ObtenerPlanDefin(
+    @Param('term') term: string
+  ) {
+    if (!term) {
+      throw new BadRequestException('Los parámetros idPlanilla son obligatorios');
+    }
+    try {
+      return await this.planillaService.ObtenerPlanDefin(term);
     } catch (error) {
       throw new InternalServerErrorException('Error al obtener planilla preliminar');
     }

@@ -176,19 +176,49 @@ export class AfiliadoService {
     
       try {
         const query = `
-        SELECT "Afil"."dni", "Ben"."dni", "Ben"."primer_nombre", "Ben"."segundo_nombre", "Ben"."tercer_nombre", "Ben"."primer_apellido", "Ben"."segundo_apellido", "Ben"."estado", "Ben"."porcentaje"  
-        FROM "afiliado" "Afil" 
-        FULL OUTER JOIN
-          "afiliado" "Ben" ON "Afil"."id_afiliado" = "Ben"."padreIdAfiliado"
-        WHERE 
-            "Afil"."dni" = ${dniAfil} AND 
-            "Afil"."estado" = 'FALLECIDO'  AND 
-            "Afil"."tipo_cotizante" = 'AFILIADO'
+        SELECT DISTINCT
+          "detA"."id_detalle_afiliado_padre"
+          FROM "afiliado" "Afil"
+          FULL OUTER JOIN
+          "detalle_afiliado" "detA" ON "Afil"."id_afiliado" = "detA"."id_detalle_afiliado_padre"
+        WHERE
+          "Afil"."dni" = '${dniAfil}' AND 
+          "Afil"."estado" = 'FALLECIDO'  AND
+          "detA"."tipo_afiliado" = 'BENEFICIARIO' AND
+          "Afil"."id_afiliado" NOT IN 
+          (
+              SELECT 
+              "detA"."id_afiliado"
+              FROM "afiliado" "Afil"
+              INNER JOIN
+              "detalle_afiliado" "detA" ON "Afil"."id_afiliado" = "detA"."id_detalle_afiliado_padre"
+          )
         `;
-  
+
         const beneficios = await this.entityManager.query(query);
+        
+        const query1 = `
+        SELECT 
+          "Afil"."dni",
+          "Afil"."primer_nombre",
+          "Afil"."segundo_nombre",
+          "Afil"."tercer_nombre",
+          "Afil"."primer_apellido",
+          "Afil"."segundo_apellido",
+          "Afil"."sexo",
+          "detA"."porcentaje",
+          "detA"."tipo_afiliado"
+        FROM
+            "detalle_afiliado" "detA" INNER JOIN 
+            "afiliado" "Afil" ON "detA"."id_afiliado" = "Afil"."id_afiliado"
+        WHERE 
+            "detA"."id_detalle_afiliado_padre" = ${beneficios[0].id_detalle_afiliado_padre} AND 
+            "detA"."tipo_afiliado" = 'BENEFICIARIO'
+        `;
+        
+        const beneficios2 = await this.entityManager.query(query1);
   
-        return beneficios;
+        return beneficios2;
       } catch (error) {
         this.logger.error(`Error al consultar beneficios: ${error.message}`);
         throw new Error(`Error al consultar beneficios: ${error.message}`);

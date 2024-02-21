@@ -132,7 +132,7 @@ const routes: Routes = [
         path: 'nuevo-beneficio',
         component: NuevoBeneficioComponent,
         data: {
-          title: 'Nuevo Afiliado',
+          title: 'Nuevo Beneficio',
         },
       },
       {
@@ -188,14 +188,14 @@ const routes: Routes = [
         path: 'nuevo-tipo-deduccion',
         component: NuevoTipoDeduccionComponent,
         data: {
-          title: 'Nuevo Afiliado',
+          title: 'Nueva Deducción',
         },
       },
       {
         path: 'editar-tipo-deduccion',
         component: EditarTipoDeduccionComponent,
         data: {
-          title: 'Editar tipo-deduccion',
+          title: 'Editar Tipo Deduccion',
         },
       },
     ],

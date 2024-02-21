@@ -17,6 +17,7 @@ export class NuevaPlanillaComponentP {
   datosG: boolean = false;
   datosCT: boolean = false;
   datosHS:boolean = false
+  datosRP:boolean = false
 
   constructor(private fb: FormBuilder, private planillaService: PlanillaService) {
     this.form = this.fb.group({
@@ -61,6 +62,7 @@ export class NuevaPlanillaComponentP {
   setEstadoDatGen(e:any){
     this.datosG = true
     this.datosCT = false
+    this.datosRP = false
     this.datosHS = false
   }
 
@@ -68,12 +70,21 @@ export class NuevaPlanillaComponentP {
     this.datosCT = true
     this.datosG = false
     this.datosHS = false
+    this.datosRP = false
   }
 
   setEstadoVerPlanP(e:any){
     this.datosG = false
     this.datosCT = false
+    this.datosRP = false
     this.datosHS = true
+  }
+
+  setEstadoVerPlanDef(e:any){
+    this.datosG = false
+    this.datosCT = false
+    this.datosHS = false
+    this.datosRP = true
   }
 
   limpiarFormulario(): void {

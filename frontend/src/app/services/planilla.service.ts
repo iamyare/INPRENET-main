@@ -99,13 +99,11 @@ export class PlanillaService {
   }
 
   getPlanillaBy(codigo_planilla: string): Observable<any> {
-
-    // Construye los parámetros de la consulta
-/*     let params = new HttpParams()
-      .set('term', codigo_planilla); */
-
-    // Realiza la petición GET al backend con los parámetros
     return this.http.get(`${environment.API_URL}/api/planilla/${codigo_planilla}`);
+  }
+
+  getPlanillaDefin(codigo_planilla: string): Observable<any> {
+    return this.http.get(`${environment.API_URL}/api/planilla/Definitiva/${codigo_planilla}`);
   }
 
   getBeneficiosNoAplicadas(periodoInicio: string, periodoFinalizacion: string): Observable<any> {

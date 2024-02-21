@@ -1,12 +1,24 @@
 <div class="container">
-  <app-dynamic-form [fields]="myFormFields" titulo="Detalles De Planilla Preliminar" subtitulo="Completa la información correspondiente" (newDatBenChange)="obtenerDatosForm($event)"></app-dynamic-form>
+  <app-dynamic-form [fields]="myFormFields" titulo="Detalles De Planilla Definitiva" subtitulo="Completa la información correspondiente" (newDatBenChange)="obtenerDatosForm($event)"></app-dynamic-form>
 
   <button (click)="getPlanilla()" [disabled]="datosFormateados.invalid" mat-raised-button style="margin: 2% 0;
   background-color: #628780;
   color: #ffffff;
   border-radius: 5px;
-  padding: 10px 20px;">Ver Planilla preliminar</button>
+  padding: 10px 20px;">Ver Planilla Definitiva</button>
+
+  <button  [disabled]="datosFormateados.invalid" mat-raised-button style="margin: 2% 0;
+  background-color: #628780;
+  color: #ffffff;
+  border-radius: 5px;
+  padding: 10px 20px;">Descargar Planilla en PDF</button>
+  <button  [disabled]="datosFormateados.invalid" mat-raised-button style="margin: 2% 0;
+  background-color: #628780;
+  color: #ffffff;
+  border-radius: 5px;
+  padding: 10px 20px;">Ver Resumen Definitiva</button>
 </div>
+
 
 <div class="card-header card-header-danger title" *ngIf="detallePlanilla">
   <div class="card-body" style="padding: 1%">
@@ -50,20 +62,5 @@
       >
       </app-dynamic-table>
     </div>
-    <button (click)="algunaAccion()">probar</button>
-    <button (click)="actualizarFechaCierrePlanilla()" mat-raised-button style="
-      margin: 2% 0;
-      background-color: #628780;
-      color: #ffffff;
-      border-radius: 5px;
-      padding: 10px 20px;"
-    >Cerrar planilla</button>
-    <button  mat-raised-button style="
-      margin: 2% 0;
-      background-color: #628780;
-      color: #ffffff;
-      border-radius: 5px;
-      padding: 10px 20px;"
-    >Generar reporte</button>
   </div>
 </div>

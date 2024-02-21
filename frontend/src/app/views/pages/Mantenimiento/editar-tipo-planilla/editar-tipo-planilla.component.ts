@@ -24,11 +24,11 @@ export class EditarTipoPlanillaComponent implements OnInit{
   ngOnInit(): void {
     // Definir las columnas
     this.myColumns = [
-      {
+/*       {
         header: 'ID',
         col: 'id',
         isEditable: false
-      },
+      }, */
       {
         header: 'Nombre de planilla',
         col: 'nombre',
@@ -96,13 +96,11 @@ export class EditarTipoPlanillaComponent implements OnInit{
 
   manejarAccionUno(row: any) {
     console.log(row);
-
     // Lógica para manejar la acción del primer botón
   }
 
   manejarAccionDos(row: any) {
     // Lógica para manejar la acción del segundo botón
   }
-
 
 }

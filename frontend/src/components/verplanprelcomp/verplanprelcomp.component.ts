@@ -18,26 +18,25 @@ import { convertirFecha } from 'src/app/shared/functions/formatoFecha';
 })
 export class VerplanprelcompComponent implements OnInit{
   convertirFecha = convertirFecha;
-  idPlanilla = ""
+
   dataPlan : any;
-  filas: any;
+  idPlanilla = ""
   tiposPlanilla: any[] = [];
   datosFormateados: any;
-
   myFormFields: FieldConfig[] = [];
-  myColumnsDed: TableColumn[] = [];
+
   datosTabl:  any[] = [];
+  myColumnsDed: TableColumn[] = [];
+  filas: any;
 
   verDat: boolean = false;
   ejecF: any;
 
+  detallePlanilla:any
   datosFilasDeduccion : any;
   datosFilasBeneficios : any;
-  detallePlanilla:any
-
 
   data: any[] = [];
-
   constructor(
     private _formBuilder: FormBuilder,
     private planillaService : PlanillaService,
@@ -50,6 +49,12 @@ export class VerplanprelcompComponent implements OnInit{
   }
 
   ngOnInit(): void {
+    this.myFormFields = [
+      {
+        type: 'string', label: 'Código De Planilla', name: 'codigo_planilla', validations: [Validators.required], display:true
+      },
+    ]
+
     this.myColumnsDed = [
       {
         header: 'DNI',
@@ -79,12 +84,6 @@ export class VerplanprelcompComponent implements OnInit{
         isEditable: true
       },
     ];
-
-    this.myFormFields = [
-      {
-        type: 'string', label: 'Código De Planilla', name: 'codigo_planilla', validations: [Validators.required], display:true
-      },
-    ]
   }
 
   obtenerDatosForm(event:any):any{

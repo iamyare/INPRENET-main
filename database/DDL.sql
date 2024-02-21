@@ -17,7 +17,6 @@ drop table "C##TEST"."afiliado" cascade constraints ;
 drop table "C##TEST"."planilla" cascade constraints ;
 drop table "C##TEST"."provincia" cascade constraints ;
 drop table "C##TEST"."rol" cascade constraints ;
-drop table "C##TEST"."planilla" cascade constraints ;
 drop table "C##TEST"."tipo_planilla" cascade constraints ;
 drop table "C##TEST"."usuario" cascade constraints ;
 drop table "C##TEST"."perf_afil_cent_trab" cascade constraints ;
@@ -25,6 +24,10 @@ drop table "C##TEST"."referencia_personal" cascade constraints ;
 drop table "C##TEST"."tipo_identificacion" cascade constraints ;
 drop table "C##TEST"."usuario" cascade constraints ;
 drop table "C##TEST"."referencia_personal_afiliado" cascade constraints ;
+drop table "C##TEST"."detalle_afiliado" cascade constraints  ;
+drop table "C##TEST"."detalle_beneficio" cascade constraints  ;
+drop table "C##TEST"."detalle_beneficio_afiliado" cascade constraints  ;
+
 
 ---------------------------------------------------------------------------------------------------------------------
 create or replace PROCEDURE calcular_suma_montos_aplicado(

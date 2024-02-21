@@ -14,7 +14,8 @@ export class Planilla {
 
     @Column('date', { nullable: false, default: () => 'SYSDATE' })
     fecha_apertura: Date;
-    @Column('date', { nullable: false, default: () => 'SYSDATE' })
+
+    @Column('date', { nullable: true })
     fecha_cierre: Date;
 
     @Column('number')

@@ -19,13 +19,13 @@ export class CreatePlanillaDto {
     @IsNotEmpty({ message: '' })
     @IsOptional({ message: '' })
     nombre_planilla?: string;
-
+    
     @IsString()
+    @IsOptional({ message: '' })
     fecha_cierre?: any;
-
+    
     @IsString()
+    @IsOptional({ message: '' })
     estado?: any;
-
-
-
+    
 }

@@ -430,7 +430,7 @@ FULL OUTER JOIN
       }
     }
 
-    async ObtenerPleliminar(idPlanilla: string): Promise<any> {
+    async ObtenerPreliminar(idPlanilla: string): Promise<any> {
       const query = `
       SELECT
       COALESCE(deducciones."id_afiliado", beneficios."id_afiliado") AS "id_afiliado",
@@ -502,6 +502,28 @@ FULL OUTER JOIN
       } catch (error) {
         this.logger.error(`Error al obtener totales por planilla: ${error.message}`, error.stack);
         throw new InternalServerErrorException('Se produjo un error al obtener los totales por planilla.');
+      }
+    }
+
+    async ObtenerPlanDefin(codPlanilla: string): Promise<any> {
+      if (codPlanilla) {
+        const queryBuilder = await this.planillaRepository
+        .createQueryBuilder('planilla')
+        .addSelect('planilla.id_planilla', 'id_planilla')
+        .addSelect('planilla.codigo_planilla', 'codigo_planilla')
+        .addSelect('planilla.fecha_apertura', 'fecha_apertura')
+        .addSelect('planilla.secuencia', 'secuencia')
+        .addSelect('planilla.estado', 'estado')
+        .addSelect('planilla.periodoInicio', 'periodoInicio')
+        .addSelect('planilla.periodoFinalizacion', 'periodoFinalizacion')
+        .addSelect('tipP.nombre_planilla', 'nombre_planilla')
+        .innerJoin(TipoPlanilla, 'tipP', 'tipP.id_tipo_planilla = planilla.id_tipo_planilla')
+        .where(`planilla.codigo_planilla = '${codPlanilla}'  AND planilla.estado = \'CERRADA\' ` )
+        .getRawMany();
+
+        return queryBuilder[0];
+        } else {
+          throw new NotFoundException(`planilla con ${codPlanilla} no encontrado.`);
       }
     }
 

@@ -2,6 +2,7 @@ import { Controller, Get, Post, Body, Patch, Param, Delete, Query, Res, BadReque
 import { PlanillaService } from './planilla.service';
 import { CreatePlanillaDto } from './dto/create-planilla.dto';
 import { UpdatePlanillaDto } from './dto/update-planilla.dto';
+import { PaginationDto } from 'src/common/dtos/pagination.dto';
 
 @Controller('planilla')
 export class PlanillaController {
@@ -10,14 +11,21 @@ export class PlanillaController {
   @Post('/actualizar-transacciones')
   @HttpCode(HttpStatus.OK)
   async actualizarBeneficiosYDeducciones(@Body() body: any): Promise<any> {
-    // Aquí, "body" debe contener los detalles necesarios para realizar la actualización
-    // Asegúrate de validar estos datos según sea necesario
-
     await this.planillaService.actualizarBeneficiosYDeduccionesConTransaccion(body.detallesBeneficios, body.detallesDeducciones);
-
-    // Devuelve una respuesta adecuada
     return { message: 'Transacción completada con éxito' };
   }
+  @Get('total/:id')
+  @HttpCode(HttpStatus.OK)
+  async obtenerTotalPlanilla(
+    @Param('id') idPlanilla: string
+  ) {
+    try {
+      return await this.planillaService.calcularTotalPlanilla(idPlanilla);
+    } catch (error) {
+      throw new InternalServerErrorException('Error al obtener el total planilla');
+    }
+  }
+
 
   @Get('preliminar')
   async ObtenerPlanillaPreliminar(
@@ -102,8 +110,8 @@ export class PlanillaController {
 
 
   @Get()
-  findAll() {
-    return this.planillaService.findAll();
+  findAll(@Query() paginationDto: PaginationDto) {
+    return this.planillaService.findAll(paginationDto);
   }
 
   /*  

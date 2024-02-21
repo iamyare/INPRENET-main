@@ -7,10 +7,10 @@ export class Deduccion {
     @PrimaryGeneratedColumn('uuid')
     id_deduccion : string;
 
-    @Column('varchar2', { length: 100, nullable: false })
+    @Column('varchar2', { length: 50, nullable: false })
     nombre_deduccion : string;
 
-    @Column('varchar2', { length: 100, nullable: false })
+    @Column('varchar2', { length: 100, nullable: true })
     descripcion_deduccion : string;
 
     @Column('varchar2', { length: 40, nullable: false })

@@ -30,6 +30,12 @@ export class PlanillaService {
     throw 'Error en la llamada HTTP';
   }
 
+  obtenerTotalPlanilla(idPlanilla: string): Observable<any> {
+    return this.http.get(`${environment.API_URL}/api/planilla/total/${idPlanilla}`).pipe(
+      catchError(this.handleError)
+    );
+  }
+
 
   // Método para crear una nueva TipoPlanilla
   createTipoPlanilla(tipoPlanillaData: any): Observable<any> {
@@ -46,6 +52,14 @@ export class PlanillaService {
       .set('offset', offset.toString());
 
     return this.http.get(`${environment.API_URL}/api/tipo-planilla`, { params });
+  }
+
+  findAllPlanillas(limit: number = 10, offset: number = 0): Observable<any> {
+    let params = new HttpParams()
+      .set('limit', limit.toString())
+      .set('offset', offset.toString());
+
+    return this.http.get(`${environment.API_URL}/api/planilla`, { params });
   }
 
 /*   getDeduccionesNoAplicadas(periodoInicio: string, periodoFinalizacion: string): Observable<any> {

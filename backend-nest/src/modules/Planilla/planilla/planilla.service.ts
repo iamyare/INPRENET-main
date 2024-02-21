@@ -4,7 +4,6 @@ import { UpdatePlanillaDto } from './dto/update-planilla.dto';
 import { InjectEntityManager, InjectRepository } from '@nestjs/typeorm';
 import { DetalleDeduccion } from '../detalle-deduccion/entities/detalle-deduccion.entity';
 import { EntityManager, Repository } from 'typeorm';
-import { Institucion } from 'src/modules/Empresarial/institucion/entities/institucion.entity';
 import { Afiliado } from 'src/modules/afiliado/entities/afiliado';
 import { Beneficio } from '../beneficio/entities/beneficio.entity';
 import { Deduccion } from '../deduccion/entities/deduccion.entity';
@@ -14,6 +13,7 @@ import { TipoPlanilla } from '../tipo-planilla/entities/tipo-planilla.entity';
 import { isUUID } from 'class-validator';
 import { DetalleBeneficioService } from '../detalle_beneficio/detalle_beneficio.service';
 import { DetalleDeduccionService } from '../detalle-deduccion/detalle-deduccion.service';
+import { PaginationDto } from 'src/common/dtos/pagination.dto';
 
 @Injectable()
 export class PlanillaService {
@@ -29,16 +29,8 @@ export class PlanillaService {
     private planillaRepository: Repository<Planilla>,
     @InjectRepository(TipoPlanilla)
     private tipoPlanillaRepository: Repository<TipoPlanilla>,
-    @InjectRepository(DetalleDeduccion)
-    private detalleDeduccionRepository: Repository<DetalleDeduccion>,
-    @InjectRepository(Beneficio)
-    private BeneficioRepository: Repository<Beneficio>,
-    @InjectRepository(Deduccion)
-    private DeduccionRepository: Repository<Deduccion>,
-    @InjectRepository(Institucion)
-    private institucionRepository: Repository<Institucion>,
     private detalleBeneficioService: DetalleBeneficioService,
-    private detalleDeduccionService: DetalleDeduccionService,){};
+    private detalleDeduccionService: DetalleDeduccionService){};
 
     async update(id_planilla: string, updatePlanillaDto: UpdatePlanillaDto): Promise<Planilla> {
       const planilla = await this.planillaRepository.preload({
@@ -55,6 +47,59 @@ export class PlanillaService {
           this.handleException(error); // Asegúrate de tener un método para manejar las excepciones
       }
   }
+
+  async calcularTotalPlanilla(idPlanilla: string): Promise<any> {
+    if (!isUUID(idPlanilla)) {
+      throw new BadRequestException('El identificador de la planilla no es válido.');
+    }
+  
+    const query = `
+    SELECT
+    SUM(beneficio."Total Beneficio") AS "Total Beneficio",
+    SUM(deduccion."Total Deducciones") AS "Total Deducciones",
+    SUM(beneficio."Total Beneficio") - SUM(deduccion."Total Deducciones") AS "Total Planilla"
+  FROM
+    (SELECT
+      afil."id_afiliado",
+      SUM(COALESCE(detBs."monto_por_periodo", 0)) AS "Total Beneficio"
+    FROM
+      "C##TEST"."afiliado" afil
+    LEFT JOIN
+      "C##TEST"."detalle_beneficio_afiliado" detBA ON afil."id_afiliado" = detBA."id_afiliado"
+    LEFT JOIN
+      "C##TEST"."detalle_beneficio" detBs ON detBA."id_detalle_ben_afil" = detBs."id_beneficio_afiliado"
+      AND detBs."id_planilla" = :idPlanilla
+    GROUP BY
+      afil."id_afiliado"
+    ) beneficio
+  INNER JOIN
+    (SELECT
+      afil."id_afiliado",
+      SUM(COALESCE(detDs."monto_aplicado", 0)) AS "Total Deducciones"
+    FROM
+      "C##TEST"."afiliado" afil
+    LEFT JOIN
+      "C##TEST"."detalle_deduccion" detDs ON afil."id_afiliado" = detDs."id_afiliado"
+      AND detDs."id_planilla" = :idPlanilla
+    GROUP BY
+      afil."id_afiliado"
+    ) deduccion ON beneficio."id_afiliado" = deduccion."id_afiliado"
+    `;
+    try {
+      const result = await this.entityManager.query(query, [idPlanilla, idPlanilla]);
+      // Si esperas un solo resultado, puedes directamente devolver ese objeto.
+      return {
+          totalBeneficio: Number(result[0]["Total Beneficio"]),
+          totalDeducciones: Number(result[0]["Total Deducciones"]),
+          totalPlanilla: Number(result[0]["Total Planilla"])
+      };
+  } catch (error) {
+      this.logger.error(`Error al calcular el total de la planilla: ${error.message}`, error.stack);
+      throw new InternalServerErrorException('Se produjo un error al calcular el total de la planilla.');
+    }
+  }
+  
+  
 
     async actualizarBeneficiosYDeduccionesConTransaccion(detallesBeneficios: any[], detallesDeducciones: any[]): Promise<void> {
       await this.entityManager.transaction(async (transactionalEntityManager) => {
@@ -489,9 +534,15 @@ FULL OUTER JOIN
     return 'This action adds a new planilla';
   }
 
-  findAll() {
-    return `This action returns all planilla`;
+  findAll(paginationDto: PaginationDto) {
+    const { limit = 10, offset = 0 } = paginationDto;
+    return this.planillaRepository.find({
+      take: limit,
+      skip: offset,
+      relations: ['tipoPlanilla'], // Agrega esta línea para cargar la relación
+    });
   }
+  
 
   async getDeduccionesNoAplicadas(periodoInicio: string, periodoFinalizacion: string): Promise<any> {
     const queryBuilder  = await this.afiliadoRepository

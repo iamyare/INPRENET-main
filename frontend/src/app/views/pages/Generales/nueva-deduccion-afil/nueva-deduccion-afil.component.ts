@@ -21,7 +21,8 @@ export class NuevaDeduccionAfilComponent{
   tiposDeducciones:any = [];
   instituciones:any = [];
   nameAfil:string = ""
-  public myFormFields: FieldConfig[] = []
+  public myFormFields: FieldConfig[] = [];
+  Afiliado:any = {};
 
   isChecked = true;
   formGroup = this._formBuilder.group({
@@ -126,6 +127,26 @@ unirNombres(
   return nombreCompleto;
 }
 
+async previsualizarInfoAfil(){
+  this.Afiliado.nameAfil = ""
+  if (this.data.value.dni){
+    /* SOLO RETORNA LOS AFILIADOS SIN BENEFICIARIOS Y SIN IMPORTAR EL ESTADO: ACTIVO, FALLECIDO, ETC. */
+    await this.svcAfilServ.getAfilByParam(this.data.value.dni).subscribe(
+      (result) => {
+        this.Afiliado = result
+        this.Afiliado.nameAfil = this.unirNombres(result.primer_nombre,result.segundo_nombre, result.tercer_nombre, result.primer_apellido,result.segundo_apellido);
+
+        //this.toastr.success('TipoPlanilla editada con éxito');
+      },
+      (error) => {
+        this.Afiliado.estado = ""
+        this.toastr.error(`Error: ${error.error.message}`);
+    })
+
+
+  }
+}
+
 guardarDetalleDeduccion(){
   this.deduccionesService.createDetalleDeduccion(this.data.value).subscribe(
     {
@@ -135,11 +156,9 @@ guardarDetalleDeduccion(){
       },
       error: (error) => {
         let mensajeError = 'Error desconocido al crear Detalle de deduccion';
-        // Verifica si el error tiene una estructura específica
         if (error.error && error.error.message) {
           mensajeError = error.error.message;
         } else if (typeof error.error === 'string') {
-          // Para errores que vienen como un string simple
           mensajeError = error.error;
         }
         this.toastr.error(mensajeError);
@@ -162,16 +181,12 @@ guardarDetalleDeduccion(){
       console.error('Cannot use multiple files');
       return;
     }
-
-    // Asignar el archivo seleccionado a la propiedad 'file' del componente
     this.file = target.files[0];
   }
 
   clearFile() {
     this.file = null;
-    this.progressValue = 0; // También puedes querer restablecer la barra de progreso
-
-    // Restablece el valor del input de archivo
+    this.progressValue = 0;
     if (this.fileInput && this.fileInput.nativeElement) {
       this.fileInput.nativeElement.value = '';
     }
@@ -184,7 +199,7 @@ guardarDetalleDeduccion(){
     }
 
     this.isUploading = true;
-    this.progressValue = 0; // Inicializa la barra de progreso
+    this.progressValue = 0;
 
     const reader: FileReader = new FileReader();
     reader.onload = (e: any) => {

@@ -1,1 +1,15 @@
-<p>ver-planillas works!</p>
+<app-dynamic-table
+  [columns]="myColumns"
+  [data]="filas"
+  [getData]="getFilas"
+  (ejecutarFuncionAsincronaEvent)="ejecutarFuncionAsincronaDesdeOtroComponente($event)"
+  [nombreEncabezadoUno]="'Detalle planilla'"
+  [mostrarBotonUno]="true"
+  [etiquetaBotonUno]="'Detalle planilla'"
+  (accionBotonUno)="manejarAccionUno($event)"
+  >
+</app-dynamic-table>
+
+
+
+

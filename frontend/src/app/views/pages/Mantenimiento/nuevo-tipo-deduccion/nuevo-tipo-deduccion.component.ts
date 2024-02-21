@@ -22,7 +22,7 @@ export class NuevoTipoDeduccionComponent {
     },
     { type: 'text', label: 'Nombre', name: 'nombre_deduccion', validations: [Validators.required] , display:true},
     { type: 'text', label: 'Descripción', name: 'descripcion_deduccion', validations: [Validators.required] , display:true},
-    { type: 'text', label: 'Código de deducción', name: 'codigo_deduccion', validations: [Validators.required], display:true },
+    { type: 'number', label: 'Código de deducción', name: 'codigo_deduccion', validations: [Validators.required], display:true },
     { type: 'number', label: 'Prioridad', name: 'Prioridad', validations: [Validators.required] , display:true},
   ];
 
@@ -44,12 +44,9 @@ export class NuevoTipoDeduccionComponent {
         },
         error: (error) => {
           let mensajeError = 'Error desconocido al crear tipo de deduccion';
-
-          // Verifica si el error tiene una estructura específica
           if (error.error && error.error.message) {
             mensajeError = error.error.message;
           } else if (typeof error.error === 'string') {
-            // Para errores que vienen como un string simple
             mensajeError = error.error;
           }
 
@@ -60,7 +57,6 @@ export class NuevoTipoDeduccionComponent {
   }
 
   limpiarFormulario(): void {
-    // Utiliza la referencia al componente DynamicFormComponent para resetear el formulario
     if (this.dynamicForm) {
       this.dynamicForm.form.reset();
     }

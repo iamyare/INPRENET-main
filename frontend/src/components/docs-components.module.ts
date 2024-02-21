@@ -45,6 +45,7 @@ import { CustomMatPaginatorIntl } from '../app/shared/functions/paginado';
 import { DynamicFormComponent } from './dynamic-form/dynamic-form.component';
 import { DynamicTableComponent } from './dynamic-table/dynamic-table.component';
 import { DynamicDialogComponent } from './dynamic-dialog/dynamic-dialog.component';
+import { DetallePlanillaDialogComponent } from './detalle-planilla-dialog/detalle-planilla-dialog.component';
 
 @NgModule({
   declarations: [
@@ -60,7 +61,8 @@ import { DynamicDialogComponent } from './dynamic-dialog/dynamic-dialog.componen
     HistorialSalarioComponent,
     DynamicFormComponent,
     DynamicTableComponent,
-    DynamicDialogComponent
+    DynamicDialogComponent,
+    DetallePlanillaDialogComponent
   ],
   exports: [
     ProgressbarComponent,
@@ -75,6 +77,7 @@ import { DynamicDialogComponent } from './dynamic-dialog/dynamic-dialog.componen
     HistorialSalarioComponent,
     DynamicFormComponent,
     DynamicTableComponent,
+    DetallePlanillaDialogComponent
   ],
   imports: [
     WebcamModule,

@@ -3,9 +3,13 @@
 </form>
 
 <div *ngIf="formGroup.invalid">
-<h2>{{nameAfil}}</h2>
+  <h3>Nombre de Afiliado: {{Afiliado.nameAfil}}</h3>
+  <h3>Estado: {{Afiliado.estado}}</h3>
 <app-dynamic-form [fields]="myFormFields" titulo="Detalles de deducciones" subtitulo="Completa la informacion correspondiente"
 (newDatBenChange)="obtenerDatos($event)"></app-dynamic-form>
+
+<button mat-raised-button color="primary" style="color: white;" [disabled]="data.invalid" (click)="previsualizarInfoAfil()" >Previsualizar información del afiliado</button>
+
 <button mat-raised-button color="primary" style="color: white;" [disabled]="data.invalid" (click)="guardarDetalleDeduccion()">Guardar</button>
 </div>
 

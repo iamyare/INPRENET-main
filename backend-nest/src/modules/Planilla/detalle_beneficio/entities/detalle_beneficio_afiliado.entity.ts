@@ -16,8 +16,14 @@ export class DetalleBeneficioAfiliado
     @Column({ type: 'date', nullable: false })
     periodoFinalizacion: Date;
 
+    @Column({nullable:true, default: 0 })
+    num_rentas_aplicadas: number;
+
     @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
     monto_total: number;
+
+    @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
+    monto_por_periodo: number;
 
     @ManyToOne(() => Afiliado, afiliado => afiliado.detalleBeneficioAfiliado)
     @JoinColumn({ name: 'id_afiliado' })

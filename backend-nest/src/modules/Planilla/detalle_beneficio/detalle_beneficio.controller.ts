@@ -52,6 +52,14 @@ export class DetalleBeneficioController {
     }
     return this.detallebeneficioService.obtenerDetallesBeneficioComplePorAfiliado(idAfiliado);
   }
+
+  @Get('/obtenerBeneficiosDeAfil/:dni')
+  async obtenerBeneficiosDeAfil(@Param('dni') dni: string) {
+    if (!dni) {
+      throw new BadRequestException('Se requiere el parámetro dni');
+    }
+    return this.detallebeneficioService.obtenerBeneficiosDeAfil(dni);
+  }
   
   @Get('/rango-beneficios')
   async getRangoDetalleBeneficios(

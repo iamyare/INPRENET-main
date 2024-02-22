@@ -61,7 +61,7 @@ export class PlanillaService {
   FROM
     (SELECT
       afil."id_afiliado",
-      SUM(COALESCE(detBs."monto_por_periodo", 0)) AS "Total Beneficio"
+      SUM(COALESCE(detBA."monto_por_periodo", 0)) AS "Total Beneficio"
     FROM
       "C##TEST"."afiliado" afil
     LEFT JOIN
@@ -85,6 +85,8 @@ export class PlanillaService {
       afil."id_afiliado"
     ) deduccion ON beneficio."id_afiliado" = deduccion."id_afiliado"
     `;
+    console.log(query);
+    
     try {
       const result = await this.entityManager.query(query, [idPlanilla, idPlanilla]);
       // Si esperas un solo resultado, puedes directamente devolver ese objeto.
@@ -137,7 +139,7 @@ export class PlanillaService {
                   COALESCE(afil."tercer_nombre", '') || ' ' ||
                   afil."primer_apellido" || ' ' ||
                   COALESCE(afil."segundo_apellido", '')) AS NOMBRE_COMPLETO,
-              SUM(detBs."monto_por_periodo") AS "Total Beneficio"
+              SUM(detBA."monto_por_periodo") AS "Total Beneficio"
         FROM
               "C##TEST"."afiliado" afil
         INNER JOIN
@@ -152,7 +154,7 @@ export class PlanillaService {
         LEFT JOIN
           "C##TEST"."detalle_beneficio" detBs ON detBA."id_detalle_ben_afil" = detBs."id_beneficio_afiliado"
           AND detBs."estado" = 'NO PAGADA' 
-          AND detBs."num_rentas_aplicadas" <= ben."numero_rentas_max"
+          
         GROUP BY
               afil."id_afiliado",
               afil."dni",
@@ -239,7 +241,7 @@ FROM
             COALESCE(afil."tercer_nombre", '') || ' ' || 
             afil."primer_apellido" || ' ' || 
             COALESCE(afil."segundo_apellido", '')) AS NOMBRE_COMPLETO,
-            SUM(detBs."monto_por_periodo") AS "Total Beneficio"
+            SUM(detBA."monto_por_periodo") AS "Total Beneficio"
     FROM
         "C##TEST"."afiliado" afil
     INNER JOIN
@@ -251,7 +253,7 @@ FROM
         "C##TEST"."beneficio" ben ON ben."id_beneficio" = detBA."id_beneficio"
     LEFT JOIN
         "C##TEST"."detalle_beneficio" detBs ON detBs."id_beneficio_afiliado" = detBA."id_detalle_ben_afil"
-        AND detBs."num_rentas_aplicadas" <= ben."numero_rentas_max"
+        
     WHERE
         detBs."estado" = 'INCONSISTENCIA'
     GROUP BY
@@ -324,7 +326,7 @@ FROM
             afil."primer_apellido" || ' ' || 
             COALESCE(afil."segundo_apellido", '')
         ) AS NOMBRE_COMPLETO,
-        SUM(detBs."monto_por_periodo") AS "Total Beneficio"
+        SUM(detBA."monto_por_periodo") AS "Total Beneficio"
     FROM
         "C##TEST"."afiliado" afil
     LEFT JOIN
@@ -333,7 +335,7 @@ FROM
         "C##TEST"."beneficio" ben ON ben."id_beneficio" = detBA."id_beneficio"
     LEFT JOIN
         "C##TEST"."detalle_beneficio" detBs  ON detBs."id_beneficio_afiliado" = detBA."id_detalle_ben_afil"
-        AND detBs."num_rentas_aplicadas" <= ben."numero_rentas_max"
+        
     INNER JOIN
         "C##TEST"."detalle_afiliado" detAf ON afil."id_afiliado" = detAf."id_afiliado"
     WHERE
@@ -421,7 +423,6 @@ FULL OUTER JOIN
     WHERE
         deducciones."estado_aplicacion" = 'NO COBRADA' AND beneficios."estado" = 'NO PAGADA'
       `;
-      
       try {
         return await this.entityManager.query(query);
       } catch (error) {
@@ -448,7 +449,7 @@ FULL OUTER JOIN
               COALESCE(afil."tercer_nombre", '') || ' ' ||
               afil."primer_apellido" || ' ' ||
               COALESCE(afil."segundo_apellido", '')) AS "NOMBRE_COMPLETO",
-          SUM(COALESCE(detBs."monto_por_periodo", 0)) AS "Total Beneficio"
+          SUM(COALESCE(detBA."monto_por_periodo", 0)) AS "Total Beneficio"
       FROM
           "C##TEST"."afiliado" afil
       LEFT JOIN
@@ -466,7 +467,7 @@ FULL OUTER JOIN
               afil."primer_apellido" || ' ' ||
               COALESCE(afil."segundo_apellido", '')) 
       HAVING
-          SUM(COALESCE(detBs."monto_por_periodo", 0)) > 0) beneficios
+          SUM(COALESCE(detBA."monto_por_periodo", 0)) > 0) beneficios
   FULL OUTER JOIN
       (SELECT
           afil."id_afiliado",

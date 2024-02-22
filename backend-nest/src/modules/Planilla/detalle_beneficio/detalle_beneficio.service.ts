@@ -76,13 +76,14 @@ export class DetalleBeneficioService {
         nuevoDetalleAfiliado.periodoInicio = periodoInicio;
         nuevoDetalleAfiliado.periodoFinalizacion = periodoFinalizacion;
         nuevoDetalleAfiliado.monto_total = datos.monto_total;
+        nuevoDetalleAfiliado.monto_por_periodo = datos.monto_por_periodo;
 
             const detalleAfiliadoGuardado = await manager.save(nuevoDetalleAfiliado);
 
             const nuevoDetalleBeneficio = manager.create(DetalleBeneficio, {
                 detalleBeneficioAfiliado: detalleAfiliadoGuardado,
                 metodo_pago: datos.metodo_pago,
-                monto_por_periodo: datos.monto_por_periodo,
+                /* monto_por_periodo: datos.monto_por_periodo, */
             });
 
             await manager.save(nuevoDetalleBeneficio);
@@ -104,8 +105,8 @@ export class DetalleBeneficioService {
         detBA."id_beneficio",
         db."estado",
         db."metodo_pago",
-        db."monto_por_periodo" AS "monto",
-        db."num_rentas_aplicadas",
+        detBA."monto_por_periodo" AS "monto",
+        detBA."num_rentas_aplicadas",
         detBA."periodoInicio",
         detBA."periodoFinalizacion",
         db."id_planilla"
@@ -135,9 +136,9 @@ export class DetalleBeneficioService {
     SELECT
     db."id_beneficio_planilla",
     db."estado",
-    db."monto_por_periodo" as "monto",
+    detBA."monto_por_periodo" as "monto",
     db."metodo_pago",
-    db."num_rentas_aplicadas",
+    detBA."num_rentas_aplicadas",
     detBA."periodoInicio",
     detBA."periodoFinalizacion",
     b."nombre_beneficio",
@@ -180,10 +181,10 @@ async obtenerDetallesBeneficioComplePorAfiliado(idAfiliado: string): Promise<any
     const query = `
     SELECT
     detB."id_beneficio_planilla",
-    detB."monto_por_periodo" as "monto",
+    detBA."monto_por_periodo" as "monto",
     detB."estado",
     detB."metodo_pago",
-    detB."num_rentas_aplicadas",
+    detBA."num_rentas_aplicadas",
     detBA."periodoInicio",
     detBA."periodoFinalizacion",
     afil."id_afiliado",
@@ -231,6 +232,27 @@ async obtenerDetallesBeneficioComplePorAfiliado(idAfiliado: string): Promise<any
     `;
 
     return await this.benAfilRepository.query(query, [idAfiliado]); // Usando un array para los parámetros
+  } catch (error) {
+    this.logger.error('Error al obtener detalles de beneficio por afiliado', error.stack);
+    throw new InternalServerErrorException('Error al obtener detalles de beneficio por afiliado');
+  }
+}
+
+async obtenerBeneficiosDeAfil(dni: string): Promise<any[]> {
+  try {
+      const query = `SELECT  
+      ben."id_beneficio", ben."nombre_beneficio", 
+      detBenAfil."num_rentas_aplicadas",
+      detBenAfil."monto_total",
+      ben."numero_rentas_max" 
+      FROM "C##TEST"."beneficio" ben
+      INNER JOIN "C##TEST"."detalle_beneficio_afiliado" detBenAfil ON  
+      detBenAfil."id_beneficio" = ben."id_beneficio"
+      INNER JOIN "C##TEST"."afiliado" afil ON  
+      detBenAfil."id_afiliado" = afil."id_afiliado"
+      WHERE 
+      afil."dni" = '${dni}'`;
+    return await this.benAfilRepository.query(query); // Usando un array para los parámetros
   } catch (error) {
     this.logger.error('Error al obtener detalles de beneficio por afiliado', error.stack);
     throw new InternalServerErrorException('Error al obtener detalles de beneficio por afiliado');
@@ -373,7 +395,7 @@ async actualizarPlanillaYEstadoDeBeneficio(detalles: { idBeneficioPlanilla: stri
         detBA."periodoFinalizacion",
         ben."nombre_beneficio",
         ben."id_beneficio",
-        detB."monto_por_periodo" as "monto",
+        detBA."monto_por_periodo" as "monto",
         detB."estado"
       FROM "C##TEST"."detalle_beneficio" detB
       INNER JOIN "C##TEST"."detalle_beneficio_afiliado" detBA ON detB."id_beneficio_afiliado" = detBA."id_detalle_ben_afil"

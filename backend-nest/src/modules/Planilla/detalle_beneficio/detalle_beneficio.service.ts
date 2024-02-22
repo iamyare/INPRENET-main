@@ -4,7 +4,7 @@ import { InjectEntityManager, InjectRepository } from '@nestjs/typeorm';
 import { EntityManager, LessThanOrEqual, MoreThanOrEqual, Not, Repository } from 'typeorm';
 import { Beneficio } from '../beneficio/entities/beneficio.entity';
 import { Afiliado } from 'src/modules/afiliado/entities/afiliado';
-import { DetalleBeneficio, EstadoEnum } from './entities/detalle_beneficio.entity';
+import { DetallePagoBeneficio, EstadoEnum } from './entities/detalle_pago_beneficio.entity';
 import { UpdateDetalleBeneficioDto } from './dto/update-detalle_beneficio_planilla.dto';
 import { CreateDetalleBeneficioDto } from './dto/create-detalle_beneficio.dto';
 import { Planilla } from '../planilla/entities/planilla.entity';
@@ -19,8 +19,8 @@ export class DetalleBeneficioService {
   private readonly afiliadoRepository : Repository<Afiliado>,
   @InjectRepository(Beneficio)
   private readonly tipoBeneficioRepository : Repository<Beneficio>,
-  @InjectRepository(DetalleBeneficio)
-  private readonly benAfilRepository : Repository<DetalleBeneficio>,
+  @InjectRepository(DetallePagoBeneficio)
+  private readonly benAfilRepository : Repository<DetallePagoBeneficio>,
   @InjectRepository(Planilla)
   private planillaRepository: Repository<Planilla>,
   @InjectRepository(DetalleBeneficioAfiliado)
@@ -33,7 +33,7 @@ export class DetalleBeneficioService {
   async actualizarEstadoPorPlanilla(idPlanilla: string, nuevoEstado: string): Promise<{ mensaje: string }> {
     try {
       const resultado = await this.benAfilRepository.createQueryBuilder()
-        .update(DetalleBeneficio)
+        .update(DetallePagoBeneficio)
         .set({ estado: nuevoEstado })
         .where("planilla.id_planilla = :idPlanilla", { idPlanilla })
         .execute();
@@ -80,7 +80,7 @@ export class DetalleBeneficioService {
 
             const detalleAfiliadoGuardado = await manager.save(nuevoDetalleAfiliado);
 
-            const nuevoDetalleBeneficio = manager.create(DetalleBeneficio, {
+            const nuevoDetalleBeneficio = manager.create(DetallePagoBeneficio, {
                 detalleBeneficioAfiliado: detalleAfiliadoGuardado,
                 metodo_pago: datos.metodo_pago,
                 monto_a_pagar: datos.monto_por_periodo,
@@ -111,7 +111,7 @@ export class DetalleBeneficioService {
         detBA."periodoFinalizacion",
         db."id_planilla"
       FROM
-        "detalle_beneficio" db
+        "detalle_pago_beneficio" db
       INNER JOIN 
         "detalle_beneficio_afiliado" detBA ON db."id_beneficio_afiliado" = detBA."id_detalle_ben_afil"
       INNER JOIN 
@@ -151,7 +151,7 @@ export class DetalleBeneficioService {
       COALESCE(afil."segundo_apellido", '')
     ) AS "nombre_completo"
   FROM
-    "C##TEST"."detalle_beneficio" db
+    "C##TEST"."detalle_pago_beneficio" db
   JOIN
     "C##TEST"."detalle_beneficio_afiliado" detBA ON db."id_beneficio_afiliado" = detBA."id_detalle_ben_afil"
   JOIN
@@ -199,7 +199,7 @@ async obtenerDetallesBeneficioComplePorAfiliado(idAfiliado: string): Promise<any
     ben."nombre_beneficio",
     ben."descripcion_beneficio"
   FROM
-    "detalle_beneficio" detB
+    "detalle_pago_beneficio" detB
       JOIN
         "detalle_beneficio_afiliado" detBA ON detBA."id_detalle_ben_afil" = detB."id_beneficio_afiliado"
       JOIN
@@ -223,7 +223,7 @@ async obtenerDetallesBeneficioComplePorAfiliado(idAfiliado: string): Promise<any
           FROM
             "detalle_beneficio_afiliado" detBA2
         JOIN
-            "detalle_beneficio" detB ON detBA2."id_detalle_ben_afil" = detB."id_beneficio_afiliado"
+            "detalle_pago_beneficio" detB ON detBA2."id_detalle_ben_afil" = detB."id_beneficio_afiliado"
           WHERE
             detB."estado" = 'PAGADA'
         )
@@ -259,12 +259,12 @@ async obtenerBeneficiosDeAfil(dni: string): Promise<any[]> {
   }
 }
 
-async actualizarPlanillaYEstadoDeBeneficio(detalles: { idBeneficioPlanilla: string; codigoPlanilla: string; estado: string }[], transactionalEntityManager?: EntityManager): Promise<DetalleBeneficio[]> {
+async actualizarPlanillaYEstadoDeBeneficio(detalles: { idBeneficioPlanilla: string; codigoPlanilla: string; estado: string }[], transactionalEntityManager?: EntityManager): Promise<DetallePagoBeneficio[]> {
   const resultados = [];
   const entityManager = transactionalEntityManager ? transactionalEntityManager : this.entityManager;
 
   for (const { idBeneficioPlanilla, codigoPlanilla, estado } of detalles) {
-    const beneficio = await entityManager.findOne(DetalleBeneficio, { where: { id_beneficio_planilla: idBeneficioPlanilla } });
+    const beneficio = await entityManager.findOne(DetallePagoBeneficio, { where: { id_beneficio_planilla: idBeneficioPlanilla } });
     if (!beneficio) {
       throw new NotFoundException(`DetalleBeneficio con ID "${idBeneficioPlanilla}" no encontrado`);
     }
@@ -343,7 +343,7 @@ async actualizarPlanillaYEstadoDeBeneficio(detalles: { idBeneficioPlanilla: stri
   }
 
   async findOne(term: string) {
-    let benAfil: DetalleBeneficio;
+    let benAfil: DetallePagoBeneficio;
     if (isUUID(term)) {
       benAfil = await this.benAfilRepository.findOneBy({ id_beneficio_planilla: term });
     } else {
@@ -397,7 +397,7 @@ async actualizarPlanillaYEstadoDeBeneficio(detalles: { idBeneficioPlanilla: stri
         ben."id_beneficio",
         detB."monto_por_periodo" as "monto",
         detB."estado"
-      FROM "C##TEST"."detalle_beneficio" detB
+      FROM "C##TEST"."detalle_pago_beneficio" detB
       INNER JOIN "C##TEST"."detalle_beneficio_afiliado" detBA ON detB."id_beneficio_afiliado" = detBA."id_detalle_ben_afil"
       INNER JOIN "C##TEST"."beneficio" ben ON ben."id_beneficio" = detBA."id_beneficio"
       WHERE detB."estado" = 'INCONSISTENCIA'

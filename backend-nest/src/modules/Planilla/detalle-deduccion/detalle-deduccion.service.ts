@@ -200,7 +200,7 @@ async obtenerDetallesDeduccionPorAfiliado(idAfiliado: string): Promise<any[]> {
       )
       AND detD."id_afiliado" NOT IN (
           SELECT dedBA."id_afiliado"
-          FROM "detalle_beneficio" detB
+          FROM "detalle_pago_beneficio" detB
           JOIN
               "detalle_beneficio_afiliado" dedBA ON detB."id_beneficio_afiliado" = dedBA."id_detalle_ben_afil"
           WHERE detB."estado" = 'PAGADA'

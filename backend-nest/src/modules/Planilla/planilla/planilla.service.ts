@@ -7,7 +7,7 @@ import { EntityManager, Repository } from 'typeorm';
 import { Afiliado } from 'src/modules/afiliado/entities/afiliado';
 import { Beneficio } from '../beneficio/entities/beneficio.entity';
 import { Deduccion } from '../deduccion/entities/deduccion.entity';
-import { DetalleBeneficio } from '../detalle_beneficio/entities/detalle_beneficio.entity';
+import { DetallePagoBeneficio } from '../detalle_beneficio/entities/detalle_pago_beneficio.entity';
 import { Planilla } from './entities/planilla.entity';
 import { TipoPlanilla } from '../tipo-planilla/entities/tipo-planilla.entity';
 import { isUUID } from 'class-validator';
@@ -21,8 +21,8 @@ export class PlanillaService {
 
   constructor(
     @InjectEntityManager() private entityManager: EntityManager,
-    @InjectRepository(DetalleBeneficio)
-    private detalleBeneficioRepository: Repository<DetalleBeneficio>,
+    @InjectRepository(DetallePagoBeneficio)
+    private detalleBeneficioRepository: Repository<DetallePagoBeneficio>,
     @InjectRepository(Afiliado)
     private afiliadoRepository: Repository<Afiliado>,
     @InjectRepository(Planilla)
@@ -67,7 +67,7 @@ export class PlanillaService {
     LEFT JOIN
       "C##TEST"."detalle_beneficio_afiliado" detBA ON afil."id_afiliado" = detBA."id_afiliado"
     LEFT JOIN
-      "C##TEST"."detalle_beneficio" detBs ON detBA."id_detalle_ben_afil" = detBs."id_beneficio_afiliado"
+      "C##TEST"."detalle_pago_beneficio" detBs ON detBA."id_detalle_ben_afil" = detBs."id_beneficio_afiliado"
       AND detBs."id_planilla" = :idPlanilla
     GROUP BY
       afil."id_afiliado"
@@ -152,7 +152,7 @@ export class PlanillaService {
         LEFT JOIN
           "C##TEST"."beneficio" ben ON ben."id_beneficio" = detBA."id_beneficio"
         LEFT JOIN
-          "C##TEST"."detalle_beneficio" detBs ON detBA."id_detalle_ben_afil" = detBs."id_beneficio_afiliado"
+          "C##TEST"."detalle_pago_beneficio" detBs ON detBA."id_detalle_ben_afil" = detBs."id_beneficio_afiliado"
           AND detBs."estado" = 'NO PAGADA' 
           
         GROUP BY
@@ -208,7 +208,7 @@ export class PlanillaService {
                   SELECT detBA."id_afiliado"
                   FROM "C##TEST"."detalle_beneficio_afiliado" detBA
                   LEFT JOIN
-                      "C##TEST"."detalle_beneficio" detBs  ON detBs."id_beneficio_afiliado" = detBA."id_detalle_ben_afil"
+                      "C##TEST"."detalle_pago_beneficio" detBs  ON detBs."id_beneficio_afiliado" = detBA."id_detalle_ben_afil"
                   WHERE detBs."estado" = 'PAGADA' AND
                       detBA."id_afiliado" = beneficios."id_afiliado"
               ))) AND beneficios."Total Beneficio" IS NOT NULL AND
@@ -252,7 +252,7 @@ FROM
     LEFT JOIN
         "C##TEST"."beneficio" ben ON ben."id_beneficio" = detBA."id_beneficio"
     LEFT JOIN
-        "C##TEST"."detalle_beneficio" detBs ON detBs."id_beneficio_afiliado" = detBA."id_detalle_ben_afil"
+        "C##TEST"."detalle_pago_beneficio" detBs ON detBs."id_beneficio_afiliado" = detBA."id_detalle_ben_afil"
         
     WHERE
         detBs."estado" = 'INCONSISTENCIA'
@@ -334,7 +334,7 @@ FROM
     LEFT JOIN
         "C##TEST"."beneficio" ben ON ben."id_beneficio" = detBA."id_beneficio"
     LEFT JOIN
-        "C##TEST"."detalle_beneficio" detBs  ON detBs."id_beneficio_afiliado" = detBA."id_detalle_ben_afil"
+        "C##TEST"."detalle_pago_beneficio" detBs  ON detBs."id_beneficio_afiliado" = detBA."id_detalle_ben_afil"
         
     INNER JOIN
         "C##TEST"."detalle_afiliado" detAf ON afil."id_afiliado" = detAf."id_afiliado"
@@ -346,7 +346,7 @@ FROM
             FROM
                 "C##TEST"."detalle_beneficio_afiliado" detBA
             LEFT JOIN
-                "C##TEST"."detalle_beneficio" detBs  ON detBs."id_beneficio_afiliado" = detBA."id_detalle_ben_afil"
+                "C##TEST"."detalle_pago_beneficio" detBs  ON detBs."id_beneficio_afiliado" = detBA."id_detalle_ben_afil"
             WHERE
                 detBs."estado" NOT IN ('NO PAGADA', 'INCONSISTENCIA')
         )  AND
@@ -401,7 +401,7 @@ FULL OUTER JOIN
         ) AND
         NOT EXISTS (
             SELECT 1
-                FROM "C##TEST"."detalle_beneficio" detB
+                FROM "C##TEST"."detalle_pago_beneficio" detB
             LEFT JOIN
                 "C##TEST"."detalle_beneficio_afiliado" detBA ON detB."id_beneficio_afiliado" = detBA."id_detalle_ben_afil"
             WHERE 
@@ -455,7 +455,7 @@ FULL OUTER JOIN
       LEFT JOIN
           "C##TEST"."detalle_beneficio_afiliado" detBA ON afil."id_afiliado" = detBA."id_afiliado"
       LEFT JOIN
-          "C##TEST"."detalle_beneficio" detBs ON detBA."id_detalle_ben_afil" = detBs."id_beneficio_afiliado"
+          "C##TEST"."detalle_pago_beneficio" detBs ON detBA."id_detalle_ben_afil" = detBs."id_beneficio_afiliado"
           AND detBs."id_planilla" = '${idPlanilla}'
       GROUP BY
           afil."id_afiliado",
@@ -581,7 +581,7 @@ FULL OUTER JOIN
     ])
     .leftJoin(DetalleDeduccion, 'detD', 'afil.id_afiliado = detD.id_afiliado')
     .leftJoin(Deduccion, 'ded', 'detD.id_deduccion = ded.id_deduccion')
-    .leftJoin(DetalleBeneficio, 'detB', 'afil.id_afiliado = detB.id_afiliado')
+    .leftJoin(DetallePagoBeneficio, 'detB', 'afil.id_afiliado = detB.id_afiliado')
     .leftJoin(Beneficio, 'ben', 'detB.id_beneficio = ben.id_beneficio')
     .where(`
       (TO_DATE(detB.periodoInicio, 'DD-MM-YYYY') BETWEEN TO_DATE(SYSDATE, 'DD-MM-YYYY') AND TO_DATE('${periodoInicio}', 'DD-MM-YYYY')) AND

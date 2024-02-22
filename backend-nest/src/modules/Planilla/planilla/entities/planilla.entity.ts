@@ -1,7 +1,7 @@
 import { Column, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 import { TipoPlanilla } from '../../tipo-planilla/entities/tipo-planilla.entity';
 import { DetalleDeduccion } from '../../detalle-deduccion/entities/detalle-deduccion.entity';
-import { DetalleBeneficio } from '../../detalle_beneficio/entities/detalle_beneficio.entity';
+import { DetallePagoBeneficio } from '../../detalle_beneficio/entities/detalle_pago_beneficio.entity';
 
 @Entity()
 export class Planilla {
@@ -37,7 +37,7 @@ export class Planilla {
     @OneToMany(() => DetalleDeduccion, detalleDeduccion => detalleDeduccion.planilla)
     detalleDeduccion: DetalleDeduccion[];
 
-    @OneToMany(() => DetalleBeneficio, detallebeneficio => detallebeneficio.planilla)
-    detallebeneficio: DetalleBeneficio[];
+    @OneToMany(() => DetallePagoBeneficio, detallepagobeneficio => detallepagobeneficio.planilla)
+    detallepagobeneficio: DetallePagoBeneficio[];
 
 }

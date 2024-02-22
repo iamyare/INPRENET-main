@@ -20,6 +20,9 @@ export class DetalleBeneficio {
     @Column({nullable:true})
     metodo_pago: string;
 
+    @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
+    monto_a_pagar: number;
+    
     @ManyToOne(() => Planilla, planilla => planilla.detallebeneficio, { cascade: true })
     @JoinColumn({ name: 'id_planilla' })
     planilla: Planilla;

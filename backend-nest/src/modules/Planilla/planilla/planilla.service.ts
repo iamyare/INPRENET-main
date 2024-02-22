@@ -61,7 +61,7 @@ export class PlanillaService {
   FROM
     (SELECT
       afil."id_afiliado",
-      SUM(COALESCE(detBA."monto_por_periodo", 0)) AS "Total Beneficio"
+      SUM(COALESCE(detBs."monto_a_pagar", 0)) AS "Total Beneficio"
     FROM
       "C##TEST"."afiliado" afil
     LEFT JOIN
@@ -139,7 +139,7 @@ export class PlanillaService {
                   COALESCE(afil."tercer_nombre", '') || ' ' ||
                   afil."primer_apellido" || ' ' ||
                   COALESCE(afil."segundo_apellido", '')) AS NOMBRE_COMPLETO,
-              SUM(detBA."monto_por_periodo") AS "Total Beneficio"
+              SUM(detBs."monto_a_pagar") AS "Total Beneficio"
         FROM
               "C##TEST"."afiliado" afil
         INNER JOIN
@@ -241,7 +241,7 @@ FROM
             COALESCE(afil."tercer_nombre", '') || ' ' || 
             afil."primer_apellido" || ' ' || 
             COALESCE(afil."segundo_apellido", '')) AS NOMBRE_COMPLETO,
-            SUM(detBA."monto_por_periodo") AS "Total Beneficio"
+            SUM(detBs."monto_a_pagar") AS "Total Beneficio"
     FROM
         "C##TEST"."afiliado" afil
     INNER JOIN
@@ -326,7 +326,7 @@ FROM
             afil."primer_apellido" || ' ' || 
             COALESCE(afil."segundo_apellido", '')
         ) AS NOMBRE_COMPLETO,
-        SUM(detBA."monto_por_periodo") AS "Total Beneficio"
+        SUM(detBs."monto_a_pagar") AS "Total Beneficio"
     FROM
         "C##TEST"."afiliado" afil
     LEFT JOIN
@@ -449,7 +449,7 @@ FULL OUTER JOIN
               COALESCE(afil."tercer_nombre", '') || ' ' ||
               afil."primer_apellido" || ' ' ||
               COALESCE(afil."segundo_apellido", '')) AS "NOMBRE_COMPLETO",
-          SUM(COALESCE(detBA."monto_por_periodo", 0)) AS "Total Beneficio"
+          SUM(COALESCE(detBs."monto_a_pagar", 0)) AS "Total Beneficio"
       FROM
           "C##TEST"."afiliado" afil
       LEFT JOIN
@@ -467,7 +467,7 @@ FULL OUTER JOIN
               afil."primer_apellido" || ' ' ||
               COALESCE(afil."segundo_apellido", '')) 
       HAVING
-          SUM(COALESCE(detBA."monto_por_periodo", 0)) > 0) beneficios
+          SUM(COALESCE(detBs."monto_a_pagar", 0)) > 0) beneficios
   FULL OUTER JOIN
       (SELECT
           afil."id_afiliado",

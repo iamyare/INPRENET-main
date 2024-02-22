@@ -83,7 +83,7 @@ export class DetalleBeneficioService {
             const nuevoDetalleBeneficio = manager.create(DetalleBeneficio, {
                 detalleBeneficioAfiliado: detalleAfiliadoGuardado,
                 metodo_pago: datos.metodo_pago,
-                /* monto_por_periodo: datos.monto_por_periodo, */
+                monto_a_pagar: datos.monto_por_periodo,
             });
 
             await manager.save(nuevoDetalleBeneficio);
@@ -105,7 +105,7 @@ export class DetalleBeneficioService {
         detBA."id_beneficio",
         db."estado",
         db."metodo_pago",
-        detBA."monto_por_periodo" AS "monto",
+        db."monto_a_pagar" AS "monto",
         detBA."num_rentas_aplicadas",
         detBA."periodoInicio",
         detBA."periodoFinalizacion",
@@ -136,7 +136,7 @@ export class DetalleBeneficioService {
     SELECT
     db."id_beneficio_planilla",
     db."estado",
-    detBA."monto_por_periodo" as "monto",
+    db."monto_a_pagar" as "monto",
     db."metodo_pago",
     detBA."num_rentas_aplicadas",
     detBA."periodoInicio",
@@ -181,7 +181,7 @@ async obtenerDetallesBeneficioComplePorAfiliado(idAfiliado: string): Promise<any
     const query = `
     SELECT
     detB."id_beneficio_planilla",
-    detBA."monto_por_periodo" as "monto",
+    detB."monto_a_pagar" as "monto",
     detB."estado",
     detB."metodo_pago",
     detBA."num_rentas_aplicadas",
@@ -395,7 +395,7 @@ async actualizarPlanillaYEstadoDeBeneficio(detalles: { idBeneficioPlanilla: stri
         detBA."periodoFinalizacion",
         ben."nombre_beneficio",
         ben."id_beneficio",
-        detBA."monto_por_periodo" as "monto",
+        detB."monto_por_periodo" as "monto",
         detB."estado"
       FROM "C##TEST"."detalle_beneficio" detB
       INNER JOIN "C##TEST"."detalle_beneficio_afiliado" detBA ON detB."id_beneficio_afiliado" = detBA."id_detalle_ben_afil"

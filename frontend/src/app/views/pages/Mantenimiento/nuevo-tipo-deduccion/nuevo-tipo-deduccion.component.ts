@@ -23,7 +23,7 @@ export class NuevoTipoDeduccionComponent {
     validations: [Validators.required], display:true
     },
     { type: 'text', label: 'Código de deducción', name: 'codigo_deduccion', validations: [Validators.required], display:true },
-    { type: 'number', label: 'Prioridad', name: 'Prioridad', validations: [Validators.required] , display:true},
+    { type: 'number', label: 'Prioridad', name: 'prioridad', validations: [Validators.required] , display:true},
   ];
 
   data:any
@@ -36,9 +36,12 @@ export class NuevoTipoDeduccionComponent {
 
   guardarTipoDeduccion():any{
 
+    console.log(this.data.value);
     this.SVCDeduccion.newTipoDeduccion(this.data.value).subscribe(
+
       {
         next: (response) => {
+
           this.toastr.success('tipo de deduccion creado con éxito');
           this.limpiarFormulario()
         },

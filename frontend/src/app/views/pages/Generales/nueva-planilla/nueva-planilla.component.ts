@@ -1,6 +1,7 @@
 import { Component, ViewChild } from '@angular/core';
 import { FormBuilder, FormGroup } from '@angular/forms';
 import { DynamicFormComponent } from '@docs-components/dynamic-form/dynamic-form.component';
+import { BeneficiosService } from 'src/app/services/beneficios.service';
 import { PlanillaService } from 'src/app/services/planilla.service';
 import { generateFormArchivo } from 'src/components/botonarchivos/botonarchivos.component';
 
@@ -88,7 +89,6 @@ export class NuevaPlanillaComponentP {
   }
 
   limpiarFormulario(): void {
-    // Utiliza la referencia al componente DynamicFormComponent para resetear el formulario
     if (this.dynamicForm) {
       this.dynamicForm.form.reset();
     }

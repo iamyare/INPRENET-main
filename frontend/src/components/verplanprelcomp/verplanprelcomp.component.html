@@ -34,6 +34,7 @@
 
     <h4 class="card-title">Afiliados en la Planilla</h4>
 
+
     <div>
       <app-dynamic-table
         [verOpcEditar]="false"
@@ -50,7 +51,6 @@
       >
       </app-dynamic-table>
     </div>
-    <button (click)="algunaAccion()">probar</button>
     <button (click)="actualizarFechaCierrePlanilla()" mat-raised-button style="
       margin: 2% 0;
       background-color: #628780;
@@ -65,5 +65,7 @@
       border-radius: 5px;
       padding: 10px 20px;"
     >Generar reporte</button>
-  </div>
+    <button (click)="mostrarTotales()" mat-raised-button style="margin: 2% 0; background-color: #628780; color: #ffffff; border-radius: 5px; padding: 10px 20px;">
+      Mostrar totales de ingresos
+    </button>
 </div>

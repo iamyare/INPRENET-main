@@ -22,7 +22,10 @@ export class DetalleDeduccionController {
     }
   }
   
-  
+  @Get('total-deducciones/:idPlanilla')
+  async getTotalDeduccionesPorPlanilla(@Param('idPlanilla') idPlanilla: string): Promise<any> {
+    return this.detalleDeduccionService.getTotalDeduccionesPorPlanilla(idPlanilla);
+  }
 
   @Get('detallesPreliminar')
   async getDetallesDeduccionPorAfiliadoYPlanilla(

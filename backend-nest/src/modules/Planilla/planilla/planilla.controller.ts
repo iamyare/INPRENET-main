@@ -14,6 +14,13 @@ export class PlanillaController {
     await this.planillaService.actualizarBeneficiosYDeduccionesConTransaccion(body.detallesBeneficios, body.detallesDeducciones);
     return { message: 'Transacción completada con éxito' };
   }
+
+  @Get('totalesBYD/:idPlanilla')
+  async getTotalesPorPlanilla(@Param('idPlanilla') idPlanilla: string) {
+    return this.planillaService.getTotalPorDedYBen(idPlanilla);
+  }
+
+
   @Get('total/:id')
   @HttpCode(HttpStatus.OK)
   async obtenerTotalPlanilla(

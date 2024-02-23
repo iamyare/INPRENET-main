@@ -24,6 +24,7 @@ import { DetalleBeneficioService } from './detalle_beneficio/detalle_beneficio.s
 import { DetallePagoBeneficio } from './detalle_beneficio/entities/detalle_pago_beneficio.entity';
 import { DetalleBeneficioController } from './detalle_beneficio/detalle_beneficio.controller';
 import { DetalleBeneficioAfiliado } from './detalle_beneficio/entities/detalle_beneficio_afiliado.entity';
+import { TipoDeduccion } from './deduccion/entities/tipo-deduccion.entity';
 
 @Module({
   controllers: [PlanillaController, BeneficioController, DetalleBeneficioController, DeduccionController,
@@ -32,6 +33,6 @@ import { DetalleBeneficioAfiliado } from './detalle_beneficio/entities/detalle_b
               TipoPlanillaService, DetalleDeduccionService, AfiliadoService],
   imports: [
     TypeOrmModule.forFeature([Beneficio, DetallePagoBeneficio, Planilla, Deduccion, TipoPlanilla, DetalleDeduccion, Institucion, Afiliado,
-       DetalleAfiliado, DetalleBeneficioAfiliado]),]
+       DetalleAfiliado, DetalleBeneficioAfiliado,TipoDeduccion]),]
 })
 export class PlanillaModule {}

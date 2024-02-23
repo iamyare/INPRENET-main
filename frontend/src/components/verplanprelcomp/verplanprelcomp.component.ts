@@ -10,6 +10,7 @@ import { PlanillaService } from 'src/app/services/planilla.service';
 import { FieldConfig } from 'src/app/shared/Interfaces/field-config';
 import { TableColumn } from 'src/app/shared/Interfaces/table-column';
 import { convertirFecha } from 'src/app/shared/functions/formatoFecha';
+import { TotalesporbydDialogComponent } from '../totalesporbydDialog/totalesporbydDialog.component';
 
 @Component({
   selector: 'app-verplanprelcomp',
@@ -165,7 +166,7 @@ export class VerplanprelcompComponent implements OnInit{
       logs.push({ message: `Nombre Completo: ${row.NOMBRE_COMPLETO}`, detail: row });
 
       const openDialog = () => this.dialog.open(DynamicDialogComponent, {
-        width: '50%', // o el ancho que prefieras
+        width: '50%',
         data: { logs: logs, type: 'deduccion' } // Asegúrate de pasar el 'type' adecuado
       });
 
@@ -216,6 +217,7 @@ export class VerplanprelcompComponent implements OnInit{
     }
 
     actualizarFechaCierrePlanilla(): void {
+      this.cerrarPagos();
       const fechaActual = new Date().toISOString().split('T')[0];
       const estadoActualizado = 'CERRADA';
 
@@ -227,7 +229,6 @@ export class VerplanprelcompComponent implements OnInit{
       this.planillaService.updatePlanilla(this.idPlanilla, datosActualizados).subscribe({
         next: (data) => {
           this.toastr.success('Planilla actualizada con éxito');
-          console.log('Planilla actualizada', data);
         },
         error: (error) => {
           this.toastr.error('Error al actualizar la planilla');
@@ -267,11 +268,95 @@ export class VerplanprelcompComponent implements OnInit{
     }
 
 
-    algunaAccion() {
-      this.actualizarFechaCierrePlanilla()
-      this.actualizarEstadoDeducciones('COBRADA');
-      this.actualizarEstadoBeneficios('PAGADA');
+    cerrarPagos() {
+      const fechaActual = new Date().toISOString().split('T')[0];
+      const estadoActualizado = 'CERRADA';
+      const datosActualizados = {
+        fecha_cierre: fechaActual,
+        estado: estadoActualizado
+      };
+
+      this.planillaService.updatePlanilla(this.idPlanilla, datosActualizados).subscribe({
+        next: (data) => {
+          this.toastr.success('Planilla actualizada con éxito');
+          this.actualizarEstadoDeducciones('COBRADA');
+          this.actualizarEstadoBeneficios('PAGADA');
+        },
+        error: (error) => {
+          this.toastr.error('Error al actualizar la planilla');
+          console.error('Error al actualizar la planilla', error);
+        }
+      });
     }
+
+    mostrarTotalesIngresos() {
+      this.planillaService.getTotalesPorDedYBen(this.idPlanilla).subscribe({
+        next: (data) => {
+          this.dialog.open(TotalesporbydDialogComponent, {
+            width: '400px',
+            data: {
+              tipo: 'Ingresos',
+              totales: data.beneficios.map((beneficio:any) => ({
+                nombre: beneficio.nombre_beneficio,
+                total: beneficio['Total Monto Beneficio']
+              }))
+            }
+          });
+        },
+        error: (error) => {
+          console.error('Error al obtener los totales de ingresos', error);
+          this.toastr.error('Error al obtener los totales de ingresos');
+        }
+      });
+    }
+
+    mostrarTotalesDeducciones() {
+      this.planillaService.getTotalesPorDedYBen(this.idPlanilla).subscribe({
+        next: (data) => {
+          this.dialog.open(TotalesporbydDialogComponent, {
+            width: '400px',
+            data: {
+              tipo: 'Deducciones',
+              totales: data.deducciones.map((deduccion:any) => ({
+                nombre: deduccion.nombre_deduccion,
+                total: deduccion['Total Monto Aplicado']
+              }))
+            }
+          });
+        },
+        error: (error) => {
+          console.error('Error al obtener los totales de deducciones', error);
+          this.toastr.error('Error al obtener los totales de deducciones');
+        }
+      });
+    }
+
+    mostrarTotales() {
+      this.planillaService.getTotalesPorDedYBen(this.idPlanilla).subscribe({
+        next: (data) => {
+          this.dialog.open(TotalesporbydDialogComponent, {
+            width: '1000px',
+            data: {
+              beneficios: data.beneficios.map((beneficio: any) => ({
+                nombre: beneficio.nombre_beneficio,
+                total: beneficio['Total Monto Beneficio']
+              })),
+              deducciones: data.deducciones.map((deduccion: any) => ({
+                nombre: deduccion.nombre_deduccion,
+                total: deduccion['Total Monto Aplicado']
+              }))
+            }
+          });
+        },
+        error: (error) => {
+          console.error('Error al obtener los totales', error);
+          this.toastr.error('Error al obtener los totales');
+        }
+      });
+    }
+
+
+
 
 
 

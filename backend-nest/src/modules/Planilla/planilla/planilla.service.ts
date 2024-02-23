@@ -48,6 +48,58 @@ export class PlanillaService {
       }
   }
 
+  async getTotalPorDedYBen(idPlanilla: string): Promise<any> {
+    if (!isUUID(idPlanilla)) {
+        throw new BadRequestException('El ID de la planilla no es válido');
+    }
+
+    try {
+        const beneficios = await this.entityManager.query(
+            `SELECT
+                ben."id_beneficio",
+                ben."nombre_beneficio",
+                SUM(COALESCE(dpb."monto_a_pagar", 0)) AS "Total Monto Beneficio"
+            FROM
+                "beneficio" ben
+            INNER JOIN
+                "detalle_beneficio_afiliado" dba ON ben."id_beneficio" = dba."id_beneficio"
+            INNER JOIN
+                "detalle_pago_beneficio" dpb ON dba."id_detalle_ben_afil" = dpb."id_beneficio_afiliado"
+            WHERE
+                dpb."id_planilla" = :idPlanilla
+            GROUP BY
+                ben."id_beneficio", ben."nombre_beneficio"`,
+            [idPlanilla]
+        );
+
+        // La consulta de deducciones permanece sin cambios, ya que no se menciona una modificación en esa parte
+        const deducciones = await this.entityManager.query(
+          `SELECT
+              ded."id_deduccion",
+              ded."nombre_deduccion" || ' - ' || inst."nombre_institucion" AS "nombre_deduccion",
+              COALESCE(SUM(detDed."monto_aplicado"), 0) AS "Total Monto Aplicado"
+          FROM
+              "detalle_deduccion" detDed
+          INNER JOIN
+              "deduccion" ded ON detDed."id_deduccion" = ded."id_deduccion"
+          LEFT JOIN
+              "institucion" inst ON detDed."id_institucion" = inst."id_institucion"
+          WHERE
+              detDed."id_planilla" = :idPlanilla
+          GROUP BY
+              ded."id_deduccion", ded."nombre_deduccion", inst."nombre_institucion"`,  // Agregado el nombre de la institución al GROUP BY
+          [idPlanilla]
+      );
+      
+        return { beneficios, deducciones };
+    } catch (error) {
+        this.logger.error('Error al obtener los totales por planilla', error.stack);
+        throw new InternalServerErrorException();
+    }
+}
+
+
+
   async calcularTotalPlanilla(idPlanilla: string): Promise<any> {
     if (!isUUID(idPlanilla)) {
       throw new BadRequestException('El identificador de la planilla no es válido.');

@@ -112,7 +112,7 @@ export class VerPlanillasComponent implements OnInit{
           periodoInicio: item.periodoInicio,
           totalBeneficio: totalResponse.totalBeneficio,
           totalDeducciones: totalResponse.totalDeducciones,
-          totalPlanilla: totalResponse.totalBeneficio, // Añade el total de la planilla
+          totalPlanilla: totalResponse.totalPlanilla, // Añade el total de la planilla
           fecha_apertura: this.datePipe.transform(item.fecha_apertura, 'dd/MM/yyyy HH:mm:ss'),
           fecha_cierre: this.datePipe.transform(item.fecha_cierre, 'dd/MM/yyyy HH:mm:ss'),
         };

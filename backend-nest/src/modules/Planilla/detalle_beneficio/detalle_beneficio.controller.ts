@@ -1,7 +1,6 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete, Query,Response, BadRequestException, HttpStatus } from '@nestjs/common';
 import {  DetalleBeneficioService } from './detalle_beneficio.service';
 import { UpdateDetalleBeneficioDto } from './dto/update-detalle_beneficio_planilla.dto';
-/* import { DetallePagoBeneficio } from './entities/detalle_beneficio.entity'; */
 import { CreateDetalleBeneficioDto } from './dto/create-detalle_beneficio.dto';
 
 @Controller('beneficio-planilla')

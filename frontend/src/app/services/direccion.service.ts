@@ -11,7 +11,7 @@ export class DireccionService {
   constructor(private http: HttpClient) { }
 
   getAllProvincias(): Observable<any | void> {
-    const url = `${environment.API_URL}/direccion/provincias`;
+    const url = `${environment.API_URL}/api/direccion/provincias`;
     return this.http.get<any>(
       url,
       ).pipe(
@@ -21,7 +21,7 @@ export class DireccionService {
       );
   }
   getAllPaises(): Observable<any | void> {
-    const url = `${environment.API_URL}/direccion/paises`;
+    const url = `${environment.API_URL}/api/pais`;
     return this.http.get<any>(
       url,
       ).pipe(
@@ -31,7 +31,7 @@ export class DireccionService {
       );
   }
   getAllCiudades(): Observable<any | void> {
-    const url = `${environment.API_URL}/direccion/ciudades`;
+    const url = `${environment.API_URL}/api/direccion/ciudades`;
     return this.http.get<any>(
       url,
       ).pipe(

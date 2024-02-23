@@ -13,7 +13,7 @@ export class Pais {
 
     @Column('varchar2', { length: 20, nullable: false })
     nacionalidad : string;
-
+    
     @OneToMany(() => Afiliado, afiliado => afiliado.pais)
     afiliado: Afiliado[];
 

@@ -1,7 +1,8 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Query } from '@nestjs/common';
 import { PaisService } from './pais.service';
 import { CreatePaiDto } from './dto/create-pai.dto';
 import { UpdatePaiDto } from './dto/update-pai.dto';
+import { PaginationDto } from 'src/common/dtos/pagination.dto';
 
 @Controller('pais')
 export class PaisController {
@@ -13,8 +14,8 @@ export class PaisController {
   }
 
   @Get()
-  findAll() {
-    return this.paisService.findAll();
+  findAll(@Query() paginationDto: PaginationDto) {
+    return this.paisService.findAll(paginationDto);
   }
 
   @Get(':id')

@@ -23,6 +23,14 @@ export class DeduccionesService {
       );
   }
 
+  obtenerTotalDeduccionesPorPlanilla(idPlanilla: string): Observable<any> {
+    return this.http.get(`${environment.API_URL}api/detalle-deduccion/total-deducciones/${idPlanilla}`).pipe(
+      tap(() => {
+        this.toastr.success('Total de beneficios obtenido con éxito');
+      }),
+      catchError(this.handleError)
+    );
+  }
 
   newTipoDeduccion(TipoDeduccion:any): Observable<any | void>{
     var url = `${environment.API_URL}/api/deduccion`;

@@ -15,6 +15,8 @@ export class DynamicDialogComponent implements OnInit{
   }
 
   ngOnInit() {
+    console.log(this.data);
+
     // Configurar las columnas y el título basado en el tipo de datos
     if (this.data.type === 'deduccion') {
       // Añadir 'monto_aplicado' a la lista de columnas mostradas para deducciones

@@ -1,5 +1,6 @@
-import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 import { DetalleDeduccion } from '../../detalle-deduccion/entities/detalle-deduccion.entity';
+import { TipoDeduccion } from './tipo-deduccion.entity';
 
 @Entity()
 export class Deduccion {
@@ -13,9 +14,6 @@ export class Deduccion {
     @Column('varchar2', { length: 100, nullable: true })
     descripcion_deduccion : string;
 
-    @Column('varchar2', { length: 40, nullable: false })
-    tipo_deduccion : string;
-
     @Column('number', {nullable: true, unique: true })
     codigo_deduccion : number;
 
@@ -24,4 +22,8 @@ export class Deduccion {
 
     @OneToMany(() => DetalleDeduccion, detalleDeduccion => detalleDeduccion.deduccion)
     detalleDeduccion : DetalleDeduccion[];
+
+    @ManyToOne(() => TipoDeduccion, tipoDeduccion => tipoDeduccion.deduccion, { cascade: true})
+    @JoinColumn({ name: 'id_tipo_deduccion' })
+    tipoDeduccion: TipoDeduccion;
 }

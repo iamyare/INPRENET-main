@@ -19,7 +19,7 @@ export class PlanillaService {
   }
 
   actualizarBeneficiosYDeducciones(detalles: { detallesBeneficios: any[], detallesDeducciones: any[] }): Observable<any> {
-    const url = `${environment.API_URL}/api/planilla/actualizar-transacciones`; // Asegúrate de que la ruta coincida con tu backend
+    const url = `${environment.API_URL}/api/planilla/actualizar-transacciones`;
     return this.http.post(url, detalles).pipe(
       catchError(this.handleError)
     );
@@ -28,6 +28,13 @@ export class PlanillaService {
   private handleError(error: any): Observable<never> {
     console.error('An error occurred:', error.error);
     throw 'Error en la llamada HTTP';
+  }
+
+  getTotalesPorDedYBen(idPlanilla: string): Observable<any> {
+    const url = `${environment.API_URL}/api/planilla/totalesBYD/${idPlanilla}`;
+    return this.http.get(url).pipe(
+      catchError(this.handleError)
+    );
   }
 
   obtenerTotalPlanilla(idPlanilla: string): Observable<any> {

@@ -11,6 +11,7 @@ import { AfiliadoService } from 'src/modules/afiliado/afiliado.service';
 import { Afiliado } from 'src/modules/afiliado/entities/afiliado';
 import { DetalleAfiliado } from 'src/modules/afiliado/entities/detalle_afiliado.entity';
 import { Planilla } from '../planilla/entities/planilla.entity';
+import { isUUID } from 'class-validator';
 
 @Injectable()
 export class DetalleDeduccionService {
@@ -46,11 +47,38 @@ export class DetalleDeduccionService {
       }
   
       const mensaje = `Estado de aplicación actualizado a '${nuevoEstado}' para los detalles de deducción de la planilla con ID ${idPlanilla}`;
-      this.logger.log(mensaje);
       return { mensaje };
     } catch (error) {
       this.logger.error(`Error al actualizar el estado de aplicación para la planilla con ID ${idPlanilla}: ${error.message}`, error.stack);
       throw new InternalServerErrorException('Se produjo un error al actualizar los estados de aplicación de los detalles de deducción');
+    }
+  }
+
+  async getTotalDeduccionesPorPlanilla(idPlanilla: string): Promise<any> {
+    if (!isUUID(idPlanilla)) {
+      throw new BadRequestException('El ID de la planilla no es válido');
+    }
+
+    try {
+      const resultado = await this.entityManager.query(
+        `SELECT
+          ded."id_deduccion",
+          ded."nombre_deduccion",
+          SUM(COALESCE(detDed."monto_aplicado", 0)) AS "Total Monto Aplicado"
+        FROM
+          "detalle_deduccion" detDed
+        INNER JOIN
+          "deduccion" ded ON detDed."id_deduccion" = ded."id_deduccion"
+        WHERE
+          detDed."id_planilla" = '${idPlanilla}'
+        GROUP BY
+          ded."id_deduccion", ded."nombre_deduccion"`
+      );
+
+      return resultado;
+    } catch (error) {
+      this.logger.error('Error al obtener el total de deducciones por planilla', error.stack);
+      throw new InternalServerErrorException();
     }
   }
   

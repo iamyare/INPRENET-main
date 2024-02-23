@@ -10,6 +10,7 @@ import { TableColumn } from 'src/app/shared/Interfaces/table-column';
 import { convertirFecha } from 'src/app/shared/functions/formatoFecha';
 import { DeduccionesService } from 'src/app/services/deducciones.service';
 import { BeneficiosService } from '../../app/services/beneficios.service';
+import { log } from 'console';
 
 @Component({
   selector: 'app-asignacion-afil-plan',
@@ -111,12 +112,9 @@ export class AsignacionAfilPlanComponent implements OnInit{
           },
           error: (error) => {
             let mensajeError = 'Error desconocido al buscar la planilla';
-
-            // Verifica si el error tiene una estructura específica
             if (error.error && error.error.message) {
               mensajeError = error.error.message;
             } else if (typeof error.error === 'string') {
-              // Para errores que vienen como un string simple
               mensajeError = error.error;
             }
 
@@ -132,6 +130,7 @@ export class AsignacionAfilPlanComponent implements OnInit{
   };
 
   getFilas = async (periodoInicio: string, periodoFinalizacion: string) => {
+    console.log(this.detallePlanilla);
     try {
 
       if (this.detallePlanilla.nombre_planilla == "COMPLEMENTARIA"){
@@ -417,7 +416,7 @@ export class AsignacionAfilPlanComponent implements OnInit{
     const detallesParaActualizar = datosFilasBeneficios.map((beneficio:any) => ({
       idBeneficioPlanilla: beneficio.id_beneficio_planilla,
       codigoPlanilla: this.detallePlanilla.codigo_planilla,
-      estado: 'PAGADA'
+      estado: 'EN PRELIMINAR'
     }));
 
     if (detallesParaActualizar.length > 0) {
@@ -434,7 +433,7 @@ export class AsignacionAfilPlanComponent implements OnInit{
     const detallesParaActualizar = datosFilasDeduccion.map((deduccion:any) => ({
       idDedDeduccion: deduccion.id_ded_deduccion,
       codigoPlanilla: this.detallePlanilla.codigo_planilla,
-      estadoAplicacion: 'COBRADO'
+      estadoAplicacion: 'EN PRELIMINAR'
     }));
 
 
@@ -478,6 +477,9 @@ export class AsignacionAfilPlanComponent implements OnInit{
       this.toastr.success('Planilla procesada con éxito.');
     }
   }
+
+
+
 }
 
 

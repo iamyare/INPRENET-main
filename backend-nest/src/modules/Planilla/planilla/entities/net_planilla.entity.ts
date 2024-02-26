@@ -1,10 +1,10 @@
 import { Column, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
-import { TipoPlanilla } from '../../tipo-planilla/entities/tipo-planilla.entity';
+import { Net_TipoPlanilla } from '../../tipo-planilla/entities/tipo-planilla.entity';
 import { DetalleDeduccion } from '../../detalle-deduccion/entities/detalle-deduccion.entity';
 import { DetallePagoBeneficio } from '../../detalle_beneficio/entities/detalle_pago_beneficio.entity';
 
 @Entity()
-export class Planilla {
+export class Net_Planilla {
 
     @PrimaryGeneratedColumn('uuid')
     id_planilla : string
@@ -30,9 +30,9 @@ export class Planilla {
     @Column('varchar2', {  nullable: false })
     periodoFinalizacion: string; 
 
-    @ManyToOne(() => TipoPlanilla, tipoPlanilla => tipoPlanilla.planilla,  { cascade: true })
+    @ManyToOne(() => Net_TipoPlanilla, tipoPlanilla => tipoPlanilla.planilla,  { cascade: true })
     @JoinColumn({ name: 'id_tipo_planilla' })
-    tipoPlanilla: TipoPlanilla;
+    tipoPlanilla: Net_TipoPlanilla;
 
     @OneToMany(() => DetalleDeduccion, detalleDeduccion => detalleDeduccion.planilla)
     detalleDeduccion: DetalleDeduccion[];

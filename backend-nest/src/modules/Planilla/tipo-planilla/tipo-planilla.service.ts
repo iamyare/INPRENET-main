@@ -2,7 +2,7 @@ import { BadRequestException, Injectable, InternalServerErrorException, Logger }
 import { CreateTipoPlanillaDto } from './dto/create-tipo-planilla.dto';
 import { UpdateTipoPlanillaDto } from './dto/update-tipo-planilla.dto';
 import { InjectEntityManager, InjectRepository } from '@nestjs/typeorm';
-import { TipoPlanilla } from './entities/tipo-planilla.entity';
+import { Net_TipoPlanilla } from './entities/tipo-planilla.entity';
 import { Repository } from 'typeorm';
 import { PaginationDto } from 'src/common/dtos/pagination.dto';
 
@@ -12,8 +12,8 @@ export class TipoPlanillaService {
   private readonly logger = new Logger(TipoPlanillaService.name)
 
   constructor(
-    @InjectRepository(TipoPlanilla)
-    private readonly tipoPlanillaRepository: Repository<TipoPlanilla>, 
+    @InjectRepository(Net_TipoPlanilla)
+    private readonly tipoPlanillaRepository: Repository<Net_TipoPlanilla>, 
   ){
 
   }

@@ -1,6 +1,6 @@
 import { Column, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 import { DetalleDeduccion } from '../../detalle-deduccion/entities/detalle-deduccion.entity';
-import { TipoDeduccion } from './tipo-deduccion.entity';
+import { Net_TipoDeduccion } from './net_tipo-deduccion.entity';
 
 @Entity()
 export class Net_Deduccion {
@@ -23,7 +23,7 @@ export class Net_Deduccion {
     @OneToMany(() => DetalleDeduccion, detalleDeduccion => detalleDeduccion.deduccion)
     detalleDeduccion : DetalleDeduccion[];
 
-    @ManyToOne(() => TipoDeduccion, tipoDeduccion => tipoDeduccion.deduccion, { cascade: true})
+    @ManyToOne(() => Net_TipoDeduccion, tipoDeduccion => tipoDeduccion.deduccion, { cascade: true})
     @JoinColumn({ name: 'id_tipo_deduccion' })
-    tipoDeduccion: TipoDeduccion;
+    tipoDeduccion: Net_TipoDeduccion;
 }

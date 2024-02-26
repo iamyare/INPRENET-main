@@ -1,10 +1,10 @@
 import { Column, Entity, JoinColumn, ManyToOne, OneToOne, PrimaryGeneratedColumn, Timestamp } from "typeorm";
-import { Rol } from "./rol.entity";
+import { Net_Rol } from "./net_rol.entity";
 import { Empleado } from "src/modules/Empresarial/empresas/entities/empleado.entity";
 /* import { Afiliado } from "src/afiliado/entities/detalle_afiliado.entity"; */
 
 @Entity()
-export class Usuario {
+export class Net_Usuario {
     @PrimaryGeneratedColumn('uuid')
     id_usuario: string;
 
@@ -44,9 +44,9 @@ export class Usuario {
     @Column('varchar2', { length: 100, nullable: true })
     respuesta_de_usuario_3: string;
 
-    @ManyToOne(() => Rol, rol => rol.usuarios, { cascade: true })
+    @ManyToOne(() => Net_Rol, rol => rol.usuarios, { cascade: true })
     @JoinColumn({ name: 'id_rol' })
-    rol: Rol;
+    rol: Net_Rol;
 
     @OneToOne(() => Empleado, empleado => empleado.usuario)
     empleado: Empleado;

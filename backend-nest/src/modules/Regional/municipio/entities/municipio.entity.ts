@@ -1,5 +1,5 @@
 import { Column, Entity, PrimaryGeneratedColumn, ManyToOne } from 'typeorm';
-import { Provincia } from '../../provincia/entities/provincia.entity';
+import { Net_Provincia } from '../../provincia/entities/net_provincia.entity';
 
 @Entity()
 export class Municipio {
@@ -9,6 +9,6 @@ export class Municipio {
     @Column('varchar2', {nullable: false, length: 30})
     nombre_municipio : string;
 
-    @ManyToOne(() => Provincia, provincia => provincia.municipio)
-    provincia : Provincia;
+    @ManyToOne(() => Net_Provincia, provincia => provincia.municipio)
+    provincia : Net_Provincia;
 }

@@ -10,7 +10,7 @@ import * as xlsx from 'xlsx';
 import { AfiliadoService } from 'src/modules/afiliado/afiliado.service';
 import { Net_Afiliado } from 'src/modules/afiliado/entities/net_afiliado';
 import { Net_Detalle_Afiliado } from 'src/modules/afiliado/entities/detalle_afiliado.entity';
-import { Planilla } from '../planilla/entities/planilla.entity';
+import { Net_Planilla } from '../planilla/entities/net_planilla.entity';
 import { isUUID } from 'class-validator';
 
 @Injectable()
@@ -29,8 +29,8 @@ export class DetalleDeduccionService {
     private institucionRepository: Repository<Institucion>,
     @InjectRepository(Net_Detalle_Afiliado)
     private detalleAfiliadoRepository: Repository<Net_Detalle_Afiliado>,
-    @InjectRepository(Planilla)
-    private planillaRepository: Repository<Planilla>,
+    @InjectRepository(Net_Planilla)
+    private planillaRepository: Repository<Net_Planilla>,
     @InjectEntityManager() private readonly entityManager: EntityManager
   ){}
 
@@ -255,7 +255,7 @@ async actualizarPlanillasYEstadosDeDeducciones(detalles: { idDedDeduccion: strin
       throw new NotFoundException(`DetalleDeduccion con ID "${idDedDeduccion}" no encontrado`);
     }
 
-    const planilla = await entityManager.findOne(Planilla, { where: { codigo_planilla: codigoPlanilla } });
+    const planilla = await entityManager.findOne(Net_Planilla, { where: { codigo_planilla: codigoPlanilla } });
     if (!planilla) {
       throw new NotFoundException(`Planilla con código "${codigoPlanilla}" no encontrada`);
     }

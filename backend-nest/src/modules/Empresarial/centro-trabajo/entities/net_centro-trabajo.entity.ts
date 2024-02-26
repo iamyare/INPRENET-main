@@ -1,5 +1,5 @@
-import { PerfAfilCentTrab } from "src/modules/afiliado/entities/perf_afil_cent_trab";
-import { Provincia } from "src/modules/Regional/provincia/entities/provincia.entity";
+import { Net_perf_afil_cent_trab } from "src/modules/afiliado/entities/net_perf_afil_cent_trab";
+import { Net_Provincia } from "src/modules/Regional/provincia/entities/net_provincia.entity";
 import { Column, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 
 @Entity()
@@ -37,11 +37,11 @@ export class Net_Centro_Trabajo {
     @Column('nvarchar2', { length: 200, nullable: false })
     UbicacionCompleta: string;
 
-    @ManyToOne(() => Provincia, provincia => provincia.centrosTrabajo)
+    @ManyToOne(() => Net_Provincia, provincia => provincia.centrosTrabajo)
     @JoinColumn({ name: 'id_provincia' })
-    provincia: Provincia;
+    provincia: Net_Provincia;
 
-    @OneToMany(() => PerfAfilCentTrab, perfAfilCentTrab => perfAfilCentTrab.centroTrabajo)
+    @OneToMany(() => Net_perf_afil_cent_trab, perfAfilCentTrab => perfAfilCentTrab.centroTrabajo)
     @JoinColumn({ name: 'id_perfAfilCentTrabs' })
-    perfAfilCentTrabs: PerfAfilCentTrab[];
+    perfAfilCentTrabs: Net_perf_afil_cent_trab[];
 }

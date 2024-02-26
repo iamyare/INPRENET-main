@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { CreateTipoIdentificacionDto } from './dto/create-tipo_identificacion.dto';
 import { UpdateTipoIdentificacionDto } from './dto/update-tipo_identificacion.dto';
-import { TipoIdentificacion } from './entities/tipo_identificacion.entity';
+import { Net_TipoIdentificacion } from './entities/net_tipo_identificacion.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
@@ -9,8 +9,8 @@ import { Repository } from 'typeorm';
 export class TipoIdentificacionService {
 
   constructor(
-    @InjectRepository(TipoIdentificacion)
-    private readonly TipoIdentificacionRepository: Repository<TipoIdentificacion>
+    @InjectRepository(Net_TipoIdentificacion)
+    private readonly TipoIdentificacionRepository: Repository<Net_TipoIdentificacion>
   ){
    
   }

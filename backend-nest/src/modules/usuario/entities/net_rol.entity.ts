@@ -1,8 +1,8 @@
 import { Entity, Column, PrimaryGeneratedColumn, OneToMany } from 'typeorm';
-import { Usuario } from './usuario.entity';
+import { Net_Usuario } from './net_usuario.entity';
 
 @Entity()
-export class Rol {
+export class Net_Rol {
     @PrimaryGeneratedColumn('uuid')
     id_rol: string;
 
@@ -12,6 +12,6 @@ export class Rol {
     @Column('varchar2', { length: 200, nullable: true })
     descripcion: string;
 
-    @OneToMany(() => Usuario, usuario => usuario.rol)
-    usuarios: Usuario[];
+    @OneToMany(() => Net_Usuario, usuario => usuario.rol)
+    usuarios: Net_Usuario[];
 }

@@ -2,7 +2,7 @@ import { Net_Afiliado } from 'src/modules/afiliado/entities/net_afiliado';
 import { Entity, Column, PrimaryGeneratedColumn, OneToOne, OneToMany } from 'typeorm';
 
 @Entity()
-export class TipoIdentificacion {
+export class Net_TipoIdentificacion {
     @PrimaryGeneratedColumn('uuid')
     id_identificacion: string;
 

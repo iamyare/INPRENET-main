@@ -8,8 +8,8 @@ import { Net_Afiliado } from 'src/modules/afiliado/entities/net_afiliado';
 import { Net_Beneficio } from '../beneficio/entities/net_beneficio.entity';
 import { Net_Deduccion } from '../deduccion/entities/net_deduccion.entity';
 import { DetallePagoBeneficio } from '../detalle_beneficio/entities/detalle_pago_beneficio.entity';
-import { Planilla } from './entities/planilla.entity';
-import { TipoPlanilla } from '../tipo-planilla/entities/tipo-planilla.entity';
+import { Net_Planilla } from './entities/net_planilla.entity';
+import { Net_TipoPlanilla } from '../tipo-planilla/entities/tipo-planilla.entity';
 import { isUUID } from 'class-validator';
 import { DetalleBeneficioService } from '../detalle_beneficio/detalle_beneficio.service';
 import { DetalleDeduccionService } from '../detalle-deduccion/detalle-deduccion.service';
@@ -25,15 +25,15 @@ export class PlanillaService {
     private detalleBeneficioRepository: Repository<DetallePagoBeneficio>,
     @InjectRepository(Net_Afiliado)
     private afiliadoRepository: Repository<Net_Afiliado>,
-    @InjectRepository(Planilla)
-    private planillaRepository: Repository<Planilla>,
-    @InjectRepository(TipoPlanilla)
-    private tipoPlanillaRepository: Repository<TipoPlanilla>,
+    @InjectRepository(Net_Planilla)
+    private planillaRepository: Repository<Net_Planilla>,
+    @InjectRepository(Net_TipoPlanilla)
+    private tipoPlanillaRepository: Repository<Net_TipoPlanilla>,
     private detalleBeneficioService: DetalleBeneficioService,
     private detalleDeduccionService: DetalleDeduccionService){
   };
 
-    async update(id_planilla: string, updatePlanillaDto: UpdatePlanillaDto): Promise<Planilla> {
+    async update(id_planilla: string, updatePlanillaDto: UpdatePlanillaDto): Promise<Net_Planilla> {
       const planilla = await this.planillaRepository.preload({
           id_planilla: id_planilla,
           ...updatePlanillaDto
@@ -657,7 +657,7 @@ ON deducciones."id_afiliado" = beneficios."id_afiliado"
         .addSelect('planilla.periodoInicio', 'periodoInicio')
         .addSelect('planilla.periodoFinalizacion', 'periodoFinalizacion')
         .addSelect('tipP.nombre_planilla', 'nombre_planilla')
-        .innerJoin(TipoPlanilla, 'tipP', 'tipP.id_tipo_planilla = planilla.id_tipo_planilla')
+        .innerJoin(Net_TipoPlanilla, 'tipP', 'tipP.id_tipo_planilla = planilla.id_tipo_planilla')
         .where(`planilla.codigo_planilla = '${codPlanilla}'  AND planilla.estado = \'CERRADA\' ` )
         .getRawMany();
 
@@ -759,7 +759,7 @@ ON deducciones."id_afiliado" = beneficios."id_afiliado"
     * Busca planillas que esten activas
    */
   async findOne(term: any) {
-    let Planilla: Planilla;
+    let Planilla: Net_Planilla;
     
     if (isUUID(term)) {
       Planilla = await this.planillaRepository.findOneBy({ id_planilla: term});
@@ -774,7 +774,7 @@ ON deducciones."id_afiliado" = beneficios."id_afiliado"
       .addSelect('planilla.periodoInicio', 'periodoInicio')
       .addSelect('planilla.periodoFinalizacion', 'periodoFinalizacion')
       .addSelect('tipP.nombre_planilla', 'nombre_planilla')
-      .innerJoin(TipoPlanilla, 'tipP', 'tipP.id_tipo_planilla = planilla.id_tipo_planilla')
+      .innerJoin(Net_TipoPlanilla, 'tipP', 'tipP.id_tipo_planilla = planilla.id_tipo_planilla')
       .where('planilla.codigo_planilla = :term AND planilla.estado = \'ACTIVA\'', { term } )
       .getRawMany();
       return queryBuilder[0];

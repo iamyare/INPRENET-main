@@ -1,8 +1,8 @@
 import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
-import { Planilla } from '../../planilla/entities/planilla.entity';
+import { Net_Planilla } from '../../planilla/entities/net_planilla.entity';
 
 @Entity()
-export class TipoPlanilla {
+export class Net_TipoPlanilla {
 
     @PrimaryGeneratedColumn('uuid')
     id_tipo_planilla : string;
@@ -22,6 +22,6 @@ export class TipoPlanilla {
 /*     @Column('varchar2', { length: 50, nullable: true })
     estado: string;
  */
-    @OneToMany(() => Planilla, planilla => planilla.tipoPlanilla)
-    planilla: Planilla[];
+    @OneToMany(() => Net_Planilla, planilla => planilla.tipoPlanilla)
+    planilla: Net_Planilla[];
 }

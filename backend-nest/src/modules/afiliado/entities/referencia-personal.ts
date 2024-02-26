@@ -1,8 +1,8 @@
 import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
-import { ReferenciaPersonalAfiliado } from "./referenciaP-Afiliado";
+import { Net_ReferenciaPersonalAfiliado } from "./referenciaP-Afiliado";
 
 @Entity()
-export class ReferenciaPersonal {
+export class Net_ReferenciaPersonal {
 
     @PrimaryGeneratedColumn('uuid')
     id_ref_personal : string;
@@ -44,7 +44,7 @@ export class ReferenciaPersonal {
     })
     telefono_celular : string;
 
-    @OneToMany(() => ReferenciaPersonalAfiliado, referenciaPersonalAfiliado => referenciaPersonalAfiliado.referenciaPersonal)
-    referenciasPersonalesAfiliado: ReferenciaPersonalAfiliado[];
+    @OneToMany(() => Net_ReferenciaPersonalAfiliado, referenciaPersonalAfiliado => referenciaPersonalAfiliado.referenciaPersonal)
+    referenciasPersonalesAfiliado: Net_ReferenciaPersonalAfiliado[];
 
 }

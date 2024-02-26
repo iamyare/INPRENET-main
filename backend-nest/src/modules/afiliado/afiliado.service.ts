@@ -3,13 +3,13 @@ import { CreateAfiliadoDto } from './dto/create-afiliado.dto';
 import { UpdateAfiliadoDto } from './dto/update-afiliado.dto';
 import { Connection, EntityManager, Repository } from 'typeorm';
 import { InjectEntityManager, InjectRepository } from '@nestjs/typeorm';
-import { PerfAfilCentTrab } from './entities/perf_afil_cent_trab';
+import { Net_perf_afil_cent_trab } from './entities/net_perf_afil_cent_trab';
 import { Net_Afiliados_Por_Banco } from 'src/modules/banco/entities/net_afiliados-banco';
 import { Net_Centro_Trabajo } from 'src/modules/Empresarial/centro-trabajo/entities/net_centro-trabajo.entity';
 import { Net_Banco } from 'src/modules/banco/entities/net_banco.entity';
-import { Provincia } from 'src/modules/Regional/provincia/entities/provincia.entity';
+import { Net_Provincia } from 'src/modules/Regional/provincia/entities/net_provincia.entity';
 import { Pais } from 'src/modules/Regional/pais/entities/pais.entity';
-import { TipoIdentificacion } from 'src/modules/tipo_identificacion/entities/tipo_identificacion.entity';
+import { Net_TipoIdentificacion } from 'src/modules/tipo_identificacion/entities/net_tipo_identificacion.entity';
 import { CreateAfiliadoTempDto } from './dto/create-afiliado-temp.dto';
 import { validate as isUUID } from 'uuid';
 import { Net_Detalle_Afiliado } from './entities/detalle_afiliado.entity';
@@ -38,7 +38,7 @@ export class AfiliadoService {
 
     try {
         // Verifica y encuentra las entidades necesarias para el afiliado principal
-        const tipoIdentificacion = await queryRunner.manager.findOneBy(TipoIdentificacion, { tipo_identificacion: createAfiliadoDto.tipo_identificacion });
+        const tipoIdentificacion = await queryRunner.manager.findOneBy(Net_TipoIdentificacion, { tipo_identificacion: createAfiliadoDto.tipo_identificacion });
         if (!tipoIdentificacion) {
             throw new BadRequestException('Identificacion not found');
         }
@@ -48,7 +48,7 @@ export class AfiliadoService {
             throw new BadRequestException('Pais not found');
         }
 
-        const provincia = await queryRunner.manager.findOneBy(Provincia, { nombre_provincia: createAfiliadoDto.nombre_provincia });
+        const provincia = await queryRunner.manager.findOneBy(Net_Provincia, { nombre_provincia: createAfiliadoDto.nombre_provincia });
         if (!provincia) {
             throw new BadRequestException('Provincia not found');
         }
@@ -72,7 +72,7 @@ export class AfiliadoService {
                 throw new BadRequestException(`Centro de trabajo no encontrado: ${perfAfilCentTrabDto.nombre_centroTrabajo}`);
             }
 
-            return queryRunner.manager.create(PerfAfilCentTrab, {
+            return queryRunner.manager.create(Net_perf_afil_cent_trab, {
                 ...perfAfilCentTrabDto,
                 centroTrabajo
             });
@@ -87,7 +87,7 @@ export class AfiliadoService {
         // Crear y asociar afiliados hijos
         if (createAfiliadoDto.afiliadosRelacionados && createAfiliadoDto.afiliadosRelacionados.length > 0) {
             for (const hijoDto of createAfiliadoDto.afiliadosRelacionados) {
-                const tipoIdentificacionHijo = await queryRunner.manager.findOneBy(TipoIdentificacion, { tipo_identificacion: hijoDto.tipo_identificacion });
+                const tipoIdentificacionHijo = await queryRunner.manager.findOneBy(Net_TipoIdentificacion, { tipo_identificacion: hijoDto.tipo_identificacion });
                 if (!tipoIdentificacionHijo) {
                     throw new BadRequestException('Identificacion not found for related affiliate');
                 }
@@ -97,7 +97,7 @@ export class AfiliadoService {
                     throw new BadRequestException('Pais not found for related affiliate');
                 }
 
-                const provinciaHijo = await queryRunner.manager.findOneBy(Provincia, { nombre_provincia: hijoDto.nombre_provincia });
+                const provinciaHijo = await queryRunner.manager.findOneBy(Net_Provincia, { nombre_provincia: hijoDto.nombre_provincia });
                 if (!provinciaHijo) {
                     throw new BadRequestException('Provincia not found for related affiliate');
                 }

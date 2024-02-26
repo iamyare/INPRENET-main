@@ -2,7 +2,7 @@ import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 import { Net_Deduccion } from "./net_deduccion.entity";
 
 @Entity()
-export class TipoDeduccion {
+export class Net_TipoDeduccion {
     
     @PrimaryGeneratedColumn('uuid')
     id_tipo_deduccion: string;

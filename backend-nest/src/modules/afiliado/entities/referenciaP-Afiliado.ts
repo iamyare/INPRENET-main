@@ -1,9 +1,9 @@
 import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
-import { ReferenciaPersonal } from "./referencia-personal";
+import { Net_ReferenciaPersonal } from "./referencia-personal";
 import { Net_Afiliado } from "./net_afiliado";
 
 @Entity()
-export class ReferenciaPersonalAfiliado {
+export class Net_ReferenciaPersonalAfiliado {
 
     @PrimaryGeneratedColumn('uuid')
     id_ReferenciaPersonalAfiliado : string;
@@ -12,6 +12,6 @@ export class ReferenciaPersonalAfiliado {
     @JoinColumn({ name: 'id_afiliado'})
     afiliado: Net_Afiliado;
 
-    @ManyToOne(() => ReferenciaPersonal, referenciaPersonal => referenciaPersonal.referenciasPersonalesAfiliado)
-    referenciaPersonal: ReferenciaPersonal;
+    @ManyToOne(() => Net_ReferenciaPersonal, referenciaPersonal => referenciaPersonal.referenciasPersonalesAfiliado)
+    referenciaPersonal: Net_ReferenciaPersonal;
 }

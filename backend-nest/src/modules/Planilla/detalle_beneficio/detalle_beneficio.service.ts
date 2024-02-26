@@ -7,7 +7,7 @@ import { Net_Afiliado } from 'src/modules/afiliado/entities/net_afiliado';
 import { DetallePagoBeneficio, EstadoEnum } from './entities/detalle_pago_beneficio.entity';
 import { UpdateDetalleBeneficioDto } from './dto/update-detalle_beneficio_planilla.dto';
 import { CreateDetalleBeneficioDto } from './dto/create-detalle_beneficio.dto';
-import { Planilla } from '../planilla/entities/planilla.entity';
+import { Net_Planilla } from '../planilla/entities/net_planilla.entity';
 import { DetalleBeneficioAfiliado } from './entities/detalle_beneficio_afiliado.entity';
 import { AfiliadoService } from '../../afiliado/afiliado.service';
 
@@ -24,8 +24,8 @@ export class DetalleBeneficioService {
   private readonly tipoBeneficioRepository : Repository<Net_Beneficio>,
   @InjectRepository(DetallePagoBeneficio)
   private readonly benAfilRepository : Repository<DetallePagoBeneficio>,
-  @InjectRepository(Planilla)
-  private planillaRepository: Repository<Planilla>,
+  @InjectRepository(Net_Planilla)
+  private planillaRepository: Repository<Net_Planilla>,
   @InjectRepository(DetalleBeneficioAfiliado)
   private detalleBeneficioAfiliadoRepository: Repository<DetalleBeneficioAfiliado>,
   @InjectEntityManager() private readonly entityManager: EntityManager
@@ -305,7 +305,7 @@ async actualizarPlanillaYEstadoDeBeneficio(detalles: { idBeneficioPlanilla: stri
       throw new NotFoundException(`DetalleBeneficio con ID "${idBeneficioPlanilla}" no encontrado`);
     }
 
-    const planilla = await entityManager.findOne(Planilla, { where: { codigo_planilla: codigoPlanilla } });
+    const planilla = await entityManager.findOne(Net_Planilla, { where: { codigo_planilla: codigoPlanilla } });
     if (!planilla) {
       throw new NotFoundException(`Planilla con código "${codigoPlanilla}" no encontrada`);
     }

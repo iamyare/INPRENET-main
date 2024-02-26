@@ -4,7 +4,7 @@ import { UpdateCentroTrabajoDto } from './dto/update-centro-trabajo.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Net_Centro_Trabajo } from './entities/net_centro-trabajo.entity';
 import { Repository } from 'typeorm';
-import { Provincia } from 'src/modules/Regional/provincia/entities/provincia.entity';
+import { Net_Provincia } from 'src/modules/Regional/provincia/entities/net_provincia.entity';
 
 @Injectable()
 export class CentroTrabajoService {
@@ -15,8 +15,8 @@ export class CentroTrabajoService {
 
     @InjectRepository(Net_Centro_Trabajo)
     private readonly centroTrabajoRepository: Repository<Net_Centro_Trabajo>,
-    @InjectRepository(Provincia)
-    private readonly provinciaRepository: Repository<Provincia>
+    @InjectRepository(Net_Provincia)
+    private readonly provinciaRepository: Repository<Net_Provincia>
     
   ){}
 

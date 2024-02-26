@@ -1,7 +1,7 @@
 import { Column, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 /* import { Beneficio } from "../../beneficio/entities/beneficio.entity";
 import { Afiliado } from "src/modules/afiliado/entities/afiliado"; */
-import { Planilla } from "../../planilla/entities/planilla.entity";
+import { Net_Planilla } from "../../planilla/entities/net_planilla.entity";
 import { DetalleBeneficioAfiliado } from "./detalle_beneficio_afiliado.entity";
 export enum EstadoEnum {
     PAGADA = 'PAGADA',
@@ -23,9 +23,9 @@ export class DetallePagoBeneficio {
     @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
     monto_a_pagar: number;
     
-    @ManyToOne(() => Planilla, planilla => planilla.detallepagobeneficio, { cascade: true })
+    @ManyToOne(() => Net_Planilla, planilla => planilla.detallepagobeneficio, { cascade: true })
     @JoinColumn({ name: 'id_planilla' })
-    planilla: Planilla;
+    planilla: Net_Planilla;
 
     @ManyToOne(() => DetalleBeneficioAfiliado, detalleBeneficioAfiliado => detalleBeneficioAfiliado.detalleBeneficio, { cascade: true })
     @JoinColumn({ name: 'id_beneficio_afiliado' })

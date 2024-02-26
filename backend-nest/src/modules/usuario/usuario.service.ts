@@ -2,15 +2,15 @@ import { BadRequestException, Injectable, InternalServerErrorException, Logger, 
 import { UpdateUsuarioDto } from './dto/update-usuario.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { PaginationDto } from 'src/common/dtos/pagination.dto';
-import { Usuario } from './entities/usuario.entity';
+import { Net_Usuario } from './entities/net_usuario.entity';
 import { Repository } from 'typeorm';
 import { JwtService } from '@nestjs/jwt';
 import { MailService } from 'src/common/services/mail.service';
 import * as bcrypt from 'bcrypt';
 import { Empleado } from 'src/modules/Empresarial/empresas/entities/empleado.entity';
-import { Rol } from './entities/rol.entity';
+import { Net_Rol } from './entities/net_rol.entity';
 import { CreateUsuarioDto } from './dto/create-usuario.dto';
-import { TipoIdentificacion } from '../tipo_identificacion/entities/tipo_identificacion.entity';
+import { Net_TipoIdentificacion } from '../tipo_identificacion/entities/net_tipo_identificacion.entity';
 
 @Injectable()
 export class UsuarioService {
@@ -18,14 +18,14 @@ export class UsuarioService {
   private readonly logger = new Logger(UsuarioService.name)
 
   constructor(
-    @InjectRepository(Usuario)
-    private readonly usuarioRepository: Repository<Usuario>,
+    @InjectRepository(Net_Usuario)
+    private readonly usuarioRepository: Repository<Net_Usuario>,
     @InjectRepository(Empleado)
     private readonly empleadoRepository: Repository<Empleado>,
-    @InjectRepository(Rol)
-    private readonly rolRepository: Repository<Rol>,
-    @InjectRepository(TipoIdentificacion)
-    private readonly tipoIdentificacionRepository: Repository<TipoIdentificacion>,
+    @InjectRepository(Net_Rol)
+    private readonly rolRepository: Repository<Net_Rol>,
+    @InjectRepository(Net_TipoIdentificacion)
+    private readonly tipoIdentificacionRepository: Repository<Net_TipoIdentificacion>,
     private readonly jwtService: JwtService,
     private readonly mailService: MailService
   ){}

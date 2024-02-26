@@ -6,7 +6,7 @@ import { Net_Afiliado } from "src/modules/afiliado/entities/net_afiliado";
 
 
 @Entity()
-export class Provincia {
+export class Net_Provincia {
     @PrimaryGeneratedColumn('uuid')
     id_provincia
 

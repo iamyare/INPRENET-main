@@ -2,19 +2,19 @@ import { Module } from '@nestjs/common';
 import { UsuarioService } from './usuario.service';
 import { UsuarioController } from './usuario.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { Rol } from './entities/rol.entity';
+import { Net_Rol } from './entities/net_rol.entity';
 import { PassportModule } from '@nestjs/passport';
 import { JwtModule } from '@nestjs/jwt';
 import { CommonModule } from 'src/common/common.module';
 import { Empleado } from 'src/modules/Empresarial/empresas/entities/empleado.entity';
-import { Usuario } from './entities/usuario.entity';
-import { TipoIdentificacion } from '../tipo_identificacion/entities/tipo_identificacion.entity';
+import { Net_Usuario } from './entities/net_usuario.entity';
+import { Net_TipoIdentificacion } from '../tipo_identificacion/entities/net_tipo_identificacion.entity';
 
 @Module({
   controllers: [UsuarioController],
   providers: [UsuarioService],
   imports: [
-    TypeOrmModule.forFeature([Usuario, Rol, Empleado, TipoIdentificacion]),
+    TypeOrmModule.forFeature([Net_Usuario, Net_Rol, Empleado, Net_TipoIdentificacion]),
     PassportModule.register({ defaultStrategy : 'jwt'}),
 
 

@@ -2,7 +2,7 @@ import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn, AfterIns
 import { Net_Deduccion } from "../../deduccion/entities/net_deduccion.entity";
 import { Institucion } from "src/modules/Empresarial/institucion/entities/institucion.entity";
 import { Net_Afiliado } from 'src/modules/afiliado/entities/net_afiliado';
-import { Planilla } from '../../planilla/entities/planilla.entity';
+import { Net_Planilla } from '../../planilla/entities/net_planilla.entity';
 import { IsEnum } from 'class-validator';
 
 @Entity()
@@ -43,7 +43,7 @@ export class DetalleDeduccion {
     @Column('timestamp', { default: () => 'CURRENT_TIMESTAMP' })
     fecha_aplicado: Date;
 
-    @ManyToOne(() => Planilla, planilla => planilla.detalleDeduccion, { cascade: true })
+    @ManyToOne(() => Net_Planilla, planilla => planilla.detalleDeduccion, { cascade: true })
     @JoinColumn({ name: 'id_planilla' })
-    planilla: Planilla;
+    planilla: Net_Planilla;
 }

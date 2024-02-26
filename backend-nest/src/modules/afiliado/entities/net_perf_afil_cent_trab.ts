@@ -4,7 +4,7 @@ import { Net_Detalle_Afiliado } from "./detalle_afiliado.entity";
 import { Net_Afiliado } from "./net_afiliado";
 
 @Entity()
-export class PerfAfilCentTrab {
+export class Net_perf_afil_cent_trab {
     @PrimaryGeneratedColumn('uuid')
     id_perf_afil_cent_trab : string;
 

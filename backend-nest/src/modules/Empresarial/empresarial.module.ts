@@ -10,17 +10,16 @@ import { CentroTrabajoService } from './centro-trabajo/centro-trabajo.service';
 import { EmpresasService } from './empresas/empresas.service';
 import { InstitucionService } from './institucion/institucion.service';
 import { DetalleDeduccion } from '../Planilla/detalle-deduccion/entities/detalle-deduccion.entity';
-import { PlanillaModule } from '../Planilla/planilla.module';
 import { Net_Deduccion } from '../Planilla/deduccion/entities/net_deduccion.entity';
 import { Empleado } from './empresas/entities/empleado.entity';
 import { EmpleadoEmpresa } from './empresas/entities/empleado-empresa.entity';
-import { Provincia } from '../Regional/provincia/entities/provincia.entity';
+import { Net_Provincia } from '../Regional/provincia/entities/net_provincia.entity';
 
 @Module({
     controllers: [CentroTrabajoController,EmpresasController,InstitucionController],
     providers: [CentroTrabajoService, EmpresasService, InstitucionService],
     imports: [
       TypeOrmModule.forFeature([Net_Centro_Trabajo, Empresa, Institucion,
-        Net_Deduccion, DetalleDeduccion, Empleado, EmpleadoEmpresa, Provincia])]
+        Net_Deduccion, DetalleDeduccion, Empleado, EmpleadoEmpresa, Net_Provincia])]
   })
 export class EmpresarialModule {}

@@ -10,6 +10,10 @@ import { PlanillaService } from 'src/app/services/planilla.service';
 import { FieldConfig } from 'src/app/shared/Interfaces/field-config';
 import { TableColumn } from 'src/app/shared/Interfaces/table-column';
 import { convertirFecha } from 'src/app/shared/functions/formatoFecha';
+import * as pdfMake from 'pdfmake/build/pdfmake';
+import * as pdfFonts from 'pdfmake/build/vfs_fonts';
+import { TDocumentDefinitions } from 'pdfmake/interfaces';
+import { HttpClient } from '@angular/common/http';
 
 @Component({
   selector: 'app-verplancerrada',
@@ -37,16 +41,23 @@ export class VerplancerradaComponent {
   datosFilasBeneficios : any;
 
   data: any[] = [];
+  backgroundImageBase64: string = '';
+
+
 
   constructor(
-    private _formBuilder: FormBuilder,
     private planillaService : PlanillaService,
-    private svcAfilServ: AfiliadoService,
     private toastr: ToastrService,
     public dialog: MatDialog,
-    private deduccionesService : DeduccionesService,
-    private beneficiosService : BeneficiosService
+    private http: HttpClient,
+    private afiliadoService: AfiliadoService
     ) {
+      (pdfMake as any).vfs = pdfFonts.pdfMake.vfs;
+      this.convertirImagenABase64('../../assets/images/HOJA-MEMBRETADA.jpg').then(base64 => {
+        this.backgroundImageBase64 = base64;
+      }).catch(error => {
+        console.error('Error al convertir la imagen a Base64', error);
+      });
   }
 
   ngOnInit(): void {
@@ -104,7 +115,7 @@ export class VerplancerradaComponent {
             } else {
               this.detallePlanilla = [];
               this.datosTabl = [];
-              this.toastr.error(`La planilla con el código de planilla: ${this.datosFormateados.value.codigo_planilla}  no existe `);
+              this.toastr.error(`La planilla con el código de planilla:%{this.datosFormateados.value.codigo_planilla}  no existe `);
             }
             if (this.ejecF) {
               this.ejecF(this.datosTabl).then(() => { });
@@ -136,6 +147,7 @@ export class VerplancerradaComponent {
     try {
         this.data = await this.planillaService.getPlanillaPrelimiar(id_planilla).toPromise();
         this.dataPlan = this.data.map((item: any) => {
+          console.log(item);
           return {
             id_afiliado: item.id_afiliado,
             dni: item.dni,
@@ -146,6 +158,8 @@ export class VerplancerradaComponent {
             tipo_afiliado: item.tipo_afiliado,
             BENEFICIOSIDS: item.BENEFICIOSIDS,
             beneficiosNombres: item.beneficiosNombres,
+            fecha_cierre : item.fecha_cierre,
+            correo_1: item.correo_1
           };
         });
       return this.dataPlan;
@@ -162,8 +176,8 @@ export class VerplancerradaComponent {
   /* Maneja las deducciones */
   manejarAccionDos(row: any) {
     let logs: any[] = []; // Array para almacenar logs
-    logs.push({ message: `DNI: ${row.dni}`, detail: row });
-    logs.push({ message: `Nombre Completo: ${row.NOMBRE_COMPLETO}`, detail: row });
+    logs.push({ message: `DNI:${row.dni}`, detail: row });
+    logs.push({ message: `Nombre Completo:${row.NOMBRE_COMPLETO}`, detail: row });
 
     const openDialog = () => this.dialog.open(DynamicDialogComponent, {
       width: '50%', // o el ancho que prefieras
@@ -186,8 +200,8 @@ export class VerplancerradaComponent {
   /* Maneja los beneficios */
   manejarAccionUno(row: any) {
     let logs: any[] = [];
-    logs.push({ message: `DNI: ${row.dni}`, detail: row });
-    logs.push({ message: `Nombre Completo: ${row.NOMBRE_COMPLETO}`, detail: row });
+    logs.push({ message: `DNI:${row.dni}`, detail: row });
+    logs.push({ message: `Nombre Completo:${row.NOMBRE_COMPLETO}`, detail: row });
 
     // Función auxiliar para abrir el diálogo una vez que todos los datos están listos
     const openDialog = () => this.dialog.open(DynamicDialogComponent, {
@@ -205,8 +219,6 @@ export class VerplancerradaComponent {
           openDialog();
         }
       });
-
-
   }
 
   openLogDialog(logs: any[]) {
@@ -216,4 +228,124 @@ export class VerplancerradaComponent {
     });
   }
 
+  manejarAccionTres(row: any) {
+    // Obtén el idPlanilla y el dni del afiliado de la fila actual
+    const idPlanilla = this.idPlanilla; // Asumiendo que esta propiedad ya tiene el valor adecuado
+    const dni = row.dni;
+
+    // Llama al servicio para obtener los totales de beneficios y deducciones
+    this.afiliadoService.generarVoucher(idPlanilla, dni).subscribe({
+      next: (resultados) => {
+        // Aquí manejas la respuesta
+        const { beneficios, deducciones } = resultados;
+
+        // Construye el documento PDF usando los datos obtenidos
+        this.construirPDF(row, beneficios, deducciones);
+      },
+      error: (error) => {
+        console.error('Error al obtener los totales:', error);
+        this.toastr.error('Error al obtener los datos para el voucher.');
+      }
+    });
+  }
+
+  construirPDF(row: any, beneficios: any[], deducciones: any[]) {
+    let docDefinition: TDocumentDefinitions = {
+      content: [
+        { text: 'Comprobante de Pago', style: 'header' },
+        { text: 'Nº Orden: ' + (row.id_afiliado || 'Desconocido'), style: 'subheader' },
+        {
+          image: this.backgroundImageBase64,
+          width: 595,
+          height: 842,
+          absolutePosition: {x: 0, y: 0},
+        },
+        {
+          columns: [
+            [
+              { text: 'Cliente', style: 'subheader' },
+              { text: 'Nombre: ' + (row.NOMBRE_COMPLETO || 'Desconocido') },
+              { text: 'Email: ' + (row.correo_1 || 'No proporcionado') },
+            ],
+            [
+              { text: 'Pago', style: 'subheader' },
+              { text: 'Medio de Pago: No especificado' }, // Asumiendo que este dato no está disponible
+              { text: 'Pago Total: ' + (row.Total || 0).toFixed(2) },
+              { text: 'Fecha de pago: ' + (row.fecha_cierre || 'No especificada') },
+            ]
+          ]
+        },
+        this.buildTable('Ingresos', beneficios.map(b => ({ nombre_ingreso: b.nombre_beneficio, monto: b['Total Monto Beneficio'] })), ['nombre_ingreso', 'monto'], 'monto'),
+        this.buildTable('Deducciones', deducciones.map(d => ({ nombre_deduccion: d.nombre_deduccion, total_deduccion: d['Total Monto Aplicado'] })), ['nombre_deduccion', 'total_deduccion'], 'total_deduccion'),
+        { text: 'Neto: ' + (row.Total || 0).toFixed(2), style: 'subheader' }
+      ],
+      styles: {
+        header: {
+          fontSize: 18,
+          bold: true,
+          margin: [0, 20, 0, 10]
+        },
+        subheader: {
+          fontSize: 14,
+          bold: true,
+          margin: [0, 0, 0, 5]
+        },
+        tableHeader: {
+          bold: true,
+          fontSize: 13,
+          color: 'black'
+        },
+        tableExample: {
+          margin: [0, 5, 0, 15]
+        }
+      }
+    };
+
+    pdfMake.createPdf(docDefinition).open();
+  }
+
+
+
+  convertirImagenABase64(url: string): Promise<string> {
+    return this.http.get(url, { responseType: 'blob' }).toPromise().then(blob => {
+      return new Promise<string>((resolve, reject) => {
+        if (blob) {
+          const reader = new FileReader();
+          reader.readAsDataURL(blob);
+          reader.onloadend = () => resolve(reader.result as string);
+          reader.onerror = error => reject(error);
+        } else {
+          reject('No se pudo cargar la imagen. El blob es undefined.');
+        }
+      });
+    });
+  }
+
+
+
+  buildTable(header: string, data: any[], columns: string[], sumColumn: string) {
+    let body = [
+      [{ text: header, style: 'tableHeader', colSpan: 2 }, {}],
+      ...data.map(item => columns.map(column => item[column]))
+    ];
+
+    let total = data.reduce((acc, curr) => acc + curr[sumColumn], 0);
+    body.push([{ text: 'Total', style: 'tableHeader' }, { text: total.toFixed(2), alignment: 'right' }]);
+
+    return {
+      style: 'tableExample',
+      table: {
+        headerRows: 1,
+        widths: ['*', 'auto'],
+        body: body
+      },
+      layout: 'lightHorizontalLines'
+    };
+  }
+
+  calculateNet(ingresos: any[], deducciones: any[]): number {
+    const totalIngresos = ingresos.reduce((acc: any, curr: any) => acc + curr.monto, 0);
+    const totalDeducciones = deducciones.reduce((acc: any, curr: any) => acc + curr.total_deduccion, 0);
+    return totalIngresos - totalDeducciones;
+  }
 }

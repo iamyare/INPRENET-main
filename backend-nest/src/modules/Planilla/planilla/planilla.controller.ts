@@ -20,6 +20,27 @@ export class PlanillaController {
     return this.planillaService.getTotalPorDedYBen(idPlanilla);
   }
 
+  @Get('generar-voucher')
+  async generarVoucher(
+    @Query('idPlanilla') idPlanilla: string,
+    @Query('dni') dni: string
+  ) {
+    // Verifica si los parámetros de consulta están presentes
+    if (!idPlanilla) {
+      throw new BadRequestException('El ID de la planilla es obligatorio.');
+    }
+    if (!dni) {
+      throw new BadRequestException('El DNI del afiliado es obligatorio.');
+    }
+
+    try {
+      const resultados = await this.planillaService.generarVoucher(idPlanilla, dni);
+      return resultados;
+    } catch (error) {
+      // Aquí deberías manejar diferentes tipos de errores de acuerdo a lo que tu lógica de negocio requiera
+      throw new InternalServerErrorException('Ocurrió un error al generar el voucher.');
+    }
+  }
 
   @Get('total/:id')
   @HttpCode(HttpStatus.OK)

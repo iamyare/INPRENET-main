@@ -48,10 +48,10 @@
 
     <div>
       <app-dynamic-table
-        [verOpcEditar]="false"
-        [columns]="myColumnsDed"
-        [data]="datosTabl" (ejecutarFuncionAsincronaEvent)="ejecutarFuncionAsincronaDesdeOtroComponente($event)"
-        [nombreEncabezadoUno]="'Detalle Ingresos'"
+      [verOpcEditar]="false"
+      [columns]="myColumnsDed"
+      [data]="datosTabl" (ejecutarFuncionAsincronaEvent)="ejecutarFuncionAsincronaDesdeOtroComponente($event)"
+      [nombreEncabezadoUno]="'Detalle Ingresos'"
         [mostrarBotonUno]="true"
         [etiquetaBotonUno]="'Detalle Ingresos'"
         (accionBotonUno)="manejarAccionUno($event)"
@@ -59,8 +59,14 @@
         [mostrarBotonDos]="true"
         [etiquetaBotonDos]="'Detalle Deducciones'"
         (accionBotonDos)="manejarAccionDos($event)"
-      >
+        [nombreEncabezadoTres]="'Voucher'"
+        [mostrarBotonTres]="true"
+        [etiquetaBotonTres]="'Generar Voucher'"
+        (accionBotonTres)="manejarAccionTres($event)"
+        >
       </app-dynamic-table>
     </div>
   </div>
 </div>
+
+

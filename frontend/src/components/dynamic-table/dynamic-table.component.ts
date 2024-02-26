@@ -33,6 +33,11 @@ export class DynamicTableComponent implements OnInit, OnDestroy {
   @Input() etiquetaBotonDos: string = '';
   @Output() accionBotonDos: EventEmitter<any> = new EventEmitter<any>();
 
+  @Input() nombreEncabezadoTres: string = '';
+  @Input() mostrarBotonTres: boolean = false;
+  @Input() etiquetaBotonTres: string = '';
+  @Output() accionBotonTres: EventEmitter<any> = new EventEmitter<any>();
+
 
   @ViewChild(MatPaginator) paginator: MatPaginator | undefined;
 
@@ -247,6 +252,10 @@ export class DynamicTableComponent implements OnInit, OnDestroy {
 
     ejecutarAccionDos(row: any) {
       this.accionBotonDos.emit(row);
+    }
+
+    ejecutarAccionTres(row: any) {
+      this.accionBotonTres.emit(row);
     }
 
 }

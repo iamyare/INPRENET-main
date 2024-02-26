@@ -1,0 +1,14 @@
+.tables-container {
+  display: flex;
+  justify-content: space-around;
+  flex-wrap: wrap; /* Esto permite que las tablas se coloquen una debajo de la otra en pantallas más pequeñas */
+}
+
+.table {
+  flex-basis: 45%; /* Ajusta este valor según sea necesario para controlar el ancho de las tablas */
+  margin: 10px;
+}
+
+mat-paginator {
+  width: 100%;
+}

@@ -21,6 +21,7 @@
       <th *ngIf="verBotEditar" class="custom-header">Acciones</th>
       <th *ngIf="mostrarBotonUno" class="custom-header">{{ nombreEncabezadoUno }}</th>
       <th *ngIf="mostrarBotonDos" class="custom-header">{{ nombreEncabezadoDos }}</th>
+      <th *ngIf="mostrarBotonTres" class="custom-header">{{ nombreEncabezadoTres }}</th>
     </tr>
   </thead>
   <tbody>
@@ -59,6 +60,11 @@
       <td *ngIf="mostrarBotonDos">
         <button *ngIf="mostrarBotonDos" mat-raised-button (click)="ejecutarAccionDos(row)">
           {{ etiquetaBotonDos }}
+        </button>
+      </td>
+      <td *ngIf="mostrarBotonTres">
+        <button *ngIf="mostrarBotonTres" mat-raised-button (click)="ejecutarAccionTres(row)">
+          {{ etiquetaBotonTres }}
         </button>
       </td>
 

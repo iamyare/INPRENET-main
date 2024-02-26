@@ -1,8 +1,8 @@
 
 import { Column, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn } from "typeorm";
-import { Beneficio } from "../../beneficio/entities/beneficio.entity";
+import { Net_Beneficio } from "../../beneficio/entities/net_beneficio.entity";
 import { DetallePagoBeneficio } from "./detalle_pago_beneficio.entity";
-import { Afiliado } from "src/modules/afiliado/entities/afiliado";
+import { Net_Afiliado } from "src/modules/afiliado/entities/net_afiliado";
 
 @Entity()
 export class DetalleBeneficioAfiliado 
@@ -25,13 +25,13 @@ export class DetalleBeneficioAfiliado
     @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
     monto_por_periodo: number;
 
-    @ManyToOne(() => Afiliado, afiliado => afiliado.detalleBeneficioAfiliado)
+    @ManyToOne(() => Net_Afiliado, afiliado => afiliado.detalleBeneficioAfiliado)
     @JoinColumn({ name: 'id_afiliado' })
-    afiliado: Afiliado;;
+    afiliado: Net_Afiliado;;
 
-    @ManyToOne(() => Beneficio, beneficio => beneficio.detalleBeneficioAfiliado)
+    @ManyToOne(() => Net_Beneficio, beneficio => beneficio.detalleBeneficioAfiliado)
     @JoinColumn({ name: 'id_beneficio' })
-    beneficio: Beneficio;
+    beneficio: Net_Beneficio;
 
     @OneToMany(() => DetallePagoBeneficio, detalleBeneficio => detalleBeneficio.detalleBeneficioAfiliado)
     detalleBeneficio: DetallePagoBeneficio[];

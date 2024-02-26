@@ -2,13 +2,13 @@ import { BadRequestException, Injectable, InternalServerErrorException, Logger, 
 import { CreateDeduccionDto } from './dto/create-deduccion.dto';
 import { UpdateDeduccionDto } from './dto/update-deduccion.dto';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Deduccion } from './entities/deduccion.entity';
+import { Net_Deduccion } from './entities/net_deduccion.entity';
 import { Repository } from 'typeorm';
 import * as xlsx from 'xlsx';
 /* import { Afiliado } from 'src/afiliado/entities/detalle_afiliado.entity'; */
 import { Institucion } from 'src/modules/Empresarial/institucion/entities/institucion.entity';
 import { DetalleDeduccion } from '../detalle-deduccion/entities/detalle-deduccion.entity';
-import { Afiliado } from 'src/modules/afiliado/entities/afiliado';
+import { Net_Afiliado } from 'src/modules/afiliado/entities/net_afiliado';
 
 @Injectable()
 export class DeduccionService {
@@ -18,10 +18,10 @@ export class DeduccionService {
   constructor(
     @InjectRepository(DetalleDeduccion)
     private detalleDeduccionRepository : Repository<DetalleDeduccion>,
-    @InjectRepository(Afiliado)
-    private afiliadoRepository: Repository<Afiliado>,
-    @InjectRepository(Deduccion)
-    private deduccionRepository: Repository<Deduccion>,
+    @InjectRepository(Net_Afiliado)
+    private afiliadoRepository: Repository<Net_Afiliado>,
+    @InjectRepository(Net_Deduccion)
+    private deduccionRepository: Repository<Net_Deduccion>,
     @InjectRepository(Institucion)
     private institucionRepository: Repository<Institucion>
   ){}

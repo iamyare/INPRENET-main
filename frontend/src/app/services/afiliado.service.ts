@@ -142,4 +142,16 @@ export class AfiliadoService {
         })
       );
   }
+
+  /* BENEFICIOS */
+  obtenerBeneficiosDeAfil(dniAfil:string | number): Observable<any | void> {
+    const url = `${environment.API_URL}/api/beneficio-planilla/obtenerBeneficiosDeAfil/${dniAfil}`;
+    return this.http.get<any>(
+      url,
+      ).pipe(
+        map((res:any) => {
+          return res;
+        })
+      );
+  }
 }

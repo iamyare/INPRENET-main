@@ -3,7 +3,7 @@ import { DetalleDeduccion } from '../../detalle-deduccion/entities/detalle-deduc
 import { TipoDeduccion } from './tipo-deduccion.entity';
 
 @Entity()
-export class Deduccion {
+export class Net_Deduccion {
 
     @PrimaryGeneratedColumn('uuid')
     id_deduccion : string;

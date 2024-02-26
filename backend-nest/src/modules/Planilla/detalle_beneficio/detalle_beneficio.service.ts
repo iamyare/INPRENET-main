@@ -2,23 +2,26 @@ import { BadRequestException, Injectable, InternalServerErrorException, Logger, 
 import { isUUID } from 'class-validator';
 import { InjectEntityManager, InjectRepository } from '@nestjs/typeorm';
 import { EntityManager, LessThanOrEqual, MoreThanOrEqual, Not, Repository } from 'typeorm';
-import { Beneficio } from '../beneficio/entities/beneficio.entity';
-import { Afiliado } from 'src/modules/afiliado/entities/afiliado';
+import { Net_Beneficio } from '../beneficio/entities/net_beneficio.entity';
+import { Net_Afiliado } from 'src/modules/afiliado/entities/net_afiliado';
 import { DetallePagoBeneficio, EstadoEnum } from './entities/detalle_pago_beneficio.entity';
 import { UpdateDetalleBeneficioDto } from './dto/update-detalle_beneficio_planilla.dto';
 import { CreateDetalleBeneficioDto } from './dto/create-detalle_beneficio.dto';
 import { Planilla } from '../planilla/entities/planilla.entity';
 import { DetalleBeneficioAfiliado } from './entities/detalle_beneficio_afiliado.entity';
+import { AfiliadoService } from '../../afiliado/afiliado.service';
 
 @Injectable()
 export class DetalleBeneficioService {
   private readonly logger = new Logger(DetalleBeneficioService.name)
 
   constructor(
-  @InjectRepository(Afiliado)
-  private readonly afiliadoRepository : Repository<Afiliado>,
-  @InjectRepository(Beneficio)
-  private readonly tipoBeneficioRepository : Repository<Beneficio>,
+  @InjectRepository(Net_Afiliado)
+  private  afiliadoRepository : Repository<Net_Afiliado>,
+  private  AfiliadoService : AfiliadoService,
+  
+  @InjectRepository(Net_Beneficio)
+  private readonly tipoBeneficioRepository : Repository<Net_Beneficio>,
   @InjectRepository(DetallePagoBeneficio)
   private readonly benAfilRepository : Repository<DetallePagoBeneficio>,
   @InjectRepository(Planilla)
@@ -26,9 +29,7 @@ export class DetalleBeneficioService {
   @InjectRepository(DetalleBeneficioAfiliado)
   private detalleBeneficioAfiliadoRepository: Repository<DetalleBeneficioAfiliado>,
   @InjectEntityManager() private readonly entityManager: EntityManager
-  ){
-
-  }
+  ){}
 
   async actualizarEstadoPorPlanilla(idPlanilla: string, nuevoEstado: string): Promise<{ mensaje: string }> {
     try {
@@ -51,12 +52,12 @@ export class DetalleBeneficioService {
   async createDetalleBeneficioAfiliado(datos: CreateDetalleBeneficioDto): Promise<any> {
     return await this.entityManager.transaction(async manager => {
         try {
-            const afiliado = await manager.findOne(Afiliado, { where: { dni: datos.dni } });
+            const afiliado = await manager.findOne(Net_Afiliado, { where: { dni: datos.dni } });
             if (!afiliado) {
                 throw new BadRequestException('Afiliado no encontrado');
             }
 
-            const beneficio = await manager.findOne(Beneficio, { where: { nombre_beneficio: datos.nombre_beneficio } });
+            const beneficio = await manager.findOne(Net_Beneficio, { where: { nombre_beneficio: datos.nombre_beneficio } });
             if (!beneficio) {
                 throw new BadRequestException('Tipo de beneficio no encontrado');
             }
@@ -95,6 +96,41 @@ export class DetalleBeneficioService {
         }
     });
 }
+
+  async createBenBenefic(beneficiario: CreateDetalleBeneficioDto, idAfiliado:string): Promise<any> {
+    console.log(idAfiliado);
+    console.log(beneficiario);
+
+    try {
+      const query = `
+        SELECT 
+            "Afil"."id_afiliado",
+            "Afil"."dni",
+            "Afil"."primer_nombre",
+            "Afil"."segundo_nombre",
+            "Afil"."tercer_nombre",
+            "Afil"."primer_apellido",
+            "Afil"."segundo_apellido",
+            "Afil"."sexo",
+            "detA"."porcentaje",
+            "detA"."tipo_afiliado"
+        FROM
+            "detalle_afiliado" "detA" INNER JOIN 
+            "afiliado" "Afil" ON "detA"."id_afiliado" = "Afil"."id_afiliado"
+        WHERE 
+            "detA"."id_detalle_afiliado_padre" = ${idAfiliado} AND
+            "Afil"."dni" = '${beneficiario.dni}' AND
+            "detA"."tipo_afiliado" = 'BENEFICIARIO'
+      `;
+      
+      const beneficiarios = await this.entityManager.query(query);
+      console.log(beneficiarios);
+        
+      return beneficiarios;
+    }catch{
+
+    }
+  }
 
   async getDetalleBeneficiosPorAfiliadoYPlanilla(idAfiliado: string, idPlanilla: string): Promise<any> {
     const query = `
@@ -151,13 +187,13 @@ export class DetalleBeneficioService {
       COALESCE(afil."segundo_apellido", '')
     ) AS "nombre_completo"
   FROM
-    "C##TEST"."detalle_pago_beneficio" db
+    "detalle_pago_beneficio" db
   JOIN
-    "C##TEST"."detalle_beneficio_afiliado" detBA ON db."id_beneficio_afiliado" = detBA."id_detalle_ben_afil"
+    "detalle_beneficio_afiliado" detBA ON db."id_beneficio_afiliado" = detBA."id_detalle_ben_afil"
   JOIN
-    "C##TEST"."beneficio" b ON detBA."id_beneficio" = b."id_beneficio"
+    "net_beneficio" b ON detBA."id_beneficio" = b."id_beneficio"
   JOIN
-    "C##TEST"."afiliado" afil ON detBA."id_afiliado" = afil."id_afiliado"
+    "Net_Afiliado" afil ON detBA."id_afiliado" = afil."id_afiliado"
   WHERE
     detBA."id_afiliado" = :idAfiliado
   AND
@@ -245,10 +281,10 @@ async obtenerBeneficiosDeAfil(dni: string): Promise<any[]> {
       detBenAfil."num_rentas_aplicadas",
       detBenAfil."monto_total",
       ben."numero_rentas_max" 
-      FROM "C##TEST"."beneficio" ben
-      INNER JOIN "C##TEST"."detalle_beneficio_afiliado" detBenAfil ON  
+      FROM "net_beneficio" ben
+      INNER JOIN "detalle_beneficio_afiliado" detBenAfil ON  
       detBenAfil."id_beneficio" = ben."id_beneficio"
-      INNER JOIN "C##TEST"."afiliado" afil ON  
+      INNER JOIN "Net_Afiliado" afil ON  
       detBenAfil."id_afiliado" = afil."id_afiliado"
       WHERE 
       afil."dni" = '${dni}'`;
@@ -281,7 +317,6 @@ async actualizarPlanillaYEstadoDeBeneficio(detalles: { idBeneficioPlanilla: stri
   }
   return resultados;
 }
-
 
   /* async create(datos: any): Promise<any> {
     try {
@@ -386,7 +421,6 @@ async actualizarPlanillaYEstadoDeBeneficio(detalles: { idBeneficioPlanilla: stri
     }
   }
 
-
   async findInconsistentBeneficiosByAfiliado(idAfiliado: string) {
     try {
       const query = `
@@ -395,11 +429,11 @@ async actualizarPlanillaYEstadoDeBeneficio(detalles: { idBeneficioPlanilla: stri
         detBA."periodoFinalizacion",
         ben."nombre_beneficio",
         ben."id_beneficio",
-        detB."monto_por_periodo" as "monto",
+        detB."monto_a_pagar" as "monto",
         detB."estado"
-      FROM "C##TEST"."detalle_pago_beneficio" detB
-      INNER JOIN "C##TEST"."detalle_beneficio_afiliado" detBA ON detB."id_beneficio_afiliado" = detBA."id_detalle_ben_afil"
-      INNER JOIN "C##TEST"."beneficio" ben ON ben."id_beneficio" = detBA."id_beneficio"
+      FROM "detalle_pago_beneficio" detB
+      INNER JOIN "detalle_beneficio_afiliado" detBA ON detB."id_beneficio_afiliado" = detBA."id_detalle_ben_afil"
+      INNER JOIN "net_beneficio" ben ON ben."id_beneficio" = detBA."id_beneficio"
       WHERE detB."estado" = 'INCONSISTENCIA'
     `;
     return await this.benAfilRepository.query(query); 
@@ -424,9 +458,4 @@ async actualizarPlanillaYEstadoDeBeneficio(detalles: { idBeneficioPlanilla: stri
     }
   }
   
-  
-  
-  
-
-
 }

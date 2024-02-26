@@ -61,6 +61,11 @@ export class AsignacionAfilPlanComponent implements OnInit{
         isEditable: true
       },
       {
+        header: 'Tipo Afiliado',
+        col: 'tipo_afiliado',
+        isEditable: true
+      },
+      {
         header: 'Total de Ingresos',
         col: 'Total Beneficio',
         isEditable: true
@@ -316,7 +321,6 @@ export class AsignacionAfilPlanComponent implements OnInit{
     });
   }
 
-
   async ingresarDeduccionesPlanilla() {
     let datosFilasDeduccion = [];
 
@@ -482,63 +486,62 @@ export class AsignacionAfilPlanComponent implements OnInit{
 
 }
 
-
 /*
-SELECT
-    a."id_afiliado",
-    a."primer_nombre" || ' ' || a."primer_apellido" AS "nombre_afiliado",
-    LISTAGG(d."nombre_deduccion", ', ') WITHIN GROUP (ORDER BY d."nombre_deduccion") AS "deducciones",
-    (SELECT LISTAGG(b."nombre_beneficio", ', ') WITHIN GROUP (ORDER BY b."nombre_beneficio")
-     FROM "detalle_beneficio" db
-     JOIN "beneficio" b ON db."id_beneficio" = b."id_beneficio"
-     WHERE db."id_afiliado" = a."id_afiliado" AND db."id_planilla" = dd."id_planilla") AS "beneficios"
-FROM
-    "detalle_deduccion" dd
-JOIN
-    "deduccion" d ON dd."id_deduccion" = d."id_deduccion"
-JOIN
-    "afiliado" a ON dd."id_afiliado" = a."id_afiliado"
-WHERE
-    dd."id_planilla" = 'cb2b8882-490e-448e-a094-9da50e39f5fd'
-GROUP BY
-    a."id_afiliado",
-    a."primer_nombre",
-    a."primer_apellido";
+  SELECT
+      a."id_afiliado",
+      a."primer_nombre" || ' ' || a."primer_apellido" AS "nombre_afiliado",
+      LISTAGG(d."nombre_deduccion", ', ') WITHIN GROUP (ORDER BY d."nombre_deduccion") AS "deducciones",
+      (SELECT LISTAGG(b."nombre_beneficio", ', ') WITHIN GROUP (ORDER BY b."nombre_beneficio")
+       FROM "detalle_beneficio" db
+       JOIN "beneficio" b ON db."id_beneficio" = b."id_beneficio"
+       WHERE db."id_afiliado" = a."id_afiliado" AND db."id_planilla" = dd."id_planilla") AS "beneficios"
+  FROM
+      "detalle_deduccion" dd
+  JOIN
+      "deduccion" d ON dd."id_deduccion" = d."id_deduccion"
+  JOIN
+      "afiliado" a ON dd."id_afiliado" = a."id_afiliado"
+  WHERE
+      dd."id_planilla" = 'cb2b8882-490e-448e-a094-9da50e39f5fd'
+  GROUP BY
+      a."id_afiliado",
+      a."primer_nombre",
+      a."primer_apellido";
 
---DESGLOSE DE BENEFICIOS
-    SELECT
-    a."id_afiliado",
-    a."primer_nombre" || ' ' || a."primer_apellido" AS "nombre_afiliado",
-    d_list."deducciones",
-    b_list."beneficios"
-FROM
-    "afiliado" a
-LEFT JOIN (
-    SELECT
-        dd."id_afiliado",
-        LISTAGG(d."nombre_deduccion", ', ') WITHIN GROUP (ORDER BY d."nombre_deduccion") AS "deducciones"
-    FROM
-        "detalle_deduccion" dd
-    JOIN
-        "deduccion" d ON dd."id_deduccion" = d."id_deduccion"
-    WHERE
-        dd."id_planilla" = 'cb2b8882-490e-448e-a094-9da50e39f5fd'
-    GROUP BY
-        dd."id_afiliado"
-) d_list ON a."id_afiliado" = d_list."id_afiliado"
-LEFT JOIN (
-    SELECT
-        db."id_afiliado",
-        LISTAGG(b."nombre_beneficio", ', ') WITHIN GROUP (ORDER BY b."nombre_beneficio") AS "beneficios"
-    FROM
-        "detalle_beneficio" db
-    JOIN
-        "beneficio" b ON db."id_beneficio" = b."id_beneficio"
-    WHERE
-        db."id_planilla" = 'cb2b8882-490e-448e-a094-9da50e39f5fd'
-    GROUP BY
-        db."id_afiliado"
-) b_list ON a."id_afiliado" = b_list."id_afiliado"
-WHERE
-    d_list."deducciones" IS NOT NULL OR b_list."beneficios" IS NOT NULL;
+  --DESGLOSE DE BENEFICIOS
+      SELECT
+      a."id_afiliado",
+      a."primer_nombre" || ' ' || a."primer_apellido" AS "nombre_afiliado",
+      d_list."deducciones",
+      b_list."beneficios"
+  FROM
+      "afiliado" a
+  LEFT JOIN (
+      SELECT
+          dd."id_afiliado",
+          LISTAGG(d."nombre_deduccion", ', ') WITHIN GROUP (ORDER BY d."nombre_deduccion") AS "deducciones"
+      FROM
+          "detalle_deduccion" dd
+      JOIN
+          "deduccion" d ON dd."id_deduccion" = d."id_deduccion"
+      WHERE
+          dd."id_planilla" = 'cb2b8882-490e-448e-a094-9da50e39f5fd'
+      GROUP BY
+          dd."id_afiliado"
+  ) d_list ON a."id_afiliado" = d_list."id_afiliado"
+  LEFT JOIN (
+      SELECT
+          db."id_afiliado",
+          LISTAGG(b."nombre_beneficio", ', ') WITHIN GROUP (ORDER BY b."nombre_beneficio") AS "beneficios"
+      FROM
+          "detalle_beneficio" db
+      JOIN
+          "beneficio" b ON db."id_beneficio" = b."id_beneficio"
+      WHERE
+          db."id_planilla" = 'cb2b8882-490e-448e-a094-9da50e39f5fd'
+      GROUP BY
+          db."id_afiliado"
+  ) b_list ON a."id_afiliado" = b_list."id_afiliado"
+  WHERE
+      d_list."deducciones" IS NOT NULL OR b_list."beneficios" IS NOT NULL;
 */

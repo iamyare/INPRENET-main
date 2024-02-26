@@ -1,8 +1,8 @@
 import { Column, Entity, ManyToOne, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 import { Pais } from "../../pais/entities/pais.entity";
-import { CentroTrabajo } from "src/modules/Empresarial/centro-trabajo/entities/centro-trabajo.entity";
+import { Net_Centro_Trabajo } from "src/modules/Empresarial/centro-trabajo/entities/net_centro-trabajo.entity";
 import { Municipio } from "../../municipio/entities/municipio.entity";
-import { Afiliado } from "src/modules/afiliado/entities/afiliado";
+import { Net_Afiliado } from "src/modules/afiliado/entities/net_afiliado";
 
 
 @Entity()
@@ -19,9 +19,9 @@ export class Provincia {
     @OneToMany(() => Municipio, municipio => municipio.provincia)
     municipio: Municipio[];
 
-    @OneToMany(() => Afiliado, afiliado => afiliado.provincia)
-    afiliado: Afiliado[];
+    @OneToMany(() => Net_Afiliado, afiliado => afiliado.provincia)
+    afiliado: Net_Afiliado[];
 
-    @OneToMany(() => CentroTrabajo, centroTrabajo => centroTrabajo.provincia)
-    centrosTrabajo: CentroTrabajo[];
+    @OneToMany(() => Net_Centro_Trabajo, centroTrabajo => centroTrabajo.provincia)
+    centrosTrabajo: Net_Centro_Trabajo[];
 }

@@ -1,5 +1,5 @@
 import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
-import { Deduccion } from "./deduccion.entity";
+import { Net_Deduccion } from "./net_deduccion.entity";
 
 @Entity()
 export class TipoDeduccion {
@@ -10,6 +10,6 @@ export class TipoDeduccion {
     @Column('varchar2', { length: 100, nullable: false })
     nombre_tipo_deduccion: string;
 
-    @OneToMany(() => Deduccion, deduccion => deduccion.tipoDeduccion)
-    deduccion : Deduccion[];
+    @OneToMany(() => Net_Deduccion, deduccion => deduccion.tipoDeduccion)
+    deduccion : Net_Deduccion[];
 }

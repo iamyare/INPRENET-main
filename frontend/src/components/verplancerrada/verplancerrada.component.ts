@@ -115,7 +115,7 @@ export class VerplancerradaComponent {
             } else {
               this.detallePlanilla = [];
               this.datosTabl = [];
-              this.toastr.error(`La planilla con el código de planilla:%{this.datosFormateados.value.codigo_planilla}  no existe `);
+              this.toastr.error(`La planilla con el código de planilla:${this.datosFormateados.value.codigo_planilla}  no existe `);
             }
             if (this.ejecF) {
               this.ejecF(this.datosTabl).then(() => { });

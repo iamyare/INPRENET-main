@@ -3,7 +3,7 @@ import { DetalleBeneficioAfiliado } from "../../detalle_beneficio/entities/detal
 
 
 @Entity()
-export class Beneficio {
+export class Net_Beneficio {
 
     @PrimaryGeneratedColumn('uuid')
     id_beneficio: string;
@@ -17,8 +17,8 @@ export class Beneficio {
     @Column()
     periodicidad: string;
 
-    @Column('number', { nullable: false, default:0 })
-    numero_rentas_max: number;
+    @Column('number', { nullable: false, default: 100000 })
+    numero_rentas_max?: number;
 
     @OneToMany(() => DetalleBeneficioAfiliado, detalleBeneficioAfiliado => detalleBeneficioAfiliado.beneficio)
     detalleBeneficioAfiliado: DetalleBeneficioAfiliado[];

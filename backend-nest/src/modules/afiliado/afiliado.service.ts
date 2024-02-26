@@ -4,16 +4,16 @@ import { UpdateAfiliadoDto } from './dto/update-afiliado.dto';
 import { Connection, EntityManager, Repository } from 'typeorm';
 import { InjectEntityManager, InjectRepository } from '@nestjs/typeorm';
 import { PerfAfilCentTrab } from './entities/perf_afil_cent_trab';
-import { AfiliadosPorBanco } from 'src/modules/banco/entities/afiliados-banco';
-import { CentroTrabajo } from 'src/modules/Empresarial/centro-trabajo/entities/centro-trabajo.entity';
-import { Banco } from 'src/modules/banco/entities/banco.entity';
+import { Net_Afiliados_Por_Banco } from 'src/modules/banco/entities/net_afiliados-banco';
+import { Net_Centro_Trabajo } from 'src/modules/Empresarial/centro-trabajo/entities/net_centro-trabajo.entity';
+import { Net_Banco } from 'src/modules/banco/entities/net_banco.entity';
 import { Provincia } from 'src/modules/Regional/provincia/entities/provincia.entity';
 import { Pais } from 'src/modules/Regional/pais/entities/pais.entity';
 import { TipoIdentificacion } from 'src/modules/tipo_identificacion/entities/tipo_identificacion.entity';
 import { CreateAfiliadoTempDto } from './dto/create-afiliado-temp.dto';
 import { validate as isUUID } from 'uuid';
-import { DetalleAfiliado } from './entities/detalle_afiliado.entity';
-import { Afiliado } from './entities/afiliado';
+import { Net_Detalle_Afiliado } from './entities/detalle_afiliado.entity';
+import { Net_Afiliado } from './entities/net_afiliado';
 
 @Injectable()
 export class AfiliadoService {
@@ -23,14 +23,14 @@ export class AfiliadoService {
   constructor(
     @InjectEntityManager() private readonly entityManager: EntityManager,
 
-    @InjectRepository(Afiliado)
-    private readonly afiliadoRepository : Repository<Afiliado>,
-    @InjectRepository(DetalleAfiliado)
-    private datosIdentificacionRepository: Repository<DetalleAfiliado>,
+    @InjectRepository(Net_Afiliado)
+    private readonly afiliadoRepository : Repository<Net_Afiliado>,
+    @InjectRepository(Net_Detalle_Afiliado)
+    private datosIdentificacionRepository: Repository<Net_Detalle_Afiliado>,
     private connection: Connection,
   ){}
   
-  async create(createAfiliadoDto: CreateAfiliadoDto): Promise<Afiliado> {
+  async create(createAfiliadoDto: CreateAfiliadoDto): Promise<Net_Afiliado> {
     const queryRunner = this.connection.createQueryRunner();
 
     await queryRunner.connect();
@@ -53,13 +53,13 @@ export class AfiliadoService {
             throw new BadRequestException('Provincia not found');
         }
 
-        const banco = await queryRunner.manager.findOneBy(Banco, { nombre_banco: createAfiliadoDto.datosBanc.nombreBanco });
+        const banco = await queryRunner.manager.findOneBy(Net_Banco, { nombre_banco: createAfiliadoDto.datosBanc.nombreBanco });
         if (!banco) {
             throw new BadRequestException('Banco not found');
         }
 
         // Crear un nuevo registro en AfiliadosPorBanco para el afiliado principal
-        const afiliadoBanco = queryRunner.manager.create(AfiliadosPorBanco, {
+        const afiliadoBanco = queryRunner.manager.create(Net_Afiliados_Por_Banco, {
             banco,
             num_cuenta: createAfiliadoDto.datosBanc.numeroCuenta
         });
@@ -67,7 +67,7 @@ export class AfiliadoService {
 
         // Verificar y encontrar los centros de trabajo para cada perfAfilCentTrab
         const perfAfilCentTrabs = await Promise.all(createAfiliadoDto.perfAfilCentTrabs.map(async perfAfilCentTrabDto => {
-            const centroTrabajo = await queryRunner.manager.findOneBy(CentroTrabajo, { nombre_Centro_Trabajo: perfAfilCentTrabDto.nombre_centroTrabajo });
+            const centroTrabajo = await queryRunner.manager.findOneBy(Net_Centro_Trabajo, { nombre_Centro_Trabajo: perfAfilCentTrabDto.nombre_centroTrabajo });
             if (!centroTrabajo) {
                 throw new BadRequestException(`Centro de trabajo no encontrado: ${perfAfilCentTrabDto.nombre_centroTrabajo}`);
             }
@@ -145,7 +145,7 @@ export class AfiliadoService {
   }
 
   async findOne(term: string) {
-    let afiliados: Afiliado;
+    let afiliados: Net_Afiliado;
     if (isUUID(term)) {
       afiliados = await this.afiliadoRepository.findOne({
         where: { id_afiliado: term },
@@ -178,9 +178,9 @@ export class AfiliadoService {
         const query = `
         SELECT DISTINCT
           "detA"."id_detalle_afiliado_padre"
-          FROM "afiliado" "Afil"
+          FROM "Net_Afiliado" "Afil"
           FULL OUTER JOIN
-          "detalle_afiliado" "detA" ON "Afil"."id_afiliado" = "detA"."id_detalle_afiliado_padre"
+          "net_detalle_afiliado" "detA" ON "Afil"."id_afiliado" = "detA"."id_detalle_afiliado_padre"
         WHERE
           "Afil"."dni" = '${dniAfil}' AND 
           "Afil"."estado" = 'FALLECIDO'  AND
@@ -189,9 +189,9 @@ export class AfiliadoService {
           (
               SELECT 
               "detA"."id_afiliado"
-              FROM "afiliado" "Afil"
+              FROM "Net_Afiliado" "Afil"
               INNER JOIN
-              "detalle_afiliado" "detA" ON "Afil"."id_afiliado" = "detA"."id_detalle_afiliado_padre"
+              "net_detalle_afiliado" "detA" ON "Afil"."id_afiliado" = "detA"."id_detalle_afiliado_padre"
           )
         `;
 
@@ -209,8 +209,8 @@ export class AfiliadoService {
           "detA"."porcentaje",
           "detA"."tipo_afiliado"
         FROM
-            "detalle_afiliado" "detA" INNER JOIN 
-            "afiliado" "Afil" ON "detA"."id_afiliado" = "Afil"."id_afiliado"
+            "net_detalle_afiliado" "detA" INNER JOIN 
+            "Net_Afiliado" "Afil" ON "detA"."id_afiliado" = "Afil"."id_afiliado"
         WHERE 
             "detA"."id_detalle_afiliado_padre" = ${beneficios[0].id_detalle_afiliado_padre} AND 
             "detA"."tipo_afiliado" = 'BENEFICIARIO'

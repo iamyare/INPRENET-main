@@ -28,9 +28,35 @@ drop table "C##TEST"."detalle_afiliado" cascade constraints  ;
 drop table "C##TEST"."detalle_beneficio" cascade constraints  ;
 drop table "C##TEST"."detalle_beneficio_afiliado" cascade constraints  ;
 
+drop TABLE "C##TEST"."net_afiliado" cascade constraints ;
+drop TABLE "C##TEST"."net_afiliados_por_banco" cascade constraints ;
+drop TABLE "C##TEST"."net_banco" cascade constraints ;
+drop TABLE "C##TEST"."net_beneficio" cascade constraints ;
+drop TABLE "C##TEST"."net_centro_trabajo" cascade constraints ;
+drop TABLE "C##TEST"."net_deduccion" cascade constraints ;
+drop TABLE "C##TEST"."net_detalle_afiliado" cascade constraints ;
+drop TABLE "C##TEST"."net_detalle_beneficio_afiliado" cascade constraints ;
+drop TABLE "C##TEST"."net_detalle_deduccion" cascade constraints ;
+drop TABLE "C##TEST"."net_detalle_pago_beneficio" cascade constraints ;
+drop TABLE "C##TEST"."net_empleado" cascade constraints ;
+drop TABLE "C##TEST"."net_empleado_empresa" cascade constraints ;
+drop TABLE "C##TEST"."net_empresa" cascade constraints ;
+drop TABLE "C##TEST"."net_institucion" cascade constraints ;
+drop TABLE "C##TEST"."net_municipio" cascade constraints ;
+drop TABLE "C##TEST"."net_pais" cascade constraints ;
+drop TABLE "C##TEST"."net_perf_afil_cent_trab" cascade constraints ;
+drop TABLE "C##TEST"."net_planilla" cascade constraints ;
+drop TABLE "C##TEST"."net_provincia" cascade constraints ;
+drop TABLE "C##TEST"."net_referencia_personal" cascade constraints ;
+drop TABLE "C##TEST"."net_referencia_personal_afiliado" cascade constraints ;
+drop TABLE "C##TEST"."net_rol" cascade constraints ;
+drop TABLE "C##TEST"."net_tipo_deduccion" cascade constraints ;
+drop TABLE "C##TEST"."net_tipo_identificacion" cascade constraints ;
+drop TABLE "C##TEST"."net_tipo_planilla" cascade constraints ;
+drop TABLE "C##TEST"."net_usuario" cascade constraints ;
 
 ---------------------------------------------------------------------------------------------------------------------
-create or replace PROCEDURE calcular_suma_montos_aplicado(
+drop PROCEDURE calcular_suma_montos_aplicado(
     p_afiliado_id IN NUMBER,
     mes_in IN NUMBER, 
     anio_in IN NUMBER,
@@ -55,7 +81,7 @@ BEGIN
 END calcular_suma_montos_aplicado;
 
 ---------------------------------------------------------------------------------------------------------------------
-create or replace TRIGGER "trig_modificar_monto_total"
+drop TRIGGER "trig_modificar_monto_total"
 BEFORE INSERT ON "detalle_deduccion"
 FOR EACH ROW
 DECLARE 
@@ -122,7 +148,7 @@ END;
 
 
 ---------------------------------------------------------------------------------------------------------------------
-CREATE OR REPLACE TRIGGER trg_incrementar_rentas_aplicadas
+drop TRIGGER trg_incrementar_rentas_aplicadas
 BEFORE UPDATE ON "C##TEST"."detalle_beneficio"
 FOR EACH ROW
 DECLARE

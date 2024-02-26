@@ -4,12 +4,12 @@ import { UpdateDetalleDeduccionDto } from './dto/update-detalle-deduccion.dto';
 import { InjectEntityManager, InjectRepository } from '@nestjs/typeorm';
 import { DetalleDeduccion } from './entities/detalle-deduccion.entity';
 import { EntityManager, Repository } from 'typeorm';
-import { Deduccion } from '../deduccion/entities/deduccion.entity';
+import { Net_Deduccion } from '../deduccion/entities/net_deduccion.entity';
 import { Institucion } from 'src/modules/Empresarial/institucion/entities/institucion.entity';
 import * as xlsx from 'xlsx';
 import { AfiliadoService } from 'src/modules/afiliado/afiliado.service';
-import { Afiliado } from 'src/modules/afiliado/entities/afiliado';
-import { DetalleAfiliado } from 'src/modules/afiliado/entities/detalle_afiliado.entity';
+import { Net_Afiliado } from 'src/modules/afiliado/entities/net_afiliado';
+import { Net_Detalle_Afiliado } from 'src/modules/afiliado/entities/detalle_afiliado.entity';
 import { Planilla } from '../planilla/entities/planilla.entity';
 import { isUUID } from 'class-validator';
 
@@ -21,14 +21,14 @@ export class DetalleDeduccionService {
   constructor(
     @InjectRepository(DetalleDeduccion)
     private detalleDeduccionRepository: Repository<DetalleDeduccion>,
-    @InjectRepository(Afiliado)
-    private afiliadoRepository: Repository<Afiliado>,
-    @InjectRepository(Deduccion)
-    private deduccionRepository: Repository<Deduccion>,
+    @InjectRepository(Net_Afiliado)
+    private afiliadoRepository: Repository<Net_Afiliado>,
+    @InjectRepository(Net_Deduccion)
+    private deduccionRepository: Repository<Net_Deduccion>,
     @InjectRepository(Institucion)
     private institucionRepository: Repository<Institucion>,
-    @InjectRepository(DetalleAfiliado)
-    private detalleAfiliadoRepository: Repository<DetalleAfiliado>,
+    @InjectRepository(Net_Detalle_Afiliado)
+    private detalleAfiliadoRepository: Repository<Net_Detalle_Afiliado>,
     @InjectRepository(Planilla)
     private planillaRepository: Repository<Planilla>,
     @InjectEntityManager() private readonly entityManager: EntityManager
@@ -136,11 +136,11 @@ export class DetalleDeduccionService {
           COALESCE(afil."segundo_apellido", '')
         ) AS "nombre_completo"
       FROM
-        "C##TEST"."detalle_deduccion" dd
+        "detalle_deduccion" dd
       JOIN
-        "C##TEST"."deduccion" d ON dd."id_deduccion" = d."id_deduccion"
+        "net_deduccion" d ON dd."id_deduccion" = d."id_deduccion"
       JOIN
-        "C##TEST"."afiliado" afil ON dd."id_afiliado" = afil."id_afiliado"
+        "Net_Afiliado" afil ON dd."id_afiliado" = afil."id_afiliado"
       WHERE
         dd."id_afiliado" = :idAfiliado
       AND
@@ -175,9 +175,9 @@ async findInconsistentDeduccionesByAfiliado(idAfiliado: string) {
       detD."anio",
       detD."mes" 
     FROM 
-      "C##TEST"."deduccion" ded
+      "net_deduccion" ded
     INNER JOIN  
-      "C##TEST"."detalle_deduccion" detD ON ded."id_deduccion" = detD."id_deduccion"
+      "detalle_deduccion" detD ON ded."id_deduccion" = detD."id_deduccion"
     WHERE 
       detD."estado_aplicacion" = 'INCONSISTENCIA' AND detD."id_afiliado" = '${idAfiliado}'
     `;

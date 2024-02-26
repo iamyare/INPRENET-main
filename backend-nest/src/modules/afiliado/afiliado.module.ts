@@ -5,25 +5,25 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { ReferenciaPersonal } from './entities/referencia-personal';
 import { ReferenciaPersonalAfiliado } from './entities/referenciaP-Afiliado';
 import { PerfAfilCentTrab } from './entities/perf_afil_cent_trab';
-import { AfiliadosPorBanco } from 'src/modules/banco/entities/afiliados-banco';
-import { CentroTrabajo } from 'src/modules/Empresarial/centro-trabajo/entities/centro-trabajo.entity';
-import { Banco } from 'src/modules/banco/entities/banco.entity';
+import { Net_Afiliados_Por_Banco } from 'src/modules/banco/entities/net_afiliados-banco';
+import { Net_Centro_Trabajo } from 'src/modules/Empresarial/centro-trabajo/entities/net_centro-trabajo.entity';
+import { Net_Banco } from 'src/modules/banco/entities/net_banco.entity';
 import { Provincia } from 'src/modules/Regional/provincia/entities/provincia.entity';
 import { Pais } from 'src/modules/Regional/pais/entities/pais.entity';
 import { TipoIdentificacion } from 'src/modules/tipo_identificacion/entities/tipo_identificacion.entity';
-import { Afiliado } from './entities/afiliado';
-import { DetalleAfiliado } from './entities/detalle_afiliado.entity';
+import { Net_Afiliado } from './entities/net_afiliado';
+import { Net_Detalle_Afiliado } from './entities/detalle_afiliado.entity';
 
 @Module({
   controllers: [AfiliadoController],
   providers: [AfiliadoService],
   imports: [
-    TypeOrmModule.forFeature([Afiliado, PerfAfilCentTrab,
+    TypeOrmModule.forFeature([Net_Afiliado, PerfAfilCentTrab,
                               ReferenciaPersonalAfiliado,
                               ReferenciaPersonal,
-                              AfiliadosPorBanco, Provincia,
+                              Net_Afiliados_Por_Banco, Provincia,
                               Pais, TipoIdentificacion,
-                              CentroTrabajo, Banco, DetalleAfiliado])
+                              Net_Centro_Trabajo, Net_Banco, Net_Detalle_Afiliado])
   ]
 
 })

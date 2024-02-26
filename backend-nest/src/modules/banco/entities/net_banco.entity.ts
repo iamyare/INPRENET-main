@@ -1,8 +1,8 @@
 import { Column, PrimaryGeneratedColumn, OneToMany, Entity } from 'typeorm';
-import { AfiliadosPorBanco } from './afiliados-banco';
+import { Net_Afiliados_Por_Banco } from './net_afiliados-banco';
 
 @Entity()
-export class Banco {
+export class Net_Banco {
     @PrimaryGeneratedColumn('uuid')
     id_banco : string;
 
@@ -12,6 +12,6 @@ export class Banco {
     @Column('varchar2', {unique: true ,length: 10, nullable: false})
     cod_banco : string;
 
-    @OneToMany(() => AfiliadosPorBanco, afiliadosPorBanco => afiliadosPorBanco.banco)
-    afiliadosDeBanco : AfiliadosPorBanco[];
+    @OneToMany(() => Net_Afiliados_Por_Banco, afiliadosPorBanco => afiliadosPorBanco.banco)
+    afiliadosDeBanco : Net_Afiliados_Por_Banco[];
 }

@@ -2,7 +2,7 @@ import { BadRequestException, Injectable, InternalServerErrorException, Logger }
 import { CreateCentroTrabajoDto } from './dto/create-centro-trabajo.dto';
 import { UpdateCentroTrabajoDto } from './dto/update-centro-trabajo.dto';
 import { InjectRepository } from '@nestjs/typeorm';
-import { CentroTrabajo } from './entities/centro-trabajo.entity';
+import { Net_Centro_Trabajo } from './entities/net_centro-trabajo.entity';
 import { Repository } from 'typeorm';
 import { Provincia } from 'src/modules/Regional/provincia/entities/provincia.entity';
 
@@ -13,8 +13,8 @@ export class CentroTrabajoService {
 
   constructor(
 
-    @InjectRepository(CentroTrabajo)
-    private readonly centroTrabajoRepository: Repository<CentroTrabajo>,
+    @InjectRepository(Net_Centro_Trabajo)
+    private readonly centroTrabajoRepository: Repository<Net_Centro_Trabajo>,
     @InjectRepository(Provincia)
     private readonly provinciaRepository: Repository<Provincia>
     

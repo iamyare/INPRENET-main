@@ -1,6 +1,6 @@
 import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 import { Provincia } from "../../provincia/entities/provincia.entity";
-import { Afiliado } from "src/modules/afiliado/entities/afiliado";
+import { Net_Afiliado } from "src/modules/afiliado/entities/net_afiliado";
 
 @Entity()
 export class Pais {
@@ -14,8 +14,8 @@ export class Pais {
     @Column('varchar2', { length: 20, nullable: false })
     nacionalidad : string;
     
-    @OneToMany(() => Afiliado, afiliado => afiliado.pais)
-    afiliado: Afiliado[];
+    @OneToMany(() => Net_Afiliado, afiliado => afiliado.pais)
+    afiliado: Net_Afiliado[];
 
     @OneToMany(() => Provincia, provincia => provincia.pais)
     provincia: Provincia[];

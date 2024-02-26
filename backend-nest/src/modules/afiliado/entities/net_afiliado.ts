@@ -7,13 +7,13 @@ import { ReferenciaPersonalAfiliado } from "./referenciaP-Afiliado";
 
 import { DetalleDeduccion } from "src/modules/Planilla/detalle-deduccion/entities/detalle-deduccion.entity";
 import { PerfAfilCentTrab } from "./perf_afil_cent_trab";
-import { DetalleAfiliado } from "./detalle_afiliado.entity";
+import { Net_Detalle_Afiliado } from "./detalle_afiliado.entity";
 /* import { DetallePagoBeneficio } from "src/modules/Planilla/detalle_beneficio/entities/detalle_pago_beneficio.entity"; */
 import { DetalleBeneficioAfiliado } from "src/modules/Planilla/detalle_beneficio/entities/detalle_beneficio_afiliado.entity";
-import { AfiliadosPorBanco } from "src/modules/banco/entities/afiliados-banco";
+import { Net_Afiliados_Por_Banco } from "src/modules/banco/entities/net_afiliados-banco";
  
 @Entity()
-export class Afiliado {
+export class Net_Afiliado {
 
     @PrimaryGeneratedColumn('uuid')
     id_afiliado: string;
@@ -95,8 +95,8 @@ export class Afiliado {
     @Column('varchar2', { length: 200, nullable: true })
     archivo_identificacion: string;
 
-    @OneToMany(() => DetalleAfiliado, detalleAfiliado => detalleAfiliado.afiliado)
-    detalleAfiliado: DetalleAfiliado[];
+    @OneToMany(() => Net_Detalle_Afiliado, detalleAfiliado => detalleAfiliado.afiliado)
+    detalleAfiliado: Net_Detalle_Afiliado[];
 
     @ManyToOne(() => Provincia, provincia => provincia.afiliado, { cascade: true })
     @JoinColumn({ name: 'id_provincia' })
@@ -105,8 +105,8 @@ export class Afiliado {
     @OneToMany(() => ReferenciaPersonalAfiliado, referenciaPersonalAfiliado => referenciaPersonalAfiliado.afiliado)
     referenciasPersonalAfiliado: ReferenciaPersonalAfiliado[];
 
-    @OneToMany(() => AfiliadosPorBanco, afiliadosPorBanco => afiliadosPorBanco.afiliado)
-    afiliadosPorBanco : AfiliadosPorBanco[];
+    @OneToMany(() => Net_Afiliados_Por_Banco, afiliadosPorBanco => afiliadosPorBanco.afiliado)
+    afiliadosPorBanco : Net_Afiliados_Por_Banco[];
 
     @OneToMany(() => DetalleDeduccion, detalleDeduccion => detalleDeduccion.afiliado)
     detalleDeduccion: DetalleDeduccion[];

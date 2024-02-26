@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { CentroTrabajo } from './centro-trabajo/entities/centro-trabajo.entity';
+import { Net_Centro_Trabajo } from './centro-trabajo/entities/net_centro-trabajo.entity';
 import { Empresa } from './empresas/entities/empresa.entity';
 import { Institucion } from './institucion/entities/institucion.entity';
 import { InstitucionController } from './institucion/institucion.controller';
@@ -11,7 +11,7 @@ import { EmpresasService } from './empresas/empresas.service';
 import { InstitucionService } from './institucion/institucion.service';
 import { DetalleDeduccion } from '../Planilla/detalle-deduccion/entities/detalle-deduccion.entity';
 import { PlanillaModule } from '../Planilla/planilla.module';
-import { Deduccion } from '../Planilla/deduccion/entities/deduccion.entity';
+import { Net_Deduccion } from '../Planilla/deduccion/entities/net_deduccion.entity';
 import { Empleado } from './empresas/entities/empleado.entity';
 import { EmpleadoEmpresa } from './empresas/entities/empleado-empresa.entity';
 import { Provincia } from '../Regional/provincia/entities/provincia.entity';
@@ -20,7 +20,7 @@ import { Provincia } from '../Regional/provincia/entities/provincia.entity';
     controllers: [CentroTrabajoController,EmpresasController,InstitucionController],
     providers: [CentroTrabajoService, EmpresasService, InstitucionService],
     imports: [
-      TypeOrmModule.forFeature([CentroTrabajo, Empresa, Institucion,
-                                Deduccion, DetalleDeduccion, Empleado, EmpleadoEmpresa, Provincia])]
+      TypeOrmModule.forFeature([Net_Centro_Trabajo, Empresa, Institucion,
+        Net_Deduccion, DetalleDeduccion, Empleado, EmpleadoEmpresa, Provincia])]
   })
 export class EmpresarialModule {}

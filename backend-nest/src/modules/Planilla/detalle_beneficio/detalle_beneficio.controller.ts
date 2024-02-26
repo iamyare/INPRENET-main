@@ -30,6 +30,20 @@ export class DetalleBeneficioController {
     }
   }
 
+  @Post('createBenBenefic/:idAfiliado')
+  async createBenBenefic(@Body() createDetalleBeneficioDto: CreateDetalleBeneficioDto, @Param('idAfiliado') idAfiliado: string) {
+    try {
+      const nuevoDetalle = await this.detallebeneficioService.createBenBenefic(createDetalleBeneficioDto, idAfiliado);
+      return { 
+        statusCode: HttpStatus.CREATED,
+        message: 'Detalle de beneficio afiliado creado exitosamente',
+        data: nuevoDetalle
+      };
+    } catch (error) {
+      throw new BadRequestException(error.message);
+    }
+  }
+
   @Get('detallesPreliminar')
   async getDetalleBeneficiosPreliminar(
     @Query('idAfiliado') idAfiliado: string,

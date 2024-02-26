@@ -4,9 +4,9 @@ import { UpdatePlanillaDto } from './dto/update-planilla.dto';
 import { InjectEntityManager, InjectRepository } from '@nestjs/typeorm';
 import { DetalleDeduccion } from '../detalle-deduccion/entities/detalle-deduccion.entity';
 import { EntityManager, Repository } from 'typeorm';
-import { Afiliado } from 'src/modules/afiliado/entities/afiliado';
-import { Beneficio } from '../beneficio/entities/beneficio.entity';
-import { Deduccion } from '../deduccion/entities/deduccion.entity';
+import { Net_Afiliado } from 'src/modules/afiliado/entities/net_afiliado';
+import { Net_Beneficio } from '../beneficio/entities/net_beneficio.entity';
+import { Net_Deduccion } from '../deduccion/entities/net_deduccion.entity';
 import { DetallePagoBeneficio } from '../detalle_beneficio/entities/detalle_pago_beneficio.entity';
 import { Planilla } from './entities/planilla.entity';
 import { TipoPlanilla } from '../tipo-planilla/entities/tipo-planilla.entity';
@@ -23,14 +23,15 @@ export class PlanillaService {
     @InjectEntityManager() private entityManager: EntityManager,
     @InjectRepository(DetallePagoBeneficio)
     private detalleBeneficioRepository: Repository<DetallePagoBeneficio>,
-    @InjectRepository(Afiliado)
-    private afiliadoRepository: Repository<Afiliado>,
+    @InjectRepository(Net_Afiliado)
+    private afiliadoRepository: Repository<Net_Afiliado>,
     @InjectRepository(Planilla)
     private planillaRepository: Repository<Planilla>,
     @InjectRepository(TipoPlanilla)
     private tipoPlanillaRepository: Repository<TipoPlanilla>,
     private detalleBeneficioService: DetalleBeneficioService,
-    private detalleDeduccionService: DetalleDeduccionService){};
+    private detalleDeduccionService: DetalleDeduccionService){
+  };
 
     async update(id_planilla: string, updatePlanillaDto: UpdatePlanillaDto): Promise<Planilla> {
       const planilla = await this.planillaRepository.preload({
@@ -157,80 +158,77 @@ export class PlanillaService {
     if (!isUUID(idPlanilla)) {
       throw new BadRequestException('El identificador de la planilla no es válido.');
     }
+      const query = `
+      SELECT
+      SUM(beneficio."Total Beneficio") AS "Total Beneficio",
+      SUM(deduccion."Total Deducciones") AS "Total Deducciones",
+      SUM(beneficio."Total Beneficio") - SUM(deduccion."Total Deducciones") AS "Total Planilla"
+    FROM
+      (SELECT
+        afil."id_afiliado",
+        SUM(COALESCE(detBs."monto_a_pagar", 0)) AS "Total Beneficio"
+      FROM
+        "Net_Afiliado" afil
+      LEFT JOIN
+        "detalle_beneficio_afiliado" detBA ON afil."id_afiliado" = detBA."id_afiliado"
+      LEFT JOIN
+        "detalle_pago_beneficio" detBs ON detBA."id_detalle_ben_afil" = detBs."id_beneficio_afiliado"
+        AND detBs."id_planilla" = :idPlanilla
+      GROUP BY
+        afil."id_afiliado"
+      ) beneficio
+    INNER JOIN
+      (SELECT
+        afil."id_afiliado",
+        SUM(COALESCE(detDs."monto_aplicado", 0)) AS "Total Deducciones"
+      FROM
+        "Net_Afiliado" afil
+      LEFT JOIN
+        "detalle_deduccion" detDs ON afil."id_afiliado" = detDs."id_afiliado"
+        AND detDs."id_planilla" = :idPlanilla
+      GROUP BY
+        afil."id_afiliado"
+      ) deduccion ON beneficio."id_afiliado" = deduccion."id_afiliado"
+      `;
   
-    const query = `
-    SELECT
-    SUM(beneficio."Total Beneficio") AS "Total Beneficio",
-    SUM(deduccion."Total Deducciones") AS "Total Deducciones",
-    SUM(beneficio."Total Beneficio") - SUM(deduccion."Total Deducciones") AS "Total Planilla"
-  FROM
-    (SELECT
-      afil."id_afiliado",
-      SUM(COALESCE(detBs."monto_a_pagar", 0)) AS "Total Beneficio"
-    FROM
-      "C##TEST"."afiliado" afil
-    LEFT JOIN
-      "C##TEST"."detalle_beneficio_afiliado" detBA ON afil."id_afiliado" = detBA."id_afiliado"
-    LEFT JOIN
-      "C##TEST"."detalle_pago_beneficio" detBs ON detBA."id_detalle_ben_afil" = detBs."id_beneficio_afiliado"
-      AND detBs."id_planilla" = :idPlanilla
-    GROUP BY
-      afil."id_afiliado"
-    ) beneficio
-  INNER JOIN
-    (SELECT
-      afil."id_afiliado",
-      SUM(COALESCE(detDs."monto_aplicado", 0)) AS "Total Deducciones"
-    FROM
-      "C##TEST"."afiliado" afil
-    LEFT JOIN
-      "C##TEST"."detalle_deduccion" detDs ON afil."id_afiliado" = detDs."id_afiliado"
-      AND detDs."id_planilla" = :idPlanilla
-    GROUP BY
-      afil."id_afiliado"
-    ) deduccion ON beneficio."id_afiliado" = deduccion."id_afiliado"
-    `;
-    console.log(query);
-    
-    try {
-      const result = await this.entityManager.query(query, [idPlanilla, idPlanilla]);
-      // Si esperas un solo resultado, puedes directamente devolver ese objeto.
-      return {
-          totalBeneficio: Number(result[0]["Total Beneficio"]),
-          totalDeducciones: Number(result[0]["Total Deducciones"]),
-          totalPlanilla: Number(result[0]["Total Planilla"])
-      };
-  } catch (error) {
-      this.logger.error(`Error al calcular el total de la planilla: ${error.message}`, error.stack);
-      throw new InternalServerErrorException('Se produjo un error al calcular el total de la planilla.');
+      try {
+        const result = await this.entityManager.query(query, [idPlanilla, idPlanilla]);
+        // Si esperas un solo resultado, puedes directamente devolver ese objeto.
+        return {
+            totalBeneficio: Number(result[0]["Total Beneficio"]),
+            totalDeducciones: Number(result[0]["Total Deducciones"]),
+            totalPlanilla: Number(result[0]["Total Planilla"])
+        };
+    } catch (error) {
+        this.logger.error(`Error al calcular el total de la planilla: ${error.message}`, error.stack);
+        throw new InternalServerErrorException('Se produjo un error al calcular el total de la planilla.');
+      }
     }
-  }
   
-  
-
     async actualizarBeneficiosYDeduccionesConTransaccion(detallesBeneficios: any[], detallesDeducciones: any[]): Promise<void> {
-      await this.entityManager.transaction(async (transactionalEntityManager) => {
-          try {
-              // Asegúrate de que `detallesBeneficios` y `detallesDeducciones` se traten como arrays
-              for (const detalleBeneficio of detallesBeneficios) {
-                  await this.detalleBeneficioService.actualizarPlanillaYEstadoDeBeneficio([detalleBeneficio], transactionalEntityManager);
-              }
-  
-              for (const detalleDeduccion of detallesDeducciones) {
-                  await this.detalleDeduccionService.actualizarPlanillasYEstadosDeDeducciones([detalleDeduccion], transactionalEntityManager);
-              }
-          } catch (error) {
-              this.logger.error('Error en la transacción para actualizar beneficios y deducciones', error);
-              throw new InternalServerErrorException('Fallo en la actualización de beneficios y deducciones');
-          }
-      });
-  }
+        await this.entityManager.transaction(async (transactionalEntityManager) => {
+            try {
+                // Asegúrate de que `detallesBeneficios` y `detallesDeducciones` se traten como arrays
+                for (const detalleBeneficio of detallesBeneficios) {
+                    await this.detalleBeneficioService.actualizarPlanillaYEstadoDeBeneficio([detalleBeneficio], transactionalEntityManager);
+                }
+    
+                for (const detalleDeduccion of detallesDeducciones) {
+                    await this.detalleDeduccionService.actualizarPlanillasYEstadosDeDeducciones([detalleDeduccion], transactionalEntityManager);
+                }
+            } catch (error) {
+                this.logger.error('Error en la transacción para actualizar beneficios y deducciones', error);
+                throw new InternalServerErrorException('Fallo en la actualización de beneficios y deducciones');
+            }
+        });
+    }
 
     async obtenerAfilOrdinaria(periodoInicio: string, periodoFinalizacion: string): Promise<any> {
       const query = `
       SELECT
       COALESCE(deducciones."id_afiliado", beneficios."id_afiliado") AS "id_afiliado",
       COALESCE(deducciones."dni", beneficios."dni") AS "dni",
+      COALESCE(deducciones."tipo_afiliado", beneficios."tipo_afiliado") AS "tipo_afiliado",
       COALESCE(deducciones."NOMBRE_COMPLETO", beneficios."NOMBRE_COMPLETO") AS "NOMBRE_COMPLETO",
       beneficios."Total Beneficio",
       deducciones."Total Deducciones"
@@ -238,6 +236,7 @@ export class PlanillaService {
       (SELECT
               afil."id_afiliado",
               afil."dni",
+              detAf."tipo_afiliado",
               TRIM(
                   afil."primer_nombre" || ' ' ||
                   COALESCE(afil."segundo_nombre", '') || ' ' ||
@@ -246,23 +245,24 @@ export class PlanillaService {
                   COALESCE(afil."segundo_apellido", '')) AS NOMBRE_COMPLETO,
               SUM(detBs."monto_a_pagar") AS "Total Beneficio"
         FROM
-              "C##TEST"."afiliado" afil
+              "Net_Afiliado" afil
         INNER JOIN
-              "C##TEST"."detalle_afiliado" detAf ON afil."id_afiliado" = detAf."id_afiliado"
+              "detalle_afiliado" detAf ON afil."id_afiliado" = detAf."id_afiliado"
               
         LEFT JOIN
-          "C##TEST"."detalle_beneficio_afiliado" detBA ON afil."id_afiliado" = detBA."id_afiliado" 
+          "detalle_beneficio_afiliado" detBA ON afil."id_afiliado" = detBA."id_afiliado" 
           AND TO_DATE(detBA."periodoInicio", 'DD/MM/YY') BETWEEN TO_DATE('${periodoInicio}', 'DD-MM-YYYY') AND TO_DATE('${periodoFinalizacion}', 'DD-MM-YYYY')
           AND TO_DATE(detBA."periodoFinalizacion", 'DD/MM/YY') BETWEEN TO_DATE('${periodoInicio}', 'DD-MM-YYYY') AND TO_DATE('${periodoFinalizacion}', 'DD-MM-YYYY')
         LEFT JOIN
-          "C##TEST"."beneficio" ben ON ben."id_beneficio" = detBA."id_beneficio"
+          "net_beneficio" ben ON ben."id_beneficio" = detBA."id_beneficio"
         LEFT JOIN
-          "C##TEST"."detalle_pago_beneficio" detBs ON detBA."id_detalle_ben_afil" = detBs."id_beneficio_afiliado"
+          "detalle_pago_beneficio" detBs ON detBA."id_detalle_ben_afil" = detBs."id_beneficio_afiliado"
           AND detBs."estado" = 'NO PAGADA' 
           
         GROUP BY
               afil."id_afiliado",
               afil."dni",
+              detAf."tipo_afiliado",
               TRIM(
                   afil."primer_nombre" || ' ' ||
                   COALESCE(afil."segundo_nombre", '') || ' ' ||
@@ -274,6 +274,7 @@ export class PlanillaService {
       (SELECT
               afil."id_afiliado",
               afil."dni",
+              detAf."tipo_afiliado",
               TRIM(
                   afil."primer_nombre" || ' ' ||
                   COALESCE(afil."segundo_nombre", '') || ' ' ||
@@ -282,19 +283,20 @@ export class PlanillaService {
                   COALESCE(afil."segundo_apellido", '')) AS NOMBRE_COMPLETO,
               SUM(detDs."monto_aplicado") AS "Total Deducciones"
         FROM
-              "C##TEST"."afiliado" afil
+              "Net_Afiliado" afil
         INNER JOIN
-              "C##TEST"."detalle_afiliado" detAf ON afil."id_afiliado" = detAf."id_afiliado"
+              "detalle_afiliado" detAf ON afil."id_afiliado" = detAf."id_afiliado"
         LEFT JOIN
-              "C##TEST"."detalle_deduccion" detDs ON afil."id_afiliado" = detDs."id_afiliado"
+              "detalle_deduccion" detDs ON afil."id_afiliado" = detDs."id_afiliado"
               AND detDs."estado_aplicacion" = 'NO COBRADA'
               AND TO_DATE(CONCAT(detDs."anio", LPAD(detDs."mes", 2, '0')), 'YYYYMM') BETWEEN TO_DATE('${periodoInicio}', 'DD-MM-YYYY') AND TO_DATE('${periodoFinalizacion}', 'DD-MM-YYYY')
         LEFT JOIN
-              "C##TEST"."deduccion" ded ON ded."id_deduccion" = detDs."id_deduccion"
+              "net_deduccion" ded ON ded."id_deduccion" = detDs."id_deduccion"
   
         GROUP BY
               afil."id_afiliado",
               afil."dni",
+              detAf."tipo_afiliado",
               TRIM(
                   afil."primer_nombre" || ' ' ||
                   COALESCE(afil."segundo_nombre", '') || ' ' ||
@@ -304,16 +306,16 @@ export class PlanillaService {
   WHERE
       ((deducciones."id_afiliado" IS NOT NULL AND EXISTS (
                   SELECT detD."id_afiliado"
-                  FROM "C##TEST"."detalle_deduccion" detD
+                  FROM "detalle_deduccion" detD
                   WHERE  detD."estado_aplicacion" = 'COBRADA' AND
                   detD."id_afiliado" = deducciones."id_afiliado"
               ))
       OR
       (beneficios."id_afiliado" IS NOT NULL AND EXISTS (
                   SELECT detBA."id_afiliado"
-                  FROM "C##TEST"."detalle_beneficio_afiliado" detBA
+                  FROM "detalle_beneficio_afiliado" detBA
                   LEFT JOIN
-                      "C##TEST"."detalle_pago_beneficio" detBs  ON detBs."id_beneficio_afiliado" = detBA."id_detalle_ben_afil"
+                      "detalle_pago_beneficio" detBs  ON detBs."id_beneficio_afiliado" = detBA."id_detalle_ben_afil"
                   WHERE detBs."estado" = 'PAGADA' AND
                       detBA."id_afiliado" = beneficios."id_afiliado"
               ))) AND beneficios."Total Beneficio" IS NOT NULL AND
@@ -333,6 +335,7 @@ export class PlanillaService {
       const query = `
       SELECT COALESCE(deducciones."id_afiliado", beneficios."id_afiliado") AS "id_afiliado",
        COALESCE(deducciones."dni", beneficios."dni") AS "dni",
+       COALESCE(deducciones."tipo_afiliado", beneficios."tipo_afiliado") AS "tipo_afiliado",
        COALESCE(deducciones."NOMBRE_COMPLETO", beneficios."NOMBRE_COMPLETO") AS "NOMBRE_COMPLETO",
        beneficios."Total Beneficio",
        deducciones."Total Deducciones"
@@ -340,6 +343,7 @@ FROM
     (SELECT
         afil."id_afiliado",
         afil."dni",
+        detAf."tipo_afiliado",
         TRIM(
             afil."primer_nombre" || ' ' || 
             COALESCE(afil."segundo_nombre", '') || ' ' || 
@@ -348,20 +352,21 @@ FROM
             COALESCE(afil."segundo_apellido", '')) AS NOMBRE_COMPLETO,
             SUM(detBs."monto_a_pagar") AS "Total Beneficio"
     FROM
-        "C##TEST"."afiliado" afil
+        "Net_Afiliado" afil
     INNER JOIN
-        "C##TEST"."detalle_afiliado" detAf ON afil."id_afiliado" = detAf."id_afiliado"
+        "detalle_afiliado" detAf ON afil."id_afiliado" = detAf."id_afiliado"
     
     LEFT JOIN
-        "C##TEST"."detalle_beneficio_afiliado" detBA ON afil."id_afiliado" = detBA."id_afiliado"
+        "detalle_beneficio_afiliado" detBA ON afil."id_afiliado" = detBA."id_afiliado"
     LEFT JOIN
-        "C##TEST"."beneficio" ben ON ben."id_beneficio" = detBA."id_beneficio"
+        "net_beneficio" ben ON ben."id_beneficio" = detBA."id_beneficio"
     LEFT JOIN
-        "C##TEST"."detalle_pago_beneficio" detBs ON detBs."id_beneficio_afiliado" = detBA."id_detalle_ben_afil"
+        "detalle_pago_beneficio" detBs ON detBs."id_beneficio_afiliado" = detBA."id_detalle_ben_afil"
         
     WHERE
         detBs."estado" = 'INCONSISTENCIA'
     GROUP BY
+        detAf."tipo_afiliado",
         afil."id_afiliado", afil."dni", TRIM(
             afil."primer_nombre" || ' ' || 
             COALESCE(afil."segundo_nombre", '') || ' ' || 
@@ -370,6 +375,7 @@ FROM
             COALESCE(afil."segundo_apellido", '')))  beneficios
 FULL OUTER JOIN
     (SELECT
+        detAf."tipo_afiliado",
         afil."id_afiliado",
         afil."dni",
         TRIM(
@@ -380,16 +386,17 @@ FULL OUTER JOIN
             COALESCE(afil."segundo_apellido", '')) AS NOMBRE_COMPLETO,
             SUM(detDs."monto_aplicado") AS "Total Deducciones"
     FROM
-        "C##TEST"."afiliado" afil
+        "Net_Afiliado" afil
     INNER JOIN
-        "C##TEST"."detalle_afiliado" detAf ON afil."id_afiliado" = detAf."id_afiliado"
+        "detalle_afiliado" detAf ON afil."id_afiliado" = detAf."id_afiliado"
     LEFT JOIN
-        "C##TEST"."detalle_deduccion" detDs ON afil."id_afiliado" = detDs."id_afiliado"
+        "detalle_deduccion" detDs ON afil."id_afiliado" = detDs."id_afiliado"
     LEFT JOIN
-        "C##TEST"."deduccion" ded ON ded."id_deduccion" = detDs."id_deduccion" 
+        "net_deduccion" ded ON ded."id_deduccion" = detDs."id_deduccion" 
     WHERE
         detDs."estado_aplicacion" = 'INCONSISTENCIA'
     GROUP BY
+        detAf."tipo_afiliado",
         afil."id_afiliado",
         afil."dni",
         TRIM(
@@ -416,6 +423,7 @@ FULL OUTER JOIN
       SELECT 
     COALESCE(deducciones."id_afiliado", beneficios."id_afiliado") AS "id_afiliado",
     COALESCE(deducciones."dni", beneficios."dni") AS "dni",
+    COALESCE(deducciones."tipo_afiliado", beneficios."tipo_afiliado") AS "tipo_afiliado",
     COALESCE(deducciones."NOMBRE_COMPLETO", beneficios."NOMBRE_COMPLETO") AS NOMBRE_COMPLETO,
     beneficios."Total Beneficio",
     deducciones."Total Deducciones"
@@ -423,6 +431,7 @@ FROM
     (SELECT
         afil."id_afiliado",
         afil."dni",
+        detAf."tipo_afiliado",
         detBs."estado",
         TRIM(
             afil."primer_nombre" || ' ' || 
@@ -433,25 +442,25 @@ FROM
         ) AS NOMBRE_COMPLETO,
         SUM(detBs."monto_a_pagar") AS "Total Beneficio"
     FROM
-        "C##TEST"."afiliado" afil
+        "Net_Afiliado" afil
     LEFT JOIN
-        "C##TEST"."detalle_beneficio_afiliado" detBA ON afil."id_afiliado" = detBA."id_afiliado"
+        "detalle_beneficio_afiliado" detBA ON afil."id_afiliado" = detBA."id_afiliado"
     LEFT JOIN
-        "C##TEST"."beneficio" ben ON ben."id_beneficio" = detBA."id_beneficio"
+        "net_beneficio" ben ON ben."id_beneficio" = detBA."id_beneficio"
     LEFT JOIN
-        "C##TEST"."detalle_pago_beneficio" detBs  ON detBs."id_beneficio_afiliado" = detBA."id_detalle_ben_afil"
+        "detalle_pago_beneficio" detBs  ON detBs."id_beneficio_afiliado" = detBA."id_detalle_ben_afil"
         
     INNER JOIN
-        "C##TEST"."detalle_afiliado" detAf ON afil."id_afiliado" = detAf."id_afiliado"
+        "detalle_afiliado" detAf ON afil."id_afiliado" = detAf."id_afiliado"
     WHERE
         detBs."estado" = 'NO PAGADA' AND
         detBA."id_afiliado" NOT IN (
             SELECT
                 detBA."id_afiliado"
             FROM
-                "C##TEST"."detalle_beneficio_afiliado" detBA
+                "detalle_beneficio_afiliado" detBA
             LEFT JOIN
-                "C##TEST"."detalle_pago_beneficio" detBs  ON detBs."id_beneficio_afiliado" = detBA."id_detalle_ben_afil"
+                "detalle_pago_beneficio" detBs  ON detBs."id_beneficio_afiliado" = detBA."id_detalle_ben_afil"
             WHERE
                 detBs."estado" NOT IN ('NO PAGADA', 'INCONSISTENCIA')
         )  AND
@@ -459,6 +468,7 @@ FROM
     GROUP BY
         afil."id_afiliado",
         afil."dni",
+        detAf."tipo_afiliado",
         detBs."estado",
         TRIM(
             afil."primer_nombre" || ' ' || 
@@ -472,6 +482,7 @@ FULL OUTER JOIN
     (SELECT
         afil."id_afiliado",
         afil."dni",
+        detAf."tipo_afiliado",
         detDs."estado_aplicacion",
         TRIM(
             afil."primer_nombre" || ' ' || 
@@ -482,39 +493,40 @@ FULL OUTER JOIN
         ) AS NOMBRE_COMPLETO,
         SUM(detDs."monto_aplicado") AS "Total Deducciones"
     FROM
-        "C##TEST"."afiliado" afil
+        "Net_Afiliado" afil
     INNER JOIN
-        "C##TEST"."detalle_afiliado" detAf ON afil."id_afiliado" = detAf."id_afiliado"
+        "detalle_afiliado" detAf ON afil."id_afiliado" = detAf."id_afiliado"
     LEFT JOIN
-        "C##TEST"."detalle_deduccion" detDs ON afil."id_afiliado" = detDs."id_afiliado"
+        "detalle_deduccion" detDs ON afil."id_afiliado" = detDs."id_afiliado"
     LEFT JOIN
-        "C##TEST"."deduccion" ded ON detDs."id_deduccion" = ded."id_deduccion"
+        "net_deduccion" ded ON detDs."id_deduccion" = ded."id_deduccion"
     WHERE
         detDs."estado_aplicacion" = 'NO COBRADA' AND
         (
             detDs."id_afiliado" NOT IN (
                 SELECT detD."id_afiliado"
-                FROM "C##TEST"."detalle_deduccion" detD
+                FROM "detalle_deduccion" detD
                 WHERE detD."estado_aplicacion" NOT IN ('NO COBRADA', 'INCONSISTENCIA')
             )
         ) AND
         detDs."estado_aplicacion" != 'INCONSISTENCIA' AND
         NOT EXISTS (
             SELECT 1
-            FROM "C##TEST"."detalle_deduccion" detD
+            FROM "detalle_deduccion" detD
             WHERE detD."id_afiliado" = afil."id_afiliado" AND detD."estado_aplicacion" = 'COBRADA'
         ) AND
         NOT EXISTS (
             SELECT 1
-                FROM "C##TEST"."detalle_pago_beneficio" detB
+                FROM "detalle_pago_beneficio" detB
             LEFT JOIN
-                "C##TEST"."detalle_beneficio_afiliado" detBA ON detB."id_beneficio_afiliado" = detBA."id_detalle_ben_afil"
+                "detalle_beneficio_afiliado" detBA ON detB."id_beneficio_afiliado" = detBA."id_detalle_ben_afil"
             WHERE 
                 detBA."id_afiliado" = afil."id_afiliado" AND detB."estado" = 'PAGADA'
         )
     GROUP BY
         afil."id_afiliado",
         afil."dni",
+        detAf."tipo_afiliado",
         detDs."estado_aplicacion",
         TRIM(
             afil."primer_nombre" || ' ' || 
@@ -561,13 +573,13 @@ FROM
         SUM(COALESCE(detBs."monto_a_pagar", 0)) AS "Total Beneficio",
         pla."fecha_cierre"
     FROM
-        "C##TEST"."afiliado" afil
+        "afiliado" afil
     LEFT JOIN
-        "C##TEST"."detalle_beneficio_afiliado" detBA ON afil."id_afiliado" = detBA."id_afiliado"
+        "detalle_beneficio_afiliado" detBA ON afil."id_afiliado" = detBA."id_afiliado"
     LEFT JOIN
-        "C##TEST"."detalle_pago_beneficio" detBs ON detBA."id_detalle_ben_afil" = detBs."id_beneficio_afiliado"
+        "detalle_pago_beneficio" detBs ON detBA."id_detalle_ben_afil" = detBs."id_beneficio_afiliado"
     LEFT JOIN
-        "C##TEST"."planilla" pla ON detBs."id_planilla" = pla."id_planilla"
+        "planilla" pla ON detBs."id_planilla" = pla."id_planilla"
     WHERE
         pla."id_planilla" = '${idPlanilla}'
     GROUP BY
@@ -600,11 +612,11 @@ FULL OUTER JOIN
         SUM(COALESCE(detDs."monto_aplicado", 0)) AS "Total Deducciones",
         pla."fecha_cierre"
     FROM
-        "C##TEST"."afiliado" afil
+        "afiliado" afil
     LEFT JOIN
-        "C##TEST"."detalle_deduccion" detDs ON afil."id_afiliado" = detDs."id_afiliado"
+        "detalle_deduccion" detDs ON afil."id_afiliado" = detDs."id_afiliado"
     LEFT JOIN
-        "C##TEST"."planilla" pla ON detDs."id_planilla" = pla."id_planilla"
+        "planilla" pla ON detDs."id_planilla" = pla."id_planilla"
     WHERE
         pla."id_planilla" = '${idPlanilla}'
     GROUP BY
@@ -693,7 +705,6 @@ ON deducciones."id_afiliado" = beneficios."id_afiliado"
     });
   }
   
-
   async getDeduccionesNoAplicadas(periodoInicio: string, periodoFinalizacion: string): Promise<any> {
     const queryBuilder  = await this.afiliadoRepository
     .createQueryBuilder('afil')
@@ -707,9 +718,9 @@ ON deducciones."id_afiliado" = beneficios."id_afiliado"
       'LISTAGG(DISTINCT ded.nombre_deduccion, \',\') AS deduccionesNombres',
     ])
     .leftJoin(DetalleDeduccion, 'detD', 'afil.id_afiliado = detD.id_afiliado')
-    .leftJoin(Deduccion, 'ded', 'detD.id_deduccion = ded.id_deduccion')
+    .leftJoin(Net_Deduccion, 'ded', 'detD.id_deduccion = ded.id_deduccion')
     .leftJoin(DetallePagoBeneficio, 'detB', 'afil.id_afiliado = detB.id_afiliado')
-    .leftJoin(Beneficio, 'ben', 'detB.id_beneficio = ben.id_beneficio')
+    .leftJoin(Net_Beneficio, 'ben', 'detB.id_beneficio = ben.id_beneficio')
     .where(`
       (TO_DATE(detB.periodoInicio, 'DD-MM-YYYY') BETWEEN TO_DATE(SYSDATE, 'DD-MM-YYYY') AND TO_DATE('${periodoInicio}', 'DD-MM-YYYY')) AND
       (TO_DATE(detB.periodoFinalizacion, 'DD-MM-YYYY') BETWEEN TO_DATE(SYSDATE, 'DD-MM-YYYY') AND TO_DATE('${periodoFinalizacion}', 'DD-MM-YYYY')) OR
@@ -731,8 +742,8 @@ ON deducciones."id_afiliado" = beneficios."id_afiliado"
       .addSelect('afil.dni', 'dni')
       .addSelect('detBen.monto', 'monto')
       .addSelect('detBen.nombre_beneficio', 'nombre_beneficio')
-      .leftJoin(Afiliado, 'afil', 'afil.id_afiliado = detBen.id_afiliado')
-      .leftJoin(Beneficio, 'ben', 'ben.id_beneficio = detBen.id_beneficio')
+      .leftJoin(Net_Afiliado, 'afil', 'afil.id_afiliado = detBen.id_afiliado')
+      .leftJoin(Net_Beneficio, 'ben', 'ben.id_beneficio = detBen.id_beneficio')
       .where(`
       (TO_DATE(detBen.periodoInicio, 'DD-MM-YYYY') BETWEEN TO_DATE(SYSDATE, 'DD-MM-YYYY') AND TO_DATE('${periodoInicio}', 'DD-MM-YYYY')) AND
       (TO_DATE(detBen.periodoFinalizacion, 'DD-MM-YYYY') BETWEEN TO_DATE(SYSDATE, 'DD-MM-YYYY') AND TO_DATE('${periodoFinalizacion}', 'DD-MM-YYYY'))
@@ -778,6 +789,7 @@ ON deducciones."id_afiliado" = beneficios."id_afiliado"
   remove(id: number) {
     return `This action removes a #${id} planilla`;
   }
+
   private handleException(error: any): void {
     this.logger.error(error);
     if (error.driverError && error.driverError.errorNum === 1) {

@@ -54,7 +54,6 @@ export class PlanillaController {
     }
   }
 
-
   @Get('preliminar')
   async ObtenerPlanillaPreliminar(
     @Query('idPlanilla') idPlanilla: string,

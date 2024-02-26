@@ -1,7 +1,7 @@
 import { Column, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn } from "typeorm";
-import { CentroTrabajo } from "src/modules/Empresarial/centro-trabajo/entities/centro-trabajo.entity";
-import { DetalleAfiliado } from "./detalle_afiliado.entity";
-import { Afiliado } from "./afiliado";
+import { Net_Centro_Trabajo } from "src/modules/Empresarial/centro-trabajo/entities/net_centro-trabajo.entity";
+import { Net_Detalle_Afiliado } from "./detalle_afiliado.entity";
+import { Net_Afiliado } from "./net_afiliado";
 
 @Entity()
 export class PerfAfilCentTrab {
@@ -30,11 +30,11 @@ export class PerfAfilCentTrab {
     numero_acuerdo: string;
 
     // Relación Uno a Muchos con PerfAfilCentTrab
-    @ManyToOne(() => Afiliado, afiliado => afiliado.perfAfilCentTrabs)
+    @ManyToOne(() => Net_Afiliado, afiliado => afiliado.perfAfilCentTrabs)
     @JoinColumn({ name: 'id_detalle_afiliado' })
-    afiliado: Afiliado;
+    afiliado: Net_Afiliado;
 
-    @ManyToOne(() => CentroTrabajo, centroTrabajo => centroTrabajo.perfAfilCentTrabs)
+    @ManyToOne(() => Net_Centro_Trabajo, centroTrabajo => centroTrabajo.perfAfilCentTrabs)
     @JoinColumn({ name: 'id_centroTrabajo' })
-    centroTrabajo: CentroTrabajo;
+    centroTrabajo: Net_Centro_Trabajo;
 }

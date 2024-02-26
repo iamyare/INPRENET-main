@@ -1,7 +1,7 @@
 import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn, AfterInsert, getRepository, AfterLoad, Unique, OneToMany } from 'typeorm';
-import { Deduccion } from "../../deduccion/entities/deduccion.entity";
+import { Net_Deduccion } from "../../deduccion/entities/net_deduccion.entity";
 import { Institucion } from "src/modules/Empresarial/institucion/entities/institucion.entity";
-import { Afiliado } from 'src/modules/afiliado/entities/afiliado';
+import { Net_Afiliado } from 'src/modules/afiliado/entities/net_afiliado';
 import { Planilla } from '../../planilla/entities/planilla.entity';
 import { IsEnum } from 'class-validator';
 
@@ -11,13 +11,13 @@ export class DetalleDeduccion {
     @PrimaryGeneratedColumn('uuid')
     id_ded_deduccion: string;
     
-    @ManyToOne(() => Deduccion, deduccion => deduccion.detalleDeduccion, { cascade: true})
+    @ManyToOne(() => Net_Deduccion, deduccion => deduccion.detalleDeduccion, { cascade: true})
     @JoinColumn({ name: 'id_deduccion' })
-    deduccion: Deduccion;
+    deduccion: Net_Deduccion;
 
-    @ManyToOne(() => Afiliado, afiliado => afiliado.detalleDeduccion, { cascade: true})
+    @ManyToOne(() => Net_Afiliado, afiliado => afiliado.detalleDeduccion, { cascade: true})
     @JoinColumn({ name: 'id_afiliado' })
-    afiliado: Afiliado;
+    afiliado: Net_Afiliado;
     
     @ManyToOne(() => Institucion, institucion => institucion.detalleDeduccion, { cascade: true})
     @JoinColumn({ name: 'id_institucion' })

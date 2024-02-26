@@ -1,9 +1,9 @@
 import { Column, Entity, JoinColumn, ManyToOne, OneToMany, OneToOne, PrimaryGeneratedColumn } from "typeorm";
 import { IsString } from "class-validator";
-import { Afiliado } from "./afiliado";
+import { Net_Afiliado } from "./net_afiliado";
 
 @Entity()
-export class DetalleAfiliado {
+export class Net_Detalle_Afiliado {
     @PrimaryGeneratedColumn('uuid')
     id_detalle_afiliado: string;
 
@@ -14,17 +14,17 @@ export class DetalleAfiliado {
     porcentaje: number;
     
     // Relación Uno a Muchos consigo mismo
-    @OneToMany(() => DetalleAfiliado, detalleAfiliado => detalleAfiliado.padreIdAfiliado)
-    hijos: DetalleAfiliado[];
+    @OneToMany(() => Net_Detalle_Afiliado, detalleAfiliado => detalleAfiliado.padreIdAfiliado)
+    hijos: Net_Detalle_Afiliado[];
 
     // Relación Muchos a Uno consigo mismo
-    @ManyToOne(() => DetalleAfiliado, detalleAfiliado => detalleAfiliado.hijos, { cascade: true })
+    @ManyToOne(() => Net_Detalle_Afiliado, detalleAfiliado => detalleAfiliado.hijos, { cascade: true })
     @JoinColumn({ name: 'id_detalle_afiliado_padre' })
     @IsString()
-    padreIdAfiliado: DetalleAfiliado;
+    padreIdAfiliado: Net_Detalle_Afiliado;
 
-    @ManyToOne(() => Afiliado, afiliado => afiliado.detalleAfiliado, { cascade: true })
+    @ManyToOne(() => Net_Afiliado, afiliado => afiliado.detalleAfiliado, { cascade: true })
     @JoinColumn({ name: 'id_afiliado' })
-    afiliado: Afiliado;
+    afiliado: Net_Afiliado;
     
 }

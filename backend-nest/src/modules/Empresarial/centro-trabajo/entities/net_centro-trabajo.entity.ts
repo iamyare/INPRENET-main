@@ -3,7 +3,7 @@ import { Provincia } from "src/modules/Regional/provincia/entities/provincia.ent
 import { Column, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 
 @Entity()
-export class CentroTrabajo {
+export class Net_Centro_Trabajo {
     @PrimaryGeneratedColumn('uuid')
     id_centro_trabajo: string;
 

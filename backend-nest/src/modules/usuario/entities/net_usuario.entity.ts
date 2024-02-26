@@ -1,6 +1,6 @@
 import { Column, Entity, JoinColumn, ManyToOne, OneToOne, PrimaryGeneratedColumn, Timestamp } from "typeorm";
 import { Net_Rol } from "./net_rol.entity";
-import { Empleado } from "src/modules/Empresarial/empresas/entities/empleado.entity";
+import { Net_Empleado } from "src/modules/Empresarial/empresas/entities/net_empleado.entity";
 /* import { Afiliado } from "src/afiliado/entities/detalle_afiliado.entity"; */
 
 @Entity()
@@ -48,8 +48,8 @@ export class Net_Usuario {
     @JoinColumn({ name: 'id_rol' })
     rol: Net_Rol;
 
-    @OneToOne(() => Empleado, empleado => empleado.usuario)
-    empleado: Empleado;
+    @OneToOne(() => Net_Empleado, empleado => empleado.usuario)
+    empleado: Net_Empleado;
 
     /* @OneToOne(() => Afiliado, afiliado => afiliado.usuario)
     afiliado: Afiliado; */

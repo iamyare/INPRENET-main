@@ -6,8 +6,8 @@ import { Net_Deduccion } from './entities/net_deduccion.entity';
 import { Repository } from 'typeorm';
 import * as xlsx from 'xlsx';
 /* import { Afiliado } from 'src/afiliado/entities/detalle_afiliado.entity'; */
-import { Institucion } from 'src/modules/Empresarial/institucion/entities/institucion.entity';
-import { DetalleDeduccion } from '../detalle-deduccion/entities/detalle-deduccion.entity';
+import { Net_Institucion } from 'src/modules/Empresarial/institucion/entities/net_institucion.entity';
+import { Net_Detalle_Deduccion } from '../detalle-deduccion/entities/detalle-deduccion.entity';
 import { Net_Afiliado } from 'src/modules/afiliado/entities/net_afiliado';
 
 @Injectable()
@@ -16,14 +16,14 @@ export class DeduccionService {
   private readonly logger = new Logger(DeduccionService.name)
 
   constructor(
-    @InjectRepository(DetalleDeduccion)
-    private detalleDeduccionRepository : Repository<DetalleDeduccion>,
+    @InjectRepository(Net_Detalle_Deduccion)
+    private detalleDeduccionRepository : Repository<Net_Detalle_Deduccion>,
     @InjectRepository(Net_Afiliado)
     private afiliadoRepository: Repository<Net_Afiliado>,
     @InjectRepository(Net_Deduccion)
     private deduccionRepository: Repository<Net_Deduccion>,
-    @InjectRepository(Institucion)
-    private institucionRepository: Repository<Institucion>
+    @InjectRepository(Net_Institucion)
+    private institucionRepository: Repository<Net_Institucion>
   ){}
 
   async create(createDeduccionDto: CreateDeduccionDto) {

@@ -2,10 +2,10 @@ import { BadRequestException, Injectable, Logger, InternalServerErrorException, 
 import { CreateDetalleDeduccionDto } from './dto/create-detalle-deduccion.dto';
 import { UpdateDetalleDeduccionDto } from './dto/update-detalle-deduccion.dto';
 import { InjectEntityManager, InjectRepository } from '@nestjs/typeorm';
-import { DetalleDeduccion } from './entities/detalle-deduccion.entity';
+import { Net_Detalle_Deduccion } from './entities/detalle-deduccion.entity';
 import { EntityManager, Repository } from 'typeorm';
 import { Net_Deduccion } from '../deduccion/entities/net_deduccion.entity';
-import { Institucion } from 'src/modules/Empresarial/institucion/entities/institucion.entity';
+import { Net_Institucion } from 'src/modules/Empresarial/institucion/entities/net_institucion.entity';
 import * as xlsx from 'xlsx';
 import { AfiliadoService } from 'src/modules/afiliado/afiliado.service';
 import { Net_Afiliado } from 'src/modules/afiliado/entities/net_afiliado';
@@ -19,14 +19,14 @@ export class DetalleDeduccionService {
   private readonly logger = new Logger(DetalleDeduccionService.name)
 
   constructor(
-    @InjectRepository(DetalleDeduccion)
-    private detalleDeduccionRepository: Repository<DetalleDeduccion>,
+    @InjectRepository(Net_Detalle_Deduccion)
+    private detalleDeduccionRepository: Repository<Net_Detalle_Deduccion>,
     @InjectRepository(Net_Afiliado)
     private afiliadoRepository: Repository<Net_Afiliado>,
     @InjectRepository(Net_Deduccion)
     private deduccionRepository: Repository<Net_Deduccion>,
-    @InjectRepository(Institucion)
-    private institucionRepository: Repository<Institucion>,
+    @InjectRepository(Net_Institucion)
+    private institucionRepository: Repository<Net_Institucion>,
     @InjectRepository(Net_Detalle_Afiliado)
     private detalleAfiliadoRepository: Repository<Net_Detalle_Afiliado>,
     @InjectRepository(Net_Planilla)
@@ -37,7 +37,7 @@ export class DetalleDeduccionService {
   async actualizarEstadoAplicacionPorPlanilla(idPlanilla: string, nuevoEstado: string): Promise<{ mensaje: string }> {
     try {
       const resultado = await this.detalleDeduccionRepository.createQueryBuilder()
-        .update(DetalleDeduccion)
+        .update(Net_Detalle_Deduccion)
         .set({ estado_aplicacion: nuevoEstado })
         .where("planilla.id_planilla = :idPlanilla", { idPlanilla })
         .execute();
@@ -66,7 +66,7 @@ export class DetalleDeduccionService {
           ded."nombre_deduccion",
           SUM(COALESCE(detDed."monto_aplicado", 0)) AS "Total Monto Aplicado"
         FROM
-          "detalle_deduccion" detDed
+          "net_detalle_deduccion" detDed
         INNER JOIN
           "deduccion" ded ON detDed."id_deduccion" = ded."id_deduccion"
         WHERE
@@ -99,7 +99,7 @@ export class DetalleDeduccionService {
         dd."fecha_aplicado",
         dd."id_planilla"
       FROM
-        "detalle_deduccion" dd
+        "net_detalle_deduccion" dd
       INNER JOIN "deduccion" ded ON ded."id_deduccion" = dd."id_deduccion" 
       WHERE
         dd."id_afiliado" = '${idAfiliado}'
@@ -136,7 +136,7 @@ export class DetalleDeduccionService {
           COALESCE(afil."segundo_apellido", '')
         ) AS "nombre_completo"
       FROM
-        "detalle_deduccion" dd
+        "net_detalle_deduccion" dd
       JOIN
         "net_deduccion" d ON dd."id_deduccion" = d."id_deduccion"
       JOIN
@@ -177,7 +177,7 @@ async findInconsistentDeduccionesByAfiliado(idAfiliado: string) {
     FROM 
       "net_deduccion" ded
     INNER JOIN  
-      "detalle_deduccion" detD ON ded."id_deduccion" = detD."id_deduccion"
+      "net_detalle_deduccion" detD ON ded."id_deduccion" = detD."id_deduccion"
     WHERE 
       detD."estado_aplicacion" = 'INCONSISTENCIA' AND detD."id_afiliado" = '${idAfiliado}'
     `;
@@ -213,7 +213,7 @@ async obtenerDetallesDeduccionPorAfiliado(idAfiliado: string): Promise<any[]> {
       ded."tipo_deduccion",
       ded."codigo_deduccion"
     FROM
-      "detalle_deduccion" detD
+      "net_detalle_deduccion" detD
     JOIN
       "deduccion" ded ON detD."id_deduccion" = ded."id_deduccion"
     JOIN
@@ -223,14 +223,14 @@ async obtenerDetallesDeduccionPorAfiliado(idAfiliado: string): Promise<any[]> {
       detD."estado_aplicacion" != 'INCONSISTENCIA' AND
       detD."id_afiliado" NOT IN (
           SELECT detD2."id_afiliado"
-          FROM "detalle_deduccion" detD2
+          FROM "net_detalle_deduccion" detD2
           WHERE detD2."estado_aplicacion" = 'COBRADA'
       )
       AND detD."id_afiliado" NOT IN (
           SELECT dedBA."id_afiliado"
-          FROM "detalle_pago_beneficio" detB
+          FROM "net_detalle_pago_beneficio" detB
           JOIN
-              "detalle_beneficio_afiliado" dedBA ON detB."id_beneficio_afiliado" = dedBA."id_detalle_ben_afil"
+              "net_detalle_beneficio_afiliado" dedBA ON detB."id_beneficio_afiliado" = dedBA."id_detalle_ben_afil"
           WHERE detB."estado" = 'PAGADA'
       )
     ORDER BY
@@ -245,12 +245,12 @@ async obtenerDetallesDeduccionPorAfiliado(idAfiliado: string): Promise<any[]> {
   }
 }
 
-async actualizarPlanillasYEstadosDeDeducciones(detalles: { idDedDeduccion: string; codigoPlanilla: string; estadoAplicacion: string }[], transactionalEntityManager?: EntityManager): Promise<DetalleDeduccion[]> {
+async actualizarPlanillasYEstadosDeDeducciones(detalles: { idDedDeduccion: string; codigoPlanilla: string; estadoAplicacion: string }[], transactionalEntityManager?: EntityManager): Promise<Net_Detalle_Deduccion[]> {
   const resultados = [];
   const entityManager = transactionalEntityManager ? transactionalEntityManager : this.entityManager;
 
   for (const { idDedDeduccion, codigoPlanilla, estadoAplicacion } of detalles) {
-    const deduccion = await entityManager.findOne(DetalleDeduccion, { where: { id_ded_deduccion: idDedDeduccion } });
+    const deduccion = await entityManager.findOne(Net_Detalle_Deduccion, { where: { id_ded_deduccion: idDedDeduccion } });
     if (!deduccion) {
       throw new NotFoundException(`DetalleDeduccion con ID "${idDedDeduccion}" no encontrado`);
     }

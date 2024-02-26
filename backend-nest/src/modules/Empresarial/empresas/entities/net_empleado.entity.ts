@@ -1,11 +1,11 @@
 import { Column, Entity, JoinColumn, OneToMany, OneToOne, PrimaryGeneratedColumn } from "typeorm";
-import { EmpleadoEmpresa } from "./empleado-empresa.entity";
-import { Net_TipoIdentificacion } from "src/modules/tipo_identificacion/entities/net_tipo_identificacion.entity";
+import { Net_Empleado_Empresa } from "./net_empleado-empresa.entity";
+import {  Net_TipoIdentificacion } from "src/modules/tipo_identificacion/entities/net_tipo_identificacion.entity";
 import { Net_Usuario } from "src/modules/usuario/entities/net_usuario.entity";
 
 
 @Entity()
-export class Empleado{
+export class Net_Empleado{
         
         @PrimaryGeneratedColumn('uuid')
         id_empleado : string;
@@ -39,15 +39,15 @@ export class Empleado{
         })
         archivo_identificacion
 
-        @OneToOne(() => Net_Usuario, { cascade: true })
+        @OneToOne(() =>  Net_Usuario, { cascade: true })
         @JoinColumn({ name: 'id_usuario' })
-        usuario: Net_Usuario;
+        usuario:  Net_Usuario;
 
-        @OneToOne(() => Net_TipoIdentificacion, { cascade: true })
+        @OneToOne(() =>  Net_TipoIdentificacion, { cascade: true })
         @JoinColumn({ name: 'id_tipoIdentificacion' })
         tipo_identificacion: Net_TipoIdentificacion;
         
 
-        @OneToMany(() => EmpleadoEmpresa, empleadoEmpresa => empleadoEmpresa.id_empleado)
-        empleadoEmpresa : EmpleadoEmpresa[];
+        @OneToMany(() => Net_Empleado_Empresa, empleadoEmpresa => empleadoEmpresa.id_empleado)
+        empleadoEmpresa : Net_Empleado_Empresa[];
 }

@@ -1,14 +1,14 @@
 import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
-import { EmpleadoEmpresa } from "./empleado-empresa.entity";
+import { Net_Empleado_Empresa } from "./net_empleado-empresa.entity";
 
 @Entity()
-export class Empresa {
+export class Net_Empresa {
 
     @PrimaryGeneratedColumn('uuid')
     id_empresa : string;
     
     @OneToMany(
-        () => EmpleadoEmpresa,
+        () => Net_Empleado_Empresa,
         (empleadoEmpresa) => empleadoEmpresa.id_empresa,
         { cascade: true}
     )

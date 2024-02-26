@@ -1,7 +1,10 @@
 import { Column, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 import { Net_TipoPlanilla } from '../../tipo-planilla/entities/tipo-planilla.entity';
-import { DetalleDeduccion } from '../../detalle-deduccion/entities/detalle-deduccion.entity';
-import { DetallePagoBeneficio } from '../../detalle_beneficio/entities/detalle_pago_beneficio.entity';
+/* import { DetalleDeduccion } from '../../detalle-deduccion/entities/detalle-deduccion.entity'; */
+/* import { DetallePagoBeneficio } from '../../detalle_beneficio/entities/detalle_pago_beneficio.entity'; */
+/* import { TipoPlanilla } from '../../tipo-planilla/entities/tipo-planilla.entity'; */
+import { Net_Detalle_Deduccion } from '../../detalle-deduccion/entities/detalle-deduccion.entity';
+import { Net_Detalle_Pago_Beneficio } from '../../detalle_beneficio/entities/net_detalle_pago_beneficio.entity';
 
 @Entity()
 export class Net_Planilla {
@@ -34,10 +37,10 @@ export class Net_Planilla {
     @JoinColumn({ name: 'id_tipo_planilla' })
     tipoPlanilla: Net_TipoPlanilla;
 
-    @OneToMany(() => DetalleDeduccion, detalleDeduccion => detalleDeduccion.planilla)
-    detalleDeduccion: DetalleDeduccion[];
+    @OneToMany(() => Net_Detalle_Deduccion, detalleDeduccion => detalleDeduccion.planilla)
+    detalleDeduccion: Net_Detalle_Deduccion[];
 
-    @OneToMany(() => DetallePagoBeneficio, detallepagobeneficio => detallepagobeneficio.planilla)
-    detallepagobeneficio: DetallePagoBeneficio[];
+    @OneToMany(() => Net_Detalle_Pago_Beneficio, detallepagobeneficio => detallepagobeneficio.planilla)
+    detallepagobeneficio: Net_Detalle_Pago_Beneficio[];
 
 }

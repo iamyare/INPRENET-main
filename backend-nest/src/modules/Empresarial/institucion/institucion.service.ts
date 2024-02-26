@@ -2,7 +2,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { CreateInstitucionDto } from './dto/create-institucion.dto';
 import { UpdateInstitucionDto } from './dto/update-institucion.dto';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Institucion } from './entities/institucion.entity';
+import { Net_Institucion } from './entities/net_institucion.entity';
 import { Repository } from 'typeorm';
 
 @Injectable()
@@ -11,8 +11,8 @@ export class InstitucionService {
   private readonly logger = new Logger(InstitucionService.name)
 
   constructor(
-    @InjectRepository(Institucion)
-    private institucionRepository : Repository<Institucion>
+    @InjectRepository(Net_Institucion)
+    private institucionRepository : Repository<Net_Institucion>
   ){}
 
   create(createInstitucionDto: CreateInstitucionDto) {

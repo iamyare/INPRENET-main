@@ -1,11 +1,11 @@
 
 import { Column, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 import { Net_Beneficio } from "../../beneficio/entities/net_beneficio.entity";
-import { DetallePagoBeneficio } from "./detalle_pago_beneficio.entity";
+import { Net_Detalle_Pago_Beneficio } from "./net_detalle_pago_beneficio.entity";
 import { Net_Afiliado } from "src/modules/afiliado/entities/net_afiliado";
 
 @Entity()
-export class DetalleBeneficioAfiliado 
+export class Net_Detalle_Beneficio_Afiliado 
 {
     @PrimaryGeneratedColumn('uuid')
     id_detalle_ben_afil: string;
@@ -33,6 +33,6 @@ export class DetalleBeneficioAfiliado
     @JoinColumn({ name: 'id_beneficio' })
     beneficio: Net_Beneficio;
 
-    @OneToMany(() => DetallePagoBeneficio, detalleBeneficio => detalleBeneficio.detalleBeneficioAfiliado)
-    detalleBeneficio: DetallePagoBeneficio[];
+    @OneToMany(() => Net_Detalle_Pago_Beneficio, detalleBeneficio => detalleBeneficio.detalleBeneficioAfiliado)
+    detalleBeneficio: Net_Detalle_Pago_Beneficio[];
 }

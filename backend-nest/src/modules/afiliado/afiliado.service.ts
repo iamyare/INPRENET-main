@@ -8,8 +8,11 @@ import { Net_Afiliados_Por_Banco } from 'src/modules/banco/entities/net_afiliado
 import { Net_Centro_Trabajo } from 'src/modules/Empresarial/centro-trabajo/entities/net_centro-trabajo.entity';
 import { Net_Banco } from 'src/modules/banco/entities/net_banco.entity';
 import { Net_Provincia } from 'src/modules/Regional/provincia/entities/net_provincia.entity';
-import { Pais } from 'src/modules/Regional/pais/entities/pais.entity';
+/* import { Pais } from 'src/modules/Regional/pais/entities/pais.entity'; */
 import { Net_TipoIdentificacion } from 'src/modules/tipo_identificacion/entities/net_tipo_identificacion.entity';
+/* import { Provincia } from 'src/modules/Regional/provincia/entities/provincia.entity'; */
+import { Net_Pais } from 'src/modules/Regional/pais/entities/pais.entity';
+/* import { TipoIdentificacion } from 'src/modules/tipo_identificacion/entities/tipo_identificacion.entity'; */
 import { CreateAfiliadoTempDto } from './dto/create-afiliado-temp.dto';
 import { validate as isUUID } from 'uuid';
 import { Net_Detalle_Afiliado } from './entities/detalle_afiliado.entity';
@@ -43,7 +46,7 @@ export class AfiliadoService {
             throw new BadRequestException('Identificacion not found');
         }
 
-        const pais = await queryRunner.manager.findOneBy(Pais, { nombre_pais: createAfiliadoDto.nombre_pais });
+        const pais = await queryRunner.manager.findOneBy(Net_Pais, { nombre_pais: createAfiliadoDto.nombre_pais });
         if (!pais) {
             throw new BadRequestException('Pais not found');
         }
@@ -92,7 +95,7 @@ export class AfiliadoService {
                     throw new BadRequestException('Identificacion not found for related affiliate');
                 }
 
-                const paisHijo = await queryRunner.manager.findOneBy(Pais, { nombre_pais: hijoDto.nombre_pais });
+                const paisHijo = await queryRunner.manager.findOneBy(Net_Pais, { nombre_pais: hijoDto.nombre_pais });
                 if (!paisHijo) {
                     throw new BadRequestException('Pais not found for related affiliate');
                 }

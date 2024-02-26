@@ -1,12 +1,12 @@
 import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn, AfterInsert, getRepository, AfterLoad, Unique, OneToMany } from 'typeorm';
 import { Net_Deduccion } from "../../deduccion/entities/net_deduccion.entity";
-import { Institucion } from "src/modules/Empresarial/institucion/entities/institucion.entity";
+import { Net_Institucion } from "src/modules/Empresarial/institucion/entities/net_institucion.entity";
 import { Net_Afiliado } from 'src/modules/afiliado/entities/net_afiliado';
 import { Net_Planilla } from '../../planilla/entities/net_planilla.entity';
 import { IsEnum } from 'class-validator';
 
 @Entity()
-export class DetalleDeduccion {
+export class Net_Detalle_Deduccion {
     
     @PrimaryGeneratedColumn('uuid')
     id_ded_deduccion: string;
@@ -19,9 +19,9 @@ export class DetalleDeduccion {
     @JoinColumn({ name: 'id_afiliado' })
     afiliado: Net_Afiliado;
     
-    @ManyToOne(() => Institucion, institucion => institucion.detalleDeduccion, { cascade: true})
+    @ManyToOne(() => Net_Institucion, institucion => institucion.detalleDeduccion, { cascade: true})
     @JoinColumn({ name: 'id_institucion' })
-    institucion: Institucion; // Correcto
+    institucion: Net_Institucion; // Correcto
 
     @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
     monto_total: number;

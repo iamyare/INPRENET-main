@@ -1,15 +1,19 @@
-import { Pais } from "src/modules/Regional/pais/entities/pais.entity";
+/* import { Pais } from "src/modules/Regional/pais/entities/pais.entity"; */
 import { Net_TipoIdentificacion } from "src/modules/tipo_identificacion/entities/net_tipo_identificacion.entity";
+import { Net_Pais } from "src/modules/Regional/pais/entities/pais.entity";
+/* import { TipoIdentificacion } from "src/modules/tipo_identificacion/entities/tipo_identificacion.entity"; */
 import { Column, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 import { Net_Provincia } from "src/modules/Regional/provincia/entities/net_provincia.entity";
 
-import { Net_ReferenciaPersonalAfiliado } from "./referenciaP-Afiliado";
+import { Net_Ref_Personal_Afiliado } from "./net_referenciaP-Afiliado";
 
-import { DetalleDeduccion } from "src/modules/Planilla/detalle-deduccion/entities/detalle-deduccion.entity";
+/* import { DetalleDeduccion } from "src/modules/Planilla/detalle-deduccion/entities/detalle-deduccion.entity"; */
 import { Net_perf_afil_cent_trab} from "./net_perf_afil_cent_trab";
+import { Net_Detalle_Deduccion } from "src/modules/Planilla/detalle-deduccion/entities/detalle-deduccion.entity";
+/* import { PerfAfilCentTrab } from "./perf_afil_cent_trab"; */
 import { Net_Detalle_Afiliado } from "./detalle_afiliado.entity";
 /* import { DetallePagoBeneficio } from "src/modules/Planilla/detalle_beneficio/entities/detalle_pago_beneficio.entity"; */
-import { DetalleBeneficioAfiliado } from "src/modules/Planilla/detalle_beneficio/entities/detalle_beneficio_afiliado.entity";
+import { Net_Detalle_Beneficio_Afiliado } from "src/modules/Planilla/detalle_beneficio/entities/net_detalle_beneficio_afiliado.entity";
 import { Net_Afiliados_Por_Banco } from "src/modules/banco/entities/net_afiliados-banco";
  
 @Entity()
@@ -22,9 +26,9 @@ export class Net_Afiliado {
     @JoinColumn({ name: 'id_tipo_identificacion' })
     tipoIdentificacion: Net_TipoIdentificacion;
 
-    @ManyToOne(() => Pais, pais => pais.afiliado, { cascade: true })
+    @ManyToOne(() => Net_Pais, pais => pais.afiliado, { cascade: true })
     @JoinColumn({ name: 'id_pais' })
-    pais: Pais;
+    pais: Net_Pais;
     
     @Column('varchar2', { length: 40, nullable: true, unique: true })
     dni: string;
@@ -102,14 +106,14 @@ export class Net_Afiliado {
     @JoinColumn({ name: 'id_provincia' })
     provincia: Net_Provincia;
     
-    @OneToMany(() => Net_ReferenciaPersonalAfiliado, referenciaPersonalAfiliado => referenciaPersonalAfiliado.afiliado)
-    referenciasPersonalAfiliado: Net_ReferenciaPersonalAfiliado[];
+    @OneToMany(() => Net_Ref_Personal_Afiliado, referenciaPersonalAfiliado => referenciaPersonalAfiliado.afiliado)
+    referenciasPersonalAfiliado: Net_Ref_Personal_Afiliado[];
 
     @OneToMany(() => Net_Afiliados_Por_Banco, afiliadosPorBanco => afiliadosPorBanco.afiliado)
     afiliadosPorBanco : Net_Afiliados_Por_Banco[];
 
-    @OneToMany(() => DetalleDeduccion, detalleDeduccion => detalleDeduccion.afiliado)
-    detalleDeduccion: DetalleDeduccion[];
+    @OneToMany(() => Net_Detalle_Deduccion, detalleDeduccion => detalleDeduccion.afiliado)
+    detalleDeduccion: Net_Detalle_Deduccion[];
 
     @OneToMany(
         () => Net_perf_afil_cent_trab,
@@ -117,7 +121,7 @@ export class Net_Afiliado {
         { cascade: true })
     perfAfilCentTrabs: Net_perf_afil_cent_trab[];
 
-    @OneToMany(() => DetalleBeneficioAfiliado, detalleBeneficioAfiliado => detalleBeneficioAfiliado.afiliado, { cascade: true })
-    detalleBeneficioAfiliado: DetalleBeneficioAfiliado[];
+    @OneToMany(() => Net_Detalle_Beneficio_Afiliado, detalleBeneficioAfiliado => detalleBeneficioAfiliado.afiliado, { cascade: true })
+    detalleBeneficioAfiliado: Net_Detalle_Beneficio_Afiliado[];
 
 }

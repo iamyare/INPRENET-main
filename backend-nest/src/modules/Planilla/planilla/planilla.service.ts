@@ -2,14 +2,17 @@ import { BadRequestException, Injectable, InternalServerErrorException, Logger, 
 import { CreatePlanillaDto } from './dto/create-planilla.dto';
 import { UpdatePlanillaDto } from './dto/update-planilla.dto';
 import { InjectEntityManager, InjectRepository } from '@nestjs/typeorm';
-import { DetalleDeduccion } from '../detalle-deduccion/entities/detalle-deduccion.entity';
+import { Net_Detalle_Deduccion } from '../detalle-deduccion/entities/detalle-deduccion.entity';
 import { EntityManager, Repository } from 'typeorm';
 import { Net_Afiliado } from 'src/modules/afiliado/entities/net_afiliado';
 import { Net_Beneficio } from '../beneficio/entities/net_beneficio.entity';
 import { Net_Deduccion } from '../deduccion/entities/net_deduccion.entity';
-import { DetallePagoBeneficio } from '../detalle_beneficio/entities/detalle_pago_beneficio.entity';
 import { Net_Planilla } from './entities/net_planilla.entity';
 import { Net_TipoPlanilla } from '../tipo-planilla/entities/tipo-planilla.entity';
+import { Net_Detalle_Pago_Beneficio } from '../detalle_beneficio/entities/net_detalle_pago_beneficio.entity';
+/* import { DetallePagoBeneficio } from '../detalle_beneficio/entities/detalle_pago_beneficio.entity';
+import { Planilla } from './entities/planilla.entity';
+import { TipoPlanilla } from '../tipo-planilla/entities/tipo-planilla.entity'; */
 import { isUUID } from 'class-validator';
 import { DetalleBeneficioService } from '../detalle_beneficio/detalle_beneficio.service';
 import { DetalleDeduccionService } from '../detalle-deduccion/detalle-deduccion.service';
@@ -21,8 +24,8 @@ export class PlanillaService {
 
   constructor(
     @InjectEntityManager() private entityManager: EntityManager,
-    @InjectRepository(DetallePagoBeneficio)
-    private detalleBeneficioRepository: Repository<DetallePagoBeneficio>,
+    @InjectRepository(Net_Detalle_Pago_Beneficio)
+    private detalleBeneficioRepository: Repository<Net_Detalle_Pago_Beneficio>,
     @InjectRepository(Net_Afiliado)
     private afiliadoRepository: Repository<Net_Afiliado>,
     @InjectRepository(Net_Planilla)
@@ -63,11 +66,11 @@ export class PlanillaService {
         FROM
             "beneficio" ben
         INNER JOIN
-            "detalle_beneficio_afiliado" dba ON ben."id_beneficio" = dba."id_beneficio"
+            "net_detalle_beneficio_afiliado" dba ON ben."id_beneficio" = dba."id_beneficio"
         INNER JOIN
-            "detalle_pago_beneficio" dpb ON dba."id_detalle_ben_afil" = dpb."id_beneficio_afiliado"
+            "net_detalle_pago_beneficio" dpb ON dba."id_detalle_ben_afil" = dpb."id_beneficio_afiliado"
         INNER JOIN
-            "afiliado" afil ON dba."id_afiliado" = afil."id_afiliado"
+            "net_afiliado" afil ON dba."id_afiliado" = afil."id_afiliado"
         WHERE
             dpb."id_planilla" = :idPlanilla AND afil."dni" = :dni
         GROUP BY
@@ -81,13 +84,13 @@ export class PlanillaService {
             ded."nombre_deduccion" || ' - ' || inst."nombre_institucion" AS "nombre_deduccion",
             COALESCE(SUM(detDed."monto_aplicado"), 0) AS "Total Monto Aplicado"
         FROM
-            "detalle_deduccion" detDed
+            "net_detalle_deduccion" detDed
         INNER JOIN
             "deduccion" ded ON detDed."id_deduccion" = ded."id_deduccion"
         LEFT JOIN
             "institucion" inst ON detDed."id_institucion" = inst."id_institucion"
         INNER JOIN
-            "afiliado" afil ON detDed."id_afiliado" = afil."id_afiliado"
+            "net_afiliado" afil ON detDed."id_afiliado" = afil."id_afiliado"
         WHERE
             detDed."id_planilla" = :idPlanilla AND afil."dni" = :dni
         GROUP BY
@@ -116,9 +119,9 @@ export class PlanillaService {
             FROM
                 "beneficio" ben
             INNER JOIN
-                "detalle_beneficio_afiliado" dba ON ben."id_beneficio" = dba."id_beneficio"
+                "net_detalle_beneficio_afiliado" dba ON ben."id_beneficio" = dba."id_beneficio"
             INNER JOIN
-                "detalle_pago_beneficio" dpb ON dba."id_detalle_ben_afil" = dpb."id_beneficio_afiliado"
+                "net_detalle_pago_beneficio" dpb ON dba."id_detalle_ben_afil" = dpb."id_beneficio_afiliado"
             WHERE
                 dpb."id_planilla" = :idPlanilla
             GROUP BY
@@ -170,9 +173,9 @@ export class PlanillaService {
       FROM
         "Net_Afiliado" afil
       LEFT JOIN
-        "detalle_beneficio_afiliado" detBA ON afil."id_afiliado" = detBA."id_afiliado"
+        "net_detalle_beneficio_afiliado" detBA ON afil."id_afiliado" = detBA."id_afiliado"
       LEFT JOIN
-        "detalle_pago_beneficio" detBs ON detBA."id_detalle_ben_afil" = detBs."id_beneficio_afiliado"
+        "net_detalle_pago_beneficio" detBs ON detBA."id_detalle_ben_afil" = detBs."id_beneficio_afiliado"
         AND detBs."id_planilla" = :idPlanilla
       GROUP BY
         afil."id_afiliado"
@@ -250,13 +253,13 @@ export class PlanillaService {
               "detalle_afiliado" detAf ON afil."id_afiliado" = detAf."id_afiliado"
               
         LEFT JOIN
-          "detalle_beneficio_afiliado" detBA ON afil."id_afiliado" = detBA."id_afiliado" 
+          "net_detalle_beneficio_afiliado" detBA ON afil."id_afiliado" = detBA."id_afiliado" 
           AND TO_DATE(detBA."periodoInicio", 'DD/MM/YY') BETWEEN TO_DATE('${periodoInicio}', 'DD-MM-YYYY') AND TO_DATE('${periodoFinalizacion}', 'DD-MM-YYYY')
           AND TO_DATE(detBA."periodoFinalizacion", 'DD/MM/YY') BETWEEN TO_DATE('${periodoInicio}', 'DD-MM-YYYY') AND TO_DATE('${periodoFinalizacion}', 'DD-MM-YYYY')
         LEFT JOIN
           "net_beneficio" ben ON ben."id_beneficio" = detBA."id_beneficio"
         LEFT JOIN
-          "detalle_pago_beneficio" detBs ON detBA."id_detalle_ben_afil" = detBs."id_beneficio_afiliado"
+          "net_detalle_pago_beneficio" detBs ON detBA."id_detalle_ben_afil" = detBs."id_beneficio_afiliado"
           AND detBs."estado" = 'NO PAGADA' 
           
         GROUP BY
@@ -313,9 +316,9 @@ export class PlanillaService {
       OR
       (beneficios."id_afiliado" IS NOT NULL AND EXISTS (
                   SELECT detBA."id_afiliado"
-                  FROM "detalle_beneficio_afiliado" detBA
+                  FROM "net_detalle_beneficio_afiliado" detBA
                   LEFT JOIN
-                      "detalle_pago_beneficio" detBs  ON detBs."id_beneficio_afiliado" = detBA."id_detalle_ben_afil"
+                      "net_detalle_pago_beneficio" detBs  ON detBs."id_beneficio_afiliado" = detBA."id_detalle_ben_afil"
                   WHERE detBs."estado" = 'PAGADA' AND
                       detBA."id_afiliado" = beneficios."id_afiliado"
               ))) AND beneficios."Total Beneficio" IS NOT NULL AND
@@ -357,11 +360,11 @@ FROM
         "detalle_afiliado" detAf ON afil."id_afiliado" = detAf."id_afiliado"
     
     LEFT JOIN
-        "detalle_beneficio_afiliado" detBA ON afil."id_afiliado" = detBA."id_afiliado"
+        "net_detalle_beneficio_afiliado" detBA ON afil."id_afiliado" = detBA."id_afiliado"
     LEFT JOIN
         "net_beneficio" ben ON ben."id_beneficio" = detBA."id_beneficio"
     LEFT JOIN
-        "detalle_pago_beneficio" detBs ON detBs."id_beneficio_afiliado" = detBA."id_detalle_ben_afil"
+        "net_detalle_pago_beneficio" detBs ON detBs."id_beneficio_afiliado" = detBA."id_detalle_ben_afil"
         
     WHERE
         detBs."estado" = 'INCONSISTENCIA'
@@ -444,11 +447,11 @@ FROM
     FROM
         "Net_Afiliado" afil
     LEFT JOIN
-        "detalle_beneficio_afiliado" detBA ON afil."id_afiliado" = detBA."id_afiliado"
+        "net_detalle_beneficio_afiliado" detBA ON afil."id_afiliado" = detBA."id_afiliado"
     LEFT JOIN
         "net_beneficio" ben ON ben."id_beneficio" = detBA."id_beneficio"
     LEFT JOIN
-        "detalle_pago_beneficio" detBs  ON detBs."id_beneficio_afiliado" = detBA."id_detalle_ben_afil"
+        "net_detalle_pago_beneficio" detBs  ON detBs."id_beneficio_afiliado" = detBA."id_detalle_ben_afil"
         
     INNER JOIN
         "detalle_afiliado" detAf ON afil."id_afiliado" = detAf."id_afiliado"
@@ -458,9 +461,9 @@ FROM
             SELECT
                 detBA."id_afiliado"
             FROM
-                "detalle_beneficio_afiliado" detBA
+                "net_detalle_beneficio_afiliado" detBA
             LEFT JOIN
-                "detalle_pago_beneficio" detBs  ON detBs."id_beneficio_afiliado" = detBA."id_detalle_ben_afil"
+                "net_detalle_pago_beneficio" detBs  ON detBs."id_beneficio_afiliado" = detBA."id_detalle_ben_afil"
             WHERE
                 detBs."estado" NOT IN ('NO PAGADA', 'INCONSISTENCIA')
         )  AND
@@ -517,9 +520,9 @@ FULL OUTER JOIN
         ) AND
         NOT EXISTS (
             SELECT 1
-                FROM "detalle_pago_beneficio" detB
+                FROM "net_detalle_pago_beneficio" detB
             LEFT JOIN
-                "detalle_beneficio_afiliado" detBA ON detB."id_beneficio_afiliado" = detBA."id_detalle_ben_afil"
+                "net_detalle_beneficio_afiliado" detBA ON detB."id_beneficio_afiliado" = detBA."id_detalle_ben_afil"
             WHERE 
                 detBA."id_afiliado" = afil."id_afiliado" AND detB."estado" = 'PAGADA'
         )
@@ -573,11 +576,11 @@ FROM
         SUM(COALESCE(detBs."monto_a_pagar", 0)) AS "Total Beneficio",
         pla."fecha_cierre"
     FROM
-        "afiliado" afil
+        "net_afiliado" afil
     LEFT JOIN
-        "detalle_beneficio_afiliado" detBA ON afil."id_afiliado" = detBA."id_afiliado"
+        "net_detalle_beneficio_afiliado" detBA ON afil."id_afiliado" = detBA."id_afiliado"
     LEFT JOIN
-        "detalle_pago_beneficio" detBs ON detBA."id_detalle_ben_afil" = detBs."id_beneficio_afiliado"
+        "net_detalle_pago_beneficio" detBs ON detBA."id_detalle_ben_afil" = detBs."id_beneficio_afiliado"
     LEFT JOIN
         "planilla" pla ON detBs."id_planilla" = pla."id_planilla"
     WHERE
@@ -612,7 +615,7 @@ FULL OUTER JOIN
         SUM(COALESCE(detDs."monto_aplicado", 0)) AS "Total Deducciones",
         pla."fecha_cierre"
     FROM
-        "afiliado" afil
+        "net_afiliado" afil
     LEFT JOIN
         "detalle_deduccion" detDs ON afil."id_afiliado" = detDs."id_afiliado"
     LEFT JOIN
@@ -717,9 +720,9 @@ ON deducciones."id_afiliado" = beneficios."id_afiliado"
       'LISTAGG(DISTINCT ded.id_deduccion, \',\') AS deduccionesIds',
       'LISTAGG(DISTINCT ded.nombre_deduccion, \',\') AS deduccionesNombres',
     ])
-    .leftJoin(DetalleDeduccion, 'detD', 'afil.id_afiliado = detD.id_afiliado')
+    .leftJoin(Net_Detalle_Deduccion, 'detD', 'afil.id_afiliado = detD.id_afiliado')
     .leftJoin(Net_Deduccion, 'ded', 'detD.id_deduccion = ded.id_deduccion')
-    .leftJoin(DetallePagoBeneficio, 'detB', 'afil.id_afiliado = detB.id_afiliado')
+    .leftJoin(Net_Detalle_Pago_Beneficio, 'detB', 'afil.id_afiliado = detB.id_afiliado')
     .leftJoin(Net_Beneficio, 'ben', 'detB.id_beneficio = ben.id_beneficio')
     .where(`
       (TO_DATE(detB.periodoInicio, 'DD-MM-YYYY') BETWEEN TO_DATE(SYSDATE, 'DD-MM-YYYY') AND TO_DATE('${periodoInicio}', 'DD-MM-YYYY')) AND

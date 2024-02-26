@@ -4,11 +4,13 @@ import { InjectEntityManager, InjectRepository } from '@nestjs/typeorm';
 import { EntityManager, LessThanOrEqual, MoreThanOrEqual, Not, Repository } from 'typeorm';
 import { Net_Beneficio } from '../beneficio/entities/net_beneficio.entity';
 import { Net_Afiliado } from 'src/modules/afiliado/entities/net_afiliado';
-import { DetallePagoBeneficio, EstadoEnum } from './entities/detalle_pago_beneficio.entity';
+import { Net_Detalle_Pago_Beneficio, EstadoEnum } from './entities/net_detalle_pago_beneficio.entity';
 import { UpdateDetalleBeneficioDto } from './dto/update-detalle_beneficio_planilla.dto';
 import { CreateDetalleBeneficioDto } from './dto/create-detalle_beneficio.dto';
 import { Net_Planilla } from '../planilla/entities/net_planilla.entity';
-import { DetalleBeneficioAfiliado } from './entities/detalle_beneficio_afiliado.entity';
+/* import { DetalleBeneficioAfiliado } from './entities/detalle_beneficio_afiliado.entity';
+import { Planilla } from '../planilla/entities/planilla.entity'; */
+import { Net_Detalle_Beneficio_Afiliado } from './entities/net_detalle_beneficio_afiliado.entity';
 import { AfiliadoService } from '../../afiliado/afiliado.service';
 
 @Injectable()
@@ -22,19 +24,20 @@ export class DetalleBeneficioService {
   
   @InjectRepository(Net_Beneficio)
   private readonly tipoBeneficioRepository : Repository<Net_Beneficio>,
-  @InjectRepository(DetallePagoBeneficio)
-  private readonly benAfilRepository : Repository<DetallePagoBeneficio>,
+
+  @InjectRepository(Net_Detalle_Pago_Beneficio)
+  private readonly benAfilRepository : Repository<Net_Detalle_Pago_Beneficio>,
   @InjectRepository(Net_Planilla)
   private planillaRepository: Repository<Net_Planilla>,
-  @InjectRepository(DetalleBeneficioAfiliado)
-  private detalleBeneficioAfiliadoRepository: Repository<DetalleBeneficioAfiliado>,
+  @InjectRepository(Net_Detalle_Beneficio_Afiliado)
+  private detalleBeneficioAfiliadoRepository: Repository<Net_Detalle_Beneficio_Afiliado>,
   @InjectEntityManager() private readonly entityManager: EntityManager
   ){}
 
   async actualizarEstadoPorPlanilla(idPlanilla: string, nuevoEstado: string): Promise<{ mensaje: string }> {
     try {
       const resultado = await this.benAfilRepository.createQueryBuilder()
-        .update(DetallePagoBeneficio)
+        .update(Net_Detalle_Pago_Beneficio)
         .set({ estado: nuevoEstado })
         .where("planilla.id_planilla = :idPlanilla", { idPlanilla })
         .execute();
@@ -71,7 +74,7 @@ export class DetalleBeneficioService {
             throw new BadRequestException('Formato de fecha inválido. Usa DD-MM-YYYY.');
         }
 
-        const nuevoDetalleAfiliado = new DetalleBeneficioAfiliado();
+        const nuevoDetalleAfiliado = new Net_Detalle_Beneficio_Afiliado();
         nuevoDetalleAfiliado.afiliado = afiliado;
         nuevoDetalleAfiliado.beneficio = beneficio;
         nuevoDetalleAfiliado.periodoInicio = periodoInicio;
@@ -81,7 +84,7 @@ export class DetalleBeneficioService {
 
             const detalleAfiliadoGuardado = await manager.save(nuevoDetalleAfiliado);
 
-            const nuevoDetalleBeneficio = manager.create(DetallePagoBeneficio, {
+            const nuevoDetalleBeneficio = manager.create(Net_Detalle_Pago_Beneficio, {
                 detalleBeneficioAfiliado: detalleAfiliadoGuardado,
                 metodo_pago: datos.metodo_pago,
                 monto_a_pagar: datos.monto_por_periodo,
@@ -147,9 +150,9 @@ export class DetalleBeneficioService {
         detBA."periodoFinalizacion",
         db."id_planilla"
       FROM
-        "detalle_pago_beneficio" db
+        "net_detalle_pago_beneficio" db
       INNER JOIN 
-        "detalle_beneficio_afiliado" detBA ON db."id_beneficio_afiliado" = detBA."id_detalle_ben_afil"
+        "net_detalle_beneficio_afiliado" detBA ON db."id_beneficio_afiliado" = detBA."id_detalle_ben_afil"
       INNER JOIN 
         "beneficio" ben ON ben."id_beneficio" = detBA."id_beneficio"
       WHERE
@@ -187,9 +190,9 @@ export class DetalleBeneficioService {
       COALESCE(afil."segundo_apellido", '')
     ) AS "nombre_completo"
   FROM
-    "detalle_pago_beneficio" db
+    "net_detalle_pago_beneficio" db
   JOIN
-    "detalle_beneficio_afiliado" detBA ON db."id_beneficio_afiliado" = detBA."id_detalle_ben_afil"
+    "net_detalle_beneficio_afiliado" detBA ON db."id_beneficio_afiliado" = detBA."id_detalle_ben_afil"
   JOIN
     "net_beneficio" b ON detBA."id_beneficio" = b."id_beneficio"
   JOIN
@@ -235,9 +238,9 @@ async obtenerDetallesBeneficioComplePorAfiliado(idAfiliado: string): Promise<any
     ben."nombre_beneficio",
     ben."descripcion_beneficio"
   FROM
-    "detalle_pago_beneficio" detB
+    "net_detalle_pago_beneficio" detB
       JOIN
-        "detalle_beneficio_afiliado" detBA ON detBA."id_detalle_ben_afil" = detB."id_beneficio_afiliado"
+        "net_detalle_beneficio_afiliado" detBA ON detBA."id_detalle_ben_afil" = detB."id_beneficio_afiliado"
       JOIN
         "beneficio" ben ON detBA."id_beneficio" = ben."id_beneficio"
       JOIN
@@ -249,7 +252,7 @@ async obtenerDetallesBeneficioComplePorAfiliado(idAfiliado: string): Promise<any
           SELECT
             detD."id_afiliado"
           FROM
-            "detalle_deduccion" detD
+            "net_detalle_deduccion" detD
           WHERE
             detD."estado_aplicacion" = 'COBRADA'
         )
@@ -257,9 +260,9 @@ async obtenerDetallesBeneficioComplePorAfiliado(idAfiliado: string): Promise<any
           SELECT
             detBA2."id_afiliado"
           FROM
-            "detalle_beneficio_afiliado" detBA2
+            "net_detalle_beneficio_afiliado" detBA2
         JOIN
-            "detalle_pago_beneficio" detB ON detBA2."id_detalle_ben_afil" = detB."id_beneficio_afiliado"
+            "net_detalle_pago_beneficio" detB ON detBA2."id_detalle_ben_afil" = detB."id_beneficio_afiliado"
           WHERE
             detB."estado" = 'PAGADA'
         )
@@ -282,7 +285,7 @@ async obtenerBeneficiosDeAfil(dni: string): Promise<any[]> {
       detBenAfil."monto_total",
       ben."numero_rentas_max" 
       FROM "net_beneficio" ben
-      INNER JOIN "detalle_beneficio_afiliado" detBenAfil ON  
+      INNER JOIN "net_detalle_beneficio_afiliado" detBenAfil ON  
       detBenAfil."id_beneficio" = ben."id_beneficio"
       INNER JOIN "Net_Afiliado" afil ON  
       detBenAfil."id_afiliado" = afil."id_afiliado"
@@ -295,12 +298,12 @@ async obtenerBeneficiosDeAfil(dni: string): Promise<any[]> {
   }
 }
 
-async actualizarPlanillaYEstadoDeBeneficio(detalles: { idBeneficioPlanilla: string; codigoPlanilla: string; estado: string }[], transactionalEntityManager?: EntityManager): Promise<DetallePagoBeneficio[]> {
+async actualizarPlanillaYEstadoDeBeneficio(detalles: { idBeneficioPlanilla: string; codigoPlanilla: string; estado: string }[], transactionalEntityManager?: EntityManager): Promise<Net_Detalle_Pago_Beneficio[]> {
   const resultados = [];
   const entityManager = transactionalEntityManager ? transactionalEntityManager : this.entityManager;
 
   for (const { idBeneficioPlanilla, codigoPlanilla, estado } of detalles) {
-    const beneficio = await entityManager.findOne(DetallePagoBeneficio, { where: { id_beneficio_planilla: idBeneficioPlanilla } });
+    const beneficio = await entityManager.findOne(Net_Detalle_Pago_Beneficio, { where: { id_beneficio_planilla: idBeneficioPlanilla } });
     if (!beneficio) {
       throw new NotFoundException(`DetalleBeneficio con ID "${idBeneficioPlanilla}" no encontrado`);
     }
@@ -378,7 +381,7 @@ async actualizarPlanillaYEstadoDeBeneficio(detalles: { idBeneficioPlanilla: stri
   }
 
   async findOne(term: string) {
-    let benAfil: DetallePagoBeneficio;
+    let benAfil: Net_Detalle_Pago_Beneficio;
     if (isUUID(term)) {
       benAfil = await this.benAfilRepository.findOneBy({ id_beneficio_planilla: term });
     } else {
@@ -431,8 +434,8 @@ async actualizarPlanillaYEstadoDeBeneficio(detalles: { idBeneficioPlanilla: stri
         ben."id_beneficio",
         detB."monto_a_pagar" as "monto",
         detB."estado"
-      FROM "detalle_pago_beneficio" detB
-      INNER JOIN "detalle_beneficio_afiliado" detBA ON detB."id_beneficio_afiliado" = detBA."id_detalle_ben_afil"
+      FROM "net_detalle_pago_beneficio" detB
+      INNER JOIN "net_detalle_beneficio_afiliado" detBA ON detB."id_beneficio_afiliado" = detBA."id_detalle_ben_afil"
       INNER JOIN "net_beneficio" ben ON ben."id_beneficio" = detBA."id_beneficio"
       WHERE detB."estado" = 'INCONSISTENCIA'
     `;

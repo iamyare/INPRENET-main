@@ -3,7 +3,7 @@ import { Net_Provincia } from "../../provincia/entities/net_provincia.entity";
 import { Net_Afiliado } from "src/modules/afiliado/entities/net_afiliado";
 
 @Entity()
-export class Pais {
+export class Net_Pais {
 
     @PrimaryGeneratedColumn('uuid')
     id_pais : string;

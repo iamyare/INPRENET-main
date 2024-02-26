@@ -9,7 +9,7 @@ export enum EstadoEnum {
     INCONSISTENCIA = 'INCONSISTENCIA'
 }
 @Entity()
-export class DetallePagoBeneficio {
+export class Net_Detalle_Pago_Beneficio {
 
     @PrimaryGeneratedColumn('uuid')
     id_beneficio_planilla : string;

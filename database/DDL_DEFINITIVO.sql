@@ -239,6 +239,7 @@ COMMENT ON TABLE net_detalle_afiliado IS 'Esta tabla hace referencia si el docen
 --  DDL for Table detalle_beneficio_afiliado
 --------------------------------------------------------
 
+-- DAVID
   CREATE TABLE net_detalle_beneficio_afiliado 
    (	id_detalle_ben_afil VARCHAR2(36 BYTE), 
 	periodoInicio DATE, 
@@ -270,7 +271,7 @@ COMMENT ON TABLE net_detalle_beneficio_afiliado IS 'Esta tabla almacena los dato
 --------------------------------------------------------
 --  DDL for Table detalle_deduccion
 --------------------------------------------------------
-
+-- DAVID
   CREATE TABLE net_detalle_deduccion 
    (	id_ded_deduccion VARCHAR2(36 BYTE), 
 	monto_total NUMBER(10,2), 
@@ -305,7 +306,7 @@ COMMENT ON TABLE net_detalle_deduccion IS 'Esta tabla almacena los datos de las 
 --------------------------------------------------------
 --  DDL for Table detalle_pago_beneficio
 --------------------------------------------------------
-
+-- DAVID
   CREATE TABLE net_detalle_pago_beneficio 
    (	id_beneficio_planilla VARCHAR2(36 BYTE), 
 	estado VARCHAR2(255 BYTE) DEFAULT 'NO PAGADA', 
@@ -335,7 +336,7 @@ COMMENT ON TABLE net_detalle_deduccion IS 'Esta tabla almacena los datos de las 
 --------------------------------------------------------
 --  DDL for Table empleado
 --------------------------------------------------------
-
+-- DAVID
   CREATE TABLE net_empleado 
    (	id_empleado VARCHAR2(36 BYTE), 
 	nombre_empleado VARCHAR2(30 BYTE), 
@@ -368,7 +369,7 @@ COMMENT ON TABLE net_empleado IS 'Esta tabla almacena los datos de los empleados
 --------------------------------------------------------
 --  DDL for Table empleado_empresa
 --------------------------------------------------------
-
+-- DAVID
   CREATE TABLE net_empleado_empresa 
    (	id VARCHAR2(36 BYTE), 
 	id_empresa VARCHAR2(36 BYTE), 
@@ -392,7 +393,7 @@ COMMENT ON TABLE net_empleado IS 'Esta tabla almacena los datos de los empleados
       NOPARALLEL
       MONITORING;
       COMMENT ON TABLE net_empleado_empresa IS 'Esta tabla a hace referencia a que empresa pertenece el empleado.';
-
+-- DAVID
 --------------------------------------------------------
 --  DDL for Table empresa
 --------------------------------------------------------
@@ -430,7 +431,7 @@ COMMENT ON TABLE net_empleado IS 'Esta tabla almacena los datos de los empleados
 --------------------------------------------------------
 --  DDL for Table institucion
 --------------------------------------------------------
-
+-- DAVID
  CREATE TABLE net_institucion (    
     id_institucion NUMBER ,
     nombre_institucion VARCHAR2(40 BYTE), 
@@ -458,7 +459,7 @@ COMMENT ON TABLE net_institucion IS 'Esta tabla almacena los datos de las instit
 --------------------------------------------------------
 --  DDL for Table municipio
 --------------------------------------------------------
-
+-- DAVID
   CREATE TABLE net_municipio 
    (	id_municipio VARCHAR2(36 BYTE), 
 	nombre_municipio VARCHAR2(30 BYTE), 
@@ -484,7 +485,7 @@ COMMENT ON TABLE net_institucion IS 'Esta tabla almacena los datos de las instit
 --------------------------------------------------------
 --  DDL for Table pais
 --------------------------------------------------------
-
+-- DAVID
   CREATE TABLE net_pais 
    (	id_pais VARCHAR2(36 BYTE), 
 	nombre_pais VARCHAR2(20 BYTE), 
@@ -507,10 +508,11 @@ COMMENT ON TABLE net_institucion IS 'Esta tabla almacena los datos de las instit
       NOCACHE
       NOPARALLEL
       MONITORING;
+
 --------------------------------------------------------
 --  DDL for Table perf_afil_cent_trab
 --------------------------------------------------------
-
+-- OSCAR
   CREATE TABLE net_perf_afil_cent_trab 
    (	id_perf_afil_cent_trab VARCHAR2(36 BYTE), 
 	cargo VARCHAR2(40 BYTE), 

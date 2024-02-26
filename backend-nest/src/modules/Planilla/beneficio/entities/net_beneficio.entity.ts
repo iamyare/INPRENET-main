@@ -1,5 +1,5 @@
 import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
-import { DetalleBeneficioAfiliado } from "../../detalle_beneficio/entities/detalle_beneficio_afiliado.entity";
+import { Net_Detalle_Beneficio_Afiliado } from "../../detalle_beneficio/entities/net_detalle_beneficio_afiliado.entity";
 
 
 @Entity()
@@ -20,6 +20,6 @@ export class Net_Beneficio {
     @Column('number', { nullable: false, default: 100000 })
     numero_rentas_max?: number;
 
-    @OneToMany(() => DetalleBeneficioAfiliado, detalleBeneficioAfiliado => detalleBeneficioAfiliado.beneficio)
-    detalleBeneficioAfiliado: DetalleBeneficioAfiliado[];
+    @OneToMany(() => Net_Detalle_Beneficio_Afiliado, detalleBeneficioAfiliado => detalleBeneficioAfiliado.beneficio)
+    detalleBeneficioAfiliado: Net_Detalle_Beneficio_Afiliado[];
 }

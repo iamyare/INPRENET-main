@@ -2,7 +2,7 @@ import { Column, Entity, PrimaryGeneratedColumn, ManyToOne } from 'typeorm';
 import { Net_Provincia } from '../../provincia/entities/net_provincia.entity';
 
 @Entity()
-export class Municipio {
+export class Net_Municipio {
     @PrimaryGeneratedColumn('uuid')
     id_municipio : string;
 

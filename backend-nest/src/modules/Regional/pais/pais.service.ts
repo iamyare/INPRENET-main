@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { CreatePaiDto } from './dto/create-pai.dto';
 import { UpdatePaiDto } from './dto/update-pai.dto';
-import { Pais } from './entities/pais.entity';
+import { Net_Pais } from './entities/pais.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { PaginationDto } from 'src/common/dtos/pagination.dto';
@@ -10,8 +10,8 @@ import { PaginationDto } from 'src/common/dtos/pagination.dto';
 export class PaisService {
 
   constructor(
-    @InjectRepository(Pais)
-    private readonly paisRepository: Repository<Pais>,
+    @InjectRepository(Net_Pais)
+    private readonly paisRepository: Repository<Net_Pais>,
   ) {}
 
 

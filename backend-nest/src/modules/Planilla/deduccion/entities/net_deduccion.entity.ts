@@ -1,6 +1,8 @@
 import { Column, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
-import { DetalleDeduccion } from '../../detalle-deduccion/entities/detalle-deduccion.entity';
+/* import { DetalleDeduccion } from '../../detalle-deduccion/entities/detalle-deduccion.entity'; */
 import { Net_TipoDeduccion } from './net_tipo-deduccion.entity';
+import { Net_Detalle_Deduccion } from '../../detalle-deduccion/entities/detalle-deduccion.entity';
+/* import { TipoDeduccion } from './tipo-deduccion.entity'; */
 
 @Entity()
 export class Net_Deduccion {
@@ -20,8 +22,8 @@ export class Net_Deduccion {
     @Column('number', {nullable: true })
     prioridad : number;
 
-    @OneToMany(() => DetalleDeduccion, detalleDeduccion => detalleDeduccion.deduccion)
-    detalleDeduccion : DetalleDeduccion[];
+    @OneToMany(() => Net_Detalle_Deduccion, detalleDeduccion => detalleDeduccion.deduccion)
+    detalleDeduccion : Net_Detalle_Deduccion[];
 
     @ManyToOne(() => Net_TipoDeduccion, tipoDeduccion => tipoDeduccion.deduccion, { cascade: true})
     @JoinColumn({ name: 'id_tipo_deduccion' })

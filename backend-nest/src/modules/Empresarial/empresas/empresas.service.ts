@@ -1,7 +1,7 @@
 import { BadRequestException, Injectable, InternalServerErrorException, Logger, NotFoundException, Query } from '@nestjs/common';
 import { CreateEmpresaDto } from './dto/create-empresa.dto';
 import { UpdateEmpresaDto } from './dto/update-empresa.dto';
-import { Empresa } from './entities/empresa.entity';
+import { Net_Empresa } from './entities/net_empresa.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { PaginationDto } from 'src/common/dtos/pagination.dto';
@@ -14,8 +14,8 @@ export class EmpresasService {
 
   constructor(
 
-    @InjectRepository(Empresa)
-    private readonly empresaRepository: Repository<Empresa>
+    @InjectRepository(Net_Empresa)
+    private readonly empresaRepository: Repository<Net_Empresa>
   ){}
 
   async create(createEmpresaDto: CreateEmpresaDto) {
@@ -37,7 +37,7 @@ export class EmpresasService {
   }
 
   async findOne(term: string) {
-    let empresa: Empresa;
+    let empresa: Net_Empresa;
     if (isUUID(term)) {
       empresa = await this.empresaRepository.findOneBy({ id_empresa: term });
     } else {

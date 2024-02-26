@@ -1,8 +1,8 @@
-import { DetalleDeduccion } from "src/modules/Planilla/detalle-deduccion/entities/detalle-deduccion.entity";
+import { Net_Detalle_Deduccion } from "src/modules/Planilla/detalle-deduccion/entities/detalle-deduccion.entity";
 import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 
 @Entity()
-export class Institucion {
+export class Net_Institucion {
 
     @PrimaryGeneratedColumn()
     id_institucion : string;
@@ -13,6 +13,6 @@ export class Institucion {
     @Column('varchar2', { length: 40, nullable: false })
     tipo_institucion: string;
 
-    @OneToMany(() => DetalleDeduccion, detalleDeduccion => detalleDeduccion.institucion)
-    detalleDeduccion : DetalleDeduccion[];
+    @OneToMany(() => Net_Detalle_Deduccion, detalleDeduccion => detalleDeduccion.institucion)
+    detalleDeduccion : Net_Detalle_Deduccion[];
 }

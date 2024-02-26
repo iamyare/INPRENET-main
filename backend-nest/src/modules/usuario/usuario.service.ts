@@ -7,8 +7,9 @@ import { Repository } from 'typeorm';
 import { JwtService } from '@nestjs/jwt';
 import { MailService } from 'src/common/services/mail.service';
 import * as bcrypt from 'bcrypt';
-import { Empleado } from 'src/modules/Empresarial/empresas/entities/empleado.entity';
+import { Net_Empleado } from 'src/modules/Empresarial/empresas/entities/net_empleado.entity';
 import { Net_Rol } from './entities/net_rol.entity';
+/* import { Rol } from './entities/rol.entity'; */
 import { CreateUsuarioDto } from './dto/create-usuario.dto';
 import { Net_TipoIdentificacion } from '../tipo_identificacion/entities/net_tipo_identificacion.entity';
 
@@ -18,10 +19,11 @@ export class UsuarioService {
   private readonly logger = new Logger(UsuarioService.name)
 
   constructor(
+
     @InjectRepository(Net_Usuario)
     private readonly usuarioRepository: Repository<Net_Usuario>,
-    @InjectRepository(Empleado)
-    private readonly empleadoRepository: Repository<Empleado>,
+    @InjectRepository(Net_Empleado)
+    private readonly empleadoRepository: Repository<Net_Empleado>,
     @InjectRepository(Net_Rol)
     private readonly rolRepository: Repository<Net_Rol>,
     @InjectRepository(Net_TipoIdentificacion)

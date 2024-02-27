@@ -68,7 +68,7 @@ export class DetalleDeduccionService {
         FROM
           "net_detalle_deduccion" detDed
         INNER JOIN
-          "deduccion" ded ON detDed."id_deduccion" = ded."id_deduccion"
+          "net_deduccion" ded ON detDed."id_deduccion" = ded."id_deduccion"
         WHERE
           detDed."id_planilla" = '${idPlanilla}'
         GROUP BY
@@ -100,7 +100,7 @@ export class DetalleDeduccionService {
         dd."id_planilla"
       FROM
         "net_detalle_deduccion" dd
-      INNER JOIN "deduccion" ded ON ded."id_deduccion" = dd."id_deduccion" 
+      INNER JOIN "net_deduccion" ded ON ded."id_deduccion" = dd."id_deduccion" 
       WHERE
         dd."id_afiliado" = '${idAfiliado}'
         AND dd."id_planilla" = '${idPlanilla}'
@@ -140,7 +140,7 @@ export class DetalleDeduccionService {
       JOIN
         "net_deduccion" d ON dd."id_deduccion" = d."id_deduccion"
       JOIN
-        "Net_Afiliado" afil ON dd."id_afiliado" = afil."id_afiliado"
+        "net_afiliado" afil ON dd."id_afiliado" = afil."id_afiliado"
       WHERE
         dd."id_afiliado" = :idAfiliado
       AND
@@ -210,14 +210,16 @@ async obtenerDetallesDeduccionPorAfiliado(idAfiliado: string): Promise<any[]> {
       ) AS "nombre_completo",
       ded."nombre_deduccion",
       ded."descripcion_deduccion",
-      ded."tipo_deduccion",
+      inst."tipo_institucion",
       ded."codigo_deduccion"
     FROM
       "net_detalle_deduccion" detD
     JOIN
-      "deduccion" ded ON detD."id_deduccion" = ded."id_deduccion"
+      "net_deduccion" ded ON detD."id_deduccion" = ded."id_deduccion"
     JOIN
-      "afiliado" afil ON detD."id_afiliado" = afil."id_afiliado"
+      "net_afiliado" afil ON detD."id_afiliado" = afil."id_afiliado"
+      JOIN
+      "net_institucion" inst ON inst."id_institucion" = detD."id_institucion"
     WHERE
       detD."id_afiliado" = :1 AND
       detD."estado_aplicacion" != 'INCONSISTENCIA' AND

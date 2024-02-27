@@ -1,4 +1,4 @@
-import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
+/* import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 import { Net_Deduccion } from "./net_deduccion.entity";
 
 @Entity()
@@ -12,4 +12,4 @@ export class Net_TipoDeduccion {
 
     @OneToMany(() => Net_Deduccion, deduccion => deduccion.tipoDeduccion)
     deduccion : Net_Deduccion[];
-}
+} */

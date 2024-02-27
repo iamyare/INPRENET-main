@@ -136,7 +136,7 @@ export class PlanillaService {
               ded."nombre_deduccion" || ' - ' || inst."nombre_institucion" AS "nombre_deduccion",
               COALESCE(SUM(detDed."monto_aplicado"), 0) AS "Total Monto Aplicado"
           FROM
-              "detalle_deduccion" detDed
+              "net_detalle_deduccion" detDed
           INNER JOIN
               "deduccion" ded ON detDed."id_deduccion" = ded."id_deduccion"
           LEFT JOIN
@@ -171,7 +171,7 @@ export class PlanillaService {
         afil."id_afiliado",
         SUM(COALESCE(detBs."monto_a_pagar", 0)) AS "Total Beneficio"
       FROM
-        "Net_Afiliado" afil
+        "net_afiliado" afil
       LEFT JOIN
         "net_detalle_beneficio_afiliado" detBA ON afil."id_afiliado" = detBA."id_afiliado"
       LEFT JOIN
@@ -185,15 +185,15 @@ export class PlanillaService {
         afil."id_afiliado",
         SUM(COALESCE(detDs."monto_aplicado", 0)) AS "Total Deducciones"
       FROM
-        "Net_Afiliado" afil
+        "net_afiliado" afil
       LEFT JOIN
-        "detalle_deduccion" detDs ON afil."id_afiliado" = detDs."id_afiliado"
+        "net_detalle_deduccion" detDs ON afil."id_afiliado" = detDs."id_afiliado"
         AND detDs."id_planilla" = :idPlanilla
       GROUP BY
         afil."id_afiliado"
       ) deduccion ON beneficio."id_afiliado" = deduccion."id_afiliado"
       `;
-  
+
       try {
         const result = await this.entityManager.query(query, [idPlanilla, idPlanilla]);
         // Si esperas un solo resultado, puedes directamente devolver ese objeto.
@@ -248,9 +248,9 @@ export class PlanillaService {
                   COALESCE(afil."segundo_apellido", '')) AS NOMBRE_COMPLETO,
               SUM(detBs."monto_a_pagar") AS "Total Beneficio"
         FROM
-              "Net_Afiliado" afil
+              "net_afiliado" afil
         INNER JOIN
-              "detalle_afiliado" detAf ON afil."id_afiliado" = detAf."id_afiliado"
+              "net_detalle_afiliado" detAf ON afil."id_afiliado" = detAf."id_afiliado"
               
         LEFT JOIN
           "net_detalle_beneficio_afiliado" detBA ON afil."id_afiliado" = detBA."id_afiliado" 
@@ -286,11 +286,11 @@ export class PlanillaService {
                   COALESCE(afil."segundo_apellido", '')) AS NOMBRE_COMPLETO,
               SUM(detDs."monto_aplicado") AS "Total Deducciones"
         FROM
-              "Net_Afiliado" afil
+              "net_afiliado" afil
         INNER JOIN
-              "detalle_afiliado" detAf ON afil."id_afiliado" = detAf."id_afiliado"
+              "net_detalle_afiliado" detAf ON afil."id_afiliado" = detAf."id_afiliado"
         LEFT JOIN
-              "detalle_deduccion" detDs ON afil."id_afiliado" = detDs."id_afiliado"
+              "net_detalle_deduccion" detDs ON afil."id_afiliado" = detDs."id_afiliado"
               AND detDs."estado_aplicacion" = 'NO COBRADA'
               AND TO_DATE(CONCAT(detDs."anio", LPAD(detDs."mes", 2, '0')), 'YYYYMM') BETWEEN TO_DATE('${periodoInicio}', 'DD-MM-YYYY') AND TO_DATE('${periodoFinalizacion}', 'DD-MM-YYYY')
         LEFT JOIN
@@ -309,7 +309,7 @@ export class PlanillaService {
   WHERE
       ((deducciones."id_afiliado" IS NOT NULL AND EXISTS (
                   SELECT detD."id_afiliado"
-                  FROM "detalle_deduccion" detD
+                  FROM "net_detalle_deduccion" detD
                   WHERE  detD."estado_aplicacion" = 'COBRADA' AND
                   detD."id_afiliado" = deducciones."id_afiliado"
               ))
@@ -355,9 +355,9 @@ FROM
             COALESCE(afil."segundo_apellido", '')) AS NOMBRE_COMPLETO,
             SUM(detBs."monto_a_pagar") AS "Total Beneficio"
     FROM
-        "Net_Afiliado" afil
+        "net_afiliado" afil
     INNER JOIN
-        "detalle_afiliado" detAf ON afil."id_afiliado" = detAf."id_afiliado"
+        "net_detalle_afiliado" detAf ON afil."id_afiliado" = detAf."id_afiliado"
     
     LEFT JOIN
         "net_detalle_beneficio_afiliado" detBA ON afil."id_afiliado" = detBA."id_afiliado"
@@ -389,11 +389,11 @@ FULL OUTER JOIN
             COALESCE(afil."segundo_apellido", '')) AS NOMBRE_COMPLETO,
             SUM(detDs."monto_aplicado") AS "Total Deducciones"
     FROM
-        "Net_Afiliado" afil
+        "net_afiliado" afil
     INNER JOIN
-        "detalle_afiliado" detAf ON afil."id_afiliado" = detAf."id_afiliado"
+        "net_detalle_afiliado" detAf ON afil."id_afiliado" = detAf."id_afiliado"
     LEFT JOIN
-        "detalle_deduccion" detDs ON afil."id_afiliado" = detDs."id_afiliado"
+        "net_detalle_deduccion" detDs ON afil."id_afiliado" = detDs."id_afiliado"
     LEFT JOIN
         "net_deduccion" ded ON ded."id_deduccion" = detDs."id_deduccion" 
     WHERE
@@ -445,7 +445,7 @@ FROM
         ) AS NOMBRE_COMPLETO,
         SUM(detBs."monto_a_pagar") AS "Total Beneficio"
     FROM
-        "Net_Afiliado" afil
+        "net_afiliado" afil
     LEFT JOIN
         "net_detalle_beneficio_afiliado" detBA ON afil."id_afiliado" = detBA."id_afiliado"
     LEFT JOIN
@@ -454,7 +454,7 @@ FROM
         "net_detalle_pago_beneficio" detBs  ON detBs."id_beneficio_afiliado" = detBA."id_detalle_ben_afil"
         
     INNER JOIN
-        "detalle_afiliado" detAf ON afil."id_afiliado" = detAf."id_afiliado"
+        "net_detalle_afiliado" detAf ON afil."id_afiliado" = detAf."id_afiliado"
     WHERE
         detBs."estado" = 'NO PAGADA' AND
         detBA."id_afiliado" NOT IN (
@@ -496,11 +496,11 @@ FULL OUTER JOIN
         ) AS NOMBRE_COMPLETO,
         SUM(detDs."monto_aplicado") AS "Total Deducciones"
     FROM
-        "Net_Afiliado" afil
+        "net_afiliado" afil
     INNER JOIN
-        "detalle_afiliado" detAf ON afil."id_afiliado" = detAf."id_afiliado"
+        "net_detalle_afiliado" detAf ON afil."id_afiliado" = detAf."id_afiliado"
     LEFT JOIN
-        "detalle_deduccion" detDs ON afil."id_afiliado" = detDs."id_afiliado"
+        "net_detalle_deduccion" detDs ON afil."id_afiliado" = detDs."id_afiliado"
     LEFT JOIN
         "net_deduccion" ded ON detDs."id_deduccion" = ded."id_deduccion"
     WHERE
@@ -508,14 +508,14 @@ FULL OUTER JOIN
         (
             detDs."id_afiliado" NOT IN (
                 SELECT detD."id_afiliado"
-                FROM "detalle_deduccion" detD
+                FROM "net_detalle_deduccion" detD
                 WHERE detD."estado_aplicacion" NOT IN ('NO COBRADA', 'INCONSISTENCIA')
             )
         ) AND
         detDs."estado_aplicacion" != 'INCONSISTENCIA' AND
         NOT EXISTS (
             SELECT 1
-            FROM "detalle_deduccion" detD
+            FROM "net_detalle_deduccion" detD
             WHERE detD."id_afiliado" = afil."id_afiliado" AND detD."estado_aplicacion" = 'COBRADA'
         ) AND
         NOT EXISTS (
@@ -582,7 +582,7 @@ FROM
     LEFT JOIN
         "net_detalle_pago_beneficio" detBs ON detBA."id_detalle_ben_afil" = detBs."id_beneficio_afiliado"
     LEFT JOIN
-        "planilla" pla ON detBs."id_planilla" = pla."id_planilla"
+        "net_planilla" pla ON detBs."id_planilla" = pla."id_planilla"
     WHERE
         pla."id_planilla" = '${idPlanilla}'
     GROUP BY
@@ -617,9 +617,9 @@ FULL OUTER JOIN
     FROM
         "net_afiliado" afil
     LEFT JOIN
-        "detalle_deduccion" detDs ON afil."id_afiliado" = detDs."id_afiliado"
+        "net_detalle_deduccion" detDs ON afil."id_afiliado" = detDs."id_afiliado"
     LEFT JOIN
-        "planilla" pla ON detDs."id_planilla" = pla."id_planilla"
+        "net_planilla" pla ON detDs."id_planilla" = pla."id_planilla"
     WHERE
         pla."id_planilla" = '${idPlanilla}'
     GROUP BY

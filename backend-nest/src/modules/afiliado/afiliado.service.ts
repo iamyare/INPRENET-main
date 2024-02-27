@@ -181,7 +181,7 @@ export class AfiliadoService {
         const query = `
         SELECT DISTINCT
           "detA"."id_detalle_afiliado_padre"
-          FROM "Net_Afiliado" "Afil"
+          FROM "net_afiliado" "Afil"
           FULL OUTER JOIN
           "net_detalle_afiliado" "detA" ON "Afil"."id_afiliado" = "detA"."id_detalle_afiliado_padre"
         WHERE
@@ -192,7 +192,7 @@ export class AfiliadoService {
           (
               SELECT 
               "detA"."id_afiliado"
-              FROM "Net_Afiliado" "Afil"
+              FROM "net_afiliado" "Afil"
               INNER JOIN
               "net_detalle_afiliado" "detA" ON "Afil"."id_afiliado" = "detA"."id_detalle_afiliado_padre"
           )
@@ -213,7 +213,7 @@ export class AfiliadoService {
           "detA"."tipo_afiliado"
         FROM
             "net_detalle_afiliado" "detA" INNER JOIN 
-            "Net_Afiliado" "Afil" ON "detA"."id_afiliado" = "Afil"."id_afiliado"
+            "net_afiliado" "Afil" ON "detA"."id_afiliado" = "Afil"."id_afiliado"
         WHERE 
             "detA"."id_detalle_afiliado_padre" = ${beneficios[0].id_detalle_afiliado_padre} AND 
             "detA"."tipo_afiliado" = 'BENEFICIARIO'

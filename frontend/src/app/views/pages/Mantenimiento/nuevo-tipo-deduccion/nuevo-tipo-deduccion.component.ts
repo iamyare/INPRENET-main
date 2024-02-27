@@ -22,7 +22,7 @@ export class NuevoTipoDeduccionComponent {
       ],
     validations: [Validators.required], display:true
     },
-    { type: 'text', label: 'Código de deducción', name: 'codigo_deduccion', validations: [Validators.required], display:true },
+    { type: 'number', label: 'Código de deducción', name: 'codigo_deduccion', validations: [Validators.required], display:true },
     { type: 'number', label: 'Prioridad', name: 'prioridad', validations: [Validators.required] , display:true},
   ];
 

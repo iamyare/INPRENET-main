@@ -119,7 +119,7 @@ export class DetalleBeneficioService {
             "detA"."tipo_afiliado"
         FROM
             "detalle_afiliado" "detA" INNER JOIN 
-            "afiliado" "Afil" ON "detA"."id_afiliado" = "Afil"."id_afiliado"
+            "net_afiliado" "Afil" ON "detA"."id_afiliado" = "Afil"."id_afiliado"
         WHERE 
             "detA"."id_detalle_afiliado_padre" = ${idAfiliado} AND
             "Afil"."dni" = '${beneficiario.dni}' AND
@@ -154,7 +154,7 @@ export class DetalleBeneficioService {
       INNER JOIN 
         "net_detalle_beneficio_afiliado" detBA ON db."id_beneficio_afiliado" = detBA."id_detalle_ben_afil"
       INNER JOIN 
-        "beneficio" ben ON ben."id_beneficio" = detBA."id_beneficio"
+        "net_beneficio" ben ON ben."id_beneficio" = detBA."id_beneficio"
       WHERE
         detBA."id_afiliado" = :idAfiliado
         AND db."id_planilla" = :idPlanilla
@@ -196,7 +196,7 @@ export class DetalleBeneficioService {
   JOIN
     "net_beneficio" b ON detBA."id_beneficio" = b."id_beneficio"
   JOIN
-    "Net_Afiliado" afil ON detBA."id_afiliado" = afil."id_afiliado"
+    "net_afiliado" afil ON detBA."id_afiliado" = afil."id_afiliado"
   WHERE
     detBA."id_afiliado" = :idAfiliado
   AND
@@ -242,9 +242,9 @@ async obtenerDetallesBeneficioComplePorAfiliado(idAfiliado: string): Promise<any
       JOIN
         "net_detalle_beneficio_afiliado" detBA ON detBA."id_detalle_ben_afil" = detB."id_beneficio_afiliado"
       JOIN
-        "beneficio" ben ON detBA."id_beneficio" = ben."id_beneficio"
+        "net_beneficio" ben ON detBA."id_beneficio" = ben."id_beneficio"
       JOIN
-        "afiliado" afil ON detBA."id_afiliado" = afil."id_afiliado"
+        "net_afiliado" afil ON detBA."id_afiliado" = afil."id_afiliado"
       WHERE
         afil."id_afiliado" = :1 AND
         detB."estado" != 'INCONSISTENCIA' AND
@@ -287,7 +287,7 @@ async obtenerBeneficiosDeAfil(dni: string): Promise<any[]> {
       FROM "net_beneficio" ben
       INNER JOIN "net_detalle_beneficio_afiliado" detBenAfil ON  
       detBenAfil."id_beneficio" = ben."id_beneficio"
-      INNER JOIN "Net_Afiliado" afil ON  
+      INNER JOIN "net_afiliado" afil ON  
       detBenAfil."id_afiliado" = afil."id_afiliado"
       WHERE 
       afil."dni" = '${dni}'`;

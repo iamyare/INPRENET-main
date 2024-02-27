@@ -2,7 +2,7 @@
 import { Net_TipoIdentificacion } from "src/modules/tipo_identificacion/entities/net_tipo_identificacion.entity";
 import { Net_Pais } from "src/modules/Regional/pais/entities/pais.entity";
 /* import { TipoIdentificacion } from "src/modules/tipo_identificacion/entities/tipo_identificacion.entity"; */
-import { Column, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn } from "typeorm";
+import { Column, Entity, Index, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 import { Net_Provincia } from "src/modules/Regional/provincia/entities/net_provincia.entity";
 
 import { Net_Ref_Personal_Afiliado } from "./net_referenciaP-Afiliado";
@@ -18,7 +18,6 @@ import { Net_Afiliados_Por_Banco } from "src/modules/banco/entities/net_afiliado
  
 @Entity()
 export class Net_Afiliado {
-
     @PrimaryGeneratedColumn('uuid')
     id_afiliado: string;
 
@@ -30,7 +29,8 @@ export class Net_Afiliado {
     @JoinColumn({ name: 'id_pais' })
     pais: Net_Pais;
     
-    @Column('varchar2', { length: 40, nullable: true, unique: true })
+    @Column('varchar2', { length: 40, nullable: true, })
+    @Index("UQ_DNI_net_afiliado", {unique:true})
     dni: string;
 
     @Column('varchar2', { length: 40, nullable: true })

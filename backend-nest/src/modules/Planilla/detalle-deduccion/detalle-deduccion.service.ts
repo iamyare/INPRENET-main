@@ -297,7 +297,7 @@ async actualizarPlanillasYEstadosDeDeducciones(detalles: { idDedDeduccion: strin
     const nuevoDetalleDeduccion = this.detalleDeduccionRepository.create({
       afiliado: afiliado,
       deduccion: deduccion,
-      institucion: institucion,
+      /* institucion: institucion, */
       monto_total: monto_total,
       monto_aplicado: monto_aplicado,
       estado_aplicacion: estado_aplicacion,
@@ -373,7 +373,7 @@ async actualizarPlanillasYEstadosDeDeducciones(detalles: { idDedDeduccion: strin
         if (!institucion) {
           throw new NotFoundException(`Institución con nombre '${nombre_institucion}' no encontrada.`);
         }
-        detalleDeduccion.institucion = institucion;
+        /* detalleDeduccion.institucion = institucion; */
     }
 
     // Actualizar los campos del DetalleDeduccion existente

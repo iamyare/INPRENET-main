@@ -33,7 +33,7 @@ export class CreateDeduccionDto {
 
     @IsString()
     @IsOptional()
-    tipo_deduccion: string;
+    id_institucion: string;
 
     @IsNumberCustom({ message: 'El valor de codigo deduccion debe ser numérico.' })
     codigo_deduccion: number

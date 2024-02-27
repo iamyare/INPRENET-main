@@ -19,9 +19,9 @@ export class Net_Detalle_Deduccion {
     @JoinColumn({ name: 'id_afiliado' })
     afiliado: Net_Afiliado;
     
-    @ManyToOne(() => Net_Institucion, institucion => institucion.detalleDeduccion, { cascade: true})
+    /* @ManyToOne(() => Net_Institucion, institucion => institucion.detalleDeduccion, { cascade: true})
     @JoinColumn({ name: 'id_institucion' })
-    institucion: Net_Institucion; // Correcto
+    institucion: Net_Institucion; // Correcto */
 
     @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
     monto_total: number;

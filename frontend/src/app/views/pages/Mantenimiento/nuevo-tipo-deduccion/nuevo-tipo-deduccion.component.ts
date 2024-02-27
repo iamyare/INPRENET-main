@@ -35,7 +35,7 @@ export class NuevoTipoDeduccionComponent implements OnInit {
           this.myFormFields = [
             { type: 'text', label: 'Nombre', name: 'nombre_deduccion', validations: [Validators.required] , display:true},
             { type: 'text', label: 'Descripción', name: 'descripcion_deduccion', validations: [Validators.required] , display:true},
-            { type: 'dropdown', label: 'institucion', name: 'nombre_institucion',
+            { type: 'dropdown', label: 'Institución', name: 'nombre_institucion',
             options: nuevoArreglo,
             validations: [Validators.required], display:true
             },

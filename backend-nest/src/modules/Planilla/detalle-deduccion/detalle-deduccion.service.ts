@@ -34,6 +34,41 @@ export class DetalleDeduccionService {
     @InjectEntityManager() private readonly entityManager: EntityManager
   ){}
 
+  async insertarDetalles(data: any[]): Promise<void> {
+    const queryRunner = this.entityManager.connection.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+
+    try {
+      for (const item of data) {
+        const institucion = await this.institucionRepository.findOne({ where: { nombre_institucion: item.nombre_institucion } });
+        if (!institucion) throw new NotFoundException(`Institucion ${item.nombre_institucion} no encontrada`);
+
+        const afiliado = await this.afiliadoRepository.findOne({ where: { dni: item.dni } });
+        if (!afiliado) throw new NotFoundException(`Afiliado con DNI ${item.dni} no encontrado`);
+
+        const deduccion = await this.deduccionRepository.findOne({ where: { codigo_deduccion: item.codigo_deduccion, institucion } });
+        if (!deduccion) throw new NotFoundException(`Deducción con código ${item.codigo_deduccion} no encontrada en la institución ${item.nombre_institucion}`);
+
+        const detalleDeduccion = new Net_Detalle_Deduccion();
+        detalleDeduccion.afiliado = afiliado;
+        detalleDeduccion.deduccion = deduccion;
+        detalleDeduccion.anio = parseInt(item.año);
+        detalleDeduccion.mes = parseInt(item.mes);
+        detalleDeduccion.monto_total = parseFloat(item.monto_total);
+
+        await queryRunner.manager.save(detalleDeduccion);
+      }
+      await queryRunner.commitTransaction();
+    } catch (error) {
+      await queryRunner.rollbackTransaction();
+      this.logger.error(`Error al insertar detalles de deducción: ${error.message}`);
+      throw new InternalServerErrorException('Error al insertar detalles de deducción');
+    } finally {
+      await queryRunner.release();
+    }
+  }
+
   async actualizarEstadoAplicacionPorPlanilla(idPlanilla: string, nuevoEstado: string): Promise<{ mensaje: string }> {
     try {
       const resultado = await this.detalleDeduccionRepository.createQueryBuilder()

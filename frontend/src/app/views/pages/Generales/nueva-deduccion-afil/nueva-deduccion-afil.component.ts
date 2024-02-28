@@ -208,29 +208,30 @@ guardarDetalleDeduccion(){
       const wb: XLSX.WorkBook = XLSX.read(bstr, { type: 'binary' });
       const wsname: string = wb.SheetNames[0];
       const ws: XLSX.WorkSheet = wb.Sheets[wsname];
-      let data: any[][] = XLSX.utils.sheet_to_json(ws, { header: 1, raw: false, defval: null }) as any[][];
 
-      // Elimina filas completamente vacías
-      data = data.filter(row => row.some(cell => cell != null && cell.toString().trim() !== ''));
+      // Convertir hoja a un arreglo de objetos
+      let data: any[] = XLSX.utils.sheet_to_json(ws, { raw: false, defval: null });
 
-      // Encuentra la primera fila con columnas vacías y sus posiciones
-      let errorDetails = [];
-      for (let i = 0; i < data.length; i++) {
-        let emptyColumns = data[i].reduce((acc, cell, index) => {
-          if (cell == null || cell.toString().trim() === '') {
-            acc.push(index + 1); // Asume que la numeración de columnas comienza en 1
-          }
-          return acc;
-        }, []);
+      // Filtrar filas completamente vacías
+      data = data.filter(row => Object.values(row).some(cell => cell != null && cell.toString().trim() !== ''));
+
+      // Encuentra la primera fila con columnas vacías y sus nombres
+      let errorDetails: { row: number; columns: string[] }[] = [];
+      data.forEach((row, rowIndex) => {
+        const emptyColumns = Object.keys(row).filter(key => {
+          const value = row[key];
+          return value == null || value.toString().trim() === '';
+        });
 
         if (emptyColumns.length > 0) {
-          errorDetails.push({ row: i + 1, columns: emptyColumns });
-          break; // Detiene el bucle después de encontrar la primera fila con errores
+          errorDetails.push({ row: rowIndex + 1, columns: emptyColumns });
+          return; // Salir del bucle forEach
         }
-      }
+      });
 
       if (errorDetails.length > 0) {
-        let message = `Error en la fila ${errorDetails[0].row}: las columnas ${errorDetails[0].columns.join(', ')} están vacías.`;
+        const { row, columns } = errorDetails[0];
+        const message = `Error en la fila ${row}: las columnas ${columns.join(', ')} están vacías.`;
         this.toastr.error(message, 'Error en la carga');
         this.resetState();
         return;
@@ -243,13 +244,15 @@ guardarDetalleDeduccion(){
       this.resetState();
     };
 
-    reader.onerror = (error) => {
+    reader.onerror = () => {
       this.toastr.error('Ocurrió un error al leer el archivo. Asegúrate de que el formato del archivo sea correcto.', 'Error');
       this.resetState();
     };
 
     reader.readAsBinaryString(this.file as Blob);
   }
+
+
 
   cancelUpload() {
     if (this.uploadInterval) {

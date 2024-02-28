@@ -5,7 +5,7 @@ import { Column, Entity, ManyToOne, OneToMany, PrimaryGeneratedColumn } from "ty
 @Entity()
 export class Net_Institucion {
 
-    @PrimaryGeneratedColumn()
+    @PrimaryGeneratedColumn('uuid')
     id_institucion : string;
 
     @Column('varchar2', { length: 40, nullable: false })

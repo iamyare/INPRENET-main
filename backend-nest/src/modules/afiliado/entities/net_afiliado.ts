@@ -5,7 +5,7 @@ import { Net_Pais } from "src/modules/Regional/pais/entities/pais.entity";
 import { Column, Entity, Index, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 import { Net_Provincia } from "src/modules/Regional/provincia/entities/net_provincia.entity";
 
-import { Net_Ref_Personal_Afiliado } from "./net_referenciaP-Afiliado";
+import { Net_Ref_Per_Afil } from "./net_ref-Per-Afiliado";
 
 /* import { DetalleDeduccion } from "src/modules/Planilla/detalle-deduccion/entities/detalle-deduccion.entity"; */
 import { Net_perf_afil_cent_trab} from "./net_perf_afil_cent_trab";
@@ -106,8 +106,8 @@ export class Net_Afiliado {
     @JoinColumn({ name: 'id_provincia' })
     provincia: Net_Provincia;
     
-    @OneToMany(() => Net_Ref_Personal_Afiliado, referenciaPersonalAfiliado => referenciaPersonalAfiliado.afiliado)
-    referenciasPersonalAfiliado: Net_Ref_Personal_Afiliado[];
+    @OneToMany(() => Net_Ref_Per_Afil, referenciaPersonalAfiliado => referenciaPersonalAfiliado.afiliado)
+    referenciasPersonalAfiliado: Net_Ref_Per_Afil[];
 
     @OneToMany(() => Net_Afiliados_Por_Banco, afiliadosPorBanco => afiliadosPorBanco.afiliado)
     afiliadosPorBanco : Net_Afiliados_Por_Banco[];

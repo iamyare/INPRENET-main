@@ -20,6 +20,7 @@ export class NuevoTipoDeduccionComponent implements OnInit {
 
   constructor(private SVCDeduccion:DeduccionesService, private datosEstaticosService:DatosEstaticosService, private toastr: ToastrService, private SVCInstituciones:InstitucionesService ){}
 
+<<<<<<< Updated upstream
   ngOnInit() {
     this.myFormFields = [
       { type: 'text', label: 'Nombre', name: 'nombre_deduccion', validations: [Validators.required] , display:true},
@@ -31,6 +32,50 @@ export class NuevoTipoDeduccionComponent implements OnInit {
       { type: 'number', label: 'Código de deducción', name: 'codigo_deduccion', validations: [Validators.required], display:true },
       { type: 'number', label: 'Prioridad', name: 'prioridad', validations: [Validators.required] , display:true},
     ];
+=======
+
+
+  constructor(private SVCDeduccion:DeduccionesService, private toastr: ToastrService, private SVCInstituciones:InstitucionesService ){}
+
+  ngOnInit(): void {
+
+    this.SVCInstituciones.getInstituciones().subscribe(
+      {
+        next: (response) => {
+          this.instituciones = response;
+          const nuevoArreglo = this.instituciones.map(item => ({
+            label: item.nombre_institucion,
+            value: String(item.id_institucion)
+          }));
+          this.myFormFields = [
+            { type: 'text', label: 'Nombre', name: 'nombre_deduccion', validations: [Validators.required] , display:true},
+            { type: 'text', label: 'Descripción', name: 'descripcion_deduccion', validations: [Validators.required] , display:true},
+            { type: 'dropdown', label: 'Institución', name: 'nombre_institucion',
+            options: nuevoArreglo,
+            validations: [Validators.required], display:true
+            },
+            { type: 'number', label: 'Código de deducción', name: 'codigo_deduccion', validations: [Validators.required], display:true },
+            { type: 'number', label: 'Prioridad', name: 'prioridad', validations: [Validators.required] , display:true},
+          ];
+
+        },
+        error: (error) => {
+          let mensajeError = 'Error desconocido al crear tipo de deduccion';
+          if (error.error && error.error.message) {
+            mensajeError = error.error.message;
+          } else if (typeof error.error === 'string') {
+            mensajeError = error.error;
+          }
+
+          this.toastr.error(mensajeError);
+        }
+      }
+      );
+
+
+
+
+>>>>>>> Stashed changes
   }
 
   obtenerDatos(event:any):any{

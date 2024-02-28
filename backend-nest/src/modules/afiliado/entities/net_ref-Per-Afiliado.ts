@@ -3,7 +3,7 @@ import { Net_ReferenciaPersonal } from "./referencia-personal";
 import { Net_Afiliado } from "./net_afiliado";
 
 @Entity()
-export class Net_Ref_Personal_Afiliado {
+export class Net_Ref_Per_Afil {
 
     @PrimaryGeneratedColumn('uuid')
     refPersonalIdRefPersonal : string;
@@ -13,5 +13,6 @@ export class Net_Ref_Personal_Afiliado {
     afiliado: Net_Afiliado;
 
     @ManyToOne(() => Net_ReferenciaPersonal, referenciaPersonal => referenciaPersonal.referenciasPersonalesAfiliado)
+    @JoinColumn({ name: 'id_ref_personal' })
     referenciaPersonal: Net_ReferenciaPersonal;
 }

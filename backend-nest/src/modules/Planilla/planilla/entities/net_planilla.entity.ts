@@ -1,4 +1,4 @@
-import { Column, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, Index, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 import { Net_TipoPlanilla } from '../../tipo-planilla/entities/tipo-planilla.entity';
 /* import { DetalleDeduccion } from '../../detalle-deduccion/entities/detalle-deduccion.entity'; */
 /* import { DetallePagoBeneficio } from '../../detalle_beneficio/entities/detalle_pago_beneficio.entity'; */
@@ -12,7 +12,8 @@ export class Net_Planilla {
     @PrimaryGeneratedColumn('uuid')
     id_planilla : string
 
-    @Column('varchar2', { unique: true,  nullable: false })
+    @Column('varchar2', {nullable: false })
+    @Index("UQ_codPlanilla_netPlan", {unique:true})
     codigo_planilla : string;
 
     @Column('date', { nullable: false, default: () => 'SYSDATE' })

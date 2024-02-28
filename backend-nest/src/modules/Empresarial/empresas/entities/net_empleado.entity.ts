@@ -1,4 +1,4 @@
-import { Column, Entity, JoinColumn, OneToMany, OneToOne, PrimaryGeneratedColumn } from "typeorm";
+import { Column, Entity, Index, JoinColumn, OneToMany, OneToOne, PrimaryGeneratedColumn } from "typeorm";
 import { Net_Empleado_Empresa } from "./net_empleado-empresa.entity";
 import {  Net_TipoIdentificacion } from "src/modules/tipo_identificacion/entities/net_tipo_identificacion.entity";
 import { Net_Usuario } from "src/modules/usuario/entities/net_usuario.entity";
@@ -29,9 +29,8 @@ export class Net_Empleado{
         })
         telefono_empleado
         
-        @Column('varchar2', {
-                unique : true
-        })
+        @Column('varchar2')
+        @Index("UQ_numIdent_netEmpl", {unique:true})
         numero_identificacion
 
         @Column('varchar2', {

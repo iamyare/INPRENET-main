@@ -1,4 +1,4 @@
-import { Column, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, Index, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 /* import { DetalleDeduccion } from '../../detalle-deduccion/entities/detalle-deduccion.entity'; */
 /* import { Net_TipoDeduccion } from './net_tipo-deduccion.entity'; */
 import { Net_Detalle_Deduccion } from '../../detalle-deduccion/entities/detalle-deduccion.entity';
@@ -17,7 +17,8 @@ export class Net_Deduccion {
     @Column('varchar2', { length: 100, nullable: true })
     descripcion_deduccion : string;
 
-    @Column('number', {nullable: true, unique: true })
+    @Column('number', {nullable: true,})
+    @Index("UQ_codDed_netDed", {unique:true})
     codigo_deduccion : number;
 
     @Column('number', {nullable: true })

@@ -1,4 +1,4 @@
-import { Column, Entity, JoinColumn, ManyToOne, OneToOne, PrimaryGeneratedColumn, Timestamp } from "typeorm";
+import { Column, Entity, Index, JoinColumn, ManyToOne, OneToOne, PrimaryGeneratedColumn, Timestamp } from "typeorm";
 import { Net_Rol } from "./net_rol.entity";
 import { Net_Empleado } from "src/modules/Empresarial/empresas/entities/net_empleado.entity";
 /* import { Afiliado } from "src/afiliado/entities/detalle_afiliado.entity"; */
@@ -8,7 +8,8 @@ export class Net_Usuario {
     @PrimaryGeneratedColumn('uuid')
     id_usuario: string;
 
-    @Column('varchar2', { unique:true, length: 200, nullable: true })
+    @Column('varchar2', {length: 200, nullable: true })
+    @Index("UQ_correo_netUsu", {unique:true})
     correo: string;
 
     @Column('varchar2', { length: 200, nullable: true })

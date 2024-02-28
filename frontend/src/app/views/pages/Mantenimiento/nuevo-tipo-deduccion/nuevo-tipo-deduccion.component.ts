@@ -20,30 +20,13 @@ export class NuevoTipoDeduccionComponent implements OnInit {
 
   constructor(private SVCDeduccion:DeduccionesService, private datosEstaticosService:DatosEstaticosService, private toastr: ToastrService, private SVCInstituciones:InstitucionesService ){}
 
-<<<<<<< Updated upstream
-  ngOnInit() {
-    this.myFormFields = [
-      { type: 'text', label: 'Nombre', name: 'nombre_deduccion', validations: [Validators.required] , display:true},
-      { type: 'text', label: 'Descripción', name: 'descripcion_deduccion', validations: [Validators.required] , display:true},
-      { type: 'dropdown', label: 'Institución', name: 'nombre_institucion',
-      options: this.Instituciones,
-      validations: [Validators.required], display:true
-      },
-      { type: 'number', label: 'Código de deducción', name: 'codigo_deduccion', validations: [Validators.required], display:true },
-      { type: 'number', label: 'Prioridad', name: 'prioridad', validations: [Validators.required] , display:true},
-    ];
-=======
-
-
-  constructor(private SVCDeduccion:DeduccionesService, private toastr: ToastrService, private SVCInstituciones:InstitucionesService ){}
-
   ngOnInit(): void {
 
     this.SVCInstituciones.getInstituciones().subscribe(
       {
         next: (response) => {
-          this.instituciones = response;
-          const nuevoArreglo = this.instituciones.map(item => ({
+          this.Instituciones = response;
+          const nuevoArreglo = this.Instituciones.map((item: { nombre_institucion: any; id_institucion: any; }) => ({
             label: item.nombre_institucion,
             value: String(item.id_institucion)
           }));
@@ -75,7 +58,6 @@ export class NuevoTipoDeduccionComponent implements OnInit {
 
 
 
->>>>>>> Stashed changes
   }
 
   obtenerDatos(event:any):any{

@@ -1,6 +1,6 @@
 import { Net_perf_afil_cent_trab } from "src/modules/afiliado/entities/net_perf_afil_cent_trab";
 import { Net_Provincia } from "src/modules/Regional/provincia/entities/net_provincia.entity";
-import { Column, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn } from "typeorm";
+import { Column, Entity, Index, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 
 @Entity()
 export class Net_Centro_Trabajo {
@@ -28,7 +28,8 @@ export class Net_Centro_Trabajo {
     @Column('nvarchar2', { length: 50, nullable: false })
     representante_legal: string;
 
-    @Column('nvarchar2', { unique : true, length: 14, nullable: false })
+    @Column('nvarchar2', { length: 14, nullable: false })
+    @Index("UQ_rtn_netCenTrab", {unique:true})
     rtn: string;
 
     @Column('nvarchar2', { length: 300, nullable: false })

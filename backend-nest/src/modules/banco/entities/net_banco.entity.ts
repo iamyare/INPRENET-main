@@ -1,4 +1,4 @@
-import { Column, PrimaryGeneratedColumn, OneToMany, Entity } from 'typeorm';
+import { Column, PrimaryGeneratedColumn, OneToMany, Entity, Index } from 'typeorm';
 import { Net_Afiliados_Por_Banco } from './net_afiliados-banco';
 
 @Entity()

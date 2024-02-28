@@ -5,6 +5,7 @@ import { ToastrService } from 'ngx-toastr';
 import { FieldConfig } from 'src/app/shared/Interfaces/field-config';
 import { DynamicFormComponent } from '@docs-components/dynamic-form/dynamic-form.component';
 import { InstitucionesService } from 'src/app/services/instituciones.service';
+import { DatosEstaticosService } from '../../../../services/datos-estaticos.service';
 @Component({
   selector: 'app-nuevo-tipo-deduccion',
   templateUrl: './nuevo-tipo-deduccion.component.html',
@@ -12,57 +13,25 @@ import { InstitucionesService } from 'src/app/services/instituciones.service';
 })
 export class NuevoTipoDeduccionComponent implements OnInit {
   data:any
-  instituciones: any[] = []
   myFormFields: FieldConfig[] = []
+  Instituciones: any = this.datosEstaticosService.Instituciones;
+
   @ViewChild(DynamicFormComponent) dynamicForm!: DynamicFormComponent;
 
+  constructor(private SVCDeduccion:DeduccionesService, private datosEstaticosService:DatosEstaticosService, private toastr: ToastrService, private SVCInstituciones:InstitucionesService ){}
 
-
-
-  constructor(private SVCDeduccion:DeduccionesService, private toastr: ToastrService, private SVCInstituciones:InstitucionesService ){}
-
-  ngOnInit(): void {
-
-    this.SVCInstituciones.getInstituciones().subscribe(
-      {
-        next: (response) => {
-          this.instituciones = response;
-          console.log(this.instituciones);
-          const nuevoArreglo = this.instituciones.map(item => ({
-            label: item.nombre_institucion,
-            value: String(item.id_institucion)
-          }));
-          this.myFormFields = [
-            { type: 'text', label: 'Nombre', name: 'nombre_deduccion', validations: [Validators.required] , display:true},
-            { type: 'text', label: 'Descripción', name: 'descripcion_deduccion', validations: [Validators.required] , display:true},
-            { type: 'dropdown', label: 'Institución', name: 'nombre_institucion',
-            options: nuevoArreglo,
-            validations: [Validators.required], display:true
-            },
-            { type: 'number', label: 'Código de deducción', name: 'codigo_deduccion', validations: [Validators.required], display:true },
-            { type: 'number', label: 'Prioridad', name: 'prioridad', validations: [Validators.required] , display:true},
-          ];
-
-        },
-        error: (error) => {
-          let mensajeError = 'Error desconocido al crear tipo de deduccion';
-          if (error.error && error.error.message) {
-            mensajeError = error.error.message;
-          } else if (typeof error.error === 'string') {
-            mensajeError = error.error;
-          }
-
-          this.toastr.error(mensajeError);
-        }
-      }
-      );
-
-
-
-
+  ngOnInit() {
+    this.myFormFields = [
+      { type: 'text', label: 'Nombre', name: 'nombre_deduccion', validations: [Validators.required] , display:true},
+      { type: 'text', label: 'Descripción', name: 'descripcion_deduccion', validations: [Validators.required] , display:true},
+      { type: 'dropdown', label: 'Institución', name: 'nombre_institucion',
+      options: this.Instituciones,
+      validations: [Validators.required], display:true
+      },
+      { type: 'number', label: 'Código de deducción', name: 'codigo_deduccion', validations: [Validators.required], display:true },
+      { type: 'number', label: 'Prioridad', name: 'prioridad', validations: [Validators.required] , display:true},
+    ];
   }
-
-
 
   obtenerDatos(event:any):any{
     this.data = event;

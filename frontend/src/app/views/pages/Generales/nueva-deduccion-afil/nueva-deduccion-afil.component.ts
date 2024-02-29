@@ -189,6 +189,9 @@ guardarDetalleDeduccion(){
   progressValue = 0;
   uploadInterval: any = null;
   @ViewChild('fileInput') fileInput!: ElementRef;
+  datosCargados: any[] = [];
+  datosCargadosExitosamente : any;
+
 
   onFileSelected(event: any) {
     const target: DataTransfer = <DataTransfer>(event.target);
@@ -209,8 +212,8 @@ guardarDetalleDeduccion(){
 
   startUpload() {
     if (!this.file) {
-      this.toastr.error('No se seleccionó ningún archivo.', 'Error');
-      return;
+        this.toastr.error('No se seleccionó ningún archivo.', 'Error');
+        return;
     }
 
     this.isUploading = true;
@@ -218,53 +221,71 @@ guardarDetalleDeduccion(){
 
     const reader: FileReader = new FileReader();
     reader.onload = (e: any) => {
-      const bstr: string = e.target.result;
-      const wb: XLSX.WorkBook = XLSX.read(bstr, { type: 'binary' });
-      const wsname: string = wb.SheetNames[0];
-      const ws: XLSX.WorkSheet = wb.Sheets[wsname];
+        const bstr: string = e.target.result;
+        const wb: XLSX.WorkBook = XLSX.read(bstr, { type: 'binary' });
+        const wsname: string = wb.SheetNames[0];
+        const ws: XLSX.WorkSheet = wb.Sheets[wsname];
 
-      // Convertir hoja a un arreglo de objetos
-      let data: any[] = XLSX.utils.sheet_to_json(ws, { raw: false, defval: null });
+        // Convertir hoja a un arreglo de objetos
+        let data: any[] = XLSX.utils.sheet_to_json(ws, { raw: false, defval: null });
 
-      // Filtrar filas completamente vacías
-      data = data.filter(row => Object.values(row).some(cell => cell != null && cell.toString().trim() !== ''));
+        // Filtrar filas completamente vacías
+        data = data.filter(row => Object.values(row).some(cell => cell != null && cell.toString().trim() !== ''));
 
-      // Encuentra la primera fila con columnas vacías y sus nombres
-      let errorDetails: { row: number; columns: string[] }[] = [];
-      data.forEach((row, rowIndex) => {
-        const emptyColumns = Object.keys(row).filter(key => {
-          const value = row[key];
-          return value == null || value.toString().trim() === '';
+        // Encuentra la primera fila con columnas vacías y sus nombres
+        let errorDetails: { row: number; columns: string[] }[] = [];
+        data.forEach((row, rowIndex) => {
+            const emptyColumns = Object.keys(row).filter(key => {
+                const value = row[key];
+                return value == null || value.toString().trim() === '';
+            });
+
+            if (emptyColumns.length > 0) {
+                errorDetails.push({ row: rowIndex + 1, columns: emptyColumns });
+            }
         });
 
-        if (emptyColumns.length > 0) {
-          errorDetails.push({ row: rowIndex + 1, columns: emptyColumns });
-          return; // Salir del bucle forEach
+        if (errorDetails.length > 0) {
+            // Crear un mensaje de error que incluye detalles de todas las filas con problemas
+            const errorMessage = errorDetails.map(error => `Error en la fila ${error.row}: las columnas ${error.columns.join(', ')} están vacías.`).join(' ');
+            this.toastr.error(errorMessage, 'Error en la carga');
+            this.resetState();
+            return;
         }
-      });
 
-      if (errorDetails.length > 0) {
-        const { row, columns } = errorDetails[0];
-        const message = `Error en la fila ${row}: las columnas ${columns.join(', ')} están vacías.`;
-        this.toastr.error(message, 'Error en la carga');
-        this.resetState();
-        return;
-      }
+        // Enviar datos procesados y validados al backend
+        this.deduccionesService.crearDesdeExcel(data).subscribe({
+            next: (response) => {
+                console.log('Datos insertados exitosamente:', response);
+                this.toastr.success('Todos los datos se cargaron correctamente.', 'Carga exitosa');
+                this.datosCargadosExitosamente = true;
+                this.resetState(); // Reiniciar estado después de la carga exitosa
+            },
+            error: (error) => {
+                this.toastr.error('Error al cargar los datos.', 'Error de carga');
+                this.datosCargadosExitosamente = false;
+                this.resetState(); // Reiniciar estado en caso de error
 
-      console.log("Datos procesados del archivo Excel:", data);
-
-      this.progressValue = 100; // Completa la barra de progreso asumiendo la carga exitosa
-      this.toastr.success('Todos los datos se cargaron correctamente.', 'Carga exitosa');
-      this.resetState();
+                // Verificar si la respuesta de error contiene detalles específicos
+                if (error.error && error.error.details) {
+                    error.error.details.forEach((detail:any) => {
+                        this.toastr.error(`Detalle: ${detail.message}`, 'Error Detallado');
+                    });
+                } else {
+                    // Mensaje de error genérico si no hay detalles disponibles
+                    this.toastr.error(error.message || 'Ocurrió un error desconocido.', 'Error');
+                }
+            }
+        });
     };
 
     reader.onerror = () => {
-      this.toastr.error('Ocurrió un error al leer el archivo. Asegúrate de que el formato del archivo sea correcto.', 'Error');
-      this.resetState();
+        this.toastr.error('Ocurrió un error al leer el archivo. Asegúrate de que el formato del archivo sea correcto.', 'Error');
+        this.resetState(); // Reiniciar estado en caso de error de lectura
     };
 
     reader.readAsBinaryString(this.file as Blob);
-  }
+}
 
 
 
@@ -274,20 +295,19 @@ guardarDetalleDeduccion(){
       this.uploadInterval = null; // Limpia la referencia
     }
 
-    this.isUploading = false; // Marca la subida como no en progreso
-    this.progressValue = 0; // Opcional: restablece la barra de progreso
-
-    // Opcional: Lógica adicional en caso de cancelación...
+    this.isUploading = false;
+    this.progressValue = 0;
   }
 
   resetState() {
     this.isUploading = false;
     this.progressValue = 0;
     this.file = null;
+    this.datosCargados = []; // Limpia los datos cargados para evitar mostrar datos residuales
     if (this.fileInput && this.fileInput.nativeElement) {
-      this.fileInput.nativeElement.value = '';
+        this.fileInput.nativeElement.value = '';
     }
-  }
+}
 
   limpiarFormulario(): void {
     // Utiliza la referencia al componente DynamicFormComponent para resetear el formulario

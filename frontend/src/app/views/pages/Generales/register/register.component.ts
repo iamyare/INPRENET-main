@@ -20,11 +20,26 @@ export class RegisterComponent implements OnInit{
   errorMsg: string = '';
   token: string | null = null;
 
+  ConfirmarContrasenaValidator(controlName: string, matchingControlName: string) {
+    return (formGroup: FormGroup) => {
+      const control = formGroup.controls[controlName];
+      const matchingControl = formGroup.controls[matchingControlName];
+
+      if (matchingControl.errors && !matchingControl.errors['confirmarContrasena']) {
+        return;
+      }
+      if (control.value !== matchingControl.value) {
+        matchingControl.setErrors({ confirmarContrasena: true });
+      } else {
+        matchingControl.setErrors(null);
+      }
+    }
+  }
+
 
   constructor(private fb: FormBuilder,
               private authService: AuthService,
-              private route: ActivatedRoute,
-              private router: Router) {
+              private route: ActivatedRoute) {
     this.form = this.fb.group({
       preguntaseguridad1: ['', [Validators.required]],
       preguntaseguridad2: ['', [Validators.required]],
@@ -33,7 +48,8 @@ export class RegisterComponent implements OnInit{
       respuestaSeguridad2: ['', [Validators.required]],
       respuestaSeguridad3: ['', [Validators.required]],
       contrasenia: ['', [Validators.required]],
-    });
+      confirmarContrasenia: ['', Validators.required]
+    }, { validator: this.ConfirmarContrasenaValidator('contrasenia', 'confirmarContrasenia') });
 
     this.preguntaSeguridad = [
       {"id": "preguntaseguridad1", "pregunta": "¿Cuál es tu animal favorito?"},
@@ -45,11 +61,6 @@ export class RegisterComponent implements OnInit{
   ngOnInit(): void {
     this.route.params.subscribe(params => {
       this.token = params['token'];
-      if (this.token) {
-        console.log('Token:', this.token);
-      } else {
-        console.log('No se encontró el token en la URL.');
-      }
     });
   }
 
@@ -81,7 +92,7 @@ export class RegisterComponent implements OnInit{
           next: (res) => {
             console.log(res);
             this.loading = true;
-            window.location.href = 'http://127.0.0.7:5500/backend/public/confirm.html';
+            window.location.href = 'http://localhost:4200/';
           },
           error: (err) => {
             console.error(err);

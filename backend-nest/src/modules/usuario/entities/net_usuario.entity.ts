@@ -1,7 +1,6 @@
-import { Column, Entity, Index, JoinColumn, ManyToOne, OneToOne, PrimaryGeneratedColumn, Timestamp } from "typeorm";
+import { Column, Entity, Index, JoinColumn, ManyToOne, OneToOne, PrimaryGeneratedColumn } from "typeorm";
 import { Net_Rol } from "./net_rol.entity";
 import { Net_Empleado } from "src/modules/Empresarial/empresas/entities/net_empleado.entity";
-/* import { Afiliado } from "src/afiliado/entities/detalle_afiliado.entity"; */
 
 @Entity()
 export class Net_Usuario {
@@ -51,7 +50,4 @@ export class Net_Usuario {
 
     @OneToOne(() => Net_Empleado, empleado => empleado.usuario)
     empleado: Net_Empleado;
-
-    /* @OneToOne(() => Afiliado, afiliado => afiliado.usuario)
-    afiliado: Afiliado; */
 }

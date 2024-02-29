@@ -9,24 +9,22 @@ import { FileInterceptor } from '@nestjs/platform-express';
 export class DetalleDeduccionController {
   constructor(private readonly detalleDeduccionService: DetalleDeduccionService) {}
 
-  /* @Post()
-  @HttpCode(HttpStatus.CREATED)
-  async insertarDetalles(@Body() data: any[], @Res() res: Response) {
-    try {
-      await this.detalleDeduccionService.insertarDetalles(data);
-      res.status(HttpStatus.CREATED).json({
-        message: 'Detalles de deducción insertados exitosamente',
-      });
-    } catch (error) {
-      if (error instanceof HttpException) {
-        // If it's a NestJS-defined HTTP exception, rethrow it
-        throw error;
-      } else {
-        // For any other errors, throw a generic internal server error
-        throw new HttpException('Error interno del servidor', HttpStatus.INTERNAL_SERVER_ERROR);
-      }
+@Post('crearDeExcel')
+@HttpCode(HttpStatus.CREATED)
+async insertarDetalles(@Body() data: any[]) {
+  try {
+    await this.detalleDeduccionService.insertarDetalles(data);
+    return {
+      message: 'Detalles de deducción insertados exitosamente',
+    };
+  } catch (error) {
+    if (error instanceof HttpException) {
+      throw error;
+    } else {
+      throw new HttpException('Error interno del servidor', HttpStatus.INTERNAL_SERVER_ERROR);
     }
-  } */
+  }
+}
   
   @Patch('actualizar-estado/:idPlanilla')
   async actualizarEstadoAplicacionPorPlanilla(

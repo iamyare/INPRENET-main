@@ -11,6 +11,10 @@ export class DeduccionesService {
 
   constructor(private toastr: ToastrService ,private http: HttpClient) { }
 
+  crearDesdeExcel(data: any): Observable<any> {
+    return this.http.post(`${environment.API_URL}/api/detalle-deduccion/crearDeExcel`, data);
+  }
+
   actualizarEstadoDeduccion(idPlanilla: string, nuevoEstado: string): Observable<any> {
     return this.http.patch(`${environment.API_URL}/api/detalle-deduccion/actualizar-estado/${idPlanilla}`, { nuevoEstado })
       .pipe(

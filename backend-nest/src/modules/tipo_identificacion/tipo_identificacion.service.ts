@@ -4,6 +4,7 @@ import { UpdateTipoIdentificacionDto } from './dto/update-tipo_identificacion.dt
 import { Net_TipoIdentificacion } from './entities/net_tipo_identificacion.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import { PaginationDto } from 'src/common/dtos/pagination.dto';
 
 @Injectable()
 export class TipoIdentificacionService {
@@ -20,13 +21,16 @@ export class TipoIdentificacionService {
       await this.TipoIdentificacionRepository.save(tipoIdentificacion)
       return tipoIdentificacion;
     } catch (error) {
-      /* this.handleException(error); */
       console.log(error);
     }
   }
 
-  findAll() {
-    return `This action returns all tipoIdentificacion`;
+  findAll(paginationDto: PaginationDto) {
+    const { limit = 10, offset = 0 } = paginationDto
+    return this.TipoIdentificacionRepository.find({
+      take: limit,
+      skip : offset
+    });
   }
 
   findOne(id: number) {

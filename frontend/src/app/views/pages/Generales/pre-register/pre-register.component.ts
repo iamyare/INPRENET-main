@@ -1,28 +1,31 @@
-import { Component } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { generateFormArchivo } from 'src/components/botonarchivos/botonarchivos.component';
 import { AuthService } from 'src/app/services/auth.service';
+import { TipoIdentificacionService } from '../../../../services/tipo-identificacion.service';
+import { ToastrService } from 'ngx-toastr';
 
 @Component({
   selector: 'app-pre-register',
   templateUrl: './pre-register.component.html',
   styleUrl: './pre-register.component.scss'
 })
-export class PreRegisterComponent {
+export class PreRegisterComponent implements OnInit{
   form: FormGroup;
-
   formArchivo = this.fb.group({
     Archivos: generateFormArchivo()
   })
-  
+
   tipoIdent: any = [];
   tipoRol: any = [];
 
-  constructor( private fb: FormBuilder,
-    private authSvc: AuthService
+  constructor(
+    private fb: FormBuilder,
+    private tipoIdentificacionService : TipoIdentificacionService,
+    private authSvc : AuthService,
+    private toastr: ToastrService
     ) {
-
     this.form = this.fb.group({
      correo: ['', [Validators.required, Validators.email]],
      rol: ['', [Validators.required]],
@@ -31,40 +34,14 @@ export class PreRegisterComponent {
      nombrecomp: ['', [Validators.required]],
    });
 
-   this.tipoIdent = [
-     {
-       "idIdentificacion":1,
-       "value": "DNI"
-     },
-     {
-       "idIdentificacion":2,
-       "value": "PASAPORTE"
-     },
-     {
-       "idIdentificacion":3,
-       "value": "CARNET RESIDENCIA"
-     },
-     {
-       "idIdentificacion":4,
-       "value": "NUMERO LICENCIA"
-     },
-     {
-       "idIdentificacion":5,
-       "value": "RTN"
-     },
-   ];
    this.tipoRol = [
      {
-       "idRol":1,
-       "value": "ADMINISTRADOR"
-     },
-     {
        "idRol":2,
-       "value": "OFICIAL DE OPERACION"
+       "value": "JEFE DE AREA"
      },
      {
        "idRol":3,
-       "value": "CONTADOR"
+       "value": "OFICIAL"
      },
      {
        "idRol":4,
@@ -73,32 +50,36 @@ export class PreRegisterComponent {
    ]
   }
 
+  ngOnInit() {
+    this.tipoIdentificacionService.obtenerTiposIdentificacion().subscribe(data => {
+      this.tipoIdent = data;
+    });
+  }
+
   crearCuenta(){
-    const correo = this.form.value.correo;
-    const rol = this.form.value.rol;
-    const tipoIdentificacion = this.form.value.tipoIdent;
-    const numeroIdentificacion = this.form.value.numeroIden;
-    const nombrecomp = this.form.value.nombrecomp;
-    const fileID = this.form.value.fileID;
-
-    const data = {
-      'correo' : correo,
-      'nombreRol' : rol,
-      'tipoIdentificacion' : tipoIdentificacion,
-      'numeroIdentificacion' : numeroIdentificacion,
-      'nombre' : nombrecomp,
-      'archivoidentificacion' :  "this.archivo"
+    if (this.form.valid) {
+      const formData = {
+        correo: this.form.value.correo,
+        nombre_rol: this.form.value.rol,
+        tipo_identificacion: this.form.value.tipoIdent,
+        numero_identificacion: this.form.value.numeroIden,
+        nombre_empleado: this.form.value.nombrecomp,
+        archivo_identificacion: "Aqui_va_el_procesamiento_del_archivo_si_es_necesario"
+      };
+      this.authSvc.crearCuenta(formData).subscribe({
+        next: (res) => {
+          this.toastr.success('Cuenta creada exitosamente!', 'Éxito');
+          this.form.reset();
+          this.formArchivo.reset();
+        },
+        error: (err) => {
+          this.toastr.error('Error al crear la cuenta', 'Error');
+        }
+      });
+    } else {
+      console.error('El formulario no es válido');
+      this.toastr.error('El formulario no es válido', 'Error');
     }
-
-    console.log(this.formArchivo);
-    
-    console.log(data);
-
-    /* this.authSvc.crearCuenta(data).subscribe((res: any) => {
-      console.log(res);
-
-      //this.fakeLoading(res);
-    }); */
   }
 
 }

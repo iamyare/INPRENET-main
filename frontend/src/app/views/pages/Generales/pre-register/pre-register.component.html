@@ -28,8 +28,8 @@
                   <mat-form-field style="width:100%">
                     <mat-label>Tipo de identificación</mat-label>
                     <select matNativeControl formControlName="tipoIdent">
-                      <option *ngFor="let p of tipoIdent" [value]="p.value">
-                        {{p.value}}
+                      <option *ngFor="let p of tipoIdent" [value]="p.tipo_identificacion">
+                        {{p.tipo_identificacion}}
                       </option>
                     </select>
                   </mat-form-field>
@@ -65,7 +65,7 @@
             </c-card-body>
           </c-card>
           <c-card [ngStyle]="{'width.%': 44}" class="text-white py-5" style="background: #1F544A; display: flex; align-items: center; justify-content: center;">
-            <img src="assets/images/inprema2.png" alt="Descripción de la imagen" style="width: 25em; height: 15em;">
+            <img src="../../../../../assets/images/LOGO INPRENET.png" alt="Descripción de la imagen" style="width: 40em; height: 10em;">
         </c-card>
         </c-card-group>
       </c-col>

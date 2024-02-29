@@ -1,7 +1,8 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Query } from '@nestjs/common';
 import { TipoIdentificacionService } from './tipo_identificacion.service';
 import { CreateTipoIdentificacionDto } from './dto/create-tipo_identificacion.dto';
 import { UpdateTipoIdentificacionDto } from './dto/update-tipo_identificacion.dto';
+import { PaginationDto } from 'src/common/dtos/pagination.dto';
 
 @Controller('tipo-identificacion')
 export class TipoIdentificacionController {
@@ -13,8 +14,8 @@ export class TipoIdentificacionController {
   }
 
   @Get()
-  findAll() {
-    return this.tipoIdentificacionService.findAll();
+  findAll(@Query() paginationDto: PaginationDto) {
+    return this.tipoIdentificacionService.findAll(paginationDto);
   }
 
   @Get(':id')

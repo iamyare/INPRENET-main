@@ -64,7 +64,7 @@ export class PlanillaService {
             ben."nombre_beneficio",
             SUM(COALESCE(dpb."monto_a_pagar", 0)) AS "Total Monto Beneficio"
         FROM
-            "beneficio" ben
+            "net_beneficio" ben
         INNER JOIN
             "net_detalle_beneficio_afiliado" dba ON ben."id_beneficio" = dba."id_beneficio"
         INNER JOIN
@@ -86,9 +86,9 @@ export class PlanillaService {
         FROM
             "net_detalle_deduccion" detDed
         INNER JOIN
-            "deduccion" ded ON detDed."id_deduccion" = ded."id_deduccion"
+            "net_deduccion" ded ON detDed."id_deduccion" = ded."id_deduccion"
         LEFT JOIN
-            "institucion" inst ON detDed."id_institucion" = inst."id_institucion"
+            "net_institucion" inst ON ded."id_institucion" = inst."id_institucion"
         INNER JOIN
             "net_afiliado" afil ON detDed."id_afiliado" = afil."id_afiliado"
         WHERE
@@ -117,7 +117,7 @@ export class PlanillaService {
                 ben."nombre_beneficio",
                 SUM(COALESCE(dpb."monto_a_pagar", 0)) AS "Total Monto Beneficio"
             FROM
-                "beneficio" ben
+                "net_beneficio" ben
             INNER JOIN
                 "net_detalle_beneficio_afiliado" dba ON ben."id_beneficio" = dba."id_beneficio"
             INNER JOIN

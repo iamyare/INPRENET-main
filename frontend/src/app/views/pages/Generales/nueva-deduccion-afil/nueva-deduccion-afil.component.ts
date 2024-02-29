@@ -47,51 +47,61 @@ export class NuevaDeduccionAfilComponent{
   }
 
 
-  obtenerDatos(event:any):any{
+  async obtenerDatos(event: any): Promise<any> {
     this.data = event;
-    this.getFilasAfilById();
+    if (this.data.value.nombre_institucion) {
+      await this.getTiposDeducciones(this.data.value.nombre_institucion);
+    }
+    if (this.data.value.dni) {
+      this.getFilasAfilById();
+    }
   }
 
-  obtenerDatos1():any{
-    this.getTiposDeducciones();
+  obtenerDatos1(): any {
     this.getInstituciones();
     this.myFormFields = [
-      { type: 'text', label: 'DNI', name: 'dni', validations: [Validators.required], display:true },
-      {
-        type: 'dropdown', label: 'Nombre de deduccion', name: 'nombre_deduccion',
-        options: this.tiposDeducciones,
-        validations: [Validators.required], display:true
-      },
+      { type: 'text', label: 'DNI', name: 'dni', validations: [Validators.required], display: true },
       {
         type: 'dropdown', label: 'Nombre de institucion', name: 'nombre_institucion',
         options: this.instituciones,
-        validations: [Validators.required], display:true
+        validations: [Validators.required], display: true
       },
-      { type: 'number', label: 'Monto total', name: 'monto_total', validations: [Validators.required,Validators.pattern("^\\d*\\.?\\d+$")], display:true },
-      { type: 'number', label: 'Año', name: 'anio', validations: [Validators.required, Validators.pattern("^\\d*\\.?\\d+$")], display:true },
-      { type: 'number', label: 'Mes', name: 'mes', validations: [Validators.required ,Validators.pattern("^\\d*\\.?\\d+$")], display:true },
+      {
+        type: 'dropdown', label: 'Nombre de deduccion', name: 'nombre_deduccion',
+        options: [], // Deja los tipos de deducción inicialmente vacíos
+        validations: [Validators.required], display: true
+      },
+      { type: 'number', label: 'Monto total', name: 'monto_total', validations: [Validators.required, Validators.pattern("^\\d*\\.?\\d+$")], display: true },
+      { type: 'number', label: 'Año', name: 'anio', validations: [Validators.required, Validators.pattern("^\\d*\\.?\\d+$")], display: true },
+      { type: 'number', label: 'Mes', name: 'mes', validations: [Validators.required ,Validators.pattern("^\\d*\\.?\\d+$")], display: true },
     ];
   }
 
-
-  getTiposDeducciones = async () => {
+  getTiposDeducciones = async (nombre_institucion: string): Promise<void> => {
     try {
-      const data = await this.deduccionesService.getDeducciones().toPromise();
-      this.filas = data.map((item: any) => {
-        this.tiposDeducciones.push({ label: `${item.nombre_deduccion}`, value: `${item.nombre_deduccion}` })
-        return {
-          id: item.id_deduccion,
-          nombre_deduccion: item.nombre_deduccion,
-          descripcion_deduccion: item.descripcion_deduccion || 'No disponible',
-          tipo_deduccion: item.nombre_deduccion,
-          prioridad: item.prioridad,
-        };
-      });
-      return this.filas;
+      const response = await this.deduccionesService.getDeduccionesByEmpresa(nombre_institucion).toPromise();
+      const field = this.myFormFields.find(field => field.name === 'nombre_deduccion');
+      if (field) {
+        if (response.length > 0) {
+          const temp = response.map((item: any) => {
+            return {
+              label: item.nombre_deduccion,
+              value: item.nombre_deduccion
+            };
+          });
+          field.options = temp;
+        } else{
+          field.options = []
+        }
+      } else {
+        console.error("No se encontró el campo 'nombre_deduccion' en myFormFields");
+      }
+
     } catch (error) {
       console.error("Error al obtener datos de deduccion", error);
     }
   };
+
 
   getInstituciones = async () => {
     try {
@@ -108,6 +118,10 @@ export class NuevaDeduccionAfilComponent{
     } catch (error) {
       console.error("Error al obtener datos de instituciones", error);
     }
+  }
+
+  getTipAfi(){
+    return this.tiposDeducciones;
   }
 
   getFilasAfilById = async () => {

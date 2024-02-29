@@ -20,13 +20,17 @@ export class DeduccionService {
     private detalleDeduccionRepository : Repository<Net_Detalle_Deduccion>,
     @InjectRepository(Net_Afiliado)
     private afiliadoRepository: Repository<Net_Afiliado>,
+    
     @InjectRepository(Net_Deduccion)
-    private deduccionRepository: Repository<Net_Deduccion>,
+    public deduccionRepository: Repository<Net_Deduccion>,
+
     @InjectRepository(Net_Institucion)
     private institucionRepository: Repository<Net_Institucion>
   ){}
 
   async create(createDeduccionDto: CreateDeduccionDto) {
+    const { nombre_institucion } = createDeduccionDto;
+
     const existingDeduccion = await this.deduccionRepository.findOne({
       where: { descripcion_deduccion: createDeduccionDto.descripcion_deduccion }
     });
@@ -34,8 +38,16 @@ export class DeduccionService {
     if (existingDeduccion) {
       throw new BadRequestException('La deducción con esa descripción ya existe');
     }
-  
-    const deduccion = this.deduccionRepository.create(createDeduccionDto);
+    // Buscar la institución por nombre
+    const institucion = await this.institucionRepository.findOne({ where: { nombre_institucion } });
+    if (!institucion) {
+      throw new NotFoundException(`Institución con nombre '${createDeduccionDto.nombre_institucion}' no encontrada.`);
+    }
+    createDeduccionDto["institucion"] = institucion
+    
+    const deduccion = this.deduccionRepository.create(
+      createDeduccionDto
+    );
     await this.deduccionRepository.save(deduccion);
     return deduccion;
   }
@@ -109,8 +121,35 @@ export class DeduccionService {
     return resultados;
   }
   
-  findAll() {
-    return this.deduccionRepository.find()
+  async findAll() {
+    /* return this.deduccionRepository.find() */
+    const queryBuilder = await this.deduccionRepository
+      .createQueryBuilder('net_deduccion')
+      .addSelect('net_deduccion.id_deduccion', 'id_deduccion')
+      .addSelect('net_deduccion.nombre_deduccion', 'nombre_deduccion')
+      .addSelect('net_deduccion.descripcion_deduccion', 'descripcion_deduccion')
+      .addSelect('net_deduccion.prioridad', 'prioridad')
+      .addSelect('institucion.nombre_institucion', 'nombre_institucion')
+      .innerJoin(Net_Institucion, 'institucion', 'net_deduccion.id_institucion = institucion.id_institucion')
+      .getRawMany();
+
+      return queryBuilder;
+  }
+
+  async findOneByNombInst(nombre_institucion:string) {
+    if (nombre_institucion) {      
+      const queryBuilder = await this.deduccionRepository
+      .createQueryBuilder('net_deduccion')
+      .addSelect('net_deduccion.id_deduccion', 'id_deduccion')
+      .addSelect('net_deduccion.nombre_deduccion', 'nombre_deduccion')
+      .innerJoin(Net_Institucion, 'institucion', 'net_deduccion.id_institucion = institucion.id_institucion')
+      .where(`institucion.nombre_institucion = '${nombre_institucion}'` )
+      .getRawMany();
+
+      return queryBuilder;
+      } else {
+        throw new NotFoundException(`la deduccion para la empresa ${nombre_institucion} no fue encontrada.`);
+    }
   }
 
   async findOne(id: string) {

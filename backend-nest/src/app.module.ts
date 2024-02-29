@@ -9,21 +9,19 @@ import { TipoIdentificacionModule } from './modules/tipo_identificacion/tipo_ide
 import { PlanillaModule } from './modules/Planilla/planilla.module';
 import { RegionalModule } from './modules/Regional/regional.module';
 import { EmpresarialModule } from './modules/Empresarial/empresarial.module';
-import * as oracledb from 'oracledb'; // Importa oracledb
-
 
 @Module({
   imports: [
     ConfigModule.forRoot(),
     TypeOrmModule.forRoot({
       type: 'oracle',
+      database: process.env.DB_NAME,
       host: process.env.DB_HOST,
       port: +process.env.DB_PORT,
       username: process.env.DB_USERNAME,
       password: process.env.DB_PASSWORD,
-      database: process.env.DB_NAME,
       connectString: process.env.CONNECT_STRING,
-      synchronize: true,
+      synchronize: false,
       autoLoadEntities : true
     }),
     CommonModule,
@@ -37,15 +35,4 @@ import * as oracledb from 'oracledb'; // Importa oracledb
   ]
 })
 export class AppModule {
-  constructor() {
-    this.initializeOracleClient();
-  }
-
-  async initializeOracleClient() {
-    try {
-      await oracledb.initOracleClient();
-    } catch (error) {
-      console.error('Error initializing Oracle client:', error);
-    }
-  }
 }

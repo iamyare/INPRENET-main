@@ -26,13 +26,13 @@ export class EditarTipoDeduccionComponent implements OnInit{
       validationRules: [Validators.required, Validators.minLength(3)]
      },
       {
-        header: 'Descripcion del beneficio',
+        header: 'Descripcion de la deducción',
          col: 'descripcion_deduccion',
          isEditable: true
       },
       {
-        header: 'Tipo de deduccion',
-      col: 'tipo_deduccion',
+        header: 'Nombre Institución',
+      col: 'nombre_institucion',
       isEditable: true,
       validationRules: [Validators.required, Validators.minLength(3)]
     },
@@ -50,10 +50,10 @@ export class EditarTipoDeduccionComponent implements OnInit{
   getFilas = async () => {
     try {
       const data = await this.deduccionesService.getDeducciones().toPromise();
-
       this.filas = data.map((item: any) => {
         return {
           id: item.id_deduccion,
+          nombre_institucion: item.nombre_institucion,
           nombre_deduccion: item.nombre_deduccion,
           descripcion_deduccion: item.descripcion_deduccion || 'No disponible',
           tipo_deduccion: item.tipo_deduccion,

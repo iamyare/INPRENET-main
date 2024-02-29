@@ -97,6 +97,18 @@ export class DeduccionesService {
         );
   }
 
+  getDeduccionesByEmpresa(nombre_institucion:string): Observable<any>{
+    var url= `${environment.API_URL}/api/deduccion/byNameInst/${nombre_institucion}`;
+
+    return this.http.get(url,
+      ).pipe(
+        map((res:any) => {
+          return res;
+        }),
+        );
+
+  }
+
   getDetalleDeduccion(): Observable<any>{
     var url= `${environment.API_URL}/api/deduccion`;
 

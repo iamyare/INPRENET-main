@@ -23,14 +23,16 @@ export class VerEditarDeduccionAfilComponent implements OnInit{
     private toastr: ToastrService) {}
 
   ngOnInit(): void {
-    this.deduccionesService.getDetallesCompletos().subscribe({
+    /* this.deduccionesService.getDetallesCompletos().subscribe({
       next: (data) => {
+
+
         this.detallesCompletos = data;
       },
       error: (error) => {
         console.error('Error al obtener detalles completos:', error);
       }
-    });
+    }); */
     this.myColumns = [
       {
         header: 'Fecha aplicado',
@@ -40,6 +42,11 @@ export class VerEditarDeduccionAfilComponent implements OnInit{
       {
         header: 'DNI',
         col : 'dni',
+        isEditable: true
+      },
+      {
+        header: 'Nombre Completo',
+        col : 'nombre_completo',
         isEditable: true
       },
       {
@@ -75,12 +82,13 @@ export class VerEditarDeduccionAfilComponent implements OnInit{
   //Funciones para llenar tabla
   getFilas = async () => {
     try {
-      const data = await firstValueFrom(this.deduccionesService.getDetallesCompletos());
-
+      /* Falta traer datos de la planilla */
+      const data = await this.deduccionesService.getDetallesCompletos().toPromise();
       this.filasT = data.map((item: any) => ({
         fecha_aplicado: this.datePipe.transform(item.fecha_aplicado, 'dd/MM/yyyy HH:mm'),
         dni: item.afiliado.dni,
-        nombre_institucion: item.institucion.nombre_institucion,
+        nombre_completo: `${item.afiliado.primer_nombre} ${item.afiliado.segundo_nombre} ${item.afiliado.primer_apellido} ${item.afiliado.segundo_apellido}`,
+        nombre_institucion: item.deduccion.institucion.nombre_institucion,
         nombre_deduccion: item.deduccion.nombre_deduccion,
         anio: item.anio,
         mes: item.mes,

@@ -41,6 +41,7 @@ import { VerEditarDeduccionAfilComponent } from '../pages/Generales/ver-editar-d
 import { AsignacionAfilPlanComponent } from '../../../components/asignacion-afil-plan/asignacion-afil-plan.component';
 import { VerplanprelcompComponent } from '../../../components/verplanprelcomp/verplanprelcomp.component';
 import { VerplancerradaComponent } from '../../../components/verplancerrada/verplancerrada.component';
+import { VerEditarBeneficioAfilComponent } from '../pages/Generales/ver-editar-beneficio-afil/ver-editar-beneficio-afil.component';
 
 @NgModule({
   imports: [
@@ -84,7 +85,7 @@ import { VerplancerradaComponent } from '../../../components/verplancerrada/verp
     NuevoBeneficioAfilComponent,
     NuevaDeduccionAfilComponent,
     VerEditarDeduccionAfilComponent,
-
+    VerEditarBeneficioAfilComponent
 /*     CentroTrabajoPageComponent */
   ]
 })

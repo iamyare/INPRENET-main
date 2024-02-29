@@ -31,10 +31,10 @@ export class TipoPlanillaService {
 
   findAll(paginationDto: PaginationDto) {
     const { limit = 10, offset = 0 } = paginationDto
-    return this.tipoPlanillaRepository.find({
+    return this.tipoPlanillaRepository.find(/* {
       take: limit,
       skip : offset
-    });
+    } */);
   }
 
   async findOne(id: string) {

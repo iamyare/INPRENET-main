@@ -17,12 +17,14 @@ function IsNumberCustom(validationOptions?: ValidationOptions) {
   }
 
 export class CreateDeduccionDto {
-
-
     @IsNotEmpty({ message: 'El nombre de la Deduccion no debe estar vacío.' })
     @IsString({ message: 'El nombre de la Deduccion debe ser una cadena de texto.' })
     @Length(5, 50, { message: 'El nombre de la Deduccion debe tener entre 5 y 50 caracteres.' })
     nombre_deduccion : string
+
+    @IsString()
+    @IsOptional()
+    nombre_institucion?: string;
     
     @IsString()
     @IsOptional()
@@ -30,10 +32,6 @@ export class CreateDeduccionDto {
 
     @IsNumberCustom({ message: 'El valor la prioridad debe ser numérico.' })
     prioridad: number;
-
-    @IsString()
-    @IsOptional()
-    id_institucion: string;
 
     @IsNumberCustom({ message: 'El valor de codigo deduccion debe ser numérico.' })
     codigo_deduccion: number

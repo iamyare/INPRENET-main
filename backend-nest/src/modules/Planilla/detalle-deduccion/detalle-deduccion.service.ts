@@ -125,7 +125,7 @@ export class DetalleDeduccionService {
         ded."nombre_deduccion",
         dd."id_afiliado",
         dd."id_deduccion",
-        dd."id_institucion",
+        ded."id_institucion",
         dd."monto_total",
         dd."monto_aplicado",
         dd."estado_aplicacion",
@@ -254,7 +254,7 @@ async obtenerDetallesDeduccionPorAfiliado(idAfiliado: string): Promise<any[]> {
     JOIN
       "net_afiliado" afil ON detD."id_afiliado" = afil."id_afiliado"
       JOIN
-      "net_institucion" inst ON inst."id_institucion" = detD."id_institucion"
+      "net_institucion" inst ON inst."id_institucion" = ded."id_institucion"
     WHERE
       detD."id_afiliado" = :1 AND
       detD."estado_aplicacion" != 'INCONSISTENCIA' AND
@@ -315,7 +315,6 @@ async actualizarPlanillasYEstadosDeDeducciones(detalles: { idDedDeduccion: strin
     if (!afiliado) {
       throw new NotFoundException(`Afiliado con DNI '${dni}' no encontrado.`);
     }
-
     // Buscar la deducción por nombre
     const deduccion = await this.deduccionRepository.findOne({ where: { nombre_deduccion: nombre_deduccion } });
     if (!deduccion) {
@@ -327,22 +326,19 @@ async actualizarPlanillasYEstadosDeDeducciones(detalles: { idDedDeduccion: strin
     if (!institucion) {
       throw new NotFoundException(`Institución con nombre '${nombre_institucion}' no encontrada.`);
     }
-
-    // Crear una nueva instancia de DetalleDeduccion con los ID obtenidos
-    const nuevoDetalleDeduccion = this.detalleDeduccionRepository.create({
-      afiliado: afiliado,
-      deduccion: deduccion,
-      /* institucion: institucion, */
-      monto_total: monto_total,
-      monto_aplicado: monto_aplicado,
-      estado_aplicacion: estado_aplicacion,
-      anio: anio,
-      mes: mes
-    });
-    
-
+ 
     // Guardar el nuevo DetalleDeduccion en la base de datos
     try {
+      const nuevoDetalleDeduccion = this.detalleDeduccionRepository.create({
+        afiliado: afiliado,
+        deduccion: deduccion,
+        /* institucion: institucion, */
+        monto_total: monto_total,
+        monto_aplicado: monto_aplicado,
+        estado_aplicacion: estado_aplicacion,
+        anio: anio,
+        mes: mes
+      });
       await this.detalleDeduccionRepository.save(nuevoDetalleDeduccion);
       return nuevoDetalleDeduccion;
     } catch (error) {
@@ -362,11 +358,10 @@ async actualizarPlanillasYEstadosDeDeducciones(detalles: { idDedDeduccion: strin
     queryBuilder
       .leftJoinAndSelect('detalleDeduccion.deduccion', 'deduccion')
       .leftJoinAndSelect('detalleDeduccion.afiliado', 'afiliado')
-      .leftJoinAndSelect('detalleDeduccion.institucion', 'institucion')
+      .leftJoinAndSelect('deduccion.institucion', 'institucion')
       .leftJoinAndSelect('afiliado.detalleAfiliado', 'detalleAfiliado'); // Asume que existe una relación desde Afiliado a DetalleAfiliado
-  
-    const result = await queryBuilder.getMany();
-  
+      
+      const result = await queryBuilder.getMany();
     return result; // Devuelve el resultado directamente
   }
   

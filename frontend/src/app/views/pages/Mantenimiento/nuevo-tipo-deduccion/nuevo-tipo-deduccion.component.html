@@ -1,4 +1,22 @@
-<app-dynamic-form [fields]="myFormFields" titulo="Nuevo Tipo De Deducción" subtitulo="Completa la información correspondiente"
-    (newDatBenChange)="obtenerDatos($event)"></app-dynamic-form>
+<div *ngIf="opcionesCargadas">
+  <app-dynamic-form
+    [fields]="myFormFields"
+    titulo="Nuevo Tipo De Deducción"
+    subtitulo="Completa la información correspondiente"
+    (newDatBenChange)="obtenerDatos($event)"
+  ></app-dynamic-form>
+  <!-- Aquí va tu código HTML para el dropdown -->
+</div>
 
-    <button mat-raised-button (click)="guardarTipoDeduccion()" style="background-color: #628780; color: #ffffff; border-radius: 5px; padding: 10px 20px;">Crear Tipo Deducción</button>
+<button
+  mat-raised-button
+  (click)="guardarTipoDeduccion()"
+  style="
+    background-color: #628780;
+    color: #ffffff;
+    border-radius: 5px;
+    padding: 10px 20px;
+  "
+>
+  Crear Tipo Deducción
+</button>

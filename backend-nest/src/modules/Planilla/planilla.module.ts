@@ -11,7 +11,6 @@ import { TipoPlanillaService } from './tipo-planilla/tipo-planilla.service';
 import { Net_Deduccion } from './deduccion/entities/net_deduccion.entity';
 import { Net_TipoPlanilla } from './tipo-planilla/entities/tipo-planilla.entity';
 import { DeduccionService } from './deduccion/deduccion.service';
-import { DetalleDeduccionController } from './detalle-deduccion/detalle-deduccion.controller';
 import { Net_Detalle_Deduccion } from './detalle-deduccion/entities/detalle-deduccion.entity';
 import { DetalleDeduccionService } from './detalle-deduccion/detalle-deduccion.service';
 import { Net_Institucion } from '../Empresarial/institucion/entities/net_institucion.entity';
@@ -24,6 +23,7 @@ import { DetalleBeneficioService } from './detalle_beneficio/detalle_beneficio.s
 import { Net_Detalle_Pago_Beneficio } from './detalle_beneficio/entities/net_detalle_pago_beneficio.entity';
 import { DetalleBeneficioController } from './detalle_beneficio/detalle_beneficio.controller';
 import { Net_Detalle_Beneficio_Afiliado } from './detalle_beneficio/entities/net_detalle_beneficio_afiliado.entity';
+import { DetalleDeduccionController } from './detalle-deduccion/detalle-deduccion.controller';
 
 /* import { Net_TipoDeduccion } from './deduccion/entities/net_tipo-deduccion.entity'; */
 /* import { DetalleBeneficioAfiliado } from './detalle_beneficio/entities/detalle_beneficio_afiliado.entity';

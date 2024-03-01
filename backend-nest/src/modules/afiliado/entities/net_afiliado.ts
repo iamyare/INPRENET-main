@@ -2,7 +2,7 @@
 import { Net_TipoIdentificacion } from "src/modules/tipo_identificacion/entities/net_tipo_identificacion.entity";
 import { Net_Pais } from "src/modules/Regional/pais/entities/pais.entity";
 /* import { TipoIdentificacion } from "src/modules/tipo_identificacion/entities/tipo_identificacion.entity"; */
-import { Column, Entity, Index, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn } from "typeorm";
+import { Column, Entity, Index, JoinColumn, ManyToOne, OneToMany, PrimaryColumn, PrimaryGeneratedColumn } from "typeorm";
 import { Net_Provincia } from "src/modules/Regional/provincia/entities/net_provincia.entity";
 
 import { Net_Ref_Per_Afil } from "./net_ref-Per-Afiliado";
@@ -18,7 +18,7 @@ import { Net_Afiliados_Por_Banco } from "src/modules/banco/entities/net_afiliado
  
 @Entity()
 export class Net_Afiliado {
-    @PrimaryGeneratedColumn('uuid')
+    @PrimaryGeneratedColumn('uuid', { primaryKeyConstraintName: 'PK_id_afiliado_net_afiliado' })
     id_afiliado: string;
 
     @ManyToOne(() => Net_TipoIdentificacion, tipoIdentificacion => tipoIdentificacion.afiliado, { cascade: true })

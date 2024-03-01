@@ -55,15 +55,16 @@ export class DetalleDeduccionService {
         detalleDeduccion.deduccion = deduccion;
         detalleDeduccion.anio = parseInt(item.año);
         detalleDeduccion.mes = parseInt(item.mes);
-        detalleDeduccion.monto_total = parseFloat(item.monto_total);
+        detalleDeduccion.monto_total = parseFloat(item.monto_motal);
+        
 
         await queryRunner.manager.save(detalleDeduccion);
       }
       await queryRunner.commitTransaction();
     } catch (error) {
       await queryRunner.rollbackTransaction();
-      this.logger.error(`Error al insertar detalles de deducción: ${error.message}`);
-      throw new InternalServerErrorException('Error al insertar detalles de deducción');
+      /* this.logger.error(`Error al insertar detalles de deducción: ${error.message}`);
+      throw new InternalServerErrorException(`Error al insertar detalles de deducción: ${error.message}`); */
     } finally {
       await queryRunner.release();
     }

@@ -27,7 +27,10 @@
                 <c-input-group class="mb-3">
                   <mat-form-field style="width:100%">
                     <mat-label>Repita La Contraseña</mat-label>
-                    <input matNativeControl type="password"  />
+                    <input matNativeControl formControlName="confirmarContrasenia" type="password"/>
+                    <mat-error *ngIf="form.controls['confirmarContrasenia'].hasError('confirmarContrasena')">
+                      Las contraseñas no coinciden
+                    </mat-error>
                   </mat-form-field>
                 </c-input-group>
 

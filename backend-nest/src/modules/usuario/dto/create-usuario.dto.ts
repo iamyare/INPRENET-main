@@ -7,17 +7,21 @@ export class CreateUsuarioDto {
     correo: string;
 
     @IsString()
+    @IsOptional()
     nombre_empleado : string
 
     @IsString()
+    @IsOptional()
     tipo_identificacion : string
 
     @MinLength(1)
     @IsString()
+    @IsOptional()
     numero_identificacion
 
     @MinLength(1)
     @IsString()
+    @IsOptional()
     archivo_identificacion
 
     @IsOptional()

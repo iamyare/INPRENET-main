@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable, InternalServerErrorException, Logger, NotFoundException } from '@nestjs/common';
+import { BadRequestException, ForbiddenException, Injectable, InternalServerErrorException, Logger, NotFoundException } from '@nestjs/common';
 import { UpdateUsuarioDto } from './dto/update-usuario.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { PaginationDto } from 'src/common/dtos/pagination.dto';
@@ -9,7 +9,6 @@ import { MailService } from 'src/common/services/mail.service';
 import * as bcrypt from 'bcrypt';
 import { Net_Empleado } from 'src/modules/Empresarial/empresas/entities/net_empleado.entity';
 import { Net_Rol } from './entities/net_rol.entity';
-/* import { Rol } from './entities/rol.entity'; */
 import { CreateUsuarioDto } from './dto/create-usuario.dto';
 import { Net_TipoIdentificacion } from '../tipo_identificacion/entities/net_tipo_identificacion.entity';
 
@@ -173,6 +172,9 @@ export class UsuarioService {
     Object.assign(usuario, restUsuario); // Actualiza propiedades del usuario
     usuario.estado = 'ACTIVO'; // o cualquier otro cambio necesario
 
+    // Aquí se actualiza la fecha de verificación con la fecha actual
+    usuario.fecha_verificacion = new Date();
+
     // Actualizar datos del usuario
     await this.usuarioRepository.save(usuario);
 
@@ -189,11 +191,39 @@ export class UsuarioService {
     return { success: true, msg: 'Usuario y empleado actualizados correctamente' };
 }
 
-
-
   remove(id: number) {
     return `This action removes a #${id} usuario`;
   }
+
+  async login(email: string, password: string): Promise<{ token: string }> {
+    const usuario = await this.usuarioRepository.findOne({
+        where: { correo: email },
+        relations: ['rol']
+    });
+    if (!usuario) {
+        throw new NotFoundException('Usuario no encontrado');
+    }
+    
+    if (usuario.estado !== 'ACTIVO') {
+      throw new ForbiddenException('La cuenta está desactivada');
+    }
+    if (!usuario.fecha_verificacion) {
+      throw new ForbiddenException('La cuenta no ha verificado su correo electrónico');
+    }
+    
+    const isPasswordValid = await bcrypt.compare(password, usuario.contrasena);
+    if (!isPasswordValid) {
+        throw new BadRequestException('Credenciales inválidas');
+    }
+    if (!usuario.rol) {
+        throw new InternalServerErrorException('El rol del usuario no está definido');
+    }
+    const payload = { username: usuario.correo, sub: usuario.id_usuario, rol: usuario.rol.nombre_rol };
+    const token = this.jwtService.sign(payload);
+
+
+    return { token };
+}
 
   private handleException(error: any): void {
     this.logger.error(error);

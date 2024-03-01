@@ -24,6 +24,17 @@ export class AfiliadoService {
       );
   }
 
+  getAfiliadoDNI(param:string | number): Observable<any | void> {
+    const url = `${environment.API_URL}/api/afiliado/dni/${param}`;
+    return this.http.get<any>(
+      url,
+      ).pipe(
+        map((res:any) => {
+          return res;
+        })
+      );
+  }
+
   generarVoucher(idPlanilla: string, dni: string): Observable<any> {
     // Definir los parámetros de la consulta
     const params = new HttpParams()

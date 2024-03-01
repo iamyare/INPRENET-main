@@ -25,7 +25,7 @@ export class VerEditarBeneficioAfilComponent {
 
   //Para generar tabla
   myColumns: TableColumn[] = [];
-  filasT: any[] =[]
+  filasT: any[] =[];
   detallesCompletos: any[] = [];
   ejecF: any;
 
@@ -35,28 +35,6 @@ export class VerEditarBeneficioAfilComponent {
     private datePipe: DatePipe,
     private toastr: ToastrService) {
     }
-
-  personData = {
-    name: "Cristian Garay",
-    email: "cristiangaray@gmail.com",
-    orderNumber: "C95B670AC",
-    payment: {
-      method: "Webpay Redcompra",
-      total: 11415,
-      date: "26 de Octubre de 2017 12:42"
-    }
-  };
-
-  dataPrueba = {
-    ingresos: [
-      { nombre_ingreso: "pensión por vejez", monto: 5000 },
-      { nombre_ingreso: "Beneficio por incapacidad", monto: 6000 }
-    ],
-    deducciones: [
-      { nombre_deduccion: "préstamos", total_deduccion: 2000 },
-      { nombre_deduccion: "intereses", total_deduccion: 3000 }
-    ]
-  };
 
   ngOnInit(): void {
     this.myFormFields = [

@@ -10,9 +10,6 @@ import { Net_Deduccion } from '../deduccion/entities/net_deduccion.entity';
 import { Net_Planilla } from './entities/net_planilla.entity';
 import { Net_TipoPlanilla } from '../tipo-planilla/entities/tipo-planilla.entity';
 import { Net_Detalle_Pago_Beneficio } from '../detalle_beneficio/entities/net_detalle_pago_beneficio.entity';
-/* import { DetallePagoBeneficio } from '../detalle_beneficio/entities/detalle_pago_beneficio.entity';
-import { Planilla } from './entities/planilla.entity';
-import { TipoPlanilla } from '../tipo-planilla/entities/tipo-planilla.entity'; */
 import { isUUID } from 'class-validator';
 import { DetalleBeneficioService } from '../detalle_beneficio/detalle_beneficio.service';
 import { DetalleDeduccionService } from '../detalle-deduccion/detalle-deduccion.service';

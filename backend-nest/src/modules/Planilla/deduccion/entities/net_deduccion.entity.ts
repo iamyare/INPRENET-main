@@ -1,9 +1,6 @@
 import { Column, Entity, Index, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
-/* import { DetalleDeduccion } from '../../detalle-deduccion/entities/detalle-deduccion.entity'; */
-/* import { Net_TipoDeduccion } from './net_tipo-deduccion.entity'; */
 import { Net_Detalle_Deduccion } from '../../detalle-deduccion/entities/detalle-deduccion.entity';
 import { Net_Institucion } from 'src/modules/Empresarial/institucion/entities/net_institucion.entity';
-/* import { TipoDeduccion } from './tipo-deduccion.entity'; */
 
 @Entity()
 export class Net_Deduccion {

@@ -19,6 +19,9 @@ export class PreRegisterComponent implements OnInit{
 
   tipoIdent: any = [];
   tipoRol: any = [];
+  archivo: any;
+  formData : any;
+
 
   constructor(
     private fb: FormBuilder,
@@ -55,18 +58,23 @@ export class PreRegisterComponent implements OnInit{
       this.tipoIdent = data;
     });
   }
+  obt(event:any) {
+    this.archivo = event;
+  }
 
   crearCuenta(){
     if (this.form.valid) {
-      const formData = {
+      this.formData = {
         correo: this.form.value.correo,
         nombre_rol: this.form.value.rol,
         tipo_identificacion: this.form.value.tipoIdent,
         numero_identificacion: this.form.value.numeroIden,
         nombre_empleado: this.form.value.nombrecomp,
-        archivo_identificacion: "Aqui_va_el_procesamiento_del_archivo_si_es_necesario"
+        archivo_identificacion: this.archivo.name
       };
-      this.authSvc.crearCuenta(formData).subscribe({
+      console.log(this.formData);
+
+      this.authSvc.crearCuenta(this.formData).subscribe({
         next: (res) => {
           this.toastr.success('Cuenta creada exitosamente!', 'Éxito');
           this.form.reset();

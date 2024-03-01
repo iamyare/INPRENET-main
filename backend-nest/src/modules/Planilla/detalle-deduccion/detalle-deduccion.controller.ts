@@ -109,6 +109,11 @@ async insertarDetalles(@Body() data: any[]) {
     return this.detalleDeduccionService.findAll();
   }
 
+  @Get('por-dni/:dni')
+  findByDni(@Param('dni') dni: string) {
+    return this.detalleDeduccionService.findDeduccionesByDni(dni);
+  }
+
   @Get('detalles-completos')
   findAllDetailed() {
     return this.detalleDeduccionService.findAllDetailed();

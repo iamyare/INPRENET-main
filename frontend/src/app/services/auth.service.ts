@@ -39,11 +39,6 @@ export class AuthService {
     }
   }
 
-  hasRole(expectedRoles: string[]): boolean {
-    const userRole = this.getUserRole();
-    return expectedRoles.includes(userRole);
-  }
-
 
   crearCuenta(data:any): Observable<any>{
     var url = `${environment.API_URL}/api/usuario/auth/signup`;

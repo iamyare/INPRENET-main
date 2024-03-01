@@ -1,8 +1,5 @@
 import { Column, Entity, Index, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 import { Net_TipoPlanilla } from '../../tipo-planilla/entities/tipo-planilla.entity';
-/* import { DetalleDeduccion } from '../../detalle-deduccion/entities/detalle-deduccion.entity'; */
-/* import { DetallePagoBeneficio } from '../../detalle_beneficio/entities/detalle_pago_beneficio.entity'; */
-/* import { TipoPlanilla } from '../../tipo-planilla/entities/tipo-planilla.entity'; */
 import { Net_Detalle_Deduccion } from '../../detalle-deduccion/entities/detalle-deduccion.entity';
 import { Net_Detalle_Pago_Beneficio } from '../../detalle_beneficio/entities/net_detalle_pago_beneficio.entity';
 

@@ -54,7 +54,7 @@
                 </c-input-group>
 
                 <form [formGroup]="formArchivo" #myForm="ngForm">
-                  <app-botonarchivos groupName="Archivos" labelBoton="Archivo de identificación"></app-botonarchivos>
+                  <app-botonarchivos groupName="Archivos" (setArchivo)="obt($event)" labelBoton="Archivo de identificación" ></app-botonarchivos>
                 </form>
 
                 <div class="d-grid">
@@ -64,8 +64,9 @@
               </form>
             </c-card-body>
           </c-card>
-          <c-card [ngStyle]="{'width.%': 44}" class="text-white py-5" style="background: #1F544A; display: flex; align-items: center; justify-content: center;">
+          <c-card [ngStyle]="{'width.%': 44}" class="text-white py-5" style="display: flex; align-items: center; justify-content: center;">
             <img src="../../../../../assets/images/LOGO INPRENET.png" alt="Descripción de la imagen" style="width: 40em; height: 10em;">
+            <img src="../../../../../assets/images/thumbnail_Edificio Bandera.jpg" alt="Descripción de la imagen" style="width: 40em; height: 40em;">
         </c-card>
         </c-card-group>
       </c-col>

@@ -1,5 +1,6 @@
 import { INavData } from '@coreui/angular';
 
+
 export const navItems: INavData[] = [
   /* {
     name: 'Dashboard',
@@ -14,22 +15,6 @@ export const navItems: INavData[] = [
   {
     title: true,
     name: 'Menú Mantenimiento'
-  },
-  {
-    name: 'Beneficio',
-    iconComponent: { name: 'cilMoney' },
-    url: '/base',
-    children: [
-      {
-        name: 'Nuevo Beneficio',
-        url: '/Beneficio/nuevo-beneficio',
-      },
-      {
-        name: 'Editar Beneficios',
-        url: '/Beneficio/editar-beneficio',
-      },
-
-    ]
   },
   {
     name: 'Deducción',
@@ -214,4 +199,6 @@ export const navItems: INavData[] = [
   }, */
 
 
-];
+]
+
+;

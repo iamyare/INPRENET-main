@@ -1,18 +1,10 @@
-/* import { Pais } from "src/modules/Regional/pais/entities/pais.entity"; */
 import { Net_TipoIdentificacion } from "src/modules/tipo_identificacion/entities/net_tipo_identificacion.entity";
 import { Net_Pais } from "src/modules/Regional/pais/entities/pais.entity";
-/* import { TipoIdentificacion } from "src/modules/tipo_identificacion/entities/tipo_identificacion.entity"; */
 import { Column, Entity, Index, JoinColumn, ManyToOne, OneToMany, PrimaryColumn, PrimaryGeneratedColumn } from "typeorm";
 import { Net_Provincia } from "src/modules/Regional/provincia/entities/net_provincia.entity";
-
-import { Net_Ref_Per_Afil } from "./net_ref-Per-Afiliado";
-
-/* import { DetalleDeduccion } from "src/modules/Planilla/detalle-deduccion/entities/detalle-deduccion.entity"; */
-import { Net_perf_afil_cent_trab} from "./net_perf_afil_cent_trab";
+import { Net_Ref_Per_Afil } from "./net_ref-Per-Afiliado";import { Net_perf_afil_cent_trab} from "./net_perf_afil_cent_trab";
 import { Net_Detalle_Deduccion } from "src/modules/Planilla/detalle-deduccion/entities/detalle-deduccion.entity";
-/* import { PerfAfilCentTrab } from "./perf_afil_cent_trab"; */
 import { Net_Detalle_Afiliado } from "./detalle_afiliado.entity";
-/* import { DetallePagoBeneficio } from "src/modules/Planilla/detalle_beneficio/entities/detalle_pago_beneficio.entity"; */
 import { Net_Detalle_Beneficio_Afiliado } from "src/modules/Planilla/detalle_beneficio/entities/net_detalle_beneficio_afiliado.entity";
 import { Net_Afiliados_Por_Banco } from "src/modules/banco/entities/net_afiliados-banco";
  

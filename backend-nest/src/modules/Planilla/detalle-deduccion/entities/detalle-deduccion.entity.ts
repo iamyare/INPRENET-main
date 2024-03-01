@@ -1,6 +1,5 @@
 import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn, AfterInsert, getRepository, AfterLoad, Unique, OneToMany } from 'typeorm';
 import { Net_Deduccion } from "../../deduccion/entities/net_deduccion.entity";
-import { Net_Institucion } from "src/modules/Empresarial/institucion/entities/net_institucion.entity";
 import { Net_Afiliado } from 'src/modules/afiliado/entities/net_afiliado';
 import { Net_Planilla } from '../../planilla/entities/net_planilla.entity';
 import { IsEnum } from 'class-validator';

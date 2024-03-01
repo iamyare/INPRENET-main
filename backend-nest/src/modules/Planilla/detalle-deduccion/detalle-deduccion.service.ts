@@ -3,7 +3,7 @@ import { CreateDetalleDeduccionDto } from './dto/create-detalle-deduccion.dto';
 import { UpdateDetalleDeduccionDto } from './dto/update-detalle-deduccion.dto';
 import { InjectEntityManager, InjectRepository } from '@nestjs/typeorm';
 import { Net_Detalle_Deduccion } from './entities/detalle-deduccion.entity';
-import { EntityManager, Repository } from 'typeorm';
+import { EntityManager, FindOptionsWhere, Repository } from 'typeorm';
 import { Net_Deduccion } from '../deduccion/entities/net_deduccion.entity';
 import { Net_Institucion } from 'src/modules/Empresarial/institucion/entities/net_institucion.entity';
 import * as xlsx from 'xlsx';
@@ -369,6 +369,23 @@ async actualizarPlanillasYEstadosDeDeducciones(detalles: { idDedDeduccion: strin
 
   findOne(id: number) {
     return `This action returns a #${id} detalleDeduccion`;
+  }
+
+  async findDeduccionesByDni(dni: string): Promise<Net_Detalle_Deduccion[]> {
+    return this.detalleDeduccionRepository
+      .createQueryBuilder('detalle')
+      .leftJoinAndSelect('detalle.deduccion', 'deduccion')
+      .leftJoinAndSelect('deduccion.institucion', 'institucion')
+      .leftJoinAndSelect('detalle.planilla', 'planilla') // Agrega esta línea para hacer join con Net_Planilla
+      .innerJoinAndSelect('detalle.afiliado', 'afiliado', 'afiliado.dni = :dni', { dni })
+      .select([
+          'detalle',
+          'deduccion.nombre_deduccion',
+          'institucion.nombre_institucion',
+          'planilla.codigo_planilla', // Selecciona el código de la planilla
+          'afiliado.dni',
+      ])
+      .getMany();
   }
 
   async update(id_ded_deduccion: string, updateDetalleDeduccionDto: UpdateDetalleDeduccionDto) {

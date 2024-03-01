@@ -36,6 +36,12 @@ export class DeduccionesService {
     );
   }
 
+  buscarDeduccionesPorDni(dni: string): Observable<any> {
+    return this.http.get(`${environment.API_URL}/api/detalle-deduccion/por-dni/${dni}`).pipe(
+      catchError(this.handleError)
+    );
+  }
+
   newTipoDeduccion(TipoDeduccion:any): Observable<any | void>{
     var url = `${environment.API_URL}/api/deduccion`;
     return this.http.post<any>(

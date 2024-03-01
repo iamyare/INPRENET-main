@@ -228,7 +228,24 @@ export class AfiliadoService {
       }
     }
 
-    async findByDni(dni: string) {
+    async findByDni(dni: string): Promise<Net_Afiliado | string> {
+      const afiliado = await this.afiliadoRepository.findOne({ where: { dni } });
+  
+      if (!afiliado) {
+        throw new NotFoundException(`Afiliado with DNI ${dni} not found`);
+      }
+  
+      switch (afiliado.estado) {
+        case 'FALLECIDO':
+          return 'El afiliado está fallecido.';
+        case 'INACTIVO':
+          return 'El afiliado está inactivo.';
+        default:
+          return afiliado;
+      }
+    }
+
+    /* async findByDni(dni: string) { */
       //const datosIdentificacion = await this.datosIdentificacionRepository.findOne({ where: { dni } });
       
      /*  if (!datosIdentificacion) {
@@ -245,7 +262,7 @@ export class AfiliadoService {
       }
 
       return afiliado; */
-  }
+  //}
   
     
 /*  afiliados = await queryBuilder

@@ -1,5 +1,4 @@
 import { Net_Deduccion } from "src/modules/Planilla/deduccion/entities/net_deduccion.entity";
-import { Net_Detalle_Deduccion } from "src/modules/Planilla/detalle-deduccion/entities/detalle-deduccion.entity";
 import { Column, Entity, ManyToOne, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 
 @Entity()

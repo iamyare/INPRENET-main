@@ -46,8 +46,8 @@ actualizarEstado(idPlanilla: string, nuevoEstado: string): Observable<any> {
   }
 
 
-  GetAllBeneficios(): Observable<any> {
-    return this.http.get(`${environment.API_URL}/api/beneficio-planilla/obtenerTodosBeneficios/`).pipe(
+  GetAllBeneficios(dni:string): Observable<any> {
+    return this.http.get(`${environment.API_URL}/api/beneficio-planilla/obtenerTodosBeneficios/${dni}`).pipe(
       tap(() => {
         /* this.toastr.success('Total de beneficios obtenido con éxito'); */
       }),

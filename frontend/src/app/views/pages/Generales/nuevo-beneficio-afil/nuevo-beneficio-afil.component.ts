@@ -46,6 +46,7 @@ export class NuevoBeneficioAfilComponent implements OnInit{
 
   ngOnInit(): void {
     this.getTipoBen();
+
     this.myFormFields = [
       { type: 'text', label: 'DNI del afiliado', name: 'dni', validations: [Validators.required, Validators.minLength(13), Validators.maxLength(14)], display:true },
     ];
@@ -61,7 +62,7 @@ export class NuevoBeneficioAfilComponent implements OnInit{
       options : [{label:'Cheque', value: 'Cheque'}, {label:'Transferencia', value: 'Transferencia' }] ,validations: [Validators.required], display:true},
       { type: 'number', label: 'Monto total', name: 'monto_total', validations: [Validators.required], display:true},
       { type: 'number', label: 'Monto por periodo', name: 'monto_por_periodo', validations: [Validators.required], display:true},
-      { type: 'daterange', label: 'Periodo', name: 'periodo', validations: [], display:false},
+      { type: 'daterange', label: 'Periodo', name: 'periodo', validations: [], display:false },
     ];
 
     this.myFormFields2 = [
@@ -75,11 +76,12 @@ export class NuevoBeneficioAfilComponent implements OnInit{
       options : [{label:'Cheque', value: 'Cheque'}, {label:'Transferencia', value: 'Transferencia' }] ,validations: [Validators.required], display:true},
       { type: 'number', label: 'Monto total', name: 'monto_total', validations: [Validators.required], display:true},
       { type: 'number', label: 'Monto por periodo', name: 'monto_por_periodo', validations: [Validators.required], display:true},
-      { type: 'daterange', label: 'Periodo', name: 'periodo', validations: [], display:false},
+      { type: 'daterange', label: 'Periodo', name: 'periodo', validations: [], display:false },
     ];
 
 
     this.myFormFields1[4].display = false;
+    this.myFormFields2[5].display = false;
 
    /*  this.myColumnsBeneficios = [
       {
@@ -252,6 +254,7 @@ export class NuevoBeneficioAfilComponent implements OnInit{
     this.form1 = event;
 
     const temp = this.buscarPeriodicidad(this.tiposBeneficios, this.form1.value.nombre_beneficio)
+
     let startDateFormatted
     let endDateFormatted
 
@@ -294,8 +297,8 @@ export class NuevoBeneficioAfilComponent implements OnInit{
 
   async obtenerDatosFormBen(event:any):Promise<any>{
     this.FormBen = event;
+    const temp = this.buscarPeriodicidad(this.tiposBeneficios, this.FormBen.value.nombre_beneficio);
 
-    const temp = this.buscarPeriodicidad(this.tiposBeneficios, this.FormBen.value.nombre_beneficio)
     let startDateFormatted
     let endDateFormatted
 
@@ -324,7 +327,7 @@ export class NuevoBeneficioAfilComponent implements OnInit{
 
     }
 
-    /* if (startDateFormatted != 'Invalid Date' && endDateFormatted != 'Invalid Date'){
+    if (startDateFormatted != 'Invalid Date' && endDateFormatted != 'Invalid Date'){
       const datosFormateados = {
         ...event.value,
         periodoInicio: startDateFormatted,
@@ -332,7 +335,7 @@ export class NuevoBeneficioAfilComponent implements OnInit{
       };
       delete datosFormateados.periodo;
       this.datosFormateados = datosFormateados;
-    } */
+    }
   }
 
   previsualizarInfoAfil(){
@@ -367,8 +370,9 @@ export class NuevoBeneficioAfilComponent implements OnInit{
   guardarNTBenef(){
     /* Asignar al afiliado si no ha fallecido */
     /* Asignar a los beneficioarios si el afiliado ya fallecio */
-    this.datosFormateados["dni"] = this.form.value.dni;
+
     if (this.Afiliado.estado != "FALLECIDO"){
+      this.datosFormateados["dni"] = this.form.value.dni;
       this.svcBeneficioServ.asigBeneficioAfil(this.datosFormateados).subscribe(
        {
          next: (response)=>{
@@ -388,13 +392,27 @@ export class NuevoBeneficioAfilComponent implements OnInit{
          }
        })
     }else{
-      console.log(this.Afiliado);
-      console.log(this.filas);
-    }
-  }
+      this.datosFormateados["dni"] = this.FormBen.value.dni;
+      this.svcBeneficioServ.asigBeneficioAfil(this.datosFormateados).subscribe(
+       {
+         next: (response)=>{
+           this.toastr.success("se asignó correctamente el beneficio");
+           this.limpiarFormulario()
+         },
+         error: (error)=>{
+           let mensajeError = 'Error desconocido al crear Detalle de deducción';
+           // Verifica si el error tiene una estructura específica
+           if (error.error && error.error.message) {
+             mensajeError = error.error.message;
+           } else if (typeof error.error === 'string') {
+           // Para errores que vienen como un string simple
+             mensajeError = error.error;
+           }
+           this.toastr.error(mensajeError);
+         }
+       })
 
-  asignarNTBenef(){
-    console.log(this.FormBen);
+    }
   }
 
   onFileSelect(event: any) {

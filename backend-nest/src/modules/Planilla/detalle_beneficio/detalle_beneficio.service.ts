@@ -56,7 +56,7 @@ export class DetalleBeneficioService {
   async createDetalleBeneficioAfiliado(datos: CreateDetalleBeneficioDto): Promise<any> {
     return await this.entityManager.transaction(async manager => {
         try {
-            const afiliado = await manager.findOne(Net_Afiliado, { where: { dni: datos.dni } });
+            const afiliado = await manager.findOne(Net_Afiliado, { where: { dni: datos.dni, estado: "ACTIVO" } });
             if (!afiliado) {
                 throw new BadRequestException('Afiliado no encontrado');
             }
@@ -74,8 +74,11 @@ export class DetalleBeneficioService {
         if (!periodoInicio || !periodoFinalizacion) {
             throw new BadRequestException('Formato de fecha inválido. Usa DD-MM-YYYY.');
         }
-
-        const nuevoDetalleAfiliado = new Net_Detalle_Beneficio_Afiliado();
+        
+        console.log(afiliado);
+        
+        
+        /* const nuevoDetalleAfiliado = new Net_Detalle_Beneficio_Afiliado();
         nuevoDetalleAfiliado.afiliado = afiliado;
         nuevoDetalleAfiliado.beneficio = beneficio;
         nuevoDetalleAfiliado.periodoInicio = periodoInicio;
@@ -93,7 +96,7 @@ export class DetalleBeneficioService {
 
             await manager.save(nuevoDetalleBeneficio);
 
-            return { detalleAfiliadoGuardado, nuevoDetalleBeneficio };
+            return { detalleAfiliadoGuardado, nuevoDetalleBeneficio }; */
         } catch (error) {
             this.logger.error(`Error al crear DetalleBeneficioAfiliado y DetalleBeneficio: ${error.message}`, error.stack);
             throw new InternalServerErrorException('Error al crear registros, por favor intente más tarde.');
@@ -211,7 +214,7 @@ export class DetalleBeneficioService {
     }
 }
 
-  async GetAllBeneficios(): Promise<any> {
+  async GetAllBeneficios(dni:string): Promise<any> {
     try {
       return await this.detalleBeneficioAfiliadoRepository.createQueryBuilder('detBenA')
         .addSelect('afil.dni', 'dni')
@@ -222,13 +225,14 @@ export class DetalleBeneficioService {
         .addSelect('ben.periodicidad', 'periodicidad')
         .addSelect('ben.numero_rentas_max', 'numero_rentas_max')
         .addSelect('ben.nombre_beneficio', 'nombre_beneficio')
-        .addSelect('detA.porcentaje', 'porcentaje')
         .addSelect('detBenA.periodoInicio', 'periodoInicio')
         .addSelect('detBenA.periodoFinalizacion', 'periodoFinalizacion')
-        .addSelect('detBenA.num_rentas_aplicadas', 'num_rentas_aplicadas')
+        .addSelect('detBenA.monto_por_periodo', 'monto_por_periodo')
+        .addSelect('detBenA.monto_total', 'monto_total')
         .innerJoin(Net_Afiliado, 'afil', 'detBenA.id_afiliado = afil.id_afiliado')
         .innerJoin(Net_Detalle_Afiliado, 'detA', 'detA.id_afiliado = afil.id_afiliado')
         .innerJoin(Net_Beneficio, 'ben', 'ben.id_beneficio = detBenA.id_beneficio')
+        .where(`afil.dni = ${dni}`)
         .getRawMany(); 
     } catch (error) {
       this.logger.error(`Error al buscar beneficios inconsistentes por afiliado: ${error.message}`, error.stack);

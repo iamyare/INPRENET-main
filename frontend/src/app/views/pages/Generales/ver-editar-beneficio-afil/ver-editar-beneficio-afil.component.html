@@ -51,7 +51,10 @@
   </button>
 </div>
 
-<div style="background-color: white; border-radius: 10px; padding: 20px">
+<div
+  *ngIf="monstrarBeneficios"
+  style="background-color: white; border-radius: 10px; padding: 20px"
+>
   <app-dynamic-table
     [columns]="myColumns"
     [data]="filasT"
@@ -59,6 +62,8 @@
     (ejecutarFuncionAsincronaEvent)="
       ejecutarFuncionAsincronaDesdeOtroComponente($event)
     "
+    [verBotEditar]="true"
+    [editarFunc]="editar"
   >
   </app-dynamic-table>
 </div>

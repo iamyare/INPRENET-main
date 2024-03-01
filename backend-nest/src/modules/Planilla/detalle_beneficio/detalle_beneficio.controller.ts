@@ -65,9 +65,9 @@ export class DetalleBeneficioController {
     return this.detallebeneficioService.obtenerBeneficiosDeAfil(dni);
   }
 
-  @Get('/obtenerTodosBeneficios')
-  GetAllBeneficios() {
-    return this.detallebeneficioService.GetAllBeneficios();
+  @Get('/obtenerTodosBeneficios/:dni')
+  GetAllBeneficios(@Param('dni') dni: string) {
+    return this.detallebeneficioService.GetAllBeneficios(dni);
   }
   
   @Get('/rango-beneficios')

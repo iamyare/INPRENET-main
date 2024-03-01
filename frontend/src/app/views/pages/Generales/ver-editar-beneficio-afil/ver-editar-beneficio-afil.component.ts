@@ -21,6 +21,7 @@ export class VerEditarBeneficioAfilComponent {
   Afiliado:any = {}
   form:any
   public myFormFields: FieldConfig[] = []
+  public monstrarBeneficios: boolean = false;
 
   //Para generar tabla
   myColumns: TableColumn[] = [];
@@ -63,46 +64,31 @@ export class VerEditarBeneficioAfilComponent {
     ];
 
     this.myColumns = [
-      /* {
-        header: 'DNI',
-        col : 'dni',
-        isEditable: false
-      },
-      {
-        header: 'Nombre Completo',
-        col : 'nombre_completo',
-        isEditable: true
-      },
-      {
-        header: 'Tipo de afiliado',
-        col : 'tipo_afiliado',
-        isEditable: true
-      },
-      {
-        header: 'Porcentaje',
-        col : 'porcentaje',
-        isEditable: true
-      },*/
       {
         header: 'Nombre del beneficio',
         col : 'nombre_beneficio',
         isEditable: false
       },
-/*       {
-        header: 'Estado del pago de beneficio',
-        col : 'estado',
+      {
+        header: 'Periodicidad',
+        col : 'periodicidad',
+        isEditable: false
+      },
+      {
+        header: 'Número de rentas máximas',
+        col : 'numero_rentas_max',
+        isEditable: false
+      },
+      {
+        header: 'Periodo de inicio',
+        col : 'periodoInicio',
         isEditable: true
       },
       {
-        header: 'Número de rentas aplicadas',
-        col : 'num_rentas_aplicadas',
+        header: 'Periodo de finalización',
+        col : 'periodoFinalizacion',
         isEditable: true
       },
-      {
-        header: 'Planilla',
-        col : 'cod_planilla',
-        isEditable: true
-      }, */
       {
         header: 'Monto por periodo',
         col : 'monto_por_periodo',
@@ -113,29 +99,9 @@ export class VerEditarBeneficioAfilComponent {
         col : 'monto_total',
         isEditable: true
       },
-      {
-        header: 'Periodicidad',
-        col : 'periodicidad',
-        isEditable: false
-      },
-      {
-        header: 'Periodo de inicio',
-        col : 'periodoInicio',
-        isEditable: false
-      },
-      {
-        header: 'Periodo de finalización',
-        col : 'periodoFinalizacion',
-        isEditable: false
-      },
-      {
-        header: 'Número de rentas máximas',
-        col : 'numero_rentas_max',
-        isEditable: true
-      },
     ];
 
-    this.getFilas().then(() => this.cargar());
+
   }
 
   async obtenerDatos(event:any):Promise<any>{
@@ -146,18 +112,15 @@ export class VerEditarBeneficioAfilComponent {
   getFilas = async () => {
     try {
       /* Falta traer datos de la planilla */
-      const data = await this.beneficioService.GetAllBeneficios().toPromise();
+      const data = await this.beneficioService.GetAllBeneficios(this.form.value.dni).toPromise();
       this.filasT = data.map((item: any) => ({
-        fecha_aplicado: this.datePipe.transform(item.fecha_aplicado, 'dd/MM/yyyy HH:mm'),
         dni: item.dni,
-        nombre_completo: this.unirNombres(item.primer_nombre, item.segundo_nombre, item.primer_apellido, item.segundo_apellido),
+        fecha_aplicado: this.datePipe.transform(item.fecha_aplicado, 'dd/MM/yyyy HH:mm'),
         nombre_beneficio: item.nombre_beneficio,
-        monto_a_pagar: item.monto_a_pagar,
         numero_rentas_max: item.numero_rentas_max,
-        porcentaje: item.porcentaje,
         periodicidad: item.periodicidad,
-        tipo_afiliado: item.tipo_afiliado,
-        num_rentas_aplicadas: item.num_rentas_aplicadas,
+        monto_por_periodo: item.monto_por_periodo,
+        monto_total: item.monto_total,
         periodoInicio: convertirFecha(item.periodoInicio),
         periodoFinalizacion: convertirFecha(item.periodoFinalizacion)
       }));
@@ -170,6 +133,8 @@ export class VerEditarBeneficioAfilComponent {
   };
 
   previsualizarInfoAfil(){
+    this.monstrarBeneficios = true;
+    this.getFilas().then(() => this.cargar());
     this.Afiliado.nameAfil = ""
     if (this.form.value.dni){
 
@@ -198,5 +163,26 @@ export class VerEditarBeneficioAfilComponent {
       });
     }
   }
+
+  editar = (row: any) => {
+    const beneficioData = {
+      nombre_beneficio: row.nombre_beneficio,
+      descripcion_beneficio: row.descripcion_beneficio,
+      numero_rentas_max: row.numero_rentas_max,
+      periodicidad: row.periodicidad,
+    };
+
+    console.log(beneficioData);
+
+
+    /* this.svcBeneficioServ.updateBeneficio(row.id, beneficioData).subscribe(
+      response => {
+        this.toastr.success('Beneficio editado con éxito');
+      },
+      error => {
+        this.toastr.error('Error al actualizar el beneficio');
+      }
+    ); */
+  };
 
 }

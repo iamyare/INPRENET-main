@@ -118,8 +118,6 @@ export class NuevaplanillaComponent implements OnInit{
     }
 
   crearPlanilla(){
-    console.log(this.datosFormateados);
-
     this.planillaService.createPlanilla(this.datosFormateados).subscribe({
       next: (response) => {
         this.toastr.success('Planilla creada con éxito');

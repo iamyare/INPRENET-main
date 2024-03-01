@@ -20,7 +20,7 @@ export class EditarTipoDeduccionComponent implements OnInit{
 
   ngOnInit(): void {
     this.myColumns = [
-      { header: 'Nombre de la Deduccion',
+      { header: 'Nombre de la Deducción',
       col: "nombre_deduccion",
       isEditable: true,
       validationRules: [Validators.required, Validators.minLength(3)]

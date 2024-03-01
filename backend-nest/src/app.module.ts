@@ -20,8 +20,8 @@ import { EmpresarialModule } from './modules/Empresarial/empresarial.module';
       port: +process.env.DB_PORT,
       username: process.env.DB_USERNAME,
       password: process.env.DB_PASSWORD,
-      connectString: process.env.CONNECT_STRING,
-      synchronize: false,
+      /* connectString: process.env.CONNECT_STRING, */
+      synchronize: true,
       autoLoadEntities : true
     }),
     CommonModule,

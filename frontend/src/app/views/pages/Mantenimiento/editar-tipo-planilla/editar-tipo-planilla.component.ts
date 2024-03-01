@@ -36,7 +36,7 @@ export class EditarTipoPlanillaComponent implements OnInit{
         validationRules: [Validators.required, Validators.minLength(5)]
       },
       {
-        header: 'Descripcion',
+        header: 'Descripción',
         col: 'descripcion',
         isEditable: true
       }

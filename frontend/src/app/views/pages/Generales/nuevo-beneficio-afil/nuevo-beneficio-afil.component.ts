@@ -6,6 +6,7 @@ import { AfiliadoService } from 'src/app/services/afiliado.service';
 import { BeneficiosService } from 'src/app/services/beneficios.service';
 import { FieldConfig } from 'src/app/shared/Interfaces/field-config';
 import { format } from 'date-fns';
+import { unirNombres } from '../../../../shared/functions/formatoNombresP';
 @Component({
   selector: 'app-nuevo-beneficio-afil',
   templateUrl: './nuevo-beneficio-afil.component.html',
@@ -17,6 +18,7 @@ export class NuevoBeneficioAfilComponent implements OnInit{
   form1:any
   FormBen:any
   datosFormateados: any;
+  unirNombres: any = unirNombres;
   tiposBeneficios:any = [];
 
 
@@ -25,10 +27,6 @@ export class NuevoBeneficioAfilComponent implements OnInit{
   public myFormFields2: FieldConfig[] = []
 
   Afiliado:any = {}
-
-  formGroup = this._formBuilder.group({
-    acceptTerms: ['', Validators.requiredTrue],
-  });
 
   myColumns:any = []
   datosTabl:  any[] = [];
@@ -335,16 +333,6 @@ export class NuevoBeneficioAfilComponent implements OnInit{
       delete datosFormateados.periodo;
       this.datosFormateados = datosFormateados;
     } */
-  }
-
-  unirNombres(
-    primerNombre: string, segundoNombre?: string, tercerNombre?: string,
-    primerApellido?: string, segundoApellido?: string
-  ): string {
-    let partesNombre: any = [primerNombre, segundoNombre, tercerNombre, primerApellido, segundoApellido].filter(Boolean);
-
-    let nombreCompleto: string = partesNombre.join(' ');
-    return nombreCompleto;
   }
 
   previsualizarInfoAfil(){

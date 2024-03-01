@@ -7,15 +7,6 @@ import { CreateDetalleBeneficioDto } from './dto/create-detalle_beneficio.dto';
 export class DetalleBeneficioController {
   constructor(private readonly detallebeneficioService: DetalleBeneficioService) {}
 
-  @Patch('actualizar-estado/:idPlanilla')
-  async actualizarEstadoPorPlanilla(
-    @Param('idPlanilla') idPlanilla: string,
-    @Body('nuevoEstado') nuevoEstado: string
-  ) {
-    const respuesta = await this.detallebeneficioService.actualizarEstadoPorPlanilla(idPlanilla, nuevoEstado);
-    return respuesta;
-  }
-
   @Post('nuevoDetalle')
   async createDetalleBeneficioAfiliado(@Body() createDetalleBeneficioDto: CreateDetalleBeneficioDto) {
     try {
@@ -73,6 +64,11 @@ export class DetalleBeneficioController {
     }
     return this.detallebeneficioService.obtenerBeneficiosDeAfil(dni);
   }
+
+  @Get('/obtenerTodosBeneficios')
+  GetAllBeneficios() {
+    return this.detallebeneficioService.GetAllBeneficios();
+  }
   
   @Get('/rango-beneficios')
   async getRangoDetalleBeneficios(
@@ -86,11 +82,6 @@ export class DetalleBeneficioController {
     return await this.detallebeneficioService.getRangoDetalleBeneficios(idAfiliado, fechaInicio, fechaFin);
   }
 
-  @Patch('/actualizar-beneficio-planilla')
-  actualizarPlanillasYEstados(@Body() detalles: { idBeneficioPlanilla: string; codigoPlanilla: string; estado: string }[]) {
-    return this.detallebeneficioService.actualizarPlanillaYEstadoDeBeneficio(detalles);
-  }
-
   @Get('inconsistencias/:idAfiliado')
   async getInconsistencias(@Param('idAfiliado') idAfiliado: string) {
     return this.detallebeneficioService.findInconsistentBeneficiosByAfiliado(idAfiliado);
@@ -99,6 +90,27 @@ export class DetalleBeneficioController {
   @Get()
   findAll() {
     return this.detallebeneficioService.findAll();
+  }
+
+  @Get(':term')
+  findOne(@Param('term') term: string) {
+    return this.detallebeneficioService.findOne(term);
+  }
+
+
+
+  @Patch('actualizar-estado/:idPlanilla')
+  async actualizarEstadoPorPlanilla(
+    @Param('idPlanilla') idPlanilla: string,
+    @Body('nuevoEstado') nuevoEstado: string
+  ) {
+    const respuesta = await this.detallebeneficioService.actualizarEstadoPorPlanilla(idPlanilla, nuevoEstado);
+    return respuesta;
+  }
+
+  @Patch('/actualizar-beneficio-planilla')
+  actualizarPlanillasYEstados(@Body() detalles: { idBeneficioPlanilla: string; codigoPlanilla: string; estado: string }[]) {
+    return this.detallebeneficioService.actualizarPlanillaYEstadoDeBeneficio(detalles);
   }
 
   @Patch(':id')
@@ -111,9 +123,4 @@ export class DetalleBeneficioController {
     return this.detallebeneficioService.remove(+id);
   }
 
-
-  @Get(':term')
-  findOne(@Param('term') term: string) {
-    return this.detallebeneficioService.findOne(term);
-  }
 }

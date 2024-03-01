@@ -97,11 +97,7 @@ export class VerPlanillasComponent implements OnInit{
     try {
       const data = await firstValueFrom(this.planillaService.findAllPlanillas());
       const enrichedRows = await Promise.all(data.map(async (item: any) => {
-        console.log(item);
-
         const totalResponse = await firstValueFrom(this.planillaService.obtenerTotalPlanilla(item.id_planilla));
-        console.log(totalResponse);
-
         return {
           id_planilla: item.id_planilla,
           nombre_planilla : item.tipoPlanilla.nombre_planilla,

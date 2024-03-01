@@ -12,6 +12,7 @@ import { Net_Planilla } from '../planilla/entities/net_planilla.entity';
 import { Planilla } from '../planilla/entities/planilla.entity'; */
 import { Net_Detalle_Beneficio_Afiliado } from './entities/net_detalle_beneficio_afiliado.entity';
 import { AfiliadoService } from '../../afiliado/afiliado.service';
+import { Net_Detalle_Afiliado } from 'src/modules/afiliado/entities/detalle_afiliado.entity';
 
 @Injectable()
 export class DetalleBeneficioService {
@@ -101,9 +102,6 @@ export class DetalleBeneficioService {
 }
 
   async createBenBenefic(beneficiario: CreateDetalleBeneficioDto, idAfiliado:string): Promise<any> {
-    console.log(idAfiliado);
-    console.log(beneficiario);
-
     try {
       const query = `
         SELECT 
@@ -127,8 +125,6 @@ export class DetalleBeneficioService {
       `;
       
       const beneficiarios = await this.entityManager.query(query);
-      console.log(beneficiarios);
-        
       return beneficiarios;
     }catch{
 
@@ -214,6 +210,32 @@ export class DetalleBeneficioService {
       throw new InternalServerErrorException('Error al consultar los detalles de beneficio en la base de datos');
     }
 }
+
+  async GetAllBeneficios(): Promise<any> {
+    try {
+      return await this.detalleBeneficioAfiliadoRepository.createQueryBuilder('detBenA')
+        .addSelect('afil.dni', 'dni')
+        .addSelect('afil.primer_nombre', 'primer_nombre')
+        .addSelect('afil.segundo_nombre', 'segundo_nombre')
+        .addSelect('afil.primer_apellido', 'primer_apellido')
+        .addSelect('afil.segundo_apellido', 'segundo_apellido')
+        .addSelect('ben.periodicidad', 'periodicidad')
+        .addSelect('ben.numero_rentas_max', 'numero_rentas_max')
+        .addSelect('ben.nombre_beneficio', 'nombre_beneficio')
+        .addSelect('detA.porcentaje', 'porcentaje')
+        .addSelect('detBenA.periodoInicio', 'periodoInicio')
+        .addSelect('detBenA.periodoFinalizacion', 'periodoFinalizacion')
+        .addSelect('detBenA.num_rentas_aplicadas', 'num_rentas_aplicadas')
+        .innerJoin(Net_Afiliado, 'afil', 'detBenA.id_afiliado = afil.id_afiliado')
+        .innerJoin(Net_Detalle_Afiliado, 'detA', 'detA.id_afiliado = afil.id_afiliado')
+        .innerJoin(Net_Beneficio, 'ben', 'ben.id_beneficio = detBenA.id_beneficio')
+        .getRawMany(); 
+    } catch (error) {
+      this.logger.error(`Error al buscar beneficios inconsistentes por afiliado: ${error.message}`, error.stack);
+      throw new InternalServerErrorException('Error al buscar beneficios inconsistentes por afiliado');
+    }
+  }
+
 
 async obtenerDetallesBeneficioComplePorAfiliado(idAfiliado: string): Promise<any[]> {
   try {
@@ -440,21 +462,6 @@ async actualizarPlanillaYEstadoDeBeneficio(detalles: { idBeneficioPlanilla: stri
       WHERE detB."estado" = 'INCONSISTENCIA'
     `;
     return await this.benAfilRepository.query(query); 
-
-      /* return await this.benAfilRepository.createQueryBuilder('detB')
-        .innerJoinAndSelect('detB.beneficiINo', 'ben')
-        .where('detB.estado = :estado', { estado: 'INCONSISTENCIA' })
-        .andWhere('detB.afiliado = :idAfiliado', { idAfiliado })
-        .select([
-          'detB.id_beneficio_planilla', // ID del detalle beneficio
-          'detB.periodoInicio',
-          'detB.periodoFinalizacion',
-          'ben.nombre_beneficio',
-          'ben.id_beneficio', // Asumiendo que 'id_beneficio' es el nombre de la columna en la entidad 'beneficio'
-          'detB.monto',
-          'detB.estado'
-        ])
-        .getMany(); */
     } catch (error) {
       this.logger.error(`Error al buscar beneficios inconsistentes por afiliado: ${error.message}`, error.stack);
       throw new InternalServerErrorException('Error al buscar beneficios inconsistentes por afiliado');

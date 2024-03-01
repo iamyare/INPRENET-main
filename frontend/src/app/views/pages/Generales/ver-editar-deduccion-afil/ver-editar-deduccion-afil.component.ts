@@ -4,6 +4,7 @@ import { ToastrService } from 'ngx-toastr';
 import { firstValueFrom } from 'rxjs';
 import { DeduccionesService } from 'src/app/services/deducciones.service';
 import { TableColumn } from 'src/app/shared/Interfaces/table-column';
+import { unirNombres } from '../../../../shared/functions/formatoNombresP';
 
 @Component({
   selector: 'app-ver-editar-deduccion-afil',
@@ -11,7 +12,7 @@ import { TableColumn } from 'src/app/shared/Interfaces/table-column';
   styleUrl: './ver-editar-deduccion-afil.component.scss'
 })
 export class VerEditarDeduccionAfilComponent implements OnInit{
-
+  unirNombres: any = unirNombres;
   //Para generar tabla
   myColumns: TableColumn[] = [];
   filasT: any[] =[]
@@ -87,7 +88,7 @@ export class VerEditarDeduccionAfilComponent implements OnInit{
       this.filasT = data.map((item: any) => ({
         fecha_aplicado: this.datePipe.transform(item.fecha_aplicado, 'dd/MM/yyyy HH:mm'),
         dni: item.afiliado.dni,
-        nombre_completo: `${item.afiliado.primer_nombre} ${item.afiliado.segundo_nombre} ${item.afiliado.primer_apellido} ${item.afiliado.segundo_apellido}`,
+        nombre_completo: this.unirNombres(item.afiliado.primer_nombre, item.afiliado.segundo_nombre, item.afiliado.primer_apellido, item.afiliado.segundo_apellido),
         nombre_institucion: item.deduccion.institucion.nombre_institucion,
         nombre_deduccion: item.deduccion.nombre_deduccion,
         anio: item.anio,

@@ -53,55 +53,111 @@ export class DetalleBeneficioService {
     }
   }
 
-  async createDetalleBeneficioAfiliado(datos: CreateDetalleBeneficioDto): Promise<any> {
+  async createDetalleBeneficioAfiliado(datos: CreateDetalleBeneficioDto, idAfiliadoPadre?:string): Promise<any> {
     return await this.entityManager.transaction(async manager => {
         try {
-            const afiliado = await manager.findOne(Net_Afiliado, { where: { dni: datos.dni, estado: "ACTIVO" } });
-            if (!afiliado) {
-                throw new BadRequestException('Afiliado no encontrado');
-            }
-
             const beneficio = await manager.findOne(Net_Beneficio, { where: { nombre_beneficio: datos.nombre_beneficio } });
             if (!beneficio) {
                 throw new BadRequestException('Tipo de beneficio no encontrado');
             }
 
-            // Asumimos que convertirCadenaAFecha es una función que convierte una cadena de fecha en formato DD-MM-YYYY a un objeto Date
-        const periodoInicio = this.convertirCadenaAFecha(datos.periodoInicio);
-        const periodoFinalizacion = this.convertirCadenaAFecha(datos.periodoFinalizacion);
-
-        // Verificar que las fechas sean válidas
-        if (!periodoInicio || !periodoFinalizacion) {
-            throw new BadRequestException('Formato de fecha inválido. Usa DD-MM-YYYY.');
-        }
-        
-        console.log(afiliado);
-        
-        
-        /* const nuevoDetalleAfiliado = new Net_Detalle_Beneficio_Afiliado();
-        nuevoDetalleAfiliado.afiliado = afiliado;
-        nuevoDetalleAfiliado.beneficio = beneficio;
-        nuevoDetalleAfiliado.periodoInicio = periodoInicio;
-        nuevoDetalleAfiliado.periodoFinalizacion = periodoFinalizacion;
-        nuevoDetalleAfiliado.monto_total = datos.monto_total;
-        nuevoDetalleAfiliado.monto_por_periodo = datos.monto_por_periodo;
-
-            const detalleAfiliadoGuardado = await manager.save(nuevoDetalleAfiliado);
+          // Asumimos que convertirCadenaAFecha es una función que convierte una cadena de fecha en formato DD-MM-YYYY a un objeto Date
+          const periodoInicio = this.convertirCadenaAFecha(datos.periodoInicio);
+          const periodoFinalizacion = this.convertirCadenaAFecha(datos.periodoFinalizacion);
+  
+          // Verificar que las fechas sean válidas
+          if (!periodoInicio || !periodoFinalizacion) {
+              throw new BadRequestException('Formato de fecha inválido. Usa DD-MM-YYYY.');
+          }
+          if( idAfiliadoPadre == "undefined"){
+            const query = `
+            SELECT
+            afil."id_afiliado",
+            afil."dni"
+            FROM
+            "net_afiliado" afil
+            JOIN
+            "net_detalle_afiliado" detA ON detA."id_afiliado" = afil."id_afiliado"
+            WHERE
+            afil."dni" = '${datos.dni}' AND detA."tipo_afiliado"='AFILIADO' AND afil."estado"='ACTIVO' 
+            `;
+            const Afiliado =  await this.afiliadoRepository.query(query);
+            if(Afiliado){
+              const queryBuilder =  this.detalleBeneficioAfiliadoRepository.createQueryBuilder();
+              
+              const detalleAfiliadoGuardado = await queryBuilder
+              .insert()
+              .into(Net_Detalle_Beneficio_Afiliado)
+              .values(
+              { 
+                afiliado: Afiliado[0].id_afiliado, 
+                beneficio: beneficio, 
+                periodoInicio: periodoInicio, 
+                periodoFinalizacion: periodoFinalizacion ,
+                monto_total: datos.monto_total ,
+                monto_por_periodo: datos.monto_por_periodo ,
+              })
+              .execute();
 
             const nuevoDetalleBeneficio = manager.create(Net_Detalle_Pago_Beneficio, {
-                detalleBeneficioAfiliado: detalleAfiliadoGuardado,
+                detalleBeneficioAfiliado: detalleAfiliadoGuardado.raw.id_detalle_ben_afil,
                 metodo_pago: datos.metodo_pago,
                 monto_a_pagar: datos.monto_por_periodo,
-            });
-
-            await manager.save(nuevoDetalleBeneficio);
-
-            return { detalleAfiliadoGuardado, nuevoDetalleBeneficio }; */
-        } catch (error) {
-            this.logger.error(`Error al crear DetalleBeneficioAfiliado y DetalleBeneficio: ${error.message}`, error.stack);
-            throw new InternalServerErrorException('Error al crear registros, por favor intente más tarde.');
-        }
-    });
+              });
+              
+              await manager.save(nuevoDetalleBeneficio);
+              
+              return { detalleAfiliadoGuardado, nuevoDetalleBeneficio };
+              
+            }
+            
+          }else{
+            const queryB = `
+            SELECT
+            afil."id_afiliado",
+            afil."dni"
+            FROM
+            "net_afiliado" afil
+            JOIN
+                "net_detalle_afiliado" detA ON detA."id_afiliado" = afil."id_afiliado"
+                WHERE
+                afil."dni" = '${datos.dni}' AND detA."tipo_afiliado"='BENEFICIARIO' AND afil."estado"='ACTIVO' AND detA."id_detalle_afiliado_padre" = ${idAfiliadoPadre}
+              `;
+                
+                const Beneficiario =  await this.afiliadoRepository.query(queryB);
+                if (Beneficiario){
+                  const queryBuilder =  this.detalleBeneficioAfiliadoRepository.createQueryBuilder();
+        
+                  const detalleAfiliadoGuardadoB = await queryBuilder
+                    .insert()
+                    .into(Net_Detalle_Beneficio_Afiliado)
+                    .values(
+                      { 
+                        afiliado: Beneficiario[0].id_afiliado, 
+                        beneficio: beneficio, 
+                        periodoInicio: periodoInicio, 
+                        periodoFinalizacion: periodoFinalizacion ,
+                        monto_total: datos.monto_total ,
+                        monto_por_periodo: datos.monto_por_periodo ,
+                      })
+                      .execute();
+      
+                      const nuevoDetalleBeneficio = manager.create(Net_Detalle_Pago_Beneficio, {
+                        detalleBeneficioAfiliado: detalleAfiliadoGuardadoB.raw.id_detalle_ben_afil,
+                        metodo_pago: datos.metodo_pago,
+                        monto_a_pagar: datos.monto_por_periodo,
+                      });
+                      
+                      await manager.save(nuevoDetalleBeneficio);
+                      
+                      return { detalleAfiliadoGuardadoB, nuevoDetalleBeneficio };
+                }
+          }
+          } catch (error) {
+              this.logger.error(`Error al crear DetalleBeneficioAfiliado y DetalleBeneficio: ${error.message}`, error.stack);
+              throw new InternalServerErrorException('Error al crear registros, por favor intente más tarde.');
+          }
+      });
 }
 
   async createBenBenefic(beneficiario: CreateDetalleBeneficioDto, idAfiliado:string): Promise<any> {

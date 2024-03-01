@@ -134,8 +134,8 @@ actualizarEstado(idPlanilla: string, nuevoEstado: string): Observable<any> {
       );
   }
 
-  asigBeneficioAfil(data:TipoBeneficio): Observable<any>{
-    var url= `${environment.API_URL}/api/beneficio-planilla/nuevoDetalle`;
+  asigBeneficioAfil(data:TipoBeneficio, idAfiliadoPadre?:string): Observable<any>{
+    var url= `${environment.API_URL}/api/beneficio-planilla/nuevoDetalle/${idAfiliadoPadre}`;
 
     return this.http.post<TipoBeneficio>(
       url,

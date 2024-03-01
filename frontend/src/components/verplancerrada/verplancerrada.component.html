@@ -1,13 +1,27 @@
 <div class="container">
-  <app-dynamic-form [fields]="myFormFields" titulo="Detalles De Planilla Definitiva" subtitulo="Completa la información correspondiente" (newDatBenChange)="obtenerDatosForm($event)"></app-dynamic-form>
+  <app-dynamic-form
+    [fields]="myFormFields"
+    titulo="Detalles De Planilla Definitiva"
+    subtitulo="Completa la información correspondiente"
+    (newDatBenChange)="obtenerDatosForm($event)"
+  ></app-dynamic-form>
 
-  <button (click)="getPlanilla()" [disabled]="datosFormateados.invalid" mat-raised-button style="margin: 2% 0;
-  background-color: #628780;
-  color: #ffffff;
-  border-radius: 5px;
-  padding: 10px 20px;">Ver Planilla Definitiva</button>
+  <button
+    (click)="getPlanilla()"
+    [disabled]="datosFormateados.invalid"
+    mat-raised-button
+    style="
+      margin: 2% 0;
+      background-color: #628780;
+      color: #ffffff;
+      border-radius: 5px;
+      padding: 10px 20px;
+    "
+  >
+    Ver Planilla Definitiva
+  </button>
 
-  <button  [disabled]="datosFormateados.invalid" mat-raised-button style="margin: 2% 0;
+  <!-- <button  [disabled]="datosFormateados.invalid" mat-raised-button style="margin: 2% 0;
   background-color: #628780;
   color: #ffffff;
   border-radius: 5px;
@@ -16,9 +30,8 @@
   background-color: #628780;
   color: #ffffff;
   border-radius: 5px;
-  padding: 10px 20px;">Ver Resumen Definitiva</button>
+  padding: 10px 20px;">Ver Resumen Definitiva</button> -->
 </div>
-
 
 <div class="card-header card-header-danger title" *ngIf="detallePlanilla">
   <div class="card-body" style="padding: 1%">
@@ -26,21 +39,21 @@
     <table>
       <tr>
         <th>Nombre Planilla</th>
-        <td>{{detallePlanilla?.nombre_planilla}}</td>
+        <td>{{ detallePlanilla?.nombre_planilla }}</td>
         <th>Fecha Apertura</th>
-        <td>{{convertirFecha(detallePlanilla?.fecha_apertura)}}</td>
+        <td>{{ convertirFecha(detallePlanilla?.fecha_apertura) }}</td>
       </tr>
       <tr>
         <th>Secuencia</th>
-        <td>{{detallePlanilla?.secuencia}}</td>
+        <td>{{ detallePlanilla?.secuencia }}</td>
         <th>Estado</th>
-        <td>{{detallePlanilla?.estado}}</td>
+        <td>{{ detallePlanilla?.estado }}</td>
       </tr>
       <tr>
         <th>Periodo Inicio</th>
-        <td>{{detallePlanilla?.periodoInicio}}</td>
+        <td>{{ detallePlanilla?.periodoInicio }}</td>
         <th>Periodo Finalización</th>
-        <td>{{detallePlanilla?.periodoFinalizacion}}</td>
+        <td>{{ detallePlanilla?.periodoFinalizacion }}</td>
       </tr>
     </table>
 
@@ -48,10 +61,13 @@
 
     <div>
       <app-dynamic-table
-      [verOpcEditar]="false"
-      [columns]="myColumnsDed"
-      [data]="datosTabl" (ejecutarFuncionAsincronaEvent)="ejecutarFuncionAsincronaDesdeOtroComponente($event)"
-      [nombreEncabezadoUno]="'Detalle Ingresos'"
+        [verOpcEditar]="false"
+        [columns]="myColumnsDed"
+        [data]="datosTabl"
+        (ejecutarFuncionAsincronaEvent)="
+          ejecutarFuncionAsincronaDesdeOtroComponente($event)
+        "
+        [nombreEncabezadoUno]="'Detalle Ingresos'"
         [mostrarBotonUno]="true"
         [etiquetaBotonUno]="'Detalle Ingresos'"
         (accionBotonUno)="manejarAccionUno($event)"
@@ -63,10 +79,8 @@
         [mostrarBotonTres]="true"
         [etiquetaBotonTres]="'Generar Voucher'"
         (accionBotonTres)="manejarAccionTres($event)"
-        >
+      >
       </app-dynamic-table>
     </div>
   </div>
 </div>
-
-

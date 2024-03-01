@@ -29,6 +29,6 @@ export class Net_Detalle_Pago_Beneficio {
 
     @ManyToOne(() => Net_Detalle_Beneficio_Afiliado, detalleBeneficioAfiliado => detalleBeneficioAfiliado.detalleBeneficio, { cascade: true })
     @JoinColumn({ name: 'id_beneficio_afiliado' })
-    detalleBeneficioAfiliado: Net_Detalle_Beneficio_Afiliado;
+    detalleBeneficioAfiliado: string;
 
 }

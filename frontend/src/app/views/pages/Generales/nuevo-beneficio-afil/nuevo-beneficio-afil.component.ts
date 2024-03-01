@@ -393,7 +393,7 @@ export class NuevoBeneficioAfilComponent implements OnInit{
        })
     }else{
       this.datosFormateados["dni"] = this.FormBen.value.dni;
-      this.svcBeneficioServ.asigBeneficioAfil(this.datosFormateados).subscribe(
+      this.svcBeneficioServ.asigBeneficioAfil(this.datosFormateados, this.Afiliado.id_afiliado).subscribe(
        {
          next: (response)=>{
            this.toastr.success("se asignó correctamente el beneficio");
@@ -433,6 +433,7 @@ export class NuevoBeneficioAfilComponent implements OnInit{
     // Utiliza la referencia al componente DynamicFormComponent para resetear el formulario
     if (this.dynamicForm) {
       this.dynamicForm.form.reset();
+      this.FormBen.reset();
     }
   }
 

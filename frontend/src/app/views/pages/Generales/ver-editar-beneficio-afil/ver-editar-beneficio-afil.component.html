@@ -1,10 +1,12 @@
-<div style="background-color: white; padding: 1%">
+<div *ngIf="Afiliado" style="background-color: white; padding: 1%">
   <h1 style="font-size: 2rem">Datos Generales Afiliado</h1>
   <div>
     <table>
       <tr>
+        <th>DNI de afiliado</th>
+        <td>{{ Afiliado.dni }}</td>
         <th>Nombre de afiliado</th>
-        <td>{{ Afiliado.nameAfil }}</td>
+        <td>{{ Afiliado.nombreCompleto }}</td>
         <th>Sexo</th>
         <td>{{ Afiliado.sexo }}</td>
         <th>Dirección de residencia</th>
@@ -62,8 +64,9 @@
     (ejecutarFuncionAsincronaEvent)="
       ejecutarFuncionAsincronaDesdeOtroComponente($event)
     "
-    [verBotEditar]="true"
-    [editarFunc]="editar"
+    [mostrarBotonUno]="true"
+    [etiquetaBotonUno]="'Editar'"
+    (accionBotonUno)="manejarAccionUno($event)"
   >
   </app-dynamic-table>
 </div>

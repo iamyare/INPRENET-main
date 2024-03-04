@@ -250,9 +250,9 @@ export class PlanillaService {
               "net_detalle_afiliado" detAf ON afil."id_afiliado" = detAf."id_afiliado"
               
         LEFT JOIN
-          "net_detalle_beneficio_afiliado" detBA ON afil."id_afiliado" = detBA."id_afiliado" 
-          AND TO_DATE(detBA."periodoInicio", 'DD/MM/YY') BETWEEN TO_DATE('${periodoInicio}', 'DD-MM-YYYY') AND TO_DATE('${periodoFinalizacion}', 'DD-MM-YYYY')
-          AND TO_DATE(detBA."periodoFinalizacion", 'DD/MM/YY') BETWEEN TO_DATE('${periodoInicio}', 'DD-MM-YYYY') AND TO_DATE('${periodoFinalizacion}', 'DD-MM-YYYY')
+          "net_detalle_beneficio_afiliado" detBA ON afil."id_afiliado" = detBA."id_afiliado" AND
+          detBA."periodoInicio" <= TO_DATE('${periodoFinalizacion}', 'DD/MM/YY') AND
+          detBA."periodoFinalizacion" >= TO_DATE('${periodoInicio}', 'DD/MM/YY')
         LEFT JOIN
           "net_beneficio" ben ON ben."id_beneficio" = detBA."id_beneficio"
         LEFT JOIN
@@ -322,6 +322,9 @@ export class PlanillaService {
               beneficios."Total Beneficio" IS NOT NULL
 
       `;
+
+      console.log(query);
+      
 
       try {
         return await this.entityManager.query(query);

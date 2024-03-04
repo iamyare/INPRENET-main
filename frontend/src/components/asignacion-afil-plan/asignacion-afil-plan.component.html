@@ -1,11 +1,25 @@
 <div>
-  <app-dynamic-form [fields]="myFormFields" titulo="Detalles De Planilla" subtitulo="Completa la información correspondiente" (newDatBenChange)="obtenerDatosForm($event)"></app-dynamic-form>
+  <app-dynamic-form
+    [fields]="myFormFields"
+    titulo="Detalles De Planilla"
+    subtitulo="Completa la información correspondiente"
+    (newDatBenChange)="obtenerDatosForm($event)"
+  ></app-dynamic-form>
 
-  <button (click)="getPlanilla()" [disabled]="datosFormateados.invalid" mat-raised-button style="margin: 2% 0;
-  background-color: #628780;
-  color: #ffffff;
-  border-radius: 5px;
-  padding: 10px 20px;">Previsualizar Datos Planilla</button>
+  <button
+    (click)="getPlanilla()"
+    [disabled]="datosFormateados.invalid"
+    mat-raised-button
+    style="
+      margin: 2% 0;
+      background-color: #628780;
+      color: #ffffff;
+      border-radius: 5px;
+      padding: 10px 20px;
+    "
+  >
+    Previsualizar Datos Planilla
+  </button>
 
   <div class="card-header card-header-danger title" *ngIf="detallePlanilla">
     <div class="card-body" style="padding: 1%">
@@ -13,49 +27,61 @@
       <table>
         <tr>
           <th>Nombre Planilla</th>
-          <td>{{detallePlanilla?.nombre_planilla}}</td>
+          <td>{{ detallePlanilla?.nombre_planilla }}</td>
           <th>Fecha Apertura</th>
-          <td>{{convertirFecha(detallePlanilla?.fecha_apertura)}}</td>
+          <td>{{ convertirFecha(detallePlanilla?.fecha_apertura, true) }}</td>
         </tr>
         <tr>
           <th>Secuencia</th>
-          <td>{{detallePlanilla?.secuencia}}</td>
+          <td>{{ detallePlanilla?.secuencia }}</td>
           <th>Estado</th>
-          <td>{{detallePlanilla?.estado}}</td>
+          <td>{{ detallePlanilla?.estado }}</td>
         </tr>
         <tr>
           <th>Periodo Inicio</th>
-          <td>{{detallePlanilla?.periodoInicio}}</td>
+          <td>{{ detallePlanilla?.periodoInicio }}</td>
           <th>Periodo Finalización</th>
-          <td>{{detallePlanilla?.periodoFinalizacion}}</td>
+          <td>{{ detallePlanilla?.periodoFinalizacion }}</td>
         </tr>
       </table>
 
-      <h4 class="card-title">Asignación De Beneficios Y Deducciones A La Planilla</h4>
+      <h4 class="card-title">
+        Asignación De Beneficios Y Deducciones A La Planilla
+      </h4>
 
       <div>
         <app-dynamic-table
-        [verOpcEditar]="false"
-        [columns]="myColumnsDed"
-        [data]="datosTabl" (ejecutarFuncionAsincronaEvent)="ejecutarFuncionAsincronaDesdeOtroComponente($event)"
-        [editarFunc]="editar"
-        [nombreEncabezadoUno]="'Detalle Ingresos'"
-        [mostrarBotonUno]="true"
-        [etiquetaBotonUno]="'Detalle Ingresos'"
-        (accionBotonUno)="manejarAccionUno($event)"
-        [nombreEncabezadoDos]="'Detalle Deducciones'"
-        [mostrarBotonDos]="true"
-        [etiquetaBotonDos]="'Detalle Deducciones'"
-        (accionBotonDos)="manejarAccionDos($event)"
+          [verOpcEditar]="false"
+          [columns]="myColumnsDed"
+          [data]="datosTabl"
+          (ejecutarFuncionAsincronaEvent)="
+            ejecutarFuncionAsincronaDesdeOtroComponente($event)
+          "
+          [editarFunc]="editar"
+          [nombreEncabezadoUno]="'Detalle Ingresos'"
+          [mostrarBotonUno]="true"
+          [etiquetaBotonUno]="'Detalle Ingresos'"
+          (accionBotonUno)="manejarAccionUno($event)"
+          [nombreEncabezadoDos]="'Detalle Deducciones'"
+          [mostrarBotonDos]="true"
+          [etiquetaBotonDos]="'Detalle Deducciones'"
+          (accionBotonDos)="manejarAccionDos($event)"
         >
         </app-dynamic-table>
       </div>
-      <button (click)="procesarPlanilla()" mat-raised-button style="
-        margin: 2% 0;
-        background-color: #628780;
-        color: #ffffff;
-        border-radius: 5px;
-        padding: 10px 20px;">Asignar a la planilla</button>
+      <button
+        (click)="procesarPlanilla()"
+        mat-raised-button
+        style="
+          margin: 2% 0;
+          background-color: #628780;
+          color: #ffffff;
+          border-radius: 5px;
+          padding: 10px 20px;
+        "
+      >
+        Asignar a la planilla
+      </button>
     </div>
   </div>
 </div>

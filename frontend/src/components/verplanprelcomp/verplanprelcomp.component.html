@@ -1,11 +1,25 @@
 <div class="container">
-  <app-dynamic-form [fields]="myFormFields" titulo="Detalles De Planilla Preliminar" subtitulo="Completa la información correspondiente" (newDatBenChange)="obtenerDatosForm($event)"></app-dynamic-form>
+  <app-dynamic-form
+    [fields]="myFormFields"
+    titulo="Detalles De Planilla Preliminar"
+    subtitulo="Completa la información correspondiente"
+    (newDatBenChange)="obtenerDatosForm($event)"
+  ></app-dynamic-form>
 
-  <button (click)="getPlanilla()" [disabled]="datosFormateados.invalid" mat-raised-button style="margin: 2% 0;
-  background-color: #628780;
-  color: #ffffff;
-  border-radius: 5px;
-  padding: 10px 20px;">Ver Planilla preliminar</button>
+  <button
+    (click)="getPlanilla()"
+    [disabled]="datosFormateados.invalid"
+    mat-raised-button
+    style="
+      margin: 2% 0;
+      background-color: #628780;
+      color: #ffffff;
+      border-radius: 5px;
+      padding: 10px 20px;
+    "
+  >
+    Ver Planilla preliminar
+  </button>
 </div>
 
 <div class="card-header card-header-danger title" *ngIf="detallePlanilla">
@@ -14,32 +28,34 @@
     <table>
       <tr>
         <th>Nombre Planilla</th>
-        <td>{{detallePlanilla?.nombre_planilla}}</td>
+        <td>{{ detallePlanilla?.nombre_planilla }}</td>
         <th>Fecha Apertura</th>
-        <td>{{convertirFecha(detallePlanilla?.fecha_apertura)}}</td>
+        <td>{{ convertirFecha(detallePlanilla?.fecha_apertura, true) }}</td>
       </tr>
       <tr>
         <th>Secuencia</th>
-        <td>{{detallePlanilla?.secuencia}}</td>
+        <td>{{ detallePlanilla?.secuencia }}</td>
         <th>Estado</th>
-        <td>{{detallePlanilla?.estado}}</td>
+        <td>{{ detallePlanilla?.estado }}</td>
       </tr>
       <tr>
         <th>Periodo Inicio</th>
-        <td>{{detallePlanilla?.periodoInicio}}</td>
+        <td>{{ detallePlanilla?.periodoInicio }}</td>
         <th>Periodo Finalización</th>
-        <td>{{detallePlanilla?.periodoFinalizacion}}</td>
+        <td>{{ detallePlanilla?.periodoFinalizacion }}</td>
       </tr>
     </table>
 
     <h4 class="card-title">Afiliados en la Planilla</h4>
 
-
     <div>
       <app-dynamic-table
         [verOpcEditar]="false"
         [columns]="myColumnsDed"
-        [data]="datosTabl" (ejecutarFuncionAsincronaEvent)="ejecutarFuncionAsincronaDesdeOtroComponente($event)"
+        [data]="datosTabl"
+        (ejecutarFuncionAsincronaEvent)="
+          ejecutarFuncionAsincronaDesdeOtroComponente($event)
+        "
         [nombreEncabezadoUno]="'Detalle Ingresos'"
         [mostrarBotonUno]="true"
         [etiquetaBotonUno]="'Detalle Ingresos'"
@@ -51,21 +67,43 @@
       >
       </app-dynamic-table>
     </div>
-    <button (click)="actualizarFechaCierrePlanilla()" mat-raised-button style="
-      margin: 2% 0;
-      background-color: #628780;
-      color: #ffffff;
-      border-radius: 5px;
-      padding: 10px 20px;"
-    >Cerrar planilla</button>
-    <button  mat-raised-button style="
-      margin: 2% 0;
-      background-color: #628780;
-      color: #ffffff;
-      border-radius: 5px;
-      padding: 10px 20px;"
-    >Generar reporte</button>
-    <button (click)="mostrarTotales()" mat-raised-button style="margin: 2% 0; background-color: #628780; color: #ffffff; border-radius: 5px; padding: 10px 20px;">
+    <button
+      (click)="actualizarFechaCierrePlanilla()"
+      mat-raised-button
+      style="
+        margin: 2% 0;
+        background-color: #628780;
+        color: #ffffff;
+        border-radius: 5px;
+        padding: 10px 20px;
+      "
+    >
+      Cerrar planilla
+    </button>
+    <button
+      mat-raised-button
+      style="
+        margin: 2% 0;
+        background-color: #628780;
+        color: #ffffff;
+        border-radius: 5px;
+        padding: 10px 20px;
+      "
+    >
+      Generar reporte
+    </button>
+    <button
+      (click)="mostrarTotales()"
+      mat-raised-button
+      style="
+        margin: 2% 0;
+        background-color: #628780;
+        color: #ffffff;
+        border-radius: 5px;
+        padding: 10px 20px;
+      "
+    >
       Mostrar totales de ingresos
     </button>
+  </div>
 </div>

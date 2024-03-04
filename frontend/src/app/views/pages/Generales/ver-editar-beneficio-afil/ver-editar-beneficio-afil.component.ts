@@ -8,6 +8,8 @@ import { BeneficiosService } from 'src/app/services/beneficios.service';
 import { convertirFecha } from '../../../../shared/functions/formatoFecha';
 import { FieldConfig } from 'src/app/shared/Interfaces/field-config';
 import { Validators } from '@angular/forms';
+import { EditarDialogComponent } from '@docs-components/editar-dialog/editar-dialog.component';
+import { MatDialog } from '@angular/material/dialog';
 
 @Component({
   selector: 'app-ver-editar-beneficio-afil',
@@ -18,7 +20,7 @@ export class VerEditarBeneficioAfilComponent {
   unirNombres: any = unirNombres;
   convertirFecha:any = convertirFecha;
 
-  Afiliado:any = {}
+  Afiliado:any;
   form:any
   public myFormFields: FieldConfig[] = []
   public monstrarBeneficios: boolean = false;
@@ -30,6 +32,7 @@ export class VerEditarBeneficioAfilComponent {
   ejecF: any;
 
   constructor(
+    private dialog: MatDialog,
     private http: HttpClient,
     private beneficioService: BeneficiosService,
     private datePipe: DatePipe,
@@ -78,8 +81,6 @@ export class VerEditarBeneficioAfilComponent {
         isEditable: true
       },
     ];
-
-
   }
 
   async obtenerDatos(event:any):Promise<any>{
@@ -91,6 +92,23 @@ export class VerEditarBeneficioAfilComponent {
     try {
       /* Falta traer datos de la planilla */
       const data = await this.beneficioService.GetAllBeneficios(this.form.value.dni).toPromise();
+      const dataAfil = data.map((item: any) => ({
+        dni: item.dni,
+        estado_civil: item.estado_civil,
+        nombreCompleto: unirNombres(item.primer_nombre, item.segundo_nombre, item.primer_apellido,item.segundo_apellido),
+        sexo: item.sexo,
+        profesion: item.profesion,
+        telefono_1: item.telefono_1,
+        colegio_magisterial: item.colegio_magisterial,
+        numero_carnet: item.numero_carnet,
+        direccion_residencia: item.direccion_residencia,
+        estado: item.estado,
+        salario_base: item.salario_base,
+        fecha_nacimiento: convertirFecha(item.fecha_nacimiento, false)
+      }));
+
+      this.Afiliado = dataAfil[0]
+
       this.filasT = data.map((item: any) => ({
         dni: item.dni,
         fecha_aplicado: this.datePipe.transform(item.fecha_aplicado, 'dd/MM/yyyy HH:mm'),
@@ -99,8 +117,8 @@ export class VerEditarBeneficioAfilComponent {
         periodicidad: item.periodicidad,
         monto_por_periodo: item.monto_por_periodo,
         monto_total: item.monto_total,
-        periodoInicio: convertirFecha(item.periodoInicio),
-        periodoFinalizacion: convertirFecha(item.periodoFinalizacion)
+        periodoInicio: convertirFecha(item.periodoInicio,false),
+        periodoFinalizacion: convertirFecha(item.periodoFinalizacion,false)
       }));
 
       return this.filasT;
@@ -113,7 +131,6 @@ export class VerEditarBeneficioAfilComponent {
   previsualizarInfoAfil(){
     this.monstrarBeneficios = true;
     this.getFilas().then(() => this.cargar());
-    this.Afiliado.nameAfil = ""
     if (this.form.value.dni){
 
       /* this.svcAfilServ.getAfilByParam(this.form.value.dni).subscribe(
@@ -162,5 +179,29 @@ export class VerEditarBeneficioAfilComponent {
       }
     ); */
   };
+
+  manejarAccionUno(row: any) {
+    const campos = [
+      { nombre: 'numero_rentas_max', tipo: 'number', requerido: true, etiqueta: 'Número de rentas máximas', editable:false },
+      { nombre: 'periodoInicio', tipo: 'number', requerido: true, etiqueta: 'Periodo de inicio' },
+      { nombre: 'periodoFinalizacion', tipo: 'number', requerido: true, etiqueta: 'Periodo de finalización' },
+      { nombre: 'monto_por_periodo', tipo: 'text', requerido: true, etiqueta: 'Monto por periodo' },
+      { nombre: 'Monto_total', tipo: 'number', requerido: true, etiqueta: 'Monto Total' },
+
+    ];
+
+
+    const dialogRef = this.dialog.open(EditarDialogComponent, {
+      width: '500px',
+      data: { campos: campos, valoresIniciales: row }
+    });
+
+
+    dialogRef.afterClosed().subscribe((result: any) => {
+      if (result) {
+        console.log('Datos editados:', result);
+      }
+    });
+  }
 
 }

@@ -14,7 +14,7 @@
         <a cNavLink routerLink="/users" routerLinkActive="active">Users</a>
       </c-nav-item>
       <c-nav-item>
-        <a cNavLink routerLink="/settings" routerLinkActive="active">
+        <a cNavLink routerLink="/settings" breadcrumb="active">
           Settings
         </a>
       </c-nav-item> -->
@@ -41,12 +41,15 @@
       <ng-container *ngTemplateOutlet="userDropdown"></ng-container>
     </c-header-nav>
 
+
   </c-container>
   <c-header-divider></c-header-divider>
-  <c-container [fluid]="true">
-    <c-breadcrumb-router class="ms-2"></c-breadcrumb-router>
-  </c-container>
-</ng-container>
+<c-container [fluid]="true">
+  <div class="ms-2 d-flex align-items-center">
+    <svg cIcon name="cilHome" size="lg" class="me-2 icon-home"></svg>
+    <c-breadcrumb-router></c-breadcrumb-router>
+  </div>
+</c-container>
 <!--</c-header>-->
 
 <ng-template #userDropdown>

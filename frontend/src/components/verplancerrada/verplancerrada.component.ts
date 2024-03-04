@@ -250,6 +250,8 @@ export class VerplancerradaComponent {
   }
 
   construirPDF(row: any, beneficios: any[], deducciones: any[]) {
+    console.log(row);
+
     let docDefinition: TDocumentDefinitions = {
       content: [
         { text: 'Comprobante de Pago', style: 'header' },
@@ -265,6 +267,7 @@ export class VerplancerradaComponent {
             [
               { text: 'Cliente', style: 'subheader' },
               { text: 'Nombre: ' + (row.NOMBRE_COMPLETO || 'Desconocido') },
+              { text: 'DNI: ' + (row.dni || 'Desconocido') },
               { text: 'Email: ' + (row.correo_1 || 'No proporcionado') },
             ],
             [

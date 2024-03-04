@@ -151,10 +151,6 @@ export class TotalesporbydDialogComponent implements OnInit {
     pdfMake.createPdf(docDefinition).download('Reporte_Beneficios_Deducciones.pdf');
   }
 
-
-
-
-
   crearTablaPDF(data: any[], titulo: string) {
     const total = data.reduce((acc, cur) => acc + (cur.total ? parseFloat(cur.total) : 0), 0);
 

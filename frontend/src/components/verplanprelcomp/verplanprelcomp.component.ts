@@ -10,6 +10,7 @@ import { PlanillaService } from 'src/app/services/planilla.service';
 import { FieldConfig } from 'src/app/shared/Interfaces/field-config';
 import { TableColumn } from 'src/app/shared/Interfaces/table-column';
 import { convertirFecha } from 'src/app/shared/functions/formatoFecha';
+import { TotalesporbydDialogComponent } from '../totalesporbydDialog/totalesporbydDialog.component';
 
 @Component({
   selector: 'app-verplanprelcomp',
@@ -288,52 +289,10 @@ export class VerplanprelcompComponent implements OnInit{
       });
     }
 
-    mostrarTotalesIngresos() {
-      this.planillaService.getTotalesPorDedYBen(this.idPlanilla).subscribe({
-        next: (data) => {
-          /* this.dialog.open(TotalesporbydDialogComponent, {
-            width: '400px',
-            data: {
-              tipo: 'Ingresos',
-              totales: data.beneficios.map((beneficio:any) => ({
-                nombre: beneficio.nombre_beneficio,
-                total: beneficio['Total Monto Beneficio']
-              }))
-            }
-          }); */
-        },
-        error: (error) => {
-          console.error('Error al obtener los totales de ingresos', error);
-          this.toastr.error('Error al obtener los totales de ingresos');
-        }
-      });
-    }
-
-    mostrarTotalesDeducciones() {
-      this.planillaService.getTotalesPorDedYBen(this.idPlanilla).subscribe({
-        next: (data) => {
-          /* this.dialog.open(TotalesporbydDialogComponent, {
-            width: '400px',
-            data: {
-              tipo: 'Deducciones',
-              totales: data.deducciones.map((deduccion:any) => ({
-                nombre: deduccion.nombre_deduccion,
-                total: deduccion['Total Monto Aplicado']
-              }))
-            }
-          }); */
-        },
-        error: (error) => {
-          console.error('Error al obtener los totales de deducciones', error);
-          this.toastr.error('Error al obtener los totales de deducciones');
-        }
-      });
-    }
-
     mostrarTotales() {
       this.planillaService.getTotalesPorDedYBen(this.idPlanilla).subscribe({
         next: (data) => {
-          /* this.dialog.open(TotalesporbydDialogComponent, {
+          this.dialog.open(TotalesporbydDialogComponent, {
             width: '1000px',
             data: {
               beneficios: data.beneficios.map((beneficio: any) => ({
@@ -345,7 +304,7 @@ export class VerplanprelcompComponent implements OnInit{
                 total: deduccion['Total Monto Aplicado']
               }))
             }
-          }); */
+          });
         },
         error: (error) => {
           console.error('Error al obtener los totales', error);

@@ -24,7 +24,6 @@ export class VerPlanillasComponent implements OnInit{
 
   }
 
-
   myColumns: TableColumn[] = [];
   filas: any[] = [];
   ejecF: any;

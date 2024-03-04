@@ -9,7 +9,6 @@ import { Validators } from '@angular/forms';
 import { DatePipe } from '@angular/common';
 import { MatDialog } from '@angular/material/dialog';
 import { EditarDialogComponent } from '../../../../../components/editar-dialog/editar-dialog.component';
-import { InstitucionesService } from 'src/app/services/instituciones.service';
 
 @Component({
   selector: 'app-ver-editar-deduccion-afil',
@@ -37,18 +36,9 @@ export class VerEditarDeduccionAfilComponent implements OnInit{
     private svcAfilServ : AfiliadoService,
     private datePipe: DatePipe,
     private dialog: MatDialog,
-    private institucionesService : InstitucionesService
     ) {}
 
   ngOnInit(): void {
-    this.institucionesService.getInstituciones().subscribe(
-      (data) => {
-        this.instituciones = data;
-      },
-      (error) => {
-        this.toastr.error(`Error al cargar las instituciones: ${error.message}`);
-      }
-    );
     this.myFormFields = [
       { type: 'text', label: 'DNI del afiliado', name: 'dni', validations: [Validators.required, Validators.minLength(13), Validators.maxLength(14)], display:true }
     ];
@@ -162,10 +152,54 @@ export class VerEditarDeduccionAfilComponent implements OnInit{
     }
   }
 
+  async cargarOpcionesDeducciones(nombreInstitucion: string): Promise<any[]> {
+    try {
+      const deducciones = await this.deduccionesService.getDeduccionesByEmpresa(nombreInstitucion).toPromise();
+      return deducciones.map((deduccion:any) => ({
+        valor: deduccion.id_deduccion,
+        etiqueta: deduccion.nombre_deduccion
+      }));
+    } catch (error) {
+      this.toastr.error(`Error al cargar deducciones: ${error}`);
+      return [];
+    }
+  }
+
   manejarAccionUno(row: any) {
     const campos = [
-      { nombre: 'nombre_deduccion', tipo: 'text', requerido: true, etiqueta: 'Nombre de Deducción' },
+      {
+        nombre: 'nombre_institucion',
+        tipo: 'list',
+        requerido: false,
+        etiqueta: 'Nombre de Institución',
+        editable: false,
+        opciones: [
+          { valor: 'INJUPEM', etiqueta: 'INJUPEM' },
+          { valor: 'INPREMA', etiqueta: 'INPREMA' },
+        ]
+      },
+      {
+        nombre: 'Tipo de deduccion',
+        tipo: 'list',
+        requerido: true,
+        etiqueta: 'Tipo de deduccion',
+        dependeDe: 'nombre_institucion',
+        valorDependiente: 'INJUPEM',
+      },
+      {
+        nombre: 'Tipo de deduccion',
+        tipo: 'list',
+        requerido: true,
+        etiqueta: 'Tipo de deduccion',
+        dependeDe: 'nombre_institucion',
+        valorDependiente: 'INPREMA',
+        opciones: [
+          { valor: 'INTERESES', etiqueta: 'INTERESES' },
+          { valor: 'PRESTAMOS', etiqueta: 'PRESTAMOS' },
+        ]
+      },
       { nombre: 'monto_total', tipo: 'number', requerido: true, etiqueta: 'Monto Total' },
+
       {
         nombre: 'estado_aplicacion', tipo: 'list', requerido: false, etiqueta: 'Estado de Aplicación',
         opciones: [
@@ -173,16 +207,10 @@ export class VerEditarDeduccionAfilComponent implements OnInit{
           { valor: 'INCONSISTENCIA', etiqueta: 'Inconsistencia' }
         ]
       },
-      { nombre: 'anio', tipo: 'text', requerido: false, etiqueta: 'Año', editable: false },
+      { nombre: 'anio', tipo: 'text', requerido: true, etiqueta: 'Año', editable: false },
       { nombre: 'mes', tipo: 'text', requerido: false, etiqueta: 'Mes', editable: false },
-      {
-        nombre: 'nombre_institucion',
-        tipo: 'list',
-        requerido: false,
-        etiqueta: 'Nombre de Institución',
-        editable: false,
-        opciones: this.instituciones.map((inst) => ({ valor: inst.id_institucion, etiqueta: inst.nombre_institucion }))
-      },
+
+
     ];
 
 
@@ -202,3 +230,11 @@ export class VerEditarDeduccionAfilComponent implements OnInit{
 
 
 }
+
+
+
+/*
+{
+
+}
+*/

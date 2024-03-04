@@ -38,6 +38,9 @@ export class DynamicTableComponent implements OnInit, OnDestroy {
   @Input() etiquetaBotonTres: string = '';
   @Output() accionBotonTres: EventEmitter<any> = new EventEmitter<any>();
 
+  @Input() titulo = "";
+  @Input() subtitulo = "";
+
 
   @ViewChild(MatPaginator) paginator: MatPaginator | undefined;
 

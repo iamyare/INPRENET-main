@@ -1,0 +1,17 @@
+.breadcrumb-item a, .breadcrumb-item.active {
+  color: #628780; /* Aplica el color a las letras */
+  font-size: 1.25em; /* Aumenta el tamaño de la letra */
+  font-weight: 500; /* Hace la letra más gruesa */
+}
+
+
+:host ::ng-deep .breadcrumb-item a,
+:host ::ng-deep .breadcrumb-item.active {
+  color: #628780;
+  font-size: 1.25em;
+  font-weight: 500;
+}
+
+.icon-home {
+  fill: green;
+}

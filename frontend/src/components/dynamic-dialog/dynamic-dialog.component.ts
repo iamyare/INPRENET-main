@@ -1,4 +1,4 @@
-import { Component, Inject, OnInit } from '@angular/core';
+import { Component, Inject, Input, OnInit } from '@angular/core';
 import { MAT_DIALOG_DATA } from '@angular/material/dialog';
 
 @Component({
@@ -10,6 +10,8 @@ export class DynamicDialogComponent implements OnInit{
 
   displayedColumns: string[] = []; // Dejar esto vacío inicialmente
   dialogTitle: string = ''; // Título del diálogo
+  @Input() titulo = "";
+  @Input() subtitulo = "";
 
   constructor(@Inject(MAT_DIALOG_DATA) public data: { logs: any[], type: string }) {
   }

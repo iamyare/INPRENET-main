@@ -1,13 +1,23 @@
 <!-- BUSCADOR -->
-<div style="text-align: right; padding: 1rem 0 1rem 0" >
-  <div class="search-container">
-    <mat-form-field appearance="outline" style="background-color: white;">
-      <mat-label>Buscar</mat-label>
-      <input matInput type="search" [formControl]="formsearch" >
-      <button mat-icon-button matSuffix aria-label="Buscar">
-        <mat-icon>search</mat-icon>
-      </button>
-    </mat-form-field>
+<div class="container-fluid">
+  <div class="row">
+    <div class="col-md-6">
+      <div class="card-header card-header-danger title" style=" color: #628780;">
+        <h4 class="card-title">{{titulo}}</h4>
+        <p class="card-category">{{subtitulo}}</p>
+      </div>
+    </div>
+    <div class="col-md-6" style="text-align: right; padding: 1rem 0;">
+      <div class="search-container">
+        <mat-form-field appearance="outline" style="background-color: white;">
+          <mat-label>Buscar</mat-label>
+          <input matInput type="search" [formControl]="formsearch" >
+          <button mat-icon-button matSuffix aria-label="Buscar">
+            <mat-icon>search</mat-icon>
+          </button>
+        </mat-form-field>
+      </div>
+    </div>
   </div>
 </div>
 

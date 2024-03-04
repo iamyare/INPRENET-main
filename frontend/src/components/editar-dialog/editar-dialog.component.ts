@@ -4,11 +4,13 @@ import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 
 interface Campo {
   nombre: string;
-  tipo: string; // 'text', 'number', 'list', etc.
+  tipo: string;
   requerido: boolean;
   etiqueta?: string;
   editable?: boolean;
   opciones?: { valor: any, etiqueta: string }[];
+  dependeDe?: string; // Nombre del campo del cual depende
+  valorDependiente?: any; // Valor del campo dependiente para mostrar este campo
 }
 
 @Component({
@@ -33,10 +35,9 @@ export class EditarDialogComponent implements OnInit {
 
   crearFormulario() {
     const group: { [key: string]: any } = {};
-    console.log(this.data.valoresIniciales);
 
-    const isFormDisabled = this.data.valoresIniciales['estado_aplicacion'] === 'COBRADA' || this.data.valoresIniciales['fecha_aplicado']
-    this.data.valoresIniciales['codigo_planilla'] !== 'No ha sido asignado';
+    const isFormDisabled = this.data.valoresIniciales['estado_aplicacion'] === 'COBRADA' ||
+                           this.data.valoresIniciales['codigo_planilla'] !== 'No ha sido asignado';
 
     this.data.campos.forEach(campo => {
       const validaciones = [];

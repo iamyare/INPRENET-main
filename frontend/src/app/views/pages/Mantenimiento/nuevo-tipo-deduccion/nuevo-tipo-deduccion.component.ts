@@ -6,6 +6,7 @@ import { FieldConfig } from 'src/app/shared/Interfaces/field-config';
 import { DynamicFormComponent } from '@docs-components/dynamic-form/dynamic-form.component';
 import { InstitucionesService } from 'src/app/services/instituciones.service';
 import { DatosEstaticosService } from '../../../../services/datos-estaticos.service';
+import { PlanillaService } from 'src/app/services/planilla.service';
 @Component({
   selector: 'app-nuevo-tipo-deduccion',
   templateUrl: './nuevo-tipo-deduccion.component.html',
@@ -20,15 +21,32 @@ export class NuevoTipoDeduccionComponent implements OnInit {
   Instituciones: any = this.datosEstaticosService.Instituciones;
   @ViewChild(DynamicFormComponent) dynamicForm!: DynamicFormComponent;
 
-  constructor(private SVCDeduccion:DeduccionesService, private datosEstaticosService:DatosEstaticosService, private toastr: ToastrService, private SVCInstituciones:InstitucionesService ){}
+  constructor(private SVCDeduccion:DeduccionesService, private datosEstaticosService:DatosEstaticosService, private toastr: ToastrService, private SVCInstituciones:InstitucionesService,
+              private planillaService : PlanillaService ){}
 
   ngOnInit(): void {
     this.prueba()
   }
 
+  mostrarTipoPlanilla: boolean = true;
+
+
+  toggleDisplayForTipoPlanilla(): void {
+    this.mostrarTipoPlanilla = !this.mostrarTipoPlanilla;
+    const tipoPlanillaField = this.myFormFields.find(field => field.name === 'tipo_planilla');
+    if (tipoPlanillaField) {
+      tipoPlanillaField.display = this.mostrarTipoPlanilla;
+    }
+  }
+
+
+
   async prueba(): Promise<void> {
     try {
       const instituciones = await this.SVCInstituciones.getInstituciones().toPromise();
+      const tiposPlanilla = await this.planillaService.findAllTipoPlanilla().toPromise();
+      console.log(tiposPlanilla);
+
 
       this.myFormFields = [
         { type: 'text', label: 'Nombre', name: 'nombre_deduccion', validations: [Validators.required] , display: true},
@@ -40,6 +58,14 @@ export class NuevoTipoDeduccionComponent implements OnInit {
           options: instituciones.map((item: { nombre_institucion: any; id_institucion: any; }) => ({
             label: item.nombre_institucion,
             value: item.nombre_institucion
+          })),
+          validations: [Validators.required], display: true
+        },
+        {
+          type: 'dropdown', label: 'TipoPlanilla', name: 'tipo_planilla',
+          options: tiposPlanilla.map((item: { nombre_planilla: any; id_tipo_planilla: any; }) => ({
+            label: item.nombre_planilla,
+            value: item.nombre_planilla
           })),
           validations: [Validators.required], display: true
         }

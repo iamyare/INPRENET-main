@@ -26,6 +26,9 @@ export class Net_perf_afil_cent_trab {
     @Column('date', { nullable: false })
     fecha_pago: string;
 
+    @Column('number', { nullable: true})
+    salario_base: number;
+
     @Column('varchar2', {  length: 40, nullable: false })
     numero_acuerdo: string;
 

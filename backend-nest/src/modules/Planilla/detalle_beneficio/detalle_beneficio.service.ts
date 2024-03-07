@@ -391,7 +391,7 @@ async obtenerBeneficiosDeAfil(dni: string): Promise<any[]> {
   }
 }
 
-async actualizarPlanillaYEstadoDeBeneficio(detalles: { idBeneficioPlanilla: string; codigoPlanilla: string; estado: string }[], transactionalEntityManager?: EntityManager): Promise<Net_Detalle_Pago_Beneficio[]> {
+async actualizarPlanillaYEstadoDeBeneficio(detalles: { idBeneficioPlanilla: number; codigoPlanilla: string; estado: string }[], transactionalEntityManager?: EntityManager): Promise<Net_Detalle_Pago_Beneficio[]> {
   const resultados = [];
   const entityManager = transactionalEntityManager ? transactionalEntityManager : this.entityManager;
 
@@ -473,7 +473,7 @@ async actualizarPlanillaYEstadoDeBeneficio(detalles: { idBeneficioPlanilla: stri
     return `This action returns all beneficioPlanilla`;
   }
 
-  async findOne(term: string) {
+  async findOne(term: number) {
     let benAfil: Net_Detalle_Pago_Beneficio;
     if (isUUID(term)) {
       benAfil = await this.benAfilRepository.findOneBy({ id_beneficio_planilla: term });

@@ -82,9 +82,6 @@ export class Net_Afiliado {
     @Column('varchar2', { length: 40, default: 'ACTIVO' })
     estado: string;
 
-    @Column('number', { nullable: true})
-    salario_base: number;
-
     @Column('date', { nullable: true })
     fecha_nacimiento: string;
 

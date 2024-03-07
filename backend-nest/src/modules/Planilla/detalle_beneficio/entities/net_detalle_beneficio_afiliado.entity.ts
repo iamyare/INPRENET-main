@@ -24,6 +24,9 @@ export class Net_Detalle_Beneficio_Afiliado
 
     @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
     monto_por_periodo: number;
+    
+    @Column({nullable:true})
+    metodo_pago: string;
 
     @ManyToOne(() => Net_Afiliado, afiliado => afiliado.detalleBeneficioAfiliado)
     @JoinColumn({ name: 'id_afiliado' })

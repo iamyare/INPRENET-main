@@ -93,7 +93,7 @@ export class DetalleBeneficioController {
   }
 
   @Get(':term')
-  findOne(@Param('term') term: string) {
+  findOne(@Param('term') term: number) {
     return this.detallebeneficioService.findOne(term);
   }
 
@@ -109,7 +109,7 @@ export class DetalleBeneficioController {
   }
 
   @Patch('/actualizar-beneficio-planilla')
-  actualizarPlanillasYEstados(@Body() detalles: { idBeneficioPlanilla: string; codigoPlanilla: string; estado: string }[]) {
+  actualizarPlanillasYEstados(@Body() detalles: { idBeneficioPlanilla: number; codigoPlanilla: string; estado: string }[]) {
     return this.detallebeneficioService.actualizarPlanillaYEstadoDeBeneficio(detalles);
   }
 

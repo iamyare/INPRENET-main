@@ -1,4 +1,6 @@
-import { Column, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn } from "typeorm";
+import { Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn } from "typeorm";
+/* import { Beneficio } from "../../beneficio/entities/beneficio.entity";
+import { Afiliado } from "src/modules/afiliado/entities/afiliado"; */
 import { Net_Planilla } from "../../planilla/entities/net_planilla.entity";
 import { Net_Detalle_Beneficio_Afiliado } from "./net_detalle_beneficio_afiliado.entity";
 export enum EstadoEnum {
@@ -8,15 +10,14 @@ export enum EstadoEnum {
 }
 @Entity()
 export class Net_Detalle_Pago_Beneficio {
-
-    @PrimaryGeneratedColumn('uuid')
-    id_beneficio_planilla : string;
+    @PrimaryGeneratedColumn({ type: 'int' })
+    id_beneficio_planilla : number;
 
     @Column({default:"NO PAGADA", enum: ['NO PAGADA', 'PAGADA']})
     estado: string;
 
-    @Column({nullable:true})
-    metodo_pago: string;
+    @CreateDateColumn()
+    fechaCarga: Date;
 
     @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
     monto_a_pagar: number;

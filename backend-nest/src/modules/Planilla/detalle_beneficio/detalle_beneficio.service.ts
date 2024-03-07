@@ -3,7 +3,7 @@ import { isUUID } from 'class-validator';
 import { InjectEntityManager, InjectRepository } from '@nestjs/typeorm';
 import { EntityManager, LessThanOrEqual, MoreThanOrEqual, Not, Repository } from 'typeorm';
 import { Net_Beneficio } from '../beneficio/entities/net_beneficio.entity';
-import { Net_Afiliado } from 'src/modules/afiliado/entities/net_afiliado';
+import { Net_Persona } from 'src/modules/afiliado/entities/Net_Persona';
 import { Net_Detalle_Pago_Beneficio, EstadoEnum } from './entities/net_detalle_pago_beneficio.entity';
 import { UpdateDetalleBeneficioDto } from './dto/update-detalle_beneficio_planilla.dto';
 import { CreateDetalleBeneficioDto } from './dto/create-detalle_beneficio.dto';
@@ -19,8 +19,8 @@ export class DetalleBeneficioService {
   private readonly logger = new Logger(DetalleBeneficioService.name)
 
   constructor(
-  @InjectRepository(Net_Afiliado)
-  private  afiliadoRepository : Repository<Net_Afiliado>,
+  @InjectRepository(Net_Persona)
+  private  afiliadoRepository : Repository<Net_Persona>,
   private  AfiliadoService : AfiliadoService,
   
   @InjectRepository(Net_Beneficio)
@@ -75,7 +75,7 @@ export class DetalleBeneficioService {
             afil."id_afiliado",
             afil."dni"
             FROM
-            "net_afiliado" afil
+            "Net_Persona" afil
             JOIN
             "net_detalle_afiliado" detA ON detA."id_afiliado" = afil."id_afiliado"
             WHERE
@@ -117,7 +117,7 @@ export class DetalleBeneficioService {
             afil."id_afiliado",
             afil."dni"
             FROM
-            "net_afiliado" afil
+            "Net_Persona" afil
             JOIN
                 "net_detalle_afiliado" detA ON detA."id_afiliado" = afil."id_afiliado"
                 WHERE
@@ -176,7 +176,7 @@ export class DetalleBeneficioService {
             "detA"."tipo_afiliado"
         FROM
             "detalle_afiliado" "detA" INNER JOIN 
-            "net_afiliado" "Afil" ON "detA"."id_afiliado" = "Afil"."id_afiliado"
+            "Net_Persona" "Afil" ON "detA"."id_afiliado" = "Afil"."id_afiliado"
         WHERE 
             "detA"."id_detalle_afiliado_padre" = ${idAfiliado} AND
             "Afil"."dni" = '${beneficiario.dni}' AND
@@ -251,7 +251,7 @@ export class DetalleBeneficioService {
   JOIN
     "net_beneficio" b ON detBA."id_beneficio" = b."id_beneficio"
   JOIN
-    "net_afiliado" afil ON detBA."id_afiliado" = afil."id_afiliado"
+    "Net_Persona" afil ON detBA."id_afiliado" = afil."id_afiliado"
   WHERE
     detBA."id_afiliado" = :idAfiliado
   AND
@@ -296,7 +296,7 @@ export class DetalleBeneficioService {
         .addSelect('detBenA.periodoFinalizacion', 'periodoFinalizacion')
         .addSelect('detBenA.monto_por_periodo', 'monto_por_periodo')
         .addSelect('detBenA.monto_total', 'monto_total')
-        .innerJoin(Net_Afiliado, 'afil', 'detBenA.id_afiliado = afil.id_afiliado')
+        .innerJoin(Net_Persona, 'afil', 'detBenA.id_afiliado = afil.id_afiliado')
         .innerJoin(Net_Detalle_Afiliado, 'detA', 'detA.id_afiliado = afil.id_afiliado')
         .innerJoin(Net_Beneficio, 'ben', 'ben.id_beneficio = detBenA.id_beneficio')
         .where(`afil.dni = ${dni}`)
@@ -337,7 +337,7 @@ async obtenerDetallesBeneficioComplePorAfiliado(idAfiliado: string): Promise<any
       JOIN
         "net_beneficio" ben ON detBA."id_beneficio" = ben."id_beneficio"
       JOIN
-        "net_afiliado" afil ON detBA."id_afiliado" = afil."id_afiliado"
+        "Net_Persona" afil ON detBA."id_afiliado" = afil."id_afiliado"
       WHERE
         afil."id_afiliado" = :1 AND
         detB."estado" != 'INCONSISTENCIA' AND
@@ -380,7 +380,7 @@ async obtenerBeneficiosDeAfil(dni: string): Promise<any[]> {
       FROM "net_beneficio" ben
       INNER JOIN "net_detalle_beneficio_afiliado" detBenAfil ON  
       detBenAfil."id_beneficio" = ben."id_beneficio"
-      INNER JOIN "net_afiliado" afil ON  
+      INNER JOIN "Net_Persona" afil ON  
       detBenAfil."id_afiliado" = afil."id_afiliado"
       WHERE 
       afil."dni" = '${dni}'`;

@@ -1,4 +1,4 @@
-import { Net_Afiliado } from 'src/modules/afiliado/entities/net_afiliado';
+import { Net_Persona } from 'src/modules/afiliado/entities/Net_Persona';
 import { Entity, Column, PrimaryGeneratedColumn, OneToOne, OneToMany } from 'typeorm';
 
 @Entity()
@@ -9,7 +9,7 @@ export class Net_TipoIdentificacion {
     @Column('varchar', { length: 40, nullable: true })
     tipo_identificacion: string;
 
-    @OneToMany(() => Net_Afiliado, afiliado => afiliado.tipoIdentificacion)
-    afiliado: Net_Afiliado[];
+    @OneToMany(() => Net_Persona, afiliado => afiliado.tipoIdentificacion)
+    afiliado: Net_Persona[];
 
 }

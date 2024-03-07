@@ -10,7 +10,7 @@ import { Net_Banco } from 'src/modules/banco/entities/net_banco.entity';
 import { Net_Provincia } from 'src/modules/Regional/provincia/entities/net_provincia.entity';
 import { Net_TipoIdentificacion } from 'src/modules/tipo_identificacion/entities/net_tipo_identificacion.entity';
 import { Net_Pais } from 'src/modules/Regional/pais/entities/pais.entity';
-import { Net_Afiliado } from './entities/net_afiliado';
+import { Net_Persona } from './entities/Net_Persona';
 import { Net_Detalle_Afiliado } from './entities/detalle_afiliado.entity';
 import { Net_perf_afil_cent_trab } from './entities/net_perf_afil_cent_trab';
 import { Net_Tipo_Afiliado } from './entities/net_tipo_afiliado.entity';
@@ -19,7 +19,7 @@ import { Net_Tipo_Afiliado } from './entities/net_tipo_afiliado.entity';
   controllers: [AfiliadoController],
   providers: [AfiliadoService],
   imports: [
-    TypeOrmModule.forFeature([Net_Afiliado, Net_perf_afil_cent_trab,
+    TypeOrmModule.forFeature([Net_Persona, Net_perf_afil_cent_trab,
       Net_Ref_Per_Afil,
                               Net_ReferenciaPersonal,
                               Net_Afiliados_Por_Banco, Net_Provincia,

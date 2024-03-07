@@ -8,7 +8,7 @@ import { Net_Deduccion } from '../deduccion/entities/net_deduccion.entity';
 import { Net_Institucion } from 'src/modules/Empresarial/institucion/entities/net_institucion.entity';
 import * as xlsx from 'xlsx';
 import { AfiliadoService } from 'src/modules/afiliado/afiliado.service';
-import { Net_Afiliado } from 'src/modules/afiliado/entities/net_afiliado';
+import { Net_Persona } from 'src/modules/afiliado/entities/Net_Persona';
 import { Net_Detalle_Afiliado } from 'src/modules/afiliado/entities/detalle_afiliado.entity';
 import { Net_Planilla } from '../planilla/entities/net_planilla.entity';
 import { isUUID } from 'class-validator';
@@ -21,8 +21,8 @@ export class DetalleDeduccionService {
   constructor(
     @InjectRepository(Net_Detalle_Deduccion)
     private detalleDeduccionRepository: Repository<Net_Detalle_Deduccion>,
-    @InjectRepository(Net_Afiliado)
-    private afiliadoRepository: Repository<Net_Afiliado>,
+    @InjectRepository(Net_Persona)
+    private afiliadoRepository: Repository<Net_Persona>,
     @InjectRepository(Net_Deduccion)
     private deduccionRepository: Repository<Net_Deduccion>,
     @InjectRepository(Net_Institucion)
@@ -176,7 +176,7 @@ export class DetalleDeduccionService {
       JOIN
         "net_deduccion" d ON dd."id_deduccion" = d."id_deduccion"
       JOIN
-        "net_afiliado" afil ON dd."id_afiliado" = afil."id_afiliado"
+        "Net_Persona" afil ON dd."id_afiliado" = afil."id_afiliado"
       WHERE
         dd."id_afiliado" = :idAfiliado
       AND
@@ -253,7 +253,7 @@ async obtenerDetallesDeduccionPorAfiliado(idAfiliado: string): Promise<any[]> {
     JOIN
       "net_deduccion" ded ON detD."id_deduccion" = ded."id_deduccion"
     JOIN
-      "net_afiliado" afil ON detD."id_afiliado" = afil."id_afiliado"
+      "Net_Persona" afil ON detD."id_afiliado" = afil."id_afiliado"
       JOIN
       "net_institucion" inst ON inst."id_institucion" = ded."id_institucion"
     WHERE

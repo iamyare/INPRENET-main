@@ -30,6 +30,8 @@ drop table "C##TEST"."net_detalle_beneficio_afiliado" cascade constraints  ;
 drop table "C##TEST"."net_detalle_pago_beneficio" cascade constraints  ;
 drop table "C##TEST"."net_ref_per_afil" cascade constraints  ;
 drop table "C##TEST"."net_ref_personal_afiliado" cascade constraints  ;
+drop table "C##TEST"."net_deduc_tipo_planilla" cascade constraints  ;
+drop table "C##TEST"."net_tipo_afiliado" cascade constraints  ;
 
 
 

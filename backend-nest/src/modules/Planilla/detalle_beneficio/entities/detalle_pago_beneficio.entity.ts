@@ -21,7 +21,7 @@ export class DetallePagoBeneficio {
     metodo_pago: string;
 
     @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
-    monto_a_pagar: number;
+    monto_pagar_por_periodo: number;
     
     @ManyToOne(() => Net_Planilla, planilla => planilla.detallepagobeneficio, { cascade: true })
     @JoinColumn({ name: 'id_planilla' })

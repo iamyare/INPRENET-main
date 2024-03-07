@@ -4,7 +4,7 @@ import { UpdatePlanillaDto } from './dto/update-planilla.dto';
 import { InjectEntityManager, InjectRepository } from '@nestjs/typeorm';
 import { Net_Detalle_Deduccion } from '../detalle-deduccion/entities/detalle-deduccion.entity';
 import { EntityManager, Repository } from 'typeorm';
-import { Net_Afiliado } from 'src/modules/afiliado/entities/net_afiliado';
+import { Net_Persona } from 'src/modules/afiliado/entities/Net_Persona';
 import { Net_Beneficio } from '../beneficio/entities/net_beneficio.entity';
 import { Net_Deduccion } from '../deduccion/entities/net_deduccion.entity';
 import { Net_Planilla } from './entities/net_planilla.entity';
@@ -23,8 +23,8 @@ export class PlanillaService {
     @InjectEntityManager() private entityManager: EntityManager,
     @InjectRepository(Net_Detalle_Pago_Beneficio)
     private detalleBeneficioRepository: Repository<Net_Detalle_Pago_Beneficio>,
-    @InjectRepository(Net_Afiliado)
-    private afiliadoRepository: Repository<Net_Afiliado>,
+    @InjectRepository(Net_Persona)
+    private afiliadoRepository: Repository<Net_Persona>,
     @InjectRepository(Net_Planilla)
     private planillaRepository: Repository<Net_Planilla>,
     @InjectRepository(Net_TipoPlanilla)
@@ -67,7 +67,7 @@ export class PlanillaService {
         INNER JOIN
             "net_detalle_pago_beneficio" dpb ON dba."id_detalle_ben_afil" = dpb."id_beneficio_afiliado"
         INNER JOIN
-            "net_afiliado" afil ON dba."id_afiliado" = afil."id_afiliado"
+            "Net_Persona" afil ON dba."id_afiliado" = afil."id_afiliado"
         WHERE
             dpb."id_planilla" = :idPlanilla AND afil."dni" = :dni
         GROUP BY
@@ -87,7 +87,7 @@ export class PlanillaService {
         LEFT JOIN
             "net_institucion" inst ON ded."id_institucion" = inst."id_institucion"
         INNER JOIN
-            "net_afiliado" afil ON detDed."id_afiliado" = afil."id_afiliado"
+            "Net_Persona" afil ON detDed."id_afiliado" = afil."id_afiliado"
         WHERE
             detDed."id_planilla" = :idPlanilla AND afil."dni" = :dni
         GROUP BY
@@ -174,7 +174,7 @@ export class PlanillaService {
         afil."id_afiliado",
         SUM(COALESCE(detBs."monto_a_pagar", 0)) AS "Total Beneficio"
       FROM
-        "net_afiliado" afil
+        "Net_Persona" afil
       LEFT JOIN
         "net_detalle_beneficio_afiliado" detBA ON afil."id_afiliado" = detBA."id_afiliado"
       LEFT JOIN
@@ -188,7 +188,7 @@ export class PlanillaService {
         afil."id_afiliado",
         SUM(COALESCE(detDs."monto_aplicado", 0)) AS "Total Deducciones"
       FROM
-        "net_afiliado" afil
+        "Net_Persona" afil
       LEFT JOIN
         "net_detalle_deduccion" detDs ON afil."id_afiliado" = detDs."id_afiliado"
         AND detDs."id_planilla" = :idPlanilla
@@ -251,7 +251,7 @@ export class PlanillaService {
                   COALESCE(afil."segundo_apellido", '')) AS NOMBRE_COMPLETO,
               SUM(detBs."monto_a_pagar") AS "Total Beneficio"
         FROM
-              "net_afiliado" afil
+              "Net_Persona" afil
         INNER JOIN
               "net_detalle_afiliado" detAf ON afil."id_afiliado" = detAf."id_afiliado"
               
@@ -289,7 +289,7 @@ export class PlanillaService {
                   COALESCE(afil."segundo_apellido", '')) AS NOMBRE_COMPLETO,
               SUM(detDs."monto_aplicado") AS "Total Deducciones"
         FROM
-              "net_afiliado" afil
+              "Net_Persona" afil
         INNER JOIN
               "net_detalle_afiliado" detAf ON afil."id_afiliado" = detAf."id_afiliado"
         LEFT JOIN
@@ -359,7 +359,7 @@ FROM
             COALESCE(afil."segundo_apellido", '')) AS NOMBRE_COMPLETO,
             SUM(detBs."monto_a_pagar") AS "Total Beneficio"
     FROM
-        "net_afiliado" afil
+        "Net_Persona" afil
     INNER JOIN
         "net_detalle_afiliado" detAf ON afil."id_afiliado" = detAf."id_afiliado"
     
@@ -393,7 +393,7 @@ FULL OUTER JOIN
             COALESCE(afil."segundo_apellido", '')) AS NOMBRE_COMPLETO,
             SUM(detDs."monto_aplicado") AS "Total Deducciones"
     FROM
-        "net_afiliado" afil
+        "Net_Persona" afil
     INNER JOIN
         "net_detalle_afiliado" detAf ON afil."id_afiliado" = detAf."id_afiliado"
     LEFT JOIN
@@ -449,7 +449,7 @@ FROM
         ) AS NOMBRE_COMPLETO,
         SUM(detBs."monto_a_pagar") AS "Total Beneficio"
     FROM
-        "net_afiliado" afil
+        "Net_Persona" afil
     LEFT JOIN
         "net_detalle_beneficio_afiliado" detBA ON afil."id_afiliado" = detBA."id_afiliado"
     LEFT JOIN
@@ -500,7 +500,7 @@ FULL OUTER JOIN
         ) AS NOMBRE_COMPLETO,
         SUM(detDs."monto_aplicado") AS "Total Deducciones"
     FROM
-        "net_afiliado" afil
+        "Net_Persona" afil
     INNER JOIN
         "net_detalle_afiliado" detAf ON afil."id_afiliado" = detAf."id_afiliado"
     LEFT JOIN
@@ -580,7 +580,7 @@ FROM
         SUM(COALESCE(detBs."monto_a_pagar", 0)) AS "Total Beneficio",
         pla."fecha_cierre"
     FROM
-        "net_afiliado" afil
+        "Net_Persona" afil
     LEFT JOIN
         "net_detalle_beneficio_afiliado" detBA ON afil."id_afiliado" = detBA."id_afiliado"
     LEFT JOIN
@@ -619,7 +619,7 @@ FULL OUTER JOIN
         SUM(COALESCE(detDs."monto_aplicado", 0)) AS "Total Deducciones",
         pla."fecha_cierre"
     FROM
-        "net_afiliado" afil
+        "Net_Persona" afil
     LEFT JOIN
         "net_detalle_deduccion" detDs ON afil."id_afiliado" = detDs."id_afiliado"
     LEFT JOIN
@@ -749,7 +749,7 @@ ON deducciones."id_afiliado" = beneficios."id_afiliado"
       .addSelect('afil.dni', 'dni')
       .addSelect('detBen.monto', 'monto')
       .addSelect('detBen.nombre_beneficio', 'nombre_beneficio')
-      .leftJoin(Net_Afiliado, 'afil', 'afil.id_afiliado = detBen.id_afiliado')
+      .leftJoin(Net_Persona, 'afil', 'afil.id_afiliado = detBen.id_afiliado')
       .leftJoin(Net_Beneficio, 'ben', 'ben.id_beneficio = detBen.id_beneficio')
       .where(`
       (TO_DATE(detBen.periodoInicio, 'DD-MM-YYYY') BETWEEN TO_DATE(SYSDATE, 'DD-MM-YYYY') AND TO_DATE('${periodoInicio}', 'DD-MM-YYYY')) AND

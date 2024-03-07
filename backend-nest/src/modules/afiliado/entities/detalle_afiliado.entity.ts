@@ -1,6 +1,6 @@
 import { Column, Entity, JoinColumn, ManyToOne, OneToMany, OneToOne, PrimaryColumn, PrimaryGeneratedColumn } from "typeorm";
 import { IsString } from "class-validator";
-import { Net_Afiliado } from "./net_afiliado";
+import { Net_Persona } from "./Net_Persona";
 import { Net_Tipo_Afiliado } from "./net_tipo_afiliado.entity";
 
 @Entity()
@@ -14,9 +14,9 @@ export class Net_Detalle_Afiliado {
     @Column('number', { nullable: true })
     porcentaje: number;
     
-    @ManyToOne(() => Net_Afiliado, afiliado => afiliado.detalleAfiliado, { cascade: true })
+    @ManyToOne(() => Net_Persona, afiliado => afiliado.detalleAfiliado, { cascade: true })
     @JoinColumn({ name: 'id_afiliado', referencedColumnName: 'id_afiliado' })
-    afiliado: Net_Afiliado;
+    afiliado: Net_Persona;
     
     // Relación Muchos a Uno consigo mismo
     @ManyToOne(() => Net_Detalle_Afiliado, detalleAfiliado => detalleAfiliado.id_detalle_afiliado, { cascade: true })

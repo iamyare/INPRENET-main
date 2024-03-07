@@ -9,7 +9,7 @@ import { Net_Detalle_Beneficio_Afiliado } from "src/modules/Planilla/detalle_ben
 import { Net_Afiliados_Por_Banco } from "src/modules/banco/entities/net_afiliados-banco";
  
 @Entity()
-export class Net_Afiliado {
+export class Net_Persona {
     @PrimaryGeneratedColumn('uuid', { primaryKeyConstraintName: 'PK_id_afiliado_net_afiliado' })
     id_afiliado: string;
 

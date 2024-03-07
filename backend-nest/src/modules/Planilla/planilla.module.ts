@@ -17,7 +17,7 @@ import { Net_Institucion } from '../Empresarial/institucion/entities/net_institu
 import { TipoPlanillaController } from './tipo-planilla/tipo-planilla.controller';
 import { AfiliadoService } from 'src/modules/afiliado/afiliado.service';
 import { AfiliadoController } from 'src/modules/afiliado/afiliado.controller';
-import { Net_Afiliado } from 'src/modules/afiliado/entities/net_afiliado';
+import { Net_Persona } from 'src/modules/afiliado/entities/Net_Persona';
 import { Net_Detalle_Afiliado } from 'src/modules/afiliado/entities/detalle_afiliado.entity';
 import { DetalleBeneficioService } from './detalle_beneficio/detalle_beneficio.service';
 import { Net_Detalle_Pago_Beneficio } from './detalle_beneficio/entities/net_detalle_pago_beneficio.entity';
@@ -32,7 +32,7 @@ import { Net_Deduc_Tipo_Planilla } from './deduccion/entities/net_ded-planilla.e
   providers: [PlanillaService, BeneficioService, DetalleBeneficioService, DeduccionService,
               TipoPlanillaService, DetalleDeduccionService, AfiliadoService],
   imports: [
-    TypeOrmModule.forFeature([Net_Beneficio, Net_Detalle_Pago_Beneficio, Net_Planilla, Net_Deduccion, Net_TipoPlanilla, Net_Detalle_Deduccion, Net_Institucion, Net_Afiliado,
+    TypeOrmModule.forFeature([Net_Beneficio, Net_Detalle_Pago_Beneficio, Net_Planilla, Net_Deduccion, Net_TipoPlanilla, Net_Detalle_Deduccion, Net_Institucion, Net_Persona,
       Net_Detalle_Afiliado, Net_Detalle_Beneficio_Afiliado, Net_Deduc_Tipo_Planilla]),]
 })
 export class PlanillaModule {}

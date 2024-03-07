@@ -16,7 +16,7 @@ import { Net_Pais } from 'src/modules/Regional/pais/entities/pais.entity';
 import { CreateAfiliadoTempDto } from './dto/create-afiliado-temp.dto';
 import { validate as isUUID } from 'uuid';
 import { Net_Detalle_Afiliado } from './entities/detalle_afiliado.entity';
-import { Net_Afiliado } from './entities/net_afiliado';
+import { Net_Persona } from './entities/Net_Persona';
 
 @Injectable()
 export class AfiliadoService {
@@ -26,14 +26,14 @@ export class AfiliadoService {
   constructor(
     @InjectEntityManager() private readonly entityManager: EntityManager,
 
-    @InjectRepository(Net_Afiliado)
-    private readonly afiliadoRepository : Repository<Net_Afiliado>,
+    @InjectRepository(Net_Persona)
+    private readonly afiliadoRepository : Repository<Net_Persona>,
     @InjectRepository(Net_Detalle_Afiliado)
     private datosIdentificacionRepository: Repository<Net_Detalle_Afiliado>,
     private connection: Connection,
   ){}
   
-  async create(createAfiliadoDto: CreateAfiliadoDto): Promise<Net_Afiliado> {
+  async create(createAfiliadoDto: CreateAfiliadoDto): Promise<Net_Persona> {
     const queryRunner = this.connection.createQueryRunner();
 
     await queryRunner.connect();
@@ -148,7 +148,7 @@ export class AfiliadoService {
   }
 
   async findOne(term: string) {
-    let afiliados: Net_Afiliado;
+    let afiliados: Net_Persona;
     if (isUUID(term)) {
       afiliados = await this.afiliadoRepository.findOne({
         where: { id_afiliado: term },
@@ -228,7 +228,7 @@ export class AfiliadoService {
       }
     }
 
-    async findByDni(dni: string): Promise<Net_Afiliado | string> {
+    async findByDni(dni: string): Promise<Net_Persona | string> {
       const afiliado = await this.afiliadoRepository.findOne({ where: { dni } });
   
       if (!afiliado) {

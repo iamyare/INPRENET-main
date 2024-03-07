@@ -99,10 +99,6 @@ export class CreateAfiliadoDto {
     @Type(() => CreateAfiliadoRelacionadoDto)
     afiliadosRelacionados: CreateAfiliadoRelacionadoDto[];
 
-    
-    
-    
-
     //datos de tabla de referencia personal
     @IsString()
     @IsOptional()

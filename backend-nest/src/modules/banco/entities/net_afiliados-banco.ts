@@ -1,7 +1,7 @@
 import { Column, Entity, Index, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 import { Net_Banco } from "./net_banco.entity";
 // import { BeneficioPlanilla } from "src/modules/Planilla/beneficio_planilla/entities/detalle_beneficio.entity";
-import { Net_Afiliado } from "src/modules/afiliado/entities/net_afiliado";
+import { Net_Persona } from "src/modules/afiliado/entities/Net_Persona";
 
 @Entity()
 export class Net_Afiliados_Por_Banco {
@@ -16,9 +16,9 @@ export class Net_Afiliados_Por_Banco {
     @JoinColumn({ name: 'id_banco' })
     banco : Net_Banco;
 
-    @ManyToOne(() => Net_Afiliado, afiliado => afiliado.afiliadosPorBanco, { cascade: true })
+    @ManyToOne(() => Net_Persona, afiliado => afiliado.afiliadosPorBanco, { cascade: true })
     @JoinColumn({ name: 'id_afiliado' })
-    afiliado : Net_Afiliado;
+    afiliado : Net_Persona;
 
 
 }

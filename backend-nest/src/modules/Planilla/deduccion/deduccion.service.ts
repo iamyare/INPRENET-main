@@ -4,29 +4,45 @@ import { UpdateDeduccionDto } from './dto/update-deduccion.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Net_Deduccion } from './entities/net_deduccion.entity';
 import { Repository } from 'typeorm';
-import * as xlsx from 'xlsx';
-/* import { Afiliado } from 'src/afiliado/entities/detalle_afiliado.entity'; */
 import { Net_Institucion } from 'src/modules/Empresarial/institucion/entities/net_institucion.entity';
-import { Net_Detalle_Deduccion } from '../detalle-deduccion/entities/detalle-deduccion.entity';
-import { Net_Afiliado } from 'src/modules/afiliado/entities/net_afiliado';
-
+import { Net_TipoPlanilla } from '../tipo-planilla/entities/tipo-planilla.entity';
+import { Net_Deduc_Tipo_Planilla } from './entities/net_ded-planilla.entity';
 @Injectable()
 export class DeduccionService {
 
   private readonly logger = new Logger(DeduccionService.name)
 
   constructor(
-    @InjectRepository(Net_Detalle_Deduccion)
-    private detalleDeduccionRepository : Repository<Net_Detalle_Deduccion>,
-    @InjectRepository(Net_Afiliado)
-    private afiliadoRepository: Repository<Net_Afiliado>,
-    
     @InjectRepository(Net_Deduccion)
     public deduccionRepository: Repository<Net_Deduccion>,
-
     @InjectRepository(Net_Institucion)
-    private institucionRepository: Repository<Net_Institucion>
+    private institucionRepository: Repository<Net_Institucion>,
+    @InjectRepository(Net_TipoPlanilla)
+    private readonly tipoPlanillaRepository: Repository<Net_TipoPlanilla>,
+    @InjectRepository(Net_Deduc_Tipo_Planilla)
+    private dedPlanillaRepository: Repository<Net_Deduc_Tipo_Planilla>
   ){}
+
+  async createDeduccionTipoPlanilla(createDeduccionDto: CreateDeduccionDto): Promise<Net_Deduc_Tipo_Planilla> {
+    try {
+      const tipoPlanilla = await this.tipoPlanillaRepository.findOne({
+        where: { nombre_planilla: createDeduccionDto.tipo_planilla },
+      });
+
+      if (!tipoPlanilla) {
+        throw new NotFoundException(`El tipo de planilla con el nombre "${createDeduccionDto.tipo_planilla}" no fue encontrado.`);
+      }
+
+      const newDedPlanilla = this.dedPlanillaRepository.create({
+        ...createDeduccionDto,
+        net_TipoPlanilla: tipoPlanilla, 
+      });
+
+      return await this.dedPlanillaRepository.save(newDedPlanilla);
+    } catch (error) {
+      this.handleException(error)
+    }
+  }
 
   async create(createDeduccionDto: CreateDeduccionDto) {
     const { nombre_institucion } = createDeduccionDto;

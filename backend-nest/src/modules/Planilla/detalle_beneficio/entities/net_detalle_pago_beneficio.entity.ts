@@ -1,6 +1,4 @@
 import { Column, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn } from "typeorm";
-/* import { Beneficio } from "../../beneficio/entities/beneficio.entity";
-import { Afiliado } from "src/modules/afiliado/entities/afiliado"; */
 import { Net_Planilla } from "../../planilla/entities/net_planilla.entity";
 import { Net_Detalle_Beneficio_Afiliado } from "./net_detalle_beneficio_afiliado.entity";
 export enum EstadoEnum {

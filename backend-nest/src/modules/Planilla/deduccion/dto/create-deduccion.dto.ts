@@ -31,9 +31,14 @@ export class CreateDeduccionDto {
     descripcion_deduccion: string;
 
     @IsNumberCustom({ message: 'El valor la prioridad debe ser numérico.' })
-    prioridad: number;
+    @IsOptional()
+    prioridad?: number;
 
     @IsNumberCustom({ message: 'El valor de codigo deduccion debe ser numérico.' })
     codigo_deduccion: number
+
+    @IsOptional()
+    @IsString({ message: 'El nombre del tipo de planilla debe ser una cadena de texto.' })
+    tipo_planilla?: string;
 
 }

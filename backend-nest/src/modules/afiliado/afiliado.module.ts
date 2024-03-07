@@ -13,6 +13,7 @@ import { Net_Pais } from 'src/modules/Regional/pais/entities/pais.entity';
 import { Net_Afiliado } from './entities/net_afiliado';
 import { Net_Detalle_Afiliado } from './entities/detalle_afiliado.entity';
 import { Net_perf_afil_cent_trab } from './entities/net_perf_afil_cent_trab';
+import { Net_Tipo_Afiliado } from './entities/net_tipo_afiliado.entity';
 
 @Module({
   controllers: [AfiliadoController],
@@ -23,7 +24,7 @@ import { Net_perf_afil_cent_trab } from './entities/net_perf_afil_cent_trab';
                               Net_ReferenciaPersonal,
                               Net_Afiliados_Por_Banco, Net_Provincia,
                               Net_Pais, Net_TipoIdentificacion,
-                              Net_Centro_Trabajo, Net_Banco, Net_Detalle_Afiliado])
+                              Net_Centro_Trabajo, Net_Banco, Net_Detalle_Afiliado, Net_Tipo_Afiliado])
   ]
 
 })

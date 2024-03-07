@@ -2,8 +2,6 @@ import { Controller, Get, Post, Body, Patch, Param, Delete, UseInterceptors, Upl
 import { DeduccionService } from './deduccion.service';
 import { CreateDeduccionDto } from './dto/create-deduccion.dto';
 import { UpdateDeduccionDto } from './dto/update-deduccion.dto';
-import { FileInterceptor } from '@nestjs/platform-express';
-import { Response } from 'express';
 
 @Controller('deduccion')
 export class DeduccionController {
@@ -12,6 +10,11 @@ export class DeduccionController {
   @Post()
   create(@Body() createDeduccionDto: CreateDeduccionDto) {
     return this.deduccionService.create(createDeduccionDto);
+  }
+
+  @Post('dedTipoPLanilla')
+  createDedPlanilla(@Body() createDeduccionDto: CreateDeduccionDto) {
+    return this.deduccionService.createDeduccionTipoPlanilla(createDeduccionDto);
   }
 
   @Get()

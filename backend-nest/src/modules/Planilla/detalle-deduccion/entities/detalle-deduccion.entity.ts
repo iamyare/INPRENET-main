@@ -3,6 +3,7 @@ import { Net_Deduccion } from "../../deduccion/entities/net_deduccion.entity";
 import { Net_Afiliado } from 'src/modules/afiliado/entities/net_afiliado';
 import { Net_Planilla } from '../../planilla/entities/net_planilla.entity';
 import { IsEnum } from 'class-validator';
+import { Net_Deduc_Tipo_Planilla } from '../../deduccion/entities/net_ded-planilla.entity';
 
 @Entity()
 export class Net_Detalle_Deduccion {
@@ -28,7 +29,6 @@ export class Net_Detalle_Deduccion {
     @IsEnum({ values: ['COBRADA', 'NO COBRADA', 'INCONSISTENCIA'] })
     estado_aplicacion: string;
     
-
     @Column('number', {nullable: true})
     anio: number;
 
@@ -41,4 +41,9 @@ export class Net_Detalle_Deduccion {
     @ManyToOne(() => Net_Planilla, planilla => planilla.detalleDeduccion, { cascade: true })
     @JoinColumn({ name: 'id_planilla' })
     planilla: Net_Planilla;
+
+    @ManyToOne(() => Net_Deduc_Tipo_Planilla, detDeduccion => detDeduccion.detalleDeduccion, { cascade: true })
+    @JoinColumn({ name: 'id_ded_planilla' })
+    detDeduccion: Net_Detalle_Deduccion;
+
 }

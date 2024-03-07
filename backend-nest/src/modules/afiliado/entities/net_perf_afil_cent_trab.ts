@@ -12,12 +12,6 @@ export class Net_perf_afil_cent_trab {
     cargo: string;
 
     @Column('varchar2', { length: 40, nullable: false })
-    sector_economico: string;
-
-    @Column('varchar2', { length: 40, nullable: false })
-    actividad_economica: string;
-
-    @Column('varchar2', { length: 40, nullable: false })
     clase_cliente: string;
 
     @Column('date', { nullable: false })

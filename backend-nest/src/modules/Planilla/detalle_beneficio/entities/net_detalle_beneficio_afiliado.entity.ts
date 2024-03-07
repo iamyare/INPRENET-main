@@ -3,6 +3,7 @@ import { Column, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColum
 import { Net_Beneficio } from "../../beneficio/entities/net_beneficio.entity";
 import { Net_Detalle_Pago_Beneficio } from "./net_detalle_pago_beneficio.entity";
 import { Net_Afiliado } from "src/modules/afiliado/entities/net_afiliado";
+import { Net_Detalle_Afiliado } from "src/modules/afiliado/entities/detalle_afiliado.entity";
 
 @Entity()
 export class Net_Detalle_Beneficio_Afiliado 
@@ -28,9 +29,9 @@ export class Net_Detalle_Beneficio_Afiliado
     @Column({nullable:true})
     metodo_pago: string;
 
-    @ManyToOne(() => Net_Afiliado, afiliado => afiliado.detalleBeneficioAfiliado)
+    /*  @ManyToOne(() => Net_Afiliado, afiliado => afiliado.detalleBeneficioAfiliado)
     @JoinColumn({ name: 'id_afiliado' })
-    afiliado: string;
+    afiliado: string; */
 
     @ManyToOne(() => Net_Beneficio, beneficio => beneficio.detalleBeneficioAfiliado)
     @JoinColumn({ name: 'id_beneficio' })
@@ -38,4 +39,8 @@ export class Net_Detalle_Beneficio_Afiliado
 
     @OneToMany(() => Net_Detalle_Pago_Beneficio, detalleBeneficio => detalleBeneficio.detalleBeneficioAfiliado)
     detalleBeneficio: Net_Detalle_Pago_Beneficio[];
+
+     @ManyToOne(() => Net_Detalle_Afiliado, afiliado => afiliado.detalleBeneficioAfiliado)
+     @JoinColumn()
+     afiliado: string;
 }

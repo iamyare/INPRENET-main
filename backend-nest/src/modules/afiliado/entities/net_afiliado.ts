@@ -110,7 +110,7 @@ export class Net_Afiliado {
         { cascade: true })
     perfAfilCentTrabs: Net_perf_afil_cent_trab[];
 
-    @OneToMany(() => Net_Detalle_Beneficio_Afiliado, detalleBeneficioAfiliado => detalleBeneficioAfiliado.afiliado, { cascade: true })
-    detalleBeneficioAfiliado: Net_Detalle_Beneficio_Afiliado[];
+        /* @OneToMany(() => Net_Detalle_Beneficio_Afiliado, detalleBeneficioAfiliado => detalleBeneficioAfiliado.afiliado, { cascade: true })
+        detalleBeneficioAfiliado: Net_Detalle_Beneficio_Afiliado[]; */
 
 }

@@ -27,5 +27,9 @@ export class Net_Detalle_Afiliado {
     @ManyToOne(() => Net_Tipo_Afiliado, tipoAfiliado => tipoAfiliado.detallesAfiliados)
     @JoinColumn({ name: 'tipo_afiliado_id' }) // Esta columna almacena la relación
     tipoAfiliado: Net_Tipo_Afiliado;
+
+    @OneToMany(() => Net_Detalle_Afiliado, detalleBeneficioAfiliado => detalleBeneficioAfiliado.afiliado)
+    detalleBeneficioAfiliado: Net_Detalle_Afiliado[];
+
     
 }

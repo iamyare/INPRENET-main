@@ -10,6 +10,9 @@ export class Net_Centro_Trabajo {
     @Column('varchar2', { length: 40, nullable: false })
     nombre_Centro_Trabajo: string;
 
+    @Column('varchar2', { length: 40, nullable: false })
+    sector_economico: string;
+
     @Column('varchar2', { length: 30, nullable: false })
     telefono_1: string;
 

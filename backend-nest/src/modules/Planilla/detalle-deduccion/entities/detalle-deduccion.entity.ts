@@ -3,7 +3,7 @@ import { Net_Deduccion } from "../../deduccion/entities/net_deduccion.entity";
 import { Net_Persona } from 'src/modules/afiliado/entities/Net_Persona';
 import { Net_Planilla } from '../../planilla/entities/net_planilla.entity';
 import { IsEnum } from 'class-validator';
-import { Net_Deduc_Tipo_Planilla } from '../../deduccion/entities/net_ded-planilla.entity';
+import { Net_TipoPlanilla } from '../../tipo-planilla/entities/tipo-planilla.entity';
 
 @Entity()
 export class Net_Detalle_Deduccion {    
@@ -38,11 +38,11 @@ export class Net_Detalle_Deduccion {
     planilla: Net_Planilla;
 
     @ManyToOne(() => Net_Deduccion, deduccion => deduccion.detalleDeduccion, { cascade: true})
-    @JoinColumn({ name: 'id_deduccion_Terc' })
+    @JoinColumn({ name: 'id_deduccion' })
     deduccion: Net_Deduccion;
 
-    @ManyToOne(() => Net_Deduc_Tipo_Planilla, detDeduccion => detDeduccion.detalleDeduccion, { cascade: true })
-    @JoinColumn({ name: 'id_ded_planilla_Locales' })
-    detDeduccion: Net_Detalle_Deduccion;
+/*     @ManyToOne(() => Net_TipoPlanilla, detDeduccion => detDeduccion.net_Ded_Planilla, { cascade: true })
+    @JoinColumn({ name: 'id_tipo_planilla' })
+    detDeduccion: Net_TipoPlanilla; */
 
 }

@@ -23,8 +23,8 @@ import { DetalleBeneficioService } from './detalle_beneficio/detalle_beneficio.s
 import { Net_Detalle_Pago_Beneficio } from './detalle_beneficio/entities/net_detalle_pago_beneficio.entity';
 import { DetalleBeneficioController } from './detalle_beneficio/detalle_beneficio.controller';
 import { Net_Detalle_Beneficio_Afiliado } from './detalle_beneficio/entities/net_detalle_beneficio_afiliado.entity';
-import { DetalleDeduccionController } from './detalle-deduccion/detalle-deduccion.controller';
-import { Net_Deduc_Tipo_Planilla } from './deduccion/entities/net_ded-planilla.entity';
+import { DetalleDeduccionController } from './detalle-deduccion/detalle-deduccion.controller';/* 
+import { Net_Deduc_Tipo_Planilla } from './deduccion/entities/net_ded-planilla.entity'; */
 
 @Module({
   controllers: [PlanillaController, BeneficioController, DetalleBeneficioController, DeduccionController,
@@ -33,6 +33,6 @@ import { Net_Deduc_Tipo_Planilla } from './deduccion/entities/net_ded-planilla.e
               TipoPlanillaService, DetalleDeduccionService, AfiliadoService],
   imports: [
     TypeOrmModule.forFeature([Net_Beneficio, Net_Detalle_Pago_Beneficio, Net_Planilla, Net_Deduccion, Net_TipoPlanilla, Net_Detalle_Deduccion, Net_Institucion, Net_Persona,
-      Net_Detalle_Afiliado, Net_Detalle_Beneficio_Afiliado, Net_Deduc_Tipo_Planilla]),]
+      Net_Detalle_Afiliado, Net_Detalle_Beneficio_Afiliado, /* Net_Deduc_Tipo_Planilla */]),]
 })
 export class PlanillaModule {}

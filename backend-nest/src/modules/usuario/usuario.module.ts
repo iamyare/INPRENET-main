@@ -9,8 +9,6 @@ import { CommonModule } from 'src/common/common.module';
 import { Net_Empleado } from 'src/modules/Empresarial/empresas/entities/net_empleado.entity';
 import { Net_Usuario } from './entities/net_usuario.entity';
 import { Net_TipoIdentificacion } from '../tipo_identificacion/entities/net_tipo_identificacion.entity';
-/* import { Usuario } from './entities/usuario.entity';
-import { TipoIdentificacion } from '../tipo_identificacion/entities/tipo_identificacion.entity'; */
 
 @Module({
   controllers: [UsuarioController],

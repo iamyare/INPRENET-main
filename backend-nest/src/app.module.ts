@@ -9,6 +9,7 @@ import { TipoIdentificacionModule } from './modules/tipo_identificacion/tipo_ide
 import { PlanillaModule } from './modules/Planilla/planilla.module';
 import { RegionalModule } from './modules/Regional/regional.module';
 import { EmpresarialModule } from './modules/Empresarial/empresarial.module';
+import { TransaccionesModule } from './modules/transacciones/transacciones.module';
 
 @Module({
   imports: [
@@ -32,7 +33,8 @@ import { EmpresarialModule } from './modules/Empresarial/empresarial.module';
     TipoIdentificacionModule,
     PlanillaModule,
     RegionalModule,
-    EmpresarialModule
+    EmpresarialModule,
+    TransaccionesModule
   ]
 })
 export class AppModule {

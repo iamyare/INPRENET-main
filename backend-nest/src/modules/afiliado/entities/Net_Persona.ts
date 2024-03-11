@@ -1,12 +1,12 @@
 import { Net_TipoIdentificacion } from "src/modules/tipo_identificacion/entities/net_tipo_identificacion.entity";
 import { Net_Pais } from "src/modules/Regional/pais/entities/pais.entity";
 import { Column, Entity, Index, JoinColumn, ManyToOne, OneToMany, PrimaryColumn, PrimaryGeneratedColumn } from "typeorm";
-import { Net_Departamento } from "src/modules/Regional/provincia/entities/net_departamento.entity";
 import { Net_Ref_Per_Afil } from "./net_ref-Per-Afiliado";import { Net_perf_afil_cent_trab} from "./net_perf_afil_cent_trab";
 import { Net_Detalle_Deduccion } from "src/modules/Planilla/detalle-deduccion/entities/detalle-deduccion.entity";
 import { Net_Detalle_Afiliado } from "./detalle_afiliado.entity";
 import { Net_Afiliados_Por_Banco } from "src/modules/banco/entities/net_afiliados-banco";
 import { Net_Municipio } from "src/modules/Regional/municipio/entities/net_municipio.entity";
+import { NET_CUENTAS_PERSONA } from "src/modules/transacciones/entities/net_cuentas_persona.entity";
  
 @Entity({ name: 'NET_PERSONA' })
 export class Net_Persona {
@@ -112,5 +112,8 @@ export class Net_Persona {
         (perfAfilCentTrab) => perfAfilCentTrab.afiliado,
         { cascade: true })
     perfAfilCentTrabs: Net_perf_afil_cent_trab[];
+
+    @OneToMany(() => NET_CUENTAS_PERSONA, cuentaPersona => cuentaPersona.persona)
+    cuentas: NET_CUENTAS_PERSONA[];
 
 }

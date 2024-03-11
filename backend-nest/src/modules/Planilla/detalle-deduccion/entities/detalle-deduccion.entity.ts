@@ -1,48 +1,43 @@
 import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn, AfterInsert, getRepository, AfterLoad, Unique, OneToMany } from 'typeorm';
-import { Net_Deduccion } from "../../deduccion/entities/net_deduccion.entity";
 import { Net_Persona } from 'src/modules/afiliado/entities/Net_Persona';
 import { Net_Planilla } from '../../planilla/entities/net_planilla.entity';
 import { IsEnum } from 'class-validator';
-import { Net_Deduc_Tipo_Planilla } from '../../deduccion/entities/net_ded-planilla.entity';
+import { Net_Deduccion_Terceros } from '../../deduccion/entities/net_deduccion-terceros.entity';
 
 @Entity()
 export class Net_Detalle_Deduccion {    
     @PrimaryGeneratedColumn('uuid')
-    id_ded_deduccion: string;
+    ID_DED_DEDUCCION: string;
 
     @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
-    monto_total: number;
+    MONTO_TOTAL: number;
 
     @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
-    monto_aplicado: number; 
+    MONTO_APLICADO: number; 
 
     @Column('varchar2', { length: 20, nullable: true, default: 'NO COBRADA' })
     @IsEnum({ values: ['COBRADA', 'NO COBRADA', 'INCONSISTENCIA'] })
-    estado_aplicacion: string;
+    ESTADO_APLICACION: string;
     
     @Column('number', {nullable: true})
-    anio: number;
+    ANIO: number;
 
     @Column('number', {nullable: true})
-    mes: number;
+    MES: number;
 
     @Column('timestamp', { default: () => 'CURRENT_TIMESTAMP' })
-    fecha_aplicado: Date;
+    FECHA_APLICACO: Date;
 
     @ManyToOne(() => Net_Persona, afiliado => afiliado.detalleDeduccion, { cascade: true})
-    @JoinColumn({ name: 'id_afiliado' })
+    @JoinColumn({ name: 'ID_AFILIADO' })
     afiliado: Net_Persona;
 
     @ManyToOne(() => Net_Planilla, planilla => planilla.detalleDeduccion, { cascade: true })
-    @JoinColumn({ name: 'id_planilla' })
+    @JoinColumn({ name: 'ID_PLANILLA' })
     planilla: Net_Planilla;
 
-    @ManyToOne(() => Net_Deduccion, deduccion => deduccion.detalleDeduccion, { cascade: true})
-    @JoinColumn({ name: 'id_deduccion_Terc' })
-    deduccion: Net_Deduccion;
-
-    @ManyToOne(() => Net_Deduc_Tipo_Planilla, detDeduccion => detDeduccion.detalleDeduccion, { cascade: true })
-    @JoinColumn({ name: 'id_ded_planilla_Locales' })
-    detDeduccion: Net_Detalle_Deduccion;
+    @ManyToOne(() => Net_Deduccion_Terceros, deduccion => deduccion.detalleDeduccion, { cascade: true})
+    @JoinColumn({ name: 'ID_DEDUCCION_TERC' })
+    deduccion: Net_Deduccion_Terceros;
 
 }

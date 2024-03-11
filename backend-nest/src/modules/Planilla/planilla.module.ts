@@ -8,7 +8,6 @@ import { BeneficioController } from './beneficio/beneficio.controller';
 import { BeneficioService } from './beneficio/beneficio.service';
 import { DeduccionController } from './deduccion/deduccion.controller';
 import { TipoPlanillaService } from './tipo-planilla/tipo-planilla.service';
-import { Net_Deduccion } from './deduccion/entities/net_deduccion.entity';
 import { Net_TipoPlanilla } from './tipo-planilla/entities/tipo-planilla.entity';
 import { DeduccionService } from './deduccion/deduccion.service';
 import { Net_Detalle_Deduccion } from './detalle-deduccion/entities/detalle-deduccion.entity';
@@ -25,6 +24,7 @@ import { DetalleBeneficioController } from './detalle_beneficio/detalle_benefici
 import { Net_Detalle_Beneficio_Afiliado } from './detalle_beneficio/entities/net_detalle_beneficio_afiliado.entity';
 import { DetalleDeduccionController } from './detalle-deduccion/detalle-deduccion.controller';
 import { Net_Deduc_Tipo_Planilla } from './deduccion/entities/net_ded-planilla.entity';
+import { Net_Deduccion_Terceros } from './deduccion/entities/net_deduccion-terceros.entity';
 
 @Module({
   controllers: [PlanillaController, BeneficioController, DetalleBeneficioController, DeduccionController,
@@ -32,7 +32,7 @@ import { Net_Deduc_Tipo_Planilla } from './deduccion/entities/net_ded-planilla.e
   providers: [PlanillaService, BeneficioService, DetalleBeneficioService, DeduccionService,
               TipoPlanillaService, DetalleDeduccionService, AfiliadoService],
   imports: [
-    TypeOrmModule.forFeature([Net_Beneficio, Net_Detalle_Pago_Beneficio, Net_Planilla, Net_Deduccion, Net_TipoPlanilla, Net_Detalle_Deduccion, Net_Institucion, Net_Persona,
+    TypeOrmModule.forFeature([Net_Beneficio, Net_Detalle_Pago_Beneficio, Net_Planilla, Net_Deduccion_Terceros, Net_TipoPlanilla, Net_Detalle_Deduccion, Net_Institucion, Net_Persona,
       Net_Detalle_Afiliado, Net_Detalle_Beneficio_Afiliado, Net_Deduc_Tipo_Planilla]),]
 })
 export class PlanillaModule {}

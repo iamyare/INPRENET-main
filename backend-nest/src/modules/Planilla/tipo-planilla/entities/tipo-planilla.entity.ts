@@ -6,13 +6,13 @@ import { Net_Deduc_Tipo_Planilla } from '../../deduccion/entities/net_ded-planil
 export class Net_TipoPlanilla {
 
     @PrimaryGeneratedColumn('uuid')
-    id_tipo_planilla : string;
+    ID_TIPO_PLANILLA : string;
 
     @Column('varchar2', { length: 100, nullable: false })
-    nombre_planilla : string;
+    NOMBRE_PLANILLA : string;
 
     @Column('varchar2', { length: 200, nullable: true })
-    descripcion: string;
+    DESCRIPCION: string;
     
     @OneToMany(() => Net_Planilla, planilla => planilla.tipoPlanilla)
     planilla: Net_Planilla[];

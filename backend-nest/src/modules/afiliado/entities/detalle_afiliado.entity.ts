@@ -6,26 +6,26 @@ import { Net_Tipo_Afiliado } from "./net_tipo_afiliado.entity";
 @Entity()
 export class Net_Detalle_Afiliado {
     @PrimaryColumn()
-    id_afiliado: string;
+    ID_AFILIADO: string;
     
     @PrimaryColumn()
-    id_detalle_afiliado: string;
+    ID_DETALLE_AFILIADO: string;
 
     @Column('number', { nullable: true })
-    porcentaje: number;
+    PORCENTAJE: number;
     
     @ManyToOne(() => Net_Persona, afiliado => afiliado.detalleAfiliado, { cascade: true })
-    @JoinColumn({ name: 'id_afiliado', referencedColumnName: 'id_afiliado' })
+    @JoinColumn({ name: 'ID_AFILIADO', referencedColumnName: 'ID_AFILIADO' })
     afiliado: Net_Persona;
     
     // Relación Muchos a Uno consigo mismo
-    @ManyToOne(() => Net_Detalle_Afiliado, detalleAfiliado => detalleAfiliado.id_detalle_afiliado, { cascade: true })
-    @JoinColumn({ name: 'id_detalle_afiliado_padre', referencedColumnName: 'id_afiliado'})
-    @JoinColumn({ name: 'id_detalle_afiliado', referencedColumnName: 'id_detalle_afiliado'})
+    @ManyToOne(() => Net_Detalle_Afiliado, detalleAfiliado => detalleAfiliado.ID_DETALLE_AFILIADO, { cascade: true })
+    @JoinColumn({ name: 'ID_DETALLE_AFILIADO_PADRE', referencedColumnName: 'ID_AFILIADO'})
+    @JoinColumn({ name: 'ID_DETALLE_AFILIADO', referencedColumnName: 'ID_DETALLE_AFILIADO'})
     padreIdAfiliado: Net_Detalle_Afiliado;
 
     @ManyToOne(() => Net_Tipo_Afiliado, tipoAfiliado => tipoAfiliado.detallesAfiliados)
-    @JoinColumn({ name: 'tipo_afiliado_id' }) // Esta columna almacena la relación
+    @JoinColumn({ name: 'ID_TIPO_AFILIADO' }) // Esta columna almacena la relación
     tipoAfiliado: Net_Tipo_Afiliado;
 
     @OneToMany(() => Net_Detalle_Afiliado, detalleBeneficioAfiliado => detalleBeneficioAfiliado.afiliado)

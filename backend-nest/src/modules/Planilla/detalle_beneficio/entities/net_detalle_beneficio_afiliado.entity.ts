@@ -2,46 +2,45 @@
 import { Column, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 import { Net_Beneficio } from "../../beneficio/entities/net_beneficio.entity";
 import { Net_Detalle_Pago_Beneficio } from "./net_detalle_pago_beneficio.entity";
-import { Net_Persona } from "src/modules/afiliado/entities/Net_Persona";
 import { Net_Detalle_Afiliado } from "src/modules/afiliado/entities/detalle_afiliado.entity";
 
 @Entity()
 export class Net_Detalle_Beneficio_Afiliado 
 {
     @PrimaryGeneratedColumn('uuid')
-    id_detalle_ben_afil: string;
+    ID_DETALLE_BEN_AFIL: string;
 
     @Column({ type: 'date', nullable: false })
-    periodoInicio: Date;
+    PERIODO_INICIO: Date;
 
     @Column({ type: 'date', nullable: false })
-    periodoFinalizacion: Date;
+    PERIODO_FINALIZACION: Date;
 
     @Column({nullable:true, default: 0 })
-    num_rentas_aplicadas: number;
+    NUM_RENTAS_APLICACDAS: number;
 
     @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
-    monto_total: number;
+    MONTO_TOTAL: number;
 
     @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
-    monto_por_periodo: number;
+    MONTO_POR_PERIODO: number;
     
     @Column({nullable:true})
-    metodo_pago: string;
+    METODO_PAGO: string;
 
     /*  @ManyToOne(() => Net_Persona, afiliado => afiliado.detalleBeneficioAfiliado)
     @JoinColumn({ name: 'id_afiliado' })
     afiliado: string; */
 
     @ManyToOne(() => Net_Beneficio, beneficio => beneficio.detalleBeneficioAfiliado)
-    @JoinColumn({ name: 'id_beneficio' })
+    @JoinColumn({ name: 'ID_BENEFICIO' })
     beneficio: Net_Beneficio;
 
     @OneToMany(() => Net_Detalle_Pago_Beneficio, detalleBeneficio => detalleBeneficio.detalleBeneficioAfiliado)
     detalleBeneficio: Net_Detalle_Pago_Beneficio[];
 
      @ManyToOne(() => Net_Detalle_Afiliado, afiliado => afiliado.detalleBeneficioAfiliado)
-     @JoinColumn({ name: 'id_causante', referencedColumnName: 'id_afiliado'})
-     @JoinColumn({ name: 'id_beneficiario', referencedColumnName: 'id_detalle_afiliado'})
+     @JoinColumn({ name: 'ID_CAUSANTE', referencedColumnName: 'ID_AFILIADO'})
+     @JoinColumn({ name: 'ID_BENEFICIARIO', referencedColumnName: 'ID_DETALLE_AFILIADO'})
      afiliado: string;
 }

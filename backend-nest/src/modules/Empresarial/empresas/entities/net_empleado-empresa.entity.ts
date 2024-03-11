@@ -6,14 +6,14 @@ import { Net_Empleado } from "./net_empleado.entity";
 export class Net_Empleado_Empresa {
 
     @PrimaryGeneratedColumn('uuid')
-    id: string;
+    ID_EMPLEADO_EMPRESA: string;
    
     @ManyToOne(() => Net_Empresa, (empresa) => empresa.id_empresa)
-    @JoinColumn({ name: 'id_empresa' })
+    @JoinColumn({ name: 'ID_EMPRESA' })
     id_empresa: Net_Empresa
 
-    @ManyToOne(() => Net_Empleado, (empleado) => empleado.id_empleado)
-    @JoinColumn({ name: 'id_empleado' })
+    @ManyToOne(() => Net_Empleado, (empleado) => empleado.ID_EMPLEADO)
+    @JoinColumn({ name: 'ID_EMPLEADO' })
     id_empleado: Net_Empleado
 
 

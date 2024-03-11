@@ -4,13 +4,13 @@ import { Net_Usuario } from './net_usuario.entity';
 @Entity()
 export class Net_Rol {
     @PrimaryGeneratedColumn('uuid')
-    id_rol: string;
+    ID_ROL: string;
 
     @Column('varchar2', { length: 20, nullable: true })
-    nombre_rol: string;
+    NOMBRE_ROL: string;
 
     @Column('varchar2', { length: 200, nullable: true })
-    descripcion: string;
+    DESCRIPCION: string;
 
     @OneToMany(() => Net_Usuario, usuario => usuario.rol)
     usuarios: Net_Usuario[];

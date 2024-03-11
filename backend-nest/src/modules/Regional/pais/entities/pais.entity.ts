@@ -6,13 +6,13 @@ import { Net_Persona } from "src/modules/afiliado/entities/Net_Persona";
 export class Net_Pais {
 
     @PrimaryGeneratedColumn('uuid')
-    id_pais : string;
+    ID_PAIS : string;
 
     @Column('varchar2', { length: 20, nullable: false })
-    nombre_pais : string;
+    NOMBRE_PAIS : string;
 
     @Column('varchar2', { length: 20, nullable: false })
-    nacionalidad : string;
+    NACIONALIDAD : string;
     
     @OneToMany(() => Net_Persona, afiliado => afiliado.pais)
     afiliado: Net_Persona[];

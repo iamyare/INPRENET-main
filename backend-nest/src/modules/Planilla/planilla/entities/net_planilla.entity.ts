@@ -7,32 +7,32 @@ import { Net_Detalle_Pago_Beneficio } from '../../detalle_beneficio/entities/net
 export class Net_Planilla {
 
     @PrimaryGeneratedColumn('uuid')
-    id_planilla : string
+    ID_PLANILLA : string
 
     @Column('varchar2', {nullable: false })
     @Index("UQ_codPlanilla_netPlan", {unique:true})
-    codigo_planilla : string;
+    CODIGO_PLANILLA : string;
 
     @Column('date', { nullable: false, default: () => 'SYSDATE' })
-    fecha_apertura: Date;
+    FECHA_APERTURA: Date;
 
     @Column('date', { nullable: true })
-    fecha_cierre: Date;
+    FECHA_CIERRE: Date;
 
     @Column('number')
-    secuencia : number;
+    SECUENCIA : number;
 
     @Column('varchar2', { nullable: true, default: 'ACTIVA' })
-    estado: string;
+    ESTADO: string;
 
     @Column('varchar2', {  nullable: false })
-    periodoInicio: string;
+    PERIODO_INICIO: string;
 
     @Column('varchar2', {  nullable: false })
-    periodoFinalizacion: string; 
+    PERIODO_FINALIZACION: string; 
 
     @ManyToOne(() => Net_TipoPlanilla, tipoPlanilla => tipoPlanilla.planilla,  { cascade: true })
-    @JoinColumn({ name: 'id_tipo_planilla' })
+    @JoinColumn({ name: 'ID_TIPO_PLANILLA' })
     tipoPlanilla: Net_TipoPlanilla;
 
     @OneToMany(() => Net_Detalle_Deduccion, detalleDeduccion => detalleDeduccion.planilla)

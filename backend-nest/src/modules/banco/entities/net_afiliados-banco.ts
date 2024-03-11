@@ -6,11 +6,11 @@ import { Net_Persona } from "src/modules/afiliado/entities/Net_Persona";
 @Entity()
 export class Net_Afiliados_Por_Banco {
     @PrimaryGeneratedColumn('uuid')
-    id_af_banco : string;
+    ID_AF_BANCO : string;
     
     @Column('varchar2', {nullable: false, length:20})
     @Index("UQ_numCuen_netAfilBanco", {unique:true})
-    num_cuenta
+    NUM_CUENTA
 
     @ManyToOne(() => Net_Banco, banco => banco.afiliadosDeBanco, { cascade: true })
     @JoinColumn({ name: 'id_banco' })

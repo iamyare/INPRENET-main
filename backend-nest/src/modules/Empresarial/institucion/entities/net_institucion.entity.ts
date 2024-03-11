@@ -1,4 +1,4 @@
-import { Net_Deduccion } from "src/modules/Planilla/deduccion/entities/net_deduccion.entity";
+import { Net_Deduccion_Terceros } from "src/modules/Planilla/deduccion/entities/net_deduccion-terceros.entity";
 import { Column, Entity, ManyToOne, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 
 @Entity()
@@ -13,6 +13,6 @@ export class Net_Institucion {
     @Column('varchar2', { length: 40, nullable: false })
     tipo_institucion: string;
 
-    @OneToMany(() => Net_Deduccion, deduccion => deduccion.institucion)
-    deduccion : Net_Deduccion[];
+    @OneToMany(() => Net_Deduccion_Terceros, deduccion => deduccion.institucion)
+    deduccion : Net_Deduccion_Terceros[];
 }

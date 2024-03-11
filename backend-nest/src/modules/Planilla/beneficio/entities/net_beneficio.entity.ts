@@ -6,19 +6,19 @@ import { Net_Detalle_Beneficio_Afiliado } from "../../detalle_beneficio/entities
 export class Net_Beneficio {
 
     @PrimaryGeneratedColumn('uuid')
-    id_beneficio: string;
+    ID_BENEFICIO: string;
 
     @Column('varchar2', { length: 30, nullable: false })
-    nombre_beneficio: string;
+    NOMBRE_BENEFICIO: string;
 
     @Column('varchar2', { length: 200, nullable: false })
-    descripcion_beneficio: string; 
+    DESCRIPCION_BENEFICIO: string; 
 
     @Column()
-    periodicidad: string;
+    PERIODICIDAD: string;
 
     @Column('number', { nullable: false, default: 100000 })
-    numero_rentas_max?: number;
+    NUMERO_RENTAS_MAX?: number;
 
     @OneToMany(() => Net_Detalle_Beneficio_Afiliado, detalleBeneficioAfiliado => detalleBeneficioAfiliado.beneficio)
     detalleBeneficioAfiliado: Net_Detalle_Beneficio_Afiliado[];

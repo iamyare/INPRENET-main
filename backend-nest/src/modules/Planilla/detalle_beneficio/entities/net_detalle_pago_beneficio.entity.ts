@@ -1,6 +1,4 @@
 import { Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn } from "typeorm";
-/* import { Beneficio } from "../../beneficio/entities/beneficio.entity";
-import { Afiliado } from "src/modules/afiliado/entities/afiliado"; */
 import { Net_Planilla } from "../../planilla/entities/net_planilla.entity";
 import { Net_Detalle_Beneficio_Afiliado } from "./net_detalle_beneficio_afiliado.entity";
 export enum EstadoEnum {
@@ -11,23 +9,23 @@ export enum EstadoEnum {
 @Entity()
 export class Net_Detalle_Pago_Beneficio {
     @PrimaryGeneratedColumn({ type: 'int' })
-    id_beneficio_planilla : number;
+    ID_BENEFICIO_PLANILLA : number;
 
     @Column({default:"NO PAGADA", enum: ['NO PAGADA', 'PAGADA']})
-    estado: string;
+    ESTADO: string;
 
     @CreateDateColumn()
-    fechaCarga: Date;
+    FECHA_CARGA: Date;
 
     @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
-    monto_a_pagar: number;
+    MONTO_A_PAGAR: number;
     
     @ManyToOne(() => Net_Planilla, planilla => planilla.detallepagobeneficio, { cascade: true })
-    @JoinColumn({ name: 'id_planilla' })
+    @JoinColumn({ name: 'ID_PLANILLA' })
     planilla: Net_Planilla;
 
     @ManyToOne(() => Net_Detalle_Beneficio_Afiliado, detalleBeneficioAfiliado => detalleBeneficioAfiliado.detalleBeneficio, { cascade: true })
-    @JoinColumn({ name: 'id_beneficio_afiliado' })
+    @JoinColumn({ name: 'ID_BENEFICIO_PLANILLA' })
     detalleBeneficioAfiliado: string;
 
 }

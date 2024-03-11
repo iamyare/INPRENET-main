@@ -8,10 +8,10 @@ import { Net_Persona } from "src/modules/afiliado/entities/Net_Persona";
 @Entity()
 export class Net_Provincia {
     @PrimaryGeneratedColumn('uuid')
-    id_provincia
+    ID_PROVINCIA : string;
 
     @Column('varchar2', {length: 30 ,nullable:false})
-    nombre_provincia: string
+    NOMBRE_PROVINCIA: string
 
     @ManyToOne(() => Net_Pais, pais => pais.provincia)
     pais: Net_Pais;

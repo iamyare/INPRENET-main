@@ -5,7 +5,6 @@ import { Net_Provincia } from "src/modules/Regional/provincia/entities/net_provi
 import { Net_Ref_Per_Afil } from "./net_ref-Per-Afiliado";import { Net_perf_afil_cent_trab} from "./net_perf_afil_cent_trab";
 import { Net_Detalle_Deduccion } from "src/modules/Planilla/detalle-deduccion/entities/detalle-deduccion.entity";
 import { Net_Detalle_Afiliado } from "./detalle_afiliado.entity";
-import { Net_Detalle_Beneficio_Afiliado } from "src/modules/Planilla/detalle_beneficio/entities/net_detalle_beneficio_afiliado.entity";
 import { Net_Afiliados_Por_Banco } from "src/modules/banco/entities/net_afiliados-banco";
  
 @Entity()
@@ -109,8 +108,5 @@ export class Net_Persona {
         (perfAfilCentTrab) => perfAfilCentTrab.afiliado,
         { cascade: true })
     perfAfilCentTrabs: Net_perf_afil_cent_trab[];
-
-        /* @OneToMany(() => Net_Detalle_Beneficio_Afiliado, detalleBeneficioAfiliado => detalleBeneficioAfiliado.afiliado, { cascade: true })
-        detalleBeneficioAfiliado: Net_Detalle_Beneficio_Afiliado[]; */
 
 }

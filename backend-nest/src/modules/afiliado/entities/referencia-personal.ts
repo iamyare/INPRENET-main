@@ -5,44 +5,44 @@ import { Net_Ref_Per_Afil } from "./net_ref-Per-Afiliado";
 export class Net_ReferenciaPersonal {
 
     @PrimaryGeneratedColumn('uuid')
-    id_ref_personal : string;
+    ID_REF_PERSONAL : string;
 
     
     @Column('varchar2', {
         length : 50,
         nullable : false
     })
-    nombre : string;
+    NOMBRE : string;
 
     @Column('varchar2', {
         length : 200,
         nullable : false
     })
-    direccion : string;
+    DIRECCION : string;
 
     @Column('varchar2', {
         length : 30,
         nullable : false
     })
-    parentesco : string;
+    PARENTESCO : string;
 
     @Column('varchar2', {
         length : 40,
         nullable : true
     })
-    telefono_domicilio : string;
+    TELEFONO_DOMICILIO : string;
 
     @Column('varchar2', {
         length : 12,
         nullable : false
     })
-    telefono_trabajo : string;
+    TELEFONO_TRABAJO : string;
 
     @Column('varchar2', {
         length : 12,
         nullable : false
     })
-    telefono_celular : string;
+    TELEFONO_CELULAR : string;
 
     @OneToMany(() => Net_Ref_Per_Afil, referenciaPersonalAfiliado => referenciaPersonalAfiliado.referenciaPersonal)
     referenciasPersonalesAfiliado: Net_Ref_Per_Afil[];

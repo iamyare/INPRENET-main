@@ -6,7 +6,6 @@ import { Net_Detalle_Deduccion } from '../detalle-deduccion/entities/detalle-ded
 import { EntityManager, Repository } from 'typeorm';
 import { Net_Persona } from 'src/modules/afiliado/entities/Net_Persona';
 import { Net_Beneficio } from '../beneficio/entities/net_beneficio.entity';
-import { Net_Deduccion } from '../deduccion/entities/net_deduccion.entity';
 import { Net_Planilla } from './entities/net_planilla.entity';
 import { Net_TipoPlanilla } from '../tipo-planilla/entities/tipo-planilla.entity';
 import { Net_Detalle_Pago_Beneficio } from '../detalle_beneficio/entities/net_detalle_pago_beneficio.entity';
@@ -14,6 +13,7 @@ import { isUUID } from 'class-validator';
 import { DetalleBeneficioService } from '../detalle_beneficio/detalle_beneficio.service';
 import { DetalleDeduccionService } from '../detalle-deduccion/detalle-deduccion.service';
 import { PaginationDto } from 'src/common/dtos/pagination.dto';
+import { Net_Deduccion_Terceros } from '../deduccion/entities/net_deduccion-terceros.entity';
 
 @Injectable()
 export class PlanillaService {
@@ -725,7 +725,7 @@ ON deducciones."id_afiliado" = beneficios."id_afiliado"
       'LISTAGG(DISTINCT ded.nombre_deduccion, \',\') AS deduccionesNombres',
     ])
     .leftJoin(Net_Detalle_Deduccion, 'detD', 'afil.id_afiliado = detD.id_afiliado')
-    .leftJoin(Net_Deduccion, 'ded', 'detD.id_deduccion = ded.id_deduccion')
+    .leftJoin(Net_Deduccion_Terceros, 'ded', 'detD.id_deduccion = ded.id_deduccion')
     .leftJoin(Net_Detalle_Pago_Beneficio, 'detB', 'afil.id_afiliado = detB.id_afiliado')
     .leftJoin(Net_Beneficio, 'ben', 'detB.id_beneficio = ben.id_beneficio')
     .where(`

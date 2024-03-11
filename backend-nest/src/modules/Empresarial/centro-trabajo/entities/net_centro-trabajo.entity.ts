@@ -5,47 +5,47 @@ import { Column, Entity, Index, JoinColumn, ManyToOne, OneToMany, PrimaryGenerat
 @Entity()
 export class Net_Centro_Trabajo {
     @PrimaryGeneratedColumn('uuid')
-    id_centro_trabajo: string;
+    ID_CENTRO_TRABAJO: string;
 
     @Column('varchar2', { length: 40, nullable: false })
-    nombre_Centro_Trabajo: string;
+    NOMBRE_CENTRO_TRABAJO: string;
 
     @Column('varchar2', { length: 40, nullable: false })
-    sector_economico: string;
+    SECTOR_ECONOMICO: string;
 
     @Column('varchar2', { length: 30, nullable: false })
-    telefono_1: string;
+    TELEFONO_1: string;
 
     @Column('varchar2', { length: 30, nullable: true })
-    telefono_2: string;
+    TELEFONO_2: string;
 
     @Column('varchar2', { unique : true, length: 40, nullable: false })
-    correo_1: string;
+    CORREO_1: string;
 
     @Column('varchar2', { length: 50, nullable: true })
-    correo_2: string;
+    CORREO_2: string;
 
     @Column('nvarchar2', { length: 50, nullable: false })
-    apoderado_legal: string;
+    APODERADO_LEGAL: string;
 
     @Column('nvarchar2', { length: 50, nullable: false })
-    representante_legal: string;
+    REPRESENTANTE_LEGAL: string;
 
     @Column('nvarchar2', { length: 14, nullable: false })
     @Index("UQ_rtn_netCenTrab", {unique:true})
-    rtn: string;
+    RTN: string;
 
     @Column('nvarchar2', { length: 300, nullable: false })
-    logo: string;
+    LOGO: string;
 
     @Column('nvarchar2', { length: 200, nullable: false })
-    UbicacionCompleta: string;
+    UBICACION_COMPLETA: string;
 
     @ManyToOne(() => Net_Provincia, provincia => provincia.centrosTrabajo)
-    @JoinColumn({ name: 'id_provincia' })
+    @JoinColumn({ name: 'ID_PROVINCIA' })
     provincia: Net_Provincia;
 
     @OneToMany(() => Net_perf_afil_cent_trab, perfAfilCentTrab => perfAfilCentTrab.centroTrabajo)
-    @JoinColumn({ name: 'id_perfAfilCentTrabs' })
+    @JoinColumn({ name: 'ID_PERFIL_AFIL_CENTR_TRAB' })
     perfAfilCentTrabs: Net_perf_afil_cent_trab[];
 }

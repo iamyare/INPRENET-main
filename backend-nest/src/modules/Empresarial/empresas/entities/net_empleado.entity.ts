@@ -8,42 +8,42 @@ import { Net_Usuario } from "src/modules/usuario/entities/net_usuario.entity";
 export class Net_Empleado{
         
         @PrimaryGeneratedColumn('uuid')
-        id_empleado : string;
+        ID_EMPLEADO : string;
 
         @Column('varchar2', { length: 30, nullable: true })
-                nombre_empleado: string;
+                NOMBRE_EMPLEADO: string;
         
         @Column('varchar2', {
                 length : 40,
                 nullable : true
         })
-        nombre_puesto : string;
+        NOMBRE_PUESTO : string;
 
         @Column('varchar2', {
                 nullable : true
         })
-        numero_empleado : string;
+        NUMERO_EMPLEADO : string;
 
         @Column('varchar2', {
                 nullable : true
         })
-        telefono_empleado
+        TELEFONO_EMPLEADO
         
         @Column('varchar2')
         @Index("UQ_numIdent_netEmpl", {unique:true})
-        numero_identificacion
+        NUMERO_IDENTIFICACION
 
         @Column('varchar2', {
                 nullable : false
         })
-        archivo_identificacion
+        ARCHIVO_IDENTIFICACION : string;
 
         @OneToOne(() =>  Net_Usuario, { cascade: true })
-        @JoinColumn({ name: 'id_usuario' })
+        @JoinColumn({ name: 'ID_USUARIO' })
         usuario:  Net_Usuario;
 
         @OneToOne(() =>  Net_TipoIdentificacion, { cascade: true })
-        @JoinColumn({ name: 'id_tipoIdentificacion' })
+        @JoinColumn({ name: 'ID_IDENTIFICACION' })
         tipo_identificacion: Net_TipoIdentificacion;
         
 

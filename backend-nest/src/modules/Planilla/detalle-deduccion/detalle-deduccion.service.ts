@@ -4,7 +4,6 @@ import { UpdateDetalleDeduccionDto } from './dto/update-detalle-deduccion.dto';
 import { InjectEntityManager, InjectRepository } from '@nestjs/typeorm';
 import { Net_Detalle_Deduccion } from './entities/detalle-deduccion.entity';
 import { EntityManager, FindOptionsWhere, Repository } from 'typeorm';
-import { Net_Deduccion } from '../deduccion/entities/net_deduccion.entity';
 import { Net_Institucion } from 'src/modules/Empresarial/institucion/entities/net_institucion.entity';
 import * as xlsx from 'xlsx';
 import { AfiliadoService } from 'src/modules/afiliado/afiliado.service';
@@ -12,6 +11,7 @@ import { Net_Persona } from 'src/modules/afiliado/entities/Net_Persona';
 import { Net_Detalle_Afiliado } from 'src/modules/afiliado/entities/detalle_afiliado.entity';
 import { Net_Planilla } from '../planilla/entities/net_planilla.entity';
 import { isUUID } from 'class-validator';
+import { Net_Deduccion_Terceros } from '../deduccion/entities/net_deduccion-terceros.entity';
 
 @Injectable()
 export class DetalleDeduccionService {
@@ -23,8 +23,8 @@ export class DetalleDeduccionService {
     private detalleDeduccionRepository: Repository<Net_Detalle_Deduccion>,
     @InjectRepository(Net_Persona)
     private afiliadoRepository: Repository<Net_Persona>,
-    @InjectRepository(Net_Deduccion)
-    private deduccionRepository: Repository<Net_Deduccion>,
+    @InjectRepository(Net_Deduccion_Terceros)
+    private deduccionRepository: Repository<Net_Deduccion_Terceros>,
     @InjectRepository(Net_Institucion)
     private institucionRepository: Repository<Net_Institucion>,
     @InjectRepository(Net_Detalle_Afiliado)

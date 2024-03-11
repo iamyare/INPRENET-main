@@ -6,26 +6,25 @@ export enum EstadoEnum {
     NO_PAGADA = 'NO PAGADA',
     INCONSISTENCIA = 'INCONSISTENCIA'
 }
-@Entity()
+@Entity({ name: 'NET_DETALLE_PAGO_BENEFICIO' })
 export class Net_Detalle_Pago_Beneficio {
-    @PrimaryGeneratedColumn({ type: 'int' })
-    ID_BENEFICIO_PLANILLA : number;
+    @PrimaryGeneratedColumn({type: 'int',name: 'ID_BENEFICIO_PLANILLA'})
+    id_beneficio_planilla: number;
 
-    @Column({default:"NO PAGADA", enum: ['NO PAGADA', 'PAGADA']})
-    ESTADO: string;
+    @Column({ default: "NO PAGADA", enum: ['NO PAGADA', 'PAGADA'], name: 'ESTADO' })
+    estado: string;
 
-    @CreateDateColumn()
-    FECHA_CARGA: Date;
+    @CreateDateColumn({ name: 'FECHA_CARGA' })
+    fecha_carga: Date;
 
-    @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
-    MONTO_A_PAGAR: number;
+    @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true, name: 'MONTO_A_PAGAR' })
+    monto_a_pagar: number;
     
     @ManyToOne(() => Net_Planilla, planilla => planilla.detallepagobeneficio, { cascade: true })
     @JoinColumn({ name: 'ID_PLANILLA' })
     planilla: Net_Planilla;
 
     @ManyToOne(() => Net_Detalle_Beneficio_Afiliado, detalleBeneficioAfiliado => detalleBeneficioAfiliado.detalleBeneficio, { cascade: true })
-    @JoinColumn({ name: 'ID_BENEFICIO_PLANILLA' })
+    @JoinColumn({ name: 'ID_BENEFICIO_PLANILLA_AFIL' })
     detalleBeneficioAfiliado: string;
-
 }

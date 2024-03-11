@@ -4,33 +4,29 @@ import { Net_Beneficio } from "../../beneficio/entities/net_beneficio.entity";
 import { Net_Detalle_Pago_Beneficio } from "./net_detalle_pago_beneficio.entity";
 import { Net_Detalle_Afiliado } from "src/modules/afiliado/entities/detalle_afiliado.entity";
 
-@Entity()
+@Entity({ name: 'NET_DETALLE_BENEFICIO_AFILIADO' })
 export class Net_Detalle_Beneficio_Afiliado 
 {
-    @PrimaryGeneratedColumn('uuid')
-    ID_DETALLE_BEN_AFIL: string;
+    @PrimaryGeneratedColumn('uuid', { name: 'ID_DETALLE_BEN_AFIL' })
+    id_detalle_ben_afil: string;
 
-    @Column({ type: 'date', nullable: false })
-    PERIODO_INICIO: Date;
+    @Column({ type: 'date', nullable: false, name: 'PERIODO_INICIO' })
+    periodo_inicio: Date;
 
-    @Column({ type: 'date', nullable: false })
-    PERIODO_FINALIZACION: Date;
+    @Column({ type: 'date', nullable: false, name: 'PERIODO_FINALIZACION' })
+    periodo_finalizacion: Date;
 
-    @Column({nullable:true, default: 0 })
-    NUM_RENTAS_APLICACDAS: number;
+    @Column({ nullable: true, default: 0, name: 'NUM_RENTAS_APLICADAS' })
+    num_rentas_aplicadas: number;
 
-    @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
-    MONTO_TOTAL: number;
+    @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true, name: 'MONTO_TOTAL' })
+    monto_total: number;
 
-    @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
-    MONTO_POR_PERIODO: number;
+    @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true, name: 'MONTO_POR_PERIODO' })
+    monto_por_periodo: number;
     
-    @Column({nullable:true})
-    METODO_PAGO: string;
-
-    /*  @ManyToOne(() => Net_Persona, afiliado => afiliado.detalleBeneficioAfiliado)
-    @JoinColumn({ name: 'id_afiliado' })
-    afiliado: string; */
+    @Column({ nullable: true, name: 'METODO_PAGO' })
+    metodo_pago: string;
 
     @ManyToOne(() => Net_Beneficio, beneficio => beneficio.detalleBeneficioAfiliado)
     @JoinColumn({ name: 'ID_BENEFICIO' })
@@ -39,8 +35,8 @@ export class Net_Detalle_Beneficio_Afiliado
     @OneToMany(() => Net_Detalle_Pago_Beneficio, detalleBeneficio => detalleBeneficio.detalleBeneficioAfiliado)
     detalleBeneficio: Net_Detalle_Pago_Beneficio[];
 
-     @ManyToOne(() => Net_Detalle_Afiliado, afiliado => afiliado.detalleBeneficioAfiliado)
-     @JoinColumn({ name: 'ID_CAUSANTE', referencedColumnName: 'ID_AFILIADO'})
-     @JoinColumn({ name: 'ID_BENEFICIARIO', referencedColumnName: 'ID_DETALLE_AFILIADO'})
-     afiliado: string;
+    /* @ManyToOne(() => Net_Detalle_Afiliado, afiliado => afiliado.detalleBeneficioAfiliado)
+    @JoinColumn({ name: 'ID_CAUSANTE', referencedColumnName: 'ID_AFILIADO' })
+    @JoinColumn({ name: 'ID_BENEFICIARIO', referencedColumnName: 'ID_DETALLE_AFILIADO' })
+    afiliado: Net_Detalle_Afiliado; */
 }

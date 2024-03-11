@@ -1,48 +1,53 @@
 import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 import { Net_Ref_Per_Afil } from "./net_ref-Per-Afiliado";
 
-@Entity()
+@Entity({name: 'NET_REFERENCIA_PERSONAL'})
 export class Net_ReferenciaPersonal {
 
-    @PrimaryGeneratedColumn('uuid')
-    ID_REF_PERSONAL : string;
+    @PrimaryGeneratedColumn('uuid', {name:'ID_REF_PERSONAL'})
+     id_ref_personal: string;
 
-    
     @Column('varchar2', {
         length : 50,
-        nullable : false
+        nullable : false,
+        name : 'NOMBRE'
     })
-    NOMBRE : string;
+     nombre : string;
 
     @Column('varchar2', {
         length : 200,
-        nullable : false
+        nullable : false,
+        name : 'DIRECCION'
     })
-    DIRECCION : string;
+     direccion: string;
 
     @Column('varchar2', {
         length : 30,
-        nullable : false
+        nullable : false,
+        name : 'PARENTESCO'
     })
-    PARENTESCO : string;
+     parentesco: string;
 
     @Column('varchar2', {
         length : 40,
-        nullable : true
+        nullable : true,
+        name :'TELEFONO_DOMICILIO'
     })
-    TELEFONO_DOMICILIO : string;
+     telefono_domicilio: string;
 
     @Column('varchar2', {
         length : 12,
-        nullable : false
+        nullable : false,
+        name: 'TELEFONO_TRABAJO'
     })
-    TELEFONO_TRABAJO : string;
+     telefono_trabajo: string;
 
     @Column('varchar2', {
         length : 12,
-        nullable : false
+        nullable : false,
+        name: 'TELEFONO_CELULAR'
     })
-    TELEFONO_CELULAR : string;
+     telefono_celular: string;
 
     @OneToMany(() => Net_Ref_Per_Afil, referenciaPersonalAfiliado => referenciaPersonalAfiliado.referenciaPersonal)
     referenciasPersonalesAfiliado: Net_Ref_Per_Afil[];

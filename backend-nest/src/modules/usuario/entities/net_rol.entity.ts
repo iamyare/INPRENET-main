@@ -1,16 +1,16 @@
 import { Entity, Column, PrimaryGeneratedColumn, OneToMany } from 'typeorm';
 import { Net_Usuario } from './net_usuario.entity';
 
-@Entity()
+@Entity({ name: 'NET_ROL' })
 export class Net_Rol {
-    @PrimaryGeneratedColumn('uuid')
-    ID_ROL: string;
+    @PrimaryGeneratedColumn('uuid', { name: 'ID_ROL' })
+    id_rol: string;
 
-    @Column('varchar2', { length: 20, nullable: true })
-    NOMBRE_ROL: string;
+    @Column('varchar2', { length: 20, nullable: true, name: 'NOMBRE_ROL' })
+    nombre_rol: string;
 
-    @Column('varchar2', { length: 200, nullable: true })
-    DESCRIPCION: string;
+    @Column('varchar2', { length: 200, nullable: true, name: 'DESCRIPCION' })
+    descripcion: string;
 
     @OneToMany(() => Net_Usuario, usuario => usuario.rol)
     usuarios: Net_Usuario[];

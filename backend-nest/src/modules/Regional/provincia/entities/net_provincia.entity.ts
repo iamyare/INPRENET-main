@@ -1,19 +1,20 @@
-import { Column, Entity, ManyToOne, OneToMany, PrimaryGeneratedColumn } from "typeorm";
+import { Column, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 import { Net_Pais } from "../../pais/entities/pais.entity";
 import { Net_Centro_Trabajo } from "src/modules/Empresarial/centro-trabajo/entities/net_centro-trabajo.entity";
 import { Net_Municipio } from "../../municipio/entities/net_municipio.entity";
 import { Net_Persona } from "src/modules/afiliado/entities/Net_Persona";
 
 
-@Entity()
+@Entity({name:'NET_PROVINCIA'})
 export class Net_Provincia {
-    @PrimaryGeneratedColumn('uuid')
-    ID_PROVINCIA : string;
+    @PrimaryGeneratedColumn('uuid',{name:'ID_PROVINCIA'})
+    id_provincia : string;
 
-    @Column('varchar2', {length: 30 ,nullable:false})
-    NOMBRE_PROVINCIA: string
+    @Column('varchar2', {length: 30 ,nullable:false, name:'NOMBRE_PROVINCIA'})
+    nombre_provincia: string
 
     @ManyToOne(() => Net_Pais, pais => pais.provincia)
+    @JoinColumn({ name: 'ID_PAIS', referencedColumnName: 'id_pais' })
     pais: Net_Pais;
 
     @OneToMany(() => Net_Municipio, municipio => municipio.provincia)

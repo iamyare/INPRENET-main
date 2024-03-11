@@ -3,33 +3,33 @@ import { Net_TipoPlanilla } from '../../tipo-planilla/entities/tipo-planilla.ent
 import { Net_Detalle_Deduccion } from '../../detalle-deduccion/entities/detalle-deduccion.entity';
 import { Net_Detalle_Pago_Beneficio } from '../../detalle_beneficio/entities/net_detalle_pago_beneficio.entity';
 
-@Entity()
+@Entity({ name: 'NET_PLANILLA' })
 export class Net_Planilla {
 
-    @PrimaryGeneratedColumn('uuid')
-    ID_PLANILLA : string
+    @PrimaryGeneratedColumn('uuid', { name: 'ID_PLANILLA' })
+    id_planilla: string;
 
-    @Column('varchar2', {nullable: false })
-    @Index("UQ_codPlanilla_netPlan", {unique:true})
-    CODIGO_PLANILLA : string;
+    @Column('varchar2', { nullable: false, name: 'CODIGO_PLANILLA' })
+    @Index("UQ_codPlanilla_netPlan", { unique: true })
+    codigo_planilla: string;
 
-    @Column('date', { nullable: false, default: () => 'SYSDATE' })
-    FECHA_APERTURA: Date;
+    @Column('date', { nullable: false, default: () => 'SYSDATE', name: 'FECHA_APERTURA' })
+    fecha_apertura: Date;
 
-    @Column('date', { nullable: true })
-    FECHA_CIERRE: Date;
+    @Column('date', { nullable: true, name: 'FECHA_CIERRE' })
+    fecha_cierre: Date;
 
-    @Column('number')
-    SECUENCIA : number;
+    @Column('number', { name: 'SECUENCIA' })
+    secuencia: number;
 
-    @Column('varchar2', { nullable: true, default: 'ACTIVA' })
-    ESTADO: string;
+    @Column('varchar2', { nullable: true, default: 'ACTIVA', name: 'ESTADO' })
+    estado: string;
 
-    @Column('varchar2', {  nullable: false })
-    PERIODO_INICIO: string;
+    @Column('varchar2', { nullable: false, name: 'PERIODO_INICIO' })
+    periodoInicio: string;
 
-    @Column('varchar2', {  nullable: false })
-    PERIODO_FINALIZACION: string; 
+    @Column('varchar2', { nullable: false, name: 'PERIODO_FINALIZACION' })
+    periodoFinalizacion: string; 
 
     @ManyToOne(() => Net_TipoPlanilla, tipoPlanilla => tipoPlanilla.planilla,  { cascade: true })
     @JoinColumn({ name: 'ID_TIPO_PLANILLA' })
@@ -40,5 +40,4 @@ export class Net_Planilla {
 
     @OneToMany(() => Net_Detalle_Pago_Beneficio, detallepagobeneficio => detallepagobeneficio.planilla)
     detallepagobeneficio: Net_Detalle_Pago_Beneficio[];
-
 }

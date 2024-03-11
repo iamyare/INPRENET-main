@@ -108,10 +108,10 @@ export class DetalleBeneficioController {
     return respuesta;
   }
 
-  @Patch('/actualizar-beneficio-planilla')
-  actualizarPlanillasYEstados(@Body() detalles: { idBeneficioPlanilla: number; codigoPlanilla: string; estado: string }[]) {
+  /* @Patch('/actualizar-beneficio-planilla')
+  actualizarPlanillasYEstados(@Body() detalles: { idBeneficioPlanilla: string; codigoPlanilla: string; estado: string }[]) {
     return this.detallebeneficioService.actualizarPlanillaYEstadoDeBeneficio(detalles);
-  }
+  } */
 
   @Patch(':id')
   update(@Param('id') id: string, @Body() updateDetalleBeneficioDto: UpdateDetalleBeneficioDto) {

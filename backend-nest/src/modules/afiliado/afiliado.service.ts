@@ -8,11 +8,8 @@ import { Net_Afiliados_Por_Banco } from 'src/modules/banco/entities/net_afiliado
 import { Net_Centro_Trabajo } from 'src/modules/Empresarial/centro-trabajo/entities/net_centro-trabajo.entity';
 import { Net_Banco } from 'src/modules/banco/entities/net_banco.entity';
 import { Net_Provincia } from 'src/modules/Regional/provincia/entities/net_provincia.entity';
-/* import { Pais } from 'src/modules/Regional/pais/entities/pais.entity'; */
 import { Net_TipoIdentificacion } from 'src/modules/tipo_identificacion/entities/net_tipo_identificacion.entity';
-/* import { Provincia } from 'src/modules/Regional/provincia/entities/provincia.entity'; */
 import { Net_Pais } from 'src/modules/Regional/pais/entities/pais.entity';
-/* import { TipoIdentificacion } from 'src/modules/tipo_identificacion/entities/tipo_identificacion.entity'; */
 import { CreateAfiliadoTempDto } from './dto/create-afiliado-temp.dto';
 import { validate as isUUID } from 'uuid';
 import { Net_Detalle_Afiliado } from './entities/detalle_afiliado.entity';
@@ -70,7 +67,7 @@ export class AfiliadoService {
 
         // Verificar y encontrar los centros de trabajo para cada perfAfilCentTrab
         const perfAfilCentTrabs = await Promise.all(createAfiliadoDto.perfAfilCentTrabs.map(async perfAfilCentTrabDto => {
-            const centroTrabajo = await queryRunner.manager.findOneBy(Net_Centro_Trabajo, { nombre_Centro_Trabajo: perfAfilCentTrabDto.nombre_centroTrabajo });
+            const centroTrabajo = await queryRunner.manager.findOneBy(Net_Centro_Trabajo, { nombre_centro_trabajo: perfAfilCentTrabDto.nombre_centroTrabajo });
             if (!centroTrabajo) {
                 throw new BadRequestException(`Centro de trabajo no encontrado: ${perfAfilCentTrabDto.nombre_centroTrabajo}`);
             }
@@ -151,7 +148,7 @@ export class AfiliadoService {
     let afiliados: Net_Persona;
     if (isUUID(term)) {
       afiliados = await this.afiliadoRepository.findOne({
-        where: { id_afiliado: term },
+        where: { id_persona: term },
         relations: ['detalleAfiliado'], // Asegúrate de cargar la relación
       });
     } else {

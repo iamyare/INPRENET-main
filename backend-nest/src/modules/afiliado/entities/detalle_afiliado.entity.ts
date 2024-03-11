@@ -1,35 +1,24 @@
 import { Column, Entity, JoinColumn, ManyToOne, OneToMany, OneToOne, PrimaryColumn, PrimaryGeneratedColumn } from "typeorm";
-import { IsString } from "class-validator";
 import { Net_Persona } from "./Net_Persona";
 import { Net_Tipo_Afiliado } from "./net_tipo_afiliado.entity";
 
-@Entity()
+@Entity({name:'NET_DETALLE_PERSONA'})
 export class Net_Detalle_Afiliado {
-    @PrimaryColumn()
-    ID_AFILIADO: string;
+    @PrimaryColumn({name :'ID_PERSONA'})
+    id_persona: string;
     
-    @PrimaryColumn()
-    ID_DETALLE_AFILIADO: string;
+    @PrimaryColumn({name:'ID_DETALLE_PERSONA'})
+    id_detalle_persona: string;
 
-    @Column('number', { nullable: true })
-    PORCENTAJE: number;
+    @Column('number', { nullable: true, name:'PORCENTAJE' })
+    porcentaje: number;
     
-    @ManyToOne(() => Net_Persona, afiliado => afiliado.detalleAfiliado, { cascade: true })
-    @JoinColumn({ name: 'ID_AFILIADO', referencedColumnName: 'ID_AFILIADO' })
-    afiliado: Net_Persona;
-    
-    // Relación Muchos a Uno consigo mismo
-    @ManyToOne(() => Net_Detalle_Afiliado, detalleAfiliado => detalleAfiliado.ID_DETALLE_AFILIADO, { cascade: true })
-    @JoinColumn({ name: 'ID_DETALLE_AFILIADO_PADRE', referencedColumnName: 'ID_AFILIADO'})
-    @JoinColumn({ name: 'ID_DETALLE_AFILIADO', referencedColumnName: 'ID_DETALLE_AFILIADO'})
-    padreIdAfiliado: Net_Detalle_Afiliado;
+    @ManyToOne(() => Net_Persona, persona => persona.detallesAfiliado)
+    @JoinColumn({ name: 'ID_PERSONA', referencedColumnName: 'id_persona' })
+    persona: Net_Persona;
 
-    @ManyToOne(() => Net_Tipo_Afiliado, tipoAfiliado => tipoAfiliado.detallesAfiliados)
-    @JoinColumn({ name: 'ID_TIPO_AFILIADO' }) // Esta columna almacena la relación
+    @ManyToOne(() => Net_Tipo_Afiliado, tipoAfiliado => tipoAfiliado.detallesAfiliado)
+    @JoinColumn({ name: 'ID_TIPO_AFILIADO' }) 
     tipoAfiliado: Net_Tipo_Afiliado;
 
-    @OneToMany(() => Net_Detalle_Afiliado, detalleBeneficioAfiliado => detalleBeneficioAfiliado.afiliado)
-    detalleBeneficioAfiliado: Net_Detalle_Afiliado[];
-
-    
 }

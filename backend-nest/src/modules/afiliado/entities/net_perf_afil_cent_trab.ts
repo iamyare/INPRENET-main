@@ -3,32 +3,32 @@ import { Net_Centro_Trabajo } from "src/modules/Empresarial/centro-trabajo/entit
 import { Net_Detalle_Afiliado } from "./detalle_afiliado.entity";
 import { Net_Persona } from "./Net_Persona";
 
-@Entity()
+@Entity({ name: 'NET_PERF_AFIL_CENT_TRAB' })
 export class Net_perf_afil_cent_trab {
-    @PrimaryGeneratedColumn('uuid')
-    ID_PERF_AFIL_CENTR_TRAB : string;
+    @PrimaryGeneratedColumn('uuid', { name: 'ID_PERF_AFIL_CENTR_TRAB' })
+    id_perf_afil_centro_trab: string;
 
-    @Column('varchar2', { length: 40, nullable: false })
-    CARGO: string;
+    @Column('varchar2', { length: 40, nullable: false, name: 'CARGO' })
+    cargo: string;
 
-    @Column('varchar2', { length: 40, nullable: false })
-    CLASE_CLIENTE: string;
+    @Column('varchar2', { length: 40, nullable: false, name: 'CLASE_CLIENTE' })
+    clase_cliente: string;
 
-    @Column('date', { nullable: false })
-    FECHA_INGRESO: string;
+    @Column('date', { nullable: false, name: 'FECHA_INGRESO' })
+    fecha_ingreso: string;
 
-    @Column('date', { nullable: false })
-    FECHA_PAGO: string;
+    @Column('date', { nullable: false, name: 'FECHA_PAGO' })
+    fecha_pago: string;
 
-    @Column('number', { nullable: true})
-    SALARIO_BASE: number;
+    @Column('number', { nullable: true, name: 'SALARIO_BASE' })
+    salario_base: number;
 
-    @Column('varchar2', {  length: 40, nullable: false })
-    NUMERO_ACUERDO: string;
+    @Column('varchar2', { length: 40, nullable: false, name: 'NUMERO_ACUERDO' })
+    numero_acuerdo: string;
 
     // Relación Uno a Muchos con PerfAfilCentTrab
     @ManyToOne(() => Net_Persona, afiliado => afiliado.perfAfilCentTrabs)
-    @JoinColumn({ name: 'ID_DETALLE_AFILIADO' })
+    @JoinColumn({ name: 'ID_DETALLE_PERSONA' })
     afiliado: Net_Persona;
 
     @ManyToOne(() => Net_Centro_Trabajo, centroTrabajo => centroTrabajo.perfAfilCentTrabs)

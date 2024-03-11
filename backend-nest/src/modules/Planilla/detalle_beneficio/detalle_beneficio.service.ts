@@ -90,10 +90,10 @@ export class DetalleBeneficioService {
               .into(Net_Detalle_Beneficio_Afiliado)
               .values(
               { 
-                afiliado: Afiliado[0].id_afiliado, 
+                //afiliado: Afiliado[0].id_afiliado, 
                 beneficio: beneficio, 
-                periodoInicio: periodoInicio, 
-                periodoFinalizacion: periodoFinalizacion ,
+                periodo_inicio: periodoInicio, 
+                periodo_finalizacion: periodoFinalizacion ,
                 monto_total: datos.monto_total ,
                 monto_por_periodo: datos.monto_por_periodo ,
               })
@@ -133,10 +133,10 @@ export class DetalleBeneficioService {
                     .into(Net_Detalle_Beneficio_Afiliado)
                     .values(
                       { 
-                        afiliado: Beneficiario[0].id_afiliado, 
+                        //afiliado: Beneficiario[0].id_afiliado, 
                         beneficio: beneficio, 
-                        periodoInicio: periodoInicio, 
-                        periodoFinalizacion: periodoFinalizacion ,
+                        periodo_inicio: periodoInicio, 
+                        periodo_finalizacion: periodoFinalizacion ,
                         monto_total: datos.monto_total ,
                         monto_por_periodo: datos.monto_por_periodo ,
                       })

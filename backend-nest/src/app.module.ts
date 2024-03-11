@@ -14,6 +14,7 @@ import { EmpresarialModule } from './modules/Empresarial/empresarial.module';
   imports: [
     ConfigModule.forRoot(),
     TypeOrmModule.forRoot({
+      //logging: ["query", "error"],
       type: 'oracle',
       database: process.env.DB_NAME,
       host: process.env.DB_HOST,

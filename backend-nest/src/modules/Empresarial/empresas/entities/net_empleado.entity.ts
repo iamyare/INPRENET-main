@@ -4,49 +4,39 @@ import {  Net_TipoIdentificacion } from "src/modules/tipo_identificacion/entitie
 import { Net_Usuario } from "src/modules/usuario/entities/net_usuario.entity";
 
 
-@Entity()
-export class Net_Empleado{
+@Entity({ name: 'NET_EMPLEADO' })
+export class Net_Empleado {
         
-        @PrimaryGeneratedColumn('uuid')
-        ID_EMPLEADO : string;
+    @PrimaryGeneratedColumn('uuid', { name: 'ID_EMPLEADO' })
+    id_empleado: string;
 
-        @Column('varchar2', { length: 30, nullable: true })
-                NOMBRE_EMPLEADO: string;
-        
-        @Column('varchar2', {
-                length : 40,
-                nullable : true
-        })
-        NOMBRE_PUESTO : string;
+    @Column('varchar2', { length: 30, nullable: true, name: 'NOMBRE_EMPLEADO' })
+    nombre_empleado: string;
+    
+    @Column('varchar2', { length: 40, nullable: true, name: 'NOMBRE_PUESTO' })
+    nombre_puesto: string;
 
-        @Column('varchar2', {
-                nullable : true
-        })
-        NUMERO_EMPLEADO : string;
+    @Column('varchar2', { nullable: true, name: 'NUMERO_EMPLEADO' })
+    numero_empleado: string;
 
-        @Column('varchar2', {
-                nullable : true
-        })
-        TELEFONO_EMPLEADO
-        
-        @Column('varchar2')
-        @Index("UQ_numIdent_netEmpl", {unique:true})
-        NUMERO_IDENTIFICACION
+    @Column('varchar2', { nullable: true, name: 'TELEFONO_EMPLEADO' })
+    telefono_empleado: string;
 
-        @Column('varchar2', {
-                nullable : false
-        })
-        ARCHIVO_IDENTIFICACION : string;
+    @Column('varchar2', { name: 'NUMERO_IDENTIFICACION' })
+    @Index("UQ_numIdent_netEmpl", { unique:true })
+    numero_identificacion: string;
 
-        @OneToOne(() =>  Net_Usuario, { cascade: true })
-        @JoinColumn({ name: 'ID_USUARIO' })
-        usuario:  Net_Usuario;
+    @Column('varchar2', { nullable: false, name: 'ARCHIVO_IDENTIFICACION' })
+    archivo_identificacion: string;
 
-        @OneToOne(() =>  Net_TipoIdentificacion, { cascade: true })
-        @JoinColumn({ name: 'ID_IDENTIFICACION' })
-        tipo_identificacion: Net_TipoIdentificacion;
-        
+    @OneToOne(() => Net_Usuario, { cascade: true })
+    @JoinColumn({ name: 'ID_USUARIO' })
+    usuario: Net_Usuario;
 
-        @OneToMany(() => Net_Empleado_Empresa, empleadoEmpresa => empleadoEmpresa.id_empleado)
-        empleadoEmpresa : Net_Empleado_Empresa[];
+    @OneToOne(() => Net_TipoIdentificacion, { cascade: true })
+    @JoinColumn({ name: 'ID_IDENTIFICACION' })
+    tipo_identificacion: Net_TipoIdentificacion;
+
+    @OneToMany(() => Net_Empleado_Empresa, empleadoEmpresa => empleadoEmpresa.id_empleado)
+    empleadoEmpresa: Net_Empleado_Empresa[];
 }

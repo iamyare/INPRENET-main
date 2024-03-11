@@ -2,19 +2,17 @@ import { Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
 import { Net_Empresa } from "./net_empresa.entity";
 import { Net_Empleado } from "./net_empleado.entity";
 
-@Entity()
+@Entity({ name: 'NET_EMPLEADO_EMPRESA' })
 export class Net_Empleado_Empresa {
 
-    @PrimaryGeneratedColumn('uuid')
-    ID_EMPLEADO_EMPRESA: string;
+    @PrimaryGeneratedColumn('uuid', { name: 'ID_EMPLEADO_EMPRESA' })
+    id_empleado_empresa: string;
    
     @ManyToOne(() => Net_Empresa, (empresa) => empresa.id_empresa)
     @JoinColumn({ name: 'ID_EMPRESA' })
-    id_empresa: Net_Empresa
+    id_empresa: Net_Empresa;
 
-    @ManyToOne(() => Net_Empleado, (empleado) => empleado.ID_EMPLEADO)
+    @ManyToOne(() => Net_Empleado, (empleado) => empleado.id_empleado)
     @JoinColumn({ name: 'ID_EMPLEADO' })
-    id_empleado: Net_Empleado
-
-
-  }
+    id_empleado: Net_Empleado;
+}

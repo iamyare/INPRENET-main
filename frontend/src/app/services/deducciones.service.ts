@@ -54,6 +54,18 @@ export class DeduccionesService {
         )
       }
 
+      newDeduccionTipoPlanilla(TipoDeduccion:any): Observable<any | void>{
+        var url = `${environment.API_URL}/api/deduccion/dedTipoPLanilla`;
+        return this.http.post<any>(
+          url,
+          TipoDeduccion,
+          ).pipe(
+            map((res:any) => {
+              return res;
+            })
+            )
+          }
+
       ingresarDeduccionPlanilla(detalles: { idDedDeduccion: string; codigoPlanilla: string; estadoAplicacion: string }[]): Observable<any> {
         const url = `${environment.API_URL}/api/detalle-deduccion/actualizar-deduccion-planilla`; // Asegúrate de usar la URL correcta
         return this.http.patch(url, detalles).pipe(

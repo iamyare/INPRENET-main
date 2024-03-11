@@ -28,14 +28,18 @@ export class NuevoTipoDeduccionComponent implements OnInit {
     this.prueba()
   }
 
-  mostrarTipoPlanilla: boolean = true;
+  toggleFields(): void {
+    this.limpiarFormulario()
 
-
-  toggleDisplayForTipoPlanilla(): void {
-    this.mostrarTipoPlanilla = !this.mostrarTipoPlanilla;
+    const prioridadField = this.myFormFields.find(field => field.name === 'prioridad');
+    const institucionField = this.myFormFields.find(field => field.name === 'nombre_institucion');
     const tipoPlanillaField = this.myFormFields.find(field => field.name === 'tipo_planilla');
-    if (tipoPlanillaField) {
-      tipoPlanillaField.display = this.mostrarTipoPlanilla;
+
+    if (prioridadField && institucionField && tipoPlanillaField) {
+      const shouldDisplayTipoPlanilla = !tipoPlanillaField.display;
+      prioridadField.display = !shouldDisplayTipoPlanilla;
+      institucionField.display = !shouldDisplayTipoPlanilla;
+      tipoPlanillaField.display = shouldDisplayTipoPlanilla;
     }
   }
 
@@ -45,13 +49,20 @@ export class NuevoTipoDeduccionComponent implements OnInit {
     try {
       const instituciones = await this.SVCInstituciones.getInstituciones().toPromise();
       const tiposPlanilla = await this.planillaService.findAllTipoPlanilla().toPromise();
-      console.log(tiposPlanilla);
 
 
       this.myFormFields = [
         { type: 'text', label: 'Nombre', name: 'nombre_deduccion', validations: [Validators.required] , display: true},
         { type: 'text', label: 'Descripción', name: 'descripcion_deduccion', validations: [Validators.required] , display: true},
         { type: 'number', label: 'Código de deducción', name: 'codigo_deduccion', validations: [Validators.required], display: true },
+        {
+          type: 'dropdown', label: 'TipoPlanilla', name: 'tipo_planilla',
+          options: tiposPlanilla.map((item: { nombre_planilla: any; id_tipo_planilla: any; }) => ({
+            label: item.nombre_planilla,
+            value: item.nombre_planilla
+          })),
+          validations: [Validators.required], display: false
+        },
         { type: 'number', label: 'Prioridad', name: 'prioridad', validations: [Validators.required] , display: true},
         {
           type: 'dropdown', label: 'Institución', name: 'nombre_institucion',
@@ -61,19 +72,11 @@ export class NuevoTipoDeduccionComponent implements OnInit {
           })),
           validations: [Validators.required], display: true
         },
-        {
-          type: 'dropdown', label: 'TipoPlanilla', name: 'tipo_planilla',
-          options: tiposPlanilla.map((item: { nombre_planilla: any; id_tipo_planilla: any; }) => ({
-            label: item.nombre_planilla,
-            value: item.nombre_planilla
-          })),
-          validations: [Validators.required], display: true
-        }
+
       ];
       this.opcionesCargadas = true;
     } catch (error) {
       console.error('Error al obtener las instituciones:', error);
-      throw error; // Propagar el error para que sea manejado en ngOnInit
     }
   }
 
@@ -82,24 +85,43 @@ export class NuevoTipoDeduccionComponent implements OnInit {
   }
 
   guardarTipoDeduccion():any{
-    this.SVCDeduccion.newTipoDeduccion(this.data.value).subscribe(
-      {
-        next: (response) => {
-          this.toastr.success('tipo de deduccion creado con éxito');
-          this.limpiarFormulario()
-        },
-        error: (error) => {
-          let mensajeError = 'Error desconocido al crear tipo de deduccion';
-          if (error.error && error.error.message) {
-            mensajeError = error.error.message;
-          } else if (typeof error.error === 'string') {
-            mensajeError = error.error;
+    if(this.data.value.tipo_planilla){
+      this.SVCDeduccion.newDeduccionTipoPlanilla(this.data.value).subscribe(
+        {
+          next: (response) => {
+            this.toastr.success('tipo de deduccion creado con éxito');
+            this.limpiarFormulario()
+          },
+          error: (error) => {
+            let mensajeError = 'Error desconocido al crear tipo de deduccion';
+            if (error.error && error.error.message) {
+              mensajeError = error.error.message;
+            } else if (typeof error.error === 'string') {
+              mensajeError = error.error;
+            }
+            this.toastr.error(mensajeError);
           }
-
-          this.toastr.error(mensajeError);
         }
-      }
       );
+    }else{
+      this.SVCDeduccion.newTipoDeduccion(this.data.value).subscribe(
+        {
+          next: (response) => {
+            this.toastr.success('tipo de deduccion creado con éxito');
+            this.limpiarFormulario()
+          },
+          error: (error) => {
+            let mensajeError = 'Error desconocido al crear tipo de deduccion';
+            if (error.error && error.error.message) {
+              mensajeError = error.error.message;
+            } else if (typeof error.error === 'string') {
+              mensajeError = error.error;
+            }
+            this.toastr.error(mensajeError);
+          }
+        }
+        );
+    }
   }
 
   limpiarFormulario(): void {

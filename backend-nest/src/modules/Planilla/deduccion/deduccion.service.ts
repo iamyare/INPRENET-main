@@ -5,7 +5,6 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Net_Institucion } from 'src/modules/Empresarial/institucion/entities/net_institucion.entity';
 import { Net_TipoPlanilla } from '../tipo-planilla/entities/tipo-planilla.entity';
-import { Net_Deduc_Tipo_Planilla } from './entities/net_ded-planilla.entity';
 import { Net_Deduccion_Terceros } from './entities/net_deduccion-terceros.entity';
 @Injectable()
 export class DeduccionService {
@@ -19,11 +18,11 @@ export class DeduccionService {
     private institucionRepository: Repository<Net_Institucion>,
     @InjectRepository(Net_TipoPlanilla)
     private readonly tipoPlanillaRepository: Repository<Net_TipoPlanilla>,
-    @InjectRepository(Net_Deduc_Tipo_Planilla)
-    private dedPlanillaRepository: Repository<Net_Deduc_Tipo_Planilla>
+   /*  @InjectRepository(Net_Deduc_Tipo_Planilla)
+    private dedPlanillaRepository: Repository<Net_Deduc_Tipo_Planilla> */
   ){}
 
-  async createDeduccionTipoPlanilla(createDeduccionDto: CreateDeduccionDto): Promise<Net_Deduc_Tipo_Planilla> {
+  /* async createDeduccionTipoPlanilla(createDeduccionDto: CreateDeduccionDto): Promise<Net_Deduc_Tipo_Planilla> {
     try {
       const tipoPlanilla = await this.tipoPlanillaRepository.findOne({
         where: { nombre_planilla: createDeduccionDto.tipo_planilla },
@@ -42,7 +41,7 @@ export class DeduccionService {
     } catch (error) {
       this.handleException(error)
     }
-  }
+  } */
 
   async create(createDeduccionDto: CreateDeduccionDto) {
     const { nombre_institucion } = createDeduccionDto;

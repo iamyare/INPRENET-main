@@ -53,7 +53,7 @@ export class VerplancerradaComponent {
     private afiliadoService: AfiliadoService
     ) {
       (pdfMake as any).vfs = pdfFonts.pdfMake.vfs;
-      this.convertirImagenABase64('../../assets/images/HOJA-MEMBRETADA.jpg').then(base64 => {
+      this.convertirImagenABase64('../../assets/images/HOJA-MEMBRETADA-INPRENET.jpg').then(base64 => {
         this.backgroundImageBase64 = base64;
       }).catch(error => {
         console.error('Error al convertir la imagen a Base64', error);
@@ -273,14 +273,14 @@ export class VerplancerradaComponent {
             [
               { text: 'Pago', style: 'subheader' },
               { text: 'Medio de Pago: No especificado' }, // Asumiendo que este dato no está disponible
-              { text: 'Pago Total: ' + (row.Total || 0).toFixed(2) },
+              { text: 'Pago Total: ' + (row.Total || 0).toFixed(2) + ' L', style: 'subheader' },
               { text: 'Fecha de pago: ' + (row.fecha_cierre || 'No especificada') },
             ]
           ]
         },
         this.buildTable('Ingresos', beneficios.map(b => ({ nombre_ingreso: b.nombre_beneficio, monto: b['Total Monto Beneficio'] })), ['nombre_ingreso', 'monto'], 'monto'),
         this.buildTable('Deducciones', deducciones.map(d => ({ nombre_deduccion: d.nombre_deduccion, total_deduccion: d['Total Monto Aplicado'] })), ['nombre_deduccion', 'total_deduccion'], 'total_deduccion'),
-        { text: 'Neto: ' + (row.Total || 0).toFixed(2), style: 'subheader' }
+        { text: 'Total: ' + (row.Total || 0).toFixed(2), style: 'subheader' }
       ],
       styles: {
         header: {
@@ -333,7 +333,7 @@ export class VerplancerradaComponent {
     ];
 
     let total = data.reduce((acc, curr) => acc + curr[sumColumn], 0);
-    body.push([{ text: 'Total', style: 'tableHeader' }, { text: total.toFixed(2), alignment: 'right' }]);
+    body.push([{ text: 'Total', style: 'tableHeader' }, { text: total.toFixed(2) + ' L', alignment: 'right' }]);
 
     return {
       style: 'tableExample',
@@ -346,9 +346,9 @@ export class VerplancerradaComponent {
     };
   }
 
-  calculateNet(ingresos: any[], deducciones: any[]): number {
+  /* calculateNet(ingresos: any[], deducciones: any[]): number {
     const totalIngresos = ingresos.reduce((acc: any, curr: any) => acc + curr.monto, 0);
     const totalDeducciones = deducciones.reduce((acc: any, curr: any) => acc + curr.total_deduccion, 0);
     return totalIngresos - totalDeducciones;
-  }
+  } */
 }

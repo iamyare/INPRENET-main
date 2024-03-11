@@ -6,7 +6,11 @@
     (newDatBenChange)="obtenerDatos($event)"
   ></app-dynamic-form>
   <!-- Aquí va tu código HTML para el dropdown -->
+  <mat-slide-toggle color="primary" (change)="toggleFields()">
+    Nueva Deducción de Tipo Planilla
+  </mat-slide-toggle>
 </div>
+
 
 <button
   mat-raised-button

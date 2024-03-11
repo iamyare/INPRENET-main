@@ -12,6 +12,9 @@ export class Net_Afiliados_Por_Banco {
     @Index("UQ_numCuen_netAfilBanco", {unique:true})
     NUM_CUENTA
 
+    @Column('varchar2', {nullable: false, length:20})
+    estado
+
     @ManyToOne(() => Net_Banco, banco => banco.afiliadosDeBanco, { cascade: true })
     @JoinColumn({ name: 'id_banco' })
     banco : Net_Banco;

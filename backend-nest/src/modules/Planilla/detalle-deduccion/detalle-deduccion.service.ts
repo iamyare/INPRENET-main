@@ -53,9 +53,9 @@ export class DetalleDeduccionService {
         const detalleDeduccion = new Net_Detalle_Deduccion();
         detalleDeduccion.afiliado = afiliado;
         detalleDeduccion.deduccion = deduccion;
-        detalleDeduccion.anio = parseInt(item.año);
-        detalleDeduccion.mes = parseInt(item.mes);
-        detalleDeduccion.monto_total = parseFloat(item.monto_motal);
+        detalleDeduccion.ANIO = parseInt(item.año);
+        detalleDeduccion.MES = parseInt(item.mes);
+        detalleDeduccion.MONTO_TOTAL = parseFloat(item.monto_motal);
         
 
         await queryRunner.manager.save(detalleDeduccion);
@@ -74,7 +74,7 @@ export class DetalleDeduccionService {
     try {
       const resultado = await this.detalleDeduccionRepository.createQueryBuilder()
         .update(Net_Detalle_Deduccion)
-        .set({ estado_aplicacion: nuevoEstado })
+        .set({ ESTADO_APLICACION: nuevoEstado })
         .where("planilla.id_planilla = :idPlanilla", { idPlanilla })
         .execute();
   
@@ -288,18 +288,18 @@ async actualizarPlanillasYEstadosDeDeducciones(detalles: { idDedDeduccion: strin
   const entityManager = transactionalEntityManager ? transactionalEntityManager : this.entityManager;
 
   for (const { idDedDeduccion, codigoPlanilla, estadoAplicacion } of detalles) {
-    const deduccion = await entityManager.findOne(Net_Detalle_Deduccion, { where: { id_ded_deduccion: idDedDeduccion } });
+    const deduccion = await entityManager.findOne(Net_Detalle_Deduccion, { where: { ID_DED_DEDUCCION: idDedDeduccion } });
     if (!deduccion) {
       throw new NotFoundException(`DetalleDeduccion con ID "${idDedDeduccion}" no encontrado`);
     }
 
-    const planilla = await entityManager.findOne(Net_Planilla, { where: { codigo_planilla: codigoPlanilla } });
+    const planilla = await entityManager.findOne(Net_Planilla, { where: { CODIGO_PLANILLA: codigoPlanilla } });
     if (!planilla) {
       throw new NotFoundException(`Planilla con código "${codigoPlanilla}" no encontrada`);
     }
 
     deduccion.planilla = planilla;
-    deduccion.estado_aplicacion = estadoAplicacion; // Actualiza el estado de aplicación
+    deduccion.ESTADO_APLICACION = estadoAplicacion; // Actualiza el estado de aplicación
 
     resultados.push(await entityManager.save(deduccion));
   }
@@ -330,10 +330,10 @@ async actualizarPlanillasYEstadosDeDeducciones(detalles: { idDedDeduccion: strin
  
     // Guardar el nuevo DetalleDeduccion en la base de datos
     try {
-      const nuevoDetalleDeduccion = this.detalleDeduccionRepository.create({
+      /* const nuevoDetalleDeduccion = this.detalleDeduccionRepository.create({
         afiliado: afiliado,
         deduccion: deduccion,
-        /* institucion: institucion, */
+        institucion: institucion,
         monto_total: monto_total,
         monto_aplicado: monto_aplicado,
         estado_aplicacion: estado_aplicacion,
@@ -341,7 +341,7 @@ async actualizarPlanillasYEstadosDeDeducciones(detalles: { idDedDeduccion: strin
         mes: mes
       });
       await this.detalleDeduccionRepository.save(nuevoDetalleDeduccion);
-      return nuevoDetalleDeduccion;
+      return nuevoDetalleDeduccion; */
     } catch (error) {
     this.handleException(error);
     }
@@ -388,11 +388,11 @@ async actualizarPlanillasYEstadosDeDeducciones(detalles: { idDedDeduccion: strin
       .getMany();
   }
 
-  async update(id_ded_deduccion: string, updateDetalleDeduccionDto: UpdateDetalleDeduccionDto) {
+  async update(ID_DED_DEDUCCION: string, updateDetalleDeduccionDto: UpdateDetalleDeduccionDto) {
     // Buscar el DetalleDeduccion existente por ID
-    const detalleDeduccion = await this.detalleDeduccionRepository.findOne({ where: { id_ded_deduccion } });
+    const detalleDeduccion = await this.detalleDeduccionRepository.findOne({ where: { ID_DED_DEDUCCION } });
     if (!detalleDeduccion) {
-      throw new NotFoundException(`DetalleDeduccion con ID '${id_ded_deduccion}' no encontrado.`);
+      throw new NotFoundException(`DetalleDeduccion con ID '${ID_DED_DEDUCCION}' no encontrado.`);
     }
 
     const { dni, nombre_deduccion, nombre_institucion, monto_total, monto_aplicado, estado_aplicacion, anio, mes } = updateDetalleDeduccionDto;
@@ -425,11 +425,11 @@ async actualizarPlanillasYEstadosDeDeducciones(detalles: { idDedDeduccion: strin
     }
 
     // Actualizar los campos del DetalleDeduccion existente
-    detalleDeduccion.monto_total = monto_total ?? detalleDeduccion.monto_total;
-    detalleDeduccion.monto_aplicado = monto_aplicado ?? detalleDeduccion.monto_aplicado;
-    detalleDeduccion.estado_aplicacion = estado_aplicacion ?? detalleDeduccion.estado_aplicacion;
-    detalleDeduccion.anio = anio ?? detalleDeduccion.anio;
-    detalleDeduccion.mes = mes ?? detalleDeduccion.mes;
+    detalleDeduccion.MONTO_TOTAL = monto_total ?? detalleDeduccion.MONTO_TOTAL;
+    detalleDeduccion.MONTO_APLICADO = monto_aplicado ?? detalleDeduccion.MONTO_APLICADO;
+    detalleDeduccion.ESTADO_APLICACION = estado_aplicacion ?? detalleDeduccion.ESTADO_APLICACION;
+    detalleDeduccion.ANIO = anio ?? detalleDeduccion.ANIO;
+    detalleDeduccion.MES = mes ?? detalleDeduccion.MES;
 
     // Guardar el DetalleDeduccion actualizado en la base de datos
     try {

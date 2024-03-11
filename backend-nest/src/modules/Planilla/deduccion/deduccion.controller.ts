@@ -14,7 +14,7 @@ export class DeduccionController {
 
   @Post('dedTipoPLanilla')
   createDedPlanilla(@Body() createDeduccionDto: CreateDeduccionDto) {
-    return this.deduccionService.createDeduccionTipoPlanilla(createDeduccionDto);
+    /* return this.deduccionService.createDeduccionTipoPlanilla(createDeduccionDto); */
   }
 
   @Get()

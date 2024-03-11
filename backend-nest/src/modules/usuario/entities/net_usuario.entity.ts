@@ -4,8 +4,8 @@ import { Net_Empleado } from "src/modules/Empresarial/empresas/entities/net_empl
 
 @Entity({ name: 'NET_USUARIO' })
 export class Net_Usuario {
-    @PrimaryGeneratedColumn('uuid', { name: 'ID_USUARIO', primaryKeyConstraintName: 'PK_id_usuario_usuar' })
-    id_usuario: string;
+    @PrimaryGeneratedColumn({ type: 'int', name: 'ID_USUARIO', primaryKeyConstraintName: 'PK_id_usuario_usuar' })
+    id_usuario: number;
 
     @Column('varchar2', { length: 200, nullable: true, name: 'CORREO' })
     @Index("UQ_correo_netUsu", { unique: true })

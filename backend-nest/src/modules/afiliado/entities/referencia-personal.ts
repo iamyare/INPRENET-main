@@ -4,8 +4,8 @@ import { Net_Ref_Per_Afil } from "./net_ref-Per-Afiliado";
 @Entity({name: 'NET_REFERENCIA_PERSONAL'})
 export class Net_ReferenciaPersonal {
 
-    @PrimaryGeneratedColumn('uuid', {name:'ID_REF_PERSONAL', primaryKeyConstraintName: 'PK_id_ref_per_refPer'})
-     id_ref_personal: string;
+    @PrimaryGeneratedColumn({type: 'int',name:'ID_REF_PERSONAL', primaryKeyConstraintName: 'PK_id_ref_per_refPer'})
+     id_ref_personal: number;
 
     @Column('varchar2', {
         length : 50,

@@ -5,8 +5,8 @@ import { Net_Persona } from "src/modules/afiliado/entities/Net_Persona";
 @Entity({name:'NET_PAIS'})
 export class Net_Pais {
 
-    @PrimaryGeneratedColumn('uuid', {name:'ID_PAIS',  primaryKeyConstraintName: 'PK_id_ben_pan_detp_ag_ben'})
-     id_pais: string;
+    @PrimaryGeneratedColumn({type: 'int', name:'ID_PAIS',  primaryKeyConstraintName: 'PK_id_ben_pan_detp_ag_ben'})
+     id_pais: number;
 
     @Column('varchar2', { length: 20, nullable: false, name:'NOMBRE_PAIS' })
     nombre_pais : string;

@@ -7,8 +7,8 @@ import { Net_Usuario } from "src/modules/usuario/entities/net_usuario.entity";
 @Entity({ name: 'NET_EMPLEADO' })
 export class Net_Empleado {
         
-    @PrimaryGeneratedColumn('uuid', { name: 'ID_EMPLEADO', primaryKeyConstraintName: 'PK_id_empleado_empleado' })
-    id_empleado: string;
+    @PrimaryGeneratedColumn({type: 'int', name: 'ID_EMPLEADO', primaryKeyConstraintName: 'PK_id_empleado_empleado' })
+    id_empleado: number;
 
     @Column('varchar2', { length: 30, nullable: true, name: 'NOMBRE_EMPLEADO' })
     nombre_empleado: string;
@@ -30,11 +30,11 @@ export class Net_Empleado {
     archivo_identificacion: string;
 
     @OneToOne(() => Net_Usuario, { cascade: true })
-    @JoinColumn({ name: 'ID_USUARIO' })
+    @JoinColumn({ name: 'ID_USUARIO', foreignKeyConstraintName:"FK_ID_USUARIO_EMPLEADO" })
     usuario: Net_Usuario;
 
     @OneToOne(() => Net_TipoIdentificacion, { cascade: true })
-    @JoinColumn({ name: 'ID_IDENTIFICACION' })
+    @JoinColumn({ name: 'ID_IDENTIFICACION', foreignKeyConstraintName:"FK_ID_IDENTIFICACION_EMPLEADO" })
     tipo_identificacion: Net_TipoIdentificacion;
 
     @OneToMany(() => Net_Empleado_Empresa, empleadoEmpresa => empleadoEmpresa.id_empleado)

@@ -4,8 +4,8 @@ import { Column, Entity, ManyToOne, OneToMany, PrimaryGeneratedColumn } from "ty
 @Entity({ name: 'NET_INSTITUCION' })
 export class Net_Institucion {
 
-    @PrimaryGeneratedColumn('uuid', { name: 'ID_INSTITUCION', primaryKeyConstraintName: 'PK_idIns_Inst'  })
-    id_institucion: string;
+    @PrimaryGeneratedColumn({type: 'int', name: 'ID_INSTITUCION', primaryKeyConstraintName: 'PK_idIns_Inst'  })
+    id_institucion: number;
 
     @Column('varchar2', { length: 40, nullable: false, name: 'NOMBRE_INSTITUCION' })
     nombre_institucion: string;

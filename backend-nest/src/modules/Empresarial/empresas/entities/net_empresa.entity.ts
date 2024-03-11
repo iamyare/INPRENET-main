@@ -3,8 +3,8 @@ import { Column, Entity, Index, OneToMany, PrimaryGeneratedColumn } from "typeor
 @Entity({name:'NET_EMPRESA'})
 export class Net_Empresa {
 
-    @PrimaryGeneratedColumn('uuid', { name: 'ID_EMPRESA', primaryKeyConstraintName: 'PK_id_empresa_empresa' })
-    id_empresa: string;
+    @PrimaryGeneratedColumn({type: 'int', name: 'ID_EMPRESA', primaryKeyConstraintName: 'PK_id_empresa_empresa' })
+    id_empresa: number;
 
     @Column('varchar2', { name: 'RAZON_SOCIAL' })
     @Index("UQ_razonSoc_netEmpr", { unique:true })

@@ -6,8 +6,8 @@ import { Net_Deduccion } from '../../deduccion/entities/net_deduccion-terceros.e
 
 @Entity({ name: 'NET_DETALLE_DEDUCCION' })
 export class Net_Detalle_Deduccion {    
-    @PrimaryGeneratedColumn('uuid', { name: 'ID_DED_DEDUCCION', primaryKeyConstraintName: 'PK_id_detD' })
-    id_ded_deduccion: string;
+    @PrimaryGeneratedColumn({ type: 'int', name: 'ID_DED_DEDUCCION', primaryKeyConstraintName: 'PK_id_detD' })
+    id_ded_deduccion: number;
 
     @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true, name: 'MONTO_TOTAL' })
     monto_total: number;
@@ -29,14 +29,14 @@ export class Net_Detalle_Deduccion {
     fecha_aplicaco: Date;
 
     @ManyToOne(() => Net_Persona, afiliado => afiliado.detalleDeduccion, { cascade: true })
-    @JoinColumn({ name: 'ID_AFILIADO' })
+    @JoinColumn({ name: 'ID_AFILIADO', foreignKeyConstraintName:"FK_ID_AFILIADO_DETDED" })
     afiliado: Net_Persona;
 
     @ManyToOne(() => Net_Planilla, planilla => planilla.detalleDeduccion, { cascade: true })
-    @JoinColumn({ name: 'ID_PLANILLA' })
+    @JoinColumn({ name: 'ID_PLANILLA', foreignKeyConstraintName:"FK_ID_PLANILLA_DETDED" })
     planilla: Net_Planilla;
 
     @ManyToOne(() => Net_Deduccion, deduccion => deduccion.detalleDeduccion, { cascade: true })
-    @JoinColumn({ name: 'ID_DEDUCCION' })
+    @JoinColumn({ name: 'ID_DEDUCCION', foreignKeyConstraintName:"FK_ID_DEDUCCION_DETDED" })
     deduccion: Net_Deduccion;
 }

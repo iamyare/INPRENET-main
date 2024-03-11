@@ -6,8 +6,8 @@ import { Net_Detalle_Pago_Beneficio } from '../../detalle_beneficio/entities/net
 @Entity({ name: 'NET_PLANILLA' })
 export class Net_Planilla {
 
-    @PrimaryGeneratedColumn('uuid', { name: 'ID_PLANILLA', primaryKeyConstraintName: 'PK_id_plan_Plan' })
-    id_planilla: string;
+    @PrimaryGeneratedColumn({ type: 'int', name: 'ID_PLANILLA', primaryKeyConstraintName: 'PK_id_plan_Plan' })
+    id_planilla: number;
 
     @Column('varchar2', { nullable: false, name: 'CODIGO_PLANILLA' })
     @Index("UQ_codPlanilla_netPlan", { unique: true })
@@ -32,7 +32,7 @@ export class Net_Planilla {
     periodoFinalizacion: string; 
 
     @ManyToOne(() => Net_TipoPlanilla, tipoPlanilla => tipoPlanilla.planilla,  { cascade: true })
-    @JoinColumn({ name: 'ID_TIPO_PLANILLA' })
+    @JoinColumn({ name: 'ID_TIPO_PLANILLA', foreignKeyConstraintName:"FK_ID_TIPO_PLANILLA_PLAN" })
     tipoPlanilla: Net_TipoPlanilla;
 
     @OneToMany(() => Net_Detalle_Deduccion, detalleDeduccion => detalleDeduccion.planilla)

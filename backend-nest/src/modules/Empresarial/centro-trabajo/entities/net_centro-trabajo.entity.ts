@@ -4,8 +4,8 @@ import { Column, Entity, Index, JoinColumn, ManyToOne, OneToMany, PrimaryGenerat
 
 @Entity({name:'NET_CENTRO_TRABAJO'})
 export class Net_Centro_Trabajo {
-    @PrimaryGeneratedColumn('uuid', { name: 'ID_CENTRO_TRABAJO',  primaryKeyConstraintName: 'PK_id_centTrab_centTrab' })
-    id_centro_trabajo: string;
+    @PrimaryGeneratedColumn({type: 'int', name: 'ID_CENTRO_TRABAJO',  primaryKeyConstraintName: 'PK_id_centTrab_centTrab' })
+    id_centro_trabajo: number;
 
     @Column('varchar2', { length: 40, nullable: false, name: 'NOMBRE_CENTRO_TRABAJO' })
     nombre_centro_trabajo: string;
@@ -43,7 +43,7 @@ export class Net_Centro_Trabajo {
     ubicacion_completa: string;
 
     @ManyToOne(() => Net_Departamento, departamento => departamento.centrosTrabajo)
-    @JoinColumn({ name: 'ID_DEPARTAMENTO' })
+    @JoinColumn({ name: 'ID_DEPARTAMENTO', foreignKeyConstraintName:"FK_ID_DEPARTAMENTO_CENT_TRAB" })
     departamento: Net_Departamento;
 
     @OneToMany(() => Net_perf_afil_cent_trab, perfAfilCentTrab => perfAfilCentTrab.centroTrabajo)

@@ -5,8 +5,8 @@ import { Net_Institucion } from 'src/modules/Empresarial/institucion/entities/ne
 @Entity({name:'NET_DEDUCCION'})
 export class Net_Deduccion {
 
-    @PrimaryGeneratedColumn('uuid',{name:'ID_DEDUCCION', primaryKeyConstraintName: 'PK_id_deduccion_net_deduccion' })
-    id_deduccion : string;
+    @PrimaryGeneratedColumn({ type: 'int', name:'ID_DEDUCCION', primaryKeyConstraintName: 'PK_id_deduccion_net_deduccion' })
+    id_deduccion : number;
 
     @Column('varchar2', {name:'NOMBRE_DEDUCCION', length: 50, nullable: false })
     nombre_deduccion : string;
@@ -22,7 +22,7 @@ export class Net_Deduccion {
     prioridad : number;
 
     @ManyToOne(() => Net_Institucion, institucion => institucion.deduccion, { cascade: true})
-    @JoinColumn({ name: 'ID_INSTITUCION' })
+    @JoinColumn({ name: 'ID_INSTITUCION', foreignKeyConstraintName:"FK_ID_INSTITUCION_DED" })
     institucion: Net_Institucion;
 
     @OneToMany(() => Net_Detalle_Deduccion, detalleDeduccion => detalleDeduccion.deduccion)

@@ -21,10 +21,10 @@ export class Net_Detalle_Pago_Beneficio {
     monto_a_pagar: number;
     
     @ManyToOne(() => Net_Planilla, planilla => planilla.detallepagobeneficio, { cascade: true })
-    @JoinColumn({ name: 'ID_PLANILLA' })
+    @JoinColumn({ name: 'ID_PLANILLA', foreignKeyConstraintName:"FK_ID_PLANILLA_DETPAGBEN" })
     planilla: Net_Planilla;
 
     @ManyToOne(() => Net_Detalle_Beneficio_Afiliado, detalleBeneficioAfiliado => detalleBeneficioAfiliado.detalleBeneficio, { cascade: true })
-    @JoinColumn({ name: 'ID_BENEFICIO_PLANILLA_AFIL' })
+    @JoinColumn({ name: 'ID_BENEFICIO_PLANILLA_AFIL', foreignKeyConstraintName:"FK_ID_BEN_PLAN_AFIL_DETPAGBEN" })
     detalleBeneficioAfiliado: string;
 }

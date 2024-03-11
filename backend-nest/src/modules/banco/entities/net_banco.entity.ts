@@ -3,8 +3,8 @@ import { Net_Afiliados_Por_Banco } from './net_afiliados-banco';
 
 @Entity({name:'NET_BANCO'})
 export class Net_Banco {
-    @PrimaryGeneratedColumn('uuid',{name:'ID_BANCO', primaryKeyConstraintName: 'PK_id_banco_Banco' })
-    id_banco : string;
+    @PrimaryGeneratedColumn({type: 'int',name:'ID_BANCO', primaryKeyConstraintName: 'PK_id_banco_Banco' })
+    id_banco : number;
 
     @Column('varchar2', {length: 30, nullable: false, name:'NOMBRE_BANCO'})
     @Index("UQ_nomBanc_netBanco", {unique:true})

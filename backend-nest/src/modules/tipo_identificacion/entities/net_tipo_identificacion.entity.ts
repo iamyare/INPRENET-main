@@ -3,8 +3,8 @@ import { Entity, Column, PrimaryGeneratedColumn, OneToOne, OneToMany } from 'typ
 
 @Entity({name:'NET_TIPO_IDENTIFICACION'})
 export class Net_TipoIdentificacion {
-    @PrimaryGeneratedColumn('uuid', {name: 'ID_IDENTIFICACION', primaryKeyConstraintName: 'PK_id_iden_tipoIden' })
-    id_identificacion: string;
+    @PrimaryGeneratedColumn({type: 'int', name: 'ID_IDENTIFICACION', primaryKeyConstraintName: 'PK_id_iden_tipoIden' })
+    id_identificacion: number;
 
     @Column('varchar', { length: 40, nullable: true, name: 'TIPO_IDENTIFICACION' })
     tipo_identificacion: string;

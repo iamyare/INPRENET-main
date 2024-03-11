@@ -10,15 +10,15 @@ import { Net_Municipio } from "src/modules/Regional/municipio/entities/net_munic
  
 @Entity({ name: 'NET_PERSONA' })
 export class Net_Persona {
-    @PrimaryGeneratedColumn('uuid', { name: 'ID_PERSONA' })
-    id_persona: string;
+    @PrimaryGeneratedColumn({type: 'int', name: 'ID_PERSONA', primaryKeyConstraintName: 'PK_ID_PERSONA_PERSONA'  })
+    id_persona: number;
 
     @ManyToOne(() => Net_TipoIdentificacion, tipoIdentificacion => tipoIdentificacion.afiliado, { cascade: true })
-    @JoinColumn({ name: 'ID_TIPO_IDENTIFICACION' })
+    @JoinColumn({ name: 'ID_TIPO_IDENTIFICACION', foreignKeyConstraintName:"FK_ID_TIPO_IDENTI_PERS" })
     tipoIdentificacion: Net_TipoIdentificacion;
 
     @ManyToOne(() => Net_Pais, pais => pais.afiliado, { cascade: true })
-    @JoinColumn({ name: 'ID_PAIS' })
+    @JoinColumn({ name: 'ID_PAIS', foreignKeyConstraintName:"FK_ID_PAIS_PERS"})
     pais: Net_Pais;
 
     @Column('varchar2', { length: 40, nullable: true, name: 'DNI' })
@@ -92,7 +92,7 @@ export class Net_Persona {
     detalleAfiliado: Net_Detalle_Afiliado[];
 
     @ManyToOne(() => Net_Municipio, municipio => municipio.afiliado, { cascade: true })
-    @JoinColumn({ name: 'ID_MUNICIPIO_RESIDENCIA' })
+    @JoinColumn({ name: 'ID_MUNICIPIO_RESIDENCIA', foreignKeyConstraintName:"FK_ID_MUNIC_RESID_PERS" })
     municipio: Net_Municipio;
     
     @OneToMany(() => Net_Detalle_Afiliado, detalleAfiliado => detalleAfiliado.afiliado)

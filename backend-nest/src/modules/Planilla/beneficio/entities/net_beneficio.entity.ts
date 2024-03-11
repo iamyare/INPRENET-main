@@ -5,7 +5,7 @@ import { Net_Detalle_Beneficio_Afiliado } from "../../detalle_beneficio/entities
 @Entity({ name: 'NET_BENEFICIO' })
 export class Net_Beneficio {
 
-    @PrimaryGeneratedColumn('uuid', { name: 'ID_BENEFICIO', primaryKeyConstraintName: 'PK_id_beneficio_beneficio'  })
+    @PrimaryGeneratedColumn({type: 'int', name: 'ID_BENEFICIO', primaryKeyConstraintName: 'PK_id_beneficio_beneficio'  })
     id_beneficio: string;
 
     @Column('varchar2', { length: 30, nullable: false, name: 'NOMBRE_BENEFICIO' })

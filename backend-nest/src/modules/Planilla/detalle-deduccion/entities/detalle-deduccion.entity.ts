@@ -37,6 +37,6 @@ export class Net_Detalle_Deduccion {
     planilla: Net_Planilla;
 
     @ManyToOne(() => Net_Deduccion, deduccion => deduccion.detalleDeduccion, { cascade: true })
-    @JoinColumn({ name: 'ID_DEDUCCION_TERC' })
+    @JoinColumn({ name: 'ID_DEDUCCION' })
     deduccion: Net_Deduccion;
 }

@@ -5,7 +5,7 @@ import { Net_Institucion } from 'src/modules/Empresarial/institucion/entities/ne
 @Entity({name:'NET_DEDUCCION'})
 export class Net_Deduccion {
 
-    @PrimaryGeneratedColumn('uuid',{name:'NET_DEDUCCION', primaryKeyConstraintName: 'PK_id_deduccion_net_deduccion' })
+    @PrimaryGeneratedColumn('uuid',{name:'ID_DEDUCCION', primaryKeyConstraintName: 'PK_id_deduccion_net_deduccion' })
     id_deduccion : string;
 
     @Column('varchar2', {name:'NOMBRE_DEDUCCION', length: 50, nullable: false })

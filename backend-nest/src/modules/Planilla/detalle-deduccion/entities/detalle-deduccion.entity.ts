@@ -2,11 +2,11 @@ import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn, AfterIns
 import { Net_Persona } from 'src/modules/afiliado/entities/Net_Persona';
 import { Net_Planilla } from '../../planilla/entities/net_planilla.entity';
 import { IsEnum } from 'class-validator';
-import { Net_Deduccion_Terceros } from '../../deduccion/entities/net_deduccion-terceros.entity';
+import { Net_Deduccion } from '../../deduccion/entities/net_deduccion-terceros.entity';
 
 @Entity({ name: 'NET_DETALLE_DEDUCCION' })
 export class Net_Detalle_Deduccion {    
-    @PrimaryGeneratedColumn('uuid', { name: 'ID_DED_DEDUCCION' })
+    @PrimaryGeneratedColumn('uuid', { name: 'ID_DED_DEDUCCION', primaryKeyConstraintName: 'PK_id_detD' })
     id_ded_deduccion: string;
 
     @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true, name: 'MONTO_TOTAL' })
@@ -36,7 +36,7 @@ export class Net_Detalle_Deduccion {
     @JoinColumn({ name: 'ID_PLANILLA' })
     planilla: Net_Planilla;
 
-    @ManyToOne(() => Net_Deduccion_Terceros, deduccion => deduccion.detalleDeduccion, { cascade: true })
+    @ManyToOne(() => Net_Deduccion, deduccion => deduccion.detalleDeduccion, { cascade: true })
     @JoinColumn({ name: 'ID_DEDUCCION_TERC' })
-    deduccion: Net_Deduccion_Terceros;
+    deduccion: Net_Deduccion;
 }

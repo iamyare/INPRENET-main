@@ -5,15 +5,15 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Net_Institucion } from 'src/modules/Empresarial/institucion/entities/net_institucion.entity';
 import { Net_TipoPlanilla } from '../tipo-planilla/entities/tipo-planilla.entity';
-import { Net_Deduccion_Terceros } from './entities/net_deduccion-terceros.entity';
+import { Net_Deduccion } from './entities/net_deduccion-terceros.entity';
 @Injectable()
 export class DeduccionService {
 
   private readonly logger = new Logger(DeduccionService.name)
 
   constructor(
-    @InjectRepository(Net_Deduccion_Terceros)
-    public deduccionRepository: Repository<Net_Deduccion_Terceros>,
+    @InjectRepository(Net_Deduccion)
+    public deduccionRepository: Repository<Net_Deduccion>,
     @InjectRepository(Net_Institucion)
     private institucionRepository: Repository<Net_Institucion>,
     @InjectRepository(Net_TipoPlanilla)

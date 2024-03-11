@@ -6,7 +6,7 @@ import { Net_Detalle_Pago_Beneficio } from '../../detalle_beneficio/entities/net
 @Entity({ name: 'NET_PLANILLA' })
 export class Net_Planilla {
 
-    @PrimaryGeneratedColumn('uuid', { name: 'ID_PLANILLA' })
+    @PrimaryGeneratedColumn('uuid', { name: 'ID_PLANILLA', primaryKeyConstraintName: 'PK_id_plan_Plan' })
     id_planilla: string;
 
     @Column('varchar2', { nullable: false, name: 'CODIGO_PLANILLA' })

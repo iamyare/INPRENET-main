@@ -5,7 +5,7 @@ import { Net_Detalle_Deduccion } from '../../detalle-deduccion/entities/detalle-
 @Entity({ name: 'NET_TIPO_PLANILLA' })
 export class Net_TipoPlanilla {
 
-    @PrimaryGeneratedColumn('uuid', { name: 'ID_TIPO_PLANILLA' })
+    @PrimaryGeneratedColumn('uuid', { name: 'ID_TIPO_PLANILLA',  primaryKeyConstraintName: 'PK_id_tip_plan_TipPlan' })
     id_tipo_planilla: string;
 
     @Column('varchar2', { length: 100, nullable: false, name: 'NOMBRE_PLANILLA' })

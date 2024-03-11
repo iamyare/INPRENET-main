@@ -11,7 +11,7 @@ import { Net_Persona } from 'src/modules/afiliado/entities/Net_Persona';
 import { Net_Detalle_Afiliado } from 'src/modules/afiliado/entities/detalle_afiliado.entity';
 import { Net_Planilla } from '../planilla/entities/net_planilla.entity';
 import { isUUID } from 'class-validator';
-import { Net_Deduccion_Terceros } from '../deduccion/entities/net_deduccion-terceros.entity';
+import { Net_Deduccion } from '../deduccion/entities/net_deduccion-terceros.entity';
 
 @Injectable()
 export class DetalleDeduccionService {
@@ -23,8 +23,8 @@ export class DetalleDeduccionService {
     private detalleDeduccionRepository: Repository<Net_Detalle_Deduccion>,
     @InjectRepository(Net_Persona)
     private afiliadoRepository: Repository<Net_Persona>,
-    @InjectRepository(Net_Deduccion_Terceros)
-    private deduccionRepository: Repository<Net_Deduccion_Terceros>,
+    @InjectRepository(Net_Deduccion)
+    private deduccionRepository: Repository<Net_Deduccion>,
     @InjectRepository(Net_Institucion)
     private institucionRepository: Repository<Net_Institucion>,
     @InjectRepository(Net_Detalle_Afiliado)

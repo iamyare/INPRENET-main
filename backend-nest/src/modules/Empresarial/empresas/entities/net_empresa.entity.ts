@@ -3,7 +3,7 @@ import { Column, Entity, Index, OneToMany, PrimaryGeneratedColumn } from "typeor
 @Entity({name:'NET_EMPRESA'})
 export class Net_Empresa {
 
-    @PrimaryGeneratedColumn('uuid', { name: 'ID_EMPRESA' })
+    @PrimaryGeneratedColumn('uuid', { name: 'ID_EMPRESA', primaryKeyConstraintName: 'PK_id_empresa_empresa' })
     id_empresa: string;
 
     @Column('varchar2', { name: 'RAZON_SOCIAL' })

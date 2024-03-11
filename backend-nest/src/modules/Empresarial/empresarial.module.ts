@@ -9,20 +9,22 @@ import { CentroTrabajoController } from './centro-trabajo/centro-trabajo.control
 import { CentroTrabajoService } from './centro-trabajo/centro-trabajo.service';
 import { EmpresasService } from './empresas/empresas.service';
 import { InstitucionService } from './institucion/institucion.service';
-import { Net_Provincia } from '../Regional/provincia/entities/net_provincia.entity';
+/* import { DetalleDeduccion } from '../Planilla/detalle-deduccion/entities/detalle-deduccion.entity'; */
+/* import { Empleado } from './empresas/entities/empleado.entity'; */
+/* import { EmpleadoEmpresa } from './empresas/entities/empleado-empresa.entity'; */
+import { Net_Departamento } from '../Regional/provincia/entities/net_departamento.entity';
 import { Net_Detalle_Deduccion } from '../Planilla/detalle-deduccion/entities/detalle-deduccion.entity';
 import { PlanillaModule } from '../Planilla/planilla.module';
 import { Net_Empleado } from './empresas/entities/net_empleado.entity';
 import { Net_Empleado_Empresa } from './empresas/entities/net_empleado-empresa.entity';
-import { Net_Deduccion_Terceros } from '../Planilla/deduccion/entities/net_deduccion-terceros.entity';
+import { Net_Deduccion } from '../Planilla/deduccion/entities/net_deduccion-terceros.entity';
 
 @Module({
     controllers: [CentroTrabajoController,EmpresasController,InstitucionController],
     providers: [CentroTrabajoService, EmpresasService, InstitucionService],
     imports: [
       TypeOrmModule.forFeature([Net_Centro_Trabajo,
-        Net_Deduccion_Terceros, Net_Provincia,
-     Net_Centro_Trabajo, Net_Empresa, Net_Institucion,
-        Net_Deduccion_Terceros, Net_Detalle_Deduccion, Net_Empleado, Net_Empleado_Empresa])]
+        Net_Deduccion, Net_Departamento,
+     Net_Centro_Trabajo, Net_Empresa, Net_Institucion, Net_Detalle_Deduccion, Net_Empleado, Net_Empleado_Empresa])]
   })
 export class EmpresarialModule {}

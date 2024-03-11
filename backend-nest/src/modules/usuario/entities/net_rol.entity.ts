@@ -3,7 +3,7 @@ import { Net_Usuario } from './net_usuario.entity';
 
 @Entity({ name: 'NET_ROL' })
 export class Net_Rol {
-    @PrimaryGeneratedColumn('uuid', { name: 'ID_ROL' })
+    @PrimaryGeneratedColumn('uuid', { name: 'ID_ROL', primaryKeyConstraintName: 'PK_id_rol_rol'  })
     id_rol: string;
 
     @Column('varchar2', { length: 20, nullable: true, name: 'NOMBRE_ROL' })

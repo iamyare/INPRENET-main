@@ -5,7 +5,7 @@ import { Net_Persona } from "./Net_Persona";
 @Entity({name:'NET_REF_PER_AFIL'})
 export class Net_Ref_Per_Afil {
 
-    @PrimaryGeneratedColumn('uuid',{name: 'ID_REF_PERSONAL_AFIL'})
+    @PrimaryGeneratedColumn('uuid',{name: 'ID_REF_PERSONAL_AFIL',  primaryKeyConstraintName: 'PK_id_refPer_refPer'})
     id_ref_personal_afil: string;
 
     @ManyToOne(() => Net_Persona, afiliado => afiliado.referenciasPersonalAfiliado)

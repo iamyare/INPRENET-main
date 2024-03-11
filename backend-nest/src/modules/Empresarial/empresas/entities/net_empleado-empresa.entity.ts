@@ -5,7 +5,7 @@ import { Net_Empleado } from "./net_empleado.entity";
 @Entity({ name: 'NET_EMPLEADO_EMPRESA' })
 export class Net_Empleado_Empresa {
 
-    @PrimaryGeneratedColumn('uuid', { name: 'ID_EMPLEADO_EMPRESA' })
+    @PrimaryGeneratedColumn('uuid', { name: 'ID_EMPLEADO_EMPRESA', primaryKeyConstraintName: 'PK_id_empleado_empresa' })
     id_empleado_empresa: string;
    
     @ManyToOne(() => Net_Empresa, (empresa) => empresa.id_empresa)

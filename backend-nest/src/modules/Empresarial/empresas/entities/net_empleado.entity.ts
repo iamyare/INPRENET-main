@@ -7,7 +7,7 @@ import { Net_Usuario } from "src/modules/usuario/entities/net_usuario.entity";
 @Entity({ name: 'NET_EMPLEADO' })
 export class Net_Empleado {
         
-    @PrimaryGeneratedColumn('uuid', { name: 'ID_EMPLEADO' })
+    @PrimaryGeneratedColumn('uuid', { name: 'ID_EMPLEADO', primaryKeyConstraintName: 'PK_id_empleado_empleado' })
     id_empleado: string;
 
     @Column('varchar2', { length: 30, nullable: true, name: 'NOMBRE_EMPLEADO' })

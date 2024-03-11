@@ -8,7 +8,7 @@ export enum EstadoEnum {
 }
 @Entity({ name: 'NET_DETALLE_PAGO_BENEFICIO' })
 export class Net_Detalle_Pago_Beneficio {
-    @PrimaryGeneratedColumn({type: 'int',name: 'ID_BENEFICIO_PLANILLA'})
+    @PrimaryGeneratedColumn({type: 'int',name: 'ID_BENEFICIO_PLANILLA', primaryKeyConstraintName: 'PK_benPlan_detPagB'})
     id_beneficio_planilla: number;
 
     @Column({ default: "NO PAGADA", enum: ['NO PAGADA', 'PAGADA'], name: 'ESTADO' })

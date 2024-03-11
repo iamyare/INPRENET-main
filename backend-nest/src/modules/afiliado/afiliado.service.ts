@@ -7,13 +7,16 @@ import { Net_perf_afil_cent_trab } from './entities/net_perf_afil_cent_trab';
 import { Net_Afiliados_Por_Banco } from 'src/modules/banco/entities/net_afiliados-banco';
 import { Net_Centro_Trabajo } from 'src/modules/Empresarial/centro-trabajo/entities/net_centro-trabajo.entity';
 import { Net_Banco } from 'src/modules/banco/entities/net_banco.entity';
-import { Net_Provincia } from 'src/modules/Regional/provincia/entities/net_provincia.entity';
 import { Net_TipoIdentificacion } from 'src/modules/tipo_identificacion/entities/net_tipo_identificacion.entity';
+/* import { Pais } from 'src/modules/Regional/pais/entities/pais.entity'; */
+
+/* import { departamento } from 'src/modules/Regional/departamento/entities/departamento.entity'; */
 import { Net_Pais } from 'src/modules/Regional/pais/entities/pais.entity';
 import { CreateAfiliadoTempDto } from './dto/create-afiliado-temp.dto';
 import { validate as isUUID } from 'uuid';
 import { Net_Detalle_Afiliado } from './entities/detalle_afiliado.entity';
 import { Net_Persona } from './entities/Net_Persona';
+import { Net_Departamento } from '../Regional/provincia/entities/net_departamento.entity';
 
 @Injectable()
 export class AfiliadoService {
@@ -48,9 +51,9 @@ export class AfiliadoService {
             throw new BadRequestException('Pais not found');
         }
 
-        const provincia = await queryRunner.manager.findOneBy(Net_Provincia, { nombre_provincia: createAfiliadoDto.nombre_provincia });
-        if (!provincia) {
-            throw new BadRequestException('Provincia not found');
+        const departamento = await queryRunner.manager.findOneBy(Net_Departamento, { nombre_departamento: createAfiliadoDto.nombre_departamento });
+        if (!departamento) {
+            throw new BadRequestException('departamento not found');
         }
 
         const banco = await queryRunner.manager.findOneBy(Net_Banco, { nombre_banco: createAfiliadoDto.datosBanc.nombreBanco });
@@ -97,9 +100,9 @@ export class AfiliadoService {
                     throw new BadRequestException('Pais not found for related affiliate');
                 }
 
-                const provinciaHijo = await queryRunner.manager.findOneBy(Net_Provincia, { nombre_provincia: hijoDto.nombre_provincia });
-                if (!provinciaHijo) {
-                    throw new BadRequestException('Provincia not found for related affiliate');
+                const departamentoHijo = await queryRunner.manager.findOneBy(Net_Departamento, { nombre_departamento: hijoDto.nombre_departamento });
+                if (!departamentoHijo) {
+                    throw new BadRequestException('departamento not found for related affiliate');
                 }
 
                 /* const bancoHijo = await queryRunner.manager.findOneBy(Banco, { nombre_banco: hijoDto.datosBanc.nombreBanco });

@@ -5,10 +5,10 @@ import { Net_Persona } from "src/modules/afiliado/entities/Net_Persona";
 
 @Entity({name:'NET_AFILIADOS_POR_BANCO'})
 export class Net_Afiliados_Por_Banco {
-    @PrimaryGeneratedColumn('uuid',{name:'ID_AF_BANCO'})
+    @PrimaryGeneratedColumn('uuid',{name:'ID_AF_BANCO', primaryKeyConstraintName: 'PK_id_af_banco_AfilBan'})
     id_af_banco : string;
     
-    @Column('varchar2', {nullable: false, length:20,name:' NUM_CUENTA '})
+    @Column('varchar2', {nullable: false, length:20,name:'NUM_CUENTA '})
     @Index("UQ_numCuen_netAfilBanco", {unique:true})
     num_cuenta: string;
 

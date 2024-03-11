@@ -1,11 +1,12 @@
 import { Net_TipoIdentificacion } from "src/modules/tipo_identificacion/entities/net_tipo_identificacion.entity";
 import { Net_Pais } from "src/modules/Regional/pais/entities/pais.entity";
 import { Column, Entity, Index, JoinColumn, ManyToOne, OneToMany, PrimaryColumn, PrimaryGeneratedColumn } from "typeorm";
-import { Net_Provincia } from "src/modules/Regional/provincia/entities/net_provincia.entity";
+import { Net_Departamento } from "src/modules/Regional/provincia/entities/net_departamento.entity";
 import { Net_Ref_Per_Afil } from "./net_ref-Per-Afiliado";import { Net_perf_afil_cent_trab} from "./net_perf_afil_cent_trab";
 import { Net_Detalle_Deduccion } from "src/modules/Planilla/detalle-deduccion/entities/detalle-deduccion.entity";
 import { Net_Detalle_Afiliado } from "./detalle_afiliado.entity";
 import { Net_Afiliados_Por_Banco } from "src/modules/banco/entities/net_afiliados-banco";
+import { Net_Municipio } from "src/modules/Regional/municipio/entities/net_municipio.entity";
  
 @Entity({ name: 'NET_PERSONA' })
 export class Net_Persona {
@@ -87,11 +88,14 @@ export class Net_Persona {
     @Column('varchar2', { length: 200, nullable: true, name: 'ARCHIVO_IDENTIFICACION' })
     archivo_identificacion: string;
 
-    @ManyToOne(() => Net_Provincia, provincia => provincia.afiliado, { cascade: true })
-    @JoinColumn({ name: 'ID_PROVINCIA' })
-    provincia: Net_Provincia;
+    @OneToMany(() => Net_Detalle_Afiliado, detalleAfiliado => detalleAfiliado.afiliado)
+    detalleAfiliado: Net_Detalle_Afiliado[];
+
+    @ManyToOne(() => Net_Municipio, municipio => municipio.afiliado, { cascade: true })
+    @JoinColumn({ name: 'ID_MUNICIPIO_RESIDENCIA' })
+    municipio: Net_Municipio;
     
-    @OneToMany(() => Net_Detalle_Afiliado, detalleAfiliado => detalleAfiliado.persona)
+    @OneToMany(() => Net_Detalle_Afiliado, detalleAfiliado => detalleAfiliado.afiliado)
     detallesAfiliado: Net_Detalle_Afiliado[];
     
     @OneToMany(() => Net_Ref_Per_Afil, referenciaPersonalAfiliado => referenciaPersonalAfiliado.afiliado)

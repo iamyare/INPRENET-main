@@ -1,11 +1,11 @@
 import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
-import { Net_Provincia } from "../../provincia/entities/net_provincia.entity";
+import { Net_Departamento } from "../../provincia/entities/net_departamento.entity";
 import { Net_Persona } from "src/modules/afiliado/entities/Net_Persona";
 
 @Entity({name:'NET_PAIS'})
 export class Net_Pais {
 
-    @PrimaryGeneratedColumn('uuid', {name:'ID_PAIS'})
+    @PrimaryGeneratedColumn('uuid', {name:'ID_PAIS',  primaryKeyConstraintName: 'PK_id_ben_pan_detp_ag_ben'})
      id_pais: string;
 
     @Column('varchar2', { length: 20, nullable: false, name:'NOMBRE_PAIS' })
@@ -17,6 +17,6 @@ export class Net_Pais {
     @OneToMany(() => Net_Persona, afiliado => afiliado.pais)
     afiliado: Net_Persona[];
 
-    @OneToMany(() => Net_Provincia, provincia => provincia.pais)
-    provincia: Net_Provincia[];
+    @OneToMany(() => Net_Departamento, departamento => departamento.pais)
+    departamento: Net_Departamento[];
 }

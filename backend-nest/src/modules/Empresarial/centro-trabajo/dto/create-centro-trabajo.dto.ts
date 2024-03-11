@@ -39,5 +39,5 @@ export class CreateCentroTrabajoDto {
 
     @IsString()
     @IsOptional()
-    nombre_provincia? : string;
+    nombre_departamento? : string;
 }

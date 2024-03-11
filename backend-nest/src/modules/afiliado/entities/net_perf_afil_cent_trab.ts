@@ -5,7 +5,7 @@ import { Net_Persona } from "./Net_Persona";
 
 @Entity({ name: 'NET_PERF_AFIL_CENT_TRAB' })
 export class Net_perf_afil_cent_trab {
-    @PrimaryGeneratedColumn('uuid', { name: 'ID_PERF_AFIL_CENTR_TRAB' })
+    @PrimaryGeneratedColumn('uuid', { name: 'ID_PERF_AFIL_CENTR_TRAB',primaryKeyConstraintName: 'PK_id_pAfCentTrab_PCenTrab' })
     id_perf_afil_centro_trab: string;
 
     @Column('varchar2', { length: 40, nullable: false, name: 'CARGO' })

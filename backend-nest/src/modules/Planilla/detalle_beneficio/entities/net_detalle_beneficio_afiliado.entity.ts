@@ -7,7 +7,7 @@ import { Net_Detalle_Afiliado } from "src/modules/afiliado/entities/detalle_afil
 @Entity({ name: 'NET_DETALLE_BENEFICIO_AFILIADO' })
 export class Net_Detalle_Beneficio_Afiliado 
 {
-    @PrimaryGeneratedColumn('uuid', { name: 'ID_DETALLE_BEN_AFIL' })
+    @PrimaryGeneratedColumn('uuid', { name: 'ID_DETALLE_BEN_AFIL' ,  primaryKeyConstraintName: 'PK_id_detBen_detBA'})
     id_detalle_ben_afil: string;
 
     @Column({ type: 'date', nullable: false, name: 'PERIODO_INICIO' })
@@ -35,8 +35,8 @@ export class Net_Detalle_Beneficio_Afiliado
     @OneToMany(() => Net_Detalle_Pago_Beneficio, detalleBeneficio => detalleBeneficio.detalleBeneficioAfiliado)
     detalleBeneficio: Net_Detalle_Pago_Beneficio[];
 
-    /* @ManyToOne(() => Net_Detalle_Afiliado, afiliado => afiliado.detalleBeneficioAfiliado)
-    @JoinColumn({ name: 'ID_CAUSANTE', referencedColumnName: 'ID_AFILIADO' })
-    @JoinColumn({ name: 'ID_BENEFICIARIO', referencedColumnName: 'ID_DETALLE_AFILIADO' })
-    afiliado: Net_Detalle_Afiliado; */
+     @ManyToOne(() => Net_Detalle_Afiliado, afiliado => afiliado.padreIdAfiliado)
+     @JoinColumn({ name: 'id_causante', referencedColumnName: 'ID_PERSONA'})
+     @JoinColumn({ name: 'id_beneficiario', referencedColumnName: 'ID_BENEFICIARIO'})
+     afiliado: string;
 }

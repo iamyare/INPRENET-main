@@ -134,7 +134,7 @@ export class CreateAfiliadoDto {
 
     @IsString()
     @IsOptional()
-    nombre_provincia?: string;    
+    nombre_departamento?: string;    
 
 
 }

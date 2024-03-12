@@ -17,7 +17,7 @@ import { Net_Detalle_Deduccion } from '../Planilla/detalle-deduccion/entities/de
 import { PlanillaModule } from '../Planilla/planilla.module';
 import { Net_Empleado } from './empresas/entities/net_empleado.entity';
 import { Net_Empleado_Empresa } from './empresas/entities/net_empleado-empresa.entity';
-import { Net_Deduccion } from '../Planilla/deduccion/entities/net_deduccion-terceros.entity';
+import { Net_Deduccion } from '../Planilla/deduccion/entities/net_deduccion.entity';
 
 @Module({
     controllers: [CentroTrabajoController,EmpresasController,InstitucionController],

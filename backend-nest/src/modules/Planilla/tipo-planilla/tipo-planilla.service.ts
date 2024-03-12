@@ -37,7 +37,7 @@ export class TipoPlanillaService {
     } */);
   }
 
-  async findOne(id: string) {
+  async findOne(id: number) {
     const tipoPlanilla = await this.tipoPlanillaRepository.findOne({ where: { id_tipo_planilla: id } });
     if (!tipoPlanilla) {
       throw new BadRequestException(`TipoPlanilla con ID ${id} no encontrado.`);
@@ -46,7 +46,7 @@ export class TipoPlanillaService {
   }
   
 
-  async update(id: string, updateTipoPlanillaDto: UpdateTipoPlanillaDto) {
+  async update(id: number, updateTipoPlanillaDto: UpdateTipoPlanillaDto) {
     const tipoPlanilla = await this.tipoPlanillaRepository.preload({
       id_tipo_planilla: id, 
       ...updateTipoPlanillaDto

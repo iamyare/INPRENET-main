@@ -37,7 +37,7 @@ export class EmpresasService {
   }
   
 
-  async findOne(term: string) {
+  async findOne(term: number) {
     let empresa: Net_Empresa;
     if (isUUID(term)) {
       empresa = await this.empresaRepository.findOneBy({ id_empresa: term });
@@ -54,7 +54,7 @@ export class EmpresasService {
     return empresa;
   }
 
-  async update(id_empresa: string, updateEmpresaDto: UpdateEmpresaDto) {
+  async update(id_empresa: number, updateEmpresaDto: UpdateEmpresaDto) {
 
     const empresa = await this.empresaRepository.preload({
       id_empresa: id_empresa,
@@ -72,7 +72,7 @@ export class EmpresasService {
     }
   }
 
-  async remove(id_empresa: string) {
+  async remove(id_empresa: number) {
     const empresa = await this.findOne(id_empresa);
     await this.empresaRepository.remove(empresa);
   }

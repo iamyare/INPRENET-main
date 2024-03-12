@@ -20,18 +20,18 @@ export class EmpresasController {
 
   @Get(':term')
   findOne(@Param('term') term: string) {
-    return this.empresasService.findOne(term);
+    return this.empresasService.findOne(+term);
   }
 
   @Patch(':id')
   update(
     @Param('id', ParseUUIDPipe) id: string,
     @Body() updateEmpresaDto: UpdateEmpresaDto) {
-    return this.empresasService.update(id, updateEmpresaDto);
+    return this.empresasService.update(+id, updateEmpresaDto);
   }
 
   @Delete(':id')
   remove(@Param('id', ParseUUIDPipe) id: string) {
-    return this.empresasService.remove(id);
+    return this.empresasService.remove(+id);
   }
 }

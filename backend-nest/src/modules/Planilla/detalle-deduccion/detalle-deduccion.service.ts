@@ -8,10 +8,10 @@ import { Net_Institucion } from 'src/modules/Empresarial/institucion/entities/ne
 import * as xlsx from 'xlsx';
 import { AfiliadoService } from 'src/modules/afiliado/afiliado.service';
 import { Net_Persona } from 'src/modules/afiliado/entities/Net_Persona';
-import { Net_Detalle_Afiliado } from 'src/modules/afiliado/entities/detalle_afiliado.entity';
+import { Net_Detalle_Afiliado } from 'src/modules/afiliado/entities/Net_detalle_persona.entity';
 import { Net_Planilla } from '../planilla/entities/net_planilla.entity';
 import { isUUID } from 'class-validator';
-import { Net_Deduccion } from '../deduccion/entities/net_deduccion-terceros.entity';
+import { Net_Deduccion } from '../deduccion/entities/net_deduccion.entity';
 
 @Injectable()
 export class DetalleDeduccionService {
@@ -283,7 +283,7 @@ async obtenerDetallesDeduccionPorAfiliado(idAfiliado: string): Promise<any[]> {
   }
 }
 
-async actualizarPlanillasYEstadosDeDeducciones(detalles: { idDedDeduccion: string; codigoPlanilla: string; estadoAplicacion: string }[], transactionalEntityManager?: EntityManager): Promise<Net_Detalle_Deduccion[]> {
+async actualizarPlanillasYEstadosDeDeducciones(detalles: { idDedDeduccion: number; codigoPlanilla: string; estadoAplicacion: string }[], transactionalEntityManager?: EntityManager): Promise<Net_Detalle_Deduccion[]> {
   const resultados = [];
   const entityManager = transactionalEntityManager ? transactionalEntityManager : this.entityManager;
 
@@ -388,7 +388,7 @@ async actualizarPlanillasYEstadosDeDeducciones(detalles: { idDedDeduccion: strin
       .getMany();
   }
 
-  async update(id_ded_deduccion: string, updateDetalleDeduccionDto: UpdateDetalleDeduccionDto) {
+  async update(id_ded_deduccion: number, updateDetalleDeduccionDto: UpdateDetalleDeduccionDto) {
     // Buscar el DetalleDeduccion existente por ID
     const detalleDeduccion = await this.detalleDeduccionRepository.findOne({ where: { id_ded_deduccion } });
     if (!detalleDeduccion) {

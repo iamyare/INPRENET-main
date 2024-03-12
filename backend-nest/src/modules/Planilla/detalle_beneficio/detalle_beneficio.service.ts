@@ -12,7 +12,7 @@ import { Net_Planilla } from '../planilla/entities/net_planilla.entity';
 import { Planilla } from '../planilla/entities/planilla.entity'; */
 import { Net_Detalle_Beneficio_Afiliado } from './entities/net_detalle_beneficio_afiliado.entity';
 import { AfiliadoService } from '../../afiliado/afiliado.service';
-import { Net_Detalle_Afiliado } from 'src/modules/afiliado/entities/detalle_afiliado.entity';
+import { Net_Detalle_Afiliado } from 'src/modules/afiliado/entities/Net_detalle_persona.entity';
 
 @Injectable()
 export class DetalleBeneficioService {

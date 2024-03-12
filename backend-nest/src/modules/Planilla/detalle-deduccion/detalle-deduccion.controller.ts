@@ -86,7 +86,7 @@ async insertarDetalles(@Body() data: any[]) {
   }
 
 @Patch('/actualizar-deduccion-planilla')
-  actualizarPlanillasYEstados(@Body() detalles: { idDedDeduccion: string; codigoPlanilla: string; estadoAplicacion: string }[]) {
+  actualizarPlanillasYEstados(@Body() detalles: { idDedDeduccion: number; codigoPlanilla: string; estadoAplicacion: string }[]) {
   return this.detalleDeduccionService.actualizarPlanillasYEstadosDeDeducciones(detalles);
 }
 
@@ -126,7 +126,7 @@ async insertarDetalles(@Body() data: any[]) {
 
   @Patch(':id')
   update(@Param('id') id: string, @Body() updateDetalleDeduccionDto: UpdateDetalleDeduccionDto) {
-    return this.detalleDeduccionService.update(id, updateDetalleDeduccionDto);
+    return this.detalleDeduccionService.update(+id, updateDetalleDeduccionDto);
   }
 
   @Delete(':id')

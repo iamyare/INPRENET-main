@@ -2,7 +2,7 @@
 import { Column, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 import { Net_Beneficio } from "../../beneficio/entities/net_beneficio.entity";
 import { Net_Detalle_Pago_Beneficio } from "./net_detalle_pago_beneficio.entity";
-import { Net_Detalle_Afiliado } from "src/modules/afiliado/entities/detalle_afiliado.entity";
+import { Net_Detalle_Afiliado } from "src/modules/afiliado/entities/Net_detalle_persona.entity";
 
 @Entity({ name: 'NET_DETALLE_BENEFICIO_AFILIADO' })
 export class Net_Detalle_Beneficio_Afiliado 

@@ -5,7 +5,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Net_Institucion } from 'src/modules/Empresarial/institucion/entities/net_institucion.entity';
 import { Net_TipoPlanilla } from '../tipo-planilla/entities/tipo-planilla.entity';
-import { Net_Deduccion } from './entities/net_deduccion-terceros.entity';
+import { Net_Deduccion } from './entities/net_deduccion.entity';
 @Injectable()
 export class DeduccionService {
 
@@ -167,7 +167,7 @@ export class DeduccionService {
     }
   }
 
-  async findOne(id: string) {
+  async findOne(id: number) {
     const deduccion = await this.deduccionRepository.findOne({ where: { id_deduccion: id } });
     if(!deduccion){
       throw new BadRequestException(`deduccion con ID ${id} no encontrado.`);
@@ -175,7 +175,7 @@ export class DeduccionService {
     return deduccion;
   }
 
-  async update(id_deduccion: string, updateDeduccionDto: UpdateDeduccionDto) {
+  async update(id_deduccion: number, updateDeduccionDto: UpdateDeduccionDto) {
     const deduccion = await this.deduccionRepository.preload({
       id_deduccion: id_deduccion, 
       ...updateDeduccionDto

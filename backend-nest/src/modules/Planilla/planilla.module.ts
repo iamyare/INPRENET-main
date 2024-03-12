@@ -17,13 +17,13 @@ import { TipoPlanillaController } from './tipo-planilla/tipo-planilla.controller
 import { AfiliadoService } from 'src/modules/afiliado/afiliado.service';
 import { AfiliadoController } from 'src/modules/afiliado/afiliado.controller';
 import { Net_Persona } from 'src/modules/afiliado/entities/Net_Persona';
-import { Net_Detalle_Afiliado } from 'src/modules/afiliado/entities/detalle_afiliado.entity';
+import { Net_Detalle_Afiliado } from 'src/modules/afiliado/entities/Net_detalle_persona.entity';
 import { DetalleBeneficioService } from './detalle_beneficio/detalle_beneficio.service';
 import { Net_Detalle_Pago_Beneficio } from './detalle_beneficio/entities/net_detalle_pago_beneficio.entity';
 import { DetalleBeneficioController } from './detalle_beneficio/detalle_beneficio.controller';
 import { Net_Detalle_Beneficio_Afiliado } from './detalle_beneficio/entities/net_detalle_beneficio_afiliado.entity';
 import { DetalleDeduccionController } from './detalle-deduccion/detalle-deduccion.controller';
-import { Net_Deduccion } from './deduccion/entities/net_deduccion-terceros.entity';
+import { Net_Deduccion } from './deduccion/entities/net_deduccion.entity';
 
 @Module({
   controllers: [PlanillaController, BeneficioController, DetalleBeneficioController, DeduccionController,

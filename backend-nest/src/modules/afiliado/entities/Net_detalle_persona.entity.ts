@@ -1,6 +1,6 @@
 import { Column, Entity, JoinColumn, ManyToOne, OneToMany, OneToOne, PrimaryColumn, PrimaryGeneratedColumn } from "typeorm";
 import { Net_Persona } from "./Net_Persona";
-import { Net_Tipo_Afiliado } from "./net_tipo_afiliado.entity";
+import { Net_Tipo_Persona } from "./net_tipo_persona.entity";
 
 @Entity({name:'NET_DETALLE_PERSONA'})
 export class Net_Detalle_Afiliado {
@@ -23,8 +23,8 @@ export class Net_Detalle_Afiliado {
     @JoinColumn({ name: 'ID_BENEFICIARIO', referencedColumnName: 'ID_BENEFICIARIO', foreignKeyConstraintName:"FK_ID_PERSONA_DETALLE_PERSONA"})
     padreIdAfiliado: Net_Detalle_Afiliado;
 
-    @ManyToOne(() => Net_Tipo_Afiliado, tipoAfiliado => tipoAfiliado.detallesAfiliado)
-    @JoinColumn({ name: 'ID_TIPO_AFILIADO', foreignKeyConstraintName:"FK_ID_TIPO_AFILIADO_DETALLE_PERSONA"}) 
-    tipoAfiliado: Net_Tipo_Afiliado;
+    @ManyToOne(() => Net_Tipo_Persona, tipoAfiliado => tipoAfiliado.detallesAfiliado)
+    @JoinColumn({ name: 'ID_TIPO_PERSONA', foreignKeyConstraintName:"FK_ID_TIPO_PERSONA_DETALLE_PERSONA"}) 
+    tipoAfiliado: Net_Tipo_Persona;
 
 }

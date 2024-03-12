@@ -13,7 +13,7 @@ import { isUUID } from 'class-validator';
 import { DetalleBeneficioService } from '../detalle_beneficio/detalle_beneficio.service';
 import { DetalleDeduccionService } from '../detalle-deduccion/detalle-deduccion.service';
 import { PaginationDto } from 'src/common/dtos/pagination.dto';
-import { Net_Deduccion } from '../deduccion/entities/net_deduccion-terceros.entity';
+import { Net_Deduccion } from '../deduccion/entities/net_deduccion.entity';
 
 @Injectable()
 export class PlanillaService {
@@ -35,7 +35,7 @@ export class PlanillaService {
 
     async update(id_planilla: string, updatePlanillaDto: UpdatePlanillaDto): Promise<Net_Planilla> {
       const planilla = await this.planillaRepository.preload({
-          id_planilla: id_planilla,
+        //ID_PLANILLA: id_planilla,
           ...updatePlanillaDto
       });
   

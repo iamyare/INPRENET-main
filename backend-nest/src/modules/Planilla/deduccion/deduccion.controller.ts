@@ -24,7 +24,7 @@ export class DeduccionController {
 
   @Get(':id')
   findOne(@Param('id') id: string) {
-    return this.deduccionService.findOne(id);
+    return this.deduccionService.findOne(+id);
   }
 
   @Get('byNameInst/:nombre_institucion')
@@ -34,7 +34,7 @@ export class DeduccionController {
 
   @Patch(':id')
   update(@Param('id') id: string, @Body() updateDeduccionDto: UpdateDeduccionDto) {
-    return this.deduccionService.update(id, updateDeduccionDto);
+    return this.deduccionService.update(+id, updateDeduccionDto);
   }
 
   @Delete(':id')

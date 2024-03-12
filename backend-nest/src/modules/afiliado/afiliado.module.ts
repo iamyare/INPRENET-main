@@ -11,9 +11,9 @@ import { Net_Departamento } from 'src/modules/Regional/provincia/entities/net_de
 import { Net_TipoIdentificacion } from 'src/modules/tipo_identificacion/entities/net_tipo_identificacion.entity';
 import { Net_Pais } from 'src/modules/Regional/pais/entities/pais.entity';
 import { Net_Persona } from './entities/Net_Persona';
-import { Net_Detalle_Afiliado } from './entities/detalle_afiliado.entity';
+import { Net_Detalle_Afiliado } from './entities/Net_detalle_persona.entity';
 import { Net_perf_afil_cent_trab } from './entities/net_perf_afil_cent_trab';
-import { Net_Tipo_Afiliado } from './entities/net_tipo_afiliado.entity';
+import { Net_Tipo_Persona } from './entities/net_tipo_persona.entity';
 
 @Module({
   controllers: [AfiliadoController],
@@ -24,7 +24,7 @@ import { Net_Tipo_Afiliado } from './entities/net_tipo_afiliado.entity';
                               Net_ReferenciaPersonal,
                               Net_Afiliados_Por_Banco, Net_Departamento,
                               Net_Pais, Net_TipoIdentificacion,
-                              Net_Centro_Trabajo, Net_Banco, Net_Detalle_Afiliado, Net_Tipo_Afiliado])
+                              Net_Centro_Trabajo, Net_Banco, Net_Detalle_Afiliado, Net_Tipo_Persona])
   ]
 
 })

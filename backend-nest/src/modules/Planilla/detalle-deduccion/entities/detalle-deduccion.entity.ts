@@ -2,7 +2,7 @@ import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn, AfterIns
 import { Net_Persona } from 'src/modules/afiliado/entities/Net_Persona';
 import { Net_Planilla } from '../../planilla/entities/net_planilla.entity';
 import { IsEnum } from 'class-validator';
-import { Net_Deduccion } from '../../deduccion/entities/net_deduccion-terceros.entity';
+import { Net_Deduccion } from '../../deduccion/entities/net_deduccion.entity';
 
 @Entity({ name: 'NET_DETALLE_DEDUCCION' })
 export class Net_Detalle_Deduccion {    

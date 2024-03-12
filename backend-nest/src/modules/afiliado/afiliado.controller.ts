@@ -29,7 +29,7 @@ export class AfiliadoController {
   }
 
   @Get(':term')
-  findOne(@Param('term') term: string) {
+  findOne(@Param('term') term: number) {
     return this.afiliadoService.findOne(term);
   }
 

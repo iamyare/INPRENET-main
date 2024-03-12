@@ -1,6 +1,6 @@
 import { Column, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 import { Net_Centro_Trabajo } from "src/modules/Empresarial/centro-trabajo/entities/net_centro-trabajo.entity";
-import { Net_Detalle_Afiliado } from "./detalle_afiliado.entity";
+import { Net_Detalle_Afiliado } from "./Net_detalle_persona.entity";
 import { Net_Persona } from "./Net_Persona";
 
 @Entity({ name: 'NET_PERF_AFIL_CENT_TRAB' })

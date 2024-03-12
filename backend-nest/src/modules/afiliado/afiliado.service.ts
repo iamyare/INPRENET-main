@@ -14,7 +14,7 @@ import { Net_TipoIdentificacion } from 'src/modules/tipo_identificacion/entities
 import { Net_Pais } from 'src/modules/Regional/pais/entities/pais.entity';
 import { CreateAfiliadoTempDto } from './dto/create-afiliado-temp.dto';
 import { validate as isUUID } from 'uuid';
-import { Net_Detalle_Afiliado } from './entities/detalle_afiliado.entity';
+import { Net_Detalle_Afiliado } from './entities/Net_detalle_persona.entity';
 import { Net_Persona } from './entities/Net_Persona';
 import { Net_Departamento } from '../Regional/provincia/entities/net_departamento.entity';
 
@@ -147,7 +147,7 @@ export class AfiliadoService {
     return afiliado;
   }
 
-  async findOne(term: string) {
+  async findOne(term: number) {
     let afiliados: Net_Persona;
     if (isUUID(term)) {
       afiliados = await this.afiliadoRepository.findOne({

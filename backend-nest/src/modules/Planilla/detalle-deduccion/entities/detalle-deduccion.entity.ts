@@ -29,7 +29,7 @@ export class Net_Detalle_Deduccion {
     fecha_aplicaco: Date;
 
     @ManyToOne(() => Net_Persona, afiliado => afiliado.detalleDeduccion, { cascade: true })
-    @JoinColumn({ name: 'ID_AFILIADO', foreignKeyConstraintName:"FK_ID_AFILIADO_DETDED" })
+    @JoinColumn({ name: 'ID_PERSONA', foreignKeyConstraintName:"FK_ID_PERSONA_DETDED" })
     afiliado: Net_Persona;
 
     @ManyToOne(() => Net_Planilla, planilla => planilla.detalleDeduccion, { cascade: true })

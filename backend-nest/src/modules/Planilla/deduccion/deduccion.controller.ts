@@ -11,12 +11,7 @@ export class DeduccionController {
   create(@Body() createDeduccionDto: CreateDeduccionDto) {
     return this.deduccionService.create(createDeduccionDto);
   }
-
-  @Post('dedTipoPLanilla')
-  createDedPlanilla(@Body() createDeduccionDto: CreateDeduccionDto) {
-    /* return this.deduccionService.createDeduccionTipoPlanilla(createDeduccionDto); */
-  }
-
+  
   @Get()
   findAll() {
     return this.deduccionService.findAll();

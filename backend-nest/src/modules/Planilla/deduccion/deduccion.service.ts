@@ -17,31 +17,8 @@ export class DeduccionService {
     @InjectRepository(Net_Institucion)
     private institucionRepository: Repository<Net_Institucion>,
     @InjectRepository(Net_TipoPlanilla)
-    private readonly tipoPlanillaRepository: Repository<Net_TipoPlanilla>,
-   /*  @InjectRepository(Net_Deduc_Tipo_Planilla)
-    private dedPlanillaRepository: Repository<Net_Deduc_Tipo_Planilla> */
+    private readonly tipoPlanillaRepository: Repository<Net_TipoPlanilla>
   ){}
-
-  /* async createDeduccionTipoPlanilla(createDeduccionDto: CreateDeduccionDto): Promise<Net_Deduc_Tipo_Planilla> {
-    try {
-      const tipoPlanilla = await this.tipoPlanillaRepository.findOne({
-        where: { nombre_planilla: createDeduccionDto.tipo_planilla },
-      });
-
-      if (!tipoPlanilla) {
-        throw new NotFoundException(`El tipo de planilla con el nombre "${createDeduccionDto.tipo_planilla}" no fue encontrado.`);
-      }
-
-      const newDedPlanilla = this.dedPlanillaRepository.create({
-        ...createDeduccionDto,
-        net_TipoPlanilla: tipoPlanilla, 
-      });
-
-      return await this.dedPlanillaRepository.save(newDedPlanilla);
-    } catch (error) {
-      this.handleException(error)
-    }
-  } */
 
   async create(createDeduccionDto: CreateDeduccionDto) {
     const { nombre_institucion } = createDeduccionDto;

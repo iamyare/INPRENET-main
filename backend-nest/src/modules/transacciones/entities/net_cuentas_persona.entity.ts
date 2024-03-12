@@ -10,11 +10,11 @@ export class NET_CUENTAS_PERSONA {
     ID_CUENTA_PERSONA : number;
 
     @ManyToOne(() => Net_Persona, persona => persona.cuentas)
-    @JoinColumn({ name: 'ID_PERSONA', referencedColumnName: 'id_persona'})
+    @JoinColumn({ name: 'ID_PERSONA', referencedColumnName: 'id_persona', foreignKeyConstraintName:"FK_ID_PERSONA_CUENT_PERSONA"})
     persona: Net_Persona;
 
     @ManyToOne(() => NET_TIPOS_CUENTA, tipoCuenta => tipoCuenta.cuentas)
-    @JoinColumn({ name: 'ID_TIPO_CUENTA' })
+    @JoinColumn({ name: 'ID_TIPO_CUENTA', foreignKeyConstraintName:"FK_ID_TIPO_CUENTA_CUENT_PERSONA" })
     tipoCuenta: NET_TIPOS_CUENTA;
 
     @OneToMany(() => NET_MOVIMIENTO_CUENTA, movimientoCuenta => movimientoCuenta.cuentaPersona)

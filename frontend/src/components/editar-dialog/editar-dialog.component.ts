@@ -36,8 +36,9 @@ export class EditarDialogComponent implements OnInit {
   crearFormulario() {
     const group: { [key: string]: any } = {};
 
-    const isFormDisabled = this.data.valoresIniciales['estado_aplicacion'] === 'COBRADA' ||
-                           this.data.valoresIniciales['codigo_planilla'] !== 'No ha sido asignado';
+/*     const isFormDisabled = this.data.valoresIniciales['estado_aplicacion'] === 'COBRADA' ||
+this.data.valoresIniciales['codigo_planilla'] !== 'No ha sido asignado'; */
+     const isFormDisabled = false
 
     this.data.campos.forEach(campo => {
       const validaciones = [];

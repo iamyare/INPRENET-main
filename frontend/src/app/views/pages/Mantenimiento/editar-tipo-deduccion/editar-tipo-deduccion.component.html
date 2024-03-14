@@ -8,8 +8,10 @@
     (ejecutarFuncionAsincronaEvent)="
       ejecutarFuncionAsincronaDesdeOtroComponente($event)
     "
-    [verBotEditar]="true"
-    [editarFunc]="editar"
+    [nombreEncabezadoUno]="'Editar'"
+    [mostrarBotonUno]="true"
+    [etiquetaBotonUno]="'Editar'"
+    (accionBotonUno)="manejarAccionUno($event)"
   >
   </app-dynamic-table>
 </div>

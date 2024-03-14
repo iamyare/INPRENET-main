@@ -9,7 +9,9 @@ import { InstitucionesService } from './instituciones.service';
   providedIn: 'root'
 })
 export class DatosEstaticosService {
-  paises: any = []; departamentos: any = []; DatosBancBen:any = [];
+  paises: any = [];
+  departamentos: any = [];
+  DatosBancBen:any = [];
   Bancos: any = [];
   Instituciones: any = [];
 
@@ -175,4 +177,19 @@ export class DatosEstaticosService {
       "value": "PUBLICO"
     }
   ];
+
+  tipoRol = [
+    {
+      "idRol":2,
+      "value": "JEFE DE AREA"
+    },
+    {
+      "idRol":3,
+      "value": "OFICIAL"
+    },
+    {
+      "idRol":4,
+      "value": "AUXILIAR"
+    },
+  ]
 }

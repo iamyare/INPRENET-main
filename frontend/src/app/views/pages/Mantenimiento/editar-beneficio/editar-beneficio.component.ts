@@ -1,5 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { Validators } from '@angular/forms';
+import { MatDialog } from '@angular/material/dialog';
+import { DetallePlanillaDialogComponent } from '@docs-components/detalle-planilla-dialog/detalle-planilla-dialog.component';
+import { EditarDialogComponent } from '@docs-components/editar-dialog/editar-dialog.component';
 import { ToastrService } from 'ngx-toastr';
 import { BeneficiosService } from 'src/app/services/beneficios.service';
 import { TableColumn } from 'src/app/shared/Interfaces/table-column';
@@ -16,7 +19,8 @@ export class EditarBeneficioComponent implements OnInit {
 
   constructor(
     private svcBeneficioServ: BeneficiosService,
-    private toastr: ToastrService
+    private toastr: ToastrService,
+    private dialog: MatDialog
   ) {}
 
   ngOnInit(): void {
@@ -94,5 +98,30 @@ export class EditarBeneficioComponent implements OnInit {
       this.ejecF(this.filas).then(() => {
       });
     }
+  }
+
+  manejarAccionUno(row: any) {
+    const campos = [
+      { nombre: 'nombre_beneficio', tipo: 'text', requerido: true, etiqueta: 'Nombre del beneficio', editable:true  },
+      { nombre: 'descripcion_beneficio', tipo: 'text', requerido: true, etiqueta: 'descripcion del beneficio' , editable:true },
+      { nombre: 'numero_rentas_max', tipo: 'number', requerido: true, etiqueta: 'Número de rentas máximas', editable:true },
+      { nombre: 'periodicidad', tipo: 'text', requerido: false, etiqueta: 'periodicidad', editable:false  }
+    ];
+
+    this.openDialog(campos, row);
+  }
+
+  openDialog(campos:any, row:any): void {
+    const dialogRef = this.dialog.open(EditarDialogComponent, {
+      width: '500px',
+      data: { campos: campos, valoresIniciales: row }
+    });
+
+
+    dialogRef.afterClosed().subscribe((result: any) => {
+      if (result) {
+        console.log('Datos editados:', result);
+      }
+    });
   }
 }

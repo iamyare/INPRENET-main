@@ -23,6 +23,7 @@ export class NuevoTipoPlanillaComponent {
   }
   myFormFields: FieldConfig[] = [
     { type: 'text', label: 'Nombre de planilla', name: 'nombre_planilla', validations: [Validators.required,Validators.maxLength(50)], display:true },
+    { type: 'dropdown', label: 'Clase Planilla', name: 'clase_planilla', validations: [Validators.required], options:[{label:"INGRESO", value:"INGRESO"}, {label:"EGRESO", value:"EGRESO"}] , display:true},
     { type: 'text', label: 'Descripción de planilla', name: 'descripcion', validations: [Validators.required], display:true },
   ];
 

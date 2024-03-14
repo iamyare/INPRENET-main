@@ -2,6 +2,8 @@ import { Component, OnInit } from '@angular/core';
 import { ValidatorFn, Validators } from '@angular/forms';import { ToastrService } from 'ngx-toastr';
 import { DeduccionesService } from '../../../../services/deducciones.service';
 import { TableColumn } from 'src/app/shared/Interfaces/table-column';
+import { MatDialog } from '@angular/material/dialog';
+import { EditarDialogComponent } from '@docs-components/editar-dialog/editar-dialog.component';
 
 @Component({
   selector: 'app-editar-tipo-deduccion',
@@ -15,7 +17,8 @@ export class EditarTipoDeduccionComponent implements OnInit{
 
   constructor (
     private deduccionesService: DeduccionesService,
-    private toastr: ToastrService
+    private toastr: ToastrService,
+    private dialog: MatDialog
     ){}
 
   ngOnInit(): void {
@@ -97,5 +100,30 @@ export class EditarTipoDeduccionComponent implements OnInit{
       this.ejecF(this.filas).then(() => {
       });
     }
+  }
+
+  manejarAccionUno(row: any) {
+    const campos = [
+      { nombre: 'nombre_deduccion', tipo: 'text', requerido: true, etiqueta: 'Nombre Planilla', editable:true  },
+      { nombre: 'descripcion_deduccion', tipo: 'text', requerido: true, etiqueta: 'descripcion' , editable:true },
+      { nombre: 'nombre_institucion', tipo: 'text', requerido: true, etiqueta: 'descripcion' , editable:true },
+      { nombre: 'prioridad', tipo: 'text', requerido: true, etiqueta: 'descripcion' , editable:true }
+    ];
+
+    this.openDialog(campos, row);
+  }
+
+  openDialog(campos:any, row:any): void {
+    const dialogRef = this.dialog.open(EditarDialogComponent, {
+      width: '500px',
+      data: { campos: campos, valoresIniciales: row }
+    });
+
+
+    dialogRef.afterClosed().subscribe((result: any) => {
+      if (result) {
+        console.log('Datos editados:', result);
+      }
+    });
   }
 }

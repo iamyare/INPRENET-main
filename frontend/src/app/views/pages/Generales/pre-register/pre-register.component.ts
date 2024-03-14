@@ -5,6 +5,7 @@ import { generateFormArchivo } from 'src/components/botonarchivos/botonarchivos.
 import { AuthService } from 'src/app/services/auth.service';
 import { TipoIdentificacionService } from '../../../../services/tipo-identificacion.service';
 import { ToastrService } from 'ngx-toastr';
+import { DatosEstaticosService } from '../../../../services/datos-estaticos.service';
 
 @Component({
   selector: 'app-pre-register',
@@ -27,6 +28,7 @@ export class PreRegisterComponent implements OnInit{
     private fb: FormBuilder,
     private tipoIdentificacionService : TipoIdentificacionService,
     private authSvc : AuthService,
+    private DatosEstaticosService : DatosEstaticosService,
     private toastr: ToastrService
     ) {
     this.form = this.fb.group({
@@ -37,20 +39,7 @@ export class PreRegisterComponent implements OnInit{
      nombrecomp: ['', [Validators.required]],
    });
 
-   this.tipoRol = [
-     {
-       "idRol":2,
-       "value": "JEFE DE AREA"
-     },
-     {
-       "idRol":3,
-       "value": "OFICIAL"
-     },
-     {
-       "idRol":4,
-       "value": "AUXILIAR"
-     },
-   ]
+   this.tipoRol = DatosEstaticosService.tipoRol;
   }
 
   ngOnInit() {

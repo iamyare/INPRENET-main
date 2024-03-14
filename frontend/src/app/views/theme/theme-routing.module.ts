@@ -80,10 +80,17 @@ const routes: Routes = [
     },
     children: [
       {
-        path: 'nueva-planilla',
+        path: 'Egresos/nueva-planilla',
         component: NuevaPlanillaComponentP,
         data: {
           title: 'Nueva Planilla',
+        },
+      },
+      {
+        path: 'Egresos/ver-planillas',
+        component: VerPlanillasComponent,
+        data: {
+          title: 'Ver Planillas',
         },
       },
       {
@@ -93,20 +100,6 @@ const routes: Routes = [
           title: 'Subir Deducciones',
         },
       },
-/*       {
-        path: 'ver-deducciones',
-        component: VerDeduccionesComponent,
-        data: {
-          title: 'Ver Deducciones',
-        },
-      }, */
-      {
-        path: 'ver-planillas',
-        component: VerPlanillasComponent,
-        data: {
-          title: 'Ver Planillas',
-        },
-      },
       {
         path: 'centro-trabajo',
         component: CentroTrabajoComponent,
@@ -114,6 +107,13 @@ const routes: Routes = [
           title: 'Centro Trabajo',
         },
       },
+/*       {
+        path: 'ver-deducciones',
+        component: VerDeduccionesComponent,
+        data: {
+          title: 'Ver Deducciones',
+        },
+      }, */
     ],
   },
   //rutas mantenimiento beneficio

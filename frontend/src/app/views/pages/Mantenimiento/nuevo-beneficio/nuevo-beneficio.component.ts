@@ -21,7 +21,7 @@ export class NuevoBeneficioComponent implements OnInit{
     this.myFormFields = [
       { type: 'text', label: 'Nombre de beneficio', name: 'nombre_beneficio', validations: [Validators.required], display:true },
       { type: 'text', label: 'Descripción de beneficio', name: 'descripcion_beneficio', validations: [Validators.required], display:true},
-      { type: 'dropdown', label: 'Periodicidad', name: 'periodicidad', validations: [Validators.required], options:[{label:"vitalicio", value:"vitalicio"}, {label:"definido", value:"Definido"}] , display:true},
+      { type: 'dropdown', label: 'Periodicidad', name: 'periodicidad', validations: [Validators.required], options:[{label:"VITALICIO", value:"VITALICIO"}, {label:"DEFINIDO", value:"DEFINIDO"}] , display:true},
       { type: 'number', label: 'Número de rentas máximas', name: 'numero_rentas_max', validations: [], display:false},
     ];
   }

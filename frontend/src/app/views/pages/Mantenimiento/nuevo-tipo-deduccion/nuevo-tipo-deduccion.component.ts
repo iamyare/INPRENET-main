@@ -16,53 +16,26 @@ export class NuevoTipoDeduccionComponent implements OnInit {
   data:any
   myFormFields: FieldConfig[] = []
   temp: any[] = []
-  opcionesCargadas: boolean = false;
 
   Instituciones: any = this.datosEstaticosService.Instituciones;
   @ViewChild(DynamicFormComponent) dynamicForm!: DynamicFormComponent;
 
-  constructor(private SVCDeduccion:DeduccionesService, private datosEstaticosService:DatosEstaticosService, private toastr: ToastrService, private SVCInstituciones:InstitucionesService,
-              private planillaService : PlanillaService ){}
+  constructor(private SVCDeduccion:DeduccionesService, private datosEstaticosService:DatosEstaticosService, private toastr: ToastrService, private SVCInstituciones:InstitucionesService){}
 
   ngOnInit(): void {
     this.prueba()
   }
 
-  toggleFields(): void {
-    this.limpiarFormulario()
 
-    const prioridadField = this.myFormFields.find(field => field.name === 'prioridad');
-    const institucionField = this.myFormFields.find(field => field.name === 'nombre_institucion');
-    const tipoPlanillaField = this.myFormFields.find(field => field.name === 'tipo_planilla');
-
-    if (prioridadField && institucionField && tipoPlanillaField) {
-      const shouldDisplayTipoPlanilla = !tipoPlanillaField.display;
-      prioridadField.display = !shouldDisplayTipoPlanilla;
-      institucionField.display = !shouldDisplayTipoPlanilla;
-      tipoPlanillaField.display = shouldDisplayTipoPlanilla;
-    }
-  }
-
-
-
-  async prueba(): Promise<void> {
+  prueba = async () => {
     try {
       const instituciones = await this.SVCInstituciones.getInstituciones().toPromise();
-      const tiposPlanilla = await this.planillaService.findAllTipoPlanilla().toPromise();
 
 
       this.myFormFields = [
         { type: 'text', label: 'Nombre', name: 'nombre_deduccion', validations: [Validators.required] , display: true},
         { type: 'text', label: 'Descripción', name: 'descripcion_deduccion', validations: [Validators.required] , display: true},
         { type: 'number', label: 'Código de deducción', name: 'codigo_deduccion', validations: [Validators.required], display: true },
-        {
-          type: 'dropdown', label: 'TipoPlanilla', name: 'tipo_planilla',
-          options: tiposPlanilla.map((item: { nombre_planilla: any; id_tipo_planilla: any; }) => ({
-            label: item.nombre_planilla,
-            value: item.nombre_planilla
-          })),
-          validations: [Validators.required], display: false
-        },
         { type: 'number', label: 'Prioridad', name: 'prioridad', validations: [Validators.required] , display: true},
         {
           type: 'dropdown', label: 'Institución', name: 'nombre_institucion',
@@ -74,7 +47,6 @@ export class NuevoTipoDeduccionComponent implements OnInit {
         },
 
       ];
-      this.opcionesCargadas = true;
     } catch (error) {
       console.error('Error al obtener las instituciones:', error);
     }
@@ -85,25 +57,6 @@ export class NuevoTipoDeduccionComponent implements OnInit {
   }
 
   guardarTipoDeduccion():any{
-    if(this.data.value.tipo_planilla){
-      this.SVCDeduccion.newDeduccionTipoPlanilla(this.data.value).subscribe(
-        {
-          next: (response) => {
-            this.toastr.success('tipo de deduccion creado con éxito');
-            this.limpiarFormulario()
-          },
-          error: (error) => {
-            let mensajeError = 'Error desconocido al crear tipo de deduccion';
-            if (error.error && error.error.message) {
-              mensajeError = error.error.message;
-            } else if (typeof error.error === 'string') {
-              mensajeError = error.error;
-            }
-            this.toastr.error(mensajeError);
-          }
-        }
-      );
-    }else{
       this.SVCDeduccion.newTipoDeduccion(this.data.value).subscribe(
         {
           next: (response) => {
@@ -121,7 +74,6 @@ export class NuevoTipoDeduccionComponent implements OnInit {
           }
         }
         );
-    }
   }
 
   limpiarFormulario(): void {

@@ -31,6 +31,7 @@ import {MatDialogModule} from '@angular/material/dialog';
 import {MatSelectModule} from '@angular/material/select';
 import { NgScrollbarModule } from 'ngx-scrollbar';
 import { MatTableModule } from '@angular/material/table';
+import {MatStepperModule} from '@angular/material/stepper';
 
 // import {FlexLayoutModule } from '@angular/flex-layout';
 import { MatNativeDateModule } from '@angular/material/core';
@@ -88,6 +89,7 @@ import { DocsComponentsModule } from '../../components/docs-components.module';
     NgScrollbarModule,
     MatTableModule,
     MatPaginatorModule,
+    MatStepperModule,
   ],
   exports: [
     DocsComponentsModule,

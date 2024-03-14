@@ -130,6 +130,16 @@ export const navItems: INavData[] = [
       {
         name: 'Ingresos',
         children: [
+          {
+            name: 'Privados',
+            iconComponent: { name: 'cilMoney' },
+            children: [
+              {
+                name: 'Planilla de privados',
+                url: '/Planilla/Ingresos/Privados/planilla-colegios-privados',
+              },
+          ]
+          }
           /* {
             url: '/Planilla/Ingresos/nueva-planilla',
             name: 'Nueva Planilla',

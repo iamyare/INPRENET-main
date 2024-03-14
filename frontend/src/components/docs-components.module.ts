@@ -66,7 +66,7 @@ import { TotalesporbydDialogComponent } from './totalesporbydDialog/totalesporby
     DynamicDialogComponent,
     DetallePlanillaDialogComponent,
     EditarDialogComponent,
-    TotalesporbydDialogComponent
+    TotalesporbydDialogComponent,
   ],
   exports: [
     ProgressbarComponent,

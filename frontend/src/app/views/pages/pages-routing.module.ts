@@ -5,6 +5,7 @@ import { Page500Component } from './Errores/page500/page500.component';
 import { LoginComponent } from './Generales/login/login.component';
 import { RegisterComponent } from './Generales/register/register.component';
 import { PreRegisterComponent } from './Generales/pre-register/pre-register.component';
+import { PlanillaColegiosPrivadosComponent } from './Generales/planilla-colegios-privados/planilla-colegios-privados.component';
 
 const routes: Routes = [
   {

@@ -22,6 +22,8 @@ export class DatosEstaticosService {
       this.Bancos = res.bancos
     }); */
     this.direccionSer.getAllPaises().subscribe((res: any) => {
+      console.log(res);
+
       this.departamentos = res.paises
       this.paises = res.paises
     });

@@ -42,6 +42,10 @@ import { AsignacionAfilPlanComponent } from '../../../components/asignacion-afil
 import { VerplanprelcompComponent } from '../../../components/verplanprelcomp/verplanprelcomp.component';
 import { VerplancerradaComponent } from '../../../components/verplancerrada/verplancerrada.component';
 import { VerEditarBeneficioAfilComponent } from '../pages/Generales/ver-editar-beneficio-afil/ver-editar-beneficio-afil.component';
+import { PlanillaColegiosPrivadosComponent } from '../pages/Generales/planilla-colegios-privados/planilla-colegios-privados.component';
+import { MatStepperModule } from '@angular/material/stepper';
+import { MAT_DATE_LOCALE, MatNativeDateModule,DateAdapter  } from '@angular/material/core';
+import { MatGridListModule } from '@angular/material/grid-list';
 
 @NgModule({
   imports: [
@@ -62,6 +66,13 @@ import { VerEditarBeneficioAfilComponent } from '../pages/Generales/ver-editar-b
     MatTableModule,
     MatPaginatorModule,
     MatIconModule,
+    MatStepperModule,
+    MatNativeDateModule,
+    MatGridListModule
+
+  ],
+  providers : [
+    { provide: MAT_DATE_LOCALE, useValue: 'es'}
   ],
   declarations: [
     VerplanprelcompComponent,
@@ -85,7 +96,9 @@ import { VerEditarBeneficioAfilComponent } from '../pages/Generales/ver-editar-b
     NuevoBeneficioAfilComponent,
     NuevaDeduccionAfilComponent,
     VerEditarDeduccionAfilComponent,
-    VerEditarBeneficioAfilComponent
+    VerEditarBeneficioAfilComponent,
+    PlanillaColegiosPrivadosComponent
+
 /*     CentroTrabajoPageComponent */
   ]
 })

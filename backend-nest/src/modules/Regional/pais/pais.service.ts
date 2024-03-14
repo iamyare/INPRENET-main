@@ -20,6 +20,8 @@ export class PaisService {
   }
 
   async findAll( paginationDto: PaginationDto){
+    console.log("fdsfdsfsf");
+    
     const { limit = 10, offset = 0 } = paginationDto
     return this.paisRepository.find({
       take: limit,

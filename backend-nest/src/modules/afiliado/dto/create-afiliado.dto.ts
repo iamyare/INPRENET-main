@@ -4,6 +4,35 @@ import { CreatePerfAfilCentTrabDto } from "./create-perfAfilCentTrabs.dto";
 import { CreateBancoDto } from "src/modules/banco/dto/create-banco.dto";
 import { CreateAfiliadoRelacionadoDto } from "./CreateAfiliadoRelacionadoDto";
 
+
+export interface PersonaResponse{
+    id_persona: number;
+    dni: string;
+    estado_civil: string;
+    primer_nombre: string;
+    segundo_nombre: string;
+    tercer_nombre: string;
+    primer_apellido: string;
+    segundo_apellido: string;
+    sexo: string;
+    cantidad_dependientes: number;
+    cantidad_hijos: number;
+    profesion: string;
+    representacion: string;
+    telefono_1: string;
+    telefono_2: string;
+    correo_1: string;
+    correo_2: string;
+    colegio_magisterial: string;
+    numero_carnet: string;
+    direccion_residencia: string;
+    estado: string;
+    fecha_nacimiento: string;
+    archivo_identificacion: string;
+    tipoIdentificacion: string;
+    }
+    
+
 export class CreateAfiliadoDto {
 
     //Datos de tabla Afiliado

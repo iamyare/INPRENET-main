@@ -11,6 +11,11 @@ export class CreateTipoPlanillaDto {
     @IsOptional()
     descripcion: string;
 
+    @IsString()
+    @Length(0, 7)
+    @IsOptional()
+    clase_planilla: string;
+
     @IsString({ message: '' })
     @Length(1, 200, { message: 'El estado debe estar lleno' })
     @IsNotEmpty({ message: '' })

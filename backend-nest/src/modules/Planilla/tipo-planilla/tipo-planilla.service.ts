@@ -29,12 +29,19 @@ export class TipoPlanillaService {
     }
   }
 
-  findAll(paginationDto: PaginationDto) {
+  findAll(paginationDto: PaginationDto, clasePlanilla?:string) {
     const { limit = 10, offset = 0 } = paginationDto
-    return this.tipoPlanillaRepository.find(/* {
+    if (clasePlanilla){
+      return this.tipoPlanillaRepository.find({ where: { clase_planilla: clasePlanilla }} )
+    }else{
+      return this.tipoPlanillaRepository.find()
+    }
+    /* {
+
+    }
       take: limit,
       skip : offset
-    } */);
+    } */
   }
 
   async findOne(id: number) {

@@ -8,9 +8,23 @@ export class DetalleBeneficioController {
   constructor(private readonly detallebeneficioService: DetalleBeneficioService) {}
 
   @Post('nuevoDetalle/:idAfiliadoPadre')
-  async createDetalleBeneficioAfiliado(@Body() createDetalleBeneficioDto: CreateDetalleBeneficioDto, @Param('idAfiliadoPadre') idAfiliadoPadre: string) {
+  async createDetalleBeneficioBeneficiario(@Body() createDetalleBeneficioDto: CreateDetalleBeneficioDto, @Param('idAfiliadoPadre') idAfiliadoPadre: string) {
     try {
       const nuevoDetalle = await this.detallebeneficioService.createDetalleBeneficioAfiliado(createDetalleBeneficioDto, idAfiliadoPadre);
+      return { 
+        statusCode: HttpStatus.CREATED,
+        message: 'Detalle de beneficio afiliado creado exitosamente',
+        data: nuevoDetalle
+      };
+    } catch (error) {
+      throw new BadRequestException(error.message);
+    }
+  }
+
+  @Post('nuevoDetalle')
+  async createDetalleBeneficioAfiliado(@Body() createDetalleBeneficioDto: CreateDetalleBeneficioDto) {
+    try {
+      const nuevoDetalle = await this.detallebeneficioService.createDetalleBeneficioAfiliado(createDetalleBeneficioDto);
       return { 
         statusCode: HttpStatus.CREATED,
         message: 'Detalle de beneficio afiliado creado exitosamente',

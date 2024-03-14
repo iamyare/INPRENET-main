@@ -1,14 +1,19 @@
 import { Net_TipoIdentificacion } from "src/modules/tipo_identificacion/entities/net_tipo_identificacion.entity";
 import { Net_Pais } from "src/modules/Regional/pais/entities/pais.entity";
-import { Column, Entity, Index, JoinColumn, ManyToOne, OneToMany, PrimaryColumn, PrimaryGeneratedColumn } from "typeorm";
+import { Check, Column, Entity, Index, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 import { Net_Ref_Per_Afil } from "./net_ref-Per-Afiliado";import { Net_perf_afil_cent_trab} from "./net_perf_afil_cent_trab";
 import { Net_Detalle_Deduccion } from "src/modules/Planilla/detalle-deduccion/entities/detalle-deduccion.entity";
 import { Net_Detalle_Afiliado } from "./Net_detalle_persona.entity";
 import { Net_Afiliados_Por_Banco } from "src/modules/banco/entities/net_afiliados-banco";
 import { Net_Municipio } from "src/modules/Regional/municipio/entities/net_municipio.entity";
 import { NET_CUENTAS_PERSONA } from "src/modules/transacciones/entities/net_cuentas_persona.entity";
+import { IsIn } from "class-validator";
+import { NET_MOVIMIENTO_CUENTA } from "src/modules/transacciones/entities/net_movimiento_cuenta.entity";
  
-@Entity({ name: 'NET_PERSONA' })
+@Entity({ 
+    name: 'NET_PERSONA', 
+})
+@Check("CK_Sexo",`SEXO IN ('F', 'M')`)
 export class Net_Persona {
     @PrimaryGeneratedColumn({type: 'int', name: 'ID_PERSONA', primaryKeyConstraintName: 'PK_ID_PERSONA_PERSONA'  })
     id_persona: number;
@@ -44,6 +49,7 @@ export class Net_Persona {
     segundo_apellido: string;
 
     @Column('char', { length: 1, nullable: true, name: 'SEXO' })
+    @IsIn(['F', 'M'])
     sexo: string;
 
     @Column('number', { nullable: true, name: 'CANTIDAD_DEPENDIENTES' })
@@ -113,7 +119,10 @@ export class Net_Persona {
         { cascade: true })
     perfAfilCentTrabs: Net_perf_afil_cent_trab[];
 
-    @OneToMany(() => NET_CUENTAS_PERSONA, cuentaPersona => cuentaPersona.persona)
+    @OneToMany(() => NET_CUENTAS_PERSONA, cuentaPersona => cuentaPersona.personaa)
     cuentas: NET_CUENTAS_PERSONA[];
+
+    @OneToMany(() => NET_MOVIMIENTO_CUENTA, movimientos => movimientos.persona)
+    movimientos: NET_MOVIMIENTO_CUENTA[];
 
 }

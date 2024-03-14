@@ -1,5 +1,5 @@
 import { BadRequestException, Injectable, InternalServerErrorException, Logger, NotFoundException } from '@nestjs/common';
-import { CreateAfiliadoDto } from './dto/create-afiliado.dto';
+import { CreateAfiliadoDto, PersonaResponse } from './dto/create-afiliado.dto';
 import { UpdateAfiliadoDto } from './dto/update-afiliado.dto';
 import { Connection, EntityManager, Repository } from 'typeorm';
 import { InjectEntityManager, InjectRepository } from '@nestjs/typeorm';
@@ -17,6 +17,7 @@ import { validate as isUUID } from 'uuid';
 import { Net_Detalle_Afiliado } from './entities/Net_detalle_persona.entity';
 import { Net_Persona } from './entities/Net_Persona';
 import { Net_Departamento } from '../Regional/provincia/entities/net_departamento.entity';
+import { map } from 'rxjs';
 
 @Injectable()
 export class AfiliadoService {
@@ -148,23 +149,24 @@ export class AfiliadoService {
   }
 
   async findOne(term: number) {
-    let afiliados: Net_Persona;
+    let personas: Net_Persona;
     if (isUUID(term)) {
-      afiliados = await this.afiliadoRepository.findOne({
+      personas = await this.afiliadoRepository.findOne({
         where: { id_persona: term },
         relations: ['detalleAfiliado'], // Asegúrate de cargar la relación
       });
     } else {
-      const queryBuilder = this.afiliadoRepository.createQueryBuilder('afiliado');
-      afiliados = await queryBuilder
-        .leftJoinAndSelect('afiliado.detalleAfiliado', 'detalleAfiliado') // Join con la tabla detalleAfiliado
-        .where('afiliado.dni = :term AND detalleAfiliado.tipo_afiliado = :tipo_afiliado', { term, tipo_afiliado: "AFILIADO" })
+      const queryBuilder = this.afiliadoRepository.createQueryBuilder('persona');
+      personas = await queryBuilder
+        .leftJoinAndSelect('persona.detallesAfiliado', 'detallepersona') // Join con la tabla detallepersonas
+        .leftJoinAndSelect('detallepersona.tipoAfiliado', 'tipoafiliado') // Join con la tabla detallepersonas
+        .where('persona.dni = :term AND tipoafiliado.tipo_afiliado = :tipo_persona', { term, tipo_persona: "AFILIADO" })
         .getOne();
     }
-    if (!afiliados) {
+    if (!personas) {
       throw new NotFoundException(`Afiliado con ${term} no existe`);
     }
-    return afiliados;
+    return personas;
   }
 
   update(id: number, updateAfiliadoDto: UpdateAfiliadoDto) {
@@ -180,54 +182,84 @@ export class AfiliadoService {
       try {
         const query = `
         SELECT DISTINCT
-          "detA"."id_detalle_afiliado_padre"
-          FROM "net_afiliado" "Afil"
-          FULL OUTER JOIN
-          "net_detalle_afiliado" "detA" ON "Afil"."id_afiliado" = "detA"."id_detalle_afiliado_padre"
-        WHERE
-          "Afil"."dni" = '${dniAfil}' AND 
-          "Afil"."estado" = 'FALLECIDO'  AND
-          "detA"."tipo_afiliado" = 'BENEFICIARIO' AND
-          "Afil"."id_afiliado" NOT IN 
-          (
-              SELECT 
-              "detA"."id_afiliado"
-              FROM "net_afiliado" "Afil"
-              INNER JOIN
-              "net_detalle_afiliado" "detA" ON "Afil"."id_afiliado" = "detA"."id_detalle_afiliado_padre"
-          )
+        "detA"."ID_PERSONA"
+        FROM NET_PERSONA "Afil"
+        FULL OUTER JOIN
+          NET_DETALLE_PERSONA "detA" ON "Afil"."ID_PERSONA" = "detA"."ID_PERSONA" 
+        INNER JOIN
+        NET_TIPO_PERSONA "tipoP" ON "tipoP"."ID_TIPO_AFILIADO" = "detA"."ID_TIPO_PERSONA"
+      WHERE
+        "Afil"."DNI" = '${dniAfil}' AND 
+        "Afil"."ESTADO" = 'FALLECIDO'  AND
+        "tipoP"."TIPO_AFILIADO" = 'AFILIADO'
         `;
 
         const beneficios = await this.entityManager.query(query);
         
         const query1 = `
         SELECT 
-          "Afil"."dni",
-          "Afil"."primer_nombre",
-          "Afil"."segundo_nombre",
-          "Afil"."tercer_nombre",
-          "Afil"."primer_apellido",
-          "Afil"."segundo_apellido",
-          "Afil"."sexo",
-          "detA"."porcentaje",
-          "detA"."tipo_afiliado"
-        FROM
-            "net_detalle_afiliado" "detA" INNER JOIN 
-            "net_afiliado" "Afil" ON "detA"."id_afiliado" = "Afil"."id_afiliado"
-        WHERE 
-            "detA"."id_detalle_afiliado_padre" = ${beneficios[0].id_detalle_afiliado_padre} AND 
-            "detA"."tipo_afiliado" = 'BENEFICIARIO'
+        "Afil"."DNI",
+        "Afil"."PRIMER_NOMBRE",
+        "Afil"."SEGUNDO_APELLIDO",
+        "Afil"."TERCER_NOMBRE",
+        "Afil"."PRIMER_APELLIDO",
+        "Afil"."SEGUNDO_APELLIDO",
+        "Afil"."SEXO",
+        "detA"."PORCENTAJE",
+        "tipoP"."TIPO_AFILIADO"
+      FROM
+          "NET_DETALLE_PERSONA" "detA" INNER JOIN 
+          "NET_PERSONA" "Afil" ON "detA"."ID_PERSONA" = "Afil"."ID_PERSONA"
+          INNER JOIN
+        NET_TIPO_PERSONA "tipoP" ON "tipoP"."ID_TIPO_AFILIADO" = "detA"."ID_TIPO_PERSONA"
+      WHERE 
+          "detA"."ID_CAUSANTE_PADRE" = ${beneficios[0].ID_PERSONA} AND 
+          "tipoP"."TIPO_AFILIADO" = 'BENEFICIARIO' 
         `;
         
         const beneficios2 = await this.entityManager.query(query1);
   
-        return beneficios2;
+        return this.normalizarDatos(beneficios2);
       } catch (error) {
         this.logger.error(`Error al consultar beneficios: ${error.message}`);
         throw new Error(`Error al consultar beneficios: ${error.message}`);
       }
     }
-
+  
+    normalizarDatos(data: any): PersonaResponse[]{
+      const newList: PersonaResponse[]= []   
+      data.map((el:any)=>{
+        const newPersona: PersonaResponse = {
+          id_persona: el.ID_PERSONA,
+          dni: el.DNI,
+          estado_civil: el.ESTADO_CIVIL,
+          primer_nombre: el.PRIMER_NOMBRE,
+          segundo_nombre: el.SEGUNDO_NOMBRE,
+          tercer_nombre: el.TERCER_NOMBRE,
+          primer_apellido: el.PRIMER_APELLIDO,
+          segundo_apellido: el.SEGUNDO_APELLIDO,
+          sexo: el.SEXO,
+          cantidad_dependientes: el.CANTIDAD_DEPENDIENTES,
+          cantidad_hijos: el.CANTIDAD_HIJOS,
+          profesion: el.PROFESION,
+          representacion: el.REPRESENTACION,
+          telefono_1: el.TELEFONO_1,
+          telefono_2: el.TELEFONO_2,
+          correo_1: el.CORREO_1,
+          correo_2: el.CORREO_2,
+          colegio_magisterial: el.COLEGIO_MAGISTERIAL,
+          numero_carnet: el.NUMERO_CARNET,
+          direccion_residencia: el.DIRECCION_RESIDENCIA,
+          estado: el.ESTADO,
+          fecha_nacimiento: el.FECHA_NACIMIENTO,
+          archivo_identificacion: el.ARCHIVO_IDENTIFICACION,
+          tipoIdentificacion: el.TIPOIDENTIFICACION,
+        }
+        newList.push(newPersona)
+      })
+      return newList;
+    }
+    
     async findByDni(dni: string): Promise<Net_Persona | string> {
       const afiliado = await this.afiliadoRepository.findOne({ where: { dni } });
   

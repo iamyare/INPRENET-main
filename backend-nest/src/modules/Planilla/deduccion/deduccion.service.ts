@@ -115,17 +115,23 @@ export class DeduccionService {
   
   async findAll() {
     /* return this.deduccionRepository.find() */
-    const queryBuilder = await this.deduccionRepository
-      .createQueryBuilder('net_deduccion')
-      .addSelect('net_deduccion.id_deduccion', 'id_deduccion')
-      .addSelect('net_deduccion.nombre_deduccion', 'nombre_deduccion')
-      .addSelect('net_deduccion.descripcion_deduccion', 'descripcion_deduccion')
-      .addSelect('net_deduccion.prioridad', 'prioridad')
-      .addSelect('institucion.nombre_institucion', 'nombre_institucion')
-      .innerJoin(Net_Institucion, 'institucion', 'net_deduccion.id_institucion = institucion.id_institucion')
-      .getRawMany();
-
-      return queryBuilder;
+    try {
+      const queryBuilder = await this.deduccionRepository
+        .createQueryBuilder('net_deduccion')
+        .addSelect('net_deduccion.id_deduccion', 'id_deduccion')
+        .addSelect('net_deduccion.nombre_deduccion', 'nombre_deduccion')
+        .addSelect('net_deduccion.descripcion_deduccion', 'descripcion_deduccion')
+        .addSelect('net_deduccion.prioridad', 'prioridad')
+        .addSelect('institucion.nombre_institucion', 'nombre_institucion')
+        .innerJoin(Net_Institucion, 'institucion', 'institucion.id_institucion = "net_deduccion".id_institucion')
+        .getRawMany();
+        
+        return queryBuilder;
+      
+    } catch (error) {
+      console.log(error);
+      
+    }
   }
 
   async findOneByNombInst(nombre_institucion:string) {

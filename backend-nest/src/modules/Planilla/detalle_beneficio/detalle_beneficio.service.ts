@@ -54,37 +54,42 @@ export class DetalleBeneficioService {
   }
 
   async createDetalleBeneficioAfiliado(datos: CreateDetalleBeneficioDto, idAfiliadoPadre?:string): Promise<any> {
+    
     return await this.entityManager.transaction(async manager => {
-        try {
-            const beneficio = await manager.findOne(Net_Beneficio, { where: { nombre_beneficio: datos.nombre_beneficio } });
-            if (!beneficio) {
-                throw new BadRequestException('Tipo de beneficio no encontrado');
-            }
-
-          // Asumimos que convertirCadenaAFecha es una función que convierte una cadena de fecha en formato DD-MM-YYYY a un objeto Date
-          const periodoInicio = this.convertirCadenaAFecha(datos.periodoInicio);
-          const periodoFinalizacion = this.convertirCadenaAFecha(datos.periodoFinalizacion);
-  
-          // Verificar que las fechas sean válidas
-          if (!periodoInicio || !periodoFinalizacion) {
-              throw new BadRequestException('Formato de fecha inválido. Usa DD-MM-YYYY.');
-          }
-          if( idAfiliadoPadre == "undefined"){
+      try {
+        const beneficio = await manager.findOne(Net_Beneficio, { where: { nombre_beneficio: datos.nombre_beneficio } });
+        if (!beneficio) {
+          throw new BadRequestException('Tipo de beneficio no encontrado');
+        }
+        
+        // Asumimos que convertirCadenaAFecha es una función que convierte una cadena de fecha en formato DD-MM-YYYY a un objeto Date
+        const periodoInicio = this.convertirCadenaAFecha(datos.periodoInicio);
+        const periodoFinalizacion = this.convertirCadenaAFecha(datos.periodoFinalizacion);
+        
+        // Verificar que las fechas sean válidas
+        if (!periodoInicio || !periodoFinalizacion) {
+          throw new BadRequestException('Formato de fecha inválido. Usa DD-MM-YYYY.');
+        }
+        if( !idAfiliadoPadre ){
+            
             const query = `
             SELECT
-            afil."id_afiliado",
-            afil."dni"
+            afil."ID_PERSONA",
+            afil."DNI"
             FROM
-            "Net_Persona" afil
+            "NET_PERSONA" afil
             JOIN
-            "net_detalle_afiliado" detA ON detA."id_afiliado" = afil."id_afiliado"
+            "NET_DETALLE_PERSONA" detA ON detA."ID_PERSONA" = afil."ID_PERSONA"
+            INNER JOIN
+          NET_TIPO_PERSONA tipoP ON tipoP."ID_TIPO_AFILIADO" = detA."ID_TIPO_PERSONA"
             WHERE
-            afil."dni" = '${datos.dni}' AND detA."tipo_afiliado"='AFILIADO' AND afil."estado"='ACTIVO' 
+            afil."DNI" = '${datos.dni}' AND tipoP."TIPO_AFILIADO"='AFILIADO' AND afil."ESTADO"='ACTIVO'  
             `;
             const Afiliado =  await this.afiliadoRepository.query(query);
             if(Afiliado){
               const queryBuilder =  this.detalleBeneficioAfiliadoRepository.createQueryBuilder();
               
+              /* Inserta en la tabla de detalle beneficio afiliado */
               const detalleAfiliadoGuardado = await queryBuilder
               .insert()
               .into(Net_Detalle_Beneficio_Afiliado)
@@ -98,7 +103,8 @@ export class DetalleBeneficioService {
                 monto_por_periodo: datos.monto_por_periodo ,
               })
               .execute();
-
+            
+              /* Inserta en la tabla de detalle pago beneficio  */
             const nuevoDetalleBeneficio = manager.create(Net_Detalle_Pago_Beneficio, {
                 detalleBeneficioAfiliado: detalleAfiliadoGuardado.raw.id_detalle_ben_afil,
                 metodo_pago: datos.metodo_pago,
@@ -123,6 +129,7 @@ export class DetalleBeneficioService {
                 WHERE
                 afil."dni" = '${datos.dni}' AND detA."tipo_afiliado"='BENEFICIARIO' AND afil."estado"='ACTIVO' AND detA."id_detalle_afiliado_padre" = ${idAfiliadoPadre}
               `;
+                console.log(queryB);
                 
                 const Beneficiario =  await this.afiliadoRepository.query(queryB);
                 if (Beneficiario){

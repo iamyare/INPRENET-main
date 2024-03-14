@@ -36,9 +36,4 @@ export class CreateDeduccionDto {
 
     @IsNumberCustom({ message: 'El valor de codigo deduccion debe ser numérico.' })
     codigo_deduccion: number
-
-    @IsOptional()
-    @IsString({ message: 'El nombre del tipo de planilla debe ser una cadena de texto.' })
-    tipo_planilla?: string;
-
 }

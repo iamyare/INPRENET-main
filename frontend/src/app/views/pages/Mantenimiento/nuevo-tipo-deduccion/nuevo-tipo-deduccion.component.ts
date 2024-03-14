@@ -17,39 +17,43 @@ export class NuevoTipoDeduccionComponent implements OnInit {
   myFormFields: FieldConfig[] = []
   temp: any[] = []
 
+  institucionesOpc: any[] = [];
+
   Instituciones: any = this.datosEstaticosService.Instituciones;
   @ViewChild(DynamicFormComponent) dynamicForm!: DynamicFormComponent;
 
-  constructor(private SVCDeduccion:DeduccionesService, private datosEstaticosService:DatosEstaticosService, private toastr: ToastrService, private SVCInstituciones:InstitucionesService){}
-
-  ngOnInit(): void {
-    this.prueba()
+  constructor(private SVCDeduccion:DeduccionesService, private datosEstaticosService:DatosEstaticosService, private toastr: ToastrService, private SVCInstituciones:InstitucionesService){
+    this.obtenerDatos1();
   }
 
+  ngOnInit(): void {}
 
-  prueba = async () => {
+  getInstituciones = async () => {
     try {
       const instituciones = await this.SVCInstituciones.getInstituciones().toPromise();
 
+      instituciones.map((item: any) => {
+        this.institucionesOpc.push({ label: `${item.nombre_institucion}`, value: `${item.nombre_institucion}` })
+      });
 
-      this.myFormFields = [
-        { type: 'text', label: 'Nombre', name: 'nombre_deduccion', validations: [Validators.required] , display: true},
-        { type: 'text', label: 'Descripción', name: 'descripcion_deduccion', validations: [Validators.required] , display: true},
-        { type: 'number', label: 'Código de deducción', name: 'codigo_deduccion', validations: [Validators.required], display: true },
-        { type: 'number', label: 'Prioridad', name: 'prioridad', validations: [Validators.required] , display: true},
-        {
-          type: 'dropdown', label: 'Institución', name: 'nombre_institucion',
-          options: instituciones.map((item: { nombre_institucion: any; id_institucion: any; }) => ({
-            label: item.nombre_institucion,
-            value: item.nombre_institucion
-          })),
-          validations: [Validators.required], display: true
-        },
-
-      ];
     } catch (error) {
       console.error('Error al obtener las instituciones:', error);
     }
+  };
+
+  obtenerDatos1 = async () => {
+    this.getInstituciones()
+    this.myFormFields = [
+      { type: 'text', label: 'Nombre', name: 'nombre_deduccion', validations: [Validators.required] , display: true},
+      { type: 'text', label: 'Descripción', name: 'descripcion_deduccion', validations: [Validators.required] , display: true},
+      { type: 'number', label: 'Código de deducción', name: 'codigo_deduccion', validations: [Validators.required], display: true },
+      { type: 'number', label: 'Prioridad', name: 'prioridad', validations: [Validators.required] , display: true},
+      {
+        type: 'dropdown', label: 'Institución', name: 'nombre_institucion',
+        options: this.institucionesOpc,
+        validations: [Validators.required], display: true
+      },
+    ];
   }
 
   obtenerDatos(event:any):any{

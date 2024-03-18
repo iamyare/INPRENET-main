@@ -71,17 +71,20 @@ export class VerplanprelcompComponent implements OnInit{
       {
         header: 'Total de Ingresos',
         col: 'Total Beneficio',
+        moneda: true,
         isEditable: true
       },
       {
         header: 'Total De Deducciones Aplicadas',
         col: 'Total Deducciones',
         isEditable: true,
+        moneda: true,
         validationRules: [Validators.required, Validators.pattern(/^(3[01]|[12][0-9]|0?[1-9])-(1[0-2]|0?[1-9])-\d{4} - (3[01]|[12][0-9]|0?[1-9])-(1[0-2]|0?[1-9])-\d{4}$/)]
       },
       {
         header: 'Neto',
         col: 'Total',
+        moneda: true,
         isEditable: true
       },
     ];
@@ -98,9 +101,9 @@ export class VerplanprelcompComponent implements OnInit{
           {
             next: async (response) => {
               if (response) {
-                this.detallePlanilla = response;
-                this.datosTabl = await this.getFilas(response.id_planilla);
-                this.idPlanilla = response.id_planilla
+                this.detallePlanilla = response.data;
+                this.datosTabl = await this.getFilas(response.data.codigo_planilla);
+                this.idPlanilla = response.data.id_planilla
                 this.verDat = true;
               } else {
                 this.detallePlanilla = [];
@@ -137,8 +140,8 @@ export class VerplanprelcompComponent implements OnInit{
           this.data = await this.planillaService.getPlanillaPrelimiar(id_planilla).toPromise();
           this.dataPlan = this.data.map((item: any) => {
             return {
-              id_afiliado: item.id_afiliado,
-              dni: item.dni,
+              id_afiliado: item.ID_PERSONA,
+              dni: item.DNI,
               NOMBRE_COMPLETO: item.NOMBRE_COMPLETO,
               "Total Beneficio": item["Total Beneficio"],
               "Total Deducciones": item["Total Deducciones"],

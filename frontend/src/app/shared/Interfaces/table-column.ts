@@ -8,5 +8,6 @@ export interface TableColumn {
   buttonAction?: (row: any) => void;
   buttonText?: string;
   isEditable?: boolean;
+  moneda?: boolean;
   validationRules?: ValidatorFn[];
 }

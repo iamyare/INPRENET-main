@@ -133,7 +133,7 @@ export class AsignacionAfilPlanComponent implements OnInit {
     console.log(this.detallePlanilla.tipoPlanilla.nombre_planilla);
     try {
 
-      if (this.detallePlanilla.tipoPlanilla.nombre_planilla == "Ordinaria - Afiliado") {
+      if (this.detallePlanilla.tipoPlanilla.nombre_planilla == "ORDINARIA - AFILIADO") {
         const data = await this.planillaService.getPlanillaOrdinariaAfiliados(periodoInicio, periodoFinalizacion).toPromise();
         this.dataPlan = data.data.map((item: any) => {
           return {
@@ -149,7 +149,7 @@ export class AsignacionAfilPlanComponent implements OnInit {
             beneficiosNombres: item.beneficiosNombres,
           };
         });
-      } else if (this.detallePlanilla.tipoPlanilla.nombre_planilla == "Ordinaria - Beneficiario") {
+      } else if (this.detallePlanilla.tipoPlanilla.nombre_planilla == "ORDINARIA - BENEFICIARIO") {
         const data = await this.planillaService.getPlanillaOrdinariaBeneficiarios(periodoInicio, periodoFinalizacion).toPromise();
         this.dataPlan = data.data.map((item: any) => {
           return {
@@ -165,7 +165,7 @@ export class AsignacionAfilPlanComponent implements OnInit {
             beneficiosNombres: item.beneficiosNombres,
           };
         });
-      } else if (this.detallePlanilla.tipoPlanilla.nombre_planilla == "Complementaria - Afiliado") {
+      } else if (this.detallePlanilla.tipoPlanilla.nombre_planilla == "COMPLEMENTARIA - AFILIADO") {
         const data = await this.planillaService.getPlanillaComplementariaAfiliados(periodoInicio, periodoFinalizacion).toPromise();
         this.dataPlan = data.data.map((item: any) => {
           return {
@@ -183,7 +183,7 @@ export class AsignacionAfilPlanComponent implements OnInit {
         });
 
       }
-      else if (this.detallePlanilla.tipoPlanilla.nombre_planilla == "Complementaria - Beneficiario") {
+      else if (this.detallePlanilla.tipoPlanilla.nombre_planilla == "COMPLEMENTARIA - BENEFICIARIO") {
         const data = await this.planillaService.getPlanillaComplementariaBeneficiarios(periodoInicio, periodoFinalizacion).toPromise();
         this.dataPlan = data.data.map((item: any) => {
           return {
@@ -241,10 +241,10 @@ export class AsignacionAfilPlanComponent implements OnInit {
     };
 
     const serviceActions:any = {
-      'Ordinaria - Afiliado': this.planillaService.getPagoBeneficioOrdiAfil.bind(this.planillaService),
-      'Ordinaria - Beneficiario': this.planillaService.getPagoBeneficioOrdiBenef.bind(this.planillaService),
-      'Complementaria - Afiliado': this.planillaService.getPagoBeneficioCompleAfil.bind(this.planillaService),
-      'Complementaria - Beneficiario': this.planillaService.getPagoBeneficioCompleBenef.bind(this.planillaService),
+      'ORDINARIA - AFILIADO': this.planillaService.getPagoBeneficioOrdiAfil.bind(this.planillaService),
+      'ORDINARIA - BENEFICIARIO': this.planillaService.getPagoBeneficioOrdiBenef.bind(this.planillaService),
+      'COMPLEMENTARIA - AFILIADO': this.planillaService.getPagoBeneficioCompleAfil.bind(this.planillaService),
+      'COMPLEMENTARIA - BENEFICIARIO': this.planillaService.getPagoBeneficioCompleBenef.bind(this.planillaService),
     };
 
     const tipoPlanilla = this.detallePlanilla.tipoPlanilla.nombre_planilla;
@@ -287,10 +287,10 @@ export class AsignacionAfilPlanComponent implements OnInit {
     };
 
     const serviceActions:any = {
-      'Ordinaria - Afiliado': this.planillaService.getPagoDeduccionesOrdiAfil.bind(this.planillaService),
-      'Ordinaria - Beneficiario': this.planillaService.getPagoDeduccionesOrdiBenef.bind(this.planillaService),
-      'Complementaria - Afiliado': this.planillaService.getPagoDeduccionesCompleAfil.bind(this.planillaService),
-      'Complementaria - Beneficiario': this.planillaService.getPagoDeduccionesCompleBenef.bind(this.planillaService),
+      'ORDINARIA - AFILIADO': this.planillaService.getPagoDeduccionesOrdiAfil.bind(this.planillaService),
+      'ORDINARIA - BENEFICIARIO': this.planillaService.getPagoDeduccionesOrdiBenef.bind(this.planillaService),
+      'COMPLEMENTARIA - AFILIADO': this.planillaService.getPagoDeduccionesCompleAfil.bind(this.planillaService),
+      'COMPLEMENTARIA - BENEFICIARIO': this.planillaService.getPagoDeduccionesCompleBenef.bind(this.planillaService),
     };
 
     const tipoPlanilla = this.detallePlanilla.tipoPlanilla.nombre_planilla;

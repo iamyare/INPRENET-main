@@ -205,7 +205,7 @@ export class DetalleBeneficioService {
        let connection;
        connection = await oracledb.getConnection({
          user: 'c##test',
-         password: '12345678',
+         password: '87654321',
          connectString: '127.0.0.1:1521/xe'
        })
    

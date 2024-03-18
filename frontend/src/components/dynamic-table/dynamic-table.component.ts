@@ -50,7 +50,7 @@ export class DynamicTableComponent implements OnInit, OnDestroy {
   formsearch = new FormControl('');
   searchResults: any = [];
 
-  itemsPerPage = 50;  // Número de resultados por página
+  itemsPerPage = 20;  // Número de resultados por página
   desde = 0; hasta: number = this.itemsPerPage;
   currentPage = 0;
 
@@ -86,6 +86,7 @@ export class DynamicTableComponent implements OnInit, OnDestroy {
       this.filas?.map((objeto: any) => ({ ...objeto, isSelected: false }));
     }else{
       this.filas = await this.getData();
+
     }
     this.filtrarUsuarios().subscribe();
   }

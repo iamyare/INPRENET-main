@@ -1,5 +1,16 @@
-<app-dynamic-form [fields]="myFormFields" titulo="Datos de Tipo de planilla" subtitulo="Completa la información correspondiente"
-(newDatBenChange)="obtenerDatos($event)"></app-dynamic-form>
+<app-dynamic-form
+  [fields]="myFormFields"
+  titulo="Datos de Tipo de planilla"
+  subtitulo="Completa la información correspondiente"
+  (newDatBenChange)="obtenerDatos($event)"
+></app-dynamic-form>
 
 <!-- Botón para enviar los datos -->
-<button mat-raised-button (click)="insertarDatos()" style="background-color: #628780; color: #ffffff; border-radius: 5px; padding: 10px 20px;">Crear Tipo Planilla</button>
+<button
+  mat-raised-button
+  (click)="insertarDatos()"
+  color="primary"
+  style="color: #ffffff; border-radius: 5px; padding: 10px 20px"
+>
+  Crear Tipo Planilla
+</button>

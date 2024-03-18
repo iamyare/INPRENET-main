@@ -290,7 +290,7 @@ export class PlanillaController {
     }
   }
 
-  /* @Get('preliminar')
+  @Get('preliminar')
   async ObtenerPlanillaPreliminar(
     @Query('idPlanilla') idPlanilla: string,
   ) {
@@ -302,7 +302,7 @@ export class PlanillaController {
     } catch (error) {
       throw new InternalServerErrorException('Error al obtener planilla preliminar');
     }
-  } */
+  }
 
   /* @Get('Definitiva/:term')
   async ObtenerPlanDefin(

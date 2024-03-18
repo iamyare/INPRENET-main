@@ -1,20 +1,15 @@
-  <app-dynamic-form
-    [fields]="myFormFields"
-    titulo="Nuevo Tipo De Deducción"
-    subtitulo="Completa la información correspondiente"
-    (newDatBenChange)="obtenerDatos($event)"
-  ></app-dynamic-form>
-
+<app-dynamic-form
+  [fields]="myFormFields"
+  titulo="Nuevo Tipo De Deducción"
+  subtitulo="Completa la información correspondiente"
+  (newDatBenChange)="obtenerDatos($event)"
+></app-dynamic-form>
 
 <button
   mat-raised-button
   (click)="guardarTipoDeduccion()"
-  style="
-    background-color: #628780;
-    color: #ffffff;
-    border-radius: 5px;
-    padding: 10px 20px;
-  "
+  color="primary"
+  style="color: #ffffff; border-radius: 5px; padding: 10px 20px"
 >
   Crear Tipo Deducción
 </button>

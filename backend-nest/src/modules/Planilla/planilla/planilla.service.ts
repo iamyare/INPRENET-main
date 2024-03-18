@@ -1180,6 +1180,108 @@ ON deducciones."id_afiliado" = beneficios."id_afiliado"
           throw new NotFoundException(`planilla con ${codPlanilla} no encontrado.`);
       }
     } */
+  
+    async ObtenerPreliminar(idPlanilla: string): Promise<any> {
+      try {
+        console.log(idPlanilla);
+        
+        const query = `SELECT
+        COALESCE(deducciones."ID_PERSONA", beneficios."ID_PERSONA") AS "ID_PERSONA",
+        COALESCE(deducciones."DNI", beneficios."DNI") AS "DNI",
+        COALESCE(deducciones."NOMBRE_COMPLETO", beneficios."NOMBRE_COMPLETO") AS "NOMBRE_COMPLETO",
+        COALESCE(beneficios."Total Beneficio", 0) AS "Total Beneficio",
+        COALESCE(deducciones."Total Deducciones", 0) AS "Total Deducciones",
+        COALESCE(deducciones."CORREO_1", beneficios."CORREO_1") AS "CORREO_1",
+        COALESCE(deducciones."FECHA_CIERRE", beneficios."FECHA_CIERRE") AS "FECHA_CIERRE"
+    FROM
+        (SELECT
+            afil."ID_PERSONA",
+            afil."DNI",
+            afil."CORREO_1",
+            TRIM(
+                afil."PRIMER_NOMBRE" || ' ' ||
+                COALESCE(afil."SEGUNDO_NOMBRE", '') || ' ' ||
+                COALESCE(afil."TERCER_NOMBRE", '') || ' ' ||
+                afil."PRIMER_APELLIDO" || ' ' ||
+                COALESCE(afil."SEGUNDO_APELLIDO", '')
+            ) AS "NOMBRE_COMPLETO",
+            SUM(COALESCE(detBs."MONTO_A_PAGAR", 0)) AS "Total Beneficio",
+            pla."FECHA_CIERRE"
+        FROM
+            "NET_PERSONA" afil
+        LEFT JOIN
+            "NET_DETALLE_PERSONA" detP ON afil."ID_PERSONA" = detP."ID_PERSONA"
+        INNER JOIN "NET_DETALLE_BENEFICIO_AFILIADO" detBA ON 
+            detP."ID_PERSONA" = detBA."ID_BENEFICIARIO" AND
+            detP."ID_CAUSANTE" = detBA."ID_CAUSANTE"
+        LEFT JOIN
+            "NET_DETALLE_PAGO_BENEFICIO" detBs ON detBA."ID_DETALLE_BEN_AFIL" = detBs."ID_BENEFICIO_PLANILLA_AFIL"
+        LEFT JOIN
+            "NET_PLANILLA" pla ON detBs."ID_PLANILLA" = pla."ID_PLANILLA"
+        WHERE
+            pla."CODIGO_PLANILLA" = '${idPlanilla}'
+        GROUP BY
+            afil."ID_PERSONA",
+            afil."DNI",
+            afil."CORREO_1",
+            pla."FECHA_CIERRE",
+            TRIM(
+                afil."PRIMER_NOMBRE" || ' ' ||
+                COALESCE(afil."SEGUNDO_NOMBRE", '') || ' ' ||
+                COALESCE(afil."TERCER_NOMBRE", '') || ' ' ||
+                afil."PRIMER_APELLIDO" || ' ' ||
+                COALESCE(afil."SEGUNDO_APELLIDO", '')
+            )
+        HAVING
+            SUM(COALESCE(detBs."MONTO_A_PAGAR", 0)) > 0
+        ) beneficios
+    FULL OUTER JOIN
+        (SELECT
+            afil."ID_PERSONA",
+            afil."DNI",
+            afil."CORREO_1",
+            TRIM(
+                afil."PRIMER_NOMBRE" || ' ' ||
+                COALESCE(afil."SEGUNDO_NOMBRE", '') || ' ' ||
+                COALESCE(afil."TERCER_NOMBRE", '') || ' ' ||
+                afil."PRIMER_APELLIDO" || ' ' ||
+                COALESCE(afil."SEGUNDO_APELLIDO", '')
+            ) AS "NOMBRE_COMPLETO",
+            SUM(COALESCE(detDs."MONTO_APLICADO", 0)) AS "Total Deducciones",
+            pla."FECHA_CIERRE"
+        FROM
+            "NET_PERSONA" afil
+        LEFT JOIN
+            "NET_DETALLE_DEDUCCION" detDs ON afil."ID_PERSONA" = detDs."ID_PERSONA"
+        LEFT JOIN
+            "NET_PLANILLA" pla ON detDs."ID_PLANILLA" = pla."ID_PLANILLA"
+        WHERE
+            pla."CODIGO_PLANILLA" = '${idPlanilla}'
+        GROUP BY
+            afil."ID_PERSONA",
+            afil."DNI",
+            afil."CORREO_1",
+            pla."FECHA_CIERRE",
+            TRIM(
+                afil."PRIMER_NOMBRE" || ' ' ||
+                COALESCE(afil."SEGUNDO_NOMBRE", '') || ' ' ||
+                COALESCE(afil."TERCER_NOMBRE", '') || ' ' ||
+                afil."PRIMER_APELLIDO" || ' ' ||
+                COALESCE(afil."SEGUNDO_APELLIDO", '')
+            )
+        HAVING
+            SUM(COALESCE(detDs."MONTO_APLICADO", 0)) > 0
+        ) deducciones
+    ON deducciones."ID_PERSONA" = beneficios."ID_PERSONA"`;
+    console.log(query);
+    
+        const result = await this.entityManager.query(query);
+        return result;
+      } catch (error) {
+        this.logger.error(`Error al obtener totales por planilla: ${error.message}`, error.stack);
+        throw new InternalServerErrorException('Se produjo un error al obtener los totales por planilla.');
+      }
+    }
 
   async create(createPlanillaDto: CreatePlanillaDto) {
     const { codigo_planilla, secuencia, periodoInicio, periodoFinalizacion, nombre_planilla,  } = createPlanillaDto;
@@ -1278,6 +1380,8 @@ ON deducciones."id_afiliado" = beneficios."id_afiliado"
   }
 
   private handleException(error: any): void {
+    console.log(error);
+    
     this.logger.error(error);
     if (error.driverError && error.driverError.errorNum === 1) {
       throw new BadRequestException('Algun dato clave ya existe');

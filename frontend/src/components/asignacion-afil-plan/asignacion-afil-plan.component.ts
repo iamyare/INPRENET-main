@@ -131,75 +131,35 @@ export class AsignacionAfilPlanComponent implements OnInit {
 
   getFilas = async (periodoInicio: string, periodoFinalizacion: string) => {
     console.log(this.detallePlanilla.tipoPlanilla.nombre_planilla);
+    const serviceCalls:any = {
+      "ORDINARIA - AFILIADO": this.planillaService.getPlanillaOrdinariaAfiliados,
+      "ORDINARIA - BENEFICIARIO": this.planillaService.getPlanillaOrdinariaBeneficiarios,
+      "COMPLEMENTARIA - AFILIADO": this.planillaService.getPlanillaComplementariaAfiliados,
+      "COMPLEMENTARIA - BENEFICIARIO": this.planillaService.getPlanillaComplementariaBeneficiarios,
+    };
+
+    const mapData = (item:any) => ({
+      id_afiliado: item.id_afiliado,
+      dni: item.DNI,
+      NOMBRE_COMPLETO: item.NOMBRE_COMPLETO,
+      periodoInicio: periodoInicio,
+      periodoFinalizacion: periodoFinalizacion,
+      "Total Beneficio": item["Total Beneficio"],
+      "Total Deducciones": item["Total Deducciones"],
+      "Total": item["Total Beneficio"] - item["Total Deducciones"],
+      BENEFICIOSIDS: item.BENEFICIOSIDS,
+      beneficiosNombres: item.beneficiosNombres,
+    });
+
     try {
+      const serviceName = this.detallePlanilla.tipoPlanilla.nombre_planilla;
+      const serviceFunction = serviceCalls[serviceName];
 
-      if (this.detallePlanilla.tipoPlanilla.nombre_planilla == "ORDINARIA - AFILIADO") {
-        const data = await this.planillaService.getPlanillaOrdinariaAfiliados(periodoInicio, periodoFinalizacion).toPromise();
-        this.dataPlan = data.data.map((item: any) => {
-          return {
-            id_afiliado: item.id_afiliado,
-            dni: item.DNI,
-            NOMBRE_COMPLETO: item.NOMBRE_COMPLETO,
-            periodoInicio: periodoInicio,
-            periodoFinalizacion: periodoFinalizacion,
-            "Total Beneficio": item["Total Beneficio"],
-            "Total Deducciones": item["Total Deducciones"],
-            "Total": item["Total Beneficio"] - item["Total Deducciones"],
-            BENEFICIOSIDS: item.BENEFICIOSIDS,
-            beneficiosNombres: item.beneficiosNombres,
-          };
-        });
-      } else if (this.detallePlanilla.tipoPlanilla.nombre_planilla == "ORDINARIA - BENEFICIARIO") {
-        const data = await this.planillaService.getPlanillaOrdinariaBeneficiarios(periodoInicio, periodoFinalizacion).toPromise();
-        this.dataPlan = data.data.map((item: any) => {
-          return {
-            id_afiliado: item.id_afiliado,
-            dni: item.DNI,
-            NOMBRE_COMPLETO: item.NOMBRE_COMPLETO,
-            periodoInicio: periodoInicio,
-            periodoFinalizacion: periodoFinalizacion,
-            "Total Beneficio": item["Total Beneficio"],
-            "Total Deducciones": item["Total Deducciones"],
-            "Total": item["Total Beneficio"] - item["Total Deducciones"],
-            BENEFICIOSIDS: item.BENEFICIOSIDS,
-            beneficiosNombres: item.beneficiosNombres,
-          };
-        });
-      } else if (this.detallePlanilla.tipoPlanilla.nombre_planilla == "COMPLEMENTARIA - AFILIADO") {
-        const data = await this.planillaService.getPlanillaComplementariaAfiliados(periodoInicio, periodoFinalizacion).toPromise();
-        this.dataPlan = data.data.map((item: any) => {
-          return {
-            id_afiliado: item.id_afiliado,
-            dni: item.DNI,
-            NOMBRE_COMPLETO: item.NOMBRE_COMPLETO,
-            periodoInicio: periodoInicio,
-            periodoFinalizacion: periodoFinalizacion,
-            "Total Beneficio": item["Total Beneficio"],
-            "Total Deducciones": item["Total Deducciones"],
-            "Total": item["Total Beneficio"] - item["Total Deducciones"],
-            BENEFICIOSIDS: item.BENEFICIOSIDS,
-            beneficiosNombres: item.beneficiosNombres,
-          };
-        });
-
-      }
-      else if (this.detallePlanilla.tipoPlanilla.nombre_planilla == "COMPLEMENTARIA - BENEFICIARIO") {
-        const data = await this.planillaService.getPlanillaComplementariaBeneficiarios(periodoInicio, periodoFinalizacion).toPromise();
-        this.dataPlan = data.data.map((item: any) => {
-          return {
-            id_afiliado: item.id_afiliado,
-            dni: item.DNI,
-            NOMBRE_COMPLETO: item.NOMBRE_COMPLETO,
-            periodoInicio: periodoInicio,
-            periodoFinalizacion: periodoFinalizacion,
-            "Total Beneficio": item["Total Beneficio"],
-            "Total Deducciones": item["Total Deducciones"],
-            "Total": item["Total Beneficio"] - item["Total Deducciones"],
-            BENEFICIOSIDS: item.BENEFICIOSIDS,
-            beneficiosNombres: item.beneficiosNombres,
-          };
-        });
-
+      if (serviceFunction) {
+        const data = await serviceFunction.bind(this.planillaService)(periodoInicio, periodoFinalizacion).toPromise();
+        this.dataPlan = data.data.map(mapData);
+      } else {
+        console.error('Servicio no definido para el tipo de planilla:', serviceName);
       }
       return this.dataPlan;
     } catch (error) {
@@ -241,10 +201,10 @@ export class AsignacionAfilPlanComponent implements OnInit {
     };
 
     const serviceActions:any = {
-      'ORDINARIA - AFILIADO': this.planillaService.getPagoBeneficioOrdiAfil.bind(this.planillaService),
-      'ORDINARIA - BENEFICIARIO': this.planillaService.getPagoBeneficioOrdiBenef.bind(this.planillaService),
-      'COMPLEMENTARIA - AFILIADO': this.planillaService.getPagoBeneficioCompleAfil.bind(this.planillaService),
-      'COMPLEMENTARIA - BENEFICIARIO': this.planillaService.getPagoBeneficioCompleBenef.bind(this.planillaService),
+      "ORDINARIA - AFILIADO": this.planillaService.getPagoBeneficioOrdiAfil.bind(this.planillaService),
+      "ORDINARIA - BENEFICIARIO": this.planillaService.getPagoBeneficioOrdiBenef.bind(this.planillaService),
+      "COMPLEMENTARIA - AFILIADO": this.planillaService.getPagoBeneficioCompleAfil.bind(this.planillaService),
+      "COMPLEMENTARIA - BENEFICIARIO": this.planillaService.getPagoBeneficioCompleBenef.bind(this.planillaService),
     };
 
     const tipoPlanilla = this.detallePlanilla.tipoPlanilla.nombre_planilla;
@@ -287,10 +247,10 @@ export class AsignacionAfilPlanComponent implements OnInit {
     };
 
     const serviceActions:any = {
-      'ORDINARIA - AFILIADO': this.planillaService.getPagoDeduccionesOrdiAfil.bind(this.planillaService),
-      'ORDINARIA - BENEFICIARIO': this.planillaService.getPagoDeduccionesOrdiBenef.bind(this.planillaService),
-      'COMPLEMENTARIA - AFILIADO': this.planillaService.getPagoDeduccionesCompleAfil.bind(this.planillaService),
-      'COMPLEMENTARIA - BENEFICIARIO': this.planillaService.getPagoDeduccionesCompleBenef.bind(this.planillaService),
+      "ORDINARIA - AFILIADO": this.planillaService.getPagoDeduccionesOrdiAfil.bind(this.planillaService),
+      "ORDINARIA - BENEFICIARIO": this.planillaService.getPagoDeduccionesOrdiBenef.bind(this.planillaService),
+      "COMPLEMENTARIA - AFILIADO": this.planillaService.getPagoDeduccionesCompleAfil.bind(this.planillaService),
+      "COMPLEMENTARIA - BENEFICIARIO": this.planillaService.getPagoDeduccionesCompleBenef.bind(this.planillaService),
     };
 
     const tipoPlanilla = this.detallePlanilla.tipoPlanilla.nombre_planilla;

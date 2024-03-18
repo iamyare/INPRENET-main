@@ -1261,10 +1261,14 @@ ON deducciones."id_afiliado" = beneficios."id_afiliado"
    */
   async findOne(term: any) {
     let Planilla: Net_Planilla;
+    console.log(term);
     
-    if (isUUID(term)) {
-      Planilla = await this.planillaRepository.findOneBy({ id_planilla: term});
-    } else {
+    Planilla = await this.planillaRepository.findOneBy({ id_planilla: term});
+    console.log(Planilla);
+    
+    if (!Planilla) {
+      throw new NotFoundException(`planilla con ${term} no encontrado.`);
+    }
       const queryBuilder = await this.planillaRepository
       .createQueryBuilder('planilla')
       .addSelect('planilla.id_planilla', 'id_planilla')
@@ -1279,12 +1283,7 @@ ON deducciones."id_afiliado" = beneficios."id_afiliado"
       .where('planilla.codigo_planilla = :term AND planilla.estado = \'ACTIVA\'', { term } )
       .getRawMany();
       return queryBuilder[0];
-      
-      /* Planilla = await queryBuilder */
-    }
-    if (!Planilla) {
-      throw new NotFoundException(`planilla con ${term} no encontrado.`);
-    }
+    
   }
 
   remove(id: number) {

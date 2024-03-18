@@ -144,8 +144,8 @@ export class DetalleBeneficioService {
                 MONTO_TOTAL,
                 MONTO_POR_PERIODO
               ) VALUES (
-                ${detPerB.ID_PERSONA},
                 ${detPerB.ID_CAUSANTE},
+                ${detPerB.ID_PERSONA},
                 ${beneficio.id_beneficio},
                 '${datos.periodoInicio}',
                 '${datos.periodoFinalizacion}',

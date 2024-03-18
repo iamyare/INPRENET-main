@@ -157,6 +157,17 @@ actualizarEstado(idPlanilla: string, nuevoEstado: string): Observable<any> {
     return this.http.patch(`${environment.API_URL}/api/beneficio/${id}`, beneficioData);
   }
 
+  cargarBeneficiosRecient(): Observable<TipoBeneficio | void>{
+    var url = `${environment.API_URL}/api/beneficio-planilla/cargarDetBen`;
+    return this.http.get<any>(
+      url,
+      ).pipe(
+        map((res:any) => {
+          return res;
+        })
+      )
+  }
+
   private handleError(error: HttpErrorResponse) {
     // Maneja el error como prefieras, por ejemplo, mostrando una notificación
     this.toastr.error(error.message, 'Error');

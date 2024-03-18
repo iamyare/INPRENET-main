@@ -370,7 +370,6 @@ export class NuevoBeneficioAfilComponent implements OnInit{
   guardarNTBenef(){
     /* Asignar al afiliado si no ha fallecido */
     /* Asignar a los beneficioarios si el afiliado ya fallecio */
-
     if (this.Afiliado.estado != "FALLECIDO"){
       this.datosFormateados["dni"] = this.form.value.dni;
       this.svcBeneficioServ.asigBeneficioAfil(this.datosFormateados).subscribe(
@@ -393,7 +392,7 @@ export class NuevoBeneficioAfilComponent implements OnInit{
        })
     }else{
       this.datosFormateados["dni"] = this.FormBen.value.dni;
-      this.svcBeneficioServ.asigBeneficioAfil(this.datosFormateados, this.Afiliado.id_afiliado).subscribe(
+      this.svcBeneficioServ.asigBeneficioAfil(this.datosFormateados, this.Afiliado.id_persona).subscribe(
        {
          next: (response)=>{
            this.toastr.success("se asignó correctamente el beneficio");

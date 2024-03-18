@@ -34,11 +34,6 @@ drop table "C##TEST"."net_deduc_tipo_planilla" cascade constraints  ;
 drop table "C##TEST"."net_tipo_afiliado" cascade constraints  ;
 
 
-
-
-
-
-
 drop TABLE "C##TEST"."net_afiliado" cascade constraints ;
 drop TABLE "C##TEST"."net_afiliados_por_banco" cascade constraints ;
 drop TABLE "C##TEST"."net_banco" cascade constraints ;
@@ -173,4 +168,106 @@ BEGIN
     -- Incrementar num_rentas_aplicadas en 1
     :NEW."num_rentas_aplicadas" := v_old_num_rentas + 1;
   END IF;
+END;
+
+----------------------------------------------------------------------------------------------------------------------
+CREATE OR REPLACE PROCEDURE insertar_registros(
+    id_beneficio_planilla_out OUT SYS_REFCURSOR,
+    cantidad_registros_insertados OUT NUMBER
+) IS
+    CURSOR c_detalle_beneficio_afiliado IS
+        SELECT detBA."MONTO_POR_PERIODO", detBA."ID_DETALLE_BEN_AFIL"
+        FROM "NET_PERSONA" persona
+        INNER JOIN "NET_DETALLE_PERSONA" detPer ON persona."ID_PERSONA" = detPer."ID_PERSONA"
+        INNER JOIN "NET_DETALLE_BENEFICIO_AFILIADO" detBA ON 
+        detPer."ID_PERSONA" = detBA."ID_CAUSANTE" AND
+        detPer."ID_CAUSANTE" = detBA."ID_BENEFICIARIO"
+        AND SYSDATE BETWEEN detBA."PERIODO_INICIO" AND detBA."PERIODO_FINALIZACION"
+        INNER JOIN "NET_BENEFICIO" ben ON ben."ID_BENEFICIO" = detBA."ID_BENEFICIO";
+
+    v_monto_a_pagar NUMBER;
+    v_id_detalle_ben NUMBER;
+    v_id_beneficio_planilla NUMBER;
+    v_cursor SYS_REFCURSOR;
+    
+    fec_carga DATE := SYSDATE; -- Declarar y asignar SYSDATE a fec_carga aquí
+
+BEGIN
+    cantidad_registros_insertados := 0;
+
+    OPEN c_detalle_beneficio_afiliado;
+
+    LOOP
+        FETCH c_detalle_beneficio_afiliado INTO v_monto_a_pagar, v_id_detalle_ben;
+        EXIT WHEN c_detalle_beneficio_afiliado%NOTFOUND;
+
+        DECLARE
+            v_count NUMBER;
+        BEGIN
+            SELECT COUNT(*)
+            INTO v_count
+            FROM "NET_DETALLE_PAGO_BENEFICIO"
+            WHERE EXTRACT(YEAR FROM FECHA_CARGA) = EXTRACT(YEAR FROM fec_carga) -- Utilizar fec_carga aquí
+            AND EXTRACT(MONTH FROM FECHA_CARGA) = EXTRACT(MONTH FROM fec_carga) -- Utilizar fec_carga aquí
+            AND "ID_BENEFICIO_PLANILLA_AFIL" = v_id_detalle_ben;
+
+            IF v_count = 0 THEN
+                INSERT INTO "NET_DETALLE_PAGO_BENEFICIO" ("FECHA_CARGA", "MONTO_A_PAGAR", "ID_BENEFICIO_PLANILLA_AFIL")
+                VALUES (fec_carga, v_monto_a_pagar, v_id_detalle_ben)
+                RETURNING "ID_BENEFICIO_PLANILLA" INTO v_id_beneficio_planilla;
+                
+                cantidad_registros_insertados := cantidad_registros_insertados + 1;
+            END IF; 
+        END;
+    END LOOP;
+    
+    OPEN v_cursor FOR
+        SELECT *
+        FROM "NET_DETALLE_PAGO_BENEFICIO" 
+        WHERE "FECHA_CARGA" = fec_carga;
+
+    CLOSE c_detalle_beneficio_afiliado;
+
+    id_beneficio_planilla_out := v_cursor;
+    
+    COMMIT;
+
+EXCEPTION
+    WHEN OTHERS THEN
+        ROLLBACK;
+        RAISE;
+END;
+
+--------------------------------------------------------------------------------------------------------------------
+DECLARE
+    -- Declarar variables para los parámetros de salida
+    id_beneficio_planilla_out SYS_REFCURSOR;
+    cantidad_registros_insertados NUMBER;
+BEGIN
+    -- Llamar al procedimiento insertar_registros
+    insertar_registros(
+        id_beneficio_planilla_out ,
+        cantidad_registros_insertados 
+    );
+   
+END;
+
+--------------------------------------------------------------------------------------------------------------------
+BEGIN
+  DBMS_SCHEDULER.CREATE_JOB (
+    job_name          => 'jb_ins_regis_beneficios',
+    job_type          => 'PLSQL_BLOCK',
+    job_action        => 'BEGIN insertar_registros; END;',
+    start_date        => SYSTIMESTAMP,
+    repeat_interval   => 'FREQ=MINUTELY; INTERVAL=1', -- Cambia esto según el intervalo deseado
+    enabled           => TRUE
+  );
+END;
+
+BEGIN
+    insertar_registros();
+END;
+
+BEGIN
+  DBMS_SCHEDULER.DROP_JOB('jb_ins_benef');
 END;

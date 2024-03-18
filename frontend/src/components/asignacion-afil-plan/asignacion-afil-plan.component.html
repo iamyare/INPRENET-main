@@ -1,14 +1,6 @@
 <div>
-  <app-dynamic-form
-    [fields]="myFormFields"
-    titulo="Detalles De Planilla"
-    subtitulo="Completa la información correspondiente"
-    (newDatBenChange)="obtenerDatosForm($event)"
-  ></app-dynamic-form>
-
   <button
-    (click)="getPlanilla()"
-    [disabled]="datosFormateados.invalid"
+    (click)="cargarBeneficiosRecient()"
     mat-raised-button
     style="
       margin: 2% 0;
@@ -18,8 +10,32 @@
       padding: 10px 20px;
     "
   >
-    Previsualizar Datos Planilla
+    Cargar Beneficios Recientes
   </button>
+
+  <div *ngIf="mostDet">
+    <app-dynamic-form
+      [fields]="myFormFields"
+      titulo="Detalles De Planilla"
+      subtitulo="Completa la información correspondiente"
+      (newDatBenChange)="obtenerDatosForm($event)"
+    ></app-dynamic-form>
+
+    <button
+      (click)="getPlanilla()"
+      [disabled]="datosFormateados.invalid"
+      mat-raised-button
+      style="
+        margin: 2% 0;
+        background-color: #628780;
+        color: #ffffff;
+        border-radius: 5px;
+        padding: 10px 20px;
+      "
+    >
+      Previsualizar Datos Planilla
+    </button>
+  </div>
 
   <div class="card-header card-header-danger title" *ngIf="detallePlanilla">
     <div class="card-body" style="padding: 1%">

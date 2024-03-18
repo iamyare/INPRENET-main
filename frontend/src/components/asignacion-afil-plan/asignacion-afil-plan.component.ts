@@ -16,34 +16,34 @@ import { BeneficiosService } from '../../app/services/beneficios.service';
   templateUrl: './asignacion-afil-plan.component.html',
   styleUrl: './asignacion-afil-plan.component.scss'
 })
-export class AsignacionAfilPlanComponent implements OnInit{
+export class AsignacionAfilPlanComponent implements OnInit {
   convertirFecha = convertirFecha;
-  mostDet: any= false;
-  dataPlan : any;
+  mostDet: any = false;
+  dataPlan: any;
   filas: any;
   tiposPlanilla: any[] = [];
   datosFormateados: any;
 
   myFormFields: FieldConfig[] = [];
   myColumnsDed: TableColumn[] = [];
-  datosTabl:  any[] = [];
+  datosTabl: any[] = [];
 
   verDat: boolean = false;
   ejecF: any;
 
-  datosFilasDeduccion : any;
-  datosFilasBeneficios : any;
+  datosFilasDeduccion: any;
+  datosFilasBeneficios: any;
 
-  detallePlanilla:any
+  detallePlanilla: any
   constructor(
     private _formBuilder: FormBuilder,
-    private planillaService : PlanillaService,
+    private planillaService: PlanillaService,
     private svcAfilServ: AfiliadoService,
     private toastr: ToastrService,
     public dialog: MatDialog,
-    private deduccionesService : DeduccionesService,
-    private beneficiosService : BeneficiosService
-    ) {
+    private deduccionesService: DeduccionesService,
+    private beneficiosService: BeneficiosService
+  ) {
   }
 
   ngOnInit(): void {
@@ -57,11 +57,6 @@ export class AsignacionAfilPlanComponent implements OnInit{
       {
         header: 'Nombre Completo',
         col: 'NOMBRE_COMPLETO',
-        isEditable: true
-      },
-      {
-        header: 'Tipo Afiliado',
-        col: 'tipo_afiliado',
         isEditable: true
       },
       {
@@ -84,13 +79,13 @@ export class AsignacionAfilPlanComponent implements OnInit{
 
     this.myFormFields = [
       {
-        type: 'string', label: 'Código De Planilla', name: 'codigo_planilla', validations: [Validators.required], display:true
+        type: 'string', label: 'Código De Planilla', name: 'codigo_planilla', validations: [Validators.required], display: true
       },
     ]
   }
 
   /* Se ejecuta cuando un valor del formulario cambia */
-  obtenerDatosForm(event:any):any{
+  obtenerDatosForm(event: any): any {
     this.datosFormateados = event;
   }
 
@@ -100,11 +95,13 @@ export class AsignacionAfilPlanComponent implements OnInit{
       this.planillaService.getPlanillaBy(this.datosFormateados.value.codigo_planilla).subscribe(
         {
           next: async (response) => {
-            if (response) {
-              this.detallePlanilla = response;
-              this.datosTabl = await this.getFilas(response.periodoInicio, response.periodoFinalizacion);
-              this.verDat = true;
 
+            if (response.data) {
+              this.detallePlanilla = response.data;
+              const periodoInicioFormatoNuevo = this.convertirFormatoFecha(response.data.periodoInicio);
+              const periodoFinalizacionFormatoNuevo = this.convertirFormatoFecha(response.data.periodoFinalizacion);
+              this.datosTabl = await this.getFilas(periodoInicioFormatoNuevo, periodoFinalizacionFormatoNuevo);
+              this.verDat = true;
             } else {
               this.detallePlanilla = [];
               this.datosTabl = [];
@@ -127,73 +124,83 @@ export class AsignacionAfilPlanComponent implements OnInit{
         }
       );
 
-
     } catch (error) {
       console.error("Error al obtener datos de Tipo Planilla", error);
     }
   };
 
   getFilas = async (periodoInicio: string, periodoFinalizacion: string) => {
+    console.log(this.detallePlanilla.tipoPlanilla.nombre_planilla);
     try {
 
-      if (this.detallePlanilla.nombre_planilla == "COMPLEMENTARIA"){
-        const data = await this.planillaService.getDatosComplementaria(periodoInicio, periodoFinalizacion).toPromise();
-        this.dataPlan = data.map((item: any) => {
+      if (this.detallePlanilla.tipoPlanilla.nombre_planilla == "Ordinaria - Afiliado") {
+        const data = await this.planillaService.getPlanillaOrdinariaAfiliados(periodoInicio, periodoFinalizacion).toPromise();
+        this.dataPlan = data.data.map((item: any) => {
           return {
             id_afiliado: item.id_afiliado,
-            dni: item.dni,
+            dni: item.DNI,
             NOMBRE_COMPLETO: item.NOMBRE_COMPLETO,
-            periodoInicio : periodoInicio,
-            periodoFinalizacion : periodoFinalizacion,
+            periodoInicio: periodoInicio,
+            periodoFinalizacion: periodoFinalizacion,
             "Total Beneficio": item["Total Beneficio"],
             "Total Deducciones": item["Total Deducciones"],
             "Total": item["Total Beneficio"] - item["Total Deducciones"],
-            tipo_afiliado: item.tipo_afiliado,
             BENEFICIOSIDS: item.BENEFICIOSIDS,
             beneficiosNombres: item.beneficiosNombres,
           };
         });
-      }else if (this.detallePlanilla.nombre_planilla == "ORDINARIA"){
-        const data = await this.planillaService.getDatosOrdinaria(periodoInicio, periodoFinalizacion).toPromise();
-        this.dataPlan = data.map((item: any) => {
+      } else if (this.detallePlanilla.tipoPlanilla.nombre_planilla == "Ordinaria - Beneficiario") {
+        const data = await this.planillaService.getPlanillaOrdinariaBeneficiarios(periodoInicio, periodoFinalizacion).toPromise();
+        this.dataPlan = data.data.map((item: any) => {
           return {
             id_afiliado: item.id_afiliado,
-            dni: item.dni,
+            dni: item.DNI,
             NOMBRE_COMPLETO: item.NOMBRE_COMPLETO,
+            periodoInicio: periodoInicio,
+            periodoFinalizacion: periodoFinalizacion,
             "Total Beneficio": item["Total Beneficio"],
             "Total Deducciones": item["Total Deducciones"],
             "Total": item["Total Beneficio"] - item["Total Deducciones"],
-            periodoInicio : periodoInicio,
-            periodoFinalizacion : periodoFinalizacion,
-            tipo_afiliado: item.tipo_afiliado,
             BENEFICIOSIDS: item.BENEFICIOSIDS,
             beneficiosNombres: item.beneficiosNombres,
-            DEDUCCIONESIDS: item.DEDUCCIONESIDS,
-            deduccionesNombres: item.deduccionesNombres,
           };
         });
-      }else if (this.detallePlanilla.nombre_planilla == "EXTRAORDINARIA"){
-        const data = await this.planillaService.getDatosExtraordinaria(periodoInicio, periodoFinalizacion).toPromise();
-        this.dataPlan = data.map((item: any) => {
+      } else if (this.detallePlanilla.tipoPlanilla.nombre_planilla == "Complementaria - Afiliado") {
+        const data = await this.planillaService.getPlanillaComplementariaAfiliados(periodoInicio, periodoFinalizacion).toPromise();
+        this.dataPlan = data.data.map((item: any) => {
           return {
             id_afiliado: item.id_afiliado,
-            dni: item.dni,
+            dni: item.DNI,
             NOMBRE_COMPLETO: item.NOMBRE_COMPLETO,
+            periodoInicio: periodoInicio,
+            periodoFinalizacion: periodoFinalizacion,
             "Total Beneficio": item["Total Beneficio"],
             "Total Deducciones": item["Total Deducciones"],
             "Total": item["Total Beneficio"] - item["Total Deducciones"],
-            periodoInicio : periodoInicio,
-            periodoFinalizacion : periodoFinalizacion,
-            tipo_afiliado: item.tipo_afiliado,
             BENEFICIOSIDS: item.BENEFICIOSIDS,
             beneficiosNombres: item.beneficiosNombres,
-            DEDUCCIONESIDS: item.DEDUCCIONESIDS,
-            deduccionesNombres: item.deduccionesNombres,
           };
         });
 
       }
+      else if (this.detallePlanilla.tipoPlanilla.nombre_planilla == "Complementaria - Beneficiario") {
+        const data = await this.planillaService.getPlanillaComplementariaBeneficiarios(periodoInicio, periodoFinalizacion).toPromise();
+        this.dataPlan = data.data.map((item: any) => {
+          return {
+            id_afiliado: item.id_afiliado,
+            dni: item.DNI,
+            NOMBRE_COMPLETO: item.NOMBRE_COMPLETO,
+            periodoInicio: periodoInicio,
+            periodoFinalizacion: periodoFinalizacion,
+            "Total Beneficio": item["Total Beneficio"],
+            "Total Deducciones": item["Total Deducciones"],
+            "Total": item["Total Beneficio"] - item["Total Deducciones"],
+            BENEFICIOSIDS: item.BENEFICIOSIDS,
+            beneficiosNombres: item.beneficiosNombres,
+          };
+        });
 
+      }
       return this.dataPlan;
     } catch (error) {
       console.error("Error al obtener datos de deducciones", error);
@@ -201,112 +208,105 @@ export class AsignacionAfilPlanComponent implements OnInit{
     }
   }
 
-  ejecutarFuncionAsincronaDesdeOtroComponente(funcion: (data:any) => Promise<void>) {
+  ejecutarFuncionAsincronaDesdeOtroComponente(funcion: (data: any) => Promise<void>) {
     this.ejecF = funcion;
   }
 
-  editar = (row: any) => {}
-
-  /* Maneja las deducciones */
-  manejarAccionDos(row: any) {
-    let logs: any[] = []; // Array para almacenar logs
-    logs.push({ message: `DNI: ${row.dni}`, detail: row });
-    logs.push({ message: `Nombre Completo: ${row.NOMBRE_COMPLETO}`, detail: row });
-
-    const openDialog = () => this.dialog.open(DynamicDialogComponent, {
-      width: '50%', // o el ancho que prefieras
-      data: { logs: logs, type: 'deduccion' } // Asegúrate de pasar el 'type' adecuado
-    });
-
-    if (this.detallePlanilla.nombre_planilla === 'EXTRAORDINARIA') {
-      this.deduccionesService.findInconsistentDeduccionesByAfiliado(row.id_afiliado).subscribe({
-
-        next: (response) => {
-          logs.push({ message: 'Datos De Deducciones Inconsistentes:', detail: response });
-          openDialog();
-        },
-        error: (error) => {
-          logs.push({ message: 'Error al obtener las deducciones inconsistentes:', detail: error });
-          openDialog();
-        }
-      });
-
-    } else if(this.detallePlanilla.nombre_planilla === 'ORDINARIA') {
-      this.deduccionesService.getDetalleDeduccionesPorRango(row.id_afiliado, row.periodoInicio, row.periodoFinalizacion).subscribe({
-        next: (response) => {
-          logs.push({ message: 'Datos De Deducciones:', detail: response });
-          openDialog();
-        },
-        error: (error) => {
-          logs.push({ message: 'Error al obtener las deducciones:', detail: error });
-          openDialog();
-        }
-      });
-
-    } else if(this.detallePlanilla.nombre_planilla === 'COMPLEMENTARIA') {
-      this.deduccionesService.obtenerDetallesDeduccionComplePorAfiliado(row.id_afiliado).subscribe({
-        next: (response) => {
-          logs.push({ message: 'Datos De Deducciones Complementarias:', detail: response });
-          openDialog();
-        },
-        error: (error) => {
-          logs.push({ message: 'Error al obtener las deducciones complementarias:', detail: error });
-          openDialog();
-        }
-      });
-    }
-  }
+  editar = (row: any) => { }
 
   /* Maneja los beneficios */
   manejarAccionUno(row: any) {
     let logs: any[] = [];
-    logs.push({ message: `DNI: ${row.dni}`, detail: row });
-    logs.push({ message: `Nombre Completo: ${row.NOMBRE_COMPLETO}`, detail: row });
+    logs.push({ message: `DNI: ${row.dni}`, detail: null  });
+    logs.push({ message: `Nombre Completo: ${row.NOMBRE_COMPLETO}`, detail: null  });
 
-    // Función auxiliar para abrir el diálogo una vez que todos los datos están listos
-    const openDialog = () => this.dialog.open(DynamicDialogComponent, {
-      width: '50%',
-      data: { logs: logs, type: 'beneficio' }
-    });
-
-    if (this.detallePlanilla.nombre_planilla === 'EXTRAORDINARIA') {
-      this.beneficiosService.obtenerDetallesExtraordinariaPorAfil(row.id_afiliado).subscribe({
-        next: (response) => {
-          logs.push({ message: 'Datos De Beneficios Inconsistentes:', detail: response });
-          openDialog();
-        },
-        error: (error) => {
-          logs.push({ message: 'Error al obtener los beneficios inconsistentes:', detail: error });
-          openDialog();
-        }
+    const openDialog = (beneficios:any) => {
+      logs.push({ message: 'Datos De Beneficio:', detail: beneficios });
+      this.dialog.open(DynamicDialogComponent, {
+        width: '50%',
+        data: { logs: logs, type: 'beneficio' }
       });
+    };
 
-    } else if(this.detallePlanilla.nombre_planilla === 'ORDINARIA') {
-      this.beneficiosService.obtenerDetallesOrdinariaBeneficioPorAfil(row.id_afiliado, row.periodoInicio, row.periodoFinalizacion).subscribe({
-        next: (response) => {
-          logs.push({ message: 'Datos De Beneficios: ', detail: response });
-          openDialog();
-        },
-        error: (error) => {
-          logs.push({ message: 'Error al obtener los beneficios:', detail: error });
-          openDialog();
-        }
+    const handleError = (error:any) => {
+      logs.push({ message: 'Error al obtener los beneficios:', detail: error });
+      openDialog([]);
+    };
+
+    const mapBeneficios = (response:any) => {
+      return response.data.map((b:any) => ({
+        NOMBRE_BENEFICIO: b.NOMBRE_BENEFICIO,
+        MontoAPagar: b.MontoAPagar
+      }));
+    };
+
+    const serviceActions:any = {
+      'Ordinaria - Afiliado': this.planillaService.getPagoBeneficioOrdiAfil.bind(this.planillaService),
+      'Ordinaria - Beneficiario': this.planillaService.getPagoBeneficioOrdiBenef.bind(this.planillaService),
+      'Complementaria - Afiliado': this.planillaService.getPagoBeneficioCompleAfil.bind(this.planillaService),
+      'Complementaria - Beneficiario': this.planillaService.getPagoBeneficioCompleBenef.bind(this.planillaService),
+    };
+
+    const tipoPlanilla = this.detallePlanilla.tipoPlanilla.nombre_planilla;
+    const serviceCall = serviceActions[tipoPlanilla];
+
+    if (serviceCall) {
+      serviceCall(row.dni, row.periodoInicio, row.periodoFinalizacion).subscribe({
+        next: (response:any) => openDialog(mapBeneficios(response)),
+        error: handleError
       });
-
-    } else if(this.detallePlanilla.nombre_planilla === 'COMPLEMENTARIA') {
-      this.beneficiosService.obtenerDetallesBeneficioComplePorAfiliado(row.id_afiliado).subscribe({
-        next: (response) => {
-          logs.push({ message: 'Datos De Deducciones Complementarias:', detail: response });
-          openDialog();
-        },
-        error: (error) => {
-          logs.push({ message: 'Error al obtener las deducciones complementarias:', detail: error });
-          openDialog();
-        }
-      });
-
+    } else {
+      console.error('No existe una acción para este tipo de planilla:', tipoPlanilla);
     }
   }
+
+  /* Maneja las deducciones */
+  manejarAccionDos(row: any) {
+    let logs: any[] = [];
+    logs.push({ message: `DNI: ${row.dni}`, detail: null  });
+    logs.push({ message: `Nombre Completo: ${row.NOMBRE_COMPLETO}`, detail: null  });
+
+    const openDialog = (deducciones:any) => {
+      logs.push({ message: 'Datos De Deduccion:', detail: deducciones });
+      this.dialog.open(DynamicDialogComponent, {
+        width: '50%',
+        data: { logs: logs, type: 'deduccion' }
+      });
+    };
+
+    const handleError = (error:any) => {
+      logs.push({ message: 'Error al obtener las deducciones:', detail: error });
+      openDialog([]);
+    };
+
+    const mapDeducciones = (response:any) => {
+      return response.data.map((b:any) => ({
+        NOMBRE_DEDUCCION: b.NOMBRE_DEDUCCION,
+        MontoAplicado: b.MontoAplicado
+      }));
+    };
+
+    const serviceActions:any = {
+      'Ordinaria - Afiliado': this.planillaService.getPagoDeduccionesOrdiAfil.bind(this.planillaService),
+      'Ordinaria - Beneficiario': this.planillaService.getPagoDeduccionesOrdiBenef.bind(this.planillaService),
+      'Complementaria - Afiliado': this.planillaService.getPagoDeduccionesCompleAfil.bind(this.planillaService),
+      'Complementaria - Beneficiario': this.planillaService.getPagoDeduccionesCompleBenef.bind(this.planillaService),
+    };
+
+    const tipoPlanilla = this.detallePlanilla.tipoPlanilla.nombre_planilla;
+    const serviceCall = serviceActions[tipoPlanilla];
+
+    if (serviceCall) {
+      serviceCall(row.dni, row.periodoInicio, row.periodoFinalizacion).subscribe({
+        next: (response:any) => openDialog(mapDeducciones(response)),
+        error: handleError
+      });
+    } else {
+      console.error('No existe una acción para este tipo de planilla:', tipoPlanilla);
+    }
+  }
+
+
 
   openLogDialog(logs: any[]) {
     this.dialog.open(DynamicDialogComponent, {
@@ -330,7 +330,7 @@ export class AsignacionAfilPlanComponent implements OnInit{
             })
         );
       } else if (this.detallePlanilla.nombre_planilla === 'ORDINARIA') {
-         promesas = this.datosTabl.map(row =>
+        promesas = this.datosTabl.map(row =>
           this.deduccionesService.getDetalleDeduccionesPorRango(row.id_afiliado, row.periodoInicio, row.periodoFinalizacion).toPromise()
             .then(deduccionesOrdinaria => deduccionesOrdinaria)
             .catch(error => {
@@ -347,7 +347,7 @@ export class AsignacionAfilPlanComponent implements OnInit{
               return [];
             })
         );
-      }else {
+      } else {
         datosFilasDeduccion = [...this.datosTabl];
       }
 
@@ -362,9 +362,9 @@ export class AsignacionAfilPlanComponent implements OnInit{
     return this.datosFilasDeduccion;
   }
 
-  async ingresarBeneficiosPlanilla(){
+  async ingresarBeneficiosPlanilla() {
     let datosFilasBeneficios = [];
-    let promesas:any[] = [];
+    let promesas: any[] = [];
 
     try {
 
@@ -410,8 +410,8 @@ export class AsignacionAfilPlanComponent implements OnInit{
     return datosFilasBeneficios;
   }
 
-  async actualizarBeneficios(datosFilasBeneficios:any) {
-    const detallesParaActualizar = datosFilasBeneficios.map((beneficio:any) => ({
+  async actualizarBeneficios(datosFilasBeneficios: any) {
+    const detallesParaActualizar = datosFilasBeneficios.map((beneficio: any) => ({
       idBeneficioPlanilla: beneficio.id_beneficio_planilla,
       codigoPlanilla: this.detallePlanilla.codigo_planilla,
       estado: 'EN PRELIMINAR'
@@ -427,8 +427,8 @@ export class AsignacionAfilPlanComponent implements OnInit{
     }
   }
 
-  async actualizarDeducciones(datosFilasDeduccion:any) {
-    const detallesParaActualizar = datosFilasDeduccion.map((deduccion:any) => ({
+  async actualizarDeducciones(datosFilasDeduccion: any) {
+    const detallesParaActualizar = datosFilasDeduccion.map((deduccion: any) => ({
       idDedDeduccion: deduccion.id_ded_deduccion,
       codigoPlanilla: this.detallePlanilla.codigo_planilla,
       estadoAplicacion: 'EN PRELIMINAR'
@@ -465,7 +465,7 @@ export class AsignacionAfilPlanComponent implements OnInit{
 
     if (resultados[0].error) {
       console.error('Se encontró un error en deducciones:', resultados[0].detalle);
-    }if (resultados[1]?.error) {
+    } if (resultados[1]?.error) {
       console.error('Se encontró un error en beneficios:', resultados[1].detalle);
     }
 
@@ -476,9 +476,9 @@ export class AsignacionAfilPlanComponent implements OnInit{
     }
   }
 
-  cargarBeneficiosRecient(){
+  cargarBeneficiosRecient() {
     this.beneficiosService.cargarBeneficiosRecient().subscribe({
-      next: (response:any) => {
+      next: (response: any) => {
         console.log(response);
         let temp = response.Registros;
         this.mostDet = true
@@ -487,5 +487,9 @@ export class AsignacionAfilPlanComponent implements OnInit{
         console.log(error);
       }
     });
+  }
+
+  convertirFormatoFecha(fecha: string): string {
+    return fecha.replace(/-/g, '.');
   }
 }

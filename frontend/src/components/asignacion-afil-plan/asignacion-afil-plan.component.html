@@ -43,7 +43,7 @@
       <table>
         <tr>
           <th>Nombre Planilla</th>
-          <td>{{ detallePlanilla?.nombre_planilla }}</td>
+          <td>{{ detallePlanilla?.tipoPlanilla.nombre_planilla }}</td>
           <th>Fecha Apertura</th>
           <td>{{ convertirFecha(detallePlanilla?.fecha_apertura, true) }}</td>
         </tr>
@@ -101,3 +101,16 @@
     </div>
   </div>
 </div>
+
+
+<!--
+
+  [nombreEncabezadoUno]="'Detalle Ingresos'"
+          [mostrarBotonUno]="true"
+          [etiquetaBotonUno]="'Detalle Ingresos'"
+          (accionBotonUno)="manejarAccionUno($event)"
+          [nombreEncabezadoDos]="'Detalle Deducciones'"
+          [mostrarBotonDos]="true"
+          [etiquetaBotonDos]="'Detalle Deducciones'"
+          (accionBotonDos)="manejarAccionDos($event)"
+ -->

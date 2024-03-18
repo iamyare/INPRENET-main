@@ -41,6 +41,19 @@ export class PlanillaService {
     private readonly deduccionRepository: Repository<Net_Deduccion>,){
   };
 
+  async findOne(codigoPlanilla: string): Promise<Net_Planilla | undefined> {
+    const planilla = await this.planillaRepository.findOne({
+      where: { codigo_planilla: codigoPlanilla, estado: 'ACTIVA' },
+      relations: ['tipoPlanilla'],
+    });
+
+    if (!planilla) {
+      throw new NotFoundException(`Planilla con código ${codigoPlanilla} no encontrada.`);
+    }
+
+    return planilla;
+  }
+
   async getPlanillaOrdinariaAfiliados(periodoInicio: string, periodoFinalizacion: string): Promise<any> {
     const query = `
       SELECT 
@@ -52,14 +65,14 @@ export class PlanillaService {
             p.PRIMER_APELLIDO || ' ' || 
             COALESCE(p.SEGUNDO_APELLIDO, '')
         ) AS NOMBRE_COMPLETO,
-        bens."Suma Monto a Pagar", 
-        COALESCE(deds.total_monto_aplicado, 0) AS total_monto_aplicado
+        bens."Total Beneficio", 
+        COALESCE(deds."Total Deducciones", 0) AS "Total Deducciones"
       FROM 
         NET_PERSONA p
       JOIN (
         SELECT
             dba.ID_BENEFICIARIO AS ID_BENEFICIARIO,
-            SUM(dpb.monto_a_pagar) AS "Suma Monto a Pagar"
+            SUM(dpb.monto_a_pagar) AS "Total Beneficio"
         FROM
             NET_DETALLE_BENEFICIO_AFILIADO dba
         JOIN
@@ -84,7 +97,7 @@ export class PlanillaService {
       LEFT JOIN (
         SELECT 
             dd.ID_PERSONA AS ID_PERSONA,
-            SUM(dd.MONTO_APLICADO) AS total_monto_aplicado
+            SUM(dd.MONTO_APLICADO) AS "Total Deducciones"
         FROM 
             NET_DETALLE_DEDUCCION dd
         JOIN 
@@ -172,14 +185,14 @@ export class PlanillaService {
             p.PRIMER_APELLIDO || ' ' || 
             COALESCE(p.SEGUNDO_APELLIDO, '')
         ) AS NOMBRE_COMPLETO,
-        bens."Suma Monto a Pagar", 
-        COALESCE(deds.total_monto_aplicado, 0) AS total_monto_aplicado
+        bens."Total Beneficio", 
+        COALESCE(deds."Total Deducciones", 0) AS "Total Deducciones"
       FROM 
         NET_PERSONA p
       JOIN (
           SELECT
               dba.ID_BENEFICIARIO AS ID_BENEFICIARIO,
-              SUM(dpb.monto_a_pagar) AS "Suma Monto a Pagar"
+              SUM(dpb.monto_a_pagar) AS "Total Beneficio"
           FROM
               NET_DETALLE_BENEFICIO_AFILIADO dba
           JOIN
@@ -204,7 +217,7 @@ export class PlanillaService {
       LEFT JOIN (
           SELECT 
               dd.ID_PERSONA AS ID_PERSONA,
-              SUM(dd.MONTO_APLICADO) AS total_monto_aplicado
+              SUM(dd.MONTO_APLICADO) AS "Total Deducciones"
           FROM 
               NET_DETALLE_DEDUCCION dd
           JOIN 
@@ -295,14 +308,14 @@ export class PlanillaService {
             p.PRIMER_APELLIDO || ' ' || 
             COALESCE(p.SEGUNDO_APELLIDO, '')
         ) AS NOMBRE_COMPLETO,
-        bens."Suma Monto a Pagar" AS "Suma Monto a Pagar", 
-        COALESCE(deds.total_monto_aplicado, 0) AS "Total Monto Aplicado"
+        bens."Total Beneficio", 
+        COALESCE(deds."Total Deducciones", 0) AS "Total Deducciones"
       FROM 
         NET_PERSONA p
       JOIN (
           SELECT
               dba.ID_BENEFICIARIO,
-              SUM(dpb.monto_a_pagar) AS "Suma Monto a Pagar"
+              SUM(dpb.monto_a_pagar) AS "Total Beneficio"
           FROM
               NET_DETALLE_BENEFICIO_AFILIADO dba
           INNER JOIN
@@ -326,7 +339,7 @@ export class PlanillaService {
       LEFT JOIN (
           SELECT 
               dd.ID_PERSONA,
-              SUM(dd.MONTO_APLICADO) AS total_monto_aplicado
+              SUM(dd.MONTO_APLICADO) AS "Total Deducciones"
           FROM 
               NET_DETALLE_DEDUCCION dd
           INNER JOIN 
@@ -422,14 +435,14 @@ export class PlanillaService {
             p.PRIMER_APELLIDO || ' ' || 
             COALESCE(p.SEGUNDO_APELLIDO, '')
         ) AS NOMBRE_COMPLETO,
-        bens."Suma Monto a Pagar" AS "Suma Monto a Pagar", 
-        COALESCE(deds.total_monto_aplicado, 0) AS "Total Monto Aplicado"
+        bens."Total Beneficio", 
+        COALESCE(deds."Total Deducciones", 0) AS "Total Deducciones"
       FROM 
         NET_PERSONA p
       JOIN (
           SELECT
               dba.ID_BENEFICIARIO,
-              SUM(dpb.monto_a_pagar) AS "Suma Monto a Pagar"
+              SUM(dpb.monto_a_pagar) AS "Total Beneficio"
           FROM
               NET_DETALLE_BENEFICIO_AFILIADO dba
           INNER JOIN
@@ -454,7 +467,7 @@ export class PlanillaService {
       LEFT JOIN (
           SELECT 
               dd.ID_PERSONA,
-              SUM(dd.MONTO_APLICADO) AS total_monto_aplicado
+              SUM(dd.MONTO_APLICADO) AS "Total Deducciones"
           FROM 
               NET_DETALLE_DEDUCCION dd
           INNER JOIN 
@@ -1259,32 +1272,6 @@ ON deducciones."id_afiliado" = beneficios."id_afiliado"
   /* 
     * Busca planillas que esten activas
    */
-  async findOne(term: any) {
-    let Planilla: Net_Planilla;
-    console.log(term);
-    
-    Planilla = await this.planillaRepository.findOneBy({ id_planilla: term});
-    console.log(Planilla);
-    
-    if (!Planilla) {
-      throw new NotFoundException(`planilla con ${term} no encontrado.`);
-    }
-      const queryBuilder = await this.planillaRepository
-      .createQueryBuilder('planilla')
-      .addSelect('planilla.id_planilla', 'id_planilla')
-      .addSelect('planilla.codigo_planilla', 'codigo_planilla')
-      .addSelect('planilla.fecha_apertura', 'fecha_apertura')
-      .addSelect('planilla.secuencia', 'secuencia')
-      .addSelect('planilla.estado', 'estado')
-      .addSelect('planilla.periodoInicio', 'periodoInicio')
-      .addSelect('planilla.periodoFinalizacion', 'periodoFinalizacion')
-      .addSelect('tipP.nombre_planilla', 'nombre_planilla')
-      .innerJoin(Net_TipoPlanilla, 'tipP', 'tipP.id_tipo_planilla = planilla.id_tipo_planilla')
-      .where('planilla.codigo_planilla = :term AND planilla.estado = \'ACTIVA\'', { term } )
-      .getRawMany();
-      return queryBuilder[0];
-    
-  }
 
   remove(id: number) {
     return `This action removes a #${id} planilla`;

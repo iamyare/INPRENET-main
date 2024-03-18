@@ -378,10 +378,21 @@ export class PlanillaController {
     } 
   */
 
-  @Get(':term')
-  findOne(@Param('term') term: string) {
-    return this.planillaService.findOne(term);
-  }
+    @Get(':codigoPlanilla')
+    async findOne(@Param('codigoPlanilla') codigoPlanilla: string, @Res() res) {
+      const planilla = await this.planillaService.findOne(codigoPlanilla);
+  
+      if (!planilla) {
+        return res.status(HttpStatus.NOT_FOUND).json({
+          message: `Planilla con código ${codigoPlanilla} no encontrada.`,
+        });
+      }
+  
+      return res.status(HttpStatus.OK).json({
+        message: "Consulta realizada con éxito",
+        data: planilla, // Asumiendo que deseas devolver un objeto único, si esperas un array, debes ajustarlo
+      });
+    }
 
   @Patch(':id')
   update(@Param('id') id: string, @Body() updatePlanillaDto: UpdatePlanillaDto) {

@@ -138,6 +138,10 @@ export const navItems: INavData[] = [
                 name: 'Planilla de privados',
                 url: '/Planilla/Ingresos/Privados/planilla-colegios-privados',
               },
+              {
+                name: 'Cargar Planilla de privados',
+                url: '/Planilla/Ingresos/Privados/cargar-planilla-privados',
+              },
           ]
           }
           /* {

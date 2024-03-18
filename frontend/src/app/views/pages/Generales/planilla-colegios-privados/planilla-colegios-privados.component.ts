@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, OnInit, ViewChild } from '@angular/core';
 import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { MatPaginator } from '@angular/material/paginator';
 import { MatSort } from '@angular/material/sort';
@@ -9,7 +9,17 @@ import { MatTableDataSource } from '@angular/material/table';
   templateUrl: './planilla-colegios-privados.component.html',
   styleUrls: ['./planilla-colegios-privados.component.scss']
 })
-export class PlanillaColegiosPrivadosComponent implements AfterViewInit {
+export class PlanillaColegiosPrivadosComponent implements AfterViewInit, OnInit {
+
+  hasSelectedShoe: boolean = false;
+
+  ngOnInit() {
+    // Escuchar los cambios en el formulario para verificar si se ha seleccionado un zapato
+    this.firstFormGroup.get('selectedShoe')?.valueChanges.subscribe(value => {
+      this.hasSelectedShoe = !!value; // Esto asegura que hasSelectedShoe sea true si hay un valor seleccionado
+    });
+  }
+
   botonSeleccionado: string = 'EMPLEADOS';
   fecha = new FormControl(new Date());
   recargoPlanilla: number = 0;
@@ -32,7 +42,7 @@ export class PlanillaColegiosPrivadosComponent implements AfterViewInit {
 
   constructor(private _formBuilder: FormBuilder) {
     this.firstFormGroup = this._formBuilder.group({
-      firstCtrl: ['', Validators.required],
+      selectedShoe: ['', Validators.required] // Agregar validador requerido para asegurar que se seleccione un zapato
     });
 
     const users: UserData[] = [];

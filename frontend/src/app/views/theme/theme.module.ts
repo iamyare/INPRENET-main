@@ -46,6 +46,7 @@ import { PlanillaColegiosPrivadosComponent } from '../pages/Generales/planilla-c
 import { MatStepperModule } from '@angular/material/stepper';
 import { MAT_DATE_LOCALE, MatNativeDateModule,DateAdapter  } from '@angular/material/core';
 import { MatGridListModule } from '@angular/material/grid-list';
+import { CargarPlanillaPrivadosComponent } from '../pages/Generales/cargar-planilla-privados/cargar-planilla-privados.component';
 
 @NgModule({
   imports: [
@@ -97,7 +98,8 @@ import { MatGridListModule } from '@angular/material/grid-list';
     NuevaDeduccionAfilComponent,
     VerEditarDeduccionAfilComponent,
     VerEditarBeneficioAfilComponent,
-    PlanillaColegiosPrivadosComponent
+    PlanillaColegiosPrivadosComponent,
+    CargarPlanillaPrivadosComponent
 
 /*     CentroTrabajoPageComponent */
   ]

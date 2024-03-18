@@ -22,6 +22,7 @@ import { NuevaDeduccionAfilComponent } from '../pages/Generales/nueva-deduccion-
 import { VerEditarBeneficioAfilComponent } from '../pages/Generales/ver-editar-beneficio-afil/ver-editar-beneficio-afil.component';
 import { VerEditarDeduccionAfilComponent } from '../pages/Generales/ver-editar-deduccion-afil/ver-editar-deduccion-afil.component';
 import { PlanillaColegiosPrivadosComponent } from '../pages/Generales/planilla-colegios-privados/planilla-colegios-privados.component';
+import { CargarPlanillaPrivadosComponent } from '../pages/Generales/cargar-planilla-privados/cargar-planilla-privados.component';
 
 const routes: Routes = [
   //rutas Afiliado
@@ -99,6 +100,13 @@ const routes: Routes = [
         component: PlanillaColegiosPrivadosComponent,
         data: {
           title: 'Planilla Colegios Privados',
+        },
+      },
+      {
+        path: 'Ingresos/Privados/cargar-planilla-privados',
+        component: CargarPlanillaPrivadosComponent,
+        data: {
+          title: 'Cargar Planilla Colegios Privados',
         },
       },
       {
@@ -218,6 +226,13 @@ const routes: Routes = [
         path: '',
         pathMatch: 'full',
         redirectTo: '',
+      },
+      {
+        path: 'cargar-planilla-privados',
+        component: CargarPlanillaPrivadosComponent,
+        data: {
+          title: 'Cargar Planilla Privados',
+        },
       },
       {
         path: 'planilla-colegios-privados',

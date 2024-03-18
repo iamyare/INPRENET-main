@@ -3,7 +3,7 @@ import { CreatePlanillaDto } from './dto/create-planilla.dto';
 import { UpdatePlanillaDto } from './dto/update-planilla.dto';
 import { InjectEntityManager, InjectRepository } from '@nestjs/typeorm';
 import { Net_Detalle_Deduccion } from '../detalle-deduccion/entities/detalle-deduccion.entity';
-import { EntityManager, Repository } from 'typeorm';
+import { EntityManager, Repository, getConnection } from 'typeorm';
 import { Net_Persona } from 'src/modules/afiliado/entities/Net_Persona';
 import { Net_Beneficio } from '../beneficio/entities/net_beneficio.entity';
 import { Net_Planilla } from './entities/net_planilla.entity';
@@ -14,6 +14,7 @@ import { DetalleBeneficioService } from '../detalle_beneficio/detalle_beneficio.
 import { DetalleDeduccionService } from '../detalle-deduccion/detalle-deduccion.service';
 import { PaginationDto } from 'src/common/dtos/pagination.dto';
 import { Net_Deduccion } from '../deduccion/entities/net_deduccion.entity';
+import { Net_Detalle_Beneficio_Afiliado } from '../detalle_beneficio/entities/net_detalle_beneficio_afiliado.entity';
 
 @Injectable()
 export class PlanillaService {
@@ -24,14 +25,525 @@ export class PlanillaService {
     @InjectRepository(Net_Detalle_Pago_Beneficio)
     private detalleBeneficioRepository: Repository<Net_Detalle_Pago_Beneficio>,
     @InjectRepository(Net_Persona)
-    private afiliadoRepository: Repository<Net_Persona>,
+    private personaRepository: Repository<Net_Persona>,
     @InjectRepository(Net_Planilla)
     private planillaRepository: Repository<Net_Planilla>,
     @InjectRepository(Net_TipoPlanilla)
     private tipoPlanillaRepository: Repository<Net_TipoPlanilla>,
     private detalleBeneficioService: DetalleBeneficioService,
-    private detalleDeduccionService: DetalleDeduccionService){
+    @InjectRepository(Net_Detalle_Beneficio_Afiliado)
+    private readonly detalleBeneficioAfiliadoRepository: Repository<Net_Detalle_Beneficio_Afiliado>,
+    @InjectRepository(Net_Detalle_Pago_Beneficio)
+    private readonly detallePagoBeneficioRepository: Repository<Net_Detalle_Pago_Beneficio>,
+    @InjectRepository(Net_Detalle_Deduccion)
+    private readonly detalleDeduccionRepository: Repository<Net_Detalle_Deduccion>,
+    @InjectRepository(Net_Deduccion)
+    private readonly deduccionRepository: Repository<Net_Deduccion>,){
   };
+
+  async getPlanillaOrdinariaAfiliados(periodoInicio: string, periodoFinalizacion: string): Promise<any> {
+    const query = `
+      SELECT 
+        p.DNI, 
+        TRIM(
+            p.PRIMER_NOMBRE || ' ' || 
+            COALESCE(p.SEGUNDO_NOMBRE, '') || ' ' || 
+            COALESCE(p.TERCER_NOMBRE, '') || ' ' || 
+            p.PRIMER_APELLIDO || ' ' || 
+            COALESCE(p.SEGUNDO_APELLIDO, '')
+        ) AS NOMBRE_COMPLETO,
+        bens."Suma Monto a Pagar", 
+        COALESCE(deds.total_monto_aplicado, 0) AS total_monto_aplicado
+      FROM 
+        NET_PERSONA p
+      JOIN (
+        SELECT
+            dba.ID_BENEFICIARIO AS ID_BENEFICIARIO,
+            SUM(dpb.monto_a_pagar) AS "Suma Monto a Pagar"
+        FROM
+            NET_DETALLE_BENEFICIO_AFILIADO dba
+        JOIN
+            NET_DETALLE_PAGO_BENEFICIO dpb ON dba.ID_DETALLE_BEN_AFIL = dpb.ID_BENEFICIO_PLANILLA_AFIL
+        WHERE
+            dba.ID_BENEFICIARIO = dba.ID_CAUSANTE AND
+            dpb.estado = 'NO PAGADA' AND
+            dpb.FECHA_CARGA BETWEEN TO_DATE(:periodoInicio || ' 12:00:00 AM', 'DD.MM.YYYY HH:MI:SS PM') AND TO_DATE(:periodoFinalizacion || ' 11:59:59 PM', 'DD.MM.YYYY HH:MI:SS PM') AND
+            EXISTS (
+                SELECT 1
+                FROM NET_DETALLE_BENEFICIO_AFILIADO dba_inner
+                JOIN NET_DETALLE_PAGO_BENEFICIO dpb_inner ON dba_inner.ID_DETALLE_BEN_AFIL = dpb_inner.ID_BENEFICIO_PLANILLA_AFIL
+                WHERE dpb_inner.estado = 'PAGADA' AND
+                dba_inner.ID_BENEFICIO = dba.ID_BENEFICIO AND
+                dba_inner.ID_BENEFICIARIO = dba.ID_BENEFICIARIO
+            )
+        GROUP BY
+            dba.ID_BENEFICIARIO
+        HAVING 
+            SUM(dpb.monto_a_pagar) > 0
+      ) bens ON p.ID_PERSONA = bens.ID_BENEFICIARIO
+      LEFT JOIN (
+        SELECT 
+            dd.ID_PERSONA AS ID_PERSONA,
+            SUM(dd.MONTO_APLICADO) AS total_monto_aplicado
+        FROM 
+            NET_DETALLE_DEDUCCION dd
+        JOIN 
+            NET_DEDUCCION d ON dd.ID_DEDUCCION = d.ID_DEDUCCION
+        WHERE 
+            d.NOMBRE_DEDUCCION NOT IN ('PRESTAMOS', 'TESORERIA', 'EMBARGOS') AND
+            dd.ESTADO_APLICACION = 'NO COBRADA' AND
+            TO_DATE(CONCAT(dd.ANIO, LPAD(dd.MES, 2, '0')), 'YYYYMM') 
+            BETWEEN TO_DATE(:periodoInicio, 'DD/MM/YY') 
+            AND TO_DATE(:periodoFinalizacion, 'DD/MM/YY')
+        GROUP BY 
+            dd.ID_PERSONA
+      ) deds ON p.ID_PERSONA = deds.ID_PERSONA
+    `;
+    const parameters:any = { periodoInicio, periodoFinalizacion };
+    return await this.entityManager.query(query, parameters);
+  }
+
+  async beneficiosOrdinariaDeAfil(dni: string, periodoInicio: string, periodoFinalizacion: string): Promise<any> {
+    const query = `
+      SELECT 
+        p.DNI,
+        b.NOMBRE_BENEFICIO,
+        SUM(dpb.monto_a_pagar) AS "MontoAPagar"
+      FROM 
+        NET_DETALLE_BENEFICIO_AFILIADO dba
+      JOIN 
+        NET_DETALLE_PAGO_BENEFICIO dpb ON dba.ID_DETALLE_BEN_AFIL = dpb.ID_BENEFICIO_PLANILLA_AFIL
+      JOIN 
+        NET_BENEFICIO b ON dba.ID_BENEFICIO = b.ID_BENEFICIO
+      JOIN 
+        NET_PERSONA p ON dba.ID_BENEFICIARIO = p.ID_PERSONA
+      WHERE 
+        p.DNI = :dni
+        AND dba.ID_BENEFICIARIO = dba.ID_CAUSANTE 
+        AND dpb.estado = 'NO PAGADA'
+        AND dpb.FECHA_CARGA BETWEEN TO_DATE(:periodoInicio || ' 12:00:00 AM', 'DD.MM.YYYY HH:MI:SS PM') AND TO_DATE(:periodoFinalizacion || ' 11:59:59 PM', 'DD.MM.YYYY HH:MI:SS PM')
+      GROUP BY 
+        p.DNI,
+        b.NOMBRE_BENEFICIO
+    `;
+
+    const parameters:any = { dni, periodoInicio, periodoFinalizacion };
+    return await this.entityManager.query(query, parameters);
+  }
+
+  async deduccionesOrdinariaDeAfil(dni: string, periodoInicio: string, periodoFinalizacion: string): Promise<any> {
+    const query = `
+      SELECT 
+        p.DNI,
+        d.NOMBRE_DEDUCCION,
+        SUM(dd.MONTO_APLICADO) AS "MontoAplicado"
+      FROM 
+        NET_DETALLE_DEDUCCION dd
+      JOIN 
+        NET_DEDUCCION d ON dd.ID_DEDUCCION = d.ID_DEDUCCION
+      JOIN 
+        NET_PERSONA p ON dd.ID_PERSONA = p.ID_PERSONA
+      WHERE 
+        p.DNI = :dni
+        AND d.NOMBRE_DEDUCCION NOT IN ('PRESTAMOS', 'TESORERIA', 'EMBARGOS')
+        AND dd.ESTADO_APLICACION = 'NO COBRADA'
+        AND (
+            TO_DATE(CONCAT(dd.ANIO, LPAD(dd.MES, 2, '0')), 'YYYYMM') 
+            BETWEEN TO_DATE(:periodoInicio, 'DD/MM/YY') 
+            AND TO_DATE(:periodoFinalizacion, 'DD/MM/YY')
+        )
+      GROUP BY 
+        p.DNI,
+        d.NOMBRE_DEDUCCION
+    `;
+
+    const parameters:any = { dni, periodoInicio, periodoFinalizacion };
+    return await this.entityManager.query(query, parameters);
+  }
+
+  async getPlanillaOrdinariaBenef(periodoInicio: string, periodoFinalizacion: string): Promise<any> {
+    const query = `
+      SELECT 
+        p.DNI, 
+        TRIM(
+            p.PRIMER_NOMBRE || ' ' || 
+            COALESCE(p.SEGUNDO_NOMBRE, '') || ' ' || 
+            COALESCE(p.TERCER_NOMBRE, '') || ' ' || 
+            p.PRIMER_APELLIDO || ' ' || 
+            COALESCE(p.SEGUNDO_APELLIDO, '')
+        ) AS NOMBRE_COMPLETO,
+        bens."Suma Monto a Pagar", 
+        COALESCE(deds.total_monto_aplicado, 0) AS total_monto_aplicado
+      FROM 
+        NET_PERSONA p
+      JOIN (
+          SELECT
+              dba.ID_BENEFICIARIO AS ID_BENEFICIARIO,
+              SUM(dpb.monto_a_pagar) AS "Suma Monto a Pagar"
+          FROM
+              NET_DETALLE_BENEFICIO_AFILIADO dba
+          JOIN
+              NET_DETALLE_PAGO_BENEFICIO dpb ON dba.ID_DETALLE_BEN_AFIL = dpb.ID_BENEFICIO_PLANILLA_AFIL
+          WHERE
+              dba.ID_BENEFICIARIO <> dba.ID_CAUSANTE AND
+              dpb.estado = 'NO PAGADA'
+              AND dpb.FECHA_CARGA BETWEEN TO_DATE(:periodoInicio || ' 12:00:00 AM', 'DD.MM.YYYY HH:MI:SS PM') AND TO_DATE(:periodoFinalizacion || ' 11:59:59 PM', 'DD.MM.YYYY HH:MI:SS PM')
+              AND EXISTS (
+                  SELECT 1
+                  FROM NET_DETALLE_BENEFICIO_AFILIADO dba_inner
+                  JOIN NET_DETALLE_PAGO_BENEFICIO dpb_inner ON dba_inner.ID_DETALLE_BEN_AFIL = dpb_inner.ID_BENEFICIO_PLANILLA_AFIL
+                  WHERE dpb_inner.estado = 'PAGADA'
+                  AND dba_inner.ID_BENEFICIO = dba.ID_BENEFICIO
+                  AND dba_inner.ID_BENEFICIARIO = dba.ID_BENEFICIARIO
+              )
+          GROUP BY
+              dba.ID_BENEFICIARIO
+          HAVING 
+              SUM(dpb.monto_a_pagar) > 0
+      ) bens ON p.ID_PERSONA = bens.ID_BENEFICIARIO
+      LEFT JOIN (
+          SELECT 
+              dd.ID_PERSONA AS ID_PERSONA,
+              SUM(dd.MONTO_APLICADO) AS total_monto_aplicado
+          FROM 
+              NET_DETALLE_DEDUCCION dd
+          JOIN 
+              NET_DEDUCCION d ON dd.ID_DEDUCCION = d.ID_DEDUCCION
+          WHERE 
+              d.NOMBRE_DEDUCCION NOT IN ('PRESTAMOS', 'TESORERIA', 'EMBARGOS')
+              AND dd.ESTADO_APLICACION = 'NO COBRADA'
+              AND (
+                  TO_DATE(CONCAT(dd.ANIO, LPAD(dd.MES, 2, '0')), 'YYYYMM') 
+                  BETWEEN TO_DATE(:periodoInicio, 'DD/MM/YY') 
+                  AND TO_DATE(:periodoFinalizacion, 'DD/MM/YY')
+              )
+          GROUP BY 
+              dd.ID_PERSONA
+      ) deds ON p.ID_PERSONA = deds.ID_PERSONA
+    `;
+
+    const parameters:any = { periodoInicio, periodoFinalizacion };
+    return await this.entityManager.query(query, parameters);
+  }
+
+  async beneficiosOrdinariaDeBenef(dni: string, periodoInicio: string, periodoFinalizacion: string): Promise<any> {
+    const query = `
+      SELECT 
+        p.DNI,
+        b.NOMBRE_BENEFICIO,
+        dpb.monto_a_pagar AS "MontoAPagar",
+        dpb.estado AS "EstadoDelPago",
+        dpb.FECHA_CARGA AS "FechaDeCargaDelPago"
+      FROM 
+        NET_DETALLE_BENEFICIO_AFILIADO dba
+      JOIN 
+        NET_DETALLE_PAGO_BENEFICIO dpb ON dba.ID_DETALLE_BEN_AFIL = dpb.ID_BENEFICIO_PLANILLA_AFIL
+      JOIN 
+        NET_BENEFICIO b ON dba.ID_BENEFICIO = b.ID_BENEFICIO
+      JOIN 
+        NET_PERSONA p ON dba.ID_BENEFICIARIO = p.ID_PERSONA
+      WHERE 
+        p.DNI = :dni
+        AND dba.ID_BENEFICIARIO <> dba.ID_CAUSANTE
+        AND dpb.estado = 'NO PAGADA'
+        AND dpb.FECHA_CARGA BETWEEN TO_DATE(:periodoInicio || ' 12:00:00 AM', 'DD.MM.YYYY HH:MI:SS PM') AND TO_DATE(:periodoFinalizacion || ' 11:59:59 PM', 'DD.MM.YYYY HH:MI:SS PM')
+      ORDER BY 
+        dpb.FECHA_CARGA
+    `;
+  
+    const parameters:any = { dni, periodoInicio, periodoFinalizacion };
+    return await this.entityManager.query(query, parameters);
+  }
+
+  async deduccionesOrdinariaDeBenef(dni: string, periodoInicio: string, periodoFinalizacion: string): Promise<any> {
+    const query = `
+      SELECT 
+        p.DNI,
+        d.NOMBRE_DEDUCCION,
+        dd.MONTO_APLICADO AS "MontoAplicado",
+        dd.ESTADO_APLICACION AS "EstadoDeLaAplicacion",
+        TO_DATE(CONCAT(dd.ANIO, LPAD(dd.MES, 2, '0')), 'YYYYMM') AS "FechaDeLaDeduccion"
+      FROM 
+        NET_DETALLE_DEDUCCION dd
+      JOIN 
+        NET_DEDUCCION d ON dd.ID_DEDUCCION = d.ID_DEDUCCION
+      JOIN 
+        NET_PERSONA p ON dd.ID_PERSONA = p.ID_PERSONA
+      WHERE 
+        p.DNI = :dni
+        AND d.NOMBRE_DEDUCCION NOT IN ('PRESTAMOS', 'TESORERIA', 'EMBARGOS')
+        AND dd.ESTADO_APLICACION = 'NO COBRADA'
+        AND (
+            TO_DATE(CONCAT(dd.ANIO, LPAD(dd.MES, 2, '0')), 'YYYYMM') 
+            BETWEEN TO_DATE(:periodoInicio, 'DD/MM/YY') 
+            AND TO_DATE(:periodoFinalizacion, 'DD/MM/YY')
+        )
+    `;
+
+    const parameters:any = { dni, periodoInicio, periodoFinalizacion };
+    return await this.entityManager.query(query, parameters);
+  }
+
+  async getPlanillaComplementariaAfiliados(periodoInicio: string, periodoFinalizacion: string): Promise<any> {
+    const query = `
+      SELECT 
+        p.DNI, 
+        TRIM(
+            p.PRIMER_NOMBRE || ' ' || 
+            COALESCE(p.SEGUNDO_NOMBRE, '') || ' ' || 
+            COALESCE(p.TERCER_NOMBRE, '') || ' ' || 
+            p.PRIMER_APELLIDO || ' ' || 
+            COALESCE(p.SEGUNDO_APELLIDO, '')
+        ) AS NOMBRE_COMPLETO,
+        bens."Suma Monto a Pagar" AS "Suma Monto a Pagar", 
+        COALESCE(deds.total_monto_aplicado, 0) AS "Total Monto Aplicado"
+      FROM 
+        NET_PERSONA p
+      JOIN (
+          SELECT
+              dba.ID_BENEFICIARIO,
+              SUM(dpb.monto_a_pagar) AS "Suma Monto a Pagar"
+          FROM
+              NET_DETALLE_BENEFICIO_AFILIADO dba
+          INNER JOIN
+              NET_DETALLE_PAGO_BENEFICIO dpb ON dba.ID_DETALLE_BEN_AFIL = dpb.ID_BENEFICIO_PLANILLA_AFIL
+          WHERE
+              dpb.estado = 'NO PAGADA'
+              AND dpb.FECHA_CARGA BETWEEN TO_DATE(:periodoInicio || ' 12:00:00 AM', 'DD.MM.YYYY HH:MI:SS PM') AND TO_DATE(:periodoFinalizacion || ' 11:59:59 PM', 'DD.MM.YYYY HH:MI:SS PM')
+              AND NOT EXISTS (
+                  SELECT 1
+                  FROM NET_DETALLE_BENEFICIO_AFILIADO dba_inner
+                  INNER JOIN NET_DETALLE_PAGO_BENEFICIO dpb_inner ON dba_inner.ID_DETALLE_BEN_AFIL = dpb_inner.ID_BENEFICIO_PLANILLA_AFIL
+                  WHERE dpb_inner.estado = 'PAGADA'
+                  AND dba_inner.ID_BENEFICIO = dba.ID_BENEFICIO
+                  AND dba_inner.ID_BENEFICIARIO = dba.ID_BENEFICIARIO
+              )
+          GROUP BY
+              dba.ID_BENEFICIARIO
+          HAVING 
+              SUM(dpb.monto_a_pagar) > 0
+      ) bens ON p.ID_PERSONA = bens.ID_BENEFICIARIO
+      LEFT JOIN (
+          SELECT 
+              dd.ID_PERSONA,
+              SUM(dd.MONTO_APLICADO) AS total_monto_aplicado
+          FROM 
+              NET_DETALLE_DEDUCCION dd
+          INNER JOIN 
+              NET_DEDUCCION d ON dd.ID_DEDUCCION = d.ID_DEDUCCION
+          WHERE 
+              d.NOMBRE_DEDUCCION IN ('PRESTAMOS', 'TESORERIA', 'EMBARGOS')
+              AND dd.ESTADO_APLICACION = 'NO COBRADA'
+              AND (
+                  TO_DATE(CONCAT(dd.ANIO, LPAD(dd.MES, 2, '0')), 'YYYYMM') 
+                  BETWEEN TO_DATE(:periodoInicio, 'DD/MM/YY') 
+                  AND TO_DATE(:periodoFinalizacion, 'DD/MM/YY')
+              )
+          GROUP BY 
+              dd.ID_PERSONA
+      ) deds ON p.ID_PERSONA = deds.ID_PERSONA
+    `;
+
+    const parameters:any = { periodoInicio, periodoFinalizacion };
+    return await this.entityManager.query(query, parameters);
+  }
+
+  async beneficiosComplementariaDeAfil(dni: string, periodoInicio: string, periodoFinalizacion: string): Promise<any> {
+    const query = `
+      SELECT 
+        p.DNI,
+        b.NOMBRE_BENEFICIO,
+        dpb.monto_a_pagar AS "MontoAPagar",
+        dpb.estado AS "EstadoDelPago",
+        dpb.FECHA_CARGA AS "FechaDeCargaDelPago"
+      FROM 
+        NET_DETALLE_BENEFICIO_AFILIADO dba
+      JOIN 
+        NET_DETALLE_PAGO_BENEFICIO dpb ON dba.ID_DETALLE_BEN_AFIL = dpb.ID_BENEFICIO_PLANILLA_AFIL
+      JOIN 
+        NET_BENEFICIO b ON dba.ID_BENEFICIO = b.ID_BENEFICIO
+      JOIN 
+        NET_PERSONA p ON dba.ID_BENEFICIARIO = p.ID_PERSONA
+      WHERE 
+        p.DNI = :dni
+        AND dpb.estado = 'NO PAGADA'
+        AND dpb.FECHA_CARGA BETWEEN TO_DATE(:periodoInicio || ' 12:00:00 AM', 'DD.MM.YYYY HH:MI:SS PM') AND TO_DATE(:periodoFinalizacion || ' 11:59:59 PM', 'DD.MM.YYYY HH:MI:SS PM')
+        AND NOT EXISTS (
+            SELECT 1
+            FROM NET_DETALLE_BENEFICIO_AFILIADO dba_inner
+            JOIN NET_DETALLE_PAGO_BENEFICIO dpb_inner ON dba_inner.ID_DETALLE_BEN_AFIL = dpb_inner.ID_BENEFICIO_PLANILLA_AFIL
+            WHERE dpb_inner.estado = 'PAGADA'
+            AND dba_inner.ID_BENEFICIO = dba.ID_BENEFICIO
+            AND dba_inner.ID_BENEFICIARIO = dba.ID_BENEFICIARIO
+        )
+    `;
+
+    const parameters:any = { dni, periodoInicio, periodoFinalizacion };
+    return await this.entityManager.query(query, parameters);
+  }
+
+  async deduccionesComplementariaDeAfil(dni: string, periodoInicio: string, periodoFinalizacion: string): Promise<any> {
+    const query = `
+      SELECT 
+        p.DNI,
+        d.NOMBRE_DEDUCCION,
+        dd.MONTO_APLICADO AS "MontoAplicado",
+        dd.ESTADO_APLICACION AS "EstadoDeLaAplicacion",
+        TO_DATE(CONCAT(dd.ANIO, LPAD(dd.MES, 2, '0')), 'YYYYMM') AS "FechaDeLaDeduccion"
+      FROM 
+        NET_DETALLE_DEDUCCION dd
+      JOIN 
+        NET_DEDUCCION d ON dd.ID_DEDUCCION = d.ID_DEDUCCION
+      JOIN 
+        NET_PERSONA p ON dd.ID_PERSONA = p.ID_PERSONA
+      WHERE 
+        p.DNI = :dni
+        AND d.NOMBRE_DEDUCCION IN ('PRESTAMOS', 'TESORERIA', 'EMBARGOS')
+        AND dd.ESTADO_APLICACION = 'NO COBRADA'
+        AND (
+            TO_DATE(CONCAT(dd.ANIO, LPAD(dd.MES, 2, '0')), 'YYYYMM') 
+            BETWEEN TO_DATE(:periodoInicio, 'DD/MM/YY') 
+            AND TO_DATE(:periodoFinalizacion, 'DD/MM/YY')
+        )
+    `;
+
+    const parameters:any = { dni, periodoInicio, periodoFinalizacion };
+    return await this.entityManager.query(query, parameters);
+  }
+
+  async getPlanillaComplementariaBenef(periodoInicio: string, periodoFinalizacion: string): Promise<any> {
+    const query = `
+      SELECT 
+        p.DNI, 
+        TRIM(
+            p.PRIMER_NOMBRE || ' ' || 
+            COALESCE(p.SEGUNDO_NOMBRE, '') || ' ' || 
+            COALESCE(p.TERCER_NOMBRE, '') || ' ' || 
+            p.PRIMER_APELLIDO || ' ' || 
+            COALESCE(p.SEGUNDO_APELLIDO, '')
+        ) AS NOMBRE_COMPLETO,
+        bens."Suma Monto a Pagar" AS "Suma Monto a Pagar", 
+        COALESCE(deds.total_monto_aplicado, 0) AS "Total Monto Aplicado"
+      FROM 
+        NET_PERSONA p
+      JOIN (
+          SELECT
+              dba.ID_BENEFICIARIO,
+              SUM(dpb.monto_a_pagar) AS "Suma Monto a Pagar"
+          FROM
+              NET_DETALLE_BENEFICIO_AFILIADO dba
+          INNER JOIN
+              NET_DETALLE_PAGO_BENEFICIO dpb ON dba.ID_DETALLE_BEN_AFIL = dpb.ID_BENEFICIO_PLANILLA_AFIL
+          WHERE
+              dba.ID_BENEFICIARIO <> dba.ID_CAUSANTE AND
+              dpb.estado = 'NO PAGADA'
+              AND dpb.FECHA_CARGA BETWEEN TO_DATE(:periodoInicio || ' 12:00:00 AM', 'DD.MM.YYYY HH:MI:SS PM') AND TO_DATE(:periodoFinalizacion || ' 11:59:59 PM', 'DD.MM.YYYY HH:MI:SS PM')
+              AND NOT EXISTS (
+                  SELECT 1
+                  FROM NET_DETALLE_BENEFICIO_AFILIADO dba_inner
+                  INNER JOIN NET_DETALLE_PAGO_BENEFICIO dpb_inner ON dba_inner.ID_DETALLE_BEN_AFIL = dpb_inner.ID_BENEFICIO_PLANILLA_AFIL
+                  WHERE dpb_inner.estado = 'PAGADA'
+                  AND dba_inner.ID_BENEFICIO = dba.ID_BENEFICIO
+                  AND dba_inner.ID_BENEFICIARIO = dba.ID_BENEFICIARIO
+              )
+          GROUP BY
+              dba.ID_BENEFICIARIO
+          HAVING 
+              SUM(dpb.monto_a_pagar) > 0
+      ) bens ON p.ID_PERSONA = bens.ID_BENEFICIARIO
+      LEFT JOIN (
+          SELECT 
+              dd.ID_PERSONA,
+              SUM(dd.MONTO_APLICADO) AS total_monto_aplicado
+          FROM 
+              NET_DETALLE_DEDUCCION dd
+          INNER JOIN 
+              NET_DEDUCCION d ON dd.ID_DEDUCCION = d.ID_DEDUCCION
+          WHERE 
+              d.NOMBRE_DEDUCCION IN ('PRESTAMOS', 'TESORERIA', 'EMBARGOS')
+              AND dd.ESTADO_APLICACION = 'NO COBRADA'
+              AND (
+                  TO_DATE(CONCAT(dd.ANIO, LPAD(dd.MES, 2, '0')), 'YYYYMM') 
+                  BETWEEN TO_DATE(:periodoInicio, 'DD/MM/YY') 
+                  AND TO_DATE(:periodoFinalizacion, 'DD/MM/YY')
+              )
+          GROUP BY 
+              dd.ID_PERSONA
+      ) deds ON p.ID_PERSONA = deds.ID_PERSONA
+    `;
+
+    const parameters:any = { periodoInicio, periodoFinalizacion };
+    return await this.entityManager.query(query, parameters);
+  }
+
+  async beneficiosComplementariaDeBenef(dni: string, periodoInicio: string, periodoFinalizacion: string): Promise<any> {
+    const query = `
+      SELECT 
+        p.DNI,
+        b.NOMBRE_BENEFICIO,
+        dba.PERIODO_INICIO,
+        dba.PERIODO_FINALIZACION,
+        dpb.monto_a_pagar AS "MontoAPagar",
+        dpb.estado AS "EstadoDelPago",
+        dpb.FECHA_CARGA AS "FechaDeCargaDelPago"
+      FROM 
+        NET_DETALLE_BENEFICIO_AFILIADO dba
+      JOIN 
+        NET_DETALLE_PAGO_BENEFICIO dpb ON dba.ID_DETALLE_BEN_AFIL = dpb.ID_BENEFICIO_PLANILLA_AFIL
+      JOIN 
+        NET_BENEFICIO b ON dba.ID_BENEFICIO = b.ID_BENEFICIO
+      JOIN 
+        NET_PERSONA p ON dba.ID_BENEFICIARIO = p.ID_PERSONA
+      WHERE 
+        p.DNI = :dni
+        AND dba.ID_BENEFICIARIO <> dba.ID_CAUSANTE
+        AND dpb.estado = 'NO PAGADA'
+        AND dpb.FECHA_CARGA BETWEEN TO_DATE(:periodoInicio || ' 12:00:00 AM', 'DD.MM.YYYY HH:MI:SS PM') AND TO_DATE(:periodoFinalizacion || ' 11:59:59 PM', 'DD.MM.YYYY HH:MI:SS PM')
+        AND NOT EXISTS (
+            SELECT 1
+            FROM NET_DETALLE_BENEFICIO_AFILIADO dba_inner
+            JOIN NET_DETALLE_PAGO_BENEFICIO dpb_inner ON dba_inner.ID_DETALLE_BEN_AFIL = dpb_inner.ID_BENEFICIO_PLANILLA_AFIL
+            WHERE dpb_inner.estado = 'PAGADA'
+            AND dba_inner.ID_BENEFICIO = dba.ID_BENEFICIO
+            AND dba_inner.ID_BENEFICIARIO = dba.ID_BENEFICIARIO
+        )
+    `;
+
+    const parameters:any = { dni, periodoInicio, periodoFinalizacion };
+    return await this.entityManager.query(query, parameters);
+  }
+
+  async deduccionesComplementariaDeBenef(dni: string, periodoInicio: string, periodoFinalizacion: string): Promise<any> {
+    const query = `
+      SELECT 
+        p.DNI,
+        d.NOMBRE_DEDUCCION,
+        dd.MONTO_APLICADO AS "MontoAplicado",
+        dd.ESTADO_APLICACION AS "EstadoDeLaAplicacion",
+        TO_DATE(CONCAT(dd.ANIO, LPAD(dd.MES, 2, '0')), 'YYYYMM') AS "FechaDeLaDeduccion"
+      FROM 
+        NET_DETALLE_DEDUCCION dd
+      JOIN 
+        NET_DEDUCCION d ON dd.ID_DEDUCCION = d.ID_DEDUCCION
+      JOIN 
+        NET_PERSONA p ON dd.ID_PERSONA = p.ID_PERSONA
+      WHERE 
+        p.DNI = :dni
+        AND d.NOMBRE_DEDUCCION IN ('PRESTAMOS', 'TESORERIA', 'EMBARGOS')
+        AND dd.ESTADO_APLICACION = 'NO COBRADA'
+        AND (
+            TO_DATE(CONCAT(dd.ANIO, LPAD(dd.MES, 2, '0')), 'YYYYMM') 
+            BETWEEN TO_DATE(:periodoInicio, 'DD/MM/YY') 
+            AND TO_DATE(:periodoFinalizacion, 'DD/MM/YY')
+        )
+    `;
+
+    const parameters:any = { dni, periodoInicio, periodoFinalizacion };
+    return await this.entityManager.query(query, parameters);
+  }
+  
+  
+  
 
     async update(id_planilla: string, updatePlanillaDto: UpdatePlanillaDto): Promise<Net_Planilla> {
       const planilla = await this.planillaRepository.preload({
@@ -210,26 +722,8 @@ export class PlanillaService {
         throw new InternalServerErrorException('Se produjo un error al calcular el total de la planilla.');
       }
     }
-  
-    async actualizarBeneficiosYDeduccionesConTransaccion(detallesBeneficios: any[], detallesDeducciones: any[]): Promise<void> {
-        await this.entityManager.transaction(async (transactionalEntityManager) => {
-            try {
-                // Asegúrate de que `detallesBeneficios` y `detallesDeducciones` se traten como arrays
-                for (const detalleBeneficio of detallesBeneficios) {
-                    await this.detalleBeneficioService.actualizarPlanillaYEstadoDeBeneficio([detalleBeneficio], transactionalEntityManager);
-                }
-    
-                for (const detalleDeduccion of detallesDeducciones) {
-                    await this.detalleDeduccionService.actualizarPlanillasYEstadosDeDeducciones([detalleDeduccion], transactionalEntityManager);
-                }
-            } catch (error) {
-                this.logger.error('Error en la transacción para actualizar beneficios y deducciones', error);
-                throw new InternalServerErrorException('Fallo en la actualización de beneficios y deducciones');
-            }
-        });
-    }
 
-    async obtenerAfilOrdinaria(periodoInicio: string, periodoFinalizacion: string): Promise<any> {
+    /* async obtenerAfilOrdinaria(periodoInicio: string, periodoFinalizacion: string): Promise<any> {
       const query = `
       SELECT
       COALESCE(deducciones."id_afiliado", beneficios."id_afiliado") AS "id_afiliado",
@@ -672,7 +1166,7 @@ ON deducciones."id_afiliado" = beneficios."id_afiliado"
         } else {
           throw new NotFoundException(`planilla con ${codPlanilla} no encontrado.`);
       }
-    }
+    } */
 
   async create(createPlanillaDto: CreatePlanillaDto) {
     const { codigo_planilla, secuencia, periodoInicio, periodoFinalizacion, nombre_planilla,  } = createPlanillaDto;
@@ -713,7 +1207,7 @@ ON deducciones."id_afiliado" = beneficios."id_afiliado"
   }
   
   async getDeduccionesNoAplicadas(periodoInicio: string, periodoFinalizacion: string): Promise<any> {
-    const queryBuilder  = await this.afiliadoRepository
+    const queryBuilder  = await this.personaRepository
     .createQueryBuilder('afil')
     .select([
       'afil.id_afiliado',

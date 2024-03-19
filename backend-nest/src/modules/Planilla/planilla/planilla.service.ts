@@ -100,9 +100,17 @@ export class PlanillaService {
             SUM(dd.MONTO_APLICADO) AS "Total Deducciones"
         FROM 
             NET_DETALLE_DEDUCCION dd
-        JOIN 
+        INNER JOIN 
+            NET_PERSONA per ON per.ID_PERSONA = dd.ID_PERSONA
+        INNER JOIN 
+            NET_DETALLE_PERSONA detPer ON detPer.ID_PERSONA = dd.ID_PERSONA
+        INNER JOIN 
+            NET_TIPO_PERSONA tipoPer ON tipoPer.ID_TIPO_AFILIADO = detPer.ID_TIPO_PERSONA
+        INNER JOIN 
             NET_DEDUCCION d ON dd.ID_DEDUCCION = d.ID_DEDUCCION
-        WHERE 
+        
+        WHERE
+            tipoPer.TIPO_AFILIADO = 'AFILIADO' AND
             d.NOMBRE_DEDUCCION NOT IN ('PRESTAMOS', 'TESORERIA', 'EMBARGOS') AND
             dd.ESTADO_APLICACION = 'NO COBRADA' AND
             TO_DATE(CONCAT(dd.ANIO, LPAD(dd.MES, 2, '0')), 'YYYYMM') 
@@ -218,11 +226,19 @@ export class PlanillaService {
           SELECT 
               dd.ID_PERSONA AS ID_PERSONA,
               SUM(dd.MONTO_APLICADO) AS "Total Deducciones"
-          FROM 
+              FROM 
               NET_DETALLE_DEDUCCION dd
-          JOIN 
+          INNER JOIN 
+              NET_PERSONA per ON per.ID_PERSONA = dd.ID_PERSONA
+          INNER JOIN 
+              NET_DETALLE_PERSONA detPer ON detPer.ID_PERSONA = dd.ID_PERSONA
+          INNER JOIN 
+              NET_TIPO_PERSONA tipoPer ON tipoPer.ID_TIPO_AFILIADO = detPer.ID_TIPO_PERSONA
+          INNER JOIN 
               NET_DEDUCCION d ON dd.ID_DEDUCCION = d.ID_DEDUCCION
-          WHERE 
+          
+          WHERE
+              tipoPer.TIPO_AFILIADO = 'BENEFICIARIO' AND
               d.NOMBRE_DEDUCCION NOT IN ('PRESTAMOS', 'TESORERIA', 'EMBARGOS')
               AND dd.ESTADO_APLICACION = 'NO COBRADA'
               AND (
@@ -298,67 +314,81 @@ export class PlanillaService {
   }
 
   async getPlanillaComplementariaAfiliados(periodoInicio: string, periodoFinalizacion: string): Promise<any> {
-    const query = `
+    try {
+      const query = `
       SELECT 
-        p.DNI, 
-        TRIM(
-            p.PRIMER_NOMBRE || ' ' || 
-            COALESCE(p.SEGUNDO_NOMBRE, '') || ' ' || 
-            COALESCE(p.TERCER_NOMBRE, '') || ' ' || 
-            p.PRIMER_APELLIDO || ' ' || 
-            COALESCE(p.SEGUNDO_APELLIDO, '')
-        ) AS NOMBRE_COMPLETO,
-        bens."Total Beneficio", 
-        COALESCE(deds."Total Deducciones", 0) AS "Total Deducciones"
-      FROM 
-        NET_PERSONA p
-      JOIN (
-          SELECT
-              dba.ID_BENEFICIARIO,
-              SUM(dpb.monto_a_pagar) AS "Total Beneficio"
-          FROM
-              NET_DETALLE_BENEFICIO_AFILIADO dba
-          INNER JOIN
-              NET_DETALLE_PAGO_BENEFICIO dpb ON dba.ID_DETALLE_BEN_AFIL = dpb.ID_BENEFICIO_PLANILLA_AFIL
-          WHERE
-              dpb.estado = 'NO PAGADA'
-              AND dpb.FECHA_CARGA BETWEEN TO_DATE(:periodoInicio || ' 12:00:00 AM', 'DD.MM.YYYY HH:MI:SS PM') AND TO_DATE(:periodoFinalizacion || ' 11:59:59 PM', 'DD.MM.YYYY HH:MI:SS PM')
-              AND NOT EXISTS (
-                  SELECT 1
-                  FROM NET_DETALLE_BENEFICIO_AFILIADO dba_inner
-                  INNER JOIN NET_DETALLE_PAGO_BENEFICIO dpb_inner ON dba_inner.ID_DETALLE_BEN_AFIL = dpb_inner.ID_BENEFICIO_PLANILLA_AFIL
-                  WHERE dpb_inner.estado = 'PAGADA'
-                  AND dba_inner.ID_BENEFICIO = dba.ID_BENEFICIO
-                  AND dba_inner.ID_BENEFICIARIO = dba.ID_BENEFICIARIO
-              )
-          GROUP BY
-              dba.ID_BENEFICIARIO
-          HAVING 
-              SUM(dpb.monto_a_pagar) > 0
-      ) bens ON p.ID_PERSONA = bens.ID_BENEFICIARIO
-      LEFT JOIN (
-          SELECT 
-              dd.ID_PERSONA,
-              SUM(dd.MONTO_APLICADO) AS "Total Deducciones"
+      p.DNI, 
+      TRIM(
+          p.PRIMER_NOMBRE || ' ' || 
+          COALESCE(p.SEGUNDO_NOMBRE, '') || ' ' || 
+          COALESCE(p.TERCER_NOMBRE, '') || ' ' || 
+          p.PRIMER_APELLIDO || ' ' || 
+          COALESCE(p.SEGUNDO_APELLIDO, '')
+      ) AS NOMBRE_COMPLETO,
+      bens."Total Beneficio" AS "Total Beneficio", 
+      COALESCE(deds."Total Deducciones", 0) AS "Total Deducciones"
+  FROM 
+      NET_PERSONA p
+  JOIN (
+      SELECT
+          dba.ID_BENEFICIARIO,
+          SUM(dpb.monto_a_pagar) AS "Total Beneficio"
+      FROM
+          NET_DETALLE_BENEFICIO_AFILIADO dba
+      INNER JOIN
+          NET_DETALLE_PAGO_BENEFICIO dpb ON dba.ID_DETALLE_BEN_AFIL = dpb.ID_BENEFICIO_PLANILLA_AFIL
+      WHERE
+          dpb.estado = 'NO PAGADA'
+          AND dba.ID_BENEFICIARIO = dba.ID_CAUSANTE
+          AND dpb.FECHA_CARGA BETWEEN TO_DATE(:periodoInicio, 'DD.MM.YYYY') AND TO_DATE(:periodoFinalizacion || ' 11:59:59 PM', 'DD.MM.YYYY HH:MI:SS PM')
+          AND NOT EXISTS (
+              SELECT 1
+              FROM NET_DETALLE_BENEFICIO_AFILIADO dba_inner
+              INNER JOIN NET_DETALLE_PAGO_BENEFICIO dpb_inner ON dba_inner.ID_DETALLE_BEN_AFIL = dpb_inner.ID_BENEFICIO_PLANILLA_AFIL
+              WHERE dpb_inner.estado = 'PAGADA'
+              AND dba_inner.ID_BENEFICIO = dba.ID_BENEFICIO
+              AND dba_inner.ID_BENEFICIARIO = dba.ID_BENEFICIARIO
+          )
+      GROUP BY
+          dba.ID_BENEFICIARIO
+      HAVING 
+          SUM(dpb.monto_a_pagar) > 0
+  ) bens ON p.ID_PERSONA = bens.ID_BENEFICIARIO
+  LEFT JOIN (
+      SELECT 
+          dd.ID_PERSONA,
+          SUM(dd.MONTO_APLICADO) AS "Total Deducciones"
           FROM 
-              NET_DETALLE_DEDUCCION dd
-          INNER JOIN 
-              NET_DEDUCCION d ON dd.ID_DEDUCCION = d.ID_DEDUCCION
-          WHERE 
-              d.NOMBRE_DEDUCCION IN ('PRESTAMOS', 'TESORERIA', 'EMBARGOS')
-              AND dd.ESTADO_APLICACION = 'NO COBRADA'
-              AND (
-                  TO_DATE(CONCAT(dd.ANIO, LPAD(dd.MES, 2, '0')), 'YYYYMM') 
-                  BETWEEN TO_DATE(:periodoInicio, 'DD/MM/YY') 
-                  AND TO_DATE(:periodoFinalizacion, 'DD/MM/YY')
-              )
-          GROUP BY 
-              dd.ID_PERSONA
-      ) deds ON p.ID_PERSONA = deds.ID_PERSONA
-    `;
-
-    const parameters:any = { periodoInicio, periodoFinalizacion };
-    return await this.entityManager.query(query, parameters);
+          NET_DETALLE_DEDUCCION dd
+      INNER JOIN 
+          NET_PERSONA per ON per.ID_PERSONA = dd.ID_PERSONA
+      INNER JOIN 
+          NET_DETALLE_PERSONA detPer ON detPer.ID_PERSONA = dd.ID_PERSONA
+      INNER JOIN 
+          NET_TIPO_PERSONA tipoPer ON tipoPer.ID_TIPO_AFILIADO = detPer.ID_TIPO_PERSONA
+      INNER JOIN 
+          NET_DEDUCCION d ON dd.ID_DEDUCCION = d.ID_DEDUCCION
+      
+      WHERE
+          tipoPer.TIPO_AFILIADO = 'AFILIADO' AND
+          d.NOMBRE_DEDUCCION IN ('PRESTAMOS', 'TESORERIA', 'EMBARGOS')
+          AND dd.ESTADO_APLICACION = 'NO COBRADA'
+          AND (
+              TO_DATE(CONCAT(dd.ANIO, LPAD(dd.MES, 2, '0')), 'YYYYMM') 
+              BETWEEN TO_DATE(:periodoInicio, 'DD/MM/YY') 
+              AND TO_DATE(:periodoFinalizacion, 'DD/MM/YY')
+          )
+      GROUP BY 
+          dd.ID_PERSONA
+  ) deds ON p.ID_PERSONA = deds.ID_PERSONA
+      `;
+      const parameters:any = { periodoInicio, periodoFinalizacion };
+      return await this.entityManager.query(query, parameters);
+      
+    } catch (error) {
+      console.log(error);
+      
+    }
   }
 
   async beneficiosComplementariaDeAfil(dni: string, periodoInicio: string, periodoFinalizacion: string): Promise<any> {
@@ -468,11 +498,19 @@ export class PlanillaService {
           SELECT 
               dd.ID_PERSONA,
               SUM(dd.MONTO_APLICADO) AS "Total Deducciones"
-          FROM 
+              FROM 
               NET_DETALLE_DEDUCCION dd
           INNER JOIN 
+              NET_PERSONA per ON per.ID_PERSONA = dd.ID_PERSONA
+          INNER JOIN 
+              NET_DETALLE_PERSONA detPer ON detPer.ID_PERSONA = dd.ID_PERSONA
+          INNER JOIN 
+              NET_TIPO_PERSONA tipoPer ON tipoPer.ID_TIPO_AFILIADO = detPer.ID_TIPO_PERSONA
+          INNER JOIN 
               NET_DEDUCCION d ON dd.ID_DEDUCCION = d.ID_DEDUCCION
-          WHERE 
+          
+          WHERE
+              tipoPer.TIPO_AFILIADO = 'BENEFICIARIO' AND
               d.NOMBRE_DEDUCCION IN ('PRESTAMOS', 'TESORERIA', 'EMBARGOS')
               AND dd.ESTADO_APLICACION = 'NO COBRADA'
               AND (
@@ -1183,8 +1221,6 @@ ON deducciones."id_afiliado" = beneficios."id_afiliado"
   
     async ObtenerPreliminar(idPlanilla: string): Promise<any> {
       try {
-        console.log(idPlanilla);
-        
         const query = `SELECT
         COALESCE(deducciones."ID_PERSONA", beneficios."ID_PERSONA") AS "ID_PERSONA",
         COALESCE(deducciones."DNI", beneficios."DNI") AS "DNI",
@@ -1273,8 +1309,6 @@ ON deducciones."id_afiliado" = beneficios."id_afiliado"
             SUM(COALESCE(detDs."MONTO_APLICADO", 0)) > 0
         ) deducciones
     ON deducciones."ID_PERSONA" = beneficios."ID_PERSONA"`;
-    console.log(query);
-    
         const result = await this.entityManager.query(query);
         return result;
       } catch (error) {

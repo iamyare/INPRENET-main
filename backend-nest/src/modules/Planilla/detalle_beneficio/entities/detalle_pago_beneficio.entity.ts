@@ -1,7 +1,7 @@
-import { Column, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn } from "typeorm";
+import { Check, Column, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 /* import { Beneficio } from "../../beneficio/entities/beneficio.entity";
 import { Afiliado } from "src/modules/afiliado/entities/afiliado"; */
-import { Net_Planilla } from "../../planilla/entities/net_planilla.entity";
+/* import { Net_Planilla } from "../../planilla/entities/net_planilla.entity";
 import { Net_Detalle_Beneficio_Afiliado } from "./net_detalle_beneficio_afiliado.entity";
 export enum EstadoEnum {
     PAGADA = 'PAGADA',
@@ -9,12 +9,13 @@ export enum EstadoEnum {
     INCONSISTENCIA = 'INCONSISTENCIA'
 }
 @Entity()
+@Check("CK_ESTADO_DETBENW",`estado IN ('PAGADA', 'NO PAGADA', 'EN PLANILLA')`)
 export class DetallePagoBeneficio {
 
     @PrimaryGeneratedColumn({ type: 'int', primaryKeyConstraintName: 'PK_id_ben_pan_detp_ag_ben' })
     id_beneficio_planilla : number;
 
-    @Column({default:"NO PAGADA", enum: ['NO PAGADA', 'PAGADA']})
+    @Column({default:"NO PAGADA", nullable: true})
     estado: string;
 
     @Column({nullable:true})
@@ -31,4 +32,4 @@ export class DetallePagoBeneficio {
     @JoinColumn({ name: 'id_beneficio_afiliado' })
     detalleBeneficioAfiliado: Net_Detalle_Beneficio_Afiliado;
 
-}
+} */

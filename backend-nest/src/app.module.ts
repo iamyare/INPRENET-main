@@ -18,11 +18,9 @@ import { TransaccionesModule } from './modules/transacciones/transacciones.modul
       /* logging: ["query", "error"], */
       type: 'oracle',
       database: process.env.DB_NAME,
-      host: process.env.DB_HOST,
-      port: +process.env.DB_PORT,
       username: process.env.DB_USERNAME,
       password: process.env.DB_PASSWORD,
-      /* connectString: process.env.CONNECT_STRING, */
+      connectString: process.env.CONNECT_STRING,
       synchronize: true,
       autoLoadEntities : true
     }),

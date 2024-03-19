@@ -1,4 +1,4 @@
-import { Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn } from "typeorm";
+import { Check, Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 import { Net_Planilla } from "../../planilla/entities/net_planilla.entity";
 import { Net_Detalle_Beneficio_Afiliado } from "./net_detalle_beneficio_afiliado.entity";
 export enum EstadoEnum {
@@ -7,6 +7,7 @@ export enum EstadoEnum {
     INCONSISTENCIA = 'INCONSISTENCIA'
 }
 @Entity({ name: 'NET_DETALLE_PAGO_BENEFICIO' })
+@Check("CK_ESTADO_DETBEN",`ESTADO IN ('PAGADA', 'NO PAGADA', 'EN PLANILLA')`)
 export class Net_Detalle_Pago_Beneficio {
     @PrimaryGeneratedColumn({type: 'int',name: 'ID_BENEFICIO_PLANILLA', primaryKeyConstraintName: 'PK_benPlan_detPagB'})
     id_beneficio_planilla: number;

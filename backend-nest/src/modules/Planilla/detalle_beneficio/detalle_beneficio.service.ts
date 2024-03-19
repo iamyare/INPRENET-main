@@ -159,8 +159,6 @@ export class DetalleBeneficioService {
           }
           } catch (error) {
               this.logger.error(`Error al crear DetalleBeneficioAfiliado y DetalleBeneficio: ${error.message}`, error.stack);
-              console.log(error);
-              
               throw new InternalServerErrorException('Error al crear registros, por favor intente más tarde.');
           }
       });
@@ -197,44 +195,54 @@ export class DetalleBeneficioService {
   }
 
   async cargarBenRec(): Promise<any> {
+    let connection;
     try {
-       // Definir los parámetros de salida
-       const id_beneficio_planilla_out = { dir: oracledb.BIND_OUT, type: oracledb.CURSOR };
-       const cantidad_registros_insertados = { dir: oracledb.BIND_OUT, type: oracledb.NUMBER };
-       
-       let connection;
-       connection = await oracledb.getConnection({
-         user: 'c##test',
-         password: '87654321',
-         connectString: '127.0.0.1:1521/xe'
-       })
-   
-       // Ejecutar el procedimiento almacenado
-       const result = await connection.execute(
-         `BEGIN 
-           insertar_registros(
-             :id_beneficio_planilla_out, 
-             :cantidad_registros_insertados
-           );
-         END;`,
-         { id_beneficio_planilla_out, cantidad_registros_insertados }
-       );
-   
-       // Manejar los valores de salida
-       const cursor = result.outBinds.id_beneficio_planilla_out;
-       const cantidadRegistrosInsertados = result.outBinds.cantidad_registros_insertados;
-   
-       // Leer los valores del cursor
-       let idBeneficioPlanillaOut = [];
-       let row;
-       while ((row = await cursor.getRow())) {
-         idBeneficioPlanillaOut.push(row);
-       }
-       
-       return { Registros: idBeneficioPlanillaOut, cantRegistros: cantidadRegistrosInsertados };
+      // Definir los parámetros de salida
+      const id_beneficio_planilla_out = { dir: oracledb.BIND_OUT, type: oracledb.CURSOR };
+      const cantidad_registros_insertados = { dir: oracledb.BIND_OUT, type: oracledb.NUMBER };
+      
+      // Obtener la conexión
+      connection = await oracledb.getConnection({
+        user: process.env.DB_USERNAME,
+        password: process.env.DB_PASSWORD,
+        connectString: process.env.CONNECT_STRING
+      });
+  
+      // Ejecutar el procedimiento almacenado
+      const result = await connection.execute(
+        `BEGIN 
+          insertar_registros(
+            :id_beneficio_planilla_out, 
+            :cantidad_registros_insertados
+          );
+        END;`,
+        { id_beneficio_planilla_out, cantidad_registros_insertados }
+      );
+  
+      // Manejar los valores de salida
+      const cursor = result.outBinds.id_beneficio_planilla_out;
+      const cantidadRegistrosInsertados = result.outBinds.cantidad_registros_insertados;
+  
+      // Leer los valores del cursor
+      let idBeneficioPlanillaOut = [];
+      let row;
+      while ((row = await cursor.getRow())) {
+        idBeneficioPlanillaOut.push(row);
+      }
+  
+      return { Registros: idBeneficioPlanillaOut, cantRegistros: cantidadRegistrosInsertados };
   
     } catch (error) {
       console.error('Error:', error);
+    } finally {
+      // Cerrar la conexión
+      if (connection) {
+        try {
+          await connection.close();
+        } catch (error) {
+          console.error('Error al cerrar la conexión:', error);
+        }
+      }
     }
   }
   

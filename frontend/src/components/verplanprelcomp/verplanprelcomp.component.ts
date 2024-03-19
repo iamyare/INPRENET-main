@@ -101,6 +101,7 @@ export class VerplanprelcompComponent implements OnInit{
           {
             next: async (response) => {
               if (response) {
+
                 this.detallePlanilla = response.data;
                 this.datosTabl = await this.getFilas(response.data.codigo_planilla);
                 this.idPlanilla = response.data.id_planilla

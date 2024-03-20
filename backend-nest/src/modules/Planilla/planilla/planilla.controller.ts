@@ -42,7 +42,7 @@ export class PlanillaController {
       return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
         message: 'Error al realizar la consulta de desglose de beneficios',
         error: error.message
-        
+
       });
     }
   }
@@ -430,11 +430,9 @@ export class PlanillaController {
     }
   }
 
-
-
   @Get('totalesBYD/:idPlanilla')
   async getTotalesPorPlanilla(@Param('idPlanilla') idPlanilla: string) {
-    return this.planillaService.getTotalPorDedYBen(idPlanilla);
+    return this.planillaService.getTotalPorBeneficiosYDeducciones(Number(idPlanilla));
   }
 
   @Get('generar-voucher')

@@ -951,11 +951,11 @@ WHERE
     // Llamamos al servicio para obtener los beneficios y deducciones de los beneficiarios con los periodos especificados
     const beneficios = await this.getDesgloseBeneficiosOrdinariaBeneficiarios(periodoInicio, periodoFinalizacion);
     const deducciones = await this.getDesgloseDeduccionesOrdinariaBeneficiarios(periodoInicio, periodoFinalizacion);
-    
+
     if ((!beneficios || beneficios.length === 0) && (!deducciones || deducciones.length === 0)) {
       return 'No se encontraron beneficios ni deducciones para actualizar.';
     }
-    
+
     const queryRunner = this.entityManager.connection.createQueryRunner();
     await queryRunner.connect();
     await queryRunner.startTransaction();
@@ -1013,7 +1013,7 @@ WHERE
     // Llamamos al servicio para obtener los beneficios y deducciones complementarias con los periodos especificados
     const beneficios = await this.getDesgloseBeneficiosComplemenariaAfiliados(periodoInicio, periodoFinalizacion);
     const deducciones = await this.getDesgloseDeduccionesComplementariaAfiliados(periodoInicio, periodoFinalizacion);
-    
+
     if ((!beneficios || beneficios.length === 0) && (!deducciones || deducciones.length === 0)) {
       return 'No se encontraron beneficios ni deducciones complementarias para actualizar.';
     }
@@ -1074,7 +1074,7 @@ WHERE
   async actualizarComplementariBeneficiariosAPreliminar(idPlanilla: number, periodoInicio: string, periodoFinalizacion: string): Promise<string> {
     const beneficios = await this.getDesgloseBeneficiosComplemenariaBeneficiarios(periodoInicio, periodoFinalizacion);
     const deducciones = await this.getDesgloseDeduccionesComplementariaBeneficiarios(periodoInicio, periodoFinalizacion);
-    
+
     if ((!beneficios || beneficios.length === 0) && (!deducciones || deducciones.length === 0)) {
       return 'No se encontraron beneficios ni deducciones complementarias para actualizar.';
     }
@@ -1132,19 +1132,58 @@ WHERE
     }
   }
 
-    async update(id_planilla: number, updatePlanillaDto: UpdatePlanillaDto): Promise<any> {
-      try {
-        const planilla = await this.planillaRepository.preload({
-          id_planilla: id_planilla,
-          ...updatePlanillaDto
-        });
-        if (!planilla) throw new NotFoundException(`Planilla con el ID: ${id_planilla} no encontrada`);
-          await this.planillaRepository.save(planilla);
-          return planilla;
-      } catch (error) {
-        console.log(error);
-        this.handleException(error); // Asegúrate de tener un método para manejar las excepciones
-      }
+  async update(id_planilla: number, updatePlanillaDto: UpdatePlanillaDto): Promise<any> {
+    try {
+      const planilla = await this.planillaRepository.preload({
+        id_planilla: id_planilla,
+        ...updatePlanillaDto
+      });
+      if (!planilla) throw new NotFoundException(`Planilla con el ID: ${id_planilla} no encontrada`);
+      await this.planillaRepository.save(planilla);
+      return planilla;
+    } catch (error) {
+      console.log(error);
+      this.handleException(error); // Asegúrate de tener un método para manejar las excepciones
+    }
+  }
+
+  async GetBeneficiosPorPlanilla(idPlanilla: number) {
+    return this.detallePagoBeneficioRepository
+      .createQueryBuilder('detalle_pago')
+      .innerJoin('detalle_pago.detalleBeneficioAfiliado', 'detalle_beneficio_afiliado')
+      .innerJoin('detalle_beneficio_afiliado.beneficio', 'beneficio')
+      .select('beneficio.id_beneficio', 'ID_BENEFICIO')
+      .addSelect('beneficio.nombre_beneficio', 'NOMBRE_BENEFICIO')
+      .addSelect('SUM(detalle_pago.monto_a_pagar)', 'TOTAL_MONTO_BENEFICIO')
+      .where('detalle_pago.planilla.id_planilla = :idPlanilla', { idPlanilla })
+      .groupBy('beneficio.id_beneficio')
+      .addGroupBy('beneficio.nombre_beneficio')
+      .getRawMany();
+  }
+
+  async GetDeduccionesPorPlanilla(idPlanilla: number) {
+    return this.detalleDeduccionRepository
+      .createQueryBuilder('detalle_deduccion')
+      .innerJoin('detalle_deduccion.deduccion', 'deduccion')
+      .select('deduccion.id_deduccion', 'ID_DEDUCCION')
+      .addSelect('deduccion.nombre_deduccion', 'NOMBRE_DEDUCCION')
+      .addSelect('SUM(detalle_deduccion.monto_aplicado)', 'TOTAL_MONTO_APLICADO')
+      .where('detalle_deduccion.planilla.id_planilla = :idPlanilla', { idPlanilla })
+      .groupBy('deduccion.id_deduccion')
+      .addGroupBy('deduccion.nombre_deduccion')
+      .getRawMany();
+  }
+
+  async getTotalPorBeneficiosYDeducciones(idPlanilla: number): Promise<any> {
+    try {
+      const beneficios = await this.GetBeneficiosPorPlanilla(idPlanilla);
+      const deducciones = await this.GetDeduccionesPorPlanilla(idPlanilla);
+
+      return { beneficios, deducciones };
+    } catch (error) {
+      console.error('Error al obtener los totales por planilla:', error);
+      throw new Error('Error al obtener los totales por planilla');
+    }
   }
 
   async generarVoucher(idPlanilla: string, dni: string): Promise<any> {
@@ -1197,68 +1236,16 @@ WHERE
       return { beneficios, deducciones };
     } catch (error) {
       console.log(error);
-      
+
       this.logger.error('Error al obtener los totales por DNI y planilla', error.stack);
       throw new InternalServerErrorException();
     }
   }
 
-  async getTotalPorDedYBen(idPlanilla: string): Promise<any> {
-    /* if (!isUUID(idPlanilla)) {
-        throw new BadRequestException('El ID de la planilla no es válido');
-    } */
-    console.log('entro aqui');
-
-
-    try {
-      const beneficios = await this.entityManager.query(
-        `SELECT
-                ben."id_beneficio",
-                ben."nombre_beneficio",
-                SUM(COALESCE(dpb."monto_a_pagar", 0)) AS "Total Monto Beneficio"
-            FROM
-                "net_beneficio" ben
-            INNER JOIN
-                "net_detalle_beneficio_afiliado" dba ON ben."id_beneficio" = dba."id_beneficio"
-            INNER JOIN
-                "net_detalle_pago_beneficio" dpb ON dba."id_detalle_ben_afil" = dpb."id_beneficio_afiliado"
-            WHERE
-                dpb."id_planilla" = :idPlanilla
-            GROUP BY
-                ben."id_beneficio", ben."nombre_beneficio"`,
-        [idPlanilla]
-      );
-
-
-      // La consulta de deducciones permanece sin cambios, ya que no se menciona una modificación en esa parte
-      const deducciones = await this.entityManager.query(
-        `SELECT
-                ded."id_deduccion",
-                ded."nombre_deduccion" || ' - ' || inst."nombre_institucion" AS "nombre_deduccion",
-                COALESCE(SUM(detDed."monto_aplicado"), 0) AS "Total Monto Aplicado"
-            FROM
-                "net_detalle_deduccion" detDed
-            INNER JOIN
-                "net_deduccion" ded ON detDed."id_deduccion" = ded."id_deduccion"
-            LEFT JOIN
-                "net_institucion" inst ON ded."id_institucion" = inst."id_institucion"
-            WHERE
-                detDed."id_planilla" = :idPlanilla
-            GROUP BY
-                ded."id_deduccion", ded."nombre_deduccion", inst."nombre_institucion"`,  // Agregado el nombre de la institución al GROUP BY
-        [idPlanilla]
-      );
-
-
-      return { beneficios, deducciones };
-    } catch (error) {
-      this.logger.error('Error al obtener los totales por planilla', error.stack);
-      throw new InternalServerErrorException();
-    }
-  }
+  
 
   async calcularTotalPlanilla(idPlanilla: string): Promise<any> {
-      const query = `
+    const query = `
       SELECT
       SUM(beneficio."Total Beneficio") AS "Total Beneficio",
       SUM(deduccion."Total Deducciones") AS "Total Deducciones",
@@ -1313,27 +1300,27 @@ WHERE
     try {
       if (codPlanilla) {
         const queryBuilder = await this.planillaRepository
-        .createQueryBuilder('planilla')
-        .addSelect('planilla.ID_PLANILLA', 'id_planilla')
-        .addSelect('planilla.CODIGO_PLANILLA', 'codigo_planilla')
-        .addSelect('planilla.FECHA_APERTURA', 'fecha_apertura')
-        .addSelect('planilla.SECUENCIA', 'secuencia')
-        .addSelect('planilla.ESTADO', 'estado')
-        .addSelect('planilla.PERIODO_INICIO', 'periodoInicio')
-        .addSelect('planilla.PERIODO_FINALIZACION', 'periodoFinalizacion')
-        .addSelect('tipP.NOMBRE_PLANILLA', 'nombre_planilla')
-        .innerJoin(Net_TipoPlanilla, 'tipP', 'tipP.ID_TIPO_PLANILLA = planilla.ID_TIPO_PLANILLA')
-        .where(`planilla.CODIGO_PLANILLA = '${codPlanilla}'  AND planilla.ESTADO = \'CERRADA\' ` )
-        .getRawMany();
+          .createQueryBuilder('planilla')
+          .addSelect('planilla.ID_PLANILLA', 'id_planilla')
+          .addSelect('planilla.CODIGO_PLANILLA', 'codigo_planilla')
+          .addSelect('planilla.FECHA_APERTURA', 'fecha_apertura')
+          .addSelect('planilla.SECUENCIA', 'secuencia')
+          .addSelect('planilla.ESTADO', 'estado')
+          .addSelect('planilla.PERIODO_INICIO', 'periodoInicio')
+          .addSelect('planilla.PERIODO_FINALIZACION', 'periodoFinalizacion')
+          .addSelect('tipP.NOMBRE_PLANILLA', 'nombre_planilla')
+          .innerJoin(Net_TipoPlanilla, 'tipP', 'tipP.ID_TIPO_PLANILLA = planilla.ID_TIPO_PLANILLA')
+          .where(`planilla.CODIGO_PLANILLA = '${codPlanilla}'  AND planilla.ESTADO = \'CERRADA\' `)
+          .getRawMany();
 
         return queryBuilder[0];
-        } else {
-          throw new NotFoundException(`planilla con ${codPlanilla} no encontrado.`);
+      } else {
+        throw new NotFoundException(`planilla con ${codPlanilla} no encontrado.`);
       }
     } catch (error) {
       console.log(error);
     }
-  } 
+  }
 
   async ObtenerPlanDefinPersonas(codPlanilla: string): Promise<any> {
     try {
@@ -1427,14 +1414,14 @@ WHERE
           SUM(COALESCE(detDs."MONTO_APLICADO", 0)) > 0
       ) deducciones
   ON deducciones."ID_PERSONA" = beneficios."ID_PERSONA"`;
-  
+
       const result = await this.entityManager.query(query);
       return result;
     } catch (error) {
       this.logger.error(`Error al obtener totales por planilla: ${error.message}`, error.stack);
       throw new InternalServerErrorException('Se produjo un error al obtener los totales por planilla.');
     }
-  } 
+  }
 
   /* async obtenerAfilOrdinaria(periodoInicio: string, periodoFinalizacion: string): Promise<any> {
     const query = `

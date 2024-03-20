@@ -1,16 +1,16 @@
-import { BadRequestException, Injectable, InternalServerErrorException, Logger, NotFoundException } from '@nestjs/common';
+import { BadRequestException, ForbiddenException, Injectable, InternalServerErrorException, Logger, NotFoundException } from '@nestjs/common';
 import { UpdateUsuarioDto } from './dto/update-usuario.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { PaginationDto } from 'src/common/dtos/pagination.dto';
-import { Usuario } from './entities/usuario.entity';
+import { Net_Usuario } from './entities/net_usuario.entity';
 import { Repository } from 'typeorm';
 import { JwtService } from '@nestjs/jwt';
 import { MailService } from 'src/common/services/mail.service';
 import * as bcrypt from 'bcrypt';
-import { Empleado } from 'src/modules/Empresarial/empresas/entities/empleado.entity';
-import { Rol } from './entities/rol.entity';
+import { Net_Empleado } from 'src/modules/Empresarial/empresas/entities/net_empleado.entity';
+import { Net_Rol } from './entities/net_rol.entity';
 import { CreateUsuarioDto } from './dto/create-usuario.dto';
-import { TipoIdentificacion } from '../tipo_identificacion/entities/tipo_identificacion.entity';
+import { Net_TipoIdentificacion } from '../tipo_identificacion/entities/net_tipo_identificacion.entity';
 
 @Injectable()
 export class UsuarioService {
@@ -18,14 +18,15 @@ export class UsuarioService {
   private readonly logger = new Logger(UsuarioService.name)
 
   constructor(
-    @InjectRepository(Usuario)
-    private readonly usuarioRepository: Repository<Usuario>,
-    @InjectRepository(Empleado)
-    private readonly empleadoRepository: Repository<Empleado>,
-    @InjectRepository(Rol)
-    private readonly rolRepository: Repository<Rol>,
-    @InjectRepository(TipoIdentificacion)
-    private readonly tipoIdentificacionRepository: Repository<TipoIdentificacion>,
+
+    @InjectRepository(Net_Usuario)
+    private readonly usuarioRepository: Repository<Net_Usuario>,
+    @InjectRepository(Net_Empleado)
+    private readonly empleadoRepository: Repository<Net_Empleado>,
+    @InjectRepository(Net_Rol)
+    private readonly rolRepository: Repository<Net_Rol>,
+    @InjectRepository(Net_TipoIdentificacion)
+    private readonly tipoIdentificacionRepository: Repository<Net_TipoIdentificacion>,
     private readonly jwtService: JwtService,
     private readonly mailService: MailService
   ){}
@@ -171,6 +172,9 @@ export class UsuarioService {
     Object.assign(usuario, restUsuario); // Actualiza propiedades del usuario
     usuario.estado = 'ACTIVO'; // o cualquier otro cambio necesario
 
+    // Aquí se actualiza la fecha de verificación con la fecha actual
+    usuario.fecha_verificacion = new Date();
+
     // Actualizar datos del usuario
     await this.usuarioRepository.save(usuario);
 
@@ -187,11 +191,39 @@ export class UsuarioService {
     return { success: true, msg: 'Usuario y empleado actualizados correctamente' };
 }
 
-
-
   remove(id: number) {
     return `This action removes a #${id} usuario`;
   }
+
+  async login(email: string, password: string): Promise<{ token: string }> {
+    const usuario = await this.usuarioRepository.findOne({
+        where: { correo: email },
+        relations: ['rol']
+    });
+    if (!usuario) {
+        throw new NotFoundException('Usuario no encontrado');
+    }
+    
+    if (usuario.estado !== 'ACTIVO') {
+      throw new ForbiddenException('La cuenta está desactivada');
+    }
+    if (!usuario.fecha_verificacion) {
+      throw new ForbiddenException('La cuenta no ha verificado su correo electrónico');
+    }
+    
+    const isPasswordValid = await bcrypt.compare(password, usuario.contrasena);
+    if (!isPasswordValid) {
+        throw new BadRequestException('Credenciales inválidas');
+    }
+    if (!usuario.rol) {
+        throw new InternalServerErrorException('El rol del usuario no está definido');
+    }
+    const payload = { username: usuario.correo, sub: usuario.id_usuario, rol: usuario.rol.nombre_rol };
+    const token = this.jwtService.sign(payload);
+
+
+    return { token };
+}
 
   private handleException(error: any): void {
     this.logger.error(error);

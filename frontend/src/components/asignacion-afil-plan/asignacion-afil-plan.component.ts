@@ -1,98 +1,119 @@
 import { Component, OnInit } from '@angular/core';
-import { FormBuilder, Validators } from '@angular/forms';
+import { Validators } from '@angular/forms';
 import { ToastrService } from 'ngx-toastr';
 import { MatDialog } from '@angular/material/dialog';
 import { DynamicDialogComponent } from '@docs-components/dynamic-dialog/dynamic-dialog.component';
-import { AfiliadoService } from 'src/app/services/afiliado.service';
 import { PlanillaService } from 'src/app/services/planilla.service';
-import { FieldConfig } from 'src/app/views/shared/shared/Interfaces/field-config';
-import { TableColumn } from 'src/app/views/shared/shared/Interfaces/table-column';
+import { FieldConfig } from 'src/app/shared/Interfaces/field-config';
+import { TableColumn } from 'src/app/shared/Interfaces/table-column';
+import { convertirFecha } from 'src/app/shared/functions/formatoFecha';
+import { BeneficiosService } from '../../app/services/beneficios.service';
 
 @Component({
   selector: 'app-asignacion-afil-plan',
   templateUrl: './asignacion-afil-plan.component.html',
   styleUrl: './asignacion-afil-plan.component.scss'
 })
-export class AsignacionAfilPlanComponent implements OnInit{
+export class AsignacionAfilPlanComponent implements OnInit {
+  convertirFecha = convertirFecha;
+  dataPlan: any;
   filas: any;
   tiposPlanilla: any[] = [];
   datosFormateados: any;
 
   myFormFields: FieldConfig[] = [];
   myColumnsDed: TableColumn[] = [];
-  filasT: any[] = [];
-  datosTabl: any;
+  datosTabl: any[] = [];
 
   verDat: boolean = false;
   ejecF: any;
 
-  detallePlanilla:any
-  constructor( private _formBuilder: FormBuilder,
-    private planillaService : PlanillaService,
-    private svcAfilServ: AfiliadoService,
+  datosFilasDeduccion: any;
+  datosFilasBeneficios: any;
+
+  detallePlanilla: any
+  constructor(
+    private planillaService: PlanillaService,
     private toastr: ToastrService,
-    public dialog: MatDialog
-    ) {
+    public dialog: MatDialog,
+    private beneficiosService: BeneficiosService,
+  ) {
   }
 
   ngOnInit(): void {
     this.myColumnsDed = [
       {
-        header: 'dni',
-        col: 'afil_dni',
+        header: 'DNI',
+        col: 'dni',
         isEditable: false,
         validationRules: [Validators.required, Validators.minLength(5)]
       },
       {
-        header: 'primer_nombre',
-        col: 'afil_primer_nombre',
+        header: 'Nombre Completo',
+        col: 'NOMBRE_COMPLETO',
         isEditable: true
       },
       {
-        header: 'Nombres de Beneficios',
-        col: 'BENEFICIOSNOMBRES',
+        header: 'Total de Ingresos',
+        col: 'Total Beneficio',
+        moneda: true,
         isEditable: true
       },
       {
-        header: 'Nombres de deducciones',
-        col: 'DEDUCCIONESNOMBRES',
+        header: 'Total De Deducciones Aplicadas',
+        col: 'Total Deducciones',
         isEditable: true,
+        moneda: true,
         validationRules: [Validators.required, Validators.pattern(/^(3[01]|[12][0-9]|0?[1-9])-(1[0-2]|0?[1-9])-\d{4} - (3[01]|[12][0-9]|0?[1-9])-(1[0-2]|0?[1-9])-\d{4}$/)]
-      }
+      },
+      {
+        header: 'Neto',
+        col: 'Total',
+        moneda: true,
+        isEditable: true
+      },
     ];
 
     this.myFormFields = [
       {
-        type: 'string', label: 'Codigo De Planilla', name: 'codigo_planilla', validations: [Validators.required]
+        type: 'string', label: 'Código De Planilla', name: 'codigo_planilla', validations: [Validators.required], display: true
       },
     ]
   }
 
   /* Se ejecuta cuando un valor del formulario cambia */
-  obtenerDatosForm(event:any):any{
-    this.datosFormateados = event.value;
+  obtenerDatosForm(event: any): any {
+    this.datosFormateados = event;
   }
 
   /* Se ejecuta cuando da click en previsualizar datos planilla */
   getPlanilla = async () => {
     try {
-      await this.planillaService.getPlanillaBy(this.datosFormateados.codigo_planilla).subscribe(
+      this.planillaService.getPlanillaBy(this.datosFormateados.value.codigo_planilla).subscribe(
         {
-          next: (response) => {
-            if (response){
-              this.detallePlanilla = response
-              this.previsualizarDatos(response.periodoInicio, response.periodoFinalizacion);
-              return this.filas;
+          next: async (response) => {
+            if (response.data) {
+              this.detallePlanilla = response.data;
+
+              const periodoInicioFormatoNuevo = this.convertirFormatoFecha(response.data.periodoInicio);
+              const periodoFinalizacionFormatoNuevo = this.convertirFormatoFecha(response.data.periodoFinalizacion);
+              this.datosTabl = await this.getFilas(periodoInicioFormatoNuevo, periodoFinalizacionFormatoNuevo);
+
+              this.verDat = true;
+            } else {
+              this.detallePlanilla = [];
+              this.datosTabl = [];
+              this.toastr.error(`La planilla con el código de planilla: ${this.datosFormateados.value.codigo_planilla}  no existe `);
+            }
+            if (this.ejecF) {
+              this.ejecF(this.datosTabl).then(() => { });
             }
           },
           error: (error) => {
             let mensajeError = 'Error desconocido al buscar la planilla';
-
-            // Verifica si el error tiene una estructura específica
             if (error.error && error.error.message) {
               mensajeError = error.error.message;
             } else if (typeof error.error === 'string') {
-              // Para errores que vienen como un string simple
               mensajeError = error.error;
             }
 
@@ -101,78 +122,178 @@ export class AsignacionAfilPlanComponent implements OnInit{
         }
       );
 
-
     } catch (error) {
       console.error("Error al obtener datos de Tipo Planilla", error);
     }
   };
 
-  /* Previsualiza los datos en la tabla. */
-  previsualizarDatos = async (periodoInicio:string, periodoFinal:string) => {
-    this.datosTabl = await this.getFilas(periodoInicio, periodoFinal)
-    this.verDat = true
-    this.filasT = this.datosTabl;
-
-    this.ejecF(this.filasT).then(()=>{})
-
-    return this.datosTabl
-  }
-
   getFilas = async (periodoInicio: string, periodoFinalizacion: string) => {
-    try {
-      // Asegúrate de pasar los parámetros mes y anio a la función getDeduccionesNoAplicadas
-      const data = await this.planillaService.getDeduccionesNoAplicadas(periodoInicio, periodoFinalizacion).toPromise();
-      this.filasT = data.map((item: any) => {
-        return {
-          afil_id_afiliado: item.afil_id_afiliado,
-          afil_dni: item.afil_dni,
-          afil_primer_nombre: item.afil_primer_nombre,
-          BENEFICIOSIDS: item.BENEFICIOSIDS,
-          BENEFICIOSNOMBRES: item.BENEFICIOSNOMBRES,
-          DEDUCCIONESIDS: item.DEDUCCIONESIDS,
-          DEDUCCIONESNOMBRES: item.DEDUCCIONESNOMBRES,
-          periodoInicio : periodoInicio,
-          periodoFinalizacion : periodoFinalizacion
-        };
-      });
+    const serviceCalls:any = {
+      "ORDINARIA - AFILIADO": this.planillaService.getPlanillaOrdinariaAfiliados,
+      "ORDINARIA - BENEFICIARIO": this.planillaService.getPlanillaOrdinariaBeneficiarios,
+      "COMPLEMENTARIA - AFILIADO": this.planillaService.getPlanillaComplementariaAfiliados,
+      "COMPLEMENTARIA - BENEFICIARIO": this.planillaService.getPlanillaComplementariaBeneficiarios,
+    };
 
-      return this.filasT;
+    const mapData = (item:any) => ({
+      dni: item.DNI,
+      NOMBRE_COMPLETO: item.NOMBRE_COMPLETO,
+      periodoInicio: periodoInicio,
+      periodoFinalizacion: periodoFinalizacion,
+      "Total Beneficio": item["Total Beneficio"],
+      "Total Deducciones": item["Total Deducciones"],
+      "Total": item["Total Beneficio"] - item["Total Deducciones"],
+    });
+
+    try {
+      const serviceName = this.detallePlanilla.tipoPlanilla.nombre_planilla;
+      const serviceFunction = serviceCalls[serviceName];
+
+      if (serviceFunction) {
+        const data = await serviceFunction.bind(this.planillaService)(periodoInicio, periodoFinalizacion).toPromise();
+        this.dataPlan = data.data.map(mapData);
+      } else {
+        console.error('Servicio no definido para el tipo de planilla:', serviceName);
+      }
+      return this.dataPlan;
+
     } catch (error) {
       console.error("Error al obtener datos de deducciones", error);
       throw error;
     }
   }
 
-  ejecutarFuncionAsincronaDesdeOtroComponente(funcion: (data:any) => Promise<void>) {
+  ejecutarFuncionAsincronaDesdeOtroComponente(funcion: (data: any) => Promise<void>) {
     this.ejecF = funcion;
   }
 
-  editar = (row: any) => {}
+  editar = (row: any) => { }
+
+  /* Maneja los beneficios */
   manejarAccionUno(row: any) {
-    this.svcAfilServ.getAfilByParam(row.afil_dni).subscribe({
-      next: (afilData) => {
-        console.log(afilData);
-        const dialogRef = this.dialog.open(DynamicDialogComponent, {
-          width: '250px', // Ajusta según tus necesidades
-          data: { afilData } // Pasando los datos obtenidos del servicio al dialog
+    let logs: any[] = [];
+    logs.push({ message: `DNI: ${row.dni}`, detail: null  });
+    logs.push({ message: `Nombre Completo: ${row.NOMBRE_COMPLETO}`, detail: null  });
 
-        });
+    const openDialog = (beneficios:any) => {
+      logs.push({ message: 'Datos De Beneficio:', detail: beneficios });
+      this.dialog.open(DynamicDialogComponent, {
+        width: '50%',
+        data: { logs: logs, type: 'beneficio' }
+      });
+    };
 
-        dialogRef.afterClosed().subscribe(result => {
-          console.log('La modal fue cerrada');
-          // Aquí puedes manejar lo que sucede después de cerrar la modal
-        });
-      },
-      error: (error) => {
-        console.error('Error al obtener datos del afiliado', error);
-        // Manejo de errores, por ejemplo, mostrar un mensaje al usuario
-      }
+    const handleError = (error:any) => {
+      logs.push({ message: 'Error al obtener los beneficios:', detail: error });
+      openDialog([]);
+    };
+
+    const mapBeneficios = (response:any) => {
+      return response.data.map((b:any) => ({
+        NOMBRE_BENEFICIO: b.NOMBRE_BENEFICIO,
+        MontoAPagar: b.MontoAPagar
+      }));
+    };
+
+    const serviceActions:any = {
+      "ORDINARIA - AFILIADO": this.planillaService.getPagoBeneficioOrdiAfil.bind(this.planillaService),
+      "ORDINARIA - BENEFICIARIO": this.planillaService.getPagoBeneficioOrdiBenef.bind(this.planillaService),
+      "COMPLEMENTARIA - AFILIADO": this.planillaService.getPagoBeneficioCompleAfil.bind(this.planillaService),
+      "COMPLEMENTARIA - BENEFICIARIO": this.planillaService.getPagoBeneficioCompleBenef.bind(this.planillaService),
+    };
+
+    const tipoPlanilla = this.detallePlanilla.tipoPlanilla.nombre_planilla;
+    const serviceCall = serviceActions[tipoPlanilla];
+
+    if (serviceCall) {
+      serviceCall(row.dni, row.periodoInicio, row.periodoFinalizacion).subscribe({
+        next: (response:any) => openDialog(mapBeneficios(response)),
+        error: handleError
+      });
+    } else {
+      console.error('No existe una acción para este tipo de planilla:', tipoPlanilla);
+    }
+  }
+
+  /* Maneja las deducciones */
+  manejarAccionDos(row: any) {
+    let logs: any[] = [];
+    logs.push({ message: `DNI: ${row.dni}`, detail: null  });
+    logs.push({ message: `Nombre Completo: ${row.NOMBRE_COMPLETO}`, detail: null  });
+
+    const openDialog = (deducciones:any) => {
+      logs.push({ message: 'Datos De Deduccion:', detail: deducciones });
+      this.dialog.open(DynamicDialogComponent, {
+        width: '50%',
+        data: { logs: logs, type: 'deduccion' }
+      });
+    };
+
+    const handleError = (error:any) => {
+      logs.push({ message: 'Error al obtener las deducciones:', detail: error });
+      openDialog([]);
+    };
+
+    const mapDeducciones = (response:any) => {
+      return response.data.map((b:any) => ({
+        NOMBRE_DEDUCCION: b.NOMBRE_DEDUCCION,
+        MontoAplicado: b.MontoAplicado
+      }));
+    };
+
+    const serviceActions:any = {
+      "ORDINARIA - AFILIADO": this.planillaService.getPagoDeduccionesOrdiAfil.bind(this.planillaService),
+      "ORDINARIA - BENEFICIARIO": this.planillaService.getPagoDeduccionesOrdiBenef.bind(this.planillaService),
+      "COMPLEMENTARIA - AFILIADO": this.planillaService.getPagoDeduccionesCompleAfil.bind(this.planillaService),
+      "COMPLEMENTARIA - BENEFICIARIO": this.planillaService.getPagoDeduccionesCompleBenef.bind(this.planillaService),
+    };
+
+    const tipoPlanilla = this.detallePlanilla.tipoPlanilla.nombre_planilla;
+    const serviceCall = serviceActions[tipoPlanilla];
+
+    if (serviceCall) {
+      serviceCall(row.dni, row.periodoInicio, row.periodoFinalizacion).subscribe({
+        next: (response:any) => openDialog(mapDeducciones(response)),
+        error: handleError
+      });
+    } else {
+      console.error('No existe una acción para este tipo de planilla:', tipoPlanilla);
+    }
+  }
+
+  openLogDialog(logs: any[]) {
+    this.dialog.open(DynamicDialogComponent, {
+      width: '1000px',
+      data: { logs }
     });
   }
 
+  actualizarPlanilla(): void {
+    const tipo = this.detallePlanilla.tipoPlanilla.nombre_planilla;
+    const idPlanilla = this.detallePlanilla.id_planilla;
+    const periodoInicio = this.convertirFormatoFecha(this.detallePlanilla.periodoInicio);
+    const periodoFinalizacion = this.convertirFormatoFecha(this.detallePlanilla.periodoFinalizacion);
 
-  manejarAccionDos(row: any) {
-    // Lógica para manejar la acción del segundo botón
+    this.planillaService.actualizarPlanillaAPreliminar(tipo, idPlanilla, periodoInicio, periodoFinalizacion)
+      .subscribe({
+        next: (response) => {
+          this.toastr.success('Planilla actualizada con éxito');
+        },
+        error: (error) => {
+          let mensajeError = 'Error al actualizar la planilla';
+          if (error.error && error.error.message) {
+            mensajeError = error.error.message;
+          } else if (typeof error.error === 'string') {
+            mensajeError = error.error;
+          }
+          this.toastr.error(mensajeError);
+        }
+      });
   }
 
+
+
+  convertirFormatoFecha(fecha: string): string {
+    return fecha.replace(/-/g, '.');
+  }
 }

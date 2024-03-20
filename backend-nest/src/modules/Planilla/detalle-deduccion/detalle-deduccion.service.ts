@@ -1,15 +1,17 @@
 import { BadRequestException, Injectable, Logger, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import { CreateDetalleDeduccionDto } from './dto/create-detalle-deduccion.dto';
 import { UpdateDetalleDeduccionDto } from './dto/update-detalle-deduccion.dto';
-import { InjectRepository } from '@nestjs/typeorm';
-import { DetalleDeduccion } from './entities/detalle-deduccion.entity';
-import { Between, Repository } from 'typeorm';
-import { Deduccion } from '../deduccion/entities/deduccion.entity';
-import { Institucion } from 'src/modules/Empresarial/institucion/entities/institucion.entity';
+import { InjectEntityManager, InjectRepository } from '@nestjs/typeorm';
+import { Net_Detalle_Deduccion } from './entities/detalle-deduccion.entity';
+import { EntityManager, FindOptionsWhere, Repository } from 'typeorm';
+import { Net_Institucion } from 'src/modules/Empresarial/institucion/entities/net_institucion.entity';
 import * as xlsx from 'xlsx';
-import { AfiliadoService } from 'src/afiliado/afiliado.service';
-import { Afiliado } from 'src/afiliado/entities/afiliado';
-import { DetalleAfiliado } from 'src/afiliado/entities/detalle_afiliado.entity';
+import { AfiliadoService } from 'src/modules/afiliado/afiliado.service';
+import { Net_Persona } from 'src/modules/afiliado/entities/Net_Persona';
+import { Net_Detalle_Afiliado } from 'src/modules/afiliado/entities/Net_detalle_persona.entity';
+import { Net_Planilla } from '../planilla/entities/net_planilla.entity';
+import { isUUID } from 'class-validator';
+import { Net_Deduccion } from '../deduccion/entities/net_deduccion.entity';
 
 @Injectable()
 export class DetalleDeduccionService {
@@ -17,28 +19,338 @@ export class DetalleDeduccionService {
   private readonly logger = new Logger(DetalleDeduccionService.name)
 
   constructor(
-    @InjectRepository(DetalleDeduccion)
-    private detalleDeduccionRepository: Repository<DetalleDeduccion>,
-    @InjectRepository(Afiliado)
-    private afiliadoRepository: Repository<Afiliado>,
-    @InjectRepository(Deduccion)
-    private deduccionRepository: Repository<Deduccion>,
-    @InjectRepository(Institucion)
-    private institucionRepository: Repository<Institucion>,
-    @InjectRepository(DetalleAfiliado)
-    private DetalleAfiliadoRepository: Repository<DetalleAfiliado>,
-    private readonly afiliadoService: AfiliadoService,
+    @InjectRepository(Net_Detalle_Deduccion)
+    private detalleDeduccionRepository: Repository<Net_Detalle_Deduccion>,
+    @InjectRepository(Net_Persona)
+    private afiliadoRepository: Repository<Net_Persona>,
+    @InjectRepository(Net_Deduccion)
+    private deduccionRepository: Repository<Net_Deduccion>,
+    @InjectRepository(Net_Institucion)
+    private institucionRepository: Repository<Net_Institucion>,
+    @InjectRepository(Net_Detalle_Afiliado)
+    private detalleAfiliadoRepository: Repository<Net_Detalle_Afiliado>,
+    @InjectRepository(Net_Planilla)
+    private planillaRepository: Repository<Net_Planilla>,
+    @InjectEntityManager() private readonly entityManager: EntityManager
   ){}
+
+  async insertarDetalles(data: any[]): Promise<void> {
+    const queryRunner = this.entityManager.connection.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+
+    try {
+      for (const item of data) {
+        const institucion = await this.institucionRepository.findOne({ where: { nombre_institucion: item.nombre_institucion } });
+        if (!institucion) throw new NotFoundException(`Institucion ${item.nombre_institucion} no encontrada`);
+
+        const afiliado = await this.afiliadoRepository.findOne({ where: { dni: item.dni } });
+        if (!afiliado) throw new NotFoundException(`Afiliado con DNI ${item.dni} no encontrado`);
+
+        const deduccion = await this.deduccionRepository.findOne({ where: { codigo_deduccion: item.codigo_deduccion, institucion } });
+        if (!deduccion) throw new NotFoundException(`Deducción con código ${item.codigo_deduccion} no encontrada en la institución ${item.nombre_institucion}`);
+
+        const detalleDeduccion = new Net_Detalle_Deduccion();
+        //detalleDeduccion.afiliado = afiliado;
+        detalleDeduccion.deduccion = deduccion;
+        detalleDeduccion.anio = parseInt(item.año);
+        detalleDeduccion.mes = parseInt(item.mes);
+        detalleDeduccion.monto_total = parseFloat(item.monto_motal);
+        
+
+        await queryRunner.manager.save(detalleDeduccion);
+      }
+      await queryRunner.commitTransaction();
+    } catch (error) {
+      await queryRunner.rollbackTransaction();
+      /* this.logger.error(`Error al insertar detalles de deducción: ${error.message}`);
+      throw new InternalServerErrorException(`Error al insertar detalles de deducción: ${error.message}`); */
+    } finally {
+      await queryRunner.release();
+    }
+  }
+
+  async actualizarEstadoAplicacionPorPlanilla(idPlanilla: string, nuevoEstado: string): Promise<{ mensaje: string }> {
+    try {
+      const resultado = await this.detalleDeduccionRepository.createQueryBuilder()
+        .update(Net_Detalle_Deduccion)
+        .set({ estado_aplicacion: nuevoEstado })
+        .where("planilla.id_planilla = :idPlanilla", { idPlanilla })
+        .execute();
+  
+      if (resultado.affected === 0) {
+        throw new NotFoundException(`No se encontraron detalles de deducción para la planilla con ID ${idPlanilla}`);
+      }
+  
+      const mensaje = `Estado de aplicación actualizado a '${nuevoEstado}' para los detalles de deducción de la planilla con ID ${idPlanilla}`;
+      return { mensaje };
+    } catch (error) {
+      this.logger.error(`Error al actualizar el estado de aplicación para la planilla con ID ${idPlanilla}: ${error.message}`, error.stack);
+      throw new InternalServerErrorException('Se produjo un error al actualizar los estados de aplicación de los detalles de deducción');
+    }
+  }
+
+  async getTotalDeduccionesPorPlanilla(idPlanilla: string): Promise<any> {
+    if (!isUUID(idPlanilla)) {
+      throw new BadRequestException('El ID de la planilla no es válido');
+    }
+
+    try {
+      const resultado = await this.entityManager.query(
+        `SELECT
+          ded."id_deduccion",
+          ded."nombre_deduccion",
+          SUM(COALESCE(detDed."monto_aplicado", 0)) AS "Total Monto Aplicado"
+        FROM
+          "net_detalle_deduccion" detDed
+        INNER JOIN
+          "net_deduccion" ded ON detDed."id_deduccion" = ded."id_deduccion"
+        WHERE
+          detDed."id_planilla" = '${idPlanilla}'
+        GROUP BY
+          ded."id_deduccion", ded."nombre_deduccion"`
+      );
+
+      return resultado;
+    } catch (error) {
+      this.logger.error('Error al obtener el total de deducciones por planilla', error.stack);
+      throw new InternalServerErrorException();
+    }
+  }
+  
+
+  async getDetallesDeduccionPorAfiliadoYPlanilla(idAfiliado: string, idPlanilla: string): Promise<any> {
+    const query = `
+    SELECT
+        dd."ID_DED_DEDUCCION",
+        ded."NOMBRE_DEDUCCION",
+        dd."ID_PERSONA",
+        dd."ID_DEDUCCION",
+        ded."ID_INSTITUCION",
+        dd."MONTO_TOTAL",
+        dd."MONTO_APLICADO" AS "MontoAplicado",
+        dd."ESTADO_APLICACION",
+        dd."ANIO",
+        dd."MES",
+        dd."FECHA_APLICADO",
+        dd."ID_PLANILLA"
+      FROM
+        "NET_DETALLE_DEDUCCION" dd
+      INNER JOIN "NET_DEDUCCION" ded ON ded."ID_DEDUCCION" = dd."ID_DEDUCCION" 
+      WHERE
+        dd."ESTADO_APLICACION" = 'EN PRELIMINAR' AND
+        dd."ID_PERSONA" = '${idAfiliado}' AND 
+        dd."ID_PLANILLA" = '${idPlanilla}'
+    `;
+
+    try {
+      // Usar un objeto para pasar los parámetros con nombre
+      //const parameters: any = { idAfiliado: idAfiliado, idPlanilla: idPlanilla };
+      const detalleDeducciones = await this.entityManager.query(query);
+      return detalleDeducciones;
+    } catch (error) {
+      this.logger.error(`Error al obtener detalles de deducción por afiliado y planilla: ${error.message}`, error.stack);
+      throw new InternalServerErrorException('Se produjo un error al obtener los detalles de deducción por afiliado y planilla.');
+    }
+  }
+
+  async getDetallesDeduccioDefinitiva(idAfiliado: string, idPlanilla: string): Promise<any> {
+    const query = `
+    SELECT
+        dd."ID_DED_DEDUCCION",
+        ded."NOMBRE_DEDUCCION",
+        dd."ID_PERSONA",
+        dd."ID_DEDUCCION",
+        ded."ID_INSTITUCION",
+        dd."MONTO_TOTAL",
+        dd."MONTO_APLICADO" AS "MontoAplicado",
+        dd."ESTADO_APLICACION",
+        dd."ANIO",
+        dd."MES",
+        dd."FECHA_APLICADO",
+        dd."ID_PLANILLA"
+      FROM
+        "NET_DETALLE_DEDUCCION" dd
+      INNER JOIN "NET_DEDUCCION" ded ON ded."ID_DEDUCCION" = dd."ID_DEDUCCION" 
+      WHERE
+        dd."ESTADO_APLICACION" = 'COBRADA' AND
+        dd."ID_PERSONA" = '${idAfiliado}' AND 
+        dd."ID_PLANILLA" = '${idPlanilla}'
+    `;
+    try {
+      // Usar un objeto para pasar los parámetros con nombre
+      //const parameters: any = { idAfiliado: idAfiliado, idPlanilla: idPlanilla };
+      const detalleDeducciones = await this.entityManager.query(query);
+      return detalleDeducciones;
+    } catch (error) {
+      this.logger.error(`Error al obtener detalles de deducción por afiliado y planilla: ${error.message}`, error.stack);
+      throw new InternalServerErrorException('Se produjo un error al obtener los detalles de deducción por afiliado y planilla.');
+    }
+  }
+  
+  async getRangoDetalleDeducciones(idPersona: string, fechaInicio: string, fechaFin: string): Promise<any> {
+    const query = `
+      SELECT
+        dd."ID_DED_DEDUCCION",
+        dd."MONTO_TOTAL",
+        dd."MONTO_APLICADO",
+        dd."ESTADO_APLICACION",
+        dd."ANIO",
+        dd."MES",
+        d."NOMBRE_DEDUCCION",
+        afil."ID_PERSONA",
+        TRIM(
+          afil."PRIMER_NOMBRE" || ' ' || 
+          COALESCE(afil."SEGUNDO_NOMBRE", '') || ' ' || 
+          COALESCE(afil."TERCER_NOMBRE", '') || ' ' || 
+          afil."PRIMER_APELLIDO" || ' ' || 
+          COALESCE(afil."SEGUNDO_APELLIDO", '')
+        ) AS "nombre_completo"
+      FROM
+        "NET_DETALLE_DEDUCCION" dd
+      JOIN
+        "NET_DEDUCCION" d ON dd."ID_DEDUCCION" = d."ID_DEDUCCION"
+      JOIN
+        "NET_PERSONA" afil ON dd."ID_PERSONA" = afil."ID_PERSONA"
+      WHERE
+        dd."ID_PERSONA" = :idPersona
+      AND
+        TO_DATE(CONCAT(dd."ANIO", LPAD(dd."MES", 2, '0')), 'YYYYMM') BETWEEN TO_DATE(:fechaInicio, 'DD-MM-YYYY') AND TO_DATE(:fechaFin, 'DD-MM-YYYY')
+      AND
+        dd."ESTADO_APLICACION" = 'NO COBRADA'
+    `;
+  
+    try {
+      const parametros :any = {
+        idPersona: idPersona,
+        fechaInicio: fechaInicio,
+        fechaFin: fechaFin,
+      };
+      return await this.detalleDeduccionRepository.query(query, parametros);
+    } catch (error) {
+      this.logger.error('Error al obtener los detalles de deducción', error.stack);
+      throw new InternalServerErrorException('Error al consultar los detalles de deducción en la base de datos');
+    }
+  }
+
+
+async findInconsistentDeduccionesByAfiliado(idAfiliado: string) {
+  try {
+    const query = `
+    SELECT  
+      ded."nombre_deduccion",
+      detD."id_ded_deduccion",
+      detD."monto_total",
+      detD."monto_aplicado",
+      detD."estado_aplicacion",
+      detD."anio",
+      detD."mes" 
+    FROM 
+      "net_deduccion" ded
+    INNER JOIN  
+      "net_detalle_deduccion" detD ON ded."id_deduccion" = detD."id_deduccion"
+    WHERE 
+      detD."estado_aplicacion" = 'INCONSISTENCIA' AND detD."id_afiliado" = '${idAfiliado}'
+    `;
+
+    return await this.detalleDeduccionRepository.query(query);
+  } catch (error) {
+    this.logger.error(`Error al buscar deducciones inconsistentes por afiliado: ${error.message}`);
+    throw new InternalServerErrorException('Error al buscar deducciones inconsistentes por afiliado');
+  }
+}
+
+async obtenerDetallesDeduccionPorAfiliado(idAfiliado: string): Promise<any[]> {
+  try {
+    const query = `
+      SELECT
+      detD."id_ded_deduccion",
+      detD."monto_total",
+      detD."monto_aplicado",
+      detD."estado_aplicacion",
+      detD."anio",
+      detD."mes",
+      afil."id_afiliado",
+      afil."dni",
+      TRIM(
+          afil."primer_nombre" || ' ' || 
+          COALESCE(afil."segundo_nombre", '') || ' ' || 
+          COALESCE(afil."tercer_nombre", '') || ' ' || 
+          afil."primer_apellido" || ' ' || 
+          COALESCE(afil."segundo_apellido", '')
+      ) AS "nombre_completo",
+      ded."nombre_deduccion",
+      ded."descripcion_deduccion",
+      inst."tipo_institucion",
+      ded."codigo_deduccion"
+    FROM
+      "net_detalle_deduccion" detD
+    JOIN
+      "net_deduccion" ded ON detD."id_deduccion" = ded."id_deduccion"
+    JOIN
+      "Net_Persona" afil ON detD."id_afiliado" = afil."id_afiliado"
+      JOIN
+      "net_institucion" inst ON inst."id_institucion" = ded."id_institucion"
+    WHERE
+      detD."id_afiliado" = :1 AND
+      detD."estado_aplicacion" != 'INCONSISTENCIA' AND
+      detD."id_afiliado" NOT IN (
+          SELECT detD2."id_afiliado"
+          FROM "net_detalle_deduccion" detD2
+          WHERE detD2."estado_aplicacion" = 'COBRADA'
+      )
+      AND detD."id_afiliado" NOT IN (
+          SELECT dedBA."id_afiliado"
+          FROM "net_detalle_pago_beneficio" detB
+          JOIN
+              "net_detalle_beneficio_afiliado" dedBA ON detB."id_beneficio_afiliado" = dedBA."id_detalle_ben_afil"
+          WHERE detB."estado" = 'PAGADA'
+      )
+    ORDER BY
+      afil."id_afiliado",
+      ded."id_deduccion"
+  `;
+  
+    return await this.detalleDeduccionRepository.query(query, [idAfiliado]);
+  } catch (error) {
+    this.logger.error('Error al obtener detalles de deduccion por afiliado', error.stack);
+    throw new InternalServerErrorException('Error al obtener detalles de deduccion por afiliado');
+  }
+}
+
+async actualizarPlanillasYEstadosDeDeducciones(detalles: { idDedDeduccion: number; codigoPlanilla: string; estadoAplicacion: string }[], transactionalEntityManager?: EntityManager): Promise<Net_Detalle_Deduccion[]> {
+  const resultados = [];
+  const entityManager = transactionalEntityManager ? transactionalEntityManager : this.entityManager;
+
+  for (const { idDedDeduccion, codigoPlanilla, estadoAplicacion } of detalles) {
+    const deduccion = await entityManager.findOne(Net_Detalle_Deduccion, { where: { id_ded_deduccion: idDedDeduccion } });
+    if (!deduccion) {
+      throw new NotFoundException(`DetalleDeduccion con ID "${idDedDeduccion}" no encontrado`);
+    }
+
+    const planilla = await entityManager.findOne(Net_Planilla, { where: { codigo_planilla: codigoPlanilla } });
+    if (!planilla) {
+      throw new NotFoundException(`Planilla con código "${codigoPlanilla}" no encontrada`);
+    }
+
+    deduccion.planilla = planilla;
+    deduccion.estado_aplicacion = estadoAplicacion; // Actualiza el estado de aplicación
+
+    resultados.push(await entityManager.save(deduccion));
+  }
+  return resultados;
+}
+
+  
 
   async create(createDetalleDeduccionDto: CreateDetalleDeduccionDto) {
     const { dni, nombre_deduccion, nombre_institucion, monto_total, monto_aplicado, estado_aplicacion, anio, mes } = createDetalleDeduccionDto;
 
     // Buscar el afiliado por DNI
-    const afiliado = await this.afiliadoRepository.findOne({ where: { dni } });
-    if (!afiliado) {
+    const persona = await this.afiliadoRepository.findOne({ where: { dni } });
+    if (!persona) {
       throw new NotFoundException(`Afiliado con DNI '${dni}' no encontrado.`);
     }
-
     // Buscar la deducción por nombre
     const deduccion = await this.deduccionRepository.findOne({ where: { nombre_deduccion: nombre_deduccion } });
     if (!deduccion) {
@@ -50,22 +362,19 @@ export class DetalleDeduccionService {
     if (!institucion) {
       throw new NotFoundException(`Institución con nombre '${nombre_institucion}' no encontrada.`);
     }
-
-    // Crear una nueva instancia de DetalleDeduccion con los ID obtenidos
-    const nuevoDetalleDeduccion = this.detalleDeduccionRepository.create({
-      afiliado: afiliado,
-      deduccion: deduccion,
-      institucion: institucion,
-      monto_total: monto_total,
-      monto_aplicado: monto_aplicado,
-      estado_aplicacion: estado_aplicacion,
-      anio: anio,
-      mes: mes
-    });
-    
-
+ 
     // Guardar el nuevo DetalleDeduccion en la base de datos
     try {
+      const nuevoDetalleDeduccion = this.detalleDeduccionRepository.create({
+        afiliado: persona,
+        deduccion: deduccion,
+        //institucion: institucion,
+        monto_total: monto_total,
+        monto_aplicado: monto_aplicado,
+        estado_aplicacion: estado_aplicacion,
+        anio: anio,
+        mes: mes
+      });
       await this.detalleDeduccionRepository.save(nuevoDetalleDeduccion);
       return nuevoDetalleDeduccion;
     } catch (error) {
@@ -85,11 +394,10 @@ export class DetalleDeduccionService {
     queryBuilder
       .leftJoinAndSelect('detalleDeduccion.deduccion', 'deduccion')
       .leftJoinAndSelect('detalleDeduccion.afiliado', 'afiliado')
-      .leftJoinAndSelect('detalleDeduccion.institucion', 'institucion')
+      .leftJoinAndSelect('deduccion.institucion', 'institucion')
       .leftJoinAndSelect('afiliado.detalleAfiliado', 'detalleAfiliado'); // Asume que existe una relación desde Afiliado a DetalleAfiliado
-  
-    const result = await queryBuilder.getMany();
-  
+      
+      const result = await queryBuilder.getMany();
     return result; // Devuelve el resultado directamente
   }
   
@@ -98,7 +406,24 @@ export class DetalleDeduccionService {
     return `This action returns a #${id} detalleDeduccion`;
   }
 
-  async update(id_ded_deduccion: string, updateDetalleDeduccionDto: UpdateDetalleDeduccionDto) {
+  async findDeduccionesByDni(dni: string): Promise<Net_Detalle_Deduccion[]> {
+    return this.detalleDeduccionRepository
+      .createQueryBuilder('detalle')
+      .leftJoinAndSelect('detalle.deduccion', 'deduccion')
+      .leftJoinAndSelect('deduccion.institucion', 'institucion')
+      .leftJoinAndSelect('detalle.planilla', 'planilla') // Agrega esta línea para hacer join con Net_Planilla
+      .innerJoinAndSelect('detalle.afiliado', 'afiliado', 'afiliado.dni = :dni', { dni })
+      .select([
+          'detalle',
+          'deduccion.nombre_deduccion',
+          'institucion.nombre_institucion',
+          'planilla.codigo_planilla', // Selecciona el código de la planilla
+          'afiliado.dni',
+      ])
+      .getMany();
+  }
+
+  async update(id_ded_deduccion: number, updateDetalleDeduccionDto: UpdateDetalleDeduccionDto) {
     // Buscar el DetalleDeduccion existente por ID
     const detalleDeduccion = await this.detalleDeduccionRepository.findOne({ where: { id_ded_deduccion } });
     if (!detalleDeduccion) {
@@ -113,7 +438,7 @@ export class DetalleDeduccionService {
         if (!afiliado) {
           throw new NotFoundException(`Afiliado con DNI '${dni}' no encontrado.`);
         }
-        detalleDeduccion.afiliado = afiliado;
+        //detalleDeduccion.afiliado = afiliado;
     }
 
     // Buscar la deducción por nombre
@@ -131,7 +456,7 @@ export class DetalleDeduccionService {
         if (!institucion) {
           throw new NotFoundException(`Institución con nombre '${nombre_institucion}' no encontrada.`);
         }
-        detalleDeduccion.institucion = institucion;
+        /* detalleDeduccion.institucion = institucion; */
     }
 
     // Actualizar los campos del DetalleDeduccion existente
@@ -180,26 +505,6 @@ export class DetalleDeduccionService {
     const worksheet = workbook.Sheets[sheetName];
     const data = xlsx.utils.sheet_to_json(worksheet);
     return data;
-  }
-
-
-  async findDeduccionesByDateRangeAndAfiliado(
-    mes1: number,
-    mes2: number,
-    año1: number,
-    año2: number,
-    id_afiliado: string
-  ): Promise<DetalleDeduccion[]> {
-    const fechaInicio = new Date(año1, mes1 - 1, 1); // Los meses en JavaScript son de 0 a 11
-    const fechaFin = new Date(año2, mes2, 0); // El día 0 del siguiente mes es el último día del mes actual
-  
-    return this.detalleDeduccionRepository.find({
-      where: {
-        afiliado: { id_afiliado },
-        fecha_aplicado: Between(fechaInicio, fechaFin)
-      },
-      relations: ['afiliado', 'deduccion', 'institucion', 'planilla'] // Asegúrate de incluir todas las relaciones que necesitas en el resultado
-    });
   }
   
 }

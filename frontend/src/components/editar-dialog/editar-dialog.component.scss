@@ -1,0 +1,9 @@
+.full-width-input {
+  width: 100%;
+}
+
+.disabled-field {
+  pointer-events: none; /* Desactiva eventos de clic, etc. */
+  color: rgba(0, 0, 0, 0.38); /* Cambia el color del texto para que parezca deshabilitado */
+  background-color: #ececec; /* Fondo de color gris claro para indicar que está deshabilitado */
+}

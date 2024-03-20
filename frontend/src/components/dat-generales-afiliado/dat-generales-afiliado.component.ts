@@ -51,36 +51,36 @@ export class DatGeneralesAfiliadoComponent implements OnInit{
   public archivo: any;
   public dataEdit:any;
 
-  tipoCotizante: any = this.datosEstaticos.tipoCotizante; tipoIdent: any = this.datosEstaticos.tipoIdent; 
-  Sexo: any = this.datosEstaticos.Sexo; estadoCivil: any = this.datosEstaticos.estadoCivil; 
+  tipoCotizante: any = this.datosEstaticos.tipoCotizante; tipoIdent: any = this.datosEstaticos.tipoIdent;
+  Sexo: any = this.datosEstaticos.Sexo; estadoCivil: any = this.datosEstaticos.estadoCivil;
   representacion: any = this.datosEstaticos.representacion; estado: any = this.datosEstaticos.estado;
-  
+
   paises: any = this.datosEstaticos.paises; departamentos: any = this.datosEstaticos.departamentos;
 
   @Input() groupName = '';
   @Output() newDatBenChange = new EventEmitter<any>()
   formArchivos:any;
   minDate: Date;
-  
+
   onDatosBenChange(fecha:any){
     this.newDatBenChange.emit(fecha._model.selection);
   }
-  
+
   constructor( private fb: FormBuilder, private afiliadoService: AfiliadoService, public direccionSer: DireccionService, private datosEstaticos: DatosEstaticosService) {
     const currentYear = new Date();
     this.minDate = new Date(currentYear.getFullYear(), currentYear.getMonth(), currentYear.getDate(),  currentYear.getHours(), currentYear.getMinutes(), currentYear.getSeconds());
   }
-  
+
   ngOnInit():void{
-    /* this.direccionSer.getAllCiudades().subscribe((res: any) => {});
+    this.direccionSer.getAllCiudades().subscribe((res: any) => {});
     this.direccionSer.getAllProvincias().subscribe((res: any) => {});
     this.direccionSer.getAllPaises().subscribe((res: any) => {
       this.departamentos = res.paises
       this.paises = res.paises
-    }); */
+    });
   }
 
-  /* prueba(e:any){ 
+  /* prueba(e:any){
     console.log(e);
     return e._model.selection
   } */

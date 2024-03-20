@@ -13,9 +13,19 @@
   background-color: white;
 }
 
+.custom-row:nth-child(even) {
+  background-color: #f2f2f2; /* Color para filas pares */
+}
+
+.custom-row:nth-child(odd) {
+  background-color: #ffffff; /* Color para filas impares */
+}
+
+
 .custom-table {
   width: 100%;
   border-collapse: collapse;
+  border-spacing: 0 10px; /* Añade espacio entre filas */
   margin-bottom: 20px;
 }
 
@@ -28,11 +38,13 @@
 
 .custom-row {
   border-bottom: 1px solid #ddd;
+  border-radius: 0; /* Restablece cualquier radio de borde que se haya aplicado anteriormente */
 }
 
 .custom-cell {
   text-align: center;
   padding: 10px;
+  border: none;
 }
 
 .custom-actions {
@@ -59,3 +71,5 @@
   background-color: #d9534f;
   color: #ffffff;
 }
+
+

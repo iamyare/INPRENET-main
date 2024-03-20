@@ -1,46 +1,43 @@
-import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn, AfterInsert, getRepository, AfterLoad, Unique, OneToMany } from 'typeorm';
-import { Deduccion } from "../../deduccion/entities/deduccion.entity";
-import { Institucion } from "src/modules/Empresarial/institucion/entities/institucion.entity";
-import { Afiliado } from 'src/afiliado/entities/afiliado';
-import { Planilla } from '../../planilla/entities/planilla.entity';
+import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn, AfterInsert, getRepository, AfterLoad, Unique, OneToMany, Check } from 'typeorm';
+import { Net_Persona } from 'src/modules/afiliado/entities/Net_Persona';
+import { Net_Planilla } from '../../planilla/entities/net_planilla.entity';
+import { IsEnum } from 'class-validator';
+import { Net_Deduccion } from '../../deduccion/entities/net_deduccion.entity';
 
-@Entity()
-export class DetalleDeduccion {
-    
-    @PrimaryGeneratedColumn('uuid')
-    id_ded_deduccion: string;
-    
-    @ManyToOne(() => Deduccion, deduccion => deduccion.detalleDeduccion, { cascade: true})
-    @JoinColumn({ name: 'id_deduccion' })
-    deduccion: Deduccion;
+@Entity({ name: 'NET_DETALLE_DEDUCCION' })
+@Check("CK_ESTADO_DED",`estado_aplicacion IN ('COBRADA', 'NO COBRADA', 'EN PRELIMINAR', 'EN PLANILLA')`)
+export class Net_Detalle_Deduccion {    
+    @PrimaryGeneratedColumn({ type: 'int', name: 'ID_DED_DEDUCCION', primaryKeyConstraintName: 'PK_id_detD' })
+    id_ded_deduccion: number;
 
-    @ManyToOne(() => Afiliado, afiliado => afiliado.detalleDeduccion, { cascade: true})
-    @JoinColumn({ name: 'id_afiliado' })
-    afiliado: Afiliado;
-    
-    @ManyToOne(() => Institucion, institucion => institucion.detalleDeduccion, { cascade: true})
-    @JoinColumn({ name: 'id_institucion' })
-    institucion: Institucion; // Correcto
-
-    @Column('number', {nullable: true})
+    @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true, name: 'MONTO_TOTAL' })
     monto_total: number;
 
-    @Column('number', {nullable: true})
+    @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true, name: 'MONTO_APLICADO' })
     monto_aplicado: number; 
 
-    @Column('varchar2', { length: 20, nullable: true })
+    @Column('varchar2', { length: 20, nullable: true, default: 'NO COBRADA', name: 'ESTADO_APLICACION' })
+    @IsEnum({ values: ['COBRADA', 'NO COBRADA', 'INCONSISTENCIA'] })
     estado_aplicacion: string;
-
-    @Column('number', {nullable: true})
+    
+    @Column('number', { nullable: true, name: 'ANIO' })
     anio: number;
 
-    @Column('number', {nullable: true})
+    @Column('number', { nullable: true, name: 'MES' })
     mes: number;
 
-    @Column('timestamp', { default: () => 'CURRENT_TIMESTAMP' })
+    @Column('timestamp', { default: () => 'CURRENT_TIMESTAMP', name: 'FECHA_APLICADO' })
     fecha_aplicado: Date;
 
-    @ManyToOne(() => Planilla, planilla => planilla.detalleDeduccion, { cascade: true })
-    @JoinColumn({ name: 'id_planilla' })
-    planilla: Planilla;
+    @ManyToOne(() => Net_Persona, afiliado => afiliado.detalleDeduccion, { cascade: true })
+    @JoinColumn({ name: 'ID_PERSONA', foreignKeyConstraintName:"FK_ID_PERSONA_DETDED" })
+    afiliado: Net_Persona;
+
+    @ManyToOne(() => Net_Planilla, planilla => planilla.detalleDeduccion, { cascade: true })
+    @JoinColumn({ name: 'ID_PLANILLA', foreignKeyConstraintName:"FK_ID_PLANILLA_DETDED" })
+    planilla: Net_Planilla;
+
+    @ManyToOne(() => Net_Deduccion, deduccion => deduccion.detalleDeduccion, { cascade: true })
+    @JoinColumn({ name: 'ID_DEDUCCION', foreignKeyConstraintName:"FK_ID_DEDUCCION_DETDED" })
+    deduccion: Net_Deduccion;
 }

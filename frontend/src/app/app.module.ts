@@ -14,7 +14,7 @@ import { AppComponent } from './app.component';
 
 // Import containers
 import { DefaultFooterComponent, DefaultHeaderComponent, DefaultLayoutComponent } from './containers';
-import { SharedModule } from './views/shared/shared/shared.module'
+import { SharedModule } from './shared/shared.module'
 
 import { IconModule, IconSetService } from '@coreui/icons-angular';
 import { HttpClientModule, HttpClient  } from '@angular/common/http';

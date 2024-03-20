@@ -1,28 +1,37 @@
-import { Component } from '@angular/core';
+import { Component, ViewChild, OnInit } from '@angular/core';
 import { ValidatorFn, Validators } from '@angular/forms';
 import { BeneficiosService } from '../../../../services/beneficios.service';
 import { ToastrService } from 'ngx-toastr';
-import { FieldConfig } from 'src/app/views/shared/shared/Interfaces/field-config';
+import { FieldConfig } from 'src/app/shared/Interfaces/field-config';
+import { DynamicFormComponent } from '@docs-components/dynamic-form/dynamic-form.component';
 @Component({
   selector: 'app-nuevo-beneficio',
   templateUrl: './nuevo-beneficio.component.html',
   styleUrl: './nuevo-beneficio.component.scss'
 })
-export class NuevoBeneficioComponent {
+export class NuevoBeneficioComponent implements OnInit{
+  @ViewChild(DynamicFormComponent) dynamicForm!: DynamicFormComponent;
   data:any
 
+  myFormFields:FieldConfig[] = []
   constructor(private SVCBeneficios:BeneficiosService, private toastr: ToastrService ,){}
 
-  myFormFields: FieldConfig[] = [
-    { type: 'text', label: 'Nombre de beneficio', name: 'nombre_beneficio', validations: [] },
-    { type: 'text', label: 'Descripción de beneficio', name: 'descripcion_beneficio', validations: [] },
-    { type: 'number', label: 'numero de rentas maximas', name: 'numero_rentas_max', validations: [] },
-
-    { type: 'dropdown', label: 'Estado', name: 'estado', validations: [], options:[{label:"vitalicio", value:"vitalicio"},
-    {label:"definido", value:"Definido"}] }
-  ];
+  ngOnInit(): void {
+    /* SI SE MUEVE LA FILA Periodo hay que cambiar la posicion en la funcion obtenerDatos */
+    this.myFormFields = [
+      { type: 'text', label: 'Nombre de beneficio', name: 'nombre_beneficio', validations: [Validators.required], display:true },
+      { type: 'text', label: 'Descripción de beneficio', name: 'descripcion_beneficio', validations: [Validators.required], display:true},
+      { type: 'dropdown', label: 'Periodicidad', name: 'periodicidad', validations: [Validators.required], options:[{label:"VITALICIO", value:"VITALICIO"}, {label:"DEFINIDO", value:"DEFINIDO"}] , display:true},
+      { type: 'number', label: 'Número de rentas máximas', name: 'numero_rentas_max', validations: [], display:false},
+    ];
+  }
 
   obtenerDatos(event:any):any{
+    if (event.value.periodicidad == "Definido"){
+      this.myFormFields[3].display = true
+    }else {
+      this.myFormFields[3].display = false
+    }
     this.data = event;
   }
 
@@ -38,6 +47,7 @@ export class NuevoBeneficioComponent {
       {
         next: (response) => {
           this.toastr.success('tipo de beneficio creado con éxito');
+          this.limpiarFormulario();
         },
         error: (error) => {
           let mensajeError = 'Error desconocido al crear tipo de beneficio';
@@ -52,5 +62,11 @@ export class NuevoBeneficioComponent {
         }
       }
       );
+  }
+
+  limpiarFormulario(): void {
+    if (this.dynamicForm) {
+      this.dynamicForm.form.reset();
+    }
   }
 }

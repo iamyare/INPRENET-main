@@ -3,17 +3,18 @@ import { CreateBeneficioDto } from './dto/create-beneficio.dto';
 import { UpdateBeneficioDto } from './dto/update-beneficio.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { Beneficio } from './entities/beneficio.entity';
+import { Net_Beneficio } from './entities/net_beneficio.entity';
 import { isUUID } from 'class-validator';
 
 @Injectable()
 export class BeneficioService {
   private readonly logger = new Logger(BeneficioService.name)
   constructor(){}
-  @InjectRepository(Beneficio)
-  private beneficioRepository: Repository<Beneficio>
+  @InjectRepository(Net_Beneficio)
+  private beneficioRepository: Repository<Net_Beneficio>
   
   async create(createBeneficioDto: CreateBeneficioDto) {
+    delete createBeneficioDto['numero_rentas_max']
     try {
       const beneficio = this.beneficioRepository.create(createBeneficioDto);
       return this.beneficioRepository.save(beneficio);
@@ -35,7 +36,7 @@ export class BeneficioService {
   } */
 
   async findOne(term: string) {
-    let beneficio: Beneficio;
+    let beneficio: Net_Beneficio;
     if (isUUID(term)) {
       beneficio = await this.beneficioRepository.findOneBy({ id_beneficio: term,});
     } else {

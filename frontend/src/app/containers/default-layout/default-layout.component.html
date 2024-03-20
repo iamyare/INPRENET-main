@@ -1,17 +1,17 @@
 <!--sidebar-->
 <c-sidebar #sidebar="cSidebar" class="d-print-none sidebar sidebar-fixed" style="background: #1F544A" id="sidebar"
   visible>
-  <c-sidebar-brand [brandFull]="{
-      src: 'assets/images/inprema2.png',
-      width: 150,
-      height: 80,
+  <c-sidebar-brand style="background: #ffffff" [brandFull]="{
+      src: 'assets/images/LOGO INPRENET.png',
+      width: 210,
+      height: 45,
       alt: 'Logo Inprema'
     }" routerLink="./" />
 
   <ng-scrollbar pointerEventsMethod="scrollbar">
     <c-sidebar-nav [navItems]="navItems" dropdownMode="close" />
   </ng-scrollbar>
-  <c-sidebar-toggler *ngIf="!sidebar.narrow" toggle="unfoldable" cSidebarToggle="sidebar" />
+  <c-sidebar-toggler *ngIf="!sidebar.narrow" toggle="unfoldable" cSidebarToggle="sidebar"/>
 </c-sidebar>
 
 <!--main-->

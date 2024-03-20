@@ -1,11 +1,11 @@
 .spinner {
     margin: 0 auto;
   }
-  
+
   .info{
     font-size: 15px;
   }
-  
+
   .inputfile {
     width: 0.1px;
     height: 0.1px;
@@ -14,7 +14,7 @@
     position: absolute;
     z-index: -1;
   }
-  
+
   .inputfile + label {
     max-width: 50%;
     font-size: 1.25rem;
@@ -26,7 +26,7 @@
     overflow: hidden;
     padding: 0.625rem 1.25rem;
   }
-  
+
   .inputfile + label svg {
     width: 1em;
     height: 1em;
@@ -35,23 +35,42 @@
     margin-top: -0.25em;
     margin-right: 0.25em;
   }
-  
+
   .iborrainputfile {
   font-size:16px;
   font-weight:normal
   }
-  
+
   /* style 1 */
-  
+
   .inputfile-1 + label {
     color: #fff;
     background-color: #1F544A;
   }
-  
+
   .inputfile-1:focus + label,
   .inputfile-1.has-focus + label,
   .inputfile-1 + label:hover {
     background-color: #1F544A;
   }
-  
-  
+
+  .card {
+    border-radius: 0.25rem; /* Asegura bordes redondeados suaves */
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Sombra suave para dar profundidad */
+    overflow: hidden; /* Asegura que el contenido no se salga de la tarjeta */
+  }
+
+  .card img {
+    max-width: 100%; /* Asegura que la imagen no sea más ancha que el contenedor */
+    height: auto; /* Permite que la altura se ajuste automáticamente manteniendo la relación de aspecto */
+    object-fit: contain; /* Asegura que se vea toda la imagen sin cortes */
+  }
+
+
+
+  /* Estilos para mejorar la responsividad de las tarjetas */
+  @media (max-width: 768px) {
+    .c-card-group {
+      flex-direction: column; /* Las tarjetas se apilan verticalmente en pantallas pequeñas */
+    }
+  }

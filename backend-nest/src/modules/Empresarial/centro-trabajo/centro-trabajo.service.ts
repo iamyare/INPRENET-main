@@ -2,9 +2,9 @@ import { BadRequestException, Injectable, InternalServerErrorException, Logger }
 import { CreateCentroTrabajoDto } from './dto/create-centro-trabajo.dto';
 import { UpdateCentroTrabajoDto } from './dto/update-centro-trabajo.dto';
 import { InjectRepository } from '@nestjs/typeorm';
-import { CentroTrabajo } from './entities/centro-trabajo.entity';
+import { Net_Centro_Trabajo } from './entities/net_centro-trabajo.entity';
 import { Repository } from 'typeorm';
-import { Provincia } from 'src/modules/Regional/provincia/entities/provincia.entity';
+import { Net_Departamento } from 'src/modules/Regional/provincia/entities/net_departamento.entity';
 
 @Injectable()
 export class CentroTrabajoService {
@@ -13,24 +13,24 @@ export class CentroTrabajoService {
 
   constructor(
 
-    @InjectRepository(CentroTrabajo)
-    private readonly centroTrabajoRepository: Repository<CentroTrabajo>,
-    @InjectRepository(Provincia)
-    private readonly provinciaRepository: Repository<Provincia>
+    @InjectRepository(Net_Centro_Trabajo)
+    private readonly centroTrabajoRepository: Repository<Net_Centro_Trabajo>,
+    @InjectRepository(Net_Departamento)
+    private readonly departamentoRepository: Repository<Net_Departamento>
     
   ){}
 
   
   async create(createCentroTrabajoDto: CreateCentroTrabajoDto) {
     try {
-      const provincia = await this.provinciaRepository.findOneBy({ nombre_provincia: createCentroTrabajoDto.nombre_provincia });
-      if (!provincia) {
-        throw new BadRequestException('Provincia not found');
+      const departamento = await this.departamentoRepository.findOneBy({ nombre_departamento: createCentroTrabajoDto.nombre_departamento });
+      if (!departamento) {
+        throw new BadRequestException('departamento not found');
       }
   
       return await this.centroTrabajoRepository.save({
         ...createCentroTrabajoDto,
-        provincia
+        departamento
       })
     } catch (error) {
       this.handleException(error);

@@ -2,24 +2,44 @@ import { Injectable } from '@angular/core';
 import { AfiliadoService } from './afiliado.service';
 import { DireccionService } from './direccion.service';
 import { BancosService } from './bancos.service';
+import { DeduccionesService } from './deducciones.service';
+import { InstitucionesService } from './instituciones.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class DatosEstaticosService {
-  paises: any = []; departamentos: any = []; DatosBancBen:any = [];
+  paises: any = [];
+  departamentos: any = [];
+  DatosBancBen:any = [];
   Bancos: any = [];
+  Instituciones: any = [];
 
-  constructor(private afiliadoService: AfiliadoService, public direccionSer: DireccionService,private bancosService: BancosService) { 
-    this.direccionSer.getAllCiudades().subscribe((res: any) => {});
-    this.direccionSer.getAllProvincias().subscribe((res: any) => {});
+  constructor( private SVCInstituciones:InstitucionesService ,private afiliadoService: AfiliadoService, public direccionSer: DireccionService,private bancosService: BancosService) {
+    /* this.direccionSer.getAllCiudades().subscribe((res: any) => {});
+    this.direccionSer.getAllProvincias().subscribe((res: any) => {}); */
+    /* this.bancosService.getAllBancos().subscribe((res: any) => {
+      this.Bancos = res.bancos
+    }); */
     this.direccionSer.getAllPaises().subscribe((res: any) => {
+      console.log(res);
+
       this.departamentos = res.paises
       this.paises = res.paises
     });
-    this.bancosService.getAllBancos().subscribe((res: any) => {
-      this.Bancos = res.bancos
+    this.SVCInstituciones.getInstituciones().subscribe((res: any) => {
+      this.Instituciones = res
     });
+    this.prueba();
+  }
+
+  async prueba(){
+    this.Instituciones = await this.SVCInstituciones.getInstituciones().toPromise();
+
+    this.Instituciones.map((item: { nombre_institucion: any; id_institucion: any; }) => ({
+      label: item.nombre_institucion,
+      value: String(item.id_institucion)
+    }));
   }
 
   estadoCivil = [
@@ -159,4 +179,19 @@ export class DatosEstaticosService {
       "value": "PUBLICO"
     }
   ];
+
+  tipoRol = [
+    {
+      "idRol":2,
+      "value": "JEFE DE AREA"
+    },
+    {
+      "idRol":3,
+      "value": "OFICIAL"
+    },
+    {
+      "idRol":4,
+      "value": "AUXILIAR"
+    },
+  ]
 }

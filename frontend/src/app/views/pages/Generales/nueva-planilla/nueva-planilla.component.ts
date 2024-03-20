@@ -1,5 +1,8 @@
-import { Component } from '@angular/core';
+import { Component, ViewChild } from '@angular/core';
 import { FormBuilder, FormGroup } from '@angular/forms';
+import { DynamicFormComponent } from '@docs-components/dynamic-form/dynamic-form.component';
+import { ToastrService } from 'ngx-toastr';
+import { BeneficiosService } from 'src/app/services/beneficios.service';
 import { PlanillaService } from 'src/app/services/planilla.service';
 import { generateFormArchivo } from 'src/components/botonarchivos/botonarchivos.component';
 
@@ -9,14 +12,17 @@ import { generateFormArchivo } from 'src/components/botonarchivos/botonarchivos.
   styleUrls: ['./nueva-planilla.component.scss']
 })
 export class NuevaPlanillaComponentP {
+  @ViewChild(DynamicFormComponent) dynamicForm!: DynamicFormComponent;
   form: FormGroup;
   formplanilla: FormGroup;
 
   datosG: boolean = false;
+  datosB: boolean = false;
   datosCT: boolean = false;
   datosHS:boolean = false
+  datosRP:boolean = false
 
-  constructor(private fb: FormBuilder, private planillaService: PlanillaService) {
+  constructor(private fb: FormBuilder, private planillaService: PlanillaService, private beneficiosService: BeneficiosService,  private toastr: ToastrService,) {
     this.form = this.fb.group({
       isChecked: [false]
     });
@@ -55,19 +61,67 @@ export class NuevaPlanillaComponentP {
       );
     }
   }
+
   setEstadoDatGen(e:any){
+    this.datosB = false
     this.datosG = true
     this.datosCT = false
+    this.datosRP = false
     this.datosHS = false
+
   }
+
   setEstadoTable(e:any){
+    this.datosB = false
     this.datosCT = true
     this.datosG = false
     this.datosHS = false
+    this.datosRP = false
+    this.cargarBeneficiosRecient();
   }
-  subirNuevPlan(e:any){
+
+  setEstadoVerPlanP(e:any){
+    this.datosB = false
     this.datosG = false
     this.datosCT = false
+    this.datosRP = false
     this.datosHS = true
+  }
+
+  setEstadoVerPlanDef(e:any){
+    this.datosB = false
+    this.datosG = false
+    this.datosCT = false
+    this.datosHS = false
+    this.datosRP = true
+  }
+
+  /* setEstadoCargarBen(e:any){
+    this.datosB = true
+    this.datosG = true
+    this.datosCT = false
+    this.datosHS = false
+    this.datosRP = false
+    this.cargarBeneficiosRecient();
+  } */
+
+  cargarBeneficiosRecient() {
+    this.beneficiosService.cargarBeneficiosRecient().subscribe({
+      next: (response: any) => {
+        if (response){
+          let temp = response.Registros;
+          this.toastr.success('Beneficios recientes Cargados exitosamente');
+        }
+      },
+      error: (error) => {
+        console.log(error);
+      }
+    });
+  }
+
+  limpiarFormulario(): void {
+    if (this.dynamicForm) {
+      this.dynamicForm.form.reset();
+    }
   }
 }

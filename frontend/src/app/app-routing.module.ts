@@ -7,6 +7,7 @@ import { Page500Component } from './views/pages/Errores/page500/page500.componen
 import { LoginComponent } from './views/pages/Generales/login/login.component';
 import { RegisterComponent } from './views/pages/Generales/register/register.component';
 import { PreRegisterComponent } from './views/pages/Generales/pre-register/pre-register.component';
+import { RoleGuard } from './guards/role-guard.guard';
 
 const routes: Routes = [
   {
@@ -18,38 +19,57 @@ const routes: Routes = [
     path: '',
     component: DefaultLayoutComponent,
     data: {
-      title: 'Home'
+      title: 'Inicio'
     },
     children: [
       {
         path: 'dashboard',
         loadChildren: () =>
-          import('./views/dashboard/dashboard.module').then((m) => m.DashboardModule)
+          import('./views/dashboard/dashboard.module').then((m) => m.DashboardModule),
+          canActivate: [RoleGuard],
+          data: { expectedRoles: ['ADMINISTRADOR', 'JEFE DE AREA'] }
       },
       {
         path: 'Afiliado',
         loadChildren: () =>
-          import('./views/theme/theme.module').then((m) => m.ThemeModule)
+          import('./views/theme/theme.module').then((m) => m.ThemeModule),
+          canActivate: [RoleGuard],
+          data: { expectedRoles: ['ADMINISTRADOR', 'JEFE DE AREA'] }
       },
       {
         path: 'Planilla',
         loadChildren: () =>
-          import('./views/theme/theme.module').then((m) => m.ThemeModule)
+          import('./views/theme/theme.module').then((m) => m.ThemeModule),
+          canActivate: [RoleGuard],
+          data: { expectedRoles: ['ADMINISTRADOR', 'JEFE DE AREA'] }
       },
       {
         path: 'Beneficio',
         loadChildren: () =>
-          import('./views/theme/theme.module').then((m) => m.ThemeModule)
+          import('./views/theme/theme.module').then((m) => m.ThemeModule),
+          canActivate: [RoleGuard],
+          data: { expectedRoles: ['ADMINISTRADOR', 'JEFE DE AREA'] }
       },
       {
         path: 'Deduccion',
         loadChildren: () =>
-          import('./views/theme/theme.module').then((m) => m.ThemeModule)
+          import('./views/theme/theme.module').then((m) => m.ThemeModule),
+          canActivate: [RoleGuard],
+          data: { expectedRoles: ['ADMINISTRADOR', 'JEFE DE AREA'] }
       },
       {
         path: 'Tipo-Planilla',
         loadChildren: () =>
-          import('./views/theme/theme.module').then((m) => m.ThemeModule)
+          import('./views/theme/theme.module').then((m) => m.ThemeModule),
+          canActivate: [RoleGuard],
+          data: { expectedRoles: ['ADMINISTRADOR', 'JEFE DE AREA'] }
+      },
+      {
+        path: 'Privados',
+        loadChildren: () =>
+          import('./views/theme/theme.module').then((m) => m.ThemeModule),
+          canActivate: [RoleGuard],
+          data: { expectedRoles: ['ADMINISTRADOR', 'JEFE DE AREA'] }
       },
 /*       {
         path: 'icons',

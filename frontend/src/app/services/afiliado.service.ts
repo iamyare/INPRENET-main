@@ -1,4 +1,4 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { EventEmitter, Injectable, Output } from '@angular/core';
 import { Router } from '@angular/router';
 import { Observable, map } from 'rxjs';
@@ -22,6 +22,25 @@ export class AfiliadoService {
           return res;
         })
       );
+  }
+
+  getAfiliadoDNI(param:string | number): Observable<any | void> {
+    const url = `${environment.API_URL}/api/afiliado/dni/${param}`;
+    return this.http.get<any>(
+      url,
+      ).pipe(
+        map((res:any) => {
+          return res;
+        })
+      );
+  }
+
+  generarVoucher(idPlanilla: string, dni: string): Observable<any> {
+    // Definir los parámetros de la consulta
+    const params = new HttpParams()
+      .set('idPlanilla', idPlanilla)
+      .set('dni', dni);
+    return this.http.get<any>(`${environment.API_URL}/api/planilla/generar-voucher`, { params });
   }
 
   getAfilByParam(param:string | number): Observable<any | void> {
@@ -126,6 +145,18 @@ export class AfiliadoService {
   /* BENEFICIARIOS */
   obtenerBenDeAfil(dniAfil:string | number): Observable<any | void> {
     const url = `${environment.API_URL}/api/afiliado/obtenerBenDeAfil/${dniAfil}`;
+    return this.http.get<any>(
+      url,
+      ).pipe(
+        map((res:any) => {
+          return res;
+        })
+      );
+  }
+
+  /* BENEFICIOS */
+  obtenerBeneficiosDeAfil(dniAfil:string | number): Observable<any | void> {
+    const url = `${environment.API_URL}/api/beneficio-planilla/obtenerBeneficiosDeAfil/${dniAfil}`;
     return this.http.get<any>(
       url,
       ).pipe(

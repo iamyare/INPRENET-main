@@ -7,7 +7,7 @@ import { IconModule } from '@coreui/icons-angular';
 // Theme Routing
 import { ThemeRoutingModule } from './theme-routing.module';
 import { AfilBancoComponent } from '../pages/Generales/afil-banco/afil-banco.component';
-import { SharedModule } from '../shared/shared/shared.module';
+import { SharedModule } from '../../shared/shared.module';
 import { CentroTrabajoComponent } from '../pages/Generales/centro-trabajo/centro-trabajo.component';
 
 import { FormsModule } from '@angular/forms';
@@ -39,6 +39,14 @@ import { NuevoBeneficioAfilComponent } from '../pages/Generales/nuevo-beneficio-
 import { NuevaDeduccionAfilComponent } from '../pages/Generales/nueva-deduccion-afil/nueva-deduccion-afil.component';
 import { VerEditarDeduccionAfilComponent } from '../pages/Generales/ver-editar-deduccion-afil/ver-editar-deduccion-afil.component';
 import { AsignacionAfilPlanComponent } from '../../../components/asignacion-afil-plan/asignacion-afil-plan.component';
+import { VerplanprelcompComponent } from '../../../components/verplanprelcomp/verplanprelcomp.component';
+import { VerplancerradaComponent } from '../../../components/verplancerrada/verplancerrada.component';
+import { VerEditarBeneficioAfilComponent } from '../pages/Generales/ver-editar-beneficio-afil/ver-editar-beneficio-afil.component';
+import { PlanillaColegiosPrivadosComponent } from '../pages/Generales/planilla-colegios-privados/planilla-colegios-privados.component';
+import { MatStepperModule } from '@angular/material/stepper';
+import { MAT_DATE_LOCALE, MatNativeDateModule,DateAdapter  } from '@angular/material/core';
+import { MatGridListModule } from '@angular/material/grid-list';
+import { CargarPlanillaPrivadosComponent } from '../pages/Generales/cargar-planilla-privados/cargar-planilla-privados.component';
 
 @NgModule({
   imports: [
@@ -59,8 +67,17 @@ import { AsignacionAfilPlanComponent } from '../../../components/asignacion-afil
     MatTableModule,
     MatPaginatorModule,
     MatIconModule,
+    MatStepperModule,
+    MatNativeDateModule,
+    MatGridListModule
+
+  ],
+  providers : [
+    { provide: MAT_DATE_LOCALE, useValue: 'es'}
   ],
   declarations: [
+    VerplanprelcompComponent,
+    VerplancerradaComponent,
     SubirDeduccionesformComponent,
     VerDeduccionesComponent,
     NuevaPlanillaComponentP,
@@ -80,6 +97,9 @@ import { AsignacionAfilPlanComponent } from '../../../components/asignacion-afil
     NuevoBeneficioAfilComponent,
     NuevaDeduccionAfilComponent,
     VerEditarDeduccionAfilComponent,
+    VerEditarBeneficioAfilComponent,
+    PlanillaColegiosPrivadosComponent,
+    CargarPlanillaPrivadosComponent
 
 /*     CentroTrabajoPageComponent */
   ]

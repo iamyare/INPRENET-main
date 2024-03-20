@@ -3,7 +3,7 @@ import { ValidatorFn, Validators } from '@angular/forms';
 import { DynamicFormComponent } from '@docs-components/dynamic-form/dynamic-form.component';
 import { ToastrService } from 'ngx-toastr';
 import { PlanillaService } from 'src/app/services/planilla.service';
-import { FieldConfig } from 'src/app/views/shared/shared/Interfaces/field-config';
+import { FieldConfig } from 'src/app/shared/Interfaces/field-config';
 
 @Component({
   selector: 'app-nuevo-tipo-planilla',
@@ -22,8 +22,9 @@ export class NuevoTipoPlanillaComponent {
 
   }
   myFormFields: FieldConfig[] = [
-    { type: 'text', label: 'Nombre de planilla', name: 'nombre_planilla', validations: [Validators.required,Validators.maxLength(50)] },
-    { type: 'text', label: 'Descripción de planilla', name: 'descripcion', validations: [] },
+    { type: 'text', label: 'Nombre de planilla', name: 'nombre_planilla', validations: [Validators.required,Validators.maxLength(50)], display:true },
+    { type: 'dropdown', label: 'Clase Planilla', name: 'clase_planilla', validations: [Validators.required], options:[{label:"INGRESO", value:"INGRESO"}, {label:"EGRESO", value:"EGRESO"}] , display:true},
+    { type: 'text', label: 'Descripción de planilla', name: 'descripcion', validations: [Validators.required], display:true },
   ];
 
   obtenerDatos(event: any): any {

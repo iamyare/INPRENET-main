@@ -1,5 +1,6 @@
 import { INavData } from '@coreui/angular';
 
+
 export const navItems: INavData[] = [
   /* {
     name: 'Dashboard',
@@ -16,44 +17,31 @@ export const navItems: INavData[] = [
     name: 'Menú Mantenimiento'
   },
   {
-    name: 'Beneficio',
+    name: 'Deducción',
+    iconComponent: { name: 'cilMoney' },
     url: '/base',
     children: [
       {
-        name: 'Nuevo Beneficio',
-        url: '/Beneficio/nuevo-beneficio',
-      },
-      {
-        name: 'Editar Beneficios',
-        url: '/Beneficio/editar-beneficio',
-      },
-
-    ]
-  },
-  {
-    name: 'Deduccion',
-    url: '/base',
-    children: [
-      {
-        name: 'Nueva Deduccion',
+        name: 'Nueva Deducción',
         url: '/Deduccion/nuevo-tipo-deduccion',
       },
       {
-        name: 'Editar Deduccion',
+        name: 'Editar Deducción',
         url: '/Deduccion/editar-tipo-deduccion',
       },
   ]
   },
   {
-    name: 'Tipo-Planilla',
+    name: 'Tipo Planilla',
+    iconComponent: { name: 'cilSpreadsheet' },
     url: '/base',
     children: [
       {
-        name: 'Nuevo tipo planilla',
+        name: 'Nuevo Tipo Planilla',
         url: '/Tipo-Planilla/nuevo-tipo-planilla',
       },
       {
-        name: 'Editar tipo planilla',
+        name: 'Editar Tipo Planilla',
         url: '/Tipo-Planilla/editar-tipo-planilla',
       },
   ]
@@ -63,44 +51,10 @@ export const navItems: INavData[] = [
     title: true,
     name: 'Menú Principal'
   },
-  /* {
-    name: 'Afiliado',
-    url: '/base',
-    children: [
-      {
-        name: 'Nuevo',
-        url: '/Afiliado/afil-banco',
-      },
-      {
-        name: 'Ver / Editar (Afiliados)',
-        children: [
-          {
-            url: '/Afiliado/datos-gen-afil',
-            name: 'Datos generales',
-          },
-          {
-            url: '/Afiliado/afil-banco',
-            name: 'Centros de trabajo',
-          },
-          {
-            url: '/Afiliado/afil-banco',
-            name: 'Historial de salario',
-          },
-          {
-            url: '/Afiliado/afil-banco',
-            name: 'Referencias personales',
-          },
-          {
-            url: '/Afiliado/afil-banco',
-            name: 'Beneficiarios',
-          }
-        ]
-      },
-    ]
-  }, */
 
   {
     name: 'Afiliado',
+    iconComponent: { name: 'cil-people' },
     url: '/base',
     children: [
       {
@@ -113,7 +67,7 @@ export const navItems: INavData[] = [
         ]
       },
       {
-        name: 'Ver / Editar (Afiliados)',
+        name: 'Ver / Editar',
         children: [
           {
             url: '/Afiliado/datos-gen-afil',
@@ -170,43 +124,50 @@ export const navItems: INavData[] = [
 
   {
     name: 'Planilla',
+    iconComponent: { name: 'cilSpreadsheet' },
     url: '/base',
     children: [
       {
-        url: '/Planilla/nueva-planilla',
-        name: 'Nueva Planilla',
-      },
-      {
-        url: '/Planilla/ver-planillas',
-        name: 'Ver Planillas',
-      },
-    ]
-  },
-
-
-  /*
-  {
-    name: 'Centro de trabajo',
-    url: '/Afiliado/centro-trabajo',
-     iconComponent: { name: 'cil-drop' }
-    children: [
-      {
-        url: '/Afiliado/centro-trabajo',
-        name: 'Nuevo registro',
-         iconComponent: { name: 'cilDollar' },
-         linkProps: { fragment: 'someAnchor' },
-      },
-      {
-        name: 'Ver / Editar',
+        name: 'Ingresos',
         children: [
           {
-            url: '/Afiliado/datos-gen-afil',
-            name: 'Datos generales',
+            name: 'Privados',
+            iconComponent: { name: 'cilMoney' },
+            children: [
+              {
+                name: 'Planilla de privados',
+                url: '/Planilla/Ingresos/Privados/planilla-colegios-privados',
+              },
+              {
+                name: 'Cargar Planilla de privados',
+                url: '/Planilla/Ingresos/Privados/cargar-planilla-privados',
+              },
+          ]
           }
+          /* {
+            url: '/Planilla/Ingresos/nueva-planilla',
+            name: 'Nueva Planilla',
+          },
+          {
+            url: '/Planilla/Ingresos/ver-planillas',
+            name: 'Ver Planillas',
+          }, */
         ]
       },
+      {
+        name: 'Egresos',
+        children: [
+          {
+            url: '/Planilla/Egresos/nueva-planilla',
+            name: 'Nueva Planilla',
+          },
+          {
+            url: '/Planilla/Egresos/ver-planillas',
+            name: 'Ver Planillas',
+          },
+        ]
+      }
     ]
-  }, */
-
-
-];
+  },
+]
+;

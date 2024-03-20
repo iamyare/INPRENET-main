@@ -3,7 +3,7 @@ import { FormControl, ValidatorFn } from '@angular/forms';
 import { MatPaginator } from '@angular/material/paginator';
 import { SelectionserviceService } from '@docs-components/nuevaplanilla/selectionservice.service';
 import { Observable, Subject, debounceTime, distinctUntilChanged, of, switchMap, takeUntil } from 'rxjs';
-import { TableColumn } from 'src/app/views/shared/shared/Interfaces/table-column';
+import { TableColumn } from 'src/app/shared/Interfaces/table-column';
 
 @Component({
   selector: 'app-dynamic-table',
@@ -33,6 +33,14 @@ export class DynamicTableComponent implements OnInit, OnDestroy {
   @Input() etiquetaBotonDos: string = '';
   @Output() accionBotonDos: EventEmitter<any> = new EventEmitter<any>();
 
+  @Input() nombreEncabezadoTres: string = '';
+  @Input() mostrarBotonTres: boolean = false;
+  @Input() etiquetaBotonTres: string = '';
+  @Output() accionBotonTres: EventEmitter<any> = new EventEmitter<any>();
+
+  @Input() titulo = "";
+  @Input() subtitulo = "";
+
 
   @ViewChild(MatPaginator) paginator: MatPaginator | undefined;
 
@@ -42,7 +50,7 @@ export class DynamicTableComponent implements OnInit, OnDestroy {
   formsearch = new FormControl('');
   searchResults: any = [];
 
-  itemsPerPage = 50;  // Número de resultados por página
+  itemsPerPage = 20;  // Número de resultados por página
   desde = 0; hasta: number = this.itemsPerPage;
   currentPage = 0;
 
@@ -51,6 +59,7 @@ export class DynamicTableComponent implements OnInit, OnDestroy {
   editableRows: any[] = []
 
   constructor(private selectionService: SelectionserviceService) {
+
     this.formsearch.valueChanges
       .pipe(
         debounceTime(300),
@@ -77,6 +86,7 @@ export class DynamicTableComponent implements OnInit, OnDestroy {
       this.filas?.map((objeto: any) => ({ ...objeto, isSelected: false }));
     }else{
       this.filas = await this.getData();
+
     }
     this.filtrarUsuarios().subscribe();
   }
@@ -246,6 +256,10 @@ export class DynamicTableComponent implements OnInit, OnDestroy {
 
     ejecutarAccionDos(row: any) {
       this.accionBotonDos.emit(row);
+    }
+
+    ejecutarAccionTres(row: any) {
+      this.accionBotonTres.emit(row);
     }
 
 }

@@ -1,0 +1,77 @@
+<h1>Detalles de la Planilla</h1>
+
+<mat-form-field>
+  <mat-label>Buscar</mat-label>
+  <input
+    matInput
+    (input)="aplicarFiltro($event)"
+    placeholder="Ingrese el término de búsqueda"
+  />
+</mat-form-field>
+
+<table
+  *ngIf="detallePlanillas.length > 0"
+  mat-table
+  [dataSource]="dataSource"
+  class="mat-elevation-z8"
+>
+  <ng-container matColumnDef="idAfiliado">
+    <th mat-header-cell *matHeaderCellDef>ID Afiliado</th>
+    <td mat-cell *matCellDef="let planilla">{{ planilla.id_afiliado }}</td>
+  </ng-container>
+
+  <ng-container matColumnDef="dni">
+    <th mat-header-cell *matHeaderCellDef>DNI</th>
+    <td mat-cell *matCellDef="let planilla">{{ planilla.dni }}</td>
+  </ng-container>
+
+  <ng-container matColumnDef="nombreCompleto">
+    <th mat-header-cell *matHeaderCellDef>NOMBRE COMPLETO</th>
+    <td mat-cell *matCellDef="let planilla">{{ planilla.NOMBRE_COMPLETO }}</td>
+  </ng-container>
+
+  <ng-container matColumnDef="totalBeneficio">
+    <th mat-header-cell *matHeaderCellDef>Total Ingreso</th>
+    <td mat-cell *matCellDef="let planilla">
+      {{ planilla["Total Beneficio"] }}
+    </td>
+  </ng-container>
+
+  <ng-container matColumnDef="totalDeducciones">
+    <th mat-header-cell *matHeaderCellDef>Total Deducciones</th>
+    <td mat-cell *matCellDef="let planilla">
+      {{ planilla["Total Deducciones"] }}
+    </td>
+  </ng-container>
+
+  <tr
+    mat-header-row
+    *matHeaderRowDef="[
+      'idAfiliado',
+      'dni',
+      'nombreCompleto',
+      'totalBeneficio',
+      'totalDeducciones'
+    ]"
+  ></tr>
+  <tr
+    mat-row
+    *matRowDef="
+      let row;
+      columns: [
+        'idAfiliado',
+        'dni',
+        'nombreCompleto',
+        'totalBeneficio',
+        'totalDeducciones'
+      ]
+    "
+  ></tr>
+</table>
+
+<button (click)="generarReportePDF()" mat-raised-button>Generar reporte</button>
+
+<mat-paginator
+  [pageSizeOptions]="[5, 10, 25, 100]"
+  showFirstLastButtons
+></mat-paginator>

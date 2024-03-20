@@ -1,27 +1,22 @@
-import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
-import { Planilla } from '../../planilla/entities/planilla.entity';
+import { Check, Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import { Net_Planilla } from '../../planilla/entities/net_planilla.entity';
 
-@Entity()
-export class TipoPlanilla {
+@Entity({ name: 'NET_TIPO_PLANILLA' })
+@Check("CK_CLASE_PLANILLA",`CLASE_PLANILLA IN ('INGRESO', 'EGRESO')`)
+export class Net_TipoPlanilla {
 
-    @PrimaryGeneratedColumn('uuid')
-    id_tipo_planilla : string;
+    @PrimaryGeneratedColumn({type: 'int', name: 'ID_TIPO_PLANILLA',  primaryKeyConstraintName: 'PK_id_tip_plan_TipPlan' })
+    id_tipo_planilla: number;
 
-    @Column('varchar2', { length: 100, nullable: false })
-    nombre_planilla : string;
+    @Column('varchar2', { length: 100, nullable: false, name: 'NOMBRE_PLANILLA' })
+    nombre_planilla: string;
 
-    @Column('varchar2', { length: 200, nullable: true })
+    @Column('varchar2', { length: 7, nullable: true, name: 'CLASE_PLANILLA' })
+    clase_planilla: string;
+
+    @Column('varchar2', { length: 200, nullable: true, name: 'DESCRIPCION' })
     descripcion: string;
 
-/*     @Column('varchar2', { length: 200, nullable: false })
-    periodoInicio: string;
-
-    @Column('varchar2', { length: 200, nullable: false })
-    periodoFinalizacion: string; */
-
-/*     @Column('varchar2', { length: 50, nullable: true })
-    estado: string;
- */
-    @OneToMany(() => Planilla, planilla => planilla.tipoPlanilla)
-    planilla: Planilla[];
+    @OneToMany(() => Net_Planilla, planilla => planilla.tipoPlanilla)
+    planilla: Net_Planilla[];
 }

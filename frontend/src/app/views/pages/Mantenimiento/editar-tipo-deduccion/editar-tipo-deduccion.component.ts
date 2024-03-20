@@ -1,7 +1,9 @@
 import { Component, OnInit } from '@angular/core';
 import { ValidatorFn, Validators } from '@angular/forms';import { ToastrService } from 'ngx-toastr';
 import { DeduccionesService } from '../../../../services/deducciones.service';
-import { TableColumn } from 'src/app/views/shared/shared/Interfaces/table-column';
+import { TableColumn } from 'src/app/shared/Interfaces/table-column';
+import { MatDialog } from '@angular/material/dialog';
+import { EditarDialogComponent } from '@docs-components/editar-dialog/editar-dialog.component';
 
 @Component({
   selector: 'app-editar-tipo-deduccion',
@@ -15,24 +17,25 @@ export class EditarTipoDeduccionComponent implements OnInit{
 
   constructor (
     private deduccionesService: DeduccionesService,
-    private toastr: ToastrService
+    private toastr: ToastrService,
+    private dialog: MatDialog
     ){}
 
   ngOnInit(): void {
     this.myColumns = [
-      { header: 'Nombre de la Deduccion',
+      { header: 'Nombre de la Deducción',
       col: "nombre_deduccion",
       isEditable: true,
       validationRules: [Validators.required, Validators.minLength(3)]
      },
       {
-        header: 'Descripcion del beneficio',
+        header: 'Descripcion de la deducción',
          col: 'descripcion_deduccion',
          isEditable: true
       },
       {
-        header: 'Tipo de deduccion',
-      col: 'tipo_deduccion',
+        header: 'Nombre Institución',
+      col: 'nombre_institucion',
       isEditable: true,
       validationRules: [Validators.required, Validators.minLength(3)]
     },
@@ -50,10 +53,10 @@ export class EditarTipoDeduccionComponent implements OnInit{
   getFilas = async () => {
     try {
       const data = await this.deduccionesService.getDeducciones().toPromise();
-
       this.filas = data.map((item: any) => {
         return {
           id: item.id_deduccion,
+          nombre_institucion: item.nombre_institucion,
           nombre_deduccion: item.nombre_deduccion,
           descripcion_deduccion: item.descripcion_deduccion || 'No disponible',
           tipo_deduccion: item.tipo_deduccion,
@@ -97,5 +100,30 @@ export class EditarTipoDeduccionComponent implements OnInit{
       this.ejecF(this.filas).then(() => {
       });
     }
+  }
+
+  manejarAccionUno(row: any) {
+    const campos = [
+      { nombre: 'nombre_deduccion', tipo: 'text', requerido: true, etiqueta: 'Nombre Planilla', editable:true  },
+      { nombre: 'descripcion_deduccion', tipo: 'text', requerido: true, etiqueta: 'descripcion' , editable:true },
+      { nombre: 'nombre_institucion', tipo: 'text', requerido: true, etiqueta: 'descripcion' , editable:true },
+      { nombre: 'prioridad', tipo: 'text', requerido: true, etiqueta: 'descripcion' , editable:true }
+    ];
+
+    this.openDialog(campos, row);
+  }
+
+  openDialog(campos:any, row:any): void {
+    const dialogRef = this.dialog.open(EditarDialogComponent, {
+      width: '500px',
+      data: { campos: campos, valoresIniciales: row }
+    });
+
+
+    dialogRef.afterClosed().subscribe((result: any) => {
+      if (result) {
+        console.log('Datos editados:', result);
+      }
+    });
   }
 }

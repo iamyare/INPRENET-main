@@ -1,0 +1,147 @@
+{
+    "afiliado": {
+        "datosGen": {
+            "tipoIdent": "DNI",
+            "numeroIden": "123213",
+            "primerNombre": null,
+            "segundoNombre": null,
+            "tercerNombre": null,
+            "primerApellido": null,
+            "segundoApellido": null,
+            "fechaNacimiento": null,
+            "cantidadDependientes": null,
+            "cantidadHijos": null,
+            "Sexo": null,
+            "profesion": null,
+            "estadoCivil": null,
+            "representacion": null,
+            "estado": null,
+            "cotizante": null,
+            "telefono1": null,
+            "telefono2": null,
+            "correo1": null,
+            "correo2": null,
+            "ciudadNacimiento": null,
+            "ciudadDomicilio": null,
+            "direccionDetallada": null,
+            "colegioMagisterial": null,
+            "numeroCarnet": null
+        },
+        "datosBanc": {
+            "nombreBanco": "BAC",
+            "numeroCuenta": "3213213"
+        },
+        "PuestTrab": [
+            {
+                "centroTrabajo": "1",
+                "cargo": null,
+                "sectorEconomico": null,
+                "actividadEconomica": null,
+                "claseCliente": null,
+                "sector": null,
+                "numeroAcuerdo": null,
+                "fechaIngreso": null,
+                "colegioMagisterial": null,
+                "numeroCarnet": null,
+                "fechaInicio": null,
+                "fechaFin": null,
+                "fechaEgreso": null
+            },
+            {
+                "centroTrabajo": "2",
+                "cargo": null,
+                "sectorEconomico": null,
+                "actividadEconomica": null,
+                "claseCliente": null,
+                "sector": null,
+                "numeroAcuerdo": null,
+                "fechaIngreso": null,
+                "colegioMagisterial": null,
+                "numeroCarnet": null,
+                "fechaInicio": null,
+                "fechaFin": null,
+                "fechaEgreso": null
+            }
+        ],
+        "HistPag": [
+            {
+                "fechaInicio": null,
+                "fechaFin": null,
+                "salario": null,
+                "centroTrabajo": "1"
+            },
+            {
+                "fechaInicio": null,
+                "fechaFin": null,
+                "salario": null,
+                "centroTrabajo": "2"
+            }
+        ],
+        "datosRefPers": [
+            {
+                "nombreRefPers": "weqeqwe",
+                "Parentesco": null,
+                "direccion": null,
+                "telefonoDom": null,
+                "telefonoTrab": null,
+                "telefonoPers": null
+            },
+            {
+                "nombreRefPers": "ewqewq",
+                "Parentesco": null,
+                "direccion": null,
+                "telefonoDom": null,
+                "telefonoTrab": null,
+                "telefonoPers": null
+            }
+        ] ,          
+         "Archivos": {
+                "Archivos": null
+            },
+            "Arch": {}
+    },
+    "datosBenefic": [
+        {
+            "refpers": "",
+            "archIdent": {},
+            "benfGroup": {
+                "tipoIdent": "DNI",
+                "numeroIden": null,
+                "primerNombre": null,
+                "segundoNombre": null,
+                "tercerNombre": null,
+                "primerApellido": null,
+                "segundoApellido": null,
+                "fechaNacimiento": null,
+                "cantidadDependientes": null,
+                "cantidadHijos": null,
+                "Sexo": null,
+                "profesion": null,
+                "estadoCivil": null,
+                "representacion": null,
+                "estado": null,
+                "cotizante": null,
+                "telefono1": null,
+                "telefono2": null,
+                "correo1": null,
+                "correo2": null,
+                "ciudadNacimiento": null,
+                "ciudadDomicilio": null,
+                "direccionDetallada": null,
+                "colegioMagisterial": null,
+                "numeroCarnet": null
+            },
+            "DatosBac": {
+                "nombreBanco": "ATLANTIDA",
+                "numeroCuenta": null
+            },
+            "Archivos": {
+                "Archivos": null
+            },
+            "Arch": {},
+            "porcBenef": {
+                "porcBenef": 1
+            }
+        }
+    ]
+}

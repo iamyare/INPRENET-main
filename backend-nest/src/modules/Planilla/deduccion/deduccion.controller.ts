@@ -2,8 +2,6 @@ import { Controller, Get, Post, Body, Patch, Param, Delete, UseInterceptors, Upl
 import { DeduccionService } from './deduccion.service';
 import { CreateDeduccionDto } from './dto/create-deduccion.dto';
 import { UpdateDeduccionDto } from './dto/update-deduccion.dto';
-import { FileInterceptor } from '@nestjs/platform-express';
-import { Response } from 'express';
 
 @Controller('deduccion')
 export class DeduccionController {
@@ -13,7 +11,7 @@ export class DeduccionController {
   create(@Body() createDeduccionDto: CreateDeduccionDto) {
     return this.deduccionService.create(createDeduccionDto);
   }
-
+  
   @Get()
   findAll() {
     return this.deduccionService.findAll();
@@ -21,12 +19,17 @@ export class DeduccionController {
 
   @Get(':id')
   findOne(@Param('id') id: string) {
-    return this.deduccionService.findOne(id);
+    return this.deduccionService.findOne(+id);
+  }
+
+  @Get('byNameInst/:nombre_institucion')
+  findOneByNombInst(@Param('nombre_institucion') nombre_institucion: string) {
+    return this.deduccionService.findOneByNombInst(nombre_institucion);
   }
 
   @Patch(':id')
   update(@Param('id') id: string, @Body() updateDeduccionDto: UpdateDeduccionDto) {
-    return this.deduccionService.update(id, updateDeduccionDto);
+    return this.deduccionService.update(+id, updateDeduccionDto);
   }
 
   @Delete(':id')

@@ -1,8 +1,10 @@
 import { Component, OnInit } from '@angular/core';
 import { ValidatorFn, Validators } from '@angular/forms';
+import { MatDialog } from '@angular/material/dialog';
+import { EditarDialogComponent } from '@docs-components/editar-dialog/editar-dialog.component';
 import { ToastrService } from 'ngx-toastr';
 import { PlanillaService } from 'src/app/services/planilla.service';
-import { TableColumn } from 'src/app/views/shared/shared/Interfaces/table-column';
+import { TableColumn } from 'src/app/shared/Interfaces/table-column';
 
 @Component({
   selector: 'app-editar-tipo-planilla',
@@ -16,7 +18,8 @@ export class EditarTipoPlanillaComponent implements OnInit{
 
   constructor(
     private planillaService: PlanillaService,
-    private toastr: ToastrService
+    private toastr: ToastrService,
+    private dialog: MatDialog
   ){
 
   }
@@ -24,11 +27,11 @@ export class EditarTipoPlanillaComponent implements OnInit{
   ngOnInit(): void {
     // Definir las columnas
     this.myColumns = [
-      {
+/*       {
         header: 'ID',
         col: 'id',
         isEditable: false
-      },
+      }, */
       {
         header: 'Nombre de planilla',
         col: 'nombre',
@@ -36,8 +39,13 @@ export class EditarTipoPlanillaComponent implements OnInit{
         validationRules: [Validators.required, Validators.minLength(5)]
       },
       {
-        header: 'Descripcion',
+        header: 'Descripción',
         col: 'descripcion',
+        isEditable: true
+      },
+      {
+        header: 'Clase de Planilla',
+        col: 'clase_planilla',
         isEditable: true
       }
     ];
@@ -51,9 +59,12 @@ export class EditarTipoPlanillaComponent implements OnInit{
       const data = await  this.planillaService.findAllTipoPlanilla().toPromise();
 
       this.filas = data.map((item: any) => {
+        console.log(item);
+
         return {
           id: item.id_tipo_planilla,
           nombre: item.nombre_planilla,
+          clase_planilla: item.clase_planilla,
           descripcion: item.descripcion || 'No disponible'
         };
       });
@@ -95,14 +106,31 @@ export class EditarTipoPlanillaComponent implements OnInit{
   }
 
   manejarAccionUno(row: any) {
-    console.log(row);
+    const campos = [
+      { nombre: 'nombre', tipo: 'text', requerido: true, etiqueta: 'Nombre Planilla', editable:true  },
+      { nombre: 'clase_planilla', tipo: 'text', requerido: true, etiqueta: 'Clase de Planilla', editable:true  },
+      { nombre: 'descripcion', tipo: 'text', requerido: true, etiqueta: 'descripcion' , editable:true }
+    ];
 
-    // Lógica para manejar la acción del primer botón
+    this.openDialog(campos, row);
+  }
+
+  openDialog(campos:any, row:any): void {
+    const dialogRef = this.dialog.open(EditarDialogComponent, {
+      width: '500px',
+      data: { campos: campos, valoresIniciales: row }
+    });
+
+
+    dialogRef.afterClosed().subscribe((result: any) => {
+      if (result) {
+        console.log('Datos editados:', result);
+      }
+    });
   }
 
   manejarAccionDos(row: any) {
     // Lógica para manejar la acción del segundo botón
   }
-
 
 }

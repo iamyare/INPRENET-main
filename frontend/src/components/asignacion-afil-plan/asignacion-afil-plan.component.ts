@@ -130,7 +130,6 @@ export class AsignacionAfilPlanComponent implements OnInit {
   };
 
   getFilas = async (periodoInicio: string, periodoFinalizacion: string) => {
-    console.log(this.detallePlanilla.tipoPlanilla.nombre_planilla);
     const serviceCalls:any = {
       "ORDINARIA - AFILIADO": this.planillaService.getPlanillaOrdinariaAfiliados,
       "ORDINARIA - BENEFICIARIO": this.planillaService.getPlanillaOrdinariaBeneficiarios,
@@ -139,7 +138,6 @@ export class AsignacionAfilPlanComponent implements OnInit {
     };
 
     const mapData = (item:any) => ({
-      id_afiliado: item.id_afiliado,
       dni: item.DNI,
       NOMBRE_COMPLETO: item.NOMBRE_COMPLETO,
       periodoInicio: periodoInicio,
@@ -147,8 +145,6 @@ export class AsignacionAfilPlanComponent implements OnInit {
       "Total Beneficio": item["Total Beneficio"],
       "Total Deducciones": item["Total Deducciones"],
       "Total": item["Total Beneficio"] - item["Total Deducciones"],
-      BENEFICIOSIDS: item.BENEFICIOSIDS,
-      beneficiosNombres: item.beneficiosNombres,
     });
 
     try {
@@ -161,7 +157,9 @@ export class AsignacionAfilPlanComponent implements OnInit {
       } else {
         console.error('Servicio no definido para el tipo de planilla:', serviceName);
       }
+      console.log(this.dataPlan);
       return this.dataPlan;
+
     } catch (error) {
       console.error("Error al obtener datos de deducciones", error);
       throw error;
@@ -280,15 +278,7 @@ export class AsignacionAfilPlanComponent implements OnInit {
 
     try {
       let promesas: any[] = []
-      if (this.detallePlanilla.nombre_planilla === 'EXTRAORDINARIA') {
-        promesas = this.datosTabl.map(row =>
-          this.deduccionesService.findInconsistentDeduccionesByAfiliado(row.id_afiliado).toPromise()
-            .then(deduccionesInconsistentes => deduccionesInconsistentes)
-            .catch(error => {
-              console.error(`Error al obtener deducciones inconsistentes para el afiliado ${row.id_afiliado}:`, error);
-              return [];
-            })
-        );
+      if (this.detallePlanilla.nombre_planilla) {
       } else if (this.detallePlanilla.nombre_planilla === 'ORDINARIA') {
         promesas = this.datosTabl.map(row =>
           this.deduccionesService.getDetalleDeduccionesPorRango(row.id_afiliado, row.periodoInicio, row.periodoFinalizacion).toPromise()
@@ -439,7 +429,6 @@ export class AsignacionAfilPlanComponent implements OnInit {
   cargarBeneficiosRecient() {
     this.beneficiosService.cargarBeneficiosRecient().subscribe({
       next: (response: any) => {
-        console.log(response);
         let temp = response.Registros;
         this.mostDet = true
       },

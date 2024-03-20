@@ -153,41 +153,41 @@ export class DetalleDeduccionService {
     }
   }
   
-  async getRangoDetalleDeducciones(idAfiliado: string, fechaInicio: string, fechaFin: string): Promise<any> {
+  async getRangoDetalleDeducciones(idPersona: string, fechaInicio: string, fechaFin: string): Promise<any> {
     const query = `
       SELECT
-        dd."id_ded_deduccion",
-        dd."monto_total",
-        dd."monto_aplicado",
-        dd."estado_aplicacion",
-        dd."anio",
-        dd."mes",
-        d."nombre_deduccion",
-        afil."id_afiliado",
+        dd."ID_DED_DEDUCCION",
+        dd."MONTO_TOTAL",
+        dd."MONTO_APLICADO",
+        dd."ESTADO_APLICACION",
+        dd."ANIO",
+        dd."MES",
+        d."NOMBRE_DEDUCCION",
+        afil."ID_PERSONA",
         TRIM(
-          afil."primer_nombre" || ' ' || 
-          COALESCE(afil."segundo_nombre", '') || ' ' || 
-          COALESCE(afil."tercer_nombre", '') || ' ' || 
-          afil."primer_apellido" || ' ' || 
-          COALESCE(afil."segundo_apellido", '')
+          afil."PRIMER_NOMBRE" || ' ' || 
+          COALESCE(afil."SEGUNDO_NOMBRE", '') || ' ' || 
+          COALESCE(afil."TERCER_NOMBRE", '') || ' ' || 
+          afil."PRIMER_APELLIDO" || ' ' || 
+          COALESCE(afil."SEGUNDO_APELLIDO", '')
         ) AS "nombre_completo"
       FROM
-        "net_detalle_deduccion" dd
+        "NET_DETALLE_DEDUCCION" dd
       JOIN
-        "net_deduccion" d ON dd."id_deduccion" = d."id_deduccion"
+        "NET_DEDUCCION" d ON dd."ID_DEDUCCION" = d."ID_DEDUCCION"
       JOIN
-        "Net_Persona" afil ON dd."id_afiliado" = afil."id_afiliado"
+        "NET_PERSONA" afil ON dd."ID_PERSONA" = afil."ID_PERSONA"
       WHERE
-        dd."id_afiliado" = :idAfiliado
+        dd."ID_PERSONA" = :idPersona
       AND
-        TO_DATE(CONCAT(dd."anio", LPAD(dd."mes", 2, '0')), 'YYYYMM') BETWEEN TO_DATE(:fechaInicio, 'DD-MM-YYYY') AND TO_DATE(:fechaFin, 'DD-MM-YYYY')
+        TO_DATE(CONCAT(dd."ANIO", LPAD(dd."MES", 2, '0')), 'YYYYMM') BETWEEN TO_DATE(:fechaInicio, 'DD-MM-YYYY') AND TO_DATE(:fechaFin, 'DD-MM-YYYY')
       AND
-        dd."estado_aplicacion" = 'NO COBRADA'
+        dd."ESTADO_APLICACION" = 'NO COBRADA'
     `;
   
     try {
       const parametros :any = {
-        idAfiliado: idAfiliado,
+        idPersona: idPersona,
         fechaInicio: fechaInicio,
         fechaFin: fechaFin,
       };

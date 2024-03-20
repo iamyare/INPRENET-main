@@ -8,6 +8,17 @@ import { PaginationDto } from 'src/common/dtos/pagination.dto';
 export class PlanillaController {
   constructor(private readonly planillaService: PlanillaService) {}
 
+  @Get('/desglose-deducciones')
+  async getDesgloseDeducciones(@Query('periodoInicio') periodoInicio: string, @Query('periodoFinalizacion') periodoFinalizacion: string) {
+    return this.planillaService.getDesgloseDeducciones(periodoInicio, periodoFinalizacion);
+  }
+
+  @Get('/desglose-beneficios')
+  async getDesgloseBeneficios(@Query('periodoInicio') periodoInicio: string, @Query('periodoFinalizacion') periodoFinalizacion: string) {
+    return this.planillaService.getDesgloseBeneficios(periodoInicio, periodoFinalizacion);
+  }
+
+
   @Get('ordinaria-afiliado')
   async getConsulta(@Query('periodoInicio') periodoInicio: string, @Query('periodoFinalizacion') periodoFinalizacion: string, @Res() res) {
     try {

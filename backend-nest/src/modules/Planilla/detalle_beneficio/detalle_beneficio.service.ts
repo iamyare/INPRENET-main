@@ -197,40 +197,40 @@ export class DetalleBeneficioService {
   async cargarBenRec(): Promise<any> {
     let connection;
     try {
-      // Definir los parámetros de salida
-      const id_beneficio_planilla_out = { dir: oracledb.BIND_OUT, type: oracledb.CURSOR };
-      const cantidad_registros_insertados = { dir: oracledb.BIND_OUT, type: oracledb.NUMBER };
-      
-      // Obtener la conexión
-      connection = await oracledb.getConnection({
-        user: process.env.DB_USERNAME,
-        password: process.env.DB_PASSWORD,
-        connectString: process.env.CONNECT_STRING
-      });
-  
-      // Ejecutar el procedimiento almacenado
-      const result = await connection.execute(
-        `BEGIN 
-          insertar_registros(
-            :id_beneficio_planilla_out, 
-            :cantidad_registros_insertados
-          );
-        END;`,
-        { id_beneficio_planilla_out, cantidad_registros_insertados }
-      );
-  
-      // Manejar los valores de salida
-      const cursor = result.outBinds.id_beneficio_planilla_out;
-      const cantidadRegistrosInsertados = result.outBinds.cantidad_registros_insertados;
-  
-      // Leer los valores del cursor
-      let idBeneficioPlanillaOut = [];
-      let row;
-      while ((row = await cursor.getRow())) {
-        idBeneficioPlanillaOut.push(row);
-      }
-  
-      return { Registros: idBeneficioPlanillaOut, cantRegistros: cantidadRegistrosInsertados };
+       // Definir los parámetros de salida
+       const id_beneficio_planilla_out = { dir: oracledb.BIND_OUT, type: oracledb.CURSOR };
+       const cantidad_registros_insertados = { dir: oracledb.BIND_OUT, type: oracledb.NUMBER };
+       
+       let connection;
+       connection = await oracledb.getConnection({
+         user: 'c##test',
+         password: '12345678',
+         connectString: '127.0.0.1:1521/xe'
+       })
+   
+       // Ejecutar el procedimiento almacenado
+       const result = await connection.execute(
+         `BEGIN 
+           insertar_registros(
+             :id_beneficio_planilla_out, 
+             :cantidad_registros_insertados
+           );
+         END;`,
+         { id_beneficio_planilla_out, cantidad_registros_insertados }
+       );
+   
+       // Manejar los valores de salida
+       const cursor = result.outBinds.id_beneficio_planilla_out;
+       const cantidadRegistrosInsertados = result.outBinds.cantidad_registros_insertados;
+   
+       // Leer los valores del cursor
+       let idBeneficioPlanillaOut = [];
+       let row;
+       while ((row = await cursor.getRow())) {
+         idBeneficioPlanillaOut.push(row);
+       }
+       
+       return { Registros: idBeneficioPlanillaOut, cantRegistros: cantidadRegistrosInsertados };
   
     } catch (error) {
       console.error('Error:', error);

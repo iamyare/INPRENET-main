@@ -280,12 +280,12 @@ export class VerplanprelcompComponent implements OnInit{
             width: '1000px',
             data: {
               beneficios: data.beneficios.map((beneficio: any) => ({
-                nombre: beneficio.nombre_beneficio,
-                total: beneficio['Total Monto Beneficio']
+                nombre: beneficio.NOMBRE_BENEFICIO,
+                total: beneficio.TOTAL_MONTO_BENEFICIO
               })),
               deducciones: data.deducciones.map((deduccion: any) => ({
-                nombre: deduccion.nombre_deduccion,
-                total: deduccion['Total Monto Aplicado']
+                nombre: deduccion.NOMBRE_DEDUCCION,
+                total: deduccion.TOTAL_MONTO_APLICADO
               }))
             }
           });

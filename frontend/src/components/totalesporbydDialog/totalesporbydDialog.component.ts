@@ -169,5 +169,8 @@ export class TotalesporbydDialogComponent implements OnInit {
     };
   }
 
+  closeDialog(): void {
+    this.dialogRef.close();
+  }
 
 }

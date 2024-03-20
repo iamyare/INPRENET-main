@@ -1,43 +1,33 @@
-<div class="container">
+<div style="background-color: white; margin-bottom: 1%">
   <app-dynamic-form
     [fields]="myFormFields"
     titulo="Detalles De Planilla Definitiva"
     subtitulo="Completa la información correspondiente"
     (newDatBenChange)="obtenerDatosForm($event)"
   ></app-dynamic-form>
-
-  <button
-    (click)="getPlanilla()"
-    [disabled]="datosFormateados.invalid"
-    mat-raised-button
-    style="
-      margin: 2% 0;
-      background-color: #628780;
-      color: #ffffff;
-      border-radius: 5px;
-      padding: 10px 20px;
-    "
-  >
-    Ver Planilla Definitiva
-  </button>
-
-  <!-- <button  [disabled]="datosFormateados.invalid" mat-raised-button style="margin: 2% 0;
-  background-color: #628780;
-  color: #ffffff;
-  border-radius: 5px;
-  padding: 10px 20px;">Descargar Planilla en PDF</button>
-  <button  [disabled]="datosFormateados.invalid" mat-raised-button style="margin: 2% 0;
-  background-color: #628780;
-  color: #ffffff;
-  border-radius: 5px;
-  padding: 10px 20px;">Ver Resumen Definitiva</button> -->
+  <div style="text-align: center">
+    <button
+      (click)="getPlanilla()"
+      color="primary"
+      [disabled]="datosFormateados.invalid"
+      mat-raised-button
+      style="
+        margin: 2% 0;
+        color: #ffffff;
+        border-radius: 5px;
+        padding: 10px 20px;
+      "
+    >
+      Ver Planilla Definitiva
+    </button>
+  </div>
 </div>
 
 <div class="card-header card-header-danger title" *ngIf="detallePlanilla">
   <div class="card-body" style="padding: 1%">
     <h4 class="card-title">Datos Generales De La Planilla</h4>
     <table>
-      <tr>
+      <tr style="background-color: #f2f2f2">
         <th>Nombre Planilla</th>
         <td>{{ detallePlanilla?.nombre_planilla }}</td>
         <th>Fecha Apertura</th>
@@ -49,7 +39,7 @@
         <th>Estado</th>
         <td>{{ detallePlanilla?.estado }}</td>
       </tr>
-      <tr>
+      <tr style="background-color: #f2f2f2">
         <th>Periodo Inicio</th>
         <td>{{ detallePlanilla?.periodoInicio }}</td>
         <th>Periodo Finalización</th>

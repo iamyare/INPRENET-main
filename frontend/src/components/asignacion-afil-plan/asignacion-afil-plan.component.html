@@ -1,33 +1,32 @@
-<div>
-  <button
-    (click)="cargarBeneficiosRecient()"
-    mat-raised-button
-    style="
-      margin: 2% 0;
-      background-color: #628780;
-      color: #ffffff;
-      border-radius: 5px;
-      padding: 10px 20px;
-    "
-  >
-    Cargar Beneficios Recientes
-  </button>
+<!-- <button
+  (click)="cargarBeneficiosRecient()"
+  mat-raised-button
+  style="
+    margin: 2% 0;
+    background-color: #628780;
+    color: #ffffff;
+    border-radius: 5px;
+    padding: 10px 20px;
+  "
+>
+  Cargar Beneficios Recientes
+</button> -->
 
-  <div *ngIf="mostDet">
-    <app-dynamic-form
-      [fields]="myFormFields"
-      titulo="Detalles De Planilla"
-      subtitulo="Completa la información correspondiente"
-      (newDatBenChange)="obtenerDatosForm($event)"
-    ></app-dynamic-form>
-
+<div style="background-color: white; margin-bottom: 1%">
+  <app-dynamic-form
+    [fields]="myFormFields"
+    titulo="Detalles De Planilla"
+    subtitulo="Completa la información correspondiente"
+    (newDatBenChange)="obtenerDatosForm($event)"
+  ></app-dynamic-form>
+  <div style="text-align: center">
     <button
+      color="primary"
       (click)="getPlanilla()"
       [disabled]="datosFormateados.invalid"
       mat-raised-button
       style="
         margin: 2% 0;
-        background-color: #628780;
         color: #ffffff;
         border-radius: 5px;
         padding: 10px 20px;
@@ -36,12 +35,13 @@
       Previsualizar Datos Planilla
     </button>
   </div>
-
+</div>
+<div>
   <div class="card-header card-header-danger title" *ngIf="detallePlanilla">
     <div class="card-body" style="padding: 1%">
       <h4 class="card-title">Datos Generales De La Planilla</h4>
       <table>
-        <tr>
+        <tr style="background-color: #f2f2f2">
           <th>Nombre Planilla</th>
           <td>{{ detallePlanilla?.tipoPlanilla.nombre_planilla }}</td>
           <th>Fecha Apertura</th>
@@ -53,7 +53,7 @@
           <th>Estado</th>
           <td>{{ detallePlanilla?.estado }}</td>
         </tr>
-        <tr>
+        <tr style="background-color: #f2f2f2">
           <th>Periodo Inicio</th>
           <td>{{ detallePlanilla?.periodoInicio }}</td>
           <th>Periodo Finalización</th>
@@ -85,23 +85,24 @@
         >
         </app-dynamic-table>
       </div>
-      <button
-        (click)="actualizarPlanilla()"
-        mat-raised-button
-        style="
-          margin: 2% 0;
-          background-color: #628780;
-          color: #ffffff;
-          border-radius: 5px;
-          padding: 10px 20px;
-        "
-      >
-        Asignar a la planilla
-      </button>
+      <div style="text-align: center">
+        <button
+          (click)="actualizarPlanilla()"
+          mat-raised-button
+          style="
+            margin: 2% 0;
+            background-color: #628780;
+            color: #ffffff;
+            border-radius: 5px;
+            padding: 10px 20px;
+          "
+        >
+          Asignar a la planilla
+        </button>
+      </div>
     </div>
   </div>
 </div>
-
 
 <!--
 

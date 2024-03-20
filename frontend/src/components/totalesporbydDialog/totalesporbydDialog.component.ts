@@ -160,9 +160,9 @@ export class TotalesporbydDialogComponent implements OnInit {
         headerRows: 1,
         widths: ['*', 'auto'],
         body: [
-          [{ text: 'Nombre', style: 'tableHeader' }, { text: 'Total de ingresos:', style: 'tableHeader' }],
-          ...data.map(el => [el.nombre, el.total.toString()]),
-          [{ text: 'Total de deducciones:', style: 'tableTotal', alignment: 'right', colSpan: 1 }, { text: total.toFixed(2).toString(), style: 'tableTotal' }]
+          [{ text: 'Nombre', style: 'tableHeader', colSpan: 2  }, { text: 'Total de ingresos:', style: 'tableHeader' }],
+          ...data.map(el => [el.nombre, {text: "L" + el.total.toFixed(2).toString(), alignment: 'right'}]), // Alineación a la derecha para la última columna
+          [{ text: 'Total de deducciones:', style: 'tableTotal', alignment: 'right', colSpan: 1 }, { text: "L" + total.toFixed(2).toString(), style: 'tableTotal' }]
         ]
       },
       layout: 'lightHorizontalLines'

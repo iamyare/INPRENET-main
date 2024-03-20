@@ -1,37 +1,40 @@
 <h1>Planilla</h1>
 
 <form [formGroup]="form" #myForm="ngForm">
+  <mat-slide-toggle
+    color="primary"
+    formControlName="isChecked"
+    (change)="onChangeToggle()"
+  >
+    ¿Desea abrir una nueva planilla?
+  </mat-slide-toggle>
 
-    <mat-slide-toggle color="primary" formControlName="isChecked" (change)="onChangeToggle()">
-        ¿Desea abrir una nueva planilla?
-    </mat-slide-toggle>
+  <app-progressplanill
+    (newDatBenChange)="setEstadoDatGen($event)"
+    [estadoSubDed]="form.get('isChecked')?.value"
+    (newEstCentrTrab)="setEstadoTable($event)"
+    (newdatosHS)="setEstadoVerPlanP($event)"
+    (newdatosRP)="setEstadoVerPlanDef($event)"
+  >
+  </app-progressplanill>
 
-    <app-progressplanill
-      (newDatBenChange)="setEstadoDatGen($event)"
-      [estadoSubDed]="form.get('isChecked')?.value"
-      (newEstCentrTrab)="setEstadoTable($event)"
-      (newdatosHS)="setEstadoVerPlanP($event)"
-      (newdatosRP)="setEstadoVerPlanDef($event)" >
-    </app-progressplanill>
+  <form [formGroup]="formplanilla" *ngIf="datosG">
+    <app-nuevaplanilla groupName="planilla"></app-nuevaplanilla>
+  </form>
 
+  <form [formGroup]="formplanilla" *ngIf="datosCT">
+    <app-asignacion-afil-plan groupName="planilla"></app-asignacion-afil-plan>
+  </form>
 
-    <form [formGroup]="formplanilla" *ngIf="datosG">
-      <app-nuevaplanilla groupName="planilla" ></app-nuevaplanilla>
-    </form>
+  <form [formGroup]="formplanilla" *ngIf="datosHS">
+    <app-verplanprelcomp groupName="planilla"></app-verplanprelcomp>
+  </form>
 
-    <form [formGroup]="formplanilla" *ngIf="datosCT">
-      <app-asignacion-afil-plan groupName="planilla" ></app-asignacion-afil-plan>
-    </form>
+  <form [formGroup]="formplanilla" *ngIf="datosRP">
+    <app-verplancerrada groupName="planilla"></app-verplancerrada>
+  </form>
 
-    <form [formGroup]="formplanilla" *ngIf="datosHS">
-      <app-verplanprelcomp groupName="planilla" ></app-verplanprelcomp>
-    </form>
-
-    <form [formGroup]="formplanilla" *ngIf="datosRP">
-      <app-verplancerrada groupName="planilla" ></app-verplancerrada>
-    </form>
-
-    <!-- <div class="row" *ngIf="datosG && form.get('isChecked')?.value">
+  <!-- <div class="row" *ngIf="datosG && form.get('isChecked')?.value">
         <div class="col-md-6">
             <app-botonarchivos labelBoton="Adjunte excel de deducciones" groupName="ArchivosDed"
                 (change)="onFileSelect($event)" accept=".xlsx, .xls"></app-botonarchivos>
@@ -40,8 +43,8 @@
             <button mat-button color="primary">Enviar Formulario</button>
         </div>
     </div> -->
-    <!-- <app-inline-editing-one *ngIf="datosTable"></app-inline-editing-one> -->
-    <!-- <div class="row" *ngIf="datosPlan">
+  <!-- <app-inline-editing-one *ngIf="datosTable"></app-inline-editing-one> -->
+  <!-- <div class="row" *ngIf="datosPlan">
         <div class="col-md-6">
             <app-botonarchivos labelBoton="Adjunte excel de planillas" groupName="ArchivosPlan"></app-botonarchivos>
         </div>
@@ -49,5 +52,4 @@
             <button mat-button color="primary">Enviar Formulario</button>
         </div>
     </div> -->
-
 </form>

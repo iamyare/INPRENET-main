@@ -19,6 +19,7 @@ export class NuevaplanillaComponent implements OnInit{
   filas: any;
   tiposPlanilla: any[] = [];
   datosFormateados: any;
+  datosForm:any
 
   constructor( private _formBuilder: FormBuilder,
     private planillaService : PlanillaService,
@@ -52,9 +53,9 @@ export class NuevaplanillaComponent implements OnInit{
     obtenerDatos1():any{
       this.getTiposPlanillas()
       this.myFormFields = [
-        { type: 'string', label: 'Codigo De Planilla', name: 'codigo_planilla', validations: [Validators.required] , display:true},
+        { type: 'string', label: 'Código De Planilla', name: 'codigo_planilla', validations: [Validators.required] , display:true},
         {
-          type: 'dropdown', label: 'Nombre de Tipo planilla', name: 'nombre_planilla',
+          type: 'dropdown', label: 'Nombre de Tipo Planilla', name: 'nombre_planilla',
           options: this.tiposPlanilla,
           validations: [Validators.required], display:true
         },
@@ -84,6 +85,7 @@ export class NuevaplanillaComponent implements OnInit{
     } */
 
     obtenerDatos(event:any):any{
+      this.datosForm = event;
       this.formatRangFech(event)
     }
 
@@ -111,6 +113,7 @@ export class NuevaplanillaComponent implements OnInit{
         delete datosFormateados.periodo;
 
         this.datosFormateados = datosFormateados;
+        console.log(this.datosFormateados);
 
       } else {
           console.error('La propiedad periodo no está definida en el evento');

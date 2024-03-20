@@ -16,7 +16,6 @@ import { BeneficiosService } from '../../app/services/beneficios.service';
 })
 export class AsignacionAfilPlanComponent implements OnInit {
   convertirFecha = convertirFecha;
-  mostDet: any = false;
   dataPlan: any;
   filas: any;
   tiposPlanilla: any[] = [];
@@ -292,19 +291,7 @@ export class AsignacionAfilPlanComponent implements OnInit {
       });
   }
 
-  cargarBeneficiosRecient() {
-    this.beneficiosService.cargarBeneficiosRecient().subscribe({
-      next: (response: any) => {
-        if (response){
-          let temp = response.Registros;
-          this.mostDet = true
-        }
-      },
-      error: (error) => {
-        console.log(error);
-      }
-    });
-  }
+
 
   convertirFormatoFecha(fecha: string): string {
     return fecha.replace(/-/g, '.');

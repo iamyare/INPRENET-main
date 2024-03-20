@@ -1,6 +1,6 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Observable, BehaviorSubject, catchError, throwError } from 'rxjs';
+import { Observable, BehaviorSubject, catchError, throwError, map } from 'rxjs';
 import { environment } from 'src/environments/environment';
 
 @Injectable({
@@ -8,6 +8,18 @@ import { environment } from 'src/environments/environment';
 })
 export class PlanillaService {
   constructor(private http: HttpClient) { }
+
+  actualizarPlanillaAPreliminar(tipo: string, idPlanilla: string, periodoInicio: string, periodoFinalizacion: string): Observable<string> {
+    const url = `${environment.API_URL}/api/planilla/actualizar-planilla`;
+    const body = { tipo, idPlanilla, periodoInicio, periodoFinalizacion };
+    return this.http.post<string>(url, body, { responseType: 'text' as 'json' }).pipe(
+      catchError(error => {
+        console.error('Error al actualizar la planilla', error);
+        return throwError(() => new Error('Error al actualizar la planilla'));
+      })
+    );
+  }
+
 
   getPlanillaOrdinariaAfiliados(periodoInicio: string, periodoFinalizacion: string): Observable<any> {
     const params = new HttpParams()

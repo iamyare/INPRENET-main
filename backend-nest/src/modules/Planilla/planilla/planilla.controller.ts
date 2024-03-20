@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Query, Res, BadRequestException, InternalServerErrorException, HttpCode, HttpStatus } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Query, Res, BadRequestException, InternalServerErrorException, HttpCode, HttpStatus, HttpException } from '@nestjs/common';
 import { PlanillaService } from './planilla.service';
 import { CreatePlanillaDto } from './dto/create-planilla.dto';
 import { UpdatePlanillaDto } from './dto/update-planilla.dto';
@@ -6,16 +6,184 @@ import { PaginationDto } from 'src/common/dtos/pagination.dto';
 
 @Controller('planilla')
 export class PlanillaController {
-  constructor(private readonly planillaService: PlanillaService) {}
+  constructor(private readonly planillaService: PlanillaService) { }
 
-  @Get('/desglose-deducciones')
-  async getDesgloseDeducciones(@Query('periodoInicio') periodoInicio: string, @Query('periodoFinalizacion') periodoFinalizacion: string) {
-    return this.planillaService.getDesgloseDeducciones(periodoInicio, periodoFinalizacion);
+  @Post('/actualizar-OA')
+  async updatePlanilla(@Body() body: any) {
+    try {
+      const { idPlanilla, periodoInicio, periodoFinalizacion } = body;
+      const resultado = await this.planillaService.updatePlanillaForBeneficios(idPlanilla, periodoInicio, periodoFinalizacion);
+      return { message: resultado };
+    } catch (error) {
+      throw new HttpException({
+        status: HttpStatus.INTERNAL_SERVER_ERROR,
+        error: 'Error al actualizar los beneficios.',
+        detail: error.message,
+      }, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
   }
 
-  @Get('/desglose-beneficios')
-  async getDesgloseBeneficios(@Query('periodoInicio') periodoInicio: string, @Query('periodoFinalizacion') periodoFinalizacion: string) {
-    return this.planillaService.getDesgloseBeneficios(periodoInicio, periodoFinalizacion);
+  @Get('/desglose-beneficios-OA')
+  async getDesgloseBeneficiosOA(
+    @Query('periodoInicio') periodoInicio: string,
+    @Query('periodoFinalizacion') periodoFinalizacion: string,
+    @Res() res
+  ) {
+    try {
+      const resultado = await this.planillaService.getDesgloseBeneficiosOrdinariaAfiliados(periodoInicio, periodoFinalizacion);
+      return res.status(HttpStatus.OK).json({
+        message: 'Consulta de desglose de beneficios realizada con éxito',
+        data: resultado
+      });
+    } catch (error) {
+      console.log(error);
+      return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
+        message: 'Error al realizar la consulta de desglose de beneficios',
+        error: error.message
+        
+      });
+    }
+  }
+
+  @Get('/desglose-deducciones-OA')
+  async getDesgloseDeduccionesOA(
+    @Query('periodoInicio') periodoInicio: string,
+    @Query('periodoFinalizacion') periodoFinalizacion: string,
+    @Res() res
+  ) {
+    try {
+      const resultado = await this.planillaService.getDesgloseDeduccionesOrdinariaAfiliados(periodoInicio, periodoFinalizacion);
+      return res.status(HttpStatus.OK).json({
+        message: 'Consulta de desglose de deducciones realizada con éxito',
+        data: resultado
+      });
+    } catch (error) {
+      return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
+        message: 'Error al realizar la consulta de desglose de deducciones',
+        error: error.message
+      });
+    }
+  }
+
+
+  @Get('desglose-beneficios-OB')
+  async getDesgloseBeneficiosOB(
+    @Query('periodoInicio') periodoInicio: string,
+    @Query('periodoFinalizacion') periodoFinalizacion: string,
+    @Res() res
+  ) {
+    try {
+      const resultado = await this.planillaService.getDesgloseBeneficiosOrdinariaBeneficiarios(periodoInicio, periodoFinalizacion);
+      return res.status(HttpStatus.OK).json({
+        message: 'Consulta de desglose de beneficios realizada con éxito',
+        data: resultado
+      });
+    } catch (error) {
+      return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
+        message: 'Error al realizar la consulta de desglose de beneficios',
+        error: error.message
+      });
+    }
+  }
+
+  @Get('desglose-deducciones-OB')
+  async getDesgloseDeduccionesOB(
+    @Query('periodoInicio') periodoInicio: string,
+    @Query('periodoFinalizacion') periodoFinalizacion: string,
+    @Res() res
+  ) {
+    try {
+      const resultado = await this.planillaService.getDesgloseDeduccionesOrdinariaBeneficiarios(periodoInicio, periodoFinalizacion);
+      return res.status(HttpStatus.OK).json({
+        message: 'Consulta de desglose de deducciones realizada con éxito',
+        data: resultado
+      });
+    } catch (error) {
+      return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
+        message: 'Error al realizar la consulta de desglose de deducciones',
+        error: error.message
+      });
+    }
+  }
+
+  @Get('desglose-beneficios-CA')
+  async getDesgloseBeneficiosComplementarios(
+    @Query('periodoInicio') periodoInicio: string,
+    @Query('periodoFinalizacion') periodoFinalizacion: string,
+    @Res() res
+  ) {
+    try {
+      const resultado = await this.planillaService.getDesgloseBeneficiosComplemenariaAfiliados(periodoInicio, periodoFinalizacion);
+      return res.status(HttpStatus.OK).json({
+        message: 'Consulta de desglose de beneficios complementarios realizada con éxito',
+        data: resultado
+      });
+    } catch (error) {
+      return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
+        message: 'Error al realizar la consulta de desglose de beneficios complementarios',
+        error: error.message
+      });
+    }
+  }
+
+  @Get('desglose-deducciones-CA')
+  async getDesgloseDeduccionesComplementarias(
+    @Query('periodoInicio') periodoInicio: string,
+    @Query('periodoFinalizacion') periodoFinalizacion: string,
+    @Res() res
+  ) {
+    try {
+      const resultado = await this.planillaService.getDesgloseDeduccionesComplementariaAfiliados(periodoInicio, periodoFinalizacion);
+      return res.status(HttpStatus.OK).json({
+        message: 'Consulta de desglose de deducciones complementarias realizada con éxito',
+        data: resultado
+      });
+    } catch (error) {
+      return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
+        message: 'Error al realizar la consulta de desglose de deducciones complementarias',
+        error: error.message
+      });
+    }
+  }
+
+  @Get('desglose-beneficios-CB')
+  async getDesgloseBeneficiosComplementariaBenef(
+    @Query('periodoInicio') periodoInicio: string,
+    @Query('periodoFinalizacion') periodoFinalizacion: string,
+    @Res() res
+  ) {
+    try {
+      const resultado = await this.planillaService.getDesgloseBeneficiosComplemenariaBeneficiarios(periodoInicio, periodoFinalizacion);
+      return res.status(HttpStatus.OK).json({
+        message: 'Consulta de desglose de beneficios realizada con éxito',
+        data: resultado
+      });
+    } catch (error) {
+      return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
+        message: 'Error al realizar la consulta de desglose de beneficios',
+        error: error.message
+      });
+    }
+  }
+
+  @Get('desglose-deducciones-CB')
+  async getDesgloseDeduccionesComplementariaBenef(
+    @Query('periodoInicio') periodoInicio: string,
+    @Query('periodoFinalizacion') periodoFinalizacion: string,
+    @Res() res
+  ) {
+    try {
+      const resultado = await this.planillaService.getDesgloseDeduccionesComplementariaBeneficiarios(periodoInicio, periodoFinalizacion);
+      return res.status(HttpStatus.OK).json({
+        message: 'Consulta de desglose de deducciones realizada con éxito',
+        data: resultado
+      });
+    } catch (error) {
+      return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
+        message: 'Error al realizar la consulta de desglose de deducciones',
+        error: error.message
+      });
+    }
   }
 
 
@@ -38,7 +206,7 @@ export class PlanillaController {
   @Get('beneficios-ordinaria-afil')
   async getMontoPagarPorBeneficio(@Query('dni') dni: string, @Query('periodoInicio') periodoInicio: string, @Query('periodoFinalizacion') periodoFinalizacion: string, @Res() res) {
     console.log('entro');
-    
+
     try {
       const resultado = await this.planillaService.beneficiosOrdinariaDeAfil(dni, periodoInicio, periodoFinalizacion);
       return res.status(HttpStatus.OK).json({
@@ -52,7 +220,7 @@ export class PlanillaController {
       });
     }
   }
-  
+
   @Get('deduccion-ordinaria-afil')
   async getMontoPorBeneficio(
     @Query('dni') dni: string,
@@ -354,7 +522,7 @@ export class PlanillaController {
   async ObtenerAfilExtraordinaria() {
     return this.planillaService.obtenerAfilExtraordinaria();
   } */
-  
+
   @Post()
   create(@Body() createPlanillaDto: CreatePlanillaDto) {
     return this.planillaService.create(createPlanillaDto);
@@ -367,7 +535,7 @@ export class PlanillaController {
   ) {
     return this.planillaService.getDeduccionesNoAplicadas(periodoInicio, periodoFinalizacion);
   }
-  
+
   @Get('beneficios-no-aplicadas')
   getBeneficiosNoAplicados(
     @Query('periodoInicio') periodoInicio: string,
@@ -389,21 +557,21 @@ export class PlanillaController {
     } 
   */
 
-    @Get(':codigoPlanilla')
-    async findOne(@Param('codigoPlanilla') codigoPlanilla: string, @Res() res) {
-      const planilla = await this.planillaService.findOne(codigoPlanilla);
-  
-      if (!planilla) {
-        return res.status(HttpStatus.NOT_FOUND).json({
-          message: `Planilla con código ${codigoPlanilla} no encontrada.`,
-        });
-      }
-  
-      return res.status(HttpStatus.OK).json({
-        message: "Consulta realizada con éxito",
-        data: planilla, // Asumiendo que deseas devolver un objeto único, si esperas un array, debes ajustarlo
+  @Get(':codigoPlanilla')
+  async findOne(@Param('codigoPlanilla') codigoPlanilla: string, @Res() res) {
+    const planilla = await this.planillaService.findOne(codigoPlanilla);
+
+    if (!planilla) {
+      return res.status(HttpStatus.NOT_FOUND).json({
+        message: `Planilla con código ${codigoPlanilla} no encontrada.`,
       });
     }
+
+    return res.status(HttpStatus.OK).json({
+      message: "Consulta realizada con éxito",
+      data: planilla, // Asumiendo que deseas devolver un objeto único, si esperas un array, debes ajustarlo
+    });
+  }
 
   @Patch(':id')
   update(@Param('id') id: string, @Body() updatePlanillaDto: UpdatePlanillaDto) {

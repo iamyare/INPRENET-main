@@ -59,6 +59,21 @@ async insertarDetalles(@Body() data: any[]) {
     }
   }
 
+  @Get('detallesDefinitiva')
+  async getDetallesDeduccioDefinitiva(
+    @Query('idAfiliado') idAfiliado: string,
+    @Query('idPlanilla') idPlanilla: string,
+    @Response() res
+  ) {
+
+    try {
+      const detalles = await this.detalleDeduccionService.getDetallesDeduccioDefinitiva(idAfiliado, idPlanilla);
+      return res.status(HttpStatus.OK).json(detalles);
+    } catch (error) {
+      return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: 'Error al obtener los detalles de deducción', error: error.message });
+    }
+  }
+
 
   @Get('/rango-deducciones')
   async getRangoDetalleDeducciones(

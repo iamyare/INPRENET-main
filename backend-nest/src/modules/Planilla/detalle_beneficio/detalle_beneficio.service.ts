@@ -203,9 +203,9 @@ export class DetalleBeneficioService {
        
        let connection;
        connection = await oracledb.getConnection({
-         user: 'c##test',
-         password: '12345678',
-         connectString: '127.0.0.1:1521/xe'
+         user: process.env.DB_USERNAME,
+         password: process.env.DB_PASSWORD,
+         connectString: process.env.CONNECT_STRING
        })
    
        // Ejecutar el procedimiento almacenado
@@ -249,31 +249,84 @@ export class DetalleBeneficioService {
   async getDetalleBeneficiosPorAfiliadoYPlanilla(idAfiliado: string, idPlanilla: string): Promise<any> {
     const query = `
     SELECT
-        db."id_beneficio_planilla",
-        detBA."id_afiliado",
-        ben."nombre_beneficio",
-        detBA."id_beneficio",
-        db."estado",
-        db."metodo_pago",
-        db."monto_a_pagar" AS "monto",
-        detBA."num_rentas_aplicadas",
-        detBA."periodoInicio",
-        detBA."periodoFinalizacion",
-        db."id_planilla"
-      FROM
-        "net_detalle_pago_beneficio" db
-      INNER JOIN 
-        "net_detalle_beneficio_afiliado" detBA ON db."id_beneficio_afiliado" = detBA."id_detalle_ben_afil"
-      INNER JOIN 
-        "net_beneficio" ben ON ben."id_beneficio" = detBA."id_beneficio"
-      WHERE
-        detBA."id_afiliado" = :idAfiliado
-        AND db."id_planilla" = :idPlanilla
+        ben."NOMBRE_BENEFICIO",
+        detP."ID_PERSONA",
+        detP."ID_CAUSANTE",
+        detBA."ID_BENEFICIO",
+        detBs."ID_BENEFICIO_PLANILLA",
+        detBs."ESTADO",
+        detBA."METODO_PAGO",
+        detBs."ID_PLANILLA",
+        detBs."MONTO_A_PAGAR" AS "MontoAPagar",
+        detBA."NUM_RENTAS_APLICADAS",
+        detBA."PERIODO_INICIO",
+        detBA."PERIODO_FINALIZACION"
+        FROM
+            "NET_PERSONA" afil
+        INNER JOIN
+            "NET_DETALLE_PERSONA" detP ON afil."ID_PERSONA" = detP."ID_PERSONA"
+        INNER JOIN "NET_DETALLE_BENEFICIO_AFILIADO" detBA ON 
+            detP."ID_PERSONA" = detBA."ID_BENEFICIARIO" AND
+            detP."ID_CAUSANTE" = detBA."ID_CAUSANTE"
+        INNER JOIN "NET_BENEFICIO" ben ON 
+            detBA."ID_BENEFICIO" = ben."ID_BENEFICIO"
+        INNER JOIN
+            "NET_DETALLE_PAGO_BENEFICIO" detBs ON detBA."ID_DETALLE_BEN_AFIL" = detBs."ID_BENEFICIO_PLANILLA_AFIL"
+        INNER JOIN
+            "NET_PLANILLA" pla ON detBs."ID_PLANILLA" = pla."ID_PLANILLA"
+            
+          WHERE
+            detBs."ESTADO" = 'EN PRELIMINAR' AND
+            afil."ID_PERSONA" = ${idAfiliado} AND 
+            pla."ID_PLANILLA" = ${idPlanilla}
     `;
-
     try {
       // Asegúrate de pasar los parámetros como un array en el orden en que aparecen en la consulta
-      const detalleBeneficios = await this.entityManager.query(query, [idAfiliado, idPlanilla]);
+      const detalleBeneficios = await this.entityManager.query(query);
+      return detalleBeneficios;
+    } catch (error) {
+      this.logger.error(`Error al obtener detalles de beneficio por afiliado y planilla: ${error.message}`, error.stack);
+      throw new InternalServerErrorException('Se produjo un error al obtener los detalles de beneficio por afiliado y planilla.');
+    }
+  }
+
+  async getBeneficiosDefinitiva(idAfiliado: string, idPlanilla: string): Promise<any> {
+    const query = `
+    SELECT
+        ben."NOMBRE_BENEFICIO",
+        detP."ID_PERSONA",
+        detP."ID_CAUSANTE",
+        detBA."ID_BENEFICIO",
+        detBs."ID_BENEFICIO_PLANILLA",
+        detBs."ESTADO",
+        detBA."METODO_PAGO",
+        detBs."ID_PLANILLA",
+        detBs."MONTO_A_PAGAR" AS "MontoAPagar",
+        detBA."NUM_RENTAS_APLICADAS",
+        detBA."PERIODO_INICIO",
+        detBA."PERIODO_FINALIZACION"
+        FROM
+            "NET_PERSONA" afil
+        INNER JOIN
+            "NET_DETALLE_PERSONA" detP ON afil."ID_PERSONA" = detP."ID_PERSONA"
+        INNER JOIN "NET_DETALLE_BENEFICIO_AFILIADO" detBA ON 
+            detP."ID_PERSONA" = detBA."ID_BENEFICIARIO" AND
+            detP."ID_CAUSANTE" = detBA."ID_CAUSANTE"
+        INNER JOIN "NET_BENEFICIO" ben ON 
+            detBA."ID_BENEFICIO" = ben."ID_BENEFICIO"
+        INNER JOIN
+            "NET_DETALLE_PAGO_BENEFICIO" detBs ON detBA."ID_DETALLE_BEN_AFIL" = detBs."ID_BENEFICIO_PLANILLA_AFIL"
+        INNER JOIN
+            "NET_PLANILLA" pla ON detBs."ID_PLANILLA" = pla."ID_PLANILLA"
+            
+          WHERE
+            detBs."ESTADO" = 'PAGADA' AND
+            afil."ID_PERSONA" = ${idAfiliado} AND 
+            pla."ID_PLANILLA" = ${idPlanilla}
+    `;
+    try {
+      // Asegúrate de pasar los parámetros como un array en el orden en que aparecen en la consulta
+      const detalleBeneficios = await this.entityManager.query(query);
       return detalleBeneficios;
     } catch (error) {
       this.logger.error(`Error al obtener detalles de beneficio por afiliado y planilla: ${error.message}`, error.stack);

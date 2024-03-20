@@ -73,6 +73,20 @@ export class DetalleBeneficioController {
     }
   }
 
+  @Get('detallesDefinitiva')
+  async getDetalleBeneficiosDefinitiva(
+    @Query('idAfiliado') idAfiliado: string,
+    @Query('idPlanilla') idPlanilla: string,
+    @Response() res
+  ) {
+    try {
+      const detalles = await this.detallebeneficioService.getBeneficiosDefinitiva(idAfiliado, idPlanilla);
+      return res.status(HttpStatus.OK).json(detalles);
+    } catch (error) {
+      return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: 'Error al obtener los detalles de beneficio', error: error.message });
+    }
+  }
+
   @Get('/detallesBene-complementaria-afiliado')
   async obtenerDetallesPorAfiliado(@Query('idAfiliado') idAfiliado: string) {
     if (!idAfiliado) {

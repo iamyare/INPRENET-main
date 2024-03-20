@@ -26,8 +26,8 @@ export class Net_Detalle_Deduccion {
     @Column('number', { nullable: true, name: 'MES' })
     mes: number;
 
-    @Column('timestamp', { default: () => 'CURRENT_TIMESTAMP', name: 'FECHA_APLICACO' })
-    fecha_aplicaco: Date;
+    @Column('timestamp', { default: () => 'CURRENT_TIMESTAMP', name: 'FECHA_APLICADO' })
+    fecha_aplicado: Date;
 
     @ManyToOne(() => Net_Persona, afiliado => afiliado.detalleDeduccion, { cascade: true })
     @JoinColumn({ name: 'ID_PERSONA', foreignKeyConstraintName:"FK_ID_PERSONA_DETDED" })

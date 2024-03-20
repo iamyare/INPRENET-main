@@ -4,8 +4,20 @@ export class CreatePlanillaDto {
     @IsString()
     codigo_planilla: string;
 
+    @IsString()
+    @IsOptional({ message: '' })
+    id_planilla: number;
+
+    @IsString()
+    @IsOptional({ message: '' })
+    fecha_cierre?: Date;
+    
     @IsNumber()
     secuencia: number;
+
+    @IsString()
+    @IsOptional({ message: '' })
+    estado?: string;
 
     @IsString({ message: '' })
     @IsNotEmpty({ message: '' })
@@ -20,12 +32,6 @@ export class CreatePlanillaDto {
     @IsOptional({ message: '' })
     nombre_planilla?: string;
     
-    @IsString()
-    @IsOptional({ message: '' })
-    fecha_cierre?: any;
     
-    @IsString()
-    @IsOptional({ message: '' })
-    estado?: any;
     
 }

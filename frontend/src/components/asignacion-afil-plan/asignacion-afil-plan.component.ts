@@ -62,17 +62,20 @@ export class AsignacionAfilPlanComponent implements OnInit {
       {
         header: 'Total de Ingresos',
         col: 'Total Beneficio',
+        moneda: true,
         isEditable: true
       },
       {
         header: 'Total De Deducciones Aplicadas',
         col: 'Total Deducciones',
         isEditable: true,
+        moneda: true,
         validationRules: [Validators.required, Validators.pattern(/^(3[01]|[12][0-9]|0?[1-9])-(1[0-2]|0?[1-9])-\d{4} - (3[01]|[12][0-9]|0?[1-9])-(1[0-2]|0?[1-9])-\d{4}$/)]
       },
       {
         header: 'Neto',
         col: 'Total',
+        moneda: true,
         isEditable: true
       },
     ];
@@ -429,8 +432,10 @@ export class AsignacionAfilPlanComponent implements OnInit {
   cargarBeneficiosRecient() {
     this.beneficiosService.cargarBeneficiosRecient().subscribe({
       next: (response: any) => {
-        let temp = response.Registros;
-        this.mostDet = true
+        if (response){
+          let temp = response.Registros;
+          this.mostDet = true
+        }
       },
       error: (error) => {
         console.log(error);

@@ -82,17 +82,20 @@ export class VerplancerradaComponent {
       {
         header: 'Total de Ingresos',
         col: 'Total Beneficio',
+        moneda: true,
         isEditable: true
       },
       {
         header: 'Total De Deducciones Aplicadas',
         col: 'Total Deducciones',
         isEditable: true,
+        moneda: true,
         validationRules: [Validators.required, Validators.pattern(/^(3[01]|[12][0-9]|0?[1-9])-(1[0-2]|0?[1-9])-\d{4} - (3[01]|[12][0-9]|0?[1-9])-(1[0-2]|0?[1-9])-\d{4}$/)]
       },
       {
         header: 'Neto',
         col: 'Total',
+        moneda: true,
         isEditable: true
       },
     ];
@@ -109,7 +112,7 @@ export class VerplancerradaComponent {
           next: async (response) => {
             if (response) {
               this.detallePlanilla = response;
-              this.datosTabl = await this.getFilas(response.id_planilla);
+              this.datosTabl = await this.getFilas(response.codigo_planilla);
               this.idPlanilla = response.id_planilla
               this.verDat = true;
             } else {
@@ -143,14 +146,13 @@ export class VerplancerradaComponent {
 
   };
 
-  getFilas = async (id_planilla: string) => {
+  getFilas = async (cod_planilla: string) => {
     try {
-        this.data = await this.planillaService.getPlanillaPrelimiar(id_planilla).toPromise();
+        this.data = await this.planillaService.getPersPlanillaDefin(cod_planilla).toPromise();
         this.dataPlan = this.data.map((item: any) => {
-          console.log(item);
           return {
-            id_afiliado: item.id_afiliado,
-            dni: item.dni,
+            id_afiliado: item.ID_PERSONA,
+            dni: item.DNI,
             NOMBRE_COMPLETO: item.NOMBRE_COMPLETO,
             "Total Beneficio": item["Total Beneficio"],
             "Total Deducciones": item["Total Deducciones"],
@@ -183,8 +185,7 @@ export class VerplancerradaComponent {
       width: '50%', // o el ancho que prefieras
       data: { logs: logs, type: 'deduccion' } // Asegúrate de pasar el 'type' adecuado
     });
-
-      this.planillaService.getDeduccionesPrelimiar(this.idPlanilla, row.id_afiliado ).subscribe({
+      this.planillaService.getDeduccionesDefinitiva(this.idPlanilla, row.id_afiliado ).subscribe({
         next: (response) => {
           logs.push({ message: 'Datos De Deducciones Inconsistentes:', detail: response });
           openDialog();
@@ -202,14 +203,12 @@ export class VerplancerradaComponent {
     let logs: any[] = [];
     logs.push({ message: `DNI:${row.dni}`, detail: row });
     logs.push({ message: `Nombre Completo:${row.NOMBRE_COMPLETO}`, detail: row });
-
-    // Función auxiliar para abrir el diálogo una vez que todos los datos están listos
     const openDialog = () => this.dialog.open(DynamicDialogComponent, {
       width: '50%',
       data: { logs: logs, type: 'beneficio' }
     });
 
-      this.planillaService.getBeneficiosPrelimiar(this.idPlanilla, row.id_afiliado).subscribe({
+      this.planillaService.getBeneficiosDefinitiva(this.idPlanilla, row.id_afiliado).subscribe({
         next: (response) => {
           logs.push({ message: 'Datos De Beneficios Inconsistentes:', detail: response });
           openDialog();
@@ -307,8 +306,6 @@ export class VerplancerradaComponent {
     pdfMake.createPdf(docDefinition).open();
   }
 
-
-
   convertirImagenABase64(url: string): Promise<string> {
     return this.http.get(url, { responseType: 'blob' }).toPromise().then(blob => {
       return new Promise<string>((resolve, reject) => {
@@ -323,8 +320,6 @@ export class VerplancerradaComponent {
       });
     });
   }
-
-
 
   buildTable(header: string, data: any[], columns: string[], sumColumn: string) {
     let body = [

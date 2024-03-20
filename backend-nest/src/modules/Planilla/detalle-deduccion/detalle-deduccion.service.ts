@@ -121,27 +121,64 @@ export class DetalleDeduccionService {
 
   async getDetallesDeduccionPorAfiliadoYPlanilla(idAfiliado: string, idPlanilla: string): Promise<any> {
     const query = `
-        SELECT
-        dd."id_ded_deduccion",
-        ded."nombre_deduccion",
-        dd."id_afiliado",
-        dd."id_deduccion",
-        ded."id_institucion",
-        dd."monto_total",
-        dd."monto_aplicado",
-        dd."estado_aplicacion",
-        dd."anio",
-        dd."mes",
-        dd."fecha_aplicado",
-        dd."id_planilla"
+    SELECT
+        dd."ID_DED_DEDUCCION",
+        ded."NOMBRE_DEDUCCION",
+        dd."ID_PERSONA",
+        dd."ID_DEDUCCION",
+        ded."ID_INSTITUCION",
+        dd."MONTO_TOTAL",
+        dd."MONTO_APLICADO" AS "MontoAplicado",
+        dd."ESTADO_APLICACION",
+        dd."ANIO",
+        dd."MES",
+        dd."FECHA_APLICADO",
+        dd."ID_PLANILLA"
       FROM
-        "net_detalle_deduccion" dd
-      INNER JOIN "net_deduccion" ded ON ded."id_deduccion" = dd."id_deduccion" 
+        "NET_DETALLE_DEDUCCION" dd
+      INNER JOIN "NET_DEDUCCION" ded ON ded."ID_DEDUCCION" = dd."ID_DEDUCCION" 
       WHERE
-        dd."id_afiliado" = '${idAfiliado}'
-        AND dd."id_planilla" = '${idPlanilla}'
+        dd."ESTADO_APLICACION" = 'EN PRELIMINAR' AND
+        dd."ID_PERSONA" = '${idAfiliado}' AND 
+        dd."ID_PLANILLA" = '${idPlanilla}'
     `;
 
+    try {
+      // Usar un objeto para pasar los parámetros con nombre
+      //const parameters: any = { idAfiliado: idAfiliado, idPlanilla: idPlanilla };
+      const detalleDeducciones = await this.entityManager.query(query);
+      return detalleDeducciones;
+    } catch (error) {
+      this.logger.error(`Error al obtener detalles de deducción por afiliado y planilla: ${error.message}`, error.stack);
+      throw new InternalServerErrorException('Se produjo un error al obtener los detalles de deducción por afiliado y planilla.');
+    }
+  }
+
+  async getDetallesDeduccioDefinitiva(idAfiliado: string, idPlanilla: string): Promise<any> {
+    const query = `
+    SELECT
+        dd."ID_DED_DEDUCCION",
+        ded."NOMBRE_DEDUCCION",
+        dd."ID_PERSONA",
+        dd."ID_DEDUCCION",
+        ded."ID_INSTITUCION",
+        dd."MONTO_TOTAL",
+        dd."MONTO_APLICADO" AS "MontoAplicado",
+        dd."ESTADO_APLICACION",
+        dd."ANIO",
+        dd."MES",
+        dd."FECHA_APLICADO",
+        dd."ID_PLANILLA"
+      FROM
+        "NET_DETALLE_DEDUCCION" dd
+      INNER JOIN "NET_DEDUCCION" ded ON ded."ID_DEDUCCION" = dd."ID_DEDUCCION" 
+      WHERE
+        dd."ESTADO_APLICACION" = 'COBRADA' AND
+        dd."ID_PERSONA" = '${idAfiliado}' AND 
+        dd."ID_PLANILLA" = '${idPlanilla}'
+    `;
+    console.log(query);
+    
     try {
       // Usar un objeto para pasar los parámetros con nombre
       //const parameters: any = { idAfiliado: idAfiliado, idPlanilla: idPlanilla };

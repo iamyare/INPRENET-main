@@ -73,16 +73,19 @@ export class VerPlanillasComponent implements OnInit{
       {
         header: 'Total de Ingresos',
         col : 'totalBeneficio',
+        moneda: true,
         isEditable: true
       },
       {
         header: 'Total de deducciones',
         col : 'totalDeducciones',
+        moneda: true,
         isEditable: true
       },
       {
         header: 'Total de la Planilla',
         col: 'totalPlanilla',
+        moneda: true,
         isEditable: false
       },
     ];

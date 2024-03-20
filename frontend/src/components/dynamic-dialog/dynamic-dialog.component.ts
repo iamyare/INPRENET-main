@@ -17,8 +17,6 @@ export class DynamicDialogComponent implements OnInit{
   }
 
   ngOnInit() {
-  console.log(this.data);
-
   if (this.data.type === 'deduccion') {
     this.displayedColumns = ['NOMBRE_DEDUCCION', 'MontoAplicado']; // Ajustar según los nombres reales de tus propiedades
     this.dialogTitle = 'Detalle de Deducciones';
@@ -31,6 +29,4 @@ export class DynamicDialogComponent implements OnInit{
   isArray(obj: any): boolean {
     return Array.isArray(obj);
   }
-
-
 }

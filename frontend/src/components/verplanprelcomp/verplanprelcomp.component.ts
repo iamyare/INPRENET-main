@@ -209,8 +209,6 @@ export class VerplanprelcompComponent implements OnInit{
             openDialog();
           }
         });
-
-
     }
 
     openLogDialog(logs: any[]) {
@@ -222,23 +220,6 @@ export class VerplanprelcompComponent implements OnInit{
 
     actualizarFechaCierrePlanilla(): void {
       this.cerrarPagos();
-      const fechaActual = new Date().toISOString().split('T')[0];
-      const estadoActualizado = 'CERRADA';
-
-      const datosActualizados = {
-        fecha_cierre: fechaActual,
-        estado: estadoActualizado
-      };
-
-      this.planillaService.updatePlanilla(this.idPlanilla, datosActualizados).subscribe({
-        next: (data) => {
-          this.toastr.success('Planilla actualizada con éxito');
-        },
-        error: (error) => {
-          this.toastr.error('Error al actualizar la planilla');
-          console.error('Error al actualizar la planilla', error);
-        }
-      });
     }
 
     actualizarEstadoDeducciones(nuevoEstado: string) {
@@ -270,7 +251,6 @@ export class VerplanprelcompComponent implements OnInit{
         }
       });
     }
-
 
     cerrarPagos() {
       const fechaActual = new Date().toISOString().split('T')[0];
@@ -316,10 +296,4 @@ export class VerplanprelcompComponent implements OnInit{
         }
       });
     }
-
-
-
-
-
-
 }

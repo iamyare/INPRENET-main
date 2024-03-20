@@ -471,19 +471,19 @@ export class PlanillaController {
 
   @Get('preliminar')
   async ObtenerPlanillaPreliminar(
-    @Query('idPlanilla') idPlanilla: string,
+    @Query('codPlanilla') codPlanilla: string,
   ) {
-    if (!idPlanilla) {
-      throw new BadRequestException('Los parámetros idPlanilla son obligatorios');
+    if (!codPlanilla) {
+      throw new BadRequestException('Los parámetros codPlanilla son obligatorios');
     }
     try {
-      return await this.planillaService.ObtenerPreliminar(idPlanilla);
+      return await this.planillaService.ObtenerPreliminar(codPlanilla);
     } catch (error) {
       throw new InternalServerErrorException('Error al obtener planilla preliminar');
     }
   }
 
-  /* @Get('Definitiva/:term')
+  @Get('Definitiva/:term')
   async ObtenerPlanDefin(
     @Param('term') term: string
   ) {
@@ -495,7 +495,21 @@ export class PlanillaController {
     } catch (error) {
       throw new InternalServerErrorException('Error al obtener planilla preliminar');
     }
-  } */
+  }
+
+  @Get('Definitiva/personas/:term')
+  async ObtenerPlanDefinPersonas(
+    @Param('term') term: string
+  ) {
+    if (!term) {
+      throw new BadRequestException('Los parámetros idPlanilla son obligatorios');
+    }
+    try {
+      return await this.planillaService.ObtenerPlanDefinPersonas(term);
+    } catch (error) {
+      throw new InternalServerErrorException('Error al obtener planilla preliminar');
+    }
+  }
 
   /* @Get('planillaOrdinaria')
   async obtenerAfilOrdinaria(
@@ -574,7 +588,7 @@ export class PlanillaController {
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updatePlanillaDto: UpdatePlanillaDto) {
+  update(@Param('id') id: number, @Body() updatePlanillaDto: UpdatePlanillaDto) {
     return this.planillaService.update(id, updatePlanillaDto);
   }
 

@@ -7,7 +7,7 @@ export enum EstadoEnum {
     INCONSISTENCIA = 'INCONSISTENCIA'
 }
 @Entity({ name: 'NET_DETALLE_PAGO_BENEFICIO' })
-@Check("CK_ESTADO_DETBEN",`ESTADO IN ('PAGADA', 'NO PAGADA', 'EN PLANILLA')`)
+@Check("CK_ESTADO_DETBEN",`ESTADO IN ('PAGADA', 'NO PAGADA', 'EN PRELIMINAR')`)
 export class Net_Detalle_Pago_Beneficio {
     @PrimaryGeneratedColumn({type: 'int',name: 'ID_BENEFICIO_PLANILLA', primaryKeyConstraintName: 'PK_benPlan_detPagB'})
     id_beneficio_planilla: number;

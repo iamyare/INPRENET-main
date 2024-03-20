@@ -155,7 +155,7 @@ export class PlanillaService {
     `;
 
     return await this.entityManager.query(queryBeneficios, [periodoInicio, periodoFinalizacion]);
-}
+  }
 
   async getDesgloseDeduccionesOrdinariaAfiliados(periodoInicio: string, periodoFinalizacion: string): Promise<any> {
     const queryDeducciones = `
@@ -197,7 +197,7 @@ export class PlanillaService {
     `;
 
     return await this.entityManager.query(queryDeducciones, [periodoInicio, periodoFinalizacion, periodoInicio, periodoFinalizacion]);
-}
+  }
 
   async beneficiosOrdinariaDeAfil(dni: string, periodoInicio: string, periodoFinalizacion: string): Promise<any> {
     const query = `
@@ -333,31 +333,31 @@ export class PlanillaService {
   async getDesgloseBeneficiosOrdinariaBeneficiarios(periodoInicio: string, periodoFinalizacion: string): Promise<any> {
     const queryBeneficiosDetallados = `
     SELECT 
-        p.DNI, 
-        dba.ID_DETALLE_BEN_AFIL,
-        b.NOMBRE_BENEFICIO,
-        dpb.MONTO_A_PAGAR
-    FROM 
-        NET_PERSONA p
-    JOIN 
-        NET_DETALLE_BENEFICIO_AFILIADO dba ON p.ID_PERSONA = dba.ID_BENEFICIARIO
-    JOIN 
-        NET_BENEFICIO b ON dba.ID_BENEFICIO = b.ID_BENEFICIO
-    JOIN 
-        NET_DETALLE_PAGO_BENEFICIO dpb ON dba.ID_DETALLE_BEN_AFIL = dpb.ID_BENEFICIO_PLANILLA_AFIL
-    WHERE 
-        dba.ID_BENEFICIARIO <> dba.ID_CAUSANTE AND
-        dpb.estado = 'NO PAGADA' AND
-        dpb.FECHA_CARGA BETWEEN TO_DATE(:periodoInicio || ' 12:00:00 AM', 'DD.MM.YYYY HH:MI:SS PM') AND TO_DATE(:periodoFinalizacion || ' 11:59:59 PM', 'DD.MM.YYYY HH:MI:SS PM') AND
-        EXISTS (
-            SELECT 1
-            FROM NET_DETALLE_BENEFICIO_AFILIADO dba_inner
-            JOIN NET_DETALLE_PAGO_BENEFICIO dpb_inner ON dba_inner.ID_DETALLE_BEN_AFIL = dpb_inner.ID_BENEFICIO_PLANILLA_AFIL
-            WHERE dpb_inner.estado = 'PAGADA' AND
-            dba_inner.ID_BENEFICIO = dba.ID_BENEFICIO AND
-            dba_inner.ID_BENEFICIARIO = dba.ID_BENEFICIARIO
-        )
-    `;
+    p.DNI, 
+    dpb.ID_BENEFICIO_PLANILLA, -- Cambio realizado aquí
+    b.NOMBRE_BENEFICIO,
+    dpb.MONTO_A_PAGAR
+FROM 
+    NET_PERSONA p
+JOIN 
+    NET_DETALLE_BENEFICIO_AFILIADO dba ON p.ID_PERSONA = dba.ID_BENEFICIARIO
+JOIN 
+    NET_BENEFICIO b ON dba.ID_BENEFICIO = b.ID_BENEFICIO
+JOIN 
+    NET_DETALLE_PAGO_BENEFICIO dpb ON dba.ID_DETALLE_BEN_AFIL = dpb.ID_BENEFICIO_PLANILLA_AFIL
+WHERE 
+    dba.ID_BENEFICIARIO <> dba.ID_CAUSANTE AND
+    dpb.estado = 'NO PAGADA' AND
+    dpb.FECHA_CARGA BETWEEN TO_DATE(:periodoInicio || ' 12:00:00 AM', 'DD.MM.YYYY HH:MI:SS PM') AND TO_DATE(:periodoFinalizacion || ' 11:59:59 PM', 'DD.MM.YYYY HH:MI:SS PM') AND
+    EXISTS (
+        SELECT 1
+        FROM NET_DETALLE_BENEFICIO_AFILIADO dba_inner
+        JOIN NET_DETALLE_PAGO_BENEFICIO dpb_inner ON dba_inner.ID_DETALLE_BEN_AFIL = dpb_inner.ID_BENEFICIO_PLANILLA_AFIL
+        WHERE dpb_inner.estado = 'PAGADA' AND
+        dba_inner.ID_BENEFICIO = dba.ID_BENEFICIO AND
+        dba_inner.ID_BENEFICIARIO = dba.ID_BENEFICIARIO
+    )
+`;
 
     return await this.entityManager.query(queryBeneficiosDetallados, [periodoInicio, periodoFinalizacion]);
   }
@@ -406,7 +406,7 @@ export class PlanillaService {
     `;
 
     return await this.entityManager.query(queryDeducciones, [periodoInicio, periodoFinalizacion, periodoInicio, periodoFinalizacion]);
-}
+  }
 
   async beneficiosOrdinariaDeBenef(dni: string, periodoInicio: string, periodoFinalizacion: string): Promise<any> {
     const query = `
@@ -540,30 +540,30 @@ export class PlanillaService {
   async getDesgloseBeneficiosComplemenariaAfiliados(periodoInicio: string, periodoFinalizacion: string): Promise<any> {
     const queryBeneficios = `
     SELECT 
-        p.DNI, 
-        dba.ID_DETALLE_BEN_AFIL,
-        b.NOMBRE_BENEFICIO,
-        dpb.MONTO_A_PAGAR
-    FROM 
-        NET_PERSONA p
-    INNER JOIN 
-        NET_DETALLE_BENEFICIO_AFILIADO dba ON p.ID_PERSONA = dba.ID_BENEFICIARIO
-    INNER JOIN 
-        NET_BENEFICIO b ON dba.ID_BENEFICIO = b.ID_BENEFICIO
-    INNER JOIN 
-        NET_DETALLE_PAGO_BENEFICIO dpb ON dba.ID_DETALLE_BEN_AFIL = dpb.ID_BENEFICIO_PLANILLA_AFIL
-    WHERE 
-        dba.ID_BENEFICIARIO = dba.ID_CAUSANTE AND
-        dpb.estado = 'NO PAGADA' AND
-        dpb.FECHA_CARGA BETWEEN TO_DATE(:periodoInicio, 'DD.MM.YYYY') AND TO_DATE(:periodoFinalizacion || ' 11:59:59 PM', 'DD.MM.YYYY HH:MI:SS PM') AND
-        NOT EXISTS (
-            SELECT 1
-            FROM NET_DETALLE_BENEFICIO_AFILIADO dba_inner
-            JOIN NET_DETALLE_PAGO_BENEFICIO dpb_inner ON dba_inner.ID_DETALLE_BEN_AFIL = dpb_inner.ID_BENEFICIO_PLANILLA_AFIL
-            WHERE dpb_inner.estado = 'PAGADA' AND
-            dba_inner.ID_BENEFICIO = dba.ID_BENEFICIO AND
-            dba_inner.ID_BENEFICIARIO = dba.ID_BENEFICIARIO
-        )
+    p.DNI, 
+    dpb.ID_BENEFICIO_PLANILLA,
+    b.NOMBRE_BENEFICIO,
+    dpb.MONTO_A_PAGAR
+FROM 
+    NET_PERSONA p
+INNER JOIN 
+    NET_DETALLE_BENEFICIO_AFILIADO dba ON p.ID_PERSONA = dba.ID_BENEFICIARIO
+INNER JOIN 
+    NET_BENEFICIO b ON dba.ID_BENEFICIO = b.ID_BENEFICIO
+INNER JOIN 
+    NET_DETALLE_PAGO_BENEFICIO dpb ON dba.ID_DETALLE_BEN_AFIL = dpb.ID_BENEFICIO_PLANILLA_AFIL  
+WHERE 
+    dba.ID_BENEFICIARIO = dba.ID_CAUSANTE AND
+    dpb.estado = 'NO PAGADA' AND
+    dpb.FECHA_CARGA BETWEEN TO_DATE(:periodoInicio, 'DD.MM.YYYY') AND TO_DATE(:periodoFinalizacion || ' 11:59:59 PM', 'DD.MM.YYYY HH:MI:SS PM') AND
+    NOT EXISTS (
+        SELECT 1
+        FROM NET_DETALLE_BENEFICIO_AFILIADO dba_inner
+        JOIN NET_DETALLE_PAGO_BENEFICIO dpb_inner ON dba_inner.ID_DETALLE_BEN_AFIL = dpb_inner.ID_BENEFICIO_PLANILLA_AFIL
+        WHERE dpb_inner.estado = 'PAGADA' AND
+        dba_inner.ID_BENEFICIO = dba.ID_BENEFICIO AND
+        dba_inner.ID_BENEFICIARIO = dba.ID_BENEFICIARIO
+    )
     `;
 
     return await this.entityManager.query(queryBeneficios, [periodoInicio, periodoFinalizacion]);
@@ -608,9 +608,8 @@ WHERE
 `;
 
     return await this.entityManager.query(queryDeducciones, [periodoInicio, periodoFinalizacion, periodoInicio, periodoFinalizacion]);
-  
-  }
 
+  }
 
   async beneficiosComplementariaDeAfil(dni: string, periodoInicio: string, periodoFinalizacion: string): Promise<any> {
     const query = `
@@ -752,7 +751,7 @@ WHERE
     const queryBeneficios = `
     SELECT 
         p.DNI, 
-        dba.ID_DETALLE_BEN_AFIL,
+        dpb.ID_BENEFICIO_PLANILLA,
         b.NOMBRE_BENEFICIO,
         dpb.MONTO_A_PAGAR
     FROM 
@@ -778,10 +777,10 @@ WHERE
     `;
 
     return await this.entityManager.query(queryBeneficios, [periodoInicio, periodoFinalizacion]);
-}
+  }
 
-async getDesgloseDeduccionesComplementariaBeneficiarios(periodoInicio: string, periodoFinalizacion: string): Promise<any> {
-  const queryDeducciones = `
+  async getDesgloseDeduccionesComplementariaBeneficiarios(periodoInicio: string, periodoFinalizacion: string): Promise<any> {
+    const queryDeducciones = `
   SELECT 
       p.DNI,
       dd.ID_DED_DEDUCCION,
@@ -819,8 +818,8 @@ async getDesgloseDeduccionesComplementariaBeneficiarios(periodoInicio: string, p
       )
   `;
 
-  return await this.entityManager.query(queryDeducciones, [periodoInicio, periodoFinalizacion, periodoInicio, periodoFinalizacion]);
-}
+    return await this.entityManager.query(queryDeducciones, [periodoInicio, periodoFinalizacion, periodoInicio, periodoFinalizacion]);
+  }
 
   async beneficiosComplementariaDeBenef(dni: string, periodoInicio: string, periodoFinalizacion: string): Promise<any> {
     const query = `
@@ -888,34 +887,255 @@ async getDesgloseDeduccionesComplementariaBeneficiarios(periodoInicio: string, p
     return await this.entityManager.query(query, parameters);
   }
 
+  //servicios de actualizacion
 
-  async updatePlanillaForBeneficios(idPlanilla: number, periodoInicio: string, periodoFinalizacion: string): Promise<string> {
-    // Llamamos al servicio para obtener los beneficios con los periodos especificados
+  async actualizarOrdinariaAfiliadosAPreliminar(idPlanilla: number, periodoInicio: string, periodoFinalizacion: string): Promise<string> {
+    // Llamamos al servicio para obtener los beneficios y deducciones con los periodos especificados
     const beneficios = await this.getDesgloseBeneficiosOrdinariaAfiliados(periodoInicio, periodoFinalizacion);
-  
-    if (!beneficios || beneficios.length === 0) {
-      return 'No se encontraron beneficios para actualizar.';
+    const deducciones = await this.getDesgloseDeduccionesOrdinariaAfiliados(periodoInicio, periodoFinalizacion);
+    if ((!beneficios || beneficios.length === 0) && (!deducciones || deducciones.length === 0)) {
+      return 'No se encontraron beneficios ni deducciones para actualizar.';
     }
-  
-    // Actualizamos la planilla para cada beneficio obtenido
-    for (const beneficio of beneficios) {
-      const query = `
-      UPDATE NET_DETALLE_PAGO_BENEFICIO
-      SET ID_PLANILLA = :idPlanilla, 
-      ESTADO = 'EN PLANILLA'
-      WHERE ID_BENEFICIO_PLANILLA = :idBeneficioPlanilla
+    const queryRunner = this.entityManager.connection.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+
+    try {
+      // Actualizamos los beneficios
+      for (const beneficio of beneficios) {
+        const updateBeneficioQuery = `
+        UPDATE NET_DETALLE_PAGO_BENEFICIO
+        SET ID_PLANILLA = :idPlanilla, 
+        ESTADO = 'EN PRELIMINAR'
+        WHERE ID_BENEFICIO_PLANILLA = :idBeneficioPlanilla
       `;
-  
-      const parameters: any = {
-        idPlanilla,
-        idBeneficioPlanilla: beneficio.ID_BENEFICIO_PLANILLA,
-      };
-  
-      await this.entityManager.query(query, parameters);
+
+        const parameters: any = {
+          idPlanilla,
+          idBeneficioPlanilla: beneficio.ID_BENEFICIO_PLANILLA,
+        };
+
+        await queryRunner.query(updateBeneficioQuery, parameters);
+      }
+
+      // Actualizamos las deducciones
+      for (const deduccion of deducciones) {
+        const updateDeduccionQuery = `
+        UPDATE NET_DETALLE_DEDUCCION
+        SET ID_PLANILLA = :idPlanilla,
+        ESTADO_APLICACION = 'EN PRELIMINAR'
+        WHERE ID_DED_DEDUCCION = :idDeduccion
+      `;
+
+        const parameters: any = {
+          idPlanilla,
+          idDeduccion: deduccion.ID_DED_DEDUCCION,
+        };
+
+        await queryRunner.query(updateDeduccionQuery, parameters);
+      }
+
+      // Confirmamos la transacción
+      await queryRunner.commitTransaction();
+
+      return 'Todos los beneficios y deducciones han sido actualizados correctamente.';
+    } catch (error) {
+      // Si hay algún error, hacemos rollback de la transacción
+      await queryRunner.rollbackTransaction();
+      throw error;
+    } finally {
+      // Liberamos la conexión de la query runner
+      await queryRunner.release();
     }
-  
-    return 'Todos los beneficios han sido actualizados correctamente.';
   }
+
+  async actualizarOrdinariaBeneficiariosAPreliminar(idPlanilla: number, periodoInicio: string, periodoFinalizacion: string): Promise<string> {
+    // Llamamos al servicio para obtener los beneficios y deducciones de los beneficiarios con los periodos especificados
+    const beneficios = await this.getDesgloseBeneficiosOrdinariaBeneficiarios(periodoInicio, periodoFinalizacion);
+    const deducciones = await this.getDesgloseDeduccionesOrdinariaBeneficiarios(periodoInicio, periodoFinalizacion);
+    
+    if ((!beneficios || beneficios.length === 0) && (!deducciones || deducciones.length === 0)) {
+      return 'No se encontraron beneficios ni deducciones para actualizar.';
+    }
+    
+    const queryRunner = this.entityManager.connection.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+
+    try {
+      // Actualizamos los beneficios de los beneficiarios
+      for (const beneficio of beneficios) {
+        const updateBeneficioQuery = `
+          UPDATE NET_DETALLE_PAGO_BENEFICIO
+          SET ID_PLANILLA = :idPlanilla, 
+          ESTADO = 'EN PRELIMINAR'
+          WHERE ID_BENEFICIO_PLANILLA = :idBeneficioPlanilla
+        `;
+
+        const parameters: any = {
+          idPlanilla,
+          idBeneficioPlanilla: beneficio.ID_BENEFICIO_PLANILLA,
+        };
+
+        await queryRunner.query(updateBeneficioQuery, parameters);
+      }
+
+      // Actualizamos las deducciones de los beneficiarios
+      for (const deduccion of deducciones) {
+        const updateDeduccionQuery = `
+          UPDATE NET_DETALLE_DEDUCCION
+          SET ID_PLANILLA = :idPlanilla,
+          ESTADO_APLICACION = 'EN PRELIMINAR'
+          WHERE ID_DED_DEDUCCION = :idDeduccion
+        `;
+
+        const parameters: any = {
+          idPlanilla,
+          idDeduccion: deduccion.ID_DED_DEDUCCION,
+        };
+
+        await queryRunner.query(updateDeduccionQuery, parameters);
+      }
+
+      // Confirmamos la transacción
+      await queryRunner.commitTransaction();
+
+      return 'Todos los beneficios y deducciones de los beneficiarios han sido actualizados correctamente.';
+    } catch (error) {
+      // Si hay algún error, hacemos rollback de la transacción
+      await queryRunner.rollbackTransaction();
+      throw error;
+    } finally {
+      // Liberamos la conexión de la query runner
+      await queryRunner.release();
+    }
+  }
+
+  async actualizarComplementariaAfiliadosAPreliminar(idPlanilla: number, periodoInicio: string, periodoFinalizacion: string): Promise<string> {
+    // Llamamos al servicio para obtener los beneficios y deducciones complementarias con los periodos especificados
+    const beneficios = await this.getDesgloseBeneficiosComplemenariaAfiliados(periodoInicio, periodoFinalizacion);
+    const deducciones = await this.getDesgloseDeduccionesComplementariaAfiliados(periodoInicio, periodoFinalizacion);
+    
+    if ((!beneficios || beneficios.length === 0) && (!deducciones || deducciones.length === 0)) {
+      return 'No se encontraron beneficios ni deducciones complementarias para actualizar.';
+    }
+
+    const queryRunner = this.entityManager.connection.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+
+    try {
+      // Actualizamos los beneficios complementarios
+      for (const beneficio of beneficios) {
+        const updateBeneficioQuery = `
+          UPDATE NET_DETALLE_PAGO_BENEFICIO
+          SET ID_PLANILLA = :idPlanilla, 
+              ESTADO = 'EN PRELIMINAR'
+          WHERE ID_BENEFICIO_PLANILLA = :idBeneficioPlanilla
+        `;
+
+        const parameters: any = {
+          idPlanilla,
+          idBeneficioPlanilla: beneficio.ID_BENEFICIO_PLANILLA,
+        };
+
+        await queryRunner.query(updateBeneficioQuery, parameters);
+      }
+
+      // Actualizamos las deducciones complementarias
+      for (const deduccion of deducciones) {
+        const updateDeduccionQuery = `
+          UPDATE NET_DETALLE_DEDUCCION
+          SET ID_PLANILLA = :idPlanilla,
+              ESTADO_APLICACION = 'EN PRELIMINAR'
+          WHERE ID_DED_DEDUCCION = :idDeduccion
+        `;
+
+        const parameters: any = {
+          idPlanilla,
+          idDeduccion: deduccion.ID_DED_DEDUCCION,
+        };
+
+        await queryRunner.query(updateDeduccionQuery, parameters);
+      }
+
+      // Confirmamos la transacción
+      await queryRunner.commitTransaction();
+
+      return 'Todos los beneficios y deducciones complementarias han sido actualizados correctamente.';
+    } catch (error) {
+      // Si hay algún error, hacemos rollback de la transacción
+      await queryRunner.rollbackTransaction();
+      throw error;
+    } finally {
+      // Liberamos la conexión de la query runner
+      await queryRunner.release();
+    }
+  }
+
+  async actualizarComplementariBeneficiariosAPreliminar(idPlanilla: number, periodoInicio: string, periodoFinalizacion: string): Promise<string> {
+    const beneficios = await this.getDesgloseBeneficiosComplemenariaBeneficiarios(periodoInicio, periodoFinalizacion);
+    const deducciones = await this.getDesgloseDeduccionesComplementariaBeneficiarios(periodoInicio, periodoFinalizacion);
+    
+    if ((!beneficios || beneficios.length === 0) && (!deducciones || deducciones.length === 0)) {
+      return 'No se encontraron beneficios ni deducciones complementarias para actualizar.';
+    }
+
+    const queryRunner = this.entityManager.connection.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+
+    try {
+      // Actualizamos los beneficios complementarios
+      for (const beneficio of beneficios) {
+        const updateBeneficioQuery = `
+          UPDATE NET_DETALLE_PAGO_BENEFICIO
+          SET ID_PLANILLA = :idPlanilla, 
+              ESTADO = 'EN PRELIMINAR'
+          WHERE ID_BENEFICIO_PLANILLA = :idBeneficioPlanilla
+        `;
+
+        const parameters: any = {
+          idPlanilla,
+          idBeneficioPlanilla: beneficio.ID_BENEFICIO_PLANILLA,
+        };
+
+        await queryRunner.query(updateBeneficioQuery, parameters);
+      }
+
+      // Actualizamos las deducciones complementarias
+      for (const deduccion of deducciones) {
+        const updateDeduccionQuery = `
+          UPDATE NET_DETALLE_DEDUCCION
+          SET ID_PLANILLA = :idPlanilla,
+              ESTADO_APLICACION = 'EN PRELIMINAR'
+          WHERE ID_DED_DEDUCCION = :idDeduccion
+        `;
+
+        const parameters: any = {
+          idPlanilla,
+          idDeduccion: deduccion.ID_DED_DEDUCCION,
+        };
+
+        await queryRunner.query(updateDeduccionQuery, parameters);
+      }
+
+      // Confirmamos la transacción
+      await queryRunner.commitTransaction();
+
+      return 'Todos los beneficios y deducciones complementarias de los beneficiarios han sido actualizados correctamente.';
+    } catch (error) {
+      // Si hay algún error, hacemos rollback de la transacción
+      await queryRunner.rollbackTransaction();
+      throw error;
+    } finally {
+      // Liberamos la conexión de la query runner
+      await queryRunner.release();
+    }
+  }
+
+
+
 
 
 

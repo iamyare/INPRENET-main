@@ -5,7 +5,7 @@ import { IsEnum } from 'class-validator';
 import { Net_Deduccion } from '../../deduccion/entities/net_deduccion.entity';
 
 @Entity({ name: 'NET_DETALLE_DEDUCCION' })
-@Check("CK_ESTADO_DED",`estado_aplicacion IN ('COBRADA', 'NO COBRADA', 'EN PLANILLA')`)
+@Check("CK_ESTADO_DED",`estado_aplicacion IN ('COBRADA', 'NO COBRADA', 'EN PRELIMINAR', 'EN PLANILLA')`)
 export class Net_Detalle_Deduccion {    
     @PrimaryGeneratedColumn({ type: 'int', name: 'ID_DED_DEDUCCION', primaryKeyConstraintName: 'PK_id_detD' })
     id_ded_deduccion: number;

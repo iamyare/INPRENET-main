@@ -12,12 +12,57 @@ export class PlanillaController {
   async updatePlanilla(@Body() body: any) {
     try {
       const { idPlanilla, periodoInicio, periodoFinalizacion } = body;
-      const resultado = await this.planillaService.updatePlanillaForBeneficios(idPlanilla, periodoInicio, periodoFinalizacion);
+      const resultado = await this.planillaService.actualizarOrdinariaAfiliadosAPreliminar(idPlanilla, periodoInicio, periodoFinalizacion);
       return { message: resultado };
     } catch (error) {
       throw new HttpException({
         status: HttpStatus.INTERNAL_SERVER_ERROR,
-        error: 'Error al actualizar los beneficios.',
+        error: 'Error al actualizar los beneficios y deducciones.',
+        detail: error.message,
+      }, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+  }
+
+  @Post('/actualizar-OB')
+  async actualizarBeneficiarios(@Body() body: any) {
+    try {
+      const { idPlanilla, periodoInicio, periodoFinalizacion } = body;
+      const resultado = await this.planillaService.actualizarOrdinariaBeneficiariosAPreliminar(idPlanilla, periodoInicio, periodoFinalizacion);
+      return { message: resultado };
+    } catch (error) {
+      throw new HttpException({
+        status: HttpStatus.INTERNAL_SERVER_ERROR,
+        error: 'Error al actualizar los beneficios y deducciones de los beneficiarios.',
+        detail: error.message,
+      }, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+  }
+
+  @Post('/actualizar-CA')
+  async actualizarAfiliados(@Body() body: any) {
+    try {
+      const { idPlanilla, periodoInicio, periodoFinalizacion } = body;
+      const resultado = await this.planillaService.actualizarComplementariaAfiliadosAPreliminar(idPlanilla, periodoInicio, periodoFinalizacion);
+      return { message: resultado };
+    } catch (error) {
+      throw new HttpException({
+        status: HttpStatus.INTERNAL_SERVER_ERROR,
+        error: 'Error al actualizar los beneficios y deducciones complementarias de los afiliados.',
+        detail: error.message,
+      }, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+  }
+
+  @Post('/actualizar-CB')
+  async actualizarComplementariaBeneficiarios(@Body() body: any) {
+    try {
+      const { idPlanilla, periodoInicio, periodoFinalizacion } = body;
+      const resultado = await this.planillaService.actualizarComplementariBeneficiariosAPreliminar(idPlanilla, periodoInicio, periodoFinalizacion);
+      return { message: resultado };
+    } catch (error) {
+      throw new HttpException({
+        status: HttpStatus.INTERNAL_SERVER_ERROR,
+        error: 'Error al actualizar los beneficios y deducciones complementarias de los beneficiarios.',
         detail: error.message,
       }, HttpStatus.INTERNAL_SERVER_ERROR);
     }

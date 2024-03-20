@@ -485,6 +485,20 @@ export class PlanillaController {
     }
   }
 
+  @Get('todas')
+  async ObtenerTodasPlanillas(
+    @Query('codPlanilla') codPlanilla: string,
+  ) {
+    if (!codPlanilla) {
+      throw new BadRequestException('Los parámetros codPlanilla son obligatorios');
+    }
+    try {
+      return await this.planillaService.ObtenerTodasPlanillas(codPlanilla);
+    } catch (error) {
+      throw new InternalServerErrorException('Error al obtener planilla preliminar');
+    }
+  }
+
   @Get('Definitiva/:term')
   async ObtenerPlanDefin(
     @Param('term') term: string

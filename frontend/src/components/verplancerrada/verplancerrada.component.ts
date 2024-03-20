@@ -53,8 +53,9 @@ export class VerplancerradaComponent {
     private afiliadoService: AfiliadoService
     ) {
       (pdfMake as any).vfs = pdfFonts.pdfMake.vfs;
-      this.convertirImagenABase64('../../assets/images/HOJA-MEMBRETADA-INPRENET.jpg').then(base64 => {
+      this.convertirImagenABase64('../../assets/images/HOJA-MEMBRETADA.jpg').then(base64 => {
         this.backgroundImageBase64 = base64;
+
       }).catch(error => {
         console.error('Error al convertir la imagen a Base64', error);
       });
@@ -249,8 +250,6 @@ export class VerplancerradaComponent {
   }
 
   construirPDF(row: any, beneficios: any[], deducciones: any[]) {
-    console.log(row);
-
     let docDefinition: TDocumentDefinitions = {
       content: [
         { text: 'Comprobante de Pago', style: 'header' },
@@ -272,14 +271,15 @@ export class VerplancerradaComponent {
             [
               { text: 'Pago', style: 'subheader' },
               { text: 'Medio de Pago: No especificado' }, // Asumiendo que este dato no está disponible
-              { text: 'Pago Total: ' + (row.Total || 0).toFixed(2) + ' L', style: 'subheader' },
+              { text: 'Pago Total: ' + 'L' + (row.Total || 0).toFixed(2), style: 'subheader' },
               { text: 'Fecha de pago: ' + (row.fecha_cierre || 'No especificada') },
             ]
           ]
         },
-        this.buildTable('Ingresos', beneficios.map(b => ({ nombre_ingreso: b.nombre_beneficio, monto: b['Total Monto Beneficio'] })), ['nombre_ingreso', 'monto'], 'monto'),
+        this.buildTable('Ingresos', beneficios.map(b => ({ nombre_ingreso: b.NOMBRE_BENEFICIO, monto: b['Total Monto Beneficio'] })), ['nombre_ingreso', 'monto'], 'monto'),
         this.buildTable('Deducciones', deducciones.map(d => ({ nombre_deduccion: d.nombre_deduccion, total_deduccion: d['Total Monto Aplicado'] })), ['nombre_deduccion', 'total_deduccion'], 'total_deduccion'),
-        { text: 'Total: ' + (row.Total || 0).toFixed(2), style: 'subheader' }
+
+        this.buildTable('', deducciones.map(d => ({ Total: "Total", valor_total: row.Total})), ['Total', 'valor_total'], 'valor_total')
       ],
       styles: {
         header: {
@@ -323,15 +323,21 @@ export class VerplancerradaComponent {
 
   buildTable(header: string, data: any[], columns: string[], sumColumn: string) {
     let body = [
-      [{ text: header, style: 'tableHeader', colSpan: 2 }, {}],
-      ...data.map(item => columns.map(column => item[column]))
+      [{ text: header, style: 'tableHeader', colSpan: 2 }, {text:""}]
     ];
 
-    let total = data.reduce((acc, curr) => acc + curr[sumColumn], 0);
-    body.push([{ text: 'Total', style: 'tableHeader' }, { text: total.toFixed(2) + ' L', alignment: 'right' }]);
+    body.push(...data.map((item, rowIndex) => {
+      let rowData = columns.map((column, index) => {
+        if (index === columns.length - 1) {
+          return { text: 'L' + Number(item[column]).toFixed(2), alignment: 'left' }; // Se cambió alignment a 'left'
+        } else {
+          return { text: item[column], alignment: 'left' };
+        }
+      });
+      return rowData;
+    }));
 
     return {
-      style: 'tableExample',
       table: {
         headerRows: 1,
         widths: ['*', 'auto'],

@@ -146,11 +146,11 @@ export class VerPlanillasComponent implements OnInit{
 
 
   manejarAccionUno(row: any) {
-    this.planillaService.getPlanillaPrelimiar(row.id_planilla).subscribe(
+    this.planillaService.getPlanillas(row.CODIGO_PLANILLA).subscribe(
       (response) => {
+        console.log('Planilla Preliminar:', response);
         this.detallePlanillas = response;
         this.dataSource.data = this.detallePlanillas;
-        console.log('Planilla Preliminar:', response);
         this.dataSource.paginator = this.paginator;
 
         // Abre el diálogo cuando se recibe la respuesta

@@ -247,6 +247,12 @@ export class PlanillaService {
     return this.http.get(`${environment.API_URL}/api/planilla/preliminar`, { params });
   }
 
+  getPlanillas(codPlanilla: string): Observable<any> {
+    let params = new HttpParams()
+      .set('codPlanilla', codPlanilla)
+    return this.http.get(`${environment.API_URL}/api/planilla/todas`, { params });
+  }
+
   getBeneficiosPrelimiar(idPlanilla: string, idAfiliado: string): Observable<any> {
     let params = new HttpParams()
       .set('idAfiliado', idAfiliado)

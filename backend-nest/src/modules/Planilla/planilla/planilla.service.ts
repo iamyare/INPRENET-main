@@ -1148,53 +1148,56 @@ WHERE
   }
 
   async generarVoucher(idPlanilla: string, dni: string): Promise<any> {
-    if (!isUUID(idPlanilla)) {
-      throw new BadRequestException('El ID de la planilla no es válido');
-    }
-
     try {
       const beneficios = await this.entityManager.query(
         `SELECT
-            ben."id_beneficio",
-            ben."nombre_beneficio",
-            SUM(COALESCE(dpb."monto_a_pagar", 0)) AS "Total Monto Beneficio"
-        FROM
-            "net_beneficio" ben
-        INNER JOIN
-            "net_detalle_beneficio_afiliado" dba ON ben."id_beneficio" = dba."id_beneficio"
-        INNER JOIN
-            "net_detalle_pago_beneficio" dpb ON dba."id_detalle_ben_afil" = dpb."id_beneficio_afiliado"
-        INNER JOIN
-            "Net_Persona" afil ON dba."id_afiliado" = afil."id_afiliado"
-        WHERE
-            dpb."id_planilla" = :idPlanilla AND afil."dni" = :dni
-        GROUP BY
-            ben."id_beneficio", ben."nombre_beneficio"`,
+        ben."ID_BENEFICIO",
+        ben."NOMBRE_BENEFICIO",
+        SUM(COALESCE(detBs."MONTO_A_PAGAR", 0)) AS "Total Monto Beneficio"
+          FROM
+            "NET_PERSONA" afil
+        LEFT JOIN
+            "NET_DETALLE_PERSONA" detP ON afil."ID_PERSONA" = detP."ID_PERSONA"
+        INNER JOIN "NET_DETALLE_BENEFICIO_AFILIADO" detBA ON 
+            detP."ID_PERSONA" = detBA."ID_BENEFICIARIO" AND
+            detP."ID_CAUSANTE" = detBA."ID_CAUSANTE"
+       INNER JOIN "NET_BENEFICIO" ben ON 
+            detP."ID_PERSONA" = detBA."ID_BENEFICIARIO" AND
+            detP."ID_CAUSANTE" = detBA."ID_CAUSANTE"
+        LEFT JOIN
+            "NET_DETALLE_PAGO_BENEFICIO" detBs ON detBA."ID_DETALLE_BEN_AFIL" = detBs."ID_BENEFICIO_PLANILLA_AFIL"
+        LEFT JOIN
+            "NET_PLANILLA" pla ON detBs."ID_PLANILLA" = pla."ID_PLANILLA"
+       WHERE
+              detBs."ID_PLANILLA" = :idPlanilla AND afil."DNI" = :dni
+       GROUP BY
+        ben."ID_BENEFICIO", ben."NOMBRE_BENEFICIO"`,
         [idPlanilla, dni]
       );
-
       const deducciones = await this.entityManager.query(
         `SELECT
-            ded."id_deduccion",
-            ded."nombre_deduccion" || ' - ' || inst."nombre_institucion" AS "nombre_deduccion",
-            COALESCE(SUM(detDed."monto_aplicado"), 0) AS "Total Monto Aplicado"
-        FROM
-            "net_detalle_deduccion" detDed
-        INNER JOIN
-            "net_deduccion" ded ON detDed."id_deduccion" = ded."id_deduccion"
-        LEFT JOIN
-            "net_institucion" inst ON ded."id_institucion" = inst."id_institucion"
-        INNER JOIN
-            "Net_Persona" afil ON detDed."id_afiliado" = afil."id_afiliado"
-        WHERE
-            detDed."id_planilla" = :idPlanilla AND afil."dni" = :dni
-        GROUP BY
-            ded."id_deduccion", ded."nombre_deduccion", inst."nombre_institucion"`,
+        ded."ID_DEDUCCION",
+        ded."NOMBRE_DEDUCCION" || ' - ' || inst."NOMBRE_INSTITUCION" AS "nombre_deduccion",
+        COALESCE(SUM(detDed."MONTO_APLICADO"), 0) AS "Total Monto Aplicado"
+      FROM
+          "NET_DETALLE_DEDUCCION" detDed
+      INNER JOIN
+          "NET_DEDUCCION" ded ON detDed."ID_DEDUCCION" = ded."ID_DEDUCCION"
+      LEFT JOIN
+          "NET_INSTITUCION" inst ON ded."ID_INSTITUCION" = inst."ID_INSTITUCION"
+      INNER JOIN
+          "NET_PERSONA" afil ON detDed."ID_PERSONA" = afil."ID_PERSONA"
+      WHERE
+          detDed."ID_PLANILLA" = :idPlanilla AND afil."DNI" = :dni
+      GROUP BY
+          ded."ID_DEDUCCION", ded."NOMBRE_DEDUCCION", inst."NOMBRE_INSTITUCION"`,
         [idPlanilla, dni]
       );
 
       return { beneficios, deducciones };
     } catch (error) {
+      console.log(error);
+      
       this.logger.error('Error al obtener los totales por DNI y planilla', error.stack);
       throw new InternalServerErrorException();
     }
@@ -1245,8 +1248,6 @@ WHERE
                 ded."id_deduccion", ded."nombre_deduccion", inst."nombre_institucion"`,  // Agregado el nombre de la institución al GROUP BY
         [idPlanilla]
       );
-
-      console.log(deducciones);
 
 
       return { beneficios, deducciones };
@@ -1426,7 +1427,6 @@ WHERE
           SUM(COALESCE(detDs."MONTO_APLICADO", 0)) > 0
       ) deducciones
   ON deducciones."ID_PERSONA" = beneficios."ID_PERSONA"`;
-  console.log(query);
   
       const result = await this.entityManager.query(query);
       return result;
@@ -1973,7 +1973,17 @@ ON deducciones."id_afiliado" = beneficios."id_afiliado"
             SUM(COALESCE(detDs."MONTO_APLICADO", 0)) > 0
         ) deducciones
     ON deducciones."ID_PERSONA" = beneficios."ID_PERSONA"`;
-      console.log(query);
+
+      const result = await this.entityManager.query(query);
+      return result;
+    } catch (error) {
+      this.logger.error(`Error al obtener totales por planilla: ${error.message}`, error.stack);
+      throw new InternalServerErrorException('Se produjo un error al obtener los totales por planilla.');
+    }
+  }
+  async ObtenerTodasPlanillas(codPlanilla: string): Promise<any> {
+    try {
+      const query = ``;
 
       const result = await this.entityManager.query(query);
       return result;

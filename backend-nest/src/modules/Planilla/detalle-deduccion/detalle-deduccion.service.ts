@@ -177,8 +177,6 @@ export class DetalleDeduccionService {
         dd."ID_PERSONA" = '${idAfiliado}' AND 
         dd."ID_PLANILLA" = '${idPlanilla}'
     `;
-    console.log(query);
-    
     try {
       // Usar un objeto para pasar los parámetros con nombre
       //const parameters: any = { idAfiliado: idAfiliado, idPlanilla: idPlanilla };

@@ -1,8 +1,5 @@
 import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
 import { NET_TIPO_MOVIMIENTO_CUENTA } from "./net_tipo_movimiento_cuenta.entity";
-import { NET_CUENTAS_PERSONA } from "./net_cuentas_persona.entity";
-import { Net_Usuario } from "src/modules/usuario/entities/net_usuario.entity";
-import { NET_TIPOS_CUENTA } from "./net_tipos_cuenta.entitiy";
 import { Net_Persona } from "src/modules/afiliado/entities/Net_Persona";
 
 @Entity({name:'NET_MOVIMIENTO_CUENTA'})

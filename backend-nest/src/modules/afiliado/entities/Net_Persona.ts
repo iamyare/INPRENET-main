@@ -6,7 +6,7 @@ import { Net_Detalle_Deduccion } from "src/modules/Planilla/detalle-deduccion/en
 import { Net_Detalle_Afiliado } from "./Net_detalle_persona.entity";
 import { Net_Afiliados_Por_Banco } from "src/modules/banco/entities/net_afiliados-banco";
 import { Net_Municipio } from "src/modules/Regional/municipio/entities/net_municipio.entity";
-import { NET_CUENTAS_PERSONA } from "src/modules/transacciones/entities/net_cuentas_persona.entity";
+import { NET_CUENTA_PERSONA } from "src/modules/transacciones/entities/net_cuenta_persona.entity";
 import { IsIn } from "class-validator";
 import { NET_MOVIMIENTO_CUENTA } from "src/modules/transacciones/entities/net_movimiento_cuenta.entity";
  
@@ -119,8 +119,8 @@ export class Net_Persona {
         { cascade: true })
     perfAfilCentTrabs: Net_perf_afil_cent_trab[];
 
-    @OneToMany(() => NET_CUENTAS_PERSONA, cuentaPersona => cuentaPersona.personaa)
-    cuentas: NET_CUENTAS_PERSONA[];
+    @OneToMany(() => NET_CUENTA_PERSONA, cuentaPersona => cuentaPersona.persona)
+    cuentas: NET_CUENTA_PERSONA[];
 
     @OneToMany(() => NET_MOVIMIENTO_CUENTA, movimientos => movimientos.persona)
     movimientos: NET_MOVIMIENTO_CUENTA[];

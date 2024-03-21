@@ -1,6 +1,6 @@
 import { Check, Column, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryColumn, PrimaryGeneratedColumn } from 'typeorm';
 import { NET_MOVIMIENTO_CUENTA } from './net_movimiento_cuenta.entity';
-import { NET_TIPOS_CUENTA } from './net_tipos_cuenta.entitiy';
+import { NET_TIPO_CUENTA } from './net_tipo_cuenta.entitiy';
 
 @Entity({name:'NET_TIPO_MOVIMIENTO'})
 @Check("CK_ACTIVA_NET_TIPO_MOV",`ACTIVA_B IN ('S', 'N')`)
@@ -34,9 +34,9 @@ export class NET_TIPO_MOVIMIENTO_CUENTA {
     @OneToMany(() => NET_MOVIMIENTO_CUENTA, movimientoCuenta => movimientoCuenta.tipoMovimiento)
     movimientos: NET_MOVIMIENTO_CUENTA[];
     
-    @ManyToOne(() => NET_TIPOS_CUENTA, tipoCuenta => tipoCuenta.movCuenta)
+    @ManyToOne(() => NET_TIPO_CUENTA, tipoCuenta => tipoCuenta.movCuenta)
     @JoinColumn({ name: 'ID_TIPO_CUENTA', foreignKeyConstraintName:"FK_ID_TIPO_TIPO_MOVIMIENTO"})
-    tipoCuenta: NET_TIPOS_CUENTA;
+    tipoCuenta: NET_TIPO_CUENTA;
     
     
 }

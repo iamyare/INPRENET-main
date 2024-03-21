@@ -3,14 +3,15 @@
     <form [formGroup]="firstFormGroup">
       <ng-template matStepLabel>Período de planilla</ng-template>
       <mat-selection-list
-      #shoes
-      [multiple]="false"
-      formControlName="selectedShoe"
-    >
-      <mat-list-option *ngFor="let shoe of typesOfShoes" [value]="shoe">
-        {{ shoe }}
-      </mat-list-option>
-    </mat-selection-list>
+        #shoes
+        color="primary"
+        [multiple]="false"
+        formControlName="selectedShoe"
+      >
+        <mat-list-option *ngFor="let shoe of typesOfShoes" [value]="shoe">
+          {{ shoe }}
+        </mat-list-option>
+      </mat-selection-list>
       <div>
         <button mat-button matStepperNext [disabled]="!firstFormGroup.valid">
           Siguiente

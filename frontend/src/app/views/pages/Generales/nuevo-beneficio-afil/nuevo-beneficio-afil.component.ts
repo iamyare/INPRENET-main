@@ -431,10 +431,11 @@ export class NuevoBeneficioAfilComponent implements OnInit{
 
   limpiarFormulario(): void {
     // Utiliza la referencia al componente DynamicFormComponent para resetear el formulario
+    this.Afiliado = []
+    this.form1.reset();
+    this.FormBen.reset();
     if (this.dynamicForm) {
       this.dynamicForm.form.reset();
-      this.FormBen.reset();
-      this.Afiliado = []
     }
   }
 

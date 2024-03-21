@@ -72,7 +72,10 @@
   </button>
 </div>
 
-<div *ngIf="Afiliado.estado == 'FALLECIDO'">
+<div
+  style="margin: 1% 0% 1% 0%; text-align: center; background-color: white"
+  *ngIf="Afiliado.estado == 'FALLECIDO'"
+>
   <app-dynamic-form
     [fields]="myFormFields2"
     titulo=""
@@ -82,7 +85,7 @@
   <button
     mat-raised-button
     color="primary"
-    style="color: white"
+    style="color: white; margin: 1% 0 1% 0"
     [disabled]="FormBen.invalid"
     (click)="guardarNTBenef()"
   >

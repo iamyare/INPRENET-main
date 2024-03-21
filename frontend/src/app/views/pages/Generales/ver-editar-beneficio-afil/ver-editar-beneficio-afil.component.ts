@@ -73,11 +73,13 @@ export class VerEditarBeneficioAfilComponent {
       {
         header: 'Monto por periodo',
         col : 'monto_por_periodo',
+        moneda:true,
         isEditable: true
       },
       {
         header: 'Monto total',
         col : 'monto_total',
+        moneda:true,
         isEditable: true
       },
     ];
@@ -93,32 +95,32 @@ export class VerEditarBeneficioAfilComponent {
       /* Falta traer datos de la planilla */
       const data = await this.beneficioService.GetAllBeneficios(this.form.value.dni).toPromise();
       const dataAfil = data.map((item: any) => ({
-        dni: item.dni,
-        estado_civil: item.estado_civil,
-        nombreCompleto: unirNombres(item.primer_nombre, item.segundo_nombre, item.primer_apellido,item.segundo_apellido),
-        sexo: item.sexo,
-        profesion: item.profesion,
-        telefono_1: item.telefono_1,
-        colegio_magisterial: item.colegio_magisterial,
-        numero_carnet: item.numero_carnet,
-        direccion_residencia: item.direccion_residencia,
-        estado: item.estado,
-        salario_base: item.salario_base,
-        fecha_nacimiento: convertirFecha(item.fecha_nacimiento, false)
+        dni: item.DNI,
+        estado_civil: item.ESTADO_CIVIL,
+        nombreCompleto: unirNombres(item.PRIMER_NOMBRE, item.SEGUNDO_NOMBRE, item.PRIMER_APELLIDO,item.SEGUNDO_APELLIDO),
+        sexo: item.SEXO,
+        profesion: item.PROFESION,
+        telefono_1: item.TELEFONO_1,
+        colegio_magisterial: item.COLEGIO_MAGISTERIAL,
+        numero_carnet: item.NUMERO_CARNET,
+        direccion_residencia: item.DIRECCION_RESIDENCIA,
+        estado: item.ESTADO,
+        salario_base: item.SALARIO_BASE,
+        fecha_nacimiento: convertirFecha(item.FECHA_NACIMIENTO, false)
       }));
 
       this.Afiliado = dataAfil[0]
 
       this.filasT = data.map((item: any) => ({
-        dni: item.dni,
+        dni: item.DNI,
         fecha_aplicado: this.datePipe.transform(item.fecha_aplicado, 'dd/MM/yyyy HH:mm'),
-        nombre_beneficio: item.nombre_beneficio,
-        numero_rentas_max: item.numero_rentas_max,
-        periodicidad: item.periodicidad,
-        monto_por_periodo: item.monto_por_periodo,
-        monto_total: item.monto_total,
-        periodoInicio: convertirFecha(item.periodoInicio,false),
-        periodoFinalizacion: convertirFecha(item.periodoFinalizacion,false)
+        nombre_beneficio: item.NOMBRE_BENEFICIO,
+        numero_rentas_max: item.NUMERO_RENTAS_MAX,
+        periodicidad: item.PERIODICIDAD,
+        monto_por_periodo: item.MONTO_POR_PERIODO,
+        monto_total: item.MONTO_TOTAL,
+        periodoInicio: convertirFecha(item.PERIODO_INICIO,false),
+        periodoFinalizacion: convertirFecha(item.PERIODO_FINALIZACION,false)
       }));
 
       return this.filasT;
@@ -181,6 +183,8 @@ export class VerEditarBeneficioAfilComponent {
   };
 
   manejarAccionUno(row: any) {
+    console.log(row);
+
     const campos = [
       { nombre: 'numero_rentas_max', tipo: 'number', requerido: true, etiqueta: 'Número de rentas máximas', editable:false },
       { nombre: 'periodoInicio', tipo: 'number', requerido: true, etiqueta: 'Periodo de inicio' },

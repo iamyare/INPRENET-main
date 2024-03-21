@@ -278,6 +278,7 @@ export class AsignacionAfilPlanComponent implements OnInit {
       .subscribe({
         next: (response) => {
           this.toastr.success('Planilla actualizada con éxito');
+          this.limpiarFormulario()
         },
         error: (error) => {
           let mensajeError = 'Error al actualizar la planilla';
@@ -295,5 +296,12 @@ export class AsignacionAfilPlanComponent implements OnInit {
 
   convertirFormatoFecha(fecha: string): string {
     return fecha.replace(/-/g, '.');
+  }
+
+  limpiarFormulario(): void {
+    if (this.datosFormateados) {
+      this.datosFormateados.reset();
+      this.detallePlanilla = false
+    }
   }
 }

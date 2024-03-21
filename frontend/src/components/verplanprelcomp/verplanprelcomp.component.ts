@@ -262,9 +262,12 @@ export class VerplanprelcompComponent implements OnInit{
 
       this.planillaService.updatePlanilla(this.idPlanilla, datosActualizados).subscribe({
         next: (data) => {
+
           this.toastr.success('Planilla actualizada con éxito');
           this.actualizarEstadoDeducciones('COBRADA');
           this.actualizarEstadoBeneficios('PAGADA');
+          this.limpiarFormulario();
+          this.detallePlanilla = false;
         },
         error: (error) => {
           this.toastr.error('Error al actualizar la planilla');
@@ -295,5 +298,12 @@ export class VerplanprelcompComponent implements OnInit{
           this.toastr.error('Error al obtener los totales');
         }
       });
+    }
+
+    limpiarFormulario(): void {
+      if (this.datosFormateados) {
+        this.datosFormateados.reset();
+        this.detallePlanilla = false
+      }
     }
 }

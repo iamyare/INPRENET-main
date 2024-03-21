@@ -12,7 +12,7 @@ import { DynamicFormComponent } from '@docs-components/dynamic-form/dynamic-form
 export class NuevoBeneficioComponent implements OnInit{
   @ViewChild(DynamicFormComponent) dynamicForm!: DynamicFormComponent;
   data:any
-
+  form:any
   myFormFields:FieldConfig[] = []
   constructor(private SVCBeneficios:BeneficiosService, private toastr: ToastrService ,){}
 
@@ -27,7 +27,8 @@ export class NuevoBeneficioComponent implements OnInit{
   }
 
   obtenerDatos(event:any):any{
-    if (event.value.periodicidad == "Definido"){
+    this.form = event
+    if (event.value.periodicidad == "DEFINIDO"){
       this.myFormFields[3].display = true
     }else {
       this.myFormFields[3].display = false

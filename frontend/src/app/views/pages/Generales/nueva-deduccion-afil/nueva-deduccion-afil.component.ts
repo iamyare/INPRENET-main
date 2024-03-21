@@ -49,6 +49,7 @@ export class NuevaDeduccionAfilComponent{
 
   async obtenerDatos(event: any): Promise<any> {
     this.data = event;
+
     if (this.data.value.nombre_institucion) {
       await this.getTiposDeducciones(this.data.value.nombre_institucion);
     }
@@ -85,8 +86,8 @@ export class NuevaDeduccionAfilComponent{
         if (response.length > 0) {
           const temp = response.map((item: any) => {
             return {
-              label: item.nombre_deduccion,
-              value: item.nombre_deduccion
+              label: item.NOMBRE_DEDUCCION,
+              value: item.NOMBRE_DEDUCCION
             };
           });
           field.options = temp;
@@ -168,6 +169,7 @@ guardarDetalleDeduccion(){
       next: (response) => {
         this.toastr.success('Detalle de deduccion creado con éxito');
         this.limpiarFormulario()
+
       },
       error: (error) => {
         let mensajeError = 'Error desconocido al crear Detalle de deduccion';
@@ -313,6 +315,7 @@ guardarDetalleDeduccion(){
     // Utiliza la referencia al componente DynamicFormComponent para resetear el formulario
     if (this.dynamicForm) {
       this.dynamicForm.form.reset();
+      this.Afiliado = [];
     }
   }
 

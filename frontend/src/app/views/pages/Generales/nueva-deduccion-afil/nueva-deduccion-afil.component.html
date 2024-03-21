@@ -9,10 +9,14 @@
   >
 </form>
 
-<div *ngIf="formGroup.invalid">
+<div
+  style="background-color: white; margin: 1% 0% 1% 0%; padding: 1% 0% 1% 0%"
+  *ngIf="formGroup.invalid"
+>
+  <h1 style="text-align: center; font-size: 2rem">Datos Generales Afiliado</h1>
   <div style="background-color: white">
     <table>
-      <tr>
+      <tr style="background-color: #f2f2f2">
         <th>Nombre de afiliado</th>
         <td>{{ Afiliado?.nameAfil }}</td>
         <th>Sexo</th>
@@ -40,7 +44,17 @@
       </tr>
     </table>
   </div>
+</div>
 
+<div
+  *ngIf="formGroup.invalid"
+  style="
+    text-align: center;
+    background-color: white;
+    margin: 1% 0% 1% 0%;
+    padding: 0% 0% 1% 0%;
+  "
+>
   <app-dynamic-form
     [fields]="myFormFields"
     titulo="Detalles de deducciones"
@@ -50,7 +64,7 @@
   <button
     mat-raised-button
     color="primary"
-    style="color: white"
+    style="color: white; margin: 1% 0 1% 0"
     [disabled]="data.invalid"
     (click)="guardarDetalleDeduccion()"
   >
@@ -58,30 +72,56 @@
   </button>
 </div>
 
-<div *ngIf="!formGroup.invalid">
-  <h1>CARGA DE DEDUCCION POR BASE EXCEL</h1>
+<div
+  style="
+    text-align: center;
+    background-color: white;
+    margin: 1% 0% 1% 0%;
+    padding: 0% 0% 1% 0%;
+  "
+  *ngIf="!formGroup.invalid"
+>
+  <h1>Carga de deducciones por medio de documento excel</h1>
   <hr />
 
   <div class="upload-container">
     <input type="file" #fileInput (change)="onFileSelected($event)" hidden />
 
-    <!-- Botón personalizado para agregar archivos -->
-    <button class="btn btn-primary" (click)="fileInput.click()">
-      <i class="fa fa-plus"></i> Agregar Archivos
+    <button
+      mat-raised-button
+      color="primary"
+      style="color: white; margin: 1% 0 1% 0"
+      (click)="fileInput.click()"
+    >
+      <i class="fa fa-plus"></i>
+      Agregar Archivos
     </button>
 
-    <!-- Botón para limpiar el archivo seleccionado -->
-    <button class="btn btn-warning" (click)="clearFile()">
-      <i class="fa fa-trash"></i> Limpiar Archivo
+    <button
+      mat-raised-button
+      color="accent"
+      style="color: white; margin: 1% 0 1% 0"
+      (click)="clearFile()"
+    >
+      <i class="fa fa-trash"></i>
+      Limpiar Archivo
     </button>
 
-    <!-- Botón para iniciar la subida del archivo -->
-    <button class="btn btn-success" (click)="startUpload()">
+    <button
+      mat-raised-button
+      color="primary"
+      style="color: white; margin: 1% 0 1% 0"
+      (click)="startUpload()"
+    >
       <i class="fa fa-upload"></i> Iniciar Subida
     </button>
 
-    <!-- Botón para cancelar la subida del archivo -->
-    <button class="btn btn-danger" (click)="cancelUpload()">
+    <button
+      mat-raised-button
+      color="warn"
+      style="color: white; margin: 1% 0 1% 0"
+      (click)="cancelUpload()"
+    >
       <i class="fa fa-ban"></i> Cancelar Subida
     </button>
 
@@ -109,17 +149,17 @@
     </thead>
     <tbody>
       <tr *ngFor="let dato of datosCargados">
-        <td>{{ dato['año'] }}</td>
+        <td>{{ dato["año"] }}</td>
         <td>{{ dato.codigo_deduccion }}</td>
         <td>{{ dato.dni }}</td>
         <td>{{ dato.mes }}</td>
-        <td>{{ dato.monto_motal }}</td> <!-- Asegúrate de que esta clave coincida con la estructura de tus datos -->
+        <td>{{ dato.monto_motal }}</td>
+        <!-- Asegúrate de que esta clave coincida con la estructura de tus datos -->
         <td>{{ dato.nombre_institucion }}</td>
       </tr>
     </tbody>
   </table>
 </div>
-
 
 <link
   rel="stylesheet"

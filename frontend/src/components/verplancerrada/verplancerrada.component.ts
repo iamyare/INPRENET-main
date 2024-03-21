@@ -250,6 +250,7 @@ export class VerplancerradaComponent {
   }
 
   construirPDF(row: any, beneficios: any[], deducciones: any[]) {
+    let formattedNumber = Number(row.Total || 0).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",")
     let docDefinition: TDocumentDefinitions = {
       content: [
         { text: 'Comprobante de Pago', style: 'header' },
@@ -271,7 +272,7 @@ export class VerplancerradaComponent {
             [
               { text: 'Pago', style: 'subheader' },
               { text: 'Medio de Pago: No especificado' }, // Asumiendo que este dato no está disponible
-              { text: 'Pago Total: ' + 'L' + (row.Total || 0).toFixed(2), style: 'subheader' },
+              { text: 'Pago Total: ' + 'L' + formattedNumber, style: 'subheader' },
               { text: 'Fecha de pago: ' + (row.fecha_cierre || 'No especificada') },
             ]
           ]
@@ -329,7 +330,9 @@ export class VerplancerradaComponent {
     body.push(...data.map((item, rowIndex) => {
       let rowData = columns.map((column, index) => {
         if (index === columns.length - 1) {
-          return { text: 'L' + Number(item[column]).toFixed(2), alignment: 'left' }; // Se cambió alignment a 'left'
+          // Aplicar formato de miles al número
+          let formattedNumber = Number(item[column]).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+          return { text: 'L' + formattedNumber, alignment: 'left' }; // Se cambió alignment a 'left'
         } else {
           return { text: item[column], alignment: 'left' };
         }

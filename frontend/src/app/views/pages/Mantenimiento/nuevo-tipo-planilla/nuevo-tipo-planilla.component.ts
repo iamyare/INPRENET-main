@@ -13,7 +13,7 @@ import { FieldConfig } from 'src/app/shared/Interfaces/field-config';
 export class NuevoTipoPlanillaComponent {
   @ViewChild(DynamicFormComponent) dynamicForm!: DynamicFormComponent;
 
-  data:any;
+  form:any;
 
   constructor(
     private planillaService: PlanillaService,
@@ -29,11 +29,11 @@ export class NuevoTipoPlanillaComponent {
 
   obtenerDatos(event: any): any {
 
-    this.data = event;
+    this.form = event;
 }
 
   insertarDatos(): void {
-  this.planillaService.createTipoPlanilla(this.data.value).subscribe({
+  this.planillaService.createTipoPlanilla(this.form.value).subscribe({
     next: (response) => {
       this.toastr.success('TipoPlanilla creada con éxito');
       this.limpiarFormulario();

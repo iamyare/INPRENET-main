@@ -53,7 +53,7 @@ export const navItems: INavData[] = [
   },
 
   {
-    name: 'Afiliado',
+    name: 'Afiliación',
     iconComponent: { name: 'cil-people' },
     url: '/base',
     children: [
@@ -129,10 +129,10 @@ export const navItems: INavData[] = [
     children: [
       {
         name: 'Ingresos',
+        iconComponent: { name: 'cilMoney' },
         children: [
           {
             name: 'Privados',
-            iconComponent: { name: 'cilMoney' },
             children: [
               {
                 name: 'Planilla de privados',
@@ -156,6 +156,7 @@ export const navItems: INavData[] = [
       },
       {
         name: 'Egresos',
+        iconComponent: { name: 'cilMoney' },
         children: [
           {
             url: '/Planilla/Egresos/nueva-planilla',

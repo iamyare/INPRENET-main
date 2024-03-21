@@ -2,7 +2,7 @@
   <h1 style="font-size: 2rem">Datos Generales Afiliado</h1>
   <div>
     <table>
-      <tr>
+      <tr style="background-color: #f2f2f2">
         <th>DNI de afiliado</th>
         <td>{{ Afiliado.dni }}</td>
         <th>Nombre de afiliado</th>
@@ -34,10 +34,17 @@
   </div>
 </div>
 
-<div>
+<div
+  style="
+    background-color: white;
+    margin: 1% 0% 1% 0%;
+    padding: 0% 0% 1% 0%;
+    text-align: center;
+  "
+>
   <app-dynamic-form
     [fields]="myFormFields"
-    titulo=""
+    titulo="Buscar Afiliado o Beneficiario Activos"
     subtitulo="Completa la información correspondiente"
     (newDatBenChange)="obtenerDatos($event)"
   ></app-dynamic-form>

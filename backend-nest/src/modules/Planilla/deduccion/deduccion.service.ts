@@ -137,13 +137,12 @@ export class DeduccionService {
   async findOneByNombInst(nombre_institucion:string) {
     if (nombre_institucion) {      
       const queryBuilder = await this.deduccionRepository
-      .createQueryBuilder('net_deduccion')
-      .addSelect('net_deduccion.id_deduccion', 'id_deduccion')
-      .addSelect('net_deduccion.nombre_deduccion', 'nombre_deduccion')
-      .innerJoin(Net_Institucion, 'institucion', 'net_deduccion.id_institucion = institucion.id_institucion')
-      .where(`institucion.nombre_institucion = '${nombre_institucion}'` )
+      .createQueryBuilder('NET_DEDUCCION')
+      .addSelect('NET_DEDUCCION.ID_DEDUCCION', 'ID_DEDUCCION')
+      .addSelect('NET_DEDUCCION.NOMBRE_DEDUCCION', 'NOMBRE_DEDUCCION')
+      .innerJoin(Net_Institucion, 'INSTITUCION', 'NET_DEDUCCION.ID_INSTITUCION = INSTITUCION.ID_INSTITUCION')
+      .where(`INSTITUCION.NOMBRE_INSTITUCION = '${nombre_institucion}'` )
       .getRawMany();
-
       return queryBuilder;
       } else {
         throw new NotFoundException(`la deduccion para la empresa ${nombre_institucion} no fue encontrada.`);

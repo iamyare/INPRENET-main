@@ -45,37 +45,28 @@ $my-primary-color: (
 ));
 
 $md-mcgpalette0: (
-    50 : #fae9e8,
-    100 : #f3c8c5,
-    200 : #eba49f,
-    300 : #e27f78,
-    400 : #dc635b,
-    500 : #d6483e,
-    600 : #d14138,
-    700 : #cc3830,
-    800 : #c63028,
-    900 : #bc211b,
-    A100 : #fff2f1,
-    A200 : #ffc0be,
-    A400 : #ff8f8b,
-    A700 : #ff7672,
-    contrast: (
-        50 : #000000,
-        100 : #000000,
-        200 : #000000,
-        300 : #000000,
-        400 : #000000,
-        500 : #ffffff,
-        600 : #ffffff,
-        700 : #ffffff,
-        800 : #ffffff,
-        900 : #ffffff,
-        A100 : #000000,
-        A200 : #000000,
-        A400 : #000000,
-        A700 : #000000,
-    )
-);
+  50: #fff2df,
+  100: #ffddb0,
+  200: #ffc77d,
+  300: #ffaf49,
+  400: #ff9e22,
+  500: #fe8d00,
+  600: #fa8100,
+  700: #f47101,
+  800: #ee6002,
+  900: #e44304,
+      contrast: (
+      50: #fff2df,
+      100: #ffddb0,
+      200: #ffc77d,
+      300: #ffaf49,
+      400: #ff9e22,
+      500: #fe8d00,
+      600: #fa8100,
+      700: #f47101,
+      800: #ee6002,
+      900: #e44304,
+  ));
 
 $coreui-free-angular-admin-template-primary: mat.define-palette($my-primary-color);
 $coreui-free-angular-admin-template-accent: mat.define-palette($md-mcgpalette0);

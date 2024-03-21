@@ -13,10 +13,9 @@ import { PlanillaService } from 'src/app/services/planilla.service';
   styleUrl: './nuevo-tipo-deduccion.component.scss'
 })
 export class NuevoTipoDeduccionComponent implements OnInit {
-  data:any
+  form:any
   myFormFields: FieldConfig[] = []
   temp: any[] = []
-
   institucionesOpc: any[] = [];
 
   Instituciones: any = this.datosEstaticosService.Instituciones;
@@ -57,11 +56,11 @@ export class NuevoTipoDeduccionComponent implements OnInit {
   }
 
   obtenerDatos(event:any):any{
-    this.data = event;
+    this.form = event;
   }
 
   guardarTipoDeduccion():any{
-      this.SVCDeduccion.newTipoDeduccion(this.data.value).subscribe(
+      this.SVCDeduccion.newTipoDeduccion(this.form.value).subscribe(
         {
           next: (response) => {
             this.toastr.success('tipo de deduccion creado con éxito');

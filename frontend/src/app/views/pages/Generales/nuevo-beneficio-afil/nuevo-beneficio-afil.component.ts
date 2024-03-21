@@ -377,6 +377,7 @@ export class NuevoBeneficioAfilComponent implements OnInit{
          next: (response)=>{
            this.toastr.success("se asignó correctamente el beneficio");
            this.limpiarFormulario()
+
          },
          error: (error)=>{
            let mensajeError = 'Error desconocido al crear Detalle de deducción';
@@ -433,6 +434,7 @@ export class NuevoBeneficioAfilComponent implements OnInit{
     if (this.dynamicForm) {
       this.dynamicForm.form.reset();
       this.FormBen.reset();
+      this.Afiliado = []
     }
   }
 

@@ -1,24 +1,18 @@
-import { AfterViewInit, Component, OnInit, ViewChild } from '@angular/core';
+import { AfterViewInit, ChangeDetectorRef, Component, OnInit, ViewChild } from '@angular/core';
 import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
+import { MatDialog } from '@angular/material/dialog';
 import { MatPaginator } from '@angular/material/paginator';
 import { MatSort } from '@angular/material/sort';
 import { MatTableDataSource } from '@angular/material/table';
+import { DynamicFormDialogComponent } from '@docs-components/dynamic-form-dialog/dynamic-form-dialog.component';
+import { EditarDialogComponent } from '@docs-components/editar-dialog/editar-dialog.component';
 
 @Component({
   selector: 'app-planilla-colegios-privados',
   templateUrl: './planilla-colegios-privados.component.html',
   styleUrls: ['./planilla-colegios-privados.component.scss']
 })
-export class PlanillaColegiosPrivadosComponent implements AfterViewInit, OnInit {
-
-  hasSelectedShoe: boolean = false;
-
-  ngOnInit() {
-    // Escuchar los cambios en el formulario para verificar si se ha seleccionado un zapato
-    this.firstFormGroup.get('selectedShoe')?.valueChanges.subscribe(value => {
-      this.hasSelectedShoe = !!value; // Esto asegura que hasSelectedShoe sea true si hay un valor seleccionado
-    });
-  }
+export class PlanillaColegiosPrivadosComponent implements AfterViewInit {
 
   botonSeleccionado: string = 'EMPLEADOS';
   fecha = new FormControl(new Date());
@@ -39,19 +33,21 @@ export class PlanillaColegiosPrivadosComponent implements AfterViewInit, OnInit 
   nombreColegio: string = 'Colegio ABC';
 
   firstFormGroup: FormGroup;
+  mostrarSegundoPaso  = false;
 
-  constructor(private _formBuilder: FormBuilder) {
+  constructor(private _formBuilder: FormBuilder, private cdr: ChangeDetectorRef, public dialog: MatDialog) {
     this.firstFormGroup = this._formBuilder.group({
-      selectedShoe: ['', Validators.required] // Agregar validador requerido para asegurar que se seleccione un zapato
+      selectedShoe: ['', Validators.required],
     });
 
-    const users: UserData[] = [];
-    const numberOfUsers = 20;
+    this.firstFormGroup.get('selectedShoe')?.valueChanges.subscribe(selectedValue => {
+      this.mostrarSegundoPaso = !!selectedValue;
+      this.cdr.detectChanges();
+      this.dataSource.paginator = this.paginator;
+      this.dataSource.sort = this.sort;
+    });
 
-    for (let i = 1; i <= numberOfUsers; i++) {
-      users.push(this.generateRandomData(i));
-    }
-
+    const users: UserData[] = this.generateUsers(20);
     this.dataSource = new MatTableDataSource(users);
   }
 
@@ -72,10 +68,21 @@ export class PlanillaColegiosPrivadosComponent implements AfterViewInit, OnInit 
     }
   }
 
-  cargarUltimaPlanilla() {
-  }
-
   agregarDocente() {
+    const formFields: any[] = [
+      { name: 'Numero de identidad', type: 'text', label: 'Numero de identidad', validations: [Validators.required]  },
+      { name: 'Sueldo', type: 'number', label: 'Sueldo', validations: [Validators.required] },
+      { name: 'Prestamos', type: 'number', label: 'Prestamos', validations: [Validators.required] },
+    ];
+
+    const dialogRef = this.dialog.open(DynamicFormDialogComponent, {
+      width: '600px',
+      data: { fields: formFields, title: 'Agregar docente' }
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      console.log('El diálogo se cerró', result);
+    });
   }
 
   exportarExcelPdf() {
@@ -96,9 +103,30 @@ export class PlanillaColegiosPrivadosComponent implements AfterViewInit, OnInit 
     this.botonSeleccionado = boton;
   }
 
-  editarElemento(row: any) {
-    console.log('Editar:', row);
+  editarElemento(row: UserData) {
+    const campos: any[] = [
+      { nombre: 'identidad', tipo: 'text', etiqueta: 'Identidad', requerido: true, editable: true },
+      { nombre: 'nombreDocente', tipo: 'text', etiqueta: 'Nombre del Docente', requerido: true, editable: true },
+      { nombre: 'sueldo', tipo: 'number', etiqueta: 'Sueldo', requerido: true, editable: true },
+      { nombre: 'aportaciones', tipo: 'number', etiqueta: 'Aportaciones', requerido: true, editable: true },
+      { nombre: 'cotizaciones', tipo: 'number', etiqueta: 'Cotizaciones', requerido: true, editable: true },
+      { nombre: 'prestamos', tipo: 'number', etiqueta: 'Préstamos', requerido: true, editable: true },
+      // Agrega más campos según necesites
+    ];
+
+    const dialogRef = this.dialog.open(EditarDialogComponent, {
+      width: '600px',
+      data: { campos: campos, valoresIniciales: row }
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) {
+        console.log('Datos editados:', result);
+        // Aquí puedes actualizar los datos en tu dataSource o realizar otras acciones necesarias
+      }
+    });
   }
+
 
   form = new FormGroup({
     mes: new FormControl(''),
@@ -134,6 +162,11 @@ export class PlanillaColegiosPrivadosComponent implements AfterViewInit, OnInit 
   private generateRandomNumber(min: number, max: number): number {
     return Math.floor(Math.random() * (max - min + 1)) + min;
   }
+
+  generateUsers(numberOfUsers: number): UserData[] {
+    return Array.from({ length: numberOfUsers }, (_, i) => this.generateRandomData(i + 1));
+  }
+
 }
 
 export interface UserData {

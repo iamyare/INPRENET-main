@@ -169,5 +169,20 @@ export const navItems: INavData[] = [
       }
     ]
   },
+  {
+      name: 'Movimientos',
+      iconComponent: { name: 'cilSpreadsheet' },
+      url: '/base',
+      children: [
+        {
+          name: 'Nuevo Movimiento',
+          url: '/Movimiento/nuevo-movimiento',
+        },
+        {
+          name: 'Ver Movimientos',
+          url: '/Movimiento/ver-movimientos',
+        },
+    ]
+    },
 ]
 ;

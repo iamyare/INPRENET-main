@@ -1,16 +1,16 @@
 <mat-stepper [linear]="isLinear" #stepper>
-  <mat-step [stepControl]="firstFormGroup" [completed]="hasSelectedShoe">
+  <mat-step [stepControl]="firstFormGroup">
     <form [formGroup]="firstFormGroup">
-      <ng-template matStepLabel>Periodo de planilla</ng-template>
+      <ng-template matStepLabel>Período de planilla</ng-template>
       <mat-selection-list
-        #shoes
-        [multiple]="false"
-        formControlName="selectedShoe"
-      >
-        <mat-list-option *ngFor="let shoe of typesOfShoes" [value]="shoe">{{
-          shoe
-        }}</mat-list-option>
-      </mat-selection-list>
+      #shoes
+      [multiple]="false"
+      formControlName="selectedShoe"
+    >
+      <mat-list-option *ngFor="let shoe of typesOfShoes" [value]="shoe">
+        {{ shoe }}
+      </mat-list-option>
+    </mat-selection-list>
       <div>
         <button mat-button matStepperNext [disabled]="!firstFormGroup.valid">
           Siguiente
@@ -18,26 +18,19 @@
       </div>
     </form>
   </mat-step>
-  <mat-step label="Datos De Planilla">
+  <mat-step label="Datos De Planilla" *ngIf="mostrarSegundoPaso">
     <div class="botones-container">
       <button
         mat-raised-button
         class="boton-estetico"
-        (click)="cargarUltimaPlanilla()"
-      >
-        Mostrar Última Planilla
-      </button>
-      <button
-        mat-raised-button
-        class="boton-estetico"
-        (click)="exportarExcelPdf()"
+        (click)="agregarDocente()"
       >
         Agregar Docente
       </button>
       <button
         mat-raised-button
         class="boton-estetico"
-        (click)="agregarDocente()"
+        (click)="exportarExcelPdf()"
       >
         Exportar a Excel y PDF
       </button>

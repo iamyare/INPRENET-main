@@ -1,0 +1,14 @@
+/* dynamic-form-dialog.component.scss */
+
+mat-dialog-content {
+  min-width: 300px; /* Ajusta esto según necesites */
+}
+
+mat-dialog-actions {
+  justify-content: flex-end;
+}
+
+/* Añade más estilos según necesites */
+.full-width {
+  width: 100%;
+}

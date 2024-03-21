@@ -71,6 +71,13 @@ const routes: Routes = [
           canActivate: [RoleGuard],
           data: { expectedRoles: ['ADMINISTRADOR', 'JEFE DE AREA'] }
       },
+      {
+        path: 'Movimiento',
+        loadChildren: () =>
+          import('./views/theme/theme.module').then((m) => m.ThemeModule),
+          canActivate: [RoleGuard],
+          data: { expectedRoles: ['ADMINISTRADOR', 'JEFE DE AREA'] }
+      },
 /*       {
         path: 'icons',
         loadChildren: () =>

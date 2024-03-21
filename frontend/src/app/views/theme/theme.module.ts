@@ -47,6 +47,8 @@ import { MatStepperModule } from '@angular/material/stepper';
 import { MAT_DATE_LOCALE, MatNativeDateModule,DateAdapter  } from '@angular/material/core';
 import { MatGridListModule } from '@angular/material/grid-list';
 import { CargarPlanillaPrivadosComponent } from '../pages/Generales/cargar-planilla-privados/cargar-planilla-privados.component';
+import { NuevoMovimientoComponent } from '../pages/Generales/nuevo-movimiento/nuevo-movimiento.component';
+import { VerMovimientosComponent } from '../pages/Generales/ver-movimientos/ver-movimientos.component';
 
 @NgModule({
   imports: [
@@ -99,7 +101,9 @@ import { CargarPlanillaPrivadosComponent } from '../pages/Generales/cargar-plani
     VerEditarDeduccionAfilComponent,
     VerEditarBeneficioAfilComponent,
     PlanillaColegiosPrivadosComponent,
-    CargarPlanillaPrivadosComponent
+    CargarPlanillaPrivadosComponent,
+    NuevoMovimientoComponent,
+    VerMovimientosComponent
 
 /*     CentroTrabajoPageComponent */
   ]

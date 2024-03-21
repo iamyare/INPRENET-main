@@ -23,6 +23,8 @@ import { VerEditarBeneficioAfilComponent } from '../pages/Generales/ver-editar-b
 import { VerEditarDeduccionAfilComponent } from '../pages/Generales/ver-editar-deduccion-afil/ver-editar-deduccion-afil.component';
 import { PlanillaColegiosPrivadosComponent } from '../pages/Generales/planilla-colegios-privados/planilla-colegios-privados.component';
 import { CargarPlanillaPrivadosComponent } from '../pages/Generales/cargar-planilla-privados/cargar-planilla-privados.component';
+import { NuevoMovimientoComponent } from '../pages/Generales/nuevo-movimiento/nuevo-movimiento.component';
+import { VerMovimientosComponent } from '../pages/Generales/ver-movimientos/ver-movimientos.component';
 
 const routes: Routes = [
   //rutas Afiliado
@@ -241,6 +243,28 @@ const routes: Routes = [
           title: 'Planilla Privados',
         },
       },
+    ],
+  },
+  {
+    path: '',
+    data: {
+      title: 'Movimiento',
+    },
+    children: [
+      {
+        path: 'nuevo-movimiento',
+        component: NuevoMovimientoComponent,
+        data: {
+          title: 'Nuevo Movimiento',
+        },
+      },
+      {
+        path: 'ver-movimientos',
+        component: VerMovimientosComponent,
+        data: {
+          title: 'Nuevo Movimiento',
+        },
+      }
     ],
   },
 ];

@@ -14,7 +14,7 @@ import { unirNombres } from '../../../../shared/functions/formatoNombresP';
 })
 export class NuevoBeneficioAfilComponent implements OnInit{
   @ViewChild(DynamicFormComponent) dynamicForm!: DynamicFormComponent;
-  form:any
+  form:any;
   form1:any
   FormBen:any
   datosFormateados: any;

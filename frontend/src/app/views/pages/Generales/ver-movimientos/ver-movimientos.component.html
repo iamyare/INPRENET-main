@@ -1,0 +1,55 @@
+<div *ngIf="persona" style="background-color: white; padding: 1%">
+  <h1 style="font-size: 2rem">Datos Generales Persona</h1>
+  <div>
+    <table>
+      <tr>
+        <th>DNI de persona</th>
+        <td>{{ persona.dni }}</td>
+        <th>Nombre de persona</th>
+        <td>{{ persona.nombreCompleto }}</td>
+        <th>Sexo</th>
+        <td>{{ persona.sexo }}</td>
+        <th>Dirección de residencia</th>
+        <td>{{ persona.direccion_residencia }}</td>
+        <th>Estado</th>
+        <td>{{ persona.estado }}</td>
+        <th>Fecha nacimiento</th>
+        <td>{{ persona.fecha_nacimiento }}</td>
+        <th>Colegio magisterial</th>
+        <td>{{ persona.colegio_magisterial }}</td>
+      </tr>
+      <tr>
+        <th>Número de carnet</th>
+        <td>{{ persona.numero_carnet }}</td>
+        <th>Profesión</th>
+        <td>{{ persona.profesion }}</td>
+        <th>Teléfono 1</th>
+        <td>{{ persona.telefono_1 }}</td>
+        <th>Salario base</th>
+        <td>{{ persona.salario_base }}</td>
+        <th>Estado civil</th>
+        <td>{{ persona.estado_civil }}</td>
+      </tr>
+    </table>
+  </div>
+</div>
+
+
+<div>
+  <app-dynamic-form
+    [fields]="myFormFields"
+    titulo=""
+    subtitulo="Completa la información correspondiente"
+    (newDatBenChange)="obtenerDatos($event)"
+  ></app-dynamic-form>
+
+  <button
+    mat-raised-button
+    color="primary"
+    style="color: white; margin: 1% 0 1% 0"
+    [disabled]="form.invalid"
+    (click)="previsualizarInfoPersona()"
+  >
+    Previsualizar información de la persona
+  </button>
+</div>

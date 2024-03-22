@@ -9,7 +9,7 @@ import { ToastrService } from 'ngx-toastr';
   templateUrl: './nuevo-movimiento.component.html',
   styleUrl: './nuevo-movimiento.component.scss'
 })
-export class NuevoMovimientoComponent implements OnInit{
+export class NuevoMovimientoComponent implements OnInit {
 
   myFormFields: FieldConfig[] = [];
   form: any;
@@ -21,16 +21,16 @@ export class NuevoMovimientoComponent implements OnInit{
   elementoSeleccionado?: any; // Para almacenar la fila completa seleccionada
 
 
-  constructor(private transaccionesService: TransaccionesService, private toastr: ToastrService,){}
+  constructor(private transaccionesService: TransaccionesService, private toastr: ToastrService,) { }
 
   ngOnInit(): void {
     this.myFormFields = [
-      { type: 'dropdown', label: 'Seleccione el tipo de movimiento', name: 'DEBITO_CREDITO_B', validations: [Validators.required], options:[{label:"DEBITO", value:"D"}, {label:"CREDITO", value:"C"}], display:true },
-      { type: 'text', label: 'Descripción', name: 'DESCRIPCION', validations: [Validators.required], display:true},
-      { type: 'text', label: 'Descripción corta', name: 'DESCRIPCION_CORTA', validations: [Validators.required], display:true},
-      { type: 'text', label: 'Cuenta Contable', name: 'CUENTA_CONTABLE', validations: [Validators.required], display:true},
-      { type: 'number', label: 'Monto', name: 'MONTO', validations: [], display:true},
-      { type: 'text', label: 'Justificacion', name: 'JUSTIFICACION', validations: [Validators.required], display:true},
+      { type: 'dropdown', label: 'Seleccione el tipo de movimiento', name: 'DEBITO_CREDITO_B', validations: [Validators.required], options: [{ label: "DEBITO", value: "D" }, { label: "CREDITO", value: "C" }], display: true },
+      { type: 'text', label: 'Descripción', name: 'DESCRIPCION', validations: [Validators.required], display: true },
+      { type: 'text', label: 'Descripción corta', name: 'DESCRIPCION_CORTA', validations: [Validators.required], display: true },
+      { type: 'text', label: 'Cuenta Contable', name: 'CUENTA_CONTABLE', validations: [Validators.required], display: true },
+      { type: 'number', label: 'Monto', name: 'MONTO', validations: [], display: true },
+      { type: 'text', label: 'Justificacion', name: 'JUSTIFICACION', validations: [Validators.required], display: true },
     ];
   }
 
@@ -56,18 +56,18 @@ export class NuevoMovimientoComponent implements OnInit{
   }
 
 
-  async obtenerDatos(event:any):Promise<any>{
+  async obtenerDatos(event: any): Promise<any> {
     this.form = event;
   }
 
   seleccionarFila(fila: any) {
     this.elementoSeleccionado = fila;
   }
-;
+  ;
 
 
 
-  guardarMovimiento(){
+  guardarMovimiento() {
     if (!this.elementoSeleccionado) {
       this.toastr.error('Por favor, seleccione un número de cuenta.', 'Error');
       return;

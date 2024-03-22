@@ -18,16 +18,16 @@ import { MatDialog } from '@angular/material/dialog';
 })
 export class VerEditarBeneficioAfilComponent {
   unirNombres: any = unirNombres;
-  convertirFecha:any = convertirFecha;
+  convertirFecha: any = convertirFecha;
 
-  Afiliado:any;
-  form:any
+  Afiliado: any;
+  form: any
   public myFormFields: FieldConfig[] = []
   public monstrarBeneficios: boolean = false;
 
   //Para generar tabla
   myColumns: TableColumn[] = [];
-  filasT: any[] =[];
+  filasT: any[] = [];
   detallesCompletos: any[] = [];
   ejecF: any;
 
@@ -37,55 +37,55 @@ export class VerEditarBeneficioAfilComponent {
     private beneficioService: BeneficiosService,
     private datePipe: DatePipe,
     private toastr: ToastrService) {
-    }
+  }
 
   ngOnInit(): void {
     this.myFormFields = [
-      { type: 'text', label: 'DNI del afiliado', name: 'dni', validations: [Validators.required, Validators.minLength(13), Validators.maxLength(14)], display:true },
+      { type: 'text', label: 'DNI del afiliado', name: 'dni', validations: [Validators.required, Validators.minLength(13), Validators.maxLength(14)], display: true },
     ];
 
     this.myColumns = [
       {
         header: 'Nombre del beneficio',
-        col : 'nombre_beneficio',
+        col: 'nombre_beneficio',
         isEditable: false
       },
       {
         header: 'Periodicidad',
-        col : 'periodicidad',
+        col: 'periodicidad',
         isEditable: false
       },
       {
         header: 'Número de rentas máximas',
-        col : 'numero_rentas_max',
+        col: 'numero_rentas_max',
         isEditable: false
       },
       {
         header: 'Periodo de inicio',
-        col : 'periodoInicio',
+        col: 'periodoInicio',
         isEditable: true
       },
       {
         header: 'Periodo de finalización',
-        col : 'periodoFinalizacion',
+        col: 'periodoFinalizacion',
         isEditable: true
       },
       {
         header: 'Monto por periodo',
-        col : 'monto_por_periodo',
-        moneda:true,
+        col: 'monto_por_periodo',
+        moneda: true,
         isEditable: true
       },
       {
         header: 'Monto total',
-        col : 'monto_total',
-        moneda:true,
+        col: 'monto_total',
+        moneda: true,
         isEditable: true
       },
     ];
   }
 
-  async obtenerDatos(event:any):Promise<any>{
+  async obtenerDatos(event: any): Promise<any> {
     this.form = event;
   }
 
@@ -97,7 +97,7 @@ export class VerEditarBeneficioAfilComponent {
       const dataAfil = data.map((item: any) => ({
         dni: item.DNI,
         estado_civil: item.ESTADO_CIVIL,
-        nombreCompleto: unirNombres(item.PRIMER_NOMBRE, item.SEGUNDO_NOMBRE, item.PRIMER_APELLIDO,item.SEGUNDO_APELLIDO),
+        nombreCompleto: unirNombres(item.PRIMER_NOMBRE, item.SEGUNDO_NOMBRE, item.PRIMER_APELLIDO, item.SEGUNDO_APELLIDO),
         sexo: item.SEXO,
         profesion: item.PROFESION,
         telefono_1: item.TELEFONO_1,
@@ -119,8 +119,8 @@ export class VerEditarBeneficioAfilComponent {
         periodicidad: item.PERIODICIDAD,
         monto_por_periodo: item.MONTO_POR_PERIODO,
         monto_total: item.MONTO_TOTAL,
-        periodoInicio: convertirFecha(item.PERIODO_INICIO,false),
-        periodoFinalizacion: convertirFecha(item.PERIODO_FINALIZACION,false)
+        periodoInicio: convertirFecha(item.PERIODO_INICIO, false),
+        periodoFinalizacion: convertirFecha(item.PERIODO_FINALIZACION, false)
       }));
 
       return this.filasT;
@@ -130,10 +130,10 @@ export class VerEditarBeneficioAfilComponent {
     }
   };
 
-  previsualizarInfoAfil(){
+  previsualizarInfoAfil() {
     this.monstrarBeneficios = true;
     this.getFilas().then(() => this.cargar());
-    if (this.form.value.dni){
+    if (this.form.value.dni) {
 
       /* this.svcAfilServ.getAfilByParam(this.form.value.dni).subscribe(
         async (result) => {
@@ -183,10 +183,8 @@ export class VerEditarBeneficioAfilComponent {
   };
 
   manejarAccionUno(row: any) {
-    console.log(row);
-
     const campos = [
-      { nombre: 'numero_rentas_max', tipo: 'number', requerido: true, etiqueta: 'Número de rentas máximas', editable:false },
+      { nombre: 'numero_rentas_max', tipo: 'number', requerido: true, etiqueta: 'Número de rentas máximas', editable: false },
       { nombre: 'periodoInicio', tipo: 'number', requerido: true, etiqueta: 'Periodo de inicio' },
       { nombre: 'periodoFinalizacion', tipo: 'number', requerido: true, etiqueta: 'Periodo de finalización' },
       { nombre: 'monto_por_periodo', tipo: 'text', requerido: true, etiqueta: 'Monto por periodo' },
@@ -194,12 +192,10 @@ export class VerEditarBeneficioAfilComponent {
 
     ];
 
-
     const dialogRef = this.dialog.open(EditarDialogComponent, {
       width: '500px',
       data: { campos: campos, valoresIniciales: row }
     });
-
 
     dialogRef.afterClosed().subscribe((result: any) => {
       if (result) {
@@ -207,5 +203,4 @@ export class VerEditarBeneficioAfilComponent {
       }
     });
   }
-
 }

@@ -2,7 +2,6 @@ import { NgModule } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
 
 import { AfilBancoComponent } from '../pages/Generales/afil-banco/afil-banco.component';
-import { VerDeduccionesComponent } from '../pages/Generales/ver-deducciones/ver-deducciones.component';
 
 import { VerPlanillasComponent } from '../pages/Generales/ver-planillas/ver-planillas.component';
 import { SubirDeduccionesformComponent } from '../pages/Generales/subir-deduccionesform/subir-deduccionesform.component';
@@ -125,15 +124,9 @@ const routes: Routes = [
           title: 'Centro Trabajo',
         },
       },
-/*       {
-        path: 'ver-deducciones',
-        component: VerDeduccionesComponent,
-        data: {
-          title: 'Ver Deducciones',
-        },
-      }, */
     ],
   },
+
   //rutas mantenimiento beneficio
   {
     path: '',
@@ -162,7 +155,7 @@ const routes: Routes = [
       },
     ],
   },
-   //rutas mantenimiento planilla
+  //rutas mantenimiento planilla
   {
     path: '',
     data: {

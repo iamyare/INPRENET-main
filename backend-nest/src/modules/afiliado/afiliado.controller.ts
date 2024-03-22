@@ -3,10 +3,12 @@ import { AfiliadoService } from './afiliado.service';
 import { CreateAfiliadoDto } from './dto/create-afiliado.dto';
 import { UpdateAfiliadoDto } from './dto/update-afiliado.dto';
 import { CreateAfiliadoTempDto } from './dto/create-afiliado-temp.dto';
+import { ApiTags } from '@nestjs/swagger';
 
+@ApiTags('Afiliado')
 @Controller('afiliado')
 export class AfiliadoController {
-  constructor(private readonly afiliadoService: AfiliadoService) {}
+  constructor(private readonly afiliadoService: AfiliadoService) { }
 
   @Post()
   create(@Body() createAfiliadoDto: CreateAfiliadoDto) {

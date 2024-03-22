@@ -2,10 +2,12 @@ import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/commo
 import { BancoService } from './banco.service';
 import { CreateBancoDto } from './dto/create-banco.dto';
 import { UpdateBancoDto } from './dto/update-banco.dto';
+import { ApiTags } from '@nestjs/swagger';
 
+@ApiTags('banco')
 @Controller('banco')
 export class BancoController {
-  constructor(private readonly bancoService: BancoService) {}
+  constructor(private readonly bancoService: BancoService) { }
 
   @Post()
   create(@Body() createBancoDto: CreateBancoDto) {

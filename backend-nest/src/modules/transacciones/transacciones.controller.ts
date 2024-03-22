@@ -2,10 +2,12 @@ import { Controller, Get, Post, Body, Patch, Param, Delete, HttpStatus, HttpExce
 import { CreateTransaccionesDto } from './dto/create-transacciones.dto';
 import { UpdateTranssacionesDto } from './dto/update-transacciones.dto';
 import { TransaccionesService } from './transacciones.service';
+import { ApiTags } from '@nestjs/swagger';
 
+@ApiTags('transacciones')
 @Controller('transacciones')
 export class TransaccionesController {
-  constructor(private readonly transaccionesService: TransaccionesService) {}
+  constructor(private readonly transaccionesService: TransaccionesService) { }
 
   @Post('/asignar-movimiento')
   async asignarMovimiento(@Body() datosMovimiento: any) {

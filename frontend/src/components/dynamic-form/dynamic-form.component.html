@@ -1,20 +1,34 @@
 <div class="card">
-  <div class="card-header card-header-danger title" style="background: #628780; color:white;">
-    <h4 class="card-title">{{titulo}}</h4>
-    <p class="card-category">{{subtitulo}}</p>
+  <div
+    class="card-header card-header-danger title"
+    style="background: #628780; color: white"
+  >
+    <h4 class="card-title">{{ titulo }}</h4>
+    <p class="card-category">{{ subtitulo }}</p>
   </div>
   <div class="card-body">
     <form [formGroup]="form" (change)="onDatosBenChange()">
       <div class="container">
         <div class="row">
           <div *ngFor="let field of fields" class="col-md-4">
-
             <!-- Campo de Texto Normal -->
             <div *ngIf="field.display">
-              <ng-container *ngIf="(field.type !== 'dropdown' && field.type !== 'date' && field.type !== 'daterange'); else customField">
-                <mat-form-field appearance="outline" style="width: 100%;">
-                  <mat-label>{{field.label}}</mat-label>
-                  <input matInput [type]="field.type" [formControlName]="field.name" [readonly]="field.readOnly">
+              <ng-container
+                *ngIf="
+                  field.type !== 'dropdown' &&
+                    field.type !== 'date' &&
+                    field.type !== 'daterange';
+                  else customField
+                "
+              >
+                <mat-form-field appearance="outline" style="width: 100%">
+                  <mat-label>{{ field.label }}</mat-label>
+                  <input
+                    matInput
+                    [type]="field.type"
+                    [formControlName]="field.name"
+                    [readonly]="field.readOnly"
+                  />
                 </mat-form-field>
               </ng-container>
             </div>
@@ -23,42 +37,81 @@
             <ng-template #customField>
               <!-- Dropdown -->
               <ng-container *ngIf="field.type === 'dropdown'; else dateField">
-                <mat-form-field appearance="outline" style="width: 100%;">
-                  <mat-label>{{field.label}}</mat-label>
-                  <mat-select [formControlName]="field.name" (selectionChange)="onDatosBenChange()" [attr.readonly]="field.readOnly">
-                    <mat-option *ngFor="let option of field.options" [value]="option.value">
-                      {{option.label}}
+                <mat-form-field appearance="outline" style="width: 100%">
+                  <mat-label>{{ field.label }}</mat-label>
+                  <mat-select
+                    [formControlName]="field.name"
+                    (selectionChange)="onDatosBenChange()"
+                    [attr.readonly]="field.readOnly"
+                  >
+                    <mat-option
+                      *ngFor="let option of field.options"
+                      [value]="option.value"
+                    >
+                      {{ option.label }}
                     </mat-option>
                   </mat-select>
                 </mat-form-field>
               </ng-container>
             </ng-template>
 
-              <!-- Fecha -->
-              <ng-template  #dateField>
-                <ng-container *ngIf="field.type === 'date'; else daterangeField">
-                  <mat-form-field  appearance="outline" style="width: 100%">
-                    <mat-label>{{field.label}}</mat-label>
-                    <input (dateChange)="onDatosBenChange()" [readonly]="field.readOnly" matInput [matDatepicker]="picker" [formControlName]="field.name">
-                    <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
-                    <mat-datepicker #picker></mat-datepicker>
-                  </mat-form-field>
-                </ng-container>
-              </ng-template>
+            <!-- Fecha -->
+            <ng-template #dateField>
+              <ng-container *ngIf="field.type === 'date'; else daterangeField">
+                <mat-form-field appearance="outline" style="width: 100%">
+                  <mat-label>{{ field.label }}</mat-label>
+                  <input
+                    (dateChange)="onDatosBenChange()"
+                    [readonly]="field.readOnly"
+                    matInput
+                    [matDatepicker]="picker"
+                    [formControlName]="field.name"
+                  />
+                  <mat-datepicker-toggle
+                    matSuffix
+                    [for]="picker"
+                  ></mat-datepicker-toggle>
+                  <mat-datepicker #picker></mat-datepicker>
+                </mat-form-field>
+              </ng-container>
+            </ng-template>
 
-                <!-- Rango de Fecha -->
-                <ng-template #daterangeField>
-                  <mat-form-field appearance="outline"  style="width: 100%" class="full-width">
-                    <mat-label>{{field.label}}</mat-label>
-                    <mat-date-range-input [rangePicker]="picker" [formGroup]="getRangeFormGroup(field.name)">
-                      <input (dateChange)="onDatosBenChange()" [readonly]="field.readOnly" matInput matStartDate placeholder="Inicio" formControlName="start">
-                      <input (dateChange)="onDatosBenChange()" [readonly]="field.readOnly" matInput matEndDate placeholder="Fin" formControlName="end">
-                    </mat-date-range-input>
-                    <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
-                    <mat-date-range-picker #picker></mat-date-range-picker>
-                  </mat-form-field>
-                </ng-template>
-
+            <!-- Rango de Fecha -->
+            <ng-template #daterangeField>
+              <mat-form-field
+                appearance="outline"
+                style="width: 100%"
+                class="full-width"
+              >
+                <mat-label>{{ field.label }}</mat-label>
+                <mat-date-range-input
+                  [rangePicker]="picker"
+                  [formGroup]="getRangeFormGroup(field.name)"
+                >
+                  <input
+                    (dateChange)="onDatosBenChange()"
+                    [readonly]="field.readOnly"
+                    matInput
+                    matStartDate
+                    placeholder="Inicio"
+                    formControlName="start"
+                  />
+                  <input
+                    (dateChange)="onDatosBenChange()"
+                    [readonly]="field.readOnly"
+                    matInput
+                    matEndDate
+                    placeholder="Fin"
+                    formControlName="end"
+                  />
+                </mat-date-range-input>
+                <mat-datepicker-toggle
+                  matSuffix
+                  [for]="picker"
+                ></mat-datepicker-toggle>
+                <mat-date-range-picker #picker></mat-date-range-picker>
+              </mat-form-field>
+            </ng-template>
           </div>
         </div>
       </div>

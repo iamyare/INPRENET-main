@@ -32,14 +32,8 @@ import {MatSelectModule} from '@angular/material/select';
 import { NgScrollbarModule } from 'ngx-scrollbar';
 import { MatTableModule } from '@angular/material/table';
 import {MatStepperModule} from '@angular/material/stepper';
-
-// import {FlexLayoutModule } from '@angular/flex-layout';
 import { MatNativeDateModule } from '@angular/material/core';
 import { DocsComponentsModule } from '../../components/docs-components.module';
-/* import { BotonarchivosComponent } from '@docs-components/botonarchivos/botonarchivos.component'; */
-//import { ToastrModule } from 'ngx-toastr';
-// import { NgxMaterialTimepickerModule } from 'ngx-material-timepicker';
-
 
 @NgModule({
   declarations: [],

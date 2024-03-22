@@ -3,10 +3,12 @@ import { PaisService } from './pais.service';
 import { CreatePaiDto } from './dto/create-pai.dto';
 import { UpdatePaiDto } from './dto/update-pai.dto';
 import { PaginationDto } from 'src/common/dtos/pagination.dto';
+import { ApiTags } from '@nestjs/swagger';
 
+@ApiTags('pais')
 @Controller('pais')
 export class PaisController {
-  constructor(private readonly paisService: PaisService) {}
+  constructor(private readonly paisService: PaisService) { }
 
   @Post()
   create(@Body() createPaiDto: CreatePaiDto) {

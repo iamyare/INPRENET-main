@@ -15,89 +15,84 @@ import { EditarDialogComponent } from '../../../../../components/editar-dialog/e
   templateUrl: './ver-editar-deduccion-afil.component.html',
   styleUrl: './ver-editar-deduccion-afil.component.scss'
 })
-export class VerEditarDeduccionAfilComponent implements OnInit{
+export class VerEditarDeduccionAfilComponent implements OnInit {
   unirNombres: any = unirNombres;
   //Para generar tabla
   columns: TableColumn[] = [];
   deducciones: any[] = [];
-  filasT: any[] =[];
+  filasT: any[] = [];
   ejecF: any;
 
-
-  Afiliado:any = {}
-  form:any;
+  Afiliado: any = {}
+  form: any;
   public myFormFields: FieldConfig[] = [];
   public monstrarDeducciones: boolean = false;
 
-  instituciones: any[] = [];
-
   constructor(private deduccionesService: DeduccionesService,
     private toastr: ToastrService,
-    private svcAfilServ : AfiliadoService,
+    private svcAfilServ: AfiliadoService,
     private datePipe: DatePipe,
     private dialog: MatDialog,
-    ) {}
+  ) { }
 
   ngOnInit(): void {
     this.myFormFields = [
-      { type: 'text', label: 'DNI del afiliado', name: 'dni', validations: [Validators.required, Validators.minLength(13), Validators.maxLength(14)], display:true }
+      { type: 'text', label: 'DNI del afiliado', name: 'dni', validations: [Validators.required, Validators.minLength(13), Validators.maxLength(14)], display: true }
     ];
 
     this.columns = [
       {
         header: 'Nombre Deduccion',
-        col : 'nombre_deduccion',
+        col: 'nombre_deduccion',
         isEditable: true
       },
       {
         header: 'Fecha aplicado',
-        col : 'fecha_aplicado',
+        col: 'fecha_aplicado',
         isEditable: false
       },
       {
         header: 'Institucion',
-        col : 'nombre_institucion',
+        col: 'nombre_institucion',
         isEditable: true
       },
       {
         header: 'Año',
-        col : 'anio',
+        col: 'anio',
         isEditable: false
       },
       {
         header: 'Mes',
-        col : 'mes',
+        col: 'mes',
         isEditable: false
       },
       {
         header: 'Codigo de planilla',
-        col : 'codigo_planilla',
+        col: 'codigo_planilla',
         isEditable: false
       },
       {
         header: 'Estado de aplicacion',
-        col : 'estado_aplicacion',
+        col: 'estado_aplicacion',
         isEditable: false
       },
       {
         header: 'Monto total',
-        col : 'monto_total',
+        col: 'monto_total',
         isEditable: true
       }
     ]
-
   }
 
-  async obtenerDatos(event:any):Promise<any>{
+  async obtenerDatos(event: any): Promise<any> {
     this.form = event;
   }
 
-
   getFilas = async () => {
     try {
-    const data = await this.deduccionesService.buscarDeduccionesPorDni(this.form.value.dni).toPromise();
+      const data = await this.deduccionesService.buscarDeduccionesPorDni(this.form.value.dni).toPromise();
 
-    this.filasT = data.map((item: any) => ({
+      this.filasT = data.map((item: any) => ({
         anio: item.anio,
         estado_aplicacion: item.estado_aplicacion,
         fecha_aplicado: this.datePipe.transform(item.fecha_aplicado, 'dd/MM/yyyy HH:mm'),
@@ -114,8 +109,7 @@ export class VerEditarDeduccionAfilComponent implements OnInit{
       console.error("Error al obtener los detalles completos de deducción", error);
       throw error;
     }
-    };
-
+  };
 
   previsualizarInfoAfil() {
     this.monstrarDeducciones = true;
@@ -128,7 +122,7 @@ export class VerEditarDeduccionAfilComponent implements OnInit{
 
 
         this.deduccionesService.buscarDeduccionesPorDni(this.form.value.dni).subscribe(deducciones => {
-          this.deducciones = deducciones.map((deduccion:any) => ({
+          this.deducciones = deducciones.map((deduccion: any) => ({
             ...deduccion,
             nombre_completo: this.Afiliado.nameAfil,
           }));
@@ -139,7 +133,7 @@ export class VerEditarDeduccionAfilComponent implements OnInit{
         this.toastr.error(`Error al cargar información del afiliado: ${error.message}`);
       });
     }
-}
+  }
 
   ejecutarFuncionAsincronaDesdeOtroComponente(funcion: (data: any) => Promise<void>) {
     this.ejecF = funcion;
@@ -155,7 +149,7 @@ export class VerEditarDeduccionAfilComponent implements OnInit{
   async cargarOpcionesDeducciones(nombreInstitucion: string): Promise<any[]> {
     try {
       const deducciones = await this.deduccionesService.getDeduccionesByEmpresa(nombreInstitucion).toPromise();
-      return deducciones.map((deduccion:any) => ({
+      return deducciones.map((deduccion: any) => ({
         valor: deduccion.id_deduccion,
         etiqueta: deduccion.nombre_deduccion
       }));
@@ -209,16 +203,12 @@ export class VerEditarDeduccionAfilComponent implements OnInit{
       },
       { nombre: 'anio', tipo: 'text', requerido: true, etiqueta: 'Año', editable: false },
       { nombre: 'mes', tipo: 'text', requerido: false, etiqueta: 'Mes', editable: false },
-
-
     ];
-
 
     const dialogRef = this.dialog.open(EditarDialogComponent, {
       width: '500px',
       data: { campos: campos, valoresIniciales: row }
     });
-
 
     dialogRef.afterClosed().subscribe(result => {
       if (result) {
@@ -226,15 +216,4 @@ export class VerEditarDeduccionAfilComponent implements OnInit{
       }
     });
   }
-
-
-
 }
-
-
-
-/*
-{
-
-}
-*/

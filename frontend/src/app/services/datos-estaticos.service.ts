@@ -11,29 +11,25 @@ import { InstitucionesService } from './instituciones.service';
 export class DatosEstaticosService {
   paises: any = [];
   departamentos: any = [];
-  DatosBancBen:any = [];
+  DatosBancBen: any = [];
   Bancos: any = [];
   Instituciones: any = [];
 
-  constructor( private SVCInstituciones:InstitucionesService ,private afiliadoService: AfiliadoService, public direccionSer: DireccionService,private bancosService: BancosService) {
+  constructor(private SVCInstituciones: InstitucionesService, private afiliadoService: AfiliadoService, public direccionSer: DireccionService, private bancosService: BancosService) {
     /* this.direccionSer.getAllCiudades().subscribe((res: any) => {});
     this.direccionSer.getAllProvincias().subscribe((res: any) => {}); */
     /* this.bancosService.getAllBancos().subscribe((res: any) => {
       this.Bancos = res.bancos
     }); */
     this.direccionSer.getAllPaises().subscribe((res: any) => {
-      console.log(res);
-
       this.departamentos = res.paises
       this.paises = res.paises
     });
-    this.SVCInstituciones.getInstituciones().subscribe((res: any) => {
-      this.Instituciones = res
-    });
-    this.prueba();
+    this.getInstituciones();
+    this.getPaises();
   }
 
-  async prueba(){
+  async getInstituciones() {
     this.Instituciones = await this.SVCInstituciones.getInstituciones().toPromise();
 
     this.Instituciones.map((item: { nombre_institucion: any; id_institucion: any; }) => ({
@@ -42,155 +38,174 @@ export class DatosEstaticosService {
     }));
   }
 
+  async getPaises() {
+    this.paises = await this.direccionSer.getAllPaises().toPromise();
+
+    /* this.paises.map((item: { nombre_institucion: any; id_institucion: any; }) => ({
+      label: item.nombre_institucion,
+      value: String(item.id_institucion)
+    })); */
+  }
+
   estadoCivil = [
     {
-      "idEstadoCivil":1,
+      "idEstadoCivil": 1,
       "value": "CASADO/A"
     },
     {
-      "idEstadoCivil":2,
+      "idEstadoCivil": 2,
       "value": "DIVORCIADO/A"
     },
     {
-      "idEstadoCivil":3,
+      "idEstadoCivil": 3,
       "value": "SEPARADO/A"
     },
     {
-      "idEstadoCivil":4,
+      "idEstadoCivil": 4,
       "value": "SOLTERO/A"
     },
     {
-      "idEstadoCivil":5,
+      "idEstadoCivil": 5,
       "value": "UNION LIBRE"
     },
     {
-      "idEstadoCivil":6,
+      "idEstadoCivil": 6,
       "value": "VIUDO/A"
     }
   ];
+  tiposPlanilla = [
+    {
+      "idTipoPlanilla": 1,
+      "value": "EGRESO"
+    },
+    {
+      "idTipoPlanilla": 2,
+      "value": "INGRESO"
+    },
+  ];
   representacion = [
     {
-      "idRepresentacion":1,
+      "idRepresentacion": 1,
       "value": "POR CUENTA PROPIA"
     },
     {
-      "idRepresentacion":2,
+      "idRepresentacion": 2,
       "value": "POR TERCEROS"
     }
   ];
   estado = [
     {
-      "idEstado":1,
+      "idEstado": 1,
       "value": "FALLECIDO"
     },
     {
-      "idEstado":2,
+      "idEstado": 2,
       "value": "ACTIVO"
     },
     {
-      "idEstado":3,
+      "idEstado": 3,
       "value": "INACTIVO"
     }
   ];
   Sexo = [
     {
-      "idSexo":1,
+      "idSexo": 1,
       "value": "M"
     },
     {
-      "idSexo":2,
+      "idSexo": 2,
       "value": "F"
     }
   ];
   tipoIdent = [
     {
-      "idIdentificacion":1,
+      "idIdentificacion": 1,
       "value": "DNI"
     },
     {
-      "idIdentificacion":2,
+      "idIdentificacion": 2,
       "value": "PASAPORTE"
     },
     {
-      "idIdentificacion":3,
+      "idIdentificacion": 3,
       "value": "CARNET RESIDENCIA"
     },
     {
-      "idIdentificacion":4,
+      "idIdentificacion": 4,
       "value": "NÚMERO LICENCIA"
     },
     {
-      "idIdentificacion":5,
+      "idIdentificacion": 5,
       "value": "RTN"
     },
   ];
   tipoCotizante = [
     {
-      "idCotizante":1,
+      "idCotizante": 1,
       "value": "AFILIADO"
     },
     {
-      "idCotizante":2,
+      "idCotizante": 2,
       "value": "BENEFICIARIO"
     },
     {
-      "idCotizante":3,
+      "idCotizante": 3,
       "value": "AFILIADO y BENEFICIARIO"
     },
     {
-      "idEstado":4,
+      "idEstado": 4,
       "value": "JUBILADO"
     }
   ];
 
   centrosTrabajo = [
     {
-      "idCentroTrabajo":1,
+      "idCentroTrabajo": 1,
       "value": "INSTITUTO CENTRAL VICENTE CÁCERES"
     },
     {
-      "idCentroTrabajo":2,
+      "idCentroTrabajo": 2,
       "value": "IHCI"
     },
     {
-      "idCentroTrabajo":3,
+      "idCentroTrabajo": 3,
       "value": "UNAH"
     }
   ];
   sector = [
     {
-      "idsector":1,
+      "idsector": 1,
       "value": "JUBILADO"
     },
     {
-      "idsector":2,
+      "idsector": 2,
       "value": "PEDAGOGICO"
     },
     {
-      "idsector":3,
+      "idsector": 3,
       "value": "PRIVADO"
     },
     {
-      "idsector":4,
+      "idsector": 4,
       "value": "PROHECO"
     },
     {
-      "idsector":5,
+      "idsector": 5,
       "value": "PUBLICO"
     }
   ];
 
   tipoRol = [
     {
-      "idRol":2,
+      "idRol": 2,
       "value": "JEFE DE AREA"
     },
     {
-      "idRol":3,
+      "idRol": 3,
       "value": "OFICIAL"
     },
     {
-      "idRol":4,
+      "idRol": 4,
       "value": "AUXILIAR"
     },
   ]

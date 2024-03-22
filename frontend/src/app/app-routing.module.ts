@@ -51,14 +51,14 @@ const routes: Routes = [
           data: { expectedRoles: ['ADMINISTRADOR', 'JEFE DE AREA'] }
       },
       {
-        path: 'Deduccion',
+        path: 'Tipo-Planilla',
         loadChildren: () =>
           import('./views/theme/theme.module').then((m) => m.ThemeModule),
           canActivate: [RoleGuard],
           data: { expectedRoles: ['ADMINISTRADOR', 'JEFE DE AREA'] }
       },
       {
-        path: 'Tipo-Planilla',
+        path: 'Deduccion',
         loadChildren: () =>
           import('./views/theme/theme.module').then((m) => m.ThemeModule),
           canActivate: [RoleGuard],
@@ -78,21 +78,6 @@ const routes: Routes = [
           canActivate: [RoleGuard],
           data: { expectedRoles: ['ADMINISTRADOR', 'JEFE DE AREA'] }
       },
-/*       {
-        path: 'icons',
-        loadChildren: () =>
-          import('./views/icons/icons.module').then((m) => m.IconsModule)
-      }, */
-/*       {
-        path: 'notifications',
-        loadChildren: () =>
-          import('./views/notifications/notifications.module').then((m) => m.NotificationsModule)
-      }, */
-      /* {
-        path: 'widgets',
-        loadChildren: () =>
-          import('./views/widgets/widgets.module').then((m) => m.WidgetsModule)
-      }, */
       {
         path: 'pages',
         loadChildren: () =>
@@ -100,6 +85,7 @@ const routes: Routes = [
       },
     ]
   },
+
   {
     path: '404',
     component: Page404Component,

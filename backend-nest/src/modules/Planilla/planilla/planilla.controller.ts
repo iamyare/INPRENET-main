@@ -3,7 +3,9 @@ import { PlanillaService } from './planilla.service';
 import { CreatePlanillaDto } from './dto/create-planilla.dto';
 import { UpdatePlanillaDto } from './dto/update-planilla.dto';
 import { PaginationDto } from 'src/common/dtos/pagination.dto';
+import { ApiTags } from '@nestjs/swagger';
 
+@ApiTags('planilla')
 @Controller('planilla')
 export class PlanillaController {
   constructor(private readonly planillaService: PlanillaService) { }

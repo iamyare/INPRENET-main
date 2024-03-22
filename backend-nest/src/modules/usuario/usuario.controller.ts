@@ -4,20 +4,22 @@ import { CreateUsuarioDto } from './dto/create-usuario.dto';
 import { UpdateUsuarioDto } from './dto/update-usuario.dto';
 import { PaginationDto } from 'src/common/dtos/pagination.dto';
 import { RolesGuard } from 'src/guards/auth/auth.guard';
+import { ApiTags } from '@nestjs/swagger';
 
+@ApiTags('usuario')
 @Controller('usuario')
 @UseGuards(RolesGuard)
 export class UsuarioController {
-  constructor(private readonly usuarioService: UsuarioService) {}
-  
+  constructor(private readonly usuarioService: UsuarioService) { }
+
   @Post('auth/signup')
   create(@Body() createUsuarioDto: CreateUsuarioDto) {
     return this.usuarioService.create(createUsuarioDto);
   }
-  
+
   @Post('auth/login')
   async login(@Body() loginDto: CreateUsuarioDto) {
-      return this.usuarioService.login(loginDto.correo, loginDto.contrasena);
+    return this.usuarioService.login(loginDto.correo, loginDto.contrasena);
   }
 
 

@@ -140,8 +140,6 @@ actualizarEstado(idPlanilla: string, nuevoEstado: string): Observable<any> {
     }else{
       var url= `${environment.API_URL}/api/beneficio-planilla/nuevoDetalle`;
     }
-    console.log(data);
-    console.log(idAfiliadoPadre);
 
     return this.http.post<TipoBeneficio>(
       url,
@@ -175,7 +173,6 @@ actualizarEstado(idPlanilla: string, nuevoEstado: string): Observable<any> {
   }
 
 }
-
 
 interface TipoBeneficio {
   nombre_beneficio: string;

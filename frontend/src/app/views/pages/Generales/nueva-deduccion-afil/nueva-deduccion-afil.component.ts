@@ -14,14 +14,14 @@ import { DynamicFormComponent } from '@docs-components/dynamic-form/dynamic-form
   templateUrl: './nueva-deduccion-afil.component.html',
   styleUrl: './nueva-deduccion-afil.component.scss'
 })
-export class NuevaDeduccionAfilComponent{
+export class NuevaDeduccionAfilComponent {
   @ViewChild(DynamicFormComponent) dynamicForm!: DynamicFormComponent;
-  data:any
-  filas:any
-  tiposDeducciones:any = [];
-  instituciones:any = [];
-  nameAfil:string = ""
-  Afiliado:any
+  data: any
+  filas: any
+  tiposDeducciones: any = [];
+  instituciones: any = [];
+  nameAfil: string = ""
+  Afiliado: any
   public myFormFields: FieldConfig[] = []
 
   isChecked = true;
@@ -31,18 +31,17 @@ export class NuevaDeduccionAfilComponent{
   });
 
   constructor(
-    private deduccionesService : DeduccionesService,
+    private deduccionesService: DeduccionesService,
     private svcAfilServ: AfiliadoService,
     private toastr: ToastrService,
     private fb: FormBuilder,
     private _formBuilder: FormBuilder,
-    private institucionesService:InstitucionesService
-  ){
+    private institucionesService: InstitucionesService
+  ) {
     this.obtenerDatos1();
   }
 
   alertFormValues(formGroup: FormGroup) {
-
     alert(JSON.stringify(formGroup.value, null, 2));
   }
 
@@ -74,7 +73,7 @@ export class NuevaDeduccionAfilComponent{
       },
       { type: 'number', label: 'Monto total', name: 'monto_total', validations: [Validators.required, Validators.pattern("^\\d*\\.?\\d+$")], display: true },
       { type: 'number', label: 'Año', name: 'anio', validations: [Validators.required, Validators.pattern("^\\d*\\.?\\d+$")], display: true },
-      { type: 'number', label: 'Mes', name: 'mes', validations: [Validators.required ,Validators.pattern("^\\d*\\.?\\d+$")], display: true },
+      { type: 'number', label: 'Mes', name: 'mes', validations: [Validators.required, Validators.pattern("^\\d*\\.?\\d+$")], display: true },
     ];
   }
 
@@ -91,7 +90,7 @@ export class NuevaDeduccionAfilComponent{
             };
           });
           field.options = temp;
-        } else{
+        } else {
           field.options = []
         }
       } else {
@@ -102,7 +101,6 @@ export class NuevaDeduccionAfilComponent{
       console.error("Error al obtener datos de deduccion", error);
     }
   };
-
 
   getInstituciones = async () => {
     try {
@@ -121,70 +119,68 @@ export class NuevaDeduccionAfilComponent{
     }
   }
 
-  getTipAfi(){
+  getTipAfi() {
     return this.tiposDeducciones;
   }
 
   getFilasAfilById = async () => {
     await this.svcAfilServ.getAfilByParam(this.data.value.dni).subscribe(result => {
       this.Afiliado = result;
-      this.nameAfil = this.unirNombres(result.primer_nombre,result.segundo_nombre, result.tercer_nombre, result.primer_apellido,result.segundo_apellido);
+      this.nameAfil = this.unirNombres(result.primer_nombre, result.segundo_nombre, result.tercer_nombre, result.primer_apellido, result.segundo_apellido);
     }
     );
-}
-
-unirNombres(
-  primerNombre: string, segundoNombre?: string, tercerNombre?: string,
-  primerApellido?: string, segundoApellido?: string
-): string {
-  let partesNombre: any = [primerNombre, segundoNombre, tercerNombre, primerApellido, segundoApellido].filter(Boolean);
-
-  let nombreCompleto: string = partesNombre.join(' ');
-  return nombreCompleto;
-}
-
-async previsualizarInfoAfil(){
-  this.Afiliado.nameAfil = ""
-  if (this.data.value.dni){
-    /* SOLO RETORNA LOS AFILIADOS SIN BENEFICIARIOS Y SIN IMPORTAR EL ESTADO: ACTIVO, FALLECIDO, ETC. */
-    await this.svcAfilServ.getAfilByParam(this.data.value.dni).subscribe(
-      (result) => {
-        this.Afiliado = result
-        this.Afiliado.nameAfil = this.unirNombres(result.primer_nombre,result.segundo_nombre, result.tercer_nombre, result.primer_apellido,result.segundo_apellido);
-
-        //this.toastr.success('TipoPlanilla editada con éxito');
-      },
-      (error) => {
-        this.Afiliado.estado = ""
-        this.toastr.error(`Error: ${error.error.message}`);
-    })
-
-
   }
-}
 
-guardarDetalleDeduccion(){
-  this.deduccionesService.createDetalleDeduccion(this.data.value).subscribe(
-    {
-      next: (response) => {
-        this.toastr.success('Detalle de deduccion creado con éxito');
-        this.limpiarFormulario()
+  unirNombres(
+    primerNombre: string, segundoNombre?: string, tercerNombre?: string,
+    primerApellido?: string, segundoApellido?: string
+  ): string {
+    let partesNombre: any = [primerNombre, segundoNombre, tercerNombre, primerApellido, segundoApellido].filter(Boolean);
 
-      },
-      error: (error) => {
-        let mensajeError = 'Error desconocido al crear Detalle de deduccion';
-        if (error.error && error.error.message) {
-          mensajeError = error.error.message;
-        } else if (typeof error.error === 'string') {
-          mensajeError = error.error;
-        }
-        this.toastr.error(mensajeError);
-      }
+    let nombreCompleto: string = partesNombre.join(' ');
+    return nombreCompleto;
+  }
+
+  async previsualizarInfoAfil() {
+    this.Afiliado.nameAfil = ""
+    if (this.data.value.dni) {
+      /* SOLO RETORNA LOS AFILIADOS SIN BENEFICIARIOS Y SIN IMPORTAR EL ESTADO: ACTIVO, FALLECIDO, ETC. */
+      await this.svcAfilServ.getAfilByParam(this.data.value.dni).subscribe(
+        (result) => {
+          this.Afiliado = result
+          this.Afiliado.nameAfil = this.unirNombres(result.primer_nombre, result.segundo_nombre, result.tercer_nombre, result.primer_apellido, result.segundo_apellido);
+
+          //this.toastr.success('TipoPlanilla editada con éxito');
+        },
+        (error) => {
+          this.Afiliado.estado = ""
+          this.toastr.error(`Error: ${error.error.message}`);
+        })
     }
-    );
-}
+  }
 
-/* Carga de archivos */
+  guardarDetalleDeduccion() {
+    this.deduccionesService.createDetalleDeduccion(this.data.value).subscribe(
+      {
+        next: (response) => {
+          this.toastr.success('Detalle de deduccion creado con éxito');
+          this.limpiarFormulario()
+
+        },
+        error: (error) => {
+          let mensajeError = 'Error desconocido al crear Detalle de deduccion';
+          if (error.error && error.error.message) {
+            mensajeError = error.error.message;
+          } else if (typeof error.error === 'string') {
+            mensajeError = error.error;
+          }
+          this.toastr.error(mensajeError);
+        }
+      }
+    );
+  }
+
+  /* Carga de archivos */
   file: File | null = null;
   isUploading = false;
   private cancelUploadSubject = new Subject<void>();
@@ -192,8 +188,7 @@ guardarDetalleDeduccion(){
   uploadInterval: any = null;
   @ViewChild('fileInput') fileInput!: ElementRef;
   datosCargados: any[] = [];
-  datosCargadosExitosamente : any;
-
+  datosCargadosExitosamente: any;
 
   onFileSelected(event: any) {
     const target: DataTransfer = <DataTransfer>(event.target);
@@ -214,8 +209,8 @@ guardarDetalleDeduccion(){
 
   startUpload() {
     if (!this.file) {
-        this.toastr.error('No se seleccionó ningún archivo.', 'Error');
-        return;
+      this.toastr.error('No se seleccionó ningún archivo.', 'Error');
+      return;
     }
 
     this.isUploading = true;
@@ -223,73 +218,71 @@ guardarDetalleDeduccion(){
 
     const reader: FileReader = new FileReader();
     reader.onload = (e: any) => {
-        const bstr: string = e.target.result;
-        const wb: XLSX.WorkBook = XLSX.read(bstr, { type: 'binary' });
-        const wsname: string = wb.SheetNames[0];
-        const ws: XLSX.WorkSheet = wb.Sheets[wsname];
+      const bstr: string = e.target.result;
+      const wb: XLSX.WorkBook = XLSX.read(bstr, { type: 'binary' });
+      const wsname: string = wb.SheetNames[0];
+      const ws: XLSX.WorkSheet = wb.Sheets[wsname];
 
-        // Convertir hoja a un arreglo de objetos
-        let data: any[] = XLSX.utils.sheet_to_json(ws, { raw: false, defval: null });
+      // Convertir hoja a un arreglo de objetos
+      let data: any[] = XLSX.utils.sheet_to_json(ws, { raw: false, defval: null });
 
-        // Filtrar filas completamente vacías
-        data = data.filter(row => Object.values(row).some(cell => cell != null && cell.toString().trim() !== ''));
+      // Filtrar filas completamente vacías
+      data = data.filter(row => Object.values(row).some(cell => cell != null && cell.toString().trim() !== ''));
 
-        // Encuentra la primera fila con columnas vacías y sus nombres
-        let errorDetails: { row: number; columns: string[] }[] = [];
-        data.forEach((row, rowIndex) => {
-            const emptyColumns = Object.keys(row).filter(key => {
-                const value = row[key];
-                return value == null || value.toString().trim() === '';
-            });
-
-            if (emptyColumns.length > 0) {
-                errorDetails.push({ row: rowIndex + 1, columns: emptyColumns });
-            }
+      // Encuentra la primera fila con columnas vacías y sus nombres
+      let errorDetails: { row: number; columns: string[] }[] = [];
+      data.forEach((row, rowIndex) => {
+        const emptyColumns = Object.keys(row).filter(key => {
+          const value = row[key];
+          return value == null || value.toString().trim() === '';
         });
 
-        if (errorDetails.length > 0) {
-            // Crear un mensaje de error que incluye detalles de todas las filas con problemas
-            const errorMessage = errorDetails.map(error => `Error en la fila ${error.row}: las columnas ${error.columns.join(', ')} están vacías.`).join(' ');
-            this.toastr.error(errorMessage, 'Error en la carga');
-            this.resetState();
-            return;
+        if (emptyColumns.length > 0) {
+          errorDetails.push({ row: rowIndex + 1, columns: emptyColumns });
         }
+      });
 
-        // Enviar datos procesados y validados al backend
-        this.deduccionesService.crearDesdeExcel(data).subscribe({
-            next: (response) => {
-                console.log('Datos insertados exitosamente:', response);
-                this.toastr.success('Todos los datos se cargaron correctamente.', 'Carga exitosa');
-                this.datosCargadosExitosamente = true;
-                this.resetState(); // Reiniciar estado después de la carga exitosa
-            },
-            error: (error) => {
-                this.toastr.error('Error al cargar los datos.', 'Error de carga');
-                this.datosCargadosExitosamente = false;
-                this.resetState(); // Reiniciar estado en caso de error
+      if (errorDetails.length > 0) {
+        // Crear un mensaje de error que incluye detalles de todas las filas con problemas
+        const errorMessage = errorDetails.map(error => `Error en la fila ${error.row}: las columnas ${error.columns.join(', ')} están vacías.`).join(' ');
+        this.toastr.error(errorMessage, 'Error en la carga');
+        this.resetState();
+        return;
+      }
 
-                // Verificar si la respuesta de error contiene detalles específicos
-                if (error.error && error.error.details) {
-                    error.error.details.forEach((detail:any) => {
-                        this.toastr.error(`Detalle: ${detail.message}`, 'Error Detallado');
-                    });
-                } else {
-                    // Mensaje de error genérico si no hay detalles disponibles
-                    this.toastr.error(error.message || 'Ocurrió un error desconocido.', 'Error');
-                }
-            }
-        });
+      // Enviar datos procesados y validados al backend
+      this.deduccionesService.crearDesdeExcel(data).subscribe({
+        next: (response) => {
+          console.log('Datos insertados exitosamente:', response);
+          this.toastr.success('Todos los datos se cargaron correctamente.', 'Carga exitosa');
+          this.datosCargadosExitosamente = true;
+          this.resetState(); // Reiniciar estado después de la carga exitosa
+        },
+        error: (error) => {
+          this.toastr.error('Error al cargar los datos.', 'Error de carga');
+          this.datosCargadosExitosamente = false;
+          this.resetState(); // Reiniciar estado en caso de error
+
+          // Verificar si la respuesta de error contiene detalles específicos
+          if (error.error && error.error.details) {
+            error.error.details.forEach((detail: any) => {
+              this.toastr.error(`Detalle: ${detail.message}`, 'Error Detallado');
+            });
+          } else {
+            // Mensaje de error genérico si no hay detalles disponibles
+            this.toastr.error(error.message || 'Ocurrió un error desconocido.', 'Error');
+          }
+        }
+      });
     };
 
     reader.onerror = () => {
-        this.toastr.error('Ocurrió un error al leer el archivo. Asegúrate de que el formato del archivo sea correcto.', 'Error');
-        this.resetState(); // Reiniciar estado en caso de error de lectura
+      this.toastr.error('Ocurrió un error al leer el archivo. Asegúrate de que el formato del archivo sea correcto.', 'Error');
+      this.resetState(); // Reiniciar estado en caso de error de lectura
     };
 
     reader.readAsBinaryString(this.file as Blob);
-}
-
-
+  }
 
   cancelUpload() {
     if (this.uploadInterval) {
@@ -307,9 +300,9 @@ guardarDetalleDeduccion(){
     this.file = null;
     this.datosCargados = []; // Limpia los datos cargados para evitar mostrar datos residuales
     if (this.fileInput && this.fileInput.nativeElement) {
-        this.fileInput.nativeElement.value = '';
+      this.fileInput.nativeElement.value = '';
     }
-}
+  }
 
   limpiarFormulario(): void {
     // Utiliza la referencia al componente DynamicFormComponent para resetear el formulario
@@ -318,6 +311,4 @@ guardarDetalleDeduccion(){
       this.Afiliado = [];
     }
   }
-
 }
-

@@ -15,16 +15,15 @@ export class CentroTrabajoService {
     const url = `${environment.API_URL}/centrosTrabajo`;
     return this.http.get<any>(
       url,
-      ).pipe(
-        map((res:any) => {
-          return res;
-        })
-      );
+    ).pipe(
+      map((res: any) => {
+        return res;
+      })
+    );
   }
 
   agregarCentroTrabajo(nuevoCentro: any): Observable<any> {
     const url = `${environment.API_URL}/centrosTrabajo/nuevoCentro`;
-    console.log(nuevoCentro);
     return this.http.post<any>(url, nuevoCentro);
   }
 

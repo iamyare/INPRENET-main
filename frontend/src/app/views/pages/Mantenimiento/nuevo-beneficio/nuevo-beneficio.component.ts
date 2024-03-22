@@ -9,34 +9,38 @@ import { DynamicFormComponent } from '@docs-components/dynamic-form/dynamic-form
   templateUrl: './nuevo-beneficio.component.html',
   styleUrl: './nuevo-beneficio.component.scss'
 })
-export class NuevoBeneficioComponent implements OnInit{
+export class NuevoBeneficioComponent implements OnInit {
   @ViewChild(DynamicFormComponent) dynamicForm!: DynamicFormComponent;
-  data:any
-  form:any
-  myFormFields:FieldConfig[] = []
-  constructor(private SVCBeneficios:BeneficiosService, private toastr: ToastrService ,){}
+  data: any
+  form: any
+  myFormFields: FieldConfig[] = []
+  constructor(private SVCBeneficios: BeneficiosService, private toastr: ToastrService,) {
+    this.precargarDatos();
+  }
 
-  ngOnInit(): void {
+  precargarDatos() {
     /* SI SE MUEVE LA FILA Periodo hay que cambiar la posicion en la funcion obtenerDatos */
     this.myFormFields = [
-      { type: 'text', label: 'Nombre de beneficio', name: 'nombre_beneficio', validations: [Validators.required], display:true },
-      { type: 'text', label: 'Descripción de beneficio', name: 'descripcion_beneficio', validations: [Validators.required], display:true},
-      { type: 'dropdown', label: 'Periodicidad', name: 'periodicidad', validations: [Validators.required], options:[{label:"VITALICIO", value:"VITALICIO"}, {label:"DEFINIDO", value:"DEFINIDO"}] , display:true},
-      { type: 'number', label: 'Número de rentas máximas', name: 'numero_rentas_max', validations: [], display:false},
+      { type: 'text', label: 'Nombre de beneficio', name: 'nombre_beneficio', validations: [Validators.required], display: true },
+      { type: 'text', label: 'Descripción de beneficio', name: 'descripcion_beneficio', validations: [Validators.required], display: true },
+      { type: 'dropdown', label: 'Periodicidad', name: 'periodicidad', validations: [Validators.required], options: [{ label: "VITALICIO", value: "VITALICIO" }, { label: "DEFINIDO", value: "DEFINIDO" }], display: true },
+      { type: 'number', label: 'Número de rentas máximas', name: 'numero_rentas_max', validations: [], display: false },
     ];
   }
 
-  obtenerDatos(event:any):any{
+  ngOnInit(): void { }
+
+  obtenerDatos(event: any): any {
     this.form = event
-    if (event.value.periodicidad == "DEFINIDO"){
+    if (event.value.periodicidad == "DEFINIDO") {
       this.myFormFields[3].display = true
-    }else {
+    } else {
       this.myFormFields[3].display = false
     }
     this.data = event;
   }
 
-  guardarTipoBeneficio(){
+  guardarTipoBeneficio() {
     const formValues = { ...this.data.value };
     this.myFormFields.forEach(field => {
       if (field.type === 'number' && formValues[field.name] !== null && formValues[field.name] !== undefined) {
@@ -62,7 +66,7 @@ export class NuevoBeneficioComponent implements OnInit{
           this.toastr.error(mensajeError);
         }
       }
-      );
+    );
   }
 
   limpiarFormulario(): void {

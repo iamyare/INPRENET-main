@@ -2,10 +2,12 @@ import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/commo
 import { MunicipioService } from './municipio.service';
 import { CreateMunicipioDto } from './dto/create-municipio.dto';
 import { UpdateMunicipioDto } from './dto/update-municipio.dto';
+import { ApiTags } from '@nestjs/swagger';
 
+@ApiTags('municipio')
 @Controller('municipio')
 export class MunicipioController {
-  constructor(private readonly municipioService: MunicipioService) {}
+  constructor(private readonly municipioService: MunicipioService) { }
 
   @Post()
   create(@Body() createMunicipioDto: CreateMunicipioDto) {

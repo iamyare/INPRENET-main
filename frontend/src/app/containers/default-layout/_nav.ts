@@ -1,6 +1,5 @@
 import { INavData } from '@coreui/angular';
 
-
 export const navItems: INavData[] = [
   /* {
     name: 'Dashboard',
@@ -11,10 +10,24 @@ export const navItems: INavData[] = [
       text: 'NEW'
     }
   }, */
-
   {
     title: true,
     name: 'Menú Mantenimiento'
+  },
+  {
+    name: 'Beneficio',
+    iconComponent: { name: 'cilMoney' },
+    url: '/base',
+    children: [
+      {
+        name: 'Nuevo Beneficio',
+        url: '/Beneficio/nuevo-beneficio',
+      },
+      {
+        name: 'Editar Beneficio',
+        url: '/Beneficio/editar-beneficio',
+      },
+  ]
   },
   {
     name: 'Deducción',
@@ -51,126 +64,76 @@ export const navItems: INavData[] = [
     title: true,
     name: 'Menú Principal'
   },
-
-  {
-    name: 'Afiliación',
-    iconComponent: { name: 'cil-people' },
-    url: '/base',
-    children: [
-      {
-        name: 'Nuevo Afiliado',
-        children: [
-          {
-            name: 'Nuevo',
-            url: '/Afiliado/afil-banco',
-          },
-        ]
-      },
-      {
-        name: 'Ver / Editar',
-        children: [
-          {
-            url: '/Afiliado/datos-gen-afil',
-            name: 'Datos generales',
-          },
-          {
-            url: '/Afiliado/afil-banco',
-            name: 'Centros de trabajo',
-          },
-          {
-            url: '/Afiliado/afil-banco',
-            name: 'Historial de salario',
-          },
-          {
-            url: '/Afiliado/afil-banco',
-            name: 'Referencias personales',
-          },
-          {
-            url: '/Afiliado/afil-banco',
-            name: 'Beneficiarios',
-          }
-        ]
-      },
-      {
-        name: 'Beneficios',
-        url: '/base',
-        children: [
-          {
-            url: 'Afiliado/Beneficios/nuevo-beneficio-afil',
-            name: 'Nueva Beneficio',
-          },
-          {
-            url: 'Afiliado/Beneficios/Ver-editar-beneficio-afil',
-            name: 'Ver/Editar Beneficio',
-          },
-        ]
-      },
-      {
-        name: 'Deducciones',
-        url: '/base',
-        children: [
-          {
-            url: 'Afiliado/Deducciones/nueva-deduccion-afil',
-            name: 'Nueva Deducción',
-          },
-          {
-            url: 'Afiliado/Deducciones/ver-editar-deduccion-afil',
-            name: 'Ver/editar Deducción',
-          },
-        ]
-      },
-    ]
-  },
-
-  {
-    name: 'Planilla',
-    iconComponent: { name: 'cilSpreadsheet' },
-    url: '/base',
-    children: [
-      {
-        name: 'Ingresos',
-        iconComponent: { name: 'cilMoney' },
-        children: [
-          {
-            name: 'Privados',
-            children: [
-              {
-                name: 'Planilla de privados',
-                url: '/Planilla/Ingresos/Privados/planilla-colegios-privados',
-              },
-              {
-                name: 'Cargar Planilla de privados',
-                url: '/Planilla/Ingresos/Privados/cargar-planilla-privados',
-              },
+    {
+      name: 'Afiliación',
+      iconComponent: { name: 'cil-people' },
+      url: '/base',
+      children: [
+        {
+          name: 'Nuevo Afiliado',
+          children: [
+            {
+              name: 'Nuevo',
+              url: '/Afiliado/afil-banco',
+            },
           ]
-          }
-          /* {
-            url: '/Planilla/Ingresos/nueva-planilla',
-            name: 'Nueva Planilla',
-          },
-          {
-            url: '/Planilla/Ingresos/ver-planillas',
-            name: 'Ver Planillas',
-          }, */
-        ]
-      },
-      {
-        name: 'Egresos',
-        iconComponent: { name: 'cilMoney' },
-        children: [
-          {
-            url: '/Planilla/Egresos/nueva-planilla',
-            name: 'Nueva Planilla',
-          },
-          {
-            url: '/Planilla/Egresos/ver-planillas',
-            name: 'Ver Planillas',
-          },
-        ]
-      }
-    ]
-  },
-  {
+        },
+        {
+          name: 'Ver / Editar',
+          children: [
+            {
+              url: '/Afiliado/datos-gen-afil',
+              name: 'Datos generales',
+            },
+            {
+              url: '/Afiliado/afil-banco',
+              name: 'Centros de trabajo',
+            },
+            {
+              url: '/Afiliado/afil-banco',
+              name: 'Historial de salario',
+            },
+            {
+              url: '/Afiliado/afil-banco',
+              name: 'Referencias personales',
+            },
+            {
+              url: '/Afiliado/afil-banco',
+              name: 'Beneficiarios',
+            }
+          ]
+        },
+        {
+          name: 'Beneficios',
+          url: '/base',
+          children: [
+            {
+              url: 'Afiliado/Beneficios/nuevo-beneficio-afil',
+              name: 'Nueva Beneficio',
+            },
+            {
+              url: 'Afiliado/Beneficios/Ver-editar-beneficio-afil',
+              name: 'Ver/Editar Beneficio',
+            },
+          ]
+        },
+        {
+          name: 'Deducciones',
+          url: '/base',
+          children: [
+            {
+              url: 'Afiliado/Deducciones/nueva-deduccion-afil',
+              name: 'Nueva Deducción',
+            },
+            {
+              url: 'Afiliado/Deducciones/ver-editar-deduccion-afil',
+              name: 'Ver/editar Deducción',
+            },
+          ]
+        },
+      ]
+    },
+    {
       name: 'Movimientos',
       iconComponent: { name: 'cilSpreadsheet' },
       url: '/base',
@@ -184,6 +147,55 @@ export const navItems: INavData[] = [
           url: '/Movimiento/ver-movimientos',
         },
     ]
+  },
+    {
+      name: 'Planilla',
+      iconComponent: { name: 'cilSpreadsheet' },
+      url: '/base',
+      children: [
+        {
+          name: 'Ingresos',
+          iconComponent: { name: 'cilMoney' },
+          children: [
+            {
+              name: 'Privados',
+              children: [
+                {
+                  name: 'Planilla de privados',
+                  url: '/Planilla/Ingresos/Privados/planilla-colegios-privados',
+                },
+                {
+                  name: 'Cargar Planilla de privados',
+                  url: '/Planilla/Ingresos/Privados/cargar-planilla-privados',
+                },
+            ]
+            }
+            /* {
+              url: '/Planilla/Ingresos/nueva-planilla',
+              name: 'Nueva Planilla',
+            },
+            {
+              url: '/Planilla/Ingresos/ver-planillas',
+              name: 'Ver Planillas',
+            }, */
+          ]
+        },
+        {
+          name: 'Egresos',
+          iconComponent: { name: 'cilMoney' },
+          children: [
+            {
+              url: '/Planilla/Egresos/nueva-planilla',
+              name: 'Nueva Planilla',
+            },
+            {
+              url: '/Planilla/Egresos/ver-planillas',
+              name: 'Ver Planillas',
+            },
+          ]
+        }
+      ]
     },
+
 ]
 ;

@@ -1,17 +1,19 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Query,Response, BadRequestException, HttpStatus } from '@nestjs/common';
-import {  DetalleBeneficioService } from './detalle_beneficio.service';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Query, Response, BadRequestException, HttpStatus } from '@nestjs/common';
+import { DetalleBeneficioService } from './detalle_beneficio.service';
 import { UpdateDetalleBeneficioDto } from './dto/update-detalle_beneficio_planilla.dto';
 import { CreateDetalleBeneficioDto } from './dto/create-detalle_beneficio.dto';
+import { ApiTags } from '@nestjs/swagger';
 
+@ApiTags('beneficio-planilla')
 @Controller('beneficio-planilla')
 export class DetalleBeneficioController {
-  constructor(private readonly detallebeneficioService: DetalleBeneficioService) {}
+  constructor(private readonly detallebeneficioService: DetalleBeneficioService) { }
 
   @Post('nuevoDetalle/:idAfiliadoPadre')
   async createDetalleBeneficioBeneficiario(@Body() createDetalleBeneficioDto: CreateDetalleBeneficioDto, @Param('idAfiliadoPadre') idAfiliadoPadre: number) {
     try {
       const nuevoDetalle = await this.detallebeneficioService.createDetalleBeneficioAfiliado(createDetalleBeneficioDto, idAfiliadoPadre);
-      return { 
+      return {
         statusCode: HttpStatus.CREATED,
         message: 'Detalle de beneficio afiliado creado exitosamente',
         data: nuevoDetalle
@@ -25,7 +27,7 @@ export class DetalleBeneficioController {
   async createDetalleBeneficioAfiliado(@Body() createDetalleBeneficioDto: CreateDetalleBeneficioDto) {
     try {
       const nuevoDetalle = await this.detallebeneficioService.createDetalleBeneficioAfiliado(createDetalleBeneficioDto);
-      return { 
+      return {
         statusCode: HttpStatus.CREATED,
         message: 'Detalle de beneficio afiliado creado exitosamente',
         data: nuevoDetalle
@@ -49,7 +51,7 @@ export class DetalleBeneficioController {
   async createBenBenefic(@Body() createDetalleBeneficioDto: CreateDetalleBeneficioDto, @Param('idAfiliado') idAfiliado: string) {
     try {
       const nuevoDetalle = await this.detallebeneficioService.createBenBenefic(createDetalleBeneficioDto, idAfiliado);
-      return { 
+      return {
         statusCode: HttpStatus.CREATED,
         message: 'Detalle de beneficio afiliado creado exitosamente',
         data: nuevoDetalle
@@ -107,7 +109,7 @@ export class DetalleBeneficioController {
   GetAllBeneficios(@Param('dni') dni: string) {
     return this.detallebeneficioService.GetAllBeneficios(dni);
   }
-  
+
   @Get('/rango-beneficios')
   async getRangoDetalleBeneficios(
     @Query('idAfiliado') idAfiliado: string,

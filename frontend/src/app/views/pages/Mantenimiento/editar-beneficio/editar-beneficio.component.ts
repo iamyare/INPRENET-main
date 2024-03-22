@@ -21,7 +21,7 @@ export class EditarBeneficioComponent implements OnInit {
     private svcBeneficioServ: BeneficiosService,
     private toastr: ToastrService,
     private dialog: MatDialog
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     this.myColumns = [
@@ -102,16 +102,16 @@ export class EditarBeneficioComponent implements OnInit {
 
   manejarAccionUno(row: any) {
     const campos = [
-      { nombre: 'nombre_beneficio', tipo: 'text', requerido: true, etiqueta: 'Nombre del beneficio', editable:true  },
-      { nombre: 'descripcion_beneficio', tipo: 'text', requerido: true, etiqueta: 'descripcion del beneficio' , editable:true },
-      { nombre: 'numero_rentas_max', tipo: 'number', requerido: true, etiqueta: 'Número de rentas máximas', editable:true },
-      { nombre: 'periodicidad', tipo: 'text', requerido: false, etiqueta: 'periodicidad', editable:false  }
+      { nombre: 'nombre_beneficio', tipo: 'text', requerido: true, etiqueta: 'Nombre del beneficio', editable: true },
+      { nombre: 'descripcion_beneficio', tipo: 'text', requerido: true, etiqueta: 'descripcion del beneficio', editable: true },
+      { nombre: 'numero_rentas_max', tipo: 'number', requerido: true, etiqueta: 'Número de rentas máximas', editable: true },
+      { nombre: 'periodicidad', tipo: 'text', requerido: false, etiqueta: 'periodicidad', editable: false }
     ];
 
     this.openDialog(campos, row);
   }
 
-  openDialog(campos:any, row:any): void {
+  openDialog(campos: any, row: any): void {
     const dialogRef = this.dialog.open(EditarDialogComponent, {
       width: '500px',
       data: { campos: campos, valoresIniciales: row }

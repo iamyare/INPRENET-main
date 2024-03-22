@@ -7,7 +7,7 @@ import { FieldConfig } from 'src/app/shared/Interfaces/field-config';
   templateUrl: './dynamic-form.component.html',
   styleUrl: './dynamic-form.component.scss'
 })
-export class DynamicFormComponent implements OnInit{
+export class DynamicFormComponent implements OnInit {
   form: FormGroup;
 
   @Input() fields: FieldConfig[] = [];
@@ -25,15 +25,15 @@ export class DynamicFormComponent implements OnInit{
   }
 
   onDatosBenChange() {
-  const formValues = { ...this.form.value };
-  this.fields.forEach(field => {
-    if (field.type === 'number' && formValues[field.name] !== null && formValues[field.name] !== undefined) {
-      this.form.value[field.name] = + formValues[field.name];
-    }
-  });
-  this.newDatBenChange.emit(this.form);
+    const formValues = { ...this.form.value };
+    this.fields.forEach(field => {
+      if (field.type === 'number' && formValues[field.name] !== null && formValues[field.name] !== undefined) {
+        this.form.value[field.name] = + formValues[field.name];
+      }
+    });
+    this.newDatBenChange.emit(this.form);
 
-}
+  }
 
   createControl(): FormGroup {
     const group = this.fb.group({});
@@ -48,14 +48,14 @@ export class DynamicFormComponent implements OnInit{
         // Modificación aquí
         const control = field.type === 'number'
           ? this.fb.control(
-              // Utilizamos el operador + para convertir la cadena a número
-              +field.value || null,
-              field.validations
-            )
+            // Utilizamos el operador + para convertir la cadena a número
+            +field.value || null,
+            field.validations
+          )
           : this.fb.control(
-              field.value || '',
-              field.validations
-            );
+            field.value || '',
+            field.validations
+          );
         group.addControl(field.name, control);
       }
     });

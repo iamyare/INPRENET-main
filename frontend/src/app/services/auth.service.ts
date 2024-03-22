@@ -39,7 +39,6 @@ export class AuthService {
     }
   }
 
-
   crearCuenta(data:any): Observable<any>{
     var url = `${environment.API_URL}/api/usuario/auth/signup`;
     return this.http.post<any>(
@@ -60,7 +59,5 @@ export class AuthService {
       }),
     );
   }
-
-
 
 }

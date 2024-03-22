@@ -34,22 +34,23 @@
   </div>
 </div>
 
-
-<div>
+<div style="background-color: white; margin: 1% 0% 1% 0%; padding: 0% 0% 1% 0%">
   <app-dynamic-form
     [fields]="myFormFields"
-    titulo=""
+    titulo="Buscar Persona"
     subtitulo="Completa la información correspondiente"
     (newDatBenChange)="obtenerDatos($event)"
   ></app-dynamic-form>
 
-  <button
-    mat-raised-button
-    color="primary"
-    style="color: white; margin: 1% 0 1% 0"
-    [disabled]="form.invalid"
-    (click)="previsualizarInfoPersona()"
-  >
-    Previsualizar información de la persona
-  </button>
+  <div style="text-align: center">
+    <button
+      mat-raised-button
+      color="primary"
+      style="color: white; margin: 1% 0 1% 0"
+      [disabled]="form.invalid"
+      (click)="previsualizarInfoPersona()"
+    >
+      Previsualizar información de la persona
+    </button>
+  </div>
 </div>

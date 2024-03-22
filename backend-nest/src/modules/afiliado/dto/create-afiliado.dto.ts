@@ -5,7 +5,7 @@ import { CreateBancoDto } from "src/modules/banco/dto/create-banco.dto";
 import { CreateAfiliadoRelacionadoDto } from "./CreateAfiliadoRelacionadoDto";
 
 
-export interface PersonaResponse{
+export interface PersonaResponse {
     id_persona: number;
     dni: string;
     estado_civil: string;
@@ -30,87 +30,89 @@ export interface PersonaResponse{
     fecha_nacimiento: string;
     archivo_identificacion: string;
     tipoIdentificacion: string;
-    }
-    
+    porcentaje: string;
+    tipo_afiliado: string;
+}
+
 
 export class CreateAfiliadoDto {
 
     //Datos de tabla Afiliado
     @IsString()
-    dni : string;
+    dni: string;
 
     @IsString()
-    estado_civil : string;
-    
-    @IsString()
-    tipo_cotizante : string;
-    
-    @IsString()
-    primer_nombre : string;
-    
-    @IsOptional()
-    @IsString()
-    segundo_nombre : string;
-   
-    @IsOptional()
-    @IsString()
-    tercer_nombre : string;
+    estado_civil: string;
 
     @IsString()
-    primer_apellido : string;
-    
+    tipo_cotizante: string;
+
+    @IsString()
+    primer_nombre: string;
+
     @IsOptional()
     @IsString()
-    segundo_apellido : string;
+    segundo_nombre: string;
+
+    @IsOptional()
+    @IsString()
+    tercer_nombre: string;
+
+    @IsString()
+    primer_apellido: string;
+
+    @IsOptional()
+    @IsString()
+    segundo_apellido: string;
 
     @IsDateString()
-    fecha_nacimiento : string;
+    fecha_nacimiento: string;
 
     @IsString()
-    sexo : string;
-    
+    sexo: string;
+
     @IsNumber()
-    cantidad_dependientes : number;
-    
+    cantidad_dependientes: number;
+
     @IsNumber()
-    cantidad_hijos : number;
-    
+    cantidad_hijos: number;
+
     @IsString()
-    profesion : string;
-    
+    profesion: string;
+
     @IsString()
-    representacion : string;
-    
+    representacion: string;
+
     @IsString()
-    telefono_1 : string;
+    telefono_1: string;
 
     @IsOptional()
     @IsString()
-    telefono_2 : string;
-    
+    telefono_2: string;
+
     @IsString()
     @IsEmail()
-    correo_1 : string;
+    correo_1: string;
 
     @IsOptional()
     @IsString()
     @IsEmail()
-    correo_2 : string;
-    
-    @IsString()
-    archivo_identificacion : string;
-    
-    @IsString()
-    direccion_residencia : string;
-    
-    @IsString()
-    estado : string;
+    correo_2: string;
 
     @IsString()
-    colegio_magisterial : string;
-    
+    archivo_identificacion: string;
+
     @IsString()
-    numero_carnet : string;
+    direccion_residencia: string;
+
+    @IsString()
+    estado: string;
+
+    @IsString()
+    colegio_magisterial: string;
+
+    @IsString()
+    numero_carnet: string;
 
     @IsArray()
     @ValidateNested({ each: true })
@@ -131,27 +133,27 @@ export class CreateAfiliadoDto {
     //datos de tabla de referencia personal
     @IsString()
     @IsOptional()
-    nombre : string;
-    
+    nombre: string;
+
     @IsString()
     @IsOptional()
-    direccion : string;
-    
+    direccion: string;
+
     @IsString()
     @IsOptional()
-    parentesco : string;
+    parentesco: string;
 
     @IsOptional()
     @IsString()
-    telefono_domicilio : string;
+    telefono_domicilio: string;
 
     @IsOptional()
     @IsString()
-    telefono_trabajo : string;
-    
+    telefono_trabajo: string;
+
     @IsString()
     @IsOptional()
-    telefono_celular : string;
+    telefono_celular: string;
 
     @IsString()
     @IsOptional()
@@ -163,7 +165,7 @@ export class CreateAfiliadoDto {
 
     @IsString()
     @IsOptional()
-    nombre_departamento?: string;    
+    nombre_departamento?: string;
 
 
 }
@@ -173,7 +175,7 @@ export class CreateAfiliadoDto {
     @Type(() => CreatePerfAfilCentTrabDto)
     perfAfilCentTrabs: CreatePerfAfilCentTrabDto[]; */
 
-    /* @IsArray()
-    @ValidateNested({ each: true })
-    @Type(() => CreateHistorialTrabajoDto)
-    historialSalario: CreateHistorialTrabajoDto[]; */
+/* @IsArray()
+@ValidateNested({ each: true })
+@Type(() => CreateHistorialTrabajoDto)
+historialSalario: CreateHistorialTrabajoDto[]; */

@@ -14,7 +14,7 @@ export class NET_TIPO_MOVIMIENTO_CUENTA {
     ID_TIPO_CUENTA : number;
 
     @Column()
-    ACTIVA_B:number;
+    ACTIVA_B:string;
 
     @Column({length:1})
     DEBITO_CREDITO_B:string;

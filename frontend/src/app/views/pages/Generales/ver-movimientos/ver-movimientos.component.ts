@@ -23,41 +23,29 @@ export class VerMovimientosComponent implements OnInit{
 
     this.columns = [
       {
-        header: 'Tipo De Movimiento',
-        col : 'nombre_beneficio',
-      },
-      {
-        header: 'Tipo de Cuenta',
-        col : 'periodicidad',
-      },
-      {
-        header: 'Tipo Transaccion',
-        col : 'numero_rentas_max',
-      },
-      {
-        header: 'Descripcion',
-        col : 'periodoInicio',
-      },
-      {
-        header: 'Descripcion Corta',
-        col : 'periodoFinalizacion',
-      },
-      {
-        header: 'Cuenta Contable',
-        col : 'monto_por_periodo',
-      },
-      {
         header: 'Monto',
-        col : 'monto_total',
-      },
-      {
-        header: 'Justificacion',
-        col : 'monto_total',
+        col : 'movimiento_MONTO',
       },
       {
         header: 'Fecha de movimiento',
-        col : 'monto_total',
+        col : 'movimiento_FECHA_MOVIMIENTO',
       },
+      {
+        header: 'Cuenta Contable',
+        col : 'CUENTA_CONTABLE',
+      },
+      {
+        header: 'Tipo de Cuenta',
+        col : 'DESCRIPCION_TIPO_CUENTA',
+      },
+      {
+        header: 'Tipo de Transacción',
+        col : 'DEBITO_CREDITO_B',
+      },
+      {
+        header: 'Estado',
+        col : 'ACTIVA_B',
+      }
     ];
   }
 

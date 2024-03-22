@@ -1,8 +1,47 @@
+<div class="container">
+  <form (ngSubmit)="onSubmit()">
+    <div fxLayout="row" fxLayoutGap="8px" fxLayoutAlign="start center">
+      <!-- Campo de entrada ocupando la mayor parte del espacio -->
+      <mat-form-field fxFlex>
+        <mat-label>DNI</mat-label>
+        <input matInput [(ngModel)]="dni" name="dni" required>
+      </mat-form-field>
+
+      <!-- Botón alineado a la derecha dentro de la fila -->
+      <button mat-raised-button color="primary" type="submit" fxFlex="nogrow">Buscar DNI</button>
+    </div>
+  </form>
+</div>
+
+<div  *ngIf="datosEncontrados" class="tabla-container">
+  <h2> Selecciona un número de cuenta </h2>
+  <table mat-table [dataSource]="datosTabla" matSort class="mat-elevation-z8">
+
+    <!-- Número de Cuenta Column -->
+    <ng-container matColumnDef="NUMERO_CUENTA">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header> Número de Cuenta </th>
+      <td mat-cell *matCellDef="let elemento"> {{elemento.NUMERO_CUENTA}} </td>
+    </ng-container>
+
+    <!-- Descripción Column -->
+    <ng-container matColumnDef="DESCRIPCION">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header> Tipo De Cuenta </th>
+      <td mat-cell *matCellDef="let elemento"> {{elemento.DESCRIPCION}} </td>
+    </ng-container>
+    <tr mat-header-row *matHeaderRowDef="columnasMostradas"></tr>
+    <tr mat-row *matRowDef="let row; columns: columnasMostradas;" [class.selected]="row === elementoSeleccionado" (click)="seleccionarFila(row)"></tr>
+  </table>
+</div>
+
+
+
 <app-dynamic-form
   [fields]="myFormFields"
   titulo="Nuevo Movimiento"
   subtitulo="Completa la información correspondiente"
   (newDatBenChange)="obtenerDatos($event)"
+  style="margin-top: 20px;"
+  class="form-container"
 ></app-dynamic-form>
 
 <button
@@ -11,5 +50,5 @@
   color="primary"
   style="color: #ffffff; border-radius: 5px; padding: 10px 20px"
 >
-  Crear Tipo Beneficio
+  Crear nuevo Movimiento
 </button>

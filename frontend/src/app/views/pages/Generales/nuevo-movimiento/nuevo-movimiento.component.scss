@@ -1,0 +1,38 @@
+.selected {
+  background-color: rgba(0, 0, 0, 0.04); /* Ajusta el color y la opacidad según prefieras */
+  font-weight: bold; /* Hace el texto de la fila seleccionada en negrita */
+}
+
+
+.mat-elevation-z8 {
+  background-color: transparent !important; /* Hace el fondo de la tabla transparente */
+  box-shadow: none !important; /* Elimina cualquier sombra para mantener el estilo limpio */
+}
+
+.demo-table {
+  width: 100%;
+}
+
+.mat-mdc-row .mat-mdc-cell {
+  border-bottom: 1px solid transparent;
+  border-top: 1px solid transparent;
+  cursor: pointer;
+}
+
+.mat-mdc-row:hover .mat-mdc-cell {
+  border-color: currentColor;
+}
+
+.demo-row-is-clicked {
+  font-weight: bold;
+}
+
+
+.tabla-container {
+  margin-bottom: 20px; /* Ajusta el espacio según prefieras */
+}
+
+.form-container {
+  margin-top: 20px; /* Ajusta el espacio según prefieras */
+}
+

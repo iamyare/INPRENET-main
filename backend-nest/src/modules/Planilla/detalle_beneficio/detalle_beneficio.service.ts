@@ -1,4 +1,4 @@
-import * as oracledb from 'oracledb'; 
+import * as oracledb from 'oracledb';
 
 import { BadRequestException, Injectable, InternalServerErrorException, Logger, NotFoundException } from '@nestjs/common';
 import { isUUID } from 'class-validator';
@@ -22,21 +22,21 @@ export class DetalleBeneficioService {
 
   constructor(
     @InjectRepository(Net_Persona)
-    private  afiliadoRepository : Repository<Net_Persona>,
-    private  AfiliadoService : AfiliadoService,
-    
+    private afiliadoRepository: Repository<Net_Persona>,
+    private AfiliadoService: AfiliadoService,
+
     @InjectRepository(Net_Beneficio)
-    private readonly tipoBeneficioRepository : Repository<Net_Beneficio>,
-    
+    private readonly tipoBeneficioRepository: Repository<Net_Beneficio>,
+
     @InjectRepository(Net_Detalle_Pago_Beneficio)
-    private readonly benAfilRepository : Repository<Net_Detalle_Pago_Beneficio>,
+    private readonly benAfilRepository: Repository<Net_Detalle_Pago_Beneficio>,
     @InjectRepository(Net_Planilla)
     private planillaRepository: Repository<Net_Planilla>,
     @InjectRepository(Net_Detalle_Beneficio_Afiliado)
     private detalleBeneficioAfiliadoRepository: Repository<Net_Detalle_Beneficio_Afiliado>,
     private readonly connection: Connection,
-  @InjectEntityManager() private readonly entityManager: EntityManager
-  ){}
+    @InjectEntityManager() private readonly entityManager: EntityManager
+  ) { }
   async actualizarEstadoPorPlanilla(idPlanilla: string, nuevoEstado: string): Promise<{ mensaje: string }> {
     try {
       const resultado = await this.benAfilRepository.createQueryBuilder()
@@ -55,44 +55,43 @@ export class DetalleBeneficioService {
     }
   }
 
-  async createDetalleBeneficioAfiliado(datos: CreateDetalleBeneficioDto, idAfiliadoPadre?:number): Promise<any> {
-    
+  async createDetalleBeneficioAfiliado(datos: CreateDetalleBeneficioDto, idAfiliadoPadre?: number): Promise<any> {
     return await this.entityManager.transaction(async manager => {
       try {
         const beneficio = await manager.findOne(Net_Beneficio, { where: { nombre_beneficio: datos.nombre_beneficio } });
         if (!beneficio) {
           throw new BadRequestException('Tipo de beneficio no encontrado');
         }
-        
+
         // Asumimos que convertirCadenaAFecha es una función que convierte una cadena de fecha en formato DD-MM-YYYY a un objeto Date
         const periodoInicio = this.convertirCadenaAFecha(datos.periodoInicio);
         const periodoFinalizacion = this.convertirCadenaAFecha(datos.periodoFinalizacion);
-        
+
         // Verificar que las fechas sean válidas
         if (!periodoInicio || !periodoFinalizacion) {
           throw new BadRequestException('Formato de fecha inválido. Usa DD-MM-YYYY.');
         }
 
-        if( !idAfiliadoPadre ){
+        if (!idAfiliadoPadre) {
           const detPer = await manager.findOne(
             Net_Detalle_Afiliado, {
-              where: {
-                ID_CAUSANTE: idAfiliadoPadre,
-                tipoAfiliado: {
-                  tipo_afiliado: "AFILIADO",
-                },
-                afiliado: {
-                  estado: 'ACTIVO',
-                }
+            where: {
+              ID_CAUSANTE: idAfiliadoPadre,
+              tipoAfiliado: {
+                tipo_afiliado: "AFILIADO",
+              },
+              afiliado: {
+                estado: 'ACTIVO',
+              }
             },
-          relations: [
-            "afiliado", 
-            "padreIdAfiliado", 
-            "afiliado.detalleAfiliado.padreIdAfiliado"]
+            relations: [
+              "afiliado",
+              "padreIdAfiliado",
+              "afiliado.detalleAfiliado.padreIdAfiliado"]
           }
-        );
-          
-          if(detPer){
+          );
+
+          if (detPer) {
             const queryInsDeBBenf = `INSERT INTO NET_DETALLE_BENEFICIO_AFILIADO (
               ID_CAUSANTE,
               ID_BENEFICIARIO,
@@ -112,30 +111,30 @@ export class DetalleBeneficioService {
             )`
             /* Inserta en la tabla de detalle beneficio afiliado */
             const detBeneBeneficia = await this.entityManager.query(queryInsDeBBenf);
-            return detBeneBeneficia; 
-              
-            }  
-        }else{
-            const detPerB = await manager.findOne(
-                Net_Detalle_Afiliado, {
-                  where: {
-                    ID_CAUSANTE: idAfiliadoPadre,
-                    tipoAfiliado: {
-                      tipo_afiliado: "BENEFICIARIO",
-                    },
-                    afiliado: {
-                      estado: 'ACTIVO',
-                    }
-                },
-              relations: [
-                "afiliado", 
-                "padreIdAfiliado", 
-                "afiliado.detalleAfiliado.padreIdAfiliado"]
+            return detBeneBeneficia;
+
+          }
+        } else {
+          const detPerB = await manager.findOne(
+            Net_Detalle_Afiliado, {
+            where: {
+              ID_CAUSANTE: idAfiliadoPadre,
+              tipoAfiliado: {
+                tipo_afiliado: "BENEFICIARIO",
+              },
+              afiliado: {
+                estado: 'ACTIVO',
               }
-            );
-            
-            if(detPerB){
-              const queryInsDeBBenf = `INSERT INTO NET_DETALLE_BENEFICIO_AFILIADO (
+            },
+            relations: [
+              "afiliado",
+              "padreIdAfiliado",
+              "afiliado.detalleAfiliado.padreIdAfiliado"]
+          }
+          );
+
+          if (detPerB) {
+            const queryInsDeBBenf = `INSERT INTO NET_DETALLE_BENEFICIO_AFILIADO (
                 ID_CAUSANTE,
                 ID_BENEFICIARIO,
                 ID_BENEFICIO,
@@ -152,19 +151,20 @@ export class DetalleBeneficioService {
                 ${datos.monto_total},
                 ${datos.monto_por_periodo}
               )`
-              /* Inserta en la tabla de detalle beneficio afiliado */
-              const detBeneBeneficia = await this.entityManager.query(queryInsDeBBenf);
-              return detBeneBeneficia;    
-            }
+            /* Inserta en la tabla de detalle beneficio afiliado */
+            const detBeneBeneficia = await this.entityManager.query(queryInsDeBBenf);
+            return detBeneBeneficia;
           }
-          } catch (error) {
-              this.logger.error(`Error al crear DetalleBeneficioAfiliado y DetalleBeneficio: ${error.message}`, error.stack);
-              throw new InternalServerErrorException('Error al crear registros, por favor intente más tarde.');
-          }
-      });
-}
+        }
+      } catch (error) {
+        this.logger.error(`Error al crear DetalleBeneficioAfiliado y DetalleBeneficio: ${error.message}`, error.stack);
+        throw new InternalServerErrorException('Error al crear registros, por favor intente más tarde.');
+      }
+    });
 
-  async createBenBenefic(beneficiario: CreateDetalleBeneficioDto, idAfiliado:string): Promise<any> {
+  }
+
+  async createBenBenefic(beneficiario: CreateDetalleBeneficioDto, idAfiliado: string): Promise<any> {
     try {
       const query = `
         SELECT 
@@ -186,10 +186,10 @@ export class DetalleBeneficioService {
             "Afil"."dni" = '${beneficiario.dni}' AND
             "detA"."tipo_afiliado" = 'BENEFICIARIO'
       `;
-      
+
       const beneficiarios = await this.entityManager.query(query);
       return beneficiarios;
-    }catch{
+    } catch {
 
     }
   }
@@ -197,41 +197,41 @@ export class DetalleBeneficioService {
   async cargarBenRec(): Promise<any> {
     let connection;
     try {
-       // Definir los parámetros de salida
-       const id_beneficio_planilla_out = { dir: oracledb.BIND_OUT, type: oracledb.CURSOR };
-       const cantidad_registros_insertados = { dir: oracledb.BIND_OUT, type: oracledb.NUMBER };
-       
-       let connection;
-       connection = await oracledb.getConnection({
-         user: process.env.DB_USERNAME,
-         password: process.env.DB_PASSWORD,
-         connectString: process.env.CONNECT_STRING
-       })
-   
-       // Ejecutar el procedimiento almacenado
-       const result = await connection.execute(
-         `BEGIN 
+      // Definir los parámetros de salida
+      const id_beneficio_planilla_out = { dir: oracledb.BIND_OUT, type: oracledb.CURSOR };
+      const cantidad_registros_insertados = { dir: oracledb.BIND_OUT, type: oracledb.NUMBER };
+
+      let connection;
+      connection = await oracledb.getConnection({
+        user: process.env.DB_USERNAME,
+        password: process.env.DB_PASSWORD,
+        connectString: process.env.CONNECT_STRING
+      })
+
+      // Ejecutar el procedimiento almacenado
+      const result = await connection.execute(
+        `BEGIN 
            insertar_registros(
              :id_beneficio_planilla_out, 
              :cantidad_registros_insertados
            );
          END;`,
-         { id_beneficio_planilla_out, cantidad_registros_insertados }
-       );
-   
-       // Manejar los valores de salida
-       const cursor = result.outBinds.id_beneficio_planilla_out;
-       const cantidadRegistrosInsertados = result.outBinds.cantidad_registros_insertados;
-   
-       // Leer los valores del cursor
-       let idBeneficioPlanillaOut = [];
-       let row;
-       while ((row = await cursor.getRow())) {
-         idBeneficioPlanillaOut.push(row);
-       }
-       
-       return { Registros: idBeneficioPlanillaOut, cantRegistros: cantidadRegistrosInsertados };
-  
+        { id_beneficio_planilla_out, cantidad_registros_insertados }
+      );
+
+      // Manejar los valores de salida
+      const cursor = result.outBinds.id_beneficio_planilla_out;
+      const cantidadRegistrosInsertados = result.outBinds.cantidad_registros_insertados;
+
+      // Leer los valores del cursor
+      let idBeneficioPlanillaOut = [];
+      let row;
+      while ((row = await cursor.getRow())) {
+        idBeneficioPlanillaOut.push(row);
+      }
+
+      return { Registros: idBeneficioPlanillaOut, cantRegistros: cantidadRegistrosInsertados };
+
     } catch (error) {
       console.error('Error:', error);
     } finally {
@@ -245,7 +245,7 @@ export class DetalleBeneficioService {
       }
     }
   }
-  
+
   async getDetalleBeneficiosPorAfiliadoYPlanilla(idAfiliado: string, idPlanilla: string): Promise<any> {
     const query = `
     SELECT
@@ -333,7 +333,7 @@ export class DetalleBeneficioService {
       throw new InternalServerErrorException('Se produjo un error al obtener los detalles de beneficio por afiliado y planilla.');
     }
   }
-  
+
   async getRangoDetalleBeneficios(idAfiliado: string, fechaInicio: string, fechaFin: string): Promise<any> {
     const query = `
     SELECT
@@ -377,9 +377,9 @@ export class DetalleBeneficioService {
       this.logger.error('Error al obtener los detalles de beneficio', error.stack);
       throw new InternalServerErrorException('Error al consultar los detalles de beneficio en la base de datos');
     }
-}
+  }
 
-  async GetAllBeneficios(dni:string): Promise<any> {
+  async GetAllBeneficios(dni: string): Promise<any> {
     try {
       return await this.detalleBeneficioAfiliadoRepository.createQueryBuilder('detBenA')
         .distinct(true)
@@ -408,7 +408,7 @@ export class DetalleBeneficioService {
         .innerJoin(Net_Persona, 'afil', 'afil.ID_PERSONA = detBenA.ID_BENEFICIARIO AND detBenA.ID_CAUSANTE = detBenA.ID_CAUSANTE')
         .innerJoin(Net_Detalle_Afiliado, 'detA', 'afil.ID_PERSONA = detBenA.ID_BENEFICIARIO AND detBenA.ID_CAUSANTE = detBenA.ID_CAUSANTE ')
         .where(`afil.dni = '${dni}'`)
-        .getRawMany(); 
+        .getRawMany();
     } catch (error) {
       this.logger.error(`Error al buscar beneficios inconsistentes por afiliado: ${error.message}`, error.stack);
       throw new InternalServerErrorException('Error al buscar beneficios inconsistentes por afiliado');
@@ -416,9 +416,9 @@ export class DetalleBeneficioService {
   }
 
 
-async obtenerDetallesBeneficioComplePorAfiliado(idAfiliado: string): Promise<any[]> {
-  try {
-    const query = `
+  async obtenerDetallesBeneficioComplePorAfiliado(idAfiliado: string): Promise<any[]> {
+    try {
+      const query = `
     SELECT
     detB."id_beneficio_planilla",
     detB."monto_a_pagar" as "monto",
@@ -471,15 +471,15 @@ async obtenerDetallesBeneficioComplePorAfiliado(idAfiliado: string): Promise<any
         ben."id_beneficio"
     `;
 
-    return await this.benAfilRepository.query(query, [idAfiliado]); // Usando un array para los parámetros
-  } catch (error) {
-    this.logger.error('Error al obtener detalles de beneficio por afiliado', error.stack);
-    throw new InternalServerErrorException('Error al obtener detalles de beneficio por afiliado');
+      return await this.benAfilRepository.query(query, [idAfiliado]); // Usando un array para los parámetros
+    } catch (error) {
+      this.logger.error('Error al obtener detalles de beneficio por afiliado', error.stack);
+      throw new InternalServerErrorException('Error al obtener detalles de beneficio por afiliado');
+    }
   }
-}
 
-async obtenerBeneficiosDeAfil(dni: string): Promise<any[]> {
-  try {
+  async obtenerBeneficiosDeAfil(dni: string): Promise<any[]> {
+    try {
       const query = `SELECT  
       ben."id_beneficio", ben."nombre_beneficio", 
       detBenAfil."num_rentas_aplicadas",
@@ -492,35 +492,35 @@ async obtenerBeneficiosDeAfil(dni: string): Promise<any[]> {
       detBenAfil."id_afiliado" = afil."id_afiliado"
       WHERE 
       afil."dni" = '${dni}'`;
-    return await this.benAfilRepository.query(query); // Usando un array para los parámetros
-  } catch (error) {
-    this.logger.error('Error al obtener detalles de beneficio por afiliado', error.stack);
-    throw new InternalServerErrorException('Error al obtener detalles de beneficio por afiliado');
-  }
-}
-
-async actualizarPlanillaYEstadoDeBeneficio(detalles: { idBeneficioPlanilla: number; codigoPlanilla: string; estado: string }[], transactionalEntityManager?: EntityManager): Promise<Net_Detalle_Pago_Beneficio[]> {
-  const resultados = [];
-  const entityManager = transactionalEntityManager ? transactionalEntityManager : this.entityManager;
-
-  for (const { idBeneficioPlanilla, codigoPlanilla, estado } of detalles) {
-    const beneficio = await entityManager.findOne(Net_Detalle_Pago_Beneficio, { where: { id_beneficio_planilla: idBeneficioPlanilla } });
-    if (!beneficio) {
-      throw new NotFoundException(`DetalleBeneficio con ID "${idBeneficioPlanilla}" no encontrado`);
+      return await this.benAfilRepository.query(query); // Usando un array para los parámetros
+    } catch (error) {
+      this.logger.error('Error al obtener detalles de beneficio por afiliado', error.stack);
+      throw new InternalServerErrorException('Error al obtener detalles de beneficio por afiliado');
     }
-
-    const planilla = await entityManager.findOne(Net_Planilla, { where: { codigo_planilla: codigoPlanilla } });
-    if (!planilla) {
-      throw new NotFoundException(`Planilla con código "${codigoPlanilla}" no encontrada`);
-    }
-
-    beneficio.planilla = planilla;
-    beneficio.estado = estado; // Actualiza el estado
-
-    resultados.push(await entityManager.save(beneficio));
   }
-  return resultados;
-}
+
+  async actualizarPlanillaYEstadoDeBeneficio(detalles: { idBeneficioPlanilla: number; codigoPlanilla: string; estado: string }[], transactionalEntityManager?: EntityManager): Promise<Net_Detalle_Pago_Beneficio[]> {
+    const resultados = [];
+    const entityManager = transactionalEntityManager ? transactionalEntityManager : this.entityManager;
+
+    for (const { idBeneficioPlanilla, codigoPlanilla, estado } of detalles) {
+      const beneficio = await entityManager.findOne(Net_Detalle_Pago_Beneficio, { where: { id_beneficio_planilla: idBeneficioPlanilla } });
+      if (!beneficio) {
+        throw new NotFoundException(`DetalleBeneficio con ID "${idBeneficioPlanilla}" no encontrado`);
+      }
+
+      const planilla = await entityManager.findOne(Net_Planilla, { where: { codigo_planilla: codigoPlanilla } });
+      if (!planilla) {
+        throw new NotFoundException(`Planilla con código "${codigoPlanilla}" no encontrada`);
+      }
+
+      beneficio.planilla = planilla;
+      beneficio.estado = estado; // Actualiza el estado
+
+      resultados.push(await entityManager.save(beneficio));
+    }
+    return resultados;
+  }
 
   /* async create(datos: any): Promise<any> {
     try {
@@ -586,7 +586,7 @@ async actualizarPlanillaYEstadoDeBeneficio(detalles: { idBeneficioPlanilla: numb
     if (isUUID(term)) {
       benAfil = await this.benAfilRepository.findOneBy({ id_beneficio_planilla: term });
     } else {
-      
+
       const queryBuilder = this.benAfilRepository.createQueryBuilder('afiliado');
       benAfil = await queryBuilder
         .where('"id_beneficio_planilla" = :term', { term })
@@ -640,11 +640,11 @@ async actualizarPlanillaYEstadoDeBeneficio(detalles: { idBeneficioPlanilla: numb
       INNER JOIN "net_beneficio" ben ON ben."id_beneficio" = detBA."id_beneficio"
       WHERE detB."estado" = 'INCONSISTENCIA'
     `;
-    return await this.benAfilRepository.query(query); 
+      return await this.benAfilRepository.query(query);
     } catch (error) {
       this.logger.error(`Error al buscar beneficios inconsistentes por afiliado: ${error.message}`, error.stack);
       throw new InternalServerErrorException('Error al buscar beneficios inconsistentes por afiliado');
     }
   }
-  
+
 }

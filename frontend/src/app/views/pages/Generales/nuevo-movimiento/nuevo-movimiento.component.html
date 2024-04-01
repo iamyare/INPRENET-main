@@ -1,6 +1,11 @@
 <div class="container">
   <form (ngSubmit)="onSubmit()">
-    <div fxLayout="row" fxLayoutGap="8px" fxLayoutAlign="start center">
+    <div
+      fxLayout="row"
+      fxLayoutGap="8px"
+      fxLayoutAlign="start center"
+      style="background-color: white; width: max-content"
+    >
       <!-- Campo de entrada ocupando la mayor parte del espacio -->
       <mat-form-field fxFlex>
         <mat-label>DNI</mat-label>
@@ -8,7 +13,13 @@
       </mat-form-field>
 
       <!-- Botón alineado a la derecha dentro de la fila -->
-      <button mat-raised-button color="primary" type="submit" fxFlex="nogrow">
+      <button
+        mat-raised-button
+        color="primary"
+        type="submit"
+        fxFlex="nogrow"
+        style="color: #ffffff; border-radius: 5px; padding: 10px 20px"
+      >
         Buscar DNI
       </button>
     </div>

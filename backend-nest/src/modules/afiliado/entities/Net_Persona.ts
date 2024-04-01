@@ -1,7 +1,7 @@
 import { Net_TipoIdentificacion } from "src/modules/tipo_identificacion/entities/net_tipo_identificacion.entity";
 import { Net_Pais } from "src/modules/Regional/pais/entities/pais.entity";
 import { Check, Column, Entity, Index, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn } from "typeorm";
-import { Net_Ref_Per_Afil } from "./net_ref-Per-Afiliado";import { Net_perf_afil_cent_trab} from "./net_perf_afil_cent_trab";
+import { Net_Ref_Per_Afil } from "./net_ref-Per-Afiliado"; import { Net_perf_afil_cent_trab } from "./net_perf_afil_cent_trab";
 import { Net_Detalle_Deduccion } from "src/modules/Planilla/detalle-deduccion/entities/detalle-deduccion.entity";
 import { Net_Detalle_Afiliado } from "./Net_detalle_persona.entity";
 import { Net_Afiliados_Por_Banco } from "src/modules/banco/entities/net_afiliados-banco";
@@ -9,21 +9,22 @@ import { Net_Municipio } from "src/modules/Regional/municipio/entities/net_munic
 import { NET_CUENTA_PERSONA } from "src/modules/transacciones/entities/net_cuenta_persona.entity";
 import { IsIn } from "class-validator";
 import { NET_MOVIMIENTO_CUENTA } from "src/modules/transacciones/entities/net_movimiento_cuenta.entity";
- 
-@Entity({ 
-    name: 'NET_PERSONA', 
+import { Net_Detalle_planilla_ingreso } from "src/modules/Planilla/Ingresos/detalle-plan-ingr/entities/net_detalle_plani_ing.entity";
+
+@Entity({
+    name: 'NET_PERSONA',
 })
-@Check("CK_Sexo",`SEXO IN ('F', 'M')`)
+@Check("CK_Sexo", `SEXO IN ('F', 'M')`)
 export class Net_Persona {
-    @PrimaryGeneratedColumn({type: 'int', name: 'ID_PERSONA', primaryKeyConstraintName: 'PK_ID_PERSONA_PERSONA'  })
+    @PrimaryGeneratedColumn({ type: 'int', name: 'ID_PERSONA', primaryKeyConstraintName: 'PK_ID_PERSONA_PERSONA' })
     id_persona: number;
 
     @ManyToOne(() => Net_TipoIdentificacion, tipoIdentificacion => tipoIdentificacion.afiliado, { cascade: true })
-    @JoinColumn({ name: 'ID_TIPO_IDENTIFICACION', foreignKeyConstraintName:"FK_ID_TIPO_IDENTI_PERS" })
+    @JoinColumn({ name: 'ID_TIPO_IDENTIFICACION', foreignKeyConstraintName: "FK_ID_TIPO_IDENTI_PERS" })
     tipoIdentificacion: Net_TipoIdentificacion;
 
     @ManyToOne(() => Net_Pais, pais => pais.afiliado, { cascade: true })
-    @JoinColumn({ name: 'ID_PAIS', foreignKeyConstraintName:"FK_ID_PAIS_PERS"})
+    @JoinColumn({ name: 'ID_PAIS', foreignKeyConstraintName: "FK_ID_PAIS_PERS" })
     pais: Net_Pais;
 
     @Column('varchar2', { length: 40, nullable: true, name: 'DNI' })
@@ -98,17 +99,17 @@ export class Net_Persona {
     detalleAfiliado: Net_Detalle_Afiliado[];
 
     @ManyToOne(() => Net_Municipio, municipio => municipio.afiliado, { cascade: true })
-    @JoinColumn({ name: 'ID_MUNICIPIO_RESIDENCIA', foreignKeyConstraintName:"FK_ID_MUNIC_RESID_PERS" })
+    @JoinColumn({ name: 'ID_MUNICIPIO_RESIDENCIA', foreignKeyConstraintName: "FK_ID_MUNIC_RESID_PERS" })
     municipio: Net_Municipio;
-    
+
     @OneToMany(() => Net_Detalle_Afiliado, detalleAfiliado => detalleAfiliado.afiliado)
     detallesAfiliado: Net_Detalle_Afiliado[];
-    
+
     @OneToMany(() => Net_Ref_Per_Afil, referenciaPersonalAfiliado => referenciaPersonalAfiliado.afiliado)
     referenciasPersonalAfiliado: Net_Ref_Per_Afil[];
 
     @OneToMany(() => Net_Afiliados_Por_Banco, afiliadosPorBanco => afiliadosPorBanco.afiliado)
-    afiliadosPorBanco : Net_Afiliados_Por_Banco[];
+    afiliadosPorBanco: Net_Afiliados_Por_Banco[];
 
     @OneToMany(() => Net_Detalle_Deduccion, detalleDeduccion => detalleDeduccion.afiliado)
     detalleDeduccion: Net_Detalle_Deduccion[];
@@ -124,5 +125,8 @@ export class Net_Persona {
 
     @OneToMany(() => NET_MOVIMIENTO_CUENTA, movimientos => movimientos.persona)
     movimientos: NET_MOVIMIENTO_CUENTA[];
+
+    @OneToMany(() => Net_Detalle_planilla_ingreso, detallePlanIngreso => detallePlanIngreso.persona)
+    detallePlanIngreso: Net_Detalle_planilla_ingreso[];
 
 }

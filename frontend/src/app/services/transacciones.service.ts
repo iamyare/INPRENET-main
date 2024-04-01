@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
+import { Observable, catchError, of, throwError } from 'rxjs';
 import { environment } from 'src/environments/environment';
 
 @Injectable({
@@ -19,6 +19,13 @@ export class TransaccionesService {
   }
 
   obtenerMovimientosPorDNI(dni: string): Observable<any> {
-    return this.http.get(`${environment.API_URL}/api/transacciones/movimientos/${dni}`);
+    return this.http.get(`${environment.API_URL}/api/transacciones/movimientos/${dni}`).pipe(
+      catchError(error => {
+         if (error.status === 404) {
+          return of([]);
+        }
+        return throwError(error);
+      })
+    );
   }
 }

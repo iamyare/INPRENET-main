@@ -13,6 +13,11 @@ export class AfiliadoService {
 
   constructor(private http: HttpClient, private router: Router) { }
 
+  buscarMovimientosPorDNI(dni: string): Observable<any> {
+    const url = `${environment.API_URL}/api/afiliado/movimientos/${dni}`;
+    return this.http.get<any>(url);
+  }
+
   getAllAfiliados(): Observable<any | void> {
     const url = `${environment.API_URL}/api/afiliado`;
     return this.http.get<any>(

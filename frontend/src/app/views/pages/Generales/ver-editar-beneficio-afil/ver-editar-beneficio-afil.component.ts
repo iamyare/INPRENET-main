@@ -28,7 +28,6 @@ export class VerEditarBeneficioAfilComponent {
   //Para generar tabla
   myColumns: TableColumn[] = [];
   filasT: any[] = [];
-  detallesCompletos: any[] = [];
   ejecF: any;
 
   constructor(

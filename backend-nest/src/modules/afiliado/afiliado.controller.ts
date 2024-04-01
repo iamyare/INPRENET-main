@@ -25,6 +25,21 @@ export class AfiliadoController {
     return this.afiliadoService.findAll();
   }
 
+  @Get('/movimientos/:dni')
+  async buscarMovimientosPorDNI(@Param('dni') dni: string) {
+    try {
+      const resultado = await this.afiliadoService.buscarPersonaYMovimientosPorDNI(dni);
+      return resultado;
+    } catch (error) {
+      // Aquí puedes manejar diferentes tipos de errores y personalizar las respuestas si es necesario
+      if (error instanceof NotFoundException) {
+        throw error;
+      } else {
+        throw new NotFoundException(`No se pudo procesar la solicitud para el DNI ${dni}`);
+      }
+    }
+  }
+
   @Get('/dni/:dni')
   async findByDni(@Param('dni') dni: string) {
     return await this.afiliadoService.findByDni(dni);

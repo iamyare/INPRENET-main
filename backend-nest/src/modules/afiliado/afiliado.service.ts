@@ -31,6 +31,7 @@ export class AfiliadoService {
     private readonly afiliadoRepository: Repository<Net_Persona>,
     @InjectRepository(Net_Detalle_Afiliado)
     private datosIdentificacionRepository: Repository<Net_Detalle_Afiliado>,
+    
     private connection: Connection,
   ) { }
 
@@ -278,6 +279,34 @@ export class AfiliadoService {
     }
   }
 
+  async buscarPersonaYMovimientosPorDNI(dni: string): Promise<any> {
+    const persona = await this.afiliadoRepository.findOne({
+        where: { dni },
+        relations: ["movimientos"] // Asegúrate de tener esta relación definida en tu entidad
+    });
+
+    if (!persona) {
+        throw new NotFoundException(`Persona con DNI ${dni} no encontrada`);
+    }
+
+    if (persona.estado === 'FALLECIDO' || persona.estado === 'INACTIVO') {
+        return {
+            status: 'error',
+            message: `La persona está ${persona.estado.toLowerCase()}.`,
+            data: { persona: null, movimientos: [] }
+        };
+    }
+
+    return {
+        status: 'success',
+        message: 'Datos y movimientos de la persona encontrados con éxito',
+        data: {
+            persona, // Todos los datos de la persona
+            movimientos: persona.movimientos // Los movimientos asociados
+        }
+    };
+}
+  
   /* async findByDni(dni: string) { */
   //const datosIdentificacion = await this.datosIdentificacionRepository.findOne({ where: { dni } });
 

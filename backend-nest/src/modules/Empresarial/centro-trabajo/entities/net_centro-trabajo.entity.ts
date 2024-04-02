@@ -51,6 +51,6 @@ export class Net_Centro_Trabajo {
     @JoinColumn({ name: 'ID_PERFIL_AFIL_CENTR_TRAB' })
     perfAfilCentTrabs: Net_perf_afil_cent_trab[];
 
-    @OneToMany(() => Net_Detalle_planilla_ingreso, perfAfilCentTrab => perfAfilCentTrab.centroTrabajo)
-    detalle_plani_ingr: Net_Detalle_planilla_ingreso;
+    @OneToMany(() => Net_Detalle_planilla_ingreso, detallePlanIngreso => detallePlanIngreso.centroTrabajo)
+    detalle_plani_ingr: Net_Detalle_planilla_ingreso[];
 }

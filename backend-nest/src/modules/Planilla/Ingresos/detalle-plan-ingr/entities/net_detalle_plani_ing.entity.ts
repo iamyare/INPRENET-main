@@ -2,6 +2,7 @@
 import { Column, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 import { Net_Persona } from "src/modules/afiliado/entities/Net_Persona";
 import { Net_Centro_Trabajo } from "src/modules/Empresarial/centro-trabajo/entities/net_centro-trabajo.entity";
+import { Net_Planilla } from "src/modules/Planilla/planilla/entities/net_planilla.entity";
 
 @Entity({ name: 'NET_DETALLE_PLANILLA_ING' })
 export class Net_Detalle_planilla_ingreso {
@@ -34,4 +35,8 @@ export class Net_Detalle_planilla_ingreso {
     @JoinColumn({ name: 'ID_CENTRO_TRABAJO', foreignKeyConstraintName: "FK_ID_CENTROTRAB_DETPLANING" })
     centroTrabajo: Net_Centro_Trabajo;
 
+    @ManyToOne(() => Net_Planilla, planilla => planilla.detallesPlanillaIngreso)
+    @JoinColumn({ name: 'ID_PLANILLA', foreignKeyConstraintName: "FK_DETALLE_PLANILLA_PLANILLA" })
+    planilla: Net_Planilla;
+    
 }

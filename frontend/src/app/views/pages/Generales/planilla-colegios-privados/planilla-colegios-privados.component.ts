@@ -26,6 +26,7 @@ export class PlanillaColegiosPrivadosComponent implements AfterViewInit, OnInit 
   showTable: boolean = true;
   dataSource: MatTableDataSource<UserData> = new MatTableDataSource<UserData>();
 
+  tiposPlanilla: string[] = ['01. Planilla Ordinaria', '02. Planilla Decimo Tercero', '03. Planilla Decimo Cuarto'];
   displayedColumns: string[] = ['numeroColegio', 'nombreColegio', 'totalSueldo', 'totalPrestamo', 'totalAportaciones', 'totalPagar', 'totalCotizaciones'];
   displayedColumns3: string[] = ['identidad', 'nombreDocente', 'sueldo', 'aportaciones', 'cotizaciones', 'prestamos', 'deducciones', 'sueldoNeto', 'editar'];
 
@@ -38,6 +39,8 @@ export class PlanillaColegiosPrivadosComponent implements AfterViewInit, OnInit 
   nombreColegio: string = 'Colegio ABC';
   firstFormGroup: FormGroup;
   mostrarSegundoPaso = false;
+  isLinear = false;
+
 
   constructor(private _formBuilder: FormBuilder, private cdr: ChangeDetectorRef, public dialog: MatDialog, private planillaIngresosService: PlanillaIngresosService) {
     this.firstFormGroup = this._formBuilder.group({
@@ -53,13 +56,12 @@ export class PlanillaColegiosPrivadosComponent implements AfterViewInit, OnInit 
   }
 
   ngOnInit(): void {
-    this.obtenerDetallesPlanilla(6);
+    this.obtenerDetallesPlanilla(1);
   }
 
   obtenerDetallesPlanilla(idCentroTrabajo: number) {
     this.planillaIngresosService.obtenerDetallesPorCentroTrabajo(idCentroTrabajo).subscribe(
       (response: any) => {
-        console.log(response.data);
 
         const mappedData = response.data.map((item: any) => ({
           identidad: item.IDENTIDAD,
@@ -160,15 +162,6 @@ export class PlanillaColegiosPrivadosComponent implements AfterViewInit, OnInit 
     });
   }
 
-
-  form = new FormGroup({
-    mes: new FormControl(''),
-    anio: new FormControl(''),
-  });
-
-  tiposPlanilla: string[] = ['01. Planilla Ordinaria', '02. Planilla Decimo Tercero', '03. Planilla Decimo Cuarto'];
-
-  isLinear = false;
 
 }
 

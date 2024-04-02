@@ -204,39 +204,7 @@ export class DetallePlanillaIngresoService {
   }
 
   private async buscarPlanilla(persona, salarioCotizableRepository, createDetPlanIngDTO): Promise<void> {
-    /* const { idInstitucion, prestamos } = createDetPlanIngDTO
-    let ValoresDetalle = {
-      idpersona: persona.id_persona,
-      idInstitucion: idInstitucion,
-      sueldo: persona.perfAfilCentTrabs[0].salario_base,
-      prestamos: prestamos,
-      aportaciones: this.calculoAportaciones(persona, salarioCotizableRepository),
-      cotizaciones: this.calculoCotizaciones(persona, salarioCotizableRepository),
-      deducciones: this.calculoAportaciones(persona, salarioCotizableRepository) + this.calculoCotizaciones(persona, salarioCotizableRepository) + prestamos,
-      sueldo_neto: persona.perfAfilCentTrabs[0].salario_base - (this.calculoAportaciones(persona, salarioCotizableRepository) + this.calculoCotizaciones(persona, salarioCotizableRepository) + createDetPlanIngDTO.prestamos)
-    }
-    const queryInsDeBBenf = `INSERT INTO NET_DETALLE_PLANILLA_ING (
-      SUELDO,
-      PRESTAMOS,
-      APORTACIONES,
-      COTIZACIONES,
-      DEDUCCIONES,
-      SUELDO_NETO,
-      ID_PERSONA,
-      ID_CENTRO_TRABAJO
-    ) VALUES (
-      ${ValoresDetalle.sueldo},
-      ${ValoresDetalle.prestamos},
-      ${ValoresDetalle.aportaciones},
-      ${ValoresDetalle.cotizaciones},
-      '${ValoresDetalle.deducciones}',
-      '${ValoresDetalle.sueldo_neto}',
-      ${ValoresDetalle.idpersona},
-      ${ValoresDetalle.idInstitucion}
-    )`
-
-    const detPlanillaIng = await this.entityManager.query(queryInsDeBBenf);
-    return detPlanillaIng; */
+    
   }
   private async insertPlanilla(persona, salarioCotizableRepository, createDetPlanIngDTO): Promise<void> {
     /* const { idTipoPlanilla, mes, dni, idInstitucion, prestamos } = createDetPlanIngDTO

@@ -6,36 +6,40 @@ import { MatSort } from '@angular/material/sort';
 import { MatTableDataSource } from '@angular/material/table';
 import { DynamicFormDialogComponent } from '@docs-components/dynamic-form-dialog/dynamic-form-dialog.component';
 import { EditarDialogComponent } from '@docs-components/editar-dialog/editar-dialog.component';
+import { PlanillaIngresosService } from '../../../../services/planillaIngresos.service';
 
 @Component({
   selector: 'app-planilla-colegios-privados',
   templateUrl: './planilla-colegios-privados.component.html',
   styleUrls: ['./planilla-colegios-privados.component.scss']
 })
-export class PlanillaColegiosPrivadosComponent implements AfterViewInit {
+export class PlanillaColegiosPrivadosComponent implements AfterViewInit, OnInit  {
+
+
+  @ViewChild(MatPaginator) paginator!: MatPaginator;
+  @ViewChild(MatSort) sort!: MatSort;
 
   botonSeleccionado: string = 'EMPLEADOS';
   fecha = new FormControl(new Date());
   recargoPlanilla: number = 0;
   totalPagarConRecargo: number = 0;
   showTable: boolean = true;
-  dataSource: MatTableDataSource<UserData>;
+  dataSource: MatTableDataSource<UserData> = new MatTableDataSource<UserData>();
 
   displayedColumns: string[] = ['numeroColegio', 'nombreColegio', 'totalSueldo', 'totalPrestamo', 'totalAportaciones', 'totalPagar', 'totalCotizaciones'];
   displayedColumns3: string[] = ['identidad', 'nombreDocente', 'sueldo', 'aportaciones', 'cotizaciones', 'prestamos', 'deducciones', 'sueldoNeto', 'editar'];
 
-  totalSueldo: number = 7000;
-  totalPrestamo: number = 5000;
-  totalAportaciones: number = 650;
-  totalCotizaciones: number = 400;
-  totalPagar: number = 3000;
+  totalSueldo: number = 0;
+  totalPrestamo: number = 0;
+  totalAportaciones: number = 0;
+  totalCotizaciones: number = 0;
+  totalPagar: number = 0;
   numeroColegio: number = 12345;
   nombreColegio: string = 'Colegio ABC';
-
   firstFormGroup: FormGroup;
   mostrarSegundoPaso  = false;
 
-  constructor(private _formBuilder: FormBuilder, private cdr: ChangeDetectorRef, public dialog: MatDialog) {
+  constructor(private _formBuilder: FormBuilder, private cdr: ChangeDetectorRef, public dialog: MatDialog, private planillaIngresosService: PlanillaIngresosService) {
     this.firstFormGroup = this._formBuilder.group({
       selectedShoe: ['', Validators.required],
     });
@@ -46,13 +50,44 @@ export class PlanillaColegiosPrivadosComponent implements AfterViewInit {
       this.dataSource.paginator = this.paginator;
       this.dataSource.sort = this.sort;
     });
-
-    const users: UserData[] = this.generateUsers(20);
-    this.dataSource = new MatTableDataSource(users);
   }
 
-  @ViewChild(MatPaginator) paginator!: MatPaginator;
-  @ViewChild(MatSort) sort!: MatSort;
+  ngOnInit(): void {
+    this.obtenerDetallesPlanilla(1);
+  }
+
+  obtenerDetallesPlanilla(idCentroTrabajo: number) {
+    this.planillaIngresosService.obtenerDetallesPorCentroTrabajo(idCentroTrabajo).subscribe(
+      (response: any) => {
+        console.log(response.data);
+
+        const mappedData = response.data.map((item: any) => ({
+          identidad: item.IDENTIDAD,
+          nombreDocente: item.NOMBREPERSONA,
+          sueldo: item.SUELDO,
+          aportaciones: item.APORTACIONES,
+          prestamos: item.PRESTAMOS,
+          cotizaciones: item.COTIZACIONES,
+          deducciones: item.DEDUCCIONES,
+          sueldoNeto: item.SUELDONETO
+        }));
+
+        mappedData.forEach((item: any) => {
+          this.totalSueldo += item.sueldo;
+          this.totalPrestamo += item.prestamos;
+          this.totalAportaciones += item.aportaciones;
+          this.totalCotizaciones += item.cotizaciones;
+          this.totalPagar += item.sueldoNeto;
+        });
+
+        this.dataSource.data = mappedData;
+        this.cdr.detectChanges();
+      },
+      error => {
+        console.error('Error al obtener detalles de planilla:', error);
+      }
+    );
+  }
 
   ngAfterViewInit() {
     this.dataSource.paginator = this.paginator;
@@ -111,7 +146,6 @@ export class PlanillaColegiosPrivadosComponent implements AfterViewInit {
       { nombre: 'aportaciones', tipo: 'number', etiqueta: 'Aportaciones', requerido: true, editable: true },
       { nombre: 'cotizaciones', tipo: 'number', etiqueta: 'Cotizaciones', requerido: true, editable: true },
       { nombre: 'prestamos', tipo: 'number', etiqueta: 'Préstamos', requerido: true, editable: true },
-      // Agrega más campos según necesites
     ];
 
     const dialogRef = this.dialog.open(EditarDialogComponent, {
@@ -122,7 +156,6 @@ export class PlanillaColegiosPrivadosComponent implements AfterViewInit {
     dialogRef.afterClosed().subscribe(result => {
       if (result) {
         console.log('Datos editados:', result);
-        // Aquí puedes actualizar los datos en tu dataSource o realizar otras acciones necesarias
       }
     });
   }
@@ -136,36 +169,6 @@ export class PlanillaColegiosPrivadosComponent implements AfterViewInit {
   typesOfShoes: string[] = ['01. Planilla Ordinaria', '02. Planilla Decimo Tercero', '03. Planilla Decimo Cuarto'];
 
   isLinear = false;
-
-  private generateRandomData(id: number): UserData {
-    const identidad = `ID${id}`;
-    const nombreDocente = `Docente ${id}`;
-    const sueldo = this.generateRandomNumber(1500, 2500);
-    const aportaciones = this.generateRandomNumber(50, 200);
-    const cotizaciones = this.generateRandomNumber(200, 500);
-    const prestamos = this.generateRandomNumber(100, 500);
-    const deducciones = aportaciones + cotizaciones + prestamos;
-    const sueldoNeto = sueldo - deducciones;
-
-    return {
-      identidad,
-      nombreDocente,
-      sueldo,
-      aportaciones,
-      cotizaciones,
-      prestamos,
-      deducciones,
-      sueldoNeto
-    };
-  }
-
-  private generateRandomNumber(min: number, max: number): number {
-    return Math.floor(Math.random() * (max - min + 1)) + min;
-  }
-
-  generateUsers(numberOfUsers: number): UserData[] {
-    return Array.from({ length: numberOfUsers }, (_, i) => this.generateRandomData(i + 1));
-  }
 
 }
 

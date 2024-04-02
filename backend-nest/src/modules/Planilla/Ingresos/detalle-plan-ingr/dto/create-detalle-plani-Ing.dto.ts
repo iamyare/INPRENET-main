@@ -1,18 +1,26 @@
 import { IsNotEmpty, IsNumber, IsOptional, IsString, Length, } from "class-validator";
 
 export class CreateDetallePlanIngDto {
+    @IsNumber()
+    prestamos: number;
+
     @IsString()
-    @IsOptional()
-    dni?: string;
+    dni: string;
 
     @IsNumber()
     @IsOptional()
     idInstitucion?: number;
 
     @IsNumber()
-    sueldo: number;
+    @IsOptional()
+    idTipoPlanilla?: number;
 
     @IsNumber()
-    prestamos: number;
+    @IsOptional()
+    mes?: number;
+
+    /*     @IsNumber()
+        sueldo: number; */
+
 
 }

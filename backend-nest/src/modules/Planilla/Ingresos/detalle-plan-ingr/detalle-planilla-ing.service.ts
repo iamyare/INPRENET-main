@@ -10,13 +10,14 @@ import { CreateDetallePlanIngDto } from './dto/create-detalle-plani-Ing.dto';
 import { UpdateDetallePlanIngDto } from './dto/update-detalle-plani-Ing.dto';
 import { Net_Detalle_planilla_ingreso } from './entities/net_detalle_plani_ing.entity';
 import { Net_SALARIO_COTIZABLE } from './entities/net_detalle_plani_ing.entity copy';
+import { Net_TipoPlanilla } from '../../tipo-planilla/entities/tipo-planilla.entity';
 
 @Injectable()
 export class DetallePlanillaIngresoService {
   private readonly logger = new Logger(DetallePlanillaIngresoService.name)
 
   constructor(
-    @InjectEntityManager() private readonly entityManager: EntityManager
+    @InjectEntityManager() private readonly entityManager: EntityManager,
   ) { }
 
   @InjectRepository(Net_Detalle_planilla_ingreso)
@@ -46,12 +47,12 @@ export class DetallePlanillaIngresoService {
         ])
         .where('centroTrabajo.id_centro_trabajo = :idCentroTrabajo', { idCentroTrabajo })
         .getRawMany();
-  
+
       if (!detalles.length) {
         this.logger.warn(`No se encontraron detalles para el centro de trabajo con ID ${idCentroTrabajo}`);
         throw new NotFoundException(`No se encontraron detalles para el centro de trabajo con ID ${idCentroTrabajo}`);
       }
-  
+
       return detalles;
     } catch (error) {
       if (error instanceof NotFoundException) {
@@ -63,40 +64,39 @@ export class DetallePlanillaIngresoService {
   }
 
   async create(createDetPlanIngDTO: CreateDetallePlanIngDto) {
+    const { idTipoPlanilla, mes, dni, idInstitucion, prestamos } = createDetPlanIngDTO
+
     try {
       let personas = await this.personaRepository.findOne({
-        where: { dni: createDetPlanIngDTO.dni, perfAfilCentTrabs: { centroTrabajo: { id_centro_trabajo: createDetPlanIngDTO.idInstitucion } } },
+        where: { dni: dni, perfAfilCentTrabs: { centroTrabajo: { id_centro_trabajo: idInstitucion } } },
         relations: ['perfAfilCentTrabs', 'perfAfilCentTrabs.centroTrabajo'],
       });
 
       let salarioCotizableRepository = await this.salarioCotizableRepository.find()
 
-      console.log(createDetPlanIngDTO);
-      console.log(personas);
-      console.log(salarioCotizableRepository);
+      const DetPlanIng = this.buscarPlanilla(personas, salarioCotizableRepository, createDetPlanIngDTO);
 
-      if (personas.perfAfilCentTrabs[0].centroTrabajo.sector_economico == "PRIVADO") {
-        let prueba = {
-          dni: createDetPlanIngDTO.dni,
-          idInstitucion: createDetPlanIngDTO.idInstitucion,
-          sueldo: createDetPlanIngDTO.sueldo,
-          prestamos: createDetPlanIngDTO.prestamos,
-          aportaciones: this.calculoAportaciones(personas, salarioCotizableRepository),
-          cotizaciones: this.calculoCotizaciones(personas.perfAfilCentTrabs[0].salario_base, salarioCotizableRepository),
-          deducciones: this.calculoDeducciones(personas.perfAfilCentTrabs[0].salario_base, salarioCotizableRepository),
-          sueldo_neto: this.calculoSueldoNeto(personas.perfAfilCentTrabs[0].salario_base, salarioCotizableRepository)
+      if (!DetPlanIng) {
+        /**los valores a insertar seran  createDetPlanIngDTO*/
+        const Planilla = this.insertPlanilla(personas, salarioCotizableRepository, createDetPlanIngDTO);
+        /**Faltaria hacer rollback */
+
+        if (Planilla) {
+          return this.insertNetDetPlanilla(personas, salarioCotizableRepository, createDetPlanIngDTO);
         }
 
-        console.log(prueba);
-        personas.perfAfilCentTrabs[0].centroTrabajo.sector_economico
+      } else {
+        const Planilla = this.insertPlanilla(personas, salarioCotizableRepository, DetPlanIng);
+        /**Faltaria hacer rollback */
 
+        if (Planilla) {
+          return this.insertNetDetPlanilla(personas, salarioCotizableRepository, DetPlanIng);
+        }
+        /**los valores a insertar seran  DetPlanIng lo que cambiaria seria el mes de la planilla*/
       }
 
-      /* const detallePlanIng = this.detallePlanillaIngr.create(createDetPlanIngDTO);
-      return this.detallePlanillaIngr.save(detallePlanIng); */
     } catch (error) {
       console.log(error);
-
       this.handleException(error);
     }
 
@@ -143,17 +143,23 @@ export class DetallePlanillaIngresoService {
 
   }
 
-  private calculoCotizaciones(salarioBaseAfiliado, salarioCotizableRepository): number {
-    let LimiteSSL;
-    let PorcAportacionSECPriv;
+  private calculoCotizaciones(persona, salarioCotizableRepository): number {
+    const salarioBaseAfiliado = persona.perfAfilCentTrabs[0].salario_base
+    const sector_economico = persona.perfAfilCentTrabs[0].centroTrabajo.sector_economico
+
+    let limiteSSL;
+    let cotizacionDoc;
+    let cotizacionEsc;
 
     const accionesSalario = {
       "COTIZACION DOCENTE": (tem: any) => {
+        cotizacionDoc = tem
       },
       "COTIZACION ESCALONADA": (tem: any) => {
+        cotizacionEsc = tem
       },
       "LIMITE SSC": (tem: any) => {
-        LimiteSSL = tem;
+        limiteSSL = tem;
       },
       "IPC INTERANUAL": (tem: any) => {
       }
@@ -165,23 +171,13 @@ export class DetallePlanillaIngresoService {
         accion(salarioC.valor); // Ejecutar la acción asociada al nombre del salario
       }
     }
-    const sueldoBase = this.calculoSueldoBase(salarioCotizableRepository);
 
-
-    if (salarioBaseAfiliado < 20000) {
-      return salarioBaseAfiliado * PorcAportacionSECPriv
-    } else if (salarioBaseAfiliado >= 20000) {
-      return salarioBaseAfiliado * PorcAportacionSECPriv
+    if (salarioBaseAfiliado < 20000 && sector_economico == "PRIVADO") {
+      return salarioBaseAfiliado * cotizacionDoc
+    } else if (salarioBaseAfiliado >= 20000 && sector_economico == "PRIVADO") {
+      return salarioBaseAfiliado * cotizacionEsc
     }
 
-  }
-
-  private calculoDeducciones(salarioBaseAfiliado, salarioCotizableRepository): number {
-    return 0
-  }
-
-  private calculoSueldoNeto(salarioBaseAfiliado, salarioCotizableRepository): number {
-    return 0
   }
 
   private calculoSueldoBase(salarioCotizableRepository): number {
@@ -205,6 +201,113 @@ export class DetallePlanillaIngresoService {
     }
 
     return sueldoBase * porcAportMin
+  }
+
+  private async buscarPlanilla(persona, salarioCotizableRepository, createDetPlanIngDTO): Promise<void> {
+    /* const { idInstitucion, prestamos } = createDetPlanIngDTO
+    let ValoresDetalle = {
+      idpersona: persona.id_persona,
+      idInstitucion: idInstitucion,
+      sueldo: persona.perfAfilCentTrabs[0].salario_base,
+      prestamos: prestamos,
+      aportaciones: this.calculoAportaciones(persona, salarioCotizableRepository),
+      cotizaciones: this.calculoCotizaciones(persona, salarioCotizableRepository),
+      deducciones: this.calculoAportaciones(persona, salarioCotizableRepository) + this.calculoCotizaciones(persona, salarioCotizableRepository) + prestamos,
+      sueldo_neto: persona.perfAfilCentTrabs[0].salario_base - (this.calculoAportaciones(persona, salarioCotizableRepository) + this.calculoCotizaciones(persona, salarioCotizableRepository) + createDetPlanIngDTO.prestamos)
+    }
+    const queryInsDeBBenf = `INSERT INTO NET_DETALLE_PLANILLA_ING (
+      SUELDO,
+      PRESTAMOS,
+      APORTACIONES,
+      COTIZACIONES,
+      DEDUCCIONES,
+      SUELDO_NETO,
+      ID_PERSONA,
+      ID_CENTRO_TRABAJO
+    ) VALUES (
+      ${ValoresDetalle.sueldo},
+      ${ValoresDetalle.prestamos},
+      ${ValoresDetalle.aportaciones},
+      ${ValoresDetalle.cotizaciones},
+      '${ValoresDetalle.deducciones}',
+      '${ValoresDetalle.sueldo_neto}',
+      ${ValoresDetalle.idpersona},
+      ${ValoresDetalle.idInstitucion}
+    )`
+
+    const detPlanillaIng = await this.entityManager.query(queryInsDeBBenf);
+    return detPlanillaIng; */
+  }
+  private async insertPlanilla(persona, salarioCotizableRepository, createDetPlanIngDTO): Promise<void> {
+    /* const { idTipoPlanilla, mes, dni, idInstitucion, prestamos } = createDetPlanIngDTO
+
+    let ValoresDetalle = {
+      idpersona: persona.id_persona,
+      idInstitucion: idInstitucion,
+      sueldo: persona.perfAfilCentTrabs[0].salario_base,
+      prestamos: prestamos,
+      aportaciones: this.calculoAportaciones(persona, salarioCotizableRepository),
+      cotizaciones: this.calculoCotizaciones(persona, salarioCotizableRepository),
+      deducciones: this.calculoAportaciones(persona, salarioCotizableRepository) + this.calculoCotizaciones(persona, salarioCotizableRepository) + prestamos,
+      sueldo_neto: persona.perfAfilCentTrabs[0].salario_base - (this.calculoAportaciones(persona, salarioCotizableRepository) + this.calculoCotizaciones(persona, salarioCotizableRepository) + createDetPlanIngDTO.prestamos)
+    }
+    const queryInsDeBBenf = `INSERT INTO NET_DETALLE_PLANILLA_ING (
+      SUELDO,
+      PRESTAMOS,
+      APORTACIONES,
+      COTIZACIONES,
+      DEDUCCIONES,
+      SUELDO_NETO,
+      ID_PERSONA,
+      ID_CENTRO_TRABAJO
+    ) VALUES (
+      ${ValoresDetalle.sueldo},
+      ${ValoresDetalle.prestamos},
+      ${ValoresDetalle.aportaciones},
+      ${ValoresDetalle.cotizaciones},
+      '${ValoresDetalle.deducciones}',
+      '${ValoresDetalle.sueldo_neto}',
+      ${ValoresDetalle.idpersona},
+      ${ValoresDetalle.idInstitucion}
+    )`
+
+    const detPlanillaIng = await this.entityManager.query(queryInsDeBBenf);
+    return detPlanillaIng; */
+  }
+  private async insertNetDetPlanilla(persona, salarioCotizableRepository, createDetPlanIngDTO): Promise<number> {
+    const { idInstitucion, prestamos } = createDetPlanIngDTO
+    let ValoresDetalle = {
+      idpersona: persona.id_persona,
+      idInstitucion: idInstitucion,
+      sueldo: persona.perfAfilCentTrabs[0].salario_base,
+      prestamos: prestamos,
+      aportaciones: this.calculoAportaciones(persona, salarioCotizableRepository),
+      cotizaciones: this.calculoCotizaciones(persona, salarioCotizableRepository),
+      deducciones: this.calculoAportaciones(persona, salarioCotizableRepository) + this.calculoCotizaciones(persona, salarioCotizableRepository) + prestamos,
+      sueldo_neto: persona.perfAfilCentTrabs[0].salario_base - (this.calculoAportaciones(persona, salarioCotizableRepository) + this.calculoCotizaciones(persona, salarioCotizableRepository) + createDetPlanIngDTO.prestamos)
+    }
+    const queryInsDeBBenf = `INSERT INTO NET_DETALLE_PLANILLA_ING (
+      SUELDO,
+      PRESTAMOS,
+      APORTACIONES,
+      COTIZACIONES,
+      DEDUCCIONES,
+      SUELDO_NETO,
+      ID_PERSONA,
+      ID_CENTRO_TRABAJO
+    ) VALUES (
+      ${ValoresDetalle.sueldo},
+      ${ValoresDetalle.prestamos},
+      ${ValoresDetalle.aportaciones},
+      ${ValoresDetalle.cotizaciones},
+      '${ValoresDetalle.deducciones}',
+      '${ValoresDetalle.sueldo_neto}',
+      ${ValoresDetalle.idpersona},
+      ${ValoresDetalle.idInstitucion}
+    )`
+
+    const detPlanillaIng = await this.entityManager.query(queryInsDeBBenf);
+    return detPlanillaIng;
   }
 
   private handleException(error: any): void {

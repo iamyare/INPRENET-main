@@ -13,7 +13,7 @@ import { PlanillaIngresosService } from '../../../../services/planillaIngresos.s
   templateUrl: './planilla-colegios-privados.component.html',
   styleUrls: ['./planilla-colegios-privados.component.scss']
 })
-export class PlanillaColegiosPrivadosComponent implements AfterViewInit, OnInit  {
+export class PlanillaColegiosPrivadosComponent implements AfterViewInit, OnInit {
 
 
   @ViewChild(MatPaginator) paginator!: MatPaginator;
@@ -37,7 +37,7 @@ export class PlanillaColegiosPrivadosComponent implements AfterViewInit, OnInit 
   numeroColegio: number = 12345;
   nombreColegio: string = 'Colegio ABC';
   firstFormGroup: FormGroup;
-  mostrarSegundoPaso  = false;
+  mostrarSegundoPaso = false;
 
   constructor(private _formBuilder: FormBuilder, private cdr: ChangeDetectorRef, public dialog: MatDialog, private planillaIngresosService: PlanillaIngresosService) {
     this.firstFormGroup = this._formBuilder.group({
@@ -53,7 +53,7 @@ export class PlanillaColegiosPrivadosComponent implements AfterViewInit, OnInit 
   }
 
   ngOnInit(): void {
-    this.obtenerDetallesPlanilla(1);
+    this.obtenerDetallesPlanilla(6);
   }
 
   obtenerDetallesPlanilla(idCentroTrabajo: number) {
@@ -105,7 +105,7 @@ export class PlanillaColegiosPrivadosComponent implements AfterViewInit, OnInit 
 
   agregarDocente() {
     const formFields: any[] = [
-      { name: 'Numero de identidad', type: 'text', label: 'Numero de identidad', validations: [Validators.required]  },
+      { name: 'Numero de identidad', type: 'text', label: 'Numero de identidad', validations: [Validators.required] },
       { name: 'Sueldo', type: 'number', label: 'Sueldo', validations: [Validators.required] },
       { name: 'Prestamos', type: 'number', label: 'Prestamos', validations: [Validators.required] },
     ];
@@ -166,7 +166,7 @@ export class PlanillaColegiosPrivadosComponent implements AfterViewInit, OnInit 
     anio: new FormControl(''),
   });
 
-  typesOfShoes: string[] = ['01. Planilla Ordinaria', '02. Planilla Decimo Tercero', '03. Planilla Decimo Cuarto'];
+  tiposPlanilla: string[] = ['01. Planilla Ordinaria', '02. Planilla Decimo Tercero', '03. Planilla Decimo Cuarto'];
 
   isLinear = false;
 

@@ -216,8 +216,8 @@ export class DetallePlanillaIngresoService {
         throw new NotFoundException(`No se encontró una persona activa con el DNI ${dni}`);
       }
       const planillaEnMesAnterior = persona.detallePlanIngreso.some(detalle => {
-        const [diaInicio, mesInicio, añoInicio] = detalle.planilla.periodoInicio.split('-').map(Number);
-        const [diaFin, mesFin, añoFin] = detalle.planilla.periodoFinalizacion.split('-').map(Number);
+        const [diaInicio, mesInicio, añoInicio] = detalle.planilla.periodoInicio.split('/').map(Number);
+        const [diaFin, mesFin, añoFin] = detalle.planilla.periodoFinalizacion.split('/').map(Number);
 
         const periodoInicio = new Date(añoInicio, mesInicio - 1, diaInicio);
         const periodoFinalizacion = new Date(añoFin, mesFin - 1, diaFin);

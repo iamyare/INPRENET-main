@@ -19,8 +19,4 @@ export class CreateDetallePlanIngDto {
     @IsOptional()
     mes?: number;
 
-    /*     @IsNumber()
-        sueldo: number; */
-
-
 }

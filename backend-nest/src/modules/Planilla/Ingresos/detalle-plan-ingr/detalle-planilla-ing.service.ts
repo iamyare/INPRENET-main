@@ -1,6 +1,6 @@
 import { BadRequestException, Injectable, Logger, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import { InjectEntityManager, InjectRepository } from '@nestjs/typeorm';
-import { EntityManager, FindOptionsWhere, Repository } from 'typeorm';
+import { Between, EntityManager, FindOptionsWhere, Repository } from 'typeorm';
 import { Net_Institucion } from 'src/modules/Empresarial/institucion/entities/net_institucion.entity';
 import * as xlsx from 'xlsx';
 import { AfiliadoService } from 'src/modules/afiliado/afiliado.service';
@@ -74,8 +74,7 @@ export class DetallePlanillaIngresoService {
 
       let salarioCotizableRepository = await this.salarioCotizableRepository.find()
 
-      const DetPlanIng = this.buscarPlanilla(personas, salarioCotizableRepository, createDetPlanIngDTO);
-
+      const DetPlanIng = this.buscarPorMesYDni(createDetPlanIngDTO.mes, dni);
       if (!DetPlanIng) {
         /**los valores a insertar seran  createDetPlanIngDTO*/
         const Planilla = this.insertPlanilla(personas, salarioCotizableRepository, createDetPlanIngDTO);
@@ -203,9 +202,42 @@ export class DetallePlanillaIngresoService {
     return sueldoBase * porcAportMin
   }
 
-  private async buscarPlanilla(persona, salarioCotizableRepository, createDetPlanIngDTO): Promise<void> {
-    
+  async buscarPorMesYDni(mes: number, dni: string): Promise<Net_Persona> {
+    try {
+      const año = new Date().getFullYear();
+      const fechaInicioMesAnterior = new Date(año, mes - 2, 1);
+      const fechaFinMesAnterior = new Date(año, mes - 1, 0);
+      const persona = await this.personaRepository.findOne({
+        where: { dni, estado: 'ACTIVO' },
+        relations: ['detallePlanIngreso', 'detallePlanIngreso.planilla'],
+      });
+
+      if (!persona) {
+        throw new NotFoundException(`No se encontró una persona activa con el DNI ${dni}`);
+      }
+      const planillaEnMesAnterior = persona.detallePlanIngreso.some(detalle => {
+        const [diaInicio, mesInicio, añoInicio] = detalle.planilla.periodoInicio.split('-').map(Number);
+        const [diaFin, mesFin, añoFin] = detalle.planilla.periodoFinalizacion.split('-').map(Number);
+
+        const periodoInicio = new Date(añoInicio, mesInicio - 1, diaInicio);
+        const periodoFinalizacion = new Date(añoFin, mesFin - 1, diaFin);
+
+        return (
+          periodoInicio >= fechaInicioMesAnterior && periodoFinalizacion <= fechaFinMesAnterior
+        );
+      });
+
+      if (!planillaEnMesAnterior) {
+        throw new NotFoundException(`La persona con DNI ${dni} no estuvo registrada en una planilla en el mes ${mes - 1}`);
+      }
+
+      return persona;
+    } catch (error) {
+      this.logger.error(`Error buscando por mes ${mes} y DNI ${dni}: ${error.message}`);
+      throw error;
+    }
   }
+  
   private async insertPlanilla(persona, salarioCotizableRepository, createDetPlanIngDTO): Promise<void> {
     /* const { idTipoPlanilla, mes, dni, idInstitucion, prestamos } = createDetPlanIngDTO
 

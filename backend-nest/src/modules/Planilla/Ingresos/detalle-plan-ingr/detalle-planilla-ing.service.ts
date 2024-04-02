@@ -27,6 +27,41 @@ export class DetallePlanillaIngresoService {
   @InjectRepository(Net_Persona)
   private personaRepository: Repository<Net_Persona>
 
+
+  async obtenerDetallesPorCentroTrabajo(idCentroTrabajo: number): Promise<any> {
+    try {
+      const detalles = await this.detallePlanillaIngr
+        .createQueryBuilder('detalle')
+        .innerJoinAndSelect('detalle.persona', 'persona')
+        .innerJoinAndSelect('detalle.centroTrabajo', 'centroTrabajo')
+        .select([
+          'persona.dni AS Identidad',
+          'persona.primer_nombre || \' \' || persona.primer_apellido AS NombrePersona',
+          'detalle.sueldo AS Sueldo',
+          'detalle.aportaciones AS Aportaciones',
+          'detalle.prestamos AS Prestamos',
+          'detalle.cotizaciones AS Cotizaciones',
+          'detalle.deducciones AS Deducciones',
+          'detalle.sueldo_neto AS SueldoNeto'
+        ])
+        .where('centroTrabajo.id_centro_trabajo = :idCentroTrabajo', { idCentroTrabajo })
+        .getRawMany();
+  
+      if (!detalles.length) {
+        this.logger.warn(`No se encontraron detalles para el centro de trabajo con ID ${idCentroTrabajo}`);
+        throw new NotFoundException(`No se encontraron detalles para el centro de trabajo con ID ${idCentroTrabajo}`);
+      }
+  
+      return detalles;
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+      this.logger.error(`Error al obtener detalles por centro de trabajo: ${error.message}`, error.stack);
+      throw new InternalServerErrorException('Error al obtener detalles por centro de trabajo');
+    }
+  }
+
   async create(createDetPlanIngDTO: CreateDetallePlanIngDto) {
     try {
       let personas = await this.personaRepository.findOne({

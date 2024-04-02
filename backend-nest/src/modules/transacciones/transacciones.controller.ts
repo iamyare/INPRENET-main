@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, HttpStatus, HttpException, Res } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, HttpStatus, HttpException, Res, HttpCode } from '@nestjs/common';
 import { CreateTransaccionesDto } from './dto/create-transacciones.dto';
 import { UpdateTranssacionesDto } from './dto/update-transacciones.dto';
 import { TransaccionesService } from './transacciones.service';
@@ -8,6 +8,22 @@ import { ApiTags } from '@nestjs/swagger';
 @Controller('transacciones')
 export class TransaccionesController {
   constructor(private readonly transaccionesService: TransaccionesService) { }
+
+  @Post('/crear-movimiento')
+  @HttpCode(HttpStatus.CREATED)
+  async crearMovimiento(@Body() createTransaccionesDto: CreateTransaccionesDto) {
+    try {
+      const movimiento = await this.transaccionesService.crearMovimiento(
+        createTransaccionesDto.dni,
+        createTransaccionesDto.numeroCuenta,
+        createTransaccionesDto.descripcionMovimiento,
+        createTransaccionesDto.monto
+      );
+      return { status: 'success', message: 'Movimiento creado con éxito', data: movimiento };
+    } catch (error) {
+      return { status: 'error', message: error.message };
+    }
+  }
 
   @Post('/asignar-movimiento')
   async asignarMovimiento(@Body() datosMovimiento: any) {

@@ -1,6 +1,6 @@
 import { Check, Column, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 import { NET_CUENTA_PERSONA } from "./net_cuenta_persona.entity";
-import { NET_TIPO_MOVIMIENTO_CUENTA } from "./net_tipo_movimiento_cuenta.entity";
+import { NET_TIPO_MOVIMIENTO_CUENTA } from "./net_tipo_movimiento.entity";
 
 @Entity({name:'NET_TIPO_CUENTA'})
 @Check("CK1_APORTACION_B_NET_TIPO_CUENTA",`APORTACION_B IN ('S', 'N')`)

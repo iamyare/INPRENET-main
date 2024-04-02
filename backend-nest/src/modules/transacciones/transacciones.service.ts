@@ -6,7 +6,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Net_Persona } from '../afiliado/entities/Net_Persona';
 import { NET_TIPO_CUENTA } from './entities/net_tipo_cuenta.entitiy';
-import { NET_TIPO_MOVIMIENTO_CUENTA } from './entities/net_tipo_movimiento_cuenta.entity';
+import { NET_TIPO_MOVIMIENTO_CUENTA } from './entities/net_tipo_movimiento.entity';
 import { NET_CUENTA_PERSONA } from './entities/net_cuenta_persona.entity';
 
 @Injectable()
@@ -68,6 +68,47 @@ export class TransaccionesService {
     await this.movimientoCuentaRepository.save(nuevoMovimientoCuenta);
   
     return nuevoMovimientoCuenta;
+  }
+
+  async crearMovimiento(
+    dni: string,
+    numeroCuenta: string,
+    descripcionMovimiento: string,
+    monto: number
+  ): Promise<NET_MOVIMIENTO_CUENTA> {
+    const persona = await this.personaRepository.findOne({ where: { dni } });
+    if (!persona) {
+      throw new Error('Persona no encontrada');
+    }
+
+    const cuentaPersona = await this.cuentaPersonaRepository.findOne({
+      where: {
+        persona: { id_persona: persona.id_persona },
+        NUMERO_CUENTA: numeroCuenta
+      },
+      relations: ['tipoCuenta']
+    });
+    if (!cuentaPersona) {
+      throw new Error('Cuenta de persona no encontrada');
+    }
+
+    const tipoMovimiento = await this.tipoMovimientoCuentaRepository.findOne({
+      where: { DESCRIPCION: descripcionMovimiento }
+    });
+    if (!tipoMovimiento) {
+      throw new Error('Tipo de movimiento no encontrado');
+    }
+
+    const nuevoMovimiento = this.movimientoCuentaRepository.create({
+      persona: persona,
+      tipoMovimiento: tipoMovimiento,
+      MONTO: monto,
+      DESCRIPCION: descripcionMovimiento,
+      CREADA_POR: 'oscar', 
+      FECHA_MOVIMIENTO: new Date(), 
+    });
+
+    return this.movimientoCuentaRepository.save(nuevoMovimiento);
   }
   
 

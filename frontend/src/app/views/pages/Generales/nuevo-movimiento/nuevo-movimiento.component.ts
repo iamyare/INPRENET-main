@@ -18,7 +18,7 @@ export class NuevoMovimientoComponent implements OnInit {
   datosTabla: any[] = [];
   columnasMostradas: string[] = ['NUMERO_CUENTA', 'DESCRIPCION'];
   datosEncontrados: boolean = false;
-  elementoSeleccionado?: any; // Para almacenar la fila completa seleccionada
+  elementoSeleccionado?: any;
 
 
   constructor(private transaccionesService: TransaccionesService, private toastr: ToastrService,) { }

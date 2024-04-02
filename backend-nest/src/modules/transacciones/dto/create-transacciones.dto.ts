@@ -1,8 +1,18 @@
+import { IsNotEmpty, IsString, IsNumber } from 'class-validator';
+
 export class CreateTransaccionesDto {
+    @IsString()
+    @IsNotEmpty()
     dni: string;
-    descripcion: string; // Usado para encontrar el ID_TIPO_CUENTA
+
+    @IsString()
+    @IsNotEmpty()
+    numeroCuenta: string;
+
+    @IsString()
+    @IsNotEmpty()
+    descripcionMovimiento: string;
+
+    @IsNumber()
     monto: number;
-    descripcionCorta: string;
-    cuentaContable: string;
-    debitoCredito: string; // 'D' para débito o 'C' para crédito
 }

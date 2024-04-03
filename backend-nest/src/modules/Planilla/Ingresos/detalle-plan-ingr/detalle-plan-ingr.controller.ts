@@ -6,18 +6,18 @@ import { CreateDetallePlanIngDto } from './dto/create-detalle-plani-Ing.dto';
 @ApiTags('Detalle-Planilla-Ingreso')
 @Controller('detalle-plan-ingr')
 export class DetallePlanIngrController {
-    private readonly logger = new Logger(DetallePlanIngrController.name);
-    constructor(private readonly planillaIngresoService: DetallePlanillaIngresoService) { }
+  private readonly logger = new Logger(DetallePlanIngrController.name);
+  constructor(private readonly planillaIngresoService: DetallePlanillaIngresoService) { }
 
-    @Post()
-    create(@Body() CreateDetallePlanIngDto: CreateDetallePlanIngDto) {
-        return this.planillaIngresoService.create(CreateDetallePlanIngDto);
-    }
+  @Post(":id_tipoPlanilla")
+  create(@Body() CreateDetallePlanIngDto: CreateDetallePlanIngDto, @Param() id_tipoPlanilla: number) {
+    return this.planillaIngresoService.create(CreateDetallePlanIngDto, id_tipoPlanilla);
+  }
 
-    @Get('/obtenerDetalleIngresos/:idCentroTrabajo')
-  async obtenerDetalleIngresosPorCentroTrabajo(@Res() res, @Param('idCentroTrabajo') idCentroTrabajo: number) {
+  @Get('/obtenerDetalleIngresos/:idCentroTrabajo/:id_tipo_planilla')
+  async obtenerDetalleIngresosPorCentroTrabajo(@Res() res, @Param('idCentroTrabajo') idCentroTrabajo: number, @Param('id_tipo_planilla') id_tipo_planilla: number) {
     try {
-      const datos = await this.planillaIngresoService.obtenerDetallesPorCentroTrabajo(idCentroTrabajo);
+      const datos = await this.planillaIngresoService.obtenerDetallesPorCentroTrabajo(idCentroTrabajo, id_tipo_planilla);
       return res.status(HttpStatus.OK).json({
         statusCode: HttpStatus.OK,
         message: 'Datos de detalle de planilla de ingresos por centro de trabajo obtenidos correctamente',
@@ -28,8 +28,8 @@ export class DetallePlanIngrController {
     }
   }
 
-  /* @Get('buscar')
-  async buscarPorMesYDni(@Query('mes') mes: string, @Query('dni') dni: string) {
+  @Get('buscar')
+  async buscarPorMesYDni(@Query('mes') mes: string, @Query('dni') dni: string, @Query('id_tipoPlanilla') id_tipoPlanilla: number) {
     if (!mes || !dni) {
       throw new BadRequestException('Se requiere tanto el mes como el DNI para realizar la búsqueda.');
     }
@@ -39,7 +39,7 @@ export class DetallePlanIngrController {
         throw new BadRequestException('El mes debe ser un número válido.');
       }
 
-      const persona = await this.planillaIngresoService.buscarPorMesYDni(mesNumerico, dni);
+      const persona = await this.planillaIngresoService.buscarPorMesYDni(mesNumerico, dni, id_tipoPlanilla);
       return persona;
     } catch (error) {
       if (error instanceof NotFoundException || error instanceof BadRequestException) {
@@ -48,5 +48,5 @@ export class DetallePlanIngrController {
       console.error('Error en buscarPorMesYDni:', error.message);
       throw new InternalServerErrorException(error.message);
     }
-  } */
+  }
 }

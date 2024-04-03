@@ -26,7 +26,7 @@ export class PlanillaColegiosPrivadosComponent implements AfterViewInit, OnInit 
   showTable: boolean = true;
   dataSource: MatTableDataSource<UserData> = new MatTableDataSource<UserData>();
 
-  tiposPlanilla: string[] = ['01. Planilla Ordinaria', '02. Planilla Decimo Tercero', '03. Planilla Decimo Cuarto'];
+  tiposPlanilla: any[] = [{ id_tipo_planilla: 1, nombre: "Planilla Ordinaria" }, { id_tipo_planilla: 2, nombre: "Planilla Decimo Tercero" }, { id_tipo_planilla: 3, nombre: "Planilla Decimo Cuarto" }];
   displayedColumns: string[] = ['numeroColegio', 'nombreColegio', 'totalSueldo', 'totalPrestamo', 'totalAportaciones', 'totalPagar', 'totalCotizaciones'];
   displayedColumns3: string[] = ['identidad', 'nombreDocente', 'sueldo', 'aportaciones', 'cotizaciones', 'prestamos', 'deducciones', 'sueldoNeto', 'editar'];
 
@@ -55,13 +55,12 @@ export class PlanillaColegiosPrivadosComponent implements AfterViewInit, OnInit 
     });
   }
 
-  ngOnInit(): void {
-    this.obtenerDetallesPlanilla(1);
-  }
+  ngOnInit(): void { }
 
-  obtenerDetallesPlanilla(idCentroTrabajo: number) {
-    this.planillaIngresosService.obtenerDetallesPorCentroTrabajo(idCentroTrabajo).subscribe(
+  obtenerDetallesPlanilla(idCentroTrabajo: number, id_tipo_planilla: number) {
+    this.planillaIngresosService.obtenerDetallesPorCentroTrabajo(idCentroTrabajo, id_tipo_planilla).subscribe(
       (response: any) => {
+        console.log(response);
 
         const mappedData = response.data.map((item: any) => ({
           identidad: item.IDENTIDAD,
@@ -86,6 +85,7 @@ export class PlanillaColegiosPrivadosComponent implements AfterViewInit, OnInit 
         this.cdr.detectChanges();
       },
       error => {
+        this.dataSource.data = []
         console.error('Error al obtener detalles de planilla:', error);
       }
     );
@@ -138,6 +138,11 @@ export class PlanillaColegiosPrivadosComponent implements AfterViewInit, OnInit 
 
   seleccionarBoton(boton: string) {
     this.botonSeleccionado = boton;
+  }
+
+  datosPlanilla() {
+    const { id_tipo_planilla, nombre } = this.firstFormGroup.value.selectedShoe[0]
+    this.obtenerDetallesPlanilla(6, id_tipo_planilla);
   }
 
   editarElemento(row: UserData) {

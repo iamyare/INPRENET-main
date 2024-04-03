@@ -11,6 +11,9 @@ import { UpdateDetallePlanIngDto } from './dto/update-detalle-plani-Ing.dto';
 import { Net_Detalle_planilla_ingreso } from './entities/net_detalle_plani_ing.entity';
 import { Net_SALARIO_COTIZABLE } from './entities/net_detalle_plani_ing.entity copy';
 import { Net_TipoPlanilla } from '../../tipo-planilla/entities/tipo-planilla.entity';
+import { Net_Planilla } from '../../planilla/entities/net_planilla.entity';
+import { startOfMonth, endOfMonth } from 'date-fns';
+import { Length } from 'class-validator';
 
 @Injectable()
 export class DetallePlanillaIngresoService {
@@ -23,18 +26,26 @@ export class DetallePlanillaIngresoService {
   @InjectRepository(Net_Detalle_planilla_ingreso)
   private detallePlanillaIngr: Repository<Net_Detalle_planilla_ingreso>
 
+  @InjectRepository(Net_Planilla)
+  private planillaRepository: Repository<Net_Planilla>
+
   @InjectRepository(Net_SALARIO_COTIZABLE)
   private salarioCotizableRepository: Repository<Net_SALARIO_COTIZABLE>
   @InjectRepository(Net_Persona)
   private personaRepository: Repository<Net_Persona>
 
+  @InjectRepository(Net_TipoPlanilla)
+  private tipoPlanillaRepository: Repository<Net_TipoPlanilla>
 
-  async obtenerDetallesPorCentroTrabajo(idCentroTrabajo: number): Promise<any> {
+
+  async obtenerDetallesPorCentroTrabajo(idCentroTrabajo: number, id_tipo_planilla: number): Promise<any> {
     try {
       const detalles = await this.detallePlanillaIngr
         .createQueryBuilder('detalle')
         .innerJoinAndSelect('detalle.persona', 'persona')
         .innerJoinAndSelect('detalle.centroTrabajo', 'centroTrabajo')
+        .innerJoinAndSelect('detalle.planilla', 'planilla')
+        .innerJoinAndSelect('planilla.tipoPlanilla', 'tipoPlanilla')
         .select([
           'persona.dni AS Identidad',
           'persona.primer_nombre || \' \' || persona.primer_apellido AS NombrePersona',
@@ -45,7 +56,7 @@ export class DetallePlanillaIngresoService {
           'detalle.deducciones AS Deducciones',
           'detalle.sueldo_neto AS SueldoNeto'
         ])
-        .where('centroTrabajo.id_centro_trabajo = :idCentroTrabajo', { idCentroTrabajo })
+        .where('centroTrabajo.id_centro_trabajo = :idCentroTrabajo AND tipoPlanilla.id_tipo_planilla = :id_tipo_planilla', { idCentroTrabajo, id_tipo_planilla })
         .getRawMany();
 
       if (!detalles.length) {
@@ -63,7 +74,7 @@ export class DetallePlanillaIngresoService {
     }
   }
 
-  async create(createDetPlanIngDTO: CreateDetallePlanIngDto) {
+  async create(createDetPlanIngDTO: CreateDetallePlanIngDto, id_tipoPlanilla: number) {
     const { idTipoPlanilla, mes, dni, idInstitucion, prestamos } = createDetPlanIngDTO
 
     try {
@@ -74,31 +85,51 @@ export class DetallePlanillaIngresoService {
 
       let salarioCotizableRepository = await this.salarioCotizableRepository.find()
 
-      const DetPlanIng = this.buscarPorMesYDni(createDetPlanIngDTO.mes, dni);
-      if (!DetPlanIng) {
-        /**los valores a insertar seran  createDetPlanIngDTO*/
-        const Planilla = this.insertPlanilla(personas, salarioCotizableRepository, createDetPlanIngDTO);
-        /**Faltaria hacer rollback */
+      const fechaActual: Date = new Date();
+      const mes: string = ('0' + (fechaActual.getMonth() + 1)).slice(-2);
+      const año: number = fechaActual.getFullYear();
+      const codPlan: string = "PLAN-ING-" + mes + "-" + año;
 
-        if (Planilla) {
-          return this.insertNetDetPlanilla(personas, salarioCotizableRepository, createDetPlanIngDTO);
+      let planilla = await this.planillaRepository.findOne({
+        where: { codigo_planilla: codPlan },
+      });
+
+      const DetPlanIng = await this.buscarPorMesYDni(createDetPlanIngDTO.mes, dni, id_tipoPlanilla).then((val) => {
+        return val
+      });
+
+      if (!planilla) {
+        let planillaId;
+        const Planilla = this.insertPlanilla(codPlan, createDetPlanIngDTO);
+        planillaId = Planilla.then((val) => {
+          if (val.id_planilla) {
+            return val.id_planilla
+          }
+        });
+
+        if (DetPlanIng.detallePlanIngreso.length > 0) {
+          planillaId.then((val) => {
+            if (val) {
+              return this.insertNetDetPlanillaMesAnt(val, DetPlanIng.detallePlanIngreso, DetPlanIng.id_persona, 6);
+            }
+          })
+        } else {
+          return this.insertNetDetPlanilla(planillaId, personas, salarioCotizableRepository, createDetPlanIngDTO);
         }
 
       } else {
-        const Planilla = this.insertPlanilla(personas, salarioCotizableRepository, DetPlanIng);
-        /**Faltaria hacer rollback */
-
-        if (Planilla) {
-          return this.insertNetDetPlanilla(personas, salarioCotizableRepository, DetPlanIng);
+        if (DetPlanIng.detallePlanIngreso.length > 0) {
+          return this.insertNetDetPlanillaMesAnt(planilla.id_planilla, DetPlanIng.detallePlanIngreso, DetPlanIng.id_persona, 6);
+        } else {
+          return this.insertNetDetPlanilla(planilla.id_planilla, personas, salarioCotizableRepository, createDetPlanIngDTO);
         }
-        /**los valores a insertar seran  DetPlanIng lo que cambiaria seria el mes de la planilla*/
       }
+
 
     } catch (error) {
       console.log(error);
       this.handleException(error);
     }
-
   }
 
   private calculoAportaciones(persona, salarioCotizableRepository): number {
@@ -202,32 +233,38 @@ export class DetallePlanillaIngresoService {
     return sueldoBase * porcAportMin
   }
 
-  async buscarPorMesYDni(mes: number, dni: string): Promise<Net_Persona> {
+  async buscarPorMesYDni(mes: number, dni: string, id_tipoPlanilla: number): Promise<any> {
+    console.log(id_tipoPlanilla);
+
     try {
       const año = new Date().getFullYear();
       const fechaInicioMesAnterior = new Date(año, mes - 2, 1);
       const fechaFinMesAnterior = new Date(año, mes - 1, 0);
       const persona = await this.personaRepository.findOne({
-        where: { dni, estado: 'ACTIVO' },
-        relations: ['detallePlanIngreso', 'detallePlanIngreso.planilla'],
+        where: { dni, estadoAfiliado: { Descripcion: 'ACTIVO' }, detallePlanIngreso: { planilla: { tipoPlanilla: { id_tipo_planilla: id_tipoPlanilla } } } },
+        relations: ['detallePlanIngreso', 'detallePlanIngreso.planilla', "estadoAfiliado"],
       });
 
       if (!persona) {
         throw new NotFoundException(`No se encontró una persona activa con el DNI ${dni}`);
       }
       const planillaEnMesAnterior = persona.detallePlanIngreso.some(detalle => {
-        const [diaInicio, mesInicio, añoInicio] = detalle.planilla.periodoInicio.split('/').map(Number);
-        const [diaFin, mesFin, añoFin] = detalle.planilla.periodoFinalizacion.split('/').map(Number);
 
-        const periodoInicio = new Date(añoInicio, mesInicio - 1, diaInicio);
-        const periodoFinalizacion = new Date(añoFin, mesFin - 1, diaFin);
+        if (detalle.planilla) {
+          const [diaInicio, mesInicio, añoInicio] = detalle.planilla.periodoInicio.split('/').map(Number);
+          const [diaFin, mesFin, añoFin] = detalle.planilla.periodoFinalizacion.split('/').map(Number);
 
-        return (
-          periodoInicio >= fechaInicioMesAnterior && periodoFinalizacion <= fechaFinMesAnterior
-        );
+          const periodoInicio = new Date(añoInicio, mesInicio - 1, diaInicio);
+          const periodoFinalizacion = new Date(añoFin, mesFin - 1, diaFin);
+
+          return (
+            periodoInicio >= fechaInicioMesAnterior && periodoFinalizacion <= fechaFinMesAnterior
+          );
+        }
       });
 
       if (!planillaEnMesAnterior) {
+        return []
         throw new NotFoundException(`La persona con DNI ${dni} no estuvo registrada en una planilla en el mes ${mes - 1}`);
       }
 
@@ -237,20 +274,55 @@ export class DetallePlanillaIngresoService {
       throw error;
     }
   }
-  
-  private async insertPlanilla(persona, salarioCotizableRepository, createDetPlanIngDTO): Promise<void> {
-    /* const { idTipoPlanilla, mes, dni, idInstitucion, prestamos } = createDetPlanIngDTO
 
-    let ValoresDetalle = {
-      idpersona: persona.id_persona,
-      idInstitucion: idInstitucion,
-      sueldo: persona.perfAfilCentTrabs[0].salario_base,
-      prestamos: prestamos,
-      aportaciones: this.calculoAportaciones(persona, salarioCotizableRepository),
-      cotizaciones: this.calculoCotizaciones(persona, salarioCotizableRepository),
-      deducciones: this.calculoAportaciones(persona, salarioCotizableRepository) + this.calculoCotizaciones(persona, salarioCotizableRepository) + prestamos,
-      sueldo_neto: persona.perfAfilCentTrabs[0].salario_base - (this.calculoAportaciones(persona, salarioCotizableRepository) + this.calculoCotizaciones(persona, salarioCotizableRepository) + createDetPlanIngDTO.prestamos)
+  async insertPlanilla(codigo_planilla, createPlanillaDto): Promise<any> {
+    const currentDate = new Date();
+    const firstDayOfMonth = startOfMonth(currentDate);
+    const lastDayOfMonth = endOfMonth(currentDate);
+
+    const periodoInicio = new Date(firstDayOfMonth).toLocaleString();
+    const periodoFinalizacion = new Date(lastDayOfMonth).toLocaleString();
+
+    try {
+      const tipoPlanilla = await this.tipoPlanillaRepository.findOneBy({ nombre_planilla: createPlanillaDto.nombre_planilla });
+
+      if (tipoPlanilla && tipoPlanilla.id_tipo_planilla) {
+
+        const planilla = this.planillaRepository.create({
+          "codigo_planilla": codigo_planilla,
+          "secuencia": 1,
+          "periodoInicio": periodoInicio,
+          "periodoFinalizacion": periodoFinalizacion,
+          "tipoPlanilla": tipoPlanilla
+        })
+
+        await this.planillaRepository.save(planilla)
+        return planilla;
+
+      } else {
+        throw new Error("No se encontró ningún tipo de planilla con el nombre proporcionado");
+      }
+
+
+    } catch (error) {
+      this.handleException(error);
     }
+
+  }
+
+  private async insertNetDetPlanillaMesAnt(id_planilla, DetPlanIng, id_persona, id_centro_trabajo): Promise<void> {
+    let values = DetPlanIng.map(detalle => `SELECT
+      ${detalle.sueldo} AS SUELDO,
+      ${detalle.prestamos} AS PRESTAMOS,
+      ${detalle.aportaciones} AS APORTACIONES,
+      ${detalle.cotizaciones} AS COTIZACIONES,
+      ${detalle.deducciones} AS DEDUCCIONES,
+      ${detalle.sueldo_neto} AS SUELDO_NETO,
+      ${id_persona} AS ID_PERSONA,
+      ${id_planilla} AS ID_PLANILLA,
+      ${id_centro_trabajo} AS ID_CENTRO_TRABAJO
+    FROM DUAL`).join('\nUNION ALL\n');
+
     const queryInsDeBBenf = `INSERT INTO NET_DETALLE_PLANILLA_ING (
       SUELDO,
       PRESTAMOS,
@@ -259,22 +331,14 @@ export class DetallePlanillaIngresoService {
       DEDUCCIONES,
       SUELDO_NETO,
       ID_PERSONA,
+      ID_PLANILLA,
       ID_CENTRO_TRABAJO
-    ) VALUES (
-      ${ValoresDetalle.sueldo},
-      ${ValoresDetalle.prestamos},
-      ${ValoresDetalle.aportaciones},
-      ${ValoresDetalle.cotizaciones},
-      '${ValoresDetalle.deducciones}',
-      '${ValoresDetalle.sueldo_neto}',
-      ${ValoresDetalle.idpersona},
-      ${ValoresDetalle.idInstitucion}
-    )`
+    )\n${values}`;
 
     const detPlanillaIng = await this.entityManager.query(queryInsDeBBenf);
-    return detPlanillaIng; */
+    return detPlanillaIng;
   }
-  private async insertNetDetPlanilla(persona, salarioCotizableRepository, createDetPlanIngDTO): Promise<number> {
+  private async insertNetDetPlanilla(id_planilla, persona, salarioCotizableRepository, createDetPlanIngDTO): Promise<number> {
     const { idInstitucion, prestamos } = createDetPlanIngDTO
     let ValoresDetalle = {
       idpersona: persona.id_persona,
@@ -294,7 +358,8 @@ export class DetallePlanillaIngresoService {
       DEDUCCIONES,
       SUELDO_NETO,
       ID_PERSONA,
-      ID_CENTRO_TRABAJO
+      ID_CENTRO_TRABAJO,
+      ID_PLANILLA
     ) VALUES (
       ${ValoresDetalle.sueldo},
       ${ValoresDetalle.prestamos},
@@ -303,7 +368,8 @@ export class DetallePlanillaIngresoService {
       '${ValoresDetalle.deducciones}',
       '${ValoresDetalle.sueldo_neto}',
       ${ValoresDetalle.idpersona},
-      ${ValoresDetalle.idInstitucion}
+      ${ValoresDetalle.idInstitucion},
+      ${id_planilla}
     )`
 
     const detPlanillaIng = await this.entityManager.query(queryInsDeBBenf);

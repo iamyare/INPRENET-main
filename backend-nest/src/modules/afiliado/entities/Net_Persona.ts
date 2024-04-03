@@ -10,6 +10,7 @@ import { NET_CUENTA_PERSONA } from "src/modules/transacciones/entities/net_cuent
 import { IsIn } from "class-validator";
 import { NET_MOVIMIENTO_CUENTA } from "src/modules/transacciones/entities/net_movimiento_cuenta.entity";
 import { Net_Detalle_planilla_ingreso } from "src/modules/Planilla/Ingresos/detalle-plan-ingr/entities/net_detalle_plani_ing.entity";
+import { Net_Estado_Afiliado } from "./net_estado_afiliado.entity";
 
 @Entity({
     name: 'NET_PERSONA',
@@ -83,12 +84,6 @@ export class Net_Persona {
     @Column('varchar2', { length: 40, nullable: true, name: 'NUMERO_CARNET' })
     numero_carnet: string;
 
-    @Column('varchar2', { length: 200, nullable: true, name: 'DIRECCION_RESIDENCIA' })
-    direccion_residencia: string;
-
-    @Column('varchar2', { length: 40, default: 'ACTIVO', name: 'ESTADO' })
-    estado: string;
-
     @Column('date', { nullable: true, name: 'FECHA_NACIMIENTO' })
     fecha_nacimiento: string;
 
@@ -98,9 +93,16 @@ export class Net_Persona {
     @OneToMany(() => Net_Detalle_Afiliado, detalleAfiliado => detalleAfiliado.afiliado)
     detalleAfiliado: Net_Detalle_Afiliado[];
 
+    @Column('varchar2', { length: 200, nullable: true, name: 'DIRECCION_RESIDENCIA' })
+    direccion_residencia: string;
+
     @ManyToOne(() => Net_Municipio, municipio => municipio.afiliado, { cascade: true })
     @JoinColumn({ name: 'ID_MUNICIPIO_RESIDENCIA', foreignKeyConstraintName: "FK_ID_MUNIC_RESID_PERS" })
     municipio: Net_Municipio;
+
+    @ManyToOne(() => Net_Estado_Afiliado, estadoAfiliado => estadoAfiliado.persona, { cascade: true })
+    @JoinColumn({ name: 'ID_ESTADO_AFILIADO', foreignKeyConstraintName: "FK_ID_ESTADO_AFIL_PERS" })
+    estadoAfiliado: Net_Estado_Afiliado;
 
     @OneToMany(() => Net_Detalle_Afiliado, detalleAfiliado => detalleAfiliado.afiliado)
     detallesAfiliado: Net_Detalle_Afiliado[];

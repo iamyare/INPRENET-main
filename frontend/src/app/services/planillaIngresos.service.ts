@@ -8,12 +8,11 @@ import { environment } from 'src/environments/environment';
 })
 export class PlanillaIngresosService {
 
-constructor(private http: HttpClient) { }
+  constructor(private http: HttpClient) { }
 
-
-obtenerDetallesPorCentroTrabajo(idCentroTrabajo: number): Observable<any> {
-  const url = `${environment.API_URL}/api/detalle-plan-ingr/obtenerDetalleIngresos/${idCentroTrabajo}`;
-  return this.http.get<any>(url);
-}
+  obtenerDetallesPorCentroTrabajo(idCentroTrabajo: number, id_tipo_planilla: number): Observable<any> {
+    const url = `${environment.API_URL}/api/detalle-plan-ingr/obtenerDetalleIngresos/${idCentroTrabajo}/${id_tipo_planilla}`;
+    return this.http.get<any>(url);
+  }
 
 }

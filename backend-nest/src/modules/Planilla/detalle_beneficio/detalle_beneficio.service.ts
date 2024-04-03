@@ -16,6 +16,7 @@ import { Net_Detalle_Beneficio_Afiliado } from './entities/net_detalle_beneficio
 import { AfiliadoService } from '../../afiliado/afiliado.service';
 import { Net_Detalle_Afiliado } from 'src/modules/afiliado/entities/Net_detalle_persona.entity';
 import { Net_Tipo_Persona } from 'src/modules/afiliado/entities/net_tipo_persona.entity';
+import { Net_Estado_Afiliado } from 'src/modules/afiliado/entities/net_estado_afiliado.entity';
 @Injectable()
 export class DetalleBeneficioService {
   private readonly logger = new Logger(DetalleBeneficioService.name)
@@ -81,13 +82,14 @@ export class DetalleBeneficioService {
                 tipo_afiliado: "AFILIADO",
               },
               afiliado: {
-                estado: 'ACTIVO',
+                estadoAfiliado: { Descripcion: "ACTIVO" },
               }
             },
             relations: [
               "afiliado",
               "padreIdAfiliado",
-              "afiliado.detalleAfiliado.padreIdAfiliado"]
+              "afiliado.detalleAfiliado.padreIdAfiliado",
+              "afiliado.estadoAfiliado"]
           }
           );
 
@@ -123,13 +125,14 @@ export class DetalleBeneficioService {
                 tipo_afiliado: "BENEFICIARIO",
               },
               afiliado: {
-                estado: 'ACTIVO',
+                estadoAfiliado: { Descripcion: "ACTIVO" },
               }
             },
             relations: [
               "afiliado",
               "padreIdAfiliado",
-              "afiliado.detalleAfiliado.padreIdAfiliado"]
+              "afiliado.detalleAfiliado.padreIdAfiliado",
+              "afiliado.estadoAfiliado"]
           }
           );
 
@@ -379,6 +382,7 @@ export class DetalleBeneficioService {
     }
   }
 
+  /**modificar por cambio de estado a una tabla */
   async GetAllBeneficios(dni: string): Promise<any> {
     try {
       return await this.detalleBeneficioAfiliadoRepository.createQueryBuilder('detBenA')
@@ -390,7 +394,7 @@ export class DetalleBeneficioService {
         .addSelect('afil.SEGUNDO_APELLIDO', 'SEGUNDO_APELLIDO')
         .addSelect('afil.SEXO', 'SEXO')
         .addSelect('afil.DIRECCION_RESIDENCIA', 'DIRECCION_RESIDENCIA')
-        .addSelect('afil.ESTADO', 'ESTADO')
+        .addSelect('estadoAfil.DESCRIPCION', 'ESTADO')
         .addSelect('afil.FECHA_NACIMIENTO', 'FECHA_NACIMIENTO')
         .addSelect('afil.COLEGIO_MAGISTERIAL', 'COLEGIO_MAGISTERIAL')
         .addSelect('afil.NUMERO_CARNET', 'NUMERO_CARNET')
@@ -405,6 +409,7 @@ export class DetalleBeneficioService {
         .addSelect('detBenA.MONTO_POR_PERIODO', 'MONTO_POR_PERIODO')
         .addSelect('detBenA.MONTO_TOTAL', 'MONTO_TOTAL')
         .innerJoin(Net_Beneficio, 'ben', 'ben.ID_BENEFICIO = detBenA.ID_BENEFICIO')
+        .innerJoin(Net_Estado_Afiliado, 'estadoAfil', 'estadoAfil.CODIGO = afil.ID_ESTADO_AFILIADO')
         .innerJoin(Net_Persona, 'afil', 'afil.ID_PERSONA = detBenA.ID_BENEFICIARIO AND detBenA.ID_CAUSANTE = detBenA.ID_CAUSANTE')
         .innerJoin(Net_Detalle_Afiliado, 'detA', 'afil.ID_PERSONA = detBenA.ID_BENEFICIARIO AND detBenA.ID_CAUSANTE = detBenA.ID_CAUSANTE ')
         .where(`afil.dni = '${dni}'`)

@@ -14,18 +14,19 @@ import { Net_Persona } from './entities/Net_Persona';
 import { Net_Detalle_Afiliado } from './entities/Net_detalle_persona.entity';
 import { Net_perf_afil_cent_trab } from './entities/net_perf_afil_cent_trab';
 import { Net_Tipo_Persona } from './entities/net_tipo_persona.entity';
+import { Net_Estado_Afiliado } from './entities/net_estado_afiliado.entity';
 
 @Module({
   controllers: [AfiliadoController],
   providers: [AfiliadoService],
   imports: [
-    TypeOrmModule.forFeature([Net_Persona, Net_perf_afil_cent_trab,
+    TypeOrmModule.forFeature([Net_Estado_Afiliado, Net_Persona, Net_perf_afil_cent_trab,
       Net_Ref_Per_Afil,
-                              Net_ReferenciaPersonal,
-                              Net_Afiliados_Por_Banco, Net_Departamento,
-                              Net_Pais, Net_TipoIdentificacion,
-                              Net_Centro_Trabajo, Net_Banco, Net_Detalle_Afiliado, Net_Tipo_Persona])
+      Net_ReferenciaPersonal,
+      Net_Afiliados_Por_Banco, Net_Departamento,
+      Net_Pais, Net_TipoIdentificacion,
+      Net_Centro_Trabajo, Net_Banco, Net_Detalle_Afiliado, Net_Tipo_Persona])
   ]
 
 })
-export class AfiliadoModule {}
+export class AfiliadoModule { }

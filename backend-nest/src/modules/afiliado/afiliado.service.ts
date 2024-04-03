@@ -31,7 +31,7 @@ export class AfiliadoService {
     private readonly afiliadoRepository: Repository<Net_Persona>,
     @InjectRepository(Net_Detalle_Afiliado)
     private datosIdentificacionRepository: Repository<Net_Detalle_Afiliado>,
-    
+
     private connection: Connection,
   ) { }
 
@@ -178,6 +178,7 @@ export class AfiliadoService {
     return `This action removes a #${id} afiliado`;
   }
 
+  /**modificar por cambio de estado a una tabla */
   async obtenerBenDeAfil(dniAfil: string): Promise<any> {
 
     try {
@@ -262,14 +263,15 @@ export class AfiliadoService {
     return newList;
   }
 
+  /**modificar por cambio de estado a una tabla */
   async findByDni(dni: string): Promise<Net_Persona | string> {
-    const afiliado = await this.afiliadoRepository.findOne({ where: { dni } });
+    const afiliado = await this.afiliadoRepository.findOne({ where: { dni }, relations: ['estadoAfiliado'] });
 
     if (!afiliado) {
       throw new NotFoundException(`Afiliado with DNI ${dni} not found`);
     }
 
-    switch (afiliado.estado) {
+    switch (afiliado.estadoAfiliado.Descripcion) {
       case 'FALLECIDO':
         return 'El afiliado está fallecido.';
       case 'INACTIVO':
@@ -279,70 +281,34 @@ export class AfiliadoService {
     }
   }
 
+  /**modificar por cambio de estado a una tabla */
   async buscarPersonaYMovimientosPorDNI(dni: string): Promise<any> {
     const persona = await this.afiliadoRepository.findOne({
-        where: { dni },
-        relations: ["movimientos"] // Asegúrate de tener esta relación definida en tu entidad
+      where: { dni },
+      relations: ["movimientos", "estadoAfiliado"] // Asegúrate de tener esta relación definida en tu entidad
     });
 
     if (!persona) {
-        throw new NotFoundException(`Persona con DNI ${dni} no encontrada`);
+      throw new NotFoundException(`Persona con DNI ${dni} no encontrada`);
     }
 
-    if (persona.estado === 'FALLECIDO' || persona.estado === 'INACTIVO') {
-        return {
-            status: 'error',
-            message: `La persona está ${persona.estado.toLowerCase()}.`,
-            data: { persona: null, movimientos: [] }
-        };
+    if (persona.estadoAfiliado.Descripcion === 'FALLECIDO' || persona.estadoAfiliado.Descripcion === 'INACTIVO') {
+      return {
+        status: 'error',
+        message: `La persona está ${persona.estadoAfiliado.Descripcion.toLowerCase()}.`,
+        data: { persona: null, movimientos: [] }
+      };
     }
 
     return {
-        status: 'success',
-        message: 'Datos y movimientos de la persona encontrados con éxito',
-        data: {
-            persona, // Todos los datos de la persona
-            movimientos: persona.movimientos // Los movimientos asociados
-        }
+      status: 'success',
+      message: 'Datos y movimientos de la persona encontrados con éxito',
+      data: {
+        persona, // Todos los datos de la persona
+        movimientos: persona.movimientos // Los movimientos asociados
+      }
     };
-}
-  
-  /* async findByDni(dni: string) { */
-  //const datosIdentificacion = await this.datosIdentificacionRepository.findOne({ where: { dni } });
-
-  /*  if (!datosIdentificacion) {
-       throw new NotFoundException(`DatosIdentificacion with DNI "${dni}" not found.`);
-   } */
-
-  /* const afiliado = await this.afiliadoRepository.findOne({
-      where: { datosIdentificacion: { id_datos_identificacion: datosIdentificacion.id_datos_identificacion } },
-      relations: ['datosIdentificacion']
-  }); */
-
-  /* if (!afiliado) {
-      throw new NotFoundException(`Afiliado with DatosIdentificacion ID "${datosIdentificacion.id_datos_identificacion}" not found.`);
   }
-
-  return afiliado; */
-  //}
-
-
-  /*  afiliados = await queryBuilder
-      .where('"dni" = :term AND estado = :est', { term, est:"FALLECIDO" })
-      .getOne(); */
-
-  /*     
-      console.log(queryBuilder);
-      return queryBuilder */
-  /*     return this.afiliadoRepository.find({
-        relations: ['padreIdAfiliado','beneficioPlanilla.beneficio'],
-        where: {
-          dni: "0801200012345",
-          tipo_cotizante: "BENEFICIARIO",
-          beneficioPlanilla.beneficio.: "dsadsa"
-        },
-      }); */
-
 
   private handleException(error: any): void {
     this.logger.error(error);

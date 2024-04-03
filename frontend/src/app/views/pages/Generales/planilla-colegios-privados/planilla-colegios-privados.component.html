@@ -9,11 +9,16 @@
         formControlName="selectedShoe"
       >
         <mat-list-option *ngFor="let shoe of tiposPlanilla" [value]="shoe">
-          {{ shoe }}
+          {{ shoe.nombre }}
         </mat-list-option>
       </mat-selection-list>
       <div>
-        <button mat-button matStepperNext [disabled]="!firstFormGroup.valid">
+        <button
+          mat-button
+          matStepperNext
+          [disabled]="!firstFormGroup.valid"
+          (click)="datosPlanilla()"
+        >
           Siguiente
         </button>
       </div>

@@ -10,8 +10,12 @@ export class TransaccionesService {
 
   constructor(private http: HttpClient) { }
 
-  asignarMovimiento(datosMovimiento: any) {
-    return this.http.post(`${environment.API_URL}/api/transacciones/asignar-movimiento`, datosMovimiento);
+  crearMovimiento(createTransaccionesDto: any): Observable<any> {
+    return this.http.post(`${environment.API_URL}/api/transacciones/crear-movimiento`, createTransaccionesDto).pipe(
+      catchError(error => {
+        return throwError(() => new Error('No fue posible crear el movimiento: ' + error.message));
+      })
+    );
   }
 
   obtenerTiposDeCuentaPorDNI(dni: string): Observable<any> {

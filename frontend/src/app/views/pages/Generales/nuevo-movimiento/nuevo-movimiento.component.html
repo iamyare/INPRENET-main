@@ -1,29 +1,48 @@
-<div class="container">
-  <form (ngSubmit)="onSubmit()">
-    <div
-      fxLayout="row"
-      fxLayoutGap="8px"
-      fxLayoutAlign="start center"
-      style="background-color: white; width: max-content"
-    >
-      <!-- Campo de entrada ocupando la mayor parte del espacio -->
-      <mat-form-field fxFlex>
-        <mat-label>DNI</mat-label>
-        <input matInput [(ngModel)]="dni" name="dni" required />
-      </mat-form-field>
+<div class="dni-search">
+  <mat-form-field appearance="fill" class="dni-input">
+    <mat-label>DNI</mat-label>
+    <input matInput placeholder="Introduce tu DNI" [(ngModel)]="dni" required>
+  </mat-form-field>
 
-      <!-- Botón alineado a la derecha dentro de la fila -->
-      <button
-        mat-raised-button
-        color="primary"
-        type="submit"
-        fxFlex="nogrow"
-        style="color: #ffffff; border-radius: 5px; padding: 10px 20px"
-      >
-        Buscar DNI
-      </button>
-    </div>
-  </form>
+  <button mat-raised-button color="primary" (click)="onSubmit()" class="search-button">
+    <mat-icon>search</mat-icon>
+    Buscar
+  </button>
+</div>
+
+
+<div *ngIf="persona" style="padding: 1%">
+  <h1 style="font-size: 2rem">Datos Generales Persona</h1>
+  <div>
+    <table>
+      <tr>
+        <th>DNI de persona</th>
+        <td>{{ persona.dni }}</td>
+        <th>Nombre de persona</th>
+        <td>{{ persona.primer_nombre }} {{ persona.segundo_nombre }} {{ persona.primer_apellido }} {{ persona.segundo_apellido }}</td>
+        <th>Sexo</th>
+        <td>{{ persona.sexo }}</td>
+        <th>Dirección de residencia</th>
+        <td>{{ persona.direccion_residencia }}</td>
+        <th>Estado</th>
+        <td>{{ persona.estado }}</td>
+        <th>Fecha nacimiento</th>
+        <td>{{ persona.fecha_nacimiento }}</td>
+      </tr>
+      <tr>
+        <th>Colegio magisterial</th>
+        <td>{{ persona.colegio_magisterial }}</td>
+        <th>Número de carnet</th>
+        <td>{{ persona.numero_carnet }}</td>
+        <th>Profesión</th>
+        <td>{{ persona.profesion }}</td>
+        <th>Teléfono 1</th>
+        <td>{{ persona.telefono_1 }}</td>
+        <th>Estado civil</th>
+        <td>{{ persona.estado_civil }}</td>
+      </tr>
+    </table>
+  </div>
 </div>
 
 <div *ngIf="datosEncontrados" class="tabla-container">
@@ -66,6 +85,7 @@
   (click)="guardarMovimiento()"
   color="primary"
   style="color: #ffffff; border-radius: 5px; padding: 10px 20px"
+  [disabled]="!puedeCrearMovimiento()"
 >
   Crear nuevo Movimiento
 </button>

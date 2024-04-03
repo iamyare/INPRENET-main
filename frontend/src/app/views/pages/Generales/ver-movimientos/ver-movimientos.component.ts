@@ -80,7 +80,11 @@ export class VerMovimientosComponent implements OnInit {
       if (this.form && this.form.value.dni) {
         const data = await this.transaccionesService.obtenerMovimientosPorDNI(this.form.value.dni).toPromise();
 
+
         if (data.length > 0) {
+
+          console.log(data);
+
           this.filasT = data.map((movimiento: any) => ({
             FECHA_MOVIMIENTO: movimiento.movimiento_FECHA_MOVIMIENTO,
             MONTO: movimiento.movimiento_MONTO,

@@ -26,7 +26,7 @@ export class PlanillaColegiosPrivadosComponent implements AfterViewInit, OnInit 
   showTable: boolean = true;
   dataSource: MatTableDataSource<UserData> = new MatTableDataSource<UserData>();
 
-  tiposPlanilla: any[] = [{ id_tipo_planilla: 1, nombre: "Planilla Ordinaria" }, { id_tipo_planilla: 2, nombre: "Planilla Decimo Tercero" }, { id_tipo_planilla: 3, nombre: "Planilla Decimo Cuarto" }];
+  tiposPlanilla: any[] = [{ id_tipo_planilla: 1, nombre: "PLANILLA ORDINARIA" }, { id_tipo_planilla: 1, nombre: "PLANILLA DECIMO TERCERO" }, { id_tipo_planilla: 3, nombre: "PLANILLA DECIMO CUARTO" }];
   displayedColumns: string[] = ['numeroColegio', 'nombreColegio', 'totalSueldo', 'totalPrestamo', 'totalAportaciones', 'totalPagar', 'totalCotizaciones'];
   displayedColumns3: string[] = ['identidad', 'nombreDocente', 'sueldo', 'aportaciones', 'cotizaciones', 'prestamos', 'deducciones', 'sueldoNeto', 'editar'];
 

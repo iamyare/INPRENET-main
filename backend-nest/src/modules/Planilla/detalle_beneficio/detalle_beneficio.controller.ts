@@ -37,7 +37,7 @@ export class DetalleBeneficioController {
     }
   }
 
-  @Get('cargarDetBen')
+  @Get('nuevoDetalle')
   async cargarBenRec() {
     try {
       const nuevoDetalle = await this.detallebeneficioService.cargarBenRec();

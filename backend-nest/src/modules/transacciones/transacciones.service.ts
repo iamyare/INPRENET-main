@@ -27,49 +27,6 @@ export class TransaccionesService {
 
   }
 
-  async asignarMovimiento(dni: string, NUMERO_CUENTA: string, datosMovimiento: any, datosTipoMovimiento: any) {
-    console.log(dni, NUMERO_CUENTA, datosMovimiento, datosTipoMovimiento);
-
-    // Encuentra la persona por DNI
-    const persona = await this.personaRepository.findOne({ where: { dni } });
-    if (!persona) {
-      throw new Error('Persona no encontrada');
-    }
-  
-    // Encuentra la cuenta activa por ID_PERSONA y NUMERO_CUENTA
-    const cuentaPersona = await this.cuentaPersonaRepository.findOne({
-      where: {
-        persona: { id_persona: persona.id_persona },  // Usa la propiedad que corresponde al ID de la persona en la entidad
-        NUMERO_CUENTA: NUMERO_CUENTA,
-        ACTIVA_B: 'S'
-      },
-      relations: ['tipoCuenta']
-    });
-    if (!cuentaPersona) {
-      throw new Error('Cuenta activa no encontrada para la persona especificada');
-    }
-  
-    // Asegúrate de que ACTIVA_B se establezca explícitamente
-    const nuevoTipoMovimiento = this.tipoMovimientoCuentaRepository.create({
-      ...datosTipoMovimiento,
-      ID_TIPO_CUENTA: cuentaPersona.tipoCuenta.ID_TIPO_CUENTA,
-      tipoCuenta: cuentaPersona.tipoCuenta,
-      CREADA_POR: datosMovimiento.CREADA_POR,
-      ACTIVA_B: 'S' // Establece ACTIVA_B aquí de manera explícita
-    });
-    await this.tipoMovimientoCuentaRepository.save(nuevoTipoMovimiento);
-  
-    // Crea un nuevo movimiento de cuenta
-    const nuevoMovimientoCuenta = this.movimientoCuentaRepository.create({
-      ...datosMovimiento,
-      persona: persona,
-      tipoMovimiento: nuevoTipoMovimiento,
-    });
-    await this.movimientoCuentaRepository.save(nuevoMovimientoCuenta);
-  
-    return nuevoMovimientoCuenta;
-  }
-
   async crearMovimiento(
     dni: string,
     numeroCuenta: string,

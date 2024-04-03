@@ -263,7 +263,7 @@ export class AfiliadoService {
     return newList;
   }
 
-  /**modificar por cambio de estado a una tabla */
+
   async findByDni(dni: string): Promise<Net_Persona | string> {
     const afiliado = await this.afiliadoRepository.findOne({ where: { dni }, relations: ['estadoAfiliado'] });
 
@@ -281,7 +281,7 @@ export class AfiliadoService {
     }
   }
 
-  /**modificar por cambio de estado a una tabla */
+
   async buscarPersonaYMovimientosPorDNI(dni: string): Promise<any> {
     const persona = await this.afiliadoRepository.findOne({
       where: { dni },

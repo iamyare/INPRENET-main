@@ -1003,7 +1003,7 @@ WHERE
       // Si hay algún error, hacemos rollback de la transacción
       await queryRunner.rollbackTransaction();
       throw error;
-    } finally {
+    } finally { 
       // Liberamos la conexión de la query runner
       await queryRunner.release();
     }

@@ -25,24 +25,6 @@ export class TransaccionesController {
     }
   }
 
-  @Post('/asignar-movimiento')
-  async asignarMovimiento(@Body() datosMovimiento: any) {
-    try {
-      const { dni, descripcionTipoCuenta, datosMovimiento: datosMov, datosTipoMovimiento } = datosMovimiento;
-      const resultado = await this.transaccionesService.asignarMovimiento(dni, descripcionTipoCuenta, datosMov, datosTipoMovimiento);
-      return {
-        statusCode: HttpStatus.OK,
-        message: 'Movimiento asignado con éxito',
-        data: resultado,
-      };
-    } catch (error) {
-      throw new HttpException({
-        statusCode: HttpStatus.BAD_REQUEST,
-        message: error.message || 'Ocurrió un error al asignar el movimiento',
-      }, HttpStatus.BAD_REQUEST);
-    }
-  }
-
   @Get('/tipos-de-cuenta/:dni')
   async obtenerTiposDeCuentaPorDNI(@Param('dni') dni: string) {
     try {

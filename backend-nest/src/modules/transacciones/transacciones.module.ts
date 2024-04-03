@@ -3,7 +3,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { NET_CUENTA_PERSONA } from './entities/net_cuenta_persona.entity';
 import { NET_MOVIMIENTO_CUENTA } from './entities/net_movimiento_cuenta.entity';
 import { NET_TIPO_CUENTA } from './entities/net_tipo_cuenta.entitiy';
-import { NET_TIPO_MOVIMIENTO_CUENTA } from './entities/net_tipo_movimiento_cuenta.entity';
+import { NET_TIPO_MOVIMIENTO_CUENTA } from './entities/net_tipo_movimiento.entity';
 import { Net_Usuario } from 'src/modules/usuario/entities/net_usuario.entity';
 import { Net_Persona } from 'src/modules/afiliado/entities/Net_Persona';
 import { TransaccionesController } from './transacciones.controller';

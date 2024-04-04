@@ -1,6 +1,18 @@
 <mat-stepper [linear]="isLinear" #stepper>
   <mat-step [stepControl]="firstFormGroup">
     <form [formGroup]="firstFormGroup">
+      <ng-template matStepLabel>Seleccione Centro</ng-template>
+
+    </form>
+    <button
+          mat-button
+          matStepperNext
+        >
+          Siguiente
+        </button>
+  </mat-step>
+  <mat-step [stepControl]="firstFormGroup">
+    <form [formGroup]="firstFormGroup">
       <ng-template matStepLabel>Período de planilla</ng-template>
       <mat-selection-list
         #shoes
@@ -13,6 +25,7 @@
         </mat-list-option>
       </mat-selection-list>
       <div>
+        <button mat-button matStepperPrevious>Back</button>
         <button
           mat-button
           matStepperNext

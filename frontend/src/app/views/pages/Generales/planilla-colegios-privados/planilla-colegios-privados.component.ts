@@ -7,6 +7,7 @@ import { MatTableDataSource } from '@angular/material/table';
 import { DynamicFormDialogComponent } from '@docs-components/dynamic-form-dialog/dynamic-form-dialog.component';
 import { EditarDialogComponent } from '@docs-components/editar-dialog/editar-dialog.component';
 import { PlanillaIngresosService } from '../../../../services/planillaIngresos.service';
+import { PlanillaService } from 'src/app/services/planilla.service';
 
 @Component({
   selector: 'app-planilla-colegios-privados',
@@ -26,7 +27,7 @@ export class PlanillaColegiosPrivadosComponent implements AfterViewInit, OnInit 
   showTable: boolean = true;
   dataSource: MatTableDataSource<UserData> = new MatTableDataSource<UserData>();
 
-  tiposPlanilla: any[] = [{ id_tipo_planilla: 1, nombre: "PLANILLA ORDINARIA" }, { id_tipo_planilla: 1, nombre: "PLANILLA DECIMO TERCERO" }, { id_tipo_planilla: 3, nombre: "PLANILLA DECIMO CUARTO" }];
+  tiposPlanilla: any[] = [];
   displayedColumns: string[] = ['numeroColegio', 'nombreColegio', 'totalSueldo', 'totalPrestamo', 'totalAportaciones', 'totalPagar', 'totalCotizaciones'];
   displayedColumns3: string[] = ['identidad', 'nombreDocente', 'sueldo', 'aportaciones', 'cotizaciones', 'prestamos', 'deducciones', 'sueldoNeto', 'editar'];
 
@@ -41,8 +42,7 @@ export class PlanillaColegiosPrivadosComponent implements AfterViewInit, OnInit 
   mostrarSegundoPaso = false;
   isLinear = false;
 
-
-  constructor(private _formBuilder: FormBuilder, private cdr: ChangeDetectorRef, public dialog: MatDialog, private planillaIngresosService: PlanillaIngresosService) {
+  constructor(private _formBuilder: FormBuilder, private cdr: ChangeDetectorRef, public dialog: MatDialog, private planillaIngresosService: PlanillaIngresosService, private tipoPlanillaSVC: PlanillaService) {
     this.firstFormGroup = this._formBuilder.group({
       selectedShoe: ['', Validators.required],
     });
@@ -55,7 +55,11 @@ export class PlanillaColegiosPrivadosComponent implements AfterViewInit, OnInit 
     });
   }
 
-  ngOnInit(): void { }
+  ngOnInit(): void {
+    this.tipoPlanillaSVC.findAllTipoPlanilla().subscribe(result => {
+      this.tiposPlanilla = result;
+    })
+  }
 
   obtenerDetallesPlanilla(idCentroTrabajo: number, id_tipo_planilla: number) {
     this.planillaIngresosService.obtenerDetallesPorCentroTrabajo(idCentroTrabajo, id_tipo_planilla).subscribe(

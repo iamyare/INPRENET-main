@@ -8,6 +8,7 @@ import { LoginComponent } from './views/pages/Generales/login/login.component';
 import { RegisterComponent } from './views/pages/Generales/register/register.component';
 import { PreRegisterComponent } from './views/pages/Generales/pre-register/pre-register.component';
 import { RoleGuard } from './guards/role-guard.guard';
+import { LoginPrivadosComponent } from './views/pages/auth/login-privados/login-privados.component';
 
 const routes: Routes = [
   {
@@ -26,57 +27,41 @@ const routes: Routes = [
         path: 'dashboard',
         loadChildren: () =>
           import('./views/dashboard/dashboard.module').then((m) => m.DashboardModule),
-          canActivate: [RoleGuard],
-          data: { expectedRoles: ['ADMINISTRADOR', 'JEFE DE AREA'] }
       },
       {
         path: 'Afiliado',
         loadChildren: () =>
           import('./views/theme/theme.module').then((m) => m.ThemeModule),
-          canActivate: [RoleGuard],
-          data: { expectedRoles: ['ADMINISTRADOR', 'JEFE DE AREA'] }
       },
       {
         path: 'Planilla',
         loadChildren: () =>
           import('./views/theme/theme.module').then((m) => m.ThemeModule),
-          canActivate: [RoleGuard],
-          data: { expectedRoles: ['ADMINISTRADOR', 'JEFE DE AREA'] }
       },
       {
         path: 'Beneficio',
         loadChildren: () =>
           import('./views/theme/theme.module').then((m) => m.ThemeModule),
-          canActivate: [RoleGuard],
-          data: { expectedRoles: ['ADMINISTRADOR', 'JEFE DE AREA'] }
       },
       {
         path: 'Tipo-Planilla',
         loadChildren: () =>
           import('./views/theme/theme.module').then((m) => m.ThemeModule),
-          canActivate: [RoleGuard],
-          data: { expectedRoles: ['ADMINISTRADOR', 'JEFE DE AREA'] }
       },
       {
         path: 'Deduccion',
         loadChildren: () =>
           import('./views/theme/theme.module').then((m) => m.ThemeModule),
-          canActivate: [RoleGuard],
-          data: { expectedRoles: ['ADMINISTRADOR', 'JEFE DE AREA'] }
       },
       {
         path: 'Privados',
         loadChildren: () =>
-          import('./views/theme/theme.module').then((m) => m.ThemeModule),
-          canActivate: [RoleGuard],
-          data: { expectedRoles: ['ADMINISTRADOR', 'JEFE DE AREA'] }
+          import('./views/theme/theme.module').then((m) => m.ThemeModule)
       },
       {
         path: 'Movimiento',
         loadChildren: () =>
           import('./views/theme/theme.module').then((m) => m.ThemeModule),
-          canActivate: [RoleGuard],
-          data: { expectedRoles: ['ADMINISTRADOR', 'JEFE DE AREA'] }
       },
       {
         path: 'pages',
@@ -121,6 +106,13 @@ const routes: Routes = [
       title: 'Pre Register Page'
     }
   },
+  {
+    path: 'login-privados',
+    component: LoginPrivadosComponent,
+    data: {
+      title: 'Login Privados Page'
+    }
+  },
 
   /* {path: '**', redirectTo: 'dashboard'} */
 ];
@@ -138,3 +130,11 @@ const routes: Routes = [
 })
 export class AppRoutingModule {
 }
+
+/*
+{
+        path: 'dashboard',
+        loadChildren: () =>
+          import('./views/dashboard/dashboard.module').then((m) => m.DashboardModule),
+      },
+*/

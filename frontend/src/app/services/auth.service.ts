@@ -11,8 +11,18 @@ export class AuthService {
   constructor( private http: HttpClient) {
    }
 
+   loginPrivada(email: string, password: string): Observable<{ access_token: string }> {
+    const url = `${environment.API_URL}/api/usuario/loginPrivada`;
+    return this.http.post<{ access_token: string }>(url, { email, contrasena: password });
+  }
+
+  createPrivada(data: any): Observable<any> {
+    const url = `${environment.API_URL}/api/usuario/crear`;
+    return this.http.post<any>(url, data);
+  }
+
   login(email: string, password: string): Observable<{ token: string }> {
-    const url = `${environment.API_URL}/api/usuario/auth/login`; // Asegúrate de que la URL sea correcta
+    const url = `${environment.API_URL}/api/usuario/auth/login`;
     return this.http.post<{ token: string }>(url, { correo: email, contrasena: password });
   }
 
@@ -20,7 +30,7 @@ export class AuthService {
     localStorage.setItem('token', token);
   }
 
-  getUserRole(): string {
+  getUserRole() {
     const token = localStorage.getItem('token');
     if (!token) return '';
 
@@ -34,8 +44,8 @@ export class AuthService {
       const { rol } = JSON.parse(jsonPayload);
       return rol || '';
     } catch (error) {
-      console.error('Error decoding token:', error);
-      return '';
+      /* console.error('Error decoding token:', error);
+      return ''; */
     }
   }
 

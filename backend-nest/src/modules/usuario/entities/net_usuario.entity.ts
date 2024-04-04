@@ -50,7 +50,4 @@ export class Net_Usuario {
 
     @OneToOne(() => Net_Empleado, empleado => empleado.usuario)
     empleado: Net_Empleado;
-
-/*     @OneToMany(() => NET_MOVIMIENTO_CUENTA, movimientoCuenta => movimientoCuenta.usuario)
-    movimientosCuenta: NET_MOVIMIENTO_CUENTA[]; */
 }

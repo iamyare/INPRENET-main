@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Query, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Query, UseGuards, BadRequestException, HttpCode, HttpStatus } from '@nestjs/common';
 import { UsuarioService } from './usuario.service';
 import { CreateUsuarioDto } from './dto/create-usuario.dto';
 import { UpdateUsuarioDto } from './dto/update-usuario.dto';
@@ -17,11 +17,32 @@ export class UsuarioController {
     return this.usuarioService.create(createUsuarioDto);
   }
 
+  @Post('loginPrivada')
+  @HttpCode(HttpStatus.OK)
+  async loginPrivada(@Body('email') email: string, @Body('contrasena') contrasena: string) {
+    return this.usuarioService.loginPrivada(email, contrasena);
+  }
+
+  @Post('/crear')
+  async createPrivada(
+    @Body('email') email: string,
+    @Body('contrasena') contrasena: string,
+    @Body('nombre_usuario') nombre_usuario: string,
+    @Body('isSuperUser') isSuperUser: boolean,
+    @Body('idCentroTrabajo') idCentroTrabajo?: number
+    ) {
+      try {
+        const nuevoUsuario = await this.usuarioService.createPrivada(email, contrasena, nombre_usuario, isSuperUser, idCentroTrabajo);
+      return nuevoUsuario;
+    } catch (error) {
+      throw new BadRequestException(error.message);
+    }
+  }
+  
   @Post('auth/login')
   async login(@Body() loginDto: CreateUsuarioDto) {
     return this.usuarioService.login(loginDto.correo, loginDto.contrasena);
   }
-
 
   @Get()
   findAll(@Query() paginationDto: PaginationDto) {

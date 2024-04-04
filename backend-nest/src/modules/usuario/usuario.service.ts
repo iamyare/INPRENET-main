@@ -1,4 +1,4 @@
-import { BadRequestException, ForbiddenException, Injectable, InternalServerErrorException, Logger, NotFoundException } from '@nestjs/common';
+import { BadRequestException, ForbiddenException, Injectable, InternalServerErrorException, Logger, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { UpdateUsuarioDto } from './dto/update-usuario.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { PaginationDto } from 'src/common/dtos/pagination.dto';
@@ -11,6 +11,8 @@ import { Net_Empleado } from 'src/modules/Empresarial/empresas/entities/net_empl
 import { Net_Rol } from './entities/net_rol.entity';
 import { CreateUsuarioDto } from './dto/create-usuario.dto';
 import { Net_TipoIdentificacion } from '../tipo_identificacion/entities/net_tipo_identificacion.entity';
+import { NET_USUARIO_PRIVADA } from './entities/net_usuario_privada.entity';
+import { Net_Centro_Trabajo } from '../Empresarial/centro-trabajo/entities/net_centro-trabajo.entity';
 
 @Injectable()
 export class UsuarioService {
@@ -21,6 +23,10 @@ export class UsuarioService {
 
     @InjectRepository(Net_Usuario)
     private readonly usuarioRepository: Repository<Net_Usuario>,
+    @InjectRepository(NET_USUARIO_PRIVADA)
+    private readonly usuarioPrivadaRepository: Repository<NET_USUARIO_PRIVADA>,
+    @InjectRepository(Net_Centro_Trabajo)
+    private readonly centroTrabajoRepository: Repository<Net_Centro_Trabajo>,
     @InjectRepository(Net_Empleado)
     private readonly empleadoRepository: Repository<Net_Empleado>,
     @InjectRepository(Net_Rol)
@@ -30,6 +36,69 @@ export class UsuarioService {
     private readonly jwtService: JwtService,
     private readonly mailService: MailService
   ){}
+
+  async validateUser(email: string, pass: string): Promise<any> {
+    const usuario = await this.usuarioPrivadaRepository.findOne({
+      where: { email },
+      relations: ['centroTrabajo']
+    });
+  
+    if (usuario && await bcrypt.compare(pass, usuario.passwordHash)) {
+      const { passwordHash, centroTrabajo, ...result } = usuario;
+      return { ...result, idCentroTrabajo: centroTrabajo ? centroTrabajo.id_centro_trabajo : null };
+    }
+    return null;
+  }
+  
+
+  async loginPrivada(email: string, contrasena: string): Promise<any> {
+    const usuario = await this.validateUser(email, contrasena);
+  
+    if (!usuario) {
+      throw new UnauthorizedException('Credenciales inválidas');
+    }
+    const payload = {
+      email: usuario.email,
+      sub: usuario.id_usuario,
+      isSuperUser: usuario.isSuperUser,
+      idCentroTrabajo: usuario.idCentroTrabajo
+    };
+  
+    return {
+      access_token: this.jwtService.sign(payload),
+    };
+  }
+
+  async createPrivada(email: string, contrasena: string, nombre_usuario: string, isSuperUser: boolean, idCentroTrabajo?: number): Promise<NET_USUARIO_PRIVADA> {
+    const usuarioExistente = await this.usuarioPrivadaRepository.findOne({ where: { email } });
+    if (usuarioExistente) {
+      throw new BadRequestException('El correo electrónico ya está en uso.');
+    }
+
+    const rolPrivados = await this.rolRepository.findOneBy({ id_rol: 21 }); 
+    if (!rolPrivados) {
+      throw new BadRequestException('El rol "PRIVADOS" no existe.');
+    }
+
+    const hashedPassword = await bcrypt.hash(contrasena, 10);
+
+    const nuevoUsuario = new NET_USUARIO_PRIVADA();
+    nuevoUsuario.email = email;
+    nuevoUsuario.passwordHash = hashedPassword;
+    nuevoUsuario.nombre_usuario = nombre_usuario;
+    nuevoUsuario.isSuperUser = isSuperUser ? 1 : 0;
+    nuevoUsuario.rol = rolPrivados;
+
+    if (!isSuperUser && idCentroTrabajo) {
+      const centroTrabajo = await this.centroTrabajoRepository.findOneBy({ id_centro_trabajo: idCentroTrabajo });
+      if (!centroTrabajo) {
+        throw new BadRequestException('El centro de trabajo proporcionado no existe.');
+      }
+      nuevoUsuario.centroTrabajo = centroTrabajo;
+    }
+
+    return this.usuarioPrivadaRepository.save(nuevoUsuario);
+  }
 
   async create(createUsuarioDto: CreateUsuarioDto) {
     try {

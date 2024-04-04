@@ -9,12 +9,14 @@ import { CommonModule } from 'src/common/common.module';
 import { Net_Empleado } from 'src/modules/Empresarial/empresas/entities/net_empleado.entity';
 import { Net_Usuario } from './entities/net_usuario.entity';
 import { Net_TipoIdentificacion } from '../tipo_identificacion/entities/net_tipo_identificacion.entity';
+import { NET_USUARIO_PRIVADA } from './entities/net_usuario_privada.entity';
+import { Net_Centro_Trabajo } from '../Empresarial/centro-trabajo/entities/net_centro-trabajo.entity';
 
 @Module({
   controllers: [UsuarioController],
   providers: [UsuarioService],
   imports: [
-    TypeOrmModule.forFeature([Net_Usuario, Net_Rol, Net_Empleado, Net_TipoIdentificacion]),
+    TypeOrmModule.forFeature([Net_Usuario, Net_Rol, Net_Empleado, Net_TipoIdentificacion, NET_USUARIO_PRIVADA, Net_Centro_Trabajo]),
     PassportModule.register({ defaultStrategy : 'jwt'}),
 
 

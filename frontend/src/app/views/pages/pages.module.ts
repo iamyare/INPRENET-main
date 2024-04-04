@@ -11,7 +11,7 @@ import { Page500Component } from './Errores/page500/page500.component';
 
 import { PreRegisterComponent } from './Generales/pre-register/pre-register.component';
 import { RegisterComponent } from './Generales/register/register.component';
-import { LoginPrivadosComponent } from './auth/login-privados/login-privados.component';
+import { LoginPrivadosComponent } from './Centros Privados/login-privados/login-privados.component';
 
 @NgModule({
   declarations: [

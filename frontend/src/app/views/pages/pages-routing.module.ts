@@ -5,7 +5,7 @@ import { Page500Component } from './Errores/page500/page500.component';
 import { LoginComponent } from './Generales/login/login.component';
 import { RegisterComponent } from './Generales/register/register.component';
 import { PreRegisterComponent } from './Generales/pre-register/pre-register.component';
-import { LoginPrivadosComponent } from './auth/login-privados/login-privados.component';
+import { LoginPrivadosComponent } from './Centros Privados/login-privados/login-privados.component';
 
 const routes: Routes = [
   {

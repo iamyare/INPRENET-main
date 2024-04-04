@@ -8,7 +8,7 @@ import { LoginComponent } from './views/pages/Generales/login/login.component';
 import { RegisterComponent } from './views/pages/Generales/register/register.component';
 import { PreRegisterComponent } from './views/pages/Generales/pre-register/pre-register.component';
 import { RoleGuard } from './guards/role-guard.guard';
-import { LoginPrivadosComponent } from './views/pages/auth/login-privados/login-privados.component';
+import { LoginPrivadosComponent } from './views/pages/Centros Privados/login-privados/login-privados.component';
 
 const routes: Routes = [
   {

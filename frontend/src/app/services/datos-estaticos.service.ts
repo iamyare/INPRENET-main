@@ -209,4 +209,24 @@ export class DatosEstaticosService {
       "value": "AUXILIAR"
     },
   ]
+
+
+  tiposPlanillasPrivadas = [
+    {
+      ID_TIPO_PLANILLA: 41,
+      NOMBRE_PLANILLA: "PLANILLA ORDINARIA"
+    },
+    {
+      ID_TIPO_PLANILLA: 42,
+      NOMBRE_PLANILLA: "PLANILLA DECIMO TERCERO"
+    },
+    {
+      ID_TIPO_PLANILLA: 43,
+      NOMBRE_PLANILLA: "PLANILLA DECIMO CUARTO"
+    },
+  ];
+
+
+
 }
+

@@ -7,14 +7,21 @@ import { MatTableDataSource } from '@angular/material/table';
 import { DynamicFormDialogComponent } from '@docs-components/dynamic-form-dialog/dynamic-form-dialog.component';
 import { EditarDialogComponent } from '@docs-components/editar-dialog/editar-dialog.component';
 import { PlanillaIngresosService } from '../../../../services/planillaIngresos.service';
-import { PlanillaService } from 'src/app/services/planilla.service';
+import { DatosEstaticosService } from 'src/app/services/datos-estaticos.service';
+import { CentroTrabajoService } from 'src/app/services/centro-trabajo.service';
+import { jwtDecode } from 'jwt-decode';
+
+export interface Item {
+  id_centro_trabajo: number;
+  nombre_centro_trabajo: string;
+}
 
 @Component({
   selector: 'app-planilla-colegios-privados',
   templateUrl: './planilla-colegios-privados.component.html',
   styleUrls: ['./planilla-colegios-privados.component.scss']
 })
-export class PlanillaColegiosPrivadosComponent implements AfterViewInit, OnInit {
+export class PlanillaColegiosPrivadosComponent implements AfterViewInit, OnInit{
 
 
   @ViewChild(MatPaginator) paginator!: MatPaginator;
@@ -27,7 +34,7 @@ export class PlanillaColegiosPrivadosComponent implements AfterViewInit, OnInit 
   showTable: boolean = true;
   dataSource: MatTableDataSource<UserData> = new MatTableDataSource<UserData>();
 
-  tiposPlanilla: any[] = [];
+
   displayedColumns: string[] = ['numeroColegio', 'nombreColegio', 'totalSueldo', 'totalPrestamo', 'totalAportaciones', 'totalPagar', 'totalCotizaciones'];
   displayedColumns3: string[] = ['identidad', 'nombreDocente', 'sueldo', 'aportaciones', 'cotizaciones', 'prestamos', 'deducciones', 'sueldoNeto', 'editar'];
 
@@ -40,32 +47,67 @@ export class PlanillaColegiosPrivadosComponent implements AfterViewInit, OnInit 
   nombreColegio: string = 'Colegio ABC';
   firstFormGroup: FormGroup;
   mostrarSegundoPaso = false;
+  mostrarTercerPaso = false;
   isLinear = false;
 
-  constructor(private _formBuilder: FormBuilder, private cdr: ChangeDetectorRef, public dialog: MatDialog, private planillaIngresosService: PlanillaIngresosService, private tipoPlanillaSVC: PlanillaService) {
+  dataSourceItems: MatTableDataSource<Item>;
+  selectedItem: Item | null = null;
+
+  tiposPlanillaPrivadas : any;
+
+  idCentroTrabajo: number | null = null;
+  mostrarPrimerPaso = true;
+
+
+  constructor(private _formBuilder: FormBuilder, private cdr: ChangeDetectorRef, public dialog: MatDialog, private planillaIngresosService: PlanillaIngresosService, private datosEstaticos: DatosEstaticosService,
+    private centroTrabajoService: CentroTrabajoService
+  ) {
+    this.tiposPlanillaPrivadas = this.datosEstaticos.tiposPlanillasPrivadas
+
     this.firstFormGroup = this._formBuilder.group({
-      selectedShoe: ['', Validators.required],
+      selectedTipoPlanilla: ['', Validators.required],
     });
 
-    this.firstFormGroup.get('selectedShoe')?.valueChanges.subscribe(selectedValue => {
-      this.mostrarSegundoPaso = !!selectedValue;
+    this.firstFormGroup.get('selectedTipoPlanilla')?.valueChanges.subscribe(selectedValue => {
+      this.mostrarTercerPaso = !!selectedValue;
       this.cdr.detectChanges();
       this.dataSource.paginator = this.paginator;
       this.dataSource.sort = this.sort;
     });
+
+    this.dataSourceItems = new MatTableDataSource<Item>([]);
+
+
   }
 
   ngOnInit(): void {
-    this.tipoPlanillaSVC.findAllTipoPlanilla().subscribe(result => {
-      this.tiposPlanilla = result;
-    })
+    const tokenData = this.decodeToken();
+    if (tokenData && tokenData.idCentroTrabajo) {
+      this.idCentroTrabajo = tokenData.idCentroTrabajo;
+      this.mostrarPrimerPaso = false;
+      this.mostrarSegundoPaso = true;
+    }
+  }
+
+
+  selectRow(item: Item) {
+    this.selectedItem = item;
+    this.mostrarSegundoPaso = true;
+  }
+
+
+  applyFilter(event: Event) {
+    const filterValue = (event.target as HTMLInputElement).value;
+    this.dataSourceItems.filter = filterValue.trim().toLowerCase();
+
+    if (this.dataSourceItems.paginator) {
+      this.dataSourceItems.paginator.firstPage();
+    }
   }
 
   obtenerDetallesPlanilla(idCentroTrabajo: number, id_tipo_planilla: number) {
     this.planillaIngresosService.obtenerDetallesPorCentroTrabajo(idCentroTrabajo, id_tipo_planilla).subscribe(
       (response: any) => {
-        console.log(response);
-
         const mappedData = response.data.map((item: any) => ({
           identidad: item.IDENTIDAD,
           nombreDocente: item.NOMBREPERSONA,
@@ -96,17 +138,22 @@ export class PlanillaColegiosPrivadosComponent implements AfterViewInit, OnInit 
   }
 
   ngAfterViewInit() {
+    this.cargarCentrosDeTrabajo();
     this.dataSource.paginator = this.paginator;
     this.dataSource.sort = this.sort;
   }
 
-  applyFilter(event: Event) {
-    const filterValue = (event.target as HTMLInputElement).value;
-    this.dataSource.filter = filterValue.trim().toLowerCase();
-
-    if (this.dataSource.paginator) {
-      this.dataSource.paginator.firstPage();
-    }
+  cargarCentrosDeTrabajo() {
+    this.centroTrabajoService.obtenerTodosLosCentrosTrabajo().subscribe(
+      (centros: Item[]) => {
+        this.dataSourceItems.data = centros;
+        this.dataSourceItems.paginator = this.paginator;
+        this.dataSourceItems.sort = this.sort;
+      },
+      error => {
+        console.error('Error al cargar los centros de trabajo', error);
+      }
+    );
   }
 
   agregarDocente() {
@@ -127,12 +174,15 @@ export class PlanillaColegiosPrivadosComponent implements AfterViewInit, OnInit 
   }
 
   exportarExcelPdf() {
+    // Lógica para exportar a Excel y PDF
   }
 
   generarActualizarPlanilla() {
+    // Lógica para generar o actualizar la planilla
   }
 
   calcularRecargo() {
+    // Lógica para calcular el recargo
   }
 
   actualizarValores() {
@@ -145,9 +195,22 @@ export class PlanillaColegiosPrivadosComponent implements AfterViewInit, OnInit 
   }
 
   datosPlanilla() {
-    const { id_tipo_planilla, nombre } = this.firstFormGroup.value.selectedShoe[0]
-    this.obtenerDetallesPlanilla(6, id_tipo_planilla);
+    const selectedTipoPlanilla = this.firstFormGroup.value.selectedTipoPlanilla;
+    if (selectedTipoPlanilla) {
+      const idTipoPlanilla = selectedTipoPlanilla[0].ID_TIPO_PLANILLA;
+
+      const idCentroTrabajo = this.idCentroTrabajo || this.selectedItem?.id_centro_trabajo;
+
+      if (idCentroTrabajo) {
+        this.obtenerDetallesPlanilla(idCentroTrabajo, idTipoPlanilla);
+      } else {
+        console.error('No hay ningún centro de trabajo seleccionado');
+      }
+    } else {
+      console.error('No hay ningún tipo de planilla seleccionado');
+    }
   }
+
 
   editarElemento(row: UserData) {
     const campos: any[] = [
@@ -171,6 +234,19 @@ export class PlanillaColegiosPrivadosComponent implements AfterViewInit, OnInit 
     });
   }
 
+  decodeToken(): any {
+    const token = localStorage.getItem('token');
+    if (token) {
+      try {
+        const decoded = jwtDecode(token);
+        return decoded;
+      } catch (error) {
+        console.error('Error decoding token:', error);
+        return null;
+      }
+    }
+    return null;
+  }
 
 }
 

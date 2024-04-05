@@ -149,3 +149,8 @@ button[mat-raised-button]:hover {
   width: 100%; // Esto asegura que la línea se extienda a lo ancho del contenedor
   margin-bottom: 20px; // Ajusta el espacio debajo de la línea, antes de los botones
 }
+
+
+.selected {
+  background-color: rgba(0, 0, 0, 0.1);
+}

@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Res, HttpStatus } from '@nestjs/common';
 import { CentroTrabajoService } from './centro-trabajo.service';
 import { CreateCentroTrabajoDto } from './dto/create-centro-trabajo.dto';
 import { UpdateCentroTrabajoDto } from './dto/update-centro-trabajo.dto';
@@ -15,8 +15,13 @@ export class CentroTrabajoController {
   }
 
   @Get()
-  findAll() {
-    return this.centroTrabajoService.findAll();
+  async findAll(@Res() res): Promise<void> {
+    try {
+      const centrosTrabajo = await this.centroTrabajoService.findAll();
+      res.status(HttpStatus.OK).json(centrosTrabajo);
+    } catch (error) {
+      res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: error.message });
+    }
   }
 
   @Get(':id')

@@ -37,8 +37,12 @@ export class CentroTrabajoService {
     }
   }
 
-  findAll() {
-    return `This action returns all centroTrabajo`;
+  async findAll(): Promise<Net_Centro_Trabajo[]> {
+    try {
+      return await this.centroTrabajoRepository.find();
+    } catch (error) {
+      this.handleException(error);
+    }
   }
 
   findOne(id: number) {

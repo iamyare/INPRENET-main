@@ -50,7 +50,6 @@ export class DetallePlanillaIngresoService {
 
         if (meses.includes(mes)) {
           const fechaInicioMesAnterior = DateTime.local(año, mes, 1).toFormat('dd/MM/yyyy');
-          console.log(fechaInicioMesAnterior);
 
           const detalles = await this.detallePlanillaIngr
             .createQueryBuilder('detalle')
@@ -207,7 +206,6 @@ export class DetallePlanillaIngresoService {
 
 
     } catch (error) {
-      console.log(error);
       this.handleException(error);
     }
   }
@@ -314,8 +312,6 @@ export class DetallePlanillaIngresoService {
   }
 
   async buscarPorMesYDni(mes: number, dni: string, id_tipoPlanilla: number): Promise<any> {
-    console.log(id_tipoPlanilla);
-
     try {
       const año = new Date().getFullYear();
       const fechaInicioMesAnterior = new Date(año, mes - 2, 1);

@@ -21,7 +21,7 @@ export interface Item {
   templateUrl: './planilla-colegios-privados.component.html',
   styleUrls: ['./planilla-colegios-privados.component.scss']
 })
-export class PlanillaColegiosPrivadosComponent implements AfterViewInit, OnInit{
+export class PlanillaColegiosPrivadosComponent implements AfterViewInit, OnInit {
 
 
   @ViewChild(MatPaginator) paginator!: MatPaginator;
@@ -45,6 +45,7 @@ export class PlanillaColegiosPrivadosComponent implements AfterViewInit, OnInit{
   totalPagar: number = 0;
   numeroColegio: number = 12345;
   nombreColegio: string = 'Colegio ABC';
+
   firstFormGroup: FormGroup;
   mostrarSegundoPaso = false;
   mostrarTercerPaso = false;
@@ -53,7 +54,7 @@ export class PlanillaColegiosPrivadosComponent implements AfterViewInit, OnInit{
   dataSourceItems: MatTableDataSource<Item>;
   selectedItem: Item | null = null;
 
-  tiposPlanillaPrivadas : any;
+  tiposPlanillaPrivadas: any;
 
   idCentroTrabajo: number | null = null;
   mostrarPrimerPaso = true;
@@ -108,30 +109,51 @@ export class PlanillaColegiosPrivadosComponent implements AfterViewInit, OnInit{
   obtenerDetallesPlanilla(idCentroTrabajo: number, id_tipo_planilla: number) {
     this.planillaIngresosService.obtenerDetallesPorCentroTrabajo(idCentroTrabajo, id_tipo_planilla).subscribe(
       (response: any) => {
-        const mappedData = response.data.map((item: any) => ({
-          identidad: item.IDENTIDAD,
-          nombreDocente: item.NOMBREPERSONA,
-          sueldo: item.SUELDO,
-          aportaciones: item.APORTACIONES,
-          prestamos: item.PRESTAMOS,
-          cotizaciones: item.COTIZACIONES,
-          deducciones: item.DEDUCCIONES,
-          sueldoNeto: item.SUELDONETO
-        }));
 
-        mappedData.forEach((item: any) => {
-          this.totalSueldo += item.sueldo;
-          this.totalPrestamo += item.prestamos;
-          this.totalAportaciones += item.aportaciones;
-          this.totalCotizaciones += item.cotizaciones;
-          this.totalPagar += item.sueldoNeto;
-        });
+        if (response.data.length > 0) {
+          const mappedData = response.data.map((item: any) => ({
+            identidad: item.IDENTIDAD,
+            nombreDocente: item.NOMBREPERSONA,
+            sueldo: item.SUELDO,
+            aportaciones: item.APORTACIONES,
+            prestamos: item.PRESTAMOS,
+            cotizaciones: item.COTIZACIONES,
+            deducciones: item.DEDUCCIONES,
+            sueldoNeto: item.SUELDONETO,
+            periodoInicio: item.PERIODO_INICIO,
+            periodoFinalizacion: item.PERIODO_FINALIZACION
+          }));
 
-        this.dataSource.data = mappedData;
-        this.cdr.detectChanges();
+          mappedData.forEach((item: any) => {
+            this.totalSueldo += item.sueldo;
+            this.totalPrestamo += item.prestamos;
+            this.totalAportaciones += item.aportaciones;
+            this.totalCotizaciones += item.cotizaciones;
+            this.totalPagar += item.sueldoNeto;
+          });
+
+          this.dataSource.data = mappedData;
+          this.cdr.detectChanges();
+        } else {
+          this.dataSource.data = []
+          this.totalSueldo = 0;
+          this.totalPrestamo = 0;
+          this.totalAportaciones = 0;
+          this.totalCotizaciones = 0;
+          this.totalPagar = 0;
+          this.numeroColegio = 0;
+          this.nombreColegio = '';
+        }
       },
       error => {
         this.dataSource.data = []
+        this.totalSueldo = 0;
+        this.totalPrestamo = 0;
+        this.totalAportaciones = 0;
+        this.totalCotizaciones = 0;
+        this.totalPagar = 0;
+        this.numeroColegio = 0;
+        this.nombreColegio = '';
         console.error('Error al obtener detalles de planilla:', error);
       }
     );
@@ -251,6 +273,8 @@ export class PlanillaColegiosPrivadosComponent implements AfterViewInit, OnInit{
 }
 
 export interface UserData {
+  periodoFinalizacion: any;
+  periodoInicio: any;
   identidad: string;
   nombreDocente: string;
   sueldo: number;

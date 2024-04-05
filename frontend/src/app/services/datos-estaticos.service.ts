@@ -213,15 +213,15 @@ export class DatosEstaticosService {
 
   tiposPlanillasPrivadas = [
     {
-      ID_TIPO_PLANILLA: 41,
+      ID_TIPO_PLANILLA: 1,
       NOMBRE_PLANILLA: "PLANILLA ORDINARIA"
     },
     {
-      ID_TIPO_PLANILLA: 42,
+      ID_TIPO_PLANILLA: 2,
       NOMBRE_PLANILLA: "PLANILLA DECIMO TERCERO"
     },
     {
-      ID_TIPO_PLANILLA: 43,
+      ID_TIPO_PLANILLA: 3,
       NOMBRE_PLANILLA: "PLANILLA DECIMO CUARTO"
     },
   ];

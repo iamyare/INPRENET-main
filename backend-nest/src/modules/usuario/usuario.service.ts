@@ -35,25 +35,25 @@ export class UsuarioService {
     private readonly tipoIdentificacionRepository: Repository<Net_TipoIdentificacion>,
     private readonly jwtService: JwtService,
     private readonly mailService: MailService
-  ){}
+  ) { }
 
   async validateUser(email: string, pass: string): Promise<any> {
     const usuario = await this.usuarioPrivadaRepository.findOne({
       where: { email },
       relations: ['centroTrabajo']
     });
-  
+
     if (usuario && await bcrypt.compare(pass, usuario.passwordHash)) {
       const { passwordHash, centroTrabajo, ...result } = usuario;
       return { ...result, idCentroTrabajo: centroTrabajo ? centroTrabajo.id_centro_trabajo : null };
     }
     return null;
   }
-  
+
 
   async loginPrivada(email: string, contrasena: string): Promise<any> {
     const usuario = await this.validateUser(email, contrasena);
-  
+
     if (!usuario) {
       throw new UnauthorizedException('Credenciales inválidas');
     }
@@ -63,7 +63,7 @@ export class UsuarioService {
       isSuperUser: usuario.isSuperUser,
       idCentroTrabajo: usuario.idCentroTrabajo
     };
-  
+
     return {
       access_token: this.jwtService.sign(payload),
     };
@@ -75,7 +75,7 @@ export class UsuarioService {
       throw new BadRequestException('El correo electrónico ya está en uso.');
     }
 
-    const rolPrivados = await this.rolRepository.findOneBy({ id_rol: 21 }); 
+    const rolPrivados = await this.rolRepository.findOneBy({ id_rol: 1 });
     if (!rolPrivados) {
       throw new BadRequestException('El rol "PRIVADOS" no existe.');
     }
@@ -104,32 +104,32 @@ export class UsuarioService {
     try {
 
       const rol = await this.rolRepository.findOneBy({ nombre_rol: createUsuarioDto.nombre_rol });
-        if (!rol) {
-            throw new BadRequestException('Rol not found');
-        }
-  
-      const usuario = this.usuarioRepository.create({...createUsuarioDto, rol});
+      if (!rol) {
+        throw new BadRequestException('Rol not found');
+      }
+
+      const usuario = this.usuarioRepository.create({ ...createUsuarioDto, rol });
       await this.usuarioRepository.save(usuario);
 
       const tipo_identificacion = await this.tipoIdentificacionRepository.findOneBy({ tipo_identificacion: createUsuarioDto.tipo_identificacion });
-        if (!tipo_identificacion) {
-            throw new BadRequestException('Tipo identificacion not found');
-        }
+      if (!tipo_identificacion) {
+        throw new BadRequestException('Tipo identificacion not found');
+      }
 
-      const empleadoData = { ...createUsuarioDto, usuario: usuario};
-      const empleado = this.empleadoRepository.create({...empleadoData, tipo_identificacion});
-      
+      const empleadoData = { ...createUsuarioDto, usuario: usuario };
+      const empleado = this.empleadoRepository.create({ ...empleadoData, tipo_identificacion });
+
 
       await this.empleadoRepository.save(empleado);
 
       const payload = { username: usuario.correo, nombre: empleadoData.nombre_empleado, rol: usuario.rol };
       const token = this.jwtService.sign(payload);
-      
+
       const enlace = `http://localhost:4200/#/register/${token}`;
       const mailContent = {
-        to: usuario.correo, 
-        subject: 'Bienvenido a Nuestra Aplicación', 
-        text: `Hola ${empleadoData.nombre_empleado}, bienvenido a nuestra aplicación.`, 
+        to: usuario.correo,
+        subject: 'Bienvenido a Nuestra Aplicación',
+        text: `Hola ${empleadoData.nombre_empleado}, bienvenido a nuestra aplicación.`,
         html: `<!DOCTYPE html>
         <html lang="es">
         <head>
@@ -194,18 +194,18 @@ export class UsuarioService {
       };
       await this.mailService.sendMail(mailContent.to, mailContent.subject, mailContent.text, mailContent.html);
 
-      
-      return { empleado };
-  } catch (error) {
-      this.handleException(error);
-  }
-}
 
-  findAll( paginationDto: PaginationDto ) {
+      return { empleado };
+    } catch (error) {
+      this.handleException(error);
+    }
+  }
+
+  findAll(paginationDto: PaginationDto) {
     const { limit = 10, offset = 0 } = paginationDto
     return this.usuarioRepository.find({
       take: limit,
-      skip : offset
+      skip: offset
     });
   }
 
@@ -249,7 +249,7 @@ export class UsuarioService {
 
     // Verificar y actualizar el empleado relacionado
     if (usuario.empleado) {
-      usuario.empleado.nombre_puesto = nombre_puesto; 
+      usuario.empleado.nombre_puesto = nombre_puesto;
       usuario.empleado.telefono_empleado = telefono_empleado;
       usuario.empleado.numero_empleado = numero_empleado; // Agrega aquí más actualizaciones de empleado si son necesarias
       await this.empleadoRepository.save(usuario.empleado);
@@ -258,7 +258,7 @@ export class UsuarioService {
     }
 
     return { success: true, msg: 'Usuario y empleado actualizados correctamente' };
-}
+  }
 
   remove(id: number) {
     return `This action removes a #${id} usuario`;
@@ -266,33 +266,33 @@ export class UsuarioService {
 
   async login(email: string, password: string): Promise<{ token: string }> {
     const usuario = await this.usuarioRepository.findOne({
-        where: { correo: email },
-        relations: ['rol']
+      where: { correo: email },
+      relations: ['rol']
     });
     if (!usuario) {
-        throw new NotFoundException('Usuario no encontrado');
+      throw new NotFoundException('Usuario no encontrado');
     }
-    
+
     if (usuario.estado !== 'ACTIVO') {
       throw new ForbiddenException('La cuenta está desactivada');
     }
     if (!usuario.fecha_verificacion) {
       throw new ForbiddenException('La cuenta no ha verificado su correo electrónico');
     }
-    
+
     const isPasswordValid = await bcrypt.compare(password, usuario.contrasena);
     if (!isPasswordValid) {
-        throw new BadRequestException('Credenciales inválidas');
+      throw new BadRequestException('Credenciales inválidas');
     }
     if (!usuario.rol) {
-        throw new InternalServerErrorException('El rol del usuario no está definido');
+      throw new InternalServerErrorException('El rol del usuario no está definido');
     }
     const payload = { username: usuario.correo, sub: usuario.id_usuario, rol: usuario.rol.nombre_rol };
     const token = this.jwtService.sign(payload);
 
 
     return { token };
-}
+  }
 
   private handleException(error: any): void {
     this.logger.error(error);

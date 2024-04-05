@@ -12,9 +12,11 @@ import { Net_Detalle_planilla_ingreso } from './entities/net_detalle_plani_ing.e
 import { Net_SALARIO_COTIZABLE } from './entities/net_detalle_plani_ing.entity copy';
 import { Net_TipoPlanilla } from '../../tipo-planilla/entities/tipo-planilla.entity';
 import { Net_Planilla } from '../../planilla/entities/net_planilla.entity';
-import { startOfMonth, endOfMonth } from 'date-fns';
+import { startOfMonth, endOfMonth, lastDayOfMonth } from 'date-fns';
 import { Length } from 'class-validator';
 import { DateTime } from 'luxon';
+import { getManager } from 'typeorm';
+
 @Injectable()
 export class DetallePlanillaIngresoService {
   private readonly logger = new Logger(DetallePlanillaIngresoService.name)
@@ -37,180 +39,7 @@ export class DetallePlanillaIngresoService {
   @InjectRepository(Net_TipoPlanilla)
   private tipoPlanillaRepository: Repository<Net_TipoPlanilla>
 
-  async obtenerDetallesPorCentroTrabajo(idCentroTrabajo: number, id_tipo_planilla: number): Promise<any> {
-    try {
-      let tipo_planilla = "PLANILLA ORDINARIA";
-
-      const fecha = DateTime.local();
-      const año = fecha.year;
-
-      if (tipo_planilla == "PLANILLA ORDINARIA") {
-        const meses: number[] = [1, 2, 3, 4, 5, 7, 8, 9, 10, 11];
-        const mes: number = fecha.month;
-
-        if (meses.includes(mes)) {
-          const fechaInicioMesAnterior = DateTime.local(año, mes, 1).toFormat('dd/MM/yyyy');
-
-          const detalles = await this.detallePlanillaIngr
-            .createQueryBuilder('detalle')
-            .innerJoinAndSelect('detalle.persona', 'persona')
-            .innerJoinAndSelect('detalle.centroTrabajo', 'centroTrabajo')
-            .innerJoinAndSelect('detalle.planilla', 'planilla')
-            .innerJoinAndSelect('planilla.tipoPlanilla', 'tipoPlanilla')
-            .select([
-              'persona.dni AS Identidad',
-              'persona.primer_nombre || \' \' || persona.primer_apellido AS NombrePersona',
-              'detalle.sueldo AS Sueldo',
-              'detalle.aportaciones AS Aportaciones',
-              'detalle.prestamos AS Prestamos',
-              'detalle.cotizaciones AS Cotizaciones',
-              'detalle.deducciones AS Deducciones',
-              'detalle.sueldo_neto AS SueldoNeto'
-            ])
-            .where(`
-            centroTrabajo.id_centro_trabajo = :idCentroTrabajo AND tipoPlanilla.id_tipo_planilla = :id_tipo_planilla
-            AND "planilla"."PERIODO_INICIO" BETWEEN TO_DATE('${fechaInicioMesAnterior}', 'DD/MM/YYYY') AND LAST_DAY(TO_DATE('${fechaInicioMesAnterior}', 'DD/MM/YYYY'))
-            AND "planilla"."PERIODO_FINALIZACION" BETWEEN TO_DATE('${fechaInicioMesAnterior}', 'DD/MM/YYYY') AND LAST_DAY(TO_DATE('${fechaInicioMesAnterior}', 'DD/MM/YYYY'))`,
-              { idCentroTrabajo, id_tipo_planilla })
-            .getRawMany();
-
-          if (!detalles.length) {
-            return []
-            this.logger.warn(`No se encontraron detalles para el centro de trabajo con ID ${idCentroTrabajo}`);
-            throw new NotFoundException(`No se encontraron detalles para el centro de trabajo con ID ${idCentroTrabajo}`);
-          }
-
-          return detalles;
-        }
-      } else if (tipo_planilla == "PLANILLA DECIMO TERCERO") {
-        const fechaInicioMesAnterior = DateTime.local(año, 6, 1).toFormat('dd/MM/yyyy');
-
-        const detalles = await this.detallePlanillaIngr
-          .createQueryBuilder('detalle')
-          .innerJoinAndSelect('detalle.persona', 'persona')
-          .innerJoinAndSelect('detalle.centroTrabajo', 'centroTrabajo')
-          .innerJoinAndSelect('detalle.planilla', 'planilla')
-          .innerJoinAndSelect('planilla.tipoPlanilla', 'tipoPlanilla')
-          .select([
-            'persona.dni AS Identidad',
-            'persona.primer_nombre || \' \' || persona.primer_apellido AS NombrePersona',
-            'detalle.sueldo AS Sueldo',
-            'detalle.aportaciones AS Aportaciones',
-            'detalle.prestamos AS Prestamos',
-            'detalle.cotizaciones AS Cotizaciones',
-            'detalle.deducciones AS Deducciones',
-            'detalle.sueldo_neto AS SueldoNeto'
-          ])
-          .where(`
-        centroTrabajo.id_centro_trabajo = :idCentroTrabajo AND tipoPlanilla.id_tipo_planilla = :id_tipo_planilla
-        AND "planilla"."PERIODO_INICIO" BETWEEN TO_DATE('${fechaInicioMesAnterior}', 'DD/MM/YYYY') AND LAST_DAY(TO_DATE('${fechaInicioMesAnterior}', 'DD/MM/YYYY'))
-        AND "planilla"."PERIODO_FINALIZACION" BETWEEN TO_DATE('${fechaInicioMesAnterior}', 'DD/MM/YYYY') AND LAST_DAY(TO_DATE('${fechaInicioMesAnterior}', 'DD/MM/YYYY'))`,
-            { idCentroTrabajo, id_tipo_planilla })
-          .getRawMany();
-
-        if (!detalles.length) {
-          return []
-          this.logger.warn(`No se encontraron detalles para el centro de trabajo con ID ${idCentroTrabajo}`);
-          throw new NotFoundException(`No se encontraron detalles para el centro de trabajo con ID ${idCentroTrabajo}`);
-        }
-
-        return detalles
-
-      } else if (tipo_planilla == "PLANILLA DECIMO CUARTO") {
-        const fechaInicioMesAnterior = DateTime.local(año, 12, 1).toFormat('dd/MM/yyyy');
-
-        const detalles = await this.detallePlanillaIngr
-          .createQueryBuilder('detalle')
-          .innerJoinAndSelect('detalle.persona', 'persona')
-          .innerJoinAndSelect('detalle.centroTrabajo', 'centroTrabajo')
-          .innerJoinAndSelect('detalle.planilla', 'planilla')
-          .innerJoinAndSelect('planilla.tipoPlanilla', 'tipoPlanilla')
-          .select([
-            'persona.dni AS Identidad',
-            'persona.primer_nombre || \' \' || persona.primer_apellido AS NombrePersona',
-            'detalle.sueldo AS Sueldo',
-            'detalle.aportaciones AS Aportaciones',
-            'detalle.prestamos AS Prestamos',
-            'detalle.cotizaciones AS Cotizaciones',
-            'detalle.deducciones AS Deducciones',
-            'detalle.sueldo_neto AS SueldoNeto'
-          ])
-          .where(`
-        centroTrabajo.id_centro_trabajo = :idCentroTrabajo AND tipoPlanilla.id_tipo_planilla = :id_tipo_planilla
-        AND "planilla"."PERIODO_INICIO" BETWEEN TO_DATE('${fechaInicioMesAnterior}', 'DD/MM/YYYY') AND LAST_DAY(TO_DATE('${fechaInicioMesAnterior}', 'DD/MM/YYYY'))
-        AND "planilla"."PERIODO_FINALIZACION" BETWEEN TO_DATE('${fechaInicioMesAnterior}', 'DD/MM/YYYY') AND LAST_DAY(TO_DATE('${fechaInicioMesAnterior}', 'DD/MM/YYYY'))`,
-            { idCentroTrabajo, id_tipo_planilla })
-          .getRawMany();
-        if (!detalles.length) {
-          return []
-          this.logger.warn(`No se encontraron detalles para el centro de trabajo con ID ${idCentroTrabajo}`);
-          throw new NotFoundException(`No se encontraron detalles para el centro de trabajo con ID ${idCentroTrabajo}`);
-        }
-        return detalles
-      }
-    } catch (Error) {
-
-    }
-  }
-
-  async create(createDetPlanIngDTO: CreateDetallePlanIngDto, id_tipoPlanilla: number) {
-    const { idTipoPlanilla, mes, dni, idInstitucion, prestamos } = createDetPlanIngDTO
-
-    try {
-      let personas = await this.personaRepository.findOne({
-        where: { dni: dni, perfAfilCentTrabs: { centroTrabajo: { id_centro_trabajo: idInstitucion } } },
-        relations: ['perfAfilCentTrabs', 'perfAfilCentTrabs.centroTrabajo'],
-      });
-
-      let salarioCotizableRepository = await this.salarioCotizableRepository.find()
-
-      const fechaActual: Date = new Date();
-      const mes: string = ('0' + (fechaActual.getMonth() + 1)).slice(-2);
-      const año: number = fechaActual.getFullYear();
-      const codPlan: string = "PLAN-ING-" + mes + "-" + año;
-
-      let planilla = await this.planillaRepository.findOne({
-        where: { codigo_planilla: codPlan },
-      });
-
-      const DetPlanIng = await this.buscarPorMesYDni(createDetPlanIngDTO.mes, dni, id_tipoPlanilla).then((val) => {
-        return val
-      });
-
-      if (!planilla) {
-        let planillaId;
-        const Planilla = this.insertPlanilla(codPlan, createDetPlanIngDTO);
-        planillaId = Planilla.then((val) => {
-          if (val.id_planilla) {
-            return val.id_planilla
-          }
-        });
-
-        if (DetPlanIng.detallePlanIngreso.length > 0) {
-          planillaId.then((val) => {
-            if (val) {
-              return this.insertNetDetPlanillaMesAnt(val, DetPlanIng.detallePlanIngreso, DetPlanIng.id_persona, 6);
-            }
-          })
-        } else {
-          return this.insertNetDetPlanilla(planillaId, personas, salarioCotizableRepository, createDetPlanIngDTO);
-        }
-
-      } else {
-        if (DetPlanIng.detallePlanIngreso.length > 0) {
-          return this.insertNetDetPlanillaMesAnt(planilla.id_planilla, DetPlanIng.detallePlanIngreso, DetPlanIng.id_persona, 6);
-        } else {
-          return this.insertNetDetPlanilla(planilla.id_planilla, personas, salarioCotizableRepository, createDetPlanIngDTO);
-        }
-      }
-
-
-    } catch (error) {
-      this.handleException(error);
-    }
-  }
-
-  private calculoAportaciones(persona, salarioCotizableRepository): number {
+  private calculoAportaciones(persona: Net_Persona, salarioCotizableRepository): number {
     const salarioBaseAfiliado = persona.perfAfilCentTrabs[0].salario_base
     const sector_economico = persona.perfAfilCentTrabs[0].centroTrabajo.sector_economico
     let LimiteSSL;
@@ -251,7 +80,7 @@ export class DetallePlanillaIngresoService {
 
   }
 
-  private calculoCotizaciones(persona, salarioCotizableRepository): number {
+  private calculoCotizaciones(persona: Net_Persona, salarioCotizableRepository): number {
     const salarioBaseAfiliado = persona.perfAfilCentTrabs[0].salario_base
     const sector_economico = persona.perfAfilCentTrabs[0].centroTrabajo.sector_economico
 
@@ -311,59 +140,263 @@ export class DetallePlanillaIngresoService {
     return sueldoBase * porcAportMin
   }
 
-  async buscarPorMesYDni(mes: number, dni: string, id_tipoPlanilla: number): Promise<any> {
+  async obtenerDetallesPorCentroTrabajo(idCentroTrabajo: number, id_tipo_planilla: number): Promise<any> {
+    console.log(id_tipo_planilla);
+    let tipoPlanilla = await this.tipoPlanillaRepository.findOne({
+      where: { id_tipo_planilla: id_tipo_planilla },
+    });
+
+    try {
+
+      const { nombre_planilla } = tipoPlanilla
+      const fecha = DateTime.local();
+      const año = fecha.year;
+
+      if (nombre_planilla == "PLANILLA ORDINARIA") {
+        const meses: number[] = [1, 2, 3, 4, 5, 7, 8, 9, 10, 11];
+        /* MES ACTUAL */
+        const mes: number = 7;
+        if (meses.includes(mes)) {
+          const detalles = await this.detallePlanillaIngr
+            .createQueryBuilder("detalle")
+            .select([
+              'persona.dni AS Identidad',
+              'persona.primer_nombre || \' \' || persona.primer_apellido AS NombrePersona',
+              'detalle.sueldo AS Sueldo',
+              'detalle.aportaciones AS Aportaciones',
+              'detalle.prestamos AS Prestamos',
+              'detalle.cotizaciones AS Cotizaciones',
+              'detalle.deducciones AS Deducciones',
+              'detalle.sueldo_neto AS SueldoNeto',
+              'planilla.PERIODO_INICIO AS periodo_inicio',
+              'planilla.PERIODO_FINALIZACION AS periodo_finalizacion'
+            ])
+            .innerJoin('detalle.persona', 'persona')
+            .innerJoin('detalle.centroTrabajo', 'centroTrabajo')
+            .innerJoin('detalle.planilla', 'planilla')
+            .innerJoin('planilla.tipoPlanilla', 'tipoPlanilla')
+            .where('centroTrabajo.id_centro_trabajo = :idCentroTrabajo', { idCentroTrabajo })
+            .andWhere('tipoPlanilla.id_tipo_planilla = :id_tipo_planilla', { id_tipo_planilla })
+            .andWhere(`planilla.FECHA_APERTURA = (SELECT MAX("NET_PLANILLA"."FECHA_APERTURA") FROM "NET_PLANILLA" WHERE "NET_PLANILLA".ID_TIPO_PLANILLA = ${id_tipo_planilla})`)
+            .getRawMany();
+
+          if (!detalles.length) {
+            return []
+            this.logger.warn(`No se encontraron detalles para el centro de trabajo con ID ${idCentroTrabajo}`);
+            throw new NotFoundException(`No se encontraron detalles para el centro de trabajo con ID ${idCentroTrabajo}`);
+          }
+
+          return detalles;
+        }
+      } else if (nombre_planilla == "PLANILLA DECIMO TERCERO") {
+        const fechaInicioMesAnterior = DateTime.local(año, 6, 1).toFormat('dd/MM/yyyy');
+
+        const detalles = await this.detallePlanillaIngr
+          .createQueryBuilder('detalle')
+          .innerJoinAndSelect('detalle.persona', 'persona')
+          .innerJoinAndSelect('detalle.centroTrabajo', 'centroTrabajo')
+          .innerJoinAndSelect('detalle.planilla', 'planilla')
+          .innerJoinAndSelect('planilla.tipoPlanilla', 'tipoPlanilla')
+          .select([
+            'persona.dni AS Identidad',
+            'persona.primer_nombre || \' \' || persona.primer_apellido AS NombrePersona',
+            'detalle.sueldo AS Sueldo',
+            'detalle.aportaciones AS Aportaciones',
+            'detalle.prestamos AS Prestamos',
+            'detalle.cotizaciones AS Cotizaciones',
+            'detalle.deducciones AS Deducciones',
+            'detalle.sueldo_neto AS SueldoNeto',
+            'planilla.PERIODO_INICIO AS periodo_inicio',
+            'planilla.PERIODO_FINALIZACION AS periodo_finalizacion'
+          ])
+          .where(`
+        centroTrabajo.id_centro_trabajo = :idCentroTrabajo AND tipoPlanilla.id_tipo_planilla = :id_tipo_planilla
+        AND "planilla"."PERIODO_INICIO" BETWEEN TO_DATE('${fechaInicioMesAnterior}', 'DD/MM/YYYY') AND LAST_DAY(TO_DATE('${fechaInicioMesAnterior}', 'DD/MM/YYYY'))
+        AND "planilla"."PERIODO_FINALIZACION" BETWEEN TO_DATE('${fechaInicioMesAnterior}', 'DD/MM/YYYY') AND LAST_DAY(TO_DATE('${fechaInicioMesAnterior}', 'DD/MM/YYYY'))`,
+            { idCentroTrabajo, id_tipo_planilla })
+          .getRawMany();
+
+        if (!detalles.length) {
+          return []
+          this.logger.warn(`No se encontraron detalles para el centro de trabajo con ID ${idCentroTrabajo}`);
+          throw new NotFoundException(`No se encontraron detalles para el centro de trabajo con ID ${idCentroTrabajo}`);
+        }
+        return detalles
+
+      } else if (nombre_planilla == "PLANILLA DECIMO CUARTO") {
+        const fechaInicioMesAnterior = DateTime.local(año, 12, 1).toFormat('dd/MM/yyyy');
+
+        const detalles = await this.detallePlanillaIngr
+          .createQueryBuilder('detalle')
+          .innerJoinAndSelect('detalle.persona', 'persona')
+          .innerJoinAndSelect('detalle.centroTrabajo', 'centroTrabajo')
+          .innerJoinAndSelect('detalle.planilla', 'planilla')
+          .innerJoinAndSelect('planilla.tipoPlanilla', 'tipoPlanilla')
+          .select([
+            'persona.dni AS Identidad',
+            'persona.primer_nombre || \' \' || persona.primer_apellido AS NombrePersona',
+            'detalle.sueldo AS Sueldo',
+            'detalle.aportaciones AS Aportaciones',
+            'detalle.prestamos AS Prestamos',
+            'detalle.cotizaciones AS Cotizaciones',
+            'detalle.deducciones AS Deducciones',
+            'detalle.sueldo_neto AS SueldoNeto',
+            'planilla.PERIODO_INICIO AS periodo_inicio',
+            'planilla.PERIODO_FINALIZACION AS periodo_finalizacion'
+          ])
+          .where(`
+        centroTrabajo.id_centro_trabajo = :idCentroTrabajo AND tipoPlanilla.id_tipo_planilla = :id_tipo_planilla
+        AND "planilla"."PERIODO_INICIO" BETWEEN TO_DATE('${fechaInicioMesAnterior}', 'DD/MM/YYYY') AND LAST_DAY(TO_DATE('${fechaInicioMesAnterior}', 'DD/MM/YYYY'))
+        AND "planilla"."PERIODO_FINALIZACION" BETWEEN TO_DATE('${fechaInicioMesAnterior}', 'DD/MM/YYYY') AND LAST_DAY(TO_DATE('${fechaInicioMesAnterior}', 'DD/MM/YYYY'))`,
+            { idCentroTrabajo, id_tipo_planilla })
+          .getRawMany();
+        if (!detalles.length) {
+          return []
+          this.logger.warn(`No se encontraron detalles para el centro de trabajo con ID ${idCentroTrabajo}`);
+          throw new NotFoundException(`No se encontraron detalles para el centro de trabajo con ID ${idCentroTrabajo}`);
+        }
+        return detalles
+      }
+    } catch (Error) {
+      console.log(Error);
+
+    }
+  }
+
+  async create() {
+    const fechaActual: Date = new Date();
+    // const currentDate = DateTime.now()
+    // mes actual
+    // mes = fechaActual.getMonth()
+
+    const idCentroEducativo: number = 6;
+    const mes = 7
+
+    const año: number = fechaActual.getFullYear();
+    const codPlan: string = "PLAN-ING-" + mes + "-" + año;
+
+    try {
+      let planilla = await this.planillaRepository.findOne({
+        where: { codigo_planilla: codPlan },
+      });
+
+      /* Busca registros del mes anterior */
+      const DetPlanIng = await this.buscarPorMesAct(mes).then((val) => {
+        return val
+      });
+
+      const meses: number[] = [1, 2, 3, 4, 5, 7, 8, 9, 10, 11];
+      const mesesDT: number[] = [6];
+      const mesesDC: number[] = [12];
+
+      /* MES ACTUAL */
+      let id_tipoPlanilla
+      if (meses.includes(mes)) {
+        let planillaSel = await this.tipoPlanillaRepository.findOne({
+          where: { nombre_planilla: "PLANILLA ORDINARIA" },
+        });
+        id_tipoPlanilla = planillaSel.id_tipo_planilla
+      } else if (mesesDT.includes(mes)) {
+        let planillaSel = await this.tipoPlanillaRepository.findOne({
+          where: { nombre_planilla: "PLANILLA DECIMO TERCERO" },
+        });
+        id_tipoPlanilla = planillaSel.id_tipo_planilla
+      } else if (mesesDC.includes(mes)) {
+        let planillaSel = await this.tipoPlanillaRepository.findOne({
+          where: { nombre_planilla: "PLANILLA DECIMO CUARTO" },
+        });
+        id_tipoPlanilla = planillaSel.id_tipo_planilla
+      }
+
+      if (planilla == null) {
+        if (DetPlanIng) {
+          if (DetPlanIng.detallePlanIngreso.length > 0) {
+            const planillaId = this.insertPlanilla(codPlan, id_tipoPlanilla, mes, año);
+            planillaId.then((val) => {
+              if (val) {
+                return this.insertNetDetPlanillaMesAnt(val.id_planilla, DetPlanIng.detallePlanIngreso, DetPlanIng.id_persona, idCentroEducativo);
+              }
+            })
+          }
+
+        }
+      } else {
+        if (DetPlanIng) {
+          if (DetPlanIng.detallePlanIngreso.length > 0) {
+            return this.insertNetDetPlanillaMesAnt(planilla.id_planilla, DetPlanIng.detallePlanIngreso, DetPlanIng.id_persona, idCentroEducativo);
+          }
+        }
+      }
+
+    } catch (error) {
+      this.handleException(error);
+    }
+  }
+
+  /* Retorna registros del mes anterior  */
+  async buscarPorMesAct(mes: number): Promise<any> {
+    const fechaActual: Date = new Date();
+    const año: number = fechaActual.getFullYear();
+    const codPlanMesAnt: string = `PLAN-ING-${mes - 1}-${año}`;
+
     try {
       const año = new Date().getFullYear();
       const fechaInicioMesAnterior = new Date(año, mes - 2, 1);
       const fechaFinMesAnterior = new Date(año, mes - 1, 0);
+
       const persona = await this.personaRepository.findOne({
-        where: { dni, estadoAfiliado: { Descripcion: 'ACTIVO' }, detallePlanIngreso: { planilla: { tipoPlanilla: { id_tipo_planilla: id_tipoPlanilla } } } },
+        where: {
+          estadoAfiliado: { Descripcion: 'ACTIVO' },
+          detallePlanIngreso: {
+            planilla:
+              { codigo_planilla: codPlanMesAnt },
+            estado: "NO CARGADO"
+          }
+        },
         relations: ['detallePlanIngreso', 'detallePlanIngreso.planilla', "estadoAfiliado"],
       });
 
       if (!persona) {
-        throw new NotFoundException(`No se encontró una persona activa con el DNI ${dni}`);
-      }
-      const planillaEnMesAnterior = persona.detallePlanIngreso.some(detalle => {
+        throw new NotFoundException(`No se encontró ningún registro`);
+      } else if (persona) {
+        const planillaEnMesAnterior = persona.detallePlanIngreso.some(detalle => {
 
-        if (detalle.planilla) {
-          const [diaInicio, mesInicio, añoInicio] = detalle.planilla.periodoInicio.split('/').map(Number);
-          const [diaFin, mesFin, añoFin] = detalle.planilla.periodoFinalizacion.split('/').map(Number);
+          if (detalle.planilla) {
+            const [diaInicio, mesInicio, añoInicio] = detalle.planilla.periodoInicio.split('/').map(Number);
+            const [diaFin, mesFin, añoFin] = detalle.planilla.periodoFinalizacion.split('/').map(Number);
 
-          const periodoInicio = new Date(añoInicio, mesInicio - 1, diaInicio);
-          const periodoFinalizacion = new Date(añoFin, mesFin - 1, diaFin);
+            const periodoInicio = new Date(añoInicio, mesInicio - 1, diaInicio);
+            const periodoFinalizacion = new Date(añoFin, mesFin - 1, diaFin);
 
-          return (
-            periodoInicio >= fechaInicioMesAnterior && periodoFinalizacion <= fechaFinMesAnterior
-          );
+            return (
+              periodoInicio >= fechaInicioMesAnterior && periodoFinalizacion <= fechaFinMesAnterior
+            );
+          }
+        });
+
+        if (!planillaEnMesAnterior) {
+          return undefined
+          /* throw new NotFoundException(`La persona con DNI ${dni} no estuvo registrada en una planilla en el mes ${mes - 1}`); */
         }
-      });
-
-      if (!planillaEnMesAnterior) {
-        return []
-        throw new NotFoundException(`La persona con DNI ${dni} no estuvo registrada en una planilla en el mes ${mes - 1}`);
+        return persona;
       }
 
-      return persona;
     } catch (error) {
-      this.logger.error(`Error buscando por mes ${mes} y DNI ${dni}: ${error.message}`);
       throw error;
     }
   }
 
-  async insertPlanilla(codigo_planilla, createPlanillaDto): Promise<any> {
-    const currentDate = new Date();
-    const firstDayOfMonth = startOfMonth(currentDate);
-    const lastDayOfMonth = endOfMonth(currentDate);
-
-    const periodoInicio = new Date(firstDayOfMonth).toLocaleString();
-    const periodoFinalizacion = new Date(lastDayOfMonth).toLocaleString();
+  async insertPlanilla(codigo_planilla: string, id_tipo_planillaR: number, mes, año): Promise<any> {
+    const currentDate = DateTime.now();
+    const periodoInicio = DateTime.local(año, mes, currentDate.startOf('month').day).toFormat('dd/MM/yyyy');
+    const periodoFinalizacion = DateTime.local(año, mes, currentDate.endOf('month').day).toFormat('dd/MM/yyyy');
 
     try {
-      const tipoPlanilla = await this.tipoPlanillaRepository.findOneBy({ nombre_planilla: createPlanillaDto.nombre_planilla });
+      const tipoPlanilla = await this.tipoPlanillaRepository.findOne({
+        where: { id_tipo_planilla: id_tipo_planillaR },
+      });
 
       if (tipoPlanilla && tipoPlanilla.id_tipo_planilla) {
-
         const planilla = this.planillaRepository.create({
           "codigo_planilla": codigo_planilla,
           "secuencia": 1,
@@ -376,44 +409,49 @@ export class DetallePlanillaIngresoService {
         return planilla;
 
       } else {
+        return []
         throw new Error("No se encontró ningún tipo de planilla con el nombre proporcionado");
       }
 
-
     } catch (error) {
-      this.handleException(error);
+      console.log(error);
+      /* this.handleException(error); */
     }
-
   }
 
-  private async insertNetDetPlanillaMesAnt(id_planilla, DetPlanIng, id_persona, id_centro_trabajo): Promise<void> {
-    let values = DetPlanIng.map(detalle => `SELECT
-      ${detalle.sueldo} AS SUELDO,
-      ${detalle.prestamos} AS PRESTAMOS,
-      ${detalle.aportaciones} AS APORTACIONES,
-      ${detalle.cotizaciones} AS COTIZACIONES,
-      ${detalle.deducciones} AS DEDUCCIONES,
-      ${detalle.sueldo_neto} AS SUELDO_NETO,
-      ${id_persona} AS ID_PERSONA,
-      ${id_planilla} AS ID_PLANILLA,
-      ${id_centro_trabajo} AS ID_CENTRO_TRABAJO
-    FROM DUAL`).join('\nUNION ALL\n');
+  private async insertNetDetPlanillaMesAnt(id_planilla, DetPlanIng, id_persona, id_centro_trabajo): Promise<any> {
+    try {
+      // Mapea los datos a instancias de la entidad
+      const detalles = DetPlanIng.map(detalle => {
+        const netDetalle = new Net_Detalle_planilla_ingreso();
+        netDetalle.sueldo = detalle.sueldo;
+        netDetalle.prestamos = detalle.prestamos;
+        netDetalle.aportaciones = detalle.aportaciones;
+        netDetalle.cotizaciones = detalle.cotizaciones;
+        netDetalle.deducciones = detalle.deducciones;
+        netDetalle.sueldo_neto = detalle.sueldo_neto;
+        netDetalle.persona = id_persona;
+        netDetalle.planilla = id_planilla;
+        netDetalle.centroTrabajo = id_centro_trabajo;
+        return netDetalle;
+      });
 
-    const queryInsDeBBenf = `INSERT INTO NET_DETALLE_PLANILLA_ING (
-      SUELDO,
-      PRESTAMOS,
-      APORTACIONES,
-      COTIZACIONES,
-      DEDUCCIONES,
-      SUELDO_NETO,
-      ID_PERSONA,
-      ID_PLANILLA,
-      ID_CENTRO_TRABAJO
-    )\n${values}`;
+      // Inserta las instancias en la base de datos
+      const result = await this.detallePlanillaIngr.save(detalles);
 
-    const detPlanillaIng = await this.entityManager.query(queryInsDeBBenf);
-    return detPlanillaIng;
+      // Actualiza el estado a 'CARGADO' para los registros apropiados
+      await this.detallePlanillaIngr.createQueryBuilder()
+        .update(new Net_Detalle_planilla_ingreso)
+        .set({ estado: 'CARGADO' })
+        .where('id_detalle_plan_Ing IN (:...ids)', { ids: DetPlanIng.map(detalle => detalle.id_detalle_plan_Ing) })
+        .execute();
+
+      return result;
+    } catch (error) {
+      console.log(error);
+    }
   }
+
   private async insertNetDetPlanilla(id_planilla, persona, salarioCotizableRepository, createDetPlanIngDTO): Promise<number> {
     const { idInstitucion, prestamos } = createDetPlanIngDTO
     let ValoresDetalle = {

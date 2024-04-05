@@ -9,9 +9,9 @@ export class DetallePlanIngrController {
   private readonly logger = new Logger(DetallePlanIngrController.name);
   constructor(private readonly planillaIngresoService: DetallePlanillaIngresoService) { }
 
-  @Post(":id_tipoPlanilla")
-  create(@Body() CreateDetallePlanIngDto: CreateDetallePlanIngDto, @Param() id_tipoPlanilla: number) {
-    return this.planillaIngresoService.create(CreateDetallePlanIngDto, id_tipoPlanilla);
+  @Post()
+  create() {
+    return this.planillaIngresoService.create();
   }
 
   @Get('/obtenerDetalleIngresos/:idCentroTrabajo/:id_tipo_planilla')
@@ -29,8 +29,8 @@ export class DetallePlanIngrController {
   }
 
   @Get('buscar')
-  async buscarPorMesYDni(@Query('mes') mes: string, @Query('dni') dni: string, @Query('id_tipoPlanilla') id_tipoPlanilla: number) {
-    if (!mes || !dni) {
+  async buscarPorMesYDni(@Query('mes') mes: string, @Query('id_tipoPlanilla') id_tipoPlanilla: number) {
+    if (!mes) {
       throw new BadRequestException('Se requiere tanto el mes como el DNI para realizar la búsqueda.');
     }
     try {
@@ -39,7 +39,7 @@ export class DetallePlanIngrController {
         throw new BadRequestException('El mes debe ser un número válido.');
       }
 
-      const persona = await this.planillaIngresoService.buscarPorMesYDni(mesNumerico, dni, id_tipoPlanilla);
+      const persona = await this.planillaIngresoService.buscarPorMesAct(mesNumerico);
       return persona;
     } catch (error) {
       if (error instanceof NotFoundException || error instanceof BadRequestException) {

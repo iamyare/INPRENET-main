@@ -76,7 +76,10 @@
       </button>
     </div>
     <div class="datos-container">
-      <h2>Datos de Planilla Marzo 2024</h2>
+      <h2>
+        Datos de Planilla {{ dataSource.data[0]?.periodoInicio }} al
+        {{ dataSource.data[0]?.periodoFinalizacion }}
+      </h2>
       <table mat-table [dataSource]="[{}]">
         <!-- Número de colegio Column -->
         <ng-container matColumnDef="numeroColegio">

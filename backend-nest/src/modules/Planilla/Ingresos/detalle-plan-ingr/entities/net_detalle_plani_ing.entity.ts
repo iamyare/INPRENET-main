@@ -1,10 +1,11 @@
 
-import { Column, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn } from "typeorm";
+import { Check, Column, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 import { Net_Persona } from "src/modules/afiliado/entities/Net_Persona";
 import { Net_Centro_Trabajo } from "src/modules/Empresarial/centro-trabajo/entities/net_centro-trabajo.entity";
 import { Net_Planilla } from "src/modules/Planilla/planilla/entities/net_planilla.entity";
 
 @Entity({ name: 'NET_DETALLE_PLANILLA_ING' })
+@Check("CK_ESTADO_PLANING", `ESTADO IN ('NO CARGADO', 'CARGADO')`)
 export class Net_Detalle_planilla_ingreso {
     @PrimaryGeneratedColumn({ type: 'int', name: 'ID_DETALLE_PLAN_INGRESO', primaryKeyConstraintName: 'PK_id_detPlanIng' })
     id_detalle_plan_Ing: number;
@@ -27,6 +28,9 @@ export class Net_Detalle_planilla_ingreso {
     @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true, name: 'SUELDO_NETO' })
     sueldo_neto: number;
 
+    @Column({ type: 'varchar2', nullable: true, name: 'ESTADO', default: "NO CARGADO" })
+    estado: string;
+
     @ManyToOne(() => Net_Persona, persona => persona.detallePlanIngreso)
     @JoinColumn({ name: 'ID_PERSONA', foreignKeyConstraintName: "FK_ID_PERSONA_DETPLANING" })
     persona: Net_Persona;
@@ -38,5 +42,5 @@ export class Net_Detalle_planilla_ingreso {
     @ManyToOne(() => Net_Planilla, planilla => planilla.detallesPlanillaIngreso)
     @JoinColumn({ name: 'ID_PLANILLA', foreignKeyConstraintName: "FK_DETALLE_PLANILLA_PLANILLA" })
     planilla: Net_Planilla;
-    
+
 }

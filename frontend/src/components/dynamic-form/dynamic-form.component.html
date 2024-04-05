@@ -29,6 +29,7 @@
                     [formControlName]="field.name"
                     [readonly]="field.readOnly"
                   />
+                  <mat-icon *ngIf="field.icon" matSuffix>{{ field.icon }}</mat-icon>
                 </mat-form-field>
               </ng-container>
             </div>
@@ -51,6 +52,7 @@
                       {{ option.label }}
                     </mat-option>
                   </mat-select>
+                  <mat-icon *ngIf="field.icon" matSuffix>{{ field.icon }}</mat-icon>
                 </mat-form-field>
               </ng-container>
             </ng-template>

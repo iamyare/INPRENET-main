@@ -9,4 +9,5 @@ export interface FieldConfig {
   value?: any;
   options?: { label: string; value: any }[];
   validations?: ValidatorFn[];
+  icon?: string;
 }

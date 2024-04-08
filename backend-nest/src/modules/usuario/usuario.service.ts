@@ -16,7 +16,6 @@ import { Net_Centro_Trabajo } from '../Empresarial/centro-trabajo/entities/net_c
 
 @Injectable()
 export class UsuarioService {
-
   private readonly logger = new Logger(UsuarioService.name)
 
   constructor(
@@ -42,61 +41,58 @@ export class UsuarioService {
       where: { email },
       relations: ['centroTrabajo']
     });
-
+  
     if (usuario && await bcrypt.compare(pass, usuario.passwordHash)) {
       const { passwordHash, centroTrabajo, ...result } = usuario;
       return { ...result, idCentroTrabajo: centroTrabajo ? centroTrabajo.id_centro_trabajo : null };
     }
     return null;
   }
-
-
+  
   async loginPrivada(email: string, contrasena: string): Promise<any> {
     const usuario = await this.validateUser(email, contrasena);
-
+  
     if (!usuario) {
       throw new UnauthorizedException('Credenciales inválidas');
     }
     const payload = {
       email: usuario.email,
       sub: usuario.id_usuario,
-      isSuperUser: usuario.isSuperUser,
       idCentroTrabajo: usuario.idCentroTrabajo
     };
-
+  
     return {
       access_token: this.jwtService.sign(payload),
     };
   }
-
-  async createPrivada(email: string, contrasena: string, nombre_usuario: string, isSuperUser: boolean, idCentroTrabajo?: number): Promise<NET_USUARIO_PRIVADA> {
+  
+  async createPrivada(email: string, contrasena: string, nombre_usuario: string, idCentroTrabajo?: number): Promise<NET_USUARIO_PRIVADA> {
     const usuarioExistente = await this.usuarioPrivadaRepository.findOne({ where: { email } });
     if (usuarioExistente) {
       throw new BadRequestException('El correo electrónico ya está en uso.');
     }
-
+  
     const rolPrivados = await this.rolRepository.findOneBy({ id_rol: 1 });
     if (!rolPrivados) {
       throw new BadRequestException('El rol "PRIVADOS" no existe.');
     }
-
+  
     const hashedPassword = await bcrypt.hash(contrasena, 10);
-
+  
     const nuevoUsuario = new NET_USUARIO_PRIVADA();
     nuevoUsuario.email = email;
     nuevoUsuario.passwordHash = hashedPassword;
     nuevoUsuario.nombre_usuario = nombre_usuario;
-    nuevoUsuario.isSuperUser = isSuperUser ? 1 : 0;
     nuevoUsuario.rol = rolPrivados;
-
-    if (!isSuperUser && idCentroTrabajo) {
+  
+    if (idCentroTrabajo) {
       const centroTrabajo = await this.centroTrabajoRepository.findOneBy({ id_centro_trabajo: idCentroTrabajo });
       if (!centroTrabajo) {
         throw new BadRequestException('El centro de trabajo proporcionado no existe.');
       }
       nuevoUsuario.centroTrabajo = centroTrabajo;
     }
-
+  
     return this.usuarioPrivadaRepository.save(nuevoUsuario);
   }
 
@@ -266,9 +262,12 @@ export class UsuarioService {
 
   async login(email: string, password: string): Promise<{ token: string }> {
     const usuario = await this.usuarioRepository.findOne({
+      
       where: { correo: email },
       relations: ['rol']
     });
+    console.log(usuario);
+    
     if (!usuario) {
       throw new NotFoundException('Usuario no encontrado');
     }

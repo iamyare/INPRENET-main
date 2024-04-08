@@ -9,6 +9,8 @@ import { RegisterComponent } from './views/pages/Generales/register/register.com
 import { PreRegisterComponent } from './views/pages/Generales/pre-register/pre-register.component';
 import { RoleGuard } from './guards/role-guard.guard';
 import { LoginPrivadosComponent } from './views/pages/Centros Privados/login-privados/login-privados.component';
+import { PlanillaColegiosPrivadosComponent } from './views/pages/Centros Privados/planilla-colegios-privados/planilla-colegios-privados.component';
+import { NavDefaultComponent } from './views/pages/Centros Privados/nav-default/nav-default.component';
 
 const routes: Routes = [
   {
@@ -32,6 +34,10 @@ const routes: Routes = [
         path: 'Afiliado',
         loadChildren: () =>
           import('./views/theme/theme.module').then((m) => m.ThemeModule),
+        canActivate: [RoleGuard],
+        data: {
+          expectedRoles: ['ADMINISTRADOR', 'JEFE', 'OFICIAL', 'AUXILIAR']
+    }
       },
       {
         path: 'Planilla',
@@ -113,6 +119,30 @@ const routes: Routes = [
       title: 'Login Privados Page'
     }
   },
+  {
+    path: 'privados',
+    component: NavDefaultComponent,
+    data: {
+      title: 'Inicio Privados'
+    },
+    children: [
+      {
+        path: '',
+        component: PlanillaColegiosPrivadosComponent,
+        data: {
+          title: 'Planilla de privados'
+        }
+      },
+      {
+        path: 'PlanillaPrivados',
+        component: PlanillaColegiosPrivadosComponent,
+        data: {
+          title: 'Planilla de privados'
+        }
+      },
+    ]
+  },
+
 
   /* {path: '**', redirectTo: 'dashboard'} */
 ];

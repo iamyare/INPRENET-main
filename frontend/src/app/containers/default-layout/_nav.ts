@@ -15,21 +15,6 @@ export const navItems: INavData[] = [
     name: 'Menú Mantenimiento'
   },
   {
-    name: 'Beneficio',
-    iconComponent: { name: 'cilMoney' },
-    url: '/base',
-    children: [
-      {
-        name: 'Nuevo Beneficio',
-        url: '/Beneficio/nuevo-beneficio',
-      },
-      {
-        name: 'Editar Beneficio',
-        url: '/Beneficio/editar-beneficio',
-      },
-  ]
-  },
-  {
     name: 'Deducción',
     iconComponent: { name: 'cilMoney' },
     url: '/base',

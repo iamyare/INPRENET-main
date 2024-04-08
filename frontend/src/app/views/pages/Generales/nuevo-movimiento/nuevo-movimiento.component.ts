@@ -30,8 +30,22 @@ export class NuevoMovimientoComponent implements OnInit {
 
   ngOnInit(): void {
     this.myFormFields = [
-      { type: 'text', label: 'Descripción', name: 'DESCRIPCION', validations: [Validators.required], display: true, icon: 'add_circle' },
-      { type: 'number', label: 'Monto', name: 'MONTO', validations: [Validators.required, Validators.min(1)], display: true, icon: 'paid' },
+      {
+        type: 'text',
+        label: 'Descripción',
+        name: 'DESCRIPCION',
+        validations: [Validators.required],
+        display: true,
+        icon: 'notes'
+      },
+      {
+        type: 'number',
+        label: 'Monto',
+        name: 'MONTO',
+        validations: [Validators.required, Validators.min(1)],
+        display: true,
+        icon: 'attach_money'
+      }
     ];
   }
 

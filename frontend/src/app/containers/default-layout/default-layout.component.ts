@@ -20,7 +20,7 @@ export class DefaultLayoutComponent implements OnInit {
   private loadNavItems(): void {
     this.navItems = JSON.parse(JSON.stringify(originalNavItems));
     const userRole = this.authService.getUserRole();
-    /* if (userRole === 'ADMINISTRADOR') {
+    if (userRole === 'ADMINISTRADOR') {
       this.navItems.splice(2, 0, {
         name: 'Beneficio',
         iconComponent: { name: 'cilMoney' },
@@ -30,6 +30,6 @@ export class DefaultLayoutComponent implements OnInit {
           { name: 'Editar Beneficios', url: '/Beneficio/editar-beneficio' },
         ],
       });
-    } */
+    }
   }
 }

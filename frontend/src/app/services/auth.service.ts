@@ -2,6 +2,8 @@ import {HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable, map } from 'rxjs';
 import { environment } from 'src/environments/environment';
+import { jwtDecode } from 'jwt-decode';
+
 
 @Injectable({
   providedIn: 'root'
@@ -35,19 +37,15 @@ export class AuthService {
     if (!token) return '';
 
     try {
-      const base64Url = token.split('.')[1];
-      const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-      const jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
-        return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
-      }).join(''));
-
-      const { rol } = JSON.parse(jsonPayload);
-      return rol || '';
+      const decodedToken: any = jwtDecode(token);
+      const role = decodedToken.rol
+      return role || '';
     } catch (error) {
-      /* console.error('Error decoding token:', error);
-      return ''; */
+      console.error('Error decoding token:', error);
+      return '';
     }
   }
+
 
   crearCuenta(data:any): Observable<any>{
     var url = `${environment.API_URL}/api/usuario/auth/signup`;

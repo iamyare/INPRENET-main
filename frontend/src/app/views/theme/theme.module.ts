@@ -48,6 +48,7 @@ import { CargarPlanillaPrivadosComponent } from '../pages/Generales/cargar-plani
 import { NuevoMovimientoComponent } from '../pages/Generales/nuevo-movimiento/nuevo-movimiento.component';
 import { VerMovimientosComponent } from '../pages/Generales/ver-movimientos/ver-movimientos.component';
 import { PlanillaColegiosPrivadosComponent } from '../pages/Centros Privados/planilla-colegios-privados/planilla-colegios-privados.component';
+import { NavDefaultComponent } from '../pages/Centros Privados/nav-default/nav-default.component';
 
 @NgModule({
   imports: [
@@ -101,7 +102,8 @@ import { PlanillaColegiosPrivadosComponent } from '../pages/Centros Privados/pla
     PlanillaColegiosPrivadosComponent,
     CargarPlanillaPrivadosComponent,
     NuevoMovimientoComponent,
-    VerMovimientosComponent
+    VerMovimientosComponent,
+    NavDefaultComponent
 
     /*     CentroTrabajoPageComponent */
   ]

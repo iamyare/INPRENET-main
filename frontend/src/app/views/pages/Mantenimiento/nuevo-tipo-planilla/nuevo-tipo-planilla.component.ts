@@ -25,9 +25,31 @@ export class NuevoTipoPlanillaComponent {
 
   precargarDatos() {
     this.myFormFields = [
-      { type: 'text', label: 'Nombre de planilla', name: 'nombre_planilla', validations: [Validators.required, Validators.maxLength(50)], display: true, icon: 'library_books' },
-      { type: 'dropdown', label: 'Clase Planilla', name: 'clase_planilla', validations: [Validators.required], options: this.getTipoPlanillas(), display: true },
-      { type: 'text', label: 'Descripción de planilla', name: 'descripcion', validations: [Validators.required], display: true, icon: 'add_notes' },
+      {
+        type: 'text',
+        label: 'Nombre de planilla',
+        name: 'nombre_planilla',
+        validations: [Validators.required, Validators.maxLength(50)],
+        display: true,
+        icon: 'library_books'
+      },
+      {
+        type: 'dropdown',
+        label: 'Clase Planilla',
+        name: 'clase_planilla',
+        validations: [Validators.required],
+        options: this.getTipoPlanillas(),
+        display: true,
+        icon: 'category'
+      },
+      {
+        type: 'text',
+        label: 'Descripción de planilla',
+        name: 'descripcion',
+        validations: [Validators.required],
+        display: true,
+        icon: 'add_notes'
+      }
     ];
   }
 
@@ -67,7 +89,6 @@ export class NuevoTipoPlanillaComponent {
   }
 
   limpiarFormulario(): void {
-    // Utiliza la referencia al componente DynamicFormComponent para resetear el formulario
     if (this.dynamicForm) {
       this.dynamicForm.form.reset();
     }

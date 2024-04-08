@@ -29,15 +29,47 @@ export class NuevoTipoDeduccionComponent implements OnInit {
   obtenerDatos1() {
     this.getInstituciones().subscribe(options => {
       this.myFormFields = [
-        { type: 'text', label: 'Nombre', name: 'nombre_deduccion', validations: [Validators.required], display: true },
-        { type: 'text', label: 'Descripción', name: 'descripcion_deduccion', validations: [Validators.required], display: true },
-        { type: 'number', label: 'Código de deducción', name: 'codigo_deduccion', validations: [Validators.required], display: true },
-        { type: 'number', label: 'Prioridad', name: 'prioridad', validations: [Validators.required], display: true },
         {
-          type: 'dropdown', label: 'Institución', name: 'nombre_institucion',
-          options: options,
-          validations: [Validators.required], display: true
+          type: 'text',
+          label: 'Nombre',
+          name: 'nombre_deduccion',
+          validations: [Validators.required],
+          display: true,
+          icon: 'badge'
         },
+        {
+          type: 'text',
+          label: 'Descripción',
+          name: 'descripcion_deduccion',
+          validations: [Validators.required],
+          display: true,
+          icon: 'description'
+        },
+        {
+          type: 'number',
+          label: 'Código de deducción',
+          name: 'codigo_deduccion',
+          validations: [Validators.required],
+          display: true,
+          icon: 'vpn_key'
+        },
+        {
+          type: 'number',
+          label: 'Prioridad',
+          name: 'prioridad',
+          validations: [Validators.required],
+          display: true,
+          icon: 'priority_high'
+        },
+        {
+          type: 'dropdown',
+          label: 'Institución',
+          name: 'nombre_institucion',
+          options: options,
+          validations: [Validators.required],
+          display: true,
+          icon: 'account_balance'
+        }
       ];
       this.loading = false
     }, error => {

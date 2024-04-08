@@ -19,13 +19,42 @@ export class NuevoBeneficioComponent implements OnInit {
   }
 
   precargarDatos() {
-    /* SI SE MUEVE LA FILA Periodo hay que cambiar la posicion en la funcion obtenerDatos */
     this.myFormFields = [
-      { type: 'text', label: 'Nombre de beneficio', name: 'nombre_beneficio', validations: [Validators.required], display: true },
-      { type: 'text', label: 'Descripción de beneficio', name: 'descripcion_beneficio', validations: [Validators.required], display: true },
-      { type: 'dropdown', label: 'Periodicidad', name: 'periodicidad', validations: [Validators.required], options: [{ label: "VITALICIO", value: "VITALICIO" }, { label: "DEFINIDO", value: "DEFINIDO" }], display: true },
-      { type: 'number', label: 'Número de rentas máximas', name: 'numero_rentas_max', validations: [], display: false },
+      {
+        type: 'text',
+        label: 'Nombre de beneficio',
+        name: 'nombre_beneficio',
+        validations: [Validators.required],
+        display: true,
+        icon: 'card_giftcard'
+      },
+      {
+        type: 'text',
+        label: 'Descripción de beneficio',
+        name: 'descripcion_beneficio',
+        validations: [Validators.required],
+        display: true,
+        icon: 'description'
+      },
+      {
+        type: 'dropdown',
+        label: 'Periodicidad',
+        name: 'periodicidad',
+        validations: [Validators.required],
+        options: [{ label: "VITALICIO", value: "VITALICIO" }, { label: "DEFINIDO", value: "DEFINIDO" }],
+        display: true,
+        icon: 'repeat'
+      },
+      {
+        type: 'number',
+        label: 'Número de rentas máximas',
+        name: 'numero_rentas_max',
+        validations: [],
+        display: false,
+        icon: 'trending_up'
+      }
     ];
+
   }
 
   ngOnInit(): void { }

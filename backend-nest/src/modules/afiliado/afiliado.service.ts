@@ -285,7 +285,7 @@ export class AfiliadoService {
   async buscarPersonaYMovimientosPorDNI(dni: string): Promise<any> {
     const persona = await this.afiliadoRepository.findOne({
       where: { dni },
-      relations: ["movimientos", "estadoAfiliado"] // Asegúrate de tener esta relación definida en tu entidad
+      relations: ["movimientos", "estadoAfiliado"]
     });
 
     if (!persona) {
@@ -304,8 +304,8 @@ export class AfiliadoService {
       status: 'success',
       message: 'Datos y movimientos de la persona encontrados con éxito',
       data: {
-        persona, // Todos los datos de la persona
-        movimientos: persona.movimientos // Los movimientos asociados
+        persona,
+        movimientos: persona.movimientos
       }
     };
   }

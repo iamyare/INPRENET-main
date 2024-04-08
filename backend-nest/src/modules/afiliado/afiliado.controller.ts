@@ -31,7 +31,6 @@ export class AfiliadoController {
       const resultado = await this.afiliadoService.buscarPersonaYMovimientosPorDNI(dni);
       return resultado;
     } catch (error) {
-      // Aquí puedes manejar diferentes tipos de errores y personalizar las respuestas si es necesario
       if (error instanceof NotFoundException) {
         throw error;
       } else {

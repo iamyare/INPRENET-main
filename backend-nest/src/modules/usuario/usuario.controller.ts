@@ -3,12 +3,10 @@ import { UsuarioService } from './usuario.service';
 import { CreateUsuarioDto } from './dto/create-usuario.dto';
 import { UpdateUsuarioDto } from './dto/update-usuario.dto';
 import { PaginationDto } from 'src/common/dtos/pagination.dto';
-import { RolesGuard } from 'src/guards/auth/auth.guard';
 import { ApiTags } from '@nestjs/swagger';
 
 @ApiTags('usuario')
 @Controller('usuario')
-@UseGuards(RolesGuard)
 export class UsuarioController {
   constructor(private readonly usuarioService: UsuarioService) { }
 
@@ -28,11 +26,10 @@ export class UsuarioController {
     @Body('email') email: string,
     @Body('contrasena') contrasena: string,
     @Body('nombre_usuario') nombre_usuario: string,
-    @Body('isSuperUser') isSuperUser: boolean,
     @Body('idCentroTrabajo') idCentroTrabajo?: number
     ) {
       try {
-        const nuevoUsuario = await this.usuarioService.createPrivada(email, contrasena, nombre_usuario, isSuperUser, idCentroTrabajo);
+        const nuevoUsuario = await this.usuarioService.createPrivada(email, contrasena, nombre_usuario, idCentroTrabajo);
       return nuevoUsuario;
     } catch (error) {
       throw new BadRequestException(error.message);

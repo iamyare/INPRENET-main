@@ -16,10 +16,7 @@ export class NET_USUARIO_PRIVADA {
 
     @Column('varchar', { length: 50, nullable: false, name: 'NOMBRE_USUARIO' })
     nombre_usuario: string;
-
-    @Column('number', { default: 0, name: 'IS_SUPERUSER' })
-    isSuperUser: number; // 0 para false, 1 para true
-
+    
     @ManyToOne(() => Net_Rol, rol => rol.usuarios)
     @JoinColumn({ name: 'ID_ROL' })
     rol: Net_Rol;

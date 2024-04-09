@@ -4,11 +4,11 @@ import { UpdateDetalleDeduccionDto } from './dto/update-detalle-deduccion.dto';
 import { InjectEntityManager, InjectRepository } from '@nestjs/typeorm';
 import { Net_Detalle_Deduccion } from './entities/detalle-deduccion.entity';
 import { EntityManager, FindOptionsWhere, Repository } from 'typeorm';
-import { Net_Institucion } from 'src/modules/Empresarial/institucion/entities/net_institucion.entity';
+import { Net_Institucion } from '../../Empresarial/institucion/entities/net_institucion.entity';
 import * as xlsx from 'xlsx';
-import { AfiliadoService } from 'src/modules/afiliado/afiliado.service';
-import { Net_Persona } from 'src/modules/afiliado/entities/Net_Persona';
-import { Net_Detalle_Afiliado } from 'src/modules/afiliado/entities/Net_detalle_persona.entity';
+import { AfiliadoService } from '../../afiliado/afiliado.service';
+import { Net_Persona } from '../../afiliado/entities/Net_Persona';
+import { Net_Detalle_Afiliado } from '../../afiliado/entities/Net_detalle_persona.entity';
 import { Net_Planilla } from '../planilla/entities/net_planilla.entity';
 import { isUUID } from 'class-validator';
 import { Net_Deduccion } from '../deduccion/entities/net_deduccion.entity';
@@ -32,7 +32,7 @@ export class DetalleDeduccionService {
     @InjectRepository(Net_Planilla)
     private planillaRepository: Repository<Net_Planilla>,
     @InjectEntityManager() private readonly entityManager: EntityManager
-  ){}
+  ) { }
 
   async insertarDetalles(data: any[]): Promise<void> {
     const queryRunner = this.entityManager.connection.createQueryRunner();
@@ -56,7 +56,7 @@ export class DetalleDeduccionService {
         detalleDeduccion.anio = parseInt(item.año);
         detalleDeduccion.mes = parseInt(item.mes);
         detalleDeduccion.monto_total = parseFloat(item.monto_motal);
-        
+
 
         await queryRunner.manager.save(detalleDeduccion);
       }
@@ -77,11 +77,11 @@ export class DetalleDeduccionService {
         .set({ estado_aplicacion: nuevoEstado })
         .where("planilla.id_planilla = :idPlanilla", { idPlanilla })
         .execute();
-  
+
       if (resultado.affected === 0) {
         throw new NotFoundException(`No se encontraron detalles de deducción para la planilla con ID ${idPlanilla}`);
       }
-  
+
       const mensaje = `Estado de aplicación actualizado a '${nuevoEstado}' para los detalles de deducción de la planilla con ID ${idPlanilla}`;
       return { mensaje };
     } catch (error) {
@@ -117,7 +117,7 @@ export class DetalleDeduccionService {
       throw new InternalServerErrorException();
     }
   }
-  
+
 
   async getDetallesDeduccionPorAfiliadoYPlanilla(idAfiliado: string, idPlanilla: string): Promise<any> {
     const query = `
@@ -187,7 +187,7 @@ export class DetalleDeduccionService {
       throw new InternalServerErrorException('Se produjo un error al obtener los detalles de deducción por afiliado y planilla.');
     }
   }
-  
+
   async getRangoDetalleDeducciones(idPersona: string, fechaInicio: string, fechaFin: string): Promise<any> {
     const query = `
       SELECT
@@ -219,9 +219,9 @@ export class DetalleDeduccionService {
       AND
         dd."ESTADO_APLICACION" = 'NO COBRADA'
     `;
-  
+
     try {
-      const parametros :any = {
+      const parametros: any = {
         idPersona: idPersona,
         fechaInicio: fechaInicio,
         fechaFin: fechaFin,
@@ -234,9 +234,9 @@ export class DetalleDeduccionService {
   }
 
 
-async findInconsistentDeduccionesByAfiliado(idAfiliado: string) {
-  try {
-    const query = `
+  async findInconsistentDeduccionesByAfiliado(idAfiliado: string) {
+    try {
+      const query = `
     SELECT  
       ded."nombre_deduccion",
       detD."id_ded_deduccion",
@@ -253,16 +253,16 @@ async findInconsistentDeduccionesByAfiliado(idAfiliado: string) {
       detD."estado_aplicacion" = 'INCONSISTENCIA' AND detD."id_afiliado" = '${idAfiliado}'
     `;
 
-    return await this.detalleDeduccionRepository.query(query);
-  } catch (error) {
-    this.logger.error(`Error al buscar deducciones inconsistentes por afiliado: ${error.message}`);
-    throw new InternalServerErrorException('Error al buscar deducciones inconsistentes por afiliado');
+      return await this.detalleDeduccionRepository.query(query);
+    } catch (error) {
+      this.logger.error(`Error al buscar deducciones inconsistentes por afiliado: ${error.message}`);
+      throw new InternalServerErrorException('Error al buscar deducciones inconsistentes por afiliado');
+    }
   }
-}
 
-async obtenerDetallesDeduccionPorAfiliado(idAfiliado: string): Promise<any[]> {
-  try {
-    const query = `
+  async obtenerDetallesDeduccionPorAfiliado(idAfiliado: string): Promise<any[]> {
+    try {
+      const query = `
       SELECT
       detD."id_ded_deduccion",
       detD."monto_total",
@@ -310,38 +310,38 @@ async obtenerDetallesDeduccionPorAfiliado(idAfiliado: string): Promise<any[]> {
       afil."id_afiliado",
       ded."id_deduccion"
   `;
-  
-    return await this.detalleDeduccionRepository.query(query, [idAfiliado]);
-  } catch (error) {
-    this.logger.error('Error al obtener detalles de deduccion por afiliado', error.stack);
-    throw new InternalServerErrorException('Error al obtener detalles de deduccion por afiliado');
-  }
-}
 
-async actualizarPlanillasYEstadosDeDeducciones(detalles: { idDedDeduccion: number; codigoPlanilla: string; estadoAplicacion: string }[], transactionalEntityManager?: EntityManager): Promise<Net_Detalle_Deduccion[]> {
-  const resultados = [];
-  const entityManager = transactionalEntityManager ? transactionalEntityManager : this.entityManager;
-
-  for (const { idDedDeduccion, codigoPlanilla, estadoAplicacion } of detalles) {
-    const deduccion = await entityManager.findOne(Net_Detalle_Deduccion, { where: { id_ded_deduccion: idDedDeduccion } });
-    if (!deduccion) {
-      throw new NotFoundException(`DetalleDeduccion con ID "${idDedDeduccion}" no encontrado`);
+      return await this.detalleDeduccionRepository.query(query, [idAfiliado]);
+    } catch (error) {
+      this.logger.error('Error al obtener detalles de deduccion por afiliado', error.stack);
+      throw new InternalServerErrorException('Error al obtener detalles de deduccion por afiliado');
     }
-
-    const planilla = await entityManager.findOne(Net_Planilla, { where: { codigo_planilla: codigoPlanilla } });
-    if (!planilla) {
-      throw new NotFoundException(`Planilla con código "${codigoPlanilla}" no encontrada`);
-    }
-
-    deduccion.planilla = planilla;
-    deduccion.estado_aplicacion = estadoAplicacion; // Actualiza el estado de aplicación
-
-    resultados.push(await entityManager.save(deduccion));
   }
-  return resultados;
-}
 
-  
+  async actualizarPlanillasYEstadosDeDeducciones(detalles: { idDedDeduccion: number; codigoPlanilla: string; estadoAplicacion: string }[], transactionalEntityManager?: EntityManager): Promise<Net_Detalle_Deduccion[]> {
+    const resultados = [];
+    const entityManager = transactionalEntityManager ? transactionalEntityManager : this.entityManager;
+
+    for (const { idDedDeduccion, codigoPlanilla, estadoAplicacion } of detalles) {
+      const deduccion = await entityManager.findOne(Net_Detalle_Deduccion, { where: { id_ded_deduccion: idDedDeduccion } });
+      if (!deduccion) {
+        throw new NotFoundException(`DetalleDeduccion con ID "${idDedDeduccion}" no encontrado`);
+      }
+
+      const planilla = await entityManager.findOne(Net_Planilla, { where: { codigo_planilla: codigoPlanilla } });
+      if (!planilla) {
+        throw new NotFoundException(`Planilla con código "${codigoPlanilla}" no encontrada`);
+      }
+
+      deduccion.planilla = planilla;
+      deduccion.estado_aplicacion = estadoAplicacion; // Actualiza el estado de aplicación
+
+      resultados.push(await entityManager.save(deduccion));
+    }
+    return resultados;
+  }
+
+
 
   async create(createDetalleDeduccionDto: CreateDetalleDeduccionDto) {
     const { dni, nombre_deduccion, nombre_institucion, monto_total, monto_aplicado, estado_aplicacion, anio, mes } = createDetalleDeduccionDto;
@@ -362,7 +362,7 @@ async actualizarPlanillasYEstadosDeDeducciones(detalles: { idDedDeduccion: numbe
     if (!institucion) {
       throw new NotFoundException(`Institución con nombre '${nombre_institucion}' no encontrada.`);
     }
- 
+
     // Guardar el nuevo DetalleDeduccion en la base de datos
     try {
       const nuevoDetalleDeduccion = this.detalleDeduccionRepository.create({
@@ -378,11 +378,11 @@ async actualizarPlanillasYEstadosDeDeducciones(detalles: { idDedDeduccion: numbe
       await this.detalleDeduccionRepository.save(nuevoDetalleDeduccion);
       return nuevoDetalleDeduccion;
     } catch (error) {
-    this.handleException(error);
+      this.handleException(error);
     }
   }
-  
-  
+
+
   findAll() {
     const detalleDeduccion = this.detalleDeduccionRepository.find()
     return detalleDeduccion;
@@ -390,17 +390,17 @@ async actualizarPlanillasYEstadosDeDeducciones(detalles: { idDedDeduccion: numbe
 
   async findAllDetailed(): Promise<any[]> {
     const queryBuilder = this.detalleDeduccionRepository.createQueryBuilder('detalleDeduccion');
-  
+
     queryBuilder
       .leftJoinAndSelect('detalleDeduccion.deduccion', 'deduccion')
       .leftJoinAndSelect('detalleDeduccion.afiliado', 'afiliado')
       .leftJoinAndSelect('deduccion.institucion', 'institucion')
       .leftJoinAndSelect('afiliado.detalleAfiliado', 'detalleAfiliado'); // Asume que existe una relación desde Afiliado a DetalleAfiliado
-      
-      const result = await queryBuilder.getMany();
+
+    const result = await queryBuilder.getMany();
     return result; // Devuelve el resultado directamente
   }
-  
+
 
   findOne(id: number) {
     return `This action returns a #${id} detalleDeduccion`;
@@ -414,11 +414,11 @@ async actualizarPlanillasYEstadosDeDeducciones(detalles: { idDedDeduccion: numbe
       .leftJoinAndSelect('detalle.planilla', 'planilla') // Agrega esta línea para hacer join con Net_Planilla
       .innerJoinAndSelect('detalle.afiliado', 'afiliado', 'afiliado.dni = :dni', { dni })
       .select([
-          'detalle',
-          'deduccion.nombre_deduccion',
-          'institucion.nombre_institucion',
-          'planilla.codigo_planilla', // Selecciona el código de la planilla
-          'afiliado.dni',
+        'detalle',
+        'deduccion.nombre_deduccion',
+        'institucion.nombre_institucion',
+        'planilla.codigo_planilla', // Selecciona el código de la planilla
+        'afiliado.dni',
       ])
       .getMany();
   }
@@ -434,29 +434,29 @@ async actualizarPlanillasYEstadosDeDeducciones(detalles: { idDedDeduccion: numbe
 
     // Buscar el afiliado por DNI
     if (dni) {
-        const afiliado = await this.afiliadoRepository.findOne({ where: { dni } });
-        if (!afiliado) {
-          throw new NotFoundException(`Afiliado con DNI '${dni}' no encontrado.`);
-        }
-        //detalleDeduccion.afiliado = afiliado;
+      const afiliado = await this.afiliadoRepository.findOne({ where: { dni } });
+      if (!afiliado) {
+        throw new NotFoundException(`Afiliado con DNI '${dni}' no encontrado.`);
+      }
+      //detalleDeduccion.afiliado = afiliado;
     }
 
     // Buscar la deducción por nombre
     if (nombre_deduccion) {
-        const deduccion = await this.deduccionRepository.findOne({ where: { nombre_deduccion } });
-        if (!deduccion) {
-          throw new NotFoundException(`Deducción con nombre '${nombre_deduccion}' no encontrada.`);
-        }
-        detalleDeduccion.deduccion = deduccion;
+      const deduccion = await this.deduccionRepository.findOne({ where: { nombre_deduccion } });
+      if (!deduccion) {
+        throw new NotFoundException(`Deducción con nombre '${nombre_deduccion}' no encontrada.`);
+      }
+      detalleDeduccion.deduccion = deduccion;
     }
 
     // Buscar la institución por nombre
     if (nombre_institucion) {
-        const institucion = await this.institucionRepository.findOne({ where: { nombre_institucion } });
-        if (!institucion) {
-          throw new NotFoundException(`Institución con nombre '${nombre_institucion}' no encontrada.`);
-        }
-        /* detalleDeduccion.institucion = institucion; */
+      const institucion = await this.institucionRepository.findOne({ where: { nombre_institucion } });
+      if (!institucion) {
+        throw new NotFoundException(`Institución con nombre '${nombre_institucion}' no encontrada.`);
+      }
+      /* detalleDeduccion.institucion = institucion; */
     }
 
     // Actualizar los campos del DetalleDeduccion existente
@@ -481,7 +481,7 @@ async actualizarPlanillasYEstadosDeDeducciones(detalles: { idDedDeduccion: numbe
 
   private handleException(error: any): void {
     this.logger.error(error);
-  
+
     // Verifica si el error es un BadRequestException y propaga el mismo
     if (error instanceof BadRequestException) {
       throw error;
@@ -506,7 +506,7 @@ async actualizarPlanillasYEstadosDeDeducciones(detalles: { idDedDeduccion: numbe
     const data = xlsx.utils.sheet_to_json(worksheet);
     return data;
   }
-  
+
 }
 
 

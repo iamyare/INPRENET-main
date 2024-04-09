@@ -7,7 +7,7 @@ import { Repository } from 'typeorm';
 import { JwtService } from '@nestjs/jwt';
 import { MailService } from 'src/common/services/mail.service';
 import * as bcrypt from 'bcrypt';
-import { Net_Empleado } from 'src/modules/Empresarial/empresas/entities/net_empleado.entity';
+import { Net_Empleado } from '../Empresarial/empresas/entities/net_empleado.entity';
 import { Net_Rol } from './entities/net_rol.entity';
 import { CreateUsuarioDto } from './dto/create-usuario.dto';
 import { Net_TipoIdentificacion } from '../tipo_identificacion/entities/net_tipo_identificacion.entity';

@@ -1,47 +1,61 @@
 import { BadRequestException, Injectable, Logger, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import { InjectEntityManager, InjectRepository } from '@nestjs/typeorm';
-import { Between, EntityManager, FindOptionsWhere, LessThanOrEqual, Repository } from 'typeorm';
+import { EntityManager, Repository } from 'typeorm';
+
+/* import * as xlsx from 'xlsx';
 import { Net_Institucion } from 'src/modules/Empresarial/institucion/entities/net_institucion.entity';
-import * as xlsx from 'xlsx';
 import { AfiliadoService } from 'src/modules/afiliado/afiliado.service';
-import { Net_Persona } from 'src/modules/afiliado/entities/Net_Persona';
 import { Net_Detalle_Afiliado } from 'src/modules/afiliado/entities/Net_detalle_persona.entity';
 import { CreateDetallePlanIngDto } from './dto/create-detalle-plani-Ing.dto';
 import { UpdateDetallePlanIngDto } from './dto/update-detalle-plani-Ing.dto';
-import { Net_Detalle_planilla_ingreso } from './entities/net_detalle_plani_ing.entity';
+import { startOfMonth, endOfMonth, lastDayOfMonth } from 'date-fns';
+import { getManager } from 'typeorm'; */
+
 import { Net_SALARIO_COTIZABLE } from './entities/net_detalle_plani_ing.entity copy';
 import { Net_TipoPlanilla } from '../../tipo-planilla/entities/tipo-planilla.entity';
+import { Net_Detalle_planilla_ingreso } from './entities/net_detalle_plani_ing.entity';
 import { Net_Planilla } from '../../planilla/entities/net_planilla.entity';
-import { startOfMonth, endOfMonth, lastDayOfMonth } from 'date-fns';
-import { Length } from 'class-validator';
 import { DateTime } from 'luxon';
-import { getManager } from 'typeorm';
+import { Net_Persona } from '../../../afiliado/entities/Net_Persona';
 
 @Injectable()
 export class DetallePlanillaIngresoService {
+  @InjectRepository(Net_Detalle_planilla_ingreso) private detallePlanillaIngr: Repository<Net_Detalle_planilla_ingreso>
+  @InjectRepository(Net_Planilla) private planillaRepository: Repository<Net_Planilla>
+  @InjectRepository(Net_SALARIO_COTIZABLE) private salarioCotizableRepository: Repository<Net_SALARIO_COTIZABLE>
+  @InjectRepository(Net_Persona) private personaRepository: Repository<Net_Persona>
+  @InjectRepository(Net_TipoPlanilla) private tipoPlanillaRepository: Repository<Net_TipoPlanilla>
+
   private readonly logger = new Logger(DetallePlanillaIngresoService.name)
 
   constructor(
     @InjectEntityManager() private readonly entityManager: EntityManager,
   ) { }
+  private calculoSueldoBase(salarioCotizableRepository): number {
+    let sueldoBase;
+    let porcAportMin;
 
-  @InjectRepository(Net_Detalle_planilla_ingreso)
-  private detallePlanillaIngr: Repository<Net_Detalle_planilla_ingreso>
+    const accionesSalario = {
+      "SUELDO BASE": (tem: any) => {
+        sueldoBase = tem
+      },
+      "APORTACION MINIMA": (tem: any) => {
+        porcAportMin = tem;
+      },
+    };
 
-  @InjectRepository(Net_Planilla)
-  private planillaRepository: Repository<Net_Planilla>
+    for (let salarioC of salarioCotizableRepository) {
+      const accion = accionesSalario[salarioC.nombre];
+      if (accion) {
+        accion(salarioC.valor); // Ejecutar la acción asociada al nombre del salario
+      }
+    }
 
-  @InjectRepository(Net_SALARIO_COTIZABLE)
-  private salarioCotizableRepository: Repository<Net_SALARIO_COTIZABLE>
-  @InjectRepository(Net_Persona)
-  private personaRepository: Repository<Net_Persona>
-
-  @InjectRepository(Net_TipoPlanilla)
-  private tipoPlanillaRepository: Repository<Net_TipoPlanilla>
-
+    return sueldoBase * porcAportMin
+  }
   private calculoAportaciones(persona: Net_Persona, salarioCotizableRepository): number {
-    const salarioBaseAfiliado = persona.perfAfilCentTrabs[0].salario_base
-    const sector_economico = persona.perfAfilCentTrabs[0].centroTrabajo.sector_economico
+    const { salario_base, centroTrabajo } = persona.perfAfilCentTrabs[0]
+
     let LimiteSSL;
     let PorcAportacionSECPriv;
     let PorcAportacionSECPUB;
@@ -68,13 +82,13 @@ export class DetallePlanillaIngresoService {
     }
     const sueldoBase = this.calculoSueldoBase(salarioCotizableRepository);
 
-    if (salarioBaseAfiliado <= sueldoBase && salarioBaseAfiliado <= LimiteSSL) {
+    if (salario_base <= sueldoBase && salario_base <= LimiteSSL) {
       return sueldoBase;
-    } else if (sector_economico == "PRIVADO" && salarioBaseAfiliado <= LimiteSSL) {
-      return salarioBaseAfiliado * PorcAportacionSECPriv
-    } else if (sector_economico == "PRIVADO" && salarioBaseAfiliado > LimiteSSL) {
+    } else if (centroTrabajo.sector_economico == "PRIVADO" && salario_base <= LimiteSSL) {
+      return salario_base * PorcAportacionSECPriv
+    } else if (centroTrabajo.sector_economico == "PRIVADO" && salario_base > LimiteSSL) {
       return LimiteSSL
-    } else if (sector_economico == "PUBLICO" && salarioBaseAfiliado <= LimiteSSL) {
+    } else if (centroTrabajo.sector_economico == "PUBLICO" && salario_base <= LimiteSSL) {
       /* return salarioBaseAfiliado * PorcAportacionSECPUB */
     }
 
@@ -117,31 +131,47 @@ export class DetallePlanillaIngresoService {
 
   }
 
-  private calculoSueldoBase(salarioCotizableRepository): number {
-    let sueldoBase;
-    let porcAportMin;
-
-    const accionesSalario = {
-      "SUELDO BASE": (tem: any) => {
-        sueldoBase = tem
-      },
-      "APORTACION MINIMA": (tem: any) => {
-        porcAportMin = tem;
-      },
-    };
-
-    for (let salarioC of salarioCotizableRepository) {
-      const accion = accionesSalario[salarioC.nombre];
-      if (accion) {
-        accion(salarioC.valor); // Ejecutar la acción asociada al nombre del salario
-      }
+  private async insertNetDetPlanilla(id_planilla, persona, salarioCotizableRepository, createDetPlanIngDTO): Promise<number> {
+    const { idInstitucion, prestamos } = createDetPlanIngDTO
+    let ValoresDetalle = {
+      idpersona: persona.id_persona,
+      idInstitucion: idInstitucion,
+      sueldo: persona.perfAfilCentTrabs[0].salario_base,
+      prestamos: prestamos,
+      aportaciones: this.calculoAportaciones(persona, salarioCotizableRepository),
+      cotizaciones: this.calculoCotizaciones(persona, salarioCotizableRepository),
+      deducciones: this.calculoAportaciones(persona, salarioCotizableRepository) + this.calculoCotizaciones(persona, salarioCotizableRepository) + prestamos,
+      sueldo_neto: persona.perfAfilCentTrabs[0].salario_base - (this.calculoAportaciones(persona, salarioCotizableRepository) + this.calculoCotizaciones(persona, salarioCotizableRepository) + createDetPlanIngDTO.prestamos)
     }
+    const queryInsDeBBenf = `INSERT INTO NET_DETALLE_PLANILLA_ING (
+        SUELDO,
+        PRESTAMOS,
+        APORTACIONES,
+        COTIZACIONES,
+        DEDUCCIONES,
+        SUELDO_NETO,
+        ID_PERSONA,
+        ID_CENTRO_TRABAJO,
+        ID_PLANILLA
+      ) VALUES (
+        ${ValoresDetalle.sueldo},
+        ${ValoresDetalle.prestamos},
+        ${ValoresDetalle.aportaciones},
+        ${ValoresDetalle.cotizaciones},
+        '${ValoresDetalle.deducciones}',
+        '${ValoresDetalle.sueldo_neto}',
+        ${ValoresDetalle.idpersona},
+        ${ValoresDetalle.idInstitucion},
+        ${id_planilla}
+      )`
 
-    return sueldoBase * porcAportMin
+    const detPlanillaIng = await this.entityManager.query(queryInsDeBBenf);
+    return detPlanillaIng;
   }
 
+
+
   async obtenerDetallesPorCentroTrabajo(idCentroTrabajo: number, id_tipo_planilla: number): Promise<any> {
-    console.log(id_tipo_planilla);
     let tipoPlanilla = await this.tipoPlanillaRepository.findOne({
       where: { id_tipo_planilla: id_tipo_planilla },
     });
@@ -263,125 +293,39 @@ export class DetallePlanillaIngresoService {
     }
   }
 
-  async create() {
-    const fechaActual: Date = new Date();
-    // const currentDate = DateTime.now()
-    // mes actual
-    // mes = fechaActual.getMonth()
-
-    const idCentroEducativo: number = 6;
-    const mes = 7
-
-    const año: number = fechaActual.getFullYear();
-    const codPlan: string = "PLAN-ING-" + mes + "-" + año;
-
+  /* Retorna registros de la ultima planilla segun centro de trabajo  */
+  async buscarUltimaPlanCarg(idCentroTrabajo: number): Promise<any> {
     try {
-      let planilla = await this.planillaRepository.findOne({
-        where: { codigo_planilla: codPlan },
-      });
+      const detalles = await this.detallePlanillaIngr
+        .createQueryBuilder("detalle")
+        .select([
+          'detalle.ID_PERSONA AS id_persona',
+          'detalle.ID_CENTRO_TRABAJO AS id_centro_trabajo',
+          'detalle.sueldo AS Sueldo',
+          'detalle.prestamos AS Prestamos',
+          'detalle.aportaciones AS Aportaciones',
+          'detalle.cotizaciones AS Cotizaciones',
+          'detalle.deducciones AS Deducciones',
+          'detalle.sueldo_neto AS SueldoNeto',
+          'detalle.ID_PLANILLA AS id_planilla',
+          'detalle.estado AS estado'
+        ])
+        .innerJoin('detalle.persona', 'persona')
+        .innerJoin('detalle.centroTrabajo', 'centroTrabajo')
+        .innerJoin('detalle.planilla', 'planilla')
+        .innerJoin('planilla.tipoPlanilla', 'tipoPlanilla')
+        .where('centroTrabajo.id_centro_trabajo = :idCentroTrabajo', { idCentroTrabajo })
+        .andWhere(`planilla.FECHA_APERTURA = (SELECT MAX("NET_PLANILLA"."FECHA_APERTURA") FROM "NET_PLANILLA")`)
+        .getRawMany();
 
-      /* Busca registros del mes anterior */
-      const DetPlanIng = await this.buscarPorMesAct(mes).then((val) => {
-        return val
-      });
-
-      const meses: number[] = [1, 2, 3, 4, 5, 7, 8, 9, 10, 11];
-      const mesesDT: number[] = [6];
-      const mesesDC: number[] = [12];
-
-      /* MES ACTUAL */
-      let id_tipoPlanilla
-      if (meses.includes(mes)) {
-        let planillaSel = await this.tipoPlanillaRepository.findOne({
-          where: { nombre_planilla: "PLANILLA ORDINARIA" },
-        });
-        id_tipoPlanilla = planillaSel.id_tipo_planilla
-      } else if (mesesDT.includes(mes)) {
-        let planillaSel = await this.tipoPlanillaRepository.findOne({
-          where: { nombre_planilla: "PLANILLA DECIMO TERCERO" },
-        });
-        id_tipoPlanilla = planillaSel.id_tipo_planilla
-      } else if (mesesDC.includes(mes)) {
-        let planillaSel = await this.tipoPlanillaRepository.findOne({
-          where: { nombre_planilla: "PLANILLA DECIMO CUARTO" },
-        });
-        id_tipoPlanilla = planillaSel.id_tipo_planilla
-      }
-
-      if (planilla == null) {
-        if (DetPlanIng) {
-          if (DetPlanIng.detallePlanIngreso.length > 0) {
-            const planillaId = this.insertPlanilla(codPlan, id_tipoPlanilla, mes, año);
-            planillaId.then((val) => {
-              if (val) {
-                return this.insertNetDetPlanillaMesAnt(val.id_planilla, DetPlanIng.detallePlanIngreso, DetPlanIng.id_persona, idCentroEducativo);
-              }
-            })
-          }
-
-        }
-      } else {
-        if (DetPlanIng) {
-          if (DetPlanIng.detallePlanIngreso.length > 0) {
-            return this.insertNetDetPlanillaMesAnt(planilla.id_planilla, DetPlanIng.detallePlanIngreso, DetPlanIng.id_persona, idCentroEducativo);
-          }
-        }
+      if (!detalles) {
+        return {}
+      } else if (detalles) {
+        return detalles;
       }
 
     } catch (error) {
-      this.handleException(error);
-    }
-  }
-
-  /* Retorna registros del mes anterior  */
-  async buscarPorMesAct(mes: number): Promise<any> {
-    const fechaActual: Date = new Date();
-    const año: number = fechaActual.getFullYear();
-    const codPlanMesAnt: string = `PLAN-ING-${mes - 1}-${año}`;
-
-    try {
-      const año = new Date().getFullYear();
-      const fechaInicioMesAnterior = new Date(año, mes - 2, 1);
-      const fechaFinMesAnterior = new Date(año, mes - 1, 0);
-
-      const persona = await this.personaRepository.findOne({
-        where: {
-          estadoAfiliado: { Descripcion: 'ACTIVO' },
-          detallePlanIngreso: {
-            planilla:
-              { codigo_planilla: codPlanMesAnt },
-            estado: "NO CARGADO"
-          }
-        },
-        relations: ['detallePlanIngreso', 'detallePlanIngreso.planilla', "estadoAfiliado"],
-      });
-
-      if (!persona) {
-        throw new NotFoundException(`No se encontró ningún registro`);
-      } else if (persona) {
-        const planillaEnMesAnterior = persona.detallePlanIngreso.some(detalle => {
-
-          if (detalle.planilla) {
-            const [diaInicio, mesInicio, añoInicio] = detalle.planilla.periodoInicio.split('/').map(Number);
-            const [diaFin, mesFin, añoFin] = detalle.planilla.periodoFinalizacion.split('/').map(Number);
-
-            const periodoInicio = new Date(añoInicio, mesInicio - 1, diaInicio);
-            const periodoFinalizacion = new Date(añoFin, mesFin - 1, diaFin);
-
-            return (
-              periodoInicio >= fechaInicioMesAnterior && periodoFinalizacion <= fechaFinMesAnterior
-            );
-          }
-        });
-
-        if (!planillaEnMesAnterior) {
-          return undefined
-          /* throw new NotFoundException(`La persona con DNI ${dni} no estuvo registrada en una planilla en el mes ${mes - 1}`); */
-        }
-        return persona;
-      }
-
-    } catch (error) {
+      console.log(error);
       throw error;
     }
   }
@@ -415,24 +359,98 @@ export class DetallePlanillaIngresoService {
 
     } catch (error) {
       console.log(error);
-      /* this.handleException(error); */
     }
   }
 
-  private async insertNetDetPlanillaMesAnt(id_planilla, DetPlanIng, id_persona, id_centro_trabajo): Promise<any> {
+  async obtIdPlanillaSeleccionada(mesActual): Promise<number> {
+    const meses: number[] = [1, 2, 3, 4, 5, 7, 8, 9, 10, 11];
+    const mesActualesDT: number[] = [6];
+    const mesActualesDC: number[] = [12];
+    let id_tipoPlanilla;
+
+    if (meses.includes(mesActual)) {
+      let planillaSel = await this.tipoPlanillaRepository.findOne({
+        where: { nombre_planilla: "PLANILLA ORDINARIA" },
+      });
+      id_tipoPlanilla = planillaSel.id_tipo_planilla
+
+    } else if (mesActualesDT.includes(mesActual)) {
+      let planillaSel = await this.tipoPlanillaRepository.findOne({
+        where: { nombre_planilla: "PLANILLA DECIMO TERCERO" },
+      });
+      id_tipoPlanilla = planillaSel.id_tipo_planilla
+
+    } else if (mesActualesDC.includes(mesActual)) {
+      let planillaSel = await this.tipoPlanillaRepository.findOne({
+        where: { nombre_planilla: "PLANILLA DECIMO CUARTO" },
+      });
+      id_tipoPlanilla = planillaSel.id_tipo_planilla
+
+    }
+
+    return id_tipoPlanilla
+  }
+
+  async create(idCentroEducativo: number) {
+    const fechaActual: Date = new Date();
+    const mes = 7
+    const año: number = fechaActual.getFullYear();
+
+    const codPlan: string = "PLAN-ING-" + mes + "-" + año;
+
+    try {
+      let id_tipoPlanilla = await this.obtIdPlanillaSeleccionada(mes);
+
+      /*       let planillaSel = await this.tipoPlanillaRepository.findOne({
+              where: { nombre_planilla: "PLANILLA ORDINARIA" },
+            });
+      
+            id_tipoPlanilla = planillaSel.id_tipo_planilla */
+
+      let planilla = await this.planillaRepository.findOne({
+        where: { codigo_planilla: codPlan },
+      });
+
+      const DetPlanIng = await this.buscarUltimaPlanCarg(idCentroEducativo).then((val) => {
+        return val
+      });
+
+      if (planilla == null) {
+        if (DetPlanIng && DetPlanIng.length > 0) {
+          const planillaId = this.insertPlanilla(codPlan, id_tipoPlanilla, mes, año);
+
+          planillaId.then((val) => {
+            if (val) {
+              return this.insertNetDetPlanillaMesAnt(val.id_planilla, DetPlanIng);
+            }
+          })
+        }
+      } else {
+        if (DetPlanIng && DetPlanIng.length > 0) {
+          return this.insertNetDetPlanillaMesAnt(planilla.id_planilla, DetPlanIng);
+        }
+      }
+
+    } catch (error) {
+      this.handleException(error);
+    }
+  }
+
+  private async insertNetDetPlanillaMesAnt(id_planilla, DetPlanIng): Promise<any> {
     try {
       // Mapea los datos a instancias de la entidad
       const detalles = DetPlanIng.map(detalle => {
+
         const netDetalle = new Net_Detalle_planilla_ingreso();
-        netDetalle.sueldo = detalle.sueldo;
+        netDetalle.sueldo = detalle.SUELDO;
         netDetalle.prestamos = detalle.prestamos;
-        netDetalle.aportaciones = detalle.aportaciones;
-        netDetalle.cotizaciones = detalle.cotizaciones;
-        netDetalle.deducciones = detalle.deducciones;
-        netDetalle.sueldo_neto = detalle.sueldo_neto;
-        netDetalle.persona = id_persona;
+        netDetalle.aportaciones = detalle.APORTACIONES;
+        netDetalle.cotizaciones = detalle.COTIZACIONES;
+        netDetalle.deducciones = detalle.DEDUCCIONES;
+        netDetalle.sueldo_neto = detalle.SUELDONETO;
+        netDetalle.persona = detalle.ID_PERSONA;
         netDetalle.planilla = id_planilla;
-        netDetalle.centroTrabajo = id_centro_trabajo;
+        netDetalle.centroTrabajo = detalle.ID_CENTRO_TRABAJO;
         return netDetalle;
       });
 
@@ -450,44 +468,6 @@ export class DetallePlanillaIngresoService {
     } catch (error) {
       console.log(error);
     }
-  }
-
-  private async insertNetDetPlanilla(id_planilla, persona, salarioCotizableRepository, createDetPlanIngDTO): Promise<number> {
-    const { idInstitucion, prestamos } = createDetPlanIngDTO
-    let ValoresDetalle = {
-      idpersona: persona.id_persona,
-      idInstitucion: idInstitucion,
-      sueldo: persona.perfAfilCentTrabs[0].salario_base,
-      prestamos: prestamos,
-      aportaciones: this.calculoAportaciones(persona, salarioCotizableRepository),
-      cotizaciones: this.calculoCotizaciones(persona, salarioCotizableRepository),
-      deducciones: this.calculoAportaciones(persona, salarioCotizableRepository) + this.calculoCotizaciones(persona, salarioCotizableRepository) + prestamos,
-      sueldo_neto: persona.perfAfilCentTrabs[0].salario_base - (this.calculoAportaciones(persona, salarioCotizableRepository) + this.calculoCotizaciones(persona, salarioCotizableRepository) + createDetPlanIngDTO.prestamos)
-    }
-    const queryInsDeBBenf = `INSERT INTO NET_DETALLE_PLANILLA_ING (
-      SUELDO,
-      PRESTAMOS,
-      APORTACIONES,
-      COTIZACIONES,
-      DEDUCCIONES,
-      SUELDO_NETO,
-      ID_PERSONA,
-      ID_CENTRO_TRABAJO,
-      ID_PLANILLA
-    ) VALUES (
-      ${ValoresDetalle.sueldo},
-      ${ValoresDetalle.prestamos},
-      ${ValoresDetalle.aportaciones},
-      ${ValoresDetalle.cotizaciones},
-      '${ValoresDetalle.deducciones}',
-      '${ValoresDetalle.sueldo_neto}',
-      ${ValoresDetalle.idpersona},
-      ${ValoresDetalle.idInstitucion},
-      ${id_planilla}
-    )`
-
-    const detPlanillaIng = await this.entityManager.query(queryInsDeBBenf);
-    return detPlanillaIng;
   }
 
   private handleException(error: any): void {

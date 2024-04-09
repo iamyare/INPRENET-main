@@ -1,8 +1,8 @@
 import { Column, Entity, Index, JoinColumn, ManyToOne, OneToMany, OneToOne, PrimaryGeneratedColumn } from "typeorm";
 import { Net_Rol } from "./net_rol.entity";
-import { Net_Empleado } from "src/modules/Empresarial/empresas/entities/net_empleado.entity";
-import { NET_MOVIMIENTO_CUENTA } from "src/modules/transacciones/entities/net_movimiento_cuenta.entity";
 import { NET_SESION } from "./net_sesion.entity";
+import { Net_Empleado } from "../../Empresarial/empresas/entities/net_empleado.entity";
+import { NET_MOVIMIENTO_CUENTA } from "../../transacciones/entities/net_movimiento_cuenta.entity";
 @Entity({ name: 'NET_USUARIO' })
 export class Net_Usuario {
     @PrimaryGeneratedColumn({ type: 'int', name: 'ID_USUARIO', primaryKeyConstraintName: 'PK_id_usuario_usuar' })

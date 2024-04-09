@@ -1,7 +1,7 @@
 import { Type } from "class-transformer";
 import { IsEmail, IsOptional, IsString, IsDateString, IsNumber, IsUUID, IsArray, ValidateNested, IsObject } from "class-validator"
 import { CreatePerfAfilCentTrabDto } from "./create-perfAfilCentTrabs.dto";
-import { CreateBancoDto } from "src/modules/banco/dto/create-banco.dto";
+import { CreateBancoDto } from "../../banco/dto/create-banco.dto";
 import { CreateAfiliadoRelacionadoDto } from "./CreateAfiliadoRelacionadoDto";
 
 

@@ -4,14 +4,14 @@ import { UpdateAfiliadoDto } from './dto/update-afiliado.dto';
 import { Connection, EntityManager, Repository } from 'typeorm';
 import { InjectEntityManager, InjectRepository } from '@nestjs/typeorm';
 import { Net_perf_afil_cent_trab } from './entities/net_perf_afil_cent_trab';
-import { Net_Afiliados_Por_Banco } from 'src/modules/banco/entities/net_afiliados-banco';
-import { Net_Centro_Trabajo } from 'src/modules/Empresarial/centro-trabajo/entities/net_centro-trabajo.entity';
-import { Net_Banco } from 'src/modules/banco/entities/net_banco.entity';
-import { Net_TipoIdentificacion } from 'src/modules/tipo_identificacion/entities/net_tipo_identificacion.entity';
-/* import { Pais } from 'src/modules/Regional/pais/entities/pais.entity'; */
+import { Net_Afiliados_Por_Banco } from '../banco/entities/net_afiliados-banco';
+import { Net_Centro_Trabajo } from '../Empresarial/centro-trabajo/entities/net_centro-trabajo.entity';
+import { Net_Banco } from '../banco/entities/net_banco.entity';
+import { Net_TipoIdentificacion } from '../tipo_identificacion/entities/net_tipo_identificacion.entity';
+/* import { Pais } from '../Regional/pais/entities/pais.entity'; */
 
-/* import { departamento } from 'src/modules/Regional/departamento/entities/departamento.entity'; */
-import { Net_Pais } from 'src/modules/Regional/pais/entities/pais.entity';
+/* import { departamento } from '../Regional/departamento/entities/departamento.entity'; */
+import { Net_Pais } from '../Regional/pais/entities/pais.entity';
 import { CreateAfiliadoTempDto } from './dto/create-afiliado-temp.dto';
 import { validate as isUUID } from 'uuid';
 import { Net_Detalle_Afiliado } from './entities/Net_detalle_persona.entity';

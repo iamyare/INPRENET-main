@@ -1,15 +1,15 @@
-import { Net_TipoIdentificacion } from "src/modules/tipo_identificacion/entities/net_tipo_identificacion.entity";
-import { Net_Pais } from "src/modules/Regional/pais/entities/pais.entity";
+import { Net_TipoIdentificacion } from "../../tipo_identificacion/entities/net_tipo_identificacion.entity";
+import { Net_Pais } from "../../Regional/pais/entities/pais.entity";
 import { Check, Column, Entity, Index, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 import { Net_Ref_Per_Afil } from "./net_ref-Per-Afiliado"; import { Net_perf_afil_cent_trab } from "./net_perf_afil_cent_trab";
-import { Net_Detalle_Deduccion } from "src/modules/Planilla/detalle-deduccion/entities/detalle-deduccion.entity";
+import { Net_Detalle_Deduccion } from "../../Planilla/detalle-deduccion/entities/detalle-deduccion.entity";
 import { Net_Detalle_Afiliado } from "./Net_detalle_persona.entity";
-import { Net_Afiliados_Por_Banco } from "src/modules/banco/entities/net_afiliados-banco";
-import { Net_Municipio } from "src/modules/Regional/municipio/entities/net_municipio.entity";
-import { NET_CUENTA_PERSONA } from "src/modules/transacciones/entities/net_cuenta_persona.entity";
+import { Net_Afiliados_Por_Banco } from "../../banco/entities/net_afiliados-banco";
+import { Net_Municipio } from "../../Regional/municipio/entities/net_municipio.entity";
+import { NET_CUENTA_PERSONA } from "../../transacciones/entities/net_cuenta_persona.entity";
 import { IsIn } from "class-validator";
-import { NET_MOVIMIENTO_CUENTA } from "src/modules/transacciones/entities/net_movimiento_cuenta.entity";
-import { Net_Detalle_planilla_ingreso } from "src/modules/Planilla/Ingresos/detalle-plan-ingr/entities/net_detalle_plani_ing.entity";
+import { NET_MOVIMIENTO_CUENTA } from "../../transacciones/entities/net_movimiento_cuenta.entity";
+import { Net_Detalle_planilla_ingreso } from "../../Planilla/Ingresos/detalle-plan-ingr/entities/net_detalle_plani_ing.entity";
 import { Net_Estado_Afiliado } from "./net_estado_afiliado.entity";
 
 @Entity({

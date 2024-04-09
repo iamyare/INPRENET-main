@@ -5,8 +5,8 @@ import { isUUID } from 'class-validator';
 import { InjectEntityManager, InjectRepository } from '@nestjs/typeorm';
 import { Connection, EntityManager, LessThanOrEqual, MoreThanOrEqual, Not, Repository, getConnection, QueryRunner } from 'typeorm';
 import { Net_Beneficio } from '../beneficio/entities/net_beneficio.entity';
-import { Net_Persona } from 'src/modules/afiliado/entities/Net_Persona';
-import { Net_Detalle_Pago_Beneficio } from './entities/net_detalle_pago_beneficio.entity';
+import { Net_Persona } from '../../afiliado/entities/Net_Persona';
+import { Net_Detalle_Pago_Beneficio, /* EstadoEnum */ } from './entities/net_detalle_pago_beneficio.entity';
 import { UpdateDetalleBeneficioDto } from './dto/update-detalle_beneficio_planilla.dto';
 import { CreateDetalleBeneficioDto } from './dto/create-detalle_beneficio.dto';
 import { Net_Planilla } from '../planilla/entities/net_planilla.entity';
@@ -14,9 +14,9 @@ import { Net_Planilla } from '../planilla/entities/net_planilla.entity';
 import { Planilla } from '../planilla/entities/planilla.entity'; */
 import { Net_Detalle_Beneficio_Afiliado } from './entities/net_detalle_beneficio_afiliado.entity';
 import { AfiliadoService } from '../../afiliado/afiliado.service';
-import { Net_Detalle_Afiliado } from 'src/modules/afiliado/entities/Net_detalle_persona.entity';
-import { Net_Tipo_Persona } from 'src/modules/afiliado/entities/net_tipo_persona.entity';
-import { Net_Estado_Afiliado } from 'src/modules/afiliado/entities/net_estado_afiliado.entity';
+import { Net_Detalle_Afiliado } from '../../afiliado/entities/Net_detalle_persona.entity';
+import { Net_Tipo_Persona } from '../../afiliado/entities/net_tipo_persona.entity';
+import { Net_Estado_Afiliado } from '../../afiliado/entities/net_estado_afiliado.entity';
 @Injectable()
 export class DetalleBeneficioService {
   private readonly logger = new Logger(DetalleBeneficioService.name)

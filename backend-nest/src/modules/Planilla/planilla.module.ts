@@ -4,7 +4,7 @@ import { Module } from '@nestjs/common';
 import { Net_Deduccion } from './deduccion/entities/net_deduccion.entity';
 import { Net_Detalle_Beneficio_Afiliado } from './detalle_beneficio/entities/net_detalle_beneficio_afiliado.entity';
 import { Net_Detalle_Pago_Beneficio } from './detalle_beneficio/entities/net_detalle_pago_beneficio.entity';
-import { Net_Detalle_Afiliado } from 'src/modules/afiliado/entities/Net_detalle_persona.entity';
+import { Net_Detalle_Afiliado } from '../afiliado/entities/Net_detalle_persona.entity';
 import { Net_Institucion } from '../Empresarial/institucion/entities/net_institucion.entity';
 import { Net_Detalle_Deduccion } from './detalle-deduccion/entities/detalle-deduccion.entity';
 import { Net_TipoPlanilla } from './tipo-planilla/entities/tipo-planilla.entity';
@@ -18,14 +18,14 @@ import { DeduccionController } from './deduccion/deduccion.controller';
 import { DeduccionService } from './deduccion/deduccion.service';
 import { DetalleDeduccionService } from './detalle-deduccion/detalle-deduccion.service';
 import { TipoPlanillaController } from './tipo-planilla/tipo-planilla.controller';
-import { AfiliadoController } from 'src/modules/afiliado/afiliado.controller';
-import { Net_Persona } from 'src/modules/afiliado/entities/Net_Persona';
+import { AfiliadoController } from '../afiliado/afiliado.controller';
+import { Net_Persona } from '../afiliado/entities/Net_Persona';
 import { DetalleBeneficioController } from './detalle_beneficio/detalle_beneficio.controller';
 import { DetalleDeduccionController } from './detalle-deduccion/detalle-deduccion.controller';
 import { DetallePlanIngrController } from './ingresos/detalle-plan-ingr/detalle-plan-ingr.controller';
 
 import { DetalleBeneficioService } from './detalle_beneficio/detalle_beneficio.service';
-import { AfiliadoService } from 'src/modules/afiliado/afiliado.service';
+import { AfiliadoService } from '../afiliado/afiliado.service';
 import { TipoPlanillaService } from './tipo-planilla/tipo-planilla.service';
 import { BeneficioService } from './beneficio/beneficio.service';
 import { PlanillaService } from './planilla/planilla.service';
@@ -38,7 +38,6 @@ import { Net_SALARIO_COTIZABLE } from './Ingresos/detalle-plan-ingr/entities/net
   providers: [PlanillaService, DetallePlanillaIngresoService, BeneficioService, DetalleBeneficioService, DeduccionService,
     TipoPlanillaService, DetalleDeduccionService, AfiliadoService],
   imports: [
-    TypeOrmModule.forFeature([Net_SALARIO_COTIZABLE, Net_Beneficio, Net_Detalle_Pago_Beneficio, Net_Planilla, Net_Deduccion, Net_TipoPlanilla, Net_Detalle_Deduccion, Net_Institucion, Net_Persona,
-      Net_Detalle_Afiliado, Net_Detalle_Beneficio_Afiliado, Net_Detalle_planilla_ingreso]),]
+    TypeOrmModule.forFeature([Net_SALARIO_COTIZABLE, Net_Beneficio, Net_Detalle_Pago_Beneficio, Net_Planilla, Net_Deduccion, Net_TipoPlanilla, Net_Detalle_Deduccion, Net_Institucion, Net_Persona, Net_Detalle_Afiliado, Net_Detalle_Beneficio_Afiliado, Net_Detalle_planilla_ingreso]),]
 })
 export class PlanillaModule { }

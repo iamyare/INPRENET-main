@@ -4,7 +4,7 @@ import { UpdatePlanillaDto } from './dto/update-planilla.dto';
 import { InjectEntityManager, InjectRepository } from '@nestjs/typeorm';
 import { Net_Detalle_Deduccion } from '../detalle-deduccion/entities/detalle-deduccion.entity';
 import { EntityManager, Repository, getConnection } from 'typeorm';
-import { Net_Persona } from 'src/modules/afiliado/entities/Net_Persona';
+import { Net_Persona } from '../../afiliado/entities/Net_Persona';
 import { Net_Beneficio } from '../beneficio/entities/net_beneficio.entity';
 import { Net_Planilla } from './entities/net_planilla.entity';
 import { Net_TipoPlanilla } from '../tipo-planilla/entities/tipo-planilla.entity';
@@ -15,7 +15,7 @@ import { DetalleDeduccionService } from '../detalle-deduccion/detalle-deduccion.
 import { PaginationDto } from 'src/common/dtos/pagination.dto';
 import { Net_Deduccion } from '../deduccion/entities/net_deduccion.entity';
 import { Net_Detalle_Beneficio_Afiliado } from '../detalle_beneficio/entities/net_detalle_beneficio_afiliado.entity';
-import { Net_Detalle_Afiliado } from 'src/modules/afiliado/entities/Net_detalle_persona.entity';
+import { Net_Detalle_Afiliado } from '../../afiliado/entities/Net_detalle_persona.entity';
 
 @Injectable()
 export class PlanillaService {
@@ -1003,7 +1003,7 @@ WHERE
       // Si hay algún error, hacemos rollback de la transacción
       await queryRunner.rollbackTransaction();
       throw error;
-    } finally { 
+    } finally {
       // Liberamos la conexión de la query runner
       await queryRunner.release();
     }
@@ -1242,7 +1242,7 @@ WHERE
     }
   }
 
-  
+
 
   async calcularTotalPlanilla(idPlanilla: string): Promise<any> {
     const query = `

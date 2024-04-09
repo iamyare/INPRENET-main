@@ -1,8 +1,8 @@
 
 import { Check, Column, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn } from "typeorm";
-import { Net_Persona } from "src/modules/afiliado/entities/Net_Persona";
-import { Net_Centro_Trabajo } from "src/modules/Empresarial/centro-trabajo/entities/net_centro-trabajo.entity";
-import { Net_Planilla } from "src/modules/Planilla/planilla/entities/net_planilla.entity";
+import { Net_Persona } from "../../../../afiliado/entities/Net_Persona";
+import { Net_Centro_Trabajo } from "../../../../Empresarial/centro-trabajo/entities/net_centro-trabajo.entity";
+import { Net_Planilla } from "../../../../Planilla/planilla/entities/net_planilla.entity";
 
 @Entity({ name: 'NET_DETALLE_PLANILLA_ING' })
 @Check("CK_ESTADO_PLANING", `ESTADO IN ('NO CARGADO', 'CARGADO')`)

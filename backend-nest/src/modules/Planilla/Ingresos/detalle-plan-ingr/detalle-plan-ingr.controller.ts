@@ -1,51 +1,48 @@
 import { BadRequestException, Body, Controller, HttpStatus, Param, Post, Res, Get, Logger, Query, NotFoundException, InternalServerErrorException } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { DetallePlanillaIngresoService } from './detalle-planilla-ing.service';
-import { CreateDetallePlanIngDto } from './dto/create-detalle-plani-Ing.dto';
 
 @ApiTags('Detalle-Planilla-Ingreso')
 @Controller('detalle-plan-ingr')
 export class DetallePlanIngrController {
   private readonly logger = new Logger(DetallePlanIngrController.name);
+
   constructor(private readonly planillaIngresoService: DetallePlanillaIngresoService) { }
 
   @Post()
-  create() {
-    return this.planillaIngresoService.create();
+  create(@Body('idCentroTrabajo') idCentroTrabajo: number) {
+    return this.planillaIngresoService.create(idCentroTrabajo);
   }
 
   @Get('/obtenerDetalleIngresos/:idCentroTrabajo/:id_tipo_planilla')
   async obtenerDetalleIngresosPorCentroTrabajo(@Res() res, @Param('idCentroTrabajo') idCentroTrabajo: number, @Param('id_tipo_planilla') id_tipo_planilla: number) {
     try {
       const datos = await this.planillaIngresoService.obtenerDetallesPorCentroTrabajo(idCentroTrabajo, id_tipo_planilla);
+
       return res.status(HttpStatus.OK).json({
         statusCode: HttpStatus.OK,
         message: 'Datos de detalle de planilla de ingresos por centro de trabajo obtenidos correctamente',
         data: datos
       });
+
     } catch (error) {
       throw error
     }
   }
 
   @Get('buscar')
-  async buscarPorMesYDni(@Query('mes') mes: string, @Query('id_tipoPlanilla') id_tipoPlanilla: number) {
-    if (!mes) {
-      throw new BadRequestException('Se requiere tanto el mes como el DNI para realizar la búsqueda.');
-    }
+  async buscarPorMesYDni(@Query('idCentroTrabajo') idCentroTrabajo: number) {
     try {
-      const mesNumerico = parseInt(mes);
-      if (isNaN(mesNumerico)) {
-        throw new BadRequestException('El mes debe ser un número válido.');
-      }
+      const persona = await this.planillaIngresoService?.buscarUltimaPlanCarg(idCentroTrabajo);
+      console.log(persona);
 
-      const persona = await this.planillaIngresoService.buscarPorMesAct(mesNumerico);
       return persona;
+
     } catch (error) {
       if (error instanceof NotFoundException || error instanceof BadRequestException) {
         throw error;
       }
-      console.error('Error en buscarPorMesYDni:', error.message);
+      /* console.error('Error en buscarPorMesYDni:', error.message); */
       throw new InternalServerErrorException(error.message);
     }
   }

@@ -1,4 +1,4 @@
-import { Net_Persona } from "src/modules/afiliado/entities/Net_Persona";
+import { Net_Persona } from "../../afiliado/entities/Net_Persona";
 import { Check, Column, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryColumn, PrimaryGeneratedColumn } from "typeorm";
 import { NET_TIPO_CUENTA } from "./net_tipo_cuenta.entitiy";
 

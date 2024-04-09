@@ -39,7 +39,7 @@ export class AppComponent implements OnInit {
           next: (resultado) => {
             if (!resultado.sesionActiva) {
               this.authService.clearToken();
-              this.router.navigate(['/login']);
+              //this.router.navigate(['/login']);
             }
           },
           error: () => {

@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Query, UseGuards, BadRequestException, HttpCode, HttpStatus } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Query, UseGuards, BadRequestException, HttpCode, HttpStatus, UnauthorizedException, Req } from '@nestjs/common';
 import { UsuarioService } from './usuario.service';
 import { CreateUsuarioDto } from './dto/create-usuario.dto';
 import { UpdateUsuarioDto } from './dto/update-usuario.dto';
@@ -10,15 +10,43 @@ import { ApiTags } from '@nestjs/swagger';
 export class UsuarioController {
   constructor(private readonly usuarioService: UsuarioService) { }
 
-  @Post('auth/signup')
-  create(@Body() createUsuarioDto: CreateUsuarioDto) {
-    return this.usuarioService.create(createUsuarioDto);
-  }
-
-  @Post('loginPrivada')
+  @Post('/loginPrivada')
   @HttpCode(HttpStatus.OK)
   async loginPrivada(@Body('email') email: string, @Body('contrasena') contrasena: string) {
     return this.usuarioService.loginPrivada(email, contrasena);
+  }
+
+  @Get('/verificarEstado')
+  async verificarEstado(@Req() request: Request) {
+      const token = request.headers['authorization']?.split(' ')[1];
+      if (!token) {
+          throw new UnauthorizedException('Token no proporcionado.');
+      }
+      return this.usuarioService.verificarEstadoSesion(token);
+  }
+
+  @Post('/logout')
+async logout(@Req() request: Request): Promise<any> {
+  console.log('Authorization Header:', request.headers['authorization']);
+  const authHeader: string | undefined = request.headers['authorization'];
+  
+  if (authHeader && authHeader.startsWith('Bearer ')) {
+    const token = authHeader.substring(7); 
+    console.log('Extracted Token:', token);
+    
+    if (token) {
+      await this.usuarioService.cerrarSesion(token);
+      return { message: 'Sesión cerrada con éxito.' };
+    }
+  }
+  
+  throw new UnauthorizedException('Formato de token incorrecto.');
+}
+
+
+  @Post('auth/signup')
+  create(@Body() createUsuarioDto: CreateUsuarioDto) {
+    return this.usuarioService.create(createUsuarioDto);
   }
 
   @Post('/crear')

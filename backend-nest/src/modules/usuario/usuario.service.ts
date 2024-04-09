@@ -13,6 +13,7 @@ import { CreateUsuarioDto } from './dto/create-usuario.dto';
 import { Net_TipoIdentificacion } from '../tipo_identificacion/entities/net_tipo_identificacion.entity';
 import { NET_USUARIO_PRIVADA } from './entities/net_usuario_privada.entity';
 import { Net_Centro_Trabajo } from '../Empresarial/centro-trabajo/entities/net_centro-trabajo.entity';
+import { NET_SESION } from './entities/net_sesion.entity';
 
 @Injectable()
 export class UsuarioService {
@@ -33,36 +34,73 @@ export class UsuarioService {
     @InjectRepository(Net_TipoIdentificacion)
     private readonly tipoIdentificacionRepository: Repository<Net_TipoIdentificacion>,
     private readonly jwtService: JwtService,
-    private readonly mailService: MailService
+    private readonly mailService: MailService,
+    @InjectRepository(NET_SESION)
+    private readonly sesionRepository: Repository<NET_SESION>,
   ) { }
 
-  async validateUser(email: string, pass: string): Promise<any> {
+  async verificarEstadoSesion(token: string): Promise<{ sesionActiva: boolean }> {
+    const sesion = await this.sesionRepository.findOne({
+        where: { token },
+        select: ['estado']
+    });
+
+    if (!sesion || sesion.estado !== 'activa') {
+        return { sesionActiva: false };
+    }
+
+    return { sesionActiva: true };
+}
+
+  async cerrarSesion(token: string): Promise<void> {
+    const sesion = await this.sesionRepository.findOne({
+        where: {
+            token,
+            estado: 'activa',
+        },
+    });
+
+    if (!sesion) {
+        throw new NotFoundException('Sesión no encontrada.');
+    }
+
+    sesion.estado = 'cerrada';
+    await this.sesionRepository.save(sesion);
+}
+
+
+  async loginPrivada(email: string, contrasena: string): Promise<any> {
+    
     const usuario = await this.usuarioPrivadaRepository.findOne({
       where: { email },
-      relations: ['centroTrabajo']
+      relations: ['centroTrabajo'],
     });
-  
-    if (usuario && await bcrypt.compare(pass, usuario.passwordHash)) {
-      const { passwordHash, centroTrabajo, ...result } = usuario;
-      return { ...result, idCentroTrabajo: centroTrabajo ? centroTrabajo.id_centro_trabajo : null };
-    }
-    return null;
-  }
-  
-  async loginPrivada(email: string, contrasena: string): Promise<any> {
-    const usuario = await this.validateUser(email, contrasena);
-  
+
     if (!usuario) {
       throw new UnauthorizedException('Credenciales inválidas');
     }
-    const payload = {
+    const passwordValid = await bcrypt.compare(contrasena, usuario.passwordHash);
+    if (!passwordValid) {
+      throw new UnauthorizedException('Credenciales inválidas');
+    }
+    const payload = { 
+      sub: usuario.id_usuario, 
       email: usuario.email,
-      sub: usuario.id_usuario,
-      idCentroTrabajo: usuario.idCentroTrabajo
+      ...(usuario.centroTrabajo && { idCentroTrabajo: usuario.centroTrabajo.id_centro_trabajo }),
     };
-  
+    const token = this.jwtService.sign(payload);
+
+    const nuevaSesion = new NET_SESION();
+    nuevaSesion.usuarioPrivada = usuario;
+    nuevaSesion.token = token;
+    nuevaSesion.fecha_creacion = new Date();
+    nuevaSesion.fecha_expiracion = new Date(Date.now() + 1000 * 60 * 60 * 24);
+    nuevaSesion.estado = 'activa';
+
+    await this.sesionRepository.save(nuevaSesion);
+
     return {
-      access_token: this.jwtService.sign(payload),
+      access_token: token,
     };
   }
   
@@ -235,9 +273,7 @@ export class UsuarioService {
 
     usuario.contrasena = await bcrypt.hash(contrasena, 10);
     Object.assign(usuario, restUsuario); // Actualiza propiedades del usuario
-    usuario.estado = 'ACTIVO'; // o cualquier otro cambio necesario
-
-    // Aquí se actualiza la fecha de verificación con la fecha actual
+    usuario.estado = 'ACTIVO';
     usuario.fecha_verificacion = new Date();
 
     // Actualizar datos del usuario
@@ -247,7 +283,7 @@ export class UsuarioService {
     if (usuario.empleado) {
       usuario.empleado.nombre_puesto = nombre_puesto;
       usuario.empleado.telefono_empleado = telefono_empleado;
-      usuario.empleado.numero_empleado = numero_empleado; // Agrega aquí más actualizaciones de empleado si son necesarias
+      usuario.empleado.numero_empleado = numero_empleado; 
       await this.empleadoRepository.save(usuario.empleado);
     } else {
       throw new NotFoundException('Empleado asociado no encontrado');
@@ -262,23 +298,21 @@ export class UsuarioService {
 
   async login(email: string, password: string): Promise<{ token: string }> {
     const usuario = await this.usuarioRepository.findOne({
-      
       where: { correo: email },
       relations: ['rol']
     });
-    console.log(usuario);
-    
+  
     if (!usuario) {
       throw new NotFoundException('Usuario no encontrado');
     }
-
+  
     if (usuario.estado !== 'ACTIVO') {
       throw new ForbiddenException('La cuenta está desactivada');
     }
     if (!usuario.fecha_verificacion) {
       throw new ForbiddenException('La cuenta no ha verificado su correo electrónico');
     }
-
+  
     const isPasswordValid = await bcrypt.compare(password, usuario.contrasena);
     if (!isPasswordValid) {
       throw new BadRequestException('Credenciales inválidas');
@@ -286,10 +320,21 @@ export class UsuarioService {
     if (!usuario.rol) {
       throw new InternalServerErrorException('El rol del usuario no está definido');
     }
+  
+    // Crear el payload y firmar el token
     const payload = { username: usuario.correo, sub: usuario.id_usuario, rol: usuario.rol.nombre_rol };
     const token = this.jwtService.sign(payload);
-
-
+  
+    // Crear una nueva sesión y guardarla en la base de datos
+    const nuevaSesion = new NET_SESION();
+    nuevaSesion.usuario = usuario; // Asigna el usuario a la sesión
+    nuevaSesion.token = token;
+    nuevaSesion.fecha_creacion = new Date();
+    nuevaSesion.fecha_expiracion = new Date(Date.now() + 1000 * 60 * 60 * 24); // Por ejemplo, 24 horas después
+    nuevaSesion.estado = 'activa';
+  
+    await this.sesionRepository.save(nuevaSesion);
+  
     return { token };
   }
 

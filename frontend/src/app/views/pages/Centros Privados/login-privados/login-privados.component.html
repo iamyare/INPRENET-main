@@ -11,17 +11,17 @@
     <div class="right">
       <div class="content">
         <h2>Login</h2>
-        <form id="form-login" (submit)="login()" method="post">
+        <form id="form-login" (ngSubmit)="login()" method="post">
           <div class="form-element form-stack">
-            <label for="email-login" class="form-label">Correo Electronico</label>
-            <input id="email-login" type="text" name="email" [(ngModel)]="loginData.email">
+            <label for="email-login" class="form-label">Correo Electrónico</label>
+            <input id="email-login" type="text" name="email" [(ngModel)]="loginData.email" required>
           </div>
           <div class="form-element form-stack">
             <label for="password-login" class="form-label">Contraseña</label>
-            <input id="password-login" type="password" name="password" [(ngModel)]="loginData.password">
+            <input id="password-login" type="password" name="password" [(ngModel)]="loginData.password" required>
           </div>
           <div class="form-element form-submit">
-            <button id="logIn" class="login" name="login" (click)="login()">Iniciar sesión</button>
+            <button id="logIn" class="login" name="login">Iniciar sesión</button>
           </div>
         </form>
       </div>

@@ -1,6 +1,6 @@
-import {HttpClient } from '@angular/common/http';
+import {HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Observable, map } from 'rxjs';
+import { Observable, catchError, map, of } from 'rxjs';
 import { environment } from 'src/environments/environment';
 import { jwtDecode } from 'jwt-decode';
 
@@ -12,6 +12,30 @@ export class AuthService {
 
   constructor( private http: HttpClient) {
    }
+
+
+   logout(): Observable<void> {
+    const url = `${environment.API_URL}/api/usuario/logout`;
+    const token = localStorage.getItem('token'); // Obtén el token JWT almacenado
+    const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
+
+    return this.http.post<void>(url, {}, { headers }).pipe(
+      map(() => {
+        this.clearToken();
+      })
+    );
+  }
+
+  verificarEstadoSesion(): Observable<{ sesionActiva: boolean }> {
+    const url = `${environment.API_URL}/api/usuario/verificarEstado`;
+    const token = localStorage.getItem('token');
+    const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
+    return this.http.get<{ sesionActiva: boolean }>(url, { headers });
+  }
+
+  clearToken(): void {
+    localStorage.removeItem('token');
+  }
 
    loginPrivada(email: string, password: string): Observable<{ access_token: string }> {
     const url = `${environment.API_URL}/api/usuario/loginPrivada`;

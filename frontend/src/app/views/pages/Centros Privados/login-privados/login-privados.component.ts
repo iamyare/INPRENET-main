@@ -22,9 +22,9 @@ export class LoginPrivadosComponent {
     login() {
       this.authService.loginPrivada(this.loginData.email, this.loginData.password).subscribe({
         next: (response) => {
-          console.log('Inicio de sesión exitoso:', response.access_token);
+          //console.log('Inicio de sesión exitoso:', response.access_token);
           this.authService.saveToken(response.access_token);
-          this.router.navigate(['/privados/prueba']);
+          this.router.navigate(['/privados/PlanillaPrivados']);
         },
         error: (error) => {
           console.error('Error en el inicio de sesión:', error);

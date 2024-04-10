@@ -2,7 +2,7 @@ $theme-signup: #03A9F4;
 $theme-signup-darken: #0288D1;
 $theme-signup-background: #2C3034;
 $theme-login: #26a69a;
-$theme-login-darken: #512DA8;
+$theme-login-darken: #0d7b6c;
 $theme-login-background: #f9f9f9;
 $theme-dark: #212121;
 $theme-light: #e3e3e3;
@@ -20,6 +20,10 @@ body {
   font-family: $font-default;
 }
 
+.prueba {
+  font-weight: 500 !important;
+}
+
 .backRight {
   position: absolute;
   right: 0;
@@ -34,6 +38,22 @@ body {
   width: 50%;
   height: 100%;
   background: $theme-login;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+
+  .welcome-container {
+    max-width: 80%; // Limita el ancho del contenido si es necesario
+    h2 {
+      color: $theme-light; // Asumiendo que quieras usar el color claro para el texto
+      font-size: 2em; // Tamaño de fuente grande para dar énfasis
+      margin: 0;
+      padding: 20px; // Espaciado alrededor del texto
+      // Asegúrate de que el texto es visible y legible sobre el fondo:
+      text-shadow: 0 2px 4px rgba($theme-dark, 0.5);
+    }
+  }
 }
 
 #back {

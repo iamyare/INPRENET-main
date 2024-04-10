@@ -92,45 +92,25 @@
           </ng-container>
         </td>
         <td *ngIf="verBotEditar">
-          <button
-            mat-raised-button
-            *ngIf="!row.isEditing"
-            (click)="startEditing(row)"
-            style="
-              background-color: #628780;
-              color: #ffffff;
-              border-radius: 5px;
-              padding: 10px 20px;
-            "
-          >
-            Editar
+          <button mat-icon-button *ngIf="!row.isEditing" (click)="startEditing(row)" class="boton-estetico">
+            <mat-icon>edit</mat-icon>
           </button>
           <button
-            mat-raised-button
-            *ngIf="row.isEditing"
-            (click)="saveChanges(row)"
-            style="
-              background-color: #628780;
-              color: #ffffff;
-              border-radius: 5px;
-              padding: 10px 20px;
-            "
-          >
-            Guardar
-          </button>
-          <button
-            mat-raised-button
-            *ngIf="row.isEditing"
-            (click)="stopEditing(row)"
-            style="
-              background-color: #628780;
-              color: #ffffff;
-              border-radius: 5px;
-              padding: 10px 20px;
-            "
-          >
-            Cancelar
-          </button>
+    mat-raised-button
+    *ngIf="row.isEditing"
+    (click)="saveChanges(row)"
+    class="boton-estetico"
+  >
+    Guardar
+  </button>
+  <button
+    mat-raised-button
+    *ngIf="row.isEditing"
+    (click)="stopEditing(row)"
+    class="boton-estetico"
+  >
+    Cancelar
+  </button>
         </td>
         <td *ngIf="mostrarBotonUno">
           <button

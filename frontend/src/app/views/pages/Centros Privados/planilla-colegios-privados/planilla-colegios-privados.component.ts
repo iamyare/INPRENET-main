@@ -22,8 +22,6 @@ export interface Item {
   styleUrls: ['./planilla-colegios-privados.component.scss']
 })
 export class PlanillaColegiosPrivadosComponent implements AfterViewInit, OnInit {
-
-
   @ViewChild(MatPaginator) paginator!: MatPaginator;
   @ViewChild(MatSort) sort!: MatSort;
 
@@ -38,27 +36,20 @@ export class PlanillaColegiosPrivadosComponent implements AfterViewInit, OnInit 
   displayedColumns: string[] = ['numeroColegio', 'nombreColegio', 'totalSueldo', 'totalPrestamo', 'totalAportaciones', 'totalPagar', 'totalCotizaciones'];
   displayedColumns3: string[] = ['identidad', 'nombreDocente', 'sueldo', 'aportaciones', 'cotizaciones', 'prestamos', 'deducciones', 'sueldoNeto', 'editar'];
 
-  totalSueldo: number = 0;
-  totalPrestamo: number = 0;
-  totalAportaciones: number = 0;
-  totalCotizaciones: number = 0;
-  totalPagar: number = 0;
-  numeroColegio: number = 12345;
-  nombreColegio: string = 'Colegio ABC';
-
   firstFormGroup: FormGroup;
   mostrarSegundoPaso = false;
   mostrarTercerPaso = false;
   isLinear = false;
 
   dataSourceItems: MatTableDataSource<Item>;
+  dataSourceItems1: any[] = [];
+
   selectedItem: Item | null = null;
 
   tiposPlanillaPrivadas: any;
 
   idCentroTrabajo: number | null = null;
   mostrarPrimerPaso = true;
-
 
   constructor(private _formBuilder: FormBuilder, private cdr: ChangeDetectorRef, public dialog: MatDialog, private planillaIngresosService: PlanillaIngresosService, private datosEstaticos: DatosEstaticosService,
     private centroTrabajoService: CentroTrabajoService
@@ -90,12 +81,10 @@ export class PlanillaColegiosPrivadosComponent implements AfterViewInit, OnInit 
     }
   }
 
-
   selectRow(item: Item) {
     this.selectedItem = item;
     this.mostrarSegundoPaso = true;
   }
-
 
   applyFilter(event: Event) {
     const filterValue = (event.target as HTMLInputElement).value;
@@ -109,7 +98,6 @@ export class PlanillaColegiosPrivadosComponent implements AfterViewInit, OnInit 
   obtenerDetallesPlanilla(idCentroTrabajo: number, id_tipo_planilla: number) {
     this.planillaIngresosService.obtenerDetallesPorCentroTrabajo(idCentroTrabajo, id_tipo_planilla).subscribe(
       (response: any) => {
-
         if (response.data.length > 0) {
           const mappedData = response.data.map((item: any) => ({
             identidad: item.IDENTIDAD,
@@ -123,37 +111,27 @@ export class PlanillaColegiosPrivadosComponent implements AfterViewInit, OnInit 
             periodoInicio: item.PERIODO_INICIO,
             periodoFinalizacion: item.PERIODO_FINALIZACION
           }));
-
-          mappedData.forEach((item: any) => {
-            this.totalSueldo += item.sueldo;
-            this.totalPrestamo += item.prestamos;
-            this.totalAportaciones += item.aportaciones;
-            this.totalCotizaciones += item.cotizaciones;
-            this.totalPagar += item.sueldoNeto;
-          });
-
           this.dataSource.data = mappedData;
           this.cdr.detectChanges();
         } else {
           this.dataSource.data = []
-          this.totalSueldo = 0;
-          this.totalPrestamo = 0;
-          this.totalAportaciones = 0;
-          this.totalCotizaciones = 0;
-          this.totalPagar = 0;
-          this.numeroColegio = 0;
-          this.nombreColegio = '';
+
         }
       },
       error => {
         this.dataSource.data = []
-        this.totalSueldo = 0;
-        this.totalPrestamo = 0;
-        this.totalAportaciones = 0;
-        this.totalCotizaciones = 0;
-        this.totalPagar = 0;
-        this.numeroColegio = 0;
-        this.nombreColegio = '';
+        console.error('Error al obtener detalles de planilla:', error);
+      }
+    );
+  }
+
+  obtenerDetallesPlanillaAgrupCent(idCentroTrabajo: number, id_tipo_planilla: number) {
+    this.planillaIngresosService.obtenerDetallesPlanillaAgrupCent(idCentroTrabajo, id_tipo_planilla).subscribe(
+      (response: any) => {
+        this.dataSourceItems1 = response.data;
+      },
+      error => {
+        this.dataSourceItems1 = []
         console.error('Error al obtener detalles de planilla:', error);
       }
     );
@@ -225,6 +203,7 @@ export class PlanillaColegiosPrivadosComponent implements AfterViewInit, OnInit 
 
       if (idCentroTrabajo) {
         this.obtenerDetallesPlanilla(idCentroTrabajo, idTipoPlanilla);
+        this.obtenerDetallesPlanillaAgrupCent(idCentroTrabajo, idTipoPlanilla);
       } else {
         console.error('No hay ningún centro de trabajo seleccionado');
       }
@@ -233,15 +212,14 @@ export class PlanillaColegiosPrivadosComponent implements AfterViewInit, OnInit 
     }
   }
 
-
   editarElemento(row: UserData) {
     const campos: any[] = [
-      { nombre: 'identidad', tipo: 'text', etiqueta: 'Identidad', requerido: true, editable: true },
-      { nombre: 'nombreDocente', tipo: 'text', etiqueta: 'Nombre del Docente', requerido: true, editable: true },
+      { nombre: 'identidad', tipo: 'text', etiqueta: 'Identidad', requerido: true, editable: false },
+      { nombre: 'nombreDocente', tipo: 'text', etiqueta: 'Nombre del Docente', requerido: true, editable: false },
       { nombre: 'sueldo', tipo: 'number', etiqueta: 'Sueldo', requerido: true, editable: true },
-      { nombre: 'aportaciones', tipo: 'number', etiqueta: 'Aportaciones', requerido: true, editable: true },
-      { nombre: 'cotizaciones', tipo: 'number', etiqueta: 'Cotizaciones', requerido: true, editable: true },
-      { nombre: 'prestamos', tipo: 'number', etiqueta: 'Préstamos', requerido: true, editable: true },
+      { nombre: 'aportaciones', tipo: 'number', etiqueta: 'Aportaciones', requerido: true, editable: false },
+      { nombre: 'cotizaciones', tipo: 'number', etiqueta: 'Cotizaciones', requerido: true, editable: false },
+      { nombre: 'prestamos', tipo: 'number', etiqueta: 'Préstamos', requerido: true, editable: false },
     ];
 
     const dialogRef = this.dialog.open(EditarDialogComponent, {
@@ -269,7 +247,6 @@ export class PlanillaColegiosPrivadosComponent implements AfterViewInit, OnInit 
     }
     return null;
   }
-
 }
 
 export interface UserData {

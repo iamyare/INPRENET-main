@@ -30,6 +30,22 @@ export class DetallePlanIngrController {
     }
   }
 
+  @Get('/obtenerDetalleIngresosAgrupCent/:idCentroTrabajo/:id_tipo_planilla')
+  async obtenerDetalleIngresosAgrupCent(@Res() res, @Param('idCentroTrabajo') idCentroTrabajo: number, @Param('id_tipo_planilla') id_tipo_planilla: number) {
+    try {
+      const datos = await this.planillaIngresoService.obtenerDetalleIngresosAgrupCent(idCentroTrabajo, id_tipo_planilla);
+
+      return res.status(HttpStatus.OK).json({
+        statusCode: HttpStatus.OK,
+        message: 'Datos de detalle de planilla de ingresos por centro de trabajo obtenidos correctamente',
+        data: datos
+      });
+
+    } catch (error) {
+      throw error
+    }
+  }
+
   @Get('buscar')
   async buscarPorMesYDni(@Query('idCentroTrabajo') idCentroTrabajo: number) {
     try {

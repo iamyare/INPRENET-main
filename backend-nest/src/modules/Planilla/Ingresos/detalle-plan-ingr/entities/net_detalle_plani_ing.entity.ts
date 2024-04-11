@@ -5,7 +5,7 @@ import { Net_Centro_Trabajo } from "../../../../Empresarial/centro-trabajo/entit
 import { Net_Planilla } from "../../../../Planilla/planilla/entities/net_planilla.entity";
 
 @Entity({ name: 'NET_DETALLE_PLANILLA_ING' })
-@Check("CK_ESTADO_PLANING", `ESTADO IN ('NO CARGADO', 'CARGADO')`)
+@Check("CK_ESTADO_PLANING", `ESTADO IN ('NO CARGADO', 'CARGADO','ELIMINADO')`)
 export class Net_Detalle_planilla_ingreso {
     @PrimaryGeneratedColumn({ type: 'int', name: 'ID_DETALLE_PLAN_INGRESO', primaryKeyConstraintName: 'PK_id_detPlanIng' })
     id_detalle_plan_Ing: number;

@@ -1,4 +1,4 @@
-import { BadRequestException, Body, Controller, HttpStatus, Param, Post, Res, Get, Logger, Query, NotFoundException, InternalServerErrorException, Put, HttpCode, ParseIntPipe } from '@nestjs/common';
+import { BadRequestException, Body, Controller, HttpStatus, Param, Post, Res, Get, Logger, Query, NotFoundException, InternalServerErrorException, Put, HttpCode, ParseIntPipe, Patch, HttpException } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { DetallePlanillaIngresoService } from './detalle-planilla-ing.service';
 import { CreateDetallePlanIngDto } from './dto/create-detalle-plani-Ing.dto';
@@ -10,6 +10,21 @@ export class DetallePlanIngrController {
 
   constructor(private readonly planillaIngresoService: DetallePlanillaIngresoService) { }
 
+  @Patch('/eliminar/:id')
+  async eliminarDetallePlanilla(@Param('id') idDetallePlanilla: number, @Res() res): Promise<void> {
+    try {
+      await this.planillaIngresoService.cambiarEstadoAEliminado(idDetallePlanilla);
+      res.status(HttpStatus.OK).json({ message: `Detalle de planilla con ID ${idDetallePlanilla} ha sido marcado como eliminado.` });
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        this.logger.error(`No se encontró el detalle de la planilla con ID: ${idDetallePlanilla}`);
+        throw new HttpException(`Detalle de planilla con ID ${idDetallePlanilla} no encontrado`, HttpStatus.NOT_FOUND);
+      }
+      this.logger.error(`Error al eliminar el detalle de la planilla con ID: ${idDetallePlanilla}`, error.stack);
+      throw new HttpException(`Error al procesar la solicitud`, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+  }
+
   @Put('/actualizar-detalles-planilla-privada')
   @HttpCode(HttpStatus.OK)
   async actualizarDetallesPlanilla(
@@ -19,8 +34,6 @@ export class DetallePlanIngrController {
   ): Promise<{ message: string }> {
     return await this.planillaIngresoService.actualizarDetallesPlanilla(dni, idDetallePlanIngreso, sueldo);
   }
-
-
 
   @Put('/:idDetallePlanIngreso')
   @HttpCode(HttpStatus.OK)

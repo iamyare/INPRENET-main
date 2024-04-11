@@ -26,6 +26,18 @@ export class DetallePlanillaIngresoService {
     private detallePlanillaIngrRepo: Repository<Net_Detalle_planilla_ingreso>,
   ) { }
 
+  async cambiarEstadoAEliminado(idDetallePlanilla: number): Promise<void> {
+    const detalle = await this.detallePlanillaIngrRepo.findOne({ where: { id_detalle_plan_Ing: idDetallePlanilla } });
+  
+    if (!detalle) {
+      throw new NotFoundException(`Detalle de planilla con ID ${idDetallePlanilla} no encontrado`);
+    }
+  
+    detalle.estado = 'ELIMINADO';
+    await this.detallePlanillaIngrRepo.save(detalle);
+  }
+  
+
   async actualizarDetallesPlanilla(dni: string, idDetallePlanIngreso: number, sueldo: number): Promise<{ message: string }> {
     const sectorEconomico = 'PRIVADO';
     const detalle = await this.detallePlanillaIngrRepo.findOne({
@@ -199,6 +211,7 @@ export class DetallePlanillaIngresoService {
             .innerJoin('planilla.tipoPlanilla', 'tipoPlanilla')
             .where('centroTrabajo.id_centro_trabajo = :idCentroTrabajo', { idCentroTrabajo })
             .andWhere('tipoPlanilla.id_tipo_planilla = :id_tipo_planilla', { id_tipo_planilla })
+            .andWhere('detalle.estado = :estado', { estado: 'CARGADO' })
             .andWhere(`planilla.FECHA_APERTURA = (SELECT MAX("NET_PLANILLA"."FECHA_APERTURA") FROM "NET_PLANILLA" WHERE "NET_PLANILLA".ID_TIPO_PLANILLA = ${id_tipo_planilla})`)
             .getRawMany();
 
@@ -238,6 +251,7 @@ export class DetallePlanillaIngresoService {
         AND "planilla"."PERIODO_INICIO" BETWEEN TO_DATE('${fechaInicioMesAnterior}', 'DD/MM/YYYY') AND LAST_DAY(TO_DATE('${fechaInicioMesAnterior}', 'DD/MM/YYYY'))
         AND "planilla"."PERIODO_FINALIZACION" BETWEEN TO_DATE('${fechaInicioMesAnterior}', 'DD/MM/YYYY') AND LAST_DAY(TO_DATE('${fechaInicioMesAnterior}', 'DD/MM/YYYY'))`,
             { idCentroTrabajo, id_tipo_planilla })
+            .andWhere('detalle.estado = :estado', { estado: 'CARGADO' })
           .getRawMany();
 
         if (!detalles.length) {
@@ -275,6 +289,7 @@ export class DetallePlanillaIngresoService {
         AND "planilla"."PERIODO_INICIO" BETWEEN TO_DATE('${fechaInicioMesAnterior}', 'DD/MM/YYYY') AND LAST_DAY(TO_DATE('${fechaInicioMesAnterior}', 'DD/MM/YYYY'))
         AND "planilla"."PERIODO_FINALIZACION" BETWEEN TO_DATE('${fechaInicioMesAnterior}', 'DD/MM/YYYY') AND LAST_DAY(TO_DATE('${fechaInicioMesAnterior}', 'DD/MM/YYYY'))`,
             { idCentroTrabajo, id_tipo_planilla })
+            .andWhere('detalle.estado = :estado', { estado: 'CARGADO' })
           .getRawMany();
         if (!detalles.length) {
           return []
@@ -322,6 +337,7 @@ export class DetallePlanillaIngresoService {
             .innerJoin('planilla.tipoPlanilla', 'tipoPlanilla')
             .where('centroTrabajo.id_centro_trabajo = :idCentroTrabajo', { idCentroTrabajo })
             .andWhere('tipoPlanilla.id_tipo_planilla = :id_tipo_planilla', { id_tipo_planilla })
+            .andWhere('detalle.estado = :estado', { estado: 'CARGADO' })
             .groupBy('centroTrabajo.id_centro_trabajo')
             .addGroupBy('centroTrabajo.nombre_centro_trabajo')
             .getRawMany();
@@ -354,6 +370,7 @@ export class DetallePlanillaIngresoService {
           .innerJoin('planilla.tipoPlanilla', 'tipoPlanilla')
           .where('centroTrabajo.id_centro_trabajo = :idCentroTrabajo', { idCentroTrabajo })
           .andWhere('tipoPlanilla.id_tipo_planilla = :id_tipo_planilla', { id_tipo_planilla })
+          .andWhere('detalle.estado = :estado', { estado: 'CARGADO' })
           .groupBy('centroTrabajo.id_centro_trabajo')
           .addGroupBy('centroTrabajo.nombre_centro_trabajo')
           .getRawMany();
@@ -384,6 +401,7 @@ export class DetallePlanillaIngresoService {
           .innerJoin('planilla.tipoPlanilla', 'tipoPlanilla')
           .where('centroTrabajo.id_centro_trabajo = :idCentroTrabajo', { idCentroTrabajo })
           .andWhere('tipoPlanilla.id_tipo_planilla = :id_tipo_planilla', { id_tipo_planilla })
+          .andWhere('detalle.estado = :estado', { estado: 'CARGADO' })
           .groupBy('centroTrabajo.id_centro_trabajo')
           .addGroupBy('centroTrabajo.nombre_centro_trabajo')
           .getRawMany();

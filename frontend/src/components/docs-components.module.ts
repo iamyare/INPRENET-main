@@ -49,6 +49,7 @@ import { DetallePlanillaDialogComponent } from './detalle-planilla-dialog/detall
 import { EditarDialogComponent } from './editar-dialog/editar-dialog.component';
 import { TotalesporbydDialogComponent } from './totalesporbydDialog/totalesporbydDialog.component';
 import { DynamicFormDialogComponent } from './dynamic-form-dialog/dynamic-form-dialog.component';
+import { ConfirmDialogComponent } from './confirm-dialog/confirm-dialog.component';
 
 @NgModule({
   declarations: [
@@ -68,7 +69,8 @@ import { DynamicFormDialogComponent } from './dynamic-form-dialog/dynamic-form-d
     DetallePlanillaDialogComponent,
     EditarDialogComponent,
     TotalesporbydDialogComponent,
-    DynamicFormDialogComponent
+    DynamicFormDialogComponent,
+    ConfirmDialogComponent
   ],
   exports: [
     ProgressbarComponent,
@@ -86,7 +88,8 @@ import { DynamicFormDialogComponent } from './dynamic-form-dialog/dynamic-form-d
     DetallePlanillaDialogComponent,
     EditarDialogComponent,
     TotalesporbydDialogComponent,
-    DynamicFormDialogComponent
+    DynamicFormDialogComponent,
+    ConfirmDialogComponent
   ],
   imports: [
     WebcamModule,

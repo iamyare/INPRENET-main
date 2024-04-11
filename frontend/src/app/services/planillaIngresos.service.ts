@@ -10,6 +10,11 @@ export class PlanillaIngresosService {
 
   constructor(private http: HttpClient) { }
 
+  eliminarDetallePlanillaIngreso(idDetallePlanIngreso: number): Observable<{ message: string }> {
+    const url = `${environment.API_URL}/api/detalle-plan-ingr/eliminar/${idDetallePlanIngreso}`;
+    return this.http.patch<{ message: string }>(url, null);
+  }
+
   actualizarDetallesPlanillaPrivada(dni: string, idDetallePlanIngreso: number, sueldo: number): Observable<{ message: string }> {
     const url = `${environment.API_URL}/api/detalle-plan-ingr/actualizar-detalles-planilla-privada`;
     return this.http.put<{ message: string }>(url, { dni, idDetallePlanIngreso, sueldo });

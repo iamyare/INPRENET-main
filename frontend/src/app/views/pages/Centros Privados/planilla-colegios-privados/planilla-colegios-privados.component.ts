@@ -22,6 +22,7 @@ import { DatosEstaticosService } from 'src/app/services/datos-estaticos.service'
 import { CentroTrabajoService } from 'src/app/services/centro-trabajo.service';
 import { jwtDecode } from 'jwt-decode';
 import { ToastrService } from 'ngx-toastr';
+import { ConfirmDialogComponent } from '@docs-components/confirm-dialog/confirm-dialog.component';
 
 export interface Item {
   id_centro_trabajo: number;
@@ -46,7 +47,7 @@ export class PlanillaColegiosPrivadosComponent
   dataSource: MatTableDataSource<UserData> = new MatTableDataSource<UserData>();
 
   displayedColumns: string[] = ['numeroColegio', 'nombreColegio', 'totalSueldo', 'totalPrestamo', 'totalAportaciones', 'totalPagar', 'totalCotizaciones'];
-  displayedColumns3: string[] = ['identidad', 'nombreDocente', 'sueldo', 'aportaciones', 'cotizaciones', 'prestamos', 'deducciones', 'sueldoNeto', 'editar'];
+  displayedColumns3: string[] = ['identidad', 'nombreDocente', 'sueldo', 'aportaciones', 'cotizaciones', 'prestamos', 'deducciones', 'sueldoNeto', 'editar', 'eliminar'];
 
   firstFormGroup: FormGroup;
   mostrarSegundoPaso = false;
@@ -120,8 +121,6 @@ export class PlanillaColegiosPrivadosComponent
       (response: any) => {
         if (response.data.length > 0) {
           const mappedData = response.data.map((item: any) => {
-            console.log(item);
-
             return {
               id_detalle_plan_Ing: item.ID_DETALLE_PLAN_INGRESO,
               identidad: item.IDENTIDAD,
@@ -250,8 +249,6 @@ export class PlanillaColegiosPrivadosComponent
 
   datosPlanilla() {
     this.selectedTipoPlanilla = this.firstFormGroup.value.selectedTipoPlanilla;
-    console.log(this.selectedTipoPlanilla);
-
     if (this.selectedTipoPlanilla) {
       const idTipoPlanilla = this.selectedTipoPlanilla[0].ID_TIPO_PLANILLA;
 
@@ -318,6 +315,41 @@ export class PlanillaColegiosPrivadosComponent
           error: (error) => {
             console.error('Error al actualizar el sueldo en detalle planilla ingreso:', error);
             this.toastr.error('Error al actualizar el sueldo en detalle planilla ingreso');
+          }
+        });
+      }
+    });
+  }
+
+  eliminarElemento(row: UserData) {
+    const dialogRef = this.dialog.open(ConfirmDialogComponent, {
+      width: '350px',
+      data: {
+        title: 'Confirmación de eliminación',
+        message: '¿Estás seguro de querer eliminar este elemento?'
+      }
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) {
+        this.planillaIngresosService.eliminarDetallePlanillaIngreso(row.id_detalle_plan_Ing).subscribe({
+          next: (response) => {
+            this.toastr.success(response.message);
+            console.log(this.idCentroTrabajo);
+            console.log(this.selectedTipoPlanilla);
+
+            if (this.selectedTipoPlanilla && this.selectedTipoPlanilla.length > 0) {
+              console.log(this.selectedTipoPlanilla[0].ID_TIPO_PLANILLA);
+              this.obtenerDetallesPlanilla(this.idCentroTrabajo, this.selectedTipoPlanilla[0].ID_TIPO_PLANILLA);
+              this.obtenerDetallesPlanillaAgrupCent(this.idCentroTrabajo, this.selectedTipoPlanilla[0].ID_TIPO_PLANILLA);
+            } else {
+              console.error('selectedTipoPlanilla está indefinido o no es un array válido.');
+              this.toastr.error('Ocurrió un error debido a un problema con el tipo de planilla seleccionado.');
+            }
+          },
+          error: (error) => {
+            console.error('Error al eliminar el detalle de la planilla ingreso:', error);
+            this.toastr.error('Ocurrió un error al eliminar el detalle de la planilla ingreso.');
           }
         });
       }

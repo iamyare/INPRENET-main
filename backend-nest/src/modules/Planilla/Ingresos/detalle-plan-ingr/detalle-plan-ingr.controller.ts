@@ -26,23 +26,16 @@ export class DetallePlanIngrController {
   }
 
   @Put('/actualizar-detalles-planilla-privada')
-  @HttpCode(HttpStatus.OK)
-  async actualizarDetallesPlanilla(
-    @Body('dni') dni: string,
-    @Body('idDetallePlanIngreso') idDetallePlanIngreso: number,
-    @Body('sueldo') sueldo: number
-  ): Promise<{ message: string }> {
-    return await this.planillaIngresoService.actualizarDetallesPlanilla(dni, idDetallePlanIngreso, sueldo);
-  }
+@HttpCode(HttpStatus.OK)
+async actualizarDetallesPlanilla(
+  @Body('dni') dni: string,
+  @Body('idDetallePlanIngreso') idDetallePlanIngreso: number,
+  @Body('sueldo') sueldo: number,
+  @Body('prestamos') prestamos?: number 
+): Promise<{ message: string }> {
+  return await this.planillaIngresoService.actualizarDetallesPlanilla(dni, idDetallePlanIngreso, sueldo, prestamos);
+}
 
-  @Put('/:idDetallePlanIngreso')
-  @HttpCode(HttpStatus.OK)
-  async updateSueldo(
-    @Param('idDetallePlanIngreso', ParseIntPipe) idDetallePlanIngreso: number,
-    @Body('sueldo') sueldo: number,
-  ) {
-    return await this.planillaIngresoService.updateSueldo(idDetallePlanIngreso, sueldo);
-  }
 
   @Post("/:id_planilla/:dni/:id_centro_educativo")
   create(@Param('id_planilla') id_planilla: number, @Param('dni') dni: string, @Param('id_centro_educativo') id_centro_educativo: number, @Body() createDetPlanIngDT: CreateDetallePlanIngDto) {

@@ -38,7 +38,7 @@ export class DetallePlanillaIngresoService {
   }
   
 
-  async actualizarDetallesPlanilla(dni: string, idDetallePlanIngreso: number, sueldo: number): Promise<{ message: string }> {
+  async actualizarDetallesPlanilla(dni: string, idDetallePlanIngreso: number, sueldo: number, prestamos?: number): Promise<{ message: string }> {
     const sectorEconomico = 'PRIVADO';
     const detalle = await this.detallePlanillaIngrRepo.findOne({
       where: { id_detalle_plan_Ing: idDetallePlanIngreso, persona: { dni: dni } },
@@ -49,37 +49,26 @@ export class DetallePlanillaIngresoService {
       this.logger.error(`Detalle Planilla de Ingreso no encontrado para el ID: ${idDetallePlanIngreso} y DNI: ${dni}`);
       throw new NotFoundException(`Detalle Planilla de Ingreso no encontrado para el ID: ${idDetallePlanIngreso} y DNI: ${dni}`);
     }
-
+    if (prestamos !== undefined) {
+      detalle.prestamos = prestamos;
+    }
     const aportacionesCalculadas = await this.calcularAportaciones(sueldo, sectorEconomico);
-    detalle.aportaciones = aportacionesCalculadas;
-
     const cotizacionesCalculadas = await this.calcularCotizaciones(sueldo, sectorEconomico);
+
+    detalle.aportaciones = aportacionesCalculadas;
     detalle.cotizaciones = cotizacionesCalculadas;
+    detalle.sueldo = sueldo;
+    detalle.deducciones = aportacionesCalculadas + cotizacionesCalculadas + (detalle.prestamos ?? 0);
+    detalle.sueldo_neto = sueldo - detalle.deducciones;
 
     try {
       await this.detallePlanillaIngrRepo.save(detalle);
       return { message: 'Detalles de la planilla privada actualizados con éxito.' };
     } catch (error) {
-      this.logger.error(`Error al actualizar las aportaciones y cotizaciones: ${error}`);
-      throw new InternalServerErrorException('Error al actualizar las aportaciones y cotizaciones');
+      this.logger.error(`Error al actualizar detalles de la planilla privada: ${error}`);
+      throw new InternalServerErrorException('Error al actualizar detalles de la planilla privada');
     }
-  }
-
-  async updateSueldo(idDetallePlanIngreso: number, sueldo: number): Promise<Net_Detalle_planilla_ingreso> {
-    const detalle = await this.detallePlanillaIngrRepo.findOne({
-      where: { id_detalle_plan_Ing: idDetallePlanIngreso }
-    });
-    if (!detalle) {
-      throw new NotFoundException(`Detalle de Planilla de Ingreso con ID ${idDetallePlanIngreso} no encontrado.`);
-    }
-    detalle.sueldo = sueldo;
-    try {
-      return await this.detallePlanillaIngrRepo.save(detalle);
-    } catch (error) {
-      this.logger.error(`Error al actualizar el sueldo: ${error.message}`);
-      throw new InternalServerErrorException('Error al actualizar el sueldo, por favor intente nuevamente.');
-    }
-  }
+}
 
   async calcularAportaciones(salarioBase: number, sectorEconomico: string): Promise<number> {
     let connection;

@@ -275,6 +275,13 @@ export class PlanillaColegiosPrivadosComponent
         requerido: true,
         editable: true,
       },
+      {
+        nombre: 'prestamos',
+        tipo: 'number',
+        etiqueta: 'Préstamos',
+        requerido: true,
+        editable: true,
+      },
     ];
 
     const dialogRef = this.dialog.open(EditarDialogComponent, {
@@ -285,41 +292,34 @@ export class PlanillaColegiosPrivadosComponent
     dialogRef.afterClosed().subscribe((result) => {
       if (result) {
         const nuevoSueldo = result.sueldo;
+        const nuevosPrestamos = result.prestamos;
         const idDetallePlanIngreso: any = row.id_detalle_plan_Ing;
         const dni = row.identidad;
         const idCentroTrabajo: any = this.idCentroTrabajo;
-        const idTipoPlanilla: any = this.firstFormGroup.value.selectedTipoPlanilla[0].ID_TIPO_PLANILLA;
 
-        this.planillaIngresosService.actualizarSueldo(idDetallePlanIngreso, nuevoSueldo).subscribe({
+        this.planillaIngresosService.actualizarSalarioBase(dni, idCentroTrabajo, nuevoSueldo).subscribe({
           next: () => {
-            this.planillaIngresosService.actualizarSalarioBase(dni, idCentroTrabajo, nuevoSueldo).subscribe({
-              next: () => {
-                this.planillaIngresosService.actualizarDetallesPlanillaPrivada(dni, idDetallePlanIngreso, nuevoSueldo).subscribe({
-                  next: (response) => {
-                    this.toastr.success('Detalles de la planilla actualizados con éxito');
-                    this.obtenerDetallesPlanilla(idCentroTrabajo, idTipoPlanilla);
-                    this.obtenerDetallesPlanillaAgrupCent(idCentroTrabajo, idTipoPlanilla);
-                  },
-                  error: (error) => {
-                    console.error('Error al actualizar detalles de la planilla privada:', error);
-                    this.toastr.error('Error al actualizar detalles de la planilla privada');
-                  }
-                });
+            this.planillaIngresosService.actualizarDetallesPlanillaPrivada(dni, idDetallePlanIngreso, nuevoSueldo, nuevosPrestamos).subscribe({
+              next: (response) => {
+                this.toastr.success('Detalles de la planilla actualizados con éxito');
+                this.obtenerDetallesPlanilla(idCentroTrabajo, this.selectedTipoPlanilla[0].ID_TIPO_PLANILLA);
+                this.obtenerDetallesPlanillaAgrupCent(idCentroTrabajo, this.selectedTipoPlanilla[0].ID_TIPO_PLANILLA);
               },
               error: (error) => {
-                console.error('Error al actualizar el salario base:', error);
-                this.toastr.error('Error al actualizar el salario base');
+                console.error('Error al actualizar detalles de la planilla privada:', error);
+                this.toastr.error('Error al actualizar detalles de la planilla privada');
               }
             });
           },
           error: (error) => {
-            console.error('Error al actualizar el sueldo en detalle planilla ingreso:', error);
-            this.toastr.error('Error al actualizar el sueldo en detalle planilla ingreso');
+            console.error('Error al actualizar el salario base:', error);
+            this.toastr.error('Error al actualizar el salario base');
           }
         });
       }
     });
   }
+
 
   eliminarElemento(row: UserData) {
     const dialogRef = this.dialog.open(ConfirmDialogComponent, {
@@ -335,11 +335,7 @@ export class PlanillaColegiosPrivadosComponent
         this.planillaIngresosService.eliminarDetallePlanillaIngreso(row.id_detalle_plan_Ing).subscribe({
           next: (response) => {
             this.toastr.success(response.message);
-            console.log(this.idCentroTrabajo);
-            console.log(this.selectedTipoPlanilla);
-
             if (this.selectedTipoPlanilla && this.selectedTipoPlanilla.length > 0) {
-              console.log(this.selectedTipoPlanilla[0].ID_TIPO_PLANILLA);
               this.obtenerDetallesPlanilla(this.idCentroTrabajo, this.selectedTipoPlanilla[0].ID_TIPO_PLANILLA);
               this.obtenerDetallesPlanillaAgrupCent(this.idCentroTrabajo, this.selectedTipoPlanilla[0].ID_TIPO_PLANILLA);
             } else {

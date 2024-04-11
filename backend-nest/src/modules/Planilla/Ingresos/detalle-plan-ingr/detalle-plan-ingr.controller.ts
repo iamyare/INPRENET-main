@@ -1,4 +1,4 @@
-import { BadRequestException, Body, Controller, HttpStatus, Param, Post, Res, Get, Logger, Query, NotFoundException, InternalServerErrorException } from '@nestjs/common';
+import { BadRequestException, Body, Controller, HttpStatus, Param, Post, Res, Get, Logger, Query, NotFoundException, InternalServerErrorException, Put, HttpCode, ParseIntPipe } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { DetallePlanillaIngresoService } from './detalle-planilla-ing.service';
 
@@ -8,6 +8,27 @@ export class DetallePlanIngrController {
   private readonly logger = new Logger(DetallePlanIngrController.name);
 
   constructor(private readonly planillaIngresoService: DetallePlanillaIngresoService) { }
+
+  @Put('/actualizar-detalles-planilla-privada')
+@HttpCode(HttpStatus.OK)
+async actualizarDetallesPlanilla(
+  @Body('dni') dni: string,
+  @Body('idDetallePlanIngreso') idDetallePlanIngreso: number,
+  @Body('sueldo') sueldo: number
+): Promise<{ message: string }> {
+  return await this.planillaIngresoService.actualizarDetallesPlanilla(dni, idDetallePlanIngreso, sueldo);
+}
+
+
+
+  @Put('/:idDetallePlanIngreso')
+  @HttpCode(HttpStatus.OK)
+  async updateSueldo(
+    @Param('idDetallePlanIngreso', ParseIntPipe) idDetallePlanIngreso: number,
+    @Body('sueldo') sueldo: number,
+  ) {
+    return await this.planillaIngresoService.updateSueldo(idDetallePlanIngreso, sueldo);
+  }
 
   @Post()
   create(@Body('idCentroTrabajo') idCentroTrabajo: number) {

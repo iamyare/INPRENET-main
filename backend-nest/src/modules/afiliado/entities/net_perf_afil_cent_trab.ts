@@ -17,9 +17,6 @@ export class Net_perf_afil_cent_trab {
     @Column('date', { nullable: false, name: 'FECHA_INGRESO' })
     fecha_ingreso: string;
 
-    /*     @Column('date', { nullable: false, name: 'FECHA_PAGO' })
-        fecha_pago: string; */
-
     @Column('number', { nullable: true, name: 'SALARIO_BASE' })
     salario_base: number;
 

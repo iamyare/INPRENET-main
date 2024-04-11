@@ -26,7 +26,7 @@ import { Net_Estado_Afiliado } from './entities/net_estado_afiliado.entity';
       Net_Afiliados_Por_Banco, Net_Departamento,
       Net_Pais, Net_TipoIdentificacion,
       Net_Centro_Trabajo, Net_Banco, Net_Detalle_Afiliado, Net_Tipo_Persona])
-  ]
-
+  ],
+  exports: [TypeOrmModule, AfiliadoService],
 })
 export class AfiliadoModule { }

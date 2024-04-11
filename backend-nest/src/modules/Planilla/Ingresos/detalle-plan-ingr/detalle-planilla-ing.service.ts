@@ -1,22 +1,13 @@
 import { BadRequestException, Injectable, Logger, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import { InjectEntityManager, InjectRepository } from '@nestjs/typeorm';
 import { EntityManager, Repository } from 'typeorm';
-
-/* import * as xlsx from 'xlsx';
-import { Net_Institucion } from 'src/modules/Empresarial/institucion/entities/net_institucion.entity';
-import { AfiliadoService } from 'src/modules/afiliado/afiliado.service';
-import { Net_Detalle_Afiliado } from 'src/modules/afiliado/entities/Net_detalle_persona.entity';
-import { CreateDetallePlanIngDto } from './dto/create-detalle-plani-Ing.dto';
-import { UpdateDetallePlanIngDto } from './dto/update-detalle-plani-Ing.dto';
-import { startOfMonth, endOfMonth, lastDayOfMonth } from 'date-fns';
-import { getManager } from 'typeorm'; */
-
 import { Net_SALARIO_COTIZABLE } from './entities/net_detalle_plani_ing.entity copy';
 import { Net_TipoPlanilla } from '../../tipo-planilla/entities/tipo-planilla.entity';
 import { Net_Detalle_planilla_ingreso } from './entities/net_detalle_plani_ing.entity';
 import { Net_Planilla } from '../../planilla/entities/net_planilla.entity';
 import { DateTime } from 'luxon';
 import { Net_Persona } from '../../../afiliado/entities/Net_Persona';
+import * as oracledb from 'oracledb';
 
 @Injectable()
 export class DetallePlanillaIngresoService {
@@ -30,7 +21,117 @@ export class DetallePlanillaIngresoService {
 
   constructor(
     @InjectEntityManager() private readonly entityManager: EntityManager,
+    @InjectRepository(Net_Detalle_planilla_ingreso)
+    private detallePlanillaIngrRepo: Repository<Net_Detalle_planilla_ingreso>,
   ) { }
+
+  async actualizarDetallesPlanilla(dni: string, idDetallePlanIngreso: number, sueldo: number): Promise<{ message: string }> {
+    const sectorEconomico = 'PRIVADO';
+    const detalle = await this.detallePlanillaIngrRepo.findOne({
+      where: { id_detalle_plan_Ing: idDetallePlanIngreso, persona: { dni: dni } },
+      relations: ['persona']
+    });
+
+    if (!detalle) {
+      this.logger.error(`Detalle Planilla de Ingreso no encontrado para el ID: ${idDetallePlanIngreso} y DNI: ${dni}`);
+      throw new NotFoundException(`Detalle Planilla de Ingreso no encontrado para el ID: ${idDetallePlanIngreso} y DNI: ${dni}`);
+    }
+
+    const aportacionesCalculadas = await this.calcularAportaciones(sueldo, sectorEconomico);
+    detalle.aportaciones = aportacionesCalculadas;
+
+    const cotizacionesCalculadas = await this.calcularCotizaciones(sueldo, sectorEconomico);
+    detalle.cotizaciones = cotizacionesCalculadas;
+
+    try {
+      await this.detallePlanillaIngrRepo.save(detalle);
+      return { message: 'Detalles de la planilla privada actualizados con éxito.' };
+    } catch (error) {
+      this.logger.error(`Error al actualizar las aportaciones y cotizaciones: ${error}`);
+      throw new InternalServerErrorException('Error al actualizar las aportaciones y cotizaciones');
+    }
+}
+
+
+
+
+
+
+  async updateSueldo(idDetallePlanIngreso: number, sueldo: number): Promise<Net_Detalle_planilla_ingreso> {
+    const detalle = await this.detallePlanillaIngrRepo.findOne({
+      where: { id_detalle_plan_Ing: idDetallePlanIngreso }
+    });
+    if (!detalle) {
+      throw new NotFoundException(`Detalle de Planilla de Ingreso con ID ${idDetallePlanIngreso} no encontrado.`);
+    }
+    detalle.sueldo = sueldo;
+    try {
+      return await this.detallePlanillaIngrRepo.save(detalle);
+    } catch (error) {
+      this.logger.error(`Error al actualizar el sueldo: ${error.message}`);
+      throw new InternalServerErrorException('Error al actualizar el sueldo, por favor intente nuevamente.');
+    }
+  }
+
+  async calcularAportaciones(salarioBase: number, sectorEconomico: string): Promise<number> {
+    let connection;
+    try {
+      connection = await oracledb.getConnection({
+        user: process.env.DB_USERNAME,
+        password: process.env.DB_PASSWORD,
+        connectString: process.env.CONNECT_STRING
+      });
+  
+      const result = await connection.execute(
+        `BEGIN SP_CALCULAR_APORTACIONES(:salarioBase, :sectorEconomico, :sueldoNeto); END;`,
+        { salarioBase, sectorEconomico, sueldoNeto: { dir: oracledb.BIND_OUT, type: oracledb.NUMBER } }
+      );
+  
+      return result.outBinds.sueldoNeto;
+    } catch (error) {
+      this.logger.error(`Error al calcular las aportaciones: ${error}`);
+      throw new InternalServerErrorException('Error al calcular las aportaciones');
+    } finally {
+      if (connection) {
+        try {
+          await connection.close();
+        } catch (error) {
+          this.logger.error(`Error al cerrar la conexión: ${error}`);
+        }
+      }
+    }
+  }
+
+  async calcularCotizaciones(salarioBase: number, sectorEconomico: string): Promise<number> {
+    let connection;
+    try {
+      connection = await oracledb.getConnection({
+        user: process.env.DB_USERNAME,
+        password: process.env.DB_PASSWORD,
+        connectString: process.env.CONNECT_STRING
+      });
+
+      const result = await connection.execute(
+        `BEGIN SP_CALCULAR_COTIZACIONES(:salarioBase, :sectorEconomico, :sueldoNeto); END;`,
+        { salarioBase, sectorEconomico, sueldoNeto: { dir: oracledb.BIND_OUT, type: oracledb.NUMBER } }
+      );
+
+      return result.outBinds.sueldoNeto;
+    } catch (error) {
+      this.logger.error(`Error al calcular las cotizaciones: ${error}`);
+      throw new InternalServerErrorException('Error al calcular las cotizaciones');
+    } finally {
+      if (connection) {
+        try {
+          await connection.close();
+        } catch (error) {
+          this.logger.error(`Error al cerrar la conexión: ${error}`);
+        }
+      }
+    }
+  }
+
+
   private calculoSueldoBase(salarioCotizableRepository): number {
     let sueldoBase;
     let porcAportMin;
@@ -192,6 +293,7 @@ export class DetallePlanillaIngresoService {
             .select([
               'persona.dni AS Identidad',
               'persona.primer_nombre || \' \' || persona.primer_apellido AS NombrePersona',
+              'detalle.ID_DETALLE_PLAN_INGRESO AS id_detalle_plan_ingreso',
               'detalle.sueldo AS Sueldo',
               'detalle.aportaciones AS Aportaciones',
               'detalle.prestamos AS Prestamos',
@@ -230,6 +332,7 @@ export class DetallePlanillaIngresoService {
           .select([
             'persona.dni AS Identidad',
             'persona.primer_nombre || \' \' || persona.primer_apellido AS NombrePersona',
+            'detalle.ID_DETALLE_PLAN_INGRESO AS id_detalle_plan_ingreso',
             'detalle.sueldo AS Sueldo',
             'detalle.aportaciones AS Aportaciones',
             'detalle.prestamos AS Prestamos',
@@ -265,6 +368,7 @@ export class DetallePlanillaIngresoService {
           .select([
             'persona.dni AS Identidad',
             'persona.primer_nombre || \' \' || persona.primer_apellido AS NombrePersona',
+            'detalle.ID_DETALLE_PLAN_INGRESO AS id_detalle_plan_ingreso',
             'detalle.sueldo AS Sueldo',
             'detalle.aportaciones AS Aportaciones',
             'detalle.prestamos AS Prestamos',

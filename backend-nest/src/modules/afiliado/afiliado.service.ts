@@ -8,16 +8,11 @@ import { Net_Afiliados_Por_Banco } from '../banco/entities/net_afiliados-banco';
 import { Net_Centro_Trabajo } from '../Empresarial/centro-trabajo/entities/net_centro-trabajo.entity';
 import { Net_Banco } from '../banco/entities/net_banco.entity';
 import { Net_TipoIdentificacion } from '../tipo_identificacion/entities/net_tipo_identificacion.entity';
-/* import { Pais } from '../Regional/pais/entities/pais.entity'; */
-
-/* import { departamento } from '../Regional/departamento/entities/departamento.entity'; */
 import { Net_Pais } from '../Regional/pais/entities/pais.entity';
 import { CreateAfiliadoTempDto } from './dto/create-afiliado-temp.dto';
 import { validate as isUUID } from 'uuid';
-import { Net_Detalle_Afiliado } from './entities/Net_detalle_persona.entity';
 import { Net_Persona } from './entities/Net_Persona';
 import { Net_Departamento } from '../Regional/provincia/entities/net_departamento.entity';
-import { map } from 'rxjs';
 
 @Injectable()
 export class AfiliadoService {
@@ -29,11 +24,28 @@ export class AfiliadoService {
 
     @InjectRepository(Net_Persona)
     private readonly afiliadoRepository: Repository<Net_Persona>,
-    @InjectRepository(Net_Detalle_Afiliado)
-    private datosIdentificacionRepository: Repository<Net_Detalle_Afiliado>,
+    @InjectRepository(Net_perf_afil_cent_trab)
+    private readonly perfAfiliCentTrabRepository: Repository<Net_perf_afil_cent_trab>,
 
     private connection: Connection,
   ) { }
+
+  async updateSalarioBase(dni: string, idCentroTrabajo: number, salarioBase: number): Promise<void> {
+
+    const perfil = await this.perfAfiliCentTrabRepository
+      .createQueryBuilder('perfil')
+      .leftJoinAndSelect('perfil.afiliado', 'afiliado')
+      .where('afiliado.DNI = :dni', { dni })
+      .andWhere('perfil.centroTrabajo = :idCentroTrabajo', { idCentroTrabajo })
+      .getOne();
+
+    if (!perfil) {
+      throw new NotFoundException(`El perfil con DNI ${dni} y centro de trabajo ID ${idCentroTrabajo} no fue encontrado.`);
+    }
+
+    perfil.salario_base = salarioBase;
+    await this.perfAfiliCentTrabRepository.save(perfil);
+  }
 
   async create(createAfiliadoDto: CreateAfiliadoDto): Promise<Net_Persona> {
     const queryRunner = this.connection.createQueryRunner();

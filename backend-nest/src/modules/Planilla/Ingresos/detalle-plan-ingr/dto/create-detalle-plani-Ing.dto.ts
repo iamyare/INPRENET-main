@@ -2,12 +2,6 @@ import { IsNotEmpty, IsNumber, IsOptional, IsString, Length, } from "class-valid
 
 export class CreateDetallePlanIngDto {
     @IsNumber()
-    prestamos: number;
-
-    @IsString()
-    dni: string;
-
-    @IsNumber()
     @IsOptional()
     idInstitucion?: number;
 
@@ -18,5 +12,11 @@ export class CreateDetallePlanIngDto {
     @IsNumber()
     @IsOptional()
     mes?: number;
+
+    @IsNumber()
+    prestamos: number;
+
+    @IsNumber()
+    salario_base: number;
 
 }

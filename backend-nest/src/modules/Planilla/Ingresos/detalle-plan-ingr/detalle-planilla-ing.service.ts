@@ -8,6 +8,7 @@ import { Net_Planilla } from '../../planilla/entities/net_planilla.entity';
 import { DateTime } from 'luxon';
 import { Net_Persona } from '../../../afiliado/entities/Net_Persona';
 import * as oracledb from 'oracledb';
+import { CreateDetallePlanIngDto } from './dto/create-detalle-plani-Ing.dto';
 
 @Injectable()
 export class DetallePlanillaIngresoService {
@@ -50,12 +51,7 @@ export class DetallePlanillaIngresoService {
       this.logger.error(`Error al actualizar las aportaciones y cotizaciones: ${error}`);
       throw new InternalServerErrorException('Error al actualizar las aportaciones y cotizaciones');
     }
-}
-
-
-
-
-
+  }
 
   async updateSueldo(idDetallePlanIngreso: number, sueldo: number): Promise<Net_Detalle_planilla_ingreso> {
     const detalle = await this.detallePlanillaIngrRepo.findOne({
@@ -81,12 +77,12 @@ export class DetallePlanillaIngresoService {
         password: process.env.DB_PASSWORD,
         connectString: process.env.CONNECT_STRING
       });
-  
+
       const result = await connection.execute(
         `BEGIN SP_CALCULAR_APORTACIONES(:salarioBase, :sectorEconomico, :sueldoNeto); END;`,
         { salarioBase, sectorEconomico, sueldoNeto: { dir: oracledb.BIND_OUT, type: oracledb.NUMBER } }
       );
-  
+
       return result.outBinds.sueldoNeto;
     } catch (error) {
       this.logger.error(`Error al calcular las aportaciones: ${error}`);
@@ -131,146 +127,39 @@ export class DetallePlanillaIngresoService {
     }
   }
 
+  async insertNetDetPlanilla(id_planilla: number, dni: string, id_centro_educativo: number, createDetPlanIngDTO: CreateDetallePlanIngDto): Promise<boolean> {
+    const { prestamos, salario_base } = createDetPlanIngDTO
 
-  private calculoSueldoBase(salarioCotizableRepository): number {
-    let sueldoBase;
-    let porcAportMin;
+    let persona = await this.personaRepository.findOne({
+      where: { dni: dni, perfAfilCentTrabs: { centroTrabajo: { id_centro_trabajo: id_centro_educativo } } },
+      relations: ["perfAfilCentTrabs", "perfAfilCentTrabs.centroTrabajo"]
+    });
 
-    const accionesSalario = {
-      "SUELDO BASE": (tem: any) => {
-        sueldoBase = tem
-      },
-      "APORTACION MINIMA": (tem: any) => {
-        porcAportMin = tem;
-      },
-    };
-
-    for (let salarioC of salarioCotizableRepository) {
-      const accion = accionesSalario[salarioC.nombre];
-      if (accion) {
-        accion(salarioC.valor); // Ejecutar la acción asociada al nombre del salario
-      }
+    if (!persona) {
+      return false;
     }
 
-    return sueldoBase * porcAportMin
-  }
-  private calculoAportaciones(persona: Net_Persona, salarioCotizableRepository): number {
-    const { salario_base, centroTrabajo } = persona.perfAfilCentTrabs[0]
-
-    let LimiteSSL;
-    let PorcAportacionSECPriv;
-    let PorcAportacionSECPUB;
-
-    const accionesSalario = {
-      "APORTACION SECTOR PUBLICO": (tem: any) => {
-        PorcAportacionSECPUB = tem
-      },
-      "IPC INTERANUAL": (tem: any) => {
-      },
-      "APORTACION SECTOR PRIVADO": (tem: any) => {
-        PorcAportacionSECPriv = tem;
-      },
-      "LIMITE SSC": (tem: any) => {
-        LimiteSSL = tem;
-      },
-    };
-
-    for (let salarioC of salarioCotizableRepository) {
-      const accion = accionesSalario[salarioC.nombre];
-      if (accion) {
-        accion(salarioC.valor); // Ejecutar la acción asociada al nombre del salario
-      }
-    }
-    const sueldoBase = this.calculoSueldoBase(salarioCotizableRepository);
-
-    if (salario_base <= sueldoBase && salario_base <= LimiteSSL) {
-      return sueldoBase;
-    } else if (centroTrabajo.sector_economico == "PRIVADO" && salario_base <= LimiteSSL) {
-      return salario_base * PorcAportacionSECPriv
-    } else if (centroTrabajo.sector_economico == "PRIVADO" && salario_base > LimiteSSL) {
-      return LimiteSSL
-    } else if (centroTrabajo.sector_economico == "PUBLICO" && salario_base <= LimiteSSL) {
-      /* return salarioBaseAfiliado * PorcAportacionSECPUB */
-    }
-
-  }
-
-  private calculoCotizaciones(persona: Net_Persona, salarioCotizableRepository): number {
-    const salarioBaseAfiliado = persona.perfAfilCentTrabs[0].salario_base
-    const sector_economico = persona.perfAfilCentTrabs[0].centroTrabajo.sector_economico
-
-    let limiteSSL;
-    let cotizacionDoc;
-    let cotizacionEsc;
-
-    const accionesSalario = {
-      "COTIZACION DOCENTE": (tem: any) => {
-        cotizacionDoc = tem
-      },
-      "COTIZACION ESCALONADA": (tem: any) => {
-        cotizacionEsc = tem
-      },
-      "LIMITE SSC": (tem: any) => {
-        limiteSSL = tem;
-      },
-      "IPC INTERANUAL": (tem: any) => {
-      }
-    };
-
-    for (let salarioC of salarioCotizableRepository) {
-      const accion = accionesSalario[salarioC.nombre];
-      if (accion) {
-        accion(salarioC.valor); // Ejecutar la acción asociada al nombre del salario
-      }
-    }
-
-    if (salarioBaseAfiliado < 20000 && sector_economico == "PRIVADO") {
-      return salarioBaseAfiliado * cotizacionDoc
-    } else if (salarioBaseAfiliado >= 20000 && sector_economico == "PRIVADO") {
-      return salarioBaseAfiliado * cotizacionEsc
-    }
-
-  }
-
-  private async insertNetDetPlanilla(id_planilla, persona, salarioCotizableRepository, createDetPlanIngDTO): Promise<number> {
-    const { idInstitucion, prestamos } = createDetPlanIngDTO
     let ValoresDetalle = {
       idpersona: persona.id_persona,
-      idInstitucion: idInstitucion,
-      sueldo: persona.perfAfilCentTrabs[0].salario_base,
+      sueldo: salario_base,
       prestamos: prestamos,
-      aportaciones: this.calculoAportaciones(persona, salarioCotizableRepository),
-      cotizaciones: this.calculoCotizaciones(persona, salarioCotizableRepository),
-      deducciones: this.calculoAportaciones(persona, salarioCotizableRepository) + this.calculoCotizaciones(persona, salarioCotizableRepository) + prestamos,
-      sueldo_neto: persona.perfAfilCentTrabs[0].salario_base - (this.calculoAportaciones(persona, salarioCotizableRepository) + this.calculoCotizaciones(persona, salarioCotizableRepository) + createDetPlanIngDTO.prestamos)
+      id_centro_educativo: id_centro_educativo,
+      sector_economico: persona.perfAfilCentTrabs[0].centroTrabajo.sector_economico,
+      id_planilla: id_planilla
     }
-    const queryInsDeBBenf = `INSERT INTO NET_DETALLE_PLANILLA_ING (
-        SUELDO,
-        PRESTAMOS,
-        APORTACIONES,
-        COTIZACIONES,
-        DEDUCCIONES,
-        SUELDO_NETO,
-        ID_PERSONA,
-        ID_CENTRO_TRABAJO,
-        ID_PLANILLA
-      ) VALUES (
-        ${ValoresDetalle.sueldo},
-        ${ValoresDetalle.prestamos},
-        ${ValoresDetalle.aportaciones},
-        ${ValoresDetalle.cotizaciones},
-        '${ValoresDetalle.deducciones}',
-        '${ValoresDetalle.sueldo_neto}',
-        ${ValoresDetalle.idpersona},
-        ${ValoresDetalle.idInstitucion},
-        ${id_planilla}
-      )`
 
-    const detPlanillaIng = await this.entityManager.query(queryInsDeBBenf);
-    return detPlanillaIng;
+    const query = `
+    BEGIN
+      SP_INSERTAR_NET_DET_PLANILLA_ING(${ValoresDetalle.idpersona}, ${ValoresDetalle.id_centro_educativo}, ${ValoresDetalle.sueldo}, ${ValoresDetalle.prestamos}, '${ValoresDetalle.sector_economico}', ${ValoresDetalle.id_planilla});
+    END;
+    `;
+
+    console.log(query);
+
+
+    await this.entityManager.query(query);
+    return true
   }
-
-
 
   async obtenerDetallesPorCentroTrabajo(idCentroTrabajo: number, id_tipo_planilla: number): Promise<any> {
     let tipoPlanilla = await this.tipoPlanillaRepository.findOne({
@@ -300,6 +189,7 @@ export class DetallePlanillaIngresoService {
               'detalle.cotizaciones AS Cotizaciones',
               'detalle.deducciones AS Deducciones',
               'detalle.sueldo_neto AS SueldoNeto',
+              'planilla.ID_PLANILLA AS id_planilla',
               'planilla.PERIODO_INICIO AS periodo_inicio',
               'planilla.PERIODO_FINALIZACION AS periodo_finalizacion'
             ])
@@ -339,6 +229,7 @@ export class DetallePlanillaIngresoService {
             'detalle.cotizaciones AS Cotizaciones',
             'detalle.deducciones AS Deducciones',
             'detalle.sueldo_neto AS SueldoNeto',
+            'planilla.ID_PLANILLA AS id_planilla',
             'planilla.PERIODO_INICIO AS periodo_inicio',
             'planilla.PERIODO_FINALIZACION AS periodo_finalizacion'
           ])
@@ -375,6 +266,7 @@ export class DetallePlanillaIngresoService {
             'detalle.cotizaciones AS Cotizaciones',
             'detalle.deducciones AS Deducciones',
             'detalle.sueldo_neto AS SueldoNeto',
+            'planilla.ID_PLANILLA AS id_planilla',
             'planilla.PERIODO_INICIO AS periodo_inicio',
             'planilla.PERIODO_FINALIZACION AS periodo_finalizacion'
           ])
@@ -430,15 +322,8 @@ export class DetallePlanillaIngresoService {
             .innerJoin('planilla.tipoPlanilla', 'tipoPlanilla')
             .where('centroTrabajo.id_centro_trabajo = :idCentroTrabajo', { idCentroTrabajo })
             .andWhere('tipoPlanilla.id_tipo_planilla = :id_tipo_planilla', { id_tipo_planilla })
-            .andWhere(`planilla.FECHA_APERTURA = (SELECT MAX("NET_PLANILLA"."FECHA_APERTURA") FROM "NET_PLANILLA" WHERE "NET_PLANILLA".ID_TIPO_PLANILLA = ${id_tipo_planilla})`)
-            .groupBy('centroTrabajo.id_centro_trabajo') // Agrupamos por el id del centro de trabajo
-            .addGroupBy('centroTrabajo.id_centro_trabajo') // Agrupamos por el id del centro de trabajo
-            .addGroupBy('centroTrabajo.nombre_centro_trabajo') // Agrupamos por el id del centro de trabajo
-            .addGroupBy('detalle.sueldo') // Agrupamos por el id del centro de trabajo
-            .addGroupBy('detalle.aportaciones') // Agrupamos por el id del centro de trabajo
-            .addGroupBy('detalle.prestamos') // Agrupamos por el id del centro de trabajo
-            .addGroupBy('detalle.cotizaciones') // Agrupamos por el id del centro de trabajo
-            .addGroupBy('detalle.deducciones') // Agrupamos por el id del centro de trabajo
+            .groupBy('centroTrabajo.id_centro_trabajo')
+            .addGroupBy('centroTrabajo.nombre_centro_trabajo')
             .getRawMany();
 
           if (!detalles.length) {
@@ -450,59 +335,27 @@ export class DetallePlanillaIngresoService {
           return detalles;
         }
       } else if (nombre_planilla == "PLANILLA DECIMO TERCERO") {
-        const fechaInicioMesAnterior = DateTime.local(año, 6, 1).toFormat('dd/MM/yyyy');
-
-        /* const detalles = await this.detallePlanillaIngr
-        .createQueryBuilder("detalle")
-            .select([
-              'centroTrabajo.id_centro_trabajo AS id_centro_trabajo',
-              'centroTrabajo.nombre_centro_trabajo AS nombre_centro_trabajo',
-              'SUM(detalle.sueldo) AS Sueldo',
-              'SUM(detalle.aportaciones) AS Aportaciones',
-              'SUM(detalle.prestamos) AS Prestamos',
-              'SUM(detalle.cotizaciones) AS Cotizaciones',
-              'SUM(detalle.deducciones) AS Deducciones'
-            ])
-            .innerJoin('detalle.persona', 'persona')
-            .innerJoin('detalle.centroTrabajo', 'centroTrabajo')
-            .innerJoin('detalle.planilla', 'planilla')
-            .innerJoin('planilla.tipoPlanilla', 'tipoPlanilla')
-            .where('centroTrabajo.id_centro_trabajo = :idCentroTrabajo', { idCentroTrabajo })
-            .andWhere('tipoPlanilla.id_tipo_planilla = :id_tipo_planilla', { id_tipo_planilla })
-            .andWhere(`planilla.FECHA_APERTURA = (SELECT MAX("NET_PLANILLA"."FECHA_APERTURA") FROM "NET_PLANILLA" WHERE "NET_PLANILLA".ID_TIPO_PLANILLA = ${id_tipo_planilla})`)
-            .groupBy('centroTrabajo.id_centro_trabajo') // Agrupamos por el id del centro de trabajo
-            .addGroupBy('centroTrabajo.id_centro_trabajo') // Agrupamos por el id del centro de trabajo
-            .addGroupBy('centroTrabajo.nombre_centro_trabajo') // Agrupamos por el id del centro de trabajo
-            .addGroupBy('detalle.sueldo') // Agrupamos por el id del centro de trabajo
-            .addGroupBy('detalle.aportaciones') // Agrupamos por el id del centro de trabajo
-            .addGroupBy('detalle.prestamos') // Agrupamos por el id del centro de trabajo
-            .addGroupBy('detalle.cotizaciones') // Agrupamos por el id del centro de trabajo
-            .addGroupBy('detalle.deducciones') // Agrupamos por el id del centro de trabajo
-            .getRawMany(); */
+        //const fechaInicioMesAnterior = DateTime.local(año, 6, 1).toFormat('dd/MM/yyyy');
 
         const detalles = await this.detallePlanillaIngr
-          .createQueryBuilder('detalle')
-          .innerJoinAndSelect('detalle.persona', 'persona')
-          .innerJoinAndSelect('detalle.centroTrabajo', 'centroTrabajo')
-          .innerJoinAndSelect('detalle.planilla', 'planilla')
-          .innerJoinAndSelect('planilla.tipoPlanilla', 'tipoPlanilla')
+          .createQueryBuilder("detalle")
           .select([
-            'persona.dni AS Identidad',
-            'persona.primer_nombre || \' \' || persona.primer_apellido AS NombrePersona',
-            'detalle.sueldo AS Sueldo',
-            'detalle.aportaciones AS Aportaciones',
-            'detalle.prestamos AS Prestamos',
-            'detalle.cotizaciones AS Cotizaciones',
-            'detalle.deducciones AS Deducciones',
-            'detalle.sueldo_neto AS SueldoNeto',
-            'planilla.PERIODO_INICIO AS periodo_inicio',
-            'planilla.PERIODO_FINALIZACION AS periodo_finalizacion'
+            'centroTrabajo.id_centro_trabajo AS id_centro_trabajo',
+            'centroTrabajo.nombre_centro_trabajo AS nombre_centro_trabajo',
+            'SUM(detalle.sueldo) AS Sueldo',
+            'SUM(detalle.aportaciones) AS Aportaciones',
+            'SUM(detalle.prestamos) AS Prestamos',
+            'SUM(detalle.cotizaciones) AS Cotizaciones',
+            'SUM(detalle.deducciones) AS Deducciones'
           ])
-          .where(`
-        centroTrabajo.id_centro_trabajo = :idCentroTrabajo AND tipoPlanilla.id_tipo_planilla = :id_tipo_planilla
-        AND "planilla"."PERIODO_INICIO" BETWEEN TO_DATE('${fechaInicioMesAnterior}', 'DD/MM/YYYY') AND LAST_DAY(TO_DATE('${fechaInicioMesAnterior}', 'DD/MM/YYYY'))
-        AND "planilla"."PERIODO_FINALIZACION" BETWEEN TO_DATE('${fechaInicioMesAnterior}', 'DD/MM/YYYY') AND LAST_DAY(TO_DATE('${fechaInicioMesAnterior}', 'DD/MM/YYYY'))`,
-            { idCentroTrabajo, id_tipo_planilla })
+          .innerJoin('detalle.persona', 'persona')
+          .innerJoin('detalle.centroTrabajo', 'centroTrabajo')
+          .innerJoin('detalle.planilla', 'planilla')
+          .innerJoin('planilla.tipoPlanilla', 'tipoPlanilla')
+          .where('centroTrabajo.id_centro_trabajo = :idCentroTrabajo', { idCentroTrabajo })
+          .andWhere('tipoPlanilla.id_tipo_planilla = :id_tipo_planilla', { id_tipo_planilla })
+          .groupBy('centroTrabajo.id_centro_trabajo')
+          .addGroupBy('centroTrabajo.nombre_centro_trabajo')
           .getRawMany();
 
         if (!detalles.length) {
@@ -513,31 +366,26 @@ export class DetallePlanillaIngresoService {
         return detalles
 
       } else if (nombre_planilla == "PLANILLA DECIMO CUARTO") {
-        const fechaInicioMesAnterior = DateTime.local(año, 12, 1).toFormat('dd/MM/yyyy');
-
+        //const fechaInicioMesAnterior = DateTime.local(año, 12, 1).toFormat('dd/MM/yyyy');
         const detalles = await this.detallePlanillaIngr
-          .createQueryBuilder('detalle')
-          .innerJoinAndSelect('detalle.persona', 'persona')
-          .innerJoinAndSelect('detalle.centroTrabajo', 'centroTrabajo')
-          .innerJoinAndSelect('detalle.planilla', 'planilla')
-          .innerJoinAndSelect('planilla.tipoPlanilla', 'tipoPlanilla')
+          .createQueryBuilder("detalle")
           .select([
-            'persona.dni AS Identidad',
-            'persona.primer_nombre || \' \' || persona.primer_apellido AS NombrePersona',
-            'detalle.sueldo AS Sueldo',
-            'detalle.aportaciones AS Aportaciones',
-            'detalle.prestamos AS Prestamos',
-            'detalle.cotizaciones AS Cotizaciones',
-            'detalle.deducciones AS Deducciones',
-            'detalle.sueldo_neto AS SueldoNeto',
-            'planilla.PERIODO_INICIO AS periodo_inicio',
-            'planilla.PERIODO_FINALIZACION AS periodo_finalizacion'
+            'centroTrabajo.id_centro_trabajo AS id_centro_trabajo',
+            'centroTrabajo.nombre_centro_trabajo AS nombre_centro_trabajo',
+            'SUM(detalle.sueldo) AS Sueldo',
+            'SUM(detalle.aportaciones) AS Aportaciones',
+            'SUM(detalle.prestamos) AS Prestamos',
+            'SUM(detalle.cotizaciones) AS Cotizaciones',
+            'SUM(detalle.deducciones) AS Deducciones'
           ])
-          .where(`
-        centroTrabajo.id_centro_trabajo = :idCentroTrabajo AND tipoPlanilla.id_tipo_planilla = :id_tipo_planilla
-        AND "planilla"."PERIODO_INICIO" BETWEEN TO_DATE('${fechaInicioMesAnterior}', 'DD/MM/YYYY') AND LAST_DAY(TO_DATE('${fechaInicioMesAnterior}', 'DD/MM/YYYY'))
-        AND "planilla"."PERIODO_FINALIZACION" BETWEEN TO_DATE('${fechaInicioMesAnterior}', 'DD/MM/YYYY') AND LAST_DAY(TO_DATE('${fechaInicioMesAnterior}', 'DD/MM/YYYY'))`,
-            { idCentroTrabajo, id_tipo_planilla })
+          .innerJoin('detalle.persona', 'persona')
+          .innerJoin('detalle.centroTrabajo', 'centroTrabajo')
+          .innerJoin('detalle.planilla', 'planilla')
+          .innerJoin('planilla.tipoPlanilla', 'tipoPlanilla')
+          .where('centroTrabajo.id_centro_trabajo = :idCentroTrabajo', { idCentroTrabajo })
+          .andWhere('tipoPlanilla.id_tipo_planilla = :id_tipo_planilla', { id_tipo_planilla })
+          .groupBy('centroTrabajo.id_centro_trabajo')
+          .addGroupBy('centroTrabajo.nombre_centro_trabajo')
           .getRawMany();
         if (!detalles.length) {
           return []
@@ -548,7 +396,6 @@ export class DetallePlanillaIngresoService {
       }
     } catch (Error) {
       console.log(Error);
-
     }
   }
 

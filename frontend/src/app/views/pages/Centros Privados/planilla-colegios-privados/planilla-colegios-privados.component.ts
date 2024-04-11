@@ -45,26 +45,8 @@ export class PlanillaColegiosPrivadosComponent
   showTable: boolean = true;
   dataSource: MatTableDataSource<UserData> = new MatTableDataSource<UserData>();
 
-  displayedColumns: string[] = [
-    'numeroColegio',
-    'nombreColegio',
-    'totalSueldo',
-    'totalPrestamo',
-    'totalAportaciones',
-    'totalPagar',
-    'totalCotizaciones',
-  ];
-  displayedColumns3: string[] = [
-    'identidad',
-    'nombreDocente',
-    'sueldo',
-    'aportaciones',
-    'cotizaciones',
-    'prestamos',
-    'deducciones',
-    'sueldoNeto',
-    'editar',
-  ];
+  displayedColumns: string[] = ['numeroColegio', 'nombreColegio', 'totalSueldo', 'totalPrestamo', 'totalAportaciones', 'totalPagar', 'totalCotizaciones'];
+  displayedColumns3: string[] = ['identidad', 'nombreDocente', 'sueldo', 'aportaciones', 'cotizaciones', 'prestamos', 'deducciones', 'sueldoNeto', 'editar'];
 
   firstFormGroup: FormGroup;
   mostrarSegundoPaso = false;
@@ -77,8 +59,9 @@ export class PlanillaColegiosPrivadosComponent
   selectedItem: Item | null = null;
 
   tiposPlanillaPrivadas: any;
+  selectedTipoPlanilla: any;
 
-  idCentroTrabajo: number | null = null;
+  idCentroTrabajo!: number;
   mostrarPrimerPaso = true;
 
   constructor(
@@ -133,14 +116,16 @@ export class PlanillaColegiosPrivadosComponent
   }
 
   obtenerDetallesPlanilla(idCentroTrabajo: number, id_tipo_planilla: number) {
-    this.planillaIngresosService
-      .obtenerDetallesPorCentroTrabajo(idCentroTrabajo, id_tipo_planilla)
-      .subscribe(
-        (response: any) => {
-          if (response.data.length > 0) {
-            const mappedData = response.data.map((item: any) => ({
+    this.planillaIngresosService.obtenerDetallesPorCentroTrabajo(idCentroTrabajo, id_tipo_planilla).subscribe(
+      (response: any) => {
+        if (response.data.length > 0) {
+          const mappedData = response.data.map((item: any) => {
+            console.log(item);
+
+            return {
               id_detalle_plan_Ing: item.ID_DETALLE_PLAN_INGRESO,
               identidad: item.IDENTIDAD,
+              id_planilla: item.ID_PLANILLA,
               nombreDocente: item.NOMBREPERSONA,
               sueldo: item.SUELDO,
               aportaciones: item.APORTACIONES,
@@ -149,19 +134,17 @@ export class PlanillaColegiosPrivadosComponent
               deducciones: item.DEDUCCIONES,
               sueldoNeto: item.SUELDONETO,
               periodoInicio: item.PERIODO_INICIO,
-              periodoFinalizacion: item.PERIODO_FINALIZACION,
-            }));
-            this.dataSource.data = mappedData;
-            this.cdr.detectChanges();
-          } else {
-            this.dataSource.data = [];
+              periodoFinalizacion: item.PERIODO_FINALIZACION
+            }
           }
-        },
-        (error) => {
-          this.dataSource.data = [];
-          console.error('Error al obtener detalles de planilla:', error);
+          );
+          this.dataSource.data = mappedData;
+          this.cdr.detectChanges();
+        } else {
+          this.dataSource.data = []
+
         }
-      );
+      });
   }
 
   obtenerDetallesPlanillaAgrupCent(
@@ -202,24 +185,9 @@ export class PlanillaColegiosPrivadosComponent
 
   agregarDocente() {
     const formFields: any[] = [
-      {
-        name: 'Numero de identidad',
-        type: 'text',
-        label: 'Numero de identidad',
-        validations: [Validators.required],
-      },
-      {
-        name: 'Sueldo',
-        type: 'number',
-        label: 'Sueldo',
-        validations: [Validators.required],
-      },
-      {
-        name: 'Prestamos',
-        type: 'number',
-        label: 'Prestamos',
-        validations: [Validators.required],
-      },
+      { name: 'dni', type: 'text', label: 'Numero de identidad', validations: [Validators.required] },
+      { name: 'Sueldo', type: 'number', label: 'Sueldo', validations: [Validators.required] },
+      { name: 'Prestamos', type: 'number', label: 'Prestamos', validations: [Validators.required] },
     ];
 
     const dialogRef = this.dialog.open(DynamicFormDialogComponent, {
@@ -227,8 +195,35 @@ export class PlanillaColegiosPrivadosComponent
       data: { fields: formFields, title: 'Agregar docente' },
     });
 
-    dialogRef.afterClosed().subscribe((result) => {
-      console.log('El diálogo se cerró', result);
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) {
+
+        /* SUELDO */
+        let dataEnviar = {
+          dni: result.dni,
+          id_centro_educativo: this.selectedItem!.id_centro_trabajo,
+          id_planilla: this.dataSource.data[0].id_planilla,
+          data: {
+            prestamos: result.Prestamos,
+            salario_base: 80000
+          }
+        }
+
+        this.planillaIngresosService.agregarDetallesPlanillaAgrupCent(dataEnviar.id_planilla, dataEnviar.dni, dataEnviar.id_centro_educativo, dataEnviar.data).subscribe(
+          (response: any) => {
+            if (response) {
+              this.toastr.success(`Docente agregado a la planilla ${dataEnviar.id_planilla}. con éxito`);
+              //this.obtenerDetallesPlanilla(dataEnviar.id_centro_educativo, dataEnviar.id_planilla)
+              //this.obtenerDetallesPlanillaAgrupCent(dataEnviar.id_centro_educativo, dataEnviar.id_planilla)
+            } else {
+              this.toastr.error(`El docente no ha sido agregado a la planilla ${dataEnviar.id_planilla}.`);
+            }
+          },
+          error => {
+            console.error('Error al Insertar el registro en la planilla:', error);
+          }
+        );
+      }
     });
   }
 
@@ -254,9 +249,11 @@ export class PlanillaColegiosPrivadosComponent
   }
 
   datosPlanilla() {
-    const selectedTipoPlanilla = this.firstFormGroup.value.selectedTipoPlanilla;
-    if (selectedTipoPlanilla) {
-      const idTipoPlanilla = selectedTipoPlanilla[0].ID_TIPO_PLANILLA;
+    this.selectedTipoPlanilla = this.firstFormGroup.value.selectedTipoPlanilla;
+    console.log(this.selectedTipoPlanilla);
+
+    if (this.selectedTipoPlanilla) {
+      const idTipoPlanilla = this.selectedTipoPlanilla[0].ID_TIPO_PLANILLA;
 
       const idCentroTrabajo =
         this.idCentroTrabajo || this.selectedItem?.id_centro_trabajo;
@@ -345,6 +342,7 @@ export class PlanillaColegiosPrivadosComponent
 }
 
 export interface UserData {
+  id_planilla: any;
   periodoFinalizacion: any;
   periodoInicio: any;
   identidad: string;

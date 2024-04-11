@@ -1,4 +1,4 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { environment } from 'src/environments/environment';
@@ -35,5 +35,13 @@ export class PlanillaIngresosService {
     return this.http.get<any>(url);
   }
 
+  agregarDetallesPlanillaAgrupCent(id_planilla: number, dni: string, id_centro_educativo: number, data: any): Observable<any> {
+    let params = new HttpParams()
+      .set('id_planilla', id_planilla)
+      .set('dni', dni)
+      .set('id_centro_educativo', id_centro_educativo)
+
+    return this.http.post(`${environment.API_URL}/api/detalle-plan-ingr/${id_planilla}/${dni}/${id_centro_educativo}`, data);
+  }
 }
 

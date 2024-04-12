@@ -101,9 +101,16 @@
       <button
         mat-raised-button
         class="boton-estetico"
-        (click)="exportarExcelPdf()"
+        (click)="generarExcel()"
       >
-        Exportar a Excel y PDF
+        Descargar Excel
+      </button>
+      <button
+        mat-raised-button
+        class="boton-estetico"
+        (click)="generarPDF()"
+      >
+        Descargar PDF
       </button>
       <button
         mat-raised-button

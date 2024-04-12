@@ -23,6 +23,10 @@ import { CentroTrabajoService } from 'src/app/services/centro-trabajo.service';
 import { jwtDecode } from 'jwt-decode';
 import { ToastrService } from 'ngx-toastr';
 import { ConfirmDialogComponent } from '@docs-components/confirm-dialog/confirm-dialog.component';
+import * as XLSX from 'xlsx';
+import jsPDF from 'jspdf';
+import 'jspdf-autotable';
+
 
 export interface Item {
   id_centro_trabajo: number;
@@ -50,6 +54,7 @@ export class PlanillaColegiosPrivadosComponent
   displayedColumns3: string[] = ['identidad', 'nombreDocente', 'sueldo', 'aportaciones', 'cotizaciones', 'prestamos', 'deducciones', 'sueldoNeto', 'editar', 'eliminar'];
 
   firstFormGroup: FormGroup;
+  mostrarPrimerPaso = true;
   mostrarSegundoPaso = false;
   mostrarTercerPaso = false;
   isLinear = false;
@@ -63,7 +68,6 @@ export class PlanillaColegiosPrivadosComponent
   selectedTipoPlanilla: any;
 
   idCentroTrabajo!: number;
-  mostrarPrimerPaso = true;
 
   constructor(
     private _formBuilder: FormBuilder,
@@ -226,7 +230,7 @@ export class PlanillaColegiosPrivadosComponent
     });
   }
 
-  exportarExcelPdf() {
+  descargarExcelPdf() {
     // Lógica para exportar a Excel y PDF
   }
 
@@ -367,6 +371,80 @@ export class PlanillaColegiosPrivadosComponent
     }
     return null;
   }
+
+  generarExcel() {
+    // Datos para la primera hoja del Excel
+    const dataForExcel = this.dataSource.data.map(item => ({
+      Identidad: item.identidad,
+      'Nombre Docente': item.nombreDocente,
+      Sueldo: item.sueldo,
+      Aportaciones: item.aportaciones,
+      Cotizaciones: item.cotizaciones,
+      Préstamos: item.prestamos,
+      Deducciones: item.deducciones,
+      'Sueldo Neto': item.sueldoNeto
+    }));
+
+    // Crear la primera hoja de trabajo
+    const ws1: XLSX.WorkSheet = XLSX.utils.json_to_sheet(dataForExcel);
+    const wb: XLSX.WorkBook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws1, 'Detalles Planilla');
+
+    // Datos para la segunda hoja del Excel
+
+    const dataForSecondSheet = this.dataSourceItems1.map(item => ({
+      'Número de Colegio': this.dataSourceItems1[0].ID_CENTRO_TRABAJO,
+      'Nombre del Colegio':  this.dataSourceItems1[0].NOMBRE_CENTRO_TRABAJO,
+      'Total Sueldo': this.dataSourceItems1[0].SUELDO,
+      'Total Préstamo': this.dataSourceItems1[0].PRESTAMOS,
+      'Total Aportaciones': this.dataSourceItems1[0].APORTACIONES,
+      'Total de Deducciones': this.dataSourceItems1[0].DEDUCCIONES,
+      'Total Cotizaciones': this.dataSourceItems1[0].COTIZACIONES
+    }));
+    const ws2: XLSX.WorkSheet = XLSX.utils.json_to_sheet(dataForSecondSheet);
+    XLSX.utils.book_append_sheet(wb, ws2, 'Resumen Colegios');
+    XLSX.writeFile(wb, 'planilla.xlsx');
+  }
+
+
+  generarPDF() {
+    const doc = new jsPDF();
+
+    // Configuración para la segunda tabla
+    const columns2 = ['Número de Colegio', 'Nombre del Colegio', 'Total Sueldo', 'Total Préstamo', 'Total Aportaciones', 'Total de Deducciones', 'Total Cotizaciones'];
+    const data2 = this.dataSourceItems1.map(item => [item.ID_CENTRO_TRABAJO, item.NOMBRE_CENTRO_TRABAJO, item.SUELDO, item.PRESTAMOS, item.APORTACIONES, item.DEDUCCIONES, item.COTIZACIONES]);
+
+    // Agregar título para la segunda tabla
+    doc.text('Resumen Colegios', 14, 15);
+
+    // Agregar la segunda tabla al PDF
+    (doc as any).autoTable({
+      head: [columns2],
+      body: data2,
+      startY: 20
+    });
+
+    // Configuración para la primera tabla
+    const columns = ['Identidad', 'Nombre Docente', 'Sueldo', 'Aportaciones', 'Cotizaciones', 'Préstamos', 'Deducciones', 'Sueldo Neto'];
+    const data = this.dataSource.data.map(item => [item.identidad, item.nombreDocente, item.sueldo, item.aportaciones, item.cotizaciones, item.prestamos, item.deducciones, item.sueldoNeto]);
+
+    // Agregar título para la primera tabla
+    doc.text('Detalles Planilla', 14, (doc as any).lastAutoTable.finalY + 25);
+
+    // Agregar la primera tabla al PDF
+    (doc as any).autoTable({
+      head: [columns],
+      body: data,
+      startY: (doc as any).lastAutoTable.finalY + 40
+    });
+
+    // Guardar el PDF
+    doc.save('planilla.pdf');
+}
+
+
+
+
 }
 
 export interface UserData {

@@ -1,5 +1,5 @@
 import { Module } from '@nestjs/common';
-import { ConfigModule } from '@nestjs/config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { CommonModule } from './common/common.module';
 import { AfiliadoModule } from './modules/afiliado/afiliado.module';
@@ -13,16 +13,28 @@ import { TransaccionesModule } from './modules/transacciones/transacciones.modul
 
 @Module({
   imports: [
-    ConfigModule.forRoot(),
-    TypeOrmModule.forRoot({
-      /* logging: ["query", "error"], */
-      type: 'oracle',
-      database: process.env.DB_NAME,
-      username: process.env.DB_USERNAME,
-      password: process.env.DB_PASSWORD,
-      connectString: process.env.CONNECT_STRING,
-      synchronize: true,
-      autoLoadEntities : true
+    ConfigModule.forRoot({
+      envFilePath: `.env.${process.env.NODE_ENV}`,
+      isGlobal: true
+    }),
+    TypeOrmModule.forRootAsync({
+      imports: [ConfigModule], 
+      useFactory: (configService: ConfigService) => ({
+        type: 'oracle',
+        host : configService.get('DB_HOST'),
+        port : configService.get('DB_PORT'),
+        username: configService.get('DB_USERNAME'),
+        database: configService.get('DB_NAME'),
+        password: configService.get('DB_PASSWORD'),
+        autoLoadEntities: true,
+        synchronize: false,
+        entities: [__dirname + '/../**/*.entity{.ts,.js}'],
+        migrations: ['src/database/migrations/*{.ts,.js}'],
+        //logging: ['error'] // solo loguear errores
+       
+      }),
+      inject : [ConfigService]
+      
     }),
     CommonModule,
     AfiliadoModule,
@@ -37,3 +49,8 @@ import { TransaccionesModule } from './modules/transacciones/transacciones.modul
 })
 export class AppModule {
 }
+
+ /* connectString: process.env.CONNECT_STRING,
+        synchronize: false,
+        autoLoadEntities : true, */
+        /* logging: ["query", "error"], */

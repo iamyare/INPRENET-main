@@ -5,8 +5,6 @@ import { ToastrService } from 'ngx-toastr';
 import { FieldConfig } from 'src/app/shared/Interfaces/field-config';
 import { DynamicFormComponent } from '@docs-components/dynamic-form/dynamic-form.component';
 import { InstitucionesService } from 'src/app/services/instituciones.service';
-import { DatosEstaticosService } from '../../../../services/datos-estaticos.service';
-import { PlanillaService } from 'src/app/services/planilla.service';
 import { Observable, map } from 'rxjs';
 @Component({
   selector: 'app-nuevo-tipo-deduccion',
@@ -49,7 +47,7 @@ export class NuevoTipoDeduccionComponent implements OnInit {
           type: 'number',
           label: 'Código de deducción',
           name: 'codigo_deduccion',
-          validations: [Validators.required],
+          validations: [Validators.required, Validators.min(0)],
           display: true,
           icon: 'vpn_key'
         },
@@ -57,7 +55,7 @@ export class NuevoTipoDeduccionComponent implements OnInit {
           type: 'number',
           label: 'Prioridad',
           name: 'prioridad',
-          validations: [Validators.required],
+          validations: [Validators.required, Validators.min(0)],
           display: true,
           icon: 'priority_high'
         },

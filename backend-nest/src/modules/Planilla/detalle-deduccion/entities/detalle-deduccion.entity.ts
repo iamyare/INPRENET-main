@@ -1,6 +1,6 @@
 import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn, AfterInsert, getRepository, AfterLoad, Unique, OneToMany, Check } from 'typeorm';
 
-import { Net_Persona } from '../../../afiliado/entities/Net_Persona';
+import { Net_Persona } from '../../../afiliado/entities/Net_Persona.entity';
 import { Net_Planilla } from '../../planilla/entities/net_planilla.entity';
 import { IsEnum } from 'class-validator';
 import { Net_Deduccion } from '../../deduccion/entities/net_deduccion.entity';

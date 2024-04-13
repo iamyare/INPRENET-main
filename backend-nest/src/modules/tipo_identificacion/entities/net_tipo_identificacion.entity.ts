@@ -1,4 +1,4 @@
-import { Net_Persona } from '../../afiliado/entities/Net_Persona';
+import { Net_Persona } from '../../afiliado/entities/Net_Persona.entity';
 import { Entity, Column, PrimaryGeneratedColumn, OneToOne, OneToMany } from 'typeorm';
 
 @Entity({ name: 'NET_TIPO_IDENTIFICACION' })

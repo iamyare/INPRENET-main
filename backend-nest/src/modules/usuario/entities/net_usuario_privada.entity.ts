@@ -1,4 +1,4 @@
-import { Net_Centro_Trabajo } from "src/modules/Empresarial/centro-trabajo/entities/net_centro-trabajo.entity";
+import { Net_Centro_Trabajo } from "src/modules/Empresarial/entities/net_centro_trabajo.entity";
 import { Column, Entity, Index, JoinColumn, ManyToOne, OneToMany, OneToOne, PrimaryGeneratedColumn } from "typeorm";
 import { Net_Rol } from "./net_rol.entity";
 import { NET_SESION } from "./net_sesion.entity";

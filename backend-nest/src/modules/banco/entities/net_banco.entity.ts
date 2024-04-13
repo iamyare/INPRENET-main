@@ -1,5 +1,5 @@
 import { Column, PrimaryGeneratedColumn, OneToMany, Entity, Index } from 'typeorm';
-import { Net_Afiliados_Por_Banco } from './net_afiliados-banco';
+import { Net_Afiliados_Por_Banco } from './net_afiliados-banco.entity';
 
 @Entity({name:'NET_BANCO'})
 export class Net_Banco {

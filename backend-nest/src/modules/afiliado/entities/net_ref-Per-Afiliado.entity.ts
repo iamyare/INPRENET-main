@@ -1,6 +1,6 @@
 import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
-import { Net_ReferenciaPersonal } from "./referencia-personal";
-import { Net_Persona } from "./Net_Persona";
+import { Net_ReferenciaPersonal } from "./referencia-personal.entity";
+import { Net_Persona } from "./Net_Persona.entity";
 
 @Entity({name:'NET_REF_PER_AFIL'})
 export class Net_Ref_Per_Afil {

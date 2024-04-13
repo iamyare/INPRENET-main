@@ -1,6 +1,5 @@
-import { Column, Entity, OneToMany, PrimaryColumn, PrimaryGeneratedColumn } from "typeorm";
-import { Net_Detalle_Afiliado } from "./Net_detalle_persona.entity";
-import { Net_Persona } from "./Net_Persona";
+import { Column, Entity, OneToMany, PrimaryColumn } from "typeorm";
+import { Net_Persona } from "./Net_Persona.entity";
 
 @Entity({ name: 'NET_ESTADO_AFILIADO' })
 export class Net_Estado_Afiliado {

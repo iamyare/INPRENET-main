@@ -1,6 +1,6 @@
-import { Net_perf_afil_cent_trab } from "../../../afiliado/entities/net_perf_afil_cent_trab";
-import { Net_Detalle_planilla_ingreso } from "../../../Planilla/Ingresos/detalle-plan-ingr/entities/net_detalle_plani_ing.entity";
-import { Net_Departamento } from "../../../Regional/provincia/entities/net_departamento.entity";
+import { Net_perf_afil_cent_trab } from "../../afiliado/entities/net_perf_afil_cent_trab.entity";
+import { Net_Detalle_planilla_ingreso } from "../../Planilla/Ingresos/detalle-plan-ingr/entities/net_detalle_plani_ing.entity";
+import { Net_Departamento } from "../../Regional/provincia/entities/net_departamento.entity";
 import { Column, Entity, Index, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 
 @Entity({ name: 'NET_CENTRO_TRABAJO' })

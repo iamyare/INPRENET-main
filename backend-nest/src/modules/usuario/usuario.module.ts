@@ -6,11 +6,11 @@ import { Net_Rol } from './entities/net_rol.entity';
 import { PassportModule } from '@nestjs/passport';
 import { JwtModule } from '@nestjs/jwt';
 import { CommonModule } from 'src/common/common.module';
-import { Net_Empleado } from '../Empresarial/empresas/entities/net_empleado.entity';
+import { Net_Empleado } from '../Empresarial/entities/net_empleado.entity';
 import { Net_Usuario } from './entities/net_usuario.entity';
 import { Net_TipoIdentificacion } from '../tipo_identificacion/entities/net_tipo_identificacion.entity';
 import { NET_USUARIO_PRIVADA } from './entities/net_usuario_privada.entity';
-import { Net_Centro_Trabajo } from '../Empresarial/centro-trabajo/entities/net_centro-trabajo.entity';
+import { Net_Centro_Trabajo } from '../Empresarial/entities/net_centro_trabajo.entity';
 import { NET_SESION } from './entities/net_sesion.entity';
 import { SesionActivaMiddleware } from './middlewares/sesion-activa/sesion-activa.middleware';
 
@@ -39,6 +39,10 @@ import { SesionActivaMiddleware } from './middlewares/sesion-activa/sesion-activ
     CommonModule
   ]
 })
+export class UsuarioModule{
+}
+
+/* 
 export class UsuarioModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
     consumer
@@ -46,3 +50,4 @@ export class UsuarioModule implements NestModule {
       .forRoutes({ path: 'api/usuario/logout', method: RequestMethod.POST });
   }
 }
+*/

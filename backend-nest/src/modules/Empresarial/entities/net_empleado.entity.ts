@@ -1,7 +1,7 @@
 import { Column, Entity, Index, JoinColumn, OneToMany, OneToOne, PrimaryGeneratedColumn } from "typeorm";
 import { Net_Empleado_Empresa } from "./net_empleado-empresa.entity";
-import { Net_TipoIdentificacion } from "../../../tipo_identificacion/entities/net_tipo_identificacion.entity";
-import { Net_Usuario } from "../../../usuario/entities/net_usuario.entity";
+import { Net_TipoIdentificacion } from "../../tipo_identificacion/entities/net_tipo_identificacion.entity";
+import { Net_Usuario } from "../../usuario/entities/net_usuario.entity";
 
 
 @Entity({ name: 'NET_EMPLEADO' })

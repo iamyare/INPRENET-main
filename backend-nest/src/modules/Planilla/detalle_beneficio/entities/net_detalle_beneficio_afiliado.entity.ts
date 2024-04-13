@@ -2,7 +2,7 @@
 import { Column, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 import { Net_Beneficio } from "../../beneficio/entities/net_beneficio.entity";
 import { Net_Detalle_Pago_Beneficio } from "./net_detalle_pago_beneficio.entity";
-import { Net_Detalle_Afiliado } from "../../../afiliado/entities/Net_detalle_persona.entity";
+import { NET_DETALLE_PERSONA } from "src/modules/afiliado/entities/Net_detalle_persona.entity";
 
 @Entity({ name: 'NET_DETALLE_BENEFICIO_AFILIADO' })
 export class Net_Detalle_Beneficio_Afiliado {
@@ -34,8 +34,8 @@ export class Net_Detalle_Beneficio_Afiliado {
     @OneToMany(() => Net_Detalle_Pago_Beneficio, detalleBeneficio => detalleBeneficio.detalleBeneficioAfiliado)
     detalleBeneficio: Net_Detalle_Pago_Beneficio[];
 
-    @ManyToOne(() => Net_Detalle_Afiliado, afiliado => afiliado.padreIdAfiliado)
+    @ManyToOne(() => NET_DETALLE_PERSONA, afiliado => afiliado.padreIdAfiliado)
     @JoinColumn({ name: 'ID_CAUSANTE', referencedColumnName: 'ID_CAUSANTE' })
     @JoinColumn({ name: 'ID_BENEFICIARIO', referencedColumnName: 'ID_PERSONA' })
-    afiliado: Net_Detalle_Afiliado[];
+    afiliado: NET_DETALLE_PERSONA[];
 }

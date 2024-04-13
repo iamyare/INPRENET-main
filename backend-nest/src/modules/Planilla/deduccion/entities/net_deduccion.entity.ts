@@ -1,6 +1,6 @@
 import { Column, Entity, Index, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 import { Net_Detalle_Deduccion } from '../../detalle-deduccion/entities/detalle-deduccion.entity';
-import { Net_Institucion } from '../../../Empresarial/institucion/entities/net_institucion.entity';
+import { Net_Institucion } from '../../../Empresarial/entities/net_institucion.entity';
 
 @Entity({ name: 'NET_DEDUCCION' })
 export class Net_Deduccion {
@@ -8,7 +8,7 @@ export class Net_Deduccion {
     @PrimaryGeneratedColumn({ type: 'int', name: 'ID_DEDUCCION', primaryKeyConstraintName: 'PK_id_deduccion_net_deduccion' })
     id_deduccion: number;
 
-    @Column('varchar2', { name: 'NOMBRE_DEDUCCION', length: 50, nullable: false })
+    @Column('varchar2', { name: 'NOMBRE_DEDUCCION', length: 50, nullable: false, unique: true })
     nombre_deduccion: string;
 
     @Column('varchar2', { name: 'DESCRIPCION_DEDUCCION', length: 100, nullable: true })

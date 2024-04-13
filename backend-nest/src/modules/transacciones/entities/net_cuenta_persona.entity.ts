@@ -1,6 +1,6 @@
-import { Net_Persona } from "../../afiliado/entities/Net_Persona";
+import { Net_Persona } from "../../afiliado/entities/Net_Persona.entity";
 import { Check, Column, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryColumn, PrimaryGeneratedColumn } from "typeorm";
-import { NET_TIPO_CUENTA } from "./net_tipo_cuenta.entitiy";
+import { NET_TIPO_CUENTA } from "./net_tipo_cuenta.entity";
 
 @Entity({ name: 'NET_CUENTA_PERSONA' })
 @Check("CK1_NET_CUENTA_PERSONA", `ACTIVA_B IN ('S', 'N')`)

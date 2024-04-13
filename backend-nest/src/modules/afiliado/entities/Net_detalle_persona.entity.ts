@@ -1,9 +1,9 @@
 import { Column, Entity, JoinColumn, ManyToOne, OneToMany, OneToOne, PrimaryColumn, PrimaryGeneratedColumn } from "typeorm";
-import { Net_Persona } from "./Net_Persona";
+import { Net_Persona } from "./Net_Persona.entity";
 import { Net_Tipo_Persona } from "./net_tipo_persona.entity";
 
 @Entity({name:'NET_DETALLE_PERSONA'})
-export class Net_Detalle_Afiliado {
+export class NET_DETALLE_PERSONA {
     @PrimaryColumn({name :'ID_PERSONA', primaryKeyConstraintName: 'PK_ID_PERSONA_DETALLE_PERSONA' })
     ID_PERSONA: number;
     
@@ -18,10 +18,10 @@ export class Net_Detalle_Afiliado {
     afiliado: Net_Persona;
     
     // Relación Muchos a Uno consigo mismo
-    @ManyToOne(() => Net_Detalle_Afiliado, detalleAfiliado => detalleAfiliado.afiliado, { cascade: true })
+    @ManyToOne(() => NET_DETALLE_PERSONA, detalleAfiliado => detalleAfiliado.afiliado, { cascade: true })
     @JoinColumn({ name: 'ID_CAUSANTE_PADRE', referencedColumnName: 'ID_PERSONA', foreignKeyConstraintName:"FK_ID_PERSONA_DETALLE_PERSONA"})
     @JoinColumn({ name: 'ID_CAUSANTE', referencedColumnName: 'ID_CAUSANTE', foreignKeyConstraintName:"FK_ID_PERSONA_DETALLE_PERSONA"})
-    padreIdAfiliado: Net_Detalle_Afiliado;
+    padreIdAfiliado: NET_DETALLE_PERSONA;
 
     @ManyToOne(() => Net_Tipo_Persona, tipoAfiliado => tipoAfiliado.detallesAfiliado)
     @JoinColumn({ name: 'ID_TIPO_PERSONA', foreignKeyConstraintName:"FK_ID_TIPO_PERSONA_DETALLE_PERSONA"}) 

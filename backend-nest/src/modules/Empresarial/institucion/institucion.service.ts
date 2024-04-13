@@ -2,7 +2,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { CreateInstitucionDto } from './dto/create-institucion.dto';
 import { UpdateInstitucionDto } from './dto/update-institucion.dto';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Net_Institucion } from './entities/net_institucion.entity';
+import { Net_Institucion } from '../entities/net_institucion.entity';
 import { Repository } from 'typeorm';
 
 @Injectable()

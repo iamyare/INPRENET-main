@@ -1,6 +1,6 @@
 import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
-import { NET_TIPO_MOVIMIENTO_CUENTA } from "./net_tipo_movimiento.entity";
-import { Net_Persona } from "../../afiliado/entities/Net_Persona";
+import { Net_Persona } from "../../afiliado/entities/Net_Persona.entity";
+import { NET_TIPO_MOVIMIENTO } from "./net_tipo_movimiento.entity";
 
 @Entity({ name: 'NET_MOVIMIENTO_CUENTA' })
 export class NET_MOVIMIENTO_CUENTA {
@@ -12,10 +12,10 @@ export class NET_MOVIMIENTO_CUENTA {
     @JoinColumn({ name: 'ID_PERSONA', foreignKeyConstraintName: "FK_ID_CUENTA_PERSONA_MOVCUENTA" })
     persona: Net_Persona;
 
-    @ManyToOne(() => NET_TIPO_MOVIMIENTO_CUENTA, tipoMovimiento => tipoMovimiento.movimientos)
+    @ManyToOne(() => NET_TIPO_MOVIMIENTO, tipoMovimiento => tipoMovimiento.movimientos)
     @JoinColumn({ name: 'ID_TIPO_MOVIMIENTO', foreignKeyConstraintName: "FK_ID_TIPO_CUENTA_MOVCUENTA", referencedColumnName: "ID_TIPO_MOVIMIENTO" })
     @JoinColumn({ name: 'ID_TIPO_CUENTA', foreignKeyConstraintName: "FK_ID_TIPO_CUENTA_MOVCUENTA", referencedColumnName: "ID_TIPO_CUENTA" })
-    tipoMovimiento: NET_TIPO_MOVIMIENTO_CUENTA;
+    tipoMovimiento: NET_TIPO_MOVIMIENTO;
 
     @Column()
     MONTO: number;

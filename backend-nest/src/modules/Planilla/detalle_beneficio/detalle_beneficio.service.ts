@@ -1,41 +1,27 @@
 import * as oracledb from 'oracledb';
-
 import { BadRequestException, Injectable, InternalServerErrorException, Logger, NotFoundException } from '@nestjs/common';
 import { isUUID } from 'class-validator';
 import { InjectEntityManager, InjectRepository } from '@nestjs/typeorm';
-import { Connection, EntityManager, LessThanOrEqual, MoreThanOrEqual, Not, Repository, getConnection, QueryRunner } from 'typeorm';
+import { EntityManager,Repository } from 'typeorm';
 import { Net_Beneficio } from '../beneficio/entities/net_beneficio.entity';
-import { Net_Persona } from '../../afiliado/entities/Net_Persona';
-import { Net_Detalle_Pago_Beneficio, /* EstadoEnum */ } from './entities/net_detalle_pago_beneficio.entity';
+import { Net_Persona } from '../../afiliado/entities/Net_Persona.entity';
+import { Net_Detalle_Pago_Beneficio} from './entities/net_detalle_pago_beneficio.entity';
 import { UpdateDetalleBeneficioDto } from './dto/update-detalle_beneficio_planilla.dto';
 import { CreateDetalleBeneficioDto } from './dto/create-detalle_beneficio.dto';
 import { Net_Planilla } from '../planilla/entities/net_planilla.entity';
-/* import { DetalleBeneficioAfiliado } from './entities/detalle_beneficio_afiliado.entity';
-import { Planilla } from '../planilla/entities/planilla.entity'; */
 import { Net_Detalle_Beneficio_Afiliado } from './entities/net_detalle_beneficio_afiliado.entity';
-import { AfiliadoService } from '../../afiliado/afiliado.service';
-import { Net_Detalle_Afiliado } from '../../afiliado/entities/Net_detalle_persona.entity';
-import { Net_Tipo_Persona } from '../../afiliado/entities/net_tipo_persona.entity';
 import { Net_Estado_Afiliado } from '../../afiliado/entities/net_estado_afiliado.entity';
+import { NET_DETALLE_PERSONA } from 'src/modules/afiliado/entities/Net_detalle_persona.entity';
 @Injectable()
 export class DetalleBeneficioService {
   private readonly logger = new Logger(DetalleBeneficioService.name)
 
   constructor(
-    @InjectRepository(Net_Persona)
-    private afiliadoRepository: Repository<Net_Persona>,
-    private AfiliadoService: AfiliadoService,
-
-    @InjectRepository(Net_Beneficio)
-    private readonly tipoBeneficioRepository: Repository<Net_Beneficio>,
 
     @InjectRepository(Net_Detalle_Pago_Beneficio)
     private readonly benAfilRepository: Repository<Net_Detalle_Pago_Beneficio>,
-    @InjectRepository(Net_Planilla)
-    private planillaRepository: Repository<Net_Planilla>,
     @InjectRepository(Net_Detalle_Beneficio_Afiliado)
     private detalleBeneficioAfiliadoRepository: Repository<Net_Detalle_Beneficio_Afiliado>,
-    private readonly connection: Connection,
     @InjectEntityManager() private readonly entityManager: EntityManager
   ) { }
   async actualizarEstadoPorPlanilla(idPlanilla: string, nuevoEstado: string): Promise<{ mensaje: string }> {
@@ -75,7 +61,7 @@ export class DetalleBeneficioService {
 
         if (!idAfiliadoPadre) {
           const detPer = await manager.findOne(
-            Net_Detalle_Afiliado, {
+            NET_DETALLE_PERSONA, {
             where: {
               ID_CAUSANTE: idAfiliadoPadre,
               tipoAfiliado: {
@@ -118,7 +104,7 @@ export class DetalleBeneficioService {
           }
         } else {
           const detPerB = await manager.findOne(
-            Net_Detalle_Afiliado, {
+            NET_DETALLE_PERSONA, {
             where: {
               ID_CAUSANTE: idAfiliadoPadre,
               tipoAfiliado: {
@@ -411,7 +397,7 @@ export class DetalleBeneficioService {
         .innerJoin(Net_Beneficio, 'ben', 'ben.ID_BENEFICIO = detBenA.ID_BENEFICIO')
         .innerJoin(Net_Estado_Afiliado, 'estadoAfil', 'estadoAfil.CODIGO = afil.ID_ESTADO_AFILIADO')
         .innerJoin(Net_Persona, 'afil', 'afil.ID_PERSONA = detBenA.ID_BENEFICIARIO AND detBenA.ID_CAUSANTE = detBenA.ID_CAUSANTE')
-        .innerJoin(Net_Detalle_Afiliado, 'detA', 'afil.ID_PERSONA = detBenA.ID_BENEFICIARIO AND detBenA.ID_CAUSANTE = detBenA.ID_CAUSANTE ')
+        .innerJoin(NET_DETALLE_PERSONA, 'detA', 'afil.ID_PERSONA = detBenA.ID_BENEFICIARIO AND detBenA.ID_CAUSANTE = detBenA.ID_CAUSANTE ')
         .where(`afil.dni = '${dni}'`)
         .getRawMany();
     } catch (error) {

@@ -1,12 +1,12 @@
 import { BadRequestException, Injectable, Logger, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import { InjectEntityManager, InjectRepository } from '@nestjs/typeorm';
 import { EntityManager, Repository } from 'typeorm';
-import { Net_SALARIO_COTIZABLE } from './entities/net_detalle_plani_ing.entity copy';
+import { Net_SALARIO_COTIZABLE } from './entities/net_salario_cotizable.entity';
 import { Net_TipoPlanilla } from '../../tipo-planilla/entities/tipo-planilla.entity';
 import { Net_Detalle_planilla_ingreso } from './entities/net_detalle_plani_ing.entity';
 import { Net_Planilla } from '../../planilla/entities/net_planilla.entity';
 import { DateTime } from 'luxon';
-import { Net_Persona } from '../../../afiliado/entities/Net_Persona';
+import { Net_Persona } from '../../../afiliado/entities/Net_Persona.entity';
 import * as oracledb from 'oracledb';
 import { CreateDetallePlanIngDto } from './dto/create-detalle-plani-Ing.dto';
 

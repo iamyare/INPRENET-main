@@ -3,15 +3,14 @@ import { CreateDetalleDeduccionDto } from './dto/create-detalle-deduccion.dto';
 import { UpdateDetalleDeduccionDto } from './dto/update-detalle-deduccion.dto';
 import { InjectEntityManager, InjectRepository } from '@nestjs/typeorm';
 import { Net_Detalle_Deduccion } from './entities/detalle-deduccion.entity';
-import { EntityManager, FindOptionsWhere, Repository } from 'typeorm';
-import { Net_Institucion } from '../../Empresarial/institucion/entities/net_institucion.entity';
+import { EntityManager, Repository } from 'typeorm';
+import { Net_Institucion } from '../../Empresarial/entities/net_institucion.entity';
 import * as xlsx from 'xlsx';
-import { AfiliadoService } from '../../afiliado/afiliado.service';
-import { Net_Persona } from '../../afiliado/entities/Net_Persona';
-import { Net_Detalle_Afiliado } from '../../afiliado/entities/Net_detalle_persona.entity';
+import { Net_Persona } from '../../afiliado/entities/Net_Persona.entity';
 import { Net_Planilla } from '../planilla/entities/net_planilla.entity';
 import { isUUID } from 'class-validator';
 import { Net_Deduccion } from '../deduccion/entities/net_deduccion.entity';
+import { NET_DETALLE_PERSONA } from 'src/modules/afiliado/entities/Net_detalle_persona.entity';
 
 @Injectable()
 export class DetalleDeduccionService {
@@ -27,8 +26,8 @@ export class DetalleDeduccionService {
     private deduccionRepository: Repository<Net_Deduccion>,
     @InjectRepository(Net_Institucion)
     private institucionRepository: Repository<Net_Institucion>,
-    @InjectRepository(Net_Detalle_Afiliado)
-    private detalleAfiliadoRepository: Repository<Net_Detalle_Afiliado>,
+    @InjectRepository(NET_DETALLE_PERSONA)
+    private detalleAfiliadoRepository: Repository<NET_DETALLE_PERSONA>,
     @InjectRepository(Net_Planilla)
     private planillaRepository: Repository<Net_Planilla>,
     @InjectEntityManager() private readonly entityManager: EntityManager

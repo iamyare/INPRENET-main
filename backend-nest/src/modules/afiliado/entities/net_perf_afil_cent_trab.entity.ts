@@ -1,7 +1,6 @@
-import { Column, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn } from "typeorm";
-import { Net_Centro_Trabajo } from "../../Empresarial/centro-trabajo/entities/net_centro-trabajo.entity";
-import { Net_Detalle_Afiliado } from "./Net_detalle_persona.entity";
-import { Net_Persona } from "./Net_Persona";
+import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
+import { Net_Centro_Trabajo } from "../../Empresarial/entities/net_centro_trabajo.entity";
+import { Net_Persona } from "./Net_Persona.entity";
 
 @Entity({ name: 'NET_PERF_AFIL_CENT_TRAB' })
 export class Net_perf_afil_cent_trab {

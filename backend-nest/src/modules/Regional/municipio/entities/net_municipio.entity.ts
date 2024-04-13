@@ -1,6 +1,6 @@
 import { Column, Entity, PrimaryGeneratedColumn, ManyToOne, OneToMany, JoinColumn } from 'typeorm';
 import { Net_Departamento } from '../../provincia/entities/net_departamento.entity';
-import { Net_Persona } from '../../../afiliado/entities/Net_Persona';
+import { Net_Persona } from '../../../afiliado/entities/Net_Persona.entity';
 
 @Entity({ name: 'NET_MUNICIPIO' })
 export class Net_Municipio {

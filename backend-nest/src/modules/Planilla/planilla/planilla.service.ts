@@ -1,21 +1,18 @@
-import { BadRequestException, Injectable, InternalServerErrorException, Logger, NotFoundException, Query } from '@nestjs/common';
+import { BadRequestException, Injectable, InternalServerErrorException, Logger, NotFoundException } from '@nestjs/common';
 import { CreatePlanillaDto } from './dto/create-planilla.dto';
 import { UpdatePlanillaDto } from './dto/update-planilla.dto';
 import { InjectEntityManager, InjectRepository } from '@nestjs/typeorm';
 import { Net_Detalle_Deduccion } from '../detalle-deduccion/entities/detalle-deduccion.entity';
-import { EntityManager, Repository, getConnection } from 'typeorm';
-import { Net_Persona } from '../../afiliado/entities/Net_Persona';
+import { EntityManager, Repository } from 'typeorm';
+import { Net_Persona } from '../../afiliado/entities/Net_Persona.entity';
 import { Net_Beneficio } from '../beneficio/entities/net_beneficio.entity';
 import { Net_Planilla } from './entities/net_planilla.entity';
 import { Net_TipoPlanilla } from '../tipo-planilla/entities/tipo-planilla.entity';
 import { Net_Detalle_Pago_Beneficio } from '../detalle_beneficio/entities/net_detalle_pago_beneficio.entity';
-import { isUUID } from 'class-validator';
 import { DetalleBeneficioService } from '../detalle_beneficio/detalle_beneficio.service';
-import { DetalleDeduccionService } from '../detalle-deduccion/detalle-deduccion.service';
 import { PaginationDto } from 'src/common/dtos/pagination.dto';
 import { Net_Deduccion } from '../deduccion/entities/net_deduccion.entity';
 import { Net_Detalle_Beneficio_Afiliado } from '../detalle_beneficio/entities/net_detalle_beneficio_afiliado.entity';
-import { Net_Detalle_Afiliado } from '../../afiliado/entities/Net_detalle_persona.entity';
 
 @Injectable()
 export class PlanillaService {

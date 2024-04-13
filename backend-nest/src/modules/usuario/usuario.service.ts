@@ -7,12 +7,12 @@ import { Repository } from 'typeorm';
 import { JwtService } from '@nestjs/jwt';
 import { MailService } from 'src/common/services/mail.service';
 import * as bcrypt from 'bcrypt';
-import { Net_Empleado } from '../Empresarial/empresas/entities/net_empleado.entity';
+import { Net_Empleado } from '../Empresarial/entities/net_empleado.entity';
 import { Net_Rol } from './entities/net_rol.entity';
 import { CreateUsuarioDto } from './dto/create-usuario.dto';
 import { Net_TipoIdentificacion } from '../tipo_identificacion/entities/net_tipo_identificacion.entity';
 import { NET_USUARIO_PRIVADA } from './entities/net_usuario_privada.entity';
-import { Net_Centro_Trabajo } from '../Empresarial/centro-trabajo/entities/net_centro-trabajo.entity';
+import { Net_Centro_Trabajo } from '../Empresarial/entities/net_centro_trabajo.entity';
 import { NET_SESION } from './entities/net_sesion.entity';
 
 @Injectable()

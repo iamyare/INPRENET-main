@@ -3,15 +3,15 @@ import { CreateAfiliadoDto, PersonaResponse } from './dto/create-afiliado.dto';
 import { UpdateAfiliadoDto } from './dto/update-afiliado.dto';
 import { Connection, EntityManager, Repository } from 'typeorm';
 import { InjectEntityManager, InjectRepository } from '@nestjs/typeorm';
-import { Net_perf_afil_cent_trab } from './entities/net_perf_afil_cent_trab';
-import { Net_Afiliados_Por_Banco } from '../banco/entities/net_afiliados-banco';
-import { Net_Centro_Trabajo } from '../Empresarial/centro-trabajo/entities/net_centro-trabajo.entity';
+import { Net_perf_afil_cent_trab } from './entities/net_perf_afil_cent_trab.entity';
+import { Net_Afiliados_Por_Banco } from '../banco/entities/net_afiliados-banco.entity';
+import { Net_Centro_Trabajo } from '../Empresarial/entities/net_centro_trabajo.entity';
 import { Net_Banco } from '../banco/entities/net_banco.entity';
 import { Net_TipoIdentificacion } from '../tipo_identificacion/entities/net_tipo_identificacion.entity';
 import { Net_Pais } from '../Regional/pais/entities/pais.entity';
 import { CreateAfiliadoTempDto } from './dto/create-afiliado-temp.dto';
 import { validate as isUUID } from 'uuid';
-import { Net_Persona } from './entities/Net_Persona';
+import { Net_Persona } from './entities/Net_Persona.entity';
 import { Net_Departamento } from '../Regional/provincia/entities/net_departamento.entity';
 
 @Injectable()

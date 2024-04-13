@@ -1,4 +1,4 @@
-import { Net_Deduccion } from "../../../Planilla/deduccion/entities/net_deduccion.entity";
+import { Net_Deduccion } from "../../Planilla/deduccion/entities/net_deduccion.entity";
 import { Column, Entity, ManyToOne, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 
 @Entity({ name: 'NET_INSTITUCION' })

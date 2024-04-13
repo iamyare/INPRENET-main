@@ -1,7 +1,7 @@
 import { Column, Entity, Index, JoinColumn, ManyToOne, OneToMany, OneToOne, PrimaryGeneratedColumn } from "typeorm";
 import { Net_Rol } from "./net_rol.entity";
 import { NET_SESION } from "./net_sesion.entity";
-import { Net_Empleado } from "../../Empresarial/empresas/entities/net_empleado.entity";
+import { Net_Empleado } from "../../Empresarial/entities/net_empleado.entity";
 import { NET_MOVIMIENTO_CUENTA } from "../../transacciones/entities/net_movimiento_cuenta.entity";
 @Entity({ name: 'NET_USUARIO' })
 export class Net_Usuario {

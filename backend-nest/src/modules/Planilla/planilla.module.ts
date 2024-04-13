@@ -4,7 +4,7 @@ import { Module } from '@nestjs/common';
 import { Net_Deduccion } from './deduccion/entities/net_deduccion.entity';
 import { Net_Detalle_Beneficio_Afiliado } from './detalle_beneficio/entities/net_detalle_beneficio_afiliado.entity';
 import { Net_Detalle_Pago_Beneficio } from './detalle_beneficio/entities/net_detalle_pago_beneficio.entity';
-import { Net_Institucion } from '../Empresarial/institucion/entities/net_institucion.entity';
+import { Net_Institucion } from '../Empresarial/entities/net_institucion.entity';
 import { Net_Detalle_Deduccion } from './detalle-deduccion/entities/detalle-deduccion.entity';
 import { Net_TipoPlanilla } from './tipo-planilla/entities/tipo-planilla.entity';
 import { Net_Beneficio } from './beneficio/entities/net_beneficio.entity';
@@ -28,7 +28,7 @@ import { TipoPlanillaService } from './tipo-planilla/tipo-planilla.service';
 import { BeneficioService } from './beneficio/beneficio.service';
 import { PlanillaService } from './planilla/planilla.service';
 import { DetallePlanillaIngresoService } from './ingresos/detalle-plan-ingr/detalle-planilla-ing.service';
-import { Net_SALARIO_COTIZABLE } from './Ingresos/detalle-plan-ingr/entities/net_detalle_plani_ing.entity copy';
+import { Net_SALARIO_COTIZABLE } from './Ingresos/detalle-plan-ingr/entities/net_salario_cotizable.entity';
 import { AfiliadoModule } from '../afiliado/afiliado.module';
 
 @Module({

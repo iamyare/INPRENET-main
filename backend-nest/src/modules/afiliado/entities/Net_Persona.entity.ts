@@ -1,16 +1,16 @@
 import { Net_TipoIdentificacion } from "../../tipo_identificacion/entities/net_tipo_identificacion.entity";
 import { Net_Pais } from "../../Regional/pais/entities/pais.entity";
 import { Check, Column, Entity, Index, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn } from "typeorm";
-import { Net_Ref_Per_Afil } from "./net_ref-Per-Afiliado"; import { Net_perf_afil_cent_trab } from "./net_perf_afil_cent_trab";
+import { Net_Ref_Per_Afil } from "./net_ref-Per-Afiliado.entity"; import { Net_perf_afil_cent_trab } from "./net_perf_afil_cent_trab.entity";
 import { Net_Detalle_Deduccion } from "../../Planilla/detalle-deduccion/entities/detalle-deduccion.entity";
-import { Net_Detalle_Afiliado } from "./Net_detalle_persona.entity";
-import { Net_Afiliados_Por_Banco } from "../../banco/entities/net_afiliados-banco";
+import { Net_Afiliados_Por_Banco } from "../../banco/entities/net_afiliados-banco.entity";
 import { Net_Municipio } from "../../Regional/municipio/entities/net_municipio.entity";
 import { NET_CUENTA_PERSONA } from "../../transacciones/entities/net_cuenta_persona.entity";
 import { IsIn } from "class-validator";
 import { NET_MOVIMIENTO_CUENTA } from "../../transacciones/entities/net_movimiento_cuenta.entity";
 import { Net_Detalle_planilla_ingreso } from "../../Planilla/Ingresos/detalle-plan-ingr/entities/net_detalle_plani_ing.entity";
 import { Net_Estado_Afiliado } from "./net_estado_afiliado.entity";
+import { NET_DETALLE_PERSONA } from "./Net_detalle_persona.entity";
 
 @Entity({
     name: 'NET_PERSONA',
@@ -90,8 +90,8 @@ export class Net_Persona {
     @Column('varchar2', { length: 200, nullable: true, name: 'ARCHIVO_IDENTIFICACION' })
     archivo_identificacion: string;
 
-    @OneToMany(() => Net_Detalle_Afiliado, detalleAfiliado => detalleAfiliado.afiliado)
-    detalleAfiliado: Net_Detalle_Afiliado[];
+    @OneToMany(() => NET_DETALLE_PERSONA, detalleAfiliado => detalleAfiliado.afiliado)
+    detalleAfiliado: NET_DETALLE_PERSONA[];
 
     @Column('varchar2', { length: 200, nullable: true, name: 'DIRECCION_RESIDENCIA' })
     direccion_residencia: string;
@@ -104,8 +104,8 @@ export class Net_Persona {
     @JoinColumn({ name: 'ID_ESTADO_AFILIADO', foreignKeyConstraintName: "FK_ID_ESTADO_AFIL_PERS" })
     estadoAfiliado: Net_Estado_Afiliado;
 
-    @OneToMany(() => Net_Detalle_Afiliado, detalleAfiliado => detalleAfiliado.afiliado)
-    detallesAfiliado: Net_Detalle_Afiliado[];
+    @OneToMany(() => NET_DETALLE_PERSONA, detalleAfiliado => detalleAfiliado.afiliado)
+    detallesAfiliado: NET_DETALLE_PERSONA[];
 
     @OneToMany(() => Net_Ref_Per_Afil, referenciaPersonalAfiliado => referenciaPersonalAfiliado.afiliado)
     referenciasPersonalAfiliado: Net_Ref_Per_Afil[];

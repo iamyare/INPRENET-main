@@ -1,5 +1,5 @@
 import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
-import { Net_Ref_Per_Afil } from "./net_ref-Per-Afiliado";
+import { Net_Ref_Per_Afil } from "./net_ref-Per-Afiliado.entity";
 
 @Entity({name: 'NET_REFERENCIA_PERSONAL'})
 export class Net_ReferenciaPersonal {

@@ -4,10 +4,10 @@ import { UpdateTranssacionesDto } from './dto/update-transacciones.dto';
 import { NET_MOVIMIENTO_CUENTA } from './entities/net_movimiento_cuenta.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { Net_Persona } from '../afiliado/entities/Net_Persona';
-import { NET_TIPO_CUENTA } from './entities/net_tipo_cuenta.entitiy';
-import { NET_TIPO_MOVIMIENTO_CUENTA } from './entities/net_tipo_movimiento.entity';
+import { Net_Persona } from '../afiliado/entities/Net_Persona.entity';
+import { NET_TIPO_CUENTA } from './entities/net_tipo_cuenta.entity';
 import { NET_CUENTA_PERSONA } from './entities/net_cuenta_persona.entity';
+import { NET_TIPO_MOVIMIENTO } from './entities/net_tipo_movimiento.entity';
 
 @Injectable()
 export class TransaccionesService {
@@ -19,8 +19,8 @@ export class TransaccionesService {
     private movimientoCuentaRepository: Repository<NET_MOVIMIENTO_CUENTA>,
     @InjectRepository(NET_TIPO_CUENTA)
     private tipoCuentaRepository: Repository<NET_TIPO_CUENTA>,
-    @InjectRepository(NET_TIPO_MOVIMIENTO_CUENTA)
-    private tipoMovimientoCuentaRepository: Repository<NET_TIPO_MOVIMIENTO_CUENTA>,
+    @InjectRepository(NET_TIPO_MOVIMIENTO)
+    private tipoMovimientoCuentaRepository: Repository<NET_TIPO_MOVIMIENTO>,
     @InjectRepository(NET_CUENTA_PERSONA) // Asegúrate de que el nombre de la entidad sea correcto
     private cuentaPersonaRepository: Repository<NET_CUENTA_PERSONA>
   ){

@@ -1,4 +1,4 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, Check, ManyToOne, JoinColumn } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn } from 'typeorm';
 import { NET_USUARIO_PRIVADA } from './net_usuario_privada.entity';
 import { Net_Usuario } from './net_usuario.entity';
 

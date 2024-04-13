@@ -2,7 +2,7 @@ import { BadRequestException, Injectable, InternalServerErrorException, Logger }
 import { CreateCentroTrabajoDto } from './dto/create-centro-trabajo.dto';
 import { UpdateCentroTrabajoDto } from './dto/update-centro-trabajo.dto';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Net_Centro_Trabajo } from './entities/net_centro-trabajo.entity';
+import { Net_Centro_Trabajo } from '../entities/net_centro_trabajo.entity';
 import { Repository } from 'typeorm';
 import { Net_Departamento } from '../../Regional/provincia/entities/net_departamento.entity';
 

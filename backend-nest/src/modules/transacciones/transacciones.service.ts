@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateTransaccionesDto } from './dto/create-transacciones.dto';
 import { UpdateTranssacionesDto } from './dto/update-transacciones.dto';
 import { NET_MOVIMIENTO_CUENTA } from './entities/net_movimiento_cuenta.entity';
@@ -25,6 +25,32 @@ export class TransaccionesService {
     private cuentaPersonaRepository: Repository<NET_CUENTA_PERSONA>
   ){
 
+  }
+
+  async generarVoucherTodosMovimientos(idPersona: number): Promise<any> {
+    const persona = await this.personaRepository.findOne({ where: { id_persona: idPersona } });
+    if (!persona) {
+      throw new NotFoundException(`Persona with ID ${idPersona} not found`);
+    }
+
+    const movimientos = await this.movimientoCuentaRepository.find({
+      where: { persona: { id_persona: idPersona } },
+      relations: ['tipoMovimiento', 'tipoMovimiento.tipoCuenta']
+    });
+
+    const voucher = movimientos.map(mov => ({
+      fecha: mov.FECHA_MOVIMIENTO instanceof Date ? mov.FECHA_MOVIMIENTO.toISOString().split('T')[0] : mov.FECHA_MOVIMIENTO,
+      monto: mov.MONTO,
+      descripcion: mov.DESCRIPCION,
+      tipoMovimiento: mov.tipoMovimiento.DESCRIPCION,
+      tipoCuenta: mov.tipoMovimiento.tipoCuenta.DESCRIPCION
+    }));
+
+    return {
+      nombreCompleto: `${persona.primer_nombre} ${persona.segundo_nombre} ${persona.primer_apellido} ${persona.segundo_apellido}`,
+      dni: persona.dni,
+      movimientos: voucher
+    };
   }
 
   async crearMovimiento(

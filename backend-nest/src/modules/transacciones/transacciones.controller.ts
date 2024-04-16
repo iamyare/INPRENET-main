@@ -2,12 +2,25 @@ import { Controller, Get, Post, Body, Patch, Param, Delete, HttpStatus, HttpExce
 import { CreateTransaccionesDto } from './dto/create-transacciones.dto';
 import { UpdateTranssacionesDto } from './dto/update-transacciones.dto';
 import { TransaccionesService } from './transacciones.service';
-import { ApiTags } from '@nestjs/swagger';
+import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { VoucherDto } from './dto/voucher.dto';
 
 @ApiTags('transacciones')
 @Controller('transacciones')
 export class TransaccionesController {
   constructor(private readonly transaccionesService: TransaccionesService) { }
+
+  @Get('voucher/todos/:idPersona')
+  @ApiOperation({ summary: 'Generate vouchers for all transactions of a person' })
+  @ApiResponse({ status: 200, description: 'Vouchers generated successfully', type: VoucherDto, isArray: true })
+  async generarVoucherTodosMovimientos(@Param('idPersona') idPersona: number, @Res() res) {
+    try {
+      const vouchers = await this.transaccionesService.generarVoucherTodosMovimientos(idPersona);
+      return res.status(HttpStatus.OK).json(vouchers);
+    } catch (e) {
+      throw new HttpException(e.message, HttpStatus.NOT_FOUND);
+    }
+  }
 
   @Post('/crear-movimiento')
   @HttpCode(HttpStatus.CREATED)

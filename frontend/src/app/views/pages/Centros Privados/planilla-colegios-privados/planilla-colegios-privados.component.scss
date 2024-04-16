@@ -121,7 +121,7 @@ button[mat-raised-button]:hover {
 .botones-container {
   display: flex;
   align-items: center;
-  margin-bottom: 20px; // Espacio antes de la siguiente sección
+  margin: 2rem 0 2rem 0;
 
   .boton-estetico {
     background-color: #26a69a; // El color de fondo que especificaste

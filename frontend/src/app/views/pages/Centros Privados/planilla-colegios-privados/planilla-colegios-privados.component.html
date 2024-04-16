@@ -3,12 +3,12 @@
     <form [formGroup]="firstFormGroup">
       <ng-template matStepLabel>Seleccione Centro</ng-template>
 
-      <mat-form-field appearance="fill">
-        <mat-label>Filtrar</mat-label>
+      <mat-form-field appearance="fill" style="width: 100%">
+        <mat-label>Buscar Centro Educativo</mat-label>
         <input
           matInput
           (keyup)="applyFilter($event)"
-          placeholder="Escribe para filtrar"
+          placeholder="Escribe para buscar el centro educativo"
         />
       </mat-form-field>
 
@@ -51,7 +51,9 @@
         ></mat-paginator>
       </div>
 
-      <p>Ítem seleccionado: {{ selectedItem?.nombre_centro_trabajo }}</p>
+      <p style="font-weight: bold">
+        Centro educativo seleccionado: {{ selectedItem?.nombre_centro_trabajo }}
+      </p>
       <div>
         <button mat-button matStepperNext [disabled]="!selectedItem">
           Siguiente
@@ -59,9 +61,10 @@
       </div>
     </form>
   </mat-step>
+
   <mat-step *ngIf="mostrarSegundoPaso" [stepControl]="firstFormGroup">
     <form [formGroup]="firstFormGroup">
-      <ng-template matStepLabel>Período de planilla</ng-template>
+      <ng-template matStepLabel>Período De Planilla</ng-template>
       <mat-selection-list
         #shoes
         color="primary"
@@ -76,7 +79,7 @@
         </mat-list-option>
       </mat-selection-list>
       <div>
-        <button mat-button matStepperPrevious>Back</button>
+        <button mat-button matStepperPrevious>Atrás</button>
         <button
           mat-button
           matStepperNext
@@ -90,41 +93,39 @@
   </mat-step>
 
   <mat-step label="Datos De Planilla" *ngIf="mostrarTercerPaso">
-    <div class="botones-container">
-      <button
-        mat-raised-button
-        class="boton-estetico"
-        (click)="agregarDocente()"
-      >
-        Agregar Docente
-      </button>
-      <button
-        mat-raised-button
-        class="boton-estetico"
-        (click)="generarExcel()"
-      >
-        Descargar Excel
-      </button>
-      <button
-        mat-raised-button
-        class="boton-estetico"
-        (click)="generarPDF()"
-      >
-        Descargar PDF
-      </button>
-      <button
-        mat-raised-button
-        class="boton-estetico"
-        (click)="generarActualizarPlanilla()"
-      >
-        Generar / Actualizar Planilla
-      </button>
-    </div>
     <div class="datos-container">
-      <h2>
-        Datos de Planilla {{ dataSource.data[0]?.periodoInicio }} al
-        {{ dataSource.data[0]?.periodoFinalizacion }}
+      <h2 style="text-align: center">
+        Planilla mes de:
+        {{ obtenerNombreMes(dataSource.data[0]) }}
       </h2>
+
+      <div class="botones-container">
+        <button
+          mat-raised-button
+          class="boton-estetico"
+          (click)="agregarDocente()"
+        >
+          Agregar Docente
+        </button>
+        <button
+          mat-raised-button
+          class="boton-estetico"
+          (click)="generarExcel()"
+        >
+          Descargar Excel
+        </button>
+        <button mat-raised-button class="boton-estetico" (click)="generarPDF()">
+          Descargar PDF
+        </button>
+        <button
+          mat-raised-button
+          class="boton-estetico"
+          (click)="generarActualizarPlanilla()"
+        >
+          Generar / Actualizar Planilla
+        </button>
+      </div>
+
       <table mat-table [dataSource]="dataSourceItems1">
         <!-- Número de colegio Column -->
         <ng-container matColumnDef="numeroColegio">
@@ -189,149 +190,141 @@
 
     <div class="linea-separadora"></div>
 
-    <button
-      mat-raised-button
-      (click)="seleccionarBoton('EMPLEADOS'); showTable = true"
-      [ngClass]="{ 'boton-seleccionado': botonSeleccionado === 'EMPLEADOS' }"
-    >
-      EMPLEADOS
-    </button>
-    <button
-      mat-raised-button
-      (click)="seleccionarBoton('CALCULO DE RECARGO'); showTable = false"
-      [ngClass]="{
-        'boton-seleccionado': botonSeleccionado === 'CALCULO DE RECARGO'
-      }"
-    >
-      CALCULO DE RECARGO
-    </button>
+    <mat-tab-group>
+      <mat-tab label="EMPLEADOS">
+        <div>
+          <mat-form-field>
+            <mat-label>Filtro</mat-label>
+            <input matInput (keyup)="applyFilter($event)" #input />
+          </mat-form-field>
 
-    <div *ngIf="showTable">
-      <mat-form-field>
-        <mat-label>Filtro</mat-label>
-        <input matInput (keyup)="applyFilter($event)" #input />
-      </mat-form-field>
+          <div>
+            <table mat-table [dataSource]="dataSource" matSort>
+              <!-- Identidad Column -->
+              <ng-container matColumnDef="identidad">
+                <th mat-header-cell *matHeaderCellDef>Identidad</th>
+                <td mat-cell *matCellDef="let row">{{ row.identidad }}</td>
+              </ng-container>
 
-      <div>
-        <table mat-table [dataSource]="dataSource" matSort>
-          <!-- Identidad Column -->
-          <ng-container matColumnDef="identidad">
-            <th mat-header-cell *matHeaderCellDef>Identidad</th>
-            <td mat-cell *matCellDef="let row">{{ row.identidad }}</td>
-          </ng-container>
+              <!-- Nombre Docente Column -->
+              <ng-container matColumnDef="nombreDocente">
+                <th mat-header-cell *matHeaderCellDef>Nombre Docente</th>
+                <td mat-cell *matCellDef="let row">{{ row.nombreDocente }}</td>
+              </ng-container>
 
-          <!-- Nombre Docente Column -->
-          <ng-container matColumnDef="nombreDocente">
-            <th mat-header-cell *matHeaderCellDef>Nombre Docente</th>
-            <td mat-cell *matCellDef="let row">{{ row.nombreDocente }}</td>
-          </ng-container>
+              <!-- Sueldo Column -->
+              <ng-container matColumnDef="sueldo">
+                <th mat-header-cell *matHeaderCellDef>Sueldo</th>
+                <td mat-cell *matCellDef="let row" style="text-align: right">
+                  {{ row.sueldo | currency : "L" }}
+                </td>
+              </ng-container>
 
-          <!-- Sueldo Column -->
-          <ng-container matColumnDef="sueldo">
-            <th mat-header-cell *matHeaderCellDef>Sueldo</th>
-            <td mat-cell *matCellDef="let row" style="text-align: right">
-              {{ row.sueldo | currency : "L" }}
-            </td>
-          </ng-container>
+              <!-- Aportaciones Column -->
+              <ng-container matColumnDef="aportaciones">
+                <th mat-header-cell *matHeaderCellDef>Aportaciones</th>
+                <td mat-cell *matCellDef="let row" style="text-align: right">
+                  {{ row.aportaciones | currency : "L" }}
+                </td>
+              </ng-container>
 
-          <!-- Aportaciones Column -->
-          <ng-container matColumnDef="aportaciones">
-            <th mat-header-cell *matHeaderCellDef>Aportaciones</th>
-            <td mat-cell *matCellDef="let row" style="text-align: right">
-              {{ row.aportaciones | currency : "L" }}
-            </td>
-          </ng-container>
+              <!-- Cotizaciones Column -->
+              <ng-container matColumnDef="cotizaciones">
+                <th mat-header-cell *matHeaderCellDef>Cotizaciones</th>
+                <td mat-cell *matCellDef="let row" style="text-align: right">
+                  {{ row.cotizaciones | currency : "L" }}
+                </td>
+              </ng-container>
 
-          <!-- Cotizaciones Column -->
-          <ng-container matColumnDef="cotizaciones">
-            <th mat-header-cell *matHeaderCellDef>Cotizaciones</th>
-            <td mat-cell *matCellDef="let row" style="text-align: right">
-              {{ row.cotizaciones | currency : "L" }}
-            </td>
-          </ng-container>
+              <!-- Prestamos Column -->
+              <ng-container matColumnDef="prestamos">
+                <th mat-header-cell *matHeaderCellDef>Préstamos</th>
+                <td mat-cell *matCellDef="let row" style="text-align: right">
+                  {{ row.prestamos | currency : "L" }}
+                </td>
+              </ng-container>
 
-          <!-- Prestamos Column -->
-          <ng-container matColumnDef="prestamos">
-            <th mat-header-cell *matHeaderCellDef>Préstamos</th>
-            <td mat-cell *matCellDef="let row" style="text-align: right">
-              {{ row.prestamos | currency : "L" }}
-            </td>
-          </ng-container>
+              <!-- Deducciones Column -->
+              <ng-container matColumnDef="deducciones">
+                <th mat-header-cell *matHeaderCellDef>Deducciones</th>
+                <td mat-cell *matCellDef="let row" style="text-align: right">
+                  {{ row.deducciones | currency : "L" }}
+                </td>
+              </ng-container>
 
-          <!-- Deducciones Column -->
-          <ng-container matColumnDef="deducciones">
-            <th mat-header-cell *matHeaderCellDef>Deducciones</th>
-            <td mat-cell *matCellDef="let row" style="text-align: right">
-              {{ row.deducciones | currency : "L" }}
-            </td>
-          </ng-container>
+              <!-- Sueldo Neto Column -->
+              <ng-container matColumnDef="sueldoNeto">
+                <th mat-header-cell *matHeaderCellDef>Sueldo Neto</th>
+                <td mat-cell *matCellDef="let row" style="text-align: right">
+                  {{ row.sueldoNeto | currency : "L" }}
+                </td>
+              </ng-container>
 
-          <!-- Sueldo Neto Column -->
-          <ng-container matColumnDef="sueldoNeto">
-            <th mat-header-cell *matHeaderCellDef>Sueldo Neto</th>
-            <td mat-cell *matCellDef="let row" style="text-align: right">
-              {{ row.sueldoNeto | currency : "L" }}
-            </td>
-          </ng-container>
+              <ng-container matColumnDef="editar">
+                <th mat-header-cell *matHeaderCellDef>Editar</th>
+                <td mat-cell *matCellDef="let row">
+                  <button mat-icon-button (click)="editarElemento(row)">
+                    <mat-icon color="primary">edit</mat-icon>
+                  </button>
+                </td>
+              </ng-container>
 
-          <ng-container matColumnDef="editar">
-            <th mat-header-cell *matHeaderCellDef>Editar</th>
-            <td mat-cell *matCellDef="let row">
-              <button mat-icon-button (click)="editarElemento(row)">
-                <mat-icon>edit</mat-icon>
-              </button>
-            </td>
-          </ng-container>
+              <ng-container matColumnDef="eliminar">
+                <th mat-header-cell *matHeaderCellDef>Eliminar</th>
+                <td mat-cell *matCellDef="let row">
+                  <button mat-icon-button (click)="eliminarElemento(row)">
+                    <mat-icon color="warn">delete</mat-icon>
+                  </button>
+                </td>
+              </ng-container>
 
-          <ng-container matColumnDef="eliminar">
-            <th mat-header-cell *matHeaderCellDef>Eliminar</th>
-            <td mat-cell *matCellDef="let row">
-              <button mat-icon-button (click)="eliminarElemento(row)">
-                <mat-icon>delete</mat-icon>
-              </button>
-            </td>
-          </ng-container>
+              <!-- No Data Row -->
+              <tr class="mat-row" *matNoDataRow>
+                <td class="mat-cell" colspan="8">
+                  No se encuentran datos con el valor: "{{ input.value }}"
+                </td>
+              </tr>
 
-          <!-- No Data Row -->
-          <tr class="mat-row" *matNoDataRow>
-            <td class="mat-cell" colspan="8">
-              No se encuentran datos con el valor: "{{ input.value }}"
-            </td>
-          </tr>
+              <!-- Columnas a mostrar -->
+              <tr mat-header-row *matHeaderRowDef="displayedColumns3"></tr>
+              <tr mat-row *matRowDef="let row; columns: displayedColumns3"></tr>
+            </table>
 
-          <!-- Columnas a mostrar -->
-          <tr mat-header-row *matHeaderRowDef="displayedColumns3"></tr>
-          <tr mat-row *matRowDef="let row; columns: displayedColumns3"></tr>
-        </table>
+            <mat-paginator
+              [pageSizeOptions]="[5, 10, 25, 100]"
+              aria-label="Select page of users"
+            ></mat-paginator>
+          </div>
+        </div>
+      </mat-tab>
+      <mat-tab label="CALCULO DE RECARGO">
+        <div>
+          <mat-form-field appearance="fill">
+            <mat-label>Elige una fecha</mat-label>
+            <input
+              matInput
+              [matDatepicker]="picker"
+              [formControl]="fecha"
+              (dateChange)="actualizarValores()"
+            />
+            <mat-datepicker-toggle
+              matSuffix
+              [for]="picker"
+            ></mat-datepicker-toggle>
+            <mat-datepicker #picker></mat-datepicker>
+          </mat-form-field>
 
-        <mat-paginator
-          [pageSizeOptions]="[5, 10, 25, 100]"
-          aria-label="Select page of users"
-        ></mat-paginator>
-      </div>
-    </div>
-
-    <div *ngIf="!showTable">
-      <mat-form-field appearance="fill">
-        <mat-label>Elige una fecha</mat-label>
-        <input
-          matInput
-          [matDatepicker]="picker"
-          [formControl]="fecha"
-          (dateChange)="actualizarValores()"
-        />
-        <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
-        <mat-datepicker #picker></mat-datepicker>
-      </mat-form-field>
-
-      <div *ngIf="recargoPlanilla && totalPagarConRecargo">
-        <p style="text-align: right">
-          Recargo de Planilla: {{ recargoPlanilla | currency : "L" }}
-        </p>
-        <p style="text-align: right">
-          Total a Pagar con Recargo: {{ totalPagarConRecargo | currency : "L" }}
-        </p>
-      </div>
-    </div>
+          <div *ngIf="recargoPlanilla && totalPagarConRecargo">
+            <p style="text-align: right">
+              Recargo de Planilla: {{ recargoPlanilla | currency : "L" }}
+            </p>
+            <p style="text-align: right">
+              Total a Pagar con Recargo:
+              {{ totalPagarConRecargo | currency : "L" }}
+            </p>
+          </div>
+        </div>
+      </mat-tab>
+    </mat-tab-group>
   </mat-step>
 </mat-stepper>

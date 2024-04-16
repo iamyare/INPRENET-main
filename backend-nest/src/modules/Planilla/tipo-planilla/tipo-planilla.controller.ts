@@ -20,6 +20,11 @@ export class TipoPlanillaController {
     return this.tipoPlanillaService.findAll(paginationDto);
   }
 
+  @Post("findTipoPlanByclasePlan")
+  findTipoPlanByclasePlan(@Query() paginationDto: PaginationDto, @Body() clasePlanilla: string) {
+    return this.tipoPlanillaService.findTipoPlanByclasePlan(paginationDto, clasePlanilla);
+  }
+
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.tipoPlanillaService.findOne(+id);

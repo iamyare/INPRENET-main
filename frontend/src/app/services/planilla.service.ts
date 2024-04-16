@@ -186,6 +186,17 @@ export class PlanillaService {
     return this.http.get(`${environment.API_URL}/api/tipo-planilla`, { params });
   }
 
+  findTipoPlanillaByclasePlanilla(clasePlanilla: string, limit: number = 10, offset: number = 0): Observable<any> {
+    let params = new HttpParams()
+      .set('limit', limit.toString())
+      .set('offset', offset.toString());
+
+    // Aquí agregamos el parámetro "clasePlanilla" al cuerpo de la solicitud
+    const body = { clasePlanilla };
+
+    return this.http.post(`${environment.API_URL}/api/tipo-planilla/findTipoPlanByclasePlan`, body, { params });
+  }
+
   findAllPlanillas(limit: number = 10, offset: number = 0): Observable<any> {
     let params = new HttpParams()
       .set('limit', limit.toString())

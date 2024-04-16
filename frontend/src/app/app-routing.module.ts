@@ -36,8 +36,8 @@ const routes: Routes = [
           import('./views/theme/theme.module').then((m) => m.ThemeModule),
         canActivate: [RoleGuard],
         data: {
-          expectedRoles: ['ADMINISTRADOR', 'JEFE', 'OFICIAL', 'AUXILIAR']
-    }
+          expectedRoles: ['ADMINISTRADOR', 'JEFE DE AREA', 'OFICIAL', 'AUXILIAR']
+        }
       },
       {
         path: 'Planilla',

@@ -32,7 +32,7 @@ export class NuevaplanillaComponent implements OnInit {
 
   getTiposPlanillas = async () => {
     try {
-      const data = await this.planillaService.findAllTipoPlanilla().toPromise();
+      const data = await this.planillaService.findTipoPlanillaByclasePlanilla("EGRESO").toPromise();
       this.filas = data.map((item: any) => {
         this.tiposPlanilla.push({ label: `${item.nombre_planilla}`, value: `${item.nombre_planilla}` })
         return {

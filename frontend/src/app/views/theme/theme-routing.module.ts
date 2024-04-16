@@ -36,7 +36,7 @@ const routes: Routes = [
       {
         path: '',
         pathMatch: 'full',
-        redirectTo: 'afil-banco',
+        redirectTo: 'dashboard',
       },
       {
         path: 'afil-banco',

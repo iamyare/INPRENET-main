@@ -18,23 +18,22 @@ import { TransaccionesModule } from './modules/transacciones/transacciones.modul
       isGlobal: true
     }),
     TypeOrmModule.forRootAsync({
-      imports: [ConfigModule], 
+      imports: [ConfigModule],
       useFactory: (configService: ConfigService) => ({
         type: 'oracle',
-        host : configService.get('DB_HOST'),
-        port : configService.get('DB_PORT'),
-        username: configService.get('DB_USERNAME'),
+        connectString: configService.get('CONNECT_STRING'),
         database: configService.get('DB_NAME'),
+        username: configService.get('DB_USERNAME'),
         password: configService.get('DB_PASSWORD'),
         autoLoadEntities: true,
         synchronize: false,
         entities: [__dirname + '/../**/*.entity{.ts,.js}'],
         migrations: ['src/database/migrations/*{.ts,.js}'],
         //logging: ['error'] // solo loguear errores
-       
+
       }),
-      inject : [ConfigService]
-      
+      inject: [ConfigService]
+
     }),
     CommonModule,
     AfiliadoModule,
@@ -50,7 +49,7 @@ import { TransaccionesModule } from './modules/transacciones/transacciones.modul
 export class AppModule {
 }
 
- /* connectString: process.env.CONNECT_STRING,
-        synchronize: false,
-        autoLoadEntities : true, */
-        /* logging: ["query", "error"], */
+/* connectString: process.env.CONNECT_STRING,
+       synchronize: false,
+       autoLoadEntities : true, */
+/* logging: ["query", "error"], */

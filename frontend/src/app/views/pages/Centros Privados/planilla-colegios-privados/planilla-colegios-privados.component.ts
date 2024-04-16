@@ -27,7 +27,6 @@ import * as XLSX from 'xlsx';
 import jsPDF from 'jspdf';
 import 'jspdf-autotable';
 
-
 export interface Item {
   id_centro_trabajo: number;
   nombre_centro_trabajo: string;
@@ -43,7 +42,7 @@ export class PlanillaColegiosPrivadosComponent
   @ViewChild(MatPaginator) paginator!: MatPaginator;
   @ViewChild(MatSort) sort!: MatSort;
 
-  botonSeleccionado: string = 'EMPLEADOS';
+  /* botonSeleccionado: string = 'EMPLEADOS'; */
   fecha = new FormControl(new Date());
   recargoPlanilla: number = 0;
   totalPagarConRecargo: number = 0;
@@ -68,6 +67,7 @@ export class PlanillaColegiosPrivadosComponent
   selectedTipoPlanilla: any;
 
   idCentroTrabajo!: number;
+  idPlanilla!: number;
 
   constructor(
     private _formBuilder: FormBuilder,
@@ -105,19 +105,27 @@ export class PlanillaColegiosPrivadosComponent
     }
   }
 
-  selectRow(item: Item) {
-    this.idCentroTrabajo = item.id_centro_trabajo
-    this.selectedItem = item;
-    this.mostrarSegundoPaso = true;
-  }
+  obtenerNombreMes(fecha: any): string {
+    if (fecha) {
+      const partesFecha: string[] = fecha?.periodoInicio.split('/');
 
-  applyFilter(event: Event) {
-    const filterValue = (event.target as HTMLInputElement).value;
-    this.dataSourceItems.filter = filterValue.trim().toLowerCase();
+      if (partesFecha.length !== 3) {
+        return 'Formato de fecha inválido';
+      }
 
-    if (this.dataSourceItems.paginator) {
-      this.dataSourceItems.paginator.firstPage();
+      const numMes: number = parseInt(partesFecha[1], 10);
+      const anio: number = parseInt(partesFecha[2], 10);
+
+      const meses: string[] = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
+
+      if (numMes >= 1 && numMes <= 12) {
+        const nombreMes: string = meses[numMes - 1];
+        return `${nombreMes} ${anio}`;
+      } else {
+        return '';
+      }
     }
+    return '';
   }
 
   obtenerDetallesPlanilla(idCentroTrabajo: number, id_tipo_planilla: number) {
@@ -145,7 +153,6 @@ export class PlanillaColegiosPrivadosComponent
           this.cdr.detectChanges();
         } else {
           this.dataSource.data = []
-
         }
       });
   }
@@ -161,16 +168,9 @@ export class PlanillaColegiosPrivadosComponent
           this.dataSourceItems1 = response.data;
         },
         (error) => {
-          this.dataSourceItems1 = [];
           console.error('Error al obtener detalles de planilla:', error);
         }
       );
-  }
-
-  ngAfterViewInit() {
-    this.cargarCentrosDeTrabajo();
-    this.dataSource.paginator = this.paginator;
-    this.dataSource.sort = this.sort;
   }
 
   cargarCentrosDeTrabajo() {
@@ -189,66 +189,51 @@ export class PlanillaColegiosPrivadosComponent
   agregarDocente() {
     const formFields: any[] = [
       { name: 'dni', type: 'text', label: 'Numero de identidad', validations: [Validators.required] },
-      { name: 'Sueldo', type: 'number', label: 'Sueldo', validations: [Validators.required] },
       { name: 'Prestamos', type: 'number', label: 'Prestamos', validations: [Validators.required] },
     ];
 
     const dialogRef = this.dialog.open(DynamicFormDialogComponent, {
       width: '600px',
-      data: { fields: formFields, title: 'Agregar docente' },
+      data: { fields: formFields, title: 'Agregar docente', id_centro_trabajo: this.idCentroTrabajo },
     });
 
-    dialogRef.afterClosed().subscribe(result => {
+    dialogRef.afterClosed().subscribe(async result => {
       if (result) {
-
-        /* SUELDO */
         let dataEnviar = {
           dni: result.dni,
           id_centro_educativo: this.selectedItem!.id_centro_trabajo,
-          id_planilla: this.dataSource.data[0].id_planilla,
+          id_planilla: this.idPlanilla,
           data: {
-            prestamos: result.Prestamos,
-            salario_base: 80000
+            prestamos: result.Prestamos
           }
         }
 
-        this.planillaIngresosService.agregarDetallesPlanillaAgrupCent(dataEnviar.id_planilla, dataEnviar.dni, dataEnviar.id_centro_educativo, dataEnviar.data).subscribe(
-          (response: any) => {
+        await this.planillaIngresosService.agregarDetallesPlanillaAgrupCent(dataEnviar.id_planilla, dataEnviar.dni, dataEnviar.id_centro_educativo, dataEnviar.data).subscribe({
+          next: async (response) => {
             if (response) {
-              this.toastr.success(`Docente agregado a la planilla ${dataEnviar.id_planilla}. con éxito`);
-              //this.obtenerDetallesPlanilla(dataEnviar.id_centro_educativo, dataEnviar.id_planilla)
-              //this.obtenerDetallesPlanillaAgrupCent(dataEnviar.id_centro_educativo, dataEnviar.id_planilla)
+              await this.obtenerDetallesPlanillaAgrupCent(dataEnviar.id_centro_educativo, this.selectedTipoPlanilla[0].ID_TIPO_PLANILLA)
+              await this.obtenerDetallesPlanilla(dataEnviar.id_centro_educativo, this.selectedTipoPlanilla[0].ID_TIPO_PLANILLA)
+              this.toastr.success(`Docente agregado a la planilla ${dataEnviar.id_planilla} con éxito`);
             } else {
               this.toastr.error(`El docente no ha sido agregado a la planilla ${dataEnviar.id_planilla}.`);
             }
           },
-          error => {
-            console.error('Error al Insertar el registro en la planilla:', error);
+          error: (error: any) => {
+            console.error('Error al actualizar detalles de la planilla privada:', error);
+            this.toastr.error('Error al actualizar detalles de la planilla privada');
           }
-        );
+        });
+
       }
-    });
+    })
   }
 
   descargarExcelPdf() {
-    // Lógica para exportar a Excel y PDF
-  }
-
-  generarActualizarPlanilla() {
-    // Lógica para generar o actualizar la planilla
-  }
-
-  calcularRecargo() {
-    // Lógica para calcular el recargo
   }
 
   actualizarValores() {
     this.recargoPlanilla = 100;
     this.totalPagarConRecargo = 1050;
-  }
-
-  seleccionarBoton(boton: string) {
-    this.botonSeleccionado = boton;
   }
 
   datosPlanilla() {
@@ -260,8 +245,20 @@ export class PlanillaColegiosPrivadosComponent
         this.idCentroTrabajo || this.selectedItem?.id_centro_trabajo;
 
       if (idCentroTrabajo) {
+
+
+        this.planillaIngresosService.obtenerPlanillaSeleccionada(idCentroTrabajo, idTipoPlanilla).subscribe(
+          (response: any) => {
+            if (response.data.length > 0) {
+              this.idPlanilla = response.data[0].ID_PLANILLA
+            } else {
+              console.error('No hay ninguna planilla');
+            }
+          });
+
         this.obtenerDetallesPlanilla(idCentroTrabajo, idTipoPlanilla);
         this.obtenerDetallesPlanillaAgrupCent(idCentroTrabajo, idTipoPlanilla);
+
       } else {
         console.error('No hay ningún centro de trabajo seleccionado');
       }
@@ -306,6 +303,8 @@ export class PlanillaColegiosPrivadosComponent
             this.planillaIngresosService.actualizarDetallesPlanillaPrivada(dni, idDetallePlanIngreso, nuevoSueldo, nuevosPrestamos).subscribe({
               next: (response) => {
                 this.toastr.success('Detalles de la planilla actualizados con éxito');
+                console.log(response);
+
                 this.obtenerDetallesPlanilla(idCentroTrabajo, this.selectedTipoPlanilla[0].ID_TIPO_PLANILLA);
                 this.obtenerDetallesPlanillaAgrupCent(idCentroTrabajo, this.selectedTipoPlanilla[0].ID_TIPO_PLANILLA);
               },
@@ -324,7 +323,6 @@ export class PlanillaColegiosPrivadosComponent
     });
   }
 
-
   eliminarElemento(row: UserData) {
     const dialogRef = this.dialog.open(ConfirmDialogComponent, {
       width: '350px',
@@ -339,6 +337,7 @@ export class PlanillaColegiosPrivadosComponent
         this.planillaIngresosService.eliminarDetallePlanillaIngreso(row.id_detalle_plan_Ing).subscribe({
           next: (response) => {
             this.toastr.success(response.message);
+
             if (this.selectedTipoPlanilla && this.selectedTipoPlanilla.length > 0) {
               this.obtenerDetallesPlanilla(this.idCentroTrabajo, this.selectedTipoPlanilla[0].ID_TIPO_PLANILLA);
               this.obtenerDetallesPlanillaAgrupCent(this.idCentroTrabajo, this.selectedTipoPlanilla[0].ID_TIPO_PLANILLA);
@@ -355,8 +354,6 @@ export class PlanillaColegiosPrivadosComponent
       }
     });
   }
-
-
 
   decodeToken(): any {
     const token = localStorage.getItem('token');
@@ -394,7 +391,7 @@ export class PlanillaColegiosPrivadosComponent
 
     const dataForSecondSheet = this.dataSourceItems1.map(item => ({
       'Número de Colegio': this.dataSourceItems1[0].ID_CENTRO_TRABAJO,
-      'Nombre del Colegio':  this.dataSourceItems1[0].NOMBRE_CENTRO_TRABAJO,
+      'Nombre del Colegio': this.dataSourceItems1[0].NOMBRE_CENTRO_TRABAJO,
       'Total Sueldo': this.dataSourceItems1[0].SUELDO,
       'Total Préstamo': this.dataSourceItems1[0].PRESTAMOS,
       'Total Aportaciones': this.dataSourceItems1[0].APORTACIONES,
@@ -405,7 +402,6 @@ export class PlanillaColegiosPrivadosComponent
     XLSX.utils.book_append_sheet(wb, ws2, 'Resumen Colegios');
     XLSX.writeFile(wb, 'planilla.xlsx');
   }
-
 
   generarPDF() {
     const doc = new jsPDF();
@@ -440,11 +436,43 @@ export class PlanillaColegiosPrivadosComponent
 
     // Guardar el PDF
     doc.save('planilla.pdf');
-}
+  }
 
+  /*   seleccionarBoton(boton: string) {
+      this.botonSeleccionado = boton;
+    } */
+  selectRow(item: Item) {
+    this.idCentroTrabajo = item.id_centro_trabajo
+    this.selectedItem = item;
+    this.mostrarSegundoPaso = true;
+  }
 
+  applyFilter(event: Event) {
+    const filterValue = (event.target as HTMLInputElement).value;
+    this.dataSourceItems.filter = filterValue.trim().toLowerCase();
 
+    if (this.dataSourceItems.paginator) {
+      this.dataSourceItems.paginator.firstPage();
+    }
+  }
 
+  ngAfterViewInit() {
+    this.cargarCentrosDeTrabajo();
+    this.dataSource.paginator = this.paginator;
+    this.dataSource.sort = this.sort;
+  }
+
+  exportarExcelPdf() {
+    // Lógica para exportar a Excel y PDF
+  }
+
+  generarActualizarPlanilla() {
+    // Lógica para generar o actualizar la planilla
+  }
+
+  calcularRecargo() {
+    // Lógica para calcular el recargo
+  }
 }
 
 export interface UserData {

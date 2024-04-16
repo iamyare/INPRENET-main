@@ -28,7 +28,7 @@ export class Net_Detalle_planilla_ingreso {
     @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true, name: 'SUELDO_NETO' })
     sueldo_neto: number;
 
-    @Column({ type: 'varchar2', nullable: true, name: 'ESTADO', default: "NO CARGADO" })
+    @Column({ type: 'varchar2', nullable: true, name: 'ESTADO', default: "CARGADO" })
     estado: string;
 
     @ManyToOne(() => Net_Persona, persona => persona.detallePlanIngreso)

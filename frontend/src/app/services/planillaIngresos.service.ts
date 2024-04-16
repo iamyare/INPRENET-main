@@ -30,6 +30,16 @@ export class PlanillaIngresosService {
     return this.http.get<any>(url);
   }
 
+  obtenerPlanillaSeleccionada(idCentroTrabajo: number, id_tipo_planilla: number): Observable<any> {
+    const url = `${environment.API_URL}/api/detalle-plan-ingr/obtenerPlanillaSeleccionada/${idCentroTrabajo}/${id_tipo_planilla}`;
+    return this.http.get<any>(url);
+  }
+
+  obtPersonaPorCentTrab(dni: string, id_centro_trabajo: number): Observable<any> {
+    const url = `${environment.API_URL}/api/detalle-plan-ingr/obtPersonaPorCentTrab/${dni}/${id_centro_trabajo}`;
+    return this.http.get<any>(url);
+  }
+
   obtenerDetallesPlanillaAgrupCent(idCentroTrabajo: number, id_tipo_planilla: number): Observable<any> {
     const url = `${environment.API_URL}/api/detalle-plan-ingr/obtenerDetalleIngresosAgrupCent/${idCentroTrabajo}/${id_tipo_planilla}`;
     return this.http.get<any>(url);

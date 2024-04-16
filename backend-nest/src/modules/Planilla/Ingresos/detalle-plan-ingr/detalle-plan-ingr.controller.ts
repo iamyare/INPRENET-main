@@ -42,10 +42,42 @@ async actualizarDetallesPlanilla(
     return this.planillaIngresoService.insertNetDetPlanilla(id_planilla, dni, id_centro_educativo, createDetPlanIngDT);
   }
 
+  @Get('/obtPersonaPorCentTrab/:dni/:id_centro_educativo')
+  async obtPersonaPorCentTrab(@Res() res, @Param('dni') dni: string, @Param('id_centro_educativo') id_centro_educativo: number) {
+    try {
+      const datos = await this.planillaIngresoService.obtPersonaPorCentTrab(dni, id_centro_educativo);
+
+      return res.status(HttpStatus.OK).json({
+        statusCode: HttpStatus.OK,
+        message: 'Datos de detalle de planilla de ingresos por centro de trabajo obtenidos correctamente',
+        data: datos
+      });
+
+    } catch (error) {
+      throw error
+    }
+  }
+
   @Get('/obtenerDetalleIngresos/:idCentroTrabajo/:id_tipo_planilla')
   async obtenerDetalleIngresosPorCentroTrabajo(@Res() res, @Param('idCentroTrabajo') idCentroTrabajo: number, @Param('id_tipo_planilla') id_tipo_planilla: number) {
     try {
       const datos = await this.planillaIngresoService.obtenerDetallesPorCentroTrabajo(idCentroTrabajo, id_tipo_planilla);
+
+      return res.status(HttpStatus.OK).json({
+        statusCode: HttpStatus.OK,
+        message: 'Datos de detalle de planilla de ingresos por centro de trabajo obtenidos correctamente',
+        data: datos
+      });
+
+    } catch (error) {
+      throw error
+    }
+  }
+
+  @Get('/obtenerPlanillaSeleccionada/:idCentroTrabajo/:id_tipo_planilla')
+  async obtenerPlanillaSeleccionada(@Res() res, @Param('idCentroTrabajo') idCentroTrabajo: number, @Param('id_tipo_planilla') id_tipo_planilla: number) {
+    try {
+      const datos = await this.planillaIngresoService.obtenerPlanillaSeleccionada(idCentroTrabajo, id_tipo_planilla);
 
       return res.status(HttpStatus.OK).json({
         statusCode: HttpStatus.OK,

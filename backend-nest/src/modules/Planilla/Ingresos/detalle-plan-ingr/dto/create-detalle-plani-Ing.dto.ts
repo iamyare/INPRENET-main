@@ -16,7 +16,4 @@ export class CreateDetallePlanIngDto {
     @IsNumber()
     prestamos: number;
 
-    @IsNumber()
-    salario_base: number;
-
 }

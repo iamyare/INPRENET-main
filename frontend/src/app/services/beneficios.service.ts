@@ -11,19 +11,19 @@ import { ToastrService } from 'ngx-toastr';
 export class BeneficiosService {
   private _refresh$ = new Subject<void>();
 
-  constructor(private toastr: ToastrService ,private http: HttpClient, private router: Router) {
+  constructor(private toastr: ToastrService, private http: HttpClient, private router: Router) {
   }
 
 
-actualizarEstado(idPlanilla: string, nuevoEstado: string): Observable<any> {
-  return this.http.patch(`${environment.API_URL}/api/beneficio-planilla/actualizar-estado/${idPlanilla}`, { nuevoEstado })
-    .pipe(
-      catchError(error => {
-        console.error('Error al actualizar el estado', error);
-        return throwError(() => new Error('Error al actualizar el estado'));
-      })
-    );
-}
+  actualizarEstado(idPlanilla: string, nuevoEstado: string): Observable<any> {
+    return this.http.patch(`${environment.API_URL}/api/beneficio-planilla/actualizar-estado/${idPlanilla}`, { nuevoEstado })
+      .pipe(
+        catchError(error => {
+          console.error('Error al actualizar el estado', error);
+          return throwError(() => new Error('Error al actualizar el estado'));
+        })
+      );
+  }
 
 
   actualizarBeneficiosPlanillas(detalles: { idBeneficioPlanilla: string; codigoPlanilla: string; estado: string }[]): Observable<any> {
@@ -41,17 +41,17 @@ actualizarEstado(idPlanilla: string, nuevoEstado: string): Observable<any> {
       tap(() => {
         this.toastr.success('Total de beneficios obtenido con éxito');
       }),
-      catchError(this.handleError)
+      /*  catchError(this.handleError) */
     );
   }
 
 
-  GetAllBeneficios(dni:string): Observable<any> {
+  GetAllBeneficios(dni: string): Observable<any> {
     return this.http.get(`${environment.API_URL}/api/beneficio-planilla/obtenerTodosBeneficios/${dni}`).pipe(
       tap(() => {
         /* this.toastr.success('Total de beneficios obtenido con éxito'); */
       }),
-      catchError(this.handleError)
+      /* catchError(this.handleError) */
     );
   }
 
@@ -81,7 +81,7 @@ actualizarEstado(idPlanilla: string, nuevoEstado: string): Observable<any> {
       tap(() => {
         this._refresh$.next();
       }),
-      catchError(this.handleError)
+      /* catchError(this.handleError) */
     );
   }
 
@@ -98,72 +98,72 @@ actualizarEstado(idPlanilla: string, nuevoEstado: string): Observable<any> {
     );
   }
 
-  get refresh$(){
+  get refresh$() {
     return this._refresh$;
   }
 
-/*   private handlerError2(err:any): Observable<never>{
-    let errorMessage = 'An error ocurred retrieving data';
-    if(err){
-      errorMessage = `Error: ${err.error.err.err.sqlMessage}`;
-    }
-    this.toastr.error(`${errorMessage}`, 'Error');
-    return throwError(errorMessage);
-  } */
+  /*   private handlerError2(err:any): Observable<never>{
+      let errorMessage = 'An error ocurred retrieving data';
+      if(err){
+        errorMessage = `Error: ${err.error.err.err.sqlMessage}`;
+      }
+      this.toastr.error(`${errorMessage}`, 'Error');
+      return throwError(errorMessage);
+    } */
 
-  newTipoBeneficio(TipoBeneficioData:TipoBeneficio): Observable<TipoBeneficio | void>{
+  newTipoBeneficio(TipoBeneficioData: TipoBeneficio): Observable<TipoBeneficio | void> {
     var url = `${environment.API_URL}/api/beneficio/createTipoBeneficio`;
     return this.http.post<TipoBeneficio>(
       url,
       TipoBeneficioData,
-      ).pipe(
-        map((res:any) => {
-          return res;
-        })
-      )
+    ).pipe(
+      map((res: any) => {
+        return res;
+      })
+    )
   }
 
-  getTipoBeneficio(): Observable<any>{
-    var url= `${environment.API_URL}/api/beneficio/obtenerTiposBeneficios`;
+  getTipoBeneficio(): Observable<any> {
+    var url = `${environment.API_URL}/api/beneficio/obtenerTiposBeneficios`;
 
     return this.http.get(url,
-      ).pipe(
-        map((res:any) => {
-          return res;
-        }),
-      );
+    ).pipe(
+      map((res: any) => {
+        return res;
+      }),
+    );
   }
 
-  asigBeneficioAfil(data:TipoBeneficio, idAfiliadoPadre?:string): Observable<any>{
-    if (idAfiliadoPadre){
-      var url= `${environment.API_URL}/api/beneficio-planilla/nuevoDetalle/${idAfiliadoPadre}`;
-    }else{
-      var url= `${environment.API_URL}/api/beneficio-planilla/nuevoDetalle`;
+  asigBeneficioAfil(data: TipoBeneficio, idAfiliadoPadre?: string): Observable<any> {
+    if (idAfiliadoPadre) {
+      var url = `${environment.API_URL}/api/beneficio-planilla/nuevoDetalle/${idAfiliadoPadre}`;
+    } else {
+      var url = `${environment.API_URL}/api/beneficio-planilla/nuevoDetalle`;
     }
 
     return this.http.post<TipoBeneficio>(
       url,
       data,
-      ).pipe(
-        map((res:any) => {
-          return res;
-        })
-      )
+    ).pipe(
+      map((res: any) => {
+        return res;
+      })
+    )
   }
 
   updateBeneficio(id: string, beneficioData: any): Observable<any> {
     return this.http.patch(`${environment.API_URL}/api/beneficio/${id}`, beneficioData);
   }
 
-  cargarBeneficiosRecient(): Observable<TipoBeneficio | void>{
+  cargarBeneficiosRecient(): Observable<TipoBeneficio | void> {
     var url = `${environment.API_URL}/api/beneficio-planilla/cargarDetBen`;
     return this.http.get<any>(
       url,
-      ).pipe(
-        map((res:any) => {
-          return res;
-        })
-      )
+    ).pipe(
+      map((res: any) => {
+        return res;
+      })
+    )
   }
 
   private handleError(error: HttpErrorResponse) {
@@ -177,6 +177,6 @@ actualizarEstado(idPlanilla: string, nuevoEstado: string): Observable<any> {
 interface TipoBeneficio {
   nombre_beneficio: string;
   descripcion_beneficio: string;
-  numero_rentas_max:number;
+  numero_rentas_max: number;
   estado: string;
 }

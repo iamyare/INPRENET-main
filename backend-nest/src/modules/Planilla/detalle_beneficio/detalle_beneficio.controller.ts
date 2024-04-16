@@ -37,11 +37,11 @@ export class DetalleBeneficioController {
     }
   }
 
-  @Get('nuevoDetalle')
+  @Get('cargarDetBen')
   async cargarBenRec() {
     try {
-      const nuevoDetalle = await this.detallebeneficioService.cargarBenRec();
-      return nuevoDetalle
+      const cargarDetBen = await this.detallebeneficioService.cargarBenRec();
+      return cargarDetBen
     } catch (error) {
       throw new BadRequestException(error.message);
     }

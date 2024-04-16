@@ -7,6 +7,7 @@ import { BeneficiosService } from 'src/app/services/beneficios.service';
 import { FieldConfig } from 'src/app/shared/Interfaces/field-config';
 import { format } from 'date-fns';
 import { unirNombres } from '../../../../shared/functions/formatoNombresP';
+import { log } from 'console';
 @Component({
   selector: 'app-nuevo-beneficio-afil',
   templateUrl: './nuevo-beneficio-afil.component.html',
@@ -351,6 +352,8 @@ export class NuevoBeneficioAfilComponent implements OnInit {
       this.svcAfilServ.getAfilByParam(this.form.value.dni).subscribe(
         async (result) => {
           this.Afiliado = result
+          console.log(this.Afiliado);
+
           this.Afiliado.nameAfil = this.unirNombres(result.primer_nombre, result.segundo_nombre, result.tercer_nombre, result.primer_apellido, result.segundo_apellido);
           //this.getBeneficios().then(() => this.cargar());
           this.getFilas().then(() => this.cargar());

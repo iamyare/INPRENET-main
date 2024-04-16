@@ -13,6 +13,7 @@ import { CreateAfiliadoTempDto } from './dto/create-afiliado-temp.dto';
 import { validate as isUUID } from 'uuid';
 import { Net_Persona } from './entities/Net_Persona.entity';
 import { Net_Departamento } from '../Regional/provincia/entities/net_departamento.entity';
+import { Net_Estado_Afiliado } from './entities/net_estado_afiliado.entity';
 
 @Injectable()
 export class AfiliadoService {
@@ -169,12 +170,30 @@ export class AfiliadoService {
         relations: ['detalleAfiliado'], // Asegúrate de cargar la relación
       });
     } else {
+
       const queryBuilder = this.afiliadoRepository.createQueryBuilder('persona');
       personas = await queryBuilder
-        .leftJoinAndSelect('persona.detallesAfiliado', 'detallepersona') // Join con la tabla detallepersonas
-        .leftJoinAndSelect('detallepersona.tipoAfiliado', 'tipoafiliado') // Join con la tabla detallepersonas
+        .select('persona.DNI', 'DNI')
+        .addSelect('persona.PRIMER_NOMBRE', 'PRIMER_NOMBRE')
+        .addSelect('persona.SEGUNDO_NOMBRE', 'SEGUNDO_NOMBRE')
+        .addSelect('persona.PRIMER_APELLIDO', 'PRIMER_APELLIDO')
+        .addSelect('persona.SEGUNDO_APELLIDO', 'SEGUNDO_APELLIDO')
+        .addSelect('persona.SEXO', 'SEXO')
+        .addSelect('persona.DIRECCION_RESIDENCIA', 'DIRECCION_RESIDENCIA')
+        .addSelect('persona.FECHA_NACIMIENTO', 'FECHA_NACIMIENTO')
+        .addSelect('persona.COLEGIO_MAGISTERIAL', 'COLEGIO_MAGISTERIAL')
+        .addSelect('persona.NUMERO_CARNET', 'NUMERO_CARNET')
+        .addSelect('persona.PROFESION', 'PROFESION')
+        .addSelect('persona.TELEFONO_1', 'TELEFONO_1')
+        .addSelect('persona.ESTADO_CIVIL', 'ESTADO_CIVIL')
+        .addSelect('estadoAfil.DESCRIPCION', 'ESTADO')
+        .innerJoin('persona.estadoAfiliado', 'estadoAfil')
+        .leftJoin('persona.detallesAfiliado', 'detallepersona')// Join con la tabla detallepersonas
+        .leftJoin('detallepersona.tipoAfiliado', 'tipoafiliado') // Join con la tabla detallepersonas
         .where('persona.dni = :term AND tipoafiliado.tipo_afiliado = :tipo_persona', { term, tipo_persona: "AFILIADO" })
-        .getOne();
+        .getRawOne();
+      console.log(personas);
+
     }
     if (!personas) {
       throw new NotFoundException(`Afiliado con ${term} no existe`);

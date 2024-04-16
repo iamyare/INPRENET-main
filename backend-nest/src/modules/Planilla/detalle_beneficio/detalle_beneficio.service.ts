@@ -2,10 +2,10 @@ import * as oracledb from 'oracledb';
 import { BadRequestException, Injectable, InternalServerErrorException, Logger, NotFoundException } from '@nestjs/common';
 import { isUUID } from 'class-validator';
 import { InjectEntityManager, InjectRepository } from '@nestjs/typeorm';
-import { EntityManager,Repository } from 'typeorm';
+import { EntityManager, Repository } from 'typeorm';
 import { Net_Beneficio } from '../beneficio/entities/net_beneficio.entity';
 import { Net_Persona } from '../../afiliado/entities/Net_Persona.entity';
-import { Net_Detalle_Pago_Beneficio} from './entities/net_detalle_pago_beneficio.entity';
+import { Net_Detalle_Pago_Beneficio } from './entities/net_detalle_pago_beneficio.entity';
 import { UpdateDetalleBeneficioDto } from './dto/update-detalle_beneficio_planilla.dto';
 import { CreateDetalleBeneficioDto } from './dto/create-detalle_beneficio.dto';
 import { Net_Planilla } from '../planilla/entities/net_planilla.entity';
@@ -200,7 +200,7 @@ export class DetalleBeneficioService {
       // Ejecutar el procedimiento almacenado
       const result = await connection.execute(
         `BEGIN 
-           insertar_registros(
+          SP_INSERTAR_NET_DETALLE_PAGO_BENEFICIO(
              :id_beneficio_planilla_out, 
              :cantidad_registros_insertados
            );
@@ -394,10 +394,10 @@ export class DetalleBeneficioService {
         .addSelect('detBenA.PERIODO_FINALIZACION', 'PERIODO_FINALIZACION')
         .addSelect('detBenA.MONTO_POR_PERIODO', 'MONTO_POR_PERIODO')
         .addSelect('detBenA.MONTO_TOTAL', 'MONTO_TOTAL')
-        .innerJoin(Net_Beneficio, 'ben', 'ben.ID_BENEFICIO = detBenA.ID_BENEFICIO')
-        .innerJoin(Net_Estado_Afiliado, 'estadoAfil', 'estadoAfil.CODIGO = afil.ID_ESTADO_AFILIADO')
+        .leftJoin(Net_Beneficio, 'ben', 'ben.ID_BENEFICIO = detBenA.ID_BENEFICIO')
         .innerJoin(Net_Persona, 'afil', 'afil.ID_PERSONA = detBenA.ID_BENEFICIARIO AND detBenA.ID_CAUSANTE = detBenA.ID_CAUSANTE')
         .innerJoin(NET_DETALLE_PERSONA, 'detA', 'afil.ID_PERSONA = detBenA.ID_BENEFICIARIO AND detBenA.ID_CAUSANTE = detBenA.ID_CAUSANTE ')
+        .innerJoin(Net_Estado_Afiliado, 'estadoAfil', 'estadoAfil.CODIGO = afil.ID_ESTADO_AFILIADO')
         .where(`afil.dni = '${dni}'`)
         .getRawMany();
     } catch (error) {
@@ -573,6 +573,8 @@ export class DetalleBeneficioService {
   }
 
   async findOne(term: number) {
+    console.log(term);
+
     let benAfil: Net_Detalle_Pago_Beneficio;
     if (isUUID(term)) {
       benAfil = await this.benAfilRepository.findOneBy({ id_beneficio_planilla: term });

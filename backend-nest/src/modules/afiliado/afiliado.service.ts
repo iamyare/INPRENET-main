@@ -314,7 +314,7 @@ export class AfiliadoService {
 
 
   async buscarPersonaYMovimientosPorDNI(dni: string): Promise<any> {
-    const persona = await this.afiliadoRepository.findOne({
+    /* const persona = await this.afiliadoRepository.findOne({
       where: { dni },
       relations: ["movimientos", "estadoAfiliado"]
     });
@@ -338,7 +338,7 @@ export class AfiliadoService {
         persona,
         movimientos: persona.movimientos
       }
-    };
+    }; */
   }
 
   private handleException(error: any): void {

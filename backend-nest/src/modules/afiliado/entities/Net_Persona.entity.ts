@@ -125,9 +125,6 @@ export class Net_Persona {
     @OneToMany(() => NET_CUENTA_PERSONA, cuentaPersona => cuentaPersona.persona)
     cuentas: NET_CUENTA_PERSONA[];
 
-    @OneToMany(() => NET_MOVIMIENTO_CUENTA, movimientos => movimientos.persona)
-    movimientos: NET_MOVIMIENTO_CUENTA[];
-
     @OneToMany(() => Net_Detalle_planilla_ingreso, detallePlanIngreso => detallePlanIngreso.persona)
     detallePlanIngreso: Net_Detalle_planilla_ingreso[];
 

@@ -26,7 +26,7 @@ import { TransaccionesModule } from './modules/transacciones/transacciones.modul
         username: configService.get('DB_USERNAME'),
         password: configService.get('DB_PASSWORD'),
         autoLoadEntities: true,
-        synchronize: false,
+        synchronize: true,
         entities: [__dirname + '/../**/*.entity{.ts,.js}'],
         migrations: ['src/database/migrations/*{.ts,.js}'],
         //logging: ['error'] // solo loguear errores

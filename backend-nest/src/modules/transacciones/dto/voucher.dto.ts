@@ -1,28 +1,20 @@
-import { IsNotEmpty, IsNumber, IsString } from "class-validator";
+// src/dto/crear-movimiento.dto.ts
+import { IsString, IsNumber, IsNotEmpty } from 'class-validator';
 
-export class VoucherDto {
-    @IsString()
+export class CrearMovimientoDTO {
     @IsNotEmpty()
-    nombreCompleto: string;
-
     @IsString()
-    @IsNotEmpty()
-    dni: string;
-
-    @IsString()
-    @IsNotEmpty()
     numeroCuenta: string;
 
-    @IsString()
     @IsNotEmpty()
-    descripcionMovimiento: string;
-
     @IsNumber()
     monto: number;
 
+    @IsNotEmpty()
     @IsString()
-    fecha: string;
+    descripcion: string;
 
+    @IsNotEmpty()
     @IsString()
-    tipoMovimiento: string; // Added property
+    tipoMovimientoDescripcion: string;
 }

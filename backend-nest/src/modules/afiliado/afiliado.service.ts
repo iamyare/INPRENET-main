@@ -314,16 +314,16 @@ export class AfiliadoService {
 
 
   async buscarPersonaYMovimientosPorDNI(dni: string): Promise<any> {
-    /* const persona = await this.afiliadoRepository.findOne({
+    const persona = await this.afiliadoRepository.findOne({
       where: { dni },
-      relations: ["movimientos", "estadoAfiliado"]
+      relations: ["cuentas", "cuentas.movimientos", "estadoAfiliado"] // Asegúrate de cargar las cuentas y sus movimientos
     });
 
     if (!persona) {
       throw new NotFoundException(`Persona con DNI ${dni} no encontrada`);
     }
 
-    if (persona.estadoAfiliado.Descripcion === 'FALLECIDO' || persona.estadoAfiliado.Descripcion === 'INACTIVO') {
+    if (['FALLECIDO', 'INACTIVO'].includes(persona.estadoAfiliado?.Descripcion.toUpperCase())) {
       return {
         status: 'error',
         message: `La persona está ${persona.estadoAfiliado.Descripcion.toLowerCase()}.`,
@@ -331,15 +331,18 @@ export class AfiliadoService {
       };
     }
 
+    const movimientos = persona.cuentas.flatMap(cuenta => cuenta.movimientos); // Aplana los movimientos de todas las cuentas
+
     return {
       status: 'success',
       message: 'Datos y movimientos de la persona encontrados con éxito',
       data: {
         persona,
-        movimientos: persona.movimientos
+        movimientos // Devuelve los movimientos aplastados de todas las cuentas
       }
-    }; */
-  }
+    };
+}
+
 
   private handleException(error: any): void {
     this.logger.error(error);

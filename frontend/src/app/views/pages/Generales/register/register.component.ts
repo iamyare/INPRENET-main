@@ -1,4 +1,4 @@
-import { Component, OnInit  } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { AuthService } from 'src/app/services/auth.service';
@@ -8,7 +8,7 @@ import { AuthService } from 'src/app/services/auth.service';
   templateUrl: './register.component.html',
   styleUrls: ['./register.component.scss']
 })
-export class RegisterComponent implements OnInit{
+export class RegisterComponent implements OnInit {
 
 
   form: FormGroup;
@@ -38,8 +38,8 @@ export class RegisterComponent implements OnInit{
 
 
   constructor(private fb: FormBuilder,
-              private authService: AuthService,
-              private route: ActivatedRoute) {
+    private authService: AuthService,
+    private route: ActivatedRoute) {
     this.form = this.fb.group({
       preguntaseguridad1: ['', [Validators.required]],
       preguntaseguridad2: ['', [Validators.required]],
@@ -52,9 +52,9 @@ export class RegisterComponent implements OnInit{
     }, { validator: this.ConfirmarContrasenaValidator('contrasenia', 'confirmarContrasenia') });
 
     this.preguntaSeguridad = [
-      {"id": "preguntaseguridad1", "pregunta": "¿Cuál es tu animal favorito?"},
-      {"id": "preguntaseguridad2", "pregunta": "¿Cuál es tu pasatiempo favorito?"},
-      {"id": "preguntaseguridad3", "pregunta": "¿En qué ciudad te gustaría vivir?"}
+      { "id": "preguntaseguridad1", "pregunta": "¿Cuál es tu animal favorito?" },
+      { "id": "preguntaseguridad2", "pregunta": "¿Cuál es tu pasatiempo favorito?" },
+      { "id": "preguntaseguridad3", "pregunta": "¿En qué ciudad te gustaría vivir?" }
     ];
   }
 
@@ -65,7 +65,6 @@ export class RegisterComponent implements OnInit{
   }
 
   prueba1(da: any) {
-    console.log(da);
     this.ocultaPregunta = true;
     this.filteredLibraries = this.preguntaSeguridad.filter((item: any) =>
       item.id !== da.form.controls.preguntaseguridad1.value
@@ -90,7 +89,6 @@ export class RegisterComponent implements OnInit{
       this.authService.confirmarYActualizarSeguridad(data)
         .subscribe({
           next: (res) => {
-            console.log(res);
             this.loading = true;
             window.location.href = 'http://localhost:4200/';
           },

@@ -1,0 +1,90 @@
+.selected {
+  background-color: rgba(0, 0, 0, 0.04); /* Ajusta el color y la opacidad según prefieras */
+  font-weight: bold; /* Hace el texto de la fila seleccionada en negrita */
+}
+
+
+.mat-elevation-z8 {
+  background-color: transparent !important; /* Hace el fondo de la tabla transparente */
+  box-shadow: none !important; /* Elimina cualquier sombra para mantener el estilo limpio */
+}
+
+.demo-table {
+  width: 100%;
+}
+
+.mat-mdc-row .mat-mdc-cell {
+  border-bottom: 1px solid transparent;
+  border-top: 1px solid transparent;
+  cursor: pointer;
+}
+
+.mat-mdc-row:hover .mat-mdc-cell {
+  border-color: currentColor;
+}
+
+.demo-row-is-clicked {
+  font-weight: bold;
+}
+
+
+.tabla-container {
+  margin-bottom: 20px;
+}
+
+.form-container {
+  margin-top: 20px;
+}
+
+
+.container {
+  max-width: 100vw;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+.preview-button,
+.assign-button {
+  margin: 2% 0;
+  background-color: #628780;
+  color: #ffffff;
+  border-radius: 5px;
+  padding: 10px 20px;
+}
+
+.card-body {
+  background: white;
+}
+
+.card-title {
+  margin-top: 20px;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 20px;
+}
+
+th, td {
+  padding: 8px;
+  border-bottom: 1px solid #ddd;
+  text-align: left;
+}
+
+@media only screen and (max-width: 768px) {
+  th:nth-child(n+5),
+  td:nth-child(n+6) {
+    display: none;
+  }
+}
+
+@media only screen and (max-width: 480px) {
+  .preview-button,
+  .assign-button {
+    background-color: #628780;
+    color: #ffffff;
+    border-radius: 5px;
+    width: 100%;
+  }
+}

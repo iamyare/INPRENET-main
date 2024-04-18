@@ -3,10 +3,12 @@ import { TipoIdentificacionService } from './tipo_identificacion.service';
 import { CreateTipoIdentificacionDto } from './dto/create-tipo_identificacion.dto';
 import { UpdateTipoIdentificacionDto } from './dto/update-tipo_identificacion.dto';
 import { PaginationDto } from 'src/common/dtos/pagination.dto';
+import { ApiTags } from '@nestjs/swagger';
 
+@ApiTags('tipo-identificacion')
 @Controller('tipo-identificacion')
 export class TipoIdentificacionController {
-  constructor(private readonly tipoIdentificacionService: TipoIdentificacionService) {}
+  constructor(private readonly tipoIdentificacionService: TipoIdentificacionService) { }
 
   @Post()
   create(@Body() createTipoIdentificacionDto: CreateTipoIdentificacionDto) {

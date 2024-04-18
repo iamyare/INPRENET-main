@@ -19,10 +19,10 @@ export class NuevaPlanillaComponentP {
   datosG: boolean = false;
   datosB: boolean = false;
   datosCT: boolean = false;
-  datosHS:boolean = false
-  datosRP:boolean = false
+  datosHS: boolean = false
+  datosRP: boolean = false
 
-  constructor(private fb: FormBuilder, private planillaService: PlanillaService, private beneficiosService: BeneficiosService,  private toastr: ToastrService,) {
+  constructor(private fb: FormBuilder, private planillaService: PlanillaService, private beneficiosService: BeneficiosService, private toastr: ToastrService,) {
     this.form = this.fb.group({
       isChecked: [false]
     });
@@ -34,9 +34,7 @@ export class NuevaPlanillaComponentP {
     });
   }
 
-  ngOnInit() {
-
-  }
+  ngOnInit() { }
 
   onChangeToggle() {
     // Acciones cuando el estado del mat-slide-toggle cambia
@@ -62,7 +60,7 @@ export class NuevaPlanillaComponentP {
     }
   }
 
-  setEstadoDatGen(e:any){
+  setEstadoDatGen(e: any) {
     this.datosB = false
     this.datosG = true
     this.datosCT = false
@@ -71,7 +69,7 @@ export class NuevaPlanillaComponentP {
 
   }
 
-  setEstadoTable(e:any){
+  setEstadoTable(e: any) {
     this.datosB = false
     this.datosCT = true
     this.datosG = false
@@ -80,7 +78,7 @@ export class NuevaPlanillaComponentP {
     this.cargarBeneficiosRecient();
   }
 
-  setEstadoVerPlanP(e:any){
+  setEstadoVerPlanP(e: any) {
     this.datosB = false
     this.datosG = false
     this.datosCT = false
@@ -88,7 +86,7 @@ export class NuevaPlanillaComponentP {
     this.datosHS = true
   }
 
-  setEstadoVerPlanDef(e:any){
+  setEstadoVerPlanDef(e: any) {
     this.datosB = false
     this.datosG = false
     this.datosCT = false
@@ -96,19 +94,10 @@ export class NuevaPlanillaComponentP {
     this.datosRP = true
   }
 
-  /* setEstadoCargarBen(e:any){
-    this.datosB = true
-    this.datosG = true
-    this.datosCT = false
-    this.datosHS = false
-    this.datosRP = false
-    this.cargarBeneficiosRecient();
-  } */
-
   cargarBeneficiosRecient() {
     this.beneficiosService.cargarBeneficiosRecient().subscribe({
       next: (response: any) => {
-        if (response){
+        if (response) {
           let temp = response.Registros;
           this.toastr.success('Beneficios recientes Cargados exitosamente');
         }

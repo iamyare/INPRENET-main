@@ -1,0 +1,156 @@
+mat-card-actions.card-actions {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px;
+}
+
+mat-card-actions.card-actions button {
+  color: white; /* Esto hace el texto de los botones blanco */
+}
+
+.totals-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(calc(33.33% - 10px), 1fr));
+  gap: 15px;
+  list-style-type: none;
+  padding: 0;
+}
+
+.mat-list-item {
+  box-sizing: border-box; /* Asegura que el padding y border se incluyan en el ancho total */
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border: 1px solid #e0e0e0;
+  padding: 8px;
+  border-radius: 4px;
+}
+
+@media (max-width: 600px) {
+  .totals-list {
+    grid-template-columns: repeat(auto-fill, minmax(100%, 1fr)); /* Ajusta a una sola columna en pantallas pequeñas */
+  }
+}
+
+.mat-stepper-horizontal {
+  margin-top: 8px;
+}
+
+.mat-mdc-form-field {
+  margin-top: 16px;
+}
+
+.mat-display-1 {
+  font-size: 1.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.mat-h2 {
+  font-size: 1.2rem;
+  font-weight: normal;
+  margin-top: 0;
+  margin-bottom: 0.5rem;
+}
+
+/* Estilos adicionales para separar y alinear el contenido de los subtítulos */
+.step-subtitles {
+  padding: 10px 0;
+  border-bottom: 1px solid #e0e0e0; /* Una línea divisoria sutil */
+}
+
+/* Ajustes para la respuesta */
+@media (max-width: 600px) {
+  .mat-display-1 {
+    font-size: 1.2rem; /* Un tamaño más pequeño para pantallas estrechas */
+  }
+  .mat-h2 {
+    font-size: 1rem; /* Un tamaño más pequeño para pantallas estrechas */
+  }
+}
+
+
+.form-field-margin {
+  margin-right: 20px; // Ajusta el espaciado a tu gusto
+
+  &:last-child {
+    margin-right: 0; // Para asegurarse de que el último elemento no tenga un margen a la derecha
+  }
+}
+
+// Alternativamente, si deseas que los campos de formulario ocupen toda la anchura disponible:
+.full-width {
+  width: 100%;
+}
+
+
+.datos-container {
+  max-width: 100%;
+  margin: 20px;
+  overflow-x: auto;
+}
+
+table {
+  width: 100%;
+}
+
+th.mat-header-cell, td.mat-cell {
+  padding: 8px;
+  text-align: left;
+}
+
+tr.mat-header-row {
+  background-color: #f5f5f5;
+}
+
+
+.boton-seleccionado {
+  color: #26a69a !important;
+}
+
+// Estilos para los botones sin seleccionar (sin color de fondo y letras en el color por defecto)
+button[mat-raised-button] {
+  background-color: transparent;
+  color: rgba(0, 0, 0, 0.87); // O el color que desees por defecto
+}
+
+// Puedes añadir más estilos para cuando el ratón pase por encima de los botones si lo deseas
+button[mat-raised-button]:hover {
+  background-color: #e0e0e0; // O el color de resalte que prefieras
+}
+
+.botones-container {
+  display: flex;
+  align-items: center;
+  margin: 2rem 0 2rem 0;
+
+  .boton-estetico {
+    background-color: #26a69a; // El color de fondo que especificaste
+    color: white; // Texto blanco para mejor contraste
+    margin-right: 10px; // Margen a la derecha para separar un poco los botones
+
+    &:hover {
+      background-color: darken(#26a69a, 5%); // Oscurece el botón ligeramente al pasar el ratón por encima
+    }
+
+    &:last-child {
+      margin-right: 0; // Elimina el margen derecho del último botón
+    }
+  }
+}
+
+// Este estilo adicional elimina el margen derecho del último botón para evitar el espaciado extra
+.boton-estetico:last-child {
+  margin-right: 0;
+}
+
+.linea-separadora {
+  height: 2px; // Puedes ajustar el grosor de la línea aquí
+  background-color: #D3D3D3; // Esto es un gris claro, puedes elegir cualquier color
+  width: 100%; // Esto asegura que la línea se extienda a lo ancho del contenedor
+  margin-bottom: 20px; // Ajusta el espacio debajo de la línea, antes de los botones
+}
+
+
+.selected {
+  background-color: rgba(0, 0, 0, 0.1);
+}

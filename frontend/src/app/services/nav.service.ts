@@ -9,12 +9,21 @@ export class NavService {
   constructor(private authService: AuthService) {}
 
   getNavItems(): INavData[] {
-    const userRole = this.authService.getUserRole();
+    //const userRole = this.authService.getUserRole();
 
     let navItems: INavData[] = [
       {
         title: true,
         name: 'Menú Mantenimiento'
+      },
+      {
+        name: 'Beneficio',
+        iconComponent: { name: 'cilMoney' },
+        url: '/base',
+        children: [
+          { name: 'Nuevo Beneficio', url: '/Beneficio/nuevo-beneficio' },
+          { name: 'Editar Beneficios', url: '/Beneficio/editar-beneficio' },
+        ]
       },
       {
         name: 'Deducción',
@@ -136,7 +145,7 @@ export class NavService {
       }
     ];
 
-    if (userRole === 'ADMINISTRADOR') {
+    /* if (userRole === 'ADMINISTRADOR') {
       navItems.splice(2, 0, {
         name: 'Beneficio',
         iconComponent: { name: 'cilMoney' },
@@ -145,10 +154,10 @@ export class NavService {
           { name: 'Nuevo Beneficio', url: '/Beneficio/nuevo-beneficio' },
           { name: 'Editar Beneficios', url: '/Beneficio/editar-beneficio' },
         ]
-        /* canActivate: [RoleGuard],
-          data: { expectedRoles: ['ADMINISTRADOR', 'JEFE DE AREA'] } */
+        canActivate: [RoleGuard],
+          data: { expectedRoles: ['ADMINISTRADOR', 'JEFE DE AREA'] }
       });
-    }
+    } */
 
     return navItems;
   }

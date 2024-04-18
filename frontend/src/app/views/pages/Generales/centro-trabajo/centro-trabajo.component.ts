@@ -33,7 +33,7 @@ export class CentroTrabajoComponent implements OnInit {
   }
 
   obtenerCentrosTrabajo() {
-    this.centroTrabajoService.getCentrosTrabajo().subscribe(
+    this.centroTrabajoService.obtenerTodosLosCentrosTrabajo().subscribe(
       (res: any) => {
         if (res.ok) {
           this.informacion = res.centroTrabajo;

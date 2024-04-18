@@ -1,21 +1,18 @@
-import { BadRequestException, Injectable, InternalServerErrorException, Logger, NotFoundException, Query } from '@nestjs/common';
+import { BadRequestException, Injectable, InternalServerErrorException, Logger, NotFoundException } from '@nestjs/common';
 import { CreatePlanillaDto } from './dto/create-planilla.dto';
 import { UpdatePlanillaDto } from './dto/update-planilla.dto';
 import { InjectEntityManager, InjectRepository } from '@nestjs/typeorm';
 import { Net_Detalle_Deduccion } from '../detalle-deduccion/entities/detalle-deduccion.entity';
-import { EntityManager, Repository, getConnection } from 'typeorm';
-import { Net_Persona } from 'src/modules/afiliado/entities/Net_Persona';
+import { EntityManager, Repository } from 'typeorm';
+import { Net_Persona } from '../../afiliado/entities/Net_Persona.entity';
 import { Net_Beneficio } from '../beneficio/entities/net_beneficio.entity';
 import { Net_Planilla } from './entities/net_planilla.entity';
 import { Net_TipoPlanilla } from '../tipo-planilla/entities/tipo-planilla.entity';
 import { Net_Detalle_Pago_Beneficio } from '../detalle_beneficio/entities/net_detalle_pago_beneficio.entity';
-import { isUUID } from 'class-validator';
 import { DetalleBeneficioService } from '../detalle_beneficio/detalle_beneficio.service';
-import { DetalleDeduccionService } from '../detalle-deduccion/detalle-deduccion.service';
 import { PaginationDto } from 'src/common/dtos/pagination.dto';
 import { Net_Deduccion } from '../deduccion/entities/net_deduccion.entity';
 import { Net_Detalle_Beneficio_Afiliado } from '../detalle_beneficio/entities/net_detalle_beneficio_afiliado.entity';
-import { Net_Detalle_Afiliado } from 'src/modules/afiliado/entities/Net_detalle_persona.entity';
 
 @Injectable()
 export class PlanillaService {
@@ -1242,7 +1239,7 @@ WHERE
     }
   }
 
-  
+
 
   async calcularTotalPlanilla(idPlanilla: string): Promise<any> {
     const query = `
@@ -1266,6 +1263,9 @@ WHERE
           AND detBs."ID_PLANILLA" = :idPlanilla
       LEFT JOIN
           "NET_PLANILLA" pla ON detBs."ID_PLANILLA" = pla."ID_PLANILLA"
+      LEFT JOIN
+          "NET_TIPO_PLANILLA" tipoPlanilla ON tipoPlanilla."ID_TIPO_PLANILLA" = pla."ID_TIPO_PLANILLA"
+      WHERE tipoPlanilla."CLASE_PLANILLA" = 'EGRESO'
       GROUP BY
         afil."ID_PERSONA"
       ) beneficio
@@ -1275,9 +1275,10 @@ WHERE
         SUM(COALESCE(detDs."MONTO_APLICADO", 0)) AS "Total Deducciones"
       FROM
         "NET_PERSONA" afil
-      LEFT JOIN
-        "NET_DETALLE_DEDUCCION" detDs ON afil."ID_PERSONA" = detDs."ID_PERSONA"
-        AND detDs."ID_PLANILLA" = :idPlanilla
+      LEFT JOIN "NET_DETALLE_DEDUCCION" detDs ON afil."ID_PERSONA" = detDs."ID_PERSONA" AND detDs."ID_PLANILLA" = :idPlanilla
+      LEFT JOIN "NET_PLANILLA" planilla ON planilla."ID_PLANILLA" = detDs."ID_PLANILLA"
+      LEFT JOIN "NET_TIPO_PLANILLA" tipoPlanilla ON tipoPlanilla."ID_TIPO_PLANILLA" = planilla."ID_TIPO_PLANILLA"
+      WHERE tipoPlanilla."CLASE_PLANILLA" = 'EGRESO'
       GROUP BY
         afil."ID_PERSONA"
       ) deduccion ON beneficio."ID_PERSONA" = deduccion."ID_PERSONA"
@@ -1285,6 +1286,8 @@ WHERE
 
     try {
       const result = await this.entityManager.query(query, [idPlanilla, idPlanilla]);
+      console.log(result);
+
       // Si esperas un solo resultado, puedes directamente devolver ese objeto.
       return {
         totalBeneficio: Number(result[0]["Total Beneficio"]),
@@ -2010,10 +2013,15 @@ ON deducciones."id_afiliado" = beneficios."id_afiliado"
   }
 
   findAll(paginationDto: PaginationDto) {
+    console.log();
+
     const { limit = 10, offset = 0 } = paginationDto;
     return this.planillaRepository.find({
       take: limit,
       skip: offset,
+      where: {
+        tipoPlanilla: { clase_planilla: "EGRESO" }
+      },
       relations: ['tipoPlanilla'], // Agrega esta línea para cargar la relación
     });
   }

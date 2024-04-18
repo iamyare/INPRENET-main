@@ -3,29 +3,30 @@ import { DetalleDeduccionService } from './detalle-deduccion.service';
 import { CreateDetalleDeduccionDto } from './dto/create-detalle-deduccion.dto';
 import { UpdateDetalleDeduccionDto } from './dto/update-detalle-deduccion.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
+import { ApiTags } from '@nestjs/swagger';
 
-
+@ApiTags('detalle-deduccion')
 @Controller('detalle-deduccion')
 export class DetalleDeduccionController {
-  constructor(private readonly detalleDeduccionService: DetalleDeduccionService) {}
+  constructor(private readonly detalleDeduccionService: DetalleDeduccionService) { }
 
-@Post('crearDeExcel')
-@HttpCode(HttpStatus.CREATED)
-async insertarDetalles(@Body() data: any[]) {
-  try {
-    await this.detalleDeduccionService.insertarDetalles(data);
-    return {
-      message: 'Detalles de deducción insertados exitosamente',
-    };
-  } catch (error) {
-    if (error instanceof HttpException) {
-      throw error;
-    } else {
-      throw new HttpException('Error interno del servidor', HttpStatus.INTERNAL_SERVER_ERROR);
+  @Post('crearDeExcel')
+  @HttpCode(HttpStatus.CREATED)
+  async insertarDetalles(@Body() data: any[]) {
+    try {
+      await this.detalleDeduccionService.insertarDetalles(data);
+      return {
+        message: 'Detalles de deducción insertados exitosamente',
+      };
+    } catch (error) {
+      if (error instanceof HttpException) {
+        throw error;
+      } else {
+        throw new HttpException('Error interno del servidor', HttpStatus.INTERNAL_SERVER_ERROR);
+      }
     }
   }
-}
-  
+
   @Patch('actualizar-estado/:idPlanilla')
   async actualizarEstadoAplicacionPorPlanilla(
     @Param('idPlanilla') idPlanilla: string,
@@ -38,7 +39,7 @@ async insertarDetalles(@Body() data: any[]) {
       throw new HttpException('Error al actualizar el estado', HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
-  
+
   @Get('total-deducciones/:idPlanilla')
   async getTotalDeduccionesPorPlanilla(@Param('idPlanilla') idPlanilla: string): Promise<any> {
     return this.detalleDeduccionService.getTotalDeduccionesPorPlanilla(idPlanilla);
@@ -80,7 +81,7 @@ async insertarDetalles(@Body() data: any[]) {
     @Query('idAfiliado') idAfiliado: string,
     @Query('fechaInicio') fechaInicio: string,
     @Query('fechaFin') fechaFin: string
-    ) {
+  ) {
     if (!idAfiliado || !fechaInicio || !fechaFin) {
       throw new BadRequestException('El ID del afiliado, la fecha de inicio y la fecha de fin son obligatorios');
     }
@@ -88,7 +89,7 @@ async insertarDetalles(@Body() data: any[]) {
   }
 
   @Get('inconsistencias/:idAfiliado')
-    async getInconsistencias(@Param('idAfiliado') idAfiliado: string) {
+  async getInconsistencias(@Param('idAfiliado') idAfiliado: string) {
     return this.detalleDeduccionService.findInconsistentDeduccionesByAfiliado(idAfiliado);
   }
 
@@ -100,10 +101,10 @@ async insertarDetalles(@Body() data: any[]) {
     return this.detalleDeduccionService.obtenerDetallesDeduccionPorAfiliado(idAfiliado);
   }
 
-@Patch('/actualizar-deduccion-planilla')
+  @Patch('/actualizar-deduccion-planilla')
   actualizarPlanillasYEstados(@Body() detalles: { idDedDeduccion: number; codigoPlanilla: string; estadoAplicacion: string }[]) {
-  return this.detalleDeduccionService.actualizarPlanillasYEstadosDeDeducciones(detalles);
-}
+    return this.detalleDeduccionService.actualizarPlanillasYEstadosDeDeducciones(detalles);
+  }
 
   @Post()
   @HttpCode(HttpStatus.CREATED)
@@ -117,7 +118,7 @@ async insertarDetalles(@Body() data: any[]) {
     const data = this.detalleDeduccionService.readExcel(file.buffer);
     // Procesa los datos según sea necesario
     return data;
-}
+  }
 
   @Get()
   findAll() {
@@ -149,5 +150,5 @@ async insertarDetalles(@Body() data: any[]) {
     return this.detalleDeduccionService.remove(+id);
   }
 
-  
+
 }

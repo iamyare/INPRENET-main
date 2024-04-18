@@ -10,7 +10,6 @@ import formatoFechaResol from 'src/app/models/fecha';
 import { AfiliadoService } from 'src/app/services/afiliado.service';
 import { generateFormArchivo } from '@docs-components/botonarchivos/botonarchivos.component';
 
-/* BUG: Al tocar el icono de fecha no se actualiza el valor del input */
 
 /* FIX:Corregir los datos de centros de trabajo que se le pasan al input del centro de trabajo */
 /* FIX:Corregir que al cambiar de proceso el contenido del archivo este en el boton */
@@ -21,50 +20,50 @@ import { generateFormArchivo } from '@docs-components/botonarchivos/botonarchivo
   selector: 'app-afil-banco',
   templateUrl: './afil-banco.component.html',
   styleUrl: './afil-banco.component.scss',
-  changeDetection:ChangeDetectionStrategy.OnPush,
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AfilBancoComponent implements OnInit {
-  DatosBancBen:any = [];
+  DatosBancBen: any = [];
 
   // Manejan el control del progreso de los datos
-  DatosGenerales:boolean = true; DatosBacAfil:boolean = false;
-  Archivos:boolean = false; DatosPuestoTrab:boolean = false;
-  DatosHS:boolean = false; referenc:boolean = false;
-  benfGroup:boolean = false; datosF:boolean = false;
-  datosA = false 
+  DatosGenerales: boolean = true; DatosBacAfil: boolean = false;
+  Archivos: boolean = false; DatosPuestoTrab: boolean = false;
+  DatosHS: boolean = false; referenc: boolean = false;
+  benfGroup: boolean = false; datosF: boolean = false;
+  datosA = false
 
   // Formularios
   public formParent: FormGroup = new FormGroup({});
   form = this.fb.group({
-      DatosGenerales: generateAddressFormGroup(),
-      DatosBacAfil: generateDatBancFormGroup(),
-      Archivos: generateFormArchivo(),
-      Arch: "",
+    DatosGenerales: generateAddressFormGroup(),
+    DatosBacAfil: generateDatBancFormGroup(),
+    Archivos: generateFormArchivo(),
+    Arch: "",
   });
-  formPuestTrab:any = new FormGroup(
+  formPuestTrab: any = new FormGroup(
     {
       refpers: new FormArray([], [Validators.required])
-  });
-  formHistPag:any = new FormGroup(
+    });
+  formHistPag: any = new FormGroup(
     {
       refpers: new FormArray([], [Validators.required])
-  });
-  formReferencias:any = new FormGroup(
+    });
+  formReferencias: any = new FormGroup(
     {
       refpers: new FormArray([], [Validators.required])
-  });
-  formBeneficiarios:any = new FormGroup(
+    });
+  formBeneficiarios: any = new FormGroup(
     {
       refpers: new FormArray([], [Validators.required])
-  });
+    });
 
   labelBoton1 = "Adjunte archivo DNI"
 
-  constructor( private fb: FormBuilder, private afilService: AfiliadoService) {}
-  ngOnInit():void{}
+  constructor(private fb: FormBuilder, private afilService: AfiliadoService) { }
+  ngOnInit(): void { }
 
   // Manejan el control del progreso de los datos
-  setEstadoDatGen(e:any){    
+  setEstadoDatGen(e: any) {
     this.DatosGenerales = e
     this.DatosGenerales = true
     this.DatosPuestoTrab = false
@@ -72,88 +71,88 @@ export class AfilBancoComponent implements OnInit {
     this.referenc = false
     this.benfGroup = false
     this.datosF = false
-    this.datosA = false 
+    this.datosA = false
   }
-  setEstadoDatCentTrab(e:any){
+  setEstadoDatCentTrab(e: any) {
     this.DatosGenerales = false
     this.DatosPuestoTrab = true
     this.DatosHS = false
     this.referenc = false
     this.benfGroup = false
     this.datosF = false
-    this.datosA = false  
+    this.datosA = false
   }
-  setDatosHS(datosHistSal:any){
+  setDatosHS(datosHistSal: any) {
     this.DatosGenerales = false
     this.DatosPuestoTrab = false
-    this.DatosHS = true 
+    this.DatosHS = true
     this.referenc = false
     this.benfGroup = false
     this.datosF = false
-    this.datosA = false 
+    this.datosA = false
   }
-  setDatosReferenc(datosHistSal:any){
+  setDatosReferenc(datosHistSal: any) {
     this.DatosGenerales = false
     this.DatosPuestoTrab = false
-    this.DatosHS = false 
+    this.DatosHS = false
     this.referenc = true
     this.benfGroup = false
     this.datosF = false
-    this.datosA = false 
+    this.datosA = false
   }
-  setDatosBenef(datosHistSal:any){
+  setDatosBenef(datosHistSal: any) {
     this.DatosGenerales = false
     this.DatosPuestoTrab = false
-    this.DatosHS = false 
-    this.referenc = false 
+    this.DatosHS = false
+    this.referenc = false
     this.benfGroup = true
-    this.datosF = false 
-    this.datosA = false 
+    this.datosF = false
+    this.datosA = false
   }
-  setDatosF(datosHistSal:any){
+  setDatosF(datosHistSal: any) {
     this.DatosGenerales = false
     this.DatosPuestoTrab = false
-    this.DatosHS = false 
-    this.referenc = false 
-    this.benfGroup = false 
+    this.DatosHS = false
+    this.referenc = false
+    this.benfGroup = false
     this.datosF = true
-    this.datosA = false 
+    this.datosA = false
   }
-  setDatosA(datosHistSal:any){
+  setDatosA(datosHistSal: any) {
     this.DatosGenerales = false
     this.DatosPuestoTrab = false
-    this.DatosHS = false 
-    this.referenc = false 
-    this.benfGroup = false 
-    this.datosF = false 
-    this.datosA = true 
+    this.DatosHS = false
+    this.referenc = false
+    this.benfGroup = false
+    this.datosF = false
+    this.datosA = true
   }
 
   // Manejan la informacion de los formularios
-  setDatosPuetTrab1(datosPuestTrab:any){    
-    this.formPuestTrab = datosPuestTrab 
-  } 
-  setHistSal(datosHistSal:any){
-    this.formHistPag = datosHistSal 
+  setDatosPuetTrab1(datosPuestTrab: any) {
+    this.formPuestTrab = datosPuestTrab
   }
-  setDatosRefPer(datosRefPer:any){
+  setHistSal(datosHistSal: any) {
+    this.formHistPag = datosHistSal
+  }
+  setDatosRefPer(datosRefPer: any) {
     this.formReferencias = datosRefPer
   }
-  setDatosBen(DatosBancBen:any){
+  setDatosBen(DatosBancBen: any) {
     this.formBeneficiarios = DatosBancBen
   }
 
   // Envia los datos del formulario al servicio para poder guardar la información
-  enviar(){
-    if (this.form.value.DatosGenerales){
-      this.form.value.DatosGenerales.fechaNacimiento = formatoFechaResol(this.form.value.DatosGenerales.fechaNacimiento);  
+  enviar() {
+    if (this.form.value.DatosGenerales) {
+      this.form.value.DatosGenerales.fechaNacimiento = formatoFechaResol(this.form.value.DatosGenerales.fechaNacimiento);
     }
-   /*  if (this.form.value.DatosPuestoTrab){
-      this.form.value.DatosPuestoTrab.fechaIngreso = formatoFechaResol(this.form.value.DatosPuestoTrab.fechaIngreso);
-      this.form.value.DatosPuestoTrab.fechaPago = formatoFechaResol(this.form.value.DatosPuestoTrab.fechaPago);
-    } */
-    if(this.DatosBancBen.length>=1){
-      for (let i=0 ; i<this.DatosBancBen.length; i++){
+    /*  if (this.form.value.DatosPuestoTrab){
+       this.form.value.DatosPuestoTrab.fechaIngreso = formatoFechaResol(this.form.value.DatosPuestoTrab.fechaIngreso);
+       this.form.value.DatosPuestoTrab.fechaPago = formatoFechaResol(this.form.value.DatosPuestoTrab.fechaPago);
+     } */
+    if (this.DatosBancBen.length >= 1) {
+      for (let i = 0; i < this.DatosBancBen.length; i++) {
         this.DatosBancBen[i].benfGroup.fechaNacimiento = formatoFechaResol(this.DatosBancBen[i].benfGroup.fechaNacimiento);
       }
     }
@@ -170,10 +169,10 @@ export class AfilBancoComponent implements OnInit {
       },
       datosBenefic: this.formBeneficiarios.value.refpers
     }
-    
-  console.log(data);
-    
-  //console.log(data);
+
+    console.log(data);
+
+    //console.log(data);
 
     /* const llamada1 = this.afilService.agregarAfiliados(data);
 
@@ -189,8 +188,8 @@ export class AfilBancoComponent implements OnInit {
 
   handleArchivoSeleccionado(archivo: any) {
     this.form.get('Arch')?.setValue(archivo);
-/*     console.log(this.form);
-*/
+    /*     console.log(this.form);
+    */
     /* if (this.formParent && this.formParent.get('refpers')) {
       const ref_RefPers = this.formParent.get('refpers') as FormArray;
       if (ref_RefPers.length > 0) {
@@ -202,14 +201,14 @@ export class AfilBancoComponent implements OnInit {
     } */
   }
 
-  getLabel():any{ 
+  getLabel(): any {
     console.log(this.form.get("Archivos")?.value["Archivos"] != "");
-    
-    if (this.form.get("Archivos")?.value["Archivos"] != ""){
-      this.labelBoton1  = this.form.get("Archivos")?.value["Archivos"]
-    }else{
+
+    if (this.form.get("Archivos")?.value["Archivos"] != "") {
+      this.labelBoton1 = this.form.get("Archivos")?.value["Archivos"]
+    } else {
       this.labelBoton1 = "asds"
     }
-    return  this.labelBoton1
+    return this.labelBoton1
   }
 }

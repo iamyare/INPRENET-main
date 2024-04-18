@@ -13,12 +13,12 @@ export class TipoPlanillaService {
 
   constructor(
     @InjectRepository(Net_TipoPlanilla)
-    private readonly tipoPlanillaRepository: Repository<Net_TipoPlanilla>, 
-  ){
+    private readonly tipoPlanillaRepository: Repository<Net_TipoPlanilla>,
+  ) {
 
   }
 
-  
+
   async create(createTipoPlanillaDto: CreateTipoPlanillaDto) {
     try {
       const tipoPlanilla = this.tipoPlanillaRepository.create(createTipoPlanillaDto);
@@ -29,19 +29,27 @@ export class TipoPlanillaService {
     }
   }
 
-  findAll(paginationDto: PaginationDto, clasePlanilla?:string) {
+  findAll(paginationDto: PaginationDto) {
     const { limit = 10, offset = 0 } = paginationDto
-    if (clasePlanilla){
-      return this.tipoPlanillaRepository.find({ where: { clase_planilla: clasePlanilla }} )
-    }else{
-      return this.tipoPlanillaRepository.find()
-    }
+    return this.tipoPlanillaRepository.find({})
     /* {
 
     }
       take: limit,
       skip : offset
     } */
+  }
+
+  findTipoPlanByclasePlan(paginationDto: PaginationDto, clasePlanilla: any) {
+    const { limit = 10, offset = 0 } = paginationDto
+
+    if (clasePlanilla) {
+      return this.tipoPlanillaRepository.find({ where: { clase_planilla: clasePlanilla.clasePlanilla } })
+
+    } else {
+      return this.tipoPlanillaRepository.find()
+    }
+
   }
 
   async findOne(id: number) {
@@ -51,18 +59,18 @@ export class TipoPlanillaService {
     }
     return tipoPlanilla;
   }
-  
+
 
   async update(id: number, updateTipoPlanillaDto: UpdateTipoPlanillaDto) {
     const tipoPlanilla = await this.tipoPlanillaRepository.preload({
-      id_tipo_planilla: id, 
+      id_tipo_planilla: id,
       ...updateTipoPlanillaDto
     });
-  
+
     if (!tipoPlanilla) {
       throw new BadRequestException(`TipoPlanilla con ID ${id} no encontrado.`);
     }
-  
+
     try {
       await this.tipoPlanillaRepository.save(tipoPlanilla);
       return tipoPlanilla;
@@ -70,7 +78,7 @@ export class TipoPlanillaService {
       this.handleException(error);
     }
   }
-  
+
 
   remove(id: number) {
     return `This action removes a #${id} tipoPlanilla`;

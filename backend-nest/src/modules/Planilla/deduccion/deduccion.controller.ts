@@ -2,16 +2,18 @@ import { Controller, Get, Post, Body, Patch, Param, Delete, UseInterceptors, Upl
 import { DeduccionService } from './deduccion.service';
 import { CreateDeduccionDto } from './dto/create-deduccion.dto';
 import { UpdateDeduccionDto } from './dto/update-deduccion.dto';
+import { ApiTags } from '@nestjs/swagger';
 
+@ApiTags('deduccion')
 @Controller('deduccion')
 export class DeduccionController {
-  constructor(private readonly deduccionService: DeduccionService) {}
+  constructor(private readonly deduccionService: DeduccionService) { }
 
   @Post()
   create(@Body() createDeduccionDto: CreateDeduccionDto) {
     return this.deduccionService.create(createDeduccionDto);
   }
-  
+
   @Get()
   findAll() {
     return this.deduccionService.findAll();

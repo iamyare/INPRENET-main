@@ -3,10 +3,15 @@ import { PlanillaService } from './planilla.service';
 import { CreatePlanillaDto } from './dto/create-planilla.dto';
 import { UpdatePlanillaDto } from './dto/update-planilla.dto';
 import { PaginationDto } from 'src/common/dtos/pagination.dto';
+import { ApiTags } from '@nestjs/swagger';
+import { EntityManager } from 'typeorm';
+import { InjectEntityManager } from '@nestjs/typeorm';
+import { Net_Planilla } from './entities/net_planilla.entity';
 
+@ApiTags('planilla')
 @Controller('planilla')
 export class PlanillaController {
-  constructor(private readonly planillaService: PlanillaService) { }
+  constructor(private readonly planillaService: PlanillaService, @InjectEntityManager() private readonly entityManager: EntityManager) { }
 
   @Post('/actualizar-planilla')
   async actualizar(@Body() body: any): Promise<string> {
@@ -587,18 +592,30 @@ export class PlanillaController {
 
   @Get(':codigoPlanilla')
   async findOne(@Param('codigoPlanilla') codigoPlanilla: string, @Res() res) {
-    const planilla = await this.planillaService.findOne(codigoPlanilla);
+    try {
+      return await this.entityManager.transaction(async manager => {
+        const planilla = await manager.findOne(Net_Planilla, {
+          where: {
+            codigo_planilla: codigoPlanilla,
+            tipoPlanilla: { clase_planilla: "EGRESO" }
+          },
+          relations: ["tipoPlanilla"]
+        });
 
-    if (!planilla) {
-      return res.status(HttpStatus.NOT_FOUND).json({
-        message: `Planilla con código ${codigoPlanilla} no encontrada.`,
+        if (!planilla) {
+          return res.status(HttpStatus.NOT_FOUND).json({
+            message: `Planilla con código ${codigoPlanilla} no encontrada.`,
+          });
+        } else {
+          return res.status(HttpStatus.OK).json({
+            message: "Consulta realizada con éxito",
+            data: planilla, // Asumiendo que deseas devolver un objeto único, si esperas un array, debes ajustarlo
+          });
+        }
       });
+    } catch (error) {
+      console.log(error);
     }
-
-    return res.status(HttpStatus.OK).json({
-      message: "Consulta realizada con éxito",
-      data: planilla, // Asumiendo que deseas devolver un objeto único, si esperas un array, debes ajustarlo
-    });
   }
 
   @Patch(':id')

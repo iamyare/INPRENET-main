@@ -104,10 +104,6 @@ export class DeduccionesService {
         );
       }
 
-      /* getDetalleDeduccion(): Observable<any> {
-    return this.http.get<any>(this.baseUrl + 'detalle-deduccion');
-  } */
-
   getDeducciones(): Observable<any>{
     var url= `${environment.API_URL}/api/deduccion`;
 

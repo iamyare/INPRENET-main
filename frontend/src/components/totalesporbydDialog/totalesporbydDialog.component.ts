@@ -82,7 +82,7 @@ export class TotalesporbydDialogComponent implements OnInit {
           table: {
             widths: ['*', 'auto'],
             body: [
-              [{ text: 'Valor Neto', style: 'header' }, { text: `${(this.totalBeneficios - this.totalDeducciones).toFixed(2)}`, style: 'totalNeto' }]
+              [{ text: 'Valor Neto', style: 'header' }, { text: `L ${Number(this.totalBeneficios - this.totalDeducciones).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",")}`, style: 'totalNeto' }]
             ]
           },
           layout: 'noBorders'
@@ -161,8 +161,8 @@ export class TotalesporbydDialogComponent implements OnInit {
         widths: ['*', 'auto'],
         body: [
           [{ text: 'Nombre', style: 'tableHeader', colSpan: 2  }, { text: 'Total de ingresos:', style: 'tableHeader' }],
-          ...data.map(el => [el.nombre, {text: "L" + el.total.toFixed(2).toString(), alignment: 'right'}]), // Alineación a la derecha para la última columna
-          [{ text: 'Total de deducciones:', style: 'tableTotal', alignment: 'right', colSpan: 1 }, { text: "L" + total.toFixed(2).toString(), style: 'tableTotal' }]
+          ...data.map(el => [el.nombre, {text: "L" + Number(el.total).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ","), alignment: 'right'}]), // Alineación a la derecha para la última columna
+          [{ text: 'Total de deducciones:', style: 'tableTotal', alignment: 'right', colSpan: 1 }, { text: "L" + Number(total).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ","), style: 'tableTotal' }]
         ]
       },
       layout: 'lightHorizontalLines'

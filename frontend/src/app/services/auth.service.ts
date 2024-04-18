@@ -1,7 +1,9 @@
-import {HttpClient } from '@angular/common/http';
+import {HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Observable, map } from 'rxjs';
+import { Observable, catchError, map, of } from 'rxjs';
 import { environment } from 'src/environments/environment';
+import { jwtDecode } from 'jwt-decode';
+
 
 @Injectable({
   providedIn: 'root'
@@ -11,8 +13,42 @@ export class AuthService {
   constructor( private http: HttpClient) {
    }
 
+
+   logout(): Observable<void> {
+    const url = `${environment.API_URL}/api/usuario/logout`;
+    const token = localStorage.getItem('token'); // Obtén el token JWT almacenado
+    const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
+
+    return this.http.post<void>(url, {}, { headers }).pipe(
+      map(() => {
+        this.clearToken();
+      })
+    );
+  }
+
+  verificarEstadoSesion(): Observable<{ sesionActiva: boolean }> {
+    const url = `${environment.API_URL}/api/usuario/verificarEstado`;
+    const token = localStorage.getItem('token');
+    const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
+    return this.http.get<{ sesionActiva: boolean }>(url, { headers });
+  }
+
+  clearToken(): void {
+    localStorage.removeItem('token');
+  }
+
+   loginPrivada(email: string, password: string): Observable<{ access_token: string }> {
+    const url = `${environment.API_URL}/api/usuario/loginPrivada`;
+    return this.http.post<{ access_token: string }>(url, { email, contrasena: password });
+  }
+
+  createPrivada(data: any): Observable<any> {
+    const url = `${environment.API_URL}/api/usuario/crear`;
+    return this.http.post<any>(url, data);
+  }
+
   login(email: string, password: string): Observable<{ token: string }> {
-    const url = `${environment.API_URL}/api/usuario/auth/login`; // Asegúrate de que la URL sea correcta
+    const url = `${environment.API_URL}/api/usuario/auth/login`;
     return this.http.post<{ token: string }>(url, { correo: email, contrasena: password });
   }
 
@@ -20,19 +56,14 @@ export class AuthService {
     localStorage.setItem('token', token);
   }
 
-  getUserRole(): string {
+  getUserRole() {
     const token = localStorage.getItem('token');
     if (!token) return '';
 
     try {
-      const base64Url = token.split('.')[1];
-      const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-      const jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
-        return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
-      }).join(''));
-
-      const { rol } = JSON.parse(jsonPayload);
-      return rol || '';
+      const decodedToken: any = jwtDecode(token);
+      const role = decodedToken.rol
+      return role || '';
     } catch (error) {
       console.error('Error decoding token:', error);
       return '';
@@ -60,7 +91,5 @@ export class AuthService {
       }),
     );
   }
-
-
 
 }

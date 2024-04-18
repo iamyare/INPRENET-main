@@ -1,8 +1,7 @@
 import { INavData } from '@coreui/angular';
 
-
 export const navItems: INavData[] = [
-  /* {
+  {
     name: 'Dashboard',
     url: '/dashboard',
     iconComponent: { name: 'cil-speedometer' },
@@ -10,8 +9,7 @@ export const navItems: INavData[] = [
       color: 'info',
       text: 'NEW'
     }
-  }, */
-
+  },
   {
     title: true,
     name: 'Menú Mantenimiento'
@@ -29,7 +27,7 @@ export const navItems: INavData[] = [
         name: 'Editar Deducción',
         url: '/Deduccion/editar-tipo-deduccion',
       },
-  ]
+    ]
   },
   {
     name: 'Tipo Planilla',
@@ -44,16 +42,15 @@ export const navItems: INavData[] = [
         name: 'Editar Tipo Planilla',
         url: '/Tipo-Planilla/editar-tipo-planilla',
       },
-  ]
+    ]
   },
 
   {
     title: true,
     name: 'Menú Principal'
   },
-
   {
-    name: 'Afiliado',
+    name: 'Afiliación',
     iconComponent: { name: 'cil-people' },
     url: '/base',
     children: [
@@ -121,7 +118,21 @@ export const navItems: INavData[] = [
       },
     ]
   },
-
+  {
+    name: 'Movimientos',
+    iconComponent: { name: 'cilSpreadsheet' },
+    url: '/base',
+    children: [
+      {
+        name: 'Nuevo Movimiento',
+        url: '/Movimiento/nuevo-movimiento',
+      },
+      {
+        name: 'Ver Movimientos',
+        url: '/Movimiento/ver-movimientos',
+      },
+    ]
+  },
   {
     name: 'Planilla',
     iconComponent: { name: 'cilSpreadsheet' },
@@ -129,10 +140,10 @@ export const navItems: INavData[] = [
     children: [
       {
         name: 'Ingresos',
+        iconComponent: { name: 'cilMoney' },
         children: [
           {
             name: 'Privados',
-            iconComponent: { name: 'cilMoney' },
             children: [
               {
                 name: 'Planilla de privados',
@@ -142,7 +153,7 @@ export const navItems: INavData[] = [
                 name: 'Cargar Planilla de privados',
                 url: '/Planilla/Ingresos/Privados/cargar-planilla-privados',
               },
-          ]
+            ]
           }
           /* {
             url: '/Planilla/Ingresos/nueva-planilla',
@@ -156,6 +167,7 @@ export const navItems: INavData[] = [
       },
       {
         name: 'Egresos',
+        iconComponent: { name: 'cilMoney' },
         children: [
           {
             url: '/Planilla/Egresos/nueva-planilla',
@@ -169,5 +181,6 @@ export const navItems: INavData[] = [
       }
     ]
   },
+
 ]
-;
+  ;

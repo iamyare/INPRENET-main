@@ -7,30 +7,31 @@ import { BeneficiosService } from 'src/app/services/beneficios.service';
 import { FieldConfig } from 'src/app/shared/Interfaces/field-config';
 import { format } from 'date-fns';
 import { unirNombres } from '../../../../shared/functions/formatoNombresP';
+import { log } from 'console';
 @Component({
   selector: 'app-nuevo-beneficio-afil',
   templateUrl: './nuevo-beneficio-afil.component.html',
   styleUrl: './nuevo-beneficio-afil.component.scss'
 })
-export class NuevoBeneficioAfilComponent implements OnInit{
+export class NuevoBeneficioAfilComponent implements OnInit {
   @ViewChild(DynamicFormComponent) dynamicForm!: DynamicFormComponent;
-  form:any
-  form1:any
-  FormBen:any
+  form: any;
+  form1: any
+  FormBen: any
   datosFormateados: any;
   unirNombres: any = unirNombres;
-  tiposBeneficios:any = [];
+  tiposBeneficios: any = [];
 
 
   public myFormFields: FieldConfig[] = []
   public myFormFields1: FieldConfig[] = []
   public myFormFields2: FieldConfig[] = []
 
-  Afiliado:any = {}
+  Afiliado: any = {}
 
-  myColumns:any = []
-  datosTabl:  any[] = [];
-  filas:any
+  myColumns: any = []
+  datosTabl: any[] = [];
+  filas: any
   ejecF: any;
 
   /* myColumnsBeneficios:  any[] = [];
@@ -42,13 +43,13 @@ export class NuevoBeneficioAfilComponent implements OnInit{
     private svcBeneficioServ: BeneficiosService,
     private svcAfilServ: AfiliadoService, private fb: FormBuilder,
     private toastr: ToastrService, private _formBuilder: FormBuilder
-  ){}
+  ) { }
 
   ngOnInit(): void {
     this.getTipoBen();
 
     this.myFormFields = [
-      { type: 'text', label: 'DNI del afiliado', name: 'dni', validations: [Validators.required, Validators.minLength(13), Validators.maxLength(14)], display:true },
+      { type: 'text', label: 'DNI del afiliado', name: 'dni', validations: [Validators.required, Validators.minLength(13), Validators.maxLength(14)], display: true },
     ];
 
     /* SI SE MUEVE LA FILA Periodo hay que cambiar la posicion en la funcion obtenerDatos1 */
@@ -56,66 +57,70 @@ export class NuevoBeneficioAfilComponent implements OnInit{
       {
         type: 'dropdown', label: 'Tipo de beneficio', name: 'nombre_beneficio',
         options: this.tiposBeneficios,
-        validations: [Validators.required], display:true
+        validations: [Validators.required], display: true
       },
-      { type: 'dropdown', label: 'Metodo de pago', name: 'metodo_pago',
-      options : [{label:'Cheque', value: 'Cheque'}, {label:'Transferencia', value: 'Transferencia' }] ,validations: [Validators.required], display:true},
-      { type: 'number', label: 'Monto total', name: 'monto_total', validations: [Validators.required], display:true},
-      { type: 'number', label: 'Monto por periodo', name: 'monto_por_periodo', validations: [Validators.required], display:true},
-      { type: 'daterange', label: 'Periodo', name: 'periodo', validations: [], display:false },
+      {
+        type: 'dropdown', label: 'Metodo de pago', name: 'metodo_pago',
+        options: [{ label: 'Cheque', value: 'Cheque' }, { label: 'Transferencia', value: 'Transferencia' }], validations: [Validators.required], display: true
+      },
+      { type: 'number', label: 'Monto total', name: 'monto_total', validations: [Validators.required], display: true },
+      { type: 'number', label: 'Monto por periodo', name: 'monto_por_periodo', validations: [Validators.required], display: true },
+      { type: 'daterange', label: 'Periodo', name: 'periodo', validations: [], display: false },
     ];
 
     this.myFormFields2 = [
-      { type: 'text', label: 'DNI del beneficiario', name: 'dni', validations: [Validators.required, Validators.minLength(13), Validators.maxLength(14)], display:true },
+      { type: 'text', label: 'DNI del beneficiario', name: 'dni', validations: [Validators.required, Validators.minLength(13), Validators.maxLength(14)], display: true },
       {
         type: 'dropdown', label: 'Tipo de beneficio', name: 'nombre_beneficio',
         options: this.tiposBeneficios,
-        validations: [Validators.required], display:true
+        validations: [Validators.required], display: true
       },
-      { type: 'dropdown', label: 'Metodo de pago', name: 'metodo_pago',
-      options : [{label:'Cheque', value: 'Cheque'}, {label:'Transferencia', value: 'Transferencia' }] ,validations: [Validators.required], display:true},
-      { type: 'number', label: 'Monto total', name: 'monto_total', validations: [Validators.required], display:true},
-      { type: 'number', label: 'Monto por periodo', name: 'monto_por_periodo', validations: [Validators.required], display:true},
-      { type: 'daterange', label: 'Periodo', name: 'periodo', validations: [], display:false },
+      {
+        type: 'dropdown', label: 'Metodo de pago', name: 'metodo_pago',
+        options: [{ label: 'Cheque', value: 'Cheque' }, { label: 'Transferencia', value: 'Transferencia' }], validations: [Validators.required], display: true
+      },
+      { type: 'number', label: 'Monto total', name: 'monto_total', validations: [Validators.required], display: true },
+      { type: 'number', label: 'Monto por periodo', name: 'monto_por_periodo', validations: [Validators.required], display: true },
+      { type: 'daterange', label: 'Periodo', name: 'periodo', validations: [], display: false },
     ];
 
 
     this.myFormFields1[4].display = false;
     this.myFormFields2[5].display = false;
 
-   /*  this.myColumnsBeneficios = [
-      {
-        header: 'Nombre del beneficio',
-        col: "nombre_beneficio",
-        isEditable: true,
-        validationRules: [Validators.required, Validators.minLength(3)]
-      },
-      {
-        header: 'Monto total beneficio',
-        col: "monto_total",
-        isEditable: true,
-        validationRules: [Validators.required, Validators.minLength(3)]
-      },
-      {
-        header: 'Número de rentas aplicadas',
-        col: "num_rentas_aplicadas",
-        isEditable: true,
-        validationRules: [Validators.required, Validators.minLength(3)]
-      },
-      {
-        header: 'Número de rentas máximas',
-        col: "numero_rentas_max",
-        isEditable: true,
-        validationRules: [Validators.required, Validators.minLength(3)]
-      }
-    ] */
+    /*  this.myColumnsBeneficios = [
+       {
+         header: 'Nombre del beneficio',
+         col: "nombre_beneficio",
+         isEditable: true,
+         validationRules: [Validators.required, Validators.minLength(3)]
+       },
+       {
+         header: 'Monto total beneficio',
+         col: "monto_total",
+         isEditable: true,
+         validationRules: [Validators.required, Validators.minLength(3)]
+       },
+       {
+         header: 'Número de rentas aplicadas',
+         col: "num_rentas_aplicadas",
+         isEditable: true,
+         validationRules: [Validators.required, Validators.minLength(3)]
+       },
+       {
+         header: 'Número de rentas máximas',
+         col: "numero_rentas_max",
+         isEditable: true,
+         validationRules: [Validators.required, Validators.minLength(3)]
+       }
+     ] */
   }
 
   getTipoBen = async () => {
     try {
       const beneficios = await this.svcBeneficioServ.getTipoBeneficio().toPromise();
       const tiposBen = beneficios.map((item: any) => {
-        this.tiposBeneficios.push({ label: `${item.nombre_beneficio}`, value: `${item.nombre_beneficio}`,  periodicidad: `${item.periodicidad}` })
+        this.tiposBeneficios.push({ label: `${item.nombre_beneficio}`, value: `${item.nombre_beneficio}`, periodicidad: `${item.periodicidad}` })
         return {
           id: item.id_beneficio,
           nombre_beneficio: item.nombre_beneficio,
@@ -135,15 +140,15 @@ export class NuevoBeneficioAfilComponent implements OnInit{
     }
   };
 
-  async obtenerDatos(event:any):Promise<any>{
+  async obtenerDatos(event: any): Promise<any> {
     this.form = event;
   }
 
-  buscarPeriodicidad(arreglo:any, etiqueta:any) {
+  buscarPeriodicidad(arreglo: any, etiqueta: any) {
     // Iterar sobre cada elemento del arreglo
     for (let i = 0; i < arreglo.length; i++) {
       // Verificar si la etiqueta coincide
-      if (etiqueta == arreglo[i].label){
+      if (etiqueta == arreglo[i].label) {
         if (arreglo[i].periodicidad == "VITALICIO") {
           // Si coincide, retornar la periodicidad
           return arreglo[i].periodicidad;
@@ -152,23 +157,23 @@ export class NuevoBeneficioAfilComponent implements OnInit{
     }
   }
 
-  ejecutarFuncionAsincronaDesdeOtroComponente(funcion: (data:any) => Promise<void>) {
+  ejecutarFuncionAsincronaDesdeOtroComponente(funcion: (data: any) => Promise<void>) {
     this.ejecF = funcion;
   }
 
-/*   ejecutarFuncionAsincronaDesdeOtroComponentes(funcion: (data:any) => Promise<void>) {
-    this.ejecFBeneficios = funcion;
-  } */
+  /*   ejecutarFuncionAsincronaDesdeOtroComponentes(funcion: (data:any) => Promise<void>) {
+      this.ejecFBeneficios = funcion;
+    } */
 
   getFilas = async () => {
-    if (this.Afiliado.estado == "FALLECIDO"){
+    if (this.Afiliado.estado == "FALLECIDO") {
       try {
         await this.getColumns();
         const data = await this.svcAfilServ.obtenerBenDeAfil(this.form.value.dni).toPromise();
 
         this.filas = data.map((item: any) => ({
           dni: item.dni,
-          nombre_completo: this.unirNombres(item.primer_nombre,item.segundo_nombre, item.tercer_nombre, item.primer_apellido,item.segundo_apellido),
+          nombre_completo: this.unirNombres(item.primer_nombre, item.segundo_nombre, item.tercer_nombre, item.primer_apellido, item.segundo_apellido),
           sexo: item.sexo,
           tipo_afiliado: item.tipo_afiliado,
           porcentaje: item.porcentaje,
@@ -216,21 +221,23 @@ export class NuevoBeneficioAfilComponent implements OnInit{
 
       this.svcAfilServ.obtenerBenDeAfil(this.form.value.dni).subscribe(
         async (response) => {
+          console.log(response);
+
           const primerObjetoTransformado = this.transformarObjeto(response[0]);
           this.myColumns = [
-            { header: 'dni', col: 'dni', isEditable: false },
+            { header: 'DNI', col: 'dni', isEditable: false },
             {
-              header: 'nombre_completo',
+              header: 'Nombre Completo',
               col: 'nombre_completo',
               isEditable: false
             },
-            { header: 'sexo', col: 'sexo', isEditable: false },
+            { header: 'Sexo', col: 'sexo', isEditable: false },
             {
-              header: 'tipo_afiliado',
+              header: 'Tipo Afiliado',
               col: 'tipo_afiliado',
               isEditable: false
             },
-            { header: 'porcentaje', col: 'porcentaje', isEditable: false },
+            { header: 'Porcentaje', col: 'porcentaje', isEditable: false },
           ];
         },
         (error) => {
@@ -250,7 +257,7 @@ export class NuevoBeneficioAfilComponent implements OnInit{
     }
   }
 
-  async obtenerDatos1(event:any):Promise<any>{
+  async obtenerDatos1(event: any): Promise<any> {
     this.form1 = event;
 
     const temp = this.buscarPeriodicidad(this.tiposBeneficios, this.form1.value.nombre_beneficio)
@@ -258,15 +265,15 @@ export class NuevoBeneficioAfilComponent implements OnInit{
     let startDateFormatted
     let endDateFormatted
 
-    if (temp=="VITALICIO"){
+    if (temp == "VITALICIO") {
       this.myFormFields1[4].display = false
 
       const fechaActual = new Date();
 
-      startDateFormatted =  format(fechaActual, 'dd-MM-yyyy');
+      startDateFormatted = format(fechaActual, 'dd-MM-yyyy');
       endDateFormatted = '01-01-2500';
 
-    }else if (!temp){
+    } else if (!temp) {
       this.myFormFields1[4].display = true
 
       const startDate = new Date(event.value.periodo.start);
@@ -283,7 +290,7 @@ export class NuevoBeneficioAfilComponent implements OnInit{
 
     }
 
-    if (startDateFormatted != 'Invalid Date' && endDateFormatted != 'Invalid Date'){
+    if (startDateFormatted != 'Invalid Date' && endDateFormatted != 'Invalid Date') {
       const datosFormateados = {
         ...event.value,
         periodoInicio: startDateFormatted,
@@ -295,22 +302,22 @@ export class NuevoBeneficioAfilComponent implements OnInit{
 
   }
 
-  async obtenerDatosFormBen(event:any):Promise<any>{
+  async obtenerDatosFormBen(event: any): Promise<any> {
     this.FormBen = event;
     const temp = this.buscarPeriodicidad(this.tiposBeneficios, this.FormBen.value.nombre_beneficio);
 
     let startDateFormatted
     let endDateFormatted
 
-    if (temp=="VITALICIO"){
+    if (temp == "VITALICIO") {
       this.myFormFields2[5].display = false
 
       const fechaActual = new Date();
 
-      startDateFormatted =  format(fechaActual, 'dd-MM-yyyy');
+      startDateFormatted = format(fechaActual, 'dd-MM-yyyy');
       endDateFormatted = '01-01-2500';
 
-    }else if (!temp){
+    } else if (!temp) {
       this.myFormFields2[5].display = true
 
       const startDate = new Date(event.value.periodo.start);
@@ -327,7 +334,7 @@ export class NuevoBeneficioAfilComponent implements OnInit{
 
     }
 
-    if (startDateFormatted != 'Invalid Date' && endDateFormatted != 'Invalid Date'){
+    if (startDateFormatted != 'Invalid Date' && endDateFormatted != 'Invalid Date') {
       const datosFormateados = {
         ...event.value,
         periodoInicio: startDateFormatted,
@@ -338,78 +345,81 @@ export class NuevoBeneficioAfilComponent implements OnInit{
     }
   }
 
-  previsualizarInfoAfil(){
+  previsualizarInfoAfil() {
     this.Afiliado.nameAfil = ""
-    if (this.form.value.dni){
+    if (this.form.value.dni) {
 
       this.svcAfilServ.getAfilByParam(this.form.value.dni).subscribe(
         async (result) => {
           this.Afiliado = result
-          this.Afiliado.nameAfil = this.unirNombres(result.primer_nombre,result.segundo_nombre, result.tercer_nombre, result.primer_apellido,result.segundo_apellido);
+          console.log(this.Afiliado);
+
+          this.Afiliado.nameAfil = this.unirNombres(result.primer_nombre, result.segundo_nombre, result.tercer_nombre, result.primer_apellido, result.segundo_apellido);
           //this.getBeneficios().then(() => this.cargar());
           this.getFilas().then(() => this.cargar());
         },
         (error) => {
           this.Afiliado.estado = ""
           this.toastr.error(`Error: ${error.error.message}`);
-      })
+        })
     }
   }
 
-  transformarObjeto(objeto:any) {
+  transformarObjeto(objeto: any) {
     return Object.keys(objeto).map(key => {
-        return {
-          header: key,
-          col: key,
-          isEditable: false,
-        };
+      return {
+        header: key,
+        col: key,
+        isEditable: false,
+      };
 
     });
   }
 
-  guardarNTBenef(){
+  guardarNTBenef() {
     /* Asignar al afiliado si no ha fallecido */
     /* Asignar a los beneficioarios si el afiliado ya fallecio */
-    if (this.Afiliado.estado != "FALLECIDO"){
+    if (this.Afiliado.estado != "FALLECIDO") {
       this.datosFormateados["dni"] = this.form.value.dni;
       this.svcBeneficioServ.asigBeneficioAfil(this.datosFormateados).subscribe(
-       {
-         next: (response)=>{
-           this.toastr.success("se asignó correctamente el beneficio");
-           this.limpiarFormulario()
-         },
-         error: (error)=>{
-           let mensajeError = 'Error desconocido al crear Detalle de deducción';
-           // Verifica si el error tiene una estructura específica
-           if (error.error && error.error.message) {
-             mensajeError = error.error.message;
-           } else if (typeof error.error === 'string') {
-           // Para errores que vienen como un string simple
-             mensajeError = error.error;
-           }
-           this.toastr.error(mensajeError);
-         }
-       })
-    }else{
+        {
+          next: (response) => {
+            this.toastr.success("se asignó correctamente el beneficio");
+            this.limpiarFormulario()
+
+          },
+          error: (error) => {
+            let mensajeError = 'Error desconocido al crear Detalle de deducción';
+            // Verifica si el error tiene una estructura específica
+            if (error.error && error.error.message) {
+              mensajeError = error.error.message;
+            } else if (typeof error.error === 'string') {
+              // Para errores que vienen como un string simple
+              mensajeError = error.error;
+            }
+            this.toastr.error(mensajeError);
+          }
+        })
+    } else {
       this.datosFormateados["dni"] = this.FormBen.value.dni;
       this.svcBeneficioServ.asigBeneficioAfil(this.datosFormateados, this.Afiliado.id_persona).subscribe(
-       {
-         next: (response)=>{
-           this.toastr.success("se asignó correctamente el beneficio");
-           this.limpiarFormulario()
-         },
-         error: (error)=>{
-           let mensajeError = 'Error desconocido al crear Detalle de deducción';
-           // Verifica si el error tiene una estructura específica
-           if (error.error && error.error.message) {
-             mensajeError = error.error.message;
-           } else if (typeof error.error === 'string') {
-           // Para errores que vienen como un string simple
-             mensajeError = error.error;
-           }
-           this.toastr.error(mensajeError);
-         }
-       })
+        {
+          next: (response) => {
+            this.toastr.success("se asignó correctamente el beneficio");
+            this.limpiarFormulario()
+          },
+          error: (error) => {
+            let mensajeError = 'Error desconocido al crear Detalle de deducción';
+            // Verifica si el error tiene una estructura específica
+            if (error.error && error.error.message) {
+              mensajeError = error.error.message;
+            } else if (typeof error.error === 'string') {
+              // Para errores que vienen como un string simple
+              mensajeError = error.error;
+            }
+            this.toastr.error(mensajeError);
+          }
+        })
 
     }
   }
@@ -417,22 +427,28 @@ export class NuevoBeneficioAfilComponent implements OnInit{
   onFileSelect(event: any) {
     if (event.target.files.length > 0) {
       const file = event.target.files[0];
-/*       this.deduccionesService.uploadDetalleDeduccion(file).subscribe({
-        next: (res: any) => {
-          console.log('Upload successful', res);
-        },
-        error: (err: any) => {
-          console.error('Upload failed', err);
-        }
-      }); */
+      /*       this.deduccionesService.uploadDetalleDeduccion(file).subscribe({
+              next: (res: any) => {
+                console.log('Upload successful', res);
+              },
+              error: (err: any) => {
+                console.error('Upload failed', err);
+              }
+            }); */
     }
   }
 
   limpiarFormulario(): void {
     // Utiliza la referencia al componente DynamicFormComponent para resetear el formulario
+    this.Afiliado = []
+    if (this.form1) {
+      this.form1.reset();
+    }
+    if (this.FormBen) {
+      this.FormBen.reset();
+    }
     if (this.dynamicForm) {
       this.dynamicForm.form.reset();
-      this.FormBen.reset();
     }
   }
 

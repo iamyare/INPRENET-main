@@ -2,10 +2,12 @@ import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/commo
 import { BeneficioService } from './beneficio.service';
 import { CreateBeneficioDto } from './dto/create-beneficio.dto';
 import { UpdateBeneficioDto } from './dto/update-beneficio.dto';
+import { ApiTags } from '@nestjs/swagger';
 
+@ApiTags('beneficio')
 @Controller('beneficio')
 export class BeneficioController {
-  constructor(private readonly beneficioService: BeneficioService) {}
+  constructor(private readonly beneficioService: BeneficioService) { }
 
   @Post("createTipoBeneficio")
   create(@Body() createBeneficioDto: CreateBeneficioDto) {

@@ -17,8 +17,6 @@ import { BeneficiosService } from '../../app/services/beneficios.service';
 export class AsignacionAfilPlanComponent implements OnInit {
   convertirFecha = convertirFecha;
   dataPlan: any;
-  filas: any;
-  tiposPlanilla: any[] = [];
   datosFormateados: any;
 
   myFormFields: FieldConfig[] = [];
@@ -27,9 +25,6 @@ export class AsignacionAfilPlanComponent implements OnInit {
 
   verDat: boolean = false;
   ejecF: any;
-
-  datosFilasDeduccion: any;
-  datosFilasBeneficios: any;
 
   detallePlanilla: any
   constructor(
@@ -128,14 +123,14 @@ export class AsignacionAfilPlanComponent implements OnInit {
   };
 
   getFilas = async (periodoInicio: string, periodoFinalizacion: string) => {
-    const serviceCalls:any = {
+    const serviceCalls: any = {
       "ORDINARIA - AFILIADO": this.planillaService.getPlanillaOrdinariaAfiliados,
       "ORDINARIA - BENEFICIARIO": this.planillaService.getPlanillaOrdinariaBeneficiarios,
       "COMPLEMENTARIA - AFILIADO": this.planillaService.getPlanillaComplementariaAfiliados,
       "COMPLEMENTARIA - BENEFICIARIO": this.planillaService.getPlanillaComplementariaBeneficiarios,
     };
 
-    const mapData = (item:any) => ({
+    const mapData = (item: any) => ({
       dni: item.DNI,
       NOMBRE_COMPLETO: item.NOMBRE_COMPLETO,
       periodoInicio: periodoInicio,
@@ -172,10 +167,10 @@ export class AsignacionAfilPlanComponent implements OnInit {
   /* Maneja los beneficios */
   manejarAccionUno(row: any) {
     let logs: any[] = [];
-    logs.push({ message: `DNI: ${row.dni}`, detail: null  });
-    logs.push({ message: `Nombre Completo: ${row.NOMBRE_COMPLETO}`, detail: null  });
+    logs.push({ message: `DNI: ${row.dni}`, detail: null });
+    logs.push({ message: `Nombre Completo: ${row.NOMBRE_COMPLETO}`, detail: null });
 
-    const openDialog = (beneficios:any) => {
+    const openDialog = (beneficios: any) => {
       logs.push({ message: 'Datos De Beneficio:', detail: beneficios });
       this.dialog.open(DynamicDialogComponent, {
         width: '50%',
@@ -183,19 +178,19 @@ export class AsignacionAfilPlanComponent implements OnInit {
       });
     };
 
-    const handleError = (error:any) => {
+    const handleError = (error: any) => {
       logs.push({ message: 'Error al obtener los beneficios:', detail: error });
       openDialog([]);
     };
 
-    const mapBeneficios = (response:any) => {
-      return response.data.map((b:any) => ({
+    const mapBeneficios = (response: any) => {
+      return response.data.map((b: any) => ({
         NOMBRE_BENEFICIO: b.NOMBRE_BENEFICIO,
         MontoAPagar: b.MontoAPagar
       }));
     };
 
-    const serviceActions:any = {
+    const serviceActions: any = {
       "ORDINARIA - AFILIADO": this.planillaService.getPagoBeneficioOrdiAfil.bind(this.planillaService),
       "ORDINARIA - BENEFICIARIO": this.planillaService.getPagoBeneficioOrdiBenef.bind(this.planillaService),
       "COMPLEMENTARIA - AFILIADO": this.planillaService.getPagoBeneficioCompleAfil.bind(this.planillaService),
@@ -207,7 +202,7 @@ export class AsignacionAfilPlanComponent implements OnInit {
 
     if (serviceCall) {
       serviceCall(row.dni, row.periodoInicio, row.periodoFinalizacion).subscribe({
-        next: (response:any) => openDialog(mapBeneficios(response)),
+        next: (response: any) => openDialog(mapBeneficios(response)),
         error: handleError
       });
     } else {
@@ -218,10 +213,10 @@ export class AsignacionAfilPlanComponent implements OnInit {
   /* Maneja las deducciones */
   manejarAccionDos(row: any) {
     let logs: any[] = [];
-    logs.push({ message: `DNI: ${row.dni}`, detail: null  });
-    logs.push({ message: `Nombre Completo: ${row.NOMBRE_COMPLETO}`, detail: null  });
+    logs.push({ message: `DNI: ${row.dni}`, detail: null });
+    logs.push({ message: `Nombre Completo: ${row.NOMBRE_COMPLETO}`, detail: null });
 
-    const openDialog = (deducciones:any) => {
+    const openDialog = (deducciones: any) => {
       logs.push({ message: 'Datos De Deduccion:', detail: deducciones });
       this.dialog.open(DynamicDialogComponent, {
         width: '50%',
@@ -229,19 +224,19 @@ export class AsignacionAfilPlanComponent implements OnInit {
       });
     };
 
-    const handleError = (error:any) => {
+    const handleError = (error: any) => {
       logs.push({ message: 'Error al obtener las deducciones:', detail: error });
       openDialog([]);
     };
 
-    const mapDeducciones = (response:any) => {
-      return response.data.map((b:any) => ({
+    const mapDeducciones = (response: any) => {
+      return response.data.map((b: any) => ({
         NOMBRE_DEDUCCION: b.NOMBRE_DEDUCCION,
         MontoAplicado: b.MontoAplicado
       }));
     };
 
-    const serviceActions:any = {
+    const serviceActions: any = {
       "ORDINARIA - AFILIADO": this.planillaService.getPagoDeduccionesOrdiAfil.bind(this.planillaService),
       "ORDINARIA - BENEFICIARIO": this.planillaService.getPagoDeduccionesOrdiBenef.bind(this.planillaService),
       "COMPLEMENTARIA - AFILIADO": this.planillaService.getPagoDeduccionesCompleAfil.bind(this.planillaService),
@@ -253,7 +248,7 @@ export class AsignacionAfilPlanComponent implements OnInit {
 
     if (serviceCall) {
       serviceCall(row.dni, row.periodoInicio, row.periodoFinalizacion).subscribe({
-        next: (response:any) => openDialog(mapDeducciones(response)),
+        next: (response: any) => openDialog(mapDeducciones(response)),
         error: handleError
       });
     } else {
@@ -278,6 +273,7 @@ export class AsignacionAfilPlanComponent implements OnInit {
       .subscribe({
         next: (response) => {
           this.toastr.success('Planilla actualizada con éxito');
+          this.limpiarFormulario()
         },
         error: (error) => {
           let mensajeError = 'Error al actualizar la planilla';
@@ -291,9 +287,14 @@ export class AsignacionAfilPlanComponent implements OnInit {
       });
   }
 
-
-
   convertirFormatoFecha(fecha: string): string {
     return fecha.replace(/-/g, '.');
+  }
+
+  limpiarFormulario(): void {
+    if (this.datosFormateados) {
+      this.datosFormateados.reset();
+      this.detallePlanilla = false
+    }
   }
 }

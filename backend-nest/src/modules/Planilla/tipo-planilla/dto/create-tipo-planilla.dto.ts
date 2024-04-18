@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsNotEmptyObject, IsOptional, IsString, Length, Max } from "class-validator";
+import { IsNotEmpty, IsNotEmptyObject, IsNumber, IsOptional, IsString, Length, Max } from "class-validator";
 
 export class CreateTipoPlanillaDto {
     @IsNotEmpty({ message: 'El nombre de la planilla no debe estar vacío.' })
@@ -15,6 +15,10 @@ export class CreateTipoPlanillaDto {
     @Length(0, 7)
     @IsOptional()
     clase_planilla: string;
+
+    @IsNumber()
+    @IsOptional()
+    id_tipo_planilla: number;
 
     @IsString({ message: '' })
     @Length(1, 200, { message: 'El estado debe estar lleno' })

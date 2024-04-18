@@ -2,6 +2,7 @@ import { Column, Entity, Index, JoinColumn, ManyToOne, OneToMany, PrimaryGenerat
 import { Net_TipoPlanilla } from '../../tipo-planilla/entities/tipo-planilla.entity';
 import { Net_Detalle_Deduccion } from '../../detalle-deduccion/entities/detalle-deduccion.entity';
 import { Net_Detalle_Pago_Beneficio } from '../../detalle_beneficio/entities/net_detalle_pago_beneficio.entity';
+import { Net_Detalle_planilla_ingreso } from '../../Ingresos/detalle-plan-ingr/entities/net_detalle_plani_ing.entity';
 
 @Entity({ name: 'NET_PLANILLA' })
 export class Net_Planilla {
@@ -40,4 +41,7 @@ export class Net_Planilla {
 
     @OneToMany(() => Net_Detalle_Pago_Beneficio, detallepagobeneficio => detallepagobeneficio.planilla)
     detallepagobeneficio: Net_Detalle_Pago_Beneficio[];
+
+    @OneToMany(() => Net_Detalle_planilla_ingreso, detallePlanillaIngreso => detallePlanillaIngreso.planilla)
+    detallesPlanillaIngreso: Net_Detalle_planilla_ingreso[];
 }

@@ -17,9 +17,10 @@ import { DefaultFooterComponent, DefaultHeaderComponent, DefaultLayoutComponent 
 import { SharedModule } from './shared/shared.module'
 
 import { IconModule, IconSetService } from '@coreui/icons-angular';
-import { HttpClientModule, HttpClient  } from '@angular/common/http';
+import { HttpClientModule, HttpClient, HTTP_INTERCEPTORS  } from '@angular/common/http';
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { ToastrModule } from 'ngx-toastr';
+import { ErrorInterceptor } from '../app/interceptors/error.interceptor';
 
 const APP_CONTAINERS = [
   DefaultFooterComponent,
@@ -45,6 +46,11 @@ const APP_CONTAINERS = [
     }),
   ],
   providers: [
+    {
+      provide: HTTP_INTERCEPTORS,
+      useClass: ErrorInterceptor,
+      multi: true
+  },
     DatePipe,
     {
       provide: LocationStrategy,

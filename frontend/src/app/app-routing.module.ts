@@ -8,6 +8,9 @@ import { LoginComponent } from './views/pages/Generales/login/login.component';
 import { RegisterComponent } from './views/pages/Generales/register/register.component';
 import { PreRegisterComponent } from './views/pages/Generales/pre-register/pre-register.component';
 import { RoleGuard } from './guards/role-guard.guard';
+import { LoginPrivadosComponent } from './views/pages/Centros Privados/login-privados/login-privados.component';
+import { PlanillaColegiosPrivadosComponent } from './views/pages/Centros Privados/planilla-colegios-privados/planilla-colegios-privados.component';
+import { NavDefaultComponent } from './views/pages/Centros Privados/nav-default/nav-default.component';
 
 const routes: Routes = [
   {
@@ -26,66 +29,46 @@ const routes: Routes = [
         path: 'dashboard',
         loadChildren: () =>
           import('./views/dashboard/dashboard.module').then((m) => m.DashboardModule),
-          canActivate: [RoleGuard],
-          data: { expectedRoles: ['ADMINISTRADOR', 'JEFE DE AREA'] }
       },
       {
         path: 'Afiliado',
         loadChildren: () =>
           import('./views/theme/theme.module').then((m) => m.ThemeModule),
-          canActivate: [RoleGuard],
-          data: { expectedRoles: ['ADMINISTRADOR', 'JEFE DE AREA'] }
+        canActivate: [RoleGuard],
+        data: {
+          expectedRoles: ['ADMINISTRADOR', 'JEFE DE AREA', 'OFICIAL', 'AUXILIAR']
+        }
       },
       {
         path: 'Planilla',
         loadChildren: () =>
           import('./views/theme/theme.module').then((m) => m.ThemeModule),
-          canActivate: [RoleGuard],
-          data: { expectedRoles: ['ADMINISTRADOR', 'JEFE DE AREA'] }
       },
       {
         path: 'Beneficio',
         loadChildren: () =>
           import('./views/theme/theme.module').then((m) => m.ThemeModule),
-          canActivate: [RoleGuard],
-          data: { expectedRoles: ['ADMINISTRADOR', 'JEFE DE AREA'] }
-      },
-      {
-        path: 'Deduccion',
-        loadChildren: () =>
-          import('./views/theme/theme.module').then((m) => m.ThemeModule),
-          canActivate: [RoleGuard],
-          data: { expectedRoles: ['ADMINISTRADOR', 'JEFE DE AREA'] }
       },
       {
         path: 'Tipo-Planilla',
         loadChildren: () =>
           import('./views/theme/theme.module').then((m) => m.ThemeModule),
-          canActivate: [RoleGuard],
-          data: { expectedRoles: ['ADMINISTRADOR', 'JEFE DE AREA'] }
+      },
+      {
+        path: 'Deduccion',
+        loadChildren: () =>
+          import('./views/theme/theme.module').then((m) => m.ThemeModule),
       },
       {
         path: 'Privados',
         loadChildren: () =>
-          import('./views/theme/theme.module').then((m) => m.ThemeModule),
-          canActivate: [RoleGuard],
-          data: { expectedRoles: ['ADMINISTRADOR', 'JEFE DE AREA'] }
+          import('./views/theme/theme.module').then((m) => m.ThemeModule)
       },
-/*       {
-        path: 'icons',
+      {
+        path: 'Movimiento',
         loadChildren: () =>
-          import('./views/icons/icons.module').then((m) => m.IconsModule)
-      }, */
-/*       {
-        path: 'notifications',
-        loadChildren: () =>
-          import('./views/notifications/notifications.module').then((m) => m.NotificationsModule)
-      }, */
-      /* {
-        path: 'widgets',
-        loadChildren: () =>
-          import('./views/widgets/widgets.module').then((m) => m.WidgetsModule)
-      }, */
+          import('./views/theme/theme.module').then((m) => m.ThemeModule),
+      },
       {
         path: 'pages',
         loadChildren: () =>
@@ -93,6 +76,7 @@ const routes: Routes = [
       },
     ]
   },
+
   {
     path: '404',
     component: Page404Component,
@@ -128,6 +112,37 @@ const routes: Routes = [
       title: 'Pre Register Page'
     }
   },
+  {
+    path: 'login-privados',
+    component: LoginPrivadosComponent,
+    data: {
+      title: 'Login Privados Page'
+    }
+  },
+  {
+    path: 'privados',
+    component: NavDefaultComponent,
+    data: {
+      title: 'Inicio Privados'
+    },
+    children: [
+      {
+        path: '',
+        component: PlanillaColegiosPrivadosComponent,
+        data: {
+          title: 'Planilla de privados'
+        }
+      },
+      {
+        path: 'PlanillaPrivados',
+        component: PlanillaColegiosPrivadosComponent,
+        data: {
+          title: 'Planilla de privados'
+        }
+      },
+    ]
+  },
+
 
   /* {path: '**', redirectTo: 'dashboard'} */
 ];
@@ -145,3 +160,11 @@ const routes: Routes = [
 })
 export class AppRoutingModule {
 }
+
+/*
+{
+        path: 'dashboard',
+        loadChildren: () =>
+          import('./views/dashboard/dashboard.module').then((m) => m.DashboardModule),
+      },
+*/

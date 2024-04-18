@@ -13,26 +13,31 @@ export class AfiliadoService {
 
   constructor(private http: HttpClient, private router: Router) { }
 
+  buscarMovimientosPorDNI(dni: string): Observable<any> {
+    const url = `${environment.API_URL}/api/afiliado/movimientos/${dni}`;
+    return this.http.get<any>(url);
+  }
+
   getAllAfiliados(): Observable<any | void> {
     const url = `${environment.API_URL}/api/afiliado`;
     return this.http.get<any>(
       url,
-      ).pipe(
-        map((res:any) => {
-          return res;
-        })
-      );
+    ).pipe(
+      map((res: any) => {
+        return res;
+      })
+    );
   }
 
-  getAfiliadoDNI(param:string | number): Observable<any | void> {
+  getAfiliadoDNI(param: string | number): Observable<any | void> {
     const url = `${environment.API_URL}/api/afiliado/dni/${param}`;
     return this.http.get<any>(
       url,
-      ).pipe(
-        map((res:any) => {
-          return res;
-        })
-      );
+    ).pipe(
+      map((res: any) => {
+        return res;
+      })
+    );
   }
 
   generarVoucher(idPlanilla: string, dni: string): Observable<any> {
@@ -43,126 +48,121 @@ export class AfiliadoService {
     return this.http.get<any>(`${environment.API_URL}/api/planilla/generar-voucher`, { params });
   }
 
-  getAfilByParam(param:string | number): Observable<any | void> {
+  getAfilByParam(param: string | number): Observable<any | void> {
     const url = `${environment.API_URL}/api/afiliado/${param}`;
     return this.http.get<any>(
       url,
-      ).pipe(
-        map((res:any) => {
-          return res;
-        })
-      );
+    ).pipe(
+      map((res: any) => {
+        return res;
+      })
+    );
   }
 
-  agregarAfiliados(data:any): Observable<any>{
+  agregarAfiliados(data: any): Observable<any> {
     var url = `${environment.API_URL}/afiliados/agregarAfiliado`;
 
     return this.http.post<any>(
       url,
       data,
-      ).pipe(
-        map((res:any) => {
-          return res;
-        })
-      )
+    ).pipe(
+      map((res: any) => {
+        return res;
+      })
+    )
   }
 
-  agregDatosGen(data:any): Observable<any>{
+  agregDatosGen(data: any): Observable<any> {
     var url = `${environment.API_URL}/auth/signup`;
-    console.log(data);
 
     return this.http.post<any>(
       url,
       data,
-      ).pipe(
-        map((res:any) => {
-          return res;
-        }),
-        //catchError((err) => this.handlerError2(err))
-      )
+    ).pipe(
+      map((res: any) => {
+        return res;
+      }),
+      //catchError((err) => this.handlerError2(err))
+    )
   }
 
-  agregDatosBanc(data:any): Observable<any>{
+  agregDatosBanc(data: any): Observable<any> {
     var url = `${environment.API_URL}/auth/signup`;
-    console.log(data);
 
     return this.http.post<any>(
       url,
       data,
-      ).pipe(
-        map((res:any) => {
-          return res;
-        }),
-        //catchError((err) => this.handlerError2(err))
-      )
+    ).pipe(
+      map((res: any) => {
+        return res;
+      }),
+      //catchError((err) => this.handlerError2(err))
+    )
   }
 
-  agregDatosPuestTra(data:any): Observable<any>{
+  agregDatosPuestTra(data: any): Observable<any> {
     var url = `${environment.API_URL}/auth/signup`;
-    console.log(data);
 
     return this.http.post<any>(
       url,
       data,
-      ).pipe(
-        map((res:any) => {
-          return res;
-        }),
-        //catchError((err) => this.handlerError2(err))
-      )
+    ).pipe(
+      map((res: any) => {
+        return res;
+      }),
+      //catchError((err) => this.handlerError2(err))
+    )
   }
 
-  agregDatosRefPer(data:any): Observable<any>{
+  agregDatosRefPer(data: any): Observable<any> {
     var url = `${environment.API_URL}/auth/signup`;
-    console.log(data);
 
     return this.http.post<any>(
       url,
       data,
-      ).pipe(
-        map((res:any) => {
-          return res;
-        }),
-        //catchError((err) => this.handlerError2(err))
-      )
+    ).pipe(
+      map((res: any) => {
+        return res;
+      }),
+      //catchError((err) => this.handlerError2(err))
+    )
   }
 
-  agregDatosBeneficiarios(data:any): Observable<any>{
+  agregDatosBeneficiarios(data: any): Observable<any> {
     var url = `${environment.API_URL}/auth/signup`;
-    console.log(data);
 
     return this.http.post<any>(
       url,
       data,
-      ).pipe(
-        map((res:any) => {
-          return res;
-        }),
-        //catchError((err) => this.handlerError2(err))
-      )
+    ).pipe(
+      map((res: any) => {
+        return res;
+      }),
+      //catchError((err) => this.handlerError2(err))
+    )
   }
 
   /* BENEFICIARIOS */
-  obtenerBenDeAfil(dniAfil:string | number): Observable<any | void> {
+  obtenerBenDeAfil(dniAfil: string | number): Observable<any | void> {
     const url = `${environment.API_URL}/api/afiliado/obtenerBenDeAfil/${dniAfil}`;
     return this.http.get<any>(
       url,
-      ).pipe(
-        map((res:any) => {
-          return res;
-        })
-      );
+    ).pipe(
+      map((res: any) => {
+        return res;
+      })
+    );
   }
 
   /* BENEFICIOS */
-  obtenerBeneficiosDeAfil(dniAfil:string | number): Observable<any | void> {
+  obtenerBeneficiosDeAfil(dniAfil: string | number): Observable<any | void> {
     const url = `${environment.API_URL}/api/beneficio-planilla/obtenerBeneficiosDeAfil/${dniAfil}`;
     return this.http.get<any>(
       url,
-      ).pipe(
-        map((res:any) => {
-          return res;
-        })
-      );
+    ).pipe(
+      map((res: any) => {
+        return res;
+      })
+    );
   }
 }

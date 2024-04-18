@@ -27,8 +27,9 @@ export class CreateDeduccionDto {
     nombre_institucion?: string;
     
     @IsString()
+    @Length(10, 100, { message: 'La descripción debe tener entre 10 y 100 caracteres.' })
     @IsOptional()
-    descripcion_deduccion: string;
+    descripcion_deduccion?: string;
 
     @IsNumberCustom({ message: 'El valor la prioridad debe ser numérico.' })
     @IsOptional()

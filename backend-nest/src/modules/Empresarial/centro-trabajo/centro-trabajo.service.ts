@@ -2,9 +2,9 @@ import { BadRequestException, Injectable, InternalServerErrorException, Logger }
 import { CreateCentroTrabajoDto } from './dto/create-centro-trabajo.dto';
 import { UpdateCentroTrabajoDto } from './dto/update-centro-trabajo.dto';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Net_Centro_Trabajo } from './entities/net_centro-trabajo.entity';
+import { Net_Centro_Trabajo } from '../entities/net_centro_trabajo.entity';
 import { Repository } from 'typeorm';
-import { Net_Departamento } from 'src/modules/Regional/provincia/entities/net_departamento.entity';
+import { Net_Departamento } from '../../Regional/provincia/entities/net_departamento.entity';
 
 @Injectable()
 export class CentroTrabajoService {
@@ -17,17 +17,17 @@ export class CentroTrabajoService {
     private readonly centroTrabajoRepository: Repository<Net_Centro_Trabajo>,
     @InjectRepository(Net_Departamento)
     private readonly departamentoRepository: Repository<Net_Departamento>
-    
-  ){}
 
-  
+  ) { }
+
+
   async create(createCentroTrabajoDto: CreateCentroTrabajoDto) {
     try {
       const departamento = await this.departamentoRepository.findOneBy({ nombre_departamento: createCentroTrabajoDto.nombre_departamento });
       if (!departamento) {
         throw new BadRequestException('departamento not found');
       }
-  
+
       return await this.centroTrabajoRepository.save({
         ...createCentroTrabajoDto,
         departamento
@@ -37,8 +37,12 @@ export class CentroTrabajoService {
     }
   }
 
-  findAll() {
-    return `This action returns all centroTrabajo`;
+  async findAll(): Promise<Net_Centro_Trabajo[]> {
+    try {
+      return await this.centroTrabajoRepository.find();
+    } catch (error) {
+      this.handleException(error);
+    }
   }
 
   findOne(id: number) {

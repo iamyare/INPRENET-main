@@ -21,7 +21,6 @@ import { MatTableModule } from '@angular/material/table';
 import { MatPaginatorModule } from '@angular/material/paginator';
 import { MatIconModule } from '@angular/material/icon';
 
-import { VerDeduccionesComponent } from '../pages/Generales/ver-deducciones/ver-deducciones.component';
 import { DatosGenAfilComponent } from '../pages/Generales/datos-gen-afil/datos-gen-afil.component';
 import { NuevaPlanillaComponentP } from '../pages/Generales/nueva-planilla/nueva-planilla.component';
 import { VerPlanillasComponent } from '../pages/Generales/ver-planillas/ver-planillas.component';
@@ -42,11 +41,14 @@ import { AsignacionAfilPlanComponent } from '../../../components/asignacion-afil
 import { VerplanprelcompComponent } from '../../../components/verplanprelcomp/verplanprelcomp.component';
 import { VerplancerradaComponent } from '../../../components/verplancerrada/verplancerrada.component';
 import { VerEditarBeneficioAfilComponent } from '../pages/Generales/ver-editar-beneficio-afil/ver-editar-beneficio-afil.component';
-import { PlanillaColegiosPrivadosComponent } from '../pages/Generales/planilla-colegios-privados/planilla-colegios-privados.component';
 import { MatStepperModule } from '@angular/material/stepper';
-import { MAT_DATE_LOCALE, MatNativeDateModule,DateAdapter  } from '@angular/material/core';
+import { MAT_DATE_LOCALE, MatNativeDateModule, DateAdapter } from '@angular/material/core';
 import { MatGridListModule } from '@angular/material/grid-list';
 import { CargarPlanillaPrivadosComponent } from '../pages/Generales/cargar-planilla-privados/cargar-planilla-privados.component';
+import { NuevoMovimientoComponent } from '../pages/Generales/nuevo-movimiento/nuevo-movimiento.component';
+import { VerMovimientosComponent } from '../pages/Generales/ver-movimientos/ver-movimientos.component';
+import { PlanillaColegiosPrivadosComponent } from '../pages/Centros Privados/planilla-colegios-privados/planilla-colegios-privados.component';
+import { NavDefaultComponent } from '../pages/Centros Privados/nav-default/nav-default.component';
 
 @NgModule({
   imports: [
@@ -72,14 +74,13 @@ import { CargarPlanillaPrivadosComponent } from '../pages/Generales/cargar-plani
     MatGridListModule
 
   ],
-  providers : [
-    { provide: MAT_DATE_LOCALE, useValue: 'es'}
+  providers: [
+    { provide: MAT_DATE_LOCALE, useValue: 'es' }
   ],
   declarations: [
     VerplanprelcompComponent,
     VerplancerradaComponent,
     SubirDeduccionesformComponent,
-    VerDeduccionesComponent,
     NuevaPlanillaComponentP,
     AfilBancoComponent,
     CentroTrabajoComponent,
@@ -99,9 +100,12 @@ import { CargarPlanillaPrivadosComponent } from '../pages/Generales/cargar-plani
     VerEditarDeduccionAfilComponent,
     VerEditarBeneficioAfilComponent,
     PlanillaColegiosPrivadosComponent,
-    CargarPlanillaPrivadosComponent
+    CargarPlanillaPrivadosComponent,
+    NuevoMovimientoComponent,
+    VerMovimientosComponent,
+    NavDefaultComponent
 
-/*     CentroTrabajoPageComponent */
+    /*     CentroTrabajoPageComponent */
   ]
 })
 export class ThemeModule {

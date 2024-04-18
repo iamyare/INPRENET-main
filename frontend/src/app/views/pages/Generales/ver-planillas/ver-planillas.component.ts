@@ -8,77 +8,76 @@ import { MatPaginator } from '@angular/material/paginator';
 import { MatTableDataSource } from '@angular/material/table';
 import { DetallePlanillaDialogComponent } from '@docs-components/detalle-planilla-dialog/detalle-planilla-dialog.component';
 
-
 @Component({
   selector: 'app-ver-planillas',
   templateUrl: './ver-planillas.component.html',
   styleUrl: './ver-planillas.component.scss'
 })
-export class VerPlanillasComponent implements OnInit{
+export class VerPlanillasComponent implements OnInit {
   @ViewChild(MatPaginator) paginator!: MatPaginator;
-
-
-  constructor(private planillaService: PlanillaService,
-    private datePipe: DatePipe,
-    private dialog: MatDialog){
-
-  }
-
   myColumns: TableColumn[] = [];
   filas: any[] = [];
   ejecF: any;
+
+  detallePlanillas: any[] = [];
+  dataSource = new MatTableDataSource<any>(this.detallePlanillas);
+
+  constructor(private planillaService: PlanillaService,
+    private datePipe: DatePipe,
+    private dialog: MatDialog) {
+  }
 
   ngOnInit(): void {
     this.myColumns = [
       {
         header: 'Codigo de planilla',
-        col : 'codigo_planilla',
+        col: 'codigo_planilla',
         isEditable: false
       },
       {
         header: 'Fecha de apertura',
-        col : 'fecha_apertura',
+        col: 'fecha_apertura',
         isEditable: true
       },
       {
         header: 'Secuencia',
-        col : 'secuencia',
+        col: 'secuencia',
         isEditable: true
       },
       {
         header: 'Estado',
-        col : 'estado',
+        col: 'estado',
         isEditable: true
       },
       {
         header: 'Periodo de inicio',
-        col : 'periodoInicio',
+        col: 'periodoInicio',
         isEditable: false
       },
       {
         header: 'Periodo de finalizacion',
-        col : 'periodoFinalizacion',
+        col: 'periodoFinalizacion',
         isEditable: false
       },
       {
         header: 'Tipo de planilla',
-        col : 'nombre_planilla',
+        col: 'nombre_planilla',
         isEditable: true
       },
       {
         header: 'Fecha de cierre',
-        col : 'fecha_cierre',
+        col: 'fecha_cierre',
         isEditable: true
       },
       {
         header: 'Total de Ingresos',
-        col : 'totalBeneficio',
+        col: 'totalBeneficio',
         moneda: true,
         isEditable: true
       },
       {
         header: 'Total de deducciones',
-        col : 'totalDeducciones',
+        col: 'totalDeducciones',
         moneda: true,
         isEditable: true
       },
@@ -93,8 +92,6 @@ export class VerPlanillasComponent implements OnInit{
     this.getFilas().then(() => this.cargar());
   }
 
-
-
   async getFilas() {
     try {
       const data = await firstValueFrom(this.planillaService.findAllPlanillas());
@@ -102,8 +99,8 @@ export class VerPlanillasComponent implements OnInit{
         const totalResponse = await firstValueFrom(this.planillaService.obtenerTotalPlanilla(item.id_planilla));
         return {
           id_planilla: item.id_planilla,
-          nombre_planilla : item.tipoPlanilla.nombre_planilla,
-          codigo_planilla : item.codigo_planilla,
+          nombre_planilla: item.tipoPlanilla.nombre_planilla,
+          codigo_planilla: item.codigo_planilla,
           estado: item.estado,
           secuencia: item.secuencia,
           periodoFinalizacion: item.periodoFinalizacion,
@@ -121,7 +118,6 @@ export class VerPlanillasComponent implements OnInit{
     }
   }
 
-
   cargar() {
     if (this.ejecF) {
       this.ejecF(this.filas).then(() => {
@@ -133,9 +129,6 @@ export class VerPlanillasComponent implements OnInit{
     this.ejecF = funcion;
   }
 
-  detallePlanillas: any[] = [];
-  dataSource = new MatTableDataSource<any>(this.detallePlanillas);
-
   aplicarFiltro(event: Event) {
     const inputElement = (event.target as HTMLInputElement)?.value;
     if (inputElement !== undefined) {
@@ -143,7 +136,6 @@ export class VerPlanillasComponent implements OnInit{
       this.dataSource.filter = filtro;
     }
   }
-
 
   manejarAccionUno(row: any) {
     this.planillaService.getPlanillas(row.CODIGO_PLANILLA).subscribe(
@@ -161,6 +153,7 @@ export class VerPlanillasComponent implements OnInit{
       }
     );
   }
+
   openDialog(): void {
     const dialogRef = this.dialog.open(DetallePlanillaDialogComponent, {
       width: '800px',
@@ -171,6 +164,5 @@ export class VerPlanillasComponent implements OnInit{
       console.log('Diálogo cerrado');
     });
   }
-
 
 }

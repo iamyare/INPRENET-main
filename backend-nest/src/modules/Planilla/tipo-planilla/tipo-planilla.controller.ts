@@ -3,10 +3,12 @@ import { TipoPlanillaService } from './tipo-planilla.service';
 import { CreateTipoPlanillaDto } from './dto/create-tipo-planilla.dto';
 import { UpdateTipoPlanillaDto } from './dto/update-tipo-planilla.dto';
 import { PaginationDto } from 'src/common/dtos/pagination.dto';
+import { ApiTags } from '@nestjs/swagger';
 
+@ApiTags('tipo-planilla')
 @Controller('tipo-planilla')
 export class TipoPlanillaController {
-  constructor(private readonly tipoPlanillaService: TipoPlanillaService) {}
+  constructor(private readonly tipoPlanillaService: TipoPlanillaService) { }
 
   @Post()
   create(@Body() createTipoPlanillaDto: CreateTipoPlanillaDto) {
@@ -16,6 +18,11 @@ export class TipoPlanillaController {
   @Get()
   findAll(@Query() paginationDto: PaginationDto) {
     return this.tipoPlanillaService.findAll(paginationDto);
+  }
+
+  @Post("findTipoPlanByclasePlan")
+  findTipoPlanByclasePlan(@Query() paginationDto: PaginationDto, @Body() clasePlanilla: string) {
+    return this.tipoPlanillaService.findTipoPlanByclasePlan(paginationDto, clasePlanilla);
   }
 
   @Get(':id')

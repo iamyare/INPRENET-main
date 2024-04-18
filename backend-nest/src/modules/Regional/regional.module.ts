@@ -4,8 +4,6 @@ import { Net_Pais } from './pais/entities/pais.entity';
 import { PaisController } from './pais/pais.controller';
 import { PaisService } from './pais/pais.service';
 import { Net_Departamento } from './provincia/entities/net_departamento.entity';
-/* import { Municipio } from './municipio/entities/municipio.entity'; */
-/* import { Provincia } from './provincia/entities/provincia.entity'; */
 import { Net_Municipio } from './municipio/entities/net_municipio.entity';
 import { MunicipioController } from './municipio/municipio.controller';
 import { ProvinciaController } from './provincia/provincia.controller';

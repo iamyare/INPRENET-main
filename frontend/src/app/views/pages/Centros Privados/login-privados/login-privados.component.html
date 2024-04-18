@@ -1,0 +1,34 @@
+<div id="back">
+  <canvas #canvas id="canvas" class="canvas-back"></canvas>
+  <div class="backRight">
+  </div>
+  <div class="backLeft">
+    <div class="welcome-container">
+      <h2>BIENVENIDO A INPRENET</h2>
+    </div>
+  </div>
+</div>
+
+
+<div id="slideBox">
+  <div class="topLayer">
+    <div class="right">
+      <div class="content">
+        <h2 class="prueba">Iniciar Sesión</h2>
+        <form id="form-login" (ngSubmit)="login()" method="post">
+          <div class="form-element form-stack">
+            <label for="email-login" class="form-label">Correo Electrónico</label>
+            <input id="email-login" type="text" name="email" [(ngModel)]="loginData.email" required>
+          </div>
+          <div class="form-element form-stack">
+            <label for="password-login" class="form-label">Contraseña</label>
+            <input id="password-login" type="password" name="password" [(ngModel)]="loginData.password" required>
+          </div>
+          <div class="form-element form-submit">
+            <button id="logIn" class="login" name="login">Iniciar sesión</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,91 @@
+<div class="dni-search">
+  <mat-form-field appearance="fill" class="dni-input">
+    <mat-label>DNI</mat-label>
+    <input matInput placeholder="Introduce tu DNI" [(ngModel)]="dni" required>
+  </mat-form-field>
+
+  <button mat-raised-button color="primary" (click)="onSubmit()" class="search-button">
+    <mat-icon>search</mat-icon>
+    Buscar
+  </button>
+</div>
+
+
+<div *ngIf="persona" style="padding: 1%">
+  <h1 style="font-size: 2rem">Datos Generales Persona</h1>
+  <div>
+    <table>
+      <tr>
+        <th>DNI de persona</th>
+        <td>{{ persona.dni }}</td>
+        <th>Nombre de persona</th>
+        <td>{{ persona.primer_nombre }} {{ persona.segundo_nombre }} {{ persona.primer_apellido }} {{ persona.segundo_apellido }}</td>
+        <th>Sexo</th>
+        <td>{{ persona.sexo }}</td>
+        <th>Dirección de residencia</th>
+        <td>{{ persona.direccion_residencia }}</td>
+        <th>Estado</th>
+        <td>{{ persona.estado }}</td>
+        <th>Fecha nacimiento</th>
+        <td>{{ persona.fecha_nacimiento }}</td>
+      </tr>
+      <tr>
+        <th>Colegio magisterial</th>
+        <td>{{ persona.colegio_magisterial }}</td>
+        <th>Número de carnet</th>
+        <td>{{ persona.numero_carnet }}</td>
+        <th>Profesión</th>
+        <td>{{ persona.profesion }}</td>
+        <th>Teléfono 1</th>
+        <td>{{ persona.telefono_1 }}</td>
+        <th>Estado civil</th>
+        <td>{{ persona.estado_civil }}</td>
+      </tr>
+    </table>
+  </div>
+</div>
+
+<div *ngIf="datosEncontrados" class="tabla-container">
+  <h2>Selecciona un número de cuenta</h2>
+  <table mat-table [dataSource]="datosTabla" matSort class="mat-elevation-z8">
+    <!-- Número de Cuenta Column -->
+    <ng-container matColumnDef="NUMERO_CUENTA">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header>
+        Número de Cuenta
+      </th>
+      <td mat-cell *matCellDef="let elemento">{{ elemento.NUMERO_CUENTA }}</td>
+    </ng-container>
+
+    <!-- Descripción Column -->
+    <ng-container matColumnDef="DESCRIPCION">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header>Tipo De Cuenta</th>
+      <td mat-cell *matCellDef="let elemento">{{ elemento.DESCRIPCION }}</td>
+    </ng-container>
+    <tr mat-header-row *matHeaderRowDef="columnasMostradas"></tr>
+    <tr
+      mat-row
+      *matRowDef="let row; columns: columnasMostradas"
+      [class.selected]="row === elementoSeleccionado"
+      (click)="seleccionarFila(row)"
+    ></tr>
+  </table>
+</div>
+
+<app-dynamic-form
+  [fields]="myFormFields"
+  titulo="Nuevo Movimiento"
+  subtitulo="Completa la información correspondiente"
+  (newDatBenChange)="obtenerDatos($event)"
+  style="margin-top: 20px"
+  class="form-container"
+></app-dynamic-form>
+
+<button
+  mat-raised-button
+  (click)="guardarMovimiento()"
+  color="primary"
+  style="color: #ffffff; border-radius: 5px; padding: 10px 20px"
+  [disabled]="!puedeCrearMovimiento()"
+>
+  Crear nuevo Movimiento
+</button>

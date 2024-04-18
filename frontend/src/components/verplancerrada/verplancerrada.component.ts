@@ -23,48 +23,42 @@ import { HttpClient } from '@angular/common/http';
 export class VerplancerradaComponent {
   convertirFecha = convertirFecha;
 
-  dataPlan : any;
+  dataPlan: any;
   idPlanilla = ""
-  tiposPlanilla: any[] = [];
   datosFormateados: any;
   myFormFields: FieldConfig[] = [];
 
-  datosTabl:  any[] = [];
+  datosTabl: any[] = [];
   myColumnsDed: TableColumn[] = [];
-  filas: any;
 
   verDat: boolean = false;
   ejecF: any;
 
-  detallePlanilla:any
-  datosFilasDeduccion : any;
-  datosFilasBeneficios : any;
+  detallePlanilla: any
 
   data: any[] = [];
   backgroundImageBase64: string = '';
 
-
-
   constructor(
-    private planillaService : PlanillaService,
+    private planillaService: PlanillaService,
     private toastr: ToastrService,
     public dialog: MatDialog,
     private http: HttpClient,
     private afiliadoService: AfiliadoService
-    ) {
-      (pdfMake as any).vfs = pdfFonts.pdfMake.vfs;
-      this.convertirImagenABase64('../../assets/images/HOJA-MEMBRETADA.jpg').then(base64 => {
-        this.backgroundImageBase64 = base64;
+  ) {
+    (pdfMake as any).vfs = pdfFonts.pdfMake.vfs;
+    this.convertirImagenABase64('../../assets/images/HOJA-MEMBRETADA.jpg').then(base64 => {
+      this.backgroundImageBase64 = base64;
 
-      }).catch(error => {
-        console.error('Error al convertir la imagen a Base64', error);
-      });
+    }).catch(error => {
+      console.error('Error al convertir la imagen a Base64', error);
+    });
   }
 
   ngOnInit(): void {
     this.myFormFields = [
       {
-        type: 'string', label: 'Código De Planilla', name: 'codigo_planilla', validations: [Validators.required], display:true
+        type: 'string', label: 'Código De Planilla', name: 'codigo_planilla', validations: [Validators.required], display: true
       },
     ]
 
@@ -102,7 +96,7 @@ export class VerplancerradaComponent {
     ];
   }
 
-  obtenerDatosForm(event:any):any{
+  obtenerDatosForm(event: any): any {
     this.datosFormateados = event;
   }
 
@@ -149,22 +143,22 @@ export class VerplancerradaComponent {
 
   getFilas = async (cod_planilla: string) => {
     try {
-        this.data = await this.planillaService.getPersPlanillaDefin(cod_planilla).toPromise();
-        this.dataPlan = this.data.map((item: any) => {
-          return {
-            id_afiliado: item.ID_PERSONA,
-            dni: item.DNI,
-            NOMBRE_COMPLETO: item.NOMBRE_COMPLETO,
-            "Total Beneficio": item["Total Beneficio"],
-            "Total Deducciones": item["Total Deducciones"],
-            "Total": item["Total Beneficio"] - item["Total Deducciones"],
-            tipo_afiliado: item.tipo_afiliado,
-            BENEFICIOSIDS: item.BENEFICIOSIDS,
-            beneficiosNombres: item.beneficiosNombres,
-            fecha_cierre : item.fecha_cierre,
-            correo_1: item.correo_1
-          };
-        });
+      this.data = await this.planillaService.getPersPlanillaDefin(cod_planilla).toPromise();
+      this.dataPlan = this.data.map((item: any) => {
+        return {
+          id_afiliado: item.ID_PERSONA,
+          dni: item.DNI,
+          NOMBRE_COMPLETO: item.NOMBRE_COMPLETO,
+          "Total Beneficio": item["Total Beneficio"],
+          "Total Deducciones": item["Total Deducciones"],
+          "Total": item["Total Beneficio"] - item["Total Deducciones"],
+          tipo_afiliado: item.tipo_afiliado,
+          BENEFICIOSIDS: item.BENEFICIOSIDS,
+          beneficiosNombres: item.beneficiosNombres,
+          fecha_cierre: item.fecha_cierre,
+          correo_1: item.correo_1
+        };
+      });
       return this.dataPlan;
     } catch (error) {
       console.error("Error al obtener datos de deducciones", error);
@@ -172,7 +166,7 @@ export class VerplancerradaComponent {
     }
   }
 
-  ejecutarFuncionAsincronaDesdeOtroComponente(funcion: (data:any) => Promise<void>) {
+  ejecutarFuncionAsincronaDesdeOtroComponente(funcion: (data: any) => Promise<void>) {
     this.ejecF = funcion;
   }
 
@@ -186,16 +180,16 @@ export class VerplancerradaComponent {
       width: '50%', // o el ancho que prefieras
       data: { logs: logs, type: 'deduccion' } // Asegúrate de pasar el 'type' adecuado
     });
-      this.planillaService.getDeduccionesDefinitiva(this.idPlanilla, row.id_afiliado ).subscribe({
-        next: (response) => {
-          logs.push({ message: 'Datos De Deducciones Inconsistentes:', detail: response });
-          openDialog();
-        },
-        error: (error) => {
-          logs.push({ message: 'Error al obtener las deducciones inconsistentes:', detail: error });
-          openDialog();
-        }
-      });
+    this.planillaService.getDeduccionesDefinitiva(this.idPlanilla, row.id_afiliado).subscribe({
+      next: (response) => {
+        logs.push({ message: 'Datos De Deducciones Inconsistentes:', detail: response });
+        openDialog();
+      },
+      error: (error) => {
+        logs.push({ message: 'Error al obtener las deducciones inconsistentes:', detail: error });
+        openDialog();
+      }
+    });
 
   }
 
@@ -209,16 +203,16 @@ export class VerplancerradaComponent {
       data: { logs: logs, type: 'beneficio' }
     });
 
-      this.planillaService.getBeneficiosDefinitiva(this.idPlanilla, row.id_afiliado).subscribe({
-        next: (response) => {
-          logs.push({ message: 'Datos De Beneficios Inconsistentes:', detail: response });
-          openDialog();
-        },
-        error: (error) => {
-          logs.push({ message: 'Error al obtener los beneficios inconsistentes:', detail: error });
-          openDialog();
-        }
-      });
+    this.planillaService.getBeneficiosDefinitiva(this.idPlanilla, row.id_afiliado).subscribe({
+      next: (response) => {
+        logs.push({ message: 'Datos De Beneficios Inconsistentes:', detail: response });
+        openDialog();
+      },
+      error: (error) => {
+        logs.push({ message: 'Error al obtener los beneficios inconsistentes:', detail: error });
+        openDialog();
+      }
+    });
   }
 
   openLogDialog(logs: any[]) {
@@ -250,6 +244,7 @@ export class VerplancerradaComponent {
   }
 
   construirPDF(row: any, beneficios: any[], deducciones: any[]) {
+    let formattedNumber = Number(row.Total || 0).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",")
     let docDefinition: TDocumentDefinitions = {
       content: [
         { text: 'Comprobante de Pago', style: 'header' },
@@ -258,7 +253,7 @@ export class VerplancerradaComponent {
           image: this.backgroundImageBase64,
           width: 595,
           height: 842,
-          absolutePosition: {x: 0, y: 0},
+          absolutePosition: { x: 0, y: 0 },
         },
         {
           columns: [
@@ -271,7 +266,7 @@ export class VerplancerradaComponent {
             [
               { text: 'Pago', style: 'subheader' },
               { text: 'Medio de Pago: No especificado' }, // Asumiendo que este dato no está disponible
-              { text: 'Pago Total: ' + 'L' + (row.Total || 0).toFixed(2), style: 'subheader' },
+              { text: 'Pago Total: ' + 'L' + formattedNumber, style: 'subheader' },
               { text: 'Fecha de pago: ' + (row.fecha_cierre || 'No especificada') },
             ]
           ]
@@ -279,7 +274,7 @@ export class VerplancerradaComponent {
         this.buildTable('Ingresos', beneficios.map(b => ({ nombre_ingreso: b.NOMBRE_BENEFICIO, monto: b['Total Monto Beneficio'] })), ['nombre_ingreso', 'monto'], 'monto'),
         this.buildTable('Deducciones', deducciones.map(d => ({ nombre_deduccion: d.nombre_deduccion, total_deduccion: d['Total Monto Aplicado'] })), ['nombre_deduccion', 'total_deduccion'], 'total_deduccion'),
 
-        this.buildTable('', deducciones.map(d => ({ Total: "Total", valor_total: row.Total})), ['Total', 'valor_total'], 'valor_total')
+        this.buildTable('', deducciones.map(d => ({ Total: "Total", valor_total: row.Total })), ['Total', 'valor_total'], 'valor_total')
       ],
       styles: {
         header: {
@@ -323,13 +318,15 @@ export class VerplancerradaComponent {
 
   buildTable(header: string, data: any[], columns: string[], sumColumn: string) {
     let body = [
-      [{ text: header, style: 'tableHeader', colSpan: 2 }, {text:""}]
+      [{ text: header, style: 'tableHeader', colSpan: 2 }, { text: "" }]
     ];
 
     body.push(...data.map((item, rowIndex) => {
       let rowData = columns.map((column, index) => {
         if (index === columns.length - 1) {
-          return { text: 'L' + Number(item[column]).toFixed(2), alignment: 'left' }; // Se cambió alignment a 'left'
+          // Aplicar formato de miles al número
+          let formattedNumber = Number(item[column]).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+          return { text: 'L' + formattedNumber, alignment: 'left' }; // Se cambió alignment a 'left'
         } else {
           return { text: item[column], alignment: 'left' };
         }

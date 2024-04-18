@@ -5,7 +5,7 @@ import { Page500Component } from './Errores/page500/page500.component';
 import { LoginComponent } from './Generales/login/login.component';
 import { RegisterComponent } from './Generales/register/register.component';
 import { PreRegisterComponent } from './Generales/pre-register/pre-register.component';
-import { PlanillaColegiosPrivadosComponent } from './Generales/planilla-colegios-privados/planilla-colegios-privados.component';
+import { LoginPrivadosComponent } from './Centros Privados/login-privados/login-privados.component';
 
 const routes: Routes = [
   {
@@ -41,6 +41,13 @@ const routes: Routes = [
     component: PreRegisterComponent,
     data: {
       title: 'Pre Register Page'
+    }
+  },
+  {
+    path: 'login-privados',
+    component: LoginPrivadosComponent,
+    data: {
+      title: 'Login Privados Page'
     }
   }
 ];

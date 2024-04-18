@@ -1,44 +1,43 @@
 <!-- <form class="example-form" [formGroup]="formGroup" ngNativeValidate>
   <mat-slide-toggle color="primary" formControlName="acceptTerms">¿Desea asignar los beneficios mediante documento de excel?</mat-slide-toggle>
 </form> -->
-
 <!-- asignacion de beneficios uno por uno -->
-<div style="background-color: white; padding: 1%">
-  <h1 style="font-size: 2rem">Datos Generales Afiliado</h1>
+<div style="background-color: white; margin: 1% 0% 1% 0%; padding: 1% 0% 1% 0%">
+  <h1 style="text-align: center; font-size: 2rem">Datos Generales Afiliado</h1>
   <div>
     <table>
-      <tr>
+      <tr style="background-color: #f2f2f2">
         <th>Nombre de afiliado</th>
         <td>{{ Afiliado.nameAfil }}</td>
         <th>Sexo</th>
-        <td>{{ Afiliado.sexo }}</td>
+        <td>{{ Afiliado.SEXO }}</td>
         <th>Dirección de residencia</th>
-        <td>{{ Afiliado.direccion_residencia }}</td>
+        <td>{{ Afiliado.DIRECCION_RESIDENCIA }}</td>
         <th>Estado</th>
-        <td>{{ Afiliado.estado }}</td>
+        <td>{{ Afiliado.ESTADO }}</td>
         <th>Fecha nacimiento</th>
-        <td>{{ Afiliado.fecha_nacimiento }}</td>
+        <td>{{ Afiliado.FECHA_NACIMIENTO }}</td>
         <th>Colegio magisterial</th>
-        <td>{{ Afiliado.colegio_magisterial }}</td>
+        <td>{{ Afiliado.COLEGIO_MAGISTERIAL }}</td>
       </tr>
       <tr>
         <th>Número de carnet</th>
-        <td>{{ Afiliado.numero_carnet }}</td>
+        <td>{{ Afiliado.NUMERO_CARNET }}</td>
         <th>Profesión</th>
-        <td>{{ Afiliado.profesion }}</td>
+        <td>{{ Afiliado.PROFESION }}</td>
         <th>Teléfono 1</th>
-        <td>{{ Afiliado.telefono_1 }}</td>
+        <td>{{ Afiliado.TELEFONO_1 }}</td>
         <th>Salario base</th>
         <td>{{ Afiliado.salario_base }}</td>
         <th>Estado civil</th>
-        <td>{{ Afiliado.estado_civil }}</td>
+        <td>{{ Afiliado.ESTADO_CIVIL }}</td>
       </tr>
     </table>
   </div>
 
   <div
     style="background-color: white; padding: 1%"
-    *ngIf="Afiliado.estado == 'FALLECIDO'"
+    *ngIf="Afiliado.ESTADO == 'FALLECIDO'"
   >
     <h2>Beneficiarios</h2>
     <app-dynamic-table
@@ -53,10 +52,10 @@
   </div>
 </div>
 
-<div>
+<div style="margin: 1% 0% 1% 0%; text-align: center; background-color: white">
   <app-dynamic-form
     [fields]="myFormFields"
-    titulo=""
+    titulo="Buscar Afiliado"
     subtitulo="Completa la información correspondiente"
     (newDatBenChange)="obtenerDatos($event)"
   ></app-dynamic-form>
@@ -72,7 +71,10 @@
   </button>
 </div>
 
-<div *ngIf="Afiliado.estado == 'FALLECIDO'">
+<div
+  style="margin: 1% 0% 1% 0%; text-align: center; background-color: white"
+  *ngIf="Afiliado.estado == 'FALLECIDO'"
+>
   <app-dynamic-form
     [fields]="myFormFields2"
     titulo=""
@@ -82,7 +84,7 @@
   <button
     mat-raised-button
     color="primary"
-    style="color: white"
+    style="color: white; margin: 1% 0 1% 0"
     [disabled]="FormBen.invalid"
     (click)="guardarNTBenef()"
   >
@@ -90,7 +92,10 @@
   </button>
 </div>
 
-<div *ngIf="Afiliado.estado == 'ACTIVO'">
+<div
+  style="margin: 1% 0% 1% 0%; text-align: center; background-color: white"
+  *ngIf="Afiliado.ESTADO == 'ACTIVO'"
+>
   <app-dynamic-form
     [fields]="myFormFields1"
     titulo="Datos sobre el beneficio"
@@ -101,7 +106,7 @@
   <button
     mat-raised-button
     color="primary"
-    style="color: white"
+    style="color: white; margin: 1% 0 1% 0"
     [disabled]="form1.invalid"
     (click)="guardarNTBenef()"
   >

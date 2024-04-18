@@ -32,6 +32,14 @@ export class NuevoMovimientoComponent implements OnInit {
     this.myFormFields = [
       {
         type: 'text',
+        label: 'Tipo de movimiento',
+        name: 'tipoMovimientoDescripcion',
+        validations: [Validators.required],
+        display: true,
+        icon: 'notes'
+      },
+      {
+        type: 'text',
         label: 'Descripción',
         name: 'DESCRIPCION',
         validations: [Validators.required],
@@ -111,10 +119,10 @@ export class NuevoMovimientoComponent implements OnInit {
     }
 
     const datosMovimiento = {
-      dni: this.dni,
       numeroCuenta: this.elementoSeleccionado.NUMERO_CUENTA,
-      descripcionMovimiento: this.form.value.DESCRIPCION,
+      descripcion: this.form.value.DESCRIPCION,
       monto: this.form.value.MONTO,
+      tipoMovimientoDescripcion : this.form.value.tipoMovimientoDescripcion
     };
 
     this.transaccionesService.crearMovimiento(datosMovimiento).subscribe({

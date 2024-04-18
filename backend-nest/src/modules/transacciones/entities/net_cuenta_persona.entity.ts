@@ -1,6 +1,7 @@
 import { Net_Persona } from "../../afiliado/entities/Net_Persona.entity";
 import { Check, Column, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryColumn, PrimaryGeneratedColumn } from "typeorm";
 import { NET_TIPO_CUENTA } from "./net_tipo_cuenta.entity";
+import { NET_MOVIMIENTO_CUENTA } from "./net_movimiento_cuenta.entity";
 
 @Entity({ name: 'NET_CUENTA_PERSONA' })
 @Check("CK1_NET_CUENTA_PERSONA", `ACTIVA_B IN ('S', 'N')`)
@@ -14,12 +15,6 @@ export class NET_CUENTA_PERSONA {
     tipoCuenta: NET_TIPO_CUENTA;
 
     @PrimaryColumn({ primaryKeyConstraintName: 'PK_NET_CUENTA_PERSONA' })
-    ID_PERSONA: number;
-
-    @PrimaryColumn({ primaryKeyConstraintName: 'PK_NET_CUENTA_PERSONA' })
-    ID_TIPO_CUENTA: number;
-
-    @PrimaryColumn({ primaryKeyConstraintName: 'PK_NET_CUENTA_PERSONA' })
     NUMERO_CUENTA: string;
 
     @Column({ length: 1 })
@@ -30,4 +25,7 @@ export class NET_CUENTA_PERSONA {
 
     @Column({ length: 12 })
     CREADA_POR: string;
+
+    @OneToMany(() => NET_MOVIMIENTO_CUENTA, movimientoCuenta => movimientoCuenta.cuentaPersona)
+    movimientos: NET_MOVIMIENTO_CUENTA[];
 }

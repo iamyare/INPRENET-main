@@ -83,8 +83,6 @@ export class VerMovimientosComponent implements OnInit {
 
         if (data.length > 0) {
 
-          console.log(data);
-
           this.filasT = data.map((movimiento: any) => ({
             FECHA_MOVIMIENTO: movimiento.movimiento_FECHA_MOVIMIENTO,
             MONTO: movimiento.movimiento_MONTO,

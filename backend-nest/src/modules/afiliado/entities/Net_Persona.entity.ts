@@ -1,6 +1,6 @@
 import { Net_TipoIdentificacion } from "../../tipo_identificacion/entities/net_tipo_identificacion.entity";
 import { Net_Pais } from "../../Regional/pais/entities/pais.entity";
-import { Check, Column, Entity, Index, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn } from "typeorm";
+import { Check, Column, Entity, Index, JoinColumn, JoinTable, ManyToMany, ManyToOne, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 import { Net_Ref_Per_Afil } from "./net_ref-Per-Afiliado.entity"; import { Net_perf_afil_cent_trab } from "./net_perf_afil_cent_trab.entity";
 import { Net_Detalle_Deduccion } from "../../Planilla/detalle-deduccion/entities/detalle-deduccion.entity";
 import { Net_Afiliados_Por_Banco } from "../../banco/entities/net_afiliados-banco.entity";
@@ -11,6 +11,8 @@ import { NET_MOVIMIENTO_CUENTA } from "../../transacciones/entities/net_movimien
 import { Net_Detalle_planilla_ingreso } from "../../Planilla/Ingresos/detalle-plan-ingr/entities/net_detalle_plani_ing.entity";
 import { Net_Estado_Afiliado } from "./net_estado_afiliado.entity";
 import { NET_DETALLE_PERSONA } from "./Net_detalle_persona.entity";
+import { Net_Colegios_Magisteriales } from "src/modules/transacciones/entities/net_colegios_magisteriales.entity";
+import { Net_Persona_Colegios } from "src/modules/transacciones/entities/net_persona_colegios.entity";
 
 @Entity({
     name: 'NET_PERSONA',
@@ -78,9 +80,6 @@ export class Net_Persona {
     @Column('varchar2', { length: 40, nullable: true, name: 'CORREO_2' })
     correo_2: string;
 
-    @Column('varchar2', { length: 40, nullable: true, name: 'COLEGIO_MAGISTERIAL' })
-    colegio_magisterial: string;
-
     @Column('varchar2', { length: 40, nullable: true, name: 'NUMERO_CARNET' })
     numero_carnet: string;
 
@@ -127,5 +126,9 @@ export class Net_Persona {
 
     @OneToMany(() => Net_Detalle_planilla_ingreso, detallePlanIngreso => detallePlanIngreso.persona)
     detallePlanIngreso: Net_Detalle_planilla_ingreso[];
+
+    @OneToMany(() => Net_Persona_Colegios, personaColegios => personaColegios.persona)
+    colegiosMagisteriales: Net_Persona_Colegios[];
+
 
 }

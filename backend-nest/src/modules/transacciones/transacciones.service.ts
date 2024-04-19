@@ -8,6 +8,7 @@ import { Net_Persona } from '../afiliado/entities/Net_Persona.entity';
 import { NET_TIPO_CUENTA } from './entities/net_tipo_cuenta.entity';
 import { NET_CUENTA_PERSONA } from './entities/net_cuenta_persona.entity';
 import { NET_TIPO_MOVIMIENTO } from './entities/net_tipo_movimiento.entity';
+import { CrearMovimientoDTO } from './dto/voucher.dto';
 
 @Injectable()
 export class TransaccionesService {
@@ -19,107 +20,95 @@ export class TransaccionesService {
     private movimientoCuentaRepository: Repository<NET_MOVIMIENTO_CUENTA>,
     @InjectRepository(NET_TIPO_CUENTA)
     private tipoCuentaRepository: Repository<NET_TIPO_CUENTA>,
-    @InjectRepository(NET_TIPO_MOVIMIENTO)
-    private tipoMovimientoCuentaRepository: Repository<NET_TIPO_MOVIMIENTO>,
     @InjectRepository(NET_CUENTA_PERSONA) 
-    private cuentaPersonaRepository: Repository<NET_CUENTA_PERSONA>
+    private cuentaPersonaRepository: Repository<NET_CUENTA_PERSONA>,
+    @InjectRepository(NET_TIPO_MOVIMIENTO)
+    private tipoMovimientoRepository: Repository<NET_TIPO_MOVIMIENTO>,
   ){
 
   }
 
-  /* async generarVoucherTodosMovimientos(idPersona: number): Promise<any> {
-    const persona = await this.personaRepository.findOne({ where: { id_persona: idPersona } });
-    if (!persona) {
-      throw new NotFoundException(`Persona with ID ${idPersona} not found`);
-    }
+  async obtenerVoucherDeMovimientos(dni: string): Promise<CrearMovimientoDTO[]> {
+    const movimientos = await this.movimientoCuentaRepository
+        .createQueryBuilder('movimiento')
+        .innerJoin('movimiento.cuentaPersona', 'cuenta')
+        .innerJoin('cuenta.persona', 'persona')
+        .innerJoin('movimiento.tipoMovimiento', 'tipoMovimiento')
+        .innerJoin('cuenta.tipoCuenta', 'tipoCuenta')
+        .select([
+          'movimiento.ID_MOVIMIENTO_CUENTA as ID_MOVIMIENTO_CUENTA',
+          'movimiento.DESCRIPCION as DESCRIPCION',
+          'movimiento.MONTO as MONTO',
+          'TO_CHAR(movimiento.FECHA_MOVIMIENTO, \'DD/MM/YYYY\') as FECHA_MOVIMIENTO',
+          'tipoMovimiento.DESCRIPCION as TIPO_MOVIMIENTO',
+          `CASE tipoMovimiento.DEBITO_CREDITO_B WHEN 'D' THEN 'DEBITO' WHEN 'C' THEN 'CREDITO' ELSE tipoMovimiento.DEBITO_CREDITO_B END as DEBITO_CREDITO_B`,
+          'tipoMovimiento.CUENTA_CONTABLE as CUENTA_CONTABLE',
+          'cuenta.NUMERO_CUENTA as NUMERO_CUENTA',
+          'persona.CORREO_1 as CORREO_1',
+          'persona.TELEFONO_1 as TELEFONO_1',
+          `CASE tipoMovimiento.ACTIVA_B WHEN 'S' THEN 'ACTIVO' WHEN 'N' THEN 'INACTIVO' ELSE tipoMovimiento.ACTIVA_B END as ESTADO_TIPO_MOVIMIENTO`,
+          'tipoCuenta.DESCRIPCION as TIPO_CUENTA_DESCRIPCION',
+          'TRIM(NVL(persona.PRIMER_NOMBRE, \'\') || \' \' || NVL(persona.SEGUNDO_NOMBRE, \'\') || \' \' || NVL(persona.PRIMER_APELLIDO, \'\') || \' \' || NVL(persona.SEGUNDO_APELLIDO, \'\')) as NOMBRE_COMPLETO'
+      ])
+        .where('persona.DNI = :dni', { dni })
+        .getRawMany();
 
-    const movimientos = await this.movimientoCuentaRepository.find({
-      where: { persona: { id_persona: idPersona } },
-      relations: ['tipoMovimiento', 'tipoMovimiento.tipoCuenta']
-    });
+    return movimientos;
+}
 
-    const voucher = movimientos.map(mov => ({
-      fecha: mov.FECHA_MOVIMIENTO instanceof Date ? mov.FECHA_MOVIMIENTO.toISOString().split('T')[0] : mov.FECHA_MOVIMIENTO,
-      monto: mov.MONTO,
-      descripcion: mov.DESCRIPCION,
-      tipoMovimiento: mov.tipoMovimiento.DESCRIPCION,
-      debitoCredito: mov.tipoMovimiento.DEBITO_CREDITO_B === 'D' ? 'DEBITO' : 'CREDITO',
-      estadoCuenta: mov.tipoMovimiento.ACTIVA_B === 'S' ? 'ACTIVO' : 'INACTIVO' // Corrected property access
-    }));
+async obtenerVoucherDeMovimientoEspecifico(dni: string, idMovimientoCuenta: number): Promise<CrearMovimientoDTO> {
+  const movimiento = await this.movimientoCuentaRepository
+      .createQueryBuilder('movimiento')
+      .innerJoin('movimiento.cuentaPersona', 'cuenta')
+      .innerJoin('cuenta.persona', 'persona')
+      .innerJoin('movimiento.tipoMovimiento', 'tipoMovimiento')
+      .select([
+        'movimiento.ID_MOVIMIENTO_CUENTA as ID_MOVIMIENTO_CUENTA',
+        'movimiento.DESCRIPCION as DESCRIPCION',
+        'movimiento.MONTO as MONTO',
+        'TO_CHAR(movimiento.FECHA_MOVIMIENTO, \'DD/MM/YYYY\') as FECHA_MOVIMIENTO',
+        'tipoMovimiento.DESCRIPCION as TIPO_MOVIMIENTO',
+        `CASE tipoMovimiento.DEBITO_CREDITO_B WHEN 'D' THEN 'DEBITO' WHEN 'C' THEN 'CREDITO' ELSE tipoMovimiento.DEBITO_CREDITO_B END as DEBITO_CREDITO_B`,
+        'tipoMovimiento.CUENTA_CONTABLE as CUENTA_CONTABLE',
+        'cuenta.NUMERO_CUENTA as NUMERO_CUENTA',
+        'persona.CORREO_1 as CORREO_1',
+        'persona.TELEFONO_1 as TELEFONO_1',
+        'TRIM(NVL(persona.PRIMER_NOMBRE, \'\') || \' \' || NVL(persona.SEGUNDO_NOMBRE, \'\') || \' \' || NVL(persona.PRIMER_APELLIDO, \'\') || \' \' || NVL(persona.SEGUNDO_APELLIDO, \'\')) as NOMBRE_COMPLETO'
+    ])
+    .where('persona.DNI = :dni AND movimiento.ID_MOVIMIENTO_CUENTA = :idMovimientoCuenta', { dni, idMovimientoCuenta })
+      .getRawOne(); 
 
-    return {
-      nombreCompleto: `${persona.primer_nombre} ${persona.segundo_nombre} ${persona.primer_apellido} ${persona.segundo_apellido}`,
-      dni: persona.dni,
-      movimientos: voucher
-    };
-  } */
+  return movimiento;
+}
 
+async crearMovimiento(dto: CrearMovimientoDTO): Promise<NET_MOVIMIENTO_CUENTA> {
+  const cuentaExistente = await this.cuentaPersonaRepository.findOne({
+      where: { NUMERO_CUENTA: dto.numeroCuenta }
+  });
 
+  if (!cuentaExistente) {
+      throw new NotFoundException(`No se encontró una cuenta con el número: ${dto.numeroCuenta}`);
+  }
 
-  /* async generarVoucherPorMovimiento(idPersona: number, idMovimiento: number) {
-    const movimiento = await this.movimientoCuentaRepository.findOne({
-      where: {
-        ID_MOVIMIENTO_CUENTA: idMovimiento,
-        persona: { id_persona: idPersona }
-      },
-      relations: ['persona', 'tipoMovimiento', 'tipoMovimiento.tipoCuenta']
-    });
+  const tipoMovimiento = await this.tipoMovimientoRepository.findOne({
+      where: { DESCRIPCION: dto.tipoMovimientoDescripcion }
+  });
 
-    if (!movimiento) {
-      throw new NotFoundException(`No movement found with ID ${idMovimiento} for persona ID ${idPersona}`);
-    }
+  if (!tipoMovimiento) {
+      throw new NotFoundException('Tipo de movimiento no encontrado.');
+  }
 
-    return {
-      fecha: movimiento.FECHA_MOVIMIENTO,
-      monto: movimiento.MONTO,
-      descripcion: movimiento.DESCRIPCION,
-      tipoMovimiento: movimiento.tipoMovimiento.DESCRIPCION,
-      debitoCredito: movimiento.tipoMovimiento.DEBITO_CREDITO_B === 'D' ? 'DEBITO' : 'CREDITO',
-      estadoCuenta: movimiento.tipoMovimiento.ACTIVA_B === 'S' ? 'ACTIVO' : 'INACTIVO',
-      perteneceA: `${movimiento.persona.primer_nombre} ${movimiento.persona.primer_apellido}`
-    };
-  } */
-
-  /* async crearMovimiento(
-    dni: string,
-    numeroCuenta: string,
-    descripcionMovimiento: string,
-    monto: number
-  ): Promise<NET_MOVIMIENTO_CUENTA> {
-    const persona = await this.personaRepository.findOne({ where: { dni } });
-    if (!persona) {
-      throw new Error('Persona no encontrada');
-    }
-
-    const cuentaPersona = await this.cuentaPersonaRepository.findOne({
-      where: {
-        persona: { id_persona: persona.id_persona },
-        NUMERO_CUENTA: numeroCuenta
-      },
-      relations: ['tipoCuenta']
-    });
-    if (!cuentaPersona) {
-      throw new Error('Cuenta de persona no encontrada');
-    }
-
-    const tipoMovimiento = await this.tipoMovimientoCuentaRepository.findOne({
-      where: { DESCRIPCION: descripcionMovimiento }
-    });
-    if (!tipoMovimiento) {
-      throw new Error('Tipo de movimiento no encontrado');
-    }
-
-    const nuevoMovimiento = this.movimientoCuentaRepository.create({
-      persona: persona,
+  const nuevoMovimiento = this.movimientoCuentaRepository.create({
+      cuentaPersona: cuentaExistente,
       tipoMovimiento: tipoMovimiento,
-      MONTO: monto,
-      DESCRIPCION: descripcionMovimiento,
-      CREADA_POR: 'oscar', 
-      FECHA_MOVIMIENTO: new Date(), 
-    });
+      MONTO: dto.monto,
+      DESCRIPCION: dto.descripcion,
+      FECHA_MOVIMIENTO: new Date(),
+      CREADA_POR: "OFICIAL"
+  });
 
-    return this.movimientoCuentaRepository.save(nuevoMovimiento);
-  } */
+  return this.movimientoCuentaRepository.save(nuevoMovimiento);
+}
   
 
   async obtenerTiposDeCuentaPorDNI(dni: string): Promise<any[]> {

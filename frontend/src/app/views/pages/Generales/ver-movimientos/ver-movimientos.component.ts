@@ -37,7 +37,8 @@ export class VerMovimientosComponent implements OnInit {
       { header: 'Tipo de Movimiento', col: 'DEBITO_CREDITO_B', isEditable: false },
       { header: 'Estado', col: 'ACTIVA_B', isEditable: false },
       { header: 'Cuenta Contable', col: 'CUENTA_CONTABLE', isEditable: false },
-      { header: 'Descripción Tipo de Cuenta', col: 'DESCRIPCION_TIPO_CUENTA', isEditable: false },
+      { header: 'Tipo de Cuenta', col: 'DESCRIPCION_TIPO_CUENTA', isEditable: false },
+      { header: 'Numero de cuenta', col: 'NUMERO_CUENTA', isEditable: false },
     ];
 
 
@@ -78,18 +79,22 @@ export class VerMovimientosComponent implements OnInit {
     try {
 
       if (this.form && this.form.value.dni) {
-        const data = await this.transaccionesService.obtenerMovimientosPorDNI(this.form.value.dni).toPromise();
+        const data = await this.transaccionesService.obtenerVouchersDeMovimientos(this.form.value.dni).toPromise();
 
 
         if (data.length > 0) {
 
-          this.filasT = data.map((movimiento: any) => ({
-            FECHA_MOVIMIENTO: movimiento.movimiento_FECHA_MOVIMIENTO,
-            MONTO: movimiento.movimiento_MONTO,
-            DEBITO_CREDITO_B: movimiento.DEBITO_CREDITO_B,
-            ACTIVA_B: movimiento.ACTIVA_B,
-            CUENTA_CONTABLE: movimiento.CUENTA_CONTABLE,
-            DESCRIPCION_TIPO_CUENTA: movimiento.DESCRIPCION_TIPO_CUENTA,
+          console.log(data);
+
+
+          this.filasT = data.map((movimientos: any) => ({
+            FECHA_MOVIMIENTO: movimientos.FECHA_MOVIMIENTO,
+            MONTO: movimientos.MONTO,
+            DEBITO_CREDITO_B: movimientos.DEBITO_CREDITO_B,
+            ACTIVA_B: movimientos.ESTADO_TIPO_MOVIMIENTO,
+            CUENTA_CONTABLE: movimientos.CUENTA_CONTABLE,
+            DESCRIPCION_TIPO_CUENTA: movimientos.TIPO_CUENTA_DESCRIPCION,
+            NUMERO_CUENTA : movimientos.NUMERO_CUENTA
           }));
         } else {
           this.filasT = [];

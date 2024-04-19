@@ -1,64 +1,28 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete, HttpStatus, HttpException, Res, HttpCode, ParseIntPipe, NotFoundException } from '@nestjs/common';
-import { CreateTransaccionesDto } from './dto/create-transacciones.dto';
 import { UpdateTranssacionesDto } from './dto/update-transacciones.dto';
 import { TransaccionesService } from './transacciones.service';
-import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
-import { VoucherDto } from './dto/voucher.dto';
+import { ApiTags } from '@nestjs/swagger';
+import { CrearMovimientoDTO } from './dto/voucher.dto';
 
 @ApiTags('transacciones')
 @Controller('transacciones')
 export class TransaccionesController {
   constructor(private readonly transaccionesService: TransaccionesService) { }
 
-  /* @Get('voucher/todos/:idPersona')
-  @ApiOperation({ summary: 'Generate vouchers for all transactions of a person' })
-  @ApiResponse({ status: 200, description: 'Vouchers generated successfully', type: VoucherDto, isArray: true })
-  async generarVoucherTodosMovimientos(@Param('idPersona') idPersona: number, @Res() res) {
-    try {
-      const vouchers = await this.transaccionesService.generarVoucherTodosMovimientos(idPersona);
-      return res.status(HttpStatus.OK).json(vouchers);
-    } catch (e) {
-      throw new HttpException(e.message, HttpStatus.NOT_FOUND);
+  @Get('voucher/:dni')
+    obtenerVouchersDeMovimientos(@Param('dni') dni: string): Promise<any> {
+        return this.transaccionesService.obtenerVoucherDeMovimientos(dni);
     }
+
+    @Get('voucherEspecifico/:dni/:idMovimientoCuenta')
+    obtenerVoucherMovimientoEspecifico(@Param('dni') dni: string, @Param('idMovimientoCuenta') idMovimientoCuenta: number): Promise<any> {
+        return this.transaccionesService.obtenerVoucherDeMovimientoEspecifico(dni, idMovimientoCuenta);
+    }
+
+    @Post('crear-movimiento')
+    crearMovimiento(@Body() crearMovimientoDto: CrearMovimientoDTO) {
+      return this.transaccionesService.crearMovimiento(crearMovimientoDto);
   }
-
-  @Get('movimientos/:idMovimiento/:idPersona')
-  async getSpecificMovement(
-    @Param('idPersona', ParseIntPipe) idPersona: number,
-    @Param('idMovimiento', ParseIntPipe) idMovimiento: number
-  ) {
-    try {
-      const movement = await this.transaccionesService.generarVoucherPorMovimiento(idPersona, idMovimiento);
-      return {
-        success: true,
-        data: movement
-      };
-    } catch (error) {
-      if (error instanceof NotFoundException) {
-        return {
-          success: false,
-          message: error.message
-        };
-      }
-      throw error;
-    }
-  } */
-
-  /* @Post('/crear-movimiento')
-  @HttpCode(HttpStatus.CREATED)
-  async crearMovimiento(@Body() createTransaccionesDto: CreateTransaccionesDto) {
-    try {
-      const movimiento = await this.transaccionesService.crearMovimiento(
-        createTransaccionesDto.dni,
-        createTransaccionesDto.numeroCuenta,
-        createTransaccionesDto.descripcionMovimiento,
-        createTransaccionesDto.monto
-      );
-      return { status: 'success', message: 'Movimiento creado con éxito', data: movimiento };
-    } catch (error) {
-      return { status: 'error', message: error.message };
-    }
-  } */
 
   @Get('/tipos-de-cuenta/:dni')
   async obtenerTiposDeCuentaPorDNI(@Param('dni') dni: string) {

@@ -14,7 +14,8 @@ import { NET_TIPO_MOVIMIENTO } from './entities/net_tipo_movimiento.entity';
   providers: [TransaccionesService],
   imports: [
     TypeOrmModule.forFeature([
-      NET_CUENTA_PERSONA, NET_MOVIMIENTO_CUENTA, NET_TIPO_CUENTA, NET_TIPO_MOVIMIENTO, Net_Usuario, Net_Persona
-    ])]
+      NET_CUENTA_PERSONA, NET_MOVIMIENTO_CUENTA, NET_TIPO_CUENTA, NET_TIPO_MOVIMIENTO, Net_Usuario, Net_Persona, 
+    ])],
+    exports: [TypeOrmModule, TransaccionesService],
 })
 export class TransaccionesModule { }

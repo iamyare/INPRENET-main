@@ -1,16 +1,29 @@
-<div class="dni-search">
+
+<div class="dni-search" style="
+background-color: white;
+margin: 1% 0% 1% 0%;
+padding: 1% 1% 1% 1%;
+">
   <mat-form-field appearance="fill" class="dni-input">
     <mat-label>DNI</mat-label>
     <input matInput placeholder="Introduce tu DNI" [(ngModel)]="dni" required>
   </mat-form-field>
 
-  <button mat-raised-button color="primary" (click)="onSubmit()" class="search-button">
+  <!-- Agregando un espacio entre el input y el botón con un margen derecho -->
+  <button mat-raised-button color="primary" style="color: white; margin-left: 10px;" (click)="onSubmit()" class="search-button">
     <mat-icon>search</mat-icon>
     Buscar
   </button>
-</div>
 
 
+<div
+  style="
+    text-align: center;
+    background-color: white;
+    margin: 1% 0% 1% 0%;
+    padding: 0% 0% 1% 0%;
+  "
+>
 <div *ngIf="persona" style="padding: 1%">
   <h1 style="font-size: 2rem">Datos Generales Persona</h1>
   <div>
@@ -84,8 +97,11 @@
   mat-raised-button
   (click)="guardarMovimiento()"
   color="primary"
-  style="color: #ffffff; border-radius: 5px; padding: 10px 20px"
+  style="color: #ffffff; border-radius: 5px; padding: 10px 20px; margin: 10px 20px"
   [disabled]="!puedeCrearMovimiento()"
 >
   Crear nuevo Movimiento
 </button>
+
+</div>
+</div>

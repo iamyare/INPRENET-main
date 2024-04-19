@@ -181,7 +181,6 @@ export class AfiliadoService {
         .addSelect('persona.SEXO', 'SEXO')
         .addSelect('persona.DIRECCION_RESIDENCIA', 'DIRECCION_RESIDENCIA')
         .addSelect('persona.FECHA_NACIMIENTO', 'FECHA_NACIMIENTO')
-        .addSelect('persona.COLEGIO_MAGISTERIAL', 'COLEGIO_MAGISTERIAL')
         .addSelect('persona.NUMERO_CARNET', 'NUMERO_CARNET')
         .addSelect('persona.PROFESION', 'PROFESION')
         .addSelect('persona.TELEFONO_1', 'TELEFONO_1')
@@ -192,7 +191,6 @@ export class AfiliadoService {
         .leftJoin('detallepersona.tipoAfiliado', 'tipoafiliado') // Join con la tabla detallepersonas
         .where('persona.dni = :term AND tipoafiliado.tipo_afiliado = :tipo_persona', { term, tipo_persona: "AFILIADO" })
         .getRawOne();
-      console.log(personas);
 
     }
     if (!personas) {
@@ -214,18 +212,20 @@ export class AfiliadoService {
 
     try {
       const query = `
-        SELECT DISTINCT
-        "detA"."ID_PERSONA"
-        FROM NET_PERSONA "Afil"
-        FULL OUTER JOIN
-          NET_DETALLE_PERSONA "detA" ON "Afil"."ID_PERSONA" = "detA"."ID_PERSONA" 
-        INNER JOIN
-        NET_TIPO_PERSONA "tipoP" ON "tipoP"."ID_TIPO_AFILIADO" = "detA"."ID_TIPO_PERSONA"
-      WHERE
-        "Afil"."DNI" = '${dniAfil}' AND 
-        "Afil"."ESTADO" = 'FALLECIDO'  AND
-        "tipoP"."TIPO_AFILIADO" = 'AFILIADO'
-        `;
+      SELECT DISTINCT
+      "detA"."ID_PERSONA"
+      FROM NET_PERSONA "Afil"
+      FULL OUTER JOIN
+        NET_DETALLE_PERSONA "detA" ON "Afil"."ID_PERSONA" = "detA"."ID_PERSONA" 
+      INNER JOIN
+      NET_TIPO_PERSONA "tipoP" ON "tipoP"."ID_TIPO_AFILIADO" = "detA"."ID_TIPO_PERSONA"
+      INNER JOIN
+      NET_ESTADO_AFILIADO "estadoPers" ON "Afil"."ID_ESTADO_AFILIADO" = "estadoPers"."CODIGO"
+    WHERE
+      "Afil"."DNI" = '${dniAfil}' AND 
+      "estadoPers"."DESCRIPCION" = 'FALLECIDO'  AND
+      "tipoP"."TIPO_AFILIADO" = 'AFILIADO'
+    `;
 
       const beneficios = await this.entityManager.query(query);
 

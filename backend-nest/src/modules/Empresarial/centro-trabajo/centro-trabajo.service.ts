@@ -5,7 +5,6 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Net_Centro_Trabajo } from '../entities/net_centro_trabajo.entity';
 import { Repository } from 'typeorm';
 import { Net_Departamento } from '../../Regional/provincia/entities/net_departamento.entity';
-
 @Injectable()
 export class CentroTrabajoService {
 
@@ -40,6 +39,14 @@ export class CentroTrabajoService {
   async findAll(): Promise<Net_Centro_Trabajo[]> {
     try {
       return await this.centroTrabajoRepository.find();
+    } catch (error) {
+      this.handleException(error);
+    }
+  }
+
+  async findAllPriv(): Promise<Net_Centro_Trabajo[]> {
+    try {
+      return await this.centroTrabajoRepository.find({where: {sector_economico:"PRIVADO"}, order: {nombre_centro_trabajo: "ASC"}});
     } catch (error) {
       this.handleException(error);
     }

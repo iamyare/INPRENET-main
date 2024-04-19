@@ -40,11 +40,12 @@ import { VerEditarDeduccionAfilComponent } from '../pages/Generales/ver-editar-d
 import { AsignacionAfilPlanComponent } from '../../../components/asignacion-afil-plan/asignacion-afil-plan.component';
 import { VerplanprelcompComponent } from '../../../components/verplanprelcomp/verplanprelcomp.component';
 import { VerplancerradaComponent } from '../../../components/verplancerrada/verplancerrada.component';
+import { VerDatPlanIngComponent } from '../../../components/ver-dat-plan-ing/ver-dat-plan-ing.component';
 import { VerEditarBeneficioAfilComponent } from '../pages/Generales/ver-editar-beneficio-afil/ver-editar-beneficio-afil.component';
 import { MatStepperModule } from '@angular/material/stepper';
 import { MAT_DATE_LOCALE, MatNativeDateModule, DateAdapter } from '@angular/material/core';
 import { MatGridListModule } from '@angular/material/grid-list';
-import { CargarPlanillaPrivadosComponent } from '../pages/Generales/cargar-planilla-privados/cargar-planilla-privados.component';
+import { CargarPlanillaPrivadosComponent } from '../pages/Centros Privados/cargar-planilla-privados/cargar-planilla-privados.component';
 import { NuevoMovimientoComponent } from '../pages/Generales/nuevo-movimiento/nuevo-movimiento.component';
 import { VerMovimientosComponent } from '../pages/Generales/ver-movimientos/ver-movimientos.component';
 import { PlanillaColegiosPrivadosComponent } from '../pages/Centros Privados/planilla-colegios-privados/planilla-colegios-privados.component';
@@ -71,7 +72,8 @@ import { NavDefaultComponent } from '../pages/Centros Privados/nav-default/nav-d
     MatIconModule,
     MatStepperModule,
     MatNativeDateModule,
-    MatGridListModule
+    MatGridListModule,
+    
 
   ],
   providers: [
@@ -103,7 +105,8 @@ import { NavDefaultComponent } from '../pages/Centros Privados/nav-default/nav-d
     CargarPlanillaPrivadosComponent,
     NuevoMovimientoComponent,
     VerMovimientosComponent,
-    NavDefaultComponent
+    NavDefaultComponent,
+    VerDatPlanIngComponent
 
     /*     CentroTrabajoPageComponent */
   ]

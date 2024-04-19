@@ -398,6 +398,7 @@ export class DetallePlanillaIngresoService {
             .innerJoin('detalle.planilla', 'planilla')
             .innerJoin('planilla.tipoPlanilla', 'tipoPlanilla')
             .where('centroTrabajo.id_centro_trabajo = :idCentroTrabajo', { idCentroTrabajo })
+            .andWhere(`planilla.FECHA_APERTURA = (SELECT MAX("NET_PLANILLA"."FECHA_APERTURA") FROM "NET_PLANILLA" WHERE "NET_PLANILLA".ID_TIPO_PLANILLA = ${id_tipo_planilla})`)
             .andWhere('tipoPlanilla.id_tipo_planilla = :id_tipo_planilla', { id_tipo_planilla })
             .andWhere('detalle.estado = :estado', { estado: 'CARGADO' })
             .groupBy('centroTrabajo.id_centro_trabajo')
@@ -431,6 +432,7 @@ export class DetallePlanillaIngresoService {
             .where('centroTrabajo.id_centro_trabajo = :idCentroTrabajo', { idCentroTrabajo })
             .andWhere('tipoPlanilla.id_tipo_planilla = :id_tipo_planilla', { id_tipo_planilla })
             .andWhere('detalle.estado = :estado', { estado: 'CARGADO' })
+            .andWhere(`planilla.FECHA_APERTURA = (SELECT MAX("NET_PLANILLA"."FECHA_APERTURA") FROM "NET_PLANILLA" WHERE "NET_PLANILLA".ID_TIPO_PLANILLA = ${id_tipo_planilla})`)
             .groupBy('centroTrabajo.id_centro_trabajo')
             .addGroupBy('centroTrabajo.nombre_centro_trabajo')
             .getRawMany();

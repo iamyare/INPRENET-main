@@ -23,6 +23,15 @@ export class CentroTrabajoController {
       res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: error.message });
     }
   }
+  @Get("Privados")
+  async findAllPriv(@Res() res): Promise<void> {
+    try {
+      const centrosTrabajo = await this.centroTrabajoService.findAllPriv();
+      res.status(HttpStatus.OK).json(centrosTrabajo);
+    } catch (error) {
+      res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: error.message });
+    }
+  }
 
   @Get(':id')
   findOne(@Param('id') id: string) {

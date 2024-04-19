@@ -21,7 +21,6 @@
     "migration:generate": "ts-node -r tsconfig-paths/register ./node_modules/typeorm/cli.js migration:generate --dataSource ormconfig.ts",
     "migration:run": "ts-node -r tsconfig-paths/register ./node_modules/typeorm/cli.js migration:run --dataSource ormconfig.ts",
     "migration:revert": "ts-node -r tsconfig-paths/register ./node_modules/typeorm/cli.js migration:revert --dataSource ormconfig.ts"
-
   },
   "dependencies": {
     "@nestjs/common": "^10.0.0",

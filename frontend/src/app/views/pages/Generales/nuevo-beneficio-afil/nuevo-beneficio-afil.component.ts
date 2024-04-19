@@ -33,6 +33,7 @@ export class NuevoBeneficioAfilComponent implements OnInit {
   datosTabl: any[] = [];
   filas: any
   ejecF: any;
+  
 
   /* myColumnsBeneficios:  any[] = [];
   datosTablBeneficios:  any[] = [];
@@ -166,7 +167,7 @@ export class NuevoBeneficioAfilComponent implements OnInit {
     } */
 
   getFilas = async () => {
-    if (this.Afiliado.estado == "FALLECIDO") {
+    if (this.Afiliado.ESTADO == "FALLECIDO") {
       try {
         await this.getColumns();
         const data = await this.svcAfilServ.obtenerBenDeAfil(this.form.value.dni).toPromise();
@@ -352,9 +353,7 @@ export class NuevoBeneficioAfilComponent implements OnInit {
       this.svcAfilServ.getAfilByParam(this.form.value.dni).subscribe(
         async (result) => {
           this.Afiliado = result
-          console.log(this.Afiliado);
-
-          this.Afiliado.nameAfil = this.unirNombres(result.primer_nombre, result.segundo_nombre, result.tercer_nombre, result.primer_apellido, result.segundo_apellido);
+          this.Afiliado.nameAfil = this.unirNombres(result.PRIMER_NOMBRE, result.SEGUNDO_NOMBRE, result.TERCER_NOMBRE, result.PRIMER_APELLIDO, result.SEGUNDO_APELLIDO);
           //this.getBeneficios().then(() => this.cargar());
           this.getFilas().then(() => this.cargar());
         },
@@ -379,7 +378,7 @@ export class NuevoBeneficioAfilComponent implements OnInit {
   guardarNTBenef() {
     /* Asignar al afiliado si no ha fallecido */
     /* Asignar a los beneficioarios si el afiliado ya fallecio */
-    if (this.Afiliado.estado != "FALLECIDO") {
+    if (this.Afiliado.ESTADO != "FALLECIDO") {
       this.datosFormateados["dni"] = this.form.value.dni;
       this.svcBeneficioServ.asigBeneficioAfil(this.datosFormateados).subscribe(
         {

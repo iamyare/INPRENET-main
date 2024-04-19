@@ -16,6 +16,11 @@ export class CentroTrabajoService {
     return this.http.get<any[]>(url);
   }
 
+  obtenerTodosLosCentrosTrabajoPrivados(): Observable<any[]> {
+    const url = `${environment.API_URL}/api/centro-trabajo/Privados`;
+    return this.http.get<any[]>(url);
+  }
+
   agregarCentroTrabajo(nuevoCentro: any): Observable<any> {
     const url = `${environment.API_URL}/centrosTrabajo/nuevoCentro`;
     return this.http.post<any>(url, nuevoCentro);

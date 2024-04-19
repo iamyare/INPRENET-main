@@ -31,7 +31,7 @@ export class DireccionService {
       );
   }
   getAllCiudades(): Observable<any | void> {
-    const url = `${environment.API_URL}/api/direccion/ciudades`;
+    const url = `${environment.API_URL}/api/municipio`;
     return this.http.get<any>(
       url,
       ).pipe(
@@ -39,5 +39,15 @@ export class DireccionService {
           return res;
         })
       );
+  }
+
+  getMunicipiosPorDepartamentoId(departamentoId: number): Observable<any> {
+    const url = `${environment.API_URL}/api/municipio/departamento/${departamentoId}`;
+    return this.http.get<any>(url);
+  }
+
+  getDepartamentosPorPaisId(paisId: number): Observable<any> {
+    const url = `${environment.API_URL}/api/departamento/pais/${paisId}`;
+    return this.http.get<any>(url);
   }
 }

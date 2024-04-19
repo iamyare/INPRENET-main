@@ -5,6 +5,9 @@ import { FieldConfig } from 'src/app/shared/Interfaces/field-config';
 import { TableColumn } from 'src/app/shared/Interfaces/table-column';
 import { ToastrService } from 'ngx-toastr';
 import { TransaccionesService } from 'src/app/services/transacciones.service';
+import * as pdfMake from 'pdfmake/build/pdfmake';
+import * as pdfFonts from 'pdfmake/build/vfs_fonts';
+import { Alignment } from 'pdfmake/interfaces';
 
 @Component({
   selector: 'app-ver-movimientos',
@@ -23,7 +26,9 @@ export class VerMovimientosComponent implements OnInit {
 
 
   constructor(private afiliadoService: AfiliadoService, private toastr: ToastrService,
-              private transaccionesService: TransaccionesService) { }
+              private transaccionesService: TransaccionesService) {
+                (pdfMake as any).vfs = pdfFonts.pdfMake.vfs;
+               }
 
 
   ngOnInit(): void {
@@ -39,6 +44,7 @@ export class VerMovimientosComponent implements OnInit {
       { header: 'Cuenta Contable', col: 'CUENTA_CONTABLE', isEditable: false },
       { header: 'Tipo de Cuenta', col: 'DESCRIPCION_TIPO_CUENTA', isEditable: false },
       { header: 'Numero de cuenta', col: 'NUMERO_CUENTA', isEditable: false },
+      { header: 'Descripcion', col: 'DESCRIPCION', isEditable: false },
     ];
 
 
@@ -94,7 +100,11 @@ export class VerMovimientosComponent implements OnInit {
             ACTIVA_B: movimientos.ESTADO_TIPO_MOVIMIENTO,
             CUENTA_CONTABLE: movimientos.CUENTA_CONTABLE,
             DESCRIPCION_TIPO_CUENTA: movimientos.TIPO_CUENTA_DESCRIPCION,
-            NUMERO_CUENTA : movimientos.NUMERO_CUENTA
+            NUMERO_CUENTA : movimientos.NUMERO_CUENTA,
+            CORREO_1 : movimientos.CORREO_1,
+            NOMBRE_COMPLETO: movimientos.NOMBRE_COMPLETO,
+            TELEFONO_1 : movimientos.TELEFONO_1,
+            DESCRIPCION : movimientos.DESCRIPCION
           }));
         } else {
           this.filasT = [];
@@ -118,6 +128,47 @@ export class VerMovimientosComponent implements OnInit {
       });
     }
   }
+manejarAccionUno(row: any): void {
+    // Define el contenido del recibo
+    const contenidoRecibo = [
+      { text: 'Recibo', style: 'encabezado' },
+      { text: 'Fecha: ' + row.FECHA_MOVIMIENTO },
+      { text: 'Nombre: ' + row.NOMBRE_COMPLETO },
+      { text: 'Correo: ' + row.CORREO_1 },
+      { text: 'Teléfono: ' + row.TELEFONO_1 },
+      { text: 'Descripción: ' + row.DESCRIPCION },
+      { text: 'Tipo de cuenta: ' + row.DESCRIPCION_TIPO_CUENTA },
+      { text: 'Número de cuenta: ' + row.NUMERO_CUENTA },
+      { text: 'Cuenta contable: ' + row.CUENTA_CONTABLE },
+      { text: 'Tipo de movimiento: ' + row.ACTIVA_B },
+      { text: 'Débito/Crédito: ' + row.DEBITO_CREDITO_B },
+      { text: 'Monto: ' + row.MONTO },
+        // Puedes agregar más detalles del recibo aquí
+    ];
+
+    // Define los estilos
+    const estilos = {
+        encabezado: {
+            fontSize: 18,
+            bold: true,
+            margin: [0, 0, 0, 10] as [number, number, number, number]
+        }
+    };
+
+    // Define el documento PDF
+    const documento = {
+        content: contenidoRecibo,
+        styles: estilos
+    };
+
+    // Genera el PDF
+    pdfMake.createPdf(documento).open();
+}
+
+
+
+
+
 
   limpiarInformacion() {
     this.persona = null;

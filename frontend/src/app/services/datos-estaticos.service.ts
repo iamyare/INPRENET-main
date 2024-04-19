@@ -4,30 +4,40 @@ import { DireccionService } from './direccion.service';
 import { BancosService } from './bancos.service';
 import { DeduccionesService } from './deducciones.service';
 import { InstitucionesService } from './instituciones.service';
+import { TipoIdentificacionService } from './tipo-identificacion.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class DatosEstaticosService {
-  paises: any = [];
+  nacionalidades: any = [];
   departamentos: any = [];
   DatosBancBen: any = [];
   Bancos: any = [];
   Instituciones: any = [];
+  tipoIdent : any = []
 
-  constructor(private SVCInstituciones: InstitucionesService, private afiliadoService: AfiliadoService, public direccionSer: DireccionService, private bancosService: BancosService) {
+  constructor(private SVCInstituciones: InstitucionesService, private afiliadoService: AfiliadoService, public direccionSer: DireccionService, private bancosService: BancosService, private tipoIdentificacionService:TipoIdentificacionService) {
     /* this.direccionSer.getAllCiudades().subscribe((res: any) => {});
     this.direccionSer.getAllProvincias().subscribe((res: any) => {}); */
     /* this.bancosService.getAllBancos().subscribe((res: any) => {
       this.Bancos = res.bancos
     }); */
-    this.direccionSer.getAllPaises().subscribe((res: any) => {
-      this.departamentos = res.paises
-      this.paises = res.paises
-    });
     this.getInstituciones();
-    this.getPaises();
+    this.getNacioalidad();
   }
+
+  async gettipoIdent() {
+    const response = await this.tipoIdentificacionService.obtenerTiposIdentificacion().toPromise();
+    const mappedResponse = response.map((item: { id_identificacion: any; tipo_identificacion: any; }) => ({
+      label: item.tipo_identificacion,
+      value: String(item.id_identificacion)
+    }));
+
+    this.tipoIdent = mappedResponse;
+    return this.tipoIdent;
+}
+
 
   async getInstituciones() {
     this.Instituciones = await this.SVCInstituciones.getInstituciones().toPromise();
@@ -38,14 +48,15 @@ export class DatosEstaticosService {
     }));
   }
 
-  async getPaises() {
-    this.paises = await this.direccionSer.getAllPaises().toPromise();
+  async getNacioalidad() {
+    const response = await this.direccionSer.getAllPaises().toPromise();
+    this.nacionalidades = response.map((item: { nacionalidad: any; id_pais: any; }) => ({
+      label: item.nacionalidad,
+      value: String(item.id_pais)
+    }));
+    return this.nacionalidades;
+}
 
-    /* this.paises.map((item: { nombre_institucion: any; id_institucion: any; }) => ({
-      label: item.nombre_institucion,
-      value: String(item.id_institucion)
-    })); */
-  }
 
   estadoCivil = [
     {
@@ -117,7 +128,7 @@ export class DatosEstaticosService {
       "value": "F"
     }
   ];
-  tipoIdent = [
+  /* tipoIdent = [
     {
       "idIdentificacion": 1,
       "value": "DNI"
@@ -138,7 +149,7 @@ export class DatosEstaticosService {
       "idIdentificacion": 5,
       "value": "RTN"
     },
-  ];
+  ]; */
   tipoCotizante = [
     {
       "idCotizante": 1,

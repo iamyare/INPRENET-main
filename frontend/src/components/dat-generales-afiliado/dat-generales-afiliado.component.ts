@@ -31,6 +31,7 @@ export function generateAddressFormGroup(datos?: any): FormGroup {
     direccionDetallada: new FormControl(datos?.direccionDetallada, Validators.required),
     colegioMagisterial: new FormControl(datos?.colegioMagisterial, [Validators.required]),
     numeroCarnet: new FormControl(datos?.numeroCarnet, [Validators.required]),
+    nacionalidad: new FormControl(datos?.nacionalidad, Validators.required),
   });
 }
 
@@ -51,11 +52,13 @@ export class DatGeneralesAfiliadoComponent implements OnInit {
   public archivo: any;
   public dataEdit: any;
 
+  tipoIdentData: any = [];
+  nacionalidades: any = [];
+
   tipoCotizante: any = this.datosEstaticos.tipoCotizante; tipoIdent: any = this.datosEstaticos.tipoIdent;
   Sexo: any = this.datosEstaticos.Sexo; estadoCivil: any = this.datosEstaticos.estadoCivil;
   representacion: any = this.datosEstaticos.representacion; estado: any = this.datosEstaticos.estado;
 
-  paises: any = this.datosEstaticos.paises; departamentos: any = this.datosEstaticos.departamentos;
 
   @Input() groupName = '';
   @Output() newDatBenChange = new EventEmitter<any>()
@@ -72,13 +75,26 @@ export class DatGeneralesAfiliadoComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.direccionSer.getAllCiudades().subscribe((res: any) => { });
-    this.direccionSer.getAllProvincias().subscribe((res: any) => { });
-    this.direccionSer.getAllPaises().subscribe((res: any) => {
-      this.departamentos = res.paises
-      this.paises = res.paises
+    this.cargarTiposIdentificacion();
+    this.cargarNacionalidades();
+  }
+
+  cargarTiposIdentificacion() {
+    this.datosEstaticos.gettipoIdent().then(data => {
+      this.tipoIdentData = data;
+    }).catch(error => {
+      console.error('Error al cargar tipos de identificación:', error);
     });
   }
+
+  cargarNacionalidades() {
+    this.datosEstaticos.getNacioalidad().then(data => {
+    this.nacionalidades = data;
+    }).catch(error => {
+      console.error('Error al cargar nacionalidades:', error);
+    });
+  }
+
 
   /* prueba(e:any){
     return e._model.selection

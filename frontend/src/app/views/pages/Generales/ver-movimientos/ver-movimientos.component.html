@@ -59,7 +59,11 @@
     [columns]="columns"
     [data]="filasT"
     [getData]="getFilas"
-    (ejecutarFuncionAsincronaEvent)="ejecutarFuncionAsincronaDesdeOtroComponente($event)">
+    (ejecutarFuncionAsincronaEvent)="ejecutarFuncionAsincronaDesdeOtroComponente($event)"
+    [nombreEncabezadoUno]="'Recibo'"
+    [mostrarBotonUno]="true"
+    [etiquetaBotonUno]="'Generar recibo'"
+    (accionBotonUno)="manejarAccionUno($event)">
   </app-dynamic-table>
 </div>
 

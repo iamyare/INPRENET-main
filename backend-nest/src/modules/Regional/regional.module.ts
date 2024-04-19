@@ -6,13 +6,13 @@ import { PaisService } from './pais/pais.service';
 import { Net_Departamento } from './provincia/entities/net_departamento.entity';
 import { Net_Municipio } from './municipio/entities/net_municipio.entity';
 import { MunicipioController } from './municipio/municipio.controller';
-import { ProvinciaController } from './provincia/provincia.controller';
-import { ProvinciaService } from './provincia/provincia.service';
 import { MunicipioService } from './municipio/municipio.service';
+import { DepartamentoController } from './provincia/departamento.controller';
+import { DepartamentoService } from './provincia/departamento.service';
 
 @Module({
-    controllers: [PaisController, ProvinciaController ,MunicipioController],
-    providers: [PaisService, ProvinciaService, MunicipioService],
+    controllers: [PaisController, DepartamentoController ,MunicipioController],
+    providers: [PaisService, DepartamentoService, MunicipioService],
     imports: [
         TypeOrmModule.forFeature([Net_Pais, Net_Departamento, Net_Municipio])
       ]

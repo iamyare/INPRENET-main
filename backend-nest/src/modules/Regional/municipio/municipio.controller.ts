@@ -33,4 +33,9 @@ export class MunicipioController {
   remove(@Param('id') id: string) {
     return this.municipioService.remove(+id);
   }
+
+  @Get('departamento/:id')
+  findByDepartamento(@Param('id') id: number) {
+    return this.municipioService.findByDepartamentoId(id);
+  }
 }

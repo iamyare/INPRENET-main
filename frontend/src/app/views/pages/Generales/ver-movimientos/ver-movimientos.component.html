@@ -67,6 +67,17 @@
   </app-dynamic-table>
 </div>
 
+<div>
+  <button
+        mat-raised-button
+        color="primary"
+        style="color: white; margin: 1% 0 1% 0"
+        *ngIf="mostrarMovimientos"
+        (click)="generarReporte()"
+      >
+      Generar Reporte de Movimientos
+      </button>
+</div>
 
 <div *ngIf="mostrarMovimientos && filasT.length === 0" style="background-color: white; padding: 1%">
   <h2>No hay movimientos asociados a esta persona.</h2>

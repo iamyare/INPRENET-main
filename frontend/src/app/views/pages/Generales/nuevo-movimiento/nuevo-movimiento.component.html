@@ -84,24 +84,27 @@ padding: 1% 1% 1% 1%;
   </table>
 </div>
 
-<app-dynamic-form
-  [fields]="myFormFields"
-  titulo="Nuevo Movimiento"
-  subtitulo="Completa la información correspondiente"
-  (newDatBenChange)="obtenerDatos($event)"
-  style="margin-top: 20px"
-  class="form-container"
-></app-dynamic-form>
+<div *ngIf="persona">
 
-<button
-  mat-raised-button
-  (click)="guardarMovimiento()"
-  color="primary"
-  style="color: #ffffff; border-radius: 5px; padding: 10px 20px; margin: 10px 20px"
-  [disabled]="!puedeCrearMovimiento()"
->
-  Crear nuevo Movimiento
-</button>
+  <app-dynamic-form
+    [fields]="myFormFields"
+    titulo="Nuevo Movimiento"
+    subtitulo="Completa la información correspondiente"
+    (newDatBenChange)="obtenerDatos($event)"
+    style="margin-top: 20px"
+    class="form-container"
+  ></app-dynamic-form>
+
+  <button
+    mat-raised-button
+    (click)="guardarMovimiento()"
+    color="primary"
+    style="color: #ffffff; border-radius: 5px; padding: 10px 20px; margin: 10px 20px"
+    [disabled]="!puedeCrearMovimiento()"
+  >
+    Crear nuevo Movimiento
+  </button>
+</div>
 
 </div>
 </div>

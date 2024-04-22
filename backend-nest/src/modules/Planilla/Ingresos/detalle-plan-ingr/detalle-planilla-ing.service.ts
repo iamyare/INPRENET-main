@@ -142,7 +142,7 @@ export class DetallePlanillaIngresoService {
 
     let ValoresDetalle = {
       idpersona: persona.id_persona,
-      sueldo: persona.perfAfilCentTrabs[0].salario_base,
+      sueldo: 5000,
       prestamos: prestamos,
       id_centro_educativo: id_centro_educativo,
       sector_economico: persona.perfAfilCentTrabs[0].centroTrabajo.sector_economico,

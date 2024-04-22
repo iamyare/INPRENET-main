@@ -100,8 +100,8 @@ export class AfiliadoService {
     )
   }
 
-  agregDatosPuestTra(data: any): Observable<any> {
-    var url = `${environment.API_URL}/auth/signup`;
+  agregDatosPuestTra(data: any,dnireferente:any): Observable<any> {
+    var url = `${environment.API_URL}/afiliado/createCentrosTrabPersona/${dnireferente}`;
 
     return this.http.post<any>(
       url,
@@ -114,8 +114,8 @@ export class AfiliadoService {
     )
   }
 
-  agregDatosRefPer(data: any): Observable<any> {
-    var url = `${environment.API_URL}/auth/signup`;
+  agregDatosRefPer(data: any,dnireferente:any): Observable<any> {
+    var url = `${environment.API_URL}/afiliado/createRefPers/${dnireferente}`;
 
     return this.http.post<any>(
       url,

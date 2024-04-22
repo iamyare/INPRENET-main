@@ -10,9 +10,9 @@ export class Net_Ref_Per_Afil {
 
     @ManyToOne(() => Net_Persona, afiliado => afiliado.referenciasPersonalAfiliado)
     @JoinColumn({ name: 'ID_PERSONA', foreignKeyConstraintName:"FK_ID_PERSONA_REF_PER_AFIL"})
-    afiliado: Net_Persona;
+    afiliado: any;
 
     @ManyToOne(() => Net_ReferenciaPersonal, referenciaPersonal => referenciaPersonal.referenciasPersonalesAfiliado)
     @JoinColumn({ name: 'ID_REF_PERSONAL', foreignKeyConstraintName:"FK_ID_REF_PERSONAL_REF_PER_AFIL" })
-    referenciaPersonal: Net_ReferenciaPersonal;
+    referenciaPersonal: any;
 }

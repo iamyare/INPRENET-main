@@ -6,20 +6,16 @@ import { DatosEstaticosService } from 'src/app/services/datos-estaticos.service'
 export function generatePuestoTrabFormGroup(datos?:any): FormGroup {
   return new FormGroup({
     centroTrabajo: new FormControl(datos.centroTrabajo, [Validators.required]),
-    cargo: new FormControl(datos.cargo, [Validators.required]),
-    sectorEconomico: new FormControl(datos.sectorEconomico, [Validators.required]),
-    actividadEconomica: new FormControl(datos.actividadEconomica, [Validators.required]),
-    claseCliente: new FormControl(datos.claseCliente, [Validators.required]),
-    sector: new FormControl(datos.sector, [Validators.required]),
+    actividadEconomica: new FormControl(datos.actividadEconomica, [Validators.required]), /* ACTIVIDAD ECONOMICA -> cargo que desempeña */
+    salario: new FormControl(datos.salario, [Validators.required]),
     numeroAcuerdo: new FormControl(datos.numeroAcuerdo, [Validators.required]),
     fechaIngreso: new FormControl(datos.fechaIngreso, [Validators.required]),
-    colegioMagisterial: new FormControl(datos.colegioMagisterial, [Validators.required]),
-    numeroCarnet: new FormControl(datos.numeroCarnet, [Validators.required]),
-    salario: new FormControl(datos.salario, [Validators.required]),
+    fechaEgreso: new FormControl(datos.fechaEgreso, Validators.required),
 
-    fechaInicio: new FormControl(datos.fechaInicio, Validators.required),
-    fechaFin: new FormControl(datos.fechaFin, Validators.required),
-    fechaEgreso: new FormControl(datos.fechaEgreso, Validators.required)
+    /* CLASE CLIENTE -> ESTADO */
+    claseCliente: new FormControl(datos.claseCliente, [Validators.required]),
+    /* SECTOR ECONOMICO-> PUBLICO, PRIVADO, PROHECO, PEDAGIGICO, JUBILADO */
+    sectorEconomico: new FormControl(datos.sectorEconomico, [Validators.required]),
   });
 }
 

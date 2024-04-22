@@ -4,7 +4,7 @@
     <p class="card-category">Completa la información correspondiente</p>
   </div>
 
-  <form [formGroup]="formParent" (change)="onDatosDatosPuestTrab()">
+  <form [formGroup]="formParent" style="margin: 1%;" (change)="onDatosDatosPuestTrab()">
     <div formArrayName="refpers">
       <div *ngFor="let skill of getCtrl('refpers', formParent).controls; index as formChild; let i = index">
         <h4 class="card-title">Centro de trabajo número: {{i+1}}</h4>
@@ -21,51 +21,20 @@
 
           </div>
         </div>
+
         <div class="row" [formGroupName]="formChild">
-          <div class="col-md-4">
-            <mat-form-field class="example-full-width; inputs" appearance="outline">
-              <mat-label>Cargo que desempeña</mat-label>
-              <input matInput formControlName="cargo">
-            </mat-form-field>
-          </div>
-          <div class="col-md-4">
-            <mat-form-field class="example-full-width; inputs" appearance="outline">
-              <mat-label>Sector Económico</mat-label>
-              <input matInput formControlName="sectorEconomico">
-            </mat-form-field>
-          </div>
-          <div class="col-md-4">
-            <mat-form-field class="example-full-width; inputs" appearance="outline">
-              <mat-label>Actividad Económica</mat-label>
-              <input matInput formControlName="actividadEconomica">
-            </mat-form-field>
-          </div>
-        </div>
-        <div class="row" [formGroupName]="formChild">
-          <div class="col-md-4">
-            <mat-form-field class="example-full-width; inputs" appearance="outline">
-              <mat-label>Clase cliente</mat-label>
-              <input matInput formControlName="claseCliente">
-            </mat-form-field>
-          </div>
-          <div class="col-md-4">
-            <mat-form-field class="example-full-width; inputs" appearance="outline">
-              <mat-label>Sector</mat-label>
-              <select matNativeControl formControlName="sector">
-                <option *ngFor="let p of sector" [value]="p.value">
-                  {{p.value}}
-                </option>
-              </select>
-            </mat-form-field>
-          </div>
           <div class="col-md-4">
             <mat-form-field class="example-full-width; inputs" appearance="outline">
               <mat-label>Número de acuerdo</mat-label>
               <input matInput formControlName="numeroAcuerdo">
             </mat-form-field>
           </div>
-        </div>
-        <div class="row" [formGroupName]="formChild">
+          <div class="col-md-4">
+            <mat-form-field class="example-full-width; inputs" appearance="outline">
+              <mat-label>Salario</mat-label>
+              <input matInput formControlName="salario">
+            </mat-form-field>
+          </div>
           <div class="col-md-4">
             <mat-form-field class="example-full-width; inputs" appearance="outline">
               <mat-label>Fecha de Ingreso</mat-label>
@@ -75,22 +44,33 @@
               <mat-datepicker #fechaIngreso></mat-datepicker>
             </mat-form-field>
           </div>
+        </div>
+
+        <div class="row" [formGroupName]="formChild">
           <div class="col-md-4">
             <mat-form-field class="example-full-width; inputs" appearance="outline">
-              <mat-label>Fecha de egreso</mat-label>
-              <input matInput formControlName="fechaEgreso" [matDatepicker]="fechaEgreso">
-              <mat-hint>MM/DD/YYYY</mat-hint>
-              <mat-datepicker-toggle matIconSuffix [for]="fechaEgreso"></mat-datepicker-toggle>
-              <mat-datepicker #fechaEgreso></mat-datepicker>
+              <mat-label>Actividad Económica</mat-label>
+              <input matInput formControlName="actividadEconomica">
             </mat-form-field>
           </div>
           <div class="col-md-4">
             <mat-form-field class="example-full-width; inputs" appearance="outline">
-              <mat-label>Salario:</mat-label>
-              <input matInput formControlName="salario">
+              <mat-label>sectorEconomico</mat-label>
+              <select matNativeControl formControlName="sectorEconomico">
+                <option *ngFor="let p of sector" [value]="p.value">
+                  {{p.value}}
+                </option>
+              </select>
+            </mat-form-field>
+          </div>
+          <div class="col-md-4">
+            <mat-form-field class="example-full-width; inputs" appearance="outline">
+              <mat-label>Clase cliente</mat-label>
+              <input matInput formControlName="claseCliente">
             </mat-form-field>
           </div>
         </div>
+
       </div>
     </div>
   </form>

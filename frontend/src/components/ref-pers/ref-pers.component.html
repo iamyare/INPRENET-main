@@ -4,7 +4,7 @@
     <p class="card-category">Completa la información correspondiente</p>
   </div>
 
-  <form [formGroup]="formParent" (change)="onDatosRefPerChange()">
+  <form [formGroup]="formParent" style="margin: 1%;"  (change)="onDatosRefPerChange()">
     <div formArrayName="refpers">
       <div *ngFor="let skill of getCtrl('refpers', formParent).controls; index as formChild; let i = index">
         <h4 class="card-title">Referencia número: {{i+1}}</h4>

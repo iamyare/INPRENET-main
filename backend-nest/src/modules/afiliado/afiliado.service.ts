@@ -14,6 +14,8 @@ import { validate as isUUID } from 'uuid';
 import { Net_Persona } from './entities/Net_Persona.entity';
 import { Net_Departamento } from '../Regional/provincia/entities/net_departamento.entity';
 import { Net_Estado_Afiliado } from './entities/net_estado_afiliado.entity';
+import { Net_Ref_Per_Afil } from './entities/net_ref-Per-Afiliado.entity';
+import { Net_ReferenciaPersonal } from './entities/referencia-personal.entity';
 
 @Injectable()
 export class AfiliadoService {
@@ -27,6 +29,15 @@ export class AfiliadoService {
     private readonly afiliadoRepository: Repository<Net_Persona>,
     @InjectRepository(Net_perf_afil_cent_trab)
     private readonly perfAfiliCentTrabRepository: Repository<Net_perf_afil_cent_trab>,
+
+    @InjectRepository(Net_Ref_Per_Afil)
+    private readonly RefPersRepositoryPersona: Repository<Net_Ref_Per_Afil>,
+
+    @InjectRepository(Net_ReferenciaPersonal)
+    private readonly RefPersRepository: Repository<Net_ReferenciaPersonal>,
+
+    @InjectRepository(Net_perf_afil_cent_trab)
+    private readonly perfilCentTrabRepository: Repository<Net_perf_afil_cent_trab>,
 
     private connection: Connection,
   ) { }
@@ -151,6 +162,77 @@ export class AfiliadoService {
       const afiliado = this.afiliadoRepository.create(createAfiliadoTempDto)
       await this.afiliadoRepository.save(afiliado)
       return afiliado;
+    } catch (error) {
+      this.handleException(error);
+    }
+  }
+
+  async createRefPers(data: any, dnireferente: any) {
+    try {
+      // Buscar la persona referente
+      const personaReferente = await this.afiliadoRepository.findOne({
+        where: { dni: dnireferente.dnireferente },
+      });
+  
+      // Verificar si se encontró la persona referente
+      if (!personaReferente) {
+        throw new Error('No se encontró la persona referente.');
+      }
+  
+      const refPersonales = this.RefPersRepository.create(data);
+      const savedRefPersonales = await this.RefPersRepository.save(refPersonales);
+
+      const idsRefPersonal = savedRefPersonales.map(objeto => objeto.id_ref_personal);
+      const idPersona = personaReferente.id_persona;
+      const arregloFinal = idsRefPersonal.map(id_ref_personal => ({ id_ref_personal, idPersona }));
+
+      const arregloRenombrado = arregloFinal.map(objeto => ({
+        afiliado: objeto.idPersona,
+        referenciaPersonal: objeto.id_ref_personal
+      }));
+
+      const asigPersonales = this.RefPersRepositoryPersona.create(arregloRenombrado);
+      const savedasigPersonales = await this.RefPersRepositoryPersona.save(asigPersonales);
+
+      return savedasigPersonales;
+    } catch (error) {
+      // Manejar errores
+      console.error('Error en createRefPers:', error);
+      throw error; // Re-lanzar el error para que sea manejado en un nivel superior si es necesario
+    }
+  }
+
+  async createCentrosTrabPersona(data: any, dnireferente:any) {
+    try {
+      // Buscar la persona referente
+      const personaReferente = await this.afiliadoRepository.findOne({
+        where: { dni: dnireferente.dnireferente },
+      });
+      
+      // Verificar si se encontró la persona referente
+      if (!personaReferente) {
+        throw new Error('No se encontró la persona referente.');
+      }
+      
+      const arregloFinal = data.map((item) => ({
+        centroTrabajo: item.id_centro_trabajo,
+        afiliado: personaReferente.id_persona,
+        cargo: item.cargo,
+        numero_acuerdo: item.numero_acuerdo,
+        salario_base: item.salario_base,
+        fecha_ingreso: new Date(item.fecha_ingreso),
+        
+        clase_cliente: item.clase_cliente,
+        sector_economico: item.sector_economico,
+    }));
+
+      const perfCentrTrab = this.perfilCentTrabRepository.create(arregloFinal);
+      const savedperfCentrTrab = await this.perfilCentTrabRepository.save(perfCentrTrab);
+      return savedperfCentrTrab;
+
+      /* const centrosTrabajo = this.perfAfiliCentTrabRepository.create(data)
+      await this.perfAfiliCentTrabRepository.save(centrosTrabajo)
+      return centrosTrabajo; */
     } catch (error) {
       this.handleException(error);
     }
@@ -294,7 +376,6 @@ export class AfiliadoService {
     return newList;
   }
 
-
   async findByDni(dni: string): Promise<Net_Persona | string> {
     const afiliado = await this.afiliadoRepository.findOne({ where: { dni }, relations: ['estadoAfiliado'] });
 
@@ -311,7 +392,6 @@ export class AfiliadoService {
         return afiliado;
     }
   }
-
 
   async buscarPersonaYMovimientosPorDNI(dni: string): Promise<any> {
     const persona = await this.afiliadoRepository.findOne({
@@ -341,8 +421,7 @@ export class AfiliadoService {
         movimientos // Devuelve los movimientos aplastados de todas las cuentas
       }
     };
-}
-
+  }
 
   private handleException(error: any): void {
     this.logger.error(error);

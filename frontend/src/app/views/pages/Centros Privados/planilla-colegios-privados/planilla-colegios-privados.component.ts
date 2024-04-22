@@ -91,25 +91,32 @@ export class PlanillaColegiosPrivadosComponent
     this.firstFormGroup = this._formBuilder.group({
       selectedTipoPlanilla: ['', Validators.required],
     });
+
+    this.reiniciarFormularios();
     const tokenData = this.decodeToken();
-    this.mostrarTercerPaso = false;
+    if (tokenData && tokenData.idCentroTrabajo) {
+      this.idCentroTrabajo = tokenData.idCentroTrabajo;
+      this.cargarCentrosDeTrabajo();
+    }
 
     this.firstFormGroup
       .get('selectedTipoPlanilla')
       ?.valueChanges.subscribe((selectedValue) => {
-        this.selectedTipoPlanilla = selectedValue;
-        this.idTipoPlanilla = selectedValue[0].ID_TIPO_PLANILLA
-        
-        this.mostrarPrimerPaso = true;
-        this.mostrarSegundoPaso = true;
-        this.mostrarTercerPaso = false;
-        
-        this.datosPlanilla()
-        
-        /* this.mostrarTercerPaso = true; */
-        this.cdr.detectChanges();
-        this.dataSourceItems.paginator = this.paginator;
-        this.dataSourceItems.sort = this.sort;
+        if (selectedValue) {
+          this.selectedTipoPlanilla = selectedValue;
+          this.idTipoPlanilla = selectedValue[0].ID_TIPO_PLANILLA
+          
+          this.mostrarPrimerPaso = true;
+          this.mostrarSegundoPaso = true;
+          this.mostrarTercerPaso = false;
+          
+          this.datosPlanilla()
+          
+          /* this.mostrarTercerPaso = true; */
+          this.cdr.detectChanges();
+          this.dataSourceItems.paginator = this.paginator;
+          this.dataSourceItems.sort = this.sort;
+        } 
       });
 
     this.dataSourceItems = new MatTableDataSource<Item>([]);
@@ -121,25 +128,32 @@ export class PlanillaColegiosPrivadosComponent
     }
   }
 
-  cargarCentrosDeTrabajo() {
-    this.centroTrabajoService.obtenerTodosLosCentrosTrabajoPrivados().subscribe(
-      (centros: Item[]) => {
-        this.dataSourceItems.data = centros;
-        this.dataSourceItems.paginator = this.paginator;
-        this.dataSourceItems.sort = this.sort;
-      },
-      (error) => {
-        console.error('Error al cargar los centros de trabajo', error);
-      }
-    );
+  async reiniciarFormularios() {
+    // Restablecer el estado de los formularios y los pasos
+    this.firstFormGroup.reset();
+    this.mostrarPrimerPaso = true;
+    this.mostrarSegundoPaso = false;
+    this.mostrarTercerPaso = false;
   }
+async cargarCentrosDeTrabajo() {
+  await this.centroTrabajoService.obtenerTodosLosCentrosTrabajoPrivados().subscribe(
+    (centros: Item[]) => {
+      this.dataSourceItems.data = centros;
+      this.dataSourceItems.paginator = this.paginator;
+      this.dataSourceItems.sort = this.sort;
+    },
+    (error) => {
+      console.error('Error al cargar los centros de trabajo', error);
+    }
+  );
+}
 
-  datosPlanilla() {
+  async datosPlanilla() {
     if (this.selectedTipoPlanilla.length>0) {
       const idCentroTrabajo = this.idCentroTrabajo || this.selectedItem?.id_centro_trabajo;
-      
+
       if (idCentroTrabajo) {
-        this.planillaIngresosService.obtenerPlanillaSeleccionada(idCentroTrabajo, this.idTipoPlanilla).subscribe(
+        await this.planillaIngresosService.obtenerPlanillaSeleccionada(idCentroTrabajo, this.idTipoPlanilla).subscribe(
           (response: any) => {
             if (response.data.length > 0) {
               this.idPlanilla = response.data[0].ID_PLANILLA
@@ -171,6 +185,10 @@ export class PlanillaColegiosPrivadosComponent
       }
     } else {
       console.error('No hay ningún tipo de planilla seleccionado');
+      this.mostrarTercerPaso = false;
+      // Reiniciar estados de visibilidad y formulario al no seleccionar un tipo de planilla
+      this.mostrarPrimerPaso = true;
+      this.mostrarSegundoPaso = true;
     }
   }
 
@@ -188,14 +206,13 @@ export class PlanillaColegiosPrivadosComponent
     return null;
   }
 
-  /*   seleccionarBoton(boton: string) {
-      this.botonSeleccionado = boton;
-    } */
-  selectRow(item: Item) {
-    this.idCentroTrabajo = item.id_centro_trabajo
-    this.selectedItem = item;
-    this.mostrarSegundoPaso = true;
-  }
+    async selectRow(item: Item) {
+      this.idCentroTrabajo = item.id_centro_trabajo;
+      this.selectedItem = item;
+      this.mostrarSegundoPaso = true;
+      this.mostrarPrimerPaso = true;
+      this.mostrarTercerPaso = false;
+    }
 
   ngAfterViewInit() {
     this.cargarCentrosDeTrabajo();

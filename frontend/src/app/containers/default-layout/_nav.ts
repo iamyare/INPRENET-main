@@ -74,10 +74,10 @@ export const navItems: INavData[] = [
             url: '/Afiliado/afil-banco',
             name: 'Centros de trabajo',
           },
-          {
+          /* {
             url: '/Afiliado/afil-banco',
             name: 'Historial de salario',
-          },
+          }, */
           {
             url: '/Afiliado/afil-banco',
             name: 'Referencias personales',

@@ -45,9 +45,9 @@ export class Net_ReferenciaPersonal {
     @Column('varchar2', {
         length : 12,
         nullable : false,
-        name: 'TELEFONO_CELULAR'
+        name: 'TELEFONO_PERSONAL'
     })
-     telefono_celular: string;
+    telefono_personal: string;
 
     @OneToMany(() => Net_Ref_Per_Afil, referenciaPersonalAfiliado => referenciaPersonalAfiliado.referenciaPersonal)
     referenciasPersonalesAfiliado: Net_Ref_Per_Afil[];

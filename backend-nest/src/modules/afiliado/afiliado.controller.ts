@@ -47,6 +47,16 @@ export class AfiliadoController {
     return this.afiliadoService.createTemp(createAfiliadoTempDto);
   }
 
+  @Post('createRefPers/:dnireferente')
+  createRefPers(@Body() data: any, @Param() dnireferente) {
+    return this.afiliadoService.createRefPers(data, dnireferente);
+  }
+  
+  @Post('createCentrosTrabPersona/:dnireferente')
+  createCentrosTrabPersona(@Body() data: any, @Param() dnireferente) {
+    return this.afiliadoService.createCentrosTrabPersona(data, dnireferente);
+  }
+
   @Get()
   findAll() {
     return this.afiliadoService.findAll();

@@ -1,5 +1,5 @@
 import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
-import { Net_Ref_Per_Afil } from "./net_ref-Per-Afiliado.entity";
+import { Net_Ref_Per_Pers } from "./net_ref-Per-Persona.entity";
 
 @Entity({name: 'NET_REFERENCIA_PERSONAL'})
 export class Net_ReferenciaPersonal {
@@ -49,7 +49,7 @@ export class Net_ReferenciaPersonal {
     })
     telefono_personal: string;
 
-    @OneToMany(() => Net_Ref_Per_Afil, referenciaPersonalAfiliado => referenciaPersonalAfiliado.referenciaPersonal)
-    referenciasPersonalesAfiliado: Net_Ref_Per_Afil[];
+    @OneToMany(() => Net_Ref_Per_Pers, referenciaPersonalAfiliado => referenciaPersonalAfiliado.referenciaPersonal)
+    referenciasPersonalesAfiliado: Net_Ref_Per_Pers[];
 
 }

@@ -1,9 +1,8 @@
-import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn, AfterInsert, getRepository, AfterLoad, Unique, OneToMany, Check } from 'typeorm';
-
-import { Net_Persona } from '../../../afiliado/entities/Net_Persona.entity';
+import { Check, Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn} from 'typeorm';
 import { Net_Planilla } from '../../planilla/entities/net_planilla.entity';
 import { IsEnum } from 'class-validator';
 import { Net_Deduccion } from '../../deduccion/entities/net_deduccion.entity';
+import { Net_Persona } from 'src/modules/Persona/entities/Net_Persona.entity';
 
 @Entity({ name: 'NET_DETALLE_DEDUCCION' })
 @Check("CK_ESTADO_DED", `estado_aplicacion IN ('COBRADA', 'NO COBRADA', 'EN PRELIMINAR', 'EN PLANILLA')`)
@@ -30,9 +29,9 @@ export class Net_Detalle_Deduccion {
     @Column('timestamp', { default: () => 'CURRENT_TIMESTAMP', name: 'FECHA_APLICADO' })
     fecha_aplicado: Date;
 
-    @ManyToOne(() => Net_Persona, afiliado => afiliado.detalleDeduccion, { cascade: true })
+    @ManyToOne(() => Net_Persona, persona => persona.detalleDeduccion, { cascade: true })
     @JoinColumn({ name: 'ID_PERSONA', foreignKeyConstraintName: "FK_ID_PERSONA_DETDED" })
-    afiliado: Net_Persona;
+    persona: Net_Persona;
 
     @ManyToOne(() => Net_Planilla, planilla => planilla.detalleDeduccion, { cascade: true })
     @JoinColumn({ name: 'ID_PLANILLA', foreignKeyConstraintName: "FK_ID_PLANILLA_DETDED" })

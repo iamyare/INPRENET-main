@@ -1,4 +1,4 @@
-import { Net_Persona } from '../../afiliado/entities/Net_Persona.entity';
+import { Net_Persona } from '../../Persona/entities/Net_Persona.entity';
 import { Entity, Column, PrimaryGeneratedColumn, OneToOne, OneToMany } from 'typeorm';
 
 @Entity({ name: 'NET_TIPO_IDENTIFICACION' })
@@ -9,7 +9,7 @@ export class Net_TipoIdentificacion {
     @Column('varchar', { length: 40, nullable: true, name: 'TIPO_IDENTIFICACION' })
     tipo_identificacion: string;
 
-    @OneToMany(() => Net_Persona, afiliado => afiliado.tipoIdentificacion)
-    afiliado: Net_Persona[];
+    @OneToMany(() => Net_Persona, persona => persona.tipoIdentificacion)
+    persona: Net_Persona[];
 
 }

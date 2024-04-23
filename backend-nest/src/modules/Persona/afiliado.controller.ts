@@ -12,8 +12,8 @@ import {
   HttpStatus,
 } from '@nestjs/common';
 import { AfiliadoService } from './afiliado.service';
-import { CreateAfiliadoDto } from './dto/create-afiliado.dto';
-import { UpdateAfiliadoDto } from './dto/update-afiliado.dto';
+import { CreatePersonaDto } from './dto/create-persona.dto';
+import { UpdatePersonaDto } from './dto/update-persona.dto';
 import { CreateAfiliadoTempDto } from './dto/create-afiliado-temp.dto';
 import { ApiTags } from '@nestjs/swagger';
 
@@ -35,11 +35,6 @@ export class AfiliadoController {
       salarioBase,
     );
     return { message: 'Salario base actualizado con éxito.' };
-  }
-
-  @Post()
-  create(@Body() createAfiliadoDto: CreateAfiliadoDto) {
-    return this.afiliadoService.create(createAfiliadoDto);
   }
 
   @Post('temp')
@@ -99,7 +94,7 @@ export class AfiliadoController {
   @Patch(':id')
   update(
     @Param('id') id: string,
-    @Body() updateAfiliadoDto: UpdateAfiliadoDto,
+    @Body() updateAfiliadoDto: UpdatePersonaDto,
   ) {
     return this.afiliadoService.update(+id, updateAfiliadoDto);
   }

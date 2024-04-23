@@ -1,10 +1,9 @@
 import { BadRequestException, Injectable, InternalServerErrorException, Logger, NotFoundException } from '@nestjs/common';
-import { CreateAfiliadoDto, PersonaResponse } from './dto/create-afiliado.dto';
-import { UpdateAfiliadoDto } from './dto/update-afiliado.dto';
+import { CreatePersonaDto, PersonaResponse } from './dto/create-persona.dto';
+import { UpdatePersonaDto } from './dto/update-persona.dto';
 import { Connection, EntityManager, Repository } from 'typeorm';
 import { InjectEntityManager, InjectRepository } from '@nestjs/typeorm';
-import { Net_perf_afil_cent_trab } from './entities/net_perf_afil_cent_trab.entity';
-import { Net_Afiliados_Por_Banco } from '../banco/entities/net_afiliados-banco.entity';
+import { Net_Persona_Por_Banco } from '../banco/entities/net_persona-banco.entity';
 import { Net_Centro_Trabajo } from '../Empresarial/entities/net_centro_trabajo.entity';
 import { Net_Banco } from '../banco/entities/net_banco.entity';
 import { Net_TipoIdentificacion } from '../tipo_identificacion/entities/net_tipo_identificacion.entity';
@@ -13,9 +12,9 @@ import { CreateAfiliadoTempDto } from './dto/create-afiliado-temp.dto';
 import { validate as isUUID } from 'uuid';
 import { Net_Persona } from './entities/Net_Persona.entity';
 import { Net_Departamento } from '../Regional/provincia/entities/net_departamento.entity';
-import { Net_Estado_Afiliado } from './entities/net_estado_afiliado.entity';
-import { Net_Ref_Per_Afil } from './entities/net_ref-Per-Afiliado.entity';
 import { Net_ReferenciaPersonal } from './entities/referencia-personal.entity';
+import { Net_Ref_Per_Pers } from './entities/net_ref-Per-Persona.entity';
+import { Net_perf_pers_cent_trab } from './entities/net_perf_pers_cent_trab.entity';
 
 @Injectable()
 export class AfiliadoService {
@@ -27,27 +26,24 @@ export class AfiliadoService {
 
     @InjectRepository(Net_Persona)
     private readonly afiliadoRepository: Repository<Net_Persona>,
-    @InjectRepository(Net_perf_afil_cent_trab)
-    private readonly perfAfiliCentTrabRepository: Repository<Net_perf_afil_cent_trab>,
+    @InjectRepository(Net_perf_pers_cent_trab)
+    private readonly perfPersoCentTrabRepository: Repository<Net_perf_pers_cent_trab>,
 
-    @InjectRepository(Net_Ref_Per_Afil)
-    private readonly RefPersRepositoryPersona: Repository<Net_Ref_Per_Afil>,
+    @InjectRepository(Net_Ref_Per_Pers)
+    private readonly RefPersRepositoryPersona: Repository<Net_Ref_Per_Pers>,
 
     @InjectRepository(Net_ReferenciaPersonal)
     private readonly RefPersRepository: Repository<Net_ReferenciaPersonal>,
-
-    @InjectRepository(Net_perf_afil_cent_trab)
-    private readonly perfilCentTrabRepository: Repository<Net_perf_afil_cent_trab>,
 
     private connection: Connection,
   ) { }
 
   async updateSalarioBase(dni: string, idCentroTrabajo: number, salarioBase: number): Promise<void> {
 
-    const perfil = await this.perfAfiliCentTrabRepository
+    const perfil = await this.perfPersoCentTrabRepository
       .createQueryBuilder('perfil')
-      .leftJoinAndSelect('perfil.afiliado', 'afiliado')
-      .where('afiliado.DNI = :dni', { dni })
+      .leftJoinAndSelect('perfil.persona', 'persona')
+      .where('persona.DNI = :dni', { dni })
       .andWhere('perfil.centroTrabajo = :idCentroTrabajo', { idCentroTrabajo })
       .getOne();
 
@@ -56,105 +52,7 @@ export class AfiliadoService {
     }
 
     perfil.salario_base = salarioBase;
-    await this.perfAfiliCentTrabRepository.save(perfil);
-  }
-
-  async create(createAfiliadoDto: CreateAfiliadoDto): Promise<Net_Persona> {
-    const queryRunner = this.connection.createQueryRunner();
-
-    await queryRunner.connect();
-    await queryRunner.startTransaction();
-
-    try {
-      // Verifica y encuentra las entidades necesarias para el afiliado principal
-      const tipoIdentificacion = await queryRunner.manager.findOneBy(Net_TipoIdentificacion, { tipo_identificacion: createAfiliadoDto.tipo_identificacion });
-      if (!tipoIdentificacion) {
-        throw new BadRequestException('Identificacion not found');
-      }
-
-      const pais = await queryRunner.manager.findOneBy(Net_Pais, { nombre_pais: createAfiliadoDto.nombre_pais });
-      if (!pais) {
-        throw new BadRequestException('Pais not found');
-      }
-
-      const departamento = await queryRunner.manager.findOneBy(Net_Departamento, { nombre_departamento: createAfiliadoDto.nombre_departamento });
-      if (!departamento) {
-        throw new BadRequestException('departamento not found');
-      }
-
-      const banco = await queryRunner.manager.findOneBy(Net_Banco, { nombre_banco: createAfiliadoDto.datosBanc.nombreBanco });
-      if (!banco) {
-        throw new BadRequestException('Banco not found');
-      }
-
-      // Crear un nuevo registro en AfiliadosPorBanco para el afiliado principal
-      const afiliadoBanco = queryRunner.manager.create(Net_Afiliados_Por_Banco, {
-        banco,
-        num_cuenta: createAfiliadoDto.datosBanc.numeroCuenta
-      });
-      await queryRunner.manager.save(afiliadoBanco);
-
-      // Verificar y encontrar los centros de trabajo para cada perfAfilCentTrab
-      const perfAfilCentTrabs = await Promise.all(createAfiliadoDto.perfAfilCentTrabs.map(async perfAfilCentTrabDto => {
-        const centroTrabajo = await queryRunner.manager.findOneBy(Net_Centro_Trabajo, { nombre_centro_trabajo: perfAfilCentTrabDto.nombre_centroTrabajo });
-        if (!centroTrabajo) {
-          throw new BadRequestException(`Centro de trabajo no encontrado: ${perfAfilCentTrabDto.nombre_centroTrabajo}`);
-        }
-
-        return queryRunner.manager.create(Net_perf_afil_cent_trab, {
-          ...perfAfilCentTrabDto,
-          centroTrabajo
-        });
-      }));
-
-      // Crear y preparar el nuevo afiliado principal con datos y relaciones
-      /* const newAfiliado = queryRunner.manager.create(Afiliado, {
-          ...createAfiliadoDto,
-      });
-      await queryRunner.manager.save(newAfiliado); */
-
-      // Crear y asociar afiliados hijos
-      if (createAfiliadoDto.afiliadosRelacionados && createAfiliadoDto.afiliadosRelacionados.length > 0) {
-        for (const hijoDto of createAfiliadoDto.afiliadosRelacionados) {
-          const tipoIdentificacionHijo = await queryRunner.manager.findOneBy(Net_TipoIdentificacion, { tipo_identificacion: hijoDto.tipo_identificacion });
-          if (!tipoIdentificacionHijo) {
-            throw new BadRequestException('Identificacion not found for related affiliate');
-          }
-
-          const paisHijo = await queryRunner.manager.findOneBy(Net_Pais, { nombre_pais: hijoDto.nombre_pais });
-          if (!paisHijo) {
-            throw new BadRequestException('Pais not found for related affiliate');
-          }
-
-          const departamentoHijo = await queryRunner.manager.findOneBy(Net_Departamento, { nombre_departamento: hijoDto.nombre_departamento });
-          if (!departamentoHijo) {
-            throw new BadRequestException('departamento not found for related affiliate');
-          }
-
-          /* const bancoHijo = await queryRunner.manager.findOneBy(Banco, { nombre_banco: hijoDto.datosBanc.nombreBanco });
-          if (!bancoHijo) {
-              throw new BadRequestException('Banco not found for related affiliate');
-          }
-
-          const afiliadoBancoHijo = queryRunner.manager.create(AfiliadosPorBanco, {
-              banco: bancoHijo,
-              num_cuenta: hijoDto.datosBanc.numeroCuenta
-          });
-          await queryRunner.manager.save(afiliadoBancoHijo); */
-
-          const afiliadoHijo = 'si'
-          await queryRunner.manager.save(afiliadoHijo);
-        }
-      }
-
-      await queryRunner.commitTransaction();
-      return;
-    } catch (error) {
-      await queryRunner.rollbackTransaction();
-      this.handleException(error);
-    } finally {
-      await queryRunner.release();
-    }
+    await this.perfPersoCentTrabRepository.save(perfil);
   }
 
   async createTemp(createAfiliadoTempDto: CreateAfiliadoTempDto) {
@@ -226,8 +124,8 @@ export class AfiliadoService {
         sector_economico: item.sector_economico,
     }));
 
-      const perfCentrTrab = this.perfilCentTrabRepository.create(arregloFinal);
-      const savedperfCentrTrab = await this.perfilCentTrabRepository.save(perfCentrTrab);
+      const perfCentrTrab = this.perfPersoCentTrabRepository.create(arregloFinal);
+      const savedperfCentrTrab = await this.perfPersoCentTrabRepository.save(perfCentrTrab);
       return savedperfCentrTrab;
 
       /* const centrosTrabajo = this.perfAfiliCentTrabRepository.create(data)
@@ -281,7 +179,7 @@ export class AfiliadoService {
     return personas;
   }
 
-  update(id: number, updateAfiliadoDto: UpdateAfiliadoDto) {
+  update(id: number, updateAfiliadoDto: UpdatePersonaDto) {
     return `This action updates a #${id} afiliado`;
   }
 
@@ -383,7 +281,7 @@ export class AfiliadoService {
       throw new NotFoundException(`Afiliado with DNI ${dni} not found`);
     }
 
-    switch (afiliado.estadoAfiliado.Descripcion) {
+    switch (afiliado.estadoPersona.Descripcion) {
       case 'FALLECIDO':
         return 'El afiliado está fallecido.';
       case 'INACTIVO':
@@ -396,17 +294,17 @@ export class AfiliadoService {
   async buscarPersonaYMovimientosPorDNI(dni: string): Promise<any> {
     const persona = await this.afiliadoRepository.findOne({
       where: { dni },
-      relations: ["cuentas", "cuentas.movimientos", "estadoAfiliado"] // Asegúrate de cargar las cuentas y sus movimientos
+      relations: ["cuentas", "cuentas.movimientos", "estadoPersona"] // Asegúrate de cargar las cuentas y sus movimientos
     });
 
     if (!persona) {
       throw new NotFoundException(`Persona con DNI ${dni} no encontrada`);
     }
 
-    if (['FALLECIDO', 'INACTIVO'].includes(persona.estadoAfiliado?.Descripcion.toUpperCase())) {
+    if (['FALLECIDO', 'INACTIVO'].includes(persona.estadoPersona?.Descripcion.toUpperCase())) {
       return {
         status: 'error',
-        message: `La persona está ${persona.estadoAfiliado.Descripcion.toLowerCase()}.`,
+        message: `La persona está ${persona.estadoPersona.Descripcion.toLowerCase()}.`,
         data: { persona: null, movimientos: [] }
       };
     }

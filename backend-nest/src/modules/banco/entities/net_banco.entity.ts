@@ -1,5 +1,5 @@
 import { Column, PrimaryGeneratedColumn, OneToMany, Entity, Index } from 'typeorm';
-import { Net_Afiliados_Por_Banco } from './net_afiliados-banco.entity';
+import { Net_Persona_Por_Banco } from './net_persona-banco.entity';
 
 @Entity({name:'NET_BANCO'})
 export class Net_Banco {
@@ -14,6 +14,6 @@ export class Net_Banco {
     @Index("UQ_net_banco_cod_banco", { unique : true})
     cod_banco : string;
 
-    @OneToMany(() => Net_Afiliados_Por_Banco, afiliadosPorBanco => afiliadosPorBanco.banco)
-    afiliadosDeBanco : Net_Afiliados_Por_Banco[];
+    @OneToMany(() => Net_Persona_Por_Banco, personasPorBanco =>  personasPorBanco.banco)
+    personasDeBanco : Net_Persona_Por_Banco[];
 }

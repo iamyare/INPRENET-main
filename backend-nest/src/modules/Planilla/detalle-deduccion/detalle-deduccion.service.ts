@@ -6,11 +6,11 @@ import { Net_Detalle_Deduccion } from './entities/detalle-deduccion.entity';
 import { EntityManager, Repository } from 'typeorm';
 import { Net_Institucion } from '../../Empresarial/entities/net_institucion.entity';
 import * as xlsx from 'xlsx';
-import { Net_Persona } from '../../afiliado/entities/Net_Persona.entity';
+import { Net_Persona } from '../../Persona/entities/Net_Persona.entity';
 import { Net_Planilla } from '../planilla/entities/net_planilla.entity';
 import { isUUID } from 'class-validator';
 import { Net_Deduccion } from '../deduccion/entities/net_deduccion.entity';
-import { NET_DETALLE_PERSONA } from 'src/modules/afiliado/entities/Net_detalle_persona.entity';
+import { NET_DETALLE_PERSONA } from 'src/modules/Persona/entities/Net_detalle_persona.entity';
 
 @Injectable()
 export class DetalleDeduccionService {
@@ -21,13 +21,13 @@ export class DetalleDeduccionService {
     @InjectRepository(Net_Detalle_Deduccion)
     private detalleDeduccionRepository: Repository<Net_Detalle_Deduccion>,
     @InjectRepository(Net_Persona)
-    private afiliadoRepository: Repository<Net_Persona>,
+    private personaRepository: Repository<Net_Persona>,
     @InjectRepository(Net_Deduccion)
     private deduccionRepository: Repository<Net_Deduccion>,
     @InjectRepository(Net_Institucion)
     private institucionRepository: Repository<Net_Institucion>,
     @InjectRepository(NET_DETALLE_PERSONA)
-    private detalleAfiliadoRepository: Repository<NET_DETALLE_PERSONA>,
+    private detallepersonaRepository: Repository<NET_DETALLE_PERSONA>,
     @InjectRepository(Net_Planilla)
     private planillaRepository: Repository<Net_Planilla>,
     @InjectEntityManager() private readonly entityManager: EntityManager
@@ -43,14 +43,14 @@ export class DetalleDeduccionService {
         const institucion = await this.institucionRepository.findOne({ where: { nombre_institucion: item.nombre_institucion } });
         if (!institucion) throw new NotFoundException(`Institucion ${item.nombre_institucion} no encontrada`);
 
-        const afiliado = await this.afiliadoRepository.findOne({ where: { dni: item.dni } });
-        if (!afiliado) throw new NotFoundException(`Afiliado con DNI ${item.dni} no encontrado`);
+        const persona = await this.personaRepository.findOne({ where: { dni: item.dni } });
+        if (!persona) throw new NotFoundException(`Pfiliado con DNI ${item.dni} no encontrado`);
 
         const deduccion = await this.deduccionRepository.findOne({ where: { codigo_deduccion: item.codigo_deduccion, institucion } });
         if (!deduccion) throw new NotFoundException(`Deducción con código ${item.codigo_deduccion} no encontrada en la institución ${item.nombre_institucion}`);
 
         const detalleDeduccion = new Net_Detalle_Deduccion();
-        //detalleDeduccion.afiliado = afiliado;
+        //detalleDeduccion.persona = persona;
         detalleDeduccion.deduccion = deduccion;
         detalleDeduccion.anio = parseInt(item.año);
         detalleDeduccion.mes = parseInt(item.mes);
@@ -118,7 +118,7 @@ export class DetalleDeduccionService {
   }
 
 
-  async getDetallesDeduccionPorAfiliadoYPlanilla(idAfiliado: string, idPlanilla: string): Promise<any> {
+  async getDetallesDeduccionPorPersonaYPlanilla(idPersona: string, idPlanilla: string): Promise<any> {
     const query = `
     SELECT
         dd."ID_DED_DEDUCCION",
@@ -138,22 +138,22 @@ export class DetalleDeduccionService {
       INNER JOIN "NET_DEDUCCION" ded ON ded."ID_DEDUCCION" = dd."ID_DEDUCCION" 
       WHERE
         dd."ESTADO_APLICACION" = 'EN PRELIMINAR' AND
-        dd."ID_PERSONA" = '${idAfiliado}' AND 
+        dd."ID_PERSONA" = '${idPersona}' AND 
         dd."ID_PLANILLA" = '${idPlanilla}'
     `;
 
     try {
       // Usar un objeto para pasar los parámetros con nombre
-      //const parameters: any = { idAfiliado: idAfiliado, idPlanilla: idPlanilla };
+      //const parameters: any = { idPersona: idPersona, idPlanilla: idPlanilla };
       const detalleDeducciones = await this.entityManager.query(query);
       return detalleDeducciones;
     } catch (error) {
-      this.logger.error(`Error al obtener detalles de deducción por afiliado y planilla: ${error.message}`, error.stack);
-      throw new InternalServerErrorException('Se produjo un error al obtener los detalles de deducción por afiliado y planilla.');
+      this.logger.error(`Error al obtener detalles de deducción por persona y planilla: ${error.message}`, error.stack);
+      throw new InternalServerErrorException('Se produjo un error al obtener los detalles de deducción por persona y planilla.');
     }
   }
 
-  async getDetallesDeduccioDefinitiva(idAfiliado: string, idPlanilla: string): Promise<any> {
+  async getDetallesDeduccioDefinitiva(idPersona: string, idPlanilla: string): Promise<any> {
     const query = `
     SELECT
         dd."ID_DED_DEDUCCION",
@@ -173,17 +173,17 @@ export class DetalleDeduccionService {
       INNER JOIN "NET_DEDUCCION" ded ON ded."ID_DEDUCCION" = dd."ID_DEDUCCION" 
       WHERE
         dd."ESTADO_APLICACION" = 'COBRADA' AND
-        dd."ID_PERSONA" = '${idAfiliado}' AND 
+        dd."ID_PERSONA" = '${idPersona}' AND 
         dd."ID_PLANILLA" = '${idPlanilla}'
     `;
     try {
       // Usar un objeto para pasar los parámetros con nombre
-      //const parameters: any = { idAfiliado: idAfiliado, idPlanilla: idPlanilla };
+      //const parameters: any = { idPersona: idPersona, idPlanilla: idPlanilla };
       const detalleDeducciones = await this.entityManager.query(query);
       return detalleDeducciones;
     } catch (error) {
-      this.logger.error(`Error al obtener detalles de deducción por afiliado y planilla: ${error.message}`, error.stack);
-      throw new InternalServerErrorException('Se produjo un error al obtener los detalles de deducción por afiliado y planilla.');
+      this.logger.error(`Error al obtener detalles de deducción por persona y planilla: ${error.message}`, error.stack);
+      throw new InternalServerErrorException('Se produjo un error al obtener los detalles de deducción por persona y planilla.');
     }
   }
 
@@ -233,7 +233,7 @@ export class DetalleDeduccionService {
   }
 
 
-  async findInconsistentDeduccionesByAfiliado(idAfiliado: string) {
+  async findInconsistentDeduccionesByAfiliado(idPersona: string) {
     try {
       const query = `
     SELECT  
@@ -249,17 +249,17 @@ export class DetalleDeduccionService {
     INNER JOIN  
       "net_detalle_deduccion" detD ON ded."id_deduccion" = detD."id_deduccion"
     WHERE 
-      detD."estado_aplicacion" = 'INCONSISTENCIA' AND detD."id_afiliado" = '${idAfiliado}'
+      detD."estado_aplicacion" = 'INCONSISTENCIA' AND detD."id_persona" = '${idPersona}'
     `;
 
       return await this.detalleDeduccionRepository.query(query);
     } catch (error) {
-      this.logger.error(`Error al buscar deducciones inconsistentes por afiliado: ${error.message}`);
-      throw new InternalServerErrorException('Error al buscar deducciones inconsistentes por afiliado');
+      this.logger.error(`Error al buscar deducciones inconsistentes por persona: ${error.message}`);
+      throw new InternalServerErrorException('Error al buscar deducciones inconsistentes por persona');
     }
   }
 
-  async obtenerDetallesDeduccionPorAfiliado(idAfiliado: string): Promise<any[]> {
+  async obtenerDetallesDeduccionPorPersona(idPersona: string): Promise<any[]> {
     try {
       const query = `
       SELECT
@@ -269,7 +269,7 @@ export class DetalleDeduccionService {
       detD."estado_aplicacion",
       detD."anio",
       detD."mes",
-      afil."id_afiliado",
+      afil."id_persona",
       afil."dni",
       TRIM(
           afil."primer_nombre" || ' ' || 
@@ -287,30 +287,30 @@ export class DetalleDeduccionService {
     JOIN
       "net_deduccion" ded ON detD."id_deduccion" = ded."id_deduccion"
     JOIN
-      "Net_Persona" afil ON detD."id_afiliado" = afil."id_afiliado"
+      "Net_Persona" afil ON detD."id_persona" = afil."id_persona"
       JOIN
       "net_institucion" inst ON inst."id_institucion" = ded."id_institucion"
     WHERE
-      detD."id_afiliado" = :1 AND
+      detD."id_persona" = :1 AND
       detD."estado_aplicacion" != 'INCONSISTENCIA' AND
-      detD."id_afiliado" NOT IN (
-          SELECT detD2."id_afiliado"
+      detD."id_persona" NOT IN (
+          SELECT detD2."id_persona"
           FROM "net_detalle_deduccion" detD2
           WHERE detD2."estado_aplicacion" = 'COBRADA'
       )
-      AND detD."id_afiliado" NOT IN (
-          SELECT dedBA."id_afiliado"
+      AND detD."id_persona" NOT IN (
+          SELECT dedBA."id_persona"
           FROM "net_detalle_pago_beneficio" detB
           JOIN
               "net_detalle_beneficio_afiliado" dedBA ON detB."id_beneficio_afiliado" = dedBA."id_detalle_ben_afil"
           WHERE detB."estado" = 'PAGADA'
       )
     ORDER BY
-      afil."id_afiliado",
+      afil."id_persona",
       ded."id_deduccion"
   `;
 
-      return await this.detalleDeduccionRepository.query(query, [idAfiliado]);
+      return await this.detalleDeduccionRepository.query(query, [idPersona]);
     } catch (error) {
       this.logger.error('Error al obtener detalles de deduccion por afiliado', error.stack);
       throw new InternalServerErrorException('Error al obtener detalles de deduccion por afiliado');
@@ -346,7 +346,7 @@ export class DetalleDeduccionService {
     const { dni, nombre_deduccion, nombre_institucion, monto_total, monto_aplicado, estado_aplicacion, anio, mes } = createDetalleDeduccionDto;
 
     // Buscar el afiliado por DNI
-    const persona = await this.afiliadoRepository.findOne({ where: { dni } });
+    const persona = await this.personaRepository.findOne({ where: { dni } });
     if (!persona) {
       throw new NotFoundException(`Afiliado con DNI '${dni}' no encontrado.`);
     }
@@ -365,7 +365,7 @@ export class DetalleDeduccionService {
     // Guardar el nuevo DetalleDeduccion en la base de datos
     try {
       const nuevoDetalleDeduccion = this.detalleDeduccionRepository.create({
-        afiliado: persona,
+        persona: persona,
         deduccion: deduccion,
         //institucion: institucion,
         monto_total: monto_total,
@@ -433,7 +433,7 @@ export class DetalleDeduccionService {
 
     // Buscar el afiliado por DNI
     if (dni) {
-      const afiliado = await this.afiliadoRepository.findOne({ where: { dni } });
+      const afiliado = await this.personaRepository.findOne({ where: { dni } });
       if (!afiliado) {
         throw new NotFoundException(`Afiliado con DNI '${dni}' no encontrado.`);
       }
@@ -515,22 +515,22 @@ export class DetalleDeduccionService {
   
   
   arrayTemp.forEach((item) => {
-    const idAfiliado = item.idAfiliado;
+    const idPersona = item.idPersona;
     const deduccion = item.deduccion;
     const salarioBase = Math.max(item.salario_base - valorMinimo, valorMinimo);
     
     const deduccions = item.deduccion.montoDeduccion;
     
-    if (!resultados[idAfiliado]) {
-      resultados[idAfiliado] = {
+    if (!resultados[idPersona]) {
+      resultados[idPersona] = {
         salarioBase: salarioBase,
         salarioRestante: salarioBase,
         deducciones: {},
       };
     }
     
-    let salarioRestante = resultados[idAfiliado].salarioRestante;
-    const deducciones = resultados[idAfiliado].deducciones;
+    let salarioRestante = resultados[idPersona].salarioRestante;
+    const deducciones = resultados[idPersona].deducciones;
     
     // Buscar si la deducción ya existe en las deducciones
     // const nombreInstitucion = deduccion.nombre_institucion; //
@@ -563,8 +563,8 @@ export class DetalleDeduccionService {
     deducciones[deduccion.id_deduccion].valor_utilizado = montoDeduccion;
     deducciones[deduccion.id_deduccion].valor_no_utilizado = Math.abs(deducciones[deduccion.id_deduccion].montoDeduccion - deducciones[deduccion.id_deduccion].valor_utilizado) ;
     
-    resultados[idAfiliado].salarioBase = salarioBase;
-    resultados[idAfiliado].deducciones = deducciones;
+    resultados[idPersona].salarioBase = salarioBase;
+    resultados[idPersona].deducciones = deducciones;
   });
   
   Object.values(resultados).forEach((afiliado:any) => {

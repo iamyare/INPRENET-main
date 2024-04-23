@@ -1,4 +1,4 @@
-import { Net_perf_afil_cent_trab } from "../../afiliado/entities/net_perf_afil_cent_trab.entity";
+import { Net_perf_pers_cent_trab } from "src/modules/Persona/entities/net_perf_pers_cent_trab.entity";
 import { Net_Detalle_planilla_ingreso } from "../../Planilla/Ingresos/detalle-plan-ingr/entities/net_detalle_plani_ing.entity";
 import { Net_Departamento } from "../../Regional/provincia/entities/net_departamento.entity";
 import { Column, Entity, Index, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn } from "typeorm";
@@ -47,9 +47,9 @@ export class Net_Centro_Trabajo {
     @JoinColumn({ name: 'ID_DEPARTAMENTO', foreignKeyConstraintName: "FK_ID_DEPARTAMENTO_CENT_TRAB" })
     departamento: Net_Departamento;
 
-    @OneToMany(() => Net_perf_afil_cent_trab, perfAfilCentTrab => perfAfilCentTrab.centroTrabajo)
+    @OneToMany(() => Net_perf_pers_cent_trab, perfAfilCentTrab => perfAfilCentTrab.centroTrabajo)
     @JoinColumn({ name: 'ID_PERFIL_AFIL_CENTR_TRAB' })
-    perfAfilCentTrabs: Net_perf_afil_cent_trab[];
+    perfAfilCentTrabs: Net_perf_pers_cent_trab[];
 
     @OneToMany(() => Net_Detalle_planilla_ingreso, detallePlanIngreso => detallePlanIngreso.centroTrabajo)
     detalle_plani_ingr: Net_Detalle_planilla_ingreso[];

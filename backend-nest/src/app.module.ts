@@ -2,7 +2,7 @@ import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { CommonModule } from './common/common.module';
-import { AfiliadoModule } from './modules/afiliado/afiliado.module';
+import { AfiliadoModule } from './modules/Persona/afiliado.module';
 import { BancoModule } from './modules/banco/banco.module';
 import { UsuarioModule } from './modules/usuario/usuario.module';
 import { TipoIdentificacionModule } from './modules/tipo_identificacion/tipo_identificacion.module';
@@ -29,7 +29,7 @@ import { TransaccionesModule } from './modules/transacciones/transacciones.modul
         synchronize: true,
         entities: [__dirname + '/../**/*.entity{.ts,.js}'],
         migrations: ['src/database/migrations/*{.ts,.js}'],
-        //logging: ['error'] // solo loguear errores
+        logging: ['error'] // solo loguear errores
 
       }),
       inject: [ConfigService]

@@ -2,15 +2,15 @@ import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from "t
 import { Net_ReferenciaPersonal } from "./referencia-personal.entity";
 import { Net_Persona } from "./Net_Persona.entity";
 
-@Entity({name:'NET_REF_PER_AFIL'})
-export class Net_Ref_Per_Afil {
+@Entity({name:'NET_REF_PER_PERS'})
+export class Net_Ref_Per_Pers {
 
     @PrimaryGeneratedColumn({ type: 'int',name: 'ID_REF_PERSONAL_AFIL',  primaryKeyConstraintName: 'PK_id_refPer_refPer'})
     id_ref_personal_afil: number;
 
-    @ManyToOne(() => Net_Persona, afiliado => afiliado.referenciasPersonalAfiliado)
-    @JoinColumn({ name: 'ID_PERSONA', foreignKeyConstraintName:"FK_ID_PERSONA_REF_PER_AFIL"})
-    afiliado: any;
+    @ManyToOne(() => Net_Persona, persona => persona.referenciasPersonalPersona)
+    @JoinColumn({ name: 'ID_PERSONA', foreignKeyConstraintName:"FK_ID_PERSONA_REF_PER_PERS"})
+    persona: any;
 
     @ManyToOne(() => Net_ReferenciaPersonal, referenciaPersonal => referenciaPersonal.referenciasPersonalesAfiliado)
     @JoinColumn({ name: 'ID_REF_PERSONAL', foreignKeyConstraintName:"FK_ID_REF_PERSONAL_REF_PER_AFIL" })

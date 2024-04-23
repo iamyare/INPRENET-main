@@ -1,10 +1,10 @@
 import { Column, Entity, Index, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 import { Net_Banco } from "./net_banco.entity";
 // import { BeneficioPlanilla } from "../../Planilla/beneficio_planilla/entities/detalle_beneficio.entity";
-import { Net_Persona } from "../../afiliado/entities/Net_Persona.entity";
+import { Net_Persona } from "../../Persona/entities/Net_Persona.entity";
 
-@Entity({ name: 'NET_AFILIADOS_POR_BANCO' })
-export class Net_Afiliados_Por_Banco {
+@Entity({ name: 'NET_PERSONA_POR_BANCO' })
+export class Net_Persona_Por_Banco {
     @PrimaryGeneratedColumn({ type: 'int', name: 'ID_AF_BANCO', primaryKeyConstraintName: 'PK_id_af_banco_AfilBan' })
     id_af_banco: number;
 
@@ -15,13 +15,13 @@ export class Net_Afiliados_Por_Banco {
     @Column('varchar2', { nullable: false, length: 20, name: 'ESTADO' })
     estado: string;
 
-    @ManyToOne(() => Net_Banco, banco => banco.afiliadosDeBanco, { cascade: true })
-    @JoinColumn({ name: 'ID_BANCO', foreignKeyConstraintName: "FK_ID_BANCO_AFILBANC" })
+    @ManyToOne(() => Net_Banco, banco => banco.personasDeBanco, { cascade: true })
+    @JoinColumn({ name: 'ID_BANCO', foreignKeyConstraintName: "FK_ID_BANCO_PERSBANC" })
     banco: Net_Banco;
 
-    @ManyToOne(() => Net_Persona, afiliado => afiliado.afiliadosPorBanco, { cascade: true })
-    @JoinColumn({ name: 'ID_PERSONA', foreignKeyConstraintName: "FK_ID_PERSONA_AFILBANC" })
-    afiliado: Net_Persona;
+    @ManyToOne(() => Net_Persona, persona => persona.personasPorBanco, { cascade: true })
+    @JoinColumn({ name: 'ID_PERSONA', foreignKeyConstraintName: "FK_ID_PERSONA_PERSBANC" })
+    persona: Net_Persona;
 
 
 }

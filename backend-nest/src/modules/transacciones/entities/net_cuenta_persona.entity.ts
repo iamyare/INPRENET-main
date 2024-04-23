@@ -1,4 +1,4 @@
-import { Net_Persona } from "../../afiliado/entities/Net_Persona.entity";
+import { Net_Persona } from "../../Persona/entities/Net_Persona.entity";
 import { Check, Column, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryColumn, PrimaryGeneratedColumn } from "typeorm";
 import { NET_TIPO_CUENTA } from "./net_tipo_cuenta.entity";
 import { NET_MOVIMIENTO_CUENTA } from "./net_movimiento_cuenta.entity";

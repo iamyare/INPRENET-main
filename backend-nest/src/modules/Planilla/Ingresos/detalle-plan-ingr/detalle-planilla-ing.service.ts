@@ -6,7 +6,7 @@ import { Net_TipoPlanilla } from '../../tipo-planilla/entities/tipo-planilla.ent
 import { Net_Detalle_planilla_ingreso } from './entities/net_detalle_plani_ing.entity';
 import { Net_Planilla } from '../../planilla/entities/net_planilla.entity';
 import { DateTime } from 'luxon';
-import { Net_Persona } from '../../../afiliado/entities/Net_Persona.entity';
+import { Net_Persona } from '../../../Persona/entities/Net_Persona.entity';
 import * as oracledb from 'oracledb';
 import { CreateDetallePlanIngDto } from './dto/create-detalle-plani-Ing.dto';
 
@@ -132,8 +132,8 @@ export class DetallePlanillaIngresoService {
     const { prestamos } = createDetPlanIngDTO
 
     let persona = await this.personaRepository.findOne({
-      where: { dni: dni, perfAfilCentTrabs: { centroTrabajo: { id_centro_trabajo: id_centro_educativo } } },
-      relations: ["perfAfilCentTrabs", "perfAfilCentTrabs.centroTrabajo"]
+      where: { dni: dni, perfPersCentTrabs: { centroTrabajo: { id_centro_trabajo: id_centro_educativo } } },
+      relations: ["perfPersCentTrabs", "perfPersCentTrabs.centroTrabajo"]
     });
 
     if (!persona) {
@@ -145,7 +145,7 @@ export class DetallePlanillaIngresoService {
       sueldo: 5000,
       prestamos: prestamos,
       id_centro_educativo: id_centro_educativo,
-      sector_economico: persona.perfAfilCentTrabs[0].centroTrabajo.sector_economico,
+      sector_economico: persona.perfPersCentTrabs[0].centroTrabajo.sector_economico,
       id_planilla: id_planilla
     }
 
@@ -162,8 +162,8 @@ export class DetallePlanillaIngresoService {
   async obtPersonaPorCentTrab(dni: string, id_centro_educativo: number): Promise<any> {
 
     let persona = await this.personaRepository.findOne({
-      where: { dni: dni, perfAfilCentTrabs: { centroTrabajo: { id_centro_trabajo: id_centro_educativo } } },
-      relations: ["perfAfilCentTrabs", "perfAfilCentTrabs.centroTrabajo"]
+      where: { dni: dni, perfPersCentTrabs: { centroTrabajo: { id_centro_trabajo: id_centro_educativo } } },
+      relations: ["perfPersCentTrabs", "perfPersCentTrabs.centroTrabajo"]
     });
 
     if (!persona) {

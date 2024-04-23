@@ -35,7 +35,7 @@ export interface PersonaResponse {
 }
 
 
-export class CreateAfiliadoDto {
+export class CreatePersonaDto {
 
     //Datos de tabla Afiliado
     @IsString()

@@ -47,13 +47,13 @@ export class DetalleDeduccionController {
 
   @Get('detallesPreliminar')
   async getDetallesDeduccionPorAfiliadoYPlanilla(
-    @Query('idAfiliado') idAfiliado: string,
+    @Query('idPersona') idPersona: string,
     @Query('idPlanilla') idPlanilla: string,
     @Response() res
   ) {
 
     try {
-      const detalles = await this.detalleDeduccionService.getDetallesDeduccionPorAfiliadoYPlanilla(idAfiliado, idPlanilla);
+      const detalles = await this.detalleDeduccionService.getDetallesDeduccionPorPersonaYPlanilla(idPersona, idPlanilla);
       return res.status(HttpStatus.OK).json(detalles);
     } catch (error) {
       return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: 'Error al obtener los detalles de deducción', error: error.message });
@@ -62,13 +62,13 @@ export class DetalleDeduccionController {
 
   @Get('detallesDefinitiva')
   async getDetallesDeduccioDefinitiva(
-    @Query('idAfiliado') idAfiliado: string,
+    @Query('idPersona') idPersona: string,
     @Query('idPlanilla') idPlanilla: string,
     @Response() res
   ) {
 
     try {
-      const detalles = await this.detalleDeduccionService.getDetallesDeduccioDefinitiva(idAfiliado, idPlanilla);
+      const detalles = await this.detalleDeduccionService.getDetallesDeduccioDefinitiva(idPersona, idPlanilla);
       return res.status(HttpStatus.OK).json(detalles);
     } catch (error) {
       return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: 'Error al obtener los detalles de deducción', error: error.message });
@@ -78,27 +78,27 @@ export class DetalleDeduccionController {
 
   @Get('/rango-deducciones')
   async getRangoDetalleDeducciones(
-    @Query('idAfiliado') idAfiliado: string,
+    @Query('idPersona') idPersona: string,
     @Query('fechaInicio') fechaInicio: string,
     @Query('fechaFin') fechaFin: string
   ) {
-    if (!idAfiliado || !fechaInicio || !fechaFin) {
-      throw new BadRequestException('El ID del afiliado, la fecha de inicio y la fecha de fin son obligatorios');
+    if (!idPersona || !fechaInicio || !fechaFin) {
+      throw new BadRequestException('El ID de la persona, la fecha de inicio y la fecha de fin son obligatorios');
     }
-    return await this.detalleDeduccionService.getRangoDetalleDeducciones(idAfiliado, fechaInicio, fechaFin);
+    return await this.detalleDeduccionService.getRangoDetalleDeducciones(idPersona, fechaInicio, fechaFin);
   }
 
-  @Get('inconsistencias/:idAfiliado')
-  async getInconsistencias(@Param('idAfiliado') idAfiliado: string) {
-    return this.detalleDeduccionService.findInconsistentDeduccionesByAfiliado(idAfiliado);
+  @Get('inconsistencias/:idPersona')
+  async getInconsistencias(@Param('idPersona') idPersona: string) {
+    return this.detalleDeduccionService.findInconsistentDeduccionesByAfiliado(idPersona);
   }
 
-  @Get('/detallesDeducc-complementaria-afiliado')
-  async obtenerDetallesPorAfiliado(@Query('idAfiliado') idAfiliado: string) {
-    if (!idAfiliado) {
-      throw new BadRequestException('Se requiere el parámetro idAfiliado');
+  @Get('/detallesDeducc-complementaria-persona')
+  async obtenerDetallesPorAfiliado(@Query('idPersona') idPersona: string) {
+    if (!idPersona) {
+      throw new BadRequestException('Se requiere el parámetro idPersona');
     }
-    return this.detalleDeduccionService.obtenerDetallesDeduccionPorAfiliado(idAfiliado);
+    return this.detalleDeduccionService.obtenerDetallesDeduccionPorPersona(idPersona);
   }
 
   @Patch('/actualizar-deduccion-planilla')

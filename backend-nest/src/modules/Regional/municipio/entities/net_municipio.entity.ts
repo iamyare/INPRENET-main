@@ -1,6 +1,6 @@
 import { Column, Entity, PrimaryGeneratedColumn, ManyToOne, OneToMany, JoinColumn } from 'typeorm';
 import { Net_Departamento } from '../../provincia/entities/net_departamento.entity';
-import { Net_Persona } from '../../../afiliado/entities/Net_Persona.entity';
+import { Net_Persona } from '../../../Persona/entities/Net_Persona.entity';
 
 @Entity({ name: 'NET_MUNICIPIO' })
 export class Net_Municipio {
@@ -14,6 +14,6 @@ export class Net_Municipio {
     @JoinColumn({ name: 'ID_DEPARTAMENTO', foreignKeyConstraintName: "FK_IDDEP_MUNIC" })
     departamento: Net_Departamento;
 
-    @OneToMany(() => Net_Persona, afiliado => afiliado.municipio)
-    afiliado: Net_Persona[];
+    @OneToMany(() => Net_Persona, persona => persona.municipio)
+    persona: Net_Persona[];
 }

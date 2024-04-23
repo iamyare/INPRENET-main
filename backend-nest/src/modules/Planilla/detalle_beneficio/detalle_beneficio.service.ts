@@ -2,16 +2,15 @@ import * as oracledb from 'oracledb';
 import { BadRequestException, Injectable, InternalServerErrorException, Logger, NotFoundException } from '@nestjs/common';
 import { isUUID } from 'class-validator';
 import { InjectEntityManager, InjectRepository } from '@nestjs/typeorm';
-import { EntityManager, Repository } from 'typeorm';
+import { EntityManager, Repository, SelectQueryBuilder } from 'typeorm';
 import { Net_Beneficio } from '../beneficio/entities/net_beneficio.entity';
-import { Net_Persona } from '../../afiliado/entities/Net_Persona.entity';
+import { Net_Persona } from '../../Persona/entities/Net_Persona.entity';
 import { Net_Detalle_Pago_Beneficio } from './entities/net_detalle_pago_beneficio.entity';
 import { UpdateDetalleBeneficioDto } from './dto/update-detalle_beneficio_planilla.dto';
 import { CreateDetalleBeneficioDto } from './dto/create-detalle_beneficio.dto';
 import { Net_Planilla } from '../planilla/entities/net_planilla.entity';
 import { Net_Detalle_Beneficio_Afiliado } from './entities/net_detalle_beneficio_afiliado.entity';
-import { Net_Estado_Afiliado } from '../../afiliado/entities/net_estado_afiliado.entity';
-import { NET_DETALLE_PERSONA } from 'src/modules/afiliado/entities/Net_detalle_persona.entity';
+import { NET_DETALLE_PERSONA } from 'src/modules/Persona/entities/Net_detalle_persona.entity';
 @Injectable()
 export class DetalleBeneficioService {
   private readonly logger = new Logger(DetalleBeneficioService.name)
@@ -67,15 +66,15 @@ export class DetalleBeneficioService {
               tipoAfiliado: {
                 tipo_afiliado: "AFILIADO",
               },
-              afiliado: {
-                estadoAfiliado: { Descripcion: "ACTIVO" },
+              persona: {
+                estadoPersona: { Descripcion: "ACTIVO" },
               }
             },
             relations: [
-              "afiliado",
-              "padreIdAfiliado",
-              "afiliado.detalleAfiliado.padreIdAfiliado",
-              "afiliado.estadoAfiliado"]
+              "persona",
+              "padreIdPersona",
+              "persona.detallePersona.padreIdPersona",
+              "persona.estadoPersona"]
           }
           );
 
@@ -110,15 +109,15 @@ export class DetalleBeneficioService {
               tipoAfiliado: {
                 tipo_afiliado: "BENEFICIARIO",
               },
-              afiliado: {
-                estadoAfiliado: { Descripcion: "ACTIVO" },
+              persona: {
+                estadoPersona: { Descripcion: "ACTIVO" },
               }
             },
             relations: [
-              "afiliado",
-              "padreIdAfiliado",
-              "afiliado.detalleAfiliado.padreIdAfiliado",
-              "afiliado.estadoAfiliado"]
+              "persona",
+              "padreIdPersona",
+              "persona.detallePersona.padreIdPersona",
+              "persona.estadoPersona"]
           }
           );
 
@@ -640,4 +639,8 @@ export class DetalleBeneficioService {
     }
   }
 
+}
+
+function Net_Estado_Afiliado(qb: SelectQueryBuilder<any>): SelectQueryBuilder<any> {
+  throw new Error('Function not implemented.');
 }

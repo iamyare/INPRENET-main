@@ -2,16 +2,10 @@ import { Entity, Column, PrimaryGeneratedColumn, ManyToOne, JoinColumn } from "t
 import { Net_Colegios_Magisteriales } from "./net_colegios_magisteriales.entity";
 import { Net_Persona } from "src/modules/Persona/entities/Net_Persona.entity";
 
-@Entity("NET_PERSONA_COLEGIOS")
+@Entity("NET_PERSONA_COLEGIOS_MAGISTERIALES")
 export class Net_Persona_Colegios {
     @PrimaryGeneratedColumn()
-    id: number; // Un identificador único para cada fila si es necesario
-
-    @Column()
-    idPersona: number;
-
-    @Column()
-    idColegio: number;
+    id: number; 
 
     @ManyToOne(() => Net_Persona, persona => persona.colegiosMagisteriales)
     @JoinColumn({ name: "ID_PERSONA", referencedColumnName: "id_persona", foreignKeyConstraintName: "FK_NET_PERSONA_COLEGIOS_PERSONA" })

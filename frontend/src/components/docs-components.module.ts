@@ -50,6 +50,9 @@ import { EditarDialogComponent } from './editar-dialog/editar-dialog.component';
 import { TotalesporbydDialogComponent } from './totalesporbydDialog/totalesporbydDialog.component';
 import { DynamicFormDialogComponent } from './dynamic-form-dialog/dynamic-form-dialog.component';
 import { ConfirmDialogComponent } from './confirm-dialog/confirm-dialog.component';
+import { AgregarPuestTrabComponent } from './agregar-puest-trab/agregar-puest-trab.component';
+import { AgregarReferenciasPersonalesComponent } from './agregar-referencias-personales/agregar-referencias-personales.component';
+import { AgregarBenefCompComponent } from './agregar-benef-comp/agregar-benef-comp.component';
 
 @NgModule({
   declarations: [
@@ -70,7 +73,10 @@ import { ConfirmDialogComponent } from './confirm-dialog/confirm-dialog.componen
     EditarDialogComponent,
     TotalesporbydDialogComponent,
     DynamicFormDialogComponent,
-    ConfirmDialogComponent
+    ConfirmDialogComponent,
+    AgregarPuestTrabComponent,
+    AgregarBenefCompComponent,
+    AgregarReferenciasPersonalesComponent
   ],
   exports: [
     ProgressbarComponent,
@@ -89,7 +95,10 @@ import { ConfirmDialogComponent } from './confirm-dialog/confirm-dialog.componen
     EditarDialogComponent,
     TotalesporbydDialogComponent,
     DynamicFormDialogComponent,
-    ConfirmDialogComponent
+    ConfirmDialogComponent,
+    AgregarPuestTrabComponent,
+    AgregarBenefCompComponent,
+    AgregarReferenciasPersonalesComponent
   ],
   imports: [
     WebcamModule,

@@ -32,6 +32,7 @@ export function generateAddressFormGroup(datos?: any): FormGroup {
     colegioMagisterial: new FormControl(datos?.colegioMagisterial, [Validators.required]),
     numeroCarnet: new FormControl(datos?.numeroCarnet, [Validators.required]),
     nacionalidad: new FormControl(datos?.nacionalidad, Validators.required),
+    municipioResidencia: new FormControl(datos?.municipioResidencia, Validators.required),
   });
 }
 

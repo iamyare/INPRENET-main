@@ -1,5 +1,5 @@
 <div class="card">
-  <div class="card-header card-header-danger tittle" style="background: rgb(29, 192, 192);">
+  <div class="card-header card-header-danger tittle" style="background: #229e92;">
     <h4 class="card-title">Referencias Personales</h4>
     <p class="card-category">Completa la información correspondiente</p>
   </div>
@@ -55,12 +55,12 @@
     </div>
   </form>
 
-  <div class="row">
+  <div class="row" style="text-align: center; margin: 1%;">
     <div class="col-md-6">
-      <button mat-button color="primary" (click)="agregarRefPer()">Agregar Referencia Personal</button>
+      <button mat-button color="primary" (click)="agregarRefPer()"><mat-icon matSuffix>exposure_plus_1</mat-icon>Agregar Referencia Personal</button>
     </div>
     <div class="col-md-6">
-      <button mat-button color="warn" (click)="eliminarRefPer()">Eliminar Referencia Personal</button>
+      <button mat-button color="warn" (click)="eliminarRefPer()"><mat-icon matSuffix>exposure_neg_1</mat-icon>Eliminar Referencia Personal</button>
     </div>
   </div>
 </div>

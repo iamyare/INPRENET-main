@@ -24,6 +24,10 @@ import { CargarPlanillaPrivadosComponent } from '../pages/Centros Privados/carga
 import { NuevoMovimientoComponent } from '../pages/Generales/nuevo-movimiento/nuevo-movimiento.component';
 import { VerMovimientosComponent } from '../pages/Generales/ver-movimientos/ver-movimientos.component';
 import { PlanillaColegiosPrivadosComponent } from '../pages/Centros Privados/planilla-colegios-privados/planilla-colegios-privados.component';
+import { EditPerfilPuestTrabComponent } from '../pages/Generales/edit-perfil-puest-trab/edit-perfil-puest-trab.component';
+import { EditReferPersonalesComponent } from '../pages/Generales/edit-refer-personales/edit-refer-personales.component';
+import { EditDatosGeneralesComponent } from '../pages/Generales/edit-datos-generales/edit-datos-generales.component';
+import { EditBeneficiariosComponent } from '../pages/Generales/edit-beneficiarios/edit-beneficiarios.component';
 
 const routes: Routes = [
   //rutas Afiliado
@@ -39,11 +43,47 @@ const routes: Routes = [
         redirectTo: 'dashboard',
       },
       {
-        path: 'afil-banco',
-        component: AfilBancoComponent,
+        path: '',
         data: {
-          title: 'Nuevo Afiliado',
+          title: '',
         },
+        children: [
+          {
+            path: 'nuevo-afiliado',
+            component: AfilBancoComponent,
+            data: {
+              title: 'Nuevo Afiliado',
+            },
+          },
+          {
+            path: 'edit-datos-generales',
+            component: EditDatosGeneralesComponent,
+            data: {
+              title: 'Editar Datos Generales',
+            },
+          },
+          {
+            path: 'Edit-Perfil-Puest-Trab',
+            component: EditPerfilPuestTrabComponent,
+            data: {
+              title: 'Editar Puestos de Trabajo',
+            },
+          },
+          {
+            path: 'edit-refer-personales',
+            component: EditReferPersonalesComponent,
+            data: {
+              title: 'Editar Referencias Personales',
+            },
+          },
+          {
+            path: 'edit-beneficiarios',
+            component: EditBeneficiariosComponent,
+            data: {
+              title: 'Editar Beneficiarios',
+            },
+          },
+        ]
       },
       {
         path: 'Beneficios/nuevo-beneficio-afil',

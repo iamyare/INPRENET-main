@@ -35,9 +35,11 @@ export class RefPersComponent {
 
   ngOnInit():void{
     this.initFormParent();
-    if (this.datos.value.refpers.length>0){
-      for (let i of this.datos.value.refpers){
-        this.agregarRefPer(i)
+    if(this.datos){
+      if (this.datos.value.refpers.length>0){
+        for (let i of this.datos.value.refpers){
+          this.agregarRefPer(i)
+        }
       }
     }
   }

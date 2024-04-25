@@ -29,6 +29,38 @@ export class AfiliadoService {
     );
   }
 
+  getAllReferenciasPersonales(dni:string): Observable<any | void> {
+    const url = `${environment.API_URL}/api/afiliado/getAllReferenciasPersonales/${dni}`;
+
+    return this.http.get<any>(
+      url,
+    ).pipe(
+      map((res: any) => {
+        return res;
+      })
+    );
+  }
+
+  updateReferenciaPersonal(id: string, referPersData: any): Observable<any> {
+    return this.http.put(`${environment.API_URL}/api/afiliado/updateReferenciaPerson/${id}`, referPersData);
+  }
+
+  getAllPerfCentroTrabajo(dni:string): Observable<any | void> {
+    const url = `${environment.API_URL}/api/afiliado/getAllPerfCentroTrabajo/${dni}`;
+    
+    return this.http.get<any>(
+      url,
+    ).pipe(
+      map((res: any) => {
+        return res;
+      })
+    );
+  }
+
+  updatePerfCentroTrabajo(id: string, PerfCentTrabData: any): Observable<any> {
+    return this.http.put(`${environment.API_URL}/api/afiliado/updatePerfCentroTrabajo/${id}`, PerfCentTrabData);
+  }
+
   getAfiliadoDNI(param: string | number): Observable<any | void> {
     const url = `${environment.API_URL}/api/afiliado/dni/${param}`;
     return this.http.get<any>(
@@ -142,9 +174,21 @@ export class AfiliadoService {
     )
   }
 
-  /* BENEFICIARIOS */
+  /* BENEFICIARIOS PARA UN CAUSANTE FALLECIDO*/
   obtenerBenDeAfil(dniAfil: string | number): Observable<any | void> {
     const url = `${environment.API_URL}/api/afiliado/obtenerBenDeAfil/${dniAfil}`;
+    return this.http.get<any>(
+      url,
+    ).pipe(
+      map((res: any) => {
+        return res;
+      })
+    );
+  }
+
+  /* BENEFICIARIOS PARA UN CAUSANTE SIN IMPORTAR SI ESTA ACTIVO O FALLECIDO*/
+  getAllBenDeAfil(dniAfil: string | number): Observable<any | void> {
+    const url = `${environment.API_URL}/api/afiliado/getAllBenDeAfil/${dniAfil}`;
     return this.http.get<any>(
       url,
     ).pipe(

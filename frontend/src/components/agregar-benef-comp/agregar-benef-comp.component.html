@@ -1,0 +1,17 @@
+<form [formGroup]="form" #myForm="ngForm" change="getLabel()">
+    <app-benef
+    [datos]="formBeneficiarios"
+    (newDatBenChange)="setDatosBen($event)"
+  ></app-benef>
+</form>
+
+<div style="text-align: center;">
+    <button
+      mat-raised-button
+      color="primary"
+      style="color: white; margin: 1% 0 1% 0"
+      [disabled]="form.invalid"
+      >
+      Guardar
+    </button>
+  </div>

@@ -84,7 +84,7 @@
       </div>
       <div class="row">
         <div class="col-md-4">
-          <mat-form-field appearance="outline">
+          <mat-form-field class="example-full-width; inputs" appearance="outline">
             <mat-label>Nacionalidad</mat-label>
             <mat-select formControlName="nacionalidad">
               <mat-option *ngFor="let nacionalidad of nacionalidades" [value]="nacionalidad.value">
@@ -93,15 +93,22 @@
             </mat-select>
           </mat-form-field>
         </div>
-        <div class="col-md-4">
-          <!-- <mat-form-field class="example-full-width; inputs" appearance="outline">
+        <!-- <div class="col-md-4">
+           <mat-form-field class="example-full-width; inputs" appearance="outline">
             <mat-label>Nacionalidad</mat-label>
             <select matNativeControl formControlName="ciudadNacimiento">
               <option *ngFor="let p of departamentos" [value]="p.NACIONALIDAD">
                 {{p.NACIONALIDAD}}
               </option>
             </select>
-          </mat-form-field> -->
+          </mat-form-field> 
+        </div>-->
+        <div class="col-md-4">
+          <mat-form-field class="example-full-width; inputs" appearance="outline">
+            <mat-label>Municipio De Residencia</mat-label>
+            <input matInput formControlName="municipioResidencia">
+            <mat-icon matIconSuffix>location_on</mat-icon>
+          </mat-form-field>
         </div>
         <div class="col-md-4">
           <mat-form-field class="example-full-width; inputs" appearance="outline">
@@ -130,7 +137,7 @@
         </div>
       </div>
       <div class="row">
-        <div class="col-md-3">
+        <div class="col-md-6">
           <mat-form-field class="example-full-width; inputs" appearance="outline">
             <mat-label>Estado Civil</mat-label>
             <select matNativeControl formControlName="estadoCivil">
@@ -140,31 +147,11 @@
             </select>
           </mat-form-field>
         </div>
-        <div class="col-md-3">
+        <div class="col-md-6">
           <mat-form-field class="example-full-width; inputs" appearance="outline">
             <mat-label>Representación</mat-label>
             <select matNativeControl formControlName="representacion">
               <option *ngFor="let p of representacion" [value]="p.value">
-                {{p.value}}
-              </option>
-            </select>
-          </mat-form-field>
-        </div>
-        <div class="col-md-3">
-          <mat-form-field class="example-full-width; inputs" appearance="outline">
-            <mat-label>Estado</mat-label>
-            <select matNativeControl formControlName="estado">
-              <option *ngFor="let p of estado" [value]="p.value">
-                {{p.value}}
-              </option>
-            </select>
-          </mat-form-field>
-        </div>
-        <div class="col-md-3">
-          <mat-form-field class="example-full-width; inputs" appearance="outline">
-            <mat-label>Tipo de Cotizante</mat-label>
-            <select matNativeControl formControlName="cotizante">
-              <option *ngFor="let p of tipoCotizante" [value]="p.value">
                 {{p.value}}
               </option>
             </select>

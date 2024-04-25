@@ -1,12 +1,14 @@
-<app-progressbar
-  (newDatBenChange)="setEstadoDatGen($event)"
-  (newEstCentrTrab)="setEstadoDatCentTrab($event)"
-  (newdatosHS)="setDatosHS($event)"
-  (newdatosRP)="setDatosReferenc($event)"
-  (newdatosB)="setDatosBenef($event)"
-  (newdatosF)="setDatosF($event)"
-  (newdatosA)="setDatosA($event)"
-></app-progressbar>
+<div>
+  <app-progressbar
+    (newDatBenChange)="setEstadoDatGen($event)"
+    (newEstCentrTrab)="setEstadoDatCentTrab($event)"
+    (newdatosHS)="setDatosHS($event)"
+    (newdatosRP)="setDatosReferenc($event)"
+    (newdatosB)="setDatosBenef($event)"
+    (newdatosF)="setDatosF($event)"
+    (newdatosA)="setDatosA($event)"
+  ></app-progressbar>
+</div>
 
 <div class="main-content">
   <div class="col-md-12">
@@ -75,13 +77,13 @@
 
     <div class="card" *ngIf="datosF">
       <div class="card-header card-header-danger tittle">
-        <h4 class="card-title">Envio de formulario</h4>
+        <h4 class="card-title">Envio De Formulario</h4>
         <p class="card-category">
           Presione el botón enviar para continuar con el proceso.
         </p>
       </div>
 
-      <div class="card-body">
+      <div class="card-body" style="text-align: center;">
         <!-- [disabled]="form.controls.DatosGenerales.invalid || form.controls.DatosPuestoTrab.invalid ||
         form.controls.DatosBacAfil.invalid || form.controls.Archivos.invalid || formReferencias.controls.refpers.invalid
         || formBeneficiarios.controls.refpers.invalid" -->

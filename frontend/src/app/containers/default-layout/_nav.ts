@@ -56,34 +56,25 @@ export const navItems: INavData[] = [
     children: [
       {
         name: 'Nuevo Afiliado',
-        children: [
-          {
-            name: 'Nuevo',
-            url: '/Afiliado/afil-banco',
-          },
-        ]
+        url: 'Afiliado/nuevo-afiliado',
       },
       {
-        name: 'Ver / Editar',
+        name: 'Ver Datos Generales',
+        url: '/Afiliado/edit-datos-generales',
+      },
+      {
+        name: 'Ver, Editar Y Agregar',
         children: [
           {
-            url: '/Afiliado/datos-gen-afil',
-            name: 'Datos generales',
-          },
-          {
-            url: '/Afiliado/afil-banco',
+            url: '/Afiliado/Edit-Perfil-Puest-Trab',
             name: 'Centros de trabajo',
           },
-          /* {
-            url: '/Afiliado/afil-banco',
-            name: 'Historial de salario',
-          }, */
           {
-            url: '/Afiliado/afil-banco',
+            url: '/Afiliado/edit-refer-personales',
             name: 'Referencias personales',
           },
           {
-            url: '/Afiliado/afil-banco',
+            url: '/Afiliado/edit-beneficiarios',
             name: 'Beneficiarios',
           }
         ]

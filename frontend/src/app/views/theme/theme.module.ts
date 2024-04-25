@@ -48,6 +48,10 @@ import { MatGridListModule } from '@angular/material/grid-list';
 import { CargarPlanillaPrivadosComponent } from '../pages/Centros Privados/cargar-planilla-privados/cargar-planilla-privados.component';
 import { NuevoMovimientoComponent } from '../pages/Generales/nuevo-movimiento/nuevo-movimiento.component';
 import { VerMovimientosComponent } from '../pages/Generales/ver-movimientos/ver-movimientos.component';
+import { EditPerfilPuestTrabComponent } from '../pages/Generales/edit-perfil-puest-trab/edit-perfil-puest-trab.component';
+import { EditReferPersonalesComponent } from '../pages/Generales/edit-refer-personales/edit-refer-personales.component';
+import { EditDatosGeneralesComponent } from '../pages/Generales/edit-datos-generales/edit-datos-generales.component';
+import { EditBeneficiariosComponent } from '../pages/Generales/edit-beneficiarios/edit-beneficiarios.component';
 import { PlanillaColegiosPrivadosComponent } from '../pages/Centros Privados/planilla-colegios-privados/planilla-colegios-privados.component';
 import { NavDefaultComponent } from '../pages/Centros Privados/nav-default/nav-default.component';
 
@@ -106,8 +110,11 @@ import { NavDefaultComponent } from '../pages/Centros Privados/nav-default/nav-d
     NuevoMovimientoComponent,
     VerMovimientosComponent,
     NavDefaultComponent,
-    VerDatPlanIngComponent
-
+    VerDatPlanIngComponent,
+    EditPerfilPuestTrabComponent,
+    EditDatosGeneralesComponent,
+    EditBeneficiariosComponent,
+    EditReferPersonalesComponent
     /*     CentroTrabajoPageComponent */
   ]
 })

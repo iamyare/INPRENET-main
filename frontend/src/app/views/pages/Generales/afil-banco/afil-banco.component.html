@@ -18,10 +18,10 @@
         groupName="DatosGenerales"
       ></app-dat-generales-afiliado>
 
-      <app-dat-banc
+      <!-- <app-dat-banc
         *ngIf="DatosGenerales"
         groupName="DatosBacAfil"
-      ></app-dat-banc>
+      ></app-dat-banc> -->
 
       <!-- <app-botonarchivos [labelBoton]="labelBoton1" groupName="Archivos" [datos]="form"
         (setArchivo)="handleArchivoSeleccionado($event)"></app-botonarchivos> -->
@@ -35,11 +35,13 @@
       [datos]="formPuestTrab"
       (newDatDatosPuestTrab)="setDatosPuetTrab1($event)"
     ></app-dat-puesto-trab>
+
     <app-historial-salario
       *ngIf="DatosHS"
       [datos]="formHistPag"
       (newDatHistSal)="setHistSal($event)"
     ></app-historial-salario>
+    
     <app-ref-pers
       *ngIf="referenc"
       [datos]="formReferencias"

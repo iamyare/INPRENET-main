@@ -26,7 +26,7 @@ export class Net_Persona {
     tipoIdentificacion: Net_TipoIdentificacion;
 
     @ManyToOne(() => Net_Pais, pais => pais.persona, { cascade: true })
-    @JoinColumn({ name: 'ID_PAIS', foreignKeyConstraintName: "FK_ID_PAIS_PERS" })
+    @JoinColumn({ name: 'ID_PAIS_NACIONALIDAD', foreignKeyConstraintName: "FK_ID_PAIS_PERS" })
     pais: Net_Pais;
 
     @Column('varchar2', { length: 40, nullable: true, name: 'DNI' })
@@ -106,7 +106,7 @@ export class Net_Persona {
     estadoPersona: Net_Estado_Persona;
 
     @OneToMany(() => NET_DETALLE_PERSONA, detallePersona => detallePersona.persona)
-    detallesePersona: NET_DETALLE_PERSONA[];
+    detallesPersona: NET_DETALLE_PERSONA[];
 
     @OneToMany(() => Net_Ref_Per_Pers, referenciasPersonalPersona => referenciasPersonalPersona.persona)
     referenciasPersonalPersona: Net_Ref_Per_Pers[];

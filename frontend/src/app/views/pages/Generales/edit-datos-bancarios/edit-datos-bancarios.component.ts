@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 import { Validators } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
-import { AgregarPuestTrabComponent } from '@docs-components/agregar-puest-trab/agregar-puest-trab.component';
+import { AgregarDatBancCompComponent } from '@docs-components/agregar-dat-banc-comp/agregar-dat-banc-comp.component';
 import { ConfirmDialogComponent } from '@docs-components/confirm-dialog/confirm-dialog.component';
 import { EditarDialogComponent } from '@docs-components/editar-dialog/editar-dialog.component';
 import { ToastrService } from 'ngx-toastr';
@@ -11,11 +11,11 @@ import { TableColumn } from 'src/app/shared/Interfaces/table-column';
 import { unirNombres } from 'src/app/shared/functions/formatoNombresP';
 
 @Component({
-  selector: 'app-edit-perfil-puest-trab',
-  templateUrl: './edit-perfil-puest-trab.component.html',
-  styleUrl: './edit-perfil-puest-trab.component.scss'
+  selector: 'app-edit-datos-bancarios',
+  templateUrl: './edit-datos-bancarios.component.html',
+  styleUrl: './edit-datos-bancarios.component.scss'
 })
-export class EditPerfilPuestTrabComponent {
+export class EditDatosBancariosComponent {
   public myFormFields: FieldConfig[] = []
   form: any;
   Afiliado!: any;
@@ -221,7 +221,7 @@ export class EditPerfilPuestTrabComponent {
   }
 
   AgregarPuestoTrabajo(){
-    const dialogRef = this.dialog.open(AgregarPuestTrabComponent, {
+    const dialogRef = this.dialog.open(AgregarDatBancCompComponent, {
       width: '55%',
       height: '75%',
       data: {

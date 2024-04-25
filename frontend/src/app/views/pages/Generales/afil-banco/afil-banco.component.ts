@@ -73,6 +73,7 @@ export class AfilBancoComponent implements OnInit {
     this.datosF = false
     this.datosA = false
   }
+
   setEstadoDatCentTrab(e: any) {
     this.DatosGenerales = false
     this.DatosPuestoTrab = true
@@ -82,6 +83,7 @@ export class AfilBancoComponent implements OnInit {
     this.datosF = false
     this.datosA = false
   }
+
   setDatosHS(datosHistSal: any) {
     this.DatosGenerales = false
     this.DatosPuestoTrab = false
@@ -91,6 +93,7 @@ export class AfilBancoComponent implements OnInit {
     this.datosF = false
     this.datosA = false
   }
+
   setDatosReferenc(datosHistSal: any) {
     this.DatosGenerales = false
     this.DatosPuestoTrab = false
@@ -100,6 +103,7 @@ export class AfilBancoComponent implements OnInit {
     this.datosF = false
     this.datosA = false
   }
+
   setDatosBenef(datosHistSal: any) {
     this.DatosGenerales = false
     this.DatosPuestoTrab = false
@@ -109,6 +113,7 @@ export class AfilBancoComponent implements OnInit {
     this.datosF = false
     this.datosA = false
   }
+
   setDatosF(datosHistSal: any) {
     this.DatosGenerales = false
     this.DatosPuestoTrab = false
@@ -118,6 +123,7 @@ export class AfilBancoComponent implements OnInit {
     this.datosF = true
     this.datosA = false
   }
+  
   setDatosA(datosHistSal: any) {
     this.DatosGenerales = false
     this.DatosPuestoTrab = false
@@ -162,7 +168,7 @@ export class AfilBancoComponent implements OnInit {
         datosGen: this.form.value.DatosGenerales,
         Archivos: this.form.value.Archivos,
         Arch: this.form.value.Arch,
-        datosBanc: this.form.value.DatosBacAfil,
+        /* datosBanc: this.form.value.DatosBacAfil, */
         PuestTrab: this.formPuestTrab.value.refpers,
         HistPag: this.formHistPag.value.refpers,
         datosRefPers: this.formReferencias.value.refpers
@@ -185,7 +191,7 @@ export class AfilBancoComponent implements OnInit {
       }
     ); */
   }
-
+  
   handleArchivoSeleccionado(archivo: any) {
     this.form.get('Arch')?.setValue(archivo);
     /*     console.log(this.form);

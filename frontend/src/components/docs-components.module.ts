@@ -53,6 +53,7 @@ import { ConfirmDialogComponent } from './confirm-dialog/confirm-dialog.componen
 import { AgregarPuestTrabComponent } from './agregar-puest-trab/agregar-puest-trab.component';
 import { AgregarReferenciasPersonalesComponent } from './agregar-referencias-personales/agregar-referencias-personales.component';
 import { AgregarBenefCompComponent } from './agregar-benef-comp/agregar-benef-comp.component';
+import { AgregarDatBancCompComponent } from './agregar-dat-banc-comp/agregar-dat-banc-comp.component';
 
 @NgModule({
   declarations: [
@@ -76,6 +77,7 @@ import { AgregarBenefCompComponent } from './agregar-benef-comp/agregar-benef-co
     ConfirmDialogComponent,
     AgregarPuestTrabComponent,
     AgregarBenefCompComponent,
+    AgregarDatBancCompComponent,
     AgregarReferenciasPersonalesComponent
   ],
   exports: [
@@ -98,6 +100,7 @@ import { AgregarBenefCompComponent } from './agregar-benef-comp/agregar-benef-co
     ConfirmDialogComponent,
     AgregarPuestTrabComponent,
     AgregarBenefCompComponent,
+    AgregarDatBancCompComponent,
     AgregarReferenciasPersonalesComponent
   ],
   imports: [

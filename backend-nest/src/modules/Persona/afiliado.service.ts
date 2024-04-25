@@ -348,8 +348,8 @@ async createDetalleBeneficiario(detalleDto: CreateDetalleBeneficiarioDto): Promi
         .addSelect('persona.TELEFONO_1', 'TELEFONO_1')
         .addSelect('persona.ESTADO_CIVIL', 'ESTADO_CIVIL')
         .addSelect('estadoAfil.DESCRIPCION', 'ESTADO')
-        .innerJoin('persona.estadoAfiliado', 'estadoAfil')
-        .leftJoin('persona.detallesAfiliado', 'detallepersona')// Join con la tabla detallepersonas
+        .innerJoin('persona.estadoPersona', 'estadoAfil')
+        .leftJoin('persona.detallesPersona', 'detallepersona')// Join con la tabla detallepersonas
         .leftJoin('detallepersona.tipoAfiliado', 'tipoafiliado') // Join con la tabla detallepersonas
         .where('persona.dni = :term AND tipoafiliado.tipo_afiliado = :tipo_persona', { term, tipo_persona: "AFILIADO" })
         .getRawOne();
@@ -382,7 +382,7 @@ async createDetalleBeneficiario(detalleDto: CreateDetalleBeneficiarioDto): Promi
       INNER JOIN
       NET_TIPO_PERSONA "tipoP" ON "tipoP"."ID_TIPO_AFILIADO" = "detA"."ID_TIPO_PERSONA"
       INNER JOIN
-      NET_ESTADO_AFILIADO "estadoPers" ON "Afil"."ID_ESTADO_AFILIADO" = "estadoPers"."CODIGO"
+      NET_ESTADO_PERSONA "estadoPers" ON "Afil"."ID_ESTADO_PERSONA" = "estadoPers"."CODIGO"
     WHERE
       "Afil"."DNI" = '${dniAfil}' AND 
       "estadoPers"."DESCRIPCION" = 'FALLECIDO'  AND
@@ -400,6 +400,56 @@ async createDetalleBeneficiario(detalleDto: CreateDetalleBeneficiarioDto): Promi
         "Afil"."PRIMER_APELLIDO",
         "Afil"."SEGUNDO_APELLIDO",
         "Afil"."SEXO",
+        "detA"."PORCENTAJE",
+        "tipoP"."TIPO_AFILIADO"
+      FROM
+          "NET_DETALLE_PERSONA" "detA" INNER JOIN 
+          "NET_PERSONA" "Afil" ON "detA"."ID_PERSONA" = "Afil"."ID_PERSONA"
+          INNER JOIN
+        NET_TIPO_PERSONA "tipoP" ON "tipoP"."ID_TIPO_AFILIADO" = "detA"."ID_TIPO_PERSONA"
+      WHERE 
+          "detA"."ID_CAUSANTE_PADRE" = ${beneficios[0].ID_PERSONA} AND 
+          "tipoP"."TIPO_AFILIADO" = 'BENEFICIARIO' 
+        `;
+      const beneficios2 = await this.entityManager.query(query1);
+
+      return this.normalizarDatos(beneficios2);
+    } catch (error) {
+      this.logger.error(`Error al consultar beneficios: ${error.message}`);
+      throw new Error(`Error al consultar beneficios: ${error.message}`);
+    }
+  }
+  
+  async getAllBenDeAfil(dniAfil: string): Promise<any> {
+
+    try {
+      const query = `
+      SELECT DISTINCT
+      "detA"."ID_PERSONA"
+      FROM NET_PERSONA "Afil"
+      FULL OUTER JOIN
+        NET_DETALLE_PERSONA "detA" ON "Afil"."ID_PERSONA" = "detA"."ID_PERSONA" 
+      INNER JOIN
+      NET_TIPO_PERSONA "tipoP" ON "tipoP"."ID_TIPO_AFILIADO" = "detA"."ID_TIPO_PERSONA"
+      INNER JOIN
+      NET_ESTADO_PERSONA "estadoPers" ON "Afil"."ID_ESTADO_PERSONA" = "estadoPers"."CODIGO"
+    WHERE
+      "Afil"."DNI" = '${dniAfil}' AND
+      "tipoP"."TIPO_AFILIADO" = 'AFILIADO'
+    `;
+
+      const beneficios = await this.entityManager.query(query);
+
+      const query1 = `
+        SELECT 
+        "Afil"."DNI",
+        "Afil"."PRIMER_NOMBRE",
+        "Afil"."SEGUNDO_APELLIDO",
+        "Afil"."TERCER_NOMBRE",
+        "Afil"."PRIMER_APELLIDO",
+        "Afil"."SEGUNDO_APELLIDO",
+        "Afil"."SEXO",
+        "Afil"."FECHA_NACIMIENTO",
         "detA"."PORCENTAJE",
         "tipoP"."TIPO_AFILIADO"
       FROM
@@ -501,6 +551,73 @@ async createDetalleBeneficiario(detalleDto: CreateDetalleBeneficiarioDto): Promi
         movimientos // Devuelve los movimientos aplastados de todas las cuentas
       }
     };
+  }
+  async getAllReferenciasPersonales(dni:string): Promise<any> {
+    const persona = await this.personaRepository.find({
+      where: {dni:dni},
+      relations: ["referenciasPersonalPersona", "referenciasPersonalPersona.referenciaPersonal"]
+    });
+
+    if (!persona) {
+      throw new NotFoundException(`Ninguna referencia personal encontrada`);
+    }
+
+    return persona[0].referenciasPersonalPersona
+   
+  }
+
+
+   async getAllPerfCentroTrabajo(dni:string): Promise<any> {
+    const persona = await this.personaRepository.findOne({
+      where: {dni:dni},
+      relations: ["perfPersCentTrabs", "perfPersCentTrabs.centroTrabajo"] // Asegúrate de cargar las cuentas y sus movimientos
+    });
+
+    if (!persona) {
+      throw new NotFoundException(`Ningún centro de trabajo encontrado no encontrado`);
+    }
+
+    return persona.perfPersCentTrabs
+    
+  } 
+
+  async updateReferenciaPerson(id: string, referPersData: number): Promise<void> {
+    console.log(id);
+    console.log(referPersData);
+    
+    /* const perfil = await this.perfPersoCentTrabRepository
+      .createQueryBuilder('perfil')
+      .leftJoinAndSelect('perfil.persona', 'persona')
+      .where('persona.DNI = :dni', { dni })
+      .andWhere('perfil.centroTrabajo = :idCentroTrabajo', { idCentroTrabajo })
+      .getOne();
+
+    if (!perfil) {
+      throw new NotFoundException(`El perfil con DNI ${dni} y centro de trabajo ID ${idCentroTrabajo} no fue encontrado.`);
+    }
+
+    perfil.salario_base = salarioBase;
+    await this.perfPersoCentTrabRepository.save(perfil); */
+  }
+
+  async updatePerfCentroTrabajo(id: string, PerfCentTrabData: number
+  ): Promise<void> {
+    console.log(id);
+    console.log(PerfCentTrabData);
+    
+    /* const perfil = await this.perfPersoCentTrabRepository
+      .createQueryBuilder('perfil')
+      .leftJoinAndSelect('perfil.persona', 'persona')
+      .where('persona.DNI = :dni', { dni })
+      .andWhere('perfil.centroTrabajo = :idCentroTrabajo', { idCentroTrabajo })
+      .getOne();
+
+    if (!perfil) {
+      throw new NotFoundException(`El perfil con DNI ${dni} y centro de trabajo ID ${idCentroTrabajo} no fue encontrado.`);
+    }
+
+    perfil.salario_base = salarioBase;
+    await this.perfPersoCentTrabRepository.save(perfil); */
   }
 
   private handleException(error: any): void {

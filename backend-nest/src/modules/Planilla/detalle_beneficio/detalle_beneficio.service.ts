@@ -11,6 +11,7 @@ import { CreateDetalleBeneficioDto } from './dto/create-detalle_beneficio.dto';
 import { Net_Planilla } from '../planilla/entities/net_planilla.entity';
 import { Net_Detalle_Beneficio_Afiliado } from './entities/net_detalle_beneficio_afiliado.entity';
 import { NET_DETALLE_PERSONA } from 'src/modules/Persona/entities/Net_detalle_persona.entity';
+import { Net_Estado_Persona } from 'src/modules/Persona/entities/net_estado_persona.entity';
 @Injectable()
 export class DetalleBeneficioService {
   private readonly logger = new Logger(DetalleBeneficioService.name)
@@ -379,27 +380,35 @@ export class DetalleBeneficioService {
         .addSelect('afil.SEGUNDO_APELLIDO', 'SEGUNDO_APELLIDO')
         .addSelect('afil.SEXO', 'SEXO')
         .addSelect('afil.DIRECCION_RESIDENCIA', 'DIRECCION_RESIDENCIA')
-        .addSelect('estadoAfil.DESCRIPCION', 'ESTADO')
         .addSelect('afil.FECHA_NACIMIENTO', 'FECHA_NACIMIENTO')
-        .addSelect('afil.COLEGIO_MAGISTERIAL', 'COLEGIO_MAGISTERIAL')
+        /* .addSelect('afil.COLEGIO_MAGISTERIAL', 'COLEGIO_MAGISTERIAL') */
         .addSelect('afil.NUMERO_CARNET', 'NUMERO_CARNET')
         .addSelect('afil.PROFESION', 'PROFESION')
         .addSelect('afil.TELEFONO_1', 'TELEFONO_1')
         .addSelect('afil.ESTADO_CIVIL', 'ESTADO_CIVIL')
+        
         .addSelect('ben.PERIODICIDAD', 'PERIODICIDAD')
         .addSelect('ben.NUMERO_RENTAS_MAX', 'NUMERO_RENTAS_MAX')
         .addSelect('ben.NOMBRE_BENEFICIO', 'NOMBRE_BENEFICIO')
+
         .addSelect('detBenA.PERIODO_INICIO', 'PERIODO_INICIO')
         .addSelect('detBenA.PERIODO_FINALIZACION', 'PERIODO_FINALIZACION')
         .addSelect('detBenA.MONTO_POR_PERIODO', 'MONTO_POR_PERIODO')
         .addSelect('detBenA.MONTO_TOTAL', 'MONTO_TOTAL')
-        .leftJoin(Net_Beneficio, 'ben', 'ben.ID_BENEFICIO = detBenA.ID_BENEFICIO')
+
+        .addSelect('estadoAfil.DESCRIPCION', 'ESTADO')
+
         .innerJoin(Net_Persona, 'afil', 'afil.ID_PERSONA = detBenA.ID_BENEFICIARIO AND detBenA.ID_CAUSANTE = detBenA.ID_CAUSANTE')
+        .leftJoin(Net_Beneficio, 'ben', 'ben.ID_BENEFICIO = detBenA.ID_BENEFICIO')
         .innerJoin(NET_DETALLE_PERSONA, 'detA', 'afil.ID_PERSONA = detBenA.ID_BENEFICIARIO AND detBenA.ID_CAUSANTE = detBenA.ID_CAUSANTE ')
-        .innerJoin(Net_Estado_Afiliado, 'estadoAfil', 'estadoAfil.CODIGO = afil.ID_ESTADO_AFILIADO')
+
+        .innerJoin(Net_Estado_Persona, 'estadoAfil', 'estadoAfil.CODIGO = afil.ID_ESTADO_PERSONA')
         .where(`afil.dni = '${dni}'`)
+        
         .getRawMany();
     } catch (error) {
+      console.log(error);
+      
       this.logger.error(`Error al buscar beneficios inconsistentes por afiliado: ${error.message}`, error.stack);
       throw new InternalServerErrorException('Error al buscar beneficios inconsistentes por afiliado');
     }
@@ -640,7 +649,8 @@ export class DetalleBeneficioService {
   }
 
 }
-
+/* 
 function Net_Estado_Afiliado(qb: SelectQueryBuilder<any>): SelectQueryBuilder<any> {
   throw new Error('Function not implemented.');
 }
+ */

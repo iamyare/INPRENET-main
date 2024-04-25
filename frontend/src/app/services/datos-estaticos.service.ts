@@ -20,9 +20,7 @@ export class DatosEstaticosService {
   constructor(private SVCInstituciones: InstitucionesService, private afiliadoService: AfiliadoService, public direccionSer: DireccionService, private bancosService: BancosService, private tipoIdentificacionService:TipoIdentificacionService) {
     /* this.direccionSer.getAllCiudades().subscribe((res: any) => {});
     this.direccionSer.getAllProvincias().subscribe((res: any) => {}); */
-    /* this.bancosService.getAllBancos().subscribe((res: any) => {
-      this.Bancos = res.bancos
-    }); */
+    /*  */
     this.getInstituciones();
     this.getNacioalidad();
   }
@@ -36,8 +34,7 @@ export class DatosEstaticosService {
 
     this.tipoIdent = mappedResponse;
     return this.tipoIdent;
-}
-
+  }
 
   async getInstituciones() {
     this.Instituciones = await this.SVCInstituciones.getInstituciones().toPromise();
@@ -55,7 +52,16 @@ export class DatosEstaticosService {
       value: String(item.id_pais)
     }));
     return this.nacionalidades;
-}
+  }
+
+  async getBancos() {
+    const response = await this.bancosService.getAllBancos().toPromise();
+    this.Bancos = response.map((item: { nombre_banco: any; cod_banco: any; }) => ({
+      label: item.nombre_banco,
+      value: String(item.cod_banco)
+    }));
+    return this.Bancos;
+  }
 
 
   estadoCivil = [

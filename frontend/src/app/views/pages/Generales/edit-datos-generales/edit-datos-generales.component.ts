@@ -105,7 +105,6 @@ export class EditDatosGeneralesComponent {
     }
   }
 
-  
   resetDatos(){
     if (this.form){
       this.form.reset();

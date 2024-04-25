@@ -19,7 +19,7 @@ import { unirNombres } from 'src/app/shared/functions/formatoNombresP';
 export class EditReferPersonalesComponent {
   public myFormFields: FieldConfig[] = []
   form: any;
-  Afiliado: any;
+  Afiliado!: any;
   unirNombres: any = unirNombres;
   datosTabl: any[] = [];
 
@@ -81,7 +81,6 @@ export class EditReferPersonalesComponent {
   }
 
   previsualizarInfoAfil() {
-    this.Afiliado.nameAfil = ""
     if (this.form.value.dni) {
 
       this.svcAfiliado.getAfilByParam(this.form.value.dni).subscribe(
@@ -103,7 +102,7 @@ export class EditReferPersonalesComponent {
       this.form.reset();
     }
     this.filas = [];
-    this.Afiliado = {};
+    this.Afiliado = undefined;
   }
 
   async getFilas() {

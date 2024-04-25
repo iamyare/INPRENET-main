@@ -1,13 +1,13 @@
 import {
   Controller,
-  Get,
   Post,
-  Body,
-  Patch,
-  Param,
-  Delete,
-  NotFoundException,
+  Get,
   Put,
+  Delete,
+  Patch,
+  Body,
+  Param,
+  NotFoundException,
   HttpCode,
   HttpStatus,
   Res,
@@ -155,6 +155,58 @@ export class AfiliadoController {
     }
   }
 
+  @Get('/getAllReferenciasPersonales/:dni')
+  async getAllReferenciasPersonales(@Param("dni") dni:string) {
+    try {
+      const resultado =
+        await this.afiliadoService.getAllReferenciasPersonales(dni);
+      return resultado;
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw error;
+      } else {
+        throw new NotFoundException(
+          `No se pudo procesar la solicitud`,
+        );
+      }
+    }
+  }
+
+  @Get('/getAllPerfCentroTrabajo/:dni')
+  async getAllPerfCentroTrabajo(@Param("dni") dni:string) {    
+    try {
+      const resultado =
+        await this.afiliadoService.getAllPerfCentroTrabajo(dni);
+      return resultado;
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw error;
+      } else {
+        throw new NotFoundException(
+          `No se pudo procesar la solicitud`,
+        );
+      }
+    }
+  }
+  
+  @Put('/updateReferenciaPerson/:id')
+  updateReferenciaPerson(
+    @Param('id') id: string,
+    @Body() referPersData: any,
+  ) {
+    
+    
+    return this.afiliadoService.updateReferenciaPerson(id, referPersData);
+  }
+
+  @Put('/updatePerfCentroTrabajo/:id')
+  updatePerfCentroTrabajo(
+    @Param('id') id: string,
+    @Body() PerfCentTrabData: any,
+  ) {
+    return this.afiliadoService.updatePerfCentroTrabajo(id, PerfCentTrabData);
+  }
+
   @Get('/dni/:dni')
   async findByDni(@Param('dni') dni: string) {
     return await this.afiliadoService.findByDni(dni);
@@ -170,6 +222,13 @@ export class AfiliadoController {
     @Param('dniAfil') dniAfil: string,
   ): Promise<any> {
     return this.afiliadoService.obtenerBenDeAfil(dniAfil);
+  }
+
+  @Get('getAllBenDeAfil/:dniAfil')
+  async getAllBenDeAfil(
+    @Param('dniAfil') dniAfil: string,
+  ): Promise<any> {
+    return this.afiliadoService.getAllBenDeAfil(dniAfil);
   }
 
   @Patch(':id')

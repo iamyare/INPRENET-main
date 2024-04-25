@@ -4,10 +4,8 @@ import { DatosEstaticosService } from 'src/app/services/datos-estaticos.service'
 
 export function generateHistSalFormGroup(datos?:any): FormGroup {
   return new FormGroup({
-    fechaInicio: new FormControl(datos.fechaInicio, Validators.required),
-    fechaFin: new FormControl(datos.fechaFin, Validators.required),
-    salario: new FormControl(datos.salario, Validators.required),
-    centroTrabajo: new FormControl(datos.centroTrabajo, Validators.required),
+    nombre_banco: new FormControl(datos.nombre_banco, Validators.required),
+    numero_cuenta: new FormControl(datos.numero_cuenta, Validators.required)
   });
 }
 
@@ -27,7 +25,7 @@ export function generateHistSalFormGroup(datos?:any): FormGroup {
 export class HistorialSalarioComponent {
   public formParent: FormGroup = new FormGroup({});
 
-  centrosTrabajo: any = this.datosEstaticos.centrosTrabajo;
+  Bancos: any = this.datosEstaticos.Bancos;
   sector: any = this.datosEstaticos.sector;
 
   @Output() newDatHistSal = new EventEmitter<any>()

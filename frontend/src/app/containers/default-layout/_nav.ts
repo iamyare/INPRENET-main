@@ -66,6 +66,10 @@ export const navItems: INavData[] = [
         name: 'Ver, Editar Y Agregar',
         children: [
           {
+            url: '/Afiliado/edit-datos-bancarios',
+            name: 'Datos Bancarios',
+          },
+          {
             url: '/Afiliado/Edit-Perfil-Puest-Trab',
             name: 'Centros de trabajo',
           },

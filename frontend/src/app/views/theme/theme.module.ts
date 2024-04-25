@@ -52,6 +52,7 @@ import { EditPerfilPuestTrabComponent } from '../pages/Generales/edit-perfil-pue
 import { EditReferPersonalesComponent } from '../pages/Generales/edit-refer-personales/edit-refer-personales.component';
 import { EditDatosGeneralesComponent } from '../pages/Generales/edit-datos-generales/edit-datos-generales.component';
 import { EditBeneficiariosComponent } from '../pages/Generales/edit-beneficiarios/edit-beneficiarios.component';
+import { EditDatosBancariosComponent } from '../pages/Generales/edit-datos-bancarios/edit-datos-bancarios.component';
 import { PlanillaColegiosPrivadosComponent } from '../pages/Centros Privados/planilla-colegios-privados/planilla-colegios-privados.component';
 import { NavDefaultComponent } from '../pages/Centros Privados/nav-default/nav-default.component';
 
@@ -114,6 +115,7 @@ import { NavDefaultComponent } from '../pages/Centros Privados/nav-default/nav-d
     EditPerfilPuestTrabComponent,
     EditDatosGeneralesComponent,
     EditBeneficiariosComponent,
+    EditDatosBancariosComponent,
     EditReferPersonalesComponent
     /*     CentroTrabajoPageComponent */
   ]

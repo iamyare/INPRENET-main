@@ -15,6 +15,7 @@ import { DepartamentoService } from './provincia/departamento.service';
     providers: [PaisService, DepartamentoService, MunicipioService],
     imports: [
         TypeOrmModule.forFeature([Net_Pais, Net_Departamento, Net_Municipio])
-      ]
+      ],
+      exports: [TypeOrmModule,PaisService, DepartamentoService, MunicipioService]
 })
 export class RegionalModule {}

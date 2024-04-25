@@ -1,36 +1,37 @@
-import { IsDateString, IsOptional, IsString } from "class-validator";
+import { IsInt, IsOptional, IsString, MaxLength, MinLength, IsNumber, IsDate } from 'class-validator';
 
-export class CreatePerfAfilCentTrabDto { 
-
-    @IsString()
-    @IsOptional()
-    cargo : string;
-    
-    @IsString()
-    @IsOptional()
-    sector_economico : string;
-    
-    @IsString()
-    @IsOptional()
-    actividad_economica : string;
+export class CentroTrabajoDTO {
+    @IsInt()
+    idCentroTrabajo: number;
 
     @IsString()
-    @IsOptional()
-    clase_cliente : string;
-    
-    @IsDateString()
-    @IsOptional()
-    fecha_ingreso : string;
-
-    @IsDateString()
-    @IsOptional()
-    fecha_pago : string;
-    
-    @IsString()
-    @IsOptional()
-    numero_acuerdo : string;
+    @MaxLength(40)
+    cargo: string;
 
     @IsString()
+    @MaxLength(40)
+    numeroAcuerdo: string;
+
     @IsOptional()
-    nombre_centroTrabajo? : string;
+    @IsNumber()
+    salarioBase?: number;
+
+    @IsString()
+    @MinLength(10)
+    @MaxLength(10)
+    fechaIngreso: string;
+
+    @IsOptional()
+    @IsString()
+    @MinLength(10)
+    @MaxLength(10)
+    fechaEgreso?: string;
+
+    @IsString()
+    @MaxLength(40)
+    claseCliente: string;
+
+    @IsString()
+    @MaxLength(40)
+    sectorEconomico: string;
 }

@@ -29,7 +29,7 @@ import { TransaccionesModule } from './modules/transacciones/transacciones.modul
         synchronize: true,
         entities: [__dirname + '/../**/*.entity{.ts,.js}'],
         migrations: ['src/database/migrations/*{.ts,.js}'],
-        logging: ['error'] // solo loguear errores
+        //logging: ['error'] // solo loguear errores
 
       }),
       inject: [ConfigService]

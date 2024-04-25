@@ -1,7 +1,7 @@
 import { BadRequestException, Injectable, InternalServerErrorException, Logger, NotFoundException } from '@nestjs/common';
-import { CreatePersonaDto, PersonaResponse } from './dto/create-persona.dto';
+import { NetPersonaDTO, PersonaResponse } from './dto/create-persona.dto';
 import { UpdatePersonaDto } from './dto/update-persona.dto';
-import { Connection, EntityManager, Repository } from 'typeorm';
+import { EntityManager, Repository } from 'typeorm';
 import { InjectEntityManager, InjectRepository } from '@nestjs/typeorm';
 import { Net_Persona_Por_Banco } from '../banco/entities/net_persona-banco.entity';
 import { Net_Centro_Trabajo } from '../Empresarial/entities/net_centro_trabajo.entity';
@@ -11,10 +11,17 @@ import { Net_Pais } from '../Regional/pais/entities/pais.entity';
 import { CreateAfiliadoTempDto } from './dto/create-afiliado-temp.dto';
 import { validate as isUUID } from 'uuid';
 import { Net_Persona } from './entities/Net_Persona.entity';
-import { Net_Departamento } from '../Regional/provincia/entities/net_departamento.entity';
 import { Net_ReferenciaPersonal } from './entities/referencia-personal.entity';
 import { Net_Ref_Per_Pers } from './entities/net_ref-Per-Persona.entity';
 import { Net_perf_pers_cent_trab } from './entities/net_perf_pers_cent_trab.entity';
+import { NET_DETALLE_PERSONA } from './entities/Net_detalle_persona.entity';
+import { CreateDetallePersonaDto } from './dto/create-detalle.dto';
+import { Net_Tipo_Persona } from './entities/net_tipo_persona.entity';
+import { Net_Municipio } from '../Regional/municipio/entities/net_municipio.entity';
+import { Net_Estado_Persona } from './entities/net_estado_persona.entity';
+import { AsignarReferenciasDTO } from './dto/asignarReferencia.dto';
+import { CreatePersonaBancoDTO } from './dto/create-persona-banco.dto';
+import { CreateDetalleBeneficiarioDto } from './dto/create-detalle-beneficiario-dto';
 
 @Injectable()
 export class AfiliadoService {
@@ -25,18 +32,193 @@ export class AfiliadoService {
     @InjectEntityManager() private readonly entityManager: EntityManager,
 
     @InjectRepository(Net_Persona)
-    private readonly afiliadoRepository: Repository<Net_Persona>,
+    private readonly personaRepository: Repository<Net_Persona>,
     @InjectRepository(Net_perf_pers_cent_trab)
     private readonly perfPersoCentTrabRepository: Repository<Net_perf_pers_cent_trab>,
 
-    @InjectRepository(Net_Ref_Per_Pers)
-    private readonly RefPersRepositoryPersona: Repository<Net_Ref_Per_Pers>,
-
     @InjectRepository(Net_ReferenciaPersonal)
-    private readonly RefPersRepository: Repository<Net_ReferenciaPersonal>,
+    private referenciaPersonalRepository: Repository<Net_ReferenciaPersonal>,
 
-    private connection: Connection,
+    @InjectRepository(Net_Ref_Per_Pers)
+    private refPerPersRepository: Repository<Net_Ref_Per_Pers>,
+
+    @InjectRepository(NET_DETALLE_PERSONA)
+    private detallePersonaRepository: Repository<NET_DETALLE_PERSONA>,
+
+    @InjectRepository(Net_TipoIdentificacion)
+    private tipoIdentificacionRepository: Repository<Net_TipoIdentificacion>,
+
+    @InjectRepository(Net_Pais)
+    private paisRepository: Repository<Net_Pais>,
+
+    @InjectRepository(Net_Municipio)
+    private municipioRepository: Repository<Net_Municipio>,
+
+    @InjectRepository(Net_Estado_Persona)
+    private estadoPersonaRepository: Repository<Net_Estado_Persona>,
+
+    @InjectRepository(Net_Centro_Trabajo)
+    private centroTrabajoRepository: Repository<Net_Centro_Trabajo>,
+
+    @InjectRepository(Net_Persona_Por_Banco)
+    private personaBancoRepository: Repository<Net_Persona_Por_Banco>,
+
+    @InjectRepository(Net_Banco)
+    private bancoRepository: Repository<Net_Banco>,
+
   ) { }
+  
+
+  async create(createPersonaDto: NetPersonaDTO): Promise<Net_Persona> {
+    const persona = new Net_Persona();
+    Object.assign(persona, createPersonaDto);
+    if (createPersonaDto.fecha_nacimiento) {
+      if (typeof createPersonaDto.fecha_nacimiento === 'string') {
+        const fechaNacimiento = new Date(createPersonaDto.fecha_nacimiento);
+        if (!isNaN(fechaNacimiento.getTime())) {
+          persona.fecha_nacimiento = fechaNacimiento.toISOString().substring(0, 10);
+        } else {
+          throw new Error('Fecha de nacimiento no válida');
+        }
+      } else if (createPersonaDto.fecha_nacimiento instanceof Date) {
+        persona.fecha_nacimiento = createPersonaDto.fecha_nacimiento.toISOString().substring(0, 10);
+      } else {
+        throw new Error('Fecha de nacimiento no es una cadena o instancia de Date');
+      }
+    }
+
+    persona.tipoIdentificacion = await this.tipoIdentificacionRepository.findOne({ where: { id_identificacion: createPersonaDto.id_tipo_identificacion } });
+    if (!persona.tipoIdentificacion) {
+        throw new Error(`Tipo de identificación con ID ${createPersonaDto.id_tipo_identificacion} no encontrado`);
+    }
+
+    persona.pais = await this.paisRepository.findOne({ where: { id_pais: createPersonaDto.id_pais } });
+    if (!persona.pais) {
+        throw new Error(`País con ID ${createPersonaDto.id_pais} no encontrado`);
+    }
+
+    persona.municipio = await this.municipioRepository.findOne({ where: { id_municipio: createPersonaDto.id_municipio_residencia } });
+    if (!persona.municipio) {
+        throw new Error(`Municipio con ID ${createPersonaDto.id_municipio_residencia} no encontrado`);
+    }
+
+    persona.estadoPersona = await this.estadoPersonaRepository.findOne({ where: { codigo: createPersonaDto.id_estado_persona } });
+    if (!persona.estadoPersona) {
+        throw new Error(`Estado de la persona con código ${createPersonaDto.id_estado_persona} no encontrado`);
+    }
+
+    return await this.personaRepository.save(persona);
+}
+
+async createDetallePersona(createDetallePersonaDto: CreateDetallePersonaDto): Promise<NET_DETALLE_PERSONA> {
+  const detallePersona = new NET_DETALLE_PERSONA();
+  detallePersona.ID_PERSONA = createDetallePersonaDto.idPersona;
+  detallePersona.ID_CAUSANTE = createDetallePersonaDto.idPersona;  // Asumiendo que ID_CAUSANTE es lo mismo que ID_PERSONA
+  detallePersona.ID_TIPO_PERSONA = createDetallePersonaDto.idTipoPersona;
+  detallePersona.porcentaje = createDetallePersonaDto.porcentaje;
+
+  return this.detallePersonaRepository.save(detallePersona);
+}
+
+async assignCentrosTrabajo(idPersona: number, centrosTrabajoData: any[]): Promise<Net_perf_pers_cent_trab[]> {
+  const persona = await this.personaRepository.findOne({ where: { id_persona: idPersona } });
+  if (!persona) {
+      throw new Error('Persona no encontrada');
+  }
+
+  const asignaciones = [];
+  const errores = [];
+
+  for (const centro of centrosTrabajoData) {
+      const centroTrabajo = await this.centroTrabajoRepository.findOne({ where: { id_centro_trabajo: centro.idCentroTrabajo } });
+      if (!centroTrabajo) {
+          errores.push(`Centro de trabajo con ID ${centro.idCentroTrabajo} no encontrado.`);
+          continue;  // Puedes optar por continuar con el siguiente centro o detener todo el proceso
+      }
+
+      const nuevoPerfil = new Net_perf_pers_cent_trab();
+      nuevoPerfil.persona = persona;
+      nuevoPerfil.centroTrabajo = centroTrabajo;
+      nuevoPerfil.cargo = centro.cargo;
+      nuevoPerfil.numero_acuerdo = centro.numeroAcuerdo;
+      nuevoPerfil.salario_base = centro.salarioBase;
+      nuevoPerfil.fecha_ingreso = centro.fechaIngreso;
+      nuevoPerfil.fecha_egreso = centro.fechaEgreso;
+      nuevoPerfil.clase_cliente = centro.claseCliente;
+      nuevoPerfil.sector_economico = centro.sectorEconomico;
+
+      asignaciones.push(await this.perfPersoCentTrabRepository.save(nuevoPerfil));
+  }
+
+  if (errores.length > 0) {
+      throw new Error(`Errores en la asignación de centros de trabajo: ${errores.join(' ')}`);
+  }
+
+  return asignaciones;
+}
+
+async createAndAssignReferences(dto: AsignarReferenciasDTO): Promise<Net_Ref_Per_Pers[]> {
+  const persona = await this.personaRepository.findOne({ 
+      where: { id_persona: dto.idPersona }
+  });
+  if (!persona) {
+      throw new Error('Persona no encontrada');
+  }
+
+  const resultados = await Promise.all(dto.referencias.map(async referenciaDto => {
+      const referencia = this.referenciaPersonalRepository.create(referenciaDto);
+      await this.referenciaPersonalRepository.save(referencia);
+
+      const refPerPers = this.refPerPersRepository.create({
+          persona: persona,
+          referenciaPersonal: referencia
+      });
+
+      return this.refPerPersRepository.save(refPerPers);
+  }));
+
+  return resultados;
+}
+
+async assignBancosToPersona(idPersona: number, bancosData: CreatePersonaBancoDTO[]): Promise<Net_Persona_Por_Banco[]> {
+  const persona = await this.personaRepository.findOne({ where: { id_persona: idPersona } });
+  if (!persona) {
+      throw new Error('Persona no encontrada');
+  }
+
+  const asignaciones = [];
+  for (const bancoData of bancosData) {
+      const banco = await this.bancoRepository.findOne({ where: { id_banco: bancoData.idBanco } });
+      if (!banco) {
+          throw new Error(`Banco con ID ${bancoData.idBanco} no encontrado`);
+      }
+
+      const personaBanco = new Net_Persona_Por_Banco();
+      personaBanco.persona = persona;
+      personaBanco.banco = banco;
+      personaBanco.num_cuenta = bancoData.numCuenta;
+      personaBanco.estado = bancoData.estado;
+
+      asignaciones.push(await this.personaBancoRepository.save(personaBanco));
+  }
+
+  return asignaciones;
+}
+
+async createBeneficiario(beneficiarioData: NetPersonaDTO): Promise<Net_Persona> {
+  return this.create(beneficiarioData);
+}
+
+async createDetalleBeneficiario(detalleDto: CreateDetalleBeneficiarioDto): Promise<NET_DETALLE_PERSONA> {
+  const detalle = new NET_DETALLE_PERSONA();
+  detalle.ID_PERSONA = detalleDto.idPersona;
+  detalle.ID_CAUSANTE = detalleDto.idCausante;
+  detalle.ID_CAUSANTE_PADRE = detalleDto.idCausantePadre;  // Asumiendo que es el mismo que ID_CAUSANTE
+  detalle.ID_TIPO_PERSONA = detalleDto.idTipoPersona;
+  detalle.porcentaje = detalleDto.porcentaje;
+
+  return this.detallePersonaRepository.save(detalle);
+}
 
   async updateSalarioBase(dni: string, idCentroTrabajo: number, salarioBase: number): Promise<void> {
 
@@ -57,8 +239,8 @@ export class AfiliadoService {
 
   async createTemp(createAfiliadoTempDto: CreateAfiliadoTempDto) {
     try {
-      const afiliado = this.afiliadoRepository.create(createAfiliadoTempDto)
-      await this.afiliadoRepository.save(afiliado)
+      const afiliado = this.personaRepository.create(createAfiliadoTempDto)
+      await this.personaRepository.save(afiliado)
       return afiliado;
     } catch (error) {
       this.handleException(error);
@@ -68,7 +250,7 @@ export class AfiliadoService {
   async createRefPers(data: any, dnireferente: any) {
     try {
       // Buscar la persona referente
-      const personaReferente = await this.afiliadoRepository.findOne({
+      const personaReferente = await this.personaRepository.findOne({
         where: { dni: dnireferente.dnireferente },
       });
   
@@ -77,8 +259,8 @@ export class AfiliadoService {
         throw new Error('No se encontró la persona referente.');
       }
   
-      const refPersonales = this.RefPersRepository.create(data);
-      const savedRefPersonales = await this.RefPersRepository.save(refPersonales);
+      const refPersonales = this.referenciaPersonalRepository.create(data);
+      const savedRefPersonales = await this.referenciaPersonalRepository.save(refPersonales);
 
       const idsRefPersonal = savedRefPersonales.map(objeto => objeto.id_ref_personal);
       const idPersona = personaReferente.id_persona;
@@ -89,8 +271,8 @@ export class AfiliadoService {
         referenciaPersonal: objeto.id_ref_personal
       }));
 
-      const asigPersonales = this.RefPersRepositoryPersona.create(arregloRenombrado);
-      const savedasigPersonales = await this.RefPersRepositoryPersona.save(asigPersonales);
+      const asigPersonales = this.refPerPersRepository.create(arregloRenombrado);
+      const savedasigPersonales = await this.refPerPersRepository.save(asigPersonales);
 
       return savedasigPersonales;
     } catch (error) {
@@ -103,7 +285,7 @@ export class AfiliadoService {
   async createCentrosTrabPersona(data: any, dnireferente:any) {
     try {
       // Buscar la persona referente
-      const personaReferente = await this.afiliadoRepository.findOne({
+      const personaReferente = await this.personaRepository.findOne({
         where: { dni: dnireferente.dnireferente },
       });
       
@@ -138,20 +320,20 @@ export class AfiliadoService {
 
 
   findAll() {
-    const afiliado = this.afiliadoRepository.find()
+    const afiliado = this.personaRepository.find()
     return afiliado;
   }
 
   async findOne(term: number) {
     let personas: Net_Persona;
     if (isUUID(term)) {
-      personas = await this.afiliadoRepository.findOne({
+      personas = await this.personaRepository.findOne({
         where: { id_persona: term },
         relations: ['detalleAfiliado'], // Asegúrate de cargar la relación
       });
     } else {
 
-      const queryBuilder = this.afiliadoRepository.createQueryBuilder('persona');
+      const queryBuilder = this.personaRepository.createQueryBuilder('persona');
       personas = await queryBuilder
         .select('persona.DNI', 'DNI')
         .addSelect('persona.PRIMER_NOMBRE', 'PRIMER_NOMBRE')
@@ -275,7 +457,7 @@ export class AfiliadoService {
   }
 
   async findByDni(dni: string): Promise<Net_Persona | string> {
-    const afiliado = await this.afiliadoRepository.findOne({ where: { dni }, relations: ['estadoAfiliado'] });
+    const afiliado = await this.personaRepository.findOne({ where: { dni }, relations: ['estadoAfiliado'] });
 
     if (!afiliado) {
       throw new NotFoundException(`Afiliado with DNI ${dni} not found`);
@@ -292,7 +474,7 @@ export class AfiliadoService {
   }
 
   async buscarPersonaYMovimientosPorDNI(dni: string): Promise<any> {
-    const persona = await this.afiliadoRepository.findOne({
+    const persona = await this.personaRepository.findOne({
       where: { dni },
       relations: ["cuentas", "cuentas.movimientos", "estadoPersona"] // Asegúrate de cargar las cuentas y sus movimientos
     });

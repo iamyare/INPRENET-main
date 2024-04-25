@@ -1,9 +1,13 @@
-import { Type } from "class-transformer";
-import { IsEmail, IsOptional, IsString, IsDateString, IsNumber, IsUUID, IsArray, ValidateNested, IsObject } from "class-validator"
-import { CreatePerfAfilCentTrabDto } from "./create-perfAfilCentTrabs.dto";
-import { CreateBancoDto } from "../../banco/dto/create-banco.dto";
-import { CreateAfiliadoRelacionadoDto } from "./CreateAfiliadoRelacionadoDto";
+import { Type } from 'class-transformer';
+import {
+    IsDate, IsEmail, IsEnum, IsInt, IsOptional, IsString, MaxLength, MinLength,
+    ValidateNested
+} from 'class-validator';
 
+enum Sexo {
+    Femenino = 'F',
+    Masculino = 'M'
+}
 
 export interface PersonaResponse {
     id_persona: number;
@@ -34,148 +38,112 @@ export interface PersonaResponse {
     tipo_afiliado: string;
 }
 
+export class NetPersonaDTO {
+    @IsInt()
+    id_tipo_identificacion: number;
 
-export class CreatePersonaDto {
-
-    //Datos de tabla Afiliado
-    @IsString()
-    dni: string;
-
-    @IsString()
-    estado_civil: string;
+    @IsInt()
+    id_pais: number;
 
     @IsString()
-    tipo_cotizante: string;
+    @MaxLength(40)
+    @IsOptional()
+    dni?: string;
 
     @IsString()
+    @MaxLength(40)
+    @IsOptional()
+    estado_civil?: string;
+
+    @IsString()
+    @MaxLength(40)
     primer_nombre: string;
 
-    @IsOptional()
     @IsString()
-    segundo_nombre: string;
-
+    @MaxLength(40)
     @IsOptional()
-    @IsString()
-    tercer_nombre: string;
+    segundo_nombre?: string;
 
     @IsString()
+    @MaxLength(40)
+    @IsOptional()
+    tercer_nombre?: string;
+
+    @IsString()
+    @MaxLength(40)
     primer_apellido: string;
 
+    @IsString()
+    @MaxLength(40)
     @IsOptional()
-    @IsString()
-    segundo_apellido: string;
+    segundo_apellido?: string;
 
-    @IsDateString()
-    fecha_nacimiento: string;
-
-    @IsString()
-    sexo: string;
-
-    @IsNumber()
-    cantidad_dependientes: number;
-
-    @IsNumber()
-    cantidad_hijos: number;
-
-    @IsString()
-    profesion: string;
-
-    @IsString()
-    representacion: string;
-
-    @IsString()
-    telefono_1: string;
-
+    @IsInt()
     @IsOptional()
-    @IsString()
-    telefono_2: string;
+    ID_TIPO_PERSONA?: number;
+
+    @IsEnum(Sexo)
+    sexo: Sexo;
+
+    @IsInt()
+    @IsOptional()
+    cantidad_dependientes?: number;
+
+    @IsInt()
+    @IsOptional()
+    cantidad_hijos?: number;
 
     @IsString()
+    @MaxLength(30)
+    @IsOptional()
+    profesion?: string;
+
+    @IsString()
+    @MaxLength(40)
+    @IsOptional()
+    representacion?: string;
+
+    @IsString()
+    @MaxLength(12)
+    @IsOptional()
+    telefono_1?: string;
+
+    @IsString()
+    @MaxLength(12)
+    @IsOptional()
+    telefono_2?: string;
+
     @IsEmail()
-    correo_1: string;
-
+    @MaxLength(40)
     @IsOptional()
-    @IsString()
+    correo_1?: string;
+
     @IsEmail()
-    correo_2: string;
+    @MaxLength(40)
+    @IsOptional()
+    correo_2?: string;
 
     @IsString()
-    archivo_identificacion: string;
+    @MaxLength(40)
+    @IsOptional()
+    numero_carnet?: string;
+
+    @IsDate()
+    @Type(() => Date)
+    fecha_nacimiento?: Date;
 
     @IsString()
+    @MaxLength(200)
+    @IsOptional()
+    archivo_identificacion?: string;
+
+    @IsString()
+    @MaxLength(200)
     direccion_residencia: string;
 
-    @IsString()
-    estado: string;
+    @IsInt()
+    id_municipio_residencia: number;
 
-    @IsString()
-    colegio_magisterial: string;
-
-    @IsString()
-    numero_carnet: string;
-
-    @IsArray()
-    @ValidateNested({ each: true })
-    @Type(() => CreatePerfAfilCentTrabDto)
-    perfAfilCentTrabs?: CreatePerfAfilCentTrabDto[];
-
-    //datos de banco
-    @IsObject()
-    @ValidateNested()
-    @Type(() => CreateBancoDto)
-    datosBanc: CreateBancoDto;
-
-    @IsArray()
-    @ValidateNested({ each: true })
-    @Type(() => CreateAfiliadoRelacionadoDto)
-    afiliadosRelacionados: CreateAfiliadoRelacionadoDto[];
-
-    //datos de tabla de referencia personal
-    @IsString()
-    @IsOptional()
-    nombre: string;
-
-    @IsString()
-    @IsOptional()
-    direccion: string;
-
-    @IsString()
-    @IsOptional()
-    parentesco: string;
-
-    @IsOptional()
-    @IsString()
-    telefono_domicilio: string;
-
-    @IsOptional()
-    @IsString()
-    telefono_trabajo: string;
-
-    @IsString()
-    @IsOptional()
-    telefono_celular: string;
-
-    @IsString()
-    @IsOptional()
-    tipo_identificacion?: string;
-
-    @IsString()
-    @IsOptional()
-    nombre_pais?: string;
-
-    @IsString()
-    @IsOptional()
-    nombre_departamento?: string;
-
-
+    @IsInt()
+    id_estado_persona: number;
 }
-
-/* @IsArray()
-    @ValidateNested({ each: true })
-    @Type(() => CreatePerfAfilCentTrabDto)
-    perfAfilCentTrabs: CreatePerfAfilCentTrabDto[]; */
-
-/* @IsArray()
-@ValidateNested({ each: true })
-@Type(() => CreateHistorialTrabajoDto)
-historialSalario: CreateHistorialTrabajoDto[]; */

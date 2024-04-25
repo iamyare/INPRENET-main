@@ -15,17 +15,19 @@ import { NET_DETALLE_PERSONA } from './entities/Net_detalle_persona.entity';
 import { Net_Persona_Por_Banco } from '../banco/entities/net_persona-banco.entity';
 import { Net_Ref_Per_Pers } from './entities/net_ref-Per-Persona.entity';
 import { Net_perf_pers_cent_trab } from './entities/net_perf_pers_cent_trab.entity';
+import { RegionalModule } from '../Regional/regional.module';
+import { Net_Municipio } from '../Regional/municipio/entities/net_municipio.entity';
 
 @Module({
   controllers: [AfiliadoController],
   providers: [AfiliadoService],
-  imports: [
+  imports: [RegionalModule, 
     TypeOrmModule.forFeature([Net_Estado_Persona, Net_Persona, Net_perf_pers_cent_trab,
       Net_Ref_Per_Pers,
       Net_ReferenciaPersonal,
       Net_Persona_Por_Banco, Net_Departamento,
       Net_Pais, Net_TipoIdentificacion,
-      Net_Centro_Trabajo, Net_Banco, NET_DETALLE_PERSONA, Net_Tipo_Persona])
+      Net_Centro_Trabajo, Net_Banco, NET_DETALLE_PERSONA, Net_Tipo_Persona, Net_Municipio])
   ],
   exports: [TypeOrmModule, AfiliadoService],
 })

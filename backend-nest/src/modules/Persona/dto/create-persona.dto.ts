@@ -132,6 +132,11 @@ export class NetPersonaDTO {
     @Type(() => Date)
     fecha_nacimiento?: Date;
 
+    @IsDate()
+    @IsOptional()
+    @Type(() => Date)
+    fecha_defuncion?: Date;
+
     @IsString()
     @MaxLength(200)
     @IsOptional()
@@ -146,4 +151,6 @@ export class NetPersonaDTO {
 
     @IsInt()
     id_estado_persona: number;
+
+
 }

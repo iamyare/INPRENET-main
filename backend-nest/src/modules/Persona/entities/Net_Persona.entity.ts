@@ -85,6 +85,9 @@ export class Net_Persona {
     @Column('date', { nullable: true, name: 'FECHA_NACIMIENTO' })
     fecha_nacimiento: string;
 
+    @Column('date', { nullable: true, name: 'FECHA_DEFUNCION' })
+    fecha_defuncion: string;
+
     @Column('varchar2', { length: 200, nullable: true, name: 'ARCHIVO_IDENTIFICACION' })
     archivo_identificacion: string;
 

@@ -30,13 +30,14 @@ import { PlanillaService } from './planilla/planilla.service';
 import { DetallePlanillaIngresoService } from './ingresos/detalle-plan-ingr/detalle-planilla-ing.service';
 import { Net_SALARIO_COTIZABLE } from './Ingresos/detalle-plan-ingr/entities/net_salario_cotizable.entity';
 import { AfiliadoModule } from '../Persona/afiliado.module';
+import { TransaccionesModule } from '../transacciones/transacciones.module';
 
 @Module({
   controllers: [DetallePlanIngrController, PlanillaController, BeneficioController, DetalleBeneficioController, DeduccionController,
     DeduccionController, DetalleDeduccionController, TipoPlanillaController, AfiliadoController],
   providers: [PlanillaService, DetallePlanillaIngresoService, BeneficioService, DetalleBeneficioService, DeduccionService,
     TipoPlanillaService, DetalleDeduccionService, AfiliadoService],
-  imports: [AfiliadoModule,
+  imports: [AfiliadoModule, TransaccionesModule,
     TypeOrmModule.forFeature([Net_SALARIO_COTIZABLE, Net_Beneficio, Net_Detalle_Pago_Beneficio,
                               Net_Planilla, Net_Deduccion, Net_TipoPlanilla, Net_Detalle_Deduccion,
                               Net_Institucion,Net_Detalle_Beneficio_Afiliado, Net_Detalle_planilla_ingreso]),]

@@ -13,14 +13,10 @@ import {
   Res,
 } from '@nestjs/common';
 import { AfiliadoService } from './afiliado.service';
-import { NetPersonaDTO } from './dto/create-persona.dto';
 import { UpdatePersonaDto } from './dto/update-persona.dto';
 import { CreateAfiliadoTempDto } from './dto/create-afiliado-temp.dto';
 import { ApiTags } from '@nestjs/swagger';
-import { CreateDetallePersonaDto } from './dto/create-detalle.dto';
 import { EncapsulatedPersonaDTO } from './dto/encapsulated-persona.dto';
-import { CreateReferenciaPersonalDTO } from './dto/create-referencia.dto ';
-import { AsignarReferenciasDTO } from './dto/asignarReferencia.dto';
 import { DataSource } from 'typeorm';
 
 @ApiTags('Afiliado')
@@ -29,78 +25,83 @@ export class AfiliadoController {
   constructor(private readonly afiliadoService: AfiliadoService, private dataSource: DataSource) {}
 
   @Post('afiliacion')
-    async createPersonaWithDetailsAndWorkCenters(@Body() encapsulatedDto: EncapsulatedPersonaDTO) {
-        try {
-            // Creación de la persona principal
-            const createPersonaDto = encapsulatedDto.datosGenerales;
-            const persona = await this.afiliadoService.create(createPersonaDto);
+async createPersonaWithDetailsAndWorkCenters(@Body() encapsulatedDto: EncapsulatedPersonaDTO) {
+    try {
+        // Creación de la persona principal
+        const createPersonaDto = encapsulatedDto.datosGenerales;
+        const persona = await this.afiliadoService.create(createPersonaDto);
 
-            // Creación del detalle de la persona
-            const detallePersonaDto = {
-                idPersona: persona.id_persona,
-                idTipoPersona: createPersonaDto.ID_TIPO_PERSONA,
-                porcentaje: 0
-            };
-            const detallePersona = await this.afiliadoService.createDetallePersona(detallePersonaDto);
+        // Creación del detalle de la persona
+        const detallePersonaDto = {
+            idPersona: persona.id_persona,
+            idTipoPersona: createPersonaDto.ID_TIPO_PERSONA,
+            porcentaje: 0
+        };
+        const detallePersona = await this.afiliadoService.createDetallePersona(detallePersonaDto);
 
-            // Asignación de centros de trabajo
-            let centrosTrabajoAsignados = [];
-            if (encapsulatedDto.centrosTrabajo && encapsulatedDto.centrosTrabajo.length > 0) {
-                centrosTrabajoAsignados = await this.afiliadoService.assignCentrosTrabajo(persona.id_persona, encapsulatedDto.centrosTrabajo);
-            }
-
-            // Creación y asignación de referencias personales
-            let referenciasAsignadas = [];
-            if (encapsulatedDto.referenciasPersonales && encapsulatedDto.referenciasPersonales.length > 0) {
-                referenciasAsignadas = await this.afiliadoService.createAndAssignReferences({
-                    idPersona: persona.id_persona,
-                    referencias: encapsulatedDto.referenciasPersonales
-                });
-            }
-
-            // Asignación de bancos
-            let bancosAsignados = [];
-            if (encapsulatedDto.bancos && encapsulatedDto.bancos.length > 0) {
-                bancosAsignados = await this.afiliadoService.assignBancosToPersona(persona.id_persona, encapsulatedDto.bancos);
-            }
-
-            // Creación de beneficiarios
-            let beneficiariosAsignados = [];
-            if (encapsulatedDto.beneficiarios && encapsulatedDto.beneficiarios.length > 0) {
-                for (const beneficiario of encapsulatedDto.beneficiarios) {
-                    const beneficiarioData = beneficiario.datosBeneficiario;
-                    const nuevoBeneficiario = await this.afiliadoService.createBeneficiario(beneficiarioData);
-                    const detalleBeneficiario = {
-                        idPersona: nuevoBeneficiario.id_persona,
-                        idCausante: persona.id_persona,
-                        idCausantePadre: persona.id_persona,
-                        idTipoPersona: beneficiarioData.ID_TIPO_PERSONA,
-                        porcentaje: beneficiario.porcentaje
-                    };
-                    const detalle = await this.afiliadoService.createDetalleBeneficiario(detalleBeneficiario);
-                    beneficiariosAsignados.push(detalle);
-                }
-            }
-
-            return {
-                persona,
-                detallePersona,
-                centrosTrabajoAsignados,
-                referenciasAsignadas,
-                bancosAsignados,
-                beneficiariosAsignados,
-                message: 'Persona creada con detalles, centros de trabajo, referencias personales, bancos y beneficiarios asignados correctamente.'
-            };
-        } catch (error) {
-            return {
-                error: true,
-                message: error.message
-            };
+        // Asignación de centros de trabajo
+        let centrosTrabajoAsignados = [];
+        if (encapsulatedDto.centrosTrabajo && encapsulatedDto.centrosTrabajo.length > 0) {
+            centrosTrabajoAsignados = await this.afiliadoService.assignCentrosTrabajo(persona.id_persona, encapsulatedDto.centrosTrabajo);
         }
+
+        // Creación y asignación de referencias personales
+        let referenciasAsignadas = [];
+        if (encapsulatedDto.referenciasPersonales && encapsulatedDto.referenciasPersonales.length > 0) {
+            referenciasAsignadas = await this.afiliadoService.createAndAssignReferences({
+                idPersona: persona.id_persona,
+                referencias: encapsulatedDto.referenciasPersonales
+            });
+        }
+
+        // Asignación de bancos
+        let bancosAsignados = [];
+        if (encapsulatedDto.bancos && encapsulatedDto.bancos.length > 0) {
+            bancosAsignados = await this.afiliadoService.assignBancosToPersona(persona.id_persona, encapsulatedDto.bancos);
+        }
+
+        // Creación de beneficiarios
+        let beneficiariosAsignados = [];
+        if (encapsulatedDto.beneficiarios && encapsulatedDto.beneficiarios.length > 0) {
+            for (const beneficiario of encapsulatedDto.beneficiarios) {
+                const beneficiarioData = beneficiario.datosBeneficiario;
+                const nuevoBeneficiario = await this.afiliadoService.createBeneficiario(beneficiarioData);
+                const detalleBeneficiario = {
+                    idPersona: nuevoBeneficiario.id_persona,
+                    idCausante: persona.id_persona,
+                    idCausantePadre: persona.id_persona,
+                    idTipoPersona: beneficiarioData.ID_TIPO_PERSONA,
+                    porcentaje: beneficiario.porcentaje
+                };
+                const detalle = await this.afiliadoService.createDetalleBeneficiario(detalleBeneficiario);
+                beneficiariosAsignados.push(detalle);
+            }
+        }
+
+        let colegiosMagisterialesAsignados = [];
+        if (encapsulatedDto.colegiosMagisteriales && encapsulatedDto.colegiosMagisteriales.length > 0) {
+          colegiosMagisterialesAsignados = await this.afiliadoService.assignColegiosMagisteriales(persona.id_persona, encapsulatedDto.colegiosMagisteriales);
+        }
+
+        return {
+            persona,
+            detallePersona,
+            centrosTrabajoAsignados,
+            referenciasAsignadas,
+            bancosAsignados,
+            beneficiariosAsignados,
+            colegiosMagisterialesAsignados,
+            message: 'Persona creada con detalles, centros de trabajo, referencias personales, bancos, beneficiarios y colegios magisteriales asignados correctamente.'
+        };
+    } catch (error) {
+        return {
+            error: true,
+            message: error.message
+        };
+}
     }
+
   
-
-
 
 
   @Put('/actualizar-salario')

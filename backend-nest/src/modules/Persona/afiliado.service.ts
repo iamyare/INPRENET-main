@@ -22,6 +22,8 @@ import { Net_Estado_Persona } from './entities/net_estado_persona.entity';
 import { AsignarReferenciasDTO } from './dto/asignarReferencia.dto';
 import { CreatePersonaBancoDTO } from './dto/create-persona-banco.dto';
 import { CreateDetalleBeneficiarioDto } from './dto/create-detalle-beneficiario-dto';
+import { Net_Colegios_Magisteriales } from '../transacciones/entities/net_colegios_magisteriales.entity';
+import { Net_Persona_Colegios } from '../transacciones/entities/net_persona_colegios.entity';
 
 @Injectable()
 export class AfiliadoService {
@@ -66,10 +68,16 @@ export class AfiliadoService {
     @InjectRepository(Net_Banco)
     private bancoRepository: Repository<Net_Banco>,
 
+    @InjectRepository(Net_Persona_Colegios)
+    private readonly netPersonaColegiosRepository: Repository<Net_Persona_Colegios>,
+    
+    @InjectRepository(Net_Colegios_Magisteriales)
+    private readonly netColegiosMagisterialesRepository: Repository<Net_Colegios_Magisteriales>
+
   ) { }
   
 
-  async create(createPersonaDto: NetPersonaDTO): Promise<Net_Persona> {
+async create(createPersonaDto: NetPersonaDTO): Promise<Net_Persona> {
     const persona = new Net_Persona();
     Object.assign(persona, createPersonaDto);
     if (createPersonaDto.fecha_nacimiento) {
@@ -219,6 +227,31 @@ async createDetalleBeneficiario(detalleDto: CreateDetalleBeneficiarioDto): Promi
 
   return this.detallePersonaRepository.save(detalle);
 }
+
+async assignColegiosMagisteriales(idPersona: number, colegiosMagisterialesData: any[]): Promise<Net_Persona_Colegios[]> {
+  const persona = await this.personaRepository.findOne({ where: { id_persona: idPersona } });
+  if (!persona) {
+    throw new Error('Persona no encontrada');
+  }
+
+  const asignaciones = [];
+  for (const colegioData of colegiosMagisterialesData) {
+    const colegio = await this.netColegiosMagisterialesRepository.findOne({ where: { idColegio: colegioData.idColegio } });
+    if (!colegio) {
+      throw new Error(`Colegio magisterial con ID ${colegioData.idColegio} no encontrado`);
+    }
+
+    const nuevoPersonaColegio = new Net_Persona_Colegios();
+    nuevoPersonaColegio.persona = persona;
+    nuevoPersonaColegio.colegio = colegio;
+
+    asignaciones.push(await this.netPersonaColegiosRepository.save(nuevoPersonaColegio));
+  }
+
+  return asignaciones;
+}
+
+
 
   async updateSalarioBase(dni: string, idCentroTrabajo: number, salarioBase: number): Promise<void> {
 

@@ -30,6 +30,7 @@ export class AfilBancoComponent implements OnInit {
   Archivos: boolean = false; DatosPuestoTrab: boolean = false;
   DatosHS: boolean = false; referenc: boolean = false;
   benfGroup: boolean = false; datosF: boolean = false;
+  ColegiosMagisteriales: boolean = false;
   datosA = false
 
   // Formularios
@@ -56,6 +57,10 @@ export class AfilBancoComponent implements OnInit {
     {
       refpers: new FormArray([], [Validators.required])
     });
+    formColegiosMagisteriales: any = new FormGroup(
+    {
+      refpers: new FormArray([], [Validators.required])
+    });
 
   labelBoton1 = "Adjunte archivo DNI"
 
@@ -72,6 +77,8 @@ export class AfilBancoComponent implements OnInit {
     this.benfGroup = false
     this.datosF = false
     this.datosA = false
+    
+    this.ColegiosMagisteriales = false
   }
 
   setEstadoDatCentTrab(e: any) {
@@ -82,6 +89,8 @@ export class AfilBancoComponent implements OnInit {
     this.benfGroup = false
     this.datosF = false
     this.datosA = false
+    
+    this.ColegiosMagisteriales = false
   }
 
   setDatosHS(datosHistSal: any) {
@@ -92,6 +101,8 @@ export class AfilBancoComponent implements OnInit {
     this.benfGroup = false
     this.datosF = false
     this.datosA = false
+    
+    this.ColegiosMagisteriales = false
   }
 
   setDatosReferenc(datosHistSal: any) {
@@ -102,6 +113,8 @@ export class AfilBancoComponent implements OnInit {
     this.benfGroup = false
     this.datosF = false
     this.datosA = false
+    
+    this.ColegiosMagisteriales = false
   }
 
   setDatosBenef(datosHistSal: any) {
@@ -112,6 +125,8 @@ export class AfilBancoComponent implements OnInit {
     this.benfGroup = true
     this.datosF = false
     this.datosA = false
+    
+    this.ColegiosMagisteriales = false
   }
 
   setDatosF(datosHistSal: any) {
@@ -122,6 +137,8 @@ export class AfilBancoComponent implements OnInit {
     this.benfGroup = false
     this.datosF = true
     this.datosA = false
+    
+    this.ColegiosMagisteriales = false
   }
   
   setDatosA(datosHistSal: any) {
@@ -132,6 +149,19 @@ export class AfilBancoComponent implements OnInit {
     this.benfGroup = false
     this.datosF = false
     this.datosA = true
+    
+    this.ColegiosMagisteriales = false
+  }
+
+  setDatosAColegiosMag(datosHistSal: any) {
+    this.DatosGenerales = false
+    this.DatosPuestoTrab = false
+    this.DatosHS = false
+    this.referenc = false
+    this.benfGroup = false
+    this.datosF = false
+    this.datosA = false
+    this.ColegiosMagisteriales = true
   }
 
   // Manejan la informacion de los formularios
@@ -146,6 +176,9 @@ export class AfilBancoComponent implements OnInit {
   }
   setDatosBen(DatosBancBen: any) {
     this.formBeneficiarios = DatosBancBen
+  }
+  setDatosColegiosMag(datosColegiosMagist: any) {
+    this.formColegiosMagisteriales = datosColegiosMagist
   }
 
   // Envia los datos del formulario al servicio para poder guardar la información

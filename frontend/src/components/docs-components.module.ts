@@ -54,6 +54,7 @@ import { AgregarPuestTrabComponent } from './agregar-puest-trab/agregar-puest-tr
 import { AgregarReferenciasPersonalesComponent } from './agregar-referencias-personales/agregar-referencias-personales.component';
 import { AgregarBenefCompComponent } from './agregar-benef-comp/agregar-benef-comp.component';
 import { AgregarDatBancCompComponent } from './agregar-dat-banc-comp/agregar-dat-banc-comp.component';
+import { AgregarColMagisComponent } from './agregar-col-magis/agregar-col-magis.component';
 
 @NgModule({
   declarations: [
@@ -78,6 +79,7 @@ import { AgregarDatBancCompComponent } from './agregar-dat-banc-comp/agregar-dat
     AgregarPuestTrabComponent,
     AgregarBenefCompComponent,
     AgregarDatBancCompComponent,
+    AgregarColMagisComponent,
     AgregarReferenciasPersonalesComponent
   ],
   exports: [
@@ -101,6 +103,7 @@ import { AgregarDatBancCompComponent } from './agregar-dat-banc-comp/agregar-dat
     AgregarPuestTrabComponent,
     AgregarBenefCompComponent,
     AgregarDatBancCompComponent,
+    AgregarColMagisComponent,
     AgregarReferenciasPersonalesComponent
   ],
   imports: [

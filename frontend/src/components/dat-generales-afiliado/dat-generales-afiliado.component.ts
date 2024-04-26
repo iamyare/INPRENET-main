@@ -29,7 +29,6 @@ export function generateAddressFormGroup(datos?: any): FormGroup {
     ciudadNacimiento: new FormControl(datos?.ciudadNacimiento, Validators.required),
     ciudadDomicilio: new FormControl(datos?.ciudadDomicilio, Validators.required),
     direccionDetallada: new FormControl(datos?.direccionDetallada, Validators.required),
-    colegioMagisterial: new FormControl(datos?.colegioMagisterial, [Validators.required]),
     numeroCarnet: new FormControl(datos?.numeroCarnet, [Validators.required]),
     nacionalidad: new FormControl(datos?.nacionalidad, Validators.required),
     municipioResidencia: new FormControl(datos?.municipioResidencia, Validators.required),

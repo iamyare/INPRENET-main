@@ -7,6 +7,7 @@
     (newdatosB)="setDatosBenef($event)"
     (newdatosF)="setDatosF($event)"
     (newdatosA)="setDatosA($event)"
+    (newdatosColegiosMag)="setDatosAColegiosMag($event)"
   ></app-progressbar>
 </div>
 
@@ -17,6 +18,11 @@
         *ngIf="DatosGenerales"
         groupName="DatosGenerales"
       ></app-dat-generales-afiliado>
+
+      <app-agregar-col-magis
+        *ngIf="ColegiosMagisteriales"
+        groupName="ColegiosMagisteriales"
+      ></app-agregar-col-magis>
 
       <!-- <app-dat-banc
         *ngIf="DatosGenerales"

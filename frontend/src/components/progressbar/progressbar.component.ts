@@ -22,8 +22,10 @@ export class ProgressbarComponent {
   @Output() newdatosB = new EventEmitter<any>()
   @Output() newdatosF = new EventEmitter<any>()
   @Output() newdatosA = new EventEmitter<any>()
+  @Output() newdatosColegiosMag = new EventEmitter<any>()
 
   datosG:boolean = true;
+  datosColegMagisteriales:boolean = false;
   datosCT:boolean = false;
   datosHS:boolean = false;
   datosRP:boolean = false;
@@ -39,6 +41,7 @@ export class ProgressbarComponent {
     this.datosB  = false;
     this.datosF  = false;
     this.datosA  = false;
+    this.datosColegMagisteriales  = false;
     this.newDatBenChange.emit(this.datosG);
     
   }
@@ -50,6 +53,7 @@ export class ProgressbarComponent {
     this.datosB  = false;
     this.datosF  = false;
     this.datosA  = false;
+    this.datosColegMagisteriales  = false;
     this.newEstCentrTrab.emit(this.datosCT);
     
   }
@@ -61,6 +65,7 @@ export class ProgressbarComponent {
     this.datosB  = false;
     this.datosF  = false;
     this.datosA  = false;
+    this.datosColegMagisteriales  = false;
     this.newdatosHS.emit(this.datosHS);
   }
   prueba4(){
@@ -71,6 +76,7 @@ export class ProgressbarComponent {
     this.datosB  = false;
     this.datosF  = false;
     this.datosA  = false;
+    this.datosColegMagisteriales  = false;
     this.newdatosRP.emit(this.datosRP);
   }
   prueba5(){
@@ -81,6 +87,7 @@ export class ProgressbarComponent {
     this.datosB  = true;
     this.datosF  = false;
     this.datosA  = false;
+    this.datosColegMagisteriales  = false;
     this.newdatosB.emit(this.datosB);
   }
   prueba6(){
@@ -91,6 +98,7 @@ export class ProgressbarComponent {
     this.datosB  = false;
     this.datosF  = true;
     this.datosA  = false;
+    this.datosColegMagisteriales  = false;
     this.newdatosF.emit(this.datosF);
   }
   prueba7(){
@@ -101,6 +109,19 @@ export class ProgressbarComponent {
     this.datosB  = false;
     this.datosF  = false;
     this.datosA  = true;
+    this.datosColegMagisteriales  = false;
     this.newdatosA.emit(this.datosA);
+  }
+
+  prueba8(){
+    this.datosG  = false;
+    this.datosCT  = false;
+    this.datosHS  = false;
+    this.datosRP  = false;
+    this.datosB  = false;
+    this.datosF  = false;
+    this.datosA  = false;
+    this.datosColegMagisteriales  = true;
+    this.newdatosColegiosMag.emit(this.datosColegMagisteriales);
   }
 }

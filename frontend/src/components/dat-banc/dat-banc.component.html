@@ -9,11 +9,11 @@
                 <div class="col-md-6">
                     <mat-form-field class="example-full-width; inputs" appearance="outline">
                         <mat-label>Nombre del Banco</mat-label>
-                        <select matNativeControl formControlName="nombreBanco">
-                            <option *ngFor="let p of Bancos" [value]="p.NOMBRE">
+                        <mat-select matNativeControl formControlName="nombreBanco">
+                            <mat-option *ngFor="let p of Bancos" [value]="p.NOMBRE">
                                 {{p.NOMBRE}}
-                            </option>
-                        </select>
+                            </mat-option>
+                        </mat-select>
                     </mat-form-field>
                 </div>
                 <div class="col-md-6">

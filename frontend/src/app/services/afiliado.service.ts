@@ -13,6 +13,11 @@ export class AfiliadoService {
 
   constructor(private http: HttpClient, private router: Router) { }
 
+  createPersonaWithDetailsAndWorkCenters(encapsulatedData: any): Observable<any> {
+    const url = `${environment.API_URL}/api/afiliado/afiliacion`;
+    return this.http.post<any>(url, encapsulatedData);
+  }
+
   buscarMovimientosPorDNI(dni: string): Observable<any> {
     const url = `${environment.API_URL}/api/afiliado/movimientos/${dni}`;
     return this.http.get<any>(url);
@@ -47,7 +52,7 @@ export class AfiliadoService {
 
   getAllPerfCentroTrabajo(dni:string): Observable<any | void> {
     const url = `${environment.API_URL}/api/afiliado/getAllPerfCentroTrabajo/${dni}`;
-    
+
     return this.http.get<any>(
       url,
     ).pipe(

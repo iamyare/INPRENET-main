@@ -6,32 +6,28 @@ import { DatosEstaticosService } from 'src/app/services/datos-estaticos.service'
 
 export function generateAddressFormGroup(datos?: any): FormGroup {
   return new FormGroup({
-    tipoIdent: new FormControl(datos?.tipoIdent, Validators.required),
-    numeroIden: new FormControl(datos?.numeroIden, Validators.required),
-    primerNombre: new FormControl(datos?.primerNombre, Validators.required),
-    segundoNombre: new FormControl(datos?.segundoNombre),
-    tercerNombre: new FormControl(datos?.tercerNombre),
-    primerApellido: new FormControl(datos?.primerApellido, Validators.required),
-    segundoApellido: new FormControl(datos?.segundoApellido),
-    fechaNacimiento: new FormControl(datos?.fechaNacimiento, Validators.required),
-    cantidadDependientes: new FormControl(datos?.cantidadDependientes, [Validators.pattern("([1-9]+([0-9])?)"), Validators.required]),
-    cantidadHijos: new FormControl(datos?.cantidadHijos, [Validators.required, Validators.pattern("([1-9]+([0-9])?)")]),
-    Sexo: new FormControl(datos?.Sexo, Validators.required),
-    profesion: new FormControl(datos?.profesion, Validators.required),
-    estadoCivil: new FormControl(datos?.estadoCivil, Validators.required),
+    id_tipo_identificacion: new FormControl(datos?.id_tipo_identificacion, Validators.required),
+    dni: new FormControl(datos?.dni, Validators.required),
+    primer_nombre: new FormControl(datos?.primer_nombre, Validators.required),
+    segundo_nombre: new FormControl(datos?.segundo_nombre),
+    tercer_nombre: new FormControl(datos?.tercer_nombre),
+    primer_apellido: new FormControl(datos?.primer_apellido, Validators.required),
+    segundo_apellido: new FormControl(datos?.segundo_apellido),
+    fecha_nacimiento: new FormControl(datos?.fecha_nacimiento, Validators.required),
+    cantidad_dependientes: new FormControl(datos?.cantidad_dependientes, [Validators.pattern("^[0-9]+$"), Validators.required]),
+    cantidad_hijos: new FormControl(datos?.cantidad_hijos, [Validators.required, Validators.pattern("^[0-9]+$")]),
+    genero: new FormControl(datos?.genero, Validators.required),
+    id_profesion: new FormControl(datos?.id_profesion, Validators.required),
+    estado_civil: new FormControl(datos?.estado_civil, Validators.required),
     representacion: new FormControl(datos?.representacion, Validators.required),
-    estado: new FormControl(datos?.estado, Validators.required),
-    cotizante: new FormControl(datos?.cotizante, Validators.required),
-    telefono1: new FormControl(datos?.telefono1, Validators.required),
-    telefono2: new FormControl(datos?.telefono2,),
-    correo1: new FormControl(datos?.correo1, [Validators.required, Validators.email]),
-    correo2: new FormControl(datos?.correo2, [Validators.email]),
-    ciudadNacimiento: new FormControl(datos?.ciudadNacimiento, Validators.required),
-    ciudadDomicilio: new FormControl(datos?.ciudadDomicilio, Validators.required),
-    direccionDetallada: new FormControl(datos?.direccionDetallada, Validators.required),
-    numeroCarnet: new FormControl(datos?.numeroCarnet, [Validators.required]),
-    nacionalidad: new FormControl(datos?.nacionalidad, Validators.required),
-    municipioResidencia: new FormControl(datos?.municipioResidencia, Validators.required),
+    telefono_1: new FormControl(datos?.telefono_1, Validators.required),
+    telefono_2: new FormControl(datos?.telefono_2,),
+    correo_1: new FormControl(datos?.correo_1, [Validators.required, Validators.email]),
+    correo_2: new FormControl(datos?.correo_2, [Validators.email]),
+    direccion_residencia: new FormControl(datos?.direccion_residencia, Validators.required),
+    numero_carnet: new FormControl(datos?.numero_carnet, [Validators.required]),
+    id_pais: new FormControl(datos?.id_pais, Validators.required),
+    id_municipio_residencia: new FormControl(datos?.id_municipio_residencia, Validators.required),
   });
 }
 
@@ -54,9 +50,12 @@ export class DatGeneralesAfiliadoComponent implements OnInit {
 
   tipoIdentData: any = [];
   nacionalidades: any = [];
+  municipios: any = [];
+  generos: string[] = [];
+  profesiones: any = [];
 
   tipoCotizante: any = this.datosEstaticos.tipoCotizante; tipoIdent: any = this.datosEstaticos.tipoIdent;
-  Sexo: any = this.datosEstaticos.Sexo; estadoCivil: any = this.datosEstaticos.estadoCivil;
+  estadoCivil: any = this.datosEstaticos.estadoCivil;
   representacion: any = this.datosEstaticos.representacion; estado: any = this.datosEstaticos.estado;
 
 
@@ -77,7 +76,19 @@ export class DatGeneralesAfiliadoComponent implements OnInit {
   ngOnInit(): void {
     this.cargarTiposIdentificacion();
     this.cargarNacionalidades();
+    this.cargarMunicipios();
+    this.cargarProfesiones();
+    this.generos = this.datosEstaticos.genero;
   }
+
+  cargarProfesiones() {
+    this.datosEstaticos.getProfesiones().then(data => {
+      this.profesiones = data;
+    }).catch(error => {
+      console.error('Error al cargar profesiones:', error);
+    });
+  }
+
 
   cargarTiposIdentificacion() {
     this.datosEstaticos.gettipoIdent().then(data => {
@@ -95,9 +106,17 @@ export class DatGeneralesAfiliadoComponent implements OnInit {
     });
   }
 
+  cargarMunicipios() {
+    this.direccionSer.getAllMunicipios().subscribe({
+      next: (data) => {
+        this.municipios = data;
+      },
+      error: (error) => {
+        console.error('Error al cargar municipios:', error);
+      }
+    });
+  }
 
-  /* prueba(e:any){
-    return e._model.selection
-  } */
+
 
 }

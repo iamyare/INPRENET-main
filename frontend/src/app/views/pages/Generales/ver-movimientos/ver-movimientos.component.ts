@@ -131,7 +131,7 @@ export class VerMovimientosComponent implements OnInit {
 
   async manejarAccionUno(row: any): Promise<void> {
     try {
-      const base64Logo = await this.convertirImagenABase64('/assets/images/LOGO INPRENET.png');
+      const base64Logo = await this.convertirImagenABase64('/assets/images/INPRENET-LOGO.svg');
 
       const informacionGeneral: Content = {
         table: {
@@ -260,7 +260,7 @@ export class VerMovimientosComponent implements OnInit {
     }
 
     try {
-      const base64Logo = await this.convertirImagenABase64('/assets/images/LOGO INPRENET.png');
+      const base64Logo = await this.convertirImagenABase64('/assets/images/INPRENET-LOGO.svg');
       const primerMovimiento = this.filasT[0];
       const currentDate = new Date().toLocaleDateString('es-ES');
       const receiptNumber = Math.floor(Math.random() * 1000000) + 100000;
@@ -347,15 +347,12 @@ export class VerMovimientosComponent implements OnInit {
 
 
   convertirImagenABase64(url: string): Promise<string> {
-    return this.http.get(url, { responseType: 'blob' }).toPromise().then((blob:any) => {
-      return new Promise<string>((resolve, reject) => {
-        const reader = new FileReader();
-        reader.readAsDataURL(blob);
-        reader.onloadend = () => resolve(reader.result as string);
-        reader.onerror = error => reject(error);
-      });
+    return this.http.get(url, { responseType: 'text' }).toPromise().then((svgText:any) => {
+      const base64Data = btoa(unescape(encodeURIComponent(svgText)));
+      return `data:image/svg+xml;base64,${base64Data}`;
     });
   }
+
 
 
   limpiarInformacion() {

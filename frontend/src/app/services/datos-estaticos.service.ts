@@ -5,6 +5,8 @@ import { BancosService } from './bancos.service';
 import { DeduccionesService } from './deducciones.service';
 import { InstitucionesService } from './instituciones.service';
 import { TipoIdentificacionService } from './tipo-identificacion.service';
+import { Observable } from 'rxjs';
+import { CentroTrabajoService } from './centro-trabajo.service';
 
 @Injectable({
   providedIn: 'root'
@@ -15,14 +17,18 @@ export class DatosEstaticosService {
   DatosBancBen: any = [];
   Bancos: any = [];
   Instituciones: any = [];
-  tipoIdent : any = []
+  tipoIdent : any = [];
+  profesiones: any = [];
 
-  constructor(private SVCInstituciones: InstitucionesService, private afiliadoService: AfiliadoService, public direccionSer: DireccionService, private bancosService: BancosService, private tipoIdentificacionService:TipoIdentificacionService) {
+  constructor(private SVCInstituciones: InstitucionesService, private afiliadoService: AfiliadoService, public direccionSer: DireccionService, private bancosService: BancosService, private tipoIdentificacionService:TipoIdentificacionService,
+    private centroTrabajoService: CentroTrabajoService,
+  ) {
     /* this.direccionSer.getAllCiudades().subscribe((res: any) => {});
     this.direccionSer.getAllProvincias().subscribe((res: any) => {}); */
     /*  */
     this.getInstituciones();
     this.getNacioalidad();
+    this.getProfesiones();
   }
 
   async gettipoIdent() {
@@ -31,6 +37,7 @@ export class DatosEstaticosService {
       label: item.tipo_identificacion,
       value: String(item.id_identificacion)
     }));
+
 
     this.tipoIdent = mappedResponse;
     return this.tipoIdent;
@@ -44,6 +51,24 @@ export class DatosEstaticosService {
       value: String(item.id_institucion)
     }));
   }
+
+  async getProfesiones() {
+    try {
+        const response = await this.centroTrabajoService.obtenerTodasLasProfesiones().toPromise() || [];
+        this.profesiones = response.map((profesion: any) => ({
+            label: profesion.descripcion,
+            value:profesion.idProfesion
+        }));
+        return this.profesiones;
+    } catch (error) {
+        console.error('Error al obtener las profesiones', error);
+        this.profesiones = [];
+        return this.profesiones;
+    }
+}
+
+
+
 
   async getNacioalidad() {
     const response = await this.direccionSer.getAllPaises().toPromise();
@@ -124,15 +149,11 @@ export class DatosEstaticosService {
       "value": "INACTIVO"
     }
   ];
-  Sexo = [
-    {
-      "idSexo": 1,
-      "value": "M"
-    },
-    {
-      "idSexo": 2,
-      "value": "F"
-    }
+  genero = [
+    "Masculino",
+    "Femenino",
+    "No binario",
+    "Otro"
   ];
   /* tipoIdent = [
     {

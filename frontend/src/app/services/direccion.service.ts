@@ -30,7 +30,7 @@ export class DireccionService {
         })
       );
   }
-  getAllCiudades(): Observable<any | void> {
+  getAllMunicipios(): Observable<any | void> {
     const url = `${environment.API_URL}/api/municipio`;
     return this.http.get<any>(
       url,

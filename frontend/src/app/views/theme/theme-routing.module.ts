@@ -29,6 +29,7 @@ import { EditReferPersonalesComponent } from '../pages/Generales/edit-refer-pers
 import { EditDatosGeneralesComponent } from '../pages/Generales/edit-datos-generales/edit-datos-generales.component';
 import { EditBeneficiariosComponent } from '../pages/Generales/edit-beneficiarios/edit-beneficiarios.component';
 import { EditDatosBancariosComponent } from '../pages/Generales/edit-datos-bancarios/edit-datos-bancarios.component';
+import { EditColegiosMagisterialesComponent } from '../pages/Generales/edit-colegios-magisteriales/edit-colegios-magisteriales.component';
 
 const routes: Routes = [
   //rutas Afiliado
@@ -61,6 +62,13 @@ const routes: Routes = [
             component: EditDatosGeneralesComponent,
             data: {
               title: 'Editar Datos Generales',
+            },
+          },
+          {
+            path: 'edit-colegios-magisteriales',
+            component: EditColegiosMagisterialesComponent,
+            data: {
+              title: 'Editar Colegios Magisteriales',
             },
           },
           {

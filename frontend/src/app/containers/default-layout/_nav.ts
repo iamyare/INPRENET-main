@@ -74,6 +74,10 @@ export const navItems: INavData[] = [
             name: 'Centros de trabajo',
           },
           {
+            url: '/Afiliado/edit-colegios-magisteriales',
+            name: 'Colegios Magisteriales',
+          },
+          {
             url: '/Afiliado/edit-refer-personales',
             name: 'Referencias personales',
           },

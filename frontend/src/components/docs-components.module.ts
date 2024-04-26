@@ -36,6 +36,7 @@ import { DatPuestoTrabComponent } from './dat-puesto-trab/dat-puesto-trab.compon
 import { DatBancComponent } from './dat-banc/dat-banc.component';
 import { RefPersComponent } from './ref-pers/ref-pers.component';
 import { BenefComponent } from './benef/benef.component';
+import { ColMagisterialesComponent } from './col-magisteriales/col-magisteriales.component';
 import { BotonarchivosComponent } from './botonarchivos/botonarchivos.component';
 import { ProgressbarComponent } from './progressbar/progressbar.component';
 import { ProgressplanillComponent } from './progressplanill/progressplanill.component';
@@ -66,6 +67,7 @@ import { AgregarColMagisComponent } from './agregar-col-magis/agregar-col-magis.
     DatBancComponent,
     BenefComponent,
     RefPersComponent,
+    ColMagisterialesComponent,
     BotonarchivosComponent,
     HistorialSalarioComponent,
     DynamicFormComponent,
@@ -91,6 +93,7 @@ import { AgregarColMagisComponent } from './agregar-col-magis/agregar-col-magis.
     DatBancComponent,
     BenefComponent,
     RefPersComponent,
+    ColMagisterialesComponent,
     BotonarchivosComponent,
     HistorialSalarioComponent,
     DynamicFormComponent,

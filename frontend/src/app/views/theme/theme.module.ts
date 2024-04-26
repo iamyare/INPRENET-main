@@ -53,6 +53,7 @@ import { EditReferPersonalesComponent } from '../pages/Generales/edit-refer-pers
 import { EditDatosGeneralesComponent } from '../pages/Generales/edit-datos-generales/edit-datos-generales.component';
 import { EditBeneficiariosComponent } from '../pages/Generales/edit-beneficiarios/edit-beneficiarios.component';
 import { EditDatosBancariosComponent } from '../pages/Generales/edit-datos-bancarios/edit-datos-bancarios.component';
+import { EditColegiosMagisterialesComponent } from '../pages/Generales/edit-colegios-magisteriales/edit-colegios-magisteriales.component';
 import { PlanillaColegiosPrivadosComponent } from '../pages/Centros Privados/planilla-colegios-privados/planilla-colegios-privados.component';
 import { NavDefaultComponent } from '../pages/Centros Privados/nav-default/nav-default.component';
 
@@ -78,8 +79,6 @@ import { NavDefaultComponent } from '../pages/Centros Privados/nav-default/nav-d
     MatStepperModule,
     MatNativeDateModule,
     MatGridListModule,
-    
-
   ],
   providers: [
     { provide: MAT_DATE_LOCALE, useValue: 'es' }
@@ -116,8 +115,8 @@ import { NavDefaultComponent } from '../pages/Centros Privados/nav-default/nav-d
     EditDatosGeneralesComponent,
     EditBeneficiariosComponent,
     EditDatosBancariosComponent,
-    EditReferPersonalesComponent
-    /*     CentroTrabajoPageComponent */
+    EditReferPersonalesComponent,
+    EditColegiosMagisterialesComponent
   ]
 })
 export class ThemeModule {

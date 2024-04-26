@@ -9,6 +9,7 @@ import { NET_TIPO_CUENTA } from './entities/net_tipo_cuenta.entity';
 import { NET_CUENTA_PERSONA } from './entities/net_cuenta_persona.entity';
 import { NET_TIPO_MOVIMIENTO } from './entities/net_tipo_movimiento.entity';
 import { CrearMovimientoDTO } from './dto/voucher.dto';
+import { NET_PROFESIONES } from './entities/net_profesiones.entity';
 
 @Injectable()
 export class TransaccionesService {
@@ -24,8 +25,18 @@ export class TransaccionesService {
     private cuentaPersonaRepository: Repository<NET_CUENTA_PERSONA>,
     @InjectRepository(NET_TIPO_MOVIMIENTO)
     private tipoMovimientoRepository: Repository<NET_TIPO_MOVIMIENTO>,
+    @InjectRepository(NET_PROFESIONES)
+    private readonly profesionesRepository: Repository<NET_PROFESIONES>,
   ){
 
+  }
+
+  async findAllProfesiones(): Promise<NET_PROFESIONES[]> {
+    try {
+      return await this.profesionesRepository.find();
+    } catch (error) {
+      
+    }
   }
 
   async obtenerVoucherDeMovimientos(dni: string): Promise<CrearMovimientoDTO[]> {

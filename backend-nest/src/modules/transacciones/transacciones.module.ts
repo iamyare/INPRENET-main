@@ -10,13 +10,14 @@ import { TransaccionesService } from './transacciones.service';
 import { NET_TIPO_MOVIMIENTO } from './entities/net_tipo_movimiento.entity';
 import { Net_Colegios_Magisteriales } from './entities/net_colegios_magisteriales.entity';
 import { Net_Persona_Colegios } from './entities/net_persona_colegios.entity';
+import { NET_PROFESIONES } from './entities/net_profesiones.entity';
 
 @Module({
   controllers: [TransaccionesController],
   providers: [TransaccionesService],
   imports: [
     TypeOrmModule.forFeature([
-      NET_CUENTA_PERSONA, NET_MOVIMIENTO_CUENTA, NET_TIPO_CUENTA, NET_TIPO_MOVIMIENTO, Net_Usuario, Net_Persona, Net_Colegios_Magisteriales, Net_Persona_Colegios
+      NET_CUENTA_PERSONA, NET_MOVIMIENTO_CUENTA, NET_TIPO_CUENTA, NET_TIPO_MOVIMIENTO, Net_Usuario, Net_Persona, Net_Colegios_Magisteriales, Net_Persona_Colegios, NET_PROFESIONES
     ])],
     exports: [TypeOrmModule, TransaccionesService],
 })

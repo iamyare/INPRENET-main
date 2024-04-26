@@ -1,13 +1,7 @@
 import { Type } from 'class-transformer';
 import {
-    IsDate, IsEmail, IsEnum, IsInt, IsOptional, IsString, MaxLength, MinLength,
-    ValidateNested
+    IsDate, IsEmail, IsEnum, IsInt, IsOptional, IsString, MaxLength,
 } from 'class-validator';
-
-enum Sexo {
-    Femenino = 'F',
-    Masculino = 'M'
-}
 
 export interface PersonaResponse {
     id_persona: number;
@@ -18,7 +12,7 @@ export interface PersonaResponse {
     tercer_nombre: string;
     primer_apellido: string;
     segundo_apellido: string;
-    sexo: string;
+    genero: string;
     cantidad_dependientes: number;
     cantidad_hijos: number;
     profesion: string;
@@ -82,8 +76,9 @@ export class NetPersonaDTO {
     @IsOptional()
     ID_TIPO_PERSONA?: number;
 
-    @IsEnum(Sexo)
-    sexo: Sexo;
+    @IsString()
+    @MaxLength(30)
+    genero: string;
 
     @IsInt()
     @IsOptional()
@@ -93,10 +88,9 @@ export class NetPersonaDTO {
     @IsOptional()
     cantidad_hijos?: number;
 
-    @IsString()
-    @MaxLength(30)
+    @IsInt()
     @IsOptional()
-    profesion?: string;
+    id_profesion?: number;
 
     @IsString()
     @MaxLength(40)

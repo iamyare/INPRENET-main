@@ -1,10 +1,9 @@
 import { Net_TipoIdentificacion } from "../../tipo_identificacion/entities/net_tipo_identificacion.entity";
 import { Net_Pais } from "../../Regional/pais/entities/pais.entity";
-import { Check, Column, Entity, Index, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn } from "typeorm";
+import { Column, Entity, Index, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 import { Net_Detalle_Deduccion } from "../../Planilla/detalle-deduccion/entities/detalle-deduccion.entity";
 import { Net_Municipio } from "../../Regional/municipio/entities/net_municipio.entity";
 import { NET_CUENTA_PERSONA } from "../../transacciones/entities/net_cuenta_persona.entity";
-import { IsIn } from "class-validator";
 import { Net_Detalle_planilla_ingreso } from "../../Planilla/Ingresos/detalle-plan-ingr/entities/net_detalle_plani_ing.entity";
 import { Net_Estado_Persona } from "./net_estado_persona.entity";
 import { NET_DETALLE_PERSONA } from "./Net_detalle_persona.entity";
@@ -12,11 +11,11 @@ import { Net_Persona_Colegios } from "src/modules/transacciones/entities/net_per
 import { Net_Persona_Por_Banco } from "src/modules/banco/entities/net_persona-banco.entity";
 import { Net_perf_pers_cent_trab } from "./net_perf_pers_cent_trab.entity";
 import { Net_Ref_Per_Pers } from "./net_ref-Per-Persona.entity";
+import { NET_PROFESIONES } from "src/modules/transacciones/entities/net_profesiones.entity";
 
 @Entity({
     name: 'NET_PERSONA',
 })
-@Check("CK_Sexo", `SEXO IN ('F', 'M')`)
 export class Net_Persona {
     @PrimaryGeneratedColumn({ type: 'int', name: 'ID_PERSONA', primaryKeyConstraintName: 'PK_ID_PERSONA_PERSONA' })
     id_persona: number;
@@ -51,18 +50,14 @@ export class Net_Persona {
     @Column('varchar2', { length: 40, nullable: true, name: 'SEGUNDO_APELLIDO' })
     segundo_apellido: string;
 
-    @Column('char', { length: 1, nullable: true, name: 'SEXO' })
-    @IsIn(['F', 'M'])
-    sexo: string;
+    @Column('varchar2', { length: 30, nullable: true, name: 'GENERO' })
+    genero: string;
 
     @Column('number', { nullable: true, name: 'CANTIDAD_DEPENDIENTES' })
     cantidad_dependientes: number;
 
     @Column('number', { nullable: true, name: 'CANTIDAD_HIJOS' })
     cantidad_hijos: number;
-
-    @Column('varchar2', { length: 30, nullable: true, name: 'PROFESION' })
-    profesion: string;
 
     @Column('varchar2', { length: 40, nullable: true, name: 'REPRESENTACION' })
     representacion: string;
@@ -131,6 +126,10 @@ export class Net_Persona {
 
     @OneToMany(() => Net_Persona_Colegios, personaColegios => personaColegios.persona)
     colegiosMagisteriales: Net_Persona_Colegios[];
+
+    @ManyToOne(() => NET_PROFESIONES, profesion => profesion.personas, { cascade: true })
+    @JoinColumn({ name: 'ID_PROFESION', foreignKeyConstraintName: 'FK_ID_PROFESION_PERSONA' })
+    profesion: NET_PROFESIONES;
 
 
 }

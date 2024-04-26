@@ -23,6 +23,7 @@ export class CentroTrabajoController {
       res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: error.message });
     }
   }
+  
   @Get("Privados")
   async findAllPriv(@Res() res): Promise<void> {
     try {

@@ -3,11 +3,17 @@ import { UpdateTranssacionesDto } from './dto/update-transacciones.dto';
 import { TransaccionesService } from './transacciones.service';
 import { ApiTags } from '@nestjs/swagger';
 import { CrearMovimientoDTO } from './dto/voucher.dto';
+import { NET_PROFESIONES } from './entities/net_profesiones.entity';
 
 @ApiTags('transacciones')
 @Controller('transacciones')
 export class TransaccionesController {
   constructor(private readonly transaccionesService: TransaccionesService) { }
+
+  @Get('profesiones')
+async findAllProfesiones(): Promise<any> {
+  return await this.transaccionesService.findAllProfesiones();
+}
 
   @Get('voucher/:dni')
     obtenerVouchersDeMovimientos(@Param('dni') dni: string): Promise<any> {

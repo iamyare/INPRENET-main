@@ -24,6 +24,7 @@ import { CreatePersonaBancoDTO } from './dto/create-persona-banco.dto';
 import { CreateDetalleBeneficiarioDto } from './dto/create-detalle-beneficiario-dto';
 import { Net_Colegios_Magisteriales } from '../transacciones/entities/net_colegios_magisteriales.entity';
 import { Net_Persona_Colegios } from '../transacciones/entities/net_persona_colegios.entity';
+import { NET_PROFESIONES } from '../transacciones/entities/net_profesiones.entity';
 
 @Injectable()
 export class AfiliadoService {
@@ -72,7 +73,10 @@ export class AfiliadoService {
     private readonly netPersonaColegiosRepository: Repository<Net_Persona_Colegios>,
     
     @InjectRepository(Net_Colegios_Magisteriales)
-    private readonly netColegiosMagisterialesRepository: Repository<Net_Colegios_Magisteriales>
+    private readonly netColegiosMagisterialesRepository: Repository<Net_Colegios_Magisteriales>,
+
+    @InjectRepository(NET_PROFESIONES)
+    private readonly netProfesionesRepository: Repository<NET_PROFESIONES>
 
   ) { }
   
@@ -112,7 +116,12 @@ async create(createPersonaDto: NetPersonaDTO): Promise<Net_Persona> {
 
     persona.estadoPersona = await this.estadoPersonaRepository.findOne({ where: { codigo: createPersonaDto.id_estado_persona } });
     if (!persona.estadoPersona) {
-        throw new Error(`Estado de la persona con código ${createPersonaDto.id_estado_persona} no encontrado`);
+        throw new Error(`Estado con código ${createPersonaDto.id_estado_persona} no encontrado`);
+    }
+
+    persona.profesion = await this.netProfesionesRepository.findOne({ where: { idProfesion: createPersonaDto.id_profesion } });
+    if (!persona.profesion) {
+        throw new Error(`Profesion con código ${createPersonaDto.id_profesion} no encontrado`);
     }
 
     return await this.personaRepository.save(persona);
@@ -517,7 +526,7 @@ async assignColegiosMagisteriales(idPersona: number, colegiosMagisterialesData: 
         tercer_nombre: el.TERCER_NOMBRE,
         primer_apellido: el.PRIMER_APELLIDO,
         segundo_apellido: el.SEGUNDO_APELLIDO,
-        sexo: el.SEXO,
+        genero: el.GENERO,
         cantidad_dependientes: el.CANTIDAD_DEPENDIENTES,
         cantidad_hijos: el.CANTIDAD_HIJOS,
         profesion: el.PROFESION,

@@ -10,6 +10,7 @@ import { NET_CUENTA_PERSONA } from './entities/net_cuenta_persona.entity';
 import { NET_TIPO_MOVIMIENTO } from './entities/net_tipo_movimiento.entity';
 import { CrearMovimientoDTO } from './dto/voucher.dto';
 import { NET_PROFESIONES } from './entities/net_profesiones.entity';
+import { Net_Colegios_Magisteriales } from './entities/net_colegios_magisteriales.entity';
 
 @Injectable()
 export class TransaccionesService {
@@ -27,6 +28,9 @@ export class TransaccionesService {
     private tipoMovimientoRepository: Repository<NET_TIPO_MOVIMIENTO>,
     @InjectRepository(NET_PROFESIONES)
     private readonly profesionesRepository: Repository<NET_PROFESIONES>,
+
+    @InjectRepository(Net_Colegios_Magisteriales)
+    private colegiosMRepository: Repository<Net_Colegios_Magisteriales>,
   ){
 
   }
@@ -151,6 +155,15 @@ async crearMovimiento(dto: CrearMovimientoDTO): Promise<NET_MOVIMIENTO_CUENTA> {
   
     return cuentasConDescripcion;
   
+  }
+
+  async getAllColegiosMagisteriales(): Promise<any[]> {
+    const colegiosMagist = await this.colegiosMRepository.find();
+  
+    if (!colegiosMagist) {
+      throw new Error('colegiosMagist no encontrada');
+    }
+    return colegiosMagist;  
   }
 
   async findMovimientosByDNI(dni: string) {

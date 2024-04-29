@@ -47,6 +47,23 @@ async findAllProfesiones(): Promise<any> {
     }
   }
 
+  @Get('/getAllColegiosMagisteriales/')
+  async getAllCentroTrabajo() {
+    try {
+      const colegiosMagisteriales = await this.transaccionesService.getAllColegiosMagisteriales();
+      return {
+        statusCode: HttpStatus.OK,
+        message: 'Colegios magisteriales obtenidos con éxito',
+        data: colegiosMagisteriales,
+      };
+    } catch (error) {
+      throw new HttpException({
+        statusCode: HttpStatus.BAD_REQUEST,
+        message: error.message || 'Ocurrió un error al obtener los colegios magisteriales',
+      }, HttpStatus.BAD_REQUEST);
+    }
+  }
+
   @Get('/movimientos/:dni')
   async getMovimientosByDNI(@Param('dni') dni: string, @Res() res) {
     try {
@@ -80,4 +97,6 @@ async findAllProfesiones(): Promise<any> {
   remove(@Param('id') id: string) {
     return this.transaccionesService.remove(+id);
   }
+
+  
 }

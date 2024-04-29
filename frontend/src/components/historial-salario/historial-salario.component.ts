@@ -25,8 +25,7 @@ export function generateHistSalFormGroup(datos?:any): FormGroup {
 export class HistorialSalarioComponent {
   public formParent: FormGroup = new FormGroup({});
 
-  Bancos: any = this.datosEstaticos.Bancos;
-  sector: any = this.datosEstaticos.sector;
+  Bancos: any;
 
   @Output() newDatHistSal = new EventEmitter<any>()
   @Input() datos:any;
@@ -36,7 +35,10 @@ export class HistorialSalarioComponent {
     this.newDatHistSal.emit(data);
   }
 
-  constructor( private fb: FormBuilder, private datosEstaticos: DatosEstaticosService) {}
+  constructor( private fb: FormBuilder, private datosEstaticos: DatosEstaticosService) {
+    this.datosEstaticos.getBancos();
+    this.Bancos = this.datosEstaticos.Bancos;
+  }
 
   ngOnInit():void{
     this.initFormParent();

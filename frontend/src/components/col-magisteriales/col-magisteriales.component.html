@@ -13,8 +13,8 @@
               <mat-form-field class="example-full-width inputs" appearance="outline">
                 <mat-label>Colegio Magisterial</mat-label>
                 <mat-select matNativeControl formControlName="colegio_magisterial">
-                  <mat-option *ngFor="let item of colegio_magisterial" [value]="item.value">
-                    {{ item.label }}
+                  <mat-option *ngFor="let item of colegio_magisterial" [value]="item.label">
+                    {{ item.value }}
                   </mat-option>
                 </mat-select>
               </mat-form-field>

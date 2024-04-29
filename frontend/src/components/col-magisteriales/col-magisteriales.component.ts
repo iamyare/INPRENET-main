@@ -1,10 +1,13 @@
 import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output, inject } from '@angular/core';
 import { ControlContainer, FormArray, FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
+import { DatosEstaticosService } from 'src/app/services/datos-estaticos.service';
+
 export function generateColegMagistFormGroup(datos?:any): FormGroup {
   return new FormGroup({
     colegio_magisterial: new FormControl(datos.colegio_magisterial, Validators.required)
   });
 }
+
 @Component({
   selector: 'app-col-magisteriales',
   templateUrl: './col-magisteriales.component.html',
@@ -21,6 +24,7 @@ export function generateColegMagistFormGroup(datos?:any): FormGroup {
 export class ColMagisterialesComponent {
   public formParent: FormGroup = new FormGroup({});
   colegio_magisterial: any = [];
+  
   @Input() nombreComp?:string
   @Input() datos?:any
   @Output() newDataColegioMagisterial = new EventEmitter<any>()
@@ -30,9 +34,11 @@ export class ColMagisterialesComponent {
     this.newDataColegioMagisterial.emit(data)
   }
 
-  constructor( private fb: FormBuilder) {
+  constructor( private fb: FormBuilder, private datosEstaticosSVC: DatosEstaticosService) {
+    this.datosEstaticosSVC.getColegiosMagisteriales();
+    this.colegio_magisterial = this.datosEstaticosSVC.colegiosMagisteriales;
   }
-
+  
   ngOnInit():void{
     this.initFormParent();
     if(this.datos){
@@ -91,6 +97,5 @@ export class ColMagisterialesComponent {
       ]
     )
     refSingle.updateValueAndValidity();
-  }
-  
+  } 
 }

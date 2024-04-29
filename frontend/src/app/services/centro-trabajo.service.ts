@@ -18,7 +18,7 @@ export class CentroTrabajoService {
 
   obtenerTodosLosCentrosTrabajo(): Observable<any[]> {
     const url = `${environment.API_URL}/api/centro-trabajo`;
-    return this.http.get<any[]>(url);
+    return this.http.get<any>(url);
   }
 
   obtenerTodosLosCentrosTrabajoPrivados(): Observable<any[]> {

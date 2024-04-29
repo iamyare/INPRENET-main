@@ -2,10 +2,10 @@ import { Injectable } from '@angular/core';
 import { AfiliadoService } from './afiliado.service';
 import { DireccionService } from './direccion.service';
 import { BancosService } from './bancos.service';
-import { DeduccionesService } from './deducciones.service';
 import { InstitucionesService } from './instituciones.service';
 import { TipoIdentificacionService } from './tipo-identificacion.service';
 import { Observable } from 'rxjs';
+import { ColegiosMagisterialesService } from './colegios-magisteriales.service';
 import { CentroTrabajoService } from './centro-trabajo.service';
 
 @Injectable({
@@ -19,17 +19,28 @@ export class DatosEstaticosService {
   Instituciones: any = [];
   tipoIdent : any = [];
   profesiones: any = [];
+  colegiosMagisteriales : any = []
+  centrosTrabajo : any = []
 
-  constructor(private SVCInstituciones: InstitucionesService, private afiliadoService: AfiliadoService, public direccionSer: DireccionService, private bancosService: BancosService, private tipoIdentificacionService:TipoIdentificacionService,
+  constructor( 
+    private colegiosMagSVC: ColegiosMagisterialesService , private bancosService: BancosService,
+    private centrosTrabSVC:CentroTrabajoService,
+    private SVCInstituciones: InstitucionesService, private afiliadoService: AfiliadoService, public direccionSer: DireccionService, private tipoIdentificacionService:TipoIdentificacionService,
     private centroTrabajoService: CentroTrabajoService,
   ) {
     /* this.direccionSer.getAllCiudades().subscribe((res: any) => {});
     this.direccionSer.getAllProvincias().subscribe((res: any) => {}); */
     /*  */
     this.getInstituciones();
-    this.getNacioalidad();
+    this.getNacionalidad();
+    this.gettipoIdent();
+    this.getBancos();
+    this.getColegiosMagisteriales();
+    this.getAllCentrosTrabajo();
+    this.getInstituciones();
     this.getProfesiones();
   }
+
 
   async gettipoIdent() {
     const response = await this.tipoIdentificacionService.obtenerTiposIdentificacion().toPromise();
@@ -43,6 +54,17 @@ export class DatosEstaticosService {
     return this.tipoIdent;
   }
 
+  async getAllCentrosTrabajo() {
+    const response = await this.centrosTrabSVC.obtenerTodosLosCentrosTrabajo().toPromise();
+    const mappedResponse = response!.map((item: { id_centro_trabajo: any; nombre_centro_trabajo: any; }) => ({
+      label: item.id_centro_trabajo,
+      value: String(item.nombre_centro_trabajo)
+    }));
+
+    this.centrosTrabajo = mappedResponse;
+    return this.centrosTrabajo;
+  }
+
   async getInstituciones() {
     this.Instituciones = await this.SVCInstituciones.getInstituciones().toPromise();
 
@@ -50,6 +72,8 @@ export class DatosEstaticosService {
       label: item.nombre_institucion,
       value: String(item.id_institucion)
     }));
+
+    return this.Instituciones;
   }
 
   async getProfesiones() {
@@ -65,12 +89,9 @@ export class DatosEstaticosService {
         this.profesiones = [];
         return this.profesiones;
     }
-}
+  }
 
-
-
-
-  async getNacioalidad() {
+  async getNacionalidad() {
     const response = await this.direccionSer.getAllPaises().toPromise();
     this.nacionalidades = response.map((item: { nacionalidad: any; id_pais: any; }) => ({
       label: item.nacionalidad,
@@ -81,13 +102,22 @@ export class DatosEstaticosService {
 
   async getBancos() {
     const response = await this.bancosService.getAllBancos().toPromise();
-    this.Bancos = response.map((item: { nombre_banco: any; cod_banco: any; }) => ({
+    this.Bancos = response.data.map((item: { nombre_banco: any; cod_banco: any; }) => ({
       label: item.nombre_banco,
       value: String(item.cod_banco)
     }));
     return this.Bancos;
   }
 
+  async getColegiosMagisteriales() {
+    const response = await this.colegiosMagSVC.getAllColegiosMagisteriales().toPromise();
+
+    this.colegiosMagisteriales = response.data.map((item: { idColegio: any; descripcion: any; }) => ({
+      label: item.idColegio,
+      value: String(item.descripcion)
+    }));
+    return this.colegiosMagisteriales;
+  }
 
   estadoCivil = [
     {
@@ -196,20 +226,7 @@ export class DatosEstaticosService {
     }
   ];
 
-  centrosTrabajo = [
-    {
-      "idCentroTrabajo": 1,
-      "value": "INSTITUTO CENTRAL VICENTE CÁCERES"
-    },
-    {
-      "idCentroTrabajo": 2,
-      "value": "IHCI"
-    },
-    {
-      "idCentroTrabajo": 3,
-      "value": "UNAH"
-    }
-  ];
+
   sector = [
     {
       "idsector": 1,
@@ -248,7 +265,6 @@ export class DatosEstaticosService {
     },
   ]
 
-
   tiposPlanillasPrivadas = [
     {
       ID_TIPO_PLANILLA: 1,
@@ -263,8 +279,4 @@ export class DatosEstaticosService {
       NOMBRE_PLANILLA: "PLANILLA DECIMO CUARTO"
     },
   ];
-
-
-
 }
-

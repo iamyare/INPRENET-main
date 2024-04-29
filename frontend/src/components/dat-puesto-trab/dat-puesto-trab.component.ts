@@ -5,9 +5,9 @@ import { DatosEstaticosService } from 'src/app/services/datos-estaticos.service'
 
 export function generatePuestoTrabFormGroup(datos?:any): FormGroup {
   return new FormGroup({
-    centroTrabajo: new FormControl(datos.centroTrabajo, [Validators.required]),
-    actividadEconomica: new FormControl(datos.actividadEconomica, [Validators.required]), /* ACTIVIDAD ECONOMICA -> cargo que desempeña */
-    salario: new FormControl(datos.salario, [Validators.required]),
+    idCentroTrabajo: new FormControl(datos.idCentroTrabajo, [Validators.required]),
+    cargo: new FormControl(datos.cargo, [Validators.required]), /* ACTIVIDAD ECONOMICA -> cargo que desempeña */
+    salarioBase: new FormControl(datos.salarioBase, [Validators.required]),
     numeroAcuerdo: new FormControl(datos.numeroAcuerdo, [Validators.required]),
     fechaIngreso: new FormControl(datos.fechaIngreso, [Validators.required]),
     fechaEgreso: new FormControl(datos.fechaEgreso, Validators.required),
@@ -40,7 +40,7 @@ export class DatPuestoTrabComponent {
 
   @Output() newDatDatosPuestTrab = new EventEmitter<any>()
   @Input() datos:any;
-  
+
   onDatosDatosPuestTrab(){
     const data = this.formParent
     this.newDatDatosPuestTrab.emit(data);
@@ -50,7 +50,7 @@ export class DatPuestoTrabComponent {
 
   ngOnInit():void{
     this.initFormParent();
-    
+
     if(this.datos){
       if (this.datos.value.refpers.length>0){
         for (let i of this.datos.value.refpers){
@@ -76,14 +76,14 @@ export class DatPuestoTrabComponent {
       ref_RefPers.push(generatePuestoTrabFormGroup({}))
     }
   }
-  
+
   eliminarRefPer():void{
     const ref_RefPers = this.formParent.get('refpers') as FormArray;
     ref_RefPers.removeAt(-1);
     const data = this.formParent
     this.newDatDatosPuestTrab.emit(data);
   }
-  
+
   getCtrl(key: string, form: FormGroup): any {
     return form.get(key)
   }

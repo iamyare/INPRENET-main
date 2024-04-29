@@ -4,7 +4,7 @@ import { DatosEstaticosService } from 'src/app/services/datos-estaticos.service'
 
 export function generateColegMagistFormGroup(datos?:any): FormGroup {
   return new FormGroup({
-    colegio_magisterial: new FormControl(datos.colegio_magisterial, Validators.required)
+    idColegio: new FormControl(datos.idColegio, Validators.required)
   });
 }
 
@@ -24,11 +24,11 @@ export function generateColegMagistFormGroup(datos?:any): FormGroup {
 export class ColMagisterialesComponent {
   public formParent: FormGroup = new FormGroup({});
   colegio_magisterial: any = [];
-  
+
   @Input() nombreComp?:string
   @Input() datos?:any
   @Output() newDataColegioMagisterial = new EventEmitter<any>()
-  
+
   onDatosRefPerChange(){
     const data = this.formParent
     this.newDataColegioMagisterial.emit(data)
@@ -38,7 +38,7 @@ export class ColMagisterialesComponent {
     this.datosEstaticosSVC.getColegiosMagisteriales();
     this.colegio_magisterial = this.datosEstaticosSVC.colegiosMagisteriales;
   }
-  
+
   ngOnInit():void{
     this.initFormParent();
     if(this.datos){
@@ -70,14 +70,14 @@ export class ColMagisterialesComponent {
       ref_RefPers.push(generateColegMagistFormGroup({}))
     }
   }
-  
+
   eliminarRefPer():void{
     const ref_RefPers = this.formParent.get('refpers') as FormArray;
     ref_RefPers.removeAt(-1);
     const data = this.formParent
     this.newDataColegioMagisterial.emit(data);
   }
-  
+
   getCtrl(key: string, form: FormGroup): any {
     return form.get(key)
   }
@@ -97,5 +97,5 @@ export class ColMagisterialesComponent {
       ]
     )
     refSingle.updateValueAndValidity();
-  } 
+  }
 }

@@ -4,8 +4,9 @@ import { DatosEstaticosService } from 'src/app/services/datos-estaticos.service'
 
 export function generateHistSalFormGroup(datos?:any): FormGroup {
   return new FormGroup({
-    nombre_banco: new FormControl(datos.nombre_banco, Validators.required),
-    numero_cuenta: new FormControl(datos.numero_cuenta, Validators.required)
+    idBanco: new FormControl(datos.idBanco, Validators.required),
+    numCuenta: new FormControl(datos.numero_cuenta, Validators.required),
+    estado: new FormControl(datos.numero_cuenta, Validators.required)
   });
 }
 
@@ -71,14 +72,14 @@ export class HistorialSalarioComponent {
       ref_RefPers.push(generateHistSalFormGroup({}))
     }
   }
-  
+
   eliminarRefPer():void{
     const ref_RefPers = this.formParent.get('refpers') as FormArray;
     ref_RefPers.removeAt(-1);
     const data = this.formParent
     this.newDatHistSal.emit(data);
   }
-  
+
   getCtrl(key: string, form: FormGroup): any {
     return form.get(key)
   }

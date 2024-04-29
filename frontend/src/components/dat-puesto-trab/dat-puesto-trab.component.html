@@ -9,30 +9,32 @@
       <div *ngFor="let skill of getCtrl('refpers', formParent).controls; index as formChild; let i = index">
         <h4 class="card-title">Centro De Trabajo Número: {{i+1}}</h4>
         <div class="row" [formGroupName]="formChild">
-          <div class="col-md-12">
+
+
+          <div class="col-md-6">
             <mat-form-field class="example-full-width; inputs" appearance="outline">
               <mat-label>Centro de Trabajo</mat-label>
-              <mat-select matNativeControl formControlName="centroTrabajo">
+              <mat-select matNativeControl formControlName="idCentroTrabajo">
                 <mat-option *ngFor="let p of centrosTrabajo" [value]="p.idCentroTrabajo">
                   {{p.value}}
                 </mat-option>
               </mat-select>
             </mat-form-field>
-
           </div>
-        </div>
-
-        <div class="row" [formGroupName]="formChild">
-          <div class="col-md-4">
+          <div class="col-md-6">
             <mat-form-field class="example-full-width; inputs" appearance="outline">
               <mat-label>Número de acuerdo</mat-label>
               <input matInput formControlName="numeroAcuerdo">
             </mat-form-field>
           </div>
+        </div>
+
+        <div class="row" [formGroupName]="formChild">
+
           <div class="col-md-4">
             <mat-form-field class="example-full-width; inputs" appearance="outline">
               <mat-label>Salario</mat-label>
-              <input matInput formControlName="salario">
+              <input matInput formControlName="salarioBase">
             </mat-form-field>
           </div>
           <div class="col-md-4">
@@ -44,13 +46,23 @@
               <mat-datepicker #fechaIngreso></mat-datepicker>
             </mat-form-field>
           </div>
+          <div class="col-md-4">
+            <mat-form-field class="example-full-width; inputs" appearance="outline">
+              <mat-label>Fecha de Egreso</mat-label>
+              <input matInput formControlName="fechaEgreso" [matDatepicker]="fechaEgreso">
+              <mat-hint>MM/DD/YYYY</mat-hint>
+              <mat-datepicker-toggle matIconSuffix [for]="fechaEgreso"></mat-datepicker-toggle>
+              <mat-datepicker #fechaEgreso></mat-datepicker>
+            </mat-form-field>
+          </div>
         </div>
+
 
         <div class="row" [formGroupName]="formChild">
           <div class="col-md-4">
             <mat-form-field class="example-full-width; inputs" appearance="outline">
               <mat-label>Actividad Económica</mat-label>
-              <input matInput formControlName="actividadEconomica">
+              <input matInput formControlName="cargo">
             </mat-form-field>
           </div>
           <div class="col-md-4">

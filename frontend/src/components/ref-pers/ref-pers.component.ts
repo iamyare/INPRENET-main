@@ -4,12 +4,12 @@ import { FormArray, FormBuilder, FormControl, FormGroup, Validators } from '@ang
 
 export function generateRefPerFormGroup(datos?:any): FormGroup {
   return new FormGroup({
-    nombreRefPers: new FormControl(datos.nombreRefPers, Validators.required),
-    Parentesco: new FormControl(datos.Parentesco, Validators.required),
+    nombre: new FormControl(datos.nombre, Validators.required),
+    parentesco: new FormControl(datos.parentesco, Validators.required),
     direccion: new FormControl(datos.direccion, Validators.required),
-    telefonoDom: new FormControl(datos.telefonoDom ),
-    telefonoTrab: new FormControl(datos.telefonoTrab),
-    telefonoPers: new FormControl(datos.telefonoPers, Validators.required)
+    telefono_domicilio: new FormControl(datos.telefono_domicilio ),
+    telefono_trabajo: new FormControl(datos.telefono_trabajo),
+    telefono_personal: new FormControl(datos.telefono_personal, Validators.required)
   });
 }
 
@@ -24,7 +24,7 @@ export class RefPersComponent {
   @Input() nombreComp?:string
   @Input() datos?:any
   @Output() newDatRefPerChange = new EventEmitter<any>()
-  
+
   onDatosRefPerChange(){
     const data = this.formParent
     this.newDatRefPerChange.emit(data)
@@ -64,14 +64,14 @@ export class RefPersComponent {
       ref_RefPers.push(generateRefPerFormGroup({}))
     }
   }
-  
+
   eliminarRefPer():void{
     const ref_RefPers = this.formParent.get('refpers') as FormArray;
     ref_RefPers.removeAt(-1);
     const data = this.formParent
     this.newDatRefPerChange.emit(data);
   }
-  
+
   getCtrl(key: string, form: FormGroup): any {
     return form.get(key)
   }

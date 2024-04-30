@@ -18,13 +18,14 @@ import { Net_perf_pers_cent_trab } from './entities/net_perf_pers_cent_trab.enti
 import { RegionalModule } from '../Regional/regional.module';
 import { Net_Municipio } from '../Regional/municipio/entities/net_municipio.entity';
 import { TransaccionesModule } from '../transacciones/transacciones.module';
+import { NET_RELACION_FAMILIAR } from './entities/net_relacion_familiar';
 
 @Module({
   controllers: [AfiliadoController],
   providers: [AfiliadoService],
   imports: [RegionalModule, TransaccionesModule, 
-    TypeOrmModule.forFeature([Net_Estado_Persona, Net_Persona, Net_perf_pers_cent_trab,
-      Net_Ref_Per_Pers,
+    TypeOrmModule.forFeature([Net_Persona, Net_Estado_Persona, Net_perf_pers_cent_trab,
+      Net_Ref_Per_Pers, NET_RELACION_FAMILIAR,
       Net_ReferenciaPersonal,
       Net_Persona_Por_Banco, Net_Departamento,
       Net_Pais, Net_TipoIdentificacion,

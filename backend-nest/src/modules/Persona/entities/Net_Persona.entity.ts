@@ -1,6 +1,6 @@
 import { Net_TipoIdentificacion } from "../../tipo_identificacion/entities/net_tipo_identificacion.entity";
 import { Net_Pais } from "../../Regional/pais/entities/pais.entity";
-import { Column, Entity, Index, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn } from "typeorm";
+import { Column, Entity, Index, JoinColumn, ManyToOne, OneToMany, OneToOne, PrimaryGeneratedColumn } from "typeorm";
 import { Net_Detalle_Deduccion } from "../../Planilla/detalle-deduccion/entities/detalle-deduccion.entity";
 import { Net_Municipio } from "../../Regional/municipio/entities/net_municipio.entity";
 import { NET_CUENTA_PERSONA } from "../../transacciones/entities/net_cuenta_persona.entity";
@@ -12,7 +12,7 @@ import { Net_Persona_Por_Banco } from "src/modules/banco/entities/net_persona-ba
 import { Net_perf_pers_cent_trab } from "./net_perf_pers_cent_trab.entity";
 import { Net_Ref_Per_Pers } from "./net_ref-Per-Persona.entity";
 import { NET_PROFESIONES } from "src/modules/transacciones/entities/net_profesiones.entity";
-
+import { NET_RELACION_FAMILIAR } from "./net_relacion_familiar";
 @Entity({
     name: 'NET_PERSONA',
 })
@@ -55,9 +55,6 @@ export class Net_Persona {
 
     @Column('number', { nullable: true, name: 'CANTIDAD_DEPENDIENTES' })
     cantidad_dependientes: number;
-
-    @Column('number', { nullable: true, name: 'CANTIDAD_HIJOS' })
-    cantidad_hijos: number;
 
     @Column('varchar2', { length: 40, nullable: true, name: 'REPRESENTACION' })
     representacion: string;
@@ -131,5 +128,7 @@ export class Net_Persona {
     @JoinColumn({ name: 'ID_PROFESION', foreignKeyConstraintName: 'FK_ID_PROFESION_PERSONA' })
     profesion: NET_PROFESIONES;
 
+    @OneToMany(() => NET_RELACION_FAMILIAR, relacionFamiliar => relacionFamiliar.persona)
+    RELACIONES: NET_RELACION_FAMILIAR[];
 
 }

@@ -42,7 +42,7 @@ export class DetalleBeneficioService {
     }
   }
 
-  async createDetalleBeneficioAfiliado(datos: CreateDetalleBeneficioDto, idAfiliadoPadre?: number): Promise<any> {
+  async createDetalleBeneficioAfiliado(datos: CreateDetalleBeneficioDto, idPersonaPadre?: number): Promise<any> {
     return await this.entityManager.transaction(async manager => {
       try {
         const beneficio = await manager.findOne(Net_Beneficio, { where: { nombre_beneficio: datos.nombre_beneficio } });
@@ -59,13 +59,13 @@ export class DetalleBeneficioService {
           throw new BadRequestException('Formato de fecha inválido. Usa DD-MM-YYYY.');
         }
 
-        if (!idAfiliadoPadre) {
+        if (!idPersonaPadre) {
           const detPer = await manager.findOne(
             NET_DETALLE_PERSONA, {
             where: {
-              ID_CAUSANTE: idAfiliadoPadre,
-              tipoAfiliado: {
-                tipo_afiliado: "AFILIADO",
+              ID_CAUSANTE: idPersonaPadre,
+              tipoPersona: {
+                tipo_persona: "AFILIADO",
               },
               persona: {
                 estadoPersona: { Descripcion: "ACTIVO" },
@@ -106,9 +106,9 @@ export class DetalleBeneficioService {
           const detPerB = await manager.findOne(
             NET_DETALLE_PERSONA, {
             where: {
-              ID_CAUSANTE: idAfiliadoPadre,
-              tipoAfiliado: {
-                tipo_afiliado: "BENEFICIARIO",
+              ID_CAUSANTE: idPersonaPadre,
+              tipoPersona: {
+                tipo_persona: "BENEFICIARIO",
               },
               persona: {
                 estadoPersona: { Descripcion: "ACTIVO" },
@@ -153,11 +153,11 @@ export class DetalleBeneficioService {
 
   }
 
-  async createBenBenefic(beneficiario: CreateDetalleBeneficioDto, idAfiliado: string): Promise<any> {
+  async createBenBenefic(beneficiario: CreateDetalleBeneficioDto, idPersona: string): Promise<any> {
     try {
       const query = `
         SELECT 
-            "Afil"."id_afiliado",
+            "Afil"."id_persona",
             "Afil"."dni",
             "Afil"."primer_nombre",
             "Afil"."segundo_nombre",
@@ -166,14 +166,14 @@ export class DetalleBeneficioService {
             "Afil"."segundo_apellido",
             "Afil"."sexo",
             "detA"."porcentaje",
-            "detA"."tipo_afiliado"
+            "detA"."tipo_persona"
         FROM
-            "detalle_afiliado" "detA" INNER JOIN 
-            "Net_Persona" "Afil" ON "detA"."id_afiliado" = "Afil"."id_afiliado"
+            "detalle_persona" "detA" INNER JOIN 
+            "Net_Persona" "Afil" ON "detA"."id_persona" = "Afil"."id_persona"
         WHERE 
-            "detA"."id_detalle_afiliado_padre" = ${idAfiliado} AND
+            "detA"."id_detalle_persona_padre" = ${idPersona} AND
             "Afil"."dni" = '${beneficiario.dni}' AND
-            "detA"."tipo_afiliado" = 'BENEFICIARIO'
+            "detA"."tipo_persona" = 'BENEFICIARIO'
       `;
 
       const beneficiarios = await this.entityManager.query(query);
@@ -235,7 +235,7 @@ export class DetalleBeneficioService {
     }
   }
 
-  async getDetalleBeneficiosPorAfiliadoYPlanilla(idAfiliado: string, idPlanilla: string): Promise<any> {
+  async getDetalleBeneficiosPorAfiliadoYPlanilla(idPersona: string, idPlanilla: string): Promise<any> {
     const query = `
     SELECT
         ben."NOMBRE_BENEFICIO",
@@ -266,7 +266,7 @@ export class DetalleBeneficioService {
             
           WHERE
             detBs."ESTADO" = 'EN PRELIMINAR' AND
-            afil."ID_PERSONA" = ${idAfiliado} AND 
+            afil."ID_PERSONA" = ${idPersona} AND 
             pla."ID_PLANILLA" = ${idPlanilla}
     `;
     try {
@@ -279,7 +279,7 @@ export class DetalleBeneficioService {
     }
   }
 
-  async getBeneficiosDefinitiva(idAfiliado: string, idPlanilla: string): Promise<any> {
+  async getBeneficiosDefinitiva(idPersona: string, idPlanilla: string): Promise<any> {
     const query = `
     SELECT
         ben."NOMBRE_BENEFICIO",
@@ -310,7 +310,7 @@ export class DetalleBeneficioService {
             
           WHERE
             detBs."ESTADO" = 'PAGADA' AND
-            afil."ID_PERSONA" = ${idAfiliado} AND 
+            afil."ID_PERSONA" = ${idPersona} AND 
             pla."ID_PLANILLA" = ${idPlanilla}
     `;
     try {
@@ -323,7 +323,7 @@ export class DetalleBeneficioService {
     }
   }
 
-  async getRangoDetalleBeneficios(idAfiliado: string, fechaInicio: string, fechaFin: string): Promise<any> {
+  async getRangoDetalleBeneficios(idPersona: string, fechaInicio: string, fechaFin: string): Promise<any> {
     const query = `
     SELECT
     db."id_beneficio_planilla",
@@ -334,7 +334,7 @@ export class DetalleBeneficioService {
     detBA."periodoInicio",
     detBA."periodoFinalizacion",
     b."nombre_beneficio",
-    afil."id_afiliado",
+    afil."id_persona",
     TRIM(
       afil."primer_nombre" || ' ' ||
       COALESCE(afil."segundo_nombre", '') || ' ' ||
@@ -349,9 +349,9 @@ export class DetalleBeneficioService {
   JOIN
     "net_beneficio" b ON detBA."id_beneficio" = b."id_beneficio"
   JOIN
-    "Net_Persona" afil ON detBA."id_afiliado" = afil."id_afiliado"
+    "Net_Persona" afil ON detBA."id_persona" = afil."id_persona"
   WHERE
-    detBA."id_afiliado" = :idAfiliado
+    detBA."id_persona" = :idPersona
   AND
     db."estado" = 'NO PAGADA'
   AND
@@ -360,8 +360,8 @@ export class DetalleBeneficioService {
      TO_DATE(detBA."periodoFinalizacion", 'DD/MM/YY') BETWEEN TO_DATE(:fechaInicio, 'DD-MM-YYYY') AND TO_DATE(:fechaFin, 'DD-MM-YYYY'))
     `;
     try {
-      const parametros = { idAfiliado, fechaInicio, fechaFin };
-      return await this.benAfilRepository.query(query, [idAfiliado, fechaInicio, fechaFin, fechaInicio, fechaFin]);
+      const parametros = { idPersona, fechaInicio, fechaFin };
+      return await this.benAfilRepository.query(query, [idPersona, fechaInicio, fechaFin, fechaInicio, fechaFin]);
     } catch (error) {
       this.logger.error('Error al obtener los detalles de beneficio', error.stack);
       throw new InternalServerErrorException('Error al consultar los detalles de beneficio en la base de datos');
@@ -415,7 +415,7 @@ export class DetalleBeneficioService {
   }
 
 
-  async obtenerDetallesBeneficioComplePorAfiliado(idAfiliado: string): Promise<any[]> {
+  async obtenerDetallesBeneficioComplePorAfiliado(idPersona: string): Promise<any[]> {
     try {
       const query = `
     SELECT
@@ -426,7 +426,7 @@ export class DetalleBeneficioService {
     detBA."num_rentas_aplicadas",
     detBA."periodoInicio",
     detBA."periodoFinalizacion",
-    afil."id_afiliado",
+    afil."id_persona",
     afil."dni",
     TRIM(
         afil."primer_nombre" || ' ' || 
@@ -444,21 +444,21 @@ export class DetalleBeneficioService {
       JOIN
         "net_beneficio" ben ON detBA."id_beneficio" = ben."id_beneficio"
       JOIN
-        "Net_Persona" afil ON detBA."id_afiliado" = afil."id_afiliado"
+        "Net_Persona" afil ON detBA."id_persona" = afil."id_persona"
       WHERE
-        afil."id_afiliado" = :1 AND
+        afil."id_persona" = :1 AND
         detB."estado" != 'INCONSISTENCIA' AND
-        detBA."id_afiliado" NOT IN (
+        detBA."id_persona" NOT IN (
           SELECT
-            detD."id_afiliado"
+            detD."id_persona"
           FROM
             "net_detalle_deduccion" detD
           WHERE
             detD."estado_aplicacion" = 'COBRADA'
         )
-        AND detBA."id_afiliado" NOT IN (
+        AND detBA."id_persona" NOT IN (
           SELECT
-            detBA2."id_afiliado"
+            detBA2."id_persona"
           FROM
             "net_detalle_beneficio_afiliado" detBA2
         JOIN
@@ -470,7 +470,7 @@ export class DetalleBeneficioService {
         ben."id_beneficio"
     `;
 
-      return await this.benAfilRepository.query(query, [idAfiliado]); // Usando un array para los parámetros
+      return await this.benAfilRepository.query(query, [idPersona]); // Usando un array para los parámetros
     } catch (error) {
       this.logger.error('Error al obtener detalles de beneficio por afiliado', error.stack);
       throw new InternalServerErrorException('Error al obtener detalles de beneficio por afiliado');
@@ -488,7 +488,7 @@ export class DetalleBeneficioService {
       INNER JOIN "net_detalle_beneficio_afiliado" detBenAfil ON  
       detBenAfil."id_beneficio" = ben."id_beneficio"
       INNER JOIN "Net_Persona" afil ON  
-      detBenAfil."id_afiliado" = afil."id_afiliado"
+      detBenAfil."id_persona" = afil."id_persona"
       WHERE 
       afil."dni" = '${dni}'`;
       return await this.benAfilRepository.query(query); // Usando un array para los parámetros
@@ -626,7 +626,7 @@ export class DetalleBeneficioService {
     }
   }
 
-  async findInconsistentBeneficiosByAfiliado(idAfiliado: string) {
+  async findInconsistentBeneficiosByAfiliado(idPersona: string) {
     try {
       const query = `
       SELECT detB."id_beneficio_planilla",

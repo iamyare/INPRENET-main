@@ -1,6 +1,6 @@
 import { Type } from 'class-transformer';
 import {
-    IsDate, IsEmail, IsEnum, IsInt, IsOptional, IsString, MaxLength,
+    IsDate, IsEmail, IsInt, IsOptional, IsString, MaxLength,
 } from 'class-validator';
 
 export interface PersonaResponse {
@@ -14,7 +14,6 @@ export interface PersonaResponse {
     segundo_apellido: string;
     genero: string;
     cantidad_dependientes: number;
-    cantidad_hijos: number;
     profesion: string;
     representacion: string;
     telefono_1: string;
@@ -83,10 +82,6 @@ export class NetPersonaDTO {
     @IsInt()
     @IsOptional()
     cantidad_dependientes?: number;
-
-    @IsInt()
-    @IsOptional()
-    cantidad_hijos?: number;
 
     @IsInt()
     @IsOptional()

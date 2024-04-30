@@ -28,8 +28,8 @@ import { TransaccionesModule } from './modules/transacciones/transacciones.modul
         autoLoadEntities: true,
         synchronize: true,
         entities: [__dirname + '/../**/*.entity{.ts,.js}'],
-        migrations: ['src/database/migrations/*{.ts,.js}'],
-        //logging: ['error'] // solo loguear errores
+        //migrations: ['src/database/migrations/*{.ts,.js}'],
+        //logging: ["query", "schema", "error", "warn", "info", "log", "migration"]
 
       }),
       inject: [ConfigService]

@@ -4,7 +4,7 @@ import { Net_Persona } from "src/modules/Persona/entities/Net_Persona.entity";
 
 @Entity("NET_PERSONA_COLEGIOS_MAGISTERIALES")
 export class Net_Persona_Colegios {
-    @PrimaryGeneratedColumn()
+    @PrimaryGeneratedColumn({name: "ID_PER_COLE_MAG"})
     id: number; 
 
     @ManyToOne(() => Net_Persona, persona => persona.colegiosMagisteriales)

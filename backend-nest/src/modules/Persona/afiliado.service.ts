@@ -8,7 +8,6 @@ import { Net_Centro_Trabajo } from '../Empresarial/entities/net_centro_trabajo.e
 import { Net_Banco } from '../banco/entities/net_banco.entity';
 import { Net_TipoIdentificacion } from '../tipo_identificacion/entities/net_tipo_identificacion.entity';
 import { Net_Pais } from '../Regional/pais/entities/pais.entity';
-import { CreateAfiliadoTempDto } from './dto/create-afiliado-temp.dto';
 import { validate as isUUID } from 'uuid';
 import { Net_Persona } from './entities/Net_Persona.entity';
 import { Net_ReferenciaPersonal } from './entities/referencia-personal.entity';
@@ -16,7 +15,6 @@ import { Net_Ref_Per_Pers } from './entities/net_ref-Per-Persona.entity';
 import { Net_perf_pers_cent_trab } from './entities/net_perf_pers_cent_trab.entity';
 import { NET_DETALLE_PERSONA } from './entities/Net_detalle_persona.entity';
 import { CreateDetallePersonaDto } from './dto/create-detalle.dto';
-import { Net_Tipo_Persona } from './entities/net_tipo_persona.entity';
 import { Net_Municipio } from '../Regional/municipio/entities/net_municipio.entity';
 import { Net_Estado_Persona } from './entities/net_estado_persona.entity';
 import { AsignarReferenciasDTO } from './dto/asignarReferencia.dto';
@@ -25,7 +23,9 @@ import { CreateDetalleBeneficiarioDto } from './dto/create-detalle-beneficiario-
 import { Net_Colegios_Magisteriales } from '../transacciones/entities/net_colegios_magisteriales.entity';
 import { Net_Persona_Colegios } from '../transacciones/entities/net_persona_colegios.entity';
 import { NET_PROFESIONES } from '../transacciones/entities/net_profesiones.entity';
-
+import { NET_RELACION_FAMILIAR } from './entities/net_relacion_familiar';
+import { CreateRelacionFamiliarDTO } from './dto/create-relacion-familiar.dto';
+import { FamiliarDTO } from './dto/create-datos-familiar.dto';
 @Injectable()
 export class AfiliadoService {
 
@@ -76,12 +76,15 @@ export class AfiliadoService {
     private readonly netColegiosMagisterialesRepository: Repository<Net_Colegios_Magisteriales>,
 
     @InjectRepository(NET_PROFESIONES)
-    private readonly netProfesionesRepository: Repository<NET_PROFESIONES>
+    private readonly netProfesionesRepository: Repository<NET_PROFESIONES>,
+
+    @InjectRepository(NET_RELACION_FAMILIAR)
+    private readonly relacionesFamiliaresRepository: Repository<NET_RELACION_FAMILIAR>
 
   ) { }
   
 
-async create(createPersonaDto: NetPersonaDTO): Promise<Net_Persona> {
+async createPersona(createPersonaDto: NetPersonaDTO): Promise<Net_Persona> {
     const persona = new Net_Persona();
     Object.assign(persona, createPersonaDto);
     if (createPersonaDto.fecha_nacimiento) {
@@ -127,10 +130,50 @@ async create(createPersonaDto: NetPersonaDTO): Promise<Net_Persona> {
     return await this.personaRepository.save(persona);
 }
 
+async createRelacionFamiliar(createRelacionFamiliarDto: CreateRelacionFamiliarDTO): Promise<NET_RELACION_FAMILIAR> {
+  const nuevaRelacion = this.relacionesFamiliaresRepository.create({
+      persona: { id_persona: createRelacionFamiliarDto.personaId },
+      familiar: { id_persona: createRelacionFamiliarDto.familiarId },
+      parentezco: createRelacionFamiliarDto.parentezco
+  });
+
+  return await this.relacionesFamiliaresRepository.save(nuevaRelacion);
+}
+
+async createPersonaConRelaciones(createPersonaDto: NetPersonaDTO, familiares: FamiliarDTO[]): Promise<Net_Persona> {
+  const personaPrincipal = await this.createPersona(createPersonaDto);
+
+  for (const familiarDto of familiares) {
+    let familiar = await this.personaRepository.findOne({ where: { dni: familiarDto.dni } });
+    if (!familiar) {
+      familiar = await this.createPersona(familiarDto);
+    }
+    await this.createRelacionFamiliar({
+      personaId: personaPrincipal.id_persona,
+      familiarId: familiar.id_persona,
+      parentezco: familiarDto.parentezcoConPrincipal
+    });
+
+    if (familiarDto.encargadoDos) {
+      let encargadoDos = await this.personaRepository.findOne({ where: { dni: familiarDto.encargadoDos.dni } });
+      if (!encargadoDos) {
+        encargadoDos = await this.createPersona(familiarDto.encargadoDos);
+      }
+      await this.createRelacionFamiliar({
+        personaId: encargadoDos.id_persona,
+        familiarId: familiar.id_persona,
+        parentezco: familiarDto.encargadoDos.parentezcoConFamiliar
+      });
+    }
+  }
+
+  return personaPrincipal;
+}
+
 async createDetallePersona(createDetallePersonaDto: CreateDetallePersonaDto): Promise<NET_DETALLE_PERSONA> {
   const detallePersona = new NET_DETALLE_PERSONA();
   detallePersona.ID_PERSONA = createDetallePersonaDto.idPersona;
-  detallePersona.ID_CAUSANTE = createDetallePersonaDto.idPersona;  // Asumiendo que ID_CAUSANTE es lo mismo que ID_PERSONA
+  detallePersona.ID_CAUSANTE = createDetallePersonaDto.idPersona;
   detallePersona.ID_TIPO_PERSONA = createDetallePersonaDto.idTipoPersona;
   detallePersona.porcentaje = createDetallePersonaDto.porcentaje;
 
@@ -150,7 +193,7 @@ async assignCentrosTrabajo(idPersona: number, centrosTrabajoData: any[]): Promis
       const centroTrabajo = await this.centroTrabajoRepository.findOne({ where: { id_centro_trabajo: centro.idCentroTrabajo } });
       if (!centroTrabajo) {
           errores.push(`Centro de trabajo con ID ${centro.idCentroTrabajo} no encontrado.`);
-          continue;  // Puedes optar por continuar con el siguiente centro o detener todo el proceso
+          continue;
       }
 
       const nuevoPerfil = new Net_perf_pers_cent_trab();
@@ -223,14 +266,14 @@ async assignBancosToPersona(idPersona: number, bancosData: CreatePersonaBancoDTO
 }
 
 async createBeneficiario(beneficiarioData: NetPersonaDTO): Promise<Net_Persona> {
-  return this.create(beneficiarioData);
+  return this.createPersona(beneficiarioData);
 }
 
 async createDetalleBeneficiario(detalleDto: CreateDetalleBeneficiarioDto): Promise<NET_DETALLE_PERSONA> {
   const detalle = new NET_DETALLE_PERSONA();
   detalle.ID_PERSONA = detalleDto.idPersona;
   detalle.ID_CAUSANTE = detalleDto.idCausante;
-  detalle.ID_CAUSANTE_PADRE = detalleDto.idCausantePadre;  // Asumiendo que es el mismo que ID_CAUSANTE
+  detalle.ID_CAUSANTE_PADRE = detalleDto.idCausantePadre;
   detalle.ID_TIPO_PERSONA = detalleDto.idTipoPersona;
   detalle.porcentaje = detalleDto.porcentaje;
 
@@ -277,16 +320,6 @@ async assignColegiosMagisteriales(idPersona: number, colegiosMagisterialesData: 
 
     perfil.salario_base = salarioBase;
     await this.perfPersoCentTrabRepository.save(perfil);
-  }
-
-  async createTemp(createAfiliadoTempDto: CreateAfiliadoTempDto) {
-    try {
-      const afiliado = this.personaRepository.create(createAfiliadoTempDto)
-      await this.personaRepository.save(afiliado)
-      return afiliado;
-    } catch (error) {
-      this.handleException(error);
-    }
   }
 
   async createRefPers(data: any, dnireferente: any) {
@@ -528,7 +561,6 @@ async assignColegiosMagisteriales(idPersona: number, colegiosMagisterialesData: 
         segundo_apellido: el.SEGUNDO_APELLIDO,
         genero: el.GENERO,
         cantidad_dependientes: el.CANTIDAD_DEPENDIENTES,
-        cantidad_hijos: el.CANTIDAD_HIJOS,
         profesion: el.PROFESION,
         representacion: el.REPRESENTACION,
         telefono_1: el.TELEFONO_1,

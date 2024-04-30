@@ -21,7 +21,7 @@ export class PlanillaIngresosService {
 }
 
   actualizarSalarioBase(dni: string, idCentroTrabajo: number, salarioBase: number): Observable<any> {
-    const url = `${environment.API_URL}/api/afiliado/actualizar-salario`;
+    const url = `${environment.API_URL}/api/Persona/actualizar-salario`;
     return this.http.put(url, { dni, idCentroTrabajo, salarioBase });
   }
 

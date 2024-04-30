@@ -1,5 +1,6 @@
-import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, EventEmitter, Inject, Input, Output, inject } from '@angular/core';
 import { ControlContainer, FormArray, FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
+import { MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { AfiliadoService } from 'src/app/services/afiliado.service';
 import { DatosEstaticosService } from 'src/app/services/datos-estaticos.service';
 import { DireccionService } from 'src/app/services/direccion.service';
@@ -18,10 +19,18 @@ export class AgregarColMagisComponent {
       refpers: new FormArray([], [Validators.required])
     });
 
-    constructor(private fb: FormBuilder, private afilService: AfiliadoService) { }
+    constructor(private fb: FormBuilder, private afilService: AfiliadoService,
+      @Inject(MAT_DIALOG_DATA) public data: { idPersona: string }
+    ) { }
     ngOnInit(): void { }
 
     setHistSal(datosHistSal: any) {
       this.formHistPag = datosHistSal
+    }
+
+    guardar(){
+      console.log(this.formHistPag.value.refpers);
+      console.log(this.data);
+      
     }
 }

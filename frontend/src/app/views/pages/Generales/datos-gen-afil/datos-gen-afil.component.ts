@@ -71,7 +71,7 @@ obtenerAfiliados() {
     this.form.get('DatosGenerales.estado')?.setValue(this.dataEntrante.ESTADO);
     this.form.get('DatosGenerales.estadoCivil')?.setValue(this.dataEntrante.ESTADO_CIVIL);
     this.form.get('DatosGenerales.cotizante')?.setValue(this.dataEntrante.TIPO_COTIZANTE);
-    this.form.get('DatosGenerales.Sexo')?.setValue(this.dataEntrante.SEXO);
+    this.form.get('DatosGenerales.genero')?.setValue(this.dataEntrante.GENERO);
     this.form.get('DatosGenerales.profesion')?.setValue(this.dataEntrante.PROFESION);
     this.form.get('DatosGenerales.cantidadHijos')?.setValue(this.dataEntrante.CANTIDAD_HIJOS);
     this.form.get('DatosGenerales.cantidadDependientes')?.setValue(this.dataEntrante.CANTIDAD_DEPENDIENTES);

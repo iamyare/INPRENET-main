@@ -30,7 +30,7 @@ export class EditColegiosMagisterialesComponent {
     private svcAfiliado: AfiliadoService,
     private toastr: ToastrService,
     private dialog: MatDialog
-  ) { }
+  ) {}
 
   ngOnInit(): void {
     this.myFormFields = [
@@ -39,24 +39,8 @@ export class EditColegiosMagisterialesComponent {
 
     this.myColumns = [
         {
-          header: 'DNI',
-          col: 'dni',
-          isEditable: true,
-          validationRules: [Validators.required, Validators.minLength(3)]
-        },
-        {
-          header: 'Nombre Completo',
-          col: 'nombre_completo',
-          isEditable: true
-        },
-        {
-          header: 'Sexo',
-          col: 'sexo',
-          isEditable: true
-        },
-        {
-          header: 'Fecha de Nacimiento',
-          col: 'fecha_nacimiento',
+          header: 'Colegio Magisterial',
+          col: 'colegio_magisterial',
           isEditable: true
         }
     ];
@@ -92,17 +76,15 @@ export class EditColegiosMagisterialesComponent {
     this.Afiliado = undefined;
   }
 
+  /* FALTA */
   async getFilas() {
     if (this.Afiliado){
       try {
-        const data = await this.svcAfiliado.getAllBenDeAfil(this.Afiliado.DNI).toPromise();
+        const data = await this.svcAfiliado.getAllColMagPPersona(this.Afiliado.DNI).toPromise();
         this.filas = data.map((item: any) => {
           return {
-            id: item.id_persona,
-            dni: item.dni,
-            nombre_completo: unirNombres(item.primer_nombre, item.segundo_nombre, item.tercer_nombre, item.primer_apellido, item.segundo_apellido),
-            fecha_nacimiento: item.fecha_nacimiento,
-            sexo: item.sexo,
+            id_colegio: item.colegio.id_persona,
+            colegio_magisterial: item.colegio.descripcion
         }});
       } catch (error) {
         this.toastr.error('Error al cargar los datos de los beneficiarios');
@@ -119,7 +101,7 @@ export class EditColegiosMagisterialesComponent {
       dni: row.dni,
       nombre_completo: row.nombre_completo,
       fecha_nacimiento: row.fecha_nacimiento,
-      sexo: row.sexo,
+      genero: row.genero,
     };
 
     this.svcAfiliado.updatePerfCentroTrabajo(row.id, BeneficiariosData).subscribe(
@@ -145,10 +127,7 @@ export class EditColegiosMagisterialesComponent {
 
   manejarAccionUno(row: any) {
     const campos = [
-      { nombre: 'dni', tipo: 'text', requerido: true, etiqueta: 'Nombre Centro Trabajo', editable: true },
-      { nombre: 'sexo', tipo: 'text', requerido: true, etiqueta: 'Número Acuerdo', editable: true },
-      { nombre: 'fecha_nacimiento', tipo: 'number', requerido: true, etiqueta: 'Fecha Nacimiento', editable: true }
-    ];
+      { nombre: 'colegio_magisterial', tipo: 'text', requerido: true, etiqueta: 'Colegio Magisterial', editable: true }];
 
     this.openDialog(campos, row);
   }
@@ -186,7 +165,7 @@ export class EditColegiosMagisterialesComponent {
     });
     /* const campos = [
       { nombre: 'dni', tipo: 'text', requerido: true, etiqueta: 'Nombre Centro Trabajo', editable: true },
-      { nombre: 'sexo', tipo: 'text', requerido: true, etiqueta: 'Número Acuerdo', editable: true },
+      { nombre: 'genero', tipo: 'text', requerido: true, etiqueta: 'Número Acuerdo', editable: true },
       { nombre: 'fecha_nacimiento', tipo: 'number', requerido: true, etiqueta: 'salario_base', editable: true }
     ];
 
@@ -198,8 +177,7 @@ export class EditColegiosMagisterialesComponent {
       width: '55%',
       height: '75%',
       data: {
-        title: 'Confirmación de eliminación',
-        message: '¿Estás seguro de querer eliminar este elemento?'
+        idPersona: this.Afiliado.ID_PERSONA
       }
     });
 

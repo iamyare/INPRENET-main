@@ -6,7 +6,6 @@ import { DatosEstaticosService } from 'src/app/services/datos-estaticos.service'
 
 export function generateAddressFormGroup(datos?: any): FormGroup {
   return new FormGroup({
-    id_tipo_identificacion: new FormControl(datos?.id_tipo_identificacion, Validators.required),
     dni: new FormControl(datos?.dni, Validators.required),
     primer_nombre: new FormControl(datos?.primer_nombre, Validators.required),
     segundo_nombre: new FormControl(datos?.segundo_nombre),
@@ -16,8 +15,6 @@ export function generateAddressFormGroup(datos?: any): FormGroup {
     fecha_nacimiento: new FormControl(datos?.fecha_nacimiento, Validators.required),
     cantidad_dependientes: new FormControl(datos?.cantidad_dependientes, [Validators.pattern("^[0-9]+$"), Validators.required]),
     cantidad_hijos: new FormControl(datos?.cantidad_hijos, [Validators.required, Validators.pattern("^[0-9]+$")]),
-    genero: new FormControl(datos?.genero, Validators.required),
-    id_profesion: new FormControl(datos?.id_profesion, Validators.required),
     estado_civil: new FormControl(datos?.estado_civil, Validators.required),
     representacion: new FormControl(datos?.representacion, Validators.required),
     telefono_1: new FormControl(datos?.telefono_1, Validators.required),
@@ -26,8 +23,14 @@ export function generateAddressFormGroup(datos?: any): FormGroup {
     correo_2: new FormControl(datos?.correo_2, [Validators.email]),
     direccion_residencia: new FormControl(datos?.direccion_residencia, Validators.required),
     numero_carnet: new FormControl(datos?.numero_carnet, [Validators.required]),
-    id_pais: new FormControl(datos?.id_pais, Validators.required),
+    genero: new FormControl(datos?.genero, Validators.required),
+    
+    id_profesion: new FormControl(datos?.id_profesion, Validators.required),
     id_municipio_residencia: new FormControl(datos?.id_municipio_residencia, Validators.required),
+    
+    id_tipo_identificacion: new FormControl(datos?.id_tipo_identificacion, Validators.required),
+    nacionalidad: new FormControl(datos?.nacionalidad, Validators.required),
+
   });
 }
 
@@ -89,7 +92,6 @@ export class DatGeneralesAfiliadoComponent implements OnInit {
     });
   }
 
-
   cargarTiposIdentificacion() {
     this.datosEstaticos.gettipoIdent().then(data => {
       this.tipoIdentData = data;
@@ -98,17 +100,21 @@ export class DatGeneralesAfiliadoComponent implements OnInit {
     });
   }
 
-  cargarNacionalidades() {
-    this.datosEstaticos.getNacionalidad().then(data => {
+  async cargarNacionalidades() {
+   await this.datosEstaticos.getNacionalidad().then(data => {
     this.nacionalidades = data;
+    console.log(this.nacionalidades);
+    
     }).catch(error => {
       console.error('Error al cargar nacionalidades:', error);
     });
   }
 
-  cargarMunicipios() {
-    this.direccionSer.getAllMunicipios().subscribe({
+  async cargarMunicipios() {
+    await this.direccionSer.getAllMunicipios().subscribe({
       next: (data) => {
+        console.log(data);
+        
         this.municipios = data;
       },
       error: (error) => {
@@ -116,7 +122,5 @@ export class DatGeneralesAfiliadoComponent implements OnInit {
       }
     });
   }
-
-
 
 }

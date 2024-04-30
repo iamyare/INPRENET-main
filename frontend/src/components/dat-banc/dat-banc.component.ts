@@ -5,7 +5,7 @@ import { BancosService } from 'src/app/services/bancos.service';
 import { DatosEstaticosService } from 'src/app/services/datos-estaticos.service';
 export function generateDatBancFormGroup(datos?:any): FormGroup {
   return new FormGroup({
-    nombreBanco: new FormControl(datos?.nombreBanco, Validators.required),
+    idBanco: new FormControl(datos?.idBanco, Validators.required),
     numeroCuenta: new FormControl(datos?.numeroCuenta, Validators.required)
   });
 }

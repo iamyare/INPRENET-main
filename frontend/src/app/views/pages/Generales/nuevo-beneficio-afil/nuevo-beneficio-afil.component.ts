@@ -175,7 +175,7 @@ export class NuevoBeneficioAfilComponent implements OnInit {
         this.filas = data.map((item: any) => ({
           dni: item.dni,
           nombre_completo: this.unirNombres(item.primer_nombre, item.segundo_nombre, item.tercer_nombre, item.primer_apellido, item.segundo_apellido),
-          sexo: item.sexo,
+          genero: item.genero,
           tipo_afiliado: item.tipo_afiliado,
           porcentaje: item.porcentaje,
         }));
@@ -232,7 +232,7 @@ export class NuevoBeneficioAfilComponent implements OnInit {
               col: 'nombre_completo',
               isEditable: false
             },
-            { header: 'Sexo', col: 'sexo', isEditable: false },
+            { header: 'Genero', col: 'genero', isEditable: false },
             {
               header: 'Tipo Afiliado',
               col: 'tipo_afiliado',

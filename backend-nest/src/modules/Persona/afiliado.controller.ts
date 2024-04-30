@@ -17,9 +17,10 @@ import { UpdatePersonaDto } from './dto/update-persona.dto';
 import { ApiTags } from '@nestjs/swagger';
 import { EncapsulatedPersonaDTO } from './dto/encapsulated-persona.dto';
 import { DataSource } from 'typeorm';
+import { AsignarReferenciasDTO } from './dto/asignarReferencia.dto';
 
-@ApiTags('Afiliado')
-@Controller('afiliado')
+@ApiTags('Persona')
+@Controller('Persona')
 export class AfiliadoController {
   constructor(private readonly afiliadoService: AfiliadoService, private dataSource: DataSource) {}
 
@@ -47,8 +48,7 @@ export class AfiliadoController {
             // Creación y asignación de referencias personales
             let referenciasAsignadas = [];
             if (encapsulatedDto.referenciasPersonales && encapsulatedDto.referenciasPersonales.length > 0) {
-                referenciasAsignadas = await this.afiliadoService.createAndAssignReferences({
-                    idPersona: persona.id_persona,
+                referenciasAsignadas = await this.afiliadoService.createAndAssignReferences(persona.id_persona,{
                     referencias: encapsulatedDto.referenciasPersonales
                 });
             }
@@ -126,9 +126,6 @@ export class AfiliadoController {
         }
     }
 
-  
-
-
   @Put('/actualizar-salario')
   @HttpCode(HttpStatus.OK)
   async actualizarSalarioBase(
@@ -143,6 +140,32 @@ export class AfiliadoController {
     );
     return { message: 'Salario base actualizado con éxito.' };
   }
+
+
+  @Post('/createReferPersonales/:idPersona')
+  createReferPersonales(@Param("idPersona") idPersona:string, @Body() createAfiliadoTempDto: any) {
+    console.log(idPersona);
+    console.log(createAfiliadoTempDto);
+    
+    /* return this.afiliadoService.createAndAssignReferences(idPersona,createAfiliadoTempDto); */
+  }
+  @Post('/createColegiosMagisteriales/:idPersona')
+  createColegiosMagisteriales(@Param() idPersona:number, @Body() colegiosMagisterialesData: any) {
+    return this.afiliadoService.assignColegiosMagisteriales(idPersona,colegiosMagisterialesData);
+  }
+  @Post('/createCentrosTrabajo/:idPersona')
+  createCentrosTrabajo(@Param() idPersona:number, @Body() centrosTrabajoData: any) {
+    return this.afiliadoService.assignCentrosTrabajo(idPersona, centrosTrabajoData);
+  }
+  @Post('/createDatosBancarios/:idPersona')
+  createDatosBancarios(@Param() idPersona:number,@Body() bancosData: any) {
+    return this.afiliadoService.assignBancosToPersona(idPersona,bancosData);
+  }
+
+/*   @Post('/createBeneficiarios/')
+  createBeneficiarios(@Body() createAfiliadoTempDto: AsignarReferenciasDTO) {
+    return this.afiliadoService.createAndAssignReferences(createAfiliadoTempDto);
+  } */
 
   @Post('createRefPers/:dnireferente')
   createRefPers(@Body() data: any, @Param() dnireferente) {
@@ -234,8 +257,23 @@ export class AfiliadoController {
   }
 
   @Get(':term')
+  
+  findOnePersona(@Param('term') term: number) {
+    return this.afiliadoService.findOnePersona(term);
+  }
+
+  @Get('Afiliado/:term')
   findOne(@Param('term') term: number) {
     return this.afiliadoService.findOne(term);
+  }
+  @Get('/getAllPersonaPBanco/:dni')
+  getAllPersonaPBanco(@Param('dni') dni: string) {
+    return this.afiliadoService.getAllPersonaPBanco(dni);
+  }
+
+  @Get('/getAllColMagPPersona/:dni')
+  getAllColMagPPersona(@Param('dni') dni: string) {
+    return this.afiliadoService.getAllColMagPPersona(dni);
   }
 
   @Get('obtenerBenDeAfil/:dniAfil')

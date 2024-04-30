@@ -1,51 +1,20 @@
 <div style="margin: 1% 0% 1% 0%; text-align: center; background-color: white">
-    <app-dynamic-form
-      [fields]="myFormFields"
-      titulo="Buscar Afiliado"
-      subtitulo="Completa la información correspondiente"
-      (newDatBenChange)="obtenerDatos($event)"
-    ></app-dynamic-form>
-  
-    <button
-      mat-raised-button
-      color="primary"
-      style="color: white; margin: 1% 0 1% 0"
-      [disabled]="form.invalid"
-      (click)="previsualizarInfoAfil()"
-    >
-      Previsualizar información del afiliado
-    </button>
+  <app-dynamic-form [fields]="myFormFields" titulo="Buscar Afiliado" subtitulo="Completa la información correspondiente"
+    (newDatBenChange)="obtenerDatos($event)"></app-dynamic-form>
+
+  <button mat-raised-button color="primary" style="color: white; margin: 1% 0 1% 0" [disabled]="form.invalid"
+    (click)="previsualizarInfoAfil()">
+    Previsualizar información del afiliado
+  </button>
 </div>
 
-<div style="background-color: white; margin: 1% 0% 1% 0%; padding: 1% 0% 1% 0%">
-    <h1 style="text-align: center; font-size: 2rem">Datos Generales Afiliado</h1>
-    <div>
-      <table>
-        <tr style="background-color: #f2f2f2">
-          <th>Nombre de afiliado</th>
-          <td>{{ Afiliado.nameAfil }}</td>
-          <th>Sexo</th>
-          <td>{{ Afiliado.SEXO }}</td>
-          <th>Dirección de residencia</th>
-          <td>{{ Afiliado.DIRECCION_RESIDENCIA }}</td>
-          <th>Estado</th>
-          <td>{{ Afiliado.ESTADO }}</td>
-          <th>Fecha nacimiento</th>
-          <td>{{ Afiliado.FECHA_NACIMIENTO }}</td>
-          <th>Colegio magisterial</th>
-          <td>{{ Afiliado.COLEGIO_MAGISTERIAL }}</td>
-        </tr>
-        <tr>
-          <th>Número de carnet</th>
-          <td>{{ Afiliado.NUMERO_CARNET }}</td>
-          <th>Profesión</th>
-          <td>{{ Afiliado.PROFESION }}</td>
-          <th>Teléfono 1</th>
-          <td>{{ Afiliado.TELEFONO_1 }}</td>
-          <th>Estado civil</th>
-          <td>{{ Afiliado.ESTADO_CIVIL }}</td>
-        </tr>
-      </table>
-    </div>
-  
+<div *ngIf="datos">
+  <form [formGroup]="form1" #myForm="ngForm" change="getLabel()">
+    <app-dat-generales-afiliado groupName="DatosGenerales"></app-dat-generales-afiliado>
+  </form>
+
+  <button mat-raised-button color="primary" style="color: white; margin: 1% 0 1% 0" [disabled]="form1.invalid"
+    (click)="GuardarInformacion()">
+    Guardar
+  </button>
 </div>

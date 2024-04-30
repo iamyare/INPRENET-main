@@ -50,8 +50,8 @@ export class EditBeneficiariosComponent {
           isEditable: true
         },
         {
-          header: 'Sexo',
-          col: 'sexo',
+          header: 'GENERO',
+          col: 'genero',
           isEditable: true
         },
         {
@@ -102,7 +102,7 @@ export class EditBeneficiariosComponent {
             dni: item.dni,
             nombre_completo: unirNombres(item.primer_nombre, item.segundo_nombre, item.tercer_nombre, item.primer_apellido, item.segundo_apellido),
             fecha_nacimiento: item.fecha_nacimiento,
-            sexo: item.sexo,
+            genero: item.genero,
         }});
       } catch (error) {
         this.toastr.error('Error al cargar los datos de los beneficiarios');
@@ -119,7 +119,7 @@ export class EditBeneficiariosComponent {
       dni: row.dni,
       nombre_completo: row.nombre_completo,
       fecha_nacimiento: row.fecha_nacimiento,
-      sexo: row.sexo,
+      genero: row.genero,
     };
 
     this.svcAfiliado.updatePerfCentroTrabajo(row.id, BeneficiariosData).subscribe(
@@ -146,7 +146,7 @@ export class EditBeneficiariosComponent {
   manejarAccionUno(row: any) {
     const campos = [
       { nombre: 'dni', tipo: 'text', requerido: true, etiqueta: 'Nombre Centro Trabajo', editable: true },
-      { nombre: 'sexo', tipo: 'text', requerido: true, etiqueta: 'Número Acuerdo', editable: true },
+      { nombre: 'genero', tipo: 'text', requerido: true, etiqueta: 'Número Acuerdo', editable: true },
       { nombre: 'fecha_nacimiento', tipo: 'number', requerido: true, etiqueta: 'Fecha Nacimiento', editable: true }
     ];
 
@@ -186,7 +186,7 @@ export class EditBeneficiariosComponent {
     });
     /* const campos = [
       { nombre: 'dni', tipo: 'text', requerido: true, etiqueta: 'Nombre Centro Trabajo', editable: true },
-      { nombre: 'sexo', tipo: 'text', requerido: true, etiqueta: 'Número Acuerdo', editable: true },
+      { nombre: 'genero', tipo: 'text', requerido: true, etiqueta: 'Número Acuerdo', editable: true },
       { nombre: 'fecha_nacimiento', tipo: 'number', requerido: true, etiqueta: 'salario_base', editable: true }
     ];
 
@@ -198,8 +198,7 @@ export class EditBeneficiariosComponent {
       width: '55%',
       height: '75%',
       data: {
-        title: 'Confirmación de eliminación',
-        message: '¿Estás seguro de querer eliminar este elemento?'
+        idPersona: this.Afiliado.ID_PERSONA
       }
     });
 

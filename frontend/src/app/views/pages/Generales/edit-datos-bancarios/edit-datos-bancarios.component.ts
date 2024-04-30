@@ -39,40 +39,14 @@ export class EditDatosBancariosComponent {
 
     this.myColumns = [
       {
-        header: 'Nombre del Centro Trabajo',
-        col: 'nombre_centro_trabajo',
+        header: 'Nombre del banco',
+        col: 'nombre_banco',
         isEditable: true,
         validationRules: [Validators.required, Validators.minLength(3)]
       },
       {
-        header: 'Número de Acuerdo',
-        col: 'numero_acuerdo',
-        isEditable: true
-      },
-      {
-        header: 'Salario Base',
-        col: 'salario_base',
-        moneda: true,
-        isEditable: true
-      },
-      {
-        header: 'Fecha Ingreso',
-        col: 'fecha_ingreso',
-        isEditable: true
-      },
-      {
-        header: 'Actividad Económica',
-        col: 'actividad_economica',
-        isEditable: true
-      },
-      {
-        header: 'Sector Económico',
-        col: 'sector_economico',
-        isEditable: true
-      },
-      {
-        header: 'Clase Cliente',
-        col: 'clase_cliente',
+        header: 'Número de cuenta',
+        col: 'numero_cuenta',
         isEditable: true
       },
     ];
@@ -87,7 +61,7 @@ export class EditDatosBancariosComponent {
   previsualizarInfoAfil() {
     if (this.form.value.dni) {
 
-      this.svcAfiliado.getAfilByParam(this.form.value.dni).subscribe(
+      this.svcAfiliado.getAllPersonas(this.form.value.dni).subscribe(
         async (result) => {
           this.Afiliado = result
           this.Afiliado.nameAfil = this.unirNombres(result.PRIMER_NOMBRE, result.SEGUNDO_NOMBRE, result.TERCER_NOMBRE, result.PRIMER_APELLIDO, result.SEGUNDO_APELLIDO);
@@ -108,19 +82,15 @@ export class EditDatosBancariosComponent {
     this.Afiliado = undefined;
   }
 
+  /* FALTA */
   async getFilas() {
     if (this.Afiliado){
       try {
-        const data = await this.svcAfiliado.getAllPerfCentroTrabajo(this.Afiliado.DNI).toPromise();
+        const data = await this.svcAfiliado.getAllPersonaPBanco(this.Afiliado.DNI).toPromise();
         this.filas = data.map((item: any) => ({
-          id: item.id_beneficio,
-          nombre_centro_trabajo: item.centroTrabajo.nombre_centro_trabajo,
-          numero_acuerdo: item.numero_acuerdo || 'No disponible',
-          salario_base: item.salario_base,
-          fecha_ingreso: item.fecha_ingreso,
-          actividad_economica: item.actividad_economica,
-          sector_economico: item.sector_economico,
-          clase_cliente: item.clase_cliente,
+          id: item.id_af_banco,
+          nombre_banco: item.banco.nombre_banco,
+          numero_cuenta: item.num_cuenta
         }));
       } catch (error) {
         this.toastr.error('Error al cargar los datos de los perfiles de los centros de trabajo');
@@ -133,19 +103,12 @@ export class EditDatosBancariosComponent {
   }
 
   editar = (row: any) => {
-    const PerfCentTrabData = {
-        nombre_centro_trabajo: row.nombre_centro_trabajo,
-        numero_acuerdo: row.numero_acuerdo || 'No disponible',
-        salario_base: row.salario_base,
-        fecha_ingreso: row.fecha_ingreso,
-        actividad_economica: row.actividad_economica,
-        sector_economico: row.sector_economico,
-        clase_cliente: row.clase_cliente,
+    const datosBancarios = {
+        nombre_banco: row.nombre_banco,
+        numero_cuenta: row.numero_cuenta
     };
 
-    console.log(PerfCentTrabData);
-    
-    this.svcAfiliado.updatePerfCentroTrabajo(row.id, PerfCentTrabData).subscribe(
+    this.svcAfiliado.updatePerfCentroTrabajo(row.id, datosBancarios).subscribe(
       response => {
         this.toastr.success('perfil de la persona en el centro de trabajo editado con éxito');
       },
@@ -168,13 +131,8 @@ export class EditDatosBancariosComponent {
 
   manejarAccionUno(row: any) {
     const campos = [
-      { nombre: 'nombre_centro_trabajo', tipo: 'text', requerido: true, etiqueta: 'Nombre Centro Trabajo', editable: true },
-      { nombre: 'numero_acuerdo', tipo: 'text', requerido: true, etiqueta: 'Número Acuerdo', editable: true },
-      { nombre: 'salario_base', tipo: 'number', requerido: true, etiqueta: 'salario_base', editable: true },
-      { nombre: 'fecha_ingreso', tipo: 'text', requerido: false, etiqueta: 'Fecha Ingreso', editable: false },
-      { nombre: 'actividad_economica', tipo: 'text', requerido: false, etiqueta: 'Actividad Económica', editable: false },
-      { nombre: 'sector_economico', tipo: 'text', requerido: false, etiqueta: 'Sector Económico', editable: false },
-      { nombre: 'clase_cliente', tipo: 'text', requerido: false, etiqueta: 'Clase Cliente', editable: false }
+      { nombre: 'nombre_banco', tipo: 'text', requerido: true, etiqueta: 'Nombre Centro Trabajo', editable: true },
+      { nombre: 'numero_cuenta', tipo: 'text', requerido: true, etiqueta: 'Número Acuerdo', editable: true }
     ];
 
     this.openDialog(campos, row);
@@ -213,20 +171,19 @@ export class EditDatosBancariosComponent {
     });
     /* const campos = [
       { nombre: 'dni', tipo: 'text', requerido: true, etiqueta: 'Nombre Centro Trabajo', editable: true },
-      { nombre: 'sexo', tipo: 'text', requerido: true, etiqueta: 'Número Acuerdo', editable: true },
+      { nombre: 'genero', tipo: 'text', requerido: true, etiqueta: 'Número Acuerdo', editable: true },
       { nombre: 'fecha_nacimiento', tipo: 'number', requerido: true, etiqueta: 'salario_base', editable: true }
     ];
 
     this.openDialog(campos, row); */
   }
 
-  AgregarPuestoTrabajo(){
+  AgregarPuestoTrabajo(){  
     const dialogRef = this.dialog.open(AgregarDatBancCompComponent, {
       width: '55%',
       height: '75%',
       data: {
-        title: 'Confirmación de eliminación',
-        message: '¿Estás seguro de querer eliminar este elemento?'
+        idPersona: this.Afiliado.ID_PERSONA
       }
     });
 

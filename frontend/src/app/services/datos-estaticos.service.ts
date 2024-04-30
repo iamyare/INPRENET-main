@@ -46,7 +46,7 @@ export class DatosEstaticosService {
     const response = await this.tipoIdentificacionService.obtenerTiposIdentificacion().toPromise();
     const mappedResponse = response.map((item: { id_identificacion: any; tipo_identificacion: any; }) => ({
       label: item.tipo_identificacion,
-      value: String(item.id_identificacion)
+      value: item.id_identificacion
     }));
 
 
@@ -80,8 +80,8 @@ export class DatosEstaticosService {
     try {
         const response = await this.centroTrabajoService.obtenerTodasLasProfesiones().toPromise() || [];
         this.profesiones = response.map((profesion: any) => ({
-            label: profesion.descripcion,
-            value:profesion.idProfesion
+            label: profesion.idProfesion,
+            value:profesion.descripcion
         }));
         return this.profesiones;
     } catch (error) {
@@ -94,8 +94,8 @@ export class DatosEstaticosService {
   async getNacionalidad() {
     const response = await this.direccionSer.getAllPaises().toPromise();
     this.nacionalidades = response.map((item: { nacionalidad: any; id_pais: any; }) => ({
-      label: item.nacionalidad,
-      value: String(item.id_pais)
+      id_pais: item.id_pais,
+      nacionalidad: item.nacionalidad
     }));
     return this.nacionalidades;
   }
@@ -180,10 +180,10 @@ export class DatosEstaticosService {
     }
   ];
   genero = [
-    "Masculino",
-    "Femenino",
-    "No binario",
-    "Otro"
+    "MASCULINO",
+    "FEMENINO",
+    "NO BINARIO",
+    "OTRO"
   ];
   /* tipoIdent = [
     {

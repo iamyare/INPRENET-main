@@ -164,7 +164,7 @@ export class DetalleBeneficioService {
             "Afil"."tercer_nombre",
             "Afil"."primer_apellido",
             "Afil"."segundo_apellido",
-            "Afil"."sexo",
+            "Afil"."genero",
             "detA"."porcentaje",
             "detA"."tipo_persona"
         FROM
@@ -378,7 +378,7 @@ export class DetalleBeneficioService {
         .addSelect('afil.SEGUNDO_NOMBRE', 'SEGUNDO_NOMBRE')
         .addSelect('afil.PRIMER_APELLIDO', 'PRIMER_APELLIDO')
         .addSelect('afil.SEGUNDO_APELLIDO', 'SEGUNDO_APELLIDO')
-        .addSelect('afil.SEXO', 'SEXO')
+        .addSelect('afil.GENERO', 'GENERO')
         .addSelect('afil.DIRECCION_RESIDENCIA', 'DIRECCION_RESIDENCIA')
         .addSelect('afil.FECHA_NACIMIENTO', 'FECHA_NACIMIENTO')
         /* .addSelect('afil.COLEGIO_MAGISTERIAL', 'COLEGIO_MAGISTERIAL') */

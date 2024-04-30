@@ -217,9 +217,11 @@ async assignCentrosTrabajo(idPersona: number, centrosTrabajoData: any[]): Promis
   return asignaciones;
 }
 
-async createAndAssignReferences(dto: AsignarReferenciasDTO): Promise<Net_Ref_Per_Pers[]> {
+async createAndAssignReferences(idPersona:number, dto: AsignarReferenciasDTO): Promise<Net_Ref_Per_Pers[]> {
+  console.log("Entro");
+  
   const persona = await this.personaRepository.findOne({ 
-      where: { id_persona: dto.idPersona }
+      where: { id_persona: idPersona }
   });
   if (!persona) {
       throw new Error('Persona no encontrada');
@@ -302,9 +304,6 @@ async assignColegiosMagisteriales(idPersona: number, colegiosMagisterialesData: 
 
   return asignaciones;
 }
-
-
-
   async updateSalarioBase(dni: string, idCentroTrabajo: number, salarioBase: number): Promise<void> {
 
     const perfil = await this.perfPersoCentTrabRepository
@@ -399,6 +398,30 @@ async assignColegiosMagisteriales(idPersona: number, colegiosMagisterialesData: 
     return afiliado;
   }
 
+  async getAllPersonaPBanco(dni:string) {
+    try {
+      const personas = await this.personaRepository.findOne({
+        where: { dni: dni },
+        relations: ['personasPorBanco','personasPorBanco.banco'], // Asegúrate de cargar la relación
+      });
+      return personas.personasPorBanco;
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+  async getAllColMagPPersona(dni:string) {
+    try {
+      const personas = await this.personaRepository.findOne({
+        where: { dni: dni },
+        relations: ['colegiosMagisteriales','colegiosMagisteriales.colegio'], // Asegúrate de cargar la relación
+      });
+      return personas.colegiosMagisteriales;
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
   async findOne(term: number) {
     let personas: Net_Persona;
     if (isUUID(term)) {
@@ -410,25 +433,80 @@ async assignColegiosMagisteriales(idPersona: number, colegiosMagisterialesData: 
 
       const queryBuilder = this.personaRepository.createQueryBuilder('persona');
       personas = await queryBuilder
-        .select('persona.DNI', 'DNI')
+      .select('persona.DNI', 'DNI')
+      .addSelect('persona.ID_PERSONA', 'ID_PERSONA')
+        .addSelect('persona.PRIMER_NOMBRE', 'PRIMER_NOMBRE')
+        .addSelect('persona.SEGUNDO_NOMBRE', 'SEGUNDO_NOMBRE')
+        .addSelect('persona.TERCER_NOMBRE', 'TERCER_NOMBRE')
+        .addSelect('persona.PRIMER_APELLIDO', 'PRIMER_APELLIDO')
+        .addSelect('persona.SEGUNDO_APELLIDO', 'SEGUNDO_APELLIDO')
+        .addSelect('persona.GENERO', 'GENERO')
+        .addSelect('persona.CANTIDAD_DEPENDIENTES', 'CANTIDAD_DEPENDIENTES')
+        .addSelect('persona.CANTIDAD_HIJOS', 'CANTIDAD_HIJOS')
+        .addSelect('persona.REPRESENTACION', 'REPRESENTACION')
+        .addSelect('persona.DIRECCION_RESIDENCIA', 'DIRECCION_RESIDENCIA')
+        .addSelect('persona.NUMERO_CARNET', 'NUMERO_CARNET')
+        .addSelect('persona.FECHA_NACIMIENTO', 'FECHA_NACIMIENTO')
+        .addSelect('profesion.DESCRIPCION', 'DESCRIPCION')
+        .addSelect('persona.TELEFONO_1', 'TELEFONO_1')
+        .addSelect('persona.TELEFONO_2', 'TELEFONO_2')
+        .addSelect('persona.CORREO_1', 'CORREO_1')
+        .addSelect('persona.CORREO_2', 'CORREO_2')
+        .addSelect('persona.ESTADO_CIVIL', 'ESTADO_CIVIL')
+        .addSelect('estadoAfil.DESCRIPCION', 'ESTADO')
+        .addSelect('municipio.ID_MUNICIPIO', 'ID_MUNICIPIO')
+        .addSelect('pais.ID_PAIS', 'ID_PAIS')
+        .addSelect('tipoIdentificacion.ID_IDENTIFICACION', 'ID_IDENTIFICACION')
+        .innerJoin('persona.estadoPersona', 'estadoAfil')
+        .leftJoin('persona.detallesPersona', 'detallepersona')// Join con la tabla detallepersonas
+        .leftJoin('persona.municipio', 'municipio')// Join con la tabla detallepersonas
+        .leftJoin('persona.pais', 'pais')// Join con la tabla detallepersonas
+        .leftJoin('persona.tipoIdentificacion', 'tipoIdentificacion')// Join con la tabla detallepersonas
+        .leftJoin('persona.profesion', 'profesion') // Join con la tabla detallepersonas
+        .leftJoin('detallepersona.tipoAfiliado', 'tipoafiliado') // Join con la tabla detallepersonas
+        .where('persona.dni = :term AND tipoafiliado.tipo_afiliado = :tipo_persona', { term, tipo_persona: "AFILIADO" })
+        .getRawOne();
+
+    }
+    if (!personas) {
+      throw new NotFoundException(`Afiliado con ${term} no existe`);
+    }
+    return personas;
+  }
+
+  async findOnePersona(term: number) {
+    let personas: Net_Persona;
+    if (isUUID(term)) {
+      personas = await this.personaRepository.findOne({
+        where: { id_persona: term },
+        relations: ['detalleAfiliado'], // Asegúrate de cargar la relación
+      });
+    } else {
+
+      const queryBuilder = this.personaRepository.createQueryBuilder('persona');
+      personas = await queryBuilder
+      .select('persona.DNI', 'DNI')
+      .addSelect('persona.ID_PERSONA', 'ID_PERSONA')
         .addSelect('persona.PRIMER_NOMBRE', 'PRIMER_NOMBRE')
         .addSelect('persona.SEGUNDO_NOMBRE', 'SEGUNDO_NOMBRE')
         .addSelect('persona.PRIMER_APELLIDO', 'PRIMER_APELLIDO')
         .addSelect('persona.SEGUNDO_APELLIDO', 'SEGUNDO_APELLIDO')
-        .addSelect('persona.SEXO', 'SEXO')
+        .addSelect('persona.GENERO', 'GENERO')
         .addSelect('persona.DIRECCION_RESIDENCIA', 'DIRECCION_RESIDENCIA')
         .addSelect('persona.FECHA_NACIMIENTO', 'FECHA_NACIMIENTO')
         .addSelect('persona.NUMERO_CARNET', 'NUMERO_CARNET')
-        .addSelect('persona.PROFESION', 'PROFESION')
+        .addSelect('profesion.DESCRIPCION', 'DESCRIPCION')
         .addSelect('persona.TELEFONO_1', 'TELEFONO_1')
         .addSelect('persona.ESTADO_CIVIL', 'ESTADO_CIVIL')
         .addSelect('estadoAfil.DESCRIPCION', 'ESTADO')
         .innerJoin('persona.estadoPersona', 'estadoAfil')
         .leftJoin('persona.detallesPersona', 'detallepersona')// Join con la tabla detallepersonas
+        .leftJoin('persona.profesion', 'profesion') // Join con la tabla detallepersonas
         .leftJoin('detallepersona.tipoAfiliado', 'tipoafiliado') // Join con la tabla detallepersonas
-        .where('persona.dni = :term AND tipoafiliado.tipo_afiliado = :tipo_persona', { term, tipo_persona: "AFILIADO" })
+        .where('persona.dni = :term', { term })
         .getRawOne();
-
+      console.log(personas);
+      
     }
     if (!personas) {
       throw new NotFoundException(`Afiliado con ${term} no existe`);
@@ -468,13 +546,14 @@ async assignColegiosMagisteriales(idPersona: number, colegiosMagisterialesData: 
 
       const query1 = `
         SELECT 
+        "Afil"."ID_PERSONA",
         "Afil"."DNI",
         "Afil"."PRIMER_NOMBRE",
         "Afil"."SEGUNDO_APELLIDO",
         "Afil"."TERCER_NOMBRE",
         "Afil"."PRIMER_APELLIDO",
         "Afil"."SEGUNDO_APELLIDO",
-        "Afil"."SEXO",
+        "Afil"."GENERO",
         "detA"."PORCENTAJE",
         "tipoP"."TIPO_AFILIADO"
       FROM
@@ -517,13 +596,14 @@ async assignColegiosMagisteriales(idPersona: number, colegiosMagisterialesData: 
 
       const query1 = `
         SELECT 
+        "Afil"."ID_PERSONA",
         "Afil"."DNI",
         "Afil"."PRIMER_NOMBRE",
         "Afil"."SEGUNDO_APELLIDO",
         "Afil"."TERCER_NOMBRE",
         "Afil"."PRIMER_APELLIDO",
         "Afil"."SEGUNDO_APELLIDO",
-        "Afil"."SEXO",
+        "Afil"."GENERO",
         "Afil"."FECHA_NACIMIENTO",
         "detA"."PORCENTAJE",
         "tipoP"."TIPO_AFILIADO"

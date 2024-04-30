@@ -1,5 +1,6 @@
-import { Component } from '@angular/core';
+import { Component, Inject } from '@angular/core';
 import { FormArray, FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { generateFormArchivo } from '@docs-components/botonarchivos/botonarchivos.component';
 import { generateDatBancFormGroup } from '@docs-components/dat-banc/dat-banc.component';
 import { generateAddressFormGroup } from '@docs-components/dat-generales-afiliado/dat-generales-afiliado.component';
@@ -18,10 +19,18 @@ export class AgregarPuestTrabComponent {
       refpers: new FormArray([], [Validators.required])
     });
 
-    constructor(private fb: FormBuilder, private afilService: AfiliadoService) { }
+    constructor(private fb: FormBuilder, private afilService: AfiliadoService,
+      @Inject(MAT_DIALOG_DATA) public data: { idPersona: string  }
+    ) { }
     ngOnInit(): void { }
 
     setDatosPuetTrab1(datosPuestTrab: any) {
       this.formPuestTrab = datosPuestTrab
+    }
+
+    guardar(){
+      console.log(this.formPuestTrab.value.refpers);
+      console.log(this.data);
+      
     }
 }

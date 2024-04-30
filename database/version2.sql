@@ -472,3 +472,44 @@ COMMIT;
 SELECT * FROM AFILIADO INNER JOIN TIPO_IDENTIFICACION ON 
 AFILIADO.TIPO_IDENTIFICACION_ID = TIPO_IDENTIFICACION.ID_IDENTIFICACION;
 
+
+
+
+drop table "C##TEST"."MD_APPICATIONFILES" cascade constraints;
+drop table "C##TEST"."MD_APPICATIONS" cascade constraints;
+drop table "C##TEST"."MD_CATALOGS" cascade constraints;
+drop table "C##TEST"."MD_CODE_REGEX" cascade constraints;
+drop table "C##TEST"."MD_COLUMNS" cascade constraints;
+drop table "C##TEST"."MD_CONNECTIONS" cascade constraints;
+drop table "C##TEST"."MD_CONSTRAINT_DETAILS" cascade constraints;
+drop table "C##TEST"."MD_CONSTRAINTS" cascade constraints;
+drop table "C##TEST"."MD_DERIVATIVES" cascade constraints;
+drop table "C##TEST"."MD_FILE_ARTIFACTS" cascade constraints;
+drop table "C##TEST"."MD_GROUP_MEMBERS" cascade constraints;
+drop table "C##TEST"."MD_GROUP_PRIVILEGES" cascade constraints;
+drop table "C##TEST"."MD_GROUPS" cascade constraints;
+drop table "C##TEST"."MD_INDEXES" cascade constraints;
+drop table "C##TEST"."MD_INDEX_DETAILS" cascade constraints;
+drop table "C##TEST"."MD_MIGR_DEPENDENCY" cascade constraints;
+drop table "C##TEST"."MD_MIGR_PARAMETER" cascade constraints;
+drop table "C##TEST"."MD_MIGR_WEAKDEPS" cascade constraints;
+drop table "C##TEST"."MD_NCIA" cascade constraints;
+drop table "C##TEST"."MD_ER_AFIL" cascade constraints;
+drop table "C##TEST"."MD_ENCIA_PERSONAL" cascade constraints;
+drop table "C##TEST"."MD_cascade constraints;
+drop table "C##TEST"."MD_AFILIADO" cascade constraints;
+drop table "C##TEST"."NET_TIPO_IDENTIFICACION" cascade constraints;
+drop table "C##TEST"."NET_TIPO_PLANILLA" cascade constraints;
+drop table "C##TEST"."NET_USUARIO" cascade constraints;
+drop table "C##TEST"."NET_DEDUCCION" cascade constraints;
+drop table "C##TEST"."NET_DEPARTAMENTO" cascade constraints;
+drop table "C##TEST"."NET_CUENTA_PERSONA" cascade constraints;
+drop table "C##TEST"."NET_DETALLE_PLANILLA_ING" cascade constraints;
+drop table "C##TEST"."NET_ESTADO_AFILIADO" cascade constraints;
+drop table "C##TEST"."NET_MOVIMIENTO_CUENTA" cascade constraints;
+drop table "C##TEST"."NET_SALARIO_CONTABLE" cascade constraints;
+drop table "C##TEST"."NET_TIPO_CUENTA" cascade constraints;
+drop table "C##TEST"."NET_TIPO_PERSONA" cascade constraints;
+drop table "C##TEST"."NET_USUARIO_PRIVADA" cascade constraints;
+drop table "C##TEST"."NET_SALARIO_COTIZABLE" cascade constraints;
+drop table "C##TEST"."NET_TIPO_MOVIMIENTO" cascade constraints;

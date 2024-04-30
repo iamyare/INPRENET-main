@@ -97,7 +97,7 @@ export class VerEditarBeneficioAfilComponent {
         dni: item.DNI,
         estado_civil: item.ESTADO_CIVIL,
         nombreCompleto: unirNombres(item.PRIMER_NOMBRE, item.SEGUNDO_NOMBRE, item.PRIMER_APELLIDO, item.SEGUNDO_APELLIDO),
-        sexo: item.SEXO,
+        genero: item.GENERO,
         profesion: item.PROFESION,
         telefono_1: item.TELEFONO_1,
         colegio_magisterial: item.COLEGIO_MAGISTERIAL,

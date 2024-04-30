@@ -5,7 +5,7 @@ import { DatosEstaticosService } from 'src/app/services/datos-estaticos.service'
 export function generateHistSalFormGroup(datos?:any): FormGroup {
   return new FormGroup({
     idBanco: new FormControl(datos.idBanco, Validators.required),
-    numCuenta: new FormControl(datos.numero_cuenta, Validators.required),
+    numero_cuenta: new FormControl(datos.numero_cuenta, Validators.required),
     estado: new FormControl(datos.numero_cuenta, Validators.required)
   });
 }

@@ -1,6 +1,7 @@
 import { Component } from '@angular/core';
-import { Validators } from '@angular/forms';
+import { FormBuilder, Validators } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
+import { generateAddressFormGroup } from '@docs-components/dat-generales-afiliado/dat-generales-afiliado.component';
 import { EditarDialogComponent } from '@docs-components/editar-dialog/editar-dialog.component';
 import { ToastrService } from 'ngx-toastr';
 import { AfiliadoService } from 'src/app/services/afiliado.service';
@@ -14,21 +15,30 @@ import { unirNombres } from 'src/app/shared/functions/formatoNombresP';
   styleUrl: './edit-datos-generales.component.scss'
 })
 export class EditDatosGeneralesComponent {
+  datosGen:any;
   public myFormFields: FieldConfig[] = []
-  form: any;
   Afiliado: any;
   unirNombres: any = unirNombres;
   datosTabl: any[] = [];
-
+  
   public myColumns: TableColumn[] = [];
   public filas: any[] = [];
   ejecF: any;
+  
+  datos!:any;
+  
+  form1 = this.fb.group({
+    DatosGenerales: generateAddressFormGroup(this.datos),
+  });
 
+  form: any;
+  
   constructor(
+    private fb: FormBuilder, 
     private svcAfiliado: AfiliadoService,
     private toastr: ToastrService,
     private dialog: MatDialog
-  ) { }
+  ) {}
   ngOnInit(): void {
     this.myFormFields = [
       { type: 'text', label: 'DNI del afiliado', name: 'dni', validations: [Validators.required, Validators.minLength(13), Validators.maxLength(14)], display: true },
@@ -79,7 +89,7 @@ export class EditDatosGeneralesComponent {
   async obtenerDatos(event: any): Promise<any> {
     this.form = event;
   }
-  
+
   cargar() {
     if (this.ejecF) {
       this.ejecF(this.filas).then(() => {
@@ -88,12 +98,40 @@ export class EditDatosGeneralesComponent {
   }
 
   previsualizarInfoAfil() {
-    this.Afiliado.nameAfil = ""
     if (this.form.value.dni) {
 
       this.svcAfiliado.getAfilByParam(this.form.value.dni).subscribe(
         async (result) => {
-          this.Afiliado = result
+          this.datos = result;
+          this.Afiliado = result;
+          this.form1 = this.fb.group({
+            DatosGenerales: this.fb.group({
+              dni: [result.DNI ],
+              primer_nombre: [result.PRIMER_NOMBRE],
+              segundo_nombre: [result.SEGUNDO_NOMBRE],
+              primer_apellido: [result.PRIMER_APELLIDO],
+              segundo_apellido: [result.SEGUNDO_APELLIDO],
+              tercer_nombre: [result.TERCER_NOMBRE],
+              fecha_nacimiento: [result.FECHA_NACIMIENTO],
+              cantidad_dependientes: [result.CANTIDAD_DEPENDIENTES],
+              cantidad_hijos: [result.CANTIDAD_HIJOS],
+              telefono_1: [result.TELEFONO_1],
+              telefono_2: [result.TELEFONO_2],
+              correo_1: [result.CORREO_1],
+              correo_2: [result.CORREO_2],
+              direccion_residencia: [result.DIRECCION_RESIDENCIA],
+              numero_carnet: [result.NUMERO_CARNET],
+              genero: [result.GENERO],
+              estado_civil: [result.ESTADO_CIVIL],
+              representacion: [result.REPRESENTACION],
+              
+              id_profesion: [result.DESCRIPCION],
+              
+              id_municipio_residencia: [result.ID_MUNICIPIO],
+              nacionalidad: [result.ID_PAIS],
+              id_tipo_identificacion: [result.ID_IDENTIFICACION],
+            })
+          });
           this.Afiliado.nameAfil = this.unirNombres(result.PRIMER_NOMBRE, result.SEGUNDO_NOMBRE, result.TERCER_NOMBRE, result.PRIMER_APELLIDO, result.SEGUNDO_APELLIDO);
           this.getFilas().then(() => this.cargar());
         },
@@ -104,14 +142,12 @@ export class EditDatosGeneralesComponent {
         })
     }
   }
-
   resetDatos(){
     if (this.form){
       this.form.reset();
     }
     this.Afiliado = {};
   }
-
   async getFilas() {
     if (this.Afiliado){
       try {
@@ -134,6 +170,10 @@ export class EditDatosGeneralesComponent {
       this.resetDatos()
     }
   
+  }
+
+  GuardarInformacion(){
+    
   }
 
 }

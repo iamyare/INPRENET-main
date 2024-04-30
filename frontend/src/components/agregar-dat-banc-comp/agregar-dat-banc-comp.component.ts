@@ -1,5 +1,6 @@
-import { Component } from '@angular/core';
+import { Component, Inject } from '@angular/core';
 import { FormArray, FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { AfiliadoService } from 'src/app/services/afiliado.service';
 
 @Component({
@@ -16,10 +17,18 @@ export class AgregarDatBancCompComponent {
       refpers: new FormArray([], [Validators.required])
     });
 
-    constructor(private fb: FormBuilder, private afilService: AfiliadoService) { }
+    constructor(private fb: FormBuilder, private afilService: AfiliadoService,
+      @Inject(MAT_DIALOG_DATA) public data: { idPersona: string } 
+    ) { }
     ngOnInit(): void { }
 
     setHistSal(datosHistSal: any) {
       this.formHistPag = datosHistSal
+    }
+
+    guardar(){
+      console.log(this.formHistPag.value.refpers);
+      console.log(this.data);
+      
     }
 }

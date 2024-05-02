@@ -15,7 +15,7 @@
             <mat-form-field class="example-full-width; inputs" appearance="outline">
               <mat-label>Centro de Trabajo</mat-label>
               <mat-select matNativeControl formControlName="idCentroTrabajo">
-                <mat-option *ngFor="let p of centrosTrabajo" [value]="p.idCentroTrabajo">
+                <mat-option *ngFor="let p of centrosTrabajo" [value]="p.label">
                   {{p.value}}
                 </mat-option>
               </mat-select>
@@ -61,7 +61,7 @@
         <div class="row" [formGroupName]="formChild">
           <div class="col-md-4">
             <mat-form-field class="example-full-width; inputs" appearance="outline">
-              <mat-label>Actividad Económica</mat-label>
+              <mat-label>Cargo</mat-label>
               <input matInput formControlName="cargo">
             </mat-form-field>
           </div>
@@ -89,10 +89,12 @@
 
   <div class="row" style="text-align: center; margin: 1%;">
     <div class="col-md-6">
-      <button mat-button color="primary" (click)="agregarRefPer()"><mat-icon matSuffix>exposure_plus_1</mat-icon>Agregar Puesto Trabajo</button>
+      <button mat-button color="primary" (click)="agregarRefPer()"><mat-icon matSuffix>exposure_plus_1</mat-icon>Agregar
+        Puesto Trabajo</button>
     </div>
     <div class="col-md-6">
-      <button mat-button color="warn" (click)="eliminarRefPer()"><mat-icon matSuffix>exposure_neg_1</mat-icon>Eliminar Puesto Trabajo</button>
+      <button mat-button color="warn" (click)="eliminarRefPer()"><mat-icon matSuffix>exposure_neg_1</mat-icon>Eliminar
+        Puesto Trabajo</button>
     </div>
   </div>
 </div>

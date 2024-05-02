@@ -11,15 +11,16 @@ export class CreateReferenciaPersonalDTO {
 
     @IsNotEmpty()
     @IsString()
+    @MinLength(2)
+    @MaxLength(30)
+    parentesco: string;
+    
+    @IsNotEmpty()
+    @IsString()
     @MinLength(10)
     @MaxLength(200)
     direccion: string;
 
-    @IsNotEmpty()
-    @IsString()
-    @MinLength(2)
-    @MaxLength(30)
-    parentesco: string;
 
     @IsOptional()
     @IsString()

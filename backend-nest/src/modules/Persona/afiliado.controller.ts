@@ -143,23 +143,20 @@ export class AfiliadoController {
 
 
   @Post('/createReferPersonales/:idPersona')
-  createReferPersonales(@Param("idPersona") idPersona:string, @Body() createAfiliadoTempDto: any) {
-    console.log(idPersona);
-    console.log(createAfiliadoTempDto);
-    
-    /* return this.afiliadoService.createAndAssignReferences(idPersona,createAfiliadoTempDto); */
+  createReferPersonales(@Param("idPersona") idPersona:number, @Body() createAfiliadoTempDto: any) {
+    return this.afiliadoService.createAndAssignReferences(idPersona,createAfiliadoTempDto);
   }
   @Post('/createColegiosMagisteriales/:idPersona')
   createColegiosMagisteriales(@Param() idPersona:number, @Body() colegiosMagisterialesData: any) {
     return this.afiliadoService.assignColegiosMagisteriales(idPersona,colegiosMagisterialesData);
   }
   @Post('/createCentrosTrabajo/:idPersona')
-  createCentrosTrabajo(@Param() idPersona:number, @Body() centrosTrabajoData: any) {
+  createCentrosTrabajo(@Param("idPersona") idPersona:number, @Body() centrosTrabajoData: any) {
     return this.afiliadoService.assignCentrosTrabajo(idPersona, centrosTrabajoData);
   }
   @Post('/createDatosBancarios/:idPersona')
-  createDatosBancarios(@Param() idPersona:number,@Body() bancosData: any) {
-    return this.afiliadoService.assignBancosToPersona(idPersona,bancosData);
+  createDatosBancarios(@Param("idPersona") idPersona:number, @Body() bancosData: any) {
+    return this.afiliadoService.assignBancosToPersona(idPersona, bancosData);
   }
 
 /*   @Post('/createBeneficiarios/')
@@ -263,7 +260,9 @@ export class AfiliadoController {
   }
 
   @Get('Afiliado/:term')
-  findOne(@Param('term') term: number) {
+  findOne(@Param('term') term: string) {
+    console.log(term);
+    
     return this.afiliadoService.findOne(term);
   }
   @Get('/getAllPersonaPBanco/:dni')

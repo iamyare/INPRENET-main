@@ -9,13 +9,14 @@ import { AfiliadoService } from 'src/app/services/afiliado.service';
 import { FieldConfig } from 'src/app/shared/Interfaces/field-config';
 import { TableColumn } from 'src/app/shared/Interfaces/table-column';
 import { unirNombres } from 'src/app/shared/functions/formatoNombresP';
-
+import { convertirFechaInputs } from 'src/app/shared/functions/formatoFecha';
 @Component({
   selector: 'app-edit-perfil-puest-trab',
   templateUrl: './edit-perfil-puest-trab.component.html',
   styleUrl: './edit-perfil-puest-trab.component.scss'
 })
 export class EditPerfilPuestTrabComponent {
+  convertirFechaInputs = convertirFechaInputs
   public myFormFields: FieldConfig[] = []
   form: any;
   Afiliado!: any;
@@ -61,8 +62,8 @@ export class EditPerfilPuestTrabComponent {
         isEditable: true
       },
       {
-        header: 'Actividad Económica',
-        col: 'actividad_economica',
+        header: 'Cargo',
+        col: 'cargo',
         isEditable: true
       },
       {
@@ -118,7 +119,7 @@ export class EditPerfilPuestTrabComponent {
           numero_acuerdo: item.numero_acuerdo || 'No disponible',
           salario_base: item.salario_base,
           fecha_ingreso: item.fecha_ingreso,
-          actividad_economica: item.actividad_economica,
+          cargo: item.cargo,
           sector_economico: item.sector_economico,
           clase_cliente: item.clase_cliente,
         }));
@@ -224,14 +225,12 @@ export class EditPerfilPuestTrabComponent {
       width: '55%',
       height: '75%',
       data: {
-        title: 'Confirmación de eliminación',
-        message: '¿Estás seguro de querer eliminar este elemento?'
+        idPersona: this.Afiliado.ID_PERSONA
       }
     });
 
     dialogRef.afterClosed().subscribe((result: any) => {
-      if (result) {
-      }
+      this.ngOnInit();
     });
   }
   

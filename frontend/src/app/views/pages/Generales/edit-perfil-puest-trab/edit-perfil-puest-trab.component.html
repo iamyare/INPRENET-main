@@ -1,30 +1,16 @@
 <div style="margin: 1% 0% 1% 0%; text-align: center; background-color: white">
-  <app-dynamic-form
-    [fields]="myFormFields"
-    titulo="Buscar Afiliado"
-    subtitulo="Completa la información correspondiente"
-    (newDatBenChange)="obtenerDatos($event)"
-  ></app-dynamic-form>
+  <app-dynamic-form [fields]="myFormFields" titulo="Buscar Afiliado" subtitulo="Completa la información correspondiente"
+    (newDatBenChange)="obtenerDatos($event)"></app-dynamic-form>
   <div class="row" style="text-align: center;  margin: 1%;">
     <div class="col-md-6">
-      <button
-      mat-raised-button
-      color="primary"
-      style="color: white; margin: 1% 0 1% 0"
-      [disabled]="form.invalid"
-      (click)="previsualizarInfoAfil()"
-    >
-      Previsualizar información del afiliado
-    </button>
+      <button mat-raised-button color="primary" style="color: white; margin: 1% 0 1% 0" [disabled]="form.invalid"
+        (click)="previsualizarInfoAfil()">
+        Previsualizar información del afiliado
+      </button>
     </div>
     <div class="col-md-6">
-      <button
-        mat-raised-button
-        color="primary"
-        style="color: white; margin: 1% 0 1% 0"
-        [disabled]="form.invalid"
-        (click)="AgregarPuestoTrabajo()"
-        >
+      <button mat-raised-button color="primary" style="color: white; margin: 1% 0 1% 0" [disabled]="form.invalid"
+        (click)="AgregarPuestoTrabajo()">
         Agregar Puesto de Trabajo
       </button>
     </div>
@@ -53,7 +39,7 @@
         <th>Estado</th>
         <td>{{ Afiliado.ESTADO }}</td>
         <th>Fecha nacimiento</th>
-        <td>{{ Afiliado.FECHA_NACIMIENTO }}</td>
+        <td>{{ convertirFechaInputs(Afiliado.FECHA_NACIMIENTO) }}</td>
         <th>Colegio magisterial</th>
         <td>{{ Afiliado.COLEGIO_MAGISTERIAL }}</td>
       </tr>
@@ -72,27 +58,13 @@
 
 </div>
 
-<div *ngIf="filas.length != 0 " style="background-color: white; border-radius: 10px; padding: 20px" >
-  <app-dynamic-table
-    style="width: 100%"
-    titulo="Editar Perfil Del Puesto De Trabajo"
-    subtitulo="Completa la información correspondiente"
-    [columns]="myColumns"
-    [data]="filas"
-    [getData]="getFilas"
+<div *ngIf="filas.length != 0 " style="background-color: white; border-radius: 10px; padding: 20px">
+  <app-dynamic-table style="width: 100%" titulo="Editar Perfil Del Puesto De Trabajo"
+    subtitulo="Completa la información correspondiente" [columns]="myColumns" [data]="filas" [getData]="getFilas"
     (ejecutarFuncionAsincronaEvent)="
       ejecutarFuncionAsincronaDesdeOtroComponente($event)
-    "
-    [nombreEncabezadoUno]="'Editar'"
-    [mostrarBotonUno]="true"
-    [etiquetaBotonUno]="'Editar'"
-    (accionBotonUno)="manejarAccionUno($event)"
-
-    
-    [nombreEncabezadoUno]="'Acciones'"
-    [mostrarBotonDos]="true"
-    [etiquetaBotonDos]="'Eliminar'"
-    (accionBotonDos)="manejarAccionDos($event)"
-  >
+    " [nombreEncabezadoUno]="'Editar'" [mostrarBotonUno]="true" [etiquetaBotonUno]="'Editar'"
+    (accionBotonUno)="manejarAccionUno($event)" [nombreEncabezadoUno]="'Acciones'" [mostrarBotonDos]="true"
+    [etiquetaBotonDos]="'Eliminar'" (accionBotonDos)="manejarAccionDos($event)">
   </app-dynamic-table>
 </div>

@@ -1,5 +1,6 @@
 import * as moment from 'moment';
-export function convertirFecha(fechaStr: string, hora: boolean): string {
+
+function convertirFecha(fechaStr: string, hora: boolean): string {
   let fechaFormateada = "";
   if (fechaStr && hora){
     const fecha = moment.utc(fechaStr);
@@ -11,3 +12,13 @@ export function convertirFecha(fechaStr: string, hora: boolean): string {
 
   return fechaFormateada;
 }
+
+function convertirFechaInputs(fecha: string): string {
+  if (fecha){
+    const fechaMoment = moment.utc(fecha);
+    return fechaMoment.format('YYYY-MM-DD');
+  }
+  return ""
+}
+
+export {convertirFecha, convertirFechaInputs}

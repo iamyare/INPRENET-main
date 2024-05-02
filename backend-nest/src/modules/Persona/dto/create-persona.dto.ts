@@ -28,7 +28,7 @@ export interface PersonaResponse {
     archivo_identificacion: string;
     tipoIdentificacion: string;
     porcentaje: string;
-    tipo_afiliado: string;
+    tipo_persona: string;
 }
 
 export class NetPersonaDTO {

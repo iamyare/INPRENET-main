@@ -181,90 +181,108 @@ async createDetallePersona(createDetallePersonaDto: CreateDetallePersonaDto): Pr
 }
 
 async assignCentrosTrabajo(idPersona: number, centrosTrabajoData: any[]): Promise<Net_perf_pers_cent_trab[]> {
-  const persona = await this.personaRepository.findOne({ where: { id_persona: idPersona } });
-  if (!persona) {
-      throw new Error('Persona no encontrada');
+  try {
+    const persona = await this.personaRepository.findOne({ where: { id_persona: idPersona } });
+    if (!persona) {
+        throw new Error('Persona no encontrada');
+    }
+  
+    const asignaciones = [];
+    const errores = [];
+  
+    for (const centro of centrosTrabajoData) {
+        const centroTrabajo = await this.centroTrabajoRepository.findOne({ where: { id_centro_trabajo: centro.idCentroTrabajo } });
+        if (!centroTrabajo) {
+            errores.push(`Centro de trabajo con ID ${centro.idCentroTrabajo} no encontrado.`);
+            continue;
+        }
+  
+        const nuevoPerfil = new Net_perf_pers_cent_trab();
+        nuevoPerfil.persona = persona;
+        nuevoPerfil.centroTrabajo = centroTrabajo;
+        nuevoPerfil.cargo = centro.cargo;
+        nuevoPerfil.numero_acuerdo = centro.numeroAcuerdo;
+        nuevoPerfil.salario_base = centro.salarioBase;
+        nuevoPerfil.fecha_ingreso = centro.fechaIngreso;
+        nuevoPerfil.fecha_egreso = centro.fechaEgreso;
+        nuevoPerfil.clase_cliente = centro.claseCliente;
+        nuevoPerfil.sector_economico = centro.sectorEconomico;
+  
+        asignaciones.push(await this.perfPersoCentTrabRepository.save(nuevoPerfil));
+    }
+  
+    if (errores.length > 0) {
+        throw new Error(`Errores en la asignación de centros de trabajo: ${errores.join(' ')}`);
+    }
+  
+    return asignaciones;
+  } catch (error) {
+    console.log(error);
+    
   }
-
-  const asignaciones = [];
-  const errores = [];
-
-  for (const centro of centrosTrabajoData) {
-      const centroTrabajo = await this.centroTrabajoRepository.findOne({ where: { id_centro_trabajo: centro.idCentroTrabajo } });
-      if (!centroTrabajo) {
-          errores.push(`Centro de trabajo con ID ${centro.idCentroTrabajo} no encontrado.`);
-          continue;
-      }
-
-      const nuevoPerfil = new Net_perf_pers_cent_trab();
-      nuevoPerfil.persona = persona;
-      nuevoPerfil.centroTrabajo = centroTrabajo;
-      nuevoPerfil.cargo = centro.cargo;
-      nuevoPerfil.numero_acuerdo = centro.numeroAcuerdo;
-      nuevoPerfil.salario_base = centro.salarioBase;
-      nuevoPerfil.fecha_ingreso = centro.fechaIngreso;
-      nuevoPerfil.fecha_egreso = centro.fechaEgreso;
-      nuevoPerfil.clase_cliente = centro.claseCliente;
-      nuevoPerfil.sector_economico = centro.sectorEconomico;
-
-      asignaciones.push(await this.perfPersoCentTrabRepository.save(nuevoPerfil));
-  }
-
-  if (errores.length > 0) {
-      throw new Error(`Errores en la asignación de centros de trabajo: ${errores.join(' ')}`);
-  }
-
-  return asignaciones;
 }
 
 async createAndAssignReferences(idPersona:number, dto: AsignarReferenciasDTO): Promise<Net_Ref_Per_Pers[]> {
-  console.log("Entro");
+
+  try {
+    const persona = await this.personaRepository.findOne({ 
+        where: { id_persona: idPersona }
+    });
+    if (!persona) {
+        throw new Error('Persona no encontrada');
+    }
   
-  const persona = await this.personaRepository.findOne({ 
-      where: { id_persona: idPersona }
-  });
-  if (!persona) {
-      throw new Error('Persona no encontrada');
+    const resultados = await Promise.all(dto.referencias.map(async referenciaDto => {
+        const referencia = this.referenciaPersonalRepository.create(referenciaDto);
+        await this.referenciaPersonalRepository.save(referencia);
+  
+        const refPerPers = this.refPerPersRepository.create({
+            persona: persona,
+            referenciaPersonal: referencia
+        });
+  
+        return this.refPerPersRepository.save(refPerPers);
+    }));
+    console.log(resultados);
+    return resultados;
+    
+  } catch (error) {
+    console.log(error);
+    
   }
-
-  const resultados = await Promise.all(dto.referencias.map(async referenciaDto => {
-      const referencia = this.referenciaPersonalRepository.create(referenciaDto);
-      await this.referenciaPersonalRepository.save(referencia);
-
-      const refPerPers = this.refPerPersRepository.create({
-          persona: persona,
-          referenciaPersonal: referencia
-      });
-
-      return this.refPerPersRepository.save(refPerPers);
-  }));
-
-  return resultados;
+  
 }
 
 async assignBancosToPersona(idPersona: number, bancosData: CreatePersonaBancoDTO[]): Promise<Net_Persona_Por_Banco[]> {
-  const persona = await this.personaRepository.findOne({ where: { id_persona: idPersona } });
-  if (!persona) {
-      throw new Error('Persona no encontrada');
+  try {
+    const persona = await this.personaRepository.findOne({ 
+      where: { id_persona: idPersona } }
+    );
+
+    if (!persona) {
+        throw new Error('Persona no encontrada');
+    }
+  
+    const asignaciones = [];
+    for (const bancoData of bancosData) {
+        const banco = await this.bancoRepository.findOne({ where: { id_banco: bancoData.idBanco } });
+        if (!banco) {
+            throw new Error(`Banco con ID ${bancoData.idBanco} no encontrado`);
+        }
+  
+        const personaBanco = new Net_Persona_Por_Banco();
+        personaBanco.persona = persona;
+        personaBanco.banco = banco;
+        personaBanco.num_cuenta = bancoData.numCuenta;
+        personaBanco.estado = bancoData.estado;
+  
+        asignaciones.push(await this.personaBancoRepository.save(personaBanco));
+    }
+    
+    return asignaciones;
+  } catch (error) {
+    console.log(error);
   }
-
-  const asignaciones = [];
-  for (const bancoData of bancosData) {
-      const banco = await this.bancoRepository.findOne({ where: { id_banco: bancoData.idBanco } });
-      if (!banco) {
-          throw new Error(`Banco con ID ${bancoData.idBanco} no encontrado`);
-      }
-
-      const personaBanco = new Net_Persona_Por_Banco();
-      personaBanco.persona = persona;
-      personaBanco.banco = banco;
-      personaBanco.num_cuenta = bancoData.numCuenta;
-      personaBanco.estado = bancoData.estado;
-
-      asignaciones.push(await this.personaBancoRepository.save(personaBanco));
-  }
-
-  return asignaciones;
 }
 
 async createBeneficiario(beneficiarioData: NetPersonaDTO): Promise<Net_Persona> {
@@ -422,14 +440,9 @@ async assignColegiosMagisteriales(idPersona: number, colegiosMagisterialesData: 
     }
   }
 
-  async findOne(term: number) {
+  async findOne(term: string) {
+    console.log(term);
     let personas: Net_Persona;
-    if (isUUID(term)) {
-      personas = await this.personaRepository.findOne({
-        where: { id_persona: term },
-        relations: ['detalleAfiliado'], // Asegúrate de cargar la relación
-      });
-    } else {
 
       const queryBuilder = this.personaRepository.createQueryBuilder('persona');
       personas = await queryBuilder
@@ -442,7 +455,6 @@ async assignColegiosMagisteriales(idPersona: number, colegiosMagisterialesData: 
         .addSelect('persona.SEGUNDO_APELLIDO', 'SEGUNDO_APELLIDO')
         .addSelect('persona.GENERO', 'GENERO')
         .addSelect('persona.CANTIDAD_DEPENDIENTES', 'CANTIDAD_DEPENDIENTES')
-        .addSelect('persona.CANTIDAD_HIJOS', 'CANTIDAD_HIJOS')
         .addSelect('persona.REPRESENTACION', 'REPRESENTACION')
         .addSelect('persona.DIRECCION_RESIDENCIA', 'DIRECCION_RESIDENCIA')
         .addSelect('persona.NUMERO_CARNET', 'NUMERO_CARNET')
@@ -463,11 +475,11 @@ async assignColegiosMagisteriales(idPersona: number, colegiosMagisterialesData: 
         .leftJoin('persona.pais', 'pais')// Join con la tabla detallepersonas
         .leftJoin('persona.tipoIdentificacion', 'tipoIdentificacion')// Join con la tabla detallepersonas
         .leftJoin('persona.profesion', 'profesion') // Join con la tabla detallepersonas
-        .leftJoin('detallepersona.tipoAfiliado', 'tipoafiliado') // Join con la tabla detallepersonas
-        .where('persona.dni = :term AND tipoafiliado.tipo_afiliado = :tipo_persona', { term, tipo_persona: "AFILIADO" })
+        .leftJoin('detallepersona.tipoPersona', 'tipoPersona') // Join con la tabla detallepersonas
+        .where('persona.dni = :term AND tipoPersona.tipo_persona = :tipo_persona', { term, tipo_persona: "AFILIADO" })
         .getRawOne();
 
-    }
+    
     if (!personas) {
       throw new NotFoundException(`Afiliado con ${term} no existe`);
     }
@@ -502,7 +514,7 @@ async assignColegiosMagisteriales(idPersona: number, colegiosMagisterialesData: 
         .innerJoin('persona.estadoPersona', 'estadoAfil')
         .leftJoin('persona.detallesPersona', 'detallepersona')// Join con la tabla detallepersonas
         .leftJoin('persona.profesion', 'profesion') // Join con la tabla detallepersonas
-        .leftJoin('detallepersona.tipoAfiliado', 'tipoafiliado') // Join con la tabla detallepersonas
+        .leftJoin('detallepersona.tipoPersona', 'tipoPersona') // Join con la tabla detallepersonas
         .where('persona.dni = :term', { term })
         .getRawOne();
       console.log(personas);
@@ -533,13 +545,13 @@ async assignColegiosMagisteriales(idPersona: number, colegiosMagisterialesData: 
       FULL OUTER JOIN
         NET_DETALLE_PERSONA "detA" ON "Afil"."ID_PERSONA" = "detA"."ID_PERSONA" 
       INNER JOIN
-      NET_TIPO_PERSONA "tipoP" ON "tipoP"."ID_TIPO_AFILIADO" = "detA"."ID_TIPO_PERSONA"
+      NET_TIPO_PERSONA "tipoP" ON "tipoP"."ID_TIPO_PERSONA" = "detA"."ID_TIPO_PERSONA"
       INNER JOIN
       NET_ESTADO_PERSONA "estadoPers" ON "Afil"."ID_ESTADO_PERSONA" = "estadoPers"."CODIGO"
     WHERE
       "Afil"."DNI" = '${dniAfil}' AND 
       "estadoPers"."DESCRIPCION" = 'FALLECIDO'  AND
-      "tipoP"."TIPO_AFILIADO" = 'AFILIADO'
+      "tipoP"."TIPO_PERSONA" = 'AFILIADO'
     `;
 
       const beneficios = await this.entityManager.query(query);
@@ -555,15 +567,15 @@ async assignColegiosMagisteriales(idPersona: number, colegiosMagisterialesData: 
         "Afil"."SEGUNDO_APELLIDO",
         "Afil"."GENERO",
         "detA"."PORCENTAJE",
-        "tipoP"."TIPO_AFILIADO"
+        "tipoP"."TIPO_PERSONA"
       FROM
           "NET_DETALLE_PERSONA" "detA" INNER JOIN 
           "NET_PERSONA" "Afil" ON "detA"."ID_PERSONA" = "Afil"."ID_PERSONA"
           INNER JOIN
-        NET_TIPO_PERSONA "tipoP" ON "tipoP"."ID_TIPO_AFILIADO" = "detA"."ID_TIPO_PERSONA"
+        NET_TIPO_PERSONA "tipoP" ON "tipoP"."ID_TIPO_PERSONA" = "detA"."ID_TIPO_PERSONA"
       WHERE 
           "detA"."ID_CAUSANTE_PADRE" = ${beneficios[0].ID_PERSONA} AND 
-          "tipoP"."TIPO_AFILIADO" = 'BENEFICIARIO' 
+          "tipoP"."TIPO_PERSONA" = 'BENEFICIARIO' 
         `;
       const beneficios2 = await this.entityManager.query(query1);
 
@@ -584,12 +596,12 @@ async assignColegiosMagisteriales(idPersona: number, colegiosMagisterialesData: 
       FULL OUTER JOIN
         NET_DETALLE_PERSONA "detA" ON "Afil"."ID_PERSONA" = "detA"."ID_PERSONA" 
       INNER JOIN
-      NET_TIPO_PERSONA "tipoP" ON "tipoP"."ID_TIPO_AFILIADO" = "detA"."ID_TIPO_PERSONA"
+      NET_TIPO_PERSONA "tipoP" ON "tipoP"."ID_TIPO_PERSONA" = "detA"."ID_TIPO_PERSONA"
       INNER JOIN
       NET_ESTADO_PERSONA "estadoPers" ON "Afil"."ID_ESTADO_PERSONA" = "estadoPers"."CODIGO"
     WHERE
       "Afil"."DNI" = '${dniAfil}' AND
-      "tipoP"."TIPO_AFILIADO" = 'AFILIADO'
+      "tipoP"."TIPO_PERSONA" = 'AFILIADO'
     `;
 
       const beneficios = await this.entityManager.query(query);
@@ -606,15 +618,15 @@ async assignColegiosMagisteriales(idPersona: number, colegiosMagisterialesData: 
         "Afil"."GENERO",
         "Afil"."FECHA_NACIMIENTO",
         "detA"."PORCENTAJE",
-        "tipoP"."TIPO_AFILIADO"
+        "tipoP"."TIPO_PERSONA"
       FROM
           "NET_DETALLE_PERSONA" "detA" INNER JOIN 
           "NET_PERSONA" "Afil" ON "detA"."ID_PERSONA" = "Afil"."ID_PERSONA"
           INNER JOIN
-        NET_TIPO_PERSONA "tipoP" ON "tipoP"."ID_TIPO_AFILIADO" = "detA"."ID_TIPO_PERSONA"
+        NET_TIPO_PERSONA "tipoP" ON "tipoP"."ID_TIPO_PERSONA" = "detA"."ID_TIPO_PERSONA"
       WHERE 
           "detA"."ID_CAUSANTE_PADRE" = ${beneficios[0].ID_PERSONA} AND 
-          "tipoP"."TIPO_AFILIADO" = 'BENEFICIARIO' 
+          "tipoP"."TIPO_PERSONA" = 'BENEFICIARIO' 
         `;
       const beneficios2 = await this.entityManager.query(query1);
 
@@ -631,7 +643,7 @@ async assignColegiosMagisteriales(idPersona: number, colegiosMagisterialesData: 
       const newPersona: PersonaResponse = {
         id_persona: el.ID_PERSONA,
         porcentaje: el.PORCENTAJE,
-        tipo_afiliado: el.TIPO_AFILIADO,
+        tipo_persona: el.TIPO_PERSONA,
         dni: el.DNI,
         estado_civil: el.ESTADO_CIVIL,
         primer_nombre: el.PRIMER_NOMBRE,

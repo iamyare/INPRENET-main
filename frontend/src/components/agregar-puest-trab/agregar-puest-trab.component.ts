@@ -1,10 +1,12 @@
 import { Component, Inject } from '@angular/core';
 import { FormArray, FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { MAT_DIALOG_DATA } from '@angular/material/dialog';
+import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { generateFormArchivo } from '@docs-components/botonarchivos/botonarchivos.component';
 import { generateDatBancFormGroup } from '@docs-components/dat-banc/dat-banc.component';
 import { generateAddressFormGroup } from '@docs-components/dat-generales-afiliado/dat-generales-afiliado.component';
+import { ToastrService } from 'ngx-toastr';
 import { AfiliadoService } from 'src/app/services/afiliado.service';
+import { convertirFechaInputs } from 'src/app/shared/functions/formatoFecha';
 
 @Component({
   selector: 'app-agregar-puest-trab',
@@ -20,6 +22,8 @@ export class AgregarPuestTrabComponent {
     });
 
     constructor(private fb: FormBuilder, private afilService: AfiliadoService,
+      private toastr: ToastrService,
+      private dialogRef: MatDialogRef<AgregarPuestTrabComponent>, 
       @Inject(MAT_DIALOG_DATA) public data: { idPersona: string  }
     ) { }
     ngOnInit(): void { }
@@ -29,8 +33,35 @@ export class AgregarPuestTrabComponent {
     }
 
     guardar(){
-      console.log(this.formPuestTrab.value.refpers);
-      console.log(this.data);
+      const datosParseados = this.formPuestTrab.value.refpers.map((dato:any) => {
+        const fechaIngresoFormateada = convertirFechaInputs(dato.fechaIngreso.toISOString());
+        const fechaEgresoFormateada = convertirFechaInputs(dato.fechaEgreso.toISOString());
+    
+       return {
+            ...dato,
+            fechaIngreso: fechaIngresoFormateada,
+            fechaEgreso: fechaEgresoFormateada
+        };
+        
+    });
+
+      this.afilService.createCentrosTrabajo(this.data.idPersona, datosParseados).subscribe(
+        (res: any) => {
+          if (res.length>0) {
+            this.formPuestTrab.reset();
+            this.toastr.success("Centro de trabajo agregado con éxito");
+            this.cerrar();
+          }
+        },
+        (error) => {
+          this.toastr.error(error);
+          console.error('Error al obtener afiliados', error);
+        }
+      );
       
+    }
+
+    cerrar() {
+      this.dialogRef.close();
     }
 }

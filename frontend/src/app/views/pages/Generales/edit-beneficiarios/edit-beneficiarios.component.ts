@@ -8,6 +8,7 @@ import { ToastrService } from 'ngx-toastr';
 import { AfiliadoService } from 'src/app/services/afiliado.service';
 import { FieldConfig } from 'src/app/shared/Interfaces/field-config';
 import { TableColumn } from 'src/app/shared/Interfaces/table-column';
+import { convertirFechaInputs } from 'src/app/shared/functions/formatoFecha';
 import { unirNombres } from 'src/app/shared/functions/formatoNombresP';
 
 @Component({
@@ -16,6 +17,7 @@ import { unirNombres } from 'src/app/shared/functions/formatoNombresP';
   styleUrl: './edit-beneficiarios.component.scss'
 })
 export class EditBeneficiariosComponent {
+  convertirFechaInputs = convertirFechaInputs
   public myFormFields: FieldConfig[] = []
   form: any;
   Afiliado!: any;
@@ -203,9 +205,7 @@ export class EditBeneficiariosComponent {
     });
 
     dialogRef.afterClosed().subscribe((result: any) => {
-      if (result) {
-        
-      }
+      this.ngOnInit();
     });
   }
 

@@ -1,6 +1,7 @@
 import { Component, Inject } from '@angular/core';
 import { FormArray, FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { MAT_DIALOG_DATA } from '@angular/material/dialog';
+import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
+import { ToastrService } from 'ngx-toastr';
 import { AfiliadoService } from 'src/app/services/afiliado.service';
 
 @Component({
@@ -15,9 +16,14 @@ export class AgregarBenefCompComponent {
     {
       refpers: new FormArray([], [Validators.required])
     });
-  constructor(private fb: FormBuilder, private afilService: AfiliadoService,
-    @Inject(MAT_DIALOG_DATA) public data: { idPersona: string }
-  ) { }
+  constructor(
+    private fb: FormBuilder, 
+    private afilService: AfiliadoService,
+    @Inject(MAT_DIALOG_DATA) public data: { idPersona: string },
+    private dialogRef: MatDialogRef<AgregarBenefCompComponent>, 
+    private toastr: ToastrService,
+  ) {}
+  
   ngOnInit(): void { }
 
   setDatosBen(DatosBancBen: any) {
@@ -25,7 +31,31 @@ export class AgregarBenefCompComponent {
   }
 
   guardar(){
-    console.log(this.formBeneficiarios.value.refpers);
-    console.log(this.data);
+    this.formBeneficiarios.value.refpers = this.formBeneficiarios.value.refpers.map((item:any) => ({
+      ...item,
+      porcentaje: item.porcentaje.porcBenef,
+    }));
+
+    const dataBeneficiarios = {
+      beneficiarios: this.formBeneficiarios.value.refpers
+    }
+
+    this.afilService.createBeneficiarios(this.data.idPersona, dataBeneficiarios).subscribe(
+      (res: any) => {
+        if (res.length>0) {
+          this.formBeneficiarios.reset();
+          this.toastr.success("Dato Bancario agregado con éxito");
+          this.cerrar();
+        }
+      },
+      (error) => {
+        this.toastr.error(error);
+        console.error('Error al obtener afiliados', error);
+      }
+      );
+  }
+
+  cerrar() {
+    this.dialogRef.close();
   }
 }

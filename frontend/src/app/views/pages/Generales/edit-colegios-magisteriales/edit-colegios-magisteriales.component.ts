@@ -184,9 +184,7 @@ export class EditColegiosMagisterialesComponent {
     });
 
     dialogRef.afterClosed().subscribe((result: any) => {
-      if (result) {
-        
-      }
+      this.ngOnInit();
     });
   }
 

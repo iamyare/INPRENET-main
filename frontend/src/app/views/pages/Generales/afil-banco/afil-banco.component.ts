@@ -29,7 +29,7 @@ export class AfilBancoComponent implements OnInit {
   DatosGenerales: boolean = true; DatosBacAfil: boolean = false;
   Archivos: boolean = false; DatosPuestoTrab: boolean = false;
   DatosHS: boolean = false; referenc: boolean = false;
-  benfGroup: boolean = false; datosF: boolean = false;
+  datosBeneficiario: boolean = false; datosF: boolean = false;
   ColegiosMagisteriales: boolean = false;
   datosA = false
 
@@ -74,7 +74,7 @@ export class AfilBancoComponent implements OnInit {
     this.DatosPuestoTrab = false
     this.DatosHS = false
     this.referenc = false
-    this.benfGroup = false
+    this.datosBeneficiario = false
     this.datosF = false
     this.datosA = false
     
@@ -86,7 +86,7 @@ export class AfilBancoComponent implements OnInit {
     this.DatosPuestoTrab = true
     this.DatosHS = false
     this.referenc = false
-    this.benfGroup = false
+    this.datosBeneficiario = false
     this.datosF = false
     this.datosA = false
     
@@ -98,7 +98,7 @@ export class AfilBancoComponent implements OnInit {
     this.DatosPuestoTrab = false
     this.DatosHS = true
     this.referenc = false
-    this.benfGroup = false
+    this.datosBeneficiario = false
     this.datosF = false
     this.datosA = false
     
@@ -110,7 +110,7 @@ export class AfilBancoComponent implements OnInit {
     this.DatosPuestoTrab = false
     this.DatosHS = false
     this.referenc = true
-    this.benfGroup = false
+    this.datosBeneficiario = false
     this.datosF = false
     this.datosA = false
     
@@ -122,7 +122,7 @@ export class AfilBancoComponent implements OnInit {
     this.DatosPuestoTrab = false
     this.DatosHS = false
     this.referenc = false
-    this.benfGroup = true
+    this.datosBeneficiario = true
     this.datosF = false
     this.datosA = false
     
@@ -134,7 +134,7 @@ export class AfilBancoComponent implements OnInit {
     this.DatosPuestoTrab = false
     this.DatosHS = false
     this.referenc = false
-    this.benfGroup = false
+    this.datosBeneficiario = false
     this.datosF = true
     this.datosA = false
     
@@ -146,7 +146,7 @@ export class AfilBancoComponent implements OnInit {
     this.DatosPuestoTrab = false
     this.DatosHS = false
     this.referenc = false
-    this.benfGroup = false
+    this.datosBeneficiario = false
     this.datosF = false
     this.datosA = true
     
@@ -158,7 +158,7 @@ export class AfilBancoComponent implements OnInit {
     this.DatosPuestoTrab = false
     this.DatosHS = false
     this.referenc = false
-    this.benfGroup = false
+    this.datosBeneficiario = false
     this.datosF = false
     this.datosA = false
     this.ColegiosMagisteriales = true
@@ -192,7 +192,7 @@ export class AfilBancoComponent implements OnInit {
      } */
     if (this.DatosBancBen.length >= 1) {
       for (let i = 0; i < this.DatosBancBen.length; i++) {
-        this.DatosBancBen[i].benfGroup.fechaNacimiento = formatoFechaResol(this.DatosBancBen[i].benfGroup.fechaNacimiento);
+        this.DatosBancBen[i].datosBeneficiario.fechaNacimiento = formatoFechaResol(this.DatosBancBen[i].datosBeneficiario.fechaNacimiento);
       }
     }
 

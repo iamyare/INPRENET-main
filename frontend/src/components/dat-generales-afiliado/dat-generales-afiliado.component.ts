@@ -14,7 +14,7 @@ export function generateAddressFormGroup(datos?: any): FormGroup {
     segundo_apellido: new FormControl(datos?.segundo_apellido),
     fecha_nacimiento: new FormControl(datos?.fecha_nacimiento, Validators.required),
     cantidad_dependientes: new FormControl(datos?.cantidad_dependientes, [Validators.pattern("^[0-9]+$"), Validators.required]),
-    cantidad_hijos: new FormControl(datos?.cantidad_hijos, [Validators.required, Validators.pattern("^[0-9]+$")]),
+/*     cantidad_hijos: new FormControl(datos?.cantidad_hijos, [Validators.required, Validators.pattern("^[0-9]+$")]), */
     estado_civil: new FormControl(datos?.estado_civil, Validators.required),
     representacion: new FormControl(datos?.representacion, Validators.required),
     telefono_1: new FormControl(datos?.telefono_1, Validators.required),
@@ -29,7 +29,7 @@ export function generateAddressFormGroup(datos?: any): FormGroup {
     id_municipio_residencia: new FormControl(datos?.id_municipio_residencia, Validators.required),
     
     id_tipo_identificacion: new FormControl(datos?.id_tipo_identificacion, Validators.required),
-    nacionalidad: new FormControl(datos?.nacionalidad, Validators.required),
+    id_pais_nacionalidad: new FormControl(datos?.id_pais_nacionalidad, Validators.required),
 
   });
 }

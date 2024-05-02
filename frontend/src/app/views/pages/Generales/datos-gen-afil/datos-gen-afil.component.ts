@@ -16,7 +16,7 @@ export class DatosGenAfilComponent implements OnInit {
   form = this.fb.group({
     DatosGenerales: generateAddressFormGroup(),
     DatosBacAfil: generateDatBancFormGroup(),
-    benfGroup: generateAddressFormGroup(),
+    datosBeneficiario: generateAddressFormGroup(),
   });
 
   @ViewChild(MatPaginator) matPaginator: MatPaginator | undefined;

@@ -117,7 +117,7 @@ async createPersona(createPersonaDto: NetPersonaDTO): Promise<Net_Persona> {
         throw new Error(`Municipio con ID ${createPersonaDto.id_municipio_residencia} no encontrado`);
     }
 
-    persona.estadoPersona = await this.estadoPersonaRepository.findOne({ where: { codigo: createPersonaDto.id_estado_persona } });
+    persona.estadoPersona = await this.estadoPersonaRepository.findOne({ where: { Descripcion: "ACTIVO" } });
     if (!persona.estadoPersona) {
         throw new Error(`Estado con código ${createPersonaDto.id_estado_persona} no encontrado`);
     }
@@ -301,26 +301,30 @@ async createDetalleBeneficiario(detalleDto: CreateDetalleBeneficiarioDto): Promi
 }
 
 async assignColegiosMagisteriales(idPersona: number, colegiosMagisterialesData: any[]): Promise<Net_Persona_Colegios[]> {
-  const persona = await this.personaRepository.findOne({ where: { id_persona: idPersona } });
-  if (!persona) {
-    throw new Error('Persona no encontrada');
-  }
-
-  const asignaciones = [];
-  for (const colegioData of colegiosMagisterialesData) {
-    const colegio = await this.netColegiosMagisterialesRepository.findOne({ where: { idColegio: colegioData.idColegio } });
-    if (!colegio) {
-      throw new Error(`Colegio magisterial con ID ${colegioData.idColegio} no encontrado`);
+  try {
+    const persona = await this.personaRepository.findOne({ where: { id_persona: idPersona } });
+    if (!persona) {
+      throw new Error('Persona no encontrada');
     }
-
-    const nuevoPersonaColegio = new Net_Persona_Colegios();
-    nuevoPersonaColegio.persona = persona;
-    nuevoPersonaColegio.colegio = colegio;
-
-    asignaciones.push(await this.netPersonaColegiosRepository.save(nuevoPersonaColegio));
+  
+    const asignaciones = [];
+    for (const colegioData of colegiosMagisterialesData) {
+      const colegio = await this.netColegiosMagisterialesRepository.findOne({ where: { idColegio: colegioData.idColegio } });
+      if (!colegio) {
+        throw new Error(`Colegio magisterial con ID ${colegioData.idColegio} no encontrado`);
+      }
+  
+      const nuevoPersonaColegio = new Net_Persona_Colegios();
+      nuevoPersonaColegio.persona = persona;
+      nuevoPersonaColegio.colegio = colegio;
+  
+      asignaciones.push(await this.netPersonaColegiosRepository.save(nuevoPersonaColegio));
+    }
+    return asignaciones;
+  } catch (error) {
+    console.log(error);
+    
   }
-
-  return asignaciones;
 }
   async updateSalarioBase(dni: string, idCentroTrabajo: number, salarioBase: number): Promise<void> {
 
@@ -441,7 +445,6 @@ async assignColegiosMagisteriales(idPersona: number, colegiosMagisterialesData: 
   }
 
   async findOne(term: string) {
-    console.log(term);
     let personas: Net_Persona;
 
       const queryBuilder = this.personaRepository.createQueryBuilder('persona');

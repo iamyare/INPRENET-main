@@ -72,18 +72,18 @@
             <input matInput type="number" formControlName="cantidad_dependientes">
           </mat-form-field>
         </div>
-        <div class="col-md-3 col-sm-6">
+        <!-- <div class="col-md-3 col-sm-6">
           <mat-form-field class="example-full-width inputs" appearance="outline">
             <mat-label>Cantidad De Hijos</mat-label>
             <input matInput type="number" formControlName="cantidad_hijos">
           </mat-form-field>
-        </div>
+        </div> -->
       </div>
       <div class="row">
         <div class="col-md-4 col-sm-6">
           <mat-form-field class="example-full-width inputs" appearance="outline">
             <mat-label>Nacionalidad</mat-label>
-            <mat-select formControlName="nacionalidad">
+            <mat-select formControlName="id_pais_nacionalidad">
               <mat-option *ngFor="let nacionalidad of nacionalidades" [value]="nacionalidad.id_pais">
                 {{ nacionalidad.nacionalidad }}
               </mat-option>
@@ -124,7 +124,7 @@
           <mat-form-field class="example-full-width inputs" appearance="outline">
             <mat-label>Profesión</mat-label>
             <mat-select formControlName="id_profesion">
-              <mat-option *ngFor="let profesion of profesiones" [value]="profesion.value">
+              <mat-option *ngFor="let profesion of profesiones" [value]="profesion.label">
                 {{ profesion.value }}
               </mat-option>
             </mat-select>

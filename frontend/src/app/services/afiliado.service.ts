@@ -36,10 +36,10 @@ export class AfiliadoService {
     return this.http.post<any>(url, encapsulatedData);
   }
 
-/*   createBeneficiarios(idPersona:string, encapsulatedData: any): Observable<any> {
-    const url = `${environment.API_URL}/api/Persona/createBeneficiarios`;
+  createBeneficiarios(idPersona:string, encapsulatedData: any): Observable<any> {
+    const url = `${environment.API_URL}/api/Persona/createBeneficiarios/${idPersona}`;
     return this.http.post<any>(url, encapsulatedData);
-  } */
+  }
 
   buscarMovimientosPorDNI(dni: string): Observable<any> {
     const url = `${environment.API_URL}/api/Persona/movimientos/${dni}`;

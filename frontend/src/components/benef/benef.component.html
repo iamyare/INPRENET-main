@@ -6,12 +6,12 @@
 
   <form [formGroup]="formParent" (change)="onDatosBenChange()">
     <div formArrayName="refpers">
-      <div *ngFor="let skill of getCtrl('refpers', formParent).controls; index as formChild; let i = index" >
+      <div *ngFor="let skill of getCtrl('refpers', formParent).controls; index as formChild; let i = index">
         <h4 class="card-title" style="margin: 16px;">Beneficiario Número: {{i+1}}</h4>
-        
+
         <div [formGroupName]="formChild" class="row">
           <!-- componente aparte de datos generales -->
-          <app-dat-generales-afiliado groupName="benfGroup"
+          <app-dat-generales-afiliado groupName="datosBeneficiario"
             (newDatBenChange)="prueba($event, i); onDatosBenChange()"></app-dat-generales-afiliado>
 
           <!-- componente aparte de datos bancarios -->
@@ -21,9 +21,9 @@
           <!-- <app-botonarchivos groupName="Archivos" [labelBoton]="getLabel('refpers', formParent, i)"
             (setArchivo)="handleArchivoSeleccionado($event, i)">
           </app-botonarchivos> -->
-          
+
           <!-- componente aparte de Beneficio -->
-          <app-beneficio groupName="porcBenef" style="margin: 16px;"></app-beneficio>
+          <app-beneficio groupName="porcentaje" style="margin: 16px;"></app-beneficio>
         </div>
 
       </div>
@@ -32,10 +32,12 @@
 
   <div class="row" style="text-align: center;  margin: 1%;">
     <div class="col-md-6">
-      <button mat-button color="primary" (click)="agregarBen()"><mat-icon matSuffix>exposure_plus_1</mat-icon>Agregar Beneficiario</button>
+      <button mat-button color="primary" (click)="agregarBen()"><mat-icon matSuffix>exposure_plus_1</mat-icon>Agregar
+        Beneficiario</button>
     </div>
     <div class="col-md-6">
-      <button mat-button color="warn" (click)="eliminarRefPer()"><mat-icon matSuffix>exposure_neg_1</mat-icon>Eliminar Beneficiario</button>
+      <button mat-button color="warn" (click)="eliminarRefPer()"><mat-icon matSuffix>exposure_neg_1</mat-icon>Eliminar
+        Beneficiario</button>
     </div>
   </div>
 </div>

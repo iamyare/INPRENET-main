@@ -45,13 +45,13 @@ export class BenefComponent {
     });
   }
   
-  initFormRefPers(benfGroup?:any, DatosBac?:any, Archivos?:File, labelArch?:any, porcBenef?:any): FormGroup {
+  initFormRefPers(datosBeneficiario?:any, DatosBac?:any, Archivos?:File, labelArch?:any, porcentaje?:any): FormGroup {
     
     const a:any = this.fb.group({
       refpers: new FormControl(''),
-      benfGroup: generateAddressFormGroup(benfGroup),
+      datosBeneficiario: generateAddressFormGroup(datosBeneficiario),
+      porcentaje: generateBenefFormGroup(porcentaje),
       DatosBac: generateDatBancFormGroup(DatosBac),
-      porcBenef: generateBenefFormGroup(porcBenef),
       Archivos: generateFormArchivo(labelArch),
       Arch: Archivos,
     });
@@ -60,9 +60,9 @@ export class BenefComponent {
 
   agregarBen(datos?:any): void {
     const ref_RefPers = this.formParent.get('refpers') as FormArray
-    if (datos?.benfGroup || datos?.DatosBac || datos?.archIdent || datos?.porcBenef){
+    if (datos?.datosBeneficiario || datos?.DatosBac || datos?.archIdent || datos?.porcentaje){
       this.labelbutton = datos?.Arch?.name
-      ref_RefPers.push(this.initFormRefPers(datos.benfGroup, datos.DatosBac, datos?.Arch, datos?.Arch.name, datos.porcBenef))
+      ref_RefPers.push(this.initFormRefPers(datos.datosBeneficiario, datos.DatosBac, datos?.Arch, datos?.Arch.name, datos.porcentaje))
     }else {
       this.labelbutton = "Archivo de identificación (beneficiario)"
       ref_RefPers.push(this.initFormRefPers())
@@ -100,6 +100,6 @@ export class BenefComponent {
   }
 
   prueba(e: any, i: any) {
-    this.formParent.value.refpers[i].benfGroup.fechaNacimiento = e
+    this.formParent.value.refpers[i].datosBeneficiario.fechaNacimiento = e
   }
 }

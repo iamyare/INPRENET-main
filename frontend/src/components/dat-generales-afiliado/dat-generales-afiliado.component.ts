@@ -30,7 +30,7 @@ export function generateAddressFormGroup(datos?: any): FormGroup {
     id_municipio_residencia: new FormControl(datos?.id_municipio_residencia, Validators.required),
 
     id_tipo_identificacion: new FormControl(datos?.id_tipo_identificacion, Validators.required),
-    id_pais_nacionalidad: new FormControl(datos?.id_pais_nacionalidad, Validators.required),
+    id_pais_nacionalidad: new FormControl(datos?.ID_PAIS, Validators.required),
 
   });
 }
@@ -117,8 +117,8 @@ export class DatGeneralesAfiliadoComponent implements OnInit, OnDestroy {
     });
   }
 
-  async cargarNacionalidades() {
-   await this.datosEstaticos.getNacionalidad().then(data => {
+  cargarNacionalidades() {
+   this.datosEstaticos.getNacionalidad().then(data => {
     this.nacionalidades = data;
     }).catch(error => {
       console.error('Error al cargar nacionalidades:', error);
@@ -128,7 +128,6 @@ export class DatGeneralesAfiliadoComponent implements OnInit, OnDestroy {
   async cargarMunicipios() {
     await this.direccionSer.getAllMunicipios().subscribe({
       next: (data) => {
-
         this.municipios = data;
       },
       error: (error) => {

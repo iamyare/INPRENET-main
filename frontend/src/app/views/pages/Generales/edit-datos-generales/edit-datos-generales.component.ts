@@ -7,6 +7,7 @@ import { ToastrService } from 'ngx-toastr';
 import { AfiliadoService } from 'src/app/services/afiliado.service';
 import { FieldConfig } from 'src/app/shared/Interfaces/field-config';
 import { TableColumn } from 'src/app/shared/Interfaces/table-column';
+import { convertirFechaInputs } from 'src/app/shared/functions/formatoFecha';
 import { unirNombres } from 'src/app/shared/functions/formatoNombresP';
 
 @Component({
@@ -68,7 +69,7 @@ export class EditDatosGeneralesComponent {
       },
       {
         header: 'Actividad Económica',
-        col: 'actividad_economica',
+        col: 'nacionalidad',
         isEditable: true
       },
       {
@@ -128,7 +129,7 @@ export class EditDatosGeneralesComponent {
               id_profesion: [result.DESCRIPCION],
               
               id_municipio_residencia: [result.ID_MUNICIPIO],
-              nacionalidad: [result.ID_PAIS],
+              id_pais_nacionalidad: [result.ID_PAIS],
               id_tipo_identificacion: [result.ID_IDENTIFICACION],
             })
           });
@@ -173,7 +174,17 @@ export class EditDatosGeneralesComponent {
   }
 
   GuardarInformacion(){
-    
-  }
-
+    this.form1.value.DatosGenerales.fecha_nacimiento = convertirFechaInputs(this.form1.value.DatosGenerales.fecha_nacimiento)
+    console.log(this.form1.value.DatosGenerales);
+    this.svcAfiliado.updateDatosGenerales(this.Afiliado.ID_PERSONA, this.form1.value.DatosGenerales).subscribe(
+      async (result) => {
+        this.toastr.success(`Datos modificados correctamente`);
+        /* this.resetDatos(); */
+      },
+      (error) => {
+        /* this.resetDatos(); */
+        this.getFilas().then(() => this.cargar());
+        this.toastr.error(`Error: ${error.error.message}`);
+      })
+  } 
 }

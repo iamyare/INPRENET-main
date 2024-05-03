@@ -156,7 +156,7 @@ export class AfiliadoController {
   }
   @Post('/createColegiosMagisteriales/:idPersona')
   createColegiosMagisteriales(@Param("idPersona") idPersona:number, @Body() colegiosMagisterialesData: any) {
-    return this.afiliadoService.assignColegiosMagisteriales(idPersona,colegiosMagisterialesData);
+    return this.afiliadoService.assignColegiosMagisteriales(idPersona, colegiosMagisterialesData);
   }
   @Post('/createCentrosTrabajo/:idPersona')
   createCentrosTrabajo(@Param("idPersona") idPersona:number, @Body() centrosTrabajoData: any) {
@@ -262,22 +262,43 @@ export class AfiliadoController {
     }
   }
   
-  @Put('/updateReferenciaPerson/:id')
+  @Put('/updateReferenciaPerson/:idPersonaRef')
   updateReferenciaPerson(
-    @Param('id') id: string,
+    @Param('idPersonaRef') idPersonaRef: Number,
     @Body() referPersData: any,
-  ) {
-    
-    
-    return this.afiliadoService.updateReferenciaPerson(id, referPersData);
+  ) {  
+    return this.afiliadoService.updateReferenciaPerson(idPersonaRef, referPersData);
   }
 
-  @Put('/updatePerfCentroTrabajo/:id')
+  @Put('/updateDatosGenerales/:idPersona')
+  updateDatosGenerales(
+    @Param('idPersona') idPersona: number,
+    @Body() datosGenerales: any,
+  ) {  
+    return this.afiliadoService.updateDatosGenerales(idPersona, datosGenerales);
+  }
+
+  @Put('/updatePerfCentroTrabajo/:idPerf')
   updatePerfCentroTrabajo(
-    @Param('id') id: string,
+    @Param('idPerf') idPerf: string,
     @Body() PerfCentTrabData: any,
   ) {
-    return this.afiliadoService.updatePerfCentroTrabajo(id, PerfCentTrabData);
+    return this.afiliadoService.updatePerfCentroTrabajo(idPerf, PerfCentTrabData);
+  }
+
+  @Put('/updateDatosBancarios/:idPerf')
+  updateDatosBancarios(
+    @Param('idPerf') idPerf: string,
+    @Body() datosBancarios: any,
+  ) {
+    return this.afiliadoService.updateDatosBancarios(idPerf, datosBancarios);
+  }
+  @Put('/updateColegiosMagist/:idPerf')
+  updateColegiosMagist(
+    @Param('idPerf') idPerf: string,
+    @Body() datosColegioMagist: any,
+  ) {
+    return this.afiliadoService.updateColegiosMagist(idPerf, datosColegioMagist);
   }
 
   @Get('/dni/:dni')
@@ -286,15 +307,12 @@ export class AfiliadoController {
   }
 
   @Get(':term')
-  
-  findOnePersona(@Param('term') term: number) {
+  findOnePersona(@Param('term') term: string) {
     return this.afiliadoService.findOnePersona(term);
   }
 
   @Get('Afiliado/:term')
   findOne(@Param('term') term: string) {
-    console.log(term);
-    
     return this.afiliadoService.findOne(term);
   }
   @Get('/getAllPersonaPBanco/:dni')

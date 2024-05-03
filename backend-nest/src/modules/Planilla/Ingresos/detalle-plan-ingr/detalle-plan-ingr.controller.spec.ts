@@ -7,8 +7,6 @@ describe('DetallePlanIngrController', () => {
 
   const mockDetPlanIngServ = {
     buscarPorMesAct: jest.fn((dto) => {
-      console.log(dto);
-
       return {
       }
     })
@@ -32,8 +30,6 @@ describe('DetallePlanIngrController', () => {
 
   it('should buscarPorMesYDni', async () => {
     const result = await controller.buscarPorMesYDni(6);
-    console.log(result);
-
     expect(result).toEqual(
       {}
     );

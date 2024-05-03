@@ -29,15 +29,16 @@ export class AgregarBenefCompComponent {
   setDatosBen(DatosBancBen: any) {
     this.formBeneficiarios = DatosBancBen
   }
-
+/* CAMBIAR BENEFICIARIOS */
   guardar(){
-    this.formBeneficiarios.value.refpers = this.formBeneficiarios.value.refpers.map((item:any) => ({
+    this.formBeneficiarios.value.beneficiario = this.formBeneficiarios.value.beneficiario.map((item:any) => ({
       ...item,
       porcentaje: item.porcentaje.porcBenef,
     }));
 
+    /* CAMBIAR BENEFICIARIOS */
     const dataBeneficiarios = {
-      beneficiarios: this.formBeneficiarios.value.refpers
+      beneficiarios: this.formBeneficiarios.value.beneficiario
     }
 
     this.afilService.createBeneficiarios(this.data.idPersona, dataBeneficiarios).subscribe(

@@ -37,8 +37,6 @@ export class CentroTrabajoComponent implements OnInit {
       (res: any) => {
         if (res.ok) {
           this.informacion = res.centroTrabajo;
-          console.log(this.informacion);
-
         }
       },
       (error) => {

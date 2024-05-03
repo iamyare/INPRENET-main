@@ -24,6 +24,8 @@ export class EditDatosBancariosComponent {
   unirNombres: any = unirNombres;
   datosTabl: any[] = [];
 
+  prevAfil:boolean = false;
+
   public myColumns: TableColumn[] = [];
   public filas: any[] = [];
   ejecF: any;
@@ -65,6 +67,7 @@ export class EditDatosBancariosComponent {
 
       this.svcAfiliado.getAllPersonas(this.form.value.dni).subscribe(
         async (result) => {
+          this.prevAfil = true;
           this.Afiliado = result
           this.Afiliado.nameAfil = this.unirNombres(result.PRIMER_NOMBRE, result.SEGUNDO_NOMBRE, result.TERCER_NOMBRE, result.PRIMER_APELLIDO, result.SEGUNDO_APELLIDO);
           this.getFilas().then(() => this.cargar());
@@ -104,7 +107,7 @@ export class EditDatosBancariosComponent {
   
   }
 
-  editar = (row: any) => {
+/*   editar = (row: any) => {
     const datosBancarios = {
         nombre_banco: row.nombre_banco,
         numero_cuenta: row.numero_cuenta
@@ -118,7 +121,7 @@ export class EditDatosBancariosComponent {
         this.toastr.error('Error al actualizar el perfil de la persona en el centro de trabajo');
       }
     );
-  };
+  }; */
 
   ejecutarFuncionAsincronaDesdeOtroComponente(funcion: (data: any) => Promise<void>) {
     this.ejecF = funcion;
@@ -201,10 +204,14 @@ export class EditDatosBancariosComponent {
     });
 
 
-    dialogRef.afterClosed().subscribe((result: any) => {
-      if (result) {
-        console.log('Datos editados:', result);
-      }
+    dialogRef.afterClosed().subscribe(async (result: any) => {
+      this.svcAfiliado.updateDatosBancarios(row.id, result).subscribe(
+        async (result) => {
+          
+        },
+        (error) => {
+      })
+    
     });
   }
 }

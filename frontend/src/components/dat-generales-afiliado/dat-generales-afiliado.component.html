@@ -84,8 +84,8 @@
           <mat-form-field class="example-full-width inputs" appearance="outline">
             <mat-label>Nacionalidad</mat-label>
             <mat-select formControlName="id_pais_nacionalidad">
-              <mat-option *ngFor="let nacionalidad of nacionalidades" [value]="nacionalidad.id_pais">
-                {{ nacionalidad.nacionalidad }}
+              <mat-option *ngFor="let nac of nacionalidades" [value]="nac.id_pais">
+                {{ nac.nacionalidad }}
               </mat-option>
             </mat-select>
           </mat-form-field>
@@ -124,7 +124,7 @@
           <mat-form-field class="example-full-width inputs" appearance="outline">
             <mat-label>Profesión</mat-label>
             <mat-select formControlName="id_profesion">
-              <mat-option *ngFor="let profesion of profesiones" [value]="profesion.label">
+              <mat-option *ngFor="let profesion of profesiones" [value]="profesion.value">
                 {{ profesion.value }}
               </mat-option>
             </mat-select>

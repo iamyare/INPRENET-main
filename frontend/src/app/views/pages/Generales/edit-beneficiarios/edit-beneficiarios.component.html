@@ -8,8 +8,8 @@
         Previsualizar información del afiliado
       </button>
     </div>
-    <div class="col-md-6">
-      <button mat-raised-button color="primary" style="color: white; margin: 1% 0 1% 0" [disabled]="form.invalid"
+    <div class="col-md-6" *ngIf="prevAfil">
+      <button mat-raised-button color="primary" style="color: white; margin: 1% 0 1% 0" [disabled]="form.invalid "
         (click)="AgregarBeneficiario()">
         Agregar Beneficiario
       </button>

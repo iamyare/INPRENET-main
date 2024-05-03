@@ -110,8 +110,6 @@ async actualizarDetallesPlanilla(
   async buscarPorMesYDni(@Query('idCentroTrabajo') idCentroTrabajo: number) {
     try {
       const persona = await this.planillaIngresoService?.buscarUltimaPlanCarg(idCentroTrabajo);
-      console.log(persona);
-
       return persona;
 
     } catch (error) {

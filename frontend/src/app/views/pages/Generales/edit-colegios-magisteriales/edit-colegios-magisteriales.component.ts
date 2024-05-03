@@ -24,6 +24,8 @@ export class EditColegiosMagisterialesComponent {
   unirNombres: any = unirNombres;
   datosTabl: any[] = [];
 
+  prevAfil:boolean = false;
+
   public myColumns: TableColumn[] = [];
   public filas: any[] = [];
   ejecF: any;
@@ -58,6 +60,7 @@ export class EditColegiosMagisterialesComponent {
     if (this.form.value.dni) {
       this.svcAfiliado.getAfilByParam(this.form.value.dni).subscribe(
         async (result) => {
+          this.prevAfil = true;
           this.Afiliado = result
           this.Afiliado.nameAfil = this.unirNombres(result.PRIMER_NOMBRE, result.SEGUNDO_NOMBRE, result.TERCER_NOMBRE, result.PRIMER_APELLIDO, result.SEGUNDO_APELLIDO);
           this.getFilas().then(() => this.cargar());
@@ -85,7 +88,7 @@ export class EditColegiosMagisterialesComponent {
         const data = await this.svcAfiliado.getAllColMagPPersona(this.Afiliado.DNI).toPromise();
         this.filas = data.map((item: any) => {
           return {
-            id_colegio: item.colegio.id_persona,
+            id_colegio: item.id,
             colegio_magisterial: item.colegio.descripcion
         }});
       } catch (error) {
@@ -97,7 +100,7 @@ export class EditColegiosMagisterialesComponent {
     }
   }
 
-  editar = (row: any) => {
+/*   editar = (row: any) => {
     const BeneficiariosData = {
       id: row.id_persona,
       dni: row.dni,
@@ -114,7 +117,7 @@ export class EditColegiosMagisterialesComponent {
         this.toastr.error('Error al actualizar el perfil de la persona en el centro de trabajo');
       }
     );
-  };
+  }; */
 
   ejecutarFuncionAsincronaDesdeOtroComponente(funcion: (data: any) => Promise<void>) {
     this.ejecF = funcion;
@@ -194,10 +197,14 @@ export class EditColegiosMagisterialesComponent {
       data: { campos: campos, valoresIniciales: row }
     });
 
-    dialogRef.afterClosed().subscribe((result: any) => {
-      if (result) {
-        console.log('Datos editados:', result);
-      }
+    dialogRef.afterClosed().subscribe(async (result: any) => {
+      this.svcAfiliado.updateColegiosMagist(row.id, result).subscribe(
+        async (result) => {
+          
+        },
+        (error) => {
+      })
+    
     });
   }
 }

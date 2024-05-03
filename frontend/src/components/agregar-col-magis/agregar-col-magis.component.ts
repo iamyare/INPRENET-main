@@ -15,7 +15,7 @@ export class AgregarColMagisComponent {
   form = this.fb.group({
   });
 
-  formHistPag: any = new FormGroup(
+  formColMag: any = new FormGroup(
     {
       refpers: new FormArray([], [Validators.required])
     });
@@ -30,17 +30,16 @@ export class AgregarColMagisComponent {
     ngOnInit(): void { }
 
     setHistSal(datosHistSal: any) {
-      this.formHistPag = datosHistSal
+      this.formColMag = datosHistSal
     }
 
     guardar(){
-      console.log(this.formHistPag.value.refpers);
-      console.log(this.data);
-
-      this.afilService.createColegiosMagisteriales(this.data.idPersona, this.formHistPag.value.refpers).subscribe(
+      console.log(this.formColMag);
+      
+      this.afilService.createColegiosMagisteriales(this.data.idPersona, this.formColMag.value.refpers).subscribe(
         (res: any) => {
           if (res.length>0) {
-            this.formHistPag.reset();
+            this.formColMag.reset();
             this.toastr.success("Colegio magisterial agregado con éxito");
             this.cerrar();
           }

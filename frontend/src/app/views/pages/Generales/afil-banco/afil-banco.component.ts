@@ -225,10 +225,8 @@ setHistSal(datosHistSal: any) {
         colegiosMagisteriales: this.formColegiosMagisteriales.value.ColMags
   };
 
-    console.log("Datos a enviar:", data);
-}
-
-
+    //console.log(data);
+  }
   handleArchivoSeleccionado(archivo: any) {
     this.form.get('Arch')?.setValue(archivo);
     /*     console.log(this.form);

@@ -10,9 +10,9 @@ export class Net_ReferenciaPersonal {
     @Column('varchar2', {
         length : 50,
         nullable : false,
-        name : 'NOMBRE'
+        name : 'NOMBRE_COMPLETO'
     })
-     nombre : string;
+     nombre_completo : string;
 
     @Column('varchar2', {
         length : 200,

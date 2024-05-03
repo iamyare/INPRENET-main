@@ -6,15 +6,15 @@
     (click)="previsualizarInfoAfil()">
     Previsualizar información del afiliado
   </button>
-</div>
 
-<div *ngIf="datos">
-  <form [formGroup]="form1" #myForm="ngForm" change="getLabel()">
-    <app-dat-generales-afiliado groupName="DatosGenerales"></app-dat-generales-afiliado>
-  </form>
+  <div *ngIf="datos">
+    <form [formGroup]="form1" #myForm="ngForm" change="getLabel()">
+      <app-dat-generales-afiliado groupName="DatosGenerales"></app-dat-generales-afiliado>
+    </form>
 
-  <button mat-raised-button color="primary" style="color: white; margin: 1% 0 1% 0" [disabled]="form1.invalid"
-    (click)="GuardarInformacion()">
-    Guardar
-  </button>
+    <button mat-raised-button color="primary" style="color: white; margin: 1% 0 1% 0" [disabled]="form1.invalid"
+      (click)="GuardarInformacion()">
+      Guardar
+    </button>
+  </div>
 </div>

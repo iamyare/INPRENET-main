@@ -61,8 +61,6 @@ export class PreRegisterComponent implements OnInit{
         nombre_empleado: this.form.value.nombrecomp,
         archivo_identificacion: this.archivo.name
       };
-      console.log(this.formData);
-
       this.authSvc.crearCuenta(this.formData).subscribe({
         next: (res) => {
           this.toastr.success('Cuenta creada exitosamente!', 'Éxito');

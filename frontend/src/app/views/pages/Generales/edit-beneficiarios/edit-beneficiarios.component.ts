@@ -24,6 +24,8 @@ export class EditBeneficiariosComponent {
   unirNombres: any = unirNombres;
   datosTabl: any[] = [];
 
+  prevAfil:boolean = false;
+
   public myColumns: TableColumn[] = [];
   public filas: any[] = [];
   ejecF: any;
@@ -52,7 +54,7 @@ export class EditBeneficiariosComponent {
           isEditable: true
         },
         {
-          header: 'GENERO',
+          header: 'Genero',
           col: 'genero',
           isEditable: true
         },
@@ -74,6 +76,7 @@ export class EditBeneficiariosComponent {
     if (this.form.value.dni) {
       this.svcAfiliado.getAfilByParam(this.form.value.dni).subscribe(
         async (result) => {
+          this.prevAfil = true;
           this.Afiliado = result
           this.Afiliado.nameAfil = this.unirNombres(result.PRIMER_NOMBRE, result.SEGUNDO_NOMBRE, result.TERCER_NOMBRE, result.PRIMER_APELLIDO, result.SEGUNDO_APELLIDO);
           this.getFilas().then(() => this.cargar());
@@ -103,7 +106,7 @@ export class EditBeneficiariosComponent {
             id: item.id_persona,
             dni: item.dni,
             nombre_completo: unirNombres(item.primer_nombre, item.segundo_nombre, item.tercer_nombre, item.primer_apellido, item.segundo_apellido),
-            fecha_nacimiento: item.fecha_nacimiento,
+            fecha_nacimiento: convertirFechaInputs(item.fecha_nacimiento),
             genero: item.genero,
         }});
       } catch (error) {
@@ -115,7 +118,7 @@ export class EditBeneficiariosComponent {
     }
   }
 
-  editar = (row: any) => {
+/*   editar = (row: any) => {
     const BeneficiariosData = {
       id: row.id_persona,
       dni: row.dni,
@@ -132,7 +135,7 @@ export class EditBeneficiariosComponent {
         this.toastr.error('Error al actualizar el perfil de la persona en el centro de trabajo');
       }
     );
-  };
+  }; */
 
   ejecutarFuncionAsincronaDesdeOtroComponente(funcion: (data: any) => Promise<void>) {
     this.ejecF = funcion;
@@ -148,7 +151,7 @@ export class EditBeneficiariosComponent {
   manejarAccionUno(row: any) {
     const campos = [
       { nombre: 'dni', tipo: 'text', requerido: true, etiqueta: 'Nombre Centro Trabajo', editable: true },
-      { nombre: 'genero', tipo: 'text', requerido: true, etiqueta: 'Número Acuerdo', editable: true },
+      { nombre: 'genero', tipo: 'text', requerido: true, etiqueta: 'genero', editable: true },
       { nombre: 'fecha_nacimiento', tipo: 'number', requerido: true, etiqueta: 'Fecha Nacimiento', editable: true }
     ];
 

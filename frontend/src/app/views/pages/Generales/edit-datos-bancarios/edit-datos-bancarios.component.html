@@ -10,7 +10,7 @@
       </button>
 
     </div>
-    <div class="col-md-6">
+    <div class="col-md-6" *ngIf="prevAfil">
       <button mat-raised-button color="primary" style="color: white; margin: 1% 0 1% 0" [disabled]="form.invalid"
         (click)="AgregarPuestoTrabajo()">
         Agregar Dato Bancario

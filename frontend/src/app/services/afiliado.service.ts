@@ -69,8 +69,12 @@ export class AfiliadoService {
     );
   }
 
-  updateReferenciaPersonal(id: string, referPersData: any): Observable<any> {
-    return this.http.put(`${environment.API_URL}/api/Persona/updateReferenciaPerson/${id}`, referPersData);
+  updateDatosGenerales(idPersona: string, datosGenerales: any): Observable<any> {
+    return this.http.put(`${environment.API_URL}/api/Persona/updateDatosGenerales/${idPersona}`, datosGenerales);
+  }
+
+  updateReferenciaPersonal(idPersonaRef: string, referPersData: any): Observable<any> {
+    return this.http.put(`${environment.API_URL}/api/Persona/updateReferenciaPerson/${idPersonaRef}`, referPersData);
   }
 
   getAllPerfCentroTrabajo(dni:string): Observable<any | void> {
@@ -85,8 +89,15 @@ export class AfiliadoService {
     );
   }
 
-  updatePerfCentroTrabajo(id: string, PerfCentTrabData: any): Observable<any> {
-    return this.http.put(`${environment.API_URL}/api/Persona/updatePerfCentroTrabajo/${id}`, PerfCentTrabData);
+  updatePerfCentroTrabajo(idPerf: string, PerfCentTrabData: any): Observable<any> {
+    return this.http.put(`${environment.API_URL}/api/Persona/updatePerfCentroTrabajo/${idPerf}`, PerfCentTrabData);
+  }
+
+  updateDatosBancarios(idPerf: string, datosBancarios: any): Observable<any> {
+    return this.http.put(`${environment.API_URL}/api/Persona/updateDatosBancarios/${idPerf}`, datosBancarios);
+  }
+  updateColegiosMagist(idPerf: string, datosColegioMagist: any): Observable<any> {
+    return this.http.put(`${environment.API_URL}/api/Persona/updateColegiosMagist/${idPerf}`, datosColegioMagist);
   }
 
   getAfiliadoDNI(param: string | number): Observable<any | void> {

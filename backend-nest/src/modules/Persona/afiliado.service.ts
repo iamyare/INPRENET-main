@@ -45,6 +45,7 @@ export class AfiliadoService {
     @InjectRepository(Net_Ref_Per_Pers)
     private refPerPersRepository: Repository<Net_Ref_Per_Pers>,
 
+    
     @InjectRepository(NET_DETALLE_PERSONA)
     private detallePersonaRepository: Repository<NET_DETALLE_PERSONA>,
 
@@ -414,7 +415,6 @@ async assignColegiosMagisteriales(idPersona: number, colegiosMagisterialesData: 
     }
   }
 
-
   findAll() {
     const afiliado = this.personaRepository.find()
     return afiliado;
@@ -489,11 +489,11 @@ async assignColegiosMagisteriales(idPersona: number, colegiosMagisterialesData: 
     return personas;
   }
 
-  async findOnePersona(term: number) {
+  async findOnePersona(term: string) {
     let personas: Net_Persona;
     if (isUUID(term)) {
       personas = await this.personaRepository.findOne({
-        where: { id_persona: term },
+        where: { dni: term },
         relations: ['detalleAfiliado'], // Asegúrate de cargar la relación
       });
     } else {
@@ -750,9 +750,64 @@ async assignColegiosMagisteriales(idPersona: number, colegiosMagisterialesData: 
     
   } 
 
-  async updateReferenciaPerson(id: string, referPersData: number): Promise<void> {
-    console.log(id);
-    console.log(referPersData);
+  async updateReferenciaPerson(id: Number, referPersData: any): Promise<any> {
+    try {
+      const refPersonal = await this.referenciaPersonalRepository.preload({
+        id_ref_personal: id,
+        ...referPersData
+      });
+      if (!refPersonal) throw new NotFoundException(`la persona con: ${id} no se ha encontrado`);
+      
+      await this.referenciaPersonalRepository.save(refPersonal);
+      return refPersonal;
+
+    } catch (error) {
+      console.log(error);
+      this.handleException(error); // Asegúrate de tener un método para manejar las excepciones
+    }
+  }
+
+  async updateDatosGenerales(idPersona: number, datosGenerales: any): Promise<any> {
+    try {
+      const afiliado = await this.personaRepository.preload({
+        id_persona: idPersona,
+        ...datosGenerales
+      });
+      
+      if (!afiliado) throw new NotFoundException(`la persona con: ${idPersona} no se ha encontrado`);
+      
+      await this.personaRepository.save(afiliado);
+      return afiliado;
+    } catch (error) {
+      console.log(error);
+      this.handleException(error); // Asegúrate de tener un método para manejar las excepciones
+    }
+  }
+
+  async updatePerfCentroTrabajo(idPerf: string, PerfCentTrabData: any
+  ): Promise<any> {
+    try {
+      const perfCentro = await this.perfPersoCentTrabRepository.preload({
+        id_perf_pers_centro_trab: idPerf,
+        ...PerfCentTrabData
+      });
+
+      if (!perfCentro) throw new NotFoundException(`la persona con: ${idPerf} no se ha encontrado`);
+      
+      await this.perfPersoCentTrabRepository.save(perfCentro);
+      return perfCentro;
+
+    } catch (error) {
+      console.log(error);
+      this.handleException(error); // Asegúrate de tener un método para manejar las excepciones
+    }
+    
+  }
+
+  async updateDatosBancarios(idPerf: string, datosBancarios: number
+  ): Promise<void> {
+    console.log(idPerf);
+    console.log(datosBancarios);
     
     /* const perfil = await this.perfPersoCentTrabRepository
       .createQueryBuilder('perfil')
@@ -769,10 +824,10 @@ async assignColegiosMagisteriales(idPersona: number, colegiosMagisterialesData: 
     await this.perfPersoCentTrabRepository.save(perfil); */
   }
 
-  async updatePerfCentroTrabajo(id: string, PerfCentTrabData: number
+  async updateColegiosMagist(idPerf: string, datosColegioMagist: number
   ): Promise<void> {
-    console.log(id);
-    console.log(PerfCentTrabData);
+    console.log(idPerf);
+    console.log(datosColegioMagist);
     
     /* const perfil = await this.perfPersoCentTrabRepository
       .createQueryBuilder('perfil')

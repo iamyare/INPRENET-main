@@ -22,6 +22,7 @@ export class EditPerfilPuestTrabComponent {
   Afiliado!: any;
   unirNombres: any = unirNombres;
   datosTabl: any[] = [];
+  prevAfil:boolean = false;
 
   public myColumns: TableColumn[] = [];
   public filas: any[] = [];
@@ -90,6 +91,7 @@ export class EditPerfilPuestTrabComponent {
 
       this.svcAfiliado.getAfilByParam(this.form.value.dni).subscribe(
         async (result) => {
+          this.prevAfil = true;
           this.Afiliado = result
           this.Afiliado.nameAfil = this.unirNombres(result.PRIMER_NOMBRE, result.SEGUNDO_NOMBRE, result.TERCER_NOMBRE, result.PRIMER_APELLIDO, result.SEGUNDO_APELLIDO);
           this.getFilas().then(() => this.cargar());
@@ -114,7 +116,7 @@ export class EditPerfilPuestTrabComponent {
       try {
         const data = await this.svcAfiliado.getAllPerfCentroTrabajo(this.Afiliado.DNI).toPromise();
         this.filas = data.map((item: any) => ({
-          id: item.id_beneficio,
+          id: item.id_perf_pers_centro_trab,
           nombre_centro_trabajo: item.centroTrabajo.nombre_centro_trabajo,
           numero_acuerdo: item.numero_acuerdo || 'No disponible',
           salario_base: item.salario_base,
@@ -133,7 +135,7 @@ export class EditPerfilPuestTrabComponent {
   
   }
 
-  editar = (row: any) => {
+  /* editar = (row: any) => {
     const PerfCentTrabData = {
         nombre_centro_trabajo: row.nombre_centro_trabajo,
         numero_acuerdo: row.numero_acuerdo || 'No disponible',
@@ -154,7 +156,7 @@ export class EditPerfilPuestTrabComponent {
         this.toastr.error('Error al actualizar el perfil de la persona en el centro de trabajo');
       }
     );
-  };
+  }; */
 
   ejecutarFuncionAsincronaDesdeOtroComponente(funcion: (data: any) => Promise<void>) {
     this.ejecF = funcion;
@@ -173,7 +175,7 @@ export class EditPerfilPuestTrabComponent {
       { nombre: 'numero_acuerdo', tipo: 'text', requerido: true, etiqueta: 'Número Acuerdo', editable: true },
       { nombre: 'salario_base', tipo: 'number', requerido: true, etiqueta: 'salario_base', editable: true },
       { nombre: 'fecha_ingreso', tipo: 'text', requerido: false, etiqueta: 'Fecha Ingreso', editable: false },
-      { nombre: 'actividad_economica', tipo: 'text', requerido: false, etiqueta: 'Actividad Económica', editable: false },
+      { nombre: 'cargo', tipo: 'text', requerido: false, etiqueta: 'Cargo', editable: false },
       { nombre: 'sector_economico', tipo: 'text', requerido: false, etiqueta: 'Sector Económico', editable: false },
       { nombre: 'clase_cliente', tipo: 'text', requerido: false, etiqueta: 'Clase Cliente', editable: false }
     ];
@@ -240,11 +242,16 @@ export class EditPerfilPuestTrabComponent {
       data: { campos: campos, valoresIniciales: row }
     });
 
-
-    dialogRef.afterClosed().subscribe((result: any) => {
-      if (result) {
-        console.log('Datos editados:', result);
-      }
+    
+    dialogRef.afterClosed().subscribe(async (result: any) => {
+      this.svcAfiliado.updatePerfCentroTrabajo(row.id, result).subscribe(
+        async (result) => {
+          
+        },
+        (error) => {
+      })
+    
     });
+
   }
 }

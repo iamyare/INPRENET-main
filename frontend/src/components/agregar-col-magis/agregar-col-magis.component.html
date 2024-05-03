@@ -1,5 +1,5 @@
 <form [formGroup]="form" #myForm="ngForm" change="getLabel()">
-  <app-col-magisteriales [datos]="formHistPag" (newDataColegioMagisterial)="setHistSal($event)"></app-col-magisteriales>
+  <app-col-magisteriales [datos]="formColMag" (newDataColegioMagisterial)="setHistSal($event)"></app-col-magisteriales>
 </form>
 
 <div style="text-align: center;">

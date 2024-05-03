@@ -28,9 +28,7 @@ export class DynamicFormDialogComponent implements OnInit {
     this.dialogTitle = data.title;
   }
 
-  ngOnInit(): void {/*
-    console.log(this.data);
- */
+  ngOnInit(): void {
     this.data.fields.forEach(field => {
       const control = new FormControl('', field.validations || []);
       this.form.addControl(field.name, control);

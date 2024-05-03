@@ -14,7 +14,8 @@
           <div class="col-md-6">
             <mat-form-field class="example-full-width; inputs" appearance="outline">
               <mat-label>Centro de Trabajo</mat-label>
-              <mat-select matNativeControl formControlName="idCentroTrabajo">
+              <mat-select (selectionChange)="onDatosDatosPuestTrab()" matNativeControl
+                formControlName="idCentroTrabajo">
                 <mat-option *ngFor="let p of centrosTrabajo" [value]="p.label">
                   {{p.value}}
                 </mat-option>
@@ -68,7 +69,8 @@
           <div class="col-md-4">
             <mat-form-field class="example-full-width; inputs" appearance="outline">
               <mat-label>Sector Económico</mat-label>
-              <mat-select matNativeControl formControlName="sectorEconomico">
+              <mat-select (selectionChange)="onDatosDatosPuestTrab()" matNativeControl
+                formControlName="sectorEconomico">
                 <mat-option *ngFor="let p of sector" [value]="p.value">
                   {{p.value}}
                 </mat-option>

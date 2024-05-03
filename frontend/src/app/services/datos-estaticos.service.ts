@@ -81,7 +81,7 @@ export class DatosEstaticosService {
         const response = await this.centroTrabajoService.obtenerTodasLasProfesiones().toPromise() || [];
         this.profesiones = response.map((profesion: any) => ({
             label: profesion.idProfesion,
-            value:profesion.descripcion
+            value: profesion.descripcion
         }));
         return this.profesiones;
     } catch (error) {
@@ -92,12 +92,18 @@ export class DatosEstaticosService {
   }
 
   async getNacionalidad() {
-    const response = await this.direccionSer.getAllPaises().toPromise();
-    this.nacionalidades = response.map((item: { nacionalidad: any; id_pais: any; }) => ({
-      id_pais: item.id_pais,
-      nacionalidad: item.nacionalidad
-    }));
-    return this.nacionalidades;
+    try {
+      const response = await this.direccionSer.getAllPaises().toPromise();
+      this.nacionalidades = response.map((item: { nacionalidad: any; id_pais: any; }) => ({
+        id_pais: item.id_pais,
+        nacionalidad: String(item.nacionalidad)
+      }));
+      return this.nacionalidades;
+      
+    } catch (error) {
+      this.nacionalidades = []
+      return this.nacionalidades;
+    }
   }
 
   async getBancos() {

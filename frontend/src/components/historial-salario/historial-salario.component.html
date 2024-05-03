@@ -12,7 +12,7 @@
           <div class="col-md-4">
             <mat-form-field class="example-full-width; inputs" appearance="outline">
               <mat-label>Nombre del Banco</mat-label>
-              <mat-select matNativeControl formControlName="idBanco">
+              <mat-select (selectionChange)="onDatosHistSal()" matNativeControl formControlName="idBanco">
                 <mat-option *ngFor="let p of Bancos" [value]="p.value">
                   {{p.label}}
                 </mat-option>

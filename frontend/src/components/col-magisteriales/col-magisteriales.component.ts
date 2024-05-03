@@ -33,19 +33,26 @@ export class ColMagisterialesComponent implements OnInit{
   @Output() newDataColegioMagisterial = new EventEmitter<any>()
 
   onDatosColMagChange() {
-    const data = this.formParent.value; // Emite el valor actual del formulario, no el FormGroup
-    this.newDataColegioMagisterial.emit(data);
-}
+    const formArray = this.formParent?.get('ColMags') as FormArray;
+    if (formArray) {
+      const data = formArray.value;
+      this.newDataColegioMagisterial.emit(data);
+    } else {
+      console.error('FormArray "ColMags" no está disponible');
+    }
+  }
+
+
+
 
   constructor(private formStateService: FormStateService, private fb: FormBuilder, private datosEstaticosSVC: DatosEstaticosService) {
     this.datosEstaticosSVC.getColegiosMagisteriales();
     this.colegio_magisterial = this.datosEstaticosSVC.colegiosMagisteriales;
   }
 
-  ngOnInit(): void {
+  ngOnInit():void{
     this.initForm();
   }
-
 
   ngOnDestroy() {
     this.formStateService.setForm(this.formKey, this.formParent);
@@ -59,29 +66,25 @@ export class ColMagisterialesComponent implements OnInit{
       this.formParent = this.fb.group({
         ColMags: this.fb.array([])
       });
-      this.formStateService.setForm(this.formKey, this.formParent);
     }
   }
 
-agregarColMag(datos?: any): void {
-  const col_ColMags = this.formParent.get('ColMags') as FormArray;
-  if (datos) {
-      col_ColMags.push(generateColegMagistFormGroup(datos));
-      console.log("Form data on change:", this.formParent.value);
-
-  } else {
-      col_ColMags.push(generateColegMagistFormGroup({}));
-  }
-  this.onDatosColMagChange();  // Asegúrate de emitir los cambios cada vez que se modifica el formulario
-}
-
-
-  eliminarColMag():void{
+  agregarColMag(datos?: any): void {
     const col_ColMags = this.formParent.get('ColMags') as FormArray;
-    col_ColMags.removeAt(-1);
-    const data = this.formParent
-    this.newDataColegioMagisterial.emit(data);
+    const newFormGroup = generateColegMagistFormGroup(datos || {});
+    col_ColMags.push(newFormGroup);
+    this.onDatosColMagChange();  // Asegurarte de emitir los datos después de agregar
   }
+
+
+  eliminarColMag(): void {
+    const col_ColMags = this.formParent.get('ColMags') as FormArray;
+    if (col_ColMags.length > 0) {
+        col_ColMags.removeAt(col_ColMags.length - 1);
+        this.onDatosColMagChange();  // Emitir los datos después de eliminar
+    }
+  }
+
 
   getCtrl(key: string, form: FormGroup): any {
     return form.get(key)

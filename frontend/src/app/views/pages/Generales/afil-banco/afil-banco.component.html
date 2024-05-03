@@ -20,10 +20,10 @@
       ></app-dat-generales-afiliado>
 
       <app-col-magisteriales
-      *ngIf="ColegiosMagisteriales"
-      [datos]="formColegiosMagisteriales.value"
-      (newDataColegioMagisterial)="setDatosColegiosMag($event)">
-      </app-col-magisteriales>
+        *ngIf="ColegiosMagisteriales"
+        [datos]="formColegiosMagisteriales"
+        (newDataColegioMagisterial)="setDatosColegiosMag($event)"
+      ></app-col-magisteriales>
 
       <!-- <app-dat-banc
         *ngIf="DatosGenerales"

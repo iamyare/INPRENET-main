@@ -10,6 +10,7 @@ import formatoFechaResol from 'src/app/models/fecha';
 import { AfiliadoService } from 'src/app/services/afiliado.service';
 import { generateFormArchivo } from '@docs-components/botonarchivos/botonarchivos.component';
 import { generateHistSalFormGroup } from '@docs-components/historial-salario/historial-salario.component';
+import { generateColegMagistFormGroup } from '@docs-components/col-magisteriales/col-magisteriales.component';
 
 
 /* FIX:Corregir los datos de centros de trabajo que se le pasan al input del centro de trabajo */
@@ -174,10 +175,21 @@ setHistSal(datosHistSal: any) {
           datosHistSal.banco.map((item: any) => generateHistSalFormGroup(item))
       ));
   } else {
-      // En caso de que no haya datos, asegúrate de limpiar o reinicializar el array
       this.formHistPag.setControl('banco', this.fb.array([]));
   }
 }
+
+setDatosColegiosMag(datosColegiosMag: any) {
+  const formArray = this.formColegiosMagisteriales.get('ColMags') as FormArray;
+  formArray.clear();
+  datosColegiosMag.forEach((item: any) => {
+    formArray.push(this.fb.group({
+      idColegio: [item.idColegio, Validators.required]
+    }));
+  });
+}
+
+
 
   setDatosRefPer(datosRefPer: any) {
     this.formReferencias = datosRefPer
@@ -185,12 +197,6 @@ setHistSal(datosHistSal: any) {
   setDatosBen(DatosBancBen: any) {
     this.formBeneficiarios = DatosBancBen
   }
-  setDatosColegiosMag(datosColegiosMagist: any) {
-    console.log('Datos recibidos para colegios magisteriales:', datosColegiosMagist);
-    this.formColegiosMagisteriales.setValue(datosColegiosMagist);
-    console.log('Formulario después de set:', this.formColegiosMagisteriales.value);
-  }
-
 
   // Envia los datos del formulario al servicio para poder guardar la información
   enviar() {
@@ -199,15 +205,6 @@ setHistSal(datosHistSal: any) {
         return;  // Salir del método si no hay datos
     }
 
-    if (!this.formColegiosMagisteriales || !this.formColegiosMagisteriales.value) {
-      console.error('Formulario de colegios magisteriales no está disponible.');
-      return;
-    }
-
-    if (!this.formColegiosMagisteriales.value.ColMags) {
-      console.error('No hay datos de colegios magisteriales disponibles.');
-      return;
-    }
     const data = {
         /* afiliado: {
             datosGen: this.form.value.DatosGenerales,
@@ -225,7 +222,7 @@ setHistSal(datosHistSal: any) {
         colegiosMagisteriales: this.formColegiosMagisteriales.value.ColMags
   };
 
-    //console.log(data);
+    console.log(data);
   }
   handleArchivoSeleccionado(archivo: any) {
     this.form.get('Arch')?.setValue(archivo);

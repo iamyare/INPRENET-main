@@ -1,7 +1,8 @@
-import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, EventEmitter, Input, OnInit, Output, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ControlContainer, FormArray, FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { DatosEstaticosService } from 'src/app/services/datos-estaticos.service';
+import { FormStateService } from 'src/app/services/form-state.service';
 
 export function generatePuestoTrabFormGroup(datos?:any): FormGroup {
   return new FormGroup({
@@ -32,7 +33,7 @@ export function generatePuestoTrabFormGroup(datos?:any): FormGroup {
     },
   ],
 })
-export class DatPuestoTrabComponent {
+export class DatPuestoTrabComponent implements OnInit{
   public formParent: FormGroup = new FormGroup({});
 
   centrosTrabajo: any = this.datosEstaticos.centrosTrabajo;
@@ -42,47 +43,54 @@ export class DatPuestoTrabComponent {
   @Input() datos:any;
 
   onDatosDatosPuestTrab(){
-    const data = this.formParent
+    const data = this.formParent.value;
     this.newDatDatosPuestTrab.emit(data);
   }
 
-  constructor( private fb: FormBuilder, private datosEstaticos: DatosEstaticosService) {}
+  constructor(private formStateService: FormStateService, private fb: FormBuilder, private datosEstaticos: DatosEstaticosService) {}
 
-  ngOnInit():void{
-    this.initFormParent();
+  private formKey = 'FormTrabajo';
 
-    if(this.datos){
-      if (this.datos.value.refpers.length>0){
-        for (let i of this.datos.value.refpers){
-          this.agregarRefPer(i)
-        }
-      }
+  ngOnInit(): void {
+    this.initForm();
+    this.formParent.valueChanges.subscribe(values => {
+        this.newDatDatosPuestTrab.emit(values);
+    });
+}
+
+
+
+  ngOnDestroy() {
+    this.formStateService.setForm(this.formKey, this.formParent);
+  }
+
+  private initForm() {
+    let existingForm = this.formStateService.getForm(this.formKey);
+    if (existingForm) {
+      this.formParent = existingForm;
+    } else {
+      this.formParent = this.fb.group({
+        trabajo: this.fb.array([])  // Corrige aquí el nombre correcto del FormArray
+      });
+      this.formStateService.setForm(this.formKey, this.formParent);
     }
   }
 
-  initFormParent():void {
-    this.formParent = new FormGroup(
-      {
-        refpers: new FormArray([], [Validators.required])
-      }
-    );
-  }
 
-  agregarRefPer(datos?:any): void{
-    const ref_RefPers = this.formParent.get('refpers') as FormArray;
-    if (datos){
-      ref_RefPers.push(generatePuestoTrabFormGroup(datos))
-    }else {
-      ref_RefPers.push(generatePuestoTrabFormGroup({}))
+  agregarTrabajo(datos?: any): void {
+    const ref_trabajo = this.formParent.get('trabajo') as FormArray;
+    if (datos) {
+      ref_trabajo.push(generatePuestoTrabFormGroup(datos));
+    } else {
+      ref_trabajo.push(generatePuestoTrabFormGroup({}));
     }
   }
 
-  eliminarRefPer():void{
-    const ref_RefPers = this.formParent.get('refpers') as FormArray;
-    ref_RefPers.removeAt(-1);
-    const data = this.formParent
-    this.newDatDatosPuestTrab.emit(data);
+  eliminarTrabajo(): void {
+    const ref_trabajo = this.formParent.get('trabajo') as FormArray;
+    ref_trabajo.removeAt(-1);
   }
+
 
   getCtrl(key: string, form: FormGroup): any {
     return form.get(key)

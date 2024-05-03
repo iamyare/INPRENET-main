@@ -5,8 +5,8 @@
   </div>
 
   <form [formGroup]="formParent" (change)="onDatosBenChange()">
-    <div formArrayName="refpers">
-      <div *ngFor="let skill of getCtrl('refpers', formParent).controls; index as formChild; let i = index">
+    <div formArrayName="beneficiario">
+      <div *ngFor="let skill of getCtrl('beneficiario', formParent).controls; index as formChild; let i = index" >
         <h4 class="card-title" style="margin: 16px;">Beneficiario Número: {{i+1}}</h4>
 
         <div [formGroupName]="formChild" class="row">
@@ -18,7 +18,7 @@
           <!-- <app-dat-banc groupName="DatosBac"></app-dat-banc> -->
 
           <!-- componente aparte de archivo -->
-          <!-- <app-botonarchivos groupName="Archivos" [labelBoton]="getLabel('refpers', formParent, i)"
+          <!-- <app-botonarchivos groupName="Archivos" [labelBoton]="getLabel('beneficiario', formParent, i)"
             (setArchivo)="handleArchivoSeleccionado($event, i)">
           </app-botonarchivos> -->
 

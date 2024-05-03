@@ -1,12 +1,13 @@
-import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, EventEmitter, Input, OnInit, Output, inject } from '@angular/core';
 import { ControlContainer, FormArray, FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { DatosEstaticosService } from 'src/app/services/datos-estaticos.service';
+import { FormStateService } from 'src/app/services/form-state.service';
 
 export function generateHistSalFormGroup(datos?:any): FormGroup {
   return new FormGroup({
     idBanco: new FormControl(datos.idBanco, Validators.required),
     numCuenta: new FormControl(datos.numCuenta, Validators.required),
-    estado: new FormControl(datos.numCuenta, Validators.required)
+    estado: new FormControl(datos.estado , Validators.required)
   });
 }
 
@@ -23,62 +24,69 @@ export function generateHistSalFormGroup(datos?:any): FormGroup {
     },
   ],
 })
-export class HistorialSalarioComponent {
+export class HistorialSalarioComponent implements OnInit{
   public formParent: FormGroup = new FormGroup({});
 
   Bancos: any;
+  private formKey = 'FormBanco';
 
   @Output() newDatHistSal = new EventEmitter<any>()
   @Input() datos:any;
 
-  onDatosHistSal(){
-    const data = this.formParent
+  onDatosHistSal() {
+    // Aquí debes asegurarte de emitir el valor actual del formulario y no el FormGroup directamente
+    const data = this.formParent.value;  // Cambio aquí para emitir el valor y no el FormGroup
     this.newDatHistSal.emit(data);
-  }
+}
 
-  constructor( private fb: FormBuilder, private datosEstaticos: DatosEstaticosService) {
+  constructor(private formStateService: FormStateService, private fb: FormBuilder, private datosEstaticos: DatosEstaticosService) {
     this.datosEstaticos.getBancos();
     this.Bancos = this.datosEstaticos.Bancos;
   }
 
-  ngOnInit():void{
-    this.initFormParent();
+  ngOnInit(): void {
+    this.initForm();
+    const bancosArray = this.formParent.get('banco') as FormArray;
+    if (this.datos && this.datos.banco && this.datos.banco.length > 0 && bancosArray.length === 0) {
+        for (let i of this.datos.banco) {
+            this.agregarBanco(i);
+        }
+    }
+}
 
-    if (this.datos.value.refpers.length>0){
-      for (let i of this.datos.value.refpers){
-        this.agregarRefPer(i)
-      }
+
+  private initForm() {
+    let existingForm = this.formStateService.getForm(this.formKey);
+    if (existingForm) {
+        this.formParent = existingForm;
+    } else {
+        this.formParent = this.fb.group({
+            banco: this.fb.array([])
+        });
+        this.formStateService.setForm(this.formKey, this.formParent);
     }
 
-  }
+}
 
-  initFormParent():void {
-    this.formParent = new FormGroup(
-      {
-        refpers: new FormArray([], [Validators.required])
-      }
-    )
-  }
 
-  initFormRefPers(): FormGroup {
-    return generateHistSalFormGroup();
+agregarBanco(datos?: any): void {
+  const ref_banco = this.formParent.get('banco') as FormArray;
+  if (datos) {
+      ref_banco.push(generateHistSalFormGroup(datos));
+  } else {
+      ref_banco.push(generateHistSalFormGroup({}));
   }
+  this.onDatosHistSal();  // Asegúrate de emitir el evento aquí.
+}
 
-  agregarRefPer(datos?:any): void{
-    const ref_RefPers = this.formParent.get('refpers') as FormArray;
-    if (datos){
-      ref_RefPers.push(generateHistSalFormGroup(datos))
-    }else {
-      ref_RefPers.push(generateHistSalFormGroup({}))
-    }
+eliminarBanco(): void {
+  const ref_banco = this.formParent.get('banco') as FormArray;
+  if (ref_banco.length > 0) {
+      ref_banco.removeAt(ref_banco.length - 1);  // Corrige para eliminar el último elemento
   }
+  this.onDatosHistSal();  // Asegúrate de emitir el evento aquí.
+}
 
-  eliminarRefPer():void{
-    const ref_RefPers = this.formParent.get('refpers') as FormArray;
-    ref_RefPers.removeAt(-1);
-    const data = this.formParent
-    this.newDatHistSal.emit(data);
-  }
 
   getCtrl(key: string, form: FormGroup): any {
     return form.get(key)

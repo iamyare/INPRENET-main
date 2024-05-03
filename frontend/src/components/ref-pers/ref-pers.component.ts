@@ -1,6 +1,7 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormArray, FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
+import { FormStateService } from 'src/app/services/form-state.service';
 
 export function generateRefPerFormGroup(datos?:any): FormGroup {
   return new FormGroup({
@@ -18,8 +19,11 @@ export function generateRefPerFormGroup(datos?:any): FormGroup {
   templateUrl: './ref-pers.component.html',
   styleUrl: './ref-pers.component.scss'
 })
-export class RefPersComponent {
+export class RefPersComponent implements OnInit{
   public formParent: FormGroup = new FormGroup({});
+
+  private formKey = 'refForm';
+
 
   @Input() nombreComp?:string
   @Input() datos?:any
@@ -30,11 +34,11 @@ export class RefPersComponent {
     this.newDatRefPerChange.emit(data)
   }
 
-  constructor( private fb: FormBuilder) {
+  constructor(private formStateService: FormStateService, private fb: FormBuilder) {
   }
 
   ngOnInit():void{
-    this.initFormParent();
+    this.initForm();
     if(this.datos){
       if (this.datos.value.refpers.length>0){
         for (let i of this.datos.value.refpers){
@@ -44,16 +48,20 @@ export class RefPersComponent {
     }
   }
 
-  initFormParent():void {
-    this.formParent = new FormGroup(
-      {
-        refpers: new FormArray([], [Validators.required])
-      }
-    )
+  ngOnDestroy() {
+    this.formStateService.setForm(this.formKey, this.formParent);
   }
 
-  initFormRefPers(): FormGroup {
-    return generateRefPerFormGroup()
+  private initForm() {
+    let existingForm = this.formStateService.getForm(this.formKey);
+    if (existingForm) {
+      this.formParent = existingForm;
+    } else {
+      this.formParent = this.fb.group({
+        refpers: this.fb.array([])
+      });
+      this.formStateService.setForm(this.formKey, this.formParent);
+    }
   }
 
   agregarRefPer(datos?:any): void{

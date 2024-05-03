@@ -1,6 +1,7 @@
-import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, EventEmitter, Input, OnInit, Output, inject } from '@angular/core';
 import { ControlContainer, FormArray, FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { DatosEstaticosService } from 'src/app/services/datos-estaticos.service';
+import { FormStateService } from 'src/app/services/form-state.service';
 
 export function generateColegMagistFormGroup(datos?:any): FormGroup {
   return new FormGroup({
@@ -21,59 +22,63 @@ export function generateColegMagistFormGroup(datos?:any): FormGroup {
     },
   ],
 })
-export class ColMagisterialesComponent {
+export class ColMagisterialesComponent implements OnInit{
   public formParent: FormGroup = new FormGroup({});
   colegio_magisterial: any = [];
+
+  private formKey = 'colMagForm';
 
   @Input() nombreComp?:string
   @Input() datos?:any
   @Output() newDataColegioMagisterial = new EventEmitter<any>()
 
-  onDatosRefPerChange(){
-    const data = this.formParent
-    this.newDataColegioMagisterial.emit(data)
-  }
+  onDatosColMagChange() {
+    const data = this.formParent.value; // Emite el valor actual del formulario, no el FormGroup
+    this.newDataColegioMagisterial.emit(data);
+}
 
-  constructor( private fb: FormBuilder, private datosEstaticosSVC: DatosEstaticosService) {
+  constructor(private formStateService: FormStateService, private fb: FormBuilder, private datosEstaticosSVC: DatosEstaticosService) {
     this.datosEstaticosSVC.getColegiosMagisteriales();
     this.colegio_magisterial = this.datosEstaticosSVC.colegiosMagisteriales;
   }
 
-  ngOnInit():void{
-    this.initFormParent();
-    if(this.datos){
-      if (this.datos.value.refpers.length>0){
-        for (let i of this.datos.value.refpers){
-          this.agregarRefPer(i)
-        }
-      }
+  ngOnInit(): void {
+    this.initForm();
+  }
+
+
+  ngOnDestroy() {
+    this.formStateService.setForm(this.formKey, this.formParent);
+  }
+
+  private initForm() {
+    let existingForm = this.formStateService.getForm(this.formKey);
+    if (existingForm) {
+      this.formParent = existingForm;
+    } else {
+      this.formParent = this.fb.group({
+        ColMags: this.fb.array([])
+      });
+      this.formStateService.setForm(this.formKey, this.formParent);
     }
   }
 
-  initFormParent():void {
-    this.formParent = new FormGroup(
-      {
-        refpers: new FormArray([], [Validators.required])
-      }
-    )
-  }
+agregarColMag(datos?: any): void {
+  const col_ColMags = this.formParent.get('ColMags') as FormArray;
+  if (datos) {
+      col_ColMags.push(generateColegMagistFormGroup(datos));
+      console.log("Form data on change:", this.formParent.value);
 
-  initFormRefPers(): FormGroup {
-    return generateColegMagistFormGroup()
+  } else {
+      col_ColMags.push(generateColegMagistFormGroup({}));
   }
+  this.onDatosColMagChange();  // Asegúrate de emitir los cambios cada vez que se modifica el formulario
+}
 
-  agregarRefPer(datos?:any): void{
-    const ref_RefPers = this.formParent.get('refpers') as FormArray;
-    if (datos){
-      ref_RefPers.push(generateColegMagistFormGroup(datos))
-    }else {
-      ref_RefPers.push(generateColegMagistFormGroup({}))
-    }
-  }
 
-  eliminarRefPer():void{
-    const ref_RefPers = this.formParent.get('refpers') as FormArray;
-    ref_RefPers.removeAt(-1);
+  eliminarColMag():void{
+    const col_ColMags = this.formParent.get('ColMags') as FormArray;
+    col_ColMags.removeAt(-1);
     const data = this.formParent
     this.newDataColegioMagisterial.emit(data);
   }
@@ -83,19 +88,10 @@ export class ColMagisterialesComponent {
   }
 
   addValidation(index: number, key: string): void {
-    const refParent = this.formParent.get('refpers') as FormArray;
-    const refSingle = refParent.at(index).get(key) as FormGroup;
-
-    refSingle.setValidators(
-      [
-        Validators.required,
-        Validators.required,
-        Validators.required,
-        Validators.required,
-        Validators.required,
-        Validators.required
-      ]
-    )
-    refSingle.updateValueAndValidity();
+    const colParent = this.formParent.get('ColMags') as FormArray;
+    const colSingle = colParent.at(index).get(key) as FormControl;
+    colSingle.setValidators(Validators.required);
+    colSingle.updateValueAndValidity();
   }
+
 }

@@ -5,6 +5,7 @@ import { generateDatBancFormGroup } from '@docs-components/dat-banc/dat-banc.com
 import { generateFormArchivo } from '../botonarchivos/botonarchivos.component';
 
 import { generateBenefFormGroup } from '@docs-components/beneficio/beneficio.component';
+import { FormStateService } from 'src/app/services/form-state.service';
 
 @Component({
   selector: 'app-benef',
@@ -13,65 +14,76 @@ import { generateBenefFormGroup } from '@docs-components/beneficio/beneficio.com
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class BenefComponent {
+  private formKey = 'FormBeneficiario';
   public formParent: FormGroup;
   archIdent: any;
   labelbutton = "Archivo de identificación (beneficiario)"
-  DatosBancBen: any = []; 
+  DatosBancBen: any = [];
   @Input() datos:any
   @Output() newDatBenChange = new EventEmitter<any>()
-  
+
   onDatosBenChange() {
     this.newDatBenChange.emit(this.formParent);
   }
-  
-  constructor(private fb: FormBuilder) {
+
+  constructor(private formStateService: FormStateService, private fb: FormBuilder) {
     this.formParent = this.fb.group({
-      refpers: this.fb.array([]),
+      beneficiario: this.fb.array([]),
     });
   }
 
   ngOnInit(): void {
-    this.initFormParent();
-    if (this.datos.value.refpers.length > 0){
-      for (let i of this.datos.value.refpers){
-        this.agregarBen(i)
+    this.initForm();
+    const beneficiariosArray = this.formParent.get('beneficiario') as FormArray;
+    if (this.datos && this.datos.value && this.datos.value.beneficiario && this.datos.value.beneficiario.length > 0 && beneficiariosArray.length === 0) {
+      for (let i of this.datos.value.beneficiario) {
+        this.agregarBen(i);
       }
     }
   }
 
-  initFormParent(): void {
-    this.formParent = this.fb.group({
-      refpers: this.fb.array([]),
-    });
+
+  private initForm() {
+    let existingForm = this.formStateService.getForm(this.formKey);
+    if (existingForm) {
+      this.formParent = existingForm;
+    } else {
+      this.formParent = this.fb.group({
+        beneficiario: this.fb.array([])
+      });
+      this.formStateService.setForm(this.formKey, this.formParent);
+    }
   }
-  
-  initFormRefPers(datosBeneficiario?:any, DatosBac?:any, Archivos?:File, labelArch?:any, porcentaje?:any): FormGroup {
-    
-    const a:any = this.fb.group({
-      refpers: new FormControl(''),
+
+
+  initFormBeneficiario(datosBeneficiario?:any, DatosBac?:any, Archivos?:File, labelArch?:any, porcentaje?:any): FormGroup {
+    return this.fb.group({
+      beneficiario: new FormControl(''),
       datosBeneficiario: generateAddressFormGroup(datosBeneficiario),
       porcentaje: generateBenefFormGroup(porcentaje),
       DatosBac: generateDatBancFormGroup(DatosBac),
       Archivos: generateFormArchivo(labelArch),
       Arch: Archivos,
     });
-    return a
+
   }
 
-  agregarBen(datos?:any): void {
-    const ref_RefPers = this.formParent.get('refpers') as FormArray
-    if (datos?.datosBeneficiario || datos?.DatosBac || datos?.archIdent || datos?.porcentaje){
-      this.labelbutton = datos?.Arch?.name
-      ref_RefPers.push(this.initFormRefPers(datos.datosBeneficiario, datos.DatosBac, datos?.Arch, datos?.Arch.name, datos.porcentaje))
-    }else {
-      this.labelbutton = "Archivo de identificación (beneficiario)"
-      ref_RefPers.push(this.initFormRefPers())
+
+  agregarBen(datos?: any): void {
+    const beneficiarios = this.formParent.get('beneficiario') as FormArray;
+    if (datos) {
+      this.labelbutton = datos.Arch ? datos.Arch.name : "Archivo de identificación (beneficiario)";
+      beneficiarios.push(this.initFormBeneficiario(datos.benfGroup, datos.DatosBac, datos.Arch, datos.Arch ? datos.Arch.name : undefined, datos.porcBenef));
+    } else {
+      this.labelbutton = "Archivo de identificación (beneficiario)";
+      beneficiarios.push(this.initFormBeneficiario());
     }
   }
 
+
   eliminarRefPer(): void {
-    const ref_RefPers = this.formParent.get('refpers') as FormArray
-    ref_RefPers.removeAt(-1)
+    const asig_Beneficiario = this.formParent.get('beneficiario') as FormArray
+    asig_Beneficiario.removeAt(-1)
     const data = this.formParent
     this.newDatBenChange.emit(data)
   }
@@ -88,10 +100,10 @@ export class BenefComponent {
     this.DatosBancBen = datosBanc
   }
   handleArchivoSeleccionado(archivo: any, i:any) {
-    if (this.formParent && this.formParent.get('refpers')) {
-      const ref_RefPers = this.formParent.get('refpers') as FormArray;
-      if (ref_RefPers.length > 0) {
-        const ultimoBeneficiario = ref_RefPers.at(i);
+    if (this.formParent && this.formParent.get('beneficiario')) {
+      const asig_Beneficiario = this.formParent.get('beneficiario') as FormArray;
+      if (asig_Beneficiario.length > 0) {
+        const ultimoBeneficiario = asig_Beneficiario.at(i);
         if (ultimoBeneficiario.get('Archivos.Archivos')) {
           ultimoBeneficiario.get('Arch')?.setValue(archivo);
         }
@@ -100,6 +112,6 @@ export class BenefComponent {
   }
 
   prueba(e: any, i: any) {
-    this.formParent.value.refpers[i].datosBeneficiario.fechaNacimiento = e
+    this.formParent.value.beneficiario[i].benfGroup.fechaNacimiento = e
   }
 }

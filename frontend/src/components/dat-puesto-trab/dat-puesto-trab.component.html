@@ -5,8 +5,8 @@
   </div>
 
   <form [formGroup]="formParent" style="margin: 1%;" (change)="onDatosDatosPuestTrab()">
-    <div formArrayName="refpers">
-      <div *ngFor="let skill of getCtrl('refpers', formParent).controls; index as formChild; let i = index">
+    <div formArrayName="trabajo">
+      <div *ngFor="let skill of getCtrl('trabajo', formParent).controls; index as formChild; let i = index">
         <h4 class="card-title">Centro De Trabajo Número: {{i+1}}</h4>
         <div class="row" [formGroupName]="formChild">
 
@@ -89,11 +89,11 @@
 
   <div class="row" style="text-align: center; margin: 1%;">
     <div class="col-md-6">
-      <button mat-button color="primary" (click)="agregarRefPer()"><mat-icon matSuffix>exposure_plus_1</mat-icon>Agregar
+      <button mat-button color="primary" (click)="agregarTrabajo()"><mat-icon matSuffix>exposure_plus_1</mat-icon>Agregar
         Puesto Trabajo</button>
     </div>
     <div class="col-md-6">
-      <button mat-button color="warn" (click)="eliminarRefPer()"><mat-icon matSuffix>exposure_neg_1</mat-icon>Eliminar
+      <button mat-button color="warn" (click)="eliminarTrabajo()"><mat-icon matSuffix>exposure_neg_1</mat-icon>Eliminar
         Puesto Trabajo</button>
     </div>
   </div>

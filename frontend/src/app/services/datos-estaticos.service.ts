@@ -22,7 +22,7 @@ export class DatosEstaticosService {
   colegiosMagisteriales : any = []
   centrosTrabajo : any = []
 
-  constructor( 
+  constructor(
     private colegiosMagSVC: ColegiosMagisterialesService , private bancosService: BancosService,
     private centrosTrabSVC:CentroTrabajoService,
     private SVCInstituciones: InstitucionesService, private afiliadoService: AfiliadoService, public direccionSer: DireccionService, private tipoIdentificacionService:TipoIdentificacionService,
@@ -113,8 +113,8 @@ export class DatosEstaticosService {
     const response = await this.colegiosMagSVC.getAllColegiosMagisteriales().toPromise();
 
     this.colegiosMagisteriales = response.data.map((item: { idColegio: any; descripcion: any; }) => ({
-      label: item.idColegio,
-      value: String(item.descripcion)
+      label:  String(item.descripcion),
+      value: item.idColegio,
     }));
     return this.colegiosMagisteriales;
   }

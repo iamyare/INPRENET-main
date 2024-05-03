@@ -1,8 +1,9 @@
-import { ChangeDetectionStrategy, Component, EventEmitter, Input, OnInit, Output, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, EventEmitter, Input, OnDestroy, OnInit, Output, inject } from '@angular/core';
 import { ControlContainer, FormArray, FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { AfiliadoService } from 'src/app/services/afiliado.service';
 import { DireccionService } from 'src/app/services/direccion.service';
 import { DatosEstaticosService } from 'src/app/services/datos-estaticos.service';
+import { FormStateService } from '../../app/services/form-state.service';
 
 export function generateAddressFormGroup(datos?: any): FormGroup {
   return new FormGroup({
@@ -24,10 +25,10 @@ export function generateAddressFormGroup(datos?: any): FormGroup {
     direccion_residencia: new FormControl(datos?.direccion_residencia, Validators.required),
     numero_carnet: new FormControl(datos?.numero_carnet, [Validators.required]),
     genero: new FormControl(datos?.genero, Validators.required),
-    
+
     id_profesion: new FormControl(datos?.id_profesion, Validators.required),
     id_municipio_residencia: new FormControl(datos?.id_municipio_residencia, Validators.required),
-    
+
     id_tipo_identificacion: new FormControl(datos?.id_tipo_identificacion, Validators.required),
     id_pais_nacionalidad: new FormControl(datos?.id_pais_nacionalidad, Validators.required),
 
@@ -47,9 +48,11 @@ export function generateAddressFormGroup(datos?: any): FormGroup {
     },
   ],
 })
-export class DatGeneralesAfiliadoComponent implements OnInit {
+export class DatGeneralesAfiliadoComponent implements OnInit, OnDestroy {
   public archivo: any;
   public dataEdit: any;
+
+  form: FormGroup = this.fb.group({});
 
   tipoIdentData: any = [];
   nacionalidades: any = [];
@@ -71,17 +74,31 @@ export class DatGeneralesAfiliadoComponent implements OnInit {
     this.newDatBenChange.emit(fecha._model.selection);
   }
 
-  constructor(private fb: FormBuilder, private afiliadoService: AfiliadoService, public direccionSer: DireccionService, private datosEstaticos: DatosEstaticosService) {
+  constructor(
+    private formStateService: FormStateService,
+    private fb: FormBuilder,
+    private afiliadoService: AfiliadoService,
+    public direccionSer: DireccionService, private datosEstaticos: DatosEstaticosService) {
     const currentYear = new Date();
     this.minDate = new Date(currentYear.getFullYear(), currentYear.getMonth(), currentYear.getDate(), currentYear.getHours(), currentYear.getMinutes(), currentYear.getSeconds());
   }
 
   ngOnInit(): void {
+    const savedForm = this.formStateService.getFormData().value;
+    if (savedForm) {
+      this.form = savedForm;
+    } else {
+      this.form = generateAddressFormGroup();
+    }
     this.cargarTiposIdentificacion();
     this.cargarNacionalidades();
     this.cargarMunicipios();
     this.cargarProfesiones();
     this.generos = this.datosEstaticos.genero;
+  }
+
+  ngOnDestroy() {
+    this.formStateService.setFormData(this.form);
   }
 
   cargarProfesiones() {
@@ -103,8 +120,6 @@ export class DatGeneralesAfiliadoComponent implements OnInit {
   async cargarNacionalidades() {
    await this.datosEstaticos.getNacionalidad().then(data => {
     this.nacionalidades = data;
-    console.log(this.nacionalidades);
-    
     }).catch(error => {
       console.error('Error al cargar nacionalidades:', error);
     });
@@ -113,8 +128,7 @@ export class DatGeneralesAfiliadoComponent implements OnInit {
   async cargarMunicipios() {
     await this.direccionSer.getAllMunicipios().subscribe({
       next: (data) => {
-        console.log(data);
-        
+
         this.municipios = data;
       },
       error: (error) => {

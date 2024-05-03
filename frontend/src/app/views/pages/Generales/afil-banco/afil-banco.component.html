@@ -20,9 +20,10 @@
       ></app-dat-generales-afiliado>
 
       <app-col-magisteriales
-        *ngIf="ColegiosMagisteriales"
-        groupName="ColegiosMagisteriales"
-      ></app-col-magisteriales>
+      *ngIf="ColegiosMagisteriales"
+      [datos]="formColegiosMagisteriales.value"
+      (newDataColegioMagisterial)="setDatosColegiosMag($event)">
+      </app-col-magisteriales>
 
       <!-- <app-dat-banc
         *ngIf="DatosGenerales"
@@ -36,11 +37,11 @@
         labelBoton="Archivo de identificación (Afiliado)"></app-botonarchivos> -->
     </form>
 
-    <app-dat-puesto-trab
+        <app-dat-puesto-trab
       *ngIf="DatosPuestoTrab"
       [datos]="formPuestTrab"
-      (newDatDatosPuestTrab)="setDatosPuetTrab1($event)"
-    ></app-dat-puesto-trab>
+      (newDatDatosPuestTrab)="setDatosPuetTrab1($event)">
+    </app-dat-puesto-trab>
 
     <app-historial-salario
       *ngIf="DatosHS"

@@ -5,8 +5,8 @@
   </div>
 
   <form [formGroup]="formParent" (change)="onDatosHistSal()">
-    <div formArrayName="refpers">
-      <div *ngFor="let skill of getCtrl('refpers', formParent).controls; index as formChild; let i = index">
+    <div formArrayName="banco">
+      <div *ngFor="let skill of getCtrl('banco', formParent).controls; index as formChild; let i = index">
         <h4 class="card-title">Banco número: {{i+1}}</h4>
         <div [formGroupName]="formChild" class="row">
           <div class="col-md-4">
@@ -38,11 +38,11 @@
 
   <div class="row" style="text-align: center; margin: 1%;">
     <div class="col-md-6">
-      <button mat-button color="primary" (click)="agregarRefPer()"><mat-icon matSuffix>exposure_plus_1</mat-icon>Agregar
+      <button mat-button color="primary" (click)="agregarBanco()"><mat-icon matSuffix>exposure_plus_1</mat-icon>Agregar
         cuenta de Banco</button>
     </div>
     <div class="col-md-6">
-      <button mat-button color="warn" (click)="eliminarRefPer()"><mat-icon matSuffix>exposure_neg_1</mat-icon>Eliminar
+      <button mat-button color="warn" (click)="eliminarBanco()"><mat-icon matSuffix>exposure_neg_1</mat-icon>Eliminar
         Cuenta de banco</button>
     </div>
   </div>

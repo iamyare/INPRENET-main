@@ -9,6 +9,7 @@ import { generatePuestoTrabFormGroup } from '@docs-components/dat-puesto-trab/da
 import formatoFechaResol from 'src/app/models/fecha';
 import { AfiliadoService } from 'src/app/services/afiliado.service';
 import { generateFormArchivo } from '@docs-components/botonarchivos/botonarchivos.component';
+import { generateHistSalFormGroup } from '@docs-components/historial-salario/historial-salario.component';
 
 
 /* FIX:Corregir los datos de centros de trabajo que se le pasan al input del centro de trabajo */
@@ -43,23 +44,22 @@ export class AfilBancoComponent implements OnInit {
   });
   formPuestTrab: any = new FormGroup(
     {
-      refpers: new FormArray([], [Validators.required])
+      trabajo: new FormArray([], [Validators.required])
     });
-  formHistPag: any = new FormGroup(
-    {
-      refpers: new FormArray([], [Validators.required])
-    });
+    formHistPag: FormGroup = this.fb.group({
+      banco: this.fb.array([])  // Esto asegura que siempre tienes una instancia de FormArray disponible
+  });
   formReferencias: any = new FormGroup(
     {
       refpers: new FormArray([], [Validators.required])
     });
   formBeneficiarios: any = new FormGroup(
     {
-      refpers: new FormArray([], [Validators.required])
+      beneficiario: new FormArray([], [Validators.required])
     });
     formColegiosMagisteriales: any = new FormGroup(
     {
-      refpers: new FormArray([], [Validators.required])
+      ColMags: new FormArray([], [Validators.required])
     });
 
   labelBoton1 = "Adjunte archivo DNI"
@@ -77,7 +77,7 @@ export class AfilBancoComponent implements OnInit {
     this.datosBeneficiario = false
     this.datosF = false
     this.datosA = false
-    
+
     this.ColegiosMagisteriales = false
   }
 
@@ -89,7 +89,7 @@ export class AfilBancoComponent implements OnInit {
     this.datosBeneficiario = false
     this.datosF = false
     this.datosA = false
-    
+
     this.ColegiosMagisteriales = false
   }
 
@@ -101,7 +101,7 @@ export class AfilBancoComponent implements OnInit {
     this.datosBeneficiario = false
     this.datosF = false
     this.datosA = false
-    
+
     this.ColegiosMagisteriales = false
   }
 
@@ -113,7 +113,7 @@ export class AfilBancoComponent implements OnInit {
     this.datosBeneficiario = false
     this.datosF = false
     this.datosA = false
-    
+
     this.ColegiosMagisteriales = false
   }
 
@@ -125,7 +125,7 @@ export class AfilBancoComponent implements OnInit {
     this.datosBeneficiario = true
     this.datosF = false
     this.datosA = false
-    
+
     this.ColegiosMagisteriales = false
   }
 
@@ -137,10 +137,10 @@ export class AfilBancoComponent implements OnInit {
     this.datosBeneficiario = false
     this.datosF = true
     this.datosA = false
-    
+
     this.ColegiosMagisteriales = false
   }
-  
+
   setDatosA(datosHistSal: any) {
     this.DatosGenerales = false
     this.DatosPuestoTrab = false
@@ -149,7 +149,7 @@ export class AfilBancoComponent implements OnInit {
     this.datosBeneficiario = false
     this.datosF = false
     this.datosA = true
-    
+
     this.ColegiosMagisteriales = false
   }
 
@@ -166,11 +166,19 @@ export class AfilBancoComponent implements OnInit {
 
   // Manejan la informacion de los formularios
   setDatosPuetTrab1(datosPuestTrab: any) {
-    this.formPuestTrab = datosPuestTrab
+    this.formPuestTrab.setControl('trabajo', this.fb.array(datosPuestTrab.trabajo || []));
+}
+setHistSal(datosHistSal: any) {
+  if (datosHistSal && datosHistSal.banco) {
+      this.formHistPag.setControl('banco', this.fb.array(
+          datosHistSal.banco.map((item: any) => generateHistSalFormGroup(item))
+      ));
+  } else {
+      // En caso de que no haya datos, asegúrate de limpiar o reinicializar el array
+      this.formHistPag.setControl('banco', this.fb.array([]));
   }
-  setHistSal(datosHistSal: any) {
-    this.formHistPag = datosHistSal
-  }
+}
+
   setDatosRefPer(datosRefPer: any) {
     this.formReferencias = datosRefPer
   }
@@ -178,53 +186,49 @@ export class AfilBancoComponent implements OnInit {
     this.formBeneficiarios = DatosBancBen
   }
   setDatosColegiosMag(datosColegiosMagist: any) {
-    this.formColegiosMagisteriales = datosColegiosMagist
+    console.log('Datos recibidos para colegios magisteriales:', datosColegiosMagist);
+    this.formColegiosMagisteriales.setValue(datosColegiosMagist);
+    console.log('Formulario después de set:', this.formColegiosMagisteriales.value);
   }
+
 
   // Envia los datos del formulario al servicio para poder guardar la información
   enviar() {
-    if (this.form.value.DatosGenerales) {
-      this.form.value.DatosGenerales.fechaNacimiento = formatoFechaResol(this.form.value.DatosGenerales.fechaNacimiento);
-    }
-    /*  if (this.form.value.DatosPuestoTrab){
-       this.form.value.DatosPuestoTrab.fechaIngreso = formatoFechaResol(this.form.value.DatosPuestoTrab.fechaIngreso);
-       this.form.value.DatosPuestoTrab.fechaPago = formatoFechaResol(this.form.value.DatosPuestoTrab.fechaPago);
-     } */
-    if (this.DatosBancBen.length >= 1) {
-      for (let i = 0; i < this.DatosBancBen.length; i++) {
-        this.DatosBancBen[i].datosBeneficiario.fechaNacimiento = formatoFechaResol(this.DatosBancBen[i].datosBeneficiario.fechaNacimiento);
-      }
+    if (!this.formHistPag || !this.formHistPag.value || !this.formHistPag.value.banco) {
+        console.error('No hay datos bancarios disponibles.');
+        return;  // Salir del método si no hay datos
     }
 
+    if (!this.formColegiosMagisteriales || !this.formColegiosMagisteriales.value) {
+      console.error('Formulario de colegios magisteriales no está disponible.');
+      return;
+    }
+
+    if (!this.formColegiosMagisteriales.value.ColMags) {
+      console.error('No hay datos de colegios magisteriales disponibles.');
+      return;
+    }
     const data = {
-      afiliado: {
-        datosGen: this.form.value.DatosGenerales,
-        Archivos: this.form.value.Archivos,
-        Arch: this.form.value.Arch,
-        /* datosBanc: this.form.value.DatosBacAfil, */
-        PuestTrab: this.formPuestTrab.value.refpers,
-        HistPag: this.formHistPag.value.refpers,
-        datosRefPers: this.formReferencias.value.refpers
-      },
-      datosBenefic: this.formBeneficiarios.value.refpers
-    }
+        /* afiliado: {
+            datosGen: this.form.value.DatosGenerales,
+            Archivos: this.form.value.Archivos,
+            Arch: this.form.value.Arch,
+            PuestTrab: this.formPuestTrab.value.trabajo,
+            banco: this.formHistPag.value.banco,  // Ahora debes tener datos aquí
+            datosRefPers: this.formReferencias.value.refpers,
+        }, */
+        datosGenerales: this.form.value.DatosGenerales,
+        centrosTrabajo: this.formPuestTrab.value.trabajo,
+        referenciasPersonales: this.formReferencias.value.refpers,
+        bancos: this.formHistPag.value.banco,
+        beneficiarios: this.formBeneficiarios.value.beneficiario,
+        colegiosMagisteriales: this.formColegiosMagisteriales.value.ColMags
+  };
 
-    console.log(data);
+    console.log("Datos a enviar:", data);
+}
 
-    //console.log(data);
 
-    /* const llamada1 = this.afilService.agregarAfiliados(data);
-
-    forkJoin([llamada1]).subscribe(
-      ([datosServicio1]) => {
-        console.log('Datos del Servicio 1:', datosServicio1);
-      },
-      (error) => {
-        console.error(error);
-      }
-    ); */
-  }
-  
   handleArchivoSeleccionado(archivo: any) {
     this.form.get('Arch')?.setValue(archivo);
     /*     console.log(this.form);

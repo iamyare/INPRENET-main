@@ -57,6 +57,8 @@ import { AgregarBenefCompComponent } from './agregar-benef-comp/agregar-benef-co
 import { AgregarDatBancCompComponent } from './agregar-dat-banc-comp/agregar-dat-banc-comp.component';
 import { AgregarColMagisComponent } from './agregar-col-magis/agregar-col-magis.component';
 import { CamaraComponent } from './camara/camara.component';
+import { NewFamiliaresComponent } from './new-familiares/new-familiares.component';
+import { EditFamiliaresCompComponent } from './edit-familiares-comp/edit-familiares-comp.component';
 
 @NgModule({
   declarations: [
@@ -84,7 +86,9 @@ import { CamaraComponent } from './camara/camara.component';
     AgregarDatBancCompComponent,
     AgregarColMagisComponent,
     AgregarReferenciasPersonalesComponent,
-    CamaraComponent
+    CamaraComponent,
+    NewFamiliaresComponent,
+    EditFamiliaresCompComponent
   ],
   exports: [
     ProgressbarComponent,
@@ -110,7 +114,9 @@ import { CamaraComponent } from './camara/camara.component';
     AgregarDatBancCompComponent,
     AgregarColMagisComponent,
     AgregarReferenciasPersonalesComponent,
-    CamaraComponent
+    CamaraComponent,
+    NewFamiliaresComponent,
+    EditFamiliaresCompComponent
   ],
   imports: [
     WebcamModule,

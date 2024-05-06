@@ -51,20 +51,20 @@ export function generateAddressFormGroup(datos?: any): FormGroup {
 export class DatGeneralesAfiliadoComponent implements OnInit, OnDestroy {
   public archivo: any;
   public dataEdit: any;
-
   form: FormGroup = this.fb.group({});
-
+  
   tipoIdentData: any = [];
   nacionalidades: any = [];
   municipios: any = [];
   generos: string[] = [];
   profesiones: any = [];
-
+  
   tipoCotizante: any = this.datosEstaticos.tipoCotizante; tipoIdent: any = this.datosEstaticos.tipoIdent;
   estadoCivil: any = this.datosEstaticos.estadoCivil;
   representacion: any = this.datosEstaticos.representacion; estado: any = this.datosEstaticos.estado;
-
-
+  
+  
+  @Input() useCamera: boolean = false;
   @Input() groupName = '';
   @Output() newDatBenChange = new EventEmitter<any>()
   formArchivos: any;

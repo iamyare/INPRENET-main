@@ -55,7 +55,6 @@ export class BenefComponent {
     }
   }
 
-
   initFormBeneficiario(datosBeneficiario?:any, DatosBac?:any, Archivos?:File, labelArch?:any, porcentaje?:any): FormGroup {
     return this.fb.group({
       beneficiario: new FormControl(''),
@@ -65,9 +64,7 @@ export class BenefComponent {
       Archivos: generateFormArchivo(labelArch),
       Arch: Archivos,
     });
-
   }
-
 
   agregarBen(datos?: any): void {
     const beneficiarios = this.formParent.get('beneficiario') as FormArray;

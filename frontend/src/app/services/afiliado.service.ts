@@ -16,27 +16,27 @@ export class AfiliadoService {
     return this.http.post<any>(url, encapsulatedData);
   }
 
-  createReferPersonales(idPersona:string, encapsulatedData: any): Observable<any> {
+  createReferPersonales(idPersona: string, encapsulatedData: any): Observable<any> {
     /* const params = new HttpParams().set('idPersona', idPersona); */
-    const encapsulatedDataE = {referencias: encapsulatedData}
-    
+    const encapsulatedDataE = { referencias: encapsulatedData }
+
     const url = `${environment.API_URL}/api/Persona/createReferPersonales/${idPersona}`;
-    return this.http.post<any>(url , encapsulatedDataE);
+    return this.http.post<any>(url, encapsulatedDataE);
   }
-  createColegiosMagisteriales(idPersona:string, encapsulatedData: any): Observable<any> {
+  createColegiosMagisteriales(idPersona: string, encapsulatedData: any): Observable<any> {
     const url = `${environment.API_URL}/api/Persona/createColegiosMagisteriales/${idPersona}`;
     return this.http.post<any>(url, encapsulatedData);
   }
-  createCentrosTrabajo(idPersona:string, encapsulatedData: any): Observable<any> {
+  createCentrosTrabajo(idPersona: string, encapsulatedData: any): Observable<any> {
     const url = `${environment.API_URL}/api/Persona/createCentrosTrabajo/${idPersona}`;
     return this.http.post<any>(url, encapsulatedData);
   }
-  createDatosBancarios(idPersona:string, encapsulatedData: any): Observable<any> {
+  createDatosBancarios(idPersona: string, encapsulatedData: any): Observable<any> {
     const url = `${environment.API_URL}/api/Persona/createDatosBancarios/${idPersona}`;
     return this.http.post<any>(url, encapsulatedData);
   }
 
-  createBeneficiarios(idPersona:string, encapsulatedData: any): Observable<any> {
+  createBeneficiarios(idPersona: string, encapsulatedData: any): Observable<any> {
     const url = `${environment.API_URL}/api/Persona/createBeneficiarios/${idPersona}`;
     return this.http.post<any>(url, encapsulatedData);
   }
@@ -57,8 +57,20 @@ export class AfiliadoService {
     );
   }
 
-  getAllReferenciasPersonales(dni:string): Observable<any | void> {
+  getAllReferenciasPersonales(dni: string): Observable<any | void> {
     const url = `${environment.API_URL}/api/Persona/getAllReferenciasPersonales/${dni}`;
+
+    return this.http.get<any>(
+      url,
+    ).pipe(
+      map((res: any) => {
+        return res;
+      })
+    );
+  }
+
+  getAllFamiliares(dni: string): Observable<any | void> {
+    const url = `${environment.API_URL}/api/Persona/getAllFamiliares/${dni}`;
 
     return this.http.get<any>(
       url,
@@ -77,7 +89,11 @@ export class AfiliadoService {
     return this.http.put(`${environment.API_URL}/api/Persona/updateReferenciaPerson/${idPersonaRef}`, referPersData);
   }
 
-  getAllPerfCentroTrabajo(dni:string): Observable<any | void> {
+  updateFamiliar(idPersonaRef: string, familiarData: any): Observable<any> {
+    return this.http.put(`${environment.API_URL}/api/Persona/updateFamiliar/${idPersonaRef}`, familiarData);
+  }
+
+  getAllPerfCentroTrabajo(dni: string): Observable<any | void> {
     const url = `${environment.API_URL}/api/Persona/getAllPerfCentroTrabajo/${dni}`;
 
     return this.http.get<any>(
@@ -203,7 +219,7 @@ export class AfiliadoService {
     )
   }
 
-  agregDatosPuestTra(data: any,dnireferente:any): Observable<any> {
+  agregDatosPuestTra(data: any, dnireferente: any): Observable<any> {
     var url = `${environment.API_URL}/Persona/createCentrosTrabPersona/${dnireferente}`;
 
     return this.http.post<any>(
@@ -217,7 +233,7 @@ export class AfiliadoService {
     )
   }
 
-  agregDatosRefPer(data: any,dnireferente:any): Observable<any> {
+  agregDatosRefPer(data: any, dnireferente: any): Observable<any> {
     var url = `${environment.API_URL}/Persona/createRefPers/${dnireferente}`;
 
     return this.http.post<any>(

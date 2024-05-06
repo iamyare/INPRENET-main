@@ -1,0 +1,60 @@
+<div class="card">
+    <div class="card-header card-header-danger tittle" style="background: #229e92;">
+        <h4 class="card-title">Familiares</h4>
+        <p class="card-category">Llene los campos para continuar con el proceso.</p>
+    </div>
+
+    <form [formGroup]="formParent" (change)="onDatosBenChange()">
+        <div formArrayName="familiar">
+            <div *ngFor="let skill of getCtrl('familiar', formParent).controls; index as formChild; let i = index">
+                <h4 class="card-title" style="margin: 16px;">Familiar Número: {{i+1}}</h4>
+
+                <div [formGroupName]="formChild" class="row">
+                    <!-- componente aparte de datos generales -->
+                    <app-dat-generales-afiliado groupName="datosFamiliar"
+                        (newDatBenChange)="prueba($event, i); onDatosBenChange()"></app-dat-generales-afiliado>
+
+                    <!-- componente aparte de datos bancarios -->
+                    <!-- <app-dat-banc groupName="DatosBac"></app-dat-banc> -->
+
+                    <!-- componente aparte de archivo -->
+                    <!-- <app-botonarchivos groupName="Archivos" [labelBoton]="getLabel('Familiar', formParent, i)"
+              (setArchivo)="handleArchivoSeleccionado($event, i)">
+            </app-botonarchivos> -->
+
+                    <!-- componente aparte de Beneficio -->
+                    <!--   <app-beneficio groupName="porcentaje" style="margin: 16px;"></app-beneficio> -->
+
+                    <fieldset groupName="datosFamiliar">
+                        <div class="row">
+                            <div class="col-md-12 col-sm-12" style="padding: 2rem;">
+                                <mat-form-field class="example-full-width inputs" appearance="outline">
+                                    <mat-label>Parentesco</mat-label>
+                                    <mat-select matNativeControl formControlName="id_parentesco">
+                                        <mat-option *ngFor="let item of parentesco" [value]="item.value">
+                                            {{ item.label }}
+                                        </mat-option>
+                                    </mat-select>
+                                </mat-form-field>
+                            </div>
+                        </div>
+                    </fieldset>
+                </div>
+
+            </div>
+        </div>
+    </form>
+
+    <div class="row" style="text-align: center;  margin: 1%;">
+        <div class="col-md-6">
+            <button mat-button color="primary" (click)="agregarBen()"><mat-icon
+                    matSuffix>exposure_plus_1</mat-icon>Agregar
+                Familiar</button>
+        </div>
+        <div class="col-md-6">
+            <button mat-button color="warn" (click)="eliminarRefPer()"><mat-icon
+                    matSuffix>exposure_neg_1</mat-icon>Eliminar
+                Familiar</button>
+        </div>
+    </div>
+</div>

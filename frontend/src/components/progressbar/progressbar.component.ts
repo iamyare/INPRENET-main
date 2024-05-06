@@ -23,8 +23,10 @@ export class ProgressbarComponent {
   @Output() newdatosF = new EventEmitter<any>()
   @Output() newdatosA = new EventEmitter<any>()
   @Output() newdatosColegiosMag = new EventEmitter<any>()
+  @Output() newDatosFa = new EventEmitter<any>()
 
   datosG:boolean = true;
+  datosFa:boolean = false;
   datosColegMagisteriales:boolean = false;
   datosCT:boolean = false;
   datosHS:boolean = false;
@@ -33,8 +35,9 @@ export class ProgressbarComponent {
   datosF:boolean = false;
   datosA:boolean  = false;
 
-  prueba(){
+  activarDatosGe(){
     this.datosG  = true;
+    this.datosFa  = false;
     this.datosCT  = false;
     this.datosHS  = false;
     this.datosRP  = false;
@@ -42,10 +45,24 @@ export class ProgressbarComponent {
     this.datosF  = false;
     this.datosA  = false;
     this.datosColegMagisteriales  = false;
-    this.newDatBenChange.emit(this.datosG);
+    this.newDatBenChange.emit(this.datosG); 
+  }
+
+  activarDatosFam(){
+    this.datosG  = false;
+    this.datosFa  = true;
+    this.datosCT  = false;
+    this.datosHS  = false;
+    this.datosRP  = false;
+    this.datosB  = false;
+    this.datosF  = false;
+    this.datosA  = false;
+    this.datosColegMagisteriales  = false;
+    this.newDatosFa.emit(this.datosFa);
     
   }
-  prueba2(){
+  activarDatosCentTrab(){
+    this.datosFa  = false;
     this.datosG  = false;
     this.datosCT  = true;
     this.datosHS  = false;
@@ -57,7 +74,8 @@ export class ProgressbarComponent {
     this.newEstCentrTrab.emit(this.datosCT);
     
   }
-  prueba3(){
+  activarDatosBancarios(){
+    this.datosFa  = false;
     this.datosG  = false;
     this.datosCT  = false;
     this.datosHS  = true;
@@ -68,7 +86,8 @@ export class ProgressbarComponent {
     this.datosColegMagisteriales  = false;
     this.newdatosHS.emit(this.datosHS);
   }
-  prueba4(){
+  activarDatosRefPers(){
+    this.datosFa  = false;
     this.datosG  = false;
     this.datosCT  = false;
     this.datosHS  = false;
@@ -79,7 +98,8 @@ export class ProgressbarComponent {
     this.datosColegMagisteriales  = false;
     this.newdatosRP.emit(this.datosRP);
   }
-  prueba5(){
+  activarDatosBenef(){
+    this.datosFa  = false;
     this.datosG  = false;
     this.datosCT  = false;
     this.datosHS  = false;
@@ -90,7 +110,8 @@ export class ProgressbarComponent {
     this.datosColegMagisteriales  = false;
     this.newdatosB.emit(this.datosB);
   }
-  prueba6(){
+  activarFinalizar(){
+    this.datosFa  = false;
     this.datosG  = false;
     this.datosCT  = false;
     this.datosHS  = false;
@@ -101,7 +122,22 @@ export class ProgressbarComponent {
     this.datosColegMagisteriales  = false;
     this.newdatosF.emit(this.datosF);
   }
+  
+  activarDatosColMag(){
+    this.datosFa  = false;
+    this.datosG  = false;
+    this.datosCT  = false;
+    this.datosHS  = false;
+    this.datosRP  = false;
+    this.datosB  = false;
+    this.datosF  = false;
+    this.datosA  = false;
+    this.datosColegMagisteriales  = true;
+    this.newdatosColegiosMag.emit(this.datosColegMagisteriales);
+  }
+  
   prueba7(){
+    this.datosFa  = false;
     this.datosG  = false;
     this.datosCT  = false;
     this.datosHS  = false;
@@ -113,15 +149,4 @@ export class ProgressbarComponent {
     this.newdatosA.emit(this.datosA);
   }
 
-  prueba8(){
-    this.datosG  = false;
-    this.datosCT  = false;
-    this.datosHS  = false;
-    this.datosRP  = false;
-    this.datosB  = false;
-    this.datosF  = false;
-    this.datosA  = false;
-    this.datosColegMagisteriales  = true;
-    this.newdatosColegiosMag.emit(this.datosColegMagisteriales);
-  }
 }

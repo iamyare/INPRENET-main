@@ -30,6 +30,7 @@ import { EditDatosGeneralesComponent } from '../pages/Generales/edit-datos-gener
 import { EditBeneficiariosComponent } from '../pages/Generales/edit-beneficiarios/edit-beneficiarios.component';
 import { EditDatosBancariosComponent } from '../pages/Generales/edit-datos-bancarios/edit-datos-bancarios.component';
 import { EditColegiosMagisterialesComponent } from '../pages/Generales/edit-colegios-magisteriales/edit-colegios-magisteriales.component';
+import { EditFamiliaresComponent } from '../pages/Generales/edit-familiares/edit-familiares.component';
 
 const routes: Routes = [
   //rutas Afiliado
@@ -65,6 +66,20 @@ const routes: Routes = [
             },
           },
           {
+            path: 'edit-familiares',
+            component: EditFamiliaresComponent,
+            data: {
+              title: 'Editar Familiares',
+            },
+          },
+          {
+            path: 'Edit-Perfil-Puest-Trab',
+            component: EditPerfilPuestTrabComponent,
+            data: {
+              title: 'Editar Puestos de trabajo',
+            },
+          },
+          {
             path: 'edit-colegios-magisteriales',
             component: EditColegiosMagisterialesComponent,
             data: {
@@ -76,13 +91,6 @@ const routes: Routes = [
             component: EditDatosBancariosComponent,
             data: {
               title: 'Editar Datos Bancarios',
-            },
-          },
-          {
-            path: 'Edit-Perfil-Puest-Trab',
-            component: EditPerfilPuestTrabComponent,
-            data: {
-              title: 'Editar Puestos de Trabajo',
             },
           },
           {

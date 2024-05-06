@@ -285,4 +285,35 @@ export class DatosEstaticosService {
       NOMBRE_PLANILLA: "PLANILLA DECIMO CUARTO"
     },
   ];
+
+  parentesco = [
+    {value: "ABUELA MATERNA", label: "Abuela Materna"},
+    {value: "ABUELA PATERNA", label: "Abuela Paterna"},
+    {value: "ABUELO MATERNO", label: "Abuelo Materno"},
+    {value: "ABUELO PATERNO", label: "Abuelo Paterno"},
+    {value: "CUÑADA", label: "Cuñada"},
+    {value: "CUÑADO", label: "Cuñado"},
+    {value: "ESPOSA", label: "Esposa"},
+    {value: "ESPOSO", label: "Esposo"},
+    {value: "HERMANA", label: "Hermana"},
+    {value: "HERMANO", label: "Hermano"},
+    {value: "HIJA", label: "Hija"},
+    {value: "HIJO", label: "Hijo"},
+    {value: "MADRE", label: "Madre"},
+    {value: "NIETA", label: "Nieta"},
+    {value: "NIETO", label: "Nieto"},
+    {value: "NUERA", label: "Nuera"},
+    {value: "PADRE", label: "Padre"},
+    {value: "PRIMA", label: "Prima"},
+    {value: "PRIMO", label: "Primo"},
+    {value: "SOBRINA", label: "Sobrina"},
+    {value: "SOBRINO", label: "Sobrino"},
+    {value: "SUEGRA", label: "Suegra"},
+    {value: "SUEGRO", label: "Suegro"},
+    {value: "TÍA MATERNA", label: "Tía Materna"},
+    {value: "TÍA PATERNA", label: "Tía Paterna"},
+    {value: "TÍO MATERNO", label: "Tío Materno"},
+    {value: "TÍO PATERNO", label: "Tío Paterno"},
+    {value: "YERNO", label: "Yerno"}
+  ]
 }

@@ -26,6 +26,8 @@ import { NET_PROFESIONES } from '../transacciones/entities/net_profesiones.entit
 import { NET_RELACION_FAMILIAR } from './entities/net_relacion_familiar';
 import { CreateRelacionFamiliarDTO } from './dto/create-relacion-familiar.dto';
 import { FamiliarDTO } from './dto/create-datos-familiar.dto';
+import { UpdatePerfCentTrabDto } from './dto/update.perfAfilCentTrab.dto';
+import { UpdateReferenciaPersonalDTO } from './dto/update-referencia-personal.dto';
 @Injectable()
 export class AfiliadoService {
 
@@ -735,37 +737,39 @@ async assignColegiosMagisteriales(idPersona: number, colegiosMagisterialesData: 
    
   }
 
-
-   async getAllPerfCentroTrabajo(dni:string): Promise<any> {
-    const persona = await this.personaRepository.findOne({
-      where: {dni:dni},
-      relations: ["perfPersCentTrabs", "perfPersCentTrabs.centroTrabajo"] // Asegúrate de cargar las cuentas y sus movimientos
-    });
-
-    if (!persona) {
-      throw new NotFoundException(`Ningún centro de trabajo encontrado no encontrado`);
+  async getAllPerfCentroTrabajo(dni: string): Promise<any[]> {
+    const persona = await this.personaRepository.createQueryBuilder('persona')
+        .leftJoinAndSelect('persona.perfPersCentTrabs', 'perfPersCentTrabs', 'perfPersCentTrabs.estado = :estado', { estado: 'ACTIVO' })
+        .leftJoinAndSelect('perfPersCentTrabs.centroTrabajo', 'centroTrabajo')
+        .where('persona.dni = :dni', { dni })
+        .getOne();
+    if (!persona || !persona.perfPersCentTrabs.length) {
+        return [];
     }
+    return persona.perfPersCentTrabs;
+}
 
-    return persona.perfPersCentTrabs
-    
-  } 
 
-  async updateReferenciaPerson(id: Number, referPersData: any): Promise<any> {
-    try {
-      const refPersonal = await this.referenciaPersonalRepository.preload({
-        id_ref_personal: id,
-        ...referPersData
-      });
-      if (!refPersonal) throw new NotFoundException(`la persona con: ${id} no se ha encontrado`);
-      
-      await this.referenciaPersonalRepository.save(refPersonal);
-      return refPersonal;
-
-    } catch (error) {
-      console.log(error);
-      this.handleException(error); // Asegúrate de tener un método para manejar las excepciones
-    }
+async updateReferenciaPersonal(id: number, updateDto: UpdateReferenciaPersonalDTO): Promise<Net_ReferenciaPersonal> {
+  const refPersonal = await this.referenciaPersonalRepository.preload({
+      id_ref_personal: id,
+      ...updateDto
+  });
+  if (!refPersonal) {
+      throw new NotFoundException(`La referencia personal con ID ${id} no fue encontrada`);
   }
+  return this.referenciaPersonalRepository.save(refPersonal);
+}
+
+async deleteReferenciaPersonal(id: number): Promise<void> {
+  const referencia = await this.referenciaPersonalRepository.findOne({ where: { id_ref_personal: id } });
+  if (!referencia) {
+    throw new NotFoundException(`La referencia personal con ID ${id} no fue encontrada`);
+  }
+  await this.referenciaPersonalRepository.remove(referencia);
+}
+
+
 
   async updateDatosGenerales(idPersona: number, datosGenerales: any): Promise<any> {
     try {
@@ -784,25 +788,33 @@ async assignColegiosMagisteriales(idPersona: number, colegiosMagisterialesData: 
     }
   }
 
-  async updatePerfCentroTrabajo(idPerf: string, PerfCentTrabData: any
-  ): Promise<any> {
-    try {
-      const perfCentro = await this.perfPersoCentTrabRepository.preload({
-        id_perf_pers_centro_trab: idPerf,
-        ...PerfCentTrabData
-      });
-
-      if (!perfCentro) throw new NotFoundException(`la persona con: ${idPerf} no se ha encontrado`);
-      
-      await this.perfPersoCentTrabRepository.save(perfCentro);
-      return perfCentro;
-
-    } catch (error) {
-      console.log(error);
-      this.handleException(error); // Asegúrate de tener un método para manejar las excepciones
+  async updatePerfCentroTrabajo(id: number, updateDto: UpdatePerfCentTrabDto): Promise<Net_perf_pers_cent_trab> {
+    const existingPerf = await this.perfPersoCentTrabRepository.findOne({ where: { id_perf_pers_centro_trab: id } });
+    if (!existingPerf) {
+      throw new NotFoundException(`Perfil centro trabajo con ID ${id} no encontrado`);
     }
-    
+    if (updateDto.idCentroTrabajo) {
+      const centroTrabajoExistente = await this.centroTrabajoRepository.findOne({ where: { id_centro_trabajo: updateDto.idCentroTrabajo } });
+
+      if (!centroTrabajoExistente) {
+        throw new NotFoundException(`El centro de trabajo con ID ${updateDto.idCentroTrabajo} no existe`);
+      }
+      existingPerf.centroTrabajo = centroTrabajoExistente;
+    }
+    const updatedPerf = { ...existingPerf, ...updateDto };
+    return this.perfPersoCentTrabRepository.save(updatedPerf);
   }
+
+  async desactivarPerfCentroTrabajo(id: number): Promise<void> {
+    const perfil = await this.perfPersoCentTrabRepository.findOne({ where: { id_perf_pers_centro_trab: id } });
+
+    if (!perfil) {
+        throw new NotFoundException(`Perfil centro trabajo con ID ${id} no encontrado`);
+    }
+    perfil.estado = 'INACTIVO';
+    await this.perfPersoCentTrabRepository.save(perfil);
+}
+
 
   async updateDatosBancarios(idPerf: string, datosBancarios: number
   ): Promise<void> {

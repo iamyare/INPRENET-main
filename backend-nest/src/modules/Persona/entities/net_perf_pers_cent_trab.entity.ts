@@ -27,6 +27,9 @@ export class Net_perf_pers_cent_trab {
 
     @Column('varchar2', { length: 40, nullable: false, name: 'SECTOR_ECONOMICO' })
     sector_economico: string;
+
+    @Column('varchar2', { length: 20, nullable: false, default: 'ACTIVO', name: 'ESTADO' })
+    estado: string;
     
     @ManyToOne(() => Net_Persona, persona => persona.perfPersCentTrabs)
     @JoinColumn({ name: 'ID_PERSONA', foreignKeyConstraintName: "FK_ID_PERS_PERAFCET" })

@@ -1,13 +1,11 @@
-// create-referencia-personal.dto.ts
-
-import { IsNotEmpty, IsOptional, IsString, MaxLength, MinLength, IsNumber } from 'class-validator';
+import { IsNotEmpty, IsOptional, IsString, MaxLength, MinLength } from 'class-validator';
 
 export class CreateReferenciaPersonalDTO {
     @IsNotEmpty()
     @IsString()
     @MinLength(2)
     @MaxLength(50)
-    nombre: string;
+    nombre_completo: string;
 
     @IsNotEmpty()
     @IsString()
@@ -20,7 +18,6 @@ export class CreateReferenciaPersonalDTO {
     @MinLength(10)
     @MaxLength(200)
     direccion: string;
-
 
     @IsOptional()
     @IsString()

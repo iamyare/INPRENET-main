@@ -1,4 +1,4 @@
-import { IsInt, IsOptional, IsString, MaxLength, MinLength, IsNumber, IsDate } from 'class-validator';
+import { IsInt, IsOptional, IsString, MaxLength, MinLength, IsNumber, IsDate, IsDateString } from 'class-validator';
 
 export class CentroTrabajoDTO {
     @IsInt()
@@ -16,13 +16,13 @@ export class CentroTrabajoDTO {
     @IsNumber()
     salarioBase?: number;
 
-    @IsString()
+    @IsDateString()
     @MinLength(10)
     @MaxLength(10)
     fechaIngreso: string;
 
     @IsOptional()
-    @IsString()
+    @IsDateString()
     @MinLength(10)
     @MaxLength(10)
     fechaEgreso?: string;
@@ -34,4 +34,9 @@ export class CentroTrabajoDTO {
     @IsString()
     @MaxLength(40)
     sectorEconomico: string;
+
+    @IsString()
+    @MaxLength(40)
+    @IsOptional()
+    estado?:string
 }

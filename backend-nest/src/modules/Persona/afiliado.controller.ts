@@ -11,6 +11,7 @@ import {
   HttpCode,
   HttpStatus,
   Res,
+  ParseIntPipe,
 } from '@nestjs/common';
 import { AfiliadoService } from './afiliado.service';
 import { UpdatePersonaDto } from './dto/update-persona.dto';
@@ -20,6 +21,8 @@ import { DataSource, Repository } from 'typeorm';
 import { AsignarReferenciasDTO } from './dto/asignarReferencia.dto';
 import { Net_Tipo_Persona } from './entities/net_tipo_persona.entity';
 import { InjectRepository } from '@nestjs/typeorm';
+import { UpdatePerfCentTrabDto } from './dto/update.perfAfilCentTrab.dto';
+import { UpdateReferenciaPersonalDTO } from './dto/update-referencia-personal.dto';
 
 @ApiTags('Persona')
 @Controller('Persona')
@@ -262,29 +265,62 @@ export class AfiliadoController {
     }
   }
   
-  @Put('/updateReferenciaPerson/:idPersonaRef')
-  updateReferenciaPerson(
-    @Param('idPersonaRef') idPersonaRef: Number,
-    @Body() referPersData: any,
-  ) {  
-    return this.afiliadoService.updateReferenciaPerson(idPersonaRef, referPersData);
+  @Patch('updateReferenciaPerson/:id')
+async updateReferenciaPerson(@Param('id') id: string, @Body() updateDto: UpdateReferenciaPersonalDTO) {
+    console.log('ID recibido:', id);
+    console.log('DTO recibido:', updateDto);
+
+    const idNum = parseInt(id, 10);
+    if (isNaN(idNum)) {
+        throw new NotFoundException(`El ID proporcionado (${id}) no es válido`);
+    }
+
+    const updatedRefPersonal = await this.afiliadoService.updateReferenciaPersonal(idNum, updateDto);
+
+    return {
+        mensaje: `Referencia personal con ID ${idNum} actualizada con éxito.`,
+        data: updatedRefPersonal,
+    };
+}
+
+@Delete('eliminarReferencia/:id')
+  async deleteReferenciaPersonal(@Param('id', ParseIntPipe) id: number) {
+    await this.afiliadoService.deleteReferenciaPersonal(id);
+    return {
+      mensaje: `La referencia personal con ID ${id} ha sido eliminada con éxito.`,
+    };
   }
 
-  @Put('/updateDatosGenerales/:idPersona')
-  updateDatosGenerales(
-    @Param('idPersona') idPersona: number,
-    @Body() datosGenerales: any,
-  ) {  
-    return this.afiliadoService.updateDatosGenerales(idPersona, datosGenerales);
+
+  @Patch('updatePerfCentroTrabajo/:id')
+  async updatePerfCentroTrabajo(@Param('id') id: string, @Body() updateDto: UpdatePerfCentTrabDto) {
+    // Convertir el ID a número para evitar errores de tipo
+    const idNum = parseInt(id, 10);
+    if (isNaN(idNum)) {
+      throw new NotFoundException(`El ID proporcionado (${id}) no es válido`);
+    }
+
+    // Llamar al servicio para actualizar el perfil
+    const updatedProfile = await this.afiliadoService.updatePerfCentroTrabajo(idNum, updateDto);
+
+    // Devolver el perfil actualizado
+    return {
+      mensaje: `Perfil de centro de trabajo con ID ${idNum} actualizado con éxito.`,
+      data: updatedProfile,
+    };
   }
 
-  @Put('/updatePerfCentroTrabajo/:idPerf')
-  updatePerfCentroTrabajo(
-    @Param('idPerf') idPerf: string,
-    @Body() PerfCentTrabData: any,
-  ) {
-    return this.afiliadoService.updatePerfCentroTrabajo(idPerf, PerfCentTrabData);
-  }
+  @Patch('desactivarPerfCentroTrabajo/:id')
+    async eliminarPerfCentroTrabajo(@Param('id') id: string) {
+        const idNum = parseInt(id, 10);
+        if (isNaN(idNum)) {
+            throw new NotFoundException(`El ID proporcionado (${id}) no es válido`);
+        }
+        await this.afiliadoService.desactivarPerfCentroTrabajo(idNum);
+        return {
+            mensaje: `Perfil de centro de trabajo con ID ${idNum} ha sido marcado como inactivo.`,
+        };
+    }
 
   @Put('/updateDatosBancarios/:idPerf')
   updateDatosBancarios(

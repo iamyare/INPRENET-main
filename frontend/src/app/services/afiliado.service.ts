@@ -18,7 +18,7 @@ export class AfiliadoService {
 
   createReferPersonales(idPersona: string, encapsulatedData: any): Observable<any> {
     /* const params = new HttpParams().set('idPersona', idPersona); */
-    const encapsulatedDataE = { referencias: encapsulatedData }
+    const encapsulatedDataE = {referencias: encapsulatedData}
 
     const url = `${environment.API_URL}/api/Persona/createReferPersonales/${idPersona}`;
     return this.http.post<any>(url, encapsulatedDataE);
@@ -85,8 +85,12 @@ export class AfiliadoService {
     return this.http.put(`${environment.API_URL}/api/Persona/updateDatosGenerales/${idPersona}`, datosGenerales);
   }
 
-  updateReferenciaPersonal(idPersonaRef: string, referPersData: any): Observable<any> {
-    return this.http.put(`${environment.API_URL}/api/Persona/updateReferenciaPerson/${idPersonaRef}`, referPersData);
+  updateReferenciaPersonal(id: string, updateDto: any): Observable<any> {
+    return this.http.patch(`${environment.API_URL}/api/Persona/updateReferenciaPerson/${id}`, updateDto);
+  }
+
+  eliminarReferenciaPersonal(id: string): Observable<any> {
+    return this.http.delete(`${environment.API_URL}/api/Persona/eliminarReferencia/${id}`);
   }
 
   updateFamiliar(idPersonaRef: string, familiarData: any): Observable<any> {
@@ -105,8 +109,9 @@ export class AfiliadoService {
     );
   }
 
-  updatePerfCentroTrabajo(idPerf: string, PerfCentTrabData: any): Observable<any> {
-    return this.http.put(`${environment.API_URL}/api/Persona/updatePerfCentroTrabajo/${idPerf}`, PerfCentTrabData);
+  updatePerfCentroTrabajo(id: number, encapsulatedData: any): Observable<any> {
+    const url = `${environment.API_URL}/api/Persona/updatePerfCentroTrabajo/${id}`;
+    return this.http.patch<any>(url, encapsulatedData);
   }
 
   updateDatosBancarios(idPerf: string, datosBancarios: any): Observable<any> {
@@ -114,6 +119,11 @@ export class AfiliadoService {
   }
   updateColegiosMagist(idPerf: string, datosColegioMagist: any): Observable<any> {
     return this.http.put(`${environment.API_URL}/api/Persona/updateColegiosMagist/${idPerf}`, datosColegioMagist);
+  }
+
+  desactivarPerfCentroTrabajo(id: number): Observable<any> {
+    const url = `${environment.API_URL}/api/Persona/desactivarPerfCentroTrabajo/${id}`;
+    return this.http.patch(url, null);
   }
 
   getAfiliadoDNI(param: string | number): Observable<any | void> {

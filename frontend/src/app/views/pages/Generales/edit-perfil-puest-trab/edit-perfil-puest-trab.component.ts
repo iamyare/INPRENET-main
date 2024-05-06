@@ -48,18 +48,23 @@ export class EditPerfilPuestTrabComponent {
       },
       {
         header: 'Número de Acuerdo',
-        col: 'numero_acuerdo',
+        col: 'numeroAcuerdo',
         isEditable: true
       },
       {
         header: 'Salario Base',
-        col: 'salario_base',
+        col: 'salarioBase',
         moneda: true,
         isEditable: true
       },
       {
         header: 'Fecha Ingreso',
-        col: 'fecha_ingreso',
+        col: 'fechaIngreso',
+        isEditable: true
+      },
+      {
+        header: 'Fecha de egreso',
+        col: 'fechaEgreso',
         isEditable: true
       },
       {
@@ -69,12 +74,12 @@ export class EditPerfilPuestTrabComponent {
       },
       {
         header: 'Sector Económico',
-        col: 'sector_economico',
+        col: 'sectorEconomico',
         isEditable: true
       },
       {
         header: 'Clase Cliente',
-        col: 'clase_cliente',
+        col: 'claseCliente',
         isEditable: true
       },
     ];
@@ -118,12 +123,13 @@ export class EditPerfilPuestTrabComponent {
         this.filas = data.map((item: any) => ({
           id: item.id_perf_pers_centro_trab,
           nombre_centro_trabajo: item.centroTrabajo.nombre_centro_trabajo,
-          numero_acuerdo: item.numero_acuerdo || 'No disponible',
-          salario_base: item.salario_base,
-          fecha_ingreso: item.fecha_ingreso,
+          numeroAcuerdo: item.numero_acuerdo || 'No disponible',
+          salarioBase: item.salario_base,
+          fechaIngreso: item.fecha_ingreso,
+          fechaEgreso: item.fecha_egreso,
           cargo: item.cargo,
-          sector_economico: item.sector_economico,
-          clase_cliente: item.clase_cliente,
+          sectorEconomico: item.sector_economico,
+          claseCliente: item.clase_cliente,
         }));
       } catch (error) {
         this.toastr.error('Error al cargar los datos de los perfiles de los centros de trabajo');
@@ -132,31 +138,8 @@ export class EditPerfilPuestTrabComponent {
     }else{
       this.resetDatos()
     }
-  
+
   }
-
-  /* editar = (row: any) => {
-    const PerfCentTrabData = {
-        nombre_centro_trabajo: row.nombre_centro_trabajo,
-        numero_acuerdo: row.numero_acuerdo || 'No disponible',
-        salario_base: row.salario_base,
-        fecha_ingreso: row.fecha_ingreso,
-        actividad_economica: row.actividad_economica,
-        sector_economico: row.sector_economico,
-        clase_cliente: row.clase_cliente,
-    };
-
-    console.log(PerfCentTrabData);
-    
-    this.svcAfiliado.updatePerfCentroTrabajo(row.id, PerfCentTrabData).subscribe(
-      response => {
-        this.toastr.success('perfil de la persona en el centro de trabajo editado con éxito');
-      },
-      error => {
-        this.toastr.error('Error al actualizar el perfil de la persona en el centro de trabajo');
-      }
-    );
-  }; */
 
   ejecutarFuncionAsincronaDesdeOtroComponente(funcion: (data: any) => Promise<void>) {
     this.ejecF = funcion;
@@ -172,12 +155,13 @@ export class EditPerfilPuestTrabComponent {
   manejarAccionUno(row: any) {
     const campos = [
       { nombre: 'nombre_centro_trabajo', tipo: 'text', requerido: true, etiqueta: 'Nombre Centro Trabajo', editable: true },
-      { nombre: 'numero_acuerdo', tipo: 'text', requerido: true, etiqueta: 'Número Acuerdo', editable: true },
-      { nombre: 'salario_base', tipo: 'number', requerido: true, etiqueta: 'salario_base', editable: true },
-      { nombre: 'fecha_ingreso', tipo: 'text', requerido: false, etiqueta: 'Fecha Ingreso', editable: false },
+      { nombre: 'numeroAcuerdo', tipo: 'text', requerido: true, etiqueta: 'Número Acuerdo', editable: true },
+      { nombre: 'salarioBase', tipo: 'number', requerido: true, etiqueta: 'salarioBase', editable: true },
+      { nombre: 'fechaIngreso', tipo: 'text', requerido: false, etiqueta: 'Fecha Ingreso', editable: false },
+      { nombre: 'fechaEgreso', tipo: 'text', requerido: false, etiqueta: 'Fecha Ingreso', editable: false },
       { nombre: 'cargo', tipo: 'text', requerido: false, etiqueta: 'Cargo', editable: false },
-      { nombre: 'sector_economico', tipo: 'text', requerido: false, etiqueta: 'Sector Económico', editable: false },
-      { nombre: 'clase_cliente', tipo: 'text', requerido: false, etiqueta: 'Clase Cliente', editable: false }
+      { nombre: 'sectorEconomico', tipo: 'text', requerido: false, etiqueta: 'Sector Económico', editable: false },
+      { nombre: 'claseCliente', tipo: 'text', requerido: false, etiqueta: 'Clase Cliente', editable: false }
     ];
 
     this.openDialog(campos, row);
@@ -187,40 +171,29 @@ export class EditPerfilPuestTrabComponent {
     const dialogRef = this.dialog.open(ConfirmDialogComponent, {
       width: '350px',
       data: {
-        idPersona: this.Afiliado.ID_PERSONA
+        title: 'Confirmar Desactivación',
+        message: '¿Está seguro de que desea desactivar este perfil?'
       }
     });
 
-    dialogRef.afterClosed().subscribe((result: any) => {
+    dialogRef.afterClosed().subscribe((result: boolean) => {
       if (result) {
-        /* console.log(this.selectedTipoPlanilla);
-        this.planillaIngresosService.eliminarDetallePlanillaIngreso(row.id_detalle_plan_Ing).subscribe({
+        this.svcAfiliado.desactivarPerfCentroTrabajo(row.id).subscribe({
           next: (response) => {
-            this.toastr.success(response.message);
-            
-            if (this.selectedTipoPlanilla) {
-              this.obtenerDetallesPlanilla(this.idCentroTrabajo, this.selectedTipoPlanilla);
-              this.obtenerDetallesPlanillaAgrupCent(this.idCentroTrabajo, this.selectedTipoPlanilla);
-            } else {
-              console.error('selectedTipoPlanilla está indefinido o no es un array válido.');
-              this.toastr.error('Ocurrió un error debido a un problema con el tipo de planilla seleccionado.');
-            }
+            this.toastr.success(response.mensaje, 'Perfil Desactivado');
+            this.getFilas().then(() => this.cargar());
           },
           error: (error) => {
-            console.error('Error al eliminar el detalle de la planilla ingreso:', error);
-            this.toastr.error('Ocurrió un error al eliminar el detalle de la planilla ingreso.');
+            console.error('Error al desactivar el perfil:', error);
+            this.toastr.error('Ocurrió un error al desactivar el perfil.');
           }
-        }); */
+        });
+      } else {
+        console.log('Desactivación cancelada por el usuario.');
       }
     });
-    /* const campos = [
-      { nombre: 'dni', tipo: 'text', requerido: true, etiqueta: 'Nombre Centro Trabajo', editable: true },
-      { nombre: 'genero', tipo: 'text', requerido: true, etiqueta: 'Número Acuerdo', editable: true },
-      { nombre: 'fecha_nacimiento', tipo: 'number', requerido: true, etiqueta: 'salario_base', editable: true }
-    ];
-
-    this.openDialog(campos, row); */
   }
+
 
   AgregarPuestoTrabajo(){
     const dialogRef = this.dialog.open(AgregarPuestTrabComponent, {
@@ -235,23 +208,41 @@ export class EditPerfilPuestTrabComponent {
       this.ngOnInit();
     });
   }
-  
+
   openDialog(campos: any, row: any): void {
     const dialogRef = this.dialog.open(EditarDialogComponent, {
-      width: '500px',
-      data: { campos: campos, valoresIniciales: row }
+        width: '500px',
+        data: { campos: campos, valoresIniciales: row }
     });
 
-    
     dialogRef.afterClosed().subscribe(async (result: any) => {
-      this.svcAfiliado.updatePerfCentroTrabajo(row.id, result).subscribe(
-        async (result) => {
-          
-        },
-        (error) => {
-      })
-    
+        if (result) {
+            delete result.nombre_centro_trabajo;
+            if (!result.claseCliente) {
+                console.error("Falta la propiedad 'claseCliente'");
+                return;
+            }
+            this.svcAfiliado.updatePerfCentroTrabajo(row.id, result).subscribe({
+                next: (response) => {
+                    const index = this.filas.findIndex(item => item.id === row.id);
+                    if (index !== -1) {
+                        this.filas[index] = {
+                            ...this.filas[index],
+                            ...result
+                        };
+                    }
+                    this.cargar();
+                },
+                error: (error) => {
+                    console.error("Error al actualizar:", error);
+                }
+            });
+        } else {
+            console.log("No se realizaron cambios.");
+        }
     });
+}
 
-  }
+
+
 }

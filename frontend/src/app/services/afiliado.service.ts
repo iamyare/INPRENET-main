@@ -93,8 +93,9 @@ export class AfiliadoService {
     return this.http.delete(`${environment.API_URL}/api/Persona/eliminarReferencia/${id}`);
   }
 
-  updateFamiliar(idPersonaRef: string, familiarData: any): Observable<any> {
-    return this.http.put(`${environment.API_URL}/api/Persona/updateFamiliar/${idPersonaRef}`, familiarData);
+  updateVinculoFamiliar(dniPersona: string, dniFamiliar: string, updateData: any): Observable<any> {
+    const url = `${environment.API_URL}/api/Persona/updateVinculoFamiliar/${dniPersona}/${dniFamiliar}`;
+    return this.http.patch<any>(url, updateData);
   }
 
   getAllPerfCentroTrabajo(dni: string): Observable<any | void> {
@@ -107,6 +108,10 @@ export class AfiliadoService {
         return res;
       })
     );
+  }
+
+  agregarFamiliar(dniPersona: string, familiarData: any): Observable<any> {
+    return this.http.post(`${environment.API_URL}/api/Persona/agregarFamiliar/${dniPersona}`, familiarData);
   }
 
   updatePerfCentroTrabajo(id: number, encapsulatedData: any): Observable<any> {

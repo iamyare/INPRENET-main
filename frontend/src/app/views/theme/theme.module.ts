@@ -57,6 +57,7 @@ import { EditColegiosMagisterialesComponent } from '../pages/Generales/edit-cole
 import { PlanillaColegiosPrivadosComponent } from '../pages/Centros Privados/planilla-colegios-privados/planilla-colegios-privados.component';
 import { NavDefaultComponent } from '../pages/Centros Privados/nav-default/nav-default.component';
 import { EditFamiliaresComponent } from '../pages/Generales/edit-familiares/edit-familiares.component';
+import { NewFamiliaresComponent } from '@docs-components/new-familiares/new-familiares.component';
 
 @NgModule({
   imports: [
@@ -118,7 +119,7 @@ import { EditFamiliaresComponent } from '../pages/Generales/edit-familiares/edit
     EditDatosBancariosComponent,
     EditReferPersonalesComponent,
     EditColegiosMagisterialesComponent,
-    EditFamiliaresComponent
+    EditFamiliaresComponent,
   ]
 })
 export class ThemeModule {

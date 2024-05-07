@@ -1,73 +1,84 @@
-import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output } from '@angular/core';
-import { FormArray, FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
-import { generateAddressFormGroup } from '@docs-components/dat-generales-afiliado/dat-generales-afiliado.component';
+import { Component, Inject, Input, Output, EventEmitter, Optional, OnInit } from '@angular/core';
+import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
+import { ToastrService } from 'ngx-toastr';
+import { FormBuilder, FormGroup, Validators, FormArray, FormControl } from '@angular/forms';
+import { DatePipe } from '@angular/common';
+import { AfiliadoService } from 'src/app/services/afiliado.service';
 import { FormStateService } from 'src/app/services/form-state.service';
 
 @Component({
   selector: 'app-new-familiares',
   templateUrl: './new-familiares.component.html',
-  styleUrl: './new-familiares.component.scss',
-  changeDetection: ChangeDetectionStrategy.OnPush,
+  styleUrls: ['./new-familiares.component.scss'],
 })
-export class NewFamiliaresComponent {
+export class NewFamiliaresComponent implements OnInit {
   private formKey = 'FormFamiliar';
   public formParent: FormGroup;
 
-  @Input() datos:any
-  @Output() newDatosFamiliares = new EventEmitter<any>()
+  @Input() datos: any;
+  @Output() newDatosFamiliares = new EventEmitter<any>();
+  @Input() dniPersona!: string;
+
   parentesco = [
-    {value: "ABUELA MATERNA", label: "Abuela Materna"},
-    {value: "ABUELA PATERNA", label: "Abuela Paterna"},
-    {value: "ABUELO MATERNO", label: "Abuelo Materno"},
-    {value: "ABUELO PATERNO", label: "Abuelo Paterno"},
-    {value: "CUÑADA", label: "Cuñada"},
-    {value: "CUÑADO", label: "Cuñado"},
-    {value: "ESPOSA", label: "Esposa"},
-    {value: "ESPOSO", label: "Esposo"},
-    {value: "HERMANA", label: "Hermana"},
-    {value: "HERMANO", label: "Hermano"},
-    {value: "HIJA", label: "Hija"},
-    {value: "HIJO", label: "Hijo"},
-    {value: "MADRE", label: "Madre"},
-    {value: "NIETA", label: "Nieta"},
-    {value: "NIETO", label: "Nieto"},
-    {value: "NUERA", label: "Nuera"},
-    {value: "PADRE", label: "Padre"},
-    {value: "PRIMA", label: "Prima"},
-    {value: "PRIMO", label: "Primo"},
-    {value: "SOBRINA", label: "Sobrina"},
-    {value: "SOBRINO", label: "Sobrino"},
-    {value: "SUEGRA", label: "Suegra"},
-    {value: "SUEGRO", label: "Suegro"},
-    {value: "TÍA MATERNA", label: "Tía Materna"},
-    {value: "TÍA PATERNA", label: "Tía Paterna"},
-    {value: "TÍO MATERNO", label: "Tío Materno"},
-    {value: "TÍO PATERNO", label: "Tío Paterno"},
-    {value: "YERNO", label: "Yerno"}
-  ]
+    { value: "ABUELA MATERNA", label: "Abuela Materna" },
+    { value: "ABUELA PATERNA", label: "Abuela Paterna" },
+    { value: "ABUELO MATERNO", label: "Abuelo Materno" },
+    { value: "ABUELO PATERNO", label: "Abuelo Paterno" },
+    { value: "CUÑADA", label: "Cuñada" },
+    { value: "CUÑADO", label: "Cuñado" },
+    { value: "ESPOSA", label: "Esposa" },
+    { value: "ESPOSO", label: "Esposo" },
+    { value: "HERMANA", label: "Hermana" },
+    { value: "HERMANO", label: "Hermano" },
+    { value: "HIJA", label: "Hija" },
+    { value: "HIJO", label: "Hijo" },
+    { value: "MADRE", label: "Madre" },
+    { value: "NIETA", label: "Nieta" },
+    { value: "NIETO", label: "Nieto" },
+    { value: "NUERA", label: "Nuera" },
+    { value: "PADRE", label: "Padre" },
+    { value: "PRIMA", label: "Prima" },
+    { value: "PRIMO", label: "Primo" },
+    { value: "SOBRINA", label: "Sobrina" },
+    { value: "SOBRINO", label: "Sobrino" },
+    { value: "SUEGRO", label: "Suegro" },
+    { value: "SUEGRA", label: "Suegra" },
+    { value: "TÍA MATERNA", label: "Tía Materna" },
+    { value: "TÍA PATERNA", label: "Tía Paterna" },
+    { value: "TÍO MATERNO", label: "Tío Materno" },
+    { value: "TÍO PATERNO", label: "Tío Paterno" },
+    { value: "YERNO", label: "Yerno" }
+  ];
 
-  onDatosBenChange() {
-    this.newDatosFamiliares.emit(this.formParent);
-  }
-
-  constructor(private formStateService: FormStateService, private fb: FormBuilder,) {
+  constructor(
+    private afiliadoService: AfiliadoService,
+    private datePipe: DatePipe,
+    private formStateService: FormStateService,
+    private fb: FormBuilder,
+    private toastr: ToastrService,
+    @Optional() @Inject(MAT_DIALOG_DATA) public data: any,
+    @Optional() private dialogRef?: MatDialogRef<NewFamiliaresComponent>
+  ) {
     this.formParent = this.fb.group({
-      familiar: this.fb.array([]),
+      familiar: this.fb.array([])
     });
+    if (data && data.dniPersona) {
+      this.dniPersona = data.dniPersona;
+    }
   }
 
   ngOnInit(): void {
     this.initForm();
     const familiarArray = this.formParent.get('familiar') as FormArray;
     if (this.datos && this.datos.value && this.datos.value.familiar && this.datos.value.familiar.length > 0 && familiarArray.length === 0) {
-      for (let i of this.datos.value.familiar) {
-        this.agregarBen(i);
+      for (const item of this.datos.value.familiar) {
+        this.agregarFamiliar(item);
       }
     }
   }
 
   private initForm() {
-    let existingForm = this.formStateService.getForm(this.formKey);
+    const existingForm = this.formStateService.getForm(this.formKey);
     if (existingForm) {
       this.formParent = existingForm;
     } else {
@@ -78,40 +89,81 @@ export class NewFamiliaresComponent {
     }
   }
 
-  initFormFamiliar(datosFamiliar?:any, DatosBac?:any, Archivos?:File, labelArch?:any, porcentaje?:any): FormGroup {
+  initFormFamiliar(): FormGroup {
     return this.fb.group({
-      familiar: new FormControl(''),
-      datosFamiliar: generateAddressFormGroup(datosFamiliar),
-      id_parentesco: new FormControl("", Validators.required)
+      primerNombre: new FormControl('', Validators.required),
+      segundoNombre: new FormControl(''),
+      primerApellido: new FormControl('', Validators.required),
+      segundoApellido: new FormControl(''),
+      dni: new FormControl('', [Validators.required, Validators.minLength(8)]),
+      fechaNacimiento: new FormControl('', Validators.required),
+      parentesco: new FormControl('', Validators.required)
     });
   }
 
-  agregarBen(datos?: any): void {
+  agregarFamiliar(datos?: any): void {
     const familiar = this.formParent.get('familiar') as FormArray;
     if (datos) {
-      /* familiar.push(this.initFormFamiliar(datos.benfGroup)); */
+      familiar.push(this.fb.group({
+        primerNombre: new FormControl(datos.primerNombre || '', Validators.required),
+        segundoNombre: new FormControl(datos.segundoNombre || ''),
+        primerApellido: new FormControl(datos.primerApellido || '', Validators.required),
+        segundoApellido: new FormControl(datos.segundoApellido || ''),
+        dni: new FormControl(datos.dni || '', [Validators.required, Validators.minLength(8)]),
+        fechaNacimiento: new FormControl(datos.fechaNacimiento || '', Validators.required),
+        parentesco: new FormControl(datos.parentesco || '', Validators.required)
+      }));
     } else {
       familiar.push(this.initFormFamiliar());
     }
   }
 
-  eliminarRefPer(): void {
-    const asig_Familiar = this.formParent.get('familiar') as FormArray
-    asig_Familiar.removeAt(-1)
-    const data = this.formParent
-    this.newDatosFamiliares.emit(data)
+  eliminarFamiliar(): void {
+    const familiar = this.formParent.get('familiar') as FormArray;
+    if (familiar.length > 0) {
+      familiar.removeAt(familiar.length - 1);
+      this.newDatosFamiliares.emit(this.formParent);
+    }
   }
 
   getCtrl(key: string, form: FormGroup): any {
-    return form.get(key)
+    return form.get(key);
   }
 
-  getLabel(key:string,form:FormGroup, indice:any):String{
-    return form.get(key)?.value[indice]?.Arch?.name
+  onDatosBenChange() {
+    this.newDatosFamiliares.emit(this.formParent);
   }
 
+  guardarFamiliares(): void {
+    const familiaresArray = (this.formParent.get('familiar') as FormArray).value;
+    const familiaresData = familiaresArray.map((familiar: any) => ({
+      primerNombre: String(familiar.primerNombre),
+      segundoNombre: familiar.segundoNombre ? String(familiar.segundoNombre) : undefined,
+      primerApellido: String(familiar.primerApellido),
+      segundoApellido: familiar.segundoApellido ? String(familiar.segundoApellido) : undefined,
+      dni: String(familiar.dni),
+      fechaNacimiento: this.datePipe.transform(familiar.fechaNacimiento, 'yyyy-MM-dd') || undefined,
+      parentesco: String(familiar.parentesco)
+    }));
 
-  prueba(e: any, i: any) {
-    this.formParent.value.familiar[i].benfGroup.fechaNacimiento = e
+    familiaresData.forEach((familiar: any) => {
+      this.afiliadoService.agregarFamiliar(this.dniPersona, familiar).subscribe({
+        next: (response) => {
+          console.log('Familiar agregado con éxito:', response);
+          this.toastr.success('Familiar agregado con éxito');
+          this.cerrarDialogo();
+        },
+        error: (error) => {
+          console.error('Error al agregar familiar:', error);
+          this.toastr.error('Error al agregar familiar');
+        }
+      });
+    });
+  }
+
+  cerrarDialogo(): void {
+    if (this.dialogRef) {
+      this.dialogRef.close();
+    }
   }
 }

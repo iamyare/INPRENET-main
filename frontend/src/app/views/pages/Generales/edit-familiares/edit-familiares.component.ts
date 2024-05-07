@@ -45,33 +45,23 @@ export class EditFamiliaresComponent {
     this.myColumns = [
       {
         header: 'Nombre Completo',
-        col: 'nombre_completo',
+        col: 'nombreCompleto',
         isEditable: true,
         validationRules: [Validators.required, Validators.minLength(3)]
       },
       {
-        header: 'Parentesco',
+        header: 'DNI',
+        col: 'dni',
+        isEditable: true
+      },
+      {
+        header: 'Fecha de nacimiento',
+        col: 'fechaNacimiento',
+        isEditable: true
+      },
+      {
+        header: 'parentesco',
         col: 'parentesco',
-        isEditable: true
-      },
-      {
-        header: 'Dirección',
-        col: 'direccion',
-        isEditable: true
-      },
-      {
-        header: 'Teléfono Domicilio',
-        col: 'telefono_domicilio',
-        isEditable: true
-      },
-      {
-        header: 'Teléfono personal',
-        col: 'telefono_personal',
-        isEditable: true
-      },
-      {
-        header: 'Teléfono trabajo',
-        col: 'telefono_trabajo',
         isEditable: true
       },
     ];
@@ -113,26 +103,30 @@ export class EditFamiliaresComponent {
     if (this.Afiliado) {
       try {
         const data = await this.svcAfiliado.getAllFamiliares(this.Afiliado.DNI).toPromise();
+
         this.filas = data.map((item: any) => {
+          const nombreCompleto = item.nombreCompleto || 'Nombre desconocido';
+          const fechaNacimiento = item.fechaNacimiento || 'Fecha no disponible';
+          const parentesco = item.parentesco || 'Parentesco no disponible';
+          const dni = item.dni || 'DNI no disponible';
+
+
           return {
-            id: item.id_ref_personal_afil,
-            nombre_completo: item.referenciaPersonal.nombre_completo,
-            parentesco: item.referenciaPersonal.parentesco || 'No disponible',
-            direccion: item.referenciaPersonal.direccion,
-            telefono_domicilio: item.referenciaPersonal.telefono_domicilio,
-            telefono_personal: item.referenciaPersonal.telefono_personal,
-            telefono_trabajo: item.referenciaPersonal.telefono_trabajo,
-          }
-        }
-        );
+            nombreCompleto,
+            fechaNacimiento,
+            parentesco,
+            dni
+          };
+        });
       } catch (error) {
         this.toastr.error('Error al cargar los datos de los familiares');
-        console.error('Error al obtener datos de datos de los familiares', error);
+        console.error('Error al obtener datos de los familiares', error);
       }
     } else {
-      this.resetDatos()
+      this.resetDatos();
     }
   }
+
 
   ejecutarFuncionAsincronaDesdeOtroComponente(funcion: (data: any) => Promise<void>) {
     this.ejecF = funcion;
@@ -147,12 +141,10 @@ export class EditFamiliaresComponent {
 
   manejarAccionUno(row: any) {
     const campos = [
-      { nombre: 'nombre_completo', tipo: 'text', requerido: true, etiqueta: 'nombre_completo', editable: true },
-      { nombre: 'parentesco', tipo: 'text', requerido: true, etiqueta: 'parentesco', editable: true },
-      { nombre: 'direccion', tipo: 'text', requerido: true, etiqueta: 'direccion', editable: true },
-      { nombre: 'telefono_domicilio', tipo: 'text', requerido: false, etiqueta: 'telefono_domicilio', editable: true },
-      { nombre: 'telefono_personal', tipo: 'text', requerido: false, etiqueta: 'telefono_personal', editable: true },
-      { nombre: 'telefono_trabajo', tipo: 'text', requerido: false, etiqueta: 'telefono_trabajo', editable: true }
+      { nombre: 'nombreCompleto', tipo: 'text', requerido: true, etiqueta: 'Nombre completo', editable: true },
+      { nombre: 'fechaNacimiento', tipo: 'text', requerido: true, etiqueta: 'Fecha de nacimiento', editable: true },
+      { nombre: 'dni', tipo: 'text', requerido: false, etiqueta: 'dni', editable: true },
+      { nombre: 'parentesco', tipo: 'text', requerido: true, etiqueta: 'Parentesco', editable: true },
     ];
 
     this.openDialog(campos, row);
@@ -178,36 +170,54 @@ export class EditFamiliaresComponent {
 
   openDialog(campos: any, row: any): void {
     const dialogRef = this.dialog.open(EditarDialogComponent, {
-      width: '500px',
-      data: { campos: campos, valoresIniciales: row }
-    });
-
-    dialogRef.afterClosed().subscribe(async (result: any) => {
-      this.svcAfiliado.updateFamiliar(row.id, result).subscribe(
-        async (result) => {
-          this.toastr.success(`Datos modificados correctamente`);
-          this.getFilas().then(() => this.cargar());
-        },
-        (error) => {
-          this.getFilas().then(() => this.cargar());
-          this.toastr.error(`Error: ${error.error.message}`);
-        })
-
-    });
-  }
-
-  crearFamiliar() {
-    const dialogRef = this.dialog.open(NewFamiliaresComponent, {
-      width: '60%',
-      height: '75%',
-      data: {
-        idPersona: this.Afiliado.ID_PERSONA
-      }
+        width: '500px',
+        data: { campos: campos, valoresIniciales: row }
     });
 
     dialogRef.afterClosed().subscribe((result: any) => {
-      this.ngOnInit();
+        if (result) {
+            this.svcAfiliado.updateVinculoFamiliar(this.Afiliado.DNI, row.dni, result).subscribe({
+                next: (response) => {
+                    this.toastr.success('Vínculo familiar actualizado con éxito.');
+                    const index = this.filas.findIndex(item => item.dni === row.dni);
+                    if (index !== -1) {
+                        this.filas[index] = {
+                            ...this.filas[index],
+                            ...result
+                        };
+                    }
+                    this.cargar();
+                },
+                error: (error) => {
+                    console.error('Error al actualizar el vínculo familiar:', error);
+                    this.toastr.error('Error al actualizar el vínculo familiar.');
+                }
+            });
+        } else {
+            console.log('Edición cancelada.');
+        }
     });
-  }
+}
+
+
+crearFamiliar() {
+  const dialogRef = this.dialog.open(NewFamiliaresComponent, {
+    width: '60%',
+    height: '75%',
+    data: {
+      dniPersona: this.Afiliado.DNI, // Aquí se debe pasar el valor correcto
+      idPersona: this.Afiliado.ID_PERSONA
+    }
+  });
+
+  console.log(this.Afiliado.DNI);
+
+
+  dialogRef.afterClosed().subscribe((result: any) => {
+    if (result) {
+      this.ngOnInit();
+    }
+  });
+}
 
 }

@@ -173,7 +173,7 @@ export class EditReferPersonalesComponent {
       { nombre: 'direccion', tipo: 'text', requerido: true, etiqueta: 'direccion', editable: true },
       { nombre: 'telefono_domicilio', tipo: 'text', requerido: false, etiqueta: 'telefono_domicilio', editable: true },
       { nombre: 'telefono_personal', tipo: 'text', requerido: false, etiqueta: 'telefono_personal', editable: true },
-      { nombre: 'telefono_trabajo', tipo: 'text', requerido: false, etiqueta: 'telefono_trabajo', editable: true }
+      { nombre: 'telefono_trabajo', tipo: 'text', requerido: false, etiqueta: 'telefono_trabajo', editable: true },
     ];
 
     this.openDialog(campos, row);

@@ -23,6 +23,9 @@ import { Net_Tipo_Persona } from './entities/net_tipo_persona.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { UpdatePerfCentTrabDto } from './dto/update.perfAfilCentTrab.dto';
 import { UpdateReferenciaPersonalDTO } from './dto/update-referencia-personal.dto';
+import { NET_RELACION_FAMILIAR } from './entities/net_relacion_familiar';
+import { UpdateFamiliarDTO } from './dto/update-familiar.dto';
+import { NuevoFamiliarDTO } from './dto/nuevo-familiar.dto';
 
 @ApiTags('Persona')
 @Controller('Persona')
@@ -103,7 +106,7 @@ export class AfiliadoController {
                     await this.afiliadoService.createRelacionFamiliar({
                         personaId: persona.id_persona,
                         familiarId: familiar.id_persona,
-                        parentezco: familiarDto.parentezcoConPrincipal
+                        parentesco: familiarDto.parentescoConPrincipal
                     });
 
                     if (familiarDto.encargadoDos) {
@@ -111,7 +114,7 @@ export class AfiliadoController {
                         await this.afiliadoService.createRelacionFamiliar({
                             personaId: encargadoDos.id_persona,
                             familiarId: familiar.id_persona,
-                            parentezco: familiarDto.encargadoDos.parentezcoConFamiliar
+                            parentesco: familiarDto.encargadoDos.parentescoConFamiliar
                         });
                     }
                     familiaresAsignados.push(familiar);
@@ -321,6 +324,39 @@ async updateReferenciaPerson(@Param('id') id: string, @Body() updateDto: UpdateR
             mensaje: `Perfil de centro de trabajo con ID ${idNum} ha sido marcado como inactivo.`,
         };
     }
+
+    @Get('getAllFamiliares/:dni')
+  async getVinculosFamiliares(
+    @Param('dni') dni: string
+  ): Promise<{ nombreCompleto: string, fechaNacimiento: string, parentesco: string }[]> {
+    return this.afiliadoService.getVinculosFamiliares(dni);
+  }
+
+  @Patch('/updateVinculoFamiliar/:dniPersona/:dniFamiliar')
+  async updateVinculoFamiliar(
+    @Param('dniPersona') dniPersona: string,
+    @Param('dniFamiliar') dniFamiliar: string,
+    @Body() updateDto: { nombreCompleto?: string, fechaNacimiento?: string, parentesco?: string, dni?: string }
+  ) {
+    try {
+      const result = await this.afiliadoService.updateFamiliarRelation(dniPersona, dniFamiliar, updateDto);
+      return result;
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw new NotFoundException(error.message);
+      } else {
+        throw new Error('No se pudo procesar la solicitud');
+      }
+    }
+  }
+
+  @Post('/agregarFamiliar/:dniPersona')
+  async agregarFamiliarYRelacion(
+    @Param('dniPersona') dniPersona: string,
+    @Body() nuevoFamiliarDto: NuevoFamiliarDTO
+  ) {
+    return this.afiliadoService.agregarFamiliarYRelacion(dniPersona, nuevoFamiliarDto);
+  }
 
   @Put('/updateDatosBancarios/:idPerf')
   updateDatosBancarios(

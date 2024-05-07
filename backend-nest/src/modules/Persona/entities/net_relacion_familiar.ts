@@ -15,6 +15,6 @@ export class NET_RELACION_FAMILIAR  {
     @JoinColumn({ name: 'ID_FAMILIAR' })
     familiar: Net_Persona;
 
-    @Column('varchar2', { length: 100, name: 'PARENTEZCO' })
-    parentezco: string;
+    @Column('varchar2', { length: 100, name: 'parentesco' })
+    parentesco: string;
 }

@@ -4,12 +4,12 @@ import { NetPersonaDTO } from './create-persona.dto';
 
 export class OtraPersonaDTO extends NetPersonaDTO {
     @IsString()
-    parentezcoConFamiliar: string;
+    parentescoConFamiliar: string;
 }
 
 export class FamiliarDTO extends NetPersonaDTO {
     @IsString()
-    parentezcoConPrincipal: string;
+    parentescoConPrincipal: string;
 
     @IsOptional()
     @ValidateNested()

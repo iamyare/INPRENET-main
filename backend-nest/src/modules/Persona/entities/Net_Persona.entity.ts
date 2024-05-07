@@ -53,6 +53,9 @@ export class Net_Persona {
     @Column('varchar2', { length: 30, nullable: true, name: 'GENERO' })
     genero: string;
 
+    @Column('varchar2', { length: 30, nullable: true, name: 'SEXO' })
+    sexo: string;
+
     @Column('number', { nullable: true, name: 'CANTIDAD_DEPENDIENTES' })
     cantidad_dependientes: number;
 

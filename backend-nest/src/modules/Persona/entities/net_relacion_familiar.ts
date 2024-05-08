@@ -2,7 +2,7 @@ import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn } from "t
 import { Net_Persona } from "./Net_Persona.entity";
 
 @Entity({ name: 'NET_RELACION_FAMILIAR' })
-export class NET_RELACION_FAMILIAR  {
+export class NET_RELACION_FAMILIAR {
 
     @PrimaryGeneratedColumn({ type: 'int', name: 'ID_RELACION' })
     id: number;
@@ -15,6 +15,6 @@ export class NET_RELACION_FAMILIAR  {
     @JoinColumn({ name: 'ID_FAMILIAR' })
     familiar: Net_Persona;
 
-    @Column('varchar2', { length: 100, name: 'parentesco' })
+    @Column('varchar2', { length: 100, name: 'PARENTESCO' })
     parentesco: string;
 }

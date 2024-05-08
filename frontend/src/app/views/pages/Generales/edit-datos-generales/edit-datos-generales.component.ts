@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, Input } from '@angular/core';
 import { FormBuilder, Validators } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
 import { generateAddressFormGroup } from '@docs-components/dat-generales-afiliado/dat-generales-afiliado.component';
@@ -16,35 +16,35 @@ import { unirNombres } from 'src/app/shared/functions/formatoNombresP';
   styleUrl: './edit-datos-generales.component.scss'
 })
 export class EditDatosGeneralesComponent {
-  datosGen:any;
+  datosGen: any;
   public myFormFields: FieldConfig[] = []
-  Afiliado: any;
+
   unirNombres: any = unirNombres;
   datosTabl: any[] = [];
-  
+
   public myColumns: TableColumn[] = [];
   public filas: any[] = [];
   ejecF: any;
-  
-  datos!:any;
-  
+
+  datos!: any;
+
   form1 = this.fb.group({
     DatosGenerales: generateAddressFormGroup(this.datos),
   });
 
   form: any;
-  
+
+  @Input() Afiliado: any;
   constructor(
-    private fb: FormBuilder, 
+    private fb: FormBuilder,
     private svcAfiliado: AfiliadoService,
     private toastr: ToastrService,
     private dialog: MatDialog
-  ) {}
+  ) { }
   ngOnInit(): void {
     this.myFormFields = [
       { type: 'text', label: 'DNI del afiliado', name: 'dni', validations: [Validators.required, Validators.minLength(13), Validators.maxLength(14)], display: true },
     ];
-
     this.myColumns = [
       {
         header: 'Nombre del Centro Trabajo',
@@ -84,6 +84,7 @@ export class EditDatosGeneralesComponent {
       },
     ];
 
+    this.previsualizarInfoAfil();
     this.getFilas().then(() => this.cargar());
   }
 
@@ -99,15 +100,14 @@ export class EditDatosGeneralesComponent {
   }
 
   previsualizarInfoAfil() {
-    if (this.form.value.dni) {
-
-      this.svcAfiliado.getAfilByParam(this.form.value.dni).subscribe(
+    if (this.Afiliado) {
+      this.svcAfiliado.getAfilByParam(this.Afiliado.DNI).subscribe(
         async (result) => {
           this.datos = result;
           this.Afiliado = result;
           this.form1 = this.fb.group({
             DatosGenerales: this.fb.group({
-              dni: [result.DNI ],
+              dni: [result.DNI],
               primer_nombre: [result.PRIMER_NOMBRE],
               segundo_nombre: [result.SEGUNDO_NOMBRE],
               primer_apellido: [result.PRIMER_APELLIDO],
@@ -125,9 +125,9 @@ export class EditDatosGeneralesComponent {
               genero: [result.GENERO],
               estado_civil: [result.ESTADO_CIVIL],
               representacion: [result.REPRESENTACION],
-              
+
               id_profesion: [result.DESCRIPCION],
-              
+
               id_municipio_residencia: [result.ID_MUNICIPIO],
               id_pais_nacionalidad: [result.ID_PAIS],
               id_tipo_identificacion: [result.ID_IDENTIFICACION],
@@ -143,14 +143,14 @@ export class EditDatosGeneralesComponent {
         })
     }
   }
-  resetDatos(){
-    if (this.form){
+  resetDatos() {
+    if (this.form) {
       this.form.reset();
     }
     this.Afiliado = {};
   }
   async getFilas() {
-    if (this.Afiliado){
+    if (this.Afiliado) {
       try {
         /* const data = await this.svcAfiliado.getAllPerfCentroTrabajo(this.Afiliado.DNI).toPromise();
         this.filas = data.map((item: any) => ({
@@ -167,15 +167,14 @@ export class EditDatosGeneralesComponent {
         this.toastr.error('Error al cargar los datos de los perfiles de los centros de trabajo');
         console.error('Error al obtener datos de datos de los perfiles de los centros de trabajo', error);
       }
-    }else{
+    } else {
       this.resetDatos()
     }
-  
   }
 
-  GuardarInformacion(){
+  GuardarInformacion() {
     this.form1.value.DatosGenerales.fecha_nacimiento = convertirFechaInputs(this.form1.value.DatosGenerales.fecha_nacimiento)
-    console.log(this.form1.value.DatosGenerales);
+
     this.svcAfiliado.updateDatosGenerales(this.Afiliado.ID_PERSONA, this.form1.value.DatosGenerales).subscribe(
       async (result) => {
         this.toastr.success(`Datos modificados correctamente`);
@@ -186,5 +185,5 @@ export class EditDatosGeneralesComponent {
         this.getFilas().then(() => this.cargar());
         this.toastr.error(`Error: ${error.error.message}`);
       })
-  } 
+  }
 }

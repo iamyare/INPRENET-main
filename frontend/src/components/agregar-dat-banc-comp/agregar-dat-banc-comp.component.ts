@@ -18,36 +18,36 @@ export class AgregarDatBancCompComponent {
       refpers: new FormArray([], [Validators.required])
     });
 
-    constructor(private fb: FormBuilder, private afilService: AfiliadoService,
-      private dialogRef: MatDialogRef<AgregarDatBancCompComponent>, 
-      private toastr: ToastrService,
-      @Inject(MAT_DIALOG_DATA) public data: { idPersona: string } 
-    ) {}
+  constructor(private fb: FormBuilder, private afilService: AfiliadoService,
+    private dialogRef: MatDialogRef<AgregarDatBancCompComponent>,
+    private toastr: ToastrService,
+    @Inject(MAT_DIALOG_DATA) public data: { idPersona: string }
+  ) { }
 
-    ngOnInit(): void {}
+  ngOnInit(): void { }
 
-    setHistSal(datosHistSal: any) {
-      this.formHistPag = datosHistSal
-    }
+  setHistSal(datosHistSal: any) {
+    this.formHistPag = datosHistSal
+  }
 
-    guardar(){
-      this.afilService.createDatosBancarios(this.data.idPersona, this.formHistPag.value.refpers).subscribe(
-        (res: any) => {
-          if (res.length>0) {
-            this.formHistPag.reset();
-            this.toastr.success("Dato Bancario agregado con éxito");
-            this.cerrar();
-          }
-        },
-        (error) => {
-          this.toastr.error(error);
-          console.error('Error al obtener afiliados', error);
+  guardar() {
+    this.afilService.createDatosBancarios(this.data.idPersona, this.formHistPag.banco).subscribe(
+      (res: any) => {
+        if (res.length > 0) {
+          /* this.formHistPag.reset(); */
+          this.toastr.success("Dato Bancario agregado con éxito");
+          this.cerrar();
         }
-        );
-    }
+      },
+      (error) => {
+        this.toastr.error(error);
+        console.error('Error al obtener afiliados', error);
+      }
+    );
+  }
 
-    cerrar() {
-      this.dialogRef.close();
-    }
+  cerrar() {
+    this.dialogRef.close();
+  }
 
 }

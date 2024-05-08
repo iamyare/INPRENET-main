@@ -1,4 +1,4 @@
-<div style="margin: 1% 0% 1% 0%; text-align: center; background-color: white">
+<!-- <div style="margin: 1% 0% 1% 0%; text-align: center; background-color: white">
   <app-dynamic-form [fields]="myFormFields" titulo="Buscar Causante" subtitulo="Completa la información correspondiente"
     (newDatBenChange)="obtenerDatos($event)"></app-dynamic-form>
   <div class="row" style="text-align: center;  margin: 1%;">
@@ -19,13 +19,9 @@
 
 <div id="texto" style="text-align: center;" *ngIf="!Afiliado">
   <h2 class="anaranjado desapareciendo">No se encuentra ningún registro</h2>
-</div>
+</div> -->
 
-<div id="texto" style="text-align: center;" *ngIf="filas.length == 0">
-  <h2 class="anaranjado desapareciendo">No se encuentra ningún beneficiario</h2>
-</div>
-
-<div *ngIf="Afiliado" style="background-color: white; margin: 1% 0% 1% 0%; padding: 1% 0% 1% 0%">
+<!-- <div *ngIf="Afiliado" style="background-color: white; margin: 1% 0% 1% 0%; padding: 1% 0% 1% 0%">
   <h1 style="text-align: center; font-size: 2rem">Datos Generales Afiliado</h1>
   <div>
     <table>
@@ -57,6 +53,15 @@
   </div>
 
 </div>
+ -->
+
+<div id="texto" style="text-align: center;" *ngIf="filas.length == 0">
+  <h2 class="anaranjado desapareciendo">No se encuentra ningún beneficiario</h2>
+</div>
+
+<button mat-raised-button color="primary" style="color: white; margin: 1% 0 1% 0" (click)="AgregarBeneficiario()">
+  Agregar Beneficiario
+</button>
 
 <div *ngIf="filas.length != 0 " style="background-color: white; border-radius: 10px; padding: 20px">
   <app-dynamic-table style="width: 100%" titulo="Editar Beneficiarios"

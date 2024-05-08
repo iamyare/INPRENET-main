@@ -16,22 +16,23 @@ export class AgregarBenefCompComponent {
     {
       refpers: new FormArray([], [Validators.required])
     });
+
   constructor(
-    private fb: FormBuilder, 
+    private fb: FormBuilder,
     private afilService: AfiliadoService,
     @Inject(MAT_DIALOG_DATA) public data: { idPersona: string },
-    private dialogRef: MatDialogRef<AgregarBenefCompComponent>, 
+    private dialogRef: MatDialogRef<AgregarBenefCompComponent>,
     private toastr: ToastrService,
-  ) {}
-  
+  ) { }
+
   ngOnInit(): void { }
 
   setDatosBen(DatosBancBen: any) {
     this.formBeneficiarios = DatosBancBen
   }
-/* CAMBIAR BENEFICIARIOS */
-  guardar(){
-    this.formBeneficiarios.value.beneficiario = this.formBeneficiarios.value.beneficiario.map((item:any) => ({
+  /* CAMBIAR BENEFICIARIOS */
+  guardar() {
+    this.formBeneficiarios.value.beneficiario = this.formBeneficiarios.value.beneficiario.map((item: any) => ({
       ...item,
       porcentaje: item.porcentaje.porcBenef,
     }));
@@ -43,9 +44,9 @@ export class AgregarBenefCompComponent {
 
     this.afilService.createBeneficiarios(this.data.idPersona, dataBeneficiarios).subscribe(
       (res: any) => {
-        if (res.length>0) {
-          this.formBeneficiarios.reset();
+        if (res.length > 0) {
           this.toastr.success("Dato Bancario agregado con éxito");
+          this.formBeneficiarios.reset();
           this.cerrar();
         }
       },
@@ -53,7 +54,7 @@ export class AgregarBenefCompComponent {
         this.toastr.error(error);
         console.error('Error al obtener afiliados', error);
       }
-      );
+    );
   }
 
   cerrar() {

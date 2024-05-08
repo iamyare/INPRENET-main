@@ -13,30 +13,34 @@ export class AgregarReferenciasPersonalesComponent {
   form = this.fb.group({
   });
 
+  dataReferenciasP: any
   formReferencias: any = new FormGroup(
-  {
-    refpers: new FormArray([], [Validators.required])
-  });
+    {
+      refpers: new FormArray([], [Validators.required])
+    });
 
   constructor(
-    private toastr: ToastrService, 
+    private toastr: ToastrService,
     private fb: FormBuilder,
-    private dialogRef: MatDialogRef<AgregarReferenciasPersonalesComponent>, 
+    private dialogRef: MatDialogRef<AgregarReferenciasPersonalesComponent>,
     private afilService: AfiliadoService,
     @Inject(MAT_DIALOG_DATA) public data: { idPersona: number }
   ) { }
 
-  ngOnInit(): void {}
+  ngOnInit(): void { }
 
   setDatosRefPer(datosRefPer: any) {
     this.formReferencias = datosRefPer
   }
 
-  guardar(){
+  guardar() {
+    console.log(this.formReferencias.value);
+
     this.afilService.createReferPersonales(String(this.data.idPersona), this.formReferencias.value.refpers).subscribe(
       (res: any) => {
-        if (res.length>0) {
-          this.formReferencias.reset();
+        console.log(res);
+
+        if (res.length > 0) {
           this.toastr.success("Referencia personal agregada con éxito");
           this.cerrar();
         }
@@ -45,7 +49,7 @@ export class AgregarReferenciasPersonalesComponent {
         this.toastr.error(error);
         console.error('Error al obtener afiliados', error);
       }
-      );
+    );
   }
 
   cerrar() {

@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, Input } from '@angular/core';
 import { Validators } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
 import { AgregarPuestTrabComponent } from '@docs-components/agregar-puest-trab/agregar-puest-trab.component';
@@ -19,10 +19,10 @@ export class EditPerfilPuestTrabComponent {
   convertirFechaInputs = convertirFechaInputs
   public myFormFields: FieldConfig[] = []
   form: any;
-  Afiliado!: any;
+  @Input() Afiliado!: any;
   unirNombres: any = unirNombres;
   datosTabl: any[] = [];
-  prevAfil:boolean = false;
+  prevAfil: boolean = false;
 
   public myColumns: TableColumn[] = [];
   public filas: any[] = [];
@@ -83,7 +83,7 @@ export class EditPerfilPuestTrabComponent {
         isEditable: true
       },
     ];
-
+    this.previsualizarInfoAfil();
     this.getFilas().then(() => this.cargar());
   }
 
@@ -92,9 +92,9 @@ export class EditPerfilPuestTrabComponent {
   }
 
   previsualizarInfoAfil() {
-    if (this.form.value.dni) {
+    if (this.Afiliado.DNI) {
 
-      this.svcAfiliado.getAfilByParam(this.form.value.dni).subscribe(
+      this.svcAfiliado.getAfilByParam(this.Afiliado.DNI).subscribe(
         async (result) => {
           this.prevAfil = true;
           this.Afiliado = result
@@ -108,8 +108,8 @@ export class EditPerfilPuestTrabComponent {
         })
     }
   }
-  resetDatos(){
-    if (this.form){
+  resetDatos() {
+    if (this.form) {
       this.form.reset();
     }
     this.filas = [];
@@ -117,7 +117,7 @@ export class EditPerfilPuestTrabComponent {
   }
 
   async getFilas() {
-    if (this.Afiliado){
+    if (this.Afiliado) {
       try {
         const data = await this.svcAfiliado.getAllPerfCentroTrabajo(this.Afiliado.DNI).toPromise();
         this.filas = data.map((item: any) => ({
@@ -135,7 +135,7 @@ export class EditPerfilPuestTrabComponent {
         this.toastr.error('Error al cargar los datos de los perfiles de los centros de trabajo');
         console.error('Error al obtener datos de datos de los perfiles de los centros de trabajo', error);
       }
-    }else{
+    } else {
       this.resetDatos()
     }
 
@@ -172,7 +172,8 @@ export class EditPerfilPuestTrabComponent {
       width: '350px',
       data: {
         title: 'Confirmar Desactivación',
-        message: '¿Está seguro de que desea desactivar este perfil?'
+        message: '¿Está seguro de que desea desactivar este perfil?',
+        idPersona: this.Afiliado.ID_PERSONA
       }
     });
 
@@ -195,7 +196,7 @@ export class EditPerfilPuestTrabComponent {
   }
 
 
-  AgregarPuestoTrabajo(){
+  AgregarPuestoTrabajo() {
     const dialogRef = this.dialog.open(AgregarPuestTrabComponent, {
       width: '55%',
       height: '75%',
@@ -211,38 +212,35 @@ export class EditPerfilPuestTrabComponent {
 
   openDialog(campos: any, row: any): void {
     const dialogRef = this.dialog.open(EditarDialogComponent, {
-        width: '500px',
-        data: { campos: campos, valoresIniciales: row }
+      width: '500px',
+      data: { campos: campos, valoresIniciales: row }
     });
 
     dialogRef.afterClosed().subscribe(async (result: any) => {
-        if (result) {
-            delete result.nombre_centro_trabajo;
-            if (!result.claseCliente) {
-                console.error("Falta la propiedad 'claseCliente'");
-                return;
-            }
-            this.svcAfiliado.updatePerfCentroTrabajo(row.id, result).subscribe({
-                next: (response) => {
-                    const index = this.filas.findIndex(item => item.id === row.id);
-                    if (index !== -1) {
-                        this.filas[index] = {
-                            ...this.filas[index],
-                            ...result
-                        };
-                    }
-                    this.cargar();
-                },
-                error: (error) => {
-                    console.error("Error al actualizar:", error);
-                }
-            });
-        } else {
-            console.log("No se realizaron cambios.");
+      if (result) {
+        delete result.nombre_centro_trabajo;
+        if (!result.claseCliente) {
+          console.error("Falta la propiedad 'claseCliente'");
+          return;
         }
+        this.svcAfiliado.updatePerfCentroTrabajo(row.id, result).subscribe({
+          next: (response) => {
+            const index = this.filas.findIndex(item => item.id === row.id);
+            if (index !== -1) {
+              this.filas[index] = {
+                ...this.filas[index],
+                ...result
+              };
+            }
+            this.cargar();
+          },
+          error: (error) => {
+            console.error("Error al actualizar:", error);
+          }
+        });
+      } else {
+        console.log("No se realizaron cambios.");
+      }
     });
-}
-
-
-
+  }
 }

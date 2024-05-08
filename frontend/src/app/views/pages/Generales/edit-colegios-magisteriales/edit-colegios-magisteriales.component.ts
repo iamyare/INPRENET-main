@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, Input } from '@angular/core';
 import { Validators } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
 import { AgregarColMagisComponent } from '@docs-components/agregar-col-magis/agregar-col-magis.component';
@@ -20,35 +20,35 @@ export class EditColegiosMagisterialesComponent {
   convertirFechaInputs = convertirFechaInputs
   public myFormFields: FieldConfig[] = []
   form: any;
-  Afiliado!: any;
   unirNombres: any = unirNombres;
   datosTabl: any[] = [];
 
-  prevAfil:boolean = false;
+  prevAfil: boolean = false;
 
   public myColumns: TableColumn[] = [];
   public filas: any[] = [];
   ejecF: any;
-  
+
+  @Input() Afiliado!: any;
   constructor(
     private svcAfiliado: AfiliadoService,
     private toastr: ToastrService,
     private dialog: MatDialog
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     this.myFormFields = [
       { type: 'text', label: 'DNI del afiliado', name: 'dni', validations: [Validators.required, Validators.minLength(13), Validators.maxLength(14)], display: true },
     ];
-
     this.myColumns = [
-        {
-          header: 'Colegio Magisterial',
-          col: 'colegio_magisterial',
-          isEditable: true
-        }
+      {
+        header: 'Colegio Magisterial',
+        col: 'colegio_magisterial',
+        isEditable: true
+      }
     ];
 
+    this.previsualizarInfoAfil();
     this.getFilas().then(() => this.cargar());
   }
 
@@ -57,8 +57,8 @@ export class EditColegiosMagisterialesComponent {
   }
 
   previsualizarInfoAfil() {
-    if (this.form.value.dni) {
-      this.svcAfiliado.getAfilByParam(this.form.value.dni).subscribe(
+    if (this.Afiliado.DNI) {
+      this.svcAfiliado.getAfilByParam(this.Afiliado.DNI).subscribe(
         async (result) => {
           this.prevAfil = true;
           this.Afiliado = result
@@ -72,9 +72,9 @@ export class EditColegiosMagisterialesComponent {
         })
     }
   }
-  
-  resetDatos(){
-    if (this.form){
+
+  resetDatos() {
+    if (this.form) {
       this.form.reset();
     }
     this.filas = [];
@@ -83,41 +83,42 @@ export class EditColegiosMagisterialesComponent {
 
   /* FALTA */
   async getFilas() {
-    if (this.Afiliado){
+    if (this.Afiliado) {
       try {
         const data = await this.svcAfiliado.getAllColMagPPersona(this.Afiliado.DNI).toPromise();
         this.filas = data.map((item: any) => {
           return {
             id_colegio: item.id,
             colegio_magisterial: item.colegio.descripcion
-        }});
+          }
+        });
       } catch (error) {
         this.toastr.error('Error al cargar los datos de los beneficiarios');
         console.error('Error al obtener datos de datos de los beneficiarios', error);
       }
-    }else{
+    } else {
       this.resetDatos()
     }
   }
 
-/*   editar = (row: any) => {
-    const BeneficiariosData = {
-      id: row.id_persona,
-      dni: row.dni,
-      nombre_completo: row.nombre_completo,
-      fecha_nacimiento: row.fecha_nacimiento,
-      genero: row.genero,
-    };
-
-    this.svcAfiliado.updatePerfCentroTrabajo(row.id, BeneficiariosData).subscribe(
-      response => {
-        this.toastr.success('perfil de la persona en el centro de trabajo editado con éxito');
-      },
-      error => {
-        this.toastr.error('Error al actualizar el perfil de la persona en el centro de trabajo');
-      }
-    );
-  }; */
+  /*   editar = (row: any) => {
+      const BeneficiariosData = {
+        id: row.id_persona,
+        dni: row.dni,
+        nombre_completo: row.nombre_completo,
+        fecha_nacimiento: row.fecha_nacimiento,
+        genero: row.genero,
+      };
+  
+      this.svcAfiliado.updatePerfCentroTrabajo(row.id, BeneficiariosData).subscribe(
+        response => {
+          this.toastr.success('perfil de la persona en el centro de trabajo editado con éxito');
+        },
+        error => {
+          this.toastr.error('Error al actualizar el perfil de la persona en el centro de trabajo');
+        }
+      );
+    }; */
 
   ejecutarFuncionAsincronaDesdeOtroComponente(funcion: (data: any) => Promise<void>) {
     this.ejecF = funcion;
@@ -177,7 +178,7 @@ export class EditColegiosMagisterialesComponent {
     this.openDialog(campos, row); */
   }
 
-  AgregarBeneficiario(){
+  AgregarBeneficiario() {
     const dialogRef = this.dialog.open(AgregarColMagisComponent, {
       width: '55%',
       height: '75%',
@@ -200,11 +201,11 @@ export class EditColegiosMagisterialesComponent {
     dialogRef.afterClosed().subscribe(async (result: any) => {
       this.svcAfiliado.updateColegiosMagist(row.id, result).subscribe(
         async (result) => {
-          
+
         },
         (error) => {
-      })
-    
+        })
+
     });
   }
 }

@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, Input } from '@angular/core';
 import { Validators } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
 import { AgregarReferenciasPersonalesComponent } from '@docs-components/agregar-referencias-personales/agregar-referencias-personales.component';
@@ -21,10 +21,10 @@ export class EditReferPersonalesComponent {
   convertirFechaInputs = convertirFechaInputs
   public myFormFields: FieldConfig[] = []
   form: any;
-  Afiliado!: any;
+  @Input() Afiliado!: any;
   unirNombres: any = unirNombres;
   datosTabl: any[] = [];
-  prevAfil:boolean = false;
+  prevAfil: boolean = false;
 
 
   public myColumns: TableColumn[] = [];
@@ -75,7 +75,7 @@ export class EditReferPersonalesComponent {
         isEditable: true
       },
     ];
-
+    this.previsualizarInfoAfil()
     this.getFilas().then(() => this.cargar());
   }
 
@@ -84,9 +84,9 @@ export class EditReferPersonalesComponent {
   }
 
   previsualizarInfoAfil() {
-    if (this.form.value.dni) {
+    if (this.Afiliado.DNI) {
 
-      this.svcAfiliado.getAfilByParam(this.form.value.dni).subscribe(
+      this.svcAfiliado.getAfilByParam(this.Afiliado.DNI).subscribe(
         async (result) => {
           this.prevAfil = true;
           this.Afiliado = result
@@ -101,8 +101,8 @@ export class EditReferPersonalesComponent {
     }
   }
 
-  resetDatos(){
-    if (this.form){
+  resetDatos() {
+    if (this.form) {
       this.form.reset();
     }
     this.filas = [];
@@ -110,7 +110,7 @@ export class EditReferPersonalesComponent {
   }
 
   async getFilas() {
-    if (this.Afiliado){
+    if (this.Afiliado) {
       try {
         const data = await this.svcAfiliado.getAllReferenciasPersonales(this.Afiliado.DNI).toPromise();
         this.filas = data.map((item: any) => {
@@ -129,7 +129,7 @@ export class EditReferPersonalesComponent {
         this.toastr.error('Error al cargar los datos de las referencias personales');
         console.error('Error al obtener datos de datos de las referencias personales', error);
       }
-    }else {
+    } else {
       this.resetDatos()
     }
   }
@@ -238,8 +238,7 @@ export class EditReferPersonalesComponent {
     });
   }
 
-
-  crearReferenciaPers(){
+  crearReferenciaPers() {
     const dialogRef = this.dialog.open(AgregarReferenciasPersonalesComponent, {
       width: '55%',
       height: '75%',

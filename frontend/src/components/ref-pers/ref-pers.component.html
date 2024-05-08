@@ -4,7 +4,7 @@
     <p class="card-category">Completa la información correspondiente</p>
   </div>
 
-  <form [formGroup]="formParent" style="margin: 1%;"  (change)="onDatosRefPerChange()">
+  <form [formGroup]="formParent" style="margin: 1%;" (change)="onDatosRefPerChange()">
     <div formArrayName="refpers">
       <div *ngFor="let skill of getCtrl('refpers', formParent).controls; index as formChild; let i = index">
         <h4 class="card-title">Referencia número: {{i+1}}</h4>
@@ -12,7 +12,7 @@
           <div class="col-md-6">
             <mat-form-field class="example-full-width; inputs" appearance="outline">
               <mat-label>Nombre Completo</mat-label>
-              <input matInput type="text" formControlName="nombre">
+              <input matInput type="text" formControlName="nombre_completo">
             </mat-form-field>
           </div>
           <div class="col-md-6">
@@ -57,10 +57,12 @@
 
   <div class="row" style="text-align: center; margin: 1%;">
     <div class="col-md-6">
-      <button mat-button color="primary" (click)="agregarRefPer()"><mat-icon matSuffix>exposure_plus_1</mat-icon>Agregar Referencia Personal</button>
+      <button mat-button color="primary" (click)="agregarRefPer()"><mat-icon matSuffix>exposure_plus_1</mat-icon>Agregar
+        Referencia Personal</button>
     </div>
     <div class="col-md-6">
-      <button mat-button color="warn" (click)="eliminarRefPer()"><mat-icon matSuffix>exposure_neg_1</mat-icon>Eliminar Referencia Personal</button>
+      <button mat-button color="warn" (click)="eliminarRefPer()"><mat-icon matSuffix>exposure_neg_1</mat-icon>Eliminar
+        Referencia Personal</button>
     </div>
   </div>
 </div>

@@ -33,7 +33,7 @@ export class NuevoBeneficioAfilComponent implements OnInit {
   datosTabl: any[] = [];
   filas: any
   ejecF: any;
-  
+
 
   /* myColumnsBeneficios:  any[] = [];
   datosTablBeneficios:  any[] = [];
@@ -67,6 +67,7 @@ export class NuevoBeneficioAfilComponent implements OnInit {
       { type: 'number', label: 'Monto total', name: 'monto_total', validations: [Validators.required], display: true },
       { type: 'number', label: 'Monto por periodo', name: 'monto_por_periodo', validations: [Validators.required], display: true },
       { type: 'daterange', label: 'Periodo', name: 'periodo', validations: [], display: false },
+      { type: 'text', label: 'Ley Aplicable', name: 'ley_aplicable', validations: [], display: true },
     ];
 
     this.myFormFields2 = [
@@ -121,7 +122,12 @@ export class NuevoBeneficioAfilComponent implements OnInit {
     try {
       const beneficios = await this.svcBeneficioServ.getTipoBeneficio().toPromise();
       const tiposBen = beneficios.map((item: any) => {
-        this.tiposBeneficios.push({ label: `${item.nombre_beneficio}`, value: `${item.nombre_beneficio}`, periodicidad: `${item.periodicidad}` })
+        this.tiposBeneficios.push({
+          label: `${item.nombre_beneficio}`,
+          value: `${item.nombre_beneficio}`,
+          periodicidad: `${item.periodicidad}`
+        }
+        )
         return {
           id: item.id_beneficio,
           nombre_beneficio: item.nombre_beneficio,
@@ -133,6 +139,7 @@ export class NuevoBeneficioAfilComponent implements OnInit {
           anio_duracion: item.anio_duracion,
           mes_duracion: item.mes_duracion,
           dia_duracion: item.dia_duracion,
+          ley_aplicable: item.ley_aplicable,
         };
       });
       return tiposBen;

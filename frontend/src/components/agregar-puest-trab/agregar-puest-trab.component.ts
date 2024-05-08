@@ -21,47 +21,47 @@ export class AgregarPuestTrabComponent {
       refpers: new FormArray([], [Validators.required])
     });
 
-    constructor(private fb: FormBuilder, private afilService: AfiliadoService,
-      private toastr: ToastrService,
-      private dialogRef: MatDialogRef<AgregarPuestTrabComponent>, 
-      @Inject(MAT_DIALOG_DATA) public data: { idPersona: string  }
-    ) { }
-    ngOnInit(): void { }
+  constructor(private fb: FormBuilder, private afilService: AfiliadoService,
+    private toastr: ToastrService,
+    private dialogRef: MatDialogRef<AgregarPuestTrabComponent>,
+    @Inject(MAT_DIALOG_DATA) public data: { idPersona: string }
+  ) { }
+  ngOnInit(): void { }
 
-    setDatosPuetTrab1(datosPuestTrab: any) {
-      this.formPuestTrab = datosPuestTrab
-    }
+  setDatosPuetTrab1(datosPuestTrab: any) {
+    this.formPuestTrab = datosPuestTrab
+  }
 
-    guardar(){
-      const datosParseados = this.formPuestTrab.value.refpers.map((dato:any) => {
-        const fechaIngresoFormateada = convertirFechaInputs(dato.fechaIngreso.toISOString());
-        const fechaEgresoFormateada = convertirFechaInputs(dato.fechaEgreso.toISOString());
-    
-       return {
-            ...dato,
-            fechaIngreso: fechaIngresoFormateada,
-            fechaEgreso: fechaEgresoFormateada
-        };
-        
+  guardar() {
+    const datosParseados = this.formPuestTrab.trabajo.map((dato: any) => {
+      const fechaIngresoFormateada = convertirFechaInputs(dato.fechaIngreso.toISOString());
+      const fechaEgresoFormateada = convertirFechaInputs(dato.fechaEgreso.toISOString());
+
+      return {
+        ...dato,
+        fechaIngreso: fechaIngresoFormateada,
+        fechaEgreso: fechaEgresoFormateada
+      };
+
     });
 
-      this.afilService.createCentrosTrabajo(this.data.idPersona, datosParseados).subscribe(
-        (res: any) => {
-          if (res.length>0) {
-            this.formPuestTrab.reset();
-            this.toastr.success("Centro de trabajo agregado con éxito");
-            this.cerrar();
-          }
-        },
-        (error) => {
-          this.toastr.error(error);
-          console.error('Error al obtener afiliados', error);
+    this.afilService.createCentrosTrabajo(this.data.idPersona, datosParseados).subscribe(
+      (res: any) => {
+        if (res.length > 0) {
+          /* this.formPuestTrab.reset(); */
+          this.toastr.success("Centro de trabajo agregado con éxito");
+          this.cerrar();
         }
-      );
-      
-    }
+      },
+      (error) => {
+        this.toastr.error(error);
+        console.error('Error al obtener afiliados', error);
+      }
+    );
 
-    cerrar() {
-      this.dialogRef.close();
-    }
+  }
+
+  cerrar() {
+    this.dialogRef.close();
+  }
 }

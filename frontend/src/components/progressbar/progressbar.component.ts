@@ -25,127 +25,127 @@ export class ProgressbarComponent {
   @Output() newdatosColegiosMag = new EventEmitter<any>()
   @Output() newDatosFa = new EventEmitter<any>()
 
-  datosG:boolean = true;
-  datosFa:boolean = false;
-  datosColegMagisteriales:boolean = false;
-  datosCT:boolean = false;
-  datosHS:boolean = false;
-  datosRP:boolean = false;
-  datosB:boolean = false;
-  datosF:boolean = false;
-  datosA:boolean  = false;
+  datosG: boolean = true;
+  datosFa: boolean = false;
+  datosColegMagisteriales: boolean = false;
+  datosCT: boolean = false;
+  datosHS: boolean = false;
+  datosRP: boolean = false;
+  datosB: boolean = false;
+  datosA: boolean = false;
+  datosF: boolean = false;
 
-  activarDatosGe(){
-    this.datosG  = true;
-    this.datosFa  = false;
-    this.datosCT  = false;
-    this.datosHS  = false;
-    this.datosRP  = false;
-    this.datosB  = false;
-    this.datosF  = false;
-    this.datosA  = false;
-    this.datosColegMagisteriales  = false;
-    this.newDatBenChange.emit(this.datosG); 
+  activarDatosGe() {
+    this.datosG = true;
+    this.datosFa = false;
+    this.datosCT = false;
+    this.datosHS = false;
+    this.datosRP = false;
+    this.datosB = false;
+    this.datosF = false;
+    this.datosA = false;
+    this.datosColegMagisteriales = false;
+    this.newDatBenChange.emit(this.datosG);
   }
 
-  activarDatosFam(){
-    this.datosG  = false;
-    this.datosFa  = true;
-    this.datosCT  = false;
-    this.datosHS  = false;
-    this.datosRP  = false;
-    this.datosB  = false;
-    this.datosF  = false;
-    this.datosA  = false;
-    this.datosColegMagisteriales  = false;
+  activarDatosFam() {
+    this.datosG = false;
+    this.datosFa = true;
+    this.datosCT = false;
+    this.datosHS = false;
+    this.datosRP = false;
+    this.datosB = false;
+    this.datosF = false;
+    this.datosA = false;
+    this.datosColegMagisteriales = false;
     this.newDatosFa.emit(this.datosFa);
-    
+
   }
-  activarDatosCentTrab(){
-    this.datosFa  = false;
-    this.datosG  = false;
-    this.datosCT  = true;
-    this.datosHS  = false;
-    this.datosRP  = false;
-    this.datosB  = false;
-    this.datosF  = false;
-    this.datosA  = false;
-    this.datosColegMagisteriales  = false;
+  activarDatosCentTrab() {
+    this.datosFa = false;
+    this.datosG = false;
+    this.datosCT = true;
+    this.datosHS = false;
+    this.datosRP = false;
+    this.datosB = false;
+    this.datosF = false;
+    this.datosA = false;
+    this.datosColegMagisteriales = false;
     this.newEstCentrTrab.emit(this.datosCT);
-    
+
   }
-  activarDatosBancarios(){
-    this.datosFa  = false;
-    this.datosG  = false;
-    this.datosCT  = false;
-    this.datosHS  = true;
-    this.datosRP  = false;
-    this.datosB  = false;
-    this.datosF  = false;
-    this.datosA  = false;
-    this.datosColegMagisteriales  = false;
+  activarDatosBancarios() {
+    this.datosFa = false;
+    this.datosG = false;
+    this.datosCT = false;
+    this.datosHS = true;
+    this.datosRP = false;
+    this.datosB = false;
+    this.datosF = false;
+    this.datosA = false;
+    this.datosColegMagisteriales = false;
     this.newdatosHS.emit(this.datosHS);
   }
-  activarDatosRefPers(){
-    this.datosFa  = false;
-    this.datosG  = false;
-    this.datosCT  = false;
-    this.datosHS  = false;
-    this.datosRP  = true;
-    this.datosB  = false;
-    this.datosF  = false;
-    this.datosA  = false;
-    this.datosColegMagisteriales  = false;
+  activarDatosRefPers() {
+    this.datosFa = false;
+    this.datosG = false;
+    this.datosCT = false;
+    this.datosHS = false;
+    this.datosRP = true;
+    this.datosB = false;
+    this.datosF = false;
+    this.datosA = false;
+    this.datosColegMagisteriales = false;
     this.newdatosRP.emit(this.datosRP);
   }
-  activarDatosBenef(){
-    this.datosFa  = false;
-    this.datosG  = false;
-    this.datosCT  = false;
-    this.datosHS  = false;
-    this.datosRP  = false;
-    this.datosB  = true;
-    this.datosF  = false;
-    this.datosA  = false;
-    this.datosColegMagisteriales  = false;
+  activarDatosBenef() {
+    this.datosFa = false;
+    this.datosG = false;
+    this.datosCT = false;
+    this.datosHS = false;
+    this.datosRP = false;
+    this.datosB = true;
+    this.datosF = false;
+    this.datosA = false;
+    this.datosColegMagisteriales = false;
     this.newdatosB.emit(this.datosB);
   }
-  activarFinalizar(){
-    this.datosFa  = false;
-    this.datosG  = false;
-    this.datosCT  = false;
-    this.datosHS  = false;
-    this.datosRP  = false;
-    this.datosB  = false;
-    this.datosF  = true;
-    this.datosA  = false;
-    this.datosColegMagisteriales  = false;
+  activarFinalizar() {
+    this.datosFa = false;
+    this.datosG = false;
+    this.datosCT = false;
+    this.datosHS = false;
+    this.datosRP = false;
+    this.datosB = false;
+    this.datosF = true;
+    this.datosA = false;
+    this.datosColegMagisteriales = false;
     this.newdatosF.emit(this.datosF);
   }
-  
-  activarDatosColMag(){
-    this.datosFa  = false;
-    this.datosG  = false;
-    this.datosCT  = false;
-    this.datosHS  = false;
-    this.datosRP  = false;
-    this.datosB  = false;
-    this.datosF  = false;
-    this.datosA  = false;
-    this.datosColegMagisteriales  = true;
+
+  activarDatosColMag() {
+    this.datosFa = false;
+    this.datosG = false;
+    this.datosCT = false;
+    this.datosHS = false;
+    this.datosRP = false;
+    this.datosB = false;
+    this.datosF = false;
+    this.datosA = false;
+    this.datosColegMagisteriales = true;
     this.newdatosColegiosMag.emit(this.datosColegMagisteriales);
   }
-  
-  prueba7(){
-    this.datosFa  = false;
-    this.datosG  = false;
-    this.datosCT  = false;
-    this.datosHS  = false;
-    this.datosRP  = false;
-    this.datosB  = false;
-    this.datosF  = false;
-    this.datosA  = true;
-    this.datosColegMagisteriales  = false;
+
+  prueba7() {
+    this.datosFa = false;
+    this.datosG = false;
+    this.datosCT = false;
+    this.datosHS = false;
+    this.datosRP = false;
+    this.datosB = false;
+    this.datosF = false;
+    this.datosA = true;
+    this.datosColegMagisteriales = false;
     this.newdatosA.emit(this.datosA);
   }
 

@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, Input } from '@angular/core';
 import { Validators } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
 import { AgregarDatBancCompComponent } from '@docs-components/agregar-dat-banc-comp/agregar-dat-banc-comp.component';
@@ -20,11 +20,11 @@ export class EditDatosBancariosComponent {
   convertirFechaInputs = convertirFechaInputs
   public myFormFields: FieldConfig[] = []
   form: any;
-  Afiliado!: any;
+  @Input() Afiliado!: any;
   unirNombres: any = unirNombres;
   datosTabl: any[] = [];
 
-  prevAfil:boolean = false;
+  prevAfil: boolean = false;
 
   public myColumns: TableColumn[] = [];
   public filas: any[] = [];
@@ -54,7 +54,7 @@ export class EditDatosBancariosComponent {
         isEditable: true
       },
     ];
-
+    this.previsualizarInfoAfil()
     this.getFilas().then(() => this.cargar());
   }
 
@@ -63,9 +63,8 @@ export class EditDatosBancariosComponent {
   }
 
   previsualizarInfoAfil() {
-    if (this.form.value.dni) {
-
-      this.svcAfiliado.getAllPersonas(this.form.value.dni).subscribe(
+    if (this.Afiliado.DNI) {
+      this.svcAfiliado.getAllPersonas(this.Afiliado.DNI).subscribe(
         async (result) => {
           this.prevAfil = true;
           this.Afiliado = result
@@ -79,8 +78,8 @@ export class EditDatosBancariosComponent {
         })
     }
   }
-  resetDatos(){
-    if (this.form){
+  resetDatos() {
+    if (this.form) {
       this.form.reset();
     }
     this.filas = [];
@@ -89,7 +88,7 @@ export class EditDatosBancariosComponent {
 
   /* FALTA */
   async getFilas() {
-    if (this.Afiliado){
+    if (this.Afiliado) {
       try {
         const data = await this.svcAfiliado.getAllPersonaPBanco(this.Afiliado.DNI).toPromise();
         this.filas = data.map((item: any) => ({
@@ -101,27 +100,27 @@ export class EditDatosBancariosComponent {
         this.toastr.error('Error al cargar los datos de los perfiles de los centros de trabajo');
         console.error('Error al obtener datos de datos de los perfiles de los centros de trabajo', error);
       }
-    }else{
+    } else {
       this.resetDatos()
     }
-  
+
   }
 
-/*   editar = (row: any) => {
-    const datosBancarios = {
-        nombre_banco: row.nombre_banco,
-        numero_cuenta: row.numero_cuenta
-    };
-
-    this.svcAfiliado.updatePerfCentroTrabajo(row.id, datosBancarios).subscribe(
-      response => {
-        this.toastr.success('perfil de la persona en el centro de trabajo editado con éxito');
-      },
-      error => {
-        this.toastr.error('Error al actualizar el perfil de la persona en el centro de trabajo');
-      }
-    );
-  }; */
+  /* editar = (row: any) => {
+      const datosBancarios = {
+          nombre_banco: row.nombre_banco,
+          numero_cuenta: row.numero_cuenta
+      };
+  
+      this.svcAfiliado.updatePerfCentroTrabajo(row.id, datosBancarios).subscribe(
+        response => {
+          this.toastr.success('perfil de la persona en el centro de trabajo editado con éxito');
+        },
+        error => {
+          this.toastr.error('Error al actualizar el perfil de la persona en el centro de trabajo');
+        }
+      );
+    }; */
 
   ejecutarFuncionAsincronaDesdeOtroComponente(funcion: (data: any) => Promise<void>) {
     this.ejecF = funcion;
@@ -183,7 +182,7 @@ export class EditDatosBancariosComponent {
     this.openDialog(campos, row); */
   }
 
-  AgregarPuestoTrabajo(){
+  AgregarPuestoTrabajo() {
     const dialogRef = this.dialog.open(AgregarDatBancCompComponent, {
       width: '55%',
       height: '75%',
@@ -196,7 +195,7 @@ export class EditDatosBancariosComponent {
       this.ngOnInit();
     });
   }
-  
+
   openDialog(campos: any, row: any): void {
     const dialogRef = this.dialog.open(EditarDialogComponent, {
       width: '500px',
@@ -207,11 +206,11 @@ export class EditDatosBancariosComponent {
     dialogRef.afterClosed().subscribe(async (result: any) => {
       this.svcAfiliado.updateDatosBancarios(row.id, result).subscribe(
         async (result) => {
-          
+
         },
         (error) => {
-      })
-    
+        })
+
     });
   }
 }

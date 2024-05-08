@@ -29,9 +29,12 @@ export class CreateDetalleBeneficioDto {
     num_rentas_aplicadas?: number;
 
     @IsNumber()
-    monto_por_periodo:number;
+    monto_por_periodo: number;
 
     @IsString()
     metodo_pago: string;
+
+    @IsString()
+    ley_aplicable: string;
 
 }

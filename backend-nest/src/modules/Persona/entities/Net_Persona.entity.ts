@@ -59,6 +59,30 @@ export class Net_Persona {
     @Column('number', { nullable: true, name: 'CANTIDAD_DEPENDIENTES' })
     cantidad_dependientes: number;
 
+    @Column('number', { nullable: true, name: 'CANTIDAD_HIJOS' })
+    cantidad_hijos: number;
+
+    @Column('varchar2', { length: 40, nullable: true, name: 'PRIMER_NOMBRE_CENSO' })
+    primer_nombre_censo: string;
+
+    @Column('varchar2', { length: 40, nullable: true, name: 'SEGUNDO_NOMBRE_CENSO' })
+    segundo_nombre_censo: string;
+
+    @Column('varchar2', { length: 300, nullable: true, name: 'NOMBRE_APELLIDO_ESCALAFON' })
+    nombre_apellido_escalafon: string;
+
+    @Column('varchar2', { length: 40, nullable: true, name: 'PRIMER_APELLIDO_CENSO' })
+    primer_apellido_censo: string;
+
+    @Column('varchar2', { length: 40, nullable: true, name: 'SEGUNDO_APELLIDO_CENSO' })
+    segundo_apellido_censo: string;
+
+    @Column('varchar2', { length: 40, nullable: true, name: 'COLEGIO_MAGISTERIAL' })
+    COLEGIO_MAGISTERIAL: string;
+
+    @Column('number', { nullable: true, name: 'ID_COLEGIO' })
+    id_colegio: number;
+
     @Column('varchar2', { length: 40, nullable: true, name: 'REPRESENTACION' })
     representacion: string;
 

@@ -3,7 +3,7 @@ import { ControlContainer, FormArray, FormBuilder, FormControl, FormGroup, Valid
 import { DatosEstaticosService } from 'src/app/services/datos-estaticos.service';
 import { FormStateService } from 'src/app/services/form-state.service';
 
-export function generateColegMagistFormGroup(datos?:any): FormGroup {
+export function generateColegMagistFormGroup(datos?: any): FormGroup {
   return new FormGroup({
     idColegio: new FormControl(datos.idColegio, Validators.required)
   });
@@ -22,14 +22,14 @@ export function generateColegMagistFormGroup(datos?:any): FormGroup {
     },
   ],
 })
-export class ColMagisterialesComponent implements OnInit{
+export class ColMagisterialesComponent implements OnInit {
   public formParent: FormGroup = new FormGroup({});
   colegio_magisterial: any = [];
 
   private formKey = 'colMagForm';
 
-  @Input() nombreComp?:string
-  @Input() datos?:any
+  @Input() nombreComp?: string
+  @Input() datos?: any
   @Output() newDataColegioMagisterial = new EventEmitter<any>()
 
   onDatosColMagChange() {
@@ -50,7 +50,7 @@ export class ColMagisterialesComponent implements OnInit{
     this.colegio_magisterial = this.datosEstaticosSVC.colegiosMagisteriales;
   }
 
-  ngOnInit():void{
+  ngOnInit(): void {
     this.initForm();
   }
 
@@ -80,8 +80,8 @@ export class ColMagisterialesComponent implements OnInit{
   eliminarColMag(): void {
     const col_ColMags = this.formParent.get('ColMags') as FormArray;
     if (col_ColMags.length > 0) {
-        col_ColMags.removeAt(col_ColMags.length - 1);
-        this.onDatosColMagChange();  // Emitir los datos después de eliminar
+      col_ColMags.removeAt(col_ColMags.length - 1);
+      this.onDatosColMagChange();  // Emitir los datos después de eliminar
     }
   }
 

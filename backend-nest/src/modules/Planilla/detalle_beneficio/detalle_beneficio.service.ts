@@ -87,7 +87,8 @@ export class DetalleBeneficioService {
               PERIODO_INICIO,
               PERIODO_FINALIZACION,
               MONTO_TOTAL,
-              MONTO_POR_PERIODO
+              MONTO_POR_PERIODO,
+              LEY_APLICABLE
             ) VALUES (
               ${detPer.ID_PERSONA},
               ${detPer.ID_CAUSANTE},
@@ -95,7 +96,8 @@ export class DetalleBeneficioService {
               '${datos.periodoInicio}',
               '${datos.periodoFinalizacion}',
               ${datos.monto_total},
-              ${datos.monto_por_periodo}
+              ${datos.monto_por_periodo},
+              ${datos.ley_aplicable}
             )`
             /* Inserta en la tabla de detalle beneficio afiliado */
             const detBeneBeneficia = await this.entityManager.query(queryInsDeBBenf);
@@ -386,7 +388,7 @@ export class DetalleBeneficioService {
         .addSelect('afil.PROFESION', 'PROFESION')
         .addSelect('afil.TELEFONO_1', 'TELEFONO_1')
         .addSelect('afil.ESTADO_CIVIL', 'ESTADO_CIVIL')
-        
+
         .addSelect('ben.PERIODICIDAD', 'PERIODICIDAD')
         .addSelect('ben.NUMERO_RENTAS_MAX', 'NUMERO_RENTAS_MAX')
         .addSelect('ben.NOMBRE_BENEFICIO', 'NOMBRE_BENEFICIO')
@@ -404,11 +406,11 @@ export class DetalleBeneficioService {
 
         .innerJoin(Net_Estado_Persona, 'estadoAfil', 'estadoAfil.CODIGO = afil.ID_ESTADO_PERSONA')
         .where(`afil.dni = '${dni}'`)
-        
+
         .getRawMany();
     } catch (error) {
       console.log(error);
-      
+
       this.logger.error(`Error al buscar beneficios inconsistentes por afiliado: ${error.message}`, error.stack);
       throw new InternalServerErrorException('Error al buscar beneficios inconsistentes por afiliado');
     }

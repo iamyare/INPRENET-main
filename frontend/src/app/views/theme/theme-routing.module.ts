@@ -31,6 +31,7 @@ import { EditBeneficiariosComponent } from '../pages/Generales/edit-beneficiario
 import { EditDatosBancariosComponent } from '../pages/Generales/edit-datos-bancarios/edit-datos-bancarios.component';
 import { EditColegiosMagisterialesComponent } from '../pages/Generales/edit-colegios-magisteriales/edit-colegios-magisteriales.component';
 import { EditFamiliaresComponent } from '../pages/Generales/edit-familiares/edit-familiares.component';
+import { VerDatosAfiliadosComponent } from '../pages/Generales/ver-datos-afiliados/ver-datos-afiliados.component';
 
 const routes: Routes = [
   //rutas Afiliado
@@ -56,6 +57,13 @@ const routes: Routes = [
             component: AfilBancoComponent,
             data: {
               title: 'Nuevo Afiliado',
+            },
+          },
+          {
+            path: 'ver-datos-afiliado',
+            component: VerDatosAfiliadosComponent,
+            data: {
+              title: 'Ver Datos Afiliado',
             },
           },
           {

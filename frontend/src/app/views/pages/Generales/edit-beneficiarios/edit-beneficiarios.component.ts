@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, Input } from '@angular/core';
 import { Validators } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
 import { AgregarBenefCompComponent } from '@docs-components/agregar-benef-comp/agregar-benef-comp.component';
@@ -20,16 +20,16 @@ export class EditBeneficiariosComponent {
   convertirFechaInputs = convertirFechaInputs
   public myFormFields: FieldConfig[] = []
   form: any;
-  Afiliado!: any;
+  @Input() Afiliado!: any;
   unirNombres: any = unirNombres;
   datosTabl: any[] = [];
 
-  prevAfil:boolean = false;
+  prevAfil: boolean = false;
 
   public myColumns: TableColumn[] = [];
   public filas: any[] = [];
   ejecF: any;
-  
+
   constructor(
     private svcAfiliado: AfiliadoService,
     private toastr: ToastrService,
@@ -42,29 +42,29 @@ export class EditBeneficiariosComponent {
     ];
 
     this.myColumns = [
-        {
-          header: 'DNI',
-          col: 'dni',
-          isEditable: true,
-          validationRules: [Validators.required, Validators.minLength(3)]
-        },
-        {
-          header: 'Nombre Completo',
-          col: 'nombre_completo',
-          isEditable: true
-        },
-        {
-          header: 'Genero',
-          col: 'genero',
-          isEditable: true
-        },
-        {
-          header: 'Fecha de Nacimiento',
-          col: 'fecha_nacimiento',
-          isEditable: true
-        }
+      {
+        header: 'DNI',
+        col: 'dni',
+        isEditable: true,
+        validationRules: [Validators.required, Validators.minLength(3)]
+      },
+      {
+        header: 'Nombre Completo',
+        col: 'nombre_completo',
+        isEditable: true
+      },
+      {
+        header: 'Genero',
+        col: 'genero',
+        isEditable: true
+      },
+      {
+        header: 'Fecha de Nacimiento',
+        col: 'fecha_nacimiento',
+        isEditable: true
+      }
     ];
-
+    this.previsualizarInfoAfil()
     this.getFilas().then(() => this.cargar());
   }
 
@@ -73,8 +73,8 @@ export class EditBeneficiariosComponent {
   }
 
   previsualizarInfoAfil() {
-    if (this.form.value.dni) {
-      this.svcAfiliado.getAfilByParam(this.form.value.dni).subscribe(
+    if (this.Afiliado.DNI) {
+      this.svcAfiliado.getAfilByParam(this.Afiliado.DNI).subscribe(
         async (result) => {
           this.prevAfil = true;
           this.Afiliado = result
@@ -88,9 +88,9 @@ export class EditBeneficiariosComponent {
         })
     }
   }
-  
-  resetDatos(){
-    if (this.form){
+
+  resetDatos() {
+    if (this.form) {
       this.form.reset();
     }
     this.filas = [];
@@ -98,7 +98,7 @@ export class EditBeneficiariosComponent {
   }
 
   async getFilas() {
-    if (this.Afiliado){
+    if (this.Afiliado) {
       try {
         const data = await this.svcAfiliado.getAllBenDeAfil(this.Afiliado.DNI).toPromise();
         this.filas = data.map((item: any) => {
@@ -108,34 +108,35 @@ export class EditBeneficiariosComponent {
             nombre_completo: unirNombres(item.primer_nombre, item.segundo_nombre, item.tercer_nombre, item.primer_apellido, item.segundo_apellido),
             fecha_nacimiento: convertirFechaInputs(item.fecha_nacimiento),
             genero: item.genero,
-        }});
+          }
+        });
       } catch (error) {
         this.toastr.error('Error al cargar los datos de los beneficiarios');
         console.error('Error al obtener datos de datos de los beneficiarios', error);
       }
-    }else{
+    } else {
       this.resetDatos()
     }
   }
 
-/*   editar = (row: any) => {
-    const BeneficiariosData = {
-      id: row.id_persona,
-      dni: row.dni,
-      nombre_completo: row.nombre_completo,
-      fecha_nacimiento: row.fecha_nacimiento,
-      genero: row.genero,
-    };
-
-    this.svcAfiliado.updatePerfCentroTrabajo(row.id, BeneficiariosData).subscribe(
-      response => {
-        this.toastr.success('perfil de la persona en el centro de trabajo editado con éxito');
-      },
-      error => {
-        this.toastr.error('Error al actualizar el perfil de la persona en el centro de trabajo');
-      }
-    );
-  }; */
+  /*   editar = (row: any) => {
+      const BeneficiariosData = {
+        id: row.id_persona,
+        dni: row.dni,
+        nombre_completo: row.nombre_completo,
+        fecha_nacimiento: row.fecha_nacimiento,
+        genero: row.genero,
+      };
+  
+      this.svcAfiliado.updatePerfCentroTrabajo(row.id, BeneficiariosData).subscribe(
+        response => {
+          this.toastr.success('perfil de la persona en el centro de trabajo editado con éxito');
+        },
+        error => {
+          this.toastr.error('Error al actualizar el perfil de la persona en el centro de trabajo');
+        }
+      );
+    }; */
 
   ejecutarFuncionAsincronaDesdeOtroComponente(funcion: (data: any) => Promise<void>) {
     this.ejecF = funcion;
@@ -198,7 +199,7 @@ export class EditBeneficiariosComponent {
     this.openDialog(campos, row); */
   }
 
-  AgregarBeneficiario(){
+  AgregarBeneficiario() {
     const dialogRef = this.dialog.open(AgregarBenefCompComponent, {
       width: '55%',
       height: '75%',

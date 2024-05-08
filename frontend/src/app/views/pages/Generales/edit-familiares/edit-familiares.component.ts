@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, Input } from '@angular/core';
 import { Validators } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
 import { AgregarReferenciasPersonalesComponent } from '@docs-components/agregar-referencias-personales/agregar-referencias-personales.component';
@@ -21,7 +21,6 @@ export class EditFamiliaresComponent {
   convertirFechaInputs = convertirFechaInputs
   public myFormFields: FieldConfig[] = []
   form: any;
-  Afiliado!: any;
   unirNombres: any = unirNombres;
   datosTabl: any[] = [];
   prevAfil: boolean = false;
@@ -30,7 +29,7 @@ export class EditFamiliaresComponent {
   public myColumns: TableColumn[] = [];
   public filas: any[] = [];
   ejecF: any;
-
+  @Input() Afiliado: any;
   constructor(
     private svcAfiliado: AfiliadoService,
     private toastr: ToastrService,
@@ -41,7 +40,6 @@ export class EditFamiliaresComponent {
     this.myFormFields = [
       { type: 'text', label: 'DNI del afiliado', name: 'dni', validations: [Validators.required, Validators.minLength(13), Validators.maxLength(14)], display: true },
     ];
-
     this.myColumns = [
       {
         header: 'Nombre Completo',
@@ -66,6 +64,7 @@ export class EditFamiliaresComponent {
       },
     ];
 
+    this.previsualizarInfoAfil();
     this.getFilas().then(() => this.cargar());
   }
 
@@ -74,9 +73,9 @@ export class EditFamiliaresComponent {
   }
 
   previsualizarInfoAfil() {
-    if (this.form.value.dni) {
+    if (this.Afiliado.DNI) {
 
-      this.svcAfiliado.getAfilByParam(this.form.value.dni).subscribe(
+      this.svcAfiliado.getAfilByParam(this.Afiliado.DNI).subscribe(
         async (result) => {
           this.prevAfil = true;
           this.Afiliado = result
@@ -90,7 +89,6 @@ export class EditFamiliaresComponent {
         })
     }
   }
-
   resetDatos() {
     if (this.form) {
       this.form.reset();

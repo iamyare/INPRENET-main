@@ -27,6 +27,9 @@ export class Net_Detalle_Beneficio_Afiliado {
     @Column({ nullable: true, name: 'METODO_PAGO' })
     metodo_pago: string;
 
+    @Column({ nullable: true, name: 'LEY_APLICABLE' })
+    ley_aplicable: string;
+
     @ManyToOne(() => Net_Beneficio, beneficio => beneficio.detalleBeneficioAfiliado)
     @JoinColumn({ name: 'ID_BENEFICIO', foreignKeyConstraintName: "FK_ID_BENEFICIO_DETBENAFIL" })
     beneficio: Net_Beneficio;

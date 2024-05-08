@@ -58,6 +58,7 @@ import { PlanillaColegiosPrivadosComponent } from '../pages/Centros Privados/pla
 import { NavDefaultComponent } from '../pages/Centros Privados/nav-default/nav-default.component';
 import { EditFamiliaresComponent } from '../pages/Generales/edit-familiares/edit-familiares.component';
 import { NewFamiliaresComponent } from '@docs-components/new-familiares/new-familiares.component';
+import { VerDatosAfiliadosComponent } from '../pages/Generales/ver-datos-afiliados/ver-datos-afiliados.component';
 
 @NgModule({
   imports: [
@@ -120,6 +121,7 @@ import { NewFamiliaresComponent } from '@docs-components/new-familiares/new-fami
     EditReferPersonalesComponent,
     EditColegiosMagisterialesComponent,
     EditFamiliaresComponent,
+    VerDatosAfiliadosComponent
   ]
 })
 export class ThemeModule {

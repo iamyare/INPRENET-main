@@ -3,12 +3,12 @@ import { CommonModule } from '@angular/common';
 import { FormArray, FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { FormStateService } from 'src/app/services/form-state.service';
 
-export function generateRefPerFormGroup(datos?:any): FormGroup {
+export function generateRefPerFormGroup(datos?: any): FormGroup {
   return new FormGroup({
-    nombre: new FormControl(datos.nombre, Validators.required),
+    nombre_completo: new FormControl(datos.nombre_completo, Validators.required),
     parentesco: new FormControl(datos.parentesco, Validators.required),
     direccion: new FormControl(datos.direccion, Validators.required),
-    telefono_domicilio: new FormControl(datos.telefono_domicilio ),
+    telefono_domicilio: new FormControl(datos.telefono_domicilio),
     telefono_trabajo: new FormControl(datos.telefono_trabajo),
     telefono_personal: new FormControl(datos.telefono_personal, Validators.required)
   });
@@ -19,17 +19,17 @@ export function generateRefPerFormGroup(datos?:any): FormGroup {
   templateUrl: './ref-pers.component.html',
   styleUrl: './ref-pers.component.scss'
 })
-export class RefPersComponent implements OnInit{
+export class RefPersComponent implements OnInit {
   public formParent: FormGroup = new FormGroup({});
 
   private formKey = 'refForm';
 
 
-  @Input() nombreComp?:string
-  @Input() datos?:any
+  @Input() nombreComp?: string
+  @Input() datos?: any
   @Output() newDatRefPerChange = new EventEmitter<any>()
 
-  onDatosRefPerChange(){
+  onDatosRefPerChange() {
     const data = this.formParent
     this.newDatRefPerChange.emit(data)
   }
@@ -37,11 +37,11 @@ export class RefPersComponent implements OnInit{
   constructor(private formStateService: FormStateService, private fb: FormBuilder) {
   }
 
-  ngOnInit():void{
+  ngOnInit(): void {
     this.initForm();
-    if(this.datos){
-      if (this.datos.value.refpers.length>0){
-        for (let i of this.datos.value.refpers){
+    if (this.datos) {
+      if (this.datos.value.refpers.length > 0) {
+        for (let i of this.datos.value.refpers) {
           this.agregarRefPer(i)
         }
       }
@@ -64,16 +64,16 @@ export class RefPersComponent implements OnInit{
     }
   }
 
-  agregarRefPer(datos?:any): void{
+  agregarRefPer(datos?: any): void {
     const ref_RefPers = this.formParent.get('refpers') as FormArray;
-    if (datos){
+    if (datos) {
       ref_RefPers.push(generateRefPerFormGroup(datos))
-    }else {
+    } else {
       ref_RefPers.push(generateRefPerFormGroup({}))
     }
   }
 
-  eliminarRefPer():void{
+  eliminarRefPer(): void {
     const ref_RefPers = this.formParent.get('refpers') as FormArray;
     ref_RefPers.removeAt(-1);
     const data = this.formParent

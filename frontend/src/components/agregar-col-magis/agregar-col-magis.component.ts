@@ -15,43 +15,47 @@ export class AgregarColMagisComponent {
   form = this.fb.group({
   });
 
+  dataColMag: any
   formColMag: any = new FormGroup(
     {
       refpers: new FormArray([], [Validators.required])
     });
 
-    constructor(
-      private fb: FormBuilder, 
-      private afilService: AfiliadoService,
-      private dialogRef: MatDialogRef<AgregarColMagisComponent>, 
-      private toastr: ToastrService,
-      @Inject(MAT_DIALOG_DATA) public data: { idPersona: string }
-    ) { }
-    ngOnInit(): void { }
+  constructor(
+    private toastr: ToastrService,
+    private dialogRef: MatDialogRef<AgregarColMagisComponent>,
+    private fb: FormBuilder,
+    private afilService: AfiliadoService,
+    @Inject(MAT_DIALOG_DATA) public data: { idPersona: string }
+  ) { }
 
-    setHistSal(datosHistSal: any) {
-      this.formColMag = datosHistSal
-    }
+  ngOnInit(): void { }
 
-    guardar(){
-      console.log(this.formColMag);
-      
-      this.afilService.createColegiosMagisteriales(this.data.idPersona, this.formColMag.value.refpers).subscribe(
-        (res: any) => {
-          if (res.length>0) {
-            this.formColMag.reset();
-            this.toastr.success("Colegio magisterial agregado con éxito");
-            this.cerrar();
-          }
-        },
-        (error) => {
-          this.toastr.error(error);
-          console.error('Error al obtener afiliados', error);
+  setHistSal(datosHistSal: any) {
+    this.dataColMag = datosHistSal
+  }
+
+  guardar() {
+    console.log(this.formColMag);
+
+    this.cerrar();
+
+    /* this.afilService.createColegiosMagisteriales(this.data.idPersona, this.formColMag.value.refpers).subscribe(
+      (res: any) => {
+        if (res.length > 0) {
+          this.toastr.success("Colegio magisterial agregado con éxito");
         }
-        );
-    }
+      },
+      (error) => {
+        this.toastr.error(error);
+        console.error('Error al obtener afiliados', error);
+      }
+    ); */
+  }
 
-    cerrar() {
-      this.dialogRef.close();
-    }
+  cerrar() {
+    this.formColMag.reset();
+    this.form.reset();
+    this.dialogRef.close();
+  }
 }

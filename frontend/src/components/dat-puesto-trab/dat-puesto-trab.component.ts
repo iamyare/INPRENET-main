@@ -4,7 +4,7 @@ import { ControlContainer, FormArray, FormBuilder, FormControl, FormGroup, Valid
 import { DatosEstaticosService } from 'src/app/services/datos-estaticos.service';
 import { FormStateService } from 'src/app/services/form-state.service';
 
-export function generatePuestoTrabFormGroup(datos?:any): FormGroup {
+export function generatePuestoTrabFormGroup(datos?: any): FormGroup {
   return new FormGroup({
     idCentroTrabajo: new FormControl(datos?.idCentroTrabajo, [
       Validators.required,
@@ -54,35 +54,42 @@ export function generatePuestoTrabFormGroup(datos?:any): FormGroup {
     },
   ],
 })
-export class DatPuestoTrabComponent implements OnInit{
+export class DatPuestoTrabComponent implements OnInit {
   public formParent: FormGroup = new FormGroup({});
 
   centrosTrabajo: any = this.datosEstaticos.centrosTrabajo;
   sector: any = this.datosEstaticos.sector;
 
   @Output() newDatDatosPuestTrab = new EventEmitter<any>()
-  @Input() datos:any;
+  @Input() datos: any;
+  @Input() editing?: boolean = false;
 
-  onDatosDatosPuestTrab(){
+  onDatosDatosPuestTrab() {
     const data = this.formParent.value;
     this.newDatDatosPuestTrab.emit(data);
   }
 
-  constructor(private formStateService: FormStateService, private fb: FormBuilder, private datosEstaticos: DatosEstaticosService) {}
+  constructor(private formStateService: FormStateService, private fb: FormBuilder, private datosEstaticos: DatosEstaticosService) { }
 
   private formKey = 'FormTrabajo';
 
   ngOnInit(): void {
     this.initForm();
+    const trabajoArray = this.formParent.get('trabajo') as FormArray;
+    if (this.datos && this.datos.trabajo && this.datos.trabajo.length > 0 && trabajoArray.length === 0) {
+      for (let i of this.datos.trabajo) {
+        this.agregarTrabajo(i);
+      }
+    }
     this.formParent.valueChanges.subscribe(values => {
-        this.newDatDatosPuestTrab.emit(values);
+      this.newDatDatosPuestTrab.emit(values);
     });
-}
-
-
+  }
 
   ngOnDestroy() {
-    this.formStateService.setForm(this.formKey, this.formParent);
+    /* if (!this.editing) {
+      this.formStateService.setForm(this.formKey, this.formParent);
+    } */
   }
 
 
@@ -94,7 +101,7 @@ export class DatPuestoTrabComponent implements OnInit{
       this.formParent = this.fb.group({
         trabajo: this.fb.array([])  // Corrige aquí el nombre correcto del FormArray
       });
-      this.formStateService.setForm(this.formKey, this.formParent);
+      /* this.formStateService.setForm(this.formKey, this.formParent); */
     }
   }
 

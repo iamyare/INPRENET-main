@@ -20,7 +20,7 @@ import 'jspdf-autotable';
   templateUrl: './ver-dat-plan-ing.component.html',
   styleUrl: './ver-dat-plan-ing.component.scss'
 })
-export class VerDatPlanIngComponent implements OnInit{
+export class VerDatPlanIngComponent implements OnInit {
   dataSourceItems1: any[] = [];
   dataSourceItems: MatTableDataSource<Item>;
   displayedColumns: string[] = ['numeroColegio', 'nombreColegio', 'totalSueldo', 'totalPrestamo', 'totalAportaciones', 'totalPagar', 'totalCotizaciones'];
@@ -41,23 +41,23 @@ export class VerDatPlanIngComponent implements OnInit{
   displayedColumns3: string[] = ['identidad', 'nombreDocente', 'sueldo', 'aportaciones', 'cotizaciones', 'prestamos', 'deducciones', 'sueldoNeto', 'editar', 'eliminar'];
 
   constructor(
-    private planillaIngresosService: PlanillaIngresosService, 
+    private planillaIngresosService: PlanillaIngresosService,
     private cdr: ChangeDetectorRef,
     private toastr: ToastrService, public dialog: MatDialog,
-  ){
+  ) {
     this.dataSourceItems = new MatTableDataSource<Item>([]);
   }
   ngOnInit(): void {
-    this.obtenerDetallesPlanillaAgrupCent(this.idCentroTrabajo,this.selectedTipoPlanilla);
-    this.obtenerDetallesPlanilla(this.idCentroTrabajo,this.selectedTipoPlanilla);
+    this.obtenerDetallesPlanillaAgrupCent(this.idCentroTrabajo, this.selectedTipoPlanilla);
+    this.obtenerDetallesPlanilla(this.idCentroTrabajo, this.selectedTipoPlanilla);
   }
 
   ngAfterViewInit() {
-    this.obtenerDetallesPlanilla(this.idCentroTrabajo,this.selectedTipoPlanilla);
+    this.obtenerDetallesPlanilla(this.idCentroTrabajo, this.selectedTipoPlanilla);
     this.dataSource.paginator = this.paginator;
     this.dataSource.sort = this.sort;
   }
-  
+
   obtenerDetallesPlanilla(idCentroTrabajo: number, id_tipo_planilla: number) {
     this.planillaIngresosService.obtenerDetallesPorCentroTrabajo(idCentroTrabajo, id_tipo_planilla).subscribe(
       (response: any) => {
@@ -152,11 +152,10 @@ export class VerDatPlanIngComponent implements OnInit{
 
     dialogRef.afterClosed().subscribe((result: any) => {
       if (result) {
-        console.log(this.selectedTipoPlanilla);
         this.planillaIngresosService.eliminarDetallePlanillaIngreso(row.id_detalle_plan_Ing).subscribe({
           next: (response) => {
             this.toastr.success(response.message);
-            
+
             if (this.selectedTipoPlanilla) {
               this.obtenerDetallesPlanilla(this.idCentroTrabajo, this.selectedTipoPlanilla);
               this.obtenerDetallesPlanillaAgrupCent(this.idCentroTrabajo, this.selectedTipoPlanilla);
@@ -312,15 +311,15 @@ export class VerDatPlanIngComponent implements OnInit{
     this.recargoPlanilla = 100;
     this.totalPagarConRecargo = 1050;
   }
-  
+
   generarActualizarPlanilla() {
     // Lógica para generar o actualizar la planilla
   }
 
   applyFilter(event: Event) {
-    
+
     const filterValue = (event.target as HTMLInputElement).value;
-    
+
     this.dataSource.filter = filterValue.trim().toLowerCase();
 
     if (this.dataSourceItems.paginator) {
@@ -346,7 +345,7 @@ export class VerDatPlanIngComponent implements OnInit{
 
   descargarExcelPdf() {
   }
-  
+
   calcularRecargo() {
     // Lógica para calcular el recargo
   }

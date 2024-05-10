@@ -71,8 +71,8 @@
     subtitulo="Completa la información correspondiente" [columns]="myColumns" [data]="filas" [getData]="getFilas"
     (ejecutarFuncionAsincronaEvent)="
         ejecutarFuncionAsincronaDesdeOtroComponente($event)
-      " [nombreEncabezadoUno]="'Editar'" [mostrarBotonUno]="true" [etiquetaBotonUno]="'Editar'"
+      " [nombreEncabezadoUno]="'Editar'" [mostrarBotonUno]="true" [etiquetaBotonUno]="'Activar'"
     (accionBotonUno)="manejarAccionUno($event)" [nombreEncabezadoUno]="'Acciones'" [mostrarBotonDos]="true"
-    [etiquetaBotonDos]="'Eliminar'" (accionBotonDos)="manejarAccionDos($event)">
+    [etiquetaBotonDos]="'Desactivar'" (accionBotonDos)="manejarAccionDos($event)">
   </app-dynamic-table>
 </div>

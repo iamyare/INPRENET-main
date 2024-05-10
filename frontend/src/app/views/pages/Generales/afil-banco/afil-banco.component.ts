@@ -180,16 +180,18 @@ export class AfilBancoComponent implements OnInit {
 
   // Manejan la informacion de los formularios
   setDatosPuetTrab1(datosPuestTrab: any) {
-    this.formPuestTrab.setControl('trabajo', this.fb.array(datosPuestTrab.trabajo || []));
+    this.formPuestTrab = datosPuestTrab
+    /* this.formPuestTrab.setControl('trabajo', this.fb.array(datosPuestTrab.trabajo || [])); */
   }
   setHistSal(datosHistSal: any) {
-    if (datosHistSal && datosHistSal.banco) {
-        this.formHistPag.setControl('banco', this.fb.array(
-            datosHistSal.banco.map((item: any) => generateHistSalFormGroup(item))
-        ));
+    this.formHistPag = datosHistSal
+    /* if (datosHistSal && datosHistSal.banco) {
+      this.formHistPag.setControl('banco', this.fb.array(
+        datosHistSal.banco.map((item: any) => generateHistSalFormGroup(item))
+      ));
     } else {
-        this.formHistPag.setControl('banco', this.fb.array([]));
-    }
+      this.formHistPag.setControl('banco', this.fb.array([]));
+    } */
   }
   setDatosColegiosMag(datosColegiosMag: any) {
     const formArray = this.formColegiosMagisteriales.get('ColMags') as FormArray;

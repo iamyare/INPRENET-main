@@ -2013,8 +2013,6 @@ ON deducciones."id_afiliado" = beneficios."id_afiliado"
   }
 
   findAll(paginationDto: PaginationDto) {
-    console.log();
-
     const { limit = 10, offset = 0 } = paginationDto;
     return this.planillaRepository.find({
       take: limit,

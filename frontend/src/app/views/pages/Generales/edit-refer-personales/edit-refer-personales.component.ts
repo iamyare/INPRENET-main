@@ -26,7 +26,7 @@ export class EditReferPersonalesComponent {
   unirNombres: any = unirNombres;
   datosTabl: any[] = [];
   prevAfil: boolean = false;
-  listaParentesco:any;
+  listaParentesco: any;
 
 
   public myColumns: TableColumn[] = [];
@@ -125,16 +125,16 @@ export class EditReferPersonalesComponent {
         const data = await this.svcAfiliado.getAllReferenciasPersonales(this.Afiliado.DNI).toPromise();
         this.filas = data.map((item: any) => {
           return {
-            id: item.id_ref_personal || 'ID no encontrado',
-            nombre_completo: item.nombre_completo,
-            parentesco: item.parentesco || 'No disponible',
-            direccion: item.direccion,
-            telefono_domicilio: item.telefono_domicilio,
-            telefono_personal: item.telefono_personal,
-            telefono_trabajo: item.telefono_trabajo,
-            dni: item.dni,
-          };
-        });
+            id: item.referenciaPersonal.id_ref_personal,
+            nombre_completo: item.referenciaPersonal.nombre_completo,
+            parentesco: item.referenciaPersonal.parentesco || 'No disponible',
+            direccion: item.referenciaPersonal.direccion,
+            telefono_domicilio: item.referenciaPersonal.telefono_domicilio,
+            telefono_personal: item.referenciaPersonal.telefono_personal,
+            telefono_trabajo: item.referenciaPersonal.telefono_trabajo,
+          }
+        }
+        );
       } catch (error) {
         this.toastr.error('Error al cargar los datos de las referencias personales');
         console.error('Error al obtener datos de las referencias personales', error);

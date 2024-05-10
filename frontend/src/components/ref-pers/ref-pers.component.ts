@@ -77,7 +77,7 @@ export class RefPersComponent implements OnInit {
   }
 
   ngOnDestroy() {
-    this.formStateService.setForm(this.formKey, this.formParent);
+    /* this.formStateService.setForm(this.formKey, this.formParent); */
   }
 
   private initForm() {
@@ -88,7 +88,7 @@ export class RefPersComponent implements OnInit {
       this.formParent = this.fb.group({
         refpers: this.fb.array([])
       });
-      this.formStateService.setForm(this.formKey, this.formParent);
+      /* this.formStateService.setForm(this.formKey, this.formParent); */
     }
   }
 

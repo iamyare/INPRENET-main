@@ -85,7 +85,7 @@ export class NewFamiliaresComponent implements OnInit {
       this.formParent = this.fb.group({
         familiar: this.fb.array([])
       });
-      this.formStateService.setForm(this.formKey, this.formParent);
+      /* this.formStateService.setForm(this.formKey, this.formParent); */
     }
   }
 

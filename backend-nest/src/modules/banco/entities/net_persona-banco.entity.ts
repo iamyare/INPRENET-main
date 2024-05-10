@@ -11,7 +11,7 @@ export class Net_Persona_Por_Banco {
     @Index("UQ_numCuen_netAfilBanco", { unique: true })
     num_cuenta: string;
 
-    @Column('varchar2', { nullable: false, length: 20, name: 'ESTADO' })
+    @Column('varchar2', { nullable: false, length: 20, name: 'ESTADO', default: "INACTIVO" })
     estado: string;
 
     @ManyToOne(() => Net_Banco, banco => banco.personasDeBanco, { cascade: true })

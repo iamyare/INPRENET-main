@@ -29,6 +29,7 @@ import { FamiliarDTO } from './dto/create-datos-familiar.dto';
 import { UpdatePerfCentTrabDto } from './dto/update.perfAfilCentTrab.dto';
 import { UpdateReferenciaPersonalDTO } from './dto/update-referencia-personal.dto';
 import { UpdateFamiliarDTO } from './dto/update-familiar.dto';
+import { Sequelize, where } from 'sequelize';
 @Injectable()
 export class AfiliadoService {
 
@@ -81,6 +82,9 @@ export class AfiliadoService {
 
     @InjectRepository(NET_PROFESIONES)
     private readonly netProfesionesRepository: Repository<NET_PROFESIONES>,
+
+    @InjectRepository(Net_Persona_Por_Banco)
+    private readonly BancosToPersonaRepository: Repository<Net_Persona_Por_Banco>,
 
     @InjectRepository(NET_RELACION_FAMILIAR)
     private readonly relacionesFamiliaresRepository: Repository<NET_RELACION_FAMILIAR>
@@ -213,18 +217,15 @@ export class AfiliadoService {
   }
 
   async createAndAssignReferences(idPersona: number, dto: AsignarReferenciasDTO): Promise<Net_Ref_Per_Pers[]> {
-
     try {
       const persona = await this.personaRepository.findOne({
         where: { id_persona: idPersona }
       });
-
       if (!persona) {
         throw new Error('Persona no encontrada');
       }
 
       const resultados = await Promise.all(dto.referencias.map(async referenciaDto => {
-
         const referencia = this.referenciaPersonalRepository.create(referenciaDto);
         await this.referenciaPersonalRepository.save(referencia);
 
@@ -266,7 +267,6 @@ export class AfiliadoService {
         personaBanco.persona = persona;
         personaBanco.banco = banco;
         personaBanco.num_cuenta = bancoData.numCuenta;
-        personaBanco.estado = bancoData.estado;
 
         asignaciones.push(await this.personaBancoRepository.save(personaBanco));
       }
@@ -437,7 +437,7 @@ export class AfiliadoService {
 
   async findOne(term: string) {
     let persona;
-  
+
     const queryBuilder = this.personaRepository.createQueryBuilder('persona');
     persona = await queryBuilder
       .select('persona.DNI', 'DNI')
@@ -473,19 +473,19 @@ export class AfiliadoService {
       .leftJoin('detallepersona.tipoPersona', 'tipoPersona')
       .where('persona.dni = :term AND tipoPersona.tipo_persona = :tipo_persona', { term, tipo_persona: "AFILIADO" })
       .getRawOne();
-  
+
     if (!persona) {
       throw new NotFoundException(`Afiliado con ${term} no existe`);
     }
-  
+
     // Convertir la imagen en base64 para enviarla al frontend
     if (persona.FOTO_PERFIL) {
       persona.FOTO_PERFIL = Buffer.from(persona.FOTO_PERFIL).toString('base64');
     }
-  
+
     return persona;
   }
-  
+
 
   async findOnePersona(term: string) {
     let personas: Net_Persona;
@@ -518,7 +518,6 @@ export class AfiliadoService {
         .leftJoin('detallepersona.tipoPersona', 'tipoPersona') // Join con la tabla detallepersonas
         .where('persona.dni = :term', { term })
         .getRawOne();
-
     }
     if (!personas) {
       throw new NotFoundException(`Afiliado con ${term} no existe`);
@@ -720,15 +719,15 @@ export class AfiliadoService {
   }
   async getAllReferenciasPersonales(dni: string): Promise<any> {
     const personas = await this.personaRepository.find({
-        where: { dni: dni },
-        relations: ["referenciasPersonalPersona", "referenciasPersonalPersona.referenciaPersonal"]
+      where: { dni: dni },
+      relations: ["referenciasPersonalPersona", "referenciasPersonalPersona.referenciaPersonal"]
     });
     if (personas.length === 0) {
-        throw new NotFoundException(`No se encontró ninguna referencia personal para la persona con el DNI ${dni}`);
+      throw new NotFoundException(`No se encontró ninguna referencia personal para la persona con el DNI ${dni}`);
     }
     const referencias = personas[0].referenciasPersonalPersona.map(relacion => relacion.referenciaPersonal);
     return referencias;
-}
+  }
 
 
   async getAllPerfCentroTrabajo(dni: string): Promise<any[]> {
@@ -752,7 +751,8 @@ export class AfiliadoService {
     if (!refPersonal) {
       throw new NotFoundException(`La referencia personal con ID ${id} no fue encontrada`);
     }
-    return this.referenciaPersonalRepository.save(refPersonal);
+    const temp = this.referenciaPersonalRepository.save(refPersonal);
+    return temp
   }
 
   async deleteReferenciaPersonal(id: number): Promise<void> {
@@ -763,7 +763,13 @@ export class AfiliadoService {
     await this.referenciaPersonalRepository.remove(referencia);
   }
 
-
+  async eliminarColegioMagisterialPersona(id: number): Promise<void> {
+    const referencia = await this.netPersonaColegiosRepository.findOne({ where: { id: id } });
+    if (!referencia) {
+      throw new NotFoundException(`El colegio magisterial para la persona no fue encontrado`);
+    }
+    await this.netPersonaColegiosRepository.remove(referencia);
+  }
 
   async updateDatosGenerales(idPersona: number, datosGenerales: any): Promise<any> {
     try {
@@ -808,6 +814,30 @@ export class AfiliadoService {
     }
     perfil.estado = 'INACTIVO';
     await this.perfPersoCentTrabRepository.save(perfil);
+  }
+  async desactivarCuentaBancaria(id: number): Promise<void> {
+    const perfil = await this.BancosToPersonaRepository.findOne({ where: { id_af_banco: id } });
+
+    if (!perfil) {
+      throw new NotFoundException(`Cuenta Bancaria con ID ${id} no encontrado`);
+    }
+    perfil.estado = 'INACTIVO';
+    await this.BancosToPersonaRepository.save(perfil);
+  }
+  async activarCuentaBancaria(id: number, id_persona: number): Promise<void> {
+    const perfil1 = await this.BancosToPersonaRepository.find({ where: { persona: { id_persona: id_persona } } });
+    const perfil = await this.BancosToPersonaRepository.findOne({ where: { persona: { id_persona: id_persona }, id_af_banco: id } });
+
+    if (!perfil) {
+      throw new NotFoundException(`Cuenta Bancaria con ID ${id} no encontrado`);
+    }
+
+    perfil1.forEach((val) => val.estado = 'INACTIVO');
+
+    perfil.estado = 'ACTIVO';
+
+    await this.BancosToPersonaRepository.save(perfil1);
+    await this.BancosToPersonaRepository.save(perfil);
   }
 
   async getVinculosFamiliares(dni: string): Promise<{ nombreCompleto: string, fechaNacimiento: string, parentesco: string, dni: string }[]> {
@@ -952,7 +982,7 @@ export class AfiliadoService {
       .where('persona.DNI = :dni', { dni })
       .andWhere('perfil.centroTrabajo = :idCentroTrabajo', { idCentroTrabajo })
       .getOne();
-
+  
     if (!perfil) {
       throw new NotFoundException(`El perfil con DNI ${dni} y centro de trabajo ID ${idCentroTrabajo} no fue encontrado.`);
     }

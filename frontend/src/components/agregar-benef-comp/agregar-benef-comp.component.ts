@@ -45,7 +45,7 @@ export class AgregarBenefCompComponent {
     this.afilService.createBeneficiarios(this.data.idPersona, dataBeneficiarios).subscribe(
       (res: any) => {
         if (res.length > 0) {
-          this.toastr.success("Dato Bancario agregado con éxito");
+          this.toastr.success("Beneficiario agregado con éxito");
           this.formBeneficiarios.reset();
           this.cerrar();
         }

@@ -119,8 +119,8 @@ export class DatGeneralesAfiliadoComponent implements OnInit, OnDestroy {
   }
 
   cargarNacionalidades() {
-   this.datosEstaticos.getNacionalidad().then(data => {
-    this.nacionalidades = data;
+    this.datosEstaticos.getNacionalidad().then(data => {
+      this.nacionalidades = data;
     }).catch(error => {
       console.error('Error al cargar nacionalidades:', error);
     });

@@ -23,7 +23,7 @@ export class AfiliadoService {
 
   createReferPersonales(idPersona: string, encapsulatedData: any): Observable<any> {
     /* const params = new HttpParams().set('idPersona', idPersona); */
-    const encapsulatedDataE = {referencias: encapsulatedData}
+    const encapsulatedDataE = { referencias: encapsulatedData }
 
     const url = `${environment.API_URL}/api/Persona/createReferPersonales/${idPersona}`;
     return this.http.post<any>(url, encapsulatedDataE);
@@ -98,6 +98,10 @@ export class AfiliadoService {
     return this.http.delete(`${environment.API_URL}/api/Persona/eliminarReferencia/${id}`);
   }
 
+  eliminarColegioMagisterialPersona(id: string): Observable<any> {
+    return this.http.delete(`${environment.API_URL}/api/Persona/eliminarColegioMagisterialPersona/${id}`);
+  }
+
   updateVinculoFamiliar(dniPersona: string, dniFamiliar: string, updateData: any): Observable<any> {
     const url = `${environment.API_URL}/api/Persona/updateVinculoFamiliar/${dniPersona}/${dniFamiliar}`;
     return this.http.patch<any>(url, updateData);
@@ -134,6 +138,16 @@ export class AfiliadoService {
   desactivarPerfCentroTrabajo(id: number): Observable<any> {
     const url = `${environment.API_URL}/api/Persona/desactivarPerfCentroTrabajo/${id}`;
     return this.http.patch(url, null);
+  }
+
+  desactivarCuentaBancaria(id: number): Observable<any> {
+    const url = `${environment.API_URL}/api/Persona/desactivarCuentaBancaria/${id}`;
+    return this.http.put(url, null);
+  }
+
+  activarCuentaBancaria(id: number, id_persona: number): Observable<any> {
+    const url = `${environment.API_URL}/api/Persona/activarCuentaBancaria/${id}/${id_persona}`;
+    return this.http.put(url, null);
   }
 
   getAfiliadoDNI(param: string | number): Observable<any | void> {

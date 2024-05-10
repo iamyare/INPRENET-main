@@ -25,9 +25,9 @@ export function generateColegMagistFormGroup(datos?: any): FormGroup {
 export class ColMagisterialesComponent implements OnInit {
   public formParent: FormGroup = new FormGroup({});
   colegio_magisterial: any = [];
-
   private formKey = 'colMagForm';
 
+  @Input() editing?: boolean = false;
   @Input() nombreComp?: string
   @Input() datos?: any
   @Output() newDataColegioMagisterial = new EventEmitter<any>()
@@ -42,9 +42,6 @@ export class ColMagisterialesComponent implements OnInit {
     }
   }
 
-
-
-
   constructor(private formStateService: FormStateService, private fb: FormBuilder, private datosEstaticosSVC: DatosEstaticosService) {
     this.datosEstaticosSVC.getColegiosMagisteriales();
     this.colegio_magisterial = this.datosEstaticosSVC.colegiosMagisteriales;
@@ -55,7 +52,9 @@ export class ColMagisterialesComponent implements OnInit {
   }
 
   ngOnDestroy() {
-    this.formStateService.setForm(this.formKey, this.formParent);
+    if (!this.editing) {
+      this.formStateService.setForm(this.formKey, this.formParent);
+    }
   }
 
   private initForm() {

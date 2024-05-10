@@ -34,9 +34,9 @@ export class AgregarDatBancCompComponent {
     this.afilService.createDatosBancarios(this.data.idPersona, this.formHistPag.banco).subscribe(
       (res: any) => {
         if (res.length > 0) {
-          /* this.formHistPag.reset(); */
           this.toastr.success("Dato Bancario agregado con éxito");
           this.cerrar();
+          this.formHistPag.reset();
         }
       },
       (error) => {

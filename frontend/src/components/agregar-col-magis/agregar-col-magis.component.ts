@@ -36,21 +36,18 @@ export class AgregarColMagisComponent {
   }
 
   guardar() {
-    console.log(this.formColMag);
-
-    this.cerrar();
-
-    /* this.afilService.createColegiosMagisteriales(this.data.idPersona, this.formColMag.value.refpers).subscribe(
+    this.afilService.createColegiosMagisteriales(this.data.idPersona, this.dataColMag).subscribe(
       (res: any) => {
         if (res.length > 0) {
           this.toastr.success("Colegio magisterial agregado con éxito");
+          this.cerrar();
         }
       },
       (error) => {
         this.toastr.error(error);
         console.error('Error al obtener afiliados', error);
       }
-    ); */
+    );
   }
 
   cerrar() {

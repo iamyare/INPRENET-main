@@ -56,6 +56,11 @@ export class EditDatosBancariosComponent {
         col: 'numero_cuenta',
         isEditable: true
       },
+      {
+        header: 'Estado',
+        col: 'estado',
+        isEditable: true
+      },
     ];
     this.previsualizarInfoAfil()
     this.getFilas().then(() => this.cargar());
@@ -96,7 +101,8 @@ export class EditDatosBancariosComponent {
         this.filas = data.map((item: any) => ({
           id: item.id_af_banco,
           nombre_banco: item.banco.nombre_banco,
-          numero_cuenta: item.num_cuenta
+          numero_cuenta: item.num_cuenta,
+          estado: item.estado
         }));
       } catch (error) {
         this.toastr.error('Error al cargar los datos de los perfiles de los centros de trabajo');
@@ -154,12 +160,28 @@ export class EditDatosBancariosComponent {
       width: '350px',
       data: {
         title: 'Confirmación de eliminación',
-        message: '¿Estás seguro de querer eliminar este elemento?'
+        message: '¿Estás seguro de querer eliminar este elemento?',
+        idPersona: this.Afiliado.ID_PERSONA
       }
     });
 
-    dialogRef.afterClosed().subscribe((result: any) => {
+    dialogRef.afterClosed().subscribe((result: boolean) => {
+      console.log(row.id);
 
+      if (result) {
+        this.svcAfiliado.desactivarCuentaBancaria(row.id).subscribe({
+          next: (response) => {
+            this.toastr.success(response.mensaje, 'Cuenta Bancaria Desactivada');
+            this.getFilas().then(() => this.cargar());
+          },
+          error: (error) => {
+            console.error('Error al desactivar el Cuenta Bancaria:', error);
+            this.toastr.error('Ocurrió un error al desactivar el Cuenta Bancaria.');
+          }
+        });
+      } else {
+        console.log('Desactivación cancelada por el usuario.');
+      }
     });
   }
 
@@ -177,7 +199,35 @@ export class EditDatosBancariosComponent {
     });
   }
 
-  openDialog(campos: any, valoresIniciales: any): void {
+  openDialog(campos: any, row: any): void {
+    const dialogRef = this.dialog.open(ConfirmDialogComponent, {
+      width: '350px',
+      data: {
+        title: 'Confirmación de Activación',
+        message: '¿Estás seguro de querer eliminar este elemento?',
+        idPersona: this.Afiliado.ID_PERSONA
+      }
+    });
+
+    dialogRef.afterClosed().subscribe((result: boolean) => {
+      if (result) {
+        this.svcAfiliado.activarCuentaBancaria(row.id, this.Afiliado.ID_PERSONA).subscribe({
+          next: (response) => {
+            this.toastr.success(response.mensaje, 'Cuenta Bancaria Desactivada');
+            this.getFilas().then(() => this.cargar());
+          },
+          error: (error) => {
+            console.error('Error al desactivar el Cuenta Bancaria:', error);
+            this.toastr.error('Ocurrió un error al desactivar el Cuenta Bancaria.');
+          }
+        });
+      } else {
+        console.log('Desactivación cancelada por el usuario.');
+      }
+    });
+  }
+
+  openDialogEditar(campos: any, valoresIniciales: any): void {
     const dialogRef = this.dialog.open(EditarDialogComponent, {
       width: '500px',
       data: { campos: campos, valoresIniciales: valoresIniciales }
@@ -208,9 +258,6 @@ export class EditDatosBancariosComponent {
           }
         );
       }
-    });
+    })
   }
-
-
-
 }

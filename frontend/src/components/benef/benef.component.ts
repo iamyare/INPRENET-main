@@ -16,10 +16,12 @@ import { FormStateService } from 'src/app/services/form-state.service';
 export class BenefComponent {
   private formKey = 'FormBeneficiario';
   public formParent: FormGroup;
+
   archIdent: any;
   labelbutton = "Archivo de identificación (beneficiario)"
   DatosBancBen: any = [];
-  @Input() datos:any
+
+  @Input() datos: any
   @Output() newDatBenChange = new EventEmitter<any>()
 
   onDatosBenChange() {
@@ -42,6 +44,30 @@ export class BenefComponent {
     }
   }
 
+  get porcentajes() {
+    return this.formParent.get('porcentaje') as FormArray;
+  }
+
+  suma100Validator(): any {
+    return (control: FormControl) => {
+      const valor = control.value;
+      if (valor !== null && isNaN(valor) === false && (valor < 0 || valor > 100)) {
+        return { sumaNo100: true };
+      }
+      return null;
+    };
+  }
+
+  actualizarPorcentajes(indice: number, nuevoValor: any) {
+    const diferencia = nuevoValor.target.value - (this.porcentajes.at(indice).value || 0);
+    const otrosPorcentajes = this.porcentajes.controls.filter((control, i) => i !== indice);
+    const porcentajeDistribuir = diferencia / otrosPorcentajes.length;
+
+    otrosPorcentajes.forEach(control => {
+      const valorActual = control.value || 0;
+      control.setValue(valorActual + porcentajeDistribuir);
+    });
+  }
 
   private initForm() {
     let existingForm = this.formStateService.getForm(this.formKey);
@@ -55,11 +81,11 @@ export class BenefComponent {
     }
   }
 
-  initFormBeneficiario(datosBeneficiario?:any, DatosBac?:any, Archivos?:File, labelArch?:any, porcentaje?:any): FormGroup {
+  initFormBeneficiario(datosBeneficiario?: any, DatosBac?: any, Archivos?: File, labelArch?: any, porcentaje?: any): FormGroup {
     return this.fb.group({
       beneficiario: new FormControl(''),
+      porcentaje: new FormControl('', [Validators.required, this.suma100Validator()]),
       datosBeneficiario: generateAddressFormGroup(datosBeneficiario),
-      porcentaje: generateBenefFormGroup(porcentaje),
       DatosBac: generateDatBancFormGroup(DatosBac),
       Archivos: generateFormArchivo(labelArch),
       Arch: Archivos,
@@ -70,7 +96,8 @@ export class BenefComponent {
     const beneficiarios = this.formParent.get('beneficiario') as FormArray;
     if (datos) {
       this.labelbutton = datos.Arch ? datos.Arch.name : "Archivo de identificación (beneficiario)";
-      beneficiarios.push(this.initFormBeneficiario(datos.benfGroup, datos.DatosBac, datos.Arch, datos.Arch ? datos.Arch.name : undefined, datos.porcBenef));
+      beneficiarios.push(this.initFormBeneficiario(datos.benfGroup, datos.DatosBac, datos.Arch, datos.Arch ? datos.Arch.name : undefined));
+
     } else {
       this.labelbutton = "Archivo de identificación (beneficiario)";
       beneficiarios.push(this.initFormBeneficiario());
@@ -89,14 +116,14 @@ export class BenefComponent {
     return form.get(key)
   }
 
-  getLabel(key:string,form:FormGroup, indice:any):String{
+  getLabel(key: string, form: FormGroup, indice: any): String {
     return form.get(key)?.value[indice]?.Arch?.name
   }
 
   setDatosBanc(datosBanc: any) {
     this.DatosBancBen = datosBanc
   }
-  handleArchivoSeleccionado(archivo: any, i:any) {
+  handleArchivoSeleccionado(archivo: any, i: any) {
     if (this.formParent && this.formParent.get('beneficiario')) {
       const asig_Beneficiario = this.formParent.get('beneficiario') as FormArray;
       if (asig_Beneficiario.length > 0) {

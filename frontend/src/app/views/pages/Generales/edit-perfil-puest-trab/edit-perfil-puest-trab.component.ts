@@ -39,7 +39,7 @@ export class EditPerfilPuestTrabComponent {
     private dialog: MatDialog,
     private datosEstaticosService: DatosEstaticosService,
     private datePipe: DatePipe // Añadir DatePipe como dependencia
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     this.myFormFields = [
@@ -166,7 +166,7 @@ export class EditPerfilPuestTrabComponent {
 
   cargar() {
     if (this.ejecF) {
-      this.ejecF(this.filas).then(() => {});
+      this.ejecF(this.filas).then(() => { });
     }
   }
 
@@ -264,11 +264,12 @@ export class EditPerfilPuestTrabComponent {
                 nombre_centro_trabajo: nombreCentro
               };
             }
+            this.toastr.success("Se actualizó el perfil de trabajo correctamente")
             this.cargar();
           },
           error: (error) => {
-            console.error('Error al actualizar:', error);
-            this.toastr.error('Ocurrió un error al actualizar el centro.');
+            this.toastr.error("Error", "No se actualizo el perfil de trabajo")
+            console.error("Error al actualizar:", error);
           }
         });
       } else {

@@ -27,7 +27,7 @@ export class EditFamiliaresComponent {
   unirNombres: any = unirNombres;
   datosTabl: any[] = [];
   prevAfil: boolean = false;
-  listaParentesco:any;
+  listaParentesco: any;
 
 
   public myColumns: TableColumn[] = [];
@@ -43,7 +43,7 @@ export class EditFamiliaresComponent {
   ) { }
 
   ngOnInit(): void {
-     this.listaParentesco = this.datosEstaticosService.parentesco;
+    this.listaParentesco = this.datosEstaticosService.parentesco;
     this.myFormFields = [
       { type: 'text', label: 'DNI del afiliado', name: 'dni', validations: [Validators.required, Validators.minLength(13), Validators.maxLength(14)], display: true },
     ];
@@ -216,25 +216,18 @@ export class EditFamiliaresComponent {
     });
   }
 
+  crearFamiliar() {
+    const dialogRef = this.dialog.open(NewFamiliaresComponent, {
+      width: '60%',
+      height: '75%',
+      data: {
+        dniPersona: this.Afiliado.DNI, // Aquí se debe pasar el valor correcto
+        idPersona: this.Afiliado.ID_PERSONA
+      }
+    });
 
-
-
-crearFamiliar() {
-  const dialogRef = this.dialog.open(NewFamiliaresComponent, {
-    width: '60%',
-    height: '75%',
-    data: {
-      dniPersona: this.Afiliado.DNI,
-      idPersona: this.Afiliado.ID_PERSONA
-    }
-  });
-
-
-  dialogRef.afterClosed().subscribe((result: any) => {
-    if (result) {
+    dialogRef.afterClosed().subscribe((result: any) => {
       this.ngOnInit();
-    }
-  });
-}
-
+    });
+  }
 }

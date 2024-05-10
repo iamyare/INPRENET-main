@@ -90,7 +90,7 @@ export class EditColegiosMagisterialesComponent {
         const data = await this.svcAfiliado.getAllColMagPPersona(this.Afiliado.DNI).toPromise();
         this.filas = data.map((item: any) => {
           return {
-            id_colegio: item.id,
+            id_per_cole_mag: item.id,
             colegio_magisterial: item.colegio.descripcion
           }
         });
@@ -140,6 +140,21 @@ export class EditColegiosMagisterialesComponent {
         message: '¿Estás seguro de querer eliminar este elemento?'
       }
     });
+
+    dialogRef.afterClosed().subscribe((result: any) => {
+      if (result) {
+        this.svcAfiliado.eliminarColegioMagisterialPersona(row.id_per_cole_mag).subscribe({
+          next: (response: any) => {
+            this.toastr.success("Colegio magisterial eliminado correctamente");
+            this.ngOnInit()
+          },
+          error: (error: any) => {
+            console.error('Error al eliminar el colegio magisterial al que pertenece la persona:', error);
+            this.toastr.error('Ocurrió un error al eliminar el colegio magisterial al que pertenece la persona.');
+          }
+        });
+      }
+    });
   }
 
   AgregarBeneficiario() {
@@ -164,7 +179,7 @@ export class EditColegiosMagisterialesComponent {
 
     dialogRef.afterClosed().subscribe(async (result: any) => {
       if (result) {
-        this.svcAfiliado.updateColegiosMagist(result.colegio_magisterial, result).subscribe(
+        this.svcAfiliado.updateColegiosMagist(result.id_per_cole_mag, result).subscribe(
           async (response) => {
             this.toastr.success('Colegio magisterial actualizado con éxito.');
             this.cargar();

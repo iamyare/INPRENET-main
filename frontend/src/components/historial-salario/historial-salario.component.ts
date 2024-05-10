@@ -3,11 +3,11 @@ import { ControlContainer, FormArray, FormBuilder, FormControl, FormGroup, Valid
 import { DatosEstaticosService } from 'src/app/services/datos-estaticos.service';
 import { FormStateService } from 'src/app/services/form-state.service';
 
-export function generateHistSalFormGroup(datos?:any): FormGroup {
+export function generateHistSalFormGroup(datos?: any): FormGroup {
   return new FormGroup({
     idBanco: new FormControl(datos.idBanco, Validators.required),
     numCuenta: new FormControl(datos.numCuenta, Validators.required),
-    estado: new FormControl(datos.estado , Validators.required)
+    /* estado: new FormControl(datos.estado , Validators.required) */
   });
 }
 
@@ -24,20 +24,20 @@ export function generateHistSalFormGroup(datos?:any): FormGroup {
     },
   ],
 })
-export class HistorialSalarioComponent implements OnInit{
+export class HistorialSalarioComponent implements OnInit {
   public formParent: FormGroup = new FormGroup({});
 
   Bancos: any;
   private formKey = 'FormBanco';
 
   @Output() newDatHistSal = new EventEmitter<any>()
-  @Input() datos:any;
+  @Input() datos: any;
 
   onDatosHistSal() {
     // Aquí debes asegurarte de emitir el valor actual del formulario y no el FormGroup directamente
     const data = this.formParent.value;  // Cambio aquí para emitir el valor y no el FormGroup
     this.newDatHistSal.emit(data);
-}
+  }
 
   constructor(private formStateService: FormStateService, private fb: FormBuilder, private datosEstaticos: DatosEstaticosService) {
     this.datosEstaticos.getBancos();
@@ -48,48 +48,53 @@ export class HistorialSalarioComponent implements OnInit{
     this.initForm();
     const bancosArray = this.formParent.get('banco') as FormArray;
     if (this.datos && this.datos.banco && this.datos.banco.length > 0 && bancosArray.length === 0) {
-        for (let i of this.datos.banco) {
-            this.agregarBanco(i);
-        }
+      for (let i of this.datos.banco) {
+        this.agregarBanco(i);
+      }
     }
-}
+  }
 
 
   private initForm() {
     let existingForm = this.formStateService.getForm(this.formKey);
     if (existingForm) {
-        this.formParent = existingForm;
+      this.formParent = existingForm;
     } else {
-        this.formParent = this.fb.group({
-            banco: this.fb.array([])
-        });
-        this.formStateService.setForm(this.formKey, this.formParent);
+      this.formParent = this.fb.group({
+        banco: this.fb.array([])
+      });
+      /* this.formStateService.setForm(this.formKey, this.formParent); */
     }
 
-}
+  }
 
 
-agregarBanco(datos?: any): void {
-  const ref_banco = this.formParent.get('banco') as FormArray;
-  if (datos) {
+  agregarBanco(datos?: any): void {
+    const ref_banco = this.formParent.get('banco') as FormArray;
+    if (datos) {
       ref_banco.push(generateHistSalFormGroup(datos));
-  } else {
+    } else {
       ref_banco.push(generateHistSalFormGroup({}));
+    }
+    this.onDatosHistSal();  // Asegúrate de emitir el evento aquí.
   }
-  this.onDatosHistSal();  // Asegúrate de emitir el evento aquí.
-}
 
-eliminarBanco(): void {
-  const ref_banco = this.formParent.get('banco') as FormArray;
-  if (ref_banco.length > 0) {
+  eliminarBanco(): void {
+    const ref_banco = this.formParent.get('banco') as FormArray;
+    if (ref_banco.length > 0) {
       ref_banco.removeAt(ref_banco.length - 1);  // Corrige para eliminar el último elemento
+    }
+    this.onDatosHistSal();  // Asegúrate de emitir el evento aquí.
   }
-  this.onDatosHistSal();  // Asegúrate de emitir el evento aquí.
-}
 
 
   getCtrl(key: string, form: FormGroup): any {
     return form.get(key)
   }
-
+  addValidation(index: number, key: string): void {
+    const colParent = this.formParent.get('banco') as FormArray;
+    const colSingle = colParent.at(index).get(key) as FormControl;
+    colSingle.setValidators(Validators.required);
+    colSingle.updateValueAndValidity();
+  }
 }

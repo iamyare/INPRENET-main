@@ -36,7 +36,7 @@ export class AfiliadoController {
   @InjectRepository(Net_Tipo_Persona)
   private readonly tipoPersonaRepos: Repository<Net_Tipo_Persona>
 
-  constructor(private readonly afiliadoService: AfiliadoService, private dataSource: DataSource) {}
+  constructor(private readonly afiliadoService: AfiliadoService, private dataSource: DataSource) { }
 
   @Post('afiliacion')
   @UseInterceptors(FileInterceptor('foto_perfil', {
@@ -55,20 +55,20 @@ export class AfiliadoController {
     @Body('encapsulatedDto') encapsulatedDtoStr: string // Se espera recibir un string desde el campo `encapsulatedDto`
   ) {
     console.log(encapsulatedDtoStr);
-    
+
     try {
       // Convertir el string JSON a un objeto
       const encapsulatedDto: EncapsulatedPersonaDTO = JSON.parse(encapsulatedDtoStr);
-  
+
       // Procesar la imagen de perfil si está presente
       if (fotoPerfil) {
         encapsulatedDto.datosGenerales.foto_perfil = fotoPerfil.buffer; // Usar el buffer directamente
       }
-  
+
       // Creación de la persona principal
       const createPersonaDto = encapsulatedDto.datosGenerales;
       const persona = await this.afiliadoService.createPersona(createPersonaDto);
-  
+
       // Creación del detalle de la persona
       const detallePersonaDto = {
         idPersona: persona.id_persona,
@@ -76,13 +76,13 @@ export class AfiliadoController {
         porcentaje: 0
       };
       const detallePersona = await this.afiliadoService.createDetallePersona(detallePersonaDto);
-  
+
       // Asignación de centros de trabajo
       let centrosTrabajoAsignados = [];
       if (encapsulatedDto.centrosTrabajo && encapsulatedDto.centrosTrabajo.length > 0) {
         centrosTrabajoAsignados = await this.afiliadoService.assignCentrosTrabajo(persona.id_persona, encapsulatedDto.centrosTrabajo);
       }
-  
+
       // Creación y asignación de referencias personales
       let referenciasAsignadas = [];
       if (encapsulatedDto.referenciasPersonales && encapsulatedDto.referenciasPersonales.length > 0) {
@@ -90,13 +90,13 @@ export class AfiliadoController {
           referencias: encapsulatedDto.referenciasPersonales
         });
       }
-  
+
       // Asignación de bancos
       let bancosAsignados = [];
       if (encapsulatedDto.bancos && encapsulatedDto.bancos.length > 0) {
         bancosAsignados = await this.afiliadoService.assignBancosToPersona(persona.id_persona, encapsulatedDto.bancos);
       }
-  
+
       // Creación de beneficiarios
       let beneficiariosAsignados = [];
       const personaReferente = await this.tipoPersonaRepos.findOne({
@@ -117,13 +117,13 @@ export class AfiliadoController {
           beneficiariosAsignados.push(detalle);
         }
       }
-  
+
       // Asignación de colegios magisteriales
       let colegiosMagisterialesAsignados = [];
       if (encapsulatedDto.colegiosMagisteriales && encapsulatedDto.colegiosMagisteriales.length > 0) {
         colegiosMagisterialesAsignados = await this.afiliadoService.assignColegiosMagisteriales(persona.id_persona, encapsulatedDto.colegiosMagisteriales);
       }
-  
+
       // Manejo de familiares y sus relaciones extendidas
       const familiaresAsignados = [];
       if (encapsulatedDto.familiares && encapsulatedDto.familiares.length > 0) {
@@ -137,7 +137,7 @@ export class AfiliadoController {
           familiaresAsignados.push(familiar);
         }
       }
-  
+
       return {
         message: 'Persona creada con detalles, centros de trabajo, referencias personales, bancos, beneficiarios, colegios magisteriales y relaciones familiares asignadas correctamente.'
       };
@@ -168,24 +168,24 @@ export class AfiliadoController {
 
 
   @Post('/createReferPersonales/:idPersona')
-  createReferPersonales(@Param("idPersona") idPersona:number, @Body() createAfiliadoTempDto: any) {
-    return this.afiliadoService.createAndAssignReferences(idPersona,createAfiliadoTempDto);
+  createReferPersonales(@Param("idPersona") idPersona: number, @Body() createAfiliadoTempDto: any) {
+    return this.afiliadoService.createAndAssignReferences(idPersona, createAfiliadoTempDto);
   }
   @Post('/createColegiosMagisteriales/:idPersona')
-  createColegiosMagisteriales(@Param("idPersona") idPersona:number, @Body() colegiosMagisterialesData: any) {
+  createColegiosMagisteriales(@Param("idPersona") idPersona: number, @Body() colegiosMagisterialesData: any) {
     return this.afiliadoService.assignColegiosMagisteriales(idPersona, colegiosMagisterialesData);
   }
   @Post('/createCentrosTrabajo/:idPersona')
-  createCentrosTrabajo(@Param("idPersona") idPersona:number, @Body() centrosTrabajoData: any) {
+  createCentrosTrabajo(@Param("idPersona") idPersona: number, @Body() centrosTrabajoData: any) {
     return this.afiliadoService.assignCentrosTrabajo(idPersona, centrosTrabajoData);
   }
   @Post('/createDatosBancarios/:idPersona')
-  createDatosBancarios(@Param("idPersona") idPersona:number, @Body() bancosData: any) {
+  createDatosBancarios(@Param("idPersona") idPersona: number, @Body() bancosData: any) {
     return this.afiliadoService.assignBancosToPersona(idPersona, bancosData);
   }
 
   @Post('/createBeneficiarios/:idPersona')
-  async createBeneficiarios(@Param("idPersona") idPersona:number, @Body() encapsulatedDto: any) {
+  async createBeneficiarios(@Param("idPersona") idPersona: number, @Body() encapsulatedDto: any) {
     const personaReferente = await this.tipoPersonaRepos.findOne({
       where: { tipo_persona: "BENEFICIARIO" },
     });
@@ -194,17 +194,17 @@ export class AfiliadoController {
       let beneficiariosAsignados = [];
       if (encapsulatedDto.beneficiarios && encapsulatedDto.beneficiarios.length > 0) {
         for (const beneficiario of encapsulatedDto.beneficiarios) {
-            const beneficiarioData = beneficiario.datosBeneficiario;
-            const nuevoBeneficiario = await this.afiliadoService.createBeneficiario(beneficiarioData);
-            const detalleBeneficiario = {
-                idPersona: nuevoBeneficiario.id_persona,
-                idCausante: idPersona,
-                idCausantePadre: idPersona,
-                idTipoPersona: personaReferente.id_tipo_persona,
-                porcentaje: beneficiario.porcentaje
-            };
-            const detalle = await this.afiliadoService.createDetalleBeneficiario(detalleBeneficiario);
-            beneficiariosAsignados.push(detalle);
+          const beneficiarioData = beneficiario.datosBeneficiario;
+          const nuevoBeneficiario = await this.afiliadoService.createBeneficiario(beneficiarioData);
+          const detalleBeneficiario = {
+            idPersona: nuevoBeneficiario.id_persona,
+            idCausante: idPersona,
+            idCausantePadre: idPersona,
+            idTipoPersona: personaReferente.id_tipo_persona,
+            porcentaje: beneficiario.porcentaje
+          };
+          const detalle = await this.afiliadoService.createDetalleBeneficiario(detalleBeneficiario);
+          beneficiariosAsignados.push(detalle);
         }
       }
       return beneficiariosAsignados;
@@ -217,7 +217,7 @@ export class AfiliadoController {
   createRefPers(@Body() data: any, @Param() dnireferente) {
     return this.afiliadoService.createRefPers(data, dnireferente);
   }
-  
+
   @Post('createCentrosTrabPersona/:dnireferente')
   createCentrosTrabPersona(@Body() data: any, @Param() dnireferente) {
     return this.afiliadoService.createCentrosTrabPersona(data, dnireferente);
@@ -246,7 +246,7 @@ export class AfiliadoController {
   }
 
   @Get('/getAllReferenciasPersonales/:dni')
-  async getAllReferenciasPersonales(@Param("dni") dni:string) {
+  async getAllReferenciasPersonales(@Param("dni") dni: string) {
     try {
       const resultado =
         await this.afiliadoService.getAllReferenciasPersonales(dni);
@@ -263,7 +263,7 @@ export class AfiliadoController {
   }
 
   @Get('/getAllPerfCentroTrabajo/:dni')
-  async getAllPerfCentroTrabajo(@Param("dni") dni:string) {    
+  async getAllPerfCentroTrabajo(@Param("dni") dni: string) {
     try {
       const resultado =
         await this.afiliadoService.getAllPerfCentroTrabajo(dni);
@@ -278,26 +278,33 @@ export class AfiliadoController {
       }
     }
   }
-  
-  @Patch('updateReferenciaPerson/:id')
-async updateReferenciaPerson(@Param('id') id: string, @Body() updateDto: UpdateReferenciaPersonalDTO) {
 
+  @Patch('updateReferenciaPerson/:id')
+  async updateReferenciaPerson(@Param('id') id: string, @Body() updateDto: UpdateReferenciaPersonalDTO) {
     const idNum = parseInt(id, 10);
     if (isNaN(idNum)) {
-        throw new NotFoundException(`El ID proporcionado (${id}) no es válido`);
+      throw new NotFoundException(`El ID proporcionado (${id}) no es válido`);
     }
 
     const updatedRefPersonal = await this.afiliadoService.updateReferenciaPersonal(idNum, updateDto);
 
     return {
-        mensaje: `Referencia personal con ID ${idNum} actualizada con éxito.`,
-        data: updatedRefPersonal,
+      mensaje: `Referencia personal con ID ${idNum} actualizada con éxito.`,
+      data: updatedRefPersonal,
     };
-}
+  }
 
-@Delete('eliminarReferencia/:id')
+  @Delete('eliminarReferencia/:id')
   async deleteReferenciaPersonal(@Param('id', ParseIntPipe) id: number) {
     await this.afiliadoService.deleteReferenciaPersonal(id);
+    return {
+      mensaje: `La referencia personal con ID ${id} ha sido eliminada con éxito.`,
+    };
+  }
+
+  @Delete('eliminarColegioMagisterialPersona/:id')
+  async eliminarColegioMagisterialPersona(@Param('id', ParseIntPipe) id: number) {
+    await this.afiliadoService.eliminarColegioMagisterialPersona(id);
     return {
       mensaje: `La referencia personal con ID ${id} ha sido eliminada con éxito.`,
     };
@@ -323,18 +330,41 @@ async updateReferenciaPerson(@Param('id') id: string, @Body() updateDto: UpdateR
   }
 
   @Patch('desactivarPerfCentroTrabajo/:id')
-    async eliminarPerfCentroTrabajo(@Param('id') id: string) {
-        const idNum = parseInt(id, 10);
-        if (isNaN(idNum)) {
-            throw new NotFoundException(`El ID proporcionado (${id}) no es válido`);
-        }
-        await this.afiliadoService.desactivarPerfCentroTrabajo(idNum);
-        return {
-            mensaje: `Perfil de centro de trabajo con ID ${idNum} ha sido marcado como inactivo.`,
-        };
+  async eliminarPerfCentroTrabajo(@Param('id') id: string) {
+    const idNum = parseInt(id, 10);
+    if (isNaN(idNum)) {
+      throw new NotFoundException(`El ID proporcionado (${id}) no es válido`);
     }
+    await this.afiliadoService.desactivarPerfCentroTrabajo(idNum);
+    return {
+      mensaje: `Perfil de centro de trabajo con ID ${idNum} ha sido marcado como inactivo.`,
+    };
+  }
 
-    @Get('getAllFamiliares/:dni')
+  @Put('desactivarCuentaBancaria/:id')
+  async desactivarCuentaBancaria(@Param('id') id: string) {
+    const idNum = parseInt(id, 10);
+    if (isNaN(idNum)) {
+      throw new NotFoundException(`El ID proporcionado (${id}) no es válido`);
+    }
+    await this.afiliadoService.desactivarCuentaBancaria(idNum);
+    return {
+      mensaje: `Perfil de centro de trabajo con ID ${idNum} ha sido marcado como inactivo.`,
+    };
+  }
+  @Put('activarCuentaBancaria/:id/:id_persona')
+  async activarCuentaBancaria(@Param('id') id: string, @Param('id_persona') id_persona: number) {
+    const idNum = parseInt(id, 10);
+    if (isNaN(idNum)) {
+      throw new NotFoundException(`El ID proporcionado (${id}) no es válido`);
+    }
+    await this.afiliadoService.activarCuentaBancaria(idNum, id_persona);
+    return {
+      mensaje: `Perfil de centro de trabajo con ID ${idNum} ha sido marcado como inactivo.`,
+    };
+  }
+
+  @Get('getAllFamiliares/:dni')
   async getVinculosFamiliares(
     @Param('dni') dni: string
   ): Promise<{ nombreCompleto: string, fechaNacimiento: string, parentesco: string }[]> {
@@ -380,6 +410,13 @@ async updateReferenciaPerson(@Param('id') id: string, @Body() updateDto: UpdateR
     @Body() datosColegioMagist: any,
   ) {
     return this.afiliadoService.updateColegiosMagist(idPerf, datosColegioMagist);
+  }
+  @Put('/updateDatosGenerales/:idPersona')
+  updateDatosGenerales(
+    @Param('idPersona') idPersona: number,
+    @Body() datosGenerales: any,
+  ) {
+    return this.afiliadoService.updateDatosGenerales(idPersona, datosGenerales);
   }
 
   @Get('/dni/:dni')

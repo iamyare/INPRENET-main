@@ -212,8 +212,6 @@ export class PlanillaController {
 
   @Get('beneficios-ordinaria-afil')
   async getMontoPagarPorBeneficio(@Query('dni') dni: string, @Query('periodoInicio') periodoInicio: string, @Query('periodoFinalizacion') periodoFinalizacion: string, @Res() res) {
-    console.log('entro');
-
     try {
       const resultado = await this.planillaService.beneficiosOrdinariaDeAfil(dni, periodoInicio, periodoFinalizacion);
       return res.status(HttpStatus.OK).json({

@@ -6,19 +6,26 @@
 
   <form [formGroup]="formParent" (change)="onDatosBenChange()">
     <div formArrayName="beneficiario">
-      <div *ngFor="let skill of getCtrl('beneficiario', formParent).controls; index as formChild; let i = index" >
+      <div *ngFor="let skill of getCtrl('beneficiario', formParent).controls; index as formChild; let i = index">
         <h4 class="card-title" style="margin: 16px;">Beneficiario Número: {{i+1}}</h4>
 
         <div [formGroupName]="formChild" class="row">
-          <!-- componente aparte de datos generales -->
           <app-dat-generales-afiliado groupName="datosBeneficiario"
             (newDatBenChange)="prueba($event, i); onDatosBenChange()"></app-dat-generales-afiliado>
 
-
           <!-- componente aparte de Beneficio -->
-          <app-beneficio groupName="porcentaje" style="margin: 16px;"></app-beneficio>
-        </div>
+          <!-- <app-beneficio groupName="porcentaje" style="margin: 16px;"></app-beneficio> -->
 
+        </div>
+        <fieldset [formGroupName]="formChild" class="fieldset-container">
+          <mat-form-field class="example-full-width; inputs" appearance="outline">
+            <mat-label>Porcentaje de beneficio</mat-label>
+            <input matInput formControlName="porcentaje" type="number" (input)="actualizarPorcentajes(i, $event)">
+          </mat-form-field>
+        </fieldset>
+      </div>
+      <div *ngIf="formParent.get('porcentaje')?.errors?.['sumaNo100'] && formParent.get('porcentaje')?.touched">
+        El porcentaje debe ser un valor entre 0 y 100.
       </div>
     </div>
   </form>

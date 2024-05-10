@@ -10,8 +10,7 @@
   <app-dynamic-table style="width: 100%" titulo="Editar Colegios Magisteriales"
     subtitulo="Completa la información correspondiente" [columns]="myColumns" [data]="filas" [getData]="getFilas"
     (ejecutarFuncionAsincronaEvent)="ejecutarFuncionAsincronaDesdeOtroComponente($event)"
-    [nombreEncabezadoUno]="'Acciones'" [mostrarBotonUno]="true" [etiquetaBotonUno]="'Editar'"
-    (accionBotonUno)="manejarAccionUno($event)" [nombreEncabezadoUno]="'Acciones'" [mostrarBotonDos]="true"
+    [nombreEncabezadoUno]="'Acciones'" [nombreEncabezadoUno]="'Acciones'" [mostrarBotonDos]="true"
     [etiquetaBotonDos]="'Eliminar'" (accionBotonDos)="manejarAccionDos($event)">
   </app-dynamic-table>
 </div>

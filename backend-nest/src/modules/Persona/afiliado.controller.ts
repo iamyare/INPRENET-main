@@ -12,6 +12,8 @@ import {
   HttpStatus,
   Res,
   ParseIntPipe,
+  UseInterceptors,
+  UploadedFile,
 } from '@nestjs/common';
 import { AfiliadoService } from './afiliado.service';
 import { UpdatePersonaDto } from './dto/update-persona.dto';
@@ -26,6 +28,7 @@ import { UpdateReferenciaPersonalDTO } from './dto/update-referencia-personal.dt
 import { NET_RELACION_FAMILIAR } from './entities/net_relacion_familiar';
 import { UpdateFamiliarDTO } from './dto/update-familiar.dto';
 import { NuevoFamiliarDTO } from './dto/nuevo-familiar.dto';
+import { FileInterceptor } from '@nestjs/platform-express';
 
 @ApiTags('Persona')
 @Controller('Persona')
@@ -36,109 +39,117 @@ export class AfiliadoController {
   constructor(private readonly afiliadoService: AfiliadoService, private dataSource: DataSource) {}
 
   @Post('afiliacion')
-    async createPersonaWithDetailsAndWorkCenters(@Body() encapsulatedDto: EncapsulatedPersonaDTO) {
-        try {
-            // Creación de la persona principal
-            const createPersonaDto = encapsulatedDto.datosGenerales;
-            const persona = await this.afiliadoService.createPersona(createPersonaDto);
-
-            // Creación del detalle de la persona
-            const detallePersonaDto = {
-                idPersona: persona.id_persona,
-                idTipoPersona: createPersonaDto.ID_TIPO_PERSONA,
-                porcentaje: 0
-            };
-            const detallePersona = await this.afiliadoService.createDetallePersona(detallePersonaDto);
-
-            // Asignación de centros de trabajo
-            let centrosTrabajoAsignados = [];
-            if (encapsulatedDto.centrosTrabajo && encapsulatedDto.centrosTrabajo.length > 0) {
-                centrosTrabajoAsignados = await this.afiliadoService.assignCentrosTrabajo(persona.id_persona, encapsulatedDto.centrosTrabajo);
-            }
-
-            // Creación y asignación de referencias personales
-            let referenciasAsignadas = [];
-            if (encapsulatedDto.referenciasPersonales && encapsulatedDto.referenciasPersonales.length > 0) {
-                referenciasAsignadas = await this.afiliadoService.createAndAssignReferences(persona.id_persona,{
-                    referencias: encapsulatedDto.referenciasPersonales
-                });
-            }
-
-            // Asignación de bancos
-            let bancosAsignados = [];
-            if (encapsulatedDto.bancos && encapsulatedDto.bancos.length > 0) {
-                bancosAsignados = await this.afiliadoService.assignBancosToPersona(persona.id_persona, encapsulatedDto.bancos);
-            }
-
-            // Creación de beneficiarios
-            /*  let beneficiariosAsignados = await this.createBeneficiarios(persona.id_persona, encapsulatedDto); */
-            let beneficiariosAsignados = [];
-            const personaReferente = await this.tipoPersonaRepos.findOne({
-              where: { tipo_persona: "BENEFICIARIO" },
-            });
-            if (encapsulatedDto.beneficiarios && encapsulatedDto.beneficiarios.length > 0) {
-                for (const beneficiario of encapsulatedDto.beneficiarios) {
-                    const beneficiarioData = beneficiario.datosBeneficiario;
-                    const nuevoBeneficiario = await this.afiliadoService.createBeneficiario(beneficiarioData);
-                    const detalleBeneficiario = {
-                        idPersona: nuevoBeneficiario.id_persona,
-                        idCausante: persona.id_persona,
-                        idCausantePadre: persona.id_persona,
-                        idTipoPersona: personaReferente.id_tipo_persona,
-                        porcentaje: beneficiario.porcentaje
-                    };
-                    const detalle = await this.afiliadoService.createDetalleBeneficiario(detalleBeneficiario);
-                    beneficiariosAsignados.push(detalle);
-                }
-            }
-
-            // Asignación de colegios magisteriales
-            let colegiosMagisterialesAsignados = [];
-            if (encapsulatedDto.colegiosMagisteriales && encapsulatedDto.colegiosMagisteriales.length > 0) {
-                colegiosMagisterialesAsignados = await this.afiliadoService.assignColegiosMagisteriales(persona.id_persona, encapsulatedDto.colegiosMagisteriales);
-            }
-
-            // Manejo de familiares y sus relaciones extendidas
-            const familiaresAsignados = [];
-            if (encapsulatedDto.familiares && encapsulatedDto.familiares.length > 0) {
-                for (const familiarDto of encapsulatedDto.familiares) {
-                    const familiar = await this.afiliadoService.createPersona(familiarDto);
-                    await this.afiliadoService.createRelacionFamiliar({
-                        personaId: persona.id_persona,
-                        familiarId: familiar.id_persona,
-                        parentesco: familiarDto.parentescoConPrincipal
-                    });
-
-                    if (familiarDto.encargadoDos) {
-                        const encargadoDos = await this.afiliadoService.createPersona(familiarDto.encargadoDos);
-                        await this.afiliadoService.createRelacionFamiliar({
-                            personaId: encargadoDos.id_persona,
-                            familiarId: familiar.id_persona,
-                            parentesco: familiarDto.encargadoDos.parentescoConFamiliar
-                        });
-                    }
-                    familiaresAsignados.push(familiar);
-                }
-            }
-
-            return {
-                persona,
-                detallePersona,
-                centrosTrabajoAsignados,
-                referenciasAsignadas,
-                bancosAsignados,
-                beneficiariosAsignados,
-                colegiosMagisterialesAsignados,
-                familiaresAsignados,
-                message: 'Persona creada con detalles, centros de trabajo, referencias personales, bancos, beneficiarios, colegios magisteriales y relaciones familiares asignadas correctamente.'
-            };
-        } catch (error) {
-            return {
-                error: true,
-                message: error.message
-            };
+  @UseInterceptors(FileInterceptor('foto_perfil', {
+    limits: { fileSize: 5 * 1024 * 1024 }, // Límite de tamaño del archivo a 5 MB
+    fileFilter: (req, file, callback) => {
+      // Filtra solo archivos de imagen
+      if (file.mimetype.startsWith('image/')) {
+        callback(null, true);
+      } else {
+        callback(new Error('Solo se permiten archivos de imagen'), false);
+      }
+    },
+  }))
+  async createPersonaWithDetailsAndWorkCenters(
+    @UploadedFile() fotoPerfil: Express.Multer.File,
+    @Body('encapsulatedDto') encapsulatedDtoStr: string // Se espera recibir un string desde el campo `encapsulatedDto`
+  ) {
+    console.log(encapsulatedDtoStr);
+    
+    try {
+      // Convertir el string JSON a un objeto
+      const encapsulatedDto: EncapsulatedPersonaDTO = JSON.parse(encapsulatedDtoStr);
+  
+      // Procesar la imagen de perfil si está presente
+      if (fotoPerfil) {
+        encapsulatedDto.datosGenerales.foto_perfil = fotoPerfil.buffer; // Usar el buffer directamente
+      }
+  
+      // Creación de la persona principal
+      const createPersonaDto = encapsulatedDto.datosGenerales;
+      const persona = await this.afiliadoService.createPersona(createPersonaDto);
+  
+      // Creación del detalle de la persona
+      const detallePersonaDto = {
+        idPersona: persona.id_persona,
+        idTipoPersona: createPersonaDto.ID_TIPO_PERSONA,
+        porcentaje: 0
+      };
+      const detallePersona = await this.afiliadoService.createDetallePersona(detallePersonaDto);
+  
+      // Asignación de centros de trabajo
+      let centrosTrabajoAsignados = [];
+      if (encapsulatedDto.centrosTrabajo && encapsulatedDto.centrosTrabajo.length > 0) {
+        centrosTrabajoAsignados = await this.afiliadoService.assignCentrosTrabajo(persona.id_persona, encapsulatedDto.centrosTrabajo);
+      }
+  
+      // Creación y asignación de referencias personales
+      let referenciasAsignadas = [];
+      if (encapsulatedDto.referenciasPersonales && encapsulatedDto.referenciasPersonales.length > 0) {
+        referenciasAsignadas = await this.afiliadoService.createAndAssignReferences(persona.id_persona, {
+          referencias: encapsulatedDto.referenciasPersonales
+        });
+      }
+  
+      // Asignación de bancos
+      let bancosAsignados = [];
+      if (encapsulatedDto.bancos && encapsulatedDto.bancos.length > 0) {
+        bancosAsignados = await this.afiliadoService.assignBancosToPersona(persona.id_persona, encapsulatedDto.bancos);
+      }
+  
+      // Creación de beneficiarios
+      let beneficiariosAsignados = [];
+      const personaReferente = await this.tipoPersonaRepos.findOne({
+        where: { tipo_persona: "BENEFICIARIO" },
+      });
+      if (encapsulatedDto.beneficiarios && encapsulatedDto.beneficiarios.length > 0) {
+        for (const beneficiario of encapsulatedDto.beneficiarios) {
+          const beneficiarioData = beneficiario.datosBeneficiario;
+          const nuevoBeneficiario = await this.afiliadoService.createBeneficiario(beneficiarioData);
+          const detalleBeneficiario = {
+            idPersona: nuevoBeneficiario.id_persona,
+            idCausante: persona.id_persona,
+            idCausantePadre: persona.id_persona,
+            idTipoPersona: personaReferente.id_tipo_persona,
+            porcentaje: beneficiario.porcentaje
+          };
+          const detalle = await this.afiliadoService.createDetalleBeneficiario(detalleBeneficiario);
+          beneficiariosAsignados.push(detalle);
         }
+      }
+  
+      // Asignación de colegios magisteriales
+      let colegiosMagisterialesAsignados = [];
+      if (encapsulatedDto.colegiosMagisteriales && encapsulatedDto.colegiosMagisteriales.length > 0) {
+        colegiosMagisterialesAsignados = await this.afiliadoService.assignColegiosMagisteriales(persona.id_persona, encapsulatedDto.colegiosMagisteriales);
+      }
+  
+      // Manejo de familiares y sus relaciones extendidas
+      const familiaresAsignados = [];
+      if (encapsulatedDto.familiares && encapsulatedDto.familiares.length > 0) {
+        for (const familiarDto of encapsulatedDto.familiares) {
+          const familiar = await this.afiliadoService.createPersona(familiarDto);
+          await this.afiliadoService.createRelacionFamiliar({
+            personaId: persona.id_persona,
+            familiarId: familiar.id_persona,
+            parentesco: familiarDto.parentescoConPrincipal
+          });
+          familiaresAsignados.push(familiar);
+        }
+      }
+  
+      return {
+        message: 'Persona creada con detalles, centros de trabajo, referencias personales, bancos, beneficiarios, colegios magisteriales y relaciones familiares asignadas correctamente.'
+      };
+    } catch (error) {
+      return {
+        error: true,
+        message: error.message
+      };
     }
+  }
+
+
 
   @Put('/actualizar-salario')
   @HttpCode(HttpStatus.OK)
@@ -270,8 +281,6 @@ export class AfiliadoController {
   
   @Patch('updateReferenciaPerson/:id')
 async updateReferenciaPerson(@Param('id') id: string, @Body() updateDto: UpdateReferenciaPersonalDTO) {
-    console.log('ID recibido:', id);
-    console.log('DTO recibido:', updateDto);
 
     const idNum = parseInt(id, 10);
     if (isNaN(idNum)) {
@@ -332,7 +341,7 @@ async updateReferenciaPerson(@Param('id') id: string, @Body() updateDto: UpdateR
     return this.afiliadoService.getVinculosFamiliares(dni);
   }
 
-  @Patch('/updateVinculoFamiliar/:dniPersona/:dniFamiliar')
+  @Patch('updateVinculoFamiliar/:dniPersona/:dniFamiliar')
   async updateVinculoFamiliar(
     @Param('dniPersona') dniPersona: string,
     @Param('dniFamiliar') dniFamiliar: string,

@@ -29,7 +29,7 @@ export class Net_ReferenciaPersonal {
      parentesco: string;
 
     @Column('varchar2', {
-        length : 40,
+        length : 12,
         nullable : true,
         name :'TELEFONO_DOMICILIO'
     })
@@ -48,6 +48,13 @@ export class Net_ReferenciaPersonal {
         name: 'TELEFONO_PERSONAL'
     })
     telefono_personal: string;
+
+    @Column('varchar2', {
+        length : 15,
+        nullable : false,
+        name: 'DNI'
+    })
+    dni: string;
 
     @OneToMany(() => Net_Ref_Per_Pers, referenciaPersonalAfiliado => referenciaPersonalAfiliado.referenciaPersonal)
     referenciasPersonalesAfiliado: Net_Ref_Per_Pers[];

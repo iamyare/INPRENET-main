@@ -1,6 +1,6 @@
 import { Net_TipoIdentificacion } from "../../tipo_identificacion/entities/net_tipo_identificacion.entity";
 import { Net_Pais } from "../../Regional/pais/entities/pais.entity";
-import { Column, Entity, Index, JoinColumn, ManyToOne, OneToMany, OneToOne, PrimaryGeneratedColumn } from "typeorm";
+import { Check, Column, Entity, Index, JoinColumn, ManyToOne, OneToMany, OneToOne, PrimaryGeneratedColumn } from "typeorm";
 import { Net_Detalle_Deduccion } from "../../Planilla/detalle-deduccion/entities/detalle-deduccion.entity";
 import { Net_Municipio } from "../../Regional/municipio/entities/net_municipio.entity";
 import { NET_CUENTA_PERSONA } from "../../transacciones/entities/net_cuenta_persona.entity";
@@ -16,6 +16,7 @@ import { NET_RELACION_FAMILIAR } from "./net_relacion_familiar";
 @Entity({
     name: 'NET_PERSONA',
 })
+@Check(`sexo IN ('F', 'M')`)
 export class Net_Persona {
     @PrimaryGeneratedColumn({ type: 'int', name: 'ID_PERSONA', primaryKeyConstraintName: 'PK_ID_PERSONA_PERSONA' })
     id_persona: number;
@@ -28,7 +29,7 @@ export class Net_Persona {
     @JoinColumn({ name: 'ID_PAIS_NACIONALIDAD', foreignKeyConstraintName: "FK_ID_PAIS_PERS" })
     pais: Net_Pais;
 
-    @Column('varchar2', { length: 40, nullable: true, name: 'DNI' })
+    @Column('varchar2', { length: 15, nullable: true, name: 'DNI' })
     @Index("UQ_DNI_net_persona", { unique: true })
     dni: string;
 
@@ -53,7 +54,7 @@ export class Net_Persona {
     @Column('varchar2', { length: 30, nullable: true, name: 'GENERO' })
     genero: string;
 
-    @Column('varchar2', { length: 30, nullable: true, name: 'SEXO' })
+    @Column('varchar2', { length: 1, nullable: true, name: 'SEXO' })
     sexo: string;
 
     @Column('number', { nullable: true, name: 'CANTIDAD_DEPENDIENTES' })
@@ -76,12 +77,6 @@ export class Net_Persona {
 
     @Column('varchar2', { length: 40, nullable: true, name: 'SEGUNDO_APELLIDO_CENSO' })
     segundo_apellido_censo: string;
-
-    @Column('varchar2', { length: 40, nullable: true, name: 'COLEGIO_MAGISTERIAL' })
-    COLEGIO_MAGISTERIAL: string;
-
-    @Column('number', { nullable: true, name: 'ID_COLEGIO' })
-    id_colegio: number;
 
     @Column('varchar2', { length: 40, nullable: true, name: 'REPRESENTACION' })
     representacion: string;
@@ -115,6 +110,9 @@ export class Net_Persona {
 
     @Column('varchar2', { length: 200, nullable: true, name: 'DIRECCION_RESIDENCIA' })
     direccion_residencia: string;
+
+    @Column('blob', { nullable: true, name: 'FOTO_PERFIL' })
+    foto_perfil: Buffer;
 
     @ManyToOne(() => Net_Municipio, municipio => municipio.persona, { cascade: true })
     @JoinColumn({ name: 'ID_MUNICIPIO_RESIDENCIA', foreignKeyConstraintName: "FK_ID_MUNIC_RESID_PERS" })

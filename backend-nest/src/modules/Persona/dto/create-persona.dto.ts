@@ -1,6 +1,6 @@
 import { Type } from 'class-transformer';
 import {
-    IsDate, IsEmail, IsInt, IsOptional, IsString, MaxLength,
+    IsDate, IsEmail, IsInt, IsOptional, IsString, Matches, MaxLength,
 } from 'class-validator';
 
 export interface PersonaResponse {
@@ -39,9 +39,11 @@ export class NetPersonaDTO {
     id_pais: number;
 
     @IsString()
-    @MaxLength(40)
-    @IsOptional()
-    dni?: string;
+    @MaxLength(15)
+    @Matches(/^[0-9]{13}$|^[0-9]{4}-[0-9]{4}-[0-9]{5}$/, {
+        message: "El DNI debe contener 13 caracteres numéricos en formato continuo o en el formato NNNN-NNNN-NNNNN.",
+    })
+    dni: string;
 
     @IsString()
     @MaxLength(40)
@@ -117,14 +119,18 @@ export class NetPersonaDTO {
     @IsOptional()
     numero_carnet?: string;
 
-    @IsDate()
-    @Type(() => Date)
-    fecha_nacimiento?: Date;
+    @IsString()
+    @Matches(/^\d{1,2}\/\d{1,2}\/\d{4}$/, {
+        message: "La fecha de nacimiento debe estar en el formato d/m/aaaa.",
+    })
+    fecha_nacimiento: string;
 
-    @IsDate()
+    @IsString()
     @IsOptional()
-    @Type(() => Date)
-    fecha_defuncion?: Date;
+    @Matches(/^\d{1,2}\/\d{1,2}\/\d{4}$/, {
+        message: "La fecha de defunción debe estar en el formato d/m/aaaa.",
+    })
+    fecha_defuncion?: string;
 
     @IsString()
     @MaxLength(200)
@@ -141,5 +147,14 @@ export class NetPersonaDTO {
     @IsInt()
     id_estado_persona: number;
 
+    @IsString()
+    @MaxLength(1)
+    @Matches(/^[FM]$/, {
+        message: "El campo 'sexo' solo acepta 'F' o 'M'.",
+    })
+    sexo: string;
+
+    @IsOptional()
+    foto_perfil?: Buffer;
 
 }

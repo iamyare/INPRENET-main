@@ -2,7 +2,6 @@ import { Controller, Get, Post, Body, Patch, Param, Delete, UseInterceptors, Upl
 import { DetalleDeduccionService } from './detalle-deduccion.service';
 import { CreateDetalleDeduccionDto } from './dto/create-detalle-deduccion.dto';
 import { UpdateDetalleDeduccionDto } from './dto/update-detalle-deduccion.dto';
-import { FileInterceptor } from '@nestjs/platform-express';
 import { ApiTags } from '@nestjs/swagger';
 
 @ApiTags('detalle-deduccion')
@@ -112,13 +111,13 @@ export class DetalleDeduccionController {
     return this.detalleDeduccionService.create(createDetalleDeduccionDto);
   }
 
-  @Post('subirArchivo')
+  /* @Post('subirArchivo')
   @UseInterceptors(FileInterceptor('file'))
   subirFile(@UploadedFile() file: Express.Multer.File) {
     const data = this.detalleDeduccionService.readExcel(file.buffer);
     // Procesa los datos según sea necesario
     return data;
-  }
+  } */
 
   @Get()
   findAll() {

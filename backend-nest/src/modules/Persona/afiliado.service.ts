@@ -93,19 +93,16 @@ export class AfiliadoService {
     Object.assign(persona, createPersonaDto);
     if (createPersonaDto.fecha_nacimiento) {
       if (typeof createPersonaDto.fecha_nacimiento === 'string') {
-        const fechaNacimiento = new Date(createPersonaDto.fecha_nacimiento);
-        if (!isNaN(fechaNacimiento.getTime())) {
-          persona.fecha_nacimiento = fechaNacimiento.toISOString().substring(0, 10);
+        const fechaNacimiento = Date.parse(createPersonaDto.fecha_nacimiento);
+        if (!isNaN(fechaNacimiento)) {
+          persona.fecha_nacimiento = new Date(fechaNacimiento).toISOString().substring(0, 10);
         } else {
           throw new Error('Fecha de nacimiento no válida');
         }
-      } else if (createPersonaDto.fecha_nacimiento instanceof Date) {
-        persona.fecha_nacimiento = createPersonaDto.fecha_nacimiento.toISOString().substring(0, 10);
       } else {
-        throw new Error('Fecha de nacimiento no es una cadena o instancia de Date');
+        throw new Error('Fecha de nacimiento no es una cadena válida');
       }
     }
-
     persona.tipoIdentificacion = await this.tipoIdentificacionRepository.findOne({ where: { id_identificacion: createPersonaDto.id_tipo_identificacion } });
     if (!persona.tipoIdentificacion) {
       throw new Error(`Tipo de identificación con ID ${createPersonaDto.id_tipo_identificacion} no encontrado`);
@@ -157,18 +154,6 @@ export class AfiliadoService {
         familiarId: familiar.id_persona,
         parentesco: familiarDto.parentescoConPrincipal
       });
-
-      if (familiarDto.encargadoDos) {
-        let encargadoDos = await this.personaRepository.findOne({ where: { dni: familiarDto.encargadoDos.dni } });
-        if (!encargadoDos) {
-          encargadoDos = await this.createPersona(familiarDto.encargadoDos);
-        }
-        await this.createRelacionFamiliar({
-          personaId: encargadoDos.id_persona,
-          familiarId: familiar.id_persona,
-          parentesco: familiarDto.encargadoDos.parentescoConFamiliar
-        });
-      }
     }
 
     return personaPrincipal
@@ -228,21 +213,17 @@ export class AfiliadoService {
   }
 
   async createAndAssignReferences(idPersona: number, dto: AsignarReferenciasDTO): Promise<Net_Ref_Per_Pers[]> {
-    console.log(dto);
-    console.log(idPersona);
 
     try {
       const persona = await this.personaRepository.findOne({
         where: { id_persona: idPersona }
       });
-      console.log(persona);
 
       if (!persona) {
         throw new Error('Persona no encontrada');
       }
 
       const resultados = await Promise.all(dto.referencias.map(async referenciaDto => {
-        console.log(referenciaDto);
 
         const referencia = this.referenciaPersonalRepository.create(referenciaDto);
         await this.referenciaPersonalRepository.save(referencia);
@@ -254,7 +235,6 @@ export class AfiliadoService {
 
         return this.refPerPersRepository.save(refPerPers);
       }));
-      console.log(resultados);
       return resultados;
 
     } catch (error) {
@@ -456,10 +436,10 @@ export class AfiliadoService {
   }
 
   async findOne(term: string) {
-    let personas: Net_Persona;
-
+    let persona;
+  
     const queryBuilder = this.personaRepository.createQueryBuilder('persona');
-    personas = await queryBuilder
+    persona = await queryBuilder
       .select('persona.DNI', 'DNI')
       .addSelect('persona.ID_PERSONA', 'ID_PERSONA')
       .addSelect('persona.PRIMER_NOMBRE', 'PRIMER_NOMBRE')
@@ -473,6 +453,7 @@ export class AfiliadoService {
       .addSelect('persona.DIRECCION_RESIDENCIA', 'DIRECCION_RESIDENCIA')
       .addSelect('persona.NUMERO_CARNET', 'NUMERO_CARNET')
       .addSelect('persona.FECHA_NACIMIENTO', 'FECHA_NACIMIENTO')
+      .addSelect('persona.FOTO_PERFIL', 'FOTO_PERFIL')
       .addSelect('profesion.DESCRIPCION', 'DESCRIPCION')
       .addSelect('persona.TELEFONO_1', 'TELEFONO_1')
       .addSelect('persona.TELEFONO_2', 'TELEFONO_2')
@@ -484,21 +465,27 @@ export class AfiliadoService {
       .addSelect('pais.ID_PAIS', 'ID_PAIS')
       .addSelect('tipoIdentificacion.ID_IDENTIFICACION', 'ID_IDENTIFICACION')
       .innerJoin('persona.estadoPersona', 'estadoAfil')
-      .leftJoin('persona.detallesPersona', 'detallepersona')// Join con la tabla detallepersonas
-      .leftJoin('persona.municipio', 'municipio')// Join con la tabla detallepersonas
-      .leftJoin('persona.pais', 'pais')// Join con la tabla detallepersonas
-      .leftJoin('persona.tipoIdentificacion', 'tipoIdentificacion')// Join con la tabla detallepersonas
-      .leftJoin('persona.profesion', 'profesion') // Join con la tabla detallepersonas
-      .leftJoin('detallepersona.tipoPersona', 'tipoPersona') // Join con la tabla detallepersonas
+      .leftJoin('persona.detallesPersona', 'detallepersona')
+      .leftJoin('persona.municipio', 'municipio')
+      .leftJoin('persona.pais', 'pais')
+      .leftJoin('persona.tipoIdentificacion', 'tipoIdentificacion')
+      .leftJoin('persona.profesion', 'profesion')
+      .leftJoin('detallepersona.tipoPersona', 'tipoPersona')
       .where('persona.dni = :term AND tipoPersona.tipo_persona = :tipo_persona', { term, tipo_persona: "AFILIADO" })
       .getRawOne();
-
-
-    if (!personas) {
+  
+    if (!persona) {
       throw new NotFoundException(`Afiliado con ${term} no existe`);
     }
-    return personas;
+  
+    // Convertir la imagen en base64 para enviarla al frontend
+    if (persona.FOTO_PERFIL) {
+      persona.FOTO_PERFIL = Buffer.from(persona.FOTO_PERFIL).toString('base64');
+    }
+  
+    return persona;
   }
+  
 
   async findOnePersona(term: string) {
     let personas: Net_Persona;
@@ -531,7 +518,6 @@ export class AfiliadoService {
         .leftJoin('detallepersona.tipoPersona', 'tipoPersona') // Join con la tabla detallepersonas
         .where('persona.dni = :term', { term })
         .getRawOne();
-      console.log(personas);
 
     }
     if (!personas) {
@@ -733,18 +719,17 @@ export class AfiliadoService {
     };
   }
   async getAllReferenciasPersonales(dni: string): Promise<any> {
-    const persona = await this.personaRepository.find({
-      where: { dni: dni },
-      relations: ["referenciasPersonalPersona", "referenciasPersonalPersona.referenciaPersonal"]
+    const personas = await this.personaRepository.find({
+        where: { dni: dni },
+        relations: ["referenciasPersonalPersona", "referenciasPersonalPersona.referenciaPersonal"]
     });
-
-    if (!persona) {
-      throw new NotFoundException(`Ninguna referencia personal encontrada`);
+    if (personas.length === 0) {
+        throw new NotFoundException(`No se encontró ninguna referencia personal para la persona con el DNI ${dni}`);
     }
+    const referencias = personas[0].referenciasPersonalPersona.map(relacion => relacion.referenciaPersonal);
+    return referencias;
+}
 
-    return persona[0].referenciasPersonalPersona
-
-  }
 
   async getAllPerfCentroTrabajo(dni: string): Promise<any[]> {
     const persona = await this.personaRepository.createQueryBuilder('persona')
@@ -863,8 +848,6 @@ export class AfiliadoService {
     if (!persona) {
       throw new NotFoundException(`La persona con DNI ${dniPersona} no fue encontrada.`);
     }
-
-    // Encuentra la relación específica usando el DNI del familiar
     const relacion = persona.RELACIONES.find(r => r.familiar.dni === dniFamiliar);
 
     if (!relacion) {
@@ -944,8 +927,6 @@ export class AfiliadoService {
 
   async updateDatosBancarios(idPerf: string, datosBancarios: number
   ): Promise<void> {
-    console.log(idPerf);
-    console.log(datosBancarios);
 
     /* const perfil = await this.perfPersoCentTrabRepository
       .createQueryBuilder('perfil')
@@ -964,8 +945,6 @@ export class AfiliadoService {
 
   async updateColegiosMagist(idPerf: string, datosColegioMagist: number
   ): Promise<void> {
-    console.log(idPerf);
-    console.log(datosColegioMagist);
 
     /* const perfil = await this.perfPersoCentTrabRepository
       .createQueryBuilder('perfil')

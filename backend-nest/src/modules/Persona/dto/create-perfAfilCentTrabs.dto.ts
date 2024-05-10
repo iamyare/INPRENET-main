@@ -1,4 +1,4 @@
-import { IsInt, IsOptional, IsString, MaxLength, MinLength, IsNumber, IsDate, IsDateString } from 'class-validator';
+import { IsInt, IsOptional, IsString, MaxLength, MinLength, IsNumber, IsDate, IsDateString, Min, Matches } from 'class-validator';
 
 export class CentroTrabajoDTO {
     @IsInt()
@@ -12,19 +12,21 @@ export class CentroTrabajoDTO {
     @MaxLength(40)
     numeroAcuerdo: string;
 
-    @IsOptional()
     @IsNumber()
-    salarioBase?: number;
+    @Min(0) 
+    salarioBase: number;
 
-    @IsDateString()
-    @MinLength(10)
-    @MaxLength(10)
+    @IsString()
+    @Matches(/^\d{1,2}\/\d{1,2}\/\d{4}$/, {
+        message: "Fecha de ingreso debe estar en el formato d/m/aaaa.",
+    })
     fechaIngreso: string;
-
+    
     @IsOptional()
-    @IsDateString()
-    @MinLength(10)
-    @MaxLength(10)
+    @IsString()
+    @Matches(/^\d{1,2}\/\d{1,2}\/\d{4}$/, {
+        message: "Fecha de egreso debe estar en el formato d/m/aaaa.",
+    })
     fechaEgreso?: string;
 
     @IsString()

@@ -243,44 +243,46 @@ export class AfilBancoComponent implements OnInit {
     // Recopila todos los datos necesarios para el DTO encapsulado
     const encapsulatedDto = {
       datosGenerales: this.form.get('DatosGenerales')?.value || {},
-      bancos: this.formHistPag.value.banco || [],
-      referenciasPersonales: this.formReferencias.value.refpers || [],
+      bancos: this.formHistPag || [],
+      referenciasPersonales: this.formReferencias || [],
       beneficiarios: this.formBeneficiarios.value.beneficiario || [],
-      centrosTrabajo: this.formPuestTrab.value.trabajo || [],
-      colegiosMagisteriales: this.formColegiosMagisteriales.value.ColMags || [],
-      familiares: this.formDatosFamiliares.value.familiar || []
+      centrosTrabajo: this.formPuestTrab || [],
+      colegiosMagisteriales: this.formColegiosMagisteriales || [],
+      familiares: this.formDatosFamiliares || []
     };
+    console.log(encapsulatedDto);
 
-    // Crear el objeto FormData
-    const formData = new FormData();
-    formData.append('encapsulatedDto', JSON.stringify(encapsulatedDto));
 
-    // Incluir la imagen de perfil si está disponible
-    const fotoPerfilBase64 = this.form.get('FotoPerfil')?.value;
-    if (fotoPerfilBase64) {
-      const fotoBlob = this.dataURLToBlob(fotoPerfilBase64);
-      formData.append('foto_perfil', fotoBlob, 'perfil.jpg');
-    }
-
-    // Crear un objeto intermedio para depurar el contenido de `FormData`
-    const formDataObj: any = {};
-    formData.forEach((value, key) => {
-      formDataObj[key] = value instanceof Blob ? 'Archivo adjunto' : value;
-    });
-
-    // Registra los datos encapsulados en la consola
-    console.log('Datos a enviar:', formDataObj.encapsulatedDto);
-
-    // Llamar al servicio para enviar la solicitud al backend
-    this.afilService.createPersonaWithDetailsAndWorkCenters(formData)
-      .subscribe(
-        response => {
-          console.log('Datos enviados con éxito:', response);
-        },
-        error => {
-          console.error('Error al enviar los datos:', error);
-        }
-      );
+    /*  // Crear el objeto FormData
+     const formData = new FormData();
+     formData.append('encapsulatedDto', JSON.stringify(encapsulatedDto));
+ 
+     // Incluir la imagen de perfil si está disponible
+     const fotoPerfilBase64 = this.form.get('FotoPerfil')?.value;
+     if (fotoPerfilBase64) {
+       const fotoBlob = this.dataURLToBlob(fotoPerfilBase64);
+       formData.append('foto_perfil', fotoBlob, 'perfil.jpg');
+     }
+ 
+     // Crear un objeto intermedio para depurar el contenido de `FormData`
+     const formDataObj: any = {};
+     formData.forEach((value, key) => {
+       formDataObj[key] = value instanceof Blob ? 'Archivo adjunto' : value;
+     });
+ 
+     // Registra los datos encapsulados en la consola
+     console.log('Datos a enviar:', formDataObj.encapsulatedDto);
+ 
+     // Llamar al servicio para enviar la solicitud al backend
+     this.afilService.createPersonaWithDetailsAndWorkCenters(formData)
+       .subscribe(
+         response => {
+           console.log('Datos enviados con éxito:', response);
+         },
+         error => {
+           console.error('Error al enviar los datos:', error);
+         }
+       ); */
   }
 
   // Función auxiliar para convertir un data URL a Blob

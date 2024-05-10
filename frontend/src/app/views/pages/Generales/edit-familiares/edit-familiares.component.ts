@@ -1,3 +1,4 @@
+import { DatePipe } from '@angular/common';
 import { Component, Input } from '@angular/core';
 import { Validators } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
@@ -7,6 +8,7 @@ import { EditarDialogComponent } from '@docs-components/editar-dialog/editar-dia
 import { NewFamiliaresComponent } from '@docs-components/new-familiares/new-familiares.component';
 import { ToastrService } from 'ngx-toastr';
 import { AfiliadoService } from 'src/app/services/afiliado.service';
+import { DatosEstaticosService } from 'src/app/services/datos-estaticos.service';
 import { FieldConfig } from 'src/app/shared/Interfaces/field-config';
 import { TableColumn } from 'src/app/shared/Interfaces/table-column';
 import { convertirFechaInputs } from 'src/app/shared/functions/formatoFecha';
@@ -15,7 +17,8 @@ import { unirNombres } from 'src/app/shared/functions/formatoNombresP';
 @Component({
   selector: 'app-edit-familiares',
   templateUrl: './edit-familiares.component.html',
-  styleUrl: './edit-familiares.component.scss'
+  styleUrl: './edit-familiares.component.scss',
+  providers: [DatePipe]
 })
 export class EditFamiliaresComponent {
   convertirFechaInputs = convertirFechaInputs
@@ -24,6 +27,7 @@ export class EditFamiliaresComponent {
   unirNombres: any = unirNombres;
   datosTabl: any[] = [];
   prevAfil: boolean = false;
+  listaParentesco:any;
 
 
   public myColumns: TableColumn[] = [];
@@ -33,10 +37,13 @@ export class EditFamiliaresComponent {
   constructor(
     private svcAfiliado: AfiliadoService,
     private toastr: ToastrService,
-    private dialog: MatDialog
+    private dialog: MatDialog,
+    private datosEstaticosService: DatosEstaticosService,
+    private datePipe: DatePipe
   ) { }
 
   ngOnInit(): void {
+     this.listaParentesco = this.datosEstaticosService.parentesco;
     this.myFormFields = [
       { type: 'text', label: 'DNI del afiliado', name: 'dni', validations: [Validators.required, Validators.minLength(13), Validators.maxLength(14)], display: true },
     ];
@@ -104,10 +111,12 @@ export class EditFamiliaresComponent {
 
         this.filas = data.map((item: any) => {
           const nombreCompleto = item.nombreCompleto || 'Nombre desconocido';
-          const fechaNacimiento = item.fechaNacimiento || 'Fecha no disponible';
+
+          // Formatear la fecha usando `DatePipe`
+          const fechaNacimiento = this.datePipe.transform(item.fechaNacimiento, 'dd/MM/yyyy') || 'Fecha no disponible';
+
           const parentesco = item.parentesco || 'Parentesco no disponible';
           const dni = item.dni || 'DNI no disponible';
-
 
           return {
             nombreCompleto,
@@ -126,6 +135,7 @@ export class EditFamiliaresComponent {
   }
 
 
+
   ejecutarFuncionAsincronaDesdeOtroComponente(funcion: (data: any) => Promise<void>) {
     this.ejecF = funcion;
   }
@@ -140,9 +150,16 @@ export class EditFamiliaresComponent {
   manejarAccionUno(row: any) {
     const campos = [
       { nombre: 'nombreCompleto', tipo: 'text', requerido: true, etiqueta: 'Nombre completo', editable: true },
-      { nombre: 'fechaNacimiento', tipo: 'text', requerido: true, etiqueta: 'Fecha de nacimiento', editable: true },
+      { nombre: 'fechaNacimiento', tipo: 'date', requerido: true, etiqueta: 'Fecha de nacimiento', editable: true },
       { nombre: 'dni', tipo: 'text', requerido: false, etiqueta: 'dni', editable: true },
-      { nombre: 'parentesco', tipo: 'text', requerido: true, etiqueta: 'Parentesco', editable: true },
+      {
+        nombre: 'parentesco',
+        tipo: 'list',
+        requerido: true,
+        etiqueta: 'Parentesco',
+        editable: true,
+        opciones: this.listaParentesco
+      }
     ];
 
     this.openDialog(campos, row);
@@ -168,34 +185,38 @@ export class EditFamiliaresComponent {
 
   openDialog(campos: any, row: any): void {
     const dialogRef = this.dialog.open(EditarDialogComponent, {
-        width: '500px',
-        data: { campos: campos, valoresIniciales: row }
+      width: '500px',
+      data: { campos: campos, valoresIniciales: row }
     });
 
     dialogRef.afterClosed().subscribe((result: any) => {
-        if (result) {
-            this.svcAfiliado.updateVinculoFamiliar(this.Afiliado.DNI, row.dni, result).subscribe({
-                next: (response) => {
-                    this.toastr.success('Vínculo familiar actualizado con éxito.');
-                    const index = this.filas.findIndex(item => item.dni === row.dni);
-                    if (index !== -1) {
-                        this.filas[index] = {
-                            ...this.filas[index],
-                            ...result
-                        };
-                    }
-                    this.cargar();
-                },
-                error: (error) => {
-                    console.error('Error al actualizar el vínculo familiar:', error);
-                    this.toastr.error('Error al actualizar el vínculo familiar.');
-                }
-            });
-        } else {
-            console.log('Edición cancelada.');
-        }
+      if (result) {
+        this.svcAfiliado.updateVinculoFamiliar(this.Afiliado.DNI, row.dni, result).subscribe({
+          next: (response) => {
+            this.toastr.success('Vínculo familiar actualizado con éxito.');
+            const index = this.filas.findIndex(item => item.dni === row.dni);
+            if (index !== -1) {
+              const fechaFormateada = this.datePipe.transform(result.fechaNacimiento, 'dd/MM/yyyy') || 'Fecha no disponible';
+              this.filas[index] = {
+                ...this.filas[index],
+                ...result,
+                fechaNacimiento: fechaFormateada
+              };
+            }
+            this.cargar();
+          },
+          error: (error) => {
+            console.error('Error al actualizar el vínculo familiar:', error);
+            this.toastr.error('Error al actualizar el vínculo familiar.');
+          }
+        });
+      } else {
+        console.log('Edición cancelada.');
+      }
     });
-}
+  }
+
+
 
 
 crearFamiliar() {
@@ -203,12 +224,10 @@ crearFamiliar() {
     width: '60%',
     height: '75%',
     data: {
-      dniPersona: this.Afiliado.DNI, // Aquí se debe pasar el valor correcto
+      dniPersona: this.Afiliado.DNI,
       idPersona: this.Afiliado.ID_PERSONA
     }
   });
-
-  console.log(this.Afiliado.DNI);
 
 
   dialogRef.afterClosed().subscribe((result: any) => {

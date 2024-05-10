@@ -6,17 +6,38 @@ import { FormStateService } from 'src/app/services/form-state.service';
 
 export function generatePuestoTrabFormGroup(datos?:any): FormGroup {
   return new FormGroup({
-    idCentroTrabajo: new FormControl(datos.idCentroTrabajo, [Validators.required]),
-    cargo: new FormControl(datos.cargo, [Validators.required]), /* ACTIVIDAD ECONOMICA -> cargo que desempeña */
-    salarioBase: new FormControl(datos.salarioBase, [Validators.required]),
-    numeroAcuerdo: new FormControl(datos.numeroAcuerdo, [Validators.required]),
-    fechaIngreso: new FormControl(datos.fechaIngreso, [Validators.required]),
-    fechaEgreso: new FormControl(datos.fechaEgreso, Validators.required),
-
-    /* CLASE CLIENTE -> ESTADO */
-    claseCliente: new FormControl(datos.claseCliente, [Validators.required]),
-    /* SECTOR ECONOMICO-> PUBLICO, PRIVADO, PROHECO, PEDAGIGICO, JUBILADO */
-    sectorEconomico: new FormControl(datos.sectorEconomico, [Validators.required]),
+    idCentroTrabajo: new FormControl(datos?.idCentroTrabajo, [
+      Validators.required,
+      Validators.min(1),
+    ]),
+    cargo: new FormControl(datos?.cargo, [
+      Validators.required,
+      Validators.maxLength(40),
+    ]),
+    numeroAcuerdo: new FormControl(datos?.numeroAcuerdo, [
+      Validators.required,
+      Validators.maxLength(40),
+    ]),
+    salarioBase: new FormControl(datos?.salarioBase, [
+      Validators.required,
+      Validators.min(0),
+    ]),
+    fechaIngreso: new FormControl(datos?.fechaIngreso, [
+      Validators.required,
+    ]),
+    fechaEgreso: new FormControl(datos?.fechaEgreso, [
+    ]),
+    claseCliente: new FormControl(datos?.claseCliente, [
+      Validators.required,
+      Validators.maxLength(40),
+    ]),
+    sectorEconomico: new FormControl(datos?.sectorEconomico, [
+      Validators.required,
+      Validators.maxLength(40),
+    ]),
+    estado: new FormControl(datos?.estado, [
+      Validators.maxLength(40),
+    ]),
   });
 }
 
@@ -63,6 +84,7 @@ export class DatPuestoTrabComponent implements OnInit{
   ngOnDestroy() {
     this.formStateService.setForm(this.formKey, this.formParent);
   }
+
 
   private initForm() {
     let existingForm = this.formStateService.getForm(this.formKey);

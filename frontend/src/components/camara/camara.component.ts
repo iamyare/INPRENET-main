@@ -1,6 +1,7 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, EventEmitter, OnInit, Output } from '@angular/core';
 import {Subject, Observable} from 'rxjs';
 import {WebcamImage, WebcamInitError, WebcamUtil} from 'ngx-webcam';
+import { FormStateService } from 'src/app/services/form-state.service';
 
 @Component({
   selector: 'app-camara',
@@ -10,26 +11,27 @@ import {WebcamImage, WebcamInitError, WebcamUtil} from 'ngx-webcam';
 export class CamaraComponent {
   title = 'camaraapp';
 
+  @Output() imageCaptured = new EventEmitter<string>();
+
+  constructor(private formStateService: FormStateService) {}
+
   // Hacer Toogle on/off
   public mostrarWebcam = true;
   public permitirCambioCamara = true;
   public multiplesCamarasDisponibles = false;
   public dispositivoId!: string;
-  public opcionesVideo: MediaTrackConstraints = {
-    //width: {ideal: 1024};
-    //height: {ideal: 576}
-  }
+  public opcionesVideo: MediaTrackConstraints = {};
 
-  // Errores al iniciar la cámara 
+  // Errores al iniciar la cámara
   public errors: WebcamInitError[] = [];
 
-  // Ultima captura o foto 
+  // Ultima captura o foto
   public imagenWebcam!: WebcamImage;
 
-  // Cada Trigger para una nueva captura o foto 
+  // Cada Trigger para una nueva captura o foto
   public trigger: Subject<void> = new Subject<void>();
 
-  // Cambiar a la siguiente o anterior cámara 
+  // Cambiar a la siguiente o anterior cámara
   private siguienteWebcam: Subject<boolean|string> = new Subject<boolean|string>();
 
   public ngOnInit(): void {
@@ -55,9 +57,10 @@ export class CamaraComponent {
     this.siguienteWebcam.next(directionOnDeviceId);
   }
 
-  public handleImage(imagenWebcam: WebcamImage): void {
-    console.info('Imagen de la webcam recibida: ', imagenWebcam);
-    this.imagenWebcam = imagenWebcam;
+  public handleImage(imagen: WebcamImage): void {
+    this.imagenWebcam = imagen;
+    this.imageCaptured.emit(imagen.imageAsDataUrl);
+    this.formStateService.setFotoPerfil(imagen.imageAsDataUrl);
   }
 
   public cameraSwitched(dispositivoId: string): void {
@@ -69,7 +72,7 @@ export class CamaraComponent {
     return this.trigger.asObservable();
   }
 
-  public get nextWebcamObservable(): Observable<boolean|string> {
+  public get nextWebcamObservable(): Observable<boolean | string> {
     return this.siguienteWebcam.asObservable();
   }
 }

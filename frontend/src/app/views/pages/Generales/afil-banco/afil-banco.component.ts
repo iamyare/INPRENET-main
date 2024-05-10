@@ -11,6 +11,7 @@ import { AfiliadoService } from 'src/app/services/afiliado.service';
 import { generateFormArchivo } from '@docs-components/botonarchivos/botonarchivos.component';
 import { generateHistSalFormGroup } from '@docs-components/historial-salario/historial-salario.component';
 import { generateColegMagistFormGroup } from '@docs-components/col-magisteriales/col-magisteriales.component';
+import { FormStateService } from 'src/app/services/form-state.service';
 
 /* FIX:Corregir los datos de centros de trabajo que se le pasan al input del centro de trabajo */
 /* FIX:Corregir que al cambiar de proceso el contenido del archivo este en el boton */
@@ -27,13 +28,14 @@ export class AfilBancoComponent implements OnInit {
   Archivos: boolean = false; DatosPuestoTrab: boolean = false;
   DatosHS: boolean = false; referenc: boolean = false;
   datosBeneficiario: boolean = false; datosF: boolean = false;
-  datosFamiliares: boolean = false; ColegiosMagisteriales: boolean = false; 
+  datosFamiliares: boolean = false; ColegiosMagisteriales: boolean = false;
   datosA = false
-  
+
   // Formularios
   public formParent: FormGroup = new FormGroup({});
   form = this.fb.group({
     DatosGenerales: generateAddressFormGroup(),
+    FotoPerfil: [''],
     DatosBacAfil: generateDatBancFormGroup(),
     Archivos: generateFormArchivo(),
     Arch: "",
@@ -56,12 +58,24 @@ export class AfilBancoComponent implements OnInit {
   formColegiosMagisteriales: any = new FormGroup({
     ColMags: new FormArray([], [Validators.required])
   });
-  
+
   labelBoton1 = "Adjunte archivo DNI"
   DatosBancBen: any = [];
 
-  constructor(private fb: FormBuilder, private afilService: AfiliadoService) {}
-  ngOnInit(): void {}
+  constructor(private fb: FormBuilder, private formStateService: FormStateService, private afilService: AfiliadoService) {
+  }
+
+  ngOnInit(): void {
+    // Recupera la imagen guardada en el servicio
+    const fotoPerfil = this.formStateService.getFotoPerfil().value;
+    if (fotoPerfil) {
+      this.form.get('FotoPerfil')?.setValue(fotoPerfil);
+    }
+  }
+
+  handleImageCaptured(image: string) {
+    this.form.get('FotoPerfil')?.setValue(image);
+  }
 
   // Manejan el control del progreso de los datos
   setEstadoDatGen(e: any) {
@@ -224,22 +238,61 @@ export class AfilBancoComponent implements OnInit {
 
   // Envia los datos del formulario al servicio para poder guardar la información
   enviar() {
-    if (!this.formHistPag || !this.formHistPag.value || !this.formHistPag.value.banco) {
-        console.error('No hay datos bancarios disponibles.');
-        return;  // Salir del método si no hay datos
+    // Recopila todos los datos necesarios para el DTO encapsulado
+    const encapsulatedDto = {
+      datosGenerales: this.form.get('DatosGenerales')?.value || {},
+      bancos: this.formHistPag.value.banco || [],
+      referenciasPersonales: this.formReferencias.value.refpers || [],
+      beneficiarios: this.formBeneficiarios.value.beneficiario || [],
+      centrosTrabajo: this.formPuestTrab.value.trabajo || [],
+      colegiosMagisteriales: this.formColegiosMagisteriales.value.ColMags || [],
+      familiares: this.formDatosFamiliares.value.familiar || []
+    };
+
+    // Crear el objeto FormData
+    const formData = new FormData();
+    formData.append('encapsulatedDto', JSON.stringify(encapsulatedDto));
+
+    // Incluir la imagen de perfil si está disponible
+    const fotoPerfilBase64 = this.form.get('FotoPerfil')?.value;
+    if (fotoPerfilBase64) {
+      const fotoBlob = this.dataURLToBlob(fotoPerfilBase64);
+      formData.append('foto_perfil', fotoBlob, 'perfil.jpg');
     }
 
-    const data = {
-        datosGenerales: this.form.value.DatosGenerales,
-        familiares: this.formDatosFamiliares.value.familiar,
-        centrosTrabajo: this.formPuestTrab.value.trabajo,
-        referenciasPersonales: this.formReferencias.value.refpers,
-        bancos: this.formHistPag.value.banco,
-        beneficiarios: this.formBeneficiarios.value.beneficiario,
-        colegiosMagisteriales: this.formColegiosMagisteriales.value.ColMags
-  };
+    // Crear un objeto intermedio para depurar el contenido de `FormData`
+    const formDataObj: any = {};
+    formData.forEach((value, key) => {
+      formDataObj[key] = value instanceof Blob ? 'Archivo adjunto' : value;
+    });
 
-    console.log(data);
+    // Registra los datos encapsulados en la consola
+    console.log('Datos a enviar:', formDataObj.encapsulatedDto);
+
+    // Llamar al servicio para enviar la solicitud al backend
+    this.afilService.createPersonaWithDetailsAndWorkCenters(formData)
+      .subscribe(
+        response => {
+          console.log('Datos enviados con éxito:', response);
+        },
+        error => {
+          console.error('Error al enviar los datos:', error);
+        }
+      );
   }
+
+  // Función auxiliar para convertir un data URL a Blob
+  dataURLToBlob(dataURL: string): Blob {
+    const byteString = atob(dataURL.split(',')[1]);
+    const mimeString = dataURL.split(',')[0].split(':')[1].split(';')[0];
+    const buffer = new Uint8Array(byteString.length);
+
+    for (let i = 0; i < byteString.length; i++) {
+      buffer[i] = byteString.charCodeAt(i);
+    }
+
+    return new Blob([buffer], { type: mimeString });
+  }
+
 
 }

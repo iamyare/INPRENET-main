@@ -8,21 +8,11 @@
 <div class="main-content">
   <div class="col-md-12">
     <form [formGroup]="form" #myForm="ngForm" change="getLabel()">
-      <app-dat-generales-afiliado [useCamera]="true" *ngIf="DatosGenerales"
+      <app-dat-generales-afiliado [useCamera]="true"
+      (imageCaptured)="handleImageCaptured($event)" *ngIf="DatosGenerales"
         groupName="DatosGenerales"></app-dat-generales-afiliado>
       <app-col-magisteriales *ngIf="ColegiosMagisteriales" [datos]="formColegiosMagisteriales"
         (newDataColegioMagisterial)="setDatosColegiosMag($event)"></app-col-magisteriales>
-
-      <!-- <app-dat-banc
-        *ngIf="DatosGenerales"
-        groupName="DatosBacAfil"
-      ></app-dat-banc> -->
-
-      <!-- <app-botonarchivos [labelBoton]="labelBoton1" groupName="Archivos" [datos]="form"
-        (setArchivo)="handleArchivoSeleccionado($event)"></app-botonarchivos> -->
-
-      <!-- <app-botonarchivos *ngIf="DatosGenerales" groupName="Archivos"
-        labelBoton="Archivo de identificación (Afiliado)"></app-botonarchivos> -->
 
     </form>
 
@@ -42,32 +32,6 @@
 
     <app-benef *ngIf="datosBeneficiario" [datos]="formBeneficiarios"
       (newDatBenChange)="setDatosBen($event)"></app-benef>
-
-    <!--     <strong>Datos Generales</strong>
-    {{ form.controls.DatosGenerales.value | json }}
-    <strong>Status:</strong> {{ form.controls.DatosGenerales.status }}
-    <br>
-    <strong>Datos del puesto de trabajo (Afiliado)</strong>
-      {{ form.controls.DatosPuestoTrab.value | json }}
-      <strong>Status:</strong> {{ form.controls.DatosPuestoTrab.status }}
-      <br>
-      <strong>Datos Bancarios</strong>
-      {{ form.controls.DatosBacAfil.value | json }}
-      <strong>Status:</strong> {{ form.controls.DatosBacAfil.status }}
-      <br>
-      <strong>Archivos:</strong>
-      {{ form.controls.Archivos.value | json }}
-      <strong>Status:</strong> {{ form.controls.Archivos.status }}
-      <br>
-      <strong>Datos Referencias:</strong>
-    {{ formReferencias.controls.refpers.value | json }}
-    <strong>Status:</strong> {{ formReferencias.controls.refpers.status }}
-    <strong>Datos Beneficiario:</strong>
-    {{ formBeneficiarios.controls.refpers.value | json }}
-    <strong>Status:</strong> {{ formBeneficiarios.controls.refpers.status }} -->
-    <!-- [disabled]="form.controls.DatosGenerales.invalid || form.controls.DatosPuestoTrab.invalid ||
-        form.controls.DatosBacAfil.invalid || form.controls.Archivos.invalid || formReferencias.controls.refpers.invalid
-        || formBeneficiarios.controls.refpers.invalid" -->
 
     <div class="card" *ngIf="datosF">
       <div class="card-header card-header-danger tittle">

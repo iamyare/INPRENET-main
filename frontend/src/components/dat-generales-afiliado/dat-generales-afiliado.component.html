@@ -4,7 +4,10 @@
     <p class="card-category">Completa la información correspondiente</p>
   </div>
   <div class="card-body">
-    <app-camara *ngIf="useCamera"></app-camara>
+    <app-camara
+    *ngIf="useCamera"
+    (imageCaptured)="handleImageCaptured($event)">
+    </app-camara>
     <fieldset [formGroupName]="groupName" cForm>
       <div class="row">
         <div class="col-md-6 col-sm-12">
@@ -70,6 +73,16 @@
           <mat-form-field class="example-full-width inputs" appearance="outline">
             <mat-label>Cantidad De Dependientes</mat-label>
             <input matInput type="number" formControlName="cantidad_dependientes">
+          </mat-form-field>
+        </div>
+        <div class="col-md-3 col-sm-6" >
+          <mat-form-field class="example-full-width inputs" appearance="outline">
+            <mat-label>Sexo</mat-label>
+            <mat-select formControlName="sexo">
+              <mat-option *ngFor="let sexo of sexo" [value]="sexo">
+                {{ sexo }}
+              </mat-option>
+            </mat-select>
           </mat-form-field>
         </div>
         <!-- <div class="col-md-3 col-sm-6">

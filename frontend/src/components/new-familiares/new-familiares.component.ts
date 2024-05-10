@@ -91,11 +91,11 @@ export class NewFamiliaresComponent implements OnInit {
 
   initFormFamiliar(): FormGroup {
     return this.fb.group({
-      primerNombre: new FormControl('', Validators.required),
-      segundoNombre: new FormControl(''),
-      primerApellido: new FormControl('', Validators.required),
-      segundoApellido: new FormControl(''),
-      dni: new FormControl('', [Validators.required, Validators.minLength(8)]),
+      primerNombre: new FormControl('', [Validators.required, Validators.maxLength(40)]),
+      segundoNombre: new FormControl('', [Validators.maxLength(40)]),
+      primerApellido: new FormControl('', [Validators.required, Validators.maxLength(40)]),
+      segundoApellido: new FormControl('', [Validators.maxLength(40)]),
+      dni: new FormControl('', [Validators.required,Validators.pattern(/^[0-9]{13}$|^[0-9]{4}-[0-9]{4}-[0-9]{5}$/),Validators.maxLength(15)]),
       fechaNacimiento: new FormControl('', Validators.required),
       parentesco: new FormControl('', Validators.required)
     });
@@ -105,11 +105,11 @@ export class NewFamiliaresComponent implements OnInit {
     const familiar = this.formParent.get('familiar') as FormArray;
     if (datos) {
       familiar.push(this.fb.group({
-        primerNombre: new FormControl(datos.primerNombre || '', Validators.required),
-        segundoNombre: new FormControl(datos.segundoNombre || ''),
-        primerApellido: new FormControl(datos.primerApellido || '', Validators.required),
-        segundoApellido: new FormControl(datos.segundoApellido || ''),
-        dni: new FormControl(datos.dni || '', [Validators.required, Validators.minLength(8)]),
+        primerNombre: new FormControl(datos.primerNombre || '', [Validators.required, Validators.maxLength(40)]),
+        segundoNombre: new FormControl(datos.segundoNombre || '', [Validators.maxLength(40)]),
+        primerApellido: new FormControl(datos.primerApellido || '', [Validators.required, Validators.maxLength(40)]),
+        segundoApellido: new FormControl(datos.segundoApellido || '', [Validators.maxLength(40)]),
+        dni: new FormControl(datos.dni || '', [Validators.required,Validators.pattern(/^[0-9]{13}$|^[0-9]{4}-[0-9]{4}-[0-9]{5}$/),Validators.maxLength(15)]),
         fechaNacimiento: new FormControl(datos.fechaNacimiento || '', Validators.required),
         parentesco: new FormControl(datos.parentesco || '', Validators.required)
       }));

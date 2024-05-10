@@ -125,6 +125,7 @@ export class EditDatosGeneralesComponent {
               genero: [result.GENERO],
               estado_civil: [result.ESTADO_CIVIL],
               representacion: [result.REPRESENTACION],
+              sexo: [result.sexo],
 
               id_profesion: [result.DESCRIPCION],
 

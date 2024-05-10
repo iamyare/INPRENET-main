@@ -6,9 +6,9 @@
 
   <form [formGroup]="formParent" style="margin: 1%;" (change)="onDatosRefPerChange()">
     <div formArrayName="refpers">
-      <div *ngFor="let skill of getCtrl('refpers', formParent).controls; index as formChild; let i = index">
-        <h4 class="card-title">Referencia número: {{i+1}}</h4>
-        <div [formGroupName]="formChild" class="row">
+      <div *ngFor="let ref of getCtrl('refpers', formParent).controls; index as i">
+        <h4 class="card-title">Referencia número: {{i + 1}}</h4>
+        <div [formGroupName]="i" class="row">
           <div class="col-md-6">
             <mat-form-field class="example-full-width; inputs" appearance="outline">
               <mat-label>Nombre Completo</mat-label>
@@ -17,43 +17,45 @@
           </div>
           <div class="col-md-6">
             <mat-form-field class="example-full-width; inputs" appearance="outline">
+              <mat-label>DNI</mat-label>
+              <input matInput type="text" formControlName="dni">
+            </mat-form-field>
+          </div>
+          <div class="col-md-6">
+            <mat-form-field class="example-full-width; inputs" appearance="outline">
               <mat-label>Parentesco</mat-label>
               <input matInput type="text" formControlName="parentesco">
             </mat-form-field>
           </div>
-        </div>
-        <div [formGroupName]="formChild" class="row">
           <div class="col-md-6">
             <mat-form-field class="example-full-width; inputs" appearance="outline">
               <mat-label>Dirección</mat-label>
               <input matInput type="text" formControlName="direccion">
             </mat-form-field>
           </div>
-          <div class="col-md-6">
+          <div class="col-md-4">
             <mat-form-field class="example-full-width; inputs" appearance="outline">
               <mat-label>Teléfono domicilio</mat-label>
               <input matInput type="text" formControlName="telefono_domicilio">
             </mat-form-field>
           </div>
-        </div>
-        <div [formGroupName]="formChild" class="row">
-          <div class="col-md-6">
+          <div class="col-md-4">
             <mat-form-field class="example-full-width; inputs" appearance="outline">
               <mat-label>Teléfono trabajo</mat-label>
               <input matInput type="text" formControlName="telefono_trabajo">
             </mat-form-field>
           </div>
-          <div class="col-md-6">
+          <div class="col-md-4">
             <mat-form-field class="example-full-width; inputs" appearance="outline">
               <mat-label>Teléfono personal</mat-label>
               <input matInput type="text" formControlName="telefono_personal">
             </mat-form-field>
           </div>
         </div>
-
       </div>
     </div>
   </form>
+
 
   <div class="row" style="text-align: center; margin: 1%;">
     <div class="col-md-6">

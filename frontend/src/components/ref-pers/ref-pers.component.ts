@@ -5,12 +5,40 @@ import { FormStateService } from 'src/app/services/form-state.service';
 
 export function generateRefPerFormGroup(datos?: any): FormGroup {
   return new FormGroup({
-    nombre_completo: new FormControl(datos.nombre_completo, Validators.required),
-    parentesco: new FormControl(datos.parentesco, Validators.required),
-    direccion: new FormControl(datos.direccion, Validators.required),
-    telefono_domicilio: new FormControl(datos.telefono_domicilio),
-    telefono_trabajo: new FormControl(datos.telefono_trabajo),
-    telefono_personal: new FormControl(datos.telefono_personal, Validators.required)
+    nombre_completo: new FormControl(datos?.nombre_completo, [
+      Validators.required,
+      Validators.minLength(2),
+      Validators.maxLength(50),
+    ]),
+    parentesco: new FormControl(datos?.parentesco, [
+      Validators.required,
+      Validators.minLength(2),
+      Validators.maxLength(30),
+    ]),
+    direccion: new FormControl(datos?.direccion, [
+      Validators.required,
+      Validators.minLength(10),
+      Validators.maxLength(200),
+    ]),
+    telefono_domicilio: new FormControl(datos?.telefono_domicilio, [
+      Validators.minLength(8),
+      Validators.maxLength(12),
+    ]),
+    telefono_trabajo: new FormControl(datos?.telefono_trabajo, [
+      Validators.required,
+      Validators.minLength(8),
+      Validators.maxLength(12),
+    ]),
+    telefono_personal: new FormControl(datos?.telefono_personal, [
+      Validators.required,
+      Validators.minLength(8),
+      Validators.maxLength(12),
+    ]),
+    dni: new FormControl(datos?.dni, [
+      Validators.required,
+      Validators.maxLength(15),
+      Validators.pattern(/^[0-9]{13}$|^[0-9]{4}-[0-9]{4}-[0-9]{5}$/),
+    ]),
   });
 }
 

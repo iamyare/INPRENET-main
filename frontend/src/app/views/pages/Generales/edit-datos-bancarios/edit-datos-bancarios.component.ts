@@ -6,6 +6,7 @@ import { ConfirmDialogComponent } from '@docs-components/confirm-dialog/confirm-
 import { EditarDialogComponent } from '@docs-components/editar-dialog/editar-dialog.component';
 import { ToastrService } from 'ngx-toastr';
 import { AfiliadoService } from 'src/app/services/afiliado.service';
+import { DatosEstaticosService } from 'src/app/services/datos-estaticos.service';
 import { FieldConfig } from 'src/app/shared/Interfaces/field-config';
 import { TableColumn } from 'src/app/shared/Interfaces/table-column';
 import { convertirFechaInputs } from 'src/app/shared/functions/formatoFecha';
@@ -23,6 +24,7 @@ export class EditDatosBancariosComponent {
   @Input() Afiliado!: any;
   unirNombres: any = unirNombres;
   datosTabl: any[] = [];
+  bancos: { label: string, value: string }[] = [];
 
   prevAfil: boolean = false;
 
@@ -33,7 +35,8 @@ export class EditDatosBancariosComponent {
   constructor(
     private svcAfiliado: AfiliadoService,
     private toastr: ToastrService,
-    private dialog: MatDialog
+    private dialog: MatDialog,
+    private datosEstaticosService: DatosEstaticosService
   ) { }
 
   ngOnInit(): void {
@@ -86,7 +89,6 @@ export class EditDatosBancariosComponent {
     this.Afiliado = undefined;
   }
 
-  /* FALTA */
   async getFilas() {
     if (this.Afiliado) {
       try {
@@ -106,22 +108,6 @@ export class EditDatosBancariosComponent {
 
   }
 
-  /* editar = (row: any) => {
-      const datosBancarios = {
-          nombre_banco: row.nombre_banco,
-          numero_cuenta: row.numero_cuenta
-      };
-  
-      this.svcAfiliado.updatePerfCentroTrabajo(row.id, datosBancarios).subscribe(
-        response => {
-          this.toastr.success('perfil de la persona en el centro de trabajo editado con éxito');
-        },
-        error => {
-          this.toastr.error('Error al actualizar el perfil de la persona en el centro de trabajo');
-        }
-      );
-    }; */
-
   ejecutarFuncionAsincronaDesdeOtroComponente(funcion: (data: any) => Promise<void>) {
     this.ejecF = funcion;
   }
@@ -133,14 +119,35 @@ export class EditDatosBancariosComponent {
     }
   }
 
-  manejarAccionUno(row: any) {
-    const campos = [
-      { nombre: 'nombre_banco', tipo: 'text', requerido: true, etiqueta: 'Nombre Centro Trabajo', editable: true },
-      { nombre: 'numero_cuenta', tipo: 'text', requerido: true, etiqueta: 'Número Acuerdo', editable: true }
-    ];
+  async manejarAccionUno(row: any) {
+    // Obtén las opciones de bancos
+    this.bancos = await this.datosEstaticosService.getBancos();
 
-    this.openDialog(campos, row);
+    // Encuentra el valor correcto basado en el nombre
+    const bancoSeleccionado = this.bancos.find(b => b.label === row.nombre_banco);
+    const codBanco = bancoSeleccionado ? bancoSeleccionado.value : '';
+
+    const campos = [
+      {
+        nombre: 'nombre_banco',
+        tipo: 'list',
+        requerido: true,
+        etiqueta: 'Nombre del Banco',
+        editable: true,
+        opciones: this.bancos // Usa las opciones correctas
+      },
+      { nombre: 'numero_cuenta', tipo: 'text', requerido: true, etiqueta: 'Número de Cuenta', editable: true }
+    ];
+    const valoresIniciales = {
+      ...row,
+      nombre_banco: codBanco
+    };
+
+    this.openDialog(campos, valoresIniciales);
   }
+
+
+
 
   manejarAccionDos(row: any) {
     const dialogRef = this.dialog.open(ConfirmDialogComponent, {
@@ -152,34 +159,8 @@ export class EditDatosBancariosComponent {
     });
 
     dialogRef.afterClosed().subscribe((result: any) => {
-      if (result) {
-        /* console.log(this.selectedTipoPlanilla);
-        this.planillaIngresosService.eliminarDetallePlanillaIngreso(row.id_detalle_plan_Ing).subscribe({
-          next: (response) => {
-            this.toastr.success(response.message);
-            
-            if (this.selectedTipoPlanilla) {
-              this.obtenerDetallesPlanilla(this.idCentroTrabajo, this.selectedTipoPlanilla);
-              this.obtenerDetallesPlanillaAgrupCent(this.idCentroTrabajo, this.selectedTipoPlanilla);
-            } else {
-              console.error('selectedTipoPlanilla está indefinido o no es un array válido.');
-              this.toastr.error('Ocurrió un error debido a un problema con el tipo de planilla seleccionado.');
-            }
-          },
-          error: (error) => {
-            console.error('Error al eliminar el detalle de la planilla ingreso:', error);
-            this.toastr.error('Ocurrió un error al eliminar el detalle de la planilla ingreso.');
-          }
-        }); */
-      }
-    });
-    /* const campos = [
-      { nombre: 'dni', tipo: 'text', requerido: true, etiqueta: 'Nombre Centro Trabajo', editable: true },
-      { nombre: 'genero', tipo: 'text', requerido: true, etiqueta: 'Número Acuerdo', editable: true },
-      { nombre: 'fecha_nacimiento', tipo: 'number', requerido: true, etiqueta: 'salario_base', editable: true }
-    ];
 
-    this.openDialog(campos, row); */
+    });
   }
 
   AgregarPuestoTrabajo() {
@@ -196,21 +177,40 @@ export class EditDatosBancariosComponent {
     });
   }
 
-  openDialog(campos: any, row: any): void {
+  openDialog(campos: any, valoresIniciales: any): void {
     const dialogRef = this.dialog.open(EditarDialogComponent, {
       width: '500px',
-      data: { campos: campos, valoresIniciales: row }
+      data: { campos: campos, valoresIniciales: valoresIniciales }
     });
-
 
     dialogRef.afterClosed().subscribe(async (result: any) => {
-      this.svcAfiliado.updateDatosBancarios(row.id, result).subscribe(
-        async (result) => {
+      if (result) {
+        const bancoSeleccionado = this.bancos.find(b => b.value === result.nombre_banco);
+        const nombreBanco = bancoSeleccionado ? bancoSeleccionado.label : 'Banco desconocido';
 
-        },
-        (error) => {
-        })
-
+        // Actualiza los datos bancarios llamando al servicio correspondiente
+        this.svcAfiliado.updateDatosBancarios(valoresIniciales.id, result).subscribe(
+          async (response) => {
+            this.toastr.success('Datos bancarios actualizados con éxito.');
+            const index = this.filas.findIndex(item => item.id === valoresIniciales.id);
+            if (index !== -1) {
+              this.filas[index] = {
+                ...this.filas[index],
+                ...result,
+                nombre_banco: nombreBanco
+              };
+            }
+            this.cargar();
+          },
+          (error) => {
+            this.toastr.error('Error al actualizar los datos bancarios.');
+            console.error('Error al actualizar los datos bancarios:', error);
+          }
+        );
+      }
     });
   }
+
+
+
 }

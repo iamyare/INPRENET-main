@@ -27,7 +27,7 @@ export class VerDatosAfiliadosComponent implements OnInit {
     private dialog: MatDialog) { }
   ngOnInit(): void {
     this.myFormFields = [
-      { type: 'text', label: 'DNI del afiliado', name: 'dni', validations: [Validators.required, Validators.minLength(13), Validators.maxLength(14)], display: true },
+      { type: 'text', label: 'DNI del afiliado', name: 'dni', validations: [Validators.required, Validators.minLength(13), Validators.maxLength(14)], display: true,value: '1234567890123' },
     ];
 
     this.myColumns = [
@@ -230,7 +230,7 @@ export class VerDatosAfiliadosComponent implements OnInit {
         fecha_nacimiento: row.fecha_nacimiento,
         genero: row.genero,
       };
-  
+
       this.svcAfiliado.updatePerfCentroTrabajo(row.id, BeneficiariosData).subscribe(
         response => {
           this.toastr.success('perfil de la persona en el centro de trabajo editado con éxito');

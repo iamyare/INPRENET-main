@@ -7,6 +7,7 @@ import { EditarDialogComponent } from '@docs-components/editar-dialog/editar-dia
 import { RefPersComponent } from '@docs-components/ref-pers/ref-pers.component';
 import { ToastrService } from 'ngx-toastr';
 import { AfiliadoService } from 'src/app/services/afiliado.service';
+import { DatosEstaticosService } from 'src/app/services/datos-estaticos.service';
 import { FieldConfig } from 'src/app/shared/Interfaces/field-config';
 import { TableColumn } from 'src/app/shared/Interfaces/table-column';
 import { convertirFechaInputs } from 'src/app/shared/functions/formatoFecha';
@@ -25,6 +26,7 @@ export class EditReferPersonalesComponent {
   unirNombres: any = unirNombres;
   datosTabl: any[] = [];
   prevAfil: boolean = false;
+  listaParentesco:any;
 
 
   public myColumns: TableColumn[] = [];
@@ -34,10 +36,12 @@ export class EditReferPersonalesComponent {
   constructor(
     private svcAfiliado: AfiliadoService,
     private toastr: ToastrService,
-    private dialog: MatDialog
+    private dialog: MatDialog,
+    private datosEstaticosService: DatosEstaticosService
   ) { }
 
   ngOnInit(): void {
+    this.listaParentesco = this.datosEstaticosService.parentesco;
     this.myFormFields = [
       { type: 'text', label: 'DNI del afiliado', name: 'dni', validations: [Validators.required, Validators.minLength(13), Validators.maxLength(14)], display: true },
     ];
@@ -46,6 +50,12 @@ export class EditReferPersonalesComponent {
       {
         header: 'Nombre Completo',
         col: 'nombre_completo',
+        isEditable: true,
+        validationRules: [Validators.required, Validators.minLength(3)]
+      },
+      {
+        header: 'DNI',
+        col: 'dni',
         isEditable: true,
         validationRules: [Validators.required, Validators.minLength(3)]
       },
@@ -115,44 +125,24 @@ export class EditReferPersonalesComponent {
         const data = await this.svcAfiliado.getAllReferenciasPersonales(this.Afiliado.DNI).toPromise();
         this.filas = data.map((item: any) => {
           return {
-            id: item.id_ref_personal_afil,
-            nombre_completo: item.referenciaPersonal.nombre_completo,
-            parentesco: item.referenciaPersonal.parentesco || 'No disponible',
-            direccion: item.referenciaPersonal.direccion,
-            telefono_domicilio: item.referenciaPersonal.telefono_domicilio,
-            telefono_personal: item.referenciaPersonal.telefono_personal,
-            telefono_trabajo: item.referenciaPersonal.telefono_trabajo,
-          }
-        }
-        );
+            id: item.id_ref_personal || 'ID no encontrado',
+            nombre_completo: item.nombre_completo,
+            parentesco: item.parentesco || 'No disponible',
+            direccion: item.direccion,
+            telefono_domicilio: item.telefono_domicilio,
+            telefono_personal: item.telefono_personal,
+            telefono_trabajo: item.telefono_trabajo,
+            dni: item.dni,
+          };
+        });
       } catch (error) {
         this.toastr.error('Error al cargar los datos de las referencias personales');
-        console.error('Error al obtener datos de datos de las referencias personales', error);
+        console.error('Error al obtener datos de las referencias personales', error);
       }
     } else {
-      this.resetDatos()
+      this.resetDatos();
     }
   }
-
-  editar = (row: any) => {
-    const referPersData = {
-      nombre_completo: row.nombre,
-      parentesco: row.parentesco || 'No disponible',
-      direccion: row.direccion,
-      telefono_domicilio: row.telefono_domicilio,
-      telefono_personal: row.telefono_personal,
-      telefono_trabajo: row.telefono_trabajo,
-    };
-    this.svcAfiliado.updateReferenciaPersonal(row.id, referPersData).subscribe({
-      next: (response) => {
-        this.toastr.success('Referencia personal editada con éxito.');
-      },
-      error: (error) => {
-        console.error('Error al actualizar la referencia personal:', error);
-        this.toastr.error('Error al actualizar la referencia personal.');
-      }
-    });
-  };
 
 
   ejecutarFuncionAsincronaDesdeOtroComponente(funcion: (data: any) => Promise<void>) {
@@ -167,21 +157,37 @@ export class EditReferPersonalesComponent {
   }
 
   manejarAccionUno(row: any) {
+    const rowParentesco = row.parentesco.toLowerCase();
+    const parentescoSeleccionado = this.listaParentesco.find(
+      (item: any) => item.label.toLowerCase() === rowParentesco
+    );
     const campos = [
-      { nombre: 'nombre_completo', tipo: 'text', requerido: true, etiqueta: 'nombre_completo', editable: true },
-      { nombre: 'parentesco', tipo: 'text', requerido: true, etiqueta: 'parentesco', editable: true },
-      { nombre: 'direccion', tipo: 'text', requerido: true, etiqueta: 'direccion', editable: true },
-      { nombre: 'telefono_domicilio', tipo: 'text', requerido: false, etiqueta: 'telefono_domicilio', editable: true },
-      { nombre: 'telefono_personal', tipo: 'text', requerido: false, etiqueta: 'telefono_personal', editable: true },
-      { nombre: 'telefono_trabajo', tipo: 'text', requerido: false, etiqueta: 'telefono_trabajo', editable: true },
+      { nombre: 'nombre_completo', tipo: 'text', requerido: true, etiqueta: 'Nombre completo', editable: true },
+      {
+        nombre: 'parentesco',
+        tipo: 'list',
+        requerido: true,
+        etiqueta: 'Parentesco',
+        editable: true,
+        opciones: this.listaParentesco
+      },
+      { nombre: 'direccion', tipo: 'text', requerido: true, etiqueta: 'Dirección', editable: true },
+      { nombre: 'telefono_domicilio', tipo: 'text', requerido: false, etiqueta: 'Teléfono Domicilio', editable: true },
+      { nombre: 'telefono_personal', tipo: 'text', requerido: false, etiqueta: 'Teléfono Personal', editable: true },
+      { nombre: 'telefono_trabajo', tipo: 'text', requerido: false, etiqueta: 'Teléfono Trabajo', editable: true },
+      { nombre: 'dni', tipo: 'text', requerido: false, etiqueta: 'DNI', editable: true }
     ];
-
-    this.openDialog(campos, row);
+    const valoresIniciales = {
+      ...row,
+      parentesco: parentescoSeleccionado ? parentescoSeleccionado.value : ''
+    };
+    this.openDialog(campos, valoresIniciales);
   }
 
 
+
+
   manejarAccionDos(row: any) {
-    // Abrir el diálogo de confirmación
     const dialogRef = this.dialog.open(ConfirmDialogComponent, {
       width: '350px',
       data: {
@@ -189,15 +195,11 @@ export class EditReferPersonalesComponent {
         message: '¿Estás seguro de querer eliminar esta referencia personal?'
       }
     });
-
-    // Acciones después de que se cierre el diálogo
     dialogRef.afterClosed().subscribe((result: boolean) => {
       if (result) {
-        // Eliminar la referencia personal si el usuario confirma
         this.svcAfiliado.eliminarReferenciaPersonal(row.id).subscribe({
           next: (response) => {
             this.toastr.success(response.mensaje, 'Referencia Personal Eliminada');
-            // Eliminar el elemento localmente para que no sea necesario recargar toda la tabla
             this.filas = this.filas.filter((item) => item.id !== row.id);
             this.cargar();
           },
@@ -223,17 +225,17 @@ export class EditReferPersonalesComponent {
       if (result) {
         this.svcAfiliado.updateReferenciaPersonal(row.id, result).subscribe({
           next: (response) => {
-            this.toastr.success(`Datos modificados correctamente.`);
+            this.toastr.success('Datos modificados correctamente.');
             this.getFilas().then(() => this.cargar());
           },
           error: (error) => {
-            this.toastr.error(`Error: ${error.error.message}`);
+            this.toastr.error('Error al actualizar la referencia personal.');
             console.error('Error al actualizar la referencia personal:', error);
             this.getFilas().then(() => this.cargar());
           }
         });
       } else {
-        console.log("Edición cancelada.");
+        console.log('Edición cancelada.');
       }
     });
   }

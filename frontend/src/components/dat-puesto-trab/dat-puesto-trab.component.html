@@ -39,23 +39,23 @@
             </mat-form-field>
           </div>
           <div class="col-md-4">
-            <mat-form-field class="example-full-width; inputs" appearance="outline">
+            <mat-form-field class="example-full-width inputs" appearance="outline">
               <mat-label>Fecha de Ingreso</mat-label>
-              <input matInput formControlName="fechaIngreso" [matDatepicker]="fechaIngreso">
-              <mat-hint>MM/DD/YYYY</mat-hint>
-              <mat-datepicker-toggle matIconSuffix [for]="fechaIngreso"></mat-datepicker-toggle>
-              <mat-datepicker #fechaIngreso></mat-datepicker>
+              <input matInput formControlName="fechaIngreso" [matDatepicker]="pickerIngreso" placeholder="d/m/aaaa">
+              <mat-datepicker-toggle matSuffix [for]="pickerIngreso"></mat-datepicker-toggle>
+              <mat-datepicker #pickerIngreso></mat-datepicker>
             </mat-form-field>
           </div>
           <div class="col-md-4">
-            <mat-form-field class="example-full-width; inputs" appearance="outline">
+            <mat-form-field class="example-full-width inputs" appearance="outline">
               <mat-label>Fecha de Egreso</mat-label>
-              <input matInput formControlName="fechaEgreso" [matDatepicker]="fechaEgreso">
-              <mat-hint>MM/DD/YYYY</mat-hint>
-              <mat-datepicker-toggle matIconSuffix [for]="fechaEgreso"></mat-datepicker-toggle>
-              <mat-datepicker #fechaEgreso></mat-datepicker>
+              <input matInput formControlName="fechaEgreso" [matDatepicker]="pickerEgreso" placeholder="d/m/aaaa">
+              <mat-datepicker-toggle matSuffix [for]="pickerEgreso"></mat-datepicker-toggle>
+              <mat-datepicker #pickerEgreso></mat-datepicker>
             </mat-form-field>
           </div>
+
+
         </div>
 
 

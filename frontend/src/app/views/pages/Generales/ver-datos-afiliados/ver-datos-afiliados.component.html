@@ -31,37 +31,30 @@
 </div>
 
 <div *ngIf="Afiliado" style="background-color: white; margin: 1% 0% 1% 0%; padding: 1% 0% 1% 0%">
-    <h1 style="text-align: center; font-size: 2rem">Datos Generales Afiliado</h1>
-    <div>
-        <table>
-            <tr style="background-color: #f2f2f2">
-                <th>Nombre de afiliado</th>
-                <td>{{ Afiliado.nameAfil }}</td>
-                <th>genero</th>
-                <td>{{ Afiliado.GENERO }}</td>
-                <th>Dirección de residencia</th>
-                <td>{{ Afiliado.DIRECCION_RESIDENCIA }}</td>
-                <th>Estado</th>
-                <td>{{ Afiliado.ESTADO }}</td>
-                <th>Fecha nacimiento</th>
-                <td>{{ convertirFechaInputs(Afiliado.FECHA_NACIMIENTO) }}</td>
-                <th>Colegio magisterial</th>
-                <td>{{ Afiliado.COLEGIO_MAGISTERIAL }}</td>
-            </tr>
-            <tr>
-                <th>Número de carnet</th>
-                <td>{{ Afiliado.NUMERO_CARNET }}</td>
-                <th>Profesión</th>
-                <td>{{ Afiliado.PROFESION }}</td>
-                <th>Teléfono 1</th>
-                <td>{{ Afiliado.TELEFONO_1 }}</td>
-                <th>Estado civil</th>
-                <td>{{ Afiliado.ESTADO_CIVIL }}</td>
-            </tr>
-        </table>
-    </div>
+  <h1 style="text-align: center; font-size: 2rem">Datos Generales Afiliado</h1>
+  <div style="display: grid; grid-template-columns: 1fr 2fr; justify-content: center; align-items: center; gap: 20px; padding: 10px;">
+      <!-- Imagen de perfil cuadrada a la izquierda -->
+      <div style="text-align: center;">
+          <img *ngIf="Afiliado.FOTO_PERFIL" [src]="'data:image/jpeg;base64,' + Afiliado.FOTO_PERFIL"
+              alt="Foto de Perfil" style="width: 150px; height: 150px;"/>
+      </div>
 
+      <!-- Información del afiliado a la derecha -->
+      <div>
+          <ul style="list-style-type: none; padding: 0; margin: 0;">
+              <li><strong>Nombre:</strong> {{ Afiliado.nameAfil }}</li>
+              <li><strong>Dirección:</strong> {{ Afiliado.DIRECCION_RESIDENCIA }}</li>
+              <li><strong>Fecha de Nacimiento:</strong> {{ convertirFechaInputs(Afiliado.FECHA_NACIMIENTO) }}</li>
+              <li><strong>Teléfono:</strong> {{ Afiliado.TELEFONO_1 }}</li>
+              <li><strong>Número de Carnet:</strong> {{ Afiliado.NUMERO_CARNET }}</li>
+          </ul>
+      </div>
+  </div>
 </div>
+
+
+
+
 
 <app-edit-datos-generales *ngIf="DatosGenerales && Afiliado" [Afiliado]="Afiliado"></app-edit-datos-generales>
 <app-edit-familiares *ngIf="datosFamiliares && Afiliado" [Afiliado]="Afiliado"></app-edit-familiares>
@@ -72,17 +65,3 @@
 
 <app-edit-refer-personales *ngIf="referenc && Afiliado" [Afiliado]="Afiliado"></app-edit-refer-personales>
 <app-edit-beneficiarios *ngIf="datosBeneficiario && Afiliado" [Afiliado]="Afiliado"></app-edit-beneficiarios>
-
-<!-- <div class="card" *ngIf="datosF">
-    <div class="card-header card-header-danger tittle">
-        <h4 class="card-title">Envío De Formulario</h4>
-        <p class="card-category">
-            Presione el botón enviar para continuar con el proceso.
-        </p>
-    </div>
-    <div class="card-body" style="text-align: center;">
-        <button mat-button color="primary" (click)="enviar()">
-            Enviar Formulario
-        </button>
-    </div>
-</div> -->

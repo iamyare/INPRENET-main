@@ -1,3 +1,4 @@
+import { DatePipe } from '@angular/common';
 import { Component, Input } from '@angular/core';
 import { Validators } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
@@ -6,22 +7,26 @@ import { ConfirmDialogComponent } from '@docs-components/confirm-dialog/confirm-
 import { EditarDialogComponent } from '@docs-components/editar-dialog/editar-dialog.component';
 import { ToastrService } from 'ngx-toastr';
 import { AfiliadoService } from 'src/app/services/afiliado.service';
+import { DatosEstaticosService } from 'src/app/services/datos-estaticos.service';
 import { FieldConfig } from 'src/app/shared/Interfaces/field-config';
 import { TableColumn } from 'src/app/shared/Interfaces/table-column';
-import { unirNombres } from 'src/app/shared/functions/formatoNombresP';
 import { convertirFechaInputs } from 'src/app/shared/functions/formatoFecha';
+import { unirNombres } from 'src/app/shared/functions/formatoNombresP';
+
 @Component({
   selector: 'app-edit-perfil-puest-trab',
   templateUrl: './edit-perfil-puest-trab.component.html',
-  styleUrl: './edit-perfil-puest-trab.component.scss'
+  styleUrls: ['./edit-perfil-puest-trab.component.scss'],
+  providers: [DatePipe] // Añadir el DatePipe como proveedor
 })
 export class EditPerfilPuestTrabComponent {
-  convertirFechaInputs = convertirFechaInputs
-  public myFormFields: FieldConfig[] = []
+  convertirFechaInputs = convertirFechaInputs;
+  public myFormFields: FieldConfig[] = [];
   form: any;
   @Input() Afiliado!: any;
   unirNombres: any = unirNombres;
   datosTabl: any[] = [];
+  centrosTrabajo: { label: string, value: string }[] = [];
   prevAfil: boolean = false;
 
   public myColumns: TableColumn[] = [];
@@ -31,12 +36,14 @@ export class EditPerfilPuestTrabComponent {
   constructor(
     private svcAfiliado: AfiliadoService,
     private toastr: ToastrService,
-    private dialog: MatDialog
-  ) { }
+    private dialog: MatDialog,
+    private datosEstaticosService: DatosEstaticosService,
+    private datePipe: DatePipe // Añadir DatePipe como dependencia
+  ) {}
 
   ngOnInit(): void {
     this.myFormFields = [
-      { type: 'text', label: 'DNI del afiliado', name: 'dni', validations: [Validators.required, Validators.minLength(13), Validators.maxLength(14)], display: true },
+      { type: 'text', label: 'DNI del afiliado', name: 'dni', validations: [Validators.required, Validators.minLength(13), Validators.maxLength(14)], display: true }
     ];
 
     this.myColumns = [
@@ -63,7 +70,7 @@ export class EditPerfilPuestTrabComponent {
         isEditable: true
       },
       {
-        header: 'Fecha de egreso',
+        header: 'Fecha de Egreso',
         col: 'fechaEgreso',
         isEditable: true
       },
@@ -81,10 +88,16 @@ export class EditPerfilPuestTrabComponent {
         header: 'Clase Cliente',
         col: 'claseCliente',
         isEditable: true
-      },
+      }
     ];
+
+    this.getCentrosTrabajo();
     this.previsualizarInfoAfil();
     this.getFilas().then(() => this.cargar());
+  }
+
+  async getCentrosTrabajo() {
+    this.centrosTrabajo = await this.datosEstaticosService.getAllCentrosTrabajo();
   }
 
   async obtenerDatos(event: any): Promise<any> {
@@ -93,21 +106,28 @@ export class EditPerfilPuestTrabComponent {
 
   previsualizarInfoAfil() {
     if (this.Afiliado.DNI) {
-
       this.svcAfiliado.getAfilByParam(this.Afiliado.DNI).subscribe(
         async (result) => {
           this.prevAfil = true;
-          this.Afiliado = result
-          this.Afiliado.nameAfil = this.unirNombres(result.PRIMER_NOMBRE, result.SEGUNDO_NOMBRE, result.TERCER_NOMBRE, result.PRIMER_APELLIDO, result.SEGUNDO_APELLIDO);
+          this.Afiliado = result;
+          this.Afiliado.nameAfil = this.unirNombres(
+            result.PRIMER_NOMBRE,
+            result.SEGUNDO_NOMBRE,
+            result.TERCER_NOMBRE,
+            result.PRIMER_APELLIDO,
+            result.SEGUNDO_APELLIDO
+          );
           this.getFilas().then(() => this.cargar());
         },
         (error) => {
           this.getFilas().then(() => this.cargar());
           this.toastr.error(`Error: ${error.error.message}`);
           this.resetDatos();
-        })
+        }
+      );
     }
   }
+
   resetDatos() {
     if (this.form) {
       this.form.reset();
@@ -125,20 +145,19 @@ export class EditPerfilPuestTrabComponent {
           nombre_centro_trabajo: item.centroTrabajo.nombre_centro_trabajo,
           numeroAcuerdo: item.numero_acuerdo || 'No disponible',
           salarioBase: item.salario_base,
-          fechaIngreso: item.fecha_ingreso,
-          fechaEgreso: item.fecha_egreso,
+          fechaIngreso: this.datePipe.transform(item.fecha_ingreso, 'dd/MM/yyyy') || 'Fecha no disponible',
+          fechaEgreso: this.datePipe.transform(item.fecha_egreso, 'dd/MM/yyyy') || 'Fecha no disponible',
           cargo: item.cargo,
           sectorEconomico: item.sector_economico,
-          claseCliente: item.clase_cliente,
+          claseCliente: item.clase_cliente
         }));
       } catch (error) {
         this.toastr.error('Error al cargar los datos de los perfiles de los centros de trabajo');
-        console.error('Error al obtener datos de datos de los perfiles de los centros de trabajo', error);
+        console.error('Error al obtener datos de los perfiles de los centros de trabajo', error);
       }
     } else {
-      this.resetDatos()
+      this.resetDatos();
     }
-
   }
 
   ejecutarFuncionAsincronaDesdeOtroComponente(funcion: (data: any) => Promise<void>) {
@@ -147,24 +166,35 @@ export class EditPerfilPuestTrabComponent {
 
   cargar() {
     if (this.ejecF) {
-      this.ejecF(this.filas).then(() => {
-      });
+      this.ejecF(this.filas).then(() => {});
     }
   }
 
-  manejarAccionUno(row: any) {
+  async manejarAccionUno(row: any) {
     const campos = [
-      { nombre: 'nombre_centro_trabajo', tipo: 'text', requerido: true, etiqueta: 'Nombre Centro Trabajo', editable: true },
+      {
+        nombre: 'nombre_centro_trabajo',
+        tipo: 'list',
+        requerido: true,
+        etiqueta: 'Nombre Centro Trabajo',
+        editable: true,
+        opciones: this.centrosTrabajo
+      },
       { nombre: 'numeroAcuerdo', tipo: 'text', requerido: true, etiqueta: 'Número Acuerdo', editable: true },
-      { nombre: 'salarioBase', tipo: 'number', requerido: true, etiqueta: 'salarioBase', editable: true },
-      { nombre: 'fechaIngreso', tipo: 'text', requerido: false, etiqueta: 'Fecha Ingreso', editable: false },
-      { nombre: 'fechaEgreso', tipo: 'text', requerido: false, etiqueta: 'Fecha Ingreso', editable: false },
-      { nombre: 'cargo', tipo: 'text', requerido: false, etiqueta: 'Cargo', editable: false },
-      { nombre: 'sectorEconomico', tipo: 'text', requerido: false, etiqueta: 'Sector Económico', editable: false },
-      { nombre: 'claseCliente', tipo: 'text', requerido: false, etiqueta: 'Clase Cliente', editable: false }
+      { nombre: 'salarioBase', tipo: 'number', requerido: true, etiqueta: 'Salario Base', editable: true },
+      { nombre: 'fechaIngreso', tipo: 'date', requerido: false, etiqueta: 'Fecha Ingreso', editable: true },
+      { nombre: 'fechaEgreso', tipo: 'date', requerido: false, etiqueta: 'Fecha Egreso', editable: true },
+      { nombre: 'cargo', tipo: 'text', requerido: false, etiqueta: 'Cargo', editable: true },
+      { nombre: 'sectorEconomico', tipo: 'text', requerido: false, etiqueta: 'Sector Económico', editable: true },
+      { nombre: 'claseCliente', tipo: 'text', requerido: false, etiqueta: 'Clase Cliente', editable: true }
     ];
 
-    this.openDialog(campos, row);
+    const valoresIniciales = {
+      ...row,
+      nombre_centro_trabajo: String(row.nombre_centro_trabajo)
+    };
+
+    this.openDialog(campos, valoresIniciales);
   }
 
   manejarAccionDos(row: any) {
@@ -195,7 +225,6 @@ export class EditPerfilPuestTrabComponent {
     });
   }
 
-
   AgregarPuestoTrabajo() {
     const dialogRef = this.dialog.open(AgregarPuestTrabComponent, {
       width: '55%',
@@ -210,37 +239,42 @@ export class EditPerfilPuestTrabComponent {
     });
   }
 
-  openDialog(campos: any, row: any): void {
+  async openDialog(campos: any, row: any): Promise<void> {
+    const centroSeleccionado = this.centrosTrabajo.find(c => c.label === row.nombre_centro_trabajo);
+    const centroValue = centroSeleccionado ? centroSeleccionado.value : '';
+    const valoresIniciales = {
+      ...row,
+      nombre_centro_trabajo: centroValue
+    };
     const dialogRef = this.dialog.open(EditarDialogComponent, {
       width: '500px',
-      data: { campos: campos, valoresIniciales: row }
+      data: { campos: campos, valoresIniciales: valoresIniciales }
     });
-
     dialogRef.afterClosed().subscribe(async (result: any) => {
       if (result) {
-        delete result.nombre_centro_trabajo;
-        if (!result.claseCliente) {
-          console.error("Falta la propiedad 'claseCliente'");
-          return;
-        }
+        const centroActualizado = this.centrosTrabajo.find(c => c.value === result.nombre_centro_trabajo);
+        const nombreCentro = centroActualizado ? centroActualizado.label : 'Centro desconocido';
         this.svcAfiliado.updatePerfCentroTrabajo(row.id, result).subscribe({
           next: (response) => {
             const index = this.filas.findIndex(item => item.id === row.id);
             if (index !== -1) {
               this.filas[index] = {
                 ...this.filas[index],
-                ...result
+                ...result,
+                nombre_centro_trabajo: nombreCentro
               };
             }
             this.cargar();
           },
           error: (error) => {
-            console.error("Error al actualizar:", error);
+            console.error('Error al actualizar:', error);
+            this.toastr.error('Ocurrió un error al actualizar el centro.');
           }
         });
       } else {
-        console.log("No se realizaron cambios.");
+        console.log('No se realizaron cambios.');
       }
     });
   }
+
 }

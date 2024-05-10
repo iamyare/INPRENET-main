@@ -5,17 +5,25 @@
     <div class="form-grid" fxLayout="column">
       <div *ngFor="let campo of data.campos" fxFlex class="form-cell" [class.non-editable-field]="!campo.editable">
         <ng-container *ngIf="!campo.dependeDe || form.get(campo.dependeDe)?.value === campo.valorDependiente">
-          <mat-form-field appearance="fill" fxFlex class="full-width-input" floatLabel="always" [class.disabled-field]="formGroup.get(campo.nombre)?.disabled">
+          <mat-form-field appearance="fill" fxFlex class="full-width-input" floatLabel="always">
             <mat-label>{{ campo.etiqueta }}</mat-label>
 
+            <input *ngIf="campo.tipo === 'date'" matInput [matDatepicker]="picker" [formControlName]="campo.nombre" />
+            <mat-datepicker-toggle matSuffix *ngIf="campo.tipo === 'date'" [for]="picker"></mat-datepicker-toggle>
+            <mat-datepicker #picker *ngIf="campo.tipo === 'date'"></mat-datepicker>
+
+            <!-- Campo de lista -->
+            <mat-select *ngIf="campo.tipo === 'list'" [formControlName]="campo.nombre">
+              <mat-option *ngFor="let opcion of campo.opciones" [value]="opcion.value">
+                {{ opcion.label }}
+              </mat-option>
+            </mat-select>
+
+            <!-- Campo de texto -->
             <input *ngIf="campo.tipo === 'text'" matInput [formControlName]="campo.nombre" />
 
+            <!-- Campo numérico -->
             <input *ngIf="campo.tipo === 'number'" matInput type="number" [formControlName]="campo.nombre" />
-            <mat-error *ngIf="formGroup.get(campo.nombre)?.errors?.['valueTooLow']">El valor no puede ser menor al valor inicial.</mat-error>
-
-            <mat-select *ngIf="campo.tipo === 'list'" [formControlName]="campo.nombre">
-              <mat-option *ngFor="let opcion of campo.opciones" [value]="opcion.valor">{{ opcion.etiqueta }}</mat-option>
-            </mat-select>
 
             <mat-error *ngIf="formGroup.get(campo.nombre)?.errors?.['required']">Este campo es requerido.</mat-error>
           </mat-form-field>

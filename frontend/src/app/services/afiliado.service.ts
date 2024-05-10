@@ -1,4 +1,4 @@
-import { HttpClient, HttpParams } from '@angular/common/http';
+import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { EventEmitter, Injectable, Output } from '@angular/core';
 import { Router } from '@angular/router';
 import { Observable, map } from 'rxjs';
@@ -11,9 +11,14 @@ export class AfiliadoService {
   @Output() PersonasEdit: EventEmitter<any> = new EventEmitter();
   constructor(private http: HttpClient, private router: Router) { }
 
-  createPersonaWithDetailsAndWorkCenters(encapsulatedData: any): Observable<any> {
-    const url = `${environment.API_URL}/api/Persona/afiliacion`;
-    return this.http.post<any>(url, encapsulatedData);
+  createPersonaWithDetailsAndWorkCenters(formData: FormData): Observable<any> {
+    const url = `${environment.API_URL}api/Persona/afiliacion`; // Asegúrate de usar la URL correcta del backend
+    return this.http.post<any>(url, formData, {
+      headers: new HttpHeaders({
+        // La cabecera `Content-Type` debe omitirse al enviar datos como `multipart/form-data`
+        'Accept': 'application/json'
+      })
+    });
   }
 
   createReferPersonales(idPersona: string, encapsulatedData: any): Observable<any> {

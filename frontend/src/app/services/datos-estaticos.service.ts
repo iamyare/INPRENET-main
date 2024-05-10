@@ -57,10 +57,9 @@ export class DatosEstaticosService {
   async getAllCentrosTrabajo() {
     const response = await this.centrosTrabSVC.obtenerTodosLosCentrosTrabajo().toPromise();
     const mappedResponse = response!.map((item: { id_centro_trabajo: any; nombre_centro_trabajo: any; }) => ({
-      label: item.id_centro_trabajo,
-      value: String(item.nombre_centro_trabajo)
+      value: String(item.id_centro_trabajo),
+      label: item.nombre_centro_trabajo
     }));
-
     this.centrosTrabajo = mappedResponse;
     return this.centrosTrabajo;
   }
@@ -99,7 +98,7 @@ export class DatosEstaticosService {
         nacionalidad: String(item.nacionalidad)
       }));
       return this.nacionalidades;
-      
+
     } catch (error) {
       this.nacionalidades = []
       return this.nacionalidades;
@@ -119,11 +118,12 @@ export class DatosEstaticosService {
     const response = await this.colegiosMagSVC.getAllColegiosMagisteriales().toPromise();
 
     this.colegiosMagisteriales = response.data.map((item: { idColegio: any; descripcion: any; }) => ({
-      label:  String(item.descripcion),
+      label: String(item.descripcion),
       value: item.idColegio,
     }));
     return this.colegiosMagisteriales;
   }
+
 
   estadoCivil = [
     {
@@ -190,6 +190,10 @@ export class DatosEstaticosService {
     "FEMENINO",
     "NO BINARIO",
     "OTRO"
+  ];
+  sexo = [
+    "F",
+    "M",
   ];
   /* tipoIdent = [
     {

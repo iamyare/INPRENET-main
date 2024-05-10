@@ -6,12 +6,12 @@ import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 interface Campo {
   nombre: string;
   tipo: string;
-  requerido: boolean;
   etiqueta?: string;
   editable?: boolean;
   opciones?: { value: any, label: string }[];
-  dependeDe?: string; // Nombre del campo del cual depende
-  valorDependiente?: any; // Valor del campo dependiente para mostrar este campo
+  dependeDe?: string;
+  valorDependiente?: any;
+  validadores?: ValidatorFn[]; // Los validadores personalizados para cada campo
 }
 
 @Component({
@@ -20,7 +20,7 @@ interface Campo {
   styleUrls: ['./editar-dialog.component.scss']
 })
 export class EditarDialogComponent implements OnInit {
-  form: FormGroup;
+  formGroup!: FormGroup;
   @ViewChild(MatDatepicker) picker!: MatDatepicker<Date>;
 
   constructor(
@@ -29,7 +29,7 @@ export class EditarDialogComponent implements OnInit {
     @Inject(MAT_DIALOG_DATA) public data: { campos: Campo[], valoresIniciales: { [key: string]: any } },
     private cdr: ChangeDetectorRef
   ) {
-    this.form = this.fb.group({});
+    this.formGroup = this.fb.group({});
   }
 
   ngOnInit(): void {
@@ -45,25 +45,22 @@ export class EditarDialogComponent implements OnInit {
 
       if (campo.tipo === 'date' && valorInicial) {
         const fecha = this.convertToDate(valorInicial);
-
-        if (fecha) {
-          valorInicial = fecha;
-        } else {
-          console.warn(`Fecha inválida para ${campo.nombre}:`, valorInicial);
-          valorInicial = '';
-        }
+        valorInicial = fecha ? fecha : '';
+        console.warn(`Fecha inválida para ${campo.nombre}:`, valorInicial);
       }
 
-      const validaciones = campo.requerido ? [Validators.required] : [];
+      const validadores = campo.validadores || [];
+
       group[campo.nombre] = new FormControl(
         { value: valorInicial, disabled: !campo.editable },
-        validaciones
+        validadores
       );
     });
 
-    this.form = this.fb.group(group);
+    this.formGroup = this.fb.group(group);
     this.cdr.detectChanges();
   }
+
 
 
 
@@ -74,7 +71,7 @@ export class EditarDialogComponent implements OnInit {
   }
 
   guardar() {
-    const formValues = this.form.value;
+    const formValues = this.formGroup.value;
     if (formValues.fechaNacimiento instanceof Date) {
       const year = formValues.fechaNacimiento.getFullYear();
       const month = (formValues.fechaNacimiento.getMonth() + 1).toString().padStart(2, '0');
@@ -83,7 +80,7 @@ export class EditarDialogComponent implements OnInit {
       formValues.fechaNacimiento = `${year}-${month}-${day}`;
     }
 
-    if (this.form.valid) {
+    if (this.formGroup.valid) {
       this.dialogRef.close(formValues);
     }
   }
@@ -92,6 +89,21 @@ export class EditarDialogComponent implements OnInit {
   cerrar() {
     this.dialogRef.close();
   }
+
+  getErrors(fieldName: string): string[] {
+    const control = this.formGroup.get(fieldName);
+    if (!control || !control.errors) {
+      return [];
+    }
+
+    const errors = [];
+    if (control.errors['required']) {
+      errors.push('Este campo es requerido.');
+    }
+    // Agrega otros mensajes de error según los validadores que uses
+    return errors;
+  }
+
 
   // Ejemplo de un validador personalizado
   minCurrentValueValidator(minValue: number): ValidatorFn {

@@ -246,6 +246,9 @@ export class AfiliadoService {
   }
 
   async assignBancosToPersona(idPersona: number, bancosData: CreatePersonaBancoDTO[]): Promise<Net_Persona_Por_Banco[]> {
+    console.log(idPersona);
+    console.log(bancosData);
+    
     try {
       const persona = await this.personaRepository.findOne({
         where: { id_persona: idPersona }
@@ -840,78 +843,70 @@ export class AfiliadoService {
     await this.BancosToPersonaRepository.save(perfil);
   }
 
-  async getVinculosFamiliares(dni: string): Promise<{ nombreCompleto: string, fechaNacimiento: string, parentesco: string, dni: string }[]> {
-    // Buscar a la persona por su DNI
+  async getVinculosFamiliares(dni: string) {
     const persona = await this.personaRepository.findOne({
       where: { dni },
       relations: ['RELACIONES', 'RELACIONES.familiar']
-    });
+  });
 
-    if (!persona) {
+  if (!persona) {
       throw new NotFoundException(`La persona con DNI ${dni} no fue encontrada.`);
-    }
+  }
 
-    // Mapear las relaciones para incluir la información solicitada
-    return persona.RELACIONES.map(relacion => ({
-      nombreCompleto: [
-        relacion.familiar.primer_nombre,
-        relacion.familiar.segundo_nombre,
-        relacion.familiar.primer_apellido,
-        relacion.familiar.segundo_apellido
-      ].filter(Boolean).join(' '),
+  // Mapear las relaciones para incluir la información solicitada
+  return persona.RELACIONES.map(relacion => ({
+      primerNombre: relacion.familiar.primer_nombre,
+      segundoNombre: relacion.familiar.segundo_nombre,
+      tercerNombre: relacion.familiar.tercer_nombre, // Asumiendo que también hay un tercer nombre
+      primerApellido: relacion.familiar.primer_apellido,
+      segundoApellido: relacion.familiar.segundo_apellido,
       fechaNacimiento: relacion.familiar.fecha_nacimiento,
       parentesco: relacion.parentesco,
       dni: relacion.familiar.dni
-    }));
+  }));
   }
 
   async updateFamiliarRelation(
     dniPersona: string,
     dniFamiliar: string,
-    updateDto: { nombreCompleto?: string, fechaNacimiento?: string, parentesco?: string, dni?: string }
-  ): Promise<{ mensaje: string }> {
+    updateDto: UpdateFamiliarDTO
+): Promise<{ mensaje: string }> {
     const persona = await this.personaRepository.findOne({
-      where: { dni: dniPersona },
-      relations: ['RELACIONES', 'RELACIONES.familiar']
+        where: { dni: dniPersona },
+        relations: ['RELACIONES', 'RELACIONES.familiar']
     });
 
     if (!persona) {
-      throw new NotFoundException(`La persona con DNI ${dniPersona} no fue encontrada.`);
+        throw new NotFoundException(`La persona con DNI ${dniPersona} no fue encontrada.`);
     }
+
     const relacion = persona.RELACIONES.find(r => r.familiar.dni === dniFamiliar);
-
     if (!relacion) {
-      throw new NotFoundException(`El familiar con DNI ${dniFamiliar} no fue encontrado entre las relaciones de la persona.`);
+        throw new NotFoundException(`El familiar con DNI ${dniFamiliar} no fue encontrado entre las relaciones de la persona.`);
     }
+
     if (updateDto.dni && updateDto.dni !== dniFamiliar) {
-      const existingFamiliar = await this.personaRepository.findOne({ where: { dni: updateDto.dni } });
-      if (existingFamiliar) {
-        throw new ConflictException(`El nuevo DNI ${updateDto.dni} ya está en uso.`);
-      }
-      relacion.familiar.dni = updateDto.dni;
-    }
-    if (updateDto.nombreCompleto) {
-      const [primerNombre, segundoNombre, primerApellido, segundoApellido] = updateDto.nombreCompleto.split(' ');
-      if (primerNombre) relacion.familiar.primer_nombre = primerNombre;
-      if (segundoNombre) relacion.familiar.segundo_nombre = segundoNombre;
-      if (primerApellido) relacion.familiar.primer_apellido = primerApellido;
-      if (segundoApellido) relacion.familiar.segundo_apellido = segundoApellido;
+        const existingFamiliar = await this.personaRepository.findOne({ where: { dni: updateDto.dni } });
+        if (existingFamiliar) {
+            throw new ConflictException(`El nuevo DNI ${updateDto.dni} ya está en uso.`);
+        }
+        relacion.familiar.dni = updateDto.dni;
     }
 
-    if (updateDto.fechaNacimiento) {
-      relacion.familiar.fecha_nacimiento = updateDto.fechaNacimiento;
-    }
+    if (updateDto.primerNombre !== undefined) relacion.familiar.primer_nombre = updateDto.primerNombre;
+    if (updateDto.segundoNombre !== undefined) relacion.familiar.segundo_nombre = updateDto.segundoNombre;
+    if (updateDto.primerApellido !== undefined) relacion.familiar.primer_apellido = updateDto.primerApellido;
+    if (updateDto.segundoApellido !== undefined) relacion.familiar.segundo_apellido = updateDto.segundoApellido;
 
-    if (updateDto.parentesco) {
-      relacion.parentesco = updateDto.parentesco;
-    }
+    if (updateDto.fechaNacimiento) relacion.familiar.fecha_nacimiento = updateDto.fechaNacimiento;
+    if (updateDto.parentesco) relacion.parentesco = updateDto.parentesco;
 
-    // Guarda los cambios usando los repositorios correspondientes
-    await this.personaRepository.save(relacion.familiar); // Actualiza los datos del familiar
-    await this.relacionesFamiliaresRepository.save(relacion); // Actualiza la relación familiar
+    await this.personaRepository.save(relacion.familiar);
+    await this.relacionesFamiliaresRepository.save(relacion);
 
     return { mensaje: 'Familiar actualizado con éxito.' };
-  }
+}
+
 
   async agregarFamiliarYRelacion(
     dniPersona: string,

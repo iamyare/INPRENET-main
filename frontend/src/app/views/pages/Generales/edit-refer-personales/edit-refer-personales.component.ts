@@ -4,7 +4,6 @@ import { MatDialog } from '@angular/material/dialog';
 import { AgregarReferenciasPersonalesComponent } from '@docs-components/agregar-referencias-personales/agregar-referencias-personales.component';
 import { ConfirmDialogComponent } from '@docs-components/confirm-dialog/confirm-dialog.component';
 import { EditarDialogComponent } from '@docs-components/editar-dialog/editar-dialog.component';
-import { RefPersComponent } from '@docs-components/ref-pers/ref-pers.component';
 import { ToastrService } from 'ngx-toastr';
 import { AfiliadoService } from 'src/app/services/afiliado.service';
 import { DatosEstaticosService } from 'src/app/services/datos-estaticos.service';
@@ -124,26 +123,26 @@ export class EditReferPersonalesComponent {
       try {
         const data = await this.svcAfiliado.getAllReferenciasPersonales(this.Afiliado.DNI).toPromise();
         this.filas = data.map((item: any) => {
-          return {
-            id: item.referenciaPersonal.id_ref_personal,
-            nombre_completo: item.referenciaPersonal.nombre_completo,
-            parentesco: item.referenciaPersonal.parentesco || 'No disponible',
-            direccion: item.referenciaPersonal.direccion,
-            telefono_domicilio: item.referenciaPersonal.telefono_domicilio,
-            telefono_personal: item.referenciaPersonal.telefono_personal,
-            telefono_trabajo: item.referenciaPersonal.telefono_trabajo,
-          }
-        }
-        );
+          const filaProcesada = {
+            id_ref_personal: item.id_ref_personal ?? 'ID no disponible',
+            dni: item.dni ?? 'ID no disponible',
+            nombre_completo: item.nombre_completo ?? 'Nombre no disponible',
+            parentesco: item.parentesco || 'No disponible',
+            direccion: item.direccion ?? 'Dirección no disponible',
+            telefono_domicilio: item.telefono_domicilio ?? 'No disponible',
+            telefono_personal: item.telefono_personal ?? 'No disponible',
+            telefono_trabajo: item.telefono_trabajo ?? 'No disponible',
+          };
+          return filaProcesada;
+        });
       } catch (error) {
         this.toastr.error('Error al cargar los datos de las referencias personales');
-        console.error('Error al obtener datos de las referencias personales', error);
+        console.error('Error al obtener datos de las referencias personales:', error);
       }
     } else {
       this.resetDatos();
     }
   }
-
 
   ejecutarFuncionAsincronaDesdeOtroComponente(funcion: (data: any) => Promise<void>) {
     this.ejecF = funcion;
@@ -181,6 +180,7 @@ export class EditReferPersonalesComponent {
       ...row,
       parentesco: parentescoSeleccionado ? parentescoSeleccionado.value : ''
     };
+
     this.openDialog(campos, valoresIniciales);
   }
 
@@ -223,7 +223,7 @@ export class EditReferPersonalesComponent {
 
     dialogRef.afterClosed().subscribe((result: any) => {
       if (result) {
-        this.svcAfiliado.updateReferenciaPersonal(row.id, result).subscribe({
+        this.svcAfiliado.updateReferenciaPersonal(row.id_ref_personal, result).subscribe({
           next: (response) => {
             this.toastr.success('Datos modificados correctamente.');
             this.getFilas().then(() => this.cargar());

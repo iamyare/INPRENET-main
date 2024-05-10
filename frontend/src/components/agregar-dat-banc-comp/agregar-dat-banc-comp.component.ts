@@ -18,32 +18,51 @@ export class AgregarDatBancCompComponent {
       refpers: new FormArray([], [Validators.required])
     });
 
-  constructor(private fb: FormBuilder, private afilService: AfiliadoService,
-    private dialogRef: MatDialogRef<AgregarDatBancCompComponent>,
-    private toastr: ToastrService,
-    @Inject(MAT_DIALOG_DATA) public data: { idPersona: string }
-  ) { }
+    constructor(private fb: FormBuilder, private afilService: AfiliadoService,
+      private dialogRef: MatDialogRef<AgregarDatBancCompComponent>,
+      private toastr: ToastrService,
+      @Inject(MAT_DIALOG_DATA) public data: { idPersona: string }
+    ) {
+      this.formHistPag = this.fb.group({
+        banco: this.fb.array([])
+      });
+    }
 
   ngOnInit(): void { }
 
   setHistSal(datosHistSal: any) {
-    this.formHistPag = datosHistSal
+    const bancoArray = this.formHistPag.get('banco') as FormArray;
+    bancoArray.clear();
+    if (datosHistSal && datosHistSal.banco && Array.isArray(datosHistSal.banco)) {
+      datosHistSal.banco.forEach((banco:any) => {
+        bancoArray.push(this.fb.group({
+          idBanco: [banco.idBanco, Validators.required],
+          numCuenta: [banco.numCuenta, Validators.required]
+        }));
+      });
+    } else {
+      console.error('Datos de historial bancario no son válidos:', datosHistSal);
+    }
   }
 
   guardar() {
-    this.afilService.createDatosBancarios(this.data.idPersona, this.formHistPag.banco).subscribe(
-      (res: any) => {
-        if (res.length > 0) {
-          this.toastr.success("Dato Bancario agregado con éxito");
-          this.cerrar();
-          this.formHistPag.reset();
+    if (this.formHistPag.valid) {
+      this.afilService.createDatosBancarios(this.data.idPersona, this.formHistPag.value.banco).subscribe(
+        (res: any) => {
+          if (res.length > 0) {
+            this.toastr.success("Dato Bancario agregado con éxito");
+            this.cerrar();
+            this.formHistPag.reset();
+          }
+        },
+        (error) => {
+          this.toastr.error(error);
+          console.error('Error al guardar datos bancarios', error);
         }
-      },
-      (error) => {
-        this.toastr.error(error);
-        console.error('Error al obtener afiliados', error);
-      }
-    );
+      );
+    } else {
+      this.toastr.error("El formulario contiene errores.");
+    }
   }
 
   cerrar() {

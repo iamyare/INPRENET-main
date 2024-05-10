@@ -107,10 +107,11 @@ export class DatosEstaticosService {
 
   async getBancos() {
     const response = await this.bancosService.getAllBancos().toPromise();
-    this.Bancos = response.data.map((item: { nombre_banco: any; cod_banco: any; }) => ({
+    this.Bancos = response.data.map((item: { nombre_banco: any; id_banco: any; }) => ({
       label: item.nombre_banco,
-      value: String(item.cod_banco)
+      value: String(item.id_banco)
     }));
+
     return this.Bancos;
   }
 

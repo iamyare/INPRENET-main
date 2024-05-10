@@ -14,6 +14,8 @@ import {
   ParseIntPipe,
   UseInterceptors,
   UploadedFile,
+  ConflictException,
+  BadRequestException,
 } from '@nestjs/common';
 import { AfiliadoService } from './afiliado.service';
 import { UpdatePersonaDto } from './dto/update-persona.dto';
@@ -42,7 +44,6 @@ export class AfiliadoController {
   @UseInterceptors(FileInterceptor('foto_perfil', {
     limits: { fileSize: 5 * 1024 * 1024 }, // Límite de tamaño del archivo a 5 MB
     fileFilter: (req, file, callback) => {
-      // Filtra solo archivos de imagen
       if (file.mimetype.startsWith('image/')) {
         callback(null, true);
       } else {
@@ -52,7 +53,7 @@ export class AfiliadoController {
   }))
   async createPersonaWithDetailsAndWorkCenters(
     @UploadedFile() fotoPerfil: Express.Multer.File,
-    @Body('encapsulatedDto') encapsulatedDtoStr: string // Se espera recibir un string desde el campo `encapsulatedDto`
+    @Body('encapsulatedDto') encapsulatedDtoStr: string
   ) {
     console.log(encapsulatedDtoStr);
 
@@ -367,7 +368,7 @@ export class AfiliadoController {
   @Get('getAllFamiliares/:dni')
   async getVinculosFamiliares(
     @Param('dni') dni: string
-  ): Promise<{ nombreCompleto: string, fechaNacimiento: string, parentesco: string }[]> {
+  ){
     return this.afiliadoService.getVinculosFamiliares(dni);
   }
 
@@ -375,16 +376,18 @@ export class AfiliadoController {
   async updateVinculoFamiliar(
     @Param('dniPersona') dniPersona: string,
     @Param('dniFamiliar') dniFamiliar: string,
-    @Body() updateDto: { nombreCompleto?: string, fechaNacimiento?: string, parentesco?: string, dni?: string }
+    @Body() updateDto: UpdateFamiliarDTO
   ) {
     try {
       const result = await this.afiliadoService.updateFamiliarRelation(dniPersona, dniFamiliar, updateDto);
-      return result;
+      return { mensaje: 'Vínculo familiar actualizado con éxito.', data: result };
     } catch (error) {
       if (error instanceof NotFoundException) {
         throw new NotFoundException(error.message);
+      } else if (error instanceof ConflictException) {
+        throw new BadRequestException(error.message);
       } else {
-        throw new Error('No se pudo procesar la solicitud');
+        throw new BadRequestException('No se pudo procesar la solicitud debido a un error desconocido.');
       }
     }
   }

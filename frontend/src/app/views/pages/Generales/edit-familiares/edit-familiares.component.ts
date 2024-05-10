@@ -110,9 +110,15 @@ export class EditFamiliaresComponent {
         const data = await this.svcAfiliado.getAllFamiliares(this.Afiliado.DNI).toPromise();
 
         this.filas = data.map((item: any) => {
-          const nombreCompleto = item.nombreCompleto || 'Nombre desconocido';
+          const nombreCompletoParts = [
+            item.primerNombre,
+            item.segundoNombre,
+            item.tercerNombre,
+            item.primerApellido,
+            item.segundoApellido
+          ].filter(part => part).join(' ');
 
-          // Formatear la fecha usando `DatePipe`
+          const nombreCompleto = nombreCompletoParts || 'Nombre desconocido';
           const fechaNacimiento = this.datePipe.transform(item.fechaNacimiento, 'dd/MM/yyyy') || 'Fecha no disponible';
 
           const parentesco = item.parentesco || 'Parentesco no disponible';
@@ -136,6 +142,7 @@ export class EditFamiliaresComponent {
 
 
 
+
   ejecutarFuncionAsincronaDesdeOtroComponente(funcion: (data: any) => Promise<void>) {
     this.ejecF = funcion;
   }
@@ -149,19 +156,20 @@ export class EditFamiliaresComponent {
 
   manejarAccionUno(row: any) {
     const campos = [
-      { nombre: 'nombreCompleto', tipo: 'text', requerido: true, etiqueta: 'Nombre completo', editable: true },
-      { nombre: 'fechaNacimiento', tipo: 'date', requerido: true, etiqueta: 'Fecha de nacimiento', editable: true },
-      { nombre: 'dni', tipo: 'text', requerido: false, etiqueta: 'dni', editable: true },
+      { nombre: 'primerNombre', tipo: 'text', etiqueta: 'Primer nombre', editable: true },
+      { nombre: 'segundoNombre', tipo: 'text', etiqueta: 'Segundo nombre', editable: true },
+      { nombre: 'primerApellido', tipo: 'text', etiqueta: 'Primer apellido', editable: true },
+      { nombre: 'segundoApellido', tipo: 'text', etiqueta: 'Segundo apellido', editable: true },
+      { nombre: 'fechaNacimiento', tipo: 'date', etiqueta: 'Fecha de nacimiento', editable: true },
+      { nombre: 'dni', tipo: 'text', etiqueta: 'Número de identidad', editable: true, validadores: [Validators.required] },
       {
         nombre: 'parentesco',
         tipo: 'list',
-        requerido: true,
         etiqueta: 'Parentesco',
         editable: true,
         opciones: this.listaParentesco
       }
     ];
-
     this.openDialog(campos, row);
   }
 
@@ -221,7 +229,7 @@ export class EditFamiliaresComponent {
       width: '60%',
       height: '75%',
       data: {
-        dniPersona: this.Afiliado.DNI, // Aquí se debe pasar el valor correcto
+        dniPersona: this.Afiliado.DNI,
         idPersona: this.Afiliado.ID_PERSONA
       }
     });

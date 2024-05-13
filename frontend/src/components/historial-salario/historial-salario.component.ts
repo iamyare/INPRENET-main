@@ -7,7 +7,6 @@ export function generateHistSalFormGroup(datos?: any): FormGroup {
   return new FormGroup({
     idBanco: new FormControl(datos.idBanco, Validators.required),
     numCuenta: new FormControl(datos.numCuenta, Validators.required),
-    /* estado: new FormControl(datos.estado , Validators.required) */
   });
 }
 

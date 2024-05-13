@@ -2,6 +2,7 @@ import { Component, EventEmitter, OnInit, Output } from '@angular/core';
 import {Subject, Observable} from 'rxjs';
 import {WebcamImage, WebcamInitError, WebcamUtil} from 'ngx-webcam';
 import { FormStateService } from 'src/app/services/form-state.service';
+import { FormBuilder, FormGroup } from '@angular/forms';
 
 @Component({
   selector: 'app-camara',
@@ -10,10 +11,15 @@ import { FormStateService } from 'src/app/services/form-state.service';
 })
 export class CamaraComponent {
   title = 'camaraapp';
+  form: FormGroup = this.fb.group({});
 
   @Output() imageCaptured = new EventEmitter<string>();
 
-  constructor(private formStateService: FormStateService) {}
+  constructor(private formStateService: FormStateService, private fb: FormBuilder,) {
+    this.form = this.fb.group({
+      FotoPerfil: ['']  // Asegúrate de añadir esto
+    });
+  }
 
   // Hacer Toogle on/off
   public mostrarWebcam = true;
@@ -35,6 +41,11 @@ export class CamaraComponent {
   private siguienteWebcam: Subject<boolean|string> = new Subject<boolean|string>();
 
   public ngOnInit(): void {
+    this.formStateService.getFotoPerfil().subscribe(foto => {
+      if (foto) {
+          this.form.get('FotoPerfil')?.setValue(foto);
+      }
+  });
     WebcamUtil.getAvailableVideoInputs()
       .then((mediaDevices: MediaDeviceInfo[]) => {
         this.multiplesCamarasDisponibles = mediaDevices && mediaDevices.length > 1;
@@ -61,7 +72,7 @@ export class CamaraComponent {
     this.imagenWebcam = imagen;
     this.imageCaptured.emit(imagen.imageAsDataUrl);
     this.formStateService.setFotoPerfil(imagen.imageAsDataUrl);
-  }
+}
 
   public cameraSwitched(dispositivoId: string): void {
     console.log('Dispositivo Actual: ' + dispositivoId);

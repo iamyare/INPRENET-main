@@ -1,49 +1,23 @@
 <div class="row" style="margin: 5px 5px 25px 5px">
-    <div class="col-6;" style="width: 50%; text-align: center;">
-        <webcam [height]="200" [width]="200" [trigger]="triggerObservable" (imageCapture)="handleImage($event)"
-            *ngIf="mostrarWebcam" [switchCamera]="nextWebcamObservable" [imageQuality]="1"
-            (cameraSwitched)="cameraSwitched($event)" (initError)="handleInitError($event)"></webcam>
-        <div class="row" style="margin: 5px 0 0 0;">
-
-            <div class="col-md-6 col-sm-12" style=" text-align: center;">
-                <button mat-raised-button style="color: white;" color="primary" (click)="triggerCaptura();">Tomar
-                    Foto</button>
-            </div>
-            <div class="col-md-6 col-sm-12" style=" text-align: center;">
-                <button mat-raised-button style="color: white;" color="primary" (click)="toggleWebcam();">Alternar
-                    Cámara</button>
-            </div>
-        </div>
-        <div class="row" style="margin: 5px 0 0 0;">
-            <div class="col-md-6 col-sm-12" style=" text-align: center;">
-                <button mat-raised-button style="color: white;" color="primary" (click)="showNextWebcam(true);"
-                    [disabled]="!multiplesCamarasDisponibles">Siguiente Cámara</button>
-            </div>
-
-            <div class="col-md-6 col-sm-12" style=" text-align: center;">
-                <mat-checkbox id="cameraSwitchCheckbox" for="cameraSwitchCheckbox" color="primary"
-                    [(ngModel)]="permitirCambioCamara">
-                    Permitir Cambio de cámara
-                </mat-checkbox>
-
-            </div>
-            <div class="col-md-12 col-sm-12">
-                <button mat-raised-button color="primary" style="color: white;"
-                    (click)="showNextWebcam(dispositivoId);">Activar</button>
-            </div>
-        </div>
-    </div>
-
-    <div class="col-6; " style="width: 50%;  text-align: center;" *ngIf="imagenWebcam">
-        <img [height]="200" [width]="280" [src]="imagenWebcam.imageAsDataUrl" />
-    </div>
+  <!-- Sección de la webcam -->
+  <div class="col-md-6" style="text-align: center;">
+      <webcam [height]="200" [width]="200" [trigger]="triggerObservable"
+              *ngIf="mostrarWebcam"
+              [switchCamera]="nextWebcamObservable"
+              [imageQuality]="1"
+              (imageCapture)="handleImage($event)"
+              (cameraSwitched)="cameraSwitched($event)"
+              (initError)="handleInitError($event)">
+      </webcam>
+      <div>
+          <button mat-raised-button color="primary" (click)="triggerCaptura();">Tomar Foto</button>
+          <button mat-raised-button color="primary" (click)="toggleWebcam();">Alternar Cámara</button>
+          <button mat-raised-button color="primary" (click)="showNextWebcam(true);"
+                  [disabled]="!multiplesCamarasDisponibles">Siguiente Cámara</button>
+          <mat-checkbox [(ngModel)]="permitirCambioCamara">Permitir Cambio de cámara</mat-checkbox>
+      </div>
+  </div>
+<div class="col-md-6" style="text-align: center;" *ngIf="form.get('FotoPerfil')?.value">
+    <img [src]="form.get('FotoPerfil')?.value" alt="Foto de perfil" style="width: 200px; height: auto;">
 </div>
-
-<!-- <div class="row">
-    <div class="col-md-3 col-sm-12">
-        <h4 *ngIf="errors.length > 0">Messages:</h4>
-        <ul *ngFor="let error of errors">
-            <li>{{error | json}}</li>
-        </ul>
-    </div>
-</div> -->
+</div>

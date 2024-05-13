@@ -79,8 +79,8 @@ export class DatosEstaticosService {
     try {
         const response = await this.centroTrabajoService.obtenerTodasLasProfesiones().toPromise() || [];
         this.profesiones = response.map((profesion: any) => ({
-            label: profesion.idProfesion,
-            value: profesion.descripcion
+            label: profesion.descripcion,
+            value: profesion.idProfesion
         }));
         return this.profesiones;
     } catch (error) {

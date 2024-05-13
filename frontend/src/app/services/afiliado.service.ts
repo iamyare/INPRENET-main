@@ -12,13 +12,8 @@ export class AfiliadoService {
   constructor(private http: HttpClient, private router: Router) { }
 
   createPersonaWithDetailsAndWorkCenters(formData: FormData): Observable<any> {
-    const url = `${environment.API_URL}api/Persona/afiliacion`; // Asegúrate de usar la URL correcta del backend
-    return this.http.post<any>(url, formData, {
-      headers: new HttpHeaders({
-        // La cabecera `Content-Type` debe omitirse al enviar datos como `multipart/form-data`
-        'Accept': 'application/json'
-      })
-    });
+    const url = `${environment.API_URL}/api/Persona/afiliacion`;
+    return this.http.post<any>(url, formData);
   }
 
   createReferPersonales(idPersona: string, encapsulatedData: any): Observable<any> {

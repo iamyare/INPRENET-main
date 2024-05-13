@@ -8,7 +8,7 @@ import { FormGroup } from '@angular/forms';
 export class FormStateService {
   private formData = new BehaviorSubject<FormGroup | null>(null);
   private forms: Map<string, FormGroup> = new Map();
-  private fotoPerfil = new BehaviorSubject<string | null>(null);
+  private fotoPerfilSource = new BehaviorSubject<string | null>(null);
 
   setFormData(form: FormGroup) {
     this.formData.next(form);
@@ -26,12 +26,12 @@ export class FormStateService {
     return this.forms.get(key);
   }
 
-  setFotoPerfil(imagen: string) {
-    this.fotoPerfil.next(imagen);
+  setFotoPerfil(foto: string) {
+    this.fotoPerfilSource.next(foto);
   }
 
-  getFotoPerfil(): BehaviorSubject<string | null> {
-    return this.fotoPerfil;
+  getFotoPerfil() {
+    return this.fotoPerfilSource.asObservable();
   }
 
 }

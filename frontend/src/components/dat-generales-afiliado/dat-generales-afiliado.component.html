@@ -138,7 +138,7 @@
             <mat-label>Profesión</mat-label>
             <mat-select formControlName="id_profesion">
               <mat-option *ngFor="let profesion of profesiones" [value]="profesion.value">
-                {{ profesion.value }}
+                {{ profesion.label }}
               </mat-option>
             </mat-select>
           </mat-form-field>

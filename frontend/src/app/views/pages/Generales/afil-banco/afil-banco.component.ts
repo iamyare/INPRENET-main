@@ -63,19 +63,25 @@ export class AfilBancoComponent implements OnInit {
   DatosBancBen: any = [];
 
   constructor(private fb: FormBuilder, private formStateService: FormStateService, private afilService: AfiliadoService) {
+    this.formPuestTrab = this.fb.group({
+      trabajo: this.fb.array([], Validators.required)
+    });
+    this.formHistPag = this.fb.group({
+      banco: this.fb.array([])
+    });
   }
 
   ngOnInit(): void {
-    // Recupera la imagen guardada en el servicio
-    const fotoPerfil = this.formStateService.getFotoPerfil().value;
-    if (fotoPerfil) {
-      this.form.get('FotoPerfil')?.setValue(fotoPerfil);
-    }
+    this.formStateService.getFotoPerfil().subscribe(foto => {
+      if (foto) {
+        this.form.get('FotoPerfil')?.setValue(foto);
+      }
+    });
   }
 
   handleImageCaptured(image: string) {
     this.form.get('FotoPerfil')?.setValue(image);
-  }
+}
 
   // Manejan el control del progreso de los datos
   setEstadoDatGen(e: any) {
@@ -180,19 +186,20 @@ export class AfilBancoComponent implements OnInit {
 
   // Manejan la informacion de los formularios
   setDatosPuetTrab1(datosPuestTrab: any) {
-    this.formPuestTrab = datosPuestTrab
-    /* this.formPuestTrab.setControl('trabajo', this.fb.array(datosPuestTrab.trabajo || [])); */
+    const trabajoArray = this.fb.array(datosPuestTrab.trabajo || [], Validators.required);
+    this.formPuestTrab.setControl('trabajo', trabajoArray);
   }
+
   setHistSal(datosHistSal: any) {
-    this.formHistPag = datosHistSal
-    /* if (datosHistSal && datosHistSal.banco) {
-      this.formHistPag.setControl('banco', this.fb.array(
-        datosHistSal.banco.map((item: any) => generateHistSalFormGroup(item))
-      ));
-    } else {
-      this.formHistPag.setControl('banco', this.fb.array([]));
-    } */
+    const bancosArray = this.fb.array(
+      (datosHistSal.banco || []).map((banco:any) => this.fb.group({
+        idBanco: [banco.idBanco, Validators.required],
+        numCuenta: [banco.numCuenta, Validators.required]
+      }))
+    );
+    this.formHistPag.setControl('banco', bancosArray);
   }
+
   setDatosColegiosMag(datosColegiosMag: any) {
     const formArray = this.formColegiosMagisteriales.get('ColMags') as FormArray;
     formArray.clear();
@@ -228,7 +235,7 @@ export class AfilBancoComponent implements OnInit {
   }
 
   getLabel(): any {
-    console.log(this.form.get("Archivos")?.value["Archivos"] != "");
+    //console.log(this.form.get("Archivos")?.value["Archivos"] != "");
 
     if (this.form.get("Archivos")?.value["Archivos"] != "") {
       this.labelBoton1 = this.form.get("Archivos")?.value["Archivos"]
@@ -238,65 +245,53 @@ export class AfilBancoComponent implements OnInit {
     return this.labelBoton1
   }
 
-  // Envia los datos del formulario al servicio para poder guardar la información
-  enviar() {
-    // Recopila todos los datos necesarios para el DTO encapsulado
-    const encapsulatedDto = {
+enviar() {
+  const formData = new FormData();
+  const encapsulatedDto = {
       datosGenerales: this.form.get('DatosGenerales')?.value || {},
-      bancos: this.formHistPag || [],
-      referenciasPersonales: this.formReferencias || [],
-      beneficiarios: this.formBeneficiarios.value.beneficiario || [],
-      centrosTrabajo: this.formPuestTrab || [],
-      colegiosMagisteriales: this.formColegiosMagisteriales || [],
-      familiares: this.formDatosFamiliares || []
-    };
-    console.log(encapsulatedDto);
+      bancos: this.formHistPag.value.banco || [],
+      referenciasPersonales: this.formReferencias.value.refpers || [],
+      beneficiarios: this.formBeneficiarios.value.beneficiario.map((ben: any) => {
+          const { Arch, Archivos, DatosBac, beneficiario, ...resto } = ben;
+          return resto;
+      }),
+      centrosTrabajo: this.formPuestTrab.value.trabajo || [],
+      colegiosMagisteriales: this.formColegiosMagisteriales.value.ColMags || [],
+      familiares: this.formDatosFamiliares.value.familiares || []
+  };
 
+  formData.append('encapsulatedDto', JSON.stringify(encapsulatedDto));
 
-    /*  // Crear el objeto FormData
-     const formData = new FormData();
-     formData.append('encapsulatedDto', JSON.stringify(encapsulatedDto));
- 
-     // Incluir la imagen de perfil si está disponible
-     const fotoPerfilBase64 = this.form.get('FotoPerfil')?.value;
-     if (fotoPerfilBase64) {
-       const fotoBlob = this.dataURLToBlob(fotoPerfilBase64);
-       formData.append('foto_perfil', fotoBlob, 'perfil.jpg');
-     }
- 
-     // Crear un objeto intermedio para depurar el contenido de `FormData`
-     const formDataObj: any = {};
-     formData.forEach((value, key) => {
-       formDataObj[key] = value instanceof Blob ? 'Archivo adjunto' : value;
-     });
- 
-     // Registra los datos encapsulados en la consola
-     console.log('Datos a enviar:', formDataObj.encapsulatedDto);
- 
-     // Llamar al servicio para enviar la solicitud al backend
-     this.afilService.createPersonaWithDetailsAndWorkCenters(formData)
-       .subscribe(
-         response => {
-           console.log('Datos enviados con éxito:', response);
-         },
-         error => {
-           console.error('Error al enviar los datos:', error);
-         }
-       ); */
+  const fotoPerfilBase64 = this.form.get('FotoPerfil')?.value;
+  if (fotoPerfilBase64) {
+      const fotoBlob = this.dataURLToBlob(fotoPerfilBase64);
+      formData.append('foto_perfil', fotoBlob, 'perfil.jpg');
   }
 
-  // Función auxiliar para convertir un data URL a Blob
+  // Log para ver qué contiene el FormData antes de enviar
+  /* formData.forEach((value, key) => {
+      console.log(`Key ${key}:`, value);
+  }); */
+
+  this.afilService.createPersonaWithDetailsAndWorkCenters(formData).subscribe(
+      response => {
+          console.log('Datos enviados con éxito:', response);
+      },
+      error => {
+          console.error('Error al enviar los datos:', error);
+      }
+  );
+}
+
   dataURLToBlob(dataURL: string): Blob {
     const byteString = atob(dataURL.split(',')[1]);
     const mimeString = dataURL.split(',')[0].split(':')[1].split(';')[0];
     const buffer = new Uint8Array(byteString.length);
-
     for (let i = 0; i < byteString.length; i++) {
-      buffer[i] = byteString.charCodeAt(i);
+        buffer[i] = byteString.charCodeAt(i);
     }
-
-    return new Blob([buffer], { type: mimeString });
-  }
+    return new Blob([buffer], {type: mimeString});
+}
 
 
 }

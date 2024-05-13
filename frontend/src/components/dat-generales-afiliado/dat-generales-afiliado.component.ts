@@ -13,7 +13,7 @@ export function generateAddressFormGroup(datos?: any): FormGroup {
     tercer_nombre: new FormControl(datos?.tercer_nombre, [Validators.maxLength(40)]),
     primer_apellido: new FormControl(datos?.primer_apellido, [Validators.required, Validators.maxLength(40), Validators.minLength(1)]),
     segundo_apellido: new FormControl(datos?.segundo_apellido, [Validators.maxLength(40)]),
-    fecha_nacimiento: new FormControl(datos?.fecha_nacimiento, [Validators.required, Validators.maxLength(10), Validators.pattern(/^\d{1,2}\/\d{1,2}\/\d{4}$/)]),
+    fecha_nacimiento: new FormControl(datos?.fecha_nacimiento, [Validators.required, Validators.maxLength(10)]),
     cantidad_dependientes: new FormControl(datos?.cantidad_dependientes, [Validators.pattern("^[0-9]+$"), Validators.required]),
     estado_civil: new FormControl(datos?.estado_civil, [Validators.required, Validators.maxLength(40)]),
     representacion: new FormControl(datos?.representacion, [Validators.required, Validators.maxLength(40)]),
@@ -79,17 +79,31 @@ export class DatGeneralesAfiliadoComponent implements OnInit, OnDestroy {
     private fb: FormBuilder,
     private afiliadoService: AfiliadoService,
     public direccionSer: DireccionService, private datosEstaticos: DatosEstaticosService) {
+      this.form = this.fb.group({
+        ...generateAddressFormGroup(),
+        FotoPerfil: ['']  // Asegúrate de añadir esto
+      });
     const currentYear = new Date();
     this.minDate = new Date(currentYear.getFullYear(), currentYear.getMonth(), currentYear.getDate(), currentYear.getHours(), currentYear.getMinutes(), currentYear.getSeconds());
   }
 
+
+
   ngOnInit(): void {
-    const savedForm = this.formStateService.getFormData().value;
-    if (savedForm) {
-      this.form = savedForm;
-    } else {
-      this.form = generateAddressFormGroup();
-    }
+    this.formStateService.getFotoPerfil().subscribe(foto => {
+      if (foto) {
+          this.form.get('FotoPerfil')?.setValue(foto);
+      }
+  });
+
+    // Suscripción para actualizaciones del formulario almacenado
+    this.formStateService.getFormData().subscribe((savedForm: FormGroup | null) => {
+      if (savedForm) {
+        // Usar 'patchValue' para actualizar el formulario con los valores guardados.
+        this.form.patchValue(savedForm.value, { emitEvent: false }); // Omitir el emitEvent si no deseas disparar otros observables
+      }
+    });
+
     this.cargarTiposIdentificacion();
     this.cargarNacionalidades();
     this.cargarMunicipios();

@@ -161,20 +161,63 @@ export class EditReferPersonalesComponent {
       (item: any) => item.label.toLowerCase() === rowParentesco
     );
     const campos = [
-      { nombre: 'nombre_completo', tipo: 'text', requerido: true, etiqueta: 'Nombre completo', editable: true },
+      {
+        nombre: 'nombre_completo',
+        tipo: 'text',
+        requerido: true,
+        etiqueta: 'Nombre completo',
+        editable: true,
+        validadores: [Validators.required, Validators.minLength(2), Validators.maxLength(100)]
+      },
       {
         nombre: 'parentesco',
         tipo: 'list',
         requerido: true,
         etiqueta: 'Parentesco',
         editable: true,
-        opciones: this.listaParentesco
+        opciones: this.listaParentesco,
+        validadores: [Validators.required]
       },
-      { nombre: 'direccion', tipo: 'text', requerido: true, etiqueta: 'Dirección', editable: true },
-      { nombre: 'telefono_domicilio', tipo: 'text', requerido: false, etiqueta: 'Teléfono Domicilio', editable: true },
-      { nombre: 'telefono_personal', tipo: 'text', requerido: false, etiqueta: 'Teléfono Personal', editable: true },
-      { nombre: 'telefono_trabajo', tipo: 'text', requerido: false, etiqueta: 'Teléfono Trabajo', editable: true },
-      { nombre: 'dni', tipo: 'text', requerido: false, etiqueta: 'DNI', editable: true }
+      {
+        nombre: 'direccion',
+        tipo: 'text',
+        requerido: true,
+        etiqueta: 'Dirección',
+        editable: true,
+        validadores: [Validators.required, Validators.minLength(10), Validators.maxLength(200)]
+      },
+      {
+        nombre: 'telefono_domicilio',
+        tipo: 'text',
+        requerido: false,
+        etiqueta: 'Teléfono Domicilio',
+        editable: true,
+        validadores: [Validators.minLength(8), Validators.maxLength(12), Validators.pattern(/^\+?[0-9]+(-?[0-9]+)*$/)]
+      },
+      {
+        nombre: 'telefono_personal',
+        tipo: 'text',
+        requerido: true,
+        etiqueta: 'Teléfono Personal',
+        editable: true,
+        validadores: [Validators.required, Validators.minLength(8), Validators.maxLength(12), Validators.pattern(/^\+?[0-9]+(-?[0-9]+)*$/)]
+      },
+      {
+        nombre: 'telefono_trabajo',
+        tipo: 'text',
+        requerido: true,
+        etiqueta: 'Teléfono Trabajo',
+        editable: true,
+        validadores: [Validators.required, Validators.minLength(8), Validators.maxLength(12), Validators.pattern(/^\+?[0-9]+(-?[0-9]+)*$/)]
+      },
+      {
+        nombre: 'dni',
+        tipo: 'text',
+        requerido: true,
+        etiqueta: 'DNI',
+        editable: true,
+        validadores: [Validators.required, Validators.pattern(/^[0-9]{13}$|^[0-9]{4}-[0-9]{4}-[0-9]{5}$/)]
+      }
     ];
     const valoresIniciales = {
       ...row,

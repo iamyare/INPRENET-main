@@ -49,8 +49,14 @@ export class EditFamiliaresComponent {
     ];
     this.myColumns = [
       {
-        header: 'Nombre Completo',
-        col: 'nombreCompleto',
+        header: 'Nombres',
+        col: 'nombres',
+        isEditable: true,
+        validationRules: [Validators.required, Validators.minLength(3)]
+      },
+      {
+        header: 'Apellidos',
+        col: 'apellidos',
         isEditable: true,
         validationRules: [Validators.required, Validators.minLength(3)]
       },
@@ -65,10 +71,10 @@ export class EditFamiliaresComponent {
         isEditable: true
       },
       {
-        header: 'parentesco',
+        header: 'Parentesco',
         col: 'parentesco',
         isEditable: true
-      },
+      }
     ];
 
     this.previsualizarInfoAfil();
@@ -110,22 +116,16 @@ export class EditFamiliaresComponent {
         const data = await this.svcAfiliado.getAllFamiliares(this.Afiliado.DNI).toPromise();
 
         this.filas = data.map((item: any) => {
-          const nombreCompletoParts = [
-            item.primerNombre,
-            item.segundoNombre,
-            item.tercerNombre,
-            item.primerApellido,
-            item.segundoApellido
-          ].filter(part => part).join(' ');
+          const nombres = [item.primerNombre, item.segundoNombre, item.tercerNombre].filter(part => part).join(' ');
+          const apellidos = [item.primerApellido, item.segundoApellido].filter(part => part).join(' ');
 
-          const nombreCompleto = nombreCompletoParts || 'Nombre desconocido';
           const fechaNacimiento = this.datePipe.transform(item.fechaNacimiento, 'dd/MM/yyyy') || 'Fecha no disponible';
-
           const parentesco = item.parentesco || 'Parentesco no disponible';
           const dni = item.dni || 'DNI no disponible';
 
           return {
-            nombreCompleto,
+            nombres,
+            apellidos,
             fechaNacimiento,
             parentesco,
             dni
@@ -140,9 +140,6 @@ export class EditFamiliaresComponent {
     }
   }
 
-
-
-
   ejecutarFuncionAsincronaDesdeOtroComponente(funcion: (data: any) => Promise<void>) {
     this.ejecF = funcion;
   }
@@ -156,18 +153,31 @@ export class EditFamiliaresComponent {
 
   manejarAccionUno(row: any) {
     const campos = [
-      { nombre: 'primerNombre', tipo: 'text', etiqueta: 'Primer nombre', editable: true },
-      { nombre: 'segundoNombre', tipo: 'text', etiqueta: 'Segundo nombre', editable: true },
-      { nombre: 'primerApellido', tipo: 'text', etiqueta: 'Primer apellido', editable: true },
-      { nombre: 'segundoApellido', tipo: 'text', etiqueta: 'Segundo apellido', editable: true },
-      { nombre: 'fechaNacimiento', tipo: 'date', etiqueta: 'Fecha de nacimiento', editable: true },
-      { nombre: 'dni', tipo: 'text', etiqueta: 'Número de identidad', editable: true, validadores: [Validators.required] },
+      { nombre: 'nombres', tipo: 'text', etiqueta: 'Nombres', editable: true, validadores: [
+        Validators.required,
+        Validators.minLength(2),
+        Validators.maxLength(120),
+        Validators.pattern(/^[^\s]+(\s[^\s]+){0,2}$/)
+      ] },
+      { nombre: 'apellidos', tipo: 'text', etiqueta: 'Apellidos', editable: true, validadores: [
+        Validators.required,
+        Validators.minLength(2),
+        Validators.maxLength(80),
+        Validators.pattern(/^[^\s]+(\s[^\s]+)?$/)
+      ] },
+      { nombre: 'fechaNacimiento', tipo: 'date', etiqueta: 'Fecha de nacimiento', editable: true,validadores: [
+        Validators.required,
+      ] },
+      { nombre: 'dni', tipo: 'text', etiqueta: 'Número de identidad', editable: true, validadores: [
+        Validators.required, Validators.pattern(/^[0-9]{13}$|^[0-9]{4}-[0-9]{4}-[0-9]{5}$/)
+      ] },
       {
         nombre: 'parentesco',
         tipo: 'list',
         etiqueta: 'Parentesco',
         editable: true,
-        opciones: this.listaParentesco
+        opciones: this.listaParentesco,
+        validadores: [Validators.required]
       }
     ];
     this.openDialog(campos, row);
@@ -199,7 +209,20 @@ export class EditFamiliaresComponent {
 
     dialogRef.afterClosed().subscribe((result: any) => {
       if (result) {
-        this.svcAfiliado.updateVinculoFamiliar(this.Afiliado.DNI, row.dni, result).subscribe({
+        const [primerNombre, segundoNombre, tercerNombre = ''] = result.nombres.split(' ');
+        const [primerApellido, segundoApellido = ''] = result.apellidos.split(' ');
+        const dataToSend = {
+          primerNombre,
+          segundoNombre,
+          tercerNombre,
+          primerApellido,
+          segundoApellido,
+          fechaNacimiento: result.fechaNacimiento,
+          dni: result.dni,
+          parentesco: result.parentesco
+        };
+
+        this.svcAfiliado.updateVinculoFamiliar(this.Afiliado.DNI, row.dni, dataToSend).subscribe({
           next: (response) => {
             this.toastr.success('Vínculo familiar actualizado con éxito.');
             const index = this.filas.findIndex(item => item.dni === row.dni);
@@ -224,6 +247,7 @@ export class EditFamiliaresComponent {
     });
   }
 
+
   crearFamiliar() {
     const dialogRef = this.dialog.open(NewFamiliaresComponent, {
       width: '60%',
@@ -237,5 +261,13 @@ export class EditFamiliaresComponent {
     dialogRef.afterClosed().subscribe((result: any) => {
       this.ngOnInit();
     });
+  }
+
+  descomponerNombres(nombres: string): string[] {
+    return nombres.split(' ').concat(['', '', '']).slice(0, 3);
+  }
+
+  descomponerApellidos(apellidos: string): string[] {
+    return apellidos.split(' ').concat(['', '']).slice(0, 2);
   }
 }

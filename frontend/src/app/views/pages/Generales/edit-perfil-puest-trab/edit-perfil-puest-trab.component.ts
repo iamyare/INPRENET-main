@@ -38,7 +38,7 @@ export class EditPerfilPuestTrabComponent {
     private toastr: ToastrService,
     private dialog: MatDialog,
     private datosEstaticosService: DatosEstaticosService,
-    private datePipe: DatePipe // Añadir DatePipe como dependencia
+    private datePipe: DatePipe
   ) { }
 
   ngOnInit(): void {
@@ -180,13 +180,13 @@ export class EditPerfilPuestTrabComponent {
         editable: true,
         opciones: this.centrosTrabajo
       },
-      { nombre: 'numeroAcuerdo', tipo: 'text', requerido: true, etiqueta: 'Número Acuerdo', editable: true },
-      { nombre: 'salarioBase', tipo: 'number', requerido: true, etiqueta: 'Salario Base', editable: true },
-      { nombre: 'fechaIngreso', tipo: 'date', requerido: false, etiqueta: 'Fecha Ingreso', editable: true },
+      { nombre: 'numeroAcuerdo', tipo: 'text', requerido: true, etiqueta: 'Número Acuerdo', editable: true, validaciones: [Validators.required, Validators.maxLength(40)] },
+      { nombre: 'salarioBase', tipo: 'number', requerido: true, etiqueta: 'Salario Base', editable: true, validaciones: [Validators.required, Validators.min(0)] },
+      { nombre: 'fechaIngreso', tipo: 'date', requerido: false, etiqueta: 'Fecha Ingreso', editable: true, validaciones: [Validators.required] },
       { nombre: 'fechaEgreso', tipo: 'date', requerido: false, etiqueta: 'Fecha Egreso', editable: true },
-      { nombre: 'cargo', tipo: 'text', requerido: false, etiqueta: 'Cargo', editable: true },
-      { nombre: 'sectorEconomico', tipo: 'text', requerido: false, etiqueta: 'Sector Económico', editable: true },
-      { nombre: 'claseCliente', tipo: 'text', requerido: false, etiqueta: 'Clase Cliente', editable: true }
+      { nombre: 'cargo', tipo: 'text', requerido: false, etiqueta: 'Cargo', editable: true, validaciones: [Validators.required, Validators.maxLength(40)] },
+      { nombre: 'sectorEconomico', tipo: 'text', requerido: false, etiqueta: 'Sector Económico', editable: true, validaciones: [Validators.required, Validators.maxLength(40)] },
+      { nombre: 'claseCliente', tipo: 'text', requerido: false, etiqueta: 'Clase Cliente', editable: true, validaciones: [Validators.required, Validators.maxLength(40)] }
     ];
 
     const valoresIniciales = {
@@ -250,11 +250,27 @@ export class EditPerfilPuestTrabComponent {
       width: '500px',
       data: { campos: campos, valoresIniciales: valoresIniciales }
     });
+
     dialogRef.afterClosed().subscribe(async (result: any) => {
       if (result) {
+        // Formateo de fechas antes de enviar los datos
+        result.fechaIngreso = this.datePipe.transform(result.fechaIngreso, 'dd/MM/yyyy');
+        result.fechaEgreso = this.datePipe.transform(result.fechaEgreso, 'dd/MM/yyyy');
+
         const centroActualizado = this.centrosTrabajo.find(c => c.value === result.nombre_centro_trabajo);
         const nombreCentro = centroActualizado ? centroActualizado.label : 'Centro desconocido';
+
+        const idCentroTrabajo = result.nombre_centro_trabajo;
+        delete result.nombre_centro_trabajo;
+
+
+        const dataToSend = {
+          ...result,
+          idCentroTrabajo: idCentroTrabajo
+        };
+
         this.svcAfiliado.updatePerfCentroTrabajo(row.id, result).subscribe({
+
           next: (response) => {
             const index = this.filas.findIndex(item => item.id === row.id);
             if (index !== -1) {
@@ -277,5 +293,6 @@ export class EditPerfilPuestTrabComponent {
       }
     });
   }
+
 
 }

@@ -14,7 +14,6 @@ import { unirNombres } from 'src/app/shared/functions/formatoNombresP';
   styleUrl: './ver-datos-afiliados.component.scss'
 })
 export class VerDatosAfiliadosComponent implements OnInit {
-  // Manejan el control del progreso de los datos
   DatosGenerales: boolean = true; DatosBacAfil: boolean = false;
   Archivos: boolean = false; DatosPuestoTrab: boolean = false;
   DatosHS: boolean = false; referenc: boolean = false;
@@ -27,7 +26,7 @@ export class VerDatosAfiliadosComponent implements OnInit {
     private dialog: MatDialog) { }
   ngOnInit(): void {
     this.myFormFields = [
-      { type: 'text', label: 'DNI del afiliado', name: 'dni', validations: [Validators.required, Validators.minLength(13), Validators.maxLength(14)], display: true,value: '8429317879511' },
+      { type: 'text', label: 'DNI del afiliado', name: 'dni', validations: [Validators.required, Validators.minLength(13), Validators.maxLength(14)], display: true,value: '1234567890123' },
     ];
 
     this.myColumns = [

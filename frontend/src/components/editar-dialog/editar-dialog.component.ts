@@ -1,4 +1,4 @@
-import { ChangeDetectorRef, Component, Inject, OnInit, ViewChild } from '@angular/core';
+import { ChangeDetectorRef, Component, Inject, OnInit, QueryList, ViewChild, ViewChildren } from '@angular/core';
 import { AbstractControl, FormBuilder, FormControl, FormGroup, ValidatorFn, Validators } from '@angular/forms';
 import { MatDatepicker } from '@angular/material/datepicker';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
@@ -22,6 +22,9 @@ interface Campo {
 export class EditarDialogComponent implements OnInit {
   formGroup!: FormGroup;
   @ViewChild(MatDatepicker) picker!: MatDatepicker<Date>;
+  @ViewChildren(MatDatepicker) private pickerQueryList!: QueryList<MatDatepicker<Date>>;
+  datePickers!: MatDatepicker<Date>[];
+
 
   constructor(
     private fb: FormBuilder,
@@ -30,6 +33,11 @@ export class EditarDialogComponent implements OnInit {
     private cdr: ChangeDetectorRef
   ) {
     this.formGroup = this.fb.group({});
+  }
+
+  ngAfterViewInit() {
+    this.datePickers = this.pickerQueryList.toArray();
+    this.cdr.detectChanges();
   }
 
   ngOnInit(): void {
@@ -100,7 +108,15 @@ export class EditarDialogComponent implements OnInit {
     if (control.errors['required']) {
       errors.push('Este campo es requerido.');
     }
-    // Agrega otros mensajes de error según los validadores que uses
+    if (control.errors['minlength']) {
+      errors.push(`Debe tener al menos ${control.errors['minlength'].requiredLength} caracteres.`);
+    }
+    if (control.errors['maxlength']) {
+      errors.push(`No puede tener más de ${control.errors['maxlength'].requiredLength} caracteres.`);
+    }
+    if (control.errors['pattern']) {
+      errors.push('El formato no es válido.');
+    }
     return errors;
   }
 

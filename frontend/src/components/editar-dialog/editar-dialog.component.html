@@ -9,9 +9,9 @@
             <mat-label>{{ campo.etiqueta }}</mat-label>
 
             <!-- Campo de fecha -->
-            <input *ngIf="campo.tipo === 'date'" matInput [matDatepicker]="picker" [formControlName]="campo.nombre" />
-            <mat-datepicker-toggle matSuffix *ngIf="campo.tipo === 'date'" [for]="picker"></mat-datepicker-toggle>
-            <mat-datepicker #picker *ngIf="campo.tipo === 'date'"></mat-datepicker>
+            <input *ngIf="campo.tipo === 'date'" matInput [matDatepicker]="pickeri" [formControlName]="campo.nombre" />
+            <mat-datepicker-toggle *ngIf="campo.tipo === 'date'" matSuffix [for]="pickeri"></mat-datepicker-toggle>
+            <mat-datepicker #pickeri="matDatepicker"></mat-datepicker>
 
             <!-- Campo de lista -->
             <mat-select *ngIf="campo.tipo === 'list'" [formControlName]="campo.nombre">

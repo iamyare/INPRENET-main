@@ -3,7 +3,7 @@
 </form>
 
 <div style="text-align: center;">
-  <button mat-raised-button color="primary" style="color: white; margin: 1% 0 1% 0" [disabled]="form.invalid"
+  <button mat-raised-button color="primary" style="color: white; margin: 1% 0 1% 0" [disabled]="!formHistPag.valid"
     (click)="guardar()">
     Guardar
   </button>

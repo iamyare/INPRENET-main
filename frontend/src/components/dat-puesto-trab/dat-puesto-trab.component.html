@@ -16,8 +16,8 @@
               <mat-label>Centro de Trabajo</mat-label>
               <mat-select (selectionChange)="onDatosDatosPuestTrab()" matNativeControl
                 formControlName="idCentroTrabajo">
-                <mat-option *ngFor="let p of centrosTrabajo" [value]="p.label">
-                  {{p.value}}
+                <mat-option *ngFor="let p of centrosTrabajo" [value]="p.value">
+                  {{p.label}}
                 </mat-option>
               </mat-select>
             </mat-form-field>

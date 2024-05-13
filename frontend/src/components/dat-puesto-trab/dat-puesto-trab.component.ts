@@ -7,8 +7,7 @@ import { FormStateService } from 'src/app/services/form-state.service';
 export function generatePuestoTrabFormGroup(datos?: any): FormGroup {
   return new FormGroup({
     idCentroTrabajo: new FormControl(datos?.idCentroTrabajo, [
-      Validators.required,
-      Validators.min(1),
+      Validators.required
     ]),
     cargo: new FormControl(datos?.cargo, [
       Validators.required,
@@ -21,6 +20,7 @@ export function generatePuestoTrabFormGroup(datos?: any): FormGroup {
     salarioBase: new FormControl(datos?.salarioBase, [
       Validators.required,
       Validators.min(0),
+      Validators.pattern(/^[0-9]+(\.[0-9]{1,2})?$/)
     ]),
     fechaIngreso: new FormControl(datos?.fechaIngreso, [
       Validators.required,

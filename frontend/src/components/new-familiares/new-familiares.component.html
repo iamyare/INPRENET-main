@@ -85,7 +85,7 @@
       </button>
     </div>
   </div>
-  <button mat-button color="primary" (click)="guardarFamiliares()" style="margin: 16px;">
+  <button mat-button color="primary" (click)="guardarFamiliares()" [disabled]="!formParent.valid" style="margin: 16px;">
     <mat-icon>save</mat-icon> Guardar Todos
   </button>
 </div>

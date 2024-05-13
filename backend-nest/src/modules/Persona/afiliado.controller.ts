@@ -246,6 +246,23 @@ export class AfiliadoController {
     }
   }
 
+  @Get('/cuentas/:dni')
+  async buscarCuentasPorDNI(@Param('dni') dni: string) {
+    try {
+      const resultado =
+        await this.afiliadoService.buscarCuentasPorDNI(dni);
+      return resultado;
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw error;
+      } else {
+        throw new NotFoundException(
+          `No se pudo procesar la solicitud para el DNI ${dni}`,
+        );
+      }
+    }
+  }
+
   @Get('/getAllReferenciasPersonales/:dni')
   async getAllReferenciasPersonales(@Param("dni") dni: string) {
     try {

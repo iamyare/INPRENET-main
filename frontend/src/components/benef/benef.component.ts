@@ -45,30 +45,32 @@ export class BenefComponent {
   }
 
   get porcentajes() {
-    return this.formParent.get('porcentaje') as FormArray;
+    return this.formParent.get('beneficiario') as FormArray;
   }
 
+  validateTotalPercentage() {
+
+  }
   suma100Validator(): any {
     return (control: FormControl) => {
       const valor = control.value;
-      if (valor !== null && isNaN(valor) === false && (valor < 0 || valor > 100)) {
+      const beneficiarioArray = this.formParent.get('beneficiario') as FormArray;
+      const totalPercentage = beneficiarioArray.controls.reduce((total, control) => {
+        return total + (control.get('beneficiario')?.value || 0);
+      }, 0);
+
+      /* this.formParent.setErrors({ 'invalidPercentage': true }); */
+      console.log(this.formParent);
+      if (totalPercentage !== 100) {
         return { sumaNo100: true };
+
+        this.formParent.setErrors({ 'invalidPercentage': true });
+      } else {
+        return { sumaNo100: false };
+        this.formParent.setErrors({ 'invalidPercentage': false });
       }
-      return null;
     };
   }
-
-  actualizarPorcentajes(indice: number, nuevoValor: any) {
-    const diferencia = nuevoValor.target.value - (this.porcentajes.at(indice).value || 0);
-    const otrosPorcentajes = this.porcentajes.controls.filter((control, i) => i !== indice);
-    const porcentajeDistribuir = diferencia / otrosPorcentajes.length;
-
-    otrosPorcentajes.forEach(control => {
-      const valorActual = control.value || 0;
-      control.setValue(valorActual + porcentajeDistribuir);
-    });
-  }
-
   private initForm() {
     let existingForm = this.formStateService.getForm(this.formKey);
     if (existingForm) {
@@ -93,11 +95,13 @@ export class BenefComponent {
   }
 
   agregarBen(datos?: any): void {
+    console.log(this.formParent);
     const beneficiarios = this.formParent.get('beneficiario') as FormArray;
+
     if (datos) {
       this.labelbutton = datos.Arch ? datos.Arch.name : "Archivo de identificación (beneficiario)";
       beneficiarios.push(this.initFormBeneficiario(datos.benfGroup, datos.DatosBac, datos.Arch, datos.Arch ? datos.Arch.name : undefined));
-
+      this.validateTotalPercentage();
     } else {
       this.labelbutton = "Archivo de identificación (beneficiario)";
       beneficiarios.push(this.initFormBeneficiario());

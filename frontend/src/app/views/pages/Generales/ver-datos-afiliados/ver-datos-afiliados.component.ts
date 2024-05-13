@@ -20,13 +20,14 @@ export class VerDatosAfiliadosComponent implements OnInit {
   datosBeneficiario: boolean = false; datosF: boolean = false;
   datosFamiliares: boolean = false; ColegiosMagisteriales: boolean = false;
   datosA = false;
+  cuentas = false;
 
   constructor(private svcAfiliado: AfiliadoService,
     private toastr: ToastrService,
     private dialog: MatDialog) { }
   ngOnInit(): void {
     this.myFormFields = [
-      { type: 'text', label: 'DNI del afiliado', name: 'dni', validations: [Validators.required, Validators.minLength(13), Validators.maxLength(14)], display: true,value: '1234567890123' },
+      { type: 'text', label: 'DNI del afiliado', name: 'dni', validations: [Validators.required, Validators.minLength(13), Validators.maxLength(14)], display: true, value: '' },
     ];
 
     this.myColumns = [
@@ -66,6 +67,7 @@ export class VerDatosAfiliadosComponent implements OnInit {
     this.datosBeneficiario = false
     this.datosF = false
     this.datosA = false
+    this.cuentas = false
     this.ColegiosMagisteriales = false
   }
   setEstadoDatFam(e: any) {
@@ -77,6 +79,7 @@ export class VerDatosAfiliadosComponent implements OnInit {
     this.datosBeneficiario = false
     this.datosF = false
     this.datosA = false
+    this.cuentas = false
     this.ColegiosMagisteriales = false
   }
   setEstadoDatCentTrab(e: any) {
@@ -88,6 +91,7 @@ export class VerDatosAfiliadosComponent implements OnInit {
     this.datosBeneficiario = false
     this.datosF = false
     this.datosA = false
+    this.cuentas = false
     this.ColegiosMagisteriales = false
   }
   setDatosHS(datosHistSal: any) {
@@ -99,6 +103,7 @@ export class VerDatosAfiliadosComponent implements OnInit {
     this.datosBeneficiario = false
     this.datosF = false
     this.datosA = false
+    this.cuentas = false
     this.ColegiosMagisteriales = false
   }
   setDatosReferenc(datosHistSal: any) {
@@ -110,6 +115,7 @@ export class VerDatosAfiliadosComponent implements OnInit {
     this.datosBeneficiario = false
     this.datosF = false
     this.datosA = false
+    this.cuentas = false
     this.ColegiosMagisteriales = false
   }
   setDatosBenef(datosHistSal: any) {
@@ -121,6 +127,7 @@ export class VerDatosAfiliadosComponent implements OnInit {
     this.datosBeneficiario = true
     this.datosF = false
     this.datosA = false
+    this.cuentas = false
     this.ColegiosMagisteriales = false
   }
   setDatosF(datosHistSal: any) {
@@ -132,6 +139,7 @@ export class VerDatosAfiliadosComponent implements OnInit {
     this.datosBeneficiario = false
     this.datosF = true
     this.datosA = false
+    this.cuentas = false
     this.ColegiosMagisteriales = false
   }
   setDatosA(datosHistSal: any) {
@@ -143,6 +151,7 @@ export class VerDatosAfiliadosComponent implements OnInit {
     this.datosBeneficiario = false
     this.datosF = false
     this.datosA = true
+    this.cuentas = false
     this.ColegiosMagisteriales = false
   }
   setDatosAColegiosMag(datosHistSal: any) {
@@ -154,7 +163,20 @@ export class VerDatosAfiliadosComponent implements OnInit {
     this.datosBeneficiario = false
     this.datosF = false
     this.datosA = false
+    this.cuentas = false
     this.ColegiosMagisteriales = true
+  }
+  setDatosCuentas(datosHistSal: any) {
+    this.datosFamiliares = false
+    this.DatosGenerales = false
+    this.DatosPuestoTrab = false
+    this.DatosHS = false
+    this.referenc = false
+    this.datosBeneficiario = false
+    this.datosF = false
+    this.datosA = false
+    this.ColegiosMagisteriales = false
+    this.cuentas = true
   }
 
   convertirFechaInputs = convertirFechaInputs

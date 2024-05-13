@@ -59,6 +59,7 @@ import { NavDefaultComponent } from '../pages/Centros Privados/nav-default/nav-d
 import { EditFamiliaresComponent } from '../pages/Generales/edit-familiares/edit-familiares.component';
 import { NewFamiliaresComponent } from '@docs-components/new-familiares/new-familiares.component';
 import { VerDatosAfiliadosComponent } from '../pages/Generales/ver-datos-afiliados/ver-datos-afiliados.component';
+import { VerCuentasPersonasComponent } from '../pages/Generales/ver-cuentas-personas/ver-cuentas-personas.component';
 
 @NgModule({
   imports: [
@@ -121,7 +122,8 @@ import { VerDatosAfiliadosComponent } from '../pages/Generales/ver-datos-afiliad
     EditReferPersonalesComponent,
     EditColegiosMagisterialesComponent,
     EditFamiliaresComponent,
-    VerDatosAfiliadosComponent
+    VerDatosAfiliadosComponent,
+    VerCuentasPersonasComponent
   ]
 })
 export class ThemeModule {

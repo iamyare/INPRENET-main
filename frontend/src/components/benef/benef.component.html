@@ -12,23 +12,22 @@
         <div [formGroupName]="formChild" class="row">
           <app-dat-generales-afiliado groupName="datosBeneficiario"
             (newDatBenChange)="prueba($event, i); onDatosBenChange()"></app-dat-generales-afiliado>
-
-          <!-- componente aparte de Beneficio -->
-          <!-- <app-beneficio groupName="porcentaje" style="margin: 16px;"></app-beneficio> -->
-
         </div>
+
         <fieldset [formGroupName]="formChild" class="fieldset-container">
           <mat-form-field class="example-full-width; inputs" appearance="outline">
             <mat-label>Porcentaje de beneficio</mat-label>
-            <input matInput formControlName="porcentaje" type="number" (input)="actualizarPorcentajes(i, $event)">
+            <input matInput formControlName="porcentaje" type="number">
           </mat-form-field>
         </fieldset>
       </div>
-      <div *ngIf="formParent.get('porcentaje')?.errors?.['sumaNo100'] && formParent.get('porcentaje')?.touched">
-        El porcentaje debe ser un valor entre 0 y 100.
-      </div>
     </div>
   </form>
+
+  <div *ngIf="formParent.errors" class="error-message">
+    La suma de los porcentajes debe ser exactamente 100.
+  </div>
+
 
   <div class="row" style="text-align: center;  margin: 1%;">
     <div class="col-md-6">

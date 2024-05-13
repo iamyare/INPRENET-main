@@ -39,6 +39,7 @@ import { BenefComponent } from './benef/benef.component';
 import { ColMagisterialesComponent } from './col-magisteriales/col-magisteriales.component';
 import { BotonarchivosComponent } from './botonarchivos/botonarchivos.component';
 import { ProgressbarComponent } from './progressbar/progressbar.component';
+import { ProgressbarVerdatosComponent } from './progressbar-verdatos/progressbar-verdatos.component';
 import { ProgressplanillComponent } from './progressplanill/progressplanill.component';
 import { WebcamModule } from 'ngx-webcam';
 import { BeneficioComponent } from './beneficio/beneficio.component';
@@ -59,12 +60,15 @@ import { AgregarColMagisComponent } from './agregar-col-magis/agregar-col-magis.
 import { CamaraComponent } from './camara/camara.component';
 import { NewFamiliaresComponent } from './new-familiares/new-familiares.component';
 import { EditFamiliaresCompComponent } from './edit-familiares-comp/edit-familiares-comp.component';
+import { AgregarCuentasComponent } from './agregar-cuentas/agregar-cuentas.component';
+import { CuentaBancariaCompComponent } from './cuenta-bancaria-comp/cuenta-bancaria-comp.component';
 
 @NgModule({
   declarations: [
     BeneficioComponent,
     ProgressplanillComponent,
     ProgressbarComponent,
+    ProgressbarVerdatosComponent,
     DatGeneralesAfiliadoComponent,
     DatPuestoTrabComponent,
     DatBancComponent,
@@ -88,11 +92,14 @@ import { EditFamiliaresCompComponent } from './edit-familiares-comp/edit-familia
     AgregarReferenciasPersonalesComponent,
     CamaraComponent,
     NewFamiliaresComponent,
-    EditFamiliaresCompComponent
+    EditFamiliaresCompComponent,
+    AgregarCuentasComponent,
+    CuentaBancariaCompComponent
   ],
   exports: [
     ProgressbarComponent,
     ProgressplanillComponent,
+    ProgressbarVerdatosComponent,
     BeneficioComponent,
     DatGeneralesAfiliadoComponent,
     DatPuestoTrabComponent,
@@ -116,7 +123,9 @@ import { EditFamiliaresCompComponent } from './edit-familiares-comp/edit-familia
     AgregarReferenciasPersonalesComponent,
     CamaraComponent,
     NewFamiliaresComponent,
-    EditFamiliaresCompComponent
+    EditFamiliaresCompComponent,
+    AgregarCuentasComponent,
+    CuentaBancariaCompComponent
   ],
   imports: [
     WebcamModule,

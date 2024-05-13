@@ -1,0 +1,17 @@
+<div id="texto" style="text-align: center;" *ngIf="filas.length == 0">
+    <h2 class="anaranjado desapareciendo">No se encuentra ningún cuenta</h2>
+</div>
+
+<button mat-raised-button color="primary" style="color: white; margin: 1% 0 1% 0" (click)="AgregarBeneficiario()">
+    Agregar cuenta
+</button>
+
+<div *ngIf="filas.length != 0 " style="background-color: white; border-radius: 10px; padding: 20px">
+    <app-dynamic-table style="width: 100%" titulo="Editar Cuentas" subtitulo="Completa la información correspondiente"
+        [columns]="myColumns" [data]="filas" [getData]="getFilas"
+        (ejecutarFuncionAsincronaEvent)="ejecutarFuncionAsincronaDesdeOtroComponente($event)"
+        [nombreEncabezadoUno]="'Acciones'" [nombreEncabezadoDos]="'Acciones'" [mostrarBotonUno]="true"
+        [mostrarBotonDos]="true" [etiquetaBotonUno]="'Activar'" (accionBotonUno)="manejarAccionUno($event)"
+        [etiquetaBotonDos]="'Desactivar'" (accionBotonDos)="manejarAccionDos($event)">
+    </app-dynamic-table>
+</div>

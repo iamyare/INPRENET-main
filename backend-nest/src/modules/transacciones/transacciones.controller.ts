@@ -4,6 +4,7 @@ import { TransaccionesService } from './transacciones.service';
 import { ApiTags } from '@nestjs/swagger';
 import { CrearMovimientoDTO } from './dto/voucher.dto';
 import { NET_PROFESIONES } from './entities/net_profesiones.entity';
+import { crearCuentaDTO } from './dto/cuenta-transaccioens.dto';
 
 @ApiTags('transacciones')
 @Controller('transacciones')
@@ -11,29 +12,49 @@ export class TransaccionesController {
   constructor(private readonly transaccionesService: TransaccionesService) { }
 
   @Get('profesiones')
-async findAllProfesiones(): Promise<any> {
-  return await this.transaccionesService.findAllProfesiones();
-}
+  async findAllProfesiones(): Promise<any> {
+    return await this.transaccionesService.findAllProfesiones();
+  }
 
   @Get('voucher/:dni')
-    obtenerVouchersDeMovimientos(@Param('dni') dni: string): Promise<any> {
-        return this.transaccionesService.obtenerVoucherDeMovimientos(dni);
-    }
+  obtenerVouchersDeMovimientos(@Param('dni') dni: string): Promise<any> {
+    return this.transaccionesService.obtenerVoucherDeMovimientos(dni);
+  }
 
-    @Get('voucherEspecifico/:dni/:idMovimientoCuenta')
-    obtenerVoucherMovimientoEspecifico(@Param('dni') dni: string, @Param('idMovimientoCuenta') idMovimientoCuenta: number): Promise<any> {
-        return this.transaccionesService.obtenerVoucherDeMovimientoEspecifico(dni, idMovimientoCuenta);
-    }
+  @Get('voucherEspecifico/:dni/:idMovimientoCuenta')
+  obtenerVoucherMovimientoEspecifico(@Param('dni') dni: string, @Param('idMovimientoCuenta') idMovimientoCuenta: number): Promise<any> {
+    return this.transaccionesService.obtenerVoucherDeMovimientoEspecifico(dni, idMovimientoCuenta);
+  }
 
-    @Post('crear-movimiento')
-    crearMovimiento(@Body() crearMovimientoDto: CrearMovimientoDTO) {
-      return this.transaccionesService.crearMovimiento(crearMovimientoDto);
+  @Post('crear-movimiento')
+  crearMovimiento(@Body() crearMovimientoDto: CrearMovimientoDTO) {
+    return this.transaccionesService.crearMovimiento(crearMovimientoDto);
+  }
+  @Post('crear-cuenta/:idPersona')
+  crearCuenta(@Param("idPersona") idPersona: number, @Body() crearCuentaDto: [crearCuentaDTO]) {
+    return this.transaccionesService.crearCuenta(idPersona, crearCuentaDto);
   }
 
   @Get('/tipos-de-cuenta/:dni')
   async obtenerTiposDeCuentaPorDNI(@Param('dni') dni: string) {
     try {
       const tiposDeCuenta = await this.transaccionesService.obtenerTiposDeCuentaPorDNI(dni);
+      return {
+        statusCode: HttpStatus.OK,
+        message: 'Tipos de cuenta obtenidos con éxito',
+        data: tiposDeCuenta,
+      };
+    } catch (error) {
+      throw new HttpException({
+        statusCode: HttpStatus.BAD_REQUEST,
+        message: error.message || 'Ocurrió un error al obtener los tipos de cuenta',
+      }, HttpStatus.BAD_REQUEST);
+    }
+  }
+  @Get('/tipos-de-cuenta/')
+  async obtenerTiposDeCuenta() {
+    try {
+      const tiposDeCuenta = await this.transaccionesService.obtenerTiposDeCuenta();
       return {
         statusCode: HttpStatus.OK,
         message: 'Tipos de cuenta obtenidos con éxito',
@@ -98,5 +119,5 @@ async findAllProfesiones(): Promise<any> {
     return this.transaccionesService.remove(+id);
   }
 
-  
+
 }

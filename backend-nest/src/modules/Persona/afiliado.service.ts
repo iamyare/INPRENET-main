@@ -720,6 +720,37 @@ export class AfiliadoService {
       }
     };
   }
+
+  async buscarCuentasPorDNI(dni: string): Promise<any> {
+    const persona = await this.personaRepository.findOne({
+      where: { dni },
+      relations: ["cuentas", "cuentas.movimientos", "cuentas.tipoCuenta", "estadoPersona"] // Asegúrate de cargar las cuentas y sus movimientos
+    });
+
+    if (!persona) {
+      throw new NotFoundException(`Persona con DNI ${dni} no encontrada`);
+    }
+
+    if (['FALLECIDO', 'INACTIVO'].includes(persona.estadoPersona?.Descripcion.toUpperCase())) {
+      return {
+        status: 'error',
+        message: `La persona está ${persona.estadoPersona.Descripcion.toLowerCase()}.`,
+        data: { persona: null, movimientos: [] }
+      };
+    }
+
+    const movimientos = persona.cuentas.flatMap(cuenta => cuenta.movimientos); // Aplana los movimientos de todas las cuentas
+
+    return {
+      status: 'success',
+      message: 'Datos y movimientos de la persona encontrados con éxito',
+      data: {
+        persona,
+        movimientos // Devuelve los movimientos aplastados de todas las cuentas
+      }
+    };
+  }
+
   async getAllReferenciasPersonales(dni: string): Promise<any> {
     const personas = await this.personaRepository.find({
       where: { dni: dni },

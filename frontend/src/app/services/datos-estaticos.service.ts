@@ -17,15 +17,16 @@ export class DatosEstaticosService {
   DatosBancBen: any = [];
   Bancos: any = [];
   Instituciones: any = [];
-  tipoIdent : any = [];
+  tipoIdent: any = [];
+  tipoCuenta: any = [];
   profesiones: any = [];
-  colegiosMagisteriales : any = []
-  centrosTrabajo : any = []
+  colegiosMagisteriales: any = []
+  centrosTrabajo: any = []
 
   constructor(
-    private colegiosMagSVC: ColegiosMagisterialesService , private bancosService: BancosService,
-    private centrosTrabSVC:CentroTrabajoService,
-    private SVCInstituciones: InstitucionesService, private afiliadoService: AfiliadoService, public direccionSer: DireccionService, private tipoIdentificacionService:TipoIdentificacionService,
+    private colegiosMagSVC: ColegiosMagisterialesService, private bancosService: BancosService,
+    private centrosTrabSVC: CentroTrabajoService,
+    private SVCInstituciones: InstitucionesService, private afiliadoService: AfiliadoService, public direccionSer: DireccionService, private tipoIdentificacionService: TipoIdentificacionService,
     private centroTrabajoService: CentroTrabajoService,
   ) {
     /* this.direccionSer.getAllCiudades().subscribe((res: any) => {});
@@ -34,6 +35,7 @@ export class DatosEstaticosService {
     this.getInstituciones();
     this.getNacionalidad();
     this.gettipoIdent();
+    this.getTipoCuenta();
     this.getBancos();
     this.getColegiosMagisteriales();
     this.getAllCentrosTrabajo();
@@ -52,6 +54,17 @@ export class DatosEstaticosService {
 
     this.tipoIdent = mappedResponse;
     return this.tipoIdent;
+  }
+
+  async getTipoCuenta() {
+    const response = await this.afiliadoService.obtenerTiposCuentas().toPromise();
+    const mappedResponse = response.data.map((item: { NUMERO_CUENTA: any; DESCRIPCION: any; }) => ({
+      label: item.DESCRIPCION,
+      value: item.NUMERO_CUENTA
+    }));
+
+    this.tipoCuenta = mappedResponse;
+    return this.tipoCuenta;
   }
 
   async getAllCentrosTrabajo() {
@@ -77,16 +90,16 @@ export class DatosEstaticosService {
 
   async getProfesiones() {
     try {
-        const response = await this.centroTrabajoService.obtenerTodasLasProfesiones().toPromise() || [];
-        this.profesiones = response.map((profesion: any) => ({
-            label: profesion.descripcion,
-            value: profesion.idProfesion
-        }));
-        return this.profesiones;
+      const response = await this.centroTrabajoService.obtenerTodasLasProfesiones().toPromise() || [];
+      this.profesiones = response.map((profesion: any) => ({
+        label: profesion.descripcion,
+        value: profesion.idProfesion
+      }));
+      return this.profesiones;
     } catch (error) {
-        console.error('Error al obtener las profesiones', error);
-        this.profesiones = [];
-        return this.profesiones;
+      console.error('Error al obtener las profesiones', error);
+      this.profesiones = [];
+      return this.profesiones;
     }
   }
 
@@ -292,33 +305,33 @@ export class DatosEstaticosService {
   ];
 
   parentesco = [
-    {value: "ABUELA MATERNA", label: "Abuela Materna"},
-    {value: "ABUELA PATERNA", label: "Abuela Paterna"},
-    {value: "ABUELO MATERNO", label: "Abuelo Materno"},
-    {value: "ABUELO PATERNO", label: "Abuelo Paterno"},
-    {value: "CUÑADA", label: "Cuñada"},
-    {value: "CUÑADO", label: "Cuñado"},
-    {value: "ESPOSA", label: "Esposa"},
-    {value: "ESPOSO", label: "Esposo"},
-    {value: "HERMANA", label: "Hermana"},
-    {value: "HERMANO", label: "Hermano"},
-    {value: "HIJA", label: "Hija"},
-    {value: "HIJO", label: "Hijo"},
-    {value: "MADRE", label: "Madre"},
-    {value: "NIETA", label: "Nieta"},
-    {value: "NIETO", label: "Nieto"},
-    {value: "NUERA", label: "Nuera"},
-    {value: "PADRE", label: "Padre"},
-    {value: "PRIMA", label: "Prima"},
-    {value: "PRIMO", label: "Primo"},
-    {value: "SOBRINA", label: "Sobrina"},
-    {value: "SOBRINO", label: "Sobrino"},
-    {value: "SUEGRA", label: "Suegra"},
-    {value: "SUEGRO", label: "Suegro"},
-    {value: "TÍA MATERNA", label: "Tía Materna"},
-    {value: "TÍA PATERNA", label: "Tía Paterna"},
-    {value: "TÍO MATERNO", label: "Tío Materno"},
-    {value: "TÍO PATERNO", label: "Tío Paterno"},
-    {value: "YERNO", label: "Yerno"}
+    { value: "ABUELA MATERNA", label: "Abuela Materna" },
+    { value: "ABUELA PATERNA", label: "Abuela Paterna" },
+    { value: "ABUELO MATERNO", label: "Abuelo Materno" },
+    { value: "ABUELO PATERNO", label: "Abuelo Paterno" },
+    { value: "CUÑADA", label: "Cuñada" },
+    { value: "CUÑADO", label: "Cuñado" },
+    { value: "ESPOSA", label: "Esposa" },
+    { value: "ESPOSO", label: "Esposo" },
+    { value: "HERMANA", label: "Hermana" },
+    { value: "HERMANO", label: "Hermano" },
+    { value: "HIJA", label: "Hija" },
+    { value: "HIJO", label: "Hijo" },
+    { value: "MADRE", label: "Madre" },
+    { value: "NIETA", label: "Nieta" },
+    { value: "NIETO", label: "Nieto" },
+    { value: "NUERA", label: "Nuera" },
+    { value: "PADRE", label: "Padre" },
+    { value: "PRIMA", label: "Prima" },
+    { value: "PRIMO", label: "Primo" },
+    { value: "SOBRINA", label: "Sobrina" },
+    { value: "SOBRINO", label: "Sobrino" },
+    { value: "SUEGRA", label: "Suegra" },
+    { value: "SUEGRO", label: "Suegro" },
+    { value: "TÍA MATERNA", label: "Tía Materna" },
+    { value: "TÍA PATERNA", label: "Tía Paterna" },
+    { value: "TÍO MATERNO", label: "Tío Materno" },
+    { value: "TÍO PATERNO", label: "Tío Paterno" },
+    { value: "YERNO", label: "Yerno" }
   ]
 }

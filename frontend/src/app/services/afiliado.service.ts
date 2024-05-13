@@ -46,6 +46,16 @@ export class AfiliadoService {
     return this.http.get<any>(url);
   }
 
+  buscarCuentasPorDNI(dni: string): Observable<any> {
+    const url = `${environment.API_URL}/api/Persona/cuentas/${dni}`;
+    return this.http.get<any>(url);
+  }
+
+  obtenerTiposCuentas(): Observable<any> {
+    const url = `${environment.API_URL}/api/Transacciones/tipos-de-cuenta/`;
+    return this.http.get<any>(url);
+  }
+
   getAllAfiliados(): Observable<any | void> {
     const url = `${environment.API_URL}/api/Persona/Afiliado`;
     return this.http.get<any>(

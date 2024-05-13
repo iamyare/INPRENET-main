@@ -895,6 +895,7 @@ export class AfiliadoService {
 
     if (updateDto.primerNombre !== undefined) relacion.familiar.primer_nombre = updateDto.primerNombre;
     if (updateDto.segundoNombre !== undefined) relacion.familiar.segundo_nombre = updateDto.segundoNombre;
+    if (updateDto.tercerNombre !== undefined) relacion.familiar.tercer_nombre = updateDto.tercerNombre;
     if (updateDto.primerApellido !== undefined) relacion.familiar.primer_apellido = updateDto.primerApellido;
     if (updateDto.segundoApellido !== undefined) relacion.familiar.segundo_apellido = updateDto.segundoApellido;
 

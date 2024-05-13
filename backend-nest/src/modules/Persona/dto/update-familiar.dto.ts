@@ -22,6 +22,11 @@ export class UpdateFamiliarDTO {
   segundoApellido?: string;
 
   @IsOptional()
+  @IsString()
+  @MaxLength(40)
+  tercerNombre?: string;
+
+  @IsOptional()
   @IsDateString()
   fechaNacimiento?: string;
 

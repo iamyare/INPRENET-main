@@ -55,7 +55,7 @@ export class AfiliadoController {
     @UploadedFile() fotoPerfil: Express.Multer.File,
     @Body('encapsulatedDto') encapsulatedDtoStr: string
   ) {
-    console.log(encapsulatedDtoStr);
+    /* console.log(encapsulatedDtoStr); */
 
     try {
       // Convertir el string JSON a un objeto
@@ -73,7 +73,7 @@ export class AfiliadoController {
       // Creación del detalle de la persona
       const detallePersonaDto = {
         idPersona: persona.id_persona,
-        idTipoPersona: createPersonaDto.ID_TIPO_PERSONA,
+        idTipoPersona: 1,
         porcentaje: 0
       };
       const detallePersona = await this.afiliadoService.createDetallePersona(detallePersonaDto);
@@ -111,7 +111,7 @@ export class AfiliadoController {
             idPersona: nuevoBeneficiario.id_persona,
             idCausante: persona.id_persona,
             idCausantePadre: persona.id_persona,
-            idTipoPersona: personaReferente.id_tipo_persona,
+            idTipoPersona: 2,
             porcentaje: beneficiario.porcentaje
           };
           const detalle = await this.afiliadoService.createDetalleBeneficiario(detalleBeneficiario);

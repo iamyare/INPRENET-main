@@ -31,6 +31,10 @@ import { NET_RELACION_FAMILIAR } from './entities/net_relacion_familiar';
 import { UpdateFamiliarDTO } from './dto/update-familiar.dto';
 import { NuevoFamiliarDTO } from './dto/nuevo-familiar.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
+import { NetPersonaDTO } from './dto/create-persona.dto';
+import { CreateDetallePersonaDto } from './dto/create-detalle.dto';
+import { UpdateBeneficiarioDto } from './dto/update-beneficiario.dto';
+import { Net_Persona } from './entities/Net_Persona.entity';
 
 @ApiTags('Persona')
 @Controller('Persona')
@@ -150,6 +154,14 @@ export class AfiliadoController {
     }
   }
 
+
+  @Put('actualizarBeneficiario/:id')
+  async updatePersona(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() updateBeneficiarioDto: UpdateBeneficiarioDto,
+  ): Promise<Net_Persona> {
+    return this.afiliadoService.updateBeneficario(id, updateBeneficiarioDto);
+  }
 
 
   @Put('/actualizar-salario')

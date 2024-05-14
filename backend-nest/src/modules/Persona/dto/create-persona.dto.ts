@@ -33,7 +33,8 @@ export interface PersonaResponse {
 
 export class NetPersonaDTO {
     @IsInt()
-    id_tipo_identificacion: number;
+    @IsOptional()
+    id_tipo_identificacion?: number;
 
     @IsInt()
     id_pais: number;

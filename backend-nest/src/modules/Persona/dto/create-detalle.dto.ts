@@ -1,9 +1,10 @@
-import {IsNumber, Min} from 'class-validator';
+import {IsNumber, IsOptional, Min} from 'class-validator';
 
 export class CreateDetallePersonaDto {
     @IsNumber()
     @Min(1)
-    idPersona: number;
+    @IsOptional()
+    idPersona?: number;
 
     @IsNumber()
     @Min(1)

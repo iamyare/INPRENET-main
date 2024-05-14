@@ -30,6 +30,7 @@ import { UpdatePerfCentTrabDto } from './dto/update.perfAfilCentTrab.dto';
 import { UpdateReferenciaPersonalDTO } from './dto/update-referencia-personal.dto';
 import { UpdateFamiliarDTO } from './dto/update-familiar.dto';
 import { Sequelize, where } from 'sequelize';
+import { UpdateBeneficiarioDto } from './dto/update-beneficiario.dto';
 @Injectable()
 export class AfiliadoService {
 
@@ -88,7 +89,6 @@ export class AfiliadoService {
 
     @InjectRepository(NET_RELACION_FAMILIAR)
     private readonly relacionesFamiliaresRepository: Repository<NET_RELACION_FAMILIAR>
-
   ) { }
 
 
@@ -321,6 +321,23 @@ export class AfiliadoService {
 
     }
   }
+
+  async updateBeneficario(id: number, updatePersonaDto: UpdateBeneficiarioDto): Promise<Net_Persona> {
+    const persona = await this.personaRepository.findOneBy({ id_persona: id });
+    if (!persona) {
+      throw new NotFoundException(`Persona with ID ${id} not found`);
+    }
+
+    // Transformar la fecha a formato ISO 8601 si está presente
+    if (updatePersonaDto.fecha_nacimiento) {
+      updatePersonaDto.fecha_nacimiento = new Date(updatePersonaDto.fecha_nacimiento).toISOString().split('T')[0];
+    }
+
+    Object.assign(persona, updatePersonaDto);
+    return this.personaRepository.save(persona);
+  }
+  
+
   async updateSalarioBase(dni: string, idCentroTrabajo: number, salarioBase: number): Promise<void> {
 
     const perfil = await this.perfPersoCentTrabRepository
@@ -589,55 +606,72 @@ export class AfiliadoService {
   }
 
   async getAllBenDeAfil(dniAfil: string): Promise<any> {
-
     try {
-      const query = `
-      SELECT DISTINCT
-      "detA"."ID_PERSONA"
-      FROM NET_PERSONA "Afil"
-      FULL OUTER JOIN
-        NET_DETALLE_PERSONA "detA" ON "Afil"."ID_PERSONA" = "detA"."ID_PERSONA" 
-      INNER JOIN
-      NET_TIPO_PERSONA "tipoP" ON "tipoP"."ID_TIPO_PERSONA" = "detA"."ID_TIPO_PERSONA"
-      INNER JOIN
-      NET_ESTADO_PERSONA "estadoPers" ON "Afil"."ID_ESTADO_PERSONA" = "estadoPers"."CODIGO"
-    WHERE
-      "Afil"."DNI" = '${dniAfil}' AND
-      "tipoP"."TIPO_PERSONA" = 'AFILIADO'
-    `;
-
-      const beneficios = await this.entityManager.query(query);
-
-      const query1 = `
-        SELECT 
-        "Afil"."ID_PERSONA",
-        "Afil"."DNI",
-        "Afil"."PRIMER_NOMBRE",
-        "Afil"."SEGUNDO_APELLIDO",
-        "Afil"."TERCER_NOMBRE",
-        "Afil"."PRIMER_APELLIDO",
-        "Afil"."SEGUNDO_APELLIDO",
-        "Afil"."GENERO",
-        "Afil"."FECHA_NACIMIENTO",
-        "detA"."PORCENTAJE",
-        "tipoP"."TIPO_PERSONA"
-      FROM
-          "NET_DETALLE_PERSONA" "detA" INNER JOIN 
-          "NET_PERSONA" "Afil" ON "detA"."ID_PERSONA" = "Afil"."ID_PERSONA"
-          INNER JOIN
+        const query = `
+        SELECT DISTINCT
+        "detA"."ID_PERSONA"
+        FROM NET_PERSONA "Afil"
+        FULL OUTER JOIN
+          NET_DETALLE_PERSONA "detA" ON "Afil"."ID_PERSONA" = "detA"."ID_PERSONA" 
+        INNER JOIN
         NET_TIPO_PERSONA "tipoP" ON "tipoP"."ID_TIPO_PERSONA" = "detA"."ID_TIPO_PERSONA"
-      WHERE 
-          "detA"."ID_CAUSANTE_PADRE" = ${beneficios[0].ID_PERSONA} AND 
-          "tipoP"."TIPO_PERSONA" = 'BENEFICIARIO' 
-        `;
-      const beneficios2 = await this.entityManager.query(query1);
+        INNER JOIN
+        NET_ESTADO_PERSONA "estadoPers" ON "Afil"."ID_ESTADO_PERSONA" = "estadoPers"."CODIGO"
+      WHERE
+        "Afil"."DNI" = '${dniAfil}' AND
+        "tipoP"."TIPO_PERSONA" = 'AFILIADO'
+      `;
 
-      return this.normalizarDatos(beneficios2);
+        const beneficios = await this.entityManager.query(query);
+
+        if (!beneficios || beneficios.length === 0) {
+            throw new Error(`No se encontraron beneficios para el DNI: ${dniAfil}`);
+        }
+
+        const query1 = `
+        SELECT 
+        "detA"."ID_PERSONA",
+        "Afil"."DNI",
+        "Afil"."PRIMER_NOMBRE" AS "primerNombre",
+        "Afil"."SEGUNDO_NOMBRE" AS "segundoNombre",
+        "Afil"."TERCER_NOMBRE" AS "tercerNombre",
+        "Afil"."PRIMER_APELLIDO" AS "primerApellido",
+        "Afil"."SEGUNDO_APELLIDO" AS "segundoApellido",
+        "Afil"."GENERO" AS "genero",
+        "Afil"."SEXO" AS "sexo",
+        "Afil"."CANTIDAD_DEPENDIENTES" AS "cantidadDependientes",
+        "Afil"."REPRESENTACION" AS "representacion",
+        "Afil"."TELEFONO_1" AS "telefono1",
+        "Afil"."FECHA_NACIMIENTO" AS "fechaNacimiento",
+        "Afil"."DIRECCION_RESIDENCIA" AS "direccionResidencia",
+        "Afil"."ID_PAIS_NACIONALIDAD" AS "idPaisNacionalidad",
+        "Afil"."ID_MUNICIPIO_RESIDENCIA" AS "idMunicipioResidencia",
+        "Afil"."ID_ESTADO_PERSONA" AS "idEstadoPersona",
+        "detA"."PORCENTAJE" AS "porcentaje",
+        "tipoP"."TIPO_PERSONA" AS "tipoPersona"
+        FROM
+          "NET_DETALLE_PERSONA" "detA"
+        INNER JOIN 
+          "NET_PERSONA" "Afil" ON "detA"."ID_PERSONA" = "Afil"."ID_PERSONA"
+        INNER JOIN
+          NET_TIPO_PERSONA "tipoP" ON "tipoP"."ID_TIPO_PERSONA" = "detA"."ID_TIPO_PERSONA"
+        WHERE 
+          "detA"."ID_CAUSANTE_PADRE" = ${beneficios[0].ID_PERSONA} AND 
+          "tipoP"."TIPO_PERSONA" = 'BENEFICIARIO'
+        `;
+
+        const beneficios2 = await this.entityManager.query(query1);
+
+        // Retornamos los datos directamente sin normalización
+        return beneficios2;
     } catch (error) {
-      this.logger.error(`Error al consultar beneficios: ${error.message}`);
-      throw new Error(`Error al consultar beneficios: ${error.message}`);
+        this.logger.error(`Error al consultar beneficios: ${error.message}`);
+        throw new Error(`Error al consultar beneficios: ${error.message}`);
     }
-  }
+}
+
+
+
 
   normalizarDatos(data: any): PersonaResponse[] {
     const newList: PersonaResponse[] = []

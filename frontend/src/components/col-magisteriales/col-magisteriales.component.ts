@@ -49,11 +49,18 @@ export class ColMagisterialesComponent implements OnInit {
 
   ngOnInit(): void {
     this.initForm();
+    if (this.datos) {
+      if (this.datos.value.ColMags.length > 0) {
+        for (let i of this.datos.value.ColMags) {
+          this.agregarColMag(i)
+        }
+      }
+    }
   }
 
   ngOnDestroy() {
     if (!this.editing) {
-      this.formStateService.setForm(this.formKey, this.formParent);
+      /* this.formStateService.setForm(this.formKey, this.formParent); */
     }
   }
 
@@ -94,6 +101,34 @@ export class ColMagisterialesComponent implements OnInit {
     const colSingle = colParent.at(index).get(key) as FormControl;
     colSingle.setValidators(Validators.required);
     colSingle.updateValueAndValidity();
+  }
+
+
+  getErrors(i: number, fieldName: string): any {
+
+    if (this.formParent instanceof FormGroup) {
+      const controlesColMags = (this.formParent.get('ColMags') as FormGroup).controls;
+      const a = controlesColMags[i].get(fieldName)!.errors
+
+      let errors = []
+      if (a) {
+        if (a['required']) {
+          errors.push('Este campo es requerido.');
+        }
+        if (a['minlength']) {
+          errors.push(`Debe tener al menos ${a['minlength'].requiredLength} caracteres.`);
+        }
+        if (a['maxlength']) {
+          errors.push(`No puede tener más de ${a['maxlength'].requiredLength} caracteres.`);
+        }
+        if (a['pattern']) {
+          errors.push('El formato no es válido.');
+        }
+
+        return errors;
+      }
+    }
+
   }
 
 }

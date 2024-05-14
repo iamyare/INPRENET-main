@@ -35,16 +35,16 @@ export class AfilBancoComponent implements OnInit {
   public formParent: FormGroup = new FormGroup({});
   form = this.fb.group({
     DatosGenerales: generateAddressFormGroup(),
-    FotoPerfil: [''],
     DatosBacAfil: generateDatBancFormGroup(),
     Archivos: generateFormArchivo(),
+    FotoPerfil: [''],
     Arch: "",
   });
   formPuestTrab: any = new FormGroup({
     trabajo: new FormArray([], [Validators.required])
   });
-  formHistPag: FormGroup = this.fb.group({
-    banco: this.fb.array([])  // Esto asegura que siempre tienes una instancia de FormArray disponible
+  formHistPag: any = new FormGroup({
+    banco: new FormArray([], [Validators.required])  // Esto asegura que siempre tienes una instancia de FormArray disponible
   });
   formReferencias: any = new FormGroup({
     refpers: new FormArray([], [Validators.required])
@@ -53,7 +53,7 @@ export class AfilBancoComponent implements OnInit {
     beneficiario: new FormArray([], [Validators.required])
   });
   formDatosFamiliares: any = new FormGroup({
-    familiares: new FormArray([], [Validators.required])
+    familiar: new FormArray([], [Validators.required])
   });
   formColegiosMagisteriales: any = new FormGroup({
     ColMags: new FormArray([], [Validators.required])
@@ -63,12 +63,12 @@ export class AfilBancoComponent implements OnInit {
   DatosBancBen: any = [];
 
   constructor(private fb: FormBuilder, private formStateService: FormStateService, private afilService: AfiliadoService) {
-    this.formPuestTrab = this.fb.group({
+    /* this.formPuestTrab = this.fb.group({
       trabajo: this.fb.array([], Validators.required)
-    });
-    this.formHistPag = this.fb.group({
+    }); */
+    /* this.formHistPag = this.fb.group({
       banco: this.fb.array([])
-    });
+    }); */
   }
 
   ngOnInit(): void {
@@ -81,7 +81,7 @@ export class AfilBancoComponent implements OnInit {
 
   handleImageCaptured(image: string) {
     this.form.get('FotoPerfil')?.setValue(image);
-}
+  }
 
   // Manejan el control del progreso de los datos
   setEstadoDatGen(e: any) {
@@ -185,21 +185,6 @@ export class AfilBancoComponent implements OnInit {
   }
 
   // Manejan la informacion de los formularios
-  setDatosPuetTrab1(datosPuestTrab: any) {
-    const trabajoArray = this.fb.array(datosPuestTrab.trabajo || [], Validators.required);
-    this.formPuestTrab.setControl('trabajo', trabajoArray);
-  }
-
-  setHistSal(datosHistSal: any) {
-    const bancosArray = this.fb.array(
-      (datosHistSal.banco || []).map((banco:any) => this.fb.group({
-        idBanco: [banco.idBanco, Validators.required],
-        numCuenta: [banco.numCuenta, Validators.required]
-      }))
-    );
-    this.formHistPag.setControl('banco', bancosArray);
-  }
-
   setDatosColegiosMag(datosColegiosMag: any) {
     const formArray = this.formColegiosMagisteriales.get('ColMags') as FormArray;
     formArray.clear();
@@ -209,12 +194,23 @@ export class AfilBancoComponent implements OnInit {
       }));
     });
   }
+
   setDatosRefPer(datosRefPer: any) {
     this.formReferencias = datosRefPer
   }
+
   setDatosBen(DatosBancBen: any) {
     this.formBeneficiarios = DatosBancBen
   }
+
+  setHistSal(datosHistSal: any) {
+    this.formHistPag = datosHistSal
+  }
+
+  setDatosPuetTrab1(datosPuestTrab: any) {
+    this.formPuestTrab = datosPuestTrab
+  }
+
   setDatosFamiliares(datosFamiliares: any) {
     this.formDatosFamiliares = datosFamiliares
   }
@@ -245,53 +241,53 @@ export class AfilBancoComponent implements OnInit {
     return this.labelBoton1
   }
 
-enviar() {
-  const formData = new FormData();
-  const encapsulatedDto = {
+  enviar() {
+    const formData = new FormData();
+    const encapsulatedDto = {
       datosGenerales: this.form.get('DatosGenerales')?.value || {},
       bancos: this.formHistPag.value.banco || [],
       referenciasPersonales: this.formReferencias.value.refpers || [],
       beneficiarios: this.formBeneficiarios.value.beneficiario.map((ben: any) => {
-          const { Arch, Archivos, DatosBac, beneficiario, ...resto } = ben;
-          return resto;
+        const { Arch, Archivos, DatosBac, beneficiario, ...resto } = ben;
+        return resto;
       }),
       centrosTrabajo: this.formPuestTrab.value.trabajo || [],
       colegiosMagisteriales: this.formColegiosMagisteriales.value.ColMags || [],
-      familiares: this.formDatosFamiliares.value.familiares || []
-  };
+      familiar: this.formDatosFamiliares.value.familiar || []
+    };
 
-  formData.append('encapsulatedDto', JSON.stringify(encapsulatedDto));
+    formData.append('encapsulatedDto', JSON.stringify(encapsulatedDto));
 
-  const fotoPerfilBase64 = this.form.get('FotoPerfil')?.value;
-  if (fotoPerfilBase64) {
+    const fotoPerfilBase64 = this.form.get('FotoPerfil')?.value;
+    if (fotoPerfilBase64) {
       const fotoBlob = this.dataURLToBlob(fotoPerfilBase64);
       formData.append('foto_perfil', fotoBlob, 'perfil.jpg');
-  }
+    }
 
-  // Log para ver qué contiene el FormData antes de enviar
-  formData.forEach((value, key) => {
+    // Log para ver qué contiene el FormData antes de enviar
+    formData.forEach((value, key) => {
       console.log(`Key ${key}:`, value);
-  });
+    });
 
-  /* this.afilService.createPersonaWithDetailsAndWorkCenters(formData).subscribe(
+    /*  
+    this.afilService.createPersonaWithDetailsAndWorkCenters(formData).subscribe(
       response => {
-          console.log('Datos enviados con éxito:', response);
+        console.log('Datos enviados con éxito:', response);
       },
       error => {
-          console.error('Error al enviar los datos:', error);
+        console.error('Error al enviar los datos:', error);
       }
-  ); */
-}
+    ); */
+  }
 
   dataURLToBlob(dataURL: string): Blob {
     const byteString = atob(dataURL.split(',')[1]);
     const mimeString = dataURL.split(',')[0].split(':')[1].split(';')[0];
     const buffer = new Uint8Array(byteString.length);
     for (let i = 0; i < byteString.length; i++) {
-        buffer[i] = byteString.charCodeAt(i);
+      buffer[i] = byteString.charCodeAt(i);
     }
-    return new Blob([buffer], {type: mimeString});
-}
-
+    return new Blob([buffer], { type: mimeString });
+  }
 
 }

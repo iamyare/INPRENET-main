@@ -1,10 +1,11 @@
-import { Column, Entity, Index, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import { Check, Column, Entity, Index, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 import { Net_TipoPlanilla } from '../../tipo-planilla/entities/tipo-planilla.entity';
 import { Net_Detalle_Deduccion } from '../../detalle-deduccion/entities/detalle-deduccion.entity';
 import { Net_Detalle_Pago_Beneficio } from '../../detalle_beneficio/entities/net_detalle_pago_beneficio.entity';
 import { Net_Detalle_planilla_ingreso } from '../../Ingresos/detalle-plan-ingr/entities/net_detalle_plani_ing.entity';
 
 @Entity({ name: 'NET_PLANILLA' })
+@Check(`estado IN ('ACTIVA', 'CERRADA', 'PAGADA')`)
 export class Net_Planilla {
 
     @PrimaryGeneratedColumn({ type: 'int', name: 'ID_PLANILLA', primaryKeyConstraintName: 'PK_id_plan_Plan' })
@@ -30,10 +31,10 @@ export class Net_Planilla {
     periodoInicio: string;
 
     @Column('varchar2', { nullable: false, name: 'PERIODO_FINALIZACION' })
-    periodoFinalizacion: string; 
+    periodoFinalizacion: string;
 
-    @ManyToOne(() => Net_TipoPlanilla, tipoPlanilla => tipoPlanilla.planilla,  { cascade: true })
-    @JoinColumn({ name: 'ID_TIPO_PLANILLA', foreignKeyConstraintName:"FK_ID_TIPO_PLANILLA_PLAN" })
+    @ManyToOne(() => Net_TipoPlanilla, tipoPlanilla => tipoPlanilla.planilla, { cascade: true })
+    @JoinColumn({ name: 'ID_TIPO_PLANILLA', foreignKeyConstraintName: "FK_ID_TIPO_PLANILLA_PLAN" })
     tipoPlanilla: Net_TipoPlanilla;
 
     @OneToMany(() => Net_Detalle_Deduccion, detalleDeduccion => detalleDeduccion.planilla)

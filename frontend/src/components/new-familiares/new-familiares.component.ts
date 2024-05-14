@@ -5,6 +5,19 @@ import { FormBuilder, FormGroup, Validators, FormArray, FormControl } from '@ang
 import { DatePipe } from '@angular/common';
 import { AfiliadoService } from 'src/app/services/afiliado.service';
 import { FormStateService } from 'src/app/services/form-state.service';
+import { DatosEstaticosService } from 'src/app/services/datos-estaticos.service';
+
+export function generateFamiliaresFormGroup(datos?: any): FormGroup {
+  return new FormGroup({
+    primerNombre: new FormControl(datos.primerNombre || '', [Validators.required, Validators.maxLength(40)]),
+    segundoNombre: new FormControl(datos.segundoNombre || '', [Validators.maxLength(40)]),
+    primerApellido: new FormControl(datos.primerApellido || '', [Validators.required, Validators.maxLength(40)]),
+    segundoApellido: new FormControl(datos.segundoApellido || '', [Validators.maxLength(40)]),
+    dni: new FormControl(datos.dni || '', [Validators.required, Validators.pattern(/^[0-9]{13}$|^[0-9]{4}-[0-9]{4}-[0-9]{5}$/), Validators.maxLength(15)]),
+    fechaNacimiento: new FormControl(datos.fechaNacimiento || '', Validators.required),
+    parentesco: new FormControl(datos.parentesco || '', Validators.required)
+  });
+}
 
 @Component({
   selector: 'app-new-familiares',
@@ -12,43 +25,18 @@ import { FormStateService } from 'src/app/services/form-state.service';
   styleUrls: ['./new-familiares.component.scss'],
 })
 export class NewFamiliaresComponent implements OnInit {
+  public formParent: FormGroup = new FormGroup({});
   private formKey = 'FormFamiliar';
-  public formParent: FormGroup;
+  parentesco: any;
 
   @Input() datos: any;
   @Output() newDatosFamiliares = new EventEmitter<any>();
   @Input() dniPersona!: string;
 
-  parentesco = [
-    { value: "ABUELA MATERNA", label: "Abuela Materna" },
-    { value: "ABUELA PATERNA", label: "Abuela Paterna" },
-    { value: "ABUELO MATERNO", label: "Abuelo Materno" },
-    { value: "ABUELO PATERNO", label: "Abuelo Paterno" },
-    { value: "CUÑADA", label: "Cuñada" },
-    { value: "CUÑADO", label: "Cuñado" },
-    { value: "ESPOSA", label: "Esposa" },
-    { value: "ESPOSO", label: "Esposo" },
-    { value: "HERMANA", label: "Hermana" },
-    { value: "HERMANO", label: "Hermano" },
-    { value: "HIJA", label: "Hija" },
-    { value: "HIJO", label: "Hijo" },
-    { value: "MADRE", label: "Madre" },
-    { value: "NIETA", label: "Nieta" },
-    { value: "NIETO", label: "Nieto" },
-    { value: "NUERA", label: "Nuera" },
-    { value: "PADRE", label: "Padre" },
-    { value: "PRIMA", label: "Prima" },
-    { value: "PRIMO", label: "Primo" },
-    { value: "SOBRINA", label: "Sobrina" },
-    { value: "SOBRINO", label: "Sobrino" },
-    { value: "SUEGRO", label: "Suegro" },
-    { value: "SUEGRA", label: "Suegra" },
-    { value: "TÍA MATERNA", label: "Tía Materna" },
-    { value: "TÍA PATERNA", label: "Tía Paterna" },
-    { value: "TÍO MATERNO", label: "Tío Materno" },
-    { value: "TÍO PATERNO", label: "Tío Paterno" },
-    { value: "YERNO", label: "Yerno" }
-  ];
+  onDatosBenChange() {
+    const data = this.formParent
+    this.newDatosFamiliares.emit(data);
+  }
 
   constructor(
     private afiliadoService: AfiliadoService,
@@ -56,23 +44,20 @@ export class NewFamiliaresComponent implements OnInit {
     private formStateService: FormStateService,
     private fb: FormBuilder,
     private toastr: ToastrService,
+    private datosEstaticosService: DatosEstaticosService,
     @Optional() @Inject(MAT_DIALOG_DATA) public data: any,
     @Optional() private dialogRef?: MatDialogRef<NewFamiliaresComponent>
   ) {
-    this.formParent = this.fb.group({
-      familiar: this.fb.array([])
-    });
-    if (data && data.dniPersona) {
-      this.dniPersona = data.dniPersona;
-    }
   }
 
   ngOnInit(): void {
+    this.parentesco = this.datosEstaticosService.parentesco;
     this.initForm();
-    const familiarArray = this.formParent.get('familiar') as FormArray;
-    if (this.datos && this.datos.value && this.datos.value.familiar && this.datos.value.familiar.length > 0 && familiarArray.length === 0) {
-      for (const item of this.datos.value.familiar) {
-        this.agregarFamiliar(item);
+    if (this.datos) {
+      if (this.datos.value.familiar.length > 0) {
+        for (let i of this.datos.value.familiar) {
+          this.agregarFamiliar(i)
+        }
       }
     }
   }
@@ -89,32 +74,12 @@ export class NewFamiliaresComponent implements OnInit {
     }
   }
 
-  initFormFamiliar(): FormGroup {
-    return this.fb.group({
-      primerNombre: new FormControl('', [Validators.required, Validators.maxLength(40)]),
-      segundoNombre: new FormControl('', [Validators.maxLength(40)]),
-      primerApellido: new FormControl('', [Validators.required, Validators.maxLength(40)]),
-      segundoApellido: new FormControl('', [Validators.maxLength(40)]),
-      dni: new FormControl('', [Validators.required,Validators.pattern(/^[0-9]{13}$|^[0-9]{4}-[0-9]{4}-[0-9]{5}$/),Validators.maxLength(15)]),
-      fechaNacimiento: new FormControl('', Validators.required),
-      parentesco: new FormControl('', Validators.required)
-    });
-  }
-
   agregarFamiliar(datos?: any): void {
-    const familiar = this.formParent.get('familiar') as FormArray;
+    const ref_Familiares = this.formParent.get('familiar') as FormArray;
     if (datos) {
-      familiar.push(this.fb.group({
-        primerNombre: new FormControl(datos.primerNombre || '', [Validators.required, Validators.maxLength(40)]),
-        segundoNombre: new FormControl(datos.segundoNombre || '', [Validators.maxLength(40)]),
-        primerApellido: new FormControl(datos.primerApellido || '', [Validators.required, Validators.maxLength(40)]),
-        segundoApellido: new FormControl(datos.segundoApellido || '', [Validators.maxLength(40)]),
-        dni: new FormControl(datos.dni || '', [Validators.required,Validators.pattern(/^[0-9]{13}$|^[0-9]{4}-[0-9]{4}-[0-9]{5}$/),Validators.maxLength(15)]),
-        fechaNacimiento: new FormControl(datos.fechaNacimiento || '', Validators.required),
-        parentesco: new FormControl(datos.parentesco || '', Validators.required)
-      }));
+      ref_Familiares.push(generateFamiliaresFormGroup(datos))
     } else {
-      familiar.push(this.initFormFamiliar());
+      ref_Familiares.push(generateFamiliaresFormGroup({}))
     }
   }
 
@@ -128,10 +93,6 @@ export class NewFamiliaresComponent implements OnInit {
 
   getCtrl(key: string, form: FormGroup): any {
     return form.get(key);
-  }
-
-  onDatosBenChange() {
-    this.newDatosFamiliares.emit(this.formParent);
   }
 
   guardarFamiliares(): void {
@@ -165,5 +126,30 @@ export class NewFamiliaresComponent implements OnInit {
     if (this.dialogRef) {
       this.dialogRef.close();
     }
+  }
+
+  getErrors(i: number, fieldName: string): any {
+    if (this.formParent instanceof FormGroup) {
+      const controlesfamiliar = (this.formParent.get('familiar') as FormGroup).controls;
+      const a = controlesfamiliar[i].get(fieldName)!.errors
+
+      let errors = []
+      if (a) {
+        if (a['required']) {
+          errors.push('Este campo es requerido.');
+        }
+        if (a['minlength']) {
+          errors.push(`Debe tener al menos ${a['minlength'].requiredLength} caracteres.`);
+        }
+        if (a['maxlength']) {
+          errors.push(`No puede tener más de ${a['maxlength'].requiredLength} caracteres.`);
+        }
+        if (a['pattern']) {
+          errors.push('El formato no es válido.');
+        }
+        return errors;
+      }
+    }
+
   }
 }

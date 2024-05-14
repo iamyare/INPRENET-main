@@ -10,8 +10,10 @@
     <app-dynamic-table style="width: 100%" titulo="Editar Cuentas" subtitulo="Completa la información correspondiente"
         [columns]="myColumns" [data]="filas" [getData]="getFilas"
         (ejecutarFuncionAsincronaEvent)="ejecutarFuncionAsincronaDesdeOtroComponente($event)"
-        [nombreEncabezadoUno]="'Acciones'" [nombreEncabezadoDos]="'Acciones'" [mostrarBotonUno]="true"
-        [mostrarBotonDos]="true" [etiquetaBotonUno]="'Activar'" (accionBotonUno)="manejarAccionUno($event)"
-        [etiquetaBotonDos]="'Desactivar'" (accionBotonDos)="manejarAccionDos($event)">
+        [nombreEncabezadoUno]="'Acciones'" [mostrarBotonUno]="true" [etiquetaBotonUno]="'Editar'"
+        (accionBotonUno)="manejarAccionUno($event)" [nombreEncabezadoDos]="'Acciones'" [mostrarBotonDos]="true"
+        [etiquetaBotonDos]="'Desactivar'" (accionBotonDos)="manejarAccionDos($event)"
+        [nombreEncabezadoTres]="'Acciones'" [mostrarBotonTres]="true" [etiquetaBotonTres]="'Activar'"
+        (accionBotonTres)="manejarAccionTres($event)">
     </app-dynamic-table>
 </div>

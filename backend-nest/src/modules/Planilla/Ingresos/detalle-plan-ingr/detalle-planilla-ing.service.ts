@@ -646,4 +646,8 @@ export class DetallePlanillaIngresoService {
     }
   }
 
+  async pagar(id_planilla: number, id_centro_educativo: number): Promise<boolean> {
+    return true
+  }
+
 }

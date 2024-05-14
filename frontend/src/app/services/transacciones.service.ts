@@ -35,6 +35,16 @@ export class TransaccionesService {
   crearCuenta(idPersona: number, datos: any): Observable<any> {
     return this.http.post(`${environment.API_URL}/api/transacciones/crear-cuenta/${idPersona}`, datos);
   }
+
+  desactivarCuenta(numCuenta: string, datosGenerales: any): Observable<any> {
+    return this.http.put(`${environment.API_URL}/api/transacciones/desactivarCuenta/${numCuenta}`, datosGenerales);
+  }
+
+  ActivarCuenta(numCuenta: string, datosGenerales: any): Observable<any> {
+    return this.http.put(`${environment.API_URL}/api/transacciones/ActivarCuenta/${numCuenta}`, datosGenerales);
+  }
+
+
 }
 
 

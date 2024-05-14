@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, HttpStatus, HttpException, Res, HttpCode, ParseIntPipe, NotFoundException } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, HttpStatus, HttpException, Res, HttpCode, ParseIntPipe, NotFoundException, Put } from '@nestjs/common';
 import { UpdateTranssacionesDto } from './dto/update-transacciones.dto';
 import { TransaccionesService } from './transacciones.service';
 import { ApiTags } from '@nestjs/swagger';
@@ -117,6 +117,23 @@ export class TransaccionesController {
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.transaccionesService.remove(+id);
+  }
+
+  @Put('ActivarCuenta/:numCuenta')
+  async ActivarCuenta(@Param('numCuenta') numCuenta: string) {
+
+    await this.transaccionesService.ActivarCuenta(numCuenta);
+    return {
+      mensaje: `La cuenta con número ${numCuenta} ha sido marcado como inactivo.`,
+    };
+  }
+
+  @Put('desactivarCuenta/:numCuenta')
+  async desactivarCuenta(@Param('numCuenta') numCuenta: string) {
+    await this.transaccionesService.desactivarCuenta(numCuenta);
+    return {
+      mensaje: `Perfil de centro de trabajo con número ${numCuenta} ha sido marcado como inactivo.`,
+    };
   }
 
 

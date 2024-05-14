@@ -8,6 +8,7 @@ import { EditarDialogComponent } from '@docs-components/editar-dialog/editar-dia
 import { ToastrService } from 'ngx-toastr';
 import { AfiliadoService } from 'src/app/services/afiliado.service';
 import { DatosEstaticosService } from 'src/app/services/datos-estaticos.service';
+import { TransaccionesService } from 'src/app/services/transacciones.service';
 import { FieldConfig } from 'src/app/shared/Interfaces/field-config';
 import { TableColumn } from 'src/app/shared/Interfaces/table-column';
 import { convertirFechaInputs } from 'src/app/shared/functions/formatoFecha';
@@ -35,6 +36,7 @@ export class VerCuentasPersonasComponent {
   @Input() Afiliado!: any;
   constructor(
     private svcAfiliado: AfiliadoService,
+    private svcTransacciones: TransaccionesService,
     private toastr: ToastrService,
     private dialog: MatDialog,
     private datosEstaticosService: DatosEstaticosService
@@ -140,20 +142,21 @@ export class VerCuentasPersonasComponent {
   }
 
   async manejarAccionUno(row: any) {
-    this.colegiosMagisteriales = await this.datosEstaticosService.getColegiosMagisteriales();
+    /* this.colegiosMagisteriales = await this.datosEstaticosService.getColegiosMagisteriales(); */
+
     const campos = [
       {
-        nombre: 'colegio_magisterial',
-        tipo: 'list',
+        nombre: 'NUMERO_CUENTA',
+        tipo: 'text',
         requerido: true,
-        etiqueta: 'Colegio Magisterial',
+        etiqueta: 'Número de Cuenta',
         editable: true,
-        opciones: this.colegiosMagisteriales
       }
     ];
     const valoresIniciales = {
-      colegio_magisterial: row.id_colegio
+      NUMERO_CUENTA: row.NUMERO_CUENTA
     };
+
     this.openDialog(campos, valoresIniciales);
   }
 
@@ -168,7 +171,7 @@ export class VerCuentasPersonasComponent {
 
     dialogRef.afterClosed().subscribe((result: any) => {
       if (result) {
-        this.svcAfiliado.eliminarColegioMagisterialPersona(row.id_per_cole_mag).subscribe({
+        this.svcTransacciones.ActivarCuenta(row.NUMERO_CUENTA, {}).subscribe({
           next: (response: any) => {
             this.toastr.success("Colegio magisterial eliminado correctamente");
             this.ngOnInit()
@@ -180,6 +183,32 @@ export class VerCuentasPersonasComponent {
         });
       }
     });
+  }
+
+  manejarAccionTres(row: any) {
+    const dialogRef = this.dialog.open(ConfirmDialogComponent, {
+      width: '350px',
+      data: {
+        title: 'Confirmación de eliminación',
+        message: '¿Estás seguro de querer eliminar este elemento?'
+      }
+    });
+
+    dialogRef.afterClosed().subscribe((result: any) => {
+      if (result) {
+        this.svcTransacciones.desactivarCuenta(row.NUMERO_CUENTA, {}).subscribe({
+          next: (response: any) => {
+            this.toastr.success("Colegio magisterial eliminado correctamente");
+            this.ngOnInit()
+          },
+          error: (error: any) => {
+            console.error('Error al eliminar el colegio magisterial al que pertenece la persona:', error);
+            this.toastr.error('Ocurrió un error al eliminar el colegio magisterial al que pertenece la persona.');
+          }
+        });
+      }
+    });
+
   }
 
   AgregarBeneficiario() {

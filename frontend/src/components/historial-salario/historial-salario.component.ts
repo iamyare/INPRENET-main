@@ -34,7 +34,7 @@ export class HistorialSalarioComponent implements OnInit {
 
   onDatosHistSal() {
     // Aquí debes asegurarte de emitir el valor actual del formulario y no el FormGroup directamente
-    const data = this.formParent.value;  // Cambio aquí para emitir el valor y no el FormGroup
+    const data = this.formParent;  // Cambio aquí para emitir el valor y no el FormGroup
     this.newDatHistSal.emit(data);
   }
 
@@ -46,9 +46,11 @@ export class HistorialSalarioComponent implements OnInit {
   ngOnInit(): void {
     this.initForm();
     const bancosArray = this.formParent.get('banco') as FormArray;
-    if (this.datos && this.datos.banco && this.datos.banco.length > 0 && bancosArray.length === 0) {
-      for (let i of this.datos.banco) {
-        this.agregarBanco(i);
+    if (this.datos) {
+      if (this.datos.value.banco.length > 0) {
+        for (let i of this.datos.value.banco) {
+          this.agregarBanco(i);
+        }
       }
     }
   }
@@ -95,5 +97,32 @@ export class HistorialSalarioComponent implements OnInit {
     const colSingle = colParent.at(index).get(key) as FormControl;
     colSingle.setValidators(Validators.required);
     colSingle.updateValueAndValidity();
+  }
+
+
+  getErrors(i: number, fieldName: string): any {
+
+    if (this.formParent instanceof FormGroup) {
+      const controlesBanco = (this.formParent.get('banco') as FormGroup).controls;
+      const a = controlesBanco[i].get(fieldName)!.errors
+
+      let errors = []
+      if (a) {
+        if (a['required']) {
+          errors.push('Este campo es requerido.');
+        }
+        if (a['minlength']) {
+          errors.push(`Debe tener al menos ${a['minlength'].requiredLength} caracteres.`);
+        }
+        if (a['maxlength']) {
+          errors.push(`No puede tener más de ${a['maxlength'].requiredLength} caracteres.`);
+        }
+        if (a['pattern']) {
+          errors.push('El formato no es válido.');
+        }
+        return errors;
+      }
+    }
+
   }
 }

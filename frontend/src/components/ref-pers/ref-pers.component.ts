@@ -2,6 +2,7 @@ import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormArray, FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { FormStateService } from 'src/app/services/form-state.service';
+import { DatosEstaticosService } from 'src/app/services/datos-estaticos.service';
 
 export function generateRefPerFormGroup(datos?: any): FormGroup {
   return new FormGroup({
@@ -49,9 +50,8 @@ export function generateRefPerFormGroup(datos?: any): FormGroup {
 })
 export class RefPersComponent implements OnInit {
   public formParent: FormGroup = new FormGroup({});
-
   private formKey = 'refForm';
-
+  parentesco: any;
 
   @Input() nombreComp?: string
   @Input() datos?: any
@@ -62,10 +62,11 @@ export class RefPersComponent implements OnInit {
     this.newDatRefPerChange.emit(data)
   }
 
-  constructor(private formStateService: FormStateService, private fb: FormBuilder) {
+  constructor(private formStateService: FormStateService, private fb: FormBuilder, private datosEstaticosService: DatosEstaticosService,) {
   }
 
   ngOnInit(): void {
+    this.parentesco = this.datosEstaticosService.parentesco;
     this.initForm();
     if (this.datos) {
       if (this.datos.value.refpers.length > 0) {
@@ -127,6 +128,33 @@ export class RefPersComponent implements OnInit {
       ]
     )
     refSingle.updateValueAndValidity();
+  }
+
+
+  getErrors(i: number, fieldName: string): any {
+
+    if (this.formParent instanceof FormGroup) {
+      const controlesrefpers = (this.formParent.get('refpers') as FormGroup).controls;
+      const a = controlesrefpers[i].get(fieldName)!.errors
+
+      let errors = []
+      if (a) {
+        if (a['required']) {
+          errors.push('Este campo es requerido.');
+        }
+        if (a['minlength']) {
+          errors.push(`Debe tener al menos ${a['minlength'].requiredLength} caracteres.`);
+        }
+        if (a['maxlength']) {
+          errors.push(`No puede tener más de ${a['maxlength'].requiredLength} caracteres.`);
+        }
+        if (a['pattern']) {
+          errors.push('El formato no es válido.');
+        }
+        return errors;
+      }
+    }
+
   }
 
 }

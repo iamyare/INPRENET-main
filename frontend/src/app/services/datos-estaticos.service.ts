@@ -72,8 +72,8 @@ export class DatosEstaticosService {
   async getAllCentrosTrabajo() {
     const response = await this.centrosTrabSVC.obtenerTodosLosCentrosTrabajo().toPromise();
     const mappedResponse = response!.map((item: { id_centro_trabajo: any; nombre_centro_trabajo: any; }) => ({
-      value: String(item.id_centro_trabajo),
-      label: item.nombre_centro_trabajo
+      label: item.nombre_centro_trabajo,
+      value: String(item.id_centro_trabajo)
     }));
     this.centrosTrabajo = mappedResponse;
     return this.centrosTrabajo;
@@ -350,33 +350,33 @@ export class DatosEstaticosService {
   ];
 
   parentesco = [
-    { value: "ABUELA MATERNA", label: "Abuela Materna" },
-    { value: "ABUELA PATERNA", label: "Abuela Paterna" },
-    { value: "ABUELO MATERNO", label: "Abuelo Materno" },
-    { value: "ABUELO PATERNO", label: "Abuelo Paterno" },
-    { value: "CUÑADA", label: "Cuñada" },
-    { value: "CUÑADO", label: "Cuñado" },
-    { value: "ESPOSA", label: "Esposa" },
-    { value: "ESPOSO", label: "Esposo" },
-    { value: "HERMANA", label: "Hermana" },
+    { value: "ABUELA MATERNA", label: "ABUELA MATERNA" },
+    { value: "ABUELA PATERNA", label: "ABUELA PATERNA" },
+    { value: "ABUELO MATERNO", label: "ABUELO MATERNO" },
+    { value: "ABUELO PATERNO", label: "ABUELO PATERNO" },
+    { value: "CUÑADA", label: "CUÑADA" },
+    { value: "CUÑADO", label: "CUÑADO" },
+    { value: "ESPOSA", label: "ESPOSA" },
+    { value: "ESPOSO", label: "ESPOSO" },
+    { value: "HERMANA", label: "HERMANA" },
     { value: "HERMANO", label: "Hermano" },
-    { value: "HIJA", label: "Hija" },
-    { value: "HIJO", label: "Hijo" },
-    { value: "MADRE", label: "Madre" },
-    { value: "NIETA", label: "Nieta" },
-    { value: "NIETO", label: "Nieto" },
-    { value: "NUERA", label: "Nuera" },
-    { value: "PADRE", label: "Padre" },
-    { value: "PRIMA", label: "Prima" },
-    { value: "PRIMO", label: "Primo" },
-    { value: "SOBRINA", label: "Sobrina" },
-    { value: "SOBRINO", label: "Sobrino" },
-    { value: "SUEGRA", label: "Suegra" },
-    { value: "SUEGRO", label: "Suegro" },
-    { value: "TÍA MATERNA", label: "Tía Materna" },
-    { value: "TÍA PATERNA", label: "Tía Paterna" },
-    { value: "TÍO MATERNO", label: "Tío Materno" },
-    { value: "TÍO PATERNO", label: "Tío Paterno" },
-    { value: "YERNO", label: "Yerno" }
+    { value: "HIJA", label: "HIJA" },
+    { value: "HIJO", label: "HIJO" },
+    { value: "MADRE", label: "MADRE" },
+    { value: "NIETA", label: "NIETA" },
+    { value: "NIETO", label: "NIETO" },
+    { value: "NUERA", label: "NUERA" },
+    { value: "PADRE", label: "PADRE" },
+    { value: "PRIMA", label: "PRIMA" },
+    { value: "PRIMO", label: "PRIMO" },
+    { value: "SOBRINA", label: "SOBRINA" },
+    { value: "SOBRINO", label: "SOBRINO" },
+    { value: "SUEGRA", label: "SUEGRA" },
+    { value: "SUEGRO", label: "SUEGRO" },
+    { value: "TÍA MATERNA", label: "TÍA MATERNA" },
+    { value: "TÍA PATERNA", label: "TÍA PATERNA" },
+    { value: "TÍO MATERNO", label: "TÍO MATERNO" },
+    { value: "TÍO PATERNO", label: "TÍO PATERNO" },
+    { value: "YERNO", label: "YERNO" }
   ]
 }

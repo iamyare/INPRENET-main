@@ -8,13 +8,11 @@
 <div class="main-content">
   <div class="col-md-12">
     <form [formGroup]="form" #myForm="ngForm" change="getLabel()">
-      <app-dat-generales-afiliado [useCamera]="true"
-      (imageCaptured)="handleImageCaptured($event)" *ngIf="DatosGenerales"
-        groupName="DatosGenerales"></app-dat-generales-afiliado>
+      <app-dat-generales-afiliado [useCamera]="true" (imageCaptured)="handleImageCaptured($event)"
+        *ngIf="DatosGenerales" groupName="DatosGenerales"></app-dat-generales-afiliado>
 
       <app-col-magisteriales *ngIf="ColegiosMagisteriales" [datos]="formColegiosMagisteriales"
         (newDataColegioMagisterial)="setDatosColegiosMag($event)"></app-col-magisteriales>
-
     </form>
 
     <app-new-familiares *ngIf="datosFamiliares" [datos]="formDatosFamiliares"
@@ -41,8 +39,38 @@
           Presione el botón enviar para continuar con el proceso.
         </p>
       </div>
+      <!-- <strong>Datos Generales</strong>
+      {{ form.controls.DatosGenerales.value | json }}
+      <strong>Status:</strong> {{ form.controls.DatosGenerales.status }}
+      <br>
+      <strong>Datos Colegios Magisteriales:</strong>
+      {{ formColegiosMagisteriales.controls.ColMags.value | json }}
+      <strong>Status:</strong> {{ formColegiosMagisteriales.controls.ColMags.status }}
+      <br>
+      <strong>Datos Familiares:</strong>
+      {{ formDatosFamiliares.controls.familiar.value | json }}
+      <strong>Status:</strong> {{ formDatosFamiliares!.controls!.familiar!.status }}
+      <br>
+      <strong>Datos Cuentas Bancarias:</strong>
+      {{formHistPag.controls.banco.value | json }}
+      <strong>Status:</strong> {{ formHistPag.controls.banco.status }}
+      <br>
+      <strong>Datos Centros de Trabajo:</strong>
+      {{ formPuestTrab.controls.trabajo.value | json }}
+      <strong>Status:</strong> {{ formPuestTrab.controls.trabajo.status }}
+      <br>
+
+      <strong>Datos Referencias:</strong>
+      {{ formReferencias.controls.refpers.value | json }}
+      <strong>Status:</strong> {{ formReferencias.controls.refpers.status }}
+      <br>
+      <strong>Datos Beneficiario:</strong>
+      {{ formBeneficiarios.controls.beneficiario.value | json }}
+      <strong>Status:</strong> {{ formBeneficiarios.controls.beneficiario.status }} -->
+
       <div class="card-body" style="text-align: center;">
-        <button mat-button color="primary" (click)="enviar()">
+        <button mat-button color="primary" (click)="enviar()"
+          [disabled]="form.controls.DatosGenerales.invalid || formColegiosMagisteriales.controls.ColMags.invalid || formDatosFamiliares.controls.familiar.invalid || formHistPag.controls.banco.invalid || formPuestTrab.controls.trabajo.invalid || formReferencias.controls.refpers.invalid || formBeneficiarios.controls.beneficiario.invalid">
           Enviar Formulario
         </button>
       </div>

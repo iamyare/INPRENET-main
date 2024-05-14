@@ -240,4 +240,20 @@ export class TransaccionesService {
   remove(id: number) {
     return `This action removes a #${id} transsacione`;
   }
+
+  async ActivarCuenta(numCuenta: string): Promise<void> {
+    const cuenta = await this.cuentaPersonaRepository.findOne({ where: { NUMERO_CUENTA: numCuenta } });
+
+    cuenta.ACTIVA_B = 'I';
+
+    await this.cuentaPersonaRepository.save(cuenta);
+  }
+
+  async desactivarCuenta(numCuenta: string): Promise<void> {
+    const cuenta = await this.cuentaPersonaRepository.findOne({ where: { NUMERO_CUENTA: numCuenta } });
+
+    cuenta.ACTIVA_B = 'A';
+
+    await this.cuentaPersonaRepository.save(cuenta);
+  }
 }

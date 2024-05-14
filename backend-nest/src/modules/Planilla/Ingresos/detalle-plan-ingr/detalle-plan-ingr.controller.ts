@@ -10,6 +10,16 @@ export class DetallePlanIngrController {
 
   constructor(private readonly planillaIngresoService: DetallePlanillaIngresoService) { }
 
+  @Post("/pagar/:id_planilla/:id_centro_educativo")
+  pagar(@Param('id_planilla') id_planilla: number, @Param('id_centro_educativo') id_centro_educativo: number) {
+    return this.planillaIngresoService.pagar(id_planilla, id_centro_educativo);
+  }
+
+  @Post("/:id_planilla/:dni/:id_centro_educativo")
+  create(@Param('id_planilla') id_planilla: number, @Param('dni') dni: string, @Param('id_centro_educativo') id_centro_educativo: number, @Body() createDetPlanIngDT: CreateDetallePlanIngDto) {
+    return this.planillaIngresoService.insertNetDetPlanilla(id_planilla, dni, id_centro_educativo, createDetPlanIngDT);
+  }
+
   @Patch('/eliminar/:id')
   async eliminarDetallePlanilla(@Param('id') idDetallePlanilla: number, @Res() res): Promise<void> {
     try {
@@ -26,21 +36,16 @@ export class DetallePlanIngrController {
   }
 
   @Put('/actualizar-detalles-planilla-privada')
-@HttpCode(HttpStatus.OK)
-async actualizarDetallesPlanilla(
-  @Body('dni') dni: string,
-  @Body('idDetallePlanIngreso') idDetallePlanIngreso: number,
-  @Body('sueldo') sueldo: number,
-  @Body('prestamos') prestamos?: number 
-): Promise<{ message: string }> {
-  return await this.planillaIngresoService.actualizarDetallesPlanilla(dni, idDetallePlanIngreso, sueldo, prestamos);
-}
-
-
-  @Post("/:id_planilla/:dni/:id_centro_educativo")
-  create(@Param('id_planilla') id_planilla: number, @Param('dni') dni: string, @Param('id_centro_educativo') id_centro_educativo: number, @Body() createDetPlanIngDT: CreateDetallePlanIngDto) {
-    return this.planillaIngresoService.insertNetDetPlanilla(id_planilla, dni, id_centro_educativo, createDetPlanIngDT);
+  @HttpCode(HttpStatus.OK)
+  async actualizarDetallesPlanilla(
+    @Body('dni') dni: string,
+    @Body('idDetallePlanIngreso') idDetallePlanIngreso: number,
+    @Body('sueldo') sueldo: number,
+    @Body('prestamos') prestamos?: number
+  ): Promise<{ message: string }> {
+    return await this.planillaIngresoService.actualizarDetallesPlanilla(dni, idDetallePlanIngreso, sueldo, prestamos);
   }
+
 
   @Get('/obtPersonaPorCentTrab/:dni/:id_centro_educativo')
   async obtPersonaPorCentTrab(@Res() res, @Param('dni') dni: string, @Param('id_centro_educativo') id_centro_educativo: number) {
@@ -120,4 +125,10 @@ async actualizarDetallesPlanilla(
       throw new InternalServerErrorException(error.message);
     }
   }
+
+
+
+  // OBTENER LOS REGISTROS DE DETALLE_PLANILLA_INGRESOS QUE TENGAN ESTADO CARGADO CUYA PLANILLA SEA ACTIVA 
+  // PAGAR PLANILLA CAMBIA DE ESTADO LA PLANILLA
+
 }

@@ -56,34 +56,35 @@ export function generatePuestoTrabFormGroup(datos?: any): FormGroup {
 })
 export class DatPuestoTrabComponent implements OnInit {
   public formParent: FormGroup = new FormGroup({});
+  private formKey = 'FormTrabajo';
 
   centrosTrabajo: any = this.datosEstaticos.centrosTrabajo;
   sector: any = this.datosEstaticos.sector;
 
-  @Output() newDatDatosPuestTrab = new EventEmitter<any>()
   @Input() datos: any;
   @Input() editing?: boolean = false;
+  @Output() newDatDatosPuestTrab = new EventEmitter<any>()
 
   onDatosDatosPuestTrab() {
-    const data = this.formParent.value;
+    const data = this.formParent;
     this.newDatDatosPuestTrab.emit(data);
   }
 
   constructor(private formStateService: FormStateService, private fb: FormBuilder, private datosEstaticos: DatosEstaticosService) { }
 
-  private formKey = 'FormTrabajo';
-
   ngOnInit(): void {
     this.initForm();
     const trabajoArray = this.formParent.get('trabajo') as FormArray;
-    if (this.datos && this.datos.trabajo && this.datos.trabajo.length > 0 && trabajoArray.length === 0) {
-      for (let i of this.datos.trabajo) {
-        this.agregarTrabajo(i);
+    if (this.datos) {
+      if (this.datos.value.trabajo.length > 0) {
+        for (let i of this.datos.value.trabajo) {
+          this.agregarTrabajo(i);
+        }
       }
     }
-    this.formParent.valueChanges.subscribe(values => {
+    /* this.formParent.valueChanges.subscribe(values => {
       this.newDatDatosPuestTrab.emit(values);
-    });
+    }); */
   }
 
   ngOnDestroy() {
@@ -118,11 +119,39 @@ export class DatPuestoTrabComponent implements OnInit {
   eliminarTrabajo(): void {
     const ref_trabajo = this.formParent.get('trabajo') as FormArray;
     ref_trabajo.removeAt(-1);
+    const data = this.formParent
+    this.newDatDatosPuestTrab.emit(data);
   }
 
 
   getCtrl(key: string, form: FormGroup): any {
     return form.get(key)
+  }
+
+  getErrors(i: number, fieldName: string): any {
+
+    if (this.formParent instanceof FormGroup) {
+      const controlestrabajo = (this.formParent.get('trabajo') as FormGroup).controls;
+      const a = controlestrabajo[i].get(fieldName)!.errors
+
+      let errors = []
+      if (a) {
+        if (a['required']) {
+          errors.push('Este campo es requerido.');
+        }
+        if (a['minlength']) {
+          errors.push(`Debe tener al menos ${a['minlength'].requiredLength} caracteres.`);
+        }
+        if (a['maxlength']) {
+          errors.push(`No puede tener más de ${a['maxlength'].requiredLength} caracteres.`);
+        }
+        if (a['pattern']) {
+          errors.push('El formato no es válido.');
+        }
+        return errors;
+      }
+    }
+
   }
 
 }

@@ -3,7 +3,7 @@ import { ControlContainer, FormBuilder, FormControl, FormGroup, Validators } fro
 
 import { BancosService } from 'src/app/services/bancos.service';
 import { DatosEstaticosService } from 'src/app/services/datos-estaticos.service';
-export function generateDatBancFormGroup(datos?:any): FormGroup {
+export function generateDatBancFormGroup(datos?: any): FormGroup {
   return new FormGroup({
     idBanco: new FormControl(datos?.idBanco, Validators.required),
     numeroCuenta: new FormControl(datos?.numeroCuenta, Validators.required)
@@ -23,17 +23,17 @@ export function generateDatBancFormGroup(datos?:any): FormGroup {
     },
   ]
 })
-export class DatBancComponent  implements OnInit {
+export class DatBancComponent implements OnInit {
   @Input() groupName = '';
   Bancos: any = this.datosEstaticos.Bancos;
 
-  constructor( private fb: FormBuilder, private datosEstaticos: DatosEstaticosService)  {
+  constructor(private fb: FormBuilder, private datosEstaticos: DatosEstaticosService) {
     /* this.bancosService.getAllBancos().subscribe((res: any) => {
       this.Bancos = res.bancos
     }); */
   }
   ngOnInit(): void {
-   
+
   }
 
 

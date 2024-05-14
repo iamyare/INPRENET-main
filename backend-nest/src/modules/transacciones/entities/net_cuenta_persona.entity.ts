@@ -5,7 +5,7 @@ import { NET_MOVIMIENTO_CUENTA } from "./net_movimiento_cuenta.entity";
 import { NOW } from "sequelize";
 
 @Entity({ name: 'NET_CUENTA_PERSONA' })
-@Check("CK1_NET_CUENTA_PERSONA", `ACTIVA_B IN ('S', 'N')`)
+@Check("CK1_NET_CUENTA_PERSONA", `ACTIVA_B IN ('A', 'I')`)
 export class NET_CUENTA_PERSONA {
     @ManyToOne(() => Net_Persona, persona => persona.cuentas, { cascade: true })
     @JoinColumn({ name: 'ID_PERSONA', referencedColumnName: 'id_persona', foreignKeyConstraintName: "FK1_NET_CUENTA_PERSONA" })
@@ -18,7 +18,7 @@ export class NET_CUENTA_PERSONA {
     @PrimaryColumn({ primaryKeyConstraintName: 'PK_NET_CUENTA_PERSONA' })
     NUMERO_CUENTA: string;
 
-    @Column({ length: 1, default: "S" })
+    @Column({ length: 1, default: "A" })
     ACTIVA_B: string;
 
     @Column('date', { default: () => 'CURRENT_DATE' })

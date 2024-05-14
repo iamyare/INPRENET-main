@@ -1,11 +1,8 @@
-import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output } from '@angular/core';
+import { ChangeDetectionStrategy, Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { FormArray, FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
-import { generateAddressFormGroup } from '../dat-generales-afiliado/dat-generales-afiliado.component';
-import { generateDatBancFormGroup } from '@docs-components/dat-banc/dat-banc.component';
-import { generateFormArchivo } from '../botonarchivos/botonarchivos.component';
-
-import { generateBenefFormGroup } from '@docs-components/beneficio/beneficio.component';
 import { FormStateService } from 'src/app/services/form-state.service';
+import { DireccionService } from 'src/app/services/direccion.service';
+import { DatosEstaticosService } from 'src/app/services/datos-estaticos.service';
 
 @Component({
   selector: 'app-benef',
@@ -13,22 +10,21 @@ import { FormStateService } from 'src/app/services/form-state.service';
   styleUrls: ['./benef.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class BenefComponent {
+export class BenefComponent implements OnInit {
   private formKey = 'FormBeneficiario';
   public formParent: FormGroup;
+  public municipios: any[] = [];
+  public nacionalidades: any[] = [];
 
-  archIdent: any;
-  labelbutton = "Archivo de identificación (beneficiario)"
-  DatosBancBen: any = [];
+  @Input() datos: any;
+  @Output() newDatBenChange = new EventEmitter<any>();
 
-  @Input() datos: any
-  @Output() newDatBenChange = new EventEmitter<any>()
-
-  onDatosBenChange() {
-    this.newDatBenChange.emit(this.formParent);
-  }
-
-  constructor(private formStateService: FormStateService, private fb: FormBuilder) {
+  constructor(
+    private formStateService: FormStateService,
+    private fb: FormBuilder,
+    private direccionService: DireccionService,
+    private datosEstaticosService: DatosEstaticosService
+  ) {
     this.formParent = this.fb.group({
       beneficiario: this.fb.array([]),
     });
@@ -36,6 +32,8 @@ export class BenefComponent {
 
   ngOnInit(): void {
     this.initForm();
+    this.loadMunicipios();
+    this.loadNacionalidades();
     const beneficiariosArray = this.formParent.get('beneficiario') as FormArray;
     if (this.datos && this.datos.value && this.datos.value.beneficiario && this.datos.value.beneficiario.length > 0 && beneficiariosArray.length === 0) {
       for (let i of this.datos.value.beneficiario) {
@@ -44,102 +42,76 @@ export class BenefComponent {
     }
   }
 
-  get porcentajes() {
-    return this.formParent.get('beneficiario') as FormArray;
-  }
-
-  validateTotalPercentage() {
-
-  }
-  suma100Validator(): any {
-    return (control: FormControl) => {
-      const valor = control.value;
-      const beneficiarioArray = this.formParent.get('beneficiario') as FormArray;
-      const totalPercentage = beneficiarioArray.controls.reduce((total, control) => {
-        return total + (control.get('beneficiario')?.value || 0);
-      }, 0);
-
-      /* this.formParent.setErrors({ 'invalidPercentage': true }); */
-      console.log(this.formParent);
-      if (totalPercentage !== 100) {
-        return { sumaNo100: true };
-
-        this.formParent.setErrors({ 'invalidPercentage': true });
-      } else {
-        return { sumaNo100: false };
-        this.formParent.setErrors({ 'invalidPercentage': false });
-      }
-    };
-  }
   private initForm() {
     let existingForm = this.formStateService.getForm(this.formKey);
     if (existingForm) {
       this.formParent = existingForm;
     } else {
       this.formParent = this.fb.group({
-        beneficiario: this.fb.array([])
+        beneficiario: this.fb.array([]),
       });
       this.formStateService.setForm(this.formKey, this.formParent);
     }
   }
 
-  initFormBeneficiario(datosBeneficiario?: any, DatosBac?: any, Archivos?: File, labelArch?: any, porcentaje?: any): FormGroup {
+  initFormBeneficiario(datosBeneficiario?: any): FormGroup {
     return this.fb.group({
-      beneficiario: new FormControl(''),
-      porcentaje: new FormControl('', [Validators.required, this.suma100Validator()]),
-      datosBeneficiario: generateAddressFormGroup(datosBeneficiario),
-      DatosBac: generateDatBancFormGroup(DatosBac),
-      Archivos: generateFormArchivo(labelArch),
-      Arch: Archivos,
+      datosBeneficiario: this.fb.group({
+        primerNombre: new FormControl(datosBeneficiario?.primerNombre || '', [Validators.required, Validators.maxLength(40)]),
+        segundoNombre: new FormControl(datosBeneficiario?.segundoNombre || '', [Validators.maxLength(40)]),
+        tercerNombre: new FormControl(datosBeneficiario?.tercerNombre || ''),
+        primerApellido: new FormControl(datosBeneficiario?.primerApellido || '', [Validators.required, Validators.maxLength(40)]),
+        segundoApellido: new FormControl(datosBeneficiario?.segundoApellido || ''),
+        genero: new FormControl(datosBeneficiario?.genero || ''),
+        cantidadDependientes: new FormControl(datosBeneficiario?.cantidadDependientes || 0),
+        representacion: new FormControl(datosBeneficiario?.representacion || ''),
+        telefono1: new FormControl(datosBeneficiario?.telefono1 || ''),
+        fechaNacimiento: new FormControl(datosBeneficiario?.fechaNacimiento || '', Validators.required),
+        direccionResidencia: new FormControl(datosBeneficiario?.direccionResidencia || ''),
+        id_pais_nacionalidad: new FormControl(datosBeneficiario?.id_pais_nacionalidad || null, Validators.required),
+        idMunicipioResidencia: new FormControl(datosBeneficiario?.idMunicipioResidencia || null, Validators.required),
+      }),
+      porcentaje: new FormControl(datosBeneficiario?.porcentaje || '', [Validators.required, Validators.maxLength(5)]),
     });
   }
 
-  agregarBen(datos?: any): void {
-    console.log(this.formParent);
-    const beneficiarios = this.formParent.get('beneficiario') as FormArray;
-
-    if (datos) {
-      this.labelbutton = datos.Arch ? datos.Arch.name : "Archivo de identificación (beneficiario)";
-      beneficiarios.push(this.initFormBeneficiario(datos.benfGroup, datos.DatosBac, datos.Arch, datos.Arch ? datos.Arch.name : undefined));
-      this.validateTotalPercentage();
-    } else {
-      this.labelbutton = "Archivo de identificación (beneficiario)";
-      beneficiarios.push(this.initFormBeneficiario());
-    }
+  agregarBen(datosBeneficiario?: any): void {
+    const control = this.getCtrl('beneficiario', this.formParent) as FormArray;
+    control.push(this.initFormBeneficiario(datosBeneficiario));
   }
 
-
   eliminarRefPer(): void {
-    const asig_Beneficiario = this.formParent.get('beneficiario') as FormArray
-    asig_Beneficiario.removeAt(-1)
-    const data = this.formParent
-    this.newDatBenChange.emit(data)
+    const control = this.getCtrl('beneficiario', this.formParent) as FormArray;
+    if (control.length > 0) {
+      control.removeAt(control.length - 1);
+    }
   }
 
   getCtrl(key: string, form: FormGroup): any {
-    return form.get(key)
+    return form.get(key);
   }
 
-  getLabel(key: string, form: FormGroup, indice: any): String {
-    return form.get(key)?.value[indice]?.Arch?.name
+  onDatosBenChange() {
+    this.newDatBenChange.emit(this.formParent);
+    this.formStateService.setForm(this.formKey, this.formParent);
   }
 
-  setDatosBanc(datosBanc: any) {
-    this.DatosBancBen = datosBanc
-  }
-  handleArchivoSeleccionado(archivo: any, i: any) {
-    if (this.formParent && this.formParent.get('beneficiario')) {
-      const asig_Beneficiario = this.formParent.get('beneficiario') as FormArray;
-      if (asig_Beneficiario.length > 0) {
-        const ultimoBeneficiario = asig_Beneficiario.at(i);
-        if (ultimoBeneficiario.get('Archivos.Archivos')) {
-          ultimoBeneficiario.get('Arch')?.setValue(archivo);
-        }
+  private loadMunicipios() {
+    this.direccionService.getAllMunicipios().subscribe({
+      next: (data) => {
+        this.municipios = data;
+      },
+      error: (error) => {
+        console.error('Error al cargar municipios:', error);
       }
-    }
+    });
   }
 
-  prueba(e: any, i: any) {
-    this.formParent.value.beneficiario[i].benfGroup.fechaNacimiento = e
+  private loadNacionalidades() {
+    this.datosEstaticosService.getNacionalidad().then(data => {
+      this.nacionalidades = data;
+    }).catch(error => {
+      console.error('Error al cargar países:', error);
+    });
   }
 }

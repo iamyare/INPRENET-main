@@ -1,4 +1,4 @@
-body { 
+body {
   font-family: Roboto, Arial, sans-serif;
   margin: 0;
 }
@@ -13,10 +13,23 @@ body {
 }
 
 .inputs {
-  width: 100%
+  width: 100%;
+  margin: 10px 0;
 }
 
 .tittle {
-  color:white; 
-  background: #628780;
+  color: white;
+  background: #229e92;
+}
+
+.example-full-width {
+  width: 100%;
+}
+
+.row {
+  margin: 10px 0;
+}
+
+.mat-form-field {
+  margin: 10px 0;
 }

@@ -7,6 +7,7 @@ import { TipoIdentificacionService } from './tipo-identificacion.service';
 import { Observable } from 'rxjs';
 import { ColegiosMagisterialesService } from './colegios-magisteriales.service';
 import { CentroTrabajoService } from './centro-trabajo.service';
+import { HttpClient } from '@angular/common/http';
 
 @Injectable({
   providedIn: 'root'
@@ -20,18 +21,17 @@ export class DatosEstaticosService {
   tipoIdent: any = [];
   tipoCuenta: any = [];
   profesiones: any = [];
-  colegiosMagisteriales: any = []
-  centrosTrabajo: any = []
+  colegiosMagisteriales: any = [];
+  centrosTrabajo: any = [];
+  municipios: any = [];
 
   constructor(
     private colegiosMagSVC: ColegiosMagisterialesService, private bancosService: BancosService,
     private centrosTrabSVC: CentroTrabajoService,
     private SVCInstituciones: InstitucionesService, private afiliadoService: AfiliadoService, public direccionSer: DireccionService, private tipoIdentificacionService: TipoIdentificacionService,
     private centroTrabajoService: CentroTrabajoService,
+    private http: HttpClient
   ) {
-    /* this.direccionSer.getAllCiudades().subscribe((res: any) => {});
-    this.direccionSer.getAllProvincias().subscribe((res: any) => {}); */
-    /*  */
     this.getInstituciones();
     this.getNacionalidad();
     this.gettipoIdent();
@@ -41,7 +41,9 @@ export class DatosEstaticosService {
     this.getAllCentrosTrabajo();
     this.getInstituciones();
     this.getProfesiones();
+    this.getMunicipios();
   }
+
 
 
   async gettipoIdent() {
@@ -106,15 +108,29 @@ export class DatosEstaticosService {
   async getNacionalidad() {
     try {
       const response = await this.direccionSer.getAllPaises().toPromise();
-      this.nacionalidades = response.map((item: { nacionalidad: any; id_pais: any; }) => ({
-        id_pais: item.id_pais,
-        nacionalidad: String(item.nacionalidad)
+      this.nacionalidades = response.map((item: { nacionalidad: string; id_pais: number; }) => ({
+        value: item.id_pais,
+        label: item.nacionalidad
       }));
       return this.nacionalidades;
-
     } catch (error) {
-      this.nacionalidades = []
+      console.error('Error al obtener nacionalidades:', error);
+      this.nacionalidades = [];
       return this.nacionalidades;
+    }
+  }
+
+  async getMunicipios() {
+    try {
+      const response = await this.direccionSer.getAllMunicipios().toPromise();
+      this.municipios = response.map((item: { id_municipio: any; nombre_municipio: any; }) => ({
+        value: item.id_municipio,
+        label: String(item.nombre_municipio)
+      }));
+      return this.municipios;
+    } catch (error) {
+      this.municipios = []
+      return this.municipios;
     }
   }
 
@@ -138,6 +154,17 @@ export class DatosEstaticosService {
     return this.colegiosMagisteriales;
   }
 
+
+  tipoPersona = [
+    {
+      "value": 1,
+      "label": "AFILIADO"
+    },
+    {
+      "value": 2,
+      "label": "BENEFICIARIO"
+    }
+  ]
 
   estadoCivil = [
     {
@@ -177,37 +204,55 @@ export class DatosEstaticosService {
   ];
   representacion = [
     {
-      "idRepresentacion": 1,
-      "value": "POR CUENTA PROPIA"
+      "value": 'POR CUENTA PROPIA',
+      "label": "POR CUENTA PROPIA"
     },
     {
-      "idRepresentacion": 2,
-      "value": "POR TERCEROS"
+      "value": "POR TERCEROS",
+      "label": "POR TERCEROS"
     }
   ];
   estado = [
     {
-      "idEstado": 1,
-      "value": "FALLECIDO"
+      "value": 1,
+      "label": "FALLECIDO"
     },
     {
-      "idEstado": 2,
-      "value": "ACTIVO"
+      "value": 2,
+      "label": "ACTIVO"
     },
     {
-      "idEstado": 3,
-      "value": "INACTIVO"
+      "value": 3,
+      "label": "INACTIVO"
     }
   ];
   genero = [
-    "MASCULINO",
-    "FEMENINO",
-    "NO BINARIO",
-    "OTRO"
+    {
+      "value": "MASCULINO",
+      "label": "MASCULINO"
+    },
+    {
+      "value": "FEMENINO",
+      "label": "FEMENINO"
+    },
+    {
+      "value": "NO BINARIO",
+      "label": "NO BINARIO"
+    },
+    {
+      "value": "OTRO",
+      "label": "OTRO"
+    }
   ];
   sexo = [
-    "F",
-    "M",
+    {
+      "value": "F",
+      "label": "FEMENINO"
+    },
+    {
+      "value": "M",
+      "label": "MASCULINO"
+    },
   ];
   /* tipoIdent = [
     {

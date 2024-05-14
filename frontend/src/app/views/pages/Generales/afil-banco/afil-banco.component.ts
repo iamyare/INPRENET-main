@@ -269,18 +269,18 @@ enviar() {
   }
 
   // Log para ver qué contiene el FormData antes de enviar
-  /* formData.forEach((value, key) => {
+  formData.forEach((value, key) => {
       console.log(`Key ${key}:`, value);
-  }); */
+  });
 
-  this.afilService.createPersonaWithDetailsAndWorkCenters(formData).subscribe(
+  /* this.afilService.createPersonaWithDetailsAndWorkCenters(formData).subscribe(
       response => {
           console.log('Datos enviados con éxito:', response);
       },
       error => {
           console.error('Error al enviar los datos:', error);
       }
-  );
+  ); */
 }
 
   dataURLToBlob(dataURL: string): Blob {

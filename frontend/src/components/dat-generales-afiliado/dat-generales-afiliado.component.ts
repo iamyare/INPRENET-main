@@ -3,7 +3,7 @@ import { ControlContainer, FormArray, FormBuilder, FormControl, FormGroup, Valid
 import { AfiliadoService } from 'src/app/services/afiliado.service';
 import { DireccionService } from 'src/app/services/direccion.service';
 import { DatosEstaticosService } from 'src/app/services/datos-estaticos.service';
-import { FormStateService } from '../../app/services/form-state.service';
+import { FormStateService } from 'src/app/services/form-state.service';
 
 export function generateAddressFormGroup(datos?: any): FormGroup {
   return new FormGroup({
@@ -35,7 +35,7 @@ export function generateAddressFormGroup(datos?: any): FormGroup {
 @Component({
   selector: 'app-dat-generales-afiliado',
   templateUrl: './dat-generales-afiliado.component.html',
-  styleUrl: './dat-generales-afiliado.component.scss',
+  styleUrls: ['./dat-generales-afiliado.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   viewProviders: [
     {
@@ -53,15 +53,15 @@ export class DatGeneralesAfiliadoComponent implements OnInit, OnDestroy {
   tipoIdentData: any = [];
   nacionalidades: any = [];
   municipios: any = [];
-  generos: string[] = [];
+  generos: { value: string; label: string }[] = [];
   profesiones: any = [];
-  sexo: string[] = [];
+  sexo: { value: string; label: string }[] = [];
 
-
-  tipoCotizante: any = this.datosEstaticos.tipoCotizante; tipoIdent: any = this.datosEstaticos.tipoIdent;
+  tipoCotizante: any = this.datosEstaticos.tipoCotizante;
+  tipoIdent: any = this.datosEstaticos.tipoIdent;
   estadoCivil: any = this.datosEstaticos.estadoCivil;
-  representacion: any = this.datosEstaticos.representacion; estado: any = this.datosEstaticos.estado;
-
+  representacion: any = this.datosEstaticos.representacion;
+  estado: any = this.datosEstaticos.estado;
 
   @Input() useCamera: boolean = false;
   @Output() imageCaptured = new EventEmitter<string>();
@@ -78,7 +78,8 @@ export class DatGeneralesAfiliadoComponent implements OnInit, OnDestroy {
     private formStateService: FormStateService,
     private fb: FormBuilder,
     private afiliadoService: AfiliadoService,
-    public direccionSer: DireccionService, private datosEstaticos: DatosEstaticosService) {
+    public direccionSer: DireccionService,
+    private datosEstaticos: DatosEstaticosService) {
       this.form = this.fb.group({
         ...generateAddressFormGroup(),
         FotoPerfil: ['']  // Asegúrate de añadir esto
@@ -87,20 +88,16 @@ export class DatGeneralesAfiliadoComponent implements OnInit, OnDestroy {
     this.minDate = new Date(currentYear.getFullYear(), currentYear.getMonth(), currentYear.getDate(), currentYear.getHours(), currentYear.getMinutes(), currentYear.getSeconds());
   }
 
-
-
   ngOnInit(): void {
     this.formStateService.getFotoPerfil().subscribe(foto => {
       if (foto) {
-          this.form.get('FotoPerfil')?.setValue(foto);
+        this.form.get('FotoPerfil')?.setValue(foto);
       }
-  });
+    });
 
-    // Suscripción para actualizaciones del formulario almacenado
     this.formStateService.getFormData().subscribe((savedForm: FormGroup | null) => {
       if (savedForm) {
-        // Usar 'patchValue' para actualizar el formulario con los valores guardados.
-        this.form.patchValue(savedForm.value, { emitEvent: false }); // Omitir el emitEvent si no deseas disparar otros observables
+        this.form.patchValue(savedForm.value, { emitEvent: false });
       }
     });
 
@@ -155,5 +152,4 @@ export class DatGeneralesAfiliadoComponent implements OnInit, OnDestroy {
   handleImageCaptured(image: string) {
     this.imageCaptured.emit(image);
   }
-
 }

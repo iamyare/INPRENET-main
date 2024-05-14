@@ -27,7 +27,7 @@ export class VerDatosAfiliadosComponent implements OnInit {
     private dialog: MatDialog) { }
   ngOnInit(): void {
     this.myFormFields = [
-      { type: 'text', label: 'DNI del afiliado', name: 'dni', validations: [Validators.required, Validators.minLength(13), Validators.maxLength(14)], display: true, value: '' },
+      { type: 'text', label: 'DNI del afiliado', name: 'dni', validations: [Validators.required, Validators.minLength(13), Validators.maxLength(14)], display: true, value: '1234567890123' },
     ];
 
     this.myColumns = [

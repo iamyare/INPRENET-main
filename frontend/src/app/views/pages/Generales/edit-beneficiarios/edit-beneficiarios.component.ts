@@ -10,6 +10,8 @@ import { FieldConfig } from 'src/app/shared/Interfaces/field-config';
 import { TableColumn } from 'src/app/shared/Interfaces/table-column';
 import { convertirFechaInputs } from 'src/app/shared/functions/formatoFecha';
 import { unirNombres } from 'src/app/shared/functions/formatoNombresP';
+import { DatosEstaticosService } from 'src/app/services/datos-estaticos.service';
+import { DatePipe } from '@angular/common';
 
 @Component({
   selector: 'app-edit-beneficiarios',
@@ -17,26 +19,27 @@ import { unirNombres } from 'src/app/shared/functions/formatoNombresP';
   styleUrl: './edit-beneficiarios.component.scss'
 })
 export class EditBeneficiariosComponent {
-  convertirFechaInputs = convertirFechaInputs
-  public myFormFields: FieldConfig[] = []
+  convertirFechaInputs = convertirFechaInputs;
+  public myFormFields: FieldConfig[] = [];
   form: any;
   @Input() Afiliado!: any;
   unirNombres: any = unirNombres;
   datosTabl: any[] = [];
-
   prevAfil: boolean = false;
-
   public myColumns: TableColumn[] = [];
   public filas: any[] = [];
   ejecF: any;
+  municipios: { label: string, value: any }[] = [];
 
   constructor(
     private svcAfiliado: AfiliadoService,
     private toastr: ToastrService,
-    private dialog: MatDialog
+    private dialog: MatDialog,
+    private datosEstaticosService: DatosEstaticosService,
+    private datePipe: DatePipe
   ) { }
 
-  ngOnInit(): void {
+  async ngOnInit(): Promise<void> {
     this.myFormFields = [
       { type: 'text', label: 'DNI del afiliado', name: 'dni', validations: [Validators.required, Validators.minLength(13), Validators.maxLength(14)], display: true },
     ];
@@ -49,13 +52,18 @@ export class EditBeneficiariosComponent {
         validationRules: [Validators.required, Validators.minLength(3)]
       },
       {
-        header: 'Nombre Completo',
-        col: 'nombre_completo',
+        header: 'Nombres',
+        col: 'nombres',
         isEditable: true
       },
       {
-        header: 'Genero',
-        col: 'genero',
+        header: 'Apellidos',
+        col: 'apellidos',
+        isEditable: true
+      },
+      {
+        header: 'Porcentaje',
+        col: 'porcentaje',
         isEditable: true
       },
       {
@@ -64,8 +72,14 @@ export class EditBeneficiariosComponent {
         isEditable: true
       }
     ];
-    this.previsualizarInfoAfil()
+
+    await this.cargarMunicipios();
+    this.previsualizarInfoAfil();
     this.getFilas().then(() => this.cargar());
+  }
+
+  async cargarMunicipios() {
+    this.municipios = await this.datosEstaticosService.getMunicipios();
   }
 
   async obtenerDatos(event: any): Promise<any> {
@@ -77,7 +91,7 @@ export class EditBeneficiariosComponent {
       this.svcAfiliado.getAfilByParam(this.Afiliado.DNI).subscribe(
         async (result) => {
           this.prevAfil = true;
-          this.Afiliado = result
+          this.Afiliado = result;
           this.Afiliado.nameAfil = this.unirNombres(result.PRIMER_NOMBRE, result.SEGUNDO_NOMBRE, result.TERCER_NOMBRE, result.PRIMER_APELLIDO, result.SEGUNDO_APELLIDO);
           this.getFilas().then(() => this.cargar());
         },
@@ -85,7 +99,8 @@ export class EditBeneficiariosComponent {
           this.getFilas().then(() => this.cargar());
           this.toastr.error(`Error: ${error.error.message}`);
           this.resetDatos();
-        })
+        }
+      );
     }
   }
 
@@ -101,42 +116,39 @@ export class EditBeneficiariosComponent {
     if (this.Afiliado) {
       try {
         const data = await this.svcAfiliado.getAllBenDeAfil(this.Afiliado.DNI).toPromise();
+
         this.filas = data.map((item: any) => {
+          const nombres = [item.primerNombre, item.segundoNombre, item.tercerNombre].filter(part => part).join(' ');
+          const apellidos = [item.primerApellido, item.segundoApellido].filter(part => part).join(' ');
+          const fechaNacimiento = this.datePipe.transform(item.fechaNacimiento, 'dd/MM/yyyy') || 'Fecha no disponible';
+
           return {
-            id: item.id_persona,
-            dni: item.dni,
-            nombre_completo: unirNombres(item.primer_nombre, item.segundo_nombre, item.tercer_nombre, item.primer_apellido, item.segundo_apellido),
-            fecha_nacimiento: convertirFechaInputs(item.fecha_nacimiento),
+            id: item.ID_PERSONA,
+            dni: item.DNI,
+            nombres,
+            apellidos,
             genero: item.genero,
-          }
+            sexo: item.sexo,
+            cantidad_dependientes: item.cantidadDependientes,
+            representacion: item.representacion,
+            telefono_1: item.telefono1,
+            fecha_nacimiento: fechaNacimiento,
+            direccion_residencia: item.direccionResidencia,
+            idPaisNacionalidad: item.idPaisNacionalidad,
+            id_municipio_residencia: item.idMunicipioResidencia,
+            id_estado_persona: item.idEstadoPersona,
+            porcentaje: item.porcentaje,
+            tipo_persona: item.tipoPersona
+          };
         });
       } catch (error) {
         this.toastr.error('Error al cargar los datos de los beneficiarios');
-        console.error('Error al obtener datos de datos de los beneficiarios', error);
+        console.error('Error al obtener datos de los beneficiarios', error);
       }
     } else {
-      this.resetDatos()
+      this.resetDatos();
     }
   }
-
-  /*   editar = (row: any) => {
-      const BeneficiariosData = {
-        id: row.id_persona,
-        dni: row.dni,
-        nombre_completo: row.nombre_completo,
-        fecha_nacimiento: row.fecha_nacimiento,
-        genero: row.genero,
-      };
-  
-      this.svcAfiliado.updatePerfCentroTrabajo(row.id, BeneficiariosData).subscribe(
-        response => {
-          this.toastr.success('perfil de la persona en el centro de trabajo editado con éxito');
-        },
-        error => {
-          this.toastr.error('Error al actualizar el perfil de la persona en el centro de trabajo');
-        }
-      );
-    }; */
 
   ejecutarFuncionAsincronaDesdeOtroComponente(funcion: (data: any) => Promise<void>) {
     this.ejecF = funcion;
@@ -149,11 +161,22 @@ export class EditBeneficiariosComponent {
     }
   }
 
-  manejarAccionUno(row: any) {
+  async manejarAccionUno(row: any) {
     const campos = [
-      { nombre: 'dni', tipo: 'text', requerido: true, etiqueta: 'Nombre Centro Trabajo', editable: true },
-      { nombre: 'genero', tipo: 'text', requerido: true, etiqueta: 'genero', editable: true },
-      { nombre: 'fecha_nacimiento', tipo: 'number', requerido: true, etiqueta: 'Fecha Nacimiento', editable: true }
+      { nombre: 'dni', tipo: 'text', etiqueta: 'DNI', editable: true },
+      { nombre: 'nombres', tipo: 'text', etiqueta: 'Nombres', editable: true },
+      { nombre: 'apellidos', tipo: 'text', etiqueta: 'Apellidos', editable: true },
+      { nombre: 'genero', tipo: 'text', etiqueta: 'Género', editable: true, opciones: this.datosEstaticosService.genero },
+      { nombre: 'sexo', tipo: 'list', etiqueta: 'Sexo', editable: true, opciones: this.datosEstaticosService.sexo },
+      { nombre: 'cantidad_dependientes', tipo: 'number', etiqueta: 'Cantidad de Dependientes', editable: true },
+      { nombre: 'representacion', tipo: 'list', etiqueta: 'Representación', editable: true, opciones: this.datosEstaticosService.representacion },
+      { nombre: 'telefono_1', tipo: 'text', etiqueta: 'Teléfono 1', editable: true },
+      { nombre: 'fecha_nacimiento', tipo: 'date', etiqueta: 'Fecha de Nacimiento', editable: true },
+      { nombre: 'direccion_residencia', tipo: 'text', etiqueta: 'Dirección de Residencia', editable: true },
+      { nombre: 'idPaisNacionalidad', tipo: 'list', etiqueta: 'País Nacionalidad', editable: true, opciones: this.datosEstaticosService.nacionalidades },
+      { nombre: 'id_municipio_residencia', tipo: 'list', etiqueta: 'Municipio Residencia', editable: true, opciones: this.datosEstaticosService.municipios },
+      { nombre: 'id_estado_persona', tipo: 'list', etiqueta: 'Estado Persona', editable: true, opciones: this.datosEstaticosService.estado },
+      { nombre: 'porcentaje', tipo: 'number', etiqueta: 'Porcentaje', editable: true }
     ];
 
     this.openDialog(campos, row);
@@ -170,33 +193,8 @@ export class EditBeneficiariosComponent {
 
     dialogRef.afterClosed().subscribe((result: any) => {
       if (result) {
-        /* console.log(this.selectedTipoPlanilla);
-        this.planillaIngresosService.eliminarDetallePlanillaIngreso(row.id_detalle_plan_Ing).subscribe({
-          next: (response) => {
-            this.toastr.success(response.message);
-            
-            if (this.selectedTipoPlanilla) {
-              this.obtenerDetallesPlanilla(this.idCentroTrabajo, this.selectedTipoPlanilla);
-              this.obtenerDetallesPlanillaAgrupCent(this.idCentroTrabajo, this.selectedTipoPlanilla);
-            } else {
-              console.error('selectedTipoPlanilla está indefinido o no es un array válido.');
-              this.toastr.error('Ocurrió un error debido a un problema con el tipo de planilla seleccionado.');
-            }
-          },
-          error: (error) => {
-            console.error('Error al eliminar el detalle de la planilla ingreso:', error);
-            this.toastr.error('Ocurrió un error al eliminar el detalle de la planilla ingreso.');
-          }
-        }); */
       }
     });
-    /* const campos = [
-      { nombre: 'dni', tipo: 'text', requerido: true, etiqueta: 'Nombre Centro Trabajo', editable: true },
-      { nombre: 'genero', tipo: 'text', requerido: true, etiqueta: 'Número Acuerdo', editable: true },
-      { nombre: 'fecha_nacimiento', tipo: 'number', requerido: true, etiqueta: 'salario_base', editable: true }
-    ];
-
-    this.openDialog(campos, row); */
   }
 
   AgregarBeneficiario() {
@@ -221,8 +219,78 @@ export class EditBeneficiariosComponent {
 
     dialogRef.afterClosed().subscribe((result: any) => {
       if (result) {
-        console.log('Datos editados:', result);
+
+        const [primer_nombre, segundo_nombre, tercer_nombre] = result.nombres.split(' ');
+        const [primer_apellido, segundo_apellido] = result.apellidos.split(' ');
+
+        const fecha_nacimiento = this.datePipe.transform(result.fecha_nacimiento, 'dd/MM/yyyy') || '';
+
+        const updatedBeneficiario = {
+          id_pais: result.idPaisNacionalidad,
+          dni: result.dni,
+          primer_nombre,
+          segundo_nombre: segundo_nombre || '',
+          tercer_nombre: tercer_nombre || '',
+          primer_apellido,
+          segundo_apellido: segundo_apellido || '',
+          genero: result.genero,
+          sexo: result.sexo,
+          cantidad_dependientes: result.cantidad_dependientes,
+          representacion: result.representacion,
+          telefono_1: result.telefono_1,
+          fecha_nacimiento,
+          direccion_residencia: result.direccion_residencia,
+          id_municipio_residencia: result.id_municipio_residencia,
+          id_estado_persona: result.id_estado_persona,
+          porcentaje: result.porcentaje,
+          id_tipo_persona: 2
+        };
+
+        this.svcAfiliado.updateBeneficiario(row.id, updatedBeneficiario).subscribe(
+          (response) => {
+            this.toastr.success('Beneficiario actualizado exitosamente');
+            this.getFilas().then(() => {
+              const index = this.filas.findIndex((fila) => fila.id === row.id);
+              if (index !== -1) {
+                this.filas[index] = { ...this.filas[index], ...updatedBeneficiario };
+                this.cargar();
+              }
+            });
+          },
+          (error) => {
+            this.toastr.error('Error al actualizar el beneficiario');
+            console.error('Error al actualizar el beneficiario', error);
+          }
+        );
       }
     });
   }
+
+  /* get porcentajes() {
+    return this.formParent.get('beneficiario') as FormArray;
+  }
+
+  validateTotalPercentage() {
+
+  }
+  suma100Validator(): any {
+    return (control: FormControl) => {
+      const valor = control.value;
+      const beneficiarioArray = this.formParent.get('beneficiario') as FormArray;
+      const totalPercentage = beneficiarioArray.controls.reduce((total, control) => {
+        return total + (control.get('beneficiario')?.value || 0);
+      }, 0);
+
+      //this.formParent.setErrors({ 'invalidPercentage': true });
+      console.log(this.formParent);
+      if (totalPercentage !== 100) {
+        return { sumaNo100: true };
+
+        this.formParent.setErrors({ 'invalidPercentage': true });
+      } else {
+        return { sumaNo100: false };
+        this.formParent.setErrors({ 'invalidPercentage': false });
+      }
+    };
+  } */
 }

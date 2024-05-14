@@ -79,8 +79,8 @@
           <mat-form-field class="example-full-width inputs" appearance="outline">
             <mat-label>Sexo</mat-label>
             <mat-select formControlName="sexo">
-              <mat-option *ngFor="let sexo of sexo" [value]="sexo">
-                {{ sexo }}
+              <mat-option *ngFor="let sexo of sexo" [value]="sexo.value">
+                {{ sexo.label }}
               </mat-option>
             </mat-select>
           </mat-form-field>
@@ -97,8 +97,8 @@
           <mat-form-field class="example-full-width inputs" appearance="outline">
             <mat-label>Nacionalidad</mat-label>
             <mat-select formControlName="id_pais_nacionalidad">
-              <mat-option *ngFor="let nac of nacionalidades" [value]="nac.id_pais">
-                {{ nac.nacionalidad }}
+              <mat-option *ngFor="let nac of nacionalidades" [value]="nac.value">
+                {{ nac.label }}
               </mat-option>
             </mat-select>
           </mat-form-field>
@@ -127,8 +127,8 @@
           <mat-form-field class="example-full-width inputs" appearance="outline">
             <mat-label>Género</mat-label>
             <mat-select formControlName="genero">
-              <mat-option *ngFor="let genero of generos" [value]="genero">
-                {{ genero }}
+              <mat-option *ngFor="let genero of generos" [value]="genero.value">
+                {{ genero.label }}
               </mat-option>
             </mat-select>
           </mat-form-field>
@@ -160,7 +160,7 @@
             <mat-label>Representación</mat-label>
             <mat-select matNativeControl formControlName="representacion">
               <mat-option *ngFor="let p of representacion" [value]="p.value">
-                {{ p.value }}
+                {{ p.label }}
               </mat-option>
             </mat-select>
           </mat-form-field>

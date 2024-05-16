@@ -156,7 +156,7 @@ export class BenefComponent implements OnInit {
   getErrors(i: number, fieldName: string): any {
     if (this.formParent instanceof FormGroup) {
       const controlesrefpers = (this.formParent.get('beneficiario') as FormGroup).controls;
-      const temp = controlesrefpers[i].get("datosBeneficiario")!.get(fieldName)!.errors
+      /* const temp = controlesrefpers[i].get("datosBeneficiario")!.get(fieldName)!.errors
 
       let errors = []
       if (temp) {
@@ -176,7 +176,7 @@ export class BenefComponent implements OnInit {
           errors.push('Correo electrónico no válido.');
         }
         return errors;
-      }
+      } */
     }
   }
 }

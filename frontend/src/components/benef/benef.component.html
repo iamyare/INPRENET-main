@@ -106,7 +106,7 @@
                 <mat-form-field style="flex-direction: column-reverse;" class="example-full-width inputs"
                   appearance="outline">
                   <mat-label>Teléfono 1</mat-label>
-                  <input matInput formControlName="telefono_1">
+                  <input matInput formControlName="telefono1">
                 </mat-form-field>
                 <mat-error *ngFor="let error of getErrors(i, 'telefono1')">
                   {{ error }}
@@ -130,7 +130,7 @@
               <div class="col-md-4">
                 <mat-form-field class="example-full-width inputs" appearance="outline">
                   <mat-label>Dirección de Residencia</mat-label>
-                  <input matInput formControlName="direccion_residencia">
+                  <input matInput formControlName="direccionResidencia">
                 </mat-form-field>
                 <mat-error *ngFor="let error of getErrors(i, 'direccionResidencia')">
                   {{ error }}
@@ -140,7 +140,7 @@
               <div class="col-md-4">
                 <mat-form-field class="example-full-width inputs" appearance="outline">
                   <mat-label>Nacionalidad</mat-label>
-                  <mat-select formControlName="id_pais">
+                  <mat-select formControlName="id_pais_nacionalidad">
                     <mat-option *ngFor="let nac of nacionalidades" [value]="nac.value">
                       {{ nac.label }}
                     </mat-option>
@@ -157,7 +157,7 @@
                 <mat-form-field style="flex-direction: column-reverse;" class="example-full-width inputs"
                   appearance="outline">
                   <mat-label>Municipio de Residencia</mat-label>
-                  <mat-select formControlName="id_municipio_residencia">
+                  <mat-select formControlName="idMunicipioResidencia">
                     <mat-option *ngFor="let municipio of municipios" [value]="municipio.id_municipio">
                       {{ municipio.nombre_municipio }}
                     </mat-option>
@@ -183,6 +183,9 @@
                   <mat-label>DNI</mat-label>
                   <input matInput formControlName="dni">
                 </mat-form-field>
+                <mat-error *ngFor="let error of getErrors(i, 'dni')">
+                  {{ error }}
+                </mat-error>
               </div>
             </div>
           </div>

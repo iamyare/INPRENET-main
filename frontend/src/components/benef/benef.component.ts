@@ -15,9 +15,10 @@ export class BenefComponent implements OnInit {
   public formParent: FormGroup;
   public municipios: any[] = [];
   public nacionalidades: any[] = [];
+  representacion: any = this.datosEstaticosService.representacion;
 
   @Input() datos: any;
-  @Output() newDatBenChange = new EventEmitter<any>();
+  @Output() newDatBenChange = new EventEmitter<FormGroup>();
 
   constructor(
     private formStateService: FormStateService,
@@ -57,19 +58,20 @@ export class BenefComponent implements OnInit {
   initFormBeneficiario(datosBeneficiario?: any): FormGroup {
     return this.fb.group({
       datosBeneficiario: this.fb.group({
-        primerNombre: new FormControl(datosBeneficiario?.primerNombre || '', [Validators.required, Validators.maxLength(40)]),
-        segundoNombre: new FormControl(datosBeneficiario?.segundoNombre || '', [Validators.maxLength(40)]),
-        tercerNombre: new FormControl(datosBeneficiario?.tercerNombre || ''),
-        primerApellido: new FormControl(datosBeneficiario?.primerApellido || '', [Validators.required, Validators.maxLength(40)]),
-        segundoApellido: new FormControl(datosBeneficiario?.segundoApellido || ''),
+        dni: new FormControl(datosBeneficiario?.dni || '', [Validators.required, Validators.maxLength(40)]),
+        primer_nombre: new FormControl(datosBeneficiario?.primer_nombre || '', [Validators.required, Validators.maxLength(40)]),
+        segundo_nombre: new FormControl(datosBeneficiario?.segundo_nombre || '', [Validators.maxLength(40)]),
+        tercer_nombre: new FormControl(datosBeneficiario?.tercer_nombre || ''),
+        primer_apellido: new FormControl(datosBeneficiario?.primer_apellido || '', [Validators.required, Validators.maxLength(40)]),
+        segundo_apellido: new FormControl(datosBeneficiario?.segundo_apellido || ''),
         genero: new FormControl(datosBeneficiario?.genero || ''),
-        cantidadDependientes: new FormControl(datosBeneficiario?.cantidadDependientes || 0),
+        cantidad_dependientes: new FormControl(datosBeneficiario?.cantidad_dependientes || 0),
         representacion: new FormControl(datosBeneficiario?.representacion || ''),
-        telefono1: new FormControl(datosBeneficiario?.telefono1 || ''),
-        fechaNacimiento: new FormControl(datosBeneficiario?.fechaNacimiento || '', Validators.required),
-        direccionResidencia: new FormControl(datosBeneficiario?.direccionResidencia || ''),
-        id_pais_nacionalidad: new FormControl(datosBeneficiario?.id_pais_nacionalidad || null, Validators.required),
-        idMunicipioResidencia: new FormControl(datosBeneficiario?.idMunicipioResidencia || null, Validators.required),
+        telefono_1: new FormControl(datosBeneficiario?.telefono_1 || ''),
+        fecha_nacimiento: new FormControl(datosBeneficiario?.fecha_nacimiento || '', Validators.required),
+        direccion_residencia: new FormControl(datosBeneficiario?.direccion_residencia || ''),
+        id_pais: new FormControl(datosBeneficiario?.id_pais || null, Validators.required),
+        id_municipio_residencia: new FormControl(datosBeneficiario?.id_municipio_residencia || null, Validators.required),
       }),
       porcentaje: new FormControl(datosBeneficiario?.porcentaje || '', [Validators.required, Validators.maxLength(5)]),
     });

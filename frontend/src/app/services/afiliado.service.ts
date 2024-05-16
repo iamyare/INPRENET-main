@@ -16,6 +16,11 @@ export class AfiliadoService {
     return this.http.post<any>(url, formData);
   }
 
+  createBeneficiarioConDetalle(personaData: any): Observable<any> {
+    const url = `${environment.API_URL}/api/Persona/create-with-detalle`;
+    return this.http.post<any>(url, personaData);
+}
+
   updateBeneficiario(idPersona: number, updatedData: any): Observable<any> {
     const url = `${environment.API_URL}/api/Persona/actualizarBeneficiario/${idPersona}`;
     return this.http.put<any>(url, updatedData);

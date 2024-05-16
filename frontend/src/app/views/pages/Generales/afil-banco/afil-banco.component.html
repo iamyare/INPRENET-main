@@ -7,30 +7,30 @@
 
 <div class="main-content">
   <div class="col-md-12">
-    <form [formGroup]="form" #myForm="ngForm" change="getLabel()">
+    <form [formGroup]="form" #myForm="ngForm" (change)="getLabel()">
       <app-dat-generales-afiliado [useCamera]="true" (imageCaptured)="handleImageCaptured($event)"
         *ngIf="DatosGenerales" groupName="DatosGenerales"></app-dat-generales-afiliado>
 
       <app-col-magisteriales *ngIf="ColegiosMagisteriales" [datos]="formColegiosMagisteriales"
         (newDataColegioMagisterial)="setDatosColegiosMag($event)"></app-col-magisteriales>
-    </form>
 
-    <app-new-familiares *ngIf="datosFamiliares" [datos]="formDatosFamiliares"
-      (newDatosFamiliares)="setDatosFamiliares($event)">
-    </app-new-familiares>
+      <app-new-familiares *ngIf="datosFamiliares" [datos]="formDatosFamiliares"
+        (newDatosFamiliares)="setDatosFamiliares($event)">
+      </app-new-familiares>
 
-    <app-dat-puesto-trab *ngIf="DatosPuestoTrab" [datos]="formPuestTrab"
-      (newDatDatosPuestTrab)="setDatosPuetTrab1($event)">
-    </app-dat-puesto-trab>
+      <app-dat-puesto-trab *ngIf="DatosPuestoTrab" [datos]="formPuestTrab"
+        (newDatDatosPuestTrab)="setDatosPuetTrab1($event)">
+      </app-dat-puesto-trab>
 
-    <app-historial-salario *ngIf="DatosHS" [datos]="formHistPag"
-      (newDatHistSal)="setHistSal($event)"></app-historial-salario>
+      <app-historial-salario *ngIf="DatosHS" [datos]="formHistPag"
+        (newDatHistSal)="setHistSal($event)"></app-historial-salario>
 
-    <app-ref-pers *ngIf="referenc" [datos]="formReferencias"
-      (newDatRefPerChange)="setDatosRefPer($event)"></app-ref-pers>
+      <app-ref-pers *ngIf="referenc" [datos]="formReferencias"
+        (newDatRefPerChange)="setDatosRefPer($event)"></app-ref-pers>
 
-    <app-benef *ngIf="datosBeneficiario" [datos]="formBeneficiarios"
-      (newDatBenChange)="setDatosBen($event)"></app-benef>
+      <app-benef *ngIf="datosBeneficiario" [datos]="formBeneficiarios"
+        (newDatBenChange)="setDatosBen($event)"></app-benef>
+
 
     <div class="card" *ngIf="datosF">
       <div class="card-header card-header-danger tittle">
@@ -69,11 +69,23 @@
       <strong>Status:</strong> {{ formBeneficiarios.controls.beneficiario.status }} -->
 
       <div class="card-body" style="text-align: center;">
-        <button mat-button color="primary" (click)="enviar()"
-          [disabled]="form.controls.DatosGenerales.invalid || formColegiosMagisteriales.controls.ColMags.invalid || formDatosFamiliares.controls.familiar.invalid || formHistPag.controls.banco.invalid || formPuestTrab.controls.trabajo.invalid || formReferencias.controls.refpers.invalid || formBeneficiarios.controls.beneficiario.invalid">
+        <!-- <button mat-button color="primary" (click)="enviar()"
+          [disabled]="
+          form.controls.DatosGenerales.invalid ||
+          formColegiosMagisteriales.controls.ColMags.invalid ||
+          formDatosFamiliares.controls.familiar.invalid ||
+          formHistPag.controls.banco.invalid ||
+          formPuestTrab.controls.trabajo.invalid ||
+          formReferencias.controls.refpers.invalid ||
+          formBeneficiarios.controls.beneficiario.invalid"
+          >
+          Enviar Formulario
+        </button> -->
+        <button mat-button color="primary" (click)="enviar()">
           Enviar Formulario
         </button>
       </div>
     </div>
+  </form>
   </div>
 </div>

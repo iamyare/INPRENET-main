@@ -15,18 +15,18 @@
             <div class="col-md-6 col-sm-6">
               <mat-form-field style="flex-direction: column-reverse;" class="full-width-field" appearance="outline">
                 <mat-label>Primer Nombre</mat-label>
-                <input matInput formControlName="primerNombre">
+                <input matInput formControlName="primer_nombre">
               </mat-form-field>
-              <mat-error *ngFor="let error of getErrors(i, 'primerNombre')">
+              <mat-error *ngFor="let error of getErrors(i, 'primer_nombre')">
                 {{ error }}
               </mat-error>
             </div>
             <div class="col-md-6 col-sm-6">
               <mat-form-field style="flex-direction: column-reverse;" class="full-width-field" appearance="outline">
                 <mat-label>Segundo Nombre</mat-label>
-                <input matInput formControlName="segundoNombre">
+                <input matInput formControlName="segundo_nombre">
               </mat-form-field>
-              <mat-error *ngFor="let error of getErrors(i, 'segundoNombre')">
+              <mat-error *ngFor="let error of getErrors(i, 'segundo_nombre')">
                 {{ error }}
               </mat-error>
             </div>
@@ -36,18 +36,18 @@
             <div class="col-md-6 col-sm-6">
               <mat-form-field style="flex-direction: column-reverse;" class="full-width-field" appearance="outline">
                 <mat-label>Primer Apellido</mat-label>
-                <input matInput formControlName="primerApellido">
+                <input matInput formControlName="primer_apellido">
               </mat-form-field>
-              <mat-error *ngFor="let error of getErrors(i, 'primerApellido')">
+              <mat-error *ngFor="let error of getErrors(i, 'primer_apellido')">
                 {{ error }}
               </mat-error>
             </div>
             <div class="col-md-6 col-sm-6">
               <mat-form-field style="flex-direction: column-reverse;" class="full-width-field" appearance="outline">
                 <mat-label>Segundo Apellido</mat-label>
-                <input matInput formControlName="segundoApellido">
+                <input matInput formControlName="segundo_apellido">
               </mat-form-field>
-              <mat-error *ngFor="let error of getErrors(i, 'segundoApellido')">
+              <mat-error *ngFor="let error of getErrors(i, 'segundo_apellido')">
                 {{ error }}
               </mat-error>
             </div>
@@ -66,11 +66,11 @@
             <div class="col-md-6 col-sm-6">
               <mat-form-field style="flex-direction: column-reverse;" class="full-width-field" appearance="outline">
                 <mat-label>Fecha de Nacimiento</mat-label>
-                <input matInput [matDatepicker]="picker" formControlName="fechaNacimiento">
+                <input matInput [matDatepicker]="picker" formControlName="fecha_nacimiento">
                 <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
                 <mat-datepicker #picker></mat-datepicker>
               </mat-form-field>
-              <mat-error *ngFor="let error of getErrors(i, 'fechaNacimiento')">
+              <mat-error *ngFor="let error of getErrors(i, 'fecha_nacimiento')">
                 {{ error }}
               </mat-error>
             </div>

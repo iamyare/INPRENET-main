@@ -15,35 +15,35 @@
               <div class="col-md-6">
                 <mat-form-field class="example-full-width inputs" appearance="outline">
                   <mat-label>Primer Nombre</mat-label>
-                  <input matInput formControlName="primerNombre" required>
+                  <input matInput formControlName="primer_nombre" required>
                 </mat-form-field>
               </div>
 
               <div class="col-md-6">
                 <mat-form-field class="example-full-width inputs" appearance="outline">
                   <mat-label>Segundo Nombre</mat-label>
-                  <input matInput formControlName="segundoNombre">
+                  <input matInput formControlName="segundo_nombre">
                 </mat-form-field>
               </div>
 
               <div class="col-md-6">
                 <mat-form-field class="example-full-width inputs" appearance="outline">
                   <mat-label>Tercer Nombre</mat-label>
-                  <input matInput formControlName="tercerNombre">
+                  <input matInput formControlName="tercer_nombre">
                 </mat-form-field>
               </div>
 
               <div class="col-md-6">
                 <mat-form-field class="example-full-width inputs" appearance="outline">
                   <mat-label>Primer Apellido</mat-label>
-                  <input matInput formControlName="primerApellido" required>
+                  <input matInput formControlName="primer_apellido" required>
                 </mat-form-field>
               </div>
 
               <div class="col-md-6">
                 <mat-form-field class="example-full-width inputs" appearance="outline">
                   <mat-label>Segundo Apellido</mat-label>
-                  <input matInput formControlName="segundoApellido">
+                  <input matInput formControlName="segundo_apellido">
                 </mat-form-field>
               </div>
 
@@ -60,42 +60,48 @@
               <div class="col-md-6">
                 <mat-form-field class="example-full-width inputs" appearance="outline">
                   <mat-label>Cantidad de Dependientes</mat-label>
-                  <input matInput formControlName="cantidadDependientes" type="number">
+                  <input matInput formControlName="cantidad_dependientes" type="number">
                 </mat-form-field>
               </div>
 
-              <div class="col-md-6">
+              <div class="col-md-6 col-sm-12">
                 <mat-form-field class="example-full-width inputs" appearance="outline">
                   <mat-label>Representación</mat-label>
-                  <input matInput formControlName="representacion">
+                  <mat-select matNativeControl formControlName="representacion">
+                    <mat-option *ngFor="let p of representacion" [value]="p.value">
+                      {{ p.label }}
+                    </mat-option>
+                  </mat-select>
                 </mat-form-field>
               </div>
 
               <div class="col-md-6">
                 <mat-form-field class="example-full-width inputs" appearance="outline">
                   <mat-label>Teléfono 1</mat-label>
-                  <input matInput formControlName="telefono1">
+                  <input matInput formControlName="telefono_1">
                 </mat-form-field>
               </div>
 
               <div class="col-md-6">
-                <mat-form-field class="example-full-width inputs" appearance="outline">
+                <mat-form-field style="flex-direction: column-reverse;" class="example-full-width inputs" appearance="outline">
                   <mat-label>Fecha de Nacimiento</mat-label>
-                  <input matInput formControlName="fechaNacimiento" type="date" required>
+                  <input matInput [matDatepicker]="picker" formControlName="fecha_nacimiento">
+                  <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+                  <mat-datepicker #picker></mat-datepicker>
                 </mat-form-field>
               </div>
 
               <div class="col-md-6">
                 <mat-form-field class="example-full-width inputs" appearance="outline">
                   <mat-label>Dirección de Residencia</mat-label>
-                  <input matInput formControlName="direccionResidencia">
+                  <input matInput formControlName="direccion_residencia">
                 </mat-form-field>
               </div>
 
               <div class="col-md-6">
                 <mat-form-field class="example-full-width inputs" appearance="outline">
                   <mat-label>Nacionalidad</mat-label>
-                  <mat-select formControlName="id_pais_nacionalidad">
+                  <mat-select formControlName="id_pais">
                     <mat-option *ngFor="let nac of nacionalidades" [value]="nac.value">
                       {{ nac.label }}
                     </mat-option>
@@ -106,11 +112,18 @@
               <div class="col-md-6">
                 <mat-form-field class="example-full-width inputs" appearance="outline">
                   <mat-label>Municipio de Residencia</mat-label>
-                  <mat-select formControlName="idMunicipioResidencia">
+                  <mat-select formControlName="id_municipio_residencia">
                     <mat-option *ngFor="let municipio of municipios" [value]="municipio.id_municipio">
                       {{ municipio.nombre_municipio }}
                     </mat-option>
                   </mat-select>
+                </mat-form-field>
+              </div>
+
+              <div class="col-md-6">
+                <mat-form-field class="example-full-width inputs" appearance="outline">
+                  <mat-label>DNI</mat-label>
+                  <input matInput formControlName="dni">
                 </mat-form-field>
               </div>
             </div>

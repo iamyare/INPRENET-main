@@ -9,12 +9,12 @@ import { DatosEstaticosService } from 'src/app/services/datos-estaticos.service'
 
 export function generateFamiliaresFormGroup(datos?: any): FormGroup {
   return new FormGroup({
-    primerNombre: new FormControl(datos.primerNombre || '', [Validators.required, Validators.maxLength(40)]),
-    segundoNombre: new FormControl(datos.segundoNombre || '', [Validators.maxLength(40)]),
-    primerApellido: new FormControl(datos.primerApellido || '', [Validators.required, Validators.maxLength(40)]),
-    segundoApellido: new FormControl(datos.segundoApellido || '', [Validators.maxLength(40)]),
+    primer_nombre: new FormControl(datos.primer_nombre || '', [Validators.required, Validators.maxLength(40)]),
+    segundo_nombre: new FormControl(datos.segundo_nombre || '', [Validators.maxLength(40)]),
+    primer_apellido: new FormControl(datos.primer_apellido || '', [Validators.required, Validators.maxLength(40)]),
+    segundo_apellido: new FormControl(datos.segundo_apellido || '', [Validators.maxLength(40)]),
     dni: new FormControl(datos.dni || '', [Validators.required, Validators.pattern(/^[0-9]{13}$|^[0-9]{4}-[0-9]{4}-[0-9]{5}$/), Validators.maxLength(15)]),
-    fechaNacimiento: new FormControl(datos.fechaNacimiento || '', Validators.required),
+    fecha_nacimiento: new FormControl(datos.fecha_nacimiento || '', Validators.required),
     parentesco: new FormControl(datos.parentesco || '', Validators.required)
   });
 }
@@ -98,12 +98,12 @@ export class NewFamiliaresComponent implements OnInit {
   guardarFamiliares(): void {
     const familiaresArray = (this.formParent.get('familiar') as FormArray).value;
     const familiaresData = familiaresArray.map((familiar: any) => ({
-      primerNombre: String(familiar.primerNombre),
-      segundoNombre: familiar.segundoNombre ? String(familiar.segundoNombre) : undefined,
-      primerApellido: String(familiar.primerApellido),
-      segundoApellido: familiar.segundoApellido ? String(familiar.segundoApellido) : undefined,
+      primer_nombre: String(familiar.primer_nombre),
+      segundo_nombre: familiar.segundo_nombre ? String(familiar.segundo_nombre) : undefined,
+      primer_apellido: String(familiar.primer_apellido),
+      segundo_apellido: familiar.segundo_apellido ? String(familiar.segundo_apellido) : undefined,
       dni: String(familiar.dni),
-      fechaNacimiento: this.datePipe.transform(familiar.fechaNacimiento, 'yyyy-MM-dd') || undefined,
+      fecha_nacimiento: this.datePipe.transform(familiar.fecha_nacimiento, 'yyyy-MM-dd') || undefined,
       parentesco: String(familiar.parentesco)
     }));
 

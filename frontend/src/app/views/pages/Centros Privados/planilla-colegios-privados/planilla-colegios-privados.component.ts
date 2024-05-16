@@ -22,10 +22,6 @@ import { DatosEstaticosService } from 'src/app/services/datos-estaticos.service'
 import { CentroTrabajoService } from 'src/app/services/centro-trabajo.service';
 import { jwtDecode } from 'jwt-decode';
 import { ToastrService } from 'ngx-toastr';
-import { ConfirmDialogComponent } from '@docs-components/confirm-dialog/confirm-dialog.component';
-import * as XLSX from 'xlsx';
-import jsPDF from 'jspdf';
-import 'jspdf-autotable';
 
 export interface Item {
   id_centro_trabajo: number;
@@ -47,17 +43,17 @@ export class PlanillaColegiosPrivadosComponent
   mostrarSegundoPaso = false;
   mostrarTercerPaso = false;
   isLinear = false;
-  
+
   dataSourceItems!: MatTableDataSource<Item>;
   tiposPlanillaPrivadas: any;
 
   selectedItem: Item | null = null;
   idCentroTrabajo!: number;
-    
+
   selectedTipoPlanilla: any;
   idPlanilla!: number;
   idTipoPlanilla!: number;
-  
+
   constructor(
     private _formBuilder: FormBuilder,
     private cdr: ChangeDetectorRef,
@@ -105,18 +101,18 @@ export class PlanillaColegiosPrivadosComponent
         if (selectedValue) {
           this.selectedTipoPlanilla = selectedValue;
           this.idTipoPlanilla = selectedValue[0].ID_TIPO_PLANILLA
-          
+
           this.mostrarPrimerPaso = true;
           this.mostrarSegundoPaso = true;
           this.mostrarTercerPaso = false;
-          
+
           this.datosPlanilla()
-          
+
           /* this.mostrarTercerPaso = true; */
           this.cdr.detectChanges();
           this.dataSourceItems.paginator = this.paginator;
           this.dataSourceItems.sort = this.sort;
-        } 
+        }
       });
 
     this.dataSourceItems = new MatTableDataSource<Item>([]);
@@ -157,9 +153,9 @@ async cargarCentrosDeTrabajo() {
           (response: any) => {
             if (response.data.length > 0) {
               this.idPlanilla = response.data[0].ID_PLANILLA
-              
+
               this.mostrarTercerPaso = true;
-              
+
               this.firstFormGroup
               .get('selectedTipoPlanilla')
               ?.valueChanges.subscribe((selectedValue) => {

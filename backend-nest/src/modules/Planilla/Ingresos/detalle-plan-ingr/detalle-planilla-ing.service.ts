@@ -646,8 +646,14 @@ export class DetallePlanillaIngresoService {
     }
   }
 
-  async pagar(id_planilla: number, id_centro_educativo: number): Promise<boolean> {
-    return true
+  async pagar(id_planilla: number, id_centro_educativo: number): Promise<any> {
+    const detallePlanilla = await this.detallePlanillaIngr.find({ where: { centroTrabajo: { id_centro_trabajo: id_centro_educativo }, planilla: { estado: "ACTIVA" }, estado: "CARGADO" } })
+    /* traer los registros siguientes a la planilla pagada */
+
+
+    console.log(detallePlanilla);
+
+    return detallePlanilla;
   }
 
 }

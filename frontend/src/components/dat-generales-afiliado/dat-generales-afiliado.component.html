@@ -4,202 +4,298 @@
     <p class="card-category">Completa la información correspondiente</p>
   </div>
   <div class="card-body">
-    <app-camara
-    *ngIf="useCamera"
-    (imageCaptured)="handleImageCaptured($event)">
+    <app-camara *ngIf="useCamera" (imageCaptured)="handleImageCaptured($event)">
     </app-camara>
-    <fieldset [formGroupName]="groupName" cForm>
-      <div class="row">
-        <div class="col-md-6 col-sm-12">
-          <mat-form-field class="example-full-width inputs" appearance="outline">
-            <mat-label>Tipo De Identificación</mat-label>
-            <mat-select matNativeControl formControlName="id_tipo_identificacion">
-              <mat-option *ngFor="let item of tipoIdentData" [value]="item.value">
-                {{ item.label }}
-              </mat-option>
-            </mat-select>
-          </mat-form-field>
+    <form [formGroup]="formParent" style="margin: 1%;" (change)="onDatosGeneralesChange()">
+      <div formArrayName="refpers">
+        <div *ngFor="let ref of getCtrl('refpers', formParent).controls; index as i">
+          <div [formGroupName]="i" class="row">
+            <div class="row">
+              <div class="col-md-6 col-sm-12">
+                <mat-form-field style="flex-direction: column-reverse;" class="example-full-width inputs"
+                  appearance="outline">
+                  <mat-label>Tipo De Identificación</mat-label>
+                  <mat-select matNativeControl formControlName="id_tipo_identificacion">
+                    <mat-option *ngFor="let item of tipoIdentData" [value]="item.value">
+                      {{ item.label }}
+                    </mat-option>
+                  </mat-select>
+                </mat-form-field>
+                <mat-error *ngFor="let error of getErrors(i, 'id_tipo_identificacion')">
+                  {{ error }}
+                </mat-error>
+              </div>
+              <div class="col-md-6 col-sm-12">
+                <mat-form-field style="flex-direction: column-reverse;" class="example-full-width inputs"
+                  appearance="outline">
+                  <mat-label>Número De Identificación</mat-label>
+                  <input matInput formControlName="dni">
+                </mat-form-field>
+                <mat-error *ngFor="let error of getErrors(i, 'dni')">
+                  {{ error }}
+                </mat-error>
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-md-3 col-sm-6">
+                <mat-form-field style="flex-direction: column-reverse;" class="example-full-width inputs"
+                  appearance="outline">
+                  <mat-label>Primer Nombre</mat-label>
+                  <input matInput formControlName="primer_nombre">
+                </mat-form-field>
+                <mat-error *ngFor="let error of getErrors(i, 'primer_nombre')">
+                  {{ error }}
+                </mat-error>
+              </div>
+              <div class="col-md-3 col-sm-6">
+                <mat-form-field style="flex-direction: column-reverse;" class="example-full-width inputs"
+                  appearance="outline">
+                  <mat-label>Segundo Nombre</mat-label>
+                  <input matInput formControlName="segundo_nombre">
+                </mat-form-field>
+                <mat-error *ngFor="let error of getErrors(i, 'segundo_nombre')">
+                  {{ error }}
+                </mat-error>
+              </div>
+              <div class="col-md-3 col-sm-6">
+                <mat-form-field style="flex-direction: column-reverse;" class="example-full-width inputs"
+                  appearance="outline">
+                  <mat-label>Primer Apellido</mat-label>
+                  <input matInput formControlName="primer_apellido">
+                </mat-form-field>
+                <mat-error *ngFor="let error of getErrors(i, 'primer_apellido')">
+                  {{ error }}
+                </mat-error>
+              </div>
+              <div class="col-md-3 col-sm-6">
+                <mat-form-field style="flex-direction: column-reverse;" class="example-full-width inputs"
+                  appearance="outline">
+                  <mat-label>Segundo Apellido</mat-label>
+                  <input matInput formControlName="segundo_apellido">
+                </mat-form-field>
+                <mat-error *ngFor="let error of getErrors(i, 'segundo_apellido')">
+                  {{ error }}
+                </mat-error>
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-md-3 col-sm-6">
+                <mat-form-field style="flex-direction: column-reverse;" class="example-full-width inputs"
+                  appearance="outline">
+                  <mat-label>Tercer Nombre</mat-label>
+                  <input matInput formControlName="tercer_nombre">
+                </mat-form-field>
+                <mat-error *ngFor="let error of getErrors(i, 'tercer_nombre')">
+                  {{ error }}
+                </mat-error>
+              </div>
+              <div class="col-md-3 col-sm-6">
+                <mat-form-field style="flex-direction: column-reverse;" class="example-full-width inputs"
+                  appearance="outline">
+                  <mat-label>Fecha De Nacimiento</mat-label>
+                  <mat-datepicker-toggle matSuffix [for]="fechaNac"></mat-datepicker-toggle>
+                  <mat-datepicker #fechaNac></mat-datepicker>
+                  <input matInput formControlName="fecha_nacimiento" [matDatepicker]="fechaNac">
+                  <mat-hint>MM/DD/YYYY</mat-hint>
+                </mat-form-field>
+                <mat-error *ngFor="let error of getErrors(i, 'fecha_nacimiento')">
+                  {{ error }}
+                </mat-error>
+              </div>
+              <div class="col-md-3 col-sm-6">
+                <mat-form-field style="flex-direction: column-reverse;" class="example-full-width inputs"
+                  appearance="outline">
+                  <mat-label>Cantidad De Dependientes</mat-label>
+                  <input matInput type="number" formControlName="cantidad_dependientes">
+                </mat-form-field>
+                <mat-error *ngFor="let error of getErrors(i, 'cantidad_dependientes')">
+                  {{ error }}
+                </mat-error>
+              </div>
+              <div class="col-md-3 col-sm-6">
+                <mat-form-field style="flex-direction: column-reverse;" class="example-full-width inputs"
+                  appearance="outline">
+                  <mat-label>Sexo</mat-label>
+                  <mat-select formControlName="sexo">
+                    <mat-option *ngFor="let sexo of sexo" [value]="sexo.value">
+                      {{ sexo.label }}
+                    </mat-option>
+                  </mat-select>
+                </mat-form-field>
+                <mat-error *ngFor="let error of getErrors(i, 'sexo')">
+                  {{ error }}
+                </mat-error>
+              </div>
+              <!-- <div class="col-md-3 col-sm-6">
+                  <mat-form-field style="flex-direction: column-reverse;"class="example-full-width inputs" appearance="outline">
+                    <mat-label>Cantidad De Hijos</mat-label>
+                    <input matInput type="number" formControlName="cantidad_hijos">
+                  </mat-form-field>
+                  <mat-error *ngFor="let error of getErrors(i, 'id_tipo_identificacion')">
+                  {{ error }}
+                </mat-error>
+                </div> -->
+            </div>
+            <div class="row">
+              <div class="col-md-4 col-sm-6">
+                <mat-form-field style="flex-direction: column-reverse;" class="example-full-width inputs"
+                  appearance="outline">
+                  <mat-label>Nacionalidad</mat-label>
+                  <mat-select formControlName="id_pais_nacionalidad">
+                    <mat-option *ngFor="let nac of nacionalidades" [value]="nac.value">
+                      {{ nac.label }}
+                    </mat-option>
+                  </mat-select>
+                </mat-form-field>
+                <mat-error *ngFor="let error of getErrors(i, 'id_pais_nacionalidad')">
+                  {{ error }}
+                </mat-error>
+              </div>
+              <div class="col-md-4">
+                <mat-form-field style="flex-direction: column-reverse;" class="example-full-width inputs"
+                  appearance="outline">
+                  <mat-label>Municipio De Residencia</mat-label>
+                  <mat-select formControlName="id_municipio_residencia">
+                    <mat-option *ngFor="let municipio of municipios" [value]="municipio.id_municipio">
+                      {{ municipio.nombre_municipio }}
+                    </mat-option>
+                  </mat-select>
+                  <mat-icon matSuffix>location_on</mat-icon>
+                </mat-form-field>
+                <mat-error *ngFor="let error of getErrors(i, 'id_municipio_residencia')">
+                  {{ error }}
+                </mat-error>
+              </div>
+              <div class="col-md-4 col-sm-6">
+                <mat-form-field style="flex-direction: column-reverse;" class="example-full-width inputs"
+                  appearance="outline">
+                  <mat-label>Dirección Residencia</mat-label>
+                  <input matInput formControlName="direccion_residencia">
+                  <mat-icon matSuffix>location_on</mat-icon>
+                </mat-form-field>
+                <mat-error *ngFor="let error of getErrors(i, 'direccion_residencia')">
+                  {{ error }}
+                </mat-error>
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-md-6">
+                <mat-form-field style="flex-direction: column-reverse;" class="example-full-width inputs"
+                  appearance="outline">
+                  <mat-label>Género</mat-label>
+                  <mat-select formControlName="genero">
+                    <mat-option *ngFor="let genero of generos" [value]="genero.value">
+                      {{ genero.label }}
+                    </mat-option>
+                  </mat-select>
+                </mat-form-field>
+                <mat-error *ngFor="let error of getErrors(i, 'genero')">
+                  {{ error }}
+                </mat-error>
+              </div>
+              <div class="col-md-6 col-sm-12">
+                <mat-form-field style="flex-direction: column-reverse;" class="example-full-width inputs"
+                  appearance="outline">
+                  <mat-label>Profesión</mat-label>
+                  <mat-select formControlName="id_profesion">
+                    <mat-option *ngFor="let profesion of profesiones" [value]="profesion.value">
+                      {{ profesion.label }}
+                    </mat-option>
+                  </mat-select>
+                </mat-form-field>
+                <mat-error *ngFor="let error of getErrors(i, 'id_profesion')">
+                  {{ error }}
+                </mat-error>
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-md-6 col-sm-12">
+                <mat-form-field style="flex-direction: column-reverse;" class="example-full-width inputs"
+                  appearance="outline">
+                  <mat-label>Estado Civil</mat-label>
+                  <mat-select matNativeControl formControlName="estado_civil">
+                    <mat-option *ngFor="let p of estadoCivil" [value]="p.value">
+                      {{ p.value }}
+                    </mat-option>
+                  </mat-select>
+                </mat-form-field>
+                <mat-error *ngFor="let error of getErrors(i, 'estado_civil')">
+                  {{ error }}
+                </mat-error>
+              </div>
+              <div class="col-md-6 col-sm-12">
+                <mat-form-field style="flex-direction: column-reverse;" class="example-full-width inputs"
+                  appearance="outline">
+                  <mat-label>Representación</mat-label>
+                  <mat-select matNativeControl formControlName="representacion">
+                    <mat-option *ngFor="let p of representacion" [value]="p.value">
+                      {{ p.label }}
+                    </mat-option>
+                  </mat-select>
+                </mat-form-field>
+                <mat-error *ngFor="let error of getErrors(i, 'representacion')">
+                  {{ error }}
+                </mat-error>
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-md-12 col-sm-12">
+                <mat-form-field style="flex-direction: column-reverse;" class="example-full-width inputs"
+                  appearance="outline">
+                  <mat-label>Número De Carnet</mat-label>
+                  <input matInput formControlName="numero_carnet">
+                </mat-form-field>
+                <mat-error *ngFor="let error of getErrors(i, 'numero_carnet')">
+                  {{ error }}
+                </mat-error>
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-md-3 col-sm-6">
+                <mat-form-field style="flex-direction: column-reverse;" class="example-full-width inputs"
+                  appearance="outline">
+                  <mat-label>Teléfono Principal</mat-label>
+                  <input matInput formControlName="telefono_1">
+                </mat-form-field>
+                <mat-error *ngFor="let error of getErrors(i, 'telefono_1')">
+                  {{ error }}
+                </mat-error>
+              </div>
+              <div class="col-md-3 col-sm-6">
+                <mat-form-field style="flex-direction: column-reverse;" class="example-full-width inputs"
+                  appearance="outline">
+                  <mat-label>Teléfono Secundario</mat-label>
+                  <input matInput formControlName="telefono_2">
+                </mat-form-field>
+                <mat-error *ngFor="let error of getErrors(i, 'telefono_2')">
+                  {{ error }}
+                </mat-error>
+              </div>
+              <div class="col-md-3 col-sm-6">
+                <mat-form-field style="flex-direction: column-reverse;" class="example-full-width inputs"
+                  appearance="outline">
+                  <mat-label>Correo Principal</mat-label>
+                  <input matInput formControlName="correo_1">
+                </mat-form-field>
+                <mat-error *ngFor="let error of getErrors(i, 'correo_1')">
+                  {{ error }}
+                </mat-error>
+              </div>
+              <div class="col-md-3 col-sm-6">
+                <mat-form-field style="flex-direction: column-reverse;" class="example-full-width inputs"
+                  appearance="outline">
+                  <mat-label>Correo Secundario</mat-label>
+                  <input matInput formControlName="correo_2">
+                </mat-form-field>
+                <mat-error *ngFor="let error of getErrors(i, 'correo_2')">
+                  {{ error }}
+                </mat-error>
+              </div>
+            </div>
+          </div>
         </div>
-        <div class="col-md-6 col-sm-12">
-          <mat-form-field class="example-full-width inputs" appearance="outline">
-            <mat-label>Número De Identificación</mat-label>
-            <input matInput formControlName="dni">
-          </mat-form-field>
-        </div>
+
       </div>
-      <div class="row">
-        <div class="col-md-3 col-sm-6">
-          <mat-form-field class="example-full-width inputs" appearance="outline">
-            <mat-label>Primer Nombre</mat-label>
-            <input matInput formControlName="primer_nombre">
-          </mat-form-field>
-        </div>
-        <div class="col-md-3 col-sm-6">
-          <mat-form-field class="example-full-width inputs" appearance="outline">
-            <mat-label>Segundo Nombre</mat-label>
-            <input matInput formControlName="segundo_nombre">
-          </mat-form-field>
-        </div>
-        <div class="col-md-3 col-sm-6">
-          <mat-form-field class="example-full-width inputs" appearance="outline">
-            <mat-label>Primer Apellido</mat-label>
-            <input matInput formControlName="primer_apellido">
-          </mat-form-field>
-        </div>
-        <div class="col-md-3 col-sm-6">
-          <mat-form-field class="example-full-width inputs" appearance="outline">
-            <mat-label>Segundo Apellido</mat-label>
-            <input matInput formControlName="segundo_apellido">
-          </mat-form-field>
-        </div>
-      </div>
-      <div class="row">
-        <div class="col-md-3 col-sm-6">
-          <mat-form-field class="example-full-width inputs" appearance="outline">
-            <mat-label>Tercer Nombre</mat-label>
-            <input matInput formControlName="tercer_nombre">
-          </mat-form-field>
-        </div>
-        <div class="col-md-3 col-sm-6">
-          <mat-form-field class="example-full-width inputs" appearance="outline">
-            <mat-label>Fecha De Nacimiento</mat-label>
-            <mat-datepicker-toggle matSuffix [for]="fechaNac"></mat-datepicker-toggle>
-            <mat-datepicker #fechaNac></mat-datepicker>
-            <input matInput formControlName="fecha_nacimiento" [matDatepicker]="fechaNac">
-            <mat-hint>MM/DD/YYYY</mat-hint>
-          </mat-form-field>
-        </div>
-        <div class="col-md-3 col-sm-6">
-          <mat-form-field class="example-full-width inputs" appearance="outline">
-            <mat-label>Cantidad De Dependientes</mat-label>
-            <input matInput type="number" formControlName="cantidad_dependientes">
-          </mat-form-field>
-        </div>
-        <div class="col-md-3 col-sm-6" >
-          <mat-form-field class="example-full-width inputs" appearance="outline">
-            <mat-label>Sexo</mat-label>
-            <mat-select formControlName="sexo">
-              <mat-option *ngFor="let sexo of sexo" [value]="sexo.value">
-                {{ sexo.label }}
-              </mat-option>
-            </mat-select>
-          </mat-form-field>
-        </div>
-        <!-- <div class="col-md-3 col-sm-6">
-          <mat-form-field class="example-full-width inputs" appearance="outline">
-            <mat-label>Cantidad De Hijos</mat-label>
-            <input matInput type="number" formControlName="cantidad_hijos">
-          </mat-form-field>
-        </div> -->
-      </div>
-      <div class="row">
-        <div class="col-md-4 col-sm-6">
-          <mat-form-field class="example-full-width inputs" appearance="outline">
-            <mat-label>Nacionalidad</mat-label>
-            <mat-select formControlName="id_pais_nacionalidad">
-              <mat-option *ngFor="let nac of nacionalidades" [value]="nac.value">
-                {{ nac.label }}
-              </mat-option>
-            </mat-select>
-          </mat-form-field>
-        </div>
-        <div class="col-md-4">
-          <mat-form-field class="example-full-width inputs" appearance="outline">
-            <mat-label>Municipio De Residencia</mat-label>
-            <mat-select formControlName="id_municipio_residencia">
-              <mat-option *ngFor="let municipio of municipios" [value]="municipio.id_municipio">
-                {{ municipio.nombre_municipio }}
-              </mat-option>
-            </mat-select>
-            <mat-icon matSuffix>location_on</mat-icon>
-          </mat-form-field>
-        </div>
-        <div class="col-md-4 col-sm-6">
-          <mat-form-field class="example-full-width inputs" appearance="outline">
-            <mat-label>Dirección Residencia</mat-label>
-            <input matInput formControlName="direccion_residencia">
-            <mat-icon matSuffix>location_on</mat-icon>
-          </mat-form-field>
-        </div>
-      </div>
-      <div class="row">
-        <div class="col-md-6">
-          <mat-form-field class="example-full-width inputs" appearance="outline">
-            <mat-label>Género</mat-label>
-            <mat-select formControlName="genero">
-              <mat-option *ngFor="let genero of generos" [value]="genero.value">
-                {{ genero.label }}
-              </mat-option>
-            </mat-select>
-          </mat-form-field>
-        </div>
-        <div class="col-md-6 col-sm-12">
-          <mat-form-field class="example-full-width inputs" appearance="outline">
-            <mat-label>Profesión</mat-label>
-            <mat-select formControlName="id_profesion">
-              <mat-option *ngFor="let profesion of profesiones" [value]="profesion.value">
-                {{ profesion.label }}
-              </mat-option>
-            </mat-select>
-          </mat-form-field>
-        </div>
-      </div>
-      <div class="row">
-        <div class="col-md-6 col-sm-12">
-          <mat-form-field class="example-full-width inputs" appearance="outline">
-            <mat-label>Estado Civil</mat-label>
-            <mat-select matNativeControl formControlName="estado_civil">
-              <mat-option *ngFor="let p of estadoCivil" [value]="p.value">
-                {{ p.value }}
-              </mat-option>
-            </mat-select>
-          </mat-form-field>
-        </div>
-        <div class="col-md-6 col-sm-12">
-          <mat-form-field class="example-full-width inputs" appearance="outline">
-            <mat-label>Representación</mat-label>
-            <mat-select matNativeControl formControlName="representacion">
-              <mat-option *ngFor="let p of representacion" [value]="p.value">
-                {{ p.label }}
-              </mat-option>
-            </mat-select>
-          </mat-form-field>
-        </div>
-      </div>
-      <div class="row">
-        <div class="col-md-12 col-sm-12">
-          <mat-form-field class="example-full-width inputs" appearance="outline">
-            <mat-label>Número De Carnet</mat-label>
-            <input matInput formControlName="numero_carnet">
-          </mat-form-field>
-        </div>
-      </div>
-      <div class="row">
-        <div class="col-md-3 col-sm-6">
-          <mat-form-field class="example-full-width inputs" appearance="outline">
-            <mat-label>Teléfono Principal</mat-label>
-            <input matInput formControlName="telefono_1">
-          </mat-form-field>
-        </div>
-        <div class="col-md-3 col-sm-6">
-          <mat-form-field class="example-full-width inputs" appearance="outline">
-            <mat-label>Teléfono Secundario</mat-label>
-            <input matInput formControlName="telefono_2">
-          </mat-form-field>
-        </div>
-        <div class="col-md-3 col-sm-6">
-          <mat-form-field class="example-full-width inputs" appearance="outline">
-            <mat-label>Correo Principal</mat-label>
-            <input matInput formControlName="correo_1">
-          </mat-form-field>
-        </div>
-        <div class="col-md-3 col-sm-6">
-          <mat-form-field class="example-full-width inputs" appearance="outline">
-            <mat-label>Correo Secundario</mat-label>
-            <input matInput formControlName="correo_2">
-          </mat-form-field>
-        </div>
-      </div>
-    </fieldset>
+    </form>
   </div>
 </div>

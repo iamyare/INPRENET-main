@@ -43,6 +43,13 @@ export class TransaccionesService {
 
     }
   }
+  async findAlltipoMovimientos(): Promise<NET_TIPO_MOVIMIENTO[]> {
+    try {
+      return await this.tipoMovimientoRepository.find();
+    } catch (error) {
+
+    }
+  }
 
   async obtenerVoucherDeMovimientos(dni: string): Promise<CrearMovimientoDTO[]> {
     const movimientos = await this.movimientoCuentaRepository

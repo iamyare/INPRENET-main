@@ -8,9 +8,7 @@
   </button>
  -->
   <div *ngIf="datos">
-    <form [formGroup]="form1" #myForm="ngForm" change="getLabel()">
-      <app-dat-generales-afiliado groupName="DatosGenerales"></app-dat-generales-afiliado>
-    </form>
+    <app-dat-generales-afiliado [datos]="formDatosGenerales"></app-dat-generales-afiliado>
 
     <button mat-raised-button color="primary" style="color: white; margin: 1% 0 1% 0" (click)="GuardarInformacion()">
       Guardar

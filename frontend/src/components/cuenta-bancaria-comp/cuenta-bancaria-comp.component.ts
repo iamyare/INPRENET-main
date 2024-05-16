@@ -105,4 +105,27 @@ export class CuentaBancariaCompComponent {
     return form.get(key)
   }
 
+  getErrors(i: number, fieldName: string): any {
+
+    const controlesrefpers = (this.formParent.get('trabajo') as FormGroup).controls;
+    const a = controlesrefpers[i].get(fieldName)!.errors
+    console.log(a);
+
+    let errors = []
+    if (a) {
+      if (a['required']) {
+        errors.push('Este campo es requerido.');
+      }
+      if (a['minlength']) {
+        errors.push(`Debe tener al menos ${a['minlength'].requiredLength} caracteres.`);
+      }
+      if (a['maxlength']) {
+        errors.push(`No puede tener más de ${a['maxlength'].requiredLength} caracteres.`);
+      }
+      if (a['pattern']) {
+        errors.push('El formato no es válido.');
+      }
+      return errors;
+    }
+  }
 }

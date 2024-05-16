@@ -8,6 +8,7 @@ import { Observable } from 'rxjs';
 import { ColegiosMagisterialesService } from './colegios-magisteriales.service';
 import { CentroTrabajoService } from './centro-trabajo.service';
 import { HttpClient } from '@angular/common/http';
+import { TransaccionesService } from './transacciones.service';
 
 @Injectable({
   providedIn: 'root'
@@ -24,18 +25,21 @@ export class DatosEstaticosService {
   colegiosMagisteriales: any = [];
   centrosTrabajo: any = [];
   municipios: any = [];
+  tiposMovimientos: any = [];
 
   constructor(
     private colegiosMagSVC: ColegiosMagisterialesService, private bancosService: BancosService,
     private centrosTrabSVC: CentroTrabajoService,
     private SVCInstituciones: InstitucionesService, private afiliadoService: AfiliadoService, public direccionSer: DireccionService, private tipoIdentificacionService: TipoIdentificacionService,
     private centroTrabajoService: CentroTrabajoService,
+    private transaccionesSVC: TransaccionesService,
     private http: HttpClient
   ) {
     this.getInstituciones();
     this.getNacionalidad();
     this.gettipoIdent();
     this.getTipoCuenta();
+    this.getTipoMovimientos();
     this.getBancos();
     this.getColegiosMagisteriales();
     this.getAllCentrosTrabajo();
@@ -67,6 +71,18 @@ export class DatosEstaticosService {
 
     this.tipoCuenta = mappedResponse;
     return this.tipoCuenta;
+  }
+
+  async getTipoMovimientos() {
+    const response = await this.transaccionesSVC.obtenerTipoMovimientos().toPromise();
+
+    const mappedResponse = response.map((item: { ID_TIPO_MOVIMIENTO: any; DESCRIPCION: any; }) => ({
+      label: item.DESCRIPCION,
+      value: item.DESCRIPCION
+    }));
+
+    this.tiposMovimientos = mappedResponse;
+    return this.tiposMovimientos;
   }
 
   async getAllCentrosTrabajo() {
@@ -254,28 +270,6 @@ export class DatosEstaticosService {
       "label": "MASCULINO"
     },
   ];
-  /* tipoIdent = [
-    {
-      "idIdentificacion": 1,
-      "value": "DNI"
-    },
-    {
-      "idIdentificacion": 2,
-      "value": "PASAPORTE"
-    },
-    {
-      "idIdentificacion": 3,
-      "value": "CARNET RESIDENCIA"
-    },
-    {
-      "idIdentificacion": 4,
-      "value": "NÚMERO LICENCIA"
-    },
-    {
-      "idIdentificacion": 5,
-      "value": "RTN"
-    },
-  ]; */
   tipoCotizante = [
     {
       "idCotizante": 1,
@@ -379,4 +373,28 @@ export class DatosEstaticosService {
     { value: "TÍO PATERNO", label: "TÍO PATERNO" },
     { value: "YERNO", label: "YERNO" }
   ]
+
+  /* tipoIdent = [
+    {
+      "idIdentificacion": 1,
+      "value": "DNI"
+    },
+    {
+      "idIdentificacion": 2,
+      "value": "PASAPORTE"
+    },
+    {
+      "idIdentificacion": 3,
+      "value": "CARNET RESIDENCIA"
+    },
+    {
+      "idIdentificacion": 4,
+      "value": "NÚMERO LICENCIA"
+    },
+    {
+      "idIdentificacion": 5,
+      "value": "RTN"
+    },
+  ]; */
+
 }

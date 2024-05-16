@@ -16,6 +16,12 @@ export class TransaccionesService {
     );
   }
 
+  obtenerTipoMovimientos(): Observable<any> {
+    return this.http.get(`${environment.API_URL}/api/transacciones/tipoMovimientos`).pipe(
+      catchError(error => throwError(() => new Error('Error al obtener los tiposMovimientos: ' + error.message)))
+    );
+  }
+
   obtenerVoucherMovimientoEspecifico(dni: string, idMovimientoCuenta: number): Observable<any> {
     return this.http.get(`${environment.API_URL}/api/transacciones/voucherEspecifico/${dni}/${idMovimientoCuenta}`).pipe(
       catchError(error => throwError(() => new Error('Error al obtener el voucher de movimiento específico: ' + error.message)))

@@ -29,13 +29,36 @@ export class AfilBancoComponent implements OnInit {
   ColegiosMagisteriales: boolean = false;
   datosA: boolean = false;
 
-  form!: FormGroup;
-  formPuestTrab!: FormGroup;
-  formHistPag!: FormGroup;
-  formReferencias!: FormGroup;
-  formBeneficiarios!: FormGroup;
-  formDatosFamiliares!: FormGroup;
-  formColegiosMagisteriales!: FormGroup;
+  // Formularios
+  public formParent: FormGroup = new FormGroup({});
+  form = this.fb.group({
+    /*  DatosGenerales: generateAddressFormGroup(), */
+    DatosBacAfil: generateDatBancFormGroup(),
+    Archivos: generateFormArchivo(),
+    FotoPerfil: [''],
+    Arch: "",
+  });
+  formPuestTrab: any = new FormGroup({
+    trabajo: new FormArray([], [Validators.required])
+  });
+  formHistPag: any = new FormGroup({
+    banco: new FormArray([], [Validators.required])  // Esto asegura que siempre tienes una instancia de FormArray disponible
+  });
+  formReferencias: any = new FormGroup({
+    refpers: new FormArray([], [Validators.required])
+  });
+  formBeneficiarios: any = new FormGroup({
+    beneficiario: new FormArray([], [Validators.required])
+  });
+  formDatosFamiliares: any = new FormGroup({
+    familiar: new FormArray([], [Validators.required])
+  });
+  formColegiosMagisteriales: any = new FormGroup({
+    ColMags: new FormArray([], [Validators.required])
+  });
+  formDatosGenerales: any = new FormGroup({
+    refpers: new FormArray([], [Validators.required])
+  });
 
   labelBoton1 = "Adjunte archivo DNI";
   DatosBancBen: any = [];
@@ -44,11 +67,11 @@ export class AfilBancoComponent implements OnInit {
     private fb: FormBuilder,
     private formStateService: FormStateService,
     private afilService: AfiliadoService
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     this.form = this.fb.group({
-      DatosGenerales: generateAddressFormGroup(),
+      /* DatosGenerales: generateAddressFormGroup(), */
       DatosBacAfil: generateDatBancFormGroup(),
       Archivos: generateFormArchivo(),
       FotoPerfil: [''],
@@ -177,6 +200,10 @@ export class AfilBancoComponent implements OnInit {
     this.formDatosFamiliares = datosFamiliares;
   }
 
+  setDatosGenerales(datosGenerales: any) {
+    this.formDatosGenerales = datosGenerales
+  }
+
   handleArchivoSeleccionado(archivo: any) {
     this.form.get('Arch')?.setValue(archivo);
   }
@@ -193,7 +220,7 @@ export class AfilBancoComponent implements OnInit {
   enviar() {
     const formData = new FormData();
     const encapsulatedDto = {
-      datosGenerales: this.form.get('DatosGenerales')?.value || {},
+      datosGenerales: this.formDatosGenerales.value.refpers[0],
       bancos: this.formHistPag.value.banco || [],
       referenciasPersonales: this.formReferencias.value.refpers || [],
       beneficiarios: this.formBeneficiarios.value.beneficiario.map((ben: any) => {
@@ -205,7 +232,7 @@ export class AfilBancoComponent implements OnInit {
       familiares: this.formDatosFamiliares.value.familiar || []
     };
 
-    const docDefinition:any = this.createPDFDefinition(encapsulatedDto);
+    const docDefinition: any = this.createPDFDefinition(encapsulatedDto);
     pdfMake.createPdf(docDefinition).download('datos_afiliado.pdf');
 
     formData.append('encapsulatedDto', JSON.stringify(encapsulatedDto));
@@ -216,6 +243,8 @@ export class AfilBancoComponent implements OnInit {
       const fotoBlob = this.dataURLToBlob(fotoPerfilBase64);
       formData.append('foto_perfil', fotoBlob, 'perfil.jpg');
     }
+
+    console.log(formData);
 
     // Log para ver qué contiene el FormData antes de enviar
     formData.forEach((value, key) => {

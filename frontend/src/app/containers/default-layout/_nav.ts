@@ -119,14 +119,6 @@ export const navItems: INavData[] = [
     url: '/base',
     children: [
       {
-        url: 'Afiliado/Deducciones/nueva-deduccion-afil',
-        name: 'Nueva Deducción',
-      },
-      {
-        url: 'Afiliado/Deducciones/ver-editar-deduccion-afil',
-        name: 'Ver/editar Deducción',
-      },
-      {
         name: 'Planilla',
         url: '/base',
         children: [
@@ -161,6 +153,14 @@ export const navItems: INavData[] = [
             name: 'Egresos',
             iconComponent: { name: 'cilMoney' },
             children: [
+              {
+                url: 'Afiliado/Deducciones/nueva-deduccion-afil',
+                name: 'Nueva Deducción',
+              },
+              {
+                url: 'Afiliado/Deducciones/ver-editar-deduccion-afil',
+                name: 'Ver/editar Deducción',
+              },
               {
                 url: '/Planilla/Egresos/nueva-planilla',
                 name: 'Nueva Planilla',

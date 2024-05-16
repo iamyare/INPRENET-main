@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
-import { FormArray, FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
+import { AbstractControl, FormArray, FormBuilder, FormControl, FormGroup, ValidationErrors, Validators } from '@angular/forms';
 import { FormStateService } from 'src/app/services/form-state.service';
 import { DireccionService } from 'src/app/services/direccion.service';
 import { DatosEstaticosService } from 'src/app/services/datos-estaticos.service';
@@ -11,6 +11,7 @@ import { DatosEstaticosService } from 'src/app/services/datos-estaticos.service'
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class BenefComponent implements OnInit {
+  minDate: Date;
   private formKey = 'FormBeneficiario';
   public formParent: FormGroup;
   public municipios: any[] = [];
@@ -26,12 +27,16 @@ export class BenefComponent implements OnInit {
     private direccionService: DireccionService,
     private datosEstaticosService: DatosEstaticosService
   ) {
+    const currentYear = new Date();
+    this.minDate = new Date(currentYear.getFullYear(), currentYear.getMonth(), currentYear.getDate());
     this.formParent = this.fb.group({
       beneficiario: this.fb.array([]),
     });
   }
 
   ngOnInit(): void {
+
+
     this.initForm();
     this.loadMunicipios();
     this.loadNacionalidades();
@@ -67,15 +72,46 @@ export class BenefComponent implements OnInit {
         genero: new FormControl(datosBeneficiario?.genero || ''),
         cantidad_dependientes: new FormControl(datosBeneficiario?.cantidad_dependientes || 0),
         representacion: new FormControl(datosBeneficiario?.representacion || ''),
-        telefono_1: new FormControl(datosBeneficiario?.telefono_1 || ''),
-        fecha_nacimiento: new FormControl(datosBeneficiario?.fecha_nacimiento || '', Validators.required),
-        direccion_residencia: new FormControl(datosBeneficiario?.direccion_residencia || ''),
-        id_pais: new FormControl(datosBeneficiario?.id_pais || null, Validators.required),
-        id_municipio_residencia: new FormControl(datosBeneficiario?.id_municipio_residencia || null, Validators.required),
+        telefono1: new FormControl(datosBeneficiario?.telefono1 || ''),
+        fechaNacimiento: new FormControl(datosBeneficiario?.fechaNacimiento || '', Validators.required),
+        direccionResidencia: new FormControl(datosBeneficiario?.direccionResidencia || ''),
+        id_pais_nacionalidad: new FormControl(datosBeneficiario?.id_pais_nacionalidad || null, Validators.required),
+        idMunicipioResidencia: new FormControl(datosBeneficiario?.idMunicipioResidencia || null, Validators.required),
+        porcentaje: new FormControl(datosBeneficiario?.porcentaje, [
+          Validators.required,
+          Validators.maxLength(5),
+          /* this.validarPorcentaje.bind(this) */ // Agrega la validación personalizada
+        ]),
       }),
-      porcentaje: new FormControl(datosBeneficiario?.porcentaje || '', [Validators.required, Validators.maxLength(5)]),
-    });
+    }, /* { validators: this.validarSumaPorcentajes.bind(this) } */);
   }
+
+  // Función para validar el campo porcentaje
+  /* validarPorcentaje(control: AbstractControl): ValidationErrors | null {
+    const porcentaje = parseInt(control.value, 10);
+    if (isNaN(porcentaje) || porcentaje < 0 || porcentaje > 100) {
+      return { invalidPorcentaje: true };
+    }
+    return null;
+  }
+
+  // Función para validar la suma de porcentajes
+  validarSumaPorcentajes(formGroup: FormGroup): ValidationErrors | null {
+    console.log("ENTRO");
+    console.log(formGroup.get('datosBeneficiario'));
+
+    const porcentajeTotal = Object.values(formGroup.get('datosBeneficiario')!.value).reduce((total: number, valor: any) => {
+      console.log(total);
+      console.log(valor);
+
+      return total + (parseInt(valor.porcentaje, 10) || 0);
+    }, 0);
+
+    if (porcentajeTotal !== 100) {
+      return { invalidSumaPorcentajes: true };
+    }
+    return null;
+  } */
 
   agregarBen(datosBeneficiario?: any): void {
     const control = this.getCtrl('beneficiario', this.formParent) as FormArray;
@@ -115,5 +151,32 @@ export class BenefComponent implements OnInit {
     }).catch(error => {
       console.error('Error al cargar países:', error);
     });
+  }
+
+  getErrors(i: number, fieldName: string): any {
+    if (this.formParent instanceof FormGroup) {
+      const controlesrefpers = (this.formParent.get('beneficiario') as FormGroup).controls;
+      const temp = controlesrefpers[i].get("datosBeneficiario")!.get(fieldName)!.errors
+
+      let errors = []
+      if (temp) {
+        if (temp['required']) {
+          errors.push('Este campo es requerido.');
+        }
+        if (temp['minlength']) {
+          errors.push(`Debe tener al menos ${temp['minlength'].requiredLength} caracteres.`);
+        }
+        if (temp['maxlength']) {
+          errors.push(`No puede tener más de ${temp['maxlength'].requiredLength} caracteres.`);
+        }
+        if (temp['pattern']) {
+          errors.push('El formato no es válido.');
+        }
+        if (temp['email']) {
+          errors.push('Correo electrónico no válido.');
+        }
+        return errors;
+      }
+    }
   }
 }

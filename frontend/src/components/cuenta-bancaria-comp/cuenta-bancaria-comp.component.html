@@ -10,26 +10,33 @@
                 <h4 class="card-title">Cuenta Número: {{i+1}}</h4>
 
                 <div class="row" [formGroupName]="formChild">
-                    <mat-form-field class="example-full-width; inputs" appearance="outline">
-                        <mat-label>Tipo Cuenta</mat-label>
-                        <mat-select (selectionChange)="onDatosDatosPuestTrab()" matNativeControl
-                            formControlName="tipo_cuenta">
-                            <mat-option *ngFor="let p of tipoCuenta" [value]="p.label">
-                                {{p.label}}
-                            </mat-option>
-                        </mat-select>
-                    </mat-form-field>
-                    <div class="col-md-4">
+                    <div class="col-md-6">
+                        <mat-form-field class="example-full-width; inputs" appearance="outline">
+                            <mat-label>Tipo Cuenta</mat-label>
+                            <mat-select (selectionChange)="onDatosDatosPuestTrab()" matNativeControl
+                                formControlName="tipo_cuenta">
+                                <mat-option *ngFor="let p of tipoCuenta" [value]="p.label">
+                                    {{p.label}}
+                                </mat-option>
+                            </mat-select>
+                        </mat-form-field>
+                        <mat-error *ngFor="let error of getErrors(i, 'tipo_cuenta')">{{error}}</mat-error>
+                    </div>
+
+                    <div class="col-md-6">
                         <mat-form-field class="example-full-width; inputs" appearance="outline">
                             <mat-label>numero cuenta</mat-label>
                             <input matInput formControlName="numero_cuenta">
                         </mat-form-field>
+                        <mat-error *ngFor="let error of getErrors(i, 'numero_cuenta')">{{error}}</mat-error>
                     </div>
-                    <div class="col-md-4">
+
+                    <div class="col-md-12">
                         <mat-form-field class="example-full-width; inputs" appearance="outline">
                             <mat-label>creado_por</mat-label>
                             <input matInput formControlName="creado_por">
                         </mat-form-field>
+                        <mat-error *ngFor="let error of getErrors(i, 'creado_por')">{{error}}</mat-error>
                     </div>
                 </div>
             </div>

@@ -13,7 +13,7 @@ export function generateAddressFormGroup(datos?: any): FormGroup {
     tercer_nombre: new FormControl(datos?.tercer_nombre, [Validators.maxLength(40)]),
     primer_apellido: new FormControl(datos?.primer_apellido, [Validators.required, Validators.maxLength(40), Validators.minLength(1)]),
     segundo_apellido: new FormControl(datos?.segundo_apellido, [Validators.maxLength(40)]),
-    fecha_nacimiento: new FormControl(datos?.fecha_nacimiento, [Validators.required, Validators.maxLength(10)]),
+    fecha_nacimiento: new FormControl(datos?.fecha_nacimiento, [Validators.required]),
     cantidad_dependientes: new FormControl(datos?.cantidad_dependientes, [Validators.pattern("^[0-9]+$"), Validators.required]),
     estado_civil: new FormControl(datos?.estado_civil, [Validators.required, Validators.maxLength(40)]),
     representacion: new FormControl(datos?.representacion, [Validators.required, Validators.maxLength(40)]),
@@ -48,28 +48,36 @@ export function generateAddressFormGroup(datos?: any): FormGroup {
 export class DatGeneralesAfiliadoComponent implements OnInit, OnDestroy {
   public archivo: any;
   public dataEdit: any;
-  form: FormGroup = this.fb.group({});
-
   tipoIdentData: any = [];
   nacionalidades: any = [];
   municipios: any = [];
   generos: { value: string; label: string }[] = [];
   profesiones: any = [];
   sexo: { value: string; label: string }[] = [];
-
   tipoCotizante: any = this.datosEstaticos.tipoCotizante;
   tipoIdent: any = this.datosEstaticos.tipoIdent;
   estadoCivil: any = this.datosEstaticos.estadoCivil;
   representacion: any = this.datosEstaticos.representacion;
   estado: any = this.datosEstaticos.estado;
 
+  public formParent: FormGroup = new FormGroup({});
+
   @Input() useCamera: boolean = false;
-  @Output() imageCaptured = new EventEmitter<string>();
   @Input() groupName = '';
+  @Input() datos?: any
+  @Output() imageCaptured = new EventEmitter<string>();
   @Output() newDatBenChange = new EventEmitter<any>()
+  @Output() newDatosGenerales = new EventEmitter<any>()
+  private formKey = 'datGenForm';
+
+  form: FormGroup = this.fb.group({});
   formArchivos: any;
   minDate: Date;
 
+  onDatosGeneralesChange() {
+    const data = this.formParent
+    this.newDatosGenerales.emit(data)
+  }
   onDatosBenChange(fecha: any) {
     this.newDatBenChange.emit(fecha._model.selection);
   }
@@ -80,15 +88,35 @@ export class DatGeneralesAfiliadoComponent implements OnInit, OnDestroy {
     private afiliadoService: AfiliadoService,
     public direccionSer: DireccionService,
     private datosEstaticos: DatosEstaticosService) {
-      this.form = this.fb.group({
-        ...generateAddressFormGroup(),
-        FotoPerfil: ['']  // Asegúrate de añadir esto
-      });
+
     const currentYear = new Date();
     this.minDate = new Date(currentYear.getFullYear(), currentYear.getMonth(), currentYear.getDate(), currentYear.getHours(), currentYear.getMinutes(), currentYear.getSeconds());
   }
+  private initForm() {
+    let existingForm = this.formStateService.getForm(this.formKey);
+    if (existingForm) {
+      this.formParent = existingForm;
+    } else {
+      this.formParent = this.fb.group({
+        refpers: this.fb.array([])
+      });
+      /* this.formStateService.setForm(this.formKey, this.formParent); */
+    }
+  }
 
   ngOnInit(): void {
+    this.initForm();
+    const ref_RefPers = this.formParent.get('refpers') as FormArray;
+    let temp = {}
+
+    if (this.datos.value.refpers.length > 0) {
+      for (let i of this.datos.value.refpers) {
+        temp = i
+      }
+    }
+
+    ref_RefPers.push(generateAddressFormGroup(temp))
+
     this.formStateService.getFotoPerfil().subscribe(foto => {
       if (foto) {
         this.form.get('FotoPerfil')?.setValue(foto);
@@ -110,7 +138,7 @@ export class DatGeneralesAfiliadoComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy() {
-    this.formStateService.setFormData(this.form);
+    /* this.formStateService.setFormData(this.form); */
   }
 
   cargarProfesiones() {
@@ -151,5 +179,36 @@ export class DatGeneralesAfiliadoComponent implements OnInit, OnDestroy {
   // Método para recibir el evento de imagen capturada y emitirlo hacia el componente padre
   handleImageCaptured(image: string) {
     this.imageCaptured.emit(image);
+  }
+
+  getCtrl(key: string, form: FormGroup): any {
+    return form.get(key)
+  }
+
+  getErrors(i: number, fieldName: string): any {
+    if (this.formParent instanceof FormGroup) {
+      const controlesrefpers = (this.formParent.get('refpers') as FormGroup).controls;
+      const a = controlesrefpers[i].get(fieldName)!.errors
+
+      let errors = []
+      if (a) {
+        if (a['required']) {
+          errors.push('Este campo es requerido.');
+        }
+        if (a['minlength']) {
+          errors.push(`Debe tener al menos ${a['minlength'].requiredLength} caracteres.`);
+        }
+        if (a['maxlength']) {
+          errors.push(`No puede tener más de ${a['maxlength'].requiredLength} caracteres.`);
+        }
+        if (a['pattern']) {
+          errors.push('El formato no es válido.');
+        }
+        if (a['email']) {
+          errors.push('Correo electrónico no válido.');
+        }
+        return errors;
+      }
+    }
   }
 }

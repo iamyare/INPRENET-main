@@ -15,6 +15,10 @@ export class TransaccionesController {
   async findAllProfesiones(): Promise<any> {
     return await this.transaccionesService.findAllProfesiones();
   }
+  @Get('tipoMovimientos')
+  async findtipoMovimientos(): Promise<any> {
+    return await this.transaccionesService.findAlltipoMovimientos();
+  }
 
   @Get('voucher/:dni')
   obtenerVouchersDeMovimientos(@Param('dni') dni: string): Promise<any> {

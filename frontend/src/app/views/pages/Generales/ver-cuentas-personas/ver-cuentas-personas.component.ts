@@ -232,7 +232,9 @@ export class VerCuentasPersonasComponent {
     });
 
     dialogRef.afterClosed().subscribe(async (result: any) => {
-      if (result) {
+      console.log(result);
+
+      /* if (result) {
         this.svcAfiliado.updateColegiosMagist(result.id_per_cole_mag, result).subscribe(
           async (response) => {
             this.toastr.success('Colegio magisterial actualizado con éxito.');
@@ -243,7 +245,7 @@ export class VerCuentasPersonasComponent {
             console.error('Error al actualizar el colegio:', error);
           }
         );
-      }
+      } */
     });
   }
 }

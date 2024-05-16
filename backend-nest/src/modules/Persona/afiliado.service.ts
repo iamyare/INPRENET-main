@@ -250,7 +250,7 @@ export class AfiliadoService {
   async assignBancosToPersona(idPersona: number, bancosData: CreatePersonaBancoDTO[]): Promise<Net_Persona_Por_Banco[]> {
     console.log(idPersona);
     console.log(bancosData);
-    
+
     try {
       const persona = await this.personaRepository.findOne({
         where: { id_persona: idPersona }
@@ -362,7 +362,7 @@ export class AfiliadoService {
     Object.assign(persona, updatePersonaDto);
     return this.personaRepository.save(persona);
   }
-  
+
 
   async updateSalarioBase(dni: string, idCentroTrabajo: number, salarioBase: number): Promise<void> {
 
@@ -494,6 +494,7 @@ export class AfiliadoService {
       .addSelect('persona.PRIMER_APELLIDO', 'PRIMER_APELLIDO')
       .addSelect('persona.SEGUNDO_APELLIDO', 'SEGUNDO_APELLIDO')
       .addSelect('persona.GENERO', 'GENERO')
+      .addSelect('persona.SEXO', 'SEXO')
       .addSelect('persona.CANTIDAD_DEPENDIENTES', 'CANTIDAD_DEPENDIENTES')
       .addSelect('persona.REPRESENTACION', 'REPRESENTACION')
       .addSelect('persona.DIRECCION_RESIDENCIA', 'DIRECCION_RESIDENCIA')
@@ -501,6 +502,7 @@ export class AfiliadoService {
       .addSelect('persona.FECHA_NACIMIENTO', 'FECHA_NACIMIENTO')
       .addSelect('persona.FOTO_PERFIL', 'FOTO_PERFIL')
       .addSelect('profesion.DESCRIPCION', 'DESCRIPCION')
+      .addSelect('profesion.ID_PROFESION', 'ID_PROFESION')
       .addSelect('persona.TELEFONO_1', 'TELEFONO_1')
       .addSelect('persona.TELEFONO_2', 'TELEFONO_2')
       .addSelect('persona.CORREO_1', 'CORREO_1')
@@ -551,10 +553,11 @@ export class AfiliadoService {
         .addSelect('persona.PRIMER_APELLIDO', 'PRIMER_APELLIDO')
         .addSelect('persona.SEGUNDO_APELLIDO', 'SEGUNDO_APELLIDO')
         .addSelect('persona.GENERO', 'GENERO')
+        .addSelect('persona.SEXO', 'SEXO')
         .addSelect('persona.DIRECCION_RESIDENCIA', 'DIRECCION_RESIDENCIA')
         .addSelect('persona.FECHA_NACIMIENTO', 'FECHA_NACIMIENTO')
         .addSelect('persona.NUMERO_CARNET', 'NUMERO_CARNET')
-        .addSelect('profesion.DESCRIPCION', 'DESCRIPCION')
+        .addSelect('profesion.ID_PROFESION', 'ID_PROFESION')
         .addSelect('persona.TELEFONO_1', 'TELEFONO_1')
         .addSelect('persona.ESTADO_CIVIL', 'ESTADO_CIVIL')
         .addSelect('estadoAfil.DESCRIPCION', 'ESTADO')
@@ -633,7 +636,7 @@ export class AfiliadoService {
 
   async getAllBenDeAfil(dniAfil: string): Promise<any> {
     try {
-        const query = `
+      const query = `
         SELECT DISTINCT
         "detA"."ID_PERSONA"
         FROM NET_PERSONA "Afil"
@@ -648,13 +651,13 @@ export class AfiliadoService {
         "tipoP"."TIPO_PERSONA" = 'AFILIADO'
       `;
 
-        const beneficios = await this.entityManager.query(query);
+      const beneficios = await this.entityManager.query(query);
 
-        if (!beneficios || beneficios.length === 0) {
-            throw new Error(`No se encontraron beneficios para el DNI: ${dniAfil}`);
-        }
+      if (!beneficios || beneficios.length === 0) {
+        throw new Error(`No se encontraron beneficios para el DNI: ${dniAfil}`);
+      }
 
-        const query1 = `
+      const query1 = `
         SELECT 
         "detA"."ID_PERSONA",
         "Afil"."DNI",
@@ -686,15 +689,15 @@ export class AfiliadoService {
           "tipoP"."TIPO_PERSONA" = 'BENEFICIARIO'
         `;
 
-        const beneficios2 = await this.entityManager.query(query1);
+      const beneficios2 = await this.entityManager.query(query1);
 
-        // Retornamos los datos directamente sin normalización
-        return beneficios2;
+      // Retornamos los datos directamente sin normalización
+      return beneficios2;
     } catch (error) {
-        this.logger.error(`Error al consultar beneficios: ${error.message}`);
-        throw new Error(`Error al consultar beneficios: ${error.message}`);
+      this.logger.error(`Error al consultar beneficios: ${error.message}`);
+      throw new Error(`Error al consultar beneficios: ${error.message}`);
     }
-}
+  }
 
 
 
@@ -938,14 +941,14 @@ export class AfiliadoService {
     const persona = await this.personaRepository.findOne({
       where: { dni },
       relations: ['RELACIONES', 'RELACIONES.familiar']
-  });
+    });
 
-  if (!persona) {
+    if (!persona) {
       throw new NotFoundException(`La persona con DNI ${dni} no fue encontrada.`);
-  }
+    }
 
-  // Mapear las relaciones para incluir la información solicitada
-  return persona.RELACIONES.map(relacion => ({
+    // Mapear las relaciones para incluir la información solicitada
+    return persona.RELACIONES.map(relacion => ({
       primerNombre: relacion.familiar.primer_nombre,
       segundoNombre: relacion.familiar.segundo_nombre,
       tercerNombre: relacion.familiar.tercer_nombre, // Asumiendo que también hay un tercer nombre
@@ -954,34 +957,34 @@ export class AfiliadoService {
       fechaNacimiento: relacion.familiar.fecha_nacimiento,
       parentesco: relacion.parentesco,
       dni: relacion.familiar.dni
-  }));
+    }));
   }
 
   async updateFamiliarRelation(
     dniPersona: string,
     dniFamiliar: string,
     updateDto: UpdateFamiliarDTO
-): Promise<{ mensaje: string }> {
+  ): Promise<{ mensaje: string }> {
     const persona = await this.personaRepository.findOne({
-        where: { dni: dniPersona },
-        relations: ['RELACIONES', 'RELACIONES.familiar']
+      where: { dni: dniPersona },
+      relations: ['RELACIONES', 'RELACIONES.familiar']
     });
 
     if (!persona) {
-        throw new NotFoundException(`La persona con DNI ${dniPersona} no fue encontrada.`);
+      throw new NotFoundException(`La persona con DNI ${dniPersona} no fue encontrada.`);
     }
 
     const relacion = persona.RELACIONES.find(r => r.familiar.dni === dniFamiliar);
     if (!relacion) {
-        throw new NotFoundException(`El familiar con DNI ${dniFamiliar} no fue encontrado entre las relaciones de la persona.`);
+      throw new NotFoundException(`El familiar con DNI ${dniFamiliar} no fue encontrado entre las relaciones de la persona.`);
     }
 
     if (updateDto.dni && updateDto.dni !== dniFamiliar) {
-        const existingFamiliar = await this.personaRepository.findOne({ where: { dni: updateDto.dni } });
-        if (existingFamiliar) {
-            throw new ConflictException(`El nuevo DNI ${updateDto.dni} ya está en uso.`);
-        }
-        relacion.familiar.dni = updateDto.dni;
+      const existingFamiliar = await this.personaRepository.findOne({ where: { dni: updateDto.dni } });
+      if (existingFamiliar) {
+        throw new ConflictException(`El nuevo DNI ${updateDto.dni} ya está en uso.`);
+      }
+      relacion.familiar.dni = updateDto.dni;
     }
 
     if (updateDto.primerNombre !== undefined) relacion.familiar.primer_nombre = updateDto.primerNombre;
@@ -997,7 +1000,7 @@ export class AfiliadoService {
     await this.relacionesFamiliaresRepository.save(relacion);
 
     return { mensaje: 'Familiar actualizado con éxito.' };
-}
+  }
 
 
   async agregarFamiliarYRelacion(

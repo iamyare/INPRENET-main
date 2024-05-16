@@ -4,6 +4,7 @@ import { FieldConfig } from 'src/app/shared/Interfaces/field-config';
 import { TransaccionesService } from '../../../../services/transacciones.service';
 import { ToastrService } from 'ngx-toastr';
 import { AfiliadoService } from 'src/app/services/afiliado.service';
+import { DatosEstaticosService } from 'src/app/services/datos-estaticos.service';
 
 @Component({
   selector: 'app-nuevo-movimiento',
@@ -21,40 +22,48 @@ export class NuevoMovimientoComponent implements OnInit {
   datosEncontrados: boolean = false;
   elementoSeleccionado?: any;
   persona: any;
-
+  tiposMovimientos: any
 
 
   constructor(private transaccionesService: TransaccionesService,
-              private toastr: ToastrService,
-              private afiliadoService: AfiliadoService) { }
+    private toastr: ToastrService,
+    private afiliadoService: AfiliadoService,
+    private datosEstaticosSVC: DatosEstaticosService,
+  ) {
+
+  }
 
   ngOnInit(): void {
-    this.myFormFields = [
-      {
-        type: 'text',
-        label: 'Tipo de movimiento',
-        name: 'tipoMovimientoDescripcion',
-        validations: [Validators.required],
-        display: true,
-        icon: 'notes'
-      },
-      {
-        type: 'text',
-        label: 'Descripción',
-        name: 'DESCRIPCION',
-        validations: [Validators.required],
-        display: true,
-        icon: 'notes'
-      },
-      {
-        type: 'number',
-        label: 'Monto',
-        name: 'MONTO',
-        validations: [Validators.required, Validators.min(1)],
-        display: true,
-        icon: 'attach_money'
-      }
-    ];
+    this.datosEstaticosSVC.getTipoMovimientos().then((value) => {
+      this.myFormFields = [
+        {
+          type: 'dropdown',
+          label: 'Tipo de movimiento',
+          name: 'tipoMovimientoDescripcion',
+          validations: [Validators.required],
+          display: true,
+          icon: 'notes',
+          options: value
+        },
+        {
+          type: 'text',
+          label: 'Descripción',
+          name: 'DESCRIPCION',
+          validations: [Validators.required],
+          display: true,
+          icon: 'notes'
+        },
+        {
+          type: 'number',
+          label: 'Monto',
+          name: 'MONTO',
+          validations: [Validators.required, Validators.min(1)],
+          display: true,
+          icon: 'attach_money'
+        }
+      ];
+    })
+
   }
 
   onSubmit() {
@@ -122,7 +131,7 @@ export class NuevoMovimientoComponent implements OnInit {
       numeroCuenta: this.elementoSeleccionado.NUMERO_CUENTA,
       descripcion: this.form.value.DESCRIPCION,
       monto: this.form.value.MONTO,
-      tipoMovimientoDescripcion : this.form.value.tipoMovimientoDescripcion
+      tipoMovimientoDescripcion: this.form.value.tipoMovimientoDescripcion
     };
 
     this.transaccionesService.crearMovimiento(datosMovimiento).subscribe({
@@ -142,9 +151,9 @@ export class NuevoMovimientoComponent implements OnInit {
 
   puedeCrearMovimiento(): boolean {
     return !!this.dni &&
-           !!this.elementoSeleccionado?.NUMERO_CUENTA &&
-           !!this.form?.value.DESCRIPCION &&
-           this.form.value.MONTO > 0;
+      !!this.elementoSeleccionado?.NUMERO_CUENTA &&
+      !!this.form?.value.DESCRIPCION &&
+      this.form.value.MONTO > 0;
   }
 
 

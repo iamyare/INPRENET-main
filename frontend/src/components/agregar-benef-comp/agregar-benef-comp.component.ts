@@ -51,13 +51,11 @@ export class AgregarBenefCompComponent implements OnInit {
             dni: datosBeneficiario.dni,
             fecha_nacimiento: formattedDate,
             cantidad_dependientes: datosBeneficiario.cantidad_dependientes,
-            correo_1: datosBeneficiario.correo_1 || "",
             telefono_1: datosBeneficiario.telefono_1,
-            id_tipo_identificacion: datosBeneficiario.id_tipo_identificacion || null,
-            id_pais_nacionalidad: datosBeneficiario.id_pais,
+            id_pais: datosBeneficiario.id_pais,
             detalleBenef: {
                 ID_CAUSANTE: this.data.idPersona,
-                porcentaje: beneficiario.porcentaje,
+                porcentaje: datosBeneficiario.porcentaje,
                 ID_TIPO_PERSONA: 2,
                 ID_CAUSANTE_PADRE: this.data.idPersona
             }
@@ -67,8 +65,6 @@ export class AgregarBenefCompComponent implements OnInit {
     });
 
     const payload = beneficiariosData[0];
-    console.log(payload);
-
     this.afilService.createBeneficiarioConDetalle(payload).subscribe(
         response => {
             this.toastr.success("Beneficiarios agregados con éxito");

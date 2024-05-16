@@ -73,8 +73,12 @@
       <strong>Status:</strong> {{ formBeneficiarios.controls.beneficiario.status }} -->
 
       <div class="card-body" style="text-align: center;">
-        <button mat-button color="primary" (click)="enviar()"
+        <!-- <button mat-button color="primary" (click)="enviar()"
           [disabled]="formDatosGenerales.controls.refpers.invalid || formColegiosMagisteriales.controls.ColMags.invalid || formDatosFamiliares.controls.familiar.invalid || formHistPag.controls.banco.invalid || formPuestTrab.controls.trabajo.invalid || formReferencias.controls.refpers.invalid || formBeneficiarios.controls.beneficiario.invalid">
+          Enviar Formulario
+        </button> -->
+        <button mat-button color="primary" (click)="enviar()"
+         >
           Enviar Formulario
         </button>
       </div>

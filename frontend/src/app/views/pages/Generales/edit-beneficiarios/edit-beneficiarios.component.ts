@@ -166,7 +166,7 @@ export class EditBeneficiariosComponent {
       { nombre: 'dni', tipo: 'text', etiqueta: 'DNI', editable: true },
       { nombre: 'nombres', tipo: 'text', etiqueta: 'Nombres', editable: true },
       { nombre: 'apellidos', tipo: 'text', etiqueta: 'Apellidos', editable: true },
-      { nombre: 'genero', tipo: 'text', etiqueta: 'Género', editable: true, opciones: this.datosEstaticosService.genero },
+      { nombre: 'genero', tipo: 'list', etiqueta: 'Género', editable: true, opciones: this.datosEstaticosService.genero },
       { nombre: 'sexo', tipo: 'list', etiqueta: 'Sexo', editable: true, opciones: this.datosEstaticosService.sexo },
       { nombre: 'cantidad_dependientes', tipo: 'number', etiqueta: 'Cantidad de Dependientes', editable: true },
       { nombre: 'representacion', tipo: 'list', etiqueta: 'Representación', editable: true, opciones: this.datosEstaticosService.representacion },

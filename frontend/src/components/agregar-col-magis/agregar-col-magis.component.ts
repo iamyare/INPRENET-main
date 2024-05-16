@@ -1,25 +1,18 @@
-import { ChangeDetectionStrategy, Component, EventEmitter, Inject, Input, Output, inject } from '@angular/core';
-import { ControlContainer, FormArray, FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
+import { ChangeDetectionStrategy, Component, EventEmitter, Inject, Input, Output, OnInit } from '@angular/core';
+import { ControlContainer, FormArray, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { ToastrService } from 'ngx-toastr';
-import { AfiliadoService } from 'src/app/services/afiliado.service';
-import { DatosEstaticosService } from 'src/app/services/datos-estaticos.service';
-import { DireccionService } from 'src/app/services/direccion.service';
+    import { AfiliadoService } from 'src/app/services/afiliado.service';
 
 @Component({
   selector: 'app-agregar-col-magis',
   templateUrl: './agregar-col-magis.component.html',
-  styleUrl: './agregar-col-magis.component.scss',
+  styleUrls: ['./agregar-col-magis.component.scss'],
 })
-export class AgregarColMagisComponent {
-  form = this.fb.group({
-  });
-
-  dataColMag: any
-  formColMag: any = new FormGroup(
-    {
-      refpers: new FormArray([], [Validators.required])
-    });
+export class AgregarColMagisComponent implements OnInit {
+  form = this.fb.group({});
+  dataColMag: any;
+  formColMag!: FormGroup;
 
   constructor(
     private toastr: ToastrService,
@@ -27,12 +20,20 @@ export class AgregarColMagisComponent {
     private fb: FormBuilder,
     private afilService: AfiliadoService,
     @Inject(MAT_DIALOG_DATA) public data: { idPersona: string }
-  ) { }
+  ) {}
 
-  ngOnInit(): void { }
+  ngOnInit(): void {
+    this.initFormColMag();
+  }
+
+  private initFormColMag(): void {
+    this.formColMag = this.fb.group({
+      ColMags: this.fb.array([]) // Inicializa el FormArray
+    });
+  }
 
   setHistSal(datosHistSal: any) {
-    this.dataColMag = datosHistSal
+    this.dataColMag = datosHistSal;
   }
 
   guardar() {

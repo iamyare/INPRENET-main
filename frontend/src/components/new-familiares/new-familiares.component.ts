@@ -107,8 +107,12 @@ export class NewFamiliaresComponent implements OnInit {
       parentesco: String(familiar.parentesco)
     }));
 
+    console.log(familiaresData);
+
+
+
     familiaresData.forEach((familiar: any) => {
-      this.afiliadoService.agregarFamiliar(this.dniPersona, familiar).subscribe({
+      this.afiliadoService.agregarFamiliar(this.data.dniPersona, familiar).subscribe({
         next: (response) => {
           console.log('Familiar agregado con éxito:', response);
           this.toastr.success('Familiar agregado con éxito');

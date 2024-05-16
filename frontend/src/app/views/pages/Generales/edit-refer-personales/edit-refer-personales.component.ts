@@ -240,11 +240,15 @@ export class EditReferPersonalesComponent {
     });
     dialogRef.afterClosed().subscribe((result: boolean) => {
       if (result) {
-        this.svcAfiliado.eliminarReferenciaPersonal(row.id).subscribe({
+        this.svcAfiliado.eliminarReferenciaPersonal(row.id_ref_personal).subscribe({
           next: (response) => {
             this.toastr.success(response.mensaje, 'Referencia Personal Eliminada');
-            this.filas = this.filas.filter((item) => item.id !== row.id);
-            this.cargar();
+            this.filas = this.filas.filter((item) => item.id_ref_personal !== row.id_ref_personal);
+            if (this.filas.length === 0) {
+              this.getFilas().then(() => this.cargar());
+            } else {
+              this.cargar();
+            }
           },
           error: (error) => {
             console.error('Error al eliminar la referencia personal:', error);
@@ -256,6 +260,7 @@ export class EditReferPersonalesComponent {
       }
     });
   }
+
 
 
   openDialog(campos: any, row: any): void {

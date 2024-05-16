@@ -72,10 +72,10 @@ export class BenefComponent implements OnInit {
         genero: new FormControl(datosBeneficiario?.genero || ''),
         cantidad_dependientes: new FormControl(datosBeneficiario?.cantidad_dependientes || 0),
         representacion: new FormControl(datosBeneficiario?.representacion || ''),
-        telefono1: new FormControl(datosBeneficiario?.telefono1 || ''),
-        fechaNacimiento: new FormControl(datosBeneficiario?.fechaNacimiento || '', Validators.required),
+        telefono_1: new FormControl(datosBeneficiario?.telefono_1 || ''),
+        fecha_nacimiento: new FormControl(datosBeneficiario?.fecha_nacimiento || '', Validators.required),
         direccionResidencia: new FormControl(datosBeneficiario?.direccionResidencia || ''),
-        id_pais_nacionalidad: new FormControl(datosBeneficiario?.id_pais_nacionalidad || null, Validators.required),
+        id_pais: new FormControl(datosBeneficiario?.id_pais || null, Validators.required),
         idMunicipioResidencia: new FormControl(datosBeneficiario?.idMunicipioResidencia || null, Validators.required),
         porcentaje: new FormControl(datosBeneficiario?.porcentaje, [
           Validators.required,

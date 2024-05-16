@@ -43,6 +43,7 @@ export class EditFamiliaresComponent {
   ) { }
 
   ngOnInit(): void {
+
     this.listaParentesco = this.datosEstaticosService.parentesco;
     this.myFormFields = [
       { type: 'text', label: 'DNI del afiliado', name: 'dni', validations: [Validators.required, Validators.minLength(13), Validators.maxLength(14)], display: true },

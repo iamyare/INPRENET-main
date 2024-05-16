@@ -1,5 +1,4 @@
 import { ChangeDetectionStrategy, Component, EventEmitter, Input, OnInit, Output, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
 import { ControlContainer, FormArray, FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { DatosEstaticosService } from 'src/app/services/datos-estaticos.service';
 import { FormStateService } from 'src/app/services/form-state.service';
@@ -44,7 +43,7 @@ export function generatePuestoTrabFormGroup(datos?: any): FormGroup {
 @Component({
   selector: 'app-dat-puesto-trab',
   templateUrl: './dat-puesto-trab.component.html',
-  styleUrl: './dat-puesto-trab.component.scss',
+  styleUrls: ['./dat-puesto-trab.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   viewProviders: [
     {
@@ -58,41 +57,37 @@ export class DatPuestoTrabComponent implements OnInit {
   public formParent: FormGroup = new FormGroup({});
   private formKey = 'FormTrabajo';
 
-  centrosTrabajo: any = this.datosEstaticos.centrosTrabajo;
-  sector: any = this.datosEstaticos.sector;
+  centrosTrabajo: any;
+  sector: any;
 
   @Input() datos: any;
   @Input() editing?: boolean = false;
   @Output() newDatDatosPuestTrab = new EventEmitter<any>()
 
-  onDatosDatosPuestTrab() {
-    const data = this.formParent;
-    this.newDatDatosPuestTrab.emit(data);
+  constructor(
+    private formStateService: FormStateService,
+    private fb: FormBuilder,
+    private datosEstaticos: DatosEstaticosService
+  ) {
+    this.centrosTrabajo = this.datosEstaticos.centrosTrabajo;
+    this.sector = this.datosEstaticos.sector;
   }
-
-  constructor(private formStateService: FormStateService, private fb: FormBuilder, private datosEstaticos: DatosEstaticosService) { }
 
   ngOnInit(): void {
     this.initForm();
     const trabajoArray = this.formParent.get('trabajo') as FormArray;
-    if (this.datos) {
+    if (this.datos && this.datos.value && Array.isArray(this.datos.value.trabajo)) {
       if (this.datos.value.trabajo.length > 0) {
         for (let i of this.datos.value.trabajo) {
           this.agregarTrabajo(i);
         }
       }
     }
-    /* this.formParent.valueChanges.subscribe(values => {
-      this.newDatDatosPuestTrab.emit(values);
-    }); */
   }
 
   ngOnDestroy() {
-    /* if (!this.editing) {
-      this.formStateService.setForm(this.formKey, this.formParent);
-    } */
+    // Lógica para guardar el formulario si es necesario
   }
-
 
   private initForm() {
     let existingForm = this.formStateService.getForm(this.formKey);
@@ -100,58 +95,53 @@ export class DatPuestoTrabComponent implements OnInit {
       this.formParent = existingForm;
     } else {
       this.formParent = this.fb.group({
-        trabajo: this.fb.array([])  // Corrige aquí el nombre correcto del FormArray
+        trabajo: this.fb.array([])  // Asegúrate de que el nombre del FormArray sea correcto
       });
-      /* this.formStateService.setForm(this.formKey, this.formParent); */
+      // this.formStateService.setForm(this.formKey, this.formParent);
     }
   }
 
-
   agregarTrabajo(datos?: any): void {
     const ref_trabajo = this.formParent.get('trabajo') as FormArray;
-    if (datos) {
-      ref_trabajo.push(generatePuestoTrabFormGroup(datos));
-    } else {
-      ref_trabajo.push(generatePuestoTrabFormGroup({}));
-    }
+    ref_trabajo.push(generatePuestoTrabFormGroup(datos || {}));
+    this.onDatosDatosPuestTrab(); // Emite los datos actualizados
   }
 
   eliminarTrabajo(): void {
     const ref_trabajo = this.formParent.get('trabajo') as FormArray;
-    ref_trabajo.removeAt(-1);
-    const data = this.formParent
+    if (ref_trabajo.length > 0) {
+      ref_trabajo.removeAt(ref_trabajo.length - 1);
+      this.onDatosDatosPuestTrab(); // Emite los datos actualizados
+    }
+  }
+
+  onDatosDatosPuestTrab() {
+    const data = this.formParent.value;
     this.newDatDatosPuestTrab.emit(data);
   }
 
-
   getCtrl(key: string, form: FormGroup): any {
-    return form.get(key)
+    return form.get(key);
   }
 
   getErrors(i: number, fieldName: string): any {
-
-    if (this.formParent instanceof FormGroup) {
-      const controlestrabajo = (this.formParent.get('trabajo') as FormGroup).controls;
-      const a = controlestrabajo[i].get(fieldName)!.errors
-
-      let errors = []
-      if (a) {
-        if (a['required']) {
-          errors.push('Este campo es requerido.');
-        }
-        if (a['minlength']) {
-          errors.push(`Debe tener al menos ${a['minlength'].requiredLength} caracteres.`);
-        }
-        if (a['maxlength']) {
-          errors.push(`No puede tener más de ${a['maxlength'].requiredLength} caracteres.`);
-        }
-        if (a['pattern']) {
-          errors.push('El formato no es válido.');
-        }
-        return errors;
+    const controlestrabajo = (this.formParent.get('trabajo') as FormArray).controls;
+    const a = controlestrabajo[i].get(fieldName)!.errors;
+    let errors = [];
+    if (a) {
+      if (a['required']) {
+        errors.push('Este campo es requerido.');
       }
+      if (a['minlength']) {
+        errors.push(`Debe tener al menos ${a['minlength'].requiredLength} caracteres.`);
+      }
+      if (a['maxlength']) {
+        errors.push(`No puede tener más de ${a['maxlength'].requiredLength} caracteres.`);
+      }
+      if (a['pattern']) {
+        errors.push('El formato no es válido.');
+      }
+      return errors;
     }
-
   }
-
 }

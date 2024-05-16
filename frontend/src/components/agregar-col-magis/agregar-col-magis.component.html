@@ -1,6 +1,9 @@
-<form [formGroup]="form" #myForm="ngForm" change="getLabel()">
-  <app-col-magisteriales [editing]="true" [datos]="formColMag"
-    (newDataColegioMagisterial)="setHistSal($event)"></app-col-magisteriales>
+<form [formGroup]="form" #myForm="ngForm">
+  <app-col-magisteriales
+    [editing]="true"
+    [datos]="formColMag"
+    (newDataColegioMagisterial)="setHistSal($event)">
+  </app-col-magisteriales>
 </form>
 
 <div style="text-align: center;">

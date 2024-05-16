@@ -232,8 +232,8 @@ export class AfilBancoComponent implements OnInit {
       familiares: this.formDatosFamiliares.value.familiar || []
     };
 
-    const docDefinition: any = this.createPDFDefinition(encapsulatedDto);
-    pdfMake.createPdf(docDefinition).download('datos_afiliado.pdf');
+    /* const docDefinition: any = this.createPDFDefinition(encapsulatedDto);
+    pdfMake.createPdf(docDefinition).download('datos_afiliado.pdf'); */
 
     formData.append('encapsulatedDto', JSON.stringify(encapsulatedDto));
 
@@ -263,7 +263,7 @@ export class AfilBancoComponent implements OnInit {
     */
   }
 
-  createPDFDefinition(data: any) {
+  /* createPDFDefinition(data: any) {
     return {
       content: [
         { text: 'I. DATOS GENERALES DEL AFILIADO', style: 'header' },
@@ -378,7 +378,7 @@ export class AfilBancoComponent implements OnInit {
       },
       style: 'table'
     };
-  }
+  } */
 
   dataURLToBlob(dataURL: string) {
     const byteString = atob(dataURL.split(',')[1]);

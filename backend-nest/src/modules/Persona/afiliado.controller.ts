@@ -163,6 +163,14 @@ async create(@Body() benef: Benef): Promise<Net_Persona> {
     }
   }
 
+  @Delete('borrarBeneficiario/:idPersona/:idCausante')
+  async deleteDetallePersona(
+    @Param('idPersona') idPersona: number,
+    @Param('idCausante') idCausante: number,
+  ): Promise<void> {
+    await this.afiliadoService.deleteByPersonaAndPadre(idPersona, idCausante);
+  }
+
 
   @Put('actualizarBeneficiario/:id')
   async updatePersona(

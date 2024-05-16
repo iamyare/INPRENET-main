@@ -1,5 +1,6 @@
 import { Column, Entity, OneToMany, PrimaryColumn } from "typeorm";
 import { Net_Persona } from "./Net_Persona.entity";
+import { NET_DETALLE_PERSONA } from "./Net_detalle_persona.entity";
 
 @Entity({ name: 'NET_ESTADO_PERSONA' })
 export class Net_Estado_Persona {
@@ -10,6 +11,6 @@ export class Net_Estado_Persona {
     @Column('varchar2', { length: 50, nullable: false, name: 'DESCRIPCION' })
     Descripcion: string;
 
-    @OneToMany(() => Net_Persona, persona => persona.estadoPersona)
-    personas: Net_Persona[];
+    @OneToMany(() => NET_DETALLE_PERSONA, detallePersona => detallePersona.estadoPersona)
+    detallesPersona: NET_DETALLE_PERSONA[];
 }

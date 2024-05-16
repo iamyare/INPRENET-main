@@ -49,38 +49,33 @@ export class DetalleBeneficioService {
         if (!beneficio) {
           throw new BadRequestException('Tipo de beneficio no encontrado');
         }
-
-        // Asumimos que convertirCadenaAFecha es una función que convierte una cadena de fecha en formato DD-MM-YYYY a un objeto Date
         const periodoInicio = this.convertirCadenaAFecha(datos.periodoInicio);
         const periodoFinalizacion = this.convertirCadenaAFecha(datos.periodoFinalizacion);
-
-        // Verificar que las fechas sean válidas
         if (!periodoInicio || !periodoFinalizacion) {
           throw new BadRequestException('Formato de fecha inválido. Usa DD-MM-YYYY.');
         }
 
         if (!idPersonaPadre) {
-          const detPer = await manager.findOne(
-            NET_DETALLE_PERSONA, {
+          throw new BadRequestException('ID de persona padre es requerido');
+        }
+
+        const detPer = await manager.findOne(
+          NET_DETALLE_PERSONA,
+          {
             where: {
               ID_CAUSANTE: idPersonaPadre,
               tipoPersona: {
-                tipo_persona: "AFILIADO",
+                tipo_persona: 'AFILIADO',
               },
-              persona: {
-                estadoPersona: { Descripcion: "ACTIVO" },
-              }
+              estadoPersona: { Descripcion: 'ACTIVO' }
             },
-            relations: [
-              "persona",
-              "padreIdPersona",
-              "persona.detallePersona.padreIdPersona",
-              "persona.estadoPersona"]
+            relations: ['persona', 'estadoPersona']
           }
-          );
+        );
 
-          if (detPer) {
-            const queryInsDeBBenf = `INSERT INTO NET_DETALLE_BENEFICIO_AFILIADO (
+        if (detPer) {
+          const queryInsDeBBenf = `
+            INSERT INTO NET_DETALLE_BENEFICIO_AFILIADO (
               ID_CAUSANTE,
               ID_BENEFICIARIO,
               ID_BENEFICIO,
@@ -97,62 +92,58 @@ export class DetalleBeneficioService {
               '${datos.periodoFinalizacion}',
               ${datos.monto_total},
               ${datos.monto_por_periodo},
-              ${datos.ley_aplicable}
-            )`
-            /* Inserta en la tabla de detalle beneficio afiliado */
-            const detBeneBeneficia = await this.entityManager.query(queryInsDeBBenf);
-            return detBeneBeneficia;
+              '${datos.ley_aplicable}'
+            )`;
 
-          }
-        } else {
-          const detPerB = await manager.findOne(
-            NET_DETALLE_PERSONA, {
+          const detBeneBeneficia = await this.entityManager.query(queryInsDeBBenf);
+          return detBeneBeneficia;
+        }
+
+        const detPerB = await manager.findOne(
+          NET_DETALLE_PERSONA,
+          {
             where: {
               ID_CAUSANTE: idPersonaPadre,
               tipoPersona: {
-                tipo_persona: "BENEFICIARIO",
+                tipo_persona: 'BENEFICIARIO',
               },
-              persona: {
-                estadoPersona: { Descripcion: "ACTIVO" },
-              }
+              estadoPersona: { Descripcion: 'ACTIVO' }
             },
-            relations: [
-              "persona",
-              "padreIdPersona",
-              "persona.detallePersona.padreIdPersona",
-              "persona.estadoPersona"]
+            relations: ['persona', 'estadoPersona']
           }
-          );
+        );
 
-          if (detPerB) {
-            const queryInsDeBBenf = `INSERT INTO NET_DETALLE_BENEFICIO_AFILIADO (
-                ID_CAUSANTE,
-                ID_BENEFICIARIO,
-                ID_BENEFICIO,
-                PERIODO_INICIO,
-                PERIODO_FINALIZACION,
-                MONTO_TOTAL,
-                MONTO_POR_PERIODO
-              ) VALUES (
-                ${detPerB.ID_CAUSANTE},
-                ${detPerB.ID_PERSONA},
-                ${beneficio.id_beneficio},
-                '${datos.periodoInicio}',
-                '${datos.periodoFinalizacion}',
-                ${datos.monto_total},
-                ${datos.monto_por_periodo}
-              )`
-            /* Inserta en la tabla de detalle beneficio afiliado */
-            const detBeneBeneficia = await this.entityManager.query(queryInsDeBBenf);
-            return detBeneBeneficia;
-          }
+        if (detPerB) {
+          const queryInsDeBBenf = `
+            INSERT INTO NET_DETALLE_BENEFICIO_AFILIADO (
+              ID_CAUSANTE,
+              ID_BENEFICIARIO,
+              ID_BENEFICIO,
+              PERIODO_INICIO,
+              PERIODO_FINALIZACION,
+              MONTO_TOTAL,
+              MONTO_POR_PERIODO
+            ) VALUES (
+              ${detPerB.ID_CAUSANTE},
+              ${detPerB.ID_PERSONA},
+              ${beneficio.id_beneficio},
+              '${datos.periodoInicio}',
+              '${datos.periodoFinalizacion}',
+              ${datos.monto_total},
+              ${datos.monto_por_periodo}
+            )`;
+
+          const detBeneBeneficia = await this.entityManager.query(queryInsDeBBenf);
+          return detBeneBeneficia;
         }
+
+        throw new BadRequestException('Detalle de persona no encontrado');
+
       } catch (error) {
         this.logger.error(`Error al crear DetalleBeneficioAfiliado y DetalleBeneficio: ${error.message}`, error.stack);
         throw new InternalServerErrorException('Error al crear registros, por favor intente más tarde.');
       }
     });
-
   }
 
   async createBenBenefic(beneficiario: CreateDetalleBeneficioDto, idPersona: string): Promise<any> {

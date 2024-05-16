@@ -54,19 +54,11 @@ export class Benef {
 
     @IsOptional()
     @IsString()
-    correo_1?: string;
-
-    @IsOptional()
-    @IsString()
     telefono_1?: string;
 
     @IsOptional()
     @IsNumber()
-    id_tipo_identificacion?: number;
-
-    @IsOptional()
-    @IsNumber()
-    id_pais_nacionalidad?: number;
+    id_pais?: number;
 
     @ValidateNested()
     @Type(() => DetalleBenef)

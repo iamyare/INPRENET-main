@@ -124,11 +124,6 @@ export class AfiliadoService {
       throw new Error(`Municipio con ID ${createPersonaDto.id_municipio_residencia} no encontrado`);
     }
 
-    persona.estadoPersona = await this.estadoPersonaRepository.findOne({ where: { Descripcion: "ACTIVO" } });
-    if (!persona.estadoPersona) {
-      throw new Error(`Estado con código ${createPersonaDto.id_estado_persona} no encontrado`);
-    }
-
     persona.profesion = await this.netProfesionesRepository.findOne({ where: { idProfesion: createPersonaDto.id_profesion } });
     if (!persona.profesion) {
       throw new Error(`Profesion con código ${createPersonaDto.id_profesion} no encontrado`);
@@ -248,9 +243,6 @@ export class AfiliadoService {
   }
 
   async assignBancosToPersona(idPersona: number, bancosData: CreatePersonaBancoDTO[]): Promise<Net_Persona_Por_Banco[]> {
-    console.log(idPersona);
-    console.log(bancosData);
-
     try {
       const persona = await this.personaRepository.findOne({
         where: { id_persona: idPersona }
@@ -738,79 +730,102 @@ export class AfiliadoService {
   }
 
   async findByDni(dni: string): Promise<Net_Persona | string> {
-    const afiliado = await this.personaRepository.findOne({ where: { dni }, relations: ['estadoAfiliado'] });
+    const persona = await this.personaRepository.findOne({ where: { dni } });
 
-    if (!afiliado) {
+    if (!persona) {
       throw new NotFoundException(`Afiliado with DNI ${dni} not found`);
     }
+    const detallePersona = await this.detallePersonaRepository.findOne({
+      where: { ID_PERSONA: persona.id_persona },
+      relations: ['estadoPersona'],
+    });
 
-    switch (afiliado.estadoPersona.Descripcion) {
+    if (!detallePersona || !detallePersona.estadoPersona) {
+      throw new NotFoundException(`Estado for persona with DNI ${dni} not found`);
+    }
+
+    // Verifica el estado de la persona
+    switch (detallePersona.estadoPersona.Descripcion) {
       case 'FALLECIDO':
         return 'El afiliado está fallecido.';
       case 'INACTIVO':
         return 'El afiliado está inactivo.';
       default:
-        return afiliado;
+        return persona;
     }
   }
 
   async buscarPersonaYMovimientosPorDNI(dni: string): Promise<any> {
     const persona = await this.personaRepository.findOne({
       where: { dni },
-      relations: ["cuentas", "cuentas.movimientos", "estadoPersona"] // Asegúrate de cargar las cuentas y sus movimientos
+      relations: ['cuentas', 'cuentas.movimientos'],
     });
 
     if (!persona) {
       throw new NotFoundException(`Persona con DNI ${dni} no encontrada`);
     }
+    const detallePersona = await this.detallePersonaRepository.findOne({
+      where: { ID_PERSONA: persona.id_persona },
+      relations: ['estadoPersona'],
+    });
 
-    if (['FALLECIDO', 'INACTIVO'].includes(persona.estadoPersona?.Descripcion.toUpperCase())) {
+    if (!detallePersona || !detallePersona.estadoPersona) {
+      throw new NotFoundException(`Estado para persona con DNI ${dni} no encontrado`);
+    }
+    if (['FALLECIDO', 'INACTIVO'].includes(detallePersona.estadoPersona.Descripcion.toUpperCase())) {
       return {
         status: 'error',
-        message: `La persona está ${persona.estadoPersona.Descripcion.toLowerCase()}.`,
-        data: { persona: null, movimientos: [] }
+        message: `La persona está ${detallePersona.estadoPersona.Descripcion.toLowerCase()}.`,
+        data: { persona: null, movimientos: [] },
       };
     }
 
-    const movimientos = persona.cuentas.flatMap(cuenta => cuenta.movimientos); // Aplana los movimientos de todas las cuentas
+    const movimientos = persona.cuentas.flatMap(cuenta => cuenta.movimientos);
 
     return {
       status: 'success',
       message: 'Datos y movimientos de la persona encontrados con éxito',
       data: {
         persona,
-        movimientos // Devuelve los movimientos aplastados de todas las cuentas
-      }
+        movimientos,
+      },
     };
   }
 
   async buscarCuentasPorDNI(dni: string): Promise<any> {
     const persona = await this.personaRepository.findOne({
       where: { dni },
-      relations: ["cuentas", "cuentas.movimientos", "cuentas.tipoCuenta", "estadoPersona"] // Asegúrate de cargar las cuentas y sus movimientos
+      relations: ['cuentas', 'cuentas.movimientos', 'cuentas.tipoCuenta'],
     });
 
     if (!persona) {
       throw new NotFoundException(`Persona con DNI ${dni} no encontrada`);
     }
+    const detallePersona = await this.detallePersonaRepository.findOne({
+      where: { ID_PERSONA: persona.id_persona },
+      relations: ['estadoPersona'],
+    });
 
-    if (['FALLECIDO', 'INACTIVO'].includes(persona.estadoPersona?.Descripcion.toUpperCase())) {
+    if (!detallePersona || !detallePersona.estadoPersona) {
+      throw new NotFoundException(`Estado para persona con DNI ${dni} no encontrado`);
+    }
+    if (['FALLECIDO', 'INACTIVO'].includes(detallePersona.estadoPersona.Descripcion.toUpperCase())) {
       return {
         status: 'error',
-        message: `La persona está ${persona.estadoPersona.Descripcion.toLowerCase()}.`,
-        data: { persona: null, movimientos: [] }
+        message: `La persona está ${detallePersona.estadoPersona.Descripcion.toLowerCase()}.`,
+        data: { persona: null, movimientos: [] },
       };
     }
 
-    const movimientos = persona.cuentas.flatMap(cuenta => cuenta.movimientos); // Aplana los movimientos de todas las cuentas
+    const movimientos = persona.cuentas.flatMap(cuenta => cuenta.movimientos);
 
     return {
       status: 'success',
       message: 'Datos y movimientos de la persona encontrados con éxito',
       data: {
         persona,
-        movimientos // Devuelve los movimientos aplastados de todas las cuentas
-      }
+        movimientos,
+      },
     };
   }
 
@@ -850,6 +865,17 @@ export class AfiliadoService {
     }
     const temp = this.referenciaPersonalRepository.save(refPersonal);
     return temp
+  }
+
+  async deleteByPersonaAndPadre(idPersona: number, idCausante: number): Promise<void> {
+    const result = await this.detallePersonaRepository.delete({
+      ID_PERSONA: idPersona,
+      ID_CAUSANTE: idCausante,
+    });
+
+    if (result.affected === 0) {
+      throw new NotFoundException(`Registro con ID_PERSONA ${idPersona} y ID_CAUSANTE ${idCausante} no encontrado`);
+    }
   }
 
   async deleteReferenciaPersonal(id: number): Promise<void> {
@@ -1006,12 +1032,12 @@ export class AfiliadoService {
   async agregarFamiliarYRelacion(
     dniPersona: string,
     nuevoFamiliarDto: {
-      primerNombre?: string,
-      segundoNombre?: string,
-      primerApellido?: string,
-      segundoApellido?: string,
+      primer_nombre?: string,
+      segundo_nombre?: string,
+      primer_apellido?: string,
+      segundo_apellido?: string,
       dni?: string,
-      fechaNacimiento?: string,
+      fecha_nacimiento?: string,
       parentesco: string
     }
   ): Promise<NET_RELACION_FAMILIAR> {
@@ -1023,12 +1049,12 @@ export class AfiliadoService {
 
     // Crear un nuevo objeto de persona para el familiar
     const nuevoFamiliar = this.personaRepository.create({
-      primer_nombre: nuevoFamiliarDto.primerNombre || null,
-      segundo_nombre: nuevoFamiliarDto.segundoNombre || null,
-      primer_apellido: nuevoFamiliarDto.primerApellido || null,
-      segundo_apellido: nuevoFamiliarDto.segundoApellido || null,
+      primer_nombre: nuevoFamiliarDto.primer_nombre || null,
+      segundo_nombre: nuevoFamiliarDto.segundo_nombre || null,
+      primer_apellido: nuevoFamiliarDto.primer_apellido || null,
+      segundo_apellido: nuevoFamiliarDto.segundo_apellido || null,
       dni: nuevoFamiliarDto.dni || null,
-      fecha_nacimiento: nuevoFamiliarDto.fechaNacimiento || null
+      fecha_nacimiento: nuevoFamiliarDto.fecha_nacimiento || null
     });
 
     // Guardar el nuevo familiar

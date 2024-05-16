@@ -5,7 +5,6 @@ import { Net_Detalle_Deduccion } from "../../Planilla/detalle-deduccion/entities
 import { Net_Municipio } from "../../Regional/municipio/entities/net_municipio.entity";
 import { NET_CUENTA_PERSONA } from "../../transacciones/entities/net_cuenta_persona.entity";
 import { Net_Detalle_planilla_ingreso } from "../../Planilla/Ingresos/detalle-plan-ingr/entities/net_detalle_plani_ing.entity";
-import { Net_Estado_Persona } from "./net_estado_persona.entity";
 import { NET_DETALLE_PERSONA } from "./Net_detalle_persona.entity";
 import { Net_Persona_Colegios } from "src/modules/transacciones/entities/net_persona_colegios.entity";
 import { Net_Persona_Por_Banco } from "src/modules/banco/entities/net_persona-banco.entity";
@@ -117,10 +116,6 @@ export class Net_Persona {
     @ManyToOne(() => Net_Municipio, municipio => municipio.persona, { cascade: true })
     @JoinColumn({ name: 'ID_MUNICIPIO_RESIDENCIA', foreignKeyConstraintName: "FK_ID_MUNIC_RESID_PERS" })
     municipio: Net_Municipio;
-
-    @ManyToOne(() => Net_Estado_Persona, estadoPersona => estadoPersona.personas, { cascade: true })
-    @JoinColumn({ name: 'ID_ESTADO_PERSONA', foreignKeyConstraintName: "FK_NET_PERSONA_ESTADO_PERSONA" })
-    estadoPersona: Net_Estado_Persona;
 
     @OneToMany(() => NET_DETALLE_PERSONA, detallePersona => detallePersona.persona)
     detallesPersona: NET_DETALLE_PERSONA[];

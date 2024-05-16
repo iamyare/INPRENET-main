@@ -16,6 +16,8 @@ import {
   UploadedFile,
   ConflictException,
   BadRequestException,
+  UsePipes,
+  ValidationPipe,
 } from '@nestjs/common';
 import { AfiliadoService } from './afiliado.service';
 import { UpdatePersonaDto } from './dto/update-persona.dto';
@@ -35,6 +37,8 @@ import { NetPersonaDTO } from './dto/create-persona.dto';
 import { CreateDetallePersonaDto } from './dto/create-detalle.dto';
 import { UpdateBeneficiarioDto } from './dto/update-beneficiario.dto';
 import { Net_Persona } from './entities/Net_Persona.entity';
+import { CreateDetalleBeneficiarioDto } from './dto/create-detalle-beneficiario-dto';
+import { Benef } from './dto/pruebaBeneficiario.dto';
 
 @ApiTags('Persona')
 @Controller('Persona')
@@ -43,6 +47,11 @@ export class AfiliadoController {
   private readonly tipoPersonaRepos: Repository<Net_Tipo_Persona>
 
   constructor(private readonly afiliadoService: AfiliadoService, private dataSource: DataSource) { }
+
+  @Post('create-with-detalle')
+async create(@Body() benef: Benef): Promise<Net_Persona> {
+    return this.afiliadoService.createBenef(benef);
+}
 
   @Post('afiliacion')
   @UseInterceptors(FileInterceptor('foto_perfil', {
@@ -137,7 +146,7 @@ export class AfiliadoController {
           await this.afiliadoService.createRelacionFamiliar({
             personaId: persona.id_persona,
             familiarId: familiar.id_persona,
-            parentesco: familiarDto.parentescoConPrincipal
+            parentesco: familiarDto.parentesco
           });
           familiaresAsignados.push(familiar);
         }

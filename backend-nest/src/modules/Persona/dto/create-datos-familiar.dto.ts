@@ -9,5 +9,5 @@ export class OtraPersonaDTO extends NetPersonaDTO {
 
 export class FamiliarDTO extends NetPersonaDTO {
     @IsString()
-    parentescoConPrincipal: string;
+    parentesco: string;
 }

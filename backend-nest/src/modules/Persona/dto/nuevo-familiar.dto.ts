@@ -2,25 +2,25 @@ import { IsString, IsOptional, IsDateString } from 'class-validator';
 
 export class NuevoFamiliarDTO {
   @IsString()
-  primerNombre: string;
+  primer_nombre: string;
 
   @IsOptional()
   @IsString()
-  segundoNombre?: string;
+  segundo_nombre?: string;
 
   @IsString()
-  primerApellido: string;
+  primer_apellido: string;
 
   @IsOptional()
   @IsString()
-  segundoApellido?: string;
+  segundo_apellido?: string;
 
   @IsString()
   dni: string;
 
   @IsOptional()
   @IsDateString()
-  fechaNacimiento?: string;
+  fecha_nacimiento?: string;
 
   @IsString()
   parentesco: string;

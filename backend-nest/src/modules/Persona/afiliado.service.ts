@@ -1,7 +1,7 @@
 import { BadRequestException, ConflictException, Injectable, InternalServerErrorException, Logger, NotFoundException } from '@nestjs/common';
 import { NetPersonaDTO, PersonaResponse } from './dto/create-persona.dto';
 import { UpdatePersonaDto } from './dto/update-persona.dto';
-import { EntityManager, Repository } from 'typeorm';
+import { Connection, EntityManager, Repository } from 'typeorm';
 import { InjectEntityManager, InjectRepository } from '@nestjs/typeorm';
 import { Net_Persona_Por_Banco } from '../banco/entities/net_persona-banco.entity';
 import { Net_Centro_Trabajo } from '../Empresarial/entities/net_centro_trabajo.entity';
@@ -31,6 +31,7 @@ import { UpdateReferenciaPersonalDTO } from './dto/update-referencia-personal.dt
 import { UpdateFamiliarDTO } from './dto/update-familiar.dto';
 import { Sequelize, where } from 'sequelize';
 import { UpdateBeneficiarioDto } from './dto/update-beneficiario.dto';
+import { Benef } from './dto/pruebaBeneficiario.dto';
 @Injectable()
 export class AfiliadoService {
 
@@ -88,7 +89,8 @@ export class AfiliadoService {
     private readonly BancosToPersonaRepository: Repository<Net_Persona_Por_Banco>,
 
     @InjectRepository(NET_RELACION_FAMILIAR)
-    private readonly relacionesFamiliaresRepository: Repository<NET_RELACION_FAMILIAR>
+    private readonly relacionesFamiliaresRepository: Repository<NET_RELACION_FAMILIAR>,
+    private readonly connection: Connection
   ) { }
 
 
@@ -156,7 +158,7 @@ export class AfiliadoService {
       await this.createRelacionFamiliar({
         personaId: personaPrincipal.id_persona,
         familiarId: familiar.id_persona,
-        parentesco: familiarDto.parentescoConPrincipal
+        parentesco: familiarDto.parentesco
       });
     }
 
@@ -321,6 +323,30 @@ export class AfiliadoService {
 
     }
   }
+
+  async createBenef(bene: Benef): Promise<Net_Persona> {
+    const { detalleBenef, dni, ...personaData } = bene;
+
+    // Verificar si la persona ya existe por su DNI
+    let persona = await this.personaRepository.findOne({ where: { dni } });
+
+    if (!persona) {
+        // Si la persona no existe, crear una nueva persona
+        persona = this.personaRepository.create({ dni, ...personaData });
+        await this.personaRepository.save(persona);
+    }
+
+    // Crear un nuevo detalle para la persona
+    const detalle = this.detallePersonaRepository.create({
+        ...detalleBenef,
+        persona,
+        ID_TIPO_PERSONA: 2
+    });
+    await this.detallePersonaRepository.save(detalle);
+
+    return persona;
+}
+
 
   async updateBeneficario(id: number, updatePersonaDto: UpdateBeneficiarioDto): Promise<Net_Persona> {
     const persona = await this.personaRepository.findOneBy({ id_persona: id });

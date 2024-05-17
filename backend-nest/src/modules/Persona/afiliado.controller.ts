@@ -39,6 +39,7 @@ import { UpdateBeneficiarioDto } from './dto/update-beneficiario.dto';
 import { Net_Persona } from './entities/Net_Persona.entity';
 import { CreateDetalleBeneficiarioDto } from './dto/create-detalle-beneficiario-dto';
 import { Benef } from './dto/pruebaBeneficiario.dto';
+import { Net_Estado_Persona } from './entities/net_estado_persona.entity';
 
 @ApiTags('Persona')
 @Controller('Persona')
@@ -163,13 +164,20 @@ async create(@Body() benef: Benef): Promise<Net_Persona> {
     }
   }
 
-  @Delete('borrarBeneficiario/:idPersona/:idCausante')
-  async deleteDetallePersona(
-    @Param('idPersona') idPersona: number,
-    @Param('idCausante') idCausante: number,
-  ): Promise<void> {
-    await this.afiliadoService.deleteByPersonaAndPadre(idPersona, idCausante);
-  }
+  @Patch('inactivar/:idPersona/:idCausante')
+    async inactivarPersona(
+        @Param('idPersona') idPersona: number,
+        @Param('idCausante') idCausante: number
+    ): Promise<void> {
+        try {
+            await this.afiliadoService.inactivarPersona(idPersona, idCausante);
+        } catch (error) {
+            if (error instanceof NotFoundException) {
+                throw new NotFoundException(error.message);
+            }
+            throw error;
+        }
+    }
 
 
   @Put('actualizarBeneficiario/:id')
@@ -196,6 +204,10 @@ async create(@Body() benef: Benef): Promise<Net_Persona> {
     return { message: 'Salario base actualizado con éxito.' };
   }
 
+  @Get('obtenerEstados')
+  async getAllEstados(): Promise<Net_Estado_Persona[]> {
+    return this.afiliadoService.getAllEstados();
+  }
 
   @Post('/createReferPersonales/:idPersona')
   createReferPersonales(@Param("idPersona") idPersona: number, @Body() createAfiliadoTempDto: any) {
@@ -446,20 +458,6 @@ async create(@Body() benef: Benef): Promise<Net_Persona> {
     return this.afiliadoService.agregarFamiliarYRelacion(dniPersona, nuevoFamiliarDto);
   }
 
-  @Put('/updateDatosBancarios/:idPerf')
-  updateDatosBancarios(
-    @Param('idPerf') idPerf: string,
-    @Body() datosBancarios: any,
-  ) {
-    return this.afiliadoService.updateDatosBancarios(idPerf, datosBancarios);
-  }
-  @Put('/updateColegiosMagist/:idPerf')
-  updateColegiosMagist(
-    @Param('idPerf') idPerf: string,
-    @Body() datosColegioMagist: any,
-  ) {
-    return this.afiliadoService.updateColegiosMagist(idPerf, datosColegioMagist);
-  }
   @Put('/updateDatosGenerales/:idPersona')
   updateDatosGenerales(
     @Param('idPersona') idPersona: number,
@@ -506,6 +504,7 @@ async create(@Body() benef: Benef): Promise<Net_Persona> {
     return this.afiliadoService.getAllBenDeAfil(dniAfil);
   }
 
+  
   @Patch(':id')
   update(
     @Param('id') id: string,

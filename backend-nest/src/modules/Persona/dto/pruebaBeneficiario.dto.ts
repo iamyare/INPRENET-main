@@ -45,6 +45,26 @@ export class Benef {
     dni?: string;
 
     @IsOptional()
+    @IsString()
+    genero?: string;
+
+    @IsOptional()
+    @IsString()
+    representacion?: string;
+
+    @IsOptional()
+    @IsString()
+    sexo?: string;
+
+    @IsOptional()
+    @IsString()
+    direccion_residencia?: string;
+
+    @IsOptional()
+    @IsNumber()
+    id_municipio_residencia?: number; 
+
+    @IsOptional()
     @IsDateString()
     fecha_nacimiento?: string;
 

@@ -317,11 +317,24 @@ export class AfiliadoService {
   }
 
   async createBenef(bene: Benef): Promise<Net_Persona> {
-    const { detalleBenef, dni, ...personaData } = bene;
-    let persona = await this.personaRepository.findOne({ where: { dni } });
+    const { detalleBenef, dni, id_pais, id_municipio_residencia, ...personaData } = bene;
 
+    let persona = await this.personaRepository.findOne({ where: { dni }, relations: ['pais', 'municipio'] });
     if (!persona) {
-        persona = this.personaRepository.create({ dni, ...personaData });
+        const pais = await this.paisRepository.findOne({ where: { id_pais } });
+        const municipio = await this.municipioRepository.findOne({ where: { id_municipio: id_municipio_residencia } });
+        if (!pais) {
+            throw new Error(`País con ID ${id_pais} no encontrado`);
+        }
+        if (!municipio) {
+            throw new Error(`Municipio con ID ${id_municipio_residencia} no encontrado`);
+        }
+        persona = this.personaRepository.create({
+            dni,
+            pais,
+            municipio,
+            ...personaData
+        });
         await this.personaRepository.save(persona);
     }
     const detalle = this.detallePersonaRepository.create({
@@ -330,25 +343,42 @@ export class AfiliadoService {
         ID_TIPO_PERSONA: 2
     });
     await this.detallePersonaRepository.save(detalle);
-
     return persona;
 }
 
 
-  async updateBeneficario(id: number, updatePersonaDto: UpdateBeneficiarioDto): Promise<Net_Persona> {
-    const persona = await this.personaRepository.findOneBy({ id_persona: id });
-    if (!persona) {
-      throw new NotFoundException(`Persona with ID ${id} not found`);
-    }
 
-    // Transformar la fecha a formato ISO 8601 si está presente
-    if (updatePersonaDto.fecha_nacimiento) {
-      updatePersonaDto.fecha_nacimiento = new Date(updatePersonaDto.fecha_nacimiento).toISOString().split('T')[0];
-    }
-
-    Object.assign(persona, updatePersonaDto);
-    return this.personaRepository.save(persona);
+async updateBeneficario(id: number, updatePersonaDto: UpdateBeneficiarioDto): Promise<Net_Persona> {
+  const persona = await this.personaRepository.findOne({
+    where: { id_persona: id },
+    relations: ['detallePersona'],
+  });
+  if (!persona) {
+    throw new NotFoundException(`Persona with ID ${id} not found`);
   }
+  const detallePersona = await this.detallePersonaRepository.findOne({
+    where: { ID_PERSONA: id },
+  });
+  if (!detallePersona) {
+    throw new NotFoundException(`Detalle persona with ID ${id} not found`);
+  }
+  if (updatePersonaDto.fecha_nacimiento) {
+    updatePersonaDto.fecha_nacimiento = new Date(updatePersonaDto.fecha_nacimiento).toISOString().split('T')[0];
+  }
+  Object.assign(persona, updatePersonaDto);
+  if (updatePersonaDto.id_estado_persona) {
+    detallePersona.estadoPersona = await this.estadoPersonaRepository.findOne({ where: { codigo: updatePersonaDto.id_estado_persona } });
+  }
+  if (updatePersonaDto.id_municipio_residencia) {
+    persona.municipio = await this.municipioRepository.findOne({ where: { id_municipio: updatePersonaDto.id_municipio_residencia } });
+  }
+  if (updatePersonaDto.id_pais) {
+    persona.pais = await this.paisRepository.findOne({ where: { id_pais: updatePersonaDto.id_pais } });
+  }
+  await this.detallePersonaRepository.save(detallePersona);
+  return this.personaRepository.save(persona);
+}
+
 
 
   async updateSalarioBase(dni: string, idCentroTrabajo: number, salarioBase: number): Promise<void> {
@@ -696,6 +726,7 @@ export class AfiliadoService {
       if (!beneficios || beneficios.length === 0) {
         throw new Error(`No se encontraron beneficios para el DNI: ${dniAfil}`);
       }
+  
       const query1 = `
         SELECT 
         "detA"."ID_PERSONA",
@@ -715,6 +746,7 @@ export class AfiliadoService {
         "Afil"."ID_PAIS_NACIONALIDAD" AS "idPaisNacionalidad",
         "Afil"."ID_MUNICIPIO_RESIDENCIA" AS "idMunicipioResidencia",
         "detA"."ID_ESTADO_PERSONA" AS "idEstadoPersona",
+        "estadoPers"."DESCRIPCION" AS "estadoDescripcion",  -- Descripción del estado
         "detA"."PORCENTAJE" AS "porcentaje",
         "tipoP"."TIPO_PERSONA" AS "tipoPersona"
         FROM
@@ -723,6 +755,8 @@ export class AfiliadoService {
           "NET_PERSONA" "Afil" ON "detA"."ID_PERSONA" = "Afil"."ID_PERSONA"
         INNER JOIN
           NET_TIPO_PERSONA "tipoP" ON "tipoP"."ID_TIPO_PERSONA" = "detA"."ID_TIPO_PERSONA"
+        INNER JOIN
+          NET_ESTADO_PERSONA "estadoPers" ON "detA"."ID_ESTADO_PERSONA" = "estadoPers"."CODIGO"
         WHERE 
           "detA"."ID_CAUSANTE_PADRE" = ${beneficios[0].ID_PERSONA} AND 
           "tipoP"."TIPO_PERSONA" = 'BENEFICIARIO'
@@ -735,6 +769,7 @@ export class AfiliadoService {
       throw new Error(`Error al consultar beneficios: ${error.message}`);
     }
   }
+  
 
   normalizarDatos(data: any): PersonaResponse[] {
     const newList: PersonaResponse[] = []
@@ -909,16 +944,19 @@ export class AfiliadoService {
     return temp
   }
 
-  async deleteByPersonaAndPadre(idPersona: number, idCausante: number): Promise<void> {
-    const result = await this.detallePersonaRepository.delete({
-      ID_PERSONA: idPersona,
-      ID_CAUSANTE: idCausante,
-    });
-
-    if (result.affected === 0) {
-      throw new NotFoundException(`Registro con ID_PERSONA ${idPersona} y ID_CAUSANTE ${idCausante} no encontrado`);
+  async inactivarPersona(idPersona: number, idCausante: number): Promise<void> {
+    const estadoInactivo = await this.estadoPersonaRepository.findOne({ where: { Descripcion: 'INACTIVO' } });
+    if (!estadoInactivo) {
+        throw new NotFoundException('Estado INACTIVO no encontrado');
     }
-  }
+    const result = await this.detallePersonaRepository.update(
+        { ID_PERSONA: idPersona, ID_CAUSANTE: idCausante },
+        { ID_ESTADO_PERSONA: estadoInactivo.codigo }
+    );
+    if (result.affected === 0) {
+        throw new NotFoundException(`Registro con ID_PERSONA ${idPersona} y ID_CAUSANTE ${idCausante} no encontrado`);
+    }
+}
 
   async deleteReferenciaPersonal(id: number): Promise<void> {
     const referencia = await this.referenciaPersonalRepository.findOne({ where: { id_ref_personal: id } });
@@ -1083,13 +1121,10 @@ export class AfiliadoService {
       parentesco: string
     }
   ): Promise<NET_RELACION_FAMILIAR> {
-    // Buscar a la persona por su DNI
     const persona = await this.personaRepository.findOne({ where: { dni: dniPersona } });
     if (!persona) {
       throw new BadRequestException(`La persona con DNI ${dniPersona} no fue encontrada`);
     }
-
-    // Crear un nuevo objeto de persona para el familiar
     const nuevoFamiliar = this.personaRepository.create({
       primer_nombre: nuevoFamiliarDto.primer_nombre || null,
       segundo_nombre: nuevoFamiliarDto.segundo_nombre || null,
@@ -1098,55 +1133,17 @@ export class AfiliadoService {
       dni: nuevoFamiliarDto.dni || null,
       fecha_nacimiento: nuevoFamiliarDto.fecha_nacimiento || null
     });
-
-    // Guardar el nuevo familiar
     const familiarGuardado = await this.personaRepository.save(nuevoFamiliar);
-
-    // Crear la relación familiar
     const nuevaRelacion = this.relacionesFamiliaresRepository.create({
       persona: persona,
       familiar: familiarGuardado,
       parentesco: nuevoFamiliarDto.parentesco
     });
-
-    // Guardar la relación familiar
     return this.relacionesFamiliaresRepository.save(nuevaRelacion);
   }
 
-  async updateDatosBancarios(idPerf: string, datosBancarios: number
-  ): Promise<void> {
-
-    /* const perfil = await this.perfPersoCentTrabRepository
-      .createQueryBuilder('perfil')
-      .leftJoinAndSelect('perfil.persona', 'persona')
-      .where('persona.DNI = :dni', { dni })
-      .andWhere('perfil.centroTrabajo = :idCentroTrabajo', { idCentroTrabajo })
-      .getOne();
-
-    if (!perfil) {
-      throw new NotFoundException(`El perfil con DNI ${dni} y centro de trabajo ID ${idCentroTrabajo} no fue encontrado.`);
-    }
-
-    perfil.salario_base = salarioBase;
-    await this.perfPersoCentTrabRepository.save(perfil); */
-  }
-
-  async updateColegiosMagist(idPerf: string, datosColegioMagist: number
-  ): Promise<void> {
-
-    /* const perfil = await this.perfPersoCentTrabRepository
-      .createQueryBuilder('perfil')
-      .leftJoinAndSelect('perfil.persona', 'persona')
-      .where('persona.DNI = :dni', { dni })
-      .andWhere('perfil.centroTrabajo = :idCentroTrabajo', { idCentroTrabajo })
-      .getOne();
-  
-    if (!perfil) {
-      throw new NotFoundException(`El perfil con DNI ${dni} y centro de trabajo ID ${idCentroTrabajo} no fue encontrado.`);
-    }
-
-    perfil.salario_base = salarioBase;
-    await this.perfPersoCentTrabRepository.save(perfil); */
+  async getAllEstados(): Promise<Net_Estado_Persona[]> {
+    return this.estadoPersonaRepository.find();
   }
 
   private handleException(error: any): void {

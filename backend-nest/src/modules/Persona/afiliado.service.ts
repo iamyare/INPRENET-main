@@ -318,17 +318,12 @@ export class AfiliadoService {
 
   async createBenef(bene: Benef): Promise<Net_Persona> {
     const { detalleBenef, dni, ...personaData } = bene;
-
-    // Verificar si la persona ya existe por su DNI
     let persona = await this.personaRepository.findOne({ where: { dni } });
 
     if (!persona) {
-        // Si la persona no existe, crear una nueva persona
         persona = this.personaRepository.create({ dni, ...personaData });
         await this.personaRepository.save(persona);
     }
-
-    // Crear un nuevo detalle para la persona
     const detalle = this.detallePersonaRepository.create({
         ...detalleBenef,
         persona,
@@ -474,96 +469,149 @@ export class AfiliadoService {
   }
 
   async findOne(term: string) {
-    let persona;
-
-    const queryBuilder = this.personaRepository.createQueryBuilder('persona');
-    persona = await queryBuilder
-      .select('persona.DNI', 'DNI')
-      .addSelect('persona.ID_PERSONA', 'ID_PERSONA')
-      .addSelect('persona.PRIMER_NOMBRE', 'PRIMER_NOMBRE')
-      .addSelect('persona.SEGUNDO_NOMBRE', 'SEGUNDO_NOMBRE')
-      .addSelect('persona.TERCER_NOMBRE', 'TERCER_NOMBRE')
-      .addSelect('persona.PRIMER_APELLIDO', 'PRIMER_APELLIDO')
-      .addSelect('persona.SEGUNDO_APELLIDO', 'SEGUNDO_APELLIDO')
-      .addSelect('persona.GENERO', 'GENERO')
-      .addSelect('persona.SEXO', 'SEXO')
-      .addSelect('persona.CANTIDAD_DEPENDIENTES', 'CANTIDAD_DEPENDIENTES')
-      .addSelect('persona.REPRESENTACION', 'REPRESENTACION')
-      .addSelect('persona.DIRECCION_RESIDENCIA', 'DIRECCION_RESIDENCIA')
-      .addSelect('persona.NUMERO_CARNET', 'NUMERO_CARNET')
-      .addSelect('persona.FECHA_NACIMIENTO', 'FECHA_NACIMIENTO')
-      .addSelect('persona.FOTO_PERFIL', 'FOTO_PERFIL')
-      .addSelect('profesion.DESCRIPCION', 'DESCRIPCION')
-      .addSelect('profesion.ID_PROFESION', 'ID_PROFESION')
-      .addSelect('persona.TELEFONO_1', 'TELEFONO_1')
-      .addSelect('persona.TELEFONO_2', 'TELEFONO_2')
-      .addSelect('persona.CORREO_1', 'CORREO_1')
-      .addSelect('persona.CORREO_2', 'CORREO_2')
-      .addSelect('persona.ESTADO_CIVIL', 'ESTADO_CIVIL')
-      .addSelect('estadoAfil.DESCRIPCION', 'ESTADO')
-      .addSelect('municipio.ID_MUNICIPIO', 'ID_MUNICIPIO')
-      .addSelect('pais.ID_PAIS', 'ID_PAIS')
-      .addSelect('tipoIdentificacion.ID_IDENTIFICACION', 'ID_IDENTIFICACION')
-      .innerJoin('persona.estadoPersona', 'estadoAfil')
-      .leftJoin('persona.detallesPersona', 'detallepersona')
-      .leftJoin('persona.municipio', 'municipio')
-      .leftJoin('persona.pais', 'pais')
-      .leftJoin('persona.tipoIdentificacion', 'tipoIdentificacion')
-      .leftJoin('persona.profesion', 'profesion')
-      .leftJoin('detallepersona.tipoPersona', 'tipoPersona')
-      .where('persona.dni = :term AND tipoPersona.tipo_persona = :tipo_persona', { term, tipo_persona: "AFILIADO" })
-      .getRawOne();
+    const persona = await this.personaRepository.findOne({
+      where: { dni: term },
+      relations: [
+        'detallePersona',
+        'detallePersona.estadoPersona',
+        'detallePersona.tipoPersona',
+        'municipio',
+        'pais',
+        'tipoIdentificacion',
+        'profesion',
+      ],
+    });
 
     if (!persona) {
-      throw new NotFoundException(`Afiliado con ${term} no existe`);
+      throw new NotFoundException(`Afiliado con DNI ${term} no existe`);
     }
 
-    // Convertir la imagen en base64 para enviarla al frontend
-    if (persona.FOTO_PERFIL) {
-      persona.FOTO_PERFIL = Buffer.from(persona.FOTO_PERFIL).toString('base64');
+    const detallePersona = persona.detallePersona.find(detalle => detalle.tipoPersona.tipo_persona === 'AFILIADO');
+
+    if (!detallePersona) {
+      throw new NotFoundException(`Afiliado con DNI ${term} no existe`);
     }
 
-    return persona;
+    const result = {
+      DNI: persona.dni,
+      ID_PERSONA: persona.id_persona,
+      PRIMER_NOMBRE: persona.primer_nombre,
+      SEGUNDO_NOMBRE: persona.segundo_nombre,
+      TERCER_NOMBRE: persona.tercer_nombre,
+      PRIMER_APELLIDO: persona.primer_apellido,
+      SEGUNDO_APELLIDO: persona.segundo_apellido,
+      GENERO: persona.genero,
+      SEXO: persona.sexo,
+      CANTIDAD_DEPENDIENTES: persona.cantidad_dependientes,
+      REPRESENTACION: persona.representacion,
+      DIRECCION_RESIDENCIA: persona.direccion_residencia,
+      NUMERO_CARNET: persona.numero_carnet,
+      FECHA_NACIMIENTO: persona.fecha_nacimiento,
+      FOTO_PERFIL: persona.foto_perfil ? Buffer.from(persona.foto_perfil).toString('base64') : null,
+      DESCRIPCION: persona.profesion?.descripcion,
+      ID_PROFESION: persona.profesion?.idProfesion,
+      TELEFONO_1: persona.telefono_1,
+      TELEFONO_2: persona.telefono_2,
+      CORREO_1: persona.correo_1,
+      CORREO_2: persona.correo_2,
+      ESTADO_CIVIL: persona.estado_civil,
+      ESTADO: detallePersona.estadoPersona.Descripcion,
+      ID_MUNICIPIO: persona.municipio?.id_municipio,
+      ID_PAIS: persona.pais?.id_pais,
+      ID_IDENTIFICACION: persona.tipoIdentificacion?.id_identificacion,
+    };
+
+    return result;
   }
 
 
   async findOnePersona(term: string) {
-    let personas: Net_Persona;
+    let persona: Net_Persona | null = null;
+
     if (isUUID(term)) {
-      personas = await this.personaRepository.findOne({
+      persona = await this.personaRepository.findOne({
         where: { dni: term },
-        relations: ['detalleAfiliado'], // Asegúrate de cargar la relación
+        relations: [
+          'detallePersona',
+          'detallePersona.estadoPersona',
+          'detallePersona.tipoPersona',
+          'municipio',
+          'pais',
+          'tipoIdentificacion',
+          'profesion',
+        ],
       });
     } else {
+      persona = await this.personaRepository.findOne({
+        where: { dni: term },
+        relations: [
+          'detallePersona',
+          'detallePersona.estadoPersona',
+          'detallePersona.tipoPersona',
+          'municipio',
+          'pais',
+          'tipoIdentificacion',
+          'profesion',
+        ],
+      });
 
-      const queryBuilder = this.personaRepository.createQueryBuilder('persona');
-      personas = await queryBuilder
-        .select('persona.DNI', 'DNI')
-        .addSelect('persona.ID_PERSONA', 'ID_PERSONA')
-        .addSelect('persona.PRIMER_NOMBRE', 'PRIMER_NOMBRE')
-        .addSelect('persona.SEGUNDO_NOMBRE', 'SEGUNDO_NOMBRE')
-        .addSelect('persona.PRIMER_APELLIDO', 'PRIMER_APELLIDO')
-        .addSelect('persona.SEGUNDO_APELLIDO', 'SEGUNDO_APELLIDO')
-        .addSelect('persona.GENERO', 'GENERO')
-        .addSelect('persona.SEXO', 'SEXO')
-        .addSelect('persona.DIRECCION_RESIDENCIA', 'DIRECCION_RESIDENCIA')
-        .addSelect('persona.FECHA_NACIMIENTO', 'FECHA_NACIMIENTO')
-        .addSelect('persona.NUMERO_CARNET', 'NUMERO_CARNET')
-        .addSelect('profesion.ID_PROFESION', 'ID_PROFESION')
-        .addSelect('persona.TELEFONO_1', 'TELEFONO_1')
-        .addSelect('persona.ESTADO_CIVIL', 'ESTADO_CIVIL')
-        .addSelect('estadoAfil.DESCRIPCION', 'ESTADO')
-        .innerJoin('persona.estadoPersona', 'estadoAfil')
-        .leftJoin('persona.detallesPersona', 'detallepersona')// Join con la tabla detallepersonas
-        .leftJoin('persona.profesion', 'profesion') // Join con la tabla detallepersonas
-        .leftJoin('detallepersona.tipoPersona', 'tipoPersona') // Join con la tabla detallepersonas
-        .where('persona.dni = :term', { term })
-        .getRawOne();
+      if (persona) {
+        const detallePersona = persona.detallePersona.find(
+          (detalle) => detalle.tipoPersona.tipo_persona === 'AFILIADO',
+        );
+
+        if (!detallePersona) {
+          throw new NotFoundException(`Afiliado con DNI ${term} no existe`);
+        }
+
+        return {
+          DNI: persona.dni,
+          ID_PERSONA: persona.id_persona,
+          PRIMER_NOMBRE: persona.primer_nombre,
+          SEGUNDO_NOMBRE: persona.segundo_nombre,
+          PRIMER_APELLIDO: persona.primer_apellido,
+          SEGUNDO_APELLIDO: persona.segundo_apellido,
+          GENERO: persona.genero,
+          SEXO: persona.sexo,
+          DIRECCION_RESIDENCIA: persona.direccion_residencia,
+          FECHA_NACIMIENTO: persona.fecha_nacimiento,
+          NUMERO_CARNET: persona.numero_carnet,
+          ID_PROFESION: persona.profesion?.idProfesion,
+          TELEFONO_1: persona.telefono_1,
+          ESTADO_CIVIL: persona.estado_civil,
+          ESTADO: detallePersona.estadoPersona.Descripcion,
+        };
+      }
     }
-    if (!personas) {
-      throw new NotFoundException(`Afiliado con ${term} no existe`);
+
+    if (!persona) {
+      throw new NotFoundException(`Afiliado con DNI ${term} no existe`);
     }
-    return personas;
+    const detallePersona = persona.detallePersona.find(
+      (detalle) => detalle.tipoPersona.tipo_persona === 'AFILIADO',
+    );
+
+    if (!detallePersona) {
+      throw new NotFoundException(`Afiliado con DNI ${term} no existe`);
+    }
+
+    return {
+      DNI: persona.dni,
+      ID_PERSONA: persona.id_persona,
+      PRIMER_NOMBRE: persona.primer_nombre,
+      SEGUNDO_NOMBRE: persona.segundo_nombre,
+      PRIMER_APELLIDO: persona.primer_apellido,
+      SEGUNDO_APELLIDO: persona.segundo_apellido,
+      GENERO: persona.genero,
+      SEXO: persona.sexo,
+      DIRECCION_RESIDENCIA: persona.direccion_residencia,
+      FECHA_NACIMIENTO: persona.fecha_nacimiento,
+      NUMERO_CARNET: persona.numero_carnet,
+      ID_PROFESION: persona.profesion?.idProfesion,
+      TELEFONO_1: persona.telefono_1,
+      ESTADO_CIVIL: persona.estado_civil,
+      ESTADO: detallePersona.estadoPersona.Descripcion,
+    };
   }
 
   update(id: number, updateAfiliadoDto: UpdatePersonaDto) {
@@ -637,18 +685,17 @@ export class AfiliadoService {
         INNER JOIN
         NET_TIPO_PERSONA "tipoP" ON "tipoP"."ID_TIPO_PERSONA" = "detA"."ID_TIPO_PERSONA"
         INNER JOIN
-        NET_ESTADO_PERSONA "estadoPers" ON "Afil"."ID_ESTADO_PERSONA" = "estadoPers"."CODIGO"
+        NET_ESTADO_PERSONA "estadoPers" ON "detA"."ID_ESTADO_PERSONA" = "estadoPers"."CODIGO"
       WHERE
         "Afil"."DNI" = '${dniAfil}' AND
         "tipoP"."TIPO_PERSONA" = 'AFILIADO'
       `;
-
+  
       const beneficios = await this.entityManager.query(query);
-
+  
       if (!beneficios || beneficios.length === 0) {
         throw new Error(`No se encontraron beneficios para el DNI: ${dniAfil}`);
       }
-
       const query1 = `
         SELECT 
         "detA"."ID_PERSONA",
@@ -667,7 +714,7 @@ export class AfiliadoService {
         "Afil"."DIRECCION_RESIDENCIA" AS "direccionResidencia",
         "Afil"."ID_PAIS_NACIONALIDAD" AS "idPaisNacionalidad",
         "Afil"."ID_MUNICIPIO_RESIDENCIA" AS "idMunicipioResidencia",
-        "Afil"."ID_ESTADO_PERSONA" AS "idEstadoPersona",
+        "detA"."ID_ESTADO_PERSONA" AS "idEstadoPersona",
         "detA"."PORCENTAJE" AS "porcentaje",
         "tipoP"."TIPO_PERSONA" AS "tipoPersona"
         FROM
@@ -679,20 +726,15 @@ export class AfiliadoService {
         WHERE 
           "detA"."ID_CAUSANTE_PADRE" = ${beneficios[0].ID_PERSONA} AND 
           "tipoP"."TIPO_PERSONA" = 'BENEFICIARIO'
-        `;
-
+      `;
+  
       const beneficios2 = await this.entityManager.query(query1);
-
-      // Retornamos los datos directamente sin normalización
       return beneficios2;
     } catch (error) {
       this.logger.error(`Error al consultar beneficios: ${error.message}`);
       throw new Error(`Error al consultar beneficios: ${error.message}`);
     }
   }
-
-
-
 
   normalizarDatos(data: any): PersonaResponse[] {
     const newList: PersonaResponse[] = []

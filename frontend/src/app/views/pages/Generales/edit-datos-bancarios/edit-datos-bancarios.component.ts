@@ -86,6 +86,7 @@ export class EditDatosBancariosComponent {
         })
     }
   }
+
   resetDatos() {
     if (this.form) {
       this.form.reset();
@@ -126,10 +127,7 @@ export class EditDatosBancariosComponent {
   }
 
   async manejarAccionUno(row: any) {
-    // Obtén las opciones de bancos
     this.bancos = await this.datosEstaticosService.getBancos();
-
-    // Encuentra el valor correcto basado en el nombre
     const bancoSeleccionado = this.bancos.find(b => b.label === row.nombre_banco);
     const codBanco = bancoSeleccionado ? bancoSeleccionado.value : '';
 
@@ -140,7 +138,7 @@ export class EditDatosBancariosComponent {
         requerido: true,
         etiqueta: 'Nombre del Banco',
         editable: true,
-        opciones: this.bancos // Usa las opciones correctas
+        opciones: this.bancos
       },
       { nombre: 'numero_cuenta', tipo: 'text', requerido: true, etiqueta: 'Número de Cuenta', editable: true }
     ];
@@ -151,9 +149,6 @@ export class EditDatosBancariosComponent {
 
     this.openDialog(campos, valoresIniciales);
   }
-
-
-
 
   manejarAccionDos(row: any) {
     const dialogRef = this.dialog.open(ConfirmDialogComponent, {

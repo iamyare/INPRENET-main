@@ -71,7 +71,6 @@ export class AfilBancoComponent implements OnInit {
 
   ngOnInit(): void {
     this.form = this.fb.group({
-      /* DatosGenerales: generateAddressFormGroup(), */
       DatosBacAfil: generateDatBancFormGroup(),
       Archivos: generateFormArchivo(),
       FotoPerfil: [''],
@@ -102,12 +101,18 @@ export class AfilBancoComponent implements OnInit {
       ColMags: this.fb.array([], [Validators.required])
     });
 
+    this.formDatosGenerales = this.fb.group({
+      refpers: this.fb.array([], [Validators.required])
+    });
+
     this.formStateService.getFotoPerfil().subscribe((foto) => {
       if (foto) {
         this.form.get('FotoPerfil')?.setValue(foto);
       }
     });
   }
+
+
 
   handleImageCaptured(image: string) {
     this.form.get('FotoPerfil')?.setValue(image);
@@ -189,7 +194,7 @@ export class AfilBancoComponent implements OnInit {
   }
 
   setHistSal(datosHistSal: any) {
-    this.formHistPag = datosHistSal;
+    this.formHistPag.setControl('banco', this.fb.array(datosHistSal.banco || []));
   }
 
   setDatosPuetTrab1(datosPuestTrab: any) {
@@ -220,20 +225,20 @@ export class AfilBancoComponent implements OnInit {
   enviar() {
     const formData = new FormData();
     const encapsulatedDto = {
-      datosGenerales: this.formDatosGenerales.value.refpers[0],
-      bancos: this.formHistPag.value.banco || [],
-      referenciasPersonales: this.formReferencias.value.refpers || [],
-      beneficiarios: this.formBeneficiarios.value.beneficiario.map((ben: any) => {
+      datosGenerales: this.formDatosGenerales?.value?.refpers[0] || {},
+      bancos: this.formHistPag?.value?.banco || [],
+      referenciasPersonales: this.formReferencias?.value?.refpers || [],
+      beneficiarios: this.formBeneficiarios?.value?.beneficiario.map((ben: any) => {
         const { Arch, Archivos, DatosBac, beneficiario, ...resto } = ben;
         return resto;
-      }),
-      centrosTrabajo: this.formPuestTrab.value.trabajo || [],
-      colegiosMagisteriales: this.formColegiosMagisteriales.value.ColMags || [],
-      familiares: this.formDatosFamiliares.value.familiar || []
+      }) || [],
+      centrosTrabajo: this.formPuestTrab?.value?.trabajo || [],
+      colegiosMagisteriales: this.formColegiosMagisteriales?.value?.ColMags || [],
+      familiares: this.formDatosFamiliares?.value?.familiar || []
     };
 
-    /* const docDefinition: any = this.createPDFDefinition(encapsulatedDto);
-    pdfMake.createPdf(docDefinition).download('datos_afiliado.pdf'); */
+    const docDefinition: any = this.createPDFDefinition(encapsulatedDto);
+    pdfMake.createPdf(docDefinition).download('datos_afiliado.pdf');
 
     formData.append('encapsulatedDto', JSON.stringify(encapsulatedDto));
 
@@ -244,26 +249,26 @@ export class AfilBancoComponent implements OnInit {
       formData.append('foto_perfil', fotoBlob, 'perfil.jpg');
     }
 
-    console.log(formData);
+    /* console.log(formData);
 
     // Log para ver qué contiene el FormData antes de enviar
     formData.forEach((value, key) => {
       console.log(`Key ${key}:`, value);
-    });
+    }); */
 
-    /*
-    this.afilService.createPersonaWithDetailsAndWorkCenters(formData).subscribe(
+
+    /* this.afilService.createPersonaWithDetailsAndWorkCenters(formData).subscribe(
       response => {
         console.log('Datos enviados con éxito:', response);
       },
       error => {
         console.error('Error al enviar los datos:', error);
       }
-    );
-    */
+    ); */
+
   }
 
-  /* createPDFDefinition(data: any) {
+  createPDFDefinition(data: any) {
     return {
       content: [
         { text: 'I. DATOS GENERALES DEL AFILIADO', style: 'header' },
@@ -378,7 +383,7 @@ export class AfilBancoComponent implements OnInit {
       },
       style: 'table'
     };
-  } */
+  }
 
   dataURLToBlob(dataURL: string) {
     const byteString = atob(dataURL.split(',')[1]);

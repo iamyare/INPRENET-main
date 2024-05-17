@@ -46,9 +46,15 @@ export class AgregarBenefCompComponent implements OnInit {
         const benef = {
             primer_nombre: datosBeneficiario.primer_nombre,
             segundo_nombre: datosBeneficiario.segundo_nombre,
+            tercer_nombre: datosBeneficiario.tercer_nombre,
             primer_apellido: datosBeneficiario.primer_apellido,
             segundo_apellido: datosBeneficiario.segundo_apellido,
+            genero: datosBeneficiario.genero,
             dni: datosBeneficiario.dni,
+            sexo: datosBeneficiario.sexo,
+            representacion: datosBeneficiario.representacion,
+            direccion_residencia: datosBeneficiario.direccion_residencia,
+            id_municipio_residencia: datosBeneficiario.id_municipio_residencia,
             fecha_nacimiento: formattedDate,
             cantidad_dependientes: datosBeneficiario.cantidad_dependientes,
             telefono_1: datosBeneficiario.telefono_1,
@@ -65,6 +71,7 @@ export class AgregarBenefCompComponent implements OnInit {
     });
 
     const payload = beneficiariosData[0];
+
     this.afilService.createBeneficiarioConDetalle(payload).subscribe(
         response => {
             this.toastr.success("Beneficiarios agregados con éxito");

@@ -7,11 +7,6 @@
 
 <div class="main-content">
   <div class="col-md-12">
-    <form [formGroup]="form" #myForm="ngForm" change="getLabel()">
-      <!-- <app-dat-generales-afiliado [useCamera]="true" (imageCaptured)="handleImageCaptured($event)"
-        *ngIf="DatosGenerales" groupName="DatosGenerales"></app-dat-generales-afiliado> -->
-    </form>
-
     <app-dat-generales-afiliado [useCamera]="true" (imageCaptured)="handleImageCaptured($event)" *ngIf="DatosGenerales"
       (newDatosGenerales)="setDatosGenerales($event)" [datos]="formDatosGenerales"></app-dat-generales-afiliado>
 
@@ -43,34 +38,6 @@
           Presione el botón enviar para continuar con el proceso.
         </p>
       </div>
-      <!-- <strong>Datos Generales</strong>
-      {{ formDatosGenerales.controls.refpers.value | json }}
-      <strong>Status:</strong> {{ formDatosGenerales.controls.refpers.status }}
-      <br>
-      <strong>Datos Colegios Magisteriales:</strong>
-      {{ formColegiosMagisteriales.controls.ColMags.value | json }}
-      <strong>Status:</strong> {{ formColegiosMagisteriales.controls.ColMags.status }}
-      <br>
-      <strong>Datos Familiares:</strong>
-      {{ formDatosFamiliares.controls.familiar.value | json }}
-      <strong>Status:</strong> {{ formDatosFamiliares!.controls!.familiar!.status }}
-      <br>
-      <strong>Datos Cuentas Bancarias:</strong>
-      {{formHistPag.controls.banco.value | json }}
-      <strong>Status:</strong> {{ formHistPag.controls.banco.status }}
-      <br>
-      <strong>Datos Centros de Trabajo:</strong>
-      {{ formPuestTrab.controls.trabajo.value | json }}
-      <strong>Status:</strong> {{ formPuestTrab.controls.trabajo.status }}
-      <br>
-
-      <strong>Datos Referencias:</strong>
-      {{ formReferencias.controls.refpers.value | json }}
-      <strong>Status:</strong> {{ formReferencias.controls.refpers.status }}
-      <br>
-      <strong>Datos Beneficiario:</strong>
-      {{ formBeneficiarios.controls.beneficiario.value | json }}
-      <strong>Status:</strong> {{ formBeneficiarios.controls.beneficiario.status }} -->
 
       <div class="card-body" style="text-align: center;">
         <!-- <button mat-button color="primary" (click)="enviar()"

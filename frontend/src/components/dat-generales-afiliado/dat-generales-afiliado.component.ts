@@ -58,7 +58,7 @@ export class DatGeneralesAfiliadoComponent implements OnInit, OnDestroy {
   tipoIdent: any = this.datosEstaticos.tipoIdent;
   estadoCivil: any = this.datosEstaticos.estadoCivil;
   representacion: any = this.datosEstaticos.representacion;
-  estado: any = this.datosEstaticos.estado;
+  estados: { value: string; label: string }[] = [];
 
   public formParent: FormGroup = new FormGroup({});
 
@@ -146,6 +146,14 @@ export class DatGeneralesAfiliadoComponent implements OnInit, OnDestroy {
       this.profesiones = data;
     }).catch(error => {
       console.error('Error al cargar profesiones:', error);
+    });
+  }
+
+  cargarEstados() {
+    this.datosEstaticos.getEstados().then(data => {
+      this.profesiones = data;
+    }).catch(error => {
+      console.error('Error al cargar estados:', error);
     });
   }
 

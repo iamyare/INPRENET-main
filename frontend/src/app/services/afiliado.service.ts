@@ -21,18 +21,27 @@ export class AfiliadoService {
     return this.http.post<any>(url, personaData);
 }
 
+inactivarPersona(idPersona: number, idCausante: number): Observable<void> {
+  const url = `${environment.API_URL}/api/Persona/inactivar/${idPersona}/${idCausante}`;
+  return this.http.patch<void>(url, {});
+}
+
+getAllEstados(): Observable<any> {
+  const url = `${environment.API_URL}/api/Persona/obtenerEstados`;
+  return this.http.get<any>(url);
+}
+
   updateBeneficiario(idPersona: number, updatedData: any): Observable<any> {
     const url = `${environment.API_URL}/api/Persona/actualizarBeneficiario/${idPersona}`;
     return this.http.put<any>(url, updatedData);
   }
 
   createReferPersonales(idPersona: string, encapsulatedData: any): Observable<any> {
-    /* const params = new HttpParams().set('idPersona', idPersona); */
     const encapsulatedDataE = { referencias: encapsulatedData }
-
     const url = `${environment.API_URL}/api/Persona/createReferPersonales/${idPersona}`;
     return this.http.post<any>(url, encapsulatedDataE);
   }
+
   createColegiosMagisteriales(idPersona: string, encapsulatedData: any): Observable<any> {
     const url = `${environment.API_URL}/api/Persona/createColegiosMagisteriales/${idPersona}`;
     return this.http.post<any>(url, encapsulatedData);

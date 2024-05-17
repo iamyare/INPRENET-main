@@ -30,6 +30,7 @@ export class EditBeneficiariosComponent {
   public filas: any[] = [];
   ejecF: any;
   municipios: { label: string, value: any }[] = [];
+  estados: { label: string, value: any }[] = [];
 
   constructor(
     private svcAfiliado: AfiliadoService,
@@ -48,38 +49,42 @@ export class EditBeneficiariosComponent {
       {
         header: 'DNI',
         col: 'dni',
-        isEditable: true,
         validationRules: [Validators.required, Validators.minLength(3)]
       },
       {
         header: 'Nombres',
         col: 'nombres',
-        isEditable: true
       },
       {
         header: 'Apellidos',
         col: 'apellidos',
-        isEditable: true
       },
       {
         header: 'Porcentaje',
         col: 'porcentaje',
-        isEditable: true
+      },
+      {
+        header: 'Estado',
+        col: 'estado_descripcion',
       },
       {
         header: 'Fecha de Nacimiento',
         col: 'fecha_nacimiento',
-        isEditable: true
       }
     ];
 
     await this.cargarMunicipios();
+    await this.cargarEstados()
     this.previsualizarInfoAfil();
     this.getFilas().then(() => this.cargar());
   }
 
   async cargarMunicipios() {
     this.municipios = await this.datosEstaticosService.getMunicipios();
+  }
+
+  async cargarEstados() {
+    this.estados = await this.datosEstaticosService.getEstados();
   }
 
   async obtenerDatos(event: any): Promise<any> {
@@ -116,12 +121,10 @@ export class EditBeneficiariosComponent {
     if (this.Afiliado) {
       try {
         const data = await this.svcAfiliado.getAllBenDeAfil(this.Afiliado.DNI).toPromise();
-
         this.filas = data.map((item: any) => {
           const nombres = [item.primerNombre, item.segundoNombre, item.tercerNombre].filter(part => part).join(' ');
           const apellidos = [item.primerApellido, item.segundoApellido].filter(part => part).join(' ');
           const fechaNacimiento = this.datePipe.transform(item.fechaNacimiento, 'dd/MM/yyyy') || 'Fecha no disponible';
-
           return {
             id: item.ID_PERSONA,
             dni: item.DNI,
@@ -137,6 +140,7 @@ export class EditBeneficiariosComponent {
             idPaisNacionalidad: item.idPaisNacionalidad,
             id_municipio_residencia: item.idMunicipioResidencia,
             id_estado_persona: item.idEstadoPersona,
+            estado_descripcion: item.estadoDescripcion,
             porcentaje: item.porcentaje,
             tipo_persona: item.tipoPersona
           };
@@ -149,6 +153,7 @@ export class EditBeneficiariosComponent {
       this.resetDatos();
     }
   }
+
 
   ejecutarFuncionAsincronaDesdeOtroComponente(funcion: (data: any) => Promise<void>) {
     this.ejecF = funcion;
@@ -175,7 +180,7 @@ export class EditBeneficiariosComponent {
       { nombre: 'direccion_residencia', tipo: 'text', etiqueta: 'Dirección de Residencia', editable: true },
       { nombre: 'idPaisNacionalidad', tipo: 'list', etiqueta: 'País Nacionalidad', editable: true, opciones: this.datosEstaticosService.nacionalidades },
       { nombre: 'id_municipio_residencia', tipo: 'list', etiqueta: 'Municipio Residencia', editable: true, opciones: this.datosEstaticosService.municipios },
-      { nombre: 'id_estado_persona', tipo: 'list', etiqueta: 'Estado Persona', editable: true, opciones: this.datosEstaticosService.estado },
+      { nombre: 'id_estado_persona', tipo: 'list', etiqueta: 'Estado Persona', editable: true, opciones: this.datosEstaticosService.estados },
       { nombre: 'porcentaje', tipo: 'number', etiqueta: 'Porcentaje', editable: true }
     ];
 
@@ -190,9 +195,9 @@ export class EditBeneficiariosComponent {
         message: '¿Estás seguro de querer eliminar este elemento?'
       }
     });
-
     dialogRef.afterClosed().subscribe((result: any) => {
       if (result) {
+        this.inactivarPersona(row.id, this.Afiliado.ID_PERSONA);
       }
     });
   }
@@ -209,6 +214,19 @@ export class EditBeneficiariosComponent {
     dialogRef.afterClosed().subscribe((result: any) => {
       this.ngOnInit();
     });
+  }
+
+  inactivarPersona(idPersona: number, idCausante: number) {
+    this.svcAfiliado.inactivarPersona(idPersona, idCausante).subscribe(
+      () => {
+        this.toastr.success('Persona inactivada exitosamente');
+        this.getFilas().then(() => this.cargar());
+      },
+      (error) => {
+        this.toastr.error('Error al inactivar persona');
+        console.error('Error al inactivar persona', error);
+      }
+    );
   }
 
   openDialog(campos: any, row: any): void {

@@ -16,6 +16,8 @@ export class BenefComponent implements OnInit {
   public formParent: FormGroup;
   public municipios: any[] = [];
   public nacionalidades: any[] = [];
+  sexo: { value: string; label: string }[] = [];
+  generos: { value: string; label: string }[] = [];
   representacion: any = this.datosEstaticosService.representacion;
 
   @Input() datos: any;
@@ -35,11 +37,11 @@ export class BenefComponent implements OnInit {
   }
 
   ngOnInit(): void {
-
-
     this.initForm();
     this.loadMunicipios();
     this.loadNacionalidades();
+    this.generos = this.datosEstaticosService.genero;
+    this.sexo = this.datosEstaticosService.sexo;
     const beneficiariosArray = this.formParent.get('beneficiario') as FormArray;
     if (this.datos && this.datos.value && this.datos.value.beneficiario && this.datos.value.beneficiario.length > 0 && beneficiariosArray.length === 0) {
       for (let i of this.datos.value.beneficiario) {
@@ -73,10 +75,11 @@ export class BenefComponent implements OnInit {
         cantidad_dependientes: new FormControl(datosBeneficiario?.cantidad_dependientes || 0),
         representacion: new FormControl(datosBeneficiario?.representacion || ''),
         telefono_1: new FormControl(datosBeneficiario?.telefono_1 || ''),
+        sexo: new FormControl(datosBeneficiario?.sexo || ''),
         fecha_nacimiento: new FormControl(datosBeneficiario?.fecha_nacimiento || '', Validators.required),
-        direccionResidencia: new FormControl(datosBeneficiario?.direccionResidencia || ''),
+        direccion_residencia: new FormControl(datosBeneficiario?.direccion_residencia || ''),
         id_pais: new FormControl(datosBeneficiario?.id_pais || null, Validators.required),
-        idMunicipioResidencia: new FormControl(datosBeneficiario?.idMunicipioResidencia || null, Validators.required),
+        id_municipio_residencia: new FormControl(datosBeneficiario?.id_municipio_residencia || null, Validators.required),
         porcentaje: new FormControl(datosBeneficiario?.porcentaje, [
           Validators.required,
           Validators.maxLength(5),

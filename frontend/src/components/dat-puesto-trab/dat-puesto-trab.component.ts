@@ -85,10 +85,6 @@ export class DatPuestoTrabComponent implements OnInit {
     }
   }
 
-  ngOnDestroy() {
-    // Lógica para guardar el formulario si es necesario
-  }
-
   private initForm() {
     let existingForm = this.formStateService.getForm(this.formKey);
     if (existingForm) {

@@ -64,15 +64,11 @@
                 </mat-error>
               </div>
               <div class="col-md-4">
-                <mat-form-field style="flex-direction: column-reverse;" class="example-full-width inputs"
-                  appearance="outline">
-                  <mat-label>Género</mat-label>
-                  <mat-select formControlName="genero">
-                    <mat-option value="Masculino">Masculino</mat-option>
-                    <mat-option value="Femenino">Femenino</mat-option>
-                  </mat-select>
+                <mat-form-field  style="flex-direction: column-reverse;" class="example-full-width inputs" appearance="outline">
+                  <mat-label>DNI</mat-label>
+                  <input matInput formControlName="dni">
                 </mat-form-field>
-                <mat-error *ngFor="let error of getErrors(i, 'genero')">
+                <mat-error *ngFor="let error of getErrors(i, 'dni')">
                   {{ error }}
                 </mat-error>
               </div>
@@ -130,9 +126,9 @@
               <div class="col-md-4">
                 <mat-form-field class="example-full-width inputs" appearance="outline">
                   <mat-label>Dirección de Residencia</mat-label>
-                  <input matInput formControlName="direccionResidencia">
+                  <input matInput formControlName="direccion_residencia">
                 </mat-form-field>
-                <mat-error *ngFor="let error of getErrors(i, 'direccionResidencia')">
+                <mat-error *ngFor="let error of getErrors(i, 'direccion_residencia')">
                   {{ error }}
                 </mat-error>
               </div>
@@ -153,21 +149,21 @@
               </div>
             </div>
             <div class="row">
-              <div class="col-md-6">
+              <div class="col-md-3">
                 <mat-form-field style="flex-direction: column-reverse;" class="example-full-width inputs"
                   appearance="outline">
                   <mat-label>Municipio de Residencia</mat-label>
-                  <mat-select formControlName="idMunicipioResidencia">
+                  <mat-select formControlName="id_municipio_residencia">
                     <mat-option *ngFor="let municipio of municipios" [value]="municipio.id_municipio">
                       {{ municipio.nombre_municipio }}
                     </mat-option>
                   </mat-select>
                 </mat-form-field>
-                <mat-error *ngFor="let error of getErrors(i, 'idMunicipioResidencia')">
+                <mat-error *ngFor="let error of getErrors(i, 'id_municipio_residencia')">
                   {{ error }}
                 </mat-error>
               </div>
-              <div class="col-md-6">
+              <div class="col-md-3">
                 <mat-form-field style="flex-direction: column-reverse;" class="example-full-width inputs"
                   appearance="outline">
                   <mat-label>Porcentaje de Beneficio</mat-label>
@@ -177,13 +173,31 @@
                   {{ error }}
                 </mat-error>
               </div>
-
-              <div class="col-md-6">
-                <mat-form-field class="example-full-width inputs" appearance="outline">
-                  <mat-label>DNI</mat-label>
-                  <input matInput formControlName="dni">
+              <div class="col-md-3">
+                <mat-form-field style="flex-direction: column-reverse;" class="example-full-width inputs"
+                  appearance="outline">
+                  <mat-label>Género</mat-label>
+                  <mat-select formControlName="genero">
+                    <mat-option *ngFor="let genero of generos" [value]="genero.value">
+                      {{ genero.label }}
+                    </mat-option>
+                  </mat-select>
                 </mat-form-field>
-                <mat-error *ngFor="let error of getErrors(i, 'dni')">
+                <mat-error *ngFor="let error of getErrors(i, 'genero')">
+                  {{ error }}
+                </mat-error>
+              </div>
+              <div class="col-md-3 col-sm-3">
+                <mat-form-field style="flex-direction: column-reverse;" class="example-full-width inputs"
+                  appearance="outline">
+                  <mat-label>Sexo</mat-label>
+                  <mat-select formControlName="sexo">
+                    <mat-option *ngFor="let sexo of sexo" [value]="sexo.value">
+                      {{ sexo.label }}
+                    </mat-option>
+                  </mat-select>
+                </mat-form-field>
+                <mat-error *ngFor="let error of getErrors(i, 'sexo')">
                   {{ error }}
                 </mat-error>
               </div>

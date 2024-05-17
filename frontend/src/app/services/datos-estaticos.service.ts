@@ -26,6 +26,7 @@ export class DatosEstaticosService {
   centrosTrabajo: any = [];
   municipios: any = [];
   tiposMovimientos: any = [];
+  estados: any = [];
 
   constructor(
     private colegiosMagSVC: ColegiosMagisterialesService, private bancosService: BancosService,
@@ -49,6 +50,15 @@ export class DatosEstaticosService {
   }
 
 
+  async getEstados() {
+    const response = await this.afiliadoService.getAllEstados().toPromise();
+    this.estados = response.map((estado: { codigo: any; Descripcion: any; }) => ({
+      label: estado.Descripcion,
+      value: estado.codigo
+    }));
+
+    return this.estados;
+  }
 
   async gettipoIdent() {
     const response = await this.tipoIdentificacionService.obtenerTiposIdentificacion().toPromise();
@@ -226,20 +236,6 @@ export class DatosEstaticosService {
     {
       "value": "POR TERCEROS",
       "label": "POR TERCEROS"
-    }
-  ];
-  estado = [
-    {
-      "value": 1,
-      "label": "FALLECIDO"
-    },
-    {
-      "value": 2,
-      "label": "ACTIVO"
-    },
-    {
-      "value": 3,
-      "label": "INACTIVO"
     }
   ];
   genero = [

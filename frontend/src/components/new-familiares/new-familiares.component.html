@@ -12,7 +12,7 @@
         <fieldset [formGroupName]="i" class="fieldset-container">
           <legend>Datos del Familiar</legend>
           <div class="row">
-            <div class="col-md-6 col-sm-6">
+            <div class="col-md-12 col-lg-6">
               <mat-form-field style="flex-direction: column-reverse;" class="full-width-field" appearance="outline">
                 <mat-label>Primer Nombre</mat-label>
                 <input matInput formControlName="primer_nombre">
@@ -21,7 +21,7 @@
                 {{ error }}
               </mat-error>
             </div>
-            <div class="col-md-6 col-sm-6">
+            <div class="col-md-12 col-lg-6">
               <mat-form-field style="flex-direction: column-reverse;" class="full-width-field" appearance="outline">
                 <mat-label>Segundo Nombre</mat-label>
                 <input matInput formControlName="segundo_nombre">
@@ -33,7 +33,7 @@
           </div>
 
           <div class="row">
-            <div class="col-md-6 col-sm-6">
+            <div class="col-md-12 col-lg-6">
               <mat-form-field style="flex-direction: column-reverse;" class="full-width-field" appearance="outline">
                 <mat-label>Primer Apellido</mat-label>
                 <input matInput formControlName="primer_apellido">
@@ -42,7 +42,7 @@
                 {{ error }}
               </mat-error>
             </div>
-            <div class="col-md-6 col-sm-6">
+            <div class="col-md-12 col-lg-6">
               <mat-form-field style="flex-direction: column-reverse;" class="full-width-field" appearance="outline">
                 <mat-label>Segundo Apellido</mat-label>
                 <input matInput formControlName="segundo_apellido">
@@ -54,7 +54,7 @@
           </div>
 
           <div class="row">
-            <div class="col-md-6 col-sm-6">
+            <div class="col-md-12 col-lg-6">
               <mat-form-field style="flex-direction: column-reverse;" class="full-width-field" appearance="outline">
                 <mat-label>DNI</mat-label>
                 <input matInput formControlName="dni">
@@ -63,7 +63,7 @@
                 {{ error }}
               </mat-error>
             </div>
-            <div class="col-md-6 col-sm-6">
+            <div class="col-md-12 col-lg-6">
               <mat-form-field style="flex-direction: column-reverse;" class="full-width-field" appearance="outline">
                 <mat-label>Fecha de Nacimiento</mat-label>
                 <input matInput [matDatepicker]="picker" formControlName="fecha_nacimiento">
@@ -95,12 +95,12 @@
   </form>
 
   <div class="row" style="text-align: center; margin: 16px;">
-    <div class="col-md-6">
+    <div class="col-md-12 col-lg-6">
       <button mat-button color="primary" (click)="agregarFamiliar()">
         <mat-icon>add</mat-icon> Agregar Familiar
       </button>
     </div>
-    <div class="col-md-6">
+    <div class="col-md-12 col-lg-6">
       <button mat-button color="warn" (click)="eliminarFamiliar()">
         <mat-icon>remove</mat-icon> Eliminar Familiar
       </button>

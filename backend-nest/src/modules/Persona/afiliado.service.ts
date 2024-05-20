@@ -321,63 +321,63 @@ export class AfiliadoService {
 
     let persona = await this.personaRepository.findOne({ where: { dni }, relations: ['pais', 'municipio'] });
     if (!persona) {
-        const pais = await this.paisRepository.findOne({ where: { id_pais } });
-        const municipio = await this.municipioRepository.findOne({ where: { id_municipio: id_municipio_residencia } });
-        if (!pais) {
-            throw new Error(`País con ID ${id_pais} no encontrado`);
-        }
-        if (!municipio) {
-            throw new Error(`Municipio con ID ${id_municipio_residencia} no encontrado`);
-        }
-        persona = this.personaRepository.create({
-            dni,
-            pais,
-            municipio,
-            ...personaData
-        });
-        await this.personaRepository.save(persona);
+      const pais = await this.paisRepository.findOne({ where: { id_pais } });
+      const municipio = await this.municipioRepository.findOne({ where: { id_municipio: id_municipio_residencia } });
+      if (!pais) {
+        throw new Error(`País con ID ${id_pais} no encontrado`);
+      }
+      if (!municipio) {
+        throw new Error(`Municipio con ID ${id_municipio_residencia} no encontrado`);
+      }
+      persona = this.personaRepository.create({
+        dni,
+        pais,
+        municipio,
+        ...personaData
+      });
+      await this.personaRepository.save(persona);
     }
     const detalle = this.detallePersonaRepository.create({
-        ...detalleBenef,
-        persona,
-        ID_TIPO_PERSONA: 2
+      ...detalleBenef,
+      persona,
+      ID_TIPO_PERSONA: 2
     });
     await this.detallePersonaRepository.save(detalle);
     return persona;
-}
+  }
 
 
 
-async updateBeneficario(id: number, updatePersonaDto: UpdateBeneficiarioDto): Promise<Net_Persona> {
-  const persona = await this.personaRepository.findOne({
-    where: { id_persona: id },
-    relations: ['detallePersona'],
-  });
-  if (!persona) {
-    throw new NotFoundException(`Persona with ID ${id} not found`);
+  async updateBeneficario(id: number, updatePersonaDto: UpdateBeneficiarioDto): Promise<Net_Persona> {
+    const persona = await this.personaRepository.findOne({
+      where: { id_persona: id },
+      relations: ['detallePersona'],
+    });
+    if (!persona) {
+      throw new NotFoundException(`Persona with ID ${id} not found`);
+    }
+    const detallePersona = await this.detallePersonaRepository.findOne({
+      where: { ID_PERSONA: id },
+    });
+    if (!detallePersona) {
+      throw new NotFoundException(`Detalle persona with ID ${id} not found`);
+    }
+    if (updatePersonaDto.fecha_nacimiento) {
+      updatePersonaDto.fecha_nacimiento = new Date(updatePersonaDto.fecha_nacimiento).toISOString().split('T')[0];
+    }
+    Object.assign(persona, updatePersonaDto);
+    if (updatePersonaDto.id_estado_persona) {
+      detallePersona.estadoPersona = await this.estadoPersonaRepository.findOne({ where: { codigo: updatePersonaDto.id_estado_persona } });
+    }
+    if (updatePersonaDto.id_municipio_residencia) {
+      persona.municipio = await this.municipioRepository.findOne({ where: { id_municipio: updatePersonaDto.id_municipio_residencia } });
+    }
+    if (updatePersonaDto.id_pais) {
+      persona.pais = await this.paisRepository.findOne({ where: { id_pais: updatePersonaDto.id_pais } });
+    }
+    await this.detallePersonaRepository.save(detallePersona);
+    return this.personaRepository.save(persona);
   }
-  const detallePersona = await this.detallePersonaRepository.findOne({
-    where: { ID_PERSONA: id },
-  });
-  if (!detallePersona) {
-    throw new NotFoundException(`Detalle persona with ID ${id} not found`);
-  }
-  if (updatePersonaDto.fecha_nacimiento) {
-    updatePersonaDto.fecha_nacimiento = new Date(updatePersonaDto.fecha_nacimiento).toISOString().split('T')[0];
-  }
-  Object.assign(persona, updatePersonaDto);
-  if (updatePersonaDto.id_estado_persona) {
-    detallePersona.estadoPersona = await this.estadoPersonaRepository.findOne({ where: { codigo: updatePersonaDto.id_estado_persona } });
-  }
-  if (updatePersonaDto.id_municipio_residencia) {
-    persona.municipio = await this.municipioRepository.findOne({ where: { id_municipio: updatePersonaDto.id_municipio_residencia } });
-  }
-  if (updatePersonaDto.id_pais) {
-    persona.pais = await this.paisRepository.findOne({ where: { id_pais: updatePersonaDto.id_pais } });
-  }
-  await this.detallePersonaRepository.save(detallePersona);
-  return this.personaRepository.save(persona);
-}
 
 
 
@@ -665,7 +665,7 @@ async updateBeneficario(id: number, updatePersonaDto: UpdateBeneficiarioDto): Pr
       INNER JOIN
       NET_TIPO_PERSONA "tipoP" ON "tipoP"."ID_TIPO_PERSONA" = "detA"."ID_TIPO_PERSONA"
       INNER JOIN
-      NET_ESTADO_PERSONA "estadoPers" ON "Afil"."ID_ESTADO_PERSONA" = "estadoPers"."CODIGO"
+      NET_ESTADO_PERSONA "estadoPers" ON "detA"."ID_ESTADO_PERSONA" = "estadoPers"."CODIGO"
     WHERE
       "Afil"."DNI" = '${dniAfil}' AND 
       "estadoPers"."DESCRIPCION" = 'FALLECIDO'  AND
@@ -720,13 +720,13 @@ async updateBeneficario(id: number, updatePersonaDto: UpdateBeneficiarioDto): Pr
         "Afil"."DNI" = '${dniAfil}' AND
         "tipoP"."TIPO_PERSONA" = 'AFILIADO'
       `;
-  
+
       const beneficios = await this.entityManager.query(query);
-  
+
       if (!beneficios || beneficios.length === 0) {
         throw new Error(`No se encontraron beneficios para el DNI: ${dniAfil}`);
       }
-  
+
       const query1 = `
         SELECT 
         "detA"."ID_PERSONA",
@@ -761,7 +761,7 @@ async updateBeneficario(id: number, updatePersonaDto: UpdateBeneficiarioDto): Pr
           "detA"."ID_CAUSANTE_PADRE" = ${beneficios[0].ID_PERSONA} AND 
           "tipoP"."TIPO_PERSONA" = 'BENEFICIARIO'
       `;
-  
+
       const beneficios2 = await this.entityManager.query(query1);
       return beneficios2;
     } catch (error) {
@@ -769,7 +769,7 @@ async updateBeneficario(id: number, updatePersonaDto: UpdateBeneficiarioDto): Pr
       throw new Error(`Error al consultar beneficios: ${error.message}`);
     }
   }
-  
+
 
   normalizarDatos(data: any): PersonaResponse[] {
     const newList: PersonaResponse[] = []
@@ -947,16 +947,16 @@ async updateBeneficario(id: number, updatePersonaDto: UpdateBeneficiarioDto): Pr
   async inactivarPersona(idPersona: number, idCausante: number): Promise<void> {
     const estadoInactivo = await this.estadoPersonaRepository.findOne({ where: { Descripcion: 'INACTIVO' } });
     if (!estadoInactivo) {
-        throw new NotFoundException('Estado INACTIVO no encontrado');
+      throw new NotFoundException('Estado INACTIVO no encontrado');
     }
     const result = await this.detallePersonaRepository.update(
-        { ID_PERSONA: idPersona, ID_CAUSANTE: idCausante },
-        { ID_ESTADO_PERSONA: estadoInactivo.codigo }
+      { ID_PERSONA: idPersona, ID_CAUSANTE: idCausante },
+      { ID_ESTADO_PERSONA: estadoInactivo.codigo }
     );
     if (result.affected === 0) {
-        throw new NotFoundException(`Registro con ID_PERSONA ${idPersona} y ID_CAUSANTE ${idCausante} no encontrado`);
+      throw new NotFoundException(`Registro con ID_PERSONA ${idPersona} y ID_CAUSANTE ${idCausante} no encontrado`);
     }
-}
+  }
 
   async deleteReferenciaPersonal(id: number): Promise<void> {
     const referencia = await this.referenciaPersonalRepository.findOne({ where: { id_ref_personal: id } });

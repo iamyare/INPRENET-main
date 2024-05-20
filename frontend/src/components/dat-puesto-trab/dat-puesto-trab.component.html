@@ -11,7 +11,7 @@
         <div class="row" [formGroupName]="formChild">
 
 
-          <div class="col-md-6">
+          <div class="col-lg-6 col-md-12">
             <mat-form-field style="flex-direction: column-reverse;" class="example-full-width; inputs"
               appearance="outline">
               <mat-label>Centro de Trabajo</mat-label>
@@ -26,7 +26,7 @@
               {{ error }}
             </mat-error>
           </div>
-          <div class="col-md-6">
+          <div class="col-lg-6 col-md-12">
             <mat-form-field style="flex-direction: column-reverse;" class="example-full-width; inputs"
               appearance="outline">
               <mat-label>Número de acuerdo</mat-label>
@@ -40,7 +40,7 @@
 
         <div class="row" [formGroupName]="formChild">
 
-          <div class="col-md-4">
+          <div class="col-lg-4 col-md-12">
             <mat-form-field style="flex-direction: column-reverse;" class="example-full-width; inputs"
               appearance="outline">
               <mat-label>Salario</mat-label>
@@ -50,7 +50,7 @@
               {{ error }}
             </mat-error>
           </div>
-          <div class="col-md-4">
+          <div class="col-lg-4 col-md-12">
             <mat-form-field style="flex-direction: column-reverse;" class="example-full-width inputs"
               appearance="outline">
               <mat-label>Fecha de Ingreso</mat-label>
@@ -62,7 +62,7 @@
               {{ error }}
             </mat-error>
           </div>
-          <div class="col-md-4">
+          <div class="col-lg-4 col-md-12">
             <mat-form-field style="flex-direction: column-reverse;" class="example-full-width inputs"
               appearance="outline">
               <mat-label>Fecha de Egreso</mat-label>
@@ -80,7 +80,7 @@
 
 
         <div class="row" [formGroupName]="formChild">
-          <div class="col-md-4">
+          <div class="col-lg-4 col-md-12">
             <mat-form-field style="flex-direction: column-reverse;" class="example-full-width; inputs"
               appearance="outline">
               <mat-label>Cargo</mat-label>
@@ -90,7 +90,7 @@
               {{ error }}
             </mat-error>
           </div>
-          <div class="col-md-4">
+          <div class="col-lg-4 col-md-12">
             <mat-form-field style="flex-direction: column-reverse;" class="example-full-width; inputs"
               appearance="outline">
               <mat-label>Sector Económico</mat-label>
@@ -105,7 +105,7 @@
               {{ error }}
             </mat-error>
           </div>
-          <div class="col-md-4">
+          <div class="col-lg-4 col-md-12">
             <mat-form-field style="flex-direction: column-reverse;" class="example-full-width; inputs"
               appearance="outline">
               <mat-label>Clase Cliente</mat-label>
@@ -122,12 +122,12 @@
   </form>
 
   <div class="row" style="text-align: center; margin: 1%;">
-    <div class="col-md-6">
+    <div class="col-lg-6 col-md-12">
       <button mat-button color="primary" (click)="agregarTrabajo()"><mat-icon
           matSuffix>exposure_plus_1</mat-icon>Agregar
         Puesto Trabajo</button>
     </div>
-    <div class="col-md-6">
+    <div class="col-lg-6 col-md-12">
       <button mat-button color="warn" (click)="eliminarTrabajo()"><mat-icon matSuffix>exposure_neg_1</mat-icon>Eliminar
         Puesto Trabajo</button>
     </div>

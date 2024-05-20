@@ -33,7 +33,7 @@ export class HistorialSalarioComponent implements OnInit {
   @Input() datos: any;
 
   onDatosHistSal() {
-    const data = this.formParent.value;
+    const data = this.formParent;
     this.newDatHistSal.emit(data);
   }
 
@@ -44,10 +44,12 @@ export class HistorialSalarioComponent implements OnInit {
 
   ngOnInit(): void {
     this.initForm();
-    const bancosArray = this.formParent.get('banco') as FormArray;
+    /* const bancosArray = this.formParent.get('banco') as FormArray; */
+    console.log(this.datos);
+
     if (this.datos) {
-      if (this.datos.banco && this.datos.banco.length > 0) {
-        for (let i of this.datos.banco) {
+      if (this.datos.value.banco && this.datos.value.banco.length > 0) {
+        for (let i of this.datos.value.banco) {
           this.agregarBanco(i);
         }
       }

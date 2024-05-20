@@ -12,6 +12,7 @@ import { Net_Planilla } from '../planilla/entities/net_planilla.entity';
 import { Net_Detalle_Beneficio_Afiliado } from './entities/net_detalle_beneficio_afiliado.entity';
 import { NET_DETALLE_PERSONA } from 'src/modules/Persona/entities/Net_detalle_persona.entity';
 import { Net_Estado_Persona } from 'src/modules/Persona/entities/net_estado_persona.entity';
+import { NET_PROFESIONES } from 'src/modules/transacciones/entities/net_profesiones.entity';
 @Injectable()
 export class DetalleBeneficioService {
   private readonly logger = new Logger(DetalleBeneficioService.name)
@@ -376,7 +377,7 @@ export class DetalleBeneficioService {
         .addSelect('afil.FECHA_NACIMIENTO', 'FECHA_NACIMIENTO')
         /* .addSelect('afil.COLEGIO_MAGISTERIAL', 'COLEGIO_MAGISTERIAL') */
         .addSelect('afil.NUMERO_CARNET', 'NUMERO_CARNET')
-        .addSelect('afil.PROFESION', 'PROFESION')
+        .addSelect('prof.DESCRIPCION', 'DESCRIPCION')
         .addSelect('afil.TELEFONO_1', 'TELEFONO_1')
         .addSelect('afil.ESTADO_CIVIL', 'ESTADO_CIVIL')
 
@@ -393,9 +394,10 @@ export class DetalleBeneficioService {
 
         .innerJoin(Net_Persona, 'afil', 'afil.ID_PERSONA = detBenA.ID_BENEFICIARIO AND detBenA.ID_CAUSANTE = detBenA.ID_CAUSANTE')
         .leftJoin(Net_Beneficio, 'ben', 'ben.ID_BENEFICIO = detBenA.ID_BENEFICIO')
+        .leftJoin(NET_PROFESIONES, 'prof', 'prof.ID_PROFESION = afil.ID_PROFESION')
         .innerJoin(NET_DETALLE_PERSONA, 'detA', 'afil.ID_PERSONA = detBenA.ID_BENEFICIARIO AND detBenA.ID_CAUSANTE = detBenA.ID_CAUSANTE ')
 
-        .innerJoin(Net_Estado_Persona, 'estadoAfil', 'estadoAfil.CODIGO = afil.ID_ESTADO_PERSONA')
+        .innerJoin(Net_Estado_Persona, 'estadoAfil', 'estadoAfil.CODIGO = detA.ID_ESTADO_PERSONA')
         .where(`afil.dni = '${dni}'`)
 
         .getRawMany();

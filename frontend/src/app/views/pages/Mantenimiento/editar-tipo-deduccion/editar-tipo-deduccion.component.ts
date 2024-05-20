@@ -105,10 +105,10 @@ export class EditarTipoDeduccionComponent implements OnInit {
 
   manejarAccionUno(row: any) {
     const campos = [
-      { nombre: 'nombre_deduccion', tipo: 'text', requerido: true, etiqueta: 'Nombre Planilla', editable: true },
-      { nombre: 'descripcion_deduccion', tipo: 'text', requerido: true, etiqueta: 'descripcion', editable: true },
-      { nombre: 'nombre_institucion', tipo: 'text', requerido: true, etiqueta: 'descripcion', editable: true },
-      { nombre: 'prioridad', tipo: 'text', requerido: true, etiqueta: 'descripcion', editable: true }
+      { nombre: 'nombre_deduccion', tipo: 'text', requerido: true, etiqueta: 'Nombre deducción', editable: true },
+      { nombre: 'descripcion_deduccion', tipo: 'text', requerido: true, etiqueta: 'Descripcion', editable: true },
+      { nombre: 'nombre_institucion', tipo: 'text', requerido: true, etiqueta: 'Nombre Institucion', editable: true },
+      { nombre: 'prioridad', tipo: 'number', requerido: true, etiqueta: 'prioridad', editable: true }
     ];
 
     this.openDialog(campos, row);

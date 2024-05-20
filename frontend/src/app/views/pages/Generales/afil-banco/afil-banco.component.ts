@@ -194,7 +194,7 @@ export class AfilBancoComponent implements OnInit {
   }
 
   setHistSal(datosHistSal: any) {
-    this.formHistPag.setControl('banco', this.fb.array(datosHistSal.banco || []));
+    this.formHistPag = datosHistSal
   }
 
   setDatosPuetTrab1(datosPuestTrab: any) {
@@ -226,15 +226,15 @@ export class AfilBancoComponent implements OnInit {
     const formData = new FormData();
     const encapsulatedDto = {
       datosGenerales: this.formDatosGenerales?.value?.refpers[0] || {},
+      familiares: this.formDatosFamiliares?.value?.familiar || [],
+      colegiosMagisteriales: this.formColegiosMagisteriales?.value?.ColMags || [],
       bancos: this.formHistPag?.value?.banco || [],
+      centrosTrabajo: this.formPuestTrab?.value?.trabajo || [],
       referenciasPersonales: this.formReferencias?.value?.refpers || [],
       beneficiarios: this.formBeneficiarios?.value?.beneficiario.map((ben: any) => {
         const { Arch, Archivos, DatosBac, beneficiario, ...resto } = ben;
         return resto;
       }) || [],
-      centrosTrabajo: this.formPuestTrab?.value?.trabajo || [],
-      colegiosMagisteriales: this.formColegiosMagisteriales?.value?.ColMags || [],
-      familiares: this.formDatosFamiliares?.value?.familiar || []
     };
 
     const docDefinition: any = this.createPDFDefinition(encapsulatedDto);

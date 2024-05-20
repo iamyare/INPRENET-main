@@ -64,6 +64,11 @@ export class DatPuestoTrabComponent implements OnInit {
   @Input() editing?: boolean = false;
   @Output() newDatDatosPuestTrab = new EventEmitter<any>()
 
+  onDatosDatosPuestTrab() {
+    const data = this.formParent;
+    this.newDatDatosPuestTrab.emit(data);
+  }
+
   constructor(
     private formStateService: FormStateService,
     private fb: FormBuilder,
@@ -111,10 +116,6 @@ export class DatPuestoTrabComponent implements OnInit {
     }
   }
 
-  onDatosDatosPuestTrab() {
-    const data = this.formParent.value;
-    this.newDatDatosPuestTrab.emit(data);
-  }
 
   getCtrl(key: string, form: FormGroup): any {
     return form.get(key);

@@ -11,9 +11,10 @@
         <h4 class="card-title">Banco número: {{i+1}}</h4>
         <div [formGroupName]="formChild" class="row">
           <div class="col-lg-6 col-md-12">
-            <mat-form-field style="flex-direction: column-reverse;" class="example-full-width; inputs"
+            <mat-form-field style="flex-direction: column-reverse;" class="example-full-width inputs"
               appearance="outline">
               <mat-label>Nombre del Banco</mat-label>
+              <mat-icon matPrefix>account_balance</mat-icon>
               <mat-select (selectionChange)="onDatosHistSal()" matNativeControl formControlName="idBanco">
                 <mat-option *ngFor="let p of Bancos" [value]="p.value">
                   {{p.label}}
@@ -25,21 +26,16 @@
             </mat-error>
           </div>
           <div class="col-lg-6 col-md-12">
-            <mat-form-field style="flex-direction: column-reverse;" class="example-full-width; inputs"
+            <mat-form-field style="flex-direction: column-reverse;" class="example-full-width inputs"
               appearance="outline">
               <mat-label>Número de cuenta:</mat-label>
+              <mat-icon matPrefix>credit_card</mat-icon>
               <input matInput type="text" formControlName="numCuenta">
             </mat-form-field>
             <mat-error *ngFor="let error of getErrors(i, 'numCuenta')">
               {{ error }}
             </mat-error>
           </div>
-          <!-- <div class="col-md-4">
-            <mat-form-field style="flex-direction: column-reverse;" class="example-full-width; inputs" appearance="outline">
-              <mat-label>Estado:</mat-label>
-              <input matInput type="text" formControlName="estado">
-            </mat-form-field>
-          </div> -->
         </div>
       </div>
     </div>
@@ -47,12 +43,14 @@
 
   <div class="row" style="text-align: center; margin: 1%;">
     <div class="col-md-6">
-      <button mat-button color="primary" (click)="agregarBanco()"><mat-icon matSuffix>exposure_plus_1</mat-icon>Agregar
-        cuenta de Banco</button>
+      <button mat-button color="primary" (click)="agregarBanco()">
+        <mat-icon matSuffix>exposure_plus_1</mat-icon>Agregar cuenta de Banco
+      </button>
     </div>
     <div class="col-md-6">
-      <button mat-button color="warn" (click)="eliminarBanco()"><mat-icon matSuffix>exposure_neg_1</mat-icon>Eliminar
-        Cuenta de banco</button>
+      <button mat-button color="warn" (click)="eliminarBanco()">
+        <mat-icon matSuffix>exposure_neg_1</mat-icon>Eliminar Cuenta de banco
+      </button>
     </div>
   </div>
 </div>

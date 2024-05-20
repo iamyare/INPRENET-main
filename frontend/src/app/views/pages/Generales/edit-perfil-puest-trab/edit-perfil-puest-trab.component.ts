@@ -178,15 +178,71 @@ export class EditPerfilPuestTrabComponent {
         requerido: true,
         etiqueta: 'Nombre Centro Trabajo',
         editable: true,
-        opciones: this.centrosTrabajo
+        opciones: this.centrosTrabajo,
+        icono: 'business'
       },
-      { nombre: 'numeroAcuerdo', tipo: 'text', requerido: true, etiqueta: 'Número Acuerdo', editable: true, validaciones: [Validators.required, Validators.maxLength(40)] },
-      { nombre: 'salarioBase', tipo: 'number', requerido: true, etiqueta: 'Salario Base', editable: true, validaciones: [Validators.required, Validators.min(0)] },
-      { nombre: 'fechaIngreso', tipo: 'date', requerido: false, etiqueta: 'Fecha Ingreso', editable: true, validaciones: [Validators.required] },
-      { nombre: 'fechaEgreso', tipo: 'date', requerido: false, etiqueta: 'Fecha Egreso', editable: true },
-      { nombre: 'cargo', tipo: 'text', requerido: false, etiqueta: 'Cargo', editable: true, validaciones: [Validators.required, Validators.maxLength(40)] },
-      { nombre: 'sectorEconomico', tipo: 'text', requerido: false, etiqueta: 'Sector Económico', editable: true, validaciones: [Validators.required, Validators.maxLength(40)] },
-      { nombre: 'claseCliente', tipo: 'text', requerido: false, etiqueta: 'Clase Cliente', editable: true, validaciones: [Validators.required, Validators.maxLength(40)] }
+      {
+        nombre: 'numeroAcuerdo',
+        tipo: 'text',
+        requerido: true,
+        etiqueta: 'Número Acuerdo',
+        editable: true,
+        icono: 'description',
+        validaciones: [Validators.required, Validators.maxLength(40)]
+      },
+      {
+        nombre: 'salarioBase',
+        tipo: 'number',
+        requerido: true,
+        etiqueta: 'Salario Base',
+        editable: true,
+        icono: 'attach_money',
+        validaciones: [Validators.required, Validators.min(0)]
+      },
+      {
+        nombre: 'fechaIngreso',
+        tipo: 'date',
+        requerido: false,
+        etiqueta: 'Fecha Ingreso',
+        editable: true,
+        icono: 'event',
+        validaciones: [Validators.required]
+      },
+      {
+        nombre: 'fechaEgreso',
+        tipo: 'date',
+        requerido: false,
+        etiqueta: 'Fecha Egreso',
+        editable: true,
+        icono: 'event_busy'
+      },
+      {
+        nombre: 'cargo',
+        tipo: 'text',
+        requerido: false,
+        etiqueta: 'Cargo',
+        editable: true,
+        icono: 'work_outline',
+        validaciones: [Validators.required, Validators.maxLength(40)]
+      },
+      {
+        nombre: 'sectorEconomico',
+        tipo: 'text',
+        requerido: false,
+        etiqueta: 'Sector Económico',
+        editable: true,
+        icono: 'domain',
+        validaciones: [Validators.required, Validators.maxLength(40)]
+      },
+      {
+        nombre: 'claseCliente',
+        tipo: 'text',
+        requerido: false,
+        etiqueta: 'Clase Cliente',
+        editable: true,
+        icono: 'group',
+        validaciones: [Validators.required, Validators.maxLength(40)]
+      }
     ];
 
     const valoresIniciales = {
@@ -196,6 +252,7 @@ export class EditPerfilPuestTrabComponent {
 
     this.openDialog(campos, valoresIniciales);
   }
+
 
   manejarAccionDos(row: any) {
     const dialogRef = this.dialog.open(ConfirmDialogComponent, {

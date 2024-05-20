@@ -11,7 +11,8 @@ interface Campo {
   opciones?: { value: any, label: string }[];
   dependeDe?: string;
   valorDependiente?: any;
-  validadores?: ValidatorFn[]; // Los validadores personalizados para cada campo
+  validadores?: ValidatorFn[];
+  icono?: string;
 }
 
 @Component({

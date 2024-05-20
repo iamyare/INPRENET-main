@@ -160,6 +160,7 @@ export class EditReferPersonalesComponent {
     const parentescoSeleccionado = this.listaParentesco.find(
       (item: any) => item.label.toLowerCase() === rowParentesco
     );
+
     const campos = [
       {
         nombre: 'nombre_completo',
@@ -167,6 +168,7 @@ export class EditReferPersonalesComponent {
         requerido: true,
         etiqueta: 'Nombre completo',
         editable: true,
+        icono: 'person',
         validadores: [Validators.required, Validators.minLength(2), Validators.maxLength(100)]
       },
       {
@@ -175,6 +177,7 @@ export class EditReferPersonalesComponent {
         requerido: true,
         etiqueta: 'Parentesco',
         editable: true,
+        icono: 'supervisor_account',
         opciones: this.listaParentesco,
         validadores: [Validators.required]
       },
@@ -184,6 +187,7 @@ export class EditReferPersonalesComponent {
         requerido: true,
         etiqueta: 'Dirección',
         editable: true,
+        icono: 'home',
         validadores: [Validators.required, Validators.minLength(10), Validators.maxLength(200)]
       },
       {
@@ -192,6 +196,7 @@ export class EditReferPersonalesComponent {
         requerido: false,
         etiqueta: 'Teléfono Domicilio',
         editable: true,
+        icono: 'phone',
         validadores: [Validators.minLength(8), Validators.maxLength(12), Validators.pattern(/^\+?[0-9]+(-?[0-9]+)*$/)]
       },
       {
@@ -200,6 +205,7 @@ export class EditReferPersonalesComponent {
         requerido: true,
         etiqueta: 'Teléfono Personal',
         editable: true,
+        icono: 'smartphone',
         validadores: [Validators.required, Validators.minLength(8), Validators.maxLength(12), Validators.pattern(/^\+?[0-9]+(-?[0-9]+)*$/)]
       },
       {
@@ -208,6 +214,7 @@ export class EditReferPersonalesComponent {
         requerido: true,
         etiqueta: 'Teléfono Trabajo',
         editable: true,
+        icono: 'work',
         validadores: [Validators.required, Validators.minLength(8), Validators.maxLength(12), Validators.pattern(/^\+?[0-9]+(-?[0-9]+)*$/)]
       },
       {
@@ -216,9 +223,11 @@ export class EditReferPersonalesComponent {
         requerido: true,
         etiqueta: 'DNI',
         editable: true,
+        icono: 'badge',
         validadores: [Validators.required, Validators.pattern(/^[0-9]{13}$|^[0-9]{4}-[0-9]{4}-[0-9]{5}$/)]
       }
     ];
+
     const valoresIniciales = {
       ...row,
       parentesco: parentescoSeleccionado ? parentescoSeleccionado.value : ''
@@ -226,6 +235,7 @@ export class EditReferPersonalesComponent {
 
     this.openDialog(campos, valoresIniciales);
   }
+
 
 
 

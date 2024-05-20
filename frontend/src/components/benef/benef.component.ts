@@ -18,7 +18,6 @@ export class BenefComponent implements OnInit {
   public nacionalidades: any[] = [];
   sexo: { value: string; label: string }[] = [];
   generos: { value: string; label: string }[] = [];
-  representacion: any = this.datosEstaticosService.representacion;
 
   @Input() datos: any;
   @Output() newDatBenChange = new EventEmitter<FormGroup>();
@@ -73,7 +72,6 @@ export class BenefComponent implements OnInit {
         segundo_apellido: new FormControl(datosBeneficiario?.segundo_apellido || ''),
         genero: new FormControl(datosBeneficiario?.genero || ''),
         cantidad_dependientes: new FormControl(datosBeneficiario?.cantidad_dependientes || 0),
-        representacion: new FormControl(datosBeneficiario?.representacion || ''),
         telefono_1: new FormControl(datosBeneficiario?.telefono_1 || ''),
         sexo: new FormControl(datosBeneficiario?.sexo || ''),
         fecha_nacimiento: new FormControl(datosBeneficiario?.fecha_nacimiento || '', Validators.required),

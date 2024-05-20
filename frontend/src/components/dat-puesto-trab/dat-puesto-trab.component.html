@@ -10,13 +10,12 @@
         <h4 class="card-title">Centro De Trabajo Número: {{i+1}}</h4>
         <div class="row" [formGroupName]="formChild">
 
-
           <div class="col-lg-6 col-md-12">
-            <mat-form-field style="flex-direction: column-reverse;" class="example-full-width; inputs"
+            <mat-form-field style="flex-direction: column-reverse;" class="example-full-width inputs"
               appearance="outline">
               <mat-label>Centro de Trabajo</mat-label>
-              <mat-select (selectionChange)="onDatosDatosPuestTrab()" matNativeControl
-                formControlName="idCentroTrabajo">
+              <mat-icon matPrefix>business</mat-icon>
+              <mat-select (selectionChange)="onDatosDatosPuestTrab()" matNativeControl formControlName="idCentroTrabajo">
                 <mat-option *ngFor="let p of centrosTrabajo" [value]="p.value">
                   {{p.label}}
                 </mat-option>
@@ -26,10 +25,12 @@
               {{ error }}
             </mat-error>
           </div>
+
           <div class="col-lg-6 col-md-12">
-            <mat-form-field style="flex-direction: column-reverse;" class="example-full-width; inputs"
+            <mat-form-field style="flex-direction: column-reverse;" class="example-full-width inputs"
               appearance="outline">
               <mat-label>Número de acuerdo</mat-label>
+              <mat-icon matPrefix>assignment</mat-icon>
               <input matInput formControlName="numeroAcuerdo">
             </mat-form-field>
             <mat-error *ngFor="let error of getErrors(i, 'numeroAcuerdo')">
@@ -41,19 +42,22 @@
         <div class="row" [formGroupName]="formChild">
 
           <div class="col-lg-4 col-md-12">
-            <mat-form-field style="flex-direction: column-reverse;" class="example-full-width; inputs"
+            <mat-form-field style="flex-direction: column-reverse;" class="example-full-width inputs"
               appearance="outline">
               <mat-label>Salario</mat-label>
+              <mat-icon matPrefix>attach_money</mat-icon>
               <input matInput formControlName="salarioBase">
             </mat-form-field>
             <mat-error *ngFor="let error of getErrors(i, 'salarioBase')">
               {{ error }}
             </mat-error>
           </div>
+
           <div class="col-lg-4 col-md-12">
             <mat-form-field style="flex-direction: column-reverse;" class="example-full-width inputs"
               appearance="outline">
               <mat-label>Fecha de Ingreso</mat-label>
+              <mat-icon matPrefix>calendar_today</mat-icon>
               <input matInput formControlName="fechaIngreso" [matDatepicker]="pickerIngreso" placeholder="d/m/aaaa">
               <mat-datepicker-toggle matSuffix [for]="pickerIngreso"></mat-datepicker-toggle>
               <mat-datepicker #pickerIngreso></mat-datepicker>
@@ -62,10 +66,12 @@
               {{ error }}
             </mat-error>
           </div>
+
           <div class="col-lg-4 col-md-12">
             <mat-form-field style="flex-direction: column-reverse;" class="example-full-width inputs"
               appearance="outline">
               <mat-label>Fecha de Egreso</mat-label>
+              <mat-icon matPrefix>calendar_today</mat-icon>
               <input matInput formControlName="fechaEgreso" [matDatepicker]="pickerEgreso" placeholder="d/m/aaaa">
               <mat-datepicker-toggle matSuffix [for]="pickerEgreso"></mat-datepicker-toggle>
               <mat-datepicker #pickerEgreso></mat-datepicker>
@@ -75,27 +81,27 @@
             </mat-error>
           </div>
 
-
         </div>
-
 
         <div class="row" [formGroupName]="formChild">
           <div class="col-lg-4 col-md-12">
-            <mat-form-field style="flex-direction: column-reverse;" class="example-full-width; inputs"
+            <mat-form-field style="flex-direction: column-reverse;" class="example-full-width inputs"
               appearance="outline">
               <mat-label>Cargo</mat-label>
+              <mat-icon matPrefix>work</mat-icon>
               <input matInput formControlName="cargo">
             </mat-form-field>
             <mat-error *ngFor="let error of getErrors(i, 'cargo')">
               {{ error }}
             </mat-error>
           </div>
+
           <div class="col-lg-4 col-md-12">
-            <mat-form-field style="flex-direction: column-reverse;" class="example-full-width; inputs"
+            <mat-form-field style="flex-direction: column-reverse;" class="example-full-width inputs"
               appearance="outline">
               <mat-label>Sector Económico</mat-label>
-              <mat-select (selectionChange)="onDatosDatosPuestTrab()" matNativeControl
-                formControlName="sectorEconomico">
+              <mat-icon matPrefix>domain</mat-icon>
+              <mat-select (selectionChange)="onDatosDatosPuestTrab()" matNativeControl formControlName="sectorEconomico">
                 <mat-option *ngFor="let p of sector" [value]="p.value">
                   {{p.value}}
                 </mat-option>
@@ -105,10 +111,12 @@
               {{ error }}
             </mat-error>
           </div>
+
           <div class="col-lg-4 col-md-12">
-            <mat-form-field style="flex-direction: column-reverse;" class="example-full-width; inputs"
+            <mat-form-field style="flex-direction: column-reverse;" class="example-full-width inputs"
               appearance="outline">
               <mat-label>Clase Cliente</mat-label>
+              <mat-icon matPrefix>people</mat-icon>
               <input matInput formControlName="claseCliente">
             </mat-form-field>
             <mat-error *ngFor="let error of getErrors(i, 'claseCliente')">
@@ -123,8 +131,7 @@
 
   <div class="row" style="text-align: center; margin: 1%;">
     <div class="col-lg-6 col-md-12">
-      <button mat-button color="primary" (click)="agregarTrabajo()"><mat-icon
-          matSuffix>exposure_plus_1</mat-icon>Agregar
+      <button mat-button color="primary" (click)="agregarTrabajo()"><mat-icon matSuffix>exposure_plus_1</mat-icon>Agregar
         Puesto Trabajo</button>
     </div>
     <div class="col-lg-6 col-md-12">

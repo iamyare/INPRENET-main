@@ -44,8 +44,6 @@ export class HistorialSalarioComponent implements OnInit {
 
   ngOnInit(): void {
     this.initForm();
-    /* const bancosArray = this.formParent.get('banco') as FormArray; */
-    console.log(this.datos);
 
     if (this.datos) {
       if (this.datos.value.banco && this.datos.value.banco.length > 0) {

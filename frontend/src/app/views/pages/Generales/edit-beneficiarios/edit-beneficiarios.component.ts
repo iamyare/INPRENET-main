@@ -133,7 +133,6 @@ export class EditBeneficiariosComponent {
             genero: item.genero,
             sexo: item.sexo,
             cantidad_dependientes: item.cantidadDependientes,
-            representacion: item.representacion,
             telefono_1: item.telefono1,
             fecha_nacimiento: fechaNacimiento,
             direccion_residencia: item.direccionResidencia,
@@ -168,24 +167,24 @@ export class EditBeneficiariosComponent {
 
   async manejarAccionUno(row: any) {
     const campos = [
-      { nombre: 'dni', tipo: 'text', etiqueta: 'DNI', editable: true },
-      { nombre: 'nombres', tipo: 'text', etiqueta: 'Nombres', editable: true },
-      { nombre: 'apellidos', tipo: 'text', etiqueta: 'Apellidos', editable: true },
-      { nombre: 'genero', tipo: 'list', etiqueta: 'Género', editable: true, opciones: this.datosEstaticosService.genero },
-      { nombre: 'sexo', tipo: 'list', etiqueta: 'Sexo', editable: true, opciones: this.datosEstaticosService.sexo },
-      { nombre: 'cantidad_dependientes', tipo: 'number', etiqueta: 'Cantidad de Dependientes', editable: true },
-      { nombre: 'representacion', tipo: 'list', etiqueta: 'Representación', editable: true, opciones: this.datosEstaticosService.representacion },
-      { nombre: 'telefono_1', tipo: 'text', etiqueta: 'Teléfono 1', editable: true },
-      { nombre: 'fecha_nacimiento', tipo: 'date', etiqueta: 'Fecha de Nacimiento', editable: true },
-      { nombre: 'direccion_residencia', tipo: 'text', etiqueta: 'Dirección de Residencia', editable: true },
-      { nombre: 'idPaisNacionalidad', tipo: 'list', etiqueta: 'País Nacionalidad', editable: true, opciones: this.datosEstaticosService.nacionalidades },
-      { nombre: 'id_municipio_residencia', tipo: 'list', etiqueta: 'Municipio Residencia', editable: true, opciones: this.datosEstaticosService.municipios },
-      { nombre: 'id_estado_persona', tipo: 'list', etiqueta: 'Estado Persona', editable: true, opciones: this.datosEstaticosService.estados },
-      { nombre: 'porcentaje', tipo: 'number', etiqueta: 'Porcentaje', editable: true }
+      { nombre: 'dni', tipo: 'text', etiqueta: 'DNI', editable: true, icono: 'badge' },
+      { nombre: 'nombres', tipo: 'text', etiqueta: 'Nombres', editable: true, icono: 'person' },
+      { nombre: 'apellidos', tipo: 'text', etiqueta: 'Apellidos', editable: true, icono: 'person_outline' },
+      { nombre: 'genero', tipo: 'list', etiqueta: 'Género', editable: true, opciones: this.datosEstaticosService.genero, icono: 'wc' },
+      { nombre: 'sexo', tipo: 'list', etiqueta: 'Sexo', editable: true, opciones: this.datosEstaticosService.sexo, icono: 'transgender' },
+      { nombre: 'cantidad_dependientes', tipo: 'number', etiqueta: 'Cantidad de Dependientes', editable: true, icono: 'people' },
+      { nombre: 'telefono_1', tipo: 'text', etiqueta: 'Teléfono 1', editable: true, icono: 'phone' },
+      { nombre: 'fecha_nacimiento', tipo: 'date', etiqueta: 'Fecha de Nacimiento', editable: true, icono: 'calendar_today' },
+      { nombre: 'direccion_residencia', tipo: 'text', etiqueta: 'Dirección de Residencia', editable: true, icono: 'home' },
+      { nombre: 'idPaisNacionalidad', tipo: 'list', etiqueta: 'País Nacionalidad', editable: true, opciones: this.datosEstaticosService.nacionalidades, icono: 'public' },
+      { nombre: 'id_municipio_residencia', tipo: 'list', etiqueta: 'Municipio Residencia', editable: true, opciones: this.datosEstaticosService.municipios, icono: 'location_city' },
+      { nombre: 'id_estado_persona', tipo: 'list', etiqueta: 'Estado Persona', editable: true, opciones: this.datosEstaticosService.estados, icono: 'assignment_ind' },
+      { nombre: 'porcentaje', tipo: 'number', etiqueta: 'Porcentaje', editable: true, icono: 'pie_chart' }
     ];
 
     this.openDialog(campos, row);
   }
+
 
   manejarAccionDos(row: any) {
     const dialogRef = this.dialog.open(ConfirmDialogComponent, {
@@ -254,7 +253,6 @@ export class EditBeneficiariosComponent {
           genero: result.genero,
           sexo: result.sexo,
           cantidad_dependientes: result.cantidad_dependientes,
-          representacion: result.representacion,
           telefono_1: result.telefono_1,
           fecha_nacimiento,
           direccion_residencia: result.direccion_residencia,

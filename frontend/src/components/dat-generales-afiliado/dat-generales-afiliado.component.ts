@@ -29,6 +29,7 @@ export function generateAddressFormGroup(datos?: any): FormGroup {
     id_tipo_identificacion: new FormControl(datos?.id_tipo_identificacion, Validators.required),
     id_pais_nacionalidad: new FormControl(datos?.id_pais_nacionalidad, Validators.required),
     sexo: new FormControl(datos?.sexo, [Validators.required, Validators.maxLength(1), Validators.pattern(/^[FM]$/)]),
+    cantidad_hijos : new FormControl(datos?.cantidad_hijos, Validators.required),
   });
 }
 

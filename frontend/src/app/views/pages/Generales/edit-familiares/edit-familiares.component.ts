@@ -154,35 +154,66 @@ export class EditFamiliaresComponent {
 
   manejarAccionUno(row: any) {
     const campos = [
-      { nombre: 'nombres', tipo: 'text', etiqueta: 'Nombres', editable: true, validadores: [
-        Validators.required,
-        Validators.minLength(2),
-        Validators.maxLength(120),
-        Validators.pattern(/^[^\s]+(\s[^\s]+){0,2}$/)
-      ] },
-      { nombre: 'apellidos', tipo: 'text', etiqueta: 'Apellidos', editable: true, validadores: [
-        Validators.required,
-        Validators.minLength(2),
-        Validators.maxLength(80),
-        Validators.pattern(/^[^\s]+(\s[^\s]+)?$/)
-      ] },
-      { nombre: 'fechaNacimiento', tipo: 'date', etiqueta: 'Fecha de nacimiento', editable: true,validadores: [
-        Validators.required,
-      ] },
-      { nombre: 'dni', tipo: 'text', etiqueta: 'Número de identidad', editable: true, validadores: [
-        Validators.required, Validators.pattern(/^[0-9]{13}$|^[0-9]{4}-[0-9]{4}-[0-9]{5}$/)
-      ] },
+      {
+        nombre: 'nombres',
+        tipo: 'text',
+        etiqueta: 'Nombres',
+        editable: true,
+        icono: 'person',
+        validadores: [
+          Validators.required,
+          Validators.minLength(2),
+          Validators.maxLength(120),
+          Validators.pattern(/^[^\s]+(\s[^\s]+){0,2}$/)
+        ]
+      },
+      {
+        nombre: 'apellidos',
+        tipo: 'text',
+        etiqueta: 'Apellidos',
+        editable: true,
+        icono: 'person_outline',
+        validadores: [
+          Validators.required,
+          Validators.minLength(2),
+          Validators.maxLength(80),
+          Validators.pattern(/^[^\s]+(\s[^\s]+)?$/)
+        ]
+      },
+      {
+        nombre: 'fechaNacimiento',
+        tipo: 'date',
+        etiqueta: 'Fecha de nacimiento',
+        editable: true,
+        icono: 'calendar_today',
+        validadores: [
+          Validators.required,
+        ]
+      },
+      {
+        nombre: 'dni',
+        tipo: 'text',
+        etiqueta: 'Número de identidad',
+        editable: true,
+        icono: 'badge',
+        validadores: [
+          Validators.required,
+          Validators.pattern(/^[0-9]{13}$|^[0-9]{4}-[0-9]{4}-[0-9]{5}$/)
+        ]
+      },
       {
         nombre: 'parentesco',
         tipo: 'list',
         etiqueta: 'Parentesco',
         editable: true,
+        icono: 'supervisor_account',
         opciones: this.listaParentesco,
         validadores: [Validators.required]
       }
     ];
     this.openDialog(campos, row);
   }
+
 
 
   manejarAccionDos(row: any) {

@@ -81,38 +81,45 @@ export class BenefComponent implements OnInit {
         porcentaje: new FormControl(datosBeneficiario?.porcentaje, [
           Validators.required,
           Validators.maxLength(5),
-          /* this.validarPorcentaje.bind(this) */ // Agrega la validación personalizada
+          Validators.min(1),
+          this.validarSumaPorcentajes.bind(this)
         ]),
       }),
-    }, /* { validators: this.validarSumaPorcentajes.bind(this) } */);
-  }
-
-  // Función para validar el campo porcentaje
-  /* validarPorcentaje(control: AbstractControl): ValidationErrors | null {
-    const porcentaje = parseInt(control.value, 10);
-    if (isNaN(porcentaje) || porcentaje < 0 || porcentaje > 100) {
-      return { invalidPorcentaje: true };
-    }
-    return null;
+    });
   }
 
   // Función para validar la suma de porcentajes
-  validarSumaPorcentajes(formGroup: FormGroup): ValidationErrors | null {
-    console.log("ENTRO");
-    console.log(formGroup.get('datosBeneficiario'));
+  validarSumaPorcentajes(control: AbstractControl): ValidationErrors | null {
+    const beneficiariosArray = this.formParent.get('beneficiario') as FormArray;
+    if (!beneficiariosArray) {
+      return null; // No se puede validar si el grupo 'beneficiario' no existe
+    }
 
-    const porcentajeTotal = Object.values(formGroup.get('datosBeneficiario')!.value).reduce((total: number, valor: any) => {
-      console.log(total);
-      console.log(valor);
+    let porcentajeTotal = 0;
 
-      return total + (parseInt(valor.porcentaje, 10) || 0);
-    }, 0);
+    beneficiariosArray.controls.forEach(control => {
+      const controlporcentaje = control.get('datosBeneficiario')?.get('porcentaje')!;
+      const porcentaje = controlporcentaje?.value;
+
+      if (porcentaje !== undefined) {
+        porcentajeTotal += porcentaje;
+      }
+    });
 
     if (porcentajeTotal !== 100) {
       return { invalidSumaPorcentajes: true };
+    } else {
+      // Eliminar el error de invalidSumaPorcentajes si existe
+      beneficiariosArray.controls.forEach(control => {
+        const controlporcentaje = control.get('datosBeneficiario')?.get('porcentaje')!;
+        if (controlporcentaje.errors) {
+          const { invalidSumaPorcentajes, ...otherErrors } = controlporcentaje.errors;
+          controlporcentaje.setErrors(Object.keys(otherErrors).length ? otherErrors : null);
+        }
+      });
     }
     return null;
-  } */
+  }
 
   agregarBen(datosBeneficiario?: any): void {
     const control = this.getCtrl('beneficiario', this.formParent) as FormArray;
@@ -123,6 +130,10 @@ export class BenefComponent implements OnInit {
     const control = this.getCtrl('beneficiario', this.formParent) as FormArray;
     if (control.length > 0) {
       control.removeAt(control.length - 1);
+      control.controls.forEach(control => {
+        const controlporcentaje = control.get('datosBeneficiario')?.get('porcentaje')!;
+        controlporcentaje.updateValueAndValidity(); // Actualizar la validación del porcentaje
+      });
     }
   }
 
@@ -155,11 +166,10 @@ export class BenefComponent implements OnInit {
   }
 
   getErrors(i: number, fieldName: string): any {
-    const controlesrefpers = (this.formParent.get('beneficiario') as FormGroup).controls;
-    const temp = controlesrefpers[i].get("datosBeneficiario")!.get(fieldName)!.errors
+    const controlesrefpers = (this.formParent.get('beneficiario') as FormArray).controls;
+    const temp = controlesrefpers[i].get("datosBeneficiario")!.get(fieldName)!.errors;
 
-
-    let errors = []
+    let errors = [];
     if (temp) {
       if (temp['required']) {
         errors.push('Este campo es requerido.');
@@ -176,8 +186,28 @@ export class BenefComponent implements OnInit {
       if (temp['email']) {
         errors.push('Correo electrónico no válido.');
       }
-      return errors;
+      if (temp['invalidPorcentaje']) {
+        errors.push('Valor no válido debe estar entre 0 - 100.');
+      }
+      if (temp['invalidSumaPorcentajes']) {
+        errors.push('La suma de los porcentajes debe ser 100%.');
+      }
     }
 
+    return errors;
+  }
+
+  getErrors2(i: number, fieldName: string): any {
+    const controlesrefpers = (this.formParent.get('beneficiario') as FormArray).controls;
+    const temp = controlesrefpers[i].get("datosBeneficiario")!.get(fieldName)!.errors;
+
+    let errors = [];
+    if (temp && temp['min']) {
+      errors.push(`El valor mínimo es 1.`);
+    }
+    if (temp && temp['invalidSumaPorcentajes'] && fieldName == "porcentaje") {
+      errors.push('La suma de los porcentajes debe ser 100%.');
+    }
+    return errors;
   }
 }

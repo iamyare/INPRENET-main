@@ -145,9 +145,6 @@ export class NetPersonaDTO {
     @IsInt()
     id_municipio_residencia: number;
 
-    @IsInt()
-    id_estado_persona: number;
-
     @IsString()
     @MaxLength(1)
     @Matches(/^[FM]$/, {

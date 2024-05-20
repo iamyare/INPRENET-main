@@ -12,4 +12,9 @@ export class CreateDetallePersonaDto {
 
     @IsNumber()
     porcentaje: number;
+
+    @IsNumber()
+    @Min(1)
+    idEstadoPersona: number;
 }
+

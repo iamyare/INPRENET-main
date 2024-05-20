@@ -88,7 +88,8 @@ async create(@Body() benef: Benef): Promise<Net_Persona> {
       const detallePersonaDto = {
         idPersona: persona.id_persona,
         idTipoPersona: 1,
-        porcentaje: 0
+        porcentaje: 0,
+        idEstadoPersona: 1
       };
       const detallePersona = await this.afiliadoService.createDetallePersona(detallePersonaDto);
 
@@ -126,7 +127,8 @@ async create(@Body() benef: Benef): Promise<Net_Persona> {
             idCausante: persona.id_persona,
             idCausantePadre: persona.id_persona,
             idTipoPersona: 2,
-            porcentaje: beneficiario.porcentaje
+            porcentaje: beneficiario.porcentaje,
+            idEstadoPersona: 1
           };
           const detalle = await this.afiliadoService.createDetalleBeneficiario(detalleBeneficiario);
           beneficiariosAsignados.push(detalle);
@@ -243,7 +245,8 @@ async create(@Body() benef: Benef): Promise<Net_Persona> {
             idCausante: idPersona,
             idCausantePadre: idPersona,
             idTipoPersona: personaReferente.id_tipo_persona,
-            porcentaje: beneficiario.porcentaje
+            porcentaje: beneficiario.porcentaje,
+            idEstadoPersona: 1
           };
           const detalle = await this.afiliadoService.createDetalleBeneficiario(detalleBeneficiario);
           beneficiariosAsignados.push(detalle);

@@ -20,4 +20,8 @@ export class CreateDetalleBeneficiarioDto {
     @IsNumber()
     @Min(1)
     idTipoPersona: number;
+
+    @IsNumber()
+    @Min(1)
+    idEstadoPersona: number;
 }

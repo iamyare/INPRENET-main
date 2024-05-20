@@ -97,6 +97,7 @@ export class AfiliadoService {
   async createPersona(createPersonaDto: NetPersonaDTO): Promise<Net_Persona> {
     const persona = new Net_Persona();
     Object.assign(persona, createPersonaDto);
+  
     if (createPersonaDto.fecha_nacimiento) {
       if (typeof createPersonaDto.fecha_nacimiento === 'string') {
         const fechaNacimiento = Date.parse(createPersonaDto.fecha_nacimiento);
@@ -109,28 +110,46 @@ export class AfiliadoService {
         throw new Error('Fecha de nacimiento no es una cadena válida');
       }
     }
-    persona.tipoIdentificacion = await this.tipoIdentificacionRepository.findOne({ where: { id_identificacion: createPersonaDto.id_tipo_identificacion } });
-    if (!persona.tipoIdentificacion) {
-      throw new Error(`Tipo de identificación con ID ${createPersonaDto.id_tipo_identificacion} no encontrado`);
+  
+    if (createPersonaDto.id_tipo_identificacion !== undefined && createPersonaDto.id_tipo_identificacion !== null) {
+      persona.tipoIdentificacion = await this.tipoIdentificacionRepository.findOne({ where: { id_identificacion: createPersonaDto.id_tipo_identificacion } });
+      if (!persona.tipoIdentificacion) {
+        throw new Error(`Tipo de identificación con ID ${createPersonaDto.id_tipo_identificacion} no encontrado`);
+      }
+    } else {
+      persona.tipoIdentificacion = null;
     }
-
-    persona.pais = await this.paisRepository.findOne({ where: { id_pais: createPersonaDto.id_pais } });
-    if (!persona.pais) {
-      throw new Error(`País con ID ${createPersonaDto.id_pais} no encontrado`);
+  
+    if (createPersonaDto.id_pais !== undefined && createPersonaDto.id_pais !== null) {
+      persona.pais = await this.paisRepository.findOne({ where: { id_pais: createPersonaDto.id_pais } });
+      if (!persona.pais) {
+        throw new Error(`País con ID ${createPersonaDto.id_pais} no encontrado`);
+      }
+    } else {
+      persona.pais = null;
     }
-
-    persona.municipio = await this.municipioRepository.findOne({ where: { id_municipio: createPersonaDto.id_municipio_residencia } });
-    if (!persona.municipio) {
-      throw new Error(`Municipio con ID ${createPersonaDto.id_municipio_residencia} no encontrado`);
+  
+    if (createPersonaDto.id_municipio_residencia !== undefined && createPersonaDto.id_municipio_residencia !== null) {
+      persona.municipio = await this.municipioRepository.findOne({ where: { id_municipio: createPersonaDto.id_municipio_residencia } });
+      if (!persona.municipio) {
+        throw new Error(`Municipio con ID ${createPersonaDto.id_municipio_residencia} no encontrado`);
+      }
+    } else {
+      persona.municipio = null;
     }
-
-    persona.profesion = await this.netProfesionesRepository.findOne({ where: { idProfesion: createPersonaDto.id_profesion } });
-    if (!persona.profesion) {
-      throw new Error(`Profesion con código ${createPersonaDto.id_profesion} no encontrado`);
+  
+    if (createPersonaDto.id_profesion !== undefined && createPersonaDto.id_profesion !== null) {
+      persona.profesion = await this.netProfesionesRepository.findOne({ where: { idProfesion: createPersonaDto.id_profesion } });
+      if (!persona.profesion) {
+        throw new Error(`Profesion con código ${createPersonaDto.id_profesion} no encontrado`);
+      }
+    } else {
+      persona.profesion = null;
     }
-
+  
     return await this.personaRepository.save(persona);
   }
+  
 
   async createRelacionFamiliar(createRelacionFamiliarDto: CreateRelacionFamiliarDTO): Promise<NET_RELACION_FAMILIAR> {
     const nuevaRelacion = this.relacionesFamiliaresRepository.create({
@@ -160,13 +179,13 @@ export class AfiliadoService {
     return personaPrincipal
   }
 
-
   async createDetallePersona(createDetallePersonaDto: CreateDetallePersonaDto): Promise<NET_DETALLE_PERSONA> {
     const detallePersona = new NET_DETALLE_PERSONA();
     detallePersona.ID_PERSONA = createDetallePersonaDto.idPersona;
     detallePersona.ID_CAUSANTE = createDetallePersonaDto.idPersona;
     detallePersona.ID_TIPO_PERSONA = createDetallePersonaDto.idTipoPersona;
     detallePersona.porcentaje = createDetallePersonaDto.porcentaje;
+    detallePersona.ID_ESTADO_PERSONA = 1;
 
     return this.detallePersonaRepository.save(detallePersona);
   }
@@ -285,6 +304,7 @@ export class AfiliadoService {
     detalle.ID_CAUSANTE_PADRE = detalleDto.idCausantePadre;
     detalle.ID_TIPO_PERSONA = detalleDto.idTipoPersona;
     detalle.porcentaje = detalleDto.porcentaje;
+    detalle.ID_ESTADO_PERSONA = 1;
 
     return this.detallePersonaRepository.save(detalle);
   }

@@ -257,14 +257,14 @@ export class AfilBancoComponent implements OnInit {
     });
 
 
-    this.afilService.createPersonaWithDetailsAndWorkCenters(formData).subscribe(
+    /* this.afilService.createPersonaWithDetailsAndWorkCenters(formData).subscribe(
       response => {
         console.log('Datos enviados con éxito:', response);
       },
       error => {
         console.error('Error al enviar los datos:', error);
       }
-    );
+    ); */
 
   }
 

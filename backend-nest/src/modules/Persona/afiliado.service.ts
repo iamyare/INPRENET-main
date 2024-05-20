@@ -303,11 +303,12 @@ export class AfiliadoService {
     detalle.ID_CAUSANTE = detalleDto.idCausante;
     detalle.ID_CAUSANTE_PADRE = detalleDto.idCausantePadre;
     detalle.ID_TIPO_PERSONA = detalleDto.idTipoPersona;
-    detalle.porcentaje = detalleDto.porcentaje;
-    detalle.ID_ESTADO_PERSONA = 1;
-
+    detalle.porcentaje = detalleDto.porcentaje; // Asegúrate de asignar el porcentaje
+    detalle.ID_ESTADO_PERSONA = 1; // Valor por defecto
+  
     return this.detallePersonaRepository.save(detalle);
   }
+  
 
   async assignColegiosMagisteriales(idPersona: number, colegiosMagisterialesData: any[]): Promise<Net_Persona_Colegios[]> {
     try {

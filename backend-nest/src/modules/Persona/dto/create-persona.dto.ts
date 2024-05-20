@@ -155,4 +155,7 @@ export class NetPersonaDTO {
     @IsOptional()
     foto_perfil?: Buffer;
 
+    @IsOptional()
+    porcentaje?: number;
+
 }

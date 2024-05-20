@@ -56,7 +56,7 @@ async create(@Body() benef: Benef): Promise<Net_Persona> {
 
   @Post('afiliacion')
   @UseInterceptors(FileInterceptor('foto_perfil', {
-    limits: { fileSize: 5 * 1024 * 1024 }, // Límite de tamaño del archivo a 5 MB
+    limits: { fileSize: 5 * 1024 * 1024 },
     fileFilter: (req, file, callback) => {
       if (file.mimetype.startsWith('image/')) {
         callback(null, true);
@@ -115,23 +115,20 @@ async create(@Body() benef: Benef): Promise<Net_Persona> {
 
       // Creación de beneficiarios
       let beneficiariosAsignados = [];
-      const personaReferente = await this.tipoPersonaRepos.findOne({
-        where: { tipo_persona: "BENEFICIARIO" },
-      });
       if (encapsulatedDto.beneficiarios && encapsulatedDto.beneficiarios.length > 0) {
         for (const beneficiario of encapsulatedDto.beneficiarios) {
           const beneficiarioData = beneficiario.datosBeneficiario;
-          const nuevoBeneficiario = await this.afiliadoService.createBeneficiario(beneficiarioData);
-          const detalleBeneficiario = {
+          const nuevoBeneficiario = await this.afiliadoService.createPersona(beneficiarioData);
+          const detalleBeneficiarioDto: CreateDetalleBeneficiarioDto = {
             idPersona: nuevoBeneficiario.id_persona,
             idCausante: persona.id_persona,
             idCausantePadre: persona.id_persona,
             idTipoPersona: 2,
-            porcentaje: beneficiario.porcentaje,
-            idEstadoPersona: 1
+            porcentaje: beneficiarioData.porcentaje,
+            idEstadoPersona: 1 
           };
-          const detalle = await this.afiliadoService.createDetalleBeneficiario(detalleBeneficiario);
-          beneficiariosAsignados.push(detalle);
+          await this.afiliadoService.createDetalleBeneficiario(detalleBeneficiarioDto);
+          beneficiariosAsignados.push(nuevoBeneficiario);
         }
       }
 

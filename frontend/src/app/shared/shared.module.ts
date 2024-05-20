@@ -35,8 +35,11 @@ import { MatStepperModule } from '@angular/material/stepper';
 import { MatNativeDateModule } from '@angular/material/core';
 import { DocsComponentsModule } from '../../components/docs-components.module';
 import { MatTabsModule } from '@angular/material/tabs';
+import { UppercaseDirective } from './directives/uppercase.directive';
 @NgModule({
-  declarations: [],
+  declarations: [
+    UppercaseDirective
+  ],
   imports: [
     DocsComponentsModule,
     MatNativeDateModule,

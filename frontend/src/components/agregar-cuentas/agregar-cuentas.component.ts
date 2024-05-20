@@ -54,7 +54,7 @@ export class AgregarCuentasComponent {
       },
       (error) => {
         this.toastr.error(error);
-        console.error('Error al obtener afiliados', error);
+        console.error('Error al crear cuenta perteneciente al afiliados', error);
       }
     );
 

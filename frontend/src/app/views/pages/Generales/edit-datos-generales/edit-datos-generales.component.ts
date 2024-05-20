@@ -183,7 +183,7 @@ export class EditDatosGeneralesComponent {
     console.log(this.formDatosGenerales.value.refpers[0])
     this.svcAfiliado.updateDatosGenerales(this.Afiliado.ID_PERSONA, this.formDatosGenerales.value.refpers[0]).subscribe(
       async (result) => {
-        this.toastr.success(`Datos modificados correctamente`);
+        this.toastr.success(`Datos generales modificados correctamente`);
         this.resetDatos();
       },
       (error) => {

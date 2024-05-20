@@ -2,7 +2,7 @@ import { ChangeDetectionStrategy, Component, EventEmitter, Inject, Input, Output
 import { ControlContainer, FormArray, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { ToastrService } from 'ngx-toastr';
-    import { AfiliadoService } from 'src/app/services/afiliado.service';
+import { AfiliadoService } from 'src/app/services/afiliado.service';
 
 @Component({
   selector: 'app-agregar-col-magis',
@@ -20,7 +20,7 @@ export class AgregarColMagisComponent implements OnInit {
     private fb: FormBuilder,
     private afilService: AfiliadoService,
     @Inject(MAT_DIALOG_DATA) public data: { idPersona: string }
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     this.initFormColMag();
@@ -46,7 +46,7 @@ export class AgregarColMagisComponent implements OnInit {
       },
       (error) => {
         this.toastr.error(error);
-        console.error('Error al obtener afiliados', error);
+        console.error('Error al crear colegios magisteriales pertenecientes al afiliado', error);
       }
     );
   }

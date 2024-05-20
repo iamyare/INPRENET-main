@@ -154,8 +154,8 @@ export class EditDatosBancariosComponent {
     const dialogRef = this.dialog.open(ConfirmDialogComponent, {
       width: '350px',
       data: {
-        title: 'Confirmación de eliminación',
-        message: '¿Estás seguro de querer eliminar este elemento?',
+        title: 'Confirmación de desactivación',
+        message: '¿Estás seguro de querer desactivar este elemento?',
         idPersona: this.Afiliado.ID_PERSONA
       }
     });
@@ -199,7 +199,7 @@ export class EditDatosBancariosComponent {
       width: '350px',
       data: {
         title: 'Confirmación de Activación',
-        message: '¿Estás seguro de querer eliminar este elemento?',
+        message: '¿Estás seguro de querer activar este elemento?',
         idPersona: this.Afiliado.ID_PERSONA
       }
     });

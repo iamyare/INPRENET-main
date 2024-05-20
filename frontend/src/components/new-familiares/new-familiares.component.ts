@@ -28,7 +28,7 @@ export class NewFamiliaresComponent implements OnInit {
   public formParent: FormGroup = new FormGroup({});
   private formKey = 'FormFamiliar';
   parentesco: any;
-
+  minDate: Date;
   @Input() datos: any;
   @Output() newDatosFamiliares = new EventEmitter<any>();
   @Input() dniPersona!: string;
@@ -48,6 +48,8 @@ export class NewFamiliaresComponent implements OnInit {
     @Optional() @Inject(MAT_DIALOG_DATA) public data: any,
     @Optional() private dialogRef?: MatDialogRef<NewFamiliaresComponent>
   ) {
+    const currentYear = new Date();
+    this.minDate = new Date(currentYear.getFullYear(), currentYear.getMonth(), currentYear.getDate());
   }
 
   ngOnInit(): void {

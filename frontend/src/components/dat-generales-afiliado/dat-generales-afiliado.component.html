@@ -76,7 +76,7 @@
                 <mat-form-field style="flex-direction: column-reverse;" class="example-full-width inputs" appearance="outline">
                   <mat-label>Segundo Apellido</mat-label>
                   <mat-icon matPrefix>person</mat-icon>
-                  <input matInput formControlName="segundo_apellido" appUppercase>
+                  <input matInput formControlName="segundo_apellido">
                 </mat-form-field>
                 <mat-error *ngFor="let error of getErrors(i, 'segundo_apellido')">
                   {{ error }}

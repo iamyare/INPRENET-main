@@ -229,7 +229,11 @@ export class AfilBancoComponent implements OnInit {
       familiares: this.formDatosFamiliares?.value?.familiar || [],
       colegiosMagisteriales: this.formColegiosMagisteriales?.value?.ColMags || [],
       bancos: this.formHistPag?.value?.banco || [],
-      centrosTrabajo: this.formPuestTrab?.value?.trabajo || [],
+      centrosTrabajo: this.formPuestTrab?.value?.trabajo.map((trabajo: any) => ({
+        ...trabajo,
+        fechaIngreso: this.formatDate(trabajo.fechaIngreso),
+        fechaEgreso: this.formatDate(trabajo.fechaEgreso)
+      })) || [],
       referenciasPersonales: this.formReferencias?.value?.refpers || [],
       beneficiarios: this.formBeneficiarios?.value?.beneficiario.map((ben: any) => {
         const { Arch, Archivos, DatosBac, beneficiario, ...resto } = ben;
@@ -257,14 +261,14 @@ export class AfilBancoComponent implements OnInit {
     });
 
 
-    /* this.afilService.createPersonaWithDetailsAndWorkCenters(formData).subscribe(
+    this.afilService.createPersonaWithDetailsAndWorkCenters(formData).subscribe(
       response => {
         console.log('Datos enviados con éxito:', response);
       },
       error => {
         console.error('Error al enviar los datos:', error);
       }
-    ); */
+    );
 
   }
 
@@ -397,5 +401,14 @@ export class AfilBancoComponent implements OnInit {
     }
 
     return new Blob([buffer], { type: mimeString });
+  }
+
+  formatDate(date: string): string {
+    if (!date) return date;
+    const d = new Date(date);
+    const day = ('0' + d.getDate()).slice(-2);
+    const month = ('0' + (d.getMonth() + 1)).slice(-2);
+    const year = d.getFullYear();
+    return `${day}/${month}/${year}`;
   }
 }

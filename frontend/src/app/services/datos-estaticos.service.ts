@@ -349,7 +349,7 @@ export class DatosEstaticosService {
     { value: "ESPOSA", label: "ESPOSA" },
     { value: "ESPOSO", label: "ESPOSO" },
     { value: "HERMANA", label: "HERMANA" },
-    { value: "HERMANO", label: "Hermano" },
+    { value: "HERMANO", label: "HERMANO" },
     { value: "HIJA", label: "HIJA" },
     { value: "HIJO", label: "HIJO" },
     { value: "MADRE", label: "MADRE" },

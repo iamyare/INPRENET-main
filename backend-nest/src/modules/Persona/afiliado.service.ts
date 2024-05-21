@@ -1009,7 +1009,6 @@ export class AfiliadoService {
         id_persona: idPersona,
         ...datosGenerales
       });
-
       if (!afiliado) throw new NotFoundException(`la persona con: ${idPersona} no se ha encontrado`);
 
       await this.personaRepository.save(afiliado);

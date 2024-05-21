@@ -241,7 +241,7 @@ export class EditBeneficiariosComponent {
         const [primer_apellido, segundo_apellido] = result.apellidos.split(' ');
 
         const fecha_nacimiento = this.datePipe.transform(result.fecha_nacimiento, 'dd/MM/yyyy') || '';
-
+        /* corregir id_tipo_persona */
         const updatedBeneficiario = {
           id_pais: result.idPaisNacionalidad,
           dni: result.dni,

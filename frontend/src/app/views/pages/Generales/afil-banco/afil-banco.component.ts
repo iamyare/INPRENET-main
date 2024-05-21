@@ -7,6 +7,7 @@ import { generateFormArchivo } from '@docs-components/botonarchivos/botonarchivo
 import { FormStateService } from 'src/app/services/form-state.service';
 import * as pdfMake from 'pdfmake/build/pdfmake';
 import * as pdfFonts from 'pdfmake/build/vfs_fonts';
+import { ToastrService } from 'ngx-toastr';
 
 (pdfMake as any).vfs = pdfFonts.pdfMake.vfs;
 
@@ -66,7 +67,8 @@ export class AfilBancoComponent implements OnInit {
   constructor(
     private fb: FormBuilder,
     private formStateService: FormStateService,
-    private afilService: AfiliadoService
+    private afilService: AfiliadoService,
+    private toastr: ToastrService
   ) { }
 
   ngOnInit(): void {
@@ -260,16 +262,16 @@ export class AfilBancoComponent implements OnInit {
       console.log(`Key ${key}:`, value);
     });
 
-
     this.afilService.createPersonaWithDetailsAndWorkCenters(formData).subscribe(
       response => {
         console.log('Datos enviados con éxito:', response);
+        this.toastr.success('Datos enviados con éxito');
       },
       error => {
         console.error('Error al enviar los datos:', error);
+        this.toastr.error('Error al enviar los datos');
       }
     );
-
   }
 
   createPDFDefinition(data: any) {

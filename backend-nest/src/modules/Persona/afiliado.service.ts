@@ -32,6 +32,7 @@ import { UpdateFamiliarDTO } from './dto/update-familiar.dto';
 import { Sequelize, where } from 'sequelize';
 import { UpdateBeneficiarioDto } from './dto/update-beneficiario.dto';
 import { Benef } from './dto/pruebaBeneficiario.dto';
+import * as moment from 'moment';
 @Injectable()
 export class AfiliadoService {
 
@@ -191,6 +192,7 @@ export class AfiliadoService {
   }
 
   async assignCentrosTrabajo(idPersona: number, centrosTrabajoData: any[]): Promise<Net_perf_pers_cent_trab[]> {
+
     try {
       const persona = await this.personaRepository.findOne({ where: { id_persona: idPersona } });
       if (!persona) {
@@ -213,10 +215,15 @@ export class AfiliadoService {
         nuevoPerfil.cargo = centro.cargo;
         nuevoPerfil.numero_acuerdo = centro.numeroAcuerdo;
         nuevoPerfil.salario_base = centro.salarioBase;
-        nuevoPerfil.fecha_ingreso = centro.fechaIngreso;
-        nuevoPerfil.fecha_egreso = centro.fechaEgreso;
+        nuevoPerfil.fecha_ingreso = centro.fechaIngreso ? moment(centro.fechaIngreso, centro.fechaIngreso.includes('/') ? 'DD/MM/YYYY' : 'YYYY-MM-DD').format('YYYY-MM-DD') : null;
+        nuevoPerfil.fecha_egreso = centro.fechaEgreso ? moment(centro.fechaEgreso, centro.fechaEgreso.includes('/') ? 'DD/MM/YYYY' : 'YYYY-MM-DD').format('YYYY-MM-DD') : null;
         nuevoPerfil.clase_cliente = centro.claseCliente;
         nuevoPerfil.sector_economico = centro.sectorEconomico;
+
+        if (!nuevoPerfil.fecha_ingreso) {
+          errores.push(`La fecha de ingreso es requerida para el centro de trabajo con ID ${centro.idCentroTrabajo}.`);
+          continue;
+        }
 
         asignaciones.push(await this.perfPersoCentTrabRepository.save(nuevoPerfil));
       }
@@ -228,7 +235,7 @@ export class AfiliadoService {
       return asignaciones;
     } catch (error) {
       console.log(error);
-
+      throw new Error('Error en la asignación de centros de trabajo');
     }
   }
 

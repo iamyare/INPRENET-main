@@ -202,8 +202,28 @@ export class BenefComponent implements OnInit {
     const temp = controlesrefpers[i].get("datosBeneficiario")!.get(fieldName)!.errors;
 
     let errors = [];
-    if (temp && temp['min']) {
-      errors.push(`El valor mínimo es 1.`);
+    if (temp) {
+      if (temp['min']) {
+        errors.push(`El valor mínimo es 1.`);
+      }
+      if (temp['required']) {
+        errors.push('Este campo es requerido.');
+      }
+      if (temp['minlength']) {
+        errors.push(`Debe tener al menos ${temp['minlength'].requiredLength} caracteres.`);
+      }
+      if (temp['maxlength']) {
+        errors.push(`No puede tener más de ${temp['maxlength'].requiredLength} caracteres.`);
+      }
+      if (temp['pattern']) {
+        errors.push('El formato no es válido.');
+      }
+      if (temp['email']) {
+        errors.push('Correo electrónico no válido.');
+      }
+      if (temp['invalidPorcentaje']) {
+        errors.push('Valor no válido debe estar entre 0 - 100.');
+      }
     }
     if (temp && temp['invalidSumaPorcentajes'] && fieldName == "porcentaje") {
       errors.push('La suma de los porcentajes debe ser 100%.');

@@ -55,7 +55,7 @@ export class AgregarPuestTrabComponent {
       },
       (error) => {
         this.toastr.error(error);
-        console.error('Error al obtener afiliados', error);
+        console.error('Error al crear centros de trabajo pertenecientes al afiliado', error);
       }
     );
 

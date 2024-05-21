@@ -43,7 +43,7 @@ export class AgregarReferenciasPersonalesComponent {
       },
       (error) => {
         this.toastr.error(error);
-        console.error('Error al obtener afiliados', error);
+        console.error('Error al agregar referencias personales pertenecientes al afiliado', error);
       }
     );
   }

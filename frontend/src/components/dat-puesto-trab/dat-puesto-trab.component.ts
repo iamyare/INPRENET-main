@@ -59,7 +59,7 @@ export class DatPuestoTrabComponent implements OnInit {
 
   centrosTrabajo: any;
   sector: any;
-
+  minDate: Date;
   @Input() datos: any;
   @Input() editing?: boolean = false;
   @Output() newDatDatosPuestTrab = new EventEmitter<any>()
@@ -74,6 +74,8 @@ export class DatPuestoTrabComponent implements OnInit {
     private fb: FormBuilder,
     private datosEstaticos: DatosEstaticosService
   ) {
+    const currentYear = new Date();
+    this.minDate = new Date(currentYear.getFullYear(), currentYear.getMonth(), currentYear.getDate());
     this.centrosTrabajo = this.datosEstaticos.centrosTrabajo;
     this.sector = this.datosEstaticos.sector;
   }

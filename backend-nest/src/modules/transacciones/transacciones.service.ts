@@ -251,7 +251,7 @@ export class TransaccionesService {
   async ActivarCuenta(numCuenta: string): Promise<void> {
     const cuenta = await this.cuentaPersonaRepository.findOne({ where: { NUMERO_CUENTA: numCuenta } });
 
-    cuenta.ACTIVA_B = 'I';
+    cuenta.ACTIVA_B = 'A';
 
     await this.cuentaPersonaRepository.save(cuenta);
   }
@@ -259,7 +259,7 @@ export class TransaccionesService {
   async desactivarCuenta(numCuenta: string): Promise<void> {
     const cuenta = await this.cuentaPersonaRepository.findOne({ where: { NUMERO_CUENTA: numCuenta } });
 
-    cuenta.ACTIVA_B = 'A';
+    cuenta.ACTIVA_B = 'I';
 
     await this.cuentaPersonaRepository.save(cuenta);
   }

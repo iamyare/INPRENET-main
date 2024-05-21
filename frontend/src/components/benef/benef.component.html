@@ -84,7 +84,7 @@
               <div class="col-lg-4 col-md-12">
                 <mat-form-field style="flex-direction: column-reverse;" class="example-full-width inputs"
                   appearance="outline">
-                  <mat-label>Cantidad de Dependientes</mat-label>
+                  <mat-label>Cantidad De Dependientes</mat-label>
                   <mat-icon matPrefix>people</mat-icon>
                   <input matInput formControlName="cantidad_dependientes" type="number">
                 </mat-form-field>
@@ -95,9 +95,9 @@
               <div class="col-lg-4 col-mg-12">
                 <mat-form-field style="flex-direction: column-reverse;" class="example-full-width inputs"
                   appearance="outline">
-                  <mat-label>Porcentaje de Beneficio</mat-label>
-                  <mat-icon matPrefix>percent</mat-icon>
+                  <mat-label>Porcentaje De Beneficio</mat-label>
                   <input matInput formControlName="porcentaje" type="number">
+                  <mat-icon matPrefix>percent</mat-icon>
                 </mat-form-field>
                 <mat-error *ngFor="let error of getErrors2(i, 'porcentaje')">
                   {{ error }}
@@ -119,7 +119,6 @@
               <div class="col-lg-4 col-md-12">
                 <mat-form-field class="example-full-width inputs" appearance="outline">
                   <mat-label>Fecha De Nacimiento</mat-label>
-                  <mat-icon matPrefix>calendar_today</mat-icon>
                   <mat-datepicker-toggle matSuffix [for]="fechaNac"></mat-datepicker-toggle>
                   <mat-datepicker #fechaNac></mat-datepicker>
                   <input matInput formControlName="fecha_nacimiento" [matDatepicker]="fechaNac" [max]="minDate">
@@ -132,7 +131,7 @@
 
               <div class="col-lg-4 col-md-12">
                 <mat-form-field class="example-full-width inputs" appearance="outline">
-                  <mat-label>Dirección de Residencia</mat-label>
+                  <mat-label>Dirección De Residencia</mat-label>
                   <mat-icon matPrefix>home</mat-icon>
                   <input matInput formControlName="direccion_residencia">
                 </mat-form-field>
@@ -160,7 +159,7 @@
               <div class="col-lg-4 col-mg-12">
                 <mat-form-field style="flex-direction: column-reverse;" class="example-full-width inputs"
                   appearance="outline">
-                  <mat-label>Municipio de Residencia</mat-label>
+                  <mat-label>Municipio De Residencia</mat-label>
                   <mat-icon matPrefix>location_city</mat-icon>
                   <mat-select formControlName="id_municipio_residencia">
                     <mat-option *ngFor="let municipio of municipios" [value]="municipio.id_municipio">

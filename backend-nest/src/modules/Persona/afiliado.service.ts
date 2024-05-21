@@ -97,7 +97,7 @@ export class AfiliadoService {
   async createPersona(createPersonaDto: NetPersonaDTO): Promise<Net_Persona> {
     const persona = new Net_Persona();
     Object.assign(persona, createPersonaDto);
-  
+
     if (createPersonaDto.fecha_nacimiento) {
       if (typeof createPersonaDto.fecha_nacimiento === 'string') {
         const fechaNacimiento = Date.parse(createPersonaDto.fecha_nacimiento);
@@ -110,7 +110,7 @@ export class AfiliadoService {
         throw new Error('Fecha de nacimiento no es una cadena válida');
       }
     }
-  
+
     if (createPersonaDto.id_tipo_identificacion !== undefined && createPersonaDto.id_tipo_identificacion !== null) {
       persona.tipoIdentificacion = await this.tipoIdentificacionRepository.findOne({ where: { id_identificacion: createPersonaDto.id_tipo_identificacion } });
       if (!persona.tipoIdentificacion) {
@@ -119,7 +119,7 @@ export class AfiliadoService {
     } else {
       persona.tipoIdentificacion = null;
     }
-  
+
     if (createPersonaDto.id_pais !== undefined && createPersonaDto.id_pais !== null) {
       persona.pais = await this.paisRepository.findOne({ where: { id_pais: createPersonaDto.id_pais } });
       if (!persona.pais) {
@@ -128,7 +128,7 @@ export class AfiliadoService {
     } else {
       persona.pais = null;
     }
-  
+
     if (createPersonaDto.id_municipio_residencia !== undefined && createPersonaDto.id_municipio_residencia !== null) {
       persona.municipio = await this.municipioRepository.findOne({ where: { id_municipio: createPersonaDto.id_municipio_residencia } });
       if (!persona.municipio) {
@@ -137,7 +137,7 @@ export class AfiliadoService {
     } else {
       persona.municipio = null;
     }
-  
+
     if (createPersonaDto.id_profesion !== undefined && createPersonaDto.id_profesion !== null) {
       persona.profesion = await this.netProfesionesRepository.findOne({ where: { idProfesion: createPersonaDto.id_profesion } });
       if (!persona.profesion) {
@@ -146,10 +146,10 @@ export class AfiliadoService {
     } else {
       persona.profesion = null;
     }
-  
+
     return await this.personaRepository.save(persona);
   }
-  
+
 
   async createRelacionFamiliar(createRelacionFamiliarDto: CreateRelacionFamiliarDTO): Promise<NET_RELACION_FAMILIAR> {
     const nuevaRelacion = this.relacionesFamiliaresRepository.create({

@@ -164,8 +164,8 @@ export class VerCuentasPersonasComponent {
     const dialogRef = this.dialog.open(ConfirmDialogComponent, {
       width: '350px',
       data: {
-        title: 'Confirmación de eliminación',
-        message: '¿Estás seguro de querer eliminar este elemento?'
+        title: 'Confirmación de activación',
+        message: '¿Estás seguro de querer activar este elemento?'
       }
     });
 
@@ -173,12 +173,12 @@ export class VerCuentasPersonasComponent {
       if (result) {
         this.svcTransacciones.ActivarCuenta(row.NUMERO_CUENTA, {}).subscribe({
           next: (response: any) => {
-            this.toastr.success("Colegio magisterial eliminado correctamente");
+            this.toastr.success("Cuenta activada correctamente");
             this.ngOnInit()
           },
           error: (error: any) => {
-            console.error('Error al eliminar el colegio magisterial al que pertenece la persona:', error);
-            this.toastr.error('Ocurrió un error al eliminar el colegio magisterial al que pertenece la persona.');
+            console.error('Error al activar la cuenta al que pertenece la persona:', error);
+            this.toastr.error('Ocurrió un error al activar la cuenta al que pertenece la persona.');
           }
         });
       }
@@ -189,8 +189,8 @@ export class VerCuentasPersonasComponent {
     const dialogRef = this.dialog.open(ConfirmDialogComponent, {
       width: '350px',
       data: {
-        title: 'Confirmación de eliminación',
-        message: '¿Estás seguro de querer eliminar este elemento?'
+        title: 'Confirmación de desactivación',
+        message: '¿Estás seguro de querer desactivar este elemento?'
       }
     });
 
@@ -198,12 +198,12 @@ export class VerCuentasPersonasComponent {
       if (result) {
         this.svcTransacciones.desactivarCuenta(row.NUMERO_CUENTA, {}).subscribe({
           next: (response: any) => {
-            this.toastr.success("Colegio magisterial eliminado correctamente");
+            this.toastr.success("Cuenta desactivada correctamente");
             this.ngOnInit()
           },
           error: (error: any) => {
-            console.error('Error al eliminar el colegio magisterial al que pertenece la persona:', error);
-            this.toastr.error('Ocurrió un error al eliminar el colegio magisterial al que pertenece la persona.');
+            console.error('Error al desactivar el cuenta al que pertenece la persona:', error);
+            this.toastr.error('Ocurrió un error al desactivar el cuenta al que pertenece la persona.');
           }
         });
       }

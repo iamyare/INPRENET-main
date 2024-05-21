@@ -312,10 +312,10 @@ export class AfiliadoService {
     detalle.ID_TIPO_PERSONA = detalleDto.idTipoPersona;
     detalle.porcentaje = detalleDto.porcentaje; // Asegúrate de asignar el porcentaje
     detalle.ID_ESTADO_PERSONA = 1; // Valor por defecto
-  
+
     return this.detallePersonaRepository.save(detalle);
   }
-  
+
 
   async assignColegiosMagisteriales(idPersona: number, colegiosMagisterialesData: any[]): Promise<Net_Persona_Colegios[]> {
     try {
@@ -561,6 +561,7 @@ export class AfiliadoService {
       GENERO: persona.genero,
       SEXO: persona.sexo,
       CANTIDAD_DEPENDIENTES: persona.cantidad_dependientes,
+      CANTIDAD_HIJOS: persona.cantidad_hijos,
       REPRESENTACION: persona.representacion,
       DIRECCION_RESIDENCIA: persona.direccion_residencia,
       NUMERO_CARNET: persona.numero_carnet,
@@ -1014,7 +1015,6 @@ export class AfiliadoService {
       await this.personaRepository.save(afiliado);
       return afiliado;
     } catch (error) {
-      console.log(error);
       this.handleException(error); // Asegúrate de tener un método para manejar las excepciones
     }
   }

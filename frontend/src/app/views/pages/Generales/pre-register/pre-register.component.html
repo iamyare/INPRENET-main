@@ -1,75 +1,61 @@
-<div class="bg-light min-vh-100 d-flex flex-row align-items-center">
-  <c-container>
-    <c-row class="justify-content-center">
-      <c-col md="12">
-        <c-card-group>
-          <c-card class="p-4">
-            <c-card-body class="p-4">
-              <form cForm [formGroup]="form">
+<!-- pre-register.component.html -->
+<div class="container">
+  <div class="form-container">
+    <div class="form-header">
+      <img src="../../../../../assets/images/LOGO INPRENET D.svg" alt="Logo" class="logo">
+      <h2>Pre-Registro</h2>
+    </div>
+    <form [formGroup]="form" (ngSubmit)="crearCuenta()">
+      <mat-form-field appearance="fill" class="full-width">
+        <mat-label>Correo</mat-label>
+        <input matInput formControlName="correo" placeholder="Ingrese su correo">
+        <mat-error *ngIf="form.get('correo')?.invalid && form.get('correo')?.touched">
+          Correo es requerido y debe ser válido
+        </mat-error>
+      </mat-form-field>
 
-                <h1>Pre Registro De Cuenta</h1>
-                <p class="text-medium-emphasis">Crear una cuenta De Usuario Para el Sistema</p>
+      <mat-form-field appearance="fill" class="full-width">
+        <mat-label>Rol</mat-label>
+        <mat-select formControlName="rol" placeholder="Seleccione un rol">
+          <mat-option *ngFor="let rol of tipoRol" [value]="rol.label">{{ rol.label }}</mat-option>
+        </mat-select>
+        <mat-error *ngIf="form.get('rol')?.invalid && form.get('rol')?.touched">
+          Rol es requerido
+        </mat-error>
+      </mat-form-field>
 
-                <c-input-group class="mb-1">
-                  <mat-form-field style="width:100%">
-                    <mat-label>Correo Electrónico</mat-label>
-                    <input matNativeControl formControlName="correo" />
-                  </mat-form-field>
-                </c-input-group>
+      <mat-form-field appearance="fill" class="full-width">
+        <mat-label>Tipo de Identificación</mat-label>
+        <mat-select formControlName="tipoIdent" placeholder="Seleccione un tipo de identificación">
+          <mat-option *ngFor="let tipo of tipoIdent" [value]="tipo.tipo_identificacion">{{ tipo.tipo_identificacion }}</mat-option>
+        </mat-select>
+        <mat-error *ngIf="form.get('tipoIdent')?.invalid && form.get('tipoIdent')?.touched">
+          Tipo de identificación es requerido
+        </mat-error>
+      </mat-form-field>
 
-                <c-input-group class="mb-1">
-                  <mat-form-field style="width:100%">
-                    <mat-label>Nombre completo</mat-label>
-                    <input matNativeControl formControlName="nombrecomp" />
-                  </mat-form-field>
-                </c-input-group>
+      <mat-form-field appearance="fill" class="full-width">
+        <mat-label>Número de Identificación</mat-label>
+        <input matInput formControlName="numeroIden" placeholder="Ingrese su número de identificación">
+        <mat-error *ngIf="form.get('numeroIden')?.invalid && form.get('numeroIden')?.touched">
+          Número de identificación es requerido
+        </mat-error>
+      </mat-form-field>
 
-                <c-input-group class="mb-1">
-                  <mat-form-field style="width:100%">
-                    <mat-label>Tipo de identificación</mat-label>
-                    <select matNativeControl formControlName="tipoIdent">
-                      <option *ngFor="let p of tipoIdent" [value]="p.tipo_identificacion">
-                        {{p.tipo_identificacion}}
-                      </option>
-                    </select>
-                  </mat-form-field>
-                </c-input-group>
+      <mat-form-field appearance="fill" class="full-width">
+        <mat-label>Nombre Completo</mat-label>
+        <input matInput formControlName="nombrecomp" placeholder="Ingrese su nombre completo">
+        <mat-error *ngIf="form.get('nombrecomp')?.invalid && form.get('nombrecomp')?.touched">
+          Nombre completo es requerido
+        </mat-error>
+      </mat-form-field>
 
-                <c-input-group class="mb-1">
-                  <mat-form-field style="width:100%">
-                    <mat-label>Número de identificación</mat-label>
-                    <input matNativeControl formControlName="numeroIden" />
-                  </mat-form-field>
-                </c-input-group>
+      <div class="file-upload">
+        <label for="file">Subir Identificación:</label>
+        <input type="file" id="file" (change)="obt($event)">
+      </div>
 
-                <c-input-group class="mb-1">
-                  <mat-form-field style="width:100%">
-                    <mat-label>Tipo de Rol</mat-label>
-                    <select matNativeControl formControlName="rol">
-                      <option *ngFor="let p of tipoRol" [value]="p.value">
-                        {{p.value}}
-                      </option>
-                    </select>
-                  </mat-form-field>
-                </c-input-group>
-
-                <form [formGroup]="formArchivo" #myForm="ngForm">
-                  <app-botonarchivos groupName="Archivos" (setArchivo)="obt($event)" labelBoton="Archivo de identificación" ></app-botonarchivos>
-                </form>
-
-                <div class="d-grid">
-                  <button cButton [disabled]="form.invalid" style="background: #1F544A; border: 0;"
-                    (click)="crearCuenta();">Crear Cuenta</button>
-                </div>
-              </form>
-            </c-card-body>
-          </c-card>
-          <c-card [ngStyle]="{'width.%': 44}" class="text-white py-5" style="display: flex; align-items: center; justify-content: center;">
-            <img src="../../../../../assets/images/INPRENET-LOGO.svg" alt="Descripción de la imagen" style="width: 40em; height: 10em;">
-            <img src="../../../../../assets/images/thumbnail_Edificio Bandera.jpg" alt="Descripción de la imagen" style="width: 40em; height: 40em;">
-        </c-card>
-        </c-card-group>
-      </c-col>
-    </c-row>
-  </c-container>
+      <button mat-raised-button color="primary" type="submit" [disabled]="form.invalid">Crear Cuenta</button>
+    </form>
+  </div>
 </div>

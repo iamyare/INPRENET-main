@@ -10,8 +10,8 @@ export class DireccionService {
 
   constructor(private http: HttpClient) { }
 
-  getAllProvincias(): Observable<any | void> {
-    const url = `${environment.API_URL}/api/direccion/provincias`;
+  getAllDepartments(): Observable<any | void> {
+    const url = `${environment.API_URL}/api/departamento`;
     return this.http.get<any>(
       url,
       ).pipe(
@@ -41,9 +41,14 @@ export class DireccionService {
       );
   }
 
-  getMunicipiosPorDepartamentoId(departamentoId: number): Observable<any> {
+  getMunicipiosPorDepartamentoId(departamentoId: number): Observable<{ value: number, label: string }[]> {
     const url = `${environment.API_URL}/api/municipio/departamento/${departamentoId}`;
-    return this.http.get<any>(url);
+    return this.http.get<any[]>(url).pipe(
+      map(municipios => municipios.map(municipio => ({
+        value: municipio.id_municipio,
+        label: municipio.nombre_municipio
+      })))
+    );
   }
 
   getDepartamentosPorPaisId(paisId: number): Observable<any> {

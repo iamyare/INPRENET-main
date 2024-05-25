@@ -13,7 +13,6 @@ export function generatePuestoTrabFormGroup(datos?: any): FormGroup {
       Validators.maxLength(40),
     ]),
     numeroAcuerdo: new FormControl(datos?.numeroAcuerdo, [
-      Validators.required,
       Validators.maxLength(40),
     ]),
     salarioBase: new FormControl(datos?.salarioBase, [
@@ -37,6 +36,7 @@ export function generatePuestoTrabFormGroup(datos?: any): FormGroup {
     estado: new FormControl(datos?.estado, [
       Validators.maxLength(40),
     ]),
+    showNumeroAcuerdo: new FormControl(true) // Nuevo control para la visibilidad
   });
 }
 
@@ -106,18 +106,24 @@ export class DatPuestoTrabComponent implements OnInit {
 
   agregarTrabajo(datos?: any): void {
     const ref_trabajo = this.formParent.get('trabajo') as FormArray;
-    ref_trabajo.push(generatePuestoTrabFormGroup(datos || {}));
-    this.onDatosDatosPuestTrab(); // Emite los datos actualizados
+    const formGroup = generatePuestoTrabFormGroup(datos || {});
+    ref_trabajo.push(formGroup);
+
+    // Observa los cambios en el campo sectorEconomico para actualizar la visibilidad del campo numeroAcuerdo
+    formGroup.get('sectorEconomico')?.valueChanges.subscribe(value => {
+      formGroup.get('showNumeroAcuerdo')?.setValue(value !== 'PRIVADO');
+    });
+
+    this.onDatosDatosPuestTrab();
   }
 
   eliminarTrabajo(): void {
     const ref_trabajo = this.formParent.get('trabajo') as FormArray;
     if (ref_trabajo.length > 0) {
       ref_trabajo.removeAt(ref_trabajo.length - 1);
-      this.onDatosDatosPuestTrab(); // Emite los datos actualizados
+      this.onDatosDatosPuestTrab();
     }
   }
-
 
   getCtrl(key: string, form: FormGroup): any {
     return form.get(key);

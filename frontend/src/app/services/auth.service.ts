@@ -92,4 +92,15 @@ export class AuthService {
     );
   }
 
+  getRolesExceptAdmin(): Observable<any[]> {
+    const url = `${environment.API_URL}/api/usuario/roles`;
+    return this.http.get<any[]>(url).pipe(
+      map((roles: any[]) => roles.filter(role => role.nombre_rol !== 'ADMINISTRADOR')),
+      catchError(error => {
+        console.error('Error fetching roles:', error);
+        return of([]);
+      })
+    );
+  }
+
 }

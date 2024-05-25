@@ -1,6 +1,5 @@
 import { ChangeDetectionStrategy, Component, EventEmitter, Input, OnDestroy, OnInit, Output, inject } from '@angular/core';
 import { ControlContainer, FormArray, FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
-import { AfiliadoService } from 'src/app/services/afiliado.service';
 import { DireccionService } from 'src/app/services/direccion.service';
 import { DatosEstaticosService } from 'src/app/services/datos-estaticos.service';
 import { FormStateService } from 'src/app/services/form-state.service';
@@ -22,9 +21,10 @@ export function generateAddressFormGroup(datos?: any): FormGroup {
     correo_1: new FormControl(datos?.correo_1, [Validators.required, Validators.maxLength(40), Validators.email]),
     correo_2: new FormControl(datos?.correo_2, [Validators.maxLength(40), Validators.email]),
     direccion_residencia: new FormControl(datos?.direccion_residencia, [Validators.required, Validators.maxLength(200)]),
-    numero_carnet: new FormControl(datos?.numero_carnet, [Validators.required, Validators.maxLength(40)]),
+    rtn: new FormControl(datos?.rtn, [Validators.required, Validators.maxLength(14), Validators.pattern(/^[0-9]{14}$/)]),
     genero: new FormControl(datos?.genero, [Validators.required, Validators.maxLength(30)]),
     id_profesion: new FormControl(datos?.id_profesion, Validators.required),
+    id_departamento_residencia: new FormControl(datos?.id_departamento_residencia, Validators.required),
     id_municipio_residencia: new FormControl(datos?.id_municipio_residencia, Validators.required),
     id_tipo_identificacion: new FormControl(datos?.id_tipo_identificacion, Validators.required),
     id_pais_nacionalidad: new FormControl(datos?.id_pais_nacionalidad, Validators.required),
@@ -52,6 +52,7 @@ export class DatGeneralesAfiliadoComponent implements OnInit, OnDestroy {
   tipoIdentData: any = [];
   nacionalidades: any = [];
   municipios: any = [];
+  departamentos: any = [];
   generos: { value: string; label: string }[] = [];
   profesiones: any = [];
   sexo: { value: string; label: string }[] = [];
@@ -86,7 +87,6 @@ export class DatGeneralesAfiliadoComponent implements OnInit, OnDestroy {
   constructor(
     private formStateService: FormStateService,
     private fb: FormBuilder,
-    private afiliadoService: AfiliadoService,
     public direccionSer: DireccionService,
     private datosEstaticos: DatosEstaticosService) {
 
@@ -132,7 +132,7 @@ export class DatGeneralesAfiliadoComponent implements OnInit, OnDestroy {
 
     this.cargarTiposIdentificacion();
     this.cargarNacionalidades();
-    this.cargarMunicipios();
+    this.cargarDepartamentos(); // Cargar los departamentos al inicializar
     this.cargarProfesiones();
     this.generos = this.datosEstaticos.genero;
     this.sexo = this.datosEstaticos.sexo;
@@ -174,8 +174,16 @@ export class DatGeneralesAfiliadoComponent implements OnInit, OnDestroy {
     });
   }
 
-  async cargarMunicipios() {
-    await this.direccionSer.getAllMunicipios().subscribe({
+  cargarDepartamentos() {
+    this.datosEstaticos.getDepartamentos().then(data => {
+      this.departamentos = data;
+    }).catch(error => {
+      console.error('Error al cargar departamentos:', error);
+    });
+  }
+
+  cargarMunicipios(departamentoId: number) {
+    this.direccionSer.getMunicipiosPorDepartamentoId(departamentoId).subscribe({
       next: (data) => {
         this.municipios = data;
       },
@@ -183,6 +191,11 @@ export class DatGeneralesAfiliadoComponent implements OnInit, OnDestroy {
         console.error('Error al cargar municipios:', error);
       }
     });
+  }
+
+  onDepartamentoChange(event: any) {
+    const departamentoId = event.value;
+    this.cargarMunicipios(departamentoId);
   }
 
   // Método para recibir el evento de imagen capturada y emitirlo hacia el componente padre

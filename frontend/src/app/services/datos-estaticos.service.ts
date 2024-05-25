@@ -9,6 +9,7 @@ import { ColegiosMagisterialesService } from './colegios-magisteriales.service';
 import { CentroTrabajoService } from './centro-trabajo.service';
 import { HttpClient } from '@angular/common/http';
 import { TransaccionesService } from './transacciones.service';
+import { AuthService } from './auth.service';
 
 @Injectable({
   providedIn: 'root'
@@ -27,14 +28,20 @@ export class DatosEstaticosService {
   municipios: any = [];
   tiposMovimientos: any = [];
   estados: any = [];
+  tipoRol: any = [];
 
   constructor(
-    private colegiosMagSVC: ColegiosMagisterialesService, private bancosService: BancosService,
+    private colegiosMagSVC: ColegiosMagisterialesService,
+    private bancosService: BancosService,
     private centrosTrabSVC: CentroTrabajoService,
-    private SVCInstituciones: InstitucionesService, private afiliadoService: AfiliadoService, public direccionSer: DireccionService, private tipoIdentificacionService: TipoIdentificacionService,
+    private SVCInstituciones: InstitucionesService,
+    private afiliadoService: AfiliadoService,
+    public direccionSer: DireccionService,
+    private tipoIdentificacionService: TipoIdentificacionService,
     private centroTrabajoService: CentroTrabajoService,
     private transaccionesSVC: TransaccionesService,
-    private http: HttpClient
+    private http: HttpClient,
+    private authService: AuthService
   ) {
     this.getInstituciones();
     this.getNacionalidad();
@@ -47,8 +54,9 @@ export class DatosEstaticosService {
     this.getInstituciones();
     this.getProfesiones();
     this.getMunicipios();
+    this.getDepartamentos();
+    this.getRoles();
   }
-
 
   async getEstados() {
     const response = await this.afiliadoService.getAllEstados().toPromise();
@@ -60,13 +68,27 @@ export class DatosEstaticosService {
     return this.estados;
   }
 
+  async getDepartamentos() {
+    try {
+      const response = await this.direccionSer.getAllDepartments().toPromise();
+      this.departamentos = response.map((item: { id_departamento: any; nombre_departamento: any; }) => ({
+        label: item.nombre_departamento,
+        value: item.id_departamento
+      }));
+      return this.departamentos;
+    } catch (error) {
+      console.error('Error al obtener los departamentos:', error);
+      this.departamentos = [];
+      return this.departamentos;
+    }
+  }
+
   async gettipoIdent() {
     const response = await this.tipoIdentificacionService.obtenerTiposIdentificacion().toPromise();
     const mappedResponse = response.map((item: { id_identificacion: any; tipo_identificacion: any; }) => ({
       label: item.tipo_identificacion,
       value: item.id_identificacion
     }));
-
 
     this.tipoIdent = mappedResponse;
     return this.tipoIdent;
@@ -180,6 +202,20 @@ export class DatosEstaticosService {
     return this.colegiosMagisteriales;
   }
 
+  async getRoles() {
+    try {
+      const roles:any = await this.authService.getRolesExceptAdmin().toPromise();
+      this.tipoRol = roles.map((role: { id_rol: any; nombre_rol: any; }) => ({
+        value: role.id_rol,
+        label: role.nombre_rol
+      }));
+      return this.tipoRol;
+    } catch (error) {
+      console.error('Error al obtener roles:', error);
+      this.tipoRol = [];
+      return this.tipoRol;
+    }
+  }
 
   tipoPersona = [
     {
@@ -218,6 +254,7 @@ export class DatosEstaticosService {
       "value": "VIUDO/A"
     }
   ];
+
   tiposPlanilla = [
     {
       "idTipoPlanilla": 1,
@@ -228,6 +265,7 @@ export class DatosEstaticosService {
       "value": "INGRESO"
     },
   ];
+
   representacion = [
     {
       "value": 'POR CUENTA PROPIA',
@@ -238,6 +276,7 @@ export class DatosEstaticosService {
       "label": "POR TERCEROS"
     }
   ];
+
   genero = [
     {
       "value": "MASCULINO",
@@ -256,6 +295,7 @@ export class DatosEstaticosService {
       "label": "OTRO"
     }
   ];
+
   sexo = [
     {
       "value": "F",
@@ -266,6 +306,7 @@ export class DatosEstaticosService {
       "label": "MASCULINO"
     },
   ];
+
   tipoCotizante = [
     {
       "idCotizante": 1,
@@ -284,7 +325,6 @@ export class DatosEstaticosService {
       "value": "JUBILADO"
     }
   ];
-
 
   sector = [
     {
@@ -308,21 +348,6 @@ export class DatosEstaticosService {
       "value": "PUBLICO"
     }
   ];
-
-  tipoRol = [
-    {
-      "idRol": 2,
-      "value": "JEFE DE AREA"
-    },
-    {
-      "idRol": 3,
-      "value": "OFICIAL"
-    },
-    {
-      "idRol": 4,
-      "value": "AUXILIAR"
-    },
-  ]
 
   tiposPlanillasPrivadas = [
     {
@@ -368,29 +393,6 @@ export class DatosEstaticosService {
     { value: "TÍO MATERNO", label: "TÍO MATERNO" },
     { value: "TÍO PATERNO", label: "TÍO PATERNO" },
     { value: "YERNO", label: "YERNO" }
-  ]
-
-  /* tipoIdent = [
-    {
-      "idIdentificacion": 1,
-      "value": "DNI"
-    },
-    {
-      "idIdentificacion": 2,
-      "value": "PASAPORTE"
-    },
-    {
-      "idIdentificacion": 3,
-      "value": "CARNET RESIDENCIA"
-    },
-    {
-      "idIdentificacion": 4,
-      "value": "NÚMERO LICENCIA"
-    },
-    {
-      "idIdentificacion": 5,
-      "value": "RTN"
-    },
-  ]; */
+  ];
 
 }

@@ -39,12 +39,14 @@ export class PreRegisterComponent implements OnInit{
      nombrecomp: ['', [Validators.required]],
    });
 
-   this.tipoRol = DatosEstaticosService.tipoRol;
   }
 
   ngOnInit() {
     this.tipoIdentificacionService.obtenerTiposIdentificacion().subscribe(data => {
       this.tipoIdent = data;
+    });
+    this.DatosEstaticosService.getRoles().then(roles => {
+      this.tipoRol = roles;
     });
   }
   obt(event:any) {

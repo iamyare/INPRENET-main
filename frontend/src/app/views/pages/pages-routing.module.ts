@@ -30,7 +30,7 @@ const routes: Routes = [
     }
   },
   {
-    path: 'register/:token',
+    path: 'register',
     component: RegisterComponent,
     data: {
       title: 'Register Page'

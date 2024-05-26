@@ -1,76 +1,68 @@
-import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { generateFormArchivo } from 'src/components/botonarchivos/botonarchivos.component';
 import { AuthService } from 'src/app/services/auth.service';
-import { TipoIdentificacionService } from '../../../../services/tipo-identificacion.service';
 import { ToastrService } from 'ngx-toastr';
-import { DatosEstaticosService } from '../../../../services/datos-estaticos.service';
 
 @Component({
   selector: 'app-pre-register',
   templateUrl: './pre-register.component.html',
-  styleUrl: './pre-register.component.scss'
+  styleUrls: ['./pre-register.component.scss']
 })
-export class PreRegisterComponent implements OnInit{
+export class PreRegisterComponent implements OnInit {
   form: FormGroup;
-  formArchivo = this.fb.group({
-    Archivos: generateFormArchivo()
-  })
-
-  tipoIdent: any = [];
-  tipoRol: any = [];
-  archivo: any;
-  formData : any;
-
+  tipoRol: any[] = [];
+  idEmpresa: number | null = null;
 
   constructor(
     private fb: FormBuilder,
-    private tipoIdentificacionService : TipoIdentificacionService,
-    private authSvc : AuthService,
-    private DatosEstaticosService : DatosEstaticosService,
+    private authSvc: AuthService,
     private toastr: ToastrService
-    ) {
+  ) {
     this.form = this.fb.group({
-     correo: ['', [Validators.required, Validators.email]],
-     rol: ['', [Validators.required]],
-     tipoIdent: ['', [Validators.required]],
-     numeroIden: ['', [Validators.required]],
-     nombrecomp: ['', [Validators.required]],
-   });
-
+      correo: ['', [Validators.required, Validators.email]],
+      rol: ['', [Validators.required]],
+      nombrePuesto: ['', [Validators.required]],
+      nombreEmpleado: ['', [Validators.required]],
+      numeroEmpleado: ['', [Validators.required]]
+    });
   }
 
   ngOnInit() {
-    this.tipoIdentificacionService.obtenerTiposIdentificacion().subscribe(data => {
-      this.tipoIdent = data;
-    });
-    this.DatosEstaticosService.getRoles().then(roles => {
-      this.tipoRol = roles;
-    });
-  }
-  obt(event:any) {
-    this.archivo = event;
+    this.idEmpresa = this.authSvc.getIdEmpresaFromToken();
+    if (this.idEmpresa) {
+      this.authSvc.getRolesByEmpresa(this.idEmpresa).subscribe({
+        next: (roles) => {
+          this.tipoRol = roles.map((rol: any) => ({
+            label: rol.nombre_rol,
+            value: rol.id_rol_empresa
+          }));
+        },
+        error: (err) => {
+          console.error('Error al obtener roles:', err);
+          this.toastr.error('Error al obtener roles', 'Error');
+        }
+      });
+    }
   }
 
-  crearCuenta(){
+  crearCuenta() {
     if (this.form.valid) {
-      this.formData = {
+      const formData = {
         correo: this.form.value.correo,
-        nombre_rol: this.form.value.rol,
-        tipo_identificacion: this.form.value.tipoIdent,
-        numero_identificacion: this.form.value.numeroIden,
-        nombre_empleado: this.form.value.nombrecomp,
-        archivo_identificacion: this.archivo.name
+        idRole: this.form.value.rol,
+        nombrePuesto: this.form.value.nombrePuesto,
+        nombreEmpleado: this.form.value.nombreEmpleado,
+        numeroEmpleado: this.form.value.numeroEmpleado
       };
-      this.authSvc.crearCuenta(this.formData).subscribe({
-        next: (res) => {
+
+      this.authSvc.preRegistro(formData).subscribe({
+        next: () => {
           this.toastr.success('Cuenta creada exitosamente!', 'Éxito');
           this.form.reset();
-          this.formArchivo.reset();
         },
         error: (err) => {
           this.toastr.error('Error al crear la cuenta', 'Error');
+          console.error('Error al crear la cuenta:', err);
         }
       });
     } else {
@@ -78,5 +70,4 @@ export class PreRegisterComponent implements OnInit{
       this.toastr.error('El formulario no es válido', 'Error');
     }
   }
-
 }

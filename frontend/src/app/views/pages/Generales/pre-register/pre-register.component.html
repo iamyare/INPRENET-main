@@ -1,4 +1,3 @@
-<!-- pre-register.component.html -->
 <div class="container">
   <div class="form-container">
     <div class="form-header">
@@ -17,7 +16,7 @@
       <mat-form-field appearance="fill" class="full-width">
         <mat-label>Rol</mat-label>
         <mat-select formControlName="rol" placeholder="Seleccione un rol">
-          <mat-option *ngFor="let rol of tipoRol" [value]="rol.label">{{ rol.label }}</mat-option>
+          <mat-option *ngFor="let rol of tipoRol" [value]="rol.value">{{ rol.label }}</mat-option>
         </mat-select>
         <mat-error *ngIf="form.get('rol')?.invalid && form.get('rol')?.touched">
           Rol es requerido
@@ -25,35 +24,28 @@
       </mat-form-field>
 
       <mat-form-field appearance="fill" class="full-width">
-        <mat-label>Tipo de Identificación</mat-label>
-        <mat-select formControlName="tipoIdent" placeholder="Seleccione un tipo de identificación">
-          <mat-option *ngFor="let tipo of tipoIdent" [value]="tipo.tipo_identificacion">{{ tipo.tipo_identificacion }}</mat-option>
-        </mat-select>
-        <mat-error *ngIf="form.get('tipoIdent')?.invalid && form.get('tipoIdent')?.touched">
-          Tipo de identificación es requerido
-        </mat-error>
-      </mat-form-field>
-
-      <mat-form-field appearance="fill" class="full-width">
-        <mat-label>Número de Identificación</mat-label>
-        <input matInput formControlName="numeroIden" placeholder="Ingrese su número de identificación">
-        <mat-error *ngIf="form.get('numeroIden')?.invalid && form.get('numeroIden')?.touched">
-          Número de identificación es requerido
+        <mat-label>Nombre del Puesto</mat-label>
+        <input matInput formControlName="nombrePuesto" placeholder="Ingrese el nombre del puesto">
+        <mat-error *ngIf="form.get('nombrePuesto')?.invalid && form.get('nombrePuesto')?.touched">
+          Nombre del puesto es requerido
         </mat-error>
       </mat-form-field>
 
       <mat-form-field appearance="fill" class="full-width">
         <mat-label>Nombre Completo</mat-label>
-        <input matInput formControlName="nombrecomp" placeholder="Ingrese su nombre completo">
-        <mat-error *ngIf="form.get('nombrecomp')?.invalid && form.get('nombrecomp')?.touched">
+        <input matInput formControlName="nombreEmpleado" placeholder="Ingrese su nombre completo">
+        <mat-error *ngIf="form.get('nombreEmpleado')?.invalid && form.get('nombreEmpleado')?.touched">
           Nombre completo es requerido
         </mat-error>
       </mat-form-field>
 
-      <div class="file-upload">
-        <label for="file">Subir Identificación:</label>
-        <input type="file" id="file" (change)="obt($event)">
-      </div>
+      <mat-form-field appearance="fill" class="full-width">
+        <mat-label>Número de Empleado</mat-label>
+        <input matInput formControlName="numeroEmpleado" placeholder="Ingrese su número de empleado">
+        <mat-error *ngIf="form.get('numeroEmpleado')?.invalid && form.get('numeroEmpleado')?.touched">
+          Número de empleado es requerido
+        </mat-error>
+      </mat-form-field>
 
       <button mat-raised-button color="primary" type="submit" [disabled]="form.invalid">Crear Cuenta</button>
     </form>

@@ -16,7 +16,7 @@ export class AuthService {
 
    logout(): Observable<void> {
     const url = `${environment.API_URL}/api/usuario/logout`;
-    const token = localStorage.getItem('token'); // Obtén el token JWT almacenado
+    const token = localStorage.getItem('token');
     const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
 
     return this.http.post<void>(url, {}, { headers }).pipe(
@@ -33,6 +33,54 @@ export class AuthService {
     return this.http.get<{ sesionActiva: boolean }>(url, { headers });
   }
 
+  preRegistro(datos: any): Observable<void> {
+    const url = `${environment.API_URL}/api/usuario/preregistro`;
+    return this.http.post<void>(url, datos).pipe(
+      catchError(this.handleError<void>('preRegistro'))
+    );
+  }
+
+  completarRegistro(token: string, datos: any, archivo: File): Observable<void> {
+    const url = `${environment.API_URL}/api/usuario/completar-registro?token=${token}`;
+    const formData = new FormData();
+    formData.append('datos', JSON.stringify(datos));
+    formData.append('archivo_identificacion', archivo);
+
+    return this.http.post<void>(url, formData).pipe(
+      catchError(this.handleError<void>('completarRegistro'))
+    );
+  }
+
+  login(correo: string, contrasena: string): Observable<{ accessToken: string }> {
+    const url = `${environment.API_URL}/api/usuario/login`;
+    const body = { correo, contrasena };
+    return this.http.post<{ accessToken: string }>(url, body).pipe(
+      map(response => {
+        localStorage.setItem('token', response.accessToken);
+        return response;
+      }),
+      catchError(this.handleError<{ accessToken: string }>('login'))
+    );
+  }
+
+  getRolesByEmpresa(idEmpresa: number): Observable<any> {
+    const url = `${environment.API_URL}/api/usuario/roles?idEmpresa=${idEmpresa}`;
+    const token = localStorage.getItem('token');
+    const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
+    return this.http.get<any>(url, { headers }).pipe(
+      catchError(this.handleError<any>('getRolesByEmpresa'))
+    );
+  }
+
+  getIdEmpresaFromToken(): number | null {
+    const token = localStorage.getItem('token');
+    if (token) {
+      const decodedToken: any = jwtDecode(token);
+      return decodedToken.idEmpresa;
+    }
+    return null;
+  }
+
   clearToken(): void {
     localStorage.removeItem('token');
   }
@@ -47,10 +95,10 @@ export class AuthService {
     return this.http.post<any>(url, data);
   }
 
-  login(email: string, password: string): Observable<{ token: string }> {
+  /* login(email: string, password: string): Observable<{ token: string }> {
     const url = `${environment.API_URL}/api/usuario/auth/login`;
     return this.http.post<{ token: string }>(url, { correo: email, contrasena: password });
-  }
+  } */
 
   saveToken(token: string): void {
     localStorage.setItem('token', token);
@@ -101,6 +149,13 @@ export class AuthService {
         return of([]);
       })
     );
+  }
+
+  private handleError<T>(operation = 'operation', result?: T) {
+    return (error: any): Observable<T> => {
+      console.error(`${operation} failed: ${error.message}`);
+      return of(result as T);
+    };
   }
 
 }

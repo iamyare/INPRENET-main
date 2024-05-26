@@ -1,96 +1,96 @@
 <div class="bg-light min-vh-100 d-flex flex-row align-items-center">
-  <c-container>
-    <c-row class="justify-content-center">
-      <c-col md="12">
-        <c-card-group>
-          <c-card class="p-4">
-            <c-card-body class="p-4">
-              <form cForm [formGroup]="form">
-
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="col-md-12">
+        <div class="card-group">
+          <div class="card p-4">
+            <div class="card-body">
+              <form [formGroup]="form" (ngSubmit)="enviarInformacionDeSeguridad()">
                 <h1>Registro De Cuenta</h1>
                 <p class="text-medium-emphasis">Crear una cuenta De Usuario Para el Sistema</p>
 
-                <c-input-group class="mb-1">
-                  <mat-form-field style="width:100%">
-                    <mat-label>Correo Electrónico</mat-label>
-                    <input matNativeControl/>
-                  </mat-form-field>
-                </c-input-group>
+                <mat-form-field appearance="fill" class="full-width mb-3">
+                  <mat-label>Correo Electrónico</mat-label>
+                  <input matInput type="email" formControlName="correo" readonly>
+                  <mat-error *ngIf="form.controls['correo'].invalid && form.controls['correo'].touched">
+                    Correo es requerido y debe ser válido
+                  </mat-error>
+                </mat-form-field>
 
-                <c-input-group class="mb-1">
-                  <mat-form-field style="width:100%">
-                    <mat-label>Nueva Contraseña</mat-label>
-                    <input matNativeControl formControlName="contrasenia" type="password"  />
-                  </mat-form-field>
-                </c-input-group>
+                <mat-form-field appearance="fill" class="full-width mb-3">
+                  <mat-label>Nueva Contraseña</mat-label>
+                  <input matInput type="password" formControlName="contrasena">
+                </mat-form-field>
 
-                <c-input-group class="mb-3">
-                  <mat-form-field style="width:100%">
-                    <mat-label>Repita La Contraseña</mat-label>
-                    <input matNativeControl formControlName="confirmarContrasenia" type="password"/>
-                    <mat-error *ngIf="form.controls['confirmarContrasenia'].hasError('confirmarContrasena')">
-                      Las contraseñas no coinciden
-                    </mat-error>
-                  </mat-form-field>
-                </c-input-group>
+                <mat-form-field appearance="fill" class="full-width mb-3">
+                  <mat-label>Repita La Contraseña</mat-label>
+                  <input matInput type="password" formControlName="confirmarContrasenia">
+                  <mat-error *ngIf="form.controls['confirmarContrasenia'].hasError('confirmarContrasena')">
+                    Las contraseñas no coinciden
+                  </mat-error>
+                </mat-form-field>
 
-                <c-input-group class="col-xl-12">
-                  <mat-form-field class="row-xl-12">
-                    <mat-label>Pregunta Seguridad 1</mat-label>
-                    <select matNativeControl  formControlName="preguntaseguridad1" change="prueba1(this)" >
-                      <option *ngFor="let p of preguntaSeguridad" [value]="p.pregunta" >
-                        {{p.pregunta}}
-                      </option>
-                    </select>
-                  </mat-form-field>
+                <mat-form-field appearance="fill" class="full-width mb-3">
+                  <mat-label>Teléfono</mat-label>
+                  <input matInput type="text" formControlName="telefonoEmpleado">
+                </mat-form-field>
 
-                  <mat-form-field >
-                    <input formControlName="respuestaSeguridad1" matNativeControl autoComplete="Respuesta Pregunta 1"  placeholder="Respuesta Pregunta 1"  />
-                  </mat-form-field>
-                </c-input-group>
+                <mat-form-field appearance="fill" class="full-width mb-3">
+                  <mat-label>Número de Identificación</mat-label>
+                  <input matInput type="text" formControlName="numero_identificacion">
+                </mat-form-field>
 
+                <mat-form-field appearance="fill" class="full-width mb-3">
+                  <mat-label>Pregunta de Seguridad 1</mat-label>
+                  <mat-select formControlName="preguntaseguridad1">
+                    <mat-option *ngFor="let p of preguntaSeguridad" [value]="p.pregunta">{{ p.pregunta }}</mat-option>
+                  </mat-select>
+                </mat-form-field>
+                <mat-form-field appearance="fill" class="full-width mb-3">
+                  <mat-label>Respuesta</mat-label>
+                  <input matInput type="text" formControlName="respuestaSeguridad1">
+                </mat-form-field>
 
-                <c-input-group class="col-xl-12">
-                  <mat-form-field >
-                    <mat-label>Pregunta Seguridad 2</mat-label>
-                    <select matNativeControl  formControlName="preguntaseguridad2" change="prueba1(this)" >
-                      <option *ngFor="let p of preguntaSeguridad" [value]="p.pregunta" >
-                        {{p.pregunta}}
-                      </option>
-                    </select>
-                  </mat-form-field>
+                <mat-form-field appearance="fill" class="full-width mb-3">
+                  <mat-label>Pregunta de Seguridad 2</mat-label>
+                  <mat-select formControlName="preguntaseguridad2">
+                    <mat-option *ngFor="let p of preguntaSeguridad" [value]="p.pregunta">{{ p.pregunta }}</mat-option>
+                  </mat-select>
+                </mat-form-field>
+                <mat-form-field appearance="fill" class="full-width mb-3">
+                  <mat-label>Respuesta</mat-label>
+                  <input matInput type="text" formControlName="respuestaSeguridad2">
+                </mat-form-field>
 
-                  <mat-form-field >
-                    <input formControlName="respuestaSeguridad2"  matNativeControl autoComplete="Respuesta Pregunta 2"  placeholder="Respuesta Pregunta 2"  />
-                  </mat-form-field>
-                </c-input-group>
+                <mat-form-field appearance="fill" class="full-width mb-3">
+                  <mat-label>Pregunta de Seguridad 3</mat-label>
+                  <mat-select formControlName="preguntaseguridad3">
+                    <mat-option *ngFor="let p of preguntaSeguridad" [value]="p.pregunta">{{ p.pregunta }}</mat-option>
+                  </mat-select>
+                </mat-form-field>
+                <mat-form-field appearance="fill" class="full-width mb-3">
+                  <mat-label>Respuesta</mat-label>
+                  <input matInput type="text" formControlName="respuestaSeguridad3">
+                </mat-form-field>
 
-                <c-input-group  class="col-xl-12">
-                  <mat-form-field >
-                    <mat-label>Pregunta Seguridad 3</mat-label>
-                    <select matNativeControl  formControlName="preguntaseguridad3" change="prueba1(this)" >
-                      <option *ngFor="let p of preguntaSeguridad" [value]="p.pregunta" >
-                        {{p.pregunta}}
-                      </option>
-                    </select>
-                  </mat-form-field>
-                  <mat-form-field >
-                    <input formControlName="respuestaSeguridad3" matNativeControl autoComplete="Respuesta Pregunta 3"  placeholder="Respuesta Pregunta 3"  />
-                  </mat-form-field>
-                </c-input-group>
-
+                <div class="mb-3">
+                  <label for="archivo_identificacion" class="form-label">Subir Identificación</label>
+                  <input type="file" id="archivo_identificacion" (change)="onFileChange($event)" class="form-control">
+                </div>
 
                 <div class="d-grid">
-                  <button cButton style="background: #1F544A; border: 0;" (click)="enviarInformacionDeSeguridad();">Crear Cuenta</button>
+                  <button mat-raised-button color="primary" type="submit" [disabled]="form.invalid || !archivo">Crear Cuenta</button>
                 </div>
               </form>
-            </c-card-body>
-          </c-card>
-          <c-card [ngStyle]="{'width.%': 44}" class="text-white py-5" style="background: #1F544A; display: flex; align-items: center; justify-content: center;">
-            <img src="assets/images/inprema2.png" alt="Descripción de la imagen" style="width: 25em; height: 15em;">
-        </c-card>
-        </c-card-group>
-      </c-col>
-    </c-row>
-  </c-container>
+            </div>
+          </div>
+          <div class="card text-white py-5 d-md-down-none" style="background: #1F544A; width:44%; display: flex; align-items: center; justify-content: center;">
+            <div>
+              <img src="assets/images/inprema2.png" alt="Descripción de la imagen" style="width: 25em; height: 15em;">
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>

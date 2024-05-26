@@ -10,7 +10,8 @@ export class CentroTrabajoDTO {
 
     @IsString()
     @MaxLength(40)
-    numeroAcuerdo: string;
+    @IsOptional()
+    numeroAcuerdo?: string;
 
     @IsNumber()
     @Min(0) 

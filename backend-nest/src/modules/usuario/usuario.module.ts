@@ -2,38 +2,46 @@ import { MiddlewareConsumer, Module, NestModule, RequestMethod } from '@nestjs/c
 import { UsuarioService } from './usuario.service';
 import { UsuarioController } from './usuario.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { Net_Rol } from './entities/net_rol.entity';
+import { Net_Rol_Empresa } from './entities/net_rol_empresa.entity';
 import { PassportModule } from '@nestjs/passport';
 import { JwtModule } from '@nestjs/jwt';
 import { CommonModule } from 'src/common/common.module';
 import { Net_Empleado } from '../Empresarial/entities/net_empleado.entity';
-import { Net_Usuario } from './entities/net_usuario.entity';
 import { Net_TipoIdentificacion } from '../tipo_identificacion/entities/net_tipo_identificacion.entity';
 import { NET_USUARIO_PRIVADA } from './entities/net_usuario_privada.entity';
 import { Net_Centro_Trabajo } from '../Empresarial/entities/net_centro_trabajo.entity';
 import { NET_SESION } from './entities/net_sesion.entity';
 import { SesionActivaMiddleware } from './middlewares/sesion-activa/sesion-activa.middleware';
+import { Net_Usuario_Empresa } from 'src/modules/usuario/entities/net_usuario_empresa.entity';
+import { MailService } from 'src/common/services/mail.service';
+import { Net_Seguridad } from './entities/net_seguridad.entity';
+import { Net_Empresa } from '../Empresarial/entities/net_empresa.entity';
 
 @Module({
   controllers: [UsuarioController],
-  providers: [UsuarioService],
+  providers: [UsuarioService, MailService],
   imports: [
-    TypeOrmModule.forFeature([Net_Usuario, Net_Rol, Net_Empleado, Net_TipoIdentificacion, NET_USUARIO_PRIVADA, Net_Centro_Trabajo, NET_SESION]),
+    TypeOrmModule.forFeature([
+      Net_Usuario_Empresa,
+      Net_Rol_Empresa, 
+      Net_Empleado, 
+      Net_TipoIdentificacion, 
+      NET_USUARIO_PRIVADA, 
+      Net_Centro_Trabajo, 
+      NET_SESION,
+      Net_Seguridad,
+      Net_Empresa
+    ]),
     PassportModule.register({ defaultStrategy: 'jwt' }),
-
-
     JwtModule.registerAsync({
-      imports: [],
       inject: [],
       useFactory: () => {
-        //console.log('JWT SECRET', process.env.JWT_SECRET);
-
         return {
           secret: process.env.JWT_SECRET,
           signOptions: {
             expiresIn: '3h'
           }
-        }
+        };
       }
     }),
     CommonModule
@@ -41,6 +49,7 @@ import { SesionActivaMiddleware } from './middlewares/sesion-activa/sesion-activ
 })
 export class UsuarioModule{
 }
+
 
 /* 
 export class UsuarioModule implements NestModule {

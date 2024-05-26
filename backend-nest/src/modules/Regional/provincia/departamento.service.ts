@@ -18,8 +18,8 @@ export class DepartamentoService {
     return 'This action adds a new provincia';
   }
 
-  findAll() {
-    return `This action returns all provincia`;
+  async findAll() {
+    return await this.departamentoRepository.find();
   }
 
   findOne(id: number) {

@@ -10,7 +10,7 @@ export class Net_perf_pers_cent_trab {
     @Column('varchar2', { length: 40, nullable: false, name: 'CARGO' })
     cargo: string;
 
-    @Column('varchar2', { length: 40, nullable: false, name: 'NUMERO_ACUERDO' })
+    @Column('varchar2', { length: 40, nullable: true, name: 'NUMERO_ACUERDO' })
     numero_acuerdo: string;
 
     @Column('number', { nullable: true, name: 'SALARIO_BASE' })

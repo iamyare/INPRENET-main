@@ -116,9 +116,9 @@ export class NetPersonaDTO {
     correo_2?: string;
 
     @IsString()
-    @MaxLength(40)
+    @MaxLength(14)
     @IsOptional()
-    numero_carnet?: string;
+    rtn?: string;
 
     @IsString()
     @Matches(/^\d{1,2}\/\d{1,2}\/\d{4}$/, {

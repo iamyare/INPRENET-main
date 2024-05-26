@@ -92,8 +92,8 @@ export class Net_Persona {
     @Column('varchar2', { length: 40, nullable: true, name: 'CORREO_2' })
     correo_2: string;
 
-    @Column('varchar2', { length: 40, nullable: true, name: 'NUMERO_CARNET' })
-    numero_carnet: string;
+    @Column('varchar2', { length: 14, nullable: true, name: 'RTN' })
+    rtn: string;
 
     @Column('date', { nullable: true, name: 'FECHA_NACIMIENTO' })
     fecha_nacimiento: string;

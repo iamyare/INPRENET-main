@@ -29,7 +29,6 @@ import { FamiliarDTO } from './dto/create-datos-familiar.dto';
 import { UpdatePerfCentTrabDto } from './dto/update.perfAfilCentTrab.dto';
 import { UpdateReferenciaPersonalDTO } from './dto/update-referencia-personal.dto';
 import { UpdateFamiliarDTO } from './dto/update-familiar.dto';
-import { Sequelize, where } from 'sequelize';
 import { UpdateBeneficiarioDto } from './dto/update-beneficiario.dto';
 import { Benef } from './dto/pruebaBeneficiario.dto';
 import * as moment from 'moment';
@@ -96,6 +95,7 @@ export class AfiliadoService {
 
 
   async createPersona(createPersonaDto: NetPersonaDTO): Promise<Net_Persona> {
+    
     const persona = new Net_Persona();
     Object.assign(persona, createPersonaDto);
 
@@ -564,7 +564,7 @@ export class AfiliadoService {
       CANTIDAD_HIJOS: persona.cantidad_hijos,
       REPRESENTACION: persona.representacion,
       DIRECCION_RESIDENCIA: persona.direccion_residencia,
-      NUMERO_CARNET: persona.numero_carnet,
+      RTN: persona.rtn,
       FECHA_NACIMIENTO: persona.fecha_nacimiento,
       FOTO_PERFIL: persona.foto_perfil ? Buffer.from(persona.foto_perfil).toString('base64') : null,
       DESCRIPCION: persona.profesion?.descripcion,
@@ -634,7 +634,7 @@ export class AfiliadoService {
           SEXO: persona.sexo,
           DIRECCION_RESIDENCIA: persona.direccion_residencia,
           FECHA_NACIMIENTO: persona.fecha_nacimiento,
-          NUMERO_CARNET: persona.numero_carnet,
+          RTN: persona.rtn,
           ID_PROFESION: persona.profesion?.idProfesion,
           TELEFONO_1: persona.telefono_1,
           ESTADO_CIVIL: persona.estado_civil,
@@ -665,7 +665,7 @@ export class AfiliadoService {
       SEXO: persona.sexo,
       DIRECCION_RESIDENCIA: persona.direccion_residencia,
       FECHA_NACIMIENTO: persona.fecha_nacimiento,
-      NUMERO_CARNET: persona.numero_carnet,
+      RTN: persona.rtn,
       ID_PROFESION: persona.profesion?.idProfesion,
       TELEFONO_1: persona.telefono_1,
       ESTADO_CIVIL: persona.estado_civil,

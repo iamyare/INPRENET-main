@@ -4,6 +4,7 @@ import { UpdateMunicipioDto } from './dto/update-municipio.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Net_Municipio } from './entities/net_municipio.entity';
+import { Net_Departamento } from '../provincia/entities/net_departamento.entity';
 
 @Injectable()
 export class MunicipioService {
@@ -11,6 +12,8 @@ export class MunicipioService {
   constructor(
     @InjectRepository(Net_Municipio)
     private municipioRepository: Repository<Net_Municipio>,
+    @InjectRepository(Net_Departamento)
+    private departamentoRepository: Repository<Net_Departamento>
   ) {}
 
   
@@ -34,7 +37,7 @@ export class MunicipioService {
     return `This action removes a #${id} municipio`;
   }
 
-  async findByDepartamentoId(departamentoId: number): Promise<Net_Municipio[]> {
+  async getMunicipiosByDepartamento(departamentoId: number): Promise<Net_Municipio[]> {
     return await this.municipioRepository.find({
       where: {
         departamento: { id_departamento: departamentoId }

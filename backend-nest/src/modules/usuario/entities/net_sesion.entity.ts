@@ -1,6 +1,6 @@
 import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn } from 'typeorm';
 import { NET_USUARIO_PRIVADA } from './net_usuario_privada.entity';
-import { Net_Usuario } from './net_usuario.entity';
+import { Net_Usuario_Empresa } from './net_usuario_empresa.entity';
 
 @Entity({ name: 'NET_SESION' })
 export class NET_SESION {
@@ -11,9 +11,9 @@ export class NET_SESION {
     @JoinColumn({ name: 'id_usuario_privada' })
     usuarioPrivada: NET_USUARIO_PRIVADA | null;
 
-    @ManyToOne(() => Net_Usuario, usuario => usuario.sesiones, { nullable: true })
+    @ManyToOne(() => Net_Usuario_Empresa, usuario => usuario.sesiones, { nullable: true })
     @JoinColumn({ name: 'id_usuario' })
-    usuario: Net_Usuario | null;
+    usuario: Net_Usuario_Empresa | null;
 
     @Column()
     token: string;

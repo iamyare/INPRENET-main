@@ -11,6 +11,9 @@ export class Net_Beneficio {
     @Column('varchar2', { length: 30, nullable: false, name: 'NOMBRE_BENEFICIO' })
     nombre_beneficio: string;
 
+    @Column('varchar2', { length: 20, nullable: false, name: 'CODIGO' })
+    codigo: string;
+
     @Column('varchar2', { length: 200, nullable: false, name: 'DESCRIPCION_BENEFICIO' })
     descripcion_beneficio: string; 
 

@@ -1,6 +1,5 @@
 import { Net_Centro_Trabajo } from "src/modules/Empresarial/entities/net_centro_trabajo.entity";
 import { Column, Entity, Index, JoinColumn, ManyToOne, OneToMany, OneToOne, PrimaryGeneratedColumn } from "typeorm";
-import { Net_Rol } from "./net_rol.entity";
 import { NET_SESION } from "./net_sesion.entity";
 
 @Entity({ name: 'NET_USUARIO_PRIVADA' })
@@ -21,9 +20,9 @@ export class NET_USUARIO_PRIVADA {
     @Column('varchar2', { length: 50, default: 'INACTIVO', name: 'ESTADO' })
     estado: string;
     
-    @ManyToOne(() => Net_Rol, rol => rol.usuarios)
+    /* @ManyToOne(() => Net_Rol, rol => rol.usuarios)
     @JoinColumn({ name: 'ID_ROL' })
-    rol: Net_Rol;
+    rol: Net_Rol; */
 
     @ManyToOne(() => Net_Centro_Trabajo, centroTrabajo => centroTrabajo.perfAfilCentTrabs, { nullable: true })
     @JoinColumn({ name: 'ID_CENTRO_TRABAJO' })

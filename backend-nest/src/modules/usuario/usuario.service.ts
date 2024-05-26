@@ -1,19 +1,24 @@
-import { BadRequestException, ForbiddenException, Injectable, InternalServerErrorException, Logger, NotFoundException, UnauthorizedException } from '@nestjs/common';
+import { BadRequestException, Injectable, InternalServerErrorException, Logger, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { UpdateUsuarioDto } from './dto/update-usuario.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { PaginationDto } from 'src/common/dtos/pagination.dto';
-import { Net_Usuario } from './entities/net_usuario.entity';
 import { Repository } from 'typeorm';
 import { JwtService } from '@nestjs/jwt';
 import { MailService } from 'src/common/services/mail.service';
 import * as bcrypt from 'bcrypt';
-import { Net_Empleado } from '../Empresarial/entities/net_empleado.entity';
-import { Net_Rol } from './entities/net_rol.entity';
 import { CreateUsuarioDto } from './dto/create-usuario.dto';
 import { Net_TipoIdentificacion } from '../tipo_identificacion/entities/net_tipo_identificacion.entity';
 import { NET_USUARIO_PRIVADA } from './entities/net_usuario_privada.entity';
 import { Net_Centro_Trabajo } from '../Empresarial/entities/net_centro_trabajo.entity';
 import { NET_SESION } from './entities/net_sesion.entity';
+import { CreatePreRegistroDto } from './dto/create-pre-registro.dto';
+import { Net_Usuario_Empresa } from './entities/net_usuario_empresa.entity';
+import { Net_Empleado } from '../Empresarial/entities/net_empleado.entity';
+import { Net_Rol_Empresa } from './entities/net_rol_empresa.entity';
+import { Net_Seguridad } from './entities/net_seguridad.entity';
+import { CompleteRegistrationDto } from './dto/complete-registration.dto';
+import { LoginDto } from './dto/login.dto';
+import { Net_Empresa } from '../Empresarial/entities/net_empresa.entity';
 
 @Injectable()
 export class UsuarioService {
@@ -21,24 +26,161 @@ export class UsuarioService {
 
   constructor(
 
-    @InjectRepository(Net_Usuario)
-    private readonly usuarioRepository: Repository<Net_Usuario>,
+    @InjectRepository(Net_Usuario_Empresa)
+    private readonly usuarioRepository: Repository<Net_Usuario_Empresa>,
     @InjectRepository(NET_USUARIO_PRIVADA)
     private readonly usuarioPrivadaRepository: Repository<NET_USUARIO_PRIVADA>,
-    @InjectRepository(Net_Centro_Trabajo)
-    private readonly centroTrabajoRepository: Repository<Net_Centro_Trabajo>,
     @InjectRepository(Net_Empleado)
     private readonly empleadoRepository: Repository<Net_Empleado>,
-    @InjectRepository(Net_Rol)
-    private readonly rolRepository: Repository<Net_Rol>,
-    @InjectRepository(Net_TipoIdentificacion)
-    private readonly tipoIdentificacionRepository: Repository<Net_TipoIdentificacion>,
     private readonly jwtService: JwtService,
     private readonly mailService: MailService,
     @InjectRepository(NET_SESION)
     private readonly sesionRepository: Repository<NET_SESION>,
+    @InjectRepository(Net_Usuario_Empresa)
+    private readonly usuarioEmpresaRepository: Repository<Net_Usuario_Empresa>,
+    @InjectRepository(Net_Rol_Empresa)
+    private readonly rolEmpresaRepository: Repository<Net_Rol_Empresa>,
+    @InjectRepository(Net_Seguridad)
+    private readonly seguridadRepository: Repository<Net_Seguridad>,
+    @InjectRepository(Net_Empresa)
+    private readonly empresaRepository: Repository<Net_Empresa>
   ) { }
 
+  async preRegistro(createPreRegistroDto: CreatePreRegistroDto): Promise<void> {
+    const { nombreEmpleado, nombrePuesto, correo, numeroEmpleado, idRole } = createPreRegistroDto;
+
+    // Verificar si el usuario ya existe
+    const usuarioExistente = await this.usuarioEmpresaRepository.findOne({ where: { correo } });
+    if (usuarioExistente) {
+      throw new BadRequestException('El correo ya está registrado');
+    }
+
+    // Verificar si el rol existe
+    const rol = await this.rolEmpresaRepository.findOne({ where: { id_rol_empresa: idRole } });
+    if (!rol) {
+      throw new BadRequestException('El rol especificado no existe');
+    }
+
+    // Crear un nuevo empleado
+    const nuevoEmpleado = this.empleadoRepository.create({
+      nombreEmpleado,
+    });
+
+    const empleado = await this.empleadoRepository.save(nuevoEmpleado);
+
+    // Crear un nuevo usuario con estado 'PENDIENTE'
+    const nuevoUsuario = this.usuarioEmpresaRepository.create({
+      nombrePuesto,
+      numeroEmpleado,
+      estado: 'PENDIENTE',
+      correo,
+      contrasena: await bcrypt.hash('temporal', 10), // Contraseña temporal
+      role: rol,
+      user: empleado, // Asignar el empleado creado
+    });
+
+    await this.usuarioEmpresaRepository.save(nuevoUsuario);
+
+    // Generar un token JWT para la verificación de correo
+    const token = this.jwtService.sign({ correo });
+
+    // Enviar correo electrónico de verificación
+    const verificationUrl = `http://localhost:4200/#/register?token=${token}`;
+    const htmlContent = `<p>Hola ${nombreEmpleado},</p>
+                         <p>Por favor, completa tu registro haciendo clic en el siguiente enlace:</p>
+                         <a href="${verificationUrl}">Completar Registro</a>`;
+
+    await this.mailService.sendMail(correo, 'Completa tu registro', '', htmlContent);
+  }
+
+  async completarRegistro(token: string, completeRegistrationDto: CompleteRegistrationDto, archivo_identificacion: Buffer): Promise<void> {
+    const { correo, contrasena, pregunta_de_usuario_1, respuesta_de_usuario_1, pregunta_de_usuario_2, respuesta_de_usuario_2, pregunta_de_usuario_3, respuesta_de_usuario_3, telefonoEmpleado, numero_identificacion } = completeRegistrationDto;
+
+    try {
+      const decoded = this.jwtService.verify(token);
+      if (decoded.correo !== correo) {
+        throw new BadRequestException('El correo no coincide');
+      }
+    } catch (error) {
+      throw new BadRequestException('Token inválido o expirado');
+    }
+
+    const usuario = await this.usuarioEmpresaRepository.findOne({ where: { correo, estado: 'PENDIENTE' }, relations: ['user'] });
+    if (!usuario) {
+      throw new BadRequestException('Usuario no encontrado o ya registrado');
+    }
+
+    usuario.contrasena = await bcrypt.hash(contrasena, 10);
+    usuario.estado = 'ACTIVO';
+    usuario.fecha_verificacion = new Date();
+    usuario.user.telefonoEmpleado = telefonoEmpleado;
+    usuario.user.numero_identificacion = numero_identificacion;
+    usuario.user.archivo_identificacion = archivo_identificacion;
+
+    await this.empleadoRepository.save(usuario.user);
+    await this.usuarioEmpresaRepository.save(usuario);
+
+    // Crear registros de seguridad
+    const seguridad1 = this.seguridadRepository.create({
+      pregunta: pregunta_de_usuario_1,
+      respuesta: respuesta_de_usuario_1,
+      usuarioEmpresa: usuario,
+    });
+
+    const seguridad2 = this.seguridadRepository.create({
+      pregunta: pregunta_de_usuario_2,
+      respuesta: respuesta_de_usuario_2,
+      usuarioEmpresa: usuario,
+    });
+
+    const seguridad3 = this.seguridadRepository.create({
+      pregunta: pregunta_de_usuario_3,
+      respuesta: respuesta_de_usuario_3,
+      usuarioEmpresa: usuario,
+    });
+
+    await this.seguridadRepository.save([seguridad1, seguridad2, seguridad3]);
+  }
+
+  async login(loginDto: LoginDto): Promise<{ accessToken: string }> {
+    const { correo, contrasena } = loginDto;
+
+    const usuario = await this.usuarioEmpresaRepository.findOne({
+      where: { correo },
+      relations: ['role', 'role.empresa']
+    });
+    if (!usuario) {
+      throw new UnauthorizedException('Credenciales inválidas');
+    }
+
+    const isPasswordValid = await bcrypt.compare(contrasena, usuario.contrasena);
+    if (!isPasswordValid) {
+      throw new UnauthorizedException('Credenciales inválidas');
+    }
+
+    const payload = {
+      correo,
+      sub: usuario.id_usuario_empresa,
+      rol: usuario.role.nombre_rol,
+      idEmpresa: usuario.role.empresa.id_empresa
+    };
+
+    const accessToken = this.jwtService.sign(payload);
+    return { accessToken };
+  }
+
+  async getRolesByEmpresa(idEmpresa: number): Promise<Net_Rol_Empresa[]> {
+    const empresa = await this.empresaRepository.findOne({ where: { id_empresa: idEmpresa } });
+
+    if (!empresa) {
+      throw new BadRequestException('Empresa no encontrada');
+    }
+
+    const roles = await this.rolEmpresaRepository.find({ where: { empresa } });
+    return roles;
+  }
+
+  
   async verificarEstadoSesion(token: string): Promise<{ sesionActiva: boolean }> {
     const sesion = await this.sesionRepository.findOne({
         where: { token },
@@ -104,8 +246,8 @@ export class UsuarioService {
     };
   }
   
-  async createPrivada(email: string, contrasena: string, nombre_usuario: string, idCentroTrabajo?: number): Promise<NET_USUARIO_PRIVADA> {
-    const usuarioExistente = await this.usuarioPrivadaRepository.findOne({ where: { email } });
+  async createPrivada(email: string, contrasena: string, nombre_usuario: string, idCentroTrabajo?: number) {
+    /* const usuarioExistente = await this.usuarioPrivadaRepository.findOne({ where: { email } });
     if (usuarioExistente) {
       throw new BadRequestException('El correo electrónico ya está en uso.');
     }
@@ -131,34 +273,68 @@ export class UsuarioService {
       nuevoUsuario.centroTrabajo = centroTrabajo;
     }
   
-    return this.usuarioPrivadaRepository.save(nuevoUsuario);
+    return this.usuarioPrivadaRepository.save(nuevoUsuario); */
   }
 
   async create(createUsuarioDto: CreateUsuarioDto) {
+    /* const queryRunner = this.usuarioRepository.manager.connection.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+  
     try {
-
-      const rol = await this.rolRepository.findOneBy({ nombre_rol: createUsuarioDto.nombre_rol });
+      // Verificar que el correo no esté registrado
+      console.log('Verificando si el correo ya está registrado...');
+      const usuarioExistente = await queryRunner.manager.findOne(Net_Usuario, { where: { correo: createUsuarioDto.correo } });
+      if (usuarioExistente) {
+        console.log('Correo ya registrado:', usuarioExistente);
+        throw new BadRequestException('El correo ya está registrado');
+      }
+  
+      // Verificar que el número de identificación no esté registrado
+      console.log('Verificando si el número de identificación ya está registrado...');
+      const empleadoExistente = await queryRunner.manager.findOne(Net_Empleado, { where: { numero_identificacion: createUsuarioDto.numero_identificacion } });
+      if (empleadoExistente) {
+        console.log('Número de identificación ya registrado:', empleadoExistente);
+        throw new BadRequestException('El número de identificación ya está registrado');
+      }
+  
+      // Buscar rol
+      console.log('Buscando rol...');
+      const rol = await queryRunner.manager.findOne(Net_Rol, { where: { nombre_rol: createUsuarioDto.nombre_rol } });
       if (!rol) {
         throw new BadRequestException('Rol not found');
       }
-
+  
+      // Crear usuario
+      console.log('Creando usuario...');
       const usuario = this.usuarioRepository.create({ ...createUsuarioDto, rol });
-      await this.usuarioRepository.save(usuario);
-
-      const tipo_identificacion = await this.tipoIdentificacionRepository.findOneBy({ tipo_identificacion: createUsuarioDto.tipo_identificacion });
+      await queryRunner.manager.save(usuario);
+  
+      // Buscar tipo de identificación
+      console.log('Buscando tipo de identificación...');
+      const tipo_identificacion = await queryRunner.manager.findOne(Net_TipoIdentificacion, { where: { tipo_identificacion: createUsuarioDto.tipo_identificacion } });
       if (!tipo_identificacion) {
         throw new BadRequestException('Tipo identificacion not found');
       }
-
-      const empleadoData = { ...createUsuarioDto, usuario: usuario };
-      const empleado = this.empleadoRepository.create({ ...empleadoData, tipo_identificacion });
-
-
-      await this.empleadoRepository.save(empleado);
-
+  
+      // Crear empleado
+      const empleadoData = {
+        ...createUsuarioDto,
+        usuario,
+        tipo_identificacion,
+        archivo_identificacion: createUsuarioDto.archivo_identificacion?.buffer,
+      };
+      console.log('Creando empleado...');
+      const empleado = this.empleadoRepository.create(empleadoData);
+      await queryRunner.manager.save(empleado);
+  
+      // Confirmar la transacción
+      await queryRunner.commitTransaction();
+  
+      // Generar token y enviar email
       const payload = { username: usuario.correo, nombre: empleadoData.nombre_empleado, rol: usuario.rol };
       const token = this.jwtService.sign(payload);
-
+  
       const enlace = `http://localhost:4200/#/register/${token}`;
       const mailContent = {
         to: usuario.correo,
@@ -227,13 +403,18 @@ export class UsuarioService {
         </html>`
       };
       await this.mailService.sendMail(mailContent.to, mailContent.subject, mailContent.text, mailContent.html);
-
-
+  
       return { empleado };
     } catch (error) {
+      await queryRunner.rollbackTransaction();
       this.handleException(error);
-    }
+    } finally {
+      await queryRunner.release();
+    } */
   }
+  
+  
+  
 
   findAll(paginationDto: PaginationDto) {
     const { limit = 10, offset = 0 } = paginationDto
@@ -248,7 +429,7 @@ export class UsuarioService {
   }
 
   async update(updateUsuarioDto: UpdateUsuarioDto) {
-    const { token, contrasena, nombre_puesto, telefono_empleado, numero_empleado, ...restUsuario } = updateUsuarioDto;
+   /*  const { token, contrasena, nombre_puesto, telefono_empleado, numero_empleado, ...restUsuario } = updateUsuarioDto;
 
     if (!contrasena) {
       throw new BadRequestException('La contraseña es requerida');
@@ -289,14 +470,14 @@ export class UsuarioService {
       throw new NotFoundException('Empleado asociado no encontrado');
     }
 
-    return { success: true, msg: 'Usuario y empleado actualizados correctamente' };
+    return { success: true, msg: 'Usuario y empleado actualizados correctamente' }; */
   }
 
   remove(id: number) {
     return `This action removes a #${id} usuario`;
   }
 
-  async login(email: string, password: string): Promise<{ token: string }> {
+  /* async login(email: string, password: string) {
     const usuario = await this.usuarioRepository.findOne({
       where: { correo: email },
       relations: ['rol']
@@ -336,7 +517,7 @@ export class UsuarioService {
     await this.sesionRepository.save(nuevaSesion);
   
     return { token };
-  }
+  } */
 
   private handleException(error: any): void {
     this.logger.error(error);
@@ -346,4 +527,10 @@ export class UsuarioService {
       throw new InternalServerErrorException('Ocurrió un error al procesar su solicitud');
     }
   }
+
+ /*  async findAllRolesExceptAdmin(): Promise<Net_Rol[]> {
+    return this.rolRepository.createQueryBuilder('rol')
+      .where('rol.nombre_rol != :nombre_rol', { nombre_rol: 'ADMINISTRADOR' })
+      .getMany();
+  } */
 }

@@ -12,7 +12,6 @@ import { InstitucionService } from './institucion/institucion.service';
 import { Net_Departamento } from '../Regional/provincia/entities/net_departamento.entity';
 import { Net_Detalle_Deduccion } from '../Planilla/detalle-deduccion/entities/detalle-deduccion.entity';
 import { Net_Empleado } from './entities/net_empleado.entity';
-import { Net_Empleado_Empresa } from './entities/net_empleado-empresa.entity';
 import { Net_Deduccion } from '../Planilla/deduccion/entities/net_deduccion.entity';
 
 @Module({
@@ -21,6 +20,6 @@ import { Net_Deduccion } from '../Planilla/deduccion/entities/net_deduccion.enti
     imports: [
       TypeOrmModule.forFeature([Net_Centro_Trabajo,
         Net_Deduccion, Net_Departamento,
-     Net_Centro_Trabajo, Net_Empresa, Net_Institucion, Net_Detalle_Deduccion, Net_Empleado, Net_Empleado_Empresa])]
+     Net_Centro_Trabajo, Net_Empresa, Net_Institucion, Net_Detalle_Deduccion, Net_Empleado])]
   })
 export class EmpresarialModule {}

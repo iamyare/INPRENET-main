@@ -3,7 +3,7 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { AuthService } from 'src/app/services/auth.service';
 import { ToastrService } from 'ngx-toastr';
-import { jwtDecode } from 'jwt-decode';
+import {jwtDecode} from 'jwt-decode';
 
 @Component({
   selector: 'app-register',
@@ -13,10 +13,17 @@ import { jwtDecode } from 'jwt-decode';
 export class RegisterComponent implements OnInit {
 
   form: FormGroup;
-  preguntaSeguridad: any[] = [];
   archivo: File | null = null;
   token: string = '';
   correo: string = '';
+  availableQuestions: string[] = [
+    "¿Cuál es tu animal favorito?",
+    "¿Cuál es tu pasatiempo favorito?",
+    "¿En qué ciudad te gustaría vivir?",
+    "¿Cuál es tu comida favorita?",
+    "¿Cuál fue el nombre de tu primera mascota?",
+    "¿Cuál es tu libro favorito?"
+  ];
 
   constructor(
     private fb: FormBuilder,
@@ -38,13 +45,8 @@ export class RegisterComponent implements OnInit {
       telefonoEmpleado: ['', [Validators.required]],
       numero_identificacion: ['', [Validators.required]]
     }, { validator: this.confirmarContrasenaValidator('contrasena', 'confirmarContrasenia') });
-
-    this.preguntaSeguridad = [
-      { pregunta: "¿Cuál es tu animal favorito?" },
-      { pregunta: "¿Cuál es tu pasatiempo favorito?" },
-      { pregunta: "¿En qué ciudad te gustaría vivir?" }
-    ];
   }
+
 
   ngOnInit(): void {
     this.token = this.route.snapshot.queryParams['token'];
@@ -52,11 +54,13 @@ export class RegisterComponent implements OnInit {
       const decodedToken: any = jwtDecode(this.token);
       this.correo = decodedToken.correo;
       this.form.patchValue({ correo: this.correo });
+      this.validateQuestions(); // Inicializar las preguntas disponibles
     } else {
       this.toastr.error('Token no encontrado', 'Error');
       this.router.navigate(['/']);
     }
   }
+
 
   confirmarContrasenaValidator(controlName: string, matchingControlName: string) {
     return (formGroup: FormGroup) => {
@@ -74,6 +78,26 @@ export class RegisterComponent implements OnInit {
     }
   }
 
+  validateQuestions() {
+    const selectedQuestions = new Set();
+    for (let i = 1; i <= 3; i++) {
+      const questionControl = this.form.get(`preguntaseguridad${i}`);
+      if (questionControl && questionControl.value) {
+        selectedQuestions.add(questionControl.value);
+      }
+    }
+    this.availableQuestions = [
+      "¿Cuál es tu animal favorito?",
+      "¿Cuál es tu pasatiempo favorito?",
+      "¿En qué ciudad te gustaría vivir?",
+      "¿Cuál es tu comida favorita?",
+      "¿Cuál fue el nombre de tu primera mascota?",
+      "¿Cuál es tu libro favorito?"
+    ].filter(question => !selectedQuestions.has(question));
+  }
+
+
+
   onFileChange(event: any) {
     if (event.target.files.length > 0) {
       this.archivo = event.target.files[0];
@@ -83,16 +107,16 @@ export class RegisterComponent implements OnInit {
   enviarInformacionDeSeguridad() {
     if (this.form.valid && this.archivo) {
       const datos = {
-        correo: this.form.value.correo,
-        contrasena: this.form.value.contrasena,
-        pregunta_de_usuario_1: this.form.value.preguntaseguridad1,
-        respuesta_de_usuario_1: this.form.value.respuestaSeguridad1,
-        pregunta_de_usuario_2: this.form.value.preguntaseguridad2,
-        respuesta_de_usuario_2: this.form.value.respuestaSeguridad2,
-        pregunta_de_usuario_3: this.form.value.preguntaseguridad3,
-        respuesta_de_usuario_3: this.form.value.respuestaSeguridad3,
-        telefonoEmpleado: this.form.value.telefonoEmpleado,
-        numero_identificacion: this.form.value.numero_identificacion
+        correo: this.form.get('correo')!.value,
+        contrasena: this.form.get('contrasena')!.value,
+        pregunta_de_usuario_1: this.form.get('preguntaseguridad1')!.value,
+        respuesta_de_usuario_1: this.form.get('respuestaSeguridad1')!.value,
+        pregunta_de_usuario_2: this.form.get('preguntaseguridad2')!.value,
+        respuesta_de_usuario_2: this.form.get('respuestaSeguridad2')!.value,
+        pregunta_de_usuario_3: this.form.get('preguntaseguridad3')!.value,
+        respuesta_de_usuario_3: this.form.get('respuestaSeguridad3')!.value,
+        telefonoEmpleado: this.form.get('telefonoEmpleado')!.value,
+        numero_identificacion: this.form.get('numero_identificacion')!.value
       };
 
       this.authService.completarRegistro(this.token, datos, this.archivo).subscribe({

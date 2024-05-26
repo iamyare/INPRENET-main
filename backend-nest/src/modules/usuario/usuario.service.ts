@@ -2,7 +2,7 @@ import { BadRequestException, Injectable, InternalServerErrorException, Logger, 
 import { UpdateUsuarioDto } from './dto/update-usuario.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { PaginationDto } from 'src/common/dtos/pagination.dto';
-import { Repository } from 'typeorm';
+import { Not, Repository } from 'typeorm';
 import { JwtService } from '@nestjs/jwt';
 import { MailService } from 'src/common/services/mail.service';
 import * as bcrypt from 'bcrypt';
@@ -67,16 +67,14 @@ export class UsuarioService {
     });
 
     const empleado = await this.empleadoRepository.save(nuevoEmpleado);
-
-    // Crear un nuevo usuario con estado 'PENDIENTE'
     const nuevoUsuario = this.usuarioEmpresaRepository.create({
       nombrePuesto,
       numeroEmpleado,
       estado: 'PENDIENTE',
       correo,
-      contrasena: await bcrypt.hash('temporal', 10), // Contraseña temporal
+      contrasena: await bcrypt.hash('temporal', 10),
       role: rol,
-      user: empleado, // Asignar el empleado creado
+      user: empleado,
     });
 
     await this.usuarioEmpresaRepository.save(nuevoUsuario);
@@ -86,9 +84,23 @@ export class UsuarioService {
 
     // Enviar correo electrónico de verificación
     const verificationUrl = `http://localhost:4200/#/register?token=${token}`;
-    const htmlContent = `<p>Hola ${nombreEmpleado},</p>
-                         <p>Por favor, completa tu registro haciendo clic en el siguiente enlace:</p>
-                         <a href="${verificationUrl}">Completar Registro</a>`;
+    const htmlContent = `
+    <div style="font-family: Arial, sans-serif; line-height: 1.6;">
+    <h2 style="color: #13776B;">¡Bienvenido a INPRENET!</h2>
+    <p>Hola ${nombreEmpleado},</p>
+    <p>Estamos encantados de tenerte con nosotros y queremos asegurarnos de que tengas la mejor experiencia posible desde el primer día.</p>
+    <div style="text-align: center;">
+      <img src="https://southcentralus1-mediap.svc.ms/transform/thumbnail?provider=spo&inputFormat=svg&cs=fFNQTw&docid=https%3A%2F%2Finpremagob-my.sharepoint.com%3A443%2F_api%2Fv2.0%2Fdrives%2Fb!SI5LDUe5UUeWwbh8d22jHOuRtzUPu3pFjDQjpEOapGryqRMSooSMRZ-wwIb8wBJs%2Fitems%2F01UGOONEU5HH7KZBUIZVEJ72CI6THKKM2V%3Fversion%3DPublished&access_token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOiIwMDAwMDAwMy0wMDAwLTBmZjEtY2UwMC0wMDAwMDAwMDAwMDAvaW5wcmVtYWdvYi1teS5zaGFyZXBvaW50LmNvbUBkMjI2NmE3Mi1jNDBkLTRkZTMtOWQ1Zi1kMmZmYmYzMDQ5YmQiLCJjYWNoZWtleSI6IjBoLmZ8bWVtYmVyc2hpcHx1cm4lM2FzcG8lM2Fhbm9uI2Q5ZDAwMjIxOGUwNjE3YTUyNTYwMWE3ZjIzMjE5YWViMzUyMjNmN2U3YmI5ZDNlMTU3YTc3YzFlYzFkMzJhNzgiLCJlbmRwb2ludHVybCI6ImsxRWtyL2tDL3pSMjg0cG9JM24wRUY5UWM0b2ZZQ3NYMUJSUlB1aStBL0U9IiwiZW5kcG9pbnR1cmxMZW5ndGgiOiIxMjAiLCJleHAiOiIxNzE2NzY4MDAwIiwiaXBhZGRyIjoiMTkwLjkyLjg3LjMiLCJpc2xvb3BiYWNrIjoiVHJ1ZSIsImlzcyI6IjAwMDAwMDAzLTAwMDAtMGZmMS1jZTAwLTAwMDAwMDAwMDAwMCIsImlzdXNlciI6InRydWUiLCJuYW1laWQiOiIwIy5mfG1lbWJlcnNoaXB8dXJuJTNhc3BvJTNhYW5vbiNkOWQwMDIyMThlMDYxN2E1MjU2MDFhN2YyMzIxOWFlYjM1MjIzZjdlN2JiOWQzZTE1N2E3N2MxZWMxZDMyYTc4IiwibmJmIjoiMTcxNjc0NjQwMCIsIm5paSI6Im1pY3Jvc29mdC5zaGFyZXBvaW50Iiwic2hhcmluZ2lkIjoiM1ZqUkduNXpza0t2ZFI5aVcrdUljQSIsInNpdGVpZCI6Ik1HUTBZamhsTkRndFlqazBOeTAwTnpVeExUazJZekV0WWpnM1l6YzNObVJoTXpGaiIsInNuaWQiOiI2Iiwic3RwIjoidCIsInR0IjoiMCIsInZlciI6Imhhc2hlZHByb29mdG9rZW4ifQ.v0PlebLrI6p6-du_YxzdVl-8U3MvWL3hf4CDJv-mQLw&cTag=%22c%3A%7BACFE399D-8886-48CD-9FE8-48F4CEA53355%7D%2C1%22&encodeFailures=1&width=459&height=270&srcWidth=&srcHeight=&cropMode=dochead" alt="Imagen del Sistema" style="width: 80%; max-width: 600px; border-radius: 8px; margin: 20px 0;">
+    </div>
+    <p>Para empezar, necesitamos que completes tu registro. Esto nos ayudará a personalizar tu experiencia y asegurarnos de que tienes acceso a todas las funcionalidades de nuestra aplicación.</p>
+    <p>Por favor, completa tu registro haciendo clic en el siguiente enlace:</p>
+    <div style="text-align: center; margin: 20px 0;">
+      <a href="${verificationUrl}" style="background-color: #13776B; color: white; padding: 10px 20px; text-decoration: none; border-radius: 4px;">Completar Registro</a>
+    </div>
+    <p>Si tienes alguna pregunta o necesitas ayuda, no dudes en contactarnos.</p>
+    <p>¡Gracias por unirte a nosotros!</p>
+    <p>El equipo de INPRENET</p>
+  </div>`;
 
     await this.mailService.sendMail(correo, 'Completa tu registro', '', htmlContent);
   }
@@ -169,15 +181,10 @@ export class UsuarioService {
     return { accessToken };
   }
 
-  async getRolesByEmpresa(idEmpresa: number): Promise<Net_Rol_Empresa[]> {
-    const empresa = await this.empresaRepository.findOne({ where: { id_empresa: idEmpresa } });
-
-    if (!empresa) {
-      throw new BadRequestException('Empresa no encontrada');
-    }
-
-    const roles = await this.rolEmpresaRepository.find({ where: { empresa } });
-    return roles;
+  async getRolesPorEmpresa(empresaId: number) {
+    return this.rolEmpresaRepository.find({
+      where: { empresa: { id_empresa: empresaId }, nombre_rol: Not('ADMINISTRADOR') },
+    });
   }
 
   

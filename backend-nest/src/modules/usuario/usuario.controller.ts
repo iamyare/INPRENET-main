@@ -37,7 +37,7 @@ export class UsuarioController {
 
   @Get('roles')
   async getRolesByEmpresa(@Query() query: any) {
-    return this.usuarioService.getRolesByEmpresa(query.idEmpresa);
+    return this.usuarioService.getRolesPorEmpresa(query.idEmpresa);
   }
 
 

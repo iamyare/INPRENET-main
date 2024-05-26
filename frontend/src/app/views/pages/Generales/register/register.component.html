@@ -1,96 +1,96 @@
-<div class="bg-light min-vh-100 d-flex flex-row align-items-center">
-  <div class="container">
-    <div class="row justify-content-center">
-      <div class="col-md-12">
-        <div class="card-group">
-          <div class="card p-4">
-            <div class="card-body">
-              <form [formGroup]="form" (ngSubmit)="enviarInformacionDeSeguridad()">
-                <h1>Registro De Cuenta</h1>
-                <p class="text-medium-emphasis">Crear una cuenta De Usuario Para el Sistema</p>
+<div class="register-wrapper">
+  <div class="register-container mat-elevation-z8">
+    <div class="logo-container">
+      <img src="../../../../../assets/images/LOGO INPRENET D.svg" alt="Logo de la Aplicación">
+    </div>
+    <h2>Completa tu Registro</h2>
+    <form [formGroup]="form" (ngSubmit)="enviarInformacionDeSeguridad()">
+      <div class="form-grid">
+        <div class="form-row">
+          <mat-form-field appearance="fill" class="form-field">
+            <mat-label>Correo Electrónico</mat-label>
+            <input matInput type="email" formControlName="correo" readonly>
+            <mat-error *ngIf="form.controls['correo'].invalid && form.controls['correo'].touched">
+              Correo es requerido y debe ser válido
+            </mat-error>
+          </mat-form-field>
+          <mat-form-field appearance="fill" class="form-field">
+            <mat-label>Teléfono</mat-label>
+            <input matInput type="text" formControlName="telefonoEmpleado">
+          </mat-form-field>
+        </div>
 
-                <mat-form-field appearance="fill" class="full-width mb-3">
-                  <mat-label>Correo Electrónico</mat-label>
-                  <input matInput type="email" formControlName="correo" readonly>
-                  <mat-error *ngIf="form.controls['correo'].invalid && form.controls['correo'].touched">
-                    Correo es requerido y debe ser válido
-                  </mat-error>
-                </mat-form-field>
+        <div class="form-row">
+          <mat-form-field appearance="fill" class="form-field">
+            <mat-label>Contraseña</mat-label>
+            <input matInput type="password" formControlName="contrasena">
+          </mat-form-field>
+          <mat-form-field appearance="fill" class="form-field">
+            <mat-label>Confirmar Contraseña</mat-label>
+            <input matInput type="password" formControlName="confirmarContrasenia">
+            <mat-error *ngIf="form.controls['confirmarContrasenia'].hasError('confirmarContrasena')">
+              Las contraseñas no coinciden
+            </mat-error>
+          </mat-form-field>
+        </div>
 
-                <mat-form-field appearance="fill" class="full-width mb-3">
-                  <mat-label>Nueva Contraseña</mat-label>
-                  <input matInput type="password" formControlName="contrasena">
-                </mat-form-field>
+        <mat-form-field appearance="fill" class="form-field full-width">
+          <mat-label>Número de Identificación</mat-label>
+          <input matInput type="text" formControlName="numero_identificacion">
+        </mat-form-field>
 
-                <mat-form-field appearance="fill" class="full-width mb-3">
-                  <mat-label>Repita La Contraseña</mat-label>
-                  <input matInput type="password" formControlName="confirmarContrasenia">
-                  <mat-error *ngIf="form.controls['confirmarContrasenia'].hasError('confirmarContrasena')">
-                    Las contraseñas no coinciden
-                  </mat-error>
-                </mat-form-field>
-
-                <mat-form-field appearance="fill" class="full-width mb-3">
-                  <mat-label>Teléfono</mat-label>
-                  <input matInput type="text" formControlName="telefonoEmpleado">
-                </mat-form-field>
-
-                <mat-form-field appearance="fill" class="full-width mb-3">
-                  <mat-label>Número de Identificación</mat-label>
-                  <input matInput type="text" formControlName="numero_identificacion">
-                </mat-form-field>
-
-                <mat-form-field appearance="fill" class="full-width mb-3">
-                  <mat-label>Pregunta de Seguridad 1</mat-label>
-                  <mat-select formControlName="preguntaseguridad1">
-                    <mat-option *ngFor="let p of preguntaSeguridad" [value]="p.pregunta">{{ p.pregunta }}</mat-option>
-                  </mat-select>
-                </mat-form-field>
-                <mat-form-field appearance="fill" class="full-width mb-3">
-                  <mat-label>Respuesta</mat-label>
-                  <input matInput type="text" formControlName="respuestaSeguridad1">
-                </mat-form-field>
-
-                <mat-form-field appearance="fill" class="full-width mb-3">
-                  <mat-label>Pregunta de Seguridad 2</mat-label>
-                  <mat-select formControlName="preguntaseguridad2">
-                    <mat-option *ngFor="let p of preguntaSeguridad" [value]="p.pregunta">{{ p.pregunta }}</mat-option>
-                  </mat-select>
-                </mat-form-field>
-                <mat-form-field appearance="fill" class="full-width mb-3">
-                  <mat-label>Respuesta</mat-label>
-                  <input matInput type="text" formControlName="respuestaSeguridad2">
-                </mat-form-field>
-
-                <mat-form-field appearance="fill" class="full-width mb-3">
-                  <mat-label>Pregunta de Seguridad 3</mat-label>
-                  <mat-select formControlName="preguntaseguridad3">
-                    <mat-option *ngFor="let p of preguntaSeguridad" [value]="p.pregunta">{{ p.pregunta }}</mat-option>
-                  </mat-select>
-                </mat-form-field>
-                <mat-form-field appearance="fill" class="full-width mb-3">
-                  <mat-label>Respuesta</mat-label>
-                  <input matInput type="text" formControlName="respuestaSeguridad3">
-                </mat-form-field>
-
-                <div class="mb-3">
-                  <label for="archivo_identificacion" class="form-label">Subir Identificación</label>
-                  <input type="file" id="archivo_identificacion" (change)="onFileChange($event)" class="form-control">
-                </div>
-
-                <div class="d-grid">
-                  <button mat-raised-button color="primary" type="submit" [disabled]="form.invalid || !archivo">Crear Cuenta</button>
-                </div>
-              </form>
-            </div>
+        <div class="security-questions">
+          <div class="form-row">
+            <mat-form-field appearance="fill" class="form-field question-field">
+              <mat-label>Pregunta de Seguridad 1</mat-label>
+              <mat-select formControlName="preguntaseguridad1" (selectionChange)="validateQuestions()">
+                <mat-option *ngFor="let opcion of availableQuestions" [value]="opcion">
+                  {{ opcion }}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+            <mat-form-field appearance="fill" class="form-field answer-field">
+              <mat-label>Respuesta</mat-label>
+              <input matInput formControlName="respuestaSeguridad1" type="text">
+            </mat-form-field>
           </div>
-          <div class="card text-white py-5 d-md-down-none" style="background: #1F544A; width:44%; display: flex; align-items: center; justify-content: center;">
-            <div>
-              <img src="assets/images/inprema2.png" alt="Descripción de la imagen" style="width: 25em; height: 15em;">
-            </div>
+          <div class="form-row">
+            <mat-form-field appearance="fill" class="form-field question-field">
+              <mat-label>Pregunta de Seguridad 2</mat-label>
+              <mat-select formControlName="preguntaseguridad2" (selectionChange)="validateQuestions()">
+                <mat-option *ngFor="let opcion of availableQuestions" [value]="opcion">
+                  {{ opcion }}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+            <mat-form-field appearance="fill" class="form-field answer-field">
+              <mat-label>Respuesta</mat-label>
+              <input matInput formControlName="respuestaSeguridad2" type="text">
+            </mat-form-field>
+          </div>
+          <div class="form-row">
+            <mat-form-field appearance="fill" class="form-field question-field">
+              <mat-label>Pregunta de Seguridad 3</mat-label>
+              <mat-select formControlName="preguntaseguridad3" (selectionChange)="validateQuestions()">
+                <mat-option *ngFor="let opcion of availableQuestions" [value]="opcion">
+                  {{ opcion }}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+            <mat-form-field appearance="fill" class="form-field answer-field">
+              <mat-label>Respuesta</mat-label>
+              <input matInput formControlName="respuestaSeguridad3" type="text">
+            </mat-form-field>
           </div>
         </div>
+
+        <div class="form-group full-width">
+          <label for="archivo">Sube tu identificación</label>
+          <input id="archivo" type="file" (change)="onFileChange($event)" class="form-control-file" />
+        </div>
       </div>
-    </div>
+
+      <button mat-raised-button color="primary" type="submit" class="full-width">Completar Registro</button>
+    </form>
   </div>
 </div>

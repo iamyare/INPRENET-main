@@ -74,17 +74,7 @@ export class EditDatosGeneralesComponent {
         header: 'Actividad Económica',
         col: 'nacionalidad',
         isEditable: true
-      },
-      {
-        header: 'Sector Económico',
-        col: 'sector_economico',
-        isEditable: true
-      },
-      {
-        header: 'Clase Cliente',
-        col: 'clase_cliente',
-        isEditable: true
-      },
+      }
     ];
 
     this.previsualizarInfoAfil();
@@ -167,7 +157,6 @@ export class EditDatosGeneralesComponent {
           fecha_ingreso: item.fecha_ingreso,
           actividad_economica: item.actividad_economica,
           sector_economico: item.sector_economico,
-          clase_cliente: item.clase_cliente,
         })); */
       } catch (error) {
         this.toastr.error('Error al cargar los datos de los perfiles de los centros de trabajo');

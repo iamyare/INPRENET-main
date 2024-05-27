@@ -78,16 +78,6 @@ export class EditPerfilPuestTrabComponent {
         header: 'Cargo',
         col: 'cargo',
         isEditable: true
-      },
-      {
-        header: 'Sector Económico',
-        col: 'sectorEconomico',
-        isEditable: true
-      },
-      {
-        header: 'Clase Cliente',
-        col: 'claseCliente',
-        isEditable: true
       }
     ];
 
@@ -148,8 +138,6 @@ export class EditPerfilPuestTrabComponent {
           fechaIngreso: this.datePipe.transform(item.fecha_ingreso, 'dd/MM/yyyy') || 'Fecha no disponible',
           fechaEgreso: this.datePipe.transform(item.fecha_egreso, 'dd/MM/yyyy') || 'Fecha no disponible',
           cargo: item.cargo,
-          sectorEconomico: item.sector_economico,
-          claseCliente: item.clase_cliente
         }));
       } catch (error) {
         this.toastr.error('Error al cargar los datos de los perfiles de los centros de trabajo');
@@ -223,24 +211,6 @@ export class EditPerfilPuestTrabComponent {
         etiqueta: 'Cargo',
         editable: true,
         icono: 'work_outline',
-        validaciones: [Validators.required, Validators.maxLength(40)]
-      },
-      {
-        nombre: 'sectorEconomico',
-        tipo: 'text',
-        requerido: false,
-        etiqueta: 'Sector Económico',
-        editable: true,
-        icono: 'domain',
-        validaciones: [Validators.required, Validators.maxLength(40)]
-      },
-      {
-        nombre: 'claseCliente',
-        tipo: 'text',
-        requerido: false,
-        etiqueta: 'Clase Cliente',
-        editable: true,
-        icono: 'group',
         validaciones: [Validators.required, Validators.maxLength(40)]
       }
     ];

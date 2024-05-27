@@ -119,9 +119,12 @@ export class DatosEstaticosService {
 
   async getAllCentrosTrabajo() {
     const response = await this.centrosTrabSVC.obtenerTodosLosCentrosTrabajo().toPromise();
-    const mappedResponse = response!.map((item: { id_centro_trabajo: any; nombre_centro_trabajo: any; }) => ({
+    console.log(response);
+
+    const mappedResponse = response!.map((item: { id_centro_trabajo: any; nombre_centro_trabajo: any; sector_economico:any }) => ({
       label: item.nombre_centro_trabajo,
-      value: String(item.id_centro_trabajo)
+      value: String(item.id_centro_trabajo),
+      sector: item.sector_economico,
     }));
     this.centrosTrabajo = mappedResponse;
     return this.centrosTrabajo;

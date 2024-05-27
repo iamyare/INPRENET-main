@@ -322,8 +322,6 @@ export class AfilBancoComponent implements OnInit {
           ['Cargo', centro.cargo || ''],
           ['Fecha de Ingreso', centro.fechaIngreso || ''],
           ['Fecha de Egreso', centro.fechaEgreso || ''],
-          ['Clase de Cliente', centro.claseCliente || ''],
-          ['Sector Económico', centro.sectorEconomico || '']
         ])),
         { text: 'IV. REFERENCIAS PERSONALES', style: 'header' },
         ...data.referenciasPersonales.map((referencia: any) => this.createTable([

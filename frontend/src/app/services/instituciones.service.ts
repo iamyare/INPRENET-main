@@ -11,7 +11,7 @@ export class InstitucionesService {
   constructor(private http: HttpClient) { }
 
   getInstituciones(): Observable<any>{
-    var url= `${environment.API_URL}/api/institucion`;
+    var url= `${environment.API_URL}/api/centro-trabajo`;
 
     return this.http.get(url,
       ).pipe(

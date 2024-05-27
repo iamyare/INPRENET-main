@@ -25,10 +25,6 @@ export function generatePuestoTrabFormGroup(datos?: any): FormGroup {
     ]),
     fechaEgreso: new FormControl(datos?.fechaEgreso, [
     ]),
-    claseCliente: new FormControl(datos?.claseCliente, [
-      Validators.required,
-      Validators.maxLength(40),
-    ]),
     sectorEconomico: new FormControl(datos?.sectorEconomico, [
       Validators.required,
       Validators.maxLength(40),
@@ -36,7 +32,7 @@ export function generatePuestoTrabFormGroup(datos?: any): FormGroup {
     estado: new FormControl(datos?.estado, [
       Validators.maxLength(40),
     ]),
-    showNumeroAcuerdo: new FormControl(true) // Nuevo control para la visibilidad
+    showNumeroAcuerdo: new FormControl(true)
   });
 }
 
@@ -77,6 +73,8 @@ export class DatPuestoTrabComponent implements OnInit {
     const currentYear = new Date();
     this.minDate = new Date(currentYear.getFullYear(), currentYear.getMonth(), currentYear.getDate());
     this.centrosTrabajo = this.datosEstaticos.centrosTrabajo;
+    console.log(this.centrosTrabajo);
+
     this.sector = this.datosEstaticos.sector;
   }
 
@@ -98,9 +96,8 @@ export class DatPuestoTrabComponent implements OnInit {
       this.formParent = existingForm;
     } else {
       this.formParent = this.fb.group({
-        trabajo: this.fb.array([])  // Asegúrate de que el nombre del FormArray sea correcto
+        trabajo: this.fb.array([])
       });
-      // this.formStateService.setForm(this.formKey, this.formParent);
     }
   }
 
@@ -109,13 +106,17 @@ export class DatPuestoTrabComponent implements OnInit {
     const formGroup = generatePuestoTrabFormGroup(datos || {});
     ref_trabajo.push(formGroup);
 
-    // Observa los cambios en el campo sectorEconomico para actualizar la visibilidad del campo numeroAcuerdo
-    formGroup.get('sectorEconomico')?.valueChanges.subscribe(value => {
-      formGroup.get('showNumeroAcuerdo')?.setValue(value !== 'PRIVADO');
+    formGroup.get('idCentroTrabajo')?.valueChanges.subscribe(value => {
+      const selectedCentro = this.centrosTrabajo.find((centro:any) => centro.value === value);
+      if (selectedCentro) {
+        formGroup.get('sectorEconomico')?.setValue(selectedCentro.sector);
+        formGroup.get('showNumeroAcuerdo')?.setValue(selectedCentro.sector !== 'PRIVADO');
+      }
     });
 
     this.onDatosDatosPuestTrab();
   }
+
 
   eliminarTrabajo(): void {
     const ref_trabajo = this.formParent.get('trabajo') as FormArray;

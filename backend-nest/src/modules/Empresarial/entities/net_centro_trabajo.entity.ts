@@ -1,7 +1,9 @@
-import { Net_perf_pers_cent_trab } from "src/modules/Persona/entities/net_perf_pers_cent_trab.entity";
-import { Net_Detalle_planilla_ingreso } from "../../Planilla/Ingresos/detalle-plan-ingr/entities/net_detalle_plani_ing.entity";
-import { Net_Departamento } from "../../Regional/provincia/entities/net_departamento.entity";
-import { Column, Entity, Index, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn } from "typeorm";
+import { Column, Entity, Index, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import { Net_perf_pers_cent_trab } from 'src/modules/Persona/entities/net_perf_pers_cent_trab.entity';
+import { Net_Detalle_planilla_ingreso } from '../../Planilla/Ingresos/detalle-plan-ingr/entities/net_detalle_plani_ing.entity';
+import { Net_Municipio } from 'src/modules/Regional/municipio/entities/net_municipio.entity';
+import { Net_Deduccion } from 'src/modules/Planilla/deduccion/entities/net_deduccion.entity';
+import { Net_Rol_Empresa } from 'src/modules/usuario/entities/net_rol_empresa.entity';
 
 @Entity({ name: 'NET_CENTRO_TRABAJO' })
 export class Net_Centro_Trabajo {
@@ -43,9 +45,9 @@ export class Net_Centro_Trabajo {
     @Column('nvarchar2', { length: 200, nullable: false, name: 'UBICACION_COMPLETA' })
     ubicacion_completa: string;
 
-    @ManyToOne(() => Net_Departamento, departamento => departamento.centrosTrabajo)
-    @JoinColumn({ name: 'ID_DEPARTAMENTO', foreignKeyConstraintName: "FK_ID_DEPARTAMENTO_CENT_TRAB" })
-    departamento: Net_Departamento;
+    @ManyToOne(() => Net_Municipio, municipio => municipio.centrosTrabajo)
+    @JoinColumn({ name: 'ID_MUNICIPIO', foreignKeyConstraintName: 'FK_ID_MUNICIPIO_CENT_TRAB' })
+    municipio: Net_Municipio;
 
     @OneToMany(() => Net_perf_pers_cent_trab, perfAfilCentTrab => perfAfilCentTrab.centroTrabajo)
     @JoinColumn({ name: 'ID_PERFIL_AFIL_CENTR_TRAB' })
@@ -53,4 +55,11 @@ export class Net_Centro_Trabajo {
 
     @OneToMany(() => Net_Detalle_planilla_ingreso, detallePlanIngreso => detallePlanIngreso.centroTrabajo)
     detalle_plani_ingr: Net_Detalle_planilla_ingreso[];
+
+    @OneToMany(() => Net_Deduccion, deduccion => deduccion.centroTrabajo)
+    deduccion: Net_Deduccion[];
+
+    @OneToMany(() => Net_Rol_Empresa, rolEmpresa => rolEmpresa.centroTrabajo)
+    roles: Net_Rol_Empresa[];
+    
 }

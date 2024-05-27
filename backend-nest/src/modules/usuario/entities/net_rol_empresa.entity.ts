@@ -1,15 +1,15 @@
 import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, OneToMany, JoinColumn } from 'typeorm';
-import { Net_Empresa } from 'src/modules/Empresarial/entities/net_empresa.entity';
 import { Net_Usuario_Empresa } from './net_usuario_empresa.entity';
+import { Net_Centro_Trabajo } from 'src/modules/Empresarial/entities/net_centro_trabajo.entity';
 
 @Entity({ name: 'NET_ROL_EMPRESA' })
 export class Net_Rol_Empresa {
   @PrimaryGeneratedColumn({ type: 'int', name: 'ID_ROL_EMPRESA', primaryKeyConstraintName: 'PK_id_rol_empresa' })
   id_rol_empresa: number;
 
-  @ManyToOne(() => Net_Empresa, empresa => empresa.roles, { nullable: false })
-  @JoinColumn({ name: 'ID_EMPRESA', referencedColumnName: 'id_empresa', foreignKeyConstraintName: 'FK_empresa_rolEmpresa' })
-  empresa: Net_Empresa;
+  @ManyToOne(() => Net_Centro_Trabajo, centroTrabajo => centroTrabajo.roles, { nullable: false })
+  @JoinColumn({ name: 'ID_CENTRO_TRABAJO', referencedColumnName: 'id_centro_trabajo', foreignKeyConstraintName: 'FK_centro_rolTrabajo' })
+  centroTrabajo: Net_Centro_Trabajo;
 
   @Column('varchar2', { length: 20, nullable: true, name: 'NOMBRE_ROL' })
   nombre_rol: string;

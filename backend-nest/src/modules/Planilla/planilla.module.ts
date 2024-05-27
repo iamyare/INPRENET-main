@@ -4,7 +4,6 @@ import { Module } from '@nestjs/common';
 import { Net_Deduccion } from './deduccion/entities/net_deduccion.entity';
 import { Net_Detalle_Beneficio_Afiliado } from './detalle_beneficio/entities/net_detalle_beneficio_afiliado.entity';
 import { Net_Detalle_Pago_Beneficio } from './detalle_beneficio/entities/net_detalle_pago_beneficio.entity';
-import { Net_Institucion } from '../Empresarial/entities/net_institucion.entity';
 import { Net_Detalle_Deduccion } from './detalle-deduccion/entities/detalle-deduccion.entity';
 import { Net_TipoPlanilla } from './tipo-planilla/entities/tipo-planilla.entity';
 import { Net_Beneficio } from './beneficio/entities/net_beneficio.entity';
@@ -40,6 +39,6 @@ import { TransaccionesModule } from '../transacciones/transacciones.module';
   imports: [AfiliadoModule, TransaccionesModule,
     TypeOrmModule.forFeature([Net_SALARIO_COTIZABLE, Net_Beneficio, Net_Detalle_Pago_Beneficio,
                               Net_Planilla, Net_Deduccion, Net_TipoPlanilla, Net_Detalle_Deduccion,
-                              Net_Institucion,Net_Detalle_Beneficio_Afiliado, Net_Detalle_planilla_ingreso]),]
+                              Net_Detalle_Beneficio_Afiliado, Net_Detalle_planilla_ingreso]),]
 })
 export class PlanillaModule { }

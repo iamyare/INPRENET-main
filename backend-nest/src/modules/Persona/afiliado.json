@@ -35,9 +35,7 @@
             {
                 "centroTrabajo": "1",
                 "cargo": null,
-                "sectorEconomico": null,
                 "actividadEconomica": null,
-                "claseCliente": null,
                 "sector": null,
                 "numeroAcuerdo": null,
                 "fechaIngreso": null,
@@ -50,9 +48,7 @@
             {
                 "centroTrabajo": "2",
                 "cargo": null,
-                "sectorEconomico": null,
                 "actividadEconomica": null,
-                "claseCliente": null,
                 "sector": null,
                 "numeroAcuerdo": null,
                 "fechaIngreso": null,

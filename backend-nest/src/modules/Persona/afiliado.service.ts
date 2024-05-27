@@ -217,8 +217,6 @@ export class AfiliadoService {
         nuevoPerfil.salario_base = centro.salarioBase;
         nuevoPerfil.fecha_ingreso = centro.fechaIngreso ? moment(centro.fechaIngreso, centro.fechaIngreso.includes('/') ? 'DD/MM/YYYY' : 'YYYY-MM-DD').format('YYYY-MM-DD') : null;
         nuevoPerfil.fecha_egreso = centro.fechaEgreso ? moment(centro.fechaEgreso, centro.fechaEgreso.includes('/') ? 'DD/MM/YYYY' : 'YYYY-MM-DD').format('YYYY-MM-DD') : null;
-        nuevoPerfil.clase_cliente = centro.claseCliente;
-        nuevoPerfil.sector_economico = centro.sectorEconomico;
 
         if (!nuevoPerfil.fecha_ingreso) {
           errores.push(`La fecha de ingreso es requerida para el centro de trabajo con ID ${centro.idCentroTrabajo}.`);
@@ -480,9 +478,6 @@ export class AfiliadoService {
         numero_acuerdo: item.numero_acuerdo,
         salario_base: item.salario_base,
         fecha_ingreso: new Date(item.fecha_ingreso),
-
-        clase_cliente: item.clase_cliente,
-        sector_economico: item.sector_economico,
       }));
 
       const perfCentrTrab = this.perfPersoCentTrabRepository.create(arregloFinal);

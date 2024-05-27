@@ -4,13 +4,13 @@ import { UpdateDetalleDeduccionDto } from './dto/update-detalle-deduccion.dto';
 import { InjectEntityManager, InjectRepository } from '@nestjs/typeorm';
 import { Net_Detalle_Deduccion } from './entities/detalle-deduccion.entity';
 import { EntityManager, Repository } from 'typeorm';
-import { Net_Institucion } from '../../Empresarial/entities/net_institucion.entity';
 import * as xlsx from 'xlsx';
 import { Net_Persona } from '../../Persona/entities/Net_Persona.entity';
 import { Net_Planilla } from '../planilla/entities/net_planilla.entity';
 import { isUUID } from 'class-validator';
 import { Net_Deduccion } from '../deduccion/entities/net_deduccion.entity';
 import { NET_DETALLE_PERSONA } from 'src/modules/Persona/entities/Net_detalle_persona.entity';
+import { Net_Centro_Trabajo } from 'src/modules/Empresarial/entities/net_centro_trabajo.entity';
 
 @Injectable()
 export class DetalleDeduccionService {
@@ -24,8 +24,8 @@ export class DetalleDeduccionService {
     private personaRepository: Repository<Net_Persona>,
     @InjectRepository(Net_Deduccion)
     private deduccionRepository: Repository<Net_Deduccion>,
-    @InjectRepository(Net_Institucion)
-    private institucionRepository: Repository<Net_Institucion>,
+    @InjectRepository(Net_Centro_Trabajo)
+    private centroTrabajoRepository: Repository<Net_Centro_Trabajo>,
     @InjectRepository(NET_DETALLE_PERSONA)
     private detallepersonaRepository: Repository<NET_DETALLE_PERSONA>,
     @InjectRepository(Net_Planilla)
@@ -40,18 +40,18 @@ export class DetalleDeduccionService {
 
     try {
       for (const item of data) {
-        const institucion = await this.institucionRepository.findOne({ where: { nombre_institucion: item.nombre_institucion } });
-        if (!institucion) throw new NotFoundException(`Institucion ${item.nombre_institucion} no encontrada`);
+        const centrotrabajo = await this.centroTrabajoRepository.findOne({ where: { nombre_centro_trabajo: item.nombre_centro_trabajo } });
+        if (!centrotrabajo) throw new NotFoundException(`Institucion ${item.nombre_centro_trabajo} no encontrada`);
 
         const persona = await this.personaRepository.findOne({ where: { dni: item.dni } });
         if (!persona) throw new NotFoundException(`Pfiliado con DNI ${item.dni} no encontrado`);
 
-        const deduccion = await this.deduccionRepository.findOne({ where: { codigo_deduccion: item.codigo_deduccion, institucion } });
-        if (!deduccion) throw new NotFoundException(`Deducción con código ${item.codigo_deduccion} no encontrada en la institución ${item.nombre_institucion}`);
+        /* const deduccion = await this.deduccionRepository.findOne({ where: { codigo_deduccion: item.codigo_deduccion, centroTrabajo } });
+        if (!deduccion) throw new NotFoundException(`Deducción con código ${item.codigo_deduccion} no encontrada en la institución ${item.nombre_centro_trabajo}`); */
 
         const detalleDeduccion = new Net_Detalle_Deduccion();
         //detalleDeduccion.persona = persona;
-        detalleDeduccion.deduccion = deduccion;
+        //detalleDeduccion.deduccion = deduccion;
         detalleDeduccion.anio = parseInt(item.año);
         detalleDeduccion.mes = parseInt(item.mes);
         detalleDeduccion.monto_total = parseFloat(item.monto_motal);
@@ -125,7 +125,7 @@ export class DetalleDeduccionService {
         ded."NOMBRE_DEDUCCION",
         dd."ID_PERSONA",
         dd."ID_DEDUCCION",
-        ded."ID_INSTITUCION",
+        ded."ID_CENTRO_TRABAJO",
         dd."MONTO_TOTAL",
         dd."MONTO_APLICADO" AS "MontoAplicado",
         dd."ESTADO_APLICACION",
@@ -160,7 +160,7 @@ export class DetalleDeduccionService {
         ded."NOMBRE_DEDUCCION",
         dd."ID_PERSONA",
         dd."ID_DEDUCCION",
-        ded."ID_INSTITUCION",
+        ded."ID_CENTRO_TRABAJO",
         dd."MONTO_TOTAL",
         dd."MONTO_APLICADO" AS "MontoAplicado",
         dd."ESTADO_APLICACION",
@@ -259,7 +259,7 @@ export class DetalleDeduccionService {
     }
   }
 
-  async obtenerDetallesDeduccionPorPersona(idPersona: string): Promise<any[]> {
+  /* async obtenerDetallesDeduccionPorPersona(idPersona: string): Promise<any[]> {
     try {
       const query = `
       SELECT
@@ -315,7 +315,7 @@ export class DetalleDeduccionService {
       this.logger.error('Error al obtener detalles de deduccion por afiliado', error.stack);
       throw new InternalServerErrorException('Error al obtener detalles de deduccion por afiliado');
     }
-  }
+  } */
 
   async actualizarPlanillasYEstadosDeDeducciones(detalles: { idDedDeduccion: number; codigoPlanilla: string; estadoAplicacion: string }[], transactionalEntityManager?: EntityManager): Promise<Net_Detalle_Deduccion[]> {
     const resultados = [];
@@ -343,7 +343,7 @@ export class DetalleDeduccionService {
 
 
   async create(createDetalleDeduccionDto: CreateDetalleDeduccionDto) {
-    const { dni, nombre_deduccion, nombre_institucion, monto_total, monto_aplicado, estado_aplicacion, anio, mes } = createDetalleDeduccionDto;
+    const { dni, nombre_deduccion, nombre_centro_trabajo, monto_total, monto_aplicado, estado_aplicacion, anio, mes } = createDetalleDeduccionDto;
 
     // Buscar el afiliado por DNI
     const persona = await this.personaRepository.findOne({ where: { dni } });
@@ -357,9 +357,9 @@ export class DetalleDeduccionService {
     }
 
     // Buscar la institución por nombre
-    const institucion = await this.institucionRepository.findOne({ where: { nombre_institucion } });
-    if (!institucion) {
-      throw new NotFoundException(`Institución con nombre '${nombre_institucion}' no encontrada.`);
+    const centroTrabajo = await this.centroTrabajoRepository.findOne({ where: { nombre_centro_trabajo } });
+    if (!centroTrabajo) {
+      throw new NotFoundException(`Institución con nombre '${nombre_centro_trabajo}' no encontrada.`);
     }
 
     // Guardar el nuevo DetalleDeduccion en la base de datos
@@ -367,7 +367,7 @@ export class DetalleDeduccionService {
       const nuevoDetalleDeduccion = this.detalleDeduccionRepository.create({
         persona: persona,
         deduccion: deduccion,
-        //institucion: institucion,
+        //centroTrabajo: centroTrabajo,
         monto_total: monto_total,
         monto_aplicado: monto_aplicado,
         estado_aplicacion: estado_aplicacion,
@@ -393,7 +393,7 @@ export class DetalleDeduccionService {
     queryBuilder
       .leftJoinAndSelect('detalleDeduccion.deduccion', 'deduccion')
       .leftJoinAndSelect('detalleDeduccion.afiliado', 'afiliado')
-      .leftJoinAndSelect('deduccion.institucion', 'institucion')
+      .leftJoinAndSelect('deduccion.centroTrabajo', 'centroTrabajo')
       .leftJoinAndSelect('afiliado.detalleAfiliado', 'detalleAfiliado'); // Asume que existe una relación desde Afiliado a DetalleAfiliado
 
     const result = await queryBuilder.getMany();
@@ -409,13 +409,13 @@ export class DetalleDeduccionService {
     return this.detalleDeduccionRepository
       .createQueryBuilder('detalle')
       .leftJoinAndSelect('detalle.deduccion', 'deduccion')
-      .leftJoinAndSelect('deduccion.institucion', 'institucion')
+      .leftJoinAndSelect('deduccion.centroTrabajo', 'centroTrabajo')
       .leftJoinAndSelect('detalle.planilla', 'planilla') // Agrega esta línea para hacer join con Net_Planilla
       .innerJoinAndSelect('detalle.afiliado', 'afiliado', 'afiliado.dni = :dni', { dni })
       .select([
         'detalle',
         'deduccion.nombre_deduccion',
-        'institucion.nombre_institucion',
+        'centroTrabajo.nombre_centro_trabajoy',
         'planilla.codigo_planilla', // Selecciona el código de la planilla
         'afiliado.dni',
       ])
@@ -429,7 +429,7 @@ export class DetalleDeduccionService {
       throw new NotFoundException(`DetalleDeduccion con ID '${id_ded_deduccion}' no encontrado.`);
     }
 
-    const { dni, nombre_deduccion, nombre_institucion, monto_total, monto_aplicado, estado_aplicacion, anio, mes } = updateDetalleDeduccionDto;
+    const { dni, nombre_deduccion, nombre_centro_trabajo, monto_total, monto_aplicado, estado_aplicacion, anio, mes } = updateDetalleDeduccionDto;
 
     // Buscar el afiliado por DNI
     if (dni) {
@@ -450,10 +450,10 @@ export class DetalleDeduccionService {
     }
 
     // Buscar la institución por nombre
-    if (nombre_institucion) {
-      const institucion = await this.institucionRepository.findOne({ where: { nombre_institucion } });
+    if (nombre_centro_trabajo) {
+      const institucion = await this.centroTrabajoRepository.findOne({ where: { nombre_centro_trabajo } });
       if (!institucion) {
-        throw new NotFoundException(`Institución con nombre '${nombre_institucion}' no encontrada.`);
+        throw new NotFoundException(`Institución con nombre '${nombre_centro_trabajo}' no encontrada.`);
       }
       /* detalleDeduccion.institucion = institucion; */
     }

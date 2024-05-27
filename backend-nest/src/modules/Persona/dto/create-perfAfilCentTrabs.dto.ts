@@ -32,14 +32,6 @@ export class CentroTrabajoDTO {
 
     @IsString()
     @MaxLength(40)
-    claseCliente: string;
-
-    @IsString()
-    @MaxLength(40)
-    sectorEconomico: string;
-
-    @IsString()
-    @MaxLength(40)
     @IsOptional()
     estado?:string
 }

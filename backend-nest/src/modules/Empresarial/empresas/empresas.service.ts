@@ -1,7 +1,6 @@
 import { BadRequestException, Injectable, InternalServerErrorException, Logger, NotFoundException, Query } from '@nestjs/common';
 import { CreateEmpresaDto } from './dto/create-empresa.dto';
 import { UpdateEmpresaDto } from './dto/update-empresa.dto';
-import { Net_Empresa } from '../entities/net_empresa.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { PaginationDto } from 'src/common/dtos/pagination.dto';
@@ -14,31 +13,31 @@ export class EmpresasService {
 
   constructor(
 
-    @InjectRepository(Net_Empresa)
-    private readonly empresaRepository: Repository<Net_Empresa>
+    /* @InjectRepository(Net_Empresa)
+    private readonly empresaRepository: Repository<Net_Empresa> */
   ){}
 
   async create(createEmpresaDto: CreateEmpresaDto) {
-    try {
+    /* try {
       const empresa = this.empresaRepository.create(createEmpresaDto)
       await this.empresaRepository.save(empresa)
       return empresa;
     } catch (error) {
       this.handleException(error);
-    }
+    } */
   }
 
   findAll( paginationDto: PaginationDto) {
-    const { limit = 10, offset = 0 } = paginationDto
+    /* const { limit = 10, offset = 0 } = paginationDto
     return this.empresaRepository.find({
       take: limit,
       skip : offset
-    });
+    }); */
   }
   
 
   async findOne(term: number) {
-    let empresa: Net_Empresa;
+    /* let empresa: Net_Empresa;
     if (isUUID(term)) {
       empresa = await this.empresaRepository.findOneBy({ id_empresa: term });
     } else {
@@ -51,12 +50,12 @@ export class EmpresasService {
     if (!empresa) {
       throw new NotFoundException(`Empresa con ${term} no existe`);
     }
-    return empresa;
+    return empresa; */
   }
 
   async update(id_empresa: number, updateEmpresaDto: UpdateEmpresaDto) {
 
-    const empresa = await this.empresaRepository.preload({
+    /* const empresa = await this.empresaRepository.preload({
       id_empresa: id_empresa,
       ...updateEmpresaDto
     });
@@ -69,12 +68,12 @@ export class EmpresasService {
     } 
     catch (error) {
       this.handleException(error);
-    }
+    } */
   }
 
   async remove(id_empresa: number) {
-    const empresa = await this.findOne(id_empresa);
-    await this.empresaRepository.remove(empresa);
+    /* const empresa = await this.findOne(id_empresa);
+    await this.empresaRepository.remove(empresa); */
   }
 
   private handleException(error: any): void {

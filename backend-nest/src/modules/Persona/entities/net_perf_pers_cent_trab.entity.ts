@@ -22,12 +22,6 @@ export class Net_perf_pers_cent_trab {
     @Column('date', { nullable: true, name: 'FECHA_EGRESO' })
     fecha_egreso: string;
 
-    @Column('varchar2', { length: 40, nullable: false, name: 'CLASE_CLIENTE' })
-    clase_cliente: string;
-
-    @Column('varchar2', { length: 40, nullable: false, name: 'SECTOR_ECONOMICO' })
-    sector_economico: string;
-
     @Column('varchar2', { length: 20, nullable: false, default: 'ACTIVO', name: 'ESTADO' })
     estado: string;
     

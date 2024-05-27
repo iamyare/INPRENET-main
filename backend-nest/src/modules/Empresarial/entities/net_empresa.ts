@@ -1,4 +1,4 @@
-import { Net_Rol_Empresa } from 'src/modules/usuario/entities/net_rol_empresa.entity';
+/* import { Net_Rol_Empresa } from 'src/modules/usuario/entities/net_rol_empresa.entity';
 import { Net_Usuario_Empresa } from 'src/modules/usuario/entities/net_usuario_empresa.entity';
 import { Column, Entity, Index, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 
@@ -39,3 +39,4 @@ export class Net_Empresa {
     @OneToMany(() => Net_Rol_Empresa, rolEmpresa => rolEmpresa.empresa)
     roles: Net_Rol_Empresa[];
 }
+ */

@@ -1,6 +1,5 @@
 import { Column, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 import { Net_Pais } from "../../pais/entities/pais.entity";
-import { Net_Centro_Trabajo } from "../../../Empresarial/entities/net_centro_trabajo.entity";
 import { Net_Municipio } from "../../municipio/entities/net_municipio.entity";
 
 
@@ -18,7 +17,4 @@ export class Net_Departamento {
 
     @OneToMany(() => Net_Municipio, municipio => municipio.departamento)
     municipio: Net_Municipio[];
-
-    @OneToMany(() => Net_Centro_Trabajo, centroTrabajo => centroTrabajo.departamento)
-    centrosTrabajo: Net_Centro_Trabajo[];
 }

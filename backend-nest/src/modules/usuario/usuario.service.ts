@@ -18,7 +18,6 @@ import { Net_Rol_Empresa } from './entities/net_rol_empresa.entity';
 import { Net_Seguridad } from './entities/net_seguridad.entity';
 import { CompleteRegistrationDto } from './dto/complete-registration.dto';
 import { LoginDto } from './dto/login.dto';
-import { Net_Empresa } from '../Empresarial/entities/net_empresa.entity';
 
 @Injectable()
 export class UsuarioService {
@@ -42,8 +41,8 @@ export class UsuarioService {
     private readonly rolEmpresaRepository: Repository<Net_Rol_Empresa>,
     @InjectRepository(Net_Seguridad)
     private readonly seguridadRepository: Repository<Net_Seguridad>,
-    @InjectRepository(Net_Empresa)
-    private readonly empresaRepository: Repository<Net_Empresa>
+    @InjectRepository(Net_Centro_Trabajo)
+    private centroTrabajoRepository: Repository<Net_Centro_Trabajo>,
   ) { }
 
   async preRegistro(createPreRegistroDto: CreatePreRegistroDto): Promise<void> {
@@ -174,16 +173,16 @@ export class UsuarioService {
       correo,
       sub: usuario.id_usuario_empresa,
       rol: usuario.role.nombre_rol,
-      idEmpresa: usuario.role.empresa.id_empresa
+      idEmpresa: usuario.role.centroTrabajo.id_centro_trabajo
     };
 
     const accessToken = this.jwtService.sign(payload);
     return { accessToken };
   }
 
-  async getRolesPorEmpresa(empresaId: number) {
+  async getRolesPorEmpresa(centroId: number) {
     return this.rolEmpresaRepository.find({
-      where: { empresa: { id_empresa: empresaId }, nombre_rol: Not('ADMINISTRADOR') },
+      where: { centroTrabajo: { id_centro_trabajo: centroId }, nombre_rol: Not('ADMINISTRADOR') },
     });
   }
 

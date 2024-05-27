@@ -3,8 +3,8 @@ import { CreateDeduccionDto } from './dto/create-deduccion.dto';
 import { UpdateDeduccionDto } from './dto/update-deduccion.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { Net_Institucion } from '../../Empresarial/entities/net_institucion.entity';
 import { Net_Deduccion } from './entities/net_deduccion.entity';
+import { Net_Centro_Trabajo } from 'src/modules/Empresarial/entities/net_centro_trabajo.entity';
 @Injectable()
 export class DeduccionService {
 
@@ -13,8 +13,8 @@ export class DeduccionService {
   constructor(
     @InjectRepository(Net_Deduccion)
     public deduccionRepository: Repository<Net_Deduccion>,
-    @InjectRepository(Net_Institucion)
-    private institucionRepository: Repository<Net_Institucion>
+    @InjectRepository(Net_Centro_Trabajo)
+    private centroTrabajoRepository: Repository<Net_Centro_Trabajo>
   ) { }
 
   async create(createDeduccionDto: CreateDeduccionDto): Promise<Net_Deduccion> {
@@ -25,8 +25,8 @@ export class DeduccionService {
     if (existingDeduccion) {
         throw new BadRequestException('El código de deducción ya existe.');
     }
-    const institucion = await this.institucionRepository.findOne({
-        where: { nombre_institucion: createDeduccionDto.nombre_institucion }
+    const institucion = await this.centroTrabajoRepository.findOne({
+        where: { nombre_centro_trabajo: createDeduccionDto.nombre_institucion }
     });
 
     if (!institucion && createDeduccionDto.nombre_institucion) {
@@ -34,7 +34,7 @@ export class DeduccionService {
     }
     const deduccion = this.deduccionRepository.create({
         ...createDeduccionDto,
-        institucion: institucion
+        centroTrabajo: institucion
     });
 
     try {
@@ -59,8 +59,8 @@ export class DeduccionService {
         .addSelect('net_deduccion.nombre_deduccion', 'nombre_deduccion')
         .addSelect('net_deduccion.descripcion_deduccion', 'descripcion_deduccion')
         .addSelect('net_deduccion.prioridad', 'prioridad')
-        .addSelect('institucion.nombre_institucion', 'nombre_institucion')
-        .innerJoin(Net_Institucion, 'institucion', 'institucion.id_institucion = "net_deduccion".id_institucion')
+        .addSelect('centrotrabajo.nombre_centro_trabajo', 'nombre_centro_trabajo')
+        .innerJoin(Net_Centro_Trabajo, 'centrotrabajo', 'centrotrabajo.id_centro_trabajo = "centrotrabajo".id_centro_trabajo')
         .getRawMany();
 
       return queryBuilder;
@@ -71,18 +71,18 @@ export class DeduccionService {
     }
   }
 
-  async findOneByNombInst(nombre_institucion: string) {
-    if (nombre_institucion) {
+  async findOneByNombInst(nombre_centro_trabajo: string) {
+    if (nombre_centro_trabajo) {
       const queryBuilder = await this.deduccionRepository
         .createQueryBuilder('NET_DEDUCCION')
         .addSelect('NET_DEDUCCION.ID_DEDUCCION', 'ID_DEDUCCION')
         .addSelect('NET_DEDUCCION.NOMBRE_DEDUCCION', 'NOMBRE_DEDUCCION')
-        .innerJoin(Net_Institucion, 'INSTITUCION', 'NET_DEDUCCION.ID_INSTITUCION = INSTITUCION.ID_INSTITUCION')
-        .where(`INSTITUCION.NOMBRE_INSTITUCION = '${nombre_institucion}'`)
+        .innerJoin(Net_Centro_Trabajo, 'INSTITUCION', 'NET_DEDUCCION.ID_INSTITUCION = INSTITUCION.ID_INSTITUCION')
+        .where(`CENTROTRABAJO.NOMBRE_CENTRO_TRABAJO = '${nombre_centro_trabajo}'`)
         .getRawMany();
       return queryBuilder;
     } else {
-      throw new NotFoundException(`la deduccion para la empresa ${nombre_institucion} no fue encontrada.`);
+      throw new NotFoundException(`la deduccion para la empresa ${nombre_centro_trabajo} no fue encontrada.`);
     }
   }
 

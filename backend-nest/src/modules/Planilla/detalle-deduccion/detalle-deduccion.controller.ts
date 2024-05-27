@@ -92,14 +92,6 @@ export class DetalleDeduccionController {
     return this.detalleDeduccionService.findInconsistentDeduccionesByAfiliado(idPersona);
   }
 
-  @Get('/detallesDeducc-complementaria-persona')
-  async obtenerDetallesPorAfiliado(@Query('idPersona') idPersona: string) {
-    if (!idPersona) {
-      throw new BadRequestException('Se requiere el parámetro idPersona');
-    }
-    return this.detalleDeduccionService.obtenerDetallesDeduccionPorPersona(idPersona);
-  }
-
   @Patch('/actualizar-deduccion-planilla')
   actualizarPlanillasYEstados(@Body() detalles: { idDedDeduccion: number; codigoPlanilla: string; estadoAplicacion: string }[]) {
     return this.detalleDeduccionService.actualizarPlanillasYEstadosDeDeducciones(detalles);

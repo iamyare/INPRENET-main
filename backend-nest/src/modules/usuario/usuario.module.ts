@@ -15,7 +15,6 @@ import { SesionActivaMiddleware } from './middlewares/sesion-activa/sesion-activ
 import { Net_Usuario_Empresa } from 'src/modules/usuario/entities/net_usuario_empresa.entity';
 import { MailService } from 'src/common/services/mail.service';
 import { Net_Seguridad } from './entities/net_seguridad.entity';
-import { Net_Empresa } from '../Empresarial/entities/net_empresa.entity';
 
 @Module({
   controllers: [UsuarioController],
@@ -30,7 +29,6 @@ import { Net_Empresa } from '../Empresarial/entities/net_empresa.entity';
       Net_Centro_Trabajo, 
       NET_SESION,
       Net_Seguridad,
-      Net_Empresa
     ]),
     PassportModule.register({ defaultStrategy: 'jwt' }),
     JwtModule.registerAsync({

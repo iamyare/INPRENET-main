@@ -226,8 +226,13 @@ export class AfilBancoComponent implements OnInit {
 
   enviar() {
     const formData = new FormData();
+    const formGenerales = this.formDatosGenerales?.value?.refpers[0] || {};
+    const direccion_residencia = `AVENIDA: ${formGenerales.avenida},CALLE: ${formGenerales.calle},SECTOR: ${formGenerales.sector},BLOQUE: ${formGenerales.bloque},N° DE CASA: ${formGenerales.numero_casa},COLOR CASA: ${formGenerales.color_casa},ALDEA: ${formGenerales.aldea},CASERIO: ${formGenerales.caserio}`;
+
+    const datosGenerales = {...formGenerales,direccion_residencia};
+
     const encapsulatedDto = {
-      datosGenerales: this.formDatosGenerales?.value?.refpers[0] || {},
+      datosGenerales,
       familiares: this.formDatosFamiliares?.value?.familiar || [],
       colegiosMagisteriales: this.formColegiosMagisteriales?.value?.ColMags || [],
       bancos: this.formHistPag?.value?.banco || [],
@@ -275,6 +280,8 @@ export class AfilBancoComponent implements OnInit {
   }
 
   createPDFDefinition(data: any) {
+    console.log(data);
+
     return {
       content: [
         { text: 'I. DATOS GENERALES DEL AFILIADO', style: 'header' },

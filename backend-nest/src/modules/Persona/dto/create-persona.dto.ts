@@ -139,7 +139,7 @@ export class NetPersonaDTO {
     archivo_identificacion?: string;
 
     @IsString()
-    @MaxLength(200)
+    @MaxLength(500)
     direccion_residencia: string;
 
     @IsInt()

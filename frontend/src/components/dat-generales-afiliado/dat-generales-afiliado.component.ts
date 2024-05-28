@@ -4,6 +4,8 @@ import { DireccionService } from 'src/app/services/direccion.service';
 import { DatosEstaticosService } from 'src/app/services/datos-estaticos.service';
 import { FormStateService } from 'src/app/services/form-state.service';
 
+const noSpecialCharsPattern = '^[a-zA-Z0-9\\s]*$';
+
 export function generateAddressFormGroup(datos?: any): FormGroup {
   return new FormGroup({
     dni: new FormControl(datos?.dni, [Validators.required, Validators.maxLength(15), Validators.pattern(/^[0-9]{13}$|^[0-9]{4}-[0-9]{4}-[0-9]{5}$/)]),
@@ -30,6 +32,38 @@ export function generateAddressFormGroup(datos?: any): FormGroup {
     id_pais_nacionalidad: new FormControl(datos?.id_pais_nacionalidad, Validators.required),
     sexo: new FormControl(datos?.sexo, [Validators.required, Validators.maxLength(1), Validators.pattern(/^[FM]$/)]),
     cantidad_hijos : new FormControl(datos?.cantidad_hijos, Validators.required),
+    avenida: new FormControl(datos?.avenida, [
+      Validators.maxLength(75),
+      Validators.pattern(noSpecialCharsPattern)
+    ]),
+    calle: new FormControl(datos?.calle, [
+      Validators.maxLength(75),
+      Validators.pattern(noSpecialCharsPattern)
+    ]),
+    sector: new FormControl(datos?.sector, [
+      Validators.maxLength(75),
+      Validators.pattern(noSpecialCharsPattern)
+    ]),
+    bloque: new FormControl(datos?.bloque, [
+      Validators.maxLength(25),
+      Validators.pattern(noSpecialCharsPattern)
+    ]),
+    numero_casa: new FormControl(datos?.numero_casa, [
+      Validators.maxLength(25),
+      Validators.pattern(noSpecialCharsPattern)
+    ]),
+    color_casa: new FormControl(datos?.color_casa, [
+      Validators.maxLength(40),
+      Validators.pattern(noSpecialCharsPattern)
+    ]),
+    aldea: new FormControl(datos?.aldea, [
+      Validators.maxLength(75),
+      Validators.pattern(noSpecialCharsPattern)
+    ]),
+    caserio: new FormControl(datos?.caserio, [
+      Validators.maxLength(75),
+      Validators.pattern(noSpecialCharsPattern)
+    ]),
   });
 }
 

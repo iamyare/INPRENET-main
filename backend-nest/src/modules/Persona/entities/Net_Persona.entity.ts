@@ -107,7 +107,7 @@ export class Net_Persona {
     @OneToMany(() => NET_DETALLE_PERSONA, detallePersona => detallePersona.persona)
     detallePersona: NET_DETALLE_PERSONA[];
 
-    @Column('varchar2', { length: 200, nullable: true, name: 'DIRECCION_RESIDENCIA' })
+    @Column('varchar2', { length: 500, nullable: true, name: 'DIRECCION_RESIDENCIA' })
     direccion_residencia: string;
 
     @Column('blob', { nullable: true, name: 'FOTO_PERFIL' })

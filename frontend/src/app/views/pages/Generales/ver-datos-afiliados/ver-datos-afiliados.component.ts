@@ -1,12 +1,15 @@
 import { Component, EventEmitter, OnInit, Output } from '@angular/core';
 import { Validators } from '@angular/forms';
-import { MatDialog } from '@angular/material/dialog';
 import { ToastrService } from 'ngx-toastr';
 import { AfiliadoService } from 'src/app/services/afiliado.service';
 import { FieldConfig } from 'src/app/shared/Interfaces/field-config';
 import { TableColumn } from 'src/app/shared/Interfaces/table-column';
 import { convertirFechaInputs } from 'src/app/shared/functions/formatoFecha';
 import { unirNombres } from 'src/app/shared/functions/formatoNombresP';
+import * as pdfMake from 'pdfmake/build/pdfmake';
+import * as pdfFonts from 'pdfmake/build/vfs_fonts';
+import { HttpClient } from '@angular/common/http';
+
 
 @Component({
   selector: 'app-ver-datos-afiliados',
@@ -24,7 +27,9 @@ export class VerDatosAfiliadosComponent implements OnInit {
 
   constructor(private svcAfiliado: AfiliadoService,
               private toastr: ToastrService,
-              private dialog: MatDialog) { }
+              private http: HttpClient) {
+                (pdfMake as any).vfs = pdfFonts.pdfMake.vfs;
+               }
 
   ngOnInit(): void {
     this.myFormFields = [
@@ -219,5 +224,90 @@ export class VerDatosAfiliadosComponent implements OnInit {
 
   ejecutarFuncionAsincronaDesdeOtroComponente(funcion: (data: any) => Promise<void>) {
     this.ejecF = funcion;
+  }
+
+  async generarConstancia() {
+    const afiliado = this.Afiliado;
+    const response:any = await this.http.get('/assets/images/MEMBRETADO.jpg', { responseType: 'blob' }).toPromise();
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      const base64data = reader.result as string;
+
+      const docDefinition:any = {
+        pageSize: 'A4',
+        background: {
+          image: base64data,
+          width: 595.28,
+          height: 841.89
+        },
+        content: [
+          { text: ' ', style: 'space' },  // Espacio debajo del encabezado
+          { text: 'A QUIEN INTERESE', style: 'header' },
+          {
+            text: 'El Instituto Nacional de Previsión del Magisterio (INPREMA), por este medio indica que:',
+            style: 'subheader'
+          },
+          {
+            text: `${afiliado.PRIMER_NOMBRE} ${afiliado.SEGUNDO_NOMBRE} ${afiliado.TERCER_NOMBRE} ${afiliado.PRIMER_APELLIDO} ${afiliado.SEGUNDO_APELLIDO}`,
+            style: 'name'
+          },
+          {
+            text: `Se encuentra afiliado a este Sistema de Previsión con el número ${afiliado.DNI}`,
+            style: 'body'
+          },
+          {
+            text: `Y para los fines que el interesado estime conveniente, se extiende el presente documento en la ciudad de Tegucigalpa, Departamento de Francisco Morazán, a los ${new Date().getDate()} días del mes de ${new Date().toLocaleString('es-HN', { month: 'long' })} del año ${new Date().getFullYear()}.`,
+            style: 'body'
+          },
+          { text: '\n\n\n' },
+          { canvas: [{ type: 'line', x1: 0, y1: 0, x2: 250, y2: 0, lineWidth: 1 }], margin: [127, 200, 0, 0] },  // Línea para la firma
+          { text: 'Fabiola Caceres', style: 'signature' },
+          { text: 'Jefe Departamento de Afiliación', style: 'signatureTitle' }
+        ],
+        styles: {
+          space: {
+            margin: [0, 100, 0, 0]  // Ajusta este valor para dejar suficiente espacio
+          },
+          header: {
+            fontSize: 18,
+            bold: true,
+            alignment: 'center',
+            margin: [0, 20, 0, 10],
+            decoration: 'underline'
+          },
+          subheader: {
+            fontSize: 11,
+            alignment: 'left',
+            margin: [40, 10, 40, 5]
+          },
+          name: {
+            fontSize: 14,
+            bold: true,
+            alignment: 'center',
+            margin: [40, 10, 40, 5],
+            decoration: 'underline'
+          },
+          body: {
+            fontSize: 11,
+            alignment: 'left',
+            margin: [40, 10, 40, 5]
+          },
+          signature: {
+            fontSize: 12,
+            bold: true,
+            alignment: 'center',
+            margin: [0, 10, 0, 0]
+          },
+          signatureTitle: {
+            fontSize: 12,
+            alignment: 'center'
+          }
+        }
+      };
+
+      pdfMake.createPdf(docDefinition).open();
+    };
+
+    reader.readAsDataURL(response);
   }
 }

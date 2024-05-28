@@ -31,27 +31,33 @@
 </div>
 
 <div *ngIf="Afiliado" style="background-color: white; margin: 1% 0% 1% 0%; padding: 1% 0% 1% 0%">
-    <h1 style="text-align: center; font-size: 2rem">Datos Generales Afiliado</h1>
-    <div
-        style="display: grid; grid-template-columns: 1fr 2fr; justify-content: center; align-items: center; gap: 20px; padding: 10px;">
-        <!-- Imagen de perfil cuadrada a la izquierda -->
-        <div style="text-align: center;">
-            <img *ngIf="Afiliado.FOTO_PERFIL" [src]="'data:image/jpeg;base64,' + Afiliado.FOTO_PERFIL"
-                alt="Foto de Perfil" style="width: 150px; height: 150px;" />
-        </div>
+  <h1 style="text-align: center; font-size: 2rem">Datos Generales Afiliado</h1>
+  <div
+      style="display: grid; grid-template-columns: 1fr 2fr; justify-content: center; align-items: center; gap: 20px; padding: 10px;">
+      <!-- Imagen de perfil cuadrada a la izquierda -->
+      <div style="text-align: center;">
+          <img *ngIf="Afiliado.FOTO_PERFIL" [src]="'data:image/jpeg;base64,' + Afiliado.FOTO_PERFIL"
+              alt="Foto de Perfil" style="width: 150px; height: 150px;" />
+      </div>
 
-        <!-- Información del afiliado a la derecha -->
-        <div>
-            <ul style="list-style-type: none; padding: 0; margin: 0;">
-                <li><strong>Nombre:</strong> {{ Afiliado.nameAfil }}</li>
-                <li><strong>Dirección:</strong> {{ Afiliado.DIRECCION_RESIDENCIA }}</li>
-                <li><strong>Fecha de Nacimiento:</strong> {{ convertirFechaInputs(Afiliado.FECHA_NACIMIENTO) }}</li>
-                <li><strong>Teléfono:</strong> {{ Afiliado.TELEFONO_1 }}</li>
-                <li><strong>Número de Carnet:</strong> {{ Afiliado.NUMERO_CARNET }}</li>
-            </ul>
-        </div>
-    </div>
+      <!-- Información del afiliado a la derecha -->
+      <div>
+          <ul style="list-style-type: none; padding: 0; margin: 0;">
+              <li><strong>Nombre:</strong> {{ Afiliado.nameAfil }}</li>
+              <li><strong>Dirección:</strong> {{ Afiliado.DIRECCION_RESIDENCIA }}</li>
+              <li><strong>Fecha de Nacimiento:</strong> {{ convertirFechaInputs(Afiliado.FECHA_NACIMIENTO) }}</li>
+              <li><strong>Teléfono:</strong> {{ Afiliado.TELEFONO_1 }}</li>
+              <li><strong>Número de Carnet:</strong> {{ Afiliado.NUMERO_CARNET }}</li>
+          </ul>
+      </div>
+  </div>
+  <div style="text-align: center; margin-top: 20px;">
+      <button mat-raised-button color="primary" style="color: white;" (click)="generarConstancia()">
+          Generar Constancia
+      </button>
+  </div>
 </div>
+
 
 <app-edit-datos-generales *ngIf="DatosGenerales && Afiliado" [Afiliado]="Afiliado"></app-edit-datos-generales>
 

@@ -23,12 +23,8 @@ import { CreateDetalleBeneficiarioDto } from './dto/create-detalle-beneficiario-
 import { Net_Colegios_Magisteriales } from '../transacciones/entities/net_colegios_magisteriales.entity';
 import { Net_Persona_Colegios } from '../transacciones/entities/net_persona_colegios.entity';
 import { NET_PROFESIONES } from '../transacciones/entities/net_profesiones.entity';
-import { NET_RELACION_FAMILIAR } from './entities/net_relacion_familiar';
-import { CreateRelacionFamiliarDTO } from './dto/create-relacion-familiar.dto';
-import { FamiliarDTO } from './dto/create-datos-familiar.dto';
 import { UpdatePerfCentTrabDto } from './dto/update.perfAfilCentTrab.dto';
 import { UpdateReferenciaPersonalDTO } from './dto/update-referencia-personal.dto';
-import { UpdateFamiliarDTO } from './dto/update-familiar.dto';
 import { UpdateBeneficiarioDto } from './dto/update-beneficiario.dto';
 import { Benef } from './dto/pruebaBeneficiario.dto';
 import * as moment from 'moment';
@@ -87,9 +83,6 @@ export class AfiliadoService {
 
     @InjectRepository(Net_Persona_Por_Banco)
     private readonly BancosToPersonaRepository: Repository<Net_Persona_Por_Banco>,
-
-    @InjectRepository(NET_RELACION_FAMILIAR)
-    private readonly relacionesFamiliaresRepository: Repository<NET_RELACION_FAMILIAR>,
     private readonly connection: Connection
   ) { }
 
@@ -151,34 +144,6 @@ export class AfiliadoService {
     return await this.personaRepository.save(persona);
   }
 
-
-  async createRelacionFamiliar(createRelacionFamiliarDto: CreateRelacionFamiliarDTO): Promise<NET_RELACION_FAMILIAR> {
-    const nuevaRelacion = this.relacionesFamiliaresRepository.create({
-      persona: { id_persona: createRelacionFamiliarDto.personaId },
-      familiar: { id_persona: createRelacionFamiliarDto.familiarId },
-      parentesco: createRelacionFamiliarDto.parentesco
-    });
-
-    return await this.relacionesFamiliaresRepository.save(nuevaRelacion);
-  }
-
-  async createPersonaConRelaciones(createPersonaDto: NetPersonaDTO, familiares: FamiliarDTO[]): Promise<Net_Persona> {
-    const personaPrincipal = await this.createPersona(createPersonaDto);
-
-    for (const familiarDto of familiares) {
-      let familiar = await this.personaRepository.findOne({ where: { dni: familiarDto.dni } });
-      if (!familiar) {
-        familiar = await this.createPersona(familiarDto);
-      }
-      await this.createRelacionFamiliar({
-        personaId: personaPrincipal.id_persona,
-        familiarId: familiar.id_persona,
-        parentesco: familiarDto.parentesco
-      });
-    }
-
-    return personaPrincipal
-  }
 
   async createDetallePersona(createDetallePersonaDto: CreateDetallePersonaDto): Promise<NET_DETALLE_PERSONA> {
     const detallePersona = new NET_DETALLE_PERSONA();
@@ -1064,105 +1029,7 @@ export class AfiliadoService {
     await this.BancosToPersonaRepository.save(perfil1);
     await this.BancosToPersonaRepository.save(perfil);
   }
-
-  async getVinculosFamiliares(dni: string) {
-    const persona = await this.personaRepository.findOne({
-      where: { dni },
-      relations: ['RELACIONES', 'RELACIONES.familiar']
-    });
-
-    if (!persona) {
-      throw new NotFoundException(`La persona con DNI ${dni} no fue encontrada.`);
-    }
-
-    // Mapear las relaciones para incluir la información solicitada
-    return persona.RELACIONES.map(relacion => ({
-      primerNombre: relacion.familiar.primer_nombre,
-      segundoNombre: relacion.familiar.segundo_nombre,
-      tercerNombre: relacion.familiar.tercer_nombre, // Asumiendo que también hay un tercer nombre
-      primerApellido: relacion.familiar.primer_apellido,
-      segundoApellido: relacion.familiar.segundo_apellido,
-      fechaNacimiento: relacion.familiar.fecha_nacimiento,
-      parentesco: relacion.parentesco,
-      dni: relacion.familiar.dni
-    }));
-  }
-
-  async updateFamiliarRelation(
-    dniPersona: string,
-    dniFamiliar: string,
-    updateDto: UpdateFamiliarDTO
-  ): Promise<{ mensaje: string }> {
-    const persona = await this.personaRepository.findOne({
-      where: { dni: dniPersona },
-      relations: ['RELACIONES', 'RELACIONES.familiar']
-    });
-
-    if (!persona) {
-      throw new NotFoundException(`La persona con DNI ${dniPersona} no fue encontrada.`);
-    }
-
-    const relacion = persona.RELACIONES.find(r => r.familiar.dni === dniFamiliar);
-    if (!relacion) {
-      throw new NotFoundException(`El familiar con DNI ${dniFamiliar} no fue encontrado entre las relaciones de la persona.`);
-    }
-
-    if (updateDto.dni && updateDto.dni !== dniFamiliar) {
-      const existingFamiliar = await this.personaRepository.findOne({ where: { dni: updateDto.dni } });
-      if (existingFamiliar) {
-        throw new ConflictException(`El nuevo DNI ${updateDto.dni} ya está en uso.`);
-      }
-      relacion.familiar.dni = updateDto.dni;
-    }
-
-    if (updateDto.primerNombre !== undefined) relacion.familiar.primer_nombre = updateDto.primerNombre;
-    if (updateDto.segundoNombre !== undefined) relacion.familiar.segundo_nombre = updateDto.segundoNombre;
-    if (updateDto.tercerNombre !== undefined) relacion.familiar.tercer_nombre = updateDto.tercerNombre;
-    if (updateDto.primerApellido !== undefined) relacion.familiar.primer_apellido = updateDto.primerApellido;
-    if (updateDto.segundoApellido !== undefined) relacion.familiar.segundo_apellido = updateDto.segundoApellido;
-
-    if (updateDto.fechaNacimiento) relacion.familiar.fecha_nacimiento = updateDto.fechaNacimiento;
-    if (updateDto.parentesco) relacion.parentesco = updateDto.parentesco;
-
-    await this.personaRepository.save(relacion.familiar);
-    await this.relacionesFamiliaresRepository.save(relacion);
-
-    return { mensaje: 'Familiar actualizado con éxito.' };
-  }
-
-
-  async agregarFamiliarYRelacion(
-    dniPersona: string,
-    nuevoFamiliarDto: {
-      primer_nombre?: string,
-      segundo_nombre?: string,
-      primer_apellido?: string,
-      segundo_apellido?: string,
-      dni?: string,
-      fecha_nacimiento?: string,
-      parentesco: string
-    }
-  ): Promise<NET_RELACION_FAMILIAR> {
-    const persona = await this.personaRepository.findOne({ where: { dni: dniPersona } });
-    if (!persona) {
-      throw new BadRequestException(`La persona con DNI ${dniPersona} no fue encontrada`);
-    }
-    const nuevoFamiliar = this.personaRepository.create({
-      primer_nombre: nuevoFamiliarDto.primer_nombre || null,
-      segundo_nombre: nuevoFamiliarDto.segundo_nombre || null,
-      primer_apellido: nuevoFamiliarDto.primer_apellido || null,
-      segundo_apellido: nuevoFamiliarDto.segundo_apellido || null,
-      dni: nuevoFamiliarDto.dni || null,
-      fecha_nacimiento: nuevoFamiliarDto.fecha_nacimiento || null
-    });
-    const familiarGuardado = await this.personaRepository.save(nuevoFamiliar);
-    const nuevaRelacion = this.relacionesFamiliaresRepository.create({
-      persona: persona,
-      familiar: familiarGuardado,
-      parentesco: nuevoFamiliarDto.parentesco
-    });
-    return this.relacionesFamiliaresRepository.save(nuevaRelacion);
-  }
+ 
 
   async getAllEstados(): Promise<Net_Estado_Persona[]> {
     return this.estadoPersonaRepository.find();

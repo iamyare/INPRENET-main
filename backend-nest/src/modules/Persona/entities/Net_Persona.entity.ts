@@ -11,7 +11,6 @@ import { Net_Persona_Por_Banco } from "src/modules/banco/entities/net_persona-ba
 import { Net_perf_pers_cent_trab } from "./net_perf_pers_cent_trab.entity";
 import { Net_Ref_Per_Pers } from "./net_ref-Per-Persona.entity";
 import { NET_PROFESIONES } from "src/modules/transacciones/entities/net_profesiones.entity";
-import { NET_RELACION_FAMILIAR } from "./net_relacion_familiar";
 @Entity({
     name: 'NET_PERSONA',
 })
@@ -147,8 +146,5 @@ export class Net_Persona {
     @ManyToOne(() => NET_PROFESIONES, profesion => profesion.personas, { cascade: true })
     @JoinColumn({ name: 'ID_PROFESION', foreignKeyConstraintName: 'FK_ID_PROFESION_PERSONA' })
     profesion: NET_PROFESIONES;
-
-    @OneToMany(() => NET_RELACION_FAMILIAR, relacionFamiliar => relacionFamiliar.persona)
-    RELACIONES: NET_RELACION_FAMILIAR[];
 
 }

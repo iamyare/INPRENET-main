@@ -6,18 +6,11 @@ import { CreateReferenciaPersonalDTO } from './create-referencia.dto ';
 import { CreatePersonaBancoDTO } from './create-persona-banco.dto';
 import { BeneficiarioDto } from './create-beneficiario.dto';
 import { NetPersonaColegiosDTO } from './create-persona-colegio.dto';
-import { FamiliarDTO } from './create-datos-familiar.dto';
 
 export class EncapsulatedPersonaDTO {
     @ValidateNested()
     @Type(() => NetPersonaDTO)
     datosGenerales: NetPersonaDTO;
-
-    @IsArray()
-    @IsOptional()
-    @ValidateNested({ each: true })
-    @Type(() => FamiliarDTO)
-    familiares?: FamiliarDTO[]
 
     @IsArray()
     @ValidateNested({ each: true })

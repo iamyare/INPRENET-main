@@ -14,26 +14,17 @@ import {
   ParseIntPipe,
   UseInterceptors,
   UploadedFile,
-  ConflictException,
-  BadRequestException,
-  UsePipes,
-  ValidationPipe,
 } from '@nestjs/common';
 import { AfiliadoService } from './afiliado.service';
 import { UpdatePersonaDto } from './dto/update-persona.dto';
 import { ApiTags } from '@nestjs/swagger';
 import { EncapsulatedPersonaDTO } from './dto/encapsulated-persona.dto';
 import { DataSource, Repository } from 'typeorm';
-import { AsignarReferenciasDTO } from './dto/asignarReferencia.dto';
 import { Net_Tipo_Persona } from './entities/net_tipo_persona.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { UpdatePerfCentTrabDto } from './dto/update.perfAfilCentTrab.dto';
 import { UpdateReferenciaPersonalDTO } from './dto/update-referencia-personal.dto';
-import { NET_RELACION_FAMILIAR } from './entities/net_relacion_familiar';
-import { UpdateFamiliarDTO } from './dto/update-familiar.dto';
-import { NuevoFamiliarDTO } from './dto/nuevo-familiar.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { NetPersonaDTO } from './dto/create-persona.dto';
 import { CreateDetallePersonaDto } from './dto/create-detalle.dto';
 import { UpdateBeneficiarioDto } from './dto/update-beneficiario.dto';
 import { Net_Persona } from './entities/Net_Persona.entity';
@@ -136,20 +127,6 @@ async create(@Body() benef: Benef): Promise<Net_Persona> {
       let colegiosMagisterialesAsignados = [];
       if (encapsulatedDto.colegiosMagisteriales && encapsulatedDto.colegiosMagisteriales.length > 0) {
         colegiosMagisterialesAsignados = await this.afiliadoService.assignColegiosMagisteriales(persona.id_persona, encapsulatedDto.colegiosMagisteriales);
-      }
-
-      // Manejo de familiares y sus relaciones extendidas
-      const familiaresAsignados = [];
-      if (encapsulatedDto.familiares && encapsulatedDto.familiares.length > 0) {
-        for (const familiarDto of encapsulatedDto.familiares) {
-          const familiar = await this.afiliadoService.createPersona(familiarDto);
-          await this.afiliadoService.createRelacionFamiliar({
-            personaId: persona.id_persona,
-            familiarId: familiar.id_persona,
-            parentesco: familiarDto.parentesco
-          });
-          familiaresAsignados.push(familiar);
-        }
       }
 
       return {
@@ -421,41 +398,6 @@ async create(@Body() benef: Benef): Promise<Net_Persona> {
     return {
       mensaje: `Perfil de centro de trabajo con ID ${idNum} ha sido marcado como inactivo.`,
     };
-  }
-
-  @Get('getAllFamiliares/:dni')
-  async getVinculosFamiliares(
-    @Param('dni') dni: string
-  ){
-    return this.afiliadoService.getVinculosFamiliares(dni);
-  }
-
-  @Patch('updateVinculoFamiliar/:dniPersona/:dniFamiliar')
-  async updateVinculoFamiliar(
-    @Param('dniPersona') dniPersona: string,
-    @Param('dniFamiliar') dniFamiliar: string,
-    @Body() updateDto: UpdateFamiliarDTO
-  ) {
-    try {
-      const result = await this.afiliadoService.updateFamiliarRelation(dniPersona, dniFamiliar, updateDto);
-      return { mensaje: 'Vínculo familiar actualizado con éxito.', data: result };
-    } catch (error) {
-      if (error instanceof NotFoundException) {
-        throw new NotFoundException(error.message);
-      } else if (error instanceof ConflictException) {
-        throw new BadRequestException(error.message);
-      } else {
-        throw new BadRequestException('No se pudo procesar la solicitud debido a un error desconocido.');
-      }
-    }
-  }
-
-  @Post('/agregarFamiliar/:dniPersona')
-  async agregarFamiliarYRelacion(
-    @Param('dniPersona') dniPersona: string,
-    @Body() nuevoFamiliarDto: NuevoFamiliarDTO
-  ) {
-    return this.afiliadoService.agregarFamiliarYRelacion(dniPersona, nuevoFamiliarDto);
   }
 
   @Put('/updateDatosGenerales/:idPersona')

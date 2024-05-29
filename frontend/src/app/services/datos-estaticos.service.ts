@@ -368,6 +368,7 @@ export class DatosEstaticosService {
   ];
 
   parentesco = [
+    { value: "CONYUGUE", label: "CONYUGUE" },
     { value: "ABUELA MATERNA", label: "ABUELA MATERNA" },
     { value: "ABUELA PATERNA", label: "ABUELA PATERNA" },
     { value: "ABUELO MATERNO", label: "ABUELO MATERNO" },

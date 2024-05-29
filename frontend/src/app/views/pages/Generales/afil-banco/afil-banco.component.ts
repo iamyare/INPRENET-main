@@ -43,16 +43,13 @@ export class AfilBancoComponent implements OnInit {
     trabajo: new FormArray([], [Validators.required])
   });
   formHistPag: any = new FormGroup({
-    banco: new FormArray([], [Validators.required])  // Esto asegura que siempre tienes una instancia de FormArray disponible
+    banco: new FormArray([], [Validators.required])
   });
   formReferencias: any = new FormGroup({
     refpers: new FormArray([], [Validators.required])
   });
   formBeneficiarios: any = new FormGroup({
     beneficiario: new FormArray([], [Validators.required])
-  });
-  formDatosFamiliares: any = new FormGroup({
-    familiar: new FormArray([], [Validators.required])
   });
   formColegiosMagisteriales: any = new FormGroup({
     ColMags: new FormArray([], [Validators.required])
@@ -95,10 +92,6 @@ export class AfilBancoComponent implements OnInit {
       beneficiario: this.fb.array([], [Validators.required])
     });
 
-    this.formDatosFamiliares = this.fb.group({
-      familiar: this.fb.array([], [Validators.required])
-    });
-
     this.formColegiosMagisteriales = this.fb.group({
       ColMags: this.fb.array([], [Validators.required])
     });
@@ -123,11 +116,6 @@ export class AfilBancoComponent implements OnInit {
   setEstadoDatGen(event: any) {
     this.resetEstados();
     this.DatosGenerales = true;
-  }
-
-  setEstadoDatFam(event: any) {
-    this.resetEstados();
-    this.datosFamiliares = true;
   }
 
   setEstadoDatCentTrab(event: any) {
@@ -203,10 +191,6 @@ export class AfilBancoComponent implements OnInit {
     this.formPuestTrab = datosPuestTrab;
   }
 
-  setDatosFamiliares(datosFamiliares: any) {
-    this.formDatosFamiliares = datosFamiliares;
-  }
-
   setDatosGenerales(datosGenerales: any) {
     this.formDatosGenerales = datosGenerales
   }
@@ -233,7 +217,6 @@ export class AfilBancoComponent implements OnInit {
 
     const encapsulatedDto = {
       datosGenerales,
-      familiares: this.formDatosFamiliares?.value?.familiar || [],
       colegiosMagisteriales: this.formColegiosMagisteriales?.value?.ColMags || [],
       bancos: this.formHistPag?.value?.banco || [],
       centrosTrabajo: this.formPuestTrab?.value?.trabajo.map((trabajo: any) => ({
@@ -311,16 +294,6 @@ export class AfilBancoComponent implements OnInit {
           ['ID Estado de Persona', data.datosGenerales.id_estado_persona || ''],
           ['ID Tipo de Persona', data.datosGenerales.ID_TIPO_PERSONA || '']
         ]),
-        { text: 'II. DATOS DE FAMILIARES', style: 'header' },
-        ...data.familiares.map((familiar: any) => this.createTable([
-          ['DNI', familiar.dni || ''],
-          ['Primer Nombre', familiar.primer_nombre || ''],
-          ['Segundo Nombre', familiar.segundo_nombre || ''],
-          ['Primer Apellido', familiar.primer_apellido || ''],
-          ['Segundo Apellido', familiar.segundo_apellido || ''],
-          ['Fecha de Nacimiento', familiar.fecha_nacimiento || ''],
-          ['Parentesco', familiar.parentesco || '']
-        ])),
         { text: 'III. DATOS DE CENTROS DE TRABAJO', style: 'header' },
         ...data.centrosTrabajo.map((centro: any) => this.createTable([
           ['ID Centro de Trabajo', centro.idCentroTrabajo || ''],
@@ -418,4 +391,69 @@ export class AfilBancoComponent implements OnInit {
     const year = d.getFullYear();
     return `${day}/${month}/${year}`;
   }
-}
+
+  createPDF() {
+    const documentDefinition:any = this.getDocumentDefinition();
+    pdfMake.createPdf(documentDefinition).download('example.pdf');
+  }
+
+
+  getDocumentDefinition() {
+    return {
+      content: [
+        {
+          table: {
+            widths: [20, '*', 100, 100, '*', 30],
+            body: [
+              [
+                { text: 'N°', style: 'tableHeader' },
+                { text: 'NOMBRE COMPLETO', style: 'tableHeader' },
+                { text: 'FECHA DE NACIMIENTO', style: 'tableHeader' },
+                { text: 'IDENTIDAD', style: 'tableHeader' },
+                { text: 'PARENTESCO', style: 'tableHeader' },
+                { text: '%', style: 'tableHeader' },
+              ],
+              [
+                { text: '1', rowSpan: 2, style: 'tableRow' },
+                { text: '', style: 'tableRow' },
+                { text: '', style: 'tableRow' },
+                { text: '', style: 'tableRow' },
+                { text: '', style: 'tableRow' },
+                { text: '', style: 'tableRow' },
+              ],
+              [
+                {}, // Cell spanning from the previous row
+                { text: 'DIRECCIÓN', style: 'tableRow' },
+                { text: '', style: 'tableRow' },
+                { text: 'TELEFONO/CEL', style: 'tableRow' },
+                { text: '', style: 'tableRow' },
+                { text: '', style: 'tableRow' },
+              ],
+            ],
+          },
+          layout: {
+            fillColor: function (rowIndex: number, node: any, columnIndex: number) {
+              return (rowIndex === 0) ? '#CCCCCC' : null;
+            }
+          }
+        }
+      ],
+      styles: {
+        tableHeader: {
+          bold: true,
+          fontSize: 10,
+          color: 'black',
+          fillColor: '#CCCCCC',
+          alignment: 'center'
+        },
+        tableRow: {
+          fontSize: 9,
+          color: 'black'
+        }
+      }
+    };
+  }
+
+
+
+  }

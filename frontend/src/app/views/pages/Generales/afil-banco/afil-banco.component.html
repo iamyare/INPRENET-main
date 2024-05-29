@@ -2,7 +2,7 @@
   <app-progressbar (newDatBenChange)="setEstadoDatGen($event)" (newEstCentrTrab)="setEstadoDatCentTrab($event)"
     (newdatosHS)="setDatosHS($event)" (newdatosRP)="setDatosReferenc($event)" (newdatosB)="setDatosBenef($event)"
     (newdatosF)="setDatosF($event)" (newdatosA)="setDatosA($event)" (newdatosColegiosMag)="setDatosAColegiosMag($event)"
-    (newDatosFa)="setEstadoDatFam($event)"></app-progressbar>
+    ></app-progressbar>
 </div>
 
 <div class="main-content">
@@ -12,10 +12,6 @@
 
     <app-col-magisteriales *ngIf="ColegiosMagisteriales" [datos]="formColegiosMagisteriales"
       (newDataColegioMagisterial)="setDatosColegiosMag($event)"></app-col-magisteriales>
-
-    <app-new-familiares *ngIf="datosFamiliares" [datos]="formDatosFamiliares"
-      (newDatosFamiliares)="setDatosFamiliares($event)">
-    </app-new-familiares>
 
     <app-dat-puesto-trab *ngIf="DatosPuestoTrab" [datos]="formPuestTrab"
       (newDatDatosPuestTrab)="setDatosPuetTrab1($event)">
@@ -45,9 +41,12 @@
         </button> -->
 
         <button mat-button color="primary" (click)="enviar()"
-          [disabled]="formDatosGenerales.controls.refpers.invalid || formColegiosMagisteriales.controls.ColMags.invalid || formDatosFamiliares.controls.familiar.invalid || formHistPag.controls.banco.invalid || formPuestTrab.controls.trabajo.invalid || formReferencias.controls.refpers.invalid || formBeneficiarios.controls.beneficiario.invalid">
+          [disabled]="formDatosGenerales.controls.refpers.invalid || formColegiosMagisteriales.controls.ColMags.invalid  || formHistPag.controls.banco.invalid || formPuestTrab.controls.trabajo.invalid || formReferencias.controls.refpers.invalid || formBeneficiarios.controls.beneficiario.invalid">
           Enviar Formulario
         </button>
+
+        <button (click)="createPDF()">Generar PDF</button>
+
       </div>
     </div>
   </div>

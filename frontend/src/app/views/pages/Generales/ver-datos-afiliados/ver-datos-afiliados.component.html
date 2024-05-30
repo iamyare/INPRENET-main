@@ -1,5 +1,5 @@
 <div>
-    <app-progressbar-verdatos (newDatBenChange)="setEstadoDatGen($event)" (newDatosFa)="setEstadoDatFam($event)"
+    <app-progressbar-verdatos (newDatBenChange)="setEstadoDatGen($event)"
         (newEstCentrTrab)="setEstadoDatCentTrab($event)" (newdatosColegiosMag)="setDatosAColegiosMag($event)"
         (newdatosHS)="setDatosHS($event)" (newEstCentrTrab)="setDatosA($event)" (newdatosRP)="setDatosReferenc($event)"
         (newdatosB)="setDatosBenef($event)" (newDatosCuentas)="setDatosCuentas($event)">
@@ -62,8 +62,6 @@
 <app-edit-datos-generales *ngIf="DatosGenerales && Afiliado" [Afiliado]="Afiliado"></app-edit-datos-generales>
 
 <app-ver-cuentas-personas *ngIf="cuentas && Afiliado" [Afiliado]="Afiliado"></app-ver-cuentas-personas>
-
-<app-edit-familiares *ngIf="datosFamiliares && Afiliado" [Afiliado]="Afiliado"></app-edit-familiares>
 <app-edit-colegios-magisteriales *ngIf="ColegiosMagisteriales && Afiliado"
     [Afiliado]="Afiliado"></app-edit-colegios-magisteriales>
 <app-edit-datos-bancarios *ngIf="DatosHS && Afiliado" [Afiliado]="Afiliado"></app-edit-datos-bancarios>

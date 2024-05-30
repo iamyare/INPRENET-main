@@ -24,11 +24,9 @@ export class ProgressbarVerdatosComponent {
   @Output() newdatosF = new EventEmitter<any>()
   @Output() newdatosA = new EventEmitter<any>()
   @Output() newdatosColegiosMag = new EventEmitter<any>()
-  @Output() newDatosFa = new EventEmitter<any>()
   @Output() newDatosCuentas = new EventEmitter<any>()
 
   datosG: boolean = true;
-  datosFa: boolean = false;
   datosColegMagisteriales: boolean = false;
   datosCT: boolean = false;
   datosHS: boolean = false;
@@ -40,7 +38,6 @@ export class ProgressbarVerdatosComponent {
 
   activarDatosGe() {
     this.datosG = true;
-    this.datosFa = false;
     this.datosCT = false;
     this.datosHS = false;
     this.datosRP = false;
@@ -52,22 +49,7 @@ export class ProgressbarVerdatosComponent {
     this.newDatBenChange.emit(this.datosG);
   }
 
-  activarDatosFam() {
-    this.datosG = false;
-    this.datosFa = true;
-    this.datosCT = false;
-    this.datosHS = false;
-    this.datosRP = false;
-    this.datosB = false;
-    this.datosF = false;
-    this.datosA = false;
-    this.cuentas = false;
-    this.datosColegMagisteriales = false;
-    this.newDatosFa.emit(this.datosFa);
-
-  }
   activarDatosCentTrab() {
-    this.datosFa = false;
     this.datosG = false;
     this.datosCT = true;
     this.datosHS = false;
@@ -81,7 +63,6 @@ export class ProgressbarVerdatosComponent {
 
   }
   activarDatosBancarios() {
-    this.datosFa = false;
     this.datosG = false;
     this.datosCT = false;
     this.datosHS = true;
@@ -94,7 +75,6 @@ export class ProgressbarVerdatosComponent {
     this.newdatosHS.emit(this.datosHS);
   }
   activarDatosRefPers() {
-    this.datosFa = false;
     this.datosG = false;
     this.datosCT = false;
     this.datosHS = false;
@@ -107,7 +87,6 @@ export class ProgressbarVerdatosComponent {
     this.newdatosRP.emit(this.datosRP);
   }
   activarDatosBenef() {
-    this.datosFa = false;
     this.datosG = false;
     this.datosCT = false;
     this.datosHS = false;
@@ -120,7 +99,6 @@ export class ProgressbarVerdatosComponent {
     this.newdatosB.emit(this.datosB);
   }
   activarFinalizar() {
-    this.datosFa = false;
     this.datosG = false;
     this.datosCT = false;
     this.datosHS = false;
@@ -134,7 +112,6 @@ export class ProgressbarVerdatosComponent {
   }
 
   activarDatosColMag() {
-    this.datosFa = false;
     this.datosG = false;
     this.datosCT = false;
     this.datosHS = false;
@@ -147,7 +124,6 @@ export class ProgressbarVerdatosComponent {
     this.newdatosColegiosMag.emit(this.datosColegMagisteriales);
   }
   activarDatosCuentas() {
-    this.datosFa = false;
     this.datosG = false;
     this.datosCT = false;
     this.datosHS = false;
@@ -161,7 +137,6 @@ export class ProgressbarVerdatosComponent {
   }
 
   prueba7() {
-    this.datosFa = false;
     this.datosG = false;
     this.datosCT = false;
     this.datosHS = false;

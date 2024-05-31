@@ -1,27 +1,14 @@
 import { Entity, PrimaryGeneratedColumn, ManyToOne, JoinColumn, Column, CreateDateColumn, UpdateDateColumn, OneToMany } from 'typeorm';
 import { NET_SESION } from './net_sesion.entity';
-import { Net_Empleado } from 'src/modules/Empresarial/entities/net_empleado.entity';
 import { Net_Seguridad } from './net_seguridad.entity';
 import { Net_Rol_Empresa } from './net_rol_empresa.entity';
+import { Net_Centro_Trabajo } from 'src/modules/Empresarial/entities/net_centro_trabajo.entity';
+import { Net_Empleado_Centro_Trabajo } from 'src/modules/Empresarial/entities/net_empleado_centro_trabajo.entity';
 
 @Entity({ name: 'NET_USUARIO_EMPRESA' })
 export class Net_Usuario_Empresa {
   @PrimaryGeneratedColumn({ type: 'int', name: 'ID_USUARIO_EMPRESA', primaryKeyConstraintName: 'PK_id_usuario_empresa' })
   id_usuario_empresa: number;
-
-  @ManyToOne(() => Net_Empleado, user => user.usuarioEmpresas, { nullable: false })
-  @JoinColumn({ name: 'ID_EMPLEADO', referencedColumnName: 'id_empleado', foreignKeyConstraintName: 'FK_empleado_usuarioEmpresa' })
-  user: Net_Empleado;
-
-  @ManyToOne(() => Net_Rol_Empresa, role => role.usuarioEmpresas, { nullable: false })
-  @JoinColumn({ name: 'ID_ROLE', referencedColumnName: 'id_rol_empresa', foreignKeyConstraintName: 'FK_role_usuarioEmpresa' })
-  role: Net_Rol_Empresa;
-
-  @Column('varchar2', { length: 255, nullable: false, name: 'NOMBRE_PUESTO' })
-  nombrePuesto: string;
-
-  @Column('varchar2', { length: 255, nullable: false, name: 'NUMERO_EMPLEADO' })
-  numeroEmpleado: string;
 
   @Column('varchar2', { length: 50, default: 'INACTIVO', name: 'ESTADO' })
   estado: string;
@@ -46,4 +33,12 @@ export class Net_Usuario_Empresa {
 
   @OneToMany(() => NET_SESION, sesion => sesion.usuario)
   sesiones: NET_SESION[];
+
+  @ManyToOne(() => Net_Rol_Empresa, rolEmpresa => rolEmpresa.usuarioEmpresas, { nullable: false })
+  @JoinColumn({ name: 'ID_ROL_EMPRESA', referencedColumnName: 'id_rol_empresa', foreignKeyConstraintName: 'FK_id_rol_empresa_usuario_empresa' })
+  rolEmpresa: Net_Rol_Empresa;
+
+  @ManyToOne(() => Net_Empleado_Centro_Trabajo, empleadoCentroTrabajo => empleadoCentroTrabajo.usuarioEmpresas, { nullable: false })
+  @JoinColumn({ name: 'ID_EMPLEADO_CENTRO_TRABAJO', referencedColumnName: 'id_empleado_centro_trabajo', foreignKeyConstraintName: 'FK_id_empleado_centro_trabajo_usuario_empresa' })
+  empleadoCentroTrabajo: Net_Empleado_Centro_Trabajo;
 }

@@ -66,7 +66,7 @@ export class UsuarioService {
     });
 
     const empleado = await this.empleadoRepository.save(nuevoEmpleado);
-    const nuevoUsuario = this.usuarioEmpresaRepository.create({
+    /* const nuevoUsuario = this.usuarioEmpresaRepository.create({
       nombrePuesto,
       numeroEmpleado,
       estado: 'PENDIENTE',
@@ -74,9 +74,9 @@ export class UsuarioService {
       contrasena: await bcrypt.hash('temporal', 10),
       role: rol,
       user: empleado,
-    });
+    }); */
 
-    await this.usuarioEmpresaRepository.save(nuevoUsuario);
+    //await this.usuarioEmpresaRepository.save(nuevoUsuario);
 
     // Generar un token JWT para la verificación de correo
     const token = this.jwtService.sign({ correo });
@@ -124,12 +124,12 @@ export class UsuarioService {
     usuario.contrasena = await bcrypt.hash(contrasena, 10);
     usuario.estado = 'ACTIVO';
     usuario.fecha_verificacion = new Date();
-    usuario.user.telefonoEmpleado = telefonoEmpleado;
+    /* usuario.user.telefonoEmpleado = telefonoEmpleado;
     usuario.user.numero_identificacion = numero_identificacion;
     usuario.user.archivo_identificacion = archivo_identificacion;
 
     await this.empleadoRepository.save(usuario.user);
-    await this.usuarioEmpresaRepository.save(usuario);
+    await this.usuarioEmpresaRepository.save(usuario); */
 
     // Crear registros de seguridad
     const seguridad1 = this.seguridadRepository.create({
@@ -172,8 +172,8 @@ export class UsuarioService {
     const payload = {
       correo,
       sub: usuario.id_usuario_empresa,
-      rol: usuario.role.nombre_rol,
-      idEmpresa: usuario.role.centroTrabajo.id_centro_trabajo
+     /*  rol: usuario.role.nombre_rol,
+      idEmpresa: usuario.role.centroTrabajo.id_centro_trabajo */
     };
 
     const accessToken = this.jwtService.sign(payload);
@@ -181,9 +181,9 @@ export class UsuarioService {
   }
 
   async getRolesPorEmpresa(centroId: number) {
-    return this.rolEmpresaRepository.find({
+    /* return this.rolEmpresaRepository.find({
       where: { centroTrabajo: { id_centro_trabajo: centroId }, nombre_rol: Not('ADMINISTRADOR') },
-    });
+    }); */
   }
 
   

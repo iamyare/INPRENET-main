@@ -1,13 +1,17 @@
 import { Column, Entity, Index, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
-import { Net_perf_pers_cent_trab } from 'src/modules/Persona/entities/net_perf_pers_cent_trab.entity';
-import { Net_Detalle_planilla_ingreso } from '../../Planilla/Ingresos/detalle-plan-ingr/entities/net_detalle_plani_ing.entity';
 import { Net_Municipio } from 'src/modules/Regional/municipio/entities/net_municipio.entity';
+import { Net_perf_pers_cent_trab } from 'src/modules/Persona/entities/net_perf_pers_cent_trab.entity';
+import { Net_Detalle_planilla_ingreso } from 'src/modules/Planilla/Ingresos/detalle-plan-ingr/entities/net_detalle_plani_ing.entity';
 import { Net_Deduccion } from 'src/modules/Planilla/deduccion/entities/net_deduccion.entity';
+import { Net_Empleado_Centro_Trabajo } from './net_empleado_centro_trabajo.entity';
+import { Net_Usuario_Empresa } from 'src/modules/usuario/entities/net_usuario_empresa.entity';
 import { Net_Rol_Empresa } from 'src/modules/usuario/entities/net_rol_empresa.entity';
+import { Net_Sociedad } from './net.sociedad.entity';
+import { Net_Sociedad_Centro_Trabajo } from './net_sociedad_centro.entity';
 
 @Entity({ name: 'NET_CENTRO_TRABAJO' })
 export class Net_Centro_Trabajo {
-    @PrimaryGeneratedColumn({ type: 'int', name: 'ID_CENTRO_TRABAJO', primaryKeyConstraintName: 'PK_id_centTrab_centTrab' })
+    @PrimaryGeneratedColumn({ type: 'int', name: 'ID_CENTRO_TRABAJO', primaryKeyConstraintName: 'PK_id_centro_trabajo' })
     id_centro_trabajo: number;
 
     @Column('varchar2', { length: 40, nullable: false, name: 'NOMBRE_CENTRO_TRABAJO' })
@@ -59,7 +63,12 @@ export class Net_Centro_Trabajo {
     @OneToMany(() => Net_Deduccion, deduccion => deduccion.centroTrabajo)
     deduccion: Net_Deduccion[];
 
+    @OneToMany(() => Net_Empleado_Centro_Trabajo, empleadoCentroTrabajo => empleadoCentroTrabajo.centroTrabajo)
+    empleadoCentroTrabajos: Net_Empleado_Centro_Trabajo[];
+
     @OneToMany(() => Net_Rol_Empresa, rolEmpresa => rolEmpresa.centroTrabajo)
-    roles: Net_Rol_Empresa[];
-    
+    rolEmpresas: Net_Rol_Empresa[];
+
+    @OneToMany(() => Net_Sociedad_Centro_Trabajo, sociedadCentroTrabajo => sociedadCentroTrabajo.centroTrabajo)
+    sociedadCentroTrabajos: Net_Sociedad_Centro_Trabajo[];
 }

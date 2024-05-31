@@ -28,7 +28,7 @@ import { Net_Seguridad } from './entities/net_seguridad.entity';
       NET_USUARIO_PRIVADA, 
       Net_Centro_Trabajo, 
       NET_SESION,
-      Net_Seguridad,
+      Net_Seguridad
     ]),
     PassportModule.register({ defaultStrategy: 'jwt' }),
     JwtModule.registerAsync({

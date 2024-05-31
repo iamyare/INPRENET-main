@@ -83,7 +83,7 @@ export class DatosEstaticosService {
     }
   }
 
-  async gettipoIdent() {
+  gettipoIdent = async () => {
     const response = await this.tipoIdentificacionService.obtenerTiposIdentificacion().toPromise();
     const mappedResponse = response.map((item: { id_identificacion: any; tipo_identificacion: any; }) => ({
       label: item.tipo_identificacion,
@@ -170,7 +170,6 @@ export class DatosEstaticosService {
       return this.nacionalidades;
     }
   }
-
   async getMunicipios() {
     try {
       const response = await this.direccionSer.getAllMunicipios().toPromise();
@@ -204,10 +203,9 @@ export class DatosEstaticosService {
     }));
     return this.colegiosMagisteriales;
   }
-
   async getRoles() {
     try {
-      const roles:any = await this.authService.getRolesExceptAdmin().toPromise();
+      const roles: any = await this.authService.getRolesExceptAdmin().toPromise();
       this.tipoRol = roles.map((role: { id_rol: any; nombre_rol: any; }) => ({
         value: role.id_rol,
         label: role.nombre_rol
@@ -398,5 +396,4 @@ export class DatosEstaticosService {
     { value: "TÍO PATERNO", label: "TÍO PATERNO" },
     { value: "YERNO", label: "YERNO" }
   ];
-
 }

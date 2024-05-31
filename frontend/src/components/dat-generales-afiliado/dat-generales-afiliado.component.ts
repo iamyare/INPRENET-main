@@ -31,7 +31,7 @@ export function generateAddressFormGroup(datos?: any): FormGroup {
     id_tipo_identificacion: new FormControl(datos?.id_tipo_identificacion, Validators.required),
     id_pais_nacionalidad: new FormControl(datos?.id_pais_nacionalidad, Validators.required),
     sexo: new FormControl(datos?.sexo, [Validators.required, Validators.maxLength(1), Validators.pattern(/^[FM]$/)]),
-    cantidad_hijos : new FormControl(datos?.cantidad_hijos, Validators.required),
+    cantidad_hijos: new FormControl(datos?.cantidad_hijos, Validators.required),
     avenida: new FormControl(datos?.avenida, [
       Validators.maxLength(75),
       Validators.pattern(noSpecialCharsPattern)
@@ -80,7 +80,8 @@ export function generateAddressFormGroup(datos?: any): FormGroup {
     },
   ],
 })
-export class DatGeneralesAfiliadoComponent implements OnInit, OnDestroy {
+export class DatGeneralesAfiliadoComponent implements OnInit {
+  public estadoCargDatos: boolean = false;
   public archivo: any;
   public dataEdit: any;
   tipoIdentData: any = [];
@@ -127,6 +128,7 @@ export class DatGeneralesAfiliadoComponent implements OnInit, OnDestroy {
     const currentYear = new Date();
     this.minDate = new Date(currentYear.getFullYear(), currentYear.getMonth(), currentYear.getDate(), currentYear.getHours(), currentYear.getMinutes(), currentYear.getSeconds());
   }
+
   private initForm() {
     let existingForm = this.formStateService.getForm(this.formKey);
     if (existingForm) {
@@ -135,11 +137,11 @@ export class DatGeneralesAfiliadoComponent implements OnInit, OnDestroy {
       this.formParent = this.fb.group({
         refpers: this.fb.array([])
       });
-      /* this.formStateService.setForm(this.formKey, this.formParent); */
     }
   }
 
   ngOnInit(): void {
+    this.cargarDatosEstaticos();
     this.initForm();
     const ref_RefPers = this.formParent.get('refpers') as FormArray;
     let temp = {}
@@ -163,56 +165,41 @@ export class DatGeneralesAfiliadoComponent implements OnInit, OnDestroy {
         this.form.patchValue(savedForm.value, { emitEvent: false });
       }
     });
+  }
 
-    this.cargarTiposIdentificacion();
-    this.cargarNacionalidades();
-    this.cargarDepartamentos(); // Cargar los departamentos al inicializar
-    this.cargarProfesiones();
+  async cargarDatosEstaticos() {
+    this.cargarDepartamentos();
+    this.estadoCargDatos = true;
+
+    this.tipoIdentData = this.datosEstaticos.tipoIdent // Cargar los departamentos al inicializar
+    this.nacionalidades = this.datosEstaticos.nacionalidades // Cargar los departamentos al inicializar
+    this.profesiones = this.datosEstaticos.profesiones // Cargar los departamentos al inicializar
+    this.municipios = this.datosEstaticos.municipios // Cargar los departamentos al inicializar
+
     this.generos = this.datosEstaticos.genero;
     this.sexo = this.datosEstaticos.sexo;
-  }
 
-  ngOnDestroy() {
-    /* this.formStateService.setFormData(this.form); */
-  }
+    if (this.datos.value.refpers.length > 0) {
+      await this.cargarMunicipios(this.datos.value.refpers[0].id_municipio_residencia);
+    }
 
-  cargarProfesiones() {
-    this.datosEstaticos.getProfesiones().then(data => {
-      this.profesiones = data;
-    }).catch(error => {
-      console.error('Error al cargar profesiones:', error);
-    });
-  }
 
-  cargarEstados() {
-    this.datosEstaticos.getEstados().then(data => {
-      this.profesiones = data;
-    }).catch(error => {
-      console.error('Error al cargar estados:', error);
-    });
-  }
-
-  cargarTiposIdentificacion() {
-    this.datosEstaticos.gettipoIdent().then(data => {
-      this.tipoIdentData = data;
-    }).catch(error => {
-      console.error('Error al cargar tipos de identificación:', error);
-    });
-  }
-
-  cargarNacionalidades() {
-    this.datosEstaticos.getNacionalidad().then(data => {
-      this.nacionalidades = data;
-    }).catch(error => {
-      console.error('Error al cargar nacionalidades:', error);
-    });
   }
 
   cargarDepartamentos() {
-    this.datosEstaticos.getDepartamentos().then(data => {
-      this.departamentos = data;
-    }).catch(error => {
-      console.error('Error al cargar departamentos:', error);
+    this.direccionSer.getAllDepartments().subscribe({
+      next: (data) => {
+        const transformedJson = data.map((departamento: { id_departamento: any; nombre_departamento: any; }) => {
+          return {
+            value: departamento.id_departamento,
+            label: departamento.nombre_departamento
+          };
+        });
+        this.departamentos = transformedJson;
+      },
+      error: (error) => {
+        console.error('Error al cargar municipios:', error);
+      }
     });
   }
 

@@ -68,9 +68,9 @@ export class DetalleBeneficioService {
               tipoPersona: {
                 tipo_persona: 'AFILIADO',
               },
-              estadoPersona: { Descripcion: 'ACTIVO' }
+              eliminado: 0
             },
-            relations: ['persona', 'estadoPersona']
+            relations: ['persona']
           }
         );
 
@@ -108,9 +108,9 @@ export class DetalleBeneficioService {
               tipoPersona: {
                 tipo_persona: 'BENEFICIARIO',
               },
-              estadoPersona: { Descripcion: 'ACTIVO' }
+              eliminado: 0
             },
-            relations: ['persona', 'estadoPersona']
+            relations: ['persona']
           }
         );
 

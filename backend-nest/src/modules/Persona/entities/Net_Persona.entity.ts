@@ -11,6 +11,7 @@ import { Net_Persona_Por_Banco } from "src/modules/banco/entities/net_persona-ba
 import { Net_perf_pers_cent_trab } from "./net_perf_pers_cent_trab.entity";
 import { Net_Ref_Per_Pers } from "./net_ref-Per-Persona.entity";
 import { NET_PROFESIONES } from "src/modules/transacciones/entities/net_profesiones.entity";
+import { Net_Estado_Persona } from "./net_estado_persona.entity";
 @Entity({
     name: 'NET_PERSONA',
 })
@@ -97,6 +98,19 @@ export class Net_Persona {
     @Column('date', { nullable: true, name: 'FECHA_NACIMIENTO' })
     fecha_nacimiento: string;
 
+    @Column('varchar', { nullable: true, name: 'TIPO_DEFUNCION' })
+    tipo_defuncion: number;
+
+    @Column('varchar', { nullable: true, name: 'OBSERVACIONES' })
+    observaciones: number;
+
+    @Column('varchar', { nullable: true, name: 'CERTIFICADO_DEFUNCION' })
+    certificado_defuncion: number;
+
+    @ManyToOne(() => Net_Estado_Persona, estadoPersona => estadoPersona.persona)
+    @JoinColumn({ name: 'ID_ESTADO_PERSONA', foreignKeyConstraintName: "FK_ID_ESTADO_PERSONA_DETALLE_PERSONA" })
+    estadoPersona: Net_Estado_Persona;
+
     @Column('date', { nullable: true, name: 'FECHA_DEFUNCION' })
     fecha_defuncion: string;
 
@@ -115,6 +129,10 @@ export class Net_Persona {
     @ManyToOne(() => Net_Municipio, municipio => municipio.persona, { cascade: true })
     @JoinColumn({ name: 'ID_MUNICIPIO_RESIDENCIA', foreignKeyConstraintName: "FK_ID_MUNIC_RESID_PERS" })
     municipio: Net_Municipio;
+
+    @ManyToOne(() => Net_Municipio, municipio => municipio.persona, { cascade: true })
+    @JoinColumn({ name: 'ID_MUNICIPIO_DEFUNCION', foreignKeyConstraintName: "FK_ID_MUNIC_DEFUNC_PERS" })
+    municipio_defuncion: Net_Municipio;
 
     @OneToMany(() => NET_DETALLE_PERSONA, detallePersona => detallePersona.persona)
     detallesPersona: NET_DETALLE_PERSONA[];

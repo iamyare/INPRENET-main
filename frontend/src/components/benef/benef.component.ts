@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import { ChangeDetectionStrategy, Component, EventEmitter, Input, OnDestroy, OnInit, Output } from '@angular/core';
 import { AbstractControl, FormArray, FormBuilder, FormControl, FormGroup, ValidationErrors, Validators } from '@angular/forms';
 import { FormStateService } from 'src/app/services/form-state.service';
 import { DireccionService } from 'src/app/services/direccion.service';
@@ -18,7 +18,8 @@ export class BenefComponent implements OnInit {
   public nacionalidades: any[] = [];
   sexo: { value: string; label: string }[] = [];
   generos: { value: string; label: string }[] = [];
-
+  parentesco: any;
+  departamentos: any = [];
   @Input() datos: any;
   @Output() newDatBenChange = new EventEmitter<FormGroup>();
 
@@ -26,7 +27,8 @@ export class BenefComponent implements OnInit {
     private formStateService: FormStateService,
     private fb: FormBuilder,
     private direccionService: DireccionService,
-    private datosEstaticosService: DatosEstaticosService
+    private datosEstaticosService: DatosEstaticosService,
+    public direccionSer: DireccionService,
   ) {
     const currentYear = new Date();
     this.minDate = new Date(currentYear.getFullYear(), currentYear.getMonth(), currentYear.getDate());
@@ -37,8 +39,17 @@ export class BenefComponent implements OnInit {
 
   ngOnInit(): void {
     this.initForm();
-    this.loadMunicipios();
+    this.cargarDepartamentos();
     this.loadNacionalidades();
+    /* this.loadMunicipios(); */
+
+    this.parentesco = this.datosEstaticosService.parentesco;
+    const nuevoParentesco = { value: "OTRO", label: "OTRO" };
+    const existe = this.parentesco.some((item: { value: string; }) => item.value === nuevoParentesco.value);
+    if (!existe) {
+      this.parentesco.push(nuevoParentesco);
+    }
+
     this.generos = this.datosEstaticosService.genero;
     this.sexo = this.datosEstaticosService.sexo;
     const beneficiariosArray = this.formParent.get('beneficiario') as FormArray;
@@ -71,20 +82,49 @@ export class BenefComponent implements OnInit {
         primer_apellido: new FormControl(datosBeneficiario?.primer_apellido || '', [Validators.required, Validators.maxLength(40)]),
         segundo_apellido: new FormControl(datosBeneficiario?.segundo_apellido || ''),
         genero: new FormControl(datosBeneficiario?.genero || ''),
-        cantidad_dependientes: new FormControl(datosBeneficiario?.cantidad_dependientes || 0),
         telefono_1: new FormControl(datosBeneficiario?.telefono_1 || ''),
         sexo: new FormControl(datosBeneficiario?.sexo || ''),
         fecha_nacimiento: new FormControl(datosBeneficiario?.fecha_nacimiento || '', Validators.required),
         direccion_residencia: new FormControl(datosBeneficiario?.direccion_residencia || ''),
         id_pais: new FormControl(datosBeneficiario?.id_pais || null, Validators.required),
         id_municipio_residencia: new FormControl(datosBeneficiario?.id_municipio_residencia || null, Validators.required),
+        id_departamento_residencia: new FormControl(datosBeneficiario?.id_departamento_residencia || null, Validators.required),
         porcentaje: new FormControl(datosBeneficiario?.porcentaje, [
           Validators.required,
           Validators.maxLength(5),
           Validators.min(1),
           this.validarSumaPorcentajes.bind(this)
         ]),
+        parentesco: new FormControl(datosBeneficiario?.parentesco, [
+          Validators.required,
+          Validators.minLength(2),
+          Validators.maxLength(30),
+        ]),
       }),
+    });
+  }
+
+  cargarDepartamentos() {
+    this.datosEstaticosService.getDepartamentos().then(data => {
+      this.departamentos = data;
+    }).catch(error => {
+      console.error('Error al cargar departamentos:', error);
+    });
+  }
+
+  onDepartamentoChange(event: any) {
+    const departamentoId = event.value;
+    this.cargarMunicipios(departamentoId);
+  }
+
+  cargarMunicipios(departamentoId: number) {
+    this.direccionSer.getMunicipiosPorDepartamentoId(departamentoId).subscribe({
+      next: (data) => {
+        this.municipios = data;
+      },
+      error: (error) => {
+        console.error('Error al cargar municipios:', error);
+      }
     });
   }
 

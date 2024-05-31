@@ -11,6 +11,6 @@ export class Net_Estado_Persona {
     @Column('varchar2', { length: 50, nullable: false, name: 'DESCRIPCION' })
     Descripcion: string;
 
-    @OneToMany(() => NET_DETALLE_PERSONA, detallePersona => detallePersona.estadoPersona)
-    detallesPersona: NET_DETALLE_PERSONA[];
+    @OneToMany(() => Net_Persona, persona => persona.estadoPersona)
+    persona: Net_Persona;
 }

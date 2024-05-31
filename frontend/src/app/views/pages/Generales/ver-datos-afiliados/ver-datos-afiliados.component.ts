@@ -26,10 +26,10 @@ export class VerDatosAfiliadosComponent implements OnInit {
   cuentas = false;
 
   constructor(private svcAfiliado: AfiliadoService,
-              private toastr: ToastrService,
-              private http: HttpClient) {
-                (pdfMake as any).vfs = pdfFonts.pdfMake.vfs;
-               }
+    private toastr: ToastrService,
+    private http: HttpClient) {
+    (pdfMake as any).vfs = pdfFonts.pdfMake.vfs;
+  }
 
   ngOnInit(): void {
     this.myFormFields = [
@@ -210,92 +210,92 @@ export class VerDatosAfiliadosComponent implements OnInit {
     const response: any = await this.http.get('/assets/images/MEMBRETADO.jpg', { responseType: 'blob' }).toPromise();
     const reader = new FileReader();
     reader.onloadend = () => {
-        const base64data = reader.result as string;
+      const base64data = reader.result as string;
 
-        const docDefinition: any = {
-            pageSize: 'A4',
-            background: {
-                image: base64data,
-                width: 595.28,
-                height: 841.89
-            },
-            content: [
-                { text: ' ', style: 'space' },
-                { text: 'A QUIEN INTERESE', style: 'header' },
-                {
-                    text: 'El Instituto Nacional de Previsión del Magisterio (INPREMA), por este medio indica que:',
-                    style: 'subheader'
-                },
-                {
-                    text: `${afiliado.PRIMER_NOMBRE} ${afiliado.SEGUNDO_NOMBRE} ${afiliado.TERCER_NOMBRE} ${afiliado.PRIMER_APELLIDO} ${afiliado.SEGUNDO_APELLIDO}`,
-                    style: 'name'
-                },
-                {
-                    text: [
-                        { text: 'Se encuentra afiliado a este Sistema de Previsión con el número ' },
-                        { text: `${afiliado.DNI}`, style: 'dni' }
-                    ],
-                    style: 'body'
-                },
-                {
-                    text: `Y para los fines que el interesado estime conveniente, se extiende el presente documento en la ciudad de Tegucigalpa, Departamento de Francisco Morazán, a los ${new Date().getDate()} días del mes de ${new Date().toLocaleString('es-HN', { month: 'long' })} del año ${new Date().getFullYear()}.`,
-                    style: 'body'
-                },
-                { text: '\n\n\n' },
-                { canvas: [{ type: 'line', x1: 0, y1: 0, x2: 250, y2: 0, lineWidth: 1 }], margin: [127, 200, 0, 0] },
-                { text: 'Fabiola Caceres', style: 'signature' },
-                { text: 'Jefe Departamento de Afiliación', style: 'signatureTitle' }
+      const docDefinition: any = {
+        pageSize: 'A4',
+        background: {
+          image: base64data,
+          width: 595.28,
+          height: 841.89
+        },
+        content: [
+          { text: ' ', style: 'space' },
+          { text: 'A QUIEN INTERESE', style: 'header' },
+          {
+            text: 'El Instituto Nacional de Previsión del Magisterio (INPREMA), por este medio indica que:',
+            style: 'subheader'
+          },
+          {
+            text: `${afiliado.PRIMER_NOMBRE} ${afiliado.SEGUNDO_NOMBRE} ${afiliado.TERCER_NOMBRE} ${afiliado.PRIMER_APELLIDO} ${afiliado.SEGUNDO_APELLIDO}`,
+            style: 'name'
+          },
+          {
+            text: [
+              { text: 'Se encuentra afiliado a este Sistema de Previsión con el número ' },
+              { text: `${afiliado.DNI}`, style: 'dni' }
             ],
-            styles: {
-                space: {
-                    margin: [0, 100, 0, 0]
-                },
-                header: {
-                    fontSize: 18,
-                    bold: true,
-                    alignment: 'center',
-                    margin: [0, 20, 0, 10],
-                    decoration: 'underline'
-                },
-                subheader: {
-                    fontSize: 11,
-                    alignment: 'left',
-                    margin: [40, 10, 40, 5]
-                },
-                name: {
-                    fontSize: 14,
-                    bold: true,
-                    alignment: 'center',
-                    margin: [40, 10, 40, 5],
-                    decoration: 'underline'
-                },
-                body: {
-                    fontSize: 11,
-                    alignment: 'left',
-                    margin: [40, 10, 40, 5]
-                },
-                dni: {
-                    fontSize: 11,
-                    bold: true,
-                    decoration: 'underline'
-                },
-                signature: {
-                    fontSize: 12,
-                    bold: true,
-                    alignment: 'center',
-                    margin: [0, 10, 0, 0]
-                },
-                signatureTitle: {
-                    fontSize: 12,
-                    alignment: 'center'
-                }
-            }
-        };
+            style: 'body'
+          },
+          {
+            text: `Y para los fines que el interesado estime conveniente, se extiende el presente documento en la ciudad de Tegucigalpa, Departamento de Francisco Morazán, a los ${new Date().getDate()} días del mes de ${new Date().toLocaleString('es-HN', { month: 'long' })} del año ${new Date().getFullYear()}.`,
+            style: 'body'
+          },
+          { text: '\n\n\n' },
+          { canvas: [{ type: 'line', x1: 0, y1: 0, x2: 250, y2: 0, lineWidth: 1 }], margin: [127, 200, 0, 0] },
+          { text: 'Fabiola Caceres', style: 'signature' },
+          { text: 'Jefe Departamento de Afiliación', style: 'signatureTitle' }
+        ],
+        styles: {
+          space: {
+            margin: [0, 100, 0, 0]
+          },
+          header: {
+            fontSize: 18,
+            bold: true,
+            alignment: 'center',
+            margin: [0, 20, 0, 10],
+            decoration: 'underline'
+          },
+          subheader: {
+            fontSize: 11,
+            alignment: 'left',
+            margin: [40, 10, 40, 5]
+          },
+          name: {
+            fontSize: 14,
+            bold: true,
+            alignment: 'center',
+            margin: [40, 10, 40, 5],
+            decoration: 'underline'
+          },
+          body: {
+            fontSize: 11,
+            alignment: 'left',
+            margin: [40, 10, 40, 5]
+          },
+          dni: {
+            fontSize: 11,
+            bold: true,
+            decoration: 'underline'
+          },
+          signature: {
+            fontSize: 12,
+            bold: true,
+            alignment: 'center',
+            margin: [0, 10, 0, 0]
+          },
+          signatureTitle: {
+            fontSize: 12,
+            alignment: 'center'
+          }
+        }
+      };
 
-        pdfMake.createPdf(docDefinition).open();
+      pdfMake.createPdf(docDefinition).open();
     };
 
     reader.readAsDataURL(response);
-}
+  }
 
 }

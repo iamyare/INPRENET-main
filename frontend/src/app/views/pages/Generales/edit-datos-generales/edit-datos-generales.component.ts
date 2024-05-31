@@ -1,13 +1,15 @@
 import { Component, Input } from '@angular/core';
-import { FormArray, FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { FormArray, FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
 import { generateAddressFormGroup } from '@docs-components/dat-generales-afiliado/dat-generales-afiliado.component';
 import { EditarDialogComponent } from '@docs-components/editar-dialog/editar-dialog.component';
 import { ToastrService } from 'ngx-toastr';
 import { AfiliadoService } from 'src/app/services/afiliado.service';
+import { DatosEstaticosService } from 'src/app/services/datos-estaticos.service';
+import { DireccionService } from 'src/app/services/direccion.service';
 import { FieldConfig } from 'src/app/shared/Interfaces/field-config';
 import { TableColumn } from 'src/app/shared/Interfaces/table-column';
-import { convertirFechaInputs } from 'src/app/shared/functions/formatoFecha';
+import { convertirFecha, convertirFechaInputs } from 'src/app/shared/functions/formatoFecha';
 import { unirNombres } from 'src/app/shared/functions/formatoNombresP';
 
 @Component({
@@ -18,9 +20,14 @@ import { unirNombres } from 'src/app/shared/functions/formatoNombresP';
 export class EditDatosGeneralesComponent {
   datosGen: any;
   public myFormFields: FieldConfig[] = []
-
+  municipios: any = [];
+  departamentos: any = [];
   unirNombres: any = unirNombres;
   datosTabl: any[] = [];
+  TipoDefuncion: any[] = [];
+  estado: any[] = [];
+  estadoPersona: string = "";
+  minDate: Date;
 
   public myColumns: TableColumn[] = [];
   public filas: any[] = [];
@@ -29,21 +36,33 @@ export class EditDatosGeneralesComponent {
   datos!: any;
 
   form1 = this.fb.group({
-    /*  DatosGenerales: generateAddressFormGroup(this.datos), */
+    estado: ["", [Validators.required]],
+    certificado_defuncion: ["", [Validators.required]],
+    tipo_defuncion: ["", [Validators.required]],
+    observaciones: ["", [Validators.required]],
+    fecha_defuncion: ["", [Validators.required]],
+    id_departamento_defuncion: ["", [Validators.required]],
+    id_municipio_defuncion: ["", [Validators.required]]
   });
 
   form: any;
   formDatosGenerales: any = new FormGroup({
-    refpers: new FormArray([], [Validators.required])
-  });
+    refpers: new FormArray([], [Validators.required]),
+  },
+  );
 
   @Input() Afiliado: any;
   constructor(
     private fb: FormBuilder,
     private svcAfiliado: AfiliadoService,
     private toastr: ToastrService,
-    private dialog: MatDialog
-  ) { }
+    private dialog: MatDialog,
+    private datosEstaticos: DatosEstaticosService,
+    public direccionSer: DireccionService,
+  ) {
+    const currentYear = new Date();
+    this.minDate = new Date(currentYear.getFullYear(), currentYear.getMonth(), currentYear.getDate(), currentYear.getHours(), currentYear.getMinutes(), currentYear.getSeconds());
+  }
   ngOnInit(): void {
     this.myFormFields = [
       { type: 'text', label: 'DNI del afiliado', name: 'dni', validations: [Validators.required, Validators.minLength(13), Validators.maxLength(14)], display: true },
@@ -76,34 +95,79 @@ export class EditDatosGeneralesComponent {
         isEditable: true
       }
     ];
+    this.TipoDefuncion = [
+      { value: "ACCIDENTAL" },
+      { value: "ASESINATO" },
+      { value: "HOMICIDIO" },
+      { value: "NATURAL" },
+      { value: "SUICIDIO" },
+    ]
+    this.estado = [
+      { value: "ACTIVO" },
+      { value: "FALLECIDO" },
+      { value: "INACTIVO" },
+    ]
 
     this.previsualizarInfoAfil();
-    this.getFilas().then(() => this.cargar());
+    this.cargarDepartamentos();
   }
+
+  cargarDepartamentos() {
+    this.direccionSer.getAllDepartments().subscribe({
+      next: (data) => {
+        const transformedJson = data.map((departamento: { id_departamento: any; nombre_departamento: any; }) => {
+          return {
+            value: departamento.id_departamento,
+            label: departamento.nombre_departamento
+          };
+        });
+        this.departamentos = transformedJson;
+      },
+      error: (error) => {
+        console.error('Error al cargar municipios:', error);
+      }
+    });
+    /* this.datosEstaticos.getDepartamentos((result) => {
+      this.departamentos = result// Aquí puedes trabajar con los datos
+    }); */
+  }
+
+  cargarMunicipios(departamentoId: number) {
+    this.direccionSer.getMunicipiosPorDepartamentoId(departamentoId).subscribe({
+      next: (data) => {
+        this.municipios = data;
+      },
+      error: (error) => {
+        console.error('Error al cargar municipios:', error);
+      }
+    });
+  }
+
+  onDepartamentoChange(event: any) {
+    const departamentoId = event.value;
+    this.cargarMunicipios(departamentoId);
+  }
+
 
   async obtenerDatos(event: any): Promise<any> {
     this.form = event;
   }
 
-  cargar() {
-    if (this.ejecF) {
-      this.ejecF(this.filas).then(() => {
-      });
-    }
-  }
   setDatosGenerales(datosGenerales: any) {
     this.formDatosGenerales = datosGenerales
   }
 
-  previsualizarInfoAfil() {
+  async previsualizarInfoAfil() {
     if (this.Afiliado) {
-      this.svcAfiliado.getAfilByParam(this.Afiliado.DNI).subscribe(
-        async (result) => {
+      await this.svcAfiliado.getAfilByParam(this.Afiliado.DNI).subscribe(
+        (result) => {
           this.datos = result;
           this.Afiliado = result;
+          this.estadoPersona = result.estadoPersona
 
           this.formDatosGenerales.value.refpers[0] = {
             dni: result.DNI,
+            rtn: result.RTN,
             primer_nombre: result.PRIMER_NOMBRE,
             segundo_nombre: result.SEGUNDO_NOMBRE,
             primer_apellido: result.PRIMER_APELLIDO,
@@ -122,21 +186,32 @@ export class EditDatosGeneralesComponent {
             estado_civil: result.ESTADO_CIVIL,
             representacion: result.REPRESENTACION,
             sexo: result.SEXO,
-
-            id_profesion: result.ID_PROFESION,
-
-            id_municipio_residencia: result.ID_MUNICIPIO,
             id_pais_nacionalidad: result.ID_PAIS,
             id_tipo_identificacion: result.ID_IDENTIFICACION,
+            id_profesion: result.ID_PROFESION,
+            id_departamento_residencia: result.id_departamento_residencia,
+            id_municipio_residencia: result.ID_MUNICIPIO,
           };
+
+          if (result.ID_MUNICIPIO_DEFUNCION) {
+            this.cargarMunicipios(result.ID_MUNICIPIO_DEFUNCION);
+          }
+
+          this.form1.controls.estado.setValue(result.estadoPersona);
+          this.form1.controls.observaciones.setValue(result.observaciones);
+          this.form1.controls.tipo_defuncion.setValue(result.tipo_defuncion);
+          this.form1.controls.fecha_defuncion.setValue(result.fecha_defuncion);
+          this.form1.controls.id_departamento_defuncion.setValue(result.ID_DEPARTAMENTO_DEFUNCION);
+          this.form1.controls.id_municipio_defuncion.setValue(result.ID_MUNICIPIO_DEFUNCION);
+          this.form1.controls.certificado_defuncion.setValue(result.certificado_defuncion);
+
           this.Afiliado.nameAfil = this.unirNombres(result.PRIMER_NOMBRE, result.SEGUNDO_NOMBRE, result.TERCER_NOMBRE, result.PRIMER_APELLIDO, result.SEGUNDO_APELLIDO);
-          this.getFilas().then(() => this.cargar());
+
         },
         (error) => {
-          this.resetDatos();
-          this.getFilas().then(() => this.cargar());
+
           this.toastr.error(`Error: ${error.error.message}`);
-        })
+        });
     }
   }
   resetDatos() {
@@ -145,39 +220,36 @@ export class EditDatosGeneralesComponent {
     }
     this.Afiliado = {};
   }
-  async getFilas() {
-    if (this.Afiliado) {
-      try {
-        /* const data = await this.svcAfiliado.getAllPerfCentroTrabajo(this.Afiliado.DNI).toPromise();
-        this.filas = data.map((item: any) => ({
-          id: item.id_beneficio,
-          nombre_centro_trabajo: item.centroTrabajo.nombre_centro_trabajo,
-          numero_acuerdo: item.numero_acuerdo || 'No disponible',
-          salario_base: item.salario_base,
-          fecha_ingreso: item.fecha_ingreso,
-          actividad_economica: item.actividad_economica,
-          sector_economico: item.sector_economico,
-        })); */
-      } catch (error) {
-        this.toastr.error('Error al cargar los datos de los perfiles de los centros de trabajo');
-        console.error('Error al obtener datos de datos de los perfiles de los centros de trabajo', error);
-      }
-    } else {
-      this.resetDatos()
-    }
-  }
 
   GuardarInformacion() {
     this.formDatosGenerales.value.refpers[0].fecha_nacimiento = convertirFechaInputs(this.formDatosGenerales.value.refpers[0].fecha_nacimiento)
+
+    const a = this.formDatosGenerales.value.refpers[0] = {
+      ...this.formDatosGenerales.value.refpers[0],
+      estado: this.form1.value.estado,
+      tipo_defuncion: this.form1.value.tipo_defuncion,
+      fecha_defuncion: convertirFechaInputs(this.form1.value.fecha_defuncion!),
+      observaciones: this.form1.value.observaciones,
+      id_departamento_defuncion: this.form1.value.id_departamento_defuncion,
+      id_municipio_defuncion: this.form1.value.id_municipio_defuncion,
+      certificado_defuncion: this.form1.value.certificado_defuncion
+    }
+
     this.svcAfiliado.updateDatosGenerales(this.Afiliado.ID_PERSONA, this.formDatosGenerales.value.refpers[0]).subscribe(
       async (result) => {
         this.toastr.success(`Datos generales modificados correctamente`);
-        this.resetDatos();
+
       },
       (error) => {
-        this.resetDatos();
-        this.getFilas().then(() => this.cargar());
+
         this.toastr.error(`Error: ${error.error.message}`);
       })
+  }
+
+  getErrors(fieldName: string): any {
+  }
+
+  mostrarCamposFallecido(e: any) {
+    this.estadoPersona = e.value
   }
 }

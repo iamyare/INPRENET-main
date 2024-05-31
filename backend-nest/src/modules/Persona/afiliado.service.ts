@@ -28,6 +28,7 @@ import { UpdateReferenciaPersonalDTO } from './dto/update-referencia-personal.dt
 import { UpdateBeneficiarioDto } from './dto/update-beneficiario.dto';
 import { Benef } from './dto/pruebaBeneficiario.dto';
 import * as moment from 'moment';
+import { Net_Tipo_Persona } from './entities/net_tipo_persona.entity';
 @Injectable()
 export class AfiliadoService {
 
@@ -88,7 +89,6 @@ export class AfiliadoService {
 
 
   async createPersona(createPersonaDto: NetPersonaDTO): Promise<Net_Persona> {
-    
     const persona = new Net_Persona();
     Object.assign(persona, createPersonaDto);
 
@@ -151,7 +151,7 @@ export class AfiliadoService {
     detallePersona.ID_CAUSANTE = createDetallePersonaDto.idPersona;
     detallePersona.ID_TIPO_PERSONA = createDetallePersonaDto.idTipoPersona;
     detallePersona.porcentaje = createDetallePersonaDto.porcentaje;
-    detallePersona.ID_ESTADO_PERSONA = 1;
+    detallePersona.eliminado = 0;
 
     return this.detallePersonaRepository.save(detallePersona);
   }
@@ -274,7 +274,7 @@ export class AfiliadoService {
     detalle.ID_CAUSANTE_PADRE = detalleDto.idCausantePadre;
     detalle.ID_TIPO_PERSONA = detalleDto.idTipoPersona;
     detalle.porcentaje = detalleDto.porcentaje;
-    detalle.ID_ESTADO_PERSONA = 1;
+    detalle.eliminado = 0;
 
     return this.detallePersonaRepository.save(detalle);
   }
@@ -358,7 +358,7 @@ export class AfiliadoService {
     }
     Object.assign(persona, updatePersonaDto);
     if (updatePersonaDto.id_estado_persona) {
-      detallePersona.estadoPersona = await this.estadoPersonaRepository.findOne({ where: { codigo: updatePersonaDto.id_estado_persona } });
+      detallePersona.eliminado = 1
     }
     if (updatePersonaDto.id_municipio_residencia) {
       persona.municipio = await this.municipioRepository.findOne({ where: { id_municipio: updatePersonaDto.id_municipio_residencia } });
@@ -491,12 +491,15 @@ export class AfiliadoService {
       where: { dni: term },
       relations: [
         'detallePersona',
-        'detallePersona.estadoPersona',
         'detallePersona.tipoPersona',
         'municipio',
         'pais',
+        'municipio.departamento',
         'tipoIdentificacion',
         'profesion',
+        'estadoPersona',
+        'municipio_defuncion',
+        'municipio_defuncion.departamento',
       ],
     });
 
@@ -534,15 +537,22 @@ export class AfiliadoService {
       CORREO_1: persona.correo_1,
       CORREO_2: persona.correo_2,
       ESTADO_CIVIL: persona.estado_civil,
-      ESTADO: detallePersona.estadoPersona.Descripcion,
+      ESTADO: detallePersona.eliminado,
       ID_MUNICIPIO: persona.municipio?.id_municipio,
       ID_PAIS: persona.pais?.id_pais,
+      id_departamento_residencia: persona.municipio?.departamento.id_departamento,
       ID_IDENTIFICACION: persona.tipoIdentificacion?.id_identificacion,
+      tipo_defuncion: persona.tipo_defuncion,
+      fecha_defuncion: persona.fecha_defuncion,
+      observaciones: persona.observaciones,
+      certificado_defuncion: persona.certificado_defuncion,
+      ID_MUNICIPIO_DEFUNCION: persona.municipio_defuncion.id_municipio,
+      ID_DEPARTAMENTO_DEFUNCION: persona.municipio_defuncion.departamento.id_departamento,
+      estadoPersona: persona.estadoPersona.Descripcion,
     };
 
     return result;
   }
-
 
   async findOnePersona(term: string) {
     let persona: Net_Persona | null = null;
@@ -598,7 +608,7 @@ export class AfiliadoService {
           ID_PROFESION: persona.profesion?.idProfesion,
           TELEFONO_1: persona.telefono_1,
           ESTADO_CIVIL: persona.estado_civil,
-          ESTADO: detallePersona.estadoPersona.Descripcion,
+          ESTADO: persona.estadoPersona.Descripcion,
         };
       }
     }
@@ -629,7 +639,7 @@ export class AfiliadoService {
       ID_PROFESION: persona.profesion?.idProfesion,
       TELEFONO_1: persona.telefono_1,
       ESTADO_CIVIL: persona.estado_civil,
-      ESTADO: detallePersona.estadoPersona.Descripcion,
+      ESTADO: persona.estadoPersona.Descripcion,
     };
   }
 
@@ -796,22 +806,22 @@ export class AfiliadoService {
   }
 
   async findByDni(dni: string): Promise<Net_Persona | string> {
-    const persona = await this.personaRepository.findOne({ where: { dni } });
+    const persona = await this.personaRepository.findOne({ where: { dni }, relations: ['estadoPersona'], },);
 
     if (!persona) {
       throw new NotFoundException(`Afiliado with DNI ${dni} not found`);
     }
-    const detallePersona = await this.detallePersonaRepository.findOne({
+    /* const detallePersona = await this.personaRepository.findOne({
       where: { ID_PERSONA: persona.id_persona },
-      relations: ['estadoPersona'],
+      
     });
 
     if (!detallePersona || !detallePersona.estadoPersona) {
       throw new NotFoundException(`Estado for persona with DNI ${dni} not found`);
-    }
+    } */
 
     // Verifica el estado de la persona
-    switch (detallePersona.estadoPersona.Descripcion) {
+    switch (persona.estadoPersona.Descripcion) {
       case 'FALLECIDO':
         return 'El afiliado está fallecido.';
       case 'INACTIVO':
@@ -824,24 +834,24 @@ export class AfiliadoService {
   async buscarPersonaYMovimientosPorDNI(dni: string): Promise<any> {
     const persona = await this.personaRepository.findOne({
       where: { dni },
-      relations: ['cuentas', 'cuentas.movimientos'],
+      relations: ['cuentas', 'cuentas.movimientos', 'estadoPersona'],
     });
 
     if (!persona) {
       throw new NotFoundException(`Persona con DNI ${dni} no encontrada`);
     }
-    const detallePersona = await this.detallePersonaRepository.findOne({
+    /* const detallePersona = await this.detallePersonaRepository.findOne({
       where: { ID_PERSONA: persona.id_persona },
       relations: ['estadoPersona'],
     });
 
     if (!detallePersona || !detallePersona.estadoPersona) {
       throw new NotFoundException(`Estado para persona con DNI ${dni} no encontrado`);
-    }
-    if (['FALLECIDO', 'INACTIVO'].includes(detallePersona.estadoPersona.Descripcion.toUpperCase())) {
+    } */
+    if (['FALLECIDO', 'INACTIVO'].includes(persona.estadoPersona.Descripcion.toUpperCase())) {
       return {
         status: 'error',
-        message: `La persona está ${detallePersona.estadoPersona.Descripcion.toLowerCase()}.`,
+        message: `La persona está ${persona.estadoPersona.Descripcion.toLowerCase()}.`,
         data: { persona: null, movimientos: [] },
       };
     }
@@ -861,24 +871,24 @@ export class AfiliadoService {
   async buscarCuentasPorDNI(dni: string): Promise<any> {
     const persona = await this.personaRepository.findOne({
       where: { dni },
-      relations: ['cuentas', 'cuentas.movimientos', 'cuentas.tipoCuenta'],
+      relations: ['cuentas', 'cuentas.movimientos', 'cuentas.tipoCuenta', 'estadoPersona'],
     });
 
     if (!persona) {
       throw new NotFoundException(`Persona con DNI ${dni} no encontrada`);
     }
-    const detallePersona = await this.detallePersonaRepository.findOne({
+    /* const detallePersona = await this.detallePersonaRepository.findOne({
       where: { ID_PERSONA: persona.id_persona },
       relations: ['estadoPersona'],
     });
 
     if (!detallePersona || !detallePersona.estadoPersona) {
       throw new NotFoundException(`Estado para persona con DNI ${dni} no encontrado`);
-    }
-    if (['FALLECIDO', 'INACTIVO'].includes(detallePersona.estadoPersona.Descripcion.toUpperCase())) {
+    } */
+    if (['FALLECIDO', 'INACTIVO'].includes(persona.estadoPersona.Descripcion.toUpperCase())) {
       return {
         status: 'error',
-        message: `La persona está ${detallePersona.estadoPersona.Descripcion.toLowerCase()}.`,
+        message: `La persona está ${persona.estadoPersona.Descripcion.toLowerCase()}.`,
         data: { persona: null, movimientos: [] },
       };
     }
@@ -940,7 +950,7 @@ export class AfiliadoService {
     }
     const result = await this.detallePersonaRepository.update(
       { ID_PERSONA: idPersona, ID_CAUSANTE: idCausante },
-      { ID_ESTADO_PERSONA: estadoInactivo.codigo }
+      { eliminado: 1 }
     );
     if (result.affected === 0) {
       throw new NotFoundException(`Registro con ID_PERSONA ${idPersona} y ID_CAUSANTE ${idCausante} no encontrado`);
@@ -964,14 +974,21 @@ export class AfiliadoService {
   }
 
   async updateDatosGenerales(idPersona: number, datosGenerales: any): Promise<any> {
+    const estadoP = await this.estadoPersonaRepository.findOne({ where: { Descripcion: datosGenerales.estado } });
     try {
       const afiliado = await this.personaRepository.preload({
         id_persona: idPersona,
+        tipo_defuncion: datosGenerales.tipo_defuncion,
+        observaciones: datosGenerales.observaciones,
+        estadoPersona: estadoP.codigo,
+        municipio_defuncion: datosGenerales.id_municipio_defuncion,
+        certificado_defuncion: datosGenerales.certificado_defuncion,
         ...datosGenerales
       });
       if (!afiliado) throw new NotFoundException(`la persona con: ${idPersona} no se ha encontrado`);
 
       await this.personaRepository.save(afiliado);
+
       return afiliado;
     } catch (error) {
       this.handleException(error); // Asegúrate de tener un método para manejar las excepciones

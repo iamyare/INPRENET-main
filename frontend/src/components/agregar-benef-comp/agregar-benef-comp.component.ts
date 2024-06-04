@@ -40,54 +40,53 @@ export class AgregarBenefCompComponent implements OnInit {
 
   guardar() {
     const beneficiariosData = this.beneficiarios.value.map((beneficiario: any) => {
-        const datosBeneficiario = beneficiario.datosBeneficiario;
-        const formattedDate = this.datePipe.transform(datosBeneficiario.fecha_nacimiento, 'yyyy-MM-dd');
+      const datosBeneficiario = beneficiario.datosBeneficiario;
+      const formattedDate = this.datePipe.transform(datosBeneficiario.fecha_nacimiento, 'yyyy-MM-dd');
 
-        const benef = {
-            primer_nombre: datosBeneficiario.primer_nombre,
-            segundo_nombre: datosBeneficiario.segundo_nombre,
-            tercer_nombre: datosBeneficiario.tercer_nombre,
-            primer_apellido: datosBeneficiario.primer_apellido,
-            segundo_apellido: datosBeneficiario.segundo_apellido,
-            genero: datosBeneficiario.genero,
-            dni: datosBeneficiario.dni,
-            sexo: datosBeneficiario.sexo,
-            representacion: datosBeneficiario.representacion,
-            direccion_residencia: datosBeneficiario.direccion_residencia,
-            id_municipio_residencia: datosBeneficiario.id_municipio_residencia,
-            fecha_nacimiento: formattedDate,
-            cantidad_dependientes: datosBeneficiario.cantidad_dependientes,
-            telefono_1: datosBeneficiario.telefono_1,
-            id_pais: datosBeneficiario.id_pais,
-            detalleBenef: {
-                ID_CAUSANTE: this.data.idPersona,
-                porcentaje: datosBeneficiario.porcentaje,
-                ID_TIPO_PERSONA: 2,
-                ID_CAUSANTE_PADRE: this.data.idPersona
-            }
-        };
+      const benef = {
+        primer_nombre: datosBeneficiario.primer_nombre,
+        segundo_nombre: datosBeneficiario.segundo_nombre,
+        tercer_nombre: datosBeneficiario.tercer_nombre,
+        primer_apellido: datosBeneficiario.primer_apellido,
+        segundo_apellido: datosBeneficiario.segundo_apellido,
+        genero: datosBeneficiario.genero,
+        dni: datosBeneficiario.dni,
+        sexo: datosBeneficiario.sexo,
+        representacion: datosBeneficiario.representacion,
+        direccion_residencia: datosBeneficiario.direccion_residencia,
+        id_municipio_residencia: datosBeneficiario.id_municipio_residencia,
+        fecha_nacimiento: formattedDate,
+        cantidad_dependientes: datosBeneficiario.cantidad_dependientes,
+        telefono_1: datosBeneficiario.telefono_1,
+        id_pais: datosBeneficiario.id_pais,
+        detalleBenef: {
+          ID_CAUSANTE: this.data.idPersona,
+          porcentaje: datosBeneficiario.porcentaje,
+          ID_CAUSANTE_PADRE: this.data.idPersona
+        }
+      };
 
-        return benef;
+      return benef;
     });
 
     const payload = beneficiariosData[0];
 
     this.afilService.createBeneficiarioConDetalle(payload).subscribe(
-        response => {
-            this.toastr.success("Beneficiarios agregados con éxito");
-            this.formBeneficiarios.reset();
-            this.cerrar();
-        },
-        error => {
-            this.toastr.error("Error al agregar beneficiarios");
-            console.error('Error al agregar beneficiarios', error);
-        }
+      response => {
+        this.toastr.success("Beneficiarios agregados con éxito");
+        this.formBeneficiarios.reset();
+        this.cerrar();
+      },
+      error => {
+        this.toastr.error("Error al agregar beneficiarios");
+        console.error('Error al agregar beneficiarios', error);
+      }
     );
-}
+  }
 
 
-cerrar() {
+  cerrar() {
     this.dialogRef.close();
-}
+  }
 
 }

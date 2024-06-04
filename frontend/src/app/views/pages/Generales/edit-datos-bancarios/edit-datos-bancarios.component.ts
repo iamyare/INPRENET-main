@@ -22,6 +22,7 @@ export class EditDatosBancariosComponent {
   public myFormFields: FieldConfig[] = []
   form: any;
   @Input() Afiliado!: any;
+
   unirNombres: any = unirNombres;
   datosTabl: any[] = [];
   bancos: { label: string, value: string }[] = [];
@@ -82,7 +83,7 @@ export class EditDatosBancariosComponent {
         (error) => {
           this.getFilas().then(() => this.cargar());
           this.toastr.error(`Error: ${error.error.message}`);
-          this.resetDatos();
+          /* this.resetDatos(); */
         })
     }
   }
@@ -181,17 +182,20 @@ export class EditDatosBancariosComponent {
   }
 
   AgregarPuestoTrabajo() {
-    const dialogRef = this.dialog.open(AgregarDatBancCompComponent, {
-      width: '55%',
-      height: '75%',
-      data: {
-        idPersona: this.Afiliado.ID_PERSONA
-      }
-    });
+    console.log(this.Afiliado);
+    if (this.Afiliado) {
+      const dialogRef = this.dialog.open(AgregarDatBancCompComponent, {
+        width: '55%',
+        height: '75%',
+        data: {
+          idPersona: this.Afiliado.ID_PERSONA
+        }
+      });
 
-    dialogRef.afterClosed().subscribe((result: any) => {
-      this.ngOnInit();
-    });
+      dialogRef.afterClosed().subscribe((result: any) => {
+        this.ngOnInit();
+      });
+    }
   }
 
   openDialog(campos: any, row: any): void {

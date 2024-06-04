@@ -3,6 +3,8 @@ import { ControlContainer, FormArray, FormBuilder, FormControl, FormGroup, Valid
 import { DireccionService } from 'src/app/services/direccion.service';
 import { DatosEstaticosService } from 'src/app/services/datos-estaticos.service';
 import { FormStateService } from 'src/app/services/form-state.service';
+import { TipoIdentificacionService } from 'src/app/services/tipo-identificacion.service';
+import { CentroTrabajoService } from 'src/app/services/centro-trabajo.service';
 
 const noSpecialCharsPattern = '^[a-zA-Z0-9\\s]*$';
 
@@ -121,6 +123,8 @@ export class DatGeneralesAfiliadoComponent implements OnInit {
 
   constructor(
     private formStateService: FormStateService,
+    private tipoIdentificacionService: TipoIdentificacionService,
+    private centrosTrabSVC: CentroTrabajoService,
     private fb: FormBuilder,
     public direccionSer: DireccionService,
     private datosEstaticos: DatosEstaticosService) {
@@ -169,21 +173,24 @@ export class DatGeneralesAfiliadoComponent implements OnInit {
 
   async cargarDatosEstaticos() {
     this.cargarDepartamentos();
-    this.estadoCargDatos = true;
-
-    this.tipoIdentData = this.datosEstaticos.tipoIdent // Cargar los departamentos al inicializar
-    this.nacionalidades = this.datosEstaticos.nacionalidades // Cargar los departamentos al inicializar
-    this.profesiones = this.datosEstaticos.profesiones // Cargar los departamentos al inicializar
-    this.municipios = this.datosEstaticos.municipios // Cargar los departamentos al inicializar
+    this.cargarTipoIdent();
+    this.cargarnacionalidades();
+    this.cargarprofesiones();
+    this.cargarDepartamentos();
 
     this.generos = this.datosEstaticos.genero;
     this.sexo = this.datosEstaticos.sexo;
 
     if (this.datos.value.refpers.length > 0) {
+      this.departamentos = this.datosEstaticos.departamentos
+      this.tipoIdentData = this.datosEstaticos.tipoIdent
+      this.nacionalidades = this.datosEstaticos.nacionalidades
+      this.profesiones = this.datosEstaticos.profesiones
+      this.municipios = this.datosEstaticos.municipios
       await this.cargarMunicipios(this.datos.value.refpers[0].id_municipio_residencia);
     }
 
-
+    this.estadoCargDatos = true;
   }
 
   cargarDepartamentos() {
@@ -203,6 +210,53 @@ export class DatGeneralesAfiliadoComponent implements OnInit {
     });
   }
 
+  cargarTipoIdent() {
+    this.tipoIdentificacionService.obtenerTiposIdentificacion().subscribe({
+      next: (data) => {
+        const transformedJson = data.map((departamento: { id_identificacion: any; tipo_identificacion: any; }) => {
+          return {
+            value: departamento.id_identificacion,
+            label: departamento.tipo_identificacion
+          };
+        });
+        this.tipoIdentData = transformedJson;
+      },
+      error: (error) => {
+        console.error('Error al cargar municipios:', error);
+      }
+    });
+  }
+
+  cargarnacionalidades() {
+    this.direccionSer.getAllPaises().subscribe({
+      next: (data) => {
+        const transformedJson = data.map((item: { nacionalidad: string; id_pais: number; }) => ({
+          value: item.id_pais,
+          label: item.nacionalidad
+        }));
+        this.nacionalidades = transformedJson;
+      },
+      error: (error) => {
+        console.error('Error al cargar municipios:', error);
+      }
+    });
+  }
+
+  cargarprofesiones() {
+    this.centrosTrabSVC.obtenerTodasLasProfesiones().subscribe({
+      next: (data) => {
+        const transformedJson = data.map((profesion: any) => ({
+          label: profesion.descripcion,
+          value: profesion.idProfesion
+        }));
+        this.profesiones = transformedJson;
+      },
+      error: (error) => {
+        console.error('Error al cargar municipios:', error);
+      }
+    });
+  }
+
   cargarMunicipios(departamentoId: number) {
     this.direccionSer.getMunicipiosPorDepartamentoId(departamentoId).subscribe({
       next: (data) => {
@@ -213,6 +267,8 @@ export class DatGeneralesAfiliadoComponent implements OnInit {
       }
     });
   }
+
+
 
   onDepartamentoChange(event: any) {
     const departamentoId = event.value;

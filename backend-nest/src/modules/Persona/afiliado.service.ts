@@ -492,12 +492,12 @@ export class AfiliadoService {
       relations: [
         'detallePersona',
         'detallePersona.tipoPersona',
-        'municipio',
         'pais',
         'municipio.departamento',
         'tipoIdentificacion',
         'profesion',
         'estadoPersona',
+        'municipio',
         'municipio_defuncion',
         'municipio_defuncion.departamento',
       ],
@@ -538,17 +538,17 @@ export class AfiliadoService {
       CORREO_2: persona.correo_2,
       ESTADO_CIVIL: persona.estado_civil,
       ESTADO: detallePersona.eliminado,
-      ID_MUNICIPIO: persona.municipio?.id_municipio,
       ID_PAIS: persona.pais?.id_pais,
       id_departamento_residencia: persona.municipio?.departamento.id_departamento,
       ID_IDENTIFICACION: persona.tipoIdentificacion?.id_identificacion,
       tipo_defuncion: persona.tipo_defuncion,
       fecha_defuncion: persona.fecha_defuncion,
       observaciones: persona.observaciones,
-      certificado_defuncion: persona.certificado_defuncion,
-      ID_MUNICIPIO_DEFUNCION: persona.municipio_defuncion.id_municipio,
-      ID_DEPARTAMENTO_DEFUNCION: persona.municipio_defuncion.departamento.id_departamento,
-      estadoPersona: persona.estadoPersona.Descripcion,
+      certificado_defuncion: persona?.certificado_defuncion,
+      ID_MUNICIPIO: persona.municipio?.id_municipio,
+      ID_MUNICIPIO_DEFUNCION: persona?.municipio_defuncion?.id_municipio!,
+      ID_DEPARTAMENTO_DEFUNCION: persona?.municipio_defuncion?.departamento?.id_departamento!,
+      estadoPersona: persona?.estadoPersona?.Descripcion,
     };
 
     return result;
@@ -562,7 +562,6 @@ export class AfiliadoService {
         where: { dni: term },
         relations: [
           'detallePersona',
-          'detallePersona.estadoPersona',
           'detallePersona.tipoPersona',
           'municipio',
           'pais',
@@ -575,7 +574,6 @@ export class AfiliadoService {
         where: { dni: term },
         relations: [
           'detallePersona',
-          'detallePersona.estadoPersona',
           'detallePersona.tipoPersona',
           'municipio',
           'pais',
@@ -608,7 +606,7 @@ export class AfiliadoService {
           ID_PROFESION: persona.profesion?.idProfesion,
           TELEFONO_1: persona.telefono_1,
           ESTADO_CIVIL: persona.estado_civil,
-          ESTADO: persona.estadoPersona.Descripcion,
+          ESTADO: persona?.estadoPersona?.Descripcion!,
         };
       }
     }
@@ -664,7 +662,7 @@ export class AfiliadoService {
       INNER JOIN
       NET_TIPO_PERSONA "tipoP" ON "tipoP"."ID_TIPO_PERSONA" = "detA"."ID_TIPO_PERSONA"
       INNER JOIN
-      NET_ESTADO_PERSONA "estadoPers" ON "detA"."ID_ESTADO_PERSONA" = "estadoPers"."CODIGO"
+      NET_ESTADO_PERSONA "estadoPers" ON "Afil"."ID_ESTADO_PERSONA" = "estadoPers"."CODIGO"
     WHERE
       "Afil"."DNI" = '${dniAfil}' AND 
       "estadoPers"."DESCRIPCION" = 'FALLECIDO'  AND
@@ -689,7 +687,7 @@ export class AfiliadoService {
           "NET_DETALLE_PERSONA" "detA" INNER JOIN 
           "NET_PERSONA" "Afil" ON "detA"."ID_PERSONA" = "Afil"."ID_PERSONA"
           INNER JOIN
-        NET_TIPO_PERSONA "tipoP" ON "tipoP"."ID_TIPO_PERSONA" = "detA"."ID_TIPO_PERSONA"
+        NET_TIPO_PERSONA "tipoP" ON "Afil"."ID_TIPO_PERSONA" = "detA"."ID_TIPO_PERSONA"
       WHERE 
           "detA"."ID_CAUSANTE_PADRE" = ${beneficios[0].ID_PERSONA} AND 
           "tipoP"."TIPO_PERSONA" = 'BENEFICIARIO' 
@@ -714,7 +712,7 @@ export class AfiliadoService {
         INNER JOIN
         NET_TIPO_PERSONA "tipoP" ON "tipoP"."ID_TIPO_PERSONA" = "detA"."ID_TIPO_PERSONA"
         INNER JOIN
-        NET_ESTADO_PERSONA "estadoPers" ON "detA"."ID_ESTADO_PERSONA" = "estadoPers"."CODIGO"
+        NET_ESTADO_PERSONA "estadoPers" ON "Afil"."ID_ESTADO_PERSONA" = "estadoPers"."CODIGO"
       WHERE
         "Afil"."DNI" = '${dniAfil}' AND
         "tipoP"."TIPO_PERSONA" = 'AFILIADO'
@@ -744,22 +742,23 @@ export class AfiliadoService {
         "Afil"."DIRECCION_RESIDENCIA" AS "direccionResidencia",
         "Afil"."ID_PAIS_NACIONALIDAD" AS "idPaisNacionalidad",
         "Afil"."ID_MUNICIPIO_RESIDENCIA" AS "idMunicipioResidencia",
-        "detA"."ID_ESTADO_PERSONA" AS "idEstadoPersona",
+        "Afil"."ID_ESTADO_PERSONA" AS "idEstadoPersona",
         "estadoPers"."DESCRIPCION" AS "estadoDescripcion",  -- Descripción del estado
         "detA"."PORCENTAJE" AS "porcentaje",
         "tipoP"."TIPO_PERSONA" AS "tipoPersona"
         FROM
           "NET_DETALLE_PERSONA" "detA"
-        INNER JOIN 
+        LEFT JOIN 
           "NET_PERSONA" "Afil" ON "detA"."ID_PERSONA" = "Afil"."ID_PERSONA"
-        INNER JOIN
+        LEFT JOIN
           NET_TIPO_PERSONA "tipoP" ON "tipoP"."ID_TIPO_PERSONA" = "detA"."ID_TIPO_PERSONA"
-        INNER JOIN
-          NET_ESTADO_PERSONA "estadoPers" ON "detA"."ID_ESTADO_PERSONA" = "estadoPers"."CODIGO"
+        LEFT JOIN
+          NET_ESTADO_PERSONA "estadoPers" ON "Afil"."ID_ESTADO_PERSONA" = "estadoPers"."CODIGO"
         WHERE 
           "detA"."ID_CAUSANTE_PADRE" = ${beneficios[0].ID_PERSONA} AND 
           "tipoP"."TIPO_PERSONA" = 'BENEFICIARIO'
       `;
+
 
       const beneficios2 = await this.entityManager.query(query1);
       return beneficios2;
@@ -1046,7 +1045,7 @@ export class AfiliadoService {
     await this.BancosToPersonaRepository.save(perfil1);
     await this.BancosToPersonaRepository.save(perfil);
   }
- 
+
 
   async getAllEstados(): Promise<Net_Estado_Persona[]> {
     return this.estadoPersonaRepository.find();

@@ -1,5 +1,6 @@
 import { ChangeDetectionStrategy, Component, EventEmitter, Input, OnInit, Output, inject } from '@angular/core';
 import { ControlContainer, FormArray, FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
+import { CentroTrabajoService } from 'src/app/services/centro-trabajo.service';
 import { DatosEstaticosService } from 'src/app/services/datos-estaticos.service';
 import { FormStateService } from 'src/app/services/form-state.service';
 
@@ -68,12 +69,12 @@ export class DatPuestoTrabComponent implements OnInit {
   constructor(
     private formStateService: FormStateService,
     private fb: FormBuilder,
-    private datosEstaticos: DatosEstaticosService
+    private datosEstaticos: DatosEstaticosService,
+    private centrosTrabSVC: CentroTrabajoService,
   ) {
     const currentYear = new Date();
     this.minDate = new Date(currentYear.getFullYear(), currentYear.getMonth(), currentYear.getDate());
-    this.centrosTrabajo = this.datosEstaticos.centrosTrabajo;
-    console.log(this.centrosTrabajo);
+    this.cargarPuestosTrabajo();
 
     this.sector = this.datosEstaticos.sector;
   }
@@ -88,6 +89,22 @@ export class DatPuestoTrabComponent implements OnInit {
         }
       }
     }
+  }
+
+  cargarPuestosTrabajo() {
+    this.centrosTrabSVC.obtenerTodosLosCentrosTrabajo().subscribe({
+      next: (data) => {
+        const transformedJson = data!.map((item: { id_centro_trabajo: any; nombre_centro_trabajo: any; sector_economico: any }) => ({
+          label: item.nombre_centro_trabajo,
+          value: String(item.id_centro_trabajo),
+          sector: item.sector_economico,
+        }));
+        this.centrosTrabajo = transformedJson;
+      },
+      error: (error) => {
+        console.error('Error al cargar municipios:', error);
+      }
+    });
   }
 
   private initForm() {
@@ -107,7 +124,7 @@ export class DatPuestoTrabComponent implements OnInit {
     ref_trabajo.push(formGroup);
 
     formGroup.get('idCentroTrabajo')?.valueChanges.subscribe(value => {
-      const selectedCentro = this.centrosTrabajo.find((centro:any) => centro.value === value);
+      const selectedCentro = this.centrosTrabajo.find((centro: any) => centro.value === value);
       if (selectedCentro) {
         formGroup.get('sectorEconomico')?.setValue(selectedCentro.sector);
         formGroup.get('showNumeroAcuerdo')?.setValue(selectedCentro.sector !== 'PRIVADO');

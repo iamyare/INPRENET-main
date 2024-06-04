@@ -1,0 +1,32 @@
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: inprenet_dev
+    ports:
+      - ${PORT}:${PORT}
+    environment:
+      DB_USERNAME: ${DB_USERNAME}  
+      DB_PASSWORD: ${DB_PASSWORD}
+      CONNECT_STRING: ${CONNECT_STRING}
+      PORT: ${PORT}
+      HOST_API: ${HOST_API}
+      JWT_SECRET: ${JWT_SECRET}
+
+    volumes:
+      - .:/app
+      - /app/node_modules
+  
+  oracle-db:
+    image: container-registry.oracle.com/database/express:18.4.0-xe
+    container_name: oracle-db
+    ports:
+      - "1523:1521"
+    environment:
+      - ORACLE_PWD:123456789
+    volumes:
+      - oracle_data:/opt/oracle/oradata
+
+volumes:
+  oracle_data:

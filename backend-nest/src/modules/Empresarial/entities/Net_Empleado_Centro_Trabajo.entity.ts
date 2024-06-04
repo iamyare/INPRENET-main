@@ -17,6 +17,12 @@ export class Net_Empleado_Centro_Trabajo {
   @JoinColumn({ name: 'ID_CENTRO_TRABAJO', foreignKeyConstraintName: 'FK_id_centro_trab' })
   centroTrabajo: Net_Centro_Trabajo;
 
+  @Column('varchar2', { length: 200, nullable: false, name: 'CORREO_1' })
+  correo_1: string;
+
+  @Column('varchar2', { length: 200, nullable: true, name: 'CORREO_2' })
+  correo_2: string;
+
   @Column('date', { nullable: false, name: 'FECHA_CONTRATACION' })
   fechaContratacion: Date;
 

@@ -2,7 +2,6 @@ import { Entity, PrimaryGeneratedColumn, ManyToOne, JoinColumn, Column, CreateDa
 import { NET_SESION } from './net_sesion.entity';
 import { Net_Seguridad } from './net_seguridad.entity';
 import { Net_Rol_Empresa } from './net_rol_empresa.entity';
-import { Net_Centro_Trabajo } from 'src/modules/Empresarial/entities/net_centro_trabajo.entity';
 import { Net_Empleado_Centro_Trabajo } from 'src/modules/Empresarial/entities/net_empleado_centro_trabajo.entity';
 
 @Entity({ name: 'NET_USUARIO_EMPRESA' })
@@ -12,9 +11,6 @@ export class Net_Usuario_Empresa {
 
   @Column('varchar2', { length: 50, default: 'INACTIVO', name: 'ESTADO' })
   estado: string;
-
-  @Column('varchar2', { length: 200, nullable: false, name: 'CORREO' })
-  correo: string;
 
   @Column('varchar2', { length: 200, nullable: false, name: 'CONTRASENA' })
   contrasena: string;

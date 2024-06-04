@@ -10,8 +10,14 @@ export class Net_Sociedad {
   @Column('varchar2', { length: 255, nullable: false, name: 'NOMBRE' })
   nombre: string;
 
-  @Column('varchar2', { length: 50, nullable: true, name: 'TIPO' })
-  tipo: string;
+  @Column('varchar2', { length: 50, nullable: true, name: 'RTN' })
+  rtn: string;
+
+  @Column('varchar2', { length: 50, nullable: true, name: 'TELEFONO' })
+  telefono: string;
+
+  @Column('varchar2', { length: 50, nullable: true, name: 'CORREO_ELECTRONICO' })
+  correo_electronico: string;
 
   @OneToMany(() => Net_Sociedad_Socio, sociedadSocio => sociedadSocio.sociedad)
   sociedadSocios: Net_Sociedad_Socio[];

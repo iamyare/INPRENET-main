@@ -1,5 +1,6 @@
-import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, OneToMany, JoinColumn, ManyToOne } from 'typeorm';
 import { Net_Sociedad_Socio } from './net_sociedad_socio.entity';
+import { Net_Municipio } from 'src/modules/Regional/municipio/entities/net_municipio.entity';
 
 @Entity({ name: 'NET_SOCIO' })
 export class Net_Socio {
@@ -15,8 +16,11 @@ export class Net_Socio {
   @Column('varchar2', { length: 20, nullable: false, unique: true, name: 'DNI' })
   dni: string;
 
-  @Column('varchar2', { length: 255, nullable: true, name: 'DIRECCION' })
-  direccion: string;
+  @Column('varchar2', { length: 255, nullable: true, name: 'DIRECCION_1' })
+  direccion_1: string;
+
+  @Column('varchar2', { length: 255, nullable: true, name: 'DIRECCION_2' })
+  direccion_2: string;
 
   @Column('varchar2', { length: 20, nullable: true, name: 'TELEFONO' })
   telefono: string;
@@ -26,4 +30,8 @@ export class Net_Socio {
 
   @OneToMany(() => Net_Sociedad_Socio, sociedadSocio => sociedadSocio.socio)
   sociedadSocios: Net_Sociedad_Socio[];
+
+  @ManyToOne(() => Net_Municipio, municipio => municipio.socios)
+  @JoinColumn({ name: 'ID_MUNICIPIO', foreignKeyConstraintName: 'FK_id_municipio_socio' })
+  municipio: Net_Municipio;
 }

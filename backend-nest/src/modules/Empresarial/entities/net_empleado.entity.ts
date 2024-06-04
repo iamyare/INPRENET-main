@@ -9,8 +9,11 @@ export class Net_Empleado {
   @Column('varchar2', { length: 100, nullable: false, name: 'NOMBRE_EMPLEADO' })
   nombreEmpleado: string;
 
-  @Column('varchar2', { length: 20, nullable: true, name: 'TELEFONO_EMPLEADO' })
-  telefonoEmpleado: string;
+  @Column('varchar2', { nullable: false, name: 'TELEFONO_1' })
+  telefono_1: string;
+
+  @Column('varchar2', { nullable: false, name: 'TELEFONO_2' })
+  telefono_2: string;
 
   @Column('varchar2', { length: 20, nullable: true, name: 'NUMERO_IDENTIFICACION' })
   @Index("UQ_numIdent_empleadoBase", { unique: true })

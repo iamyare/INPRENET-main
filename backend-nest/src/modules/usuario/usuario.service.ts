@@ -49,10 +49,10 @@ export class UsuarioService {
     const { nombreEmpleado, nombrePuesto, correo, numeroEmpleado, idRole } = createPreRegistroDto;
 
     // Verificar si el usuario ya existe
-    const usuarioExistente = await this.usuarioEmpresaRepository.findOne({ where: { correo } });
+    /* const usuarioExistente = await this.usuarioEmpresaRepository.findOne({ where: { correo } });
     if (usuarioExistente) {
       throw new BadRequestException('El correo ya está registrado');
-    }
+    } */
 
     // Verificar si el rol existe
     const rol = await this.rolEmpresaRepository.findOne({ where: { id_rol_empresa: idRole } });
@@ -105,7 +105,7 @@ export class UsuarioService {
   }
 
   async completarRegistro(token: string, completeRegistrationDto: CompleteRegistrationDto, archivo_identificacion: Buffer): Promise<void> {
-    const { correo, contrasena, pregunta_de_usuario_1, respuesta_de_usuario_1, pregunta_de_usuario_2, respuesta_de_usuario_2, pregunta_de_usuario_3, respuesta_de_usuario_3, telefonoEmpleado, numero_identificacion } = completeRegistrationDto;
+    /* const { correo, contrasena, pregunta_de_usuario_1, respuesta_de_usuario_1, pregunta_de_usuario_2, respuesta_de_usuario_2, pregunta_de_usuario_3, respuesta_de_usuario_3, telefonoEmpleado, numero_identificacion } = completeRegistrationDto;
 
     try {
       const decoded = this.jwtService.verify(token);
@@ -124,12 +124,12 @@ export class UsuarioService {
     usuario.contrasena = await bcrypt.hash(contrasena, 10);
     usuario.estado = 'ACTIVO';
     usuario.fecha_verificacion = new Date();
-    /* usuario.user.telefonoEmpleado = telefonoEmpleado;
+    usuario.user.telefonoEmpleado = telefonoEmpleado;
     usuario.user.numero_identificacion = numero_identificacion;
     usuario.user.archivo_identificacion = archivo_identificacion;
 
     await this.empleadoRepository.save(usuario.user);
-    await this.usuarioEmpresaRepository.save(usuario); */
+    await this.usuarioEmpresaRepository.save(usuario);
 
     // Crear registros de seguridad
     const seguridad1 = this.seguridadRepository.create({
@@ -150,11 +150,11 @@ export class UsuarioService {
       usuarioEmpresa: usuario,
     });
 
-    await this.seguridadRepository.save([seguridad1, seguridad2, seguridad3]);
+    await this.seguridadRepository.save([seguridad1, seguridad2, seguridad3]); */
   }
 
-  async login(loginDto: LoginDto): Promise<{ accessToken: string }> {
-    const { correo, contrasena } = loginDto;
+  async login(loginDto: LoginDto){
+    /* const { correo, contrasena } = loginDto;
 
     const usuario = await this.usuarioEmpresaRepository.findOne({
       where: { correo },
@@ -172,12 +172,12 @@ export class UsuarioService {
     const payload = {
       correo,
       sub: usuario.id_usuario_empresa,
-     /*  rol: usuario.role.nombre_rol,
-      idEmpresa: usuario.role.centroTrabajo.id_centro_trabajo */
+      rol: usuario.role.nombre_rol,
+      idEmpresa: usuario.role.centroTrabajo.id_centro_trabajo
     };
 
     const accessToken = this.jwtService.sign(payload);
-    return { accessToken };
+    return { accessToken }; */
   }
 
   async getRolesPorEmpresa(centroId: number) {

@@ -31,7 +31,7 @@ export class UsuarioController {
   }
 
   @Post('login')
-  async login(@Body() loginDto: LoginDto): Promise<{ accessToken: string }> {
+  async login(@Body() loginDto: LoginDto){
     return this.usuarioService.login(loginDto);
   }
 

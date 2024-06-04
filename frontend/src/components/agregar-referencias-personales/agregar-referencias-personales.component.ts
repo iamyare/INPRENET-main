@@ -36,6 +36,8 @@ export class AgregarReferenciasPersonalesComponent {
   guardar() {
     this.afilService.createReferPersonales(String(this.data.idPersona), this.formReferencias.value.refpers).subscribe(
       (res: any) => {
+        console.log(res);
+
         if (res.length > 0) {
           this.toastr.success("Referencia personal agregada con éxito");
           this.cerrar();

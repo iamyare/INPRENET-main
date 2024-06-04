@@ -29,13 +29,13 @@ export class AgregarDatBancCompComponent implements OnInit {
     });
   }
 
-  ngOnInit(): void {}
+  ngOnInit(): void { }
 
   setHistSal(datosHistSal: any) {
     const bancoArray = this.formHistPag.get('banco') as FormArray;
     bancoArray.clear();
-    if (datosHistSal && Array.isArray(datosHistSal.banco)) {
-      datosHistSal.banco.forEach((banco: any) => {
+    if (datosHistSal && Array.isArray(datosHistSal.value.banco)) {
+      datosHistSal.value.banco.forEach((banco: any) => {
         bancoArray.push(this.fb.group({
           idBanco: [banco.idBanco, Validators.required],
           numCuenta: [banco.numCuenta, Validators.required]

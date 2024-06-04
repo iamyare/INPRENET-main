@@ -11,6 +11,7 @@ import { RoleGuard } from './guards/role-guard.guard';
 import { LoginPrivadosComponent } from './views/pages/Centros Privados/login-privados/login-privados.component';
 import { PlanillaColegiosPrivadosComponent } from './views/pages/Centros Privados/planilla-colegios-privados/planilla-colegios-privados.component';
 import { NavDefaultComponent } from './views/pages/Centros Privados/nav-default/nav-default.component';
+import { AfiliacionCentrosComponent } from './views/pages/afil-centros-priv/afiliacion-centros/afiliacion-centros.component';
 
 const routes: Routes = [
   {

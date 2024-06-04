@@ -1,0 +1,13 @@
+<div *ngFor="let name of fieldNames; let rowIndex = index" class="row">
+  <div *ngFor="let fieldName of getFieldsInRow(rowIndex); let colIndex = index"
+       [class]="'col-' + fieldLayout[fieldName].col">
+    <mat-form-field style="flex-direction: column-reverse;" class="example-full-width inputs" appearance="outline">
+      <mat-label>{{ fieldLabels[fieldName] }}</mat-label>
+      <mat-icon matPrefix>{{ icons[fieldName] }}</mat-icon>
+      <input matInput [formControl]="getControl(fieldName)">
+    </mat-form-field>
+    <mat-error *ngFor="let error of getControl(fieldName)?.errors | keyvalue">
+      {{ error.key }}: {{ error.value }}
+    </mat-error>
+  </div>
+</div>

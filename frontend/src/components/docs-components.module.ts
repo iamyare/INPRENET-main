@@ -62,6 +62,8 @@ import { NewFamiliaresComponent } from './new-familiares/new-familiares.componen
 import { EditFamiliaresCompComponent } from './edit-familiares-comp/edit-familiares-comp.component';
 import { AgregarCuentasComponent } from './agregar-cuentas/agregar-cuentas.component';
 import { CuentaBancariaCompComponent } from './cuenta-bancaria-comp/cuenta-bancaria-comp.component';
+import { ProgressbarDynamicComponent } from './progressbar-dynamic/progressbar-dynamic.component';
+import { SharedFormFieldsComponent } from './shared-form-fields/shared-form-fields.component';
 
 @NgModule({
   declarations: [
@@ -94,7 +96,9 @@ import { CuentaBancariaCompComponent } from './cuenta-bancaria-comp/cuenta-banca
     NewFamiliaresComponent,
     EditFamiliaresCompComponent,
     AgregarCuentasComponent,
-    CuentaBancariaCompComponent
+    CuentaBancariaCompComponent,
+    ProgressbarDynamicComponent,
+    SharedFormFieldsComponent
   ],
   exports: [
     ProgressbarComponent,
@@ -125,7 +129,9 @@ import { CuentaBancariaCompComponent } from './cuenta-bancaria-comp/cuenta-banca
     NewFamiliaresComponent,
     EditFamiliaresCompComponent,
     AgregarCuentasComponent,
-    CuentaBancariaCompComponent
+    CuentaBancariaCompComponent,
+    ProgressbarDynamicComponent,
+    SharedFormFieldsComponent
   ],
   imports: [
     WebcamModule,

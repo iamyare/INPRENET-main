@@ -1,0 +1,9 @@
+<div class="container-fluid" style="position: sticky;">
+  <ul class="list-unstyled multi-steps pointer-cursor">
+      <li *ngFor="let step of steps; let i = index"
+          (click)="activateStep(i)"
+          [ngClass]="step.isActive ? 'is-active' : 'inactive'"
+          id="estado">{{ step.label }}
+      </li>
+  </ul>
+</div>

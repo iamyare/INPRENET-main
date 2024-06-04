@@ -60,6 +60,12 @@ import { EditFamiliaresComponent } from '../pages/Generales/edit-familiares/edit
 import { NewFamiliaresComponent } from '@docs-components/new-familiares/new-familiares.component';
 import { VerDatosAfiliadosComponent } from '../pages/Generales/ver-datos-afiliados/ver-datos-afiliados.component';
 import { VerCuentasPersonasComponent } from '../pages/Generales/ver-cuentas-personas/ver-cuentas-personas.component';
+import { AfiliacionCentrosComponent } from '../pages/afil-centros-priv/afiliacion-centros/afiliacion-centros.component';
+import { DatosGeneralesCentroComponent } from '../pages/afil-centros-priv/datos-generales-centro/datos-generales-centro.component';
+import { ReferenciasBancariasComercialesComponent } from '../pages/afil-centros-priv/referencias-bancarias-comerciales/referencias-bancarias-comerciales.component';
+import { SociedadComponent } from '../pages/afil-centros-priv/sociedad/sociedad.component';
+import { SociedadSocioComponent } from '../pages/afil-centros-priv/sociedad-socio/sociedad-socio.component';
+import { AdminCentroEducativoComponent } from '../pages/afil-centros-priv/admin-centro-educativo/admin-centro-educativo.component';
 
 @NgModule({
   imports: [
@@ -123,7 +129,13 @@ import { VerCuentasPersonasComponent } from '../pages/Generales/ver-cuentas-pers
     EditColegiosMagisterialesComponent,
     EditFamiliaresComponent,
     VerDatosAfiliadosComponent,
-    VerCuentasPersonasComponent
+    VerCuentasPersonasComponent,
+    AfiliacionCentrosComponent,
+    DatosGeneralesCentroComponent,
+    ReferenciasBancariasComercialesComponent,
+    SociedadComponent,
+    SociedadSocioComponent,
+    AdminCentroEducativoComponent
   ]
 })
 export class ThemeModule {

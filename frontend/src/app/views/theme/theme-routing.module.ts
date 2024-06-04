@@ -32,6 +32,7 @@ import { EditDatosBancariosComponent } from '../pages/Generales/edit-datos-banca
 import { EditColegiosMagisterialesComponent } from '../pages/Generales/edit-colegios-magisteriales/edit-colegios-magisteriales.component';
 import { EditFamiliaresComponent } from '../pages/Generales/edit-familiares/edit-familiares.component';
 import { VerDatosAfiliadosComponent } from '../pages/Generales/ver-datos-afiliados/ver-datos-afiliados.component';
+import { AfiliacionCentrosComponent } from '../pages/afil-centros-priv/afiliacion-centros/afiliacion-centros.component';
 
 const routes: Routes = [
   //rutas Afiliado
@@ -64,6 +65,13 @@ const routes: Routes = [
             component: VerDatosAfiliadosComponent,
             data: {
               title: 'Ver Datos Afiliado',
+            },
+          },
+          {
+            path: 'nuevo-centro',
+            component: AfiliacionCentrosComponent,
+            data: {
+              title: 'Nuevo Centro',
             },
           },
           {

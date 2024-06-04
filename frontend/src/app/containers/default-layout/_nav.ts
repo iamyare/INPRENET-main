@@ -62,6 +62,10 @@ export const navItems: INavData[] = [
         name: 'Ver Datos Afiliados',
         url: '/Afiliado/ver-datos-afiliado',
       },
+      {
+        name: 'Nuevo Centro Privado',
+        url: 'Afiliado/nuevo-centro',
+      },
       /*{
         name: 'Ver Datos Generales',
         url: '/Afiliado/edit-datos-generales',

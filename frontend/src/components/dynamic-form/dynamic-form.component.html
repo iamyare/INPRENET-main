@@ -1,8 +1,5 @@
-<div class="card">
-  <div
-    class="card-header card-header-danger title"
-    style="background: #229e92; color: white"
-  >
+<div class="card dados-generales-centro-card">
+  <div class="card-header card-header-danger title" style="background: #229e92; color: white">
     <h4 class="card-title">{{ titulo }}</h4>
     <p class="card-category">{{ subtitulo }}</p>
   </div>
@@ -10,109 +7,81 @@
     <form [formGroup]="form" (change)="onDatosBenChange()">
       <div class="container">
         <div class="row">
-          <div *ngFor="let field of fields" class="col-md-4">
+          <div *ngFor="let field of fields" [ngClass]="'col-md-' + field.col" [ngStyle]="{ 'grid-row': field.row }">
             <!-- Campo de Texto Normal -->
             <div *ngIf="field.display">
-              <ng-container
-                *ngIf="
-                  field.type !== 'dropdown' &&
-                    field.type !== 'date' &&
-                    field.type !== 'daterange';
-                  else customField
-                "
-              >
+              <ng-container *ngIf="field.type !== 'dropdown' && field.type !== 'date' && field.type !== 'daterange' && field.type !== 'checkboxGroup' && field.type !== 'radio'; else customField">
                 <mat-form-field appearance="outline" style="width: 100%">
                   <mat-label>{{ field.label }}</mat-label>
-                  <input
-                    matInput
-                    [type]="field.type"
-                    [formControlName]="field.name"
-                    [readonly]="field.readOnly"
-                  />
+                  <input matInput [type]="field.type" [formControlName]="field.name" [readonly]="field.readOnly" />
                   <mat-icon *ngIf="field.icon" matSuffix>{{ field.icon }}</mat-icon>
                 </mat-form-field>
               </ng-container>
             </div>
 
-            <!-- Campos Personalizados (Dropdown, Fecha, Rango de Fecha) -->
+            <!-- Campos Personalizados (Dropdown, Fecha, Rango de Fecha, Checkbox Group, Radio Buttons) -->
             <ng-template #customField>
               <!-- Dropdown -->
               <ng-container *ngIf="field.type === 'dropdown'; else dateField">
                 <mat-form-field appearance="outline" style="width: 100%">
                   <mat-label>{{ field.label }}</mat-label>
-                  <mat-select
-                    [formControlName]="field.name"
-                    (selectionChange)="onDatosBenChange()"
-                    [attr.readonly]="field.readOnly"
-                  >
-                    <mat-option
-                      *ngFor="let option of field.options"
-                      [value]="option.value"
-                    >
+                  <mat-select [formControlName]="field.name" (selectionChange)="onDatosBenChange()" [attr.readonly]="field.readOnly">
+                    <mat-option *ngFor="let option of field.options" [value]="option.value">
                       {{ option.label }}
                     </mat-option>
                   </mat-select>
                   <mat-icon *ngIf="field.icon" matSuffix>{{ field.icon }}</mat-icon>
                 </mat-form-field>
               </ng-container>
-            </ng-template>
 
-            <!-- Fecha -->
-            <ng-template #dateField>
-              <ng-container *ngIf="field.type === 'date'; else daterangeField">
-                <mat-form-field appearance="outline" style="width: 100%">
-                  <mat-label>{{ field.label }}</mat-label>
-                  <input
-                    (dateChange)="onDatosBenChange()"
-                    [readonly]="field.readOnly"
-                    matInput
-                    [matDatepicker]="picker"
-                    [formControlName]="field.name"
-                  />
-                  <mat-datepicker-toggle
-                    matSuffix
-                    [for]="picker"
-                  ></mat-datepicker-toggle>
-                  <mat-datepicker #picker></mat-datepicker>
-                </mat-form-field>
+              <!-- Fecha -->
+              <ng-template #dateField>
+                <ng-container *ngIf="field.type === 'date'; else daterangeField">
+                  <mat-form-field appearance="outline" style="width: 100%">
+                    <mat-label>{{ field.label }}</mat-label>
+                    <input (dateChange)="onDatosBenChange()" [readonly]="field.readOnly" matInput [matDatepicker]="picker" [formControlName]="field.name" />
+                    <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+                    <mat-datepicker #picker></mat-datepicker>
+                  </mat-form-field>
+                </ng-container>
+              </ng-template>
+
+              <!-- Rango de Fecha -->
+              <ng-template #daterangeField>
+                <ng-container *ngIf="field.type === 'daterange'">
+                  <mat-form-field appearance="outline" style="width: 100%" class="full-width">
+                    <mat-label>{{ field.label }}</mat-label>
+                    <mat-date-range-input [rangePicker]="picker" [formGroup]="getRangeFormGroup(field.name)">
+                      <input (dateChange)="onDatosBenChange()" [readonly]="field.readOnly" matInput matStartDate placeholder="Inicio" formControlName="start" />
+                      <input (dateChange)="onDatosBenChange()" [readonly]="field.readOnly" matInput matEndDate placeholder="Fin" formControlName="end" />
+                    </mat-date-range-input>
+                    <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+                    <mat-date-range-picker #picker></mat-date-range-picker>
+                  </mat-form-field>
+                </ng-container>
+              </ng-template>
+
+              <!-- Checkbox Group -->
+              <ng-container *ngIf="field.type === 'checkboxGroup'">
+                <label>{{ field.label }}</label>
+                <div [formArrayName]="field.name" *ngFor="let option of field.options; let i = index">
+                  <mat-checkbox [formControlName]="i" (change)="onDatosBenChange()">
+                    {{ option.label }}
+                  </mat-checkbox>
+                </div>
               </ng-container>
-            </ng-template>
 
-            <!-- Rango de Fecha -->
-            <ng-template #daterangeField>
-              <mat-form-field
-                appearance="outline"
-                style="width: 100%"
-                class="full-width"
-              >
-                <mat-label>{{ field.label }}</mat-label>
-                <mat-date-range-input
-                  [rangePicker]="picker"
-                  [formGroup]="getRangeFormGroup(field.name)"
-                >
-                  <input
-                    (dateChange)="onDatosBenChange()"
-                    [readonly]="field.readOnly"
-                    matInput
-                    matStartDate
-                    placeholder="Inicio"
-                    formControlName="start"
-                  />
-                  <input
-                    (dateChange)="onDatosBenChange()"
-                    [readonly]="field.readOnly"
-                    matInput
-                    matEndDate
-                    placeholder="Fin"
-                    formControlName="end"
-                  />
-                </mat-date-range-input>
-                <mat-datepicker-toggle
-                  matSuffix
-                  [for]="picker"
-                ></mat-datepicker-toggle>
-                <mat-date-range-picker #picker></mat-date-range-picker>
-              </mat-form-field>
+              <!-- Radio Buttons -->
+              <ng-container *ngIf="field.type === 'radio'">
+                <label>{{ field.label }}</label>
+                <div [formGroupName]="field.name">
+                  <mat-radio-group>
+                    <mat-radio-button *ngFor="let option of field.options" [value]="option.value" (change)="onDatosBenChange()">
+                      {{ option.label }}
+                    </mat-radio-button>
+                  </mat-radio-group>
+                </div>
+              </ng-container>
             </ng-template>
           </div>
         </div>

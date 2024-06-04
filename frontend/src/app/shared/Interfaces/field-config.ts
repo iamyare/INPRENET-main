@@ -7,7 +7,10 @@ export interface FieldConfig {
   label: string;
   name: string;
   value?: any;
+  header?: string;
   options?: { label: string; value: any }[];
   validations?: ValidatorFn[];
+  row?: number;
+  col?: number;
   icon?: string;
 }

@@ -240,8 +240,8 @@ export class EditBeneficiariosComponent {
         const [primer_nombre, segundo_nombre, tercer_nombre] = result.nombres.split(' ');
         const [primer_apellido, segundo_apellido] = result.apellidos.split(' ');
 
-        const fecha_nacimiento = this.datePipe.transform(result.fecha_nacimiento, 'dd/MM/yyyy') || '';
-        /* corregir id_tipo_persona */
+        const fecha_nacimiento = this.datePipe.transform(result.fecha_nacimiento, 'dd-MM-yyyy') || '';
+
         const updatedBeneficiario = {
           id_pais: result.idPaisNacionalidad,
           dni: result.dni,
@@ -258,8 +258,7 @@ export class EditBeneficiariosComponent {
           direccion_residencia: result.direccion_residencia,
           id_municipio_residencia: result.id_municipio_residencia,
           id_estado_persona: result.id_estado_persona,
-          porcentaje: result.porcentaje,
-          id_tipo_persona: 2
+          porcentaje: result.porcentaje
         };
 
         this.svcAfiliado.updateBeneficiario(row.id, updatedBeneficiario).subscribe(

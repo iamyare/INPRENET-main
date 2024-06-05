@@ -33,7 +33,9 @@ export class AgregarPuestTrabComponent {
   }
 
   guardar() {
-    const datosParseados = this.formPuestTrab.trabajo.map((dato: any) => {
+    console.log(this.formPuestTrab);
+
+    const datosParseados = this.formPuestTrab.value.trabajo.map((dato: any) => {
       const fechaIngresoFormateada = convertirFechaInputs(dato.fechaIngreso.toISOString());
       const fechaEgresoFormateada = convertirFechaInputs(dato.fechaEgreso.toISOString());
 

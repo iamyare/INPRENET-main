@@ -179,8 +179,8 @@ export class VerDatosAfiliadosComponent implements OnInit {
   }
 
   previsualizarInfoAfil() {
-    if (this.form.value.dni) {
-      this.svcAfiliado.getAfilByParam(this.form.value.dni).subscribe(
+    if (this.form.dni) {
+      this.svcAfiliado.getAfilByParam(this.form.dni).subscribe(
         async (result) => {
           this.prevAfil = true;
           this.Afiliado = result;

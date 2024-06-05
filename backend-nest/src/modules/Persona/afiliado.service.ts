@@ -48,6 +48,9 @@ export class AfiliadoService {
     @InjectRepository(Net_Ref_Per_Pers)
     private refPerPersRepository: Repository<Net_Ref_Per_Pers>,
 
+    @InjectRepository(Net_Tipo_Persona)
+    private tipoPersonaRepository: Repository<Net_Tipo_Persona>,
+
 
     @InjectRepository(NET_DETALLE_PERSONA)
     private detallePersonaRepository: Repository<NET_DETALLE_PERSONA>,
@@ -309,7 +312,9 @@ export class AfiliadoService {
 
   async createBenef(bene: Benef): Promise<Net_Persona> {
     const { detalleBenef, dni, id_pais, id_municipio_residencia, ...personaData } = bene;
-
+    const tipoPersona = await this.tipoPersonaRepository.findOne({
+      where: { tipo_persona: "BENEFICIARIO" }
+    });
     let persona = await this.personaRepository.findOne({ where: { dni }, relations: ['pais', 'municipio'] });
     if (!persona) {
       const pais = await this.paisRepository.findOne({ where: { id_pais } });
@@ -331,7 +336,7 @@ export class AfiliadoService {
     const detalle = this.detallePersonaRepository.create({
       ...detalleBenef,
       persona,
-      ID_TIPO_PERSONA: 2
+      tipoPersona
     });
     await this.detallePersonaRepository.save(detalle);
     return persona;
@@ -340,25 +345,36 @@ export class AfiliadoService {
 
 
   async updateBeneficario(id: number, updatePersonaDto: UpdateBeneficiarioDto): Promise<Net_Persona> {
+    console.log(updatePersonaDto);
+
+
     const persona = await this.personaRepository.findOne({
       where: { id_persona: id },
       relations: ['detallePersona'],
     });
+
     if (!persona) {
       throw new NotFoundException(`Persona with ID ${id} not found`);
     }
     const detallePersona = await this.detallePersonaRepository.findOne({
       where: { ID_PERSONA: id },
     });
+
     if (!detallePersona) {
       throw new NotFoundException(`Detalle persona with ID ${id} not found`);
     }
     if (updatePersonaDto.fecha_nacimiento) {
-      updatePersonaDto.fecha_nacimiento = new Date(updatePersonaDto.fecha_nacimiento).toISOString().split('T')[0];
+      console.log(updatePersonaDto.fecha_nacimiento)
     }
     Object.assign(persona, updatePersonaDto);
-    if (updatePersonaDto.id_estado_persona) {
+    if (updatePersonaDto.eliminado) {
       detallePersona.eliminado = 1
+    }
+    if (updatePersonaDto.id_estado_persona) {
+      const estadoP = await this.estadoPersonaRepository.findOne({
+        where: { codigo: updatePersonaDto.id_estado_persona }
+      });
+      persona.estadoPersona = estadoP
     }
     if (updatePersonaDto.id_municipio_residencia) {
       persona.municipio = await this.municipioRepository.findOne({ where: { id_municipio: updatePersonaDto.id_municipio_residencia } });
@@ -366,6 +382,10 @@ export class AfiliadoService {
     if (updatePersonaDto.id_pais) {
       persona.pais = await this.paisRepository.findOne({ where: { id_pais: updatePersonaDto.id_pais } });
     }
+    if (updatePersonaDto.id_pais) {
+      persona.pais = await this.paisRepository.findOne({ where: { id_pais: updatePersonaDto.id_pais } });
+    }
+
     await this.detallePersonaRepository.save(detallePersona);
     return this.personaRepository.save(persona);
   }

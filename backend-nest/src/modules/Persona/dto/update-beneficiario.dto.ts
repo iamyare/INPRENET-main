@@ -56,11 +56,11 @@ export class UpdateBeneficiarioDto {
   telefono_1?: string;
 
   @IsOptional()
-  @Transform(({ value }) => {
-    const [day, month, year] = value.split('/');
-    return `${year}-${month}-${day}`;
-  }, { toClassOnly: true })
-  @IsDateString()
+  /*   @Transform(({ value }) => {
+      const [day, month, year] = value.split('/');
+      return `${day}-${month}-${year}`;
+    }, { toClassOnly: true }) */
+  @IsString()
   fecha_nacimiento?: string;
 
   @IsInt()
@@ -79,6 +79,10 @@ export class UpdateBeneficiarioDto {
   @IsInt()
   @IsNotEmpty()
   id_tipo_persona: number;
+
+  @IsInt()
+  @IsOptional()
+  eliminado: number;
 
   @IsInt()
   @IsOptional()

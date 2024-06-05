@@ -41,9 +41,9 @@ export class AfiliadoController {
   constructor(private readonly afiliadoService: AfiliadoService, private dataSource: DataSource) { }
 
   @Post('create-with-detalle')
-async create(@Body() benef: Benef): Promise<Net_Persona> {
+  async create(@Body() benef: Benef): Promise<Net_Persona> {
     return this.afiliadoService.createBenef(benef);
-}
+  }
 
   @Post('afiliacion')
   @UseInterceptors(FileInterceptor('foto_perfil', {
@@ -116,7 +116,7 @@ async create(@Body() benef: Benef): Promise<Net_Persona> {
             idCausantePadre: persona.id_persona,
             idTipoPersona: 2,
             porcentaje: beneficiarioData.porcentaje,
-            idEstadoPersona: 1 
+            idEstadoPersona: 1
           };
           await this.afiliadoService.createDetalleBeneficiario(detalleBeneficiarioDto);
           beneficiariosAsignados.push(nuevoBeneficiario);
@@ -141,44 +141,23 @@ async create(@Body() benef: Benef): Promise<Net_Persona> {
   }
 
   @Patch('inactivar/:idPersona/:idCausante')
-    async inactivarPersona(
-        @Param('idPersona') idPersona: number,
-        @Param('idCausante') idCausante: number
-    ): Promise<void> {
-        try {
-            await this.afiliadoService.inactivarPersona(idPersona, idCausante);
-        } catch (error) {
-            if (error instanceof NotFoundException) {
-                throw new NotFoundException(error.message);
-            }
-            throw error;
-        }
+  async inactivarPersona(
+    @Param('idPersona') idPersona: number,
+    @Param('idCausante') idCausante: number
+  ): Promise<void> {
+    try {
+      await this.afiliadoService.inactivarPersona(idPersona, idCausante);
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw new NotFoundException(error.message);
+      }
+      throw error;
     }
-
-
-  @Put('actualizarBeneficiario/:id')
-  async updatePersona(
-    @Param('id', ParseIntPipe) id: number,
-    @Body() updateBeneficiarioDto: UpdateBeneficiarioDto,
-  ): Promise<Net_Persona> {
-    return this.afiliadoService.updateBeneficario(id, updateBeneficiarioDto);
   }
 
 
-  @Put('/actualizar-salario')
-  @HttpCode(HttpStatus.OK)
-  async actualizarSalarioBase(
-    @Body('dni') dni: string,
-    @Body('idCentroTrabajo') idCentroTrabajo: number,
-    @Body('salarioBase') salarioBase: number,
-  ): Promise<{ message: string }> {
-    await this.afiliadoService.updateSalarioBase(
-      dni,
-      idCentroTrabajo,
-      salarioBase,
-    );
-    return { message: 'Salario base actualizado con éxito.' };
-  }
+
+
 
   @Get('obtenerEstados')
   async getAllEstados(): Promise<Net_Estado_Persona[]> {
@@ -377,6 +356,29 @@ async create(@Body() benef: Benef): Promise<Net_Persona> {
     };
   }
 
+  @Put('/actualizar-salario')
+  @HttpCode(HttpStatus.OK)
+  async actualizarSalarioBase(
+    @Body('dni') dni: string,
+    @Body('idCentroTrabajo') idCentroTrabajo: number,
+    @Body('salarioBase') salarioBase: number,
+  ): Promise<{ message: string }> {
+    await this.afiliadoService.updateSalarioBase(
+      dni,
+      idCentroTrabajo,
+      salarioBase,
+    );
+    return { message: 'Salario base actualizado con éxito.' };
+  }
+
+  @Put('actualizarBeneficiario/:id')
+  updatePersona(
+    @Param('id') id: number,
+    @Body() updateBeneficiarioDto: any,
+  ): Promise<Net_Persona> {
+    return this.afiliadoService.updateBeneficario(id, updateBeneficiarioDto);
+  }
+
   @Put('desactivarCuentaBancaria/:id')
   async desactivarCuentaBancaria(@Param('id') id: string) {
     const idNum = parseInt(id, 10);
@@ -388,6 +390,15 @@ async create(@Body() benef: Benef): Promise<Net_Persona> {
       mensaje: `Perfil de centro de trabajo con ID ${idNum} ha sido marcado como inactivo.`,
     };
   }
+
+  @Put('/updateDatosGenerales/:idPersona')
+  updateDatosGenerales(
+    @Param('idPersona') idPersona: number,
+    @Body() datosGenerales: any,
+  ) {
+    return this.afiliadoService.updateDatosGenerales(idPersona, datosGenerales);
+  }
+
   @Put('activarCuentaBancaria/:id/:id_persona')
   async activarCuentaBancaria(@Param('id') id: string, @Param('id_persona') id_persona: number) {
     const idNum = parseInt(id, 10);
@@ -398,14 +409,6 @@ async create(@Body() benef: Benef): Promise<Net_Persona> {
     return {
       mensaje: `Perfil de centro de trabajo con ID ${idNum} ha sido marcado como inactivo.`,
     };
-  }
-
-  @Put('/updateDatosGenerales/:idPersona')
-  updateDatosGenerales(
-    @Param('idPersona') idPersona: number,
-    @Body() datosGenerales: any,
-  ) {
-    return this.afiliadoService.updateDatosGenerales(idPersona, datosGenerales);
   }
 
   @Get('/dni/:dni')
@@ -446,7 +449,7 @@ async create(@Body() benef: Benef): Promise<Net_Persona> {
     return this.afiliadoService.getAllBenDeAfil(dniAfil);
   }
 
-  
+
   @Patch(':id')
   update(
     @Param('id') id: string,

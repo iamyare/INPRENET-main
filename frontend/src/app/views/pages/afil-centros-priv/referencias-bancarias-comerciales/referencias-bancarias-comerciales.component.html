@@ -1,48 +1,31 @@
 <div class="card">
-  <div class="card-header card-header-danger tittle" style="background: #229e92;">
+  <div class="card-header card-header-danger title">
     <h4 class="card-title">Referencias Bancarias y Comerciales</h4>
     <p class="card-category">Completa la información correspondiente</p>
   </div>
   <div class="card-body">
-    <form [formGroup]="formParent" style="margin: 1%;" (change)="onDatosReferenciaChange()">
-      <div formArrayName="Referencias">
-        <div *ngFor="let referencia of getCtrl('Referencias', formParent).controls; index as i">
-          <h4 class="card-title">Referencia Número: {{i + 1}}</h4>
-          <div [formGroupName]="i" class="row">
-            <div class="col-md-6">
-              <mat-form-field style="flex-direction: column-reverse;" class="example-full-width inputs" appearance="outline">
-                <mat-label>Tipo de Referencia</mat-label>
-                <mat-icon matPrefix>assignment</mat-icon>
-                <mat-select formControlName="tipoReferencia">
-                  <mat-option value="bancaria">Bancaria</mat-option>
-                  <mat-option value="comercial">Comercial</mat-option>
-                </mat-select>
-              </mat-form-field>
-              <mat-error *ngFor="let error of getErrors(i, 'tipoReferencia')">{{ error }}</mat-error>
-            </div>
-            <div class="col-md-6">
-              <mat-form-field style="flex-direction: column-reverse;" class="example-full-width inputs" appearance="outline">
-                <mat-label>Nombre</mat-label>
-                <mat-icon matPrefix>person</mat-icon>
-                <input matInput formControlName="nombre">
-              </mat-form-field>
-              <mat-error *ngFor="let error of getErrors(i, 'nombre')">{{ error }}</mat-error>
-            </div>
-          </div>
+    <form [formGroup]="parentForm" style="margin: 1%;">
+      <div formArrayName="referencias" *ngIf="referencias.length > 0">
+        <div *ngFor="let referencia of referencias.controls; let i = index" [formGroupName]="i" class="row">
+          <h4 class="card-title">Referencia {{ i + 1 }}</h4>
+          <app-shared-form-fields
+            [parentForm]="asFormGroup(referencia)"
+            [fields]="fields">
+          </app-shared-form-fields>
+        </div>
+      </div>
+      <div class="row" style="text-align: center; margin: 1%;">
+        <div class="col-md-6">
+          <button mat-button color="primary" type="button" (click)="addReferencia()">
+            <mat-icon matSuffix>exposure_plus_1</mat-icon> Agregar Referencia
+          </button>
+        </div>
+        <div class="col-md-6" *ngIf="referencias.length > 0">
+          <button mat-button color="warn" type="button" (click)="removeReferencia(referencias.length - 1)">
+            <mat-icon matSuffix>exposure_neg_1</mat-icon> Eliminar Referencia
+          </button>
         </div>
       </div>
     </form>
-    <div class="row" style="text-align: center; margin: 1%;">
-      <div class="col-md-6">
-        <button mat-button color="primary" (click)="agregarReferencia()">
-          <mat-icon matSuffix>exposure_plus_1</mat-icon>Agregar Referencia
-        </button>
-      </div>
-      <div class="col-md-6">
-        <button mat-button color="warn" (click)="eliminarReferencia(getCtrl('Referencias', formParent).length - 1)">
-          <mat-icon matSuffix>exposure_neg_1</mat-icon>Eliminar Referencia
-        </button>
-      </div>
-    </div>
   </div>
 </div>

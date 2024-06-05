@@ -1,4 +1,5 @@
-import { Component } from '@angular/core';
+import { Component, Input, OnInit } from '@angular/core';
+import { FormControl, FormGroup } from '@angular/forms';
 import { FieldConfig } from 'src/app/shared/Interfaces/field-config';
 
 @Component({
@@ -6,7 +7,10 @@ import { FieldConfig } from 'src/app/shared/Interfaces/field-config';
   templateUrl: './datos-generales-centro.component.html',
   styleUrls: ['./datos-generales-centro.component.scss']
 })
-export class DatosGeneralesCentroComponent {
+export class DatosGeneralesCentroComponent implements OnInit {
+
+  @Input() parentForm!: FormGroup;
+
   fields: FieldConfig[] = [
     {
       name: 'nombre_centro_trabajo',
@@ -269,6 +273,16 @@ export class DatosGeneralesCentroComponent {
   ];
 
   onDatosBenChange(form: any) {
-    console.log('Valores del formulario:', form);
+    //console.log('Valores del formulario:', form);
+  }
+
+  ngOnInit() {
+    this.addControlsToForm();
+  }
+
+  addControlsToForm() {
+    this.fields.forEach(field => {
+      this.parentForm.addControl(field.name, new FormControl(field.value, field.validations));
+    });
   }
 }

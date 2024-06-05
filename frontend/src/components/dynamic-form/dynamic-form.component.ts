@@ -31,7 +31,7 @@ export class DynamicFormComponent implements OnInit {
   createControl(): FormGroup {
     const group = this.fb.group({});
 
-    this.fields.forEach((field:any) => {
+    this.fields.forEach((field: any) => {
       if (field.type === 'daterange') {
         const dateRangeGroup = this.fb.group({
           start: [field.value?.start || '', field.validations],
@@ -42,9 +42,7 @@ export class DynamicFormComponent implements OnInit {
         const checkboxArray = this.fb.array(field.options.map(() => this.fb.control(false)));
         group.addControl(field.name, checkboxArray);
       } else if (field.type === 'radio') {
-        const radioGroup = this.fb.group({
-          [field.name]: [field.value || '', field.validations]
-        });
+        const radioGroup = this.fb.control(field.value || '', field.validations);
         group.addControl(field.name, radioGroup);
       } else {
         const control = field.type === 'number'
@@ -65,9 +63,9 @@ export class DynamicFormComponent implements OnInit {
 
   getFormValues() {
     const formValues = this.form.value;
-    const result:any = {};
+    const result: any = {};
 
-    this.fields.forEach((field:any) => {
+    this.fields.forEach((field: any) => {
       if (field.type === 'daterange') {
         result[field.name] = {
           start: formValues[field.name]?.start,
@@ -75,8 +73,8 @@ export class DynamicFormComponent implements OnInit {
         };
       } else if (field.type === 'checkboxGroup') {
         const selectedOptions = formValues[field.name]
-          .map((checked:any, i:any) => checked ? field.options[i].value : null)
-          .filter((v:any) => v !== null);
+          .map((checked: any, i: any) => checked ? field.options[i].value : null)
+          .filter((v: any) => v !== null);
         result[field.name] = selectedOptions;
       } else if (field.type === 'radio') {
         result[field.name] = formValues[field.name];

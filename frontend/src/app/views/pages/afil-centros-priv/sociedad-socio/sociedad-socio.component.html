@@ -4,74 +4,13 @@
     <p class="card-category">Completa la información correspondiente</p>
   </div>
   <div class="card-body">
-    <form [formGroup]="sociedadSocioForm" (ngSubmit)="onSubmit()" style="margin: 1%;">
-      <div formArrayName="sociedadSocios">
+    <form [formGroup]="parentForm" style="margin: 1%;">
+      <div formArrayName="sociedadSocios" *ngIf="sociedadSocios.length > 0">
         <div *ngFor="let grupo of sociedadSocios.controls; let i = index" [formGroupName]="i" class="row">
           <h4 class="card-title">Registro {{ i + 1 }}</h4>
           <app-shared-form-fields
             [parentForm]="asFormGroup(grupo)"
-            [fieldNames]="[
-              'nombreSociedad', 'rtn', 'telefonoSociedad', 'correoSociedad', 'nombreSocio', 'apellido', 'dni',
-              'otroPuntoReferencia', 'barrioAvenida', 'grupoCalle', 'numeroCasa', 'telefonoSocio', 'emailSocio',
-              'municipio', 'porcentajeParticipacion', 'fechaIngreso', 'fechaSalida'
-            ]"
-            [fieldLabels]="{
-              'nombreSociedad': 'Nombre de la Sociedad',
-              'rtn': 'RTN',
-              'telefonoSociedad': 'Teléfono de la Sociedad',
-              'correoSociedad': 'Correo de la Sociedad',
-              'nombreSocio': 'Nombre del Socio',
-              'apellido': 'Apellido',
-              'dni': 'DNI',
-              'otroPuntoReferencia': 'Otro Punto de Referencia',
-              'barrioAvenida': 'Barrio / Avenida',
-              'grupoCalle': 'Grupo / Calle',
-              'numeroCasa': 'N° de Casa',
-              'telefonoSocio': 'Teléfono del Socio',
-              'emailSocio': 'Correo del Socio',
-              'municipio': 'Municipio',
-              'porcentajeParticipacion': 'Porcentaje de Participación',
-              'fechaIngreso': 'Fecha de Ingreso',
-              'fechaSalida': 'Fecha de Salida'
-            }"
-            [icons]="{
-              'nombreSociedad': 'business',
-              'rtn': 'badge',
-              'telefonoSociedad': 'phone',
-              'correoSociedad': 'email',
-              'nombreSocio': 'person',
-              'apellido': 'person',
-              'dni': 'badge',
-              'otroPuntoReferencia': 'location_on',
-              'barrioAvenida': 'location_city',
-              'grupoCalle': 'streetview',
-              'numeroCasa': 'home',
-              'telefonoSocio': 'phone',
-              'emailSocio': 'email',
-              'municipio': 'location_city',
-              'porcentajeParticipacion': 'percent',
-              'fechaIngreso': 'calendar_today',
-              'fechaSalida': 'calendar_today'
-            }"
-            [fieldLayout]="{
-              'nombreSociedad': { row: 0, col: 4 },
-              'rtn': { row: 0, col: 4 },
-              'telefonoSociedad': { row: 0, col: 4 },
-              'correoSociedad': { row: 1, col: 12 },
-              'nombreSocio': { row: 2, col: 6 },
-              'apellido': { row: 2, col: 6 },
-              'dni': { row: 3, col: 6 },
-              'otroPuntoReferencia': { row: 3, col: 6 },
-              'barrioAvenida': { row: 4, col: 6 },
-              'grupoCalle': { row: 4, col: 6 },
-              'numeroCasa': { row: 5, col: 6 },
-              'telefonoSocio': { row: 5, col: 6 },
-              'emailSocio': { row: 6, col: 12 },
-              'municipio': { row: 7, col: 6 },
-              'porcentajeParticipacion': { row: 7, col: 6 },
-              'fechaIngreso': { row: 8, col: 12 },
-              'fechaSalida': { row: 9, col: 12 }
-            }">
+            [fields]="fields">
           </app-shared-form-fields>
         </div>
       </div>
@@ -81,7 +20,7 @@
             <mat-icon matSuffix>exposure_plus_1</mat-icon> Agregar Sociedad
           </button>
         </div>
-        <div class="col-md-6">
+        <div class="col-md-6" *ngIf="sociedadSocios.length > 0">
           <button mat-button color="warn" type="button" (click)="removeSociedadSocio(sociedadSocios.length - 1)">
             <mat-icon matSuffix>exposure_neg_1</mat-icon> Eliminar Sociedad
           </button>

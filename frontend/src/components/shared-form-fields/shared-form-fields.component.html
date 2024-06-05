@@ -1,13 +1,21 @@
-<div *ngFor="let name of fieldNames; let rowIndex = index" class="row">
-  <div *ngFor="let fieldName of getFieldsInRow(rowIndex); let colIndex = index"
-       [class]="'col-' + fieldLayout[fieldName].col">
-    <mat-form-field style="flex-direction: column-reverse;" class="example-full-width inputs" appearance="outline">
-      <mat-label>{{ fieldLabels[fieldName] }}</mat-label>
-      <mat-icon matPrefix>{{ icons[fieldName] }}</mat-icon>
-      <input matInput [formControl]="getControl(fieldName)">
-    </mat-form-field>
-    <mat-error *ngFor="let error of getControl(fieldName)?.errors | keyvalue">
-      {{ error.key }}: {{ error.value }}
-    </mat-error>
+<div *ngFor="let rowIndex of getRowIndices()">
+  <div class="row">
+    <div *ngFor="let field of getFieldsInRow(rowIndex)" [class]="'col-md-' + (field.layout?.col ?? 12)">
+      <mat-form-field style="flex-direction: column-reverse;" class="example-full-width inputs" appearance="outline">
+        <mat-label>{{ field.label }}</mat-label>
+        <mat-icon matPrefix *ngIf="field.icon">{{ field.icon }}</mat-icon>
+        <ng-container [ngSwitch]="field.type">
+          <input *ngSwitchCase="'text'" matInput [formControl]="getControl(field.name)">
+          <mat-select *ngSwitchCase="'select'" [formControl]="getControl(field.name)">
+            <mat-option *ngFor="let option of field.options" [value]="option.value">
+              {{ option.label }}
+            </mat-option>
+          </mat-select>
+        </ng-container>
+      </mat-form-field>
+      <mat-error *ngFor="let error of getControl(field.name)?.errors | keyvalue">
+        {{ error.key }}: {{ error.value }}
+      </mat-error>
+    </div>
   </div>
 </div>

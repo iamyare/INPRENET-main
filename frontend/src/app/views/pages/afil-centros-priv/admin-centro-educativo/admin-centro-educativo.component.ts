@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, Input, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup } from '@angular/forms';
 
 @Component({
@@ -6,11 +6,17 @@ import { FormBuilder, FormGroup } from '@angular/forms';
   templateUrl: './admin-centro-educativo.component.html',
   styleUrls: ['./admin-centro-educativo.component.scss']
 })
-export class AdminCentroEducativoComponent {
-  form: FormGroup;
+export class AdminCentroEducativoComponent implements OnInit {
+  @Input() parentForm!: FormGroup;
 
-  constructor(private fb: FormBuilder) {
-    this.form = this.fb.group({
+  constructor(private fb: FormBuilder) {}
+
+  ngOnInit(): void {
+    this.addControlsToForm();
+  }
+
+  addControlsToForm() {
+    const formControls:any = {
       administradorNombre: [''],
       administradorTelefono: [''],
       administradorCorreo: [''],
@@ -29,10 +35,16 @@ export class AdminCentroEducativoComponent {
       propietarioCorreo1: [''],
       propietarioCorreo2: [''],
       propietarioReferencia: [''],
-    });
+    };
+
+    for (const key in formControls) {
+      if (formControls.hasOwnProperty(key)) {
+        this.parentForm.addControl(key, this.fb.control(formControls[key]));
+      }
+    }
   }
 
   onSubmit() {
-    console.log(this.form.value);
+    //console.log(this.parentForm.value);
   }
 }

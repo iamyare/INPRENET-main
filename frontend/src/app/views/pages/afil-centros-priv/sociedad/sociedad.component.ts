@@ -1,5 +1,5 @@
-import { Component } from '@angular/core';
-import { Validators } from '@angular/forms';
+import { Component, Input, OnInit } from '@angular/core';
+import { FormGroup, FormControl, Validators } from '@angular/forms';
 import { FieldConfig } from 'src/app/shared/Interfaces/field-config';
 
 @Component({
@@ -7,7 +7,8 @@ import { FieldConfig } from 'src/app/shared/Interfaces/field-config';
   templateUrl: './sociedad.component.html',
   styleUrls: ['./sociedad.component.scss']
 })
-export class SociedadComponent {
+export class SociedadComponent implements OnInit {
+  @Input() parentForm!: FormGroup;
 
   fields: FieldConfig[] = [
     {
@@ -51,6 +52,21 @@ export class SociedadComponent {
       validations: [Validators.email],
     }
   ];
+
+  ngOnInit() {
+    this.addControlsToForm();
+  }
+
+  addControlsToForm() {
+    this.fields.forEach(field => {
+      if (!this.parentForm.contains(field.name)) {
+        this.parentForm.addControl(field.name, new FormControl(field.value, field.validations));
+      } else {
+        const control = this.parentForm.get(field.name) as FormControl;
+        control.setValue(control.value || field.value);
+      }
+    });
+  }
 
   onDatosBenChange(form: any) {
     console.log('Valores del formulario:', form);

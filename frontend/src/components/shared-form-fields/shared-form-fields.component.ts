@@ -1,5 +1,6 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { FormGroup, FormControl } from '@angular/forms';
+import { FieldArrays } from '../../app/shared/Interfaces/field-arrays';
 
 @Component({
   selector: 'app-shared-form-fields',
@@ -8,10 +9,7 @@ import { FormGroup, FormControl } from '@angular/forms';
 })
 export class SharedFormFieldsComponent implements OnInit {
   @Input() parentForm!: FormGroup;
-  @Input() fieldNames: string[] = [];
-  @Input() fieldLabels: { [key: string]: string } = {};
-  @Input() icons: { [key: string]: string } = {};
-  @Input() fieldLayout: { [key: string]: { row: number; col: number } } = {};
+  @Input() fields: FieldArrays[] = [];
 
   ngOnInit() {
     if (!(this.parentForm instanceof FormGroup)) {
@@ -27,10 +25,13 @@ export class SharedFormFieldsComponent implements OnInit {
     return control as FormControl;
   }
 
-  getFieldsInRow(rowIndex: number): string[] {
-    return this.fieldNames.filter((name, index) => {
-      const layout = this.fieldLayout[name];
-      return layout && layout.row === rowIndex;
-    });
+  getFieldsInRow(rowIndex: number): FieldArrays[] {
+    return this.fields.filter((field: FieldArrays) => field.layout?.row === rowIndex);
+  }
+
+  getRowIndices(): number[] {
+    const rows = new Set<number>();
+    this.fields.forEach((field: FieldArrays) => rows.add(field.layout?.row ?? 0));
+    return Array.from(rows).sort((a, b) => a - b);
   }
 }

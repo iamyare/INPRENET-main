@@ -74,9 +74,9 @@
               <!-- Radio Buttons -->
               <ng-container *ngIf="field.type === 'radio'">
                 <label>{{ field.label }}</label>
-                <div [formGroupName]="field.name">
-                  <mat-radio-group>
-                    <mat-radio-button *ngFor="let option of field.options" [value]="option.value" (change)="onDatosBenChange()">
+                <div [formGroup]="form">
+                  <mat-radio-group [formControlName]="field.name" (change)="onDatosBenChange()">
+                    <mat-radio-button *ngFor="let option of field.options" [value]="option.value">
                       {{ option.label }}
                     </mat-radio-button>
                   </mat-radio-group>

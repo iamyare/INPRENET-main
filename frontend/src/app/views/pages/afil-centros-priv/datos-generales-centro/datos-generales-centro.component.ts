@@ -1,4 +1,4 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, Input, OnInit, Output, EventEmitter } from '@angular/core';
 import { FormControl, FormGroup } from '@angular/forms';
 import { FieldConfig } from 'src/app/shared/Interfaces/field-config';
 
@@ -8,8 +8,8 @@ import { FieldConfig } from 'src/app/shared/Interfaces/field-config';
   styleUrls: ['./datos-generales-centro.component.scss']
 })
 export class DatosGeneralesCentroComponent implements OnInit {
-
   @Input() parentForm!: FormGroup;
+  @Output() formUpdated = new EventEmitter<any>();
 
   fields: FieldConfig[] = [
     {
@@ -272,17 +272,32 @@ export class DatosGeneralesCentroComponent implements OnInit {
     }
   ];
 
-  onDatosBenChange(form: any) {
-    //console.log('Valores del formulario:', form);
-  }
-
   ngOnInit() {
     this.addControlsToForm();
+    this.parentForm.valueChanges.subscribe(value => {
+      this.formUpdated.emit(this.convertNumberFields(value));
+    });
   }
 
   addControlsToForm() {
     this.fields.forEach(field => {
-      this.parentForm.addControl(field.name, new FormControl(field.value, field.validations));
+      const control = new FormControl(field.value, field.validations);
+      this.parentForm.addControl(field.name, control);
     });
+    this.formUpdated.emit(this.convertNumberFields(this.parentForm.value));
+  }
+
+  convertNumberFields(values: any) {
+    const updatedValues = { ...values };
+    this.fields.forEach(field => {
+      if (field.type === 'number' && updatedValues[field.name] !== null && updatedValues[field.name] !== '') {
+        updatedValues[field.name] = Number(updatedValues[field.name]);
+      }
+    });
+    return updatedValues;
+  }
+
+  onDatosBenChange(form: any) {
+    this.formUpdated.emit(this.convertNumberFields(form));
   }
 }

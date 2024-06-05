@@ -1,4 +1,4 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, Input, OnInit, Output, EventEmitter } from '@angular/core';
 import { FormGroup, FormControl, Validators } from '@angular/forms';
 import { FieldConfig } from 'src/app/shared/Interfaces/field-config';
 
@@ -9,6 +9,7 @@ import { FieldConfig } from 'src/app/shared/Interfaces/field-config';
 })
 export class SociedadComponent implements OnInit {
   @Input() parentForm!: FormGroup;
+  @Output() formUpdated = new EventEmitter<any>();
 
   fields: FieldConfig[] = [
     {
@@ -66,9 +67,10 @@ export class SociedadComponent implements OnInit {
         control.setValue(control.value || field.value);
       }
     });
+    this.formUpdated.emit(this.parentForm.value);
   }
 
   onDatosBenChange(form: any) {
-    console.log('Valores del formulario:', form);
+    this.formUpdated.emit(form);
   }
 }

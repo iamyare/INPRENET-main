@@ -26,6 +26,9 @@ export class AfiliacionCentrosComponent implements OnInit {
   sociedadSocioForm!: FormGroup;
   adminCentroEducativoForm!: FormGroup;
 
+  datosGeneralesData: any = {}; // Variable para almacenar los datos del formulario de datos generales
+  sociedadData: any = {}; // Variable para almacenar los datos del formulario de sociedad
+
   fieldsStep5: FieldConfig[] = [
     {
       name: 'pep_declaration',
@@ -108,7 +111,7 @@ export class AfiliacionCentrosComponent implements OnInit {
     this.referenciasForm = this.fb.group({
       referencias: this.fb.array([])
     });
-    this.sociedadForm = this.fb.group({}); // Inicializar correctamente el formulario
+    this.sociedadForm = this.fb.group({});
     this.sociedadSocioForm = this.fb.group({
       sociedadSocios: this.fb.array([])
     });
@@ -120,7 +123,6 @@ export class AfiliacionCentrosComponent implements OnInit {
   }
 
   onDatosBenChange(formValues: any): void {
-    console.log('Valores del formulario:', formValues);
     this.updateFieldVisibility(formValues.pep_declaration);
   }
 
@@ -133,11 +135,19 @@ export class AfiliacionCentrosComponent implements OnInit {
     });
   }
 
+  onDatosGeneralesFormUpdate(formValues: any): void {
+    this.datosGeneralesData = formValues;
+  }
+
+  onSociedadFormUpdate(formValues: any): void {
+    this.sociedadData = formValues;
+  }
+
   gatherAllData(): void {
     const allData = {
-      datosGenerales: this.isFormGroupEmpty(this.datosGeneralesForm) ? {} : this.datosGeneralesForm.value,
+      datosGenerales: this.datosGeneralesData,
       referencias: this.referenciasForm.value.referencias.length > 0 ? this.referenciasForm.value.referencias : [],
-      sociedad: this.isFormGroupEmpty(this.sociedadForm) ? {} : this.sociedadForm.value, // Verifica si los datos se están recogiendo correctamente
+      sociedad: this.sociedadData,
       sociedadSocio: this.sociedadSocioForm.value.sociedadSocios.length > 0 ? this.sociedadSocioForm.value.sociedadSocios : [],
       adminCentroEducativo: this.isFormGroupEmpty(this.adminCentroEducativoForm) ? {} : this.adminCentroEducativoForm.value
     };

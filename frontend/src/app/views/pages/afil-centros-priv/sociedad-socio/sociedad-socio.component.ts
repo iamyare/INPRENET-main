@@ -21,13 +21,13 @@ export class SociedadSocioComponent implements OnInit {
     { name: 'otroPuntoReferencia', label: 'Otro Punto de Referencia', icon: 'location_on', layout: { row: 3, col: 6 }, type: 'text', value: '', validations: [] },
     { name: 'barrioAvenida', label: 'Barrio / Avenida', icon: 'location_city', layout: { row: 4, col: 6 }, type: 'text', value: '', validations: [] },
     { name: 'grupoCalle', label: 'Grupo / Calle', icon: 'streetview', layout: { row: 4, col: 6 }, type: 'text', value: '', validations: [] },
-    { name: 'numeroCasa', label: 'N° de Casa', icon: 'home', layout: { row: 5, col: 6 }, type: 'text', value: '', validations: [] },
+    { name: 'numeroCasa', label: 'N° de Casa', icon: 'home', layout: { row: 5, col: 6 }, type: 'number', value: '', validations: [] },
     { name: 'telefonoSocio', label: 'Teléfono del Socio', icon: 'phone', layout: { row: 5, col: 6 }, type: 'text', value: '', validations: [] },
     { name: 'emailSocio', label: 'Correo del Socio', icon: 'email', layout: { row: 6, col: 12 }, type: 'text', value: '', validations: [Validators.email] },
     { name: 'municipio', label: 'Municipio', icon: 'location_city', layout: { row: 7, col: 6 }, type: 'text', value: '', validations: [Validators.required] },
     { name: 'porcentajeParticipacion', label: 'Porcentaje de Participación', icon: 'percent', layout: { row: 7, col: 6 }, type: 'text', value: '', validations: [Validators.required, Validators.min(0), Validators.max(100)] },
-    { name: 'fechaIngreso', label: 'Fecha de Ingreso', icon: 'calendar_today', layout: { row: 8, col: 12 }, type: 'text', value: '', validations: [Validators.required] },
-    { name: 'fechaSalida', label: 'Fecha de Salida', icon: 'calendar_today', layout: { row: 9, col: 12 }, type: 'text', value: '', validations: [] }
+    { name: 'fechaIngreso', label: 'Fecha de Ingreso', icon: 'calendar_today', layout: { row: 8, col: 3 }, type: 'date', value: '', validations: [Validators.required] },
+    { name: 'fechaSalida', label: 'Fecha de Salida', icon: 'calendar_today', layout: { row: 8, col: 5 }, type: 'date', value: '', validations: [] }
   ];
 
   constructor(private fb: FormBuilder) {}

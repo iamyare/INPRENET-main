@@ -111,7 +111,7 @@ export class DatosGeneralesCentroComponent implements OnInit {
     {
       name: 'rtn',
       label: 'RTN',
-      type: 'text',
+      type: 'number',
       icon: 'badge',
       value: '',
       display: true,
@@ -159,7 +159,7 @@ export class DatosGeneralesCentroComponent implements OnInit {
     {
       name: 'numero_casa',
       label: 'Número de Casa',
-      type: 'text',
+      type: 'number',
       icon: 'home',
       value: '',
       display: true,
@@ -171,7 +171,7 @@ export class DatosGeneralesCentroComponent implements OnInit {
     {
       name: 'numero_acuerdo',
       label: 'Número de Acuerdo',
-      type: 'text',
+      type: 'number',
       icon: 'gavel',
       value: '',
       display: true,
@@ -248,11 +248,11 @@ export class DatosGeneralesCentroComponent implements OnInit {
       col: 6,
       display: true,
       options: [
-        { label: 'Pre-Escolar', value: 'pre_escolar' },
-        { label: 'Primaria', value: 'primaria' },
-        { label: 'Media', value: 'media' },
-        { label: 'Academia', value: 'academia' },
-        { label: 'Técnica', value: 'tecnica' }
+        { label: 'PRE-ESCOLAR', value: 'PRE-ESCOLAR' },
+        { label: 'PRIMARIA', value: 'PRIMARIA' },
+        { label: 'MEDIA', value: 'MEDIA' },
+        { label: 'ACADEMIA', value: 'ACADEMIA' },
+        { label: 'TECNICA', value: 'TECNICA' }
       ],
       validations: []
     },
@@ -264,9 +264,9 @@ export class DatosGeneralesCentroComponent implements OnInit {
       col: 6,
       display: true,
       options: [
-        { label: 'Matutina', value: 'matutina' },
-        { label: 'Diurna', value: 'diurna' },
-        { label: 'Nocturna', value: 'nocturna' }
+        { label: 'MATUTINA', value: 'MATUTINA' },
+        { label: 'DIURNA', value: 'DIURNA' },
+        { label: 'NOCTURNA', value: 'NOCTURNA' }
       ],
       validations: []
     }

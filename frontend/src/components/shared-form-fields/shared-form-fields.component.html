@@ -12,9 +12,11 @@
             </mat-option>
           </mat-select>
           <ng-container *ngSwitchCase="'date'">
-            <input matInput [matDatepicker]="picker" [formControl]="getControl(field.name)" placeholder="{{ field.label }}">
-            <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
-            <mat-datepicker #picker></mat-datepicker>
+            <div class="datepicker-input">
+              <input matInput [matDatepicker]="picker" [formControl]="getControl(field.name)" placeholder="{{ field.label }}">
+              <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+              <mat-datepicker #picker></mat-datepicker>
+            </div>
           </ng-container>
           <input *ngSwitchCase="'number'" matInput type="number" [formControl]="getControl(field.name)">
         </ng-container>

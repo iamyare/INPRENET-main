@@ -26,8 +26,8 @@ export class SociedadSocioComponent implements OnInit {
     { name: 'emailSocio', label: 'Correo del Socio', icon: 'email', layout: { row: 6, col: 12 }, type: 'text', value: '', validations: [Validators.email] },
     { name: 'municipio', label: 'Municipio', icon: 'location_city', layout: { row: 7, col: 6 }, type: 'text', value: '', validations: [Validators.required] },
     { name: 'porcentajeParticipacion', label: 'Porcentaje de Participación', icon: 'percent', layout: { row: 7, col: 6 }, type: 'text', value: '', validations: [Validators.required, Validators.min(0), Validators.max(100)] },
-    { name: 'fechaIngreso', label: 'Fecha de Ingreso', icon: 'calendar_today', layout: { row: 8, col: 3 }, type: 'date', value: '', validations: [Validators.required] },
-    { name: 'fechaSalida', label: 'Fecha de Salida', icon: 'calendar_today', layout: { row: 8, col: 5 }, type: 'date', value: '', validations: [] }
+    { name: 'fechaIngreso', label: 'Fecha de Ingreso', icon: 'calendar_today', layout: { row: 8, col: 6 }, type: 'date', value: '', validations: [Validators.required] },
+    { name: 'fechaSalida', label: 'Fecha de Salida', icon: 'calendar_today', layout: { row: 8, col: 6 }, type: 'date', value: '', validations: [] }
   ];
 
   constructor(private fb: FormBuilder) {}

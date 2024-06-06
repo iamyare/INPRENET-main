@@ -15,3 +15,26 @@ mat-error {
   color: red;
 }
 
+.datepicker-input {
+  display: flex;
+  align-items: center;
+  height: 25px;
+}
+
+.datepicker-input input {
+  flex: 1;
+  height: 20px;
+  padding: 0 20px;
+}
+
+.mat-form-field-appearance-outline .mat-form-field-wrapper {
+  padding: 0;
+}
+
+.mat-form-field-appearance-outline .mat-form-field-flex {
+  padding: 0 8px;
+}
+
+.mat-form-field-appearance-outline .mat-form-field-outline {
+  top: 0;
+}

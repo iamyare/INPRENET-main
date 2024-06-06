@@ -1,5 +1,7 @@
 import { Component, Input, OnInit, Output, EventEmitter } from '@angular/core';
 import { FormControl, FormGroup } from '@angular/forms';
+import { DatosEstaticosService } from 'src/app/services/datos-estaticos.service';
+import { DireccionService } from 'src/app/services/direccion.service';
 import { FieldConfig } from 'src/app/shared/Interfaces/field-config';
 
 @Component({
@@ -10,6 +12,8 @@ import { FieldConfig } from 'src/app/shared/Interfaces/field-config';
 export class DatosGeneralesCentroComponent implements OnInit {
   @Input() parentForm!: FormGroup;
   @Output() formUpdated = new EventEmitter<any>();
+
+  constructor(private datosEstaticosService: DatosEstaticosService, private direccionService: DireccionService) {}
 
   fields: FieldConfig[] = [
     {
@@ -25,16 +29,60 @@ export class DatosGeneralesCentroComponent implements OnInit {
       col: 6
     },
     {
-      name: 'sector_economico',
-      label: 'Sector Económico',
-      type: 'text',
-      icon: 'business',
+      name: 'rtn',
+      label: 'RTN',
+      type: 'number',
+      icon: 'badge',
       value: '',
       display: true,
       readOnly: false,
       validations: [],
       row: 1,
       col: 6
+    },
+    {
+      name: 'departamento',
+      label: 'Departamento',
+      type: 'dropdown',
+      row: 2,
+      col: 6,
+      display: true,
+      options: [],
+      validations: []
+    },
+    {
+      name: 'municipio',
+      label: 'Municipio',
+      type: 'dropdown',
+      row: 2,
+      col: 6,
+      display: true,
+      options: [],
+      validations: []
+    },
+    {
+      name: 'objetivo_social',
+      label: 'Objetivo Social o Razón Económica',
+      type: 'text',
+      icon: 'business',
+      value: '',
+      display: true,
+      readOnly: false,
+      validations: [],
+      row: 3,
+      col: 8
+    },
+    {
+      name: 'numero_empleados',
+      label: 'Número de Empleados',
+      type: 'number',
+      icon: 'group',
+      value: '',
+      display: true,
+      readOnly: false,
+      validations: [],
+      row: 3,
+      col: 4
     },
     {
       name: 'telefono_1',
@@ -45,8 +93,8 @@ export class DatosGeneralesCentroComponent implements OnInit {
       display: true,
       readOnly: false,
       validations: [],
-      row: 2,
-      col: 6
+      row: 4,
+      col: 3
     },
     {
       name: 'telefono_2',
@@ -57,8 +105,32 @@ export class DatosGeneralesCentroComponent implements OnInit {
       display: true,
       readOnly: false,
       validations: [],
-      row: 2,
-      col: 6
+      row: 4,
+      col: 3
+    },
+    {
+      name: 'celular_1',
+      label: 'Celular 1',
+      type: 'tel',
+      icon: 'phone',
+      value: '',
+      display: true,
+      readOnly: false,
+      validations: [],
+      row: 4,
+      col: 3
+    },
+    {
+      name: 'celular_2',
+      label: 'Celular 2',
+      type: 'tel',
+      icon: 'phone',
+      value: '',
+      display: true,
+      readOnly: false,
+      validations: [],
+      row: 4,
+      col: 3
     },
     {
       name: 'correo_1',
@@ -69,7 +141,7 @@ export class DatosGeneralesCentroComponent implements OnInit {
       display: true,
       readOnly: false,
       validations: [],
-      row: 3,
+      row: 5,
       col: 6
     },
     {
@@ -77,42 +149,6 @@ export class DatosGeneralesCentroComponent implements OnInit {
       label: 'Correo 2',
       type: 'email',
       icon: 'email',
-      value: '',
-      display: true,
-      readOnly: false,
-      validations: [],
-      row: 3,
-      col: 6
-    },
-    {
-      name: 'apoderado_legal',
-      label: 'Apoderado Legal',
-      type: 'text',
-      icon: 'person',
-      value: '',
-      display: true,
-      readOnly: false,
-      validations: [],
-      row: 4,
-      col: 6
-    },
-    {
-      name: 'representante_legal',
-      label: 'Representante Legal',
-      type: 'text',
-      icon: 'person',
-      value: '',
-      display: true,
-      readOnly: false,
-      validations: [],
-      row: 4,
-      col: 6
-    },
-    {
-      name: 'rtn',
-      label: 'RTN',
-      type: 'number',
-      icon: 'badge',
       value: '',
       display: true,
       readOnly: false,
@@ -129,8 +165,8 @@ export class DatosGeneralesCentroComponent implements OnInit {
       display: true,
       readOnly: false,
       validations: [],
-      row: 5,
-      col: 6
+      row: 6,
+      col: 3
     },
     {
       name: 'barrio_avenida',
@@ -142,7 +178,7 @@ export class DatosGeneralesCentroComponent implements OnInit {
       readOnly: false,
       validations: [],
       row: 6,
-      col: 4
+      col: 3
     },
     {
       name: 'grupo_calle',
@@ -154,7 +190,7 @@ export class DatosGeneralesCentroComponent implements OnInit {
       readOnly: false,
       validations: [],
       row: 6,
-      col: 4
+      col: 3
     },
     {
       name: 'numero_casa',
@@ -166,7 +202,19 @@ export class DatosGeneralesCentroComponent implements OnInit {
       readOnly: false,
       validations: [],
       row: 6,
-      col: 4
+      col: 3
+    },
+    {
+      name: 'direccion_2',
+      label: 'Otro punto de referencia',
+      type: 'text',
+      icon: 'location_on',
+      value: '',
+      display: true,
+      readOnly: false,
+      validations: [],
+      row: 7,
+      col: 12
     },
     {
       name: 'numero_acuerdo',
@@ -177,8 +225,8 @@ export class DatosGeneralesCentroComponent implements OnInit {
       display: true,
       readOnly: false,
       validations: [],
-      row: 7,
-      col: 4
+      row: 8,
+      col: 3
     },
     {
       name: 'fecha_emision',
@@ -189,8 +237,8 @@ export class DatosGeneralesCentroComponent implements OnInit {
       display: true,
       readOnly: false,
       validations: [],
-      row: 7,
-      col: 4
+      row: 8,
+      col: 3
     },
     {
       name: 'fecha_inicio_operaciones',
@@ -201,20 +249,8 @@ export class DatosGeneralesCentroComponent implements OnInit {
       display: true,
       readOnly: false,
       validations: [],
-      row: 7,
-      col: 4
-    },
-    {
-      name: 'numero_empleados',
-      label: 'Número de Empleados',
-      type: 'number',
-      icon: 'group',
-      value: '',
-      display: true,
-      readOnly: false,
-      validations: [],
       row: 8,
-      col: 6
+      col: 3
     },
     {
       name: 'monto_activos_totales',
@@ -226,25 +262,14 @@ export class DatosGeneralesCentroComponent implements OnInit {
       readOnly: false,
       validations: [],
       row: 8,
-      col: 6
+      col: 3
     },
-    {
-      name: 'municipio',
-      label: 'Municipio',
-      type: 'text',
-      icon: 'location_city',
-      value: '',
-      display: true,
-      readOnly: false,
-      validations: [],
-      row: 9,
-      col: 12
-    },
+
     {
       name: 'modalidad_ensenanza',
       label: 'Marque la Modalidad de Enseñanza',
       type: 'checkboxGroup',
-      row: 10,
+      row: 9,
       col: 6,
       display: true,
       options: [
@@ -260,7 +285,7 @@ export class DatosGeneralesCentroComponent implements OnInit {
       name: 'tipo_jornada',
       label: 'Marque el Tipo de Jornada',
       type: 'checkboxGroup',
-      row: 10,
+      row: 9,
       col: 6,
       display: true,
       options: [
@@ -272,11 +297,20 @@ export class DatosGeneralesCentroComponent implements OnInit {
     }
   ];
 
-  ngOnInit() {
+  async ngOnInit() {
+    await this.loadDepartamentos();
     this.addControlsToForm();
     this.parentForm.valueChanges.subscribe(value => {
       this.formUpdated.emit(this.convertNumberFields(value));
     });
+  }
+
+  async loadDepartamentos() {
+    const departamentos = await this.datosEstaticosService.getDepartamentos();
+    const departamentoField = this.fields.find(field => field.name === 'departamento');
+    if (departamentoField) {
+      departamentoField.options = departamentos;
+    }
   }
 
   addControlsToForm() {
@@ -299,5 +333,33 @@ export class DatosGeneralesCentroComponent implements OnInit {
 
   onDatosBenChange(form: any) {
     this.formUpdated.emit(this.convertNumberFields(form));
+  }
+
+  async onDepartamentoChange(event: any) {
+    const departamentoId = event.value;
+
+    const municipios = await this.direccionService.getMunicipiosPorDepartamentoId(departamentoId).toPromise();
+
+    const municipioField = this.fields.find(field => field.name === 'municipio');
+    if (municipioField) {
+      municipioField.options = municipios;
+    }
+
+    const municipioControl = this.parentForm.get('municipio');
+    if (municipioControl) {
+      municipioControl.setValue(null);
+    }
+  }
+
+  onMunicipioChange(event: any) {
+    //console.log('Municipio seleccionado:', event.value);
+  }
+
+  handleSelectChange(event: { fieldName: string, value: any }) {
+    if (event.fieldName === 'departamento') {
+      this.onDepartamentoChange(event);
+    } else if (event.fieldName === 'municipio') {
+      this.onMunicipioChange(event);
+    }
   }
 }

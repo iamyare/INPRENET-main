@@ -33,7 +33,9 @@ export class NuevoTipoDeduccionComponent implements OnInit {
           name: 'nombre_deduccion',
           validations: [Validators.required],
           display: true,
-          icon: 'badge'
+          icon: 'badge',
+          row: 1,
+          col: 4
         },
         {
           type: 'text',
@@ -41,7 +43,9 @@ export class NuevoTipoDeduccionComponent implements OnInit {
           name: 'descripcion_deduccion',
           validations: [Validators.required],
           display: true,
-          icon: 'description'
+          icon: 'description',
+          row: 1,
+          col: 4
         },
         {
           type: 'number',
@@ -49,7 +53,9 @@ export class NuevoTipoDeduccionComponent implements OnInit {
           name: 'codigo_deduccion',
           validations: [Validators.required, Validators.min(0)],
           display: true,
-          icon: 'vpn_key'
+          icon: 'vpn_key',
+          row: 1,
+          col: 4
         },
         {
           type: 'number',
@@ -57,7 +63,9 @@ export class NuevoTipoDeduccionComponent implements OnInit {
           name: 'prioridad',
           validations: [Validators.required, Validators.min(0)],
           display: true,
-          icon: 'priority_high'
+          icon: 'priority_high',
+          row: 2,
+          col: 6
         },
         {
           type: 'dropdown',
@@ -66,7 +74,9 @@ export class NuevoTipoDeduccionComponent implements OnInit {
           options: options,
           validations: [Validators.required],
           display: true,
-          icon: 'account_balance'
+          icon: 'account_balance',
+          row: 2,
+          col: 6
         }
       ];
       this.loading = false
@@ -77,7 +87,7 @@ export class NuevoTipoDeduccionComponent implements OnInit {
 
   getInstituciones(): Observable<{ label: string; value: string }[]> {
     return this.SVCInstituciones.getInstituciones().pipe(
-      map(instituciones => instituciones.map((item: { nombre_institucion: any; }) => ({ label: item.nombre_institucion, value: item.nombre_institucion })))
+      map(instituciones => instituciones.map((item: { nombre_centro_trabajo: any; }) => ({ label: item.nombre_centro_trabajo, value: item.nombre_centro_trabajo })))
     );
   }
 

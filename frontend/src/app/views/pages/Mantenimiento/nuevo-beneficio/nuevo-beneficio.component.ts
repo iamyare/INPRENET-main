@@ -26,7 +26,9 @@ export class NuevoBeneficioComponent implements OnInit {
         name: 'nombre_beneficio',
         validations: [Validators.required],
         display: true,
-        icon: 'card_giftcard'
+        icon: 'card_giftcard',
+        row: 1,
+        col: 6
       },
       {
         type: 'text',
@@ -34,7 +36,9 @@ export class NuevoBeneficioComponent implements OnInit {
         name: 'descripcion_beneficio',
         validations: [Validators.required],
         display: true,
-        icon: 'description'
+        icon: 'description',
+        row: 1,
+        col: 6
       },
       {
         type: 'dropdown',
@@ -43,7 +47,9 @@ export class NuevoBeneficioComponent implements OnInit {
         validations: [Validators.required],
         options: [{ label: "VITALICIO", value: "VITALICIO" }, { label: "DEFINIDO", value: "DEFINIDO" }],
         display: true,
-        icon: 'repeat'
+        icon: 'repeat',
+        row: 2,
+        col: 6
       },
       {
         type: 'number',
@@ -51,7 +57,9 @@ export class NuevoBeneficioComponent implements OnInit {
         name: 'numero_rentas_max',
         validations: [],
         display: false,
-        icon: 'trending_up'
+        icon: 'trending_up',
+        row: 2,
+        col: 6
       }
     ];
 

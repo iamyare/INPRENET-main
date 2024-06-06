@@ -27,6 +27,12 @@ export class Net_Centro_Trabajo {
     @Column('varchar2', { length: 30, nullable: true, name: 'TELEFONO_2' })
     telefono_2: string;
 
+    @Column('varchar2', { length: 30, nullable: false, name: 'CELULAR_1' })
+    celular_1: string;
+
+    @Column('varchar2', { length: 30, nullable: true, name: 'CELULAR_2' })
+    celular_2: string;
+
     @Column('varchar2', { length: 40, nullable: false, name: 'CORREO_1' })
     @Index("UQ_Correo_centro_trab", { unique: true })
     correo_1: string;
@@ -67,6 +73,9 @@ export class Net_Centro_Trabajo {
     
     @Column('number', { precision: 18, scale: 2, nullable: true, name: 'MONTO_ACTIVOS_TOTALES' })
     monto_activos_totales: number;
+
+    @Column('nvarchar2', { length: 255, nullable: true, name: 'OBJETIVO_SOCIAL' })
+    objetivo_social: string;
 
     @ManyToOne(() => Net_Municipio, municipio => municipio.centrosTrabajo)
     @JoinColumn({ name: 'ID_MUNICIPIO', foreignKeyConstraintName: 'FK_ID_MUNICIPIO_CENT_TRAB' })

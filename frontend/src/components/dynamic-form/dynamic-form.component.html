@@ -25,7 +25,7 @@
               <ng-container *ngIf="field.type === 'dropdown'; else dateField">
                 <mat-form-field appearance="outline" style="width: 100%">
                   <mat-label>{{ field.label }}</mat-label>
-                  <mat-select [formControlName]="field.name" (selectionChange)="onDatosBenChange()" [attr.readonly]="field.readOnly">
+                  <mat-select [formControlName]="field.name" (selectionChange)="onSelectChange(field.name, $event)" [attr.readonly]="field.readOnly">
                     <mat-option *ngFor="let option of field.options" [value]="option.value">
                       {{ option.label }}
                     </mat-option>

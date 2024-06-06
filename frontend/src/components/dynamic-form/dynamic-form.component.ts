@@ -14,6 +14,7 @@ export class DynamicFormComponent implements OnInit {
   @Input() titulo = "";
   @Input() subtitulo = "";
   @Output() newDatBenChange = new EventEmitter<any>()
+  @Output() selectChange = new EventEmitter<{ fieldName: string, value: any }>();
 
   constructor(private fb: FormBuilder) {
     this.form = this.fb.group({});
@@ -102,5 +103,9 @@ export class DynamicFormComponent implements OnInit {
     } else {
       throw new Error(`Control with name '${fieldName}' is not a FormArray`);
     }
+  }
+
+  onSelectChange(fieldName: string, event: any) {
+    this.selectChange.emit({ fieldName, value: event.value });
   }
 }

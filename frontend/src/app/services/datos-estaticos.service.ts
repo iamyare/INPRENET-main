@@ -2,9 +2,7 @@ import { Injectable } from '@angular/core';
 import { AfiliadoService } from './afiliado.service';
 import { DireccionService } from './direccion.service';
 import { BancosService } from './bancos.service';
-import { InstitucionesService } from './instituciones.service';
 import { TipoIdentificacionService } from './tipo-identificacion.service';
-import { Observable } from 'rxjs';
 import { ColegiosMagisterialesService } from './colegios-magisteriales.service';
 import { CentroTrabajoService } from './centro-trabajo.service';
 import { HttpClient } from '@angular/common/http';
@@ -19,7 +17,6 @@ export class DatosEstaticosService {
   departamentos: any = [];
   DatosBancBen: any = [];
   Bancos: any = [];
-  Instituciones: any = [];
   tipoIdent: any = [];
   tipoCuenta: any = [];
   profesiones: any = [];
@@ -34,7 +31,6 @@ export class DatosEstaticosService {
     private colegiosMagSVC: ColegiosMagisterialesService,
     private bancosService: BancosService,
     private centrosTrabSVC: CentroTrabajoService,
-    private SVCInstituciones: InstitucionesService,
     private afiliadoService: AfiliadoService,
     public direccionSer: DireccionService,
     private tipoIdentificacionService: TipoIdentificacionService,
@@ -43,7 +39,6 @@ export class DatosEstaticosService {
     private http: HttpClient,
     private authService: AuthService
   ) {
-    this.getInstituciones();
     this.getNacionalidad();
     this.gettipoIdent();
     this.getTipoCuenta();
@@ -51,12 +46,12 @@ export class DatosEstaticosService {
     this.getBancos();
     this.getColegiosMagisteriales();
     this.getAllCentrosTrabajo();
-    this.getInstituciones();
     this.getProfesiones();
     this.getMunicipios();
     this.getDepartamentos();
     this.getRoles();
   }
+
 
   async getEstados() {
     const response = await this.afiliadoService.getAllEstados().toPromise();
@@ -68,7 +63,7 @@ export class DatosEstaticosService {
     return this.estados;
   }
 
-  async getDepartamentos() {
+  async getDepartamentos(): Promise<any[]> {
     try {
       const response = await this.direccionSer.getAllDepartments().toPromise();
       this.departamentos = response.map((item: { id_departamento: any; nombre_departamento: any; }) => ({
@@ -82,6 +77,8 @@ export class DatosEstaticosService {
       return this.departamentos;
     }
   }
+
+
 
   gettipoIdent = async () => {
     const response = await this.tipoIdentificacionService.obtenerTiposIdentificacion().toPromise();
@@ -126,17 +123,6 @@ export class DatosEstaticosService {
     }));
     this.centrosTrabajo = mappedResponse;
     return this.centrosTrabajo;
-  }
-
-  async getInstituciones() {
-    this.Instituciones = await this.SVCInstituciones.getInstituciones().toPromise();
-
-    this.Instituciones.map((item: { nombre_institucion: any; id_institucion: any; }) => ({
-      label: item.nombre_institucion,
-      value: String(item.id_institucion)
-    }));
-
-    return this.Instituciones;
   }
 
   async getProfesiones() {

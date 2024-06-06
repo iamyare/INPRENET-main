@@ -31,7 +31,9 @@ export class NuevoTipoPlanillaComponent {
         name: 'nombre_planilla',
         validations: [Validators.required, Validators.maxLength(50)],
         display: true,
-        icon: 'library_books'
+        icon: 'library_books',
+        row: 1,
+        col: 4
       },
       {
         type: 'dropdown',
@@ -40,7 +42,9 @@ export class NuevoTipoPlanillaComponent {
         validations: [Validators.required],
         options: this.getTipoPlanillas(),
         display: true,
-        icon: 'category'
+        icon: 'category',
+        row: 1,
+        col: 4
       },
       {
         type: 'text',
@@ -48,7 +52,9 @@ export class NuevoTipoPlanillaComponent {
         name: 'descripcion',
         validations: [Validators.required],
         display: true,
-        icon: 'add_notes'
+        icon: 'add_notes',
+        row: 1,
+        col: 4
       }
     ];
   }

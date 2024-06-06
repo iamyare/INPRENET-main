@@ -7,50 +7,6 @@
   <div class="card-body">
     <form [formGroup]="parentForm" (ngSubmit)="onSubmit()">
       <div class="container">
-        <h4>Administrador</h4>
-        <div class="row">
-          <div class="col-md-6">
-            <mat-form-field appearance="outline" style="width: 100%">
-              <mat-label>Nombre del Administrador(a)</mat-label>
-              <input matInput formControlName="administradorNombre" />
-            </mat-form-field>
-          </div>
-          <div class="col-md-3">
-            <mat-form-field appearance="outline" style="width: 100%">
-              <mat-label>Teléfono</mat-label>
-              <input matInput formControlName="administradorTelefono" />
-            </mat-form-field>
-          </div>
-          <div class="col-md-3">
-            <mat-form-field appearance="outline" style="width: 100%">
-              <mat-label>Correo Electrónico</mat-label>
-              <input matInput formControlName="administradorCorreo" />
-            </mat-form-field>
-          </div>
-        </div>
-
-        <h4>Contador</h4>
-        <div class="row">
-          <div class="col-md-6">
-            <mat-form-field appearance="outline" style="width: 100%">
-              <mat-label>Nombre del Contador(a)</mat-label>
-              <input matInput formControlName="contadorNombre" />
-            </mat-form-field>
-          </div>
-          <div class="col-md-3">
-            <mat-form-field appearance="outline" style="width: 100%">
-              <mat-label>Teléfono</mat-label>
-              <input matInput formControlName="contadorTelefono" />
-            </mat-form-field>
-          </div>
-          <div class="col-md-3">
-            <mat-form-field appearance="outline" style="width: 100%">
-              <mat-label>Correo Electrónico</mat-label>
-              <input matInput formControlName="contadorCorreo" />
-            </mat-form-field>
-          </div>
-        </div>
-
         <h4>Datos del Propietario(a) / Representante Legal</h4>
         <div class="row">
           <div class="col-md-6">
@@ -123,6 +79,50 @@
             <mat-form-field appearance="outline" style="width: 100%">
               <mat-label>Otros Puntos de Referencia</mat-label>
               <textarea matInput formControlName="propietarioReferencia"></textarea>
+            </mat-form-field>
+          </div>
+        </div>
+
+        <h4>Administrador</h4>
+        <div class="row">
+          <div class="col-md-6">
+            <mat-form-field appearance="outline" style="width: 100%">
+              <mat-label>Nombre del Administrador(a)</mat-label>
+              <input matInput formControlName="administradorNombre" />
+            </mat-form-field>
+          </div>
+          <div class="col-md-3">
+            <mat-form-field appearance="outline" style="width: 100%">
+              <mat-label>Teléfono</mat-label>
+              <input matInput formControlName="administradorTelefono" />
+            </mat-form-field>
+          </div>
+          <div class="col-md-3">
+            <mat-form-field appearance="outline" style="width: 100%">
+              <mat-label>Correo Electrónico</mat-label>
+              <input matInput formControlName="administradorCorreo" />
+            </mat-form-field>
+          </div>
+        </div>
+
+        <h4>Contador</h4>
+        <div class="row">
+          <div class="col-md-6">
+            <mat-form-field appearance="outline" style="width: 100%">
+              <mat-label>Nombre del Contador(a)</mat-label>
+              <input matInput formControlName="contadorNombre" />
+            </mat-form-field>
+          </div>
+          <div class="col-md-3">
+            <mat-form-field appearance="outline" style="width: 100%">
+              <mat-label>Teléfono</mat-label>
+              <input matInput formControlName="contadorTelefono" />
+            </mat-form-field>
+          </div>
+          <div class="col-md-3">
+            <mat-form-field appearance="outline" style="width: 100%">
+              <mat-label>Correo Electrónico</mat-label>
+              <input matInput formControlName="contadorCorreo" />
             </mat-form-field>
           </div>
         </div>

@@ -18,6 +18,7 @@ import { Net_Rol_Empresa } from './entities/net_rol_empresa.entity';
 import { Net_Seguridad } from './entities/net_seguridad.entity';
 import { CompleteRegistrationDto } from './dto/complete-registration.dto';
 import { LoginDto } from './dto/login.dto';
+import { Net_Empleado_Centro_Trabajo } from '../Empresarial/entities/net_empleado_centro_trabajo.entity';
 
 @Injectable()
 export class UsuarioService {
@@ -43,19 +44,33 @@ export class UsuarioService {
     private readonly seguridadRepository: Repository<Net_Seguridad>,
     @InjectRepository(Net_Centro_Trabajo)
     private centroTrabajoRepository: Repository<Net_Centro_Trabajo>,
+    @InjectRepository(Net_Empleado_Centro_Trabajo)
+    private readonly empleadoCentroTrabajoRepository: Repository<Net_Empleado_Centro_Trabajo>,
   ) { }
 
   async preRegistro(createPreRegistroDto: CreatePreRegistroDto): Promise<void> {
     const { nombreEmpleado, nombrePuesto, correo, numeroEmpleado, idRole } = createPreRegistroDto;
 
     // Verificar si el usuario ya existe
-    /* const usuarioExistente = await this.usuarioEmpresaRepository.findOne({ where: { correo } });
+    const usuarioExistente = await this.usuarioEmpresaRepository.findOne({
+      relations: ['empleadoCentroTrabajo'],
+      where: {
+        empleadoCentroTrabajo: {
+          correo_1: correo
+        }
+      }
+    });
+
     if (usuarioExistente) {
       throw new BadRequestException('El correo ya está registrado');
-    } */
+    }
 
     // Verificar si el rol existe
-    const rol = await this.rolEmpresaRepository.findOne({ where: { id_rol_empresa: idRole } });
+    const rol = await this.rolEmpresaRepository.findOne({
+      where: { id_rol_empresa: idRole },
+      relations: ['centroTrabajo'],
+    });
+
     if (!rol) {
       throw new BadRequestException('El rol especificado no existe');
     }
@@ -66,17 +81,27 @@ export class UsuarioService {
     });
 
     const empleado = await this.empleadoRepository.save(nuevoEmpleado);
-    /* const nuevoUsuario = this.usuarioEmpresaRepository.create({
-      nombrePuesto,
-      numeroEmpleado,
-      estado: 'PENDIENTE',
-      correo,
-      contrasena: await bcrypt.hash('temporal', 10),
-      role: rol,
-      user: empleado,
-    }); */
 
-    //await this.usuarioEmpresaRepository.save(nuevoUsuario);
+    // Crear una nueva relación de empleado con centro de trabajo
+    const nuevoEmpleadoCentroTrabajo = this.empleadoCentroTrabajoRepository.create({
+      empleado,
+      correo_1: correo,
+      numeroEmpleado,
+      nombrePuesto,
+      centroTrabajo: rol.centroTrabajo,
+    });
+
+    const empleadoCentroTrabajo = await this.empleadoCentroTrabajoRepository.save(nuevoEmpleadoCentroTrabajo);
+
+    // Crear un nuevo usuario
+    const nuevoUsuario = this.usuarioEmpresaRepository.create({
+      estado: 'PENDIENTE',
+      contrasena: await bcrypt.hash('temporal', 10),
+      rolEmpresa: rol,
+      empleadoCentroTrabajo: empleadoCentroTrabajo,
+    });
+
+    await this.usuarioEmpresaRepository.save(nuevoUsuario);
 
     // Generar un token JWT para la verificación de correo
     const token = this.jwtService.sign({ correo });
@@ -85,28 +110,28 @@ export class UsuarioService {
     const verificationUrl = `http://localhost:4200/#/register?token=${token}`;
     const htmlContent = `
     <div style="font-family: Arial, sans-serif; line-height: 1.6;">
-    <h2 style="color: #13776B;">¡Bienvenido a INPRENET!</h2>
-    <p>Hola ${nombreEmpleado},</p>
-    <p>Estamos encantados de tenerte con nosotros y queremos asegurarnos de que tengas la mejor experiencia posible desde el primer día.</p>
-    <div style="text-align: center;">
-      <img src="https://southcentralus1-mediap.svc.ms/transform/thumbnail?provider=spo&inputFormat=svg&cs=fFNQTw&docid=https%3A%2F%2Finpremagob-my.sharepoint.com%3A443%2F_api%2Fv2.0%2Fdrives%2Fb!SI5LDUe5UUeWwbh8d22jHOuRtzUPu3pFjDQjpEOapGryqRMSooSMRZ-wwIb8wBJs%2Fitems%2F01UGOONEU5HH7KZBUIZVEJ72CI6THKKM2V%3Fversion%3DPublished&access_token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOiIwMDAwMDAwMy0wMDAwLTBmZjEtY2UwMC0wMDAwMDAwMDAwMDAvaW5wcmVtYWdvYi1teS5zaGFyZXBvaW50LmNvbUBkMjI2NmE3Mi1jNDBkLTRkZTMtOWQ1Zi1kMmZmYmYzMDQ5YmQiLCJjYWNoZWtleSI6IjBoLmZ8bWVtYmVyc2hpcHx1cm4lM2FzcG8lM2Fhbm9uI2Q5ZDAwMjIxOGUwNjE3YTUyNTYwMWE3ZjIzMjE5YWViMzUyMjNmN2U3YmI5ZDNlMTU3YTc3YzFlYzFkMzJhNzgiLCJlbmRwb2ludHVybCI6ImsxRWtyL2tDL3pSMjg0cG9JM24wRUY5UWM0b2ZZQ3NYMUJSUlB1aStBL0U9IiwiZW5kcG9pbnR1cmxMZW5ndGgiOiIxMjAiLCJleHAiOiIxNzE2NzY4MDAwIiwiaXBhZGRyIjoiMTkwLjkyLjg3LjMiLCJpc2xvb3BiYWNrIjoiVHJ1ZSIsImlzcyI6IjAwMDAwMDAzLTAwMDAtMGZmMS1jZTAwLTAwMDAwMDAwMDAwMCIsImlzdXNlciI6InRydWUiLCJuYW1laWQiOiIwIy5mfG1lbWJlcnNoaXB8dXJuJTNhc3BvJTNhYW5vbiNkOWQwMDIyMThlMDYxN2E1MjU2MDFhN2YyMzIxOWFlYjM1MjIzZjdlN2JiOWQzZTE1N2E3N2MxZWMxZDMyYTc4IiwibmJmIjoiMTcxNjc0NjQwMCIsIm5paSI6Im1pY3Jvc29mdC5zaGFyZXBvaW50Iiwic2hhcmluZ2lkIjoiM1ZqUkduNXpza0t2ZFI5aVcrdUljQSIsInNpdGVpZCI6Ik1HUTBZamhsTkRndFlqazBOeTAwTnpVeExUazJZekV0WWpnM1l6YzNObVJoTXpGaiIsInNuaWQiOiI2Iiwic3RwIjoidCIsInR0IjoiMCIsInZlciI6Imhhc2hlZHByb29mdG9rZW4ifQ.v0PlebLrI6p6-du_YxzdVl-8U3MvWL3hf4CDJv-mQLw&cTag=%22c%3A%7BACFE399D-8886-48CD-9FE8-48F4CEA53355%7D%2C1%22&encodeFailures=1&width=459&height=270&srcWidth=&srcHeight=&cropMode=dochead" alt="Imagen del Sistema" style="width: 80%; max-width: 600px; border-radius: 8px; margin: 20px 0;">
-    </div>
-    <p>Para empezar, necesitamos que completes tu registro. Esto nos ayudará a personalizar tu experiencia y asegurarnos de que tienes acceso a todas las funcionalidades de nuestra aplicación.</p>
-    <p>Por favor, completa tu registro haciendo clic en el siguiente enlace:</p>
-    <div style="text-align: center; margin: 20px 0;">
-      <a href="${verificationUrl}" style="background-color: #13776B; color: white; padding: 10px 20px; text-decoration: none; border-radius: 4px;">Completar Registro</a>
-    </div>
-    <p>Si tienes alguna pregunta o necesitas ayuda, no dudes en contactarnos.</p>
-    <p>¡Gracias por unirte a nosotros!</p>
-    <p>El equipo de INPRENET</p>
-  </div>`;
+      <h2 style="color: #13776B;">¡Bienvenido a INPRENET!</h2>
+      <p>Hola ${nombreEmpleado},</p>
+      <p>Estamos encantados de tenerte con nosotros y queremos asegurarnos de que tengas la mejor experiencia posible desde el primer día.</p>
+      <div style="text-align: center;">
+        <img src="https://southcentralus1-mediap.svc.ms/transform/thumbnail?provider=spo&inputFormat=svg&cs=fFNQTw&docid=https%3A%2F%2Finpremagob-my.sharepoint.com%3A443%2F_api%2Fv2.0%2Fdrives%2Fb!SI5LDUe5UUeWwbh8d22jHOuRtzUPu3pFjDQjpEOapGryqRMSooSMRZ-wwIb8wBJs%2Fitems%2F01UGOONEU5HH7KZBUIZVEJ72CI6THKKM2V%3Fversion%3DPublished&access_token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOiIwMDAwMDAwMy0wMDAwLTBmZjEtY2UwMC0wMDAwMDAwMDAwMDAvaW5wcmVtYWdvYi1teS5zaGFyZXBvaW50LmNvbUBkMjI2NmE3Mi1jNDBkLTRkZTMtOWQ1Zi1kMmZmYmYzMDQ5YmQiLCJjYWNoZWtleSI6IjBoLmZ8bWVtYmVyc2hpcHx1cm4lM2FzcG8lM2Fhbm9uI2Q5ZDAwMjIxOGUwNjE3YTUyNTYwMWE3ZjIzMjE5YWViMzUyMjNmN2U3YmI5ZDNlMTU3YTc3YzFlYzFkMzJhNzgiLCJlbmRwb2ludHVybCI6ImsxRWtyL2tDL3pSMjg0cG9JM24wRUY5UWM0b2ZZQ3NYMUJSUlB1aStBL0U9IiwiZW5kcG9pbnR1cmxMZW5ndGgiOiIxMjAiLCJleHAiOiIxNzE2NzY4MDAwIiwiaXBhZGRyIjoiMTkwLjkyLjg3LjMiLCJpc2xvb3BiYWNrIjoiVHJ1ZSIsImlzcyI6IjAwMDAwMDAzLTAwMDAtMGZmMS1jZTAwLTAwMDAwMDAwMDAwMCIsImlzdXNlciI6InRydWUiLCJuYW1laWQiOiIwIy5mfG1lbWJlcn
+      <p>Para empezar, necesitamos que completes tu registro. Esto nos ayudará a personalizar tu experiencia y asegurarnos de que tienes acceso a todas las funcionalidades de nuestra aplicación.</p>
+      <p>Por favor, completa tu registro haciendo clic en el siguiente enlace:</p>
+      <div style="text-align: center; margin: 20px 0;">
+        <a href="${verificationUrl}" style="background-color: #13776B; color: white; padding: 10px 20px; text-decoration: none; border-radius: 4px;">Completar Registro</a>
+      </div>
+      <p>Si tienes alguna pregunta o necesitas ayuda, no dudes en contactarnos.</p>
+      <p>¡Gracias por unirte a nosotros!</p>
+      <p>El equipo de INPRENET</p>
+    </div>`;
 
     await this.mailService.sendMail(correo, 'Completa tu registro', '', htmlContent);
   }
 
   async completarRegistro(token: string, completeRegistrationDto: CompleteRegistrationDto, archivo_identificacion: Buffer): Promise<void> {
-    /* const { correo, contrasena, pregunta_de_usuario_1, respuesta_de_usuario_1, pregunta_de_usuario_2, respuesta_de_usuario_2, pregunta_de_usuario_3, respuesta_de_usuario_3, telefonoEmpleado, numero_identificacion } = completeRegistrationDto;
+    const { correo, contrasena, pregunta_de_usuario_1, respuesta_de_usuario_1, pregunta_de_usuario_2, respuesta_de_usuario_2, pregunta_de_usuario_3, respuesta_de_usuario_3, telefonoEmpleado, numero_identificacion } = completeRegistrationDto;
 
+    // Verificar el token JWT
     try {
       const decoded = this.jwtService.verify(token);
       if (decoded.correo !== correo) {
@@ -116,19 +141,31 @@ export class UsuarioService {
       throw new BadRequestException('Token inválido o expirado');
     }
 
-    const usuario = await this.usuarioEmpresaRepository.findOne({ where: { correo, estado: 'PENDIENTE' }, relations: ['user'] });
+    // Encontrar el usuario pendiente
+    const usuario = await this.usuarioEmpresaRepository.findOne({
+      where: {
+        estado: 'PENDIENTE',
+        empleadoCentroTrabajo: {
+          correo_1: correo,
+        },
+      },
+      relations: ['empleadoCentroTrabajo', 'empleadoCentroTrabajo.empleado'],
+    });
+
     if (!usuario) {
       throw new BadRequestException('Usuario no encontrado o ya registrado');
     }
 
+    // Actualizar la información del usuario y del empleado
     usuario.contrasena = await bcrypt.hash(contrasena, 10);
     usuario.estado = 'ACTIVO';
     usuario.fecha_verificacion = new Date();
-    usuario.user.telefonoEmpleado = telefonoEmpleado;
-    usuario.user.numero_identificacion = numero_identificacion;
-    usuario.user.archivo_identificacion = archivo_identificacion;
+    usuario.empleadoCentroTrabajo.empleado.telefono_1 = telefonoEmpleado;
+    usuario.empleadoCentroTrabajo.empleado.numero_identificacion = numero_identificacion;
+    usuario.empleadoCentroTrabajo.empleado.archivo_identificacion = archivo_identificacion;
 
-    await this.empleadoRepository.save(usuario.user);
+    // Guardar los cambios en la base de datos
+    await this.empleadoRepository.save(usuario.empleadoCentroTrabajo.empleado);
     await this.usuarioEmpresaRepository.save(usuario);
 
     // Crear registros de seguridad
@@ -150,41 +187,59 @@ export class UsuarioService {
       usuarioEmpresa: usuario,
     });
 
-    await this.seguridadRepository.save([seguridad1, seguridad2, seguridad3]); */
+    await this.seguridadRepository.save([seguridad1, seguridad2, seguridad3]);
   }
 
-  async login(loginDto: LoginDto){
-    /* const { correo, contrasena } = loginDto;
+  async login(loginDto: LoginDto) {
+    const { correo, contrasena } = loginDto;
 
+    // Encontrar el usuario por correo
     const usuario = await this.usuarioEmpresaRepository.findOne({
-      where: { correo },
-      relations: ['role', 'role.empresa']
+      where: {
+        empleadoCentroTrabajo: {
+          correo_1: correo
+        }
+      },
+      relations: ['rolEmpresa', 'empleadoCentroTrabajo', 'empleadoCentroTrabajo.centroTrabajo']
     });
+
     if (!usuario) {
       throw new UnauthorizedException('Credenciales inválidas');
     }
 
+    // Validar la contraseña
     const isPasswordValid = await bcrypt.compare(contrasena, usuario.contrasena);
     if (!isPasswordValid) {
       throw new UnauthorizedException('Credenciales inválidas');
     }
 
+    // Generar el payload del token
     const payload = {
       correo,
       sub: usuario.id_usuario_empresa,
-      rol: usuario.role.nombre_rol,
-      idEmpresa: usuario.role.centroTrabajo.id_centro_trabajo
+      rol: usuario.rolEmpresa.nombre,
+      idCentroTrabajo: usuario.empleadoCentroTrabajo.centroTrabajo.id_centro_trabajo
     };
 
+    // Firmar el token JWT
     const accessToken = this.jwtService.sign(payload);
-    return { accessToken }; */
+    return { accessToken };
   }
 
   async getRolesPorEmpresa(centroId: number) {
-    /* return this.rolEmpresaRepository.find({
-      where: { centroTrabajo: { id_centro_trabajo: centroId }, nombre_rol: Not('ADMINISTRADOR') },
-    }); */
+    return this.rolEmpresaRepository.find({
+      where: {
+        centroTrabajo: { id_centro_trabajo: centroId },
+        nombre: Not('ADMINISTRADOR')
+      },
+    });
   }
+
+  /*  async findAllRolesExceptAdmin(): Promise<Net_Rol[]> {
+    return this.rolRepository.createQueryBuilder('rol')
+      .where('rol.nombre_rol != :nombre_rol', { nombre_rol: 'ADMINISTRADOR' })
+      .getMany();
+  } */
 
   
   async verificarEstadoSesion(token: string): Promise<{ sesionActiva: boolean }> {
@@ -534,9 +589,4 @@ export class UsuarioService {
     }
   }
 
- /*  async findAllRolesExceptAdmin(): Promise<Net_Rol[]> {
-    return this.rolRepository.createQueryBuilder('rol')
-      .where('rol.nombre_rol != :nombre_rol', { nombre_rol: 'ADMINISTRADOR' })
-      .getMany();
-  } */
 }

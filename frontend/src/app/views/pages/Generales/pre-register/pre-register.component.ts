@@ -31,9 +31,10 @@ export class PreRegisterComponent implements OnInit {
     this.idEmpresa = this.authSvc.getIdEmpresaFromToken();
     if (this.idEmpresa) {
       this.authSvc.getRolesByEmpresa(this.idEmpresa).subscribe({
+
         next: (roles) => {
           this.tipoRol = roles.map((rol: any) => ({
-            label: rol.nombre_rol,
+            label: rol.nombre,
             value: rol.id_rol_empresa
           }));
         },

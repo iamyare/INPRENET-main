@@ -1,6 +1,5 @@
 import { Entity, PrimaryGeneratedColumn, ManyToOne, JoinColumn, Column, OneToMany } from 'typeorm';
 import { Net_Empleado } from './net_empleado.entity';
-import { Net_Rol_Empresa } from 'src/modules/usuario/entities/net_rol_empresa.entity';
 import { Net_Centro_Trabajo } from './net_centro_trabajo.entity';
 import { Net_Usuario_Empresa } from 'src/modules/usuario/entities/net_usuario_empresa.entity';
 
@@ -23,8 +22,11 @@ export class Net_Empleado_Centro_Trabajo {
   @Column('varchar2', { length: 200, nullable: true, name: 'CORREO_2' })
   correo_2: string;
 
-  @Column('date', { nullable: false, name: 'FECHA_CONTRATACION' })
-  fechaContratacion: Date;
+  @Column('varchar2', { length: 100, nullable: false, name: 'NUMERO_EMPLEADO' })
+  numeroEmpleado: string;
+
+  @Column('varchar2', { length: 100, nullable: false, name: 'NOMBRE_PUESTO' })
+  nombrePuesto: string;
 
   @OneToMany(() => Net_Usuario_Empresa, usuarioEmpresa => usuarioEmpresa.empleadoCentroTrabajo)
   usuarioEmpresas: Net_Usuario_Empresa[];

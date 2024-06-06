@@ -18,7 +18,7 @@ export class Net_Centro_Trabajo {
     @Column('varchar2', { length: 40, nullable: false, name: 'NOMBRE_CENTRO_TRABAJO' })
     nombre_centro_trabajo: string;
 
-    @Column('varchar2', { length: 40, nullable: false, name: 'SECTOR_ECONOMICO' })
+    @Column('varchar2', { length: 40, nullable: true, name: 'SECTOR_ECONOMICO' })
     sector_economico: string;
 
     @Column('varchar2', { length: 30, nullable: false, name: 'TELEFONO_1' })
@@ -34,38 +34,38 @@ export class Net_Centro_Trabajo {
     @Column('varchar2', { length: 50, nullable: true, name: 'CORREO_2' })
     correo_2: string;
 
-    @Column('nvarchar2', { length: 50, nullable: false, name: 'APODERADO_LEGAL' })
+    @Column('nvarchar2', { length: 50, nullable: true, name: 'APODERADO_LEGAL' })
     apoderado_legal: string;
 
-    @Column('nvarchar2', { length: 50, nullable: false, name: 'REPRESENTANTE_LEGAL' })
+    @Column('nvarchar2', { length: 50, nullable: true, name: 'REPRESENTANTE_LEGAL' })
     representante_legal: string;
 
     @Column('nvarchar2', { length: 14, nullable: false, name: 'RTN' })
     @Index("UQ_rtn_netCenTrab", { unique: true })
     rtn: string;
 
-    @Column('nvarchar2', { length: 300, nullable: false, name: 'LOGO' })
+    @Column('nvarchar2', { length: 300, nullable: true, name: 'LOGO' })
     logo: string;
 
     @Column('nvarchar2', { length: 200, nullable: false, name: 'DIRECCION_1' })
     direccion_1: string;
 
-    @Column('nvarchar2', { length: 200, nullable: false, name: 'DIRECCION_2' })
+    @Column('nvarchar2', { length: 200, nullable: true, name: 'DIRECCION_2' })
     direccion_2: string;
 
-    @Column('varchar2', { length: 50, nullable: false, name: 'NUMERO_ACUERDO' })
+    @Column('varchar2', { length: 50, nullable: true, name: 'NUMERO_ACUERDO' })
     numero_acuerdo: string;
 
-    @Column('date', { nullable: false, name: 'FECHA_EMISION' })
+    @Column('date', { nullable: true, name: 'FECHA_EMISION' })
     fecha_emision: Date;
 
-    @Column('date', { nullable: false, name: 'FECHA_INICIO_OPERACIONES' })
+    @Column('date', { nullable: true, name: 'FECHA_INICIO_OPERACIONES' })
     fecha_inicio_operaciones: Date;
 
-    @Column('int', { nullable: false, name: 'NUMERO_EMPLEADOS' })
+    @Column('int', { nullable: true, name: 'NUMERO_EMPLEADOS' })
     numero_empleados: number;
     
-    @Column('number', { precision: 18, scale: 2, nullable: false, name: 'MONTO_ACTIVOS_TOTALES' })
+    @Column('number', { precision: 18, scale: 2, nullable: true, name: 'MONTO_ACTIVOS_TOTALES' })
     monto_activos_totales: number;
 
     @ManyToOne(() => Net_Municipio, municipio => municipio.centrosTrabajo)

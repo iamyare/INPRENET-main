@@ -19,10 +19,6 @@ export class NET_USUARIO_PRIVADA {
 
     @Column('varchar2', { length: 50, default: 'INACTIVO', name: 'ESTADO' })
     estado: string;
-    
-    /* @ManyToOne(() => Net_Rol, rol => rol.usuarios)
-    @JoinColumn({ name: 'ID_ROL' })
-    rol: Net_Rol; */
 
     @ManyToOne(() => Net_Centro_Trabajo, centroTrabajo => centroTrabajo.perfAfilCentTrabs, { nullable: true })
     @JoinColumn({ name: 'ID_CENTRO_TRABAJO' })

@@ -74,9 +74,11 @@ export class AuthService {
 
   getIdEmpresaFromToken(): number | null {
     const token = localStorage.getItem('token');
+    console.log(token);
+
     if (token) {
       const decodedToken: any = jwtDecode(token);
-      return decodedToken.idEmpresa;
+      return decodedToken.idCentroTrabajo;
     }
     return null;
   }

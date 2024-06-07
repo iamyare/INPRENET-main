@@ -20,7 +20,7 @@ import { LoginPrivadosComponent } from './Centros Privados/login-privados/login-
     Page500Component,
     PreRegisterComponent,
     RegisterComponent,
-    LoginPrivadosComponent
+    LoginPrivadosComponent,
   ],
   imports: [
     CommonModule,

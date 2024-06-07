@@ -6,7 +6,6 @@ import { LoginComponent } from './Generales/login/login.component';
 import { RegisterComponent } from './Generales/register/register.component';
 import { PreRegisterComponent } from './Generales/pre-register/pre-register.component';
 import { LoginPrivadosComponent } from './Centros Privados/login-privados/login-privados.component';
-import { AfiliacionCentrosComponent } from './afil-centros-priv/afiliacion-centros/afiliacion-centros.component';
 
 const routes: Routes = [
   {

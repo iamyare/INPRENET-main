@@ -1,5 +1,5 @@
-import { Component, Input, OnInit } from '@angular/core';
-import { FormGroup, FormControl } from '@angular/forms';
+import { Component, Input, OnInit, Output, EventEmitter } from '@angular/core';
+import { FormGroup, FormControl, Validators } from '@angular/forms';
 import { FieldArrays } from '../../app/shared/Interfaces/field-arrays';
 
 @Component({
@@ -10,6 +10,7 @@ import { FieldArrays } from '../../app/shared/Interfaces/field-arrays';
 export class SharedFormFieldsComponent implements OnInit {
   @Input() parentForm!: FormGroup;
   @Input() fields: FieldArrays[] = [];
+  @Output() selectChange = new EventEmitter<{ fieldName: string, value: any, formGroup: FormGroup }>();
 
   ngOnInit() {
     if (!(this.parentForm instanceof FormGroup)) {
@@ -33,5 +34,9 @@ export class SharedFormFieldsComponent implements OnInit {
     const rows = new Set<number>();
     this.fields.forEach((field: FieldArrays) => rows.add(field.layout?.row ?? 0));
     return Array.from(rows).sort((a, b) => a - b);
+  }
+
+  onSelectChange(fieldName: string, event: any) {
+    this.selectChange.emit({ fieldName, value: event.value, formGroup: this.parentForm });
   }
 }

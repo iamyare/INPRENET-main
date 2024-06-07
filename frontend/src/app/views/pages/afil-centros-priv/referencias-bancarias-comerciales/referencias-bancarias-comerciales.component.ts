@@ -12,7 +12,7 @@ export class ReferenciasBancariasComercialesComponent implements OnInit {
 
   fields: FieldArrays[] = [
     { name: 'nombre', label: 'Nombre', icon: 'person', layout: { row: 0, col: 6 }, type: 'text', value: '', validations: [Validators.required] },
-    { name: 'tipoReferencia', label: 'Tipo de Referencia', icon: 'list', layout: { row: 0, col: 6 }, type: 'select', options: [{ label: 'Bancaria', value: 'bancaria' }, { label: 'Comercial', value: 'comercial' }], value: '', validations: [Validators.required] }
+    { name: 'tipoReferencia', label: 'Tipo de Referencia', icon: 'list', layout: { row: 0, col: 6 }, type: 'select', options: [{ label: 'BANCARIA', value: 'BANCARIA' }, { label: 'COMERCIAL', value: 'COMERCIAL' }], value: '', validations: [Validators.required] }
   ];
 
   constructor(private fb: FormBuilder) {}

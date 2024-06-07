@@ -10,7 +10,8 @@
           <h4 class="card-title">Registro {{ i + 1 }}</h4>
           <app-shared-form-fields
             [parentForm]="asFormGroup(grupo)"
-            [fields]="fields">
+            [fields]="fields"
+            (selectChange)="onDepartamentoChange($event)">
           </app-shared-form-fields>
         </div>
       </div>

@@ -36,7 +36,7 @@
       </div>
 
       <div class="card-body" style="text-align: center;">
-        <strong>Datos Generales</strong>
+        <!-- <strong>Datos Generales</strong>
         {{ formDatosGenerales.controls.refpers.value | json }}
         <strong>Status:</strong> {{ formDatosGenerales.controls.refpers.status }}
         <br>
@@ -58,7 +58,7 @@
         <br>
         <strong>Datos Beneficiario:</strong>
         {{ formBeneficiarios.controls.beneficiario.value | json }}
-        <strong>Status:</strong> {{ formBeneficiarios.controls.beneficiario.status }}
+        <strong>Status:</strong> {{ formBeneficiarios.controls.beneficiario.status }} -->
 
         <!-- <button mat-button color="primary" (click)="enviar()"
           [disabled]="formDatosGenerales.controls.refpers.invalid || formColegiosMagisteriales.controls.ColMags.invalid  || formHistPag.controls.banco.invalid || formPuestTrab.controls.trabajo.invalid || formReferencias.controls.refpers.invalid || formBeneficiarios.controls.beneficiario.invalid"> </button> -->
@@ -67,7 +67,7 @@
           Enviar Formulario
         </button>
 
-        <button (click)="createPDF()">Generar PDF</button>
+        <button mat-button color="primary" (click)="createPDF()">Generar PDF</button>
 
       </div>
     </div>

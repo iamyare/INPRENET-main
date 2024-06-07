@@ -1,0 +1,49 @@
+<div class="add-user-container">
+  <h2>Agregar Usuario</h2>
+  <form [formGroup]="userForm" (ngSubmit)="onSubmit()">
+    <mat-form-field appearance="fill">
+      <mat-label>Nombre del Empleado</mat-label>
+      <input matInput formControlName="nombreEmpleado" required>
+      <mat-error *ngIf="userForm.get('nombreEmpleado')?.hasError('required')">
+        El nombre del empleado es requerido.
+      </mat-error>
+    </mat-form-field>
+
+    <mat-form-field appearance="fill">
+      <mat-label>Nombre del Puesto</mat-label>
+      <input matInput formControlName="nombrePuesto" required>
+      <mat-error *ngIf="userForm.get('nombrePuesto')?.hasError('required')">
+        El nombre del puesto es requerido.
+      </mat-error>
+    </mat-form-field>
+
+    <mat-form-field appearance="fill">
+      <mat-label>Correo</mat-label>
+      <input matInput formControlName="correo" required>
+      <mat-error *ngIf="userForm.get('correo')?.hasError('required')">
+        El correo es requerido.
+      </mat-error>
+      <mat-error *ngIf="userForm.get('correo')?.hasError('email')">
+        Ingresa un correo válido.
+      </mat-error>
+    </mat-form-field>
+
+    <mat-form-field appearance="fill">
+      <mat-label>Número del Empleado</mat-label>
+      <input matInput formControlName="numeroEmpleado" required>
+      <mat-error *ngIf="userForm.get('numeroEmpleado')?.hasError('required')">
+        El número del empleado es requerido.
+      </mat-error>
+    </mat-form-field>
+
+    <mat-form-field appearance="fill">
+      <mat-label>ID del Rol</mat-label>
+      <input matInput formControlName="idRole" required>
+      <mat-error *ngIf="userForm.get('idRole')?.hasError('required')">
+        El ID del rol es requerido.
+      </mat-error>
+    </mat-form-field>
+
+    <button mat-raised-button color="primary" type="submit">Agregar Usuario</button>
+  </form>
+</div>

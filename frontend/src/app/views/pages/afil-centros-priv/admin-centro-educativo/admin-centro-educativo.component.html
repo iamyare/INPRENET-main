@@ -1,6 +1,5 @@
 <div class="card dados-generales-centro-card">
-  <div class="card-header card-header-danger title"
-       style="background: #229e92; color: white">
+  <div class="card-header card-header-danger title" style="background: #229e92; color: white">
     <h4 class="card-title">Datos de la Administración del Centro Educativo</h4>
     <p class="card-category">Completa la información correspondiente</p>
   </div>
@@ -33,16 +32,30 @@
               <input matInput formControlName="propietarioGrupo" />
             </mat-form-field>
           </div>
-          <div class="col-md-6">
+          <div class="col-md-4">
             <mat-form-field appearance="outline" style="width: 100%">
               <mat-label>N° de Casa</mat-label>
               <input matInput formControlName="propietarioCasa" />
             </mat-form-field>
           </div>
-          <div class="col-md-6">
+          <div class="col-md-4">
             <mat-form-field appearance="outline" style="width: 100%">
-              <mat-label>Departamento y Municipio</mat-label>
-              <input matInput formControlName="propietarioDepartamento" />
+              <mat-label>Departamento</mat-label>
+              <mat-select formControlName="propietarioDepartamento" (selectionChange)="onDepartamentoChange($event)">
+                <mat-option *ngFor="let departamento of departamentos" [value]="departamento.id_departamento">
+                  {{ departamento.nombre_departamento }}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
+          <div class="col-md-4">
+            <mat-form-field appearance="outline" style="width: 100%">
+              <mat-label>Municipio</mat-label>
+              <mat-select formControlName="propietarioMunicipio">
+                <mat-option *ngFor="let municipio of municipios" [value]="municipio.value">
+                  {{ municipio.label }}
+                </mat-option>
+              </mat-select>
             </mat-form-field>
           </div>
           <div class="col-md-4">

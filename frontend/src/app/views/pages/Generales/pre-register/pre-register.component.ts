@@ -11,7 +11,7 @@ import { ToastrService } from 'ngx-toastr';
 export class PreRegisterComponent implements OnInit {
   form: FormGroup;
   tipoRol: any[] = [];
-  idEmpresa: number | null = null;
+  idCentroTrabajo: number | null = null;
 
   constructor(
     private fb: FormBuilder,
@@ -28,9 +28,9 @@ export class PreRegisterComponent implements OnInit {
   }
 
   ngOnInit() {
-    this.idEmpresa = this.authSvc.getIdEmpresaFromToken();
-    if (this.idEmpresa) {
-      this.authSvc.getRolesByEmpresa(this.idEmpresa).subscribe({
+    this.idCentroTrabajo = this.authSvc.getIdEmpresaFromToken();
+    if (this.idCentroTrabajo) {
+      this.authSvc.getRolesByEmpresa(this.idCentroTrabajo).subscribe({
 
         next: (roles) => {
           this.tipoRol = roles.map((rol: any) => ({

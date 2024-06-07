@@ -1,5 +1,4 @@
 import { NgModule } from '@angular/core';
-import { CommonModule } from '@angular/common';
 
 //angular material
 import { AvatarModule, BadgeModule, BreadcrumbModule, } from '@coreui/angular';
@@ -87,7 +86,8 @@ import { UppercaseDirective } from './directives/uppercase.directive';
     MatTableModule,
     MatPaginatorModule,
     MatStepperModule,
-    MatTabsModule
+    MatTabsModule,
+
   ],
   exports: [
     DocsComponentsModule,
@@ -133,7 +133,8 @@ import { UppercaseDirective } from './directives/uppercase.directive';
     BadgeModule,
     ListGroupModule,
     NgScrollbarModule,
-    MatTabsModule
+    MatTabsModule,
+    MatTableModule,
   ]
 })
 export class SharedModule { }

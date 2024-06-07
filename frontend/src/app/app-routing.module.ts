@@ -1,6 +1,5 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
-
 import { DefaultLayoutComponent } from './containers';
 import { Page404Component } from './views/pages/Errores/page404/page404.component';
 import { Page500Component } from './views/pages/Errores/page500/page500.component';
@@ -11,13 +10,16 @@ import { RoleGuard } from './guards/role-guard.guard';
 import { LoginPrivadosComponent } from './views/pages/Centros Privados/login-privados/login-privados.component';
 import { PlanillaColegiosPrivadosComponent } from './views/pages/Centros Privados/planilla-colegios-privados/planilla-colegios-privados.component';
 import { NavDefaultComponent } from './views/pages/Centros Privados/nav-default/nav-default.component';
-import { AfiliacionCentrosComponent } from './views/pages/afil-centros-priv/afiliacion-centros/afiliacion-centros.component';
 
 const routes: Routes = [
   {
     path: '',
     redirectTo: 'dashboard',
     pathMatch: 'full'
+  },
+  {
+    path: 'admin',
+    loadChildren: () => import('../app/views/pages/admin/admin.module').then(m => m.AdminModule)
   },
   {
     path: '',

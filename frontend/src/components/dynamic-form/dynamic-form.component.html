@@ -15,6 +15,13 @@
                   <mat-label>{{ field.label }}</mat-label>
                   <input matInput [type]="field.type" [formControlName]="field.name" [readonly]="field.readOnly" />
                   <mat-icon *ngIf="field.icon" matSuffix>{{ field.icon }}</mat-icon>
+                  <mat-error *ngIf="form.get(field.name)?.invalid && (form.get(field.name)?.dirty || form.get(field.name)?.touched)">
+                    <ng-container *ngIf="form.get(field.name)?.errors?.['required']">Este campo es requerido</ng-container>
+                    <ng-container *ngIf="form.get(field.name)?.errors?.['maxlength']">Ha excedido el número máximo de caracteres</ng-container>
+                    <ng-container *ngIf="form.get(field.name)?.errors?.['email']">Correo electrónico inválido</ng-container>
+                    <ng-container *ngIf="form.get(field.name)?.errors?.['min']">El valor debe ser mayor o igual a {{ form.get(field.name)?.errors?.['min']?.min }}</ng-container>
+                    <ng-container *ngIf="form.get(field.name)?.errors?.['pattern']">Formato incorrecto</ng-container>
+                  </mat-error>
                 </mat-form-field>
               </ng-container>
             </div>

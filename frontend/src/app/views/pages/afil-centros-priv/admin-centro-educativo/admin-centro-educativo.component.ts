@@ -1,5 +1,6 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup } from '@angular/forms';
+import { DireccionService } from 'src/app/services/direccion.service';
 
 @Component({
   selector: 'app-admin-centro-educativo',
@@ -8,11 +9,14 @@ import { FormBuilder, FormGroup } from '@angular/forms';
 })
 export class AdminCentroEducativoComponent implements OnInit {
   @Input() parentForm!: FormGroup;
+  departamentos: any = [];
+  municipios: any = [];
 
-  constructor(private fb: FormBuilder) {}
+  constructor(private fb: FormBuilder, private direccionService: DireccionService) {}
 
   ngOnInit(): void {
     this.addControlsToForm();
+    this.loadDepartamentos();
   }
 
   addControlsToForm() {
@@ -29,6 +33,7 @@ export class AdminCentroEducativoComponent implements OnInit {
       propietarioGrupo: [''],
       propietarioCasa: [''],
       propietarioDepartamento: [''],
+      propietarioMunicipio: [''],
       propietarioTelefonoCasa: [''],
       propietarioCelular1: [''],
       propietarioCelular2: [''],
@@ -42,6 +47,18 @@ export class AdminCentroEducativoComponent implements OnInit {
         this.parentForm.addControl(key, this.fb.control(formControls[key]));
       }
     }
+  }
+
+  async loadDepartamentos() {
+    this.departamentos = await this.direccionService.getAllDepartments().toPromise();
+
+  }
+
+  async onDepartamentoChange(event: any) {
+    const departamentoId = event.value;
+
+    this.municipios = await this.direccionService.getMunicipiosPorDepartamentoId(departamentoId).toPromise();
+    this.parentForm.get('propietarioMunicipio')?.setValue(null);
   }
 
   onSubmit() {

@@ -1,0 +1,16 @@
+<div class="dashboard-container">
+  <h1>Bienvenido al Panel de Administración</h1>
+  <div class="stats-container">
+    <mat-card *ngFor="let stat of stats" class="stat-card">
+      <mat-card-header>
+        <div mat-card-avatar class="stat-icon">
+          <mat-icon>{{ stat.icon }}</mat-icon>
+        </div>
+        <mat-card-title>{{ stat.title }}</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <p>{{ stat.count }}</p>
+      </mat-card-content>
+    </mat-card>
+  </div>
+</div>

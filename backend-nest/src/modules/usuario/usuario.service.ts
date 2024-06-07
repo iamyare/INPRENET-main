@@ -114,7 +114,7 @@ export class UsuarioService {
       <p>Hola ${nombreEmpleado},</p>
       <p>Estamos encantados de tenerte con nosotros y queremos asegurarnos de que tengas la mejor experiencia posible desde el primer día.</p>
       <div style="text-align: center;">
-        <img src="https://southcentralus1-mediap.svc.ms/transform/thumbnail?provider=spo&inputFormat=svg&cs=fFNQTw&docid=https%3A%2F%2Finpremagob-my.sharepoint.com%3A443%2F_api%2Fv2.0%2Fdrives%2Fb!SI5LDUe5UUeWwbh8d22jHOuRtzUPu3pFjDQjpEOapGryqRMSooSMRZ-wwIb8wBJs%2Fitems%2F01UGOONEU5HH7KZBUIZVEJ72CI6THKKM2V%3Fversion%3DPublished&access_token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOiIwMDAwMDAwMy0wMDAwLTBmZjEtY2UwMC0wMDAwMDAwMDAwMDAvaW5wcmVtYWdvYi1teS5zaGFyZXBvaW50LmNvbUBkMjI2NmE3Mi1jNDBkLTRkZTMtOWQ1Zi1kMmZmYmYzMDQ5YmQiLCJjYWNoZWtleSI6IjBoLmZ8bWVtYmVyc2hpcHx1cm4lM2FzcG8lM2Fhbm9uI2Q5ZDAwMjIxOGUwNjE3YTUyNTYwMWE3ZjIzMjE5YWViMzUyMjNmN2U3YmI5ZDNlMTU3YTc3YzFlYzFkMzJhNzgiLCJlbmRwb2ludHVybCI6ImsxRWtyL2tDL3pSMjg0cG9JM24wRUY5UWM0b2ZZQ3NYMUJSUlB1aStBL0U9IiwiZW5kcG9pbnR1cmxMZW5ndGgiOiIxMjAiLCJleHAiOiIxNzE2NzY4MDAwIiwiaXBhZGRyIjoiMTkwLjkyLjg3LjMiLCJpc2xvb3BiYWNrIjoiVHJ1ZSIsImlzcyI6IjAwMDAwMDAzLTAwMDAtMGZmMS1jZTAwLTAwMDAwMDAwMDAwMCIsImlzdXNlciI6InRydWUiLCJuYW1laWQiOiIwIy5mfG1lbWJlcn
+      <img src="https://inprema.gob.hn/wp-content/uploads/2021/11/inprema-logo-dorado.png" alt="Descripción de la imagen" width="150" height="auto">
       <p>Para empezar, necesitamos que completes tu registro. Esto nos ayudará a personalizar tu experiencia y asegurarnos de que tienes acceso a todas las funcionalidades de nuestra aplicación.</p>
       <p>Por favor, completa tu registro haciendo clic en el siguiente enlace:</p>
       <div style="text-align: center; margin: 20px 0;">

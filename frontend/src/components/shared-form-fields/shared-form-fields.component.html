@@ -6,32 +6,39 @@
         <mat-icon matPrefix *ngIf="field.icon">{{ field.icon }}</mat-icon>
         <ng-container [ngSwitch]="field.type">
           <input *ngSwitchCase="'text'" matInput [formControl]="getControl(field.name)">
-          <mat-select *ngSwitchCase="'select'" [formControl]="getControl(field.name)" (selectionChange)="onSelectChange(field.name, $event)">
+          <mat-select *ngSwitchCase="'select'" [formControl]="getControl(field.name)"
+            (selectionChange)="onSelectChange(field.name, $event)">
             <mat-option *ngFor="let option of field.options" [value]="option.value">
               {{ option.label }}
             </mat-option>
           </mat-select>
           <ng-container *ngSwitchCase="'date'">
             <div class="datepicker-input">
-              <input matInput [matDatepicker]="picker" [formControl]="getControl(field.name)" placeholder="{{ field.label }}">
+              <input matInput [matDatepicker]="picker" [formControl]="getControl(field.name)"
+                placeholder="{{ field.label }}">
               <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
               <mat-datepicker #picker></mat-datepicker>
             </div>
           </ng-container>
           <input *ngSwitchCase="'number'" matInput type="number" [formControl]="getControl(field.name)">
         </ng-container>
-        <mat-error *ngIf="getControl(field.name)?.invalid && (getControl(field.name)?.dirty || getControl(field.name)?.touched)">
+        <mat-error
+          *ngIf="getControl(field.name)?.invalid && (getControl(field.name)?.dirty || getControl(field.name)?.touched)">
           <ng-container *ngIf="getControl(field.name)?.errors?.['required']">Este campo es requerido</ng-container>
           <br *ngIf="getControl(field.name)?.errors?.['required']">
-          <ng-container *ngIf="getControl(field.name)?.errors?.['maxlength']">Ha excedido el número máximo de caracteres</ng-container>
+          <ng-container *ngIf="getControl(field.name)?.errors?.['maxlength']">Ha excedido el número máximo de
+            caracteres</ng-container>
           <br *ngIf="getControl(field.name)?.errors?.['maxlength']">
-          <ng-container *ngIf="getControl(field.name)?.errors?.['minlength']">El número mínimo de caracteres es {{ getControl(field.name)?.errors?.['minlength']?.requiredLength }}</ng-container>
+          <ng-container *ngIf="getControl(field.name)?.errors?.['minlength']">El número mínimo de caracteres es {{
+            getControl(field.name)!.errors?.['minlength']?.requiredLength }}</ng-container>
           <br *ngIf="getControl(field.name)?.errors?.['minlength']">
           <ng-container *ngIf="getControl(field.name)?.errors?.['email']">Correo electrónico inválido</ng-container>
           <br *ngIf="getControl(field.name)?.errors?.['email']">
-          <ng-container *ngIf="getControl(field.name)?.errors?.['min']">El valor debe ser mayor o igual a {{ getControl(field.name)?.errors?.['min']?.min }}</ng-container>
+          <ng-container *ngIf="getControl(field.name)?.errors?.['min']">El valor debe ser mayor o igual a {{
+            getControl(field.name)!.errors?.['min']?.min }}</ng-container>
           <br *ngIf="getControl(field.name)?.errors?.['min']">
-          <ng-container *ngIf="getControl(field.name)?.errors?.['max']">El valor debe ser menor o igual a {{ getControl(field.name)?.errors?.['max']?.max }}</ng-container>
+          <ng-container *ngIf="getControl(field.name)?.errors?.['max']">El valor debe ser menor o igual a {{
+            getControl(field.name)!.errors?.['max']?.max }}</ng-container>
           <br *ngIf="getControl(field.name)?.errors?.['max']">
           <ng-container *ngIf="getControl(field.name)?.errors?.['pattern']">Formato incorrecto</ng-container>
         </mat-error>

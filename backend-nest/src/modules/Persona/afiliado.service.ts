@@ -374,7 +374,7 @@ export class AfiliadoService {
       const estadoP = await this.estadoPersonaRepository.findOne({
         where: { codigo: updatePersonaDto.id_estado_persona }
       });
-      persona.estadoPersona = estadoP
+      detallePersona.estadoAfiliacion = estadoP
     }
     if (updatePersonaDto.id_municipio_residencia) {
       persona.municipio = await this.municipioRepository.findOne({ where: { id_municipio: updatePersonaDto.id_municipio_residencia } });
@@ -568,7 +568,7 @@ export class AfiliadoService {
       ID_MUNICIPIO: persona.municipio?.id_municipio,
       ID_MUNICIPIO_DEFUNCION: persona?.municipio_defuncion?.id_municipio!,
       ID_DEPARTAMENTO_DEFUNCION: persona?.municipio_defuncion?.departamento?.id_departamento!,
-      estadoPersona: persona?.estadoPersona?.Descripcion,
+      estadoPersona: detallePersona?.estadoAfiliacion?.Descripcion,
     };
 
     return result;
@@ -626,7 +626,7 @@ export class AfiliadoService {
           ID_PROFESION: persona.profesion?.idProfesion,
           TELEFONO_1: persona.telefono_1,
           ESTADO_CIVIL: persona.estado_civil,
-          ESTADO: persona?.estadoPersona?.Descripcion!,
+          ESTADO: detallePersona?.estadoAfiliacion?.Descripcion!,
         };
       }
     }
@@ -657,7 +657,7 @@ export class AfiliadoService {
       ID_PROFESION: persona.profesion?.idProfesion,
       TELEFONO_1: persona.telefono_1,
       ESTADO_CIVIL: persona.estado_civil,
-      ESTADO: persona.estadoPersona.Descripcion,
+      ESTADO: detallePersona.estadoAfiliacion.Descripcion,
     };
   }
 
@@ -840,10 +840,10 @@ export class AfiliadoService {
     } */
 
     // Verifica el estado de la persona
-    switch (persona.estadoPersona.Descripcion) {
-      case 'FALLECIDO':
+    switch (persona.fallecido) {
+      case 'SI':
         return 'El afiliado está fallecido.';
-      case 'INACTIVO':
+      case 'NO':
         return 'El afiliado está inactivo.';
       default:
         return persona;
@@ -867,10 +867,10 @@ export class AfiliadoService {
     if (!detallePersona || !detallePersona.estadoPersona) {
       throw new NotFoundException(`Estado para persona con DNI ${dni} no encontrado`);
     } */
-    if (['FALLECIDO', 'INACTIVO'].includes(persona.estadoPersona.Descripcion.toUpperCase())) {
+    if (['SI'].includes(persona.fallecido.toUpperCase())) {
       return {
         status: 'error',
-        message: `La persona está ${persona.estadoPersona.Descripcion.toLowerCase()}.`,
+        message: `La persona está ${persona.fallecido.toLowerCase()}.`,
         data: { persona: null, movimientos: [] },
       };
     }
@@ -904,10 +904,10 @@ export class AfiliadoService {
     if (!detallePersona || !detallePersona.estadoPersona) {
       throw new NotFoundException(`Estado para persona con DNI ${dni} no encontrado`);
     } */
-    if (['FALLECIDO', 'INACTIVO'].includes(persona.estadoPersona.Descripcion.toUpperCase())) {
+    if (['SI'].includes(persona.fallecido.toUpperCase())) {
       return {
         status: 'error',
-        message: `La persona está ${persona.estadoPersona.Descripcion.toLowerCase()}.`,
+        message: `La persona está ${persona.fallecido.toLowerCase()}.`,
         data: { persona: null, movimientos: [] },
       };
     }

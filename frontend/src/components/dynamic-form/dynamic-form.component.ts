@@ -1,5 +1,5 @@
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
-import { FormBuilder, FormGroup, FormArray } from '@angular/forms';
+import { FormBuilder, FormGroup, FormArray, Validators } from '@angular/forms';
 import { FieldConfig } from 'src/app/shared/Interfaces/field-config';
 
 @Component({
@@ -8,20 +8,21 @@ import { FieldConfig } from 'src/app/shared/Interfaces/field-config';
   styleUrls: ['./dynamic-form.component.scss']
 })
 export class DynamicFormComponent implements OnInit {
-  form: FormGroup;
-
   @Input() fields: FieldConfig[] = [];
   @Input() titulo = "";
   @Input() subtitulo = "";
   @Output() newDatBenChange = new EventEmitter<any>()
   @Output() selectChange = new EventEmitter<{ fieldName: string, value: any }>();
+  @Input() incomingForm: FormGroup | null = null;
+
+  form: FormGroup;
 
   constructor(private fb: FormBuilder) {
     this.form = this.fb.group({});
   }
 
   ngOnInit() {
-    this.form = this.createControl();
+    this.form = this.incomingForm ? this.mergeForms(this.incomingForm) : this.createControl();
     this.newDatBenChange.emit(this.getFormValues());
   }
 
@@ -56,6 +57,20 @@ export class DynamicFormComponent implements OnInit {
             field.validations
           );
         group.addControl(field.name, control);
+      }
+    });
+
+    return group;
+  }
+
+  mergeForms(incomingForm: FormGroup): FormGroup {
+    const group = this.createControl();
+
+    Object.keys(incomingForm.controls).forEach(key => {
+      if (group.contains(key)) {
+        group.setControl(key, incomingForm.get(key)!);
+      } else {
+        group.addControl(key, incomingForm.get(key)!);
       }
     });
 

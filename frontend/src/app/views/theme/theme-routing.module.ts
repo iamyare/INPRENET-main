@@ -33,6 +33,7 @@ import { EditColegiosMagisterialesComponent } from '../pages/Generales/edit-cole
 import { EditFamiliaresComponent } from '../pages/Generales/edit-familiares/edit-familiares.component';
 import { VerDatosAfiliadosComponent } from '../pages/Generales/ver-datos-afiliados/ver-datos-afiliados.component';
 import { AfiliacionCentrosComponent } from '../pages/afil-centros-priv/afiliacion-centros/afiliacion-centros.component';
+import { VerDatosCentrosComponent } from '../pages/Generales/ver-datos-centros/ver-datos-centros.component';
 
 const routes: Routes = [
   //rutas Afiliado
@@ -65,6 +66,13 @@ const routes: Routes = [
             component: VerDatosAfiliadosComponent,
             data: {
               title: 'Ver Datos Afiliado',
+            },
+          },
+          {
+            path: 'ver-datos-centro',
+            component: VerDatosCentrosComponent,
+            data: {
+              title: 'Ver Datos Centro',
             },
           },
           {

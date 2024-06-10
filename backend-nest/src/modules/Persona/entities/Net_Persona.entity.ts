@@ -16,6 +16,7 @@ import { Net_Estado_Persona } from "./net_estado_persona.entity";
     name: 'NET_PERSONA',
 })
 @Check(`sexo IN ('F', 'M')`)
+@Check(`fallecido IN ('SI', 'NO')`)
 export class Net_Persona {
     @PrimaryGeneratedColumn({ type: 'int', name: 'ID_PERSONA', primaryKeyConstraintName: 'PK_ID_PERSONA_PERSONA' })
     id_persona: number;
@@ -55,6 +56,9 @@ export class Net_Persona {
 
     @Column('varchar2', { length: 1, nullable: true, name: 'SEXO' })
     sexo: string;
+
+    @Column('varchar2', { length: 2, nullable: false, name: 'FALLECIDO', default: "NO" })
+    fallecido: string;
 
     @Column('number', { nullable: true, name: 'CANTIDAD_DEPENDIENTES' })
     cantidad_dependientes: number;
@@ -106,10 +110,6 @@ export class Net_Persona {
 
     @Column('varchar', { nullable: true, name: 'CERTIFICADO_DEFUNCION' })
     certificado_defuncion: number;
-
-    @ManyToOne(() => Net_Estado_Persona, estadoPersona => estadoPersona.persona)
-    @JoinColumn({ name: 'ID_ESTADO_PERSONA', foreignKeyConstraintName: "FK_ID_ESTADO_PERSONA_DETALLE_PERSONA" })
-    estadoPersona: Net_Estado_Persona;
 
     @Column('date', { nullable: true, name: 'FECHA_DEFUNCION' })
     fecha_defuncion: string;

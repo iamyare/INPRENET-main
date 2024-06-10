@@ -43,7 +43,7 @@
             ],
             "scripts": [],
             "allowedCommonJsDependencies": [
-              "chart.js"
+              "lodash"
             ]
           },
           "configurations": {

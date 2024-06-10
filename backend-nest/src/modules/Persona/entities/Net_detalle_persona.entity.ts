@@ -37,4 +37,8 @@ export class NET_DETALLE_PERSONA {
     @Column({ type: 'int', nullable: true, name: 'ID_CAUSANTE_PADRE' })
     ID_CAUSANTE_PADRE: number;
 
+    @ManyToOne(() => Net_Estado_Persona, estadoAfiliacion => estadoAfiliacion.persona)
+    @JoinColumn({ name: 'ID_ESTADO_AFILIACION', foreignKeyConstraintName: "FK_ID_ESTADO_PERSONA_DETALLE_PERSONA" })
+    estadoAfiliacion: Net_Estado_Persona;
+
 }

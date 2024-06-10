@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable, InternalServerErrorException, Logger } from '@nestjs/common';
+import { BadRequestException, Injectable, InternalServerErrorException, Logger, NotFoundException } from '@nestjs/common';
 import { CreateCentroTrabajoDto } from './dto/create-centro-trabajo.dto';
 import { UpdateCentroTrabajoDto } from './dto/update-centro-trabajo.dto';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -52,8 +52,12 @@ export class CentroTrabajoService {
     }
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} centroTrabajo`;
+  async findOne(id: number): Promise<Net_Centro_Trabajo> {
+    const centroTrabajo = await this.centroTrabajoRepository.findOne({ where: { id_centro_trabajo: id } });
+    if (!centroTrabajo) {
+      throw new NotFoundException(`Centro de Trabajo con ID ${id} no encontrado`);
+    }
+    return centroTrabajo;
   }
 
   update(id: number, updateCentroTrabajoDto: UpdateCentroTrabajoDto) {

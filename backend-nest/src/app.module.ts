@@ -10,43 +10,30 @@ import { PlanillaModule } from './modules/Planilla/planilla.module';
 import { RegionalModule } from './modules/Regional/regional.module';
 import { EmpresarialModule } from './modules/Empresarial/empresarial.module';
 import { TransaccionesModule } from './modules/transacciones/transacciones.module';
-import * as oracledb from 'oracledb';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
-      envFilePath: `development.env`,
+      envFilePath: `.env.${process.env.NODE_ENV}`,
+      isGlobal: true
     }),
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
-      useFactory: async (configService: ConfigService) => {
-        const user = configService.get('DB_USERNAME');
-        const password = configService.get('DB_PASSWORD');
-        const connectString = configService.get('CONNECT_STRING');
+      useFactory: (configService: ConfigService) => ({
+        type: 'oracle',
+        connectString: configService.get('CONNECT_STRING'),
+        database: configService.get('DB_NAME'),
+        username: configService.get('DB_USERNAME'),
+        password: configService.get('DB_PASSWORD'),
+        autoLoadEntities: true,
+        synchronize: true,
+        entities: [__dirname + '/../**/*.entity{.ts,.js}'],
+        //migrations: ['src/database/migrations/*{.ts,.js}'],
+        //logging: ["query", "schema", "error", "warn", "info", "log", "migration"]
 
-        // Ensure Thin mode is used
-        oracledb.initOracleClient({ configDir: '', libDir: '', errorDir: '' });
+      }),
+      inject: [ConfigService]
 
-        const pool = await oracledb.createPool({
-          user,
-          password,
-          connectString
-        });
-
-        return {
-          type: 'oracle',
-          username: user,
-          password,
-          connectString,
-          extra: { pool },
-          autoLoadEntities: true,
-          synchronize: true,
-          entities: [__dirname + '/../**/*.entity{.ts,.js}'],
-          //migrations: ['src/database/migrations/*{.ts,.js}'],
-          //logging: ["query", "schema", "error", "warn", "info", "log", "migration"]   
-        };
-      },
-      inject: [ConfigService],
     }),
     CommonModule,
     AfiliadoModule,
@@ -56,7 +43,13 @@ import * as oracledb from 'oracledb';
     PlanillaModule,
     RegionalModule,
     EmpresarialModule,
-    TransaccionesModule,
-  ],
+    TransaccionesModule
+  ]
 })
-export class AppModule { }
+export class AppModule {
+}
+
+/* connectString: process.env.CONNECT_STRING,
+       synchronize: false,
+       autoLoadEntities : true, */
+/* logging: ["query", "error"], */

@@ -7,7 +7,6 @@ import { JwtService } from '@nestjs/jwt';
 import { MailService } from 'src/common/services/mail.service';
 import * as bcrypt from 'bcrypt';
 import { CreateUsuarioDto } from './dto/create-usuario.dto';
-import { Net_TipoIdentificacion } from '../tipo_identificacion/entities/net_tipo_identificacion.entity';
 import { NET_USUARIO_PRIVADA } from './entities/net_usuario_privada.entity';
 import { Net_Centro_Trabajo } from '../Empresarial/entities/net_centro_trabajo.entity';
 import { NET_SESION } from './entities/net_sesion.entity';
@@ -306,6 +305,22 @@ export class UsuarioService {
       access_token: token,
     };
   }
+
+  async getUsuariosPorCentro(centroTrabajoId: number): Promise<Net_Usuario_Empresa[]> {
+    try {
+      const usuarios = await this.usuarioRepository.createQueryBuilder('usuario')
+        .innerJoinAndSelect('usuario.empleadoCentroTrabajo', 'empleadoCentroTrabajo')
+        .innerJoinAndSelect('empleadoCentroTrabajo.centroTrabajo', 'centroTrabajo')
+        .innerJoinAndSelect('empleadoCentroTrabajo.empleado', 'empleado')
+        .where('centroTrabajo.id_centro_trabajo = :centroTrabajoId', { centroTrabajoId })
+        .getMany();
+
+      return usuarios;
+    } catch (error) {
+      this.logger.error(`Failed to get users for center with id ${centroTrabajoId}`, error.stack);
+      throw new Error(`Failed to get users for center with id ${centroTrabajoId}`);
+    }
+  }
   
   async createPrivada(email: string, contrasena: string, nombre_usuario: string, idCentroTrabajo?: number) {
     /* const usuarioExistente = await this.usuarioPrivadaRepository.findOne({ where: { email } });
@@ -336,145 +351,6 @@ export class UsuarioService {
   
     return this.usuarioPrivadaRepository.save(nuevoUsuario); */
   }
-
-  async create(createUsuarioDto: CreateUsuarioDto) {
-    /* const queryRunner = this.usuarioRepository.manager.connection.createQueryRunner();
-    await queryRunner.connect();
-    await queryRunner.startTransaction();
-  
-    try {
-      // Verificar que el correo no esté registrado
-      console.log('Verificando si el correo ya está registrado...');
-      const usuarioExistente = await queryRunner.manager.findOne(Net_Usuario, { where: { correo: createUsuarioDto.correo } });
-      if (usuarioExistente) {
-        console.log('Correo ya registrado:', usuarioExistente);
-        throw new BadRequestException('El correo ya está registrado');
-      }
-  
-      // Verificar que el número de identificación no esté registrado
-      console.log('Verificando si el número de identificación ya está registrado...');
-      const empleadoExistente = await queryRunner.manager.findOne(Net_Empleado, { where: { numero_identificacion: createUsuarioDto.numero_identificacion } });
-      if (empleadoExistente) {
-        console.log('Número de identificación ya registrado:', empleadoExistente);
-        throw new BadRequestException('El número de identificación ya está registrado');
-      }
-  
-      // Buscar rol
-      console.log('Buscando rol...');
-      const rol = await queryRunner.manager.findOne(Net_Rol, { where: { nombre_rol: createUsuarioDto.nombre_rol } });
-      if (!rol) {
-        throw new BadRequestException('Rol not found');
-      }
-  
-      // Crear usuario
-      console.log('Creando usuario...');
-      const usuario = this.usuarioRepository.create({ ...createUsuarioDto, rol });
-      await queryRunner.manager.save(usuario);
-  
-      // Buscar tipo de identificación
-      console.log('Buscando tipo de identificación...');
-      const tipo_identificacion = await queryRunner.manager.findOne(Net_TipoIdentificacion, { where: { tipo_identificacion: createUsuarioDto.tipo_identificacion } });
-      if (!tipo_identificacion) {
-        throw new BadRequestException('Tipo identificacion not found');
-      }
-  
-      // Crear empleado
-      const empleadoData = {
-        ...createUsuarioDto,
-        usuario,
-        tipo_identificacion,
-        archivo_identificacion: createUsuarioDto.archivo_identificacion?.buffer,
-      };
-      console.log('Creando empleado...');
-      const empleado = this.empleadoRepository.create(empleadoData);
-      await queryRunner.manager.save(empleado);
-  
-      // Confirmar la transacción
-      await queryRunner.commitTransaction();
-  
-      // Generar token y enviar email
-      const payload = { username: usuario.correo, nombre: empleadoData.nombre_empleado, rol: usuario.rol };
-      const token = this.jwtService.sign(payload);
-  
-      const enlace = `http://localhost:4200/#/register/${token}`;
-      const mailContent = {
-        to: usuario.correo,
-        subject: 'Bienvenido a Nuestra Aplicación',
-        text: `Hola ${empleadoData.nombre_empleado}, bienvenido a nuestra aplicación.`,
-        html: `<!DOCTYPE html>
-        <html lang="es">
-        <head>
-            <style>
-                body {
-                    font-family: 'Arial', sans-serif;
-                    color: #333;
-                    background-color: #f4f4f4;
-                    margin: 0;
-                    padding: 0;
-                }
-                .email-container {
-                    max-width: 600px;
-                    margin: 20px auto;
-                    background: #fff;
-                    border: 1px solid #ddd;
-                    padding: 20px;
-                }
-                .email-header img {
-                    max-width: 100%;
-                    height: auto;
-                }
-                .email-content h2 {
-                    color: #333;
-                }
-                .email-content p {
-                    font-size: 16px;
-                }
-                .email-button {
-                    display: inline-block;
-                    padding: 10px 20px;
-                    margin-top: 20px;
-                    background-color: #007bff;
-                    color: #fff;
-                    text-decoration: none;
-                    border-radius: 5px;
-                }
-                .email-footer {
-                    text-align: center;
-                    margin-top: 30px;
-                    font-size: 12px;
-                    color: #999;
-                }
-            </style>
-        </head>
-        <body>
-            <div class="email-container">
-                <div class="email-header">
-                    <img src="https://cdn.pixabay.com/photo/2023/12/09/19/36/present-8440034_1280.jpg" alt="SYSJUB">
-                </div>
-                <div class="email-content">
-                    <h2>Hola ${empleadoData.nombre_empleado}</h2>
-                    <p>Haz clic en el siguiente enlace para actualizar tus datos:</p>
-                    <a href="${enlace}" class="email-button">Actualizar Datos</a>
-                </div>
-                <div class="email-footer">
-                    <p>Este es un mensaje automático, por favor no responder.</p>
-                </div>
-            </div>
-        </body>
-        </html>`
-      };
-      await this.mailService.sendMail(mailContent.to, mailContent.subject, mailContent.text, mailContent.html);
-  
-      return { empleado };
-    } catch (error) {
-      await queryRunner.rollbackTransaction();
-      this.handleException(error);
-    } finally {
-      await queryRunner.release();
-    } */
-  }
-  
-  
   
 
   findAll(paginationDto: PaginationDto) {
@@ -538,47 +414,6 @@ export class UsuarioService {
     return `This action removes a #${id} usuario`;
   }
 
-  /* async login(email: string, password: string) {
-    const usuario = await this.usuarioRepository.findOne({
-      where: { correo: email },
-      relations: ['rol']
-    });
-  
-    if (!usuario) {
-      throw new NotFoundException('Usuario no encontrado');
-    }
-  
-    if (usuario.estado !== 'ACTIVO') {
-      throw new ForbiddenException('La cuenta está desactivada');
-    }
-    if (!usuario.fecha_verificacion) {
-      throw new ForbiddenException('La cuenta no ha verificado su correo electrónico');
-    }
-  
-    const isPasswordValid = await bcrypt.compare(password, usuario.contrasena);
-    if (!isPasswordValid) {
-      throw new BadRequestException('Credenciales inválidas');
-    }
-    if (!usuario.rol) {
-      throw new InternalServerErrorException('El rol del usuario no está definido');
-    }
-  
-    // Crear el payload y firmar el token
-    const payload = { username: usuario.correo, sub: usuario.id_usuario, rol: usuario.rol.nombre_rol };
-    const token = this.jwtService.sign(payload);
-  
-    // Crear una nueva sesión y guardarla en la base de datos
-    const nuevaSesion = new NET_SESION();
-    nuevaSesion.usuario = usuario; // Asigna el usuario a la sesión
-    nuevaSesion.token = token;
-    nuevaSesion.fecha_creacion = new Date();
-    nuevaSesion.fecha_expiracion = new Date(Date.now() + 1000 * 60 * 60 * 24); // Por ejemplo, 24 horas después
-    nuevaSesion.estado = 'activa';
-  
-    await this.sesionRepository.save(nuevaSesion);
-  
-    return { token };
-  } */
 
   private handleException(error: any): void {
     this.logger.error(error);

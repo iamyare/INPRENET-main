@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Query, UseGuards, BadRequestException, HttpCode, HttpStatus, UnauthorizedException, Req, UseInterceptors, UploadedFile } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Query, UseGuards, BadRequestException, HttpCode, HttpStatus, UnauthorizedException, Req, UseInterceptors, UploadedFile, ParseIntPipe, Res } from '@nestjs/common';
 import { UsuarioService } from './usuario.service';
 import { CreateUsuarioDto } from './dto/create-usuario.dto';
 import { UpdateUsuarioDto } from './dto/update-usuario.dto';
@@ -8,6 +8,7 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { CreatePreRegistroDto } from './dto/create-pre-registro.dto';
 import { CompleteRegistrationDto } from './dto/complete-registration.dto';
 import { LoginDto } from './dto/login.dto';
+import { Net_Usuario_Empresa } from './entities/net_usuario_empresa.entity';
 
 @ApiTags('usuario')
 @Controller('usuario')
@@ -80,17 +81,22 @@ async logout(@Req() request: Request): Promise<any> {
 }
 
 
-@Post('auth/signup')
-@UseInterceptors(FileInterceptor('archivo_identificacion'))
-create(
-  @Body() createUsuarioDto: CreateUsuarioDto,
-  @UploadedFile() archivo_identificacion: Express.Multer.File,
-) {
-  if (archivo_identificacion) {
-    createUsuarioDto.archivo_identificacion = archivo_identificacion;
+@Get('centro/:centroTrabajoId')
+  async getUsuariosPorCentro(
+    @Param('centroTrabajoId', ParseIntPipe) centroTrabajoId: number,
+    @Res() res,
+  ): Promise<Response> {
+    try {
+      const usuarios: Net_Usuario_Empresa[] = await this.usuarioService.getUsuariosPorCentro(centroTrabajoId);
+      return res.status(HttpStatus.OK).json(usuarios);
+    } catch (error) {
+      return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
+        statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
+        message: 'Error fetching users for the specified center',
+        error: error.message,
+      });
+    }
   }
-  return this.usuarioService.create(createUsuarioDto);
-}
 
   @Post('/crear')
   async createPrivada(

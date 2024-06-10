@@ -63,6 +63,14 @@ export class AuthService {
     );
   }
 
+  getUsuariosPorCentro(centroTrabajoId: number): Observable<any> {
+    const url = `${environment.API_URL}/api/usuario/centro/${centroTrabajoId}`;
+
+    return this.http.get<any>(url).pipe(
+      catchError(this.handleError<any>('getUsuariosPorCentro'))
+    );
+  }
+
   getRolesByEmpresa(idEmpresa: number): Observable<any> {
     const url = `${environment.API_URL}/api/usuario/roles?idEmpresa=${idEmpresa}`;
     const token = localStorage.getItem('token');
@@ -74,7 +82,6 @@ export class AuthService {
 
   getIdEmpresaFromToken(): number | null {
     const token = localStorage.getItem('token');
-    console.log(token);
 
     if (token) {
       const decodedToken: any = jwtDecode(token);
@@ -151,6 +158,25 @@ export class AuthService {
         return of([]);
       })
     );
+  }
+
+  getToken(): string {
+    return localStorage.getItem('token') || ''; // O como estés almacenando el token
+  }
+
+  decodeToken(token: string): any {
+    try {
+      return jwtDecode(token);
+    } catch (error) {
+      console.error('Error decoding token', error);
+      return null;
+    }
+  }
+
+  getCentroTrabajoId(): number | null {
+    const token = this.getToken();
+    const decodedToken = this.decodeToken(token);
+    return decodedToken ? decodedToken.idCentroTrabajo : null;
   }
 
   private handleError<T>(operation = 'operation', result?: T) {

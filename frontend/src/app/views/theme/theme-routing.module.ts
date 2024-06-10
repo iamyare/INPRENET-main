@@ -34,6 +34,8 @@ import { EditFamiliaresComponent } from '../pages/Generales/edit-familiares/edit
 import { VerDatosAfiliadosComponent } from '../pages/Generales/ver-datos-afiliados/ver-datos-afiliados.component';
 import { AfiliacionCentrosComponent } from '../pages/afil-centros-priv/afiliacion-centros/afiliacion-centros.component';
 import { VerDatosCentrosComponent } from '../pages/Generales/ver-datos-centros/ver-datos-centros.component';
+import { GestionUsuariosComponent } from '../pages/admin-centro/gestion-usuarios/gestion-usuarios.component';
+import { NuevoUsuarioComponent } from '../pages/admin-centro/nuevo-usuario/nuevo-usuario.component';
 
 const routes: Routes = [
   //rutas Afiliado
@@ -346,6 +348,28 @@ const routes: Routes = [
           title: 'Nuevo Movimiento',
         },
       }
+    ],
+  },
+  {
+    path: '',
+    data: {
+      title: 'Gestion Usuarios',
+    },
+    children: [
+      {
+        path: 'editar-usuarios',
+        component: GestionUsuariosComponent,
+        data: {
+          title: 'Editar Usuarios',
+        },
+      },
+      {
+        path: 'nuevo-usuario',
+        component: NuevoUsuarioComponent,
+        data: {
+          title: 'Nuevo usuario',
+        },
+      },
     ],
   },
 ];

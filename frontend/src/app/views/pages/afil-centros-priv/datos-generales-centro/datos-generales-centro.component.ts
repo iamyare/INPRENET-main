@@ -242,7 +242,7 @@ export class DatosGeneralesCentroComponent implements OnInit {
     },
     {
         name: 'fecha_inicio_operaciones',
-        label: 'Fecha de Inicio de Operaciones',
+        label: 'Inicio de Operaciones',
         type: 'date',
         icon: 'calendar_today',
         value: '',

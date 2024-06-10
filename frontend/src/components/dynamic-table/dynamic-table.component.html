@@ -40,15 +40,16 @@
         <th *ngIf="mostrarBotonTres" class="custom-header">
           {{ nombreEncabezadoTres }}
         </th>
+        <th class="custom-header">Eliminar</th>
+        <th class="custom-header">Editar</th>
       </tr>
     </thead>
     <tbody>
-      <tr *ngFor=" let row of searchResults && searchResults.slice(desde, hasta); let i = index" class="custom-row">
+      <tr *ngFor="let row of searchResults && searchResults.slice(desde, hasta); let i = index" class="custom-row">
         <td *ngIf="verOpcEditar">
-          <!-- [(ngModel)]="row.isSelected" -->
           <input type="checkbox" (change)="onSelectionChange(row)" />
         </td>
-        <td *ngFor="let col of columns" >
+        <td *ngFor="let col of columns">
           <ng-container *ngIf="!row.isEditing && !col.moneda" style="text-align: center; padding: 1rem 1rem 1rem 1rem">
             {{ getCellValue(row, col) }}
           </ng-container>
@@ -62,7 +63,7 @@
               <mat-form-field class="example-full-width; inputs" style="background-color: white" appearance="outline">
                 <input matInput [formControl]="row[col.col + '_control']" />
               </mat-form-field>
-              <div *ngIf=" row[col.col + '_control'].invalid && row[col.col + '_control'].touched">
+              <div *ngIf="row[col.col + '_control'].invalid && row[col.col + '_control'].touched">
                 <span *ngFor="let error of getControlErrors(row, col)">
                   {{ error }}
                 </span>
@@ -79,7 +80,7 @@
           <button mat-raised-button *ngIf="row.isEditing" (click)="saveChanges(row)" class="boton-estetico">Guardar</button>
           <button mat-raised-button *ngIf="row.isEditing" (click)="stopEditing(row)" class="boton-estetico">Cancelar</button>
         </td>
-        
+
         <td *ngIf="mostrarBotonUno">
           <button *ngIf="mostrarBotonUno" mat-raised-button (click)="ejecutarAccionUno(row)">{{ etiquetaBotonUno }}</button>
         </td>
@@ -90,6 +91,14 @@
 
         <td *ngIf="mostrarBotonTres">
           <button *ngIf="mostrarBotonTres" mat-raised-button (click)="ejecutarAccionTres(row)">{{ etiquetaBotonTres }}</button>
+        </td>
+
+        <td>
+          <button mat-icon-button (click)="eliminarFila(row)" class="boton-eliminar"><mat-icon>delete</mat-icon></button>
+        </td>
+
+        <td>
+          <button mat-icon-button (click)="editarFila(row)" class="boton-editar"><mat-icon>edit</mat-icon></button>
         </td>
       </tr>
     </tbody>

@@ -10,8 +10,14 @@ import { environment } from 'src/environments/environment';
 export class CentrosTrabajoService {
   constructor(private http: HttpClient, private router: Router) { }
 
+  getCentroTrabajoById(id: number): Observable<any> {
+    const url = `${environment.API_URL}/api/centro-trabajo/${id}`;
+    return this.http.get<any>(url);
+  }
+
   getAllCentrosTrabajo(): Observable<any> {
     const url = `${environment.API_URL}/api/transacciones/getAllCentrosTrabajo`;
     return this.http.get<any[]>(url);
   }
+
 }

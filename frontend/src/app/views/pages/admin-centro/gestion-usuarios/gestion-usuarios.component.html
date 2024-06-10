@@ -1,0 +1,17 @@
+<div class="header-container">
+  <h2 class="center-name">{{ nombreCentroTrabajo }}</h2>
+  <button mat-raised-button color="primary" (click)="irANuevaPagina()">Agregar Nuevo Usuario</button>
+</div>
+<div class="content-container">
+  <app-dynamic-table
+    titulo="Gestión de Usuarios"
+    subtitulo="Completa la información correspondiente"
+    [columns]="columns"
+    [data]="usuarios"
+    [getData]="getFilas"
+    (ejecutarFuncionAsincronaEvent)="ejecutarFuncionAsincronaDesdeOtroComponente($event)"
+    (eliminar)="manejarEliminar($event)"
+    (editar)="manejarEditar($event)"
+  >
+  </app-dynamic-table>
+</div>

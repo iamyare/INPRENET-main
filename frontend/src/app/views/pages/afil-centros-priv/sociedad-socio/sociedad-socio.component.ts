@@ -31,7 +31,55 @@ export class SociedadSocioComponent implements OnInit {
     { name: 'departamento', label: 'Departamento', icon: 'location_city', layout: { row: 6, col: 6 }, type: 'select', value: '', options: [], validations: [Validators.required] },
     { name: 'municipio', label: 'Municipio', icon: 'location_city', layout: { row: 6, col: 6 }, type: 'select', value: '', options: [], validations: [Validators.required] },
     { name: 'fechaIngreso', label: 'Fecha de Ingreso', icon: 'calendar_today', layout: { row: 7, col: 6 }, type: 'date', value: '', validations: [Validators.required] },
-    { name: 'fechaSalida', label: 'Fecha de Salida', icon: 'calendar_today', layout: { row: 7, col: 6 }, type: 'date', value: '', validations: [] }
+    { name: 'fechaSalida', label: 'Fecha de Salida', icon: 'calendar_today', layout: { row: 7, col: 6 }, type: 'date', value: '', validations: [] },
+    {
+      name: 'pep_declaration',
+      label: '¿Alguno de los socios o propietario ha desempeñado o ha desempeñado un cargo público?',
+      type: 'radio',
+      options: [
+        { label: 'Sí', value: 'si' },
+        { label: 'No', value: 'no' }
+      ],
+      value: '',
+      validations: [],
+      layout: { row: 8, col: 12 }
+    },
+    {
+      name: 'pep_cargo_desempenado',
+      label: 'Cargo Desempeñado',
+      type: 'text',
+      value: '',
+      validations: [],
+      layout: { row: 9, col: 6 }
+    },
+    {
+      name: 'pep_periodo',
+      label: 'Periodo',
+      type: 'text',
+      value: '',
+      validations: [],
+      layout: { row: 9, col: 6 }
+    },
+    {
+      name: 'pep_otras_referencias',
+      label: 'Otras Referencias',
+      type: 'text',
+      value: '',
+      validations: [],
+      layout: { row: 10, col: 12 }
+    },
+    {
+      name: 'docente_deducciones',
+      label: 'HA REALIZADO DEDUCCIONES DE COTIZACIONES A LOS DOCENTES QUE TRABAJAN EN LA INSTITUCIÓN:',
+      type: 'radio',
+      options: [
+        { label: 'Sí', value: 'si' },
+        { label: 'No', value: 'no' }
+      ],
+      value: '',
+      validations: [],
+      layout: { row: 11, col: 12 }
+    }
   ];
 
   constructor(private fb: FormBuilder, private direccionService: DireccionService) {}
@@ -51,7 +99,7 @@ export class SociedadSocioComponent implements OnInit {
     this.departamentos = await this.direccionService.getAllDepartments().toPromise();
     const departamentoField = this.fields.find(field => field.name === 'departamento');
     if (departamentoField) {
-      departamentoField.options = this.departamentos.map((dep:any) => ({
+      departamentoField.options = this.departamentos.map((dep: any) => ({
         value: dep.id_departamento,
         label: dep.nombre_departamento
       }));
@@ -59,7 +107,7 @@ export class SociedadSocioComponent implements OnInit {
   }
 
   async onDepartamentoChange(event: { fieldName: string, value: any, formGroup: FormGroup }) {
-    if (event.fieldName !== 'departamento') return; // Solo ejecutar si el campo es 'departamento'
+    if (event.fieldName !== 'departamento') return;
 
     const departamentoId = event.value;
 
@@ -67,9 +115,9 @@ export class SociedadSocioComponent implements OnInit {
 
     const municipioField = this.fields.find(field => field.name === 'municipio');
     if (municipioField && municipios) {
-      municipioField.options = municipios.map(mun => ({
-        value: mun.value,
-        label: mun.label
+      municipioField.options = municipios.map((mun: any) => ({
+        value: mun.id_municipio,
+        label: mun.nombre_municipio
       }));
     }
 
@@ -95,10 +143,32 @@ export class SociedadSocioComponent implements OnInit {
       municipio: ['', Validators.required],
       porcentajeParticipacion: ['', [Validators.required, Validators.min(0), Validators.max(100)]],
       fechaIngreso: ['', Validators.required],
-      fechaSalida: ['']
+      fechaSalida: [''],
+      pep_declaration: ['', Validators.required],
+      pep_nombre_apellidos: [{ value: '', disabled: true }],
+      pep_cargo_desempenado: [{ value: '', disabled: true }],
+      pep_periodo: [{ value: '', disabled: true }],
+      pep_otras_referencias: [{ value: '', disabled: true }],
+      docente_deducciones: ['', Validators.required]
     });
 
     this.sociedadSocios.push(sociedadSocioGroup);
+
+    sociedadSocioGroup.get('pep_declaration')?.valueChanges.subscribe((value:any) => {
+      this.updateFieldVisibility(sociedadSocioGroup, value);
+    });
+  }
+
+  updateFieldVisibility(sociedadSocioGroup: FormGroup, pepDeclarationValue: string): void {
+    const fieldsToUpdate = ['pep_nombre_apellidos', 'pep_cargo_desempenado', 'pep_periodo', 'pep_otras_referencias'];
+    fieldsToUpdate.forEach(fieldName => {
+      const control = sociedadSocioGroup.get(fieldName);
+      if (pepDeclarationValue === 'si') {
+        control?.enable();
+      } else {
+        control?.disable();
+      }
+    });
   }
 
   removeSociedadSocio(index: number): void {

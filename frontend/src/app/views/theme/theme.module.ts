@@ -67,6 +67,9 @@ import { ReferenciasBancariasComercialesComponent } from '../pages/afil-centros-
 import { SociedadComponent } from '../pages/afil-centros-priv/sociedad/sociedad.component';
 import { SociedadSocioComponent } from '../pages/afil-centros-priv/sociedad-socio/sociedad-socio.component';
 import { AdminCentroEducativoComponent } from '../pages/afil-centros-priv/admin-centro-educativo/admin-centro-educativo.component';
+import { GestionUsuariosComponent } from '../pages/admin-centro/gestion-usuarios/gestion-usuarios.component';
+import { NuevoUsuarioComponent } from '../pages/admin-centro/nuevo-usuario/nuevo-usuario.component';
+import { PagesModule } from '../pages/pages.module';
 
 @NgModule({
   imports: [
@@ -90,6 +93,7 @@ import { AdminCentroEducativoComponent } from '../pages/afil-centros-priv/admin-
     MatStepperModule,
     MatNativeDateModule,
     MatGridListModule,
+    PagesModule
   ],
   providers: [
     { provide: MAT_DATE_LOCALE, useValue: 'es' }
@@ -137,7 +141,9 @@ import { AdminCentroEducativoComponent } from '../pages/afil-centros-priv/admin-
     SociedadComponent,
     SociedadSocioComponent,
     AdminCentroEducativoComponent,
-    VerDatosCentrosComponent
+    VerDatosCentrosComponent,
+    GestionUsuariosComponent,
+    NuevoUsuarioComponent
   ]
 })
 export class ThemeModule {

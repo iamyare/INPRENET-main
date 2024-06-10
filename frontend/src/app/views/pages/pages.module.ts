@@ -28,7 +28,9 @@ import { LoginPrivadosComponent } from './Centros Privados/login-privados/login-
     IconModule,
     SharedModule,
   ],
-  exports: []
+  exports: [
+    PreRegisterComponent
+  ]
 })
 export class PagesModule {
 }

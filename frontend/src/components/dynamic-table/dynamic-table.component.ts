@@ -38,9 +38,11 @@ export class DynamicTableComponent implements OnInit, OnDestroy {
   @Input() etiquetaBotonTres: string = '';
   @Output() accionBotonTres: EventEmitter<any> = new EventEmitter<any>();
 
+  @Output() eliminar: EventEmitter<any> = new EventEmitter<any>();
+  @Output() editar: EventEmitter<any> = new EventEmitter<any>();
+
   @Input() titulo = "";
   @Input() subtitulo = "";
-
 
   @ViewChild(MatPaginator) paginator: MatPaginator | undefined;
 
@@ -235,31 +237,38 @@ export class DynamicTableComponent implements OnInit, OnDestroy {
     });
   }
 
-    // En tu componente
-    onSelectionChange(user: any) {
-      if (user.isSelected) {
-          this.selectionService.addSelectedItem(user);
-      } else {
-          this.selectionService.removeSelectedItem(user);
-      }
-      this.obtenerFilasSeleccionadas();
+  // En tu componente
+  onSelectionChange(user: any) {
+    if (user.isSelected) {
+        this.selectionService.addSelectedItem(user);
+    } else {
+        this.selectionService.removeSelectedItem(user);
     }
-    obtenerFilasSeleccionadas() {
-      const filasSeleccionadas = this.selectionService.getSelectedItems();
-      this.getElemSeleccionados.emit(filasSeleccionadas);
-      console.log(filasSeleccionadas);
-    }
+    this.obtenerFilasSeleccionadas();
+  }
+  obtenerFilasSeleccionadas() {
+    const filasSeleccionadas = this.selectionService.getSelectedItems();
+    this.getElemSeleccionados.emit(filasSeleccionadas);
+    console.log(filasSeleccionadas);
+  }
 
-    ejecutarAccionUno(row: any) {
-      this.accionBotonUno.emit(row);
-    }
+  ejecutarAccionUno(row: any) {
+    this.accionBotonUno.emit(row);
+  }
 
-    ejecutarAccionDos(row: any) {
-      this.accionBotonDos.emit(row);
-    }
+  ejecutarAccionDos(row: any) {
+    this.accionBotonDos.emit(row);
+  }
 
-    ejecutarAccionTres(row: any) {
-      this.accionBotonTres.emit(row);
-    }
+  ejecutarAccionTres(row: any) {
+    this.accionBotonTres.emit(row);
+  }
 
+  eliminarFila(row: any) {
+    this.eliminar.emit(row);
+  }
+
+  editarFila(row: any) {
+    this.editar.emit(row);
+  }
 }

@@ -10,6 +10,7 @@ export const navItems: INavData[] = [
       text: 'NEW'
     }
   }, */
+
   {
     title: true,
     name: 'Menú Mantenimiento'
@@ -44,6 +45,25 @@ export const navItems: INavData[] = [
       },
     ]
   },
+  {
+    title: true,
+    name: 'Gestion De Personal'
+  },
+  {
+    name: 'Gestion',
+    iconComponent: { name: 'cilMoney' },
+    children: [
+      {
+        name: 'Gestion de usuarios',
+        url: '/Gestion/editar-usuarios',
+      },
+      {
+        name: 'Nuevo usuario',
+        url: '/Gestion/nuevo-usuario',
+      },
+    ]
+  },
+
 
   {
     title: true,
@@ -66,44 +86,6 @@ export const navItems: INavData[] = [
         name: 'Nuevo Centro Privado',
         url: 'Afiliado/nuevo-centro',
       },
-      {
-        name: 'Ver Datos Centro',
-        url: '/Afiliado/ver-datos-centro',
-      },
-      /*{
-        name: 'Ver Datos Generales',
-        url: '/Afiliado/edit-datos-generales',
-      },
-       {
-        name: 'Ver, Editar o Agregar',
-        children: [
-          {
-            url: '/Afiliado/edit-datos-bancarios',
-            name: 'Datos Bancarios',
-          },
-          {
-            url: '/Afiliado/edit-familiares',
-            name: 'Datos Familiares',
-          },
-          {
-            url: '/Afiliado/Edit-Perfil-Puest-Trab',
-            name: 'Centros de trabajo',
-          },
-          {
-            url: '/Afiliado/edit-colegios-magisteriales',
-            name: 'Colegios Magisteriales',
-          },
-          {
-            url: '/Afiliado/edit-refer-personales',
-            name: 'Referencias personales',
-          },
-          {
-            url: '/Afiliado/edit-beneficiarios',
-            name: 'Beneficiarios',
-          }
-        ]
-      }, */
-
     ]
   },
   {
@@ -147,14 +129,6 @@ export const navItems: INavData[] = [
                   },
                 ]
               }
-              /* {
-                url: '/Planilla/Ingresos/nueva-planilla',
-                name: 'Nueva Planilla',
-              },
-              {
-                url: '/Planilla/Ingresos/ver-planillas',
-                name: 'Ver Planillas',
-              }, */
             ]
           },
           {

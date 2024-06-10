@@ -19,16 +19,16 @@ export class DefaultLayoutComponent implements OnInit {
 
   private loadNavItems(): void {
     this.navItems = JSON.parse(JSON.stringify(originalNavItems));
-    const userRole = this.authService.getUserRole();
-    if (userRole === 'ADMINISTRADOR') {
-      this.navItems.splice(2, 0, {
-        name: 'Beneficio',
-        iconComponent: { name: 'cilMoney' },
-        url: '/base',
-        children: [
-          { name: 'Nuevo Beneficio', url: '/Beneficio/nuevo-beneficio' },
-          { name: 'Editar Beneficios', url: '/Beneficio/editar-beneficio' },
-        ],
+    const menuMantenimientoIndex = this.navItems.findIndex(item => item.name === 'Menú Mantenimiento');
+      if (menuMantenimientoIndex !== -1) {
+        this.navItems.splice(menuMantenimientoIndex + 1, 0, {
+          name: 'Beneficio',
+          iconComponent: { name: 'cilMoney' },
+          url: '/base',
+          children: [
+            { name: 'Nuevo Beneficio', url: '/Beneficio/nuevo-beneficio' },
+            { name: 'Editar Beneficios', url: '/Beneficio/editar-beneficio' },
+          ],
       });
     }
   }

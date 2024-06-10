@@ -77,6 +77,11 @@ const routes: Routes = [
         loadChildren: () =>
           import('./views/pages/pages.module').then((m) => m.PagesModule)
       },
+      {
+        path: 'Gestion',
+        loadChildren: () =>
+          import('./views/theme/theme.module').then((m) => m.ThemeModule)
+      },
     ]
   },
 

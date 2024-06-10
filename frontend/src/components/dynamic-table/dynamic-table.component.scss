@@ -99,3 +99,39 @@
 .boton-editar mat-icon {
   color: white; /* Asegura que el ícono dentro del botón también sea blanco */
 }
+
+.boton-eliminar {
+  mat-icon {
+    font-size: 25px;
+  }
+
+  background-color: #26a69a;
+  color: white;
+  margin-right: 10px;
+
+  &:hover {
+    background-color: darken(#26a69a, 5%);
+  }
+
+  &:last-child {
+    margin-right: 0;
+  }
+}
+
+.boton-editar {
+  mat-icon {
+    font-size: 20px;
+  }
+
+  background-color: #ffa726;
+  color: white;
+  margin-right: 10px;
+
+  &:hover {
+    background-color: darken(#ffa726, 5%);
+  }
+
+  &:last-child {
+    margin-right: 0;
+  }
+}

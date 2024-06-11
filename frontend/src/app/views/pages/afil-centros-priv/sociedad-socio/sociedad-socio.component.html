@@ -18,12 +18,12 @@
       <div class="row" style="text-align: center; margin: 1%;">
         <div class="col-md-6">
           <button mat-button color="primary" type="button" (click)="addSociedadSocio()">
-            <mat-icon matSuffix>exposure_plus_1</mat-icon> Agregar Sociedad
+            <mat-icon matSuffix>exposure_plus_1</mat-icon> Agregar Socio
           </button>
         </div>
         <div class="col-md-6" *ngIf="sociedadSocios.length > 0">
           <button mat-button color="warn" type="button" (click)="removeSociedadSocio(sociedadSocios.length - 1)">
-            <mat-icon matSuffix>exposure_neg_1</mat-icon> Eliminar Sociedad
+            <mat-icon matSuffix>exposure_neg_1</mat-icon> Eliminar Socio
           </button>
         </div>
       </div>

@@ -34,7 +34,7 @@ export class SociedadSocioComponent implements OnInit {
     { name: 'fechaSalida', label: 'Fecha de Salida', icon: 'calendar_today', layout: { row: 7, col: 6 }, type: 'date', value: '', validations: [] },
     {
       name: 'pep_declaration',
-      label: '¿Alguno de los socios o propietario ha desempeñado o ha desempeñado un cargo público?',
+      label: '¿Ha desempeñado un cargo público?',
       type: 'radio',
       options: [
         { label: 'Sí', value: 'si' },
@@ -70,7 +70,7 @@ export class SociedadSocioComponent implements OnInit {
     },
     {
       name: 'docente_deducciones',
-      label: 'HA REALIZADO DEDUCCIONES DE COTIZACIONES A LOS DOCENTES QUE TRABAJAN EN LA INSTITUCIÓN:',
+      label: '¿Ha realizado deducciones de cotizaciones a los docentes que trabajan en la institución?',
       type: 'radio',
       options: [
         { label: 'Sí', value: 'si' },
@@ -115,10 +115,12 @@ export class SociedadSocioComponent implements OnInit {
 
     const municipioField = this.fields.find(field => field.name === 'municipio');
     if (municipioField && municipios) {
+      console.log(municipios);
       municipioField.options = municipios.map((mun: any) => ({
-        value: mun.id_municipio,
-        label: mun.nombre_municipio
+        value: mun.value,
+        label: mun.label
       }));
+
     }
 
     event.formGroup.get('municipio')?.setValue(null);

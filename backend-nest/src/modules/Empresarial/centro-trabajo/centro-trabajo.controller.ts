@@ -3,6 +3,7 @@ import { CentroTrabajoService } from './centro-trabajo.service';
 import { CreateCentroTrabajoDto } from './dto/create-centro-trabajo.dto';
 import { UpdateCentroTrabajoDto } from './dto/update-centro-trabajo.dto';
 import { ApiTags } from '@nestjs/swagger';
+import { CreatePrivateCentroTrabajoDto } from './dto/create-private-centro-trabajo.dto';
 
 @ApiTags('centro-trabajo')
 @Controller('centro-trabajo')
@@ -12,6 +13,11 @@ export class CentroTrabajoController {
   @Post()
   create(@Body() createCentroTrabajoDto: CreateCentroTrabajoDto) {
     return this.centroTrabajoService.create(createCentroTrabajoDto);
+  }
+
+  @Post('create-private')
+  async createPrivateCentroTrabajo(@Body() createPrivateCentroTrabajoDto: CreatePrivateCentroTrabajoDto) {
+    return this.centroTrabajoService.createPrivateCentroTrabajo(createPrivateCentroTrabajoDto);
   }
 
   @Get()

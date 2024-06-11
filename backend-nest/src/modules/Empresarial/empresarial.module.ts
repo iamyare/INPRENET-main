@@ -14,6 +14,7 @@ import { Net_Centro_Trabajo_Nivel } from './entities/net_centro_trabajo_nivel.en
 import { Net_Centro_Trabajo_Jornada } from './entities/net_centro_trabajo_jornada.entity';
 import { Net_Referencia_Centro_Trabajo } from './entities/net_referencia_centro_trabajo.entity';
 import { Net_Nivel_Educativo } from './entities/net_nivel_educativo.entity';
+import { Net_Municipio } from '../Regional/municipio/entities/net_municipio.entity';
 
 @Module({
   controllers: [CentroTrabajoController, EmpresasController],
@@ -30,6 +31,7 @@ import { Net_Nivel_Educativo } from './entities/net_nivel_educativo.entity';
       Net_Centro_Trabajo_Nivel,
       Net_Centro_Trabajo_Jornada,
       Net_Referencia_Centro_Trabajo,
+      Net_Municipio
     ]),
   ],
 })

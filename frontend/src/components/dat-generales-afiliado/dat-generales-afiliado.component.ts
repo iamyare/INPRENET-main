@@ -16,6 +16,7 @@ export function generateAddressFormGroup(datos?: any): FormGroup {
     tercer_nombre: new FormControl(datos?.tercer_nombre, [Validators.maxLength(40)]),
     primer_apellido: new FormControl(datos?.primer_apellido, [Validators.required, Validators.maxLength(40), Validators.minLength(1)]),
     segundo_apellido: new FormControl(datos?.segundo_apellido, [Validators.maxLength(40)]),
+    fallecido: new FormControl(datos?.fallecido, [Validators.maxLength(2)]),
     fecha_nacimiento: new FormControl(datos?.fecha_nacimiento, [Validators.required]),
     cantidad_dependientes: new FormControl(datos?.cantidad_dependientes, [Validators.pattern("^[0-9]+$"), Validators.required]),
     estado_civil: new FormControl(datos?.estado_civil, [Validators.required, Validators.maxLength(40)]),
@@ -112,6 +113,7 @@ export class DatGeneralesAfiliadoComponent implements OnInit {
   form: FormGroup = this.fb.group({});
   formArchivos: any;
   minDate: Date;
+  fallecido: any;
 
   onDatosGeneralesChange() {
     const data = this.formParent
@@ -178,6 +180,7 @@ export class DatGeneralesAfiliadoComponent implements OnInit {
     this.cargarprofesiones();
     this.cargarDepartamentos();
 
+    this.fallecido = [{ value: "SI" }, { value: "NO" }]
     this.generos = this.datosEstaticos.genero;
     this.sexo = this.datosEstaticos.sexo;
 

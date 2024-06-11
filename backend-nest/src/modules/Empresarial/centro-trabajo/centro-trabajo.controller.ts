@@ -29,7 +29,7 @@ export class CentroTrabajoController {
       res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: error.message });
     }
   }
-  
+
   @Get("Privados")
   async findAllPriv(@Res() res): Promise<void> {
     try {
@@ -43,6 +43,11 @@ export class CentroTrabajoController {
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.centroTrabajoService.findOne(+id);
+  }
+
+  @Get('findBy/:content')
+  findBy(@Param('content') content: string) {
+    return this.centroTrabajoService.findBy(content);
   }
 
   @Patch(':id')

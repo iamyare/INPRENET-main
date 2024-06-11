@@ -83,8 +83,12 @@ export const navItems: INavData[] = [
         url: '/Afiliado/ver-datos-afiliado',
       },
       {
-        name: 'Nuevo Centro Privado',
+        name: 'Nuevo Centro Educativo',
         url: 'Afiliado/nuevo-centro',
+      },
+      {
+        name: 'Ver Centro Educativo',
+        url: 'Afiliado/ver-datos-centro',
       },
     ]
   },

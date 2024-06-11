@@ -512,11 +512,11 @@ export class AfiliadoService {
       relations: [
         'detallePersona',
         'detallePersona.tipoPersona',
+        'detallePersona.estadoAfiliacion',
         'pais',
         'municipio.departamento',
         'tipoIdentificacion',
         'profesion',
-        'estadoPersona',
         'municipio',
         'municipio_defuncion',
         'municipio_defuncion.departamento',
@@ -563,13 +563,15 @@ export class AfiliadoService {
       ID_IDENTIFICACION: persona.tipoIdentificacion?.id_identificacion,
       tipo_defuncion: persona.tipo_defuncion,
       fecha_defuncion: persona.fecha_defuncion,
-      observaciones: persona.observaciones,
+      motivo_fallecimiento: persona.motivo_fallecimiento,
       certificado_defuncion: persona?.certificado_defuncion,
       ID_MUNICIPIO: persona.municipio?.id_municipio,
       ID_MUNICIPIO_DEFUNCION: persona?.municipio_defuncion?.id_municipio!,
       ID_DEPARTAMENTO_DEFUNCION: persona?.municipio_defuncion?.departamento?.id_departamento!,
-      estadoPersona: detallePersona?.estadoAfiliacion?.Descripcion,
+      fallecido: persona.fallecido,
+      estadoAfiliacion: persona.detallePersona[0]?.estadoAfiliacion?.codigo,
     };
+
 
     return result;
   }
@@ -682,7 +684,7 @@ export class AfiliadoService {
       INNER JOIN
       NET_TIPO_PERSONA "tipoP" ON "tipoP"."ID_TIPO_PERSONA" = "detA"."ID_TIPO_PERSONA"
       INNER JOIN
-      NET_ESTADO_PERSONA "estadoPers" ON "Afil"."ID_ESTADO_PERSONA" = "estadoPers"."CODIGO"
+      NET_ESTADO_AFILIACION "estadoPers" ON "detA"."ID_ESTADO_AFILIACION" = "estadoPers"."CODIGO"
     WHERE
       "Afil"."DNI" = '${dniAfil}' AND 
       "estadoPers"."DESCRIPCION" = 'FALLECIDO'  AND
@@ -732,11 +734,12 @@ export class AfiliadoService {
         INNER JOIN
         NET_TIPO_PERSONA "tipoP" ON "tipoP"."ID_TIPO_PERSONA" = "detA"."ID_TIPO_PERSONA"
         INNER JOIN
-        NET_ESTADO_PERSONA "estadoPers" ON "Afil"."ID_ESTADO_PERSONA" = "estadoPers"."CODIGO"
+        NET_ESTADO_AFILIACION "estadoPers" ON "detA"."ID_ESTADO_AFILIACION" = "estadoPers"."CODIGO"
       WHERE
         "Afil"."DNI" = '${dniAfil}' AND
         "tipoP"."TIPO_PERSONA" = 'AFILIADO'
       `;
+
 
       const beneficios = await this.entityManager.query(query);
 
@@ -755,6 +758,7 @@ export class AfiliadoService {
         "Afil"."SEGUNDO_APELLIDO" AS "segundoApellido",
         "Afil"."GENERO" AS "genero",
         "Afil"."SEXO" AS "sexo",
+        "Afil"."FALLECIDO" AS "FALLECIDO",
         "Afil"."CANTIDAD_DEPENDIENTES" AS "cantidadDependientes",
         "Afil"."REPRESENTACION" AS "representacion",
         "Afil"."TELEFONO_1" AS "telefono1",
@@ -762,7 +766,7 @@ export class AfiliadoService {
         "Afil"."DIRECCION_RESIDENCIA" AS "direccionResidencia",
         "Afil"."ID_PAIS_NACIONALIDAD" AS "idPaisNacionalidad",
         "Afil"."ID_MUNICIPIO_RESIDENCIA" AS "idMunicipioResidencia",
-        "Afil"."ID_ESTADO_PERSONA" AS "idEstadoPersona",
+        "detA"."ID_ESTADO_AFILIACION" AS "idEstadoPersona",
         "estadoPers"."DESCRIPCION" AS "estadoDescripcion",  -- Descripción del estado
         "detA"."PORCENTAJE" AS "porcentaje",
         "tipoP"."TIPO_PERSONA" AS "tipoPersona"
@@ -773,7 +777,7 @@ export class AfiliadoService {
         LEFT JOIN
           NET_TIPO_PERSONA "tipoP" ON "tipoP"."ID_TIPO_PERSONA" = "detA"."ID_TIPO_PERSONA"
         LEFT JOIN
-          NET_ESTADO_PERSONA "estadoPers" ON "Afil"."ID_ESTADO_PERSONA" = "estadoPers"."CODIGO"
+          NET_ESTADO_AFILIACION "estadoPers" ON "detA"."ID_ESTADO_AFILIACION" = "estadoPers"."CODIGO"
         WHERE 
           "detA"."ID_CAUSANTE_PADRE" = ${beneficios[0].ID_PERSONA} AND 
           "tipoP"."TIPO_PERSONA" = 'BENEFICIARIO'
@@ -998,7 +1002,7 @@ export class AfiliadoService {
       const afiliado = await this.personaRepository.preload({
         id_persona: idPersona,
         tipo_defuncion: datosGenerales.tipo_defuncion,
-        observaciones: datosGenerales.observaciones,
+        motivo_fallecimiento: datosGenerales.motivo_fallecimiento,
         estadoPersona: estadoP.codigo,
         municipio_defuncion: datosGenerales.id_municipio_defuncion,
         certificado_defuncion: datosGenerales.certificado_defuncion,

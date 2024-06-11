@@ -26,7 +26,10 @@ export class EditDatosGeneralesComponent {
   datosTabl: any[] = [];
   TipoDefuncion: any[] = [];
   estado: any[] = [];
-  estadoPersona: string = "";
+
+  estadoAfiliacion: any;
+  fallecido: any;
+
   minDate: Date;
 
   public myColumns: TableColumn[] = [];
@@ -102,14 +105,17 @@ export class EditDatosGeneralesComponent {
       { value: "NATURAL" },
       { value: "SUICIDIO" },
     ]
-    this.estado = [
-      { value: "ACTIVO" },
-      { value: "FALLECIDO" },
-      { value: "INACTIVO" },
-    ]
-
+    this.cargarEstadosAfiliado();
     this.previsualizarInfoAfil();
     this.cargarDepartamentos();
+  }
+
+  async cargarEstadosAfiliado() {
+    const response = await this.svcAfiliado.getAllEstados().toPromise();
+    this.estado = response.map((estado: { codigo: any; Descripcion: any; }) => ({
+      label: estado.Descripcion,
+      value: estado.codigo
+    }));
   }
 
   cargarDepartamentos() {
@@ -155,6 +161,7 @@ export class EditDatosGeneralesComponent {
 
   setDatosGenerales(datosGenerales: any) {
     this.formDatosGenerales = datosGenerales
+    this.fallecido = this.formDatosGenerales.value.refpers[0].fallecido
   }
 
   async previsualizarInfoAfil() {
@@ -163,7 +170,8 @@ export class EditDatosGeneralesComponent {
         (result) => {
           this.datos = result;
           this.Afiliado = result;
-          this.estadoPersona = result.estadoPersona
+          this.estadoAfiliacion = result.estadoAfiliacion
+          this.fallecido = result.fallecido
 
           this.formDatosGenerales.value.refpers[0] = {
             dni: result.DNI,
@@ -191,13 +199,14 @@ export class EditDatosGeneralesComponent {
             id_profesion: result.ID_PROFESION,
             id_departamento_residencia: result.id_departamento_residencia,
             id_municipio_residencia: result.ID_MUNICIPIO,
+            fallecido: result.fallecido,
           };
 
           if (result.ID_MUNICIPIO_DEFUNCION) {
             this.cargarMunicipios(result.ID_MUNICIPIO_DEFUNCION);
           }
 
-          this.form1.controls.estado.setValue(result.estadoPersona);
+          this.form1.controls.estado.setValue(result.estadoAfiliacion);
           this.form1.controls.observaciones.setValue(result.observaciones);
           this.form1.controls.tipo_defuncion.setValue(result.tipo_defuncion);
           this.form1.controls.fecha_defuncion.setValue(result.fecha_defuncion);
@@ -209,7 +218,6 @@ export class EditDatosGeneralesComponent {
 
         },
         (error) => {
-
           this.toastr.error(`Error: ${error.error.message}`);
         });
     }
@@ -250,6 +258,6 @@ export class EditDatosGeneralesComponent {
   }
 
   mostrarCamposFallecido(e: any) {
-    this.estadoPersona = e.value
+    this.estadoAfiliacion = e.value
   }
 }

@@ -227,7 +227,7 @@ export class VerDatosAfiliadosComponent implements OnInit {
             style: 'subheader'
           },
           {
-            text: `${afiliado.PRIMER_NOMBRE} ${afiliado.SEGUNDO_NOMBRE} ${afiliado.TERCER_NOMBRE} ${afiliado.PRIMER_APELLIDO} ${afiliado.SEGUNDO_APELLIDO}`,
+            text: unirNombres(afiliado.PRIMER_NOMBRE, afiliado.SEGUNDO_NOMBRE, afiliado.TERCER_NOMBRE, afiliado.PRIMER_APELLIDO, afiliado.SEGUNDO_APELLIDO),
             style: 'name'
           },
           {

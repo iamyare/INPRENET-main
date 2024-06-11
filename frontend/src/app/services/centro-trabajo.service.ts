@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Router } from '@angular/router';
-import {Observable } from 'rxjs';
+import { Observable } from 'rxjs';
 import { environment } from 'src/environments/environment';
 import { HttpClient } from '@angular/common/http';
 
@@ -34,5 +34,11 @@ export class CentroTrabajoService {
   buscarCentroTrabajoPorNombre(nombre: string): Observable<any> {
     const url = `${environment.API_URL}/centrosTrabajo/obtenerCentro`;
     return this.http.post<any>(url, { nombre });
+  }
+
+
+  findBy(content: string): Observable<any> {
+    const url = `${environment.API_URL}/api/centro-trabajo/findBy/${content}`;
+    return this.http.get<any[]>(url);
   }
 }

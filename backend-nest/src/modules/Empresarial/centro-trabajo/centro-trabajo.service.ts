@@ -62,7 +62,15 @@ export class CentroTrabajoService {
 
   async findAllPriv(): Promise<Net_Centro_Trabajo[]> {
     try {
-      return await this.centroTrabajoRepository.find({where: {sector_economico:"PRIVADO"}, order: {nombre_centro_trabajo: "ASC"}});
+      return await this.centroTrabajoRepository.find({ where: { sector_economico: "PRIVADO" }, order: { nombre_centro_trabajo: "ASC" } });
+    } catch (error) {
+      this.handleException(error);
+    }
+  }
+
+  async findBy(content: string): Promise<Net_Centro_Trabajo> {
+    try {
+      return await this.centroTrabajoRepository.findOne({ where: { nombre_centro_trabajo: content } });
     } catch (error) {
       this.handleException(error);
     }

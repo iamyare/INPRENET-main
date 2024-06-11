@@ -13,13 +13,13 @@
 
     <form [formGroup]="form1">
       <div class="row" style="margin: 0px 20px 0 20px;">
-        <div class="col-md-4">
+        <div class="col-md-4" *ngIf="fallecido == 'NO'">
           <mat-form-field style="flex-direction: column-reverse;" class="example-full-width inputs"
             appearance="outline">
             <mat-label>Estado Persona</mat-label>
             <mat-select matNativeControl formControlName="estado" (selectionChange)="mostrarCamposFallecido($event)">
               <mat-option *ngFor="let p of estado" [value]="p.value">
-                {{ p.value }}
+                {{ p.label }}
               </mat-option>
             </mat-select>
           </mat-form-field>
@@ -28,7 +28,7 @@
           </mat-error>
         </div>
 
-        <div class="col-md-4" *ngIf="estadoPersona == 'FALLECIDO'">
+        <div class="col-md-4" *ngIf="fallecido == 'SI'">
           <mat-form-field style="flex-direction: column-reverse;" class="example-full-width inputs"
             appearance="outline">
             <mat-label>Certificado Defunción</mat-label>
@@ -39,7 +39,7 @@
           </mat-error>
         </div>
 
-        <div class="col-md-4" *ngIf="estadoPersona == 'FALLECIDO'">
+        <div class="col-md-4" *ngIf="fallecido == 'SI'">
           <mat-form-field style="flex-direction: column-reverse;" class="example-full-width inputs"
             appearance="outline">
             <mat-label>Tipo De Defunción</mat-label>
@@ -53,7 +53,7 @@
             {{ error }}
           </mat-error>
         </div>
-        <div class="col-md-4" *ngIf="estadoPersona == 'FALLECIDO'">
+        <div class="col-md-4" *ngIf="fallecido == 'SI'">
           <mat-form-field style="flex-direction: column-reverse;" class="example-full-width inputs"
             appearance="outline">
             <mat-label>Observaciones</mat-label>
@@ -63,7 +63,7 @@
             {{ error }}
           </mat-error>
         </div>
-        <div class="col-md-4" *ngIf="estadoPersona == 'FALLECIDO'">
+        <div class="col-md-4" *ngIf="fallecido == 'SI'">
           <mat-form-field style="flex-direction: column-reverse;" class="example-full-width inputs"
             appearance="outline">
             <mat-label>Fecha Defunción</mat-label>
@@ -75,7 +75,7 @@
             {{ error }}
           </mat-error>
         </div>
-        <div class="col-lg-4 col-md-12" *ngIf="estadoPersona == 'FALLECIDO'">
+        <div class="col-lg-4 col-md-12" *ngIf="fallecido == 'SI'">
           <mat-form-field style="flex-direction: column-reverse;" class="example-full-width inputs"
             appearance="outline">
             <mat-label>Departamento de Defunción</mat-label>
@@ -90,7 +90,7 @@
             {{ error }}
           </mat-error>
         </div>
-        <div class="col-lg-4 col-md-12" *ngIf="estadoPersona == 'FALLECIDO'">
+        <div class="col-lg-4 col-md-12" *ngIf="fallecido == 'SI'">
           <mat-form-field style="flex-direction: column-reverse;" class="example-full-width inputs"
             appearance="outline">
             <mat-label>Municipio de Defunción</mat-label>

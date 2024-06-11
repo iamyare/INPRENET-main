@@ -33,9 +33,9 @@ import { EditColegiosMagisterialesComponent } from '../pages/Generales/edit-cole
 import { EditFamiliaresComponent } from '../pages/Generales/edit-familiares/edit-familiares.component';
 import { VerDatosAfiliadosComponent } from '../pages/Generales/ver-datos-afiliados/ver-datos-afiliados.component';
 import { AfiliacionCentrosComponent } from '../pages/afil-centros-priv/afiliacion-centros/afiliacion-centros.component';
-import { VerDatosCentrosComponent } from '../pages/Generales/ver-datos-centros/ver-datos-centros.component';
 import { GestionUsuariosComponent } from '../pages/admin-centro/gestion-usuarios/gestion-usuarios.component';
 import { NuevoUsuarioComponent } from '../pages/admin-centro/nuevo-usuario/nuevo-usuario.component';
+import { VerDatosCentrosComponent } from '../pages/afil-centros-priv/ver-datos-centros/ver-datos-centros.component';
 
 const routes: Routes = [
   //rutas Afiliado

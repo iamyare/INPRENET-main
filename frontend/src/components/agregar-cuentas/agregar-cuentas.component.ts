@@ -44,8 +44,6 @@ export class AgregarCuentasComponent {
 
     this.transaccionesSVC.crearCuenta(this.data.idPersona, datosParseados).subscribe(
       (res: any) => {
-        console.log(res);
-
         this.toastr.success("Cuenta agregada con éxito");
         this.cerrar();
         /* if (res.length > 0) {

@@ -105,8 +105,8 @@ export class Net_Persona {
     @Column('varchar', { nullable: true, name: 'TIPO_DEFUNCION' })
     tipo_defuncion: number;
 
-    @Column('varchar', { nullable: true, name: 'OBSERVACIONES' })
-    observaciones: number;
+    @Column('varchar', { nullable: true, name: 'MOTIVO_FALLECIMIENTO' })
+    motivo_fallecimiento: number;
 
     @Column('varchar', { nullable: true, name: 'CERTIFICADO_DEFUNCION' })
     certificado_defuncion: number;

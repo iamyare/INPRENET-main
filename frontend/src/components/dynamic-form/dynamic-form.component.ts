@@ -66,6 +66,8 @@ export class DynamicFormComponent implements OnInit {
   mergeForms(incomingForm: FormGroup): FormGroup {
     const group = this.createControl();
 
+    console.log(incomingForm);
+
     Object.keys(incomingForm.controls).forEach(key => {
       if (group.contains(key)) {
         group.setControl(key, incomingForm.get(key)!);

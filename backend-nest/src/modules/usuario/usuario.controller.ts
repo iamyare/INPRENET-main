@@ -9,6 +9,7 @@ import { CreatePreRegistroDto } from './dto/create-pre-registro.dto';
 import { CompleteRegistrationDto } from './dto/complete-registration.dto';
 import { LoginDto } from './dto/login.dto';
 import { Net_Usuario_Empresa } from './entities/net_usuario_empresa.entity';
+import { Net_Rol_Modulo } from './entities/net_rol_modulo.entity';
 
 @ApiTags('usuario')
 @Controller('usuario')
@@ -46,6 +47,19 @@ export class UsuarioController {
   @HttpCode(HttpStatus.OK)
   async loginPrivada(@Body('email') email: string, @Body('contrasena') contrasena: string) {
     return this.usuarioService.loginPrivada(email, contrasena);
+  }
+
+  @Get('usuarios-modulos')
+  async obtenerUsuariosPorModulos(@Query('modulos') modulos: string[]): Promise<Net_Usuario_Empresa[]> {
+    if (typeof modulos === 'string') {
+      modulos = [modulos];
+    }
+    return this.usuarioService.obtenerUsuariosPorModulos(modulos);
+  }
+
+  @Get('usuarios-modulos/:modulo')
+  async obtenerRolesPorModulo(@Param('modulo') modulo: string): Promise<Net_Rol_Modulo[]> {
+    return this.usuarioService.obtenerRolesPorModulo(modulo);
   }
 
   /* @Get('roles')
@@ -87,7 +101,7 @@ async logout(@Req() request: Request): Promise<any> {
     @Res() res,
   ): Promise<Response> {
     try {
-      const usuarios: Net_Usuario_Empresa[] = await this.usuarioService.getUsuariosPorCentro(centroTrabajoId);
+      const usuarios: any = await this.usuarioService.getUsuariosPorCentro(centroTrabajoId);
       return res.status(HttpStatus.OK).json(usuarios);
     } catch (error) {
       return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({

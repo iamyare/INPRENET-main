@@ -1,6 +1,7 @@
 import { Entity, PrimaryGeneratedColumn, Column, OneToMany, JoinColumn, ManyToOne } from 'typeorm';
 import { Net_Sociedad_Socio } from './net_sociedad_socio.entity';
 import { Net_Municipio } from 'src/modules/Regional/municipio/entities/net_municipio.entity';
+import { Net_Peps } from './Net_peps-entity';
 
 @Entity({ name: 'NET_SOCIO' })
 export class Net_Socio {
@@ -34,4 +35,7 @@ export class Net_Socio {
   @ManyToOne(() => Net_Municipio, municipio => municipio.socios)
   @JoinColumn({ name: 'ID_MUNICIPIO', foreignKeyConstraintName: 'FK_id_municipio_socio' })
   municipio: Net_Municipio;
+
+  @OneToMany(() => Net_Peps, peps => peps.socio)
+  peps: Net_Peps[];
 }

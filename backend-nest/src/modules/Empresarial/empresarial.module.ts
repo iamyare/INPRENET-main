@@ -15,6 +15,11 @@ import { Net_Centro_Trabajo_Jornada } from './entities/net_centro_trabajo_jornad
 import { Net_Referencia_Centro_Trabajo } from './entities/net_referencia_centro_trabajo.entity';
 import { Net_Nivel_Educativo } from './entities/net_nivel_educativo.entity';
 import { Net_Municipio } from '../Regional/municipio/entities/net_municipio.entity';
+import { Net_Sociedad } from './entities/net.sociedad.entity';
+import { Net_Sociedad_Centro_Trabajo } from './entities/net_sociedad_centro.entity';
+import { Net_Peps } from './entities/Net_peps-entity';
+import { Net_Socio } from './entities/net_socio.entity';
+import { Net_Sociedad_Socio } from './entities/net_sociedad_socio.entity';
 
 @Module({
   controllers: [CentroTrabajoController, EmpresasController],
@@ -31,7 +36,12 @@ import { Net_Municipio } from '../Regional/municipio/entities/net_municipio.enti
       Net_Centro_Trabajo_Nivel,
       Net_Centro_Trabajo_Jornada,
       Net_Referencia_Centro_Trabajo,
-      Net_Municipio
+      Net_Municipio,
+      Net_Sociedad,
+      Net_Sociedad_Centro_Trabajo,
+      Net_Peps,
+      Net_Socio,
+      Net_Sociedad_Socio
     ]),
   ],
 })

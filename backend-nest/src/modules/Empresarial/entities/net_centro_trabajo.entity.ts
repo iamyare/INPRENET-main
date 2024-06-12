@@ -4,11 +4,11 @@ import { Net_perf_pers_cent_trab } from 'src/modules/Persona/entities/net_perf_p
 import { Net_Detalle_planilla_ingreso } from 'src/modules/Planilla/Ingresos/detalle-plan-ingr/entities/net_detalle_plani_ing.entity';
 import { Net_Deduccion } from 'src/modules/Planilla/deduccion/entities/net_deduccion.entity';
 import { Net_Empleado_Centro_Trabajo } from './net_empleado_centro_trabajo.entity';
-import { Net_Rol_Empresa } from 'src/modules/usuario/entities/net_rol_empresa.entity';
 import { Net_Sociedad_Centro_Trabajo } from './net_sociedad_centro.entity';
 import { Net_Referencia_Centro_Trabajo } from './net_referencia_centro_trabajo.entity';
 import { Net_Centro_Trabajo_Jornada } from './Net_Centro_Trabajo_Jornada.entity';
 import { Net_Centro_Trabajo_Nivel } from './Net_Centro_Trabajo_Nivel.entity';
+import { Net_Modulo } from 'src/modules/usuario/entities/net_modulo.entity';
 
 @Entity({ name: 'NET_CENTRO_TRABAJO' })
 export class Net_Centro_Trabajo {
@@ -94,9 +94,6 @@ export class Net_Centro_Trabajo {
     @OneToMany(() => Net_Empleado_Centro_Trabajo, empleadoCentroTrabajo => empleadoCentroTrabajo.centroTrabajo)
     empleadoCentroTrabajos: Net_Empleado_Centro_Trabajo[];
 
-    @OneToMany(() => Net_Rol_Empresa, rolEmpresa => rolEmpresa.centroTrabajo)
-    rolEmpresas: Net_Rol_Empresa[];
-
     @OneToMany(() => Net_Sociedad_Centro_Trabajo, sociedadCentroTrabajo => sociedadCentroTrabajo.centroTrabajo)
     sociedadCentroTrabajos: Net_Sociedad_Centro_Trabajo[];
 
@@ -108,4 +105,7 @@ export class Net_Centro_Trabajo {
 
     @OneToMany(() => Net_Centro_Trabajo_Jornada, centroTrabajoJornada => centroTrabajoJornada.centroTrabajo)
     centroTrabajoJornadas: Net_Centro_Trabajo_Jornada[];
+
+    @OneToMany(() => Net_Modulo, modulo => modulo.centroTrabajo)
+    modulos: Net_Modulo[];
 }

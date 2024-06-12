@@ -2,7 +2,7 @@ import { BadRequestException, Injectable, InternalServerErrorException, Logger, 
 import { UpdateUsuarioDto } from './dto/update-usuario.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { PaginationDto } from 'src/common/dtos/pagination.dto';
-import { Not, Repository } from 'typeorm';
+import { In, Not, Repository } from 'typeorm';
 import { JwtService } from '@nestjs/jwt';
 import { MailService } from 'src/common/services/mail.service';
 import * as bcrypt from 'bcrypt';
@@ -11,13 +11,14 @@ import { NET_USUARIO_PRIVADA } from './entities/net_usuario_privada.entity';
 import { Net_Centro_Trabajo } from '../Empresarial/entities/net_centro_trabajo.entity';
 import { NET_SESION } from './entities/net_sesion.entity';
 import { CreatePreRegistroDto } from './dto/create-pre-registro.dto';
-import { Net_Usuario_Empresa } from './entities/net_usuario_empresa.entity';
 import { Net_Empleado } from '../Empresarial/entities/net_empleado.entity';
-import { Net_Rol_Empresa } from './entities/net_rol_empresa.entity';
 import { Net_Seguridad } from './entities/net_seguridad.entity';
 import { CompleteRegistrationDto } from './dto/complete-registration.dto';
 import { LoginDto } from './dto/login.dto';
 import { Net_Empleado_Centro_Trabajo } from '../Empresarial/entities/net_empleado_centro_trabajo.entity';
+import { Net_Rol_Modulo } from './entities/net_rol_modulo.entity';
+import { Net_Usuario_Empresa } from './entities/net_usuario_empresa.entity';
+import { Net_Usuario_Modulo } from './entities/net_usuario_modulo.entity';
 
 @Injectable()
 export class UsuarioService {
@@ -25,8 +26,6 @@ export class UsuarioService {
 
   constructor(
 
-    @InjectRepository(Net_Usuario_Empresa)
-    private readonly usuarioRepository: Repository<Net_Usuario_Empresa>,
     @InjectRepository(NET_USUARIO_PRIVADA)
     private readonly usuarioPrivadaRepository: Repository<NET_USUARIO_PRIVADA>,
     @InjectRepository(Net_Empleado)
@@ -35,16 +34,18 @@ export class UsuarioService {
     private readonly mailService: MailService,
     @InjectRepository(NET_SESION)
     private readonly sesionRepository: Repository<NET_SESION>,
-    @InjectRepository(Net_Usuario_Empresa)
-    private readonly usuarioEmpresaRepository: Repository<Net_Usuario_Empresa>,
-    @InjectRepository(Net_Rol_Empresa)
-    private readonly rolEmpresaRepository: Repository<Net_Rol_Empresa>,
     @InjectRepository(Net_Seguridad)
     private readonly seguridadRepository: Repository<Net_Seguridad>,
     @InjectRepository(Net_Centro_Trabajo)
     private centroTrabajoRepository: Repository<Net_Centro_Trabajo>,
     @InjectRepository(Net_Empleado_Centro_Trabajo)
     private readonly empleadoCentroTrabajoRepository: Repository<Net_Empleado_Centro_Trabajo>,
+    @InjectRepository(Net_Usuario_Empresa)
+    private readonly usuarioEmpresaRepository: Repository<Net_Usuario_Empresa>,
+    @InjectRepository(Net_Rol_Modulo)
+    private readonly rolModuloRepository: Repository<Net_Rol_Modulo>,
+    @InjectRepository(Net_Usuario_Modulo)
+    private readonly usuarioModuloRepository: Repository<Net_Usuario_Modulo>,
   ) { }
 
   async preRegistro(createPreRegistroDto: CreatePreRegistroDto): Promise<void> {
@@ -55,9 +56,9 @@ export class UsuarioService {
       relations: ['empleadoCentroTrabajo'],
       where: {
         empleadoCentroTrabajo: {
-          correo_1: correo
-        }
-      }
+          correo_1: correo,
+        },
+      },
     });
 
     if (usuarioExistente) {
@@ -65,9 +66,9 @@ export class UsuarioService {
     }
 
     // Verificar si el rol existe
-    const rol = await this.rolEmpresaRepository.findOne({
-      where: { id_rol_empresa: idRole },
-      relations: ['centroTrabajo'],
+    const rol = await this.rolModuloRepository.findOne({
+      where: { id_rol_modulo: idRole },
+      relations: ['modulo', 'modulo.centroTrabajo'],
     });
 
     if (!rol) {
@@ -87,7 +88,7 @@ export class UsuarioService {
       correo_1: correo,
       numeroEmpleado,
       nombrePuesto,
-      centroTrabajo: rol.centroTrabajo,
+      centroTrabajo: rol.modulo.centroTrabajo,
     });
 
     const empleadoCentroTrabajo = await this.empleadoCentroTrabajoRepository.save(nuevoEmpleadoCentroTrabajo);
@@ -96,11 +97,18 @@ export class UsuarioService {
     const nuevoUsuario = this.usuarioEmpresaRepository.create({
       estado: 'PENDIENTE',
       contrasena: await bcrypt.hash('temporal', 10),
-      rolEmpresa: rol,
       empleadoCentroTrabajo: empleadoCentroTrabajo,
     });
 
-    await this.usuarioEmpresaRepository.save(nuevoUsuario);
+    const usuarioGuardado = await this.usuarioEmpresaRepository.save(nuevoUsuario);
+
+    // Crear la relación en Net_Usuario_Modulo
+    const usuarioModulo = this.usuarioModuloRepository.create({
+      usuarioEmpresa: usuarioGuardado,
+      rolModulo: rol,
+    });
+
+    await this.usuarioModuloRepository.save(usuarioModulo);
 
     // Generar un token JWT para la verificación de correo
     const token = this.jwtService.sign({ correo });
@@ -196,10 +204,10 @@ export class UsuarioService {
     const usuario = await this.usuarioEmpresaRepository.findOne({
       where: {
         empleadoCentroTrabajo: {
-          correo_1: correo
-        }
+          correo_1: correo,
+        },
       },
-      relations: ['rolEmpresa', 'empleadoCentroTrabajo', 'empleadoCentroTrabajo.centroTrabajo']
+      relations: ['empleadoCentroTrabajo', 'empleadoCentroTrabajo.centroTrabajo', 'usuarioModulos', 'usuarioModulos.rolModulo', 'usuarioModulos.rolModulo.modulo'],
     });
 
     if (!usuario) {
@@ -213,11 +221,16 @@ export class UsuarioService {
     }
 
     // Generar el payload del token
+    const rolesModulos = usuario.usuarioModulos.map(um => ({
+      rol: um.rolModulo.nombre,
+      modulo: um.rolModulo.modulo.nombre
+    }));
+
     const payload = {
       correo,
       sub: usuario.id_usuario_empresa,
-      rol: usuario.rolEmpresa.nombre,
-      idCentroTrabajo: usuario.empleadoCentroTrabajo.centroTrabajo.id_centro_trabajo
+      rolesModulos: rolesModulos,
+      idCentroTrabajo: usuario.empleadoCentroTrabajo.centroTrabajo.id_centro_trabajo,
     };
 
     // Firmar el token JWT
@@ -226,12 +239,12 @@ export class UsuarioService {
   }
 
   async getRolesPorEmpresa(centroId: number) {
-    return this.rolEmpresaRepository.find({
+    /* return this.rolEmpresaRepository.find({
       where: {
         centroTrabajo: { id_centro_trabajo: centroId },
         nombre: Not('ADMINISTRADOR')
       },
-    });
+    }); */
   }
 
   /*  async findAllRolesExceptAdmin(): Promise<Net_Rol[]> {
@@ -306,8 +319,8 @@ export class UsuarioService {
     };
   }
 
-  async getUsuariosPorCentro(centroTrabajoId: number): Promise<Net_Usuario_Empresa[]> {
-    try {
+  async getUsuariosPorCentro(centroTrabajoId: number) {
+    /* try {
       const usuarios = await this.usuarioRepository.createQueryBuilder('usuario')
         .innerJoinAndSelect('usuario.empleadoCentroTrabajo', 'empleadoCentroTrabajo')
         .innerJoinAndSelect('empleadoCentroTrabajo.centroTrabajo', 'centroTrabajo')
@@ -319,7 +332,7 @@ export class UsuarioService {
     } catch (error) {
       this.logger.error(`Failed to get users for center with id ${centroTrabajoId}`, error.stack);
       throw new Error(`Failed to get users for center with id ${centroTrabajoId}`);
-    }
+    } */
   }
   
   async createPrivada(email: string, contrasena: string, nombre_usuario: string, idCentroTrabajo?: number) {
@@ -354,11 +367,11 @@ export class UsuarioService {
   
 
   findAll(paginationDto: PaginationDto) {
-    const { limit = 10, offset = 0 } = paginationDto
+    /* const { limit = 10, offset = 0 } = paginationDto
     return this.usuarioRepository.find({
       take: limit,
       skip: offset
-    });
+    }); */
   }
 
   findOne(id: number) {
@@ -412,6 +425,46 @@ export class UsuarioService {
 
   remove(id: number) {
     return `This action removes a #${id} usuario`;
+  }
+
+  async obtenerUsuariosPorModulos(modulos: string[]): Promise<Net_Usuario_Empresa[]> {
+    const usuariosModulos = await this.usuarioModuloRepository.find({
+      where: { rolModulo: { modulo: { nombre: In(modulos) } } },
+      relations: ['usuarioEmpresa', 'usuarioEmpresa.empleadoCentroTrabajo', 'usuarioEmpresa.empleadoCentroTrabajo.empleado'],
+      select: {
+        usuarioEmpresa: {
+          id_usuario_empresa: true,
+          estado: true,
+          contrasena: false, // Si no necesitas la contraseña
+          fecha_creacion: true,
+          fecha_verificacion: true,
+          fecha_modificacion: true,
+          empleadoCentroTrabajo: {
+            id_empleado_centro_trabajo: true,
+            correo_1: true,
+            correo_2: true,
+            numeroEmpleado: true,
+            nombrePuesto: true,
+            empleado: {
+              id_empleado: true,
+              nombreEmpleado: true,
+              telefono_1: true,
+              numero_identificacion: true,
+              // archivo_identificacion: false, // Excluir el campo BLOB
+            },
+          },
+        },
+      },
+    });
+
+    return usuariosModulos.map(um => um.usuarioEmpresa);
+  }
+
+  async obtenerRolesPorModulo(modulo: string): Promise<Net_Rol_Modulo[]> {
+    return await this.rolModuloRepository.find({
+      where: { modulo: { nombre: modulo } },
+      relations: ['modulo'],
+    });
   }
 
 

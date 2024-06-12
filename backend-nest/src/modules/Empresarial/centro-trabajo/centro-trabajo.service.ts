@@ -11,6 +11,18 @@ import { Net_Jornada } from '../entities/net_jornada.entity';
 import { Net_Centro_Trabajo_Jornada } from '../entities/Net_Centro_Trabajo_Jornada.entity';
 import { Net_Centro_Trabajo_Nivel } from '../entities/Net_Centro_Trabajo_Nivel.entity';
 import { Net_Municipio } from 'src/modules/Regional/municipio/entities/net_municipio.entity';
+import { CreatePrivateReferenciaCentroTrabajoDto } from './dto/create-private-referencia-centro-trabajo.dto';
+import { Net_Referencia_Centro_Trabajo } from '../entities/net_referencia_centro_trabajo.entity';
+import { CreatePrivateCentroTrabajoCompleteDto } from './dto/create-private-centro-trabajo-complete.dto';
+import { Net_Sociedad_Centro_Trabajo } from '../entities/net_sociedad_centro.entity';
+import { Net_Sociedad } from '../entities/net.sociedad.entity';
+import { CreatePrivateSociedadDto } from './dto/create-private-sociedad.dto';
+import { Net_Socio } from '../entities/net_socio.entity';
+import { Net_Sociedad_Socio } from '../entities/net_sociedad_socio.entity';
+import { Net_Peps } from '../entities/Net_peps-entity';
+import { CreatePrivateSociedadSocioDto } from './dto/create-private-sociedad-socio.dto';
+import { CreatePrivatePepsDto } from './dto/create-private-peps.dto';
+import { CreatePrivateSocioDto } from './dto/create-private-socio.dto';
 @Injectable()
 export class CentroTrabajoService {
 
@@ -32,7 +44,18 @@ export class CentroTrabajoService {
     private readonly centroTrabajoJornadaRepository: Repository<Net_Centro_Trabajo_Jornada>,
     @InjectRepository(Net_Municipio)
     private readonly municipioRepository: Repository<Net_Municipio>,
-
+    @InjectRepository(Net_Referencia_Centro_Trabajo)
+    private readonly referenciaCentroTrabajoRepository: Repository<Net_Referencia_Centro_Trabajo>,
+    @InjectRepository(Net_Sociedad)
+    private readonly sociedadRepository: Repository<Net_Sociedad>,
+    @InjectRepository(Net_Sociedad_Centro_Trabajo)
+    private readonly sociedadCentroTrabajoRepository: Repository<Net_Sociedad_Centro_Trabajo>,
+    @InjectRepository(Net_Socio)
+    private readonly socioRepository: Repository<Net_Socio>,
+    @InjectRepository(Net_Sociedad_Socio)
+    private readonly sociedadSocioRepository: Repository<Net_Sociedad_Socio>,
+    @InjectRepository(Net_Peps)
+    private readonly pepsRepository: Repository<Net_Peps>,
   ) { }
 
 
@@ -191,4 +214,111 @@ export class CentroTrabajoService {
 
     return centroTrabajo;
   }
+
+  async addPrivateReferenciaCentroTrabajo(id_centro_trabajo: number, referencias: CreatePrivateReferenciaCentroTrabajoDto[]): Promise<void> {
+    const centroTrabajo = await this.centroTrabajoRepository.findOne({ where: { id_centro_trabajo } });
+    if (!centroTrabajo) {
+      throw new NotFoundException(`Centro de Trabajo with ID ${id_centro_trabajo} not found`);
+    }
+
+    for (const referenciaDto of referencias) {
+      const referencia = this.referenciaCentroTrabajoRepository.create({
+        tipoReferencia: referenciaDto.tipoReferencia,
+        nombre: referenciaDto.nombre,
+        centroTrabajo: centroTrabajo
+      });
+      await this.referenciaCentroTrabajoRepository.save(referencia);
+    }
+  }
+
+  async createPrivateSociedad(createPrivateSociedadDto: CreatePrivateSociedadDto): Promise<Net_Sociedad> {
+    const { nombre, rtn, telefono, correo_electronico } = createPrivateSociedadDto;
+
+    const newSociedad = this.sociedadRepository.create({
+      nombre,
+      rtn,
+      telefono,
+      correo_electronico,
+    });
+
+    return await this.sociedadRepository.save(newSociedad);
+  }
+
+  async addSociedadCentroTrabajo(sociedad: Net_Sociedad, centroTrabajo: Net_Centro_Trabajo): Promise<void> {
+    const newSociedadCentroTrabajo = this.sociedadCentroTrabajoRepository.create({
+      sociedad,
+      centroTrabajo,
+    });
+    await this.sociedadCentroTrabajoRepository.save(newSociedadCentroTrabajo);
+  }
+
+  async createPrivateSocio(createPrivateSocioDto: CreatePrivateSocioDto): Promise<Net_Socio> {
+    const { nombre, apellido, dni, direccion_1, direccion_2, telefono, email, municipio } = createPrivateSocioDto;
+
+    const foundMunicipio = await this.municipioRepository.findOne({ where: { id_municipio: municipio } });
+    if (!foundMunicipio) {
+      throw new NotFoundException(`Municipio with ID ${municipio} not found`);
+    }
+
+    const newSocio = this.socioRepository.create({
+      nombre,
+      apellido,
+      dni,
+      direccion_1,
+      direccion_2,
+      telefono,
+      email,
+      municipio: foundMunicipio,
+    });
+
+    return await this.socioRepository.save(newSocio);
+  }
+
+  async createPrivateSociedadSocio(sociedad: Net_Sociedad, socio: Net_Socio, createPrivateSociedadSocioDto: CreatePrivateSociedadSocioDto): Promise<Net_Sociedad_Socio> {
+    const { porcentajeParticipacion, fechaIngreso, fechaSalida } = createPrivateSociedadSocioDto;
+
+    const newSociedadSocio = this.sociedadSocioRepository.create({
+      sociedad,
+      socio,
+      porcentajeParticipacion,
+      fechaIngreso,
+      fechaSalida,
+    });
+
+    return await this.sociedadSocioRepository.save(newSociedadSocio);
+  }
+
+  async createPrivatePeps(socio: Net_Socio, createPrivatePepsDto: CreatePrivatePepsDto): Promise<Net_Peps> {
+    const { cargo, fecha_inicio, fecha_fin, referencias } = createPrivatePepsDto;
+
+    const newPeps = this.pepsRepository.create({
+      cargo,
+      fecha_inicio,
+      fecha_fin,
+      referencias,
+      socio,
+    });
+
+    return await this.pepsRepository.save(newPeps);
+  }
+
+  async createPrivateCentroTrabajoComplete(createPrivateCentroTrabajoCompleteDto: CreatePrivateCentroTrabajoCompleteDto): Promise<Net_Centro_Trabajo> {
+    const { centroTrabajo, referencias, sociedad, socio, sociedadSocio, peps } = createPrivateCentroTrabajoCompleteDto;
+    
+    const newCentroTrabajo = await this.createPrivateCentroTrabajo(centroTrabajo);
+    await this.addPrivateReferenciaCentroTrabajo(newCentroTrabajo.id_centro_trabajo, referencias);
+
+    const newSociedad = await this.createPrivateSociedad(sociedad);
+    await this.addSociedadCentroTrabajo(newSociedad, newCentroTrabajo);
+
+    const newSocio = await this.createPrivateSocio(socio);
+    await this.createPrivateSociedadSocio(newSociedad, newSocio, sociedadSocio);
+
+    if (peps) {
+      await this.createPrivatePeps(newSocio, peps);
+    }
+
+    return newCentroTrabajo;
+  }
+
 }

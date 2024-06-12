@@ -38,6 +38,8 @@ export class DynamicTableComponent implements OnInit, OnDestroy {
   @Input() etiquetaBotonTres: string = '';
   @Output() accionBotonTres: EventEmitter<any> = new EventEmitter<any>();
 
+  @Input() mostrarBotonEliminar: boolean = false;
+  @Input() mostrarBotonEditar: boolean = false;
   @Output() eliminar: EventEmitter<any> = new EventEmitter<any>();
   @Output() editar: EventEmitter<any> = new EventEmitter<any>();
 

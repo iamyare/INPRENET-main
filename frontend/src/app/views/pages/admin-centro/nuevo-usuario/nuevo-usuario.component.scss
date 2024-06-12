@@ -16,100 +16,48 @@ $color-A700: #2dffe0;
 .container {
   max-width: 600px;
   margin: 0 auto;
-  padding: 20px;
-  background: #fff;
-  border-radius: 10px;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  padding: 16px;
 }
 
-.logo-container {
-  text-align: center;
-  margin-bottom: 20px;
+.form-card {
+  padding: 16px;
+  margin-top: 16px;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+}
+
+.full-width {
+  grid-column: span 2;
+}
+
+.half-width {
+  grid-column: span 1;
 }
 
 .logo {
   max-width: 200px;
   height: auto;
+  display: block;
+  margin: 0 auto;
 }
 
 .header-container {
   display: flex;
-  justify-content: center;
+  justify-content: space-between;
   align-items: center;
-  background-color: $color-50;
-  padding: 10px;
+  background-color: #e5f4f3;
+  padding: 20px;
   border-radius: 10px;
   margin-bottom: 20px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
 }
 
 .center-name {
   font-size: 24px;
-  color: $color-700;
-}
-
-.title {
-  text-align: center;
-  margin-bottom: 20px;
-  font-size: 24px;
-  color: $color-700;
-}
-
-.form-group {
-  margin-bottom: 15px;
-}
-
-.mat-form-field {
-  width: 100%;
-}
-
-.invalid-feedback {
-  color: $color-900;
-}
-
-.button-container {
-  display: flex;
-  justify-content: center;
-}
-
-.mat-raised-button {
-  background-color: $color-500 !important;
-  border-color: $color-500 !important;
-  color: #fff;
-  padding: 10px 20px;
-  border-radius: 5px;
-  cursor: pointer;
-  width: auto;
-  transition: background-color 0.3s, border-color 0.3s;
-
-  &:hover {
-    background-color: $color-600 !important;
-    border-color: $color-600 !important;
-  }
-
-  &:disabled {
-    background-color: $color-300 !important;
-    border-color: $color-300 !important;
-  }
-}
-
-.row {
-  display: flex;
-  flex-wrap: wrap;
-  margin-right: -15px;
-  margin-left: -15px;
-}
-
-.col-6, .col-12 {
-  padding-right: 15px;
-  padding-left: 15px;
-}
-
-.col-6 {
-  flex: 0 0 50%;
-  max-width: 50%;
-}
-
-.col-12 {
-  flex: 0 0 100%;
-  max-width: 100%;
+  color: #1c9588;
+  margin: 0;
 }

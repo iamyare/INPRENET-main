@@ -2,7 +2,6 @@ import { Component, OnInit } from '@angular/core';
 import { Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AuthService } from 'src/app/services/auth.service';
-import { CentrosTrabajoService } from 'src/app/services/centros-trabajo.service';
 import { TableColumn } from 'src/app/shared/Interfaces/table-column';
 
 @Component({
@@ -11,8 +10,9 @@ import { TableColumn } from 'src/app/shared/Interfaces/table-column';
   styleUrls: ['./gestion-usuarios.component.scss']
 })
 export class GestionUsuariosComponent implements OnInit {
-  centroTrabajoId: number | null = null;
-  nombreCentroTrabajo: string = '';
+  rolesModulos: { rol: string, modulo: string }[] = [];
+  adminRolesModulos: { rol: string, modulo: string }[] = [];
+  selectedModulos: string[] = [];
   public columns: TableColumn[] = [];
   public usuarios: any[] = [];
   ejecF: any;
@@ -20,16 +20,26 @@ export class GestionUsuariosComponent implements OnInit {
   constructor(
     private usuarioService: AuthService,
     private authService: AuthService,
-    private centrosTrabajoService: CentrosTrabajoService,
     private router: Router
   ) { }
 
   ngOnInit(): void {
-    this.centroTrabajoId = this.authService.getCentroTrabajoId();
-    if (this.centroTrabajoId === null) {
-      console.error("No se pudo obtener el centro de trabajo del token");
+    this.rolesModulos = this.authService.getRolesModulos();
+
+    if (this.rolesModulos.length === 0) {
+      console.error("No se pudieron obtener los módulos del token");
       return;
     }
+    // Filtra los módulos donde el usuario es administrador
+    this.adminRolesModulos = this.rolesModulos.filter(rm => rm.rol === 'ADMINISTRADOR');
+
+    if (this.adminRolesModulos.length === 0) {
+      console.error("No se encontraron módulos donde el usuario es administrador");
+      return;
+    }
+
+    // Preselecciona todos los módulos donde es administrador
+    this.selectedModulos = this.adminRolesModulos.map(rm => rm.modulo);
 
     this.columns = [
       { header: 'Nombre', col: 'nombreEmpleado', isEditable: true, validationRules: [Validators.required] },
@@ -39,34 +49,34 @@ export class GestionUsuariosComponent implements OnInit {
       { header: 'Puesto', col: 'nombrePuesto' },
     ];
 
-    this.centrosTrabajoService.getCentroTrabajoById(this.centroTrabajoId).subscribe({
-      next: (data) => {
-        this.nombreCentroTrabajo = data.nombre_centro_trabajo;
-      },
-      error: (err) => {
-        console.error('Error al obtener el nombre del centro de trabajo:', err);
-      }
-    });
-
     this.getFilas().then(() => this.cargar());
   }
 
+  onModuloChange(event: Event): void {
+    const target = event.target as HTMLSelectElement;
+    const selectedModulo = target?.value;
+    if (selectedModulo) {
+      this.selectedModulos = [selectedModulo];
+      this.getFilas().then(() => this.cargar());
+    }
+  }
+
   getFilas = async () => {
-    if (this.centroTrabajoId === null) {
-      console.error("No se pudo obtener el centro de trabajo del token");
+    if (this.selectedModulos.length === 0) {
+      console.error("No se pudo obtener los módulos seleccionados");
       return;
     }
 
     try {
-      const data = await this.usuarioService.getUsuariosPorCentro(this.centroTrabajoId).toPromise();
+      const data:any = await this.usuarioService.obtenerUsuariosPorModulos(this.selectedModulos).toPromise();
       this.usuarios = data.map((item: any) => {
         return {
           id: item.id_usuario_empresa,
-          nombreEmpleado: item.empleadoCentroTrabajo.empleado.nombreEmpleado,
-          correo_1: item.empleadoCentroTrabajo.correo_1,
+          nombreEmpleado: item.empleadoCentroTrabajo?.empleado?.nombreEmpleado || 'N/A',
+          correo_1: item.empleadoCentroTrabajo?.correo_1 || 'N/A',
           estado: item.estado,
-          nombre_centro_trabajo: item.empleadoCentroTrabajo.centroTrabajo.nombre_centro_trabajo,
-          nombrePuesto: item.empleadoCentroTrabajo.nombrePuesto
+          nombre_centro_trabajo: item.empleadoCentroTrabajo?.centroTrabajo?.nombre_centro_trabajo || 'N/A',
+          nombrePuesto: item.empleadoCentroTrabajo?.nombrePuesto || 'N/A'
         };
       });
 
@@ -78,7 +88,6 @@ export class GestionUsuariosComponent implements OnInit {
   };
 
   editarUsuario = (row: any) => {
-    // Implementa la lógica para editar el usuario aquí
     console.log('Editar usuario:', row);
   };
 
@@ -88,13 +97,11 @@ export class GestionUsuariosComponent implements OnInit {
 
   cargar() {
     if (this.ejecF) {
-      this.ejecF(this.usuarios).then(() => {
-      });
+      this.ejecF(this.usuarios).then(() => {});
     }
   }
 
   manejarEliminar(row: any) {
-    // Implementa la lógica para manejar la eliminación del usuario aquí
     console.log('Eliminar usuario:', row);
     const index = this.usuarios.findIndex(usuario => usuario.id === row.id);
     if (index !== -1) {

@@ -14,6 +14,9 @@ export class NuevoUsuarioComponent implements OnInit {
   tipoRol: any[] = [];
   idCentroTrabajo: number | null = null;
   nombreCentroTrabajo: string = '';
+  rolesModulos: { rol: string, modulo: string }[] = [];
+  adminRolesModulos: { rol: string, modulo: string }[] = [];
+  selectedModulo: string = '';
 
   constructor(
     private fb: FormBuilder,
@@ -23,6 +26,7 @@ export class NuevoUsuarioComponent implements OnInit {
   ) {
     this.form = this.fb.group({
       correo: ['', [Validators.required, Validators.email]],
+      modulo: ['', [Validators.required]],
       rol: ['', [Validators.required]],
       nombrePuesto: ['', [Validators.required]],
       nombreEmpleado: ['', [Validators.required]],
@@ -42,26 +46,46 @@ export class NuevoUsuarioComponent implements OnInit {
         }
       });
 
-      this.authSvc.getRolesByEmpresa(this.idCentroTrabajo).subscribe({
-        next: (roles) => {
-          this.tipoRol = roles.map((rol: any) => ({
-            label: rol.nombre,
-            value: rol.id_rol_empresa
-          }));
-        },
-        error: (err) => {
-          console.error('Error al obtener roles:', err);
-          this.toastr.error('Error al obtener roles', 'Error');
-        }
-      });
+      this.rolesModulos = this.authSvc.getRolesModulos();
+      this.adminRolesModulos = this.rolesModulos.filter(rm => rm.rol === 'ADMINISTRADOR');
+
+      if (this.adminRolesModulos.length === 0) {
+        console.error("No se encontraron módulos donde el usuario es administrador");
+        return;
+      }
+
+      this.selectedModulo = this.adminRolesModulos[0].modulo;
+      this.cargarRolesPorModulo(this.selectedModulo);
     }
+  }
+
+  onModuloChange(modulo: string): void {
+    if (modulo) {
+      this.selectedModulo = modulo;
+      this.cargarRolesPorModulo(modulo);
+    }
+  }
+
+  cargarRolesPorModulo(modulo: string) {
+    this.authSvc.obtenerRolesPorModulo(modulo).subscribe({
+      next: (roles) => {
+        this.tipoRol = roles.map((rol: any) => ({
+          label: rol.nombre,
+          value: rol.id_rol_modulo
+        }));
+      },
+      error: (err) => {
+        console.error('Error al obtener roles:', err);
+        this.toastr.error('Error al obtener roles', 'Error');
+      }
+    });
   }
 
   crearCuenta() {
     if (this.form.valid) {
       const formData = {
         correo: this.form.value.correo,
-        idRole: Number(this.form.value.rol), // Convertir el rol a número
+        idRole: Number(this.form.value.rol),
         nombrePuesto: this.form.value.nombrePuesto,
         nombreEmpleado: this.form.value.nombreEmpleado,
         numeroEmpleado: this.form.value.numeroEmpleado

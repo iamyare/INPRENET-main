@@ -49,7 +49,7 @@ export class DatosEstaticosService {
     this.getProfesiones();
     this.getMunicipios();
     this.getDepartamentos();
-    this.getRoles();
+    //this.getRoles();
   }
 
 
@@ -187,7 +187,8 @@ export class DatosEstaticosService {
     }));
     return this.colegiosMagisteriales;
   }
-  async getRoles() {
+
+  /* async getRoles() {
     try {
       const roles: any = await this.authService.getRolesExceptAdmin().toPromise();
       this.tipoRol = roles.map((role: { id_rol: any; nombre_rol: any; }) => ({
@@ -200,7 +201,7 @@ export class DatosEstaticosService {
       this.tipoRol = [];
       return this.tipoRol;
     }
-  }
+  } */
 
   tipoPersona = [
     {

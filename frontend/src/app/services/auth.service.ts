@@ -63,13 +63,39 @@ export class AuthService {
     );
   }
 
-  getUsuariosPorCentro(centroTrabajoId: number): Observable<any> {
-    const url = `${environment.API_URL}/api/usuario/centro/${centroTrabajoId}`;
+  obtenerUsuariosPorModulos(modulos: string[]): Observable<any[]> {
+    const url = `${environment.API_URL}/api/usuario/usuarios-modulos?modulos=${modulos.join(',')}`;
 
-    return this.http.get<any>(url).pipe(
-      catchError(this.handleError<any>('getUsuariosPorCentro'))
+    return this.http.get<any[]>(url).pipe(
+      catchError(error => {
+        console.error('Error en obtenerUsuariosPorModulos:', error);
+        return of([]);
+      })
     );
   }
+
+  obtenerRolesPorModulo(modulo: string): Observable<any[]> {
+    const url = `${environment.API_URL}/api/usuario/usuarios-modulos/${modulo}`;
+    return this.http.get<any[]>(url).pipe(
+      catchError(this.handleError<any[]>('obtenerRolesPorModulo', []))
+    );
+  }
+
+
+  getRolesModulos(): { rol: string, modulo: string }[] {
+    const token = localStorage.getItem('token');
+    if (!token) return [];
+
+    try {
+      const decodedToken: any = jwtDecode(token);
+      const rolesModulos = decodedToken.rolesModulos || [];
+      return rolesModulos;
+    } catch (error) {
+      console.error('Error decoding token:', error);
+      return [];
+    }
+  }
+
 
   getRolesByEmpresa(idEmpresa: number): Observable<any> {
     const url = `${environment.API_URL}/api/usuario/roles?idEmpresa=${idEmpresa}`;
@@ -113,17 +139,17 @@ export class AuthService {
     localStorage.setItem('token', token);
   }
 
-  getUserRole() {
+  getUserRolesAndModules() {
     const token = localStorage.getItem('token');
-    if (!token) return '';
+    if (!token) return [];
 
     try {
       const decodedToken: any = jwtDecode(token);
-      const role = decodedToken.rol
-      return role || '';
+      const rolesModulos = decodedToken.rolesModulos || [];
+      return rolesModulos;
     } catch (error) {
       console.error('Error decoding token:', error);
-      return '';
+      return [];
     }
   }
 
@@ -149,7 +175,7 @@ export class AuthService {
     );
   }
 
-  getRolesExceptAdmin(): Observable<any[]> {
+  /* getRolesExceptAdmin(): Observable<any[]> {
     const url = `${environment.API_URL}/api/usuario/roles`;
     return this.http.get<any[]>(url).pipe(
       map((roles: any[]) => roles.filter(role => role.nombre_rol !== 'ADMINISTRADOR')),
@@ -158,7 +184,7 @@ export class AuthService {
         return of([]);
       })
     );
-  }
+  } */
 
   getToken(): string {
     return localStorage.getItem('token') || ''; // O como estés almacenando el token

@@ -1,5 +1,11 @@
 <div class="header-container">
-  <h2 class="center-name">{{ nombreCentroTrabajo }}</h2>
+  <!-- <h2 class="center-name">{{ nombreCentroTrabajo }}</h2> -->
+  <div>
+    <label for="modulo">Seleccionar Módulo:</label>
+    <select id="modulo" (change)="onModuloChange($event)">
+      <option *ngFor="let rm of adminRolesModulos" [value]="rm.modulo">{{ rm.modulo }}</option>
+    </select>
+  </div>
   <button mat-raised-button color="primary" (click)="irANuevaPagina()">Agregar Nuevo Usuario</button>
 </div>
 <div class="content-container">
@@ -12,6 +18,8 @@
     (ejecutarFuncionAsincronaEvent)="ejecutarFuncionAsincronaDesdeOtroComponente($event)"
     (eliminar)="manejarEliminar($event)"
     (editar)="manejarEditar($event)"
+    [mostrarBotonEliminar]="true"
+    [mostrarBotonEditar]="true"
   >
   </app-dynamic-table>
 </div>

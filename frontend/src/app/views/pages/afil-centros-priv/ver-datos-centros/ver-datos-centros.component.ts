@@ -33,8 +33,8 @@ export class VerDatosCentrosComponent {
   sociedadForm!: FormGroup;
   sociedadSocioForm!: FormGroup;
   adminCentroEducativoForm!: FormGroup;
-  datosGeneralesData: any = {}; // Variable para almacenar los datos del formulario de datos generales
-  sociedadData: any = {}; // Variable para almacenar los datos del formulario de sociedad
+  datosGeneralesData: any = {};
+  sociedadData: any = {};
 
   fieldsStep5: FieldConfig[] = [
     {

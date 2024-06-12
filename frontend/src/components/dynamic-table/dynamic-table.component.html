@@ -40,8 +40,8 @@
         <th *ngIf="mostrarBotonTres" class="custom-header">
           {{ nombreEncabezadoTres }}
         </th>
-        <th class="custom-header">Eliminar</th>
-        <th class="custom-header">Editar</th>
+        <th *ngIf="mostrarBotonEliminar" class="custom-header">Eliminar</th>
+        <th *ngIf="mostrarBotonEditar" class="custom-header">Editar</th>
       </tr>
     </thead>
     <tbody>
@@ -93,11 +93,11 @@
           <button *ngIf="mostrarBotonTres" mat-raised-button (click)="ejecutarAccionTres(row)">{{ etiquetaBotonTres }}</button>
         </td>
 
-        <td>
+        <td *ngIf="mostrarBotonEliminar">
           <button mat-icon-button (click)="eliminarFila(row)" class="boton-eliminar"><mat-icon>delete</mat-icon></button>
         </td>
 
-        <td>
+        <td *ngIf="mostrarBotonEditar">
           <button mat-icon-button (click)="editarFila(row)" class="boton-editar"><mat-icon>edit</mat-icon></button>
         </td>
       </tr>

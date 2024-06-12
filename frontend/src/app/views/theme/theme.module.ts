@@ -57,9 +57,7 @@ import { EditColegiosMagisterialesComponent } from '../pages/Generales/edit-cole
 import { PlanillaColegiosPrivadosComponent } from '../pages/Centros Privados/planilla-colegios-privados/planilla-colegios-privados.component';
 import { NavDefaultComponent } from '../pages/Centros Privados/nav-default/nav-default.component';
 import { EditFamiliaresComponent } from '../pages/Generales/edit-familiares/edit-familiares.component';
-import { NewFamiliaresComponent } from '@docs-components/new-familiares/new-familiares.component';
 import { VerDatosAfiliadosComponent } from '../pages/Generales/ver-datos-afiliados/ver-datos-afiliados.component';
-import { VerDatosCentrosComponent } from '../pages/afil-centros-priv/ver-datos-centros/ver-datos-centros.component';
 import { VerCuentasPersonasComponent } from '../pages/Generales/ver-cuentas-personas/ver-cuentas-personas.component';
 import { AfiliacionCentrosComponent } from '../pages/afil-centros-priv/afiliacion-centros/afiliacion-centros.component';
 import { DatosGeneralesCentroComponent } from '../pages/afil-centros-priv/datos-generales-centro/datos-generales-centro.component';
@@ -70,6 +68,7 @@ import { AdminCentroEducativoComponent } from '../pages/afil-centros-priv/admin-
 import { GestionUsuariosComponent } from '../pages/admin-centro/gestion-usuarios/gestion-usuarios.component';
 import { NuevoUsuarioComponent } from '../pages/admin-centro/nuevo-usuario/nuevo-usuario.component';
 import { PagesModule } from '../pages/pages.module';
+import { VerDatosCentrosComponent } from '../pages/afil-centros-priv/ver-datos-centros/ver-datos-centros.component';
 
 @NgModule({
   imports: [
@@ -141,9 +140,9 @@ import { PagesModule } from '../pages/pages.module';
     SociedadComponent,
     SociedadSocioComponent,
     AdminCentroEducativoComponent,
-    VerDatosCentrosComponent,
     GestionUsuariosComponent,
-    NuevoUsuarioComponent
+    NuevoUsuarioComponent,
+    VerDatosCentrosComponent,
   ]
 })
 export class ThemeModule {

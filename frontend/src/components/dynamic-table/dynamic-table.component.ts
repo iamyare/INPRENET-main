@@ -50,7 +50,7 @@ export class DynamicTableComponent implements OnInit, OnDestroy {
 
   private destroy$: Subject<void> = new Subject<void>();
 
-  filas:any = [];
+  filas: any = [];
   formsearch = new FormControl('');
   searchResults: any = [];
 
@@ -84,11 +84,11 @@ export class DynamicTableComponent implements OnInit, OnDestroy {
     this.destroy$.complete();
   }
 
-  public async ejecutarFuncionAsincrona(data:any) {
-    if (data){
+  public async ejecutarFuncionAsincrona(data: any) {
+    if (data) {
       this.filas = data
       this.filas?.map((objeto: any) => ({ ...objeto, isSelected: false }));
-    }else{
+    } else {
       this.filas = await this.getData();
 
     }
@@ -242,9 +242,9 @@ export class DynamicTableComponent implements OnInit, OnDestroy {
   // En tu componente
   onSelectionChange(user: any) {
     if (user.isSelected) {
-        this.selectionService.addSelectedItem(user);
+      this.selectionService.addSelectedItem(user);
     } else {
-        this.selectionService.removeSelectedItem(user);
+      this.selectionService.removeSelectedItem(user);
     }
     this.obtenerFilasSeleccionadas();
   }

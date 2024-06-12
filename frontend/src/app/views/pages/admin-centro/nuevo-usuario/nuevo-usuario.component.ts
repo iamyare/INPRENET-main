@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { AuthService } from 'src/app/services/auth.service';
 import { ToastrService } from 'ngx-toastr';
-import { CentrosTrabajoService } from 'src/app/services/centros-trabajo.service';
+import { CentroTrabajoService } from 'src/app/services/centro-trabajo.service';
 
 @Component({
   selector: 'app-nuevo-usuario',
@@ -22,7 +22,7 @@ export class NuevoUsuarioComponent implements OnInit {
     private fb: FormBuilder,
     private authSvc: AuthService,
     private toastr: ToastrService,
-    private centrosTrabajoService: CentrosTrabajoService
+    private centrosTrabajoService: CentroTrabajoService
   ) {
     this.form = this.fb.group({
       correo: ['', [Validators.required, Validators.email]],

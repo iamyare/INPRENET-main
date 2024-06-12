@@ -9,16 +9,14 @@
         <app-datos-generales-centro [parentForm]="datosGeneralesData" (formUpdated)="onDatosGeneralesFormUpdate($event)"
             [searchResult]="searchResults"></app-datos-generales-centro>
     </div>
-    <div [hidden]="activeStep !== 1">
-        <!-- <app-referencias-bancarias-comerciales [parentForm]="referenciasForm"></app-referencias-bancarias-comerciales> -->
-        <h1>Editar Referencias Bancarias y comerciales</h1>
+    <div *ngIf="mostrar" [hidden]="activeStep !== 1">
+        <app-ver-referencias></app-ver-referencias>
     </div>
     <div [hidden]="activeStep !== 2">
         <app-sociedad [parentForm]="sociedadForm" (formUpdated)="onSociedadFormUpdate($event)"></app-sociedad>
     </div>
-    <div [hidden]="activeStep !== 3">
-        <!-- <app-sociedad-socio [parentForm]="sociedadSocioForm"></app-sociedad-socio> -->
-        <h1>Editar Socios</h1>
+    <div *ngIf="mostrar" [hidden]="activeStep !== 3">
+        <app-ver-socios></app-ver-socios>
     </div>
     <div [hidden]="activeStep !== 4">
         <app-admin-centro-educativo [parentForm]="adminCentroEducativoForm"></app-admin-centro-educativo>

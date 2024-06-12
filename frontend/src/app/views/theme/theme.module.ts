@@ -66,6 +66,8 @@ import { SociedadComponent } from '../pages/afil-centros-priv/sociedad/sociedad.
 import { SociedadSocioComponent } from '../pages/afil-centros-priv/sociedad-socio/sociedad-socio.component';
 import { AdminCentroEducativoComponent } from '../pages/afil-centros-priv/admin-centro-educativo/admin-centro-educativo.component';
 import { GestionUsuariosComponent } from '../pages/admin-centro/gestion-usuarios/gestion-usuarios.component';
+import { VerReferenciasComponent } from '../pages/afil-centros-priv/ver-referencias/ver-referencias.component';
+import { VerSociosComponent } from '../pages/afil-centros-priv/ver-socios/ver-socios.component';
 import { NuevoUsuarioComponent } from '../pages/admin-centro/nuevo-usuario/nuevo-usuario.component';
 import { PagesModule } from '../pages/pages.module';
 import { VerDatosCentrosComponent } from '../pages/afil-centros-priv/ver-datos-centros/ver-datos-centros.component';
@@ -143,6 +145,8 @@ import { VerDatosCentrosComponent } from '../pages/afil-centros-priv/ver-datos-c
     GestionUsuariosComponent,
     NuevoUsuarioComponent,
     VerDatosCentrosComponent,
+    VerReferenciasComponent,
+    VerSociosComponent
   ]
 })
 export class ThemeModule {

@@ -15,9 +15,14 @@ export class ReferenciasBancariasComercialesComponent implements OnInit {
     { name: 'tipoReferencia', label: 'Tipo de Referencia', icon: 'list', layout: { row: 0, col: 6 }, type: 'select', options: [{ label: 'BANCARIA', value: 'BANCARIA' }, { label: 'COMERCIAL', value: 'COMERCIAL' }], value: '', validations: [Validators.required] }
   ];
 
-  constructor(private fb: FormBuilder) {}
+  constructor(private fb: FormBuilder) { }
 
   ngOnInit(): void {
+    if (!this.parentForm) {
+      this.parentForm = this.fb.group({
+        referencias: this.fb.array([])
+      });
+    }
     this.addControlsToForm();
   }
 

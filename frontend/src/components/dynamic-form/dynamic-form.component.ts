@@ -22,12 +22,18 @@ export class DynamicFormComponent implements OnInit {
   }
 
   ngOnInit() {
-    this.form = this.incomingForm ? this.mergeForms(this.incomingForm) : this.createControl();
-    this.newDatBenChange.emit(this.getFormValues());
+    if (this.incomingForm) {
+      this.form = this.mergeForms(this.incomingForm);
+    } if (this.fields) {
+      this.form = this.createControl();
+    }
+    this.newDatBenChange.emit(this.form);
   }
 
+
   onDatosBenChange() {
-    this.newDatBenChange.emit(this.getFormValues());
+    const transformedForm = this.transformFormValues(this.form);
+    this.newDatBenChange.emit(transformedForm);
   }
 
   createControl(): FormGroup {
@@ -41,8 +47,10 @@ export class DynamicFormComponent implements OnInit {
         });
         group.addControl(field.name, dateRangeGroup);
       } else if (field.type === 'checkboxGroup') {
+
         const checkboxArray = this.fb.array(field.options.map(() => this.fb.control(false)));
         group.addControl(field.name, checkboxArray);
+
       } else if (field.type === 'radio') {
         const radioGroup = this.fb.control(field.value || '', field.validations);
         group.addControl(field.name, radioGroup);
@@ -63,11 +71,34 @@ export class DynamicFormComponent implements OnInit {
     return group;
   }
 
+  private transformFormValues(form: FormGroup): any {
+    const formValues = form.value;
+    const result: any = {};
+
+    this.fields.forEach((field: any) => {
+      if (field.type === 'daterange') {
+        result[field.name] = {
+          start: formValues[field.name]?.start,
+          end: formValues[field.name]?.end
+        };
+      } else if (field.type === 'checkboxGroup') {
+        const checkboxArray = form.get(field.name) as FormArray;
+        result[field.name] = checkboxArray.controls.map((control: any, index: number) => ({
+          key: field.options[index].value,
+          value: control.value
+        }));
+      } else if (field.type === 'radio') {
+        result[field.name] = formValues[field.name];
+      } else {
+        result[field.name] = formValues[field.name];
+      }
+    });
+
+    return result;
+  }
+
   mergeForms(incomingForm: FormGroup): FormGroup {
     const group = this.createControl();
-
-    console.log(incomingForm);
-
     Object.keys(incomingForm.controls).forEach(key => {
       if (group.contains(key)) {
         group.setControl(key, incomingForm.get(key)!);
@@ -90,6 +121,7 @@ export class DynamicFormComponent implements OnInit {
           end: formValues[field.name]?.end
         };
       } else if (field.type === 'checkboxGroup') {
+        console.log(formValues[field.name]);
         const selectedOptions = formValues[field.name]
           .map((checked: any, i: any) => checked ? field.options[i].value : null)
           .filter((v: any) => v !== null);

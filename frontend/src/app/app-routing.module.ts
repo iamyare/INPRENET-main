@@ -41,6 +41,7 @@ const routes: Routes = [
         data: {
           expectedRolesModules: [
             { role: 'ADMINISTRADOR', module: 'Planilla' },
+            { role: 'ADMINISTRADOR', module: 'AFILIACION' },
             { role: 'JEFE DE AREA', module: 'Planilla' },
             { role: 'OFICIAL', module: 'PLANILLA' },
             { role: 'AUXILIAR', module: 'Planilla' },

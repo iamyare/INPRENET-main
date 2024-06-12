@@ -32,6 +32,10 @@ export class CentroTrabajoService {
 
     @InjectRepository(Net_Centro_Trabajo)
     private readonly centroTrabajoRepository: Repository<Net_Centro_Trabajo>,
+
+    @InjectRepository(Net_Referencia_Centro_Trabajo)
+    private readonly refcentroTrabajoRepository: Repository<Net_Referencia_Centro_Trabajo>,
+
     @InjectRepository(Net_Departamento)
     private readonly departamentoRepository: Repository<Net_Departamento>,
     @InjectRepository(Net_Nivel_Educativo)
@@ -78,6 +82,14 @@ export class CentroTrabajoService {
   async findAll(): Promise<Net_Centro_Trabajo[]> {
     try {
       return await this.centroTrabajoRepository.find();
+    } catch (error) {
+      this.handleException(error);
+    }
+  }
+
+  async getAllReferenciasByCentro(idCentroTrabajo: number): Promise<any> {
+    try {
+      return await this.refcentroTrabajoRepository.find({ where: { centroTrabajo: { id_centro_trabajo: idCentroTrabajo } } });
     } catch (error) {
       this.handleException(error);
     }
@@ -304,7 +316,7 @@ export class CentroTrabajoService {
 
   async createPrivateCentroTrabajoComplete(createPrivateCentroTrabajoCompleteDto: CreatePrivateCentroTrabajoCompleteDto): Promise<Net_Centro_Trabajo> {
     const { centroTrabajo, referencias, sociedad, socio, sociedadSocio, peps } = createPrivateCentroTrabajoCompleteDto;
-    
+
     const newCentroTrabajo = await this.createPrivateCentroTrabajo(centroTrabajo);
     await this.addPrivateReferenciaCentroTrabajo(newCentroTrabajo.id_centro_trabajo, referencias);
 

@@ -266,42 +266,48 @@ export class DatosGeneralesCentroComponent implements OnInit {
       row: 8,
       col: 3
     },
-    /*  {
-       name: 'modalidad_ensenanza',
-       label: 'Marque la Modalidad de Enseñanza',
-       type: 'checkboxGroup',
-       row: 9,
-       col: 6,
-       display: true,
-       options: [
-         { label: 'PRE-ESCOLAR', value: 'PRE-ESCOLAR' },
-         { label: 'PRIMARIA', value: 'PRIMARIA' },
-         { label: 'MEDIA', value: 'MEDIA' },
-         { label: 'ACADEMIA', value: 'ACADEMIA' },
-         { label: 'TECNICA', value: 'TECNICA' }
-       ],
-       validations: []
-     },
-     {
-       name: 'tipo_jornada',
-       label: 'Marque el Tipo de Jornada',
-       type: 'checkboxGroup',
-       row: 9,
-       col: 6,
-       display: true,
-       options: [
-         { label: 'MATUTINA', value: 'MATUTINA' },
-         { label: 'DIURNA', value: 'DIURNA' },
-         { label: 'NOCTURNA', value: 'NOCTURNA' }
-       ],
-       validations: []
-     } */
+    {
+      name: 'modalidad_ensenanza',
+      label: 'Marque la Modalidad de Enseñanza',
+      type: 'checkboxGroup',
+      row: 9,
+      col: 6,
+      display: true,
+      options: [
+        { label: 'PRE-ESCOLAR', value: 'PRE-ESCOLAR' },
+        { label: 'PRIMARIA', value: 'PRIMARIA' },
+        { label: 'MEDIA', value: 'MEDIA' },
+        { label: 'ACADEMIA', value: 'ACADEMIA' },
+        { label: 'TECNICA', value: 'TECNICA' }
+      ],
+      validations: []
+    },
+    {
+      name: 'tipo_jornada',
+      label: 'Marque el Tipo de Jornada',
+      type: 'checkboxGroup',
+      row: 9,
+      col: 6,
+      display: true,
+      options: [
+        { label: 'MATUTINA', value: 'MATUTINA' },
+        { label: 'DIURNA', value: 'DIURNA' },
+        { label: 'NOCTURNA', value: 'NOCTURNA' }
+      ],
+      validations: []
+    }
   ];
 
-
   async ngOnInit() {
+    this.parentForm = this.fb.group({})
     await this.loadDepartamentos();
-    this.addControlsToForm();
+
+    if (this.fields) {
+      this.addControlsToForm();
+    }
+    if (this.searchResult) {
+      await this.handleSearchResult(this.searchResult);
+    }
     this.parentForm.valueChanges.subscribe(value => {
       this.formUpdated.emit(this.convertNumberFields(value));
     });
@@ -316,31 +322,26 @@ export class DatosGeneralesCentroComponent implements OnInit {
   }
 
   addControlsToForm() {
-    this.parentForm = this.fb.group({})
     this.fields.forEach(field => {
       const control = new FormControl(field.value, field.validations);
       this.parentForm.addControl(field.name, control);
     });
-    this.formUpdated.emit(this.convertNumberFields(this.parentForm.value));
+    this.formUpdated.emit(this.convertNumberFields(this.parentForm));
     this.parentFormIsExist = true;
   }
 
-  convertNumberFields(values: any) {
-    const updatedValues = { ...values };
+  convertNumberFields(form: any) {
+    const updatedValues = { ...form.value };
     this.fields.forEach(field => {
       if (field.type === 'number' && updatedValues[field.name] !== null && updatedValues[field.name] !== '') {
         updatedValues[field.name] = Number(updatedValues[field.name]);
       }
     });
-    return this.parentForm;
+    return form;
   }
 
   async onDatosBenChange(form: any) {
     this.formUpdated.emit(this.convertNumberFields(form));
-
-    if (this.searchResult) {
-      await this.handleSearchResult(this.searchResult);
-    }
   }
 
   handleSearchResult(searchResult: any) {

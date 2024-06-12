@@ -50,6 +50,11 @@ export class CentroTrabajoController {
     return this.centroTrabajoService.findBy(content);
   }
 
+  @Get('getAllReferenciasByCentro/:idCentroTrab')
+  getAllReferenciasByCentro(@Param('idCentroTrab') idCentroTrab: number) {
+    return this.centroTrabajoService.getAllReferenciasByCentro(idCentroTrab);
+  }
+
   @Patch(':id')
   update(@Param('id') id: string, @Body() updateCentroTrabajoDto: UpdateCentroTrabajoDto) {
     return this.centroTrabajoService.update(+id, updateCentroTrabajoDto);

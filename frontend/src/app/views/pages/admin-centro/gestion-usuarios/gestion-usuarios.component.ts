@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AuthService } from 'src/app/services/auth.service';
+import { CentroTrabajoService } from 'src/app/services/centro-trabajo.service';
 import { TableColumn } from 'src/app/shared/Interfaces/table-column';
 
 @Component({
@@ -20,6 +21,7 @@ export class GestionUsuariosComponent implements OnInit {
   constructor(
     private usuarioService: AuthService,
     private authService: AuthService,
+    private centrosTrabajoService: CentroTrabajoService,
     private router: Router
   ) { }
 
@@ -68,7 +70,7 @@ export class GestionUsuariosComponent implements OnInit {
     }
 
     try {
-      const data:any = await this.usuarioService.obtenerUsuariosPorModulos(this.selectedModulos).toPromise();
+      const data: any = await this.usuarioService.obtenerUsuariosPorModulos(this.selectedModulos).toPromise();
       this.usuarios = data.map((item: any) => {
         return {
           id: item.id_usuario_empresa,
@@ -97,7 +99,7 @@ export class GestionUsuariosComponent implements OnInit {
 
   cargar() {
     if (this.ejecF) {
-      this.ejecF(this.usuarios).then(() => {});
+      this.ejecF(this.usuarios).then(() => { });
     }
   }
 

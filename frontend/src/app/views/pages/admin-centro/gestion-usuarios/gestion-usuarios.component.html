@@ -1,8 +1,8 @@
 <div class="header-container">
-  <!-- <h2 class="center-name">{{ nombreCentroTrabajo }}</h2> -->
   <div>
     <label for="modulo">Seleccionar Módulo:</label>
     <select id="modulo" (change)="onModuloChange($event)">
+      <option value="">Seleccione un módulo</option>
       <option *ngFor="let rm of adminRolesModulos" [value]="rm.modulo">{{ rm.modulo }}</option>
     </select>
   </div>

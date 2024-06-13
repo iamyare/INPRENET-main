@@ -178,7 +178,6 @@ export class DatGeneralesAfiliadoComponent implements OnInit {
     this.cargarTipoIdent();
     this.cargarnacionalidades();
     this.cargarprofesiones();
-    this.cargarDepartamentos();
 
     this.fallecido = [{ value: "SI" }, { value: "NO" }]
     this.generos = this.datosEstaticos.genero;
@@ -208,7 +207,7 @@ export class DatGeneralesAfiliadoComponent implements OnInit {
         this.departamentos = transformedJson;
       },
       error: (error) => {
-        console.error('Error al cargar municipios:', error);
+        console.error('Error al cargar departamentos:', error);
       }
     });
   }
@@ -216,16 +215,16 @@ export class DatGeneralesAfiliadoComponent implements OnInit {
   cargarTipoIdent() {
     this.tipoIdentificacionService.obtenerTiposIdentificacion().subscribe({
       next: (data) => {
-        const transformedJson = data.map((departamento: { id_identificacion: any; tipo_identificacion: any; }) => {
+        const transformedJson = data.map((identificaion: { id_identificacion: any; tipo_identificacion: any; }) => {
           return {
-            value: departamento.id_identificacion,
-            label: departamento.tipo_identificacion
+            value: identificaion.id_identificacion,
+            label: identificaion.tipo_identificacion
           };
         });
         this.tipoIdentData = transformedJson;
       },
       error: (error) => {
-        console.error('Error al cargar municipios:', error);
+        console.error('Error al cargar las identificaciones:', error);
       }
     });
   }

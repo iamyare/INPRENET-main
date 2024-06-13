@@ -1,11 +1,12 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Input, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup } from '@angular/forms';
 import { DireccionService } from 'src/app/services/direccion.service';
 
 @Component({
   selector: 'app-admin-centro-educativo',
   templateUrl: './admin-centro-educativo.component.html',
-  styleUrls: ['./admin-centro-educativo.component.scss']
+  styleUrls: ['./admin-centro-educativo.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AdminCentroEducativoComponent implements OnInit {
   @Input() parentForm!: FormGroup;

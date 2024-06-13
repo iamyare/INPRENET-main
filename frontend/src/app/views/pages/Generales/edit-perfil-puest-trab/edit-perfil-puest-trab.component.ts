@@ -26,7 +26,7 @@ export class EditPerfilPuestTrabComponent {
   @Input() Afiliado!: any;
   unirNombres: any = unirNombres;
   datosTabl: any[] = [];
-  centrosTrabajo: { label: string, value: string }[] = [];
+  centrosTrabajo: any = [];
   prevAfil: boolean = false;
 
   public myColumns: TableColumn[] = [];
@@ -267,7 +267,7 @@ export class EditPerfilPuestTrabComponent {
   }
 
   async openDialog(campos: any, row: any): Promise<void> {
-    const centroSeleccionado = this.centrosTrabajo.find(c => c.label === row.nombre_centro_trabajo);
+    const centroSeleccionado = this.centrosTrabajo.find((c:any) => c.label === row.nombre_centro_trabajo);
     const centroValue = centroSeleccionado ? centroSeleccionado.value : '';
     const valoresIniciales = {
       ...row,
@@ -284,7 +284,7 @@ export class EditPerfilPuestTrabComponent {
         result.fechaIngreso = this.datePipe.transform(result.fechaIngreso, 'dd/MM/yyyy');
         result.fechaEgreso = this.datePipe.transform(result.fechaEgreso, 'dd/MM/yyyy');
 
-        const centroActualizado = this.centrosTrabajo.find(c => c.value === result.nombre_centro_trabajo);
+        const centroActualizado = this.centrosTrabajo.find((c:any) => c.value === result.nombre_centro_trabajo);
         const nombreCentro = centroActualizado ? centroActualizado.label : 'Centro desconocido';
 
         const idCentroTrabajo = result.nombre_centro_trabajo;

@@ -6,9 +6,6 @@ import { FieldConfig } from 'src/app/shared/Interfaces/field-config';
 import { TableColumn } from 'src/app/shared/Interfaces/table-column';
 import { convertirFechaInputs } from 'src/app/shared/functions/formatoFecha';
 import { unirNombres } from 'src/app/shared/functions/formatoNombresP';
-import * as pdfMake from 'pdfmake/build/pdfmake';
-import * as pdfFonts from 'pdfmake/build/vfs_fonts';
-import { HttpClient } from '@angular/common/http';
 
 
 @Component({
@@ -17,18 +14,22 @@ import { HttpClient } from '@angular/common/http';
   styleUrls: ['./ver-datos-afiliados.component.scss']
 })
 export class VerDatosAfiliadosComponent implements OnInit {
-  DatosGenerales: boolean = true; DatosBacAfil: boolean = false;
-  Archivos: boolean = false; DatosPuestoTrab: boolean = false;
-  DatosHS: boolean = false; referenc: boolean = false;
-  datosBeneficiario: boolean = false; datosF: boolean = false;
+  DatosGenerales: boolean = true;
+  DatosBacAfil: boolean = false;
+  Archivos: boolean = false;
+  DatosPuestoTrab: boolean = false;
+  DatosHS: boolean = false;
+  referenc: boolean = false;
+  datosBeneficiario: boolean = false;
+  datosF: boolean = false;
   ColegiosMagisteriales: boolean = false;
   datosA = false;
   cuentas = false;
+  generacionConstancias: boolean = false; // Nueva propiedad
 
   constructor(private svcAfiliado: AfiliadoService,
-    private toastr: ToastrService,
-    private http: HttpClient) {
-    (pdfMake as any).vfs = pdfFonts.pdfMake.vfs;
+              private toastr: ToastrService) {
+
   }
 
   ngOnInit(): void {
@@ -63,94 +64,56 @@ export class VerDatosAfiliadosComponent implements OnInit {
 
   // Manejan el control del progreso de los datos
   setEstadoDatGen(e: any) {
+    this.resetEstados();
     this.DatosGenerales = true;
-    this.DatosPuestoTrab = false;
-    this.DatosHS = false;
-    this.referenc = false;
-    this.datosBeneficiario = false;
-    this.datosF = false;
-    this.datosA = false;
-    this.cuentas = false;
-    this.ColegiosMagisteriales = false;
   }
+
   setEstadoDatCentTrab(e: any) {
-    this.DatosGenerales = false;
+    this.resetEstados();
     this.DatosPuestoTrab = true;
-    this.DatosHS = false;
-    this.referenc = false;
-    this.datosBeneficiario = false;
-    this.datosF = false;
-    this.datosA = false;
-    this.cuentas = false;
-    this.ColegiosMagisteriales = false;
   }
+
   setDatosHS(datosHistSal: any) {
-    this.DatosGenerales = false;
-    this.DatosPuestoTrab = false;
+    this.resetEstados();
     this.DatosHS = true;
-    this.referenc = false;
-    this.datosBeneficiario = false;
-    this.datosF = false;
-    this.datosA = false;
-    this.cuentas = false;
-    this.ColegiosMagisteriales = false;
   }
+
   setDatosReferenc(datosHistSal: any) {
-    this.DatosGenerales = false;
-    this.DatosPuestoTrab = false;
-    this.DatosHS = false;
+    this.resetEstados();
     this.referenc = true;
-    this.datosBeneficiario = false;
-    this.datosF = false;
-    this.datosA = false;
-    this.cuentas = false;
-    this.ColegiosMagisteriales = false;
   }
+
   setDatosBenef(datosHistSal: any) {
-    this.DatosGenerales = false;
-    this.DatosPuestoTrab = false;
-    this.DatosHS = false;
-    this.referenc = false;
+    this.resetEstados();
     this.datosBeneficiario = true;
-    this.datosF = false;
-    this.datosA = false;
-    this.cuentas = false;
-    this.ColegiosMagisteriales = false;
   }
+
   setDatosF(datosHistSal: any) {
-    this.DatosGenerales = false;
-    this.DatosPuestoTrab = false;
-    this.DatosHS = false;
-    this.referenc = false;
-    this.datosBeneficiario = false;
+    this.resetEstados();
     this.datosF = true;
-    this.datosA = false;
-    this.cuentas = false;
-    this.ColegiosMagisteriales = false;
   }
+
   setDatosA(datosHistSal: any) {
-    this.DatosGenerales = false;
-    this.DatosPuestoTrab = false;
-    this.DatosHS = false;
-    this.referenc = false;
-    this.datosBeneficiario = false;
-    this.datosF = false;
+    this.resetEstados();
     this.datosA = true;
-    this.cuentas = false;
-    this.ColegiosMagisteriales = false;
   }
+
   setDatosAColegiosMag(datosHistSal: any) {
-    this.DatosGenerales = false;
-    this.DatosPuestoTrab = false;
-    this.DatosHS = false;
-    this.referenc = false;
-    this.datosBeneficiario = false;
-    this.datosF = false;
-    this.datosA = false;
-    this.cuentas = false;
+    this.resetEstados();
     this.ColegiosMagisteriales = true;
   }
+
   setDatosCuentas(datosHistSal: any) {
+    this.resetEstados();
+    this.cuentas = true;
+  }
+
+  setGeneracionConstancias(event: any) {
+    this.resetEstados();
+    this.generacionConstancias = true;
+  }
+
+  resetEstados() {
     this.DatosGenerales = false;
     this.DatosPuestoTrab = false;
     this.DatosHS = false;
@@ -158,8 +121,9 @@ export class VerDatosAfiliadosComponent implements OnInit {
     this.datosBeneficiario = false;
     this.datosF = false;
     this.datosA = false;
+    this.cuentas = false;
     this.ColegiosMagisteriales = false;
-    this.cuentas = true;
+    this.generacionConstancias = false;
   }
 
   convertirFechaInputs = convertirFechaInputs;
@@ -204,98 +168,4 @@ export class VerDatosAfiliadosComponent implements OnInit {
   ejecutarFuncionAsincronaDesdeOtroComponente(funcion: (data: any) => Promise<void>) {
     this.ejecF = funcion;
   }
-
-  async generarConstancia() {
-    const afiliado = this.Afiliado;
-    const response: any = await this.http.get('/assets/images/MEMBRETADO.jpg', { responseType: 'blob' }).toPromise();
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      const base64data = reader.result as string;
-
-      const docDefinition: any = {
-        pageSize: 'A4',
-        background: {
-          image: base64data,
-          width: 595.28,
-          height: 841.89
-        },
-        content: [
-          { text: ' ', style: 'space' },
-          { text: 'A QUIEN INTERESE', style: 'header' },
-          {
-            text: 'El Instituto Nacional de Previsión del Magisterio (INPREMA), por este medio indica que:',
-            style: 'subheader'
-          },
-          {
-            text: unirNombres(afiliado.PRIMER_NOMBRE, afiliado.SEGUNDO_NOMBRE, afiliado.TERCER_NOMBRE, afiliado.PRIMER_APELLIDO, afiliado.SEGUNDO_APELLIDO),
-            style: 'name'
-          },
-          {
-            text: [
-              { text: 'Se encuentra afiliado a este Sistema de Previsión con el número ' },
-              { text: `${afiliado.DNI}`, style: 'dni' }
-            ],
-            style: 'body'
-          },
-          {
-            text: `Y para los fines que el interesado estime conveniente, se extiende el presente documento en la ciudad de Tegucigalpa, Departamento de Francisco Morazán, a los ${new Date().getDate()} días del mes de ${new Date().toLocaleString('es-HN', { month: 'long' })} del año ${new Date().getFullYear()}.`,
-            style: 'body'
-          },
-          { text: '\n\n\n' },
-          { canvas: [{ type: 'line', x1: 0, y1: 0, x2: 250, y2: 0, lineWidth: 1 }], margin: [127, 200, 0, 0] },
-          { text: 'Fabiola Caceres', style: 'signature' },
-          { text: 'Jefe Departamento de Afiliación', style: 'signatureTitle' }
-        ],
-        styles: {
-          space: {
-            margin: [0, 100, 0, 0]
-          },
-          header: {
-            fontSize: 18,
-            bold: true,
-            alignment: 'center',
-            margin: [0, 20, 0, 10],
-            decoration: 'underline'
-          },
-          subheader: {
-            fontSize: 11,
-            alignment: 'left',
-            margin: [40, 10, 40, 5]
-          },
-          name: {
-            fontSize: 14,
-            bold: true,
-            alignment: 'center',
-            margin: [40, 10, 40, 5],
-            decoration: 'underline'
-          },
-          body: {
-            fontSize: 11,
-            alignment: 'left',
-            margin: [40, 10, 40, 5]
-          },
-          dni: {
-            fontSize: 11,
-            bold: true,
-            decoration: 'underline'
-          },
-          signature: {
-            fontSize: 12,
-            bold: true,
-            alignment: 'center',
-            margin: [0, 10, 0, 0]
-          },
-          signatureTitle: {
-            fontSize: 12,
-            alignment: 'center'
-          }
-        }
-      };
-
-      pdfMake.createPdf(docDefinition).open();
-    };
-
-    reader.readAsDataURL(response);
-  }
-
 }

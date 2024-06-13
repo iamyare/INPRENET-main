@@ -106,6 +106,15 @@ export class AuthService {
     );
   }
 
+  obtenerModulosPorCentroTrabajo(idCentroTrabajo: number): Observable<any[]> {
+    return this.http.get<any[]>(`${environment.API_URL}/api/usuario/modulos-centro-trabajo/${idCentroTrabajo}`).pipe(
+      catchError((error) => {
+        console.error('Error al obtener los módulos:', error);
+        return [];
+      })
+    );
+  }
+
   getIdEmpresaFromToken(): number | null {
     const token = localStorage.getItem('token');
 

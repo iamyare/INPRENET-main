@@ -65,6 +65,7 @@ import { CuentaBancariaCompComponent } from './cuenta-bancaria-comp/cuenta-banca
 import { ProgressbarDynamicComponent } from './progressbar-dynamic/progressbar-dynamic.component';
 import { SharedFormFieldsComponent } from './shared-form-fields/shared-form-fields.component';
 import { BuscadorComponent } from './buscador/buscador.component';
+import { DynamicMenuConstanciasComponent } from './Dynamics/dynamic-menu-constancias/dynamic-menu-constancias.component';
 
 @NgModule({
   declarations: [
@@ -100,7 +101,8 @@ import { BuscadorComponent } from './buscador/buscador.component';
     AgregarCuentasComponent,
     CuentaBancariaCompComponent,
     ProgressbarDynamicComponent,
-    SharedFormFieldsComponent
+    SharedFormFieldsComponent,
+    DynamicMenuConstanciasComponent
   ],
   exports: [
     ProgressbarComponent,
@@ -134,7 +136,8 @@ import { BuscadorComponent } from './buscador/buscador.component';
     CuentaBancariaCompComponent,
     ProgressbarDynamicComponent,
     SharedFormFieldsComponent,
-    BuscadorComponent
+    BuscadorComponent,
+    DynamicMenuConstanciasComponent
   ],
   imports: [
     WebcamModule,

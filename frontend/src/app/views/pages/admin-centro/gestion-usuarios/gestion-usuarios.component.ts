@@ -32,6 +32,7 @@ export class GestionUsuariosComponent implements OnInit {
       console.error("No se pudieron obtener los módulos del token");
       return;
     }
+
     // Filtra los módulos donde el usuario es administrador
     this.adminRolesModulos = this.rolesModulos.filter(rm => rm.rol === 'ADMINISTRADOR');
 
@@ -39,9 +40,6 @@ export class GestionUsuariosComponent implements OnInit {
       console.error("No se encontraron módulos donde el usuario es administrador");
       return;
     }
-
-    // Preselecciona todos los módulos donde es administrador
-    this.selectedModulos = this.adminRolesModulos.map(rm => rm.modulo);
 
     this.columns = [
       { header: 'Nombre', col: 'nombreEmpleado', isEditable: true, validationRules: [Validators.required] },
@@ -51,7 +49,8 @@ export class GestionUsuariosComponent implements OnInit {
       { header: 'Puesto', col: 'nombrePuesto' },
     ];
 
-    this.getFilas().then(() => this.cargar());
+    // No cargamos filas hasta que se seleccione un módulo
+    // this.getFilas().then(() => this.cargar());
   }
 
   onModuloChange(event: Event): void {
@@ -59,11 +58,11 @@ export class GestionUsuariosComponent implements OnInit {
     const selectedModulo = target?.value;
     if (selectedModulo) {
       this.selectedModulos = [selectedModulo];
-      this.getFilas().then(() => this.cargar());
+      this.getFilas();
     }
   }
 
-  getFilas = async () => {
+  async getFilas() {
     if (this.selectedModulos.length === 0) {
       console.error("No se pudo obtener los módulos seleccionados");
       return;
@@ -81,13 +80,11 @@ export class GestionUsuariosComponent implements OnInit {
           nombrePuesto: item.empleadoCentroTrabajo?.nombrePuesto || 'N/A'
         };
       });
-
-      return this.usuarios;
+      this.cargar();
     } catch (error) {
       console.error("Error al obtener datos de Usuarios", error);
-      throw error;
     }
-  };
+  }
 
   editarUsuario = (row: any) => {
     console.log('Editar usuario:', row);

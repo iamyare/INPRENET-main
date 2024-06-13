@@ -1,32 +1,52 @@
-import { Component, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { MatSnackBar } from '@angular/material/snack-bar';
-
-interface Admin {
-  name: string;
-  email: string;
-  password: string;
-}
+import { AuthService } from 'src/app/services/auth.service';
+import { DatosEstaticosService } from 'src/app/services/datos-estaticos.service';
 
 @Component({
   selector: 'app-add-admin',
   templateUrl: './add-admin.component.html',
-  styleUrl: './add-admin.component.scss'
+  styleUrls: ['./add-admin.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AddAdminComponent implements OnInit {
   userForm: FormGroup;
+  centrosTrabajo: any[] = [];
+  modulos: any[] = [];
 
-  constructor(private fb: FormBuilder, private snackBar: MatSnackBar) {
+  constructor(
+    private fb: FormBuilder,
+    private snackBar: MatSnackBar,
+    private datosEstaticosService: DatosEstaticosService,
+    private authService : AuthService,
+  ) {
     this.userForm = this.fb.group({
       nombreEmpleado: ['', Validators.required],
       nombrePuesto: ['', Validators.required],
       correo: ['', [Validators.required, Validators.email]],
       numeroEmpleado: ['', Validators.required],
-      idRole: ['', Validators.required]
+      idRole: ['', Validators.required],
+      centroTrabajo: ['', Validators.required],
+      modulo: ['', Validators.required],
     });
   }
 
-  ngOnInit(): void { }
+  ngOnInit(): void {
+    this.datosEstaticosService.getAllCentrosTrabajo().then(() => {
+      this.centrosTrabajo = this.datosEstaticosService.centrosTrabajo;
+    });
+  }
+
+  onCentroTrabajoChange(event: any): void {
+    const idCentroTrabajo = event.value;
+    this.authService.obtenerModulosPorCentroTrabajo(idCentroTrabajo).subscribe((modulos) => {
+      this.modulos = modulos.map(modulo => ({
+        label: modulo.nombre,
+        value: modulo.id_modulo,
+      }));
+    });
+  }
 
   onSubmit(): void {
     if (this.userForm.valid) {

@@ -40,11 +40,11 @@ const routes: Routes = [
         canActivate: [RoleGuard],
         data: {
           expectedRolesModules: [
-            { role: 'ADMINISTRADOR', module: 'Planilla' },
+            { role: 'ADMINISTRADOR', module: 'PLANILLA' },
             { role: 'ADMINISTRADOR', module: 'AFILIACION' },
-            { role: 'JEFE DE AREA', module: 'Planilla' },
+            { role: 'JEFE DE AREA', module: 'PLANILLA' },
             { role: 'OFICIAL', module: 'PLANILLA' },
-            { role: 'AUXILIAR', module: 'Planilla' },
+            { role: 'AUXILIAR', module: 'PLANILLA' },
           ]
         }
       },

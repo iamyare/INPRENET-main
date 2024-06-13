@@ -115,14 +115,19 @@ export class DatosEstaticosService {
   }
 
   async getAllCentrosTrabajo() {
-    const response = await this.centrosTrabSVC.obtenerTodosLosCentrosTrabajo().toPromise();
-    const mappedResponse = response!.map((item: { id_centro_trabajo: any; nombre_centro_trabajo: any; sector_economico: any }) => ({
-      label: item.nombre_centro_trabajo,
-      value: String(item.id_centro_trabajo),
-      sector: item.sector_economico,
-    }));
-    this.centrosTrabajo = mappedResponse;
-    return this.centrosTrabajo;
+    try {
+      const response = await this.centrosTrabSVC.obtenerTodosLosCentrosTrabajo().toPromise();
+      if (response) {
+        const mappedResponse = response.map((item) => ({
+          label: item.nombre_centro_trabajo,
+          value: String(item.id_centro_trabajo),
+          sector: item.sector_economico,
+        }));
+        this.centrosTrabajo = mappedResponse;
+      }
+    } catch (error) {
+      console.error('Error al obtener los centros de trabajo:', error);
+    }
   }
 
   async getProfesiones() {
@@ -187,21 +192,6 @@ export class DatosEstaticosService {
     }));
     return this.colegiosMagisteriales;
   }
-
-  /* async getRoles() {
-    try {
-      const roles: any = await this.authService.getRolesExceptAdmin().toPromise();
-      this.tipoRol = roles.map((role: { id_rol: any; nombre_rol: any; }) => ({
-        value: role.id_rol,
-        label: role.nombre_rol
-      }));
-      return this.tipoRol;
-    } catch (error) {
-      console.error('Error al obtener roles:', error);
-      this.tipoRol = [];
-      return this.tipoRol;
-    }
-  } */
 
   tipoPersona = [
     {

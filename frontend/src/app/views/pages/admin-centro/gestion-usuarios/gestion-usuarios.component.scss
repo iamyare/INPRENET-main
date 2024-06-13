@@ -9,12 +9,6 @@
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
 }
 
-.center-name {
-  font-size: 24px;
-  color: #1c9588;
-  margin: 0;
-}
-
 button[mat-raised-button] {
   background-color: #26a69a;
   color: white;
@@ -32,15 +26,8 @@ button[mat-raised-button]:hover {
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
 }
 
-select#modulo {
+select {
   padding: 8px;
-  font-size: 16px;
-  border-radius: 5px;
   border: 1px solid #ccc;
-  background-color: #f9f9f9;
-}
-
-select#modulo option {
-  padding: 10px;
-  font-size: 16px;
+  border-radius: 4px;
 }

@@ -10,6 +10,7 @@ import { CompleteRegistrationDto } from './dto/complete-registration.dto';
 import { LoginDto } from './dto/login.dto';
 import { Net_Usuario_Empresa } from './entities/net_usuario_empresa.entity';
 import { Net_Rol_Modulo } from './entities/net_rol_modulo.entity';
+import { Net_Modulo } from './entities/net_modulo.entity';
 
 @ApiTags('usuario')
 @Controller('usuario')
@@ -60,6 +61,13 @@ export class UsuarioController {
   @Get('usuarios-modulos/:modulo')
   async obtenerRolesPorModulo(@Param('modulo') modulo: string): Promise<Net_Rol_Modulo[]> {
     return this.usuarioService.obtenerRolesPorModulo(modulo);
+  }
+
+  @Get('modulos-centro-trabajo/:idCentroTrabajo')
+  async obtenerModulosPorCentroTrabajo(
+    @Param('idCentroTrabajo', ParseIntPipe) idCentroTrabajo: number,
+  ): Promise<Net_Modulo[]> {
+    return this.usuarioService.obtenerModulosPorCentroTrabajo(idCentroTrabajo);
   }
 
   /* @Get('roles')

@@ -19,6 +19,7 @@ import { Net_Empleado_Centro_Trabajo } from '../Empresarial/entities/net_emplead
 import { Net_Rol_Modulo } from './entities/net_rol_modulo.entity';
 import { Net_Usuario_Empresa } from './entities/net_usuario_empresa.entity';
 import { Net_Usuario_Modulo } from './entities/net_usuario_modulo.entity';
+import { Net_Modulo } from './entities/net_modulo.entity';
 
 @Injectable()
 export class UsuarioService {
@@ -46,6 +47,8 @@ export class UsuarioService {
     private readonly rolModuloRepository: Repository<Net_Rol_Modulo>,
     @InjectRepository(Net_Usuario_Modulo)
     private readonly usuarioModuloRepository: Repository<Net_Usuario_Modulo>,
+    @InjectRepository(Net_Modulo)
+    private readonly moduloRepository: Repository<Net_Modulo>,
   ) { }
 
   async preRegistro(createPreRegistroDto: CreatePreRegistroDto): Promise<void> {
@@ -467,6 +470,17 @@ export class UsuarioService {
     });
   }
 
+  async obtenerModulosPorCentroTrabajo(idCentroTrabajo: number): Promise<Net_Modulo[]> {
+    return this.moduloRepository.find({
+      where: {
+        centroTrabajo: {
+          id_centro_trabajo: idCentroTrabajo,
+        },
+      },
+      relations: ['centroTrabajo'],
+    });
+  }
+  
 
   private handleException(error: any): void {
     this.logger.error(error);

@@ -1,0 +1,22 @@
+<div>
+  <app-progressbar-verdatos
+      (newDatBenChange)="setEstadoDatGen()"
+      (newEstCentrTrab)="setEstadoDatCentTrab()"
+      (newdatosColegiosMag)="setDatosAColegiosMag()"
+      (newdatosHS)="setDatosHS()"
+      (newEstCentrTrab)="setDatosA()"
+      (newdatosRP)="setDatosReferenc()"
+      (newdatosB)="setDatosBenef()"
+      (newDatosCuentas)="setDatosCuentas()"
+      (newGeneracionConstancias)="setGeneracionConstancias()"
+  ></app-progressbar-verdatos>
+</div>
+
+<app-edit-datos-generales *ngIf="DatosGenerales && detalle" [Afiliado]="detalle"></app-edit-datos-generales>
+<app-ver-cuentas-personas *ngIf="cuentas && detalle" [Afiliado]="detalle"></app-ver-cuentas-personas>
+<app-edit-colegios-magisteriales *ngIf="ColegiosMagisteriales && detalle" [Afiliado]="detalle"></app-edit-colegios-magisteriales>
+<app-edit-datos-bancarios *ngIf="DatosHS && detalle" [Afiliado]="detalle"></app-edit-datos-bancarios>
+<app-edit-perfil-puest-trab *ngIf="datosA && detalle" [Afiliado]="detalle"></app-edit-perfil-puest-trab>
+<app-edit-refer-personales *ngIf="referenc && detalle" [Afiliado]="detalle"></app-edit-refer-personales>
+<app-edit-beneficiarios *ngIf="datosBeneficiario && detalle" [Afiliado]="detalle"></app-edit-beneficiarios>
+<app-constancias-afiliado *ngIf="generacionConstancias && detalle" [Afiliado]="detalle"></app-constancias-afiliado>

@@ -22,6 +22,10 @@ const routes: Routes = [
     loadChildren: () => import('../app/views/pages/admin/admin.module').then(m => m.AdminModule)
   },
   {
+    path: 'perfil',
+    loadChildren: () => import('../app/views/pages/afiliacion/afiliacion.module').then(m => m.AfiliacionModule)
+  },
+  {
     path: '',
     component: DefaultLayoutComponent,
     data: {
@@ -156,9 +160,7 @@ const routes: Routes = [
       },
     ]
   },
-
-
-  /* {path: '**', redirectTo: 'dashboard'} */
+  { path: '**', redirectTo: 'dashboard' }
 ];
 
 @NgModule({
@@ -167,18 +169,8 @@ const routes: Routes = [
       scrollPositionRestoration: 'top',
       anchorScrolling: 'enabled',
       initialNavigation: 'enabledBlocking'
-      // relativeLinkResolution: 'legacy'
     })
   ],
   exports: [RouterModule]
 })
-export class AppRoutingModule {
-}
-
-/*
-{
-        path: 'dashboard',
-        loadChildren: () =>
-          import('./views/dashboard/dashboard.module').then((m) => m.DashboardModule),
-      },
-*/
+export class AppRoutingModule { }

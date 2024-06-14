@@ -1,0 +1,21 @@
+<div class="perfil-container">
+  <div class="perfil-header">
+    <div class="perfil-foto">
+      <img *ngIf="persona.foto_perfil" [src]="getFotoUrl(persona.foto_perfil)" alt="Foto de Perfil">
+    </div>
+    <div class="perfil-datos">
+      <h2>{{ persona.primer_nombre }} {{ persona.segundo_nombre }} {{ persona.tercer_nombre }} {{ persona.primer_apellido }} {{ persona.segundo_apellido }}</h2>
+      <p><strong>DNI:</strong> {{ persona.dni }}</p>
+      <p><strong>Teléfono:</strong> {{ persona.telefono_1 }}</p>
+      <p><strong>Correo Principal:</strong> {{ persona.correo_1 }}</p>
+      <p><strong>Género:</strong> {{ persona.genero }}</p>
+      <p><strong>Fecha de Nacimiento:</strong> {{ convertirFechaInputs(persona.fecha_nacimiento) }}</p>
+    </div>
+  </div>
+
+  <mat-tab-group>
+    <mat-tab *ngFor="let perfil of perfiles" [label]="perfil.descripcion">
+      <ng-container *ngComponentOutlet="perfil.componente; injector: createInjector(perfil.detalle)"></ng-container>
+    </mat-tab>
+  </mat-tab-group>
+</div>

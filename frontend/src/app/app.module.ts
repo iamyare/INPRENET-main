@@ -21,6 +21,7 @@ import { HttpClientModule, HttpClient, HTTP_INTERCEPTORS  } from '@angular/commo
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { ToastrModule } from 'ngx-toastr';
 import { ErrorInterceptor } from '../app/interceptors/error.interceptor';
+import { AfiliacionModule } from './views/pages/afiliacion/afiliacion.module';
 
 const APP_CONTAINERS = [
   DefaultFooterComponent,
@@ -33,6 +34,7 @@ const APP_CONTAINERS = [
   imports: [
     BrowserModule,
     AppRoutingModule,
+    AfiliacionModule,
     HttpClientModule,
     SharedModule,
     FormsModule,

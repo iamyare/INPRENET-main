@@ -91,6 +91,35 @@ export class AfiliadoService {
   ) { }
 
 
+  async getPersonaByDni(dni: string): Promise<Net_Persona> {
+    const persona = await this.personaRepository.findOne({
+      where: { dni },
+      relations: [
+        'tipoIdentificacion',
+        'pais',
+        'municipio',
+        'municipio_defuncion',
+        'profesion',
+        'detallePersona',
+        'detallePersona.tipoPersona',
+        'detallePersona.estadoAfiliacion',
+        'referenciasPersonalPersona',
+        'personasPorBanco',
+        'detalleDeduccion',
+        'perfPersCentTrabs',
+        'cuentas',
+        'detallePlanIngreso',
+        'colegiosMagisteriales',
+      ],
+    });
+
+    if (!persona) {
+      throw new NotFoundException(`Persona with DNI ${dni} not found`);
+    }
+
+    return persona;
+  }
+
   async createPersona(createPersonaDto: NetPersonaDTO): Promise<Net_Persona> {
     const persona = new Net_Persona();
     Object.assign(persona, createPersonaDto);

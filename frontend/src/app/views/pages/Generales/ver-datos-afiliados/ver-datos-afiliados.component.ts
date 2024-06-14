@@ -148,6 +148,8 @@ export class VerDatosAfiliadosComponent implements OnInit {
         async (result) => {
           this.prevAfil = true;
           this.Afiliado = result;
+          console.log(this.Afiliado);
+
           this.Afiliado.nameAfil = this.unirNombres(result.PRIMER_NOMBRE, result.SEGUNDO_NOMBRE, result.TERCER_NOMBRE, result.PRIMER_APELLIDO, result.SEGUNDO_APELLIDO);
         },
         (error) => {

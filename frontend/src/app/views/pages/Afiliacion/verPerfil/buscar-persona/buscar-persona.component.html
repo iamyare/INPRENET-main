@@ -1,0 +1,12 @@
+<div class="buscar-persona-container">
+  <h1>Buscar Persona</h1>
+  <mat-form-field appearance="outline">
+    <mat-label>DNI</mat-label>
+    <input matInput type="text" [(ngModel)]="dni" placeholder="Ingrese DNI">
+  </mat-form-field>
+  <button mat-raised-button color="primary" (click)="buscarPersona()">Buscar</button>
+  <div *ngIf="errorMessage" class="error-message">{{ errorMessage }}</div>
+  <div *ngIf="persona">
+    <app-perfil [persona]="persona"></app-perfil>
+  </div>
+</div>

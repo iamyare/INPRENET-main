@@ -137,6 +137,7 @@ export class DatGeneralesAfiliadoComponent implements OnInit {
 
   private initForm() {
     let existingForm = this.formStateService.getForm(this.formKey);
+
     if (existingForm) {
       this.formParent = existingForm;
     } else {

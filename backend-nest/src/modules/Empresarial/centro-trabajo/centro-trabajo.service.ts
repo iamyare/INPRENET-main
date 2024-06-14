@@ -105,7 +105,14 @@ export class CentroTrabajoService {
 
   async findBy(content: string): Promise<Net_Centro_Trabajo> {
     try {
-      return await this.centroTrabajoRepository.findOne({ where: { nombre_centro_trabajo: content } });
+
+      return await this.centroTrabajoRepository.findOne(
+        {
+          where: { nombre_centro_trabajo: content },
+          relations: ['centroTrabajoNiveles.nivel', 'centroTrabajoJornadas.jornada', 'municipio.departamento']
+        }
+      );
+
     } catch (error) {
       this.handleException(error);
     }

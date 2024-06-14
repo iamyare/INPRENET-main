@@ -151,8 +151,9 @@ export class VerDatosCentrosComponent {
     });
   }
 
-  onDatosGeneralesFormUpdate(formData: any): void {
-    this.datosGeneralesData = formData;
+  onDatosGeneralesFormUpdate(formData: FormGroup): void {
+    this.datosGeneralesData = formData
+    const temp = formData;
   }
 
   onSociedadFormUpdate(formValues: any): void {
@@ -161,7 +162,7 @@ export class VerDatosCentrosComponent {
 
   gatherAllData(): void {
     const allData = {
-      datosGenerales: this.datosGeneralesData.value,
+      datosGenerales: this.datosGeneralesData,
       referencias: this.referenciasForm.value.referencias.length > 0 ? this.referenciasForm.value.referencias : [],
       sociedad: this.sociedadData,
       sociedadSocio: this.sociedadSocioForm.value.sociedadSocios.length > 0 ? this.sociedadSocioForm.value.sociedadSocios : [],
@@ -191,6 +192,71 @@ export class VerDatosCentrosComponent {
         }
       );
     });
+  }
+
+  handleSearchResult1(form: any) {
+    form.controls["nombre_centro_trabajo"]!.patchValue(this.searchResults[0].nombre_centro_trabajo)
+    form.controls["rtn"]!.patchValue(this.searchResults[0].rtn)
+    form.controls["departamento"]!.patchValue(this.searchResults[0].municipio.departamento.id_departamento)
+    form.controls["municipio"]!.patchValue(this.searchResults[0].municipio.id_municipio)
+    form.controls["objetivo_social"]!.patchValue(this.searchResults[0].objetivo_social)
+    form.controls["numero_empleados"]!.patchValue(this.searchResults[0].numero_empleados)
+    form.controls["telefono_1"]!.patchValue(this.searchResults[0].telefono_1)
+    form.controls["telefono_2"]!.patchValue(this.searchResults[0].telefono_2)
+    form.controls["celular_1"]!.patchValue(this.searchResults[0].celular_1)
+    form.controls["celular_2"]!.patchValue(this.searchResults[0].celular_2)
+    form.controls["correo_1"]!.patchValue(this.searchResults[0].correo_1)
+    form.controls["correo_2"]!.patchValue(this.searchResults[0].correo_2)
+    form.controls["colonia_localidad"]!.patchValue(this.searchResults[0].colonia_localidad)
+    form.controls["barrio_avenida"]!.patchValue(this.searchResults[0].barrio_avenida)
+    form.controls["grupo_calle"]!.patchValue(this.searchResults[0].grupo_calle)
+    form.controls["numero_casa"]!.patchValue(this.searchResults[0].numero_casa)
+    form.controls["direccion_2"]!.patchValue(this.searchResults[0].direccion_2)
+    form.controls["numero_acuerdo"]!.patchValue(this.searchResults[0].numero_acuerdo)
+    form.controls["fecha_emision"]!.patchValue(this.searchResults[0].fecha_emision)
+    form.controls["fecha_inicio_operaciones"]!.patchValue(this.searchResults[0].fecha_inicio_operaciones)
+    form.controls["monto_activos_totales"]!.patchValue(this.searchResults[0].monto_activos_totales)
+
+    const tipo_jornada = this.searchResults[0].centroTrabajoJornadas.map((jornada: { jornada: { nombre: string; }; }) => ({
+      key: jornada.jornada.nombre,
+      value: true
+    }));
+
+    const modalidad = this.searchResults[0].centroTrabajoNiveles.map((nivel: { nivel: { nombre: string; }; }) => ({
+      key: nivel.nivel.nombre,
+      value: true
+    }));
+
+    const modalidades = [
+      { nombre: 'PRE-ESCOLAR' },
+      { nombre: 'PRIMARIA' },
+      { nombre: 'MEDIA' },
+      { nombre: 'ACADEMIA' },
+      { nombre: 'TECNICA' },
+    ]
+    const tipo_jornadas = [
+      { nombre: 'MATUTINA' },
+      { nombre: 'DIURNA' },
+      { nombre: 'NOCTURNA' }
+    ]
+
+    for (let j = 0; j < modalidades.length; j++) {
+      for (let i = 0; i < modalidad.length; i++) {
+        if (modalidades[j].nombre == modalidad[i].key) {
+          form.controls["modalidad_ensenanza"]!.get(`${j}`)?.patchValue(modalidad[i].value)
+        }
+      }
+    }
+
+    for (let j = 0; j < tipo_jornadas.length; j++) {
+      for (let i = 0; i < tipo_jornada.length; i++) {
+        if (tipo_jornadas[j].nombre == tipo_jornada[i].key) {
+          form.controls["tipo_jornada"]!.get(`${j}`)?.patchValue(tipo_jornada[i].value)
+        }
+      }
+    }
+
+    this.datosGeneralesData = form
   }
 
   handleSearchResult(searchResult: any) {

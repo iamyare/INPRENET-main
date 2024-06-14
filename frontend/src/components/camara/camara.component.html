@@ -8,13 +8,13 @@
         <div>
             <button mat-raised-button style="color: white;" color="primary" (click)="triggerCaptura();">Tomar
                 Foto</button>
-            <button mat-raised-button style="color: white;" color="primary" (click)="toggleWebcam();">Alternar
-                Cámara</button>
             <button mat-raised-button style="color: white;" color="primary" (click)="showNextWebcam(true);"
                 [disabled]="!multiplesCamarasDisponibles">Siguiente Cámara</button>
-            <mat-checkbox color="primary" style="background-color: white;" [(ngModel)]="permitirCambioCamara">Permitir
+            <!-- <button mat-raised-button style="color: white;" color="primary" (click)="toggleWebcam();">Alternar
+                    Cámara</button> -->
+            <!-- <mat-checkbox color="primary" style="background-color: white;" [(ngModel)]="permitirCambioCamara">Permitir
                 Cambio de
-                cámara</mat-checkbox>
+                cámara</mat-checkbox> -->
         </div>
     </div>
     <div class="col-md-6" style="text-align: center;" *ngIf="form.get('FotoPerfil')?.value">

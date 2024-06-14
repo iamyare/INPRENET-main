@@ -11,7 +11,6 @@ import { FieldConfig } from 'src/app/shared/Interfaces/field-config';
 })
 export class DatosGeneralesCentroComponent implements OnInit {
   @Input() parentForm!: FormGroup;
-  @Input() searchResult: any;
   @Output() formUpdated = new EventEmitter<any>();
   parentFormIsExist: boolean = false;
 
@@ -305,11 +304,8 @@ export class DatosGeneralesCentroComponent implements OnInit {
     if (this.fields) {
       this.addControlsToForm();
     }
-    if (this.searchResult) {
-      await this.handleSearchResult(this.searchResult);
-    }
     this.parentForm.valueChanges.subscribe(value => {
-      this.formUpdated.emit(this.convertNumberFields(value));
+      /* this.formUpdated.emit(this.convertNumberFields(value)); */
     });
   }
 
@@ -330,48 +326,24 @@ export class DatosGeneralesCentroComponent implements OnInit {
     this.parentFormIsExist = true;
   }
 
+  handleSelectChange(event: { fieldName: string, value: any }) {
+    if (event.fieldName === 'departamento') {
+      this.onDepartamentoChange(event);
+    }
+  }
   convertNumberFields(form: any) {
     const updatedValues = { ...form.value };
     this.fields.forEach(field => {
       if (field.type === 'number' && updatedValues[field.name] !== null && updatedValues[field.name] !== '') {
-        updatedValues[field.name] = Number(updatedValues[field.name]);
+        this.parentForm.value[field.name] = Number(this.parentForm.value[field.name]);
       }
     });
+
     return form;
   }
 
   async onDatosBenChange(form: any) {
     this.formUpdated.emit(this.convertNumberFields(form));
-  }
-
-  handleSearchResult(searchResult: any) {
-    for (let i = 0; i < searchResult.length; i++) {
-      const element = searchResult[i];
-
-      this.fields.forEach(field => {
-        if (element[field.name] !== undefined) {
-          field.value = element[field.name];
-
-          const control = this.parentForm.get(field.name);
-          if (control) {
-            control.setValue(element[field.name]);
-          } else if (field.type === 'daterange') {
-            this.parentForm.get(field.name)?.get('start')?.setValue(element[field.name].start);
-            this.parentForm.get(field.name)?.get('end')?.setValue(element[field.name].end);
-          } else if (field.type === 'checkboxGroup') {
-            const formArray = this.parentForm.get(field.name) as FormArray;
-            formArray.clear();
-            field!.options!.forEach((option: any) => {
-              formArray.push(this.fb.control(searchResult[0][field.name].includes(option.value)));
-            });
-          }
-        }
-      });
-    }
-
-
-
-
   }
 
   async onDepartamentoChange(event: any) {
@@ -387,18 +359,6 @@ export class DatosGeneralesCentroComponent implements OnInit {
     const municipioControl = this.parentForm.get('municipio');
     if (municipioControl) {
       municipioControl.setValue(null);
-    }
-  }
-
-  onMunicipioChange(event: any) {
-    //console.log('Municipio seleccionado:', event.value);
-  }
-
-  handleSelectChange(event: { fieldName: string, value: any }) {
-    if (event.fieldName === 'departamento') {
-      this.onDepartamentoChange(event);
-    } else if (event.fieldName === 'municipio') {
-      this.onMunicipioChange(event);
     }
   }
 }

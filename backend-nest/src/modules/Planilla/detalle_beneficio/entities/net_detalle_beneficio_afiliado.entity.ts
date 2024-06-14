@@ -38,7 +38,8 @@ export class Net_Detalle_Beneficio_Afiliado {
     detalleBeneficio: Net_Detalle_Pago_Beneficio[];
 
     @ManyToOne(() => NET_DETALLE_PERSONA, persona => persona.padreIdPersona)
+    @JoinColumn({ name: 'ID_PERSONA', referencedColumnName: 'ID_PERSONA' })
     @JoinColumn({ name: 'ID_CAUSANTE', referencedColumnName: 'ID_CAUSANTE' })
-    @JoinColumn({ name: 'ID_BENEFICIARIO', referencedColumnName: 'ID_PERSONA' })
+    @JoinColumn({ name: 'ID_DETALLE_PERSONA', referencedColumnName: 'ID_DETALLE_PERSONA' })
     persona: NET_DETALLE_PERSONA[];
 }

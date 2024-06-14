@@ -8,7 +8,10 @@ export class Net_Estado_Persona {
     @PrimaryColumn({ type: 'int', name: 'CODIGO', primaryKeyConstraintName: 'PK_NET_ESTADO_AFILIACION' })
     codigo: number;
 
-    @Column('varchar2', { length: 50, nullable: false, name: 'DESCRIPCION' })
+    @Column('varchar2', { length: 50, nullable: false, name: 'NOMBRE_ESTADO' })
+    nombre_estado: string;
+
+    @Column('varchar2', { length: 200, nullable: true, name: 'DESCRIPCION' })
     Descripcion: string;
 
     @OneToMany(() => NET_DETALLE_PERSONA, persona => persona.estadoAfiliacion)

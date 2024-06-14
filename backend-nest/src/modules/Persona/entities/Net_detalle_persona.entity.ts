@@ -8,6 +8,9 @@ export class NET_DETALLE_PERSONA {
     @PrimaryColumn({ name: 'ID_PERSONA', primaryKeyConstraintName: 'PK_ID_PERSONA_DETALLE_PERSONA' })
     ID_PERSONA: number;
 
+    @PrimaryGeneratedColumn({ name: 'ID_DETALLE_PERSONA', primaryKeyConstraintName: 'PK_ID_PERSONA_DETALLE_PERSONA' })
+    ID_DETALLE_PERSONA: number;
+
     @PrimaryColumn({ name: 'ID_CAUSANTE', primaryKeyConstraintName: 'PK_ID_PERSONA_DETALLE_PERSONA' })
     ID_CAUSANTE: number;
 
@@ -25,6 +28,7 @@ export class NET_DETALLE_PERSONA {
     @ManyToOne(() => NET_DETALLE_PERSONA, detalleAfiliado => detalleAfiliado.persona, { cascade: true })
     @JoinColumn({ name: 'ID_CAUSANTE_PADRE', referencedColumnName: 'ID_PERSONA', foreignKeyConstraintName: "FK_ID_PERSONA_DETALLE_PERSONA" })
     @JoinColumn({ name: 'ID_CAUSANTE', referencedColumnName: 'ID_CAUSANTE', foreignKeyConstraintName: "FK_ID_PERSONA_DETALLE_PERSONA" })
+    @JoinColumn({ name: 'ID_DETALLE_PERSONA', referencedColumnName: 'ID_DETALLE_PERSONA', foreignKeyConstraintName: "FK_ID_PERSONA_DETALLE_PERSONA" })
     padreIdPersona: NET_DETALLE_PERSONA;
 
     @ManyToOne(() => Net_Tipo_Persona, tipoPersona => tipoPersona.detallesPersona)

@@ -8,31 +8,37 @@ import { FieldConfig } from 'src/app/shared/Interfaces/field-config';
   styleUrls: ['./dynamic-form.component.scss']
 })
 export class DynamicFormComponent implements OnInit {
-  @Input() fields: FieldConfig[] = [];
+  form: FormGroup;
+
   @Input() titulo = "";
   @Input() subtitulo = "";
-  @Output() newDatBenChange = new EventEmitter<any>()
-  @Output() selectChange = new EventEmitter<{ fieldName: string, value: any }>();
+
+  @Input() fields: FieldConfig[] = [];
   @Input() incomingForm: FormGroup | null = null;
 
-  form: FormGroup;
+  @Output() newDatBenChange = new EventEmitter<any>()
+  @Output() selectChange = new EventEmitter<{ fieldName: string, value: any }>();
 
   constructor(private fb: FormBuilder) {
     this.form = this.fb.group({});
   }
 
   ngOnInit() {
-    if (this.incomingForm) {
-      this.form = this.mergeForms(this.incomingForm);
-    } if (this.fields) {
-      this.form = this.createControl();
-    }
+    this.form = this.createControl();
+    this.form = this.mergeForms(this.form);
+
     this.newDatBenChange.emit(this.form);
   }
 
-
   onDatosBenChange() {
-    const transformedForm = this.transformFormValues(this.form);
+    const transformedForm = this.transformFormValues(this.incomingForm!);
+    this.newDatBenChange.emit(transformedForm);
+  }
+
+  onDatosBenChange1(e: any) {
+    console.log(this.form);
+
+    const transformedForm = this.transformFormValues(this.form!);
     this.newDatBenChange.emit(transformedForm);
   }
 
@@ -47,7 +53,6 @@ export class DynamicFormComponent implements OnInit {
         });
         group.addControl(field.name, dateRangeGroup);
       } else if (field.type === 'checkboxGroup') {
-
         const checkboxArray = this.fb.array(field.options.map(() => this.fb.control(false)));
         group.addControl(field.name, checkboxArray);
 
@@ -65,8 +70,10 @@ export class DynamicFormComponent implements OnInit {
             field.validations
           );
         group.addControl(field.name, control);
+
       }
     });
+
 
     return group;
   }
@@ -77,24 +84,24 @@ export class DynamicFormComponent implements OnInit {
 
     this.fields.forEach((field: any) => {
       if (field.type === 'daterange') {
-        result[field.name] = {
+        this.form.value[field.name] = {
           start: formValues[field.name]?.start,
           end: formValues[field.name]?.end
         };
       } else if (field.type === 'checkboxGroup') {
         const checkboxArray = form.get(field.name) as FormArray;
-        result[field.name] = checkboxArray.controls.map((control: any, index: number) => ({
+        this.form.value[field.name] = checkboxArray.controls.map((control: any, index: number) => ({
           key: field.options[index].value,
           value: control.value
         }));
       } else if (field.type === 'radio') {
-        result[field.name] = formValues[field.name];
+        this.form.value[field.name] = formValues[field.name];
       } else {
-        result[field.name] = formValues[field.name];
+        this.form.value[field.name] = formValues[field.name];
       }
     });
 
-    return result;
+    return this.form;
   }
 
   mergeForms(incomingForm: FormGroup): FormGroup {
@@ -106,6 +113,7 @@ export class DynamicFormComponent implements OnInit {
         group.addControl(key, incomingForm.get(key)!);
       }
     });
+
 
     return group;
   }

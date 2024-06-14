@@ -30,7 +30,6 @@ import { TransaccionesModule } from './modules/transacciones/transacciones.modul
         entities: [__dirname + '/../**/*.entity{.ts,.js}'],
         //migrations: ['src/database/migrations/*{.ts,.js}'],
         //logging: ["query", "schema", "error", "warn", "info", "log", "migration"]
-
       }),
       inject: [ConfigService]
 

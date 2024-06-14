@@ -6,8 +6,8 @@
     </div>
 
     <div *ngIf="mostrar" [hidden]="activeStep !== 0">
-        <app-datos-generales-centro [parentForm]="datosGeneralesData" (formUpdated)="onDatosGeneralesFormUpdate($event)"
-            [searchResult]="searchResults"></app-datos-generales-centro>
+        <app-datos-generales-centro [parentForm]="datosGeneralesData"
+            (formUpdated)="onDatosGeneralesFormUpdate($event)"></app-datos-generales-centro>
     </div>
     <div *ngIf="mostrar" [hidden]="activeStep !== 1">
         <app-ver-referencias></app-ver-referencias>

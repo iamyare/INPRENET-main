@@ -306,7 +306,6 @@ export class AfiliadoService {
       return asignaciones;
     } catch (error) {
       console.log(error);
-
     }
   }
 

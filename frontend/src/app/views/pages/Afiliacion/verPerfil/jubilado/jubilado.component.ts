@@ -5,12 +5,6 @@ import { Component, Input, OnInit } from '@angular/core';
   templateUrl: './jubilado.component.html',
   styleUrls: ['./jubilado.component.scss']
 })
-export class JubiladoComponent implements OnInit {
-  @Input() datos: any;
-
-  constructor() { }
-
-  ngOnInit(): void {
-    console.log('Datos recibidos en JubiladoComponent:', this.datos);
-  }
+export class JubiladoComponent{
+  @Input() detalle: any;
 }

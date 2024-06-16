@@ -169,12 +169,16 @@ export class EditDatosGeneralesComponent {
 
   async previsualizarInfoAfil() {
     if (this.Afiliado) {
+
       await this.svcAfiliado.getAfilByParam(this.Afiliado.DNI).subscribe(
         (result) => {
           this.datos = result;
           this.Afiliado = result;
           this.estadoAfiliacion = result.estadoAfiliacion
           this.fallecido = result.fallecido
+
+          console.log(result);
+
 
           this.formDatosGenerales.value.refpers[0] = {
             dni: result.DNI,

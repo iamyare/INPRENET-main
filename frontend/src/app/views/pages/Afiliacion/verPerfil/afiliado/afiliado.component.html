@@ -1,22 +1,19 @@
-<div>
-  <app-progressbar-verdatos
-      (newDatBenChange)="setEstadoDatGen()"
-      (newEstCentrTrab)="setEstadoDatCentTrab()"
-      (newdatosColegiosMag)="setDatosAColegiosMag()"
-      (newdatosHS)="setDatosHS()"
-      (newEstCentrTrab)="setDatosA()"
-      (newdatosRP)="setDatosReferenc()"
-      (newdatosB)="setDatosBenef()"
-      (newDatosCuentas)="setDatosCuentas()"
-      (newGeneracionConstancias)="setGeneracionConstancias()"
-  ></app-progressbar-verdatos>
-</div>
+<!-- <div class="afiliado">
+  <h2>Perfil de Afiliado</h2>
+  <div *ngIf="informacionCompleta">
+      <h3>Datos del Beneficiario</h3>
+      <p>ID Persona: {{ informacionCompleta.ID_PERSONA }}</p>
+      <p>ID Causante: {{ informacionCompleta.ID_CAUSANTE }}</p>
+      <p>Porcentaje: {{ informacionCompleta.porcentaje }}</p>
+      <p>Estado Afiliacion: {{ informacionCompleta.estadoAfiliacion?.Descripcion }}</p>
 
-<app-edit-datos-generales *ngIf="DatosGenerales && detalle" [Afiliado]="detalle"></app-edit-datos-generales>
-<app-ver-cuentas-personas *ngIf="cuentas && detalle" [Afiliado]="detalle"></app-ver-cuentas-personas>
-<app-edit-colegios-magisteriales *ngIf="ColegiosMagisteriales && detalle" [Afiliado]="detalle"></app-edit-colegios-magisteriales>
-<app-edit-datos-bancarios *ngIf="DatosHS && detalle" [Afiliado]="detalle"></app-edit-datos-bancarios>
-<app-edit-perfil-puest-trab *ngIf="datosA && detalle" [Afiliado]="detalle"></app-edit-perfil-puest-trab>
-<app-edit-refer-personales *ngIf="referenc && detalle" [Afiliado]="detalle"></app-edit-refer-personales>
-<app-edit-beneficiarios *ngIf="datosBeneficiario && detalle" [Afiliado]="detalle"></app-edit-beneficiarios>
-<app-constancias-afiliado *ngIf="generacionConstancias && detalle" [Afiliado]="detalle"></app-constancias-afiliado>
+  </div>
+  <div *ngIf="!informacionCompleta">
+    <p>No hay datos disponibles para mostrar.</p>
+  </div>
+</div>
+ -->
+ <div *ngIf="detalle">
+  <h2>Afiliado: {{ detalle.ID_PERSONA }} - {{ detalle.tipoPersona.tipo_persona }}</h2>
+  <!-- Más detalles del afiliado -->
+</div>

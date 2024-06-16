@@ -149,7 +149,8 @@ import { ConstanciasAfiliadoComponent } from '../pages/Afiliacion/verAfiliados/c
     VerReferenciasComponent,
     VerSociosComponent,
     ConstanciasAfiliadoComponent,
-  ]
+  ],
+  exports: [EditDatosGeneralesComponent]
 })
 export class ThemeModule {
 }

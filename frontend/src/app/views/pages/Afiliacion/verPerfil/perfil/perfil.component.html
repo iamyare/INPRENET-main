@@ -12,10 +12,17 @@
       <p><strong>Fecha de Nacimiento:</strong> {{ convertirFechaInputs(persona.fecha_nacimiento) }}</p>
     </div>
   </div>
-
-  <mat-tab-group>
-    <mat-tab *ngFor="let perfil of perfiles" [label]="perfil.descripcion">
-      <ng-container *ngComponentOutlet="perfil.componente; injector: createInjector(perfil.detalle)"></ng-container>
+  <mat-tab-group *ngIf="persona">
+    <mat-tab label="Información General">
+      <app-informacion-general [persona]="persona"></app-informacion-general>
+    </mat-tab>
+    <mat-tab *ngFor="let detalle of detallePersona" [label]="detalle.tipoPersona.tipo_persona">
+      <ng-container [ngSwitch]="detalle.tipoPersona.tipo_persona">
+        <app-beneficiario *ngSwitchCase="'BENEFICIARIO'" [detalle]="detalle"></app-beneficiario>
+        <app-pensionado *ngSwitchCase="'PENSIONADO'" [detalle]="detalle"></app-pensionado>
+        <app-voluntario *ngSwitchCase="'VOLUNTARIO'" [detalle]="detalle"></app-voluntario>
+        <app-jubilado *ngSwitchCase="'JUBILADO'" [detalle]="detalle"></app-jubilado>
+      </ng-container>
     </mat-tab>
   </mat-tab-group>
 </div>

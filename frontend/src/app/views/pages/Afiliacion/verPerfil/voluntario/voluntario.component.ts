@@ -5,12 +5,6 @@ import { Component, Input, OnInit } from '@angular/core';
   templateUrl: './voluntario.component.html',
   styleUrls: ['./voluntario.component.scss']
 })
-export class VoluntarioComponent implements OnInit {
-  @Input() datos: any;
-
-  constructor() { }
-
-  ngOnInit(): void {
-    console.log('Datos recibidos en VoluntarioComponent:', this.datos);
-  }
+export class VoluntarioComponent {
+  @Input() detalle: any;
 }

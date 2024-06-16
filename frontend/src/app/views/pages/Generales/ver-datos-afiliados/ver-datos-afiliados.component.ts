@@ -143,8 +143,10 @@ export class VerDatosAfiliadosComponent implements OnInit {
   }
 
   previsualizarInfoAfil() {
-    if (this.form.dni) {
-      this.svcAfiliado.getAfilByParam(this.form.dni).subscribe(
+    const dniControl = this.form.get('dni');
+
+    if (dniControl && dniControl.value) {
+      this.svcAfiliado.getAfilByParam(dniControl.value).subscribe(
         async (result) => {
           this.prevAfil = true;
           this.Afiliado = result;
@@ -157,8 +159,11 @@ export class VerDatosAfiliadosComponent implements OnInit {
           this.resetDatos();
         }
       );
+    } else {
+      console.log('El campo DNI es nulo o indefinido');
     }
   }
+
 
   resetDatos() {
     if (this.form) {

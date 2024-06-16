@@ -1,47 +1,29 @@
-import { Component, Input, OnInit, Injector } from '@angular/core';
-import { AfiliadoComponent } from '../afiliado/afiliado.component';
-import { BeneficiarioComponent } from '../beneficiario/beneficiario.component';
-import { JubiladoComponent } from '../jubilado/jubilado.component';
-import { PensionadoComponent } from '../pensionado/pensionado.component';
-import { VoluntarioComponent } from '../voluntario/voluntario.component';
+import { Component, Input, OnChanges, SimpleChanges, Injector, ChangeDetectionStrategy, SimpleChange, OnInit } from '@angular/core';
 import { convertirFechaInputs } from 'src/app/shared/functions/formatoFecha';
+import { PersonaService } from 'src/app/services/persona.service';
 
 @Component({
   selector: 'app-perfil',
   templateUrl: './perfil.component.html',
-  styleUrls: ['./perfil.component.scss']
+  styleUrls: ['./perfil.component.scss'],
 })
-export class PerfilComponent implements OnInit {
-  @Input() persona!: any;
+export class PerfilComponent implements OnInit{
+  persona: any;
+  detallePersona: any[] = [];
 
-  perfiles: { tipo: string, descripcion: string, componente: any, detalle: any }[] = [];
+  constructor(private personaService: PersonaService) { }
 
   ngOnInit() {
-    this.perfiles = this.persona.detallePersona.map((detalle: any) => {
-      return {
-        tipo: detalle.tipoPersona.tipo_persona,
-        descripcion: `Perfil de ${detalle.tipoPersona.tipo_persona}`,
-        componente: this.getComponente(detalle.tipoPersona.tipo_persona),
-        detalle: detalle
-      };
+    this.personaService.currentPersona.subscribe(persona => {
+      this.persona = persona;
+      if (persona && persona.detallePersona) {
+        this.detallePersona = persona.detallePersona;
+      }
     });
   }
 
-  getComponente(tipoPersona: string) {
-    switch(tipoPersona) {
-      case 'AFILIADO': return AfiliadoComponent;
-      case 'BENEFICIARIO': return BeneficiarioComponent;
-      case 'JUBILADO': return JubiladoComponent;
-      case 'PENSIONADO': return PensionadoComponent;
-      case 'VOLUNTARIO': return VoluntarioComponent;
-      default: return null;
-    }
-  }
-
-  createInjector(detalle: any): Injector {
-    return Injector.create({
-      providers: [{ provide: 'detalle', useValue: detalle }]
-    });
+  trackByPerfil(index: number, perfil: any): any {
+    return perfil.tipo;
   }
 
   getFotoUrl(foto: any): string {

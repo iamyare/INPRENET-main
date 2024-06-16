@@ -21,19 +21,19 @@ export class Net_Centro_Trabajo {
     @Column('varchar2', { length: 40, nullable: true, name: 'SECTOR_ECONOMICO' })
     sector_economico: string;
 
-    @Column('varchar2', { length: 30, nullable: false, name: 'TELEFONO_1' })
+    @Column('varchar2', { length: 30, nullable: true, name: 'TELEFONO_1' })
     telefono_1: string;
 
     @Column('varchar2', { length: 30, nullable: true, name: 'TELEFONO_2' })
     telefono_2: string;
 
-    @Column('varchar2', { length: 30, nullable: false, name: 'CELULAR_1' })
+    @Column('varchar2', { length: 30, nullable: true, name: 'CELULAR_1' })
     celular_1: string;
 
     @Column('varchar2', { length: 30, nullable: true, name: 'CELULAR_2' })
     celular_2: string;
 
-    @Column('varchar2', { length: 40, nullable: false, name: 'CORREO_1' })
+    @Column('varchar2', { length: 40, nullable: true, name: 'CORREO_1' })
     @Index("UQ_Correo_centro_trab", { unique: true })
     correo_1: string;
 
@@ -46,14 +46,14 @@ export class Net_Centro_Trabajo {
     @Column('nvarchar2', { length: 50, nullable: true, name: 'REPRESENTANTE_LEGAL' })
     representante_legal: string;
 
-    @Column('nvarchar2', { length: 14, nullable: false, name: 'RTN' })
+    @Column('nvarchar2', { length: 14, nullable: true, name: 'RTN' })
     @Index("UQ_rtn_netCenTrab", { unique: true })
     rtn: string;
 
     @Column('nvarchar2', { length: 300, nullable: true, name: 'LOGO' })
     logo: string;
 
-    @Column('nvarchar2', { length: 200, nullable: false, name: 'DIRECCION_1' })
+    @Column('nvarchar2', { length: 200, nullable: true, name: 'DIRECCION_1' })
     direccion_1: string;
 
     @Column('nvarchar2', { length: 200, nullable: true, name: 'DIRECCION_2' })

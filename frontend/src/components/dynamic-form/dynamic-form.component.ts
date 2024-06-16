@@ -83,26 +83,29 @@ export class DynamicFormComponent implements OnInit {
     const result: any = {};
 
     this.fields.forEach((field: any) => {
+      const controlValue = formValues[field.name];
+
       if (field.type === 'daterange') {
-        this.form.value[field.name] = {
-          start: formValues[field.name]?.start,
-          end: formValues[field.name]?.end
+        result[field.name] = {
+          start: controlValue?.start || '',
+          end: controlValue?.end || ''
         };
       } else if (field.type === 'checkboxGroup') {
         const checkboxArray = form.get(field.name) as FormArray;
-        this.form.value[field.name] = checkboxArray.controls.map((control: any, index: number) => ({
-          key: field.options[index].value,
-          value: control.value
-        }));
-      } else if (field.type === 'radio') {
-        this.form.value[field.name] = formValues[field.name];
+        if (checkboxArray) {
+          result[field.name] = checkboxArray.controls.map((control: any, index: number) => ({
+            key: field.options[index].value,
+            value: control.value
+          }));
+        }
       } else {
-        this.form.value[field.name] = formValues[field.name];
+        result[field.name] = controlValue || '';
       }
     });
 
-    return this.form;
+    return result;
   }
+
 
   mergeForms(incomingForm: FormGroup): FormGroup {
     const group = this.createControl();

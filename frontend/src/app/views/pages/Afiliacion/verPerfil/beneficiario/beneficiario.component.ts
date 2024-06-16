@@ -1,4 +1,4 @@
-import { Component, OnInit, Input } from '@angular/core';
+import { Component, Input, OnInit } from '@angular/core';
 
 @Component({
   selector: 'app-beneficiario',
@@ -6,12 +6,20 @@ import { Component, OnInit, Input } from '@angular/core';
   styleUrls: ['./beneficiario.component.scss']
 })
 export class BeneficiarioComponent implements OnInit {
-  @Input() datos: any;
+  @Input() detalle: any;
 
-  constructor() { }
+  steps = [
+    { label: 'Constancias', isActive: true },
+    { label: 'Beneficios Asignados', isActive: false }
+  ];
 
-  ngOnInit(): void {
-    console.log(this.datos);
+  currentStepIndex = 0;
 
+  ngOnInit() {
+    console.log(this.detalle);
+  }
+
+  onStepChange(index: number) {
+    this.currentStepIndex = index;
   }
 }

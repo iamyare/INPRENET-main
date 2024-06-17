@@ -1,15 +1,15 @@
-import { Component, Input, OnChanges, SimpleChanges, Injector, ChangeDetectionStrategy, SimpleChange, OnInit } from '@angular/core';
-import { convertirFechaInputs } from 'src/app/shared/functions/formatoFecha';
+import { Component, OnInit } from '@angular/core';
 import { PersonaService } from 'src/app/services/persona.service';
+import { convertirFechaInputs } from 'src/app/shared/functions/formatoFecha';
 
 @Component({
   selector: 'app-perfil',
   templateUrl: './perfil.component.html',
-  styleUrls: ['./perfil.component.scss'],
+  styleUrls: ['./perfil.component.scss']
 })
-export class PerfilComponent implements OnInit{
+export class PerfilComponent implements OnInit {
   persona: any;
-  detallePersona: any[] = [];
+  detallePersonaUnico: any[] = [];
 
   constructor(private personaService: PersonaService) { }
 
@@ -17,13 +17,24 @@ export class PerfilComponent implements OnInit{
     this.personaService.currentPersona.subscribe(persona => {
       this.persona = persona;
       if (persona && persona.detallePersona) {
-        this.detallePersona = persona.detallePersona;
+        this.detallePersonaUnico = this.filtrarDetallePersona(persona.detallePersona);
       }
     });
   }
 
+  filtrarDetallePersona(detallePersona: any[]): any[] {
+    const tiposUnicos = new Set();
+    return detallePersona.filter(detalle => {
+      if (!tiposUnicos.has(detalle.tipoPersona.tipo_persona)) {
+        tiposUnicos.add(detalle.tipoPersona.tipo_persona);
+        return true;
+      }
+      return false;
+    });
+  }
+
   trackByPerfil(index: number, perfil: any): any {
-    return perfil.tipo;
+    return perfil.tipoPersona.tipo_persona;
   }
 
   getFotoUrl(foto: any): string {

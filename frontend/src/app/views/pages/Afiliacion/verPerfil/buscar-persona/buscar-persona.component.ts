@@ -1,8 +1,7 @@
-// buscar-persona.component.ts
 import { Component } from '@angular/core';
 import { catchError } from 'rxjs/operators';
 import { of } from 'rxjs';
-import { PersonaService } from '../../../../../services/persona.service';
+import { PersonaService } from 'src/app/services/persona.service';
 
 @Component({
   selector: 'app-buscar-persona',
@@ -24,9 +23,9 @@ export class BuscarPersonaComponent {
       })
     ).subscribe(persona => {
       if (persona) {
-        this.persona = persona; // Asigna la persona encontrada
-        this.personaService.changePersona(persona); // Actualiza el estado compartido
-        this.errorMessage = null; // Reinicia el mensaje de error si se encuentra la persona
+        this.persona = persona;
+        this.personaService.changePersona(persona);
+        this.errorMessage = null;
       }
     });
   }

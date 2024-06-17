@@ -169,7 +169,7 @@ export class EditDatosGeneralesComponent {
 
   async previsualizarInfoAfil() {
     if (this.Afiliado) {
-      await this.svcAfiliado.getAfilByParam(this.Afiliado.N_IDENTIFICACION).subscribe(
+      await this.svcAfiliado.getAfilByParam(this.Afiliado.n_identificacion).subscribe(
         (result) => {
           this.datos = result;
           this.Afiliado = result;
@@ -180,7 +180,7 @@ export class EditDatosGeneralesComponent {
 
 
           this.formDatosGenerales.value.refpers[0] = {
-            n_identificacion: result.N_IDENTIFICACION,
+            n_identificacion: result.n_identificacion,
             rtn: result.RTN,
             primer_nombre: result.PRIMER_NOMBRE,
             segundo_nombre: result.SEGUNDO_NOMBRE,

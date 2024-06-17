@@ -14,6 +14,7 @@ import { InformacionGeneralComponent } from './verPerfil/informacion-general/inf
 import { PruebiComponent } from './verPerfil/pruebi/pruebi.component';
 import { BeneficiarioConstanciasComponent } from './verPerfil/beneficiario-constancias/beneficiario-constancias.component';
 import { BeneficiarioBeneficiosAsignadosComponent } from './verPerfil/beneficiario-beneficios-asignados/beneficiario-beneficios-asignados.component';
+import { CausanteDetalleComponent } from './verPerfil/causante-detalle/causante-detalle.component';
 
 @NgModule({
   declarations: [
@@ -28,6 +29,7 @@ import { BeneficiarioBeneficiosAsignadosComponent } from './verPerfil/beneficiar
     PruebiComponent,
     BeneficiarioConstanciasComponent,
     BeneficiarioBeneficiosAsignadosComponent,
+    CausanteDetalleComponent
   ],
   imports: [
     CommonModule,

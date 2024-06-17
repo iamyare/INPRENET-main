@@ -13,9 +13,14 @@ export class PersonaService {
 
   constructor(private http: HttpClient) { }
 
-  getPersonaByDni(dni: string): Observable<any> {
-    const url = `${environment.API_URL}/api/Persona/persona-dni/${dni}`;
+  getPersonaByDni(n_identificacion: string): Observable<any> {
+    const url = `${environment.API_URL}/api/Persona/persona-dni/${n_identificacion}`;
     return this.http.get<any>(url);
+  }
+
+  getCausantesBy_n_identificacionBeneficiario(n_identificacion: string): Observable<any[]> {
+    const url = `${environment.API_URL}/api/afiliacion/causantes/${n_identificacion}`;
+    return this.http.get<any[]>(url);
   }
 
   changePersona(persona: any) {

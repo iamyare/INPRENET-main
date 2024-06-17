@@ -9,6 +9,6 @@ export class BeneficiarioConstanciasComponent implements OnInit {
   @Input() datos: any;
 
   ngOnInit() {
-    console.log(this.datos);
+    //console.log(this.datos);
   }
 }

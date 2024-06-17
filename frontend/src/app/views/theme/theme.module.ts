@@ -95,7 +95,7 @@ import { ConstanciasAfiliadoComponent } from '../pages/Afiliacion/verAfiliados/c
     MatStepperModule,
     MatNativeDateModule,
     MatGridListModule,
-    PagesModule
+    PagesModule,
   ],
   providers: [
     { provide: MAT_DATE_LOCALE, useValue: 'es' }
@@ -148,8 +148,9 @@ import { ConstanciasAfiliadoComponent } from '../pages/Afiliacion/verAfiliados/c
     VerDatosCentrosComponent,
     VerReferenciasComponent,
     VerSociosComponent,
-    ConstanciasAfiliadoComponent
-  ]
+    ConstanciasAfiliadoComponent,
+  ],
+  exports: [EditDatosGeneralesComponent]
 })
 export class ThemeModule {
 }

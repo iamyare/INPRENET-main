@@ -38,7 +38,12 @@ export class AfiliadoController {
   @InjectRepository(Net_Tipo_Persona)
   private readonly tipoPersonaRepos: Repository<Net_Tipo_Persona>
 
-  constructor(private readonly afiliadoService: AfiliadoService, private dataSource: DataSource) { }
+  constructor(private readonly afiliadoService: AfiliadoService) { }
+
+  @Get('persona-dni/:dni')
+  async getPersonaByDni(@Param('n_identificacion') n_identificacion: string): Promise<Net_Persona> {
+    return this.afiliadoService.getPersonaByn_identificacioni(n_identificacion);
+  }
 
   @Post('create-with-detalle')
   async create(@Body() benef: Benef): Promise<Net_Persona> {

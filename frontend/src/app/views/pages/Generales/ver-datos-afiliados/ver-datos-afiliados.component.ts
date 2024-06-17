@@ -143,13 +143,14 @@ export class VerDatosAfiliadosComponent implements OnInit {
   }
 
   previsualizarInfoAfil() {
-    console.log(this.form.value.n_identificacion);
-
+    console.log(this.form);
     if (this.form.value.n_identificacion) {
       this.svcAfiliado.getAfilByParam(this.form.value.n_identificacion).subscribe(
         async (result) => {
           this.prevAfil = true;
           this.Afiliado = result;
+          console.log(this.Afiliado);
+
           this.Afiliado.nameAfil = this.unirNombres(result.PRIMER_NOMBRE, result.SEGUNDO_NOMBRE, result.TERCER_NOMBRE, result.PRIMER_APELLIDO, result.SEGUNDO_APELLIDO);
         },
         (error) => {
@@ -157,8 +158,11 @@ export class VerDatosAfiliadosComponent implements OnInit {
           /* this.resetDatos(); */
         }
       );
+    } else {
+      console.log('El campo DNI es nulo o indefinido');
     }
   }
+
 
   resetDatos() {
     if (this.form) {

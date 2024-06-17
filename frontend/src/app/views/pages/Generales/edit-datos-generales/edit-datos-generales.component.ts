@@ -67,6 +67,9 @@ export class EditDatosGeneralesComponent {
     this.minDate = new Date(currentYear.getFullYear(), currentYear.getMonth(), currentYear.getDate(), currentYear.getHours(), currentYear.getMinutes(), currentYear.getSeconds());
   }
   ngOnInit(): void {
+    console.log(this.Afiliado);
+
+
     this.myFormFields = [
       { type: 'text', label: 'N_IDENTIFICACION del afiliado', name: 'n_identificacion', validations: [Validators.required, Validators.minLength(13), Validators.maxLength(14)], display: true },
     ];
@@ -172,6 +175,9 @@ export class EditDatosGeneralesComponent {
           this.Afiliado = result;
           this.estadoAfiliacion = result.estadoAfiliacion
           this.fallecido = result.fallecido
+
+          console.log(result);
+
 
           this.formDatosGenerales.value.refpers[0] = {
             n_identificacion: result.N_IDENTIFICACION,

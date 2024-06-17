@@ -1,0 +1,35 @@
+<div *ngIf="detalle" class="grid-container">
+  <h1>hola</h1>
+  <app-progressbar-dynamic [steps]="steps" (stepChange)="onStepChange($event)"></app-progressbar-dynamic>
+
+  <div *ngIf="currentStepIndex === 0">
+    <app-beneficiario-constancias [datos]="detalle"></app-beneficiario-constancias>
+  </div>
+  <div *ngIf="currentStepIndex === 1">
+    <app-beneficiario-beneficios-asignados [datos]="detalle"></app-beneficiario-beneficios-asignados>
+  </div>
+</div>
+
+
+<!-- <div *ngIf="detalle" class="grid-container">
+  <h1>hola</h1>
+  <app-pruebi></app-pruebi>
+  <mat-grid-list cols="2" rowHeight="fit" gutterSize="16px">
+    <mat-grid-tile *ngFor="let tile of tiles" [colspan]="tile.cols" [rowspan]="tile.rows" [style.background]="tile.color">
+      <mat-card class="grid-card">
+        <mat-card-header>
+          <mat-icon>{{tile.icon}}</mat-icon>
+          <mat-card-title>{{tile.text}}</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <ng-container *ngIf="tile.component === 'constancias'">
+            <app-beneficiario-constancias [datos]="detalle"></app-beneficiario-constancias>
+          </ng-container>
+          <ng-container *ngIf="tile.component === 'beneficios'">
+            <app-beneficiario-beneficios-asignados [datos]="detalle"></app-beneficiario-beneficios-asignados>
+          </ng-container>
+        </mat-card-content>
+      </mat-card>
+    </mat-grid-tile>
+  </mat-grid-list>
+</div> -->

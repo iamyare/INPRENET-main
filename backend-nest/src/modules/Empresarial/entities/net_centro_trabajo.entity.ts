@@ -9,7 +9,7 @@ import { Net_Referencia_Centro_Trabajo } from './net_referencia_centro_trabajo.e
 import { Net_Centro_Trabajo_Jornada } from './Net_Centro_Trabajo_Jornada.entity';
 import { Net_Centro_Trabajo_Nivel } from './Net_Centro_Trabajo_Nivel.entity';
 import { Net_Modulo } from 'src/modules/usuario/entities/net_modulo.entity';
-import { Net_Estado_Centro_Trabajo } from './Net_Estado_Centro_trabajo.entuty';
+import { Net_Estado_Centro_Trabajo } from './Net_Estado_Centro_trabajo.entity';
 
 @Entity({ name: 'NET_CENTRO_TRABAJO' })
 export class Net_Centro_Trabajo {
@@ -22,19 +22,19 @@ export class Net_Centro_Trabajo {
     @Column('varchar2', { length: 40, nullable: true, name: 'SECTOR_ECONOMICO' })
     sector_economico: string;
 
-    @Column('varchar2', { length: 30, nullable: false, name: 'TELEFONO_1' })
+    @Column('varchar2', { length: 30, nullable: true, name: 'TELEFONO_1' })
     telefono_1: string;
 
     @Column('varchar2', { length: 30, nullable: true, name: 'TELEFONO_2' })
     telefono_2: string;
 
-    @Column('varchar2', { length: 30, nullable: false, name: 'CELULAR_1' })
+    @Column('varchar2', { length: 30, nullable: true, name: 'CELULAR_1' })
     celular_1: string;
 
     @Column('varchar2', { length: 30, nullable: true, name: 'CELULAR_2' })
     celular_2: string;
 
-    @Column('varchar2', { length: 40, nullable: false, name: 'CORREO_1' })
+    @Column('varchar2', { length: 40, nullable: true, name: 'CORREO_1' })
     @Index("UQ_Correo_centro_trab", { unique: true })
     correo_1: string;
 
@@ -47,14 +47,14 @@ export class Net_Centro_Trabajo {
     @Column('nvarchar2', { length: 50, nullable: true, name: 'REPRESENTANTE_LEGAL' })
     representante_legal: string;
 
-    @Column('nvarchar2', { length: 14, nullable: false, name: 'RTN' })
+    @Column('nvarchar2', { length: 14, nullable: true, name: 'RTN' })
     @Index("UQ_rtn_netCenTrab", { unique: true })
     rtn: string;
 
     @Column('nvarchar2', { length: 300, nullable: true, name: 'LOGO' })
     logo: string;
 
-    @Column('nvarchar2', { length: 200, nullable: false, name: 'DIRECCION_1' })
+    @Column('nvarchar2', { length: 200, nullable: true, name: 'DIRECCION_1' })
     direccion_1: string;
 
     @Column('nvarchar2', { length: 200, nullable: true, name: 'DIRECCION_2' })

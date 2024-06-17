@@ -81,6 +81,8 @@ export class DynamicFormComponent implements OnInit {
     const result: any = {};
 
     this.fields.forEach((field: any) => {
+      //const controlValue = formValues[field.name];
+
       if (field.type === 'daterange') {
         this.form.value[field.name] = {
           start: this.form.value[field.name]?.start,
@@ -101,6 +103,7 @@ export class DynamicFormComponent implements OnInit {
 
     return this.form;
   }
+
 
   mergeForms(incomingForm: FormGroup): FormGroup {
     const group = this.createControl();

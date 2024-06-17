@@ -1,0 +1,19 @@
+<!-- <div class="afiliado">
+  <h2>Perfil de Afiliado</h2>
+  <div *ngIf="informacionCompleta">
+      <h3>Datos del Beneficiario</h3>
+      <p>ID Persona: {{ informacionCompleta.ID_PERSONA }}</p>
+      <p>ID Causante: {{ informacionCompleta.ID_CAUSANTE }}</p>
+      <p>Porcentaje: {{ informacionCompleta.porcentaje }}</p>
+      <p>Estado Afiliacion: {{ informacionCompleta.estadoAfiliacion?.Descripcion }}</p>
+
+  </div>
+  <div *ngIf="!informacionCompleta">
+    <p>No hay datos disponibles para mostrar.</p>
+  </div>
+</div>
+ -->
+ <div *ngIf="detalle">
+  <h2>Afiliado: {{ detalle.ID_PERSONA }} - {{ detalle.tipoPersona.tipo_persona }}</h2>
+  <!-- Más detalles del afiliado -->
+</div>

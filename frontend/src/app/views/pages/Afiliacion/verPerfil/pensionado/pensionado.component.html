@@ -1,0 +1,13 @@
+<!-- <div *ngIf="datos">
+  <h3>Datos del Pensionado</h3>
+  <p>ID Persona: {{ datos.ID_PERSONA }}</p>
+  <p>ID Causante: {{ datos.ID_CAUSANTE }}</p>
+  <p>Porcentaje: {{ datos.porcentaje }}</p>
+  <p>Estado Afiliacion: {{ datos.estadoAfiliacion?.Descripcion }}</p>
+</div>
+ -->
+
+ <div *ngIf="detalle">
+  <h2>Afiliado: {{ detalle.ID_PERSONA }} - {{ detalle.tipoPersona.tipo_persona }}</h2>
+  <!-- Más detalles del afiliado -->
+</div>

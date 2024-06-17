@@ -20,7 +20,7 @@ import { Net_Sociedad_Centro_Trabajo } from './entities/net_sociedad_centro.enti
 import { Net_Peps } from './entities/Net_peps-entity';
 import { Net_Socio } from './entities/net_socio.entity';
 import { Net_Sociedad_Socio } from './entities/net_sociedad_socio.entity';
-import { Net_Estado_Centro_Trabajo } from './entities/Net_Estado_Centro_trabajo.entuty';
+import { Net_Estado_Centro_Trabajo } from './entities/Net_Estado_Centro_trabajo.entity';
 
 @Module({
   controllers: [CentroTrabajoController, EmpresasController],

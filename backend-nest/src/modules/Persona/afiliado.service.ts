@@ -120,6 +120,38 @@ export class AfiliadoService {
     return persona;
   }
 
+  async getCausanteByDniBeneficiario(n_identificacion: string): Promise<Net_Persona> {
+    // Obtener la persona (beneficiario) por n_identificacion
+    const beneficiario = await this.personaRepository.findOne({ where: { n_identificacion }, relations: ['detallePersona'] });
+
+    if (!beneficiario) {
+      throw new Error('Beneficiario no encontrado');
+    }
+
+    // Obtener el ID del tipo de persona basado en el nombre "BENEFICIARIO"
+    const tipoPersona = await this.tipoPersonaRepository.findOne({ where: { tipo_persona: 'BENEFICIARIO' } });
+    if (!tipoPersona) {
+      throw new Error('Tipo de persona "BENEFICIARIO" no encontrado');
+    }
+
+    // Obtener el detalle de la persona del beneficiario
+    const detalle = beneficiario.detallePersona.find(d => d.ID_TIPO_PERSONA === tipoPersona.id_tipo_persona);
+
+    if (!detalle) {
+      throw new Error('Detalle de beneficiario no encontrado');
+    }
+
+    // Obtener el causante usando el ID_CAUSANTE del detalle del beneficiario
+    const causante = await this.personaRepository.findOne({ where: { id_persona: detalle.ID_CAUSANTE } });
+
+    if (!causante) {
+      throw new Error('Causante no encontrado');
+    }
+
+    return causante;
+  }
+
+
   async createPersona(createPersonaDto: NetPersonaDTO): Promise<Net_Persona> {
     const persona = new Net_Persona();
     Object.assign(persona, createPersonaDto);

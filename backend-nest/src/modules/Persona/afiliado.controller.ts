@@ -45,6 +45,11 @@ export class AfiliadoController {
     return this.afiliadoService.getPersonaByn_identificacioni(n_identificacion);
   }
 
+  @Get('causante/:dni')
+  async getCausanteByDniBeneficiario(@Param('dni') dni: string): Promise<Net_Persona> {
+    return this.afiliadoService.getCausanteByDniBeneficiario(dni);
+  }
+
   @Post('create-with-detalle')
   async create(@Body() benef: Benef): Promise<Net_Persona> {
     return this.afiliadoService.createBenef(benef);

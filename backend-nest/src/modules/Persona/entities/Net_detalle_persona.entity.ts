@@ -26,8 +26,8 @@ export class NET_DETALLE_PERSONA {
 
     // Relación Muchos a Uno consigo mismo
     @ManyToOne(() => NET_DETALLE_PERSONA, detalleAfiliado => detalleAfiliado.persona, { cascade: true })
-    @JoinColumn({ name: 'ID_CAUSANTE_PADRE', referencedColumnName: 'ID_PERSONA', foreignKeyConstraintName: "FK_ID_PERSONA_DETALLE_PERSONA" })
-    @JoinColumn({ name: 'ID_CAUSANTE', referencedColumnName: 'ID_CAUSANTE', foreignKeyConstraintName: "FK_ID_PERSONA_DETALLE_PERSONA" })
+    @JoinColumn({ name: 'ID_CAUSANTE_PADRE', referencedColumnName: 'ID_CAUSANTE', foreignKeyConstraintName: "FK_ID_PERSONA_DETALLE_PERSONA" })
+    @JoinColumn({ name: 'ID_CAUSANTE', referencedColumnName: 'ID_PERSONA', foreignKeyConstraintName: "FK_ID_PERSONA_DETALLE_PERSONA" })
     @JoinColumn({ name: 'ID_DETALLE_PERSONA', referencedColumnName: 'ID_DETALLE_PERSONA', foreignKeyConstraintName: "FK_ID_PERSONA_DETALLE_PERSONA" })
     padreIdPersona: NET_DETALLE_PERSONA;
 

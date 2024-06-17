@@ -9,6 +9,7 @@ import { Net_Referencia_Centro_Trabajo } from './net_referencia_centro_trabajo.e
 import { Net_Centro_Trabajo_Jornada } from './Net_Centro_Trabajo_Jornada.entity';
 import { Net_Centro_Trabajo_Nivel } from './Net_Centro_Trabajo_Nivel.entity';
 import { Net_Modulo } from 'src/modules/usuario/entities/net_modulo.entity';
+import { Net_Estado_Centro_Trabajo } from './Net_Estado_Centro_trabajo.entuty';
 
 @Entity({ name: 'NET_CENTRO_TRABAJO' })
 export class Net_Centro_Trabajo {
@@ -70,7 +71,7 @@ export class Net_Centro_Trabajo {
 
     @Column('int', { nullable: true, name: 'NUMERO_EMPLEADOS' })
     numero_empleados: number;
-    
+
     @Column('number', { precision: 18, scale: 2, nullable: true, name: 'MONTO_ACTIVOS_TOTALES' })
     monto_activos_totales: number;
 
@@ -108,4 +109,8 @@ export class Net_Centro_Trabajo {
 
     @OneToMany(() => Net_Modulo, modulo => modulo.centroTrabajo)
     modulos: Net_Modulo[];
+
+    @ManyToOne(() => Net_Estado_Centro_Trabajo, estado => estado.centro_trabajo)
+    @JoinColumn({ name: 'ID_ESTADO_CENTRO_TRAB', foreignKeyConstraintName: 'FK_ID_ESTADO_CENTRO_TRAB_CENT_TRAB' })
+    estado: Net_Centro_Trabajo;
 }

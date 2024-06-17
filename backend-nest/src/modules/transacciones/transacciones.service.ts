@@ -164,9 +164,9 @@ export class TransaccionesService {
 
 
 
-  async obtenerTiposDeCuentaPorDNI(dni: string): Promise<any[]> {
+  async obtenerTiposDeCuentaPorDNI(n_identificacion: string): Promise<any[]> {
     const persona = await this.personaRepository.findOne({
-      where: { dni }
+      where: { n_identificacion }
     });
 
     if (!persona) {

@@ -10,7 +10,7 @@ const noSpecialCharsPattern = '^[a-zA-Z0-9\\s]*$';
 
 export function generateAddressFormGroup(datos?: any): FormGroup {
   return new FormGroup({
-    dni: new FormControl(datos?.dni, [Validators.required, Validators.maxLength(15), Validators.pattern(/^[0-9]{13}$|^[0-9]{4}-[0-9]{4}-[0-9]{5}$/)]),
+    n_identificacion: new FormControl(datos?.n_identificacion, [Validators.required, Validators.maxLength(15), Validators.pattern(/^[0-9]{13}$|^[0-9]{4}-[0-9]{4}-[0-9]{5}$/)]),
     primer_nombre: new FormControl(datos?.primer_nombre, [Validators.required, Validators.maxLength(40), Validators.minLength(1)]),
     segundo_nombre: new FormControl(datos?.segundo_nombre, [Validators.maxLength(40)]),
     tercer_nombre: new FormControl(datos?.tercer_nombre, [Validators.maxLength(40)]),
@@ -18,6 +18,7 @@ export function generateAddressFormGroup(datos?: any): FormGroup {
     segundo_apellido: new FormControl(datos?.segundo_apellido, [Validators.maxLength(40)]),
     fallecido: new FormControl(datos?.fallecido, [Validators.maxLength(2)]),
     fecha_nacimiento: new FormControl(datos?.fecha_nacimiento, [Validators.required]),
+    fecha_vencimiento_ident: new FormControl(datos?.fecha_vencimiento_ident, [Validators.required]),
     cantidad_dependientes: new FormControl(datos?.cantidad_dependientes, [Validators.pattern("^[0-9]+$"), Validators.required]),
     estado_civil: new FormControl(datos?.estado_civil, [Validators.required, Validators.maxLength(40)]),
     representacion: new FormControl(datos?.representacion, [Validators.required, Validators.maxLength(40)]),

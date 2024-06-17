@@ -38,16 +38,16 @@ export class DetallePlanillaIngresoService {
   }
 
 
-  async actualizarDetallesPlanilla(dni: string, idDetallePlanIngreso: number, sueldo: number, prestamos?: number): Promise<{ message: string }> {
+  async actualizarDetallesPlanilla(n_identificacion: string, idDetallePlanIngreso: number, sueldo: number, prestamos?: number): Promise<{ message: string }> {
     const sectorEconomico = 'PRIVADO';
     const detalle = await this.detallePlanillaIngrRepo.findOne({
-      where: { id_detalle_plan_Ing: idDetallePlanIngreso, persona: { dni: dni } },
+      where: { id_detalle_plan_Ing: idDetallePlanIngreso, persona: { n_identificacion: n_identificacion } },
       relations: ['persona']
     });
 
     if (!detalle) {
-      this.logger.error(`Detalle Planilla de Ingreso no encontrado para el ID: ${idDetallePlanIngreso} y DNI: ${dni}`);
-      throw new NotFoundException(`Detalle Planilla de Ingreso no encontrado para el ID: ${idDetallePlanIngreso} y DNI: ${dni}`);
+      this.logger.error(`Detalle Planilla de Ingreso no encontrado para el ID: ${idDetallePlanIngreso} y DNI: ${n_identificacion}`);
+      throw new NotFoundException(`Detalle Planilla de Ingreso no encontrado para el ID: ${idDetallePlanIngreso} y DNI: ${n_identificacion}`);
     }
     if (prestamos !== undefined) {
       detalle.prestamos = prestamos;
@@ -128,11 +128,11 @@ export class DetallePlanillaIngresoService {
     }
   }
 
-  async insertNetDetPlanilla(id_planilla: number, dni: string, id_centro_educativo: number, createDetPlanIngDTO: CreateDetallePlanIngDto): Promise<boolean> {
+  async insertNetDetPlanilla(id_planilla: number, n_identificacion: string, id_centro_educativo: number, createDetPlanIngDTO: CreateDetallePlanIngDto): Promise<boolean> {
     const { prestamos } = createDetPlanIngDTO
 
     let persona = await this.personaRepository.findOne({
-      where: { dni: dni, perfPersCentTrabs: { centroTrabajo: { id_centro_trabajo: id_centro_educativo } } },
+      where: { n_identificacion: n_identificacion, perfPersCentTrabs: { centroTrabajo: { id_centro_trabajo: id_centro_educativo } } },
       relations: ["perfPersCentTrabs", "perfPersCentTrabs.centroTrabajo"]
     });
 
@@ -159,10 +159,10 @@ export class DetallePlanillaIngresoService {
     return true
   }
 
-  async obtPersonaPorCentTrab(dni: string, id_centro_educativo: number): Promise<any> {
+  async obtPersonaPorCentTrab(n_identificacion: string, id_centro_educativo: number): Promise<any> {
 
     let persona = await this.personaRepository.findOne({
-      where: { dni: dni, perfPersCentTrabs: { centroTrabajo: { id_centro_trabajo: id_centro_educativo } } },
+      where: { n_identificacion: n_identificacion, perfPersCentTrabs: { centroTrabajo: { id_centro_trabajo: id_centro_educativo } } },
       relations: ["perfPersCentTrabs", "perfPersCentTrabs.centroTrabajo"]
     });
 

@@ -16,7 +16,7 @@
         <div class="col-md-4" *ngIf="fallecido == 'NO'">
           <mat-form-field style="flex-direction: column-reverse;" class="example-full-width inputs"
             appearance="outline">
-            <mat-label>Estado Persona</mat-label>
+            <mat-label>Estado de Afiliación de la Persona</mat-label>
             <mat-select matNativeControl formControlName="estado" (selectionChange)="mostrarCamposFallecido($event)">
               <mat-option *ngFor="let p of estado" [value]="p.value">
                 {{ p.label }}

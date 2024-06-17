@@ -68,7 +68,7 @@ export class EditDatosGeneralesComponent {
   }
   ngOnInit(): void {
     this.myFormFields = [
-      { type: 'text', label: 'DNI del afiliado', name: 'dni', validations: [Validators.required, Validators.minLength(13), Validators.maxLength(14)], display: true },
+      { type: 'text', label: 'N_IDENTIFICACION del afiliado', name: 'n_identificacion', validations: [Validators.required, Validators.minLength(13), Validators.maxLength(14)], display: true },
     ];
     this.myColumns = [
       {
@@ -112,8 +112,8 @@ export class EditDatosGeneralesComponent {
 
   async cargarEstadosAfiliado() {
     const response = await this.svcAfiliado.getAllEstados().toPromise();
-    this.estado = response.map((estado: { codigo: any; Descripcion: any; }) => ({
-      label: estado.Descripcion,
+    this.estado = response.map((estado: { codigo: any; nombre_estado: any; }) => ({
+      label: estado.nombre_estado,
       value: estado.codigo
     }));
   }
@@ -166,7 +166,7 @@ export class EditDatosGeneralesComponent {
 
   async previsualizarInfoAfil() {
     if (this.Afiliado) {
-      await this.svcAfiliado.getAfilByParam(this.Afiliado.DNI).subscribe(
+      await this.svcAfiliado.getAfilByParam(this.Afiliado.N_IDENTIFICACION).subscribe(
         (result) => {
           this.datos = result;
           this.Afiliado = result;
@@ -174,7 +174,7 @@ export class EditDatosGeneralesComponent {
           this.fallecido = result.fallecido
 
           this.formDatosGenerales.value.refpers[0] = {
-            dni: result.DNI,
+            n_identificacion: result.N_IDENTIFICACION,
             rtn: result.RTN,
             primer_nombre: result.PRIMER_NOMBRE,
             segundo_nombre: result.SEGUNDO_NOMBRE,
@@ -182,6 +182,7 @@ export class EditDatosGeneralesComponent {
             segundo_apellido: result.SEGUNDO_APELLIDO,
             tercer_nombre: result.TERCER_NOMBRE,
             fecha_nacimiento: result.FECHA_NACIMIENTO,
+            fecha_vencimiento_ident: result.fecha_vencimiento_ident,
             cantidad_dependientes: result.CANTIDAD_DEPENDIENTES,
             cantidad_hijos: result.CANTIDAD_HIJOS,
             telefono_1: result.TELEFONO_1,
@@ -206,6 +207,7 @@ export class EditDatosGeneralesComponent {
             this.cargarMunicipios(result.ID_MUNICIPIO_DEFUNCION);
           }
 
+          /* this.form1.controls.fecha_vencimiento_ident.setValue(result.fecha_vencimiento_ident); */
           this.form1.controls.estado.setValue(result.estadoAfiliacion);
           this.form1.controls.observaciones.setValue(result.observaciones);
           this.form1.controls.tipo_defuncion.setValue(result.tipo_defuncion);

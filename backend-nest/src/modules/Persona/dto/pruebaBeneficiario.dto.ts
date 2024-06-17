@@ -42,7 +42,7 @@ export class Benef {
 
     @IsOptional()
     @IsString()
-    dni?: string;
+    n_identificacion?: string;
 
     @IsOptional()
     @IsString()
@@ -62,7 +62,7 @@ export class Benef {
 
     @IsOptional()
     @IsNumber()
-    id_municipio_residencia?: number; 
+    id_municipio_residencia?: number;
 
     @IsOptional()
     @IsDateString()

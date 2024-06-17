@@ -20,6 +20,7 @@ import { Net_Sociedad_Centro_Trabajo } from './entities/net_sociedad_centro.enti
 import { Net_Peps } from './entities/Net_peps-entity';
 import { Net_Socio } from './entities/net_socio.entity';
 import { Net_Sociedad_Socio } from './entities/net_sociedad_socio.entity';
+import { Net_Estado_Centro_Trabajo } from './entities/Net_Estado_Centro_trabajo.entuty';
 
 @Module({
   controllers: [CentroTrabajoController, EmpresasController],
@@ -27,6 +28,7 @@ import { Net_Sociedad_Socio } from './entities/net_sociedad_socio.entity';
   imports: [
     TypeOrmModule.forFeature([
       Net_Centro_Trabajo,
+      Net_Estado_Centro_Trabajo,
       Net_Deduccion,
       Net_Departamento,
       Net_Detalle_Deduccion,
@@ -45,4 +47,4 @@ import { Net_Sociedad_Socio } from './entities/net_sociedad_socio.entity';
     ]),
   ],
 })
-export class EmpresarialModule {}
+export class EmpresarialModule { }

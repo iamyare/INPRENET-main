@@ -60,8 +60,8 @@ export class EditColegiosMagisterialesComponent {
   }
 
   previsualizarInfoAfil() {
-    if (this.Afiliado.DNI) {
-      this.svcAfiliado.getAfilByParam(this.Afiliado.DNI).subscribe(
+    if (this.Afiliado.N_IDENTIFICACION) {
+      this.svcAfiliado.getAfilByParam(this.Afiliado.N_IDENTIFICACION).subscribe(
         async (result) => {
           this.prevAfil = true;
           this.Afiliado = result
@@ -87,7 +87,7 @@ export class EditColegiosMagisterialesComponent {
   async getFilas() {
     if (this.Afiliado) {
       try {
-        const data = await this.svcAfiliado.getAllColMagPPersona(this.Afiliado.DNI).toPromise();
+        const data = await this.svcAfiliado.getAllColMagPPersona(this.Afiliado.N_IDENTIFICACION).toPromise();
         this.filas = data.map((item: any) => {
           return {
             id_per_cole_mag: item.id,

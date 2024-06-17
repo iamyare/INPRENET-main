@@ -36,8 +36,6 @@ export class DynamicFormComponent implements OnInit {
   }
 
   onDatosBenChange1(e: any) {
-    console.log(this.form);
-
     const transformedForm = this.transformFormValues(this.form!);
     this.newDatBenChange.emit(transformedForm);
   }
@@ -79,14 +77,14 @@ export class DynamicFormComponent implements OnInit {
   }
 
   private transformFormValues(form: FormGroup): any {
-    const formValues = form.value;
+
     const result: any = {};
 
     this.fields.forEach((field: any) => {
       if (field.type === 'daterange') {
         this.form.value[field.name] = {
-          start: formValues[field.name]?.start,
-          end: formValues[field.name]?.end
+          start: this.form.value[field.name]?.start,
+          end: this.form.value[field.name]?.end
         };
       } else if (field.type === 'checkboxGroup') {
         const checkboxArray = form.get(field.name) as FormArray;
@@ -95,9 +93,9 @@ export class DynamicFormComponent implements OnInit {
           value: control.value
         }));
       } else if (field.type === 'radio') {
-        this.form.value[field.name] = formValues[field.name];
+        this.form.value[field.name] = this.form.value[field.name];
       } else {
-        this.form.value[field.name] = formValues[field.name];
+        this.form.value[field.name] = this.form.value[field.name];
       }
     });
 

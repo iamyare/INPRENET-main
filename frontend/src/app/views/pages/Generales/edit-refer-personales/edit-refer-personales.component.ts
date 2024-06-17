@@ -93,9 +93,9 @@ export class EditReferPersonalesComponent {
   }
 
   previsualizarInfoAfil() {
-    if (this.Afiliado.DNI) {
+    if (this.Afiliado.N_IDENTIFICACION) {
 
-      this.svcAfiliado.getAfilByParam(this.Afiliado.DNI).subscribe(
+      this.svcAfiliado.getAfilByParam(this.Afiliado.N_IDENTIFICACION).subscribe(
         async (result) => {
           this.prevAfil = true;
           this.Afiliado = result
@@ -121,7 +121,7 @@ export class EditReferPersonalesComponent {
   async getFilas() {
     if (this.Afiliado) {
       try {
-        const data = await this.svcAfiliado.getAllReferenciasPersonales(this.Afiliado.DNI).toPromise();
+        const data = await this.svcAfiliado.getAllReferenciasPersonales(this.Afiliado.N_IDENTIFICACION).toPromise();
         this.filas = data.map((item: any) => {
           const filaProcesada = {
             id_ref_personal: item.id_ref_personal ?? 'ID no disponible',

@@ -28,19 +28,19 @@ export class VerDatosAfiliadosComponent implements OnInit {
   generacionConstancias: boolean = false; // Nueva propiedad
 
   constructor(private svcAfiliado: AfiliadoService,
-              private toastr: ToastrService) {
+    private toastr: ToastrService) {
 
   }
 
   ngOnInit(): void {
     this.myFormFields = [
-      { type: 'text', label: 'DNI del afiliado', name: 'dni', validations: [Validators.required, Validators.minLength(13), Validators.maxLength(14)], display: true, value: '' },
+      { type: 'text', label: 'Número de identificación del afiliado', name: 'n_identificacion', validations: [Validators.required, Validators.minLength(13), Validators.maxLength(14)], display: true, value: '' },
     ];
 
     this.myColumns = [
       {
-        header: 'DNI',
-        col: 'dni',
+        header: 'N_IDENTIFICACION',
+        col: 'n_identificacion',
         isEditable: true,
         validationRules: [Validators.required, Validators.minLength(3)]
       },
@@ -143,8 +143,10 @@ export class VerDatosAfiliadosComponent implements OnInit {
   }
 
   previsualizarInfoAfil() {
-    if (this.form.dni) {
-      this.svcAfiliado.getAfilByParam(this.form.dni).subscribe(
+    console.log(this.form.value.n_identificacion);
+
+    if (this.form.value.n_identificacion) {
+      this.svcAfiliado.getAfilByParam(this.form.value.n_identificacion).subscribe(
         async (result) => {
           this.prevAfil = true;
           this.Afiliado = result;
@@ -152,7 +154,7 @@ export class VerDatosAfiliadosComponent implements OnInit {
         },
         (error) => {
           this.toastr.error(`Error: ${error.error.message}`);
-          this.resetDatos();
+          /* this.resetDatos(); */
         }
       );
     }

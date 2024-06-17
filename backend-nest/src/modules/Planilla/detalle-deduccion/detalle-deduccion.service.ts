@@ -43,8 +43,8 @@ export class DetalleDeduccionService {
         const centrotrabajo = await this.centroTrabajoRepository.findOne({ where: { nombre_centro_trabajo: item.nombre_centro_trabajo } });
         if (!centrotrabajo) throw new NotFoundException(`Institucion ${item.nombre_centro_trabajo} no encontrada`);
 
-        const persona = await this.personaRepository.findOne({ where: { dni: item.dni } });
-        if (!persona) throw new NotFoundException(`Pfiliado con DNI ${item.dni} no encontrado`);
+        const persona = await this.personaRepository.findOne({ where: { n_identificacion: item.n_identificacion } });
+        if (!persona) throw new NotFoundException(`Pfiliado con DNI ${item.n_identificacion} no encontrado`);
 
         /* const deduccion = await this.deduccionRepository.findOne({ where: { codigo_deduccion: item.codigo_deduccion, centroTrabajo } });
         if (!deduccion) throw new NotFoundException(`Deducción con código ${item.codigo_deduccion} no encontrada en la institución ${item.nombre_centro_trabajo}`); */
@@ -343,12 +343,12 @@ export class DetalleDeduccionService {
 
 
   async create(createDetalleDeduccionDto: CreateDetalleDeduccionDto) {
-    const { dni, nombre_deduccion, nombre_centro_trabajo, monto_total, monto_aplicado, estado_aplicacion, anio, mes } = createDetalleDeduccionDto;
+    const { n_identificacion, nombre_deduccion, nombre_centro_trabajo, monto_total, monto_aplicado, estado_aplicacion, anio, mes } = createDetalleDeduccionDto;
 
     // Buscar el afiliado por DNI
-    const persona = await this.personaRepository.findOne({ where: { dni } });
+    const persona = await this.personaRepository.findOne({ where: { n_identificacion } });
     if (!persona) {
-      throw new NotFoundException(`Afiliado con DNI '${dni}' no encontrado.`);
+      throw new NotFoundException(`Afiliado con DNI '${n_identificacion}' no encontrado.`);
     }
     // Buscar la deducción por nombre
     const deduccion = await this.deduccionRepository.findOne({ where: { nombre_deduccion: nombre_deduccion } });
@@ -429,13 +429,13 @@ export class DetalleDeduccionService {
       throw new NotFoundException(`DetalleDeduccion con ID '${id_ded_deduccion}' no encontrado.`);
     }
 
-    const { dni, nombre_deduccion, nombre_centro_trabajo, monto_total, monto_aplicado, estado_aplicacion, anio, mes } = updateDetalleDeduccionDto;
+    const { n_identificacion, nombre_deduccion, nombre_centro_trabajo, monto_total, monto_aplicado, estado_aplicacion, anio, mes } = updateDetalleDeduccionDto;
 
     // Buscar el afiliado por DNI
-    if (dni) {
-      const afiliado = await this.personaRepository.findOne({ where: { dni } });
+    if (n_identificacion) {
+      const afiliado = await this.personaRepository.findOne({ where: { n_identificacion } });
       if (!afiliado) {
-        throw new NotFoundException(`Afiliado con DNI '${dni}' no encontrado.`);
+        throw new NotFoundException(`Afiliado con DNI '${n_identificacion}' no encontrado.`);
       }
       //detalleDeduccion.afiliado = afiliado;
     }

@@ -72,8 +72,8 @@ export class EditDatosBancariosComponent {
   }
 
   previsualizarInfoAfil() {
-    if (this.Afiliado.DNI) {
-      this.svcAfiliado.getAllPersonas(this.Afiliado.DNI).subscribe(
+    if (this.Afiliado.N_IDENTIFICACION) {
+      this.svcAfiliado.getAllPersonas(this.Afiliado.N_IDENTIFICACION).subscribe(
         async (result) => {
           this.prevAfil = true;
           this.Afiliado = result
@@ -99,7 +99,7 @@ export class EditDatosBancariosComponent {
   async getFilas() {
     if (this.Afiliado) {
       try {
-        const data = await this.svcAfiliado.getAllPersonaPBanco(this.Afiliado.DNI).toPromise();
+        const data = await this.svcAfiliado.getAllPersonaPBanco(this.Afiliado.N_IDENTIFICACION).toPromise();
         this.filas = data.map((item: any) => ({
           id: item.id_af_banco,
           nombre_banco: item.banco.nombre_banco,

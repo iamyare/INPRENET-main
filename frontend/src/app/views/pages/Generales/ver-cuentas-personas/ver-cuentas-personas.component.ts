@@ -44,7 +44,7 @@ export class VerCuentasPersonasComponent {
 
   ngOnInit(): void {
     this.myFormFields = [
-      { type: 'text', label: 'DNI del afiliado', name: 'dni', validations: [Validators.required, Validators.minLength(13), Validators.maxLength(14)], display: true },
+      { type: 'text', label: 'número de identificacion del afiliado', name: 'n_identificacion', validations: [Validators.required, Validators.minLength(13), Validators.maxLength(14)], display: true },
     ];
     this.myColumns = [
       {
@@ -76,6 +76,8 @@ export class VerCuentasPersonasComponent {
 
     this.previsualizarInfoAfil();
     this.getFilas().then(() => this.cargar());
+    console.log(this.Afiliado);
+
   }
 
   async obtenerDatos(event: any): Promise<any> {
@@ -83,8 +85,8 @@ export class VerCuentasPersonasComponent {
   }
 
   previsualizarInfoAfil() {
-    if (this.Afiliado.DNI) {
-      this.svcAfiliado.getAfilByParam(this.Afiliado.DNI).subscribe(
+    if (this.Afiliado.N_IDENTIFICACION) {
+      this.svcAfiliado.getAfilByParam(this.Afiliado.N_IDENTIFICACION).subscribe(
         async (result) => {
           this.prevAfil = true;
           this.Afiliado = result
@@ -108,9 +110,11 @@ export class VerCuentasPersonasComponent {
   }
 
   async getFilas() {
+
     if (this.Afiliado) {
       try {
-        const data = await this.svcAfiliado.buscarCuentasPorDNI(this.Afiliado.DNI).toPromise();
+        const data = await this.svcAfiliado.buscarCuentasPorDNI(this.Afiliado.N_IDENTIFICACION).toPromise();
+        console.log(data);
         this.filas = data.data.persona.cuentas.map((item: any) => {
           return {
             NUMERO_CUENTA: item.NUMERO_CUENTA,
@@ -126,7 +130,7 @@ export class VerCuentasPersonasComponent {
         console.error('Error al cargar los datos de las cuentas de la persona', error);
       }
     } else {
-      this.resetDatos()
+      /* this.resetDatos() */
     }
   }
 

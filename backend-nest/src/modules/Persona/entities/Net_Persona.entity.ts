@@ -29,9 +29,15 @@ export class Net_Persona {
     @JoinColumn({ name: 'ID_PAIS_NACIONALIDAD', foreignKeyConstraintName: "FK_ID_PAIS_PERS" })
     pais: Net_Pais;
 
-    @Column('varchar2', { length: 15, nullable: true, name: 'DNI' })
-    @Index("UQ_DNI_net_persona", { unique: true })
-    dni: string;
+    @Column('varchar2', { length: 15, nullable: true, name: 'N_IDENTIFICACION' })
+    @Index("UQ_N_Identificacion_net_persona", { unique: true })
+    n_identificacion: string;
+
+    @Column('date', { nullable: true, name: 'FECHA_VENCIMIENTO_IDENT' })
+    fecha_vencimiento_ident: string;
+
+    @Column('varchar2', { length: 14, nullable: true, name: 'RTN' })
+    rtn: string;
 
     @Column('varchar2', { length: 40, nullable: true, name: 'ESTADO_CIVIL' })
     estado_civil: string;
@@ -95,9 +101,6 @@ export class Net_Persona {
 
     @Column('varchar2', { length: 40, nullable: true, name: 'CORREO_2' })
     correo_2: string;
-
-    @Column('varchar2', { length: 14, nullable: true, name: 'RTN' })
-    rtn: string;
 
     @Column('date', { nullable: true, name: 'FECHA_NACIMIENTO' })
     fecha_nacimiento: string;

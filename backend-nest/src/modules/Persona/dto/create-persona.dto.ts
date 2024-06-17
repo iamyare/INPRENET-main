@@ -5,7 +5,7 @@ import {
 
 export interface PersonaResponse {
     id_persona: number;
-    dni: string;
+    n_identificacion: string;
     estado_civil: string;
     primer_nombre: string;
     segundo_nombre: string;
@@ -25,6 +25,7 @@ export interface PersonaResponse {
     direccion_residencia: string;
     estado: string;
     fecha_nacimiento: string;
+    fecha_vencimiento_ident: string;
     archivo_identificacion: string;
     tipoIdentificacion: string;
     porcentaje: string;

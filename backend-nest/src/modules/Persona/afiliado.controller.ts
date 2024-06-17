@@ -227,34 +227,34 @@ export class AfiliadoController {
   }
 
   @Get('/movimientos/:dni')
-  async buscarMovimientosPorDNI(@Param('dni') dni: string) {
+  async buscarMovimientosPorN_IDENTIFICACION(@Param('dni') dni: string) {
     try {
       const resultado =
-        await this.afiliadoService.buscarPersonaYMovimientosPorDNI(dni);
+        await this.afiliadoService.buscarPersonaYMovimientosPorN_IDENTIFICACION(dni);
       return resultado;
     } catch (error) {
       if (error instanceof NotFoundException) {
         throw error;
       } else {
         throw new NotFoundException(
-          `No se pudo procesar la solicitud para el DNI ${dni}`,
+          `No se pudo procesar la solicitud para el N_IDENTIFICACION ${dni}`,
         );
       }
     }
   }
 
-  @Get('/cuentas/:dni')
-  async buscarCuentasPorDNI(@Param('dni') dni: string) {
+  @Get('/cuentas/:n_identificacion')
+  async buscarCuentasPorN_IDENTIFICACION(@Param('n_identificacion') n_identificacion: string) {
     try {
       const resultado =
-        await this.afiliadoService.buscarCuentasPorDNI(dni);
+        await this.afiliadoService.buscarCuentasPorN_IDENTIFICACION(n_identificacion);
       return resultado;
     } catch (error) {
       if (error instanceof NotFoundException) {
         throw error;
       } else {
         throw new NotFoundException(
-          `No se pudo procesar la solicitud para el DNI ${dni}`,
+          `No se pudo procesar la solicitud para el N_IDENTIFICACION ${n_identificacion}`,
         );
       }
     }

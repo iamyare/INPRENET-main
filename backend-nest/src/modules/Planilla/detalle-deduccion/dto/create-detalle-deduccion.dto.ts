@@ -2,9 +2,9 @@ import { IsNumber, IsOptional, IsString, IsUUID, Length, Max, Min, isNumber } fr
 
 export class CreateDetalleDeduccionDto {
     @IsString()
-    dni: string; // Asume que el DNI tiene una longitud específica
+    n_identificacion: string; // Asume que el DNI tiene una longitud específica
 
-     @IsString()
+    @IsString()
     nombre_deduccion: string;
 
     @IsString()

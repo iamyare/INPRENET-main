@@ -11,7 +11,6 @@ import { Net_Persona_Por_Banco } from "src/modules/banco/entities/net_persona-ba
 import { Net_perf_pers_cent_trab } from "./net_perf_pers_cent_trab.entity";
 import { Net_Ref_Per_Pers } from "./net_ref-Per-Persona.entity";
 import { NET_PROFESIONES } from "src/modules/transacciones/entities/net_profesiones.entity";
-import { Net_Estado_Persona } from "./net_estado_persona.entity";
 @Entity({
     name: 'NET_PERSONA',
 })

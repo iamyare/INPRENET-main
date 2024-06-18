@@ -40,11 +40,6 @@ export class AfiliadoController {
 
   constructor(private readonly afiliadoService: AfiliadoService) { }
 
-  @Get('persona-dni/:dni')
-  async getPersonaByDni(@Param('n_identificacion') n_identificacion: string): Promise<Net_Persona> {
-    return this.afiliadoService.getPersonaByn_identificacioni(n_identificacion);
-  }
-
   @Get('causante/:dni')
   async getCausanteByDniBeneficiario(@Param('dni') dni: string): Promise<Net_Persona> {
     return this.afiliadoService.getCausanteByDniBeneficiario(dni);
@@ -70,21 +65,20 @@ export class AfiliadoController {
     @UploadedFile() fotoPerfil: Express.Multer.File,
     @Body('encapsulatedDto') encapsulatedDtoStr: string
   ) {
-    /* console.log(encapsulatedDtoStr); */
-
+  
     try {
       // Convertir el string JSON a un objeto
       const encapsulatedDto: EncapsulatedPersonaDTO = JSON.parse(encapsulatedDtoStr);
-
+  
       // Procesar la imagen de perfil si está presente
       if (fotoPerfil) {
         encapsulatedDto.datosGenerales.foto_perfil = fotoPerfil.buffer; // Usar el buffer directamente
       }
-
+  
       // Creación de la persona principal
       const createPersonaDto = encapsulatedDto.datosGenerales;
       const persona = await this.afiliadoService.createPersona(createPersonaDto);
-
+  
       // Creación del detalle de la persona
       const detallePersonaDto = {
         idPersona: persona.id_persona,
@@ -93,13 +87,13 @@ export class AfiliadoController {
         idEstadoPersona: 1
       };
       const detallePersona = await this.afiliadoService.createDetallePersona(detallePersonaDto);
-
+  
       // Asignación de centros de trabajo
       let centrosTrabajoAsignados = [];
       if (encapsulatedDto.centrosTrabajo && encapsulatedDto.centrosTrabajo.length > 0) {
         centrosTrabajoAsignados = await this.afiliadoService.assignCentrosTrabajo(persona.id_persona, encapsulatedDto.centrosTrabajo);
       }
-
+  
       // Creación y asignación de referencias personales
       let referenciasAsignadas = [];
       if (encapsulatedDto.referenciasPersonales && encapsulatedDto.referenciasPersonales.length > 0) {
@@ -107,13 +101,13 @@ export class AfiliadoController {
           referencias: encapsulatedDto.referenciasPersonales
         });
       }
-
+  
       // Asignación de bancos
       let bancosAsignados = [];
       if (encapsulatedDto.bancos && encapsulatedDto.bancos.length > 0) {
         bancosAsignados = await this.afiliadoService.assignBancosToPersona(persona.id_persona, encapsulatedDto.bancos);
       }
-
+  
       // Creación de beneficiarios
       let beneficiariosAsignados = [];
       if (encapsulatedDto.beneficiarios && encapsulatedDto.beneficiarios.length > 0) {
@@ -126,19 +120,20 @@ export class AfiliadoController {
             idCausantePadre: persona.id_persona,
             idTipoPersona: 2,
             porcentaje: beneficiarioData.porcentaje,
-            idEstadoPersona: 1
+            idEstadoPersona: 1,
+            idDetallePersona: detallePersona.ID_DETALLE_PERSONA // Asigna el mismo ID_DETALLE_PERSONA
           };
           await this.afiliadoService.createDetalleBeneficiario(detalleBeneficiarioDto);
           beneficiariosAsignados.push(nuevoBeneficiario);
         }
       }
-
+  
       // Asignación de colegios magisteriales
       let colegiosMagisterialesAsignados = [];
       if (encapsulatedDto.colegiosMagisteriales && encapsulatedDto.colegiosMagisteriales.length > 0) {
         colegiosMagisterialesAsignados = await this.afiliadoService.assignColegiosMagisteriales(persona.id_persona, encapsulatedDto.colegiosMagisteriales);
       }
-
+  
       return {
         message: 'Persona creada con detalles, centros de trabajo, referencias personales, bancos, beneficiarios, colegios magisteriales y relaciones familiares asignadas correctamente.'
       };
@@ -149,6 +144,7 @@ export class AfiliadoController {
       };
     }
   }
+  
 
   @Patch('inactivar/:idPersona/:idCausante')
   async inactivarPersona(
@@ -198,7 +194,7 @@ export class AfiliadoController {
     });
 
     try {
-      let beneficiariosAsignados = [];
+      /* let beneficiariosAsignados = [];
       if (encapsulatedDto.beneficiarios && encapsulatedDto.beneficiarios.length > 0) {
         for (const beneficiario of encapsulatedDto.beneficiarios) {
           const beneficiarioData = beneficiario.datosBeneficiario;
@@ -215,7 +211,7 @@ export class AfiliadoController {
           beneficiariosAsignados.push(detalle);
         }
       }
-      return beneficiariosAsignados;
+      return beneficiariosAsignados; */
     } catch (error) {
       console.log(error);
     }

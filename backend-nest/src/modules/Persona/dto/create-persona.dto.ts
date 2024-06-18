@@ -159,4 +159,6 @@ export class NetPersonaDTO {
     @IsOptional()
     porcentaje?: number;
 
+    fecha_vencimiento_ident
+
 }

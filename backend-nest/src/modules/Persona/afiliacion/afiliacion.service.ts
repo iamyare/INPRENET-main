@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { Net_Tipo_Persona } from '../entities/net_tipo_persona.entity';
 import { Net_Persona } from '../entities/Net_Persona.entity';
 import { NET_DETALLE_PERSONA } from '../entities/Net_detalle_persona.entity';
@@ -15,6 +15,36 @@ export class AfiliacionService {
         @InjectRepository(Net_Tipo_Persona)
         private readonly tipoPersonaRepository: Repository<Net_Tipo_Persona>,
       ) {}
+
+      async getPersonaByn_identificacioni(n_identificacion: string): Promise<Net_Persona> {
+        
+        const persona = await this.personaRepository.findOne({
+          where: { n_identificacion },
+          relations: [
+            'tipoIdentificacion',
+            'pais',
+            'municipio',
+            'municipio_defuncion',
+            'profesion',
+            'detallePersona',
+            'detallePersona.tipoPersona',
+            'detallePersona.estadoAfiliacion',
+            'referenciasPersonalPersona',
+            'personasPorBanco',
+            'detalleDeduccion',
+            'perfPersCentTrabs',
+            'cuentas',
+            'detallePlanIngreso',
+            'colegiosMagisteriales',
+          ],
+        });
+    
+        if (!persona) {
+          throw new NotFoundException(`Persona with DNI ${n_identificacion} not found`);
+        }
+    
+        return persona;
+      }
 
       async getCausantesByDniBeneficiario(n_identificacion: string): Promise<Net_Persona[]> {
         // Obtener la persona (beneficiario) por n_identificacion

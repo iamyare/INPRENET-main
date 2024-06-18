@@ -51,7 +51,7 @@ export class Net_ReferenciaPersonal {
 
     @Column('varchar2', {
         length: 15,
-        nullable: false,
+        nullable: true,
         name: 'DNI'
     })
     dni: string;

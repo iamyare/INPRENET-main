@@ -90,36 +90,6 @@ export class AfiliadoService {
     private readonly connection: Connection
   ) { }
 
-
-  async getPersonaByn_identificacioni(n_identificacion: string): Promise<Net_Persona> {
-    const persona = await this.personaRepository.findOne({
-      where: { n_identificacion },
-      relations: [
-        'tipoIdentificacion',
-        'pais',
-        'municipio',
-        'municipio_defuncion',
-        'profesion',
-        'detallePersona',
-        'detallePersona.tipoPersona',
-        'detallePersona.estadoAfiliacion',
-        'referenciasPersonalPersona',
-        'personasPorBanco',
-        'detalleDeduccion',
-        'perfPersCentTrabs',
-        'cuentas',
-        'detallePlanIngreso',
-        'colegiosMagisteriales',
-      ],
-    });
-
-    if (!persona) {
-      throw new NotFoundException(`Persona with DNI ${n_identificacion} not found`);
-    }
-
-    return persona;
-  }
-
   async getCausanteByDniBeneficiario(n_identificacion: string): Promise<Net_Persona> {
     // Obtener la persona (beneficiario) por n_identificacion
     const beneficiario = await this.personaRepository.findOne({ where: { n_identificacion }, relations: ['detallePersona'] });
@@ -151,63 +121,34 @@ export class AfiliadoService {
     return causante;
   }
 
-
   async createPersona(createPersonaDto: NetPersonaDTO): Promise<Net_Persona> {
     const persona = new Net_Persona();
     Object.assign(persona, createPersonaDto);
 
+    // Convertir y formatear fechas
     if (createPersonaDto.fecha_nacimiento) {
-      if (typeof createPersonaDto.fecha_nacimiento === 'string') {
-        const fechaNacimiento = Date.parse(createPersonaDto.fecha_nacimiento);
-        if (!isNaN(fechaNacimiento)) {
-          persona.fecha_nacimiento = new Date(fechaNacimiento).toISOString().substring(0, 10);
-        } else {
-          throw new Error('Fecha de nacimiento no válida');
-        }
-      } else {
-        throw new Error('Fecha de nacimiento no es una cadena válida');
-      }
+        persona.fecha_nacimiento = this.formatDateToYYYYMMDD(createPersonaDto.fecha_nacimiento);
+    }
+    if (createPersonaDto.fecha_vencimiento_ident) {
+        persona.fecha_vencimiento_ident = this.formatDateToYYYYMMDD(createPersonaDto.fecha_vencimiento_ident);
     }
 
+    // Asignar otros campos relacionados
     if (createPersonaDto.id_tipo_identificacion !== undefined && createPersonaDto.id_tipo_identificacion !== null) {
-      persona.tipoIdentificacion = await this.tipoIdentificacionRepository.findOne({ where: { id_identificacion: createPersonaDto.id_tipo_identificacion } });
-      if (!persona.tipoIdentificacion) {
-        throw new Error(`Tipo de identificación con ID ${createPersonaDto.id_tipo_identificacion} no encontrado`);
-      }
-    } else {
-      persona.tipoIdentificacion = null;
+        persona.tipoIdentificacion = await this.tipoIdentificacionRepository.findOne({ where: { id_identificacion: createPersonaDto.id_tipo_identificacion } });
     }
-
     if (createPersonaDto.id_pais !== undefined && createPersonaDto.id_pais !== null) {
-      persona.pais = await this.paisRepository.findOne({ where: { id_pais: createPersonaDto.id_pais } });
-      if (!persona.pais) {
-        throw new Error(`País con ID ${createPersonaDto.id_pais} no encontrado`);
-      }
-    } else {
-      persona.pais = null;
+        persona.pais = await this.paisRepository.findOne({ where: { id_pais: createPersonaDto.id_pais } });
     }
-
     if (createPersonaDto.id_municipio_residencia !== undefined && createPersonaDto.id_municipio_residencia !== null) {
-      persona.municipio = await this.municipioRepository.findOne({ where: { id_municipio: createPersonaDto.id_municipio_residencia } });
-      if (!persona.municipio) {
-        throw new Error(`Municipio con ID ${createPersonaDto.id_municipio_residencia} no encontrado`);
-      }
-    } else {
-      persona.municipio = null;
+        persona.municipio = await this.municipioRepository.findOne({ where: { id_municipio: createPersonaDto.id_municipio_residencia } });
     }
-
     if (createPersonaDto.id_profesion !== undefined && createPersonaDto.id_profesion !== null) {
-      persona.profesion = await this.netProfesionesRepository.findOne({ where: { idProfesion: createPersonaDto.id_profesion } });
-      if (!persona.profesion) {
-        throw new Error(`Profesion con código ${createPersonaDto.id_profesion} no encontrado`);
-      }
-    } else {
-      persona.profesion = null;
+        persona.profesion = await this.netProfesionesRepository.findOne({ where: { idProfesion: createPersonaDto.id_profesion } });
     }
 
     return await this.personaRepository.save(persona);
-  }
-
+}
 
   async createDetallePersona(createDetallePersonaDto: CreateDetallePersonaDto): Promise<NET_DETALLE_PERSONA> {
     const detallePersona = new NET_DETALLE_PERSONA();
@@ -218,7 +159,7 @@ export class AfiliadoService {
     detallePersona.eliminado = 0;
 
     return this.detallePersonaRepository.save(detallePersona);
-  }
+}
 
   async assignCentrosTrabajo(idPersona: number, centrosTrabajoData: any[]): Promise<Net_perf_pers_cent_trab[]> {
 
@@ -339,10 +280,10 @@ export class AfiliadoService {
     detalle.ID_TIPO_PERSONA = detalleDto.idTipoPersona;
     detalle.porcentaje = detalleDto.porcentaje;
     detalle.eliminado = 0;
+    detalle.ID_DETALLE_PERSONA = detalleDto.idDetallePersona;
 
     return this.detallePersonaRepository.save(detalle);
   }
-
 
   async assignColegiosMagisteriales(idPersona: number, colegiosMagisterialesData: any[]): Promise<Net_Persona_Colegios[]> {
     try {
@@ -370,6 +311,16 @@ export class AfiliadoService {
     }
   }
 
+  
+  
+  formatDateToYYYYMMDD(dateString: string): string {
+    const date = new Date(dateString);
+    const day = ('0' + date.getDate()).slice(-2);
+    const month = ('0' + (date.getMonth() + 1)).slice(-2);
+    const year = date.getFullYear();
+    return `${year}-${month}-${day}`;
+  }
+  
   async createBenef(bene: Benef): Promise<Net_Persona> {
     const { detalleBenef, n_identificacion, id_pais, id_municipio_residencia, ...personaData } = bene;
     const tipoPersona = await this.tipoPersonaRepository.findOne({
@@ -401,8 +352,6 @@ export class AfiliadoService {
     await this.detallePersonaRepository.save(detalle);
     return persona;
   }
-
-
 
   async updateBeneficario(id: number, updatePersonaDto: UpdateBeneficiarioDto): Promise<Net_Persona> {
     console.log(updatePersonaDto);

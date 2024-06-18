@@ -38,9 +38,10 @@ export class CreateReferenciaPersonalDTO {
     telefono_personal: string;
 
     @IsString()
+    @IsOptional()
     @MaxLength(15)
     @Matches(/^[0-9]{13}$|^[0-9]{4}-[0-9]{4}-[0-9]{5}$/, {
         message: "El DNI debe contener 13 caracteres numéricos en formato continuo o en el formato NNNN-NNNN-NNNNN.",
     })
-    dni: string;
+    dni?: string;
 }

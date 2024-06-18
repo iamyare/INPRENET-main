@@ -90,7 +90,6 @@ export class DynamicTableComponent implements OnInit, OnDestroy {
       this.filas?.map((objeto: any) => ({ ...objeto, isSelected: false }));
     } else {
       this.filas = await this.getData();
-
     }
     this.filtrarUsuarios().subscribe();
   }

@@ -82,10 +82,14 @@ export class SociedadSocioComponent implements OnInit {
     }
   ];
 
-  constructor(private fb: FormBuilder, private direccionService: DireccionService) {}
+  constructor(private fb: FormBuilder, private direccionService: DireccionService) { }
 
   ngOnInit(): void {
-    if (!this.parentForm.get('sociedadSocios')) {
+    if (!this.parentForm) {
+      this.parentForm = this.fb.group({
+        sociedadSocios: this.fb.array([])
+      });
+    } else if (!this.parentForm.get('sociedadSocios')) {
       this.parentForm.addControl('sociedadSocios', this.fb.array([]));
     }
     this.loadDepartamentos();
@@ -156,7 +160,7 @@ export class SociedadSocioComponent implements OnInit {
 
     this.sociedadSocios.push(sociedadSocioGroup);
 
-    sociedadSocioGroup.get('pep_declaration')?.valueChanges.subscribe((value:any) => {
+    sociedadSocioGroup.get('pep_declaration')?.valueChanges.subscribe((value: any) => {
       this.updateFieldVisibility(sociedadSocioGroup, value);
     });
   }

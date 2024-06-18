@@ -19,11 +19,11 @@
     </div>
 </div>
 
-<div id="texto" style="text-align: center;" *ngIf="!Afiliado">
+<div id="texto" style="text-align: center;" *ngIf="!Afiliado && !loading">
     <h2 class="anaranjado desapareciendo">No se encuentra ningún registro</h2>
 </div>
 
-<div *ngIf="Afiliado" style="background-color: white; margin: 1% 0% 1% 0%; padding: 1% 0% 1% 0%">
+<div *ngIf="Afiliado && !loading" style="background-color: white; margin: 1% 0% 1% 0%; padding: 1% 0% 1% 0%">
     <h1 style="text-align: center; font-size: 2rem">Datos Generales Afiliado</h1>
     <div
         style="display: grid; grid-template-columns: 1fr 2fr; justify-content: center; align-items: center; gap: 20px; padding: 10px;">
@@ -45,7 +45,10 @@
     </div>
 </div>
 
-<app-edit-datos-generales *ngIf="DatosGenerales && Afiliado" [Afiliado]="Afiliado"></app-edit-datos-generales>
+<mat-spinner class="spinner" *ngIf="loading" diameter="50"></mat-spinner>
+
+<!-- <app-edit-datos-generales *ngIf="DatosGenerales && Afiliado && !loading"
+    [Afiliado]="Afiliado"></app-edit-datos-generales> -->
 <app-edit-colegios-magisteriales *ngIf="ColegiosMagisteriales && Afiliado"
     [Afiliado]="Afiliado"></app-edit-colegios-magisteriales>
 <app-edit-datos-bancarios *ngIf="DatosHS && Afiliado" [Afiliado]="Afiliado"></app-edit-datos-bancarios>
@@ -53,3 +56,4 @@
 <app-edit-refer-personales *ngIf="referenc && Afiliado" [Afiliado]="Afiliado"></app-edit-refer-personales>
 <app-edit-beneficiarios *ngIf="datosBeneficiario && Afiliado" [Afiliado]="Afiliado"></app-edit-beneficiarios>
 <app-ver-cuentas-personas *ngIf="cuentas && Afiliado" [Afiliado]="Afiliado"></app-ver-cuentas-personas>
+<app-constancias-afiliado *ngIf="generacionConstancias && Afiliado" [Afiliado]="Afiliado"></app-constancias-afiliado>

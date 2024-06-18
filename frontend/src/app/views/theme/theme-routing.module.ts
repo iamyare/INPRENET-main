@@ -1,12 +1,12 @@
 import { NgModule } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
 
-import { AfilBancoComponent } from '../pages/Generales/afil-banco/afil-banco.component';
+import { AfilBancoComponent } from '../pages/Afiliacion/Docentes-Designados/afil-banco/afil-banco.component';
 
-import { VerPlanillasComponent } from '../pages/Generales/ver-planillas/ver-planillas.component';
+import { VerPlanillasComponent } from '../pages/planilla/ver-planillas/ver-planillas.component';
 import { SubirDeduccionesformComponent } from '../pages/Generales/subir-deduccionesform/subir-deduccionesform.component';
 import { CentroTrabajoComponent } from '../pages/Generales/centro-trabajo/centro-trabajo.component';
-import { NuevaPlanillaComponentP } from '../pages/Generales/nueva-planilla/nueva-planilla.component';
+import { NuevaPlanillaComponentP } from '../pages/planilla/nueva-planilla/nueva-planilla.component';
 
 import { NuevoBeneficioComponent } from '../pages/Mantenimiento/nuevo-beneficio/nuevo-beneficio.component';
 import { EditarBeneficioComponent } from '../pages/Mantenimiento/editar-beneficio/editar-beneficio.component';
@@ -15,28 +15,27 @@ import { EditarTipoDeduccionComponent } from '../pages/Mantenimiento/editar-tipo
 import { EditarTipoPlanillaComponent } from '../pages/Mantenimiento/editar-tipo-planilla/editar-tipo-planilla.component';
 import { NuevoTipoPlanillaComponent } from '../pages/Mantenimiento/nuevo-tipo-planilla/nuevo-tipo-planilla.component';
 
-/* import { CentroTrabajoPageComponent } from '../pages/centro-trabajo-page/centro-trabajo-page.component'; */
 import { NuevoBeneficioAfilComponent } from '../pages/Generales/nuevo-beneficio-afil/nuevo-beneficio-afil.component';
-import { NuevaDeduccionAfilComponent } from '../pages/Generales/nueva-deduccion-afil/nueva-deduccion-afil.component';
+import { NuevaDeduccionAfilComponent } from '../pages/planilla/nueva-deduccion-afil/nueva-deduccion-afil.component';
 import { VerEditarBeneficioAfilComponent } from '../pages/Generales/ver-editar-beneficio-afil/ver-editar-beneficio-afil.component';
 import { VerEditarDeduccionAfilComponent } from '../pages/Generales/ver-editar-deduccion-afil/ver-editar-deduccion-afil.component';
 import { CargarPlanillaPrivadosComponent } from '../pages/Centros Privados/cargar-planilla-privados/cargar-planilla-privados.component';
-import { NuevoMovimientoComponent } from '../pages/Generales/nuevo-movimiento/nuevo-movimiento.component';
-import { VerMovimientosComponent } from '../pages/Generales/ver-movimientos/ver-movimientos.component';
+import { NuevoMovimientoComponent } from '../pages/planilla/nuevo-movimiento/nuevo-movimiento.component';
+import { VerMovimientosComponent } from '../pages/planilla/ver-movimientos/ver-movimientos.component';
 import { PlanillaColegiosPrivadosComponent } from '../pages/Centros Privados/planilla-colegios-privados/planilla-colegios-privados.component';
-import { EditPerfilPuestTrabComponent } from '../pages/Generales/edit-perfil-puest-trab/edit-perfil-puest-trab.component';
-import { EditReferPersonalesComponent } from '../pages/Generales/edit-refer-personales/edit-refer-personales.component';
-import { EditDatosGeneralesComponent } from '../pages/Generales/edit-datos-generales/edit-datos-generales.component';
-import { EditBeneficiariosComponent } from '../pages/Generales/edit-beneficiarios/edit-beneficiarios.component';
-import { EditDatosBancariosComponent } from '../pages/Generales/edit-datos-bancarios/edit-datos-bancarios.component';
-import { EditColegiosMagisterialesComponent } from '../pages/Generales/edit-colegios-magisteriales/edit-colegios-magisteriales.component';
+import { EditPerfilPuestTrabComponent } from '../pages/Afiliacion/Docentes-Designados/edit-perfil-puest-trab/edit-perfil-puest-trab.component';
+import { EditReferPersonalesComponent } from '../pages/Afiliacion/Docentes-Designados/edit-refer-personales/edit-refer-personales.component';
+;
+import { EditBeneficiariosComponent } from '../pages/Afiliacion/Docentes-Designados/edit-beneficiarios/edit-beneficiarios.component';
+import { EditDatosBancariosComponent } from '../pages/Afiliacion/Docentes-Designados/edit-datos-bancarios/edit-datos-bancarios.component';
+import { EditColegiosMagisterialesComponent } from '../pages/Afiliacion/Docentes-Designados/edit-colegios-magisteriales/edit-colegios-magisteriales.component';
 import { EditFamiliaresComponent } from '../pages/Generales/edit-familiares/edit-familiares.component';
-import { VerDatosAfiliadosComponent } from '../pages/Generales/ver-datos-afiliados/ver-datos-afiliados.component';
-import { AfiliacionCentrosComponent } from '../pages/afil-centros-priv/afiliacion-centros/afiliacion-centros.component';
+import { AfiliacionCentrosComponent } from '../pages/Afiliacion/Centros-Educativos/afiliacion-centros/afiliacion-centros.component';
 import { GestionUsuariosComponent } from '../pages/admin-centro/gestion-usuarios/gestion-usuarios.component';
 import { NuevoUsuarioComponent } from '../pages/admin-centro/nuevo-usuario/nuevo-usuario.component';
-import { VerDatosCentrosComponent } from '../pages/afil-centros-priv/ver-datos-centros/ver-datos-centros.component';
+
 import { BuscarPersonaComponent } from '../pages/afiliacion/verPerfil/buscar-persona/buscar-persona.component';
+import { VerDatosCentrosComponent } from '../pages/Afiliacion/Centros-Educativos/ver-datos-centros/ver-datos-centros.component';
 
 const routes: Routes = [
   //rutas Afiliado
@@ -83,13 +82,6 @@ const routes: Routes = [
             component: AfiliacionCentrosComponent,
             data: {
               title: 'Nuevo Centro',
-            },
-          },
-          {
-            path: 'edit-datos-generales',
-            component: EditDatosGeneralesComponent,
-            data: {
-              title: 'Editar Datos Generales',
             },
           },
           {

@@ -1,8 +1,6 @@
-import { Component, Input } from '@angular/core';
-import { FormArray, FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
+import { ChangeDetectionStrategy, Component, Input, inject } from '@angular/core';
+import { ControlContainer, FormArray, FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
-import { generateAddressFormGroup } from '@docs-components/dat-generales-afiliado/dat-generales-afiliado.component';
-import { EditarDialogComponent } from '@docs-components/editar-dialog/editar-dialog.component';
 import { ToastrService } from 'ngx-toastr';
 import { AfiliadoService } from 'src/app/services/afiliado.service';
 import { DatosEstaticosService } from 'src/app/services/datos-estaticos.service';
@@ -54,7 +52,8 @@ export class EditDatosGeneralesComponent {
   },
   );
 
-  @Input() Afiliado: any;
+  @Input() Afiliado!: any;
+
   constructor(
     private fb: FormBuilder,
     private svcAfiliado: AfiliadoService,
@@ -63,11 +62,13 @@ export class EditDatosGeneralesComponent {
     private datosEstaticos: DatosEstaticosService,
     public direccionSer: DireccionService,
   ) {
+    console.log(this.Afiliado);
+
     const currentYear = new Date();
     this.minDate = new Date(currentYear.getFullYear(), currentYear.getMonth(), currentYear.getDate(), currentYear.getHours(), currentYear.getMinutes(), currentYear.getSeconds());
   }
   ngOnInit(): void {
-
+    console.log(this.Afiliado);
 
     this.myFormFields = [
       { type: 'text', label: 'N_IDENTIFICACION del afiliado', name: 'n_identificacion', validations: [Validators.required, Validators.minLength(13), Validators.maxLength(14)], display: true },
@@ -175,9 +176,8 @@ export class EditDatosGeneralesComponent {
           this.estadoAfiliacion = result.estadoAfiliacion
           this.fallecido = result.fallecido
 
-
           this.formDatosGenerales.value.refpers[0] = {
-            n_identificacion: result.N_IDENTIFICACION,
+            n_identificacion: result.n_identificacion,
             rtn: result.RTN,
             primer_nombre: result.PRIMER_NOMBRE,
             segundo_nombre: result.SEGUNDO_NOMBRE,

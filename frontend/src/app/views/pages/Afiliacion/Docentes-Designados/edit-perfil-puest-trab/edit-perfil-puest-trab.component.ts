@@ -7,6 +7,7 @@ import { ConfirmDialogComponent } from '@docs-components/confirm-dialog/confirm-
 import { EditarDialogComponent } from '@docs-components/editar-dialog/editar-dialog.component';
 import { ToastrService } from 'ngx-toastr';
 import { AfiliadoService } from 'src/app/services/afiliado.service';
+import { CentroTrabajoService } from 'src/app/services/centro-trabajo.service';
 import { DatosEstaticosService } from 'src/app/services/datos-estaticos.service';
 import { FieldConfig } from 'src/app/shared/Interfaces/field-config';
 import { TableColumn } from 'src/app/shared/Interfaces/table-column';
@@ -38,7 +39,8 @@ export class EditPerfilPuestTrabComponent {
     private toastr: ToastrService,
     private dialog: MatDialog,
     private datosEstaticosService: DatosEstaticosService,
-    private datePipe: DatePipe
+    private datePipe: DatePipe,
+    private centrosTrabSVC: CentroTrabajoService,
   ) { }
 
   ngOnInit(): void {
@@ -51,7 +53,7 @@ export class EditPerfilPuestTrabComponent {
         header: 'Nombre del Centro Trabajo',
         col: 'nombre_centro_trabajo',
         isEditable: true,
-        validationRules: [Validators.required, Validators.minLength(3)]
+        validationRules: [Validators.required]
       },
       {
         header: 'Número de Acuerdo',
@@ -87,7 +89,17 @@ export class EditPerfilPuestTrabComponent {
   }
 
   async getCentrosTrabajo() {
-    this.centrosTrabajo = await this.datosEstaticosService.getAllCentrosTrabajo();
+    const response = await this.centrosTrabSVC.obtenerTodosLosCentrosTrabajo().toPromise();
+    if (response) {
+      const mappedResponse = response.map((item) => ({
+        label: item.nombre_centro_trabajo,
+        value: String(item.id_centro_trabajo),
+        sector: item.sector_economico,
+      }));
+      this.centrosTrabajo = mappedResponse;
+    }
+
+    //this.centrosTrabajo = await this.datosEstaticosService.getAllCentrosTrabajo();
   }
 
   async obtenerDatos(event: any): Promise<any> {
@@ -95,8 +107,8 @@ export class EditPerfilPuestTrabComponent {
   }
 
   previsualizarInfoAfil() {
-    if (this.Afiliado.DNI) {
-      this.svcAfiliado.getAfilByParam(this.Afiliado.DNI).subscribe(
+    if (this.Afiliado.N_IDENTIFICACION) {
+      this.svcAfiliado.getAfilByParam(this.Afiliado.N_IDENTIFICACION).subscribe(
         async (result) => {
           this.prevAfil = true;
           this.Afiliado = result;
@@ -129,9 +141,10 @@ export class EditPerfilPuestTrabComponent {
   async getFilas() {
     if (this.Afiliado) {
       try {
-        const data = await this.svcAfiliado.getAllPerfCentroTrabajo(this.Afiliado.DNI).toPromise();
+        const data = await this.svcAfiliado.getAllPerfCentroTrabajo(this.Afiliado.N_IDENTIFICACION).toPromise();
         this.filas = data.map((item: any) => ({
-          id: item.id_perf_pers_centro_trab,
+          id_perf_pers_centro_trab: item.id_perf_pers_centro_trab,
+          id_centro_trabajo: item.centroTrabajo.id_centro_trabajo,
           nombre_centro_trabajo: item.centroTrabajo.nombre_centro_trabajo,
           numeroAcuerdo: item.numero_acuerdo || 'No disponible',
           salarioBase: item.salario_base,
@@ -161,7 +174,7 @@ export class EditPerfilPuestTrabComponent {
   async manejarAccionUno(row: any) {
     const campos = [
       {
-        nombre: 'nombre_centro_trabajo',
+        nombre: 'id_centro_trabajo',
         tipo: 'list',
         requerido: true,
         etiqueta: 'Nombre Centro Trabajo',
@@ -215,12 +228,50 @@ export class EditPerfilPuestTrabComponent {
       }
     ];
 
-    const valoresIniciales = {
-      ...row,
-      nombre_centro_trabajo: String(row.nombre_centro_trabajo)
-    };
+    console.log(row);
 
-    this.openDialog(campos, valoresIniciales);
+    const dialogRef = this.dialog.open(EditarDialogComponent, {
+      width: '500px',
+      data: { campos: campos, valoresIniciales: row }
+    });
+
+    dialogRef.afterClosed().subscribe(async (result: any) => {
+      if (result) {
+        // Formateo de fechas antes de enviar los datos
+        result.fechaIngreso = this.datePipe.transform(result.fechaIngreso, 'dd/MM/yyyy');
+        result.fechaEgreso = this.datePipe.transform(result.fechaEgreso, 'dd/MM/yyyy');
+
+        const idCentroTrabajo = result.id_centro_trabajo;
+        delete result.nombre_centro_trabajo;
+
+        const dataToSend = {
+          ...result,
+          idCentroTrabajo: idCentroTrabajo
+        };
+
+        this.svcAfiliado.updatePerfCentroTrabajo(row.id, result).subscribe({
+
+          next: (response) => {
+            const index = this.filas.findIndex(item => item.id === row.id);
+            if (index !== -1) {
+              this.filas[index] = {
+                ...this.filas[index],
+                ...result,
+                nombre_centro_trabajo: row.nombre_centro_trabajo
+              };
+            }
+            this.toastr.success("Se actualizó el perfil de trabajo correctamente")
+            this.cargar();
+          },
+          error: (error) => {
+            this.toastr.error("Error", "No se actualizo el perfil de trabajo")
+            console.error("Error al actualizar:", error);
+          }
+        });
+      } else {
+        console.log('No se realizaron cambios.');
+      }
+    });
   }
 
 
@@ -265,61 +316,5 @@ export class EditPerfilPuestTrabComponent {
       this.ngOnInit();
     });
   }
-
-  async openDialog(campos: any, row: any): Promise<void> {
-    const centroSeleccionado = this.centrosTrabajo.find((c:any) => c.label === row.nombre_centro_trabajo);
-    const centroValue = centroSeleccionado ? centroSeleccionado.value : '';
-    const valoresIniciales = {
-      ...row,
-      nombre_centro_trabajo: centroValue
-    };
-    const dialogRef = this.dialog.open(EditarDialogComponent, {
-      width: '500px',
-      data: { campos: campos, valoresIniciales: valoresIniciales }
-    });
-
-    dialogRef.afterClosed().subscribe(async (result: any) => {
-      if (result) {
-        // Formateo de fechas antes de enviar los datos
-        result.fechaIngreso = this.datePipe.transform(result.fechaIngreso, 'dd/MM/yyyy');
-        result.fechaEgreso = this.datePipe.transform(result.fechaEgreso, 'dd/MM/yyyy');
-
-        const centroActualizado = this.centrosTrabajo.find((c:any) => c.value === result.nombre_centro_trabajo);
-        const nombreCentro = centroActualizado ? centroActualizado.label : 'Centro desconocido';
-
-        const idCentroTrabajo = result.nombre_centro_trabajo;
-        delete result.nombre_centro_trabajo;
-
-
-        const dataToSend = {
-          ...result,
-          idCentroTrabajo: idCentroTrabajo
-        };
-
-        this.svcAfiliado.updatePerfCentroTrabajo(row.id, result).subscribe({
-
-          next: (response) => {
-            const index = this.filas.findIndex(item => item.id === row.id);
-            if (index !== -1) {
-              this.filas[index] = {
-                ...this.filas[index],
-                ...result,
-                nombre_centro_trabajo: nombreCentro
-              };
-            }
-            this.toastr.success("Se actualizó el perfil de trabajo correctamente")
-            this.cargar();
-          },
-          error: (error) => {
-            this.toastr.error("Error", "No se actualizo el perfil de trabajo")
-            console.error("Error al actualizar:", error);
-          }
-        });
-      } else {
-        console.log('No se realizaron cambios.');
-      }
-    });
-  }
-
 
 }

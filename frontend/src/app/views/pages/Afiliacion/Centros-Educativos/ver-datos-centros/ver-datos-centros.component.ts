@@ -154,6 +154,8 @@ export class VerDatosCentrosComponent {
   onDatosGeneralesFormUpdate(formData: FormGroup): void {
     this.datosGeneralesData = formData
     const temp = formData;
+    console.log(temp);
+    this.handleSearchResult1(temp);
   }
 
   onSociedadFormUpdate(formValues: any): void {
@@ -195,6 +197,8 @@ export class VerDatosCentrosComponent {
   }
 
   handleSearchResult1(form: any) {
+    console.log(form);
+
     form.controls["nombre_centro_trabajo"]!.patchValue(this.searchResults[0].nombre_centro_trabajo)
     form.controls["rtn"]!.patchValue(this.searchResults[0].rtn)
     form.controls["departamento"]!.patchValue(this.searchResults[0].municipio.departamento.id_departamento)
@@ -261,7 +265,9 @@ export class VerDatosCentrosComponent {
 
   handleSearchResult(searchResult: any) {
     this.searchResults = searchResult;
+    this.datosGeneralesData = this.fb.group({})
     this.mostrar = true;
+
   }
 
   handleFormChange(event: any) {

@@ -25,6 +25,7 @@ export class VerDatosAfiliadosComponent implements OnInit {
   ColegiosMagisteriales: boolean = false;
   datosA = false;
   cuentas = false;
+  loading = false;
   generacionConstancias: boolean = false; // Nueva propiedad
 
   constructor(private svcAfiliado: AfiliadoService,
@@ -143,14 +144,12 @@ export class VerDatosAfiliadosComponent implements OnInit {
   }
 
   previsualizarInfoAfil() {
-    console.log(this.form);
+    this.fakeLoading();
     if (this.form.value.n_identificacion) {
       this.svcAfiliado.getAfilByParam(this.form.value.n_identificacion).subscribe(
         async (result) => {
           this.prevAfil = true;
           this.Afiliado = result;
-          console.log(this.Afiliado);
-
           this.Afiliado.nameAfil = this.unirNombres(result.PRIMER_NOMBRE, result.SEGUNDO_NOMBRE, result.TERCER_NOMBRE, result.PRIMER_APELLIDO, result.SEGUNDO_APELLIDO);
         },
         (error) => {
@@ -173,5 +172,12 @@ export class VerDatosAfiliadosComponent implements OnInit {
 
   ejecutarFuncionAsincronaDesdeOtroComponente(funcion: (data: any) => Promise<void>) {
     this.ejecF = funcion;
+  }
+
+  fakeLoading() {
+    this.loading = true;
+    setTimeout(() => {
+      this.loading = false;
+    }, 1500);
   }
 }

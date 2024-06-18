@@ -3,11 +3,11 @@ import { RouterModule, Routes } from '@angular/router';
 import { DefaultLayoutComponent } from './containers';
 import { Page404Component } from './views/pages/Errores/page404/page404.component';
 import { Page500Component } from './views/pages/Errores/page500/page500.component';
-import { LoginComponent } from './views/pages/Generales/login/login.component';
-import { RegisterComponent } from './views/pages/Generales/register/register.component';
-import { PreRegisterComponent } from './views/pages/Generales/pre-register/pre-register.component';
+import { LoginComponent } from './views/pages/login-registro/login/login.component';
+import { RegisterComponent } from './views/pages/login-registro/register/register.component';
+import { PreRegisterComponent } from './views/pages/login-registro/pre-register/pre-register.component';
 import { RoleGuard } from './guards/role-guard.guard';
-import { LoginPrivadosComponent } from './views/pages/Centros Privados/login-privados/login-privados.component';
+import { LoginPrivadosComponent } from './views/pages/login-registro/login-privados/login-privados.component';
 import { PlanillaColegiosPrivadosComponent } from './views/pages/Centros Privados/planilla-colegios-privados/planilla-colegios-privados.component';
 import { NavDefaultComponent } from './views/pages/Centros Privados/nav-default/nav-default.component';
 

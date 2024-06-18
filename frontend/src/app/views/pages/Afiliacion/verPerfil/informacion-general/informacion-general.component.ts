@@ -1,11 +1,12 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Input, OnInit, inject } from '@angular/core';
+import { ControlContainer } from '@angular/forms';
 
 @Component({
   selector: 'app-informacion-general',
   templateUrl: './informacion-general.component.html',
   styleUrls: ['./informacion-general.component.scss']
 })
-export class InformacionGeneralComponent{
+export class InformacionGeneralComponent {
   @Input() persona: any;
 
   steps = [

@@ -15,6 +15,7 @@ import { TableColumn } from 'src/app/shared/Interfaces/table-column';
 import { convertirFechaInputs } from 'src/app/shared/functions/formatoFecha';
 import { unirNombres } from 'src/app/shared/functions/formatoNombresP';
 import { ReferenciasBancariasComercialesComponent } from '../referencias-bancarias-comerciales/referencias-bancarias-comerciales.component';
+/* import { ReferenciasBancariasComercialesComponent } from '../../Afiliacion/Centros-Educativos/referencias-bancarias-comerciales/referencias-bancarias-comerciales.component'; */
 
 @Component({
   selector: 'app-ver-referencias',

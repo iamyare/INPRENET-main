@@ -750,7 +750,6 @@ export class AfiliadoService {
         "tipoP"."TIPO_PERSONA" = 'AFILIADO'
       `;
 
-
       const beneficios = await this.entityManager.query(query);
 
       if (!beneficios || beneficios.length === 0) {
@@ -778,7 +777,7 @@ export class AfiliadoService {
         "Afil"."ID_PAIS_NACIONALIDAD" AS "idPaisNacionalidad",
         "Afil"."ID_MUNICIPIO_RESIDENCIA" AS "idMunicipioResidencia",
         "detA"."ID_ESTADO_AFILIACION" AS "idEstadoPersona",
-        "estadoPers"."DESCRIPCION" AS "estadoDescripcion",  -- Descripción del estado
+        "estadoPers"."NOMBRE_ESTADO" AS "estadoDescripcion",  -- Descripción del estado
         "detA"."PORCENTAJE" AS "porcentaje",
         "tipoP"."TIPO_PERSONA" AS "tipoPersona"
         FROM
@@ -791,9 +790,8 @@ export class AfiliadoService {
           NET_ESTADO_AFILIACION "estadoPers" ON "detA"."ID_ESTADO_AFILIACION" = "estadoPers"."CODIGO"
         WHERE 
           "detA"."ID_CAUSANTE_PADRE" = ${beneficios[0].ID_PERSONA} AND 
-          "tipoP"."TIPO_PERSONA" = 'BENEFICIARIO'
+          "tipoP"."TIPO_PERSONA" = 'DESIGNADO'
       `;
-
 
       const beneficios2 = await this.entityManager.query(query1);
       return beneficios2;
@@ -956,15 +954,20 @@ export class AfiliadoService {
 
 
   async getAllPerfCentroTrabajo(n_identificacion: string): Promise<any[]> {
-    const persona = await this.personaRepository.createQueryBuilder('persona')
-      .leftJoinAndSelect('persona.perfPersCentTrabs', 'perfPersCentTrabs', 'perfPersCentTrabs.estado = :estado', { estado: 'ACTIVO' })
-      .leftJoinAndSelect('perfPersCentTrabs.centroTrabajo', 'centroTrabajo')
-      .where('persona.n_identificacion = :n_identificacion', { n_identificacion })
-      .getOne();
-    if (!persona || !persona.perfPersCentTrabs.length) {
-      return [];
+    try {
+      const persona = await this.personaRepository.createQueryBuilder('persona')
+        .leftJoinAndSelect('persona.perfPersCentTrabs', 'perfPersCentTrabs', 'perfPersCentTrabs.estado = :estado', { estado: 'ACTIVO' })
+        .leftJoinAndSelect('perfPersCentTrabs.centroTrabajo', 'centroTrabajo')
+        .where('persona.n_identificacion = :n_identificacion', { n_identificacion })
+        .getOne();
+      if (!persona || !persona.perfPersCentTrabs.length) {
+        return [];
+      }
+      return persona.perfPersCentTrabs;
+    } catch (error) {
+      console.log(error);
+
     }
-    return persona.perfPersCentTrabs;
   }
 
 

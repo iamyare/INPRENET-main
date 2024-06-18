@@ -19,18 +19,20 @@ import { DatePipe } from '@angular/common';
   styleUrl: './edit-beneficiarios.component.scss'
 })
 export class EditBeneficiariosComponent {
-  convertirFechaInputs = convertirFechaInputs;
-  public myFormFields: FieldConfig[] = [];
+  convertirFechaInputs = convertirFechaInputs
+  public myFormFields: FieldConfig[] = []
   form: any;
   @Input() Afiliado!: any;
+
   unirNombres: any = unirNombres;
   datosTabl: any[] = [];
+  bancos: { label: string, value: string }[] = [];
+
   prevAfil: boolean = false;
+
   public myColumns: TableColumn[] = [];
   public filas: any[] = [];
   ejecF: any;
-  municipios: { label: string, value: any }[] = [];
-  estados: { label: string, value: any }[] = [];
 
   constructor(
     private svcAfiliado: AfiliadoService,
@@ -40,15 +42,15 @@ export class EditBeneficiariosComponent {
     private datePipe: DatePipe
   ) { }
 
-  async ngOnInit(): Promise<void> {
+  ngOnInit(): void {
     this.myFormFields = [
       { type: 'text', label: 'DNI del afiliado', name: 'dni', validations: [Validators.required, Validators.minLength(13), Validators.maxLength(14)], display: true },
     ];
 
     this.myColumns = [
       {
-        header: 'DNI',
-        col: 'dni',
+        header: 'N de Identificación',
+        col: 'n_identificacion',
         validationRules: [Validators.required, Validators.minLength(3)]
       },
       {
@@ -73,18 +75,8 @@ export class EditBeneficiariosComponent {
       }
     ];
 
-    await this.cargarMunicipios();
-    await this.cargarEstados()
-    this.previsualizarInfoAfil();
+    this.previsualizarInfoAfil()
     this.getFilas().then(() => this.cargar());
-  }
-
-  async cargarMunicipios() {
-    this.municipios = await this.datosEstaticosService.getMunicipios();
-  }
-
-  async cargarEstados() {
-    this.estados = await this.datosEstaticosService.getEstados();
   }
 
   async obtenerDatos(event: any): Promise<any> {
@@ -92,20 +84,19 @@ export class EditBeneficiariosComponent {
   }
 
   previsualizarInfoAfil() {
-    if (this.Afiliado.DNI) {
-      this.svcAfiliado.getAfilByParam(this.Afiliado.DNI).subscribe(
+    if (this.Afiliado.N_IDENTIFICACION) {
+      this.svcAfiliado.getAllPersonas(this.Afiliado.N_IDENTIFICACION).subscribe(
         async (result) => {
           this.prevAfil = true;
-          this.Afiliado = result;
+          this.Afiliado = result
           this.Afiliado.nameAfil = this.unirNombres(result.PRIMER_NOMBRE, result.SEGUNDO_NOMBRE, result.TERCER_NOMBRE, result.PRIMER_APELLIDO, result.SEGUNDO_APELLIDO);
           this.getFilas().then(() => this.cargar());
         },
         (error) => {
           this.getFilas().then(() => this.cargar());
           this.toastr.error(`Error: ${error.error.message}`);
-          this.resetDatos();
-        }
-      );
+          /* this.resetDatos(); */
+        })
     }
   }
 
@@ -120,14 +111,14 @@ export class EditBeneficiariosComponent {
   async getFilas() {
     if (this.Afiliado) {
       try {
-        const data = await this.svcAfiliado.getAllBenDeAfil(this.Afiliado.DNI).toPromise();
+        const data = await this.svcAfiliado.getAllBenDeAfil(this.Afiliado.N_IDENTIFICACION).toPromise();
         this.filas = data.map((item: any) => {
           const nombres = [item.primerNombre, item.segundoNombre, item.tercerNombre].filter(part => part).join(' ');
           const apellidos = [item.primerApellido, item.segundoApellido].filter(part => part).join(' ');
           const fechaNacimiento = this.datePipe.transform(item.fechaNacimiento, 'dd/MM/yyyy') || 'Fecha no disponible';
-          return {
+          const respData = {
             id: item.ID_PERSONA,
-            dni: item.DNI,
+            n_identificacion: item.N_IDENTIFICACION,
             nombres,
             apellidos,
             genero: item.genero,
@@ -143,16 +134,18 @@ export class EditBeneficiariosComponent {
             porcentaje: item.porcentaje,
             tipo_persona: item.tipoPersona
           };
+          return respData
         });
+
       } catch (error) {
-        this.toastr.error('Error al cargar los datos de los beneficiarios');
-        console.error('Error al obtener datos de los beneficiarios', error);
+        this.toastr.error('Error al cargar los datos de los perfiles de los centros de trabajo');
+        console.error('Error al obtener datos de datos de los perfiles de los centros de trabajo', error);
       }
     } else {
-      this.resetDatos();
+      this.resetDatos()
     }
-  }
 
+  }
 
   ejecutarFuncionAsincronaDesdeOtroComponente(funcion: (data: any) => Promise<void>) {
     this.ejecF = funcion;
@@ -280,32 +273,6 @@ export class EditBeneficiariosComponent {
       }
     });
   }
-
-  /* get porcentajes() {
-    return this.formParent.get('beneficiario') as FormArray;
-  }
-
-  validateTotalPercentage() {
-
-  }
-  suma100Validator(): any {
-    return (control: FormControl) => {
-      const valor = control.value;
-      const beneficiarioArray = this.formParent.get('beneficiario') as FormArray;
-      const totalPercentage = beneficiarioArray.controls.reduce((total, control) => {
-        return total + (control.get('beneficiario')?.value || 0);
-      }, 0);
-
-      //this.formParent.setErrors({ 'invalidPercentage': true });
-      console.log(this.formParent);
-      if (totalPercentage !== 100) {
-        return { sumaNo100: true };
-
-        this.formParent.setErrors({ 'invalidPercentage': true });
-      } else {
-        return { sumaNo100: false };
-        this.formParent.setErrors({ 'invalidPercentage': false });
-      }
-    };
-  } */
 }
+
+

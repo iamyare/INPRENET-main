@@ -283,11 +283,11 @@ export class AfiliadoController {
     }
   }
 
-  @Get('/getAllPerfCentroTrabajo/:dni')
-  async getAllPerfCentroTrabajo(@Param("dni") dni: string) {
+  @Get('/getAllPerfCentroTrabajo/:n_identificacion')
+  async getAllPerfCentroTrabajo(@Param("n_identificacion") n_identificacion: string) {
     try {
       const resultado =
-        await this.afiliadoService.getAllPerfCentroTrabajo(dni);
+        await this.afiliadoService.getAllPerfCentroTrabajo(n_identificacion);
       return resultado;
     } catch (error) {
       if (error instanceof NotFoundException) {

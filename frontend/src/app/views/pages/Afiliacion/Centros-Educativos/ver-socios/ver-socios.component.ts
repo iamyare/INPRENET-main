@@ -9,6 +9,8 @@ import { CentroTrabajoService } from 'src/app/services/centro-trabajo.service';
 import { FieldConfig } from 'src/app/shared/Interfaces/field-config';
 import { TableColumn } from 'src/app/shared/Interfaces/table-column';
 import { unirNombres } from 'src/app/shared/functions/formatoNombresP';
+import { SociedadSocioComponent } from '../sociedad-socio/sociedad-socio.component';
+/* import { SociedadSocioComponent } from '../../Afiliacion/Centros-Educativos/sociedad-socio/sociedad-socio.component'; */
 
 @Component({
   selector: 'app-ver-socios',
@@ -178,7 +180,19 @@ export class VerSociosComponent {
     });
   }
 
-  AgregarReferencia() {
+  AgregarSocios() {
+    const dialogRef = this.dialog.open(SociedadSocioComponent, {
+      width: '55%',
+      height: '75%',
+      /* data: {
+        idPersona: this.Afiliado.ID_PERSONA
+      } */
+    });
+
+    dialogRef.afterClosed().subscribe((result: any) => {
+      this.ngOnInit();
+    });
 
   }
+
 }

@@ -93,6 +93,8 @@ export class EditReferPersonalesComponent {
   }
 
   previsualizarInfoAfil() {
+    console.log(this.Afiliado);
+
     if (this.Afiliado.N_IDENTIFICACION) {
 
       this.svcAfiliado.getAfilByParam(this.Afiliado.N_IDENTIFICACION).subscribe(

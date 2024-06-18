@@ -735,66 +735,47 @@ export class AfiliadoService {
 
   async getAllBenDeAfil(n_identificacionAfil: string): Promise<any> {
     try {
-      const query = `
-        SELECT DISTINCT
-        "detA"."ID_PERSONA"
-        FROM NET_PERSONA "Afil"
-        FULL OUTER JOIN
-          NET_DETALLE_PERSONA "detA" ON "Afil"."ID_PERSONA" = "detA"."ID_PERSONA" 
-        INNER JOIN
-        NET_TIPO_PERSONA "tipoP" ON "tipoP"."ID_TIPO_PERSONA" = "detA"."ID_TIPO_PERSONA"
-        INNER JOIN
-        NET_ESTADO_AFILIACION "estadoPers" ON "detA"."ID_ESTADO_AFILIACION" = "estadoPers"."CODIGO"
-      WHERE
-        "Afil"."N_IDENTIFICACION" = '${n_identificacionAfil}' AND
-        "tipoP"."TIPO_PERSONA" = 'AFILIADO'
-      `;
+      const afiliado = await this.personaRepository.findOne({
+        where: { n_identificacion: n_identificacionAfil },
+        relations: ['detallePersona'],
+      });
 
-      const beneficios = await this.entityManager.query(query);
-
-      if (!beneficios || beneficios.length === 0) {
-        throw new Error(`No se encontraron beneficios para el N_IDENTIFICACION: ${n_identificacionAfil}`);
+      if (!afiliado) {
+        throw new Error(`No se encontró el afiliado con N_IDENTIFICACION: ${n_identificacionAfil}`);
       }
+      const beneficiarios = await this.detallePersonaRepository.find({
+        where: {
+          ID_CAUSANTE: afiliado.id_persona,
+          ID_CAUSANTE_PADRE: afiliado.id_persona
+        },
+        relations: ['persona', 'tipoPersona', 'estadoAfiliacion'],
+      });
+      const beneficiariosFormatted = beneficiarios.map(beneficiario => ({
+        idPersona: beneficiario.ID_PERSONA,
+        nIdentificacion: beneficiario.persona?.n_identificacion || null,
+        primerNombre: beneficiario.persona?.primer_nombre || null,
+        segundoNombre: beneficiario.persona?.segundo_nombre || null,
+        tercerNombre: beneficiario.persona?.tercer_nombre || null,
+        primerApellido: beneficiario.persona?.primer_apellido || null,
+        segundoApellido: beneficiario.persona?.segundo_apellido || null,
+        genero: beneficiario.persona?.genero || null,
+        sexo: beneficiario.persona?.sexo || null,
+        fallecido: beneficiario.persona?.fallecido || null,
+        cantidadDependientes: beneficiario.persona?.cantidad_dependientes || null,
+        representacion: beneficiario.persona?.representacion || null,
+        telefono1: beneficiario.persona?.telefono_1 || null,
+        fechaNacimiento: beneficiario.persona?.fecha_nacimiento || null,
+        fechaVencimientoIdent: beneficiario.persona?.fecha_vencimiento_ident || null,
+        direccionResidencia: beneficiario.persona?.direccion_residencia || null,
+        idPaisNacionalidad: beneficiario.persona?.pais?.id_pais || null,
+        idMunicipioResidencia: beneficiario.persona?.municipio?.id_municipio || null,
+        idEstadoPersona: beneficiario.estadoAfiliacion?.codigo || null,
+        estadoDescripcion: beneficiario.estadoAfiliacion?.nombre_estado || null,
+        porcentaje: beneficiario.porcentaje || null,
+        tipoPersona: beneficiario.tipoPersona?.tipo_persona || null,
+      }));
 
-      const query1 = `
-        SELECT 
-        "detA"."ID_PERSONA",
-        "Afil"."N_IDENTIFICACION",
-        "Afil"."PRIMER_NOMBRE" AS "primerNombre",
-        "Afil"."SEGUNDO_NOMBRE" AS "segundoNombre",
-        "Afil"."TERCER_NOMBRE" AS "tercerNombre",
-        "Afil"."PRIMER_APELLIDO" AS "primerApellido",
-        "Afil"."SEGUNDO_APELLIDO" AS "segundoApellido",
-        "Afil"."GENERO" AS "genero",
-        "Afil"."SEXO" AS "sexo",
-        "Afil"."FALLECIDO" AS "FALLECIDO",
-        "Afil"."CANTIDAD_DEPENDIENTES" AS "cantidadDependientes",
-        "Afil"."REPRESENTACION" AS "representacion",
-        "Afil"."TELEFONO_1" AS "telefono1",
-        "Afil"."FECHA_NACIMIENTO" AS "fechaNacimiento",
-        "Afil"."FECHA_VENCIMIENTO_IDENT" AS "fecha_vencimiento_ident",
-        "Afil"."DIRECCION_RESIDENCIA" AS "direccionResidencia",
-        "Afil"."ID_PAIS_NACIONALIDAD" AS "idPaisNacionalidad",
-        "Afil"."ID_MUNICIPIO_RESIDENCIA" AS "idMunicipioResidencia",
-        "detA"."ID_ESTADO_AFILIACION" AS "idEstadoPersona",
-        "estadoPers"."NOMBRE_ESTADO" AS "estadoDescripcion",  -- Descripción del estado
-        "detA"."PORCENTAJE" AS "porcentaje",
-        "tipoP"."TIPO_PERSONA" AS "tipoPersona"
-        FROM
-          "NET_DETALLE_PERSONA" "detA"
-        LEFT JOIN 
-          "NET_PERSONA" "Afil" ON "detA"."ID_PERSONA" = "Afil"."ID_PERSONA"
-        LEFT JOIN
-          NET_TIPO_PERSONA "tipoP" ON "tipoP"."ID_TIPO_PERSONA" = "detA"."ID_TIPO_PERSONA"
-        LEFT JOIN
-          NET_ESTADO_AFILIACION "estadoPers" ON "detA"."ID_ESTADO_AFILIACION" = "estadoPers"."CODIGO"
-        WHERE 
-          "detA"."ID_CAUSANTE_PADRE" = ${beneficios[0].ID_PERSONA} AND 
-          "tipoP"."TIPO_PERSONA" = 'DESIGNADO'
-      `;
-
-      const beneficios2 = await this.entityManager.query(query1);
-      return beneficios2;
+      return beneficiariosFormatted;
     } catch (error) {
       this.logger.error(`Error al consultar beneficios: ${error.message}`);
       throw new Error(`Error al consultar beneficios: ${error.message}`);

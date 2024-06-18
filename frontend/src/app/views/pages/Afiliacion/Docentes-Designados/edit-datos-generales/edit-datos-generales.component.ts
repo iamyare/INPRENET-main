@@ -1,6 +1,5 @@
 import { ChangeDetectionStrategy, Component, Input, inject } from '@angular/core';
 import { ControlContainer, FormArray, FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
-import { MatDialog } from '@angular/material/dialog';
 import { ToastrService } from 'ngx-toastr';
 import { AfiliadoService } from 'src/app/services/afiliado.service';
 import { DatosEstaticosService } from 'src/app/services/datos-estaticos.service';
@@ -58,17 +57,13 @@ export class EditDatosGeneralesComponent {
     private fb: FormBuilder,
     private svcAfiliado: AfiliadoService,
     private toastr: ToastrService,
-    private dialog: MatDialog,
-    private datosEstaticos: DatosEstaticosService,
     public direccionSer: DireccionService,
   ) {
-    console.log(this.Afiliado);
 
     const currentYear = new Date();
     this.minDate = new Date(currentYear.getFullYear(), currentYear.getMonth(), currentYear.getDate(), currentYear.getHours(), currentYear.getMinutes(), currentYear.getSeconds());
   }
   ngOnInit(): void {
-    console.log(this.Afiliado);
 
     this.myFormFields = [
       { type: 'text', label: 'N_IDENTIFICACION del afiliado', name: 'n_identificacion', validations: [Validators.required, Validators.minLength(13), Validators.maxLength(14)], display: true },

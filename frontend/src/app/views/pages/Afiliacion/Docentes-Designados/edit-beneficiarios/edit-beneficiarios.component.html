@@ -8,12 +8,18 @@
   </button>
 
   <div *ngIf="filas.length != 0" style="background-color: white; border-radius: 10px; padding: 20px">
-    <app-dynamic-table style="width: 100%" titulo="Editar Beneficiarios"
-      subtitulo="Completa la información correspondiente" [columns]="myColumns" [data]="filas" [getData]="getFilas"
+    <app-dynamic-table
+      style="width: 100%"
+      titulo="Editar Beneficiarios"
+      subtitulo="Completa la información correspondiente"
+      [columns]="myColumns"
+      [data]="filas"
+      [getData]="getFilas.bind(this)"
       (ejecutarFuncionAsincronaEvent)="ejecutarFuncionAsincronaDesdeOtroComponente($event)"
-      [nombreEncabezadoUno]="'Acciones'" [mostrarBotonUno]="true" [etiquetaBotonUno]="'Editar'"
-      (accionBotonUno)="manejarAccionUno($event)" [nombreEncabezadoUno]="'Acciones'" [mostrarBotonDos]="true"
-      [etiquetaBotonDos]="'Eliminar'" (accionBotonDos)="manejarAccionDos($event)">
+      [mostrarBotonEditar]="true"
+      (editar)="editarFila($event)"
+      [mostrarBotonEliminar]="true"
+      (eliminar)="eliminarFila($event)">
     </app-dynamic-table>
   </div>
 </div>

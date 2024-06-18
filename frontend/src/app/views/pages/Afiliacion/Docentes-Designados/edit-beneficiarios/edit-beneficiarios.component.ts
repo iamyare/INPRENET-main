@@ -51,7 +51,6 @@ export class EditBeneficiariosComponent implements OnInit, OnChanges, OnDestroy 
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['persona'] && this.persona) {
-      console.log('EditBeneficiariosComponent - persona:', this.persona);
       this.initializeComponent();
     }
   }
@@ -70,7 +69,7 @@ export class EditBeneficiariosComponent implements OnInit, OnChanges, OnDestroy 
     ];
 
     this.myColumns = [
-      { header: 'DNI', col: 'dni', validationRules: [Validators.required, Validators.minLength(3)] },
+      { header: 'Numero De Identificacion', col: 'n_identificacion', validationRules: [Validators.required, Validators.minLength(3)] },
       { header: 'Nombres', col: 'nombres' },
       { header: 'Apellidos', col: 'apellidos' },
       { header: 'Porcentaje', col: 'porcentaje' },
@@ -98,12 +97,13 @@ export class EditBeneficiariosComponent implements OnInit, OnChanges, OnDestroy 
       try {
         const data = await this.svcAfiliado.getAllBenDeAfil(this.persona.n_identificacion).toPromise();
         this.filas = data.map((item: any) => {
+
           const nombres = [item.primerNombre, item.segundoNombre, item.tercerNombre].filter(part => part).join(' ');
           const apellidos = [item.primerApellido, item.segundoApellido].filter(part => part).join(' ');
           const fechaNacimiento = this.datePipe.transform(item.fechaNacimiento, 'dd/MM/yyyy') || 'Fecha no disponible';
           const respData = {
             id: item.ID_PERSONA,
-            n_identificacion: item.N_IDENTIFICACION,
+            n_identificacion: item.nIdentificacion,
             nombres,
             apellidos,
             genero: item.genero,
@@ -119,17 +119,16 @@ export class EditBeneficiariosComponent implements OnInit, OnChanges, OnDestroy 
             porcentaje: item.porcentaje,
             tipo_persona: item.tipoPersona
           };
-          return respData
+          return respData;
         });
-
+        this.cargar();
       } catch (error) {
-        this.toastr.error('Error al cargar los datos de los perfiles de los centros de trabajo');
-        console.error('Error al obtener datos de datos de los perfiles de los centros de trabajo', error);
+        this.toastr.error('Error al cargar los datos de los beneficiarios');
+        console.error('Error al obtener datos de los beneficiarios', error);
       }
     } else {
-      this.resetDatos()
+      this.resetDatos();
     }
-
   }
 
   ejecutarFuncionAsincronaDesdeOtroComponente(funcion: (data: any) => Promise<void>) {
@@ -142,9 +141,9 @@ export class EditBeneficiariosComponent implements OnInit, OnChanges, OnDestroy 
     }
   }
 
-  async manejarAccionUno(row: any) {
+  editarFila(row: any) {
     const campos = [
-      { nombre: 'dni', tipo: 'text', etiqueta: 'DNI', editable: true, icono: 'badge' },
+      { nombre: 'n_identificacion', tipo: 'text', etiqueta: 'Numero de Identificacion', editable: true, icono: 'badge' },
       { nombre: 'nombres', tipo: 'text', etiqueta: 'Nombres', editable: true, icono: 'person' },
       { nombre: 'apellidos', tipo: 'text', etiqueta: 'Apellidos', editable: true, icono: 'person_outline' },
       { nombre: 'genero', tipo: 'list', etiqueta: 'Género', editable: true, opciones: this.datosEstaticosService.genero, icono: 'wc' },
@@ -162,12 +161,12 @@ export class EditBeneficiariosComponent implements OnInit, OnChanges, OnDestroy 
     this.openDialog(campos, row);
   }
 
-  manejarAccionDos(row: any) {
+  eliminarFila(row: any) {
     const dialogRef = this.dialog.open(ConfirmDialogComponent, {
       width: '350px',
       data: {
         title: 'Confirmación de eliminación',
-        message: '¿Estás seguro de querer eliminar este elemento?'
+        message: '¿Estás seguro de querer eliminar este beneficiario?'
       }
     });
     dialogRef.afterClosed().subscribe((result: any) => {
@@ -194,12 +193,12 @@ export class EditBeneficiariosComponent implements OnInit, OnChanges, OnDestroy 
   inactivarPersona(idPersona: number, idCausante: number) {
     this.svcAfiliado.inactivarPersona(idPersona, idCausante).subscribe(
       () => {
-        this.toastr.success('Persona inactivada exitosamente');
+        this.toastr.success('Beneficiario inactivado exitosamente');
         this.getFilas().then(() => this.cargar());
       },
       (error) => {
-        this.toastr.error('Error al inactivar persona');
-        console.error('Error al inactivar persona', error);
+        this.toastr.error('Error al inactivar beneficiario');
+        console.error('Error al inactivar beneficiario', error);
       }
     );
   }
@@ -219,7 +218,7 @@ export class EditBeneficiariosComponent implements OnInit, OnChanges, OnDestroy 
 
         const updatedBeneficiario = {
           id_pais: result.idPaisNacionalidad,
-          dni: result.dni,
+          n_identificacion: result.n_identificacion ?? 'ID no disponible',
           primer_nombre,
           segundo_nombre: segundo_nombre || '',
           tercer_nombre: tercer_nombre || '',
@@ -256,5 +255,3 @@ export class EditBeneficiariosComponent implements OnInit, OnChanges, OnDestroy 
     });
   }
 }
-
-

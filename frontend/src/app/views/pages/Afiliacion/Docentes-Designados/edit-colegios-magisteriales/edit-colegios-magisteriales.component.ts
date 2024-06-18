@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, OnInit, OnChanges, SimpleChanges, OnDestroy } from '@angular/core';
 import { Validators } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
 import { AgregarColMagisComponent } from '@docs-components/agregar-col-magis/agregar-col-magis.component';
@@ -11,27 +11,28 @@ import { FieldConfig } from 'src/app/shared/Interfaces/field-config';
 import { TableColumn } from 'src/app/shared/Interfaces/table-column';
 import { convertirFechaInputs } from 'src/app/shared/functions/formatoFecha';
 import { unirNombres } from 'src/app/shared/functions/formatoNombresP';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-edit-colegios-magisteriales',
   templateUrl: './edit-colegios-magisteriales.component.html',
-  styleUrl: './edit-colegios-magisteriales.component.scss'
+  styleUrls: ['./edit-colegios-magisteriales.component.scss']
 })
-export class EditColegiosMagisterialesComponent {
-  convertirFechaInputs = convertirFechaInputs
-  public myFormFields: FieldConfig[] = []
+export class EditColegiosMagisterialesComponent implements OnInit, OnChanges, OnDestroy {
+  convertirFechaInputs = convertirFechaInputs;
+  public myFormFields: FieldConfig[] = [];
   form: any;
+  @Input() Afiliado: any;
   unirNombres: any = unirNombres;
   datosTabl: any[] = [];
   colegiosMagisteriales: { label: string, value: any }[] = [];
-
   prevAfil: boolean = false;
-
   public myColumns: TableColumn[] = [];
   public filas: any[] = [];
   ejecF: any;
+  private subscriptions: Subscription = new Subscription();
+  public loading: boolean = false;
 
-  @Input() Afiliado!: any;
   constructor(
     private svcAfiliado: AfiliadoService,
     private toastr: ToastrService,
@@ -40,9 +41,28 @@ export class EditColegiosMagisterialesComponent {
   ) { }
 
   ngOnInit(): void {
+    this.initializeComponent();
+  }
+
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['Afiliado'] && this.Afiliado) {
+      this.initializeComponent();
+    }
+  }
+
+  ngOnDestroy(): void {
+    this.subscriptions.unsubscribe();
+  }
+
+  initializeComponent(): void {
+    if (!this.Afiliado) {
+      return;
+    }
+
     this.myFormFields = [
       { type: 'text', label: 'DNI del afiliado', name: 'dni', validations: [Validators.required, Validators.minLength(13), Validators.maxLength(14)], display: true },
     ];
+
     this.myColumns = [
       {
         header: 'Colegio Magisterial',
@@ -50,13 +70,12 @@ export class EditColegiosMagisterialesComponent {
         isEditable: true
       }
     ];
-    this.getFilas().then(() => this.cargar());
+    this.getFilas();
   }
 
   async obtenerDatos(event: any): Promise<any> {
     this.form = event;
   }
-
 
   resetDatos() {
     if (this.form) {
@@ -67,22 +86,28 @@ export class EditColegiosMagisterialesComponent {
   }
 
   async getFilas() {
+    this.loading = true; // Mostrar el spinner antes de cargar los datos
+    this.filas = [];
     if (this.Afiliado) {
       try {
         const data = await this.svcAfiliado.getAllColMagPPersona(this.Afiliado.n_identificacion).toPromise();
         this.filas = data.map((item: any) => {
           return {
-            id_per_cole_mag: item.id,
+            id_per_cole_mag: item.colegio.idColegio,
             colegio_magisterial: item.colegio.descripcion
-          }
+          };
         });
       } catch (error) {
-        this.toastr.error('Error al cargar los datos de los beneficiarios');
-        console.error('Error al obtener datos de datos de los beneficiarios', error);
+        this.toastr.error('Error al cargar los datos de los colegios magisteriales');
+        console.error('Error al obtener datos de los colegios magisteriales', error);
       }
     } else {
-      this.resetDatos()
+      this.resetDatos();
     }
+    setTimeout(() => {
+      this.loading = false; // Ocultar el spinner después de cargar los datos
+      this.cargar(); // Llamar cargar() después de ocultar el spinner
+    }, 1000); // Retraso de 1 segundo
   }
 
   ejecutarFuncionAsincronaDesdeOtroComponente(funcion: (data: any) => Promise<void>) {
@@ -96,7 +121,7 @@ export class EditColegiosMagisterialesComponent {
     }
   }
 
-  async manejarAccionUno(row: any) {
+  async editarFila(row: any) {
     this.colegiosMagisteriales = await this.datosEstaticosService.getColegiosMagisteriales();
     const campos = [
       {
@@ -109,17 +134,17 @@ export class EditColegiosMagisterialesComponent {
       }
     ];
     const valoresIniciales = {
-      colegio_magisterial: row.id_colegio
+      colegio_magisterial: row.id_per_cole_mag
     };
     this.openDialog(campos, valoresIniciales);
   }
 
-  manejarAccionDos(row: any) {
+  eliminarFila(row: any) {
     const dialogRef = this.dialog.open(ConfirmDialogComponent, {
       width: '350px',
       data: {
         title: 'Confirmación de eliminación',
-        message: '¿Estás seguro de querer eliminar este elemento?'
+        message: '¿Estás seguro de querer eliminar este colegio magisterial?'
       }
     });
 
@@ -128,7 +153,7 @@ export class EditColegiosMagisterialesComponent {
         this.svcAfiliado.eliminarColegioMagisterialPersona(row.id_per_cole_mag).subscribe({
           next: (response: any) => {
             this.toastr.success("Colegio magisterial eliminado correctamente");
-            this.ngOnInit()
+            this.getFilas();
           },
           error: (error: any) => {
             console.error('Error al eliminar el colegio magisterial al que pertenece la persona:', error);
@@ -139,7 +164,7 @@ export class EditColegiosMagisterialesComponent {
     });
   }
 
-  AgregarBeneficiario() {
+  AgregarColegioMagisterial() {
     const dialogRef = this.dialog.open(AgregarColMagisComponent, {
       width: '55%',
       height: '75%',
@@ -149,7 +174,7 @@ export class EditColegiosMagisterialesComponent {
     });
 
     dialogRef.afterClosed().subscribe((result: any) => {
-      this.ngOnInit();
+      this.getFilas();
     });
   }
 
@@ -164,7 +189,7 @@ export class EditColegiosMagisterialesComponent {
         this.svcAfiliado.updateColegiosMagist(result.id_per_cole_mag, result).subscribe(
           async (response) => {
             this.toastr.success('Colegio magisterial actualizado con éxito.');
-            this.cargar();
+            this.getFilas();
           },
           (error) => {
             this.toastr.error('Error al actualizar el colegio magisterial.');

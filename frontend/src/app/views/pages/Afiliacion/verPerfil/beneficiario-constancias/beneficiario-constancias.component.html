@@ -1,5 +1,3 @@
 <div *ngIf="datos">
-  <p><strong>Constancia 1:</strong> {{ datos.constancia1 }}</p>
-  <p><strong>Constancia 2:</strong> {{ datos.constancia2 }}</p>
-  <!-- Más detalles de constancias -->
+  <app-dynamic-menu-constancias [menuItems]="menuItems"></app-dynamic-menu-constancias>
 </div>

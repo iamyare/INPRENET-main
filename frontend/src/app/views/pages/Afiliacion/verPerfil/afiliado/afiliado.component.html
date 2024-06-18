@@ -4,4 +4,17 @@
   <div *ngIf="currentStepIndex === 0">
     <app-constancias-afiliado [persona]="persona"></app-constancias-afiliado>
   </div>
+  <div *ngIf="currentStepIndex === 1">
+    <app-edit-beneficiarios [persona]="persona"></app-edit-beneficiarios>
+  </div>
+  <div *ngIf="currentStepIndex === 2">
+    <app-ver-cuentas-personas [Afiliado]="persona"></app-ver-cuentas-personas>
+  </div>
+  <div *ngIf="currentStepIndex === 3">
+    <app-edit-colegios-magisteriales [Afiliado]="persona"></app-edit-colegios-magisteriales>
+  </div>
+  <div *ngIf="currentStepIndex === 4">
+    <app-edit-refer-personales [Afiliado]="persona"></app-edit-refer-personales>
+  </div>
+
 </div>

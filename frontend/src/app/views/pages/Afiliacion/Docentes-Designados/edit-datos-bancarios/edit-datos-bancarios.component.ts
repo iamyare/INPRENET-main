@@ -63,29 +63,11 @@ export class EditDatosBancariosComponent {
         isEditable: true
       },
     ];
-    this.previsualizarInfoAfil()
     this.getFilas().then(() => this.cargar());
   }
 
   async obtenerDatos(event: any): Promise<any> {
     this.form = event;
-  }
-
-  previsualizarInfoAfil() {
-    if (this.Afiliado.N_IDENTIFICACION) {
-      this.svcAfiliado.getAllPersonas(this.Afiliado.N_IDENTIFICACION).subscribe(
-        async (result) => {
-          this.prevAfil = true;
-          this.Afiliado = result
-          this.Afiliado.nameAfil = this.unirNombres(result.PRIMER_NOMBRE, result.SEGUNDO_NOMBRE, result.TERCER_NOMBRE, result.PRIMER_APELLIDO, result.SEGUNDO_APELLIDO);
-          this.getFilas().then(() => this.cargar());
-        },
-        (error) => {
-          this.getFilas().then(() => this.cargar());
-          this.toastr.error(`Error: ${error.error.message}`);
-          /* this.resetDatos(); */
-        })
-    }
   }
 
   resetDatos() {
@@ -99,7 +81,7 @@ export class EditDatosBancariosComponent {
   async getFilas() {
     if (this.Afiliado) {
       try {
-        const data = await this.svcAfiliado.getAllPersonaPBanco(this.Afiliado.N_IDENTIFICACION).toPromise();
+        const data = await this.svcAfiliado.getAllPersonaPBanco(this.Afiliado.n_identificacion).toPromise();
         this.filas = data.map((item: any) => ({
           id: item.id_af_banco,
           nombre_banco: item.banco.nombre_banco,

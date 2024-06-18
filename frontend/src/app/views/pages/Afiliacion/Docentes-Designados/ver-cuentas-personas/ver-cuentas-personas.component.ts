@@ -1,13 +1,11 @@
 import { Component, Input } from '@angular/core';
 import { Validators } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
-import { AgregarColMagisComponent } from '@docs-components/agregar-col-magis/agregar-col-magis.component';
 import { AgregarCuentasComponent } from '@docs-components/agregar-cuentas/agregar-cuentas.component';
 import { ConfirmDialogComponent } from '@docs-components/confirm-dialog/confirm-dialog.component';
 import { EditarDialogComponent } from '@docs-components/editar-dialog/editar-dialog.component';
 import { ToastrService } from 'ngx-toastr';
 import { AfiliadoService } from 'src/app/services/afiliado.service';
-import { DatosEstaticosService } from 'src/app/services/datos-estaticos.service';
 import { TransaccionesService } from 'src/app/services/transacciones.service';
 import { FieldConfig } from 'src/app/shared/Interfaces/field-config';
 import { TableColumn } from 'src/app/shared/Interfaces/table-column';
@@ -39,7 +37,6 @@ export class VerCuentasPersonasComponent {
     private svcTransacciones: TransaccionesService,
     private toastr: ToastrService,
     private dialog: MatDialog,
-    private datosEstaticosService: DatosEstaticosService
   ) { }
 
   ngOnInit(): void {
@@ -73,8 +70,6 @@ export class VerCuentasPersonasComponent {
         isEditable: true
       },
     ];
-
-    this.previsualizarInfoAfil();
     this.getFilas().then(() => this.cargar());
     console.log(this.Afiliado);
 
@@ -82,23 +77,6 @@ export class VerCuentasPersonasComponent {
 
   async obtenerDatos(event: any): Promise<any> {
     this.form = event;
-  }
-
-  previsualizarInfoAfil() {
-    if (this.Afiliado.N_IDENTIFICACION) {
-      this.svcAfiliado.getAfilByParam(this.Afiliado.N_IDENTIFICACION).subscribe(
-        async (result) => {
-          this.prevAfil = true;
-          this.Afiliado = result
-          this.Afiliado.nameAfil = this.unirNombres(result.PRIMER_NOMBRE, result.SEGUNDO_NOMBRE, result.TERCER_NOMBRE, result.PRIMER_APELLIDO, result.SEGUNDO_APELLIDO);
-          this.getFilas().then(() => this.cargar());
-        },
-        (error) => {
-          this.getFilas().then(() => this.cargar());
-          this.toastr.error(`Error: ${error.error.message}`);
-          this.resetDatos();
-        })
-    }
   }
 
   resetDatos() {
@@ -112,10 +90,13 @@ export class VerCuentasPersonasComponent {
   async getFilas() {
 
     if (this.Afiliado) {
+      console.log(this.Afiliado);
+
       try {
-        const data = await this.svcAfiliado.buscarCuentasPorDNI(this.Afiliado.N_IDENTIFICACION).toPromise();
-        console.log(data);
+        const data = await this.svcAfiliado.buscarCuentasPorDNI(this.Afiliado.n_identificacion).toPromise();
         this.filas = data.data.persona.cuentas.map((item: any) => {
+          console.log(item);
+
           return {
             NUMERO_CUENTA: item.NUMERO_CUENTA,
             FECHA_CREACION: item.FECHA_CREACION,

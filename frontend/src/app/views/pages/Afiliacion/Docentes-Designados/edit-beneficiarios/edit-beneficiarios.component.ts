@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, OnInit, OnChanges, SimpleChanges, OnDestroy } from '@angular/core';
 import { Validators } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
 import { AgregarBenefCompComponent } from '@docs-components/agregar-benef-comp/agregar-benef-comp.component';
@@ -12,18 +12,18 @@ import { convertirFechaInputs } from 'src/app/shared/functions/formatoFecha';
 import { unirNombres } from 'src/app/shared/functions/formatoNombresP';
 import { DatosEstaticosService } from 'src/app/services/datos-estaticos.service';
 import { DatePipe } from '@angular/common';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-edit-beneficiarios',
   templateUrl: './edit-beneficiarios.component.html',
-  styleUrl: './edit-beneficiarios.component.scss',
+  styleUrls: ['./edit-beneficiarios.component.scss']
 })
-export class EditBeneficiariosComponent {
-  convertirFechaInputs = convertirFechaInputs
-  public myFormFields: FieldConfig[] = []
+export class EditBeneficiariosComponent implements OnInit, OnChanges, OnDestroy {
+  convertirFechaInputs = convertirFechaInputs;
+  public myFormFields: FieldConfig[] = [];
   form: any;
-  @Input() Afiliado!: any;
-
+  @Input() persona: any;
   unirNombres: any = unirNombres;
   datosTabl: any[] = [];
   bancos: { label: string, value: string }[] = [];
@@ -33,6 +33,9 @@ export class EditBeneficiariosComponent {
   public myColumns: TableColumn[] = [];
   public filas: any[] = [];
   ejecF: any;
+  municipios: { label: string, value: any }[] = [];
+  estados: { label: string, value: any }[] = [];
+  private subscriptions: Subscription = new Subscription();
 
   constructor(
     private svcAfiliado: AfiliadoService,
@@ -43,39 +46,38 @@ export class EditBeneficiariosComponent {
   ) { }
 
   ngOnInit(): void {
+    this.initializeComponent();
+  }
+
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['persona'] && this.persona) {
+      console.log('EditBeneficiariosComponent - persona:', this.persona);
+      this.initializeComponent();
+    }
+  }
+
+  ngOnDestroy(): void {
+    this.subscriptions.unsubscribe();
+  }
+
+  initializeComponent(): void {
+    if (!this.persona) {
+      return;
+    }
+
     this.myFormFields = [
       { type: 'text', label: 'DNI del afiliado', name: 'dni', validations: [Validators.required, Validators.minLength(13), Validators.maxLength(14)], display: true },
     ];
 
     this.myColumns = [
-      {
-        header: 'N de Identificación',
-        col: 'n_identificacion',
-        validationRules: [Validators.required, Validators.minLength(3)]
-      },
-      {
-        header: 'Nombres',
-        col: 'nombres',
-      },
-      {
-        header: 'Apellidos',
-        col: 'apellidos',
-      },
-      {
-        header: 'Porcentaje',
-        col: 'porcentaje',
-      },
-      {
-        header: 'Estado',
-        col: 'estado_descripcion',
-      },
-      {
-        header: 'Fecha de Nacimiento',
-        col: 'fecha_nacimiento',
-      }
+      { header: 'DNI', col: 'dni', validationRules: [Validators.required, Validators.minLength(3)] },
+      { header: 'Nombres', col: 'nombres' },
+      { header: 'Apellidos', col: 'apellidos' },
+      { header: 'Porcentaje', col: 'porcentaje' },
+      { header: 'Estado', col: 'estado_descripcion' },
+      { header: 'Fecha de Nacimiento', col: 'fecha_nacimiento' }
     ];
 
-    this.previsualizarInfoAfil()
     this.getFilas().then(() => this.cargar());
   }
 
@@ -83,35 +85,18 @@ export class EditBeneficiariosComponent {
     this.form = event;
   }
 
-  previsualizarInfoAfil() {
-    if (this.Afiliado.N_IDENTIFICACION) {
-      this.svcAfiliado.getAllPersonas(this.Afiliado.N_IDENTIFICACION).subscribe(
-        async (result) => {
-          this.prevAfil = true;
-          this.Afiliado = result
-          this.Afiliado.nameAfil = this.unirNombres(result.PRIMER_NOMBRE, result.SEGUNDO_NOMBRE, result.TERCER_NOMBRE, result.PRIMER_APELLIDO, result.SEGUNDO_APELLIDO);
-          this.getFilas().then(() => this.cargar());
-        },
-        (error) => {
-          this.getFilas().then(() => this.cargar());
-          this.toastr.error(`Error: ${error.error.message}`);
-          /* this.resetDatos(); */
-        })
-    }
-  }
-
   resetDatos() {
     if (this.form) {
       this.form.reset();
     }
     this.filas = [];
-    this.Afiliado = undefined;
+    this.persona = undefined;
   }
 
   async getFilas() {
-    if (this.Afiliado) {
+    if (this.persona) {
       try {
-        const data = await this.svcAfiliado.getAllBenDeAfil(this.Afiliado.N_IDENTIFICACION).toPromise();
+        const data = await this.svcAfiliado.getAllBenDeAfil(this.persona.n_identificacion).toPromise();
         this.filas = data.map((item: any) => {
           const nombres = [item.primerNombre, item.segundoNombre, item.tercerNombre].filter(part => part).join(' ');
           const apellidos = [item.primerApellido, item.segundoApellido].filter(part => part).join(' ');
@@ -153,8 +138,7 @@ export class EditBeneficiariosComponent {
 
   cargar() {
     if (this.ejecF) {
-      this.ejecF(this.filas).then(() => {
-      });
+      this.ejecF(this.filas).then(() => {});
     }
   }
 
@@ -178,7 +162,6 @@ export class EditBeneficiariosComponent {
     this.openDialog(campos, row);
   }
 
-
   manejarAccionDos(row: any) {
     const dialogRef = this.dialog.open(ConfirmDialogComponent, {
       width: '350px',
@@ -189,7 +172,7 @@ export class EditBeneficiariosComponent {
     });
     dialogRef.afterClosed().subscribe((result: any) => {
       if (result) {
-        this.inactivarPersona(row.id, this.Afiliado.ID_PERSONA);
+        this.inactivarPersona(row.id, this.persona.ID_PERSONA);
       }
     });
   }
@@ -199,7 +182,7 @@ export class EditBeneficiariosComponent {
       width: '55%',
       height: '75%',
       data: {
-        idPersona: this.Afiliado.ID_PERSONA
+        idPersona: this.persona.ID_PERSONA
       }
     });
 
@@ -229,7 +212,6 @@ export class EditBeneficiariosComponent {
 
     dialogRef.afterClosed().subscribe((result: any) => {
       if (result) {
-
         const [primer_nombre, segundo_nombre, tercer_nombre] = result.nombres.split(' ');
         const [primer_apellido, segundo_apellido] = result.apellidos.split(' ');
 

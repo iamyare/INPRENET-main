@@ -148,9 +148,9 @@ import { ConstanciasAfiliadoComponent } from '../pages/Afiliacion/Docentes-Desig
     VerReferenciasComponent,
     VerSociosComponent,
     ConstanciasAfiliadoComponent,
-
   ],
-  exports: []
+  exports: [
+  ]
 })
 export class ThemeModule {
 }

@@ -1,6 +1,7 @@
-import { Controller, Get, NotFoundException, Param } from '@nestjs/common';
+import { Controller, Get, NotFoundException, Param, Post, UploadedFile, UseInterceptors } from '@nestjs/common';
 import { AfiliacionService } from './afiliacion.service';
 import { Net_Persona } from '../entities/Net_Persona.entity';
+import { FileInterceptor } from '@nestjs/platform-express';
 
 @Controller('afiliacion')
 export class AfiliacionController {
@@ -23,5 +24,23 @@ export class AfiliacionController {
     } catch (error) {
       throw new NotFoundException(error.message);
     }
+  }
+
+  @Post(':id/foto-perfil')
+  @UseInterceptors(FileInterceptor('fotoPerfil', {
+    limits: { fileSize: 5 * 1024 * 1024 }, // 5MB file size limit
+    fileFilter: (req, file, callback) => {
+      if (file.mimetype.startsWith('image/')) {
+        callback(null, true);
+      } else {
+        callback(new Error('Solo se permiten archivos de imagen'), false);
+      }
+    },
+  }))
+  async updateFotoPerfil(@Param('id') id: string, @UploadedFile() fotoPerfil: Express.Multer.File) {
+    if (!fotoPerfil) {
+      throw new Error('No se ha subido ningún archivo');
+    }
+    return await this.afiliacionService.updateFotoPerfil(Number(id), fotoPerfil.buffer);
   }
 }

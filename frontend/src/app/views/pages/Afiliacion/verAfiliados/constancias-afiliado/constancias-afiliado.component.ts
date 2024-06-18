@@ -25,6 +25,8 @@ export class ConstanciasAfiliadoComponent {
     { name: 'Generar Constancia de Renuncia CAP', action: this.generarConstanciaRenunciaCap.bind(this) },
     { name: 'Generar Constancia de Afiliación', action: this.generarConstanciaAfiliacion.bind(this) },
     { name: 'Generar Constancia de No Cotizar', action: this.generarConstanciaNoCotizar.bind(this) },
+    { name: 'Generar Constancia de Débitos', action: this.generarConstanciaDebitos.bind(this) },
+    { name: 'Generar Constancia de Tiempo De Cotizar Con Monto', action: this.generarConstanciaTiempoCotizarConMonto.bind(this) }
   ];
 
   async getMembreteBase64() {
@@ -266,4 +268,157 @@ export class ConstanciasAfiliadoComponent {
 
     pdfMake.createPdf(docDefinition).open();
   }
+
+  async generarConstanciaDebitos() {
+    const base64data = await this.getMembreteBase64();
+    const afiliado = this.persona;
+
+    const docDefinition: any = {
+      pageSize: 'A4',
+      pageMargins: [40, 120, 40, 40],
+      background: {
+        image: base64data,
+        width: 595.28,
+        height: 841.89
+      },
+      content: [
+        { text: 'A QUIEN INTERESE', style: 'header' },
+        {
+          text: [
+            'El Departamento de Atención al Docente del Instituto Nacional de Previsión del Magisterio, (INPREMA) INFORMA que el(la) Docente: ',
+            { text: `${afiliado.primer_nombre} ${afiliado.segundo_nombre} ${afiliado.tercer_nombre} ${afiliado.primer_apellido} ${afiliado.segundo_apellido}`, bold: true },
+            ' con Identidad No. ',
+            { text: `${afiliado.n_identificacion}`, bold: true },
+            ' según los registros existentes de esta institución, tiene un debito de ',
+            { text: 'L 0.00', bold: true },
+            ' por concepto de ',
+            { text: '', bold: true },
+            ', con fecha de oficio ',
+            { text: '', bold: true },
+            '.'
+          ],
+          style: 'body'
+        },
+        {
+          text: [
+            'Y para los fines que el interesado estime convenientes, se extiende la presente confirmación en la ciudad de ',
+            { text: 'TEGUCIGALPA, FRANCISCO MORAZAN', bold: true },
+            ', a los ',
+            { text: `${new Date().getDate()}`, bold: true },
+            ' días del mes de ',
+            { text: `${new Date().toLocaleString('es-HN', { month: 'long' })}`, bold: true },
+            ' del año ',
+            { text: `${new Date().getFullYear()}`, bold: true },
+            '.'
+          ],
+          style: 'body'
+        },
+        { text: '\n\n\n' },
+        { canvas: [{ type: 'line', x1: 0, y1: 0, x2: 250, y2: 0, lineWidth: 1 }], margin: [127, 120, 0, 0] },
+        { text: 'Departamento de Atención al Docente', style: 'signature' },
+        { text: 'Firma Autorizada', style: 'signatureTitle' }
+      ],
+      styles: {
+        header: {
+          fontSize: 18,
+          bold: true,
+          alignment: 'center',
+          margin: [0, 20, 0, 20],
+        },
+        body: {
+          fontSize: 11,
+          alignment: 'justify',
+          margin: [40, 0, 40, 5]
+        },
+        signature: {
+          fontSize: 12,
+          bold: true,
+          alignment: 'center',
+          margin: [0, 10, 0, 0]
+        },
+        signatureTitle: {
+          fontSize: 12,
+          alignment: 'center'
+        }
+      }
+    };
+
+    pdfMake.createPdf(docDefinition).open();
+  }
+
+  async generarConstanciaTiempoCotizarConMonto() {
+    const base64data = await this.getMembreteBase64();
+    const afiliado = this.persona;
+
+    const docDefinition: any = {
+      pageSize: 'A4',
+      pageMargins: [40, 120, 40, 40],
+      background: {
+        image: base64data,
+        width: 595.28,
+        height: 841.89
+      },
+      content: [
+        { text: 'A QUIEN INTERESE', style: 'header' },
+        {
+          text: [
+            'El Instituto Nacional de Previsión del Magisterio (INPREMA) INFORMA que el(la) Docente: ',
+            { text: `${afiliado.primer_nombre} ${afiliado.segundo_nombre} ${afiliado.tercer_nombre} ${afiliado.primer_apellido} ${afiliado.segundo_apellido}`, bold: true },
+            ' con Identidad No. ',
+            { text: `${afiliado.n_identificacion}`, bold: true },
+            ', según la información contenida en los registros existentes de esta institución, cotiza al sistema desde el mes de ',
+            { text: 'Noviembre del año 2001', bold: true },
+            ' a Mayo de 2024. Tiene por concepto de cotizaciones, la suma de L ',
+            { text: '256,217.94', bold: true },
+            ' (DOSCIENTOS CINCUENTA Y SEIS MIL DOSCIENTOS DIECISIETE LEMPIRAS CON 94/100 CTV).'
+          ],
+          style: 'body'
+        },
+        {
+          text: [
+            'Y para los fines que el interesado estime convenientes, se extiende la presente confirmación en la ciudad de ',
+            { text: 'TEGUCIGALPA, FRANCISCO MORAZAN', bold: true },
+            ', a los ',
+            { text: `${new Date().getDate()}`, bold: true },
+            ' días del mes de ',
+            { text: `${new Date().toLocaleString('es-HN', { month: 'long' })}`, bold: true },
+            ' del año ',
+            { text: `${new Date().getFullYear()}`, bold: true },
+            '.'
+          ],
+          style: 'body'
+        },
+        { text: '\n\n\n' },
+        { canvas: [{ type: 'line', x1: 0, y1: 0, x2: 250, y2: 0, lineWidth: 1 }], margin: [127, 120, 0, 0] },
+        { text: 'Departamento de Atención al Docente', style: 'signature' },
+        { text: 'Firma Autorizada', style: 'signatureTitle' }
+      ],
+      styles: {
+        header: {
+          fontSize: 18,
+          bold: true,
+          alignment: 'center',
+          margin: [0, 20, 0, 20],
+        },
+        body: {
+          fontSize: 11,
+          alignment: 'justify',
+          margin: [40, 0, 40, 5]
+        },
+        signature: {
+          fontSize: 12,
+          bold: true,
+          alignment: 'center',
+          margin: [0, 10, 0, 0]
+        },
+        signatureTitle: {
+          fontSize: 12,
+          alignment: 'center'
+        }
+      }
+    };
+
+    pdfMake.createPdf(docDefinition).open();
+  }
+
 }

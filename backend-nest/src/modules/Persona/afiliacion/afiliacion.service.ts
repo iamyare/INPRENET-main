@@ -16,6 +16,15 @@ export class AfiliacionService {
         private readonly tipoPersonaRepository: Repository<Net_Tipo_Persona>,
       ) {}
 
+      async updateFotoPerfil(id: number, fotoPerfil: Buffer): Promise<Net_Persona> {
+        const persona = await this.personaRepository.findOneBy({ id_persona: id });
+        if (!persona) {
+          throw new Error('Persona no encontrada');
+        }
+        persona.foto_perfil = fotoPerfil;
+        return await this.personaRepository.save(persona);
+      }
+
       async getPersonaByn_identificacioni(n_identificacion: string): Promise<Net_Persona> {
         
         const persona = await this.personaRepository.findOne({
@@ -76,5 +85,8 @@ export class AfiliacionService {
     
         return causantes;
       }
+
+
+      
       
 }

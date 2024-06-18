@@ -3,10 +3,9 @@
 
   <div *ngIf="currentStepIndex === 0">
     <app-edit-datos-generales [Afiliado]="persona"></app-edit-datos-generales>
-    <app-edit-beneficiarios></app-edit-beneficiarios>
   </div>
 
   <div *ngIf="currentStepIndex === 1">
-    <!-- Otra información que se desee agregar -->
+    <app-edit-datos-bancarios [Afiliado]="persona"></app-edit-datos-bancarios>
   </div>
 </div>

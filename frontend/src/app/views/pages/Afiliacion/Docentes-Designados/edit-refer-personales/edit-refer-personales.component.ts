@@ -84,32 +84,11 @@ export class EditReferPersonalesComponent {
         isEditable: true
       },
     ];
-    this.previsualizarInfoAfil()
     this.getFilas().then(() => this.cargar());
   }
 
   async obtenerDatos(event: any): Promise<any> {
     this.form = event;
-  }
-
-  previsualizarInfoAfil() {
-    console.log(this.Afiliado);
-
-    if (this.Afiliado.N_IDENTIFICACION) {
-
-      this.svcAfiliado.getAfilByParam(this.Afiliado.N_IDENTIFICACION).subscribe(
-        async (result) => {
-          this.prevAfil = true;
-          this.Afiliado = result
-          this.Afiliado.nameAfil = this.unirNombres(result.PRIMER_NOMBRE, result.SEGUNDO_NOMBRE, result.TERCER_NOMBRE, result.PRIMER_APELLIDO, result.SEGUNDO_APELLIDO);
-          this.getFilas().then(() => this.cargar());
-        },
-        (error) => {
-          this.resetDatos();
-          this.getFilas().then(() => this.cargar());
-          this.toastr.error(`Error: ${error.error.message}`);
-        })
-    }
   }
 
   resetDatos() {
@@ -123,7 +102,7 @@ export class EditReferPersonalesComponent {
   async getFilas() {
     if (this.Afiliado) {
       try {
-        const data = await this.svcAfiliado.getAllReferenciasPersonales(this.Afiliado.N_IDENTIFICACION).toPromise();
+        const data = await this.svcAfiliado.getAllReferenciasPersonales(this.Afiliado.n_identificacion).toPromise();
         this.filas = data.map((item: any) => {
           const filaProcesada = {
             id_ref_personal: item.id_ref_personal ?? 'ID no disponible',

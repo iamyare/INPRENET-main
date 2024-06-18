@@ -52,8 +52,6 @@ import { EditPerfilPuestTrabComponent } from '../pages/Afiliacion/Docentes-Desig
 import { EditReferPersonalesComponent } from '../pages/Afiliacion/Docentes-Designados/edit-refer-personales/edit-refer-personales.component';
 
 
-
-import { EditBeneficiariosComponent } from '../pages/Afiliacion/Docentes-Designados/edit-beneficiarios/edit-beneficiarios.component';
 import { EditDatosBancariosComponent } from '../pages/Afiliacion/Docentes-Designados/edit-datos-bancarios/edit-datos-bancarios.component';
 import { EditColegiosMagisterialesComponent } from '../pages/Afiliacion/Docentes-Designados/edit-colegios-magisteriales/edit-colegios-magisteriales.component';
 import { PlanillaColegiosPrivadosComponent } from '../pages/Centros Privados/planilla-colegios-privados/planilla-colegios-privados.component';
@@ -75,8 +73,6 @@ import { PagesModule } from '../pages/pages.module';
 import { VerDatosCentrosComponent } from '../pages/Afiliacion/Centros-Educativos/ver-datos-centros/ver-datos-centros.component';
 
 import { ConstanciasAfiliadoComponent } from '../pages/Afiliacion/Docentes-Designados/constancias-afiliado/constancias-afiliado.component';
-
-/* import { EditDatosGeneralesComponent } from '../pages/Afiliacion/Docentes-Designados/edit-datos-generales/edit-datos-generales.component'; */
 
 @NgModule({
   imports: [
@@ -134,7 +130,6 @@ import { ConstanciasAfiliadoComponent } from '../pages/Afiliacion/Docentes-Desig
     NavDefaultComponent,
     VerDatPlanIngComponent,
     EditPerfilPuestTrabComponent,
-    EditBeneficiariosComponent,
     EditDatosBancariosComponent,
     EditReferPersonalesComponent,
     EditColegiosMagisterialesComponent,
@@ -153,6 +148,7 @@ import { ConstanciasAfiliadoComponent } from '../pages/Afiliacion/Docentes-Desig
     VerReferenciasComponent,
     VerSociosComponent,
     ConstanciasAfiliadoComponent,
+
   ],
   exports: []
 })

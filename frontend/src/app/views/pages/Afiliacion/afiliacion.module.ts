@@ -16,6 +16,7 @@ import { BeneficiarioConstanciasComponent } from './verPerfil/beneficiario-const
 import { BeneficiarioBeneficiosAsignadosComponent } from './verPerfil/beneficiario-beneficios-asignados/beneficiario-beneficios-asignados.component';
 import { CausanteDetalleComponent } from './verPerfil/causante-detalle/causante-detalle.component';
 import { ConstanciasAfiliadoComponent } from './verAfiliados/constancias-afiliado/constancias-afiliado.component';
+import { EditBeneficiariosComponent } from './Docentes-Designados/edit-beneficiarios/edit-beneficiarios.component';
 import { EditDatosGeneralesComponent } from './Docentes-Designados/edit-datos-generales/edit-datos-generales.component';
 
 @NgModule({
@@ -33,19 +34,19 @@ import { EditDatosGeneralesComponent } from './Docentes-Designados/edit-datos-ge
     BeneficiarioBeneficiosAsignadosComponent,
     CausanteDetalleComponent,
     ConstanciasAfiliadoComponent,
+    EditBeneficiariosComponent,
     EditDatosGeneralesComponent
   ],
   imports: [
     CommonModule,
     SharedModule,
-    ThemeModule,
-    AfiliacionRoutingModule,
   ],
   exports: [
     BuscarPersonaComponent,
     PerfilComponent,
     ThemeModule,
-    EditDatosGeneralesComponent
+    EditDatosGeneralesComponent,
+    EditBeneficiariosComponent
   ],
   schemas: [CUSTOM_ELEMENTS_SCHEMA]
 })

@@ -16,7 +16,7 @@ import { DatePipe } from '@angular/common';
 @Component({
   selector: 'app-edit-beneficiarios',
   templateUrl: './edit-beneficiarios.component.html',
-  styleUrl: './edit-beneficiarios.component.scss'
+  styleUrl: './edit-beneficiarios.component.scss',
 })
 export class EditBeneficiariosComponent {
   convertirFechaInputs = convertirFechaInputs

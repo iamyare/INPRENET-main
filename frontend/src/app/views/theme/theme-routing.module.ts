@@ -25,8 +25,8 @@ import { VerMovimientosComponent } from '../pages/planilla/ver-movimientos/ver-m
 import { PlanillaColegiosPrivadosComponent } from '../pages/Centros Privados/planilla-colegios-privados/planilla-colegios-privados.component';
 import { EditPerfilPuestTrabComponent } from '../pages/Afiliacion/Docentes-Designados/edit-perfil-puest-trab/edit-perfil-puest-trab.component';
 import { EditReferPersonalesComponent } from '../pages/Afiliacion/Docentes-Designados/edit-refer-personales/edit-refer-personales.component';
-;
-import { EditBeneficiariosComponent } from '../pages/Afiliacion/Docentes-Designados/edit-beneficiarios/edit-beneficiarios.component';
+/* ;
+import { EditBeneficiariosComponent } from '../pages/Afiliacion/Docentes-Designados/edit-beneficiarios/edit-beneficiarios.component'; */
 import { EditDatosBancariosComponent } from '../pages/Afiliacion/Docentes-Designados/edit-datos-bancarios/edit-datos-bancarios.component';
 import { EditColegiosMagisterialesComponent } from '../pages/Afiliacion/Docentes-Designados/edit-colegios-magisteriales/edit-colegios-magisteriales.component';
 import { EditFamiliaresComponent } from '../pages/Generales/edit-familiares/edit-familiares.component';
@@ -36,6 +36,7 @@ import { NuevoUsuarioComponent } from '../pages/admin-centro/nuevo-usuario/nuevo
 
 import { BuscarPersonaComponent } from '../pages/afiliacion/verPerfil/buscar-persona/buscar-persona.component';
 import { VerDatosCentrosComponent } from '../pages/Afiliacion/Centros-Educativos/ver-datos-centros/ver-datos-centros.component';
+import { EditBeneficiariosComponent } from '../pages/afiliacion/Docentes-Designados/edit-beneficiarios/edit-beneficiarios.component';
 
 const routes: Routes = [
   //rutas Afiliado

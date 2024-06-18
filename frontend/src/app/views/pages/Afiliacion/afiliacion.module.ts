@@ -18,6 +18,12 @@ import { CausanteDetalleComponent } from './verPerfil/causante-detalle/causante-
 import { ConstanciasAfiliadoComponent } from './verAfiliados/constancias-afiliado/constancias-afiliado.component';
 import { EditBeneficiariosComponent } from './Docentes-Designados/edit-beneficiarios/edit-beneficiarios.component';
 import { EditDatosGeneralesComponent } from './Docentes-Designados/edit-datos-generales/edit-datos-generales.component';
+import { EditColegiosMagisterialesComponent } from './Docentes-Designados/edit-colegios-magisteriales/edit-colegios-magisteriales.component';
+import { VerCuentasPersonasComponent } from './Docentes-Designados/ver-cuentas-personas/ver-cuentas-personas.component';
+
+import { EditPerfilPuestTrabComponent } from './Docentes-Designados/edit-perfil-puest-trab/edit-perfil-puest-trab.component';
+import { EditReferPersonalesComponent } from './Docentes-Designados/edit-refer-personales/edit-refer-personales.component';
+import { EditDatosBancariosComponent } from './Docentes-Designados/edit-datos-bancarios/edit-datos-bancarios.component';
 
 @NgModule({
   declarations: [
@@ -35,7 +41,13 @@ import { EditDatosGeneralesComponent } from './Docentes-Designados/edit-datos-ge
     CausanteDetalleComponent,
     ConstanciasAfiliadoComponent,
     EditBeneficiariosComponent,
-    EditDatosGeneralesComponent
+    EditDatosGeneralesComponent,
+    EditColegiosMagisterialesComponent,
+    EditPerfilPuestTrabComponent,
+    EditDatosBancariosComponent,
+    EditReferPersonalesComponent,
+    VerCuentasPersonasComponent,
+    ConstanciasAfiliadoComponent,
   ],
   imports: [
     CommonModule,
@@ -46,7 +58,13 @@ import { EditDatosGeneralesComponent } from './Docentes-Designados/edit-datos-ge
     PerfilComponent,
     ThemeModule,
     EditDatosGeneralesComponent,
-    EditBeneficiariosComponent
+    EditBeneficiariosComponent,
+    EditColegiosMagisterialesComponent,
+    EditPerfilPuestTrabComponent,
+    EditDatosBancariosComponent,
+    EditReferPersonalesComponent,
+    VerCuentasPersonasComponent,
+    ConstanciasAfiliadoComponent,
   ],
   schemas: [CUSTOM_ELEMENTS_SCHEMA]
 })

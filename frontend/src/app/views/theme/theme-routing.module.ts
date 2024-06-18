@@ -23,12 +23,15 @@ import { CargarPlanillaPrivadosComponent } from '../pages/Centros Privados/carga
 import { NuevoMovimientoComponent } from '../pages/planilla/nuevo-movimiento/nuevo-movimiento.component';
 import { VerMovimientosComponent } from '../pages/planilla/ver-movimientos/ver-movimientos.component';
 import { PlanillaColegiosPrivadosComponent } from '../pages/Centros Privados/planilla-colegios-privados/planilla-colegios-privados.component';
-import { EditPerfilPuestTrabComponent } from '../pages/Afiliacion/Docentes-Designados/edit-perfil-puest-trab/edit-perfil-puest-trab.component';
-import { EditReferPersonalesComponent } from '../pages/Afiliacion/Docentes-Designados/edit-refer-personales/edit-refer-personales.component';
+
+/* import { EditPerfilPuestTrabComponent } from '../pages/Afiliacion/Docentes-Designados/edit-perfil-puest-trab/edit-perfil-puest-trab.component';
+import { EditReferPersonalesComponent } from '../pages/Afiliacion/Docentes-Designados/edit-refer-personales/edit-refer-personales.component'; */
 /* ;
 import { EditBeneficiariosComponent } from '../pages/Afiliacion/Docentes-Designados/edit-beneficiarios/edit-beneficiarios.component'; */
-import { EditDatosBancariosComponent } from '../pages/Afiliacion/Docentes-Designados/edit-datos-bancarios/edit-datos-bancarios.component';
-import { EditColegiosMagisterialesComponent } from '../pages/Afiliacion/Docentes-Designados/edit-colegios-magisteriales/edit-colegios-magisteriales.component';
+/* import { EditColegiosMagisterialesComponent } from '../pages/Afiliacion/Docentes-Designados/edit-colegios-magisteriales/edit-colegios-magisteriales.component'; */
+
+/* import { EditDatosBancariosComponent } from '../pages/Afiliacion/Docentes-Designados/edit-datos-bancarios/edit-datos-bancarios.component'; */
+
 import { EditFamiliaresComponent } from '../pages/Generales/edit-familiares/edit-familiares.component';
 import { AfiliacionCentrosComponent } from '../pages/Afiliacion/Centros-Educativos/afiliacion-centros/afiliacion-centros.component';
 import { GestionUsuariosComponent } from '../pages/admin-centro/gestion-usuarios/gestion-usuarios.component';
@@ -37,6 +40,9 @@ import { NuevoUsuarioComponent } from '../pages/admin-centro/nuevo-usuario/nuevo
 import { BuscarPersonaComponent } from '../pages/afiliacion/verPerfil/buscar-persona/buscar-persona.component';
 import { VerDatosCentrosComponent } from '../pages/Afiliacion/Centros-Educativos/ver-datos-centros/ver-datos-centros.component';
 import { EditBeneficiariosComponent } from '../pages/afiliacion/Docentes-Designados/edit-beneficiarios/edit-beneficiarios.component';
+import { EditPerfilPuestTrabComponent } from '../pages/afiliacion/Docentes-Designados/edit-perfil-puest-trab/edit-perfil-puest-trab.component';
+import { EditDatosBancariosComponent } from '../pages/afiliacion/Docentes-Designados/edit-datos-bancarios/edit-datos-bancarios.component';
+import { EditReferPersonalesComponent } from '../pages/afiliacion/Docentes-Designados/edit-refer-personales/edit-refer-personales.component';
 
 const routes: Routes = [
   //rutas Afiliado
@@ -99,13 +105,13 @@ const routes: Routes = [
               title: 'Editar Puestos de trabajo',
             },
           },
-          {
+          /* {
             path: 'edit-colegios-magisteriales',
             component: EditColegiosMagisterialesComponent,
             data: {
               title: 'Editar Colegios Magisteriales',
             },
-          },
+          }, */
           {
             path: 'edit-datos-bancarios',
             component: EditDatosBancariosComponent,

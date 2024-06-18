@@ -48,17 +48,17 @@ import { MatGridListModule } from '@angular/material/grid-list';
 import { CargarPlanillaPrivadosComponent } from '../pages/Centros Privados/cargar-planilla-privados/cargar-planilla-privados.component';
 import { NuevoMovimientoComponent } from '../pages/planilla/nuevo-movimiento/nuevo-movimiento.component';
 import { VerMovimientosComponent } from '../pages/planilla/ver-movimientos/ver-movimientos.component';
-import { EditPerfilPuestTrabComponent } from '../pages/Afiliacion/Docentes-Designados/edit-perfil-puest-trab/edit-perfil-puest-trab.component';
+
+/* import { EditPerfilPuestTrabComponent } from '../pages/Afiliacion/Docentes-Designados/edit-perfil-puest-trab/edit-perfil-puest-trab.component';
 import { EditReferPersonalesComponent } from '../pages/Afiliacion/Docentes-Designados/edit-refer-personales/edit-refer-personales.component';
-
-
 import { EditDatosBancariosComponent } from '../pages/Afiliacion/Docentes-Designados/edit-datos-bancarios/edit-datos-bancarios.component';
-import { EditColegiosMagisterialesComponent } from '../pages/Afiliacion/Docentes-Designados/edit-colegios-magisteriales/edit-colegios-magisteriales.component';
+/* import { VerCuentasPersonasComponent } from '../pages/Afiliacion/Docentes-Designados/ver-cuentas-personas/ver-cuentas-personas.component';
+/* import { ConstanciasAfiliadoComponent } from '../pages/Afiliacion/Docentes-Designados/constancias-afiliado/constancias-afiliado.component'; */
+
 import { PlanillaColegiosPrivadosComponent } from '../pages/Centros Privados/planilla-colegios-privados/planilla-colegios-privados.component';
 import { NavDefaultComponent } from '../pages/Centros Privados/nav-default/nav-default.component';
 import { EditFamiliaresComponent } from '../pages/Generales/edit-familiares/edit-familiares.component';
 import { VerDatosAfiliadosComponent } from '../pages/Afiliacion/Docentes-Designados/ver-datos-afiliados/ver-datos-afiliados.component';
-import { VerCuentasPersonasComponent } from '../pages/Afiliacion/Docentes-Designados/ver-cuentas-personas/ver-cuentas-personas.component';
 import { AfiliacionCentrosComponent } from '../pages/Afiliacion/Centros-Educativos/afiliacion-centros/afiliacion-centros.component';
 import { DatosGeneralesCentroComponent } from '../pages/Afiliacion/Centros-Educativos/datos-generales-centro/datos-generales-centro.component';
 import { ReferenciasBancariasComercialesComponent } from '../pages/Afiliacion/Centros-Educativos/referencias-bancarias-comerciales/referencias-bancarias-comerciales.component';
@@ -72,7 +72,6 @@ import { NuevoUsuarioComponent } from '../pages/admin-centro/nuevo-usuario/nuevo
 import { PagesModule } from '../pages/pages.module';
 import { VerDatosCentrosComponent } from '../pages/Afiliacion/Centros-Educativos/ver-datos-centros/ver-datos-centros.component';
 
-import { ConstanciasAfiliadoComponent } from '../pages/Afiliacion/Docentes-Designados/constancias-afiliado/constancias-afiliado.component';
 
 @NgModule({
   imports: [
@@ -129,13 +128,8 @@ import { ConstanciasAfiliadoComponent } from '../pages/Afiliacion/Docentes-Desig
     VerMovimientosComponent,
     NavDefaultComponent,
     VerDatPlanIngComponent,
-    EditPerfilPuestTrabComponent,
-    EditDatosBancariosComponent,
-    EditReferPersonalesComponent,
-    EditColegiosMagisterialesComponent,
     EditFamiliaresComponent,
     VerDatosAfiliadosComponent,
-    VerCuentasPersonasComponent,
     AfiliacionCentrosComponent,
     DatosGeneralesCentroComponent,
     ReferenciasBancariasComercialesComponent,
@@ -147,7 +141,6 @@ import { ConstanciasAfiliadoComponent } from '../pages/Afiliacion/Docentes-Desig
     VerDatosCentrosComponent,
     VerReferenciasComponent,
     VerSociosComponent,
-    ConstanciasAfiliadoComponent,
   ],
   exports: [
   ]

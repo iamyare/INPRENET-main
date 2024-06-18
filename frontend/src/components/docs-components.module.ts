@@ -66,9 +66,12 @@ import { ProgressbarDynamicComponent } from './progressbar-dynamic/progressbar-d
 import { SharedFormFieldsComponent } from './shared-form-fields/shared-form-fields.component';
 import { BuscadorComponent } from './buscador/buscador.component';
 import { DynamicMenuConstanciasComponent } from './Dynamics/dynamic-menu-constancias/dynamic-menu-constancias.component';
+import { MapsComponent } from './maps/maps.component';
+import { GoogleMapsModule } from '@angular/google-maps';
 
 @NgModule({
   declarations: [
+    MapsComponent,
     BuscadorComponent,
     BeneficioComponent,
     ProgressplanillComponent,
@@ -105,6 +108,7 @@ import { DynamicMenuConstanciasComponent } from './Dynamics/dynamic-menu-constan
     DynamicMenuConstanciasComponent
   ],
   exports: [
+    MapsComponent,
     ProgressbarComponent,
     ProgressplanillComponent,
     ProgressbarVerdatosComponent,
@@ -140,6 +144,7 @@ import { DynamicMenuConstanciasComponent } from './Dynamics/dynamic-menu-constan
     DynamicMenuConstanciasComponent
   ],
   imports: [
+    GoogleMapsModule,
     WebcamModule,
     CommonModule,
     NavModule,
@@ -192,6 +197,7 @@ import { DynamicMenuConstanciasComponent } from './Dynamics/dynamic-menu-constan
     NgScrollbarModule,
     MatTableModule,
     MatPaginatorModule,
+
   ],
   providers: [
     { provide: MatPaginatorIntl, useClass: CustomMatPaginatorIntl },

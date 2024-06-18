@@ -45,7 +45,6 @@ export class VerReferenciasComponent {
   }
 
   ngOnInit(): void {
-
     this.myColumns = [
       {
         header: 'Id Referencia',

@@ -5,7 +5,7 @@ import { Component, Input, OnInit } from '@angular/core';
   templateUrl: './informacion-general.component.html',
   styleUrls: ['./informacion-general.component.scss']
 })
-export class InformacionGeneralComponent implements OnInit {
+export class InformacionGeneralComponent{
   @Input() persona: any;
 
   steps = [
@@ -14,10 +14,6 @@ export class InformacionGeneralComponent implements OnInit {
   ];
 
   currentStepIndex = 0;
-
-  ngOnInit() {
-  }
-
   onStepChange(index: number) {
     this.steps.forEach((step, i) => step.isActive = i === index);
     this.currentStepIndex = index;

@@ -1,5 +1,5 @@
 import { HttpClient } from '@angular/common/http';
-import { Component, Input } from '@angular/core';
+import { Component, Input, SimpleChanges } from '@angular/core';
 import * as pdfMake from 'pdfmake/build/pdfmake';
 import * as pdfFonts from 'pdfmake/build/vfs_fonts';
 import { unirNombres } from 'src/app/shared/functions/formatoNombresP';
@@ -10,12 +10,14 @@ import { unirNombres } from 'src/app/shared/functions/formatoNombresP';
   styleUrls: ['./constancias-afiliado.component.scss']
 })
 export class ConstanciasAfiliadoComponent {
-  @Input() Afiliado: any;
+  @Input() persona: any;
   unirNombres: any = unirNombres;
+
 
   constructor(
     private http: HttpClient
   ){
+
     (pdfMake as any).vfs = pdfFonts.pdfMake.vfs;
   }
 
@@ -38,7 +40,7 @@ export class ConstanciasAfiliadoComponent {
 
   async generarConstanciaRenunciaCap() {
     const base64data = await this.getMembreteBase64();
-    const afiliado = this.Afiliado;
+    const afiliado = this.persona;
 
     const docDefinition: any = {
       pageSize: 'A4',
@@ -53,9 +55,9 @@ export class ConstanciasAfiliadoComponent {
         {
           text: [
             'El Instituto Nacional de Previsión del Magisterio (INPREMA) hace constar que el/la Docente: ',
-            { text: `${afiliado.nameAfil}`, bold: true },
+            { text: `${afiliado.primer_nombre} ${afiliado.segundo_nombre} ${afiliado.tercer_nombre} ${afiliado.primer_apellido} ${afiliado.segundo_apellido}`, bold: true },
             ' con Identidad No. ',
-            { text: `${afiliado.DNI}`, bold: true },
+            { text: `${afiliado.n_identificacion}`, bold: true },
             ' presentó su renuncia formal a la Cuenta de Ahorro Previsional (CAP) en fecha: ',
             { text: '24 de Julio del año 2014', bold: true },
             ' mediante el formulario No: ',
@@ -115,7 +117,7 @@ export class ConstanciasAfiliadoComponent {
 
   async generarConstanciaAfiliacion() {
     const base64data = await this.getMembreteBase64();
-    const afiliado = this.Afiliado;
+    const afiliado = this.persona;
 
     const docDefinition: any = {
       pageSize: 'A4',
@@ -132,13 +134,13 @@ export class ConstanciasAfiliadoComponent {
           style: 'subheader'
         },
         {
-          text: unirNombres(afiliado.PRIMER_NOMBRE, afiliado.SEGUNDO_NOMBRE, afiliado.TERCER_NOMBRE, afiliado.PRIMER_APELLIDO, afiliado.SEGUNDO_APELLIDO),
+          text: unirNombres(afiliado.primer_nombre, afiliado.segundo_nombre, afiliado.tercer_nombre, afiliado.primer_apellido, afiliado.segundo_apellido),
           style: 'name'
         },
         {
           text: [
             { text: 'Se encuentra afiliado a este Sistema de Previsión con el número ' },
-            { text: `${afiliado.DNI}`, style: 'dni' }
+            { text: `${afiliado.n_identificacion}`, style: 'dni' }
           ],
           style: 'body'
         },
@@ -196,7 +198,7 @@ export class ConstanciasAfiliadoComponent {
 
   async generarConstanciaNoCotizar() {
     const base64data = await this.getMembreteBase64();
-    const afiliado = this.Afiliado;
+    const afiliado = this.persona;
 
     const docDefinition: any = {
       pageSize: 'A4',
@@ -211,9 +213,9 @@ export class ConstanciasAfiliadoComponent {
         {
           text: [
             'El Departamento de Atención al Docente del Instituto Nacional de Previsión del Magisterio, (INPREMA) INFORMA que el(la) Sr.(Sra.): ',
-            { text: `${afiliado.nameAfil}`, bold: true },
+            { text: `${afiliado.primer_nombre} ${afiliado.segundo_nombre} ${afiliado.tercer_nombre} ${afiliado.primer_apellido} ${afiliado.segundo_apellido}`, bold: true },
             ' con Identidad No. ',
-            { text: `${afiliado.DNI}`, bold: true },
+            { text: `${afiliado.n_identificacion}`, bold: true },
             ' no cotiza para esta institución.'
           ],
           style: 'body'

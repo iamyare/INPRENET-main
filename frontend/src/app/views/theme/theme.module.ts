@@ -71,7 +71,6 @@ import { VerSociosComponent } from '../pages/afil-centros-priv/ver-socios/ver-so
 import { NuevoUsuarioComponent } from '../pages/admin-centro/nuevo-usuario/nuevo-usuario.component';
 import { PagesModule } from '../pages/pages.module';
 import { VerDatosCentrosComponent } from '../pages/afil-centros-priv/ver-datos-centros/ver-datos-centros.component';
-import { ConstanciasAfiliadoComponent } from '../pages/Afiliacion/verAfiliados/constancias-afiliado/constancias-afiliado.component';
 
 @NgModule({
   imports: [
@@ -148,7 +147,6 @@ import { ConstanciasAfiliadoComponent } from '../pages/Afiliacion/verAfiliados/c
     VerDatosCentrosComponent,
     VerReferenciasComponent,
     VerSociosComponent,
-    ConstanciasAfiliadoComponent,
   ],
   exports: [EditDatosGeneralesComponent]
 })

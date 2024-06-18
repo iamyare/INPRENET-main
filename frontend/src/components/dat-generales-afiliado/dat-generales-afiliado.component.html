@@ -210,13 +210,13 @@
                   appearance="outline">
                   <mat-label>Nacionalidad</mat-label>
                   <mat-icon matPrefix>flag</mat-icon>
-                  <mat-select formControlName="id_pais_nacionalidad" (selectionChange)="onDatosGeneralesChange()">
+                  <mat-select formControlName="id_pais" (selectionChange)="onDatosGeneralesChange()">
                     <mat-option *ngFor="let nac of nacionalidades" [value]="nac.value">
                       {{ nac.label }}
                     </mat-option>
                   </mat-select>
                 </mat-form-field>
-                <mat-error *ngFor="let error of getErrors(i, 'id_pais_nacionalidad')">
+                <mat-error *ngFor="let error of getErrors(i, 'id_pais')">
                   {{ error }}
                 </mat-error>
               </div>

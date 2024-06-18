@@ -3,24 +3,34 @@
   flex-direction: column;
   align-items: center;
   margin-top: 20px;
+  padding: 10px 20px;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  background-color: #fafafa;
+  max-width: 500px;
+  margin: 20px auto;
+}
 
-  h1 {
-    margin-bottom: 20px;
-  }
+.buscar-persona-container h1 {
+  margin-bottom: 10px;
+  font-size: 1.5em;
+}
 
-  mat-form-field {
-    width: 100%;
-    max-width: 400px;
-    margin-bottom: 20px;
-  }
+.buscar-persona-container mat-form-field {
+  width: 100%;
+  max-width: 400px;
+  margin-bottom: 10px;
+}
 
-  button {
-    margin-bottom: 20px;
-  }
+.buscar-persona-container button {
+  margin-bottom: 10px;
+  width: 100%;
+  max-width: 400px;
+}
 
-  .error-message {
-    color: red;
-    font-weight: bold;
-    margin-top: 10px;
-  }
+.error-message {
+  color: red;
+  font-weight: bold;
+  margin-top: 10px;
 }

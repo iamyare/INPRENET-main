@@ -1,7 +1,7 @@
 .perfil-container {
   margin: 20px;
   padding: 20px;
-  background-color: #ffffff; /* Fondo blanco para mejor contraste */
+  background-color: #ffffff;
   border-radius: 10px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   position: relative;
@@ -15,19 +15,7 @@
   left: -4px;
   right: -4px;
   bottom: -4px;
-  background: linear-gradient(
-    45deg,
-    #e5f4f3,
-    #bee4e1,
-    #93d3cd,
-    #67c1b8,
-    #47b3a9,
-    #26a69a,
-    #229e92,
-    #1c9588,
-    #178b7e,
-    #0d7b6c
-  );
+  background: linear-gradient(45deg, #e5f4f3, #bee4e1, #93d3cd, #67c1b8, #47b3a9, #26a69a, #229e92, #1c9588, #178b7e, #0d7b6c);
   z-index: -1;
   border-radius: 10px;
   padding: 2px;
@@ -50,7 +38,7 @@
   display: flex;
   align-items: center;
   margin-bottom: 20px;
-  border-bottom: 2px solid #bee4e1; /* Línea de acento */
+  border-bottom: 2px solid #bee4e1;
   padding-bottom: 10px;
 }
 
@@ -66,7 +54,7 @@
   border-radius: 50%;
   object-fit: cover;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  border: 3px solid #26a69a; /* Borde con acento */
+  border: 3px solid #26a69a;
 }
 
 .perfil-datos {
@@ -87,18 +75,18 @@
 }
 
 .mat-tab-group {
-  background-color: #f5f5f5; /* Fondo neutro para las pestañas */
+  background-color: #f5f5f5;
   border-radius: 10px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
 .mat-tab-label {
-  color: #178b7e; /* Color de las etiquetas de las pestañas */
+  color: #178b7e;
 }
 
 .mat-tab-label-active {
-  color: #0d7b6c; /* Color de la etiqueta activa */
-  border-bottom: 2px solid #26a69a; /* Línea inferior para la etiqueta activa */
+  color: #0d7b6c;
+  border-bottom: 2px solid #26a69a;
 }
 
 .mat-tab-body {

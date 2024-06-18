@@ -5,10 +5,15 @@ import { Component, Input, OnInit } from '@angular/core';
   templateUrl: './afiliado.component.html',
   styleUrls: ['./afiliado.component.scss']
 })
-export class AfiliadoComponent implements OnInit{
-  @Input() detalle: any;
+export class AfiliadoComponent {
+  @Input() persona: any = {};
 
-  ngOnInit(): void {
-    console.log('ngOnInit: AfiliadoComponent informacionCompleta:', this.detalle);
+  currentStepIndex = 0;
+
+  steps = [
+    { label: 'Constancias', isActive: true },
+  ];
+  onStepChange(index: number) {
+    this.currentStepIndex = index;
   }
 }

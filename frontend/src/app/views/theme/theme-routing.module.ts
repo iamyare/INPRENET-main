@@ -36,6 +36,7 @@ import { AfiliacionCentrosComponent } from '../pages/afil-centros-priv/afiliacio
 import { GestionUsuariosComponent } from '../pages/admin-centro/gestion-usuarios/gestion-usuarios.component';
 import { NuevoUsuarioComponent } from '../pages/admin-centro/nuevo-usuario/nuevo-usuario.component';
 import { VerDatosCentrosComponent } from '../pages/afil-centros-priv/ver-datos-centros/ver-datos-centros.component';
+import { BuscarPersonaComponent } from '../pages/afiliacion/verPerfil/buscar-persona/buscar-persona.component';
 
 const routes: Routes = [
   //rutas Afiliado
@@ -65,7 +66,7 @@ const routes: Routes = [
           },
           {
             path: 'ver-datos-afiliado',
-            component: VerDatosAfiliadosComponent,
+            component: BuscarPersonaComponent,
             data: {
               title: 'Ver Datos Afiliado',
             },

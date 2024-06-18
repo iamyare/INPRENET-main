@@ -11,10 +11,26 @@ const noSpecialCharsPattern = '^[a-zA-Z0-9\\s]*$';
 export function generateAddressFormGroup(datos?: any): FormGroup {
   return new FormGroup({
     n_identificacion: new FormControl(datos?.n_identificacion, [Validators.required, Validators.maxLength(15), Validators.pattern(/^[0-9]{13}$|^[0-9]{4}-[0-9]{4}-[0-9]{5}$/)]),
-    primer_nombre: new FormControl(datos?.primer_nombre, [Validators.required, Validators.maxLength(40), Validators.minLength(1)]),
-    segundo_nombre: new FormControl(datos?.segundo_nombre, [Validators.maxLength(40)]),
-    tercer_nombre: new FormControl(datos?.tercer_nombre, [Validators.maxLength(40)]),
-    primer_apellido: new FormControl(datos?.primer_apellido, [Validators.required, Validators.maxLength(40), Validators.minLength(1)]),
+    primer_nombre: new FormControl(datos?.primer_nombre, [
+      Validators.required,
+      Validators.maxLength(40),
+      Validators.minLength(1),
+      Validators.pattern(/^[^\s]+$/)
+    ]),
+    segundo_nombre: new FormControl(datos?.segundo_nombre, [
+      Validators.maxLength(40),
+      Validators.pattern(/^[^\s]+$/)
+    ]),
+    tercer_nombre: new FormControl(datos?.tercer_nombre, [
+      Validators.maxLength(40),
+      Validators.pattern(/^[^\s]+$/)
+    ]),
+    primer_apellido: new FormControl(datos?.primer_apellido, [
+      Validators.required,
+      Validators.maxLength(40),
+      Validators.minLength(1),
+      Validators.pattern(/^[^\s]+$/)
+    ]),
     segundo_apellido: new FormControl(datos?.segundo_apellido, [Validators.maxLength(40)]),
     fallecido: new FormControl(datos?.fallecido, [Validators.maxLength(2)]),
     fecha_nacimiento: new FormControl(datos?.fecha_nacimiento, [Validators.required]),
@@ -33,7 +49,7 @@ export function generateAddressFormGroup(datos?: any): FormGroup {
     id_departamento_residencia: new FormControl(datos?.id_departamento_residencia, Validators.required),
     id_municipio_residencia: new FormControl(datos?.id_municipio_residencia, Validators.required),
     id_tipo_identificacion: new FormControl(datos?.id_tipo_identificacion, Validators.required),
-    id_pais_nacionalidad: new FormControl(datos?.id_pais_nacionalidad, Validators.required),
+    id_pais: new FormControl(datos?.id_pais, Validators.required),
     sexo: new FormControl(datos?.sexo, [Validators.required, Validators.maxLength(1), Validators.pattern(/^[FM]$/)]),
     cantidad_hijos: new FormControl(datos?.cantidad_hijos, Validators.required),
     avenida: new FormControl(datos?.avenida, [

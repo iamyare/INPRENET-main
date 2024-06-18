@@ -14,7 +14,7 @@ export class PersonaService {
   constructor(private http: HttpClient) { }
 
   getPersonaByDni(n_identificacion: string): Observable<any> {
-    const url = `${environment.API_URL}/api/Persona/persona-dni/${n_identificacion}`;
+    const url = `${environment.API_URL}/api/afiliacion/persona-dni/${n_identificacion}`;
     return this.http.get<any>(url);
   }
 

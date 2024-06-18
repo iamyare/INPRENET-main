@@ -9,14 +9,14 @@ import { PersonaService } from 'src/app/services/persona.service';
   styleUrls: ['./buscar-persona.component.scss']
 })
 export class BuscarPersonaComponent {
-  dni!: string;
+  n_identifiacion!: string;
   errorMessage: string | null = null;
   persona: any = null;
 
   constructor(private personaService: PersonaService) {}
 
   buscarPersona() {
-    this.personaService.getPersonaByDni(this.dni).pipe(
+    this.personaService.getPersonaByDni(this.n_identifiacion).pipe(
       catchError(error => {
         this.errorMessage = 'Persona no encontrada o ocurrió un error.';
         return of(null);

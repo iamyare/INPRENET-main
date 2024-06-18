@@ -32,7 +32,6 @@ export class AfilBancoComponent implements OnInit {
   // Formularios
   public formParent: FormGroup = new FormGroup({});
   form = this.fb.group({
-    /*  DatosGenerales: generateAddressFormGroup(), */
     DatosBacAfil: generateDatBancFormGroup(),
     Archivos: generateFormArchivo(),
     FotoPerfil: [''],
@@ -105,8 +104,6 @@ export class AfilBancoComponent implements OnInit {
       }
     });
   }
-
-
 
   handleImageCaptured(image: string) {
     this.form.get('FotoPerfil')?.setValue(image);
@@ -212,7 +209,12 @@ export class AfilBancoComponent implements OnInit {
     const formGenerales = this.formDatosGenerales?.value?.refpers[0] || {};
     const direccion_residencia = `AVENIDA: ${formGenerales.avenida},CALLE: ${formGenerales.calle},SECTOR: ${formGenerales.sector},BLOQUE: ${formGenerales.bloque},N° DE CASA: ${formGenerales.numero_casa},COLOR CASA: ${formGenerales.color_casa},ALDEA: ${formGenerales.aldea},CASERIO: ${formGenerales.caserio}`;
 
-    const datosGenerales = {...formGenerales,direccion_residencia};
+    const datosGenerales = {
+      ...formGenerales,
+      fecha_nacimiento: this.formatDate(formGenerales.fecha_nacimiento),
+      fecha_vencimiento_ident: this.formatDate(formGenerales.fecha_vencimiento_ident),
+      direccion_residencia
+    };
 
     const encapsulatedDto = {
       datosGenerales,
@@ -226,7 +228,10 @@ export class AfilBancoComponent implements OnInit {
       referenciasPersonales: this.formReferencias?.value?.refpers || [],
       beneficiarios: this.formBeneficiarios?.value?.beneficiario.map((ben: any) => {
         const { Arch, Archivos, DatosBac, beneficiario, ...resto } = ben;
-        return resto;
+        return {
+          ...resto,
+          fecha_nacimiento: this.formatDate(resto.fecha_nacimiento)
+        };
       }) || [],
     };
 
@@ -395,7 +400,6 @@ export class AfilBancoComponent implements OnInit {
     const documentDefinition:any = this.getDocumentDefinition();
     pdfMake.createPdf(documentDefinition).download('example.pdf');
   }
-
 
   getDocumentDefinition() {
     const data = [
@@ -629,18 +633,4 @@ export class AfilBancoComponent implements OnInit {
         }
     };
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-  }
+}

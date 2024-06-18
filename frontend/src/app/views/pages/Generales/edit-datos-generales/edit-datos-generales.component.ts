@@ -67,7 +67,6 @@ export class EditDatosGeneralesComponent {
     this.minDate = new Date(currentYear.getFullYear(), currentYear.getMonth(), currentYear.getDate(), currentYear.getHours(), currentYear.getMinutes(), currentYear.getSeconds());
   }
   ngOnInit(): void {
-    console.log(this.Afiliado);
 
 
     this.myFormFields = [
@@ -176,11 +175,9 @@ export class EditDatosGeneralesComponent {
           this.estadoAfiliacion = result.estadoAfiliacion
           this.fallecido = result.fallecido
 
-          console.log(result);
-
 
           this.formDatosGenerales.value.refpers[0] = {
-            n_identificacion: result.n_identificacion,
+            n_identificacion: result.N_IDENTIFICACION,
             rtn: result.RTN,
             primer_nombre: result.PRIMER_NOMBRE,
             segundo_nombre: result.SEGUNDO_NOMBRE,

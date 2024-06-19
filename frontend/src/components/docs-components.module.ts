@@ -65,6 +65,7 @@ import { CuentaBancariaCompComponent } from './cuenta-bancaria-comp/cuenta-banca
 import { ProgressbarDynamicComponent } from './progressbar-dynamic/progressbar-dynamic.component';
 import { SharedFormFieldsComponent } from './shared-form-fields/shared-form-fields.component';
 import { BuscadorComponent } from './buscador/buscador.component';
+import { DynamicTablePruebaComponent } from './dynamic-table-prueba/dynamic-table-prueba.component';
 import { DynamicMenuConstanciasComponent } from './Dynamics/dynamic-menu-constancias/dynamic-menu-constancias.component';
 import { MapsComponent } from './maps/maps.component';
 import { GoogleMapsModule } from '@angular/google-maps';
@@ -105,7 +106,8 @@ import { GoogleMapsModule } from '@angular/google-maps';
     CuentaBancariaCompComponent,
     ProgressbarDynamicComponent,
     SharedFormFieldsComponent,
-    DynamicMenuConstanciasComponent
+    DynamicMenuConstanciasComponent,
+    DynamicTablePruebaComponent
   ],
   exports: [
     MapsComponent,

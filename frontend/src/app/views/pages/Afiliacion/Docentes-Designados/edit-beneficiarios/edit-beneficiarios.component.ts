@@ -9,6 +9,7 @@ import { AfiliadoService } from 'src/app/services/afiliado.service';
 import { FieldConfig } from 'src/app/shared/Interfaces/field-config';
 import { TableColumn } from 'src/app/shared/Interfaces/table-column';
 import { convertirFechaInputs } from 'src/app/shared/functions/formatoFecha';
+import { measureAsyncExecutionTime } from 'src/app/shared/functions/calculoTiempoEjecucion';
 import { unirNombres } from 'src/app/shared/functions/formatoNombresP';
 import { DatosEstaticosService } from 'src/app/services/datos-estaticos.service';
 import { DatePipe } from '@angular/common';
@@ -96,7 +97,9 @@ export class EditBeneficiariosComponent implements OnInit, OnChanges, OnDestroy 
     this.filas = [];
     if (this.persona) {
       try {
-        const data = await this.svcAfiliado.getAllBenDeAfil(this.persona.n_identificacion).toPromise();
+        const { data, time } = await measureAsyncExecutionTime(() => this.svcAfiliado.getAllBenDeAfil(this.persona.n_identificacion).toPromise());
+        /* console.log(`El tiempo de ejecución fue de ${time} milisegundos.`); */
+
         this.filas = data.map((item: any) => {
           const nombres = [item.primerNombre, item.segundoNombre, item.tercerNombre].filter(part => part).join(' ');
           const apellidos = [item.primerApellido, item.segundoApellido].filter(part => part).join(' ');
@@ -139,8 +142,9 @@ export class EditBeneficiariosComponent implements OnInit, OnChanges, OnDestroy 
   }
 
   cargar() {
+
     if (this.ejecF) {
-      this.ejecF(this.filas).then(() => {});
+      this.ejecF(this.filas).then(() => { });
     }
   }
 

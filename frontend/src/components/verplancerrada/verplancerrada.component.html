@@ -1,23 +1,13 @@
 <div style="background-color: white; margin-bottom: 1%">
-  <app-dynamic-form
-    [fields]="myFormFields"
-    titulo="Detalles De Planilla Definitiva"
-    subtitulo="Completa la información correspondiente"
-    (newDatBenChange)="obtenerDatosForm($event)"
-  ></app-dynamic-form>
+  <app-dynamic-form [fields]="myFormFields" titulo="Detalles De Planilla Definitiva"
+    subtitulo="Completa la información correspondiente" (newDatBenChange)="obtenerDatosForm($event)"></app-dynamic-form>
   <div style="text-align: center">
-    <button
-      (click)="getPlanilla()"
-      color="primary"
-      [disabled]="datosFormateados.invalid"
-      mat-raised-button
-      style="
+    <button (click)="getPlanilla()" color="primary" [disabled]="datosFormateados.invalid" mat-raised-button style="
         margin: 2% 0;
         color: #ffffff;
         border-radius: 5px;
         padding: 10px 20px;
-      "
-    >
+      ">
       Ver Planilla Definitiva
     </button>
   </div>
@@ -49,28 +39,25 @@
 
     <h4 class="card-title">Afiliados en la Planilla</h4>
 
-    <div>
-      <app-dynamic-table
-        [verOpcEditar]="false"
-        [columns]="myColumnsDed"
-        [data]="datosTabl"
-        (ejecutarFuncionAsincronaEvent)="
+  </div>
+</div>
+
+
+<div style="background-color: white;margin-bottom: 1%; padding-top: 1%;margin-top: 1%; " *ngIf="verDat">
+  <h4 class="card-title" style="text-align: center">
+    Personas en la Planilla
+  </h4>
+
+  <div style="padding: 1% 1% 1% 1%">
+    <app-dynamic-table [verOpcEditar]="false" [columns]="myColumnsDed" [data]="datosTabl"
+      (ejecutarFuncionAsincronaEvent)="
           ejecutarFuncionAsincronaDesdeOtroComponente($event)
-        "
-        [nombreEncabezadoUno]="'Detalle Ingresos'"
-        [mostrarBotonUno]="true"
-        [etiquetaBotonUno]="'Detalle Ingresos'"
-        (accionBotonUno)="manejarAccionUno($event)"
-        [nombreEncabezadoDos]="'Detalle Deducciones'"
-        [mostrarBotonDos]="true"
-        [etiquetaBotonDos]="'Detalle Deducciones'"
-        (accionBotonDos)="manejarAccionDos($event)"
-        [nombreEncabezadoTres]="'Voucher'"
-        [mostrarBotonTres]="true"
-        [etiquetaBotonTres]="'Generar Voucher'"
-        (accionBotonTres)="manejarAccionTres($event)"
-      >
-      </app-dynamic-table>
-    </div>
+        " [nombreEncabezadoUno]="'Detalle Ingresos'" [mostrarBotonUno]="true" [etiquetaBotonUno]="'Detalle Ingresos'"
+      (accionBotonUno)="manejarAccionUno($event)" [nombreEncabezadoDos]="'Detalle Deducciones'" [mostrarBotonDos]="true"
+      [etiquetaBotonDos]="'Detalle Deducciones'" (accionBotonDos)="manejarAccionDos($event)"
+      [nombreEncabezadoTres]="'Voucher'" [mostrarBotonTres]="true" [etiquetaBotonTres]="'Generar Voucher'"
+      (accionBotonTres)="manejarAccionTres($event)">
+    </app-dynamic-table>
+
   </div>
 </div>

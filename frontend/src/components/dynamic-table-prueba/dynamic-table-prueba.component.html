@@ -1,0 +1,108 @@
+<table mat-table [dataSource]="dataSource" matSort>
+    <!-- Encabezado Condicional -->
+    <ng-container *ngIf="verOpcEditar" matColumnDef="select">
+        <th mat-header-cell *matHeaderCellDef class="custom-header"></th>
+        <td mat-cell *matCellDef="let row">
+            <input type="checkbox" (change)="onSelectionChange(row)" />
+        </td>
+    </ng-container>
+
+    <!-- Columnas Dinámicas -->
+    <ng-container *ngFor="let col of columns" [matColumnDef]="col.col">
+        <th mat-header-cell *matHeaderCellDef class="custom-header">{{ col.header }}</th>
+        <td mat-cell *matCellDef="let row" style="text-align: end;">
+            <ng-container *ngIf="!row.isEditing && !col.moneda">
+                {{ getCellValue(row, col) }}
+            </ng-container>
+            <ng-container *ngIf="!row.isEditing && col.moneda">
+                {{ getCellValue(row, col) | currency : 'L' : 'symbol' : '1.2-2' }}
+            </ng-container>
+            <ng-container *ngIf="row.isEditing">
+                <ng-container *ngIf="col.isEditable">
+                    <mat-form-field class="example-full-width; inputs" style="background-color: white"
+                        appearance="outline">
+                        <input matInput [formControl]="row[col.col + '_control']" />
+                    </mat-form-field>
+                    <div *ngIf="row[col.col + '_control'].invalid && row[col.col + '_control'].touched">
+                        <span *ngFor="let error of getControlErrors(row, col)">
+                            {{ error }}
+                        </span>
+                    </div>
+                </ng-container>
+                <ng-container *ngIf="!col.isEditable">
+                    {{ getCellValue(row, col) }}
+                </ng-container>
+            </ng-container>
+        </td>
+    </ng-container>
+
+    <!-- Columna de Acciones -->
+    <ng-container *ngIf="verBotEditar" matColumnDef="acciones">
+        <th mat-header-cell *matHeaderCellDef class="custom-header">Acciones</th>
+        <td mat-cell *matCellDef="let row">
+            <button mat-icon-button *ngIf="!row.isEditing" (click)="startEditing(row)" class="boton-estetico">
+                <mat-icon>edit</mat-icon>
+            </button>
+            <button mat-raised-button *ngIf="row.isEditing" (click)="saveChanges(row)" class="boton-estetico">
+                Guardar
+            </button>
+            <button mat-raised-button *ngIf="row.isEditing" (click)="stopEditing(row)" class="boton-estetico">
+                Cancelar
+            </button>
+        </td>
+    </ng-container>
+
+    <!-- Botón Uno -->
+    <ng-container *ngIf="mostrarBotonUno" matColumnDef="botonUno">
+        <th mat-header-cell *matHeaderCellDef class="custom-header">{{ nombreEncabezadoUno }}</th>
+        <td mat-cell *matCellDef="let row">
+            <button mat-raised-button (click)="ejecutarAccionUno(row)">
+                {{ etiquetaBotonUno }}
+            </button>
+        </td>
+    </ng-container>
+
+    <!-- Botón Dos -->
+    <ng-container *ngIf="mostrarBotonDos" matColumnDef="botonDos">
+        <th mat-header-cell *matHeaderCellDef class="custom-header">{{ nombreEncabezadoDos }}</th>
+        <td mat-cell *matCellDef="let row">
+            <button mat-raised-button (click)="ejecutarAccionDos(row)">
+                {{ etiquetaBotonDos }}
+            </button>
+        </td>
+    </ng-container>
+
+    <!-- Botón Tres -->
+    <ng-container *ngIf="mostrarBotonTres" matColumnDef="botonTres">
+        <th mat-header-cell *matHeaderCellDef class="custom-header">{{ nombreEncabezadoTres }}</th>
+        <td mat-cell *matCellDef="let row">
+            <button mat-raised-button (click)="ejecutarAccionTres(row)">
+                {{ etiquetaBotonTres }}
+            </button>
+        </td>
+    </ng-container>
+
+    <!-- Botón Eliminar -->
+    <ng-container *ngIf="mostrarBotonEliminar" matColumnDef="eliminar">
+        <th mat-header-cell *matHeaderCellDef class="custom-header">Eliminar</th>
+        <td mat-cell *matCellDef="let row">
+            <button mat-icon-button (click)="eliminarFila(row)" class="boton-eliminar">
+                <mat-icon>delete</mat-icon>
+            </button>
+        </td>
+    </ng-container>
+
+    <!-- Botón Editar -->
+    <ng-container *ngIf="mostrarBotonEditar" matColumnDef="editar">
+        <th mat-header-cell *matHeaderCellDef class="custom-header">Editar</th>
+        <td mat-cell *matCellDef="let row">
+            <button mat-icon-button (click)="editarFila(row)" class="boton-editar">
+                <mat-icon>edit</mat-icon>
+            </button>
+        </td>
+    </ng-container>
+
+    <!-- Filas de la Tabla -->
+    <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+    <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+</table>

@@ -2,7 +2,7 @@
 
 // Custom Theming for Angular Material
 // For more information: https://material.angular.io/guide/theming
-@use '@angular/material' as mat;
+@use "@angular/material" as mat;
 // Plus imports for other components in your app.
 
 // Include the common styles for Angular Material. We include this here so that you only
@@ -14,36 +14,37 @@
 // (imported above). For each palette, you can optionally specify a default, lighter, and darker
 // hue. Available color palettes: https://material.io/design/color/
 $my-primary-color: (
-    50 : #e5f4f3,
-    100 : #bee4e1,
-    200 : #93d3cd,
-    300 : #67c1b8,
-    400 : #47b3a9,
-    500 : #26a69a,
-    600 : #229e92,
-    700 : #1c9588,
-    800 : #178b7e,
-    900 : #0d7b6c,
-    A100 : #adfff3,
-    A200 : #7affec,
-    A400 : #47ffe4,
-    A700 : #2dffe0,
-    contrast: (
-        50 : #000000,
-        100 : #000000,
-        200 : #000000,
-        300 : #000000,
-        400 : #000000,
-        500 : #ffffff,
-        600 : #ffffff,
-        700 : #ffffff,
-        800 : #ffffff,
-        900 : #ffffff,
-        A100 : #000000,
-        A200 : #000000,
-        A400 : #000000,
-        A700 : #000000,
-));
+  50: #e5f4f3,
+  100: #bee4e1,
+  200: #93d3cd,
+  300: #67c1b8,
+  400: #47b3a9,
+  500: #26a69a,
+  600: #229e92,
+  700: #1c9588,
+  800: #178b7e,
+  900: #0d7b6c,
+  A100: #adfff3,
+  A200: #7affec,
+  A400: #47ffe4,
+  A700: #2dffe0,
+  contrast: (
+    50: #000000,
+    100: #000000,
+    200: #000000,
+    300: #000000,
+    400: #000000,
+    500: #ffffff,
+    600: #ffffff,
+    700: #ffffff,
+    800: #ffffff,
+    900: #ffffff,
+    A100: #000000,
+    A200: #000000,
+    A400: #000000,
+    A700: #000000,
+  ),
+);
 
 $md-mcgpalette0: (
   50: #fff2df,
@@ -56,20 +57,23 @@ $md-mcgpalette0: (
   700: #f47101,
   800: #ee6002,
   900: #e44304,
-      contrast: (
-      50: #fff2df,
-      100: #ffddb0,
-      200: #ffc77d,
-      300: #ffaf49,
-      400: #ff9e22,
-      500: #fe8d00,
-      600: #fa8100,
-      700: #f47101,
-      800: #ee6002,
-      900: #e44304,
-  ));
+  contrast: (
+    50: #fff2df,
+    100: #ffddb0,
+    200: #ffc77d,
+    300: #ffaf49,
+    400: #ff9e22,
+    500: #fe8d00,
+    600: #fa8100,
+    700: #f47101,
+    800: #ee6002,
+    900: #e44304,
+  ),
+);
 
-$coreui-free-angular-admin-template-primary: mat.define-palette($my-primary-color);
+$coreui-free-angular-admin-template-primary: mat.define-palette(
+  $my-primary-color
+);
 $coreui-free-angular-admin-template-accent: mat.define-palette($md-mcgpalette0);
 
 // The warn palette is optional (defaults to red).
@@ -78,13 +82,15 @@ $coreui-free-angular-admin-template-warn: mat.define-palette(mat.$red-palette);
 // Create the theme object. A theme consists of configurations for individual
 // theming systems such as "color" or "typography".
 
-$coreui-free-angular-admin-template-theme: mat.define-light-theme((
-  color: (
-    primary: $coreui-free-angular-admin-template-primary,
-    accent: $coreui-free-angular-admin-template-accent,
-    warn: $coreui-free-angular-admin-template-warn,
+$coreui-free-angular-admin-template-theme: mat.define-light-theme(
+  (
+    color: (
+      primary: $coreui-free-angular-admin-template-primary,
+      accent: $coreui-free-angular-admin-template-accent,
+      warn: $coreui-free-angular-admin-template-warn,
+    ),
   )
-));
+);
 
 // Include theme styles for core and each component used in your app.
 // Alternatively, you can import and @include the theme mixins for each component
@@ -116,7 +122,8 @@ $enable-rtl: true;
 @import "customtheme";
 
 // Añade los estilos globales para asegurar el color de fondo completo
-html, body {
+html,
+body {
   height: 100%;
   width: 100%;
   margin: 0;
@@ -124,5 +131,5 @@ html, body {
 }
 
 body {
-  font-family: "Exo", "Arial", "sans-serif";
+  font-family: "Exo", "Gotham" "Arial" !important;
 }

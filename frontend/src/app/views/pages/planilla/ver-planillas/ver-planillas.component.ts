@@ -95,7 +95,38 @@ export class VerPlanillasComponent implements OnInit {
   async getFilas() {
     try {
       const data = await firstValueFrom(this.planillaService.findAllPlanillas());
-      const enrichedRows = await Promise.all(data.map(async (item: any) => {
+      const enrichedRows = [
+        {
+          id_planilla: "1",
+          nombre_planilla: "ORDINARIA - JUBILADOS",
+          codigo_planilla: "5A",
+          estado: "CERRADA",
+          secuencia: "1",
+          periodoFinalizacion: "01/05/2024",
+          periodoInicio: "30/05/2024",
+          totalBeneficio: "350000",
+          totalDeducciones: "10000",
+          totalPlanilla: "250000", // Añade el total de la planilla
+          fecha_apertura: "01/05/2024",
+          fecha_cierre: "30/05/2024",
+        },
+        {
+          id_planilla: "1",
+          nombre_planilla: "ORDINARIA - JUBILADOS",
+          codigo_planilla: "1A",
+          estado: "ACTIVA",
+          secuencia: "1",
+          periodoFinalizacion: "01/06/2024",
+          periodoInicio: "30/06/2024",
+          totalBeneficio: "400000",
+          totalDeducciones: "15000",
+          totalPlanilla: "260000", // Añade el total de la planilla
+          fecha_apertura: "01/06/2024",
+          fecha_cierre: "30/06/2024",
+        },
+      ];
+
+      /* const enrichedRows = await Promise.all(data.map(async (item: any) => {
         const totalResponse = await firstValueFrom(this.planillaService.obtenerTotalPlanilla(item.id_planilla));
         return {
           id_planilla: item.id_planilla,
@@ -111,8 +142,10 @@ export class VerPlanillasComponent implements OnInit {
           fecha_apertura: this.datePipe.transform(item.fecha_apertura, 'dd/MM/yyyy HH:mm:ss'),
           fecha_cierre: this.datePipe.transform(item.fecha_cierre, 'dd/MM/yyyy HH:mm:ss'),
         };
-      }));
+      })); */
       this.filas = enrichedRows;
+      console.log(this.filas);
+
     } catch (error) {
       console.error("Error al obtener los detalles completos de planilla", error);
     }

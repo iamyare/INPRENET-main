@@ -254,12 +254,7 @@ export class EditReferPersonalesComponent implements OnInit, OnChanges, OnDestro
         this.svcAfiliado.eliminarReferenciaPersonal(row.id_ref_personal).subscribe({
           next: (response) => {
             this.toastr.success(response.mensaje, 'Referencia Personal Eliminada');
-            this.filas = this.filas.filter((item) => item.id_ref_personal !== row.id_ref_personal);
-            if (this.filas.length === 0) {
-              this.getFilas().then(() => this.cargar());
-            } else {
-              this.cargar();
-            }
+            this.getFilas(); // Volver a cargar las filas después de eliminar
           },
           error: (error) => {
             console.error('Error al eliminar la referencia personal:', error);
@@ -283,12 +278,12 @@ export class EditReferPersonalesComponent implements OnInit, OnChanges, OnDestro
         this.svcAfiliado.updateReferenciaPersonal(row.id_ref_personal, result).subscribe({
           next: (response) => {
             this.toastr.success('Datos modificados correctamente.');
-            this.getFilas().then(() => this.cargar());
+            this.getFilas(); // Volver a cargar las filas después de actualizar
           },
           error: (error) => {
             this.toastr.error('Error al actualizar la referencia personal.');
             console.error('Error al actualizar la referencia personal:', error);
-            this.getFilas().then(() => this.cargar());
+            this.getFilas(); // Volver a cargar las filas incluso si hay un error
           }
         });
       } else {
@@ -307,7 +302,9 @@ export class EditReferPersonalesComponent implements OnInit, OnChanges, OnDestro
     });
 
     dialogRef.afterClosed().subscribe((result: any) => {
-      this.getFilas();
+      if (result) {
+        this.getFilas(); // Volver a cargar las filas después de agregar una nueva referencia
+      }
     });
   }
 }

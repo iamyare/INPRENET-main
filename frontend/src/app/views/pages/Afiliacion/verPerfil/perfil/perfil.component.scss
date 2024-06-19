@@ -34,6 +34,22 @@
   z-index: -1;
 }
 
+.header-actions {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.search-again {
+  margin-right: 10px;
+}
+
+.search-text {
+  font-size: 14px;
+  color: #1c9588;
+}
+
 .perfil-header {
   display: flex;
   align-items: center;

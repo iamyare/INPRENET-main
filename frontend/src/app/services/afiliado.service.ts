@@ -11,6 +11,36 @@ export class AfiliadoService {
   @Output() PersonasEdit: EventEmitter<any> = new EventEmitter();
   constructor(private http: HttpClient, private router: Router) { }
 
+  generarConstanciaAfiliacion(data: any): Observable<any> {
+    const url = `${environment.API_URL}/api/documents/constancia-afiliacion`;
+    return this.http.post<any>(url, data);
+  }
+
+  generarConstanciaQR(data: any, type: string): Observable<Blob> {
+    const url = `${environment.API_URL}/api/documents/constancia-qr`;
+    return this.http.post(url, { ...data, type }, { responseType: 'blob' });
+  }
+
+  generarConstanciaRenunciaCap(data: any): Observable<any> {
+    const url = `${environment.API_URL}/api/documents/constancia-renuncia-cap`;
+    return this.http.post<any>(url, data);
+  }
+
+  generarConstanciaNoCotizar(data: any): Observable<any> {
+    const url = `${environment.API_URL}/api/documents/constancia-no-cotizar`;
+    return this.http.post<any>(url, data);
+  }
+
+  generarConstanciaDebitos(data: any): Observable<any> {
+    const url = `${environment.API_URL}/api/documents/constancia-debitos`;
+    return this.http.post<any>(url, data);
+  }
+
+  generarConstanciaTiempoCotizarConMonto(data: any): Observable<any> {
+    const url = `${environment.API_URL}/api/documents/constancia-tiempo-cotizar-con-monto`;
+    return this.http.post<any>(url, data);
+  }
+
   createPersonaWithDetailsAndWorkCenters(formData: FormData): Observable<any> {
     const url = `${environment.API_URL}/api/Persona/afiliacion`;
     return this.http.post<any>(url, formData);

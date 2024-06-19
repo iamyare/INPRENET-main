@@ -1,7 +1,10 @@
 <div class="perfil-container">
-  <button mat-icon-button (click)="resetBusqueda2()" class="search-again">
-    <mat-icon>search</mat-icon>
-  </button>
+  <div class="header-actions">
+    <button mat-icon-button (click)="resetBusqueda2()" class="search-again">
+      <mat-icon>search</mat-icon>
+    </button>
+    <span class="search-text">Buscar otra persona</span>
+  </div>
   <div class="perfil-header">
     <div class="perfil-foto">
       <img *ngIf="persona.foto_perfil" [src]="getFotoUrl(persona.foto_perfil)" alt="Foto de Perfil">

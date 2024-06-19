@@ -9,9 +9,11 @@
         <app-datos-generales-centro [parentForm]="datosGeneralesData"
             (formUpdated)="onDatosGeneralesFormUpdate($event)"></app-datos-generales-centro>
     </div>
+
     <div *ngIf="mostrar" [hidden]="activeStep !== 1">
         <app-ver-referencias></app-ver-referencias>
     </div>
+
     <div [hidden]="activeStep !== 2">
         <app-sociedad [parentForm]="sociedadForm" (formUpdated)="onSociedadFormUpdate($event)"></app-sociedad>
     </div>

@@ -184,7 +184,7 @@ export class EditBeneficiariosComponent implements OnInit, OnChanges, OnDestroy 
       width: '55%',
       height: '75%',
       data: {
-        idPersona: this.persona.ID_PERSONA
+        idPersona: this.persona.id_persona
       }
     });
 

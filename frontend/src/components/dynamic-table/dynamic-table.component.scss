@@ -15,14 +15,13 @@
 
 .custom-row:nth-child(even) {
   background-color: #f2f2f2; /* Color para filas pares */
-  text-align: center; /* Color para filas pares */
+  text-align: center; /* Alineación del texto para filas pares */
 }
 
 .custom-row:nth-child(odd) {
   background-color: #ffffff; /* Color para filas impares */
-  text-align: center; /* Color para filas impares */
+  text-align: center; /* Alineación del texto para filas impares */
 }
-
 
 .custom-table {
   width: 100%;
@@ -74,64 +73,25 @@
   color: #ffffff;
 }
 
-
-.boton-estetico {
-  background-color: #26a69a; /* Color de fondo especificado en tus estilos */
-  color: white; /* Texto blanco para un contraste óptimo */
-  margin-right: 10px; /* Espaciado a la derecha para separación entre botones */
-
-  &:hover {
-    background-color: darken(#26a69a, 5%); /* Efecto al pasar el ratón por encima */
-  }
-
-  &:last-child {
-    margin-right: 0; /* Elimina el margen derecho en el último botón */
-  }
-}
-
-/* Para el botón de editar específicamente, puedes querer un estilo ligeramente diferente */
-.boton-editar {
-  margin: 0; /* Sin márgenes adicionales */
-  padding: 8px; /* Padding reducido para un botón más compacto */
-  background-color: #628780; /* Ajusta al color que prefieras */
-}
-
+/* Estilos para los botones de editar y eliminar */
 .boton-editar mat-icon {
-  color: white; /* Asegura que el ícono dentro del botón también sea blanco */
+  color: #26a69a; /* Color del ícono de editar */
 }
 
-.boton-eliminar {
-  mat-icon {
-    font-size: 25px;
-  }
-
-  background-color: #26a69a;
-  color: white;
-  margin-right: 10px;
-
-  &:hover {
-    background-color: darken(#26a69a, 5%);
-  }
-
-  &:last-child {
-    margin-right: 0;
-  }
+.boton-eliminar mat-icon {
+  color: #ff5252; /* Color del ícono de eliminar */
 }
 
-.boton-editar {
-  mat-icon {
-    font-size: 20px;
-  }
+.boton-editar, .boton-eliminar {
+  background-color: transparent; /* Fondo transparente */
+  border: none; /* Sin borde */
+  cursor: pointer; /* Cursor de mano */
+}
 
-  background-color: #ffa726;
-  color: white;
-  margin-right: 10px;
+.boton-editar:hover mat-icon {
+  color: #1d7b5f; /* Color del ícono al pasar el ratón por encima */
+}
 
-  &:hover {
-    background-color: darken(#ffa726, 5%);
-  }
-
-  &:last-child {
-    margin-right: 0;
-  }
+.boton-eliminar:hover mat-icon {
+  color: #e04848; /* Color del ícono al pasar el ratón por encima */
 }

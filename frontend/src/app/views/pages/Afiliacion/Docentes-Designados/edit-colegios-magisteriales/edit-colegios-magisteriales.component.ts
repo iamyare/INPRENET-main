@@ -163,11 +163,12 @@ export class EditColegiosMagisterialesComponent implements OnInit, OnChanges, On
   }
 
   AgregarColegioMagisterial() {
+
     const dialogRef = this.dialog.open(AgregarColMagisComponent, {
       width: '55%',
       height: '75%',
       data: {
-        idPersona: this.Afiliado.ID_PERSONA
+        idPersona: this.Afiliado.id_persona
       }
     });
 

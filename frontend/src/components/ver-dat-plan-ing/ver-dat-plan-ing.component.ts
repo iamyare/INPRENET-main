@@ -11,14 +11,14 @@ import { ToastrService } from 'ngx-toastr';
 import { PlanillaIngresosService } from 'src/app/services/planillaIngresos.service';
 import { Item, UserData } from 'src/app/views/pages/planilla/Centros Privados/planilla-colegios-privados/planilla-colegios-privados.component';
 import * as XLSX from 'xlsx';
-import jsPDF from 'jspdf';
-import 'jspdf-autotable';
+import * as pdfMake from 'pdfmake/build/pdfmake';
+import * as pdfFonts from 'pdfmake/build/vfs_fonts';
 
 @Component({
   selector: 'app-ver-dat-plan-ing',
   standalone: false,
   templateUrl: './ver-dat-plan-ing.component.html',
-  styleUrl: './ver-dat-plan-ing.component.scss'
+  styleUrls: ['./ver-dat-plan-ing.component.scss']
 })
 export class VerDatPlanIngComponent implements OnInit {
   dataSourceItems1: any[] = [];
@@ -46,7 +46,9 @@ export class VerDatPlanIngComponent implements OnInit {
     private toastr: ToastrService, public dialog: MatDialog,
   ) {
     this.dataSourceItems = new MatTableDataSource<Item>([]);
+    (pdfMake as any).vfs = pdfFonts.pdfMake.vfs;
   }
+
   ngOnInit(): void {
     this.obtenerDetallesPlanillaAgrupCent(this.idCentroTrabajo, this.selectedTipoPlanilla);
     this.obtenerDetallesPlanilla(this.idCentroTrabajo, this.selectedTipoPlanilla);
@@ -292,7 +294,7 @@ export class VerDatPlanIngComponent implements OnInit {
             }
           }
           );
-          this.dataSource.data = mappedData; 
+          this.dataSource.data = mappedData;
           this.cdr.detectChanges();
         } else {
           this.dataSource.data = []
@@ -487,38 +489,51 @@ export class VerDatPlanIngComponent implements OnInit {
   }
 
   generarPDF() {
-    const doc = new jsPDF();
+    const docDefinition:any = {
+      pageOrientation: 'landscape',
+      content: [
+        { text: 'Resumen De Colegio', style: 'header' },
+        {
+          style: 'tableExample',
+          table: {
+            body: [
+              ['Número de Colegio', 'Nombre del Colegio', 'Total Sueldo', 'Total Préstamo', 'Total Aportaciones', 'Total de Deducciones', 'Total Cotizaciones'],
+              ...this.dataSourceItems1.map(item => [item.ID_CENTRO_TRABAJO, item.NOMBRE_CENTRO_TRABAJO, item.SUELDO, item.PRESTAMOS, item.APORTACIONES, item.DEDUCCIONES, item.COTIZACIONES])
+            ]
+          }
+        },
+        { text: 'Detalles Planilla', style: 'header', margin: [0, 20, 0, 10] },
+        {
+          style: 'tableExample',
+          table: {
+            body: [
+              ['Identidad', 'Nombre Docente', 'Sueldo', 'Aportaciones', 'Cotizaciones', 'Préstamos', 'Deducciones', 'Sueldo Neto'],
+              ...this.dataSource.data.map(item => [item.identidad, item.nombreDocente, item.sueldo, item.aportaciones, item.cotizaciones, item.prestamos, item.deducciones, item.sueldoNeto])
+            ]
+          }
+        }
+      ],
+      styles: {
+        header: {
+          fontSize: 18,
+          bold: true,
+          margin: [0, 0, 0, 10]
+        },
+        tableExample: {
+          margin: [0, 5, 0, 15]
+        },
+        tableHeader: {
+          bold: true,
+          fontSize: 13,
+          color: 'black'
+        }
+      },
+      defaultStyle: {
+        // alignment: 'justify'
+      }
+    };
 
-    // Configuración para la segunda tabla
-    const columns2 = ['Número de Colegio', 'Nombre del Colegio', 'Total Sueldo', 'Total Préstamo', 'Total Aportaciones', 'Total de Deducciones', 'Total Cotizaciones'];
-    const data2 = this.dataSourceItems1.map(item => [item.ID_CENTRO_TRABAJO, item.NOMBRE_CENTRO_TRABAJO, item.SUELDO, item.PRESTAMOS, item.APORTACIONES, item.DEDUCCIONES, item.COTIZACIONES]);
-
-    // Agregar título para la segunda tabla
-    doc.text('Resumen Colegios', 14, 15);
-
-    // Agregar la segunda tabla al PDF
-    (doc as any).autoTable({
-      head: [columns2],
-      body: data2,
-      startY: 20
-    });
-
-    // Configuración para la primera tabla
-    const columns = ['Identidad', 'Nombre Docente', 'Sueldo', 'Aportaciones', 'Cotizaciones', 'Préstamos', 'Deducciones', 'Sueldo Neto'];
-    const data = this.dataSource.data.map(item => [item.identidad, item.nombreDocente, item.sueldo, item.aportaciones, item.cotizaciones, item.prestamos, item.deducciones, item.sueldoNeto]);
-
-    // Agregar título para la primera tabla
-    doc.text('Detalles Planilla', 14, (doc as any).lastAutoTable.finalY + 25);
-
-    // Agregar la primera tabla al PDF
-    (doc as any).autoTable({
-      head: [columns],
-      body: data,
-      startY: (doc as any).lastAutoTable.finalY + 40
-    });
-
-    // Guardar el PDF
-    doc.save('planilla.pdf');
+    pdfMake.createPdf(docDefinition).download('planilla.pdf');
   }
 
   actualizarValores() {
@@ -531,21 +546,14 @@ export class VerDatPlanIngComponent implements OnInit {
   }
 
   applyFilter(event: Event) {
-
     const filterValue = (event.target as HTMLInputElement).value;
-
     this.dataSource.filter = filterValue.trim().toLowerCase();
-
     if (this.dataSourceItems.paginator) {
       this.dataSourceItems.paginator.firstPage();
     }
   }
 
-  obtenerDetallesPlanillaAgrupCent(
-    idCentroTrabajo: number,
-    id_tipo_planilla: number
-  ) {
-
+  obtenerDetallesPlanillaAgrupCent(idCentroTrabajo: number, id_tipo_planilla: number) {
     this.dataSourceItems1 = [{
       'ID_CENTRO_TRABAJO': 1,
       'NOMBRE_CENTRO_TRABAJO': "INSTITUTO TECNICO TAULAR",
@@ -568,13 +576,14 @@ export class VerDatPlanIngComponent implements OnInit {
   }
 
   descargarExcelPdf() {
+    // Lógica para descargar Excel y PDF
   }
 
   calcularRecargo() {
     // Lógica para calcular el recargo
   }
+
   exportarExcelPdf() {
     // Lógica para exportar a Excel y PDF
   }
-
 }

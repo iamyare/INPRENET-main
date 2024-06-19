@@ -297,7 +297,7 @@ export class EditReferPersonalesComponent implements OnInit, OnChanges, OnDestro
       width: '55%',
       height: '75%',
       data: {
-        idPersona: this.Afiliado.ID_PERSONA
+        idPersona: this.Afiliado.id_persona
       }
     });
 

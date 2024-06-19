@@ -25,6 +25,7 @@ import { EditPerfilPuestTrabComponent } from './Docentes-Designados/edit-perfil-
 import { EditReferPersonalesComponent } from './Docentes-Designados/edit-refer-personales/edit-refer-personales.component';
 import { EditDatosBancariosComponent } from './Docentes-Designados/edit-datos-bancarios/edit-datos-bancarios.component';
 import { MAT_DATE_LOCALE } from '@angular/material/core';
+import { AgregarMovimientoComponent } from './Docentes-Designados/agregar-movimiento/agregar-movimiento.component';
 @NgModule({
   declarations: [
     AfiliadoComponent,
@@ -48,6 +49,7 @@ import { MAT_DATE_LOCALE } from '@angular/material/core';
     EditReferPersonalesComponent,
     VerCuentasPersonasComponent,
     ConstanciasAfiliadoComponent,
+    AgregarMovimientoComponent
   ],
   imports: [
     CommonModule,

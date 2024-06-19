@@ -40,7 +40,6 @@ export class ConstanciasAfiliadoComponent {
     };
 
     this.afiliadoService.generarConstanciaAfiliacion(data).subscribe((response: any) => {
-      console.log('File ID:', response.fileId);
     });
 
     this.afiliadoService.generarConstanciaQR(data, 'afiliacion').subscribe((blob: Blob) => {
@@ -62,7 +61,6 @@ export class ConstanciasAfiliadoComponent {
     };
 
     this.afiliadoService.generarConstanciaRenunciaCap(data).subscribe((response: any) => {
-      console.log('File ID:', response.fileId);
     });
 
     this.afiliadoService.generarConstanciaQR(data, 'renuncia-cap').subscribe((blob: Blob) => {
@@ -84,7 +82,6 @@ export class ConstanciasAfiliadoComponent {
     };
 
     this.afiliadoService.generarConstanciaNoCotizar(data).subscribe((response: any) => {
-      console.log('File ID:', response.fileId);
     });
 
     this.afiliadoService.generarConstanciaQR(data, 'no-cotizar').subscribe((blob: Blob) => {
@@ -106,7 +103,6 @@ export class ConstanciasAfiliadoComponent {
     };
 
     this.afiliadoService.generarConstanciaDebitos(data).subscribe((response: any) => {
-      console.log('File ID:', response.fileId);
     });
 
     this.afiliadoService.generarConstanciaQR(data, 'debitos').subscribe((blob: Blob) => {
@@ -128,7 +124,6 @@ export class ConstanciasAfiliadoComponent {
     };
 
     this.afiliadoService.generarConstanciaTiempoCotizarConMonto(data).subscribe((response: any) => {
-      console.log('File ID:', response.fileId);
     });
 
     this.afiliadoService.generarConstanciaQR(data, 'tiempo-cotizar-con-monto').subscribe((blob: Blob) => {

@@ -1,4 +1,4 @@
-import { ChangeDetectorRef, Component, Inject, OnInit, QueryList, ViewChild, ViewChildren } from '@angular/core';
+import { ChangeDetectorRef, Component, Inject, OnInit, QueryList, ViewChild, ViewChildren, Output, EventEmitter } from '@angular/core';
 import { AbstractControl, FormBuilder, FormControl, FormGroup, ValidatorFn, Validators } from '@angular/forms';
 import { MatDatepicker } from '@angular/material/datepicker';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
@@ -26,6 +26,7 @@ export class EditarDialogComponent implements OnInit {
   @ViewChildren(MatDatepicker) private pickerQueryList!: QueryList<MatDatepicker<Date>>;
   datePickers!: MatDatepicker<Date>[];
 
+  @Output() saved = new EventEmitter<any>();
 
   constructor(
     private fb: FormBuilder,
@@ -70,9 +71,6 @@ export class EditarDialogComponent implements OnInit {
     this.cdr.detectChanges();
   }
 
-
-
-
   convertToDate(dateString: string): Date | null {
     const [day, month, year] = dateString.split('/').map(Number);
     const date = new Date(year, month - 1, day);
@@ -90,10 +88,10 @@ export class EditarDialogComponent implements OnInit {
     }
 
     if (this.formGroup.valid) {
+      this.saved.emit(formValues);
       this.dialogRef.close(formValues);
     }
   }
-
 
   cerrar() {
     this.dialogRef.close();
@@ -120,7 +118,6 @@ export class EditarDialogComponent implements OnInit {
     }
     return errors;
   }
-
 
   // Ejemplo de un validador personalizado
   minCurrentValueValidator(minValue: number): ValidatorFn {

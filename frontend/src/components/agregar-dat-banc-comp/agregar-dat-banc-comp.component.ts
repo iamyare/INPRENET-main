@@ -1,4 +1,4 @@
-import { Component, Inject, OnInit, ViewChild } from '@angular/core';
+import { Component, Inject, OnInit, ViewChild, Output, EventEmitter } from '@angular/core';
 import { FormArray, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { ToastrService } from 'ngx-toastr';
@@ -13,6 +13,8 @@ import { HistorialSalarioComponent } from '../historial-salario/historial-salari
 export class AgregarDatBancCompComponent implements OnInit {
   form: FormGroup;
   formHistPag: FormGroup;
+
+  @Output() saved = new EventEmitter<any>();
 
   @ViewChild(HistorialSalarioComponent) historialSalarioComponent!: HistorialSalarioComponent; // Obtén la referencia del componente hijo
 
@@ -53,6 +55,7 @@ export class AgregarDatBancCompComponent implements OnInit {
           if (res.length > 0) {
             this.toastr.success("Dato Bancario agregado con éxito");
             this.resetForm();
+            this.saved.emit();
             this.cerrar();
           }
         },

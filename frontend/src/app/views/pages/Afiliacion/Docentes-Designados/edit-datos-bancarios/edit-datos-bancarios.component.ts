@@ -1,9 +1,5 @@
-import { Component, Input, OnInit, OnChanges, SimpleChanges, OnDestroy } from '@angular/core';
-import { Validators } from '@angular/forms';
+import { Component, Input, OnInit, OnChanges, SimpleChanges } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
-import { AgregarDatBancCompComponent } from '@docs-components/agregar-dat-banc-comp/agregar-dat-banc-comp.component';
-import { ConfirmDialogComponent } from '@docs-components/confirm-dialog/confirm-dialog.component';
-import { EditarDialogComponent } from '@docs-components/editar-dialog/editar-dialog.component';
 import { ToastrService } from 'ngx-toastr';
 import { AfiliadoService } from 'src/app/services/afiliado.service';
 import { DatosEstaticosService } from 'src/app/services/datos-estaticos.service';
@@ -11,19 +7,21 @@ import { FieldConfig } from 'src/app/shared/Interfaces/field-config';
 import { TableColumn } from 'src/app/shared/Interfaces/table-column';
 import { convertirFechaInputs } from 'src/app/shared/functions/formatoFecha';
 import { unirNombres } from 'src/app/shared/functions/formatoNombresP';
-import { Subscription } from 'rxjs';
+import { AgregarDatBancCompComponent } from '@docs-components/agregar-dat-banc-comp/agregar-dat-banc-comp.component';
+import { ConfirmDialogComponent } from '@docs-components/confirm-dialog/confirm-dialog.component';
+import { EditarDialogComponent } from '@docs-components/editar-dialog/editar-dialog.component';
+import { Validators } from '@angular/forms';
 
 @Component({
   selector: 'app-edit-datos-bancarios',
   templateUrl: './edit-datos-bancarios.component.html',
   styleUrls: ['./edit-datos-bancarios.component.scss']
 })
-export class EditDatosBancariosComponent implements OnInit, OnChanges, OnDestroy {
+export class EditDatosBancariosComponent implements OnInit, OnChanges {
   convertirFechaInputs = convertirFechaInputs;
   public myFormFields: FieldConfig[] = [];
   form: any;
-  @Input() Afiliado!: any;
-
+  @Input() Afiliado: any;
   unirNombres: any = unirNombres;
   datosTabl: any[] = [];
   bancos: { label: string, value: string }[] = [];
@@ -32,7 +30,6 @@ export class EditDatosBancariosComponent implements OnInit, OnChanges, OnDestroy
   public filas: any[] = [];
   ejecF: any;
   public loading: boolean = false;
-  private subscriptions: Subscription = new Subscription();
 
   constructor(
     private svcAfiliado: AfiliadoService,
@@ -51,12 +48,9 @@ export class EditDatosBancariosComponent implements OnInit, OnChanges, OnDestroy
     }
   }
 
-  ngOnDestroy(): void {
-    this.subscriptions.unsubscribe();
-  }
-
   initializeComponent(): void {
     if (!this.Afiliado) {
+      this.resetDatos();
       return;
     }
 
@@ -82,11 +76,8 @@ export class EditDatosBancariosComponent implements OnInit, OnChanges, OnDestroy
         isEditable: true
       },
     ];
-    this.getFilas();
-  }
 
-  async obtenerDatos(event: any): Promise<any> {
-    this.form = event;
+    this.getFilas();
   }
 
   resetDatos() {
@@ -98,8 +89,8 @@ export class EditDatosBancariosComponent implements OnInit, OnChanges, OnDestroy
   }
 
   async getFilas() {
+
     this.loading = true;
-    this.filas = [];
     if (this.Afiliado) {
       try {
         const data = await this.svcAfiliado.getAllPersonaPBanco(this.Afiliado.n_identificacion).toPromise();
@@ -110,7 +101,6 @@ export class EditDatosBancariosComponent implements OnInit, OnChanges, OnDestroy
           numero_cuenta: item.num_cuenta,
           estado: item.estado
         }));
-
       } catch (error) {
         this.toastr.error('Error al cargar los datos de los perfiles de los centros de trabajo');
         console.error('Error al obtener datos de datos de los perfiles de los centros de trabajo', error);
@@ -118,7 +108,7 @@ export class EditDatosBancariosComponent implements OnInit, OnChanges, OnDestroy
     } else {
       this.resetDatos();
     }
-    this.loading = false;
+    this.loading = false; // Ocultar el spinner después de cargar los datos
     this.cargar();
   }
 
@@ -128,12 +118,11 @@ export class EditDatosBancariosComponent implements OnInit, OnChanges, OnDestroy
 
   cargar() {
     if (this.ejecF) {
-      this.ejecF(this.filas).then(() => {
-      });
+      this.ejecF(this.filas).then(() => {});
     }
   }
 
-  async editarFila(row: any) {
+  async manejarAccionUno(row: any) {
     this.bancos = await this.datosEstaticosService.getBancos();
     const bancoSeleccionado = this.bancos.find(b => b.label === row.nombre_banco);
     const codBanco = bancoSeleccionado ? bancoSeleccionado.value : '';
@@ -157,13 +146,13 @@ export class EditDatosBancariosComponent implements OnInit, OnChanges, OnDestroy
     this.openDialogEditar(campos, valoresIniciales);
   }
 
-  eliminarFila(row: any) {
+  manejarAccionDos(row: any) {
     const dialogRef = this.dialog.open(ConfirmDialogComponent, {
       width: '350px',
       data: {
         title: 'Confirmación de desactivación',
         message: '¿Estás seguro de querer desactivar este elemento?',
-        idPersona: this.Afiliado.ID_PERSONA
+        idPersona: this.Afiliado.id_persona
       }
     });
 
@@ -185,13 +174,13 @@ export class EditDatosBancariosComponent implements OnInit, OnChanges, OnDestroy
     });
   }
 
-  AgregarPuestoTrabajo() {
+  AgregarDatoBancario() {
     if (this.Afiliado) {
       const dialogRef = this.dialog.open(AgregarDatBancCompComponent, {
         width: '55%',
         height: '75%',
         data: {
-          idPersona: this.Afiliado.ID_PERSONA
+          idPersona: this.Afiliado.id_persona
         }
       });
 
@@ -201,34 +190,6 @@ export class EditDatosBancariosComponent implements OnInit, OnChanges, OnDestroy
         }
       });
     }
-  }
-
-  openDialog(campos: any, row: any): void {
-    const dialogRef = this.dialog.open(ConfirmDialogComponent, {
-      width: '350px',
-      data: {
-        title: 'Confirmación de Activación',
-        message: '¿Estás seguro de querer activar este elemento?',
-        idPersona: this.Afiliado.ID_PERSONA
-      }
-    });
-
-    dialogRef.afterClosed().subscribe((result: boolean) => {
-      if (result) {
-        this.svcAfiliado.activarCuentaBancaria(row.id, this.Afiliado.ID_PERSONA).subscribe({
-          next: (response) => {
-            this.toastr.success(response.mensaje, 'Cuenta Bancaria Activada');
-            this.getFilas();
-          },
-          error: (error) => {
-            console.error('Error al activar la Cuenta Bancaria:', error);
-            this.toastr.error('Ocurrió un error al activar la Cuenta Bancaria.');
-          }
-        });
-      } else {
-        console.log('Activación cancelada por el usuario.');
-      }
-    });
   }
 
   openDialogEditar(campos: any, valoresIniciales: any): void {
@@ -246,21 +207,41 @@ export class EditDatosBancariosComponent implements OnInit, OnChanges, OnDestroy
         this.svcAfiliado.updateDatosBancarios(valoresIniciales.id, result).subscribe(
           async (response) => {
             this.toastr.success('Datos bancarios actualizados con éxito.');
-            const index = this.filas.findIndex(item => item.id === valoresIniciales.id);
-            if (index !== -1) {
-              this.filas[index] = {
-                ...this.filas[index],
-                ...result,
-                nombre_banco: nombreBanco
-              };
-            }
-            this.cargar();
+            this.getFilas();
           },
           (error) => {
             this.toastr.error('Error al actualizar los datos bancarios.');
             console.error('Error al actualizar los datos bancarios:', error);
           }
         );
+      }
+    });
+  }
+
+  openDialog(campos: any, row: any): void {
+    const dialogRef = this.dialog.open(ConfirmDialogComponent, {
+      width: '350px',
+      data: {
+        title: 'Confirmación de Activación',
+        message: '¿Estás seguro de querer activar este elemento?',
+        idPersona: this.Afiliado.id_persona
+      }
+    });
+
+    dialogRef.afterClosed().subscribe((result: boolean) => {
+      if (result) {
+        this.svcAfiliado.activarCuentaBancaria(row.id, this.Afiliado.id_persona).subscribe({
+          next: (response) => {
+            this.toastr.success(response.mensaje, 'Cuenta Bancaria Activada');
+            this.getFilas();
+          },
+          error: (error) => {
+            console.error('Error al activar el Cuenta Bancaria:', error);
+            this.toastr.error('Ocurrió un error al activar el Cuenta Bancaria.');
+          }
+        });
+      } else {
+        console.log('Activación cancelada por el usuario.');
       }
     });
   }

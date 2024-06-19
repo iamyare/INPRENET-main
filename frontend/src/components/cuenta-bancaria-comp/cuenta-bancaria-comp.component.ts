@@ -109,7 +109,6 @@ export class CuentaBancariaCompComponent {
 
     const controlesrefpers = (this.formParent.get('trabajo') as FormGroup).controls;
     const a = controlesrefpers[i].get(fieldName)!.errors
-    console.log(a);
 
     let errors = []
     if (a) {

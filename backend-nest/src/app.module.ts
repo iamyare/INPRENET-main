@@ -10,6 +10,7 @@ import { PlanillaModule } from './modules/Planilla/planilla.module';
 import { RegionalModule } from './modules/Regional/regional.module';
 import { EmpresarialModule } from './modules/Empresarial/empresarial.module';
 import { TransaccionesModule } from './modules/transacciones/transacciones.module';
+import { DocumentsModule } from './modules/documents/documents.module';
 
 @Module({
   imports: [
@@ -42,7 +43,8 @@ import { TransaccionesModule } from './modules/transacciones/transacciones.modul
     PlanillaModule,
     RegionalModule,
     EmpresarialModule,
-    TransaccionesModule
+    TransaccionesModule,
+    DocumentsModule
   ]
 })
 export class AppModule {

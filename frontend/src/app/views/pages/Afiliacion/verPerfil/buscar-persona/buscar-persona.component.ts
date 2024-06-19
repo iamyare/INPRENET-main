@@ -9,7 +9,7 @@ import { PersonaService } from 'src/app/services/persona.service';
   styleUrls: ['./buscar-persona.component.scss']
 })
 export class BuscarPersonaComponent {
-  n_identifiacion: string = '1234567890123';
+  n_identifiacion: string = '';
   errorMessage: string | null = null;
   persona: any = null;
 

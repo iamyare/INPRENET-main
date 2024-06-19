@@ -47,11 +47,12 @@
     <app-dynamic-table style="width: 100%" titulo="Editar Beneficiarios"
       subtitulo="Completa la información correspondiente" [verOpcEditar]="false" [columns]="myColumnsDed"
       [data]="datosTabl" [getData]="getFilas"
-      (ejecutarFuncionAsincronaEvent)="ejecutarFuncionAsincronaDesdeOtroComponente($event)" [mostrarBotonEditar]="true"
+      (ejecutarFuncionAsincronaEvent)="ejecutarFuncionAsincronaDesdeOtroComponente($event)"
       [nombreEncabezadoUno]="'Detalle Ingresos'" [mostrarBotonUno]="true" [etiquetaBotonUno]="'Detalle Ingresos'"
       (accionBotonUno)="manejarAccionUno($event)" [nombreEncabezadoDos]="'Detalle Deducciones'" [mostrarBotonDos]="true"
       [etiquetaBotonDos]="'Detalle Deducciones'" (accionBotonDos)="manejarAccionDos($event)">
     </app-dynamic-table>
+
     <!-- <app-dynamic-table [verOpcEditar]="false" [columns]="myColumnsDed" [data]="datosTabl"
       (ejecutarFuncionAsincronaEvent)="
       ejecutarFuncionAsincronaDesdeOtroComponente($event)

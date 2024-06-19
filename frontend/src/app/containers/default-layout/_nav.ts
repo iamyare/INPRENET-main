@@ -92,7 +92,7 @@ export const navItems: INavData[] = [
       },
     ]
   },
-  {
+  /* {
     name: 'Beneficios',
     iconComponent: { name: 'cilSpreadsheet' },
     url: '/base',
@@ -106,7 +106,7 @@ export const navItems: INavData[] = [
         name: 'Ver/Editar Beneficio',
       },
     ]
-  },
+  }, */
   {
     /* name: 'Operaciones',
     iconComponent: { name: 'cilSpreadsheet' },
@@ -173,7 +173,7 @@ export const navItems: INavData[] = [
     /* },
   ] */
   },
-  {
+  /* {
     name: 'Movimientos',
     iconComponent: { name: 'cilSpreadsheet' },
     url: '/base',
@@ -187,5 +187,5 @@ export const navItems: INavData[] = [
         url: '/Movimiento/ver-movimientos',
       },
     ]
-  },
+  }, */
 ];

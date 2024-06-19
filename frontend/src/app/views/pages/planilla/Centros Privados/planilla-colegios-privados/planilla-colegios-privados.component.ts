@@ -15,13 +15,11 @@ import { MatDialog } from '@angular/material/dialog';
 import { MatPaginator } from '@angular/material/paginator';
 import { MatSort } from '@angular/material/sort';
 import { MatTableDataSource } from '@angular/material/table';
-import { DynamicFormDialogComponent } from '@docs-components/dynamic-form-dialog/dynamic-form-dialog.component';
-import { EditarDialogComponent } from '@docs-components/editar-dialog/editar-dialog.component';
-import { PlanillaIngresosService } from '../../../../services/planillaIngresos.service';
 import { DatosEstaticosService } from 'src/app/services/datos-estaticos.service';
 import { CentroTrabajoService } from 'src/app/services/centro-trabajo.service';
 import { jwtDecode } from 'jwt-decode';
 import { ToastrService } from 'ngx-toastr';
+import { PlanillaIngresosService } from 'src/app/services/planillaIngresos.service';
 
 export interface Item {
   id_centro_trabajo: number;
@@ -131,21 +129,21 @@ export class PlanillaColegiosPrivadosComponent
     this.mostrarSegundoPaso = false;
     this.mostrarTercerPaso = false;
   }
-async cargarCentrosDeTrabajo() {
-  await this.centroTrabajoService.obtenerTodosLosCentrosTrabajoPrivados().subscribe(
-    (centros: Item[]) => {
-      this.dataSourceItems.data = centros;
-      this.dataSourceItems.paginator = this.paginator;
-      this.dataSourceItems.sort = this.sort;
-    },
-    (error) => {
-      console.error('Error al cargar los centros de trabajo', error);
-    }
-  );
-}
+  async cargarCentrosDeTrabajo() {
+    await this.centroTrabajoService.obtenerTodosLosCentrosTrabajoPrivados().subscribe(
+      (centros: Item[]) => {
+        this.dataSourceItems.data = centros;
+        this.dataSourceItems.paginator = this.paginator;
+        this.dataSourceItems.sort = this.sort;
+      },
+      (error) => {
+        console.error('Error al cargar los centros de trabajo', error);
+      }
+    );
+  }
 
   async datosPlanilla() {
-    if (this.selectedTipoPlanilla.length>0) {
+    if (this.selectedTipoPlanilla.length > 0) {
       const idCentroTrabajo = this.idCentroTrabajo || this.selectedItem?.id_centro_trabajo;
 
       if (idCentroTrabajo) {
@@ -157,15 +155,15 @@ async cargarCentrosDeTrabajo() {
               this.mostrarTercerPaso = true;
 
               this.firstFormGroup
-              .get('selectedTipoPlanilla')
-              ?.valueChanges.subscribe((selectedValue) => {
-                this.mostrarPrimerPaso = true;
-                this.mostrarSegundoPaso = true;
-                this.mostrarTercerPaso = true;
-                this.cdr.detectChanges();
-                this.dataSourceItems.paginator = this.paginator;
-                this.dataSourceItems.sort = this.sort;
-              });
+                .get('selectedTipoPlanilla')
+                ?.valueChanges.subscribe((selectedValue) => {
+                  this.mostrarPrimerPaso = true;
+                  this.mostrarSegundoPaso = true;
+                  this.mostrarTercerPaso = true;
+                  this.cdr.detectChanges();
+                  this.dataSourceItems.paginator = this.paginator;
+                  this.dataSourceItems.sort = this.sort;
+                });
 
             } else {
               console.error('No hay ninguna planilla');
@@ -202,13 +200,13 @@ async cargarCentrosDeTrabajo() {
     return null;
   }
 
-    async selectRow(item: Item) {
-      this.idCentroTrabajo = item.id_centro_trabajo;
-      this.selectedItem = item;
-      this.mostrarSegundoPaso = true;
-      this.mostrarPrimerPaso = true;
-      this.mostrarTercerPaso = false;
-    }
+  async selectRow(item: Item) {
+    this.idCentroTrabajo = item.id_centro_trabajo;
+    this.selectedItem = item;
+    this.mostrarSegundoPaso = true;
+    this.mostrarPrimerPaso = true;
+    this.mostrarTercerPaso = false;
+  }
 
   ngAfterViewInit() {
     this.cargarCentrosDeTrabajo();

@@ -9,7 +9,7 @@ import { DynamicFormDialogComponent } from '@docs-components/dynamic-form-dialog
 import { EditarDialogComponent } from '@docs-components/editar-dialog/editar-dialog.component';
 import { ToastrService } from 'ngx-toastr';
 import { PlanillaIngresosService } from 'src/app/services/planillaIngresos.service';
-import { Item, UserData } from 'src/app/views/pages/Centros Privados/planilla-colegios-privados/planilla-colegios-privados.component';
+import { Item, UserData } from 'src/app/views/pages/planilla/Centros Privados/planilla-colegios-privados/planilla-colegios-privados.component';
 import * as XLSX from 'xlsx';
 import jsPDF from 'jspdf';
 import 'jspdf-autotable';
@@ -23,7 +23,7 @@ import 'jspdf-autotable';
 export class VerDatPlanIngComponent implements OnInit {
   dataSourceItems1: any[] = [];
   dataSourceItems: MatTableDataSource<Item>;
-  displayedColumns: string[] = ['numeroColegio', 'nombreColegio', 'totalSueldo', 'totalPrestamo', 'totalAportaciones', 'totalPagar', 'totalCotizaciones'];
+  displayedColumns: string[] = ['numeroColegio', 'nombreColegio', 'totalSueldo', 'totalAportaciones', 'totalCotizaciones', 'totalPrestamo', 'totalPagar',];
   recargoPlanilla: number = 0;
   totalPagarConRecargo: number = 0;
   fecha = new FormControl(new Date());
@@ -59,7 +59,220 @@ export class VerDatPlanIngComponent implements OnInit {
   }
 
   obtenerDetallesPlanilla(idCentroTrabajo: number, id_tipo_planilla: number) {
-    this.planillaIngresosService.obtenerDetallesPorCentroTrabajo(idCentroTrabajo, id_tipo_planilla).subscribe(
+    this.dataSource.data = [
+      {
+        "id_detalle_plan_Ing": 1,
+        "identidad": "0801199912345",
+        "id_planilla": 1,
+        "nombreDocente": "Juan Carlos Antonio Pérez Gómez",
+        "sueldo": 24000,
+        "aportaciones": 1000,
+        "prestamos": 0,
+        "cotizaciones": 1000,
+        "deducciones": 500,
+        "sueldoNeto": 21500,
+        "periodoInicio": "01/06/2024",
+        "periodoFinalizacion": "30/06/2024"
+      },
+      {
+        "id_detalle_plan_Ing": 2,
+        "identidad": "0801199923456",
+        "id_planilla": 1,
+        "nombreDocente": "María Fernanda López Rodríguez",
+        "sueldo": 26000,
+        "aportaciones": 1200,
+        "prestamos": 500,
+        "cotizaciones": 1200,
+        "deducciones": 700,
+        "sueldoNeto": 22300,
+        "periodoInicio": "01/06/2024",
+        "periodoFinalizacion": "30/06/2024"
+      },
+      {
+        "id_detalle_plan_Ing": 3,
+        "identidad": "0801199934567",
+        "id_planilla": 1,
+        "nombreDocente": "Carlos Andrés Morales Santos",
+        "sueldo": 25000,
+        "aportaciones": 1100,
+        "prestamos": 0,
+        "cotizaciones": 1100,
+        "deducciones": 600,
+        "sueldoNeto": 22200,
+        "periodoInicio": "01/06/2024",
+        "periodoFinalizacion": "30/06/2024"
+      },
+      {
+        "id_detalle_plan_Ing": 4,
+        "identidad": "0801199945678",
+        "id_planilla": 1,
+        "nombreDocente": "Ana María García Fernández",
+        "sueldo": 27000,
+        "aportaciones": 1300,
+        "prestamos": 1000,
+        "cotizaciones": 1300,
+        "deducciones": 800,
+        "sueldoNeto": 22600,
+        "periodoInicio": "01/06/2024",
+        "periodoFinalizacion": "30/06/2024"
+      },
+      {
+        "id_detalle_plan_Ing": 5,
+        "identidad": "0801199956789",
+        "id_planilla": 1,
+        "nombreDocente": "José Miguel Herrera Martínez",
+        "sueldo": 24000,
+        "aportaciones": 1000,
+        "prestamos": 0,
+        "cotizaciones": 1000,
+        "deducciones": 500,
+        "sueldoNeto": 21500,
+        "periodoInicio": "01/06/2024",
+        "periodoFinalizacion": "30/06/2024"
+      },
+      {
+        "id_detalle_plan_Ing": 6,
+        "identidad": "0801199967890",
+        "id_planilla": 1,
+        "nombreDocente": "Lucía Patricia Mendoza Salazar",
+        "sueldo": 28000,
+        "aportaciones": 1400,
+        "prestamos": 200,
+        "cotizaciones": 1400,
+        "deducciones": 900,
+        "sueldoNeto": 24100,
+        "periodoInicio": "01/06/2024",
+        "periodoFinalizacion": "30/06/2024"
+      },
+      {
+        "id_detalle_plan_Ing": 7,
+        "identidad": "0801199978901",
+        "id_planilla": 1,
+        "nombreDocente": "Alberto Javier Núñez Reyes",
+        "sueldo": 25000,
+        "aportaciones": 1100,
+        "prestamos": 300,
+        "cotizaciones": 1100,
+        "deducciones": 600,
+        "sueldoNeto": 21900,
+        "periodoInicio": "01/06/2024",
+        "periodoFinalizacion": "30/06/2024"
+      },
+      {
+        "id_detalle_plan_Ing": 8,
+        "identidad": "0801199989012",
+        "id_planilla": 1,
+        "nombreDocente": "Verónica Isabel Rivera Campos",
+        "sueldo": 26000,
+        "aportaciones": 1200,
+        "prestamos": 400,
+        "cotizaciones": 1200,
+        "deducciones": 700,
+        "sueldoNeto": 22400,
+        "periodoInicio": "01/06/2024",
+        "periodoFinalizacion": "30/06/2024"
+      },
+      {
+        "id_detalle_plan_Ing": 9,
+        "identidad": "0801199990123",
+        "id_planilla": 1,
+        "nombreDocente": "Jorge Luis Rivas Pérez",
+        "sueldo": 24000,
+        "aportaciones": 1000,
+        "prestamos": 0,
+        "cotizaciones": 1000,
+        "deducciones": 500,
+        "sueldoNeto": 21500,
+        "periodoInicio": "01/06/2024",
+        "periodoFinalizacion": "30/06/2024"
+      },
+      {
+        "id_detalle_plan_Ing": 10,
+        "identidad": "0801200001234",
+        "id_planilla": 1,
+        "nombreDocente": "Gabriela Sofía Ortiz Castro",
+        "sueldo": 28000,
+        "aportaciones": 1400,
+        "prestamos": 600,
+        "cotizaciones": 1400,
+        "deducciones": 900,
+        "sueldoNeto": 24000,
+        "periodoInicio": "01/06/2024",
+        "periodoFinalizacion": "30/06/2024"
+      },
+      {
+        "id_detalle_plan_Ing": 11,
+        "identidad": "0801200012345",
+        "id_planilla": 1,
+        "nombreDocente": "Ricardo Antonio Cruz Varela",
+        "sueldo": 27000,
+        "aportaciones": 1300,
+        "prestamos": 700,
+        "cotizaciones": 1300,
+        "deducciones": 800,
+        "sueldoNeto": 22900,
+        "periodoInicio": "01/06/2024",
+        "periodoFinalizacion": "30/06/2024"
+      },
+      {
+        "id_detalle_plan_Ing": 12,
+        "identidad": "0801200023456",
+        "id_planilla": 1,
+        "nombreDocente": "Patricia Alejandra Moreno Lara",
+        "sueldo": 26000,
+        "aportaciones": 1200,
+        "prestamos": 500,
+        "cotizaciones": 1200,
+        "deducciones": 700,
+        "sueldoNeto": 22400,
+        "periodoInicio": "01/06/2024",
+        "periodoFinalizacion": "30/06/2024"
+      },
+      {
+        "id_detalle_plan_Ing": 13,
+        "identidad": "0801200034567",
+        "id_planilla": 1,
+        "nombreDocente": "Fernando Manuel López Pérez",
+        "sueldo": 25000,
+        "aportaciones": 1100,
+        "prestamos": 0,
+        "cotizaciones": 1100,
+        "deducciones": 600,
+        "sueldoNeto": 22200,
+        "periodoInicio": "01/06/2024",
+        "periodoFinalizacion": "30/06/2024"
+      },
+      {
+        "id_detalle_plan_Ing": 14,
+        "identidad": "0801200045678",
+        "id_planilla": 1,
+        "nombreDocente": "Sofía María Vargas Gómez",
+        "sueldo": 28000,
+        "aportaciones": 1400,
+        "prestamos": 200,
+        "cotizaciones": 1400,
+        "deducciones": 900,
+        "sueldoNeto": 24100,
+        "periodoInicio": "01/06/2024",
+        "periodoFinalizacion": "30/06/2024"
+      },
+      {
+        "id_detalle_plan_Ing": 15,
+        "identidad": "0801200056789",
+        "id_planilla": 1,
+        "nombreDocente": "Mario Alberto Castillo Díaz",
+        "sueldo": 27000,
+        "aportaciones": 1300,
+        "prestamos": 0,
+        "cotizaciones": 1300,
+        "deducciones": 800,
+        "sueldoNeto": 23600,
+        "periodoInicio": "01/06/2024",
+        "periodoFinalizacion": "30/06/2024"
+      }
+    ]
+
+    /* this.planillaIngresosService.obtenerDetallesPorCentroTrabajo(idCentroTrabajo, id_tipo_planilla).subscribe(
       (response: any) => {
         if (response.data.length > 0) {
           const mappedData = response.data.map((item: any) => {
@@ -79,12 +292,13 @@ export class VerDatPlanIngComponent implements OnInit {
             }
           }
           );
-          this.dataSource.data = mappedData;
+          this.dataSource.data = mappedData; 
           this.cdr.detectChanges();
         } else {
           this.dataSource.data = []
         }
       });
+      */
   }
 
   editarElemento(row: UserData) {
@@ -331,7 +545,17 @@ export class VerDatPlanIngComponent implements OnInit {
     idCentroTrabajo: number,
     id_tipo_planilla: number
   ) {
-    this.planillaIngresosService
+
+    this.dataSourceItems1 = [{
+      'ID_CENTRO_TRABAJO': 1,
+      'NOMBRE_CENTRO_TRABAJO': "INSTITUTO TECNICO TAULAR",
+      'SUELDO': 240000,
+      'PRESTAMOS': 0,
+      'APORTACIONES': 15000,
+      'DEDUCCIONES': 0,
+      'COTIZACIONES': 15000
+    }]
+    /* this.planillaIngresosService
       .obtenerDetallesPlanillaAgrupCent(idCentroTrabajo, id_tipo_planilla)
       .subscribe(
         (response: any) => {
@@ -340,7 +564,7 @@ export class VerDatPlanIngComponent implements OnInit {
         (error) => {
           console.error('Error al obtener detalles de planilla:', error);
         }
-      );
+      ); */
   }
 
   descargarExcelPdf() {

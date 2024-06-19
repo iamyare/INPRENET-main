@@ -8,8 +8,10 @@ import { RegisterComponent } from './views/pages/login-registro/register/registe
 import { PreRegisterComponent } from './views/pages/login-registro/pre-register/pre-register.component';
 import { RoleGuard } from './guards/role-guard.guard';
 import { LoginPrivadosComponent } from './views/pages/login-registro/login-privados/login-privados.component';
-import { PlanillaColegiosPrivadosComponent } from './views/pages/Centros Privados/planilla-colegios-privados/planilla-colegios-privados.component';
-import { NavDefaultComponent } from './views/pages/Centros Privados/nav-default/nav-default.component';
+import { PlanillaColegiosPrivadosComponent } from './views/pages/planilla/Centros Privados/planilla-colegios-privados/planilla-colegios-privados.component';
+import { NavDefaultComponent } from './views/pages/planilla/Centros Privados/nav-default/nav-default.component';
+
+
 
 const routes: Routes = [
   {

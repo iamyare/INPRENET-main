@@ -108,58 +108,70 @@ export const navItems: INavData[] = [
     ]
   },
   {
-    name: 'Operaciones',
+    /* name: 'Operaciones',
     iconComponent: { name: 'cilSpreadsheet' },
     url: '/base',
     children: [
+      { */
+    name: 'Planilla',
+    url: '/base',
+    iconComponent: { name: 'cilSpreadsheet' },
+    children: [
       {
-        name: 'Planilla',
-        url: '/base',
+        name: 'Ingresos',
+        /* iconComponent: { name: 'cilMoney' }, */
         children: [
           {
-            name: 'Ingresos',
-            iconComponent: { name: 'cilMoney' },
-            children: [
-              {
-                name: 'Privados',
-                children: [
-                  {
-                    name: 'Planilla de privados',
-                    url: '/Planilla/Ingresos/Privados/planilla-colegios-privados',
-                  },
-                  {
-                    name: 'Cargar Planilla de privados',
-                    url: '/Planilla/Ingresos/Privados/cargar-planilla-privados',
-                  },
-                ]
-              }
-            ]
+            name: 'Privados',
+            url: '/Planilla/Ingresos/Privados/planilla-colegios-privados',
           },
-          {
-            name: 'Egresos',
-            iconComponent: { name: 'cilMoney' },
-            children: [
-              {
-                url: 'Afiliado/Deducciones/nueva-deduccion-afil',
-                name: 'Nueva Deducción',
-              },
-              {
-                url: 'Afiliado/Deducciones/ver-editar-deduccion-afil',
-                name: 'Ver/editar Deducción',
-              },
-              {
-                url: '/Planilla/Egresos/nueva-planilla',
-                name: 'Nueva Planilla',
-              },
-              {
-                url: '/Planilla/Egresos/ver-planillas',
-                name: 'Ver Planillas',
-              },
-            ]
-          }
         ]
       },
+      /* children: [
+        {
+          name: 'Ingresos',
+          
+          children: [
+            {
+              name: 'Privados',
+              children: [
+                {
+                  name: 'Planilla de privados',
+                  url: '/Planilla/Ingresos/Privados/planilla-colegios-privados',
+                },
+                {
+                  name: 'Cargar Planilla de privados',
+                  url: '/Planilla/Ingresos/Privados/cargar-planilla-privados',
+                },
+              ]
+            }
+          ]
+        }, */
+      {
+        name: 'Egresos',
+        /*  iconComponent: { name: 'cilMoney' }, */
+        children: [
+          {
+            url: 'Afiliado/Deducciones/nueva-deduccion-afil',
+            name: 'Nueva Deducción',
+          },
+          {
+            url: 'Afiliado/Deducciones/ver-editar-deduccion-afil',
+            name: 'Ver/editar Deducción',
+          },
+          {
+            url: '/Planilla/Egresos/nueva-planilla',
+            name: 'Nueva Planilla',
+          },
+          {
+            url: '/Planilla/Egresos/ver-planillas',
+            name: 'Ver Planillas',
+          },
+        ]
+      }
     ]
+    /* },
+  ] */
   },
   {
     name: 'Movimientos',

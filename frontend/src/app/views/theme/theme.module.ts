@@ -45,7 +45,7 @@ import { VerEditarBeneficioAfilComponent } from '../pages/Generales/ver-editar-b
 import { MatStepperModule } from '@angular/material/stepper';
 import { MAT_DATE_LOCALE, MatNativeDateModule, DateAdapter } from '@angular/material/core';
 import { MatGridListModule } from '@angular/material/grid-list';
-import { CargarPlanillaPrivadosComponent } from '../pages/Centros Privados/cargar-planilla-privados/cargar-planilla-privados.component';
+/* import { CargarPlanillaPrivadosComponent } from '../pages/planilla/Centros Privados/cargar-planilla-privados/cargar-planilla-privados.component'; */
 import { NuevoMovimientoComponent } from '../pages/planilla/nuevo-movimiento/nuevo-movimiento.component';
 import { VerMovimientosComponent } from '../pages/planilla/ver-movimientos/ver-movimientos.component';
 
@@ -55,8 +55,8 @@ import { EditDatosBancariosComponent } from '../pages/Afiliacion/Docentes-Design
 /* import { VerCuentasPersonasComponent } from '../pages/Afiliacion/Docentes-Designados/ver-cuentas-personas/ver-cuentas-personas.component';
 /* import { ConstanciasAfiliadoComponent } from '../pages/Afiliacion/Docentes-Designados/constancias-afiliado/constancias-afiliado.component'; */
 
-import { PlanillaColegiosPrivadosComponent } from '../pages/Centros Privados/planilla-colegios-privados/planilla-colegios-privados.component';
-import { NavDefaultComponent } from '../pages/Centros Privados/nav-default/nav-default.component';
+/* import { PlanillaColegiosPrivadosComponent } from '../pages/Centros Privados/planilla-colegios-privados/planilla-colegios-privados.component'; */
+/* import { NavDefaultComponent } from '../pages/Centros Privados/nav-default/nav-default.component'; */
 import { EditFamiliaresComponent } from '../pages/Generales/edit-familiares/edit-familiares.component';
 import { VerDatosAfiliadosComponent } from '../pages/Afiliacion/Docentes-Designados/ver-datos-afiliados/ver-datos-afiliados.component';
 import { AfiliacionCentrosComponent } from '../pages/Afiliacion/Centros-Educativos/afiliacion-centros/afiliacion-centros.component';
@@ -71,6 +71,12 @@ import { VerSociosComponent } from '../pages//Afiliacion/Centros-Educativos/ver-
 import { NuevoUsuarioComponent } from '../pages/admin-centro/nuevo-usuario/nuevo-usuario.component';
 import { PagesModule } from '../pages/pages.module';
 import { VerDatosCentrosComponent } from '../pages/Afiliacion/Centros-Educativos/ver-datos-centros/ver-datos-centros.component';
+import { CargarPlanillaPrivadosComponent } from '../pages/planilla/Centros Privados/cargar-planilla-privados/cargar-planilla-privados.component';
+
+import { PlanillaColegiosPrivadosComponent } from '../pages/planilla/Centros Privados/planilla-colegios-privados/planilla-colegios-privados.component';
+import { NavDefaultComponent } from '../pages/planilla/Centros Privados/nav-default/nav-default.component';
+
+
 
 
 @NgModule({

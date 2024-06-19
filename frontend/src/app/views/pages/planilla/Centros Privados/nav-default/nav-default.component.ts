@@ -1,7 +1,8 @@
 import { Component } from '@angular/core';
-import { AuthService } from '../../../../services/auth.service';
+
 import { Router } from '@angular/router';
 import { ToastrService } from 'ngx-toastr';
+import { AuthService } from 'src/app/services/auth.service';
 
 @Component({
   selector: 'app-nav-default',
@@ -10,8 +11,8 @@ import { ToastrService } from 'ngx-toastr';
 })
 export class NavDefaultComponent {
 
-  constructor(private authService: AuthService,private toastr: ToastrService,
-    private router: Router){
+  constructor(private authService: AuthService, private toastr: ToastrService,
+    private router: Router) {
 
   }
 

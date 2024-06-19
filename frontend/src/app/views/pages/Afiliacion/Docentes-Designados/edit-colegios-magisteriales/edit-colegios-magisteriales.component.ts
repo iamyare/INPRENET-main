@@ -104,10 +104,8 @@ export class EditColegiosMagisterialesComponent implements OnInit, OnChanges, On
     } else {
       this.resetDatos();
     }
-    setTimeout(() => {
-      this.loading = false; // Ocultar el spinner después de cargar los datos
-      this.cargar(); // Llamar cargar() después de ocultar el spinner
-    }, 1000); // Retraso de 1 segundo
+    this.loading = false;
+    this.cargar();
   }
 
   ejecutarFuncionAsincronaDesdeOtroComponente(funcion: (data: any) => Promise<void>) {
@@ -174,7 +172,9 @@ export class EditColegiosMagisterialesComponent implements OnInit, OnChanges, On
     });
 
     dialogRef.afterClosed().subscribe((result: any) => {
-      this.getFilas();
+      if (result) {
+        this.getFilas();
+      }
     });
   }
 

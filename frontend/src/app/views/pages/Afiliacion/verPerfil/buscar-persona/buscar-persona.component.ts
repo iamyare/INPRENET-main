@@ -9,7 +9,7 @@ import { PersonaService } from 'src/app/services/persona.service';
   styleUrls: ['./buscar-persona.component.scss']
 })
 export class BuscarPersonaComponent {
-  n_identifiacion : string = '1234567890123';
+  n_identifiacion: string = '1234567890123';
   errorMessage: string | null = null;
   persona: any = null;
 
@@ -28,5 +28,10 @@ export class BuscarPersonaComponent {
         this.errorMessage = null;
       }
     });
+  }
+
+  resetBusqueda() {
+    this.persona = null;
+    this.n_identifiacion = '';
   }
 }

@@ -27,15 +27,14 @@ export class EditBeneficiariosComponent implements OnInit, OnChanges, OnDestroy 
   unirNombres: any = unirNombres;
   datosTabl: any[] = [];
   bancos: { label: string, value: string }[] = [];
-
   prevAfil: boolean = false;
-
   public myColumns: TableColumn[] = [];
   public filas: any[] = [];
   ejecF: any;
   municipios: { label: string, value: any }[] = [];
   estados: { label: string, value: any }[] = [];
   private subscriptions: Subscription = new Subscription();
+  public loading: boolean = false;
 
   constructor(
     private svcAfiliado: AfiliadoService,
@@ -77,7 +76,7 @@ export class EditBeneficiariosComponent implements OnInit, OnChanges, OnDestroy 
       { header: 'Fecha de Nacimiento', col: 'fecha_nacimiento' }
     ];
 
-    this.getFilas().then(() => this.cargar());
+    this.getFilas();
   }
 
   async obtenerDatos(event: any): Promise<any> {
@@ -93,11 +92,12 @@ export class EditBeneficiariosComponent implements OnInit, OnChanges, OnDestroy 
   }
 
   async getFilas() {
+    this.loading = true;
+    this.filas = [];
     if (this.persona) {
       try {
         const data = await this.svcAfiliado.getAllBenDeAfil(this.persona.n_identificacion).toPromise();
         this.filas = data.map((item: any) => {
-
           const nombres = [item.primerNombre, item.segundoNombre, item.tercerNombre].filter(part => part).join(' ');
           const apellidos = [item.primerApellido, item.segundoApellido].filter(part => part).join(' ');
           const fechaNacimiento = this.datePipe.transform(item.fechaNacimiento, 'dd/MM/yyyy') || 'Fecha no disponible';
@@ -121,14 +121,17 @@ export class EditBeneficiariosComponent implements OnInit, OnChanges, OnDestroy 
           };
           return respData;
         });
-        this.cargar();
+        this.loading = false;
       } catch (error) {
         this.toastr.error('Error al cargar los datos de los beneficiarios');
         console.error('Error al obtener datos de los beneficiarios', error);
+        this.loading = false;
       }
     } else {
       this.resetDatos();
+      this.loading = false;
     }
+    this.cargar();
   }
 
   ejecutarFuncionAsincronaDesdeOtroComponente(funcion: (data: any) => Promise<void>) {
@@ -186,7 +189,9 @@ export class EditBeneficiariosComponent implements OnInit, OnChanges, OnDestroy 
     });
 
     dialogRef.afterClosed().subscribe((result: any) => {
-      this.ngOnInit();
+      if (result) {
+        this.getFilas();
+      }
     });
   }
 

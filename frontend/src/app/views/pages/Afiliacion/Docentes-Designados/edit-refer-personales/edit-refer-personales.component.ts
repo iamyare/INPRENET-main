@@ -32,7 +32,7 @@ export class EditReferPersonalesComponent implements OnInit, OnChanges, OnDestro
   ejecF: any;
   private subscriptions: Subscription = new Subscription();
   public mostrarMensaje: boolean = false;
-
+  public loading: boolean = false;
 
   constructor(
     private svcAfiliado: AfiliadoService,
@@ -100,7 +100,7 @@ export class EditReferPersonalesComponent implements OnInit, OnChanges, OnDestro
         isEditable: true
       },
     ];
-    this.getFilas().then(() => this.cargar());
+    this.getFilas();
   }
 
   async obtenerDatos(event: any): Promise<any> {
@@ -116,13 +116,8 @@ export class EditReferPersonalesComponent implements OnInit, OnChanges, OnDestro
   }
 
   async getFilas() {
+    this.loading = true; // Mostrar el spinner antes de cargar los datos
     this.mostrarMensaje = false;
-    setTimeout(() => {
-      if (this.filas.length === 0) {
-        this.mostrarMensaje = true;
-      }
-    }, 1000);
-
     if (this.Afiliado) {
       try {
         const data = await this.svcAfiliado.getAllReferenciasPersonales(this.Afiliado.n_identificacion).toPromise();
@@ -139,7 +134,6 @@ export class EditReferPersonalesComponent implements OnInit, OnChanges, OnDestro
           };
           return filaProcesada;
         });
-        this.cargar();
       } catch (error) {
         this.toastr.error('Error al cargar los datos de las referencias personales');
         console.error('Error al obtener datos de las referencias personales:', error);
@@ -147,6 +141,13 @@ export class EditReferPersonalesComponent implements OnInit, OnChanges, OnDestro
     } else {
       this.resetDatos();
     }
+    setTimeout(() => {
+      this.loading = false;
+      if (this.filas.length === 0) {
+        this.mostrarMensaje = true;
+      }
+      this.cargar();
+    }, 1000);
   }
 
   ejecutarFuncionAsincronaDesdeOtroComponente(funcion: (data: any) => Promise<void>) {
@@ -155,8 +156,7 @@ export class EditReferPersonalesComponent implements OnInit, OnChanges, OnDestro
 
   cargar() {
     if (this.ejecF) {
-      this.ejecF(this.filas).then(() => {
-      });
+      this.ejecF(this.filas).then(() => {});
     }
   }
 
@@ -307,7 +307,7 @@ export class EditReferPersonalesComponent implements OnInit, OnChanges, OnDestro
     });
 
     dialogRef.afterClosed().subscribe((result: any) => {
-      this.ngOnInit();
+      this.getFilas();
     });
   }
 }

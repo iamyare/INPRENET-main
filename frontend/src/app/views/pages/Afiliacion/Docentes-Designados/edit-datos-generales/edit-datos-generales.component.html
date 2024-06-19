@@ -1,5 +1,9 @@
 <div style="margin: 1% 0% 1% 0%; text-align: center; background-color: white">
-  <div *ngIf="datos">
+  <div *ngIf="loading" class="spinner-container">
+    <mat-spinner class="spinner" diameter="50"></mat-spinner>
+  </div>
+
+  <div *ngIf="datos && !loading">
     <app-dat-generales-afiliado [datos]="formDatosGenerales"
       (newDatosGenerales)="setDatosGenerales($event)"></app-dat-generales-afiliado>
 

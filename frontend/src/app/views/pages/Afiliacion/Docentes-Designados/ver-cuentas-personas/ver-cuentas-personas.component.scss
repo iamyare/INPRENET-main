@@ -70,3 +70,11 @@ td {
 .desapareciendo {
   animation: desaparecer 2s infinite;
 }
+
+
+.spinner-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 200px;
+}

@@ -31,6 +31,7 @@ export class VerCuentasPersonasComponent implements OnInit, OnChanges, OnDestroy
   public filas: any[] = [];
   ejecF: any;
   private subscriptions: Subscription = new Subscription();
+  public loading: boolean = false;
 
   constructor(
     private svcAfiliado: AfiliadoService,
@@ -71,7 +72,7 @@ export class VerCuentasPersonasComponent implements OnInit, OnChanges, OnDestroy
       { header: 'Tipo Cuenta', col: 'DESCRIPCION', isEditable: true },
     ];
 
-    this.getFilas().then(() => this.cargar());
+    this.getFilas();
   }
 
   async obtenerDatos(event: any): Promise<any> {
@@ -87,6 +88,8 @@ export class VerCuentasPersonasComponent implements OnInit, OnChanges, OnDestroy
   }
 
   async getFilas() {
+    this.loading = true;
+    this.filas = [];
     if (this.Afiliado) {
       try {
         const data = await this.svcAfiliado.buscarCuentasPorDNI(this.Afiliado.n_identificacion).toPromise();
@@ -99,7 +102,6 @@ export class VerCuentasPersonasComponent implements OnInit, OnChanges, OnDestroy
             DESCRIPCION: item.tipoCuenta.DESCRIPCION
           };
         });
-        this.cargar(); // Mueve la llamada a cargar() aquí para asegurarte de que se ejecuta después de obtener los datos.
       } catch (error) {
         this.toastr.error('Error al cargar los datos de las cuentas de la persona');
         console.error('Error al cargar los datos de las cuentas de la persona', error);
@@ -107,6 +109,10 @@ export class VerCuentasPersonasComponent implements OnInit, OnChanges, OnDestroy
     } else {
       this.resetDatos();
     }
+    setTimeout(() => {
+      this.loading = false;
+      this.cargar();
+    }, 1000);
   }
 
   ejecutarFuncionAsincronaDesdeOtroComponente(funcion: (data: any) => Promise<void>) {
@@ -145,7 +151,7 @@ export class VerCuentasPersonasComponent implements OnInit, OnChanges, OnDestroy
         this.svcTransacciones.ActivarCuenta(row.NUMERO_CUENTA, {}).subscribe({
           next: (response: any) => {
             this.toastr.success("Cuenta activada correctamente");
-            this.ngOnInit();
+            this.getFilas();
           },
           error: (error: any) => {
             console.error('Error al activar la cuenta al que pertenece la persona:', error);
@@ -170,7 +176,7 @@ export class VerCuentasPersonasComponent implements OnInit, OnChanges, OnDestroy
         this.svcTransacciones.desactivarCuenta(row.NUMERO_CUENTA, {}).subscribe({
           next: (response: any) => {
             this.toastr.success("Cuenta desactivada correctamente");
-            this.ngOnInit();
+            this.getFilas();
           },
           error: (error: any) => {
             console.error('Error al desactivar la cuenta al que pertenece la persona:', error);
@@ -191,7 +197,7 @@ export class VerCuentasPersonasComponent implements OnInit, OnChanges, OnDestroy
     });
 
     dialogRef.afterClosed().subscribe((result: any) => {
-      this.ngOnInit();
+      this.getFilas();
     });
   }
 

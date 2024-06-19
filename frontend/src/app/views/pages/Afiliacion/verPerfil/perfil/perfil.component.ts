@@ -1,17 +1,20 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, EventEmitter, Output } from '@angular/core';
 import { PersonaService } from 'src/app/services/persona.service';
+import { DatePipe } from '@angular/common';
 import { convertirFechaInputs } from 'src/app/shared/functions/formatoFecha';
 
 @Component({
   selector: 'app-perfil',
   templateUrl: './perfil.component.html',
-  styleUrls: ['./perfil.component.scss']
+  styleUrls: ['./perfil.component.scss'],
+  providers: [DatePipe]
 })
 export class PerfilComponent implements OnInit {
   persona: any;
+  @Output() resetBusqueda = new EventEmitter<void>();
   detallePersonaUnico: any[] = [];
 
-  constructor(private personaService: PersonaService) { }
+  constructor(private personaService: PersonaService, private datePipe: DatePipe) { }
 
   ngOnInit() {
     this.personaService.currentPersona.subscribe(persona => {
@@ -55,4 +58,12 @@ export class PerfilComponent implements OnInit {
   }
 
   convertirFechaInputs = convertirFechaInputs;
+
+  formatDate(fecha: string): string {
+    return this.datePipe.transform(fecha, 'dd MMMM yyyy') || '';
+  }
+
+  resetBusqueda2() {
+    this.resetBusqueda.emit();
+  }
 }

@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, Input, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Input, OnInit, OnChanges, SimpleChanges, OnDestroy } from '@angular/core';
 import { ControlContainer, FormArray, FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { ToastrService } from 'ngx-toastr';
 import { AfiliadoService } from 'src/app/services/afiliado.service';
@@ -12,11 +12,11 @@ import { unirNombres } from 'src/app/shared/functions/formatoNombresP';
 @Component({
   selector: 'app-edit-datos-generales',
   templateUrl: './edit-datos-generales.component.html',
-  styleUrl: './edit-datos-generales.component.scss'
+  styleUrls: ['./edit-datos-generales.component.scss']
 })
-export class EditDatosGeneralesComponent {
+export class EditDatosGeneralesComponent implements OnInit {
   datosGen: any;
-  public myFormFields: FieldConfig[] = []
+  public myFormFields: FieldConfig[] = [];
   municipios: any = [];
   departamentos: any = [];
   unirNombres: any = unirNombres;
@@ -32,6 +32,7 @@ export class EditDatosGeneralesComponent {
   public myColumns: TableColumn[] = [];
   public filas: any[] = [];
   ejecF: any;
+  public loading: boolean = false;
 
   datos!: any;
 
@@ -48,8 +49,7 @@ export class EditDatosGeneralesComponent {
   form: any;
   formDatosGenerales: any = new FormGroup({
     refpers: new FormArray([], [Validators.required]),
-  },
-  );
+  });
 
   @Input() Afiliado!: any;
 
@@ -59,12 +59,11 @@ export class EditDatosGeneralesComponent {
     private toastr: ToastrService,
     public direccionSer: DireccionService,
   ) {
-
     const currentYear = new Date();
     this.minDate = new Date(currentYear.getFullYear(), currentYear.getMonth(), currentYear.getDate(), currentYear.getHours(), currentYear.getMinutes(), currentYear.getSeconds());
   }
-  ngOnInit(): void {
 
+  ngOnInit(): void {
     this.myFormFields = [
       { type: 'text', label: 'N_IDENTIFICACION del afiliado', name: 'n_identificacion', validations: [Validators.required, Validators.minLength(13), Validators.maxLength(14)], display: true },
     ];
@@ -102,7 +101,7 @@ export class EditDatosGeneralesComponent {
       { value: "HOMICIDIO" },
       { value: "NATURAL" },
       { value: "SUICIDIO" },
-    ]
+    ];
     this.cargarEstadosAfiliado();
     this.previsualizarInfoAfil();
     this.cargarDepartamentos();
@@ -131,9 +130,6 @@ export class EditDatosGeneralesComponent {
         console.error('Error al cargar municipios:', error);
       }
     });
-    /* this.datosEstaticos.getDepartamentos((result) => {
-      this.departamentos = result// Aquí puedes trabajar con los datos
-    }); */
   }
 
   cargarMunicipios(departamentoId: number) {
@@ -152,24 +148,24 @@ export class EditDatosGeneralesComponent {
     this.cargarMunicipios(departamentoId);
   }
 
-
   async obtenerDatos(event: any): Promise<any> {
     this.form = event;
   }
 
   setDatosGenerales(datosGenerales: any) {
-    this.formDatosGenerales = datosGenerales
-    this.fallecido = this.formDatosGenerales.value.refpers[0].fallecido
+    this.formDatosGenerales = datosGenerales;
+    this.fallecido = this.formDatosGenerales.value.refpers[0].fallecido;
   }
 
   async previsualizarInfoAfil() {
     if (this.Afiliado) {
+      this.loading = true; // Mostrar el spinner antes de cargar los datos
       await this.svcAfiliado.getAfilByParam(this.Afiliado.n_identificacion).subscribe(
         (result) => {
           this.datos = result;
           this.Afiliado = result;
-          this.estadoAfiliacion = result.estadoAfiliacion
-          this.fallecido = result.fallecido
+          this.estadoAfiliacion = result.estadoAfiliacion;
+          this.fallecido = result.fallecido;
 
           this.formDatosGenerales.value.refpers[0] = {
             n_identificacion: result.n_identificacion,
@@ -205,7 +201,6 @@ export class EditDatosGeneralesComponent {
             this.cargarMunicipios(result.ID_MUNICIPIO_DEFUNCION);
           }
 
-          /* this.form1.controls.fecha_vencimiento_ident.setValue(result.fecha_vencimiento_ident); */
           this.form1.controls.estado.setValue(result.estadoAfiliacion);
           this.form1.controls.observaciones.setValue(result.observaciones);
           this.form1.controls.tipo_defuncion.setValue(result.tipo_defuncion);
@@ -216,12 +211,16 @@ export class EditDatosGeneralesComponent {
 
           this.Afiliado.nameAfil = this.unirNombres(result.PRIMER_NOMBRE, result.SEGUNDO_NOMBRE, result.TERCER_NOMBRE, result.PRIMER_APELLIDO, result.SEGUNDO_APELLIDO);
 
+          this.loading = false; // Ocultar el spinner después de cargar los datos
         },
         (error) => {
           this.toastr.error(`Error: ${error.error.message}`);
-        });
+          this.loading = false; // Ocultar el spinner si hay un error
+        }
+      );
     }
   }
+
   resetDatos() {
     if (this.form) {
       this.form.reset();
@@ -230,7 +229,7 @@ export class EditDatosGeneralesComponent {
   }
 
   GuardarInformacion() {
-    this.formDatosGenerales.value.refpers[0].fecha_nacimiento = convertirFechaInputs(this.formDatosGenerales.value.refpers[0].fecha_nacimiento)
+    this.formDatosGenerales.value.refpers[0].fecha_nacimiento = convertirFechaInputs(this.formDatosGenerales.value.refpers[0].fecha_nacimiento);
 
     const a = this.formDatosGenerales.value.refpers[0] = {
       ...this.formDatosGenerales.value.refpers[0],
@@ -241,23 +240,23 @@ export class EditDatosGeneralesComponent {
       id_departamento_defuncion: this.form1.value.id_departamento_defuncion,
       id_municipio_defuncion: this.form1.value.id_municipio_defuncion,
       certificado_defuncion: this.form1.value.certificado_defuncion
-    }
+    };
 
     this.svcAfiliado.updateDatosGenerales(this.Afiliado.ID_PERSONA, this.formDatosGenerales.value.refpers[0]).subscribe(
       async (result) => {
         this.toastr.success(`Datos generales modificados correctamente`);
-
       },
       (error) => {
-
         this.toastr.error(`Error: ${error.error.message}`);
-      })
+      }
+    );
   }
 
   getErrors(fieldName: string): any {
+    // Implementar lógica para manejar errores de validación
   }
 
   mostrarCamposFallecido(e: any) {
-    this.estadoAfiliacion = e.value
+    this.estadoAfiliacion = e.value;
   }
 }

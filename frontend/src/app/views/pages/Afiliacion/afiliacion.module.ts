@@ -1,5 +1,5 @@
 import { NgModule, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { CommonModule, registerLocaleData } from '@angular/common';
 import { SharedModule } from '../../../shared/shared.module';
 import { AfiliadoComponent } from './verPerfil/afiliado/afiliado.component';
 import { BeneficiarioComponent } from './verPerfil/beneficiario/beneficiario.component';
@@ -24,7 +24,7 @@ import { VerCuentasPersonasComponent } from './Docentes-Designados/ver-cuentas-p
 import { EditPerfilPuestTrabComponent } from './Docentes-Designados/edit-perfil-puest-trab/edit-perfil-puest-trab.component';
 import { EditReferPersonalesComponent } from './Docentes-Designados/edit-refer-personales/edit-refer-personales.component';
 import { EditDatosBancariosComponent } from './Docentes-Designados/edit-datos-bancarios/edit-datos-bancarios.component';
-
+import { MAT_DATE_LOCALE } from '@angular/material/core';
 @NgModule({
   declarations: [
     AfiliadoComponent,
@@ -65,6 +65,9 @@ import { EditDatosBancariosComponent } from './Docentes-Designados/edit-datos-ba
     EditReferPersonalesComponent,
     VerCuentasPersonasComponent,
     ConstanciasAfiliadoComponent,
+  ],
+  providers: [
+    { provide: MAT_DATE_LOCALE, useValue: 'es' }
   ],
   schemas: [CUSTOM_ELEMENTS_SCHEMA]
 })

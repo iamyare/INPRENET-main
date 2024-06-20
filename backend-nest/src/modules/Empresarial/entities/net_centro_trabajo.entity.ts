@@ -78,6 +78,15 @@ export class Net_Centro_Trabajo {
     @Column('nvarchar2', { length: 255, nullable: true, name: 'OBJETIVO_SOCIAL' })
     objetivo_social: string;
 
+    @Column('decimal', { precision: 10, scale: 7, nullable: true, name: 'LATITUD' })
+    latitud: number;
+
+    @Column('decimal', { precision: 10, scale: 7, nullable: true, name: 'LONGITUD' })
+    longitud: number;
+
+    @Column('char', { length: 1, nullable: false, name: 'TIPO' })
+    tipo: string;
+
     @ManyToOne(() => Net_Municipio, municipio => municipio.centrosTrabajo)
     @JoinColumn({ name: 'ID_MUNICIPIO', foreignKeyConstraintName: 'FK_ID_MUNICIPIO_CENT_TRAB' })
     municipio: Net_Municipio;

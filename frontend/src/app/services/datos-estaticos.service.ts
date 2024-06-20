@@ -26,6 +26,7 @@ export class DatosEstaticosService {
   tiposMovimientos: any = [];
   estados: any = [];
   tipoRol: any = [];
+  centrosTrabajoTipoE : any = [];
 
   constructor(
     private colegiosMagSVC: ColegiosMagisterialesService,
@@ -46,10 +47,10 @@ export class DatosEstaticosService {
     this.getBancos();
     this.getColegiosMagisteriales();
     this.getAllCentrosTrabajo();
+    this.getCentrosTrabajoTipoE();
     this.getProfesiones();
     this.getMunicipios();
     this.getDepartamentos();
-    //this.getRoles();
   }
 
 
@@ -61,6 +62,21 @@ export class DatosEstaticosService {
     }));
 
     return this.estados;
+  }
+
+  async getCentrosTrabajoTipoE() {
+    try {
+      const response:any = await this.centroTrabajoService.obtenerCentrosTrabajoTipoE().toPromise();
+      this.centrosTrabajoTipoE = response.map((item: { id_centro_trabajo: any; nombre_centro_trabajo: any; }) => ({
+        label: item.nombre_centro_trabajo,
+        value: item.id_centro_trabajo
+      }));
+      return this.centrosTrabajoTipoE;
+    } catch (error) {
+      console.error('Error al obtener los centros de trabajo tipo E:', error);
+      this.centrosTrabajoTipoE = [];
+      return this.centrosTrabajoTipoE;
+    }
   }
 
   async getDepartamentos(): Promise<any[]> {

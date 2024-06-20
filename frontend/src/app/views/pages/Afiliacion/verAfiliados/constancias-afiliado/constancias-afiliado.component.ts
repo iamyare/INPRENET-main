@@ -29,6 +29,12 @@ export class ConstanciasAfiliadoComponent {
     { name: 'Generar Constancia de Tiempo De Cotizar Con Monto', action: this.generarConstanciaTiempoCotizarConMonto.bind(this) }
   ];
 
+  generarNombreArchivo(tipo: string): string {
+    const nombreCompleto = `${this.persona.primer_nombre}_${this.persona.primer_apellido}`;
+    const fechaActual = new Date().toISOString().split('T')[0]; // Formato YYYY-MM-DD
+    return `${nombreCompleto}_${fechaActual}_constancia_${tipo}.pdf`;
+  }
+
   generarConstanciaAfiliacion() {
     const data = {
       primer_nombre: this.persona.primer_nombre,
@@ -43,10 +49,12 @@ export class ConstanciasAfiliadoComponent {
     });
 
     this.afiliadoService.generarConstanciaQR(data, 'afiliacion').subscribe((blob: Blob) => {
+      const downloadURL = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
-      link.href = window.URL.createObjectURL(blob);
-      link.download = 'constancia_afiliacion_qr.pdf';
+      link.href = downloadURL;
+      link.download = this.generarNombreArchivo('afiliacion');
       link.click();
+      window.URL.revokeObjectURL(downloadURL); // Liberar el objeto URL
     });
   }
 
@@ -64,10 +72,12 @@ export class ConstanciasAfiliadoComponent {
     });
 
     this.afiliadoService.generarConstanciaQR(data, 'renuncia-cap').subscribe((blob: Blob) => {
+      const downloadURL = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
-      link.href = window.URL.createObjectURL(blob);
-      link.download = 'constancia_renuncia_cap_qr.pdf';
+      link.href = downloadURL;
+      link.download = this.generarNombreArchivo('renuncia-cap');
       link.click();
+      window.URL.revokeObjectURL(downloadURL); // Liberar el objeto URL
     });
   }
 
@@ -85,10 +95,12 @@ export class ConstanciasAfiliadoComponent {
     });
 
     this.afiliadoService.generarConstanciaQR(data, 'no-cotizar').subscribe((blob: Blob) => {
+      const downloadURL = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
-      link.href = window.URL.createObjectURL(blob);
-      link.download = 'constancia_no_cotizar_qr.pdf';
+      link.href = downloadURL;
+      link.download = this.generarNombreArchivo('no-cotizar');
       link.click();
+      window.URL.revokeObjectURL(downloadURL); // Liberar el objeto URL
     });
   }
 
@@ -106,10 +118,12 @@ export class ConstanciasAfiliadoComponent {
     });
 
     this.afiliadoService.generarConstanciaQR(data, 'debitos').subscribe((blob: Blob) => {
+      const downloadURL = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
-      link.href = window.URL.createObjectURL(blob);
-      link.download = 'constancia_debitos_qr.pdf';
+      link.href = downloadURL;
+      link.download = this.generarNombreArchivo('debitos');
       link.click();
+      window.URL.revokeObjectURL(downloadURL); // Liberar el objeto URL
     });
   }
 
@@ -127,10 +141,12 @@ export class ConstanciasAfiliadoComponent {
     });
 
     this.afiliadoService.generarConstanciaQR(data, 'tiempo-cotizar-con-monto').subscribe((blob: Blob) => {
+      const downloadURL = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
-      link.href = window.URL.createObjectURL(blob);
-      link.download = 'constancia_tiempo_cotizar_con_monto_qr.pdf';
+      link.href = downloadURL;
+      link.download = this.generarNombreArchivo('tiempo-cotizar-con-monto');
       link.click();
+      window.URL.revokeObjectURL(downloadURL); // Liberar el objeto URL
     });
   }
 }

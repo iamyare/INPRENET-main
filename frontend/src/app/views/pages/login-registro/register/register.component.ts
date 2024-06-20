@@ -3,7 +3,7 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { AuthService } from 'src/app/services/auth.service';
 import { ToastrService } from 'ngx-toastr';
-import {jwtDecode} from 'jwt-decode';
+import { jwtDecode } from 'jwt-decode';
 
 @Component({
   selector: 'app-register',
@@ -14,6 +14,7 @@ export class RegisterComponent implements OnInit {
 
   form: FormGroup;
   archivo: File | null = null;
+  fotografia: File | null = null;
   token: string = '';
   correo: string = '';
   availableQuestions: string[] = [
@@ -47,20 +48,17 @@ export class RegisterComponent implements OnInit {
     }, { validator: this.confirmarContrasenaValidator('contrasena', 'confirmarContrasenia') });
   }
 
-
   ngOnInit(): void {
     this.token = this.route.snapshot.queryParams['token'];
     if (this.token) {
       const decodedToken: any = jwtDecode(this.token);
       this.correo = decodedToken.correo;
       this.form.patchValue({ correo: this.correo });
-      this.validateQuestions(); // Inicializar las preguntas disponibles
     } else {
       this.toastr.error('Token no encontrado', 'Error');
       this.router.navigate(['/']);
     }
   }
-
 
   confirmarContrasenaValidator(controlName: string, matchingControlName: string) {
     return (formGroup: FormGroup) => {
@@ -78,29 +76,15 @@ export class RegisterComponent implements OnInit {
     }
   }
 
-  validateQuestions() {
-    const selectedQuestions = new Set();
-    for (let i = 1; i <= 3; i++) {
-      const questionControl = this.form.get(`preguntaseguridad${i}`);
-      if (questionControl && questionControl.value) {
-        selectedQuestions.add(questionControl.value);
-      }
-    }
-    this.availableQuestions = [
-      "¿Cuál es tu animal favorito?",
-      "¿Cuál es tu pasatiempo favorito?",
-      "¿En qué ciudad te gustaría vivir?",
-      "¿Cuál es tu comida favorita?",
-      "¿Cuál fue el nombre de tu primera mascota?",
-      "¿Cuál es tu libro favorito?"
-    ].filter(question => !selectedQuestions.has(question));
-  }
-
-
-
   onFileChange(event: any) {
     if (event.target.files.length > 0) {
       this.archivo = event.target.files[0];
+    }
+  }
+
+  onFileChangeFoto(event: any) {
+    if (event.target.files.length > 0) {
+      this.fotografia = event.target.files[0];
     }
   }
 

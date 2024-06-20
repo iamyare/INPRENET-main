@@ -62,6 +62,13 @@ export class CentroTrabajoService {
     private readonly pepsRepository: Repository<Net_Peps>,
   ) { }
 
+  async obtenerCentrosDeTrabajoConTipoE(): Promise<Net_Centro_Trabajo[]> {
+    return await this.centroTrabajoRepository.find({
+      where: {
+        tipo: 'E',
+      },
+    });
+  }
 
   async create(createCentroTrabajoDto: CreateCentroTrabajoDto) {
     try {

@@ -3,22 +3,22 @@
   height: 100%;
   width: 100%;
   background-color: #1C9588;
-  overflow: auto; /* Permitir desplazamiento en el host */
+  overflow: auto;
 }
 
 .register-wrapper {
   display: flex;
   align-items: center;
   justify-content: center;
-  min-height: 100vh; /* Asegurar altura mínima de 100% de la ventana */
+  min-height: 100vh;
   width: 100%;
-  padding: 20px; /* Añadir más espacio alrededor */
+  padding: 20px;
 }
 
 .register-container {
-  max-width: 600px; /* Ajustar el ancho máximo */
+  max-width: 600px;
   width: 100%;
-  padding: 20px; /* Reducir el padding interno */
+  padding: 20px;
   background-color: #fff;
   border-radius: 8px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
@@ -33,21 +33,21 @@
     margin-bottom: 10px;
 
     img {
-      max-width: 200px; /* Reducir el tamaño máximo de la imagen */
+      max-width: 200px;
     }
   }
 
   h2 {
     text-align: center;
-    margin-bottom: 20px; /* Añadir más espacio debajo del título */
+    margin-bottom: 20px;
     font-size: 2rem;
   }
 
   .form-grid {
     display: grid;
-    grid-template-columns: 1fr 1fr; /* Dos columnas */
-    gap: 15px; /* Reducir el espacio entre columnas */
-    width: 100%; /* Ajustar el ancho para que los inputs sean más largos */
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+    width: 100%;
   }
 
   .form-field {
@@ -55,13 +55,12 @@
   }
 
   .form-field.full-width {
-    grid-column: span 2; /* Permitir que ocupe dos columnas */
+    grid-column: span 2;
   }
 
   .form-group {
     width: 100%;
     margin-bottom: 10px;
-    grid-column: span 2; /* Permitir que ocupe dos columnas */
 
     label {
       display: block;
@@ -76,58 +75,74 @@
     }
   }
 
+  .form-group.half-width {
+    width: 100%;
+  }
+
   .security-questions {
     width: 100%;
-    grid-column: span 2; /* Permitir que ocupe dos columnas */
+    grid-column: span 2;
   }
 
   .form-row {
     display: flex;
     gap: 15px;
     width: 100%;
-    flex-wrap: wrap; /* Permitir que los elementos se envuelvan */
+    flex-wrap: wrap;
   }
 
   .question-field,
   .answer-field,
   .form-field.half-width {
     flex: 1;
-    min-width: calc(50% - 15px); /* Ajustar para que cada campo ocupe el 50% del ancho menos el gap */
+    min-width: calc(50% - 15px);
   }
 
-  button {
+  .button-container {
     width: 100%;
-    padding: 10px;
-    font-size: 16px;
-    cursor: pointer;
-    grid-column: span 2; /* Permitir que ocupe dos columnas */
+    display: flex;
+    justify-content: center;
+    margin-top: 20px;
+
+    button {
+      width: auto;
+      padding: 10px 20px;
+      font-size: 16px;
+      cursor: pointer;
+      margin: 0 10px;
+    }
   }
 
   @media (max-width: 600px) {
     .form-grid,
     .security-questions {
-      grid-template-columns: 1fr; /* Una columna para pantallas pequeñas */
-      gap: 10px; /* Ajustar el espacio entre filas */
+      grid-template-columns: 1fr;
+      gap: 10px;
     }
 
     .form-field.full-width {
-      grid-column: span 1; /* Permitir que ocupe una columna en pantallas pequeñas */
+      grid-column: span 1;
     }
 
     .form-group {
-      grid-column: span 1; /* Permitir que ocupe una columna en pantallas pequeñas */
+      grid-column: span 1;
     }
 
     .security-questions .form-row {
       flex-direction: column;
     }
 
-    button {
-      grid-column: span 1; /* Permitir que ocupe una columna en pantallas pequeñas */
+    .button-container {
+      flex-direction: column;
+      align-items: stretch;
+
+      button {
+        margin: 10px 0;
+      }
     }
   }
 }
 
 mat-form-field {
-  width: 100%; /* Ajustar el ancho de los mat-form-field para que sean más largos */
+  width: 100%;
 }

@@ -65,6 +65,7 @@ export class AfiliadoController {
     @UploadedFile() fotoPerfil: Express.Multer.File,
     @Body('encapsulatedDto') encapsulatedDtoStr: string
   ) {
+  console.log(encapsulatedDtoStr);
   
     try {
       // Convertir el string JSON a un objeto

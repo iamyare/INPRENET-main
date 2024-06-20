@@ -11,6 +11,11 @@ export class CentroTrabajoService {
 
   constructor(private http: HttpClient, private router: Router) { }
 
+  obtenerCentrosTrabajoTipoE(): Observable<any[]> {
+    const url = `${environment.API_URL}/api/centro-trabajo/tipo-e`;
+    return this.http.get<any[]>(url);
+  }
+
   obtenerTodasLasProfesiones(): Observable<any[]> {
     const url = `${environment.API_URL}/api/transacciones/profesiones`;
     return this.http.get<any[]>(url);

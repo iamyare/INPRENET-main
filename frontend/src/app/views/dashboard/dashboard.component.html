@@ -1,383 +1,457 @@
-<!-- <app-widgets-dropdown></app-widgets-dropdown> -->
-<c-card class="mb-4">
-  <c-card-body>
-    <c-row>
-      <c-col sm="5">
-        <h4 class="card-title mb-0" id="traffic">Traffic</h4>
-        <div class="small text-medium-emphasis">January - December 2021</div>
-      </c-col>
-      <c-col class="d-none d-md-block" sm="7">
-        <button cButton class="float-end" color="primary">
-          <svg cIcon name="cilCloudDownload"></svg>
-        </button>
-        <form [formGroup]="trafficRadioGroup">
-          <c-button-group class="float-end me-3" role="group">
-            <input class="btn-check" formControlName="trafficRadio" type="radio" value="Day" />
-            <label (click)="setTrafficPeriod('Day')" cButton cFormCheckLabel color="secondary"
-              variant="outline">Day</label>
-
-            <input class="btn-check" formControlName="trafficRadio" type="radio" value="Month" />
-            <label (click)="setTrafficPeriod('Month')" cButton cFormCheckLabel color="secondary"
-              variant="outline">Month</label>
-
-            <input class="btn-check" formControlName="trafficRadio" type="radio" value="Year" />
-            <label (click)="setTrafficPeriod('Year')" cButton cFormCheckLabel color="secondary"
-              variant="outline">Year</label>
-          </c-button-group>
-        </form>
-      </c-col>
-    </c-row>
-    <c-chart [data]="mainChart.data" [height]="300" [ngStyle]="{ 'marginTop.px': 40 }" [options]="mainChart.options"
-      [type]="mainChart.type">
-      Main chart
-    </c-chart>
-  </c-card-body>
-  <c-card-footer>
-    <c-row class="text-center" [md]="5" [xs]="1">
-      <c-col class="mb-sm-2 mb-0">
-        <div class="text-medium-emphasis">Visits</div>
-        <strong>29.703 Users (40%)</strong>
-        <c-progress class="mt-2" thin>
-          <c-progress-bar color="success" value="40"></c-progress-bar>
-        </c-progress>
-      </c-col>
-      <c-col class="mb-sm-2 mb-0">
-        <div class="text-medium-emphasis">Unique</div>
-        <strong>24.093 Users (20%)</strong>
-        <c-progress class="mt-2" thin>
-          <c-progress-bar color="info" value="20"></c-progress-bar>
-        </c-progress>
-      </c-col>
-      <c-col class="mb-sm-2 mb-0">
-        <div class="text-medium-emphasis">Page views</div>
-        <strong>78.706 Views (60%)</strong>
-        <c-progress class="mt-2" thin>
-          <c-progress-bar color="warning" value="60"></c-progress-bar>
-        </c-progress>
-      </c-col>
-      <c-col class="mb-sm-2 mb-0">
-        <div class="text-medium-emphasis">New Users</div>
-        <strong>22.123 Users (80%)</strong>
-        <c-progress class="mt-2" thin>
-          <c-progress-bar color="danger" value="80"></c-progress-bar>
-        </c-progress>
-      </c-col>
-      <c-col class="mb-sm-2 mb-0">
-        <div class="text-medium-emphasis">Bounce Rate</div>
-        <strong>Average Rate (40.15%)</strong>
-        <c-progress class="mt-2" thin>
-          <c-progress-bar value="40"></c-progress-bar>
-        </c-progress>
-      </c-col>
-    </c-row>
-  </c-card-footer>
-</c-card>
-
 <!-- <app-widgets-brand [withCharts]="true"></app-widgets-brand> -->
+<!-- ################################################ -->
+<div class="row g-4 mb-4">
+  <!-- Indicador de afilicion y demograficos node_modules/@coreui/icons/sprites/free.svg#cil-chart-pie-->
+  <div class="example">
+    <ul class="nav nav-underline-border" role="tablist">
+      <li class="nav-item" role="presentation">
+        <a class="nav-link active" data-coreui-toggle="tab" href="#preview-1000" role="tab" aria-selected="true">
+          <h1 style="font-size: 30px; color: #26a69a;">Indicadores de Afiliación y Demográficos</h1>
+        </a>
+      </li>
+    </ul>
+    <div class="tab-content rounded-bottom">
+      <div class="tab-pane p-3 active preview" role="tabpanel" id="preview-1000">
+        <div class="row g-4">
 
-<c-row>
-  <c-col xs>
-    <c-card class="mb-4">
-      <c-card-header>Traffic {{ "&" }} Sales</c-card-header>
-      <c-card-body>
-        <c-row>
-          <c-col md="6" xl="6" xs="12">
-            <c-row>
-              <c-col sm="6">
-                <div class="border-start border-start-4 border-start-info py-1 px-3 mb-3">
-                  <div class="text-medium-emphasis small">New Clients</div>
-                  <div class="fs-5 fw-semibold">9,123</div>
+          <div class="col-sm-6 col-xl-3 mx-auto">
+            <div class="card text-white h-100" style="background-color: #f3f4f5;">
+              <div class="card-body d-flex flex-column justify-content-center align-items-center text-center">
+                <div>
+                  <div class="fs-2 fw-bold mb-2 text-black">88,695</div>
+                  <div class="fs-5 mb-3 text-black">Total afiliados</div>
+                  <svg class="centered-icon mt-2" cIcon name="cil-user-follow" size="lg"></svg>
                 </div>
-              </c-col>
-              <c-col sm="6">
-                <div class="border-start border-start-4 border-start-danger py-1 px-3 mb-3">
-                  <div class="text-medium-emphasis small">
-                    Recurring Clients
+              </div>
+            </div>
+          </div>
+
+          <div class="col-sm-6 col-xl-3 mx-auto">
+            <div class="card text-white h-100" style="background-color: #f3f4f5;">
+              <div class="card-body d-flex flex-column justify-content-center align-items-center text-center">
+                <div>
+                  <div class="fs-2 fw-bold mb-2 text-black">88,695</div>
+                  <div class="fs-5 mb-3 text-black">Distribución por Afiliados</div>
+                  <div class="c-chart-wrapper" style="width: 100%; height: 100%; max-height: 300px;">
+                    <c-chart [type]="pieChart.type" [data]="pieChart.data" [options]="pieChart.options"
+                      class="centered-chart"></c-chart>
                   </div>
-                  <div class="fs-5 fw-semibold">22,643</div>
                 </div>
-              </c-col>
-            </c-row>
+              </div>
+            </div>
+          </div>
 
-            <hr class="mt-0" />
-
-            <div class="progress-group mb-4">
-              <div class="progress-group-prepend">
-                <span class="text-medium-emphasis small">Monday</span>
-              </div>
-              <div class="progress-group-bars">
-                <c-progress thin>
-                  <c-progress-bar color="info" value="34"></c-progress-bar>
-                </c-progress>
-                <c-progress thin>
-                  <c-progress-bar color="danger" value="78"></c-progress-bar>
-                </c-progress>
-              </div>
-            </div>
-            <div class="progress-group mb-4">
-              <div class="progress-group-prepend">
-                <span class="text-medium-emphasis small">Tuesday</span>
-              </div>
-              <div class="progress-group-bars">
-                <c-progress thin>
-                  <c-progress-bar color="info" value="56"></c-progress-bar>
-                </c-progress>
-                <c-progress thin>
-                  <c-progress-bar color="danger" value="94"></c-progress-bar>
-                </c-progress>
-              </div>
-            </div>
-            <div class="progress-group mb-4">
-              <div class="progress-group-prepend">
-                <span class="text-medium-emphasis small">Wednesday</span>
-              </div>
-              <div class="progress-group-bars">
-                <c-progress thin>
-                  <c-progress-bar color="info" value="12"></c-progress-bar>
-                </c-progress>
-                <c-progress thin>
-                  <c-progress-bar color="danger" value="67"></c-progress-bar>
-                </c-progress>
-              </div>
-            </div>
-            <div class="progress-group mb-4">
-              <div class="progress-group-prepend">
-                <span class="text-medium-emphasis small">Thursday</span>
-              </div>
-              <div class="progress-group-bars">
-                <c-progress thin>
-                  <c-progress-bar color="info" value="43"></c-progress-bar>
-                </c-progress>
-                <c-progress thin>
-                  <c-progress-bar color="danger" value="91"></c-progress-bar>
-                </c-progress>
-              </div>
-            </div>
-            <div class="progress-group mb-4">
-              <div class="progress-group-prepend">
-                <span class="text-medium-emphasis small">Friday</span>
-              </div>
-              <div class="progress-group-bars">
-                <c-progress thin>
-                  <c-progress-bar color="info" value="22"></c-progress-bar>
-                </c-progress>
-                <c-progress thin>
-                  <c-progress-bar color="danger" value="73"></c-progress-bar>
-                </c-progress>
-              </div>
-            </div>
-            <div class="progress-group mb-4">
-              <div class="progress-group-prepend">
-                <span class="text-medium-emphasis small">Saturday</span>
-              </div>
-              <div class="progress-group-bars">
-                <c-progress thin>
-                  <c-progress-bar color="info" value="53"></c-progress-bar>
-                </c-progress>
-                <c-progress thin>
-                  <c-progress-bar color="danger" value="82"></c-progress-bar>
-                </c-progress>
-              </div>
-            </div>
-            <div class="progress-group mb-4">
-              <div class="progress-group-prepend">
-                <span class="text-medium-emphasis small">Sunday</span>
-              </div>
-              <div class="progress-group-bars">
-                <c-progress thin>
-                  <c-progress-bar color="info" value="9"></c-progress-bar>
-                </c-progress>
-                <c-progress thin>
-                  <c-progress-bar color="danger" value="69"></c-progress-bar>
-                </c-progress>
-              </div>
-            </div>
-            <div class="legend text-center" ngPreserveWhitespaces>
-              <small>
-                <sup>
-                  <span class="badge badge-pill badge-sm bg-info">&nbsp;</span>
-                </sup>
-                <span>New clients</span>
-                &nbsp;&nbsp;
-                <sup>
-                  <span class="badge badge-pill badge-sm bg-danger">&nbsp;</span>
-                </sup>
-                <span>Recurring clients</span>
-              </small>
-            </div>
-          </c-col>
-
-          <c-col md="6" xl="6" xs="12">
-            <c-row>
-              <c-col sm="6">
-                <div class="border-start border-start-4 border-start-warning py-1 px-3 mb-3">
-                  <div class="text-medium-emphasis small">Page views</div>
-                  <div class="fs-5 fw-semibold">78,623</div>
+          <div class="col-sm-6 col-xl-3 mx-auto">
+            <div class="card text-white h-100" style="background-color: #f3f4f5;">
+              <div class="card-body d-flex flex-column justify-content-center align-items-center text-center">
+                <div>
+                  <div class="fs-2 fw-bold mb-2 text-black">67,701</div>
+                  <div class="fs-5 mb-3 text-black">Distribución por Género</div>
+                  <div class="c-chart-wrapper" style="width: 100%; height: 100%; max-height: 300px;">
+                    <c-chart [type]="pieChartAfiliados.type" [data]="pieChartAfiliados.data"
+                      [options]="pieChartAfiliados.options" class="centered-chart"></c-chart>
+                  </div>
                 </div>
-              </c-col>
-              <c-col sm="6">
-                <div class="border-start border-start-4 border-start-success py-1 px-3 mb-3">
-                  <div class="text-medium-emphasis small">Organic</div>
-                  <div class="fs-5 fw-semibold">49,123</div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- Indicadores de Jubilación y Pensión: -->
+  <div class="example">
+    <ul class="nav nav-underline-border" role="tablist">
+      <li class="nav-item" role="presentation"><a class="nav-link active" data-coreui-toggle="tab" href="#preview-1006"
+          role="tab" aria-selected="true">
+          <h1 style="font-size: 30px; color: #26a69a;">Indicadores de Jubilación y Pensión</h1>
+        </a></li>
+    </ul>
+    <div class="tab-content rounded-bottom">
+      <div class="tab-pane p-3 active preview" role="tabpanel" id="preview-1006">
+        <div class="row g-4">
+          <div class="col-12 col-sm-6 col-xl-4 col-xxl-3">
+            <div class="card overflow-hidden">
+              <div class="card-body p-0 d-flex align-items-center">
+                <div class="text-white p-4 me-3" style="background-color: #59bda5;">
+                  <svg class="centered-icon mt-2" cIcon name="cil-user" size="lg"></svg>
                 </div>
-              </c-col>
-            </c-row>
+                <div>
+                  <div class="fs-6 fw-semibold text-primary">20924</div>
+                  <div class="text-body-secondary text-uppercase fw-semibold small">Número de jubilados</div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <!-- /.col-->
+          <div class="col-12 col-sm-6 col-xl-4 col-xxl-3">
+            <div class="card overflow-hidden">
+              <div class="card-body p-0 d-flex align-items-center">
+                <div class="text-white p-4 me-3" style="background-color: #59d3f6;">
+                  <svg class="centered-icon mt-2" cIcon name="cil-people" size="lg"></svg>
+                </div>
+                <div>
+                  <div class="fs-6 fw-semibold text-info">999</div>
+                  <div class="text-body-secondary text-uppercase fw-semibold small">afiliados elegibles para jubilación
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <!-- /.col-->
+          <div class="col-12 col-sm-6 col-xl-4 col-xxl-3">
+            <div class="card overflow-hidden">
+              <div class="card-body p-0 d-flex align-items-center">
+                <div class="bg-warning text-white p-4 me-3">
+                  <svg class="centered-icon mt-2" cIcon name="cil-dollar" size="lg"></svg>
+                </div>
+                <div>
+                  <div class="fs-6 fw-semibold text-warning">L. 1,999.50</div>
+                  <div class="text-body-secondary text-uppercase fw-semibold small">Montos de pensión distribuidos</div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <!-- /.col-->
+        </div>
+      </div>
+    </div>
+  </div>
 
-            <hr class="mt-0" />
+  <!-- Indicadores Financieros -->
+  <div class="example">
+    <ul class="nav nav-underline-border" role="tablist">
+      <li class="nav-item" role="presentation"><a class="nav-link active" data-coreui-toggle="tab" href="#preview-1009"
+          role="tab" aria-selected="true">
+          <h1 style="font-size: 30px; color: #26a69a;">Indicadores Financieros</h1>
+        </a></li>
+    </ul>
+    <div class="tab-content rounded-bottom">
+      <div class="tab-pane p-3 active preview" role="tabpanel" id="preview-1009">
+        <div class="card-group">
+          <div class="card">
+            <div class="card-body">
+              <div class="fs-4 fw-semibold">87,500</div>
+              <div class="small text-body-secondary text-uppercase fw-semibold text-truncate">Fondos totales
+                administrados</div>
+              <div class="progress progress-thin mt-3 mb-0">
+                <div class="progress-bar bg-info" role="progressbar" style="width: 25%" aria-valuenow="25"
+                  aria-valuemin="0" aria-valuemax="100"></div>
+              </div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-body">
+              <div class="fs-4 fw-semibold">385</div>
+              <div class="small text-body-secondary text-uppercase fw-semibold text-truncate">Rendimiento de inversiones
+              </div>
+              <div class="progress progress-thin mt-3 mb-0">
+                <div class="progress-bar bg-success" role="progressbar" style="width: 25%" aria-valuenow="25"
+                  aria-valuemin="0" aria-valuemax="100"></div>
+              </div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-body">
+              <div class="fs-4 fw-semibold">1238</div>
+              <div class="small text-body-secondary text-uppercase fw-semibold text-truncate">Ingresos por servicios
+                financieros</div>
+              <div class="progress progress-thin mt-3 mb-0">
+                <div class="progress-bar bg-warning" role="progressbar" style="width: 25%" aria-valuenow="25"
+                  aria-valuemin="0" aria-valuemax="100"></div>
+              </div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-body">
+              <div class="fs-4 fw-semibold">450</div>
+              <div class="small text-body-secondary text-uppercase fw-semibold text-truncate">préstamos otorgados</div>
+              <div class="progress progress-thin mt-3 mb-0">
+                <div class="progress-bar" role="progressbar" style="width: 25%" aria-valuenow="25" aria-valuemin="0"
+                  aria-valuemax="100"></div>
+              </div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-body">
+              <div class="fs-4 fw-semibold">28%</div>
+              <div class="small text-body-secondary text-uppercase fw-semibold text-truncate">Tasa de morosidad</div>
+              <div class="progress progress-thin mt-3 mb-0">
+                <div class="progress-bar bg-danger" role="progressbar" style="width: 25%" aria-valuenow="25"
+                  aria-valuemin="0" aria-valuemax="100"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 
-            <div class="progress-group mb-4">
-              <div class="progress-group-header">
-                <svg cIcon class="icon icon-lg me-2" name="cilUser"></svg>
-                <span>Male</span>
-                <span class="ms-auto font-semibold">43%</span>
-              </div>
-              <div class="progress-group-bars">
-                <c-progress thin>
-                  <c-progress-bar color="warning" value="43"></c-progress-bar>
-                </c-progress>
+  <!-- Indicadores de Bienestar y Servicios -->
+  <div class="example">
+    <ul class="nav nav-underline-border" role="tablist">
+      <li class="nav-item" role="presentation"><a class="nav-link active" data-coreui-toggle="tab" href="#preview-1007"
+          role="tab" aria-selected="true">
+          <h1 style="font-size: 30px; color: #26a69a;">Indicadores de Bienestar y Servicios</h1>
+        </a></li>
+    </ul>
+    <div class="tab-content rounded-bottom">
+      <div class="tab-pane p-3 active preview" role="tabpanel" id="preview-1007">
+        <div class="row g-4">
+          <div class="col-12 col-sm-6 col-xl-4 col-xxl-3">
+            <div class="card overflow-hidden">
+              <div class="card-body p-0 d-flex align-items-center">
+                <div class="g-primary text-white p-4 me-3" style="background-color: #59bda5;">
+                  <svg class="centered-icon mt-2" cIcon name="cil-check" size="lg"></svg>
+                </div>
+                <div>
+                  <div class="fs-6 fw-semibold text-primary">150</div>
+                  <div class="text-body-secondary text-uppercase fw-semibold small ">Participación en programas de
+                    bienestar</div>
+                </div>
               </div>
             </div>
-            <div class="progress-group mb-5">
-              <div class="progress-group-header">
-                <svg cIcon class="icon icon-lg me-2" name="cilUserFemale"></svg>
-                <span>Female</span>
-                <span class="ms-auto font-semibold">37%</span>
-              </div>
-              <div class="progress-group-bars">
-                <c-progress thin>
-                  <c-progress-bar color="warning" value="37"></c-progress-bar>
-                </c-progress>
+          </div>
+          <!-- /.col-->
+          <div class="col-12 col-sm-6 col-xl-4 col-xxl-3">
+            <div class="card overflow-hidden">
+              <div class="card-body p-0 d-flex align-items-center">
+                <div class="text-white p-4 me-3" style="background-color: #59d3f6;">
+                  <svg class="centered-icon mt-2" cIcon name="cil-description" size="lg"></svg>
+                </div>
+                <div>
+                  <div class="fs-6 fw-semibold text-info">500</div>
+                  <div class="text-body-secondary text-uppercase fw-semibold small">Acceso a servicios de salud</div>
+                </div>
               </div>
             </div>
+          </div>
+          <!-- /.col-->
+          <div class="col-12 col-sm-6 col-xl-4 col-xxl-3">
+            <div class="card overflow-hidden">
+              <div class="card-body p-0 d-flex align-items-center">
+                <div class="bg-warning text-white p-4 me-3">
+                  <svg class="centered-icon mt-2" cIcon name="cil-speech" size="lg"></svg>
+                </div>
+                <div>
+                  <div class="fs-6 fw-semibold text-warning">546</div>
+                  <div class="text-body-secondary text-uppercase fw-semibold small">Consultas y asesorías financieras
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
 
-            <div class="progress-group">
-              <div class="progress-group-header">
-                <svg cIcon class="icon icon-lg me-2" name="cibGoogle"></svg>
-                <span>Organic Search</span>
-                <span class="ms-auto font-semibold">
-                  191,235 <span class="text-medium-emphasis small">(56%)</span>
-                </span>
-              </div>
-              <div class="progress-group-bars">
-                <c-progress thin>
-                  <c-progress-bar color="success" value="56"></c-progress-bar>
-                </c-progress>
-              </div>
-            </div>
-            <div class="progress-group">
-              <div class="progress-group-header">
-                <svg cIcon class="icon icon-lg me-2" name="cibFacebook"></svg>
-                <span>Facebook</span>
-                <span class="ms-auto font-semibold">
-                  51,223 <span class="text-medium-emphasis small">(15%)</span>
-                </span>
-              </div>
-              <div class="progress-group-bars">
-                <c-progress thin>
-                  <c-progress-bar color="success" value="15"></c-progress-bar>
-                </c-progress>
-              </div>
-            </div>
-            <div class="progress-group">
-              <div class="progress-group-header">
-                <svg cIcon class="icon icon-lg me-2" name="cibTwitter"></svg>
-                <span>Twitter</span>
-                <span class="ms-auto font-semibold">
-                  37,564 <span class="text-medium-emphasis small">(11%)</span>
-                </span>
-              </div>
-              <div class="progress-group-bars">
-                <c-progress thin>
-                  <c-progress-bar color="success" value="11"></c-progress-bar>
-                </c-progress>
-              </div>
-            </div>
-            <div class="progress-group">
-              <div class="progress-group-header">
-                <svg cIcon class="icon icon-lg me-2" name="cibLinkedin"></svg>
-                <span>LinkedIn</span>
-                <span class="ms-auto font-semibold">
-                  27,319 <span class="text-medium-emphasis small">(8%)</span>
-                </span>
-              </div>
-              <div class="progress-group-bars">
-                <c-progress thin>
-                  <c-progress-bar color="success" value="8"></c-progress-bar>
-                </c-progress>
-              </div>
-            </div>
-            <div class="divider d-flex justify-content-center">
-              <button cButton class="text-muted btn-link" color="transparent" size="sm" type="button">
-                <svg cIcon name="cil-options"></svg>
-              </button>
-            </div>
-          </c-col>
-        </c-row>
-      </c-card-body>
-    </c-card>
-  </c-col>
-</c-row>
-<c-row>
-  <c-col xs>
-    <c-card class="mb-4">
-      <c-card-header>Users</c-card-header>
-      <c-card-body>
-        <table [hover]="true" [responsive]="true" [striped]="true" align="middle" cTable class="mb-0 border">
-          <thead cTableColor="light">
-            <tr>
-              <th class="text-center">
-                <svg cIcon name="cilPeople"></svg>
+          <!-- /.col-->
+        </div>
+        <!-- /.row.g-4-->
+      </div>
+    </div>
+  </div>
+
+  <!-- /.col-->
+</div>
+
+<!-- /.row-->
+<div class="card mb-4">
+  <div class="card-body">
+    <div class="d-flex justify-content-between">
+      <div>
+        <h4 class="card-title mb-0">Tendencias</h4>
+        <div class="small text-body-secondary">Afiliaciones, Jubilaciones, y Distribuciones Financieras</div>
+      </div>
+    </div>
+    <div class="c-chart-wrapper" style="height:300px;margin-top:40px;">
+      <!-- <canvas class="chart" id="main-chart" height="300"></canvas> -->
+      <c-chart [data]="mainChart.data" [height]="300" [ngStyle]="{ 'marginTop.px': 40 }" [options]="mainChart.options"
+        [type]="mainChart.type">
+        Main chart
+      </c-chart>
+
+    </div>
+  </div>
+  <div class="card-footer">
+    <div class="row row-cols-1 row-cols-sm-2 row-cols-lg-4 row-cols-xl-5 g-4 mb-2 text-center">
+      <div class="col">
+        <div class="text-body-secondary">Tasa de Crecimiento de Afiliados</div>
+        <div class="fw-semibold text-truncate">29.703 (40%)</div>
+        <div class="progress progress-thin mt-2">
+          <div class="progress-bar bg-success" role="progressbar" style="width: 40%" aria-valuenow="40"
+            aria-valuemin="0" aria-valuemax="100"></div>
+        </div>
+      </div>
+      <div class="col">
+        <div class="text-body-secondary">Montos de pensión y servicios</div>
+        <div class="fw-semibold text-truncate">24.093 (20%)</div>
+        <div class="progress progress-thin mt-2">
+          <div class="progress-bar bg-info" role="progressbar" style="width: 20%" aria-valuenow="20" aria-valuemin="0"
+            aria-valuemax="100"></div>
+        </div>
+      </div>
+      <div class="col">
+        <div class="text-body-secondary">Monto Promedio de Pensión</div>
+        <div class="fw-semibold text-truncate">78.706 (60%)</div>
+        <div class="progress progress-thin mt-2">
+          <div class="progress-bar bg-warning" role="progressbar" style="width: 60%" aria-valuenow="60"
+            aria-valuemin="0" aria-valuemax="100"></div>
+        </div>
+      </div>
+      <div class="col">
+        <div class="text-body-secondary">Aaumento de jubilaciones</div>
+        <div class="fw-semibold text-truncate">22.123 (80%)</div>
+        <div class="progress progress-thin mt-2">
+          <div class="progress-bar bg-danger" role="progressbar" style="width: 80%" aria-valuenow="80" aria-valuemin="0"
+            aria-valuemax="100"></div>
+        </div>
+      </div>
+      <div class="col d-none d-xl-block">
+        <div class="text-body-secondary">Segmentación por Especialidad</div>
+        <div class="fw-semibold text-truncate">40.15%</div>
+        <div class="progress progress-thin mt-2">
+          <div class="progress-bar" role="progressbar" style="width: 40%" aria-valuenow="40" aria-valuemin="0"
+            aria-valuemax="100"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- /.Tabla-->
+<div class="row">
+  <div class="col-md-12">
+    <div class="card mb-4">
+      <div class="table-responsive">
+        <table class="table border mb-0">
+          <thead class="fw-semibold text-nowrap">
+            <tr class="align-middle">
+              <th class="bg-body-secondary text-center">
+                <svg class="icon">
+                  <use xlink:href="node_modules/@coreui/icons/sprites/free.svg#cil-people"></use>
+                </svg>
               </th>
-              <th>User</th>
-              <th class="text-center">Country</th>
-              <th>Usage</th>
-              <!-- <th class="text-center">Payment Method</th> -->
-              <th>Activity</th>
+              <th class="bg-body-secondary">Afiliados Recientes</th>
+              <th class="bg-body-secondary text-center"></th>
+              <th class="bg-body-secondary"></th>
+              <th class="bg-body-secondary text-center"></th>
+              <th class="bg-body-secondary"></th>
+              <th class="bg-body-secondary"></th>
             </tr>
           </thead>
           <tbody>
-            <tr *ngFor="let user of users; index as i">
+            <tr class="align-middle">
               <td class="text-center">
-                <c-avatar size="md" src="{{ user.avatar }}" status="{{ user.status }}"></c-avatar>
+                <div class="avatar avatar-md"><img class="avatar-img" src="assets/img/avatars/1.jpg"
+                    alt="user@email.com"><span class="avatar-status bg-success"></span></div>
               </td>
               <td>
-                <div>{{ user.name }}</div>
-                <div class="small text-medium-emphasis text-nowrap">
-                  <span>
-                    {{ user.state }} | Registered: {{ user.registered }}
-                  </span>
+                <div class="text-nowrap">Maria Josefina Hernandez</div>
+                <div class="small text-body-secondary text-nowrap"><span>40 años</span> | 0801-1984-00131</div>
+              </td>
+              <td class="text-center">
+              </td>
+              <td>
+                <div class="d-flex justify-content-between align-items-baseline">
+                  <div class="fw-semibold">Francisco Morazán</div>
+                  <div class="text-nowrap small text-body-secondary ms-3">Tegucigalpa</div>
+                </div>
+                <div class="text-small" style="font-size: 12px;">
+                  Col El Hato, tercera etapa, casa 22, B 7
                 </div>
               </td>
               <td class="text-center">
-                <svg cIcon id="{{ user.country + user.name }}" name="cif{{ user.country }}" size="xl"
-                  title="{{ user.country }}"></svg>
+
               </td>
               <td>
-                <div class="d-flex justify-content-between">
-                  <div class="float-start">
-                    <strong>{{ user.usage }}%</strong>
-                  </div>
-                  <div class="float-end ms-1 text-nowrap">
-                    <small class="text-medium-emphasis">
-                      {{ user.period }}
-                    </small>
+                <div class="small text-body-secondary">Fecha registro</div>
+                <div class="fw-semibold text-nowrap">hace 10 min.</div>
+              </td>
+              <td>
+                <div class="dropdown">
+                  <button class="btn btn-transparent p-0" type="button" data-coreui-toggle="dropdown"
+                    aria-haspopup="true" aria-expanded="false">
+                    <svg class="icon">
+                      <use xlink:href="node_modules/@coreui/icons/sprites/free.svg#cil-options"></use>
+                    </svg>
+                  </button>
+                  <div class="dropdown-menu dropdown-menu-end"><a class="dropdown-item" href="#">Info</a><a
+                      class="dropdown-item" href="#">Edit</a><a class="dropdown-item text-danger" href="#">Delete</a>
                   </div>
                 </div>
-                <c-progress thin>
-                  <c-progress-bar [value]="user.usage" color="{{ user.color }}"></c-progress-bar>
-                </c-progress>
               </td>
-              <!-- <td class="text-center">
-                <svg cIcon name="cibCc{{ user.payment }}" size="xl"></svg>
-              </td> -->
+            </tr>
+            <tr class="align-middle">
+              <td class="text-center">
+                <div class="avatar avatar-md"><img class="avatar-img" src="assets/img/avatars/2.jpg"
+                    alt="user@email.com"><span class="avatar-status bg-success"></span></div>
+              </td>
               <td>
-                <div class="small text-medium-emphasis">Last login</div>
-                <div class="fw-semibold text-nowrap">{{ user.activity }}</div>
+                <div class="text-nowrap">Avram Tarasios</div>
+                <div class="small text-body-secondary text-nowrap"><span>37 años</span> | 0801-1987-00131</div>
+              </td>
+              <td class="text-center">
+              </td>
+              <td>
+                <div class="d-flex justify-content-between align-items-baseline">
+                  <div class="fw-semibold">Francisco Morazán</div>
+                  <div class="text-nowrap small text-body-secondary ms-3">Tegucigalpa</div>
+                </div>
+                <div class="text-small" style="font-size: 12px;">
+                  Col El Hato, tercera etapa, casa 22, B 7
+                </div>
+              </td>
+              <td class="text-center">
+
+              </td>
+              <td>
+                <div class="small text-body-secondary">Fecha registro</div>
+                <div class="fw-semibold text-nowrap">hace 10 min.</div>
+              </td>
+              <td>
+                <div class="dropdown">
+                  <button class="btn btn-transparent p-0" type="button" data-coreui-toggle="dropdown"
+                    aria-haspopup="true" aria-expanded="false">
+                    <svg class="icon">
+                      <use xlink:href="node_modules/@coreui/icons/sprites/free.svg#cil-options"></use>
+                    </svg>
+                  </button>
+                  <div class="dropdown-menu dropdown-menu-end"><a class="dropdown-item" href="#">Info</a><a
+                      class="dropdown-item" href="#">Edit</a><a class="dropdown-item text-danger" href="#">Delete</a>
+                  </div>
+                </div>
               </td>
             </tr>
           </tbody>
         </table>
-      </c-card-body>
-    </c-card>
-  </c-col>
-</c-row>
+      </div>
+    </div>
+  </div>
+  <!-- /.col-->
+</div>
+
+<!-- ################################################ -->
+
+
+
+
+<!-- Indicadores de Jubilación y Pensión: -->
+<div class="example">
+  <div class="tab-content rounded-bottom">
+    <div class="tab-pane p-3 active preview" role="tabpanel" id="preview-1006">
+      <div class="row g-4">
+        <div>
+          <ul class="nav nav-underline-border" role="tablist">
+            <li class="nav-item" role="presentation">
+              <a class="nav-link active" data-coreui-toggle="tab" href="#preview-1000" role="tab" aria-selected="true">
+                <h1 style="font-size: 30px; color: #26a69a;">Indicadores de Afiliación y Demográficos</h1>
+              </a>
+            </li>
+          </ul>
+          <div id="map" style="height: 500px;"></div> <!-- Div para el mapa -->
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

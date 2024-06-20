@@ -51,6 +51,103 @@ export class UsuarioService {
     private readonly moduloRepository: Repository<Net_Modulo>,
   ) { }
 
+  async preRegistroAdmin(createPreRegistroDto: CreatePreRegistroDto): Promise<void> {
+    const { nombreEmpleado, nombrePuesto, correo, numeroEmpleado, idModulo } = createPreRegistroDto;
+  
+    // Verificar si el usuario ya existe
+    const usuarioExistente = await this.usuarioEmpresaRepository.findOne({
+      relations: ['empleadoCentroTrabajo'],
+      where: {
+        empleadoCentroTrabajo: {
+          correo_1: correo,
+        },
+      },
+    });
+  
+    if (usuarioExistente) {
+      throw new BadRequestException('El correo ya está registrado');
+    }
+  
+    // Verificar si el módulo existe y obtener el centro de trabajo
+    const modulo = await this.moduloRepository.findOne({
+      where: { id_modulo: idModulo },
+      relations: ['centroTrabajo'],
+    });
+  
+    if (!modulo) {
+      throw new BadRequestException('El módulo especificado no existe');
+    }
+  
+    // Asignar el rol de administrador (ID_ROLE_ADMIN)
+    const rolAdmin = await this.rolModuloRepository.findOne({
+      where: { modulo: { id_modulo: idModulo }, nombre: 'ADMINISTRADOR' },
+    });
+  
+    if (!rolAdmin) {
+      throw new BadRequestException('El rol de administrador no existe para el módulo especificado');
+    }
+  
+    // Crear un nuevo empleado
+    const nuevoEmpleado = this.empleadoRepository.create({
+      nombreEmpleado,
+    });
+  
+    const empleado = await this.empleadoRepository.save(nuevoEmpleado);
+  
+    // Crear una nueva relación de empleado con centro de trabajo
+    const nuevoEmpleadoCentroTrabajo = this.empleadoCentroTrabajoRepository.create({
+      empleado,
+      correo_1: correo,
+      numeroEmpleado,
+      nombrePuesto,
+      centroTrabajo: modulo.centroTrabajo,
+    });
+  
+    const empleadoCentroTrabajo = await this.empleadoCentroTrabajoRepository.save(nuevoEmpleadoCentroTrabajo);
+  
+    // Crear un nuevo usuario
+    const nuevoUsuario = this.usuarioEmpresaRepository.create({
+      estado: 'PENDIENTE',
+      contrasena: await bcrypt.hash('temporal', 10),
+      empleadoCentroTrabajo: empleadoCentroTrabajo,
+    });
+  
+    const usuarioGuardado = await this.usuarioEmpresaRepository.save(nuevoUsuario);
+  
+    // Crear la relación en Net_Usuario_Modulo
+    const usuarioModulo = this.usuarioModuloRepository.create({
+      usuarioEmpresa: usuarioGuardado,
+      rolModulo: rolAdmin,
+    });
+  
+    await this.usuarioModuloRepository.save(usuarioModulo);
+  
+    // Generar un token JWT para la verificación de correo
+    const token = this.jwtService.sign({ correo });
+  
+    // Enviar correo electrónico de verificación
+    const verificationUrl = `http://localhost:4200/#/register?token=${token}`;
+    const htmlContent = `
+      <div style="font-family: Arial, sans-serif; line-height: 1.6;">
+        <h2 style="color: #13776B;">¡Bienvenido a INPRENET!</h2>
+        <p>Hola ${nombreEmpleado},</p>
+        <p>Estamos encantados de tenerte con nosotros y queremos asegurarnos de que tengas la mejor experiencia posible desde el primer día.</p>
+        <div style="text-align: center;">
+        <img src="https://inprema.gob.hn/wp-content/uploads/2021/11/inprema-logo-dorado.png" alt="Descripción de la imagen" width="150" height="auto">
+        <p>Para empezar, necesitamos que completes tu registro como administrador. Esto nos ayudará a personalizar tu experiencia y asegurarnos de que tienes acceso a todas las funcionalidades de nuestra aplicación.</p>
+        <p>Por favor, completa tu registro haciendo clic en el siguiente enlace:</p>
+        <div style="text-align: center; margin: 20px 0;">
+          <a href="${verificationUrl}" style="background-color: #13776B; color: white; padding: 10px 20px; text-decoration: none; border-radius: 4px;">Completar Registro</a>
+        </div>
+        <p>Si tienes alguna pregunta o necesitas ayuda, no dudes en contactarnos.</p>
+        <p>¡Gracias por unirte a nosotros!</p>
+        <p>El equipo de INPRENET</p>
+      </div>`;
+  
+    await this.mailService.sendMail(correo, 'Completa tu registro', '', htmlContent);
+  }
+  
+
   async preRegistro(createPreRegistroDto: CreatePreRegistroDto): Promise<void> {
     const { nombreEmpleado, nombrePuesto, correo, numeroEmpleado, idRole } = createPreRegistroDto;
 
@@ -134,6 +231,7 @@ export class UsuarioService {
       <p>¡Gracias por unirte a nosotros!</p>
       <p>El equipo de INPRENET</p>
     </div>`;
+    
 
     await this.mailService.sendMail(correo, 'Completa tu registro', '', htmlContent);
   }

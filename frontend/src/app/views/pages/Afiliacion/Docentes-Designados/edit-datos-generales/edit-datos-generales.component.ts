@@ -1,12 +1,11 @@
-import { ChangeDetectionStrategy, Component, Input, OnInit, OnChanges, SimpleChanges, OnDestroy } from '@angular/core';
-import { ControlContainer, FormArray, FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
+import { Component, Input, OnInit} from '@angular/core';
+import { FormArray, FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { ToastrService } from 'ngx-toastr';
 import { AfiliadoService } from 'src/app/services/afiliado.service';
-import { DatosEstaticosService } from 'src/app/services/datos-estaticos.service';
 import { DireccionService } from 'src/app/services/direccion.service';
 import { FieldConfig } from 'src/app/shared/Interfaces/field-config';
 import { TableColumn } from 'src/app/shared/Interfaces/table-column';
-import { convertirFecha, convertirFechaInputs } from 'src/app/shared/functions/formatoFecha';
+import { convertirFechaInputs } from 'src/app/shared/functions/formatoFecha';
 import { unirNombres } from 'src/app/shared/functions/formatoNombresP';
 
 @Component({
@@ -159,6 +158,7 @@ export class EditDatosGeneralesComponent implements OnInit {
 
   async previsualizarInfoAfil() {
     if (this.Afiliado) {
+
       this.loading = true; // Mostrar el spinner antes de cargar los datos
       await this.svcAfiliado.getAfilByParam(this.Afiliado.n_identificacion).subscribe(
         (result) => {
@@ -166,7 +166,6 @@ export class EditDatosGeneralesComponent implements OnInit {
           this.Afiliado = result;
           this.estadoAfiliacion = result.estadoAfiliacion;
           this.fallecido = result.fallecido;
-          console.log(result);
 
           this.formDatosGenerales.value.refpers[0] = {
             n_identificacion: result.N_IDENTIFICACION,
@@ -197,6 +196,8 @@ export class EditDatosGeneralesComponent implements OnInit {
             id_municipio_residencia: result.ID_MUNICIPIO,
             fallecido: result.fallecido,
           };
+          console.log(this.formDatosGenerales.value.refpers[0]);
+
 
           if (result.ID_MUNICIPIO_DEFUNCION) {
             this.cargarMunicipios(result.ID_MUNICIPIO_DEFUNCION);
@@ -212,11 +213,11 @@ export class EditDatosGeneralesComponent implements OnInit {
 
           this.Afiliado.nameAfil = this.unirNombres(result.PRIMER_NOMBRE, result.SEGUNDO_NOMBRE, result.TERCER_NOMBRE, result.PRIMER_APELLIDO, result.SEGUNDO_APELLIDO);
 
-          this.loading = false; // Ocultar el spinner después de cargar los datos
+          this.loading = false;
         },
         (error) => {
           this.toastr.error(`Error: ${error.error.message}`);
-          this.loading = false; // Ocultar el spinner si hay un error
+          this.loading = false;
         }
       );
     }

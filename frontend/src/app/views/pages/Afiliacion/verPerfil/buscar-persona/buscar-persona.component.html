@@ -4,7 +4,7 @@
     <mat-label>Número De Identificación</mat-label>
     <input matInput type="text" [(ngModel)]="n_identifiacion" placeholder="Ingrese El Número De Identificación">
   </mat-form-field>
-  <button mat-raised-button color="primary" (click)="buscarPersona()">Buscar</button>
+  <button style="color: white;" mat-raised-button color="primary" (click)="buscarPersona()">Buscar</button>
   <div *ngIf="errorMessage" class="error-message">{{ errorMessage }}</div>
 </div>
 

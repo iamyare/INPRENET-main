@@ -43,7 +43,7 @@
           <div class="form-row">
             <mat-form-field appearance="fill" class="form-field question-field">
               <mat-label>Pregunta de Seguridad 1</mat-label>
-              <mat-select formControlName="preguntaseguridad1" (selectionChange)="validateQuestions()">
+              <mat-select formControlName="preguntaseguridad1">
                 <mat-option *ngFor="let opcion of availableQuestions" [value]="opcion">
                   {{ opcion }}
                 </mat-option>
@@ -57,7 +57,7 @@
           <div class="form-row">
             <mat-form-field appearance="fill" class="form-field question-field">
               <mat-label>Pregunta de Seguridad 2</mat-label>
-              <mat-select formControlName="preguntaseguridad2" (selectionChange)="validateQuestions()">
+              <mat-select formControlName="preguntaseguridad2">
                 <mat-option *ngFor="let opcion of availableQuestions" [value]="opcion">
                   {{ opcion }}
                 </mat-option>
@@ -71,7 +71,7 @@
           <div class="form-row">
             <mat-form-field appearance="fill" class="form-field question-field">
               <mat-label>Pregunta de Seguridad 3</mat-label>
-              <mat-select formControlName="preguntaseguridad3" (selectionChange)="validateQuestions()">
+              <mat-select formControlName="preguntaseguridad3">
                 <mat-option *ngFor="let opcion of availableQuestions" [value]="opcion">
                   {{ opcion }}
                 </mat-option>
@@ -84,13 +84,22 @@
           </div>
         </div>
 
-        <div class="form-group full-width">
-          <label for="archivo">Sube tu identificación</label>
-          <input id="archivo" type="file" (change)="onFileChange($event)" class="form-control-file" />
+        <div class="form-row">
+          <div class="form-group half-width">
+            <label for="archivo">Sube tu identificación</label>
+            <input id="archivo" type="file" (change)="onFileChange($event)" class="form-control-file" />
+          </div>
+
+          <div class="form-group half-width">
+            <label for="fotografia">Sube tu fotografía</label>
+            <input id="fotografia" type="file" (change)="onFileChangeFoto($event)" class="form-control-file" />
+          </div>
         </div>
       </div>
 
-      <button mat-raised-button color="primary" type="submit" class="full-width">Completar Registro</button>
+      <div class="button-container">
+        <button mat-raised-button color="primary" type="submit">Completar Registro</button>
+      </div>
     </form>
   </div>
 </div>

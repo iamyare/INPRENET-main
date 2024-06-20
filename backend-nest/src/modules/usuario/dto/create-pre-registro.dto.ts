@@ -1,4 +1,4 @@
-import { IsString, IsEmail, IsNotEmpty, Length, IsInt, Min } from 'class-validator';
+import { IsString, IsEmail, IsNotEmpty, Length, IsInt, Min, IsOptional } from 'class-validator';
 
 export class CreatePreRegistroDto {
   @IsString()
@@ -22,5 +22,9 @@ export class CreatePreRegistroDto {
 
   @IsInt()
   @Min(1)
-  idRole: number;
+  @IsOptional()
+  idRole?: number;
+
+  @IsOptional()
+  idModulo?: number;
 }

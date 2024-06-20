@@ -13,6 +13,20 @@ export class AuthService {
   constructor( private http: HttpClient) {
    }
 
+   preRegistro(datos: any): Observable<void> {
+    const url = `${environment.API_URL}/api/usuario/preregistro`;
+    return this.http.post<void>(url, datos).pipe(
+      catchError(this.handleError<void>('preRegistro'))
+    );
+  }
+
+  preRegistroAdmin(datos: any): Observable<void> {
+    const url = `${environment.API_URL}/api/usuario/preregistro-admin`;
+    return this.http.post<void>(url, datos).pipe(
+      catchError(this.handleError<void>('preRegistroAdmin'))
+    );
+  }
+
 
    logout(): Observable<void> {
     const url = `${environment.API_URL}/api/usuario/logout`;
@@ -33,12 +47,7 @@ export class AuthService {
     return this.http.get<{ sesionActiva: boolean }>(url, { headers });
   }
 
-  preRegistro(datos: any): Observable<void> {
-    const url = `${environment.API_URL}/api/usuario/preregistro`;
-    return this.http.post<void>(url, datos).pipe(
-      catchError(this.handleError<void>('preRegistro'))
-    );
-  }
+
 
   completarRegistro(token: string, datos: any, archivo: File): Observable<void> {
     const url = `${environment.API_URL}/api/usuario/completar-registro?token=${token}`;

@@ -1,127 +1,99 @@
 import { Component, OnInit } from '@angular/core';
-import { UntypedFormControl, UntypedFormGroup } from '@angular/forms';
-
+import * as L from 'leaflet';
 import { DashboardChartsData, IChartProps } from './dashboard-charts-data';
 
-interface IUser {
-  name: string;
-  state: string;
-  registered: string;
-  country: string;
-  usage: number;
-  period: string;
-  payment: string;
-  activity: string;
-  avatar: string;
-  status: string;
-  color: string;
-}
 
 @Component({
-  templateUrl: 'dashboard.component.html',
-  styleUrls: ['dashboard.component.scss']
+  selector: 'app-dashboard',
+  templateUrl: './dashboard.component.html',
+  styleUrls: ['./dashboard.component.scss']
 })
 export class DashboardComponent implements OnInit {
-  constructor(private chartsData: DashboardChartsData) {
-  }
-
-  public users: IUser[] = [
-    {
-      name: 'Yiorgos Avraamu',
-      state: 'New',
-      registered: 'Jan 1, 2021',
-      country: 'Us',
-      usage: 50,
-      period: 'Jun 11, 2021 - Jul 10, 2021',
-      payment: 'Mastercard',
-      activity: '10 sec ago',
-      avatar: './assets/img/avatars/1.jpg',
-      status: 'success',
-      color: 'success'
-    },
-    {
-      name: 'Avram Tarasios',
-      state: 'Recurring ',
-      registered: 'Jan 1, 2021',
-      country: 'Br',
-      usage: 10,
-      period: 'Jun 11, 2021 - Jul 10, 2021',
-      payment: 'Visa',
-      activity: '5 minutes ago',
-      avatar: './assets/img/avatars/2.jpg',
-      status: 'danger',
-      color: 'info'
-    },
-    {
-      name: 'Quintin Ed',
-      state: 'New',
-      registered: 'Jan 1, 2021',
-      country: 'In',
-      usage: 74,
-      period: 'Jun 11, 2021 - Jul 10, 2021',
-      payment: 'Stripe',
-      activity: '1 hour ago',
-      avatar: './assets/img/avatars/3.jpg',
-      status: 'warning',
-      color: 'warning'
-    },
-    {
-      name: 'Enéas Kwadwo',
-      state: 'Sleep',
-      registered: 'Jan 1, 2021',
-      country: 'Fr',
-      usage: 98,
-      period: 'Jun 11, 2021 - Jul 10, 2021',
-      payment: 'Paypal',
-      activity: 'Last month',
-      avatar: './assets/img/avatars/4.jpg',
-      status: 'secondary',
-      color: 'danger'
-    },
-    {
-      name: 'Agapetus Tadeáš',
-      state: 'New',
-      registered: 'Jan 1, 2021',
-      country: 'Es',
-      usage: 22,
-      period: 'Jun 11, 2021 - Jul 10, 2021',
-      payment: 'ApplePay',
-      activity: 'Last week',
-      avatar: './assets/img/avatars/5.jpg',
-      status: 'success',
-      color: 'primary'
-    },
-    {
-      name: 'Friderik Dávid',
-      state: 'New',
-      registered: 'Jan 1, 2021',
-      country: 'Pl',
-      usage: 43,
-      period: 'Jun 11, 2021 - Jul 10, 2021',
-      payment: 'Amex',
-      activity: 'Yesterday',
-      avatar: './assets/img/avatars/6.jpg',
-      status: 'info',
-      color: 'dark'
-    }
-  ];
   public mainChart: IChartProps = {};
-  public chart: Array<IChartProps> = [];
-  public trafficRadioGroup = new UntypedFormGroup({
-    trafficRadio: new UntypedFormControl('Month')
-  });
+  public lineChart: IChartProps = {};
+  public barChart: IChartProps = {};
+  public pieChart: IChartProps = {};
+  public pieChartAfiliados: IChartProps = {};
+  public polarAreaChart: IChartProps = {};
+  private map: L.Map | undefined;
+
+  constructor(
+    private chartsData: DashboardChartsData
+  ) {}
 
   ngOnInit(): void {
-    this.initCharts();
-  }
-
-  initCharts(): void {
     this.mainChart = this.chartsData.mainChart;
+    this.initMap();
+    this.lineChart=this.chartsData.lineChart;
+    this.barChart=this.chartsData.barChart;
+    this.pieChart=this.chartsData.pieChart;
+    this.pieChartAfiliados=this.chartsData.pieChartAfiliados;
+    this.polarAreaChart=this.chartsData.polarAreaChart;
   }
 
-  setTrafficPeriod(value: string): void {
-    this.trafficRadioGroup.setValue({ trafficRadio: value });
-    this.chartsData.initMainChart(value);
-    this.initCharts();
+  private initMap(): void {
+    this.map = L.map('map').setView([14.5, -86.5], 7); // Coordenadas centradas en Honduras
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+    }).addTo(this.map);
+
+    // Datos de ejemplo de afiliados por departamento
+    // Datos de ejemplo de afiliados por departamento
+    const afiliadosData: { [key: string]: number } = {
+      'Atlántida': 800,
+      'Choluteca': 600,
+      'Colón': 500,
+      'Comayagua': 700,
+      'Copán': 450,
+      'Cortés': 1000,
+      'El Paraíso': 650,
+      'Francisco Morazán': 1500,
+      'Gracias a Dios': 300,
+      'Intibucá': 400,
+      'Islas de la Bahía': 350,
+      'La Paz': 370,
+      'Lempira': 410,
+      'Ocotepeque': 360,
+      'Olancho': 500,
+      'Santa Bárbara': 520,
+      'Valle': 430,
+      'Yoro': 490,
+      // Agrega los demás departamentos si es necesario
+    };
+
+    // Coordenadas aproximadas de los departamentos
+    const departamentosCoords: { [key: string]: [number, number] } = {
+      'Atlántida': [15.7, -86.9],
+      'Choluteca': [13.3, -87.2],
+      'Colón': [15.6, -85.3],
+      'Comayagua': [14.5, -87.6],
+      'Copán': [14.9, -88.9],
+      'Cortés': [15.5, -88.0],
+      'El Paraíso': [13.9, -86.6],
+      'Francisco Morazán': [14.1, -87.2],
+      'Gracias a Dios': [15.0, -83.3],
+      'Intibucá': [14.3, -88.2],
+      'Islas de la Bahía': [16.3, -86.5],
+      'La Paz': [14.2, -87.7],
+      'Lempira': [14.8, -88.6],
+      'Ocotepeque': [14.4, -89.2],
+      'Olancho': [14.6, -85.9],
+      'Santa Bárbara': [14.9, -88.2],
+      'Valle': [13.5, -87.6],
+      'Yoro': [15.1, -87.1],
+      // Agrega las coordenadas de los demás departamentos si es necesario
+    };
+
+    // Añadir marcadores al mapa
+    for (const departamento in afiliadosData) {
+      if (afiliadosData.hasOwnProperty(departamento)) {
+        const coords = departamentosCoords[departamento];
+        const afiliados = afiliadosData[departamento];
+        L.marker(coords).addTo(this.map)
+          .bindPopup(`${departamento}: ${afiliados} afiliados`)
+          .openPopup();
+      }
+    }
   }
 }

@@ -35,7 +35,6 @@ export class EditBeneficiariosComponent implements OnInit, OnChanges, OnDestroy 
   municipios: { label: string, value: any }[] = [];
   estados: { label: string, value: any }[] = [];
   private subscriptions: Subscription = new Subscription();
-  public loading: boolean = false;
 
   constructor(
     private svcAfiliado: AfiliadoService,
@@ -93,19 +92,18 @@ export class EditBeneficiariosComponent implements OnInit, OnChanges, OnDestroy 
   }
 
   async getFilas() {
-    this.loading = true;
     this.filas = [];
+    console.log('getFilas called');
     if (this.persona) {
       try {
         const { data, time } = await measureAsyncExecutionTime(() => this.svcAfiliado.getAllBenDeAfil(this.persona.n_identificacion).toPromise());
-        /* console.log(`El tiempo de ejecución fue de ${time} milisegundos.`); */
-
+        console.log('Data fetched:', data);
         this.filas = data.map((item: any) => {
           const nombres = [item.primerNombre, item.segundoNombre, item.tercerNombre].filter(part => part).join(' ');
           const apellidos = [item.primerApellido, item.segundoApellido].filter(part => part).join(' ');
           const fechaNacimiento = this.datePipe.transform(item.fechaNacimiento, 'dd/MM/yyyy') || 'Fecha no disponible';
           const respData = {
-            id: item.ID_PERSONA,
+            id: item.idPersona,
             n_identificacion: item.nIdentificacion,
             nombres,
             apellidos,
@@ -124,15 +122,13 @@ export class EditBeneficiariosComponent implements OnInit, OnChanges, OnDestroy 
           };
           return respData;
         });
-        this.loading = false;
+        console.log('Filas after mapping:', this.filas);
       } catch (error) {
         this.toastr.error('Error al cargar los datos de los beneficiarios');
         console.error('Error al obtener datos de los beneficiarios', error);
-        this.loading = false;
       }
     } else {
       this.resetDatos();
-      this.loading = false;
     }
     this.cargar();
   }
@@ -142,10 +138,63 @@ export class EditBeneficiariosComponent implements OnInit, OnChanges, OnDestroy 
   }
 
   cargar() {
-
+    console.log('cargar called');
     if (this.ejecF) {
       this.ejecF(this.filas).then(() => { });
     }
+  }
+
+  openDialog(campos: any, row: any): void {
+    const dialogRef = this.dialog.open(EditarDialogComponent, {
+      width: '500px',
+      data: { campos: campos, valoresIniciales: row }
+    });
+
+    dialogRef.afterClosed().subscribe((result: any) => {
+      if (result) {
+        const [primer_nombre, segundo_nombre, tercer_nombre] = result.nombres.split(' ');
+        const [primer_apellido, segundo_apellido] = result.apellidos.split(' ');
+
+        const fecha_nacimiento = this.datePipe.transform(result.fecha_nacimiento, 'dd-MM-yyyy') || '';
+
+        const updatedBeneficiario = {
+          id_pais: result.idPaisNacionalidad,
+          n_identificacion: result.n_identificacion ?? 'ID no disponible',
+          primer_nombre,
+          segundo_nombre: segundo_nombre || '',
+          tercer_nombre: tercer_nombre || '',
+          primer_apellido,
+          segundo_apellido: segundo_apellido || '',
+          genero: result.genero,
+          sexo: result.sexo,
+          cantidad_dependientes: result.cantidad_dependientes,
+          telefono_1: result.telefono_1,
+          fecha_nacimiento,
+          direccion_residencia: result.direccion_residencia,
+          id_municipio_residencia: result.id_municipio_residencia,
+          id_estado_persona: result.id_estado_persona,
+          porcentaje: result.porcentaje
+        };
+
+        console.log('Updating beneficiario:', updatedBeneficiario);
+        this.svcAfiliado.updateBeneficiario(row.id, updatedBeneficiario).subscribe(
+          (response) => {
+            this.toastr.success('Beneficiario actualizado exitosamente');
+            this.getFilas().then(() => {
+              const index = this.filas.findIndex((fila) => fila.id === row.id);
+              if (index !== -1) {
+                this.filas[index] = { ...this.filas[index], ...updatedBeneficiario };
+                this.cargar();
+              }
+            });
+          },
+          (error) => {
+            this.toastr.error('Error al actualizar el beneficiario');
+            console.error('Error al actualizar el beneficiario', error);
+          }
+        );
+      }
+    });
   }
 
   editarFila(row: any) {
@@ -210,57 +259,5 @@ export class EditBeneficiariosComponent implements OnInit, OnChanges, OnDestroy 
         console.error('Error al inactivar beneficiario', error);
       }
     );
-  }
-
-  openDialog(campos: any, row: any): void {
-    const dialogRef = this.dialog.open(EditarDialogComponent, {
-      width: '500px',
-      data: { campos: campos, valoresIniciales: row }
-    });
-
-    dialogRef.afterClosed().subscribe((result: any) => {
-      if (result) {
-        const [primer_nombre, segundo_nombre, tercer_nombre] = result.nombres.split(' ');
-        const [primer_apellido, segundo_apellido] = result.apellidos.split(' ');
-
-        const fecha_nacimiento = this.datePipe.transform(result.fecha_nacimiento, 'dd-MM-yyyy') || '';
-
-        const updatedBeneficiario = {
-          id_pais: result.idPaisNacionalidad,
-          n_identificacion: result.n_identificacion ?? 'ID no disponible',
-          primer_nombre,
-          segundo_nombre: segundo_nombre || '',
-          tercer_nombre: tercer_nombre || '',
-          primer_apellido,
-          segundo_apellido: segundo_apellido || '',
-          genero: result.genero,
-          sexo: result.sexo,
-          cantidad_dependientes: result.cantidad_dependientes,
-          telefono_1: result.telefono_1,
-          fecha_nacimiento,
-          direccion_residencia: result.direccion_residencia,
-          id_municipio_residencia: result.id_municipio_residencia,
-          id_estado_persona: result.id_estado_persona,
-          porcentaje: result.porcentaje
-        };
-
-        this.svcAfiliado.updateBeneficiario(row.id, updatedBeneficiario).subscribe(
-          (response) => {
-            this.toastr.success('Beneficiario actualizado exitosamente');
-            this.getFilas().then(() => {
-              const index = this.filas.findIndex((fila) => fila.id === row.id);
-              if (index !== -1) {
-                this.filas[index] = { ...this.filas[index], ...updatedBeneficiario };
-                this.cargar();
-              }
-            });
-          },
-          (error) => {
-            this.toastr.error('Error al actualizar el beneficiario');
-            console.error('Error al actualizar el beneficiario', error);
-          }
-        );
-      }
-    });
   }
 }

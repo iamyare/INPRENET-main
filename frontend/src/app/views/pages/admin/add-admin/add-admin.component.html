@@ -1,4 +1,3 @@
-<!-- add-admin.component.html -->
 <div class="header-container">
   <h2 class="center-name">Agregar Administrador</h2>
 </div>
@@ -25,7 +24,7 @@
         <mat-form-field class="half-width" appearance="outline">
           <mat-label>Centro de Trabajo</mat-label>
           <mat-select formControlName="centroTrabajo" (selectionChange)="onCentroTrabajoChange($event)">
-            <mat-option *ngFor="let centro of centrosTrabajo" [value]="centro.value">
+            <mat-option *ngFor="let centro of centrosTrabajoTipoE" [value]="centro.value">
               {{ centro.label }}
             </mat-option>
           </mat-select>
@@ -55,7 +54,11 @@
         </mat-form-field>
       </div>
 
-      <button mat-raised-button color="primary" type="submit" [disabled]="userForm.invalid">Crear Cuenta</button>
+      <button mat-raised-button color="primary" type="submit">Crear Cuenta</button>
     </form>
   </mat-card-content>
 </mat-card>
+
+
+
+<!-- [disabled]="userForm.invalid" -->

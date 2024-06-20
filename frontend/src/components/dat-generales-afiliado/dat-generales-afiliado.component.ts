@@ -42,7 +42,6 @@ export function generateAddressFormGroup(datos?: any): FormGroup {
     telefono_2: new FormControl(datos?.telefono_2, [Validators.maxLength(12)]),
     correo_1: new FormControl(datos?.correo_1, [Validators.required, Validators.maxLength(40), Validators.email]),
     correo_2: new FormControl(datos?.correo_2, [Validators.maxLength(40), Validators.email]),
-    direccion_residencia: new FormControl(datos?.direccion_residencia, [Validators.required, Validators.maxLength(200)]),
     rtn: new FormControl(datos?.rtn, [Validators.required, Validators.maxLength(14), Validators.pattern(/^[0-9]{14}$/)]),
     genero: new FormControl(datos?.genero, [Validators.required, Validators.maxLength(30)]),
     id_profesion: new FormControl(datos?.id_profesion, Validators.required),
@@ -165,6 +164,7 @@ export class DatGeneralesAfiliadoComponent implements OnInit {
   }
 
   ngOnInit(): void {
+
     this.cargarDatosEstaticos();
     this.initForm();
     const ref_RefPers = this.formParent.get('refpers') as FormArray;
@@ -172,7 +172,7 @@ export class DatGeneralesAfiliadoComponent implements OnInit {
 
     if (this.datos.value.refpers.length > 0) {
       for (let i of this.datos.value.refpers) {
-        temp = i
+        temp = this.splitDireccionResidencia(i);
       }
     }
 
@@ -189,6 +189,22 @@ export class DatGeneralesAfiliadoComponent implements OnInit {
         this.form.patchValue(savedForm.value, { emitEvent: false });
       }
     });
+  }
+
+  splitDireccionResidencia(datos: any): any {
+    const direccion = datos.direccion_residencia;
+    const partes = direccion.split(', ');
+    return {
+      ...datos,
+      avenida: partes[0]?.split(': ')[1] || '',
+      calle: partes[1]?.split(': ')[1] || '',
+      sector: partes[2]?.split(': ')[1] || '',
+      bloque: partes[3]?.split(': ')[1] || '',
+      numero_casa: partes[4]?.split(': ')[1] || '',
+      color_casa: partes[5]?.split(': ')[1] || '',
+      aldea: partes[6]?.split(': ')[1] || '',
+      caserio: partes[7]?.split(': ')[1] || '',
+    };
   }
 
   async cargarDatosEstaticos() {
@@ -287,8 +303,6 @@ export class DatGeneralesAfiliadoComponent implements OnInit {
       }
     });
   }
-
-
 
   onDepartamentoChange(event: any) {
     const departamentoId = event.value;

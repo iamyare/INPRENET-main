@@ -22,6 +22,11 @@ export class UsuarioController {
     return this.usuarioService.preRegistro(createPreRegistroDto);
   }
 
+  @Post('preregistro-admin')
+  async preRegistroAdmin(@Body() createPreRegistroDto: CreatePreRegistroDto): Promise<void> {
+    return this.usuarioService.preRegistroAdmin(createPreRegistroDto);
+  }
+
   @Post('completar-registro')
   @UseInterceptors(FileInterceptor('archivo_identificacion'))
   async completarRegistro(

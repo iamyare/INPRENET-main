@@ -351,12 +351,11 @@ export class AfiliadoService {
     });
     await this.detallePersonaRepository.save(detalle);
     return persona;
-  }
+  } 
 
   async updateBeneficario(id: number, updatePersonaDto: UpdateBeneficiarioDto): Promise<Net_Persona> {
     console.log(updatePersonaDto);
-
-
+    
     const persona = await this.personaRepository.findOne({
       where: { id_persona: id },
       relations: ['detallePersona'],
@@ -372,25 +371,28 @@ export class AfiliadoService {
     if (!detallePersona) {
       throw new NotFoundException(`Detalle persona with ID ${id} not found`);
     }
+
     if (updatePersonaDto.fecha_nacimiento) {
-      console.log(updatePersonaDto.fecha_nacimiento)
+      updatePersonaDto.fecha_nacimiento = this.formatDateToYYYYMMDD(updatePersonaDto.fecha_nacimiento);
     }
+
     Object.assign(persona, updatePersonaDto);
+
     if (updatePersonaDto.eliminado) {
-      detallePersona.eliminado = 1
+      detallePersona.eliminado = 1;
     }
+
     if (updatePersonaDto.id_estado_persona) {
       const estadoP = await this.estadoPersonaRepository.findOne({
         where: { codigo: updatePersonaDto.id_estado_persona }
       });
-      detallePersona.estadoAfiliacion = estadoP
+      detallePersona.estadoAfiliacion = estadoP;
     }
+
     if (updatePersonaDto.id_municipio_residencia) {
       persona.municipio = await this.municipioRepository.findOne({ where: { id_municipio: updatePersonaDto.id_municipio_residencia } });
     }
-    if (updatePersonaDto.id_pais) {
-      persona.pais = await this.paisRepository.findOne({ where: { id_pais: updatePersonaDto.id_pais } });
-    }
+
     if (updatePersonaDto.id_pais) {
       persona.pais = await this.paisRepository.findOne({ where: { id_pais: updatePersonaDto.id_pais } });
     }

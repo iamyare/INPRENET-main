@@ -38,7 +38,7 @@ import { DashboardComponent } from './dashboard.component';
     ButtonGroupModule,
     ChartjsModule,
     AvatarModule,
-    TableModule,
+    TableModule
   ],
   declarations: [DashboardComponent]
 })

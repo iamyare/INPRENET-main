@@ -20,9 +20,18 @@ export class PdfService {
     return `data:image/jpeg;base64,${base64}`;
   }
 
+  async getFirmaDigitalBase64(): Promise<string> {
+    const imagesPath = process.env.IMAGES_PATH || path.resolve(__dirname, '../../../../assets/images');
+    const imagePath = path.join(imagesPath, 'Firma.jpg');
+    
+    const base64 = fs.readFileSync(imagePath, { encoding: 'base64' });
+    return `data:image/jpeg;base64,${base64}`;
+}
+
   async generateConstancia(data: any, includeQR: boolean, templateFunction: (data: any, includeQR: boolean) => any): Promise<Buffer> {
     const base64data = await this.getMembreteBase64();
-    const docDefinition = await templateFunction({ ...data, base64data }, includeQR);
+    const firmaDigitalBase64 = await this.getFirmaDigitalBase64();
+    const docDefinition = await templateFunction({ ...data, base64data, firmaDigitalBase64 }, includeQR);
 
     return new Promise((resolve, reject) => {
       const pdfDoc = pdfMake.createPdf(docDefinition);
@@ -55,23 +64,18 @@ export class PdfService {
         style: 'body'
       },
       { text: '\n\n\n' },
-      { canvas: [{ type: 'line', x1: 0, y1: 0, x2: 250, y2: 0, lineWidth: 1 }], margin: [127, 120, 0, 0] },
+      { image: data.firmaDigitalBase64, width: 150, alignment: 'center', margin: [0, 0, 0, -20] },
+      { canvas: [{ type: 'line', x1: 0, y1: 0, x2: 250, y2: 0, lineWidth: 1 }], margin: [127, 0, 0, 0] },
       { text: '[Nombre]', style: 'signature' },
       { text: 'Jefe Departamento de Afiliación', style: 'signatureTitle' },
       { text: '\n\n\n' }
     ];
-
+  
     if (includeQR) {
       const qrCode = await QRCode.toDataURL(`https://drive.google.com/file/d/${data.fileId}/view`);
       content.push({ image: qrCode, width: 100, alignment: 'center' });
     }
-
-    content.push({
-      text: 'Documento generado desde el sistema de INPRENET',
-      style: 'footer',
-      absolutePosition: { x: 300, y: 775 }
-    });
-
+  
     return {
       pageSize: 'A4',
       pageMargins: [40, 120, 40, 60],
@@ -125,9 +129,84 @@ export class PdfService {
       }
     };
   }
+  
 
   async generateConstanciaAfiliacion(data: any, includeQR: boolean): Promise<Buffer> {
     return this.generateConstancia(data, includeQR, this.generateConstanciaAfiliacionTemplate);
+  }
+
+  async generateAndUploadConstancia(data: any, type: string): Promise<string> {
+    const nombreCompleto = `${data.primer_nombre}_${data.primer_apellido}`;
+    const fechaActual = new Date().toISOString().split('T')[0];
+    const fileName = `${nombreCompleto}_${fechaActual}_constancia_${type}`;
+    
+    // Generar documento sin QR
+    let pdfBufferWithoutQR;
+    switch (type) {
+      case 'afiliacion':
+        pdfBufferWithoutQR = await this.generateConstanciaAfiliacion(data, false);
+        break;
+      case 'renuncia-cap':
+        pdfBufferWithoutQR = await this.generateConstanciaRenunciaCap(data, false);
+        break;
+      case 'no-cotizar':
+        pdfBufferWithoutQR = await this.generateConstanciaNoCotizar(data, false);
+        break;
+      case 'debitos':
+        pdfBufferWithoutQR = await this.generateConstanciaDebitos(data, false);
+        break;
+      case 'tiempo-cotizar-con-monto':
+        pdfBufferWithoutQR = await this.generateConstanciaTiempoCotizarConMonto(data, false);
+        break;
+      default:
+        throw new Error('Invalid constancia type');
+    }
+
+    const fileId = await this.driveService.uploadFile(`${fileName}_sin_qr.pdf`, pdfBufferWithoutQR);
+
+    // Generar documento con QR
+    let pdfBufferWithQR;
+    switch (type) {
+      case 'afiliacion':
+        pdfBufferWithQR = await this.generateConstanciaAfiliacion({ ...data, fileId }, true);
+        break;
+      case 'renuncia-cap':
+        pdfBufferWithQR = await this.generateConstanciaRenunciaCap({ ...data, fileId }, true);
+        break;
+      case 'no-cotizar':
+        pdfBufferWithQR = await this.generateConstanciaNoCotizar({ ...data, fileId }, true);
+        break;
+      case 'debitos':
+        pdfBufferWithQR = await this.generateConstanciaDebitos({ ...data, fileId }, true);
+        break;
+      case 'tiempo-cotizar-con-monto':
+        pdfBufferWithQR = await this.generateConstanciaTiempoCotizarConMonto({ ...data, fileId }, true);
+        break;
+      default:
+        throw new Error('Invalid constancia type');
+    }
+
+    // Guardar el documento con QR localmente
+    fs.writeFileSync(`${fileName}_con_qr.pdf`, pdfBufferWithQR);
+
+    return fileId;
+  }
+
+  async generateConstanciaWithQR(data: any, type: string): Promise<Buffer> {
+    switch (type) {
+      case 'afiliacion':
+        return await this.generateConstanciaAfiliacion(data, true);
+      case 'renuncia-cap':
+        return await this.generateConstanciaRenunciaCap(data, true);
+      case 'no-cotizar':
+        return await this.generateConstanciaNoCotizar(data, true);
+      case 'debitos':
+        return await this.generateConstanciaDebitos(data, true);
+      case 'tiempo-cotizar-con-monto':
+        return await this.generateConstanciaTiempoCotizarConMonto(data, true);
+      default:
+        throw new Error('Invalid constancia type');
+    }
   }
 
   async generateConstanciaRenunciaCap(data: any, includeQR: boolean): Promise<Buffer> {
@@ -165,7 +244,8 @@ export class PdfService {
           style: 'body'
         },
         { text: '\n\n\n' },
-        { canvas: [{ type: 'line', x1: 0, y1: 0, x2: 250, y2: 0, lineWidth: 1 }], margin: [127, 120, 0, 0] },
+        { image: data.firmaDigitalBase64, width: 100, alignment: 'center' },
+        { canvas: [{ type: 'line', x1: 0, y1: 0, x2: 250, y2: 0, lineWidth: 1 }], margin: [127, 10, 0, 0] },
         { text: 'Departamento de Atención al Docente', style: 'signature' },
         { text: 'Firma Autorizada', style: 'signatureTitle' }
       ];
@@ -247,7 +327,8 @@ export class PdfService {
           style: 'body'
         },
         { text: '\n\n\n' },
-        { canvas: [{ type: 'line', x1: 0, y1: 0, x2: 250, y2: 0, lineWidth: 1 }], margin: [127, 120, 0, 0] },
+        { image: data.firmaDigitalBase64, width: 100, alignment: 'center' },
+        { canvas: [{ type: 'line', x1: 0, y1: 0, x2: 250, y2: 0, lineWidth: 1 }], margin: [127, 10, 0, 0] },
         { text: 'Departamento de Atención al Docente', style: 'signature' },
         { text: 'Firma Autorizada', style: 'signatureTitle' }
       ];
@@ -335,7 +416,8 @@ export class PdfService {
           style: 'body'
         },
         { text: '\n\n\n' },
-        { canvas: [{ type: 'line', x1: 0, y1: 0, x2: 250, y2: 0, lineWidth: 1 }], margin: [127, 120, 0, 0] },
+        { image: data.firmaDigitalBase64, width: 100, alignment: 'center' },
+        { canvas: [{ type: 'line', x1: 0, y1: 0, x2: 250, y2: 0, lineWidth: 1 }], margin: [127, 10, 0, 0] },
         { text: 'Departamento de Atención al Docente', style: 'signature' },
         { text: 'Firma Autorizada', style: 'signatureTitle' }
       ];
@@ -421,7 +503,8 @@ export class PdfService {
           style: 'body'
         },
         { text: '\n\n\n' },
-        { canvas: [{ type: 'line', x1: 0, y1: 0, x2: 250, y2: 0, lineWidth: 1 }], margin: [127, 120, 0, 0] },
+        { image: data.firmaDigitalBase64, width: 100, alignment: 'center' },
+        { canvas: [{ type: 'line', x1: 0, y1: 0, x2: 250, y2: 0, lineWidth: 1 }], margin: [127, 10, 0, 0] },
         { text: 'Departamento de Atención al Docente', style: 'signature' },
         { text: 'Firma Autorizada', style: 'signatureTitle' }
       ];
@@ -472,75 +555,5 @@ export class PdfService {
     };
 
     return this.generateConstancia(data, includeQR, templateFunction);
-  }
-
-  async generateAndUploadConstancia(data: any, type: string): Promise<string> {
-    // Generar documento sin QR
-    let pdfBufferWithoutQR;
-    switch (type) {
-      case 'afiliacion':
-        pdfBufferWithoutQR = await this.generateConstanciaAfiliacion(data, false);
-        break;
-      case 'renuncia-cap':
-        pdfBufferWithoutQR = await this.generateConstanciaRenunciaCap(data, false);
-        break;
-      case 'no-cotizar':
-        pdfBufferWithoutQR = await this.generateConstanciaNoCotizar(data, false);
-        break;
-      case 'debitos':
-        pdfBufferWithoutQR = await this.generateConstanciaDebitos(data, false);
-        break;
-      case 'tiempo-cotizar-con-monto':
-        pdfBufferWithoutQR = await this.generateConstanciaTiempoCotizarConMonto(data, false);
-        break;
-      default:
-        throw new Error('Invalid constancia type');
-    }
-
-    const fileId = await this.driveService.uploadFile(`constancia_${type}_sin_qr.pdf`, pdfBufferWithoutQR);
-
-    // Generar documento con QR
-    let pdfBufferWithQR;
-    switch (type) {
-      case 'afiliacion':
-        pdfBufferWithQR = await this.generateConstanciaAfiliacion({ ...data, fileId }, true);
-        break;
-      case 'renuncia-cap':
-        pdfBufferWithQR = await this.generateConstanciaRenunciaCap({ ...data, fileId }, true);
-        break;
-      case 'no-cotizar':
-        pdfBufferWithQR = await this.generateConstanciaNoCotizar({ ...data, fileId }, true);
-        break;
-      case 'debitos':
-        pdfBufferWithQR = await this.generateConstanciaDebitos({ ...data, fileId }, true);
-        break;
-      case 'tiempo-cotizar-con-monto':
-        pdfBufferWithQR = await this.generateConstanciaTiempoCotizarConMonto({ ...data, fileId }, true);
-        break;
-      default:
-        throw new Error('Invalid constancia type');
-    }
-
-    // Guardar el documento con QR localmente
-    fs.writeFileSync(`constancia_${type}_con_qr.pdf`, pdfBufferWithQR);
-
-    return fileId;
-  }
-
-  async generateConstanciaWithQR(data: any, type: string): Promise<Buffer> {
-    switch (type) {
-      case 'afiliacion':
-        return await this.generateConstanciaAfiliacion(data, true);
-      case 'renuncia-cap':
-        return await this.generateConstanciaRenunciaCap(data, true);
-      case 'no-cotizar':
-        return await this.generateConstanciaNoCotizar(data, true);
-      case 'debitos':
-        return await this.generateConstanciaDebitos(data, true);
-      case 'tiempo-cotizar-con-monto':
-        return await this.generateConstanciaTiempoCotizarConMonto(data, true);
-      default:
-        throw new Error('Invalid constancia type');
-    }
   }
 }

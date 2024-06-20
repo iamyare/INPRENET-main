@@ -12,34 +12,35 @@ import { DatosEstaticosService } from 'src/app/services/datos-estaticos.service'
 })
 export class AddAdminComponent implements OnInit {
   userForm: FormGroup;
-  centrosTrabajo: any[] = [];
+  centrosTrabajoTipoE: any[] = [];
   modulos: any[] = [];
 
   constructor(
     private fb: FormBuilder,
     private snackBar: MatSnackBar,
     private datosEstaticosService: DatosEstaticosService,
-    private authService : AuthService,
+    private authService: AuthService,
   ) {
     this.userForm = this.fb.group({
       nombreEmpleado: ['', Validators.required],
       nombrePuesto: ['', Validators.required],
       correo: ['', [Validators.required, Validators.email]],
       numeroEmpleado: ['', Validators.required],
-      idRole: ['', Validators.required],
       centroTrabajo: ['', Validators.required],
       modulo: ['', Validators.required],
     });
   }
 
   ngOnInit(): void {
-    this.datosEstaticosService.getAllCentrosTrabajo().then(() => {
-      this.centrosTrabajo = this.datosEstaticosService.centrosTrabajo;
+    this.datosEstaticosService.getCentrosTrabajoTipoE().then(() => {
+      this.centrosTrabajoTipoE = this.datosEstaticosService.centrosTrabajoTipoE;
     });
   }
 
   onCentroTrabajoChange(event: any): void {
     const idCentroTrabajo = event.value;
+    console.log(idCentroTrabajo);
+
     this.authService.obtenerModulosPorCentroTrabajo(idCentroTrabajo).subscribe((modulos) => {
       this.modulos = modulos.map(modulo => ({
         label: modulo.nombre,
@@ -50,12 +51,32 @@ export class AddAdminComponent implements OnInit {
 
   onSubmit(): void {
     if (this.userForm.valid) {
-      const newUser = this.userForm.value;
-      console.log('Nuevo usuario:', newUser);
-      this.snackBar.open('Usuario creado exitosamente', 'Cerrar', {
-        duration: 3000
-      });
-      this.userForm.reset();
+      const { nombreEmpleado, nombrePuesto, correo, numeroEmpleado, centroTrabajo, modulo } = this.userForm.value;
+      const newUser = {
+        nombreEmpleado,
+        nombrePuesto,
+        correo,
+        numeroEmpleado,
+        idModulo: modulo,
+      };
+
+      console.log(newUser);
+
+
+      this.authService.preRegistroAdmin(newUser).subscribe(
+        () => {
+          this.snackBar.open('Usuario creado exitosamente', 'Cerrar', {
+            duration: 3000
+          });
+          this.userForm.reset();
+        },
+        error => {
+          console.error('Error al crear usuario:', error);
+          this.snackBar.open('Error al crear usuario', 'Cerrar', {
+            duration: 3000
+          });
+        }
+      );
     } else {
       this.snackBar.open('Por favor completa todos los campos correctamente', 'Cerrar', {
         duration: 3000

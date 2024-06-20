@@ -84,7 +84,7 @@ export class EditarDialogComponent implements OnInit {
       const month = (formValues.fechaNacimiento.getMonth() + 1).toString().padStart(2, '0');
       const day = formValues.fechaNacimiento.getDate().toString().padStart(2, '0');
 
-      formValues.fechaNacimiento = `${year}-${month}-${day}`;
+      formValues.fechaNacimiento = `${day}/${month}/${year}`;
     }
 
     if (this.formGroup.valid) {

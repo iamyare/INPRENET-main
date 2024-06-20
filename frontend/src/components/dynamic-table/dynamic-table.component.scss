@@ -34,7 +34,7 @@
   background-color: #229e92;
   color: #ffffff;
   padding: 10px;
-  text-align: center;
+  text-align: left;
 }
 
 .custom-row {
@@ -82,7 +82,8 @@
   color: #ff5252; /* Color del ícono de eliminar */
 }
 
-.boton-editar, .boton-eliminar {
+.boton-editar,
+.boton-eliminar {
   background-color: transparent; /* Fondo transparente */
   border: none; /* Sin borde */
   cursor: pointer; /* Cursor de mano */

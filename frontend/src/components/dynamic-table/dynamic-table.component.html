@@ -25,7 +25,7 @@
 <div style="overflow-x: auto">
   <table class="custom-table">
     <thead>
-      <tr class="text-center">
+      <tr>
         <th class="custom-header" *ngIf="verOpcEditar"></th>
         <th *ngFor="let col of columns" class="custom-header">
           {{ col.header }}
@@ -80,33 +80,39 @@
 
 
         <td *ngIf="verBotEditar">
-          <button mat-icon-button *ngIf="!row.isEditing" (click)="startEditing(row)" class="boton-editar">
+          <button style="height: auto" color="primary" mat-icon-button *ngIf="!row.isEditing"
+            (click)="startEditing(row)" class="boton-editar">
             <mat-icon class="icono-editar">edit</mat-icon>
           </button>
-          <button mat-raised-button *ngIf="row.isEditing" (click)="saveChanges(row)" class="boton-estetico">Guardar</button>
-          <button mat-raised-button *ngIf="row.isEditing" (click)="stopEditing(row)" class="boton-estetico">Cancelar</button>
+          <button style="height: auto" color="primary" mat-raised-button *ngIf="row.isEditing"
+            (click)="saveChanges(row)" class="boton-estetico">Guardar</button>
+          <button style="height: auto" color="warn" mat-raised-button *ngIf="row.isEditing" (click)="stopEditing(row)"
+            class="boton-estetico">Cancelar</button>
         </td>
 
         <td *ngIf="mostrarBotonUno">
-          <button *ngIf="mostrarBotonUno" mat-raised-button (click)="ejecutarAccionUno(row)">{{ etiquetaBotonUno }}</button>
+          <button mat-raised-button style="height: auto" *ngIf="mostrarBotonUno" mat-raised-button
+            (click)="ejecutarAccionUno(row)">{{ etiquetaBotonUno }}</button>
         </td>
 
         <td *ngIf="mostrarBotonDos">
-          <button *ngIf="mostrarBotonDos" mat-raised-button (click)="ejecutarAccionDos(row)">{{ etiquetaBotonDos }}</button>
+          <button mat-raised-button style="height: auto" *ngIf="mostrarBotonDos" mat-raised-button
+            (click)="ejecutarAccionDos(row)">{{ etiquetaBotonDos }}</button>
         </td>
 
         <td *ngIf="mostrarBotonTres">
-          <button *ngIf="mostrarBotonTres" mat-raised-button (click)="ejecutarAccionTres(row)">{{ etiquetaBotonTres }}</button>
+          <button mat-raised-button style="height: auto" *ngIf="mostrarBotonTres" mat-raised-button
+            (click)="ejecutarAccionTres(row)">{{ etiquetaBotonTres }}</button>
         </td>
 
         <td *ngIf="mostrarBotonEliminar">
-          <button mat-icon-button (click)="eliminarFila(row)" class="boton-eliminar">
+          <button style="height: auto" mat-icon-button (click)="eliminarFila(row)" class="boton-eliminar">
             <mat-icon class="icono-eliminar">delete</mat-icon>
           </button>
         </td>
 
         <td *ngIf="mostrarBotonEditar">
-          <button mat-icon-button (click)="editarFila(row)" class="boton-editar">
+          <button style="height: auto" mat-icon-button (click)="editarFila(row)" class="boton-editar">
             <mat-icon class="icono-editar">edit</mat-icon>
           </button>
         </td>
@@ -115,4 +121,5 @@
   </table>
 </div>
 
-<mat-paginator [length]="filas?.length" [pageSize]="itemsPerPage" [pageSizeOptions]="[itemsPerPage]" (page)="onPageChange($event)"></mat-paginator>
+<mat-paginator [length]="filas?.length" [pageSize]="itemsPerPage" [pageSizeOptions]="[itemsPerPage]"
+  (page)="onPageChange($event)"></mat-paginator>

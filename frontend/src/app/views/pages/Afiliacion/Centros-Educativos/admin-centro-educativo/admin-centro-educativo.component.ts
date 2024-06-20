@@ -13,7 +13,7 @@ export class AdminCentroEducativoComponent implements OnInit {
   departamentos: any = [];
   municipios: any = [];
 
-  constructor(private fb: FormBuilder, private direccionService: DireccionService) {}
+  constructor(private fb: FormBuilder, private direccionService: DireccionService) { }
 
   ngOnInit(): void {
     this.addControlsToForm();
@@ -21,26 +21,26 @@ export class AdminCentroEducativoComponent implements OnInit {
   }
 
   addControlsToForm() {
-    const formControls:any = {
-      administradorNombre: [''],
-      administradorTelefono: [''],
-      administradorCorreo: [''],
-      contadorNombre: [''],
-      contadorTelefono: [''],
-      contadorCorreo: [''],
-      propietarioNombre: [''],
-      propietarioColonia: [''],
+    const formControls: any = {
+      administradorNombre: ['asd'],
+      administradorTelefono: ['22252625'],
+      administradorCorreo: ['pedro@gmail.com'],
+      contadorNombre: ['Maria Del Carmen'],
+      contadorTelefono: ['98866325'],
+      contadorCorreo: ['maria@gmail.com'],
+      propietarioNombre: ['Kenia Rodriguez'],
+      propietarioColonia: ['La Miraflores'],
       propietarioBarrio: [''],
-      propietarioGrupo: [''],
-      propietarioCasa: [''],
-      propietarioDepartamento: [''],
-      propietarioMunicipio: [''],
+      propietarioGrupo: ['C. Roatan'],
+      propietarioCasa: ['556'],
+      propietarioDepartamento: ['ATLANTIDA'],
+      propietarioMunicipio: ['ESPARTA'],
       propietarioTelefonoCasa: [''],
-      propietarioCelular1: [''],
+      propietarioCelular1: ['98855663'],
       propietarioCelular2: [''],
-      propietarioCorreo1: [''],
-      propietarioCorreo2: [''],
-      propietarioReferencia: [''],
+      propietarioCorreo1: ['Kenia@gmail.com'],
+      propietarioCorreo2: ['KeniaRod@gmail.com'],
+      propietarioReferencia: ['Atrás de la Teletón'],
     };
 
     for (const key in formControls) {

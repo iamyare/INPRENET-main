@@ -166,9 +166,10 @@ export class EditDatosGeneralesComponent implements OnInit {
           this.Afiliado = result;
           this.estadoAfiliacion = result.estadoAfiliacion;
           this.fallecido = result.fallecido;
+          console.log(result);
 
           this.formDatosGenerales.value.refpers[0] = {
-            n_identificacion: result.n_identificacion,
+            n_identificacion: result.N_IDENTIFICACION,
             rtn: result.RTN,
             primer_nombre: result.PRIMER_NOMBRE,
             segundo_nombre: result.SEGUNDO_NOMBRE,
@@ -189,7 +190,7 @@ export class EditDatosGeneralesComponent implements OnInit {
             estado_civil: result.ESTADO_CIVIL,
             representacion: result.REPRESENTACION,
             sexo: result.SEXO,
-            id_pais_nacionalidad: result.ID_PAIS,
+            id_pais: 1,
             id_tipo_identificacion: result.ID_IDENTIFICACION,
             id_profesion: result.ID_PROFESION,
             id_departamento_residencia: result.id_departamento_residencia,

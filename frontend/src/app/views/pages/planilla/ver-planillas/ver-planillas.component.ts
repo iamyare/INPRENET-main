@@ -30,7 +30,7 @@ export class VerPlanillasComponent implements OnInit {
   ngOnInit(): void {
     this.myColumns = [
       {
-        header: 'Codigo de planilla',
+        header: 'Código de planilla',
         col: 'codigo_planilla',
         isEditable: false
       },

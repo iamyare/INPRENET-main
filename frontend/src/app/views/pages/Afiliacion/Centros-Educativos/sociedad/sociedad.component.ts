@@ -15,6 +15,7 @@ export class SociedadComponent implements OnInit {
     {
       label: 'Nombre',
       name: 'nombre',
+      value: "prueba@gmail.com",
       type: 'text',
       icon: 'person',
       row: 1,
@@ -25,6 +26,7 @@ export class SociedadComponent implements OnInit {
     {
       label: 'RTN',
       name: 'rtn',
+      value: "12345678912345",
       type: 'text',
       icon: 'business',
       row: 1,
@@ -35,6 +37,7 @@ export class SociedadComponent implements OnInit {
     {
       label: 'Teléfono',
       name: 'telefono',
+      value: "22255636",
       type: 'tel',
       icon: 'phone',
       row: 2,
@@ -44,6 +47,7 @@ export class SociedadComponent implements OnInit {
     },
     {
       label: 'Correo Electrónico',
+      value: "prueba@gmail.com",
       name: 'correo_electronico',
       type: 'email',
       icon: 'email',

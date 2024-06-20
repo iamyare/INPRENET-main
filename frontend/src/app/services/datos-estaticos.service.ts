@@ -332,11 +332,11 @@ export class DatosEstaticosService {
     },
     {
       ID_TIPO_PLANILLA: 2,
-      NOMBRE_PLANILLA: "PLANILLA DECIMO TERCERO"
+      NOMBRE_PLANILLA: "PLANILLA DÉCIMO TERCERO"
     },
     {
       ID_TIPO_PLANILLA: 3,
-      NOMBRE_PLANILLA: "PLANILLA DECIMO CUARTO"
+      NOMBRE_PLANILLA: "PLANILLA DÉCIMO CUARTO"
     },
   ];
 

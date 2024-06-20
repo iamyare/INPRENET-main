@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, EventEmitter, Output, inject } from '@angular/core';
-import { ControlContainer } from '@angular/forms';
+import { ControlContainer, FormBuilder, FormGroup, Validators } from '@angular/forms';
 
 @Component({
   selector: 'app-progressbar',
@@ -25,106 +25,59 @@ export class ProgressbarComponent {
   @Output() newdatosColegiosMag = new EventEmitter<any>()
   @Output() newDatosFa = new EventEmitter<any>()
 
-  datosG: boolean = true;
-  datosColegMagisteriales: boolean = false;
-  datosCT: boolean = false;
-  datosHS: boolean = false;
-  datosRP: boolean = false;
-  datosB: boolean = false;
-  datosA: boolean = false;
-  datosF: boolean = false;
+  isLinear = true;
+  firstFormGroup: FormGroup;
+  secondFormGroup: FormGroup;
+
+  datosG = false;
+  datosColegMagisteriales = false;
+  datosHS = false;
+  datosCT = false;
+  datosRP = false;
+  datosB = false;
+  datosF = false;
+
+  constructor(private _formBuilder: FormBuilder) {
+    this.firstFormGroup = this._formBuilder.group({
+      firstCtrl: ['', Validators.required]
+    });
+    this.secondFormGroup = this._formBuilder.group({
+      secondCtrl: ['', Validators.required]
+    });
+  }
 
   activarDatosGe() {
     this.datosG = true;
-    this.datosCT = false;
-    this.datosHS = false;
-    this.datosRP = false;
-    this.datosB = false;
-    this.datosF = false;
-    this.datosA = false;
-    this.datosColegMagisteriales = false;
-    this.newDatBenChange.emit(this.datosG);
-  }
-
-  activarDatosCentTrab() {
-    this.datosG = false;
-    this.datosCT = true;
-    this.datosHS = false;
-    this.datosRP = false;
-    this.datosB = false;
-    this.datosF = false;
-    this.datosA = false;
-    this.datosColegMagisteriales = false;
-    this.newEstCentrTrab.emit(this.datosCT);
-
-  }
-  activarDatosBancarios() {
-    this.datosG = false;
-    this.datosCT = false;
-    this.datosHS = true;
-    this.datosRP = false;
-    this.datosB = false;
-    this.datosF = false;
-    this.datosA = false;
-    this.datosColegMagisteriales = false;
-    this.newdatosHS.emit(this.datosHS);
-  }
-  activarDatosRefPers() {
-    this.datosG = false;
-    this.datosCT = false;
-    this.datosHS = false;
-    this.datosRP = true;
-    this.datosB = false;
-    this.datosF = false;
-    this.datosA = false;
-    this.datosColegMagisteriales = false;
-    this.newdatosRP.emit(this.datosRP);
-  }
-  activarDatosBenef() {
-    this.datosG = false;
-    this.datosCT = false;
-    this.datosHS = false;
-    this.datosRP = false;
-    this.datosB = true;
-    this.datosF = false;
-    this.datosA = false;
-    this.datosColegMagisteriales = false;
-    this.newdatosB.emit(this.datosB);
-  }
-  activarFinalizar() {
-    this.datosG = false;
-    this.datosCT = false;
-    this.datosHS = false;
-    this.datosRP = false;
-    this.datosB = false;
-    this.datosF = true;
-    this.datosA = false;
-    this.datosColegMagisteriales = false;
-    this.newdatosF.emit(this.datosF);
+    this.datosColegMagisteriales = this.datosHS = this.datosCT = this.datosRP = this.datosB = this.datosF = false;
   }
 
   activarDatosColMag() {
-    this.datosG = false;
-    this.datosCT = false;
-    this.datosHS = false;
-    this.datosRP = false;
-    this.datosB = false;
-    this.datosF = false;
-    this.datosA = false;
     this.datosColegMagisteriales = true;
-    this.newdatosColegiosMag.emit(this.datosColegMagisteriales);
+    this.datosG = this.datosHS = this.datosCT = this.datosRP = this.datosB = this.datosF = false;
   }
 
-  prueba7() {
-    this.datosG = false;
-    this.datosCT = false;
-    this.datosHS = false;
-    this.datosRP = false;
-    this.datosB = false;
-    this.datosF = false;
-    this.datosA = true;
-    this.datosColegMagisteriales = false;
-    this.newdatosA.emit(this.datosA);
+  activarDatosBancarios() {
+    this.datosHS = true;
+    this.datosG = this.datosColegMagisteriales = this.datosCT = this.datosRP = this.datosB = this.datosF = false;
   }
 
+  activarDatosCentTrab() {
+    this.datosCT = true;
+    this.datosG = this.datosColegMagisteriales = this.datosHS = this.datosRP = this.datosB = this.datosF = false;
+  }
+
+  activarDatosRefPers() {
+    this.datosRP = true;
+    this.datosG = this.datosColegMagisteriales = this.datosHS = this.datosCT = this.datosB = this.datosF = false;
+  }
+
+  activarDatosBenef() {
+    this.datosB = true;
+    this.datosG = this.datosColegMagisteriales = this.datosHS = this.datosCT = this.datosRP = this.datosF = false;
+  }
+
+  activarFinalizar() {
+    this.datosF = true;
+    this.datosG = this.datosColegMagisteriales = this.datosHS = this.datosCT = this.datosRP = this.datosB = false;
+  }
 }

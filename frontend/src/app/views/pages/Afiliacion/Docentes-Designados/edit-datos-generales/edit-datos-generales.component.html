@@ -74,7 +74,7 @@
         <div class="col-lg-4 col-md-12" *ngIf="fallecido == 'SI'">
           <mat-form-field style="flex-direction: column-reverse;" class="example-full-width inputs"
             appearance="outline">
-            <mat-label>Departamento de Defunción</mat-label>
+            <mat-label>Departamento De Defunción</mat-label>
             <mat-icon matPrefix>location_city</mat-icon>
             <mat-select formControlName="id_departamento_defuncion" (selectionChange)="onDepartamentoChange($event)">
               <mat-option *ngFor="let departamento of departamentos" [value]="departamento.value">
@@ -89,7 +89,7 @@
         <div class="col-lg-4 col-md-12" *ngIf="fallecido == 'SI'">
           <mat-form-field style="flex-direction: column-reverse;" class="example-full-width inputs"
             appearance="outline">
-            <mat-label>Municipio de Defunción</mat-label>
+            <mat-label>Municipio De Defunción</mat-label>
             <mat-icon matPrefix>location_city</mat-icon>
             <mat-select formControlName="id_municipio_defuncion">
               <mat-option *ngFor="let municipio of municipios" [value]="municipio.value">

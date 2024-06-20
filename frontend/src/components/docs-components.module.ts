@@ -69,6 +69,8 @@ import { DynamicTablePruebaComponent } from './dynamic-table-prueba/dynamic-tabl
 import { DynamicMenuConstanciasComponent } from './Dynamics/dynamic-menu-constancias/dynamic-menu-constancias.component';
 import { MapsComponent } from './maps/maps.component';
 import { GoogleMapsModule } from '@angular/google-maps';
+import { MatStepperModule } from '@angular/material/stepper';
+
 
 @NgModule({
   declarations: [
@@ -107,9 +109,10 @@ import { GoogleMapsModule } from '@angular/google-maps';
     ProgressbarDynamicComponent,
     SharedFormFieldsComponent,
     DynamicMenuConstanciasComponent,
-    DynamicTablePruebaComponent
+    DynamicTablePruebaComponent,
   ],
   exports: [
+    MatStepperModule,
     MapsComponent,
     ProgressbarComponent,
     ProgressplanillComponent,
@@ -146,6 +149,7 @@ import { GoogleMapsModule } from '@angular/google-maps';
     DynamicMenuConstanciasComponent
   ],
   imports: [
+    MatStepperModule,
     GoogleMapsModule,
     WebcamModule,
     CommonModule,

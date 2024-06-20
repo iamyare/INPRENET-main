@@ -140,9 +140,9 @@ export class VerSociosComponent {
   manejarAccionUno(row: any) {
     const campos = [
       { nombre: 'numero_rentas_max', tipo: 'number', requerido: true, etiqueta: 'Número de rentas máximas', editable: false },
-      { nombre: 'periodoInicio', tipo: 'number', requerido: true, etiqueta: 'Periodo de inicio' },
-      { nombre: 'periodoFinalizacion', tipo: 'number', requerido: true, etiqueta: 'Periodo de finalización' },
-      { nombre: 'monto_por_periodo', tipo: 'text', requerido: true, etiqueta: 'Monto por periodo' },
+      { nombre: 'periodoInicio', tipo: 'number', requerido: true, etiqueta: 'Período de inicio' },
+      { nombre: 'periodoFinalizacion', tipo: 'number', requerido: true, etiqueta: 'Período de finalización' },
+      { nombre: 'monto_por_periodo', tipo: 'text', requerido: true, etiqueta: 'Monto por período' },
       { nombre: 'Monto_total', tipo: 'number', requerido: true, etiqueta: 'Monto Total' },
 
     ];
@@ -161,9 +161,9 @@ export class VerSociosComponent {
   manejarAccionDos(row: any) {
     const campos = [
       { nombre: 'numero_rentas_max', tipo: 'number', requerido: true, etiqueta: 'Número de rentas máximas', editable: false },
-      { nombre: 'periodoInicio', tipo: 'number', requerido: true, etiqueta: 'Periodo de inicio' },
-      { nombre: 'periodoFinalizacion', tipo: 'number', requerido: true, etiqueta: 'Periodo de finalización' },
-      { nombre: 'monto_por_periodo', tipo: 'text', requerido: true, etiqueta: 'Monto por periodo' },
+      { nombre: 'periodoInicio', tipo: 'number', requerido: true, etiqueta: 'Período de inicio' },
+      { nombre: 'periodoFinalizacion', tipo: 'number', requerido: true, etiqueta: 'Período de finalización' },
+      { nombre: 'monto_por_periodo', tipo: 'text', requerido: true, etiqueta: 'Monto por período' },
       { nombre: 'Monto_total', tipo: 'number', requerido: true, etiqueta: 'Monto Total' },
 
     ];

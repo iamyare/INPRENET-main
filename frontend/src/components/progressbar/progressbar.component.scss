@@ -6,33 +6,33 @@ $grey-light: White;
   cursor: pointer;
 }
 
-%remain-steps{
+%remain-steps {
   &:before {
     content: counter(stepNum);
     font-family: inherit;
     font-weight: 700;
   }
-  &:after{
+  &:after {
     background-color: $grey-light;
   }
 }
-.multi-steps{
+.multi-steps {
   display: table;
   table-layout: fixed;
   width: 100%;
-  > li{
+  > li {
     counter-increment: stepNum;
     text-align: center;
     display: table-cell;
     position: relative;
     color: $brand-primary;
 
-    &:before{
-      content: '\f00c';
-      content: '\2713;';
-      content: '\10003';
-      content: '\10004';
-      content: '\2713';
+    &:before {
+      content: "\f00c";
+      content: "\2713;";
+      content: "\10003";
+      content: "\10004";
+      content: "\2713";
       display: block;
       margin: 0 auto 4px;
       background-color: $white;
@@ -48,8 +48,8 @@ $grey-light: White;
         radius: 50%;
       }
     }
-    &:after{
-      content: '';
+    &:after {
+      content: "";
       height: 2px;
       width: 100%;
       background-color: $brand-primary;
@@ -58,23 +58,23 @@ $grey-light: White;
       left: 50%;
       z-index: -1;
     }
-    &:last-child{
-      &:after{
+    &:last-child {
+      &:after {
         display: none;
       }
     }
 
-    &.is-active{
+    &.is-active {
       @extend %remain-steps;
-      &:before{
+      &:before {
         background-color: $white;
         border-color: $brand-primary;
       }
 
-      ~ li{
+      ~ li {
         color: #808080;
         @extend %remain-steps;
-        &:before{
+        &:before {
           background-color: $grey-light;
           border-color: $grey-light;
         }

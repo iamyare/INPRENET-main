@@ -10,7 +10,8 @@
       <img *ngIf="persona.foto_perfil" [src]="getFotoUrl(persona.foto_perfil)" alt="Foto de Perfil">
     </div>
     <div class="perfil-datos">
-      <h2>{{ persona.primer_nombre }} {{ persona.segundo_nombre }} {{ persona.tercer_nombre }} {{ persona.primer_apellido }} {{ persona.segundo_apellido }}</h2>
+      <h2>{{ persona.primer_nombre }} {{ persona.segundo_nombre }} {{ persona.tercer_nombre }} {{
+        persona.primer_apellido }} {{ persona.segundo_apellido }}</h2>
       <p><strong>DNI:</strong> {{ persona.n_identificacion }}</p>
       <p><strong>Teléfono:</strong> {{ persona.telefono_1 }}</p>
       <p><strong>Correo Principal:</strong> {{ persona.correo_1 }}</p>
@@ -19,10 +20,11 @@
     </div>
   </div>
   <mat-tab-group dynamicHeight>
-    <mat-tab label="INFORMACION GENERAL">
+    <mat-tab label="INFORMACIÓN GENERAL">
       <app-informacion-general [persona]="persona"></app-informacion-general>
     </mat-tab>
-    <mat-tab *ngFor="let detalle of detallePersonaUnico; trackBy: trackByPerfil" [label]="detalle.tipoPersona.tipo_persona">
+    <mat-tab *ngFor="let detalle of detallePersonaUnico; trackBy: trackByPerfil"
+      [label]="detalle.tipoPersona.tipo_persona">
       <ng-container [ngSwitch]="detalle.tipoPersona.tipo_persona">
         <app-afiliado *ngSwitchCase="'AFILIADO'" [persona]="persona"></app-afiliado>
         <app-beneficiario *ngSwitchCase="'BENEFICIARIO'" [persona]="persona"></app-beneficiario>

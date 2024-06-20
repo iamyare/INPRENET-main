@@ -1,13 +1,96 @@
-<div class="container-fluid" style="position: sticky;">
-    <ul class="list-unstyled multi-steps pointer-cursor">
-        <li (click)="activarDatosGe()" [ngClass]="datosG ? 'is-active' : 'inactive'" id="estado">Datos Generales</li>
-        <li (click)="activarDatosColMag()" [ngClass]="datosColegMagisteriales ? 'is-active' : 'inactive'" id="estado">
-            Colegios Magisteriales</li>
-        <li (click)="activarDatosBancarios()" [ngClass]="datosHS ? 'is-active' : 'inactive'">Datos Cuentas Bancarias
-        </li>
-        <li (click)="activarDatosCentTrab()" [ngClass]="datosCT ? 'is-active' : 'inactive'">Centros de Trabajo</li>
-        <li (click)="activarDatosRefPers()" [ngClass]="datosRP ? 'is-active' : 'inactive'">Referencias Personales</li>
-        <li (click)="activarDatosBenef()" [ngClass]="datosB ? 'is-active' : 'inactive'">Beneficiarios</li>
-        <li (click)="activarFinalizar()" [ngClass]="datosF ? 'is-active' : 'inactive'">Finalizar</li>
-    </ul>
-</div>
+<mat-stepper [linear]="isLinear" #stepper>
+    <mat-step [stepControl]="firstFormGroup">
+        <form [formGroup]="firstFormGroup">
+            <ng-template matStepLabel>
+                <span (click)="activarDatosGe()" [ngClass]="datosG ? 'is-active' : 'inactive'" id="estado">
+                    Datos Generales
+                </span>
+            </ng-template>
+            <mat-form-field>
+                <mat-label>Name</mat-label>
+                <input matInput placeholder="Last name, First name" formControlName="firstCtrl" required>
+            </mat-form-field>
+            <div>
+                <button mat-button matStepperNext>Siguiente</button>
+            </div>
+        </form>
+    </mat-step>
+    <mat-step [stepControl]="secondFormGroup">
+        <form [formGroup]="secondFormGroup">
+            <ng-template matStepLabel>
+                <span (click)="activarDatosColMag()" [ngClass]="datosColegMagisteriales ? 'is-active' : 'inactive'"
+                    id="estado">
+                    Colegios Magisteriales
+                </span>
+            </ng-template>
+            <mat-form-field>
+                <mat-label>Address</mat-label>
+                <input matInput formControlName="secondCtrl" placeholder="Ex. 1 Main St, New York, NY" required>
+            </mat-form-field>
+            <div>
+                <button mat-button matStepperPrevious>Atrás</button>
+                <button mat-button matStepperNext>Siguiente</button>
+            </div>
+        </form>
+    </mat-step>
+    <mat-step>
+        <ng-template matStepLabel>
+            <span (click)="activarDatosBancarios()" [ngClass]="datosHS ? 'is-active' : 'inactive'" id="estado">
+                Datos Cuentas Bancarias
+            </span>
+        </ng-template>
+        <p>Contenido para Datos Cuentas Bancarias</p>
+        <div>
+            <button mat-button matStepperPrevious>Atrás</button>
+            <button mat-button matStepperNext>Siguiente</button>
+        </div>
+    </mat-step>
+    <mat-step>
+        <ng-template matStepLabel>
+            <span (click)="activarDatosCentTrab()" [ngClass]="datosCT ? 'is-active' : 'inactive'" id="estado">
+                Centros De Trabajo
+            </span>
+        </ng-template>
+        <p>Contenido para Centros De Trabajo</p>
+        <div>
+            <button mat-button matStepperPrevious>Atrás</button>
+            <button mat-button matStepperNext>Siguiente</button>
+        </div>
+    </mat-step>
+    <mat-step>
+        <ng-template matStepLabel>
+            <span (click)="activarDatosRefPers()" [ngClass]="datosRP ? 'is-active' : 'inactive'" id="estado">
+                Referencias Personales
+            </span>
+        </ng-template>
+        <p>Contenido para Referencias Personales</p>
+        <div>
+            <button mat-button matStepperPrevious>Atrás</button>
+            <button mat-button matStepperNext>Siguiente</button>
+        </div>
+    </mat-step>
+    <mat-step>
+        <ng-template matStepLabel>
+            <span (click)="activarDatosBenef()" [ngClass]="datosB ? 'is-active' : 'inactive'" id="estado">
+                Beneficiarios
+            </span>
+        </ng-template>
+        <p>Contenido para Beneficiarios</p>
+        <div>
+            <button mat-button matStepperPrevious>Atrás</button>
+            <button mat-button matStepperNext>Siguiente</button>
+        </div>
+    </mat-step>
+    <mat-step>
+        <ng-template matStepLabel>
+            <span (click)="activarFinalizar()" [ngClass]="datosF ? 'is-active' : 'inactive'" id="estado">
+                Finalizar
+            </span>
+        </ng-template>
+        <p>Has completado todos los pasos.</p>
+        <div>
+            <button mat-button matStepperPrevious>Atrás</button>
+            <button mat-button (click)="stepper.reset()">Resetear</button>
+        </div>
+    </mat-step>
+</mat-stepper>

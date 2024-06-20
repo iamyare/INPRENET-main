@@ -50,12 +50,12 @@ export class VerPlanillasComponent implements OnInit {
         isEditable: true
       },
       {
-        header: 'Periodo de inicio',
+        header: 'Período de inicio',
         col: 'periodoInicio',
         isEditable: false
       },
       {
-        header: 'Periodo de finalizacion',
+        header: 'Período de finalización',
         col: 'periodoFinalizacion',
         isEditable: false
       },

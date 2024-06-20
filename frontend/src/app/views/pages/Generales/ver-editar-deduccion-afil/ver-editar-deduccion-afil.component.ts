@@ -67,7 +67,7 @@ export class VerEditarDeduccionAfilComponent implements OnInit {
         isEditable: false
       },
       {
-        header: 'Codigo de planilla',
+        header: 'Código de planilla',
         col: 'codigo_planilla',
         isEditable: false
       },

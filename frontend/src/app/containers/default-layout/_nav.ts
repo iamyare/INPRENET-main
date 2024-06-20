@@ -47,14 +47,14 @@ export const navItems: INavData[] = [
   },
   {
     title: true,
-    name: 'Gestion De Personal'
+    name: 'Gestión De Personal'
   },
   {
-    name: 'Gestion',
+    name: 'Gestión',
     iconComponent: { name: 'cilMoney' },
     children: [
       {
-        name: 'Gestion de usuarios',
+        name: 'Gestión de usuarios',
         url: '/Gestion/editar-usuarios',
       },
       {

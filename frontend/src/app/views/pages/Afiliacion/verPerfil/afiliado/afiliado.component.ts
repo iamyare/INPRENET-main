@@ -5,14 +5,14 @@ import { Component, Input } from '@angular/core';
   templateUrl: './afiliado.component.html',
   styleUrls: ['./afiliado.component.scss']
 })
-export class AfiliadoComponent{
+export class AfiliadoComponent {
   @Input() persona: any = {};
 
   currentStepIndex = 0;
 
   steps = [
     { label: 'Constancias', isActive: true },
-    { label: 'Designados Beneficiarios', isActive: true },
+    { label: 'Beneficiarios', isActive: true },
     { label: 'Cuentas INPREMA', isActive: true },
     { label: 'Colegios Magisteriales', isActive: true },
     { label: 'Referencias Personales', isActive: true },

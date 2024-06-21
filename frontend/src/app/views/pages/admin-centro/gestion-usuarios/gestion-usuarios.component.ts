@@ -45,7 +45,7 @@ export class GestionUsuariosComponent implements OnInit {
       { header: 'Nombre', col: 'nombreEmpleado', isEditable: true, validationRules: [Validators.required] },
       { header: 'Correo', col: 'correo_1', isEditable: true, validationRules: [Validators.required, Validators.email] },
       { header: 'Estado', col: 'estado' },
-      { header: 'Centro de Trabajo', col: 'nombre_centro_trabajo' },
+      //{ header: 'Centro de Trabajo', col: 'nombre_centro_trabajo' },
       { header: 'Puesto', col: 'nombrePuesto' },
     ];
 
@@ -71,6 +71,8 @@ export class GestionUsuariosComponent implements OnInit {
     try {
       const data: any = await this.usuarioService.obtenerUsuariosPorModulos(this.selectedModulos).toPromise();
       this.usuarios = data.map((item: any) => {
+        console.log(item);
+
         return {
           id: item.id_usuario_empresa,
           nombreEmpleado: item.empleadoCentroTrabajo?.empleado?.nombreEmpleado || 'N/A',

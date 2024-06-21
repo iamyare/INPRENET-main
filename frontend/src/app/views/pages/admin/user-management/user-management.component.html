@@ -1,7 +1,7 @@
 <div class="user-management-container">
   <h2>Gestión de Usuarios</h2>
   <button mat-raised-button color="primary" (click)="addUser()">Agregar Usuario</button>
-  <table mat-table [dataSource]="users" class="mat-elevation-z8">
+  <table mat-table [dataSource]="users">
     <!-- Definición de columnas -->
     <ng-container matColumnDef="name">
       <th mat-header-cell *matHeaderCellDef> Nombre </th>

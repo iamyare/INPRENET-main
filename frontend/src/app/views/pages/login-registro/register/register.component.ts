@@ -88,8 +88,12 @@ export class RegisterComponent implements OnInit {
     }
   }
 
+  isFormComplete(): boolean {
+    return this.form.valid && this.archivo !== null && this.fotografia !== null;
+  }
+
   enviarInformacionDeSeguridad() {
-    if (this.form.valid && this.archivo) {
+    if (this.isFormComplete()) {
       const datos = {
         correo: this.form.get('correo')!.value,
         contrasena: this.form.get('contrasena')!.value,
@@ -103,7 +107,7 @@ export class RegisterComponent implements OnInit {
         numero_identificacion: this.form.get('numero_identificacion')!.value
       };
 
-      this.authService.completarRegistro(this.token, datos, this.archivo).subscribe({
+      this.authService.completarRegistro(this.token, datos, this.archivo!).subscribe({
         next: () => {
           this.toastr.success('Registro completado con éxito', 'Éxito');
           this.router.navigate(['/login']);
@@ -114,7 +118,7 @@ export class RegisterComponent implements OnInit {
         }
       });
     } else {
-      this.toastr.error('Por favor, completa todos los campos y sube el archivo de identificación.', 'Error');
+      this.toastr.error('Por favor, completa todos los campos y sube los archivos requeridos.', 'Error');
     }
   }
 }

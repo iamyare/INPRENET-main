@@ -98,7 +98,7 @@
       </div>
 
       <div class="button-container">
-        <button mat-raised-button color="primary" type="submit">Completar Registro</button>
+        <button mat-raised-button color="primary" type="submit" [disabled]="!isFormComplete()">Completar Registro</button>
       </div>
     </form>
   </div>

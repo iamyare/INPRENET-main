@@ -4,6 +4,7 @@ import * as QRCode from 'qrcode';
 import * as pdfMake from 'pdfmake/build/pdfmake';
 import * as pdfFonts from 'pdfmake/build/vfs_fonts';
 import { DriveService } from '../drive/drive.service';
+import { unirNombres } from '../../../shared/formatoNombresP';
 import * as path from 'path';
 
 @Injectable()
@@ -15,7 +16,7 @@ export class PdfService {
   async getMembreteBase64(): Promise<string> {
     const imagesPath = process.env.IMAGES_PATH || path.resolve(__dirname, '../../../../assets/images');
     const imagePath = path.join(imagesPath, 'MEMBRETADO.jpg');
-    
+
     const base64 = fs.readFileSync(imagePath, { encoding: 'base64' });
     return `data:image/jpeg;base64,${base64}`;
   }
@@ -23,10 +24,10 @@ export class PdfService {
   async getFirmaDigitalBase64(): Promise<string> {
     const imagesPath = process.env.IMAGES_PATH || path.resolve(__dirname, '../../../../assets/images');
     const imagePath = path.join(imagesPath, 'Firma.jpg');
-    
+
     const base64 = fs.readFileSync(imagePath, { encoding: 'base64' });
     return `data:image/jpeg;base64,${base64}`;
-}
+  }
 
   async generateConstancia(data: any, includeQR: boolean, templateFunction: (data: any, includeQR: boolean) => any): Promise<Buffer> {
     const base64data = await this.getMembreteBase64();
@@ -49,7 +50,7 @@ export class PdfService {
         style: 'subheader'
       },
       {
-        text: `${data.primer_nombre} ${data.segundo_nombre} ${data.tercer_nombre} ${data.primer_apellido} ${data.segundo_apellido}`,
+        text: unirNombres(data.primer_nombre, data.segundo_nombre, data.tercer_nombre, data.primer_apellido, data.segundo_apellido),
         style: 'name'
       },
       {
@@ -70,12 +71,12 @@ export class PdfService {
       { text: 'Jefe Departamento de Afiliación', style: 'signatureTitle' },
       { text: '\n\n\n' }
     ];
-  
+
     if (includeQR) {
       const qrCode = await QRCode.toDataURL(`https://drive.google.com/file/d/${data.fileId}/view`);
       content.push({ image: qrCode, width: 100, alignment: 'center' });
     }
-  
+
     return {
       pageSize: 'A4',
       pageMargins: [40, 120, 40, 60],
@@ -129,7 +130,7 @@ export class PdfService {
       }
     };
   }
-  
+
 
   async generateConstanciaAfiliacion(data: any, includeQR: boolean): Promise<Buffer> {
     return this.generateConstancia(data, includeQR, this.generateConstanciaAfiliacionTemplate);
@@ -139,7 +140,7 @@ export class PdfService {
     const nombreCompleto = `${data.primer_nombre}_${data.primer_apellido}`;
     const fechaActual = new Date().toISOString().split('T')[0];
     const fileName = `${nombreCompleto}_${fechaActual}_constancia_${type}`;
-    
+
     // Generar documento sin QR
     let pdfBufferWithoutQR;
     switch (type) {
@@ -216,7 +217,7 @@ export class PdfService {
         {
           text: [
             'El Instituto Nacional de Previsión del Magisterio (INPREMA) hace constar que el/la Docente: ',
-            { text: `${data.primer_nombre} ${data.segundo_nombre} ${data.tercer_nombre} ${data.primer_apellido} ${data.segundo_apellido}`, bold: true },
+            { text: unirNombres(data.primer_nombre, data.segundo_nombre, data.tercer_nombre, data.primer_apellido, data.segundo_apellido), bold: true },
             ' con Identidad No. ',
             { text: `${data.n_identificacion}`, bold: true },
             ' presentó su renuncia formal a la Cuenta de Ahorro Previsional (CAP) en fecha: ',
@@ -305,7 +306,7 @@ export class PdfService {
         {
           text: [
             'El Departamento de Atención al Docente del Instituto Nacional de Previsión del Magisterio, (INPREMA) INFORMA que el(la) Sr.(Sra.): ',
-            { text: `${data.primer_nombre} ${data.segundo_nombre} ${data.tercer_nombre} ${data.primer_apellido} ${data.segundo_apellido}`, bold: true },
+            { text: unirNombres(data.primer_nombre, data.segundo_nombre, data.tercer_nombre, data.primer_apellido, data.segundo_apellido), bold: true },
             ' con Identidad No. ',
             { text: `${data.n_identificacion}`, bold: true },
             ' no cotiza para esta institución.'
@@ -388,7 +389,7 @@ export class PdfService {
         {
           text: [
             'El Departamento de Atención al Docente del Instituto Nacional de Previsión del Magisterio, (INPREMA) INFORMA que el(la) Docente: ',
-            { text: `${data.primer_nombre} ${data.segundo_nombre} ${data.tercer_nombre} ${data.primer_apellido} ${data.segundo_apellido}`, bold: true },
+            { text: unirNombres(data.primer_nombre, data.segundo_nombre, data.tercer_nombre, data.primer_apellido, data.segundo_apellido), bold: true },
             ' con Identidad No. ',
             { text: `${data.n_identificacion}`, bold: true },
             ' según los registros existentes de esta institución, tiene un debito de ',
@@ -477,7 +478,7 @@ export class PdfService {
         {
           text: [
             'El Instituto Nacional de Previsión del Magisterio (INPREMA) INFORMA que el(la) Docente: ',
-            { text: `${data.primer_nombre} ${data.segundo_nombre} ${data.tercer_nombre} ${data.primer_apellido} ${data.segundo_apellido}`, bold: true },
+            { text: unirNombres(data.primer_nombre, data.segundo_nombre, data.tercer_nombre, data.primer_apellido, data.segundo_apellido), bold: true },
             ' con Identidad No. ',
             { text: `${data.n_identificacion}`, bold: true },
             ', según la información contenida en los registros existentes de esta institución, cotiza al sistema desde el mes de ',

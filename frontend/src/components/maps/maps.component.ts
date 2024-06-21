@@ -11,8 +11,8 @@ export class MapsComponent {
   @ViewChild(MapInfoWindow, { static: false }) infoWindow!: MapInfoWindow;
 
   zoom = 8;
-  center: google.maps.LatLngLiteral = { lat: 14.081849622989658, lng: -87.21569269895554 };
-  markerPositions: google.maps.LatLngLiteral[] = [];
+  center: google.maps.LatLngLiteral = { lat: 14.107180, lng: -87.203741 };
+  markerPositions: google.maps.LatLngLiteral[] = [{ lat: 14.107180, lng: -87.203741 }];
   display: any;
 
   constructor() { }

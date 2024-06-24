@@ -2,7 +2,6 @@ import { Component, OnInit } from '@angular/core';
 import { Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AuthService } from 'src/app/services/auth.service';
-import { CentroTrabajoService } from 'src/app/services/centro-trabajo.service';
 import { TableColumn } from 'src/app/shared/Interfaces/table-column';
 
 @Component({
@@ -21,7 +20,6 @@ export class GestionUsuariosComponent implements OnInit {
   constructor(
     private usuarioService: AuthService,
     private authService: AuthService,
-    private centrosTrabajoService: CentroTrabajoService,
     private router: Router
   ) { }
 
@@ -45,7 +43,6 @@ export class GestionUsuariosComponent implements OnInit {
       { header: 'Nombre', col: 'nombreEmpleado', isEditable: true, validationRules: [Validators.required] },
       { header: 'Correo', col: 'correo_1', isEditable: true, validationRules: [Validators.required, Validators.email] },
       { header: 'Estado', col: 'estado' },
-      //{ header: 'Centro de Trabajo', col: 'nombre_centro_trabajo' },
       { header: 'Puesto', col: 'nombrePuesto' },
     ];
 

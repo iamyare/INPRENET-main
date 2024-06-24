@@ -13,19 +13,19 @@ export class BeneficiarioBeneficiosAsignadosComponent implements OnInit {
 
   beneficios = [
     {
-      nombreBeneficio: 'Beca de Estudio',
+      nombreBeneficio: 'SEPARACION DEL SISTEMA VOLUNTARIO',
       monto: 'L 5,000',
-      causante: 'Juan Pérez'
+      causante: 'Juan Carlos Pérez Gómez'
     },
     {
-      nombreBeneficio: 'Ayuda Alimentaria',
+      nombreBeneficio: 'PENSION POR VEJEZ',
       monto: 'L 2,500',
-      causante: 'María López'
+      causante: 'Juan Carlos Pérez Gómez'
     },
     {
-      nombreBeneficio: 'Subsidio de Transporte',
+      nombreBeneficio: 'SEGURO DE VIDA Y SEPARACION',
       monto: 'L 1,200',
-      causante: 'Carlos García'
+      causante: 'Juan Carlos Pérez Gómez'
     }
   ];
 

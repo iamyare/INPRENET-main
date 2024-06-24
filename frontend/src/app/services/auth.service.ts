@@ -84,7 +84,7 @@ export class AuthService {
   }
 
   obtenerRolesPorModulo(modulo: string): Observable<any[]> {
-    const url = `${environment.API_URL}/api/usuario/usuarios-modulos/${modulo}`;
+    const url = `${environment.API_URL}/api/usuario/roles-modulos/${modulo}`;
     return this.http.get<any[]>(url).pipe(
       catchError(this.handleError<any[]>('obtenerRolesPorModulo', []))
     );

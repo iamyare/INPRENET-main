@@ -42,7 +42,7 @@ import { Net_Usuario_Modulo } from './entities/net_usuario_modulo.entity';
         return {
           secret: process.env.JWT_SECRET,
           signOptions: {
-            expiresIn: '3h'
+            expiresIn: '8h'
           }
         };
       }

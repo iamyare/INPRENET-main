@@ -10,5 +10,7 @@ export class CausanteDetalleComponent implements OnInit {
 
   constructor() {}
 
-  ngOnInit(): void {}
+  ngOnInit(): void {
+
+  }
 }

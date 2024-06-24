@@ -72,7 +72,8 @@ export class VerReferenciasComponent {
   getFilas = async () => {
     try {
       /* Falta traer datos de la planilla */
-      const data = await this.SVCCentrosTrab.getAllReferenciasByCentro(1).toPromise();
+      const data = await this.SVCCentrosTrab.getAllReferenciasByCentro(10).toPromise();
+      console.log(data);
 
       this.filasT = data.map((item: any) => ({
         id_referencia: item.id_referencia,

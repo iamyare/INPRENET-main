@@ -106,7 +106,7 @@ export class VerPlanillasComponent implements OnInit {
           periodoInicio: "30/05/2024",
           totalBeneficio: "350000",
           totalDeducciones: "10000",
-          totalPlanilla: "250000", // Añade el total de la planilla
+          totalPlanilla: "340000", // Añade el total de la planilla
           fecha_apertura: "01/05/2024",
           fecha_cierre: "30/05/2024",
         },
@@ -120,7 +120,7 @@ export class VerPlanillasComponent implements OnInit {
           periodoInicio: "30/06/2024",
           totalBeneficio: "400000",
           totalDeducciones: "15000",
-          totalPlanilla: "260000", // Añade el total de la planilla
+          totalPlanilla: "385000", // Añade el total de la planilla
           fecha_apertura: "01/06/2024",
           fecha_cierre: "30/06/2024",
         },

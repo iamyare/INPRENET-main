@@ -128,8 +128,8 @@ export class VerCuentasPersonasComponent implements OnInit, OnChanges, OnDestroy
   async getMovimientos() {
     // Simulando la obtención de movimientos. En un escenario real, harías una llamada a un servicio aquí.
     this.movimientos = [
-      { NUMERO_CUENTA: '123456', TIPO_CUENTA: 'APORTACION', MONTO: 1000, DESCRIPCION: 'Depósito inicial', FECHA_MOVIMIENTO: new Date(), TIPO: 'Crédito' },
-      { NUMERO_CUENTA: '123456', TIPO_CUENTA: 'COTIZACION', MONTO: -500, DESCRIPCION: 'Retiro', FECHA_MOVIMIENTO: new Date(), TIPO: 'Débito' }
+      { NUMERO_CUENTA: '123456', TIPO_CUENTA: 'APORTACION', MONTO: 1000, DESCRIPCION: 'Depósito inicial', FECHA_MOVIMIENTO: new Date(), TIPO: 'DEPOSITOS' },
+      { NUMERO_CUENTA: '123456', TIPO_CUENTA: 'COTIZACION', MONTO: -500, DESCRIPCION: 'Retiro', FECHA_MOVIMIENTO: new Date(), TIPO: 'RETIROS' }
     ];
   }
 

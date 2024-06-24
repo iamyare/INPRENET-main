@@ -37,7 +37,6 @@
 
   <div
     style="background-color: white; padding: 1%"
-    *ngIf="Afiliado.ESTADO == 'FALLECIDO'"
   >
     <h2>Beneficiarios</h2>
     <app-dynamic-table
@@ -71,9 +70,9 @@
   </button>
 </div>
 
-<div
+<!-- <div
   style="margin: 1% 0% 1% 0%; text-align: center; background-color: white"
-  *ngIf="Afiliado.ESTADO == 'FALLECIDO'"
+
 >
   <app-dynamic-form
     [fields]="myFormFields2"
@@ -90,11 +89,11 @@
   >
     Asignar beneficio al beneficiario
   </button>
-</div>
+</div> -->
 
 <div
   style="margin: 1% 0% 1% 0%; text-align: center; background-color: white"
-  *ngIf="Afiliado.ESTADO == 'ACTIVO'"
+
 >
   <app-dynamic-form
     [fields]="myFormFields1"

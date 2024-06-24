@@ -27,8 +27,8 @@
     <mat-form-field style="width: 100%;">
       <mat-label>Tipo de Movimiento</mat-label>
       <mat-select formControlName="tipo" required>
-        <mat-option value="Crédito">Crédito</mat-option>
-        <mat-option value="Débito">Débito</mat-option>
+        <mat-option value="Crédito">DEPOSITO</mat-option>
+        <mat-option value="Débito">RETIRO</mat-option>
       </mat-select>
       <mat-error *ngIf="movimientoForm.controls['tipo'].invalid">Tipo es requerido</mat-error>
     </mat-form-field>

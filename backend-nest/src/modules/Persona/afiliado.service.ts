@@ -538,11 +538,11 @@ export class AfiliadoService {
       throw new NotFoundException(`Afiliado con N_IDENTIFICACION ${term} no existe`);
     }
 
-    const detallePersona = persona.detallePersona.find(detalle => detalle.tipoPersona.tipo_persona === 'AFILIADO');
+    /* const detallePersona = persona.detallePersona.find(detalle => detalle.tipoPersona.tipo_persona === 'AFILIADO');
 
     if (!detallePersona) {
       throw new NotFoundException(`Afiliado con N_IDENTIFICACION ${term} no existe`);
-    }
+    } */
 
     const result = {
       N_IDENTIFICACION: persona.n_identificacion,
@@ -568,7 +568,7 @@ export class AfiliadoService {
       CORREO_1: persona.correo_1,
       CORREO_2: persona.correo_2,
       ESTADO_CIVIL: persona.estado_civil,
-      ESTADO: detallePersona.eliminado,
+      //ESTADO: detallePersona.eliminado,
       ID_PAIS: persona.pais?.id_pais,
       id_departamento_residencia: persona.municipio?.departamento.id_departamento,
       ID_IDENTIFICACION: persona.tipoIdentificacion?.id_identificacion,

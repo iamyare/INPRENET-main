@@ -63,7 +63,7 @@ export class UsuarioController {
     return this.usuarioService.obtenerUsuariosPorModulos(modulos);
   }
 
-  @Get('usuarios-modulos/:modulo')
+  @Get('roles-modulos/:modulo')
   async obtenerRolesPorModulo(@Param('modulo') modulo: string): Promise<Net_Rol_Modulo[]> {
     return this.usuarioService.obtenerRolesPorModulo(modulo);
   }

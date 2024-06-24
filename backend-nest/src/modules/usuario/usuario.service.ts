@@ -562,11 +562,14 @@ export class UsuarioService {
   }
 
   async obtenerRolesPorModulo(modulo: string): Promise<Net_Rol_Modulo[]> {
-    return await this.rolModuloRepository.find({
-      where: { modulo: { nombre: modulo } },
-      relations: ['modulo'],
-    });
-  }
+    return await this.rolModuloRepository.createQueryBuilder('rol')
+        .innerJoinAndSelect('rol.modulo', 'modulo')
+        .where('modulo.nombre = :modulo', { modulo })
+        .andWhere('rol.nombre != :nombre', { nombre: 'ADMINISTRADOR' })
+        .getMany();
+}
+
+
 
   async obtenerModulosPorCentroTrabajo(idCentroTrabajo: number): Promise<Net_Modulo[]> {
     return this.moduloRepository.find({

@@ -12,7 +12,6 @@ import { TableColumn } from 'src/app/shared/Interfaces/table-column';
 })
 export class DynamicTableComponent implements OnInit, OnDestroy {
   @Input() verOpcEditar: boolean = false;
-
   @Input() verBotEditar: boolean = false;
   @Output() getElemSeleccionados = new EventEmitter<any>()
 
@@ -45,6 +44,9 @@ export class DynamicTableComponent implements OnInit, OnDestroy {
 
   @Input() titulo = "";
   @Input() subtitulo = "";
+
+  @Input() enableRowClick: boolean = false; // Nueva entrada para habilitar la funcionalidad de clic en la fila
+  @Output() rowClicked: EventEmitter<any> = new EventEmitter<any>(); // Nueva salida para emitir el evento de clic en la fila
 
   @ViewChild(MatPaginator) paginator: MatPaginator | undefined;
 
@@ -271,5 +273,12 @@ export class DynamicTableComponent implements OnInit, OnDestroy {
 
   editarFila(row: any) {
     this.editar.emit(row);
+  }
+
+  // Método para manejar el clic en la fila
+  onRowClick(row: any): void {
+    if (this.enableRowClick) {
+      this.rowClicked.emit(row);
+    }
   }
 }

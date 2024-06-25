@@ -1,21 +1,26 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Query, UseGuards, BadRequestException, HttpCode, HttpStatus, UnauthorizedException, Req, UseInterceptors, UploadedFile, ParseIntPipe, Res } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Query, UseGuards, BadRequestException, HttpCode, HttpStatus, UnauthorizedException, Req, UseInterceptors, UploadedFile, ParseIntPipe, Res, Put, UploadedFiles } from '@nestjs/common';
 import { UsuarioService } from './usuario.service';
-import { CreateUsuarioDto } from './dto/create-usuario.dto';
 import { UpdateUsuarioDto } from './dto/update-usuario.dto';
 import { PaginationDto } from 'src/common/dtos/pagination.dto';
 import { ApiTags } from '@nestjs/swagger';
-import { FileInterceptor } from '@nestjs/platform-express';
+import { FileFieldsInterceptor, FileInterceptor } from '@nestjs/platform-express';
 import { CreatePreRegistroDto } from './dto/create-pre-registro.dto';
 import { CompleteRegistrationDto } from './dto/complete-registration.dto';
 import { LoginDto } from './dto/login.dto';
 import { Net_Usuario_Empresa } from './entities/net_usuario_empresa.entity';
 import { Net_Rol_Modulo } from './entities/net_rol_modulo.entity';
 import { Net_Modulo } from './entities/net_modulo.entity';
+import { ForgotPasswordDto } from './dto/forgot-password.dto';
 
 @ApiTags('usuario')
 @Controller('usuario')
 export class UsuarioController {
   constructor(private readonly usuarioService: UsuarioService) { }
+
+  @Get('preguntas-seguridad')
+  async obtenerPreguntasSeguridad(@Query('correo') correo: string): Promise<string[]> {
+    return this.usuarioService.obtenerPreguntasSeguridad(correo);
+  }
 
   @Post('preregistro')
   async preRegistro(@Body() createPreRegistroDto: CreatePreRegistroDto): Promise<void> {
@@ -28,15 +33,33 @@ export class UsuarioController {
   }
 
   @Post('completar-registro')
-  @UseInterceptors(FileInterceptor('archivo_identificacion'))
-  async completarRegistro(
-    @Query('token') token: string,
-    @Body('datos') datos: string,
-    @UploadedFile() archivo_identificacion: Express.Multer.File,
-  ): Promise<void> {
-    const completeRegistrationDto: CompleteRegistrationDto = JSON.parse(datos);
-    return this.usuarioService.completarRegistro(token, completeRegistrationDto, archivo_identificacion.buffer);
+@UseInterceptors(
+  FileFieldsInterceptor([
+    { name: 'archivo_identificacion', maxCount: 1 },
+    { name: 'foto_empleado', maxCount: 1 }
+  ])
+)
+async completarRegistro(
+  @Query('token') token: string,
+  @Body('datos') datos: string,
+  @UploadedFiles() files: { archivo_identificacion?: Express.Multer.File[], foto_empleado?: Express.Multer.File[] },
+): Promise<void> {
+  const completeRegistrationDto: CompleteRegistrationDto = JSON.parse(datos);
+  const archivoIdentificacionBuffer = files.archivo_identificacion[0].buffer;
+  const fotoEmpleadoBuffer = files.foto_empleado[0].buffer;
+  return this.usuarioService.completarRegistro(token, completeRegistrationDto, archivoIdentificacionBuffer, fotoEmpleadoBuffer);
+}
+
+  @Get('perfil')
+  async obtenerPerfilUsuario(@Query('correo') correo: string) {
+  return this.usuarioService.obtenerPerfilPorCorreo(correo);
+}
+
+  @Put('cambiar-contrasena')
+  async cambiarContrasena(@Body() cambiarContrasenaDto: { correo: string; nuevaContrasena: string }) {
+    return this.usuarioService.cambiarContrasena(cambiarContrasenaDto.correo, cambiarContrasenaDto.nuevaContrasena);
   }
+  
 
   @Post('login')
   async login(@Body() loginDto: LoginDto){
@@ -55,12 +78,20 @@ export class UsuarioController {
     return this.usuarioService.loginPrivada(email, contrasena);
   }
 
-  @Get('usuarios-modulos')
-  async obtenerUsuariosPorModulos(@Query('modulos') modulos: string[]): Promise<Net_Usuario_Empresa[]> {
+  @Get('modulo-centro-trabajo')
+  async obtenerUsuariosPorModuloYCentroTrabajo(
+    @Query('modulos') modulos: string[],
+    @Query('idCentroTrabajo') idCentroTrabajo: number
+  ): Promise<Net_Usuario_Empresa[]> {
     if (typeof modulos === 'string') {
       modulos = [modulos];
     }
-    return this.usuarioService.obtenerUsuariosPorModulos(modulos);
+    try {
+      return await this.usuarioService.obtenerUsuariosPorModuloYCentroTrabajo(modulos, idCentroTrabajo);
+    } catch (error) {
+      console.error('Error al obtener usuarios por módulo y centro de trabajo:', error);
+      throw new Error('Ocurrió un error inesperado. Inténtelo de nuevo más tarde o contacte con soporte si el problema persiste.');
+    }
   }
 
   @Get('roles-modulos/:modulo')
@@ -163,6 +194,20 @@ async logout(@Req() request: Request): Promise<any> {
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.usuarioService.remove(+id);
+  }
+
+  @Post('olvido-contrasena')
+  async olvidoContrasena(@Body() dto: ForgotPasswordDto): Promise<{ message: string }> {
+    const usuario = await this.usuarioService.validarPreguntasSeguridad(dto.email, dto);
+    const token = await this.usuarioService.crearTokenRestablecimiento(usuario);
+    await this.usuarioService.enviarCorreoRestablecimiento(usuario.empleadoCentroTrabajo.correo_1, token);
+    return { message: 'Se ha enviado un enlace para restablecer la contraseña a su correo' };
+  }
+
+  @Post('restablecer-contrasena/:token')
+  async restablecerContrasena(@Param('token') token: string, @Body('nuevaContrasena') nuevaContrasena: string): Promise<{ message: string }> {
+    await this.usuarioService.restablecerContrasena(token, nuevaContrasena);
+    return { message: 'Contraseña restablecida correctamente' };
   }
 
   

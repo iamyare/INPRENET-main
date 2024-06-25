@@ -87,12 +87,12 @@
         <div class="form-row">
           <div class="form-group half-width">
             <label for="archivo">Sube tu identificación</label>
-            <input id="archivo" type="file" (change)="onFileChange($event)" class="form-control-file" />
+            <input id="archivo" type="file" (change)="onFileChange($event, 'archivo')" class="form-control-file" />
           </div>
 
           <div class="form-group half-width">
             <label for="fotografia">Sube tu fotografía</label>
-            <input id="fotografia" type="file" (change)="onFileChangeFoto($event)" class="form-control-file" />
+            <input id="fotografia" type="file" (change)="onFileChange($event, 'fotografia')" class="form-control-file" />
           </div>
         </div>
       </div>

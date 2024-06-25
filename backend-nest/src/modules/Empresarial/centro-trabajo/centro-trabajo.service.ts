@@ -23,6 +23,9 @@ import { Net_Peps } from '../entities/Net_peps-entity';
 import { CreatePrivateSociedadSocioDto } from './dto/create-private-sociedad-socio.dto';
 import { CreatePrivatePepsDto } from './dto/create-private-peps.dto';
 import { CreatePrivateSocioDto } from './dto/create-private-socio.dto';
+import { Net_Empleado } from '../entities/net_empleado.entity';
+import { UpdateEmpleadoDto } from './dto/update-empleado.dto';
+import { Net_Empleado_Centro_Trabajo } from '../entities/Net_Empleado_Centro_Trabajo.entity';
 @Injectable()
 export class CentroTrabajoService {
 
@@ -60,7 +63,47 @@ export class CentroTrabajoService {
     private readonly sociedadSocioRepository: Repository<Net_Sociedad_Socio>,
     @InjectRepository(Net_Peps)
     private readonly pepsRepository: Repository<Net_Peps>,
+    @InjectRepository(Net_Empleado)
+    private readonly empleadoRepository: Repository<Net_Empleado>,
+    @InjectRepository(Net_Empleado_Centro_Trabajo)
+    private readonly empleadoCentroTrabajoRepository: Repository<Net_Empleado_Centro_Trabajo>
   ) { }
+
+
+  async actualizarEmpleado(
+    id: number, 
+    updateEmpleadoDto: UpdateEmpleadoDto, 
+    archivoIdentificacion: Buffer | null, 
+    fotoEmpleado: Buffer | null
+  ): Promise<Net_Empleado> {
+    const empleado = await this.empleadoRepository.findOne({ where: { id_empleado: id }, relations: ['empleadoCentroTrabajos'] });
+    
+    if (!empleado) {
+      throw new NotFoundException('Empleado no encontrado');
+    }
+  
+    // Actualizar la información del empleado
+    empleado.nombreEmpleado = updateEmpleadoDto.nombreEmpleado;
+    empleado.telefono_1 = updateEmpleadoDto.telefono_1;
+    empleado.telefono_2 = updateEmpleadoDto.telefono_2;
+    empleado.numero_identificacion = updateEmpleadoDto.numero_identificacion;
+    if (archivoIdentificacion) {
+      empleado.archivo_identificacion = archivoIdentificacion;
+    }
+    if (fotoEmpleado) {
+      empleado.foto_empleado = fotoEmpleado;
+    }
+  
+    // Actualizar la información del empleadoCentroTrabajo
+    const empleadoCentroTrabajo = empleado.empleadoCentroTrabajos[0];
+    empleadoCentroTrabajo.correo_1 = updateEmpleadoDto.correo_1;
+    empleadoCentroTrabajo.nombrePuesto = updateEmpleadoDto.nombrePuesto;
+    empleadoCentroTrabajo.usuarioEmpresas[0].estado = updateEmpleadoDto.estado;
+  
+    await this.empleadoCentroTrabajoRepository.save(empleadoCentroTrabajo);
+  
+    return this.empleadoRepository.save(empleado);
+  }
 
   async obtenerCentrosDeTrabajoConTipoE(): Promise<Net_Centro_Trabajo[]> {
     return await this.centroTrabajoRepository.find({

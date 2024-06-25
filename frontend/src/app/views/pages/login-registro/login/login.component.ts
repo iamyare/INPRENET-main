@@ -12,6 +12,7 @@ import { AuthService } from 'src/app/services/auth.service';
 export class LoginComponent {
 
   loginForm: FormGroup;
+  loading: boolean = false;
 
   constructor(
     private fb: FormBuilder,
@@ -26,14 +27,28 @@ export class LoginComponent {
   }
 
   onLogin() {
+    this.loading = true;
     this.authService.login(this.loginForm.value.email, this.loginForm.value.password).subscribe({
       next: (response) => {
-        this.router.navigate(['/dashboard']);
+        setTimeout(() => {
+          this.loading = false;
+          this.router.navigate(['/dashboard']);
+        }, 1000); // Retraso de 1 segundo
       },
       error: (err) => {
-        console.error('Login failed:', err);
+        setTimeout(() => {
+          this.loading = false;
+          this.toastr.error('Credenciales incorrectas. Por favor, intente de nuevo.', 'Error de inicio de sesión', {
+            closeButton: true,
+            timeOut: 3000,
+          });
+          console.error('Login failed:', err);
+        }, 1000); // Retraso de 1 segundo
       }
     });
   }
 
+  redirectOlvidoContrasena() {
+    this.router.navigate(['/solicitud-restablecimiento']);
+  }
 }

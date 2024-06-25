@@ -76,15 +76,13 @@ export class RegisterComponent implements OnInit {
     }
   }
 
-  onFileChange(event: any) {
+  onFileChange(event: any, type: string) {
     if (event.target.files.length > 0) {
-      this.archivo = event.target.files[0];
-    }
-  }
-
-  onFileChangeFoto(event: any) {
-    if (event.target.files.length > 0) {
-      this.fotografia = event.target.files[0];
+      if (type === 'archivo') {
+        this.archivo = event.target.files[0];
+      } else if (type === 'fotografia') {
+        this.fotografia = event.target.files[0];
+      }
     }
   }
 
@@ -107,7 +105,7 @@ export class RegisterComponent implements OnInit {
         numero_identificacion: this.form.get('numero_identificacion')!.value
       };
 
-      this.authService.completarRegistro(this.token, datos, this.archivo!).subscribe({
+      this.authService.completarRegistro(this.token, datos, this.archivo!, this.fotografia!).subscribe({
         next: () => {
           this.toastr.success('Registro completado con éxito', 'Éxito');
           this.router.navigate(['/login']);

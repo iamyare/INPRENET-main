@@ -22,6 +22,9 @@ export class Net_Empleado {
   @Column('blob', { nullable: true, name: 'ARCHIVO_IDENTIFICACION' })
   archivo_identificacion: Buffer;
 
+  @Column('blob', { nullable: true, name: 'FOTO_EMPLEADO' })
+  foto_empleado: Buffer;
+
   @OneToMany(() => Net_Empleado_Centro_Trabajo, empleadoCentroTrabajo => empleadoCentroTrabajo.empleado)
   empleadoCentroTrabajos: Net_Empleado_Centro_Trabajo[];
 }

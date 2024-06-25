@@ -53,4 +53,8 @@ export class CompleteRegistrationDto {
   @IsNotEmpty()
   @Length(1, 255)
   numero_identificacion: string;
+
+  @IsString()
+  @IsNotEmpty()
+  foto_empleado: Buffer;
 }

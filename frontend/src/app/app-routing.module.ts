@@ -8,10 +8,8 @@ import { RegisterComponent } from './views/pages/login-registro/register/registe
 import { PreRegisterComponent } from './views/pages/login-registro/pre-register/pre-register.component';
 import { RoleGuard } from './guards/role-guard.guard';
 import { LoginPrivadosComponent } from './views/pages/login-registro/login-privados/login-privados.component';
-import { PlanillaColegiosPrivadosComponent } from './views/pages/planilla/Centros Privados/planilla-colegios-privados/planilla-colegios-privados.component';
-import { NavDefaultComponent } from './views/pages/planilla/Centros Privados/nav-default/nav-default.component';
-
-
+import { RestablecerContrasenaComponent } from './views/pages/login-registro/restablecer-contrasena/restablecer-contrasena.component';
+import { OlvidoContrasenaComponent } from './views/pages/login-registro/olvido-contrasena/olvido-contrasena.component';
 
 const routes: Routes = [
   {
@@ -70,6 +68,11 @@ const routes: Routes = [
           import('./views/theme/theme.module').then((m) => m.ThemeModule),
       },
       {
+        path: 'Usuario',
+        loadChildren: () =>
+          import('./views/theme/theme.module').then((m) => m.ThemeModule),
+      },
+      {
         path: 'Deduccion',
         loadChildren: () =>
           import('./views/theme/theme.module').then((m) => m.ThemeModule),
@@ -96,7 +99,6 @@ const routes: Routes = [
       },
     ]
   },
-
   {
     path: '404',
     component: Page404Component,
@@ -139,29 +141,18 @@ const routes: Routes = [
       title: 'Login Privados Page'
     }
   },
-  {
-    path: 'privados',
-    component: NavDefaultComponent,
+  { path: 'solicitud-restablecimiento',
+    component: OlvidoContrasenaComponent,
     data: {
-      title: 'Inicio Privados'
-    },
-    children: [
-      {
-        path: '',
-        component: PlanillaColegiosPrivadosComponent,
-        data: {
-          title: 'Planilla de privados'
-        }
-      },
-      {
-        path: 'PlanillaPrivados',
-        component: PlanillaColegiosPrivadosComponent,
-        data: {
-          title: 'Planilla de privados'
-        }
-      },
-    ]
-  },
+      title: 'Solitud de restablecimiento'
+    }
+   },
+  { path: 'restablecer-contrasena/:token',
+    component: RestablecerContrasenaComponent,
+    data: {
+      title: 'Restablecer Contraseña'
+    }
+   },
   { path: '**', redirectTo: 'dashboard' }
 ];
 

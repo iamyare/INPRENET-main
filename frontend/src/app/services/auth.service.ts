@@ -1,6 +1,6 @@
 import {HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Observable, catchError, map, of } from 'rxjs';
+import { Observable, catchError, map, of, throwError } from 'rxjs';
 import { environment } from 'src/environments/environment';
 import { jwtDecode } from 'jwt-decode';
 
@@ -12,6 +12,36 @@ export class AuthService {
 
   constructor( private http: HttpClient) {
    }
+
+   olvidoContrasena(dto: any): Observable<{ message: string }> {
+    const url = `${environment.API_URL}/api/usuario/olvido-contrasena`;
+    return this.http.post<{ message: string }>(url, dto).pipe(
+      catchError(this.handleError<{ message: string }>('olvidoContrasena'))
+    );
+  }
+
+  restablecerContrasena(token: string, nuevaContrasena: string): Observable<{ message: string }> {
+    const url = `${environment.API_URL}/api/usuario/restablecer-contrasena/${token}`;
+    return this.http.post<{ message: string }>(url, { nuevaContrasena }).pipe(
+      catchError(this.handleError<{ message: string }>('restablecerContrasena'))
+    );
+  }
+
+  obtenerPreguntasSeguridad(correo: string): Observable<string[]> {
+    return this.http.get<string[]>(`${environment.API_URL}/api/usuario/preguntas-seguridad`, {
+      params: { correo }
+    });
+  }
+
+  obtenerPerfil(correo: string): Observable<any> {
+    return this.http.get<any>(`${environment.API_URL}/api/usuario/perfil?correo=${correo}`);
+  }
+
+  cambiarContrasena(correo: string, nuevaContrasena: string): Observable<any> {
+    return this.http.put<any>(`${environment.API_URL}/api/usuario/cambiar-contrasena`, { correo, nuevaContrasena });
+  }
+
+
 
    preRegistro(datos: any): Observable<void> {
     const url = `${environment.API_URL}/api/usuario/preregistro`;
@@ -49,11 +79,12 @@ export class AuthService {
 
 
 
-  completarRegistro(token: string, datos: any, archivo: File): Observable<void> {
+  completarRegistro(token: string, datos: any, archivoIdentificacion: File, fotoEmpleado: File): Observable<void> {
     const url = `${environment.API_URL}/api/usuario/completar-registro?token=${token}`;
     const formData = new FormData();
     formData.append('datos', JSON.stringify(datos));
-    formData.append('archivo_identificacion', archivo);
+    formData.append('archivo_identificacion', archivoIdentificacion);
+    formData.append('foto_empleado', fotoEmpleado);
 
     return this.http.post<void>(url, formData).pipe(
       catchError(this.handleError<void>('completarRegistro'))
@@ -68,16 +99,18 @@ export class AuthService {
         localStorage.setItem('token', response.accessToken);
         return response;
       }),
-      catchError(this.handleError<{ accessToken: string }>('login'))
+      catchError(error => {
+        console.error('Login failed:', error);
+        return throwError(error);
+      })
     );
   }
 
-  obtenerUsuariosPorModulos(modulos: string[]): Observable<any[]> {
-    const url = `${environment.API_URL}/api/usuario/usuarios-modulos?modulos=${modulos.join(',')}`;
-
+  obtenerUsuarioPorModuloYCentroTrabajo(modulo: string, idCentroTrabajo: number): Observable<any[]> {
+    const url = `${environment.API_URL}/api/usuario/modulo-centro-trabajo?modulos=${modulo}&idCentroTrabajo=${idCentroTrabajo}`;
     return this.http.get<any[]>(url).pipe(
       catchError(error => {
-        console.error('Error en obtenerUsuariosPorModulos:', error);
+        console.error('Error en obtenerUsuarioPorModuloYCentroTrabajo:', error);
         return of([]);
       })
     );
@@ -122,6 +155,15 @@ export class AuthService {
         return [];
       })
     );
+  }
+
+  obtenerCorreoDelToken(): string | null {
+    const token = localStorage.getItem('token');
+    if (token) {
+      const decodedToken: any = jwtDecode(token);
+      return decodedToken.correo;
+    }
+    return null;
   }
 
   getIdEmpresaFromToken(): number | null {

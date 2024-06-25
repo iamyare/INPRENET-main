@@ -1,0 +1,29 @@
+.perfil-edicion-container {
+  padding: 20px;
+}
+
+.perfil-general {
+  display: flex;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.perfil-imagen {
+  margin-right: 20px;
+}
+
+.perfil-imagen img {
+  width: 150px;
+  height: 150px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.perfil-info {
+  flex-grow: 1;
+}
+
+.full-width {
+  width: 100%;
+  margin-bottom: 20px;
+}

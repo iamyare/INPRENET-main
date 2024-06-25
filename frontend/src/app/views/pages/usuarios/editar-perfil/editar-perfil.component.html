@@ -1,0 +1,42 @@
+<div class="container">
+  <h2>Editar Perfil</h2>
+  <form [formGroup]="perfilForm" class="form-container">
+    <mat-card class="perfil-card">
+      <mat-form-field appearance="fill" class="full-width">
+        <mat-label>Nombre</mat-label>
+        <input matInput formControlName="nombre">
+      </mat-form-field>
+      <mat-form-field appearance="fill" class="full-width">
+        <mat-label>Correo</mat-label>
+        <input matInput formControlName="correo">
+      </mat-form-field>
+      <mat-form-field appearance="fill" class="full-width">
+        <mat-label>Puesto</mat-label>
+        <input matInput formControlName="puesto">
+      </mat-form-field>
+      <mat-form-field appearance="fill" class="full-width">
+        <mat-label>Centro de Trabajo</mat-label>
+        <input matInput formControlName="centroTrabajo">
+      </mat-form-field>
+      <mat-form-field appearance="fill" class="full-width">
+        <mat-label>Teléfono</mat-label>
+        <input matInput formControlName="telefono">
+      </mat-form-field>
+    </mat-card>
+  </form>
+
+  <h2>Cambiar Contraseña</h2>
+  <form [formGroup]="contrasenaForm" (ngSubmit)="cambiarContrasena()" class="form-container">
+    <mat-card class="contrasena-card">
+      <mat-form-field appearance="fill" class="full-width">
+        <mat-label>Nueva Contraseña</mat-label>
+        <input matInput type="password" formControlName="nuevaContrasena" required>
+      </mat-form-field>
+      <mat-form-field appearance="fill" class="full-width">
+        <mat-label>Confirmar Nueva Contraseña</mat-label>
+        <input matInput type="password" formControlName="confirmarContrasena" required>
+      </mat-form-field>
+      <button mat-raised-button color="primary" type="submit" [disabled]="!contrasenaForm.valid">Cambiar Contraseña</button>
+    </mat-card>
+  </form>
+</div>

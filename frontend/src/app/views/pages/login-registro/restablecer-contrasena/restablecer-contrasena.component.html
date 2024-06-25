@@ -1,0 +1,25 @@
+<div class="reset-password-container">
+  <h2 class="title">Restablecer Contraseña</h2>
+  <form [formGroup]="resetPasswordForm" (ngSubmit)="onSubmit()">
+    <mat-card class="reset-password-card">
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Nueva Contraseña</mat-label>
+        <input matInput type="password" formControlName="nuevaContrasena" required>
+        <mat-error *ngIf="resetPasswordForm.get('nuevaContrasena')?.invalid && resetPasswordForm.get('nuevaContrasena')?.touched">
+          Debe tener al menos 8 caracteres
+        </mat-error>
+      </mat-form-field>
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Confirmar Nueva Contraseña</mat-label>
+        <input matInput type="password" formControlName="confirmarContrasena" required>
+        <mat-error *ngIf="resetPasswordForm.get('confirmarContrasena')?.invalid && resetPasswordForm.get('confirmarContrasena')?.touched">
+          Las contraseñas no coinciden
+        </mat-error>
+      </mat-form-field>
+      <mat-error *ngIf="resetPasswordForm.hasError('passwordMismatch')">
+        Las contraseñas no coinciden
+      </mat-error>
+      <button mat-raised-button color="primary" type="submit" class="full-width" [disabled]="resetPasswordForm.invalid">Restablecer Contraseña</button>
+    </mat-card>
+  </form>
+</div>

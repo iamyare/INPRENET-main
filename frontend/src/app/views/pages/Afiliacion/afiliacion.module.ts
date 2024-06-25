@@ -8,7 +8,6 @@ import { PerfilComponent } from './verPerfil/perfil/perfil.component';
 import { PensionadoComponent } from './verPerfil/pensionado/pensionado.component';
 import { VoluntarioComponent } from './verPerfil/voluntario/voluntario.component';
 import { JubiladoComponent } from './verPerfil/jubilado/jubilado.component';
-import { AfiliacionRoutingModule } from './afiliacion-routing.module';
 import { ThemeModule } from '../../theme/theme.module';
 import { InformacionGeneralComponent } from './verPerfil/informacion-general/informacion-general.component';
 import { PruebiComponent } from './verPerfil/pruebi/pruebi.component';

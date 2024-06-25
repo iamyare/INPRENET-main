@@ -27,7 +27,6 @@ import { VerPlanillasComponent } from '../pages/planilla/ver-planillas/ver-plani
 import { SubirDeduccionesformComponent } from '../pages/Generales/subir-deduccionesform/subir-deduccionesform.component';
 import { NuevoBeneficioComponent } from '../pages/Mantenimiento/nuevo-beneficio/nuevo-beneficio.component';
 import { EditarBeneficioComponent } from '../pages/Mantenimiento/editar-beneficio/editar-beneficio.component';
-/* import { CentroTrabajoPageComponent } from '../pages/centro-trabajo-page/centro-trabajo-page.component' */
 import { InlineEditingOneComponent } from '../../../components/inline-editing-one/inline-editing-one.component';
 import { NuevaplanillaComponent } from '../../../components/nuevaplanilla/nuevaplanilla.component';
 import { NuevoTipoPlanillaComponent } from '../pages/Mantenimiento/nuevo-tipo-planilla/nuevo-tipo-planilla.component';
@@ -45,18 +44,8 @@ import { VerEditarBeneficioAfilComponent } from '../pages/Generales/ver-editar-b
 import { MatStepperModule } from '@angular/material/stepper';
 import { MAT_DATE_LOCALE, MatNativeDateModule, DateAdapter } from '@angular/material/core';
 import { MatGridListModule } from '@angular/material/grid-list';
-/* import { CargarPlanillaPrivadosComponent } from '../pages/planilla/Centros Privados/cargar-planilla-privados/cargar-planilla-privados.component'; */
 import { NuevoMovimientoComponent } from '../pages/planilla/nuevo-movimiento/nuevo-movimiento.component';
 import { VerMovimientosComponent } from '../pages/planilla/ver-movimientos/ver-movimientos.component';
-
-/* import { EditPerfilPuestTrabComponent } from '../pages/Afiliacion/Docentes-Designados/edit-perfil-puest-trab/edit-perfil-puest-trab.component';
-import { EditReferPersonalesComponent } from '../pages/Afiliacion/Docentes-Designados/edit-refer-personales/edit-refer-personales.component';
-import { EditDatosBancariosComponent } from '../pages/Afiliacion/Docentes-Designados/edit-datos-bancarios/edit-datos-bancarios.component';
-/* import { VerCuentasPersonasComponent } from '../pages/Afiliacion/Docentes-Designados/ver-cuentas-personas/ver-cuentas-personas.component';
-/* import { ConstanciasAfiliadoComponent } from '../pages/Afiliacion/Docentes-Designados/constancias-afiliado/constancias-afiliado.component'; */
-
-/* import { PlanillaColegiosPrivadosComponent } from '../pages/Centros Privados/planilla-colegios-privados/planilla-colegios-privados.component'; */
-/* import { NavDefaultComponent } from '../pages/Centros Privados/nav-default/nav-default.component'; */
 import { EditFamiliaresComponent } from '../pages/Generales/edit-familiares/edit-familiares.component';
 import { VerDatosAfiliadosComponent } from '../pages/Afiliacion/Docentes-Designados/ver-datos-afiliados/ver-datos-afiliados.component';
 import { AfiliacionCentrosComponent } from '../pages/Afiliacion/Centros-Educativos/afiliacion-centros/afiliacion-centros.component';
@@ -75,6 +64,10 @@ import { CargarPlanillaPrivadosComponent } from '../pages/planilla/Centros Priva
 
 import { PlanillaColegiosPrivadosComponent } from '../pages/planilla/Centros Privados/planilla-colegios-privados/planilla-colegios-privados.component';
 import { NavDefaultComponent } from '../pages/planilla/Centros Privados/nav-default/nav-default.component';
+import { EditarPerfilComponent } from '../pages/usuarios/editar-perfil/editar-perfil.component';
+import { PerfilEdicionComponent } from '../pages/admin-centro/perfil-edicion/perfil-edicion.component';
+import { PerfilEdicionSeguridadComponent } from '../pages/admin-centro/perfil-edicion-seguridad/perfil-edicion-seguridad.component';
+import { DisableUserDialogComponent } from '../pages/admin-centro/disable-user-dialog/disable-user-dialog.component';
 
 
 
@@ -147,6 +140,10 @@ import { NavDefaultComponent } from '../pages/planilla/Centros Privados/nav-defa
     VerDatosCentrosComponent,
     VerReferenciasComponent,
     VerSociosComponent,
+    EditarPerfilComponent,
+    PerfilEdicionComponent,
+    PerfilEdicionSeguridadComponent,
+    DisableUserDialogComponent
   ],
   exports: [
   ]

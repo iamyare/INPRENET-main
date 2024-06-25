@@ -16,22 +16,25 @@ export class GestionUsuariosComponent implements OnInit {
   public columns: TableColumn[] = [];
   public usuarios: any[] = [];
   ejecF: any;
+  data: any;
 
   constructor(
     private usuarioService: AuthService,
     private authService: AuthService,
     private router: Router
-  ) { }
+  ) {}
 
   ngOnInit(): void {
-    this.rolesModulos = this.authService.getRolesModulos();
+    const token = localStorage.getItem('token');
+    if (token) {
+      this.rolesModulos = this.authService.decodeToken(token).rolesModulos;
+    }
 
     if (this.rolesModulos.length === 0) {
       console.error("No se pudieron obtener los módulos del token");
       return;
     }
 
-    // Filtra los módulos donde el usuario es administrador
     this.adminRolesModulos = this.rolesModulos.filter(rm => rm.rol === 'ADMINISTRADOR');
 
     if (this.adminRolesModulos.length === 0) {
@@ -45,38 +48,45 @@ export class GestionUsuariosComponent implements OnInit {
       { header: 'Estado', col: 'estado' },
       { header: 'Puesto', col: 'nombrePuesto' },
     ];
-
-    // No cargamos filas hasta que se seleccione un módulo
-    // this.getFilas().then(() => this.cargar());
   }
 
   onModuloChange(event: Event): void {
     const target = event.target as HTMLSelectElement;
     const selectedModulo = target?.value;
-    if (selectedModulo) {
-      this.selectedModulos = [selectedModulo];
-      this.getFilas();
+    const token = localStorage.getItem('token');
+    if (token) {
+      const idCentroTrabajo = this.authService.decodeToken(token).idCentroTrabajo;
+      if (selectedModulo) {
+        this.selectedModulos = [selectedModulo];
+        this.getFilas(selectedModulo, idCentroTrabajo);
+      }
     }
   }
 
-  async getFilas() {
-    if (this.selectedModulos.length === 0) {
-      console.error("No se pudo obtener los módulos seleccionados");
-      return;
-    }
-
+  async getFilas(modulo: string, idCentroTrabajo: number) {
     try {
-      const data: any = await this.usuarioService.obtenerUsuariosPorModulos(this.selectedModulos).toPromise();
-      this.usuarios = data.map((item: any) => {
-        console.log(item);
+      const data: any = await this.usuarioService.obtenerUsuarioPorModuloYCentroTrabajo(modulo, idCentroTrabajo).toPromise();
+      console.log(data);
 
+      this.data = data;
+      this.usuarios = data.map((item: any) => {
         return {
           id: item.id_usuario_empresa,
           nombreEmpleado: item.empleadoCentroTrabajo?.empleado?.nombreEmpleado || 'N/A',
           correo_1: item.empleadoCentroTrabajo?.correo_1 || 'N/A',
           estado: item.estado,
           nombre_centro_trabajo: item.empleadoCentroTrabajo?.centroTrabajo?.nombre_centro_trabajo || 'N/A',
-          nombrePuesto: item.empleadoCentroTrabajo?.nombrePuesto || 'N/A'
+          nombrePuesto: item.empleadoCentroTrabajo?.nombrePuesto || 'N/A',
+          municipio: item.empleadoCentroTrabajo?.centroTrabajo?.municipio?.nombre || 'N/A',
+          fecha_verificacion: item.fecha_verificacion,
+          fecha_modificacion: item.fecha_modificacion,
+          fecha_creacion: item.fecha_creacion,
+          telefono_1: item.empleadoCentroTrabajo?.empleado?.telefono_1 || 'N/A',
+          telefono_2: item.empleadoCentroTrabajo?.empleado?.telefono_2 || 'N/A',
+          numero_identificacion: item.empleadoCentroTrabajo?.empleado?.numero_identificacion || 'N/A',
+          modulos: item.empleadoCentroTrabajo?.centroTrabajo?.modulos?.map((modulo: any) => modulo.nombre) || [],
+          archivo_identificacion: item.empleadoCentroTrabajo?.empleado?.archivo_identificacion ? `data:image/png;base64,${item.empleadoCentroTrabajo.empleado.archivo_identificacion}` : null,
+          foto_empleado: item.empleadoCentroTrabajo?.empleado?.foto_empleado ? `data:image/png;base64,${item.empleadoCentroTrabajo.empleado.foto_empleado}` : null,
         };
       });
       this.cargar();
@@ -84,10 +94,6 @@ export class GestionUsuariosComponent implements OnInit {
       console.error("Error al obtener datos de Usuarios", error);
     }
   }
-
-  editarUsuario = (row: any) => {
-    console.log('Editar usuario:', row);
-  };
 
   ejecutarFuncionAsincronaDesdeOtroComponente(funcion: (data: any) => Promise<void>) {
     this.ejecF = funcion;
@@ -99,18 +105,9 @@ export class GestionUsuariosComponent implements OnInit {
     }
   }
 
-  manejarEliminar(row: any) {
-    console.log('Eliminar usuario:', row);
-    const index = this.usuarios.findIndex(usuario => usuario.id === row.id);
-    if (index !== -1) {
-      this.usuarios.splice(index, 1);
-      this.cargar();
-    }
-  }
-
-  manejarEditar(row: any) {
-    console.log('Editar usuario:', row);
-    this.editarUsuario(row);
+  manejarRowClick(row: any) {
+    const usuarioSeleccionado = this.data.find((usuario: any) => usuario.id_usuario_empresa === row.id);
+    this.router.navigate(['/Gestion/editar-perfil', row.id], { state: { usuario: usuarioSeleccionado } });
   }
 
   irANuevaPagina() {

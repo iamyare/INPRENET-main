@@ -10,10 +10,9 @@
     margin: 0 auto;
     background-color: #fff;
   ">
-
-    <!-- Agrega [formGroup]="loginForm" y (ngSubmit)="onLogin()" -->
-    <div class="text-white" style="margin: 0 0 5% 0"><img src="../../../../../assets/images/LOGO INPRENET.png"
-        width="320px" height="70px" alt="Descripción de la imagen"></div>
+    <div class="text-white" style="margin: 0 0 5% 0">
+      <img src="../../../../../assets/images/LOGO INPRENET.png" width="320px" height="70px" alt="Descripción de la imagen">
+    </div>
     <div>
       <div class="text-center">
         <form [formGroup]="loginForm" (ngSubmit)="onLogin()">
@@ -23,44 +22,33 @@
             <span cInputGroupText>
               <svg cIcon name="cilUser"></svg>
             </span>
-            <!-- Agrega formControlName="email" -->
-            <input formControlName="email" autoComplete="Correo Electrónico" cFormControl
-              placeholder="Correo Electrónico" />
+            <input formControlName="email" autoComplete="Correo Electrónico" cFormControl placeholder="Correo Electrónico" />
           </c-input-group>
           <c-input-group class="mb-4">
             <span cInputGroupText>
               <svg cIcon name="cilLockLocked"></svg>
             </span>
-            <!-- Agrega formControlName="password" -->
-            <input formControlName="password" autoComplete="Contraseña" cFormControl placeholder="Contraseña"
-              type="password" />
+            <input formControlName="password" autoComplete="Contraseña" cFormControl placeholder="Contraseña" type="password" />
           </c-input-group>
-          <c-row>
+          <c-row *ngIf="!loading; else loadingTemplate">
             <c-col style="padding: 4%;">
-              <!-- Agrega type="submit" al botón para enviar el formulario -->
               <button cButton class="px-4 general" style="border: 0;" type="submit">
                 Ingresar
               </button>
             </c-col>
             <c-col class="text-right">
-              <button cButton class="px-0" color="link">
+              <button cButton class="px-0" color="link" (click)="redirectOlvidoContrasena()">
                 ¿Olvidaste tu contraseña?
               </button>
             </c-col>
           </c-row>
+          <ng-template #loadingTemplate>
+            <div class="spinner-container">
+              <mat-progress-spinner mode="indeterminate"></mat-progress-spinner>
+            </div>
+          </ng-template>
         </form>
-
-        <!-- <div>
-                    <h2></h2>
-                    <p>
-
-                    </p>
-                    <button [active]="true" cButton class="mt-3" color="primary" routerLink="/register">
-
-                    </button>
-                  </div> -->
       </div>
     </div>
-
   </c-container>
 </div>

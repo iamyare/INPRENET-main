@@ -96,3 +96,13 @@
 .boton-eliminar:hover mat-icon {
   color: #e04848; /* Color del ícono al pasar el ratón por encima */
 }
+
+/* Estilos para filas clickeables */
+.clickable-row {
+  cursor: pointer; /* Cambia el cursor a una mano para indicar que es clickeable */
+}
+
+.clickable-row:hover {
+  background-color: #d9edf7; /* Color de fondo cuando se pasa el ratón por encima */
+  transition: background-color 0.3s; /* Transición suave del color de fondo */
+}

@@ -16,10 +16,8 @@
     [data]="usuarios"
     [getData]="getFilas"
     (ejecutarFuncionAsincronaEvent)="ejecutarFuncionAsincronaDesdeOtroComponente($event)"
-    (eliminar)="manejarEliminar($event)"
-    (editar)="manejarEditar($event)"
-    [mostrarBotonEliminar]="true"
-    [mostrarBotonEditar]="true"
+    (rowClicked)="manejarRowClick($event)"
+    [enableRowClick]="true"
   >
   </app-dynamic-table>
 </div>

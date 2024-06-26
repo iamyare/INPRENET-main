@@ -14,8 +14,8 @@ export class CentroTrabajoService {
   actualizarEmpleado(id: number, datos: any, archivos: { archivoIdentificacion?: File; fotoEmpleado?: File }): Observable<any> {
     const formData = new FormData();
     formData.append('nombreEmpleado', datos.nombreEmpleado);
-    formData.append('estado', datos.estado);
     formData.append('correo_1', datos.correo_1);
+    formData.append('estado', datos.estado);
     formData.append('nombrePuesto', datos.nombrePuesto);
     formData.append('telefono_1', datos.telefono_1);
     formData.append('telefono_2', datos.telefono_2);
@@ -28,7 +28,7 @@ export class CentroTrabajoService {
       formData.append('fotoEmpleado', archivos.fotoEmpleado);
     }
 
-    return this.http.put<any>(`${environment.API_URL}/api/centro-trabajo/actualizar/${id}`, formData);
+    return this.http.put(`${environment.API_URL}/api/centro-trabajo/actualizar/${id}`, formData);
   }
 
 

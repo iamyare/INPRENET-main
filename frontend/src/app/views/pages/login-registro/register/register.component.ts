@@ -44,6 +44,7 @@ export class RegisterComponent implements OnInit {
       preguntaseguridad3: ['', [Validators.required]],
       respuestaSeguridad3: ['', [Validators.required]],
       telefonoEmpleado: ['', [Validators.required]],
+      telefonoEmpleado2: [''], // Nuevo campo para el segundo teléfono
       numero_identificacion: ['', [Validators.required]]
     }, { validator: this.confirmarContrasenaValidator('contrasena', 'confirmarContrasenia') });
   }
@@ -77,12 +78,15 @@ export class RegisterComponent implements OnInit {
   }
 
   onFileChange(event: any, type: string) {
-    if (event.target.files.length > 0) {
+    const file = event.target.files[0];
+    if (file && file.type.startsWith('image/')) {
       if (type === 'archivo') {
-        this.archivo = event.target.files[0];
+        this.archivo = file;
       } else if (type === 'fotografia') {
-        this.fotografia = event.target.files[0];
+        this.fotografia = file;
       }
+    } else {
+      this.toastr.error('Solo se permiten archivos de tipo imagen.', 'Error de archivo');
     }
   }
 
@@ -102,6 +106,7 @@ export class RegisterComponent implements OnInit {
         pregunta_de_usuario_3: this.form.get('preguntaseguridad3')!.value,
         respuesta_de_usuario_3: this.form.get('respuestaSeguridad3')!.value,
         telefonoEmpleado: this.form.get('telefonoEmpleado')!.value,
+        telefonoEmpleado2: this.form.get('telefonoEmpleado2')!.value, // Nuevo campo
         numero_identificacion: this.form.get('numero_identificacion')!.value
       };
 

@@ -4,6 +4,7 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
 import { CentroTrabajoService } from 'src/app/services/centro-trabajo.service';
 import { DisableUserDialogComponent } from '../disable-user-dialog/disable-user-dialog.component';
+import { ToastrService } from 'ngx-toastr';
 
 @Component({
   selector: 'app-perfil-edicion',
@@ -14,17 +15,19 @@ export class PerfilEdicionComponent implements OnInit {
   userId: string;
   usuario: any;
   perfilForm: FormGroup;
-  estados = ['ACTIVO', 'INACTIVO', 'PENDIENTE', 'SUSPENDIDO']; // Lista de estados
+  estados = ['ACTIVO', 'INACTIVO', 'PENDIENTE', 'SUSPENDIDO'];
   archivoIdentificacion: File | null = null;
+  archivoIdentificacionUrl: string | null = null;
   fotoEmpleado: File | null = null;
-  fotoEmpleadoUrl: string | null = null; // Para almacenar la URL de la imagen
+  fotoEmpleadoUrl: string | null = null;
 
   constructor(
     private route: ActivatedRoute,
     private router: Router,
     private fb: FormBuilder,
     public dialog: MatDialog,
-    private centroTrabajoService: CentroTrabajoService
+    private centroTrabajoService: CentroTrabajoService,
+    private toastr: ToastrService // Importa ToastrService
   ) {
     this.userId = this.route.snapshot.paramMap.get('id')!;
     const navigation = this.router.getCurrentNavigation();
@@ -44,7 +47,6 @@ export class PerfilEdicionComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    console.log('ID del usuario:', this.usuario);
     this.cargarDatosUsuario();
   }
 
@@ -63,9 +65,13 @@ export class PerfilEdicionComponent implements OnInit {
         numero_identificacion: this.usuario.empleadoCentroTrabajo.empleado.numero_identificacion || 'N/A'
       });
 
-      // Convertir la foto del empleado de base64 a URL
+      // Convertir las imágenes de base64 a URL
       this.fotoEmpleadoUrl = this.usuario.empleadoCentroTrabajo.empleado.foto_empleado
         ? `data:image/png;base64,${this.usuario.empleadoCentroTrabajo.empleado.foto_empleado}`
+        : null;
+
+      this.archivoIdentificacionUrl = this.usuario.empleadoCentroTrabajo.empleado.archivo_identificacion
+        ? `data:image/png;base64,${this.usuario.empleadoCentroTrabajo.empleado.archivo_identificacion}`
         : null;
 
       this.perfilForm.get('fecha_verificacion')?.disable();
@@ -75,17 +81,25 @@ export class PerfilEdicionComponent implements OnInit {
   }
 
   onFileChange(event: any, tipoArchivo: string) {
-    if (event.target.files.length > 0) {
+    const file = event.target.files[0];
+    if (file && file.type.startsWith('image/')) {
       if (tipoArchivo === 'archivoIdentificacion') {
-        this.archivoIdentificacion = event.target.files[0];
+        this.archivoIdentificacion = file;
+        this.archivoIdentificacionUrl = URL.createObjectURL(file);
       } else if (tipoArchivo === 'fotoEmpleado') {
-        this.fotoEmpleado = event.target.files[0];
-        if (this.fotoEmpleado) {
-          this.fotoEmpleadoUrl = URL.createObjectURL(this.fotoEmpleado);
-        } else {
-          this.fotoEmpleadoUrl = null;
-        }
+        this.fotoEmpleado = file;
+        this.fotoEmpleadoUrl = URL.createObjectURL(file);
       }
+    } else {
+      this.toastr.error('Solo se permiten archivos de tipo imagen.', 'Error de archivo');
+    }
+  }
+
+  editarArchivo(tipoArchivo: string): void {
+    const input = document.getElementById(tipoArchivo) as HTMLInputElement;
+    if (input) {
+      input.accept = 'image/*'; // Asegúrate de que solo se puedan seleccionar archivos de imagen
+      input.click();
     }
   }
 
@@ -93,7 +107,7 @@ export class PerfilEdicionComponent implements OnInit {
     if (this.perfilForm.valid) {
       const datos = {
         nombreEmpleado: this.perfilForm.value.nombre,
-        correo: this.perfilForm.value.correo,
+        correo_1: this.perfilForm.value.correo,
         estado: this.perfilForm.value.estado,
         nombrePuesto: this.perfilForm.value.puesto,
         telefono_1: this.perfilForm.value.telefono_1,
@@ -112,14 +126,14 @@ export class PerfilEdicionComponent implements OnInit {
 
       this.centroTrabajoService.actualizarEmpleado(parseInt(this.userId), datos, archivos).subscribe({
         next: (response) => {
-          console.log('Datos guardados:', response);
+          this.toastr.success('Datos guardados con éxito', 'Éxito');
         },
         error: (err) => {
-          console.log('Error al guardar los datos:', err);
+          this.toastr.error('Error al guardar los datos', 'Error');
         }
       });
     } else {
-      console.log('Formulario inválido');
+      this.toastr.error('Formulario inválido', 'Error');
     }
   }
 
@@ -132,7 +146,6 @@ export class PerfilEdicionComponent implements OnInit {
     dialogRef.afterClosed().subscribe(result => {
       if (result) {
         console.log('Resultado del diálogo:', result);
-        // Aquí puedes manejar la lógica para deshabilitar el usuario
       }
     });
   }

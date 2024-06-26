@@ -3,6 +3,8 @@ import { Injectable } from '@angular/core';
 import { Observable, catchError, map, of, throwError } from 'rxjs';
 import { environment } from 'src/environments/environment';
 import { jwtDecode } from 'jwt-decode';
+import { ToastrService } from 'ngx-toastr';
+import { Router } from '@angular/router';
 
 
 @Injectable({
@@ -10,7 +12,8 @@ import { jwtDecode } from 'jwt-decode';
 })
 export class AuthService {
 
-  constructor( private http: HttpClient) {
+  constructor( private http: HttpClient,private router: Router,
+    private toastr: ToastrService) {
    }
 
    olvidoContrasena(dto: any): Observable<{ message: string }> {
@@ -68,6 +71,12 @@ export class AuthService {
         this.clearToken();
       })
     );
+  }
+
+  clearSession(): void {
+    localStorage.removeItem('token');
+    this.router.navigate(['/login']);
+    this.toastr.success('Sesión cerrada con éxito', 'Logout');
   }
 
   verificarEstadoSesion(): Observable<{ sesionActiva: boolean }> {

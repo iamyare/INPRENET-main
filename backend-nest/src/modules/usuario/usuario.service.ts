@@ -272,8 +272,8 @@ export class UsuarioService {
   }
 
   async completarRegistro(token: string, completeRegistrationDto: CompleteRegistrationDto, archivoIdentificacionBuffer: Buffer, fotoEmpleadoBuffer: Buffer): Promise<void> {
-    const { correo, contrasena, pregunta_de_usuario_1, respuesta_de_usuario_1, pregunta_de_usuario_2, respuesta_de_usuario_2, pregunta_de_usuario_3, respuesta_de_usuario_3, telefonoEmpleado, numero_identificacion } = completeRegistrationDto;
-  
+    const { correo, contrasena, pregunta_de_usuario_1, respuesta_de_usuario_1, pregunta_de_usuario_2, respuesta_de_usuario_2, pregunta_de_usuario_3, respuesta_de_usuario_3, telefonoEmpleado, telefonoEmpleado2, numero_identificacion } = completeRegistrationDto;
+
     try {
       const decoded = this.jwtService.verify(token);
       if (decoded.correo !== correo) {
@@ -282,7 +282,7 @@ export class UsuarioService {
     } catch (error) {
       throw new BadRequestException('Token inválido o expirado');
     }
-  
+
     const usuario = await this.usuarioEmpresaRepository.findOne({
       where: {
         estado: 'PENDIENTE',
@@ -292,42 +292,44 @@ export class UsuarioService {
       },
       relations: ['empleadoCentroTrabajo', 'empleadoCentroTrabajo.empleado'],
     });
-  
+
     if (!usuario) {
       throw new BadRequestException('Usuario no encontrado o ya registrado');
     }
-  
+
     usuario.contrasena = await bcrypt.hash(contrasena, 10);
     usuario.estado = 'ACTIVO';
     usuario.fecha_verificacion = new Date();
     usuario.empleadoCentroTrabajo.empleado.telefono_1 = telefonoEmpleado;
+    usuario.empleadoCentroTrabajo.empleado.telefono_2 = telefonoEmpleado2; // Agregar el campo telefonoEmpleado2
     usuario.empleadoCentroTrabajo.empleado.numero_identificacion = numero_identificacion;
     usuario.empleadoCentroTrabajo.empleado.archivo_identificacion = archivoIdentificacionBuffer;
     usuario.empleadoCentroTrabajo.empleado.foto_empleado = fotoEmpleadoBuffer;
-  
+
     await this.empleadoRepository.save(usuario.empleadoCentroTrabajo.empleado);
     await this.usuarioEmpresaRepository.save(usuario);
-  
+
     const seguridad1 = this.seguridadRepository.create({
       pregunta: pregunta_de_usuario_1,
       respuesta: respuesta_de_usuario_1,
       usuarioEmpresa: usuario,
     });
-  
+
     const seguridad2 = this.seguridadRepository.create({
       pregunta: pregunta_de_usuario_2,
       respuesta: respuesta_de_usuario_2,
       usuarioEmpresa: usuario,
     });
-  
+
     const seguridad3 = this.seguridadRepository.create({
       pregunta: pregunta_de_usuario_3,
       respuesta: respuesta_de_usuario_3,
       usuarioEmpresa: usuario,
     });
-  
+
     await this.seguridadRepository.save([seguridad1, seguridad2, seguridad3]);
-  }  
+  } 
+ 
 
   async login(loginDto: LoginDto) {
     const { correo, contrasena } = loginDto;

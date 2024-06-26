@@ -66,8 +66,6 @@ export class GestionUsuariosComponent implements OnInit {
   async getFilas(modulo: string, idCentroTrabajo: number) {
     try {
       const data: any = await this.usuarioService.obtenerUsuarioPorModuloYCentroTrabajo(modulo, idCentroTrabajo).toPromise();
-      console.log(data);
-
       this.data = data;
       this.usuarios = data.map((item: any) => {
         return {

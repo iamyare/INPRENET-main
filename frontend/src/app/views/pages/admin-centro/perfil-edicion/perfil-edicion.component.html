@@ -1,10 +1,35 @@
 <div class="perfil-edicion-container">
   <h2>Editar Perfil de Usuario</h2>
   <div class="row">
-    <div class="col-12 col-md-4 perfil-imagen">
-      <img *ngIf="fotoEmpleadoUrl" [src]="fotoEmpleadoUrl" alt="Foto del Empleado">
+    <div class="col-12 perfil-imagenes">
+      <div class="image-container foto-empleado">
+        <img *ngIf="fotoEmpleadoUrl" [src]="fotoEmpleadoUrl" alt="Foto del Empleado">
+        <button class="edit-button" (click)="editarArchivo('fotoEmpleado')">
+          <mat-icon>edit</mat-icon>
+        </button>
+        <input
+          id="fotoEmpleado"
+          type="file"
+          (change)="onFileChange($event, 'fotoEmpleado')"
+          accept="image/*"
+          style="display: none;"
+        />
+      </div>
+      <div class="image-container archivo-identificacion">
+        <img *ngIf="archivoIdentificacionUrl" [src]="archivoIdentificacionUrl" alt="Archivo de Identificación">
+        <button class="edit-button" (click)="editarArchivo('archivoIdentificacion')">
+          <mat-icon>edit</mat-icon>
+        </button>
+        <input
+          id="archivoIdentificacion"
+          type="file"
+          (change)="onFileChange($event, 'archivoIdentificacion')"
+          accept="image/*"
+          style="display: none;"
+        />
+      </div>
     </div>
-    <div class="col-12 col-md-8 perfil-info">
+    <div class="col-12 perfil-info">
       <h3>Información General</h3>
       <form [formGroup]="perfilForm">
         <div class="row">
@@ -77,16 +102,6 @@
               <mat-label>Número de Identificación</mat-label>
               <input matInput id="numero_identificacion" formControlName="numero_identificacion">
             </mat-form-field>
-          </div>
-        </div>
-        <div class="row">
-          <div class="col-12 col-md-6">
-            <label for="archivoIdentificacion">Archivo de Identificación</label>
-            <input id="archivoIdentificacion" type="file" (change)="onFileChange($event, 'archivoIdentificacion')">
-          </div>
-          <div class="col-12 col-md-6">
-            <label for="fotoEmpleado">Foto del Empleado</label>
-            <input id="fotoEmpleado" type="file" (change)="onFileChange($event, 'fotoEmpleado')">
           </div>
         </div>
         <div class="row">

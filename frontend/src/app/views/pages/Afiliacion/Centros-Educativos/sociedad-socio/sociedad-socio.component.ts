@@ -32,54 +32,54 @@ export class SociedadSocioComponent implements OnInit {
     { name: 'municipio', label: 'Municipio', icon: 'location_city', layout: { row: 6, col: 6 }, type: 'select', value: '', options: [], validations: [Validators.required] },
     { name: 'fechaIngreso', label: 'Fecha de Ingreso', icon: 'calendar_today', layout: { row: 7, col: 6 }, type: 'date', value: '', validations: [Validators.required] },
     { name: 'fechaSalida', label: 'Fecha de Salida', icon: 'calendar_today', layout: { row: 7, col: 6 }, type: 'date', value: '', validations: [] },
-    {
-      name: 'pep_declaration',
-      label: '¿Ha desempeñado un cargo público?',
-      type: 'radio',
-      options: [
-        { label: 'Sí', value: 'si' },
-        { label: 'No', value: 'no' }
-      ],
-      value: '',
-      validations: [],
-      layout: { row: 8, col: 12 }
-    },
-    {
-      name: 'pep_cargo_desempenado',
-      label: 'Cargo Desempeñado',
-      type: 'text',
-      value: '',
-      validations: [],
-      layout: { row: 9, col: 6 }
-    },
-    {
-      name: 'pep_periodo',
-      label: 'Periodo',
-      type: 'text',
-      value: '',
-      validations: [],
-      layout: { row: 9, col: 6 }
-    },
-    {
-      name: 'pep_otras_referencias',
-      label: 'Otras Referencias',
-      type: 'text',
-      value: '',
-      validations: [],
-      layout: { row: 10, col: 12 }
-    },
-    {
-      name: 'docente_deducciones',
-      label: '¿Ha realizado deducciones de cotizaciones a los docentes que trabajan en la institución?',
-      type: 'radio',
-      options: [
-        { label: 'Sí', value: 'si' },
-        { label: 'No', value: 'no' }
-      ],
-      value: '',
-      validations: [],
-      layout: { row: 11, col: 12 }
-    }
+    /*     {
+          name: 'pep_declaration',
+          label: '¿Ha desempeñado un cargo público?',
+          type: 'radio',
+          options: [
+            { label: 'Sí', value: 'si' },
+            { label: 'No', value: 'no' }
+          ],
+          value: '',
+          validations: [],
+          layout: { row: 8, col: 12 }
+        },
+        {
+          name: 'pep_cargo_desempenado',
+          label: 'Cargo Desempeñado',
+          type: 'text',
+          value: '',
+          validations: [],
+          layout: { row: 9, col: 6 }
+        },
+        {
+          name: 'pep_periodo',
+          label: 'Periodo',
+          type: 'text',
+          value: '',
+          validations: [],
+          layout: { row: 9, col: 6 }
+        },
+        {
+          name: 'pep_otras_referencias',
+          label: 'Otras Referencias',
+          type: 'text',
+          value: '',
+          validations: [],
+          layout: { row: 10, col: 12 }
+        },
+        {
+          name: 'docente_deducciones',
+          label: '¿Ha realizado deducciones de cotizaciones a los docentes que trabajan en la institución?',
+          type: 'radio',
+          options: [
+            { label: 'Sí', value: 'si' },
+            { label: 'No', value: 'no' }
+          ],
+          value: '',
+          validations: [],
+          layout: { row: 11, col: 12 }
+        } */
   ];
 
   constructor(private fb: FormBuilder, private direccionService: DireccionService) { }
@@ -150,12 +150,12 @@ export class SociedadSocioComponent implements OnInit {
       porcentajeParticipacion: ['', [Validators.required, Validators.min(0), Validators.max(100)]],
       fechaIngreso: ['', Validators.required],
       fechaSalida: [''],
-      pep_declaration: ['', Validators.required],
+      /* pep_declaration: ['', Validators.required],
       pep_nombre_apellidos: [{ value: '', disabled: true }],
       pep_cargo_desempenado: [{ value: '', disabled: true }],
       pep_periodo: [{ value: '', disabled: true }],
       pep_otras_referencias: [{ value: '', disabled: true }],
-      docente_deducciones: ['', Validators.required]
+      docente_deducciones: ['', Validators.required] */
     });
 
     this.sociedadSocios.push(sociedadSocioGroup);

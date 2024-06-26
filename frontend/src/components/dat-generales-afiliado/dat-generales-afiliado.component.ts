@@ -50,7 +50,14 @@ export function generateAddressFormGroup(datos?: any): FormGroup {
     id_tipo_identificacion: new FormControl(datos?.id_tipo_identificacion, Validators.required),
     id_pais: new FormControl(datos?.id_pais, Validators.required),
     sexo: new FormControl(datos?.sexo, [Validators.required, Validators.maxLength(1), Validators.pattern(/^[FM]$/)]),
+    raza: new FormControl(datos?.raza, [Validators.required]),
+    tipo_discapacidad: new FormControl(datos?.tipo_discapacidad, [Validators.required]),
+    discapacidad: new FormControl(datos?.discapacidad, [Validators.required]),
     cantidad_hijos: new FormControl(datos?.cantidad_hijos, Validators.required),
+    barrio_colonia: new FormControl(datos?.barrio_colonia, [
+      Validators.maxLength(75),
+      Validators.pattern(noSpecialCharsPattern)
+    ]),
     avenida: new FormControl(datos?.avenida, [
       Validators.maxLength(75),
       Validators.pattern(noSpecialCharsPattern)
@@ -126,15 +133,47 @@ export class DatGeneralesAfiliadoComponent implements OnInit {
   @Output() newDatosGenerales = new EventEmitter<any>()
   private formKey = 'datGenForm';
 
+  field = {
+    options: [
+      { value: 'si', label: 'SI' },
+      { value: 'no', label: 'NO' }
+    ]
+  };
+  discapacidadEstado = {
+    si: false,
+    no: false
+  };
+  tipo_discapacidad = [
+    { label: "motriz", value: "motriz" },
+    { label: "auditiva", value: "auditiva" },
+    { label: "visual", value: "visual" },
+    { label: "intelectual", value: "intelectual" },
+    { label: "mental", value: "mental" },
+    { label: "psicosocial", value: "psicosocial" },
+    { label: "múltiple", value: "múltiple" },
+    { label: "sensorial", value: "sensorial" },
+  ]
+
   form: FormGroup = this.fb.group({});
   formArchivos: any;
   minDate: Date;
   fallecido: any;
+  discapacidad: boolean = false;
 
   onDatosGeneralesChange() {
     const data = this.formParent
     this.newDatosGenerales.emit(data)
   }
+
+  onDatosGeneralesDiscChange(event: any) {
+    const value = event.value;
+    this.discapacidadEstado = {
+      si: value === 'si',
+      no: value === 'no'
+    };
+    this.discapacidad = this.discapacidadEstado.si
+  }
+
   onDatosBenChange(fecha: any) {
     this.newDatBenChange.emit(fecha._model.selection);
   }

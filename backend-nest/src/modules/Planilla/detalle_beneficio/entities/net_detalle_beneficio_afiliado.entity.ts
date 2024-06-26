@@ -1,5 +1,5 @@
 
-import { Column, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn } from "typeorm";
+import { Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 import { Net_Beneficio } from "../../beneficio/entities/net_beneficio.entity";
 import { Net_Detalle_Pago_Beneficio } from "./net_detalle_pago_beneficio.entity";
 import { NET_DETALLE_PERSONA } from "src/modules/Persona/entities/Net_detalle_persona.entity";
@@ -29,6 +29,9 @@ export class Net_Detalle_Beneficio_Afiliado {
 
     @Column({ nullable: true, name: 'LEY_APLICABLE' })
     ley_aplicable: string;
+
+    @CreateDateColumn({ name: 'FECHA_PRIMER_PAGO' })
+    fecha_primer_pago: Date;
 
     @ManyToOne(() => Net_Beneficio, beneficio => beneficio.detalleBeneficioAfiliado)
     @JoinColumn({ name: 'ID_BENEFICIO', foreignKeyConstraintName: "FK_ID_BENEFICIO_DETBENAFIL" })

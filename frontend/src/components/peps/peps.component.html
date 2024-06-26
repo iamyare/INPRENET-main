@@ -1,0 +1,17 @@
+<div class="card">
+    <div class="card-header card-header-danger title">
+        <h4 class="card-title">PEPS</h4>
+        <p class="card-category">Completa la información correspondiente</p>
+    </div>
+    <div class="card-body">
+        <form [formGroup]="parentForm" style="margin: 1%;">
+            <div formArrayName="peps" *ngIf="peps.length > 0">
+                <div *ngFor="let referencia of peps.controls; let i = index" [formGroupName]="i" class="row">
+                    <app-shared-form-fields [parentForm]="asFormGroup(referencia)" [fields]="fields">
+                    </app-shared-form-fields>
+                </div>
+
+            </div>
+        </form>
+    </div>
+</div>

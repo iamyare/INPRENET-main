@@ -70,6 +70,7 @@ import { PerfilEdicionSeguridadComponent } from '../pages/admin-centro/perfil-ed
 import { DisableUserDialogComponent } from '../pages/admin-centro/disable-user-dialog/disable-user-dialog.component';
 
 
+/* import { PepsComponent } from '../../../components/peps/peps.component'; */
 
 
 @NgModule({
@@ -95,11 +96,13 @@ import { DisableUserDialogComponent } from '../pages/admin-centro/disable-user-d
     MatNativeDateModule,
     MatGridListModule,
     PagesModule,
+    /* PepsComponent */
   ],
   providers: [
     { provide: MAT_DATE_LOCALE, useValue: 'es' }
   ],
   declarations: [
+    /* PepsComponent, */
     VerplanprelcompComponent,
     VerplancerradaComponent,
     SubirDeduccionesformComponent,

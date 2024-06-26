@@ -127,28 +127,28 @@ export class AfiliadoService {
 
     // Convertir y formatear fechas
     if (createPersonaDto.fecha_nacimiento) {
-        persona.fecha_nacimiento = this.formatDateToYYYYMMDD(createPersonaDto.fecha_nacimiento);
+      persona.fecha_nacimiento = this.formatDateToYYYYMMDD(createPersonaDto.fecha_nacimiento);
     }
     if (createPersonaDto.fecha_vencimiento_ident) {
-        persona.fecha_vencimiento_ident = this.formatDateToYYYYMMDD(createPersonaDto.fecha_vencimiento_ident);
+      persona.fecha_vencimiento_ident = this.formatDateToYYYYMMDD(createPersonaDto.fecha_vencimiento_ident);
     }
 
     // Asignar otros campos relacionados
     if (createPersonaDto.id_tipo_identificacion !== undefined && createPersonaDto.id_tipo_identificacion !== null) {
-        persona.tipoIdentificacion = await this.tipoIdentificacionRepository.findOne({ where: { id_identificacion: createPersonaDto.id_tipo_identificacion } });
+      persona.tipoIdentificacion = await this.tipoIdentificacionRepository.findOne({ where: { id_identificacion: createPersonaDto.id_tipo_identificacion } });
     }
     if (createPersonaDto.id_pais !== undefined && createPersonaDto.id_pais !== null) {
-        persona.pais = await this.paisRepository.findOne({ where: { id_pais: createPersonaDto.id_pais } });
+      persona.pais = await this.paisRepository.findOne({ where: { id_pais: createPersonaDto.id_pais } });
     }
     if (createPersonaDto.id_municipio_residencia !== undefined && createPersonaDto.id_municipio_residencia !== null) {
-        persona.municipio = await this.municipioRepository.findOne({ where: { id_municipio: createPersonaDto.id_municipio_residencia } });
+      persona.municipio = await this.municipioRepository.findOne({ where: { id_municipio: createPersonaDto.id_municipio_residencia } });
     }
     if (createPersonaDto.id_profesion !== undefined && createPersonaDto.id_profesion !== null) {
-        persona.profesion = await this.netProfesionesRepository.findOne({ where: { idProfesion: createPersonaDto.id_profesion } });
+      persona.profesion = await this.netProfesionesRepository.findOne({ where: { idProfesion: createPersonaDto.id_profesion } });
     }
 
     return await this.personaRepository.save(persona);
-}
+  }
 
   async createDetallePersona(createDetallePersonaDto: CreateDetallePersonaDto): Promise<NET_DETALLE_PERSONA> {
     const detallePersona = new NET_DETALLE_PERSONA();
@@ -156,10 +156,10 @@ export class AfiliadoService {
     detallePersona.ID_CAUSANTE = createDetallePersonaDto.idPersona;
     detallePersona.ID_TIPO_PERSONA = createDetallePersonaDto.idTipoPersona;
     detallePersona.porcentaje = createDetallePersonaDto.porcentaje;
-    detallePersona.eliminado = 0;
+    detallePersona.eliminado = "NO";
 
     return this.detallePersonaRepository.save(detallePersona);
-}
+  }
 
   async assignCentrosTrabajo(idPersona: number, centrosTrabajoData: any[]): Promise<Net_perf_pers_cent_trab[]> {
 
@@ -279,7 +279,7 @@ export class AfiliadoService {
     detalle.ID_CAUSANTE_PADRE = detalleDto.idCausantePadre;
     detalle.ID_TIPO_PERSONA = detalleDto.idTipoPersona;
     detalle.porcentaje = detalleDto.porcentaje;
-    detalle.eliminado = 0;
+    detalle.eliminado = "NO";
     detalle.ID_DETALLE_PERSONA = detalleDto.idDetallePersona;
 
     return this.detallePersonaRepository.save(detalle);
@@ -311,8 +311,8 @@ export class AfiliadoService {
     }
   }
 
-  
-  
+
+
   formatDateToYYYYMMDD(dateString: string): string {
     const date = new Date(dateString);
     const day = ('0' + date.getDate()).slice(-2);
@@ -320,7 +320,7 @@ export class AfiliadoService {
     const year = date.getFullYear();
     return `${year}-${month}-${day}`;
   }
-  
+
   async createBenef(bene: Benef): Promise<Net_Persona> {
     const { detalleBenef, n_identificacion, id_pais, id_municipio_residencia, ...personaData } = bene;
     const tipoPersona = await this.tipoPersonaRepository.findOne({
@@ -351,11 +351,11 @@ export class AfiliadoService {
     });
     await this.detallePersonaRepository.save(detalle);
     return persona;
-  } 
+  }
 
   async updateBeneficario(id: number, updatePersonaDto: UpdateBeneficiarioDto): Promise<Net_Persona> {
     console.log(updatePersonaDto);
-    
+
     const persona = await this.personaRepository.findOne({
       where: { id_persona: id },
       relations: ['detallePersona'],
@@ -379,7 +379,7 @@ export class AfiliadoService {
     Object.assign(persona, updatePersonaDto);
 
     if (updatePersonaDto.eliminado) {
-      detallePersona.eliminado = 1;
+      detallePersona.eliminado = "SI";
     }
 
     if (updatePersonaDto.id_estado_persona) {
@@ -973,7 +973,7 @@ export class AfiliadoService {
     }
     const result = await this.detallePersonaRepository.update(
       { ID_PERSONA: idPersona, ID_CAUSANTE: idCausante },
-      { eliminado: 1 }
+      { eliminado: "SI" }
     );
     if (result.affected === 0) {
       throw new NotFoundException(`Registro con ID_PERSONA ${idPersona} y ID_CAUSANTE ${idCausante} no encontrado`);

@@ -1,7 +1,8 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn, Check } from 'typeorm';
 import { Net_Centro_Trabajo } from './net_centro_trabajo.entity';
 
 @Entity({ name: 'NET_REFERENCIA_CENTRO_TRABAJO' })
+@Check(`TIPO_REFERENCIA IN ('BANCARIA', 'COMERCIAL')`)
 export class Net_Referencia_Centro_Trabajo {
   @PrimaryGeneratedColumn({ type: 'int', name: 'ID_REFERENCIA', primaryKeyConstraintName: 'PK_id_referencia_centro_trabajo' })
   id_referencia: number;

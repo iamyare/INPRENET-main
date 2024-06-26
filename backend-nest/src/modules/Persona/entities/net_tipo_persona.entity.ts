@@ -15,4 +15,7 @@ export class Net_Tipo_Persona {
 
     @OneToMany(() => NET_DETALLE_PERSONA, detallePersona => detallePersona.tipoPersona)
     detallesPersona: NET_DETALLE_PERSONA[];
+
+    @OneToMany(() => NET_DETALLE_PERSONA, detallePersona => detallePersona.tipoPersona)
+    benfTipoPersona: NET_DETALLE_PERSONA[];
 }

@@ -6,13 +6,13 @@ export class CreateBeneficioDto {
     nombre_beneficio: string;
 
     @IsString()
-    descripcion_beneficio : string
-    
+    descripcion_beneficio: string
+
     @IsString()
     @IsOptional()
-    periodicidad? : string
+    periodicidad?: string
 
     @IsNumber()
     @IsOptional()
-    numero_rentas_max? : number
+    numero_rentas_max?: number
 }

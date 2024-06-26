@@ -11,6 +11,7 @@ import { Net_Persona_Por_Banco } from "src/modules/banco/entities/net_persona-ba
 import { Net_perf_pers_cent_trab } from "./net_perf_pers_cent_trab.entity";
 import { Net_Ref_Per_Pers } from "./net_ref-Per-Persona.entity";
 import { NET_PROFESIONES } from "src/modules/transacciones/entities/net_profesiones.entity";
+import { Net_Peps } from "src/modules/Empresarial/entities/Net_peps-entity";
 @Entity({
     name: 'NET_PERSONA',
 })
@@ -55,6 +56,9 @@ export class Net_Persona {
 
     @Column('varchar2', { length: 40, nullable: true, name: 'SEGUNDO_APELLIDO' })
     segundo_apellido: string;
+
+    @Column('varchar2', { length: 40, nullable: true, name: 'TIPO_DISCAPACIDAD' })
+    tipo_discapacidad: string;
 
     @Column('varchar2', { length: 30, nullable: true, name: 'GENERO' })
     genero: string;
@@ -119,14 +123,14 @@ export class Net_Persona {
     @Column('varchar2', { length: 200, nullable: true, name: 'ARCHIVO_IDENTIFICACION' })
     archivo_identificacion: string;
 
-    @OneToMany(() => NET_DETALLE_PERSONA, detallePersona => detallePersona.persona)
-    detallePersona: NET_DETALLE_PERSONA[];
-
     @Column('varchar2', { length: 500, nullable: true, name: 'DIRECCION_RESIDENCIA' })
     direccion_residencia: string;
 
     @Column('blob', { nullable: true, name: 'FOTO_PERFIL' })
     foto_perfil: Buffer;
+
+    @OneToMany(() => NET_DETALLE_PERSONA, detallePersona => detallePersona.persona)
+    detallePersona: NET_DETALLE_PERSONA[];
 
     @ManyToOne(() => Net_Municipio, municipio => municipio.persona, { cascade: true })
     @JoinColumn({ name: 'ID_MUNICIPIO_RESIDENCIA', foreignKeyConstraintName: "FK_ID_MUNIC_RESID_PERS" })
@@ -166,5 +170,8 @@ export class Net_Persona {
     @ManyToOne(() => NET_PROFESIONES, profesion => profesion.personas, { cascade: true })
     @JoinColumn({ name: 'ID_PROFESION', foreignKeyConstraintName: 'FK_ID_PROFESION_PERSONA' })
     profesion: NET_PROFESIONES;
+
+    @OneToMany(() => Net_Peps, peps => peps.persona)
+    peps: Net_Peps[];
 
 }

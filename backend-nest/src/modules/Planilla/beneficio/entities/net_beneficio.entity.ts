@@ -1,5 +1,6 @@
-import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
+import { Column, CreateDateColumn, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 import { Net_Detalle_Beneficio_Afiliado } from "../../detalle_beneficio/entities/net_detalle_beneficio_afiliado.entity";
+import { Net_Beneficio_Tipo_Persona } from "../../beneficio_tipo_persona/entities/net_beneficio_tipo_persona.entity";
 
 
 @Entity({ name: 'NET_BENEFICIO' })
@@ -25,4 +26,7 @@ export class Net_Beneficio {
 
     @OneToMany(() => Net_Detalle_Beneficio_Afiliado, detalleBeneficioAfiliado => detalleBeneficioAfiliado.beneficio)
     detalleBeneficioAfiliado: Net_Detalle_Beneficio_Afiliado[];
+
+    @OneToMany(() => Net_Beneficio_Tipo_Persona, beneficioTipoPersona => beneficioTipoPersona.beneficio)
+    benefTipoPersona: Net_Beneficio_Tipo_Persona[];
 }

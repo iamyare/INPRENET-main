@@ -8,11 +8,10 @@
       <div formArrayName="sociedadSocios" *ngIf="sociedadSocios.length > 0">
         <div *ngFor="let grupo of sociedadSocios.controls; let i = index" [formGroupName]="i" class="row">
           <h4 class="card-title">Registro {{ i + 1 }}</h4>
-          <app-shared-form-fields
-            [parentForm]="asFormGroup(grupo)"
-            [fields]="fields"
+          <app-shared-form-fields [parentForm]="asFormGroup(grupo)" [fields]="fields"
             (selectChange)="onDepartamentoChange($event)">
           </app-shared-form-fields>
+          <app-peps></app-peps>
         </div>
       </div>
       <div class="row" style="text-align: center; margin: 1%;">

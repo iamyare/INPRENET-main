@@ -5,6 +5,11 @@ import { DatosEstaticosService } from 'src/app/services/datos-estaticos.service'
 
 export function generateRefPerFormGroup(datos?: any): FormGroup {
   return new FormGroup({
+    numero_identificacion: new FormControl(datos?.numero_identificacion, [
+      Validators.required,
+      Validators.minLength(2),
+      Validators.maxLength(50),
+    ]),
     nombre_completo: new FormControl(datos?.nombre_completo, [
       Validators.required,
       Validators.minLength(2),
@@ -38,9 +43,14 @@ export function generateRefPerFormGroup(datos?: any): FormGroup {
       Validators.maxLength(15),
       Validators.pattern(/^[0-9]{13}$|^[0-9]{4}-[0-9]{4}-[0-9]{5}$/),
     ]),
+    discapacidad: new FormControl(datos?.dni, [
+      Validators.required,
+    ]),
     fecha_nacimiento: new FormControl(datos?.fecha_nacimiento),
     es_afiliado: new FormControl(datos?.es_afiliado || false),
     trabaja: new FormControl(datos?.trabaja || false),
+    tipo: new FormControl(datos?.tipo || false),
+    sexo: new FormControl(datos?.sexo || false),
   });
 }
 
@@ -54,10 +64,24 @@ export class RefPersComponent implements OnInit {
   private formKey = 'refForm';
   parentesco: any;
   availableParentesco: any[] = [];
+  sexo: any[] = [];
+  tipo: any[] = [];
 
   @Input() nombreComp?: string;
   @Input() datos?: any;
   @Output() newDatRefPerChange = new EventEmitter<any>();
+
+  field = {
+    options: [
+      { value: 'si', label: 'SI' },
+      { value: 'no', label: 'NO' }
+    ]
+  };
+  discapacidadEstado = {
+    si: false,
+    no: false
+  };
+  discapacidad: boolean = false;
 
   onDatosRefPerChange() {
     const data = this.formParent;
@@ -65,7 +89,29 @@ export class RefPersComponent implements OnInit {
     this.updateAvailableParentesco();
   }
 
-  constructor(private formStateService: FormStateService, private fb: FormBuilder, private datosEstaticosService: DatosEstaticosService) { }
+  onDatosGeneralesDiscChange(event: any) {
+    const value = event.value;
+    this.discapacidadEstado = {
+      si: value === 'si',
+      no: value === 'no'
+    };
+    this.discapacidad = this.discapacidadEstado.si
+  }
+
+  constructor(private formStateService: FormStateService, private fb: FormBuilder, private datosEstaticosService: DatosEstaticosService) {
+
+    this.sexo = [
+      { label: "MASCULINO", value: "M" },
+      { label: "FEMENINO", value: "F" },
+    ]
+    this.tipo = [
+      { label: "REFERENCIA PERSONAL", value: "REFERENCIA PERSONAL" },
+      { label: "REFERENCIA FAMILIAR", value: "REFERENCIA FAMILIAR" },
+    ]
+
+
+
+  }
 
   ngOnInit(): void {
     this.parentesco = this.datosEstaticosService.parentesco;
@@ -157,17 +203,17 @@ export class RefPersComponent implements OnInit {
   isConyugue(index: number): boolean {
     const refParent = this.formParent.get('refpers') as FormArray;
     const parentesco = refParent.at(index).get('parentesco')?.value;
-    return parentesco === 'CONYUGUE';
+    return parentesco === 'CÓNYUGE';
   }
 
   private existeConyugue(): boolean {
     const refParent = this.formParent.get('refpers') as FormArray;
-    return refParent.controls.some(ctrl => ctrl.get('parentesco')?.value === 'CONYUGUE');
+    return refParent.controls.some(ctrl => ctrl.get('parentesco')?.value === 'CÓNYUGE');
   }
 
   private updateAvailableParentesco(): void {
     if (this.existeConyugue()) {
-      this.availableParentesco = this.parentesco.filter((item: any) => item.value !== 'CONYUGUE');
+      this.availableParentesco = this.parentesco.filter((item: any) => item.value !== 'CÓNYUGE');
     } else {
       this.availableParentesco = this.parentesco;
     }
@@ -176,7 +222,7 @@ export class RefPersComponent implements OnInit {
   getAvailableParentesco(index: number): any[] {
     const refParent = this.formParent.get('refpers') as FormArray;
     const currentParentesco = refParent.at(index).get('parentesco')?.value;
-    if (currentParentesco === 'CONYUGUE') {
+    if (currentParentesco === 'CÓNYUGE') {
       return this.parentesco;
     }
     return this.availableParentesco;

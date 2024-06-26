@@ -26,7 +26,7 @@ export class DatosEstaticosService {
   tiposMovimientos: any = [];
   estados: any = [];
   tipoRol: any = [];
-  centrosTrabajoTipoE : any = [];
+  centrosTrabajoTipoE: any = [];
 
   constructor(
     private colegiosMagSVC: ColegiosMagisterialesService,
@@ -66,7 +66,7 @@ export class DatosEstaticosService {
 
   async getCentrosTrabajoTipoE() {
     try {
-      const response:any = await this.centroTrabajoService.obtenerCentrosTrabajoTipoE().toPromise();
+      const response: any = await this.centroTrabajoService.obtenerCentrosTrabajoTipoE().toPromise();
       this.centrosTrabajoTipoE = response.map((item: { id_centro_trabajo: any; nombre_centro_trabajo: any; }) => ({
         label: item.nombre_centro_trabajo,
         value: item.id_centro_trabajo
@@ -357,7 +357,7 @@ export class DatosEstaticosService {
   ];
 
   parentesco = [
-    { value: "CONYUGUE", label: "CONYUGUE" },
+    { value: "CÓNYUGE", label: "CÓNYUGE" },
     { value: "ABUELA MATERNA", label: "ABUELA MATERNA" },
     { value: "ABUELA PATERNA", label: "ABUELA PATERNA" },
     { value: "ABUELO MATERNO", label: "ABUELO MATERNO" },

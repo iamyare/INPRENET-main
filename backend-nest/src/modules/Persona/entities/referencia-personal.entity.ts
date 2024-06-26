@@ -1,7 +1,8 @@
-import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
+import { Check, Column, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 import { Net_Ref_Per_Pers } from "./net_ref-Per-Persona.entity";
 
 @Entity({ name: 'NET_REFERENCIA_PERSONAL' })
+@Check(`SEXO IN ('F', 'M')`)
 export class Net_ReferenciaPersonal {
 
     @PrimaryGeneratedColumn({ type: 'int', name: 'ID_REF_PERSONAL', primaryKeyConstraintName: 'PK_id_ref_per_refPer' })
@@ -15,18 +16,18 @@ export class Net_ReferenciaPersonal {
     nombre_completo: string;
 
     @Column('varchar2', {
+        length: 1,
+        nullable: false,
+        name: 'SEXO'
+    })
+    sexo: string;
+
+    @Column('varchar2', {
         length: 200,
         nullable: true,
         name: 'DIRECCION'
     })
     direccion: string;
-
-    @Column('varchar2', {
-        length: 30,
-        nullable: false,
-        name: 'PARENTESCO'
-    })
-    parentesco: string;
 
     @Column('varchar2', {
         length: 12,

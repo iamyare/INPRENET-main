@@ -1,5 +1,6 @@
 import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn } from 'typeorm';
 import { Net_Socio } from './net_socio.entity';
+import { Net_Persona } from 'src/modules/Persona/entities/Net_Persona.entity';
 
 @Entity({ name: 'NET_PEPS' })
 export class Net_Peps {
@@ -21,4 +22,8 @@ export class Net_Peps {
   @ManyToOne(() => Net_Socio, socio => socio.peps)
   @JoinColumn({ name: 'ID_SOCIO', foreignKeyConstraintName: 'FK_id_socio_peps' })
   socio: Net_Socio;
+
+  @ManyToOne(() => Net_Persona, persona => persona.peps)
+  @JoinColumn({ name: 'ID_PERSONA', foreignKeyConstraintName: 'FK_id_persona_peps' })
+  persona: Net_Socio;
 }

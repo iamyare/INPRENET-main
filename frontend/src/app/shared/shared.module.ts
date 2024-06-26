@@ -36,10 +36,10 @@ import { DocsComponentsModule } from '../../components/docs-components.module';
 import { MatTabsModule } from '@angular/material/tabs';
 import { UppercaseDirective } from './directives/uppercase.directive';
 import { GoogleMapsModule } from '@angular/google-maps';
+
 @NgModule({
   declarations: [
     UppercaseDirective,
-
   ],
   imports: [
     DocsComponentsModule,

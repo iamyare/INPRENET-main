@@ -29,6 +29,7 @@ import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatTableModule } from '@angular/material/table';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { NgScrollbarModule } from 'ngx-scrollbar';
+import { MatTabsModule } from '@angular/material/tabs';
 
 import { DatGeneralesAfiliadoComponent } from './dat-generales-afiliado/dat-generales-afiliado.component';
 import { HistorialSalarioComponent } from './historial-salario/historial-salario.component';
@@ -65,6 +66,7 @@ import { CuentaBancariaCompComponent } from './cuenta-bancaria-comp/cuenta-banca
 import { ProgressbarDynamicComponent } from './progressbar-dynamic/progressbar-dynamic.component';
 import { SharedFormFieldsComponent } from './shared-form-fields/shared-form-fields.component';
 import { BuscadorComponent } from './buscador/buscador.component';
+import { PepsComponent } from './peps/peps.component';
 import { DynamicTablePruebaComponent } from './dynamic-table-prueba/dynamic-table-prueba.component';
 import { DynamicMenuConstanciasComponent } from './Dynamics/dynamic-menu-constancias/dynamic-menu-constancias.component';
 import { MapsComponent } from './maps/maps.component';
@@ -74,6 +76,8 @@ import { MatStepperModule } from '@angular/material/stepper';
 
 @NgModule({
   declarations: [
+    DatPuestoTrabComponent,
+    PepsComponent,
     MapsComponent,
     BuscadorComponent,
     BeneficioComponent,
@@ -110,8 +114,11 @@ import { MatStepperModule } from '@angular/material/stepper';
     SharedFormFieldsComponent,
     DynamicMenuConstanciasComponent,
     DynamicTablePruebaComponent,
+    DatPuestoTrabComponent,
   ],
   exports: [
+    PepsComponent,
+    MatTabsModule,
     MatStepperModule,
     MapsComponent,
     ProgressbarComponent,
@@ -149,6 +156,7 @@ import { MatStepperModule } from '@angular/material/stepper';
     DynamicMenuConstanciasComponent
   ],
   imports: [
+    MatTabsModule,
     MatStepperModule,
     GoogleMapsModule,
     WebcamModule,
@@ -203,7 +211,7 @@ import { MatStepperModule } from '@angular/material/stepper';
     NgScrollbarModule,
     MatTableModule,
     MatPaginatorModule,
-
+    MatTabsModule
   ],
   providers: [
     { provide: MatPaginatorIntl, useClass: CustomMatPaginatorIntl },

@@ -1,4 +1,4 @@
-import { Column, Entity, Index, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import { Check, Column, Entity, Index, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 import { Net_Municipio } from 'src/modules/Regional/municipio/entities/net_municipio.entity';
 import { Net_perf_pers_cent_trab } from 'src/modules/Persona/entities/net_perf_pers_cent_trab.entity';
 import { Net_Detalle_planilla_ingreso } from 'src/modules/Planilla/Ingresos/detalle-plan-ingr/entities/net_detalle_plani_ing.entity';
@@ -12,6 +12,8 @@ import { Net_Modulo } from 'src/modules/usuario/entities/net_modulo.entity';
 import { Net_Estado_Centro_Trabajo } from './Net_Estado_Centro_trabajo.entity';
 
 @Entity({ name: 'NET_CENTRO_TRABAJO' })
+@Check(`TIPO IN ('EDUCACION', 'INSTITUCION')`)
+@Check(`SECTOR_ECONOMICO IN ('PUBLICO', 'PRIVADO')`)
 export class Net_Centro_Trabajo {
     @PrimaryGeneratedColumn({ type: 'int', name: 'ID_CENTRO_TRABAJO', primaryKeyConstraintName: 'PK_id_centro_trabajo' })
     id_centro_trabajo: number;
@@ -84,7 +86,7 @@ export class Net_Centro_Trabajo {
     @Column('decimal', { precision: 10, scale: 7, nullable: true, name: 'LONGITUD' })
     longitud: number;
 
-    @Column('char', { length: 1, nullable: false, name: 'TIPO' })
+    @Column('char', { length: 50, nullable: false, name: 'TIPO' })
     tipo: string;
 
     @ManyToOne(() => Net_Municipio, municipio => municipio.centrosTrabajo)

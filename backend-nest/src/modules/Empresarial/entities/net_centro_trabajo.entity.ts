@@ -86,7 +86,7 @@ export class Net_Centro_Trabajo {
     @Column('decimal', { precision: 10, scale: 7, nullable: true, name: 'LONGITUD' })
     longitud: number;
 
-    @Column('char', { length: 50, nullable: false, name: 'TIPO' })
+    @Column('nvarchar2', { length: 50, nullable: false, name: 'TIPO' })
     tipo: string;
 
     @ManyToOne(() => Net_Municipio, municipio => municipio.centrosTrabajo)

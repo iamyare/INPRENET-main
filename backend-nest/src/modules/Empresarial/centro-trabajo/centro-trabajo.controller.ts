@@ -5,7 +5,7 @@ import { UpdateCentroTrabajoDto } from './dto/update-centro-trabajo.dto';
 import { ApiTags } from '@nestjs/swagger';
 import { CreatePrivateCentroTrabajoCompleteDto } from './dto/create-private-centro-trabajo-complete.dto';
 import { Net_Centro_Trabajo } from '../entities/net_centro_trabajo.entity';
-import { FilesInterceptor } from '@nestjs/platform-express';
+import { FileFieldsInterceptor, FilesInterceptor } from '@nestjs/platform-express';
 import { UpdateEmpleadoDto } from './dto/update-empleado.dto';
 
 @ApiTags('centro-trabajo')
@@ -14,21 +14,27 @@ export class CentroTrabajoController {
   constructor(private readonly centroTrabajoService: CentroTrabajoService) { }
 
   @Put('actualizar/:id')
-@UseInterceptors(FilesInterceptor('files'))
+@UseInterceptors(
+  FileFieldsInterceptor(
+    [
+      { name: 'archivoIdentificacion', maxCount: 1 },
+      { name: 'fotoEmpleado', maxCount: 1 }
+    ]
+  )
+)
 async actualizarEmpleado(
   @Param('id') id: number,
   @Body() updateEmpleadoDto: UpdateEmpleadoDto,
-  @UploadedFiles() files: Express.Multer.File[]
+  @UploadedFiles() files: { archivoIdentificacion?: Express.Multer.File[], fotoEmpleado?: Express.Multer.File[] }
 ): Promise<any> {
   let archivoIdentificacion: Buffer | null = null;
   let fotoEmpleado: Buffer | null = null;
 
-  for (const file of files) {
-    if (file.fieldname === 'archivoIdentificacion') {
-      archivoIdentificacion = file.buffer;
-    } else if (file.fieldname === 'fotoEmpleado') {
-      fotoEmpleado = file.buffer;
-    }
+  if (files.archivoIdentificacion && files.archivoIdentificacion.length > 0) {
+    archivoIdentificacion = files.archivoIdentificacion[0].buffer;
+  }
+  if (files.fotoEmpleado && files.fotoEmpleado.length > 0) {
+    fotoEmpleado = files.fotoEmpleado[0].buffer;
   }
 
   const empleadoActualizado = await this.centroTrabajoService.actualizarEmpleado(id, updateEmpleadoDto, archivoIdentificacion, fotoEmpleado);
@@ -38,6 +44,7 @@ async actualizarEmpleado(
     empleado: empleadoActualizado,
   };
 }
+  
 
   @Get('tipo-e')
   async obtenerCentrosDeTrabajoConTipoE(): Promise<Net_Centro_Trabajo[]> {

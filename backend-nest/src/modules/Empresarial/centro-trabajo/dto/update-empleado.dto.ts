@@ -36,10 +36,4 @@ export class UpdateEmpleadoDto {
   @IsOptional()
   @ApiProperty({ description: 'Número de identificación del empleado' })
   numero_identificacion?: string;
-
-  @ApiProperty({ type: 'string', format: 'binary', required: false })
-  archivo_identificacion?: any;
-
-  @ApiProperty({ type: 'string', format: 'binary', required: false })
-  foto_empleado?: any;
 }

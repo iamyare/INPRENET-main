@@ -26,6 +26,7 @@ import { CreatePrivateSocioDto } from './dto/create-private-socio.dto';
 import { Net_Empleado } from '../entities/net_empleado.entity';
 import { UpdateEmpleadoDto } from './dto/update-empleado.dto';
 import { Net_Empleado_Centro_Trabajo } from '../entities/Net_Empleado_Centro_Trabajo.entity';
+import { Net_Usuario_Empresa } from 'src/modules/usuario/entities/net_usuario_empresa.entity';
 @Injectable()
 export class CentroTrabajoService {
 
@@ -66,18 +67,29 @@ export class CentroTrabajoService {
     @InjectRepository(Net_Empleado)
     private readonly empleadoRepository: Repository<Net_Empleado>,
     @InjectRepository(Net_Empleado_Centro_Trabajo)
-    private readonly empleadoCentroTrabajoRepository: Repository<Net_Empleado_Centro_Trabajo>
+    private readonly empleadoCentroTrabajoRepository: Repository<Net_Empleado_Centro_Trabajo>,
+    @InjectRepository(Net_Usuario_Empresa)
+    private readonly usuarioEmpresaRepository: Repository<Net_Usuario_Empresa>
   ) { }
 
 
   async actualizarEmpleado(
-    id: number, 
-    updateEmpleadoDto: UpdateEmpleadoDto, 
-    archivoIdentificacion: Buffer | null, 
+    id: number,
+    updateEmpleadoDto: UpdateEmpleadoDto,
+    archivoIdentificacion: Buffer | null,
     fotoEmpleado: Buffer | null
   ): Promise<Net_Empleado> {
-    const empleado = await this.empleadoRepository.findOne({ where: { id_empleado: id }, relations: ['empleadoCentroTrabajos'] });
-    
+    const usuarioEmpresa = await this.usuarioEmpresaRepository.findOne({
+      where: { id_usuario_empresa: id },
+      relations: ['empleadoCentroTrabajo', 'empleadoCentroTrabajo.empleado']
+    });
+  
+    if (!usuarioEmpresa) {
+      throw new NotFoundException('Usuario Empresa no encontrado');
+    }
+  
+    const empleado = usuarioEmpresa.empleadoCentroTrabajo.empleado;
+  
     if (!empleado) {
       throw new NotFoundException('Empleado no encontrado');
     }
@@ -95,20 +107,22 @@ export class CentroTrabajoService {
     }
   
     // Actualizar la información del empleadoCentroTrabajo
-    const empleadoCentroTrabajo = empleado.empleadoCentroTrabajos[0];
+    const empleadoCentroTrabajo = usuarioEmpresa.empleadoCentroTrabajo;
     empleadoCentroTrabajo.correo_1 = updateEmpleadoDto.correo_1;
     empleadoCentroTrabajo.nombrePuesto = updateEmpleadoDto.nombrePuesto;
-    empleadoCentroTrabajo.usuarioEmpresas[0].estado = updateEmpleadoDto.estado;
+    usuarioEmpresa.estado = updateEmpleadoDto.estado;
   
     await this.empleadoCentroTrabajoRepository.save(empleadoCentroTrabajo);
+    await this.usuarioEmpresaRepository.save(usuarioEmpresa);
   
     return this.empleadoRepository.save(empleado);
   }
+  
 
   async obtenerCentrosDeTrabajoConTipoE(): Promise<Net_Centro_Trabajo[]> {
     return await this.centroTrabajoRepository.find({
       where: {
-        tipo: 'E',
+        tipo: 'INSTITUCION',
       },
     });
   }

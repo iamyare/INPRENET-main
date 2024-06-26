@@ -52,6 +52,11 @@ export class CompleteRegistrationDto {
   @IsString()
   @IsNotEmpty()
   @Length(1, 255)
+  telefonoEmpleado2?: string;
+
+  @IsString()
+  @IsNotEmpty()
+  @Length(1, 255)
   numero_identificacion: string;
 
   @IsString()

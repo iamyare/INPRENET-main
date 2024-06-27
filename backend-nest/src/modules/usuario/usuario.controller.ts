@@ -17,6 +17,21 @@ import { ForgotPasswordDto } from './dto/forgot-password.dto';
 export class UsuarioController {
   constructor(private readonly usuarioService: UsuarioService) { }
 
+  @Patch(':id/desactivar')
+  async desactivarUsuario(
+    @Param('id') idUsuario: number,
+    @Body('fechaReactivacion') fechaReactivacion: Date | null = null,
+  ) {
+    await this.usuarioService.desactivarUsuario(idUsuario, fechaReactivacion);
+    return { message: 'Usuario desactivado correctamente' };
+  }
+
+  @Patch(':id/reactivar')
+  async reactivarUsuario(@Param('id') idUsuario: number) {
+    await this.usuarioService.reactivarUsuario(idUsuario);
+    return { message: 'Usuario reactivado correctamente' };
+  }
+
   @Get('preguntas-seguridad')
   async obtenerPreguntasSeguridad(@Query('correo') correo: string): Promise<string[]> {
     return this.usuarioService.obtenerPreguntasSeguridad(correo);
@@ -59,6 +74,8 @@ async completarRegistro(
   async cambiarContrasena(@Body() cambiarContrasenaDto: { correo: string; nuevaContrasena: string }) {
     return this.usuarioService.cambiarContrasena(cambiarContrasenaDto.correo, cambiarContrasenaDto.nuevaContrasena);
   }
+
+  
   
 
   @Post('login')

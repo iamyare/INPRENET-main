@@ -13,6 +13,7 @@ export class CreatePreRegistroDto {
 
   @IsEmail()
   @IsNotEmpty()
+  @Length(1, 255)
   correo: string;
 
   @IsString()
@@ -25,6 +26,8 @@ export class CreatePreRegistroDto {
   @IsOptional()
   idRole?: number;
 
+  @IsInt()
+  @Min(1)
   @IsOptional()
   idModulo?: number;
 }

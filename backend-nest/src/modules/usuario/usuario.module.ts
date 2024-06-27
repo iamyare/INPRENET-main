@@ -17,10 +17,11 @@ import { Net_Modulo } from './entities/net_modulo.entity';
 import { Net_Rol_Modulo } from './entities/net_rol_modulo.entity';
 import { Net_Usuario_Empresa } from './entities/net_usuario_empresa.entity';
 import { Net_Usuario_Modulo } from './entities/net_usuario_modulo.entity';
+import { JwtAuthGuard } from './jwt-auth.guard';
 
 @Module({
   controllers: [UsuarioController],
-  providers: [UsuarioService, MailService],
+  providers: [UsuarioService, MailService, JwtAuthGuard],
   imports: [
     TypeOrmModule.forFeature([
       Net_Empleado, 
@@ -50,16 +51,4 @@ import { Net_Usuario_Modulo } from './entities/net_usuario_modulo.entity';
     CommonModule
   ]
 })
-export class UsuarioModule{
-}
-
-
-/* 
-export class UsuarioModule implements NestModule {
-  configure(consumer: MiddlewareConsumer) {
-    consumer
-      .apply(SesionActivaMiddleware)
-      .forRoutes({ path: 'api/usuario/logout', method: RequestMethod.POST });
-  }
-}
-*/
+export class UsuarioModule {}

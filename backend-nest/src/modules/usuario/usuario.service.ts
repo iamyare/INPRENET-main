@@ -2,7 +2,7 @@ import { BadRequestException, Injectable, InternalServerErrorException, Logger, 
 import { UpdateUsuarioDto } from './dto/update-usuario.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { PaginationDto } from 'src/common/dtos/pagination.dto';
-import { In, Repository } from 'typeorm';
+import { In, LessThan, Repository } from 'typeorm';
 import { JwtService } from '@nestjs/jwt';
 import { MailService } from 'src/common/services/mail.service';
 import * as bcrypt from 'bcrypt';
@@ -19,6 +19,7 @@ import { Net_Usuario_Empresa } from './entities/net_usuario_empresa.entity';
 import { Net_Usuario_Modulo } from './entities/net_usuario_modulo.entity';
 import { Net_Modulo } from './entities/net_modulo.entity';
 import { ForgotPasswordDto } from './dto/forgot-password.dto';
+import { Cron } from '@nestjs/schedule';
 
 @Injectable()
 export class UsuarioService {
@@ -59,13 +60,64 @@ export class UsuarioService {
         'usuarioModulos.rolModulo',
         'usuarioModulos.rolModulo.modulo',
       ],
-    });
+    }); 
 
     if (!usuario) {
       throw new NotFoundException('Usuario no encontrado');
     }
 
     return usuario;
+  }
+
+  async desactivarUsuario(idUsuario: number, fechaReactivacion: Date | null = null): Promise<void> {
+    const usuario = await this.usuarioEmpresaRepository.findOne({ where: { id_usuario_empresa: idUsuario } });
+    
+    if (!usuario) {
+      throw new NotFoundException('Usuario no encontrado');
+    }
+
+    usuario.estado = 'INACTIVO';
+    usuario.fecha_desactivacion = new Date();
+    usuario.fecha_reactivacion = fechaReactivacion;
+
+    await this.usuarioEmpresaRepository.save(usuario);
+  }
+
+  async reactivarUsuario(idUsuario: number): Promise<void> {
+    const usuario = await this.usuarioEmpresaRepository.findOne({ where: { id_usuario_empresa: idUsuario } });
+
+    if (!usuario) {
+      throw new NotFoundException('Usuario no encontrado');
+    }
+
+    if (usuario.fecha_reactivacion && usuario.fecha_reactivacion > new Date()) {
+      throw new BadRequestException('El usuario no puede ser reactivado antes de la fecha de reactivación');
+    }
+
+    usuario.estado = 'ACTIVO';
+    usuario.fecha_desactivacion = null;
+    usuario.fecha_reactivacion = null;
+    usuario.fecha_verificacion = new Date();
+
+    await this.usuarioEmpresaRepository.save(usuario);
+  }
+
+  @Cron('0 0 * * *') // Se ejecuta cada día a medianoche
+  async reactivarUsuariosAutomaticamente() {
+    const usuarios = await this.usuarioEmpresaRepository.find({
+      where: {
+        estado: 'INACTIVO',
+        fecha_reactivacion: LessThan(new Date()),
+      },
+    });
+
+    for (const usuario of usuarios) {
+      usuario.estado = 'ACTIVO';
+      usuario.fecha_desactivacion = null;
+      usuario.fecha_reactivacion = null;
+      usuario.fecha_verificacion = new Date();
+      await this.usuarioEmpresaRepository.save(usuario);
+    }
   }
 
   async cambiarContrasena(correo: string, nuevaContrasena: string) {

@@ -95,7 +95,13 @@ const routes: Routes = [
       {
         path: 'Gestion',
         loadChildren: () =>
-          import('./views/theme/theme.module').then((m) => m.ThemeModule)
+          import('./views/theme/theme.module').then((m) => m.ThemeModule),
+        canActivate: [RoleGuard],
+        data: {
+          expectedRolesModules: [
+            { role: 'ADMINISTRADOR'}
+          ]
+        }
       },
     ]
   },

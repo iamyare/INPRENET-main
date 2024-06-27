@@ -1,6 +1,6 @@
 import { Type } from 'class-transformer';
 import {
-    IsDate, IsEmail, IsInt, IsOptional, IsString, Matches, MaxLength,
+    IsDate, IsEmail, IsInt, IsOptional, IsString, Length, Matches, MaxLength,
 } from 'class-validator';
 
 export interface PersonaResponse {
@@ -40,12 +40,10 @@ export class NetPersonaDTO {
     @IsInt()
     id_pais: number;
 
+    @IsOptional()
     @IsString()
-    @MaxLength(15)
-    @Matches(/^[0-9]{13}$|^[0-9]{4}-[0-9]{4}-[0-9]{5}$/, {
-        message: "El DNI debe contener 13 caracteres numéricos en formato continuo o en el formato NNNN-NNNN-NNNNN.",
-    })
-    dni: string;
+    @Length(0, 15)
+    n_identificacion?: string;
 
     @IsString()
     @MaxLength(40)

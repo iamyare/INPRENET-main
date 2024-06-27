@@ -93,11 +93,9 @@ export class EditBeneficiariosComponent implements OnInit, OnChanges, OnDestroy 
 
   async getFilas() {
     this.filas = [];
-    console.log('getFilas called');
     if (this.persona) {
       try {
         const { data, time } = await measureAsyncExecutionTime(() => this.svcAfiliado.getAllBenDeAfil(this.persona.n_identificacion).toPromise());
-        console.log('Data fetched:', data);
         this.filas = data.map((item: any) => {
           const nombres = [item.primerNombre, item.segundoNombre, item.tercerNombre].filter(part => part).join(' ');
           const apellidos = [item.primerApellido, item.segundoApellido].filter(part => part).join(' ');
@@ -122,7 +120,6 @@ export class EditBeneficiariosComponent implements OnInit, OnChanges, OnDestroy 
           };
           return respData;
         });
-        console.log('Filas after mapping:', this.filas);
       } catch (error) {
         this.toastr.error('Error al cargar los datos de los beneficiarios');
         console.error('Error al obtener datos de los beneficiarios', error);
@@ -138,7 +135,6 @@ export class EditBeneficiariosComponent implements OnInit, OnChanges, OnDestroy 
   }
 
   cargar() {
-    console.log('cargar called');
     if (this.ejecF) {
       this.ejecF(this.filas).then(() => { });
     }

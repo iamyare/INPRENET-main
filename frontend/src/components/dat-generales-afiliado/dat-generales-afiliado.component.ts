@@ -9,7 +9,6 @@ import { CentroTrabajoService } from 'src/app/services/centro-trabajo.service';
 const noSpecialCharsPattern = '^[a-zA-Z0-9\\s]*$';
 
 export function generateAddressFormGroup(datos?: any): FormGroup {
-
   return new FormGroup({
     n_identificacion: new FormControl(datos?.n_identificacion, [Validators.required, Validators.maxLength(15), Validators.pattern(/^[0-9]{13}$|^[0-9]{4}-[0-9]{4}-[0-9]{5}$/)]),
     primer_nombre: new FormControl(datos?.primer_nombre, [
@@ -51,7 +50,7 @@ export function generateAddressFormGroup(datos?: any): FormGroup {
     id_tipo_identificacion: new FormControl(datos?.id_tipo_identificacion, Validators.required),
     id_pais: new FormControl(datos?.id_pais, Validators.required),
     sexo: new FormControl(datos?.sexo, [Validators.required, Validators.maxLength(1), Validators.pattern(/^[FM]$/)]),
-    raza: new FormControl(datos?.raza, [Validators.required]),
+    grupo_etnico: new FormControl(datos?.grupo_etnico, [Validators.required]),
     tipo_discapacidad: new FormControl(datos?.tipo_discapacidad, [Validators.required]),
     discapacidad: new FormControl(datos?.discapacidad, [Validators.required]),
     cantidad_hijos: new FormControl(datos?.cantidad_hijos, Validators.required),
@@ -95,7 +94,6 @@ export function generateAddressFormGroup(datos?: any): FormGroup {
       Validators.maxLength(75)
     ]),
   });
-
 }
 
 @Component({
@@ -128,6 +126,20 @@ export class DatGeneralesAfiliadoComponent implements OnInit {
   representacion: any = this.datosEstaticos.representacion;
   estados: { value: string; label: string }[] = [];
 
+  grupo_etnico = [
+    { "label": "MESTIZO", "value": "MESTIZO" },
+    { "label": "LENCA", "value": "LENCA" },
+    { "label": "MISKITO", "value": "MISKITO" },
+    { "label": "GARÍFUNA", "value": "GARÍFUNA" },
+    { "label": "TOLUPAN", "value": "TOLUPAN" },
+    { "label": "CHORTÍ", "value": "CHORTÍ" },
+    { "label": "PECH", "value": "PECH" },
+    { "label": "TAWAHKA", "value": "TAWAHKA" },
+    { "label": "AFROHONDUREÑO", "value": "AFROHONDUREÑO" },
+    { "label": "BLANCO", "value": "BLANCO" },
+    { "label": "ÁRABE", "value": "ÁRABE" },
+  ];
+
   public formParent: FormGroup = new FormGroup({});
 
   @Input() useCamera: boolean = false;
@@ -155,15 +167,16 @@ export class DatGeneralesAfiliadoComponent implements OnInit {
   };
 
   tipo_discapacidad = [
-    { label: "motriz", value: "motriz" },
-    { label: "auditiva", value: "auditiva" },
-    { label: "visual", value: "visual" },
-    { label: "intelectual", value: "intelectual" },
-    { label: "mental", value: "mental" },
-    { label: "psicosocial", value: "psicosocial" },
-    { label: "múltiple", value: "múltiple" },
-    { label: "sensorial", value: "sensorial" },
+    { "label": "MOTRIZ", "value": "MOTRIZ" },
+    { "label": "AUDITIVA", "value": "AUDITIVA" },
+    { "label": "VISUAL", "value": "VISUAL" },
+    { "label": "INTELECTUAL", "value": "INTELECTUAL" },
+    { "label": "MENTAL", "value": "MENTAL" },
+    { "label": "PSICOSOCIAL", "value": "PSICOSOCIAL" },
+    { "label": "MÚLTIPLE", "value": "MÚLTIPLE" },
+    { "label": "SENSORIAL", "value": "SENSORIAL" }
   ]
+
 
   form: FormGroup = this.fb.group({});
   formArchivos: any;
@@ -224,7 +237,6 @@ export class DatGeneralesAfiliadoComponent implements OnInit {
   }
 
   ngOnInit(): void {
-
     this.cargarDatosEstaticos();
     this.initForm();
     const ref_RefPers = this.formParent.get('refpers') as FormArray;

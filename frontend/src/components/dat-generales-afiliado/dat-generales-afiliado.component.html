@@ -478,7 +478,8 @@
                   {{ error }}
                 </mat-error>
               </div>
-              <div class="col-lg-4 col-md-12">
+
+              <div class="col-lg-12 col-md-12">
                 <label>¿Posee alguna discapacidad?</label>
                 <mat-radio-group formControlName="discapacidad" (change)="onDatosGeneralesDiscChange($event)">
                   <mat-radio-button *ngFor="let option of field.options" [value]="option.value">
@@ -486,6 +487,7 @@
                   </mat-radio-button>
                 </mat-radio-group>
               </div>
+
               <div class="col-lg-4 col-md-12" *ngIf="discapacidad">
                 <mat-form-field style="flex-direction: column-reverse;" class="example-full-width inputs"
                   appearance="outline">
@@ -501,12 +503,22 @@
                   {{ error }}
                 </mat-error>
               </div>
+
             </div>
 
-            <div class="col-lg-12 col-md-12" *ngIf="discapacidad">
-              <app-peps></app-peps>
-            </div>
+            <div class="col-lg-12 col-md-12">
 
+              <label>¿Ha desempeñado un cargo público?</label>
+              <mat-radio-group formControlName="cargoPublico" (change)="onDatosGeneralesCargChange($event)">
+                <mat-radio-button *ngFor="let option of field.options" [value]="option.value">
+                  {{ option.label }}
+                </mat-radio-button>
+              </mat-radio-group>
+
+            </div>
+            <div class="col-lg-12 col-md-12">
+              <app-peps *ngIf="cargoPublico"></app-peps>
+            </div>
           </div>
         </div>
       </div>

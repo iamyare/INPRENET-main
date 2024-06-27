@@ -17,6 +17,7 @@ import { Net_Peps } from "src/modules/Empresarial/entities/Net_peps-entity";
 })
 @Check(`sexo IN ('F', 'M')`)
 @Check(`fallecido IN ('SI', 'NO')`)
+@Check(`REPRESENTACION IN ('POR CUENTA PROPIA', 'POR TERCEROS')`)
 export class Net_Persona {
     @PrimaryGeneratedColumn({ type: 'int', name: 'ID_PERSONA', primaryKeyConstraintName: 'PK_ID_PERSONA_PERSONA' })
     id_persona: number;
@@ -38,6 +39,9 @@ export class Net_Persona {
 
     @Column('varchar2', { length: 14, nullable: true, name: 'RTN' })
     rtn: string;
+
+    @Column('varchar2', { length: 14, nullable: true, name: 'RAZA' })
+    raza: string;
 
     @Column('varchar2', { length: 40, nullable: true, name: 'ESTADO_CIVIL' })
     estado_civil: string;

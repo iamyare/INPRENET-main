@@ -43,7 +43,10 @@ export function generateRefPerFormGroup(datos?: any): FormGroup {
       Validators.maxLength(15),
       Validators.pattern(/^[0-9]{13}$|^[0-9]{4}-[0-9]{4}-[0-9]{5}$/),
     ]),
-    discapacidad: new FormControl(datos?.dni, [
+    dependiente: new FormControl(datos?.dependiente, [
+      Validators.required,
+    ]),
+    cargoPublico: new FormControl(datos?.cargoPublico, [
       Validators.required,
     ]),
     fecha_nacimiento: new FormControl(datos?.fecha_nacimiento),
@@ -77,11 +80,16 @@ export class RefPersComponent implements OnInit {
       { value: 'no', label: 'NO' }
     ]
   };
-  discapacidadEstado = {
+  dependienteEstado = {
     si: false,
     no: false
   };
-  discapacidad: boolean = false;
+  cargoEstado = {
+    si: false,
+    no: false
+  };
+  dependiente: boolean = false;
+  cargoPublico: boolean = false;
 
   onDatosRefPerChange() {
     const data = this.formParent;
@@ -91,11 +99,19 @@ export class RefPersComponent implements OnInit {
 
   onDatosGeneralesDiscChange(event: any) {
     const value = event.value;
-    this.discapacidadEstado = {
+    this.dependienteEstado = {
       si: value === 'si',
       no: value === 'no'
     };
-    this.discapacidad = this.discapacidadEstado.si
+    this.dependiente = this.dependienteEstado.si
+  }
+  onDatosGeneralesCargoPChange(event: any) {
+    const value = event.value;
+    this.cargoEstado = {
+      si: value === 'si',
+      no: value === 'no'
+    };
+    this.cargoPublico = this.cargoEstado.si
   }
 
   constructor(private formStateService: FormStateService, private fb: FormBuilder, private datosEstaticosService: DatosEstaticosService) {

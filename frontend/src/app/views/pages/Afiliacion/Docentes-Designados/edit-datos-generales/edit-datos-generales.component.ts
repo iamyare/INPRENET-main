@@ -1,4 +1,4 @@
-import { Component, Input, OnInit} from '@angular/core';
+import { Component, Input, OnInit } from '@angular/core';
 import { FormArray, FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { ToastrService } from 'ngx-toastr';
 import { AfiliadoService } from 'src/app/services/afiliado.service';
@@ -195,13 +195,17 @@ export class EditDatosGeneralesComponent implements OnInit {
             id_departamento_residencia: result.id_departamento_residencia,
             id_municipio_residencia: result.ID_MUNICIPIO,
             fallecido: result.fallecido,
+            raza: result.RAZA,
+            discapacidad: result.TIPO_DISCAPACIDAD ? "SI" : "NO",
+            tipo_discapacidad: result.TIPO_DISCAPACIDAD,
           };
-          console.log(this.formDatosGenerales.value.refpers[0]);
+
 
 
           if (result.ID_MUNICIPIO_DEFUNCION) {
             this.cargarMunicipios(result.ID_MUNICIPIO_DEFUNCION);
           }
+
 
           this.form1.controls.estado.setValue(result.estadoAfiliacion);
           this.form1.controls.observaciones.setValue(result.observaciones);

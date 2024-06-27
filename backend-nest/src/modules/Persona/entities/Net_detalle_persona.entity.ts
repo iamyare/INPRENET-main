@@ -18,7 +18,7 @@ export class NET_DETALLE_PERSONA {
     @Column('number', { nullable: true, name: 'PORCENTAJE' })
     porcentaje: number;
 
-    @Column('varchar2', { nullable: true, name: 'ELIMINADO', default: "NO" })
+    @Column('varchar2', { length: 2, nullable: true, name: 'ELIMINADO', default: "NO" })
     eliminado: string;
 
     @ManyToOne(() => Net_Persona, persona => persona.detallePersona,)

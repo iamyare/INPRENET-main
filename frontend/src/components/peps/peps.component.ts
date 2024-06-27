@@ -16,18 +16,6 @@ export class PepsComponent {
 
   fields: FieldArrays[] = [
     {
-      name: 'pep_declaration',
-      label: '¿Ha desempeñado un cargo público?',
-      type: 'radio',
-      options: [
-        { label: 'Sí', value: 'si' },
-        { label: 'No', value: 'no' }
-      ],
-      value: '',
-      validations: [],
-      layout: { row: 8, col: 12 }
-    },
-    {
       name: 'pep_cargo_desempenado',
       label: 'Cargo Desempeñado',
       type: 'text',
@@ -60,25 +48,14 @@ export class PepsComponent {
       layout: { row: 9, col: 6 }
     },
     {
-      name: 'pep_otras_peps',
-      label: 'Otras peps',
+      name: 'observacion',
+      label: 'Observación',
       type: 'text',
       value: '',
       validations: [],
       layout: { row: 10, col: 12 }
     },
-    {
-      name: 'docente_deducciones',
-      label: '¿Ha realizado deducciones de cotizaciones a los docentes que trabajan en la institución?',
-      type: 'radio',
-      options: [
-        { label: 'Sí', value: 'si' },
-        { label: 'No', value: 'no' }
-      ],
-      value: '',
-      validations: [],
-      layout: { row: 11, col: 12 }
-    }
+
   ];
 
   constructor(private fb: FormBuilder, private direccionService: DireccionService) { }
@@ -89,7 +66,7 @@ export class PepsComponent {
         peps: this.fb.array([])
       });
     }
-    this.addReferencia();
+    //this.addReferencia();
   }
 
   addControlsToForm() {
@@ -105,9 +82,7 @@ export class PepsComponent {
   addReferencia(): void {
     const referenciaGroup = this.fb.group({
       nombre: ['', Validators.required],
-      pep_declaration: ['', Validators.required],
-      docente_deducciones: ['', Validators.required],
-      pep_otras_peps: ['', Validators.required],
+      observacion: ['', Validators.required],
       pep_periodo: ['', Validators.required],
       pep_cargo_desempenado: ['', Validators.required],
       fecha_resolucion: ['', Validators.required],

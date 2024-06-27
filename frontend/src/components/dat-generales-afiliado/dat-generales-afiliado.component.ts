@@ -9,6 +9,7 @@ import { CentroTrabajoService } from 'src/app/services/centro-trabajo.service';
 const noSpecialCharsPattern = '^[a-zA-Z0-9\\s]*$';
 
 export function generateAddressFormGroup(datos?: any): FormGroup {
+
   return new FormGroup({
     n_identificacion: new FormControl(datos?.n_identificacion, [Validators.required, Validators.maxLength(15), Validators.pattern(/^[0-9]{13}$|^[0-9]{4}-[0-9]{4}-[0-9]{5}$/)]),
     primer_nombre: new FormControl(datos?.primer_nombre, [
@@ -90,7 +91,11 @@ export function generateAddressFormGroup(datos?: any): FormGroup {
       Validators.maxLength(75),
       Validators.pattern(noSpecialCharsPattern)
     ]),
+    cargoPublico: new FormControl(datos?.cargoPublico, [
+      Validators.maxLength(75)
+    ]),
   });
+
 }
 
 @Component({
@@ -135,14 +140,20 @@ export class DatGeneralesAfiliadoComponent implements OnInit {
 
   field = {
     options: [
-      { value: 'si', label: 'SI' },
-      { value: 'no', label: 'NO' }
+      { value: 'SI', label: 'SI' },
+      { value: 'NO', label: 'NO' }
     ]
   };
   discapacidadEstado = {
     si: false,
     no: false
   };
+
+  cargoPublicoEstado = {
+    si: false,
+    no: false
+  };
+
   tipo_discapacidad = [
     { label: "motriz", value: "motriz" },
     { label: "auditiva", value: "auditiva" },
@@ -159,6 +170,7 @@ export class DatGeneralesAfiliadoComponent implements OnInit {
   minDate: Date;
   fallecido: any;
   discapacidad: boolean = false;
+  cargoPublico: boolean = false;
 
   onDatosGeneralesChange() {
     const data = this.formParent
@@ -168,10 +180,19 @@ export class DatGeneralesAfiliadoComponent implements OnInit {
   onDatosGeneralesDiscChange(event: any) {
     const value = event.value;
     this.discapacidadEstado = {
-      si: value === 'si',
-      no: value === 'no'
+      si: value === 'SI',
+      no: value === 'NO'
     };
     this.discapacidad = this.discapacidadEstado.si
+  }
+
+  onDatosGeneralesCargChange(event: any) {
+    const value = event.value;
+    this.cargoPublicoEstado = {
+      si: value === 'SI',
+      no: value === 'NO'
+    };
+    this.cargoPublico = this.cargoPublicoEstado.si
   }
 
   onDatosBenChange(fecha: any) {
@@ -212,6 +233,13 @@ export class DatGeneralesAfiliadoComponent implements OnInit {
     if (this.datos.value.refpers.length > 0) {
       for (let i of this.datos.value.refpers) {
         temp = this.splitDireccionResidencia(i);
+
+        if (i.discapacidad == "SI") {
+          this.discapacidad = true;
+        } else if (i.discapacidad == "NO") {
+          this.discapacidad = false
+        }
+
       }
     }
 
@@ -232,18 +260,25 @@ export class DatGeneralesAfiliadoComponent implements OnInit {
 
   splitDireccionResidencia(datos: any): any {
     const direccion = datos.direccion_residencia;
-    const partes = direccion.split(', ');
-    return {
-      ...datos,
-      avenida: partes[0]?.split(': ')[1] || '',
-      calle: partes[1]?.split(': ')[1] || '',
-      sector: partes[2]?.split(': ')[1] || '',
-      bloque: partes[3]?.split(': ')[1] || '',
-      numero_casa: partes[4]?.split(': ')[1] || '',
-      color_casa: partes[5]?.split(': ')[1] || '',
-      aldea: partes[6]?.split(': ')[1] || '',
-      caserio: partes[7]?.split(': ')[1] || '',
-    };
+    if (direccion) {
+      const partes = direccion.split(', ');
+      return {
+        ...datos,
+        barrio_colonia: partes[0]?.split(': ')[1] || '',
+        avenida: partes[1]?.split(': ')[1] || '',
+        calle: partes[2]?.split(': ')[1] || '',
+        sector: partes[3]?.split(': ')[1] || '',
+        bloque: partes[4]?.split(': ')[1] || '',
+        numero_casa: partes[5]?.split(': ')[1] || '',
+        color_casa: partes[6]?.split(': ')[1] || '',
+        aldea: partes[7]?.split(': ')[1] || '',
+        caserio: partes[8]?.split(': ')[1] || '',
+      };
+    } else {
+      return {
+        ...datos,
+      }
+    }
   }
 
   async cargarDatosEstaticos() {

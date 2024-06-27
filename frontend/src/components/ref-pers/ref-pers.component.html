@@ -157,14 +157,23 @@
 
           <div class="col-lg-4 col-md-12">
             <label>¿Depende económicamente de usted?</label>
-            <mat-radio-group formControlName="discapacidad" (change)="onDatosGeneralesDiscChange($event)">
+            <mat-radio-group formControlName="dependiente" (change)="onDatosGeneralesDiscChange($event)">
               <mat-radio-button *ngFor="let option of field.options" [value]="option.value">
                 {{ option.label }}
               </mat-radio-button>
             </mat-radio-group>
           </div>
 
-          <div *ngIf="discapacidad">
+          <div class="col-lg-4 col-md-12">
+            <label>¿Ha desempeñado un cargo público?</label>
+            <mat-radio-group formControlName="cargoPublico" (change)="onDatosGeneralesCargoPChange($event)">
+              <mat-radio-button *ngFor="let option of field.options" [value]="option.value">
+                {{ option.label }}
+              </mat-radio-button>
+            </mat-radio-group>
+          </div>
+
+          <div>
             <app-peps></app-peps>
           </div>
 

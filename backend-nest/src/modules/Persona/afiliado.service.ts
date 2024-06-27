@@ -1,7 +1,7 @@
 import { BadRequestException, ConflictException, Injectable, InternalServerErrorException, Logger, NotFoundException } from '@nestjs/common';
 import { NetPersonaDTO, PersonaResponse } from './dto/create-persona.dto';
 import { UpdatePersonaDto } from './dto/update-persona.dto';
-import { Connection, EntityManager, Repository } from 'typeorm';
+import { Connection, EntityManager, Repository, getConnection } from 'typeorm';
 import { InjectEntityManager, InjectRepository } from '@nestjs/typeorm';
 import { Net_Persona_Por_Banco } from '../banco/entities/net_persona-banco.entity';
 import { Net_Centro_Trabajo } from '../Empresarial/entities/net_centro_trabajo.entity';
@@ -344,6 +344,46 @@ export class AfiliadoService {
       });
       await this.personaRepository.save(persona);
     }
+    /* interface DetallePersonaDTO {
+      p_id_detalle_persona: number;
+      id_persona: number;
+      id_causante: number;
+      porcentaje: number;
+      eliminado: string;
+      id_estado_afiliacion: number;
+      id_tipo_persona: number;
+      id_causante_padre: number;
+    }
+
+    const detalles: DetallePersonaDTO[] = [{
+      p_id_detalle_persona: 1,
+      id_persona:1,
+      id_causante:1,
+      porcentaje:100,
+      eliminado:"NO",
+      id_estado_afiliacion:1,
+      id_tipo_persona:1,
+      id_causante_padre:1,
+    }]
+
+    const t_detalle_persona_tab = detalles.map((detalle) => ({
+      p_id_detalle_persona: detalle.p_id_detalle_persona,
+      id_persona: detalle.id_persona,
+      id_causante: detalle.id_causante,
+      porcentaje: detalle.porcentaje,
+      eliminado: detalle.eliminado,
+      id_estado_afiliacion: detalle.id_estado_afiliacion,
+      id_tipo_persona: detalle.id_tipo_persona,
+      id_causante_padre: detalle.id_causante_padre,
+    }));
+    
+    const connection = getConnection();
+    // Llamar al procedimiento almacenado
+    await connection.query(
+      `BEGIN insertar_detalle_persona_multiple(:p_detalles); END;`,
+      { p_detalles: t_detalle_persona_tab }
+    ); */
+
     const detalle = this.detallePersonaRepository.create({
       ...detalleBenef,
       persona,
@@ -554,6 +594,8 @@ export class AfiliadoService {
       SEGUNDO_APELLIDO: persona.segundo_apellido,
       GENERO: persona.genero,
       SEXO: persona.sexo,
+      RAZA: persona.raza,
+      TIPO_DISCAPACIDAD: persona.tipo_discapacidad,
       CANTIDAD_DEPENDIENTES: persona.cantidad_dependientes,
       CANTIDAD_HIJOS: persona.cantidad_hijos,
       REPRESENTACION: persona.representacion,

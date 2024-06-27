@@ -25,7 +25,7 @@ export class GestionUsuariosComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    const token = localStorage.getItem('token');
+    const token = sessionStorage.getItem('token');
     if (token) {
       this.rolesModulos = this.authService.decodeToken(token).rolesModulos;
     }
@@ -53,7 +53,7 @@ export class GestionUsuariosComponent implements OnInit {
   onModuloChange(event: Event): void {
     const target = event.target as HTMLSelectElement;
     const selectedModulo = target?.value;
-    const token = localStorage.getItem('token');
+    const token = sessionStorage.getItem('token');
     if (token) {
       const idCentroTrabajo = this.authService.decodeToken(token).idCentroTrabajo;
       if (selectedModulo) {

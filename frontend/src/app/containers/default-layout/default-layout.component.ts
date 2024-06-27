@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { navItems as originalNavItems } from '../default-layout/_nav';
 import { INavData } from '@coreui/angular';
-import { AuthService } from '../../services/auth.service'; // Asume que tienes un servicio de autenticación
+import { AuthService } from '../../services/auth.service';
 
 @Component({
   selector: 'app-dashboard',
@@ -10,26 +10,25 @@ import { AuthService } from '../../services/auth.service'; // Asume que tienes u
 })
 export class DefaultLayoutComponent implements OnInit {
   public navItems: INavData[] = [];
+  private rolesModulos: { rol: string, modulo: string }[] = [];
 
   constructor(private authService: AuthService) {}
 
   ngOnInit(): void {
+    this.rolesModulos = this.authService.getRolesModulos();
     this.loadNavItems();
   }
 
   private loadNavItems(): void {
     this.navItems = JSON.parse(JSON.stringify(originalNavItems));
-    const menuMantenimientoIndex = this.navItems.findIndex(item => item.name === 'Menú Mantenimiento');
-      if (menuMantenimientoIndex !== -1) {
-        this.navItems.splice(menuMantenimientoIndex + 1, 0, {
-          name: 'Beneficio',
-          iconComponent: { name: 'cilMoney' },
-          url: '/base',
-          children: [
-            { name: 'Nuevo Beneficio', url: '/Beneficio/nuevo-beneficio' },
-            { name: 'Editar Beneficios', url: '/Beneficio/editar-beneficio' },
-          ],
-      });
+
+    const isAdmin = this.rolesModulos.some(rm => rm.rol.toUpperCase() === 'ADMINISTRADOR');
+
+    if (!isAdmin) {
+      const gestionIndex = this.navItems.findIndex(item => item.name === 'Gestión De Personal');
+      if (gestionIndex !== -1) {
+        this.navItems.splice(gestionIndex, 1);
+      }
     }
   }
 }

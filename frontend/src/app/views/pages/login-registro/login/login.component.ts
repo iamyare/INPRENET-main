@@ -33,6 +33,7 @@ export class LoginComponent {
         setTimeout(() => {
           this.loading = false;
           this.router.navigate(['/dashboard']);
+          this.toastr.success('Inicio de sesión exitoso', 'Bienvenido');
         }, 1000); // Retraso de 1 segundo
       },
       error: (err) => {

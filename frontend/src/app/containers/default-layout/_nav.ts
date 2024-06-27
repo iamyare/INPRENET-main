@@ -1,19 +1,24 @@
 import { INavData } from '@coreui/angular';
 
 export const navItems: INavData[] = [
-  /* {
-    name: 'Dashboard',
-    url: '/dashboard',
-    iconComponent: { name: 'cil-speedometer' },
-    badge: {
-      color: 'info',
-      text: 'NEW'
-    }
-  }, */
-
   {
     title: true,
     name: 'Menú Mantenimiento'
+  },
+  {
+    name: 'Beneficio',
+    iconComponent: { name: 'cilMoney' },
+    url: '/base',
+    children: [
+      {
+        name: 'Nuevo Beneficio',
+        url: '/Beneficio/nuevo-beneficio',
+      },
+      {
+        name: 'Editar Beneficios',
+        url: '/Beneficio/editar-beneficio',
+      },
+    ]
   },
   {
     name: 'Deducción',
@@ -63,8 +68,6 @@ export const navItems: INavData[] = [
       },
     ]
   },
-
-
   {
     title: true,
     name: 'Menú Principal'
@@ -108,18 +111,12 @@ export const navItems: INavData[] = [
     ]
   },
   {
-    /* name: 'Operaciones',
-    iconComponent: { name: 'cilSpreadsheet' },
-    url: '/base',
-    children: [
-      { */
     name: 'Planilla',
     url: '/base',
     iconComponent: { name: 'cilSpreadsheet' },
     children: [
       {
         name: 'Ingresos',
-        /* iconComponent: { name: 'cilMoney' }, */
         children: [
           {
             name: 'Privados',
@@ -127,29 +124,8 @@ export const navItems: INavData[] = [
           },
         ]
       },
-      /* children: [
-        {
-          name: 'Ingresos',
-
-          children: [
-            {
-              name: 'Privados',
-              children: [
-                {
-                  name: 'Planilla de privados',
-                  url: '/Planilla/Ingresos/Privados/planilla-colegios-privados',
-                },
-                {
-                  name: 'Cargar Planilla de privados',
-                  url: '/Planilla/Ingresos/Privados/cargar-planilla-privados',
-                },
-              ]
-            }
-          ]
-        }, */
       {
         name: 'Egresos',
-        /*  iconComponent: { name: 'cilMoney' }, */
         children: [
           {
             url: 'Afiliado/Deducciones/nueva-deduccion-afil',

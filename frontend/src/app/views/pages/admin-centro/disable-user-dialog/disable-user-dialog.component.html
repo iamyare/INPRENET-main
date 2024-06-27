@@ -3,7 +3,7 @@
   <form [formGroup]="disableForm">
     <mat-form-field class="full-width">
       <mat-label>Periodo de Deshabilitación (días)</mat-label>
-      <input matInput formControlName="disablePeriod" type="number" min="1">
+      <input matInput formControlName="disablePeriod" type="number" min="1" [disabled]="disableForm.get('indefinite')?.value">
     </mat-form-field>
     <mat-checkbox formControlName="indefinite">Indefinido</mat-checkbox>
   </form>

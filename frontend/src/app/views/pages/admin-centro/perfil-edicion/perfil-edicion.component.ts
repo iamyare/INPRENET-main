@@ -3,6 +3,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
 import { CentroTrabajoService } from 'src/app/services/centro-trabajo.service';
+import { AuthService } from 'src/app/services/auth.service';
 import { DisableUserDialogComponent } from '../disable-user-dialog/disable-user-dialog.component';
 import { ToastrService } from 'ngx-toastr';
 
@@ -27,7 +28,8 @@ export class PerfilEdicionComponent implements OnInit {
     private fb: FormBuilder,
     public dialog: MatDialog,
     private centroTrabajoService: CentroTrabajoService,
-    private toastr: ToastrService // Importa ToastrService
+    private authService: AuthService,
+    private toastr: ToastrService
   ) {
     this.userId = this.route.snapshot.paramMap.get('id')!;
     const navigation = this.router.getCurrentNavigation();
@@ -98,7 +100,7 @@ export class PerfilEdicionComponent implements OnInit {
   editarArchivo(tipoArchivo: string): void {
     const input = document.getElementById(tipoArchivo) as HTMLInputElement;
     if (input) {
-      input.accept = 'image/*'; // Asegúrate de que solo se puedan seleccionar archivos de imagen
+      input.accept = 'image/*';
       input.click();
     }
   }
@@ -145,7 +147,41 @@ export class PerfilEdicionComponent implements OnInit {
 
     dialogRef.afterClosed().subscribe(result => {
       if (result) {
-        console.log('Resultado del diálogo:', result);
+        const { disablePeriod, indefinite } = result;
+        const fechaReactivacion = indefinite ? null : this.calcularFechaReactivacion(disablePeriod);
+        this.desactivarUsuario(fechaReactivacion);
+      }
+    });
+  }
+
+  calcularFechaReactivacion(dias: number): Date {
+    const fechaReactivacion = new Date();
+    fechaReactivacion.setDate(fechaReactivacion.getDate() + dias);
+    return fechaReactivacion;
+  }
+
+  desactivarUsuario(fechaReactivacion: Date | null) {
+    this.authService.desactivarUsuario(parseInt(this.userId), fechaReactivacion).subscribe({
+      next: response => {
+        this.toastr.success(response.message, 'Usuario Desactivado');
+        this.router.navigate(['/usuarios']);
+      },
+      error: err => {
+        console.error('Error desactivando usuario', err);
+        this.toastr.error('Error desactivando usuario', 'Error');
+      }
+    });
+  }
+
+  reactivarUsuario() {
+    this.authService.reactivarUsuario(parseInt(this.userId)).subscribe({
+      next: response => {
+        this.toastr.success(response.message, 'Usuario Reactivado');
+        this.router.navigate(['/usuarios']);
+      },
+      error: err => {
+        console.error('Error reactivando usuario', err);
+        this.toastr.error('Error reactivando usuario', 'Error');
       }
     });
   }

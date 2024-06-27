@@ -23,6 +23,57 @@ export class AuthService {
     );
   }
 
+   clearSession(): void {
+    sessionStorage.removeItem('token');
+    this.router.navigate(['/login']);
+    this.toastr.success('Sesión cerrada con éxito', 'Logout');
+  }
+
+  login(correo: string, contrasena: string): Observable<{ accessToken: string }> {
+    const url = `${environment.API_URL}/api/usuario/login`;
+    const body = { correo, contrasena };
+    return this.http.post<{ accessToken: string }>(url, body).pipe(
+      map(response => {
+        sessionStorage.setItem('token', response.accessToken);
+        return response;
+      }),
+      catchError(error => {
+        console.error('Login failed:', error);
+        this.toastr.error('Inicio de sesión fallido', 'Error');
+        return throwError(error);
+      })
+    );
+  }
+
+  isAuthenticated(): boolean {
+    return sessionStorage.getItem('token') !== null;
+  }
+
+
+  desactivarUsuario(idUsuario: number, fechaReactivacion: Date | null = null): Observable<{ message: string }> {
+    const url = `${environment.API_URL}/api/usuario/${idUsuario}/desactivar`;
+    const body = { fechaReactivacion };
+    return this.http.patch<{ message: string }>(url, body).pipe(
+      map(response => {
+        this.toastr.success(response.message, 'Desactivación Exitosa');
+        return response;
+      }),
+      catchError(this.handleError<{ message: string }>('desactivarUsuario'))
+    );
+  }
+
+  reactivarUsuario(idUsuario: number): Observable<{ message: string }> {
+    const url = `${environment.API_URL}/api/usuario/${idUsuario}/reactivar`;
+    return this.http.patch<{ message: string }>(url, {}).pipe(
+      map(response => {
+        this.toastr.success(response.message, 'Reactivación Exitosa');
+        return response;
+      }),
+      catchError(this.handleError<{ message: string }>('reactivarUsuario'))
+    );
+  }
+
+
   restablecerContrasena(token: string, nuevaContrasena: string): Observable<{ message: string }> {
     const url = `${environment.API_URL}/api/usuario/restablecer-contrasena/${token}`;
     return this.http.post<{ message: string }>(url, { nuevaContrasena }).pipe(
@@ -43,7 +94,6 @@ export class AuthService {
   cambiarContrasena(correo: string, nuevaContrasena: string): Observable<any> {
     return this.http.put<any>(`${environment.API_URL}/api/usuario/cambiar-contrasena`, { correo, nuevaContrasena });
   }
-
 
 
    preRegistro(datos: any): Observable<void> {
@@ -73,12 +123,6 @@ export class AuthService {
     );
   }
 
-  clearSession(): void {
-    localStorage.removeItem('token');
-    this.router.navigate(['/login']);
-    this.toastr.success('Sesión cerrada con éxito', 'Logout');
-  }
-
   verificarEstadoSesion(): Observable<{ sesionActiva: boolean }> {
     const url = `${environment.API_URL}/api/usuario/verificarEstado`;
     const token = localStorage.getItem('token');
@@ -100,20 +144,6 @@ export class AuthService {
     );
   }
 
-  login(correo: string, contrasena: string): Observable<{ accessToken: string }> {
-    const url = `${environment.API_URL}/api/usuario/login`;
-    const body = { correo, contrasena };
-    return this.http.post<{ accessToken: string }>(url, body).pipe(
-      map(response => {
-        localStorage.setItem('token', response.accessToken);
-        return response;
-      }),
-      catchError(error => {
-        console.error('Login failed:', error);
-        return throwError(error);
-      })
-    );
-  }
 
   obtenerUsuarioPorModuloYCentroTrabajo(modulo: string, idCentroTrabajo: number): Observable<any[]> {
     const url = `${environment.API_URL}/api/usuario/modulo-centro-trabajo?modulos=${modulo}&idCentroTrabajo=${idCentroTrabajo}`;
@@ -134,17 +164,12 @@ export class AuthService {
 
 
   getRolesModulos(): { rol: string, modulo: string }[] {
-    const token = localStorage.getItem('token');
-    if (!token) return [];
-
-    try {
+    const token = sessionStorage.getItem('token');
+    if (token) {
       const decodedToken: any = jwtDecode(token);
-      const rolesModulos = decodedToken.rolesModulos || [];
-      return rolesModulos;
-    } catch (error) {
-      console.error('Error decoding token:', error);
-      return [];
+      return decodedToken.rolesModulos || [];
     }
+    return [];
   }
 
 
@@ -167,7 +192,7 @@ export class AuthService {
   }
 
   obtenerCorreoDelToken(): string | null {
-    const token = localStorage.getItem('token');
+    const token = sessionStorage.getItem('token');
     if (token) {
       const decodedToken: any = jwtDecode(token);
       return decodedToken.correo;
@@ -176,11 +201,10 @@ export class AuthService {
   }
 
   getIdEmpresaFromToken(): number | null {
-    const token = localStorage.getItem('token');
-
+    const token = sessionStorage.getItem('token');
     if (token) {
       const decodedToken: any = jwtDecode(token);
-      return decodedToken.idCentroTrabajo;
+      return decodedToken.idCentroTrabajo || null;
     }
     return null;
   }
@@ -209,7 +233,7 @@ export class AuthService {
   }
 
   getUserRolesAndModules() {
-    const token = localStorage.getItem('token');
+    const token = sessionStorage.getItem('token');
     if (!token) return [];
 
     try {
@@ -220,6 +244,49 @@ export class AuthService {
       console.error('Error decoding token:', error);
       return [];
     }
+  }
+
+  getUserProfile(): Observable<any> {
+    const url = `${environment.API_URL}/api/usuario/perfil`;
+    const token = sessionStorage.getItem('token');
+
+    if (!token) {
+      console.error('Token no encontrado en sessionStorage');
+      return of(null);
+    }
+
+    const decodedToken = this.decodeToken(token);
+
+    if (!decodedToken) {
+      console.error('Error decodificando el token');
+      return of(null);
+    }
+
+    const correo = decodedToken.correo;
+    const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
+
+    return this.http.get<any>(`${url}?correo=${correo}`, { headers }).pipe(
+      map(profile => {
+        if (profile.empleadoCentroTrabajo.empleado.foto_empleado) {
+          profile.empleadoCentroTrabajo.empleado.foto_empleado = this.bufferToBase64(profile.empleadoCentroTrabajo.empleado.foto_empleado.data);
+        }
+        return profile;
+      }),
+      catchError(error => {
+        console.error('Error obteniendo el perfil del usuario', error);
+        return of(null);
+      })
+    );
+  }
+
+  bufferToBase64(buffer: ArrayBuffer): string {
+    let binary = '';
+    const bytes = new Uint8Array(buffer);
+    const len = bytes.byteLength;
+    for (let i = 0; i < len; i++) {
+      binary += String.fromCharCode(bytes[i]);
+    }
+    return window.btoa(binary);
   }
 
 
@@ -277,6 +344,7 @@ export class AuthService {
   private handleError<T>(operation = 'operation', result?: T) {
     return (error: any): Observable<T> => {
       console.error(`${operation} failed: ${error.message}`);
+      this.toastr.error(`Error en ${operation}: ${error.message}`, 'Error');
       return of(result as T);
     };
   }

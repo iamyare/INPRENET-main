@@ -27,6 +27,12 @@ export class Net_Usuario_Empresa {
   @UpdateDateColumn({ type: 'timestamp', name: 'FECHA_MODIFICACION' })
   fecha_modificacion: Date;
 
+  @Column({ type: 'timestamp', nullable: true, name: 'FECHA_DESACTIVACION' })
+  fecha_desactivacion: Date;
+
+  @Column({ type: 'timestamp', nullable: true, name: 'FECHA_REACTIVACION' })
+  fecha_reactivacion: Date;
+
   @OneToMany(() => Net_Seguridad, seguridad => seguridad.usuarioEmpresa)
   seguridad: Net_Seguridad[];
 

@@ -16,8 +16,16 @@ export class DisableUserDialogComponent {
     private fb: FormBuilder
   ) {
     this.disableForm = this.fb.group({
-      disablePeriod: [''],
+      disablePeriod: [{ value: '', disabled: false }],
       indefinite: [false]
+    });
+
+    this.disableForm.get('indefinite')?.valueChanges.subscribe(indefinite => {
+      if (indefinite) {
+        this.disableForm.get('disablePeriod')?.disable();
+      } else {
+        this.disableForm.get('disablePeriod')?.enable();
+      }
     });
   }
 

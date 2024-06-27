@@ -13,7 +13,7 @@ export class AfiliadoComponent {
   steps = [
     { label: 'Constancias', isActive: true },
     { label: 'Beneficiarios', isActive: true },
-    { label: 'Cuentas INPREMA', isActive: true },
+    { label: 'Ahorro', isActive: true },
     { label: 'Colegios Magisteriales', isActive: true },
     { label: 'Referencias Personales', isActive: true },
   ];

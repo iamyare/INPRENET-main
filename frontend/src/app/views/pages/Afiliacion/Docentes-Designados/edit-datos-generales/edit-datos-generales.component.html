@@ -7,7 +7,7 @@
     <app-dat-generales-afiliado [datos]="formDatosGenerales"
       (newDatosGenerales)="setDatosGenerales($event)"></app-dat-generales-afiliado>
 
-    <form [formGroup]="form1">
+    <form style="margin: 0 0 1.5rem;" [formGroup]="form1">
       <div class="row" style="margin: 0px 20px 0 20px;">
         <div class="col-md-4" *ngIf="fallecido == 'NO'">
           <mat-form-field style="flex-direction: column-reverse;" class="example-full-width inputs"
@@ -104,6 +104,8 @@
 
       </div>
     </form>
+
+    <app-maps></app-maps>
 
     <button mat-raised-button color="primary" style="color: white; margin: 1% 0 1% 0" (click)="GuardarInformacion()">
       Guardar

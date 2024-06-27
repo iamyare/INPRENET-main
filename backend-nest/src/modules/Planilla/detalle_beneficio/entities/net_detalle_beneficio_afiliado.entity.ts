@@ -9,14 +9,11 @@ export class Net_Detalle_Beneficio_Afiliado {
     @PrimaryGeneratedColumn({ type: 'int', name: 'ID_DETALLE_BEN_AFIL', primaryKeyConstraintName: 'PK_id_detBen_detBA' })
     id_detalle_ben_afil: number;
 
-    @Column({ type: 'date', nullable: false, name: 'PERIODO_INICIO' })
-    periodo_inicio: Date;
+    @Column({ nullable: true, name: 'ESTADO_SOLICITUD' })
+    estado_solicitud: string;
 
-    @Column({ type: 'date', nullable: false, name: 'PERIODO_FINALIZACION' })
-    periodo_finalizacion: Date;
-
-    @Column({ nullable: true, default: 0, name: 'NUM_RENTAS_APLICADAS' })
-    num_rentas_aplicadas: number;
+    @Column({ type: 'date', nullable: false, name: 'FECHA_CALCULO' })
+    fecha_calculo: Date;
 
     @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true, name: 'MONTO_TOTAL' })
     monto_total: number;
@@ -29,6 +26,15 @@ export class Net_Detalle_Beneficio_Afiliado {
 
     @Column({ nullable: true, name: 'LEY_APLICABLE' })
     ley_aplicable: string;
+
+    @Column({ type: 'date', nullable: false, name: 'PERIODO_INICIO' })
+    periodo_inicio: Date;
+
+    @Column({ type: 'date', nullable: false, name: 'PERIODO_FINALIZACION' })
+    periodo_finalizacion: Date;
+
+    @Column({ nullable: true, default: 0, name: 'NUM_RENTAS_APLICADAS' })
+    num_rentas_aplicadas: number;
 
     @CreateDateColumn({ name: 'FECHA_PRIMER_PAGO' })
     fecha_primer_pago: Date;

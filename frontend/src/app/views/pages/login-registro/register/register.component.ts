@@ -59,6 +59,11 @@ export class RegisterComponent implements OnInit {
       this.toastr.error('Token no encontrado', 'Error');
       this.router.navigate(['/']);
     }
+
+    // Suscribirse a los cambios en las preguntas de seguridad
+    this.form.get('preguntaseguridad1')!.valueChanges.subscribe(() => this.updateQuestions());
+    this.form.get('preguntaseguridad2')!.valueChanges.subscribe(() => this.updateQuestions());
+    this.form.get('preguntaseguridad3')!.valueChanges.subscribe(() => this.updateQuestions());
   }
 
   confirmarContrasenaValidator(controlName: string, matchingControlName: string) {
@@ -94,6 +99,21 @@ export class RegisterComponent implements OnInit {
     return this.form.valid && this.archivo !== null && this.fotografia !== null;
   }
 
+  getAvailableQuestions(currentIndex: number): string[] {
+    const selectedQuestions = [
+      this.form.get('preguntaseguridad1')!.value,
+      this.form.get('preguntaseguridad2')!.value,
+      this.form.get('preguntaseguridad3')!.value
+    ];
+    return this.availableQuestions.filter(question => !selectedQuestions.includes(question) || selectedQuestions[currentIndex] === question);
+  }
+
+  updateQuestions() {
+    this.form.get('preguntaseguridad1')!.updateValueAndValidity({ emitEvent: false });
+    this.form.get('preguntaseguridad2')!.updateValueAndValidity({ emitEvent: false });
+    this.form.get('preguntaseguridad3')!.updateValueAndValidity({ emitEvent: false });
+  }
+
   enviarInformacionDeSeguridad() {
     if (this.isFormComplete()) {
       const datos = {
@@ -124,4 +144,5 @@ export class RegisterComponent implements OnInit {
       this.toastr.error('Por favor, completa todos los campos y sube los archivos requeridos.', 'Error');
     }
   }
+
 }

@@ -5,55 +5,84 @@ import { DatosEstaticosService } from 'src/app/services/datos-estaticos.service'
 
 export function generateRefPerFormGroup(datos?: any): FormGroup {
   return new FormGroup({
-    numero_identificacion: new FormControl(datos?.numero_identificacion, [
+    primer_nombre: new FormControl(datos?.primer_nombre, [
       Validators.required,
       Validators.minLength(2),
       Validators.maxLength(50),
+      Validators.pattern(/^[^0-9]*$/)
     ]),
-    nombre_completo: new FormControl(datos?.nombre_completo, [
+    segundo_nombre: new FormControl(datos?.segundo_nombre, [
+      Validators.maxLength(50),
+      Validators.pattern(/^[^0-9]*$/)
+    ]),
+    tercer_nombre: new FormControl(datos?.tercer_nombre, [
+      Validators.maxLength(50),
+      Validators.pattern(/^[^0-9]*$/)
+    ]),
+    primer_apellido: new FormControl(datos?.primer_apellido, [
       Validators.required,
       Validators.minLength(2),
       Validators.maxLength(50),
+      Validators.pattern(/^[^0-9]*$/)
     ]),
-    parentesco: new FormControl(datos?.parentesco, [
+    segundo_apellido: new FormControl(datos?.segundo_apellido, [
+      Validators.maxLength(50),
+      Validators.pattern(/^[^0-9]*$/)
+    ]),
+    sexo: new FormControl(datos?.sexo, [
       Validators.required,
-      Validators.minLength(2),
-      Validators.maxLength(30),
+      Validators.pattern(/^(F|M)$/)
     ]),
     direccion: new FormControl(datos?.direccion, [
-      Validators.required,
-      Validators.minLength(10),
-      Validators.maxLength(200),
+      Validators.maxLength(200)
     ]),
     telefono_domicilio: new FormControl(datos?.telefono_domicilio, [
       Validators.minLength(8),
       Validators.maxLength(12),
+      Validators.pattern(/^[0-9]*$/)
     ]),
     telefono_trabajo: new FormControl(datos?.telefono_trabajo, [
       Validators.required,
       Validators.minLength(8),
       Validators.maxLength(12),
+      Validators.pattern(/^[0-9]*$/)
     ]),
     telefono_personal: new FormControl(datos?.telefono_personal, [
       Validators.required,
       Validators.minLength(8),
       Validators.maxLength(12),
+      Validators.pattern(/^[0-9]*$/)
     ]),
-    dni: new FormControl(datos?.dni, [
-      Validators.maxLength(15),
-      Validators.pattern(/^[0-9]{13}$|^[0-9]{4}-[0-9]{4}-[0-9]{5}$/),
+    n_identificacion: new FormControl(datos?.n_identificacion, [
+      Validators.required,
+      Validators.maxLength(15)
+    ]),
+    tipo_identificacion: new FormControl(datos?.tipo_identificacion, [
+      Validators.required
+    ]),
+    profesion: new FormControl(datos?.profesion, [
+      Validators.maxLength(50),
+      Validators.pattern(/^[^0-9]*$/)
+    ]),
+    discapacidad: new FormControl(datos?.discapacidad, [
+      Validators.maxLength(20),
+      Validators.pattern(/^(MOTRIZ|AUDITIVA|VISUAL|INTELECTUAL|MENTAL|PSICOSOCIAL|MÚLTIPLE|SENSORIAL)$/)
+    ]),
+    parentesco: new FormControl(datos?.parentesco, [
+      Validators.required,
+      Validators.minLength(2),
+      Validators.maxLength(30)
     ]),
     dependiente: new FormControl(datos?.dependiente, [
-      Validators.required,
+      Validators.required
     ]),
     cargoPublico: new FormControl(datos?.cargoPublico, [
-      Validators.required,
+      Validators.required
     ]),
     fecha_nacimiento: new FormControl(datos?.fecha_nacimiento),
     es_afiliado: new FormControl(datos?.es_afiliado || false),
     trabaja: new FormControl(datos?.trabaja || false),
-    tipo: new FormControl(datos?.tipo || false),
-    sexo: new FormControl(datos?.sexo || false),
+    tipo: new FormControl(datos?.tipo || false)
   });
 }
 
@@ -69,6 +98,8 @@ export class RefPersComponent implements OnInit {
   availableParentesco: any[] = [];
   sexo: any[] = [];
   tipo: any[] = [];
+  tipo_identificacion: any[] = [];
+  tipo_discapacidad: any[] = [];
 
   @Input() nombreComp?: string;
   @Input() datos?: any;
@@ -103,7 +134,7 @@ export class RefPersComponent implements OnInit {
       si: value === 'si',
       no: value === 'no'
     };
-    this.dependiente = this.dependienteEstado.si
+    this.dependiente = this.dependienteEstado.si;
   }
   onDatosGeneralesCargoPChange(event: any) {
     const value = event.value;
@@ -111,22 +142,33 @@ export class RefPersComponent implements OnInit {
       si: value === 'si',
       no: value === 'no'
     };
-    this.cargoPublico = this.cargoEstado.si
+    this.cargoPublico = this.cargoEstado.si;
   }
 
   constructor(private formStateService: FormStateService, private fb: FormBuilder, private datosEstaticosService: DatosEstaticosService) {
-
     this.sexo = [
       { label: "MASCULINO", value: "M" },
-      { label: "FEMENINO", value: "F" },
-    ]
+      { label: "FEMENINO", value: "F" }
+    ];
     this.tipo = [
       { label: "REFERENCIA PERSONAL", value: "REFERENCIA PERSONAL" },
-      { label: "REFERENCIA FAMILIAR", value: "REFERENCIA FAMILIAR" },
-    ]
-
-
-
+      { label: "REFERENCIA FAMILIAR", value: "REFERENCIA FAMILIAR" }
+    ];
+    this.tipo_identificacion = [
+      { label: "DNI", value: "DNI" },
+      { label: "CARNET DE RESIDENCIA", value: "CARNET DE RESIDENCIA" },
+      { label: "PASAPORTE", value: "PASAPORTE" }
+    ];
+    this.tipo_discapacidad = [
+      { label: "MOTRIZ", value: "MOTRIZ" },
+      { label: "AUDITIVA", value: "AUDITIVA" },
+      { label: "VISUAL", value: "VISUAL" },
+      { label: "INTELECTUAL", value: "INTELECTUAL" },
+      { label: "MENTAL", value: "MENTAL" },
+      { label: "PSICOSOCIAL", value: "PSICOSOCIAL" },
+      { label: "MÚLTIPLE", value: "MÚLTIPLE" },
+      { label: "SENSORIAL", value: "SENSORIAL" }
+    ];
   }
 
   ngOnInit(): void {

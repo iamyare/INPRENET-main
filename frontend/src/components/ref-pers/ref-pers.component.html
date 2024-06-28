@@ -10,13 +10,11 @@
         <h4 class="card-title">Opción Número: {{i + 1}}</h4>
         <div [formGroupName]="i" class="row">
           <div class="col-lg-4 col-md-12">
-            <mat-form-field style="flex-direction: column-reverse;" class="full-width-field inputs"
-              appearance="outline">
+            <mat-form-field style="flex-direction: column-reverse;" class="full-width-field inputs" appearance="outline">
               <mat-label>Tipo De Referencia</mat-label>
               <mat-icon matPrefix>people</mat-icon>
               <mat-select formControlName="tipo">
-                <mat-option *ngFor="let item of tipo" [value]="item.value">{{ item.label
-                  }}</mat-option>
+                <mat-option *ngFor="let item of tipo" [value]="item.value">{{ item.label }}</mat-option>
               </mat-select>
             </mat-form-field>
             <mat-error *ngFor="let error of getErrors(i, 'tipo')">
@@ -25,61 +23,105 @@
           </div>
 
           <div class="col-lg-4 col-md-12">
-            <mat-form-field style="flex-direction: column-reverse;" class="example-full-width inputs"
-              appearance="outline">
-              <mat-label>Número De Identificación</mat-label>
-              <mat-icon matPrefix>person</mat-icon>
-              <input matInput type="text" formControlName="numero_identificacion">
+            <mat-form-field style="flex-direction: column-reverse;" class="full-width-field inputs" appearance="outline">
+              <mat-label>Tipo de Identificación</mat-label>
+              <mat-icon matPrefix>badge</mat-icon>
+              <mat-select formControlName="tipo_identificacion">
+                <mat-option *ngFor="let item of tipo_identificacion" [value]="item.value">{{ item.label }}</mat-option>
+              </mat-select>
             </mat-form-field>
-            <mat-error *ngFor="let error of getErrors(i, 'numero_identificacion')">
-              {{ error }}
-            </mat-error>
-          </div>
-          <div class="col-lg-4 col-md-12">
-            <mat-form-field style="flex-direction: column-reverse;" class="example-full-width inputs"
-              appearance="outline">
-              <mat-label>Nombre Completo</mat-label>
-              <mat-icon matPrefix>person</mat-icon>
-              <input matInput type="text" formControlName="nombre_completo">
-            </mat-form-field>
-            <mat-error *ngFor="let error of getErrors(i, 'nombre_completo')">
+            <mat-error *ngFor="let error of getErrors(i, 'tipo_identificacion')">
               {{ error }}
             </mat-error>
           </div>
 
           <div class="col-lg-4 col-md-12">
-            <mat-form-field style="flex-direction: column-reverse;" class="full-width-field inputs"
-              appearance="outline">
+            <mat-form-field style="flex-direction: column-reverse;" class="example-full-width inputs" appearance="outline">
+              <mat-label>Número de Identificación</mat-label>
+              <mat-icon matPrefix>badge</mat-icon>
+              <input matInput type="text" formControlName="n_identificacion">
+            </mat-form-field>
+            <mat-error *ngFor="let error of getErrors(i, 'n_identificacion')">
+              {{ error }}
+            </mat-error>
+          </div>
+
+          <div class="col-lg-4 col-md-12">
+            <mat-form-field style="flex-direction: column-reverse;" class="example-full-width inputs" appearance="outline">
+              <mat-label>Primer Nombre</mat-label>
+              <mat-icon matPrefix>person</mat-icon>
+              <input matInput type="text" formControlName="primer_nombre">
+            </mat-form-field>
+            <mat-error *ngFor="let error of getErrors(i, 'primer_nombre')">
+              {{ error }}
+            </mat-error>
+          </div>
+          <div class="col-lg-4 col-md-12">
+            <mat-form-field style="flex-direction: column-reverse;" class="example-full-width inputs" appearance="outline">
+              <mat-label>Segundo Nombre</mat-label>
+              <mat-icon matPrefix>person</mat-icon>
+              <input matInput type="text" formControlName="segundo_nombre">
+            </mat-form-field>
+            <mat-error *ngFor="let error of getErrors(i, 'segundo_nombre')">
+              {{ error }}
+            </mat-error>
+          </div>
+          <div class="col-lg-4 col-md-12">
+            <mat-form-field style="flex-direction: column-reverse;" class="example-full-width inputs" appearance="outline">
+              <mat-label>Tercer Nombre</mat-label>
+              <mat-icon matPrefix>person</mat-icon>
+              <input matInput type="text" formControlName="tercer_nombre">
+            </mat-form-field>
+            <mat-error *ngFor="let error of getErrors(i, 'tercer_nombre')">
+              {{ error }}
+            </mat-error>
+          </div>
+          <div class="col-lg-4 col-md-12">
+            <mat-form-field style="flex-direction: column-reverse;" class="example-full-width inputs" appearance="outline">
+              <mat-label>Primer Apellido</mat-label>
+              <mat-icon matPrefix>person</mat-icon>
+              <input matInput type="text" formControlName="primer_apellido">
+            </mat-form-field>
+            <mat-error *ngFor="let error of getErrors(i, 'primer_apellido')">
+              {{ error }}
+            </mat-error>
+          </div>
+          <div class="col-lg-4 col-md-12">
+            <mat-form-field style="flex-direction: column-reverse;" class="example-full-width inputs" appearance="outline">
+              <mat-label>Segundo Apellido</mat-label>
+              <mat-icon matPrefix>person</mat-icon>
+              <input matInput type="text" formControlName="segundo_apellido">
+            </mat-form-field>
+            <mat-error *ngFor="let error of getErrors(i, 'segundo_apellido')">
+              {{ error }}
+            </mat-error>
+          </div>
+          <div class="col-lg-4 col-md-12">
+            <mat-form-field style="flex-direction: column-reverse;" class="full-width-field inputs" appearance="outline">
               <mat-label>Sexo</mat-label>
               <mat-icon matPrefix>people</mat-icon>
               <mat-select formControlName="sexo">
-                <mat-option *ngFor="let item of sexo" [value]="item.value">{{ item.label
-                  }}</mat-option>
+                <mat-option *ngFor="let item of sexo" [value]="item.value">{{ item.label }}</mat-option>
               </mat-select>
             </mat-form-field>
             <mat-error *ngFor="let error of getErrors(i, 'sexo')">
               {{ error }}
             </mat-error>
           </div>
-
           <div class="col-lg-4 col-md-12">
-            <mat-form-field style="flex-direction: column-reverse;" class="full-width-field inputs"
-              appearance="outline">
+            <mat-form-field style="flex-direction: column-reverse;" class="full-width-field inputs" appearance="outline">
               <mat-label>Parentesco</mat-label>
               <mat-icon matPrefix>people</mat-icon>
               <mat-select formControlName="parentesco">
-                <mat-option *ngFor="let item of getAvailableParentesco(i)" [value]="item.value">{{ item.label
-                  }}</mat-option>
+                <mat-option *ngFor="let item of getAvailableParentesco(i)" [value]="item.value">{{ item.label }}</mat-option>
               </mat-select>
             </mat-form-field>
             <mat-error *ngFor="let error of getErrors(i, 'parentesco')">
               {{ error }}
             </mat-error>
           </div>
-
-          <div class="col-lg-4 col-md-12" *ngIf="!isConyugue(i)">
-            <mat-form-field style="flex-direction: column-reverse;" class="example-full-width inputs"
-              appearance="outline">
+          <div class="col-lg-4 col-md-12">
+            <mat-form-field style="flex-direction: column-reverse;" class="example-full-width inputs" appearance="outline">
               <mat-label>Dirección</mat-label>
               <mat-icon matPrefix>home</mat-icon>
               <input matInput type="text" formControlName="direccion">
@@ -88,14 +130,8 @@
               {{ error }}
             </mat-error>
           </div>
-
-
-
-
-
           <div class="col-lg-4 col-md-12">
-            <mat-form-field style="flex-direction: column-reverse;" class="example-full-width inputs"
-              appearance="outline">
+            <mat-form-field style="flex-direction: column-reverse;" class="example-full-width inputs" appearance="outline">
               <mat-label>Teléfono Domicilio</mat-label>
               <mat-icon matPrefix>phone</mat-icon>
               <input matInput type="text" formControlName="telefono_domicilio">
@@ -104,10 +140,8 @@
               {{ error }}
             </mat-error>
           </div>
-
           <div class="col-lg-4 col-md-12">
-            <mat-form-field style="flex-direction: column-reverse;" class="example-full-width inputs"
-              appearance="outline">
+            <mat-form-field style="flex-direction: column-reverse;" class="example-full-width inputs" appearance="outline">
               <mat-label>Teléfono Trabajo</mat-label>
               <mat-icon matPrefix>work</mat-icon>
               <input matInput type="text" formControlName="telefono_trabajo">
@@ -116,10 +150,8 @@
               {{ error }}
             </mat-error>
           </div>
-
           <div class="col-lg-4 col-md-12">
-            <mat-form-field style="flex-direction: column-reverse;" class="example-full-width inputs"
-              appearance="outline">
+            <mat-form-field style="flex-direction: column-reverse;" class="example-full-width inputs" appearance="outline">
               <mat-label>Teléfono Personal</mat-label>
               <mat-icon matPrefix>smartphone</mat-icon>
               <input matInput type="text" formControlName="telefono_personal">
@@ -128,22 +160,30 @@
               {{ error }}
             </mat-error>
           </div>
-
-          <div class="col-lg-6 col-md-12" *ngIf="isConyugue(i)">
-            <mat-form-field style="flex-direction: column-reverse;" class="example-full-width inputs"
-              appearance="outline">
-              <mat-label>DNI</mat-label>
-              <mat-icon matPrefix>badge</mat-icon>
-              <input matInput type="text" formControlName="dni">
+          <div class="col-lg-4 col-md-12">
+            <mat-form-field style="flex-direction: column-reverse;" class="example-full-width inputs" appearance="outline">
+              <mat-label>Profesión</mat-label>
+              <mat-icon matPrefix>work</mat-icon>
+              <input matInput type="text" formControlName="profesion">
             </mat-form-field>
-            <mat-error *ngFor="let error of getErrors(i, 'dni')">
+            <mat-error *ngFor="let error of getErrors(i, 'profesion')">
               {{ error }}
             </mat-error>
           </div>
-
-          <div class="col-lg-6 col-md-12" *ngIf="isConyugue(i)">
-            <mat-form-field style="flex-direction: column-reverse;" class="example-full-width inputs"
-              appearance="outline">
+          <div class="col-lg-4 col-md-12">
+            <mat-form-field style="flex-direction: column-reverse;" class="full-width-field inputs" appearance="outline">
+              <mat-label>Discapacidad</mat-label>
+              <mat-icon matPrefix>accessible</mat-icon>
+              <mat-select formControlName="discapacidad">
+                <mat-option *ngFor="let item of tipo_discapacidad" [value]="item.value">{{ item.label }}</mat-option>
+              </mat-select>
+            </mat-form-field>
+            <mat-error *ngFor="let error of getErrors(i, 'discapacidad')">
+              {{ error }}
+            </mat-error>
+          </div>
+          <div class="col-lg-6 col-md-12">
+            <mat-form-field style="flex-direction: column-reverse;" class="example-full-width inputs" appearance="outline">
               <mat-label>Fecha de Nacimiento</mat-label>
               <mat-icon matPrefix>calendar_today</mat-icon>
               <input matInput [matDatepicker]="picker" formControlName="fecha_nacimiento">
@@ -154,7 +194,6 @@
               {{ error }}
             </mat-error>
           </div>
-
           <div class="col-lg-4 col-md-12">
             <label>¿Depende económicamente de usted?</label>
             <mat-radio-group formControlName="dependiente" (change)="onDatosGeneralesDiscChange($event)">
@@ -163,7 +202,6 @@
               </mat-radio-button>
             </mat-radio-group>
           </div>
-
           <div class="col-lg-4 col-md-12">
             <label>¿Ha desempeñado un cargo público?</label>
             <mat-radio-group formControlName="cargoPublico" (change)="onDatosGeneralesCargoPChange($event)">
@@ -172,15 +210,13 @@
               </mat-radio-button>
             </mat-radio-group>
           </div>
-
           <div>
             <app-peps></app-peps>
           </div>
-
-          <div class="col-lg-6 col-md-12" *ngIf="isConyugue(i)">
+          <div class="col-lg-6 col-md-12">
             <mat-checkbox class="custom-checkbox" formControlName="es_afiliado">¿Es afiliado?</mat-checkbox>
           </div>
-          <div class="col-lg-6 col-md-12" *ngIf="isConyugue(i)">
+          <div class="col-lg-6 col-md-12">
             <mat-checkbox class="custom-checkbox" formControlName="trabaja">¿Trabaja?</mat-checkbox>
           </div>
         </div>

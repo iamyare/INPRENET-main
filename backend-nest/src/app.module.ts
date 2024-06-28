@@ -40,7 +40,7 @@ import * as oracledb from 'oracledb';
           connectString,
           extra: { pool },
           autoLoadEntities: true,
-          synchronize: true,
+          //synchronize: true,
           entities: [__dirname + '/../**/*.entity{.ts,.js}'],
           //migrations: ['src/database/migrations/*{.ts,.js}'],
           //logging: ["query", "schema", "error", "warn", "info", "log", "migration"]

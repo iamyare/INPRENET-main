@@ -24,6 +24,9 @@ export class Net_Beneficio {
     @Column('number', { nullable: false, default: 100000, name: 'NUMERO_RENTAS_MAX' })
     numero_rentas_max?: number;
 
+    @Column('number', { nullable: true, name: 'PORCENTAJE_POR_BENEFICIO' })
+    porcentaje_por_beneficio?: number;
+
     @OneToMany(() => Net_Detalle_Beneficio_Afiliado, detalleBeneficioAfiliado => detalleBeneficioAfiliado.beneficio)
     detalleBeneficioAfiliado: Net_Detalle_Beneficio_Afiliado[];
 

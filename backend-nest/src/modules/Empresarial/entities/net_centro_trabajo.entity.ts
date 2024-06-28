@@ -6,10 +6,10 @@ import { Net_Deduccion } from 'src/modules/Planilla/deduccion/entities/net_deduc
 import { Net_Empleado_Centro_Trabajo } from './net_empleado_centro_trabajo.entity';
 import { Net_Sociedad_Centro_Trabajo } from './net_sociedad_centro.entity';
 import { Net_Referencia_Centro_Trabajo } from './net_referencia_centro_trabajo.entity';
-import { Net_Centro_Trabajo_Jornada } from './Net_Centro_Trabajo_Jornada.entity';
-import { Net_Centro_Trabajo_Nivel } from './Net_Centro_Trabajo_Nivel.entity';
+import { Net_Centro_Trabajo_Jornada } from './net_centro_trabajo_jornada.entity';
+import { Net_Centro_Trabajo_Nivel } from './net_centro_trabajo_nivel.entity';
 import { Net_Modulo } from 'src/modules/usuario/entities/net_modulo.entity';
-import { Net_Estado_Centro_Trabajo } from './Net_Estado_Centro_trabajo.entity';
+import { Net_Estado_Centro_Trabajo } from './net_estado_centro_trabajo.entity';
 
 @Entity({ name: 'NET_CENTRO_TRABAJO' })
 @Check(`TIPO IN ('EDUCACION', 'INSTITUCION')`)

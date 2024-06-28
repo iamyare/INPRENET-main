@@ -4,7 +4,7 @@ import { isUUID } from 'class-validator';
 import { InjectEntityManager, InjectRepository } from '@nestjs/typeorm';
 import { EntityManager, Repository, SelectQueryBuilder } from 'typeorm';
 import { Net_Beneficio } from '../beneficio/entities/net_beneficio.entity';
-import { Net_Persona } from '../../Persona/entities/Net_Persona.entity';
+import { Net_Persona } from '../../Persona/entities/net_Persona.entity';
 import { Net_Detalle_Pago_Beneficio } from './entities/net_detalle_pago_beneficio.entity';
 import { UpdateDetalleBeneficioDto } from './dto/update-detalle_beneficio_planilla.dto';
 import { CreateDetalleBeneficioDto } from './dto/create-detalle_beneficio.dto';

@@ -1,6 +1,6 @@
 import { Entity, Column, PrimaryGeneratedColumn, ManyToOne, JoinColumn } from "typeorm";
 import { Net_Colegios_Magisteriales } from "./net_colegios_magisteriales.entity";
-import { Net_Persona } from "src/modules/Persona/entities/Net_Persona.entity";
+import { Net_Persona } from "src/modules/Persona/entities/net_Persona.entity";
 
 @Entity("NET_PERSONA_COLEGIOS_MAGISTERIALES")
 export class Net_Persona_Colegios {

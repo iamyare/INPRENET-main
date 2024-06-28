@@ -5,7 +5,7 @@ import { InjectEntityManager, InjectRepository } from '@nestjs/typeorm';
 import { Net_Detalle_Deduccion } from './entities/detalle-deduccion.entity';
 import { EntityManager, Repository } from 'typeorm';
 import * as xlsx from 'xlsx';
-import { Net_Persona } from '../../Persona/entities/Net_Persona.entity';
+import { Net_Persona } from '../../Persona/entities/net_Persona.entity';
 import { Net_Planilla } from '../planilla/entities/net_planilla.entity';
 import { isUUID } from 'class-validator';
 import { Net_Deduccion } from '../deduccion/entities/net_deduccion.entity';

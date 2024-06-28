@@ -1,6 +1,6 @@
 
 import { Check, Column, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn } from "typeorm";
-import { Net_Persona } from "../../../../Persona/entities/Net_Persona.entity";
+import { Net_Persona } from "../../../../Persona/entities/net_Persona.entity";
 import { Net_Centro_Trabajo } from "../../../../Empresarial/entities/net_centro_trabajo.entity";
 import { Net_Planilla } from "../../../../Planilla/planilla/entities/net_planilla.entity";
 

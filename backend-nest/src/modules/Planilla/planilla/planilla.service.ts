@@ -4,7 +4,7 @@ import { UpdatePlanillaDto } from './dto/update-planilla.dto';
 import { InjectEntityManager, InjectRepository } from '@nestjs/typeorm';
 import { Net_Detalle_Deduccion } from '../detalle-deduccion/entities/detalle-deduccion.entity';
 import { EntityManager, Repository } from 'typeorm';
-import { Net_Persona } from '../../Persona/entities/Net_Persona.entity';
+import { Net_Persona } from '../../Persona/entities/net_Persona.entity';
 import { Net_Beneficio } from '../beneficio/entities/net_beneficio.entity';
 import { Net_Planilla } from './entities/net_planilla.entity';
 import { Net_TipoPlanilla } from '../tipo-planilla/entities/tipo-planilla.entity';

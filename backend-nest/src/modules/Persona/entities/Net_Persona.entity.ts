@@ -1,6 +1,6 @@
 import { Net_TipoIdentificacion } from "../../tipo_identificacion/entities/net_tipo_identificacion.entity";
 import { Net_Pais } from "../../Regional/pais/entities/pais.entity";
-import { Check, Column, Entity, Index, JoinColumn, ManyToOne, OneToMany, OneToOne, PrimaryGeneratedColumn } from "typeorm";
+import { Check, Column, Entity, Index, JoinColumn, ManyToMany, ManyToOne, OneToMany, OneToOne, PrimaryGeneratedColumn } from "typeorm";
 import { Net_Detalle_Deduccion } from "../../Planilla/detalle-deduccion/entities/detalle-deduccion.entity";
 import { Net_Municipio } from "../../Regional/municipio/entities/net_municipio.entity";
 import { NET_CUENTA_PERSONA } from "../../transacciones/entities/net_cuenta_persona.entity";
@@ -11,7 +11,8 @@ import { Net_Persona_Por_Banco } from "src/modules/banco/entities/net_persona-ba
 import { Net_perf_pers_cent_trab } from "./net_perf_pers_cent_trab.entity";
 import { Net_Ref_Per_Pers } from "./net_ref-Per-Persona.entity";
 import { NET_PROFESIONES } from "src/modules/transacciones/entities/net_profesiones.entity";
-import { Net_Peps } from "src/modules/Empresarial/entities/Net_peps-entity";
+import { Net_Discapacidad } from "./net_discapacidad.entity";
+import { Net_Peps } from "src/modules/Empresarial/entities/net_peps.entity";
 @Entity({
     name: 'NET_PERSONA',
 })
@@ -60,9 +61,6 @@ export class Net_Persona {
 
     @Column('varchar2', { length: 40, nullable: true, name: 'SEGUNDO_APELLIDO' })
     segundo_apellido: string;
-
-    @Column('varchar2', { length: 40, nullable: true, name: 'TIPO_DISCAPACIDAD' })
-    tipo_discapacidad: string;
 
     @Column('varchar2', { length: 30, nullable: true, name: 'GENERO' })
     genero: string;
@@ -177,5 +175,8 @@ export class Net_Persona {
 
     @OneToMany(() => Net_Peps, peps => peps.persona)
     peps: Net_Peps[];
+
+    @ManyToMany(() => Net_Discapacidad, discapacidad => discapacidad.personas)
+    discapacidades: Net_Discapacidad[];
 
 }

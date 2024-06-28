@@ -6,7 +6,7 @@ import { Net_TipoPlanilla } from '../../tipo-planilla/entities/tipo-planilla.ent
 import { Net_Detalle_planilla_ingreso } from './entities/net_detalle_plani_ing.entity';
 import { Net_Planilla } from '../../planilla/entities/net_planilla.entity';
 import { DateTime } from 'luxon';
-import { Net_Persona } from '../../../Persona/entities/Net_Persona.entity';
+import { Net_Persona } from '../../../Persona/entities/net_Persona.entity';
 import * as oracledb from 'oracledb';
 import { CreateDetallePlanIngDto } from './dto/create-detalle-plani-Ing.dto';
 

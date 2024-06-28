@@ -1,6 +1,6 @@
 import { Column, Entity, Index, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
 import { Net_Banco } from "./net_banco.entity";
-import { Net_Persona } from "../../Persona/entities/Net_Persona.entity";
+import { Net_Persona } from "../../Persona/entities/net_Persona.entity";
 
 @Entity({ name: 'NET_PERSONA_POR_BANCO' })
 export class Net_Persona_Por_Banco {

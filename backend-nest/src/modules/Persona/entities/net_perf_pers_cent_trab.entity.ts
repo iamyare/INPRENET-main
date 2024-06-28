@@ -1,6 +1,6 @@
 import { Column, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 import { Net_Centro_Trabajo } from "../../Empresarial/entities/net_centro_trabajo.entity";
-import { Net_Persona } from "./Net_Persona.entity";
+import { Net_Persona } from "./net_Persona.entity";
 
 @Entity({ name: 'NET_PERF_PERS_CENT_TRAB' })
 export class Net_perf_pers_cent_trab {

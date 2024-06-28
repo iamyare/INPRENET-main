@@ -27,7 +27,7 @@ import { UpdateReferenciaPersonalDTO } from './dto/update-referencia-personal.dt
 import { FileInterceptor } from '@nestjs/platform-express';
 import { CreateDetallePersonaDto } from './dto/create-detalle.dto';
 import { UpdateBeneficiarioDto } from './dto/update-beneficiario.dto';
-import { Net_Persona } from './entities/Net_Persona.entity';
+import { Net_Persona } from './entities/net_Persona.entity';
 import { CreateDetalleBeneficiarioDto } from './dto/create-detalle-beneficiario-dto';
 import { Benef } from './dto/pruebaBeneficiario.dto';
 import { Net_Estado_Persona } from './entities/net_estado_persona.entity';

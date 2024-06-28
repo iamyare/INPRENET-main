@@ -1,5 +1,5 @@
 import { Check, Column, Entity, JoinColumn, ManyToOne, OneToMany, OneToOne, PrimaryColumn, PrimaryGeneratedColumn } from "typeorm";
-import { Net_Persona } from "./Net_Persona.entity";
+import { Net_Persona } from "./net_Persona.entity";
 import { Net_Tipo_Persona } from "./net_tipo_persona.entity";
 import { Net_Estado_Persona } from "./net_estado_persona.entity";
 

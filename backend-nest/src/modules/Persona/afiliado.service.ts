@@ -9,7 +9,7 @@ import { Net_Banco } from '../banco/entities/net_banco.entity';
 import { Net_TipoIdentificacion } from '../tipo_identificacion/entities/net_tipo_identificacion.entity';
 import { Net_Pais } from '../Regional/pais/entities/pais.entity';
 import { validate as isUUID } from 'uuid';
-import { Net_Persona } from './entities/Net_Persona.entity';
+import { Net_Persona } from './entities/net_Persona.entity';
 import { Net_ReferenciaPersonal } from './entities/referencia-personal.entity';
 import { Net_Ref_Per_Pers } from './entities/net_ref-Per-Persona.entity';
 import { Net_perf_pers_cent_trab } from './entities/net_perf_pers_cent_trab.entity';
@@ -595,7 +595,6 @@ export class AfiliadoService {
       GENERO: persona.genero,
       SEXO: persona.sexo,
       RAZA: persona.raza,
-      TIPO_DISCAPACIDAD: persona.tipo_discapacidad,
       CANTIDAD_DEPENDIENTES: persona.cantidad_dependientes,
       CANTIDAD_HIJOS: persona.cantidad_hijos,
       REPRESENTACION: persona.representacion,

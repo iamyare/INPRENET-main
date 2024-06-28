@@ -1,5 +1,5 @@
 import { Column, Entity, OneToMany, PrimaryColumn } from "typeorm";
-import { Net_Persona } from "./Net_Persona.entity";
+import { Net_Persona } from "./net_Persona.entity";
 import { NET_DETALLE_PERSONA } from "./Net_detalle_persona.entity";
 
 @Entity({ name: 'NET_ESTADO_AFILIACION' })

@@ -1,6 +1,6 @@
 import { Controller, Get, NotFoundException, Param, Post, UploadedFile, UseInterceptors } from '@nestjs/common';
 import { AfiliacionService } from './afiliacion.service';
-import { Net_Persona } from '../entities/Net_Persona.entity';
+import { Net_Persona } from '../entities/net_Persona.entity';
 import { FileInterceptor } from '@nestjs/platform-express';
 
 @Controller('afiliacion')

@@ -1,4 +1,4 @@
-import { Net_Persona } from 'src/modules/Persona/entities/Net_Persona.entity';
+import { Net_Persona } from 'src/modules/Persona/entities/net_Persona.entity';
 import { Entity, Column, PrimaryGeneratedColumn, OneToMany } from 'typeorm';
 
 @Entity('NET_PROFESIONES')

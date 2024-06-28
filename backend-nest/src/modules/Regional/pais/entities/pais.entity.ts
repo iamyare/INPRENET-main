@@ -1,6 +1,6 @@
 import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 import { Net_Departamento } from "../../provincia/entities/net_departamento.entity";
-import { Net_Persona } from "../../../Persona/entities/Net_Persona.entity";
+import { Net_Persona } from "../../../Persona/entities/net_Persona.entity";
 
 @Entity({ name: 'NET_PAIS' })
 export class Net_Pais {

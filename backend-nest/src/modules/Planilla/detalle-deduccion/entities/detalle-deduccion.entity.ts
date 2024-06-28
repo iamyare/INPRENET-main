@@ -2,7 +2,7 @@ import { Check, Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn} f
 import { Net_Planilla } from '../../planilla/entities/net_planilla.entity';
 import { IsEnum } from 'class-validator';
 import { Net_Deduccion } from '../../deduccion/entities/net_deduccion.entity';
-import { Net_Persona } from 'src/modules/Persona/entities/Net_Persona.entity';
+import { Net_Persona } from 'src/modules/Persona/entities/net_Persona.entity';
 
 @Entity({ name: 'NET_DETALLE_DEDUCCION' })
 @Check("CK_ESTADO_DED", `estado_aplicacion IN ('COBRADA', 'NO COBRADA', 'EN PRELIMINAR', 'EN PLANILLA')`)

@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { Net_Tipo_Persona } from '../entities/net_tipo_persona.entity';
-import { Net_Persona } from '../entities/Net_Persona.entity';
+import { Net_Persona } from '../entities/net_Persona.entity';
 import { NET_DETALLE_PERSONA } from '../entities/Net_detalle_persona.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';

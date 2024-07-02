@@ -51,4 +51,4 @@ import { net_empleado_centro_trabajo } from './entities/net_empleado_centro_trab
     ]),
   ],
 })
-export class EmpresarialModule {}
+export class EmpresarialModule { }

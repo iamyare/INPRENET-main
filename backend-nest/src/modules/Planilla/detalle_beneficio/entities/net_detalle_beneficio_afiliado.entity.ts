@@ -12,7 +12,7 @@ export class Net_Detalle_Beneficio_Afiliado {
     @Column({ nullable: true, name: 'ESTADO_SOLICITUD' })
     estado_solicitud: string;
 
-    @Column({ type: 'date', nullable: false, name: 'FECHA_CALCULO' })
+    @Column({ type: 'date', nullable: true, name: 'FECHA_CALCULO' })
     fecha_calculo: Date;
 
     @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true, name: 'MONTO_TOTAL' })
@@ -24,8 +24,7 @@ export class Net_Detalle_Beneficio_Afiliado {
     @Column({ nullable: true, name: 'METODO_PAGO' })
     metodo_pago: string;
 
-    @Column({ nullable: true, name: 'LEY_APLICABLE' })
-    ley_aplicable: string;
+
 
     @Column({ type: 'date', nullable: false, name: 'PERIODO_INICIO' })
     periodo_inicio: Date;
@@ -36,8 +35,8 @@ export class Net_Detalle_Beneficio_Afiliado {
     @Column({ nullable: true, default: 0, name: 'NUM_RENTAS_APLICADAS' })
     num_rentas_aplicadas: number;
 
-    @CreateDateColumn({ name: 'FECHA_PRIMER_PAGO' })
-    fecha_primer_pago: Date;
+    /* @CreateDateColumn({ name: 'FECHA_PRIMER_PAGO' })
+    fecha_primer_pago: Date; */
 
     @ManyToOne(() => Net_Beneficio, beneficio => beneficio.detalleBeneficioAfiliado)
     @JoinColumn({ name: 'ID_BENEFICIO', foreignKeyConstraintName: "FK_ID_BENEFICIO_DETBENAFIL" })

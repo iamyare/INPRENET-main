@@ -83,17 +83,17 @@ export class CentroTrabajoService {
       where: { id_usuario_empresa: id },
       relations: ['empleadoCentroTrabajo', 'empleadoCentroTrabajo.empleado']
     });
-  
+
     if (!usuarioEmpresa) {
       throw new NotFoundException('Usuario Empresa no encontrado');
     }
-  
+
     const empleado = usuarioEmpresa.empleadoCentroTrabajo.empleado;
-  
+
     if (!empleado) {
       throw new NotFoundException('Empleado no encontrado');
     }
-  
+
     // Actualizar la información del empleado
     empleado.nombreEmpleado = updateEmpleadoDto.nombreEmpleado;
     empleado.telefono_1 = updateEmpleadoDto.telefono_1;
@@ -105,19 +105,19 @@ export class CentroTrabajoService {
     if (fotoEmpleado) {
       empleado.foto_empleado = fotoEmpleado;
     }
-  
+
     // Actualizar la información del empleadoCentroTrabajo
     const empleadoCentroTrabajo = usuarioEmpresa.empleadoCentroTrabajo;
     empleadoCentroTrabajo.correo_1 = updateEmpleadoDto.correo_1;
     empleadoCentroTrabajo.nombrePuesto = updateEmpleadoDto.nombrePuesto;
     usuarioEmpresa.estado = updateEmpleadoDto.estado;
-  
+
     await this.empleadoCentroTrabajoRepository.save(empleadoCentroTrabajo);
     await this.usuarioEmpresaRepository.save(usuarioEmpresa);
-  
+
     return this.empleadoRepository.save(empleado);
   }
-  
+
 
   async obtenerCentrosDeTrabajoConTipoE(): Promise<Net_Centro_Trabajo[]> {
     return await this.centroTrabajoRepository.find({

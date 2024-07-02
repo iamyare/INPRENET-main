@@ -5,7 +5,7 @@ import { Net_Municipio } from "../../Regional/municipio/entities/net_municipio.e
 import { NET_CUENTA_PERSONA } from "../../transacciones/entities/net_cuenta_persona.entity";
 import { Net_Detalle_planilla_ingreso } from "../../Planilla/Ingresos/detalle-plan-ingr/entities/net_detalle_plani_ing.entity";
 import { Net_perf_pers_cent_trab } from "./net_perf_pers_cent_trab.entity";
-import { Net_Ref_Per_Pers } from "./net_ref-Per-Persona.entity";
+import { Net_Ref_Per_Pers } from "./net_ref-per-persona.entity";
 import { NET_PROFESIONES } from "src/modules/transacciones/entities/net_profesiones.entity";
 import { Net_Discapacidad } from "./net_discapacidad.entity";
 import { Net_Peps } from "src/modules/Empresarial/entities/net_peps.entity";

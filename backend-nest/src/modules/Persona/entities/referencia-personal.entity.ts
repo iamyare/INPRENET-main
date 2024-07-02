@@ -1,5 +1,5 @@
 import { Check, Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
-import { Net_Ref_Per_Pers } from './net_ref-Per-Persona.entity';
+import { Net_Ref_Per_Pers } from './net_ref-per-persona.entity';
 
 @Entity({ name: 'NET_REFERENCIA_PERSONAL' })
 @Check('CHECK_SEXO', `SEXO IN ('F', 'M')`)

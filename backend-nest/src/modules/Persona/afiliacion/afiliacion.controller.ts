@@ -5,15 +5,15 @@ import { FileInterceptor } from '@nestjs/platform-express';
 
 @Controller('afiliacion')
 export class AfiliacionController {
-    constructor(private readonly afiliacionService: AfiliacionService) {        
-    }
+  constructor(private readonly afiliacionService: AfiliacionService) {
+  }
 
-    @Get('persona-dni/:n_identificacion')
+  @Get('persona-dni/:n_identificacion')
   async getPersonaByDni(@Param('n_identificacion') n_identificacion: string): Promise<net_persona> {
     return this.afiliacionService.getPersonaByn_identificacioni(n_identificacion);
   }
 
-    @Get('causantes/:n_identificacion')
+  @Get('causantes/:n_identificacion')
   async getCausantesByDniBeneficiario(@Param('n_identificacion') n_identificacion: string): Promise<net_persona[]> {
     try {
       const causantes = await this.afiliacionService.getCausantesByDniBeneficiario(n_identificacion);

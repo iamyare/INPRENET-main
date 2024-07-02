@@ -63,21 +63,21 @@ export class AfiliadoController {
     @UploadedFile() fotoPerfil: Express.Multer.File,
     @Body('encapsulatedDto') encapsulatedDtoStr: string
   ) {
-  console.log(encapsulatedDtoStr);
-  
+    console.log(encapsulatedDtoStr);
+
     try {
       // Convertir el string JSON a un objeto
       const encapsulatedDto: EncapsulatedPersonaDTO = JSON.parse(encapsulatedDtoStr);
-  
+
       // Procesar la imagen de perfil si está presente
       if (fotoPerfil) {
         encapsulatedDto.datosGenerales.foto_perfil = fotoPerfil.buffer; // Usar el buffer directamente
       }
-  
+
       // Creación de la persona principal
       const createPersonaDto = encapsulatedDto.datosGenerales;
       const persona = await this.afiliadoService.createPersona(createPersonaDto);
-  
+
       // Creación del detalle de la persona
       const detallePersonaDto = {
         idPersona: persona.id_persona,
@@ -86,13 +86,13 @@ export class AfiliadoController {
         idEstadoPersona: 1
       };
       const detallePersona = await this.afiliadoService.createDetallePersona(detallePersonaDto);
-  
+
       // Asignación de centros de trabajo
       let centrosTrabajoAsignados = [];
       if (encapsulatedDto.centrosTrabajo && encapsulatedDto.centrosTrabajo.length > 0) {
         centrosTrabajoAsignados = await this.afiliadoService.assignCentrosTrabajo(persona.id_persona, encapsulatedDto.centrosTrabajo);
       }
-  
+
       // Creación y asignación de referencias personales
       let referenciasAsignadas = [];
       if (encapsulatedDto.referenciasPersonales && encapsulatedDto.referenciasPersonales.length > 0) {
@@ -100,13 +100,13 @@ export class AfiliadoController {
           referencias: encapsulatedDto.referenciasPersonales
         });
       }
-  
+
       // Asignación de bancos
       let bancosAsignados = [];
       if (encapsulatedDto.bancos && encapsulatedDto.bancos.length > 0) {
         bancosAsignados = await this.afiliadoService.assignBancosToPersona(persona.id_persona, encapsulatedDto.bancos);
       }
-  
+
       // Creación de beneficiarios
       let beneficiariosAsignados = [];
       if (encapsulatedDto.beneficiarios && encapsulatedDto.beneficiarios.length > 0) {
@@ -126,13 +126,13 @@ export class AfiliadoController {
           beneficiariosAsignados.push(nuevoBeneficiario);
         }
       }
-  
+
       // Asignación de colegios magisteriales
       let colegiosMagisterialesAsignados = [];
       if (encapsulatedDto.colegiosMagisteriales && encapsulatedDto.colegiosMagisteriales.length > 0) {
         colegiosMagisterialesAsignados = await this.afiliadoService.assignColegiosMagisteriales(persona.id_persona, encapsulatedDto.colegiosMagisteriales);
       }
-  
+
       return {
         message: 'Persona creada con detalles, centros de trabajo, referencias personales, bancos, beneficiarios, colegios magisteriales y relaciones familiares asignadas correctamente.'
       };
@@ -143,7 +143,7 @@ export class AfiliadoController {
       };
     }
   }
-  
+
 
   @Patch('inactivar/:idPersona/:idCausante')
   async inactivarPersona(

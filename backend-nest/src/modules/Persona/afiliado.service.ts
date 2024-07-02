@@ -10,7 +10,7 @@ import { Net_Pais } from '../Regional/pais/entities/pais.entity';
 import { validate as isUUID } from 'uuid';
 import { net_persona } from './entities/net_persona.entity';
 import { Net_ReferenciaPersonal } from './entities/referencia-personal.entity';
-import { Net_Ref_Per_Pers } from './entities/net_ref-Per-Persona.entity';
+import { Net_Ref_Per_Pers } from './entities/net_ref-per-persona.entity';
 import { Net_perf_pers_cent_trab } from './entities/net_perf_pers_cent_trab.entity';
 import { net_detalle_persona } from './entities/net_detalle_persona.entity';
 import { CreateDetallePersonaDto } from './dto/create-detalle.dto';

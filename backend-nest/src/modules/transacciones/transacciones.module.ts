@@ -19,6 +19,6 @@ import { Net_Usuario_Empresa } from '../usuario/entities/net_usuario_empresa.ent
     TypeOrmModule.forFeature([
       NET_CUENTA_PERSONA, NET_MOVIMIENTO_CUENTA, NET_TIPO_CUENTA, NET_TIPO_MOVIMIENTO, Net_Usuario_Empresa, net_persona, Net_Colegios_Magisteriales, Net_Persona_Colegios, NET_PROFESIONES
     ])],
-    exports: [TypeOrmModule, TransaccionesService],
+  exports: [TypeOrmModule, TransaccionesService],
 })
 export class TransaccionesModule { }

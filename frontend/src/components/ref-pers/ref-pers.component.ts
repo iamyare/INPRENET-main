@@ -1,7 +1,7 @@
-import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
-import { FormArray, FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
-import { FormStateService } from 'src/app/services/form-state.service';
-import { DatosEstaticosService } from 'src/app/services/datos-estaticos.service';
+import { AbstractControl, FormArray, FormBuilder, FormControl, FormGroup, ValidatorFn, Validators } from "@angular/forms";
+import { FormStateService } from "src/app/services/form-state.service";
+import { DatosEstaticosService } from "src/app/services/datos-estaticos.service";
+import { Component, EventEmitter, Input, OnInit, Output } from "@angular/core";
 
 export function generateRefPerFormGroup(datos?: any): FormGroup {
   return new FormGroup({
@@ -82,7 +82,8 @@ export function generateRefPerFormGroup(datos?: any): FormGroup {
     fecha_nacimiento: new FormControl(datos?.fecha_nacimiento),
     es_afiliado: new FormControl(datos?.es_afiliado || false),
     trabaja: new FormControl(datos?.trabaja || false),
-    tipo: new FormControl(datos?.tipo || false)
+    tipo: new FormControl(datos?.tipo || false),
+    discapacidades: new FormArray([]) // Añadido FormArray discapacidades
   });
 }
 
@@ -91,7 +92,8 @@ export function generateRefPerFormGroup(datos?: any): FormGroup {
   templateUrl: './ref-pers.component.html',
   styleUrls: ['./ref-pers.component.scss']
 })
-export class RefPersComponent implements OnInit {
+export class RefPersComponent implements OnInit
+ {
   public formParent: FormGroup = new FormGroup({});
   private formKey = 'refForm';
   parentesco: any;
@@ -136,6 +138,7 @@ export class RefPersComponent implements OnInit {
     };
     this.dependiente = this.dependienteEstado.si;
   }
+
   onDatosGeneralesCargoPChange(event: any) {
     const value = event.value;
     this.cargoEstado = {
@@ -143,6 +146,21 @@ export class RefPersComponent implements OnInit {
       no: value === 'no'
     };
     this.cargoPublico = this.cargoEstado.si;
+  }
+
+  onDiscapacidadChange(i: number, event: any) {
+    const refpersArray = this.formParent.get('refpers') as FormArray;
+    const refpersGroup = refpersArray.controls[i] as FormGroup;
+
+    if (event.value === 'si') {
+      if (!refpersGroup.contains('discapacidades')) {
+        refpersGroup.addControl('discapacidades', new FormArray([]));
+      }
+    } else {
+      if (refpersGroup.contains('discapacidades')) {
+        refpersGroup.removeControl('discapacidades');
+      }
+    }
   }
 
   constructor(private formStateService: FormStateService, private fb: FormBuilder, private datosEstaticosService: DatosEstaticosService) {
@@ -200,11 +218,28 @@ export class RefPersComponent implements OnInit {
 
   agregarRefPer(datos?: any): void {
     const ref_RefPers = this.formParent.get('refpers') as FormArray;
+    const formGroup = generateRefPerFormGroup(datos);
+    const tipoControl = formGroup.get('tipo') as FormControl;
+
+    // Listen to changes in 'tipo' to control the visibility of 'discapacidades'
+    tipoControl.valueChanges.subscribe(value => {
+      if (value === 'REFERENCIA FAMILIAR') {
+        formGroup.addControl('discapacidad', new FormControl('', Validators.required));
+      } else {
+        formGroup.removeControl('discapacidad');
+      }
+    });
+
     if (datos) {
-      ref_RefPers.push(generateRefPerFormGroup(datos));
-    } else {
-      ref_RefPers.push(generateRefPerFormGroup({}));
+      const discapacidadesArray = formGroup.get('discapacidades') as FormArray;
+      if (datos.discapacidades) {
+        datos.discapacidades.forEach((discapacidad: any) => {
+          discapacidadesArray.push(new FormControl(discapacidad));
+        });
+      }
     }
+
+    ref_RefPers.push(formGroup);
     this.updateAvailableParentesco();
   }
 
@@ -284,5 +319,59 @@ export class RefPersComponent implements OnInit {
       return this.parentesco;
     }
     return this.availableParentesco;
+  }
+
+  agregarDiscapacidad(i: number) {
+    const refpersArray = this.formParent.get('refpers') as FormArray;
+    const refpersGroup = refpersArray.controls[i] as FormGroup;
+    const discapacidadesArray = refpersGroup.get('discapacidades') as FormArray;
+
+    const newDisabilityControl = new FormControl('', Validators.required);
+
+    discapacidadesArray.push(newDisabilityControl);
+
+    newDisabilityControl.valueChanges.subscribe(() => {
+      discapacidadesArray.controls.forEach((control: AbstractControl, index: number) => {
+        if (control instanceof FormControl) {
+          control.setValidators([
+            Validators.required,
+            this.uniqueDisabilityValidator(discapacidadesArray.value, index)
+          ]);
+          control.updateValueAndValidity({ emitEvent: false });
+        }
+      });
+    });
+  }
+
+  eliminarDiscapacidad(i: number, index: number) {
+    const refpersArray = this.formParent.get('refpers') as FormArray;
+    const refpersGroup = refpersArray.controls[i] as FormGroup;
+    const discapacidadesArray = refpersGroup.get('discapacidades') as FormArray;
+
+    discapacidadesArray.removeAt(index);
+
+    discapacidadesArray.controls.forEach((control: AbstractControl, idx: number) => {
+      if (control instanceof FormControl) {
+        control.setValidators([
+          Validators.required,
+          this.uniqueDisabilityValidator(discapacidadesArray.value, idx)
+        ]);
+        control.updateValueAndValidity({ emitEvent: false });
+      }
+    });
+  }
+
+  uniqueDisabilityValidator(disabilityArray: string[], currentIndex: number): ValidatorFn {
+    return (control: AbstractControl): { [key: string]: any } | null => {
+      const currentValue = control.value;
+      const isDuplicate = disabilityArray.some((val: string, index: number) => index !== currentIndex && val === currentValue);
+
+      return isDuplicate ? { 'duplicateDisability': { value: currentValue } } : null;
+    };
+  }
+
+  getAvailableDisabilities(discapacidadesArray: FormArray, currentIndex: number): { label: string; value: string }[] {
+    const selectedValues = discapacidadesArray.value.map((val: any, index: number) => index !== currentIndex ? val : null);
+    return this.tipo_discapacidad.filter(d => !selectedValues.includes(d.value));
   }
 }

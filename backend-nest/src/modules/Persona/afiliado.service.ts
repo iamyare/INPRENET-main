@@ -595,7 +595,7 @@ export class AfiliadoService {
       GENERO: persona.genero,
       SEXO: persona.sexo,
       RAZA: persona.raza,
-      CANTIDAD_DEPENDIENTES: persona.cantidad_dependientes,
+      /* CANTIDAD_DEPENDIENTES: persona.cantidad_dependientes, */
       CANTIDAD_HIJOS: persona.cantidad_hijos,
       REPRESENTACION: persona.representacion,
       DIRECCION_RESIDENCIA: persona.direccion_residencia,
@@ -804,7 +804,7 @@ export class AfiliadoService {
         genero: beneficiario.persona?.genero || null,
         sexo: beneficiario.persona?.sexo || null,
         fallecido: beneficiario.persona?.fallecido || null,
-        cantidadDependientes: beneficiario.persona?.cantidad_dependientes || null,
+        /* cantidadDependientes: beneficiario.persona?.cantidad_dependientes || null, */
         representacion: beneficiario.persona?.representacion || null,
         telefono1: beneficiario.persona?.telefono_1 || null,
         fechaNacimiento: beneficiario.persona?.fecha_nacimiento || null,

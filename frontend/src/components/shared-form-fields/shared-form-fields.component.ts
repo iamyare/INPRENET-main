@@ -18,7 +18,7 @@ export class SharedFormFieldsComponent implements OnInit {
     }
   }
 
-  getControl(name: string): FormControl {
+  getControl(name: any): FormControl {
     const control = this.parentForm.get(name);
     if (!(control instanceof FormControl)) {
       throw new Error(`Control ${name} is not an instance of FormControl`);

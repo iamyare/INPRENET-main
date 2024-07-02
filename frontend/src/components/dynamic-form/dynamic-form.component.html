@@ -63,7 +63,7 @@
 
               <!-- Rango de Fecha -->
               <ng-template #daterangeField>
-                <ng-container *ngIf="field.type === 'daterange'">
+                <ng-container *ngIf="field.type === 'dateRange'">
                   <mat-form-field appearance="outline" style="width: 100%" class="full-width">
                     <mat-label>{{ field.label }}</mat-label>
                     <mat-date-range-input [rangePicker]="picker" [formGroup]="getRangeFormGroup(field.name)">

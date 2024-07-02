@@ -16,7 +16,7 @@
       <p><strong>Teléfono:</strong> {{ persona.telefono_1 }}</p>
       <p><strong>Correo Principal:</strong> {{ persona.correo_1 }}</p>
       <p><strong>Género:</strong> {{ persona.genero }}</p>
-      <p><strong>Fecha de Nacimiento:</strong> {{ formatDate(persona.fecha_nacimiento) }}</p>
+      <p><strong>Fecha de Nacimiento:</strong> {{ convertirFecha(persona.fecha_nacimiento,false) }}</p>
     </div>
   </div>
   <mat-tab-group dynamicHeight>

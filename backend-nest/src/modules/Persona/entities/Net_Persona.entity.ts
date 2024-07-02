@@ -24,8 +24,8 @@ export class net_persona {
     id_persona: number;
 
     @ManyToOne(() => Net_Tipo_Identificacion, tipoIdentificacion => tipoIdentificacion.personas, { cascade: true })
-      @JoinColumn({ name: 'ID_TIPO_IDENTIFICACION', foreignKeyConstraintName: 'FK_ID_TIPO_IDENTI_PERS' })
-      tipoIdentificacion: Net_Tipo_Identificacion;
+    @JoinColumn({ name: 'ID_TIPO_IDENTIFICACION', foreignKeyConstraintName: 'FK_ID_TIPO_IDENTI_PERS' })
+    tipoIdentificacion: Net_Tipo_Identificacion;
 
     @ManyToOne(() => Net_Pais, pais => pais.persona, { cascade: true })
     @JoinColumn({ name: 'ID_PAIS_NACIONALIDAD', foreignKeyConstraintName: "FK_ID_PAIS_PERS" })
@@ -71,8 +71,8 @@ export class net_persona {
     @Column('varchar2', { length: 2, nullable: false, name: 'FALLECIDO', default: "NO" })
     fallecido: string;
 
-    @Column('number', { nullable: true, name: 'CANTIDAD_DEPENDIENTES' })
-    cantidad_dependientes: number;
+    /* @Column('number', { nullable: true, name: 'CANTIDAD_DEPENDIENTES' })
+    cantidad_dependientes: number; */
 
     @Column('number', { nullable: true, name: 'CANTIDAD_HIJOS' })
     cantidad_hijos: number;

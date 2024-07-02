@@ -14,6 +14,9 @@ export class PepsComponent {
   departamentos: any = [];
   municipios: any = [];
 
+  currentYear = new Date();
+  maxDate: Date = new Date(this.currentYear.getFullYear(), this.currentYear.getMonth(), this.currentYear.getDate(), this.currentYear.getHours(), this.currentYear.getMinutes(), this.currentYear.getSeconds());
+
   fields: FieldArrays[] = [
     {
       name: 'pep_cargo_desempenado',
@@ -21,31 +24,33 @@ export class PepsComponent {
       type: 'text',
       value: '',
       validations: [],
-      layout: { row: 9, col: 6 }
+      layout: { row: 1, col: 6 }
     },
     {
-      name: 'pep_periodo',
+      name: 'dateRange',
       label: 'Periodo',
-      type: 'text',
-      value: '',
-      validations: [],
-      layout: { row: 9, col: 6 }
+      type: 'dateRange',
+      startDateControlName: 'startDate',
+      endDateControlName: 'endDate',
+      layout: { row: 1, col: 6 }
     },
     {
       name: 'fecha_resolucion',
       label: 'Fecha Resolucion',
       type: 'date',
+      maxDate: this.maxDate,
       value: '',
       validations: [],
-      layout: { row: 9, col: 6 }
+      layout: { row: 2, col: 6 }
     },
     {
       name: 'fecha_ingreso_peps',
       label: 'Fecha Ingreso A PEPS',
       type: 'date',
+      maxDate: this.maxDate,
       value: '',
       validations: [],
-      layout: { row: 9, col: 6 }
+      layout: { row: 2, col: 6 }
     },
     {
       name: 'observacion',
@@ -53,7 +58,7 @@ export class PepsComponent {
       type: 'text',
       value: '',
       validations: [],
-      layout: { row: 10, col: 12 }
+      layout: { row: 3, col: 12 }
     },
 
   ];
@@ -81,6 +86,8 @@ export class PepsComponent {
 
   addReferencia(): void {
     const referenciaGroup = this.fb.group({
+      startDate: new FormControl(null, Validators.required),
+      endDate: new FormControl(null, Validators.required),
       nombre: ['', Validators.required],
       observacion: ['', Validators.required],
       pep_periodo: ['', Validators.required],

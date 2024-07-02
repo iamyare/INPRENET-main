@@ -10,6 +10,8 @@
     <app-dat-generales-afiliado [useCamera]="true" (imageCaptured)="handleImageCaptured($event)" *ngIf="DatosGenerales"
       (newDatosGenerales)="setDatosGenerales($event)" [datos]="formDatosGenerales"></app-dat-generales-afiliado>
 
+    <!-- <app-maps></app-maps> -->
+
     <app-col-magisteriales *ngIf="ColegiosMagisteriales" [datos]="formColegiosMagisteriales"
       (newDataColegioMagisterial)="setDatosColegiosMag($event)"></app-col-magisteriales>
 

@@ -69,14 +69,17 @@ import { BuscadorComponent } from './buscador/buscador.component';
 import { PepsComponent } from './peps/peps.component';
 import { DynamicTablePruebaComponent } from './dynamic-table-prueba/dynamic-table-prueba.component';
 import { DynamicMenuConstanciasComponent } from './Dynamics/dynamic-menu-constancias/dynamic-menu-constancias.component';
+import { OtrasFuentesIngresoComponent } from './otras-fuentes-ingreso/otras-fuentes-ingreso.component';
 import { MapsComponent } from './maps/maps.component';
 import { GoogleMapsModule } from '@angular/google-maps';
 import { MatStepperModule } from '@angular/material/stepper';
 
 
+
 @NgModule({
   declarations: [
     DatPuestoTrabComponent,
+    OtrasFuentesIngresoComponent,
     PepsComponent,
     MapsComponent,
     BuscadorComponent,
@@ -118,6 +121,7 @@ import { MatStepperModule } from '@angular/material/stepper';
   ],
   exports: [
     PepsComponent,
+    OtrasFuentesIngresoComponent,
     MatTabsModule,
     MatStepperModule,
     MapsComponent,

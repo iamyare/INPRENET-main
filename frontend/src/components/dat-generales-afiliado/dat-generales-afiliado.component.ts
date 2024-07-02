@@ -5,7 +5,7 @@ import { DatosEstaticosService } from 'src/app/services/datos-estaticos.service'
 import { FormStateService } from 'src/app/services/form-state.service';
 import { TipoIdentificacionService } from 'src/app/services/tipo-identificacion.service';
 import { CentroTrabajoService } from 'src/app/services/centro-trabajo.service';
-
+import * as moment from 'moment';
 const noSpecialCharsPattern = '^[a-zA-Z0-9\\s]*$';
 
 export function generateAddressFormGroup(datos?: any): FormGroup {
@@ -33,7 +33,7 @@ export function generateAddressFormGroup(datos?: any): FormGroup {
     ]),
     segundo_apellido: new FormControl(datos?.segundo_apellido, [Validators.maxLength(40)]),
     fallecido: new FormControl(datos?.fallecido, [Validators.maxLength(2)]),
-    fecha_nacimiento: new FormControl(datos?.fecha_nacimiento, [Validators.required]),
+    fecha_nacimiento: new FormControl(datos ? moment.utc(datos.fecha_nacimiento).add(1, 'days').format('YYYY-MM-DD') : "", [Validators.required]),
     fecha_vencimiento_ident: new FormControl(datos?.fecha_vencimiento_ident, [Validators.required]),
     cantidad_dependientes: new FormControl(datos?.cantidad_dependientes, [Validators.pattern("^[0-9]+$"), Validators.required]),
     estado_civil: new FormControl(datos?.estado_civil, [Validators.required, Validators.maxLength(40)]),
@@ -94,6 +94,9 @@ export function generateAddressFormGroup(datos?: any): FormGroup {
     cargoPublico: new FormControl(datos?.cargoPublico, [
       Validators.maxLength(75)
     ]),
+    grado_academico: new FormControl(datos?.grado_academico, [
+      Validators.maxLength(75)
+    ]),
   });
 }
 
@@ -149,6 +152,13 @@ export class DatGeneralesAfiliadoComponent implements OnInit {
     { "label": "AFROHONDUREÑO", "value": "AFROHONDUREÑO" },
     { "label": "BLANCO", "value": "BLANCO" },
     { "label": "ÁRABE", "value": "ÁRABE" },
+  ];
+
+  grado_academico = [
+    { "label": "PRIMARIA", "value": "PRIMARIA" },
+    { "label": "EDUCACIÓN MEDIA", "value": "EDUCACIÓN MEDIA" },
+    { "label": "PRE-GRADO", "value": "PRE-GRADO" },
+    { "label": "POST-GRADO", "value": "POST-GRADO" },
   ];
 
   public formParent: FormGroup = new FormGroup({});

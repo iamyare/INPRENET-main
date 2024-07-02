@@ -1,7 +1,7 @@
 import { Component, OnInit, EventEmitter, Output } from '@angular/core';
 import { PersonaService } from 'src/app/services/persona.service';
 import { DatePipe } from '@angular/common';
-import { convertirFechaInputs } from 'src/app/shared/functions/formatoFecha';
+import { convertirFechaInputs, convertirFecha } from 'src/app/shared/functions/formatoFecha';
 
 @Component({
   selector: 'app-perfil',
@@ -58,6 +58,7 @@ export class PerfilComponent implements OnInit {
   }
 
   convertirFechaInputs = convertirFechaInputs;
+  convertirFecha = convertirFecha;
 
   formatDate(fecha: string): string {
     return this.datePipe.transform(fecha, 'dd MMMM yyyy') || '';

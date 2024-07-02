@@ -2,7 +2,6 @@ import { Module } from '@nestjs/common';
 import { AfiliadoService } from './afiliado.service';
 import { AfiliadoController } from './afiliado.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { Net_ReferenciaPersonal } from './entities/referencia-personal.entity';
 import { Net_Centro_Trabajo } from '../Empresarial/entities/net_centro_trabajo.entity';
 import { Net_Banco } from '../banco/entities/net_banco.entity';
 import { Net_Departamento } from '../Regional/provincia/entities/net_departamento.entity';
@@ -27,7 +26,7 @@ import { Net_Persona_Por_Banco } from 'src/modules/banco/entities/net_persona-ba
   providers: [AfiliadoService, AfiliacionService],
   imports: [RegionalModule, TransaccionesModule,
     TypeOrmModule.forFeature([net_persona, Net_Discapacidad, net_estado_afiliacion, net_detalle_persona, Net_perf_pers_cent_trab,
-      Net_Ref_Per_Pers, Net_ReferenciaPersonal,
+      Net_Ref_Per_Pers,
       Net_Persona_Por_Banco, Net_Departamento,
       Net_Pais, Net_Tipo_Identificacion,
       Net_Centro_Trabajo, Net_Banco, Net_Tipo_Persona, Net_Municipio])

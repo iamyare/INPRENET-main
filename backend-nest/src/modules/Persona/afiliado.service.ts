@@ -9,7 +9,6 @@ import { Net_Banco } from '../banco/entities/net_banco.entity';
 import { Net_Pais } from '../Regional/pais/entities/pais.entity';
 import { validate as isUUID } from 'uuid';
 import { net_persona } from './entities/net_persona.entity';
-import { Net_ReferenciaPersonal } from './entities/referencia-personal.entity';
 import { Net_Ref_Per_Pers } from './entities/net_ref-per-persona.entity';
 import { Net_perf_pers_cent_trab } from './entities/net_perf_pers_cent_trab.entity';
 import { net_detalle_persona } from './entities/net_detalle_persona.entity';
@@ -41,9 +40,6 @@ export class AfiliadoService {
     private readonly personaRepository: Repository<net_persona>,
     @InjectRepository(Net_perf_pers_cent_trab)
     private readonly perfPersoCentTrabRepository: Repository<Net_perf_pers_cent_trab>,
-
-    @InjectRepository(Net_ReferenciaPersonal)
-    private referenciaPersonalRepository: Repository<Net_ReferenciaPersonal>,
 
     @InjectRepository(Net_Ref_Per_Pers)
     private refPerPersRepository: Repository<Net_Ref_Per_Pers>,
@@ -207,8 +203,8 @@ export class AfiliadoService {
     }
   }
 
-  async createAndAssignReferences(idPersona: number, dto: AsignarReferenciasDTO): Promise<Net_Ref_Per_Pers[]> {
-    try {
+  async createAndAssignReferences(idPersona: number, dto: AsignarReferenciasDTO){
+    /* try {
       const persona = await this.personaRepository.findOne({
         where: { id_persona: idPersona }
       });
@@ -233,7 +229,7 @@ export class AfiliadoService {
       console.log(error);
 
     }
-
+ */
   }
 
   async assignBancosToPersona(idPersona: number, bancosData: CreatePersonaBancoDTO[]): Promise<Net_Persona_Por_Banco[]> {
@@ -461,7 +457,7 @@ export class AfiliadoService {
   }
 
   async createRefPers(data: any, n_identificacion_referente: any) {
-    try {
+    /* try {
       // Buscar la persona referente
       const personaReferente = await this.personaRepository.findOne({
         where: { n_identificacion: n_identificacion_referente.n_identificacion_referente },
@@ -492,7 +488,7 @@ export class AfiliadoService {
       // Manejar errores
       console.error('Error en createRefPers:', error);
       throw error; // Re-lanzar el error para que sea manejado en un nivel superior si es necesario
-    }
+    } */
   }
 
   async createCentrosTrabPersona(data: any, n_identificacion_referente: any) {
@@ -594,7 +590,7 @@ export class AfiliadoService {
       SEGUNDO_APELLIDO: persona.segundo_apellido,
       GENERO: persona.genero,
       SEXO: persona.sexo,
-      RAZA: persona.raza,
+      GRUPO_ETNICO: persona.grupo_etnico,
       /* CANTIDAD_DEPENDIENTES: persona.cantidad_dependientes, */
       CANTIDAD_HIJOS: persona.cantidad_hijos,
       REPRESENTACION: persona.representacion,
@@ -964,17 +960,6 @@ export class AfiliadoService {
     };
   }
 
-  async getAllReferenciasPersonales(n_identificacion: string): Promise<any> {
-    const personas = await this.personaRepository.find({
-      where: { n_identificacion: n_identificacion },
-      relations: ["referenciasPersonalPersona", "referenciasPersonalPersona.referenciaPersonal"]
-    });
-    if (personas.length === 0) {
-      throw new NotFoundException(`No se encontró ninguna referencia personal para la persona con el N_IDENTIFICACION ${n_identificacion}`);
-    }
-    const referencias = personas[0].referenciasPersonalPersona.map(relacion => relacion.referenciaPersonal);
-    return referencias;
-  }
 
 
   async getAllPerfCentroTrabajo(n_identificacion: string): Promise<any[]> {
@@ -994,19 +979,6 @@ export class AfiliadoService {
     }
   }
 
-
-  async updateReferenciaPersonal(id: number, updateDto: UpdateReferenciaPersonalDTO): Promise<Net_ReferenciaPersonal> {
-    const refPersonal = await this.referenciaPersonalRepository.preload({
-      id_ref_personal: id,
-      ...updateDto
-    });
-    if (!refPersonal) {
-      throw new NotFoundException(`La referencia personal con ID ${id} no fue encontrada`);
-    }
-    const temp = this.referenciaPersonalRepository.save(refPersonal);
-    return temp
-  }
-
   async inactivarPersona(idPersona: number, idCausante: number): Promise<void> {
     const estadoInactivo = await this.estadoAfiliacionRepository.findOne({ where: { Descripcion: 'INACTIVO' } });
     if (!estadoInactivo) {
@@ -1021,13 +993,6 @@ export class AfiliadoService {
     }
   }
 
-  async deleteReferenciaPersonal(id: number): Promise<void> {
-    const referencia = await this.referenciaPersonalRepository.findOne({ where: { id_ref_personal: id } });
-    if (!referencia) {
-      throw new NotFoundException(`La referencia personal con ID ${id} no fue encontrada`);
-    }
-    await this.referenciaPersonalRepository.remove(referencia);
-  }
 
   async eliminarColegioMagisterialPersona(id: number): Promise<void> {
     const referencia = await this.netPersonaColegiosRepository.findOne({ where: { id: id } });

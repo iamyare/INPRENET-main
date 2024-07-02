@@ -95,11 +95,11 @@ export class AfiliadoController {
 
       // Creación y asignación de referencias personales
       let referenciasAsignadas = [];
-      if (encapsulatedDto.referenciasPersonales && encapsulatedDto.referenciasPersonales.length > 0) {
+      /* if (encapsulatedDto.referenciasPersonales && encapsulatedDto.referenciasPersonales.length > 0) {
         referenciasAsignadas = await this.afiliadoService.createAndAssignReferences(persona.id_persona, {
           referencias: encapsulatedDto.referenciasPersonales
         });
-      }
+      } */
 
       // Asignación de bancos
       let bancosAsignados = [];
@@ -265,23 +265,6 @@ export class AfiliadoController {
     }
   }
 
-  @Get('/getAllReferenciasPersonales/:dni')
-  async getAllReferenciasPersonales(@Param("dni") dni: string) {
-    try {
-      const resultado =
-        await this.afiliadoService.getAllReferenciasPersonales(dni);
-      return resultado;
-    } catch (error) {
-      if (error instanceof NotFoundException) {
-        throw error;
-      } else {
-        throw new NotFoundException(
-          `No se pudo procesar la solicitud`,
-        );
-      }
-    }
-  }
-
   @Get('/getAllPerfCentroTrabajo/:n_identificacion')
   async getAllPerfCentroTrabajo(@Param("n_identificacion") n_identificacion: string) {
     try {
@@ -297,29 +280,6 @@ export class AfiliadoController {
         );
       }
     }
-  }
-
-  @Patch('updateReferenciaPerson/:id')
-  async updateReferenciaPerson(@Param('id') id: string, @Body() updateDto: UpdateReferenciaPersonalDTO) {
-    const idNum = parseInt(id, 10);
-    if (isNaN(idNum)) {
-      throw new NotFoundException(`El ID proporcionado (${id}) no es válido`);
-    }
-
-    const updatedRefPersonal = await this.afiliadoService.updateReferenciaPersonal(idNum, updateDto);
-
-    return {
-      mensaje: `Referencia personal con ID ${idNum} actualizada con éxito.`,
-      data: updatedRefPersonal,
-    };
-  }
-
-  @Delete('eliminarReferencia/:id')
-  async deleteReferenciaPersonal(@Param('id', ParseIntPipe) id: number) {
-    await this.afiliadoService.deleteReferenciaPersonal(id);
-    return {
-      mensaje: `La referencia personal con ID ${id} ha sido eliminada con éxito.`,
-    };
   }
 
   @Delete('eliminarColegioMagisterialPersona/:id')

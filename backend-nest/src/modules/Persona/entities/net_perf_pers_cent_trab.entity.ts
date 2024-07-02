@@ -1,6 +1,6 @@
 import { Column, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 import { Net_Centro_Trabajo } from "../../Empresarial/entities/net_centro_trabajo.entity";
-import { Net_Persona } from "./net_Persona.entity";
+import { net_persona } from "./net_persona.entity";
 
 @Entity({ name: 'NET_PERF_PERS_CENT_TRAB' })
 export class Net_perf_pers_cent_trab {
@@ -25,9 +25,9 @@ export class Net_perf_pers_cent_trab {
     @Column('varchar2', { length: 20, nullable: false, default: 'ACTIVO', name: 'ESTADO' })
     estado: string;
     
-    @ManyToOne(() => Net_Persona, persona => persona.perfPersCentTrabs)
+    @ManyToOne(() => net_persona, persona => persona.perfPersCentTrabs)
     @JoinColumn({ name: 'ID_PERSONA', foreignKeyConstraintName: "FK_ID_PERS_PERAFCET" })
-    persona: Net_Persona;
+    persona: net_persona;
 
     @ManyToOne(() => Net_Centro_Trabajo, centroTrabajo => centroTrabajo.perfAfilCentTrabs)
     @JoinColumn({ name: 'ID_CENTRO_TRABAJO', foreignKeyConstraintName: "FK_ID_CENT_TRAB_PERAFCET" })

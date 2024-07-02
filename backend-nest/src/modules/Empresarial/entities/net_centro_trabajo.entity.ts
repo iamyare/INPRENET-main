@@ -3,12 +3,12 @@ import { Net_Municipio } from 'src/modules/Regional/municipio/entities/net_munic
 import { Net_perf_pers_cent_trab } from 'src/modules/Persona/entities/net_perf_pers_cent_trab.entity';
 import { Net_Detalle_planilla_ingreso } from 'src/modules/Planilla/Ingresos/detalle-plan-ingr/entities/net_detalle_plani_ing.entity';
 import { Net_Deduccion } from 'src/modules/Planilla/deduccion/entities/net_deduccion.entity';
-import { Net_Empleado_Centro_Trabajo } from './net_empleado_centro_trabajo.entity';
+import { net_empleado_centro_trabajo } from './net_empleado_centro_trabajo.entity';
 import { Net_Sociedad_Centro_Trabajo } from './net_sociedad_centro.entity';
 import { Net_Referencia_Centro_Trabajo } from './net_referencia_centro_trabajo.entity';
 import { Net_Centro_Trabajo_Jornada } from './net_centro_trabajo_jornada.entity';
 import { Net_Centro_Trabajo_Nivel } from './net_centro_trabajo_nivel.entity';
-import { Net_Modulo } from 'src/modules/usuario/entities/net_modulo.entity';
+import { net_modulo } from 'src/modules/usuario/entities/net_modulo.entity';
 import { Net_Estado_Centro_Trabajo } from './net_estado_centro_trabajo.entity';
 
 @Entity({ name: 'NET_CENTRO_TRABAJO' })
@@ -103,8 +103,8 @@ export class Net_Centro_Trabajo {
     @OneToMany(() => Net_Deduccion, deduccion => deduccion.centroTrabajo)
     deduccion: Net_Deduccion[];
 
-    @OneToMany(() => Net_Empleado_Centro_Trabajo, empleadoCentroTrabajo => empleadoCentroTrabajo.centroTrabajo)
-    empleadoCentroTrabajos: Net_Empleado_Centro_Trabajo[];
+    @OneToMany(() => net_empleado_centro_trabajo, empleadoCentroTrabajo => empleadoCentroTrabajo.centroTrabajo)
+    empleadoCentroTrabajos: net_empleado_centro_trabajo[];
 
     @OneToMany(() => Net_Sociedad_Centro_Trabajo, sociedadCentroTrabajo => sociedadCentroTrabajo.centroTrabajo)
     sociedadCentroTrabajos: Net_Sociedad_Centro_Trabajo[];
@@ -118,8 +118,8 @@ export class Net_Centro_Trabajo {
     @OneToMany(() => Net_Centro_Trabajo_Jornada, centroTrabajoJornada => centroTrabajoJornada.centroTrabajo)
     centroTrabajoJornadas: Net_Centro_Trabajo_Jornada[];
 
-    @OneToMany(() => Net_Modulo, modulo => modulo.centroTrabajo)
-    modulos: Net_Modulo[];
+    @OneToMany(() => net_modulo, modulo => modulo.centroTrabajo)
+    modulos: net_modulo[];
 
     @ManyToOne(() => Net_Estado_Centro_Trabajo, estado => estado.centro_trabajo)
     @JoinColumn({ name: 'ID_ESTADO_CENTRO_TRAB', foreignKeyConstraintName: 'FK_ID_ESTADO_CENTRO_TRAB_CENT_TRAB' })

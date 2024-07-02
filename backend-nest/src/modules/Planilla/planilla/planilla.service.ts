@@ -4,7 +4,7 @@ import { UpdatePlanillaDto } from './dto/update-planilla.dto';
 import { InjectEntityManager, InjectRepository } from '@nestjs/typeorm';
 import { Net_Detalle_Deduccion } from '../detalle-deduccion/entities/detalle-deduccion.entity';
 import { EntityManager, Repository } from 'typeorm';
-import { Net_Persona } from '../../Persona/entities/net_Persona.entity';
+import { net_persona } from '../../Persona/entities/net_persona.entity';
 import { Net_Beneficio } from '../beneficio/entities/net_beneficio.entity';
 import { Net_Planilla } from './entities/net_planilla.entity';
 import { Net_TipoPlanilla } from '../tipo-planilla/entities/tipo-planilla.entity';
@@ -22,8 +22,8 @@ export class PlanillaService {
     @InjectEntityManager() private entityManager: EntityManager,
     @InjectRepository(Net_Detalle_Pago_Beneficio)
     private detalleBeneficioRepository: Repository<Net_Detalle_Pago_Beneficio>,
-    @InjectRepository(Net_Persona)
-    private personaRepository: Repository<Net_Persona>,
+    @InjectRepository(net_persona)
+    private personaRepository: Repository<net_persona>,
     @InjectRepository(Net_Planilla)
     private planillaRepository: Repository<Net_Planilla>,
     @InjectRepository(Net_TipoPlanilla)
@@ -101,7 +101,7 @@ export class PlanillaService {
         INNER JOIN 
             NET_PERSONA per ON per.ID_PERSONA = dd.ID_PERSONA
         INNER JOIN 
-            NET_DETALLE_PERSONA detPer ON detPer.ID_PERSONA = dd.ID_PERSONA
+            net_detalle_persona detPer ON detPer.ID_PERSONA = dd.ID_PERSONA
         INNER JOIN 
             NET_TIPO_PERSONA tipoPer ON tipoPer.ID_TIPO_AFILIADO = detPer.ID_TIPO_PERSONA
         INNER JOIN 
@@ -303,7 +303,7 @@ export class PlanillaService {
       INNER JOIN 
           NET_PERSONA per ON per.ID_PERSONA = dd.ID_PERSONA
       INNER JOIN 
-          NET_DETALLE_PERSONA detPer ON detPer.ID_PERSONA = dd.ID_PERSONA
+          net_detalle_persona detPer ON detPer.ID_PERSONA = dd.ID_PERSONA
       INNER JOIN 
           NET_TIPO_PERSONA tipoPer ON tipoPer.ID_TIPO_AFILIADO = detPer.ID_TIPO_PERSONA
       INNER JOIN 
@@ -373,7 +373,7 @@ WHERE
     JOIN 
         NET_DEDUCCION d ON d.ID_DEDUCCION = dd.ID_DEDUCCION
     JOIN 
-        NET_DETALLE_PERSONA detPer ON detPer.ID_PERSONA = dd.ID_PERSONA
+        net_detalle_persona detPer ON detPer.ID_PERSONA = dd.ID_PERSONA
     JOIN 
         NET_TIPO_PERSONA tipoPer ON tipoPer.ID_TIPO_AFILIADO = detPer.ID_TIPO_PERSONA
     WHERE
@@ -720,7 +720,7 @@ WHERE
           INNER JOIN 
               NET_PERSONA per ON per.ID_PERSONA = dd.ID_PERSONA
           INNER JOIN 
-              NET_DETALLE_PERSONA detPer ON detPer.ID_PERSONA = dd.ID_PERSONA
+              net_detalle_persona detPer ON detPer.ID_PERSONA = dd.ID_PERSONA
           INNER JOIN 
               NET_TIPO_PERSONA tipoPer ON tipoPer.ID_TIPO_AFILIADO = detPer.ID_TIPO_PERSONA
           INNER JOIN 
@@ -1193,7 +1193,7 @@ WHERE
           FROM
             "NET_PERSONA" afil
         LEFT JOIN
-            "NET_DETALLE_PERSONA" detP ON afil."ID_PERSONA" = detP."ID_PERSONA"
+            "net_detalle_persona" detP ON afil."ID_PERSONA" = detP."ID_PERSONA"
         INNER JOIN "NET_DETALLE_BENEFICIO_AFILIADO" detBA ON 
             detP."ID_PERSONA" = detBA."ID_BENEFICIARIO" AND
             detP."ID_CAUSANTE" = detBA."ID_CAUSANTE"
@@ -1254,7 +1254,7 @@ WHERE
       FROM
           "NET_PERSONA" afil
       LEFT JOIN
-          "NET_DETALLE_PERSONA" detP ON afil."ID_PERSONA" = detP."ID_PERSONA"
+          "net_detalle_persona" detP ON afil."ID_PERSONA" = detP."ID_PERSONA"
       INNER JOIN "NET_DETALLE_BENEFICIO_AFILIADO" detBA ON 
           detP."ID_PERSONA" = detBA."ID_BENEFICIARIO" AND
           detP."ID_CAUSANTE" = detBA."ID_CAUSANTE"
@@ -1352,7 +1352,7 @@ WHERE
       FROM
           "NET_PERSONA" afil
       LEFT JOIN
-          "NET_DETALLE_PERSONA" detP ON afil."ID_PERSONA" = detP."ID_PERSONA"
+          "net_detalle_persona" detP ON afil."ID_PERSONA" = detP."ID_PERSONA"
       INNER JOIN "NET_DETALLE_BENEFICIO_AFILIADO" detBA ON 
           detP."ID_PERSONA" = detBA."ID_BENEFICIARIO" AND
           detP."ID_CAUSANTE" = detBA."ID_CAUSANTE"
@@ -1898,7 +1898,7 @@ ON deducciones."id_afiliado" = beneficios."id_afiliado"
         FROM
             "NET_PERSONA" afil
         LEFT JOIN
-            "NET_DETALLE_PERSONA" detP ON afil."ID_PERSONA" = detP."ID_PERSONA"
+            "net_detalle_persona" detP ON afil."ID_PERSONA" = detP."ID_PERSONA"
         INNER JOIN "NET_DETALLE_BENEFICIO_AFILIADO" detBA ON 
             detP."ID_PERSONA" = detBA."ID_BENEFICIARIO" AND
             detP."ID_CAUSANTE" = detBA."ID_CAUSANTE"
@@ -2061,7 +2061,7 @@ ON deducciones."id_afiliado" = beneficios."id_afiliado"
       .addSelect('afil.dni', 'dni')
       .addSelect('detBen.monto', 'monto')
       .addSelect('detBen.nombre_beneficio', 'nombre_beneficio')
-      .leftJoin(Net_Persona, 'afil', 'afil.id_afiliado = detBen.id_afiliado')
+      .leftJoin(net_persona, 'afil', 'afil.id_afiliado = detBen.id_afiliado')
       .leftJoin(Net_Beneficio, 'ben', 'ben.id_beneficio = detBen.id_beneficio')
       .where(`
       (TO_DATE(detBen.periodoInicio, 'DD-MM-YYYY') BETWEEN TO_DATE(SYSDATE, 'DD-MM-YYYY') AND TO_DATE('${periodoInicio}', 'DD-MM-YYYY')) AND

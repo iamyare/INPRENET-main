@@ -1,8 +1,8 @@
 import { Column, Entity, Index, PrimaryGeneratedColumn, OneToMany } from 'typeorm';
-import { Net_Empleado_Centro_Trabajo } from './net_empleado_centro_trabajo.entity';
+import { net_empleado_centro_trabajo } from './net_empleado_centro_trabajo.entity';
 
 @Entity({ name: 'NET_EMPLEADO' })
-export class Net_Empleado {
+export class net_empleado {
   @PrimaryGeneratedColumn({ type: 'int', name: 'ID_EMPLEADO', primaryKeyConstraintName: 'PK_id_empleado' })
   id_empleado: number;
 
@@ -25,6 +25,6 @@ export class Net_Empleado {
   @Column('blob', { nullable: true, name: 'FOTO_EMPLEADO' })
   foto_empleado: Buffer;
 
-  @OneToMany(() => Net_Empleado_Centro_Trabajo, empleadoCentroTrabajo => empleadoCentroTrabajo.empleado)
-  empleadoCentroTrabajos: Net_Empleado_Centro_Trabajo[];
+  @OneToMany(() => net_empleado_centro_trabajo, empleadoCentroTrabajo => empleadoCentroTrabajo.empleado)
+  empleadoCentroTrabajos: net_empleado_centro_trabajo[];
 }

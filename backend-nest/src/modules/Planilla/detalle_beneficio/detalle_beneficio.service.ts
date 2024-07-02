@@ -4,14 +4,14 @@ import { isUUID } from 'class-validator';
 import { InjectEntityManager, InjectRepository } from '@nestjs/typeorm';
 import { EntityManager, Repository, SelectQueryBuilder } from 'typeorm';
 import { Net_Beneficio } from '../beneficio/entities/net_beneficio.entity';
-import { Net_Persona } from '../../Persona/entities/net_Persona.entity';
+import { net_persona } from '../../Persona/entities/net_persona.entity';
 import { Net_Detalle_Pago_Beneficio } from './entities/net_detalle_pago_beneficio.entity';
 import { UpdateDetalleBeneficioDto } from './dto/update-detalle_beneficio_planilla.dto';
 import { CreateDetalleBeneficioDto } from './dto/create-detalle_beneficio.dto';
 import { Net_Planilla } from '../planilla/entities/net_planilla.entity';
 import { Net_Detalle_Beneficio_Afiliado } from './entities/net_detalle_beneficio_afiliado.entity';
-import { NET_DETALLE_PERSONA } from 'src/modules/Persona/entities/Net_detalle_persona.entity';
-import { Net_Estado_Persona } from 'src/modules/Persona/entities/net_estado_persona.entity';
+import { net_detalle_persona } from 'src/modules/Persona/entities/net_detalle_persona.entity';
+import { net_estado_afiliacion } from 'src/modules/Persona/entities/net_estado_afiliacion.entity';
 import { NET_PROFESIONES } from 'src/modules/transacciones/entities/net_profesiones.entity';
 @Injectable()
 export class DetalleBeneficioService {
@@ -61,7 +61,7 @@ export class DetalleBeneficioService {
         }
 
         const detPer = await manager.findOne(
-          NET_DETALLE_PERSONA,
+          net_detalle_persona,
           {
             where: {
               ID_CAUSANTE: idPersonaPadre,
@@ -101,7 +101,7 @@ export class DetalleBeneficioService {
         }
 
         const detPerB = await manager.findOne(
-          NET_DETALLE_PERSONA,
+          net_detalle_persona,
           {
             where: {
               ID_CAUSANTE: idPersonaPadre,
@@ -163,7 +163,7 @@ export class DetalleBeneficioService {
             "detA"."tipo_persona"
         FROM
             "detalle_persona" "detA" INNER JOIN 
-            "Net_Persona" "Afil" ON "detA"."id_persona" = "Afil"."id_persona"
+            "net_persona" "Afil" ON "detA"."id_persona" = "Afil"."id_persona"
         WHERE 
             "detA"."id_detalle_persona_padre" = ${idPersona} AND
             "Afil"."dni" = '${beneficiario.dni}' AND
@@ -245,9 +245,9 @@ export class DetalleBeneficioService {
         detBA."PERIODO_INICIO",
         detBA."PERIODO_FINALIZACION"
         FROM
-            "NET_PERSONA" afil
+            "net_persona" afil
         INNER JOIN
-            "NET_DETALLE_PERSONA" detP ON afil."ID_PERSONA" = detP."ID_PERSONA"
+            "net_detalle_persona" detP ON afil."ID_PERSONA" = detP."ID_PERSONA"
         INNER JOIN "NET_DETALLE_BENEFICIO_AFILIADO" detBA ON 
             detP."ID_PERSONA" = detBA."ID_BENEFICIARIO" AND
             detP."ID_CAUSANTE" = detBA."ID_CAUSANTE"
@@ -289,9 +289,9 @@ export class DetalleBeneficioService {
         detBA."PERIODO_INICIO",
         detBA."PERIODO_FINALIZACION"
         FROM
-            "NET_PERSONA" afil
+            "net_persona" afil
         INNER JOIN
-            "NET_DETALLE_PERSONA" detP ON afil."ID_PERSONA" = detP."ID_PERSONA"
+            "net_detalle_persona" detP ON afil."ID_PERSONA" = detP."ID_PERSONA"
         INNER JOIN "NET_DETALLE_BENEFICIO_AFILIADO" detBA ON 
             detP."ID_PERSONA" = detBA."ID_BENEFICIARIO" AND
             detP."ID_CAUSANTE" = detBA."ID_CAUSANTE"
@@ -343,7 +343,7 @@ export class DetalleBeneficioService {
   JOIN
     "net_beneficio" b ON detBA."id_beneficio" = b."id_beneficio"
   JOIN
-    "Net_Persona" afil ON detBA."id_persona" = afil."id_persona"
+    "net_persona" afil ON detBA."id_persona" = afil."id_persona"
   WHERE
     detBA."id_persona" = :idPersona
   AND
@@ -392,12 +392,12 @@ export class DetalleBeneficioService {
 
         .addSelect('estadoAfil.DESCRIPCION', 'ESTADO')
 
-        .innerJoin(Net_Persona, 'afil', 'afil.ID_PERSONA = detBenA.ID_BENEFICIARIO AND detBenA.ID_CAUSANTE = detBenA.ID_CAUSANTE')
+        .innerJoin(net_persona, 'afil', 'afil.ID_PERSONA = detBenA.ID_BENEFICIARIO AND detBenA.ID_CAUSANTE = detBenA.ID_CAUSANTE')
         .leftJoin(Net_Beneficio, 'ben', 'ben.ID_BENEFICIO = detBenA.ID_BENEFICIO')
         .leftJoin(NET_PROFESIONES, 'prof', 'prof.ID_PROFESION = afil.ID_PROFESION')
-        .innerJoin(NET_DETALLE_PERSONA, 'detA', 'afil.ID_PERSONA = detBenA.ID_BENEFICIARIO AND detBenA.ID_CAUSANTE = detBenA.ID_CAUSANTE ')
+        .innerJoin(net_detalle_persona, 'detA', 'afil.ID_PERSONA = detBenA.ID_BENEFICIARIO AND detBenA.ID_CAUSANTE = detBenA.ID_CAUSANTE ')
 
-        .innerJoin(Net_Estado_Persona, 'estadoAfil', 'estadoAfil.CODIGO = detA.ID_ESTADO_PERSONA')
+        .innerJoin(net_estado_afiliacion, 'estadoAfil', 'estadoAfil.CODIGO = detA.ID_ESTADO_PERSONA')
         .where(`afil.dni = '${dni}'`)
 
         .getRawMany();
@@ -439,7 +439,7 @@ export class DetalleBeneficioService {
       JOIN
         "net_beneficio" ben ON detBA."id_beneficio" = ben."id_beneficio"
       JOIN
-        "Net_Persona" afil ON detBA."id_persona" = afil."id_persona"
+        "net_persona" afil ON detBA."id_persona" = afil."id_persona"
       WHERE
         afil."id_persona" = :1 AND
         detB."estado" != 'INCONSISTENCIA' AND
@@ -482,7 +482,7 @@ export class DetalleBeneficioService {
       FROM "net_beneficio" ben
       INNER JOIN "net_detalle_beneficio_afiliado" detBenAfil ON  
       detBenAfil."id_beneficio" = ben."id_beneficio"
-      INNER JOIN "Net_Persona" afil ON  
+      INNER JOIN "net_persona" afil ON  
       detBenAfil."id_persona" = afil."id_persona"
       WHERE 
       afil."dni" = '${dni}'`;

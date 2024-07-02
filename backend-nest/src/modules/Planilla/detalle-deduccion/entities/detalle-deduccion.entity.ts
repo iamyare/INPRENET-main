@@ -2,7 +2,7 @@ import { Check, Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn} f
 import { Net_Planilla } from '../../planilla/entities/net_planilla.entity';
 import { IsEnum } from 'class-validator';
 import { Net_Deduccion } from '../../deduccion/entities/net_deduccion.entity';
-import { Net_Persona } from 'src/modules/Persona/entities/net_Persona.entity';
+import { net_persona } from 'src/modules/Persona/entities/net_persona.entity';
 
 @Entity({ name: 'NET_DETALLE_DEDUCCION' })
 @Check("CK_ESTADO_DED", `estado_aplicacion IN ('COBRADA', 'NO COBRADA', 'EN PRELIMINAR', 'EN PLANILLA')`)
@@ -29,9 +29,9 @@ export class Net_Detalle_Deduccion {
     @Column('timestamp', { default: () => 'CURRENT_TIMESTAMP', name: 'FECHA_APLICADO' })
     fecha_aplicado: Date;
 
-    @ManyToOne(() => Net_Persona, persona => persona.detalleDeduccion, { cascade: true })
+    @ManyToOne(() => net_persona, persona => persona.detalleDeduccion, { cascade: true })
     @JoinColumn({ name: 'ID_PERSONA', foreignKeyConstraintName: "FK_ID_PERSONA_DETDED" })
-    persona: Net_Persona;
+    persona: net_persona;
 
     @ManyToOne(() => Net_Planilla, planilla => planilla.detalleDeduccion, { cascade: true })
     @JoinColumn({ name: 'ID_PLANILLA', foreignKeyConstraintName: "FK_ID_PLANILLA_DETDED" })

@@ -11,6 +11,7 @@ import { RegionalModule } from './modules/Regional/regional.module';
 import { EmpresarialModule } from './modules/Empresarial/empresarial.module';
 import { TransaccionesModule } from './modules/transacciones/transacciones.module';
 import * as oracledb from 'oracledb';
+import { AppDataSource } from '../ormconfig';
 
 @Module({
   imports: [
@@ -39,9 +40,11 @@ import * as oracledb from 'oracledb';
           password,
           connectString,
           extra: { pool },
-          autoLoadEntities: true,
-          //synchronize: true,
+          //autoLoadEntities: true,
+          synchronize: false,
           entities: [__dirname + '/../**/*.entity{.ts,.js}'],
+          migrations: [__dirname + '/../migrations/*{.ts,.js}'],
+          dataSource: AppDataSource,
           //migrations: ['src/database/migrations/*{.ts,.js}'],
           //logging: ["query", "schema", "error", "warn", "info", "log", "migration"]
         };
@@ -51,8 +54,8 @@ import * as oracledb from 'oracledb';
     CommonModule,
     AfiliadoModule,
     BancoModule,
-    UsuarioModule,
     TipoIdentificacionModule,
+    UsuarioModule,
     PlanillaModule,
     RegionalModule,
     EmpresarialModule,

@@ -19,18 +19,16 @@ import { AfiliadoService } from './afiliado.service';
 import { UpdatePersonaDto } from './dto/update-persona.dto';
 import { ApiTags } from '@nestjs/swagger';
 import { EncapsulatedPersonaDTO } from './dto/encapsulated-persona.dto';
-import { DataSource, Repository } from 'typeorm';
+import { Repository } from 'typeorm';
 import { Net_Tipo_Persona } from './entities/net_tipo_persona.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { UpdatePerfCentTrabDto } from './dto/update.perfAfilCentTrab.dto';
 import { UpdateReferenciaPersonalDTO } from './dto/update-referencia-personal.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { CreateDetallePersonaDto } from './dto/create-detalle.dto';
-import { UpdateBeneficiarioDto } from './dto/update-beneficiario.dto';
-import { Net_Persona } from './entities/net_Persona.entity';
+import { net_persona } from './entities/net_persona.entity';
 import { CreateDetalleBeneficiarioDto } from './dto/create-detalle-beneficiario-dto';
 import { Benef } from './dto/pruebaBeneficiario.dto';
-import { Net_Estado_Persona } from './entities/net_estado_persona.entity';
+import { net_estado_afiliacion } from './entities/net_estado_afiliacion.entity';
 
 @ApiTags('Persona')
 @Controller('Persona')
@@ -41,12 +39,12 @@ export class AfiliadoController {
   constructor(private readonly afiliadoService: AfiliadoService) { }
 
   @Get('causante/:dni')
-  async getCausanteByDniBeneficiario(@Param('dni') dni: string): Promise<Net_Persona> {
+  async getCausanteByDniBeneficiario(@Param('dni') dni: string): Promise<net_persona> {
     return this.afiliadoService.getCausanteByDniBeneficiario(dni);
   }
 
   @Post('create-with-detalle')
-  async create(@Body() benef: Benef): Promise<Net_Persona> {
+  async create(@Body() benef: Benef): Promise<net_persona> {
     return this.afiliadoService.createBenef(benef);
   }
 
@@ -167,7 +165,7 @@ export class AfiliadoController {
 
 
   @Get('obtenerEstados')
-  async getAllEstados(): Promise<Net_Estado_Persona[]> {
+  async getAllEstados(): Promise<net_estado_afiliacion[]> {
     return this.afiliadoService.getAllEstados();
   }
 
@@ -382,7 +380,7 @@ export class AfiliadoController {
   updatePersona(
     @Param('id') id: number,
     @Body() updateBeneficiarioDto: any,
-  ): Promise<Net_Persona> {
+  ): Promise<net_persona> {
     return this.afiliadoService.updateBeneficario(id, updateBeneficiarioDto);
   }
 

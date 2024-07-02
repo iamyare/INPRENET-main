@@ -1,6 +1,6 @@
 
 import { Check, Column, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn } from "typeorm";
-import { Net_Persona } from "../../../../Persona/entities/net_Persona.entity";
+import { net_persona } from "../../../../Persona/entities/net_persona.entity";
 import { Net_Centro_Trabajo } from "../../../../Empresarial/entities/net_centro_trabajo.entity";
 import { Net_Planilla } from "../../../../Planilla/planilla/entities/net_planilla.entity";
 
@@ -31,9 +31,9 @@ export class Net_Detalle_planilla_ingreso {
     @Column({ type: 'varchar2', nullable: true, name: 'ESTADO', default: "CARGADO" })
     estado: string;
 
-    @ManyToOne(() => Net_Persona, persona => persona.detallePlanIngreso)
+    @ManyToOne(() => net_persona, persona => persona.detallePlanIngreso)
     @JoinColumn({ name: 'ID_PERSONA', foreignKeyConstraintName: "FK_ID_PERSONA_DETPLANING" })
-    persona: Net_Persona;
+    persona: net_persona;
 
     @ManyToOne(() => Net_Centro_Trabajo, centroTrabajo => centroTrabajo.detalle_plani_ingr)
     @JoinColumn({ name: 'ID_CENTRO_TRABAJO', foreignKeyConstraintName: "FK_ID_CENTROTRAB_DETPLANING" })

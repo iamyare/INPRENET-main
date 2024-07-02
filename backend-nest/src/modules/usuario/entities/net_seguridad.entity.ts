@@ -11,7 +11,7 @@ export class Net_Seguridad {
 
   @Column('varchar2', { length: 100, name: 'RESPUESTA' })
   respuesta: string;
-
+  
   @ManyToOne(() => Net_Usuario_Empresa, usuarioEmpresa => usuarioEmpresa.seguridad, { nullable: false })
   @JoinColumn({ name: 'ID_USUARIO_EMPRESA', referencedColumnName: 'id_usuario_empresa', foreignKeyConstraintName: 'FK_id_usuario_empresa_seguridad' })
   usuarioEmpresa: Net_Usuario_Empresa;

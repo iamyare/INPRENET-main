@@ -1,6 +1,6 @@
 import { Controller, Get, NotFoundException, Param, Post, UploadedFile, UseInterceptors } from '@nestjs/common';
 import { AfiliacionService } from './afiliacion.service';
-import { Net_Persona } from '../entities/net_Persona.entity';
+import { net_persona } from '../entities/net_persona.entity';
 import { FileInterceptor } from '@nestjs/platform-express';
 
 @Controller('afiliacion')
@@ -9,12 +9,12 @@ export class AfiliacionController {
     }
 
     @Get('persona-dni/:n_identificacion')
-  async getPersonaByDni(@Param('n_identificacion') n_identificacion: string): Promise<Net_Persona> {
+  async getPersonaByDni(@Param('n_identificacion') n_identificacion: string): Promise<net_persona> {
     return this.afiliacionService.getPersonaByn_identificacioni(n_identificacion);
   }
 
     @Get('causantes/:n_identificacion')
-  async getCausantesByDniBeneficiario(@Param('n_identificacion') n_identificacion: string): Promise<Net_Persona[]> {
+  async getCausantesByDniBeneficiario(@Param('n_identificacion') n_identificacion: string): Promise<net_persona[]> {
     try {
       const causantes = await this.afiliacionService.getCausantesByDniBeneficiario(n_identificacion);
       if (!causantes || causantes.length === 0) {

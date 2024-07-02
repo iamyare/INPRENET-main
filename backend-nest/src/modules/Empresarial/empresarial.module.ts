@@ -6,7 +6,7 @@ import { CentroTrabajoController } from './centro-trabajo/centro-trabajo.control
 import { CentroTrabajoService } from './centro-trabajo/centro-trabajo.service';
 import { EmpresasService } from './empresas/empresas.service';
 import { Net_Departamento } from '../Regional/provincia/entities/net_departamento.entity';
-import { Net_Empleado } from './entities/net_empleado.entity';
+import { net_empleado } from './entities/net_empleado.entity';
 import { Net_Deduccion } from '../Planilla/deduccion/entities/net_deduccion.entity';
 import { Net_Jornada } from './entities/net_jornada.entity';
 import { Net_Centro_Trabajo_Nivel } from './entities/net_centro_trabajo_nivel.entity';
@@ -19,10 +19,10 @@ import { Net_Peps } from './entities/net_peps.entity';
 import { Net_Socio } from './entities/net_socio.entity';
 import { Net_Sociedad_Socio } from './entities/net_sociedad_socio.entity';
 import { Net_Estado_Centro_Trabajo } from './entities/net_estado_centro_trabajo.entity';
-import { Net_Empleado_Centro_Trabajo } from './entities/net_empleado_centro_trabajo.entity';
 import { Net_Usuario_Empresa } from '../usuario/entities/net_usuario_empresa.entity';
 import { Net_Detalle_Deduccion } from '../Planilla/detalle-deduccion/entities/detalle-deduccion.entity';
 import { Net_Sociedad } from './entities/net.sociedad.entity';
+import { net_empleado_centro_trabajo } from './entities/net_empleado_centro_trabajo.entity';
 
 @Module({
   controllers: [CentroTrabajoController, EmpresasController],
@@ -34,7 +34,7 @@ import { Net_Sociedad } from './entities/net.sociedad.entity';
       Net_Deduccion,
       Net_Departamento,
       Net_Detalle_Deduccion,
-      Net_Empleado,
+      net_empleado,
       Net_Nivel_Educativo,
       Net_Jornada,
       Net_Centro_Trabajo_Nivel,
@@ -46,7 +46,7 @@ import { Net_Sociedad } from './entities/net.sociedad.entity';
       Net_Peps,
       Net_Socio,
       Net_Sociedad_Socio,
-      Net_Empleado_Centro_Trabajo,
+      net_empleado_centro_trabajo,
       Net_Usuario_Empresa
     ]),
   ],

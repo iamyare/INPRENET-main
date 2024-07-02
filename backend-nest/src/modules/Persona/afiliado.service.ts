@@ -6,17 +6,15 @@ import { InjectEntityManager, InjectRepository } from '@nestjs/typeorm';
 import { Net_Persona_Por_Banco } from '../banco/entities/net_persona-banco.entity';
 import { Net_Centro_Trabajo } from '../Empresarial/entities/net_centro_trabajo.entity';
 import { Net_Banco } from '../banco/entities/net_banco.entity';
-import { Net_TipoIdentificacion } from '../tipo_identificacion/entities/net_tipo_identificacion.entity';
 import { Net_Pais } from '../Regional/pais/entities/pais.entity';
 import { validate as isUUID } from 'uuid';
-import { Net_Persona } from './entities/net_Persona.entity';
+import { net_persona } from './entities/net_persona.entity';
 import { Net_ReferenciaPersonal } from './entities/referencia-personal.entity';
 import { Net_Ref_Per_Pers } from './entities/net_ref-Per-Persona.entity';
 import { Net_perf_pers_cent_trab } from './entities/net_perf_pers_cent_trab.entity';
-import { NET_DETALLE_PERSONA } from './entities/Net_detalle_persona.entity';
+import { net_detalle_persona } from './entities/net_detalle_persona.entity';
 import { CreateDetallePersonaDto } from './dto/create-detalle.dto';
 import { Net_Municipio } from '../Regional/municipio/entities/net_municipio.entity';
-import { Net_Estado_Persona } from './entities/net_estado_persona.entity';
 import { AsignarReferenciasDTO } from './dto/asignarReferencia.dto';
 import { CreatePersonaBancoDTO } from './dto/create-persona-banco.dto';
 import { CreateDetalleBeneficiarioDto } from './dto/create-detalle-beneficiario-dto';
@@ -29,6 +27,8 @@ import { UpdateBeneficiarioDto } from './dto/update-beneficiario.dto';
 import { Benef } from './dto/pruebaBeneficiario.dto';
 import * as moment from 'moment';
 import { Net_Tipo_Persona } from './entities/net_tipo_persona.entity';
+import { Net_Tipo_Identificacion } from '../tipo_identificacion/entities/net_tipo_identificacion.entity';
+import { net_estado_afiliacion } from './entities/net_estado_afiliacion.entity';
 @Injectable()
 export class AfiliadoService {
 
@@ -37,8 +37,8 @@ export class AfiliadoService {
   constructor(
     @InjectEntityManager() private readonly entityManager: EntityManager,
 
-    @InjectRepository(Net_Persona)
-    private readonly personaRepository: Repository<Net_Persona>,
+    @InjectRepository(net_persona)
+    private readonly personaRepository: Repository<net_persona>,
     @InjectRepository(Net_perf_pers_cent_trab)
     private readonly perfPersoCentTrabRepository: Repository<Net_perf_pers_cent_trab>,
 
@@ -52,11 +52,11 @@ export class AfiliadoService {
     private tipoPersonaRepository: Repository<Net_Tipo_Persona>,
 
 
-    @InjectRepository(NET_DETALLE_PERSONA)
-    private detallePersonaRepository: Repository<NET_DETALLE_PERSONA>,
+    @InjectRepository(net_detalle_persona)
+    private detallePersonaRepository: Repository<net_detalle_persona>,
 
-    @InjectRepository(Net_TipoIdentificacion)
-    private tipoIdentificacionRepository: Repository<Net_TipoIdentificacion>,
+    @InjectRepository(Net_Tipo_Identificacion)
+    private tipoIdentificacionRepository: Repository<Net_Tipo_Identificacion>,
 
     @InjectRepository(Net_Pais)
     private paisRepository: Repository<Net_Pais>,
@@ -64,8 +64,8 @@ export class AfiliadoService {
     @InjectRepository(Net_Municipio)
     private municipioRepository: Repository<Net_Municipio>,
 
-    @InjectRepository(Net_Estado_Persona)
-    private estadoPersonaRepository: Repository<Net_Estado_Persona>,
+    @InjectRepository(net_estado_afiliacion)
+    private estadoAfiliacionRepository: Repository<net_estado_afiliacion>,
 
     @InjectRepository(Net_Centro_Trabajo)
     private centroTrabajoRepository: Repository<Net_Centro_Trabajo>,
@@ -90,7 +90,7 @@ export class AfiliadoService {
     private readonly connection: Connection
   ) { }
 
-  async getCausanteByDniBeneficiario(n_identificacion: string): Promise<Net_Persona> {
+  async getCausanteByDniBeneficiario(n_identificacion: string): Promise<net_persona> {
     // Obtener la persona (beneficiario) por n_identificacion
     const beneficiario = await this.personaRepository.findOne({ where: { n_identificacion }, relations: ['detallePersona'] });
 
@@ -121,8 +121,8 @@ export class AfiliadoService {
     return causante;
   }
 
-  async createPersona(createPersonaDto: NetPersonaDTO): Promise<Net_Persona> {
-    const persona = new Net_Persona();
+  async createPersona(createPersonaDto: NetPersonaDTO): Promise<net_persona> {
+    const persona = new net_persona();
     Object.assign(persona, createPersonaDto);
 
     // Convertir y formatear fechas
@@ -150,8 +150,8 @@ export class AfiliadoService {
     return await this.personaRepository.save(persona);
   }
 
-  async createDetallePersona(createDetallePersonaDto: CreateDetallePersonaDto): Promise<NET_DETALLE_PERSONA> {
-    const detallePersona = new NET_DETALLE_PERSONA();
+  async createDetallePersona(createDetallePersonaDto: CreateDetallePersonaDto): Promise<net_detalle_persona> {
+    const detallePersona = new net_detalle_persona();
     detallePersona.ID_PERSONA = createDetallePersonaDto.idPersona;
     detallePersona.ID_CAUSANTE = createDetallePersonaDto.idPersona;
     detallePersona.ID_TIPO_PERSONA = createDetallePersonaDto.idTipoPersona;
@@ -268,12 +268,12 @@ export class AfiliadoService {
     }
   }
 
-  async createBeneficiario(beneficiarioData: NetPersonaDTO): Promise<Net_Persona> {
+  async createBeneficiario(beneficiarioData: NetPersonaDTO): Promise<net_persona> {
     return this.createPersona(beneficiarioData);
   }
 
-  async createDetalleBeneficiario(detalleDto: CreateDetalleBeneficiarioDto): Promise<NET_DETALLE_PERSONA> {
-    const detalle = new NET_DETALLE_PERSONA();
+  async createDetalleBeneficiario(detalleDto: CreateDetalleBeneficiarioDto): Promise<net_detalle_persona> {
+    const detalle = new net_detalle_persona();
     detalle.ID_PERSONA = detalleDto.idPersona;
     detalle.ID_CAUSANTE = detalleDto.idCausante;
     detalle.ID_CAUSANTE_PADRE = detalleDto.idCausantePadre;
@@ -321,7 +321,7 @@ export class AfiliadoService {
     return `${year}-${month}-${day}`;
   }
 
-  async createBenef(bene: Benef): Promise<Net_Persona> {
+  async createBenef(bene: Benef): Promise<net_persona> {
     const { detalleBenef, n_identificacion, id_pais, id_municipio_residencia, ...personaData } = bene;
     const tipoPersona = await this.tipoPersonaRepository.findOne({
       where: { tipo_persona: "BENEFICIARIO" }
@@ -393,7 +393,7 @@ export class AfiliadoService {
     return persona;
   }
 
-  async updateBeneficario(id: number, updatePersonaDto: UpdateBeneficiarioDto): Promise<Net_Persona> {
+  async updateBeneficario(id: number, updatePersonaDto: UpdateBeneficiarioDto): Promise<net_persona> {
     console.log(updatePersonaDto);
 
     const persona = await this.personaRepository.findOne({
@@ -423,7 +423,7 @@ export class AfiliadoService {
     }
 
     if (updatePersonaDto.id_estado_persona) {
-      const estadoP = await this.estadoPersonaRepository.findOne({
+      const estadoP = await this.estadoAfiliacionRepository.findOne({
         where: { codigo: updatePersonaDto.id_estado_persona }
       });
       detallePersona.estadoAfiliacion = estadoP;
@@ -630,7 +630,7 @@ export class AfiliadoService {
   }
 
   async findOnePersona(term: string) {
-    let persona: Net_Persona | null = null;
+    let persona: net_persona | null = null;
 
     if (isUUID(term)) {
       persona = await this.personaRepository.findOne({
@@ -731,13 +731,13 @@ export class AfiliadoService {
       const query = `
       SELECT DISTINCT
       "detA"."ID_PERSONA"
-      FROM NET_PERSONA "Afil"
+      FROM net_persona "Afil"
       FULL OUTER JOIN
-        NET_DETALLE_PERSONA "detA" ON "Afil"."ID_PERSONA" = "detA"."ID_PERSONA" 
+        net_detalle_persona "detA" ON "Afil"."ID_PERSONA" = "detA"."ID_PERSONA" 
       INNER JOIN
       NET_TIPO_PERSONA "tipoP" ON "tipoP"."ID_TIPO_PERSONA" = "detA"."ID_TIPO_PERSONA"
       INNER JOIN
-      NET_ESTADO_AFILIACION "estadoPers" ON "detA"."ID_ESTADO_AFILIACION" = "estadoPers"."CODIGO"
+      net_estado_afiliacion "estadoPers" ON "detA"."ID_ESTADO_AFILIACION" = "estadoPers"."CODIGO"
     WHERE
       "Afil"."N_IDENTIFICACION" = '${n_identificacionAfil}' AND 
       "estadoPers"."DESCRIPCION" = 'FALLECIDO'  AND
@@ -759,8 +759,8 @@ export class AfiliadoService {
         "detA"."PORCENTAJE",
         "tipoP"."TIPO_PERSONA"
       FROM
-          "NET_DETALLE_PERSONA" "detA" INNER JOIN 
-          "NET_PERSONA" "Afil" ON "detA"."ID_PERSONA" = "Afil"."ID_PERSONA"
+          "net_detalle_persona" "detA" INNER JOIN 
+          "net_persona" "Afil" ON "detA"."ID_PERSONA" = "Afil"."ID_PERSONA"
           INNER JOIN
         NET_TIPO_PERSONA "tipoP" ON "Afil"."ID_TIPO_PERSONA" = "detA"."ID_TIPO_PERSONA"
       WHERE 
@@ -864,7 +864,7 @@ export class AfiliadoService {
     return newList;
   }
 
-  async findByDni(n_identificacion: string): Promise<Net_Persona | string> {
+  async findByDni(n_identificacion: string): Promise<net_persona | string> {
     const persona = await this.personaRepository.findOne({ where: { n_identificacion }, relations: ['estadoPersona'], },);
 
     if (!persona) {
@@ -1008,7 +1008,7 @@ export class AfiliadoService {
   }
 
   async inactivarPersona(idPersona: number, idCausante: number): Promise<void> {
-    const estadoInactivo = await this.estadoPersonaRepository.findOne({ where: { Descripcion: 'INACTIVO' } });
+    const estadoInactivo = await this.estadoAfiliacionRepository.findOne({ where: { Descripcion: 'INACTIVO' } });
     if (!estadoInactivo) {
       throw new NotFoundException('Estado INACTIVO no encontrado');
     }
@@ -1038,7 +1038,7 @@ export class AfiliadoService {
   }
 
   async updateDatosGenerales(idPersona: number, datosGenerales: any): Promise<any> {
-    const estadoP = await this.estadoPersonaRepository.findOne({ where: { Descripcion: datosGenerales.estado } });
+    const estadoP = await this.estadoAfiliacionRepository.findOne({ where: { Descripcion: datosGenerales.estado } });
     try {
       const afiliado = await this.personaRepository.preload({
         id_persona: idPersona,
@@ -1112,8 +1112,8 @@ export class AfiliadoService {
   }
 
 
-  async getAllEstados(): Promise<Net_Estado_Persona[]> {
-    return this.estadoPersonaRepository.find();
+  async getAllEstados(): Promise<net_estado_afiliacion[]> {
+    return this.estadoAfiliacionRepository.find();
   }
 
   private handleException(error: any): void {

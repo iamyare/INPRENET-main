@@ -178,7 +178,7 @@ CREATE OR REPLACE PROCEDURE insertar_registros(
     CURSOR c_detalle_beneficio_afiliado IS
        SELECT detBA."MONTO_POR_PERIODO", detBA."ID_DETALLE_BEN_AFIL"
         FROM "NET_PERSONA" persona
-        INNER JOIN "NET_DETALLE_PERSONA" detPer ON persona."ID_PERSONA" = detPer."ID_PERSONA"
+        INNER JOIN "net_detalle_persona" detPer ON persona."ID_PERSONA" = detPer."ID_PERSONA"
         INNER JOIN "NET_DETALLE_BENEFICIO_AFILIADO" detBA ON 
         detPer."ID_PERSONA" = detBA."ID_BENEFICIARIO" AND
         detPer."ID_CAUSANTE" = detBA."ID_CAUSANTE"

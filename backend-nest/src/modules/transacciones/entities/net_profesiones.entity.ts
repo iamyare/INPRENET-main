@@ -1,4 +1,4 @@
-import { Net_Persona } from 'src/modules/Persona/entities/net_Persona.entity';
+import { net_persona } from 'src/modules/Persona/entities/net_persona.entity';
 import { Entity, Column, PrimaryGeneratedColumn, OneToMany } from 'typeorm';
 
 @Entity('NET_PROFESIONES')
@@ -9,6 +9,6 @@ export class NET_PROFESIONES {
     @Column({ name: 'DESCRIPCION', length: 50 })
     descripcion: string;
 
-    @OneToMany(() => Net_Persona, persona => persona.profesion)
-    personas: Net_Persona[];
+    @OneToMany(() => net_persona, persona => persona.profesion)
+    personas: net_persona[];
 }

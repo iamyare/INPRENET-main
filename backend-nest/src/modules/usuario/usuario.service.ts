@@ -9,15 +9,15 @@ import * as bcrypt from 'bcrypt';
 import { NET_USUARIO_PRIVADA } from './entities/net_usuario_privada.entity';
 import { NET_SESION } from './entities/net_sesion.entity';
 import { CreatePreRegistroDto } from './dto/create-pre-registro.dto';
-import { Net_Empleado } from '../Empresarial/entities/net_empleado.entity';
+import { net_empleado } from '../Empresarial/entities/net_empleado.entity';
 import { Net_Seguridad } from './entities/net_seguridad.entity';
 import { CompleteRegistrationDto } from './dto/complete-registration.dto';
 import { LoginDto } from './dto/login.dto';
-import { Net_Empleado_Centro_Trabajo } from '../Empresarial/entities/net_empleado_centro_trabajo.entity';
-import { Net_Rol_Modulo } from './entities/net_rol_modulo.entity';
+import { net_empleado_centro_trabajo } from '../Empresarial/entities/net_empleado_centro_trabajo.entity';
+import { net_rol_modulo } from './entities/net_rol_modulo.entity';
 import { Net_Usuario_Empresa } from './entities/net_usuario_empresa.entity';
-import { Net_Usuario_Modulo } from './entities/net_usuario_modulo.entity';
-import { Net_Modulo } from './entities/net_modulo.entity';
+import { net_usuario_modulo } from './entities/net_usuario_modulo.entity';
+import { net_modulo } from './entities/net_modulo.entity';
 import { ForgotPasswordDto } from './dto/forgot-password.dto';
 import { Cron } from '@nestjs/schedule';
 
@@ -29,24 +29,24 @@ export class UsuarioService {
 
     @InjectRepository(NET_USUARIO_PRIVADA)
     private readonly usuarioPrivadaRepository: Repository<NET_USUARIO_PRIVADA>,
-    @InjectRepository(Net_Empleado)
-    private readonly empleadoRepository: Repository<Net_Empleado>,
+    @InjectRepository(net_empleado)
+    private readonly empleadoRepository: Repository<net_empleado>,
     private readonly jwtService: JwtService,
     private readonly mailService: MailService,
     @InjectRepository(NET_SESION)
     private readonly sesionRepository: Repository<NET_SESION>,
     @InjectRepository(Net_Seguridad)
     private readonly seguridadRepository: Repository<Net_Seguridad>,
-    @InjectRepository(Net_Empleado_Centro_Trabajo)
-    private readonly empleadoCentroTrabajoRepository: Repository<Net_Empleado_Centro_Trabajo>,
+    @InjectRepository(net_empleado_centro_trabajo)
+    private readonly empleadoCentroTrabajoRepository: Repository<net_empleado_centro_trabajo>,
     @InjectRepository(Net_Usuario_Empresa)
     private readonly usuarioEmpresaRepository: Repository<Net_Usuario_Empresa>,
-    @InjectRepository(Net_Rol_Modulo)
-    private readonly rolModuloRepository: Repository<Net_Rol_Modulo>,
-    @InjectRepository(Net_Usuario_Modulo)
-    private readonly usuarioModuloRepository: Repository<Net_Usuario_Modulo>,
-    @InjectRepository(Net_Modulo)
-    private readonly moduloRepository: Repository<Net_Modulo>,
+    @InjectRepository(net_rol_modulo)
+    private readonly rolModuloRepository: Repository<net_rol_modulo>,
+    @InjectRepository(net_usuario_modulo)
+    private readonly usuarioModuloRepository: Repository<net_usuario_modulo>,
+    @InjectRepository(net_modulo)
+    private readonly moduloRepository: Repository<net_modulo>,
   ) { }
 
   async obtenerPerfilPorCorreo(correo: string) {
@@ -680,7 +680,7 @@ export class UsuarioService {
 
 
 
-  async obtenerRolesPorModulo(modulo: string): Promise<Net_Rol_Modulo[]> {
+  async obtenerRolesPorModulo(modulo: string): Promise<net_rol_modulo[]> {
     return await this.rolModuloRepository.createQueryBuilder('rol')
         .innerJoinAndSelect('rol.modulo', 'modulo')
         .where('modulo.nombre = :modulo', { modulo })
@@ -690,7 +690,7 @@ export class UsuarioService {
 
 
 
-  async obtenerModulosPorCentroTrabajo(idCentroTrabajo: number): Promise<Net_Modulo[]> {
+  async obtenerModulosPorCentroTrabajo(idCentroTrabajo: number): Promise<net_modulo[]> {
     return this.moduloRepository.find({
       where: {
         centroTrabajo: {

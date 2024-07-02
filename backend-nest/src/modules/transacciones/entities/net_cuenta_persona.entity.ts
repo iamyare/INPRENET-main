@@ -1,4 +1,4 @@
-import { Net_Persona } from "../../Persona/entities/net_Persona.entity";
+import { net_persona } from "../../Persona/entities/net_persona.entity";
 import { Check, Column, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryColumn, PrimaryGeneratedColumn } from "typeorm";
 import { NET_TIPO_CUENTA } from "./net_tipo_cuenta.entity";
 import { NET_MOVIMIENTO_CUENTA } from "./net_movimiento_cuenta.entity";
@@ -7,9 +7,9 @@ import { NOW } from "sequelize";
 @Entity({ name: 'NET_CUENTA_PERSONA' })
 @Check("CK1_NET_CUENTA_PERSONA", `ACTIVA_B IN ('A', 'I')`)
 export class NET_CUENTA_PERSONA {
-    @ManyToOne(() => Net_Persona, persona => persona.cuentas, { cascade: true })
+    @ManyToOne(() => net_persona, persona => persona.cuentas, { cascade: true })
     @JoinColumn({ name: 'ID_PERSONA', referencedColumnName: 'id_persona', foreignKeyConstraintName: "FK1_NET_CUENTA_PERSONA" })
-    persona: Net_Persona;
+    persona: net_persona;
 
     @ManyToOne(() => NET_TIPO_CUENTA, tipoCuenta => tipoCuenta.cuentas, { cascade: true })
     @JoinColumn({ name: 'ID_TIPO_CUENTA', referencedColumnName: 'ID_TIPO_CUENTA', foreignKeyConstraintName: "FK2_NET_CUENTA_PERSONA" })

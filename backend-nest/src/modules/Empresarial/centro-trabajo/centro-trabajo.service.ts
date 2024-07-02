@@ -23,9 +23,9 @@ import { Net_Peps } from '../entities/net_peps.entity';
 import { CreatePrivateSociedadSocioDto } from './dto/create-private-sociedad-socio.dto';
 import { CreatePrivatePepsDto } from './dto/create-private-peps.dto';
 import { CreatePrivateSocioDto } from './dto/create-private-socio.dto';
-import { Net_Empleado } from '../entities/net_empleado.entity';
+import { net_empleado } from '../entities/net_empleado.entity';
 import { UpdateEmpleadoDto } from './dto/update-empleado.dto';
-import { Net_Empleado_Centro_Trabajo } from '../entities/Net_Empleado_Centro_Trabajo.entity';
+import { net_empleado_centro_trabajo } from '../entities/net_empleado_centro_trabajo.entity';
 import { Net_Usuario_Empresa } from 'src/modules/usuario/entities/net_usuario_empresa.entity';
 @Injectable()
 export class CentroTrabajoService {
@@ -64,10 +64,10 @@ export class CentroTrabajoService {
     private readonly sociedadSocioRepository: Repository<Net_Sociedad_Socio>,
     @InjectRepository(Net_Peps)
     private readonly pepsRepository: Repository<Net_Peps>,
-    @InjectRepository(Net_Empleado)
-    private readonly empleadoRepository: Repository<Net_Empleado>,
-    @InjectRepository(Net_Empleado_Centro_Trabajo)
-    private readonly empleadoCentroTrabajoRepository: Repository<Net_Empleado_Centro_Trabajo>,
+    @InjectRepository(net_empleado)
+    private readonly empleadoRepository: Repository<net_empleado>,
+    @InjectRepository(net_empleado_centro_trabajo)
+    private readonly empleadoCentroTrabajoRepository: Repository<net_empleado_centro_trabajo>,
     @InjectRepository(Net_Usuario_Empresa)
     private readonly usuarioEmpresaRepository: Repository<Net_Usuario_Empresa>
   ) { }
@@ -78,7 +78,7 @@ export class CentroTrabajoService {
     updateEmpleadoDto: UpdateEmpleadoDto,
     archivoIdentificacion: Buffer | null,
     fotoEmpleado: Buffer | null
-  ): Promise<Net_Empleado> {
+  ): Promise<net_empleado> {
     const usuarioEmpresa = await this.usuarioEmpresaRepository.findOne({
       where: { id_usuario_empresa: id },
       relations: ['empleadoCentroTrabajo', 'empleadoCentroTrabajo.empleado']

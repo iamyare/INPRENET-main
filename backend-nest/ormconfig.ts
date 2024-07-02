@@ -1,17 +1,16 @@
-import { config } from 'dotenv';
 import { DataSource } from 'typeorm';
+import * as dotenv from 'dotenv';
 
-config();
-const env = process.env.NODE_ENV || 'development';
+dotenv.config({ path: 'development.env' });
 
-const dataSource = new DataSource({
-    type: 'oracle',
-    connectString: process.env.CONNECT_STRING,
-    database: process.env.DB_NAME,
-    username: process.env.DB_USERNAME,
-    password: process.env.DB_PASSWORD,
-    entities: ['src/**/**/*.entity{.ts,.js}'],
-    migrations: ['src/database/migrations/*.ts'],
+export const AppDataSource = new DataSource({
+  type: 'oracle',
+  host: process.env.DATABASE_HOST,
+  port: parseInt(process.env.DATABASE_PORT, 10),
+  username: process.env.DB_USERNAME,
+  password: process.env.DB_PASSWORD,
+  database: process.env.DATABASE_NAME,
+  entities: [__dirname + '/src/**/*.entity{.ts,.js}'],
+  migrations: [__dirname + '/src/migrations/*{.ts,.js}'],
+  synchronize: false,
 });
-
-export default dataSource;

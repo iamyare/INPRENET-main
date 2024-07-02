@@ -1,6 +1,6 @@
 import { Check, Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
 import { Net_ReferenciaPersonal } from "./referencia-personal.entity";
-import { Net_Persona } from "./net_Persona.entity";
+import { net_persona } from "./net_persona.entity";
 
 @Entity({ name: 'NET_REF_PER_PERS' })
 @Check(`TIPO_REFERENCIA IN ('REFERENCIA PERSONAL', 'REFERENCIA REFERENCIA FAMILIAR')`)
@@ -31,7 +31,7 @@ export class Net_Ref_Per_Pers {
     })
     parentesco: string;
 
-    @ManyToOne(() => Net_Persona, persona => persona.referenciasPersonalPersona)
+    @ManyToOne(() => net_persona, persona => persona.referenciasPersonalPersona)
     @JoinColumn({ name: 'ID_PERSONA', foreignKeyConstraintName: "FK_ID_PERSONA_REF_PER_PERS" })
     persona: any;
 

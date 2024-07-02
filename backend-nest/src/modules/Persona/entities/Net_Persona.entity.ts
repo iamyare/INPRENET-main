@@ -1,31 +1,31 @@
-import { Net_TipoIdentificacion } from "../../tipo_identificacion/entities/net_tipo_identificacion.entity";
 import { Net_Pais } from "../../Regional/pais/entities/pais.entity";
 import { Check, Column, Entity, Index, JoinColumn, ManyToMany, ManyToOne, OneToMany, OneToOne, PrimaryGeneratedColumn } from "typeorm";
 import { Net_Detalle_Deduccion } from "../../Planilla/detalle-deduccion/entities/detalle-deduccion.entity";
 import { Net_Municipio } from "../../Regional/municipio/entities/net_municipio.entity";
 import { NET_CUENTA_PERSONA } from "../../transacciones/entities/net_cuenta_persona.entity";
 import { Net_Detalle_planilla_ingreso } from "../../Planilla/Ingresos/detalle-plan-ingr/entities/net_detalle_plani_ing.entity";
-import { NET_DETALLE_PERSONA } from "./Net_detalle_persona.entity";
-import { Net_Persona_Colegios } from "src/modules/transacciones/entities/net_persona_colegios.entity";
-import { Net_Persona_Por_Banco } from "src/modules/banco/entities/net_persona-banco.entity";
 import { Net_perf_pers_cent_trab } from "./net_perf_pers_cent_trab.entity";
 import { Net_Ref_Per_Pers } from "./net_ref-Per-Persona.entity";
 import { NET_PROFESIONES } from "src/modules/transacciones/entities/net_profesiones.entity";
 import { Net_Discapacidad } from "./net_discapacidad.entity";
 import { Net_Peps } from "src/modules/Empresarial/entities/net_peps.entity";
+import { Net_Tipo_Identificacion } from '../../tipo_identificacion/entities/net_tipo_identificacion.entity';
+import { net_detalle_persona } from "./net_detalle_persona.entity";
+import { Net_Persona_Por_Banco } from 'src/modules/banco/entities/net_persona-banco.entity';
+import { Net_Persona_Colegios } from 'src/modules/transacciones/entities/net_persona_colegios.entity';
 @Entity({
     name: 'NET_PERSONA',
 })
 @Check(`sexo IN ('F', 'M')`)
 @Check(`fallecido IN ('SI', 'NO')`)
 @Check(`REPRESENTACION IN ('POR CUENTA PROPIA', 'POR TERCEROS')`)
-export class Net_Persona {
+export class net_persona {
     @PrimaryGeneratedColumn({ type: 'int', name: 'ID_PERSONA', primaryKeyConstraintName: 'PK_ID_PERSONA_PERSONA' })
     id_persona: number;
 
-    @ManyToOne(() => Net_TipoIdentificacion, tipoIdentificacion => tipoIdentificacion.persona, { cascade: true })
-    @JoinColumn({ name: 'ID_TIPO_IDENTIFICACION', foreignKeyConstraintName: "FK_ID_TIPO_IDENTI_PERS" })
-    tipoIdentificacion: Net_TipoIdentificacion;
+    @ManyToOne(() => Net_Tipo_Identificacion, tipoIdentificacion => tipoIdentificacion.personas, { cascade: true })
+      @JoinColumn({ name: 'ID_TIPO_IDENTIFICACION', foreignKeyConstraintName: 'FK_ID_TIPO_IDENTI_PERS' })
+      tipoIdentificacion: Net_Tipo_Identificacion;
 
     @ManyToOne(() => Net_Pais, pais => pais.persona, { cascade: true })
     @JoinColumn({ name: 'ID_PAIS_NACIONALIDAD', foreignKeyConstraintName: "FK_ID_PAIS_PERS" })
@@ -131,8 +131,8 @@ export class Net_Persona {
     @Column('blob', { nullable: true, name: 'FOTO_PERFIL' })
     foto_perfil: Buffer;
 
-    @OneToMany(() => NET_DETALLE_PERSONA, detallePersona => detallePersona.persona)
-    detallePersona: NET_DETALLE_PERSONA[];
+    @OneToMany(() => net_detalle_persona, detallePersona => detallePersona.persona)
+    detallePersona: net_detalle_persona[];
 
     @ManyToOne(() => Net_Municipio, municipio => municipio.persona, { cascade: true })
     @JoinColumn({ name: 'ID_MUNICIPIO_RESIDENCIA', foreignKeyConstraintName: "FK_ID_MUNIC_RESID_PERS" })
@@ -141,9 +141,6 @@ export class Net_Persona {
     @ManyToOne(() => Net_Municipio, municipio => municipio.persona, { cascade: true })
     @JoinColumn({ name: 'ID_MUNICIPIO_DEFUNCION', foreignKeyConstraintName: "FK_ID_MUNIC_DEFUNC_PERS" })
     municipio_defuncion: Net_Municipio;
-
-    @OneToMany(() => NET_DETALLE_PERSONA, detallePersona => detallePersona.persona)
-    detallesPersona: NET_DETALLE_PERSONA[];
 
     @OneToMany(() => Net_Ref_Per_Pers, referenciasPersonalPersona => referenciasPersonalPersona.persona)
     referenciasPersonalPersona: Net_Ref_Per_Pers[];

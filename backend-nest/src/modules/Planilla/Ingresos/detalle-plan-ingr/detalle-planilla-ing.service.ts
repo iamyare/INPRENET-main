@@ -6,7 +6,7 @@ import { Net_TipoPlanilla } from '../../tipo-planilla/entities/tipo-planilla.ent
 import { Net_Detalle_planilla_ingreso } from './entities/net_detalle_plani_ing.entity';
 import { Net_Planilla } from '../../planilla/entities/net_planilla.entity';
 import { DateTime } from 'luxon';
-import { Net_Persona } from '../../../Persona/entities/net_Persona.entity';
+import { net_persona } from '../../../Persona/entities/net_persona.entity';
 import * as oracledb from 'oracledb';
 import { CreateDetallePlanIngDto } from './dto/create-detalle-plani-Ing.dto';
 
@@ -15,7 +15,7 @@ export class DetallePlanillaIngresoService {
   @InjectRepository(Net_Detalle_planilla_ingreso) private detallePlanillaIngr: Repository<Net_Detalle_planilla_ingreso>
   @InjectRepository(Net_Planilla) private planillaRepository: Repository<Net_Planilla>
   @InjectRepository(Net_SALARIO_COTIZABLE) private salarioCotizableRepository: Repository<Net_SALARIO_COTIZABLE>
-  @InjectRepository(Net_Persona) private personaRepository: Repository<Net_Persona>
+  @InjectRepository(net_persona) private personaRepository: Repository<net_persona>
   @InjectRepository(Net_TipoPlanilla) private tipoPlanillaRepository: Repository<Net_TipoPlanilla>
 
   private readonly logger = new Logger(DetallePlanillaIngresoService.name)

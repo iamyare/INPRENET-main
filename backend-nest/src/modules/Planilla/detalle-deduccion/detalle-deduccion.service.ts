@@ -5,11 +5,11 @@ import { InjectEntityManager, InjectRepository } from '@nestjs/typeorm';
 import { Net_Detalle_Deduccion } from './entities/detalle-deduccion.entity';
 import { EntityManager, Repository } from 'typeorm';
 import * as xlsx from 'xlsx';
-import { Net_Persona } from '../../Persona/entities/net_Persona.entity';
+import { net_persona } from '../../Persona/entities/net_persona.entity';
 import { Net_Planilla } from '../planilla/entities/net_planilla.entity';
 import { isUUID } from 'class-validator';
 import { Net_Deduccion } from '../deduccion/entities/net_deduccion.entity';
-import { NET_DETALLE_PERSONA } from 'src/modules/Persona/entities/Net_detalle_persona.entity';
+import { net_detalle_persona } from 'src/modules/Persona/entities/net_detalle_persona.entity';
 import { Net_Centro_Trabajo } from 'src/modules/Empresarial/entities/net_centro_trabajo.entity';
 
 @Injectable()
@@ -20,16 +20,12 @@ export class DetalleDeduccionService {
   constructor(
     @InjectRepository(Net_Detalle_Deduccion)
     private detalleDeduccionRepository: Repository<Net_Detalle_Deduccion>,
-    @InjectRepository(Net_Persona)
-    private personaRepository: Repository<Net_Persona>,
+    @InjectRepository(net_persona)
+    private personaRepository: Repository<net_persona>,
     @InjectRepository(Net_Deduccion)
     private deduccionRepository: Repository<Net_Deduccion>,
     @InjectRepository(Net_Centro_Trabajo)
     private centroTrabajoRepository: Repository<Net_Centro_Trabajo>,
-    @InjectRepository(NET_DETALLE_PERSONA)
-    private detallepersonaRepository: Repository<NET_DETALLE_PERSONA>,
-    @InjectRepository(Net_Planilla)
-    private planillaRepository: Repository<Net_Planilla>,
     @InjectEntityManager() private readonly entityManager: EntityManager
   ) { }
 
@@ -210,7 +206,7 @@ export class DetalleDeduccionService {
       JOIN
         "NET_DEDUCCION" d ON dd."ID_DEDUCCION" = d."ID_DEDUCCION"
       JOIN
-        "NET_PERSONA" afil ON dd."ID_PERSONA" = afil."ID_PERSONA"
+        "net_persona" afil ON dd."ID_PERSONA" = afil."ID_PERSONA"
       WHERE
         dd."ID_PERSONA" = :idPersona
       AND
@@ -287,7 +283,7 @@ export class DetalleDeduccionService {
     JOIN
       "net_deduccion" ded ON detD."id_deduccion" = ded."id_deduccion"
     JOIN
-      "Net_Persona" afil ON detD."id_persona" = afil."id_persona"
+      "net_persona" afil ON detD."id_persona" = afil."id_persona"
       JOIN
       "net_institucion" inst ON inst."id_institucion" = ded."id_institucion"
     WHERE

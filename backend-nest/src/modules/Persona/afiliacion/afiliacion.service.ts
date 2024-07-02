@@ -1,22 +1,19 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { Net_Tipo_Persona } from '../entities/net_tipo_persona.entity';
-import { Net_Persona } from '../entities/net_Persona.entity';
-import { NET_DETALLE_PERSONA } from '../entities/Net_detalle_persona.entity';
+import { net_persona } from '../entities/net_persona.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
 @Injectable()
 export class AfiliacionService {
     constructor(
-        @InjectRepository(NET_DETALLE_PERSONA)
-        private readonly detallePersonaRepository: Repository<NET_DETALLE_PERSONA>,
-        @InjectRepository(Net_Persona)
-        private readonly personaRepository: Repository<Net_Persona>,
+        @InjectRepository(net_persona)
+        private readonly personaRepository: Repository<net_persona>,
         @InjectRepository(Net_Tipo_Persona)
         private readonly tipoPersonaRepository: Repository<Net_Tipo_Persona>,
       ) {}
 
-      async updateFotoPerfil(id: number, fotoPerfil: Buffer): Promise<Net_Persona> {
+      async updateFotoPerfil(id: number, fotoPerfil: Buffer): Promise<net_persona> {
         const persona = await this.personaRepository.findOneBy({ id_persona: id });
         if (!persona) {
           throw new Error('Persona no encontrada');
@@ -25,7 +22,7 @@ export class AfiliacionService {
         return await this.personaRepository.save(persona);
       }
 
-      async getPersonaByn_identificacioni(n_identificacion: string): Promise<Net_Persona> {
+      async getPersonaByn_identificacioni(n_identificacion: string): Promise<net_persona> {
         
         const persona = await this.personaRepository.findOne({
           where: { n_identificacion },
@@ -55,7 +52,7 @@ export class AfiliacionService {
         return persona;
       }
 
-      async getCausantesByDniBeneficiario(n_identificacion: string): Promise<Net_Persona[]> {
+      async getCausantesByDniBeneficiario(n_identificacion: string): Promise<net_persona[]> {
         // Obtener la persona (beneficiario) por n_identificacion
         const beneficiario = await this.personaRepository.findOne({ where: { n_identificacion }, relations: ['detallePersona'] });
     

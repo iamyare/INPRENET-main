@@ -1,5 +1,5 @@
 import { Entity, PrimaryGeneratedColumn, Column, ManyToMany, JoinTable } from "typeorm";
-import { Net_Persona } from "./net_Persona.entity";
+import { net_persona } from "./net_persona.entity";
 
 @Entity({
     name: 'NET_DISCAPACIDAD',
@@ -14,7 +14,7 @@ export class Net_Discapacidad {
     @Column('varchar2', { length: 500, nullable: true, name: 'DESCRIPCION' })
     descripcion: string;
 
-    @ManyToMany(() => Net_Persona, persona => persona.discapacidades)
+    @ManyToMany(() => net_persona, persona => persona.discapacidades)
     @JoinTable({
         name: 'NET_PERSONA_DISCAPACIDAD',
         joinColumn: {
@@ -28,5 +28,5 @@ export class Net_Discapacidad {
             foreignKeyConstraintName: 'FK_ID_PERSONA_PERSONA_DISCAPACIDAD'
         }
     })
-    personas: Net_Persona[];
+    personas: net_persona[];
 }

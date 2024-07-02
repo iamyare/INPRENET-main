@@ -4,7 +4,7 @@ import { UpdateTranssacionesDto } from './dto/update-transacciones.dto';
 import { NET_MOVIMIENTO_CUENTA } from './entities/net_movimiento_cuenta.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { Net_Persona } from '../Persona/entities/net_Persona.entity';
+import { net_persona } from '../Persona/entities/net_persona.entity';
 import { NET_TIPO_CUENTA } from './entities/net_tipo_cuenta.entity';
 import { NET_CUENTA_PERSONA } from './entities/net_cuenta_persona.entity';
 import { NET_TIPO_MOVIMIENTO } from './entities/net_tipo_movimiento.entity';
@@ -17,8 +17,8 @@ import { crearCuentaDTO } from './dto/cuenta-transaccioens.dto';
 export class TransaccionesService {
 
   constructor(
-    @InjectRepository(Net_Persona)
-    private personaRepository: Repository<Net_Persona>,
+    @InjectRepository(net_persona)
+    private personaRepository: Repository<net_persona>,
     @InjectRepository(NET_MOVIMIENTO_CUENTA)
     private movimientoCuentaRepository: Repository<NET_MOVIMIENTO_CUENTA>,
     @InjectRepository(NET_TIPO_CUENTA)

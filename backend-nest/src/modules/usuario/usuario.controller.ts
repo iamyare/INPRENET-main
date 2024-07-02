@@ -8,8 +8,8 @@ import { CreatePreRegistroDto } from './dto/create-pre-registro.dto';
 import { CompleteRegistrationDto } from './dto/complete-registration.dto';
 import { LoginDto } from './dto/login.dto';
 import { Net_Usuario_Empresa } from './entities/net_usuario_empresa.entity';
-import { Net_Rol_Modulo } from './entities/net_rol_modulo.entity';
-import { Net_Modulo } from './entities/net_modulo.entity';
+import { net_rol_modulo } from './entities/net_rol_modulo.entity';
+import { net_modulo } from './entities/net_modulo.entity';
 import { ForgotPasswordDto } from './dto/forgot-password.dto';
 
 @ApiTags('usuario')
@@ -112,14 +112,14 @@ async completarRegistro(
   }
 
   @Get('roles-modulos/:modulo')
-  async obtenerRolesPorModulo(@Param('modulo') modulo: string): Promise<Net_Rol_Modulo[]> {
+  async obtenerRolesPorModulo(@Param('modulo') modulo: string): Promise<net_rol_modulo[]> {
     return this.usuarioService.obtenerRolesPorModulo(modulo);
   }
 
   @Get('modulos-centro-trabajo/:idCentroTrabajo')
   async obtenerModulosPorCentroTrabajo(
     @Param('idCentroTrabajo', ParseIntPipe) idCentroTrabajo: number,
-  ): Promise<Net_Modulo[]> {
+  ): Promise<net_modulo[]> {
     return this.usuarioService.obtenerModulosPorCentroTrabajo(idCentroTrabajo);
   }
 

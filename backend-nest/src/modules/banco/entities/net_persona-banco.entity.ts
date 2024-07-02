@@ -1,6 +1,6 @@
 import { Column, Entity, Index, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
 import { Net_Banco } from "./net_banco.entity";
-import { Net_Persona } from "../../Persona/entities/net_Persona.entity";
+import { net_persona } from "src/modules/Persona/entities/net_persona.entity";
 
 @Entity({ name: 'NET_PERSONA_POR_BANCO' })
 export class Net_Persona_Por_Banco {
@@ -18,9 +18,9 @@ export class Net_Persona_Por_Banco {
     @JoinColumn({ name: 'ID_BANCO', foreignKeyConstraintName: "FK_ID_BANCO_PERSBANC" })
     banco: Net_Banco;
 
-    @ManyToOne(() => Net_Persona, persona => persona.personasPorBanco, { cascade: true })
+    @ManyToOne(() => net_persona, persona => persona.personasPorBanco, { cascade: true })
     @JoinColumn({ name: 'ID_PERSONA', foreignKeyConstraintName: "FK_ID_PERSONA_PERSBANC" })
-    persona: Net_Persona;
+    persona: net_persona;
 
 
 }

@@ -1,6 +1,6 @@
 <mat-tab-group>
   <mat-tab label="Centros De Trabajo">
-    <div class=" card">
+    <div class="card">
       <div class="card-header card-header-danger tittle" style="background: #229e92">
         <h4 class="card-title">Centros De Trabajo</h4>
         <p class="card-category">Completa la información correspondiente</p>
@@ -88,7 +88,7 @@
             </div>
 
             <div class="row" [formGroupName]="formChild">
-              <div class="col-lg-6 col-md-12">
+              <div class="col-lg-4 col-md-12">
                 <mat-form-field style="flex-direction: column-reverse;" class="example-full-width inputs"
                   appearance="outline">
                   <mat-label>Cargo</mat-label>
@@ -100,7 +100,7 @@
                 </mat-error>
               </div>
 
-              <div class="col-lg-6 col-md-12"
+              <div class="col-lg-4 col-md-12"
                 *ngIf="getCtrl('trabajo', formParent).controls[i].get('showNumeroAcuerdo').value">
                 <mat-form-field style="flex-direction: column-reverse;" class="example-full-width inputs"
                   appearance="outline">
@@ -112,6 +112,34 @@
                   {{ error }}
                 </mat-error>
               </div>
+
+              <div class="col-lg-4 col-md-12">
+                <mat-form-field style="flex-direction: column-reverse;" class="example-full-width inputs"
+                  appearance="outline">
+                  <mat-label>Jornada en la que trabaja</mat-label>
+                  <mat-icon matPrefix>schedule</mat-icon>
+                  <mat-select formControlName="jornada">
+                    <mat-option *ngFor="let option of jornadas" [value]="option.value">{{ option.label }}</mat-option>
+                  </mat-select>
+                </mat-form-field>
+                <mat-error *ngFor="let error of getErrors(i, 'jornada')">
+                  {{ error }}
+                </mat-error>
+              </div>
+
+              <div class="col-lg-4 col-md-12">
+                <mat-form-field style="flex-direction: column-reverse;" class="example-full-width inputs"
+                  appearance="outline">
+                  <mat-label>Tipo de Jornada</mat-label>
+                  <mat-icon matPrefix>assignment_turned_in</mat-icon>
+                  <mat-select formControlName="tipoJornada">
+                    <mat-option *ngFor="let option of tiposJornada" [value]="option.value">{{ option.label }}</mat-option>
+                  </mat-select>
+                </mat-form-field>
+                <mat-error *ngFor="let error of getErrors(i, 'tipoJornada')">
+                  {{ error }}
+                </mat-error>
+              </div>
             </div>
 
           </div>
@@ -120,14 +148,16 @@
 
       <div class="row" style="text-align: center; margin: 1%;">
         <div class="col-lg-6 col-md-12">
-          <button mat-button color="primary" (click)="agregarTrabajo()"><mat-icon
-              matSuffix>exposure_plus_1</mat-icon>Agregar
-            Puesto Trabajo</button>
+          <button mat-button color="primary" (click)="agregarTrabajo()">
+            <mat-icon matSuffix>exposure_plus_1</mat-icon>
+            Agregar Puesto Trabajo
+          </button>
         </div>
         <div class="col-lg-6 col-md-12">
-          <button mat-button color="warn" (click)="eliminarTrabajo()"><mat-icon
-              matSuffix>exposure_neg_1</mat-icon>Eliminar
-            Puesto Trabajo</button>
+          <button mat-button color="warn" (click)="eliminarTrabajo()">
+            <mat-icon matSuffix>exposure_neg_1</mat-icon>
+            Eliminar Puesto Trabajo
+          </button>
         </div>
       </div>
     </div>

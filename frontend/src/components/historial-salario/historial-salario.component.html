@@ -1,5 +1,5 @@
 <div class="card">
-  <div class="card-header card-header-danger tittle" style="background: #229e92">
+  <div class="card-header card-header-danger tittle" style="background: #229e92;">
     <h4 class="card-title">Cuenta en Bancos</h4>
     <p class="card-category">Completa la información correspondiente</p>
   </div>
@@ -35,6 +35,13 @@
             <mat-error *ngFor="let error of getErrors(i, 'numCuenta')">
               {{ error }}
             </mat-error>
+          </div>
+          <div class="col-lg-6 col-md-12">
+            <label>¿Es la cuenta principal?</label>
+            <mat-radio-group [formControlName]="'cuentaPrincipal'" (change)="onCuentaPrincipalChange(i)">
+              <mat-radio-button [value]="true">Sí</mat-radio-button>
+              <mat-radio-button [value]="false">No</mat-radio-button>
+            </mat-radio-group>
           </div>
         </div>
       </div>

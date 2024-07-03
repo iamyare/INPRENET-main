@@ -33,7 +33,13 @@ export function generatePuestoTrabFormGroup(datos?: any): FormGroup {
     estado: new FormControl(datos?.estado, [
       Validators.maxLength(40),
     ]),
-    showNumeroAcuerdo: new FormControl(true)
+    showNumeroAcuerdo: new FormControl(true),
+    jornada: new FormControl(datos?.jornada, [
+      Validators.required,
+    ]),
+    tipoJornada: new FormControl(datos?.tipoJornada, [
+      Validators.required,
+    ])
   });
 }
 
@@ -56,10 +62,12 @@ export class DatPuestoTrabComponent implements OnInit {
 
   centrosTrabajo: any;
   sector: any;
+  jornadas: any[];
+  tiposJornada: any[];
   minDate: Date;
   @Input() datos: any;
   @Input() editing?: boolean = false;
-  @Output() newDatDatosPuestTrab = new EventEmitter<any>()
+  @Output() newDatDatosPuestTrab = new EventEmitter<any>();
 
   onDatosDatosPuestTrab() {
     const data = this.formParent;
@@ -77,6 +85,15 @@ export class DatPuestoTrabComponent implements OnInit {
     this.cargarPuestosTrabajo();
 
     this.sector = this.datosEstaticos.sector;
+    this.jornadas = [
+      { label: 'MANANA', value: 'MANANA' },
+      { label: 'TARDE', value: 'TARDE' },
+      { label: 'NOCHE', value: 'NOCHE' }
+    ];
+    this.tiposJornada = [
+      { label: 'COMPLETA', value: 'COMPLETA' },
+      { label: 'PARCIAL', value: 'PARCIAL' }
+    ];
   }
 
   ngOnInit(): void {
@@ -133,7 +150,6 @@ export class DatPuestoTrabComponent implements OnInit {
 
     this.onDatosDatosPuestTrab();
   }
-
 
   eliminarTrabajo(): void {
     const ref_trabajo = this.formParent.get('trabajo') as FormArray;

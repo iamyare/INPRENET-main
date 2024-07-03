@@ -7,6 +7,7 @@ export function generateHistSalFormGroup(datos?: any): FormGroup {
   return new FormGroup({
     idBanco: new FormControl(datos.idBanco, Validators.required),
     numCuenta: new FormControl(datos.numCuenta, Validators.required),
+    cuentaPrincipal: new FormControl(datos.cuentaPrincipal || false, Validators.required)
   });
 }
 
@@ -25,11 +26,10 @@ export function generateHistSalFormGroup(datos?: any): FormGroup {
 })
 export class HistorialSalarioComponent implements OnInit {
   public formParent: FormGroup = new FormGroup({});
-
   Bancos: any;
   private formKey = 'FormBanco';
 
-  @Output() newDatHistSal = new EventEmitter<any>()
+  @Output() newDatHistSal = new EventEmitter<any>();
   @Input() datos: any;
 
   onDatosHistSal() {
@@ -80,6 +80,19 @@ export class HistorialSalarioComponent implements OnInit {
     if (ref_banco.length > 0) {
       ref_banco.removeAt(ref_banco.length - 1);
     }
+    this.onDatosHistSal();
+  }
+
+  onCuentaPrincipalChange(index: number): void {
+    const bancoArray = this.formParent.get('banco') as FormArray;
+
+    // Ensure only one account is marked as principal
+    bancoArray.controls.forEach((group, i) => {
+      if (i !== index) {
+        (group.get('cuentaPrincipal') as FormControl).setValue(false, { emitEvent: false });
+      }
+    });
+
     this.onDatosHistSal();
   }
 

@@ -81,11 +81,12 @@
               <!-- Checkbox Group -->
               <ng-container *ngIf="field.type === 'checkboxGroup'">
                 <label>{{ field.label }}</label>
-                <div [formArrayName]="field.name" *ngFor="let option of field.options; let i = index">
-                  <mat-checkbox name="{{field.name}}" color="primary" [formControlName]="i"
-                    (change)="onDatosBenChange1($event)">
-                    {{ option.label }}
-                  </mat-checkbox>
+                <div [formArrayName]="field.name">
+                  <div *ngFor="let option of field.options; let i = index">
+                    <mat-checkbox [formControlName]="i" (change)="onDatosBenChange1($event)">
+                      {{ option.label }}
+                    </mat-checkbox>
+                  </div>
                 </div>
               </ng-container>
 

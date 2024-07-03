@@ -254,31 +254,13 @@ export class DatosGeneralesCentroComponent implements OnInit {
       col: 3
     },
     {
-      name: 'monto_activos_totales',
-      label: 'Monto de Activos Totales',
-      type: 'number',
-      icon: 'attach_money',
-      value: '',
-      display: true,
-      readOnly: false,
-      validations: [Validators.min(0)],
-      row: 8,
-      col: 3
-    },
-    {
       name: 'modalidad_ensenanza',
       label: 'Marque la Modalidad de Enseñanza',
       type: 'checkboxGroup',
       row: 9,
       col: 6,
       display: true,
-      options: [
-        { label: 'PRE-ESCOLAR', value: 'PRE-ESCOLAR' },
-        { label: 'PRIMARIA', value: 'PRIMARIA' },
-        { label: 'MEDIA', value: 'MEDIA' },
-        { label: 'ACADEMIA', value: 'ACADEMIA' },
-        { label: 'TECNICA', value: 'TECNICA' }
-      ],
+      options: [],
       validations: []
     },
     {
@@ -288,24 +270,22 @@ export class DatosGeneralesCentroComponent implements OnInit {
       row: 9,
       col: 6,
       display: true,
-      options: [
-        { label: 'MATUTINA', value: 'MATUTINA' },
-        { label: 'DIURNA', value: 'DIURNA' },
-        { label: 'NOCTURNA', value: 'NOCTURNA' }
-      ],
+      options: [],
       validations: []
     }
   ];
 
   async ngOnInit() {
-    this.parentForm = this.fb.group({})
+    this.parentForm = this.fb.group({});
     await this.loadDepartamentos();
+    await this.loadJornadas();
+    await this.loadNivelesEducativos();
 
     if (this.fields) {
       this.addControlsToForm();
     }
     this.parentForm.valueChanges.subscribe(value => {
-      /* this.formUpdated.emit(this.convertNumberFields(value)); */
+      this.formUpdated.emit(this.convertNumberFields(value));
     });
   }
 
@@ -317,10 +297,39 @@ export class DatosGeneralesCentroComponent implements OnInit {
     }
   }
 
+  async loadJornadas() {
+    const jornadas = await this.datosEstaticosService.getJornadas();
+    const jornadaField = this.fields.find(field => field.name === 'tipo_jornada');
+    if (jornadaField) {
+      jornadaField.options = jornadas.map(jornada => ({
+        label: jornada.nombre,
+        value: jornada.id_jornada
+      }));
+    }
+  }
+
+  async loadNivelesEducativos() {
+    const nivelesEducativos = await this.datosEstaticosService.getNivelesEducativos();
+    const modalidadField = this.fields.find(field => field.name === 'modalidad_ensenanza');
+    if (modalidadField) {
+      modalidadField.options = nivelesEducativos.map(nivel => ({
+        label: nivel.nombre,
+        value: nivel.id_nivel
+      }));
+    }
+  }
+
   addControlsToForm() {
-    this.fields.forEach(field => {
-      const control = new FormControl(field.value, field.validations);
-      this.parentForm.addControl(field.name, control);
+    this.fields.forEach((field:any) => {
+      if (field.type === 'checkboxGroup') {
+        const formArray = new FormArray(
+          field.options.map(() => new FormControl(false))
+        );
+        this.parentForm.addControl(field.name, formArray);
+      } else {
+        const control = new FormControl(field.value, field.validations);
+        this.parentForm.addControl(field.name, control);
+      }
     });
     this.formUpdated.emit(this.convertNumberFields(this.parentForm));
     this.parentFormIsExist = true;
@@ -331,6 +340,7 @@ export class DatosGeneralesCentroComponent implements OnInit {
       this.onDepartamentoChange(event);
     }
   }
+
   convertNumberFields(form: any) {
     const updatedValues = { ...form.value };
     this.fields.forEach(field => {

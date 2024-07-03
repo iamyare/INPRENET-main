@@ -86,9 +86,9 @@ export class DatPuestoTrabComponent implements OnInit {
 
     this.sector = this.datosEstaticos.sector;
     this.jornadas = [
-      { label: 'MANANA', value: 'MANANA' },
-      { label: 'TARDE', value: 'TARDE' },
-      { label: 'NOCHE', value: 'NOCHE' }
+      { label: 'MATUTINA', value: 'MATUTINA' },
+      { label: 'DIURNA', value: 'DIURNA' },
+      { label: 'NOCTURNA', value: 'NOCTURNA' }
     ];
     this.tiposJornada = [
       { label: 'COMPLETA', value: 'COMPLETA' },

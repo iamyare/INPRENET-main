@@ -11,6 +11,16 @@ export class CentroTrabajoService {
 
   constructor(private http: HttpClient, private router: Router) { }
 
+  obtenerJornadas(): Observable<any[]> {
+    const url = `${environment.API_URL}/api/centro-trabajo/jornadas`;
+    return this.http.get<any[]>(url);
+  }
+
+  obtenerNivelesEducativos(): Observable<any[]> {
+    const url = `${environment.API_URL}/api/centro-trabajo/niveles-educativos`;
+    return this.http.get<any[]>(url);
+  }
+
   actualizarEmpleado(id: number, datos: any, archivos: { archivoIdentificacion?: File; fotoEmpleado?: File }): Observable<any> {
     const formData = new FormData();
     formData.append('nombreEmpleado', datos.nombreEmpleado);

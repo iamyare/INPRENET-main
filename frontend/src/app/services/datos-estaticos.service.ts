@@ -27,6 +27,8 @@ export class DatosEstaticosService {
   estados: any = [];
   tipoRol: any = [];
   centrosTrabajoTipoE: any = [];
+  jornadas: any = [];
+  nivelesEducativos: any = [];
 
   constructor(
     private colegiosMagSVC: ColegiosMagisterialesService,
@@ -51,6 +53,8 @@ export class DatosEstaticosService {
     this.getProfesiones();
     this.getMunicipios();
     this.getDepartamentos();
+    this.getJornadas();
+    this.getNivelesEducativos();
   }
 
 
@@ -62,6 +66,36 @@ export class DatosEstaticosService {
     }));
 
     return this.estados;
+  }
+
+  async getJornadas(): Promise<any[]> {
+    try {
+      const response: any = await this.centroTrabajoService.obtenerJornadas().toPromise();
+      this.jornadas = response.map((item: { id_jornada: any; nombre: any; }) => ({
+        label: item.nombre,
+        value: item.id_jornada
+      }));
+      return this.jornadas;
+    } catch (error) {
+      console.error('Error al obtener las jornadas:', error);
+      this.jornadas = [];
+      return this.jornadas;
+    }
+  }
+
+  async getNivelesEducativos(): Promise<any[]> {
+    try {
+      const response: any = await this.centroTrabajoService.obtenerNivelesEducativos().toPromise();
+      this.nivelesEducativos = response.map((item: { id_nivel: any; nombre: any; }) => ({
+        label: item.nombre,
+        value: item.id_nivel
+      }));
+      return this.nivelesEducativos;
+    } catch (error) {
+      console.error('Error al obtener los niveles educativos:', error);
+      this.nivelesEducativos = [];
+      return this.nivelesEducativos;
+    }
   }
 
   async getCentrosTrabajoTipoE() {

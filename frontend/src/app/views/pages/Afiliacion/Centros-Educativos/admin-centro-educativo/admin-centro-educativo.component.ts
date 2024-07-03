@@ -21,7 +21,7 @@ export class AdminCentroEducativoComponent implements OnInit {
   }
 
   addControlsToForm() {
-    const formControls: any = {
+    /* const formControls: any = {
       administradorNombre: ['asd'],
       administradorTelefono: ['22252625'],
       administradorCorreo: ['pedro@gmail.com'],
@@ -41,6 +41,27 @@ export class AdminCentroEducativoComponent implements OnInit {
       propietarioCorreo1: ['Kenia@gmail.com'],
       propietarioCorreo2: ['KeniaRod@gmail.com'],
       propietarioReferencia: ['Atrás de la Teletón'],
+    }; */
+    const formControls: any = {
+      administradorNombre: [''],
+      administradorTelefono: [''],
+      administradorCorreo: [''],
+      contadorNombre: [''],
+      contadorTelefono: [''],
+      contadorCorreo: [''],
+      propietarioNombre: [''],
+      propietarioColonia: [''],
+      propietarioBarrio: [''],
+      propietarioGrupo: [''],
+      propietarioCasa: [''],
+      propietarioDepartamento: [''],
+      propietarioMunicipio: [''],
+      propietarioTelefonoCasa: [''],
+      propietarioCelular1: [''],
+      propietarioCelular2: [''],
+      propietarioCorreo1: [''],
+      propietarioCorreo2: [''],
+      propietarioReferencia: [''],
     };
 
     for (const key in formControls) {

@@ -53,7 +53,6 @@ export class DynamicFormComponent implements OnInit {
       } else if (field.type === 'checkboxGroup') {
         const checkboxArray = this.fb.array(field.options.map(() => this.fb.control(false)));
         group.addControl(field.name, checkboxArray);
-
       } else if (field.type === 'radio') {
         const radioGroup = this.fb.control(field.value || '', field.validations);
         group.addControl(field.name, radioGroup);
@@ -68,42 +67,36 @@ export class DynamicFormComponent implements OnInit {
             field.validations
           );
         group.addControl(field.name, control);
-
       }
     });
-
 
     return group;
   }
 
   private transformFormValues(form: FormGroup): any {
-
     const result: any = {};
 
     this.fields.forEach((field: any) => {
-      //const controlValue = formValues[field.name];
-
       if (field.type === 'daterange') {
-        this.form.value[field.name] = {
-          start: this.form.value[field.name]?.start,
-          end: this.form.value[field.name]?.end
+        result[field.name] = {
+          start: form.get(field.name)?.value.start,
+          end: form.get(field.name)?.value.end
         };
       } else if (field.type === 'checkboxGroup') {
         const checkboxArray = form.get(field.name) as FormArray;
-        this.form.value[field.name] = checkboxArray.controls.map((control: any, index: number) => ({
+        result[field.name] = checkboxArray.controls.map((control: any, index: number) => ({
           key: field.options[index].value,
           value: control.value
         }));
       } else if (field.type === 'radio') {
-        this.form.value[field.name] = this.form.value[field.name];
+        result[field.name] = form.get(field.name)?.value;
       } else {
-        this.form.value[field.name] = this.form.value[field.name];
+        result[field.name] = form.get(field.name)?.value;
       }
     });
 
-    return this.form;
+    return result;
   }
-
 
   mergeForms(incomingForm: FormGroup): FormGroup {
     const group = this.createControl();
@@ -114,7 +107,6 @@ export class DynamicFormComponent implements OnInit {
         group.addControl(key, incomingForm.get(key)!);
       }
     });
-
 
     return group;
   }
@@ -130,7 +122,6 @@ export class DynamicFormComponent implements OnInit {
           end: formValues[field.name]?.end
         };
       } else if (field.type === 'checkboxGroup') {
-        console.log(formValues[field.name]);
         const selectedOptions = formValues[field.name]
           .map((checked: any, i: any) => checked ? field.options[i].value : null)
           .filter((v: any) => v !== null);

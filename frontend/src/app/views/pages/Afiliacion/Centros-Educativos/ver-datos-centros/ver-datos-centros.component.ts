@@ -219,7 +219,6 @@ export class VerDatosCentrosComponent {
     form.controls["numero_acuerdo"]!.patchValue(this.searchResults[0].numero_acuerdo)
     form.controls["fecha_emision"]!.patchValue(this.searchResults[0].fecha_emision)
     form.controls["fecha_inicio_operaciones"]!.patchValue(this.searchResults[0].fecha_inicio_operaciones)
-    form.controls["monto_activos_totales"]!.patchValue(this.searchResults[0].monto_activos_totales)
 
     const tipo_jornada = this.searchResults[0].centroTrabajoJornadas.map((jornada: { jornada: { nombre: string; }; }) => ({
       key: jornada.jornada.nombre,

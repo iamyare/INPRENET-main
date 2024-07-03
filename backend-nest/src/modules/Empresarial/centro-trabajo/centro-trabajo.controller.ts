@@ -7,11 +7,23 @@ import { CreatePrivateCentroTrabajoCompleteDto } from './dto/create-private-cent
 import { Net_Centro_Trabajo } from '../entities/net_centro_trabajo.entity';
 import { FileFieldsInterceptor, FilesInterceptor } from '@nestjs/platform-express';
 import { UpdateEmpleadoDto } from './dto/update-empleado.dto';
+import { Net_Jornada } from '../entities/net_jornada.entity';
+import { Net_Nivel_Educativo } from '../entities/net_nivel_educativo.entity';
 
 @ApiTags('centro-trabajo')
 @Controller('centro-trabajo')
 export class CentroTrabajoController {
   constructor(private readonly centroTrabajoService: CentroTrabajoService) { }
+
+  @Get('jornadas')
+  async getAllJornadas(): Promise<Net_Jornada[]> {
+    return this.centroTrabajoService.getAllJornadas();
+  }
+
+  @Get('niveles-educativos')
+  async getAllNivelesEducativos(): Promise<Net_Nivel_Educativo[]> {
+    return this.centroTrabajoService.getAllNivelesEducativos();
+  }
 
   @Put('actualizar/:id')
 @UseInterceptors(

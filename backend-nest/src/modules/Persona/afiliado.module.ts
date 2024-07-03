@@ -20,6 +20,7 @@ import { Net_Pais } from '../Regional/pais/entities/pais.entity';
 import { Net_Tipo_Identificacion } from '../tipo_identificacion/entities/net_tipo_identificacion.entity';
 import { net_estado_afiliacion } from './entities/net_estado_afiliacion.entity';
 import { Net_Persona_Por_Banco } from 'src/modules/banco/entities/net_persona-banco.entity';
+import { net_causas_fallecimientos } from './entities/net_causas_fallecimientos.entity';
 
 @Module({
   controllers: [AfiliadoController, AfiliacionController],
@@ -28,7 +29,7 @@ import { Net_Persona_Por_Banco } from 'src/modules/banco/entities/net_persona-ba
     TypeOrmModule.forFeature([net_persona, Net_Discapacidad, net_estado_afiliacion, net_detalle_persona, Net_perf_pers_cent_trab,
       Net_Ref_Per_Pers,
       Net_Persona_Por_Banco, Net_Departamento,
-      Net_Pais, Net_Tipo_Identificacion,
+      Net_Pais, Net_Tipo_Identificacion,net_causas_fallecimientos,
       Net_Centro_Trabajo, Net_Banco, Net_Tipo_Persona, Net_Municipio])
   ],
   exports: [TypeOrmModule, AfiliadoService],

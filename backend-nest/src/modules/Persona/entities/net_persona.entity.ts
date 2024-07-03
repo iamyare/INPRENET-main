@@ -13,9 +13,10 @@ import { Net_Tipo_Identificacion } from '../../tipo_identificacion/entities/net_
 import { net_detalle_persona } from "./net_detalle_persona.entity";
 import { Net_Persona_Por_Banco } from 'src/modules/banco/entities/net_persona-banco.entity';
 import { Net_Persona_Colegios } from 'src/modules/transacciones/entities/net_persona_colegios.entity';
+import { net_causas_fallecimientos } from "./net_causas_fallecimientos.entity";
 
 @Entity({
-    name: 'net_persona',
+    name: 'NET_PERSONA',
 })
 @Check("CK_SEXO_NET_PERSONA", `sexo IN ('F', 'M')`)
 @Check("CK_FALLECIDO_NET_PERSONA", `fallecido IN ('SI', 'NO')`)
@@ -111,9 +112,6 @@ export class net_persona {
     @Column('varchar', { nullable: true, name: 'TIPO_DEFUNCION' })
     tipo_defuncion: number;
 
-    @Column('varchar', { nullable: true, name: 'MOTIVO_FALLECIMIENTO' })
-    motivo_fallecimiento: number;
-
     @Column('varchar', { nullable: true, name: 'CERTIFICADO_DEFUNCION' })
     certificado_defuncion: number;
 
@@ -176,4 +174,8 @@ export class net_persona {
 
     @ManyToMany(() => Net_Discapacidad, discapacidad => discapacidad.personas)
     discapacidades: Net_Discapacidad[];
+
+    @ManyToOne(() => net_causas_fallecimientos, causaFallecimiento => causaFallecimiento.personas, { cascade: true })
+    @JoinColumn({ name: 'ID_CAUSA_FALLECIMIENTO', foreignKeyConstraintName: "FK_ID_CAUSA_FALLECIMIENTO_NET_PERSONA" })
+    causa_fallecimiento: net_causas_fallecimientos;
 }

@@ -91,11 +91,6 @@ export class CreatePrivateCentroTrabajoDto {
   @Type(() => Date)
   fecha_inicio_operaciones?: Date;
 
-  @IsNumber()
-  @Min(0)
-  @IsOptional()
-  monto_activos_totales?: number;
-
   @IsArray()
   @IsOptional()
   @Type(() => String)

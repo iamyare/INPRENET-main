@@ -74,9 +74,6 @@ export class Net_Centro_Trabajo {
     @Column('int', { nullable: true, name: 'NUMERO_EMPLEADOS' })
     numero_empleados: number;
 
-    @Column('number', { precision: 18, scale: 2, nullable: true, name: 'MONTO_ACTIVOS_TOTALES' })
-    monto_activos_totales: number;
-
     @Column('nvarchar2', { length: 255, nullable: true, name: 'OBJETIVO_SOCIAL' })
     objetivo_social: string;
 

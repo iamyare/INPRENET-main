@@ -72,6 +72,31 @@ export class CentroTrabajoService {
     private readonly usuarioEmpresaRepository: Repository<Net_Usuario_Empresa>
   ) { }
 
+  async getAllJornadas(): Promise<Net_Jornada[]> {
+    try {
+      const jornadas = await this.jornadaRepository.find({ relations: ['centroTrabajoJornadas'] });
+      if (!jornadas) {
+        throw new NotFoundException('No se encontraron jornadas');
+      }
+      return jornadas;
+    } catch (error) {
+      this.logger.error(`Error fetching jornadas: ${error.message}`, error.stack);
+      throw new InternalServerErrorException('Error al obtener jornadas');
+    }
+  }
+
+  async getAllNivelesEducativos(): Promise<Net_Nivel_Educativo[]> {
+    try {
+      const niveles = await this.nivelEducativoRepository.find({ relations: ['centroTrabajoNiveles'] });
+      if (!niveles) {
+        throw new NotFoundException('No se encontraron niveles educativos');
+      }
+      return niveles;
+    } catch (error) {
+      this.logger.error(`Error fetching niveles educativos: ${error.message}`, error.stack);
+      throw new InternalServerErrorException('Error al obtener niveles educativos');
+    }
+  }
 
   async actualizarEmpleado(
     id: number,
@@ -227,7 +252,6 @@ export class CentroTrabajoService {
       numero_acuerdo,
       fecha_emision,
       fecha_inicio_operaciones,
-      monto_activos_totales,
       modalidad_ensenanza,
       tipo_jornada,
       municipio,
@@ -261,7 +285,6 @@ export class CentroTrabajoService {
       numero_acuerdo,
       fecha_emision,
       fecha_inicio_operaciones,
-      monto_activos_totales,
       municipio: foundMunicipio
     });
 

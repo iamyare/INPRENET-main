@@ -1,11 +1,12 @@
 import { DatePipe } from '@angular/common';
-import { Component, Input } from '@angular/core';
+import { Component, Input, SimpleChanges } from '@angular/core';
 import { Validators } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
 import { AgregarPuestTrabComponent } from '@docs-components/agregar-puest-trab/agregar-puest-trab.component';
 import { ConfirmDialogComponent } from '@docs-components/confirm-dialog/confirm-dialog.component';
 import { EditarDialogComponent } from '@docs-components/editar-dialog/editar-dialog.component';
 import { ToastrService } from 'ngx-toastr';
+import { Subscription } from 'rxjs';
 import { AfiliadoService } from 'src/app/services/afiliado.service';
 import { CentroTrabajoService } from 'src/app/services/centro-trabajo.service';
 import { DatosEstaticosService } from 'src/app/services/datos-estaticos.service';
@@ -21,16 +22,20 @@ import { unirNombres } from 'src/app/shared/functions/formatoNombresP';
   providers: [DatePipe] // Añadir el DatePipe como proveedor
 })
 export class EditPerfilPuestTrabComponent {
-  convertirFechaInputs = convertirFechaInputs;
-  public myFormFields: FieldConfig[] = [];
-  form: any;
   @Input() Afiliado!: any;
+
+  private subscriptions: Subscription = new Subscription();
+
+  convertirFechaInputs = convertirFechaInputs;
+  form: any;
+
   unirNombres: any = unirNombres;
   datosTabl: any[] = [];
   centrosTrabajo: any = [];
   prevAfil: boolean = false;
 
   public myColumns: TableColumn[] = [];
+  public myFormFields: FieldConfig[] = [];
   public filas: any[] = [];
   ejecF: any;
 
@@ -42,8 +47,25 @@ export class EditPerfilPuestTrabComponent {
     private datePipe: DatePipe,
     private centrosTrabSVC: CentroTrabajoService,
   ) { }
-
   ngOnInit(): void {
+    this.initializeComponent();
+  }
+
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['Afiliado'] && this.Afiliado) {
+      this.initializeComponent();
+    }
+  }
+
+  ngOnDestroy(): void {
+    this.subscriptions.unsubscribe();
+  }
+
+  initializeComponent(): void {
+    if (!this.Afiliado) {
+      return;
+    }
+
     this.myFormFields = [
       { type: 'text', label: 'DNI del afiliado', name: 'dni', validations: [Validators.required, Validators.minLength(13), Validators.maxLength(14)], display: true }
     ];
@@ -84,9 +106,10 @@ export class EditPerfilPuestTrabComponent {
     ];
 
     this.getCentrosTrabajo();
-    this.previsualizarInfoAfil();
-    this.getFilas().then(() => this.cargar());
+    //this.previsualizarInfoAfil();
+    this.getFilas();
   }
+
 
   async getCentrosTrabajo() {
     const response = await this.centrosTrabSVC.obtenerTodosLosCentrosTrabajo().toPromise();
@@ -106,30 +129,6 @@ export class EditPerfilPuestTrabComponent {
     this.form = event;
   }
 
-  previsualizarInfoAfil() {
-    if (this.Afiliado.N_IDENTIFICACION) {
-      this.svcAfiliado.getAfilByParam(this.Afiliado.N_IDENTIFICACION).subscribe(
-        async (result) => {
-          this.prevAfil = true;
-          this.Afiliado = result;
-          this.Afiliado.nameAfil = this.unirNombres(
-            result.PRIMER_NOMBRE,
-            result.SEGUNDO_NOMBRE,
-            result.TERCER_NOMBRE,
-            result.PRIMER_APELLIDO,
-            result.SEGUNDO_APELLIDO
-          );
-          this.getFilas().then(() => this.cargar());
-        },
-        (error) => {
-          this.getFilas().then(() => this.cargar());
-          this.toastr.error(`Error: ${error.error.message}`);
-          this.resetDatos();
-        }
-      );
-    }
-  }
-
   resetDatos() {
     if (this.form) {
       this.form.reset();
@@ -139,9 +138,9 @@ export class EditPerfilPuestTrabComponent {
   }
 
   async getFilas() {
-    if (this.Afiliado) {
+    if (this.Afiliado.n_identificacion) {
       try {
-        const data = await this.svcAfiliado.getAllPerfCentroTrabajo(this.Afiliado.N_IDENTIFICACION).toPromise();
+        const data = await this.svcAfiliado.getAllPerfCentroTrabajo(this.Afiliado.n_identificacion).toPromise();
         this.filas = data.map((item: any) => ({
           id_perf_pers_centro_trab: item.id_perf_pers_centro_trab,
           id_centro_trabajo: item.centroTrabajo.id_centro_trabajo,

@@ -15,6 +15,7 @@ import { Net_Persona_Por_Banco } from 'src/modules/banco/entities/net_persona-ba
 import { Net_Persona_Colegios } from 'src/modules/transacciones/entities/net_persona_colegios.entity';
 import { net_causas_fallecimientos } from "./net_causas_fallecimientos.entity";
 
+import { net_otra_fuente_ingreso } from "./net_otra_fuente_ingreso.entity";
 @Entity({
     name: 'NET_PERSONA',
 })
@@ -94,6 +95,9 @@ export class net_persona {
     @Column('varchar2', { length: 40, nullable: true, name: 'REPRESENTACION' })
     representacion: string;
 
+    @Column('varchar2', { length: 40, nullable: true, name: 'GRADO_ACADEMICO' })
+    grado_academico: string;
+
     @Column('varchar2', { length: 12, nullable: true, name: 'TELEFONO_1' })
     telefono_1: string;
 
@@ -172,10 +176,15 @@ export class net_persona {
     @OneToMany(() => Net_Peps, peps => peps.persona)
     peps: Net_Peps[];
 
+
     @ManyToMany(() => Net_Discapacidad, discapacidad => discapacidad.personas)
     discapacidades: Net_Discapacidad[];
 
     @ManyToOne(() => net_causas_fallecimientos, causaFallecimiento => causaFallecimiento.personas, { cascade: true })
     @JoinColumn({ name: 'ID_CAUSA_FALLECIMIENTO', foreignKeyConstraintName: "FK_ID_CAUSA_FALLECIMIENTO_NET_PERSONA" })
     causa_fallecimiento: net_causas_fallecimientos;
+    @OneToMany(() => net_otra_fuente_ingreso, otra_fuente_ingreso => otra_fuente_ingreso.persona)
+    otra_fuente_ingreso: net_otra_fuente_ingreso[];
+
+
 }

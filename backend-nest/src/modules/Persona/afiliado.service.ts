@@ -203,7 +203,7 @@ export class AfiliadoService {
     }
   }
 
-  async createAndAssignReferences(idPersona: number, dto: AsignarReferenciasDTO){
+  async createAndAssignReferences(idPersona: number, dto: AsignarReferenciasDTO) {
     /* try {
       const persona = await this.personaRepository.findOne({
         where: { id_persona: idPersona }
@@ -590,8 +590,8 @@ export class AfiliadoService {
       SEGUNDO_APELLIDO: persona.segundo_apellido,
       GENERO: persona.genero,
       SEXO: persona.sexo,
+      GRADO_ACADEMICO: persona.grado_academico,
       GRUPO_ETNICO: persona.grupo_etnico,
-      /* CANTIDAD_DEPENDIENTES: persona.cantidad_dependientes, */
       CANTIDAD_HIJOS: persona.cantidad_hijos,
       REPRESENTACION: persona.representacion,
       DIRECCION_RESIDENCIA: persona.direccion_residencia,
@@ -605,20 +605,21 @@ export class AfiliadoService {
       CORREO_1: persona.correo_1,
       CORREO_2: persona.correo_2,
       ESTADO_CIVIL: persona.estado_civil,
-      //ESTADO: detallePersona.eliminado,
       ID_PAIS: persona.pais?.id_pais,
       id_departamento_residencia: persona.municipio?.departamento.id_departamento,
       ID_IDENTIFICACION: persona.tipoIdentificacion?.id_identificacion,
       tipo_defuncion: persona.tipo_defuncion,
       fecha_defuncion: persona.fecha_defuncion,
       fecha_vencimiento_ident: persona.fecha_vencimiento_ident,
-      motivo_fallecimiento: persona.motivo_fallecimiento,
+      motivo_fallecimiento: persona.causa_fallecimiento.nombre,
       certificado_defuncion: persona?.certificado_defuncion,
       ID_MUNICIPIO: persona.municipio?.id_municipio,
       ID_MUNICIPIO_DEFUNCION: persona?.municipio_defuncion?.id_municipio!,
       ID_DEPARTAMENTO_DEFUNCION: persona?.municipio_defuncion?.departamento?.id_departamento!,
       fallecido: persona.fallecido,
       estadoAfiliacion: persona.detallePersona[0]?.estadoAfiliacion?.codigo,
+      /* CANTIDAD_DEPENDIENTES: persona.cantidad_dependientes, */
+      //ESTADO: detallePersona.eliminado,
     };
 
 

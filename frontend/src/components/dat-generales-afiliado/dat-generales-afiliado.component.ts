@@ -279,11 +279,7 @@ export class DatGeneralesAfiliadoComponent implements OnInit {
       for (let i of this.datos.value.refpers) {
         temp = this.splitDireccionResidencia(i);
 
-        if (i.discapacidad == "SI") {
-          this.discapacidad = true;
-        } else if (i.discapacidad == "NO") {
-          this.discapacidad = false
-        }
+        this.discapacidad = i.discapacidad == "SI" ? true : (i.discapacidad == "NO" ? false : this.discapacidad);
 
         const addressGroup = generateAddressFormGroup(temp);
         const discapacidadesArray = addressGroup.get('discapacidades') as FormArray;

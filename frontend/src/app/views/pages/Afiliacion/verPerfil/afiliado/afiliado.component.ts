@@ -11,11 +11,12 @@ export class AfiliadoComponent {
   currentStepIndex = 0;
 
   steps = [
-    { label: 'Constancias', isActive: true },
+    { label: 'Fuentes De Ingreso', isActive: true },
     { label: 'Beneficiarios', isActive: true },
-    { label: 'Ahorro', isActive: true },
     { label: 'Colegios Magisteriales', isActive: true },
     { label: 'Referencias Personales', isActive: true },
+    { label: 'Ahorro', isActive: true },
+    { label: 'Constancias', isActive: true },
   ];
 
   onStepChange(index: number) {

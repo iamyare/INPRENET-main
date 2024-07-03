@@ -195,7 +195,8 @@ export class EditDatosGeneralesComponent implements OnInit {
             id_departamento_residencia: result.id_departamento_residencia,
             id_municipio_residencia: result.ID_MUNICIPIO,
             fallecido: result.fallecido,
-            raza: result.RAZA,
+            grupo_etnico: result.GRUPO_ETNICO,
+            grado_academico: result.GRADO_ACADEMICO,
             discapacidad: result.TIPO_DISCAPACIDAD ? "SI" : "NO",
             tipo_discapacidad: result.TIPO_DISCAPACIDAD,
           };

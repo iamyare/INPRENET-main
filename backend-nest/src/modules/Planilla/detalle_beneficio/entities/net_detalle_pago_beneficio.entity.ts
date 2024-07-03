@@ -3,9 +3,9 @@ import { Net_Planilla } from "../../planilla/entities/net_planilla.entity";
 import { Net_Detalle_Beneficio_Afiliado } from "./net_detalle_beneficio_afiliado.entity";
 
 @Entity({ name: 'NET_DETALLE_PAGO_BENEFICIO' })
-@Check("CK_ESTADO_DETBEN",`ESTADO IN ('PAGADA', 'NO PAGADA', 'EN PRELIMINAR', 'EN PLANILLA')`)
+@Check("CK_ESTADO_DETBEN", `ESTADO IN ('PAGADA', 'NO PAGADA', 'EN PRELIMINAR', 'EN PLANILLA')`)
 export class Net_Detalle_Pago_Beneficio {
-    @PrimaryGeneratedColumn({type: 'int',name: 'ID_BENEFICIO_PLANILLA', primaryKeyConstraintName: 'PK_benPlan_detPagB'})
+    @PrimaryGeneratedColumn({ type: 'int', name: 'ID_BENEFICIO_PLANILLA', primaryKeyConstraintName: 'PK_BENPLAN_DETPLANB' })
     id_beneficio_planilla: number;
 
     @Column({ default: "NO PAGADA", name: 'ESTADO' })
@@ -16,12 +16,17 @@ export class Net_Detalle_Pago_Beneficio {
 
     @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true, name: 'MONTO_A_PAGAR' })
     monto_a_pagar: number;
-    
+
     @ManyToOne(() => Net_Planilla, planilla => planilla.detallepagobeneficio, { cascade: true })
-    @JoinColumn({ name: 'ID_PLANILLA', foreignKeyConstraintName:"FK_ID_PLANILLA_DETPAGBEN" })
+    @JoinColumn({ name: 'ID_PLANILLA', foreignKeyConstraintName: "FK_ID_PLANILLA_DETPAGBEN" })
     planilla: Net_Planilla;
 
+
     @ManyToOne(() => Net_Detalle_Beneficio_Afiliado, detalleBeneficioAfiliado => detalleBeneficioAfiliado.detalleBeneficio, { cascade: true })
-    @JoinColumn({ name: 'ID_BENEFICIO_PLANILLA_AFIL', foreignKeyConstraintName:"FK_ID_BEN_PLAN_AFIL_DETPAGBEN" })
+    @JoinColumn({ name: 'ID_PERSONA', referencedColumnName: 'ID_PERSONA', foreignKeyConstraintName: "FK_ID_BEN_PLAN_AFIL_DETPAGBEN" })
+    @JoinColumn({ name: 'ID_CAUSANTE', referencedColumnName: 'ID_CAUSANTE', foreignKeyConstraintName: "FK_ID_BEN_PLAN_AFIL_DETPAGBEN" })
+    @JoinColumn({ name: 'ID_DETALLE_PERSONA', referencedColumnName: 'ID_DETALLE_PERSONA', foreignKeyConstraintName: "FK_ID_BEN_PLAN_AFIL_DETPAGBEN" })
+    @JoinColumn({ name: 'ID_BENEFICIO', referencedColumnName: 'ID_BENEFICIO', foreignKeyConstraintName: "FK_ID_BEN_PLAN_AFIL_DETPAGBEN" })
     detalleBeneficioAfiliado: string;
 }
+

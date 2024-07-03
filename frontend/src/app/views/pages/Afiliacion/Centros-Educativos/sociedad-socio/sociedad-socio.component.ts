@@ -14,11 +14,7 @@ export class SociedadSocioComponent implements OnInit {
   municipios: any = [];
 
   fields: FieldArrays[] = [
-    { name: 'nombreSociedad', label: 'Nombre de la Sociedad', icon: 'business', layout: { row: 0, col: 4 }, type: 'text', value: '', validations: [] },
-    { name: 'rtn', label: 'RTN', icon: 'badge', layout: { row: 0, col: 4 }, type: 'text', value: '', validations: [Validators.required, Validators.maxLength(14), Validators.minLength(14), Validators.pattern('^[0-9]{14}$')] },
-    { name: 'telefonoSociedad', label: 'Teléfono de la Sociedad', icon: 'phone', layout: { row: 0, col: 4 }, type: 'text', value: '', validations: [] },
-    { name: 'correoSociedad', label: 'Correo de la Sociedad', icon: 'email', layout: { row: 1, col: 12 }, type: 'text', value: '', validations: [Validators.email] },
-    { name: 'nombreSocio', label: 'Nombre del Socio', icon: 'person', layout: { row: 2, col: 4 }, type: 'text', value: '', validations: [Validators.required] },
+    { name: 'nombreSocio', label: 'Nombre', icon: 'person', layout: { row: 2, col: 4 }, type: 'text', value: '', validations: [Validators.required] },
     { name: 'apellido', label: 'Apellido', icon: 'person', layout: { row: 2, col: 4 }, type: 'text', value: '', validations: [Validators.required] },
     { name: 'porcentajeParticipacion', label: 'Porcentaje de Participación', icon: 'percent', layout: { row: 2, col: 4 }, type: 'number', value: '', validations: [Validators.required, Validators.min(0), Validators.max(100)] },
     { name: 'dni', label: 'DNI', icon: 'badge', layout: { row: 3, col: 6 }, type: 'text', value: '', validations: [Validators.required, Validators.pattern('^[0-9]*$')] },
@@ -26,8 +22,8 @@ export class SociedadSocioComponent implements OnInit {
     { name: 'barrioAvenida', label: 'Barrio / Avenida', icon: 'location_city', layout: { row: 4, col: 6 }, type: 'text', value: '', validations: [] },
     { name: 'grupoCalle', label: 'Grupo / Calle', icon: 'streetview', layout: { row: 4, col: 6 }, type: 'text', value: '', validations: [] },
     { name: 'numeroCasa', label: 'N° de Casa', icon: 'home', layout: { row: 5, col: 6 }, type: 'number', value: '', validations: [] },
-    { name: 'telefonoSocio', label: 'Teléfono del Socio', icon: 'phone', layout: { row: 5, col: 6 }, type: 'text', value: '', validations: [] },
-    { name: 'emailSocio', label: 'Correo del Socio', icon: 'email', layout: { row: 6, col: 12 }, type: 'text', value: '', validations: [Validators.email] },
+    { name: 'telefonoSocio', label: 'Teléfono', icon: 'phone', layout: { row: 5, col: 6 }, type: 'text', value: '', validations: [] },
+    { name: 'emailSocio', label: 'Correo', icon: 'email', layout: { row: 6, col: 12 }, type: 'text', value: '', validations: [Validators.email] },
     { name: 'departamento', label: 'Departamento', icon: 'location_city', layout: { row: 6, col: 6 }, type: 'select', value: '', options: [], validations: [Validators.required] },
     { name: 'municipio', label: 'Municipio', icon: 'location_city', layout: { row: 6, col: 6 }, type: 'select', value: '', options: [], validations: [Validators.required] },
     { name: 'fechaIngreso', label: 'Fecha de Ingreso', icon: 'calendar_today', layout: { row: 7, col: 6 }, type: 'date', value: '', validations: [Validators.required] },

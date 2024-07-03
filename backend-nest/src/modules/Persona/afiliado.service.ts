@@ -611,7 +611,6 @@ export class AfiliadoService {
       tipo_defuncion: persona.tipo_defuncion,
       fecha_defuncion: persona.fecha_defuncion,
       fecha_vencimiento_ident: persona.fecha_vencimiento_ident,
-      motivo_fallecimiento: persona.causa_fallecimiento.nombre,
       certificado_defuncion: persona?.certificado_defuncion,
       ID_MUNICIPIO: persona.municipio?.id_municipio,
       ID_MUNICIPIO_DEFUNCION: persona?.municipio_defuncion?.id_municipio!,

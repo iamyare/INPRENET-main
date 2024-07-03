@@ -19,7 +19,7 @@ export class DatosGeneralesCentroComponent implements OnInit {
   fields: FieldConfig[] = [
     {
       name: 'nombre_centro_trabajo',
-      label: 'Nombre del Centro de Trabajo',
+      label: 'Nombre del Centro Educaditvo',
       type: 'text',
       icon: 'business',
       value: '',
@@ -302,9 +302,10 @@ export class DatosGeneralesCentroComponent implements OnInit {
     const jornadaField = this.fields.find(field => field.name === 'tipo_jornada');
     if (jornadaField) {
       jornadaField.options = jornadas.map(jornada => ({
-        label: jornada.nombre,
-        value: jornada.id_jornada
+        label: jornada.label,
+        value: jornada.value
       }));
+
     }
   }
 
@@ -313,8 +314,8 @@ export class DatosGeneralesCentroComponent implements OnInit {
     const modalidadField = this.fields.find(field => field.name === 'modalidad_ensenanza');
     if (modalidadField) {
       modalidadField.options = nivelesEducativos.map(nivel => ({
-        label: nivel.nombre,
-        value: nivel.id_nivel
+        label: nivel.label,
+        value: nivel.value
       }));
     }
   }

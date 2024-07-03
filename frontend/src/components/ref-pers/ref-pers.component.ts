@@ -66,7 +66,6 @@ export function generateRefPerFormGroup(datos?: any): FormGroup {
     ]),
     discapacidad: new FormControl(datos?.discapacidad, [
       Validators.maxLength(20),
-      Validators.pattern(/^(MOTRIZ|AUDITIVA|VISUAL|INTELECTUAL|MENTAL|PSICOSOCIAL|MÚLTIPLE|SENSORIAL)$/)
     ]),
     parentesco: new FormControl(datos?.parentesco, [
       Validators.required,
@@ -83,7 +82,7 @@ export function generateRefPerFormGroup(datos?: any): FormGroup {
     es_afiliado: new FormControl(datos?.es_afiliado || false),
     trabaja: new FormControl(datos?.trabaja || false),
     tipo: new FormControl(datos?.tipo || false),
-    discapacidades: new FormArray([]) // Añadido FormArray discapacidades
+    discapacidades: new FormArray([])
   });
 }
 

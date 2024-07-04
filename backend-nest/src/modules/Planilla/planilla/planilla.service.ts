@@ -1329,7 +1329,7 @@ WHERE
     try {
       const query = `SELECT
       COALESCE(deducciones."ID_PERSONA", beneficios."ID_PERSONA") AS "ID_PERSONA",
-      COALESCE(deducciones."DNI", beneficios."DNI") AS "DNI",
+      COALESCE(deducciones."N_IDENTIFICACION", beneficios."N_IDENTIFICACION") AS "DNI",
       COALESCE(deducciones."NOMBRE_COMPLETO", beneficios."NOMBRE_COMPLETO") AS "NOMBRE_COMPLETO",
       COALESCE(beneficios."Total Beneficio", 0) AS "Total Beneficio",
       COALESCE(deducciones."Total Deducciones", 0) AS "Total Deducciones",
@@ -1338,7 +1338,7 @@ WHERE
   FROM
       (SELECT
           afil."ID_PERSONA",
-          afil."DNI",
+          afil."N_IDENTIFICACION",
           afil."CORREO_1",
           TRIM(
               afil."PRIMER_NOMBRE" || ' ' ||
@@ -1352,12 +1352,17 @@ WHERE
       FROM
           "NET_PERSONA" afil
       LEFT JOIN
-          "net_detalle_persona" detP ON afil."ID_PERSONA" = detP."ID_PERSONA"
+          "NET_DETALLE_PERSONA" detP ON afil."ID_PERSONA" = detP."ID_PERSONA"
       INNER JOIN "NET_DETALLE_BENEFICIO_AFILIADO" detBA ON 
-          detP."ID_PERSONA" = detBA."ID_BENEFICIARIO" AND
-          detP."ID_CAUSANTE" = detBA."ID_CAUSANTE"
+          detP."ID_PERSONA" = detBA."ID_PERSONA" AND
+          detP."ID_CAUSANTE" = detBA."ID_CAUSANTE" AND
+          detP."ID_DETALLE_PERSONA" = detBA."ID_DETALLE_PERSONA" 
       LEFT JOIN
-          "NET_DETALLE_PAGO_BENEFICIO" detBs ON detBA."ID_DETALLE_BEN_AFIL" = detBs."ID_BENEFICIO_PLANILLA_AFIL"
+          "NET_DETALLE_PAGO_BENEFICIO" detBs ON 
+          detBs."ID_PERSONA" = detBA."ID_PERSONA" AND
+          detBs."ID_CAUSANTE" = detBA."ID_CAUSANTE" AND
+          detBs."ID_DETALLE_PERSONA" = detBA."ID_DETALLE_PERSONA" 
+          
       LEFT JOIN
           "NET_PLANILLA" pla ON detBs."ID_PLANILLA" = pla."ID_PLANILLA"
       WHERE
@@ -1365,7 +1370,7 @@ WHERE
           pla."CODIGO_PLANILLA" = '${codPlanilla}'
       GROUP BY
           afil."ID_PERSONA",
-          afil."DNI",
+          afil."N_IDENTIFICACION",
           afil."CORREO_1",
           pla."FECHA_CIERRE",
           TRIM(
@@ -1380,8 +1385,8 @@ WHERE
       ) beneficios
   FULL OUTER JOIN
       (SELECT
-          afil."ID_PERSONA",
-          afil."DNI",
+         afil."ID_PERSONA",
+          afil."N_IDENTIFICACION",
           afil."CORREO_1",
           TRIM(
               afil."PRIMER_NOMBRE" || ' ' ||
@@ -1403,7 +1408,7 @@ WHERE
           pla."CODIGO_PLANILLA" = '${codPlanilla}'
       GROUP BY
           afil."ID_PERSONA",
-          afil."DNI",
+          afil."N_IDENTIFICACION",
           afil."CORREO_1",
           pla."FECHA_CIERRE",
           TRIM(
@@ -1415,8 +1420,7 @@ WHERE
           )
       HAVING
           SUM(COALESCE(detDs."MONTO_APLICADO", 0)) > 0
-      ) deducciones
-  ON deducciones."ID_PERSONA" = beneficios."ID_PERSONA"`;
+      ) deducciones ON deducciones."ID_PERSONA" = beneficios."ID_PERSONA"`;
 
       const result = await this.entityManager.query(query);
       return result;

@@ -1325,103 +1325,116 @@ WHERE
     }
   }
 
-  async ObtenerPlanDefinPersonas(codPlanilla: string): Promise<any> {
+  async ObtenerPlanDefinPersonas(codPlanilla: string, page?: number, limit?: number): Promise<any> {
+    let query = `
+      SELECT
+        COALESCE(deducciones."ID_PERSONA", beneficios."ID_PERSONA") AS "ID_PERSONA",
+        COALESCE(deducciones."N_IDENTIFICACION", beneficios."N_IDENTIFICACION") AS "DNI",
+        COALESCE(deducciones."NOMBRE_COMPLETO", beneficios."NOMBRE_COMPLETO") AS "NOMBRE_COMPLETO",
+        COALESCE(beneficios."Total Beneficio", 0) AS "Total Beneficio",
+        COALESCE(deducciones."Total Deducciones", 0) AS "Total Deducciones",
+        COALESCE(deducciones."CORREO_1", beneficios."CORREO_1") AS "CORREO_1",
+        COALESCE(deducciones."FECHA_CIERRE", beneficios."FECHA_CIERRE") AS "FECHA_CIERRE"
+      FROM
+        (SELECT
+            afil."ID_PERSONA",
+            afil."N_IDENTIFICACION",
+            afil."CORREO_1",
+            TRIM(
+                afil."PRIMER_NOMBRE" || ' ' ||
+                COALESCE(afil."SEGUNDO_NOMBRE", '') || ' ' ||
+                COALESCE(afil."TERCER_NOMBRE", '') || ' ' ||
+                afil."PRIMER_APELLIDO" || ' ' ||
+                COALESCE(afil."SEGUNDO_APELLIDO", '')
+            ) AS "NOMBRE_COMPLETO",
+            SUM(COALESCE(detBs."MONTO_A_PAGAR", 0)) AS "Total Beneficio",
+            pla."FECHA_CIERRE"
+        FROM
+            "NET_PERSONA" afil
+        LEFT JOIN
+            "NET_DETALLE_PERSONA" detP ON afil."ID_PERSONA" = detP."ID_PERSONA"
+        INNER JOIN "NET_DETALLE_BENEFICIO_AFILIADO" detBA ON
+            detP."ID_PERSONA" = detBA."ID_PERSONA" AND
+            detP."ID_CAUSANTE" = detBA."ID_CAUSANTE" AND
+            detP."ID_DETALLE_PERSONA" = detBA."ID_DETALLE_PERSONA"
+        LEFT JOIN
+            "NET_DETALLE_PAGO_BENEFICIO" detBs ON
+            detBs."ID_PERSONA" = detBA."ID_PERSONA" AND
+            detBs."ID_CAUSANTE" = detBA."ID_CAUSANTE" AND
+            detBs."ID_DETALLE_PERSONA" = detBA."ID_DETALLE_PERSONA"
+        LEFT JOIN
+            "NET_PLANILLA" pla ON detBs."ID_PLANILLA" = pla."ID_PLANILLA"
+        WHERE
+            detBs."ESTADO" = 'PAGADA' AND
+            pla."CODIGO_PLANILLA" = '${codPlanilla}'
+        GROUP BY
+            afil."ID_PERSONA",
+            afil."N_IDENTIFICACION",
+            afil."CORREO_1",
+            pla."FECHA_CIERRE",
+            TRIM(
+                afil."PRIMER_NOMBRE" || ' ' ||
+                COALESCE(afil."SEGUNDO_NOMBRE", '') || ' ' ||
+                COALESCE(afil."TERCER_NOMBRE", '') || ' ' ||
+                afil."PRIMER_APELLIDO" || ' ' ||
+                COALESCE(afil."SEGUNDO_APELLIDO", '')
+            )
+        HAVING
+            SUM(COALESCE(detBs."MONTO_A_PAGAR", 0)) > 0
+        ) beneficios
+      FULL OUTER JOIN
+        (SELECT
+            afil."ID_PERSONA",
+            afil."N_IDENTIFICACION",
+            afil."CORREO_1",
+            TRIM(
+                afil."PRIMER_NOMBRE" || ' ' ||
+                COALESCE(afil."SEGUNDO_NOMBRE", '') || ' ' ||
+                COALESCE(afil."TERCER_NOMBRE", '') || ' ' ||
+                afil."PRIMER_APELLIDO" || ' ' ||
+                COALESCE(afil."SEGUNDO_APELLIDO", '')
+            ) AS "NOMBRE_COMPLETO",
+            SUM(COALESCE(detDs."MONTO_APLICADO", 0)) AS "Total Deducciones",
+            pla."FECHA_CIERRE"
+        FROM
+            "NET_PERSONA" afil
+        LEFT JOIN
+            "NET_DETALLE_DEDUCCION" detDs ON afil."ID_PERSONA" = detDs."ID_PERSONA"
+        LEFT JOIN
+            "NET_PLANILLA" pla ON detDs."ID_PLANILLA" = pla."ID_PLANILLA"
+        WHERE
+            detDs."ESTADO_APLICACION" = 'COBRADA' AND
+            pla."CODIGO_PLANILLA" = '${codPlanilla}'
+        GROUP BY
+            afil."ID_PERSONA",
+            afil."N_IDENTIFICACION",
+            afil."CORREO_1",
+            pla."FECHA_CIERRE",
+            TRIM(
+                afil."PRIMER_NOMBRE" || ' ' ||
+                COALESCE(afil."SEGUNDO_NOMBRE", '') || ' ' ||
+                COALESCE(afil."TERCER_NOMBRE", '') || ' ' ||
+                afil."PRIMER_APELLIDO" || ' ' ||
+                COALESCE(afil."SEGUNDO_APELLIDO", '')
+            )
+        HAVING
+            SUM(COALESCE(detDs."MONTO_APLICADO", 0)) > 0
+        ) deducciones ON deducciones."ID_PERSONA" = beneficios."ID_PERSONA"
+    `;
+  
+    if (page && limit) {
+      const offset = (page - 1) * limit + 1;
+      const nextOffset = offset + limit - 1;
+      query = `
+        SELECT * FROM (
+          ${query},
+          ROW_NUMBER() OVER (ORDER BY COALESCE(deducciones."ID_PERSONA", beneficios."ID_PERSONA")) AS rnum
+        )
+        WHERE rnum >= ${offset} AND rnum <= ${nextOffset}
+      `;
+    }
+  
     try {
-      const query = `SELECT
-      COALESCE(deducciones."ID_PERSONA", beneficios."ID_PERSONA") AS "ID_PERSONA",
-      COALESCE(deducciones."N_IDENTIFICACION", beneficios."N_IDENTIFICACION") AS "DNI",
-      COALESCE(deducciones."NOMBRE_COMPLETO", beneficios."NOMBRE_COMPLETO") AS "NOMBRE_COMPLETO",
-      COALESCE(beneficios."Total Beneficio", 0) AS "Total Beneficio",
-      COALESCE(deducciones."Total Deducciones", 0) AS "Total Deducciones",
-      COALESCE(deducciones."CORREO_1", beneficios."CORREO_1") AS "CORREO_1",
-      COALESCE(deducciones."FECHA_CIERRE", beneficios."FECHA_CIERRE") AS "FECHA_CIERRE"
-  FROM
-      (SELECT
-          afil."ID_PERSONA",
-          afil."N_IDENTIFICACION",
-          afil."CORREO_1",
-          TRIM(
-              afil."PRIMER_NOMBRE" || ' ' ||
-              COALESCE(afil."SEGUNDO_NOMBRE", '') || ' ' ||
-              COALESCE(afil."TERCER_NOMBRE", '') || ' ' ||
-              afil."PRIMER_APELLIDO" || ' ' ||
-              COALESCE(afil."SEGUNDO_APELLIDO", '')
-          ) AS "NOMBRE_COMPLETO",
-          SUM(COALESCE(detBs."MONTO_A_PAGAR", 0)) AS "Total Beneficio",
-          pla."FECHA_CIERRE"
-      FROM
-          "NET_PERSONA" afil
-      LEFT JOIN
-          "NET_DETALLE_PERSONA" detP ON afil."ID_PERSONA" = detP."ID_PERSONA"
-      INNER JOIN "NET_DETALLE_BENEFICIO_AFILIADO" detBA ON 
-          detP."ID_PERSONA" = detBA."ID_PERSONA" AND
-          detP."ID_CAUSANTE" = detBA."ID_CAUSANTE" AND
-          detP."ID_DETALLE_PERSONA" = detBA."ID_DETALLE_PERSONA" 
-      LEFT JOIN
-          "NET_DETALLE_PAGO_BENEFICIO" detBs ON 
-          detBs."ID_PERSONA" = detBA."ID_PERSONA" AND
-          detBs."ID_CAUSANTE" = detBA."ID_CAUSANTE" AND
-          detBs."ID_DETALLE_PERSONA" = detBA."ID_DETALLE_PERSONA" 
-          
-      LEFT JOIN
-          "NET_PLANILLA" pla ON detBs."ID_PLANILLA" = pla."ID_PLANILLA"
-      WHERE
-          detBs."ESTADO" = 'PAGADA' AND
-          pla."CODIGO_PLANILLA" = '${codPlanilla}'
-      GROUP BY
-          afil."ID_PERSONA",
-          afil."N_IDENTIFICACION",
-          afil."CORREO_1",
-          pla."FECHA_CIERRE",
-          TRIM(
-              afil."PRIMER_NOMBRE" || ' ' ||
-              COALESCE(afil."SEGUNDO_NOMBRE", '') || ' ' ||
-              COALESCE(afil."TERCER_NOMBRE", '') || ' ' ||
-              afil."PRIMER_APELLIDO" || ' ' ||
-              COALESCE(afil."SEGUNDO_APELLIDO", '')
-          )
-      HAVING
-          SUM(COALESCE(detBs."MONTO_A_PAGAR", 0)) > 0
-      ) beneficios
-  FULL OUTER JOIN
-      (SELECT
-         afil."ID_PERSONA",
-          afil."N_IDENTIFICACION",
-          afil."CORREO_1",
-          TRIM(
-              afil."PRIMER_NOMBRE" || ' ' ||
-              COALESCE(afil."SEGUNDO_NOMBRE", '') || ' ' ||
-              COALESCE(afil."TERCER_NOMBRE", '') || ' ' ||
-              afil."PRIMER_APELLIDO" || ' ' ||
-              COALESCE(afil."SEGUNDO_APELLIDO", '')
-          ) AS "NOMBRE_COMPLETO",
-          SUM(COALESCE(detDs."MONTO_APLICADO", 0)) AS "Total Deducciones",
-          pla."FECHA_CIERRE"
-      FROM
-          "NET_PERSONA" afil
-      LEFT JOIN
-          "NET_DETALLE_DEDUCCION" detDs ON afil."ID_PERSONA" = detDs."ID_PERSONA"
-      LEFT JOIN
-          "NET_PLANILLA" pla ON detDs."ID_PLANILLA" = pla."ID_PLANILLA"
-      WHERE
-      detDs."ESTADO_APLICACION" = 'COBRADA' AND
-          pla."CODIGO_PLANILLA" = '${codPlanilla}'
-      GROUP BY
-          afil."ID_PERSONA",
-          afil."N_IDENTIFICACION",
-          afil."CORREO_1",
-          pla."FECHA_CIERRE",
-          TRIM(
-              afil."PRIMER_NOMBRE" || ' ' ||
-              COALESCE(afil."SEGUNDO_NOMBRE", '') || ' ' ||
-              COALESCE(afil."TERCER_NOMBRE", '') || ' ' ||
-              afil."PRIMER_APELLIDO" || ' ' ||
-              COALESCE(afil."SEGUNDO_APELLIDO", '')
-          )
-      HAVING
-          SUM(COALESCE(detDs."MONTO_APLICADO", 0)) > 0
-      ) deducciones ON deducciones."ID_PERSONA" = beneficios."ID_PERSONA"`;
-
       const result = await this.entityManager.query(query);
       return result;
     } catch (error) {
@@ -1429,6 +1442,10 @@ WHERE
       throw new InternalServerErrorException('Se produjo un error al obtener los totales por planilla.');
     }
   }
+  
+  
+  
+  
 
   /* async obtenerAfilOrdinaria(periodoInicio: string, periodoFinalizacion: string): Promise<any> {
     const query = `

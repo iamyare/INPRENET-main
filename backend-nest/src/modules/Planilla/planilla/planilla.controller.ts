@@ -515,18 +515,22 @@ export class PlanillaController {
   }
 
   @Get('Definitiva/personas/:term')
-  async ObtenerPlanDefinPersonas(
-    @Param('term') term: string
-  ) {
-    if (!term) {
-      throw new BadRequestException('Los parámetros idPlanilla son obligatorios');
-    }
-    try {
-      return await this.planillaService.ObtenerPlanDefinPersonas(term);
-    } catch (error) {
-      throw new InternalServerErrorException('Error al obtener planilla preliminar');
-    }
+async ObtenerPlanDefinPersonas(
+  @Param('term') term: string,
+  @Query('page') page?: number,
+  @Query('limit') limit?: number
+) {
+  if (!term) {
+    throw new BadRequestException('Los parámetros idPlanilla son obligatorios');
   }
+  try {
+    return await this.planillaService.ObtenerPlanDefinPersonas(term, page, limit);
+  } catch (error) {
+    throw new InternalServerErrorException('Error al obtener planilla preliminar');
+  }
+}
+
+
 
   /* @Get('planillaOrdinaria')
   async obtenerAfilOrdinaria(

@@ -1239,53 +1239,82 @@ WHERE
     }
   }
 
+  async getPlanillaById(id_planilla: number) {
+    const planilla = await this.planillaRepository.findOne({ where: { id_planilla } });
 
+    if (!planilla) {
+      throw new NotFoundException(`Planilla con ID ${id_planilla} no encontrada`);
+    }
+
+    const totalBeneficios = await this.detallePagoBeneficioRepository
+      .createQueryBuilder('detallePagoBeneficio')
+      .select('SUM(detallePagoBeneficio.monto_a_pagar)', 'totalBeneficios')
+      .where('detallePagoBeneficio.planilla.id_planilla = :id_planilla', { id_planilla })
+      .getRawOne();
+
+    const totalDeducciones = await this.detalleDeduccionRepository
+      .createQueryBuilder('detalleDeduccion')
+      .select('SUM(detalleDeduccion.monto_aplicado)', 'totalDeducciones')
+      .where('detalleDeduccion.planilla.id_planilla = :id_planilla', { id_planilla })
+      .getRawOne();
+
+    return {
+      planilla,
+      totalBeneficios: totalBeneficios.totalBeneficios || 0,
+      totalDeducciones: totalDeducciones.totalDeducciones || 0,
+    };
+  }
 
   async calcularTotalPlanilla(idPlanilla: string): Promise<any> {
     const query = `
       SELECT
-      SUM(beneficio."Total Beneficio") AS "Total Beneficio",
-      SUM(deduccion."Total Deducciones") AS "Total Deducciones",
-      SUM(beneficio."Total Beneficio") - SUM(deduccion."Total Deducciones") AS "Total Planilla"
-    FROM
-      (SELECT
-        afil."ID_PERSONA",
-        SUM(COALESCE(detBs."MONTO_A_PAGAR", 0)) AS "Total Beneficio"
+        SUM(beneficio."Total Beneficio") AS "Total Beneficio",
+        SUM(deduccion."Total Deducciones") AS "Total Deducciones",
+        SUM(beneficio."Total Beneficio") - SUM(deduccion."Total Deducciones") AS "Total Planilla"
       FROM
+        (SELECT
+          afil."ID_PERSONA",
+          SUM(COALESCE(detBs."MONTO_A_PAGAR", 0)) AS "Total Beneficio"
+        FROM
           "NET_PERSONA" afil
-      LEFT JOIN
-          "net_detalle_persona" detP ON afil."ID_PERSONA" = detP."ID_PERSONA"
-      INNER JOIN "NET_DETALLE_BENEFICIO_AFILIADO" detBA ON 
-          detP."ID_PERSONA" = detBA."ID_BENEFICIARIO" AND
-          detP."ID_CAUSANTE" = detBA."ID_CAUSANTE"
-      LEFT JOIN
-          "NET_DETALLE_PAGO_BENEFICIO" detBs ON detBA."ID_DETALLE_BEN_AFIL" = detBs."ID_BENEFICIO_PLANILLA_AFIL"
-          AND detBs."ID_PLANILLA" = :idPlanilla
-      LEFT JOIN
+        LEFT JOIN
+          "NET_DETALLE_PERSONA" detP ON afil."ID_PERSONA" = detP."ID_PERSONA"
+        INNER JOIN 
+          "NET_DETALLE_BENEFICIO_AFILIADO" detBA ON 
+          detP."ID_PERSONA" = detBA."ID_PERSONA" AND
+          detP."ID_CAUSANTE" = detBA."ID_CAUSANTE" AND
+          detP."ID_DETALLE_PERSONA" = detBA."ID_DETALLE_PERSONA"
+        LEFT JOIN
+          "NET_DETALLE_PAGO_BENEFICIO" detBs ON 
+          detBs."ID_PERSONA" = detBA."ID_PERSONA" AND
+          detBs."ID_CAUSANTE" = detBA."ID_CAUSANTE" AND
+          detBs."ID_DETALLE_PERSONA" = detBA."ID_DETALLE_PERSONA" AND
+          detBs."ID_PLANILLA" = $1
+        LEFT JOIN
           "NET_PLANILLA" pla ON detBs."ID_PLANILLA" = pla."ID_PLANILLA"
-      LEFT JOIN
+        LEFT JOIN
           "NET_TIPO_PLANILLA" tipoPlanilla ON tipoPlanilla."ID_TIPO_PLANILLA" = pla."ID_TIPO_PLANILLA"
-      WHERE tipoPlanilla."CLASE_PLANILLA" = 'EGRESO'
-      GROUP BY
-        afil."ID_PERSONA"
-      ) beneficio
-    INNER JOIN
-      (SELECT
-        afil."ID_PERSONA",
-        SUM(COALESCE(detDs."MONTO_APLICADO", 0)) AS "Total Deducciones"
-      FROM
-        "NET_PERSONA" afil
-      LEFT JOIN "NET_DETALLE_DEDUCCION" detDs ON afil."ID_PERSONA" = detDs."ID_PERSONA" AND detDs."ID_PLANILLA" = :idPlanilla
-      LEFT JOIN "NET_PLANILLA" planilla ON planilla."ID_PLANILLA" = detDs."ID_PLANILLA"
-      LEFT JOIN "NET_TIPO_PLANILLA" tipoPlanilla ON tipoPlanilla."ID_TIPO_PLANILLA" = planilla."ID_TIPO_PLANILLA"
-      WHERE tipoPlanilla."CLASE_PLANILLA" = 'EGRESO'
-      GROUP BY
-        afil."ID_PERSONA"
-      ) deduccion ON beneficio."ID_PERSONA" = deduccion."ID_PERSONA"
+        WHERE tipoPlanilla."CLASE_PLANILLA" = 'EGRESO'
+        GROUP BY
+          afil."ID_PERSONA"
+        ) beneficio
+      INNER JOIN
+        (SELECT
+          afil."ID_PERSONA",
+          SUM(COALESCE(detDs."MONTO_APLICADO", 0)) AS "Total Deducciones"
+        FROM
+          "NET_PERSONA" afil
+        LEFT JOIN "NET_DETALLE_DEDUCCION" detDs ON afil."ID_PERSONA" = detDs."ID_PERSONA" AND detDs."ID_PLANILLA" = $1
+        LEFT JOIN "NET_PLANILLA" planilla ON planilla."ID_PLANILLA" = detDs."ID_PLANILLA"
+        LEFT JOIN "NET_TIPO_PLANILLA" tipoPlanilla ON tipoPlanilla."ID_TIPO_PLANILLA" = planilla."ID_TIPO_PLANILLA"
+        WHERE tipoPlanilla."CLASE_PLANILLA" = 'EGRESO'
+        GROUP BY
+          afil."ID_PERSONA"
+        ) deduccion ON beneficio."ID_PERSONA" = deduccion."ID_PERSONA"
       `;
 
     try {
-      const result = await this.entityManager.query(query, [idPlanilla, idPlanilla]);
+      const result = await this.entityManager.query(query, [idPlanilla]);
       console.log(result);
 
       // Si esperas un solo resultado, puedes directamente devolver ese objeto.
@@ -1299,6 +1328,10 @@ WHERE
       throw new InternalServerErrorException('Se produjo un error al calcular el total de la planilla.');
     }
   }
+
+
+
+
   async ObtenerPlanDefin(codPlanilla: string): Promise<any> {
     try {
       if (codPlanilla) {

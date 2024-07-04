@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Query, Res, BadRequestException, InternalServerErrorException, HttpCode, HttpStatus, HttpException } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Query, Res, BadRequestException, InternalServerErrorException, HttpCode, HttpStatus, HttpException, NotFoundException, ParseIntPipe } from '@nestjs/common';
 import { PlanillaService } from './planilla.service';
 import { CreatePlanillaDto } from './dto/create-planilla.dto';
 import { UpdatePlanillaDto } from './dto/update-planilla.dto';
@@ -460,15 +460,16 @@ export class PlanillaController {
     }
   }
 
-  @Get('total/:id')
-  @HttpCode(HttpStatus.OK)
-  async obtenerTotalPlanilla(
-    @Param('id') idPlanilla: string
-  ) {
+  @Get('total/:id_planilla')
+  async getPlanilla(@Param('id_planilla', ParseIntPipe) id_planilla: number) {
     try {
-      return await this.planillaService.calcularTotalPlanilla(idPlanilla);
+      return await this.planillaService.getPlanillaById(id_planilla);
     } catch (error) {
-      throw new InternalServerErrorException('Error al obtener el total planilla');
+      
+      if (error instanceof NotFoundException) {
+        throw new NotFoundException(`Planilla con ID ${id_planilla} no encontrada`);
+      }
+      throw new InternalServerErrorException('Error interno del servidor');
     }
   }
 

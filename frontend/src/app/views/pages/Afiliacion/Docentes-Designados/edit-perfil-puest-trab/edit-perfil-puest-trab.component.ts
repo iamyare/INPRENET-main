@@ -151,6 +151,7 @@ export class EditPerfilPuestTrabComponent {
           fechaEgreso: this.datePipe.transform(item.fecha_egreso, 'dd/MM/yyyy') || 'Fecha no disponible',
           cargo: item.cargo,
         }));
+        this.getFilas().then(() => this.cargar());
       } catch (error) {
         this.toastr.error('Error al cargar los datos de los perfiles de los centros de trabajo');
         console.error('Error al obtener datos de los perfiles de los centros de trabajo', error);
@@ -162,9 +163,12 @@ export class EditPerfilPuestTrabComponent {
 
   ejecutarFuncionAsincronaDesdeOtroComponente(funcion: (data: any) => Promise<void>) {
     this.ejecF = funcion;
+
+
   }
 
   cargar() {
+    console.log(this.ejecF);
     if (this.ejecF) {
       this.ejecF(this.filas).then(() => { });
     }

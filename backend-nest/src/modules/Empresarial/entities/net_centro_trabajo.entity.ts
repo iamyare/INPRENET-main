@@ -12,8 +12,8 @@ import { net_modulo } from 'src/modules/usuario/entities/net_modulo.entity';
 import { Net_Estado_Centro_Trabajo } from './net_estado_centro_trabajo.entity';
 
 @Entity({ name: 'NET_CENTRO_TRABAJO' })
-@Check(`TIPO IN ('EDUCACION', 'INSTITUCION')`)
-@Check(`SECTOR_ECONOMICO IN ('PUBLICO', 'PRIVADO')`)
+@Check('CK_TIPO_CENTRO_TRAB', `TIPO IN ('EDUCACION', 'INSTITUCION')`)
+@Check('CK_SECTOR_ECONOMICO_TRAB', `SECTOR_ECONOMICO IN ('PUBLICO', 'PRIVADO')`)
 export class Net_Centro_Trabajo {
     @PrimaryGeneratedColumn({ type: 'int', name: 'ID_CENTRO_TRABAJO', primaryKeyConstraintName: 'PK_id_centro_trabajo' })
     id_centro_trabajo: number;

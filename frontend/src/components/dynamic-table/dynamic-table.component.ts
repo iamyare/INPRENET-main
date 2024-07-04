@@ -17,6 +17,8 @@ export class DynamicTableComponent implements OnInit, OnDestroy {
 
   @Input() getData?: any;
   @Input() data?: any;
+  filas: any = [];
+
   @Output() ejecutarFuncionAsincronaEvent: EventEmitter<(param: any) => Promise<void>> = new EventEmitter<(param: any) => Promise<void>>();
 
   @Input() columns: TableColumn[] = [];
@@ -52,7 +54,7 @@ export class DynamicTableComponent implements OnInit, OnDestroy {
 
   private destroy$: Subject<void> = new Subject<void>();
 
-  filas: any = [];
+
   formsearch = new FormControl('');
   searchResults: any = [];
 
@@ -87,6 +89,8 @@ export class DynamicTableComponent implements OnInit, OnDestroy {
   }
 
   public async ejecutarFuncionAsincrona(data: any) {
+    console.log(data);
+
     if (data) {
       this.filas = data
       this.filas?.map((objeto: any) => ({ ...objeto, isSelected: false }));

@@ -102,17 +102,17 @@ export class VerplancerradaComponent {
 
   getPlanilla = async () => {
     try {
-      this.getFilas("").then(async () => {
+      /* this.getFilas("").then(async () => {
         const temp = await this.cargar()
         this.verDat = true;
         return temp
-      });
+      }); */
       this.planillaService.getPlanillaDefin(this.datosFormateados.value.codigo_planilla).subscribe(
         {
           next: async (response) => {
             if (response) {
               this.detallePlanilla = response;
-              this.datosTabl = await this.getFilas(response.codigo_planilla);
+              this.getFilas(response.codigo_planilla).then(() => this.cargar());
               this.idPlanilla = response.id_planilla
               this.verDat = true;
             } else {
@@ -177,6 +177,7 @@ export class VerplancerradaComponent {
           correo_1: item.correo_1
         };
       });
+
       return this.dataPlan;
     } catch (error) {
       console.error("Error al obtener datos de deducciones", error);

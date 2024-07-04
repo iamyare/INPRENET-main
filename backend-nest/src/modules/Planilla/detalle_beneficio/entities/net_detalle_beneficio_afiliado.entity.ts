@@ -34,10 +34,10 @@ export class Net_Detalle_Beneficio_Afiliado {
     @Column({ nullable: true, name: 'METODO_PAGO' })
     metodo_pago: string;
 
-    @Column({ type: 'date', nullable: false, name: 'PERIODO_INICIO' })
+    @Column({ type: 'date', nullable: true, name: 'PERIODO_INICIO' })
     periodo_inicio: Date;
 
-    @Column({ type: 'date', nullable: false, name: 'PERIODO_FINALIZACION' })
+    @Column({ type: 'date', nullable: true, name: 'PERIODO_FINALIZACION' })
     periodo_finalizacion: Date;
 
     @Column({ nullable: true, default: 0, name: 'NUM_RENTAS_APLICADAS' })

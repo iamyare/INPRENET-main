@@ -4,15 +4,15 @@ import { Net_Usuario_Empresa } from './net_usuario_empresa.entity';
 
 @Entity({ name: 'NET_SESION' })
 export class NET_SESION {
-    @PrimaryGeneratedColumn()
+    @PrimaryGeneratedColumn({ name: 'ID_SESION', primaryKeyConstraintName: 'FK_SESION_NET_SESION' })
     id_sesion: number;
 
     @ManyToOne(() => NET_USUARIO_PRIVADA, usuarioPrivada => usuarioPrivada.sesiones, { nullable: true })
-    @JoinColumn({ name: 'id_usuario_privada' })
+    @JoinColumn({ name: 'id_usuario_privada', foreignKeyConstraintName: 'FK_ID_USUARIO_PRIV_NET_SESION' })
     usuarioPrivada: NET_USUARIO_PRIVADA | null;
 
     @ManyToOne(() => Net_Usuario_Empresa, usuario => usuario.sesiones, { nullable: true })
-    @JoinColumn({ name: 'id_usuario' })
+    @JoinColumn({ name: 'id_usuario', foreignKeyConstraintName: 'FK_ID_USUARIO_NET_SESION' })
     usuario: Net_Usuario_Empresa | null;
 
     @Column()
@@ -25,5 +25,5 @@ export class NET_SESION {
     fecha_expiracion: Date;
 
     @Column({ type: 'varchar', length: 20, default: 'activa' })
-    estado: string; 
+    estado: string;
 }

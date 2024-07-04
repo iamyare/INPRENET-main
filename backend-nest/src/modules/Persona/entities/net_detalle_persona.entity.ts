@@ -27,9 +27,9 @@ export class net_detalle_persona {
 
     // Relación Muchos a Uno consigo mismo
     @ManyToOne(() => net_detalle_persona, detalleAfiliado => detalleAfiliado.persona, { cascade: true })
-    @JoinColumn({ name: 'ID_CAUSANTE_PADRE', referencedColumnName: 'ID_CAUSANTE' })
-    @JoinColumn({ name: 'ID_CAUSANTE', referencedColumnName: 'ID_PERSONA' })
-    @JoinColumn({ name: 'ID_DETALLE_PERSONA', referencedColumnName: 'ID_DETALLE_PERSONA' })
+    @JoinColumn({ name: 'ID_CAUSANTE_PADRE', referencedColumnName: 'ID_CAUSANTE', foreignKeyConstraintName: 'FK_ID_CAUSANTE_DET_PER' })
+    @JoinColumn({ name: 'ID_CAUSANTE', referencedColumnName: 'ID_PERSONA', foreignKeyConstraintName: 'FK_ID_PERSONA_DET_PER' })
+    @JoinColumn({ name: 'ID_DETALLE_PERSONA', referencedColumnName: 'ID_DETALLE_PERSONA', foreignKeyConstraintName: 'FK_ID_DETALLE_PERSONA_DET_PER' })
     padreIdPersona: net_detalle_persona;
 
     @ManyToOne(() => Net_Tipo_Persona, tipoPersona => tipoPersona.detallesPersona)
@@ -43,7 +43,7 @@ export class net_detalle_persona {
     ID_CAUSANTE_PADRE: number;
 
     @ManyToOne(() => net_estado_afiliacion, estadoAfiliacion => estadoAfiliacion.persona)
-    @JoinColumn({ name: 'ID_ESTADO_AFILIACION' })
+    @JoinColumn({ name: 'ID_ESTADO_AFILIACION', foreignKeyConstraintName: 'FK_ID_ESTADO_AFILIAC_DET_PER' })
     estadoAfiliacion: net_estado_afiliacion;
 
     @Column({ type: 'int', nullable: true, name: 'ID_ESTADO_AFILIACION' })

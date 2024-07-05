@@ -1,6 +1,7 @@
 import { Check, Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 import { Net_Planilla } from "../../planilla/entities/net_planilla.entity";
 import { Net_Detalle_Beneficio_Afiliado } from "./net_detalle_beneficio_afiliado.entity";
+import { Net_Detalle_Deduccion } from "../../detalle-deduccion/entities/detalle-deduccion.entity";
 
 @Entity({ name: 'NET_DETALLE_PAGO_BENEFICIO' })
 @Check("CK_ESTADO_DETBEN", `ESTADO IN ('PAGADA', 'NO PAGADA', 'EN PRELIMINAR', 'EN PLANILLA')`)
@@ -21,6 +22,8 @@ export class Net_Detalle_Pago_Beneficio {
     @JoinColumn({ name: 'ID_PLANILLA', foreignKeyConstraintName: "FK_ID_PLANILLA_DETPAGBEN" })
     planilla: Net_Planilla;
 
+    @OneToMany(() => Net_Detalle_Deduccion, detalleDeduccion => detalleDeduccion.detalle_pago_beneficio)
+    detalleDeduccion: Net_Detalle_Deduccion[];
 
     @ManyToOne(() => Net_Detalle_Beneficio_Afiliado, detalleBeneficioAfiliado => detalleBeneficioAfiliado.detalleBeneficio, { cascade: true })
     @JoinColumn({ name: 'ID_PERSONA', referencedColumnName: 'ID_PERSONA', foreignKeyConstraintName: "FK_ID_BEN_PLAN_AFIL_DETPAGBEN" })

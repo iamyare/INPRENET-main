@@ -173,6 +173,18 @@ export class AfiliadoService {
     );
   }
 
+  getAllOtrasFuentesIngres(dni: string): Observable<any | void> {
+    const url = `${environment.API_URL}/api/Persona/getAllOtrasFuentesIngres/${dni}`;
+
+    return this.http.get<any>(
+      url,
+    ).pipe(
+      map((res: any) => {
+        return res;
+      })
+    );
+  }
+
   agregarFamiliar(dniPersona: string, familiarData: any): Observable<any> {
     return this.http.post(`${environment.API_URL}/api/Persona/agregarFamiliar/${dniPersona}`, familiarData);
   }

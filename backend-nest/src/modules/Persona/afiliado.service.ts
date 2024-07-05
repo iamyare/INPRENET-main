@@ -979,6 +979,21 @@ export class AfiliadoService {
 
     }
   }
+  async getAllOtrasFuentesIngres(n_identificacion: string): Promise<any[]> {
+    try {
+      const persona = await this.personaRepository.createQueryBuilder('persona')
+        .leftJoinAndSelect('persona.otra_fuente_ingreso', 'otra_fuente_ingreso')
+        .where('persona.n_identificacion = :n_identificacion', { n_identificacion })
+        .getOne();
+      if (!persona || !persona.otra_fuente_ingreso.length) {
+        return [];
+      }
+      return persona.otra_fuente_ingreso;
+    } catch (error) {
+      console.log(error);
+
+    }
+  }
 
   async inactivarPersona(idPersona: number, idCausante: number): Promise<void> {
     const estadoInactivo = await this.estadoAfiliacionRepository.findOne({ where: { Descripcion: 'INACTIVO' } });

@@ -16,12 +16,12 @@ import { convertirFechaInputs } from 'src/app/shared/functions/formatoFecha';
 import { unirNombres } from 'src/app/shared/functions/formatoNombresP';
 
 @Component({
-  selector: 'app-edit-perfil-puest-trab',
-  templateUrl: './edit-perfil-puest-trab.component.html',
-  styleUrls: ['./edit-perfil-puest-trab.component.scss'],
+  selector: 'ver-otras-fuentes-ingreso',
+  templateUrl: './ver-otras-fuentes-ingreso.component.html',
+  styleUrl: './ver-otras-fuentes-ingreso.component.scss',
   providers: [DatePipe] // Añadir el DatePipe como proveedor
 })
-export class EditPerfilPuestTrabComponent implements OnInit, OnDestroy, OnChanges {
+export class VerOtrasFuentesIngresoComponent implements OnInit, OnDestroy, OnChanges {
   @Input() Afiliado!: any;
 
   private subscriptions: Subscription = new Subscription();
@@ -72,42 +72,26 @@ export class EditPerfilPuestTrabComponent implements OnInit, OnDestroy, OnChange
 
     this.myColumns = [
       {
-        header: 'Nombre del Centro Trabajo',
-        col: 'nombre_centro_trabajo',
-        isEditable: true,
-        validationRules: [Validators.required]
-      },
-      {
-        header: 'Número de Acuerdo',
-        col: 'numeroAcuerdo',
+        header: 'Actividad Económica',
+        col: 'actividad_economica',
+        moneda: false,
         isEditable: true
       },
       {
-        header: 'Salario Base',
-        col: 'salarioBase',
+        header: 'Monto Ingreso',
+        col: 'monto_ingreso',
         moneda: true,
         isEditable: true
       },
       {
-        header: 'Fecha Ingreso',
-        col: 'fechaIngreso',
+        header: 'Observacion',
+        col: 'observacion',
         isEditable: true
       },
-      {
-        header: 'Fecha de Egreso',
-        col: 'fechaEgreso',
-        isEditable: true
-      },
-      {
-        header: 'Cargo',
-        col: 'cargo',
-        isEditable: true
-      }
     ];
 
     this.getCentrosTrabajo();
     this.getFilas().then(() => this.cargar());
-
   }
 
 
@@ -140,18 +124,13 @@ export class EditPerfilPuestTrabComponent implements OnInit, OnDestroy, OnChange
   async getFilas() {
     if (this.Afiliado.n_identificacion) {
       try {
-        const data = await this.svcAfiliado.getAllPerfCentroTrabajo(this.Afiliado.n_identificacion).toPromise();
+        const data = await this.svcAfiliado.getAllOtrasFuentesIngres(this.Afiliado.n_identificacion).toPromise();
         this.filas = data.map((item: any) => ({
-          id_perf_pers_centro_trab: item.id_perf_pers_centro_trab,
-          id_centro_trabajo: item.centroTrabajo.id_centro_trabajo,
-          nombre_centro_trabajo: item.centroTrabajo.nombre_centro_trabajo,
-          numeroAcuerdo: item.numero_acuerdo || 'No disponible',
-          salarioBase: item.salario_base,
-          fechaIngreso: this.datePipe.transform(item.fecha_ingreso, 'dd/MM/yyyy') || 'Fecha no disponible',
-          fechaEgreso: this.datePipe.transform(item.fecha_egreso, 'dd/MM/yyyy') || 'Fecha no disponible',
-          cargo: item.cargo,
+          id_otra_fuente_ingreso: item.id_otra_fuente_ingreso,
+          actividad_economica: item.actividad_economica,
+          monto_ingreso: item.monto_ingreso,
+          observacion: item.observacion
         }));
-
       } catch (error) {
         this.toastr.error('Error al cargar los datos de los perfiles de los centros de trabajo');
         console.error('Error al obtener datos de los perfiles de los centros de trabajo', error);
@@ -163,6 +142,8 @@ export class EditPerfilPuestTrabComponent implements OnInit, OnDestroy, OnChange
 
   ejecutarFuncionAsincronaDesdeOtroComponente(funcion: (data: any) => Promise<void>) {
     this.ejecF = funcion;
+
+
   }
 
   cargar() {
@@ -174,60 +155,50 @@ export class EditPerfilPuestTrabComponent implements OnInit, OnDestroy, OnChange
   async manejarAccionUno(row: any) {
     const campos = [
       {
-        nombre: 'id_centro_trabajo',
+        nombre: 'n_identificacion',
         tipo: 'list',
         requerido: true,
-        etiqueta: 'Nombre Centro Trabajo',
+        etiqueta: 'Número De Identificación',
         editable: true,
         opciones: this.centrosTrabajo,
         icono: 'business'
       },
       {
-        nombre: 'numeroAcuerdo',
+        nombre: 'nombre_completo',
         tipo: 'text',
         requerido: true,
-        etiqueta: 'Número Acuerdo',
+        etiqueta: 'Nombre Completo',
         editable: true,
         icono: 'description',
         validaciones: [Validators.required, Validators.maxLength(40)]
       },
       {
-        nombre: 'salarioBase',
+        nombre: 'actividad_economica',
         tipo: 'number',
         requerido: true,
-        etiqueta: 'Salario Base',
+        etiqueta: 'Actividad Económica',
         editable: true,
         icono: 'attach_money',
         validaciones: [Validators.required, Validators.min(0)]
       },
       {
-        nombre: 'fechaIngreso',
+        nombre: 'monto_ingreso',
         tipo: 'date',
         requerido: false,
-        etiqueta: 'Fecha Ingreso',
+        etiqueta: 'Monto Ingreso',
         editable: true,
         icono: 'event',
         validaciones: [Validators.required]
       },
       {
-        nombre: 'fechaEgreso',
+        nombre: 'observacion',
         tipo: 'date',
         requerido: false,
-        etiqueta: 'Fecha Egreso',
+        etiqueta: 'Observación',
         editable: true,
         icono: 'event_busy'
       },
-      {
-        nombre: 'cargo',
-        tipo: 'text',
-        requerido: false,
-        etiqueta: 'Cargo',
-        editable: true,
-        icono: 'work_outline',
-        validaciones: [Validators.required, Validators.maxLength(40)]
-      }
     ];
-
 
     const dialogRef = this.dialog.open(EditarDialogComponent, {
       width: '500px',
@@ -302,7 +273,7 @@ export class EditPerfilPuestTrabComponent implements OnInit, OnDestroy, OnChange
     });
   }
 
-  AgregarPuestoTrabajo() {
+  AgregarOtraFuenteIngreso() {
     const dialogRef = this.dialog.open(AgregarPuestTrabComponent, {
       width: '55%',
       height: '75%',

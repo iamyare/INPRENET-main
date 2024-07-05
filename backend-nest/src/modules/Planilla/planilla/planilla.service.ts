@@ -1360,7 +1360,7 @@ WHERE
 
   async ObtenerPlanDefinPersonas(codPlanilla: string, page?: number, limit?: number): Promise<any> {
     let query = `
-      SELECT
+      SELECT  
         COALESCE(deducciones."ID_PERSONA", beneficios."ID_PERSONA") AS "ID_PERSONA",
         COALESCE(deducciones."N_IDENTIFICACION", beneficios."N_IDENTIFICACION") AS "DNI",
         COALESCE(deducciones."NOMBRE_COMPLETO", beneficios."NOMBRE_COMPLETO") AS "NOMBRE_COMPLETO",
@@ -1383,23 +1383,27 @@ WHERE
             SUM(COALESCE(detBs."MONTO_A_PAGAR", 0)) AS "Total Beneficio",
             pla."FECHA_CIERRE"
         FROM
-            "NET_PERSONA" afil
-        LEFT JOIN
-            "NET_DETALLE_PERSONA" detP ON afil."ID_PERSONA" = detP."ID_PERSONA"
+            "NET_DETALLE_PAGO_BENEFICIO" detBs
         INNER JOIN "NET_DETALLE_BENEFICIO_AFILIADO" detBA ON
-            detP."ID_PERSONA" = detBA."ID_PERSONA" AND
-            detP."ID_CAUSANTE" = detBA."ID_CAUSANTE" AND
-            detP."ID_DETALLE_PERSONA" = detBA."ID_DETALLE_PERSONA"
-        LEFT JOIN
-            "NET_DETALLE_PAGO_BENEFICIO" detBs ON
             detBs."ID_PERSONA" = detBA."ID_PERSONA" AND
             detBs."ID_CAUSANTE" = detBA."ID_CAUSANTE" AND
-            detBs."ID_DETALLE_PERSONA" = detBA."ID_DETALLE_PERSONA"
+            detBs."ID_DETALLE_PERSONA" = detBA."ID_DETALLE_PERSONA" AND
+            detBs."ID_BENEFICIO" = detBA."ID_BENEFICIO"
+            
+        LEFT JOIN
+            "NET_DETALLE_PERSONA" detP ON
+            detBs."ID_PERSONA" = detP."ID_PERSONA" AND
+            detBs."ID_CAUSANTE" = detP."ID_CAUSANTE" AND
+            detBs."ID_DETALLE_PERSONA" = detP."ID_DETALLE_PERSONA"
+        LEFT JOIN
+            "NET_PERSONA" afil ON
+            afil."ID_PERSONA" = detP."ID_PERSONA" 
         LEFT JOIN
             "NET_PLANILLA" pla ON detBs."ID_PLANILLA" = pla."ID_PLANILLA"
         WHERE
             detBs."ESTADO" = 'PAGADA' AND
-            pla."CODIGO_PLANILLA" = '${codPlanilla}'
+            pla."CODIGO_PLANILLA" = '${codPlanilla}' 
+        
         GROUP BY
             afil."ID_PERSONA",
             afil."N_IDENTIFICACION",
@@ -1411,10 +1415,11 @@ WHERE
                 COALESCE(afil."TERCER_NOMBRE", '') || ' ' ||
                 afil."PRIMER_APELLIDO" || ' ' ||
                 COALESCE(afil."SEGUNDO_APELLIDO", '')
+            ),
+            COALESCE(detBs."MONTO_A_PAGAR", 0
             )
         HAVING
-            SUM(COALESCE(detBs."MONTO_A_PAGAR", 0)) > 0
-        ) beneficios
+            SUM(COALESCE(detBs."MONTO_A_PAGAR", 0)) > 0) beneficios
       FULL OUTER JOIN
         (SELECT
             afil."ID_PERSONA",
@@ -1452,9 +1457,9 @@ WHERE
             )
         HAVING
             SUM(COALESCE(detDs."MONTO_APLICADO", 0)) > 0
-        ) deducciones ON deducciones."ID_PERSONA" = beneficios."ID_PERSONA"
+        ) deducciones ON deducciones."ID_PERSONA" = beneficios."ID_PERSONA" 
     `;
-  
+
     if (page && limit) {
       const offset = (page - 1) * limit + 1;
       const nextOffset = offset + limit - 1;
@@ -1466,7 +1471,7 @@ WHERE
         WHERE rnum >= ${offset} AND rnum <= ${nextOffset}
       `;
     }
-  
+
     try {
       const result = await this.entityManager.query(query);
       return result;
@@ -1475,10 +1480,10 @@ WHERE
       throw new InternalServerErrorException('Se produjo un error al obtener los totales por planilla.');
     }
   }
-  
-  
-  
-  
+
+
+
+
 
   /* async obtenerAfilOrdinaria(periodoInicio: string, periodoFinalizacion: string): Promise<any> {
     const query = `

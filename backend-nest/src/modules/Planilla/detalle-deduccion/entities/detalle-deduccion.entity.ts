@@ -1,8 +1,9 @@
-import { Check, Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn} from 'typeorm';
+import { Check, Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 import { Net_Planilla } from '../../planilla/entities/net_planilla.entity';
 import { IsEnum } from 'class-validator';
 import { Net_Deduccion } from '../../deduccion/entities/net_deduccion.entity';
 import { net_persona } from 'src/modules/Persona/entities/net_persona.entity';
+import { Net_Detalle_Pago_Beneficio } from '../../detalle_beneficio/entities/net_detalle_pago_beneficio.entity';
 
 @Entity({ name: 'NET_DETALLE_DEDUCCION' })
 @Check("CK_ESTADO_DED", `estado_aplicacion IN ('COBRADA', 'NO COBRADA', 'EN PRELIMINAR', 'EN PLANILLA')`)
@@ -33,9 +34,9 @@ export class Net_Detalle_Deduccion {
     @JoinColumn({ name: 'ID_PERSONA', foreignKeyConstraintName: "FK_ID_PERSONA_DETDED" })
     persona: net_persona;
 
-    @ManyToOne(() => Net_Planilla, planilla => planilla.detalleDeduccion, { cascade: true })
-    @JoinColumn({ name: 'ID_PLANILLA', foreignKeyConstraintName: "FK_ID_PLANILLA_DETDED" })
-    planilla: Net_Planilla;
+    @ManyToOne(() => Net_Detalle_Pago_Beneficio, det_pago_beneficio => det_pago_beneficio.detalleDeduccion, { cascade: true })
+    @JoinColumn({ name: 'ID_DETALLE_PAGO_BENEFICIO', foreignKeyConstraintName: "FK_ID_DETALLE_PAGO_BENEFICIO_DETDED" })
+    detalle_pago_beneficio: Net_Detalle_Pago_Beneficio;
 
     @ManyToOne(() => Net_Deduccion, deduccion => deduccion.detalleDeduccion, { cascade: true })
     @JoinColumn({ name: 'ID_DEDUCCION', foreignKeyConstraintName: "FK_ID_DEDUCCION_DETDED" })

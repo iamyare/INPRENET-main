@@ -19,6 +19,7 @@ import { EditBeneficiariosComponent } from './Docentes-Designados/edit-beneficia
 import { EditDatosGeneralesComponent } from './Docentes-Designados/edit-datos-generales/edit-datos-generales.component';
 import { EditColegiosMagisterialesComponent } from './Docentes-Designados/edit-colegios-magisteriales/edit-colegios-magisteriales.component';
 import { VerCuentasPersonasComponent } from './Docentes-Designados/ver-cuentas-personas/ver-cuentas-personas.component';
+import { VerOtrasFuentesIngresoComponent } from './Docentes-Designados/ver-otras-fuentes-ingreso/ver-otras-fuentes-ingreso.component';
 
 import { EditPerfilPuestTrabComponent } from './Docentes-Designados/edit-perfil-puest-trab/edit-perfil-puest-trab.component';
 import { EditReferPersonalesComponent } from './Docentes-Designados/edit-refer-personales/edit-refer-personales.component';
@@ -48,7 +49,8 @@ import { AgregarMovimientoComponent } from './Docentes-Designados/agregar-movimi
     EditReferPersonalesComponent,
     VerCuentasPersonasComponent,
     ConstanciasAfiliadoComponent,
-    AgregarMovimientoComponent
+    AgregarMovimientoComponent,
+    VerOtrasFuentesIngresoComponent
   ],
   imports: [
     CommonModule,

@@ -328,7 +328,7 @@ export class DetalleDeduccionService {
         throw new NotFoundException(`Planilla con código "${codigoPlanilla}" no encontrada`);
       }
 
-      deduccion.planilla = planilla;
+      /* deduccion.planilla = planilla; */
       deduccion.estado_aplicacion = estadoAplicacion; // Actualiza el estado de aplicación
 
       resultados.push(await entityManager.save(deduccion));

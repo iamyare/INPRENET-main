@@ -37,8 +37,8 @@ export class Net_Planilla {
     @JoinColumn({ name: 'ID_TIPO_PLANILLA', foreignKeyConstraintName: "FK_ID_TIPO_PLANILLA_PLAN" })
     tipoPlanilla: Net_TipoPlanilla;
 
-    @OneToMany(() => Net_Detalle_Deduccion, detalleDeduccion => detalleDeduccion.planilla)
-    detalleDeduccion: Net_Detalle_Deduccion[];
+    /* @OneToMany(() => Net_Detalle_Deduccion, detalleDeduccion => detalleDeduccion.planilla)
+    detalleDeduccion: Net_Detalle_Deduccion[]; */
 
     @OneToMany(() => Net_Detalle_Pago_Beneficio, detallepagobeneficio => detallepagobeneficio.planilla)
     detallepagobeneficio: Net_Detalle_Pago_Beneficio[];

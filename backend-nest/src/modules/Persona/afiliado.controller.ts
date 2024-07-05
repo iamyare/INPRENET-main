@@ -281,6 +281,22 @@ export class AfiliadoController {
       }
     }
   }
+  @Get('/getAllOtrasFuentesIngres/:n_identificacion')
+  async getAllOtrasFuentesIngres(@Param("n_identificacion") n_identificacion: string) {
+    try {
+      const resultado =
+        await this.afiliadoService.getAllOtrasFuentesIngres(n_identificacion);
+      return resultado;
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw error;
+      } else {
+        throw new NotFoundException(
+          `No se pudo procesar la solicitud`,
+        );
+      }
+    }
+  }
 
   @Delete('eliminarColegioMagisterialPersona/:id')
   async eliminarColegioMagisterialPersona(@Param('id', ParseIntPipe) id: number) {

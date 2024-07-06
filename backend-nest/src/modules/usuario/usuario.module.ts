@@ -9,7 +9,6 @@ import { net_empleado } from '../Empresarial/entities/net_empleado.entity';
 import { Net_Tipo_Identificacion } from '../tipo_identificacion/entities/net_tipo_identificacion.entity';
 import { NET_USUARIO_PRIVADA } from './entities/net_usuario_privada.entity';
 import { Net_Centro_Trabajo } from '../Empresarial/entities/net_centro_trabajo.entity';
-import { NET_SESION } from './entities/net_sesion.entity';
 import { MailService } from 'src/common/services/mail.service';
 import { Net_Seguridad } from './entities/net_seguridad.entity';
 import { net_empleado_centro_trabajo } from '../Empresarial/entities/net_empleado_centro_trabajo.entity';
@@ -27,8 +26,7 @@ import { JwtAuthGuard } from './jwt-auth.guard';
       net_empleado, 
       Net_Tipo_Identificacion, 
       NET_USUARIO_PRIVADA, 
-      Net_Centro_Trabajo, 
-      NET_SESION,
+      Net_Centro_Trabajo,
       Net_Seguridad,
       net_empleado_centro_trabajo,
       net_rol_modulo,

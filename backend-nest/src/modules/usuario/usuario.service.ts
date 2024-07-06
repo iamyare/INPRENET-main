@@ -7,7 +7,6 @@ import { JwtService } from '@nestjs/jwt';
 import { MailService } from 'src/common/services/mail.service';
 import * as bcrypt from 'bcrypt';
 import { NET_USUARIO_PRIVADA } from './entities/net_usuario_privada.entity';
-import { NET_SESION } from './entities/net_sesion.entity';
 import { CreatePreRegistroDto } from './dto/create-pre-registro.dto';
 import { net_empleado } from '../Empresarial/entities/net_empleado.entity';
 import { Net_Seguridad } from './entities/net_seguridad.entity';
@@ -33,8 +32,6 @@ export class UsuarioService {
     private readonly empleadoRepository: Repository<net_empleado>,
     private readonly jwtService: JwtService,
     private readonly mailService: MailService,
-    @InjectRepository(NET_SESION)
-    private readonly sesionRepository: Repository<NET_SESION>,
     @InjectRepository(Net_Seguridad)
     private readonly seguridadRepository: Repository<Net_Seguridad>,
     @InjectRepository(net_empleado_centro_trabajo)
@@ -431,35 +428,6 @@ export class UsuarioService {
       .getMany();
   } */
 
-  
-  async verificarEstadoSesion(token: string): Promise<{ sesionActiva: boolean }> {
-    const sesion = await this.sesionRepository.findOne({
-        where: { token },
-        select: ['estado']
-    });
-
-    if (!sesion || sesion.estado !== 'activa') {
-        return { sesionActiva: false };
-    }
-
-    return { sesionActiva: true };
-}
-
-  async cerrarSesion(token: string): Promise<void> {
-    const sesion = await this.sesionRepository.findOne({
-        where: {
-            token,
-            estado: 'activa',
-        },
-    });
-
-    if (!sesion) {
-        throw new NotFoundException('Sesión no encontrada.');
-    }
-
-    sesion.estado = 'cerrada';
-    await this.sesionRepository.save(sesion);
-}
 
 
   async loginPrivada(email: string, contrasena: string): Promise<any> {
@@ -483,14 +451,6 @@ export class UsuarioService {
     };
     const token = this.jwtService.sign(payload);
 
-    const nuevaSesion = new NET_SESION();
-    nuevaSesion.usuarioPrivada = usuario;
-    nuevaSesion.token = token;
-    nuevaSesion.fecha_creacion = new Date();
-    nuevaSesion.fecha_expiracion = new Date(Date.now() + 1000 * 60 * 60 * 24);
-    nuevaSesion.estado = 'activa';
-
-    await this.sesionRepository.save(nuevaSesion);
 
     return {
       access_token: token,

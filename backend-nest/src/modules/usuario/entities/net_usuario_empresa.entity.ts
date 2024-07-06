@@ -1,6 +1,5 @@
 import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, OneToMany, ManyToOne, JoinColumn } from 'typeorm';
 import { Net_Seguridad } from './net_seguridad.entity';
-import { NET_SESION } from './net_sesion.entity';
 import { net_usuario_modulo } from './net_usuario_modulo.entity';
 import { net_empleado_centro_trabajo } from 'src/modules/Empresarial/entities/net_empleado_centro_trabajo.entity';
 
@@ -35,9 +34,6 @@ export class Net_Usuario_Empresa {
 
   @OneToMany(() => Net_Seguridad, seguridad => seguridad.usuarioEmpresa)
   seguridad: Net_Seguridad[];
-
-  @OneToMany(() => NET_SESION, sesion => sesion.usuario)
-  sesiones: NET_SESION[];
 
   @OneToMany(() => net_usuario_modulo, usuarioModulo => usuarioModulo.usuarioEmpresa)
   usuarioModulos: net_usuario_modulo[];

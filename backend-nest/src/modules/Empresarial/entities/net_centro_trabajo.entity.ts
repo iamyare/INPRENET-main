@@ -13,7 +13,7 @@ import { Net_Estado_Centro_Trabajo } from './net_estado_centro_trabajo.entity';
 
 @Entity({ name: 'NET_CENTRO_TRABAJO' })
 @Check('CK_TIPO_CENTRO_TRAB', `TIPO IN ('EDUCACION', 'INSTITUCION')`)
-@Check('CK_SECTOR_ECONOMICO_TRAB', `SECTOR_ECONOMICO IN ('PUBLICO', 'PRIVADO')`)
+@Check('CK_SECTOR_ECONOMICO_TRABA', `SECTOR_ECONOMICO IN ('PUBLICO', 'PRIVADO', 'PEDAGOGICO', 'PROHECO', 'ADMINISTRATIVO')`)
 export class Net_Centro_Trabajo {
     @PrimaryGeneratedColumn({ type: 'int', name: 'ID_CENTRO_TRABAJO', primaryKeyConstraintName: 'PK_id_centro_trabajo' })
     id_centro_trabajo: number;
@@ -62,7 +62,7 @@ export class Net_Centro_Trabajo {
     @Column('nvarchar2', { length: 200, nullable: true, name: 'DIRECCION_2' })
     direccion_2: string;
 
-    @Column('varchar2', { length: 50, nullable: true, name: 'NUMERO_ACUERDO' })
+    @Column('varchar2', { length: 30, nullable: true, name: 'NUMERO_ACUERDO' })
     numero_acuerdo: string;
 
     @Column('date', { nullable: true, name: 'FECHA_EMISION' })

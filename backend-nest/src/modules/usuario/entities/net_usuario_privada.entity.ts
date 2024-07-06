@@ -1,6 +1,5 @@
 import { Net_Centro_Trabajo } from "src/modules/Empresarial/entities/net_centro_trabajo.entity";
-import { Column, Entity, Index, JoinColumn, ManyToOne, OneToMany, OneToOne, PrimaryGeneratedColumn } from "typeorm";
-import { NET_SESION } from "./net_sesion.entity";
+import { Column, Entity, JoinColumn, ManyToOne, OneToMany, OneToOne, PrimaryGeneratedColumn } from "typeorm";
 
 @Entity({ name: 'NET_USUARIO_PRIVADA' })
 export class NET_USUARIO_PRIVADA {
@@ -23,7 +22,4 @@ export class NET_USUARIO_PRIVADA {
     @ManyToOne(() => Net_Centro_Trabajo, centroTrabajo => centroTrabajo.perfAfilCentTrabs, { nullable: true })
     @JoinColumn({ name: 'ID_CENTRO_TRABAJO' })
     centroTrabajo: Net_Centro_Trabajo | null;
-    
-    @OneToMany(() => NET_SESION, sesion => sesion.usuarioPrivada)
-    sesiones: NET_SESION[];
 }

@@ -128,33 +128,6 @@ async completarRegistro(
     return this.usuarioService.findAllRolesExceptAdmin();
   } */
 
-  @Get('/verificarEstado')
-  async verificarEstado(@Req() request: Request) {
-      const token = request.headers['authorization']?.split(' ')[1];
-      if (!token) {
-          throw new UnauthorizedException('Token no proporcionado.');
-      }
-      return this.usuarioService.verificarEstadoSesion(token);
-  }
-
-  @Post('/logout')
-async logout(@Req() request: Request): Promise<any> {
-  console.log('Authorization Header:', request.headers['authorization']);
-  const authHeader: string | undefined = request.headers['authorization'];
-  
-  if (authHeader && authHeader.startsWith('Bearer ')) {
-    const token = authHeader.substring(7); 
-    console.log('Extracted Token:', token);
-    
-    if (token) {
-      await this.usuarioService.cerrarSesion(token);
-      return { message: 'Sesión cerrada con éxito.' };
-    }
-  }
-  
-  throw new UnauthorizedException('Formato de token incorrecto.');
-}
-
 
 @Get('centro/:centroTrabajoId')
   async getUsuariosPorCentro(

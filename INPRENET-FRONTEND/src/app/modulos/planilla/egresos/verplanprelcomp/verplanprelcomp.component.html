@@ -1,0 +1,87 @@
+<div style="background-color: white; margin-bottom: 1%">
+  <app-dynamic-form [fields]="myFormFields" titulo="Detalles De Planilla Preliminar"
+    subtitulo="Completa la información correspondiente" (newDatBenChange)="obtenerDatosForm($event)">
+  </app-dynamic-form>
+  <div style="text-align: center">
+    <button color="primary" (click)="getPlanilla()" [disabled]="datosFormateados.invalid" mat-raised-button
+      style="margin: 2% 0; color: white; border-radius: 5px; padding: 10px 20px">
+      Ver Planilla preliminar
+    </button>
+  </div>
+</div>
+
+<div class="card-header card-header-danger title" *ngIf="detallePlanilla ">
+  <div class="card-body" style="padding: 1% 1% 1% 1%">
+    <h4 class="card-title" style="text-align: center">
+      Datos Generales De La Planilla
+    </h4>
+    <table>
+      <tr style="background-color: #f2f2f2">
+        <th>Nombre Planilla</th>
+        <td>{{ detallePlanilla?.tipoPlanilla.nombre_planilla }}</td>
+        <th>Fecha Apertura</th>
+        <td>{{ convertirFecha(detallePlanilla?.fecha_apertura, true) }}</td>
+      </tr>
+      <tr>
+        <th>Secuencia</th>
+        <td>{{ detallePlanilla?.secuencia }}</td>
+        <th>Estado</th>
+        <td>{{ detallePlanilla?.estado }}</td>
+      </tr>
+      <tr style="background-color: #f2f2f2">
+        <th>Período Inicio</th>
+        <td>{{ detallePlanilla?.periodoInicio }}</td>
+        <th>Período Finalización</th>
+        <td>{{ detallePlanilla?.periodoFinalizacion }}</td>
+      </tr>
+    </table>
+  </div>
+</div>
+
+<div style="background-color: white;margin-bottom: 1%; padding-top: 1%;margin-top: 1%; " *ngIf="verDat">
+  <h4 class="card-title" style="text-align: center">
+    Personas en la Planilla
+  </h4>
+
+  <div style="padding: 1% 1% 1% 1%">
+    <app-dynamic-table style="width: 100%" titulo="Editar Beneficiarios"
+      subtitulo="Completa la información correspondiente" [verOpcEditar]="false" [columns]="myColumnsDed"
+      [data]="datosTabl" [getData]="getFilas"
+      (ejecutarFuncionAsincronaEvent)="ejecutarFuncionAsincronaDesdeOtroComponente($event)"
+      [nombreEncabezadoUno]="'Detalle Ingresos'" [mostrarBotonUno]="true" [etiquetaBotonUno]="'Detalle Ingresos'"
+      (accionBotonUno)="manejarAccionUno($event)" [nombreEncabezadoDos]="'Detalle Deducciones'" [mostrarBotonDos]="true"
+      [etiquetaBotonDos]="'Detalle Deducciones'" (accionBotonDos)="manejarAccionDos($event)">
+    </app-dynamic-table>
+
+    <!-- <app-dynamic-table [verOpcEditar]="false" [columns]="myColumnsDed" [data]="datosTabl"
+      (ejecutarFuncionAsincronaEvent)="
+      ejecutarFuncionAsincronaDesdeOtroComponente($event)
+    " [nombreEncabezadoUno]="'Detalle Ingresos'" [mostrarBotonUno]="true" [etiquetaBotonUno]="'Detalle Ingresos'"
+      (accionBotonUno)="manejarAccionUno($event)" [nombreEncabezadoDos]="'Detalle Deducciones'" [mostrarBotonDos]="true"
+      [etiquetaBotonDos]="'Detalle Deducciones'" (accionBotonDos)="manejarAccionDos($event)">
+    </app-dynamic-table> -->
+
+    <div style="background-color: white; margin-bottom: 1%; text-align: center">
+      <button (click)="actualizarFechaCierrePlanilla()" mat-raised-button style="
+        margin: 2% 2%;
+        padding: 2% 1% 1% 1%;
+        background-color: #628780;
+        color: #ffffff;
+        border-radius: 5px;
+        padding: 10px 20px;
+      ">
+        Cerrar planilla
+      </button>
+
+      <button (click)="mostrarTotales()" mat-raised-button style="
+        margin: 2% 2%;
+        background-color: #628780;
+        color: #ffffff;
+        border-radius: 5px;
+        padding: 10px 20px;
+      ">
+        Mostrar totales de ingresos
+      </button>
+    </div>
+  </div>
+</div>

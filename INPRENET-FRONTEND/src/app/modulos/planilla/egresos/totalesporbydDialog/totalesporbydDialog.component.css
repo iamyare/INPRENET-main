@@ -1,0 +1,49 @@
+.tables-container {
+  display: flex;
+  justify-content: space-around;
+  flex-wrap: wrap; /* Esto permite que las tablas se coloquen una debajo de la otra en pantallas más pequeñas */
+}
+
+.table {
+  flex-basis: 45%; /* Ajusta este valor según sea necesario para controlar el ancho de las tablas */
+  margin: 10px;
+}
+
+mat-paginator {
+  width: 100%;
+}
+
+.dialog-header {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start; /* Cambio a flex-start para alinear a la izquierda */
+  text-align: center;
+
+}
+
+h1[mat-dialog-title] {
+  font-size: 24px; /* Aumentamos el tamaño de la fuente del título */
+  font-weight: bold; /* Opcional: para darle más énfasis al título */
+  width: 100%; /* Esto asegura que el título se extienda a lo largo del contenedor */
+  margin-bottom: 20px; /* Espacio después del título para separarlo de los filtros */
+}
+
+.filters {
+  width: 100%; /* Esto toma el ancho completo del contenedor para permitir la alineación interna */
+  display: flex;
+  justify-content: flex-start; /* Mantiene los filtros alineados a la izquierda */
+  gap: 20px; /* Mantiene un espacio entre los campos de filtro */
+  padding-left: 24px; /* Esto añade espacio a la izquierda de los filtros */
+  margin-bottom: 16px; /* Esto añade espacio debajo de los filtros */
+}
+
+/* Ajustes para la respuesta visual en pantallas más pequeñas */
+@media (max-width: 600px) {
+  .filters {
+    flex-direction: column;
+  }
+}
+
+mat-dialog-container {
+  border: 30px solid green; /* Añade un borde de color verde alrededor del diálogo */
+}

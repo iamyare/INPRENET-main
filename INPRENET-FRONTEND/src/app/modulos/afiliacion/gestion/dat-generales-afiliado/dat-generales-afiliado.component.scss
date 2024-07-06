@@ -1,0 +1,59 @@
+body {
+  font-family: Roboto, Arial, sans-serif;
+  margin: 0;
+}
+
+.basic-container {
+  padding: 30px;
+}
+
+.version-info {
+  font-size: 8pt;
+  float: right;
+}
+
+.inputs {
+  width: 100%;
+}
+
+.tittle {
+  color: white;
+  background: #229e92;
+}
+
+.example-full-width {
+  width: 100%;
+}
+
+.discapacidad-container {
+  background: #f1f1f1;
+  border-radius: 8px;
+  padding: 16px;
+  margin-top: 16px;
+  width: 100%;
+}
+
+.discapacidad-title {
+  font-size: 1.2em;
+  font-weight: bold;
+  margin-bottom: 8px;
+}
+
+.discapacidad-item {
+  display: flex;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.discapacidad-field {
+  flex: 1;
+  margin-right: 8px;
+}
+
+.discapacidad-remove-btn {
+  margin-top: 16px;
+}
+
+.discapacidad-add-btn {
+  margin-top: 16px;
+}

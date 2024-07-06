@@ -1,0 +1,31 @@
+<div class="afiliacion-centros-container">
+    <app-progressbar-dynamic [steps]="steps" (stepChange)="handleStepChange($event)"></app-progressbar-dynamic>
+
+    <div>
+        <app-buscador [searchFunction]="search" (searchResult)="handleSearchResult($event)"></app-buscador>
+    </div>
+
+    <div *ngIf="mostrar" [hidden]="activeStep !== 0">
+        <app-datos-generales-centro [parentForm]="datosGeneralesData"
+            (formUpdated)="onDatosGeneralesFormUpdate($event)"></app-datos-generales-centro>
+    </div>
+
+    <div *ngIf="mostrar" [hidden]="activeStep !== 1">
+        <app-ver-referencias></app-ver-referencias>
+    </div>
+
+    <div [hidden]="activeStep !== 2">
+        <app-sociedad [parentForm]="sociedadForm" (formUpdated)="onSociedadFormUpdate($event)"></app-sociedad>
+    </div>
+    <div *ngIf="mostrar" [hidden]="activeStep !== 3">
+        <app-ver-socios></app-ver-socios>
+    </div>
+    <div [hidden]="activeStep !== 4">
+        <app-admin-centro-educativo [parentForm]="adminCentroEducativoForm"></app-admin-centro-educativo>
+    </div>
+    <div [hidden]="activeStep !== 5">
+        <button mat-button color="primary" (click)="gatherAllData()">
+            <mat-icon>save</mat-icon> Enviar y Mostrar Datos
+        </button>
+    </div>
+</div>

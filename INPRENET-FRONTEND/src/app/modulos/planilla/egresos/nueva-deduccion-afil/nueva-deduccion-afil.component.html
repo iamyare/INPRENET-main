@@ -1,0 +1,169 @@
+<form
+  class="example-form"
+  [formGroup]="formGroup"
+  (ngSubmit)="alertFormValues(formGroup)"
+  ngNativeValidate
+>
+  <mat-slide-toggle color="primary" formControlName="acceptTerms"
+    >¿Desea ingresar deducciones de terceros?</mat-slide-toggle
+  >
+</form>
+
+<div
+  style="background-color: white; margin: 1% 0% 1% 0%; padding: 1% 0% 1% 0%"
+  *ngIf="formGroup.invalid"
+>
+  <h1 style="text-align: center; font-size: 2rem">Datos Generales Afiliado</h1>
+  <div style="background-color: white">
+    <table>
+      <tr style="background-color: #f2f2f2">
+        <th>Nombre de afiliado</th>
+        <td>{{ Afiliado?.nameAfil }}</td>
+        <th>Genero</th>
+        <td>{{ Afiliado?.genero }}</td>
+        <th>Dirección de residencia</th>
+        <td>{{ Afiliado?.direccion_residencia }}</td>
+        <th>Estado</th>
+        <td>{{ Afiliado?.estado }}</td>
+        <th>Fecha nacimiento</th>
+        <td>{{ Afiliado?.fecha_nacimiento }}</td>
+        <th>Colegio magisterial</th>
+        <td>{{ Afiliado?.colegio_magisterial }}</td>
+      </tr>
+      <tr>
+        <th>Número de carnet</th>
+        <td>{{ Afiliado?.numero_carnet }}</td>
+        <th>Profesión</th>
+        <td>{{ Afiliado?.profesion }}</td>
+        <th>Teléfono 1</th>
+        <td>{{ Afiliado?.telefono_1 }}</td>
+        <th>Salario base</th>
+        <td>{{ Afiliado?.salario_base }}</td>
+        <th>Estado civil</th>
+        <td>{{ Afiliado?.estado_civil }}</td>
+      </tr>
+    </table>
+  </div>
+</div>
+
+<div
+  *ngIf="formGroup.invalid"
+  style="
+    text-align: center;
+    background-color: white;
+    margin: 1% 0% 1% 0%;
+    padding: 0% 0% 1% 0%;
+  "
+>
+  <app-dynamic-form
+    [fields]="myFormFields"
+    titulo="Detalles de deducciones"
+    subtitulo="Completa la informacion correspondiente"
+    (newDatBenChange)="obtenerDatos($event)"
+  ></app-dynamic-form>
+  <button
+    mat-raised-button
+    color="primary"
+    style="color: white; margin: 1% 0 1% 0"
+    [disabled]="data.invalid"
+    (click)="guardarDetalleDeduccion()"
+  >
+    Guardar
+  </button>
+</div>
+
+<div
+  style="
+    text-align: center;
+    background-color: white;
+    margin: 1% 0% 1% 0%;
+    padding: 0% 0% 1% 0%;
+  "
+  *ngIf="!formGroup.invalid"
+>
+  <h1>Carga de deducciones por medio de documento excel</h1>
+  <hr />
+
+  <div class="upload-container">
+    <input type="file" #fileInput (change)="onFileSelected($event)" hidden />
+
+    <button
+      mat-raised-button
+      color="primary"
+      style="color: white; margin: 1% 0 1% 0"
+      (click)="fileInput.click()"
+    >
+      <i class="fa fa-plus"></i>
+      Agregar Archivos
+    </button>
+
+    <button
+      mat-raised-button
+      color="accent"
+      style="color: white; margin: 1% 0 1% 0"
+      (click)="clearFile()"
+    >
+      <i class="fa fa-trash"></i>
+      Limpiar Archivo
+    </button>
+
+    <button
+      mat-raised-button
+      color="primary"
+      style="color: white; margin: 1% 0 1% 0"
+      (click)="startUpload()"
+    >
+      <i class="fa fa-upload"></i> Iniciar Subida
+    </button>
+
+    <button
+      mat-raised-button
+      color="warn"
+      style="color: white; margin: 1% 0 1% 0"
+      (click)="cancelUpload()"
+    >
+      <i class="fa fa-ban"></i> Cancelar Subida
+    </button>
+
+    <div *ngIf="file" class="file-name-container">
+      <div class="file-name-background">{{ file.name }}</div>
+      <div class="file-name-progress" [style.width]="progressValue + '%'">
+        {{ file.name }}
+      </div>
+    </div>
+  </div>
+</div>
+
+<div *ngIf="datosCargados.length > 0 && datosCargadosExitosamente" class="mt-4">
+  <h3>Datos Cargados</h3>
+  <table class="table table-bordered">
+    <thead class="thead-light">
+      <tr>
+        <th scope="col">Año</th>
+        <th scope="col">Código de Deducción</th>
+        <th scope="col">DNI</th>
+        <th scope="col">Mes</th>
+        <th scope="col">Monto Total</th>
+        <th scope="col">Nombre de Institución</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let dato of datosCargados">
+        <td>{{ dato["año"] }}</td>
+        <td>{{ dato.codigo_deduccion }}</td>
+        <td>{{ dato.dni }}</td>
+        <td>{{ dato.mes }}</td>
+        <td>{{ dato.monto_motal }}</td>
+        <!-- Asegúrate de que esta clave coincida con la estructura de tus datos -->
+        <td>{{ dato.nombre_institucion }}</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<link
+  rel="stylesheet"
+  href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css"
+/>
+<!-- <input type="file" (change)="onFileSelect($event)">
+<button mat-raised-button color="primary" style="color: white;" [disabled]="data.invalid" (click)="guardarDetalleDeduccion()">Guardar</button> -->

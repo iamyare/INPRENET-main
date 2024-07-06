@@ -1,0 +1,14 @@
+<h1 mat-dialog-title>Deshabilitar Usuario</h1>
+<div mat-dialog-content>
+  <form [formGroup]="disableForm">
+    <mat-form-field class="full-width">
+      <mat-label>Periodo de Deshabilitación (días)</mat-label>
+      <input matInput formControlName="disablePeriod" type="number" min="1" [disabled]="disableForm.get('indefinite')?.value">
+    </mat-form-field>
+    <mat-checkbox formControlName="indefinite">Indefinido</mat-checkbox>
+  </form>
+</div>
+<div mat-dialog-actions>
+  <button mat-button (click)="onCancel()">Cancelar</button>
+  <button mat-raised-button color="primary" (click)="onDisable()">Deshabilitar</button>
+</div>

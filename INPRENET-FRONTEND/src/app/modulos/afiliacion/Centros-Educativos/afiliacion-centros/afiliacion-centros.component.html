@@ -1,0 +1,25 @@
+<div class="afiliacion-centros-container">
+  <app-progressbar-dynamic [steps]="steps" (stepChange)="handleStepChange($event)"></app-progressbar-dynamic>
+
+  <div [hidden]="activeStep !== 0">
+    <app-datos-generales-centro [parentForm]="datosGeneralesForm"
+      (formUpdated)="onDatosGeneralesFormUpdate($event)"></app-datos-generales-centro>
+  </div>
+  <div [hidden]="activeStep !== 1">
+    <app-referencias-bancarias-comerciales [parentForm]="referenciasForm"></app-referencias-bancarias-comerciales>
+  </div>
+  <div [hidden]="activeStep !== 2">
+    <app-sociedad [parentForm]="sociedadForm" (formUpdated)="onSociedadFormUpdate($event)"></app-sociedad>
+  </div>
+  <div [hidden]="activeStep !== 3">
+    <app-sociedad-socio [parentForm]="sociedadSocioForm"></app-sociedad-socio>
+  </div>
+  <div [hidden]="activeStep !== 4">
+    <app-admin-centro-educativo [parentForm]="adminCentroEducativoForm"></app-admin-centro-educativo>
+  </div>
+  <div [hidden]="activeStep !== 5">
+    <button mat-button color="primary" (click)="gatherAllData()">
+      <mat-icon>save</mat-icon> Enviar y Mostrar Datos
+    </button>
+  </div>
+</div>

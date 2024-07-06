@@ -1,0 +1,53 @@
+<div class="container">
+  <div class="form-container">
+    <div class="form-header">
+      <img src="../../../../../assets/images/LOGO INPRENET D.svg" alt="Logo" class="logo">
+      <h2>Pre-Registro</h2>
+    </div>
+    <form [formGroup]="form" (ngSubmit)="crearCuenta()">
+      <mat-form-field appearance="fill" class="full-width">
+        <mat-label>Correo</mat-label>
+        <input matInput formControlName="correo" placeholder="Ingrese su correo">
+        <mat-error *ngIf="form.get('correo')?.invalid && form.get('correo')?.touched">
+          Correo es requerido y debe ser válido
+        </mat-error>
+      </mat-form-field>
+
+      <mat-form-field appearance="fill" class="full-width">
+        <mat-label>Rol</mat-label>
+        <mat-select formControlName="rol" placeholder="Seleccione un rol">
+          <mat-option *ngFor="let rol of tipoRol" [value]="rol.value">{{ rol.label }}</mat-option>
+        </mat-select>
+        <mat-error *ngIf="form.get('rol')?.invalid && form.get('rol')?.touched">
+          Rol es requerido
+        </mat-error>
+      </mat-form-field>
+
+      <mat-form-field appearance="fill" class="full-width">
+        <mat-label>Nombre del Puesto</mat-label>
+        <input matInput formControlName="nombrePuesto" placeholder="Ingrese el nombre del puesto">
+        <mat-error *ngIf="form.get('nombrePuesto')?.invalid && form.get('nombrePuesto')?.touched">
+          Nombre del puesto es requerido
+        </mat-error>
+      </mat-form-field>
+
+      <mat-form-field appearance="fill" class="full-width">
+        <mat-label>Nombre Completo</mat-label>
+        <input matInput formControlName="nombreEmpleado" placeholder="Ingrese su nombre completo">
+        <mat-error *ngIf="form.get('nombreEmpleado')?.invalid && form.get('nombreEmpleado')?.touched">
+          Nombre completo es requerido
+        </mat-error>
+      </mat-form-field>
+
+      <mat-form-field appearance="fill" class="full-width">
+        <mat-label>Número de Empleado</mat-label>
+        <input matInput formControlName="numeroEmpleado" placeholder="Ingrese su número de empleado">
+        <mat-error *ngIf="form.get('numeroEmpleado')?.invalid && form.get('numeroEmpleado')?.touched">
+          Número de empleado es requerido
+        </mat-error>
+      </mat-form-field>
+
+      <button mat-raised-button color="primary" type="submit" [disabled]="form.invalid">Crear Cuenta</button>
+    </form>
+  </div>
+</div>

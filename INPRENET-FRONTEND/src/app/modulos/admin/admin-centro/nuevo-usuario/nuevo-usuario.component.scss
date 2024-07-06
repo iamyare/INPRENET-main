@@ -1,0 +1,63 @@
+$color-50: #e5f4f3;
+$color-100: #bee4e1;
+$color-200: #93d3cd;
+$color-300: #67c1b8;
+$color-400: #47b3a9;
+$color-500: #26a69a;
+$color-600: #229e92;
+$color-700: #1c9588;
+$color-800: #178b7e;
+$color-900: #0d7b6c;
+$color-A100: #adfff3;
+$color-A200: #7affec;
+$color-A400: #47ffe4;
+$color-A700: #2dffe0;
+
+.container {
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 16px;
+}
+
+.form-card {
+  padding: 16px;
+  margin-top: 16px;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+}
+
+.full-width {
+  grid-column: span 2;
+}
+
+.half-width {
+  grid-column: span 1;
+}
+
+.logo {
+  max-width: 200px;
+  height: auto;
+  display: block;
+  margin: 0 auto;
+}
+
+.header-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #e5f4f3;
+  padding: 20px;
+  border-radius: 10px;
+  margin-bottom: 20px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.center-name {
+  font-size: 24px;
+  color: #1c9588;
+  margin: 0;
+}

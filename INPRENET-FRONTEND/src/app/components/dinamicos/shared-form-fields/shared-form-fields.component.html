@@ -1,0 +1,77 @@
+<div *ngFor="let rowIndex of getRowIndices()">
+  <div class="row">
+    <div *ngFor="let field of getFieldsInRow(rowIndex)" [class]="'col-md-' + (field.layout?.col ?? 12)">
+      <mat-form-field class="example-full-width inputs" appearance="outline"
+        *ngIf="field.type !== 'radio' && field.type !== 'dateRange'">
+        <mat-label>{{ field.label }}</mat-label>
+        <mat-icon matPrefix *ngIf="field.icon">{{ field.icon }}</mat-icon>
+        <ng-container [ngSwitch]="field.type">
+          <input *ngSwitchCase="'text'" matInput [formControl]="getControl(field.name)">
+          <mat-select *ngSwitchCase="'select'" [formControl]="getControl(field.name)"
+            (selectionChange)="onSelectChange(field.name, $event)">
+            <mat-option *ngFor="let option of field.options" [value]="option.value">
+              {{ option.label }}
+            </mat-option>
+          </mat-select>
+          <ng-container *ngSwitchCase="'date'">
+            <div class="datepicker-input">
+              <input [min]="field.minDate" [max]="field.maxDate" matInput [matDatepicker]="picker"
+                [formControl]="getControl(field.name)" placeholder="{{ field.label }}">
+              <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+              <mat-datepicker #picker></mat-datepicker>
+            </div>
+          </ng-container>
+          <input *ngSwitchCase="'number'" matInput type="number" [formControl]="getControl(field.name)">
+        </ng-container>
+        <mat-error
+          *ngIf="getControl(field.name)?.invalid && (getControl(field.name)?.dirty || getControl(field.name)?.touched)">
+          <ng-container *ngIf="getControl(field.name)?.errors?.['required']">Este campo es requerido</ng-container>
+          <br *ngIf="getControl(field.name)?.errors?.['required']">
+          <ng-container *ngIf="getControl(field.name)?.errors?.['maxlength']">Ha excedido el número máximo de
+            caracteres</ng-container>
+          <br *ngIf="getControl(field.name)?.errors?.['maxlength']">
+          <ng-container *ngIf="getControl(field.name)?.errors?.['minlength']">El número mínimo de caracteres es {{
+            getControl(field.name)!.errors?.['minlength']?.requiredLength }}</ng-container>
+          <br *ngIf="getControl(field.name)?.errors?.['minlength']">
+          <ng-container *ngIf="getControl(field.name)?.errors?.['email']">Correo electrónico inválido</ng-container>
+          <br *ngIf="getControl(field.name)?.errors?.['email']">
+          <ng-container *ngIf="getControl(field.name)?.errors?.['min']">El valor debe ser mayor o igual a {{
+            getControl(field.name)!.errors?.['min']?.min }}</ng-container>
+          <br *ngIf="getControl(field.name)?.errors?.['min']">
+          <ng-container *ngIf="getControl(field.name)?.errors?.['max']">El valor debe ser menor o igual a {{
+            getControl(field.name)!.errors?.['max']?.max }}</ng-container>
+          <br *ngIf="getControl(field.name)?.errors?.['max']">
+          <ng-container *ngIf="getControl(field.name)?.errors?.['pattern']">Formato incorrecto</ng-container>
+        </mat-error>
+      </mat-form-field>
+
+      <!-- Radio buttons -->
+      <div *ngIf="field.type === 'radio'">
+        <label>{{ field.label }}</label>
+        <mat-radio-group [formControl]="getControl(field.name)" (change)="onSelectChange(field.name, $event)">
+          <mat-radio-button *ngFor="let option of field.options" [value]="option.value">
+            {{ option.label }}
+          </mat-radio-button>
+        </mat-radio-group>
+        <mat-error
+          *ngIf="getControl(field.name)?.invalid && (getControl(field.name)?.dirty || getControl(field.name)?.touched)">
+          <ng-container *ngIf="getControl(field.name)?.errors?.['required']">Este campo es requerido</ng-container>
+        </mat-error>
+      </div>
+
+      <!-- Date Range picker -->
+      <div *ngIf="field.type === 'dateRange'">
+        <mat-form-field class="example-full-width">
+          <mat-label>{{ field.label }}</mat-label>
+          <mat-date-range-input [rangePicker]="picker">
+            <input matStartDate placeholder="Fecha De Inicio" [formControl]="getControl(field.startDateControlName)">
+            <input matEndDate placeholder="Fecha Finalización" [formControl]="getControl(field.endDateControlName)">
+          </mat-date-range-input>
+          <mat-hint>MM/DD/YYYY – MM/DD/YYYY</mat-hint>
+          <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
+          <mat-date-range-picker #picker></mat-date-range-picker>
+        </mat-form-field>
+      </div>
+    </div>
+  </div>
+</div>

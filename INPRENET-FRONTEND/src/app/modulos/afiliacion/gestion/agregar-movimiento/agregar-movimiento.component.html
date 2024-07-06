@@ -1,0 +1,42 @@
+<!-- src/app/components/agregar-movimiento/agregar-movimiento.component.html -->
+<h1 mat-dialog-title>Agregar Movimiento</h1>
+<div mat-dialog-content>
+  <form [formGroup]="movimientoForm" style="text-align: center;">
+    <mat-form-field style="width: 100%;">
+      <mat-label>Tipo de Cuenta</mat-label>
+      <mat-select formControlName="tipoCuenta" required>
+        <mat-option value="APORTACION">APORTACION</mat-option>
+        <mat-option value="COTIZACION">COTIZACION</mat-option>
+        <mat-option value="CAP">CAP</mat-option>
+      </mat-select>
+      <mat-error *ngIf="movimientoForm.controls['tipoCuenta'].invalid">Tipo de Cuenta es requerido</mat-error>
+    </mat-form-field>
+
+    <mat-form-field style="width: 100%;">
+      <mat-label>Monto</mat-label>
+      <input matInput formControlName="monto" type="number" required>
+      <mat-error *ngIf="movimientoForm.controls['monto'].invalid">Monto es requerido y debe ser positivo</mat-error>
+    </mat-form-field>
+
+    <mat-form-field style="width: 100%;">
+      <mat-label>Descripción</mat-label>
+      <input matInput formControlName="descripcion" required maxlength="30">
+      <mat-error *ngIf="movimientoForm.controls['descripcion'].invalid">Descripción es requerida y debe tener máximo 30 caracteres</mat-error>
+    </mat-form-field>
+
+    <mat-form-field style="width: 100%;">
+      <mat-label>Tipo de Movimiento</mat-label>
+      <mat-select formControlName="tipo" required>
+        <mat-option value="Crédito">DEPOSITO</mat-option>
+        <mat-option value="Débito">RETIRO</mat-option>
+      </mat-select>
+      <mat-error *ngIf="movimientoForm.controls['tipo'].invalid">Tipo es requerido</mat-error>
+    </mat-form-field>
+  </form>
+</div>
+<div mat-dialog-actions style="justify-content: center;">
+  <button mat-button (click)="onNoClick()">Cancelar</button>
+  <button mat-button [disabled]="!movimientoForm.valid" (click)="onSubmit()" style="background-color: #25A094; color: white;">
+    Agregar
+  </button>
+</div>

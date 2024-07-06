@@ -1,0 +1,14 @@
+<div class="container-fluid" style="position: sticky;">
+    <ul class="list-unstyled multi-steps pointer-cursor">
+        <li (click)="activarDatosGe()" [ngClass]="datosG ? 'is-active' : 'inactive'" id="estado">Datos Generales</li>
+        <li (click)="activarDatosColMag()" [ngClass]="datosColegMagisteriales ? 'is-active' : 'inactive'" id="estado">
+            Colegios Magisteriales</li>
+        <li (click)="activarDatosBancarios()" [ngClass]="datosHS ? 'is-active' : 'inactive'">Datos Cuentas Bancarias
+        </li>
+        <li (click)="activarDatosCentTrab()" [ngClass]="datosCT ? 'is-active' : 'inactive'">Fuentes De Ingresos</li>
+        <li (click)="activarDatosRefPers()" [ngClass]="datosRP ? 'is-active' : 'inactive'">Referencias Personales /
+            Familiares</li>
+        <li (click)="activarDatosBenef()" [ngClass]="datosB ? 'is-active' : 'inactive'">Beneficiarios</li>
+        <li (click)="activarFinalizar()" [ngClass]="datosF ? 'is-active' : 'inactive'">Finalizar</li>
+    </ul>
+</div>

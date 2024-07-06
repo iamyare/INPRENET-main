@@ -1,0 +1,14 @@
+<div
+  style="background-color: white; border-radius: 10px; padding: 20px"
+  class="editar-beneficio-container"
+>
+  <app-dynamic-table
+    [columns]="myColumns"
+    [data]="filas"
+    [getData]="getFilas"
+    (ejecutarFuncionAsincronaEvent)="
+      ejecutarFuncionAsincronaDesdeOtroComponente($event)
+    "
+  >
+  </app-dynamic-table>
+</div>

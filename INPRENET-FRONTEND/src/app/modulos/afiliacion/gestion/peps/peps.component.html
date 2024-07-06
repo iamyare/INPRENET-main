@@ -1,0 +1,29 @@
+<div class="card">
+    <div class="card-header card-header-danger title">
+        <h4 class="card-title">PEPS</h4>
+        <p class="card-category">Completa la información correspondiente</p>
+    </div>
+    <div class="card-body">
+        <form [formGroup]="parentForm" style="margin: 1%;">
+            <div formArrayName="peps" *ngIf="peps.length > 0">
+                <div *ngFor="let pep of peps.controls; let i = index" [formGroupName]="i" class="row">
+                    <h4 class="card-title">Cargo {{ i + 1 }}</h4>
+                    <app-shared-form-fields [parentForm]="asFormGroup(pep)" [fields]="fields">
+                    </app-shared-form-fields>
+                </div>
+            </div>
+            <div class="row" style="text-align: center; margin: 1%;">
+                <div class="col-md-6">
+                    <button mat-button color="primary" type="button" (click)="addReferencia()">
+                        <mat-icon matSuffix>exposure_plus_1</mat-icon> Agregar Cargo
+                    </button>
+                </div>
+                <div class="col-md-6" *ngIf="peps.length > 0">
+                    <button mat-button color="warn" type="button" (click)="removeReferencia(peps.length - 1)">
+                        <mat-icon matSuffix>exposure_neg_1</mat-icon> Eliminar Cargo
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>

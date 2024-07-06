@@ -1,0 +1,23 @@
+<div class="row" style="margin: 5px 5px 25px 5px">
+    <!-- Sección de la webcam -->
+    <div class="col-md-6" style="text-align: center;">
+        <webcam [height]="200" [width]="200" [trigger]="triggerObservable" *ngIf="mostrarWebcam"
+            [switchCamera]="nextWebcamObservable" [imageQuality]="1" (imageCapture)="handleImage($event)"
+            (cameraSwitched)="cameraSwitched($event)" (initError)="handleInitError($event)">
+        </webcam>
+        <div>
+            <button mat-raised-button style="color: white;" color="primary" (click)="triggerCaptura();">Tomar
+                Foto</button>
+            <button mat-raised-button style="color: white;" color="primary" (click)="showNextWebcam(true);"
+                [disabled]="!multiplesCamarasDisponibles">Siguiente Cámara</button>
+            <!-- <button mat-raised-button style="color: white;" color="primary" (click)="toggleWebcam();">Alternar
+                    Cámara</button> -->
+            <!-- <mat-checkbox color="primary" style="background-color: white;" [(ngModel)]="permitirCambioCamara">Permitir
+                Cambio de
+                cámara</mat-checkbox> -->
+        </div>
+    </div>
+    <div class="col-md-6" style="text-align: center;" *ngIf="form.get('FotoPerfil')?.value">
+        <img [src]="form.get('FotoPerfil')?.value" alt="Foto de perfil" style="width: 200px; height: auto;">
+    </div>
+</div>

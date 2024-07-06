@@ -1,0 +1,46 @@
+<h2 mat-dialog-title>Editar</h2>
+
+<div *ngIf="formGroup as formGroup" mat-dialog-content>
+  <form [formGroup]="formGroup" class="edit-form">
+    <div class="form-grid" fxLayout="column">
+      <div *ngFor="let campo of data.campos" fxFlex class="form-cell" [class.non-editable-field]="!campo.editable">
+        <ng-container *ngIf="!campo.dependeDe || formGroup.get(campo.dependeDe)?.value === campo.valorDependiente">
+          <mat-form-field appearance="fill" fxFlex class="full-width-input" floatLabel="always">
+            <mat-label>{{ campo.etiqueta }}</mat-label>
+
+            <mat-icon *ngIf="campo.icono" matPrefix>{{ campo.icono }}</mat-icon>
+
+            <!-- Campo de fecha -->
+            <input *ngIf="campo.tipo === 'date'" matInput [matDatepicker]="pickeri" [formControlName]="campo.nombre" />
+            <mat-datepicker-toggle *ngIf="campo.tipo === 'date'" matSuffix [for]="pickeri"></mat-datepicker-toggle>
+            <mat-datepicker #pickeri="matDatepicker"></mat-datepicker>
+
+            <!-- Campo de lista -->
+            <mat-select *ngIf="campo.tipo === 'list'" [formControlName]="campo.nombre">
+              <mat-option *ngFor="let opcion of campo.opciones" [value]="opcion.value">
+                {{ opcion.label }}
+              </mat-option>
+            </mat-select>
+
+            <!-- Campo de texto -->
+            <input *ngIf="campo.tipo === 'text'" matInput [formControlName]="campo.nombre" />
+
+            <!-- Campo numérico -->
+            <input *ngIf="campo.tipo === 'number'" matInput type="number" [formControlName]="campo.nombre" />
+
+            <!-- Errores de validación -->
+            <mat-error *ngFor="let error of getErrors(campo.nombre)">
+              {{ error }}
+            </mat-error>
+          </mat-form-field>
+        </ng-container>
+      </div>
+    </div>
+
+    <div mat-dialog-actions>
+      <button mat-button (click)="cerrar()">Cancelar</button>
+      <button mat-raised-button style="color: white;" color="primary" (click)="guardar()"
+        [disabled]="!formGroup.valid">Guardar</button>
+    </div>
+  </form>
+</div>

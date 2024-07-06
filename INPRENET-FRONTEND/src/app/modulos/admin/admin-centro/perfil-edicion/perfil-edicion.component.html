@@ -1,0 +1,117 @@
+<div class="perfil-edicion-container">
+  <h2>Editar Perfil de Usuario</h2>
+  <div class="row">
+    <div class="col-12 perfil-imagenes">
+      <div class="image-container foto-empleado">
+        <img *ngIf="fotoEmpleadoUrl" [src]="fotoEmpleadoUrl" alt="Foto del Empleado">
+        <button class="edit-button" (click)="editarArchivo('fotoEmpleado')">
+          <mat-icon>edit</mat-icon>
+        </button>
+        <input
+          id="fotoEmpleado"
+          type="file"
+          (change)="onFileChange($event, 'fotoEmpleado')"
+          accept="image/*"
+          style="display: none;"
+        />
+      </div>
+      <div class="image-container archivo-identificacion">
+        <img *ngIf="archivoIdentificacionUrl" [src]="archivoIdentificacionUrl" alt="Archivo de Identificación">
+        <button class="edit-button" (click)="editarArchivo('archivoIdentificacion')">
+          <mat-icon>edit</mat-icon>
+        </button>
+        <input
+          id="archivoIdentificacion"
+          type="file"
+          (change)="onFileChange($event, 'archivoIdentificacion')"
+          accept="image/*"
+          style="display: none;"
+        />
+      </div>
+    </div>
+    <div class="col-12 perfil-info">
+      <h3>Información General</h3>
+      <form [formGroup]="perfilForm">
+        <div class="row">
+          <div class="col-12 col-md-6">
+            <mat-form-field class="full-width">
+              <mat-label>Nombre</mat-label>
+              <input matInput id="nombre" formControlName="nombre">
+            </mat-form-field>
+          </div>
+          <div class="col-12 col-md-6">
+            <mat-form-field class="full-width">
+              <mat-label>Correo</mat-label>
+              <input matInput id="correo" formControlName="correo" type="email">
+            </mat-form-field>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-12 col-md-6">
+            <mat-form-field class="full-width">
+              <mat-label>Estado</mat-label>
+              <mat-select id="estado" formControlName="estado">
+                <mat-option *ngFor="let estado of estados" [value]="estado">{{ estado }}</mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
+          <div class="col-12 col-md-6">
+            <mat-form-field class="full-width">
+              <mat-label>Puesto</mat-label>
+              <input matInput id="puesto" formControlName="puesto">
+            </mat-form-field>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-12 col-md-6">
+            <mat-form-field class="full-width">
+              <mat-label>Fecha de Verificación</mat-label>
+              <input matInput id="fecha_verificacion" formControlName="fecha_verificacion">
+            </mat-form-field>
+          </div>
+          <div class="col-12 col-md-6">
+            <mat-form-field class="full-width">
+              <mat-label>Fecha de Modificación</mat-label>
+              <input matInput id="fecha_modificacion" formControlName="fecha_modificacion">
+            </mat-form-field>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-12 col-md-6">
+            <mat-form-field class="full-width">
+              <mat-label>Fecha de Creación</mat-label>
+              <input matInput id="fecha_creacion" formControlName="fecha_creacion">
+            </mat-form-field>
+          </div>
+          <div class="col-12 col-md-6">
+            <mat-form-field class="full-width">
+              <mat-label>Teléfono 1</mat-label>
+              <input matInput id="telefono_1" formControlName="telefono_1">
+            </mat-form-field>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-12 col-md-6">
+            <mat-form-field class="full-width">
+              <mat-label>Teléfono 2</mat-label>
+              <input matInput id="telefono_2" formControlName="telefono_2">
+            </mat-form-field>
+          </div>
+          <div class="col-12 col-md-6">
+            <mat-form-field class="full-width">
+              <mat-label>Número de Identificación</mat-label>
+              <input matInput id="numero_identificacion" formControlName="numero_identificacion">
+            </mat-form-field>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-12">
+            <button mat-raised-button color="primary" (click)="guardar()">Guardar</button>
+            <button mat-raised-button color="warn" (click)="abrirDialogoDeshabilitar()">Deshabilitar Usuario</button>
+            <button mat-raised-button color="accent" (click)="reactivarUsuario()">Reactivar Usuario</button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

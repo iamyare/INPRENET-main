@@ -1,0 +1,32 @@
+<div class="forgot-password-container">
+  <h2 class="title">Olvido de Contraseña</h2>
+  <form (ngSubmit)="onSubmit()">
+    <mat-card class="forgot-password-card">
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Correo Electrónico</mat-label>
+        <input matInput type="email" [(ngModel)]="forgotPasswordDto.email" name="email" autocomplete="off" required>
+      </mat-form-field>
+      <button mat-raised-button color="primary" type="button" class="full-width" (click)="obtenerPreguntas()">Obtener Preguntas de Seguridad</button>
+
+      <div *ngIf="preguntasSeguridad.length > 0" class="security-questions">
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>{{ preguntasSeguridad[0] }}</mat-label>
+          <input matInput type="text" [(ngModel)]="forgotPasswordDto.question1Answer" name="question1Answer" autocomplete="off" required>
+        </mat-form-field>
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>{{ preguntasSeguridad[1] }}</mat-label>
+          <input matInput type="text" [(ngModel)]="forgotPasswordDto.question2Answer" name="question2Answer" autocomplete="off" required>
+        </mat-form-field>
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>{{ preguntasSeguridad[2] }}</mat-label>
+          <input matInput type="text" [(ngModel)]="forgotPasswordDto.question3Answer" name="question3Answer" autocomplete="off" required>
+        </mat-form-field>
+        <button mat-raised-button color="primary" type="submit" class="full-width">Enviar</button>
+      </div>
+
+      <div *ngIf="cargando" class="loading-spinner">
+        <mat-progress-spinner mode="indeterminate"></mat-progress-spinner>
+      </div>
+    </mat-card>
+  </form>
+</div>

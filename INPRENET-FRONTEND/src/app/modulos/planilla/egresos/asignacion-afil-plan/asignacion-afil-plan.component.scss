@@ -1,0 +1,72 @@
+.container {
+  max-width: 100vw; /* O el ancho máximo deseado */
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+.preview-button,
+.assign-button {
+  margin: 2% 0;
+  background-color: #628780;
+  color: #ffffff;
+  border-radius: 5px;
+  padding: 10px 20px;
+}
+
+.card-body {
+  background: white;
+}
+
+.card-title {
+  margin-top: 20px;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 20px;
+}
+
+th, td {
+  padding: 8px;
+  border-bottom: 1px solid #ddd;
+  text-align: left;
+}
+
+@media only screen and (max-width: 768px) {
+  th:nth-child(n+5),
+  td:nth-child(n+6) {
+    display: none;
+  }
+}
+
+/* Estilos para el botón "Cargar Beneficios Recientes" */
+.cargar-beneficios {
+  margin: 2% 0;
+  background-color: #628780;
+  color: #ffffff;
+  border-radius: 5px;
+  padding: 10px 20px;
+}
+
+/* Estilos para el botón "Previsualizar Datos Planilla" */
+.previsualizar-planilla {
+  margin: 2% 0;
+  color: #ffffff;
+  border-radius: 5px;
+  padding: 10px 20px;
+}
+
+/* Estilos para la tabla de detalles de la planilla */
+.detalles-planilla-table {
+  background-color: #f2f2f2;
+}
+
+/* Estilos para el botón "Enviar a preliminar" */
+.enviar-preliminar {
+  margin: 2% 0;
+  background-color: #628780;
+  color: #ffffff;
+  border-radius: 5px;
+  padding: 10px 20px;
+}

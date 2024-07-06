@@ -1,0 +1,14 @@
+<mat-card class="causante-card" *ngIf="causante">
+  <mat-card-header>
+    <div mat-card-avatar class="causante-avatar"></div>
+    <mat-card-title>{{ causante.primer_nombre }} {{ causante.segundo_nombre }} {{ causante.primer_apellido }} {{ causante.segundo_apellido }}</mat-card-title>
+    <mat-card-subtitle>DNI: {{ causante.dni }}</mat-card-subtitle>
+  </mat-card-header>
+  <mat-card-content>
+    <p><strong>Numero de identificacion:</strong> {{ causante.n_identificacion }}</p>
+    <p><strong>Estado Civil:</strong> {{ causante.estado_civil }}</p>
+    <p><strong>Correo:</strong> {{ causante.correo_1 }}</p>
+    <p><strong>Teléfono:</strong> {{ causante.telefono_1 }}</p>
+    <!-- Agrega más detalles según sea necesario -->
+  </mat-card-content>
+</mat-card>

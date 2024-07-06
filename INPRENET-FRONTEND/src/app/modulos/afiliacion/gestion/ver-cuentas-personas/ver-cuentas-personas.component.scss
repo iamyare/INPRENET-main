@@ -1,0 +1,80 @@
+.container {
+  max-width: 100vw; /* O el ancho máximo deseado */
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+.preview-button,
+.assign-button {
+  margin: 2% 0;
+  background-color: #628780;
+  color: #ffffff;
+  border-radius: 5px;
+  padding: 10px 20px;
+}
+
+.card-body {
+  background: white;
+}
+
+.card-title {
+  margin-top: 20px;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 20px;
+}
+
+th,
+td {
+  padding: 8px;
+  border-bottom: 1px solid #ddd;
+  text-align: left;
+}
+
+@media only screen and (max-width: 768px) {
+  th:nth-child(n + 5),
+  td:nth-child(n + 6) {
+    display: none;
+  }
+}
+
+@media only screen and (max-width: 480px) {
+  .preview-button,
+  .assign-button {
+    background-color: #628780;
+    color: #ffffff;
+    border-radius: 5px;
+    width: 100%;
+  }
+}
+
+.anaranjado {
+  color: #ee6002;
+}
+
+@keyframes desaparecer {
+  0% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+.desapareciendo {
+  animation: desaparecer 2s infinite;
+}
+
+
+.spinner-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 200px;
+}

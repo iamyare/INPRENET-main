@@ -1,0 +1,78 @@
+<div>
+  <app-progressbar (newDatBenChange)="setEstadoDatGen($event)" (newEstCentrTrab)="setEstadoDatCentTrab($event)"
+    (newdatosHS)="setDatosHS($event)" (newdatosRP)="setDatosReferenc($event)" (newdatosB)="setDatosBenef($event)"
+    (newdatosF)="setDatosF($event)" (newdatosA)="setDatosA($event)"
+    (newdatosColegiosMag)="setDatosAColegiosMag($event)"></app-progressbar>
+</div>
+
+<div class="main-content">
+  <div class="col-md-12">
+    <app-dat-generales-afiliado [useCamera]="true" (imageCaptured)="handleImageCaptured($event)" *ngIf="DatosGenerales"
+      (newDatosGenerales)="setDatosGenerales($event)" [datos]="formDatosGenerales"></app-dat-generales-afiliado>
+
+    <!-- <app-maps></app-maps> -->
+
+    <app-col-magisteriales *ngIf="ColegiosMagisteriales" [datos]="formColegiosMagisteriales"
+      (newDataColegioMagisterial)="setDatosColegiosMag($event)"></app-col-magisteriales>
+
+    <app-dat-puesto-trab *ngIf="DatosPuestoTrab" [datos]="formPuestTrab"
+      (newDatDatosPuestTrab)="setDatosPuetTrab1($event)">
+    </app-dat-puesto-trab>
+
+    <app-historial-salario *ngIf="DatosHS" [datos]="formHistPag"
+      (newDatHistSal)="setHistSal($event)"></app-historial-salario>
+
+    <app-ref-pers *ngIf="referenc" [datos]="formReferencias"
+      (newDatRefPerChange)="setDatosRefPer($event)"></app-ref-pers>
+
+    <app-benef *ngIf="datosBeneficiario" [datos]="formBeneficiarios"
+      (newDatBenChange)="setDatosBen($event)"></app-benef>
+
+
+    <div class="card" *ngIf="datosF">
+      <div class="card-header card-header-danger tittle">
+        <h4 class="card-title">Envío De Formulario</h4>
+        <p class="card-category">
+          Presione el botón "Enviar Formulario" para continuar con el proceso.
+        </p>
+      </div>
+
+      <div class="card-body" style="text-align: center;">
+        <!-- <strong>Datos Generales</strong>
+        {{ formDatosGenerales.controls.refpers.value | json }}
+        <strong>Status:</strong> {{ formDatosGenerales.controls.refpers.status }}
+        <br>
+        <strong>Datos Colegios Magisteriales:</strong>
+        {{ formColegiosMagisteriales.controls.ColMags.value | json }}
+        <strong>Status:</strong> {{ formColegiosMagisteriales.controls.ColMags.status }}
+        <br>
+        <strong>Datos Cuentas Bancarias:</strong>
+        {{formHistPag.controls.banco.value | json }}
+        <strong>Status:</strong> {{ formHistPag.controls.banco.status }}
+        <br>
+        <strong>Datos Centros de Trabajo:</strong>
+        {{ formPuestTrab.controls.trabajo.value | json }}
+        <strong>Status:</strong> {{ formPuestTrab.controls.trabajo.status }}
+        <br>
+        <strong>Datos Referencias:</strong>
+        {{ formReferencias.controls.refpers.value | json }}
+        <strong>Status:</strong> {{ formReferencias.controls.refpers.status }}
+        <br>
+        <strong>Datos Beneficiario:</strong>
+        {{ formBeneficiarios.controls.beneficiario.value | json }}
+        <strong>Status:</strong> {{ formBeneficiarios.controls.beneficiario.status }} -->
+
+        <button mat-button color="primary" (click)="enviar()"
+          [disabled]="formDatosGenerales.controls.refpers.invalid || formColegiosMagisteriales.controls.ColMags.invalid  || formHistPag.controls.banco.invalid || formPuestTrab.controls.trabajo.invalid || formReferencias.controls.refpers.invalid || formBeneficiarios.controls.beneficiario.invalid">Enviar
+          Formulario</button>
+
+        <!-- <button mat-button color="primary" (click)="enviar()">
+          Enviar Formulario
+        </button> -->
+
+        <!-- <button mat-button color="primary" (click)="createPDF()">Generar PDF</button> -->
+
+      </div>
+    </div>
+  </div>
+</div>

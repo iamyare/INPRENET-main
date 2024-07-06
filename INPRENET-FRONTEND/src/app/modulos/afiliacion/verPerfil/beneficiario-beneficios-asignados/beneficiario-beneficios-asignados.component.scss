@@ -1,0 +1,71 @@
+.card {
+  background-color: #e5f4f3; /* Color base */
+  border: 1px solid #bee4e1;
+  border-radius: 8px;
+  padding: 16px;
+  margin: 8px 0;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  transition: background-color 0.3s;
+  position: relative;
+
+  &:hover {
+    background-color: #bee4e1; /* Color al pasar el cursor */
+  }
+
+  p {
+    margin: 8px 0;
+
+    strong {
+      color: #0d7b6c; /* Color del texto en negrita */
+    }
+  }
+
+  button {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    background-color: #26a69a;
+    border: none;
+    color: white;
+    padding: 8px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+
+    &:hover {
+      background-color: #1c9588;
+    }
+  }
+}
+
+.table {
+  width: 100%;
+  margin-bottom: 1rem;
+  color: #212529;
+  border-collapse: collapse;
+
+  th {
+    background-color: #26a69a;
+    color: white;
+    padding: 8px;
+    text-align: left;
+  }
+
+  td {
+    padding: 8px;
+    border-top: 1px solid #dee2e6;
+  }
+
+  tr:nth-child(even) {
+    background-color: #f2f2f2;
+  }
+}
+
+.modal-header {
+  background-color: #26a69a;
+  color: white;
+}
+
+.modal-footer {
+  background-color: #e5f4f3;
+}

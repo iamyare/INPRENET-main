@@ -1,0 +1,41 @@
+<div class="card">
+  <div class="card-header card-header-danger tittle" style="background: #229e92;">
+    <h4 class="card-title">Colegio Magisterial</h4>
+    <p class="card-category">Completa la información correspondiente</p>
+  </div>
+
+  <form [formGroup]="formParent" style="margin: 1%;" (change)="onDatosColMagChange()">
+    <div formArrayName="ColMags">
+      <div *ngFor="let skill of getCtrl('ColMags', formParent).controls; index as formChild; let i = index">
+        <h4 class="card-title">Colegio Magisterial Número: {{i+1}}</h4>
+        <div [formGroupName]="formChild" class="row">
+          <div class="col-md-12">
+            <mat-form-field style="flex-direction: column-reverse;" class="example-full-width inputs"
+              appearance="outline">
+              <mat-label>Colegio Magisterial</mat-label>
+              <mat-select (ngModelChange)="onDatosColMagChange()" matNativeControl formControlName="idColegio">
+                <mat-option *ngFor="let item of colegio_magisterial" [value]="item.value">
+                  {{ item.label }}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+            <mat-error *ngFor="let error of getErrors(i, 'idColegio')">
+              {{ error }}
+            </mat-error>
+          </div>
+        </div>
+      </div>
+    </div>
+  </form>
+
+  <div class="row" style="text-align: center; margin: 1%;">
+    <div class="col-md-6">
+      <button mat-button color="primary" (click)="agregarColMag()"><mat-icon matSuffix>exposure_plus_1</mat-icon>Agregar
+        Colegio Magisterial</button>
+    </div>
+    <div class="col-md-6">
+      <button mat-button color="warn" (click)="eliminarColMag()"><mat-icon matSuffix>exposure_neg_1</mat-icon>Eliminar
+        Colegio Magisterial</button>
+    </div>
+  </div>
+</div>

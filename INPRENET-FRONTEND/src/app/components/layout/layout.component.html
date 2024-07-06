@@ -1,0 +1,37 @@
+<app-header></app-header>
+
+<mat-sidenav-container class="example-container" *ngIf="sidenavOpened">
+  <mat-sidenav #sidenav mode="side" [(opened)]="sidenavOpened" class="sidenav">
+    <ng-container *ngFor="let section of menuSections">
+      <div class="sidenav-section">
+        <h3 class="sidenav-title">{{ section.name }}</h3>
+      </div>
+      <mat-accordion class="custom-accordion">
+        <ng-container *ngFor="let menuItem of section.items">
+          <mat-expansion-panel class="custom-expansion-panel">
+            <mat-expansion-panel-header class="custom-expansion-panel-header">
+              <mat-panel-title>
+                <mat-icon>{{ menuItem.icon }}</mat-icon>
+                <span *ngIf="sidenavOpened">{{ menuItem.title }}</span>
+              </mat-panel-title>
+            </mat-expansion-panel-header>
+            <mat-nav-list>
+              <a mat-list-item *ngFor="let child of menuItem.children" [routerLink]="child.route" class="child-menu-item">
+                <mat-icon>{{ child.icon }}</mat-icon>
+                <span *ngIf="sidenavOpened">{{ child.title }}</span>
+              </a>
+            </mat-nav-list>
+          </mat-expansion-panel>
+        </ng-container>
+      </mat-accordion>
+    </ng-container>
+  </mat-sidenav>
+  <mat-sidenav-content class="content-container">
+    <div class="content-wrapper">
+      <div class="content">
+        <router-outlet></router-outlet>
+      </div>
+      <app-footer class="footer"></app-footer>
+    </div>
+  </mat-sidenav-content>
+</mat-sidenav-container>

@@ -1,0 +1,91 @@
+<div class="container">
+  <h2>Editar Perfil</h2>
+
+  <div class="perfil-imagenes">
+    <div class="image-container foto-empleado">
+      <img *ngIf="fotoEmpleadoUrl" [src]="fotoEmpleadoUrl" alt="Foto del Empleado">
+      <button class="edit-button" (click)="editarArchivo('fotoEmpleado')">
+        <mat-icon>edit</mat-icon>
+      </button>
+      <input
+        id="fotoEmpleado"
+        type="file"
+        (change)="onFileChange($event, 'fotoEmpleado')"
+        accept="image/*"
+        style="display: none;"
+      />
+    </div>
+    <div class="image-container archivo-identificacion">
+      <img *ngIf="archivoIdentificacionUrl" [src]="archivoIdentificacionUrl" alt="Archivo de Identificación">
+      <button class="edit-button" (click)="editarArchivo('archivoIdentificacion')">
+        <mat-icon>edit</mat-icon>
+      </button>
+      <input
+        id="archivoIdentificacion"
+        type="file"
+        (change)="onFileChange($event, 'archivoIdentificacion')"
+        accept="image/*"
+        style="display: none;"
+      />
+    </div>
+  </div>
+
+  <mat-card class="info-card">
+    <div class="info-section">
+      <h3>Puesto</h3>
+      <p>{{ perfilForm.get('puesto')?.value }}</p>
+    </div>
+    <div class="info-section">
+      <h3>Centro de Trabajo</h3>
+      <p>{{ perfilForm.get('centroTrabajo')?.value }}</p>
+    </div>
+  </mat-card>
+
+  <form [formGroup]="perfilForm" class="form-container">
+    <mat-card class="perfil-card">
+      <mat-form-field appearance="fill" class="full-width">
+        <mat-label>Nombre</mat-label>
+        <input matInput formControlName="nombre">
+      </mat-form-field>
+      <mat-form-field appearance="fill" class="full-width">
+        <mat-label>Correo</mat-label>
+        <input matInput formControlName="correo">
+      </mat-form-field>
+      <mat-form-field appearance="fill" class="full-width">
+        <mat-label>Teléfono 1</mat-label>
+        <input matInput formControlName="telefono1">
+      </mat-form-field>
+      <mat-form-field appearance="fill" class="full-width">
+        <mat-label>Teléfono 2</mat-label>
+        <input matInput formControlName="telefono2">
+      </mat-form-field>
+      <mat-form-field appearance="fill" class="full-width">
+        <mat-label>Número de Identificación</mat-label>
+        <input matInput formControlName="numeroIdentificacion">
+      </mat-form-field>
+    </mat-card>
+  </form>
+
+  <div class="modules-container">
+    <h2>Módulos</h2>
+    <mat-card *ngFor="let modulo of modulos" class="module-card">
+      <h3>{{ modulo.nombre }}</h3>
+      <p>{{ modulo.descripcion }}</p>
+    </mat-card>
+  </div>
+
+  <h2>Cambiar Contraseña</h2>
+  <form [formGroup]="contrasenaForm" (ngSubmit)="cambiarContrasena()" class="form-container">
+    <mat-card class="contrasena-card">
+      <mat-form-field appearance="fill" class="full-width">
+        <mat-label>Nueva Contraseña</mat-label>
+        <input matInput type="password" formControlName="nuevaContrasena" required>
+      </mat-form-field>
+      <mat-form-field appearance="fill" class="full-width">
+        <mat-label>Confirmar Nueva Contraseña</mat-label>
+        <input matInput type="password" formControlName="confirmarContrasena" required>
+      </mat-form-field>
+      <button mat-raised-button color="primary" type="submit" [disabled]="!contrasenaForm.valid">Cambiar Contraseña</button>
+    </mat-card>
+  </form>
+</div>

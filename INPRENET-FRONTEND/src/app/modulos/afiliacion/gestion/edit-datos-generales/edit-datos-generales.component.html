@@ -1,0 +1,114 @@
+<div style="margin: 1% 0% 1% 0%; text-align: center; background-color: white">
+  <div *ngIf="loading" class="spinner-container">
+    <mat-spinner class="spinner" diameter="50"></mat-spinner>
+  </div>
+
+  <div *ngIf="datos && !loading">
+    <app-dat-generales-afiliado [datos]="formDatosGenerales"
+      (newDatosGenerales)="setDatosGenerales($event)"></app-dat-generales-afiliado>
+
+    <form style="margin: 0 0 1.5rem;" [formGroup]="form1">
+      <div class="row" style="margin: 0px 20px 0 20px;">
+        <div class="col-md-4" *ngIf="fallecido == 'NO'">
+          <mat-form-field style="flex-direction: column-reverse;" class="example-full-width inputs"
+            appearance="outline">
+            <mat-label>Estado de Afiliación de la Persona</mat-label>
+            <mat-select matNativeControl formControlName="estado" (selectionChange)="mostrarCamposFallecido($event)">
+              <mat-option *ngFor="let p of estado" [value]="p.value">
+                {{ p.label }}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+          <mat-error *ngFor="let error of getErrors('estado')">
+            {{ error }}
+          </mat-error>
+        </div>
+
+        <div class="col-md-4" *ngIf="fallecido == 'SI'">
+          <mat-form-field style="flex-direction: column-reverse;" class="example-full-width inputs"
+            appearance="outline">
+            <mat-label>Certificado Defunción</mat-label>
+            <input matInput formControlName="certificado_defuncion">
+          </mat-form-field>
+          <mat-error *ngFor="let error of getErrors('certificado_defuncion')">
+            {{ error }}
+          </mat-error>
+        </div>
+
+        <div class="col-md-4" *ngIf="fallecido == 'SI'">
+          <mat-form-field style="flex-direction: column-reverse;" class="example-full-width inputs"
+            appearance="outline">
+            <mat-label>Tipo De Defunción</mat-label>
+            <mat-select matNativeControl formControlName="tipo_defuncion">
+              <mat-option *ngFor="let p of TipoDefuncion" [value]="p.value">
+                {{ p.value }}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+          <mat-error *ngFor="let error of getErrors('tipo_defuncion')">
+            {{ error }}
+          </mat-error>
+        </div>
+        <div class="col-md-4" *ngIf="fallecido == 'SI'">
+          <mat-form-field style="flex-direction: column-reverse;" class="example-full-width inputs"
+            appearance="outline">
+            <mat-label>Observaciones</mat-label>
+            <input matInput formControlName="observaciones">
+          </mat-form-field>
+          <mat-error *ngFor="let error of getErrors('observaciones')">
+            {{ error }}
+          </mat-error>
+        </div>
+        <div class="col-md-4" *ngIf="fallecido == 'SI'">
+          <mat-form-field style="flex-direction: column-reverse;" class="example-full-width inputs"
+            appearance="outline">
+            <mat-label>Fecha Defunción</mat-label>
+            <mat-datepicker-toggle matSuffix [for]="fechaDef"></mat-datepicker-toggle>
+            <mat-datepicker #fechaDef></mat-datepicker>
+            <input matInput formControlName="fecha_defuncion" [matDatepicker]="fechaDef" [max]="minDate">
+          </mat-form-field>
+          <mat-error *ngFor="let error of getErrors('fecha_defuncion')">
+            {{ error }}
+          </mat-error>
+        </div>
+        <div class="col-lg-4 col-md-12" *ngIf="fallecido == 'SI'">
+          <mat-form-field style="flex-direction: column-reverse;" class="example-full-width inputs"
+            appearance="outline">
+            <mat-label>Departamento De Defunción</mat-label>
+            <mat-icon matPrefix>location_city</mat-icon>
+            <mat-select formControlName="id_departamento_defuncion" (selectionChange)="onDepartamentoChange($event)">
+              <mat-option *ngFor="let departamento of departamentos" [value]="departamento.value">
+                {{ departamento.label }}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+          <mat-error *ngFor="let error of getErrors('id_departamento_defuncion')">
+            {{ error }}
+          </mat-error>
+        </div>
+        <div class="col-lg-4 col-md-12" *ngIf="fallecido == 'SI'">
+          <mat-form-field style="flex-direction: column-reverse;" class="example-full-width inputs"
+            appearance="outline">
+            <mat-label>Municipio De Defunción</mat-label>
+            <mat-icon matPrefix>location_city</mat-icon>
+            <mat-select formControlName="id_municipio_defuncion">
+              <mat-option *ngFor="let municipio of municipios" [value]="municipio.value">
+                {{ municipio.label }}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+          <mat-error *ngFor="let error of getErrors('id_municipio_defuncion')">
+            {{ error }}
+          </mat-error>
+        </div>
+
+      </div>
+    </form>
+
+    <app-maps></app-maps>
+
+    <button mat-raised-button color="primary" style="color: white; margin: 1% 0 1% 0" (click)="GuardarInformacion()">
+      Guardar
+    </button>
+  </div>
+</div>

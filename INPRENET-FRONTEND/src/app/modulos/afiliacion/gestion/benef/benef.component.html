@@ -1,0 +1,318 @@
+<div class="card">
+  <div class="card-header card-header-danger tittle">
+    <h4 class="card-title">Beneficiarios</h4>
+    <p class="card-category">Llene los campos para continuar con el proceso.</p>
+  </div>
+
+  <form [formGroup]="formParent" (change)="onDatosBenChange()">
+    <div formArrayName="beneficiario">
+      <div *ngFor="let group of getCtrl('beneficiario', formParent).controls; let i = index">
+        <h4 class="card-title" style="margin: 16px;">Beneficiario Número: {{i+1}}</h4>
+        <div [formGroupName]="i" class="row">
+          <div formGroupName="datosBeneficiario">
+            <div class="row">
+              <div class="col-lg-4 col-md-12">
+                <mat-form-field style="flex-direction: column-reverse;" class="example-full-width inputs" appearance="outline">
+                  <mat-label>Primer Nombre</mat-label>
+                  <mat-icon matPrefix>person</mat-icon>
+                  <input matInput formControlName="primer_nombre" required>
+                </mat-form-field>
+                <mat-error *ngFor="let error of getErrors(i, 'primer_nombre')">
+                  {{ error }}
+                </mat-error>
+              </div>
+              <div class="col-lg-4 col-md-12">
+                <mat-form-field style="flex-direction: column-reverse;" class="example-full-width inputs" appearance="outline">
+                  <mat-label>Segundo Nombre</mat-label>
+                  <mat-icon matPrefix>person</mat-icon>
+                  <input matInput formControlName="segundo_nombre">
+                </mat-form-field>
+                <mat-error *ngFor="let error of getErrors(i, 'segundo_nombre')">
+                  {{ error }}
+                </mat-error>
+              </div>
+              <div class="col-lg-4 col-md-12">
+                <mat-form-field style="flex-direction: column-reverse;" class="example-full-width inputs" appearance="outline">
+                  <mat-label>Tercer Nombre</mat-label>
+                  <mat-icon matPrefix>person</mat-icon>
+                  <input matInput formControlName="tercer_nombre">
+                </mat-form-field>
+                <mat-error *ngFor="let error of getErrors(i, 'tercer_nombre')">
+                  {{ error }}
+                </mat-error>
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-lg-4 col-md-12">
+                <mat-form-field style="flex-direction: column-reverse;" class="example-full-width inputs" appearance="outline">
+                  <mat-label>Primer Apellido</mat-label>
+                  <mat-icon matPrefix>person</mat-icon>
+                  <input matInput formControlName="primer_apellido" required>
+                </mat-form-field>
+                <mat-error *ngFor="let error of getErrors(i, 'primer_apellido')">
+                  {{ error }}
+                </mat-error>
+              </div>
+              <div class="col-lg-4 col-md-12">
+                <mat-form-field style="flex-direction: column-reverse;" class="example-full-width inputs" appearance="outline">
+                  <mat-label>Segundo Apellido</mat-label>
+                  <mat-icon matPrefix>person</mat-icon>
+                  <input matInput formControlName="segundo_apellido">
+                </mat-form-field>
+                <mat-error *ngFor="let error of getErrors(i, 'segundo_apellido')">
+                  {{ error }}
+                </mat-error>
+              </div>
+              <div class="col-lg-4 col-md-12">
+                <mat-form-field style="flex-direction: column-reverse;" class="example-full-width inputs" appearance="outline">
+                  <mat-label>DNI</mat-label>
+                  <mat-icon matPrefix>badge</mat-icon>
+                  <input matInput formControlName="dni">
+                </mat-form-field>
+                <mat-error *ngFor="let error of getErrors(i, 'dni')">
+                  {{ error }}
+                </mat-error>
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-lg-4 col-mg-12">
+                <mat-form-field style="flex-direction: column-reverse;" class="example-full-width inputs" appearance="outline">
+                  <mat-label>Departamento de Residencia</mat-label>
+                  <mat-icon matPrefix>location_city</mat-icon>
+                  <mat-select formControlName="id_departamento_residencia" (selectionChange)="onDepartamentoChange($event)">
+                    <mat-option *ngFor="let departamento of departamentos" [value]="departamento.value">
+                      {{ departamento.label }}
+                    </mat-option>
+                  </mat-select>
+                </mat-form-field>
+                <mat-error *ngFor="let error of getErrors(i, 'id_departamento_residencia')">
+                  {{ error }}
+                </mat-error>
+              </div>
+              <div class="col-lg-4 col-mg-12">
+                <mat-form-field style="flex-direction: column-reverse;" class="example-full-width inputs" appearance="outline">
+                  <mat-label>Porcentaje De Beneficio</mat-label>
+                  <input matInput formControlName="porcentaje" type="number">
+                  <mat-icon matPrefix>percent</mat-icon>
+                </mat-form-field>
+                <mat-error *ngFor="let error of getErrors2(i, 'porcentaje')">
+                  {{ error }}
+                </mat-error>
+              </div>
+              <div class="col-lg-4 col-md-12">
+                <mat-form-field style="flex-direction: column-reverse;" class="example-full-width inputs" appearance="outline">
+                  <mat-label>Teléfono 1</mat-label>
+                  <mat-icon matPrefix>phone</mat-icon>
+                  <input matInput formControlName="telefono_1">
+                </mat-form-field>
+                <mat-error *ngFor="let error of getErrors(i, 'telefono_1')">
+                  {{ error }}
+                </mat-error>
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-lg-4 col-md-12">
+                <mat-form-field style="flex-direction: column-reverse;" class="example-full-width inputs" appearance="outline">
+                  <mat-label>Departamento De Nacimiento</mat-label>
+                  <mat-icon matPrefix>location_city</mat-icon>
+                  <mat-select formControlName="id_departamento_nacimiento" (selectionChange)="onDepartamentoNacimientoChange($event)">
+                    <mat-option *ngFor="let departamento of departamentosNacimiento" [value]="departamento.value">
+                      {{ departamento.label }}
+                    </mat-option>
+                  </mat-select>
+                </mat-form-field>
+                <mat-error *ngFor="let error of getErrors(i, 'id_departamento_nacimiento')">
+                  {{ error }}
+                </mat-error>
+              </div>
+
+              <div class="col-lg-4 col-md-12">
+                <mat-form-field style="flex-direction: column-reverse;" class="example-full-width inputs" appearance="outline">
+                  <mat-label>Municipio De Nacimiento</mat-label>
+                  <mat-icon matPrefix>location_city</mat-icon>
+                  <mat-select formControlName="id_municipio_nacimiento" (selectionChange)="onDatosBenChange()">
+                    <mat-option *ngFor="let municipio of municipiosNacimiento" [value]="municipio.value">
+                      {{ municipio.label }}
+                    </mat-option>
+                  </mat-select>
+                </mat-form-field>
+                <mat-error *ngFor="let error of getErrors(i, 'id_municipio_nacimiento')">
+                  {{ error }}
+                </mat-error>
+              </div>
+
+              <div class="col-lg-4 col-md-12">
+                <mat-form-field style="flex-direction: column-reverse;" class="example-full-width inputs" appearance="outline">
+                  <mat-label>Nacionalidad</mat-label>
+                  <mat-icon matPrefix>flag</mat-icon>
+                  <mat-select formControlName="id_pais" (selectionChange)="onDatosBenChange()">
+                    <mat-option *ngFor="let nac of nacionalidades" [value]="nac.value">
+                      {{ nac.label }}
+                    </mat-option>
+                  </mat-select>
+                </mat-form-field>
+                <mat-error *ngFor="let error of getErrors(i, 'id_pais')">
+                  {{ error }}
+                </mat-error>
+              </div>
+              <div class="col-lg-4 col-md-12">
+                <mat-form-field class="example-full-width inputs" appearance="outline">
+                  <mat-label>Fecha De Nacimiento</mat-label>
+                  <mat-datepicker-toggle matSuffix [for]="fechaNac"></mat-datepicker-toggle>
+                  <mat-datepicker #fechaNac></mat-datepicker>
+                  <input matInput formControlName="fecha_nacimiento" [matDatepicker]="fechaNac" [max]="minDate">
+                  <mat-hint>DD/MM/YYYY</mat-hint>
+                </mat-form-field>
+                <mat-error *ngFor="let error of getErrors(i, 'fecha_nacimiento')">
+                  {{ error }}
+                </mat-error>
+              </div>
+
+              <div class="col-lg-4 col-md-12">
+                <mat-form-field class="example-full-width inputs" appearance="outline">
+                  <mat-label>Dirección De Residencia</mat-label>
+                  <mat-icon matPrefix>home</mat-icon>
+                  <input matInput formControlName="direccion_residencia">
+                </mat-form-field>
+                <mat-error *ngFor="let error of getErrors(i, 'direccion_residencia')">
+                  {{ error }}
+                </mat-error>
+              </div>
+
+              <div class="col-lg-4 col-md-12">
+                <mat-form-field class="example-full-width inputs" appearance="outline">
+                  <mat-label>Nacionalidad</mat-label>
+                  <mat-icon matPrefix>flag</mat-icon>
+                  <mat-select formControlName="id_pais">
+                    <mat-option *ngFor="let nac of nacionalidades" [value]="nac.value">
+                      {{ nac.label }}
+                    </mat-option>
+                  </mat-select>
+                </mat-form-field>
+                <mat-error *ngFor="let error of getErrors(i, 'id_pais')">
+                  {{ error }}
+                </mat-error>
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-lg-4 col-mg-12">
+                <mat-form-field style="flex-direction: column-reverse;" class="example-full-width inputs" appearance="outline">
+                  <mat-label>Municipio De Residencia</mat-label>
+                  <mat-icon matPrefix>location_city</mat-icon>
+                  <mat-select formControlName="id_municipio_residencia">
+                    <mat-option *ngFor="let municipio of municipios" [value]="municipio.value">
+                      {{ municipio.label }}
+                    </mat-option>
+                  </mat-select>
+                </mat-form-field>
+                <mat-error *ngFor="let error of getErrors(i, 'id_municipio_residencia')">
+                  {{ error }}
+                </mat-error>
+              </div>
+              <div class="col-lg-4 col-mg-12">
+                <mat-form-field style="flex-direction: column-reverse;" class="example-full-width inputs" appearance="outline">
+                  <mat-label>Género</mat-label>
+                  <mat-icon matPrefix>wc</mat-icon>
+                  <mat-select formControlName="genero">
+                    <mat-option *ngFor="let genero of generos" [value]="genero.value">
+                      {{ genero.label }}
+                    </mat-option>
+                  </mat-select>
+                </mat-form-field>
+                <mat-error *ngFor="let error of getErrors(i, 'genero')">
+                  {{ error }}
+                </mat-error>
+              </div>
+              <div class="col-lg-4 col-mg-12">
+                <mat-form-field style="flex-direction: column-reverse;" class="example-full-width inputs" appearance="outline">
+                  <mat-label>Sexo</mat-label>
+                  <mat-icon matPrefix>transgender</mat-icon>
+                  <mat-select formControlName="sexo">
+                    <mat-option *ngFor="let sexo of sexo" [value]="sexo.value">
+                      {{ sexo.label }}
+                    </mat-option>
+                  </mat-select>
+                </mat-form-field>
+                <mat-error *ngFor="let error of getErrors(i, 'sexo')">
+                  {{ error }}
+                </mat-error>
+              </div>
+              <div class="col-lg-4 col-md-12">
+                <label>¿Depende económicamente de usted?</label>
+                <mat-radio-group formControlName="dependiente" (change)="onDatosGeneralesDiscChange($event, i)">
+                  <mat-radio-button *ngFor="let option of field.options" [value]="option.value">
+                    {{ option.label }}
+                  </mat-radio-button>
+                </mat-radio-group>
+              </div>
+              <div class="col-lg-4 col-md-12">
+                <label>¿Ha desempeñado un cargo público?</label>
+                <mat-radio-group formControlName="cargoPublico" (change)="onDatosGeneralesCargoPChange($event, i)">
+                  <mat-radio-button *ngFor="let option of field.options" [value]="option.value">
+                    {{ option.label }}
+                  </mat-radio-button>
+                </mat-radio-group>
+              </div>
+              <div class="col-lg-4 col-md-12">
+                <label>¿Posee alguna discapacidad?</label>
+                <mat-radio-group formControlName="discapacidad" (change)="onDiscapacidadChange(i, $event)">
+                  <mat-radio-button *ngFor="let option of field.options" [value]="option.value">
+                    {{ option.label }}
+                  </mat-radio-button>
+                </mat-radio-group>
+              </div>
+              <div class="col-lg-12 col-md-12" *ngIf="group.get('datosBeneficiario').get('discapacidad')?.value === 'si'">
+                <div formArrayName="discapacidades" class="discapacidad-container">
+                  <div class="discapacidad-title">Tipos de Discapacidad</div>
+                  <div *ngFor="let control of getCtrl('beneficiario', formParent).at(i).get('datosBeneficiario.discapacidades').controls; let j = index" class="discapacidad-item">
+                    <mat-form-field class="example-full-width inputs discapacidad-field" appearance="outline">
+                      <mat-label>Tipo De Discapacidad</mat-label>
+                      <mat-icon matPrefix>wc</mat-icon>
+                      <mat-select [formControlName]="j" (selectionChange)="onDatosBenChange()">
+                        <mat-option *ngFor="let tipo_discapacidad of getAvailableDisabilities(getCtrl('beneficiario', formParent).at(i).get('datosBeneficiario.discapacidades'), j)" [value]="tipo_discapacidad.value">
+                          {{ tipo_discapacidad.label }}
+                        </mat-option>
+                      </mat-select>
+                    </mat-form-field>
+                    <mat-error *ngFor="let error of getErrors(i, 'discapacidades')">
+                      {{ error }}
+                    </mat-error>
+                    <button mat-raised-button color="warn" class="discapacidad-remove-btn" (click)="eliminarDiscapacidad(i, j)">Eliminar</button>
+                  </div>
+                  <button mat-raised-button color="primary" class="discapacidad-add-btn" (click)="agregarDiscapacidad(i)">Agregar Discapacidad</button>
+                </div>
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-lg-12 col-mg-12">
+                <mat-form-field style="flex-direction: column-reverse;" class="full-width-field inputs" appearance="outline">
+                  <mat-label>Parentesco</mat-label>
+                  <mat-icon matPrefix>people</mat-icon>
+                  <mat-select formControlName="parentesco">
+                    <mat-option *ngFor="let item of parentesco" [value]="item.value">{{ item.label }}</mat-option>
+                  </mat-select>
+                </mat-form-field>
+                <mat-error *ngFor="let error of getErrors(i, 'parentesco')">
+                  {{ error }}
+                </mat-error>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </form>
+
+  <div class="row" style="text-align: center; margin: 1%;">
+    <div class="col-lg-4 col-md-12">
+      <button mat-button color="primary" (click)="agregarBen()">
+        <mat-icon matSuffix>exposure_plus_1</mat-icon> Agregar Beneficiario
+      </button>
+    </div>
+    <div class="col-lg-4 col-md-12">
+      <button mat-button color="warn" (click)="eliminarRefPer()">
+        <mat-icon matSuffix>exposure_neg_1</mat-icon> Eliminar Beneficiario
+      </button>
+    </div>
+  </div>
+</div>

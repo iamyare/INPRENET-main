@@ -1,0 +1,23 @@
+<div class="admin-layout-container">
+  <header>
+    <nav class="navbar">
+      <span class="navbar-brand">Admin Panel</span>
+      <button mat-button [matMenuTriggerFor]="menu">Menú</button>
+      <mat-menu #menu="matMenu">
+        <button mat-menu-item routerLink="/admin/dashboard">Dashboard</button>
+        <button mat-menu-item routerLink="/admin/user-management">Gestión de Usuarios</button>
+        <button mat-menu-item routerLink="/admin/add-admin">Agregar Administrador</button>
+      </mat-menu>
+    </nav>
+  </header>
+
+  <main>
+    <router-outlet></router-outlet>
+  </main>
+
+  <footer>
+    <div class="footer-content">
+      <p>&copy; 2024 Admin Panel. Todos los derechos reservados.</p>
+    </div>
+  </footer>
+</div>

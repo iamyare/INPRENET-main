@@ -1,0 +1,18 @@
+<div *ngIf="persona" class="grid-container">
+  <app-progressbar-dynamic [steps]="steps" (stepChange)="onStepChange($event)"></app-progressbar-dynamic>
+
+  <div *ngIf="currentStepIndex === 0">
+    <app-beneficiario-constancias [datos]="persona"></app-beneficiario-constancias>
+  </div>
+  <div *ngIf="currentStepIndex === 1">
+    <app-beneficiario-beneficios-asignados [datos]="persona"></app-beneficiario-beneficios-asignados>
+  </div>
+  <div *ngIf="currentStepIndex === 2">
+    <div class="causantes-container">
+      <h2>Detalles de los Causantes</h2>
+      <div *ngFor="let causante of causantes">
+        <app-causante-detalle [causante]="causante"></app-causante-detalle>
+      </div>
+    </div>
+  </div>
+</div>

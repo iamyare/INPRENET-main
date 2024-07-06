@@ -1,0 +1,99 @@
+<mat-stepper [linear]="isLinear" #stepper>
+  <mat-step *ngIf="mostrarPrimerPaso">
+    <form [formGroup]="firstFormGroup">
+      <ng-template matStepLabel>Seleccione Centro</ng-template>
+
+      <mat-form-field appearance="fill" style="width: 100%">
+        <mat-label>Buscar Centro Educativo</mat-label>
+        <input
+          matInput
+          (keyup)="applyFilter($event)"
+          placeholder="Escribe para buscar el centro educativo"
+        />
+      </mat-form-field>
+
+      <div>
+        <table mat-table [dataSource]="dataSourceItems" matSort>
+          <!-- ID Centro de Trabajo Column -->
+          <ng-container matColumnDef="id_centro_trabajo">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header>ID</th>
+            <td mat-cell *matCellDef="let item">
+              {{ item.id_centro_trabajo }}
+            </td>
+          </ng-container>
+
+          <!-- Nombre Centro de Trabajo Column -->
+          <ng-container matColumnDef="nombre_centro_trabajo">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header>Nombre</th>
+            <td mat-cell *matCellDef="let item">
+              {{ item.nombre_centro_trabajo }}
+            </td>
+          </ng-container>
+
+          <!-- Header and Row Declarations -->
+          <tr
+            mat-header-row
+            *matHeaderRowDef="['id_centro_trabajo', 'nombre_centro_trabajo']"
+          ></tr>
+          <tr
+            mat-row
+            *matRowDef="
+              let item;
+              columns: ['id_centro_trabajo', 'nombre_centro_trabajo']
+            "
+            [class.selected]="item === selectedItem"
+            (click)="selectRow(item)"
+          ></tr>
+        </table>
+        <mat-paginator
+          [pageSizeOptions]="[5, 10, 20]"
+          showFirstLastButtons
+        ></mat-paginator>
+      </div>
+
+      <p style="font-weight: bold">
+        Centro educativo seleccionado: {{ selectedItem?.nombre_centro_trabajo }}
+      </p>
+      <div>
+        <button mat-button matStepperNext [disabled]="!selectedItem">
+          Siguiente
+        </button>
+      </div>
+    </form>
+  </mat-step>
+
+  <mat-step *ngIf="mostrarSegundoPaso" [stepControl]="firstFormGroup">
+    <form [formGroup]="firstFormGroup">
+      <ng-template matStepLabel>Período De Planilla</ng-template>
+      <mat-selection-list
+        #shoes
+        color="primary"
+        [multiple]="false"
+        formControlName="selectedTipoPlanilla"
+      >
+        <mat-list-option
+          *ngFor="let tipoPlanilla of tiposPlanillaPrivadas"
+          [value]="tipoPlanilla"
+        >
+          {{ tipoPlanilla.NOMBRE_PLANILLA }}
+        </mat-list-option>
+      </mat-selection-list>
+      <div>
+        <button mat-button matStepperPrevious>Atrás</button>
+        <button
+          mat-button
+          matStepperNext
+          [disabled]="!firstFormGroup.valid"
+          (click)="datosPlanilla()"
+        >
+          Siguiente
+        </button>
+      </div>
+    </form>
+  </mat-step>
+
+  <mat-step label="Datos De Planilla" *ngIf="mostrarTercerPaso">
+    <app-ver-dat-plan-ing [idCentroTrabajo] = "idCentroTrabajo" [selectedTipoPlanilla] = "idTipoPlanilla" [idPlanilla]=39>
+    </app-ver-dat-plan-ing>
+  </mat-step>
+</mat-stepper>

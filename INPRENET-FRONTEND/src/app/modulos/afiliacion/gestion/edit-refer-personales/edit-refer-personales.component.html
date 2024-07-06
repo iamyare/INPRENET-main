@@ -1,0 +1,29 @@
+<div *ngIf="Afiliado">
+  <div *ngIf="loading" class="spinner-container">
+    <mat-spinner class="spinner" diameter="50"></mat-spinner>
+  </div>
+
+  <div id="texto" style="text-align: center;" *ngIf="!loading && filas.length == 0">
+    <h2 class="anaranjado desapareciendo">No se encuentra ninguna referencia personal</h2>
+  </div>
+
+  <button mat-raised-button color="primary" style="color: white; margin: 1% 0 1% 0" (click)="crearReferenciaPers()">
+    Agregar Referencia Personal
+  </button>
+
+  <div *ngIf="!loading && filas.length != 0" style="background-color: white; border-radius: 10px; padding: 20px">
+    <app-dynamic-table
+      style="width: 100%"
+      titulo="Editar Referencias Personales"
+      subtitulo="Completa la información correspondiente"
+      [columns]="myColumns"
+      [data]="filas"
+      [getData]="getFilas.bind(this)"
+      (ejecutarFuncionAsincronaEvent)="ejecutarFuncionAsincronaDesdeOtroComponente($event)"
+      [mostrarBotonEditar]="true"
+      (editar)="editarFila($event)"
+      [mostrarBotonEliminar]="true"
+      (eliminar)="eliminarFila($event)">
+    </app-dynamic-table>
+  </div>
+</div>

@@ -1,0 +1,62 @@
+<!-- nuevo-usuario.component.html -->
+<div class="header-container">
+  <h2 class="center-name">{{ nombreCentroTrabajo }}</h2>
+</div>
+<mat-card class="form-card">
+  <mat-card-header>
+    <img src="/assets/images/LOGO INPRENET D.svg" alt="Logo" class="logo" />
+  </mat-card-header>
+  <mat-card-content>
+    <h2>Crear Nuevo Usuario</h2>
+    <form [formGroup]="form" (ngSubmit)="crearCuenta()">
+      <div class="form-grid">
+        <mat-form-field class="full-width" appearance="outline">
+          <mat-label>Nombre del Empleado</mat-label>
+          <input matInput formControlName="nombreEmpleado" placeholder="Nombre del Empleado" />
+          <mat-error *ngIf="form.get('nombreEmpleado')?.hasError('required')">Nombre del Empleado es requerido</mat-error>
+        </mat-form-field>
+
+        <mat-form-field class="half-width" appearance="outline">
+          <mat-label>Correo</mat-label>
+          <input matInput formControlName="correo" placeholder="Correo electrónico" />
+          <mat-error *ngIf="form.get('correo')?.hasError('required')">Correo es requerido</mat-error>
+          <mat-error *ngIf="form.get('correo')?.hasError('email')">Correo no válido</mat-error>
+        </mat-form-field>
+
+        <mat-form-field class="half-width" appearance="outline">
+          <mat-label>Seleccionar Módulo</mat-label>
+          <mat-select formControlName="modulo" (selectionChange)="onModuloChange($event.value)">
+            <mat-option *ngFor="let rm of adminRolesModulos" [value]="rm.modulo">
+              {{ rm.modulo }}
+            </mat-option>
+          </mat-select>
+          <mat-error *ngIf="form.get('modulo')?.hasError('required')">Módulo es requerido</mat-error>
+        </mat-form-field>
+
+        <mat-form-field class="half-width" appearance="outline">
+          <mat-label>Rol</mat-label>
+          <mat-select formControlName="rol">
+            <mat-option *ngFor="let rol of tipoRol" [value]="rol.value">
+              {{ rol.label }}
+            </mat-option>
+          </mat-select>
+          <mat-error *ngIf="form.get('rol')?.hasError('required')">Rol es requerido</mat-error>
+        </mat-form-field>
+
+        <mat-form-field class="half-width" appearance="outline">
+          <mat-label>Nombre del Puesto</mat-label>
+          <input matInput formControlName="nombrePuesto" placeholder="Nombre del Puesto" />
+          <mat-error *ngIf="form.get('nombrePuesto')?.hasError('required')">Nombre del Puesto es requerido</mat-error>
+        </mat-form-field>
+
+        <mat-form-field class="half-width" appearance="outline">
+          <mat-label>Número de Empleado</mat-label>
+          <input matInput formControlName="numeroEmpleado" placeholder="Número de Empleado" />
+          <mat-error *ngIf="form.get('numeroEmpleado')?.hasError('required')">Número de Empleado es requerido</mat-error>
+        </mat-form-field>
+      </div>
+
+      <button mat-raised-button color="primary" type="submit" [disabled]="form.invalid">Crear Cuenta</button>
+    </form>
+  </mat-card-content>
+</mat-card>

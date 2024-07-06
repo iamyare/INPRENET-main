@@ -1,0 +1,40 @@
+.row {
+  margin-bottom: 5px;
+}
+
+.col-4, .col-6, .col-12 {
+  padding: 0 10px;
+}
+
+mat-form-field {
+  width: 100%;
+}
+
+mat-error {
+  font-size: 12px;
+  color: red;
+}
+
+.datepicker-input {
+  display: flex;
+  align-items: center;
+  height: 25px;
+}
+
+.datepicker-input input {
+  flex: 1;
+  height: 20px;
+  padding: 0 20px;
+}
+
+.mat-form-field-appearance-outline .mat-form-field-wrapper {
+  padding: 0;
+}
+
+.mat-form-field-appearance-outline .mat-form-field-flex {
+  padding: 0 8px;
+}
+
+.mat-form-field-appearance-outline .mat-form-field-outline {
+  top: 0;
+}

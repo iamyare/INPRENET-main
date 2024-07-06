@@ -1,0 +1,11 @@
+<form [formGroup]="form" #myForm="ngForm" change="getLabel()">
+    <app-cuenta-bancaria-comp [datos]="formPuestTrab"
+        (newDatDatosPuestTrab)="setDatosPuetTrab1($event)"></app-cuenta-bancaria-comp>
+</form>
+
+<div style="text-align: center;">
+    <button mat-raised-button color="primary" style="color: white; margin: 1% 0 1% 0" [disabled]="form.invalid"
+        (click)="guardar()">
+        Guardar
+    </button>
+</div>

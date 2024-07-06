@@ -1,0 +1,138 @@
+.buscar-persona-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 20px;
+  padding: 10px 20px;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  background-color: #fafafa;
+  max-width: 500px;
+  margin: 20px auto;
+}
+
+.buscar-persona-container h1 {
+  margin-bottom: 10px;
+  font-size: 1.5em;
+}
+
+.buscar-persona-container mat-form-field {
+  width: 100%;
+  max-width: 400px;
+  margin-bottom: 10px;
+}
+
+.buscar-persona-container button {
+  margin-bottom: 10px;
+  width: 100%;
+  max-width: 400px;
+}
+
+.error-message {
+  color: red;
+  font-weight: bold;
+  margin-top: 10px;
+}
+
+.perfil-container {
+  margin: 20px;
+  padding: 20px;
+  background-color: #ffffff;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  position: relative;
+  overflow: hidden;
+}
+
+.perfil-container::before {
+  content: "";
+  position: absolute;
+  top: -4px;
+  left: -4px;
+  right: -4px;
+  bottom: -4px;
+  background: linear-gradient(45deg, #e5f4f3, #bee4e1, #93d3cd, #67c1b8, #47b3a9, #26a69a, #229e92, #1c9588, #178b7e, #0d7b6c);
+  z-index: -1;
+  border-radius: 10px;
+  padding: 2px;
+  box-sizing: border-box;
+}
+
+.perfil-container::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #ffffff;
+  border-radius: 10px;
+  z-index: -1;
+}
+
+.perfil-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 20px;
+  border-bottom: 2px solid #bee4e1;
+  padding-bottom: 10px;
+}
+
+.perfil-foto {
+  flex: 0 0 150px;
+  height: 150px;
+  margin-right: 20px;
+}
+
+.perfil-foto img {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  border: 3px solid #26a69a;
+}
+
+.perfil-datos {
+  flex: 1;
+}
+
+.perfil-datos h2 {
+  margin: 0;
+  font-size: 24px;
+  font-weight: bold;
+  color: #0d7b6c;
+}
+
+.perfil-datos p {
+  margin: 5px 0;
+  font-size: 16px;
+  color: #1c9588;
+}
+
+.mat-tab-group {
+  background-color: #f5f5f5;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.mat-tab-label {
+  color: #178b7e;
+}
+
+.mat-tab-label-active {
+  color: #0d7b6c;
+  border-bottom: 2px solid #26a69a;
+}
+
+.mat-tab-body {
+  padding: 20px;
+}
+
+.search-again {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background-color: white;
+}

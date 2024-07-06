@@ -1,0 +1,23 @@
+<div class="header-container">
+  <div>
+    <label for="modulo">Seleccionar Módulo:</label>
+    <select id="modulo" (change)="onModuloChange($event)">
+      <option value="">Seleccione un módulo</option>
+      <option *ngFor="let rm of adminRolesModulos" [value]="rm.modulo">{{ rm.modulo }}</option>
+    </select>
+  </div>
+  <button mat-raised-button color="primary" (click)="irANuevaPagina()">Agregar Nuevo Usuario</button>
+</div>
+<div class="content-container">
+  <app-dynamic-table
+    titulo="Gestión de Usuarios"
+    subtitulo="Completa la información correspondiente"
+    [columns]="columns"
+    [data]="usuarios"
+    [getData]="getFilas"
+    (ejecutarFuncionAsincronaEvent)="ejecutarFuncionAsincronaDesdeOtroComponente($event)"
+    (rowClicked)="manejarRowClick($event)"
+    [enableRowClick]="true"
+  >
+  </app-dynamic-table>
+</div>

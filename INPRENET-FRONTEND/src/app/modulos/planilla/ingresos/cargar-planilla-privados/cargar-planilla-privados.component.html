@@ -1,0 +1,200 @@
+<mat-stepper [linear]="isLinear" #stepper>
+  <mat-step [stepControl]="firstFormGroup">
+    <form [formGroup]="firstFormGroup">
+      <ng-template matStepLabel>Selecciona un ítem</ng-template>
+
+      <mat-form-field appearance="fill">
+        <mat-label>Filtrar</mat-label>
+        <input matInput (keyup)="applyFilter($event)" placeholder="Escribe para filtrar">
+      </mat-form-field>
+
+      <div>
+        <table mat-table [dataSource]="dataSource" matSort>
+          <ng-container matColumnDef="id">
+            <th mat-header-cell *matHeaderCellDef>ID</th>
+            <td mat-cell *matCellDef="let row">{{ row.id }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="nombre">
+            <th mat-header-cell *matHeaderCellDef>Nombre</th>
+            <td mat-cell *matCellDef="let row">{{ row.nombre }}</td>
+          </ng-container>
+
+          <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+          <tr mat-row *matRowDef="let row; columns: displayedColumns;" [class.selected]="row === selectedItem" (click)="selectRow(row)"></tr>
+        </table>
+        <mat-paginator [pageSizeOptions]="[5, 10, 20]" showFirstLastButtons></mat-paginator>
+      </div>
+
+
+      <p>Ítem seleccionado: {{selectedItem?.nombre}}</p>
+      <div>
+        <button mat-button matStepperNext [disabled]="!selectedItem">Siguiente</button>
+      </div>
+    </form>
+  </mat-step>
+  <mat-step>
+    <ng-template matStepLabel>Paso 2</ng-template>
+    <!-- Contenido del Paso 2 -->
+    <div class="botones-container">
+      <button mat-raised-button class="boton-estetico" (click)="cargarUltimaPlanilla()">
+        <mat-icon>attach_file</mat-icon>
+        Subir Archivo
+      </button>
+
+      <button mat-raised-button class="boton-estetico" (click)="exportarExcelPdf()">
+        <mat-icon>cloud_upload</mat-icon>
+        Iniciar Subida
+      </button>
+
+      <button mat-raised-button class="boton-estetico" (click)="agregarDocente()">
+        <mat-icon>cancel</mat-icon>
+        Cancelar Subida
+      </button>
+
+      <button mat-raised-button class="boton-estetico" (click)="generarActualizarPlanilla()">
+        <mat-icon>delete</mat-icon>
+        Limpiar Archivo
+      </button>
+
+    </div>
+    <div class="datos-container">
+      <h2>Datos de Planilla Marzo 2024</h2>
+      <table mat-table [dataSource]="[{}]">
+
+        <!-- Número de colegio Column -->
+        <ng-container matColumnDef="numeroColegio">
+          <th mat-header-cell *matHeaderCellDef>Número de colegio</th>
+          <td mat-cell *matCellDef>{{ numeroColegio }}</td>
+        </ng-container>
+
+        <!-- Nombre del colegio Column -->
+        <ng-container matColumnDef="nombreColegio">
+          <th mat-header-cell *matHeaderCellDef>Nombre del colegio</th>
+          <td mat-cell *matCellDef>{{ nombreColegio }}</td>
+        </ng-container>
+
+        <!-- Total Sueldo Column -->
+        <ng-container matColumnDef="totalSueldo">
+          <th mat-header-cell *matHeaderCellDef>Total Sueldo</th>
+          <td mat-cell *matCellDef>{{ totalSueldo | currency:'L':'L' }}</td>
+        </ng-container>
+
+        <!-- Total Préstamo Column -->
+        <ng-container matColumnDef="totalPrestamo">
+          <th mat-header-cell *matHeaderCellDef>Total Préstamo</th>
+          <td mat-cell *matCellDef>{{ totalPrestamo | currency:'L':'L' }}</td>
+        </ng-container>
+
+        <!-- Total Aportaciones Column -->
+        <ng-container matColumnDef="totalAportaciones">
+          <th mat-header-cell *matHeaderCellDef>Total Aportaciones</th>
+          <td mat-cell *matCellDef>{{ totalAportaciones | currency:'L':'L' }}</td>
+        </ng-container>
+
+        <!-- Total Pagar Column -->
+        <ng-container matColumnDef="totalPagar">
+          <th mat-header-cell *matHeaderCellDef>Total Pagar</th>
+          <td mat-cell *matCellDef>{{ totalPagar | currency:'L':'L' }}</td>
+        </ng-container>
+
+        <!-- Total Cotizaciones Column -->
+        <ng-container matColumnDef="totalCotizaciones">
+          <th mat-header-cell *matHeaderCellDef>Total Cotizaciones</th>
+          <td mat-cell *matCellDef>{{ totalCotizaciones | currency:'L':'L' }}</td>
+        </ng-container>
+
+
+        <tr mat-header-row *matHeaderRowDef="datosGenerales"></tr>
+        <tr mat-row *matRowDef="let row; columns: datosGenerales;"></tr>
+      </table>
+    </div>
+
+    <div class="linea-separadora"></div>
+    <h2>Seleccione una fecha para calcular el recargo de planilla</h2>
+    <mat-form-field appearance="fill">
+      <mat-label>Selecciona una fecha</mat-label>
+      <input matInput [matDatepicker]="picker" placeholder="Elige una fecha">
+      <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+      <mat-datepicker #picker></mat-datepicker>
+    </mat-form-field>
+    <div>
+
+    <div class="linea-separadora"></div>
+
+    <h2>Planilla Cargada</h2>
+    <div class="botones-container">
+      <button mat-raised-button class="boton-estetico" (click)="descargarDetallePlanilla()">Descargar Detalle De Planilla</button>
+    </div>
+
+      <table mat-table [dataSource]="dataSourcePlanilla">
+        <!-- Código Colegio Column -->
+        <ng-container matColumnDef="codigoColegio">
+          <th mat-header-cell *matHeaderCellDef>Código Colegio</th>
+          <td mat-cell *matCellDef="let element">{{ element.codigoColegio }}</td>
+        </ng-container>
+
+        <!-- Año Planilla Column -->
+        <ng-container matColumnDef="anioPlanilla">
+          <th mat-header-cell *matHeaderCellDef>Año Planilla</th>
+          <td mat-cell *matCellDef="let element">{{ element.anioPlanilla }}</td>
+        </ng-container>
+
+        <!-- Mes Planilla Column -->
+        <ng-container matColumnDef="mesPlanilla">
+          <th mat-header-cell *matHeaderCellDef>Mes Planilla</th>
+          <td mat-cell *matCellDef="let element">{{ element.mesPlanilla }}</td>
+        </ng-container>
+
+        <!-- Código Planilla Column -->
+        <ng-container matColumnDef="codigoPlanilla">
+          <th mat-header-cell *matHeaderCellDef>Código Planilla</th>
+          <td mat-cell *matCellDef="let element">{{ element.codigoPlanilla }}</td>
+        </ng-container>
+
+        <!-- Cantidad Docentes Column -->
+        <ng-container matColumnDef="cantidadDocentes">
+          <th mat-header-cell *matHeaderCellDef>Cantidad Docentes</th>
+          <td mat-cell *matCellDef="let element">{{ element.cantidadDocentes }}</td>
+        </ng-container>
+
+        <!-- Sueldos Column -->
+        <ng-container matColumnDef="sueldos">
+          <th mat-header-cell *matHeaderCellDef>Sueldos</th>
+          <td mat-cell *matCellDef="let element">{{ element.sueldos | currency:'L' }}</td>
+        </ng-container>
+
+        <!-- Aportaciones Column -->
+        <ng-container matColumnDef="aportaciones">
+          <th mat-header-cell *matHeaderCellDef>Aportaciones</th>
+          <td mat-cell *matCellDef="let element">{{ element.aportaciones | currency:'L' }}</td>
+        </ng-container>
+
+        <!-- Cotizaciones Column -->
+        <ng-container matColumnDef="cotizaciones">
+          <th mat-header-cell *matHeaderCellDef>Cotizaciones</th>
+          <td mat-cell *matCellDef="let element">{{ element.cotizaciones | currency:'L' }}</td>
+        </ng-container>
+
+        <!-- Préstamos Column -->
+        <ng-container matColumnDef="prestamos">
+          <th mat-header-cell *matHeaderCellDef>Préstamos</th>
+          <td mat-cell *matCellDef="let element">{{ element.prestamos | currency:'L' }}</td>
+        </ng-container>
+
+        <!-- Recargo Column -->
+        <ng-container matColumnDef="recargo">
+          <th mat-header-cell *matHeaderCellDef>Recargo</th>
+          <td mat-cell *matCellDef="let element">{{ element.recargo | currency:'L' }}</td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="displayedColumnsPlanilla"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumnsPlanilla;"></tr>
+      </table>
+    </div>
+    <div>
+
+      <button mat-button matStepperPrevious>Anterior</button>
+    </div>
+  </mat-step>
+</mat-stepper>

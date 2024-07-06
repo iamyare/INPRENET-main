@@ -1,0 +1,22 @@
+<mat-toolbar color="primary">
+  <!-- Imagen del logo en lugar del texto "MiApp" -->
+  <img src="../../../../../assets/images/INPRENET-LOGO.svg" alt="Logo" class="toolbar-logo"/>
+
+  <!-- Espacio entre el logo y los elementos de navegación -->
+  <span class="example-spacer"></span>
+
+  <!-- Botón para desplegar el menú, ahora movido a la derecha -->
+  <button mat-icon-button [matMenuTriggerFor]="menu" class="menu-button">
+    <img src="../../../../../assets/images/inprema.png" alt="Menu"/>
+  </button>
+
+  <!-- Menú que se despliega -->
+  <mat-menu #menu="matMenu">
+    <button mat-menu-item (click)="cerrarSesion()">
+      <mat-icon>logout</mat-icon>
+      Cerrar sesión
+    </button>
+  </mat-menu>
+</mat-toolbar>
+
+<router-outlet></router-outlet>

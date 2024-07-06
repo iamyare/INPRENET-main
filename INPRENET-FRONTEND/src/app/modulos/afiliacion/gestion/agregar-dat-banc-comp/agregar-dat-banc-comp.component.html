@@ -1,0 +1,13 @@
+<form [formGroup]="form" #myForm="ngForm">
+  <app-historial-salario [datos]="formHistPag" (newDatHistSal)="setHistSal($event)"></app-historial-salario>
+</form>
+
+<div style="text-align: center;">
+  <button mat-raised-button color="primary" style="color: white; margin: 1% 0 1% 0" [disabled]="!formHistPag.valid"
+    (click)="guardar()">
+    Guardar
+  </button>
+  <button mat-raised-button color="warn" style="color: white; margin: 1% 0 1% 1%" (click)="cerrar()">
+    Cancelar
+  </button>
+</div>

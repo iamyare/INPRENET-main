@@ -1,0 +1,38 @@
+mat-icon-button img {
+  border-radius: 50%;
+  width: 40px; // o el tamaño que desees
+  height: 40px; // debe coincidir con el ancho para ser un círculo
+}
+
+mat-icon-button {
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  border-radius: 50%;
+  overflow: hidden; // Esto asegura que la imagen no desborde el círculo si es más grande.
+
+  img {
+    height: 100%; // Establece la altura al 100% del botón para que se escale proporcionalmente
+  }
+}
+
+.example-spacer {
+  flex: 1 1 auto;
+}
+
+.example-fill-remaining-space {
+  flex: 1 1 auto;
+}
+
+.navbar-links {
+  display: flex;
+
+  button {
+    margin-right: 8px; // O cualquier espacio que prefieras entre botones
+  }
+}
+
+.toolbar-logo {
+  height: 40px; // o el tamaño que prefieras para el logo
+  margin-right: 8px; // para mantener un poco de espacio entre el logo y los elementos siguientes
+}

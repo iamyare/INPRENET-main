@@ -1,0 +1,63 @@
+<div style="background-color: white; margin-bottom: 1%">
+  <app-dynamic-form [fields]="myFormFields" titulo="Detalles De Planilla Definitiva"
+    subtitulo="Completa la información correspondiente" (newDatBenChange)="obtenerDatosForm($event)"></app-dynamic-form>
+  <div style="text-align: center">
+    <button (click)="getPlanilla()" color="primary" [disabled]="datosFormateados.invalid" mat-raised-button style="
+        margin: 2% 0;
+        color: #ffffff;
+        border-radius: 5px;
+        padding: 10px 20px;
+      ">
+      Ver Planilla Definitiva
+    </button>
+  </div>
+</div>
+
+<div class="card-header card-header-danger title" *ngIf="detallePlanilla">
+  <div class="card-body" style="padding: 1%">
+    <h4 class="card-title">Datos Generales De La Planilla</h4>
+    <table>
+      <tr style="background-color: #f2f2f2">
+        <th>Nombre Planilla</th>
+        <td>{{ detallePlanilla?.nombre_planilla }}</td>
+        <th>Fecha Apertura</th>
+        <td>{{ convertirFecha(detallePlanilla?.fecha_apertura, true) }}</td>
+      </tr>
+      <tr>
+        <th>Secuencia</th>
+        <td>{{ detallePlanilla?.secuencia }}</td>
+        <th>Estado</th>
+        <td>{{ detallePlanilla?.estado }}</td>
+      </tr>
+      <tr style="background-color: #f2f2f2">
+        <th>Período Inicio</th>
+        <td>{{ detallePlanilla?.periodoInicio }}</td>
+        <th>período Finalización</th>
+        <td>{{ detallePlanilla?.periodoFinalizacion }}</td>
+      </tr>
+    </table>
+
+    <h4 class="card-title">Afiliados en la Planilla</h4>
+
+  </div>
+</div>
+
+
+<div style="background-color: white;margin-bottom: 1%; padding-top: 1%;margin-top: 1%; " *ngIf="verDat">
+  <h4 class="card-title" style="text-align: center">
+    Personas en la Planilla
+  </h4>
+
+  <div style="padding: 1% 1% 1% 1%">
+    <app-dynamic-table [verOpcEditar]="false" [columns]="myColumnsDed" [data]="datosTabl"
+      (ejecutarFuncionAsincronaEvent)="
+          ejecutarFuncionAsincronaDesdeOtroComponente($event)
+        " [nombreEncabezadoUno]="'Detalle Ingresos'" [mostrarBotonUno]="true" [etiquetaBotonUno]="'Detalle Ingresos'"
+      (accionBotonUno)="manejarAccionUno($event)" [nombreEncabezadoDos]="'Detalle Deducciones'" [mostrarBotonDos]="true"
+      [etiquetaBotonDos]="'Detalle Deducciones'" (accionBotonDos)="manejarAccionDos($event)"
+      [nombreEncabezadoTres]="'Voucher'" [mostrarBotonTres]="true" [etiquetaBotonTres]="'Generar Voucher'"
+      (accionBotonTres)="manejarAccionTres($event)">
+    </app-dynamic-table>
+
+  </div>
+</div>

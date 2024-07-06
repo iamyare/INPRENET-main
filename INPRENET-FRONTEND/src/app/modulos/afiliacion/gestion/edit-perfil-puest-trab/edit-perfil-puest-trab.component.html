@@ -1,0 +1,18 @@
+<div id="texto" style="text-align: center;" *ngIf="filas.length == 0">
+  <h2 class="anaranjado desapareciendo">No se encuentra ningún perfil de trabajo</h2>
+</div>
+
+<button mat-raised-button color="primary" style="color: white; margin: 1% 0 1% 0" (click)="AgregarPuestoTrabajo()">
+  Agregar Puesto de Trabajo
+</button>
+
+<div *ngIf="filas.length != 0 " style="background-color: white; border-radius: 10px; padding: 20px">
+  <app-dynamic-table style="width: 100%" titulo="Editar Perfil Del Puesto De Trabajo"
+    subtitulo="Completa la información correspondiente" [columns]="myColumns" [data]="filas" [getData]="getFilas"
+    (ejecutarFuncionAsincronaEvent)="
+      ejecutarFuncionAsincronaDesdeOtroComponente($event)
+    " [nombreEncabezadoUno]="'Editar'" [mostrarBotonUno]="true" [etiquetaBotonUno]="'Editar'"
+    (accionBotonUno)="manejarAccionUno($event)" [nombreEncabezadoUno]="'Acciones'" [mostrarBotonDos]="true"
+    [etiquetaBotonDos]="'Eliminar'" (accionBotonDos)="manejarAccionDos($event)">
+  </app-dynamic-table>
+</div>

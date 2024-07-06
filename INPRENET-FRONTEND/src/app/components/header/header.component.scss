@@ -1,0 +1,36 @@
+.header-toolbar {
+  position: fixed;
+  top: 0;
+  width: 100%;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+}
+
+.logo-header {
+  max-height: 40px;
+  margin-right: 10px;
+}
+
+.spacer {
+  flex: 1 1 auto;
+}
+
+.user-icon-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 50px; /* Ajustar el tamaño del contenedor */
+  height: 50px; /* Ajustar el tamaño del contenedor */
+  border-radius: 50%;
+  overflow: hidden;
+  margin-left: 10px;
+  padding: 0; /* Asegurar que el botón no tenga padding */
+}
+
+.user-icon {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%; /* Hacer la imagen circular */
+}

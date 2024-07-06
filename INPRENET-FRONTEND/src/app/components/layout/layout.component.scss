@@ -1,0 +1,128 @@
+.example-container {
+  margin-top: 64px; /* Ajustar según la altura de tu toolbar */
+  height: calc(100vh - 64px);
+  display: flex;
+}
+
+mat-sidenav {
+  width: 250px;
+  transition: width 0.3s; /* Animación suave al colapsar */
+}
+
+mat-sidenav.mat-drawer-opened {
+  width: 250px;
+}
+
+mat-sidenav.mat-drawer-closed {
+  width: 70px; /* Ajustar el ancho cuando está colapsado */
+}
+
+mat-sidenav-content {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  height: 100%;
+  position: relative;
+}
+
+.content-container {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  position: relative;
+}
+
+.content-wrapper {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.content {
+  flex: 1;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+}
+
+.sidenav-header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 64px;
+}
+
+.sidenav-section {
+  margin-top: 8px; /* Reducido el margen superior */
+}
+
+.sidenav-title {
+  padding: 8px 16px; /* Reducido el padding */
+  text-align: center;
+  font-size: 1.2em;
+  color: #555;
+  margin-bottom: 0; /* Asegurarse de que no haya margen inferior */
+}
+
+.child-menu-item {
+  display: flex;
+  align-items: center;
+  text-decoration: none;
+  color: inherit;
+}
+
+.child-menu-item:hover {
+  background-color: rgba(0, 0, 0, 0.1);
+}
+
+.child-menu-item mat-icon {
+  font-size: 20px;
+  margin-right: 8px;
+  vertical-align: middle;
+}
+
+.custom-accordion .mat-expansion-panel {
+  border: none; /* Eliminar borde del panel */
+  box-shadow: none; /* Eliminar sombra del panel */
+  background-color: transparent; /* Fondo transparente */
+}
+
+.custom-accordion .mat-expansion-panel-header {
+  padding: 0 16px; /* Ajustar padding para un aspecto más limpio */
+  background-color: transparent; /* Fondo transparente */
+}
+
+.custom-accordion .mat-expansion-panel-header:hover {
+  background-color: rgba(0, 0, 0, 0.04); /* Color de fondo al pasar el mouse */
+}
+
+.custom-accordion .mat-expansion-panel-header .mat-panel-title {
+  display: flex;
+  align-items: center;
+  padding: 8px 0;
+}
+
+.custom-accordion .mat-expansion-panel-header .mat-panel-title mat-icon {
+  margin-right: 8px;
+}
+
+.custom-accordion .mat-expansion-panel-header.mat-expanded {
+  background-color: transparent; /* Fondo transparente cuando está expandido */
+}
+
+.custom-expansion-panel {
+  margin: 0; /* Sin margen entre paneles */
+}
+
+app-footer {
+  height: 50px;
+  width: 100%;
+  background: #3f51b5; /* Ajustar el color según tus preferencias */
+  color: white; /* Ajustar el color del texto según tus preferencias */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  bottom: 0;
+  flex-shrink: 0; /* Asegura que el footer no se encoja */
+}

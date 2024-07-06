@@ -1,0 +1,51 @@
+<div style="background-color: white; margin-bottom: 1%">
+  <app-dynamic-form
+    [fields]="myFormFields"
+    titulo="Detalles de nueva planilla"
+    subtitulo="Completa la información correspondiente"
+    (newDatBenChange)="obtenerDatos($event)"
+  ></app-dynamic-form>
+
+  <div style="text-align: center">
+    <button
+      color="primary"
+      [disabled]="datosForm.invalid"
+      (click)="crearPlanilla()"
+      mat-raised-button
+      style="
+        margin: 2% 0;
+        color: #ffffff;
+        border-radius: 5px;
+        padding: 10px 20px;
+      "
+    >
+      Crear Planilla
+    </button>
+  </div>
+</div>
+
+<!--   <button mat-raised-button (click)="crearPlanilla()" style="background-color: #628780; color: #ffffff; border-radius: 5px; padding: 10px 20px;">Crear Planilla</button> -->
+
+<!-- VER INFORMACION DE TODOS LOS AFILIADOS CON BENEFICIOS Y DEDUCCIONES FILTRADOS POR FECHA CADA UNO DE ELLOS -->
+<!--   <H2>Ver total de beneficios por afiliado y por periodo</H2>
+  <div class="container mt-4">
+    <div class="row">
+      <div class="col-md-12">
+        <div >
+          <app-dynamic-table  [verOpcEditar]="true" [columns]="myColumnsBen" [data]="filasBen" (ejecutarFuncionAsincronaEvent)="getBeneficios($event)"></app-dynamic-table>
+        </div>
+      </div>
+    </div>
+  </div> -->
+
+<!-- VER BENEFICIOS MODAL -->
+<!--   <div class="container mt-4">
+    <div class="row">
+      <div class="col-md-12">
+        <div >
+          <app-dynamic-table  [verOpcEditar]="true" [columns]="myColumns" [data]="filasT" (ejecutarFuncionAsincronaEvent)="ejecutarFuncionAsincronaDesdeOtroComponente($event)" [editarFunc]="editar"></app-dynamic-table>
+        </div>
+      </div>
+    </div>
+  </div>
+-->

@@ -1,0 +1,30 @@
+<h1 mat-dialog-title>{{ dialogTitle }}</h1>
+<div mat-dialog-content>
+  <mat-label>Nombre Persona: {{ nombre_persona }} </mat-label>
+  <mat-label>Sueldo Base: {{ sueldo_base }} </mat-label>
+  <form [formGroup]="form" (change)="emitirdatos()">
+    <div *ngFor="let field of data.fields">
+      <mat-form-field appearance="fill" class="full-width">
+        <mat-label>{{ field.label }}</mat-label>
+        <input
+          matInput
+          *ngIf="field.type === 'text'"
+          [type]="field.type"
+          [formControlName]="field.name"
+        />
+        <input
+          matInput
+          *ngIf="field.type === 'number'"
+          [type]="field.type"
+          [formControlName]="field.name"
+        />
+      </mat-form-field>
+    </div>
+  </form>
+</div>
+<div mat-dialog-actions>
+  <button mat-button (click)="onNoClick()">Cancelar</button>
+  <button mat-button (click)="onSave()" [disabled]="!form.valid">
+    Guardar
+  </button>
+</div>

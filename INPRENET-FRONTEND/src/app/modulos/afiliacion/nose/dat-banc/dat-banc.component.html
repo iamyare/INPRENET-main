@@ -1,0 +1,31 @@
+<div class="card">
+    <div class="card-header card-header-danger tittle">
+        <h4 class="card-title">Datos Bancarios</h4>
+        <p class="card-category">Completa la información correspondiente</p>
+    </div>
+    <div class="card-body">
+        <fieldset [formGroupName]="groupName" cForm>
+            <div class="row">
+                <div class="col-md-6">
+                    <mat-form-field style="flex-direction: column-reverse;" class="example-full-width; inputs"
+                        appearance="outline">
+                        <mat-label>Nombre del Banco</mat-label>
+                        <mat-select matNativeControl formControlName="idBanco">
+                            <mat-option *ngFor="let p of Bancos" [value]="p.ID_BANCO">
+                                {{p.NOMBRE}}
+                            </mat-option>
+                        </mat-select>
+                    </mat-form-field>
+                </div>
+                <div class="col-md-6">
+                    <mat-form-field style="flex-direction: column-reverse;" class="example-full-width; inputs"
+                        appearance="outline">
+                        <mat-label>Número de Cuenta</mat-label>
+                        <input matInput formControlName="numeroCuenta">
+                        <!-- <mat-icon matSuffix>sentiment_very_satisfied</mat-icon> -->
+                    </mat-form-field>
+                </div>
+            </div>
+        </fieldset>
+    </div>
+</div>

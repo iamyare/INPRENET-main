@@ -1252,11 +1252,19 @@ WHERE
       .where('detallePagoBeneficio.planilla.id_planilla = :id_planilla', { id_planilla })
       .getRawOne();
 
+    console.log(totalBeneficios);
+
+
     const totalDeducciones = await this.detalleDeduccionRepository
       .createQueryBuilder('detalleDeduccion')
+      .leftJoin(Net_Detalle_Pago_Beneficio, 'detallePagoB', 'detallePagoB.ID_BENEFICIO_PLANILLA = detalleDeduccion.ID_DETALLE_PAGO_BENEFICIO')
+      .innerJoin(Net_Planilla, 'plan', 'plan.ID_PLANILLA = detallePagoB.ID_PLANILLA')
       .select('SUM(detalleDeduccion.monto_aplicado)', 'totalDeducciones')
-      .where('detalleDeduccion.planilla.id_planilla = :id_planilla', { id_planilla })
+      .where('plan.id_planilla = :id_planilla', { id_planilla })
       .getRawOne();
+
+    console.log(totalDeducciones);
+
 
     return {
       planilla,
@@ -1360,7 +1368,7 @@ WHERE
 
   async ObtenerPlanDefinPersonas(codPlanilla: string, page?: number, limit?: number): Promise<any> {
     let query = `
-      SELECT  
+            SELECT  
         COALESCE(deducciones."ID_PERSONA", beneficios."ID_PERSONA") AS "ID_PERSONA",
         COALESCE(deducciones."N_IDENTIFICACION", beneficios."N_IDENTIFICACION") AS "DNI",
         COALESCE(deducciones."NOMBRE_COMPLETO", beneficios."NOMBRE_COMPLETO") AS "NOMBRE_COMPLETO",
@@ -1369,7 +1377,7 @@ WHERE
         COALESCE(deducciones."CORREO_1", beneficios."CORREO_1") AS "CORREO_1",
         COALESCE(deducciones."FECHA_CIERRE", beneficios."FECHA_CIERRE") AS "FECHA_CIERRE"
       FROM
-        (SELECT
+        (SELECT 
             afil."ID_PERSONA",
             afil."N_IDENTIFICACION",
             afil."CORREO_1",
@@ -1389,7 +1397,6 @@ WHERE
             detBs."ID_CAUSANTE" = detBA."ID_CAUSANTE" AND
             detBs."ID_DETALLE_PERSONA" = detBA."ID_DETALLE_PERSONA" AND
             detBs."ID_BENEFICIO" = detBA."ID_BENEFICIO"
-            
         LEFT JOIN
             "NET_DETALLE_PERSONA" detP ON
             detBs."ID_PERSONA" = detP."ID_PERSONA" AND
@@ -1397,13 +1404,13 @@ WHERE
             detBs."ID_DETALLE_PERSONA" = detP."ID_DETALLE_PERSONA"
         LEFT JOIN
             "NET_PERSONA" afil ON
-            afil."ID_PERSONA" = detP."ID_PERSONA" 
+            afil."ID_PERSONA" = detP."ID_PERSONA"
         LEFT JOIN
             "NET_PLANILLA" pla ON detBs."ID_PLANILLA" = pla."ID_PLANILLA"
         WHERE
             detBs."ESTADO" = 'PAGADA' AND
-            pla."CODIGO_PLANILLA" = '${codPlanilla}' 
-        
+            pla."CODIGO_PLANILLA" = '${codPlanilla}'
+       
         GROUP BY
             afil."ID_PERSONA",
             afil."N_IDENTIFICACION",
@@ -1416,12 +1423,14 @@ WHERE
                 afil."PRIMER_APELLIDO" || ' ' ||
                 COALESCE(afil."SEGUNDO_APELLIDO", '')
             ),
-            COALESCE(detBs."MONTO_A_PAGAR", 0
-            )
+            COALESCE(detBs."MONTO_A_PAGAR", 0)
         HAVING
-            SUM(COALESCE(detBs."MONTO_A_PAGAR", 0)) > 0) beneficios
+            SUM(COALESCE(detBs."MONTO_A_PAGAR", 0)) > 0
+          
+            ) beneficios
       FULL OUTER JOIN
-        (SELECT
+        (  
+        SELECT DISTINCT
             afil."ID_PERSONA",
             afil."N_IDENTIFICACION",
             afil."CORREO_1",
@@ -1432,17 +1441,32 @@ WHERE
                 afil."PRIMER_APELLIDO" || ' ' ||
                 COALESCE(afil."SEGUNDO_APELLIDO", '')
             ) AS "NOMBRE_COMPLETO",
-            SUM(COALESCE(detDs."MONTO_APLICADO", 0)) AS "Total Deducciones",
+            SUM(COALESCE(detDed."MONTO_APLICADO", 0)) AS "Total Deducciones",
             pla."FECHA_CIERRE"
         FROM
-            "NET_PERSONA" afil
+            "NET_DETALLE_PAGO_BENEFICIO" detBs
+        INNER JOIN "NET_DETALLE_BENEFICIO_AFILIADO" detBA ON
+            detBs."ID_PERSONA" = detBA."ID_PERSONA" AND
+            detBs."ID_CAUSANTE" = detBA."ID_CAUSANTE" AND
+            detBs."ID_DETALLE_PERSONA" = detBA."ID_DETALLE_PERSONA" AND
+            detBs."ID_BENEFICIO" = detBA."ID_BENEFICIO"
         LEFT JOIN
-            "NET_DETALLE_DEDUCCION" detDs ON afil."ID_PERSONA" = detDs."ID_PERSONA"
+            "NET_DETALLE_PERSONA" detP ON
+            detBs."ID_PERSONA" = detP."ID_PERSONA" AND
+            detBs."ID_CAUSANTE" = detP."ID_CAUSANTE" AND
+            detBs."ID_DETALLE_PERSONA" = detP."ID_DETALLE_PERSONA"
         LEFT JOIN
-            "NET_PLANILLA" pla ON detDs."ID_PLANILLA" = pla."ID_PLANILLA"
+            "NET_PERSONA" afil ON
+            afil."ID_PERSONA" = detP."ID_PERSONA"
+        LEFT JOIN
+            "NET_PLANILLA" pla ON detBs."ID_PLANILLA" = pla."ID_PLANILLA"
+        LEFT JOIN
+            "NET_DETALLE_DEDUCCION" detDed ON
+            detBs."ID_BENEFICIO_PLANILLA" = detDed."ID_DETALLE_PAGO_BENEFICIO"
         WHERE
-            detDs."ESTADO_APLICACION" = 'COBRADA' AND
-            pla."CODIGO_PLANILLA" = '${codPlanilla}'
+            detBs."ESTADO" = 'PAGADA' AND
+            pla."CODIGO_PLANILLA" = '${codPlanilla}' 
+       
         GROUP BY
             afil."ID_PERSONA",
             afil."N_IDENTIFICACION",
@@ -1454,9 +1478,10 @@ WHERE
                 COALESCE(afil."TERCER_NOMBRE", '') || ' ' ||
                 afil."PRIMER_APELLIDO" || ' ' ||
                 COALESCE(afil."SEGUNDO_APELLIDO", '')
-            )
+            ),
+            COALESCE(detBs."MONTO_A_PAGAR", 0)
         HAVING
-            SUM(COALESCE(detDs."MONTO_APLICADO", 0)) > 0
+            SUM(COALESCE(detBs."MONTO_A_PAGAR", 0)) > 0
         ) deducciones ON deducciones."ID_PERSONA" = beneficios."ID_PERSONA" 
     `;
 

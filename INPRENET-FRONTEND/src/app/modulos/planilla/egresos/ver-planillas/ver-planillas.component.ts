@@ -98,7 +98,9 @@ export class VerPlanillasComponent implements OnInit {
 
       const enrichedRows = await Promise.all(data.map(async (item: any) => {
         const totalResponse = await firstValueFrom(this.planillaService.obtenerTotalPlanilla(item.id_planilla));
-        return {
+
+
+        const result = {
           id_planilla: item.id_planilla,
           nombre_planilla: item.tipoPlanilla.nombre_planilla,
           codigo_planilla: item.codigo_planilla,
@@ -106,12 +108,14 @@ export class VerPlanillasComponent implements OnInit {
           secuencia: item.secuencia,
           periodoFinalizacion: item.periodoFinalizacion,
           periodoInicio: item.periodoInicio,
-          totalBeneficio: totalResponse.totalBeneficio,
+          totalBeneficio: totalResponse.totalBeneficios,
           totalDeducciones: totalResponse.totalDeducciones,
           totalPlanilla: totalResponse.totalPlanilla, // Añade el total de la planilla
           fecha_apertura: this.datePipe.transform(item.fecha_apertura, 'dd/MM/yyyy HH:mm:ss'),
           fecha_cierre: this.datePipe.transform(item.fecha_cierre, 'dd/MM/yyyy HH:mm:ss'),
         };
+
+        return result
       }));
       this.filas = enrichedRows;
 

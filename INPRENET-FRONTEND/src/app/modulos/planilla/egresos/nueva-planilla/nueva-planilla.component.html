@@ -1,21 +1,13 @@
 <h1 style="text-align: center">Planilla</h1>
 
 <form [formGroup]="form" #myForm="ngForm">
-  <mat-slide-toggle
-    color="primary"
-    formControlName="isChecked"
-    (change)="onChangeToggle()"
-  >
+  <mat-slide-toggle color="primary" formControlName="isChecked" (change)="onChangeToggle()">
     ¿Desea abrir una nueva planilla?
   </mat-slide-toggle>
 
-  <app-progressplanill
-    (newDatBenChange)="setEstadoDatGen($event)"
-    [estadoSubDed]="form.get('isChecked')?.value"
-    (newEstCentrTrab)="setEstadoTable($event)"
-    (newdatosHS)="setEstadoVerPlanP($event)"
-    (newdatosRP)="setEstadoVerPlanDef($event)"
-  >
+  <app-progressplanill (newDatBenChange)="setEstadoDatGen($event)" [estadoSubDed]="form.get('isChecked')?.value"
+    (newEstCentrTrab)="setEstadoTable($event)" (newdatosHS)="setEstadoVerPlanP($event)"
+    (newdatosRP)="setEstadoVerPlanDef($event)">
   </app-progressplanill>
 
   <form [formGroup]="formplanilla" *ngIf="datosG">
@@ -34,7 +26,7 @@
     <app-verplancerrada groupName="planilla"></app-verplancerrada>
   </form>
 
-  <!-- <div class="row" *ngIfW="datosG && form.get('isChecked')?.value">
+  <!-- <div class="row" *ngIf="datosG && form.get('isChecked')?.value">
         <div class="col-md-6">
             <app-botonarchivos labelBoton="Adjunte excel de deducciones" groupName="ArchivosDed"
                 (change)="onFileSelect($event)" accept=".xlsx, .xls"></app-botonarchivos>

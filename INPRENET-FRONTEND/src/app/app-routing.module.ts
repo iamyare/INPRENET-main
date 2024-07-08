@@ -13,6 +13,7 @@ import { UserManagementComponent } from './modulos/admin/user-management/user-ma
 import { AddAdminComponent } from './modulos/admin/add-admin/add-admin.component';
 import { EditarPerfilComponent } from './modulos/auth/editar-perfil/editar-perfil.component';
 import { DashboardComponent } from './views/dashboard/dashboard.component';
+import { MainLayoutComponent } from './components/main-layout/main-layout.component';
 
 const routes: Routes = [
       { path: 'login', component: LoginComponent },
@@ -25,7 +26,7 @@ const routes: Routes = [
 
   {
     path: '',
-    component: LayoutComponent,
+    component: MainLayoutComponent,
     children: [
       {
         path: 'afiliacion',

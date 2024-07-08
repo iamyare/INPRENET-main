@@ -16,6 +16,12 @@
     <img *ngIf="userPhotoUrl" [src]="userPhotoUrl" alt="User" class="user-icon">
   </button>
   <mat-menu #userMenu="matMenu">
-    <app-user-menu [sections]="sections"></app-user-menu>
+    <ng-container *ngFor="let section of sections">
+      <mat-divider></mat-divider>
+      <div mat-menu-item *ngFor="let item of section.items" [routerLink]="item.route">
+        <mat-icon>{{ item.icon }}</mat-icon>
+        <span>{{ item.title }}</span>
+      </div>
+    </ng-container>
   </mat-menu>
 </mat-toolbar>

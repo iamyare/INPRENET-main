@@ -1,128 +1,118 @@
-.example-container {
-  margin-top: 64px; /* Ajustar según la altura de tu toolbar */
-  height: calc(100vh - 64px);
-  display: flex;
-}
-
-mat-sidenav {
-  width: 250px;
-  transition: width 0.3s; /* Animación suave al colapsar */
-}
-
-mat-sidenav.mat-drawer-opened {
-  width: 250px;
-}
-
-mat-sidenav.mat-drawer-closed {
-  width: 70px; /* Ajustar el ancho cuando está colapsado */
-}
-
-mat-sidenav-content {
-  display: flex;
-  flex-direction: column;
-  flex: 1;
+.sidenav-container {
   height: 100%;
-  position: relative;
-}
-
-.content-container {
   display: flex;
   flex-direction: column;
-  flex: 1;
-  position: relative;
+  background: #fff; /* Fondo blanco */
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
-.content-wrapper {
+.mat-sidenav-container {
   flex: 1;
   display: flex;
   flex-direction: column;
+  height: calc(100% - 64px); /* Ajusta según la altura de tu toolbar */
+  padding-top: 64px; /* Ajusta según la altura de tu toolbar */
+  background: #f7f7f7;
 }
 
-.content {
+.mat-sidenav-content {
   flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding-bottom: 64px; /* Ajusta según la altura del footer */
+  box-sizing: border-box;
   padding: 20px;
+  background: #ffffff;
+  border-top-left-radius: 16px;
+  border-top-right-radius: 16px;
+}
+
+.mat-expansion-panel {
+  border: none !important;
+  box-shadow: none !important;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.mat-expansion-panel-header {
+  padding: 0 16px;
+  background: #fff; /* Fondo blanco */
+  border-radius: 8px;
+  font-weight: bold;
+  transition: background-color 0.3s ease;
+}
+
+.mat-expansion-panel-header:hover {
+  background: #f0f0f0; /* Color de fondo al pasar el mouse */
+}
+
+.mat-expansion-panel-header.mat-expanded {
+  background: #e9eef5; /* Color de fondo al estar expandido */
+}
+
+.mat-expansion-panel-header .mat-panel-title {
   display: flex;
-  flex-direction: column;
+  align-items: center; /* Alinea verticalmente los iconos y el texto */
 }
 
-.sidenav-header {
+.mat-expansion-panel-header .mat-icon {
+  margin-right: 8px;
+  color: #6c757d; /* Color de los iconos */
+}
+
+.mat-expansion-panel-body {
+  padding: 0 16px;
+  background: #f8f9fa;
+}
+
+.section-name {
+  font-size: 0.85em; /* Ajustar tamaño de fuente */
+  color: #6c757d;
+  padding-left: 16px;
+  margin-top: 10px;
+  margin-bottom: 5px;
+  display: block; /* Asegura que ocupe toda la línea */
+  text-transform: uppercase; /* Mayúsculas */
+  font-weight: 500;
+}
+
+.item-title {
+  font-size: 0.75em; /* Ajustar tamaño de fuente */
+  color: #6c757d;
+}
+
+.child-title {
+  font-size: 0.75em; /* Ajustar tamaño de fuente */
+  color: #6c757d;
+  margin-left: 8px; /* Alineación mejorada */
+}
+
+a.mat-list-item {
+  color: #6c757d;
   display: flex;
-  align-items: center;
-  justify-content: center;
-  height: 64px;
-}
-
-.sidenav-section {
-  margin-top: 8px; /* Reducido el margen superior */
-}
-
-.sidenav-title {
-  padding: 8px 16px; /* Reducido el padding */
-  text-align: center;
-  font-size: 1.2em;
-  color: #555;
-  margin-bottom: 0; /* Asegurarse de que no haya margen inferior */
-}
-
-.child-menu-item {
-  display: flex;
-  align-items: center;
+  align-items: center; /* Alinea verticalmente los iconos y el texto */
+  padding: 8px 16px;
+  border-radius: 8px;
+  transition: background-color 0.3s ease;
   text-decoration: none;
-  color: inherit;
+  font-size: 0.9em; /* Ajustar tamaño de fuente */
 }
 
-.child-menu-item:hover {
-  background-color: rgba(0, 0, 0, 0.1);
+a.mat-list-item:hover {
+  background-color: #e9eef5; /* Fondo azul claro al pasar el mouse */
 }
 
-.child-menu-item mat-icon {
-  font-size: 20px;
+a.mat-list-item:active {
+  background-color: #d9e2ef; /* Fondo azul más oscuro al hacer clic */
+}
+
+a.mat-list-item:focus {
+  background-color: #e9eef5; /* Fondo azul claro al enfocarse */
+}
+
+.mat-list-icon {
+  color: #6c757d;
   margin-right: 8px;
-  vertical-align: middle;
-}
-
-.custom-accordion .mat-expansion-panel {
-  border: none; /* Eliminar borde del panel */
-  box-shadow: none; /* Eliminar sombra del panel */
-  background-color: transparent; /* Fondo transparente */
-}
-
-.custom-accordion .mat-expansion-panel-header {
-  padding: 0 16px; /* Ajustar padding para un aspecto más limpio */
-  background-color: transparent; /* Fondo transparente */
-}
-
-.custom-accordion .mat-expansion-panel-header:hover {
-  background-color: rgba(0, 0, 0, 0.04); /* Color de fondo al pasar el mouse */
-}
-
-.custom-accordion .mat-expansion-panel-header .mat-panel-title {
+  font-size: 20px; /* Asegura que los iconos tengan el mismo tamaño */
   display: flex;
-  align-items: center;
-  padding: 8px 0;
-}
-
-.custom-accordion .mat-expansion-panel-header .mat-panel-title mat-icon {
-  margin-right: 8px;
-}
-
-.custom-accordion .mat-expansion-panel-header.mat-expanded {
-  background-color: transparent; /* Fondo transparente cuando está expandido */
-}
-
-.custom-expansion-panel {
-  margin: 0; /* Sin margen entre paneles */
-}
-
-app-footer {
-  height: 50px;
-  width: 100%;
-  background: #3f51b5; /* Ajustar el color según tus preferencias */
-  color: white; /* Ajustar el color del texto según tus preferencias */
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  position: relative;
-  bottom: 0;
-  flex-shrink: 0; /* Asegura que el footer no se encoja */
+  align-items: center; /* Asegura que los iconos estén alineados verticalmente */
 }

@@ -1,4 +1,14 @@
-mat-toolbar {
+.footer {
+  height: 64px; /* Asegura que el footer tenga la altura correcta */
+  display: flex;
+  align-items: center;
   justify-content: center;
-  height: 50px;
+}
+
+.spacer {
+  flex: 1 1 auto;
+}
+
+.mat-toolbar {
+  height: 64px; /* Asegura que el footer tenga la altura correcta */
 }

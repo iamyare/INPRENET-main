@@ -38,7 +38,7 @@ import { GoogleMapsModule } from '@angular/google-maps';
     ProgressbarComponent,
     BuscadorComponent,
     UserMenuComponent,
-    MapsComponent
+    MapsComponent,
   ],
   imports: [
     CommonModule,
@@ -61,7 +61,7 @@ import { GoogleMapsModule } from '@angular/google-maps';
     ProgressbarComponent,
     BuscadorComponent,
     UserMenuComponent,
-    MapsComponent
+    MapsComponent,
   ]
 })
 export class ComponentsModule { }

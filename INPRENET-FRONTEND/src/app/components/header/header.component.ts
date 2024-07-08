@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, Output, EventEmitter } from '@angular/core';
 import { AuthService } from 'src/app/services/auth.service';
 import { SidenavService } from 'src/app/services/sidenav.service';
 import { MenuSection } from '../user-menu/user-menu.component';
@@ -9,6 +9,7 @@ import { MenuSection } from '../user-menu/user-menu.component';
   styleUrls: ['./header.component.scss']
 })
 export class HeaderComponent implements OnInit {
+  @Output() sidenavToggle = new EventEmitter<void>();
   userPhotoUrl: string | null = null;
 
   sections: MenuSection[] = [
@@ -45,7 +46,7 @@ export class HeaderComponent implements OnInit {
   }
 
   toggleSidenav() {
-    this.sidenavService.toggleSidenav();
+    this.sidenavToggle.emit();
   }
 
   logout(): void {

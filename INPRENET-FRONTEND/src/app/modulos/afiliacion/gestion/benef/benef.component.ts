@@ -125,9 +125,6 @@ export class BenefComponent implements OnInit {
         dependiente: new FormControl(datosBeneficiario?.dependiente, [
           Validators.required
         ]),
-        cargoPublico: new FormControl(datosBeneficiario?.cargoPublico, [
-          Validators.required
-        ]),
         discapacidad: new FormControl(datosBeneficiario?.discapacidad || '', [
           Validators.required
         ]),
@@ -390,18 +387,6 @@ export class BenefComponent implements OnInit {
       beneficiarioGroup.get('datosBeneficiario.dependiente')?.setValue(true);
     } else {
       beneficiarioGroup.get('datosBeneficiario.dependiente')?.setValue(false);
-    }
-  }
-
-  onDatosGeneralesCargoPChange(event: any, i: number) {
-    const value = event.value;
-    const beneficiariosArray = this.formParent.get('beneficiario') as FormArray;
-    const beneficiarioGroup = beneficiariosArray.controls[i] as FormGroup;
-
-    if (value === 'si') {
-      beneficiarioGroup.get('datosBeneficiario.cargoPublico')?.setValue(true);
-    } else {
-      beneficiarioGroup.get('datosBeneficiario.cargoPublico')?.setValue(false);
     }
   }
 

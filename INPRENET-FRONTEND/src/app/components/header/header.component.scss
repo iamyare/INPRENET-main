@@ -1,15 +1,20 @@
 .header-toolbar {
+  height: 64px;
   position: fixed;
   top: 0;
   width: 100%;
   z-index: 1000;
   display: flex;
   align-items: center;
+  background-color: #1c9588; /* Color primario */
+  color: white; /* Texto blanco */
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Sombra ligera */
+  padding: 0 16px; /* Padding para espaciado */
 }
 
 .logo-header {
   max-height: 40px;
-  margin-right: 10px;
+  margin-right: 16px; /* Espaciado más grande */
 }
 
 .spacer {
@@ -20,17 +25,30 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 50px; /* Ajustar el tamaño del contenedor */
-  height: 50px; /* Ajustar el tamaño del contenedor */
+  width: 40px; /* Tamaño del contenedor */
+  height: 40px; /* Tamaño del contenedor */
   border-radius: 50%;
   overflow: hidden;
-  margin-left: 10px;
-  padding: 0; /* Asegurar que el botón no tenga padding */
+  margin-left: 16px; /* Espaciado */
+  padding: 0;
+  border: 2px solid white; /* Borde blanco */
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); /* Sombra */
 }
 
 .user-icon {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  border-radius: 50%; /* Hacer la imagen circular */
+  border-radius: 50%;
+}
+
+.mat-menu-item {
+  display: flex;
+  align-items: center;
+  padding: 10px 20px;
+}
+
+.mat-menu-item mat-icon {
+  margin-right: 8px;
+  color: #51A7F9; /* Color del icono */
 }

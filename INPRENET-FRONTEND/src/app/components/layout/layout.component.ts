@@ -1,31 +1,31 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
-import { SidenavService } from '../../services/sidenav.service';
-import { MENU_CONFIG, Section } from './menu-config';
-import { Subscription } from 'rxjs';
+import { Component, OnInit } from '@angular/core';
+import { Section } from './menu-config';
+import { SidenavService } from 'src/app/services/sidenav.service';
 
 @Component({
   selector: 'app-layout',
   templateUrl: './layout.component.html',
   styleUrls: ['./layout.component.scss']
 })
-export class LayoutComponent implements OnInit, OnDestroy {
-  menuSections: Section[] = MENU_CONFIG;
-  sidenavOpened: boolean = true;
-  private sidenavSubscription!: Subscription;
+export class LayoutComponent implements OnInit {
+  menuConfig: Section[] = [];
+  expandedPanel: any = null;
 
   constructor(private sidenavService: SidenavService) {}
 
-  ngOnInit() {
-    this.sidenavSubscription = this.sidenavService.sidenavOpened$.subscribe(
-      (isOpened) => {
-        this.sidenavOpened = isOpened;
-      }
-    );
+  ngOnInit(): void {
+    this.menuConfig = this.sidenavService.getMenuConfig();
   }
 
-  ngOnDestroy() {
-    if (this.sidenavSubscription) {
-      this.sidenavSubscription.unsubscribe();
-    }
+  setExpandedPanel(panel:any): void {
+    this.expandedPanel = panel;
+  }
+
+  togglePanel(panel:any): void {
+    this.expandedPanel = this.expandedPanel === panel ? null : panel;
+  }
+
+  selectChild(panel:any): void {
+    this.expandedPanel = panel;
   }
 }

@@ -180,15 +180,6 @@
             </mat-radio-group>
           </div>
 
-          <div class="col-lg-4 col-md-12">
-            <label>¿Ha desempeñado un cargo público?</label>
-            <mat-radio-group formControlName="cargoPublico" (change)="onDatosGeneralesCargoPChange($event)">
-              <mat-radio-button *ngFor="let option of field.options" [value]="option.value">
-                {{ option.label }}
-              </mat-radio-button>
-            </mat-radio-group>
-          </div>
-
           <div class="col-lg-12 col-md-12" *ngIf="ref.get('tipo')?.value === 'REFERENCIA FAMILIAR'">
             <label>¿Posee alguna discapacidad?</label>
             <mat-radio-group formControlName="discapacidad" (change)="onDiscapacidadChange(i, $event)">

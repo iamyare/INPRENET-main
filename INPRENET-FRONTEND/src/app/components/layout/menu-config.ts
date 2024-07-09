@@ -40,16 +40,16 @@ export const MENU_CONFIG: Section[] = [
     ],
   },
   {
-    name: 'GESTION DE PERSONAL',
+    name: 'GESTIÓN DE PERSONAL',
     items: [
-      {
-        title: 'USUARIOS',
-        icon: 'attach_money',
-        children: [
-          { title: 'Gestion De Usuarios', route: '/gestion/editar-usuarios', icon: 'post_add' },
-          { title: 'Nuevo Usuario', route: '/gestion/nuevo-usuario', icon: 'receipt' },
-        ],
-      },
+        {
+            title: 'USUARIOS',
+            icon: 'group',  // Icono más adecuado para usuarios
+            children: [
+                { title: 'Gestión de Usuarios', route: '/gestion/editar-usuarios', icon: 'manage_accounts' },
+                { title: 'Nuevo Usuario', route: '/gestion/nuevo-usuario', icon: 'person_add' },
+            ],
+        },
     ],
-  },
+}
 ];

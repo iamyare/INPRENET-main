@@ -7,7 +7,6 @@ import { FieldConfig } from 'src/app/shared/Interfaces/field-config';
 import { TableColumn } from 'src/app/shared/Interfaces/table-column';
 import { convertirFechaInputs } from 'src/app/shared/functions/formatoFecha';
 import { unirNombres } from 'src/app/shared/functions/formatoNombresP';
-import { DatePipe } from '@angular/common';
 import { Subscription } from 'rxjs';
 import { HttpClient } from '@angular/common/http';
 import { Validators } from '@angular/forms';
@@ -15,6 +14,9 @@ import { AgregarMovimientoComponent } from '../agregar-movimiento/agregar-movimi
 import { ConfirmDialogComponent } from 'src/app/components/dinamicos/confirm-dialog/confirm-dialog.component';
 import { AgregarCuentasComponent } from '../agregar-cuentas/agregar-cuentas.component';
 import { EditarDialogComponent } from 'src/app/components/dinamicos/editar-dialog/editar-dialog.component';
+import pdfMake from 'pdfmake/build/pdfmake';
+import pdfFonts from 'pdfmake/build/vfs_fonts';
+import { DatePipe } from '@angular/common';
 
 @Component({
   selector: 'app-ver-cuentas-personas',
@@ -41,8 +43,8 @@ export class VerCuentasPersonasComponent implements OnInit, OnChanges, OnDestroy
     private svcTransacciones: TransaccionesService,
     private toastr: ToastrService,
     private dialog: MatDialog,
+    private http: HttpClient,
     private datePipe: DatePipe,
-    private http: HttpClient
   ) {
   }
 
@@ -259,7 +261,7 @@ export class VerCuentasPersonasComponent implements OnInit, OnChanges, OnDestroy
     });
   }
 
-  /* async generarReporteMovimientos() {
+  async generarReporteMovimientos() {
     const base64data = await this.getMembreteBase64();
     const afiliado = this.Afiliado;
 
@@ -367,9 +369,9 @@ export class VerCuentasPersonasComponent implements OnInit, OnChanges, OnDestroy
     };
 
     pdfMake.createPdf(docDefinition).open();
-  } */
+  }
 
-  /* async generarReciboMovimiento(movimiento: any) {
+  async generarReciboMovimiento(movimiento: any) {
     const base64data = await this.getMembreteBase64();
     const afiliado = this.Afiliado;
 
@@ -464,5 +466,5 @@ export class VerCuentasPersonasComponent implements OnInit, OnChanges, OnDestroy
     };
 
     pdfMake.createPdf(docDefinition).open();
-  } */
+  }
 }

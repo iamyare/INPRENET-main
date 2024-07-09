@@ -1,10 +1,12 @@
 import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
-import { FormArray, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { AfiliadoService } from 'src/app/services/afiliado.service';
 import { FormStateService } from 'src/app/services/form-state.service';
 import { ToastrService } from 'ngx-toastr';
 import { generateDatBancFormGroup } from '../../nose/dat-banc/dat-banc.component';
 import { generateFormArchivo } from 'src/app/components/dinamicos/botonarchivos/botonarchivos.component';
+import { FormArray, FormBuilder, FormGroup, Validators } from '@angular/forms';
+import pdfMake from 'pdfmake/build/pdfmake';
+import pdfFonts from 'pdfmake/build/vfs_fonts';
 
 @Component({
   selector: 'app-afil-banco',
@@ -102,8 +104,6 @@ export class AfilBancoComponent implements OnInit {
     });
   }
 
-
-
   handleImageCaptured(image: string) {
     this.form.get('FotoPerfil')?.setValue(image);
   }
@@ -195,13 +195,16 @@ export class AfilBancoComponent implements OnInit {
   }
 
   getLabel(): any {
-    if (this.form.get("Archivos")?.value["Archivos"] != "") {
-      this.labelBoton1 = this.form.get("Archivos")?.value["Archivos"];
+    const archivos = this.form.get("Archivos")?.value as { Archivos: string };
+    if (archivos["Archivos"] != "") {
+      this.labelBoton1 = archivos["Archivos"];
     } else {
       this.labelBoton1 = "Adjunte archivo DNI";
     }
     return this.labelBoton1;
-  }
+}
+
+
 
   enviar() {
     const formData = new FormData();
@@ -226,9 +229,6 @@ export class AfilBancoComponent implements OnInit {
       }) || [],
     };
 
-    const docDefinition: any = this.createPDFDefinition(encapsulatedDto);
-    /* pdfMake.createPdf(docDefinition).download('datos_afiliado.pdf'); */
-
     formData.append('encapsulatedDto', JSON.stringify(encapsulatedDto));
 
     const fotoPerfilBase64 = this.form.get('FotoPerfil')?.value ?? '';
@@ -245,7 +245,7 @@ export class AfilBancoComponent implements OnInit {
       console.log(`Key ${key}:`, value);
     });
 
-    this.afilService.createPersonaWithDetailsAndWorkCenters(formData).subscribe(
+    /* this.afilService.createPersonaWithDetailsAndWorkCenters(formData).subscribe(
       response => {
         console.log('Datos enviados con éxito:', response);
         this.toastr.success('Datos enviados con éxito');
@@ -254,101 +254,7 @@ export class AfilBancoComponent implements OnInit {
         console.error('Error al enviar los datos:', error);
         this.toastr.error('Error al enviar los datos');
       }
-    );
-  }
-
-  createPDFDefinition(data: any) {
-    console.log(data);
-
-    return {
-      content: [
-        { text: 'I. DATOS GENERALES DEL AFILIADO', style: 'header' },
-        this.createTable([
-          ['ID Tipo Identificación', data.datosGenerales.id_tipo_identificacion || ''],
-          ['DNI', data.datosGenerales.dni || ''],
-          ['Estado Civil', data.datosGenerales.estado_civil || ''],
-          ['Primer Nombre', data.datosGenerales.primer_nombre || ''],
-          ['Segundo Nombre', data.datosGenerales.segundo_nombre || ''],
-          ['Tercer Nombre', data.datosGenerales.tercer_nombre || ''],
-          ['Primer Apellido', data.datosGenerales.primer_apellido || ''],
-          ['Segundo Apellido', data.datosGenerales.segundo_apellido || ''],
-          ['Género', data.datosGenerales.genero || ''],
-          ['Cantidad de Dependientes', data.datosGenerales.cantidad_dependientes || ''],
-          ['ID Profesión', data.datosGenerales.id_profesion || ''],
-          ['Representación', data.datosGenerales.representacion || ''],
-          ['Teléfono 1', data.datosGenerales.telefono_1 || ''],
-          ['Teléfono 2', data.datosGenerales.telefono_2 || ''],
-          ['Correo 1', data.datosGenerales.correo_1 || ''],
-          ['Correo 2', data.datosGenerales.correo_2 || ''],
-          ['Número Carnet', data.datosGenerales.numero_carnet || ''],
-          ['Fecha de Nacimiento', data.datosGenerales.fecha_nacimiento || ''],
-          ['Archivo de Identificación', data.datosGenerales.archivo_identificacion || ''],
-          ['Dirección de Residencia', data.datosGenerales.direccion_residencia || ''],
-          ['ID País', data.datosGenerales.id_pais || ''],
-          ['ID Municipio de Residencia', data.datosGenerales.id_municipio_residencia || ''],
-          ['ID Estado de Persona', data.datosGenerales.id_estado_persona || ''],
-          ['ID Tipo de Persona', data.datosGenerales.ID_TIPO_PERSONA || '']
-        ]),
-        { text: 'III. DATOS DE CENTROS DE TRABAJO', style: 'header' },
-        ...data.centrosTrabajo.map((centro: any) => this.createTable([
-          ['ID Centro de Trabajo', centro.idCentroTrabajo || ''],
-          ['Número de Acuerdo', centro.numeroAcuerdo || ''],
-          ['Salario Base', centro.salarioBase || ''],
-          ['Cargo', centro.cargo || ''],
-          ['Fecha de Ingreso', centro.fechaIngreso || ''],
-          ['Fecha de Egreso', centro.fechaEgreso || ''],
-        ])),
-        { text: 'IV. REFERENCIAS PERSONALES', style: 'header' },
-        ...data.referenciasPersonales.map((referencia: any) => this.createTable([
-          ['Nombre Completo', referencia.nombre_completo || ''],
-          ['Dirección', referencia.direccion || ''],
-          ['Parentesco', referencia.parentesco || ''],
-          ['Teléfono Domicilio', referencia.telefono_domicilio || ''],
-          ['Teléfono Trabajo', referencia.telefono_trabajo || ''],
-          ['Teléfono Personal', referencia.telefono_personal || ''],
-          ['DNI', referencia.dni || '']
-        ])),
-        { text: 'V. BANCOS', style: 'header' },
-        ...data.bancos.map((banco: any) => this.createTable([
-          ['ID Banco', banco.idBanco || ''],
-          ['Número de Cuenta', banco.numCuenta || ''],
-          ['Estado', banco.estado || '']
-        ])),
-        { text: 'VI. BENEFICIARIOS', style: 'header' },
-        ...data.beneficiarios.map((beneficiario: any) => this.createTable([
-          ['DNI', beneficiario.datosBeneficiario.dni || ''],
-          ['Primer Nombre', beneficiario.datosBeneficiario.primer_nombre || ''],
-          ['Segundo Nombre', beneficiario.datosBeneficiario.segundo_nombre || ''],
-          ['Tercer Nombre', beneficiario.datosBeneficiario.tercer_nombre || ''],
-          ['Primer Apellido', beneficiario.datosBeneficiario.primer_apellido || ''],
-          ['Segundo Apellido', beneficiario.datosBeneficiario.segundo_apellido || ''],
-          ['Género', beneficiario.datosBeneficiario.genero || ''],
-          ['Cantidad de Dependientes', beneficiario.datosBeneficiario.cantidad_dependientes || ''],
-          ['Representación', beneficiario.datosBeneficiario.representacion || ''],
-          ['Teléfono 1', beneficiario.datosBeneficiario.telefono_1 || ''],
-          ['Fecha de Nacimiento', beneficiario.datosBeneficiario.fecha_nacimiento || ''],
-          ['Dirección de Residencia', beneficiario.datosBeneficiario.direccion_residencia || ''],
-          ['ID País', beneficiario.datosBeneficiario.id_pais || ''],
-          ['ID Municipio de Residencia', beneficiario.datosBeneficiario.id_municipio_residencia || ''],
-          ['ID Estado de Persona', beneficiario.datosBeneficiario.id_estado_persona || ''],
-          ['Porcentaje', beneficiario.porcentaje || '']
-        ])),
-        { text: 'VII. COLEGIOS MAGISTERIALES', style: 'header' },
-        ...data.colegiosMagisteriales.map((colegio: any) => this.createTable([
-          ['ID Colegio', colegio.idColegio || '']
-        ]))
-      ],
-      styles: {
-        header: {
-          fontSize: 16,
-          bold: true,
-          margin: [0, 10, 0, 10]
-        },
-        table: {
-          margin: [0, 5, 0, 15]
-        }
-      }
-    };
+    ); */
   }
 
   createTable(data: [string, any][]) {
@@ -387,10 +293,10 @@ export class AfilBancoComponent implements OnInit {
     return `${day}/${month}/${year}`;
   }
 
-  /* createPDF() {
+  createPDF() {
     const documentDefinition:any = this.getDocumentDefinition();
     pdfMake.createPdf(documentDefinition).download('example.pdf');
-  } */
+  }
 
 
   getDocumentDefinition() {
@@ -612,7 +518,7 @@ export class AfilBancoComponent implements OnInit {
                 alignment: 'center'
             },
             tableRowLarge: {
-                fontSize: 11, // Tamaño de fuente más grande para los datos de la tabla
+                fontSize: 11,
                 color: 'black',
                 alignment: 'center'
             },

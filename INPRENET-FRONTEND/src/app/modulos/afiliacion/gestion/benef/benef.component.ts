@@ -190,7 +190,7 @@ export class BenefComponent implements OnInit {
 
     let porcentajeTotal = 0;
 
-    beneficiariosArray.controls.forEach(control => {
+    beneficiariosArray.controls.forEach((control:any) => {
       const controlporcentaje = control.get('datosBeneficiario')?.get('porcentaje')!;
       const porcentaje = controlporcentaje?.value;
 
@@ -203,7 +203,7 @@ export class BenefComponent implements OnInit {
       return { invalidSumaPorcentajes: true };
     } else {
       // Eliminar el error de invalidSumaPorcentajes si existe
-      beneficiariosArray.controls.forEach(control => {
+      beneficiariosArray.controls.forEach((control:any) => {
         const controlporcentaje = control.get('datosBeneficiario')?.get('porcentaje')!;
         if (controlporcentaje.errors) {
           const { invalidSumaPorcentajes, ...otherErrors } = controlporcentaje.errors;
@@ -223,7 +223,7 @@ export class BenefComponent implements OnInit {
     const control = this.getCtrl('beneficiario', this.formParent) as FormArray;
     if (control.length > 0) {
       control.removeAt(control.length - 1);
-      control.controls.forEach(control => {
+      control.controls.forEach((control:any) => {
         const controlporcentaje = control.get('datosBeneficiario')?.get('porcentaje')!;
         controlporcentaje.updateValueAndValidity(); // Actualizar la validación del porcentaje
       });

@@ -15,6 +15,7 @@ import { VerDatPlanIngComponent } from './ingresos/ver-dat-plan-ing/ver-dat-plan
 import { PlanillaRoutingModule } from './planilla-routing.module';
 import { VerPlanillasComponent } from './egresos/ver-planillas/ver-planillas.component';
 import { DetallePlanillaDialogComponent } from './egresos/detalle-planilla-dialog/detalle-planilla-dialog.component';
+import { CargarPlanillaPrivadosComponent } from './ingresos/cargar-planilla-privados/cargar-planilla-privados.component';
 
 @NgModule({
   declarations: [
@@ -29,7 +30,8 @@ import { DetallePlanillaDialogComponent } from './egresos/detalle-planilla-dialo
     PlanillaColegiosPrivadosComponent,
     VerDatPlanIngComponent,
     VerPlanillasComponent,
-    DetallePlanillaDialogComponent
+    DetallePlanillaDialogComponent,
+    CargarPlanillaPrivadosComponent
   ],
   imports: [
     CommonModule,

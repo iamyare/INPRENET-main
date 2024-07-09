@@ -1,20 +1,17 @@
 import { Component } from '@angular/core';
-import { FormBuilder, Validators } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
 import { ToastrService } from 'ngx-toastr';
 import { AfiliadoService } from 'src/app/services/afiliado.service';
-import { BeneficiosService } from 'src/app/services/beneficios.service';
-import { DeduccionesService } from 'src/app/services/deducciones.service';
 import { PlanillaService } from 'src/app/services/planilla.service';
 import { FieldConfig } from 'src/app/shared/Interfaces/field-config';
 import { TableColumn } from 'src/app/shared/Interfaces/table-column';
 import { convertirFecha } from 'src/app/shared/functions/formatoFecha';
-import * as pdfMake from 'pdfmake/build/pdfmake';
-import * as pdfFonts from 'pdfmake/build/vfs_fonts';
 import { TDocumentDefinitions } from 'pdfmake/interfaces';
 import { HttpClient } from '@angular/common/http';
 import { DynamicDialogComponent } from 'src/app/components/dinamicos/dynamic-dialog/dynamic-dialog.component';
-
+import { Validators } from '@angular/forms';
+import pdfMake from 'pdfmake/build/pdfmake';
+import pdfFonts from 'pdfmake/build/vfs_fonts';
 @Component({
   selector: 'app-verplancerrada',
   templateUrl: './verplancerrada.component.html',
@@ -46,7 +43,6 @@ export class VerplancerradaComponent {
     private http: HttpClient,
     private afiliadoService: AfiliadoService
   ) {
-    (pdfMake as any).vfs = pdfFonts.pdfMake.vfs;
     this.convertirImagenABase64('../../assets/images/HOJA-MEMBRETADA.jpg').then(base64 => {
       this.backgroundImageBase64 = base64;
 

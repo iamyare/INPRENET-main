@@ -4,6 +4,10 @@ import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { MatPaginator } from '@angular/material/paginator';
 import { MatTableDataSource } from '@angular/material/table';
 import { TDocumentDefinitions } from 'pdfmake/interfaces';
+import pdfMake from 'pdfmake/build/pdfmake';
+import pdfFonts from 'pdfmake/build/vfs_fonts';
+
+pdfMake.vfs = pdfFonts.pdfMake.vfs;
 
 @Component({
   selector: 'app-totalesporbydDialog',
@@ -14,7 +18,6 @@ export class TotalesporbydDialogComponent implements OnInit {
 
   @ViewChild('paginatorBeneficios', { static: true }) paginatorBeneficios!: MatPaginator;
   @ViewChild('paginatorDeducciones', { static: true }) paginatorDeducciones!: MatPaginator;
-
 
   dataSourceBeneficios: MatTableDataSource<any>;
   dataSourceDeducciones: MatTableDataSource<any>;
@@ -29,7 +32,6 @@ export class TotalesporbydDialogComponent implements OnInit {
   ) {
     this.dataSourceBeneficios = new MatTableDataSource<any>(this.data.beneficios);
     this.dataSourceDeducciones = new MatTableDataSource<any>(this.data.deducciones);
-    //(pdfMake as any).vfs = pdfFonts.pdfMake.vfs;
   }
 
   ngOnInit(): void {
@@ -146,7 +148,7 @@ export class TotalesporbydDialogComponent implements OnInit {
       }
     };
 
-    //pdfMake.createPdf(docDefinition).download('Reporte_Beneficios_Deducciones.pdf');
+    pdfMake.createPdf(docDefinition).download('Reporte_Beneficios_Deducciones.pdf');
   }
 
   crearTablaPDF(data: any[], titulo: string) {

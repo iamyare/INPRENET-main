@@ -1,11 +1,14 @@
 import { ChangeDetectorRef, Component, Inject, OnInit } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { MatTableDataSource } from '@angular/material/table';
+import pdfMake from 'pdfmake/build/pdfmake';
+import pdfFonts from 'pdfmake/build/vfs_fonts';
 
 @Component({
   selector: 'app-detalle-planilla-dialog',
   templateUrl: './detalle-planilla-dialog.component.html',
-  styleUrl: './detalle-planilla-dialog.component.scss'
+  styleUrl: './detalle-planilla-dialog.component.scss',
+
 })
 export class DetallePlanillaDialogComponent{
 
@@ -62,7 +65,7 @@ export class DetallePlanillaDialogComponent{
       }
     };
 
-    //pdfMake.createPdf(docDefinition).download('Detalle_Planilla.pdf');
+    pdfMake.createPdf(docDefinition).download('Detalle_Planilla.pdf');
   }
 
   crearTabla() {

@@ -1,5 +1,4 @@
 import { ChangeDetectorRef, Component, Input, OnInit, ViewChild } from '@angular/core';
-import { FormControl, Validators } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
 import { MatPaginator } from '@angular/material/paginator';
 import { MatSort } from '@angular/material/sort';
@@ -10,6 +9,9 @@ import { Item, UserData } from '../planilla-colegios-privados/planilla-colegios-
 import { EditarDialogComponent } from 'src/app/components/dinamicos/editar-dialog/editar-dialog.component';
 import { ConfirmDialogComponent } from 'src/app/components/dinamicos/confirm-dialog/confirm-dialog.component';
 import { DynamicFormDialogComponent } from 'src/app/components/dinamicos/dynamic-form-dialog/dynamic-form-dialog.component';
+import { FormControl, Validators } from '@angular/forms';
+import pdfMake from 'pdfmake/build/pdfmake';
+import pdfFonts from 'pdfmake/build/vfs_fonts';
 
 @Component({
   selector: 'app-ver-dat-plan-ing',
@@ -43,7 +45,6 @@ export class VerDatPlanIngComponent implements OnInit {
     private toastr: ToastrService, public dialog: MatDialog,
   ) {
     this.dataSourceItems = new MatTableDataSource<Item>([]);
-    //(pdfMake as any).vfs = pdfFonts.pdfMake.vfs;
   }
 
   ngOnInit(): void {
@@ -530,7 +531,7 @@ export class VerDatPlanIngComponent implements OnInit {
       }
     };
 
-    //pdfMake.createPdf(docDefinition).download('planilla.pdf');
+    pdfMake.createPdf(docDefinition).download('planilla.pdf');
   }
 
   actualizarValores() {

@@ -14,8 +14,9 @@ import { net_detalle_persona } from "./net_detalle_persona.entity";
 import { Net_Persona_Por_Banco } from 'src/modules/banco/entities/net_persona-banco.entity';
 import { Net_Persona_Colegios } from 'src/modules/transacciones/entities/net_persona_colegios.entity';
 import { net_causas_fallecimientos } from "./net_causas_fallecimientos.entity";
-
 import { net_otra_fuente_ingreso } from "./net_otra_fuente_ingreso.entity";
+import { Net_Persona_Discapacidad } from "./net_persona_discapacidad.entity";
+import { Net_Familia } from "./net_familia.entity";
 @Entity({
     name: 'NET_PERSONA',
 })
@@ -176,15 +177,20 @@ export class net_persona {
     @OneToMany(() => Net_Peps, peps => peps.persona)
     peps: Net_Peps[];
 
-
-    @ManyToMany(() => Net_Discapacidad, discapacidad => discapacidad.personas)
-    discapacidades: Net_Discapacidad[];
+    @OneToMany(() => Net_Persona_Discapacidad, personaDiscapacidad => personaDiscapacidad.persona)
+    personaDiscapacidades: Net_Persona_Discapacidad[];
 
     @ManyToOne(() => net_causas_fallecimientos, causaFallecimiento => causaFallecimiento.personas, { cascade: true })
     @JoinColumn({ name: 'ID_CAUSA_FALLECIMIENTO', foreignKeyConstraintName: "FK_ID_CAUSA_FALLECIMIENTO_NET_PERSONA" })
     causa_fallecimiento: net_causas_fallecimientos;
+
     @OneToMany(() => net_otra_fuente_ingreso, otra_fuente_ingreso => otra_fuente_ingreso.persona)
     otra_fuente_ingreso: net_otra_fuente_ingreso[];
 
+    @OneToMany(() => Net_Familia, familia => familia.persona)
+    familiares: Net_Familia[];
+
+    @OneToMany(() => Net_Familia, familia => familia.referenciada)
+    familiaresReferenciados: Net_Familia[];
 
 }

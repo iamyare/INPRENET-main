@@ -1,5 +1,5 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToMany, JoinTable } from "typeorm";
-import { net_persona } from "./net_persona.entity";
+import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
+import { Net_Persona_Discapacidad } from "./net_persona_discapacidad.entity";
 
 @Entity({
     name: 'NET_DISCAPACIDAD',
@@ -14,19 +14,6 @@ export class Net_Discapacidad {
     @Column('varchar2', { length: 500, nullable: true, name: 'DESCRIPCION' })
     descripcion: string;
 
-    @ManyToMany(() => net_persona, persona => persona.discapacidades)
-    @JoinTable({
-        name: 'NET_PERSONA_DISCAPACIDAD',
-        joinColumn: {
-            name: 'ID_DISCAPACIDAD',
-            referencedColumnName: 'id_discapacidad',
-            foreignKeyConstraintName: 'FK_ID_DISCAPACIDAD_PERSONA_DISCAPACIDAD'
-        },
-        inverseJoinColumn: {
-            name: 'ID_PERSONA',
-            referencedColumnName: 'id_persona',
-            foreignKeyConstraintName: 'FK_ID_PERSONA_PERSONA_DISCAPACIDAD'
-        }
-    })
-    personas: net_persona[];
+    @OneToMany(() => Net_Persona_Discapacidad, personaDiscapacidad => personaDiscapacidad.discapacidad)
+    personaDiscapacidades: Net_Persona_Discapacidad[];
 }

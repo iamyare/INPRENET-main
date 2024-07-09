@@ -1,7 +1,8 @@
-import { Controller, Get, NotFoundException, Param, Post, UploadedFile, UseInterceptors } from '@nestjs/common';
+import { Body, Controller, Get, HttpException, HttpStatus, NotFoundException, Param, Post, UploadedFile, UseInterceptors } from '@nestjs/common';
 import { AfiliacionService } from './afiliacion.service';
 import { net_persona } from '../entities/net_persona.entity';
 import { FileInterceptor } from '@nestjs/platform-express';
+import { CrearDatosDto } from './dtos/crear-datos.dto';
 
 @Controller('afiliacion')
 export class AfiliacionController {
@@ -42,5 +43,19 @@ export class AfiliacionController {
       throw new Error('No se ha subido ningún archivo');
     }
     return await this.afiliacionService.updateFotoPerfil(Number(id), fotoPerfil.buffer);
+  }
+
+  @Post('/crear')
+  @UseInterceptors(FileInterceptor('foto_perfil'))
+  async crear(
+    @Body('datos') datos: string,
+    @UploadedFile() fotoPerfil: Express.Multer.File
+  ): Promise<any> {
+    try {
+      const crearDatosDto: CrearDatosDto = JSON.parse(datos);
+      return await this.afiliacionService.crearDatos(crearDatosDto, fotoPerfil);
+    } catch (error) {
+      throw new HttpException(error.message, HttpStatus.BAD_REQUEST);
+    }
   }
 }

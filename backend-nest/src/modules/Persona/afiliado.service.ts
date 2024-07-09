@@ -1,7 +1,7 @@
-import { BadRequestException, ConflictException, Injectable, InternalServerErrorException, Logger, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, InternalServerErrorException, Logger, NotFoundException } from '@nestjs/common';
 import { NetPersonaDTO, PersonaResponse } from './dto/create-persona.dto';
 import { UpdatePersonaDto } from './dto/update-persona.dto';
-import { Connection, EntityManager, Repository, getConnection } from 'typeorm';
+import { EntityManager, Repository } from 'typeorm';
 import { InjectEntityManager, InjectRepository } from '@nestjs/typeorm';
 import { Net_Persona_Por_Banco } from '../banco/entities/net_persona-banco.entity';
 import { Net_Centro_Trabajo } from '../Empresarial/entities/net_centro_trabajo.entity';
@@ -9,7 +9,6 @@ import { Net_Banco } from '../banco/entities/net_banco.entity';
 import { Net_Pais } from '../Regional/pais/entities/pais.entity';
 import { validate as isUUID } from 'uuid';
 import { net_persona } from './entities/net_persona.entity';
-import { Net_Ref_Per_Pers } from './entities/net_ref-per-persona.entity';
 import { Net_perf_pers_cent_trab } from './entities/net_perf_pers_cent_trab.entity';
 import { net_detalle_persona } from './entities/net_detalle_persona.entity';
 import { CreateDetallePersonaDto } from './dto/create-detalle.dto';
@@ -21,7 +20,6 @@ import { Net_Colegios_Magisteriales } from '../transacciones/entities/net_colegi
 import { Net_Persona_Colegios } from '../transacciones/entities/net_persona_colegios.entity';
 import { NET_PROFESIONES } from '../transacciones/entities/net_profesiones.entity';
 import { UpdatePerfCentTrabDto } from './dto/update.perfAfilCentTrab.dto';
-import { UpdateReferenciaPersonalDTO } from './dto/update-referencia-personal.dto';
 import { UpdateBeneficiarioDto } from './dto/update-beneficiario.dto';
 import { Benef } from './dto/pruebaBeneficiario.dto';
 import * as moment from 'moment';
@@ -35,55 +33,36 @@ export class AfiliadoService {
 
   constructor(
     @InjectEntityManager() private readonly entityManager: EntityManager,
-
     @InjectRepository(net_persona)
     private readonly personaRepository: Repository<net_persona>,
     @InjectRepository(Net_perf_pers_cent_trab)
     private readonly perfPersoCentTrabRepository: Repository<Net_perf_pers_cent_trab>,
-
-    @InjectRepository(Net_Ref_Per_Pers)
-    private refPerPersRepository: Repository<Net_Ref_Per_Pers>,
-
     @InjectRepository(Net_Tipo_Persona)
     private tipoPersonaRepository: Repository<Net_Tipo_Persona>,
-
-
     @InjectRepository(net_detalle_persona)
     private detallePersonaRepository: Repository<net_detalle_persona>,
-
     @InjectRepository(Net_Tipo_Identificacion)
     private tipoIdentificacionRepository: Repository<Net_Tipo_Identificacion>,
-
     @InjectRepository(Net_Pais)
     private paisRepository: Repository<Net_Pais>,
-
     @InjectRepository(Net_Municipio)
     private municipioRepository: Repository<Net_Municipio>,
-
     @InjectRepository(net_estado_afiliacion)
     private estadoAfiliacionRepository: Repository<net_estado_afiliacion>,
-
     @InjectRepository(Net_Centro_Trabajo)
     private centroTrabajoRepository: Repository<Net_Centro_Trabajo>,
-
     @InjectRepository(Net_Persona_Por_Banco)
     private personaBancoRepository: Repository<Net_Persona_Por_Banco>,
-
     @InjectRepository(Net_Banco)
     private bancoRepository: Repository<Net_Banco>,
-
     @InjectRepository(Net_Persona_Colegios)
     private readonly netPersonaColegiosRepository: Repository<Net_Persona_Colegios>,
-
     @InjectRepository(Net_Colegios_Magisteriales)
     private readonly netColegiosMagisterialesRepository: Repository<Net_Colegios_Magisteriales>,
-
     @InjectRepository(NET_PROFESIONES)
     private readonly netProfesionesRepository: Repository<NET_PROFESIONES>,
-
     @InjectRepository(Net_Persona_Por_Banco)
     private readonly BancosToPersonaRepository: Repository<Net_Persona_Por_Banco>,
-    private readonly connection: Connection
   ) { }
 
   async getCausanteByDniBeneficiario(n_identificacion: string): Promise<net_persona> {
@@ -140,7 +119,7 @@ export class AfiliadoService {
       persona.municipio = await this.municipioRepository.findOne({ where: { id_municipio: createPersonaDto.id_municipio_residencia } });
     }
     if (createPersonaDto.id_profesion !== undefined && createPersonaDto.id_profesion !== null) {
-      persona.profesion = await this.netProfesionesRepository.findOne({ where: { idProfesion: createPersonaDto.id_profesion } });
+      persona.profesion = await this.netProfesionesRepository.findOne({ where: { id_profesion: createPersonaDto.id_profesion } });
     }
 
     return await this.personaRepository.save(persona);
@@ -599,7 +578,7 @@ export class AfiliadoService {
       FECHA_NACIMIENTO: persona.fecha_nacimiento,
       FOTO_PERFIL: persona.foto_perfil ? Buffer.from(persona.foto_perfil).toString('base64') : null,
       DESCRIPCION: persona.profesion?.descripcion,
-      ID_PROFESION: persona.profesion?.idProfesion,
+      ID_PROFESION: persona.profesion?.id_profesion,
       TELEFONO_1: persona.telefono_1,
       TELEFONO_2: persona.telefono_2,
       CORREO_1: persona.correo_1,
@@ -675,7 +654,7 @@ export class AfiliadoService {
           DIRECCION_RESIDENCIA: persona.direccion_residencia,
           FECHA_NACIMIENTO: persona.fecha_nacimiento,
           RTN: persona.rtn,
-          ID_PROFESION: persona.profesion?.idProfesion,
+          ID_PROFESION: persona.profesion?.id_profesion,
           TELEFONO_1: persona.telefono_1,
           ESTADO_CIVIL: persona.estado_civil,
           ESTADO: detallePersona?.estadoAfiliacion?.Descripcion!,
@@ -706,7 +685,7 @@ export class AfiliadoService {
       DIRECCION_RESIDENCIA: persona.direccion_residencia,
       FECHA_NACIMIENTO: persona.fecha_nacimiento,
       RTN: persona.rtn,
-      ID_PROFESION: persona.profesion?.idProfesion,
+      ID_PROFESION: persona.profesion?.id_profesion,
       TELEFONO_1: persona.telefono_1,
       ESTADO_CIVIL: persona.estado_civil,
       ESTADO: detallePersona.estadoAfiliacion.Descripcion,

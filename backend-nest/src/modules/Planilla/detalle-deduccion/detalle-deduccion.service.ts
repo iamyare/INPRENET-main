@@ -149,7 +149,7 @@ export class DetalleDeduccionService {
     }
   }
 
-  async getDetallesDeduccioDefinitiva(idPersona: string, idPlanilla: string): Promise<any> {
+  async getDetallesDeduccioDefinitiva(idPlanilla: string, idPersona: string): Promise<any> {
     const query = `
     SELECT
         dd."ID_DED_DEDUCCION",
@@ -163,14 +163,18 @@ export class DetalleDeduccionService {
         dd."ANIO",
         dd."MES",
         dd."FECHA_APLICADO",
-        dd."ID_PLANILLA"
+        detPagB."ID_PLANILLA"
       FROM
         "NET_DETALLE_DEDUCCION" dd
-      INNER JOIN "NET_DEDUCCION" ded ON ded."ID_DEDUCCION" = dd."ID_DEDUCCION" 
+      INNER JOIN "NET_DEDUCCION" ded ON ded."ID_DEDUCCION" = dd."ID_DEDUCCION"
+      INNER JOIN
+        NET_DETALLE_PAGO_BENEFICIO detPagB ON 
+        DD."ID_DETALLE_PAGO_BENEFICIO" = detPagB."ID_BENEFICIO_PLANILLA"
       WHERE
         dd."ESTADO_APLICACION" = 'COBRADA' AND
-        dd."ID_PERSONA" = '${idPersona}' AND 
-        dd."ID_PLANILLA" = '${idPlanilla}'
+        dd."ID_PERSONA" = ${idPersona} AND 
+        detPagB."ID_PLANILLA" = ${idPlanilla}
+
     `;
     try {
       // Usar un objeto para pasar los parámetros con nombre

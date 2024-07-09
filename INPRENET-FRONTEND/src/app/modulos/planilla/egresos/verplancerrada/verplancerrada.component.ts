@@ -196,34 +196,16 @@ export class VerplancerradaComponent {
       data: { logs: logs, type: 'deduccion' } // Asegúrate de pasar el 'type' adecuado
     });
 
-    const response = [
-      {
-        ID_DED_DEDUCCION: "1",
-        NOMBRE_DEDUCCION: "PRESTAMOS",
-        ID_PERSONA: "1",
-        ID_DEDUCCION: "1",
-        ID_CENTRO_TRABAJO: "1",
-        MONTO_TOTAL: row["Total Deducciones"],
-        MontoAplicado: row["Total Deducciones"],
-        ANIO: "2024",
-        MES: "5",
-        FECHA_APLICADO: "",
-        ID_PLANILLA: "1",
-      }
-    ]
-
-    logs.push({ message: 'Datos De Deducciones:', detail: response });
     openDialog();
-    /* this.planillaService.getDeduccionesDefinitiva(this.idPlanilla, row.id_afiliado).subscribe({
+    this.planillaService.getDeduccionesDefinitiva(this.idPlanilla, row.id_afiliado).subscribe({
       next: (response) => {
-        logs.push({ message: 'Datos De Deducciones Inconsistentes:', detail: response });
-        openDialog();
+        logs.push({ message: 'Datos De Deducciones:', detail: response });
       },
       error: (error) => {
         logs.push({ message: 'Error al obtener las deducciones inconsistentes:', detail: error });
-        openDialog();
+
       }
-    }); */
+    });
 
   }
 
@@ -237,33 +219,17 @@ export class VerplancerradaComponent {
       data: { logs: logs, type: 'beneficio' }
     });
 
-    const response = [{
-      NOMBRE_BENEFICIO: "JUBILACION VOLUNTARIA",
-      ID_PERSONA: "1",
-      ID_CAUSANTE: "1",
-      ID_BENEFICIO: "1",
-      ID_BENEFICIO_PLANILLA: "1",
-      ESTADO: "",
-      METODO_PAGO: "",
-      MontoAPagar: row["Total Beneficio"],
-      NUM_RENTAS_APLICADAS: "1",
-      PERIODO_INICIO: "01/06/2024",
-      PERIODO_FINALIZACION: "30/06/2024",
-    }]
 
-    logs.push({ message: 'Datos De Beneficios:', detail: response });
     openDialog();
 
-    /*  this.planillaService.getBeneficiosDefinitiva(this.idPlanilla, row.id_afiliado).subscribe({
-       next: (response) => {
-         logs.push({ message: 'Datos De Beneficios Inconsistentes:', detail: response });
-         openDialog();
-       },
-       error: (error) => {
-         logs.push({ message: 'Error al obtener los beneficios inconsistentes:', detail: error });
-         openDialog();
-       }
-     }); */
+    this.planillaService.getBeneficiosDefinitiva(this.idPlanilla, row.id_afiliado).subscribe({
+      next: (response) => {
+        logs.push({ message: 'Datos De Beneficios:', detail: response });
+      },
+      error: (error) => {
+        logs.push({ message: 'Error al obtener los beneficios inconsistentes:', detail: error });
+      }
+    });
   }
 
   openLogDialog(logs: any[]) {

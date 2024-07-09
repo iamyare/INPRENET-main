@@ -1252,9 +1252,6 @@ WHERE
       .where('detallePagoBeneficio.planilla.id_planilla = :id_planilla', { id_planilla })
       .getRawOne();
 
-    console.log(totalBeneficios);
-
-
     const totalDeducciones = await this.detalleDeduccionRepository
       .createQueryBuilder('detalleDeduccion')
       .leftJoin(Net_Detalle_Pago_Beneficio, 'detallePagoB', 'detallePagoB.ID_BENEFICIO_PLANILLA = detalleDeduccion.ID_DETALLE_PAGO_BENEFICIO')
@@ -1263,13 +1260,12 @@ WHERE
       .where('plan.id_planilla = :id_planilla', { id_planilla })
       .getRawOne();
 
-    console.log(totalDeducciones);
-
 
     return {
       planilla,
       totalBeneficios: totalBeneficios.totalBeneficios || 0,
       totalDeducciones: totalDeducciones.totalDeducciones || 0,
+      totalPlanilla: totalBeneficios.totalBeneficios - totalDeducciones.totalDeducciones,
     };
   }
 

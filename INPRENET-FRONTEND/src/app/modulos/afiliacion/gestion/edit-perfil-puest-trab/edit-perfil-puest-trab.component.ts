@@ -1,5 +1,5 @@
 import { DatePipe } from '@angular/common';
-import { Component, Input, SimpleChanges } from '@angular/core';
+import { Component, Input, OnChanges, OnDestroy, OnInit, SimpleChanges } from '@angular/core';
 import { Validators } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
 import { ToastrService } from 'ngx-toastr';
@@ -21,7 +21,7 @@ import { AgregarPuestTrabComponent } from '../agregar-puest-trab/agregar-puest-t
   styleUrls: ['./edit-perfil-puest-trab.component.scss'],
   providers: [DatePipe] // Añadir el DatePipe como proveedor
 })
-export class EditPerfilPuestTrabComponent {
+export class EditPerfilPuestTrabComponent implements OnInit, OnDestroy, OnChanges {
   @Input() Afiliado!: any;
 
   private subscriptions: Subscription = new Subscription();
@@ -106,8 +106,8 @@ export class EditPerfilPuestTrabComponent {
     ];
 
     this.getCentrosTrabajo();
-    //this.previsualizarInfoAfil();
-    this.getFilas();
+    this.getFilas().then(() => this.cargar());
+
   }
 
 
@@ -151,6 +151,7 @@ export class EditPerfilPuestTrabComponent {
           fechaEgreso: this.datePipe.transform(item.fecha_egreso, 'dd/MM/yyyy') || 'Fecha no disponible',
           cargo: item.cargo,
         }));
+
       } catch (error) {
         this.toastr.error('Error al cargar los datos de los perfiles de los centros de trabajo');
         console.error('Error al obtener datos de los perfiles de los centros de trabajo', error);
@@ -227,7 +228,6 @@ export class EditPerfilPuestTrabComponent {
       }
     ];
 
-    console.log(row);
 
     const dialogRef = this.dialog.open(EditarDialogComponent, {
       width: '500px',

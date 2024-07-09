@@ -49,6 +49,8 @@ import { DatPuestoTrabComponent } from './gestion/dat-puesto-trab/dat-puesto-tra
 import { RefPersComponent } from './gestion/ref-pers/ref-pers.component';
 import { BenefComponent } from './gestion/benef/benef.component';
 import { VerOtrasFuentesIngresoComponent } from './verPerfil/ver-otras-fuentes-ingreso/ver-otras-fuentes-ingreso.component';
+import { EditPerfilPuestTrabComponent } from './gestion/edit-perfil-puest-trab/edit-perfil-puest-trab.component';
+import { EditColegiosMagisterialesComponent } from './gestion/edit-colegios-magisteriales/edit-colegios-magisteriales.component';
 
 @NgModule({
   declarations: [
@@ -95,7 +97,7 @@ import { VerOtrasFuentesIngresoComponent } from './verPerfil/ver-otras-fuentes-i
     DatPuestoTrabComponent,
     RefPersComponent,
     BenefComponent,
-    VerOtrasFuentesIngresoComponent
+    VerOtrasFuentesIngresoComponent, EditPerfilPuestTrabComponent, EditColegiosMagisterialesComponent
   ],
   imports: [
     CommonModule,
@@ -114,7 +116,7 @@ import { VerOtrasFuentesIngresoComponent } from './verPerfil/ver-otras-fuentes-i
     DatBancComponent
   ],
   providers: [
-    { provide: MAT_DATE_LOCALE, useValue: 'es' ,},
+    { provide: MAT_DATE_LOCALE, useValue: 'es', },
   ],
   schemas: [CUSTOM_ELEMENTS_SCHEMA]
 })

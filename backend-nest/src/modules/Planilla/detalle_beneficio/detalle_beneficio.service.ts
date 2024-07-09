@@ -275,7 +275,7 @@ export class DetalleBeneficioService {
 
   async getBeneficiosDefinitiva(idPersona: string, idPlanilla: string): Promise<any> {
     const query = `
-    SELECT
+        SELECT
         ben."NOMBRE_BENEFICIO",
         detP."ID_PERSONA",
         detP."ID_CAUSANTE",
@@ -288,24 +288,28 @@ export class DetalleBeneficioService {
         detBA."NUM_RENTAS_APLICADAS",
         detBA."PERIODO_INICIO",
         detBA."PERIODO_FINALIZACION"
-        FROM
-            "net_persona" afil
-        INNER JOIN
-            "net_detalle_persona" detP ON afil."ID_PERSONA" = detP."ID_PERSONA"
-        INNER JOIN "NET_DETALLE_BENEFICIO_AFILIADO" detBA ON 
-            detP."ID_PERSONA" = detBA."ID_BENEFICIARIO" AND
-            detP."ID_CAUSANTE" = detBA."ID_CAUSANTE"
-        INNER JOIN "NET_BENEFICIO" ben ON 
-            detBA."ID_BENEFICIO" = ben."ID_BENEFICIO"
-        INNER JOIN
-            "NET_DETALLE_PAGO_BENEFICIO" detBs ON detBA."ID_DETALLE_BEN_AFIL" = detBs."ID_BENEFICIO_PLANILLA_AFIL"
-        INNER JOIN
-            "NET_PLANILLA" pla ON detBs."ID_PLANILLA" = pla."ID_PLANILLA"
-            
-          WHERE
-            detBs."ESTADO" = 'PAGADA' AND
-            afil."ID_PERSONA" = ${idPersona} AND 
-            pla."ID_PLANILLA" = ${idPlanilla}
+    FROM
+        "NET_DETALLE_PAGO_BENEFICIO" detBs
+    INNER JOIN
+        net_detalle_persona detP ON 
+        detBs."ID_PERSONA" = detP."ID_PERSONA" AND
+        detBs."ID_CAUSANTE" = detP."ID_CAUSANTE"
+    INNER JOIN
+        net_persona afil ON detP."ID_PERSONA" = afil."ID_PERSONA"
+    INNER JOIN
+        NET_DETALLE_BENEFICIO_AFILIADO detBA ON 
+        detP."ID_PERSONA" = detBA."ID_PERSONA" AND
+        detP."ID_CAUSANTE" = detBA."ID_CAUSANTE" AND
+        detP."ID_DETALLE_PERSONA" = detBA."ID_DETALLE_PERSONA"
+    INNER JOIN 
+        "NET_BENEFICIO" ben ON 
+        detBA."ID_BENEFICIO" = ben."ID_BENEFICIO"
+    INNER JOIN
+        "NET_PLANILLA" pla ON detBs."ID_PLANILLA" = pla."ID_PLANILLA"
+    WHERE
+        detBs."ESTADO" = 'PAGADA' AND
+        afil."ID_PERSONA" = ${idPersona} AND 
+        pla."ID_PLANILLA" = '${idPlanilla}'
     `;
     try {
       // Asegúrate de pasar los parámetros como un array en el orden en que aparecen en la consulta

@@ -14,6 +14,8 @@ export class PdfService {
   }
 
   async getMembreteBase64(): Promise<string> {
+    console.log("ENTRO");
+
     const imagesPath = process.env.IMAGES_PATH || path.resolve(__dirname, '../../../../assets/images');
     const imagePath = path.join(imagesPath, 'MEMBRETADO.jpg');
 
@@ -22,6 +24,7 @@ export class PdfService {
   }
 
   async getFirmaDigitalBase64(): Promise<string> {
+    console.log("ENTRO");
     const imagesPath = process.env.IMAGES_PATH || path.resolve(__dirname, '../../../../assets/images');
     const imagePath = path.join(imagesPath, 'Firma.jpg');
 
@@ -30,11 +33,14 @@ export class PdfService {
   }
 
   async generateConstancia(data: any, includeQR: boolean, templateFunction: (data: any, includeQR: boolean) => any): Promise<Buffer> {
+    console.log("HOLA");
     const base64data = await this.getMembreteBase64();
     const firmaDigitalBase64 = await this.getFirmaDigitalBase64();
     const docDefinition = await templateFunction({ ...data, base64data, firmaDigitalBase64 }, includeQR);
 
+
     return new Promise((resolve, reject) => {
+      console.log("ENTRO");
       const pdfDoc = pdfMake.createPdf(docDefinition);
       pdfDoc.getBuffer((buffer) => {
         resolve(buffer);
@@ -137,6 +143,7 @@ export class PdfService {
   }
 
   async generateAndUploadConstancia(data: any, type: string): Promise<string> {
+    console.log("Entro");
     const nombreCompleto = `${data.primer_nombre}_${data.primer_apellido}`;
     const fechaActual = new Date().toISOString().split('T')[0];
     const fileName = `${nombreCompleto}_${fechaActual}_constancia_${type}`;
@@ -145,6 +152,8 @@ export class PdfService {
     let pdfBufferWithoutQR;
     switch (type) {
       case 'afiliacion':
+
+
         pdfBufferWithoutQR = await this.generateConstanciaAfiliacion(data, false);
         break;
       case 'renuncia-cap':

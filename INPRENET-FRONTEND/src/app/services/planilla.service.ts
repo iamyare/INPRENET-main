@@ -260,28 +260,29 @@ export class PlanillaService {
     return this.http.get(`${environment.API_URL}/api/planilla/todas`, { params });
   }
 
-  getBeneficiosDefinitiva(idPlanilla: string, idAfiliado: string): Observable<any> {
+  getBeneficiosDefinitiva(idPlanilla: string, idPersona: string): Observable<any> {
     let params = new HttpParams()
-      .set('idAfiliado', idAfiliado)
+      .set('idPersona', idPersona)
       .set('idPlanilla', idPlanilla)
     return this.http.get(`${environment.API_URL}/api/beneficio-planilla/detallesDefinitiva`, { params });
   }
-  getDeduccionesDefinitiva(idPlanilla: string, idAfiliado: string): Observable<any> {
+  getDeduccionesDefinitiva(idPlanilla: string, idPersona: string): Observable<any> {
     let params = new HttpParams()
-      .set('idAfiliado', idAfiliado)
+      .set('idPersona', idPersona)
       .set('idPlanilla', idPlanilla)
     return this.http.get(`${environment.API_URL}/api/detalle-deduccion/detallesDefinitiva`, { params });
   }
 
-  getBeneficiosPrelimiar(idPlanilla: string, idAfiliado: string): Observable<any> {
+  getBeneficiosPrelimiar(idPlanilla: string, idPersona: string): Observable<any> {
     let params = new HttpParams()
-      .set('idAfiliado', idAfiliado)
+      .set('idPersona', idPersona)
       .set('idPlanilla', idPlanilla)
     return this.http.get(`${environment.API_URL}/api/beneficio-planilla/detallesPreliminar`, { params });
   }
-  getDeduccionesPrelimiar(idPlanilla: string, idAfiliado: string): Observable<any> {
+
+  getDeduccionesPrelimiar(idPlanilla: string, idPersona: string): Observable<any> {
     let params = new HttpParams()
-      .set('idAfiliado', idAfiliado)
+      .set('idPersona', idPersona)
       .set('idPlanilla', idPlanilla)
     return this.http.get(`${environment.API_URL}/api/detalle-deduccion/detallesPreliminar`, { params });
   }

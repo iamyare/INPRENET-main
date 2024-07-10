@@ -12,16 +12,19 @@ import { DynamicDialogComponent } from 'src/app/components/dinamicos/dynamic-dia
 import { Validators } from '@angular/forms';
 import pdfMake from 'pdfmake/build/pdfmake';
 import pdfFonts from 'pdfmake/build/vfs_fonts';
+
+pdfMake.vfs = pdfFonts.pdfMake.vfs;
+
 @Component({
   selector: 'app-verplancerrada',
   templateUrl: './verplancerrada.component.html',
-  styleUrl: './verplancerrada.component.scss'
+  styleUrls: ['./verplancerrada.component.scss']
 })
 export class VerplancerradaComponent {
   convertirFecha = convertirFecha;
 
   dataPlan: any;
-  idPlanilla = ""
+  idPlanilla: any = "";
   datosFormateados: any;
   myFormFields: FieldConfig[] = [];
 
@@ -31,7 +34,7 @@ export class VerplancerradaComponent {
   verDat: boolean = false;
   ejecF: any;
 
-  detallePlanilla: any
+  detallePlanilla: any;
 
   data: any[] = [];
   backgroundImageBase64: string = '';
@@ -45,7 +48,6 @@ export class VerplancerradaComponent {
   ) {
     this.convertirImagenABase64('../../assets/images/HOJA-MEMBRETADA.jpg').then(base64 => {
       this.backgroundImageBase64 = base64;
-
     }).catch(error => {
       console.error('Error al convertir la imagen a Base64', error);
     });
@@ -98,18 +100,13 @@ export class VerplancerradaComponent {
 
   getPlanilla = async () => {
     try {
-      /* this.getFilas("").then(async () => {
-        const temp = await this.cargar()
-        this.verDat = true;
-        return temp
-      }); */
       this.planillaService.getPlanillaDefin(this.datosFormateados.value.codigo_planilla).subscribe(
         {
           next: async (response) => {
             if (response) {
               this.detallePlanilla = response;
               this.getFilas(response.codigo_planilla).then(() => this.cargar());
-              this.idPlanilla = response.id_planilla
+              this.idPlanilla = response.id_planilla;
               this.verDat = true;
             } else {
               this.detallePlanilla = [];
@@ -118,20 +115,18 @@ export class VerplancerradaComponent {
             }
             if (this.ejecF) {
               this.getFilas("").then(async () => {
-                const temp = await this.cargar()
+                const temp = await this.cargar();
                 this.verDat = true;
-                return temp
+                return temp;
               });
             }
           },
           error: (error) => {
             let mensajeError = 'Error desconocido al buscar la planilla';
 
-            // Verifica si el error tiene una estructura específica
             if (error.error && error.error.message) {
               mensajeError = error.error.message;
             } else if (typeof error.error === 'string') {
-              // Para errores que vienen como un string simple
               mensajeError = error.error;
             }
 
@@ -139,23 +134,20 @@ export class VerplancerradaComponent {
           }
         }
       );
-
     } catch (error) {
       console.error("Error al obtener datos de Tipo Planilla", error);
     }
-
   };
 
   cargar() {
     if (this.ejecF) {
-      this.ejecF(this.dataPlan).then(() => {
-      });
+      this.ejecF(this.dataPlan).then(() => {});
     }
   }
 
   getFilas = async (cod_planilla: string) => {
     try {
-      this.dataPlan = []
+      this.dataPlan = [];
 
       this.data = await this.planillaService.getPersPlanillaDefin(cod_planilla).toPromise();
       this.dataPlan = this.data.map((item: any) => {
@@ -185,15 +177,14 @@ export class VerplancerradaComponent {
     this.ejecF = funcion;
   }
 
-  /* Maneja las deducciones */
   manejarAccionDos(row: any) {
-    let logs: any[] = []; // Array para almacenar logs
+    let logs: any[] = [];
     logs.push({ message: `DNI:${row.dni}`, detail: row });
     logs.push({ message: `Nombre Completo:${row.NOMBRE_COMPLETO}`, detail: row });
 
     const openDialog = () => this.dialog.open(DynamicDialogComponent, {
       width: '50%',
-      data: { logs: logs, type: 'deduccion' } // Asegúrate de pasar el 'type' adecuado
+      data: { logs: logs, type: 'deduccion' }
     });
 
     openDialog();
@@ -203,13 +194,10 @@ export class VerplancerradaComponent {
       },
       error: (error) => {
         logs.push({ message: 'Error al obtener las deducciones inconsistentes:', detail: error });
-
       }
     });
-
   }
 
-  /* Maneja los beneficios */
   manejarAccionUno(row: any) {
     let logs: any[] = [];
     logs.push({ message: `DNI:${row.dni}`, detail: row });
@@ -218,7 +206,6 @@ export class VerplancerradaComponent {
       width: '50%',
       data: { logs: logs, type: 'beneficio' }
     });
-
 
     openDialog();
 
@@ -240,42 +227,25 @@ export class VerplancerradaComponent {
   }
 
   manejarAccionTres(row: any) {
-    // Obtén el idPlanilla y el dni del afiliado de la fila actual
-    const idPlanilla = this.idPlanilla; // Asumiendo que esta propiedad ya tiene el valor adecuado
+    const idPlanilla = this.idPlanilla;
     const dni = row.dni;
-
-    // Llama al servicio para obtener los totales de beneficios y deducciones
 
     const beneficios = [{
       ID_BENEFICIO: 1,
       NOMBRE_BENEFICIO: "Pensión por Jubilación",
       "Total Monto Beneficio": row["Total Beneficio"]
-    }]
+    }];
     const deducciones = [{
       ID_DEDUCCION: 1,
       NOMBRE_DEDUCCION: "Préstamo",
       "Total Monto Aplicado": row["Total Deducciones"],
-    }]
+    }];
 
     this.construirPDF(row, beneficios, deducciones);
-
-    /* this.afiliadoService.generarVoucher(idPlanilla, dni).subscribe({
-      next: (resultados) => {
-        // Aquí manejas la respuesta
-        const { beneficios, deducciones } = resultados;
-
-        // Construye el documento PDF usando los datos obtenidos
-        this.construirPDF(row, beneficios, deducciones);
-      },
-      error: (error) => {
-        console.error('Error al obtener los totales:', error);
-        this.toastr.error('Error al obtener los datos para el voucher.');
-      }
-    }); */
   }
 
   construirPDF(row: any, beneficios: any[], deducciones: any[]) {
-    let formattedNumber = Number(row.Total || 0).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+    let formattedNumber = Number(row.Total || 0).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
     let docDefinition: TDocumentDefinitions = {
       content: [
         { text: 'Comprobante de Pago', style: 'header' },
@@ -296,14 +266,14 @@ export class VerplancerradaComponent {
             ],
             [
               { text: 'Pago', style: 'subheader' },
-              { text: 'Medio de Pago: No especificado' }, // Asumiendo que este dato no está disponible
+              { text: 'Medio de Pago: No especificado' },
               { text: 'Pago Total: ' + 'L' + formattedNumber, style: 'subheader' },
               { text: 'Fecha de pago: ' + (row.fecha_cierre || 'No especificada') },
             ]
           ]
         },
         this.buildTable('Ingresos', beneficios.map(b => ({ nombre_ingreso: b.NOMBRE_BENEFICIO, monto: b['Total Monto Beneficio'] })), ['nombre_ingreso', 'monto'], 'monto'),
-        this.buildTable('Deducciones', deducciones.map(d => ({ nombre_deduccion: d.nombre_deduccion, total_deduccion: d['Total Monto Aplicado'] })), ['nombre_deduccion', 'total_deduccion'], 'total_deduccion'),
+        this.buildTable('Deducciones', deducciones.map(d => ({ nombre_deduccion: d.NOMBRE_DEDUCCION, total_deduccion: d['Total Monto Aplicado'] })), ['nombre_deduccion', 'total_deduccion'], 'total_deduccion'),
 
         this.buildTable('', deducciones.map(d => ({ Total: "Total", valor_total: row.Total })), ['Total', 'valor_total'], 'valor_total')
       ],
@@ -355,11 +325,14 @@ export class VerplancerradaComponent {
     body.push(...data.map((item, rowIndex) => {
       let rowData = columns.map((column, index) => {
         if (index === columns.length - 1) {
-          // Aplicar formato de miles al número
-          let formattedNumber = Number(item[column]).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-          return { text: 'L' + formattedNumber, alignment: 'left' }; // Se cambió alignment a 'left'
+          let value = item[column];
+          if (value === undefined || value === null) {
+            value = 0;
+          }
+          let formattedNumber = Number(value).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+          return { text: 'L' + formattedNumber, alignment: 'left' };
         } else {
-          return { text: item[column], alignment: 'left' };
+          return { text: item[column] || '', alignment: 'left' };
         }
       });
       return rowData;
@@ -375,9 +348,148 @@ export class VerplancerradaComponent {
     };
   }
 
-  /* calculateNet(ingresos: any[], deducciones: any[]): number {
-    const totalIngresos = ingresos.reduce((acc: any, curr: any) => acc + curr.monto, 0);
-    const totalDeducciones = deducciones.reduce((acc: any, curr: any) => acc + curr.total_deduccion, 0);
-    return totalIngresos - totalDeducciones;
-  } */
+  descargarExcel(codPlanilla: string): void {
+    this.planillaService.generarExcelPlanilla(codPlanilla).subscribe(blob => {
+      const a = document.createElement('a');
+      const objectUrl = URL.createObjectURL(blob);
+      a.href = objectUrl;
+      a.download = 'planilla.xlsx';
+      a.click();
+      URL.revokeObjectURL(objectUrl);
+    }, error => {
+      console.error('Error al descargar el Excel', error);
+    });
+  }
+
+  async generarPDFDeduccionesSeparadas() {
+    try {
+      const base64Image = await this.convertirImagenABase64('../../assets/images/HOJA-MEMBRETADA.jpg');
+      this.planillaService.getDeduccionesPorPlanillaSeparadas(this.idPlanilla).subscribe(response => {
+        const deduccionesInprema = response.deduccionesINPREMA || [];
+        const deduccionesTerceros = response.deduccionesTerceros || [];
+
+        const totalInprema = deduccionesInprema.reduce((acc: any, cur: any) => acc + (cur.TOTAL_MONTO_APLICADO ? parseFloat(cur.TOTAL_MONTO_APLICADO) : 0), 0);
+        const totalTerceros = deduccionesTerceros.reduce((acc: any, cur: any) => acc + (cur.TOTAL_MONTO_APLICADO ? parseFloat(cur.TOTAL_MONTO_APLICADO) : 0), 0);
+
+        const docDefinition: TDocumentDefinitions = {
+          background: function (currentPage, pageSize) {
+            return {
+              image: base64Image,
+              width: pageSize.width,
+              height: pageSize.height,
+              absolutePosition: { x: 0, y: 0 }
+            };
+          },
+          pageMargins: [40, 100, 40, 60], // Adjust margins to fit content correctly
+          content: [
+            { text: 'Reporte de Deducciones INPREMA', style: 'header', margin: [0, 40, 0, 10] },
+            this.crearTablaPDF(deduccionesInprema, 'Deducciones INPREMA', 'Total de deducciones INPREMA'),
+            { text: 'Reporte de Deducciones de Terceros', style: 'header', pageBreak: 'before', margin: [0, 20, 0, 10] },
+            this.crearTablaPDF(deduccionesTerceros, 'Deducciones de Terceros', 'Total de deducciones de Terceros'),
+            {
+              table: {
+                widths: ['*', 'auto'],
+                body: [
+                  [{ text: 'Valor Neto', style: 'header' }, { text: `L ${(totalInprema + totalTerceros).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",")}`, style: 'totalNeto' }]
+                ]
+              },
+              layout: 'noBorders',
+              margin: [0, 40] // Increase the margin to separate the total net value
+            },
+            {
+              columns: [
+                {
+                  width: '*',
+                  text: ''
+                },
+                {
+                  width: 'auto',
+                  stack: [
+                    {
+                      canvas: [
+                        {
+                          type: 'line',
+                          x1: 0, y1: 0,
+                          x2: 150, y2: 0,
+                          lineWidth: 1.5
+                        }
+                      ]
+                    },
+                    {
+                      text: 'P Smith\nDirector General',
+                      style: 'signatureName'
+                    }
+                  ],
+                  margin: [0, 20] // Reduce margin to position the signature properly
+                }
+              ],
+              margin: [0, 20] // Add margin to avoid overlapping footer
+            }
+          ],
+          styles: {
+            header: {
+              fontSize: 18,
+              bold: true,
+              margin: [0, 20, 0, 10]
+            },
+            tableHeader: {
+              bold: true,
+              fontSize: 13,
+              color: 'black'
+            },
+            tableTotal: {
+              bold: true,
+              fontSize: 13,
+              color: 'black',
+              alignment: 'right'
+            },
+            totalNeto: {
+              fontSize: 16,
+              bold: true,
+              alignment: 'right'
+            },
+            signatureName: {
+              alignment: 'center',
+              bold: true,
+              margin: [0, 5] // Adjust margin to position the name text properly
+            }
+          }
+        };
+
+        pdfMake.createPdf(docDefinition).download('reporte_deducciones_separadas.pdf');
+      }, error => {
+        console.error('Error al obtener las deducciones separadas', error);
+        this.toastr.error('Error al obtener las deducciones separadas');
+      });
+    } catch (error) {
+      console.error('Error al generar el PDF', error);
+      this.toastr.error('Error al generar el PDF');
+    }
+  }
+
+
+  crearTablaPDF(data: any[], titulo: string, totalTexto: string) {
+    const total = data.reduce((acc, cur) => acc + (cur.TOTAL_MONTO_APLICADO ? parseFloat(cur.TOTAL_MONTO_APLICADO) : 0), 0);
+
+    return {
+      style: 'tableExample',
+      table: {
+        headerRows: 1,
+        widths: ['*', 'auto'],
+        body: [
+          [{ text: 'Nombre', style: 'tableHeader' }, { text: 'Total', style: 'tableHeader' }],
+          ...data.map(el => {
+            const nombre = el.NOMBRE_DEDUCCION || ''; // Asegurarse de que el nombre esté definido
+            const total = el.TOTAL_MONTO_APLICADO ? Number(el.TOTAL_MONTO_APLICADO).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") : '0.00';
+            return [nombre, { text: "L" + total, alignment: 'right' }];
+          }),
+          [{ text: totalTexto + ":", style: 'tableTotal', alignment: 'right', colSpan: 1 }, { text: "L" + total, style: 'tableTotal' }]
+        ]
+      },
+      layout: 'lightHorizontalLines'
+    };
+}
+
+
+
 }

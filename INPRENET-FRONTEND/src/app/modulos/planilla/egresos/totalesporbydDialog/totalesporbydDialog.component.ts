@@ -73,11 +73,12 @@ export class TotalesporbydDialogComponent implements OnInit {
           absolutePosition: { x: 0, y: 0 }
         };
       },
+      pageMargins: [40, 100, 40, 100], // Adjust margins to fit content correctly
       content: [
-        { text: '\n\n\n\n\nReporte de Beneficios', style: 'header' },
-        this.crearTablaPDF(this.dataSourceBeneficios.data, 'Beneficios'),
-        { text: 'Reporte de Deducciones', style: 'header' },
-        this.crearTablaPDF(this.dataSourceDeducciones.data, 'Deducciones'),
+        { text: 'Reporte de Beneficios', style: 'header' },
+        this.crearTablaPDF(this.dataSourceBeneficios.data, 'Beneficios', 'Total de beneficios'),
+        { text: 'Reporte de Deducciones', style: 'header', pageBreak: 'before' },
+        this.crearTablaPDF(this.dataSourceDeducciones.data, 'Deducciones', 'Total de deducciones'),
         {
           table: {
             widths: ['*', 'auto'],
@@ -85,7 +86,8 @@ export class TotalesporbydDialogComponent implements OnInit {
               [{ text: 'Valor Neto', style: 'header' }, { text: `L ${Number(this.totalBeneficios - this.totalDeducciones).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",")}`, style: 'totalNeto' }]
             ]
           },
-          layout: 'noBorders'
+          layout: 'noBorders',
+          margin: [0, 40] // Increase the margin to separate the total net value
         },
         {
           columns: [
@@ -111,18 +113,17 @@ export class TotalesporbydDialogComponent implements OnInit {
                   style: 'signatureName'
                 }
               ],
-              margin: [0, 5] // Adjust margin to position the signature properly
+              margin: [0, 20] // Reduce margin to position the signature properly
             }
           ],
-          // This positions the entire columns object at the bottom of the page.
-          absolutePosition: { x: 0, y: 720 } // Adjust the 'y' value as needed.
+          margin: [0, 20] // Add margin to avoid overlapping footer
         }
       ],
       styles: {
         header: {
           fontSize: 18,
           bold: true,
-          margin: [0, 0, 0, 10]
+          margin: [0, 10, 0, 10] // Reduce top margin
         },
         tableHeader: {
           bold: true,
@@ -151,7 +152,7 @@ export class TotalesporbydDialogComponent implements OnInit {
     pdfMake.createPdf(docDefinition).download('Reporte_Beneficios_Deducciones.pdf');
   }
 
-  crearTablaPDF(data: any[], titulo: string) {
+  crearTablaPDF(data: any[], titulo: string, totalTexto: string) {
     const total = data.reduce((acc, cur) => acc + (cur.total ? parseFloat(cur.total) : 0), 0);
 
     return {
@@ -160,9 +161,9 @@ export class TotalesporbydDialogComponent implements OnInit {
         headerRows: 1,
         widths: ['*', 'auto'],
         body: [
-          [{ text: 'Nombre', style: 'tableHeader', colSpan: 2  }, { text: 'Total de ingresos:', style: 'tableHeader' }],
-          ...data.map(el => [el.nombre, {text: "L" + Number(el.total).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ","), alignment: 'right'}]), // Alineación a la derecha para la última columna
-          [{ text: 'Total de deducciones:', style: 'tableTotal', alignment: 'right', colSpan: 1 }, { text: "L" + Number(total).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ","), style: 'tableTotal' }]
+          [{ text: 'Nombre', style: 'tableHeader', colSpan: 2  }, { text: 'Total:', style: 'tableHeader' }],
+          ...data.map(el => [el.nombre, {text: "L" + Number(el.total).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ","), alignment: 'right'}]),
+          [{ text: totalTexto + ":", style: 'tableTotal', alignment: 'right', colSpan: 1 }, { text: "L" + Number(total).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ","), style: 'tableTotal' }]
         ]
       },
       layout: 'lightHorizontalLines'

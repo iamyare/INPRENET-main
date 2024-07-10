@@ -9,6 +9,37 @@ import { environment } from 'src/environments/environment';
 export class PlanillaService {
   constructor(private http: HttpClient) { }
 
+  generarExcelPlanilla(codPlanilla: string): Observable<Blob> {
+    const params = new HttpParams().set('codPlanilla', codPlanilla);
+    const url = `${environment.API_URL}/api/planilla/generar-excel`;
+    return this.http.get(url, { params, responseType: 'blob' }).pipe(
+      catchError(error => {
+        console.error('Error al generar el Excel de la planilla', error);
+        return throwError(() => new Error('Error al generar el Excel de la planilla'));
+      })
+    );
+  }
+
+
+  getDeduccionesPorPlanillaSeparadas(idPlanilla: number): Observable<{ deduccionesINPREMA: any[], deduccionesTerceros: any[] }> {
+    const url = `${environment.API_URL}/api/planilla/deducciones-separadas/${idPlanilla}`;
+    return this.http.get<{ deduccionesINPREMA: any[], deduccionesTerceros: any[] }>(url).pipe(
+      catchError(error => {
+        console.error('Error al obtener las deducciones separadas', error);
+        return throwError(error);
+      })
+    );
+}
+
+
+  getTotalesPorDedYBen(idPlanilla: string): Observable<any> {
+    const url = `${environment.API_URL}/api/planilla/totalesBYD/${idPlanilla}`;
+    return this.http.get(url).pipe(
+      catchError(this.handleError)
+    );
+  }
+
+
   actualizarPlanillaAPreliminar(tipo: string, idPlanilla: string, periodoInicio: string, periodoFinalizacion: string): Observable<string> {
     const url = `${environment.API_URL}/api/planilla/actualizar-planilla`;
     const body = { tipo, idPlanilla, periodoInicio, periodoFinalizacion };
@@ -156,12 +187,7 @@ export class PlanillaService {
     throw 'Error en la llamada HTTP';
   }
 
-  getTotalesPorDedYBen(idPlanilla: string): Observable<any> {
-    const url = `${environment.API_URL}/api/planilla/totalesBYD/${idPlanilla}`;
-    return this.http.get(url).pipe(
-      catchError(this.handleError)
-    );
-  }
+
 
   obtenerTotalPlanilla(idPlanilla: string): Observable<any> {
     return this.http.get(`${environment.API_URL}/api/planilla/total/${idPlanilla}`).pipe(

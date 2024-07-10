@@ -13,6 +13,11 @@ import { DetalleBeneficioService } from '../detalle_beneficio/detalle_beneficio.
 import { PaginationDto } from 'src/common/dtos/pagination.dto';
 import { Net_Deduccion } from '../deduccion/entities/net_deduccion.entity';
 import { Net_Detalle_Beneficio_Afiliado } from '../detalle_beneficio/entities/net_detalle_beneficio_afiliado.entity';
+import { Workbook } from 'exceljs';
+import { Response } from 'express';
+import * as pdfMake from 'pdfmake/build/pdfmake';
+import * as pdfFonts from 'pdfmake/build/vfs_fonts';
+
 
 @Injectable()
 export class PlanillaService {
@@ -1147,8 +1152,8 @@ WHERE
   async GetBeneficiosPorPlanilla(idPlanilla: number) {
     return this.detallePagoBeneficioRepository
       .createQueryBuilder('detalle_pago')
-      .innerJoin('detalle_pago.detalleBeneficioAfiliado', 'detalle_beneficio_afiliado')
-      .innerJoin('detalle_beneficio_afiliado.beneficio', 'beneficio')
+      .innerJoin('detalle_pago.detalleBeneficioAfiliado', 'detalleBeneficioAfiliado')
+      .innerJoin('detalleBeneficioAfiliado.beneficio', 'beneficio')
       .select('beneficio.id_beneficio', 'ID_BENEFICIO')
       .addSelect('beneficio.nombre_beneficio', 'NOMBRE_BENEFICIO')
       .addSelect('SUM(detalle_pago.monto_a_pagar)', 'TOTAL_MONTO_BENEFICIO')
@@ -1162,21 +1167,24 @@ WHERE
     return this.detalleDeduccionRepository
       .createQueryBuilder('detalle_deduccion')
       .innerJoin('detalle_deduccion.deduccion', 'deduccion')
+      .innerJoin('detalle_deduccion.detalle_pago_beneficio', 'detalle_pago_beneficio')
+      .innerJoin('detalle_pago_beneficio.planilla', 'planilla')
       .select('deduccion.id_deduccion', 'ID_DEDUCCION')
       .addSelect('deduccion.nombre_deduccion', 'NOMBRE_DEDUCCION')
       .addSelect('SUM(detalle_deduccion.monto_aplicado)', 'TOTAL_MONTO_APLICADO')
-      .where('detalle_deduccion.planilla.id_planilla = :idPlanilla', { idPlanilla })
+      .where('planilla.id_planilla = :idPlanilla', { idPlanilla })
       .groupBy('deduccion.id_deduccion')
       .addGroupBy('deduccion.nombre_deduccion')
       .getRawMany();
   }
 
+
   async getTotalPorBeneficiosYDeducciones(idPlanilla: number): Promise<any> {
     try {
       const beneficios = await this.GetBeneficiosPorPlanilla(idPlanilla);
       const deducciones = await this.GetDeduccionesPorPlanilla(idPlanilla);
-
       return { beneficios, deducciones };
+      
     } catch (error) {
       console.error('Error al obtener los totales por planilla:', error);
       throw new Error('Error al obtener los totales por planilla');
@@ -1500,6 +1508,58 @@ WHERE
       this.logger.error(`Error al obtener totales por planilla: ${error.message}`, error.stack);
       throw new InternalServerErrorException('Se produjo un error al obtener los totales por planilla.');
     }
+  }
+
+  async GetDeduccionesPorPlanillaSeparadas(idPlanilla: number) {
+    const deducciones = await this.detalleDeduccionRepository
+      .createQueryBuilder('detalle_deduccion')
+      .innerJoin('detalle_deduccion.deduccion', 'deduccion')
+      .innerJoin('detalle_deduccion.detalle_pago_beneficio', 'detalle_pago_beneficio')
+      .innerJoin('detalle_pago_beneficio.planilla', 'planilla')
+      .select('deduccion.id_deduccion', 'ID_DEDUCCION')
+      .addSelect('deduccion.nombre_deduccion', 'NOMBRE_DEDUCCION')
+      .addSelect('SUM(detalle_deduccion.monto_aplicado)', 'TOTAL_MONTO_APLICADO')
+      .where('planilla.id_planilla = :idPlanilla', { idPlanilla })
+      .groupBy('deduccion.id_deduccion')
+      .addGroupBy('deduccion.nombre_deduccion')
+      .getRawMany();
+
+    const deduccionesINPREMA = deducciones.filter(d => [1, 3, 51].includes(d.ID_DEDUCCION));
+    const deduccionesTerceros = deducciones.filter(d => ![1, 3, 51].includes(d.ID_DEDUCCION));
+
+    return {
+      deduccionesINPREMA,
+      deduccionesTerceros,
+    };
+}
+
+
+  async generarExcel(data: any[], response: Response): Promise<void> {
+    const workbook = new Workbook();
+    const worksheet = workbook.addWorksheet('Planilla');
+
+    // Definir las columnas
+    worksheet.columns = [
+      { header: 'ID_PERSONA', key: 'ID_PERSONA', width: 15 },
+      { header: 'DNI', key: 'DNI', width: 15 },
+      { header: 'NOMBRE_COMPLETO', key: 'NOMBRE_COMPLETO', width: 30 },
+      { header: 'Total Beneficio', key: 'Total Beneficio', width: 15 },
+      { header: 'Total Deducciones', key: 'Total Deducciones', width: 15 },
+      { header: 'CORREO_1', key: 'CORREO_1', width: 25 },
+      { header: 'FECHA_CIERRE', key: 'FECHA_CIERRE', width: 15 },
+    ];
+
+    // Agregar los datos al worksheet
+    data.forEach(item => {
+      worksheet.addRow(item);
+    });
+
+    // Formatear el archivo como buffer y enviarlo al cliente
+    const buffer = await workbook.xlsx.writeBuffer();
+    
+    response.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+    response.setHeader('Content-Disposition', 'attachment; filename=planilla.xlsx');
+    response.send(buffer);
   }
 
 

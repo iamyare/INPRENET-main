@@ -13,6 +13,17 @@ import { Net_Planilla } from './entities/net_planilla.entity';
 export class PlanillaController {
   constructor(private readonly planillaService: PlanillaService, @InjectEntityManager() private readonly entityManager: EntityManager) { }
 
+  @Get('generar-excel')
+  async generarExcel(
+    @Query('codPlanilla') codPlanilla: string,
+    @Query('page') page: number,
+    @Query('limit') limit: number,
+    @Res() res,
+  ) {
+    const data = await this.planillaService.ObtenerPlanDefinPersonas(codPlanilla, page, limit);
+    await this.planillaService.generarExcel(data, res);
+  }
+
   @Post('/actualizar-planilla')
   async actualizar(@Body() body: any): Promise<string> {
     const { tipo, idPlanilla, periodoInicio, periodoFinalizacion } = body;
@@ -436,6 +447,21 @@ export class PlanillaController {
   @Get('totalesBYD/:idPlanilla')
   async getTotalesPorPlanilla(@Param('idPlanilla') idPlanilla: string) {
     return this.planillaService.getTotalPorBeneficiosYDeducciones(Number(idPlanilla));
+  }
+
+  @Get('beneficios/:idPlanilla')
+  async getBeneficiosPorPlanilla(@Param('idPlanilla') idPlanilla: number) {
+    return await this.planillaService.GetBeneficiosPorPlanilla(idPlanilla);
+  }
+
+  @Get('deducciones/:idPlanilla')
+  async getDeduccionesPorPlanilla(@Param('idPlanilla') idPlanilla: number) {
+    return await this.planillaService.GetDeduccionesPorPlanilla(idPlanilla);
+  }
+
+  @Get('deducciones-separadas/:idPlanilla')
+  async getDeduccionesPorPlanillaSeparadas(@Param('idPlanilla', ParseIntPipe) idPlanilla: number) {
+    return this.planillaService.GetDeduccionesPorPlanillaSeparadas(idPlanilla);
   }
 
   @Get('generar-voucher')

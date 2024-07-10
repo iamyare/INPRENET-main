@@ -520,6 +520,29 @@ export class AfiliadoService {
     }
   }
 
+  async getAllReferenciasPersonales(n_identificacion: string) {
+    console.log(n_identificacion);
+    /* id_ref_personal: item.id_ref_personal ?? 'ID no disponible',
+                dni: item.dni ?? 'ID no disponible',
+                nombre_completo: item.nombre_completo ?? 'Nombre no disponible',
+                parentesco: item.parentesco || 'No disponible',
+                direccion: item.direccion ?? 'Dirección no disponible',
+                telefono_domicilio: item.telefono_domicilio ?? 'No disponible',
+                telefono_personal: item.telefono_personal ?? 'No disponible',
+                telefono_trabajo: item.telefono_trabajo ?? 'No disponible', 
+    */
+
+    /* try {
+      const personas = await this.personaRepository.findOne({
+        where: { n_identificacion: n_identificacion },
+        relations: ['personasPorBanco', 'personasPorBanco.banco'], // Asegúrate de cargar la relación
+      });
+      return personas.personasPorBanco;
+    } catch (error) {
+      console.log(error);
+    } */
+  }
+
   async getAllColMagPPersona(n_identificacion: string) {
     try {
       const personas = await this.personaRepository.findOne({

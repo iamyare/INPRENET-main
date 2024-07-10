@@ -281,6 +281,24 @@ export class AfiliadoController {
       }
     }
   }
+
+  @Get('/getAllReferenciasPersonales/:n_identificacion')
+  async getAllReferenciasPersonales(@Param("n_identificacion") n_identificacion: string) {
+    try {
+      const resultado =
+        await this.afiliadoService.getAllReferenciasPersonales(n_identificacion);
+      return resultado;
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw error;
+      } else {
+        throw new NotFoundException(
+          `No se pudo procesar la solicitud`,
+        );
+      }
+    }
+  }
+
   @Get('/getAllOtrasFuentesIngres/:n_identificacion')
   async getAllOtrasFuentesIngres(@Param("n_identificacion") n_identificacion: string) {
     try {

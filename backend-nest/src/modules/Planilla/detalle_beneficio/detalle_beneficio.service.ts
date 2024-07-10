@@ -275,41 +275,41 @@ export class DetalleBeneficioService {
 
   async getBeneficiosDefinitiva(idPersona: string, idPlanilla: string): Promise<any> {
     const query = `
-        SELECT
-        ben."NOMBRE_BENEFICIO",
-        detP."ID_PERSONA",
-        detP."ID_CAUSANTE",
-        detBA."ID_BENEFICIO",
-        detBs."ID_BENEFICIO_PLANILLA",
-        detBs."ESTADO",
-        detBA."METODO_PAGO",
-        detBs."ID_PLANILLA",
-        detBs."MONTO_A_PAGAR" AS "MontoAPagar",
-        detBA."NUM_RENTAS_APLICADAS",
-        detBA."PERIODO_INICIO",
-        detBA."PERIODO_FINALIZACION"
-    FROM
-        "NET_DETALLE_PAGO_BENEFICIO" detBs
-    INNER JOIN
-        net_detalle_persona detP ON 
-        detBs."ID_PERSONA" = detP."ID_PERSONA" AND
-        detBs."ID_CAUSANTE" = detP."ID_CAUSANTE"
-    INNER JOIN
-        net_persona afil ON detP."ID_PERSONA" = afil."ID_PERSONA"
-    INNER JOIN
-        NET_DETALLE_BENEFICIO_AFILIADO detBA ON 
-        detP."ID_PERSONA" = detBA."ID_PERSONA" AND
-        detP."ID_CAUSANTE" = detBA."ID_CAUSANTE" AND
-        detP."ID_DETALLE_PERSONA" = detBA."ID_DETALLE_PERSONA"
-    INNER JOIN 
-        "NET_BENEFICIO" ben ON 
-        detBA."ID_BENEFICIO" = ben."ID_BENEFICIO"
-    INNER JOIN
-        "NET_PLANILLA" pla ON detBs."ID_PLANILLA" = pla."ID_PLANILLA"
-    WHERE
-        detBs."ESTADO" = 'PAGADA' AND
-        afil."ID_PERSONA" = ${idPersona} AND 
-        pla."ID_PLANILLA" = '${idPlanilla}'
+        SELECT 
+            ben."NOMBRE_BENEFICIO",
+            detP."ID_PERSONA",
+            detP."ID_CAUSANTE",
+            detBA."ID_BENEFICIO",
+            detBs."ESTADO",
+            detBA."METODO_PAGO",
+            detBs."ID_PLANILLA",
+            detBs."MONTO_A_PAGAR" AS "MontoAPagar",
+            detBA."NUM_RENTAS_APLICADAS",
+            detBA."PERIODO_INICIO",
+            detBA."PERIODO_FINALIZACION"
+        FROM 
+            "NET_DETALLE_PAGO_BENEFICIO" detBs
+        JOIN 
+            "NET_DETALLE_BENEFICIO_AFILIADO" detBA
+        ON 
+            detBs."ID_DETALLE_PERSONA" = detBA."ID_DETALLE_PERSONA" 
+            AND detBs."ID_PERSONA" = detBA."ID_PERSONA"
+            AND detBs."ID_CAUSANTE" = detBA."ID_CAUSANTE"
+            AND detBs."ID_BENEFICIO" = detBA."ID_BENEFICIO"
+        JOIN 
+            "NET_BENEFICIO" ben
+        ON 
+            detBA."ID_BENEFICIO" = ben."ID_BENEFICIO"
+        JOIN 
+            "NET_DETALLE_PERSONA" detP
+        ON 
+            detBA."ID_PERSONA" = detP."ID_PERSONA"
+            AND detBA."ID_DETALLE_PERSONA" = detP."ID_DETALLE_PERSONA"
+            AND detBA."ID_CAUSANTE" = detP."ID_CAUSANTE"
+        WHERE
+                detBs."ESTADO" = 'PAGADA' AND
+                detBA."ID_PERSONA" = ${idPersona} AND 
+                detBs."ID_PLANILLA" = ${idPlanilla}
     `;
     try {
       // Asegúrate de pasar los parámetros como un array en el orden en que aparecen en la consulta

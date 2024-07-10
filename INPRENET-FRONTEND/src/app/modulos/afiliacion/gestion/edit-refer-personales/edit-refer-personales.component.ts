@@ -156,7 +156,7 @@ export class EditReferPersonalesComponent implements OnInit, OnChanges, OnDestro
 
   cargar() {
     if (this.ejecF) {
-      this.ejecF(this.filas).then(() => {});
+      this.ejecF(this.filas).then(() => { });
     }
   }
 

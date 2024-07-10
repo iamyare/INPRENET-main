@@ -6,25 +6,33 @@ import { MAT_DIALOG_DATA } from '@angular/material/dialog';
   templateUrl: './dynamic-dialog.component.html',
   styleUrls: ['./dynamic-dialog.component.scss']
 })
-export class DynamicDialogComponent implements OnInit{
+export class DynamicDialogComponent implements OnInit {
 
-  displayedColumns: string[] = []; // Dejar esto vacío inicialmente
-  dialogTitle: string = ''; // Título del diálogo
   @Input() titulo = "";
   @Input() subtitulo = "";
+  dialogTitle: string = ''; // Título del diálogo
 
-  constructor(@Inject(MAT_DIALOG_DATA) public data: { logs: any[], type: string }) {
-  }
+  displayedColumnsB: string[] = []; // Dejar esto vacío inicialmente
+  displayedColumnsD: string[] = []; // Dejar esto vacío inicialmente
+
+  constructor(@Inject(MAT_DIALOG_DATA) public data: { logs: any[] }) { }
 
   ngOnInit() {
-  if (this.data.type === 'deduccion') {
-    this.displayedColumns = ['NOMBRE_DEDUCCION', 'MontoAplicado']; // Ajustar según los nombres reales de tus propiedades
-    this.dialogTitle = 'Detalle de Deducciones';
-  } else if (this.data.type === 'beneficio') {
-    this.displayedColumns = ['NOMBRE_BENEFICIO', 'MontoAPagar'];
-    this.dialogTitle = 'Detalle de Beneficios';
+    console.log(this.data);
+
+    for (let i = 0; i < this.data.logs.length; i++) {
+      const element = this.data.logs[i];
+      console.log(element);
+
+      if (element.type == 'beneficios') {
+        this.displayedColumnsB = ['NOMBRE_BENEFICIO', 'MontoAPagar'];
+      }
+      if (element.type == 'deducciones') {
+        this.displayedColumnsD = ['NOMBRE_DEDUCCION', 'MontoAplicado'];
+      }
+    }
+
   }
-}
 
   isArray(obj: any): boolean {
     return Array.isArray(obj);

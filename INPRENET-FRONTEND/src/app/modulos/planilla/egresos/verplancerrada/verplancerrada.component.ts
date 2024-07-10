@@ -141,7 +141,7 @@ export class VerplancerradaComponent {
 
   cargar() {
     if (this.ejecF) {
-      this.ejecF(this.dataPlan).then(() => {});
+      this.ejecF(this.dataPlan).then(() => { });
     }
   }
 
@@ -200,23 +200,44 @@ export class VerplancerradaComponent {
 
   manejarAccionUno(row: any) {
     let logs: any[] = [];
-    logs.push({ message: `DNI:${row.dni}`, detail: row });
-    logs.push({ message: `Nombre Completo:${row.NOMBRE_COMPLETO}`, detail: row });
-    const openDialog = () => this.dialog.open(DynamicDialogComponent, {
-      width: '50%',
-      data: { logs: logs, type: 'beneficio' }
-    });
-
-    openDialog();
 
     this.planillaService.getBeneficiosDefinitiva(this.idPlanilla, row.id_afiliado).subscribe({
       next: (response) => {
-        logs.push({ message: 'Datos De Beneficios:', detail: response });
+
+
+        this.planillaService.getDeduccionesDefinitiva(this.idPlanilla, row.id_afiliado).subscribe({
+          next: (response1) => {
+            logs.push({ message: `DNI:${row.dni}`, detail: row });
+            logs.push({ message: `Nombre Completo:${row.NOMBRE_COMPLETO}`, detail: row });
+            logs.push({ message: 'Datos De Beneficios:', detail: response, type: 'beneficios' });
+            console.log(logs);
+            logs.push({ message: 'Datos De Deducciones:', detail: response1, type: 'deducciones' });
+
+            const openDialog = () => this.dialog.open(DynamicDialogComponent, {
+              width: '50%',
+              data: { logs: logs }
+            });
+
+
+            openDialog();
+          },
+
+          error: (error) => {
+            /* logs.push({ message: 'Error al obtener las deducciones inconsistentes:', detail: error }); */
+
+          }
+        });
       },
+
       error: (error) => {
-        logs.push({ message: 'Error al obtener los beneficios inconsistentes:', detail: error });
+        /* logs.push({ message: 'Error al obtener los beneficios inconsistentes:', detail: error }); */
       }
     });
+
+
+
+
+
   }
 
   openLogDialog(logs: any[]) {
@@ -230,18 +251,34 @@ export class VerplancerradaComponent {
     const idPlanilla = this.idPlanilla;
     const dni = row.dni;
 
-    const beneficios = [{
-      ID_BENEFICIO: 1,
-      NOMBRE_BENEFICIO: "Pensión por Jubilación",
-      "Total Monto Beneficio": row["Total Beneficio"]
-    }];
-    const deducciones = [{
-      ID_DEDUCCION: 1,
-      NOMBRE_DEDUCCION: "Préstamo",
-      "Total Monto Aplicado": row["Total Deducciones"],
-    }];
+    // Llama al servicio para obtener los totales de beneficios y deducciones
 
-    this.construirPDF(row, beneficios, deducciones);
+    /*  const beneficios = [{
+       ID_BENEFICIO: 1,
+       NOMBRE_BENEFICIO: "Pensión por Jubilación",
+       "Total Monto Beneficio": row["Total Beneficio"]
+     }]
+     const deducciones = [{
+       ID_DEDUCCION: 1,
+       NOMBRE_DEDUCCION: "Préstamo",
+       "Total Monto Aplicado": row["Total Deducciones"],
+     }] */
+
+    //this.construirPDF(row, beneficios, deducciones);
+
+    this.afiliadoService.generarVoucher(idPlanilla, dni).subscribe({
+      next: (resultados) => {
+        // Aquí manejas la respuesta
+        const { beneficios, deducciones } = resultados;
+
+        // Construye el documento PDF usando los datos obtenidos
+        this.construirPDF(row, beneficios, deducciones);
+      },
+      error: (error) => {
+        console.error('Error al obtener los totales:', error);
+        this.toastr.error('Error al obtener los datos para el voucher.');
+      }
+    });
   }
 
   construirPDF(row: any, beneficios: any[], deducciones: any[]) {
@@ -488,7 +525,7 @@ export class VerplancerradaComponent {
       },
       layout: 'lightHorizontalLines'
     };
-}
+  }
 
 
 

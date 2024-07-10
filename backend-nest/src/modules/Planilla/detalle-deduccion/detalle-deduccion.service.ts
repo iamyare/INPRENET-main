@@ -187,6 +187,36 @@ export class DetalleDeduccionService {
     }
   }
 
+  /*           
+SELECT 
+            afil."ID_PERSONA",
+            dedd."ID_DEDUCCION",
+            ded."NOMBRE_DEDUCCION"
+        FROM
+            "NET_DETALLE_PAGO_BENEFICIO" detBs
+        FULL OUTER JOIN "NET_DETALLE_DEDUCCION" dedd ON detBs.ID_BENEFICIO_PLANILLA = dedd."ID_DETALLE_PAGO_BENEFICIO"
+        INNER JOIN
+            "NET_DEDUCCION" ded ON ded."ID_DEDUCCION" = dedd."ID_DEDUCCION"
+        INNER JOIN "NET_DETALLE_BENEFICIO_AFILIADO" detBA ON
+            detBs."ID_PERSONA" = detBA."ID_PERSONA" AND
+            detBs."ID_CAUSANTE" = detBA."ID_CAUSANTE" AND
+            detBs."ID_DETALLE_PERSONA" = detBA."ID_DETALLE_PERSONA" AND
+            detBs."ID_BENEFICIO" = detBA."ID_BENEFICIO"
+        LEFT JOIN
+            "NET_DETALLE_PERSONA" detP ON
+            detBs."ID_PERSONA" = detP."ID_PERSONA" AND
+            detBs."ID_CAUSANTE" = detP."ID_CAUSANTE" AND
+            detBs."ID_DETALLE_PERSONA" = detP."ID_DETALLE_PERSONA"
+        LEFT JOIN
+            "NET_PERSONA" afil ON
+            afil."ID_PERSONA" = detP."ID_PERSONA"
+        LEFT JOIN
+            "NET_PLANILLA" pla ON detBs."ID_PLANILLA" = pla."ID_PLANILLA"
+        WHERE
+            detBs."ESTADO" = 'PAGADA' AND
+            pla."CODIGO_PLANILLA" = 'ORD-JUB-PEN-01-2024' AND
+            detBs."ID_BENEFICIO" = 2;    */
+
   async getRangoDetalleDeducciones(idPersona: string, fechaInicio: string, fechaFin: string): Promise<any> {
     const query = `
       SELECT

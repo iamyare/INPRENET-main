@@ -11,7 +11,7 @@
       Ver Planilla Definitiva
     </button>
     <button (click)="descargarExcel(datosFormateados.value.codigo_planilla)" color="primary"
-            [disabled]="!datosFormateados?.value?.codigo_planilla" mat-raised-button style="
+      [disabled]="!datosFormateados?.value?.codigo_planilla" mat-raised-button style="
         margin: 2% 0;
         color: #ffffff;
         border-radius: 5px;
@@ -25,8 +25,8 @@
         border-radius: 5px;
         padding: 10px 20px;
       ">
-  Generar PDF de Deducciones
-</button>
+      Generar PDF de Deducciones
+    </button>
   </div>
 </div>
 
@@ -62,13 +62,25 @@
   </h4>
 
   <div style="padding: 1% 1% 1% 1%">
+
     <app-dynamic-table [verOpcEditar]="false" [columns]="myColumnsDed" [data]="datosTabl"
-      (ejecutarFuncionAsincronaEvent)="ejecutarFuncionAsincronaDesdeOtroComponente($event)"
-      [nombreEncabezadoUno]="'Detalle Ingresos'" [mostrarBotonUno]="true" [etiquetaBotonUno]="'Detalle Ingresos'"
-      (accionBotonUno)="manejarAccionUno($event)" [nombreEncabezadoDos]="'Detalle Deducciones'" [mostrarBotonDos]="true"
-      [etiquetaBotonDos]="'Detalle Deducciones'" (accionBotonDos)="manejarAccionDos($event)"
-      [nombreEncabezadoTres]="'Voucher'" [mostrarBotonTres]="true" [etiquetaBotonTres]="'Generar Voucher'"
-      (accionBotonTres)="manejarAccionTres($event)">
+      (ejecutarFuncionAsincronaEvent)="
+          ejecutarFuncionAsincronaDesdeOtroComponente($event)
+        " [nombreEncabezadoUno]="'Detalle Ingresos'" [mostrarBotonUno]="true" [etiquetaBotonUno]="'Ver Detalle'"
+      (accionBotonUno)="manejarAccionUno($event)" [nombreEncabezadoTres]="'Voucher'" [mostrarBotonTres]="true"
+      [etiquetaBotonTres]="'Generar Voucher'" (accionBotonTres)="manejarAccionTres($event)">
     </app-dynamic-table>
+
+    <!-- <app-dynamic-table [verOpcEditar]="false" [columns]="myColumnsDed" [data]="datosTabl"
+          (ejecutarFuncionAsincronaEvent)="
+              ejecutarFuncionAsincronaDesdeOtroComponente($event)
+            " [nombreEncabezadoUno]="'Detalle Ingresos'" [mostrarBotonUno]="true" [etiquetaBotonUno]="'Detalle Ingresos'"
+          (accionBotonUno)="manejarAccionUno($event)" [nombreEncabezadoDos]="'Detalle Deducciones'" [mostrarBotonDos]="true"
+          [etiquetaBotonDos]="'Detalle Deducciones'" (accionBotonDos)="manejarAccionDos($event)"
+          [nombreEncabezadoTres]="'Voucher'" [mostrarBotonTres]="true" [etiquetaBotonTres]="'Generar Voucher'"
+          (accionBotonTres)="manejarAccionTres($event)">
+        </app-dynamic-table> 
+    -->
+
   </div>
 </div>

@@ -1,7 +1,8 @@
-import { Check, Column, Entity, JoinColumn, ManyToOne, PrimaryColumn, PrimaryGeneratedColumn } from "typeorm";
+import { Check, Column, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryColumn, PrimaryGeneratedColumn } from "typeorm";
 import { Net_Tipo_Persona } from "./net_tipo_persona.entity";
 import { net_estado_afiliacion } from "./net_estado_afiliacion.entity";
 import { net_persona } from "./net_persona.entity";
+import { Net_Detalle_Beneficio_Afiliado } from "src/modules/Planilla/detalle_beneficio/entities/net_detalle_beneficio_afiliado.entity";
 
 @Entity({ name: 'NET_DETALLE_PERSONA' })
 @Check(`ELIMINADO IN ('SI', 'NO')`)
@@ -45,6 +46,9 @@ export class net_detalle_persona {
     @ManyToOne(() => net_estado_afiliacion, estadoAfiliacion => estadoAfiliacion.persona)
     @JoinColumn({ name: 'ID_ESTADO_AFILIACION', foreignKeyConstraintName: 'FK_ID_ESTADO_AFILIAC_DET_PER' })
     estadoAfiliacion: net_estado_afiliacion;
+
+    @OneToMany(() => Net_Detalle_Beneficio_Afiliado, detalleBenAfil => detalleBenAfil.persona)
+    detalleBeneficio: Net_Detalle_Beneficio_Afiliado[];
 
     @Column({ type: 'int', nullable: true, name: 'ID_ESTADO_AFILIACION' })
     ID_ESTADO_AFILIACION: number;

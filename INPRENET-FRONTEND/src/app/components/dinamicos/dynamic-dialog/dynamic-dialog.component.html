@@ -12,7 +12,63 @@
     <h3 style="font-size: 16px">{{ log.message }}</h3>
 
     <div *ngIf="isArray(log.detail)">
-      <table *ngIf="log.detail.length > 0" mat-table [dataSource]="log.detail">
+      <table *ngIf="log.detail.length > 0 && log.type == 'beneficios'" mat-table [dataSource]="log.detail">
+        <ng-container matColumnDef="id_beneficio_planilla" *ngIf="displayedColumnsB.includes('id_beneficio_planilla')">
+          <th mat-header-cell *matHeaderCellDef>ID Beneficio</th>
+          <td mat-cell *matCellDef="let element">
+            {{ element.id_beneficio_planilla }}
+          </td>
+        </ng-container>
+
+        <!-- Nombre Beneficio Column -->
+        <ng-container matColumnDef="NOMBRE_BENEFICIO" *ngIf="displayedColumnsB.includes('NOMBRE_BENEFICIO')">
+          <th mat-header-cell *matHeaderCellDef>Nombre Beneficio</th>
+          <td mat-cell *matCellDef="let element">
+            {{ element.NOMBRE_BENEFICIO }}
+          </td>
+        </ng-container>
+
+        <!-- Periodo Inicio y Finalización Columns -->
+        <ng-container matColumnDef="periodoInicio" *ngIf="displayedColumnsB.includes('periodoInicio')">
+          <th mat-header-cell *matHeaderCellDef>Periodo Inicio</th>
+          <td mat-cell *matCellDef="let element">
+            {{ element.periodoInicio }}
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="periodoFinalizacion" *ngIf="displayedColumnsB.includes('periodoFinalizacion')">
+          <th mat-header-cell *matHeaderCellDef>Periodo Finalización</th>
+          <td mat-cell *matCellDef="let element">
+            {{ element.periodoFinalizacion }}
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="MontoAPagar" *ngIf="displayedColumnsB.includes('MontoAPagar')">
+          <th mat-header-cell *matHeaderCellDef>Monto</th>
+          <td mat-cell *matCellDef="let element" style="text-align: end">
+            {{ element.MontoAPagar | currency : "L" : "symbol" : "1.2-2" }}
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="estado" *ngIf="displayedColumnsB.includes('estado')">
+          <th mat-header-cell *matHeaderCellDef>Estado</th>
+          <td mat-cell *matCellDef="let element">{{ element.estado }}</td>
+        </ng-container>
+
+        <!-- Ver Deducciones Column -->
+        <ng-container matColumnDef="verDeducciones" *ngIf="displayedColumnsB.includes('verDeducciones')">
+          <th mat-header-cell *matHeaderCellDef>Ver Deducciones</th>
+          <td mat-cell *matCellDef="let element">
+            <button mat-button (click)="getDeduccionesByBeneficio(element)">Ver Deducciones</button>
+          </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="displayedColumnsB"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumnsB"></tr>
+      </table>
+
+
+      <table *ngIf="log.detail.length > 0 && log.type == 'deducciones'" mat-table [dataSource]="log.detail">
         <!-- ID Column -->
         <ng-container matColumnDef="id_ded_deduccion" *ngIf="displayedColumnsD.includes('id_ded_deduccion')">
           <th mat-header-cell *matHeaderCellDef>ID Deducción</th>
@@ -53,55 +109,6 @@
         <tr mat-header-row *matHeaderRowDef="displayedColumnsD"></tr>
         <tr mat-row *matRowDef="let row; columns: displayedColumnsD"></tr>
       </table>
-
-      <table *ngIf="log.detail.length > 0" mat-table [dataSource]="log.detail">
-        <ng-container matColumnDef="id_beneficio_planilla" *ngIf="displayedColumnsB.includes('id_beneficio_planilla')">
-          <th mat-header-cell *matHeaderCellDef>ID Beneficio</th>
-          <td mat-cell *matCellDef="let element">
-            {{ element.id_beneficio_planilla }}
-          </td>
-        </ng-container>
-
-
-        <!-- Nombre Beneficio Column -->
-        <ng-container matColumnDef="NOMBRE_BENEFICIO" *ngIf="displayedColumnsB.includes('NOMBRE_BENEFICIO')">
-          <th mat-header-cell *matHeaderCellDef>Nombre Beneficio</th>
-          <td mat-cell *matCellDef="let element">
-            {{ element.NOMBRE_BENEFICIO }}
-          </td>
-        </ng-container>
-
-        <!-- Periodo Inicio y Finalización Columns -->
-        <ng-container matColumnDef="periodoInicio" *ngIf="displayedColumnsB.includes('periodoInicio')">
-          <th mat-header-cell *matHeaderCellDef>Periodo Inicio</th>
-          <td mat-cell *matCellDef="let element">
-            {{ element.periodoInicio }}
-          </td>
-        </ng-container>
-
-        <ng-container matColumnDef="periodoFinalizacion" *ngIf="displayedColumnsB.includes('periodoFinalizacion')">
-          <th mat-header-cell *matHeaderCellDef>Periodo Finalización</th>
-          <td mat-cell *matCellDef="let element">
-            {{ element.periodoFinalizacion }}
-          </td>
-        </ng-container>
-
-        <ng-container matColumnDef="MontoAPagar" *ngIf="displayedColumnsB.includes('MontoAPagar')">
-          <th mat-header-cell *matHeaderCellDef>Monto</th>
-          <td mat-cell *matCellDef="let element" style="text-align: end">
-            {{ element.MontoAPagar | currency : "L" : "symbol" : "1.2-2" }}
-          </td>
-        </ng-container>
-
-        <ng-container matColumnDef="estado" *ngIf="displayedColumnsB.includes('estado')">
-          <th mat-header-cell *matHeaderCellDef>Estado</th>
-          <td mat-cell *matCellDef="let element">{{ element.estado }}</td>
-        </ng-container>
-
-        <tr mat-header-row *matHeaderRowDef="displayedColumnsB"></tr>
-        <tr mat-row *matRowDef="let row; columns: displayedColumnsB"></tr>
-      </table>
-
     </div>
   </div>
 </mat-dialog-content>

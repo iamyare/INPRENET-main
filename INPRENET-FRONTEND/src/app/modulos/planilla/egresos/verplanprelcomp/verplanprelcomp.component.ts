@@ -332,44 +332,6 @@ export class VerplanprelcompComponent implements OnInit {
     });
   }
 
-  mostrarTotales() {
-    const beneficios = [{
-      nombre: "Pensión por vejez",
-      total: "50000.00"
-    }]
-    const deducciones = [{
-      nombre: "Préstamo",
-      total: "16000.00"
-    }]
-
-    const data = {
-      beneficios,
-      deducciones
-    }
-
-    this.planillaService.getTotalesPorDedYBen(this.idPlanilla).subscribe({
-      next: (res) => {
-        const data = {
-          beneficios: res.beneficios.map((beneficio: any) => ({
-            nombre: beneficio.NOMBRE_BENEFICIO,
-            total: beneficio.TOTAL_MONTO_BENEFICIO
-          })),
-          deducciones: res.deducciones.map((deduccion: any) => ({
-            nombre: deduccion.NOMBRE_DEDUCCION,
-            total: deduccion.TOTAL_MONTO_APLICADO
-          }))
-        }
-        this.dialog.open(TotalesporbydDialogComponent, {
-          width: '1000px',
-          data
-        });
-      },
-      error: (error) => {
-        console.error('Error al obtener los totales', error);
-        this.toastr.error('Error al obtener los totales');
-      }
-    });
-  }
 
   limpiarFormulario(): void {
     if (this.datosFormateados) {

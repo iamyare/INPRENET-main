@@ -9,7 +9,7 @@ import { ToastrService } from 'ngx-toastr';
 })
 export class DeduccionesService {
 
-  constructor(private toastr: ToastrService ,private http: HttpClient) { }
+  constructor(private toastr: ToastrService, private http: HttpClient) { }
 
   crearDesdeExcel(data: any): Observable<any> {
     return this.http.post(`${environment.API_URL}/api/detalle-deduccion/crearDeExcel`, data);
@@ -36,128 +36,142 @@ export class DeduccionesService {
     );
   }
 
+
+  getDeduccionesByPersonaAndBenef(idPersona: number, idBeneficio: number): Observable<any> {
+    let params = new HttpParams()
+      .set('idPersona', idPersona)
+      .set('idBeneficio', idBeneficio);
+
+    return this.http.get<any>(`${environment.API_URL}/api/detalle-deduccion/getDeduccionesByPersonaAndBenef`, { params }).pipe(
+      tap(() => {
+        this.toastr.success('Detalle de Deducciones obtenido con éxito');
+      }),
+      catchError(this.handleError)
+    );
+  }
+
   buscarDeduccionesPorDni(dni: string): Observable<any> {
     return this.http.get(`${environment.API_URL}/api/detalle-deduccion/por-dni/${dni}`).pipe(
       catchError(this.handleError)
     );
   }
 
-  newTipoDeduccion(TipoDeduccion:any): Observable<any | void>{
+  newTipoDeduccion(TipoDeduccion: any): Observable<any | void> {
     var url = `${environment.API_URL}/api/deduccion`;
     return this.http.post<any>(
       url,
       TipoDeduccion,
-      ).pipe(
-        map((res:any) => {
-          return res;
-        })
-        )
-      }
-
-      newDeduccionTipoPlanilla(TipoDeduccion:any): Observable<any | void>{
-        var url = `${environment.API_URL}/api/deduccion/dedTipoPLanilla`;
-        return this.http.post<any>(
-          url,
-          TipoDeduccion,
-          ).pipe(
-            map((res:any) => {
-              return res;
-            })
-            )
-          }
-
-      ingresarDeduccionPlanilla(detalles: { idDedDeduccion: string; codigoPlanilla: string; estadoAplicacion: string }[]): Observable<any> {
-        const url = `${environment.API_URL}/api/detalle-deduccion/actualizar-deduccion-planilla`; // Asegúrate de usar la URL correcta
-        return this.http.patch(url, detalles).pipe(
-          tap(() => {
-            this.toastr.success('Deducciones ingresadas correctamente');
-          }),
-          catchError(this.handleError)
-        );
-      }
-
-
-
-      obtenerDetallesDeduccionComplePorAfiliado(idAfiliado: string): Observable<any> {
-        const params = new HttpParams().set('idAfiliado', idAfiliado);
-        return this.http.get<any>(`${environment.API_URL}/api/detalle-deduccion/detallesDeducc-complementaria-afiliado`, { params }).pipe(
-          catchError(this.handleError)
-        );
-      }
-
-      getDetalleDeduccionesPorRango(idAfiliado: string, fechaInicio: string, fechaFin: string): Observable<any> {
-        let params = new HttpParams()
-          .set('idAfiliado', idAfiliado)
-          .set('fechaInicio', fechaInicio)
-          .set('fechaFin', fechaFin);
-
-        return this.http.get<any>(`${environment.API_URL}/api/detalle-deduccion/rango-deducciones`, { params }).pipe(
-          catchError(this.handleError)
-        );
-      }
-
-      findInconsistentDeduccionesByAfiliado(idAfiliado: string): Observable<any> {
-        const url = `${environment.API_URL}/api/detalle-deduccion/inconsistencias/${idAfiliado}`;
-
-        return this.http.get<any>(url).pipe(
-          catchError(this.handleError)
-        );
-      }
-
-  getDeducciones(): Observable<any>{
-    var url= `${environment.API_URL}/api/deduccion`;
-
-    return this.http.get(url,
-      ).pipe(
-        map((res:any) => {
-          return res;
-        }),
-        );
+    ).pipe(
+      map((res: any) => {
+        return res;
+      })
+    )
   }
 
-  getDeduccionesByEmpresa(nombre_institucion:string): Observable<any>{
-    var url= `${environment.API_URL}/api/deduccion/byNameInst/${nombre_institucion}`;
+  newDeduccionTipoPlanilla(TipoDeduccion: any): Observable<any | void> {
+    var url = `${environment.API_URL}/api/deduccion/dedTipoPLanilla`;
+    return this.http.post<any>(
+      url,
+      TipoDeduccion,
+    ).pipe(
+      map((res: any) => {
+        return res;
+      })
+    )
+  }
+
+  ingresarDeduccionPlanilla(detalles: { idDedDeduccion: string; codigoPlanilla: string; estadoAplicacion: string }[]): Observable<any> {
+    const url = `${environment.API_URL}/api/detalle-deduccion/actualizar-deduccion-planilla`; // Asegúrate de usar la URL correcta
+    return this.http.patch(url, detalles).pipe(
+      tap(() => {
+        this.toastr.success('Deducciones ingresadas correctamente');
+      }),
+      catchError(this.handleError)
+    );
+  }
+
+
+
+  obtenerDetallesDeduccionComplePorAfiliado(idAfiliado: string): Observable<any> {
+    const params = new HttpParams().set('idAfiliado', idAfiliado);
+    return this.http.get<any>(`${environment.API_URL}/api/detalle-deduccion/detallesDeducc-complementaria-afiliado`, { params }).pipe(
+      catchError(this.handleError)
+    );
+  }
+
+  getDetalleDeduccionesPorRango(idAfiliado: string, fechaInicio: string, fechaFin: string): Observable<any> {
+    let params = new HttpParams()
+      .set('idAfiliado', idAfiliado)
+      .set('fechaInicio', fechaInicio)
+      .set('fechaFin', fechaFin);
+
+    return this.http.get<any>(`${environment.API_URL}/api/detalle-deduccion/rango-deducciones`, { params }).pipe(
+      catchError(this.handleError)
+    );
+  }
+
+  findInconsistentDeduccionesByAfiliado(idAfiliado: string): Observable<any> {
+    const url = `${environment.API_URL}/api/detalle-deduccion/inconsistencias/${idAfiliado}`;
+
+    return this.http.get<any>(url).pipe(
+      catchError(this.handleError)
+    );
+  }
+
+  getDeducciones(): Observable<any> {
+    var url = `${environment.API_URL}/api/deduccion`;
 
     return this.http.get(url,
-      ).pipe(
-        map((res:any) => {
-          return res;
-        }),
-        );
+    ).pipe(
+      map((res: any) => {
+        return res;
+      }),
+    );
+  }
+
+  getDeduccionesByEmpresa(nombre_institucion: string): Observable<any> {
+    var url = `${environment.API_URL}/api/deduccion/byNameInst/${nombre_institucion}`;
+
+    return this.http.get(url,
+    ).pipe(
+      map((res: any) => {
+        return res;
+      }),
+    );
 
   }
 
-  getDetalleDeduccion(): Observable<any>{
-    var url= `${environment.API_URL}/api/deduccion`;
+  getDetalleDeduccion(): Observable<any> {
+    var url = `${environment.API_URL}/api/deduccion`;
 
     return this.http.get(url,
-      ).pipe(
-        map((res:any) => {
-          return res;
-        }),
-        );
-      }
+    ).pipe(
+      map((res: any) => {
+        return res;
+      }),
+    );
+  }
 
-      getDetallesCompletos(): Observable<any> {
-        const url = `${environment.API_URL}/api/detalle-deduccion/detalles-completos`;
-        return this.http.get<any>(url);
-      }
+  getDetallesCompletos(): Observable<any> {
+    const url = `${environment.API_URL}/api/detalle-deduccion/detalles-completos`;
+    return this.http.get<any>(url);
+  }
 
-      createDetalleDeduccion(detalleDeduccion: any): Observable<any> {
-        const url = `${environment.API_URL}/api/detalle-deduccion`;
-        return this.http.post<any>(url, detalleDeduccion);
-      }
+  createDetalleDeduccion(detalleDeduccion: any): Observable<any> {
+    const url = `${environment.API_URL}/api/detalle-deduccion`;
+    return this.http.post<any>(url, detalleDeduccion);
+  }
 
-      updateDeduccion(id: string, deduccionData: any): Observable<any> {
-        return this.http.patch(`${environment.API_URL}/api/deduccion/${id}`, deduccionData);
-      }
+  updateDeduccion(id: string, deduccionData: any): Observable<any> {
+    return this.http.patch(`${environment.API_URL}/api/deduccion/${id}`, deduccionData);
+  }
 
-      editDetalleDeduccion(id: string, updateData: any): Observable<any> {
-        const url = `${environment.API_URL}/api/detalle-deduccion/${id}/edit`; // Asegúrate de que esta sea la ruta correcta
-        return this.http.patch(url, updateData).pipe(
-          catchError(this.handleError)
-        );
-      }
+  editDetalleDeduccion(id: string, updateData: any): Observable<any> {
+    const url = `${environment.API_URL}/api/detalle-deduccion/${id}/edit`; // Asegúrate de que esta sea la ruta correcta
+    return this.http.patch(url, updateData).pipe(
+      catchError(this.handleError)
+    );
+  }
 
   private handleError(error: HttpErrorResponse) {
     // Aquí podrías manejar mejor el error, por ejemplo, mostrando un mensaje al usuario.

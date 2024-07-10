@@ -1,5 +1,6 @@
 import { Component, Inject, Input, OnInit } from '@angular/core';
 import { MAT_DIALOG_DATA } from '@angular/material/dialog';
+import { DeduccionesService } from 'src/app/services/deducciones.service';
 
 @Component({
   selector: 'app-dynamic-dialog',
@@ -15,23 +16,30 @@ export class DynamicDialogComponent implements OnInit {
   displayedColumnsB: string[] = []; // Dejar esto vacío inicialmente
   displayedColumnsD: string[] = []; // Dejar esto vacío inicialmente
 
-  constructor(@Inject(MAT_DIALOG_DATA) public data: { logs: any[] }) { }
+  constructor(@Inject(MAT_DIALOG_DATA) public data: { logs: any[] }, private deduccionSVC: DeduccionesService) { }
 
   ngOnInit() {
-    console.log(this.data);
-
     for (let i = 0; i < this.data.logs.length; i++) {
       const element = this.data.logs[i];
-      console.log(element);
-
-      if (element.type == 'beneficios') {
-        this.displayedColumnsB = ['NOMBRE_BENEFICIO', 'MontoAPagar'];
-      }
-      if (element.type == 'deducciones') {
-        this.displayedColumnsD = ['NOMBRE_DEDUCCION', 'MontoAplicado'];
+      if (element.type === 'beneficios') {
+        this.displayedColumnsB = ['NOMBRE_BENEFICIO', 'MontoAPagar', 'verDeducciones'];
       }
     }
+  }
 
+  getDeduccionesByBeneficio(element: any) {
+    // Limpiar cualquier deducción previa antes de agregar nuevas deducciones
+    this.data.logs = this.data.logs.filter(log => log.type !== 'deducciones');
+
+    this.deduccionSVC.getDeduccionesByPersonaAndBenef(element.ID_PERSONA, element.ID_BENEFICIO).subscribe({
+      next: (response1) => {
+        if (response1) {
+          const data = response1;
+          this.data.logs.push({ message: 'Datos De Deducciones:', detail: data, type: 'deducciones' });
+          this.displayedColumnsD = ['NOMBRE_DEDUCCION', 'MontoAplicado'];
+        }
+      },
+    });
   }
 
   isArray(obj: any): boolean {

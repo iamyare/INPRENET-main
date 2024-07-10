@@ -98,6 +98,60 @@ export class VerplancerradaComponent {
     this.datosFormateados = event;
   }
 
+  calcularTotales = async (cod_planilla: string) => {
+    try {
+      if (!cod_planilla) {
+        this.toastr.error('Debe proporcionar un código de planilla válido');
+        return;
+      }
+
+      this.planillaService.getPersPlanillaDefin(cod_planilla).subscribe(
+        {
+          next: (response) => {
+            let totalBeneficios = 0;
+            let totalDeducciones = 0;
+
+            this.datosTabl = response.map((item: any) => {
+              totalBeneficios += item["Total Beneficio"] || 0;
+              totalDeducciones += item["Total Deducciones"] || 0;
+
+              return {
+                id_afiliado: item.ID_PERSONA,
+                dni: item.DNI,
+                NOMBRE_COMPLETO: item.NOMBRE_COMPLETO,
+                "Total Beneficio": item["Total Beneficio"],
+                "Total Deducciones": item["Total Deducciones"],
+                "Total": item["Total Beneficio"] - item["Total Deducciones"],
+                tipo_afiliado: item.tipo_afiliado,
+                BENEFICIOSIDS: item.BENEFICIOSIDS,
+                beneficiosNombres: item.beneficiosNombres,
+                fecha_cierre: item.fecha_cierre,
+                correo_1: item.correo_1
+              };
+            });
+
+            this.detallePlanilla.totalBeneficios = totalBeneficios;
+            this.detallePlanilla.totalDeducciones = totalDeducciones;
+            this.detallePlanilla.totalNeto = totalBeneficios - totalDeducciones;
+
+            this.verDat = true;
+          },
+          error: (error) => {
+            console.error("Error al obtener datos de Tipo Planilla", error);
+            this.toastr.error('Error al obtener datos de la planilla');
+          }
+        }
+      );
+    } catch (error) {
+      console.error("Error al calcular totales", error);
+      this.toastr.error('Error al calcular totales');
+    }
+  };
+
+
+
+
+
   getPlanilla = async () => {
     try {
       this.planillaService.getPlanillaDefin(this.datosFormateados.value.codigo_planilla).subscribe(
@@ -106,6 +160,7 @@ export class VerplancerradaComponent {
             if (response) {
               this.detallePlanilla = response;
               this.getFilas(response.codigo_planilla).then(() => this.cargar());
+              this.calcularTotales(this.datosFormateados.value.codigo_planilla)
               this.idPlanilla = response.id_planilla;
               this.verDat = true;
             } else {
@@ -148,7 +203,6 @@ export class VerplancerradaComponent {
   getFilas = async (cod_planilla: string) => {
     try {
       this.dataPlan = [];
-
       this.data = await this.planillaService.getPersPlanillaDefin(cod_planilla).toPromise();
       this.dataPlan = this.data.map((item: any) => {
         return {

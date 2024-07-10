@@ -1,120 +1,292 @@
-import { Component } from '@angular/core';
-import { FormBuilder, FormControl, Validators } from '@angular/forms';
-import { MatTableDataSource } from '@angular/material/table';
-
-interface Column {
-  col: string;
-  header: string;
-  isEditable?: boolean;
-  moneda?: boolean;
-}
-
-interface RowData {
-  [key: string]: any;
-  isEditing?: boolean;
-}
+import { Component, EventEmitter, Input, OnDestroy, OnInit, Output, ViewChild } from '@angular/core';
+import { FormControl } from '@angular/forms';
+import { MatPaginator } from '@angular/material/paginator';
+import { Observable, Subject, debounceTime, distinctUntilChanged, of, switchMap, takeUntil } from 'rxjs';
+import { SelectionserviceService } from 'src/app/services/selectionservice.service';
+import { TableColumn } from 'src/app/shared/Interfaces/table-column';
 
 @Component({
   selector: 'app-dynamic-table-prueba',
   templateUrl: './dynamic-table-prueba.component.html',
   styleUrls: ['./dynamic-table-prueba.component.scss']
 })
-export class DynamicTablePruebaComponent {
-  dataSource: MatTableDataSource<RowData>;
-  displayedColumns: string[] = ['select', 'identidad', 'nombre', 'acciones', 'botonUno', 'botonDos', 'botonTres', 'eliminar', 'editar'];
-  columns: Column[] = [
-    { col: 'identidad', header: 'Identidad' },
-    { col: 'nombre', header: 'Nombre', isEditable: true },
-    { col: 'monto', header: 'Monto', isEditable: true, moneda: true }
-  ];
+export class DynamicTablePruebaComponent implements OnInit, OnDestroy {
+  @Input() verOpcEditar: boolean = false;
+  @Input() verBotEditar: boolean = false;
+  @Output() getElemSeleccionados = new EventEmitter<any>();
 
-  verOpcEditar = true;
-  verBotEditar = true;
-  mostrarBotonUno = true;
-  nombreEncabezadoUno = 'Acción Uno';
-  etiquetaBotonUno = 'Acción 1';
-  mostrarBotonDos = true;
-  nombreEncabezadoDos = 'Acción Dos';
-  etiquetaBotonDos = 'Acción 2';
-  mostrarBotonTres = true;
-  nombreEncabezadoTres = 'Acción Tres';
-  etiquetaBotonTres = 'Acción 3';
-  mostrarBotonEliminar = true;
-  mostrarBotonEditar = true;
+  @Input() getData?: any;
+  @Input() data?: any;
+  filas: any = [];
 
-  searchResults: RowData[] = [
-    { identidad: '12345', nombre: 'Juan', monto: 1000 },
-    { identidad: '67890', nombre: 'Ana', monto: 2000 },
-    { identidad: '54321', nombre: 'Luis', monto: 1500 }
-  ];
+  @Output() ejecutarFuncionAsincronaEvent: EventEmitter<(param: any) => Promise<void>> = new EventEmitter<(param: any) => Promise<void>>();
 
-  constructor(private fb: FormBuilder) {
-    this.dataSource = new MatTableDataSource(this.searchResults);
+  @Input() columns: TableColumn[] = [];
+  @Input() editarFunc: any;
+
+  @Input() nombreEncabezadoUno: string = '';
+  @Input() mostrarBotonUno: boolean = false;
+  @Input() etiquetaBotonUno: string = '';
+  @Output() accionBotonUno: EventEmitter<any> = new EventEmitter<any>();
+
+  @Input() nombreEncabezadoDos: string = '';
+  @Input() mostrarBotonDos: boolean = false;
+  @Input() etiquetaBotonDos: string = '';
+  @Output() accionBotonDos: EventEmitter<any> = new EventEmitter<any>();
+
+  @Input() nombreEncabezadoTres: string = '';
+  @Input() mostrarBotonTres: boolean = false;
+  @Input() etiquetaBotonTres: string = '';
+  @Output() accionBotonTres: EventEmitter<any> = new EventEmitter<any>();
+
+  @Input() mostrarBotonEliminar: boolean = false;
+  @Input() mostrarBotonEditar: boolean = false;
+  @Output() eliminar: EventEmitter<any> = new EventEmitter<any>();
+  @Output() editar: EventEmitter<any> = new EventEmitter<any>();
+
+  @Input() titulo = "";
+  @Input() subtitulo = "";
+
+  @Input() enableRowClick: boolean = false;
+  @Input() highlightOnHover: boolean = true; // Nueva entrada para habilitar/deshabilitar el sombreado al pasar el ratón
+
+  @Output() rowClicked: EventEmitter<any> = new EventEmitter<any>();
+
+  @ViewChild(MatPaginator) paginator: MatPaginator | undefined;
+
+  private destroy$: Subject<void> = new Subject<void>();
+
+  formsearch = new FormControl('');
+  searchResults: any = [];
+
+  itemsPerPage = 20;
+  desde = 0;
+  hasta: number = this.itemsPerPage;
+  currentPage = 0;
+
+  editingRow: any | null = null;
+  editFormControls: { [rowKey: string]: { [colKey: string]: FormControl } } = {};
+  editableRows: any[] = [];
+
+  columnDefs: string[] = [];
+
+  selectedItem: any; // Agregamos selectedItem
+
+  constructor(private selectionService: SelectionserviceService) {
+    this.formsearch.valueChanges
+      .pipe(
+        debounceTime(300),
+        distinctUntilChanged(),
+        switchMap(query => this.filtrarUsuarios(query)),
+        takeUntil(this.destroy$)
+      )
+      .subscribe(results => {
+        this.searchResults = results;
+        this.currentPage = 0;
+        this.paginator?.firstPage();
+      });
   }
 
-  ngOnInit() {
-    this.searchResults.forEach(row => this.initRowControls(row));
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
-  initRowControls(row: RowData) {
-    this.columns.forEach(col => {
-      if (col.isEditable) {
-        row[col.col + '_control'] = new FormControl(row[col.col], Validators.required);
+  public async ejecutarFuncionAsincrona(data: any) {
+    if (data) {
+      this.filas = data;
+      this.filas?.map((objeto: any) => ({ ...objeto, isSelected: false }));
+    } else {
+      this.filas = await this.getData();
+    }
+    this.filtrarUsuarios().subscribe();
+  }
+
+  ngOnInit(): void {
+    this.ejecutarFuncionAsincronaEvent.emit(this.ejecutarFuncionAsincrona.bind(this));
+    this.columnDefs = [
+      ...this.columns.map(col => col.col),
+      ...(this.verOpcEditar ? ['opcionesEditar'] : []),
+      ...(this.verBotEditar ? ['acciones'] : []),
+      ...(this.mostrarBotonUno ? ['botonUno'] : []),
+      ...(this.mostrarBotonDos ? ['botonDos'] : []),
+      ...(this.mostrarBotonTres ? ['botonTres'] : []),
+      ...(this.mostrarBotonEliminar ? ['eliminar'] : []),
+      ...(this.mostrarBotonEditar ? ['editar'] : [])
+    ];
+  }
+
+  filtrarUsuarios(query?: any): Observable<any[]> {
+    let filteredResults: any = [];
+    const temp: any = [...this.filas];
+
+    const startIndex = this.currentPage * this.itemsPerPage;
+    if (!query) {
+      this.hasta = startIndex + this.itemsPerPage;
+      this.searchResults = temp.slice(startIndex, this.hasta);
+      return of(this.searchResults.slice(startIndex, this.hasta));
+    } else {
+      temp.filter((value: { [x: string]: { toString: () => string; }; }) => {
+        for (const key in value) {
+          if (value[key]) {
+            if (value[key].toString().toLowerCase().includes(query.toLowerCase())) {
+              filteredResults.push(value);
+              break;
+            }
+          }
+        }
+      });
+      return of(filteredResults.slice(startIndex, this.currentPage + this.itemsPerPage));
+    }
+  }
+
+  updateSearchResults(): void {
+    const query = this.formsearch.value?.trim();
+    if (query) {
+      this.filtrarUsuarios(query).subscribe(results => {
+        this.searchResults = results;
+      });
+    } else {
+      this.ejecutarFuncionAsincrona(this.filas);
+    }
+  }
+
+  onPageChange(event: any): void {
+    this.currentPage = event.pageIndex;
+    this.updateSearchResults();
+  }
+
+  getCellValue(row: any, column: TableColumn): string {
+    if (column.customRender) {
+      return column.customRender(row);
+    }
+    return row[column.col];
+  }
+
+  getFormControl(row: any, column: TableColumn): FormControl {
+    if (!this.editFormControls[row]) {
+      this.editFormControls[row] = {};
+    }
+
+    if (!this.editFormControls[row][column.col]) {
+      const control = new FormControl(row[column.col]);
+      this.editFormControls[row][column.col] = control;
+    }
+
+    return this.editFormControls[row][column.col];
+  }
+
+  toggleEditMode(row: any): void {
+    if (this.editingRow === row) {
+      this.editingRow = null;
+    } else {
+      this.editingRow = row;
+    }
+  }
+
+  ejecutarAccionBoton(column: TableColumn, row: any) {
+    if (column.buttonAction) {
+      column.buttonAction(row);
+    }
+  }
+
+  startEditing(row: any): void {
+    this.columns.forEach(column => {
+      if (column.isEditable) {
+        const validationRules = column.validationRules || [];
+        row[`${column.col}_control`] = new FormControl(row[column.col], validationRules);
       }
     });
-  }
-
-  onSelectionChange(row: RowData) {
-    // Manejo de la selección
-  }
-
-  startEditing(row: RowData) {
     row.isEditing = true;
   }
 
-  stopEditing(row: RowData) {
+  stopEditing(row: any): void {
     row.isEditing = false;
   }
 
-  saveChanges(row: RowData) {
-    this.columns.forEach(col => {
-      if (col.isEditable) {
-        row[col.col] = row[col.col + '_control'].value;
+  saveChanges(row: any): void {
+    let isValid = true;
+    this.columns.forEach(column => {
+      if (column.isEditable && row[`${column.col}_control`]) {
+        isValid = isValid && row[`${column.col}_control`].valid;
       }
     });
-    row.isEditing = false;
+
+    if (isValid) {
+      this.columns.forEach(column => {
+        if (column.isEditable) {
+          row[column.col] = row[`${column.col}_control`].value;
+        }
+      });
+      row.isEditing = false;
+      this.editarFunc(row);
+    } else {
+      console.log('Datos no válidos');
+    }
   }
 
-  getCellValue(row: RowData, col: Column) {
-    return row[col.col];
+  getControlErrors(row: any, column: TableColumn): string[] {
+    const control = row[`${column.col}_control`];
+    if (!control || !control.errors) return [];
+
+    return Object.keys(control.errors).map(errKey => {
+      let message = '';
+      switch (errKey) {
+        case 'required':
+          message = `El campo ${column.header} es obligatorio.`;
+          break;
+        case 'minlength':
+          message = `El campo ${column.header} debe tener al menos ${control.errors['minlength'].requiredLength} caracteres.`;
+          break;
+        case 'maxlength':
+          message = `El campo ${column.header} no puede exceder ${control.errors['maxlength'].requiredLength} caracteres.`;
+          break;
+        default:
+          message = `Error en el campo ${column.header}.`;
+      }
+      return message;
+    });
   }
 
-  getControlErrors(row: RowData, col: Column) {
-    const control = row[col.col + '_control'];
-    return control.errors ? Object.keys(control.errors).map(key => control.errors[key]) : [];
+  onSelectionChange(user: any) {
+    if (user.isSelected) {
+      this.selectionService.addSelectedItem(user);
+    } else {
+      this.selectionService.removeSelectedItem(user);
+    }
+    this.obtenerFilasSeleccionadas();
   }
 
-  ejecutarAccionUno(row: RowData) {
-    // Lógica para acción uno
-    console.log('Acción uno ejecutada', row);
+  obtenerFilasSeleccionadas() {
+    const filasSeleccionadas = this.selectionService.getSelectedItems();
+    this.getElemSeleccionados.emit(filasSeleccionadas);
+    console.log(filasSeleccionadas);
   }
 
-  ejecutarAccionDos(row: RowData) {
-    // Lógica para acción dos
-    console.log('Acción dos ejecutada', row);
+  ejecutarAccionUno(row: any) {
+    this.accionBotonUno.emit(row);
   }
 
-  ejecutarAccionTres(row: RowData) {
-    // Lógica para acción tres
-    console.log('Acción tres ejecutada', row);
+  ejecutarAccionDos(row: any) {
+    this.accionBotonDos.emit(row);
   }
 
-  eliminarFila(row: RowData) {
-    this.dataSource.data = this.dataSource.data.filter((item: RowData) => item !== row);
+  ejecutarAccionTres(row: any) {
+    this.accionBotonTres.emit(row);
   }
 
-  editarFila(row: RowData) {
-    this.startEditing(row);
+  eliminarFila(row: any) {
+    this.eliminar.emit(row);
   }
 
+  editarFila(row: any) {
+    this.editar.emit(row);
+  }
+
+  onRowClick(row: any): void {
+    if (this.enableRowClick) {
+      this.selectedItem = row;
+      this.rowClicked.emit(row);
+    }
+  }
 }

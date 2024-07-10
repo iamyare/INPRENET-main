@@ -37,6 +37,13 @@ export const MENU_CONFIG: Section[] = [
           { title: 'Ver Planillas', route: '/planilla/ver-planillas', icon: 'receipt' },
         ],
       },
+      {
+        title: 'INGRESOS',
+        icon: 'attach_money',
+        children: [
+          { title: 'Privados', route: '/planilla/planilla-colegios-privados', icon: 'receipt' },
+        ],
+      },
     ],
   },
   {

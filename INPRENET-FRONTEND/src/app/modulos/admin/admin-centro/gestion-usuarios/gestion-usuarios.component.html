@@ -9,7 +9,7 @@
   <button mat-raised-button color="primary" (click)="irANuevaPagina()">Agregar Nuevo Usuario</button>
 </div>
 <div class="content-container">
-  <app-dynamic-table
+  <app-dynamic-table-prueba
     titulo="Gestión de Usuarios"
     subtitulo="Completa la información correspondiente"
     [columns]="columns"
@@ -19,5 +19,5 @@
     (rowClicked)="manejarRowClick($event)"
     [enableRowClick]="true"
   >
-  </app-dynamic-table>
+  </app-dynamic-table-prueba>
 </div>

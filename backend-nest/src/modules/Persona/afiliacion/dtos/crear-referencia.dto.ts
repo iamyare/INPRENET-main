@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsString, IsNumber, ValidateNested } from 'class-validator';
+import { IsNotEmpty, IsString, IsNumber, ValidateNested, IsOptional } from 'class-validator';
 import { CrearPersonaDto } from './crear-persona.dto';
 import { Type } from 'class-transformer';
 
@@ -11,7 +11,8 @@ export class CrearReferenciaDto {
 
   @IsNotEmpty()
   @IsString()
-  dependiente_economico: string;
+  @IsOptional()
+  dependiente_economico?: string;
 
   @IsNotEmpty()
   @IsString()

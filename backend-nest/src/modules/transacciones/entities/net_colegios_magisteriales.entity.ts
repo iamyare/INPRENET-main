@@ -4,7 +4,7 @@ import { Net_Persona_Colegios } from "./net_persona_colegios.entity";
 @Entity({ name: "NET_COLEGIOS_MAGISTERIALES" })
 export class Net_Colegios_Magisteriales {
     @PrimaryGeneratedColumn({ name: "ID_COLEGIO", type: "int", primaryKeyConstraintName: 'PK_ID_COLEGIO_MAG' })
-    idColegio: number;
+    id_colegio: number;
 
     @Column({ name: "DESCRIPCION", type: "varchar", length: 50 })
     descripcion: string;

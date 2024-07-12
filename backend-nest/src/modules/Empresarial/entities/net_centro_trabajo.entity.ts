@@ -85,7 +85,7 @@ export class Net_Centro_Trabajo {
 
     @Column('nvarchar2', { length: 50, nullable: false, name: 'TIPO' })
     tipo: string;
-
+    
     @ManyToOne(() => Net_Municipio, municipio => municipio.centrosTrabajo)
     @JoinColumn({ name: 'ID_MUNICIPIO', foreignKeyConstraintName: 'FK_ID_MUNICIPIO_CENT_TRAB' })
     municipio: Net_Municipio;

@@ -25,6 +25,12 @@ export class Net_perf_pers_cent_trab {
     @Column('varchar2', { length: 20, nullable: false, default: 'ACTIVO', name: 'ESTADO' })
     estado: string;
 
+    @Column('nvarchar2', { length: 50, nullable: true, name: 'TIPO_JORNADA' })
+    tipo_jornada: string;
+    
+    @Column('nvarchar2', { length: 50, nullable: true, name: 'JORNADA' })
+    jornada: string;
+
     @ManyToOne(() => net_persona, persona => persona.perfPersCentTrabs)
     @JoinColumn({ name: 'ID_PERSONA', foreignKeyConstraintName: "FK_ID_PERS_PERAFCET" })
     persona: net_persona;

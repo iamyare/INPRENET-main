@@ -7,7 +7,6 @@ import { Net_Detalle_planilla_ingreso } from "../../Planilla/Ingresos/detalle-pl
 import { Net_perf_pers_cent_trab } from "./net_perf_pers_cent_trab.entity";
 import { Net_Ref_Per_Pers } from "./net_ref-per-persona.entity";
 import { NET_PROFESIONES } from "src/modules/transacciones/entities/net_profesiones.entity";
-import { Net_Discapacidad } from "./net_discapacidad.entity";
 import { Net_Peps } from "src/modules/Empresarial/entities/net_peps.entity";
 import { Net_Tipo_Identificacion } from '../../tipo_identificacion/entities/net_tipo_identificacion.entity';
 import { net_detalle_persona } from "./net_detalle_persona.entity";
@@ -72,11 +71,14 @@ export class net_persona {
     @Column('varchar2', { length: 1, nullable: true, name: 'SEXO' })
     sexo: string;
 
-    @Column('varchar2', { length: 2, nullable: false, name: 'FALLECIDO', default: "NO" })
+    @Column('varchar2', { length: 2, nullable: true, name: 'FALLECIDO', default: "NO" })
     fallecido: string;
 
     @Column('number', { nullable: true, name: 'CANTIDAD_HIJOS' })
     cantidad_hijos: number;
+
+    @Column('number', { nullable: true, name: 'CANTIDAD_DEPENDIENTES' })
+    cantidad_dependientes: number;
 
     @Column('varchar2', { length: 40, nullable: true, name: 'PRIMER_NOMBRE_CENSO' })
     primer_nombre_censo: string;
@@ -142,6 +144,10 @@ export class net_persona {
     @ManyToOne(() => Net_Municipio, municipio => municipio.persona, { cascade: true })
     @JoinColumn({ name: 'ID_MUNICIPIO_DEFUNCION', foreignKeyConstraintName: "FK_ID_MUNIC_DEFUNC_NET_PERSONA" })
     municipio_defuncion: Net_Municipio;
+
+    @ManyToOne(() => Net_Municipio, municipio => municipio.persona, { cascade: true })
+    @JoinColumn({ name: 'ID_MUNICIPIO_NACIMIENTO', foreignKeyConstraintName: "FK_ID_MUNIC_NACIMIENTO_NET_PERSONA" })
+    municipio_nacimiento: Net_Municipio;
 
     @OneToMany(() => Net_Ref_Per_Pers, referenciasPersonalPersona => referenciasPersonalPersona.persona)
     referenciasPersonalPersona: Net_Ref_Per_Pers[];

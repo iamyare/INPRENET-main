@@ -28,4 +28,12 @@ export class CrearPersonaCentroTrabajoDto {
   @IsNotEmpty()
   @IsString()
   estado: string;
+
+  @IsOptional()
+  @IsString()
+  tipo_jornada?: string;
+
+  @IsOptional()
+  @IsString()
+  jornada?: string;
 }

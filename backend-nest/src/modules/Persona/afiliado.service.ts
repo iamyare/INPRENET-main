@@ -269,9 +269,9 @@ export class AfiliadoService {
 
       const asignaciones = [];
       for (const colegioData of colegiosMagisterialesData) {
-        const colegio = await this.netColegiosMagisterialesRepository.findOne({ where: { idColegio: colegioData.idColegio } });
+        const colegio = await this.netColegiosMagisterialesRepository.findOne({ where: { id_colegio: colegioData.id_colegio } });
         if (!colegio) {
-          throw new Error(`Colegio magisterial con ID ${colegioData.idColegio} no encontrado`);
+          throw new Error(`Colegio magisterial con ID ${colegioData.id_colegio} no encontrado`);
         }
 
         const nuevoPersonaColegio = new Net_Persona_Colegios();

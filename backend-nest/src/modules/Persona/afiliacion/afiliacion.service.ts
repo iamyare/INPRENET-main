@@ -216,7 +216,7 @@ export class AfiliacionService {
     const resultados: Net_Persona_Colegios[] = [];
 
     for (const crearPersonaColegiosDto of crearPersonaColegiosDtos) {
-      const colegio = await this.colegiosMagisterialesRepository.findOne({ where: { idColegio: crearPersonaColegiosDto.id_colegio } });
+      const colegio = await this.colegiosMagisterialesRepository.findOne({ where: { id_colegio: crearPersonaColegiosDto.id_colegio } });
       if (!colegio) {
         throw new NotFoundException(`Colegio magisterial con ID ${crearPersonaColegiosDto.id_colegio} no encontrado`);
       }

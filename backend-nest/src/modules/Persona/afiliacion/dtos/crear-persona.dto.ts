@@ -60,32 +60,17 @@ export class CrearPersonaDto {
   sexo: string;
 
   @IsNotEmpty()
+  @IsOptional()
   @IsEnum(['SI', 'NO'])
-  fallecido: string;
+  fallecido?: string;
 
   @IsOptional()
   @IsNumber()
   cantidad_hijos?: number;
 
   @IsOptional()
-  @IsString()
-  primer_nombre_censo?: string;
-
-  @IsOptional()
-  @IsString()
-  segundo_nombre_censo?: string;
-
-  @IsOptional()
-  @IsString()
-  nombre_apellido_escalafon?: string;
-
-  @IsOptional()
-  @IsString()
-  primer_apellido_censo?: string;
-
-  @IsOptional()
-  @IsString()
-  segundo_apellido_censo?: string;
+  @IsNumber()
+  cantidad_dependientes?: number;
 
   @IsOptional()
   @IsString()
@@ -142,9 +127,23 @@ export class CrearPersonaDto {
   @IsNumber()
   id_municipio_residencia: number;
 
+  @IsNotEmpty()
+  @IsNumber()
+  id_municipio_nacimiento: number;
+
   @IsOptional()
   @IsNumber()
   id_municipio_defuncion?: number;
+
+  @IsNotEmpty()
+  @IsNumber()
+  @IsOptional()
+  id_departamento_nacimiento?: number;
+
+  @IsNotEmpty()
+  @IsNumber()
+  @IsOptional()
+  id_departamento_residencia?: number;
 
   @IsOptional()
   @IsNumber()
@@ -159,4 +158,8 @@ export class CrearPersonaDto {
   @ValidateNested({ each: true })
   @Type(() => CrearDiscapacidadDto)
   discapacidades?: CrearDiscapacidadDto[];
+
+
+  @IsOptional()
+  cargoPublico?
 }

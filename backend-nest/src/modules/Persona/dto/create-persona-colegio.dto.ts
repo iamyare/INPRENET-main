@@ -3,5 +3,5 @@ import { IsNumber, ValidateNested } from 'class-validator';
 
 export class NetPersonaColegiosDTO {
     @IsNumber()
-    idColegio: number;
+    id_colegio: number;
 }

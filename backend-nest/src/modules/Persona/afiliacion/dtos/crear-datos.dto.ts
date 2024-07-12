@@ -1,4 +1,4 @@
-import { IsArray, IsObject, ValidateNested } from 'class-validator';
+import { IsArray, IsObject, ValidateNested, IsOptional } from 'class-validator';
 import { Type } from 'class-transformer';
 import { CrearPersonaDto } from './crear-persona.dto';
 import { CrearDetallePersonaDto } from './crear-net_detalle_persona.dto';
@@ -38,9 +38,10 @@ export class CrearDatosDto {
   centrosTrabajo: CrearPersonaCentroTrabajoDto[];
   
   @IsArray()
+  @IsOptional()
   @ValidateNested({ each: true })
   @Type(() => CrearOtraFuenteIngresoDto)
-  otrasFuentesIngreso: CrearOtraFuenteIngresoDto[];
+  otrasFuentesIngreso?: CrearOtraFuenteIngresoDto[];
 
   @IsArray()
   @ValidateNested({ each: true })
@@ -53,12 +54,14 @@ export class CrearDatosDto {
   beneficiarios: CrearBeneficiarioDto[];
 
   @IsArray()
+  @IsOptional()
   @ValidateNested({ each: true })
   @Type(() => CrearDiscapacidadDto)
-  discapacidades: CrearDiscapacidadDto[];
+  discapacidades?: CrearDiscapacidadDto[];
 
   @IsArray()
+  @IsOptional()
   @ValidateNested({ each: true })
   @Type(() => CrearFamiliaDto)
-  familiares: CrearFamiliaDto[];
+  familiares?: CrearFamiliaDto[];
 }

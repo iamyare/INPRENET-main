@@ -1557,8 +1557,8 @@ WHERE
       .addGroupBy('deduccion.nombre_deduccion')
       .getRawMany();
 
-    const deduccionesINPREMA = deducciones.filter(d => [1, 3, 51].includes(d.ID_DEDUCCION));
-    const deduccionesTerceros = deducciones.filter(d => ![1, 3, 51].includes(d.ID_DEDUCCION));
+    const deduccionesINPREMA = deducciones.filter(d => [1, 3, 51, 45].includes(d.ID_DEDUCCION));
+    const deduccionesTerceros = deducciones.filter(d => ![1, 3, 51, 45].includes(d.ID_DEDUCCION));
 
     return {
       deduccionesINPREMA,

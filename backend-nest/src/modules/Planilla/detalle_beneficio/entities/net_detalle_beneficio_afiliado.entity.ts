@@ -48,7 +48,7 @@ export class Net_Detalle_Beneficio_Afiliado {
     beneficio: Net_Beneficio;
 
     @OneToMany(() => Net_Detalle_Pago_Beneficio, detalleBeneficio => detalleBeneficio.detalleBeneficioAfiliado)
-    detalleBeneficio: Net_Detalle_Pago_Beneficio[];
+    detallePagBeneficio: Net_Detalle_Pago_Beneficio[];
 
     @ManyToOne(() => net_detalle_persona, persona => persona.padreIdPersona)
     @JoinColumn({ name: 'ID_PERSONA', referencedColumnName: 'ID_PERSONA', foreignKeyConstraintName: "FK_ID_DET_BEN_DET_PERS" })

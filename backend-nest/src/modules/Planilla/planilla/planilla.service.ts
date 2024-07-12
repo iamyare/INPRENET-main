@@ -1184,33 +1184,50 @@ WHERE
       const beneficios = await this.GetBeneficiosPorPlanilla(idPlanilla);
       const deducciones = await this.GetDeduccionesPorPlanilla(idPlanilla);
       return { beneficios, deducciones };
-      
+
     } catch (error) {
       console.error('Error al obtener los totales por planilla:', error);
       throw new Error('Error al obtener los totales por planilla');
     }
   }
 
-  async generarVoucher(idPlanilla: string, dni: string): Promise<any> {
-    console.log(idPlanilla);
-    console.log(dni);
-
+  async generarVoucher(idPlanilla: number, dni: string): Promise<any> {
     try {
       const beneficios = await this.entityManager.query(
-        `SELECT 
+        `SELECT DISTINCT
           ben."NOMBRE_BENEFICIO",
           detP."ID_PERSONA",
           detP."ID_CAUSANTE",
           detBA."ID_BENEFICIO",
+          detBs."MONTO_A_PAGAR" AS "MontoAPagar",
           detBs."ESTADO",
           detBA."METODO_PAGO",
           detBs."ID_PLANILLA",
-          detBs."MONTO_A_PAGAR" AS "MontoAPagar",
           detBA."NUM_RENTAS_APLICADAS",
-          detBA."PERIODO_INICIO",
-          detBA."PERIODO_FINALIZACION"
+          plan."PERIODO_INICIO",
+          plan."PERIODO_FINALIZACION",
+          detDed."MONTO_APLICADO",
+          detDed."ID_DEDUCCION",
+          ded."NOMBRE_DEDUCCION",
+          banco."NOMBRE_BANCO",
+          persPorBanco."NUM_CUENTA"
+          
           FROM 
               "NET_DETALLE_PAGO_BENEFICIO" detBs
+          JOIN 
+              "NET_PLANILLA" plan
+          ON 
+              plan."ID_PLANILLA" = detBs."ID_PLANILLA"
+          
+          FULL OUTER JOIN 
+              "NET_DETALLE_DEDUCCION" detDed
+          ON 
+              detBs."ID_BENEFICIO_PLANILLA" = detDed."ID_DETALLE_PAGO_BENEFICIO"
+          FULL OUTER JOIN 
+              "NET_DEDUCCION" ded
+          ON 
+              ded."ID_DEDUCCION" = detDed."ID_DEDUCCION"
+          
           JOIN 
               "NET_DETALLE_BENEFICIO_AFILIADO" detBA
           ON 
@@ -1231,42 +1248,30 @@ WHERE
           JOIN 
               "NET_PERSONA" pers 
           ON 
-              pers."ID_PERSONA" = detP."ID_PERSONA" 
+              pers."ID_PERSONA" = detP."ID_PERSONA"
+          
+          
+          LEFT JOIN 
+              "NET_PERSONA_POR_BANCO" persPorBanco 
+          ON 
+              pers."ID_PERSONA" = persPorBanco."ID_PERSONA" 
+          LEFT JOIN 
+              "NET_BANCO" banco 
+          ON 
+              banco."ID_BANCO" = persPorBanco."ID_BANCO"
+          
+          LEFT JOIN "NET_DETALLE_PAGO_BENEFICIO" detPagBen 
+          ON 
+              detPagBen."ID_AF_BANCO" = persPorBanco."ID_AF_BANCO"
+          
           WHERE
                   detBs."ESTADO" = 'PAGADA' AND
-                  detBs."ID_PLANILLA" = :idPlanilla AND 
-                  pers."N_IDENTIFICACION" = :dni `,
-        [idPlanilla, dni]
-      );
-      console.log(beneficios);
-
-      const deducciones = await this.entityManager.query(
-        `SELECT
-            dd."ID_DED_DEDUCCION",
-            ded."NOMBRE_DEDUCCION",
-            dd."ID_PERSONA",
-            dd."ID_DEDUCCION",
-            ded."ID_CENTRO_TRABAJO",
-            dd."MONTO_TOTAL",
-            dd."MONTO_APLICADO" AS "Total Monto Aplicado",
-            dd."ESTADO_APLICACION",
-            dd."ANIO",
-            dd."MES",
-            dd."FECHA_APLICADO",
-            detPagB."ID_PLANILLA"
-          FROM
-            "NET_DETALLE_DEDUCCION" dd
-          INNER JOIN "NET_DEDUCCION" ded ON ded."ID_DEDUCCION" = dd."ID_DEDUCCION"
-          INNER JOIN
-            NET_DETALLE_PAGO_BENEFICIO detPagB ON 
-            DD."ID_DETALLE_PAGO_BENEFICIO" = detPagB."ID_BENEFICIO_PLANILLA"
-          WHERE
-            dd."ESTADO_APLICACION" = 'COBRADA' AND
-            dd."ID_PERSONA" = ${beneficios[0].ID_PERSONA} AND 
-            detPagB."ID_PLANILLA" = ${idPlanilla}`
+                  detBs."ID_PLANILLA" = ${idPlanilla} AND 
+                  pers."N_IDENTIFICACION" = '${dni}' AND
+                  persPorBanco."ESTADO" = 'ACTIVO'`
       );
 
-      return { beneficios, deducciones };
+      return { beneficios };
     } catch (error) {
       console.log(error);
 
@@ -1400,9 +1405,11 @@ WHERE
 
   async ObtenerPlanDefinPersonas(codPlanilla: string, page?: number, limit?: number): Promise<any> {
     let query = `
-            SELECT 
+              SELECT 
             per."N_IDENTIFICACION" AS "DNI",
             per."ID_PERSONA",
+            perPorBan."NUM_CUENTA",
+            banco."NOMBRE_BANCO",
             SUM(detBs."MONTO_A_PAGAR") AS "Total Beneficio",
             TRIM(
                 per."PRIMER_NOMBRE" || ' ' ||
@@ -1438,12 +1445,26 @@ WHERE
             "NET_PERSONA" per
         ON 
             per."ID_PERSONA" = detP."ID_PERSONA"
+        LEFT JOIN 
+            "NET_PERSONA_POR_BANCO" perPorBan
+        ON 
+            per."ID_PERSONA" = perPorBan."ID_PERSONA"
+        LEFT JOIN 
+            "NET_BANCO" banco
+        ON 
+            banco."ID_BANCO" = perPorBan."ID_BANCO"
+        LEFT JOIN "NET_DETALLE_PAGO_BENEFICIO" detPagBen 
+          ON 
+              detPagBen."ID_AF_BANCO" = perPorBan."ID_AF_BANCO"
         WHERE
                 detBs."ESTADO" = 'PAGADA' AND
                 plan."CODIGO_PLANILLA" = '${codPlanilla}'
+                
         GROUP BY 
         per."N_IDENTIFICACION",
-            per."ID_PERSONA",
+        per."ID_PERSONA",
+        perPorBan."NUM_CUENTA",
+        banco."NOMBRE_BANCO",
             TRIM(
                 per."PRIMER_NOMBRE" || ' ' ||
                 COALESCE(per."SEGUNDO_NOMBRE", '') || ' ' ||
@@ -1543,7 +1564,7 @@ WHERE
       deduccionesINPREMA,
       deduccionesTerceros,
     };
-}
+  }
 
 
   async generarExcel(data: any[], response: Response): Promise<void> {
@@ -1557,8 +1578,8 @@ WHERE
       { header: 'NOMBRE_COMPLETO', key: 'NOMBRE_COMPLETO', width: 30 },
       { header: 'Total Beneficio', key: 'Total Beneficio', width: 15 },
       { header: 'Total Deducciones', key: 'Total Deducciones', width: 15 },
-      { header: 'CORREO_1', key: 'CORREO_1', width: 25 },
-      { header: 'FECHA_CIERRE', key: 'FECHA_CIERRE', width: 15 },
+      { header: 'NUMERO DE CUENTA', key: 'NUM_CUENTA', width: 25 },
+      { header: 'NOMBRE BANCO', key: 'NOMBRE_BANCO', width: 15 },
     ];
 
     // Agregar los datos al worksheet
@@ -1568,7 +1589,7 @@ WHERE
 
     // Formatear el archivo como buffer y enviarlo al cliente
     const buffer = await workbook.xlsx.writeBuffer();
-    
+
     response.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
     response.setHeader('Content-Disposition', 'attachment; filename=planilla.xlsx');
     response.send(buffer);

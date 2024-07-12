@@ -14,7 +14,7 @@ export class DynamicFormComponent implements OnInit {
   @Input() subtitulo = "";
 
   @Input() fields: FieldConfig[] = [];
-  @Input() incomingForm: FormGroup | null = null;
+  @Input() incomingForm!: FormGroup;
 
   @Output() newDatBenChange = new EventEmitter<any>()
   @Output() selectChange = new EventEmitter<{ fieldName: string, value: any }>();
@@ -31,8 +31,11 @@ export class DynamicFormComponent implements OnInit {
   }
 
   onDatosBenChange() {
-    const transformedForm = this.transformFormValues(this.incomingForm!);
-    this.newDatBenChange.emit(transformedForm);
+    /*
+      console.log(this.incomingForm);
+      const transformedForm = this.transformFormValues(this.incomingForm!)
+      */
+    this.newDatBenChange.emit(this.form);
   }
 
   onDatosBenChange1(e: any) {

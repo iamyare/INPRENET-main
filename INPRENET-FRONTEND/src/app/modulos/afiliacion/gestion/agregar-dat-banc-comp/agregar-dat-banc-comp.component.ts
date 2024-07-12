@@ -39,8 +39,8 @@ export class AgregarDatBancCompComponent implements OnInit {
     if (datosHistSal && Array.isArray(datosHistSal.value.banco)) {
       datosHistSal.value.banco.forEach((banco: any) => {
         bancoArray.push(this.fb.group({
-          idBanco: [banco.idBanco, Validators.required],
-          numCuenta: [banco.numCuenta, Validators.required]
+          id_banco: [banco.id_banco, Validators.required],
+          num_cuenta: [banco.num_cuenta, Validators.required]
         }));
       });
     } else {

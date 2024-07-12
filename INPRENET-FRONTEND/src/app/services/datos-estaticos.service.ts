@@ -235,10 +235,9 @@ export class DatosEstaticosService {
 
   async getColegiosMagisteriales() {
     const response = await this.colegiosMagSVC.getAllColegiosMagisteriales().toPromise();
-
-    this.colegiosMagisteriales = response.data.map((item: { idColegio: any; descripcion: any; }) => ({
+    this.colegiosMagisteriales = response.data.map((item: { id_colegio: any; descripcion: any; }) => ({
       label: String(item.descripcion),
-      value: item.idColegio,
+      value: item.id_colegio,
     }));
     return this.colegiosMagisteriales;
   }

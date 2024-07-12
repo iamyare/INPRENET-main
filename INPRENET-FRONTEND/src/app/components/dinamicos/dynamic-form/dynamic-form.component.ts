@@ -19,6 +19,8 @@ export class DynamicFormComponent implements OnInit {
   @Output() newDatBenChange = new EventEmitter<any>()
   @Output() selectChange = new EventEmitter<{ fieldName: string, value: any }>();
 
+  selectedOption: string | null = null;
+
   constructor(private fb: FormBuilder) {
     this.form = this.fb.group({});
   }
@@ -31,10 +33,6 @@ export class DynamicFormComponent implements OnInit {
   }
 
   onDatosBenChange() {
-    /*
-      console.log(this.incomingForm);
-      const transformedForm = this.transformFormValues(this.incomingForm!)
-      */
     this.newDatBenChange.emit(this.form);
   }
 
@@ -54,9 +52,12 @@ export class DynamicFormComponent implements OnInit {
         });
         group.addControl(field.name, dateRangeGroup);
       } else if (field.type === 'checkboxGroup') {
-        const checkboxArray = this.fb.array(field.options.map(() => this.fb.control(false)));
+        const checkboxArray = this.fb.array(field.options ? field.options.map(() => this.fb.control(false)) : []);
         group.addControl(field.name, checkboxArray);
       } else if (field.type === 'radio') {
+        const radioGroup = this.fb.control(field.value || '', field.validations);
+        group.addControl(field.name, radioGroup);
+      } else if (field.type === 'conditionalRadio') {
         const radioGroup = this.fb.control(field.value || '', field.validations);
         group.addControl(field.name, radioGroup);
       } else {
@@ -87,11 +88,16 @@ export class DynamicFormComponent implements OnInit {
         };
       } else if (field.type === 'checkboxGroup') {
         const checkboxArray = form.get(field.name) as FormArray;
-        result[field.name] = checkboxArray.controls.map((control: any, index: number) => ({
-          key: field.options[index].value,
-          value: control.value
-        }));
+        result[field.name] = checkboxArray.controls
+          .map((control: any, index: number) => ({
+            id_discapacidad: field.options[index].value,
+            value: control.value
+          }))
+          .filter((item: any) => item.value)
+          .map((item: any) => ({ id_discapacidad: item.id_discapacidad }));
       } else if (field.type === 'radio') {
+        result[field.name] = form.get(field.name)?.value;
+      } else if (field.type === 'conditionalRadio') {
         result[field.name] = form.get(field.name)?.value;
       } else {
         result[field.name] = form.get(field.name)?.value;
@@ -126,10 +132,12 @@ export class DynamicFormComponent implements OnInit {
         };
       } else if (field.type === 'checkboxGroup') {
         const selectedOptions = formValues[field.name]
-          .map((checked: any, i: any) => checked ? field.options[i].value : null)
+          .map((checked: any, i: any) => checked ? field.options ? field.options[i].value : null : null)
           .filter((v: any) => v !== null);
         result[field.name] = selectedOptions;
       } else if (field.type === 'radio') {
+        result[field.name] = formValues[field.name];
+      } else if (field.type === 'conditionalRadio') {
         result[field.name] = formValues[field.name];
       } else {
         result[field.name] = formValues[field.name];
@@ -159,5 +167,28 @@ export class DynamicFormComponent implements OnInit {
 
   onSelectChange(fieldName: string, event: any) {
     this.selectChange.emit({ fieldName, value: event.value });
+    if (fieldName === 'showCheckboxes') {
+      this.selectedOption = event.value;
+      this.updateDependentFields();
+    }
+  }
+
+  updateDependentFields() {
+    const selectedField = this.fields.find(field => field.name === 'showCheckboxes');
+    if (selectedField && selectedField.dependentFields) {
+      const dependentFields = selectedField.dependentFields[this.selectedOption!];
+      if (dependentFields) {
+        dependentFields.forEach(field => {
+          if (!this.form.contains(field.name)) {
+            if (field.type === 'checkboxGroup') {
+              const checkboxArray = this.fb.array(field.options ? field.options.map(() => this.fb.control(false)) : []);
+              this.form.addControl(field.name, checkboxArray);
+            } else {
+              this.form.addControl(field.name, this.fb.control(''));
+            }
+          }
+        });
+      }
+    }
   }
 }

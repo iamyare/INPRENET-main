@@ -27,7 +27,7 @@ export class TotalesporbydDialogComponent implements OnInit {
 
   constructor(
     public dialogRef: MatDialogRef<TotalesporbydDialogComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: { beneficios: any[], deducciones: any[] },
+    @Inject(MAT_DIALOG_DATA) public data: { beneficios: any[], deducciones: any[], codigoPlanilla: string, nombrePlanilla: string, mesPlanilla: string },
     private http: HttpClient
   ) {
     this.dataSourceBeneficios = new MatTableDataSource<any>(this.data.beneficios);
@@ -61,69 +61,63 @@ export class TotalesporbydDialogComponent implements OnInit {
 
   async generarPDF() {
     const base64Image = await this.convertirImagenABase64('../../assets/images/HOJA-MEMBRETADA.jpg');
+
+    // Verificar y calcular los totales
     this.totalBeneficios = this.dataSourceBeneficios.data.reduce((acc, cur) => acc + (cur.total ? parseFloat(cur.total) : 0), 0);
     this.totalDeducciones = this.dataSourceDeducciones.data.reduce((acc, cur) => acc + (cur.total ? parseFloat(cur.total) : 0), 0);
 
+    const netoTotal = this.totalBeneficios - this.totalDeducciones;
+
     const docDefinition: TDocumentDefinitions = {
-      background: function(currentPage, pageSize) {
-        return {
-          image: base64Image,
-          width: pageSize.width,
-          height: pageSize.height,
-          absolutePosition: { x: 0, y: 0 }
-        };
-      },
-      pageMargins: [40, 100, 40, 100], // Adjust margins to fit content correctly
-      content: [
-        { text: 'Reporte de Beneficios', style: 'header' },
-        this.crearTablaPDF(this.dataSourceBeneficios.data, 'Beneficios', 'Total de beneficios'),
-        { text: 'Reporte de Deducciones', style: 'header', pageBreak: 'before' },
-        this.crearTablaPDF(this.dataSourceDeducciones.data, 'Deducciones', 'Total de deducciones'),
+      background: (currentPage, pageSize) => ({
+        image: base64Image,
+        width: pageSize.width,
+        height: pageSize.height,
+        absolutePosition: { x: 0, y: 0 }
+      }),
+      pageMargins: [40, 150, 40, 100],
+      header: () => [
         {
-          table: {
-            widths: ['*', 'auto'],
-            body: [
-              [{ text: 'Valor Neto', style: 'header' }, { text: `L ${Number(this.totalBeneficios - this.totalDeducciones).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",")}`, style: 'totalNeto' }]
-            ]
-          },
-          layout: 'noBorders',
-          margin: [0, 40] // Increase the margin to separate the total net value
+          text: this.data.nombrePlanilla,
+          style: 'header',
+          alignment: 'center',
+          margin: [0, 80, 0, 0]
         },
         {
           columns: [
             {
-              width: '*',
-              text: ''
+              width: '50%',
+              text: [
+                { text: 'Código de Planilla: ', bold: true },
+                `${this.data.codigoPlanilla}\n`,
+                { text: 'Mes de la Planilla: ', bold: true },
+                `${this.data.mesPlanilla}`,
+              ],
+              alignment: 'left'
             },
             {
-              width: 'auto',
-              stack: [
-                {
-                  canvas: [
-                    {
-                      type: 'line',
-                      x1: 0, y1: 0,
-                      x2: 150, y2: 0,
-                      lineWidth: 1.5
-                    }
-                  ]
-                },
-                {
-                  text: 'P Smith\nDirector General',
-                  style: 'signatureName'
-                }
+              width: '50%',
+              text: [
+                { text: 'Neto Total: ', bold: true },
+                `L ${netoTotal.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",")}`
               ],
-              margin: [0, 20] // Reduce margin to position the signature properly
+              alignment: 'right'
             }
           ],
-          margin: [0, 20] // Add margin to avoid overlapping footer
+          margin: [40, 5, 40, 10]
         }
+      ],
+      content: [
+        { text: 'Reporte de Beneficios', style: 'header' },
+        this.crearTablaPDF(this.dataSourceBeneficios.data, 'Beneficios', `Total de beneficios: ${this.totalBeneficios}`, this.totalDeducciones),
+        { text: 'Reporte de Deducciones', style: 'header', pageBreak: 'before' },
+        this.crearTablaPDF(this.dataSourceDeducciones.data, 'Deducciones', `Total de deducciones: ${this.totalDeducciones}`, this.totalDeducciones),
       ],
       styles: {
         header: {
           fontSize: 18,
           bold: true,
-          margin: [0, 10, 0, 10] // Reduce top margin
+          margin: [0, 10, 0, 10]
         },
         tableHeader: {
           bold: true,
@@ -140,11 +134,6 @@ export class TotalesporbydDialogComponent implements OnInit {
           fontSize: 16,
           bold: true,
           alignment: 'right'
-        },
-        signatureName: {
-          alignment: 'center',
-          bold: true,
-          margin: [0, 5] // Adjust margin to position the name text properly
         }
       }
     };
@@ -152,18 +141,16 @@ export class TotalesporbydDialogComponent implements OnInit {
     pdfMake.createPdf(docDefinition).download('Reporte_Beneficios_Deducciones.pdf');
   }
 
-  crearTablaPDF(data: any[], titulo: string, totalTexto: string) {
-    const total = data.reduce((acc, cur) => acc + (cur.total ? parseFloat(cur.total) : 0), 0);
-
+  crearTablaPDF(data: any[], titulo: string, totalTexto: string, total: number) {
     return {
       style: 'tableExample',
       table: {
         headerRows: 1,
         widths: ['*', 'auto'],
         body: [
-          [{ text: 'Nombre', style: 'tableHeader', colSpan: 2  }, { text: 'Total:', style: 'tableHeader' }],
-          ...data.map(el => [el.nombre, {text: "L" + Number(el.total).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ","), alignment: 'right'}]),
-          [{ text: totalTexto + ":", style: 'tableTotal', alignment: 'right', colSpan: 1 }, { text: "L" + Number(total).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ","), style: 'tableTotal' }]
+          [{ text: titulo, style: 'tableHeader', colSpan: 2 }, {}],
+          ...data.map(el => [el.nombre, { text: `L${Number(el.total).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",")}`, alignment: 'right' }]),
+          [{ text: totalTexto, style: 'tableTotal', alignment: 'right', colSpan: 2 }, { text: `L${Number(total).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",")}`, style: 'tableTotal', alignment: 'right' }]
         ]
       },
       layout: 'lightHorizontalLines'

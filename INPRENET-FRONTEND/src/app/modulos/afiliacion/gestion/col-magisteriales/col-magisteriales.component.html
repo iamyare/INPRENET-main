@@ -13,13 +13,13 @@
             <mat-form-field style="flex-direction: column-reverse;" class="example-full-width inputs"
               appearance="outline">
               <mat-label>Colegio Magisterial</mat-label>
-              <mat-select (ngModelChange)="onDatosColMagChange()" matNativeControl formControlName="idColegio">
+              <mat-select (ngModelChange)="onDatosColMagChange()" matNativeControl formControlName="id_colegio">
                 <mat-option *ngFor="let item of colegio_magisterial" [value]="item.value">
                   {{ item.label }}
                 </mat-option>
               </mat-select>
             </mat-form-field>
-            <mat-error *ngFor="let error of getErrors(i, 'idColegio')">
+            <mat-error *ngFor="let error of getErrors(i, 'id_colegio')">
               {{ error }}
             </mat-error>
           </div>

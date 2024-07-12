@@ -73,7 +73,7 @@ export function generateRefPerFormGroup(datos?: any): FormGroup {
       Validators.minLength(2),
       Validators.maxLength(30)
     ]),
-    dependiente: new FormControl(datos?.dependiente, [
+    dependiente_economico: new FormControl(datos?.dependiente_economico, [
       Validators.required
     ]),
     cargoPublico: new FormControl(datos?.cargoPublico, [
@@ -82,7 +82,7 @@ export function generateRefPerFormGroup(datos?: any): FormGroup {
     fecha_nacimiento: new FormControl(datos?.fecha_nacimiento),
     es_afiliado: new FormControl(datos?.es_afiliado || false),
     trabaja: new FormControl(datos?.trabaja || false),
-    tipo: new FormControl(datos?.tipo || false),
+    tipo_referencia: new FormControl(datos?.tipo_referencia || false),
     discapacidades: new FormArray([])
   });
 }
@@ -99,7 +99,7 @@ export class RefPersComponent implements OnInit
   parentesco: any;
   availableParentesco: any[] = [];
   sexo: any[] = [];
-  tipo: any[] = [];
+  tipo_referencia: any[] = [];
   tipo_identificacion: any[] = [];
   tipo_discapacidad: any[] = [];
 
@@ -121,7 +121,7 @@ export class RefPersComponent implements OnInit
     si: false,
     no: false
   };
-  dependiente: boolean = false;
+  dependiente_economico: boolean = false;
   cargoPublico: boolean = false;
 
   onDatosRefPerChange() {
@@ -136,7 +136,7 @@ export class RefPersComponent implements OnInit
       si: value === 'si',
       no: value === 'no'
     };
-    this.dependiente = this.dependienteEstado.si;
+    this.dependiente_economico = this.dependienteEstado.si;
   }
 
   onDatosGeneralesCargoPChange(event: any) {
@@ -168,7 +168,7 @@ export class RefPersComponent implements OnInit
       { label: "MASCULINO", value: "M" },
       { label: "FEMENINO", value: "F" }
     ];
-    this.tipo = [
+    this.tipo_referencia = [
       { label: "REFERENCIA PERSONAL", value: "REFERENCIA PERSONAL" },
       { label: "REFERENCIA FAMILIAR", value: "REFERENCIA FAMILIAR" }
     ];
@@ -219,7 +219,7 @@ export class RefPersComponent implements OnInit
   agregarRefPer(datos?: any): void {
     const ref_RefPers = this.formParent.get('refpers') as FormArray;
     const formGroup = generateRefPerFormGroup(datos);
-    const tipoControl = formGroup.get('tipo') as FormControl;
+    const tipoControl = formGroup.get('tipo_referencia') as FormControl;
 
     // Listen to changes in 'tipo' to control the visibility of 'discapacidades'
     tipoControl.valueChanges.subscribe(value => {

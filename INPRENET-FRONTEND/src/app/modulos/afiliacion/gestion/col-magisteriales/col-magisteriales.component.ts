@@ -5,8 +5,9 @@ import { FormStateService } from 'src/app/services/form-state.service';
 
 export function generateColegMagistFormGroup(datos?: any): FormGroup {
   return new FormGroup({
-    idColegio: new FormControl(datos.idColegio, Validators.required)
+    id_colegio: new FormControl(datos.id_colegio, Validators.required)
   });
+
 }
 
 @Component({

@@ -21,6 +21,7 @@ import { PensionadoComponent } from './verPerfil/pensionado/pensionado.component
 import { PerfilComponent } from './verPerfil/perfil/perfil.component';
 import { VoluntarioComponent } from './verPerfil/voluntario/voluntario.component';
 import { AfilBancoComponent } from './gestion/afil-banco/afil-banco.component';
+import { AfiliacionDocentesComponent } from './gestion/afiliacion-docentes/afiliacion-docentes.component';
 
 const routes: Routes = [
   { path: 'admin-centro-educativo', component: AdminCentroEducativoComponent },
@@ -44,6 +45,7 @@ const routes: Routes = [
   { path: 'perfil', component: PerfilComponent },
   { path: 'voluntario', component: VoluntarioComponent },
   { path: 'nuevo-afiliado', component: AfilBancoComponent },
+  { path: 'nueva-afiliacion', component: AfiliacionDocentesComponent },
   { path: '', redirectTo: 'afiliacion', pathMatch: 'full' }
 ];
 

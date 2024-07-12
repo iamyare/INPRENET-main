@@ -1,36 +1,52 @@
-import { Component, Input } from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { AbstractControl, FormArray, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { DireccionService } from 'src/app/services/direccion.service';
+import { FormStateService } from 'src/app/services/form-state.service';
 import { FieldArrays } from 'src/app/shared/Interfaces/field-arrays';
 
 @Component({
   selector: 'app-otras-fuentes-ingreso',
   templateUrl: './otras-fuentes-ingreso.component.html',
-  styleUrl: './otras-fuentes-ingreso.component.scss'
+  styleUrls: ['./otras-fuentes-ingreso.component.scss']
 })
-export class OtrasFuentesIngresoComponent {
+export class OtrasFuentesIngresoComponent implements OnInit {
   @Input() parentForm!: FormGroup;
+  @Output() onOtrasFuentesIngresoChange = new EventEmitter<FormGroup>();
+
   departamentos: any = [];
   municipios: any = [];
+  private formKey = 'FormOtrasFuentesIngreso';
 
   fields: FieldArrays[] = [
     { name: 'actividad_economica', label: 'Actividad Económica', icon: 'business', layout: { row: 0, col: 4 }, type: 'select', value: '', options: [{ label: "SECRETARIO GENERAL", value: "SECRETARIO GENERAL" }], validations: [] },
-    { name: 'monto', label: 'Monto', layout: { row: 0, col: 4 }, type: 'number', value: '', validations: [] },
+    { name: 'monto_ingreso', label: 'Monto De Ingreso', layout: { row: 0, col: 4 }, type: 'number', value: '', validations: [] },
     { name: 'observacion', label: 'Observación', icon: 'visibility', layout: { row: 0, col: 4 }, type: 'text', value: '', validations: [Validators.required, Validators.maxLength(14), Validators.minLength(14), Validators.pattern('^[0-9]{14}$')] },
-
   ];
 
-  constructor(private fb: FormBuilder, private direccionService: DireccionService) { }
+  constructor(
+    private fb: FormBuilder,
+    private direccionService: DireccionService,
+    private formStateService: FormStateService
+  ) { }
 
   ngOnInit(): void {
-    if (!this.parentForm) {
+    this.initForm();
+    this.loadDepartamentos();
+  }
+
+  private initForm(): void {
+    let existingForm = this.formStateService.getForm(this.formKey);
+    if (existingForm) {
+      this.parentForm = existingForm;
+    } else {
       this.parentForm = this.fb.group({
         sociedadSocios: this.fb.array([])
       });
-    } else if (!this.parentForm.get('sociedadSocios')) {
-      this.parentForm.addControl('sociedadSocios', this.fb.array([]));
     }
-    this.loadDepartamentos();
+
+    this.parentForm.valueChanges.subscribe(() => {
+      this.onOtrasFuentesIngresoChange.emit(this.parentForm);
+    });
   }
 
   get sociedadSocios(): FormArray {
@@ -57,12 +73,10 @@ export class OtrasFuentesIngresoComponent {
 
     const municipioField = this.fields.find(field => field.name === 'municipio');
     if (municipioField && municipios) {
-      console.log(municipios);
       municipioField.options = municipios.map((mun: any) => ({
         value: mun.value,
         label: mun.label
       }));
-
     }
 
     event.formGroup.get('municipio')?.setValue(null);
@@ -71,16 +85,13 @@ export class OtrasFuentesIngresoComponent {
   addSociedadSocio(): void {
     const sociedadSocioGroup = this.fb.group({
       actividad_economica: ['', Validators.required],
-      monto: ['', Validators.required],
+      monto_ingreso: ['', Validators.required],
       observacion: ['', [Validators.required, Validators.maxLength(14), Validators.minLength(14), Validators.pattern('^[0-9]{14}$')]],
-
     });
 
     this.sociedadSocios.push(sociedadSocioGroup);
 
-    sociedadSocioGroup.get('monto')?.valueChanges.subscribe((value: any) => {
-      this.updateFieldVisibility(sociedadSocioGroup, value);
-    });
+    this.onDatosOtrasFuentesIngreso();
   }
 
   updateFieldVisibility(sociedadSocioGroup: FormGroup, pepDeclarationValue: string): void {
@@ -97,9 +108,15 @@ export class OtrasFuentesIngresoComponent {
 
   removeSociedadSocio(index: number): void {
     this.sociedadSocios.removeAt(index);
+    this.onDatosOtrasFuentesIngreso();
   }
 
   asFormGroup(control: AbstractControl): FormGroup {
     return control as FormGroup;
+  }
+
+  onDatosOtrasFuentesIngreso() {
+    this.formStateService.setForm(this.formKey, this.parentForm);
+    this.onOtrasFuentesIngresoChange.emit(this.parentForm);
   }
 }

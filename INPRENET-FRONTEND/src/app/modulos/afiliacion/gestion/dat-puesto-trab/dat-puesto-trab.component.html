@@ -8,29 +8,26 @@
 
       <form [formGroup]="formParent" style="margin: 1%;" (change)="onDatosDatosPuestTrab()">
         <div formArrayName="trabajo">
-          <div *ngFor="let skill of getCtrl('trabajo', formParent).controls; index as formChild; let i = index">
-            <h4 class="card-title">Centro De Trabajo Número: {{i+1}}</h4>
-            <div class="row" [formGroupName]="formChild">
-
+          <div *ngFor="let trabajo of getCtrl('trabajo', formParent).controls; index as i" [formGroupName]="i">
+            <h4 class="card-title">Centro De Trabajo Número: {{ i + 1 }}</h4>
+            <div class="row">
               <div class="col-lg-6 col-md-12">
-                <mat-form-field style="flex-direction: column-reverse;" class="example-full-width inputs"
-                  appearance="outline">
+                <mat-form-field class="example-full-width inputs" appearance="outline">
                   <mat-label>Centro De Trabajo</mat-label>
                   <mat-icon matPrefix>business</mat-icon>
-                  <mat-select (selectionChange)="onDatosDatosPuestTrab()" formControlName="idCentroTrabajo">
+                  <mat-select formControlName="id_centro_trabajo">
                     <mat-option *ngFor="let p of centrosTrabajo" [value]="p.value">
-                      {{p.label}}
+                      {{ p.label }}
                     </mat-option>
                   </mat-select>
                 </mat-form-field>
-                <mat-error *ngFor="let error of getErrors(i, 'idCentroTrabajo')">
+                <mat-error *ngFor="let error of getErrors(i, 'id_centro_trabajo')">
                   {{ error }}
                 </mat-error>
               </div>
 
               <div class="col-lg-6 col-md-12">
-                <mat-form-field style="flex-direction: column-reverse;" class="example-full-width inputs"
-                  appearance="outline">
+                <mat-form-field class="example-full-width inputs" appearance="outline">
                   <mat-label>Sector Económico</mat-label>
                   <mat-icon matPrefix>domain</mat-icon>
                   <input matInput formControlName="sectorEconomico" readonly>
@@ -39,58 +36,51 @@
                   {{ error }}
                 </mat-error>
               </div>
-
             </div>
 
-            <div class="row" [formGroupName]="formChild">
-
+            <div class="row">
               <div class="col-lg-4 col-md-12">
-                <mat-form-field style="flex-direction: column-reverse;" class="example-full-width inputs"
-                  appearance="outline">
+                <mat-form-field class="example-full-width inputs" appearance="outline">
                   <mat-label>Salario</mat-label>
                   <mat-icon matPrefix>attach_money</mat-icon>
-                  <input matInput formControlName="salarioBase">
+                  <input matInput formControlName="salario_base">
                 </mat-form-field>
-                <mat-error *ngFor="let error of getErrors(i, 'salarioBase')">
+                <mat-error *ngFor="let error of getErrors(i, 'salario_base')">
                   {{ error }}
                 </mat-error>
               </div>
 
               <div class="col-lg-4 col-md-12">
-                <mat-form-field style="flex-direction: column-reverse;" class="example-full-width inputs"
-                  appearance="outline">
+                <mat-form-field class="example-full-width inputs" appearance="outline">
                   <mat-label>Fecha de Ingreso</mat-label>
                   <mat-icon matPrefix>calendar_today</mat-icon>
-                  <input matInput formControlName="fechaIngreso" [matDatepicker]="pickerIngreso" placeholder="d/m/aaaa"
+                  <input matInput formControlName="fecha_ingreso" [matDatepicker]="pickerIngreso" placeholder="d/m/aaaa"
                     [max]="minDate">
                   <mat-datepicker-toggle matSuffix [for]="pickerIngreso"></mat-datepicker-toggle>
                   <mat-datepicker #pickerIngreso></mat-datepicker>
                 </mat-form-field>
-                <mat-error *ngFor="let error of getErrors(i, 'fechaIngreso')">
+                <mat-error *ngFor="let error of getErrors(i, 'fecha_ingreso')">
                   {{ error }}
                 </mat-error>
               </div>
 
               <div class="col-lg-4 col-md-12">
-                <mat-form-field style="flex-direction: column-reverse;" class="example-full-width inputs"
-                  appearance="outline">
+                <mat-form-field class="example-full-width inputs" appearance="outline">
                   <mat-label>Fecha de Egreso</mat-label>
-                  <input matInput formControlName="fechaEgreso" [matDatepicker]="pickerEgreso" placeholder="d/m/aaaa"
+                  <input matInput formControlName="fecha_egreso" [matDatepicker]="pickerEgreso" placeholder="d/m/aaaa"
                     [max]="minDate">
                   <mat-datepicker-toggle matSuffix [for]="pickerEgreso"></mat-datepicker-toggle>
                   <mat-datepicker #pickerEgreso></mat-datepicker>
                 </mat-form-field>
-                <mat-error *ngFor="let error of getErrors(i, 'fechaEgreso')">
+                <mat-error *ngFor="let error of getErrors(i, 'fecha_egreso')">
                   {{ error }}
                 </mat-error>
               </div>
-
             </div>
 
-            <div class="row" [formGroupName]="formChild">
+            <div class="row">
               <div class="col-lg-4 col-md-12">
-                <mat-form-field style="flex-direction: column-reverse;" class="example-full-width inputs"
-                  appearance="outline">
+                <mat-form-field class="example-full-width inputs" appearance="outline">
                   <mat-label>Cargo</mat-label>
                   <mat-icon matPrefix>work</mat-icon>
                   <input matInput formControlName="cargo">
@@ -100,22 +90,19 @@
                 </mat-error>
               </div>
 
-              <div class="col-lg-4 col-md-12"
-                *ngIf="getCtrl('trabajo', formParent).controls[i].get('showNumeroAcuerdo').value">
-                <mat-form-field style="flex-direction: column-reverse;" class="example-full-width inputs"
-                  appearance="outline">
+              <div class="col-lg-4 col-md-12" *ngIf="getCtrl('trabajo', formParent).controls[i].get('showNumeroAcuerdo').value">
+                <mat-form-field class="example-full-width inputs" appearance="outline">
                   <mat-label>Número De Acuerdo</mat-label>
                   <mat-icon matPrefix>assignment</mat-icon>
-                  <input matInput formControlName="numeroAcuerdo">
+                  <input matInput formControlName="numero_acuerdo">
                 </mat-form-field>
-                <mat-error *ngFor="let error of getErrors(i, 'numeroAcuerdo')">
+                <mat-error *ngFor="let error of getErrors(i, 'numero_acuerdo')">
                   {{ error }}
                 </mat-error>
               </div>
 
               <div class="col-lg-4 col-md-12">
-                <mat-form-field style="flex-direction: column-reverse;" class="example-full-width inputs"
-                  appearance="outline">
+                <mat-form-field class="example-full-width inputs" appearance="outline">
                   <mat-label>Jornada</mat-label>
                   <mat-icon matPrefix>schedule</mat-icon>
                   <mat-select formControlName="jornada">
@@ -128,8 +115,7 @@
               </div>
 
               <div class="col-lg-4 col-md-12">
-                <mat-form-field style="flex-direction: column-reverse;" class="example-full-width inputs"
-                  appearance="outline">
+                <mat-form-field class="example-full-width inputs" appearance="outline">
                   <mat-label>Tipo de Jornada</mat-label>
                   <mat-icon matPrefix>assignment_turned_in</mat-icon>
                   <mat-select formControlName="tipoJornada">
@@ -141,7 +127,6 @@
                 </mat-error>
               </div>
             </div>
-
           </div>
         </div>
       </form>
@@ -149,20 +134,18 @@
       <div class="row" style="text-align: center; margin: 1%;">
         <div class="col-lg-6 col-md-12">
           <button mat-button color="primary" (click)="agregarTrabajo()">
-            <mat-icon matSuffix>exposure_plus_1</mat-icon>
-            Agregar Puesto Trabajo
+            <mat-icon matSuffix>exposure_plus_1</mat-icon>Agregar Puesto Trabajo
           </button>
         </div>
         <div class="col-lg-6 col-md-12">
           <button mat-button color="warn" (click)="eliminarTrabajo()">
-            <mat-icon matSuffix>exposure_neg_1</mat-icon>
-            Eliminar Puesto Trabajo
+            <mat-icon matSuffix>exposure_neg_1</mat-icon>Eliminar Puesto Trabajo
           </button>
         </div>
       </div>
     </div>
   </mat-tab>
   <mat-tab label="Otras Fuentes De Ingreso">
-    <app-otras-fuentes-ingreso></app-otras-fuentes-ingreso>
+    <app-otras-fuentes-ingreso (onOtrasFuentesIngresoChange)="onOtrasFuentesIngresoChange($event)"></app-otras-fuentes-ingreso>
   </mat-tab>
 </mat-tab-group>

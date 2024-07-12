@@ -95,7 +95,7 @@ export class BenefComponent implements OnInit {
   initFormBeneficiario(datosBeneficiario?: any): FormGroup {
     return this.fb.group({
       datosBeneficiario: this.fb.group({
-        dni: new FormControl(datosBeneficiario?.dni || '', [Validators.required, Validators.maxLength(40)]),
+        n_identificacion: new FormControl(datosBeneficiario?.n_identificacion || '', [Validators.required, Validators.maxLength(40)]),
         primer_nombre: new FormControl(datosBeneficiario?.primer_nombre || '', [Validators.required, Validators.maxLength(40)]),
         segundo_nombre: new FormControl(datosBeneficiario?.segundo_nombre || '', [Validators.maxLength(40)]),
         tercer_nombre: new FormControl(datosBeneficiario?.tercer_nombre || ''),
@@ -106,7 +106,7 @@ export class BenefComponent implements OnInit {
         sexo: new FormControl(datosBeneficiario?.sexo || ''),
         fecha_nacimiento: new FormControl(datosBeneficiario?.fecha_nacimiento || '', Validators.required),
         direccion_residencia: new FormControl(datosBeneficiario?.direccion_residencia || ''),
-        id_pais: new FormControl(datosBeneficiario?.id_pais || null, Validators.required),
+        id_pais_nacionalidad: new FormControl(datosBeneficiario?.id_pais_nacionalidad || null, Validators.required),
         id_municipio_residencia: new FormControl(datosBeneficiario?.id_municipio_residencia || null, Validators.required),
         id_departamento_residencia: new FormControl(datosBeneficiario?.id_departamento_residencia || null, Validators.required),
         id_departamento_nacimiento: new FormControl(datosBeneficiario?.id_departamento_nacimiento || null, Validators.required),

@@ -10,7 +10,7 @@
                     <mat-form-field style="flex-direction: column-reverse;" class="example-full-width; inputs"
                         appearance="outline">
                         <mat-label>Nombre del Banco</mat-label>
-                        <mat-select matNativeControl formControlName="idBanco">
+                        <mat-select matNativeControl formControlName="id_banco">
                             <mat-option *ngFor="let p of Bancos" [value]="p.ID_BANCO">
                                 {{p.NOMBRE}}
                             </mat-option>
@@ -21,7 +21,7 @@
                     <mat-form-field style="flex-direction: column-reverse;" class="example-full-width; inputs"
                         appearance="outline">
                         <mat-label>Número de Cuenta</mat-label>
-                        <input matInput formControlName="numeroCuenta">
+                        <input matInput formControlName="num_cuenta">
                         <!-- <mat-icon matSuffix>sentiment_very_satisfied</mat-icon> -->
                     </mat-form-field>
                 </div>

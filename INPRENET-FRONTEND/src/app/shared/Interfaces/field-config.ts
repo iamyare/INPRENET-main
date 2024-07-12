@@ -1,16 +1,16 @@
-import { ValidatorFn } from '@angular/forms';
+import { ValidatorFn } from "@angular/forms";
 
 export interface FieldConfig {
-  readOnly?: boolean;
-  display: boolean;
   type: string;
-  label: string;
   name: string;
+  label?: string;
   value?: any;
-  header?: string;
-  options?: { label: string; value: any }[];
+  options?: { label: string, value: any }[];
   validations?: ValidatorFn[];
-  row?: number;
+  display?: boolean;
+  readOnly?: boolean;
   col?: number;
+  row?: number;
   icon?: string;
+  dependentFields?: { [key: string]: FieldConfig[] };
 }

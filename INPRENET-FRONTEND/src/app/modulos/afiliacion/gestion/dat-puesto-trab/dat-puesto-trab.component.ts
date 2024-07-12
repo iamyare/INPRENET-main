@@ -6,25 +6,25 @@ import { FormStateService } from 'src/app/services/form-state.service';
 
 export function generatePuestoTrabFormGroup(datos?: any): FormGroup {
   return new FormGroup({
-    idCentroTrabajo: new FormControl(datos?.idCentroTrabajo, [
+    id_centro_trabajo: new FormControl(datos?.id_centro_trabajo, [
       Validators.required
     ]),
     cargo: new FormControl(datos?.cargo, [
       Validators.required,
       Validators.maxLength(40),
     ]),
-    numeroAcuerdo: new FormControl(datos?.numeroAcuerdo, [
+    numero_acuerdo: new FormControl(datos?.numero_acuerdo, [
       Validators.maxLength(40),
     ]),
-    salarioBase: new FormControl(datos?.salarioBase, [
+    salario_base: new FormControl(datos?.salario_base, [
       Validators.required,
       Validators.min(0),
       Validators.pattern(/^[0-9]+(\.[0-9]{1,2})?$/)
     ]),
-    fechaIngreso: new FormControl(datos?.fechaIngreso, [
+    fecha_ingreso: new FormControl(datos?.fecha_ingreso, [
       Validators.required,
     ]),
-    fechaEgreso: new FormControl(datos?.fechaEgreso, [
+    fecha_egreso: new FormControl(datos?.fecha_egreso, [
     ]),
     sectorEconomico: new FormControl(datos?.sectorEconomico, [
       Validators.required,
@@ -68,6 +68,7 @@ export class DatPuestoTrabComponent implements OnInit {
   @Input() datos: any;
   @Input() editing?: boolean = false;
   @Output() newDatDatosPuestTrab = new EventEmitter<any>();
+  @Output() newOtrasFuentesIngreso = new EventEmitter<FormGroup>();
 
   onDatosDatosPuestTrab() {
     const data = this.formParent;
@@ -140,23 +141,23 @@ export class DatPuestoTrabComponent implements OnInit {
     const formGroup = generatePuestoTrabFormGroup(datos || {});
     ref_trabajo.push(formGroup);
 
-    formGroup.get('idCentroTrabajo')?.valueChanges.subscribe(value => {
+    formGroup.get('id_centro_trabajo')?.valueChanges.subscribe(value => {
       const selectedCentro = this.centrosTrabajo.find((centro: any) => centro.value === value);
       if (selectedCentro) {
         formGroup.get('sectorEconomico')?.setValue(selectedCentro.sector);
         const sector = selectedCentro.sector;
         if (sector === 'PRIVADO' || sector === 'PROHECO') {
-          formGroup.get('numeroAcuerdo')?.setValidators([
+          formGroup.get('numero_acuerdo')?.setValidators([
             Validators.required,
             Validators.maxLength(40)
           ]);
         } else {
-          formGroup.get('numeroAcuerdo')?.clearValidators();
-          formGroup.get('numeroAcuerdo')?.setValidators([
+          formGroup.get('numero_acuerdo')?.clearValidators();
+          formGroup.get('numero_acuerdo')?.setValidators([
             Validators.maxLength(40)
           ]);
         }
-        formGroup.get('numeroAcuerdo')?.updateValueAndValidity();
+        formGroup.get('numero_acuerdo')?.updateValueAndValidity();
         formGroup.get('showNumeroAcuerdo')?.setValue(sector === 'PRIVADO' || sector === 'PROHECO');
       }
     });
@@ -170,6 +171,10 @@ export class DatPuestoTrabComponent implements OnInit {
       ref_trabajo.removeAt(ref_trabajo.length - 1);
       this.onDatosDatosPuestTrab();
     }
+  }
+
+  onOtrasFuentesIngresoChange(form: FormGroup): void {
+    this.newOtrasFuentesIngreso.emit(form);
   }
 
   getCtrl(key: string, form: FormGroup): any {

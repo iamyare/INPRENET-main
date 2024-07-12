@@ -5,9 +5,9 @@ import { FormStateService } from 'src/app/services/form-state.service';
 
 export function generateHistSalFormGroup(datos?: any): FormGroup {
   return new FormGroup({
-    idBanco: new FormControl(datos.idBanco, Validators.required),
-    numCuenta: new FormControl(datos.numCuenta, Validators.required),
-    cuentaPrincipal: new FormControl(datos.cuentaPrincipal || false, Validators.required)
+    id_banco: new FormControl(datos?.id_banco, Validators.required),
+    num_cuenta: new FormControl(datos?.num_cuenta, Validators.required),
+    estado: new FormControl(datos?.estado || 'INACTIVO', Validators.required)
   });
 }
 
@@ -33,8 +33,7 @@ export class HistorialSalarioComponent implements OnInit {
   @Input() datos: any;
 
   onDatosHistSal() {
-    const data = this.formParent;
-    this.newDatHistSal.emit(data);
+    this.newDatHistSal.emit(this.formParent.value);
   }
 
   constructor(private formStateService: FormStateService, private fb: FormBuilder, private datosEstaticos: DatosEstaticosService) {
@@ -52,6 +51,10 @@ export class HistorialSalarioComponent implements OnInit {
         }
       }
     }
+
+    this.formParent.valueChanges.subscribe(() => {
+      this.onDatosHistSal();
+    });
   }
 
   private initForm() {
@@ -72,7 +75,6 @@ export class HistorialSalarioComponent implements OnInit {
     } else {
       ref_banco.push(generateHistSalFormGroup({}));
     }
-    this.onDatosHistSal();
   }
 
   eliminarBanco(): void {
@@ -80,20 +82,17 @@ export class HistorialSalarioComponent implements OnInit {
     if (ref_banco.length > 0) {
       ref_banco.removeAt(ref_banco.length - 1);
     }
-    this.onDatosHistSal();
   }
 
   onCuentaPrincipalChange(index: number): void {
     const bancoArray = this.formParent.get('banco') as FormArray;
-
-    // Ensure only one account is marked as principal
     bancoArray.controls.forEach((group, i) => {
-      if (i !== index) {
-        (group.get('cuentaPrincipal') as FormControl).setValue(false, { emitEvent: false });
+      if (i === index) {
+        group.get('estado')?.setValue('ACTIVO', { emitEvent: false });
+      } else {
+        group.get('estado')?.setValue('INACTIVO', { emitEvent: false });
       }
     });
-
-    this.onDatosHistSal();
   }
 
   getCtrl(key: string, form: FormGroup): any {
@@ -110,7 +109,7 @@ export class HistorialSalarioComponent implements OnInit {
   getErrors(i: number, fieldName: string): any {
     if (this.formParent instanceof FormGroup) {
       const controlesBanco = (this.formParent.get('banco') as FormGroup).controls;
-      const a = controlesBanco[i].get(fieldName)!.errors
+      const a = controlesBanco[i].get(fieldName)!.errors;
 
       let errors = [];
       if (a) {

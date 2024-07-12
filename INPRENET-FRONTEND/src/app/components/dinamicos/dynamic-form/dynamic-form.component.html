@@ -10,7 +10,7 @@
           <div *ngFor="let field of fields" [ngClass]="'col-md-' + field.col" [ngStyle]="{ 'grid-row': field.row }">
             <!-- Campo de Texto Normal -->
             <div *ngIf="field.display">
-              <ng-container *ngIf="field.type !== 'dropdown' && field.type !== 'date' && field.type !== 'daterange' && field.type !== 'checkboxGroup' && field.type !== 'radio'; else customField">
+              <ng-container *ngIf="field.type !== 'dropdown' && field.type !== 'date' && field.type !== 'daterange' && field.type !== 'checkboxGroup' && field.type !== 'radio' && field.type !== 'conditionalRadio'; else customField">
                 <mat-form-field appearance="outline" style="width: 100%">
                   <mat-label>{{ field.label }}</mat-label>
                   <input matInput [type]="field.type" [formControlName]="field.name" [readonly]="field.readOnly" />
@@ -89,6 +89,32 @@
                       {{ option.label }}
                     </mat-radio-button>
                   </mat-radio-group>
+                </div>
+              </ng-container>
+
+              <!-- Conditional Radio Buttons -->
+              <ng-container *ngIf="field.type === 'conditionalRadio'">
+                <label>{{ field.label }}</label>
+                <div [formGroup]="form">
+                  <mat-radio-group [formControlName]="field.name" (change)="onSelectChange(field.name, $event)">
+                    <mat-radio-button *ngFor="let option of field.options" [value]="option.value">
+                      {{ option.label }}
+                    </mat-radio-button>
+                  </mat-radio-group>
+                </div>
+                <div *ngIf="selectedOption && field.dependentFields">
+                  <ng-container *ngFor="let dependentField of field.dependentFields[selectedOption]">
+                    <div *ngIf="dependentField.type === 'checkboxGroup'">
+                      <label>{{ dependentField.label }}</label>
+                      <div [formArrayName]="dependentField.name">
+                        <div *ngFor="let option of dependentField.options; let i = index">
+                          <mat-checkbox [formControlName]="i" (change)="onDatosBenChange1($event)">
+                            {{ option.label }}
+                          </mat-checkbox>
+                        </div>
+                      </div>
+                    </div>
+                  </ng-container>
                 </div>
               </ng-container>
             </ng-template>

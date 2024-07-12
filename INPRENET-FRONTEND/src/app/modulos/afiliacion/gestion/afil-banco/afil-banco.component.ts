@@ -7,6 +7,7 @@ import { generateFormArchivo } from 'src/app/components/dinamicos/botonarchivos/
 import { FormArray, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import pdfMake from 'pdfmake/build/pdfmake';
 import pdfFonts from 'pdfmake/build/vfs_fonts';
+import { AfiliacionService } from 'src/app/services/afiliacion.service';
 
 @Component({
   selector: 'app-afil-banco',
@@ -30,7 +31,6 @@ export class AfilBancoComponent implements OnInit {
   // Formularios
   public formParent: FormGroup = new FormGroup({});
   form = this.fb.group({
-    /*  DatosGenerales: generateAddressFormGroup(), */
     DatosBacAfil: generateDatBancFormGroup(),
     Archivos: generateFormArchivo(),
     FotoPerfil: [''],
@@ -54,6 +54,9 @@ export class AfilBancoComponent implements OnInit {
   formDatosGenerales: any = new FormGroup({
     refpers: new FormArray([], [Validators.required])
   });
+  formOtrasFuentesIngreso: any = new FormGroup({
+    sociedadSocios: new FormArray([], [Validators.required])
+  });
 
   labelBoton1 = "Adjunte archivo DNI";
   DatosBancBen: any = [];
@@ -61,7 +64,7 @@ export class AfilBancoComponent implements OnInit {
   constructor(
     private fb: FormBuilder,
     private formStateService: FormStateService,
-    private afilService: AfiliadoService,
+    private afiliacionService: AfiliacionService,
     private toastr: ToastrService
   ) { }
 
@@ -97,11 +100,20 @@ export class AfilBancoComponent implements OnInit {
       refpers: this.fb.array([], [Validators.required])
     });
 
+    this.formOtrasFuentesIngreso = this.fb.group({
+      sociedadSocios: this.fb.array([], [Validators.required])
+    });
+
     this.formStateService.getFotoPerfil().subscribe((foto) => {
       if (foto) {
         this.form.get('FotoPerfil')?.setValue(foto);
       }
     });
+
+    let otrasFuentesIngresoForm = this.formStateService.getForm('FormOtrasFuentesIngreso');
+    if (otrasFuentesIngresoForm) {
+      this.formOtrasFuentesIngreso = otrasFuentesIngresoForm;
+    }
   }
 
   handleImageCaptured(image: string) {
@@ -148,6 +160,10 @@ export class AfilBancoComponent implements OnInit {
     this.ColegiosMagisteriales = true;
   }
 
+  setOtrasFuentesIngreso(datosOtrasFuentesIngreso: any) {
+    this.formOtrasFuentesIngreso = datosOtrasFuentesIngreso;
+  }
+
   resetEstados() {
     this.DatosGenerales = false;
     this.datosFamiliares = false;
@@ -165,7 +181,7 @@ export class AfilBancoComponent implements OnInit {
     formArray.clear();
     datosColegiosMag.forEach((item: any) => {
       formArray.push(this.fb.group({
-        idColegio: [item.idColegio, Validators.required]
+        id_colegio: [item.id_colegio, Validators.required]
       }));
     });
   }
@@ -202,40 +218,73 @@ export class AfilBancoComponent implements OnInit {
       this.labelBoton1 = "Adjunte archivo DNI";
     }
     return this.labelBoton1;
-}
-
-
+  }
 
   enviar() {
     const formData = new FormData();
     const formGenerales = this.formDatosGenerales?.value?.refpers[0] || {};
     const direccion_residencia = `AVENIDA: ${formGenerales.avenida},CALLE: ${formGenerales.calle},SECTOR: ${formGenerales.sector},BLOQUE: ${formGenerales.bloque},N° DE CASA: ${formGenerales.numero_casa},COLOR CASA: ${formGenerales.color_casa},ALDEA: ${formGenerales.aldea},CASERIO: ${formGenerales.caserio}`;
 
-    const datosGenerales = {...formGenerales,direccion_residencia};
+    const persona = { ...formGenerales, direccion_residencia };
+
+    const referencias = this.formReferencias?.value?.refpers.map((ref: any) => {
+      return {
+        tipo_referencia: ref.tipo_referencia,
+        parentesco: ref.parentesco,
+        dependiente_economico: ref.dependiente_economico ? "SI" : "NO",
+        persona_referencia: {
+          primer_nombre: ref.primer_nombre,
+          segundo_nombre: ref.segundo_nombre,
+          tercer_nombre: ref.tercer_nombre,
+          primer_apellido: ref.primer_apellido,
+          segundo_apellido: ref.segundo_apellido,
+          sexo: ref.sexo,
+          direccion: ref.direccion,
+          telefono_domicilio: ref.telefono_domicilio,
+          telefono_trabajo: ref.telefono_trabajo,
+          telefono_personal: ref.telefono_personal,
+          n_identificacion: ref.n_identificacion,
+          tipo_identificacion: ref.tipo_identificacion,
+          profesion: ref.profesion,
+          discapacidad: ref.discapacidad,
+          fecha_nacimiento: ref.fecha_nacimiento
+        },
+        discapacidades: ref.discapacidades
+      };
+    }) || [];
 
     const encapsulatedDto = {
-      datosGenerales,
+      persona,
+      detallePersona: {
+        eliminado: 'NO',
+        id_tipo_persona: 1,
+        id_estado_afiliacion: 1
+      },
       colegiosMagisteriales: this.formColegiosMagisteriales?.value?.ColMags || [],
       bancos: this.formHistPag?.value?.banco || [],
       centrosTrabajo: this.formPuestTrab?.value?.trabajo.map((trabajo: any) => ({
         ...trabajo,
-        fechaIngreso: this.formatDate(trabajo.fechaIngreso),
-        fechaEgreso: this.formatDate(trabajo.fechaEgreso)
+        fecha_ingreso: this.formatDate(trabajo.fecha_ingreso),
+        fecha_egreso: this.formatDate(trabajo.fecha_egreso)
       })) || [],
-      referenciasPersonales: this.formReferencias?.value?.refpers || [],
+      otrasFuentesIngreso: this.formOtrasFuentesIngreso?.value?.sociedadSocios || [],
+      referencias: referencias,
       beneficiarios: this.formBeneficiarios?.value?.beneficiario.map((ben: any) => {
         const { Arch, Archivos, DatosBac, beneficiario, ...resto } = ben;
         return resto;
       }) || [],
+      familiares: [] // Agrega aquí los datos de familiares si tienes algún campo relacionado
     };
 
-    formData.append('encapsulatedDto', JSON.stringify(encapsulatedDto));
+    formData.append('datos', JSON.stringify(encapsulatedDto));
 
     const fotoPerfilBase64 = this.form.get('FotoPerfil')?.value ?? '';
 
+    let file: any;
     if (fotoPerfilBase64) {
       const fotoBlob = this.dataURLToBlob(fotoPerfilBase64);
-      formData.append('foto_perfil', fotoBlob, 'perfil.jpg');
+      file = new File([fotoBlob], 'perfil.jpg', { type: 'image/jpeg' });
+      formData.append('foto_perfil', file);
     }
 
     console.log(formData);
@@ -245,7 +294,7 @@ export class AfilBancoComponent implements OnInit {
       console.log(`Key ${key}:`, value);
     });
 
-    /* this.afilService.createPersonaWithDetailsAndWorkCenters(formData).subscribe(
+    this.afiliacionService.crearAfiliacion(encapsulatedDto, file).subscribe(
       response => {
         console.log('Datos enviados con éxito:', response);
         this.toastr.success('Datos enviados con éxito');
@@ -254,7 +303,7 @@ export class AfilBancoComponent implements OnInit {
         console.error('Error al enviar los datos:', error);
         this.toastr.error('Error al enviar los datos');
       }
-    ); */
+    );
   }
 
   createTable(data: [string, any][]) {
@@ -292,6 +341,7 @@ export class AfilBancoComponent implements OnInit {
     const year = d.getFullYear();
     return `${day}/${month}/${year}`;
   }
+
 
   createPDF() {
     const documentDefinition:any = this.getDocumentDefinition();

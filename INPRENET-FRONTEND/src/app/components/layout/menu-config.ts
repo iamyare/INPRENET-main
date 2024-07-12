@@ -19,6 +19,7 @@ export const MENU_CONFIG: Section[] = [
         icon: 'person',
         children: [
           { title: 'Nuevo Afiliado', route: '/afiliacion/nuevo-afiliado', icon: 'person_add' },
+          { title: 'Nueva Afiliacion', route: '/afiliacion/nueva-afiliacion', icon: 'person_add' },
           { title: 'Buscar Persona', route: '/afiliacion/buscar-persona', icon: 'search' },
           { title: 'Nuevo Centro Educativo', route: '/afiliacion/nuevo-centro', icon: 'school' },
           { title: 'Ver Centro Educativo', route: '/afiliacion/ver-datos-centro', icon: 'visibility' },

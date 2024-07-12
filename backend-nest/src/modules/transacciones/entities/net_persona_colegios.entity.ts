@@ -12,6 +12,6 @@ export class Net_Persona_Colegios {
     persona: net_persona;
 
     @ManyToOne(() => Net_Colegios_Magisteriales, colegio => colegio.personas)
-    @JoinColumn({ name: "ID_COLEGIO", referencedColumnName: "idColegio", foreignKeyConstraintName: "FK_NET_PERSONA_COLEGIOS_COLEGIO" })
+    @JoinColumn({ name: "ID_COLEGIO", referencedColumnName: "id_colegio", foreignKeyConstraintName: "FK_NET_PERSONA_COLEGIOS_COLEGIO" })
     colegio: Net_Colegios_Magisteriales;
 }

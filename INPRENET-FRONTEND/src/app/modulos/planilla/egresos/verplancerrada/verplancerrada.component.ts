@@ -5,7 +5,7 @@ import { AfiliadoService } from 'src/app/services/afiliado.service';
 import { PlanillaService } from 'src/app/services/planilla.service';
 import { FieldConfig } from 'src/app/shared/Interfaces/field-config';
 import { TableColumn } from 'src/app/shared/Interfaces/table-column';
-import { convertirFecha } from 'src/app/shared/functions/formatoFecha';
+import { convertirFecha, obtenerNombreMes } from 'src/app/shared/functions/formatoFecha';
 import { TDocumentDefinitions } from 'pdfmake/interfaces';
 import { HttpClient } from '@angular/common/http';
 import { DynamicDialogComponent } from 'src/app/components/dinamicos/dynamic-dialog/dynamic-dialog.component';
@@ -13,6 +13,7 @@ import { Validators } from '@angular/forms';
 import pdfMake from 'pdfmake/build/pdfmake';
 import pdfFonts from 'pdfmake/build/vfs_fonts';
 import { TotalesporbydDialogComponent } from '../totalesporbydDialog/totalesporbydDialog.component';
+import { log } from 'console';
 
 pdfMake.vfs = pdfFonts.pdfMake.vfs;
 
@@ -208,23 +209,28 @@ export class VerplancerradaComponent {
     try {
       this.dataPlan = [];
       this.data = await this.planillaService.getPersPlanillaDefin(cod_planilla).toPromise();
-      this.dataPlan = this.data.map((item: any) => {
-        return {
-          id_afiliado: item.ID_PERSONA,
-          dni: item.DNI,
-          NOMBRE_COMPLETO: item.NOMBRE_COMPLETO,
-          "Total Beneficio": item["Total Beneficio"],
-          "Total Deducciones": item["Total Deducciones"],
-          "Total": item["Total Beneficio"] - item["Total Deducciones"],
-          tipo_afiliado: item.tipo_afiliado,
-          BENEFICIOSIDS: item.BENEFICIOSIDS,
-          beneficiosNombres: item.beneficiosNombres,
-          fecha_cierre: item.fecha_cierre,
-          correo_1: item.correo_1
-        };
-      });
 
-      return this.dataPlan;
+      if (this.data) {
+        this.dataPlan = this.data.map((item: any) => {
+          const deducciones = item["Total Deducciones"] || 0.00
+          return {
+            id_afiliado: item.ID_PERSONA,
+            dni: item.DNI,
+            NOMBRE_COMPLETO: item.NOMBRE_COMPLETO,
+            "Total Beneficio": item["Total Beneficio"],
+            "Total Deducciones": deducciones,
+            "Total": item["Total Beneficio"] - deducciones,
+            tipo_afiliado: item.tipo_afiliado,
+            BENEFICIOSIDS: item.BENEFICIOSIDS,
+            beneficiosNombres: item.beneficiosNombres,
+            fecha_cierre: item.fecha_cierre,
+            correo_1: item.correo_1
+          };
+        });
+
+        return this.dataPlan;
+      }
+
     } catch (error) {
       console.error("Error al obtener datos de deducciones", error);
       throw error;
@@ -311,7 +317,7 @@ export class VerplancerradaComponent {
         const { beneficios, deducciones } = resultados;
 
         // Construye el documento PDF usando los datos obtenidos
-        this.construirPDF(row, beneficios, deducciones);
+        this.construirPDF(row, resultados, this.backgroundImageBase64);
       },
       error: (error) => {
         console.error('Error al obtener los totales:', error);
@@ -320,62 +326,204 @@ export class VerplancerradaComponent {
     });
   }
 
-  construirPDF(row: any, beneficios: any[], deducciones: any[]) {
-    let formattedNumber = Number(row.Total || 0).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-    let docDefinition: TDocumentDefinitions = {
-      content: [
-        { text: 'Comprobante de Pago', style: 'header' },
-        { text: 'Nº Orden: ' + (row.id_afiliado || 'Desconocido'), style: 'subheader' },
-        {
-          image: this.backgroundImageBase64,
-          width: 595,
-          height: 842,
-          absolutePosition: { x: 0, y: 0 },
-        },
-        {
-          columns: [
-            [
-              { text: 'Cliente', style: 'subheader' },
-              { text: 'Nombre: ' + (row.NOMBRE_COMPLETO || 'Desconocido') },
-              { text: 'DNI: ' + (row.dni || 'Desconocido') },
-              { text: 'Email: ' + (row.correo_1 || 'No proporcionado') },
-            ],
-            [
-              { text: 'Pago', style: 'subheader' },
-              { text: 'Medio de Pago: No especificado' },
-              { text: 'Pago Total: ' + 'L' + formattedNumber, style: 'subheader' },
-              { text: 'Fecha de pago: ' + (row.fecha_cierre || 'No especificada') },
-            ]
-          ]
-        },
-        this.buildTable('Ingresos', beneficios.map(b => ({ nombre_ingreso: b.NOMBRE_BENEFICIO, monto: b['Total Monto Beneficio'] })), ['nombre_ingreso', 'monto'], 'monto'),
-        this.buildTable('Deducciones', deducciones.map(d => ({ nombre_deduccion: d.NOMBRE_DEDUCCION, total_deduccion: d['Total Monto Aplicado'] })), ['nombre_deduccion', 'total_deduccion'], 'total_deduccion'),
 
-        this.buildTable('', deducciones.map(d => ({ Total: "Total", valor_total: row.Total })), ['Total', 'valor_total'], 'valor_total')
-      ],
-      styles: {
-        header: {
-          fontSize: 18,
-          bold: true,
-          margin: [0, 20, 0, 10]
-        },
-        subheader: {
-          fontSize: 14,
-          bold: true,
-          margin: [0, 0, 0, 5]
-        },
-        tableHeader: {
-          bold: true,
-          fontSize: 13,
-          color: 'black'
-        },
-        tableExample: {
-          margin: [0, 5, 0, 15]
+  construirPDF(row: { Total: any; NOMBRE_COMPLETO: any; dni: any; correo_1: any; fecha_cierre: any; }, resultados: any, backgroundImageBase64: string) {
+    const formatCurrency = (value: number) => new Intl.NumberFormat('es-HN', { style: 'currency', currency: 'HNL' }).format(value);
+
+    if (resultados) {
+      const persona = resultados.persona;
+      const detallePersona = persona.detallePersona || [];
+      const nombreCompleto = `${persona.primer_nombre} ${persona.segundo_nombre || ''} ${persona.primer_apellido} ${persona.segundo_apellido || ''}`.trim();
+      const dni = persona.n_identificacion || 'NO PROPORCIONADO';
+      const correo = persona.correo_1 || 'NO PROPORCIONADO';
+      let sumaBeneficios = 0;
+      let sumaDeducciones = 0;
+
+      // Mapeo de ID_DETALLE_PERSONA a n_identificacion del padre
+      const causantesMap = new Map();
+      detallePersona.forEach((detalle: { ID_DETALLE_PERSONA: number; padreIdPersona: { persona: { n_identificacion: string; } }; }) => {
+        if (detalle.padreIdPersona && detalle.padreIdPersona.persona && detalle.padreIdPersona.persona.n_identificacion) {
+          causantesMap.set(detalle.ID_DETALLE_PERSONA, detalle.padreIdPersona.persona.n_identificacion);
         }
-      }
-    };
+      });
 
-    pdfMake.createPdf(docDefinition).open();
+      const data = detallePersona.map((detalle: { detalleBeneficio: any[]; ID_DETALLE_PERSONA: number; }) => {
+        const beneficio = detalle.detalleBeneficio[0];
+        const deducciones = beneficio.detallePagBeneficio.flatMap((pagBeneficio: { detalleDeduccion: any[]; }) => {
+          return pagBeneficio.detalleDeduccion.map((deduccion) => {
+            const montoDeduccion = deduccion.monto_aplicado;
+            sumaDeducciones += montoDeduccion;
+            return {
+              NOMBRE_DEDUCCION: deduccion.deduccion.nombre_deduccion,
+              TotalMontoAplicado: montoDeduccion
+            };
+          });
+        });
+
+        const montoPorPeriodo = beneficio.monto_por_periodo;
+        sumaBeneficios += montoPorPeriodo;
+
+        return {
+          CAUSANTE: causantesMap.get(detalle.ID_DETALLE_PERSONA) || 'NO APLICA',
+          NOMBRE_BENEFICIO: beneficio.beneficio.nombre_beneficio,
+          MontoAPagar: montoPorPeriodo,
+          DEDUCCIONES: deducciones,
+          METODO_PAGO: beneficio.metodo_pago,
+          NOMBRE_BANCO: beneficio.detallePagBeneficio[0].personaporbanco ? beneficio.detallePagBeneficio[0].personaporbanco.estado : 'NO PROPORCIONADO',
+          NUM_CUENTA: beneficio.detallePagBeneficio[0].personaporbanco ? beneficio.detallePagBeneficio[0].personaporbanco.num_cuenta : 'NO PROPORCIONADO'
+        };
+      });
+
+      const neto = sumaBeneficios - sumaDeducciones;
+
+      const docDefinition: TDocumentDefinitions = {
+        background: function (currentPage, pageSize) {
+          return {
+            image: backgroundImageBase64,
+            width: pageSize.width,
+            height: pageSize.height,
+            absolutePosition: { x: 0, y: 2 }
+          };
+        },
+        content: [
+          {
+            stack: [
+              { text: 'CONSTANCIA DE PAGO', style: ['header'], alignment: 'center' },
+              { text: 'VOUCHER DEL MES DE: ' + obtenerNombreMes(resultados.persona.detallePersona[0].detalleBeneficio[0].detallePagBeneficio[0].planilla.periodoInicio), style: 'subheader', alignment: 'center' },
+              {
+                columns: [
+                  [
+                    { text: 'DOCENTE', style: 'subheader' },
+                    { text: 'NOMBRE: ' + nombreCompleto },
+                    { text: 'DNI: ' + dni },
+                    { text: 'EMAIL: ' + correo },
+                  ],
+                  [
+                    { text: 'DETALLE DE PAGO', style: 'subheader' },
+                    { text: 'PAGO TOTAL: ' + formatCurrency(neto) },
+                    { text: 'MÉTODO DE PAGO: ' + (data[0]?.METODO_PAGO || 'NO PROPORCIONADO') },
+                    { text: 'BANCO: ' + (data[0]?.NOMBRE_BANCO || 'NO PROPORCIONADO') },
+                    { text: 'N° CUENTA: ' + (data[0]?.NUM_CUENTA || 'NO PROPORCIONADO') },
+                  ]
+                ],
+                margin: [0, 10, 0, 0]  // Añade 5px de margen superior
+              },
+              {
+                table: {
+                  widths: ['*', '*', '*', '*', '*'],
+                  body: [
+                    [{ text: 'CAUSANTE', style: 'tableHeader' }, { text: 'INGRESO', style: 'tableHeader' }, { text: 'MONTO INGRESO', style: ['tableHeader', 'alignRight'] }, { text: 'DEDUCCIÓN', style: 'tableHeader' }, { text: 'MONTO DEDUCCIÓN', style: ['tableHeader', 'alignRight'] }],
+                    ...data.flatMap((b: any) => {
+                      if (b.DEDUCCIONES.length === 0) {
+                        return [[
+                          { text: b.CAUSANTE },
+                          { text: b.NOMBRE_BENEFICIO },
+                          { text: formatCurrency(b.MontoAPagar), style: 'alignRight' },
+                          { text: '---------------', alignment: 'center' },
+                          { text: formatCurrency(0), style: 'alignRight' }
+                        ]];
+                      } else {
+                        return b.DEDUCCIONES.map((d: { NOMBRE_DEDUCCION: any; TotalMontoAplicado: number; }, index: number) => [
+                          index === 0 ? { text: b.CAUSANTE, rowSpan: b.DEDUCCIONES.length } : {},
+                          index === 0 ? { text: b.NOMBRE_BENEFICIO, rowSpan: b.DEDUCCIONES.length } : {},
+                          index === 0 ? { text: formatCurrency(b.MontoAPagar), rowSpan: b.DEDUCCIONES.length, style: 'alignRight' } : { text: formatCurrency(0), style: 'alignRight' },
+                          { text: d.NOMBRE_DEDUCCION },
+                          { text: formatCurrency(d.TotalMontoAplicado), style: 'alignRight' }
+                        ]);
+                      }
+                    })
+                  ]
+                },
+                margin: [0, 5, 0, 0],
+                style: 'tableExample'
+              },
+              {
+                table: {
+                  widths: ['*', '*'],
+                  body: [
+                    [{ text: 'TOTAL INGRESOS', style: 'tableHeader' }, { text: formatCurrency(sumaBeneficios), style: ['tableHeader', 'alignRight'] }]
+                  ]
+                },
+                style: 'tableExample'
+              },
+              {
+                table: {
+                  widths: ['*', '*'],
+                  body: [
+                    [{ text: 'TOTAL DEDUCCIONES', style: 'tableHeader' }, { text: formatCurrency(sumaDeducciones), style: ['tableHeader', 'alignRight'] }]
+                  ]
+                },
+                style: 'tableExample'
+              },
+              {
+                table: {
+                  widths: ['*', '*'],
+                  body: [
+                    [{ text: 'NETO A PAGAR', style: 'tableHeader' }, { text: formatCurrency(neto), style: ['tableHeader', 'alignRight'] }]
+                  ]
+                },
+                style: 'tableExample'
+              },
+              { canvas: [{ type: 'line', x1: 0, y1: 0, x2: 250, y2: 0, lineWidth: 1 }], margin: [127, 70, 0, 10] }, // Aumenta el margen inferior en 10px
+              { text: 'FIRMA CONTROL DE BENEFICIOS', style: 'signatureTitle', margin: [0, 5, 0, 0] } // Aumenta el margen superior en 10px
+            ],
+            margin: [0, 0, 0, 0]  // Establece el margen superior a 40px
+          }
+        ],
+        footer: function (currentPage, pageCount) {
+          return {
+            table: {
+              widths: ['*', '*'],
+              body: [
+                [
+                  { text: 'Fecha y Hora: ' + new Date().toLocaleString(), alignment: 'left', border: [false, false, false, false] },
+                  { text: 'Página ' + currentPage.toString() + ' de ' + pageCount, alignment: 'right', border: [false, false, false, false] }
+                ]
+              ]
+            },
+            margin: [20, 0, 20, 20]
+          };
+        },
+        pageMargins: [50, 80, 50, 85],
+        styles: {
+          header: {
+            fontSize: 16,
+            bold: true,
+            margin: [0, 0, 0, 0]
+          },
+          subheader: {
+            fontSize: 12,
+            bold: true
+          },
+          tableHeader: {
+            bold: true,
+            fontSize: 13,
+            color: 'black'
+          },
+          tableExample: {
+            margin: [0, 5, 0, 15]
+          },
+          alignRight: {
+            alignment: 'right'
+          },
+          signatureTitle: {
+            alignment: 'center',
+            bold: true,
+            fontSize: 12,
+            decoration: 'underline'
+          }
+        },
+        defaultStyle: {
+          fontSize: 10
+        },
+        pageSize: 'LETTER',
+        pageOrientation: 'portrait'
+      };
+
+      pdfMake.createPdf(docDefinition).open();
+    } else {
+      console.log("ERROR. FALTA INFORMACIÓN");
+    }
   }
 
   convertirImagenABase64(url: string): Promise<string> {
@@ -437,7 +585,7 @@ export class VerplancerradaComponent {
     });
   }
 
-  formatMonth(dateString:any) {
+  formatMonth(dateString: any) {
     const date = new Date(dateString);
     return date.toLocaleString('es-ES', { month: 'long', year: 'numeric' });
   }
@@ -445,170 +593,170 @@ export class VerplancerradaComponent {
 
   async generarPDFDeduccionesSeparadas() {
     try {
-        const base64Image = await this.convertirImagenABase64('../../assets/images/HOJA-MEMBRETADA.jpg');
-        this.planillaService.getDeduccionesPorPlanillaSeparadas(this.idPlanilla).subscribe(response => {
-            const deduccionesInprema = response.deduccionesINPREMA || [];
-            const deduccionesTerceros = response.deduccionesTerceros || [];
+      const base64Image = await this.convertirImagenABase64('../../assets/images/HOJA-MEMBRETADA.jpg');
+      this.planillaService.getDeduccionesPorPlanillaSeparadas(this.idPlanilla).subscribe(response => {
+        const deduccionesInprema = response.deduccionesINPREMA || [];
+        const deduccionesTerceros = response.deduccionesTerceros || [];
 
-            const totalInprema = deduccionesInprema.reduce((acc, cur) => acc + (cur.TOTAL_MONTO_APLICADO ? parseFloat(cur.TOTAL_MONTO_APLICADO) : 0), 0);
-            const totalTerceros = deduccionesTerceros.reduce((acc, cur) => acc + (cur.TOTAL_MONTO_APLICADO ? parseFloat(cur.TOTAL_MONTO_APLICADO) : 0), 0);
-            const neto = totalInprema + totalTerceros;
+        const totalInprema = deduccionesInprema.reduce((acc, cur) => acc + (cur.TOTAL_MONTO_APLICADO ? parseFloat(cur.TOTAL_MONTO_APLICADO) : 0), 0);
+        const totalTerceros = deduccionesTerceros.reduce((acc, cur) => acc + (cur.TOTAL_MONTO_APLICADO ? parseFloat(cur.TOTAL_MONTO_APLICADO) : 0), 0);
+        const neto = totalInprema + totalTerceros;
 
-            const docDefinition: TDocumentDefinitions = {
-                background: function (currentPage, pageSize) {
-                    return {
-                        image: base64Image,
-                        width: pageSize.width,
-                        height: pageSize.height,
-                        absolutePosition: { x: 0, y: 0 }
-                    };
-                },
-                pageMargins: [40, 150, 40, 100], // Aumentado el espacio en el footer
-                header: (currentPage, pageCount, pageSize) => {
-                    return [
-                      {
-                        text: `${this.detallePlanilla?.nombre_planilla || 'Desconocido'}`,
-                        style: 'header',
-                        alignment: 'center',
-                        margin: [0, 80, 0, 0]
-                      },
-                      {
-                        columns: [
-                          {
-                            width: '50%',
-                            text: [
-                              { text: 'Código de Planilla: ', bold: true },
-                              `${this.detallePlanilla?.codigo_planilla || 'N/A'}\n`,
-                              { text: 'Mes de la Planilla: ', bold: true },
-                              `${this.formatMonth(this.detallePlanilla?.fecha_apertura) || 'N/A'}`,
-                            ],
-                            alignment: 'left'
-                          },
-                          {
-                            width: '50%',
-                            text: [
-                              { text: 'Neto Total: ', bold: true },
-                              `L ${neto.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",")}`
-                            ],
-                            alignment: 'right'
-                          }
-                        ],
-                        margin: [40, 5, 40, 10]
-                      }
-                    ];
-                },
-                content: [
-                    { text: 'Deducciones INPREMA', style: 'subheader', margin: [0, 0, 0, 5] },
-                    this.crearTablaPDF(deduccionesInprema, 'Deducciones INPREMA', `Total de deducciones INPREMA: L ${totalInprema.toFixed(2)}`, [0, 0, 0, 10]),
-                    { text: 'Deducciones de Terceros', style: 'subheader', pageBreak: 'before', margin: [0, 10, 0, 5] },
-                    this.crearTablaPDF(deduccionesTerceros, 'Deducciones de Terceros', `Total de deducciones de Terceros: L ${totalTerceros.toFixed(2)}`, [0, 0, 0, 10]),
-                    {
-                        canvas: [
-                            {
-                                type: 'line',
-                                x1: 0, y1: 0,
-                                x2: 240, y2: 0,
-                                lineWidth: 1.5
-                            }
-                        ],
-                        alignment: 'center',
-                        margin: [0, 60, 0, 5]  // Aumentado el espacio entre la última tabla y la línea de firma
-                    },
-                    {
-                        text: 'Firma:',
-                        style: 'signature',
-                        alignment: 'center',
-                        margin: [0, 20, 0, 20]  // Espaciado después de la línea de firma
-                    }
-                ],
-                styles: {
-                    header: {
-                        fontSize: 18,
-                        bold: true
-                    },
-                    subheader: {
-                        fontSize: 14,
-                        bold: false,
-                        margin: [0, 5, 0, 10]
-                    },
-                    signature: {
-                        fontSize: 16,
-                        bold: true
-                    }
-                }
+        const docDefinition: TDocumentDefinitions = {
+          background: function (currentPage, pageSize) {
+            return {
+              image: base64Image,
+              width: pageSize.width,
+              height: pageSize.height,
+              absolutePosition: { x: 0, y: 0 }
             };
+          },
+          pageMargins: [40, 150, 40, 100], // Aumentado el espacio en el footer
+          header: (currentPage, pageCount, pageSize) => {
+            return [
+              {
+                text: `${this.detallePlanilla?.nombre_planilla || 'Desconocido'}`,
+                style: 'header',
+                alignment: 'center',
+                margin: [0, 80, 0, 0]
+              },
+              {
+                columns: [
+                  {
+                    width: '50%',
+                    text: [
+                      { text: 'Código de Planilla: ', bold: true },
+                      `${this.detallePlanilla?.codigo_planilla || 'N/A'}\n`,
+                      { text: 'Mes de la Planilla: ', bold: true },
+                      `${this.formatMonth(this.detallePlanilla?.fecha_apertura) || 'N/A'}`,
+                    ],
+                    alignment: 'left'
+                  },
+                  {
+                    width: '50%',
+                    text: [
+                      { text: 'Neto Total: ', bold: true },
+                      `L ${neto.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",")}`
+                    ],
+                    alignment: 'right'
+                  }
+                ],
+                margin: [40, 5, 40, 10]
+              }
+            ];
+          },
+          content: [
+            { text: 'Deducciones INPREMA', style: 'subheader', margin: [0, 0, 0, 5] },
+            this.crearTablaPDF(deduccionesInprema, 'Deducciones INPREMA', `Total de deducciones INPREMA: L ${totalInprema.toFixed(2)}`, [0, 0, 0, 10]),
+            { text: 'Deducciones de Terceros', style: 'subheader', pageBreak: 'before', margin: [0, 10, 0, 5] },
+            this.crearTablaPDF(deduccionesTerceros, 'Deducciones de Terceros', `Total de deducciones de Terceros: L ${totalTerceros.toFixed(2)}`, [0, 0, 0, 10]),
+            {
+              canvas: [
+                {
+                  type: 'line',
+                  x1: 0, y1: 0,
+                  x2: 240, y2: 0,
+                  lineWidth: 1.5
+                }
+              ],
+              alignment: 'center',
+              margin: [0, 60, 0, 5]  // Aumentado el espacio entre la última tabla y la línea de firma
+            },
+            {
+              text: 'Firma:',
+              style: 'signature',
+              alignment: 'center',
+              margin: [0, 20, 0, 20]  // Espaciado después de la línea de firma
+            }
+          ],
+          styles: {
+            header: {
+              fontSize: 18,
+              bold: true
+            },
+            subheader: {
+              fontSize: 14,
+              bold: false,
+              margin: [0, 5, 0, 10]
+            },
+            signature: {
+              fontSize: 16,
+              bold: true
+            }
+          }
+        };
 
-            pdfMake.createPdf(docDefinition).download('reporte_deducciones_separadas.pdf');
-        }, error => {
-            console.error('Error al obtener las deducciones separadas', error);
-            this.toastr.error('Error al obtener las deducciones separadas');
-        });
+        pdfMake.createPdf(docDefinition).download('reporte_deducciones_separadas.pdf');
+      }, error => {
+        console.error('Error al obtener las deducciones separadas', error);
+        this.toastr.error('Error al obtener las deducciones separadas');
+      });
     } catch (error) {
-        console.error('Error al generar el PDF', error);
-        this.toastr.error('Error al generar el PDF');
+      console.error('Error al generar el PDF', error);
+      this.toastr.error('Error al generar el PDF');
     }
-}
+  }
 
 
   crearTablaPDF(data: any[], titulo: string, totalTexto: string, margin: [number, number, number, number]) {
     const total = data.reduce((acc, cur) => acc + (cur.TOTAL_MONTO_APLICADO ? parseFloat(cur.TOTAL_MONTO_APLICADO) : 0), 0);
     const formatAmount = (amount: number) => amount.toLocaleString('en-US', {
-        minimumFractionDigits: 2,
-        maximumFractionDigits: 2
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
     });
 
     const formattedTotalText = `Total de ${titulo}: L ${formatAmount(total)}`; // Formatea aquí también para usar en el PDF
 
     return {
-        style: 'tableExample',
-        table: {
-            headerRows: 1,
-            widths: ['*', 'auto'],
-            body: [
-                [{ text: 'Nombre', style: 'tableHeader' }, { text: 'Total', style: 'tableHeader' }],
-                ...data.map(el => {
-                    const nombre = el.NOMBRE_DEDUCCION || '';
-                    const totalFormatted = el.TOTAL_MONTO_APLICADO ? formatAmount(parseFloat(el.TOTAL_MONTO_APLICADO)) : '0.00';
-                    return [nombre, { text: `L ${totalFormatted}`, alignment: 'right' }];
-                }),
-                [{ text: formattedTotalText, style: 'tableTotal', alignment: 'right', colSpan: 2 }, {}] // Asegura el formato aquí
-            ]
-        },
-        layout: 'lightHorizontalLines',
-        margin: margin
+      style: 'tableExample',
+      table: {
+        headerRows: 1,
+        widths: ['*', 'auto'],
+        body: [
+          [{ text: 'Nombre', style: 'tableHeader' }, { text: 'Total', style: 'tableHeader' }],
+          ...data.map(el => {
+            const nombre = el.NOMBRE_DEDUCCION || '';
+            const totalFormatted = el.TOTAL_MONTO_APLICADO ? formatAmount(parseFloat(el.TOTAL_MONTO_APLICADO)) : '0.00';
+            return [nombre, { text: `L ${totalFormatted}`, alignment: 'right' }];
+          }),
+          [{ text: formattedTotalText, style: 'tableTotal', alignment: 'right', colSpan: 2 }, {}] // Asegura el formato aquí
+        ]
+      },
+      layout: 'lightHorizontalLines',
+      margin: margin
     };
-}
+  }
 
 
 
-mostrarTotales() {
-  this.planillaService.getTotalesPorDedYBen(this.idPlanilla).subscribe({
-    next: (res) => {
-      const dialogData = {
-        beneficios: res.beneficios.map((b:any) => ({
-          nombre: b.NOMBRE_BENEFICIO,
-          total: b.TOTAL_MONTO_BENEFICIO
-        })),
-        deducciones: res.deducciones.map((d:any) => ({
-          nombre: d.NOMBRE_DEDUCCION,
-          total: d.TOTAL_MONTO_APLICADO
-        })),
-        codigoPlanilla: this.detallePlanilla?.codigo_planilla || 'N/A',
-        nombrePlanilla: this.detallePlanilla?.nombre_planilla || 'Desconocido',
-        mesPlanilla: this.formatMonth(this.detallePlanilla?.fecha_apertura)
-      };
+  mostrarTotales() {
+    this.planillaService.getTotalesPorDedYBen(this.idPlanilla).subscribe({
+      next: (res) => {
+        const dialogData = {
+          beneficios: res.beneficios.map((b: any) => ({
+            nombre: b.NOMBRE_BENEFICIO,
+            total: b.TOTAL_MONTO_BENEFICIO
+          })),
+          deducciones: res.deducciones.map((d: any) => ({
+            nombre: d.NOMBRE_DEDUCCION,
+            total: d.TOTAL_MONTO_APLICADO
+          })),
+          codigoPlanilla: this.detallePlanilla?.codigo_planilla || 'N/A',
+          nombrePlanilla: this.detallePlanilla?.nombre_planilla || 'Desconocido',
+          mesPlanilla: this.formatMonth(this.detallePlanilla?.fecha_apertura)
+        };
 
-      this.dialog.open(TotalesporbydDialogComponent, {
-        width: '1000px',
-        data: dialogData
-      });
-    },
-    error: (error) => {
-      console.error('Error al obtener los totales', error);
-      this.toastr.error('Error al obtener los totales');
-    }
-  });
-}
+        this.dialog.open(TotalesporbydDialogComponent, {
+          width: '1000px',
+          data: dialogData
+        });
+      },
+      error: (error) => {
+        console.error('Error al obtener los totales', error);
+        this.toastr.error('Error al obtener los totales');
+      }
+    });
+  }
 
 
 

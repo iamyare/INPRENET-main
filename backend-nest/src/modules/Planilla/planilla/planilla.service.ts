@@ -1193,7 +1193,30 @@ WHERE
 
   async generarVoucher(idPlanilla: number, dni: string): Promise<any> {
     try {
-      const beneficios = await this.entityManager.query(
+      const persona = await this.personaRepository.findOne({
+        where: {
+          n_identificacion: dni, detallePersona: {
+            detalleBeneficio: {
+              detallePagBeneficio: {
+                estado: 'PAGADA',
+                personaporbanco: { estado: 'ACTIVO' },
+                planilla: { id_planilla: idPlanilla }
+              },
+            }
+          }
+        },
+        relations: [
+          'detallePersona', 'detallePersona.detalleBeneficio',
+          'detallePersona.padreIdPersona',
+          'detallePersona.padreIdPersona.persona',
+          'detallePersona.detalleBeneficio.beneficio',
+          'detallePersona.detalleBeneficio.detallePagBeneficio',
+          'detallePersona.detalleBeneficio.detallePagBeneficio.detalleDeduccion.deduccion',
+          'detallePersona.detalleBeneficio.detallePagBeneficio.personaporbanco',
+          'detallePersona.detalleBeneficio.detallePagBeneficio.planilla']
+      })
+
+      /* const beneficios = await this.entityManager.query(
         `SELECT DISTINCT
           ben."NOMBRE_BENEFICIO",
           detP."ID_PERSONA",
@@ -1239,17 +1262,6 @@ WHERE
               "NET_BENEFICIO" ben
           ON 
               detBA."ID_BENEFICIO" = ben."ID_BENEFICIO"
-          JOIN 
-              "NET_DETALLE_PERSONA" detP
-          ON 
-              detBA."ID_PERSONA" = detP."ID_PERSONA"
-              AND detBA."ID_DETALLE_PERSONA" = detP."ID_DETALLE_PERSONA"
-              AND detBA."ID_CAUSANTE" = detP."ID_CAUSANTE"
-          JOIN 
-              "NET_PERSONA" pers 
-          ON 
-              pers."ID_PERSONA" = detP."ID_PERSONA"
-          
           
           LEFT JOIN 
               "NET_PERSONA_POR_BANCO" persPorBanco 
@@ -1260,7 +1272,7 @@ WHERE
           ON 
               banco."ID_BANCO" = persPorBanco."ID_BANCO"
           
-          LEFT JOIN "NET_DETALLE_PAGO_BENEFICIO" detPagBen 
+          LEFT JOIN "NET_DETALLE_PAGO_BENEFICIO" persona 
           ON 
               detPagBen."ID_AF_BANCO" = persPorBanco."ID_AF_BANCO"
           
@@ -1269,9 +1281,9 @@ WHERE
                   detBs."ID_PLANILLA" = ${idPlanilla} AND 
                   pers."N_IDENTIFICACION" = '${dni}' AND
                   persPorBanco."ESTADO" = 'ACTIVO'`
-      );
+      ); */
 
-      return { beneficios };
+      return { persona };
     } catch (error) {
       console.log(error);
 
@@ -1405,7 +1417,7 @@ WHERE
 
   async ObtenerPlanDefinPersonas(codPlanilla: string, page?: number, limit?: number): Promise<any> {
     let query = `
-              SELECT 
+              SELECT DISTINCT
             per."N_IDENTIFICACION" AS "DNI",
             per."ID_PERSONA",
             perPorBan."NUM_CUENTA",
@@ -1420,6 +1432,7 @@ WHERE
             ) AS "NOMBRE_COMPLETO"
         FROM 
             "NET_DETALLE_PAGO_BENEFICIO" detBs
+        
         JOIN 
             "NET_PLANILLA" plan
         ON 
@@ -1448,14 +1461,12 @@ WHERE
         LEFT JOIN 
             "NET_PERSONA_POR_BANCO" perPorBan
         ON 
-            per."ID_PERSONA" = perPorBan."ID_PERSONA"
+            detBs."ID_AF_BANCO" = perPorBan."ID_AF_BANCO"
         LEFT JOIN 
             "NET_BANCO" banco
         ON 
             banco."ID_BANCO" = perPorBan."ID_BANCO"
-        LEFT JOIN "NET_DETALLE_PAGO_BENEFICIO" detPagBen 
-          ON 
-              detPagBen."ID_AF_BANCO" = perPorBan."ID_AF_BANCO"
+        
         WHERE
                 detBs."ESTADO" = 'PAGADA' AND
                 plan."CODIGO_PLANILLA" = '${codPlanilla}'

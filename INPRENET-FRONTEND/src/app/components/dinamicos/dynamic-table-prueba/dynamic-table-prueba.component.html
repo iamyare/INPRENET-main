@@ -67,12 +67,12 @@
     <ng-container *ngIf="verBotEditar" matColumnDef="acciones">
       <th mat-header-cell *matHeaderCellDef>Acciones</th>
       <td mat-cell *matCellDef="let row">
-        <button style="height: auto" color="primary" mat-icon-button *ngIf="!row.isEditing"
-          (click)="startEditing(row)" class="boton-editar">
+        <button style="height: auto" color="primary" mat-icon-button *ngIf="!row.isEditing" (click)="startEditing(row)"
+          class="boton-editar">
           <mat-icon class="icono-editar">edit</mat-icon>
         </button>
-        <button style="height: auto" color="primary" mat-raised-button *ngIf="row.isEditing"
-          (click)="saveChanges(row)" class="boton-estetico">Guardar</button>
+        <button style="height: auto" color="primary" mat-raised-button *ngIf="row.isEditing" (click)="saveChanges(row)"
+          class="boton-estetico">Guardar</button>
         <button style="height: auto" color="warn" mat-raised-button *ngIf="row.isEditing" (click)="stopEditing(row)"
           class="boton-estetico">Cancelar</button>
       </td>
@@ -96,7 +96,8 @@
     <ng-container *ngIf="mostrarBotonTres" matColumnDef="botonTres">
       <th mat-header-cell *matHeaderCellDef>{{ nombreEncabezadoTres }}</th>
       <td mat-cell *matCellDef="let row">
-        <button mat-raised-button style="height: auto" (click)="ejecutarAccionTres(row)">{{ etiquetaBotonTres }}</button>
+        <button mat-raised-button style="height: auto" (click)="ejecutarAccionTres(row)">{{ etiquetaBotonTres
+          }}</button>
       </td>
     </ng-container>
 
@@ -120,13 +121,9 @@
 
     <!-- Header and Row Declarations -->
     <tr mat-header-row *matHeaderRowDef="columnDefs"></tr>
-    <tr mat-row *matRowDef="let row; columns: columnDefs; let i = index"
-      [class.selected]="row === selectedItem"
-      [class.clickable-row]="enableRowClick"
-      [class.highlight-on-hover]="highlightOnHover"
-      [class.even-row]="i % 2 === 0"
-      [class.odd-row]="i % 2 !== 0"
-      (click)="onRowClick(row)">
+    <tr mat-row *matRowDef="let row; columns: columnDefs; let i = index" [class.selected]="row === selectedItem"
+      [class.clickable-row]="enableRowClick" [class.highlight-on-hover]="highlightOnHover"
+      [class.even-row]="i % 2 === 0" [class.odd-row]="i % 2 !== 0" (click)="onRowClick(row)">
     </tr>
   </table>
 </div>

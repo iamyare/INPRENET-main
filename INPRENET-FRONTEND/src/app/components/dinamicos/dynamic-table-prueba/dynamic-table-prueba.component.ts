@@ -114,6 +114,7 @@ export class DynamicTablePruebaComponent implements OnInit, OnDestroy {
       ...(this.mostrarBotonEliminar ? ['eliminar'] : []),
       ...(this.mostrarBotonEditar ? ['editar'] : [])
     ];
+    this.calculateTotals();
   }
 
   filtrarUsuarios(query?: any): Observable<any[]> {
@@ -288,5 +289,21 @@ export class DynamicTablePruebaComponent implements OnInit, OnDestroy {
       this.selectedItem = row;
       this.rowClicked.emit(row);
     }
+  }
+
+  totals: any = {};
+  // Método para calcular los totales
+  calculateTotals() {
+    this.totals = {};
+    this.searchResults.forEach((row: { [x: string]: string; }) => {
+      this.columns.forEach(col => {
+        if (col.moneda) {
+          if (!this.totals[col.col]) {
+            this.totals[col.col] = 0;
+          }
+          this.totals[col.col] += parseFloat(row[col.col]) || 0;
+        }
+      });
+    });
   }
 }

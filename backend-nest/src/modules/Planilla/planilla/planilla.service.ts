@@ -1466,7 +1466,7 @@ WHERE
             per."ID_PERSONA",
             perPorBan."NUM_CUENTA",
             banco."NOMBRE_BANCO",
-            SUM(detBs."MONTO_A_PAGAR") AS "Total Beneficio",
+            SUM(detBs."MONTO_A_PAGAR") AS "TOTAL_BENEFICIO",
             TRIM(
                 per."PRIMER_NOMBRE" || ' ' ||
                 COALESCE(per."SEGUNDO_NOMBRE", '') || ' ' ||
@@ -1529,18 +1529,22 @@ WHERE
             )
     `;
 
-    let query2 = `
+    let queryI = `
             SELECT
         per."ID_PERSONA",
-        SUM(dd."MONTO_APLICADO") AS "Total Deducciones"
+        SUM(dd."MONTO_APLICADO") AS "DEDUCCIONES_INPREMA"
         
       FROM
         "NET_DETALLE_DEDUCCION" dd
       INNER JOIN "NET_DEDUCCION" ded ON ded."ID_DEDUCCION" = dd."ID_DEDUCCION"
+      LEFT JOIN 
+            "NET_CENTRO_TRABAJO" instFin
+        ON 
+            instFin."ID_CENTRO_TRABAJO" = ded."ID_CENTRO_TRABAJO" 
       INNER JOIN
         NET_DETALLE_PAGO_BENEFICIO detPagB ON 
         DD."ID_DETALLE_PAGO_BENEFICIO" = detPagB."ID_BENEFICIO_PLANILLA"
-    JOIN 
+      JOIN 
             "NET_PLANILLA" plan
         ON 
             plan."ID_PLANILLA" = detPagB."ID_PLANILLA"
@@ -1563,7 +1567,52 @@ WHERE
             per."ID_PERSONA" = detP."ID_PERSONA"
       WHERE
         dd."ESTADO_APLICACION" = 'COBRADA' AND
-        plan."CODIGO_PLANILLA" = '${codPlanilla}'
+        plan."CODIGO_PLANILLA" = '${codPlanilla}' AND
+        instFin."NOMBRE_CENTRO_TRABAJO" = 'INPREMA'
+      GROUP BY 
+            per."ID_PERSONA"
+    `;
+
+    let queryT = `
+    SELECT
+        per."ID_PERSONA",
+        SUM(dd."MONTO_APLICADO") AS "DEDUCCIONES_TERCEROS"
+        
+      FROM
+        "NET_DETALLE_DEDUCCION" dd
+      INNER JOIN "NET_DEDUCCION" ded ON ded."ID_DEDUCCION" = dd."ID_DEDUCCION"
+      LEFT JOIN 
+            "NET_CENTRO_TRABAJO" instFin
+        ON 
+            instFin."ID_CENTRO_TRABAJO" = ded."ID_CENTRO_TRABAJO" 
+      INNER JOIN
+        NET_DETALLE_PAGO_BENEFICIO detPagB ON 
+        DD."ID_DETALLE_PAGO_BENEFICIO" = detPagB."ID_BENEFICIO_PLANILLA"
+      JOIN 
+            "NET_PLANILLA" plan
+        ON 
+            plan."ID_PLANILLA" = detPagB."ID_PLANILLA"
+     JOIN 
+            "NET_DETALLE_BENEFICIO_AFILIADO" detBA
+        ON 
+            detPagB."ID_DETALLE_PERSONA" = detBA."ID_DETALLE_PERSONA" 
+            AND detPagB."ID_PERSONA" = detBA."ID_PERSONA"
+            AND detPagB."ID_CAUSANTE" = detBA."ID_CAUSANTE"
+            AND detPagB."ID_BENEFICIO" = detBA."ID_BENEFICIO"
+        JOIN 
+            "NET_DETALLE_PERSONA" detP
+        ON 
+            detBA."ID_PERSONA" = detP."ID_PERSONA"
+            AND detBA."ID_DETALLE_PERSONA" = detP."ID_DETALLE_PERSONA"
+            AND detBA."ID_CAUSANTE" = detP."ID_CAUSANTE"
+        JOIN 
+            "NET_PERSONA" per
+        ON 
+            per."ID_PERSONA" = detP."ID_PERSONA"
+      WHERE
+        dd."ESTADO_APLICACION" = 'COBRADA' AND
+        plan."CODIGO_PLANILLA" = '${codPlanilla}' AND
+        instFin."NOMBRE_CENTRO_TRABAJO" != 'INPREMA'
       GROUP BY 
             per."ID_PERSONA"
     `;
@@ -1571,26 +1620,35 @@ WHERE
     interface Persona {
       DNI: string;
       ID_PERSONA: number;
-      'Total Beneficio': number;
+      'TOTAL_BENEFICIO': number;
       NOMBRE_COMPLETO: string;
-      'Total Deducciones'?: number; // Hacemos opcional esta propiedad
+      'DEDUCCIONES_INPREMA'?: number; // Hacemos opcional esta propiedad
+      'DEDUCCIONES_TERCEROS'?: number; // Hacemos opcional esta propiedad
     }
 
     interface Deduccion {
       ID_PERSONA: number;
-      'Total Deducciones': number;
+      'DEDUCCIONES_INPREMA'?: number;
+      'DEDUCCIONES_TERCEROS'?: number;
     }
 
     try {
       const result: Persona[] = await this.entityManager.query(query);
-      const result2: Deduccion[] = await this.entityManager.query(query2);
+      const resultI: Deduccion[] = await this.entityManager.query(queryI);
+      const resultT: Deduccion[] = await this.entityManager.query(queryT);
 
       result.forEach(persona => {
-        const deduccion = result2.find(d => d.ID_PERSONA === persona.ID_PERSONA);
-        if (deduccion) {
-          persona['Total Deducciones'] = deduccion['Total Deducciones'];
+        const deduccionI = resultI.find(d => d.ID_PERSONA === persona.ID_PERSONA);
+        if (deduccionI) {
+          persona['DEDUCCIONES_INPREMA'] = deduccionI['DEDUCCIONES_INPREMA'];
+        }
+        const deduccionT = resultT.find(d => d.ID_PERSONA === persona.ID_PERSONA);
+        if (deduccionT) {
+          persona['DEDUCCIONES_TERCEROS'] = deduccionT['DEDUCCIONES_TERCEROS'];
         }
       });
+      console.log(result);
+
       return result;
     } catch (error) {
       this.logger.error(`Error al obtener totales por planilla: ${error.message}`, error.stack);
@@ -1631,8 +1689,9 @@ WHERE
       { header: 'ID_PERSONA', key: 'ID_PERSONA', width: 15 },
       { header: 'DNI', key: 'DNI', width: 15 },
       { header: 'NOMBRE_COMPLETO', key: 'NOMBRE_COMPLETO', width: 30 },
-      { header: 'Total Beneficio', key: 'Total Beneficio', width: 15 },
-      { header: 'Total Deducciones', key: 'Total Deducciones', width: 15 },
+      { header: 'TOTAL BENEFICIO', key: 'TOTAL_BENEFICIO', width: 15 },
+      { header: 'DEDUCCIONES TERCEROS', key: 'DEDUCCIONES_TERCEROS', width: 15 },
+      { header: 'DEDUCCIONES INPREMA', key: 'DEDUCCIONES_INPREMA', width: 15 },
       { header: 'NUMERO DE CUENTA', key: 'NUM_CUENTA', width: 25 },
       { header: 'NOMBRE BANCO', key: 'NOMBRE_BANCO', width: 15 },
     ];

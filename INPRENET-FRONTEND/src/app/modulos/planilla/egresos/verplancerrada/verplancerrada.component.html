@@ -72,13 +72,15 @@
       <tr>
         <th>Total Beneficios</th>
         <td>{{ detallePlanilla?.totalBeneficios | currency: "L" }}</td>
-        <th>Total Deducciones</th>
-        <td>{{ detallePlanilla?.totalDeducciones | currency: "L" }}</td>
+        <th>Deducciones INPREMA</th>
+        <td>{{ detallePlanilla?.deduccionesI | currency: "L" }}</td>
+
       </tr>
       <tr style="background-color: #f2f2f2">
         <th>Total Neto</th>
         <td>{{ detallePlanilla?.totalNeto | currency: "L" }}</td>
-        <td></td>
+        <th>Deducciones Terceros</th>
+        <td>{{ detallePlanilla?.deduccionesT | currency: "L" }}</td>
         <td></td>
       </tr>
     </table>
@@ -88,13 +90,13 @@
 <div style="background-color: white;margin-bottom: 1%; padding-top: 1%;margin-top: 1%; " *ngIf="verDat">
 
 
-  <app-dynamic-table-prueba titulo="Datos De Planilla Definitiva"[verOpcEditar]="false" [columns]="myColumnsDed" [data]="datosTabl"
-  (ejecutarFuncionAsincronaEvent)="
+  <app-dynamic-table-prueba titulo="Datos De Planilla Definitiva" [verOpcEditar]="false" [columns]="myColumnsDed"
+    [data]="datosTabl" (ejecutarFuncionAsincronaEvent)="
       ejecutarFuncionAsincronaDesdeOtroComponente($event)
       " [nombreEncabezadoUno]="'Detalle Ingresos'" [mostrarBotonUno]="true" [etiquetaBotonUno]="'Ver Detalle'"
-  (accionBotonUno)="manejarAccionUno($event)" [nombreEncabezadoTres]="'Voucher'" [mostrarBotonTres]="true"
-  [etiquetaBotonTres]="'Generar Voucher'" (accionBotonTres)="manejarAccionTres($event)">
-</app-dynamic-table-prueba>
+    (accionBotonUno)="manejarAccionUno($event)" [nombreEncabezadoTres]="'Voucher'" [mostrarBotonTres]="true"
+    [etiquetaBotonTres]="'Generar Voucher'" (accionBotonTres)="manejarAccionTres($event)">
+  </app-dynamic-table-prueba>
 </div>
 <!-- <div style="background-color: white;margin-bottom: 1%; padding-top: 1%;margin-top: 1%; " *ngIf="verDat">
   <h4 class="card-title" style="text-align: center">

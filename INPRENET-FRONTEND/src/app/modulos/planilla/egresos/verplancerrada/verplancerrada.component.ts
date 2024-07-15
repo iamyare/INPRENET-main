@@ -75,13 +75,20 @@ export class VerplancerradaComponent {
       },
       {
         header: 'Total de Ingresos',
-        col: 'Total Beneficio',
+        col: 'TOTAL_BENEFICIO',
         moneda: true,
         isEditable: true
       },
       {
-        header: 'Total De Deducciones Aplicadas',
-        col: 'Total Deducciones',
+        header: 'Deducciones Terceros',
+        col: 'DEDUCCIONES_TERCEROS',
+        isEditable: true,
+        moneda: true,
+        validationRules: [Validators.required, Validators.pattern(/^(3[01]|[12][0-9]|0?[1-9])-(1[0-2]|0?[1-9])-\d{4} - (3[01]|[12][0-9]|0?[1-9])-(1[0-2]|0?[1-9])-\d{4}$/)]
+      },
+      {
+        header: 'Deducciones Inprema',
+        col: 'DEDUCCIONES_INPREMA',
         isEditable: true,
         moneda: true,
         validationRules: [Validators.required, Validators.pattern(/^(3[01]|[12][0-9]|0?[1-9])-(1[0-2]|0?[1-9])-\d{4} - (3[01]|[12][0-9]|0?[1-9])-(1[0-2]|0?[1-9])-\d{4}$/)]
@@ -110,33 +117,37 @@ export class VerplancerradaComponent {
         {
           next: (response) => {
             let totalBeneficios = 0;
-            let totalDeducciones = 0;
+            let deduccionesI = 0;
+            let deduccionesT = 0;
 
             this.datosTabl = response.map((item: any) => {
-              totalBeneficios += item["Total Beneficio"] || 0;
-              totalDeducciones += item["Total Deducciones"] || 0;
 
-              return {
+              totalBeneficios += item.TOTAL_BENEFICIO || 0;
+              deduccionesI += item.DEDUCCIONES_INPREMA || 0;
+              deduccionesT += item.DEDUCCIONES_TERCEROS || 0;
+
+              let respons: any = {
                 id_afiliado: item.ID_PERSONA,
                 dni: item.DNI,
                 NOMBRE_COMPLETO: item.NOMBRE_COMPLETO,
-                "Total Beneficio": item["Total Beneficio"],
-                "Total Deducciones": item["Total Deducciones"],
-                "Total": item["Total Beneficio"] - item["Total Deducciones"],
+                TOTAL_BENEFICIO: item.TOTAL_BENEFICIO,
+                DEDUCCIONES_INPREMA: item.DEDUCCIONES_INPREMA || 0,
+                DEDUCCIONES_TERCEROS: item.DEDUCCIONES_TERCEROS || 0,
+                "Total": item.TOTAL_BENEFICIO - (item.DEDUCCIONES_INPREMA || 0 + item.DEDUCCIONES_TERCEROS || 0),
                 tipo_afiliado: item.tipo_afiliado,
                 BENEFICIOSIDS: item.BENEFICIOSIDS,
                 beneficiosNombres: item.beneficiosNombres,
                 fecha_cierre: item.fecha_cierre,
                 correo_1: item.correo_1
               };
+
+              return respons
             });
 
-            console.log(this.detallePlanilla.fecha_apertura);
-
-
             this.detallePlanilla.totalBeneficios = totalBeneficios;
-            this.detallePlanilla.totalDeducciones = totalDeducciones;
-            this.detallePlanilla.totalNeto = totalBeneficios - totalDeducciones;
+            this.detallePlanilla.deduccionesI = deduccionesI;
+            this.detallePlanilla.deduccionesT = deduccionesT;
+            this.detallePlanilla.totalNeto = totalBeneficios - (deduccionesI + deduccionesT);
 
             this.verDat = true;
           },
@@ -216,9 +227,10 @@ export class VerplancerradaComponent {
             id_afiliado: item.ID_PERSONA,
             dni: item.DNI,
             NOMBRE_COMPLETO: item.NOMBRE_COMPLETO,
-            "Total Beneficio": item["Total Beneficio"],
-            "Total Deducciones": deducciones,
-            "Total": item["Total Beneficio"] - deducciones,
+            TOTAL_BENEFICIO: item.TOTAL_BENEFICIO,
+            DEDUCCIONES_INPREMA: item.DEDUCCIONES_INPREMA || 0,
+            DEDUCCIONES_TERCEROS: item.DEDUCCIONES_TERCEROS || 0,
+            "Total": item.TOTAL_BENEFICIO - (item.DEDUCCIONES_INPREMA || 0 + item.DEDUCCIONES_TERCEROS || 0),
             tipo_afiliado: item.tipo_afiliado,
             BENEFICIOSIDS: item.BENEFICIOSIDS,
             beneficiosNombres: item.beneficiosNombres,
@@ -509,7 +521,6 @@ export class VerplancerradaComponent {
             alignment: 'center',
             bold: true,
             fontSize: 12,
-            decoration: 'underline'
           }
         },
         defaultStyle: {

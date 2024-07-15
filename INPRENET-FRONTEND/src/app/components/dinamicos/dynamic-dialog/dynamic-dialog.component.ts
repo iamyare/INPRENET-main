@@ -36,7 +36,7 @@ export class DynamicDialogComponent implements OnInit {
         if (response1) {
           const data = response1;
           this.data.logs.push({ message: 'Datos De Deducciones:', detail: data, type: 'deducciones' });
-          this.displayedColumnsD = ['NOMBRE_DEDUCCION', 'MontoAplicado'];
+          this.displayedColumnsD = ['NOMBRE_INSTITUCION', 'NOMBRE_DEDUCCION', 'MontoAplicado'];
         }
       },
     });

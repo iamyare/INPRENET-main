@@ -8,6 +8,7 @@ import { CentroTrabajoService } from './centro-trabajo.service';
 import { HttpClient } from '@angular/common/http';
 import { TransaccionesService } from './transacciones.service';
 import { AuthService } from './auth.service';
+import { map, Observable } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
@@ -223,23 +224,28 @@ export class DatosEstaticosService {
     }
   }
 
-  async getBancos() {
-    const response = await this.bancosService.getAllBancos().toPromise();
-    this.Bancos = response.data.map((item: { nombre_banco: any; id_banco: any; }) => ({
-      label: item.nombre_banco,
-      value: String(item.id_banco)
-    }));
-
-    return this.Bancos;
+  getBancos(): Observable<any[]> {
+    return this.bancosService.getAllBancos().pipe(
+      map(response => {
+        this.Bancos = response.data.map((item: { nombre_banco: any; id_banco: any; }) => ({
+          label: item.nombre_banco,
+          value: String(item.id_banco)
+        }));
+        return this.Bancos;
+      })
+    );
   }
 
-  async getColegiosMagisteriales() {
-    const response = await this.colegiosMagSVC.getAllColegiosMagisteriales().toPromise();
-    this.colegiosMagisteriales = response.data.map((item: { id_colegio: any; descripcion: any; }) => ({
-      label: String(item.descripcion),
-      value: item.id_colegio,
-    }));
-    return this.colegiosMagisteriales;
+  getColegiosMagisteriales(): Observable<any[]> {
+    return this.colegiosMagSVC.getAllColegiosMagisteriales().pipe(
+      map(response => {
+        this.colegiosMagisteriales = response.data.map((item: { id_colegio: any; descripcion: any; }) => ({
+          label: String(item.descripcion),
+          value: item.id_colegio,
+        }));
+        return this.colegiosMagisteriales;
+      })
+    );
   }
 
   tipoPersona = [

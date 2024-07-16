@@ -4,8 +4,9 @@
   <div [hidden]="activeStep !== 0">
     <app-dat-generales-afiliado
       [useCamera]="true"
-      [formParent]="datosGeneralesForm"
-      (newDatosGenerales)="handleDatosGeneralesChange($event)">
+      [datos]="datosGeneralesForm"
+      (newDatosGenerales)="handleDatosGeneralesChange($event)"
+      (imageCaptured)="handleImageCaptured($event)">
     </app-dat-generales-afiliado>
   </div>
 

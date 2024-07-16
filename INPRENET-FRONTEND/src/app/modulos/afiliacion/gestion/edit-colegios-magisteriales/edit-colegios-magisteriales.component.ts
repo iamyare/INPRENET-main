@@ -120,7 +120,7 @@ export class EditColegiosMagisterialesComponent implements OnInit, OnChanges, On
   }
 
   async editarFila(row: any) {
-    this.colegiosMagisteriales = await this.datosEstaticosService.getColegiosMagisteriales();
+    /* this.colegiosMagisteriales = await this.datosEstaticosService.getColegiosMagisteriales();
     const campos = [
       {
         nombre: 'colegio_magisterial',
@@ -134,7 +134,7 @@ export class EditColegiosMagisterialesComponent implements OnInit, OnChanges, On
     const valoresIniciales = {
       colegio_magisterial: row.id_per_cole_mag
     };
-    this.openDialog(campos, valoresIniciales);
+    this.openDialog(campos, valoresIniciales); */
   }
 
   eliminarFila(row: any) {

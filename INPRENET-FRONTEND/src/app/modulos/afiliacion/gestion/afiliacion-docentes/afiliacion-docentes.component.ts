@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup } from '@angular/forms';
+import { AfiliacionService } from 'src/app/services/afiliacion.service';
 
 @Component({
   selector: 'app-afiliacion-docentes',
@@ -34,8 +35,9 @@ export class AfiliacionDocentesComponent implements OnInit {
   otrasFuentesIngresoData: any = {};
   refPersData: any = {};
   benefData: any = {};
+  fotoPerfil: string = '';
 
-  constructor(private fb: FormBuilder) {
+  constructor(private fb: FormBuilder, private afiliacionService: AfiliacionService) {
     this.datosGeneralesForm = this.fb.group({});
     this.colegioMagisterialForm = this.fb.group({});
     this.bancosForm = this.fb.group({});
@@ -109,18 +111,90 @@ export class AfiliacionDocentesComponent implements OnInit {
   }
 
   gatherAllData(): void {
+    const persona = {
+      id_tipo_identificacion: this.datosGeneralesData.refpers[0].id_tipo_identificacion,
+      id_pais_nacionalidad: this.datosGeneralesData.refpers[0].id_pais_nacionalidad,
+      n_identificacion: this.datosGeneralesData.refpers[0].n_identificacion,
+      fecha_vencimiento_ident: this.datosGeneralesData.refpers[0].fecha_vencimiento_ident,
+      rtn: this.datosGeneralesData.refpers[0].rtn,
+      grupo_etnico: this.datosGeneralesData.refpers[0].grupo_etnico,
+      estado_civil: this.datosGeneralesData.refpers[0].estado_civil,
+      primer_nombre: this.datosGeneralesData.refpers[0].primer_nombre,
+      segundo_nombre: this.datosGeneralesData.refpers[0].segundo_nombre,
+      tercer_nombre: this.datosGeneralesData.refpers[0].tercer_nombre,
+      primer_apellido: this.datosGeneralesData.refpers[0].primer_apellido,
+      segundo_apellido: this.datosGeneralesData.refpers[0].segundo_apellido,
+      genero: this.datosGeneralesData.refpers[0].genero,
+      sexo: this.datosGeneralesData.refpers[0].sexo,
+      cantidad_hijos: this.datosGeneralesData.refpers[0].cantidad_hijos,
+      grado_academico: this.datosGeneralesData.refpers[0].grado_academico,
+      telefono_1: this.datosGeneralesData.refpers[0].telefono_1,
+      telefono_2: this.datosGeneralesData.refpers[0].telefono_2,
+      correo_1: this.datosGeneralesData.refpers[0].correo_1,
+      correo_2: this.datosGeneralesData.refpers[0].correo_2,
+      fecha_nacimiento: this.datosGeneralesData.refpers[0].fecha_nacimiento,
+      archivo_identificacion: this.datosGeneralesData.refpers[0].archivo_identificacion,
+      direccion_residencia: this.datosGeneralesData.refpers[0].direccion_residencia,
+      id_municipio_residencia: this.datosGeneralesData.refpers[0].id_municipio_residencia,
+      id_profesion: this.datosGeneralesData.refpers[0].id_profesion,
+      discapacidades: this.datosGeneralesData.discapacidades ? this.datosGeneralesData.discapacidades.map((id: number) => ({ id_discapacidad: id })) : []
+    }
+
+    const detalle = {
+      eliminado: "NO",
+      tipo_persona: "AFILIADO",
+      nombre_estado: "ACTIVO"
+    };
+
     const allData = {
-      persona: {
-        ...this.datosGeneralesData,
-        discapacidades: this.datosGeneralesData.discapacidades ? this.datosGeneralesData.discapacidades.map((id: number) => ({ id_discapacidad: id })) : []
-      },
-      colegioMagisterial: this.colegioMagisterialData,
+      persona: persona,
+      detallePersona: detalle,
+      colegiosMagisteriales: this.colegioMagisterialData,
       bancos: this.bancosData.banco,
       centrosTrabajo: this.centrosTrabajoData.trabajo,
       otrasFuentesIngreso: this.otrasFuentesIngresoData.sociedadSocios,
-      referenciasPersonales: this.refPersData.refpers,
-      beneficiarios: this.benefData.value.beneficiario
+      referencias: this.refPersData.referencias,
+      beneficiarios: this.benefData.value.beneficiarios
     };
+
     console.log('Datos Completos:', allData);
+    this.enviarDatos(allData);
+  }
+
+  enviarDatos(datos: any): void {
+    const fotoPerfilBase64 = this.fotoPerfil || '';
+
+    let file: any;
+    if (fotoPerfilBase64) {
+      const fotoBlob = this.dataURItoBlob(fotoPerfilBase64);
+      file = new File([fotoBlob], 'perfil.jpg', { type: 'image/jpeg' });
+    }
+
+    this.afiliacionService.crearAfiliacion(datos, file).subscribe(
+      response => {
+        console.log('Datos enviados con éxito:', response);
+      },
+      error => {
+        console.error('Error al enviar los datos:', error);
+      }
+    );
+  }
+
+  dataURItoBlob(dataURI: string): Blob {
+    const byteString = atob(dataURI.split(',')[1]);
+    const mimeString = dataURI.split(',')[0].split(':')[1].split(';')[0];
+
+    const buffer = new ArrayBuffer(byteString.length);
+    const data = new DataView(buffer);
+
+    for (let i = 0; i < byteString.length; i++) {
+      data.setUint8(i, byteString.charCodeAt(i));
+    }
+
+    return new Blob([buffer], { type: mimeString });
+  }
+
+  handleImageCaptured(image: string): void {
+    this.fotoPerfil = image;
   }
 }

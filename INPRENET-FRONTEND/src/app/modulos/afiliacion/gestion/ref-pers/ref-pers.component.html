@@ -26,11 +26,11 @@
             <mat-form-field style="flex-direction: column-reverse;" class="full-width-field inputs" appearance="outline">
               <mat-label>Tipo de Identificación</mat-label>
               <mat-icon matPrefix>badge</mat-icon>
-              <mat-select formControlName="tipo_identificacion">
+              <mat-select formControlName="id_tipo_identificacion">
                 <mat-option *ngFor="let item of tipo_identificacion" [value]="item.value">{{ item.label }}</mat-option>
               </mat-select>
             </mat-form-field>
-            <mat-error *ngFor="let error of getErrors(i, 'tipo_identificacion')">
+            <mat-error *ngFor="let error of getErrors(i, 'id_tipo_identificacion')">
               {{ error }}
             </mat-error>
           </div>

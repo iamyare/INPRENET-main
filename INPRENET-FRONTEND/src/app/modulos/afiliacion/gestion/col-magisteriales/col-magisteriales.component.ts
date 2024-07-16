@@ -50,13 +50,15 @@ export class ColMagisterialesComponent implements OnInit {
 
   ngOnInit(): void {
     this.initForm();
-    if (this.datos) {
-      if (this.datos.value.ColMags.length > 0) {
+    this.datosEstaticosSVC.getColegiosMagisteriales().subscribe(colegios => {
+      this.colegio_magisterial = colegios;
+
+      if (this.datos && this.datos.value.ColMags.length > 0) {
         for (let i of this.datos.value.ColMags) {
-          this.agregarColMag(i)
+          this.agregarColMag(i);
         }
       }
-    }
+    });
   }
 
   ngOnDestroy() {
@@ -71,16 +73,18 @@ export class ColMagisterialesComponent implements OnInit {
       this.formParent = existingForm;
     } else {
       this.formParent = this.fb.group({
-        ColMags: this.fb.array([])
+        ColMags: this.fb.array([]),
       });
     }
   }
 
   agregarColMag(datos?: any): void {
     const col_ColMags = this.formParent.get('ColMags') as FormArray;
-    const newFormGroup = generateColegMagistFormGroup(datos || {});
+    const newFormGroup = new FormGroup({
+      id_colegio: new FormControl(datos?.id_colegio || '', Validators.required),
+    });
     col_ColMags.push(newFormGroup);
-    this.onDatosColMagChange();  // Asegurarte de emitir los datos después de agregar
+    this.onDatosColMagChange();
   }
 
 
@@ -88,13 +92,13 @@ export class ColMagisterialesComponent implements OnInit {
     const col_ColMags = this.formParent.get('ColMags') as FormArray;
     if (col_ColMags.length > 0) {
       col_ColMags.removeAt(col_ColMags.length - 1);
-      this.onDatosColMagChange();  // Emitir los datos después de eliminar
+      this.onDatosColMagChange();
     }
   }
 
 
   getCtrl(key: string, form: FormGroup): any {
-    return form.get(key)
+    return form.get(key);
   }
 
   addValidation(index: number, key: string): void {
@@ -105,13 +109,12 @@ export class ColMagisterialesComponent implements OnInit {
   }
 
 
-  getErrors(i: number, fieldName: string): any {
-
+  getErrors(i: number, fieldName: string): any[] {
     if (this.formParent instanceof FormGroup) {
-      const controlesColMags = (this.formParent.get('ColMags') as FormGroup).controls;
-      const a = controlesColMags[i].get(fieldName)!.errors
+      const controlesColMags = (this.formParent.get('ColMags') as FormArray).controls;
+      const a = controlesColMags[i].get(fieldName)!.errors;
 
-      let errors = []
+      let errors = [];
       if (a) {
         if (a['required']) {
           errors.push('Este campo es requerido.');
@@ -125,11 +128,10 @@ export class ColMagisterialesComponent implements OnInit {
         if (a['pattern']) {
           errors.push('El formato no es válido.');
         }
-
-        return errors;
       }
+      return errors;
     }
-
+    return [];
   }
 
 }

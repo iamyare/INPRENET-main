@@ -1,4 +1,3 @@
-
 import { FormStateService } from "src/app/services/form-state.service";
 import { DatosEstaticosService } from "src/app/services/datos-estaticos.service";
 import { Component, EventEmitter, Input, OnInit, Output } from "@angular/core";
@@ -58,7 +57,7 @@ export function generateRefPerFormGroup(datos?: any): FormGroup {
       Validators.required,
       Validators.maxLength(15)
     ]),
-    tipo_identificacion: new FormControl(datos?.tipo_identificacion, [
+    id_tipo_identificacion: new FormControl(datos?.id_tipo_identificacion, [
       Validators.required
     ]),
     profesion: new FormControl(datos?.profesion, [
@@ -92,8 +91,7 @@ export function generateRefPerFormGroup(datos?: any): FormGroup {
   templateUrl: './ref-pers.component.html',
   styleUrls: ['./ref-pers.component.scss']
 })
-export class RefPersComponent implements OnInit
- {
+export class RefPersComponent implements OnInit {
   public formParent: FormGroup = new FormGroup({});
   private formKey = 'refForm';
   parentesco: any;
@@ -126,7 +124,30 @@ export class RefPersComponent implements OnInit
 
   onDatosRefPerChange(): void {
     const data = this.formParent.value;
-    this.newDatRefPerChange.emit(data);
+    const formattedData = this.formatData(data.refpers);
+    this.newDatRefPerChange.emit({ referencias: formattedData });
+  }
+
+  formatData(refpersArray: any[]): any[] {
+    return refpersArray.map(ref => ({
+      tipo_referencia: ref.tipo_referencia,
+      parentesco: ref.parentesco,
+      dependiente_economico: ref.dependiente_economico === 'si' ? 'SI' : 'NO',
+      persona_referencia: {
+        id_tipo_identificacion: ref.id_tipo_identificacion,
+        n_identificacion: ref.n_identificacion,
+        primer_nombre: ref.primer_nombre,
+        segundo_nombre: ref.segundo_nombre,
+        tercer_nombre: ref.tercer_nombre,
+        primer_apellido: ref.primer_apellido,
+        segundo_apellido: ref.segundo_apellido,
+        genero: ref.sexo === 'M' ? 'Masculino' : 'Femenino',
+        sexo: ref.sexo,
+        telefono_1: ref.telefono_personal,
+        telefono_2: ref.telefono_trabajo,
+        direccion_residencia: ref.direccion,
+      }
+    }));
   }
 
   onDatosGeneralesDiscChange(event: any) {
@@ -172,9 +193,9 @@ export class RefPersComponent implements OnInit
       { label: "REFERENCIA FAMILIAR", value: "REFERENCIA FAMILIAR" }
     ];
     this.tipo_identificacion = [
-      { label: "DNI", value: "DNI" },
-      { label: "CARNET DE RESIDENCIA", value: "CARNET DE RESIDENCIA" },
-      { label: "PASAPORTE", value: "PASAPORTE" }
+      { label: "DNI", value: 1 },
+      { label: "CARNET DE RESIDENCIA", value: 2 },
+      { label: "PASAPORTE", value: 3 }
     ];
     this.tipo_discapacidad = [
       { label: "MOTRIZ", value: "MOTRIZ" },
@@ -193,9 +214,8 @@ export class RefPersComponent implements OnInit
     this.initForm();
     this.updateAvailableParentesco();
 
-    // Agrega esto
     this.formParent.valueChanges.subscribe(values => {
-      this.newDatRefPerChange.emit(values);
+      this.onDatosRefPerChange();
     });
 
     if (this.datos) {
@@ -206,7 +226,6 @@ export class RefPersComponent implements OnInit
       }
     }
   }
-
 
   ngOnDestroy() { }
 
@@ -226,7 +245,6 @@ export class RefPersComponent implements OnInit
     const formGroup = generateRefPerFormGroup(datos);
     const tipoControl = formGroup.get('tipo_referencia') as FormControl;
 
-    // Listen to changes in 'tipo' to control the visibility of 'discapacidades'
     tipoControl.valueChanges.subscribe(value => {
       if (value === 'REFERENCIA FAMILIAR') {
         formGroup.addControl('discapacidad', new FormControl('', Validators.required));
@@ -251,9 +269,8 @@ export class RefPersComponent implements OnInit
   eliminarRefPer(): void {
     const ref_RefPers = this.formParent.get('refpers') as FormArray;
     ref_RefPers.removeAt(-1);
-    const data = this.formParent;
-    this.newDatRefPerChange.emit(data);
     this.updateAvailableParentesco();
+    this.onDatosRefPerChange();
   }
 
   getCtrl(key: string, form: FormGroup): any {

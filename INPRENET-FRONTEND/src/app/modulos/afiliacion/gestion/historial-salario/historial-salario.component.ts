@@ -39,18 +39,21 @@ export class HistorialSalarioComponent implements OnInit {
   constructor(private formStateService: FormStateService, private fb: FormBuilder, private datosEstaticos: DatosEstaticosService) {
     this.datosEstaticos.getBancos();
     this.Bancos = this.datosEstaticos.Bancos;
+
   }
 
   ngOnInit(): void {
     this.initForm();
 
-    if (this.datos) {
-      if (this.datos.value.banco && this.datos.value.banco.length > 0) {
+    this.datosEstaticos.getBancos().subscribe(bancos => {
+      this.Bancos = bancos;
+
+      if (this.datos && this.datos.value.banco && this.datos.value.banco.length > 0) {
         for (let i of this.datos.value.banco) {
           this.agregarBanco(i);
         }
       }
-    }
+    });
 
     this.formParent.valueChanges.subscribe(() => {
       this.onDatosHistSal();

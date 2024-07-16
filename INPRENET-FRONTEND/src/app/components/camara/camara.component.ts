@@ -69,10 +69,14 @@ export class CamaraComponent {
   }
 
   public handleImage(imagen: WebcamImage): void {
-    this.imagenWebcam = imagen;
-    this.imageCaptured.emit(imagen.imageAsDataUrl);
-    this.formStateService.setFotoPerfil(imagen.imageAsDataUrl);
-}
+    if (imagen && imagen.imageAsDataUrl) {
+      this.imagenWebcam = imagen;
+      this.imageCaptured.emit(imagen.imageAsDataUrl);
+      this.formStateService.setFotoPerfil(imagen.imageAsDataUrl);
+    } else {
+      console.error('La imagen capturada no es válida');
+    }
+  }
 
   public cameraSwitched(dispositivoId: string): void {
     console.log('Dispositivo Actual: ' + dispositivoId);

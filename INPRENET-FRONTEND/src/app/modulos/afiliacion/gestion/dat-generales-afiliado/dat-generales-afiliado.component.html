@@ -8,8 +8,8 @@
     </app-camara>
     <form [formGroup]="formParent" style="margin: 1%;" (change)="onDatosGeneralesChange()">
 
-      <div formArrayName="datgen">
-        <div *ngFor="let ref of getCtrl('datgen', formParent).controls; index as i">
+      <div formArrayName="refpers">
+        <div *ngFor="let ref of getCtrl('refpers', formParent).controls; index as i">
           <div [formGroupName]="i" class="row">
             <div class="row">
               <div class="col-lg-4 col-md-12">
@@ -541,12 +541,12 @@
               <div class="col-lg-12 col-md-12" *ngIf="discapacidad">
                 <div formArrayName="discapacidades" class="discapacidad-container">
                   <div class="discapacidad-title">Tipos de Discapacidad</div>
-                  <div *ngFor="let control of getCtrl('datgen', formParent).at(i).get('discapacidades').controls; let j = index" class="discapacidad-item">
+                  <div *ngFor="let control of getCtrl('refpers', formParent).at(i).get('discapacidades').controls; let j = index" class="discapacidad-item">
                     <mat-form-field class="example-full-width inputs discapacidad-field" appearance="outline">
                       <mat-label>Tipo De Discapacidad</mat-label>
                       <mat-icon matPrefix>wc</mat-icon>
                       <mat-select [formControlName]="j" (selectionChange)="onDatosGeneralesChange()">
-                        <mat-option *ngFor="let tipo_discapacidad of getAvailableDisabilities(getCtrl('datgen', formParent).at(i).get('discapacidades'), j)" [value]="tipo_discapacidad.value">
+                        <mat-option *ngFor="let tipo_discapacidad of getAvailableDisabilities(getCtrl('refpers', formParent).at(i).get('discapacidades'), j)" [value]="tipo_discapacidad.value">
                           {{ tipo_discapacidad.label }}
                         </mat-option>
                       </mat-select>

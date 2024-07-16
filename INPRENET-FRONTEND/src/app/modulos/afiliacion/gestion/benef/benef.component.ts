@@ -94,18 +94,35 @@ export class BenefComponent implements OnInit {
 
   initFormBeneficiario(datosBeneficiario?: any): FormGroup {
     return this.fb.group({
+      id_tipo_identificacion: new FormControl(datosBeneficiario?.id_tipo_identificacion || 1),
+      id_pais_nacionalidad: new FormControl(datosBeneficiario?.id_pais_nacionalidad || 1),
       n_identificacion: new FormControl(datosBeneficiario?.n_identificacion || '', [Validators.required, Validators.maxLength(40)]),
+      fecha_vencimiento_ident: new FormControl(datosBeneficiario?.fecha_vencimiento_ident || '', Validators.required),
+      rtn: new FormControl(datosBeneficiario?.rtn || '', [Validators.maxLength(40)]),
+      grupo_etnico: new FormControl(datosBeneficiario?.grupo_etnico || ''),
+      estado_civil: new FormControl(datosBeneficiario?.estado_civil || ''),
       primer_nombre: new FormControl(datosBeneficiario?.primer_nombre || '', [Validators.required, Validators.maxLength(40)]),
       segundo_nombre: new FormControl(datosBeneficiario?.segundo_nombre || '', [Validators.maxLength(40)]),
       tercer_nombre: new FormControl(datosBeneficiario?.tercer_nombre || ''),
       primer_apellido: new FormControl(datosBeneficiario?.primer_apellido || '', [Validators.required, Validators.maxLength(40)]),
       segundo_apellido: new FormControl(datosBeneficiario?.segundo_apellido || ''),
       genero: new FormControl(datosBeneficiario?.genero || ''),
-      telefono_1: new FormControl(datosBeneficiario?.telefono_1 || ''),
       sexo: new FormControl(datosBeneficiario?.sexo || ''),
+      fallecido: new FormControl(datosBeneficiario?.fallecido || 'NO'),
+      cantidad_hijos: new FormControl(datosBeneficiario?.cantidad_hijos || 0),
+      primer_nombre_censo: new FormControl(datosBeneficiario?.primer_nombre_censo || ''),
+      segundo_nombre_censo: new FormControl(datosBeneficiario?.segundo_nombre_censo || ''),
+      nombre_apellido_escalafon: new FormControl(datosBeneficiario?.nombre_apellido_escalafon || ''),
+      primer_apellido_censo: new FormControl(datosBeneficiario?.primer_apellido_censo || ''),
+      segundo_apellido_censo: new FormControl(datosBeneficiario?.segundo_apellido_censo || ''),
+      representacion: new FormControl(datosBeneficiario?.representacion || ''),
+      grado_academico: new FormControl(datosBeneficiario?.grado_academico || ''),
+      telefono_1: new FormControl(datosBeneficiario?.telefono_1 || ''),
+      telefono_2: new FormControl(datosBeneficiario?.telefono_2 || ''),
+      correo_1: new FormControl(datosBeneficiario?.correo_1 || ''),
+      correo_2: new FormControl(datosBeneficiario?.correo_2 || ''),
       fecha_nacimiento: new FormControl(datosBeneficiario?.fecha_nacimiento || '', Validators.required),
       direccion_residencia: new FormControl(datosBeneficiario?.direccion_residencia || ''),
-      id_pais_nacionalidad: new FormControl(datosBeneficiario?.id_pais_nacionalidad || null, Validators.required),
       id_municipio_residencia: new FormControl(datosBeneficiario?.id_municipio_residencia || null, Validators.required),
       id_departamento_residencia: new FormControl(datosBeneficiario?.id_departamento_residencia || null, Validators.required),
       id_departamento_nacimiento: new FormControl(datosBeneficiario?.id_departamento_nacimiento || null, Validators.required),
@@ -130,7 +147,6 @@ export class BenefComponent implements OnInit {
       discapacidades: new FormArray([])
     });
   }
-
 
   cargarDepartamentos() {
     this.datosEstaticosService.getDepartamentos().then(data => {
@@ -234,7 +250,48 @@ export class BenefComponent implements OnInit {
   }
 
   onDatosBenChange() {
-    this.newDatBenChange.emit(this.formParent);
+    const beneficiariosArray = this.formParent.get('beneficiario') as FormArray;
+    const beneficiarios = beneficiariosArray.value.map((beneficiario: any) => ({
+      persona: {
+        id_tipo_identificacion: beneficiario.id_tipo_identificacion,
+        id_pais_nacionalidad: beneficiario.id_pais_nacionalidad,
+        n_identificacion: beneficiario.n_identificacion,
+        fecha_vencimiento_ident: beneficiario.fecha_vencimiento_ident,
+        rtn: beneficiario.rtn,
+        grupo_etnico: beneficiario.grupo_etnico,
+        estado_civil: beneficiario.estado_civil,
+        primer_nombre: beneficiario.primer_nombre,
+        segundo_nombre: beneficiario.segundo_nombre,
+        tercer_nombre: beneficiario.tercer_nombre,
+        primer_apellido: beneficiario.primer_apellido,
+        segundo_apellido: beneficiario.segundo_apellido,
+        genero: beneficiario.genero,
+        sexo: beneficiario.sexo,
+        fallecido: beneficiario.fallecido,
+        cantidad_hijos: beneficiario.cantidad_hijos,
+        primer_nombre_censo: beneficiario.primer_nombre_censo,
+        segundo_nombre_censo: beneficiario.segundo_nombre_censo,
+        nombre_apellido_escalafon: beneficiario.nombre_apellido_escalafon,
+        primer_apellido_censo: beneficiario.primer_apellido_censo,
+        segundo_apellido_censo: beneficiario.segundo_apellido_censo,
+        representacion: beneficiario.representacion,
+        grado_academico: beneficiario.grado_academico,
+        telefono_1: beneficiario.telefono_1,
+        telefono_2: beneficiario.telefono_2,
+        correo_1: beneficiario.correo_1,
+        correo_2: beneficiario.correo_2,
+        fecha_nacimiento: beneficiario.fecha_nacimiento,
+        direccion_residencia: beneficiario.direccion_residencia,
+        id_municipio_residencia: beneficiario.id_municipio_residencia,
+        id_profesion: beneficiario.id_profesion,
+      }
+    }));
+
+    const formattedFormGroup = this.fb.group({
+      beneficiarios: this.fb.array(beneficiarios.map((b:any) => this.fb.group(b)))
+    });
+
+    this.newDatBenChange.emit(formattedFormGroup);
     this.formStateService.setForm(this.formKey, this.formParent);
   }
 

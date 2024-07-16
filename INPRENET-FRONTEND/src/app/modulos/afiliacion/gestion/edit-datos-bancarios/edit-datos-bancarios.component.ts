@@ -123,7 +123,7 @@ export class EditDatosBancariosComponent implements OnInit, OnChanges {
   }
 
   async manejarAccionUno(row: any) {
-    this.bancos = await this.datosEstaticosService.getBancos();
+    /* this.bancos = await this.datosEstaticosService.getBancos();
     const bancoSeleccionado = this.bancos.find(b => b.label === row.nombre_banco);
     const codBanco = bancoSeleccionado ? bancoSeleccionado.value : '';
 
@@ -143,7 +143,7 @@ export class EditDatosBancariosComponent implements OnInit, OnChanges {
       nombre_banco: codBanco
     };
 
-    this.openDialogEditar(campos, valoresIniciales);
+    this.openDialogEditar(campos, valoresIniciales); */
   }
 
   manejarAccionDos(row: any) {

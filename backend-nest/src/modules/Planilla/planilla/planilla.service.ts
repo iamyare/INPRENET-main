@@ -1415,6 +1415,50 @@ WHERE
     }
   }
 
+  async ObtenerMontosPorBanco(codPlanilla: string): Promise<any> {
+    let query = `
+        SELECT 
+            banco."ID_BANCO" AS "IdBanco",
+            banco."NOMBRE_BANCO" AS "NombreBanco",
+            SUM(detBs."MONTO_A_PAGAR") AS "TotalPagado"
+        FROM 
+            "NET_DETALLE_PAGO_BENEFICIO" detBs
+        JOIN 
+            "NET_PLANILLA" plan
+        ON 
+            plan."ID_PLANILLA" = detBs."ID_PLANILLA"
+        LEFT JOIN 
+            "NET_PERSONA_POR_BANCO" perPorBan
+        ON 
+            detBs."ID_AF_BANCO" = perPorBan."ID_AF_BANCO"
+        LEFT JOIN 
+            "NET_BANCO" banco
+        ON 
+            banco."ID_BANCO" = perPorBan."ID_BANCO"
+        WHERE
+            detBs."ESTADO" = 'PAGADA' AND
+            plan."CODIGO_PLANILLA" = '${codPlanilla}'
+        GROUP BY 
+            banco."ID_BANCO", banco."NOMBRE_BANCO"
+    `;
+
+    interface MontoBanco {
+        IdBanco: number;
+        NombreBanco: string;
+        TotalPagado: number;
+    }
+
+    try {
+        const result: MontoBanco[] = await this.entityManager.query(query);
+        return result;
+    } catch (error) {
+        this.logger.error(`Error al obtener montos por banco: ${error.message}`, error.stack);
+        throw new InternalServerErrorException('Se produjo un error al obtener los montos por banco.');
+    }
+}
+
+
+
   async ObtenerPlanDefinPersonas(codPlanilla: string, page?: number, limit?: number): Promise<any> {
     let query = `
               SELECT DISTINCT

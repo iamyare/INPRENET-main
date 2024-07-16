@@ -557,6 +557,20 @@ export class PlanillaController {
     }
   }
 
+  @Get('montos-banco/:term')
+  async ObtenerMontosPorBanco(
+    @Param('term') term: string
+  ) {
+    if (!term) {
+      throw new BadRequestException('El parámetro term es obligatorio');
+    }
+    try {
+      return await this.planillaService.ObtenerMontosPorBanco(term);
+    } catch (error) {
+      throw new InternalServerErrorException('Error al obtener los montos por banco');
+    }
+  }
+
 
 
   /* @Get('planillaOrdinaria')

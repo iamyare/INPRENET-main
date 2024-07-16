@@ -613,6 +613,7 @@ export class VerplancerradaComponent {
         const neto = totalInprema + totalTerceros;
 
         const docDefinition: TDocumentDefinitions = {
+          pageSize: 'A4',
           background: function (currentPage, pageSize) {
             return {
               image: base64Image,
@@ -657,9 +658,9 @@ export class VerplancerradaComponent {
           },
           content: [
             { text: 'Deducciones INPREMA', style: 'subheader', margin: [0, 0, 0, 5] },
-            this.crearTablaPDF(deduccionesInprema, 'Deducciones INPREMA', `Total de deducciones INPREMA: L ${totalInprema.toFixed(2)}`, [0, 0, 0, 10]),
+            this.crearTablaPDF(deduccionesInprema, 'Deducciones INPREMA', `Total de deducciones INPREMA: L ${totalInprema.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",")}`, [0, 0, 0, 10]),
             { text: 'Deducciones de Terceros', style: 'subheader', pageBreak: 'before', margin: [0, 10, 0, 5] },
-            this.crearTablaPDF(deduccionesTerceros, 'Deducciones de Terceros', `Total de deducciones de Terceros: L ${totalTerceros.toFixed(2)}`, [0, 0, 0, 10]),
+            this.crearTablaPDF(deduccionesTerceros, 'Deducciones de Terceros', `Total de deducciones de Terceros: L ${totalTerceros.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",")}`, [0, 0, 0, 10]),
             {
               canvas: [
                 {
@@ -706,6 +707,7 @@ export class VerplancerradaComponent {
       this.toastr.error('Error al generar el PDF');
     }
   }
+
 
 
   crearTablaPDF(data: any[], titulo: string, totalTexto: string, margin: [number, number, number, number]) {

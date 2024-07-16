@@ -209,8 +209,8 @@ export class DatGeneralesAfiliadoComponent implements OnInit {
   cargoPublico: boolean = false;
 
   onDatosGeneralesChange() {
-    const data = this.formParent.value
-    this.newDatosGenerales.emit(data)
+    const data = this.formParent.getRawValue();
+    this.newDatosGenerales.emit(data);
   }
 
   onDatosGeneralesDiscChange(event: any, i: number) {
@@ -223,9 +223,9 @@ export class DatGeneralesAfiliadoComponent implements OnInit {
 
     // Si se selecciona 'Sí', inicializar el FormArray de discapacidades
     if (this.discapacidad) {
-      const refpersArray = this.formParent.get('refpers') as FormArray;
-      const firstRefpersGroup = refpersArray.controls[i] as FormGroup;
-      const discapacidadesArray = firstRefpersGroup.get('discapacidades') as FormArray;
+      const datgenArray = this.formParent.get('datgen') as FormArray;
+      const firstDatGenGroup = datgenArray.controls[i] as FormGroup;
+      const discapacidadesArray = firstDatGenGroup.get('discapacidades') as FormArray;
 
       if (discapacidadesArray) {
         discapacidadesArray.clear();  // Limpiar cualquier selección anterior
@@ -266,7 +266,7 @@ export class DatGeneralesAfiliadoComponent implements OnInit {
       this.formParent = existingForm;
     } else {
       this.formParent = this.fb.group({
-        refpers: this.fb.array([])
+        datgen: this.fb.array([])
       });
     }
   }
@@ -274,11 +274,11 @@ export class DatGeneralesAfiliadoComponent implements OnInit {
   ngOnInit(): void {
     this.cargarDatosEstaticos();
     this.initForm();
-    const ref_RefPers = this.formParent.get('refpers') as FormArray;
+    const DatGen = this.formParent.get('datgen') as FormArray;
     let temp = {}
 
-    if (this.datos && this.datos.value && this.datos.value.refpers && this.datos.value.refpers.length > 0) {
-      for (let i of this.datos.value.refpers) {
+    if (this.datos && this.datos.value && this.datos.value.datgen && this.datos.value.datgen.length > 0) {
+      for (let i of this.datos.value.datgen) {
         temp = this.splitDireccionResidencia(i);
 
         this.discapacidad = i.discapacidad == "SI" ? true : (i.discapacidad == "NO" ? false : this.discapacidad);
@@ -290,10 +290,10 @@ export class DatGeneralesAfiliadoComponent implements OnInit {
             discapacidadesArray.push(new FormControl(discapacidad));
           });
         }
-        ref_RefPers.push(addressGroup);
+        DatGen.push(addressGroup);
       }
     } else {
-      ref_RefPers.push(generateAddressFormGroup());
+      DatGen.push(generateAddressFormGroup());
     }
 
     this.formStateService.getFotoPerfil().subscribe(foto => {
@@ -342,13 +342,13 @@ export class DatGeneralesAfiliadoComponent implements OnInit {
     this.generos = this.datosEstaticos.genero;
     this.sexo = this.datosEstaticos.sexo;
 
-    if (this.datos && this.datos.value && this.datos.value.refpers && this.datos.value.refpers.length > 0) {
+    if (this.datos && this.datos.value && this.datos.value.datgen && this.datos.value.datgen.length > 0) {
       this.departamentos = this.datosEstaticos.departamentos
       this.tipoIdentData = this.datosEstaticos.tipoIdent
       this.nacionalidades = this.datosEstaticos.nacionalidades
       this.profesiones = this.datosEstaticos.profesiones
       this.municipios = this.datosEstaticos.municipios
-      await this.cargarMunicipios(this.datos.value.refpers[0].id_municipio_residencia);
+      await this.cargarMunicipios(this.datos.value.datgen[0].id_municipio_residencia);
     }
 
     this.estadoCargDatos = true;
@@ -474,8 +474,8 @@ export class DatGeneralesAfiliadoComponent implements OnInit {
 
   getErrors(i: number, fieldName: string): any {
     if (this.formParent instanceof FormGroup) {
-      const controlesrefpers = (this.formParent.get('refpers') as FormGroup).controls;
-      const a = controlesrefpers[i].get(fieldName)!.errors
+      const controlesdatgen = (this.formParent.get('datgen') as FormGroup).controls;
+      const a = controlesdatgen[i].get(fieldName)!.errors
 
       let errors = []
       if (a) {
@@ -501,9 +501,9 @@ export class DatGeneralesAfiliadoComponent implements OnInit {
 
   // Método para agregar una discapacidad al FormArray
   agregarDiscapacidad(i: number) {
-    const refpersArray = this.formParent.get('refpers') as FormArray;
-    const firstRefpersGroup = refpersArray.controls[i] as FormGroup;
-    const discapacidadesArray = firstRefpersGroup.get('discapacidades') as FormArray;
+    const datgenArray = this.formParent.get('datgen') as FormArray;
+    const firstDatGenGroup = datgenArray.controls[i] as FormGroup;
+    const discapacidadesArray = firstDatGenGroup.get('discapacidades') as FormArray;
 
     const newDisabilityControl = new FormControl('', Validators.required);
 
@@ -527,9 +527,9 @@ export class DatGeneralesAfiliadoComponent implements OnInit {
 
   // Método para eliminar una discapacidad del FormArray
   eliminarDiscapacidad(i: number, index: number) {
-    const refpersArray = this.formParent.get('refpers') as FormArray;
-    const firstRefpersGroup = refpersArray.controls[i] as FormGroup;
-    const discapacidadesArray = firstRefpersGroup.get('discapacidades') as FormArray;
+    const datgenArray = this.formParent.get('datgen') as FormArray;
+    const firstDatGenGroup = datgenArray.controls[i] as FormGroup;
+    const discapacidadesArray = firstDatGenGroup.get('discapacidades') as FormArray;
     discapacidadesArray.removeAt(index);
 
     discapacidadesArray.controls.forEach((control: AbstractControl, idx: number) => {

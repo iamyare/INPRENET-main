@@ -110,7 +110,10 @@ export class AfiliacionDocentesComponent implements OnInit {
 
   gatherAllData(): void {
     const allData = {
-      datosGenerales: this.datosGeneralesData.refpers,
+      persona: {
+        ...this.datosGeneralesData,
+        discapacidades: this.datosGeneralesData.discapacidades ? this.datosGeneralesData.discapacidades.map((id: number) => ({ id_discapacidad: id })) : []
+      },
       colegioMagisterial: this.colegioMagisterialData,
       bancos: this.bancosData.banco,
       centrosTrabajo: this.centrosTrabajoData.trabajo,

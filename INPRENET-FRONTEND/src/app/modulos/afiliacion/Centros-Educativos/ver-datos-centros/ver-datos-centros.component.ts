@@ -18,12 +18,14 @@ import { FieldConfig } from 'src/app/shared/Interfaces/field-config';
   ]
 })
 export class VerDatosCentrosComponent {
+  public temp: any = 1;
+
   steps = [
     { label: 'Datos Generales De Centros', isActive: true },
+    { label: 'Administración del Centro Educativo', isActive: false },
     { label: 'Referencias Bancarias Y Comerciales', isActive: false },
     { label: 'Sociedades', isActive: false },
     { label: 'Socios', isActive: false },
-    { label: 'Administración del Centro Educativo', isActive: false },
     { label: 'Finalizar', isActive: false },
   ];
 
@@ -39,7 +41,7 @@ export class VerDatosCentrosComponent {
   fieldsStep5: FieldConfig[] = [
     {
       name: 'pep_declaration',
-      label: '¿Alguno de los socios o propietario ha desempeñado o ha desempeñado un cargo público?',
+      label: '¿Alguno de los socios o propietario ha desempeñado o ha desempeña un cargo público?',
       type: 'radio',
       options: [
         { label: 'Sí', value: 'si' },
@@ -110,7 +112,8 @@ export class VerDatosCentrosComponent {
   formData!: any
   mostrar: boolean = false
 
-  searchResults: any;
+  public searchResults: any;
+
 
   constructor(
     private fb: FormBuilder,
@@ -135,6 +138,7 @@ export class VerDatosCentrosComponent {
   }
 
   handleStepChange(index: number): void {
+    this.mostrar = false
     this.activeStep = index;
   }
 
@@ -200,6 +204,7 @@ export class VerDatosCentrosComponent {
     console.log(form);
 
     form.controls["nombre_centro_trabajo"]!.patchValue(this.searchResults[0].nombre_centro_trabajo)
+    form.controls["sector_economico"]!.patchValue(this.searchResults[0].sector_economico)
     form.controls["rtn"]!.patchValue(this.searchResults[0].rtn)
     form.controls["departamento"]!.patchValue(this.searchResults[0].municipio.departamento.id_departamento)
     form.controls["municipio"]!.patchValue(this.searchResults[0].municipio.id_municipio)
@@ -262,8 +267,10 @@ export class VerDatosCentrosComponent {
     this.datosGeneralesData = form
   }
 
-  handleSearchResult(searchResult: any) {
-    this.searchResults = searchResult;
+  async handleSearchResult(searchResult: any) {
+    this.searchResults = await searchResult;
+    console.log(searchResult);
+
     this.datosGeneralesData = this.fb.group({})
     this.mostrar = true;
 

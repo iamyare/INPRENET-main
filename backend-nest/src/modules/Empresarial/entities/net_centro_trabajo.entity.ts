@@ -18,11 +18,36 @@ export class Net_Centro_Trabajo {
     @PrimaryGeneratedColumn({ type: 'int', name: 'ID_CENTRO_TRABAJO', primaryKeyConstraintName: 'PK_id_centro_trabajo' })
     id_centro_trabajo: number;
 
+    @Column('nvarchar2', { length: 14, nullable: true, name: 'RTN' })
+    @Index("UQ_rtn_netCenTrab", { unique: true })
+    rtn: string;
+
     @Column('varchar2', { length: 40, nullable: false, name: 'NOMBRE_CENTRO_TRABAJO' })
     nombre_centro_trabajo: string;
 
+    @Column('int', { nullable: true, name: 'NUMERO_EMPLEADOS' })
+    numero_empleados: number;
+
+    @Column('nvarchar2', { length: 255, nullable: true, name: 'OBJETIVO_SOCIAL' })
+    objetivo_social: string;
+
     @Column('varchar2', { length: 40, nullable: true, name: 'SECTOR_ECONOMICO' })
     sector_economico: string;
+
+    @Column('varchar2', { length: 40, nullable: true, name: 'MONTO_APROX_ACTIVOS_TOTAL' })
+    monto_aprox_activos_total: string;
+
+    @Column('varchar2', { length: 30, nullable: true, name: 'NUMERO_ACUERDO' })
+    numero_acuerdo: string;
+
+    @Column('date', { nullable: true, name: 'FECHA_EMISION' })
+    fecha_emision: Date;
+
+    @Column('date', { nullable: true, name: 'FECHA_INICIO_OPERACIONES' })
+    fecha_inicio_operaciones: Date;
+
+    @Column('nvarchar2', { length: 50, nullable: false, name: 'TIPO' })
+    tipo: string;
 
     @Column('varchar2', { length: 30, nullable: true, name: 'TELEFONO_1' })
     telefono_1: string;
@@ -49,10 +74,6 @@ export class Net_Centro_Trabajo {
     @Column('nvarchar2', { length: 50, nullable: true, name: 'REPRESENTANTE_LEGAL' })
     representante_legal: string;
 
-    @Column('nvarchar2', { length: 14, nullable: true, name: 'RTN' })
-    @Index("UQ_rtn_netCenTrab", { unique: true })
-    rtn: string;
-
     @Column('nvarchar2', { length: 300, nullable: true, name: 'LOGO' })
     logo: string;
 
@@ -62,30 +83,12 @@ export class Net_Centro_Trabajo {
     @Column('nvarchar2', { length: 200, nullable: true, name: 'DIRECCION_2' })
     direccion_2: string;
 
-    @Column('varchar2', { length: 30, nullable: true, name: 'NUMERO_ACUERDO' })
-    numero_acuerdo: string;
-
-    @Column('date', { nullable: true, name: 'FECHA_EMISION' })
-    fecha_emision: Date;
-
-    @Column('date', { nullable: true, name: 'FECHA_INICIO_OPERACIONES' })
-    fecha_inicio_operaciones: Date;
-
-    @Column('int', { nullable: true, name: 'NUMERO_EMPLEADOS' })
-    numero_empleados: number;
-
-    @Column('nvarchar2', { length: 255, nullable: true, name: 'OBJETIVO_SOCIAL' })
-    objetivo_social: string;
-
     @Column('decimal', { precision: 10, scale: 7, nullable: true, name: 'LATITUD' })
     latitud: number;
 
     @Column('decimal', { precision: 10, scale: 7, nullable: true, name: 'LONGITUD' })
     longitud: number;
 
-    @Column('nvarchar2', { length: 50, nullable: false, name: 'TIPO' })
-    tipo: string;
-    
     @ManyToOne(() => Net_Municipio, municipio => municipio.centrosTrabajo)
     @JoinColumn({ name: 'ID_MUNICIPIO', foreignKeyConstraintName: 'FK_ID_MUNICIPIO_CENT_TRAB' })
     municipio: Net_Municipio;

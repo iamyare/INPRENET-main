@@ -1,16 +1,15 @@
-import { ChangeDetectionStrategy, Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { FormArray, FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { DatosEstaticosService } from 'src/app/services/datos-estaticos.service';
 import { DireccionService } from 'src/app/services/direccion.service';
 import { FieldConfig } from 'src/app/shared/Interfaces/field-config';
 
 @Component({
-  selector: 'app-admin-centro-educativo',
-  templateUrl: './admin-centro-educativo.component.html',
-  styleUrls: ['./admin-centro-educativo.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush,
+  selector: 'app-datos-propietario',
+  templateUrl: './datos-propietario.component.html',
+  styleUrl: './datos-propietario.component.scss'
 })
-export class AdminCentroEducativoComponent implements OnInit {
+export class DatosPropietarioComponent {
   @Input() parentForm!: FormGroup;
   departamentos: any = [];
   municipios: any = [];
@@ -22,226 +21,177 @@ export class AdminCentroEducativoComponent implements OnInit {
 
   fields: FieldConfig[] = [
     {
-      name: 'administradorNombre',
-      label: 'Nombre del Centro Educativo',
+      name: 'n_identificacion',
+      label: 'Numero de identificación',
       type: 'text',
-      icon: 'business',
-      value: '',
-      display: true,
-      readOnly: false,
-      validations: [Validators.required, Validators.maxLength(40)],
-      row: 1,
-      col: 6
-    },
-    {
-      name: 'administradorTelefono',
-      label: 'RTN',
-      type: 'text',
-      icon: 'badge',
-      value: '',
-      display: true,
-      readOnly: false,
-      validations: [Validators.required, Validators.maxLength(14)],
-      row: 1,
-      col: 6
-    },
-    {
-      name: 'administradorCorreo',
-      label: 'Departamento',
-      type: 'dropdown',
-      row: 2,
-      col: 6,
-      display: true,
-      options: [],
-      validations: [Validators.required]
-    },
-    {
-      name: 'contadorNombre',
-      label: 'Municipio',
-      type: 'dropdown',
-      row: 2,
-      col: 6,
-      display: true,
-      options: [],
-      validations: [Validators.required]
-    },
-    {
-      name: 'contadorTelefono',
-      label: 'Sector Económico',
-      type: 'dropdown',
-      row: 3,
-      col: 4,
-      display: true,
-      options: [{ label: 'PUBLICO', value: 'PUBLICO' }, { label: 'PEGAGOGICO', value: 'PEGAGOGICO' }, { label: 'PRIVADO', value: 'PRIVADO' }, { label: 'PROHECO', value: 'PROHECO' }, { label: 'ADMINISTRATIVO', value: 'ADMINISTRATIVO' }],
-      validations: [Validators.required]
-    },
-    {
-      name: 'contadorCorreo',
-      label: 'Objetivo Social o Razón Económica',
-      type: 'text',
-      icon: 'business',
-      value: '',
-      display: true,
-      readOnly: false,
-      validations: [Validators.maxLength(255)],
-      row: 3,
-      col: 4
-    },
-    {
-      name: 'propietarioNombre',
-      label: 'Número de Empleados',
-      type: 'number',
       icon: 'group',
       value: '',
       display: true,
       readOnly: false,
       validations: [Validators.required, Validators.min(0)],
-      row: 3,
+      row: 1,
+      col: 4
+    },
+    {
+      name: 'propietarioNombre',
+      label: 'Nombre Completo',
+      type: 'text',
+      icon: 'group',
+      value: '',
+      display: true,
+      readOnly: false,
+      validations: [Validators.required, Validators.min(0)],
+      row: 1,
       col: 4
     },
     {
       name: 'propietarioColonia',
-      label: 'Teléfono 1',
-      type: 'number',
-      icon: 'phone',
+      label: 'Colonia / Localidad',
+      type: 'text',
+      icon: '',
       value: '',
       display: true,
       readOnly: false,
       validations: [Validators.required, Validators.maxLength(30)],
-      row: 4,
-      col: 3
+      row: 1,
+      col: 4
     },
+
     {
       name: 'propietarioBarrio',
-      label: 'Teléfono 2',
-      type: 'number',
-      icon: 'phone',
+      label: 'Barrio  / Avenida',
+      type: 'text',
+      icon: '',
       value: '',
       display: true,
       readOnly: false,
       validations: [Validators.maxLength(30)],
-      row: 4,
-      col: 3
+      row: 1,
+      col: 4
     },
+
     {
       name: 'propietarioGrupo',
-      label: 'Celular 1',
-      type: 'number',
-      icon: 'phone',
-      value: '',
-      display: true,
-      readOnly: false,
-      validations: [Validators.required, Validators.maxLength(30)],
-      row: 4,
-      col: 3
-    },
-    {
-      name: 'propietarioCasa',
-      label: 'Celular 2',
-      type: 'number',
-      icon: 'phone',
+      label: 'Grupo / Calle',
+      type: 'text',
+      icon: '',
       value: '',
       display: true,
       readOnly: false,
       validations: [Validators.maxLength(30)],
-      row: 4,
-      col: 3
+      row: 2,
+      col: 4
+    },
+
+    {
+      name: 'propietarioCasa',
+      label: 'N° de casa',
+      type: 'text',
+      icon: '',
+      value: '',
+      display: true,
+      readOnly: false,
+      validations: [Validators.maxLength(30)],
+      row: 2,
+      col: 4
     },
     {
       name: 'propietarioDepartamento',
-      label: 'Correo 1',
-      type: 'email',
-      icon: 'email',
+      label: 'Departamento',
+      type: 'dropdown',
+      options: [],
+      icon: 'location_on',
       value: '',
       display: true,
       readOnly: false,
       validations: [Validators.required, Validators.email, Validators.maxLength(40)],
-      row: 5,
-      col: 6
+      row: 2,
+      col: 4
     },
     {
       name: 'propietarioMunicipio',
-      label: 'Correo 2',
-      type: 'email',
-      icon: 'email',
+      label: 'Municipio',
+      type: 'dropdown',
+      options: [],
+      icon: 'location_on',
       value: '',
       display: true,
       readOnly: false,
       validations: [Validators.email, Validators.maxLength(50)],
-      row: 5,
-      col: 6
+      row: 3,
+      col: 4
     },
     {
       name: 'propietarioTelefonoCasa',
-      label: 'Colonia/Localidad',
+      label: 'Teléfono de Casa',
       type: 'text',
-      icon: 'location_on',
+      icon: 'phone',
       value: '',
       display: true,
       readOnly: false,
       validations: [Validators.maxLength(200)],
-      row: 6,
-      col: 3
+      row: 3,
+      col: 4
     },
     {
       name: 'propietarioCelular1',
-      label: 'Barrio/Avenida',
+      label: 'Celular 1',
       type: 'text',
-      icon: 'location_on',
+      icon: 'phone',
       value: '',
       display: true,
       readOnly: false,
       validations: [Validators.maxLength(200)],
-      row: 6,
-      col: 3
+      row: 3,
+      col: 4
     },
     {
       name: 'propietarioCelular2',
-      label: 'Grupo/Calle',
+      label: 'Teléfono 2',
       type: 'text',
-      icon: 'location_on',
+      icon: 'phone',
       value: '',
       display: true,
       readOnly: false,
       validations: [Validators.maxLength(200)],
-      row: 6,
-      col: 3
+      row: 4,
+      col: 4
     },
     {
       name: 'propietarioCorreo1',
-      label: 'Número de Casa',
-      type: 'number',
+      label: 'Correo Electrónico 1',
+      type: 'email',
       icon: 'home',
       value: '',
       display: true,
       readOnly: false,
       validations: [Validators.maxLength(200)],
-      row: 6,
-      col: 3
+      row: 4,
+      col: 4
     },
     {
       name: 'propietarioCorreo2',
-      label: 'Otro punto de referencia',
-      type: 'text',
+      label: 'Correo Electrónico 2',
+      type: 'email',
       icon: 'location_on',
       value: '',
       display: true,
       readOnly: false,
       validations: [Validators.maxLength(200)],
-      row: 7,
-      col: 12
+      row: 4,
+      col: 4
     },
     {
       name: 'propietarioReferencia',
-      label: 'Número de Acuerdo',
+      label: 'Otros Puntos de Referencia',
       type: 'text',
       icon: 'gavel',
       value: '',
       display: true,
       readOnly: false,
       validations: [Validators.maxLength(50)],
-      row: 8,
-      col: 3
+      row: 5,
+      col: 12
     },
   ];
 
@@ -319,5 +269,4 @@ export class AdminCentroEducativoComponent implements OnInit {
       municipioControl.setValue(null);
     }
   }
-
 }

@@ -68,7 +68,7 @@ export class DatosGeneralesCentroComponent implements OnInit {
       row: 3,
       col: 4,
       display: true,
-      options: [{ label: 'PUBLICO', value: 'PUBLICO' },{ label: 'PEGAGOGICO', value: 'PEGAGOGICO' },{ label: 'PEGAGOGICO', value: 'PEGAGOGICO' },{ label: 'PROHECO', value: 'PROHECO' },{ label: 'ADMINISTRATIVO', value: 'ADMINISTRATIVO' }],
+      options: [{ label: 'PUBLICO', value: 'PUBLICO' }, { label: 'PEGAGOGICO', value: 'PEGAGOGICO' }, { label: 'PRIVADO', value: 'PRIVADO' }, { label: 'PROHECO', value: 'PROHECO' }, { label: 'ADMINISTRATIVO', value: 'ADMINISTRATIVO' }],
       validations: [Validators.required]
     },
     {
@@ -230,7 +230,7 @@ export class DatosGeneralesCentroComponent implements OnInit {
     {
       name: 'numero_acuerdo',
       label: 'Número de Acuerdo',
-      type: 'number',
+      type: 'text',
       icon: 'gavel',
       value: '',
       display: true,
@@ -331,7 +331,7 @@ export class DatosGeneralesCentroComponent implements OnInit {
   }
 
   addControlsToForm() {
-    this.fields.forEach((field:any) => {
+    this.fields.forEach((field: any) => {
       if (field.type === 'checkboxGroup') {
         const formArray = new FormArray(
           field.options.map(() => new FormControl(false))

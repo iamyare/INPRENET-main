@@ -30,8 +30,7 @@ export class DynamicDialogComponent implements OnInit {
   getDeduccionesByBeneficio(element: any) {
     // Limpiar cualquier deducción previa antes de agregar nuevas deducciones
     this.data.logs = this.data.logs.filter(log => log.type !== 'deducciones');
-
-    this.deduccionSVC.getDeduccionesByPersonaAndBenef(element.ID_PERSONA, element.ID_BENEFICIO).subscribe({
+    this.deduccionSVC.getDeduccionesByPersonaAndBenef(element.ID_PERSONA, element.ID_BENEFICIO, this.data.logs[2].detail[0].ID_PLANILLA).subscribe({
       next: (response1) => {
         if (response1) {
           const data = response1;

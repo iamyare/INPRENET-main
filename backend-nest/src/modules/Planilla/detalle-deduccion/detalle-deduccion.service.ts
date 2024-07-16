@@ -187,25 +187,29 @@ export class DetalleDeduccionService {
     }
   }
 
-  async getDeduccionesByPersonaAndBenef(idPersona: number, idBeneficio: number): Promise<any> {
+  async getDeduccionesByPersonaAndBenef(idPersona: number, idBeneficio: number, idPlanilla: number): Promise<any> {
     const query = `
     SELECT 
             dedd."ID_DEDUCCION",
+            inst."NOMBRE_CENTRO_TRABAJO" AS "NOMBRE_INSTITUCION",
             ded."NOMBRE_DEDUCCION",
             dedd."MONTO_APLICADO" AS "MontoAplicado"
         FROM
             "NET_DETALLE_PAGO_BENEFICIO" detBs
-        FULL OUTER JOIN "NET_DETALLE_DEDUCCION" dedd ON detBs.ID_BENEFICIO_PLANILLA = dedd."ID_DETALLE_PAGO_BENEFICIO"
-        FULL OUTER JOIN
+        INNER JOIN "NET_DETALLE_DEDUCCION" dedd ON detBs.ID_BENEFICIO_PLANILLA = dedd."ID_DETALLE_PAGO_BENEFICIO"
+        INNER JOIN
             "NET_DEDUCCION" ded ON ded."ID_DEDUCCION" = dedd."ID_DEDUCCION"
-        FULL OUTER JOIN "NET_DETALLE_BENEFICIO_AFILIADO" detBA ON
+        INNER JOIN
+            "NET_CENTRO_TRABAJO" inst ON inst."ID_CENTRO_TRABAJO" = ded."ID_CENTRO_TRABAJO"
+        INNER JOIN "NET_DETALLE_BENEFICIO_AFILIADO" detBA ON
             detBs."ID_PERSONA" = detBA."ID_PERSONA" AND
             detBs."ID_CAUSANTE" = detBA."ID_CAUSANTE" AND
             detBs."ID_DETALLE_PERSONA" = detBA."ID_DETALLE_PERSONA" AND
             detBs."ID_BENEFICIO" = detBA."ID_BENEFICIO"
         WHERE
             detBs."ID_PERSONA" = ${idPersona} AND
-            detBs."ID_BENEFICIO" = ${idBeneficio}
+            detBs."ID_BENEFICIO" = ${idBeneficio} AND
+            detBs."ID_PLANILLA" = ${idPlanilla}
 
     `;
     try {

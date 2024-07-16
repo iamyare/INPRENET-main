@@ -1,13 +1,22 @@
-import { Component } from '@angular/core';
-import { MatDialog } from '@angular/material/dialog';import { CentroTrabajoService } from 'src/app/services/centro-trabajo.service';
+import { ChangeDetectionStrategy, Component, inject, Input } from '@angular/core';
+import { MatDialog } from '@angular/material/dialog'; import { CentroTrabajoService } from 'src/app/services/centro-trabajo.service';
 import { FieldConfig } from 'src/app/shared/Interfaces/field-config';
 import { TableColumn } from 'src/app/shared/Interfaces/table-column';
 import { ReferenciasBancariasComercialesComponent } from '../referencias-bancarias-comerciales/referencias-bancarias-comerciales.component';
 import { ConfirmDialogComponent } from 'src/app/components/dinamicos/confirm-dialog/confirm-dialog.component';
+import { ControlContainer } from '@angular/forms';
 @Component({
   selector: 'app-ver-referencias',
   templateUrl: './ver-referencias.component.html',
-  styleUrls: ['./ver-referencias.component.scss']
+  styleUrls: ['./ver-referencias.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  viewProviders: [
+    {
+      provide: ControlContainer,
+      useFactory: () =>
+        inject(ControlContainer, { skipSelf: true, host: true }),
+    },
+  ]
 })
 export class VerReferenciasComponent {
 
@@ -21,9 +30,12 @@ export class VerReferenciasComponent {
   filasT: any[] = [];
   ejecF: any;
 
+  @Input() parentForm: any = 1;
+
   constructor(
     private dialog: MatDialog,
     private SVCCentrosTrab: CentroTrabajoService,) {
+    console.log(this.parentForm);
     this.getFilas().then(() => this.cargar());
   }
 
@@ -54,9 +66,9 @@ export class VerReferenciasComponent {
   //Funciones para llenar tabla
   getFilas = async () => {
     try {
-      /* Falta traer datos de la planilla */
-      const data = await this.SVCCentrosTrab.getAllReferenciasByCentro(10).toPromise();
+      const data = await this.SVCCentrosTrab.getAllReferenciasByCentro(1).toPromise();
       console.log(data);
+
 
       this.filasT = data.map((item: any) => ({
         id_referencia: item.id_referencia,

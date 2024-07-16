@@ -37,10 +37,11 @@ export class DeduccionesService {
   }
 
 
-  getDeduccionesByPersonaAndBenef(idPersona: number, idBeneficio: number): Observable<any> {
+  getDeduccionesByPersonaAndBenef(idPersona: number, idBeneficio: number, idPlanilla: number): Observable<any> {
     let params = new HttpParams()
       .set('idPersona', idPersona)
-      .set('idBeneficio', idBeneficio);
+      .set('idBeneficio', idBeneficio)
+      .set('idPlanilla', idPlanilla);
 
     return this.http.get<any>(`${environment.API_URL}/api/detalle-deduccion/getDeduccionesByPersonaAndBenef`, { params }).pipe(
       tap(() => {

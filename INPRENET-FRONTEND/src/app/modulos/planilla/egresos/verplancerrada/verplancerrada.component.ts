@@ -163,10 +163,6 @@ export class VerplancerradaComponent {
     }
   };
 
-
-
-
-
   getPlanilla = async () => {
     try {
       this.planillaService.getPlanillaDefin(this.datosFormateados.value.codigo_planilla).subscribe(
@@ -365,6 +361,7 @@ export class VerplancerradaComponent {
             const montoDeduccion = deduccion.monto_aplicado;
             sumaDeducciones += montoDeduccion;
             return {
+              NOMBRE_INSTITUCION: deduccion.deduccion.centroTrabajo.nombre_centro_trabajo,
               NOMBRE_DEDUCCION: deduccion.deduccion.nombre_deduccion,
               TotalMontoAplicado: montoDeduccion
             };
@@ -373,14 +370,16 @@ export class VerplancerradaComponent {
 
         const montoPorPeriodo = beneficio.monto_por_periodo;
         sumaBeneficios += montoPorPeriodo;
+        console.log(beneficio.detallePagBeneficio[0].personaporbanco);
 
         return {
           CAUSANTE: causantesMap.get(detalle.ID_DETALLE_PERSONA) || 'NO APLICA',
           NOMBRE_BENEFICIO: beneficio.beneficio.nombre_beneficio,
           MontoAPagar: montoPorPeriodo,
           DEDUCCIONES: deducciones,
+          INSTITUCION: deducciones.centroTrabajo,
           METODO_PAGO: beneficio.metodo_pago,
-          NOMBRE_BANCO: beneficio.detallePagBeneficio[0].personaporbanco ? beneficio.detallePagBeneficio[0].personaporbanco.estado : 'NO PROPORCIONADO',
+          NOMBRE_BANCO: beneficio.detallePagBeneficio[0].personaporbanco ? beneficio.detallePagBeneficio[0].personaporbanco.banco.nombre_banco : 'NO PROPORCIONADO',
           NUM_CUENTA: beneficio.detallePagBeneficio[0].personaporbanco ? beneficio.detallePagBeneficio[0].personaporbanco.num_cuenta : 'NO PROPORCIONADO'
         };
       });
@@ -419,9 +418,9 @@ export class VerplancerradaComponent {
               },
               {
                 table: {
-                  widths: ['*', '*', '*', '*', '*'],
+                  widths: ['*', '*', '*', '*', '*', '*'],
                   body: [
-                    [{ text: 'CAUSANTE', style: 'tableHeader' }, { text: 'INGRESO', style: 'tableHeader' }, { text: 'MONTO INGRESO', style: ['tableHeader', 'alignRight'] }, { text: 'DEDUCCIÓN', style: 'tableHeader' }, { text: 'MONTO DEDUCCIÓN', style: ['tableHeader', 'alignRight'] }],
+                    [{ text: 'CAUSANTE', style: 'tableHeader' }, { text: 'INGRESO', style: 'tableHeader' }, { text: 'MONTO INGRESO', style: ['tableHeader', 'alignRight'] }, { text: 'INSTITUCIÓN', style: 'tableHeader' }, { text: 'DEDUCCIÓN', style: 'tableHeader' }, { text: 'MONTO DEDUCCIÓN', style: ['tableHeader', 'alignRight'] }],
                     ...data.flatMap((b: any) => {
                       if (b.DEDUCCIONES.length === 0) {
                         return [[
@@ -432,10 +431,11 @@ export class VerplancerradaComponent {
                           { text: formatCurrency(0), style: 'alignRight' }
                         ]];
                       } else {
-                        return b.DEDUCCIONES.map((d: { NOMBRE_DEDUCCION: any; TotalMontoAplicado: number; }, index: number) => [
+                        return b.DEDUCCIONES.map((d: { NOMBRE_INSTITUCION: any; NOMBRE_DEDUCCION: any; TotalMontoAplicado: number; }, index: number) => [
                           index === 0 ? { text: b.CAUSANTE, rowSpan: b.DEDUCCIONES.length } : {},
                           index === 0 ? { text: b.NOMBRE_BENEFICIO, rowSpan: b.DEDUCCIONES.length } : {},
                           index === 0 ? { text: formatCurrency(b.MontoAPagar), rowSpan: b.DEDUCCIONES.length, style: 'alignRight' } : { text: formatCurrency(0), style: 'alignRight' },
+                          { text: d.NOMBRE_INSTITUCION },
                           { text: d.NOMBRE_DEDUCCION },
                           { text: formatCurrency(d.TotalMontoAplicado), style: 'alignRight' }
                         ]);
@@ -773,139 +773,139 @@ export class VerplancerradaComponent {
 
   async generarPDFMontosPorBanco() {
     try {
-        const codigo_planilla = this.datosFormateados?.value?.codigo_planilla;
+      const codigo_planilla = this.datosFormateados?.value?.codigo_planilla;
 
-        if (!codigo_planilla) {
-            this.toastr.error('Debe proporcionar un código de planilla válido');
-            return;
-        }
+      if (!codigo_planilla) {
+        this.toastr.error('Debe proporcionar un código de planilla válido');
+        return;
+      }
 
-        const base64Image = await this.convertirImagenABase64('../../assets/images/HOJA-MEMBRETADA.jpg');
-        this.planillaService.getMontosPorBanco(codigo_planilla).subscribe(response => {
-            const montosPorBanco = response || [];
+      const base64Image = await this.convertirImagenABase64('../../assets/images/HOJA-MEMBRETADA.jpg');
+      this.planillaService.getMontosPorBanco(codigo_planilla).subscribe(response => {
+        const montosPorBanco = response || [];
 
-            const totalMonto = montosPorBanco.reduce((acc, cur) => acc + (cur.MONTO_NETO ? parseFloat(cur.MONTO_NETO) : 0), 0);
+        const totalMonto = montosPorBanco.reduce((acc, cur) => acc + (cur.MONTO_NETO ? parseFloat(cur.MONTO_NETO) : 0), 0);
 
-            const docDefinition: TDocumentDefinitions = {
-                pageSize: 'LETTER',
-                background: function (currentPage, pageSize) {
-                    return {
-                        image: base64Image,
-                        width: pageSize.width,
-                        height: pageSize.height,
-                        absolutePosition: { x: 0, y: 0 }
-                    };
-                },
-                pageMargins: [40, 150, 40, 100], // Aumentado el espacio en el footer
-                header: (currentPage, pageCount, pageSize) => {
-                    return [
-                        {
-                            columns: [
-                                {
-                                    width: '*',
-                                    text: ''
-                                },
-                                {
-                                    width: 'auto',
-                                    text: `MONTOS POR BANCO PARA PLANILLA ${this.detallePlanilla?.nombre_planilla}`,
-                                    style: 'header',
-                                    alignment: 'center',
-                                    margin: [50, 80, 50, 0]
-                                },
-                                {
-                                    width: '*',
-                                    text: ''
-                                }
-                            ]
-                        },
-                        {
-                            columns: [
-                                {
-                                    width: '50%',
-                                    text: [
-                                        { text: 'Código de Planilla: ', bold: true },
-                                        `${codigo_planilla}\n`,
-                                    ],
-                                    alignment: 'left'
-                                },
-                                {
-                                    width: '50%',
-                                    text: [
-                                        { text: 'Monto Total: ', bold: true },
-                                        `L ${totalMonto.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",")}`
-                                    ],
-                                    alignment: 'right'
-                                }
-                            ],
-                            margin: [40, 5, 40, 10]
-                        }
-                    ];
-                },
-                content: [
-                    { text: 'Montos Pagados por Banco', style: 'subheader', margin: [0, 0, 0, 5] },
-                    this.crearTablaMontosPorBanco(montosPorBanco, 'Montos Pagados por Banco', `Total de montos pagados: L ${totalMonto.toFixed(2)}`, [0, 0, 0, 10]),
-                ],
-                styles: {
-                    header: {
-                        fontSize: 18,
-                        bold: true
-                    },
-                    subheader: {
-                        fontSize: 14,
-                        bold: false,
-                        margin: [0, 5, 0, 10]
-                    },
-                    signature: {
-                        fontSize: 16,
-                        bold: true
-                    }
-                }
+        const docDefinition: TDocumentDefinitions = {
+          pageSize: 'LETTER',
+          background: function (currentPage, pageSize) {
+            return {
+              image: base64Image,
+              width: pageSize.width,
+              height: pageSize.height,
+              absolutePosition: { x: 0, y: 0 }
             };
+          },
+          pageMargins: [40, 150, 40, 100], // Aumentado el espacio en el footer
+          header: (currentPage, pageCount, pageSize) => {
+            return [
+              {
+                columns: [
+                  {
+                    width: '*',
+                    text: ''
+                  },
+                  {
+                    width: 'auto',
+                    text: `MONTOS POR BANCO PARA PLANILLA ${this.detallePlanilla?.nombre_planilla}`,
+                    style: 'header',
+                    alignment: 'center',
+                    margin: [50, 80, 50, 0]
+                  },
+                  {
+                    width: '*',
+                    text: ''
+                  }
+                ]
+              },
+              {
+                columns: [
+                  {
+                    width: '50%',
+                    text: [
+                      { text: 'Código de Planilla: ', bold: true },
+                      `${codigo_planilla}\n`,
+                    ],
+                    alignment: 'left'
+                  },
+                  {
+                    width: '50%',
+                    text: [
+                      { text: 'Monto Total: ', bold: true },
+                      `L ${totalMonto.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",")}`
+                    ],
+                    alignment: 'right'
+                  }
+                ],
+                margin: [40, 5, 40, 10]
+              }
+            ];
+          },
+          content: [
+            { text: 'Montos Pagados por Banco', style: 'subheader', margin: [0, 0, 0, 5] },
+            this.crearTablaMontosPorBanco(montosPorBanco, 'Montos Pagados por Banco', `Total de montos pagados: L ${totalMonto.toFixed(2)}`, [0, 0, 0, 10]),
+          ],
+          styles: {
+            header: {
+              fontSize: 18,
+              bold: true
+            },
+            subheader: {
+              fontSize: 14,
+              bold: false,
+              margin: [0, 5, 0, 10]
+            },
+            signature: {
+              fontSize: 16,
+              bold: true
+            }
+          }
+        };
 
-            pdfMake.createPdf(docDefinition).download('montos_por_banco.pdf');
-        }, error => {
-            console.error('Error al obtener los montos por banco', error);
-            this.toastr.error('Error al obtener los montos por banco');
-        });
+        pdfMake.createPdf(docDefinition).download('montos_por_banco.pdf');
+      }, error => {
+        console.error('Error al obtener los montos por banco', error);
+        this.toastr.error('Error al obtener los montos por banco');
+      });
     } catch (error) {
-        console.error('Error al generar el PDF', error);
-        this.toastr.error('Error al generar el PDF');
+      console.error('Error al generar el PDF', error);
+      this.toastr.error('Error al generar el PDF');
     }
-}
+  }
 
-crearTablaMontosPorBanco(data: any[], titulo: string, totalTexto: string, margin: [number, number, number, number]) {
+  crearTablaMontosPorBanco(data: any[], titulo: string, totalTexto: string, margin: [number, number, number, number]) {
     const formatAmount = (amount: number) => amount.toLocaleString('en-US', {
-        minimumFractionDigits: 2,
-        maximumFractionDigits: 2
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
     });
 
     const formattedTotalText = `Total de ${titulo}: L ${formatAmount(data.reduce((acc, cur) => acc + (cur.MONTO_NETO ? parseFloat(cur.MONTO_NETO) : 0), 0))}`;
 
     return {
-        style: 'tableExample',
-        table: {
-            headerRows: 1,
-            widths: ['*', 'auto'],
-            body: [
-                [
-                    { text: 'Nombre del Banco', style: 'tableHeader' },
-                    { text: 'Monto Neto Pagado', style: 'tableHeader' }
-                ],
-                ...data.map(el => {
-                    const nombre = el.NOMBRE_BANCO || 'NO TIENE CUENTA';
-                    const montoNeto = el.MONTO_NETO ? formatAmount(parseFloat(el.MONTO_NETO)) : '0.00';
-                    return [
-                        nombre,
-                        { text: `L ${montoNeto}`, alignment: 'right' }
-                    ];
-                }),
-                [{ text: formattedTotalText, style: 'tableTotal', alignment: 'right', colSpan: 2 }, {}]
-            ]
-        },
-        layout: 'lightHorizontalLines',
-        margin: margin
+      style: 'tableExample',
+      table: {
+        headerRows: 1,
+        widths: ['*', 'auto'],
+        body: [
+          [
+            { text: 'Nombre del Banco', style: 'tableHeader' },
+            { text: 'Monto Neto Pagado', style: 'tableHeader' }
+          ],
+          ...data.map(el => {
+            const nombre = el.NOMBRE_BANCO || 'NO TIENE CUENTA';
+            const montoNeto = el.MONTO_NETO ? formatAmount(parseFloat(el.MONTO_NETO)) : '0.00';
+            return [
+              nombre,
+              { text: `L ${montoNeto}`, alignment: 'right' }
+            ];
+          }),
+          [{ text: formattedTotalText, style: 'tableTotal', alignment: 'right', colSpan: 2 }, {}]
+        ]
+      },
+      layout: 'lightHorizontalLines',
+      margin: margin
     };
-}
+  }
 
 
 

@@ -1212,7 +1212,9 @@ WHERE
           'detallePersona.detalleBeneficio.beneficio',
           'detallePersona.detalleBeneficio.detallePagBeneficio',
           'detallePersona.detalleBeneficio.detallePagBeneficio.detalleDeduccion.deduccion',
+          'detallePersona.detalleBeneficio.detallePagBeneficio.detalleDeduccion.deduccion.centroTrabajo',
           'detallePersona.detalleBeneficio.detallePagBeneficio.personaporbanco',
+          'detallePersona.detalleBeneficio.detallePagBeneficio.personaporbanco.banco',
           'detallePersona.detalleBeneficio.detallePagBeneficio.planilla']
       })
 
@@ -1372,7 +1374,6 @@ WHERE
 
     try {
       const result = await this.entityManager.query(query, [idPlanilla]);
-
       // Si esperas un solo resultado, puedes directamente devolver ese objeto.
       return {
         totalBeneficio: Number(result[0]["Total Beneficio"]),
@@ -1494,33 +1495,33 @@ WHERE
     `;
 
     interface Banco {
-        ID_BANCO: number;
-        NOMBRE_BANCO: string;
-        TOTAL_BENEFICIO: number;
-        DEDUCCIONES_INPREMA?: number;
-        DEDUCCIONES_TERCEROS?: number;
-        MONTO_NETO?: number;
+      ID_BANCO: number;
+      NOMBRE_BANCO: string;
+      TOTAL_BENEFICIO: number;
+      DEDUCCIONES_INPREMA?: number;
+      DEDUCCIONES_TERCEROS?: number;
+      MONTO_NETO?: number;
     }
 
     try {
-        const result: Banco[] = await this.entityManager.query(query);
-        const resultI: { ID_BANCO: number, DEDUCCIONES_INPREMA: number }[] = await this.entityManager.query(queryI);
-        const resultT: { ID_BANCO: number, DEDUCCIONES_TERCEROS: number }[] = await this.entityManager.query(queryT);
+      const result: Banco[] = await this.entityManager.query(query);
+      const resultI: { ID_BANCO: number, DEDUCCIONES_INPREMA: number }[] = await this.entityManager.query(queryI);
+      const resultT: { ID_BANCO: number, DEDUCCIONES_TERCEROS: number }[] = await this.entityManager.query(queryT);
 
-        result.forEach(banco => {
-            const deduccionI = resultI.find(d => d.ID_BANCO === banco.ID_BANCO);
-            const deduccionT = resultT.find(d => d.ID_BANCO === banco.ID_BANCO);
-            banco.DEDUCCIONES_INPREMA = deduccionI ? deduccionI.DEDUCCIONES_INPREMA : 0;
-            banco.DEDUCCIONES_TERCEROS = deduccionT ? deduccionT.DEDUCCIONES_TERCEROS : 0;
-            banco.MONTO_NETO = banco.TOTAL_BENEFICIO - (banco.DEDUCCIONES_INPREMA || 0) - (banco.DEDUCCIONES_TERCEROS || 0);
-        });
+      result.forEach(banco => {
+        const deduccionI = resultI.find(d => d.ID_BANCO === banco.ID_BANCO);
+        const deduccionT = resultT.find(d => d.ID_BANCO === banco.ID_BANCO);
+        banco.DEDUCCIONES_INPREMA = deduccionI ? deduccionI.DEDUCCIONES_INPREMA : 0;
+        banco.DEDUCCIONES_TERCEROS = deduccionT ? deduccionT.DEDUCCIONES_TERCEROS : 0;
+        banco.MONTO_NETO = banco.TOTAL_BENEFICIO - (banco.DEDUCCIONES_INPREMA || 0) - (banco.DEDUCCIONES_TERCEROS || 0);
+      });
 
-        return result;
+      return result;
     } catch (error) {
-        this.logger.error(`Error al obtener totales por banco: ${error.message}`, error.stack);
-        throw new InternalServerErrorException('Se produjo un error al obtener los totales por banco.');
+      this.logger.error(`Error al obtener totales por banco: ${error.message}`, error.stack);
+      throw new InternalServerErrorException('Se produjo un error al obtener los totales por banco.');
     }
-}
+  }
 
 
 
@@ -2364,9 +2365,8 @@ ON deducciones."id_afiliado" = beneficios."id_afiliado"
   }
 
   findAll(paginationDto: PaginationDto) {
-    const { limit = 10, offset = 0 } = paginationDto;
+    const { offset = 0 } = paginationDto;
     return this.planillaRepository.find({
-      take: limit,
       skip: offset,
       where: {
         tipoPlanilla: { clase_planilla: "EGRESO" }
@@ -2434,8 +2434,6 @@ ON deducciones."id_afiliado" = beneficios."id_afiliado"
   }
 
   private handleException(error: any): void {
-    console.log(error);
-
     this.logger.error(error);
     if (error.driverError && error.driverError.errorNum === 1) {
       throw new BadRequestException('Algun dato clave ya existe');

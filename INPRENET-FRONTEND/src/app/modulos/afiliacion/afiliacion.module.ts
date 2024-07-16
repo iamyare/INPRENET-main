@@ -52,6 +52,9 @@ import { VerOtrasFuentesIngresoComponent } from './verPerfil/ver-otras-fuentes-i
 import { EditPerfilPuestTrabComponent } from './gestion/edit-perfil-puest-trab/edit-perfil-puest-trab.component';
 import { EditColegiosMagisterialesComponent } from './gestion/edit-colegios-magisteriales/edit-colegios-magisteriales.component';
 import { AfiliacionDocentesComponent } from './gestion/afiliacion-docentes/afiliacion-docentes.component';
+import { DatosPropietarioComponent } from './Centros-Educativos/admin-centro-educativo/datos-propietario/datos-propietario.component';
+import { DatosContadorComponent } from './Centros-Educativos/admin-centro-educativo/datos-contador/datos-contador.component';
+import { DatosAdministradorComponent } from './Centros-Educativos/admin-centro-educativo/datos-administrador/datos-administrador.component';
 
 @NgModule({
   declarations: [
@@ -99,7 +102,10 @@ import { AfiliacionDocentesComponent } from './gestion/afiliacion-docentes/afili
     RefPersComponent,
     BenefComponent,
     VerOtrasFuentesIngresoComponent, EditPerfilPuestTrabComponent, EditColegiosMagisterialesComponent,
-    AfiliacionDocentesComponent
+    AfiliacionDocentesComponent,
+    DatosPropietarioComponent,
+    DatosContadorComponent,
+    DatosAdministradorComponent
   ],
   imports: [
     CommonModule,

@@ -78,10 +78,10 @@ export class TotalesporbydDialogComponent implements OnInit {
       pageMargins: [40, 150, 40, 100],
       header: () => [
         {
-          text: this.data.nombrePlanilla,
+          text: `TOTALES BENEFICIOS Y DEDUCCIONES DE PLANILLA ${this.data.nombrePlanilla}`,
           style: 'header',
           alignment: 'center',
-          margin: [0, 80, 0, 0]
+          margin: [50, 80, 50, 0]
         },
         {
           columns: [
@@ -109,9 +109,9 @@ export class TotalesporbydDialogComponent implements OnInit {
       ],
       content: [
         { text: 'Reporte de Beneficios', style: 'header' },
-        this.crearTablaPDF(this.dataSourceBeneficios.data, 'Beneficios', `Total de beneficios: ${this.totalBeneficios}`, this.totalDeducciones),
+        this.crearTablaPDF(this.dataSourceBeneficios.data, 'Beneficios', `Total de beneficios: L${this.totalBeneficios.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",")}`),
         { text: 'Reporte de Deducciones', style: 'header', pageBreak: 'before' },
-        this.crearTablaPDF(this.dataSourceDeducciones.data, 'Deducciones', `Total de deducciones: ${this.totalDeducciones}`, this.totalDeducciones),
+        this.crearTablaPDF(this.dataSourceDeducciones.data, 'Deducciones', `Total de deducciones: L${this.totalDeducciones.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",")}`),
       ],
       styles: {
         header: {
@@ -141,7 +141,7 @@ export class TotalesporbydDialogComponent implements OnInit {
     pdfMake.createPdf(docDefinition).download('Reporte_Beneficios_Deducciones.pdf');
   }
 
-  crearTablaPDF(data: any[], titulo: string, totalTexto: string, total: number) {
+  crearTablaPDF(data: any[], titulo: string, totalTexto: string) {
     return {
       style: 'tableExample',
       table: {
@@ -150,7 +150,7 @@ export class TotalesporbydDialogComponent implements OnInit {
         body: [
           [{ text: titulo, style: 'tableHeader', colSpan: 2 }, {}],
           ...data.map(el => [el.nombre, { text: `L${Number(el.total).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",")}`, alignment: 'right' }]),
-          [{ text: totalTexto, style: 'tableTotal', alignment: 'right', colSpan: 2 }, { text: `L${Number(total).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",")}`, style: 'tableTotal', alignment: 'right' }]
+          [{ text: totalTexto, style: 'tableTotal', alignment: 'right', colSpan: 2 }, {}]
         ]
       },
       layout: 'lightHorizontalLines'

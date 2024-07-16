@@ -94,44 +94,43 @@ export class BenefComponent implements OnInit {
 
   initFormBeneficiario(datosBeneficiario?: any): FormGroup {
     return this.fb.group({
-      datosBeneficiario: this.fb.group({
-        n_identificacion: new FormControl(datosBeneficiario?.n_identificacion || '', [Validators.required, Validators.maxLength(40)]),
-        primer_nombre: new FormControl(datosBeneficiario?.primer_nombre || '', [Validators.required, Validators.maxLength(40)]),
-        segundo_nombre: new FormControl(datosBeneficiario?.segundo_nombre || '', [Validators.maxLength(40)]),
-        tercer_nombre: new FormControl(datosBeneficiario?.tercer_nombre || ''),
-        primer_apellido: new FormControl(datosBeneficiario?.primer_apellido || '', [Validators.required, Validators.maxLength(40)]),
-        segundo_apellido: new FormControl(datosBeneficiario?.segundo_apellido || ''),
-        genero: new FormControl(datosBeneficiario?.genero || ''),
-        telefono_1: new FormControl(datosBeneficiario?.telefono_1 || ''),
-        sexo: new FormControl(datosBeneficiario?.sexo || ''),
-        fecha_nacimiento: new FormControl(datosBeneficiario?.fecha_nacimiento || '', Validators.required),
-        direccion_residencia: new FormControl(datosBeneficiario?.direccion_residencia || ''),
-        id_pais_nacionalidad: new FormControl(datosBeneficiario?.id_pais_nacionalidad || null, Validators.required),
-        id_municipio_residencia: new FormControl(datosBeneficiario?.id_municipio_residencia || null, Validators.required),
-        id_departamento_residencia: new FormControl(datosBeneficiario?.id_departamento_residencia || null, Validators.required),
-        id_departamento_nacimiento: new FormControl(datosBeneficiario?.id_departamento_nacimiento || null, Validators.required),
-        id_municipio_nacimiento: new FormControl(datosBeneficiario?.id_municipio_nacimiento || null, Validators.required),
-        porcentaje: new FormControl(datosBeneficiario?.porcentaje, [
-          Validators.required,
-          Validators.maxLength(5),
-          Validators.min(1),
-          this.validarSumaPorcentajes.bind(this)
-        ]),
-        parentesco: new FormControl(datosBeneficiario?.parentesco, [
-          Validators.required,
-          Validators.minLength(2),
-          Validators.maxLength(30),
-        ]),
-        dependiente: new FormControl(datosBeneficiario?.dependiente, [
-          Validators.required
-        ]),
-        discapacidad: new FormControl(datosBeneficiario?.discapacidad || '', [
-          Validators.required
-        ]),
-        discapacidades: new FormArray([]),
-      }),
+      n_identificacion: new FormControl(datosBeneficiario?.n_identificacion || '', [Validators.required, Validators.maxLength(40)]),
+      primer_nombre: new FormControl(datosBeneficiario?.primer_nombre || '', [Validators.required, Validators.maxLength(40)]),
+      segundo_nombre: new FormControl(datosBeneficiario?.segundo_nombre || '', [Validators.maxLength(40)]),
+      tercer_nombre: new FormControl(datosBeneficiario?.tercer_nombre || ''),
+      primer_apellido: new FormControl(datosBeneficiario?.primer_apellido || '', [Validators.required, Validators.maxLength(40)]),
+      segundo_apellido: new FormControl(datosBeneficiario?.segundo_apellido || ''),
+      genero: new FormControl(datosBeneficiario?.genero || ''),
+      telefono_1: new FormControl(datosBeneficiario?.telefono_1 || ''),
+      sexo: new FormControl(datosBeneficiario?.sexo || ''),
+      fecha_nacimiento: new FormControl(datosBeneficiario?.fecha_nacimiento || '', Validators.required),
+      direccion_residencia: new FormControl(datosBeneficiario?.direccion_residencia || ''),
+      id_pais_nacionalidad: new FormControl(datosBeneficiario?.id_pais_nacionalidad || null, Validators.required),
+      id_municipio_residencia: new FormControl(datosBeneficiario?.id_municipio_residencia || null, Validators.required),
+      id_departamento_residencia: new FormControl(datosBeneficiario?.id_departamento_residencia || null, Validators.required),
+      id_departamento_nacimiento: new FormControl(datosBeneficiario?.id_departamento_nacimiento || null, Validators.required),
+      id_municipio_nacimiento: new FormControl(datosBeneficiario?.id_municipio_nacimiento || null, Validators.required),
+      porcentaje: new FormControl(datosBeneficiario?.porcentaje, [
+        Validators.required,
+        Validators.maxLength(5),
+        Validators.min(1),
+        this.validarSumaPorcentajes.bind(this)
+      ]),
+      parentesco: new FormControl(datosBeneficiario?.parentesco, [
+        Validators.required,
+        Validators.minLength(2),
+        Validators.maxLength(30),
+      ]),
+      dependiente: new FormControl(datosBeneficiario?.dependiente, [
+        Validators.required
+      ]),
+      discapacidad: new FormControl(datosBeneficiario?.discapacidad || '', [
+        Validators.required
+      ]),
+      discapacidades: new FormArray([])
     });
   }
+
 
   cargarDepartamentos() {
     this.datosEstaticosService.getDepartamentos().then(data => {
@@ -190,8 +189,8 @@ export class BenefComponent implements OnInit {
 
     let porcentajeTotal = 0;
 
-    beneficiariosArray.controls.forEach((control:any) => {
-      const controlporcentaje = control.get('datosBeneficiario')?.get('porcentaje')!;
+    beneficiariosArray.controls.forEach((control: any) => {
+      const controlporcentaje = control.get('porcentaje');
       const porcentaje = controlporcentaje?.value;
 
       if (porcentaje !== undefined) {
@@ -203,8 +202,8 @@ export class BenefComponent implements OnInit {
       return { invalidSumaPorcentajes: true };
     } else {
       // Eliminar el error de invalidSumaPorcentajes si existe
-      beneficiariosArray.controls.forEach((control:any) => {
-        const controlporcentaje = control.get('datosBeneficiario')?.get('porcentaje')!;
+      beneficiariosArray.controls.forEach((control: any) => {
+        const controlporcentaje = control.get('porcentaje');
         if (controlporcentaje.errors) {
           const { invalidSumaPorcentajes, ...otherErrors } = controlporcentaje.errors;
           controlporcentaje.setErrors(Object.keys(otherErrors).length ? otherErrors : null);
@@ -223,8 +222,8 @@ export class BenefComponent implements OnInit {
     const control = this.getCtrl('beneficiario', this.formParent) as FormArray;
     if (control.length > 0) {
       control.removeAt(control.length - 1);
-      control.controls.forEach((control:any) => {
-        const controlporcentaje = control.get('datosBeneficiario')?.get('porcentaje')!;
+      control.controls.forEach((control: any) => {
+        const controlporcentaje = control.get('porcentaje');
         controlporcentaje.updateValueAndValidity(); // Actualizar la validación del porcentaje
       });
     }
@@ -261,7 +260,7 @@ export class BenefComponent implements OnInit {
   agregarDiscapacidad(i: number) {
     const beneficiariosArray = this.formParent.get('beneficiario') as FormArray;
     const beneficiarioGroup = beneficiariosArray.controls[i] as FormGroup;
-    const discapacidadesArray = beneficiarioGroup.get('datosBeneficiario.discapacidades') as FormArray;
+    const discapacidadesArray = beneficiarioGroup.get('discapacidades') as FormArray;
 
     const newDisabilityControl = new FormControl('', Validators.required);
 
@@ -283,7 +282,7 @@ export class BenefComponent implements OnInit {
   eliminarDiscapacidad(i: number, index: number) {
     const beneficiariosArray = this.formParent.get('beneficiario') as FormArray;
     const beneficiarioGroup = beneficiariosArray.controls[i] as FormGroup;
-    const discapacidadesArray = beneficiarioGroup.get('datosBeneficiario.discapacidades') as FormArray;
+    const discapacidadesArray = beneficiarioGroup.get('discapacidades') as FormArray;
 
     discapacidadesArray.removeAt(index);
 
@@ -309,12 +308,12 @@ export class BenefComponent implements OnInit {
 
   getAvailableDisabilities(discapacidadesArray: FormArray, currentIndex: number): { label: string; value: string }[] {
     const selectedValues = discapacidadesArray.value.map((val: any, index: number) => index !== currentIndex ? val : null);
-    return this.tipo_discapacidad.filter((d:any) => !selectedValues.includes(d.value));
+    return this.tipo_discapacidad.filter((d: any) => !selectedValues.includes(d.value));
   }
 
   getErrors(i: number, fieldName: string): any {
     const controlesBeneficiarios = (this.formParent.get('beneficiario') as FormArray).controls;
-    const temp = controlesBeneficiarios[i].get("datosBeneficiario")!.get(fieldName)!.errors;
+    const temp = controlesBeneficiarios[i].get(fieldName)?.errors;
 
     let errors = [];
     if (temp) {
@@ -346,7 +345,7 @@ export class BenefComponent implements OnInit {
 
   getErrors2(i: number, fieldName: string): any {
     const controlesBeneficiarios = (this.formParent.get('beneficiario') as FormArray).controls;
-    const temp = controlesBeneficiarios[i].get("datosBeneficiario")!.get(fieldName)!.errors;
+    const temp = controlesBeneficiarios[i].get(fieldName)?.errors;
 
     let errors = [];
     if (temp) {
@@ -384,9 +383,9 @@ export class BenefComponent implements OnInit {
     const beneficiarioGroup = beneficiariosArray.controls[i] as FormGroup;
 
     if (value === 'si') {
-      beneficiarioGroup.get('datosBeneficiario.dependiente')?.setValue(true);
+      beneficiarioGroup.get('dependiente')?.setValue(true);
     } else {
-      beneficiarioGroup.get('datosBeneficiario.dependiente')?.setValue(false);
+      beneficiarioGroup.get('dependiente')?.setValue(false);
     }
   }
 

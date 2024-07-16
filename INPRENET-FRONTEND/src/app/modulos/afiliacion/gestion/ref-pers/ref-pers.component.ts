@@ -124,10 +124,9 @@ export class RefPersComponent implements OnInit
   dependiente_economico: boolean = false;
   cargoPublico: boolean = false;
 
-  onDatosRefPerChange() {
-    const data = this.formParent;
+  onDatosRefPerChange(): void {
+    const data = this.formParent.value;
     this.newDatRefPerChange.emit(data);
-    this.updateAvailableParentesco();
   }
 
   onDatosGeneralesDiscChange(event: any) {
@@ -194,6 +193,11 @@ export class RefPersComponent implements OnInit
     this.initForm();
     this.updateAvailableParentesco();
 
+    // Agrega esto
+    this.formParent.valueChanges.subscribe(values => {
+      this.newDatRefPerChange.emit(values);
+    });
+
     if (this.datos) {
       if (this.datos.value.refpers.length > 0) {
         for (let i of this.datos.value.refpers) {
@@ -202,6 +206,7 @@ export class RefPersComponent implements OnInit
       }
     }
   }
+
 
   ngOnDestroy() { }
 

@@ -2,7 +2,11 @@
   <app-progressbar-dynamic [steps]="steps" (stepChange)="handleStepChange($event)"></app-progressbar-dynamic>
 
   <div [hidden]="activeStep !== 0">
-    <app-dat-generales-afiliado [parentForm]="datosGeneralesForm" (formUpdated)="onDatosGeneralesFormUpdate($event)"></app-dat-generales-afiliado>
+    <app-dat-generales-afiliado
+      [useCamera]="true"
+      [datos]="datosGeneralesForm"
+      (newDatosGenerales)="handleDatosGeneralesChange($event)">
+    </app-dat-generales-afiliado>
   </div>
 
   <div [hidden]="activeStep !== 1">
@@ -14,10 +18,18 @@
   </div>
 
   <div [hidden]="activeStep !== 3">
-    <app-dat-puesto-trab [parentForm]="centrosTrabajoForm" (newDatDatosPuestTrab)="onCentrosTrabajoFormUpdate($event)"></app-dat-puesto-trab>
+    <app-dat-puesto-trab (newDatDatosPuestTrab)="handleDatosPuestTrab($event)" (newOtrasFuentesIngreso)="handleOtrasFuentesIngreso($event)"></app-dat-puesto-trab>
   </div>
 
   <div [hidden]="activeStep !== 4">
+    <app-ref-pers (newDatRefPerChange)="handleRefPersData($event)"></app-ref-pers>
+  </div>
+
+  <div [hidden]="activeStep !== 5">
+    <app-benef [formParent]="benefForm" (newDatBenChange)="handleBenefData($event)"></app-benef>
+  </div>
+
+  <div [hidden]="activeStep !== 6">
     <button mat-button color="primary" (click)="gatherAllData()">
       <mat-icon>save</mat-icon> Enviar y Mostrar Datos
     </button>

@@ -71,9 +71,9 @@ export class DatPuestoTrabComponent implements OnInit {
   @Output() newOtrasFuentesIngreso = new EventEmitter<FormGroup>();
 
   onDatosDatosPuestTrab() {
-    const data = this.formParent;
-    this.newDatDatosPuestTrab.emit(data);
-  }
+  const data = this.formParent.value;
+  this.newDatDatosPuestTrab.emit(data);
+}
 
   constructor(
     private formStateService: FormStateService,
@@ -174,8 +174,9 @@ export class DatPuestoTrabComponent implements OnInit {
   }
 
   onOtrasFuentesIngresoChange(form: FormGroup): void {
-    this.newOtrasFuentesIngreso.emit(form);
+    this.newOtrasFuentesIngreso.emit(form.value);
   }
+
 
   getCtrl(key: string, form: FormGroup): any {
     return form.get(key);

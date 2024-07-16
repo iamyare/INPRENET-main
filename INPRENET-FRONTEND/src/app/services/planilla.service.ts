@@ -9,6 +9,16 @@ import { environment } from 'src/environments/environment';
 export class PlanillaService {
   constructor(private http: HttpClient) { }
 
+  getMontosPorBanco(term: string): Observable<any[]> {
+    const url = `${environment.API_URL}/api/planilla/montos-banco/${term}`;
+    return this.http.get<any[]>(url).pipe(
+      catchError(error => {
+        console.error('Error al obtener los montos por banco', error);
+        return throwError(error);
+      })
+    );
+  }
+
   generarExcelPlanilla(codPlanilla: string): Observable<Blob> {
     const params = new HttpParams().set('codPlanilla', codPlanilla);
     const url = `${environment.API_URL}/api/planilla/generar-excel`;

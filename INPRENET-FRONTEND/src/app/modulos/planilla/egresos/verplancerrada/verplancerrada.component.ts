@@ -536,6 +536,7 @@ export class VerplancerradaComponent {
     }
   }
 
+
   convertirImagenABase64(url: string): Promise<string> {
     return this.http.get(url, { responseType: 'blob' }).toPromise().then(blob => {
       return new Promise<string>((resolve, reject) => {
@@ -613,7 +614,7 @@ export class VerplancerradaComponent {
         const neto = totalInprema + totalTerceros;
 
         const docDefinition: TDocumentDefinitions = {
-          pageSize: 'A4',
+          pageSize: 'LETTER',
           background: function (currentPage, pageSize) {
             return {
               image: base64Image,
@@ -787,6 +788,7 @@ export class VerplancerradaComponent {
         const totalMonto = montosPorBanco.reduce((acc, cur) => acc + (cur.TotalPagado ? parseFloat(cur.TotalPagado) : 0), 0);
 
         const docDefinition: TDocumentDefinitions = {
+          pageSize: 'LETTER',
           background: function (currentPage, pageSize) {
             return {
               image: base64Image,
@@ -899,6 +901,7 @@ export class VerplancerradaComponent {
       margin: margin
     };
   }
+
 
 
 

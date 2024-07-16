@@ -69,6 +69,7 @@ export class TotalesporbydDialogComponent implements OnInit {
     const netoTotal = this.totalBeneficios - this.totalDeducciones;
 
     const docDefinition: TDocumentDefinitions = {
+      pageSize: 'LETTER',
       background: (currentPage, pageSize) => ({
         image: base64Image,
         width: pageSize.width,
@@ -156,6 +157,7 @@ export class TotalesporbydDialogComponent implements OnInit {
       layout: 'lightHorizontalLines'
     };
   }
+
 
   closeDialog(): void {
     this.dialogRef.close();

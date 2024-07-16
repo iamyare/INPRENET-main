@@ -166,9 +166,9 @@ export class AfiliacionService {
 
     const persona = entityManager.create(net_persona, {
       ...crearPersonaDto,
-      fecha_vencimiento_ident: crearPersonaDto.fecha_vencimiento_ident ? new Date(crearPersonaDto.fecha_vencimiento_ident).toISOString().split('T')[0] : null,
-      fecha_nacimiento: crearPersonaDto.fecha_nacimiento ? new Date(crearPersonaDto.fecha_nacimiento).toISOString().split('T')[0] : null,
-      fecha_defuncion: crearPersonaDto.fecha_defuncion ? new Date(crearPersonaDto.fecha_defuncion).toISOString().split('T')[0] : null,
+      fecha_vencimiento_ident: this.formatDateToYYYYMMDD(crearPersonaDto.fecha_vencimiento_ident),
+      fecha_nacimiento: this.formatDateToYYYYMMDD(crearPersonaDto.fecha_nacimiento),
+      fecha_defuncion: this.formatDateToYYYYMMDD(crearPersonaDto.fecha_defuncion),
       foto_perfil: fotoPerfil?.buffer,
       tipoIdentificacion,
       pais,
@@ -185,29 +185,31 @@ export class AfiliacionService {
     idPersona: number,
     entityManager: EntityManager,
   ): Promise<net_detalle_persona> {
-    // Verificar si el tipo de persona existe
-    const tipoPersona = await this.tipoPersonaRepository.findOne({ where: { id_tipo_persona: crearDetallePersonaDto.id_tipo_persona } });
+    // Verificar si el tipo de persona existe basado en `tipo_persona`
+    const tipoPersona = await this.tipoPersonaRepository.findOne({ where: { tipo_persona: crearDetallePersonaDto.tipo_persona } });
     if (!tipoPersona) {
       throw new NotFoundException('Tipo de persona no encontrado');
     }
-
-    // Verificar si el estado de afiliación existe
-    const estadoAfiliacion = await this.estadoAfiliacionRepository.findOne({ where: { codigo: crearDetallePersonaDto.id_estado_afiliacion } });
+  
+    // Verificar si el estado de afiliación existe basado en `nombre_estado`
+    const estadoAfiliacion = await this.estadoAfiliacionRepository.findOne({ where: { nombre_estado: crearDetallePersonaDto.nombre_estado } });
     if (!estadoAfiliacion) {
       throw new NotFoundException('Estado de afiliación no encontrado');
     }
-
+  
     const detallePersona = entityManager.create(net_detalle_persona, {
       ID_PERSONA: idPersona,
       ID_CAUSANTE: idPersona,
       eliminado: crearDetallePersonaDto.eliminado,
-      ID_TIPO_PERSONA: crearDetallePersonaDto.id_tipo_persona,
-      ID_ESTADO_AFILIACION: crearDetallePersonaDto.id_estado_afiliacion,
+      tipoPersona,
+      estadoAfiliacion,
+      ID_TIPO_PERSONA: tipoPersona.id_tipo_persona,
+      ID_ESTADO_AFILIACION: estadoAfiliacion.codigo,
     });
-
+  
     return await entityManager.save(net_detalle_persona, detallePersona);
   }
-
+  
   async crearPersonaColegios(
     crearPersonaColegiosDtos: CrearPersonaColegiosDto[],
     idPersona: number,
@@ -238,25 +240,26 @@ export class AfiliacionService {
     entityManager: EntityManager,
   ): Promise<Net_Persona_Por_Banco[]> {
     const resultados: Net_Persona_Por_Banco[] = [];
-
+  
     for (const crearPersonaBancosDto of crearPersonaBancosDtos) {
       const banco = await this.bancoRepository.findOne({ where: { id_banco: crearPersonaBancosDto.id_banco } });
       if (!banco) {
         throw new NotFoundException(`Banco con ID ${crearPersonaBancosDto.id_banco} no encontrado`);
       }
-
+  
       const personaBanco = entityManager.create(Net_Persona_Por_Banco, {
         persona: { id_persona: idPersona },
         banco,
         num_cuenta: crearPersonaBancosDto.num_cuenta,
         estado: crearPersonaBancosDto.estado,
       });
-
+  
       resultados.push(await entityManager.save(Net_Persona_Por_Banco, personaBanco));
     }
-
+  
     return resultados;
   }
+  
 
   async crearPersonaCentrosTrabajo(
     crearPersonaCentrosTrabajoDtos: CrearPersonaCentroTrabajoDto[],
@@ -270,15 +273,14 @@ export class AfiliacionService {
       if (!centroTrabajo) {
         throw new NotFoundException(`Centro de trabajo con ID ${crearPersonaCentrosTrabajoDto.id_centro_trabajo} no encontrado`);
       }
-
       const personaCentroTrabajo = entityManager.create(Net_perf_pers_cent_trab, {
         persona: { id_persona: idPersona },
         centroTrabajo,
         cargo: crearPersonaCentrosTrabajoDto.cargo,
         numero_acuerdo: crearPersonaCentrosTrabajoDto.numero_acuerdo,
         salario_base: crearPersonaCentrosTrabajoDto.salario_base,
-        fecha_ingreso: crearPersonaCentrosTrabajoDto.fecha_ingreso,
-        fecha_egreso: crearPersonaCentrosTrabajoDto.fecha_egreso,
+        fecha_ingreso: this.formatDateToYYYYMMDD(crearPersonaCentrosTrabajoDto.fecha_ingreso),
+        fecha_egreso: this.formatDateToYYYYMMDD(crearPersonaCentrosTrabajoDto.fecha_egreso),
         estado: crearPersonaCentrosTrabajoDto.estado,
       });
 
@@ -457,10 +459,20 @@ export class AfiliacionService {
 
         return resultados;
       } catch (error) {
+        console.error('Error al crear los datos:', error);
         throw new Error(`Error al crear los datos: ${error.message}`);
       }
     });
   }
   
   
+  formatDateToYYYYMMDD(dateString: string): string {
+    if (!dateString) return null;
+    const date = new Date(dateString);
+    const day = ('0' + date.getDate()).slice(-2);
+    const month = ('0' + (date.getMonth() + 1)).slice(-2);
+    const year = date.getFullYear();
+    return `${year}-${month}-${day}`;
+  }
 }
+

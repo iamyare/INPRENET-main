@@ -1,16 +1,15 @@
-import { IsNotEmpty, IsOptional, IsNumber, IsEnum, IsString } from 'class-validator';
+import { IsNotEmpty, IsString } from 'class-validator';
 
 export class CrearDetallePersonaDto {
-  @IsOptional()
-  @IsString()
-  @IsEnum(['SI', 'NO'])
-  eliminado?: string = 'NO';
+    @IsNotEmpty()
+    @IsString()
+    eliminado: string;
 
-  @IsNotEmpty()
-  @IsNumber()
-  id_tipo_persona: number;
+    @IsNotEmpty()
+    @IsString()
+    tipo_persona: string;
 
-  @IsNotEmpty()
-  @IsNumber()
-  id_estado_afiliacion: number;
+    @IsNotEmpty()
+    @IsString()
+    nombre_estado: string;
 }

@@ -17,10 +17,10 @@ export class CrearPersonaCentroTrabajoDto {
   @IsNumber()
   salario_base?: number;
 
-  @IsNotEmpty()
+  @IsOptional()
   @IsDateString()
   fecha_ingreso: string;
-
+  
   @IsOptional()
   @IsDateString()
   fecha_egreso?: string;

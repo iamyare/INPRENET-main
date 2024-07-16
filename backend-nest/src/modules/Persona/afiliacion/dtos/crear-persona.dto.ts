@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsOptional, IsString, IsNumber, IsDate, IsEnum, IsEmail, ValidateNested, IsArray } from 'class-validator';
+import { IsNotEmpty, IsOptional, IsString, IsNumber, IsDate, IsEnum, IsEmail, ValidateNested, IsArray, IsDateString } from 'class-validator';
 import { CrearDiscapacidadDto } from './crear-discapacidad.dto';
 import { Type } from 'class-transformer';
 
@@ -16,8 +16,8 @@ export class CrearPersonaDto {
   n_identificacion: string;
 
   @IsOptional()
-  @IsDate()
-  fecha_vencimiento_ident?: Date;
+  @IsDateString()
+  fecha_vencimiento_ident?: string;
 
   @IsOptional()
   @IsString()
@@ -97,8 +97,8 @@ export class CrearPersonaDto {
   correo_2?: string;
 
   @IsOptional()
-  @IsDate()
-  fecha_nacimiento?: Date;
+  @IsDateString()
+  fecha_nacimiento?: string;
 
   @IsOptional()
   @IsNumber()
@@ -109,8 +109,8 @@ export class CrearPersonaDto {
   certificado_defuncion?: number;
 
   @IsOptional()
-  @IsDate()
-  fecha_defuncion?: Date;
+  @IsDateString()
+  fecha_defuncion?: string;
 
   @IsOptional()
   @IsString()

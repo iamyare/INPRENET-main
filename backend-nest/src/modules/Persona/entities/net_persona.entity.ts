@@ -25,7 +25,7 @@ import { Net_Familia } from "./net_familia.entity";
 export class net_persona {
     @PrimaryGeneratedColumn({ type: 'int', name: 'ID_PERSONA', primaryKeyConstraintName: 'PK_ID_PERSONA_NET_PERSONA' })
     id_persona: number;
-
+ 
     @ManyToOne(() => Net_Tipo_Identificacion, tipoIdentificacion => tipoIdentificacion.personas, { cascade: true })
     @JoinColumn({ name: 'ID_TIPO_IDENTIFICACION', foreignKeyConstraintName: 'FK_ID_TIPO_IDENTI_NET_PERSONA' })
     tipoIdentificacion: Net_Tipo_Identificacion;

@@ -22,7 +22,7 @@ export class Net_perf_pers_cent_trab {
     @Column('date', { nullable: true, name: 'FECHA_EGRESO' })
     fecha_egreso: string;
 
-    @Column('varchar2', { length: 20, nullable: false, default: 'ACTIVO', name: 'ESTADO' })
+    @Column('varchar2', { length: 20, nullable: true, default: 'ACTIVO', name: 'ESTADO' })
     estado: string;
 
     @Column('nvarchar2', { length: 50, nullable: true, name: 'TIPO_JORNADA' })

@@ -1372,7 +1372,6 @@ WHERE
 
     try {
       const result = await this.entityManager.query(query, [idPlanilla]);
-      console.log(result);
 
       // Si esperas un solo resultado, puedes directamente devolver ese objeto.
       return {
@@ -1417,45 +1416,112 @@ WHERE
 
   async ObtenerMontosPorBanco(codPlanilla: string): Promise<any> {
     let query = `
-        SELECT 
-            banco."ID_BANCO" AS "IdBanco",
-            banco."NOMBRE_BANCO" AS "NombreBanco",
-            SUM(detBs."MONTO_A_PAGAR") AS "TotalPagado"
+        SELECT DISTINCT
+            banco."ID_BANCO",
+            banco."NOMBRE_BANCO",
+            SUM(detBs."MONTO_A_PAGAR") AS "TOTAL_BENEFICIO"
         FROM 
             "NET_DETALLE_PAGO_BENEFICIO" detBs
         JOIN 
-            "NET_PLANILLA" plan
-        ON 
-            plan."ID_PLANILLA" = detBs."ID_PLANILLA"
+            "NET_PLANILLA" plan ON plan."ID_PLANILLA" = detBs."ID_PLANILLA"
+        JOIN 
+            "NET_DETALLE_BENEFICIO_AFILIADO" detBA ON detBs."ID_DETALLE_PERSONA" = detBA."ID_DETALLE_PERSONA" 
+            AND detBs."ID_PERSONA" = detBA."ID_PERSONA"
+            AND detBs."ID_CAUSANTE" = detBA."ID_CAUSANTE"
+            AND detBs."ID_BENEFICIO" = detBA."ID_BENEFICIO"
+        JOIN 
+            "NET_BENEFICIO" ben ON detBA."ID_BENEFICIO" = ben."ID_BENEFICIO"
         LEFT JOIN 
-            "NET_PERSONA_POR_BANCO" perPorBan
-        ON 
-            detBs."ID_AF_BANCO" = perPorBan."ID_AF_BANCO"
+            "NET_PERSONA_POR_BANCO" perPorBan ON detBs."ID_AF_BANCO" = perPorBan."ID_AF_BANCO"
         LEFT JOIN 
-            "NET_BANCO" banco
-        ON 
-            banco."ID_BANCO" = perPorBan."ID_BANCO"
+            "NET_BANCO" banco ON banco."ID_BANCO" = perPorBan."ID_BANCO"
         WHERE
             detBs."ESTADO" = 'PAGADA' AND
             plan."CODIGO_PLANILLA" = '${codPlanilla}'
         GROUP BY 
-            banco."ID_BANCO", banco."NOMBRE_BANCO"
+            banco."ID_BANCO",
+            banco."NOMBRE_BANCO"
     `;
 
-    interface MontoBanco {
-        IdBanco: number;
-        NombreBanco: string;
-        TotalPagado: number;
+    let queryI = `
+        SELECT
+            banco."ID_BANCO",
+            SUM(dd."MONTO_APLICADO") AS "DEDUCCIONES_INPREMA"
+        FROM
+            "NET_DETALLE_DEDUCCION" dd
+        INNER JOIN "NET_DEDUCCION" ded ON ded."ID_DEDUCCION" = dd."ID_DEDUCCION"
+        LEFT JOIN 
+            "NET_CENTRO_TRABAJO" instFin ON instFin."ID_CENTRO_TRABAJO" = ded."ID_CENTRO_TRABAJO" 
+        INNER JOIN
+            NET_DETALLE_PAGO_BENEFICIO detPagB ON DD."ID_DETALLE_PAGO_BENEFICIO" = detPagB."ID_BENEFICIO_PLANILLA"
+        JOIN 
+            "NET_PLANILLA" plan ON plan."ID_PLANILLA" = detPagB."ID_PLANILLA"
+        LEFT JOIN 
+            "NET_PERSONA_POR_BANCO" perPorBan ON detPagB."ID_AF_BANCO" = perPorBan."ID_AF_BANCO"
+        LEFT JOIN 
+            "NET_BANCO" banco ON banco."ID_BANCO" = perPorBan."ID_BANCO"
+        WHERE
+            dd."ESTADO_APLICACION" = 'COBRADA' AND
+            plan."CODIGO_PLANILLA" = '${codPlanilla}' AND
+            instFin."NOMBRE_CENTRO_TRABAJO" = 'INPREMA'
+        GROUP BY 
+            banco."ID_BANCO"
+    `;
+
+    let queryT = `
+        SELECT
+            banco."ID_BANCO",
+            SUM(dd."MONTO_APLICADO") AS "DEDUCCIONES_TERCEROS"
+        FROM
+            "NET_DETALLE_DEDUCCION" dd
+        INNER JOIN "NET_DEDUCCION" ded ON ded."ID_DEDUCCION" = dd."ID_DEDUCCION"
+        LEFT JOIN 
+            "NET_CENTRO_TRABAJO" instFin ON instFin."ID_CENTRO_TRABAJO" = ded."ID_CENTRO_TRABAJO" 
+        INNER JOIN
+            NET_DETALLE_PAGO_BENEFICIO detPagB ON DD."ID_DETALLE_PAGO_BENEFICIO" = detPagB."ID_BENEFICIO_PLANILLA"
+        JOIN 
+            "NET_PLANILLA" plan ON plan."ID_PLANILLA" = detPagB."ID_PLANILLA"
+        LEFT JOIN 
+            "NET_PERSONA_POR_BANCO" perPorBan ON detPagB."ID_AF_BANCO" = perPorBan."ID_AF_BANCO"
+        LEFT JOIN 
+            "NET_BANCO" banco ON banco."ID_BANCO" = perPorBan."ID_BANCO"
+        WHERE
+            dd."ESTADO_APLICACION" = 'COBRADA' AND
+            plan."CODIGO_PLANILLA" = '${codPlanilla}' AND
+            instFin."NOMBRE_CENTRO_TRABAJO" != 'INPREMA'
+        GROUP BY 
+            banco."ID_BANCO"
+    `;
+
+    interface Banco {
+        ID_BANCO: number;
+        NOMBRE_BANCO: string;
+        TOTAL_BENEFICIO: number;
+        DEDUCCIONES_INPREMA?: number;
+        DEDUCCIONES_TERCEROS?: number;
+        MONTO_NETO?: number;
     }
 
     try {
-        const result: MontoBanco[] = await this.entityManager.query(query);
+        const result: Banco[] = await this.entityManager.query(query);
+        const resultI: { ID_BANCO: number, DEDUCCIONES_INPREMA: number }[] = await this.entityManager.query(queryI);
+        const resultT: { ID_BANCO: number, DEDUCCIONES_TERCEROS: number }[] = await this.entityManager.query(queryT);
+
+        result.forEach(banco => {
+            const deduccionI = resultI.find(d => d.ID_BANCO === banco.ID_BANCO);
+            const deduccionT = resultT.find(d => d.ID_BANCO === banco.ID_BANCO);
+            banco.DEDUCCIONES_INPREMA = deduccionI ? deduccionI.DEDUCCIONES_INPREMA : 0;
+            banco.DEDUCCIONES_TERCEROS = deduccionT ? deduccionT.DEDUCCIONES_TERCEROS : 0;
+            banco.MONTO_NETO = banco.TOTAL_BENEFICIO - (banco.DEDUCCIONES_INPREMA || 0) - (banco.DEDUCCIONES_TERCEROS || 0);
+        });
+
         return result;
     } catch (error) {
-        this.logger.error(`Error al obtener montos por banco: ${error.message}`, error.stack);
-        throw new InternalServerErrorException('Se produjo un error al obtener los montos por banco.');
+        this.logger.error(`Error al obtener totales por banco: ${error.message}`, error.stack);
+        throw new InternalServerErrorException('Se produjo un error al obtener los totales por banco.');
     }
 }
+
 
 
 
@@ -1647,8 +1713,6 @@ WHERE
           persona['DEDUCCIONES_TERCEROS'] = deduccionT['DEDUCCIONES_TERCEROS'];
         }
       });
-      console.log(result);
-
       return result;
     } catch (error) {
       this.logger.error(`Error al obtener totales por planilla: ${error.message}`, error.stack);

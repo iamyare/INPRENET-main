@@ -6,8 +6,8 @@ import { Net_Discapacidad } from "./net_discapacidad.entity";
     name: 'NET_PERSONA_DISCAPACIDAD',
 })
 export class Net_Persona_Discapacidad {
-    @PrimaryGeneratedColumn({ type: 'int', name: 'ID_UNICO', primaryKeyConstraintName: 'PK_ID_UNICO' })
-    id_unico: number;
+    @PrimaryGeneratedColumn({ type: 'int', name: 'ID_PERSONA_DISCAPACIDAD', primaryKeyConstraintName: 'PK_ID_PERSONA_DISCAPACIDAD' })
+    id_persona_discapacidad: number;
 
     @ManyToOne(() => Net_Discapacidad, discapacidad => discapacidad.personaDiscapacidades)
     @JoinColumn({ name: 'ID_DISCAPACIDAD', referencedColumnName: 'id_discapacidad', foreignKeyConstraintName: 'FK_ID_DISCAPACIDAD_PERSONA_DISCAPACIDAD' })

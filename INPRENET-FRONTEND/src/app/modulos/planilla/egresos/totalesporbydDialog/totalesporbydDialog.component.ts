@@ -168,21 +168,21 @@ export class TotalesporbydDialogComponent implements OnInit {
           columns: [
             {
               width: '33%',
-              text: 'ELABORÓ:',
+              text: 'ELABORÓ',
               style: 'signature',
               alignment: 'center',
               margin: [0, 5, 0, 20]
             },
             {
               width: '33%',
-              text: 'REVISÓ:',
+              text: 'REVISÓ',
               style: 'signature',
               alignment: 'center',
               margin: [0, 5, 0, 20]
             },
             {
               width: '33%',
-              text: 'AUTORIZÓ:',
+              text: 'AUTORIZÓ',
               style: 'signature',
               alignment: 'center',
               margin: [0, 5, 0, 20]

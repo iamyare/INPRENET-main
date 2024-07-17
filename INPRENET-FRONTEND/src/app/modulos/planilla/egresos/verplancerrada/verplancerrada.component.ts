@@ -705,21 +705,21 @@ export class VerplancerradaComponent {
                         columns: [
                             {
                                 width: '33%',
-                                text: 'ELABORO:',
+                                text: 'ELABORÓ',
                                 style: 'signature',
                                 alignment: 'center',
                                 margin: [0, 5, 0, 20]  // Espaciado después de la línea de firma
                             },
                             {
                                 width: '33%',
-                                text: 'REVISO:',
+                                text: 'REVISÓ',
                                 style: 'signature',
                                 alignment: 'center',
                                 margin: [0, 5, 0, 20]  // Espaciado después de la línea de firma
                             },
                             {
                                 width: '33%',
-                                text: 'AUTORIZO:',
+                                text: 'AUTORIZÓ',
                                 style: 'signature',
                                 alignment: 'center',
                                 margin: [0, 5, 0, 20]  // Espaciado después de la línea de firma
@@ -807,10 +807,12 @@ crearTablaPDF(data: any[], titulo: string, totalTexto: string, margin: [number, 
 
   mostrarTotales() {
     this.planillaService.getTotalesPorDedYBen(this.idPlanilla).subscribe({
-        next: (res) => {
+
+      next: (res) => {
+          console.log(res);
             const dialogData = {
                 beneficios: res.beneficios.map((b: any) => ({
-                    codigo: b.CODIGO_BENEFICIO,
+                    codigo: b.ID_BENEFICIO,
                     nombre: b.NOMBRE_BENEFICIO,
                     total: b.TOTAL_MONTO_BENEFICIO
                 })),
@@ -862,27 +864,14 @@ async generarPDFMontosPorBanco() {
                       absolutePosition: { x: 0, y: 0 }
                   };
               },
-              pageMargins: [50, 80, 50, 85], // Aumentado el espacio en el footer
-              header: (currentPage, pageCount, pageSize) => {
-                  return [
+              pageMargins: [40, 150, 40, 100],
+              header: {
+                  stack: [
                       {
-                          columns: [
-                              {
-                                  width: '*',
-                                  text: ''
-                              },
-                              {
-                                  width: 'auto',
-                                  text: `MONTOS PAGADOS POR PLANILLA ${this.detallePlanilla?.nombre_planilla}`,
-                                  style: 'header',
-                                  alignment: 'center',
-                                  margin: [50, 80, 50, 0]
-                              },
-                              {
-                                  width: '*',
-                                  text: ''
-                              }
-                          ]
+                          text: `MONTOS PAGADOS POR PLANILLA ${this.detallePlanilla?.nombre_planilla}`,
+                          style: 'header',
+                          alignment: 'center',
+                          margin: [50, 80, 50, 0]
                       },
                       {
                           columns: [
@@ -891,6 +880,8 @@ async generarPDFMontosPorBanco() {
                                   text: [
                                       { text: 'Código de Planilla: ', bold: true },
                                       `${codigo_planilla}\n`,
+                                      { text: 'Mes de la Planilla: ', bold: true },
+                                      `${this.detallePlanilla?.mes_planilla || 'N/A'}`,
                                   ],
                                   alignment: 'left'
                               },
@@ -905,7 +896,7 @@ async generarPDFMontosPorBanco() {
                           ],
                           margin: [40, 5, 40, 10]
                       }
-                  ];
+                  ]
               },
               content: [
                   { text: 'Montos Pagados por Banco', style: 'subheader', margin: [0, 0, 0, 5] },
@@ -923,7 +914,7 @@ async generarPDFMontosPorBanco() {
                                   }
                               ],
                               alignment: 'center',
-                              margin: [0, 60, 0, 5]  // Aumentado el espacio entre la última tabla y la línea de firma
+                              margin: [0, 60, 0, 5]
                           },
                           {
                               width: '33%',
@@ -936,7 +927,7 @@ async generarPDFMontosPorBanco() {
                                   }
                               ],
                               alignment: 'center',
-                              margin: [0, 60, 0, 5]  // Aumentado el espacio entre la última tabla y la línea de firma
+                              margin: [0, 60, 0, 5]
                           },
                           {
                               width: '33%',
@@ -949,7 +940,7 @@ async generarPDFMontosPorBanco() {
                                   }
                               ],
                               alignment: 'center',
-                              margin: [0, 60, 0, 5]  // Aumentado el espacio entre la última tabla y la línea de firma
+                              margin: [0, 60, 0, 5]
                           }
                       ]
                   },
@@ -957,24 +948,24 @@ async generarPDFMontosPorBanco() {
                       columns: [
                           {
                               width: '33%',
-                              text: 'ELABORO:',
+                              text: 'ELABORÓ',
                               style: 'signature',
                               alignment: 'center',
-                              margin: [0, 5, 0, 20]  // Espaciado después de la línea de firma
+                              margin: [0, 5, 0, 20]
                           },
                           {
                               width: '33%',
-                              text: 'REVISO:',
+                              text: 'REVISÓ',
                               style: 'signature',
                               alignment: 'center',
-                              margin: [0, 5, 0, 20]  // Espaciado después de la línea de firma
+                              margin: [0, 5, 0, 20]
                           },
                           {
                               width: '33%',
-                              text: 'AUTORIZO:',
+                              text: 'AUTORIZÓ',
                               style: 'signature',
                               alignment: 'center',
-                              margin: [0, 5, 0, 20]  // Espaciado después de la línea de firma
+                              margin: [0, 5, 0, 20]
                           }
                       ]
                   }
@@ -1059,11 +1050,6 @@ crearTablaMontosPorBanco(data: any[], titulo: string, totalTexto: string, margin
       margin: margin
   };
 }
-
-
-
-
-
 
 
 

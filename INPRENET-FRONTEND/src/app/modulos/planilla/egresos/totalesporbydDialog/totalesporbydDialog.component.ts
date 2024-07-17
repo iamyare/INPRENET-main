@@ -68,166 +68,174 @@ export class TotalesporbydDialogComponent implements OnInit {
 
     const netoTotal = this.totalBeneficios - this.totalDeducciones;
 
+    // Debug: Verificar valores de datos
+    console.log('Mes de la Planilla:', this.data.mesPlanilla);
+    console.log('Código de Planilla:', this.data.codigoPlanilla);
+    console.log('Neto Total:', netoTotal);
+
     const docDefinition: TDocumentDefinitions = {
-        pageSize: 'LETTER',
-        background: (currentPage, pageSize) => ({
-            image: base64Image,
-            width: pageSize.width,
-            height: pageSize.height,
-            absolutePosition: { x: 0, y: 0 }
-        }),
-        pageMargins: [50, 80, 50, 85],
-        header: () => [
-            {
-                text: `TOTALES BENEFICIOS Y DEDUCCIONES DE PLANILLA ${this.data.nombrePlanilla}`,
-                style: 'header',
-                alignment: 'center',
-                margin: [50, 80, 50, 0]
-            },
-            {
-                columns: [
-                    {
-                        width: '50%',
-                        text: [
-                            { text: 'Código de Planilla: ', bold: true },
-                            `${this.data.codigoPlanilla}\n`,
-                            { text: 'Mes de la Planilla: ', bold: true },
-                            `${this.data.mesPlanilla}`,
-                        ],
-                        alignment: 'left'
-                    },
-                    {
-                        width: '50%',
-                        text: [
-                            { text: 'Neto Total: ', bold: true },
-                            `L ${netoTotal.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",")}`
-                        ],
-                        alignment: 'right'
-                    }
+      pageSize: 'LETTER',
+      background: (currentPage, pageSize) => ({
+        image: base64Image,
+        width: pageSize.width,
+        height: pageSize.height,
+        absolutePosition: { x: 0, y: 0 }
+      }),
+      pageMargins: [40, 150, 40, 100],
+      header: (currentPage, pageCount, pageSize) => {
+        return [
+          {
+            text: `TOTALES BENEFICIOS Y DEDUCCIONES DE PLANILLA ${this.data.nombrePlanilla}`,
+            style: 'header',
+            alignment: 'center',
+            margin: [50, 80, 50, 0]
+          },
+          {
+            columns: [
+              {
+                width: '50%',
+                text: [
+                  { text: 'Código de Planilla: ', bold: true },
+                  this.data.codigoPlanilla,
+                  '\n',
+                  { text: 'Mes de la Planilla: ', bold: true },
+                  this.data.mesPlanilla
                 ],
-                margin: [40, 5, 40, 10]
-            }
-        ],
-        content: [
-            { text: 'Reporte de Beneficios', style: 'header' },
-            this.crearTablaPDF(this.dataSourceBeneficios.data, 'Beneficios', `Total de beneficios: L${this.totalBeneficios.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",")}`),
-            { text: 'Reporte de Deducciones', style: 'header', pageBreak: 'before' },
-            this.crearTablaPDF(this.dataSourceDeducciones.data, 'Deducciones', `Total de deducciones: L${this.totalDeducciones.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",")}`),
+                alignment: 'left'
+              },
+              {
+                width: '50%',
+                text: [
+                  { text: 'Neto Total: ', bold: true },
+                  `L ${netoTotal.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",")}`
+                ],
+                alignment: 'right'
+              }
+            ],
+            margin: [40, 5, 40, 10]
+          }
+        ];
+      },
+      content: [
+        { text: 'Reporte de Beneficios', style: 'header' },
+        this.crearTablaPDF(this.dataSourceBeneficios.data, 'Beneficios', `Total de beneficios: L${this.totalBeneficios.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",")}`),
+        { text: 'Reporte de Deducciones', style: 'header', pageBreak: 'before' },
+        this.crearTablaPDF(this.dataSourceDeducciones.data, 'Deducciones', `Total de deducciones: L${this.totalDeducciones.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",")}`),
+        {
+          columns: [
             {
-                columns: [
-                    {
-                        width: '33%',
-                        canvas: [
-                            {
-                                type: 'line',
-                                x1: 0, y1: 0,
-                                x2: 150, y2: 0,
-                                lineWidth: 1.5
-                            }
-                        ],
-                        alignment: 'center',
-                        margin: [0, 60, 0, 5]  // Aumentado el espacio entre la última tabla y la línea de firma
-                    },
-                    {
-                        width: '33%',
-                        canvas: [
-                            {
-                                type: 'line',
-                                x1: 0, y1: 0,
-                                x2: 150, y2: 0,
-                                lineWidth: 1.5
-                            }
-                        ],
-                        alignment: 'center',
-                        margin: [0, 60, 0, 5]  // Aumentado el espacio entre la última tabla y la línea de firma
-                    },
-                    {
-                        width: '33%',
-                        canvas: [
-                            {
-                                type: 'line',
-                                x1: 0, y1: 0,
-                                x2: 150, y2: 0,
-                                lineWidth: 1.5
-                            }
-                        ],
-                        alignment: 'center',
-                        margin: [0, 60, 0, 5]  // Aumentado el espacio entre la última tabla y la línea de firma
-                    }
-                ]
+              width: '33%',
+              canvas: [
+                {
+                  type: 'line',
+                  x1: 0, y1: 0,
+                  x2: 150, y2: 0,
+                  lineWidth: 1.5
+                }
+              ],
+              alignment: 'center',
+              margin: [0, 60, 0, 5]
             },
             {
-                columns: [
-                    {
-                        width: '33%',
-                        text: 'ELABORO:',
-                        style: 'signature',
-                        alignment: 'center',
-                        margin: [0, 5, 0, 20]  // Espaciado después de la línea de firma
-                    },
-                    {
-                        width: '33%',
-                        text: 'REVISO:',
-                        style: 'signature',
-                        alignment: 'center',
-                        margin: [0, 5, 0, 20]  // Espaciado después de la línea de firma
-                    },
-                    {
-                        width: '33%',
-                        text: 'AUTORIZO:',
-                        style: 'signature',
-                        alignment: 'center',
-                        margin: [0, 5, 0, 20]  // Espaciado después de la línea de firma
-                    }
-                ]
+              width: '33%',
+              canvas: [
+                {
+                  type: 'line',
+                  x1: 0, y1: 0,
+                  x2: 150, y2: 0,
+                  lineWidth: 1.5
+                }
+              ],
+              alignment: 'center',
+              margin: [0, 60, 0, 5]
+            },
+            {
+              width: '33%',
+              canvas: [
+                {
+                  type: 'line',
+                  x1: 0, y1: 0,
+                  x2: 150, y2: 0,
+                  lineWidth: 1.5
+                }
+              ],
+              alignment: 'center',
+              margin: [0, 60, 0, 5]
             }
-        ],
-        styles: {
-            header: {
-                fontSize: 18,
-                bold: true,
-                margin: [0, 10, 0, 10]
+          ]
+        },
+        {
+          columns: [
+            {
+              width: '33%',
+              text: 'ELABORÓ:',
+              style: 'signature',
+              alignment: 'center',
+              margin: [0, 5, 0, 20]
             },
-            tableHeader: {
-                bold: true,
-                fontSize: 13,
-                color: 'black'
+            {
+              width: '33%',
+              text: 'REVISÓ:',
+              style: 'signature',
+              alignment: 'center',
+              margin: [0, 5, 0, 20]
             },
-            tableTotal: {
-                bold: true,
-                fontSize: 13,
-                color: 'black',
-                alignment: 'right'
-            },
-            totalNeto: {
-                fontSize: 16,
-                bold: true,
-                alignment: 'right'
-            },
-            signature: {
-                fontSize: 16,
-                bold: true
+            {
+              width: '33%',
+              text: 'AUTORIZÓ:',
+              style: 'signature',
+              alignment: 'center',
+              margin: [0, 5, 0, 20]
             }
+          ]
+        }
+      ],
+      styles: {
+        header: {
+          fontSize: 18,
+          bold: true,
+          margin: [0, 10, 0, 10]
         },
-        footer: function (currentPage, pageCount) {
-            return {
-                table: {
-                    widths: ['*', '*', '*'],
-                    body: [
-                        [
-                            { text: 'Fecha y Hora: ' + new Date().toLocaleString(), alignment: 'left', border: [false, false, false, false] },
-                            { text: 'Generó: ', alignment: 'left', border: [false, false, false, false] },
-                            { text: 'Página ' + currentPage.toString() + ' de ' + pageCount, alignment: 'right', border: [false, false, false, false] }
-                        ]
-                    ]
-                },
-                margin: [20, 0, 20, 20]
-            };
+        tableHeader: {
+          bold: true,
+          fontSize: 13,
+          color: 'black'
         },
-        defaultStyle: {
-            fontSize: 10
+        tableTotal: {
+          bold: true,
+          fontSize: 13,
+          color: 'black',
+          alignment: 'right'
         },
-        pageOrientation: 'portrait'
+        totalNeto: {
+          fontSize: 16,
+          bold: true,
+          alignment: 'right'
+        },
+        signature: {
+          fontSize: 16,
+          bold: true
+        }
+      },
+      footer: function (currentPage, pageCount) {
+        return {
+          table: {
+            widths: ['*', '*', '*'],
+            body: [
+              [
+                { text: 'Fecha y Hora: ' + new Date().toLocaleString(), alignment: 'left', border: [false, false, false, false] },
+                { text: 'Generó: ', alignment: 'left', border: [false, false, false, false] },
+                { text: 'Página ' + currentPage.toString() + ' de ' + pageCount, alignment: 'right', border: [false, false, false, false] }
+              ]
+            ]
+          },
+          margin: [20, 0, 20, 20]
+        };
+      },
+      defaultStyle: {
+        fontSize: 10
+      },
+      pageOrientation: 'portrait'
     };
 
     pdfMake.createPdf(docDefinition).download('Reporte_Beneficios_Deducciones.pdf');
@@ -235,19 +243,20 @@ export class TotalesporbydDialogComponent implements OnInit {
 
 crearTablaPDF(data: any[], titulo: string, totalTexto: string) {
     return {
-        style: 'tableExample',
-        table: {
-            headerRows: 1,
-            widths: ['auto', '*', 'auto'],
-            body: [
-                [{ text: 'Código', style: 'tableHeader' }, { text: 'Nombre', style: 'tableHeader' }, { text: 'Total', style: 'tableHeader' }],
-                ...data.map(el => [el.codigo, el.nombre, { text: `L${Number(el.total).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",")}`, alignment: 'right' }]),
-                [{ text: totalTexto, style: 'tableTotal', alignment: 'right', colSpan: 3 }, {}]
-            ]
-        },
-        layout: 'lightHorizontalLines'
+      style: 'tableExample',
+      table: {
+        headerRows: 1,
+        widths: ['auto', '*', 'auto'],
+        body: [
+          [{ text: 'Código', style: 'tableHeader' }, { text: 'Nombre', style: 'tableHeader' }, { text: 'Total', style: 'tableHeader' }],
+          ...data.map(el => [el.codigo, el.nombre, { text: `L${Number(el.total).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",")}`, alignment: 'right' }]),
+          [{ text: totalTexto, style: 'tableTotal', alignment: 'right', colSpan: 3 }, {}, {}]
+        ]
+      },
+      layout: 'lightHorizontalLines'
     };
 }
+
 
 
   closeDialog(): void {

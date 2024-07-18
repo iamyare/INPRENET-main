@@ -24,10 +24,12 @@ import { net_causas_fallecimientos } from './entities/net_causas_fallecimientos.
 import { net_otra_fuente_ingreso } from './entities/net_otra_fuente_ingreso.entity';
 import { Net_Persona_Discapacidad } from './entities/net_persona_discapacidad.entity';
 import { Net_Familia } from './entities/net_familia.entity';
+import { MantenimientoAfiliacionService } from './afiliacion/mantenimiento-afiliacion.service';
+import { MantenimientoAfiliacionController } from './afiliacion/mantenimiento-afiliacion.controller';
 
 @Module({
-  controllers: [AfiliadoController, AfiliacionController],
-  providers: [AfiliadoService, AfiliacionService],
+  controllers: [AfiliadoController, AfiliacionController, MantenimientoAfiliacionController],
+  providers: [AfiliadoService, AfiliacionService, MantenimientoAfiliacionService],
   imports: [RegionalModule, TransaccionesModule,
     TypeOrmModule.forFeature([net_otra_fuente_ingreso, net_persona, Net_Discapacidad, net_estado_afiliacion, net_detalle_persona, Net_perf_pers_cent_trab,
       Net_Ref_Per_Pers, Net_Persona_Discapacidad,

@@ -1,6 +1,7 @@
 import { IsNotEmpty, IsOptional, IsString, IsNumber, IsDate, IsEnum, IsEmail, ValidateNested, IsArray, IsDateString } from 'class-validator';
 import { CrearDiscapacidadDto } from './crear-discapacidad.dto';
 import { Type } from 'class-transformer';
+import { CrearPepsDto } from './crear-peps.dto';
 
 export class CrearPersonaDto {
   @IsNotEmpty()
@@ -158,6 +159,12 @@ export class CrearPersonaDto {
   @ValidateNested({ each: true })
   @Type(() => CrearDiscapacidadDto)
   discapacidades?: CrearDiscapacidadDto[];
+
+  @IsOptional()
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => CrearPepsDto)
+  peps?: CrearPepsDto[];
 
 
   @IsOptional()

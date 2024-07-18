@@ -32,6 +32,9 @@ import { Net_Discapacidad } from '../entities/net_discapacidad.entity';
 import { Net_Persona_Discapacidad } from '../entities/net_persona_discapacidad.entity';
 import { CrearFamiliaDto } from './dtos/crear-familiar.dto';
 import { Net_Familia } from '../entities/net_familia.entity';
+import { Net_Peps } from 'src/modules/Empresarial/entities/net_peps.entity';
+import { CrearPepsDto } from './dtos/crear-peps.dto';
+import { ReferenciaDto } from './dtos/Referencia.dto';
 
 @Injectable()
 export class AfiliacionService {
@@ -143,6 +146,10 @@ export class AfiliacionService {
     }
 
     return causantes;
+  }
+
+  async getAllDiscapacidades(): Promise<Net_Discapacidad[]> {
+    return this.discapacidadRepository.find();
   }
 
   async crearPersona(crearPersonaDto: CrearPersonaDto, fotoPerfil: Express.Multer.File, entityManager: EntityManager): Promise<net_persona> {
@@ -317,10 +324,16 @@ export class AfiliacionService {
     entityManager: EntityManager,
   ): Promise<Net_Ref_Per_Pers[]> {
     const resultados: Net_Ref_Per_Pers[] = [];
-  
+
     for (const crearReferenciaDto of crearReferenciasDtos) {
-      const personaReferencia = await this.crearPersona(crearReferenciaDto.persona_referencia, null, entityManager);
-  
+      let personaReferencia = await this.personaRepository.findOne({
+        where: { n_identificacion: crearReferenciaDto.persona_referencia.n_identificacion }
+      });
+
+      if (!personaReferencia) {
+        personaReferencia = await this.crearPersona(crearReferenciaDto.persona_referencia, null, entityManager);
+      }
+
       const referencia = entityManager.create(Net_Ref_Per_Pers, {
         persona: { id_persona: idPersona },
         referenciada: personaReferencia,
@@ -328,10 +341,10 @@ export class AfiliacionService {
         dependiente_economico: crearReferenciaDto.dependiente_economico,
         parentesco: crearReferenciaDto.parentesco,
       });
-  
+
       resultados.push(await entityManager.save(Net_Ref_Per_Pers, referencia));
     }
-  
+
     return resultados;
   }
   
@@ -342,16 +355,22 @@ export class AfiliacionService {
     entityManager: EntityManager,
   ): Promise<net_detalle_persona[]> {
     const resultados: net_detalle_persona[] = [];
-  
+
     const tipoPersonaBeneficiario = await this.tipoPersonaRepository.findOne({ where: { tipo_persona: 'BENEFICIARIO' } });
     if (!tipoPersonaBeneficiario) {
       throw new NotFoundException('Tipo de persona "BENEFICIARIO" no encontrado');
     }
-  
+
     for (const crearBeneficiarioDto of crearBeneficiariosDtos) {
-      // Crear la persona beneficiaria
-      const beneficiario = await this.crearPersona(crearBeneficiarioDto.persona, null, entityManager);
-  
+      // Verificar si el beneficiario ya existe
+      let beneficiario = await this.personaRepository.findOne({
+        where: { n_identificacion: crearBeneficiarioDto.persona.n_identificacion }
+      });
+
+      if (!beneficiario) {
+        beneficiario = await this.crearPersona(crearBeneficiarioDto.persona, null, entityManager);
+      }
+
       // Crear el detalle del beneficiario
       const detalleBeneficiario = entityManager.create(net_detalle_persona, {
         ID_DETALLE_PERSONA: idDetallePersona,
@@ -361,10 +380,10 @@ export class AfiliacionService {
         ID_TIPO_PERSONA: tipoPersonaBeneficiario.id_tipo_persona,
         eliminado: 'NO',
       });
-  
+
       resultados.push(await entityManager.save(net_detalle_persona, detalleBeneficiario));
     }
-  
+
     return resultados;
   }
   
@@ -391,13 +410,35 @@ export class AfiliacionService {
     }
   }
 
+  async crearPeps(pepsDto: CrearPepsDto[], idPersona: number, entityManager: EntityManager): Promise<Net_Peps[]> {
+    const resultados: Net_Peps[] = [];
+  
+    for (const peps of pepsDto) {
+      const nuevoPeps = entityManager.create(Net_Peps, {
+        ...peps,
+        persona: { id_persona: idPersona },
+      });
+  
+      resultados.push(await entityManager.save(Net_Peps, nuevoPeps));
+    }
+  
+    return resultados;
+  }
+
   async crearFamilia(
     familiaresDto: CrearFamiliaDto[],
     idPersona: number,
     entityManager: EntityManager,
   ): Promise<void> {
     for (const familiaDto of familiaresDto) {
-      const personaReferencia = await this.crearPersona(familiaDto.persona_referencia, null, entityManager);
+      // Verificar si la persona de referencia ya existe
+      let personaReferencia = await this.personaRepository.findOne({
+        where: { n_identificacion: familiaDto.persona_referencia.n_identificacion }
+      });
+
+      if (!personaReferencia) {
+        personaReferencia = await this.crearPersona(familiaDto.persona_referencia, null, entityManager);
+      }
 
       const familia = entityManager.create(Net_Familia, {
         dependiente_economico: familiaDto.dependiente_economico,
@@ -457,6 +498,11 @@ export class AfiliacionService {
           await this.crearFamilia(crearDatosDto.familiares, persona.id_persona, transactionalEntityManager);
         }
 
+        if (crearDatosDto.persona.peps && crearDatosDto.persona.peps.length > 0) {
+          const peps = await this.crearPeps(crearDatosDto.persona.peps, persona.id_persona, transactionalEntityManager);
+          resultados.push(...peps);
+        }
+
         return resultados;
       } catch (error) {
         console.error('Error al crear los datos:', error);
@@ -473,6 +519,23 @@ export class AfiliacionService {
     const month = ('0' + (date.getMonth() + 1)).slice(-2);
     const year = date.getFullYear();
     return `${year}-${month}-${day}`;
+  }
+
+
+  async obtenerReferenciasPorIdentificacion(nIdentificacion: string): Promise<any> {
+    const persona = await this.personaRepository.findOne({
+      where: { n_identificacion: nIdentificacion },
+      relations: ['referenciasHechas', 'referenciasHechas.referenciada'],
+    });
+
+    if (!persona) {
+      throw new NotFoundException(`Persona con identificación ${nIdentificacion} no encontrada`);
+    }
+
+    return persona.referenciasHechas.map(ref => ({
+      referencia: ref,
+      personaReferenciada: ref.referenciada,
+    }));
   }
 }
 

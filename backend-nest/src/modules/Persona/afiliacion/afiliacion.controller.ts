@@ -1,12 +1,23 @@
-import { Body, Controller, Get, HttpException, HttpStatus, NotFoundException, Param, Post, UploadedFile, UseInterceptors } from '@nestjs/common';
+import { Body, Controller, Get, HttpException, HttpStatus, NotFoundException, Param, ParseIntPipe, Post, UploadedFile, UseInterceptors } from '@nestjs/common';
 import { AfiliacionService } from './afiliacion.service';
 import { net_persona } from '../entities/net_persona.entity';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { CrearDatosDto } from './dtos/crear-datos.dto';
+import { Net_Discapacidad } from '../entities/net_discapacidad.entity';
 
 @Controller('afiliacion')
 export class AfiliacionController {
   constructor(private readonly afiliacionService: AfiliacionService) {
+  }
+
+  @Get('referencias/:nIdentificacion')
+  async obtenerReferencias(@Param('nIdentificacion') nIdentificacion: string) {
+    return await this.afiliacionService.obtenerReferenciasPorIdentificacion(nIdentificacion);
+  }
+
+  @Get('discapacidades')
+  async getAllDiscapacidades(): Promise<Net_Discapacidad[]> {
+    return this.afiliacionService.getAllDiscapacidades();
   }
 
   @Get('persona-dni/:n_identificacion')

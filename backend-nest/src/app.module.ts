@@ -12,6 +12,7 @@ import { EmpresarialModule } from './modules/Empresarial/empresarial.module';
 import { TransaccionesModule } from './modules/transacciones/transacciones.module';
 import * as oracledb from 'oracledb';
 import { AppDataSource } from '../ormconfig';
+import { MantenimientoAfiliacionService } from './modules/Persona/afiliacion/mantenimiento-afiliacion.service';
 
 @Module({
   imports: [
@@ -61,5 +62,6 @@ import { AppDataSource } from '../ormconfig';
     EmpresarialModule,
     TransaccionesModule,
   ],
+  providers: [MantenimientoAfiliacionService],
 })
 export class AppModule { }

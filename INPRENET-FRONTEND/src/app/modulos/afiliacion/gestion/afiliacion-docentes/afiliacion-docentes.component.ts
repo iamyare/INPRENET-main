@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup } from '@angular/forms';
 import { AfiliacionService } from 'src/app/services/afiliacion.service';
+import { DatosEstaticosService } from 'src/app/services/datos-estaticos.service';
 
 @Component({
   selector: 'app-afiliacion-docentes',
@@ -36,8 +37,9 @@ export class AfiliacionDocentesComponent implements OnInit {
   refPersData: any = {};
   benefData: any = {};
   fotoPerfil: string = '';
+  tipoDiscapacidad: any[] = [];
 
-  constructor(private fb: FormBuilder, private afiliacionService: AfiliacionService) {
+  constructor(private fb: FormBuilder, private afiliacionService: AfiliacionService, private datosEstaticos: DatosEstaticosService) {
     this.datosGeneralesForm = this.fb.group({});
     this.colegioMagisterialForm = this.fb.group({});
     this.bancosForm = this.fb.group({});
@@ -48,6 +50,18 @@ export class AfiliacionDocentesComponent implements OnInit {
 
   ngOnInit(): void {
     this.initForms();
+    this.loadDiscapacidades();
+  }
+
+  loadDiscapacidades(): void {
+    this.datosEstaticos.getDiscapacidades().subscribe(
+      (data) => {
+        this.tipoDiscapacidad = data;
+      },
+      (error) => {
+        console.error('Error al cargar discapacidades', error);
+      }
+    );
   }
 
   initForms() {
@@ -111,6 +125,10 @@ export class AfiliacionDocentesComponent implements OnInit {
   }
 
   gatherAllData(): void {
+    const selectedDiscapacidades = this.datosGeneralesData.refpers[0].discapacidades
+      .map((d: any, index: number) => d ? { id_discapacidad: this.tipoDiscapacidad[index].value } : null)
+      .filter((d: any) => d !== null);
+
     const persona = {
       id_tipo_identificacion: this.datosGeneralesData.refpers[0].id_tipo_identificacion,
       id_pais_nacionalidad: this.datosGeneralesData.refpers[0].id_pais_nacionalidad,
@@ -126,6 +144,7 @@ export class AfiliacionDocentesComponent implements OnInit {
       segundo_apellido: this.datosGeneralesData.refpers[0].segundo_apellido,
       genero: this.datosGeneralesData.refpers[0].genero,
       sexo: this.datosGeneralesData.refpers[0].sexo,
+      cantidad_dependientes: this.datosGeneralesData.refpers[0].cantidad_dependientes,
       cantidad_hijos: this.datosGeneralesData.refpers[0].cantidad_hijos,
       grado_academico: this.datosGeneralesData.refpers[0].grado_academico,
       telefono_1: this.datosGeneralesData.refpers[0].telefono_1,
@@ -136,9 +155,11 @@ export class AfiliacionDocentesComponent implements OnInit {
       archivo_identificacion: this.datosGeneralesData.refpers[0].archivo_identificacion,
       direccion_residencia: this.datosGeneralesData.refpers[0].direccion_residencia,
       id_municipio_residencia: this.datosGeneralesData.refpers[0].id_municipio_residencia,
+      id_municipio_nacimiento: this.datosGeneralesData.refpers[0].id_municipio_nacimiento,
       id_profesion: this.datosGeneralesData.refpers[0].id_profesion,
-      discapacidades: this.datosGeneralesData.discapacidades ? this.datosGeneralesData.discapacidades.map((id: number) => ({ id_discapacidad: id })) : []
-    }
+      representacion: this.datosGeneralesData.refpers[0].representacion,
+      discapacidades: selectedDiscapacidades
+    };
 
     const detalle = {
       eliminado: "NO",
@@ -154,11 +175,11 @@ export class AfiliacionDocentesComponent implements OnInit {
       centrosTrabajo: this.centrosTrabajoData.trabajo,
       otrasFuentesIngreso: this.otrasFuentesIngresoData.sociedadSocios,
       referencias: this.refPersData.referencias,
-      beneficiarios: this.benefData.value.beneficiarios
+      beneficiarios: this.benefData?.value?.beneficiarios || []
     };
 
     console.log('Datos Completos:', allData);
-    this.enviarDatos(allData);
+    //this.enviarDatos(allData);
   }
 
   enviarDatos(datos: any): void {

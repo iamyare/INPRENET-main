@@ -530,39 +530,23 @@
               </div>
             </div>
 
-              <div class="col-lg-12 col-md-12">
-                <label>¿Posee alguna discapacidad?</label>
-                <mat-radio-group formControlName="discapacidad" (change)="onDatosGeneralesDiscChange($event, i)">
-                  <mat-radio-button *ngFor="let option of field.options" [value]="option.value">
-                    {{ option.label }}
-                  </mat-radio-button>
-                </mat-radio-group>
-              </div>
-              <div class="col-lg-12 col-md-12" *ngIf="discapacidad">
-                <div formArrayName="discapacidades" class="discapacidad-container">
-                  <div class="discapacidad-title">Tipos de Discapacidad</div>
-                  <div *ngFor="let control of getCtrl('refpers', formParent).at(i).get('discapacidades').controls; let j = index" class="discapacidad-item">
-                    <mat-form-field class="example-full-width inputs discapacidad-field" appearance="outline">
-                      <mat-label>Tipo De Discapacidad</mat-label>
-                      <mat-icon matPrefix>wc</mat-icon>
-                      <mat-select [formControlName]="j" (selectionChange)="onDatosGeneralesChange()">
-                        <mat-option *ngFor="let tipo_discapacidad of getAvailableDisabilities(getCtrl('refpers', formParent).at(i).get('discapacidades'), j)" [value]="tipo_discapacidad.value">
-                          {{ tipo_discapacidad.label }}
-                        </mat-option>
-                      </mat-select>
-                    </mat-form-field>
-                    <mat-error *ngFor="let error of getErrors(i, 'discapacidades')">
-                      {{ error }}
-                    </mat-error>
-                    <button mat-raised-button color="warn" class="discapacidad-remove-btn" (click)="eliminarDiscapacidad(i, j)">Eliminar</button>
-                  </div>
-
-
-
-
-                  <button mat-raised-button color="primary" class="discapacidad-add-btn" (click)="agregarDiscapacidad(i)">Agregar Discapacidad</button>
+            <div class="col-lg-12 col-md-12">
+              <label>¿Posee alguna discapacidad?</label>
+              <mat-radio-group formControlName="discapacidad" (change)="onDatosGeneralesDiscChange($event, i)">
+                <mat-radio-button *ngFor="let option of field.options" [value]="option.value">
+                  {{ option.label }}
+                </mat-radio-button>
+              </mat-radio-group>
+            </div>
+            <div class="col-lg-12 col-md-12" *ngIf="discapacidad">
+              <div formArrayName="discapacidades" >
+                <div>Tipos de Discapacidad</div>
+                <div *ngFor="let tipo of tipo_discapacidad; let j = index" class="discapacidad-item">
+                  <mat-checkbox [formControlName]="j">{{ tipo.label }}</mat-checkbox>
                 </div>
               </div>
+            </div>
+
 
             <div class="col-lg-12 col-md-12">
 

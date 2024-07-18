@@ -55,6 +55,11 @@ import { AfiliacionDocentesComponent } from './gestion/afiliacion-docentes/afili
 import { DatosPropietarioComponent } from './Centros-Educativos/admin-centro-educativo/datos-propietario/datos-propietario.component';
 import { DatosContadorComponent } from './Centros-Educativos/admin-centro-educativo/datos-contador/datos-contador.component';
 import { DatosAdministradorComponent } from './Centros-Educativos/admin-centro-educativo/datos-administrador/datos-administrador.component';
+import { DiscapacidadComponent } from './mantenimiento/discapacidad/discapacidad.component';
+import { ProfesionComponent } from './mantenimiento/profesion/profesion.component';
+import { ColegioComponent } from './mantenimiento/colegio/colegio.component';
+import { BancoComponent } from './mantenimiento/banco/banco.component';
+import { MantenimientoAfiliacionComponent } from './mantenimiento/mantenimiento-afiliacion/mantenimiento-afiliacion.component';
 
 @NgModule({
   declarations: [
@@ -105,7 +110,12 @@ import { DatosAdministradorComponent } from './Centros-Educativos/admin-centro-e
     AfiliacionDocentesComponent,
     DatosPropietarioComponent,
     DatosContadorComponent,
-    DatosAdministradorComponent
+    DatosAdministradorComponent,
+    MantenimientoAfiliacionComponent,
+    DiscapacidadComponent,
+    ProfesionComponent,
+    ColegioComponent,
+    BancoComponent
   ],
   imports: [
     CommonModule,

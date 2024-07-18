@@ -9,6 +9,7 @@ import { HttpClient } from '@angular/common/http';
 import { TransaccionesService } from './transacciones.service';
 import { AuthService } from './auth.service';
 import { map, Observable } from 'rxjs';
+import { AfiliacionService } from './afiliacion.service';
 
 @Injectable({
   providedIn: 'root'
@@ -30,6 +31,7 @@ export class DatosEstaticosService {
   centrosTrabajoTipoE: any = [];
   jornadas: any = [];
   nivelesEducativos: any = [];
+  discapacidades: any = [];
 
   constructor(
     private colegiosMagSVC: ColegiosMagisterialesService,
@@ -41,7 +43,8 @@ export class DatosEstaticosService {
     private centroTrabajoService: CentroTrabajoService,
     private transaccionesSVC: TransaccionesService,
     private http: HttpClient,
-    private authService: AuthService
+    private authService: AuthService,
+    private afiliacionService: AfiliacionService
   ) {
     this.getNacionalidad();
     this.gettipoIdent();
@@ -56,8 +59,20 @@ export class DatosEstaticosService {
     this.getDepartamentos();
     this.getJornadas();
     this.getNivelesEducativos();
+    this.getDiscapacidades();
   }
 
+  getDiscapacidades(): Observable<any[]> {
+    return this.afiliacionService.getAllDiscapacidades().pipe(
+      map(response => {
+        this.discapacidades = response.map((item: { tipo_discapacidad: any; id_discapacidad: any; }) => ({
+          label: item.tipo_discapacidad,
+          value: item.id_discapacidad
+        }));
+        return this.discapacidades;
+      })
+    );
+  }
 
   async getEstados() {
     const response = await this.afiliadoService.getAllEstados().toPromise();

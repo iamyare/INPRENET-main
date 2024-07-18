@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, EventEmitter, inject, Input, OnInit, Output } from '@angular/core';
-import { AbstractControl, ControlContainer, FormArray, FormBuilder, FormControl, FormGroup, ValidatorFn, Validators } from '@angular/forms';
+import { AbstractControl, ControlContainer, FormArray, FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { DireccionService } from 'src/app/services/direccion.service';
 import { DatosEstaticosService } from 'src/app/services/datos-estaticos.service';
 import { FormStateService } from 'src/app/services/form-state.service';
@@ -53,9 +53,8 @@ export function generateAddressFormGroup(datos?: any): FormGroup {
     id_pais: new FormControl(datos?.id_pais, Validators.required),
     sexo: new FormControl(datos?.sexo, [Validators.required, Validators.maxLength(1), Validators.pattern(/^[FM]$/)]),
     grupo_etnico: new FormControl(datos?.grupo_etnico, [Validators.required]),
-    tipo_discapacidad: new FormControl(datos?.tipo_discapacidad, [Validators.required]),
     discapacidad: new FormControl(datos?.discapacidad, [Validators.required]),
-    discapacidades: new FormArray([]),  // Añadido FormArray discapacidades
+    discapacidades: new FormArray([]),
     cantidad_hijos: new FormControl(datos?.cantidad_hijos, Validators.required),
     barrio_colonia: new FormControl(datos?.barrio_colonia, [
       Validators.maxLength(75),
@@ -102,15 +101,6 @@ export function generateAddressFormGroup(datos?: any): FormGroup {
   });
 }
 
-export function uniqueDisabilityValidator(disabilityArray: string[], currentIndex: number): ValidatorFn {
-  return (control: AbstractControl): { [key: string]: any } | null => {
-    const currentValue = control.value;
-    const isDuplicate = disabilityArray.some((val: string, index: number) => index !== currentIndex && val === currentValue);
-
-    return isDuplicate ? { 'duplicateDisability': { value: currentValue } } : null;
-  };
-}
-
 @Component({
   selector: 'app-dat-generales-afiliado',
   templateUrl: './dat-generales-afiliado.component.html',
@@ -131,9 +121,9 @@ export class DatGeneralesAfiliadoComponent implements OnInit {
   tipoIdentData: any = [];
   nacionalidades: any = [];
   municipios: any = [];
-  municipiosNacimiento: any = [];  // Agregado para municipios de nacimiento
+  municipiosNacimiento: any = [];
   departamentos: any = [];
-  departamentosNacimiento: any = [];  // Agregado para departamentos de nacimiento
+  departamentosNacimiento: any = [];
   generos: { value: string; label: string }[] = [];
   profesiones: any = [];
   sexo: { value: string; label: string }[] = [];
@@ -142,6 +132,7 @@ export class DatGeneralesAfiliadoComponent implements OnInit {
   estadoCivil: any = this.datosEstaticos.estadoCivil;
   representacion: any = this.datosEstaticos.representacion;
   estados: { value: string; label: string }[] = [];
+  tipo_discapacidad: any = [];
 
   grupo_etnico = [
     { "label": "MESTIZO", "value": "MESTIZO" },
@@ -190,17 +181,6 @@ export class DatGeneralesAfiliadoComponent implements OnInit {
     no: false
   };
 
-  tipo_discapacidad = [
-    { "label": "MOTRIZ", "value": "MOTRIZ" },
-    { "label": "AUDITIVA", "value": "AUDITIVA" },
-    { "label": "VISUAL", "value": "VISUAL" },
-    { "label": "INTELECTUAL", "value": "INTELECTUAL" },
-    { "label": "MENTAL", "value": "MENTAL" },
-    { "label": "PSICOSOCIAL", "value": "PSICOSOCIAL" },
-    { "label": "MÚLTIPLE", "value": "MÚLTIPLE" },
-    { "label": "SENSORIAL", "value": "SENSORIAL" }
-  ]
-
   form: FormGroup = this.fb.group({});
   formArchivos: any;
   minDate: Date;
@@ -209,8 +189,8 @@ export class DatGeneralesAfiliadoComponent implements OnInit {
   cargoPublico: boolean = false;
 
   onDatosGeneralesChange() {
-    const data = this.formParent.value
-    this.newDatosGenerales.emit(data)
+    const data = this.formParent.value;
+    this.newDatosGenerales.emit(data);
   }
 
   onDatosGeneralesDiscChange(event: any, i: number) {
@@ -221,15 +201,16 @@ export class DatGeneralesAfiliadoComponent implements OnInit {
     };
     this.discapacidad = this.discapacidadEstado.si;
 
-    // Si se selecciona 'Sí', inicializar el FormArray de discapacidades
     if (this.discapacidad) {
       const refpersArray = this.formParent.get('refpers') as FormArray;
       const firstRefpersGroup = refpersArray.controls[i] as FormGroup;
       const discapacidadesArray = firstRefpersGroup.get('discapacidades') as FormArray;
 
       if (discapacidadesArray) {
-        discapacidadesArray.clear();  // Limpiar cualquier selección anterior
-        discapacidadesArray.push(new FormControl(''));  // Agregar un control vacío inicialmente
+        discapacidadesArray.clear();
+        this.tipo_discapacidad.forEach(() => {
+          discapacidadesArray.push(new FormControl(false));
+        });
       }
     }
   }
@@ -240,7 +221,7 @@ export class DatGeneralesAfiliadoComponent implements OnInit {
       si: value === 'SI',
       no: value === 'NO'
     };
-    this.cargoPublico = this.cargoPublicoEstado.si
+    this.cargoPublico = this.cargoPublicoEstado.si;
   }
 
   onDatosBenChange(fecha: any) {
@@ -275,7 +256,7 @@ export class DatGeneralesAfiliadoComponent implements OnInit {
     this.cargarDatosEstaticos();
     this.initForm();
     const ref_RefPers = this.formParent.get('refpers') as FormArray;
-    let temp = {}
+    let temp = {};
 
     if (this.datos && this.datos.value && this.datos.value.refpers && this.datos.value.refpers.length > 0) {
       for (let i of this.datos.value.refpers) {
@@ -338,18 +319,27 @@ export class DatGeneralesAfiliadoComponent implements OnInit {
     this.cargarnacionalidades();
     this.cargarprofesiones();
 
-    this.fallecido = [{ value: "SI" }, { value: "NO" }]
+    this.fallecido = [{ value: "SI" }, { value: "NO" }];
     this.generos = this.datosEstaticos.genero;
     this.sexo = this.datosEstaticos.sexo;
 
+    this.datosEstaticos.getDiscapacidades().subscribe((data) => {
+      this.tipo_discapacidad = data;
+    }, (error) => {
+      console.error('Error al cargar discapacidades', error);
+    });
+
     if (this.datos && this.datos.value && this.datos.value.refpers && this.datos.value.refpers.length > 0) {
-      this.departamentos = this.datosEstaticos.departamentos
-      this.tipoIdentData = this.datosEstaticos.tipoIdent
-      this.nacionalidades = this.datosEstaticos.nacionalidades
-      this.profesiones = this.datosEstaticos.profesiones
-      this.municipios = this.datosEstaticos.municipios
+      this.departamentos = this.datosEstaticos.departamentos;
+      this.tipoIdentData = this.datosEstaticos.tipoIdent;
+      this.nacionalidades = this.datosEstaticos.nacionalidades;
+      this.profesiones = this.datosEstaticos.profesiones;
+      this.municipios = this.datosEstaticos.municipios;
       await this.cargarMunicipios(this.datos.value.refpers[0].id_municipio_residencia);
     }
+
+    this.tipo_discapacidad = await this.datosEstaticos.getDiscapacidades();
+
 
     this.estadoCargDatos = true;
   }
@@ -423,7 +413,7 @@ export class DatGeneralesAfiliadoComponent implements OnInit {
       next: (data) => {
         const transformedJson = data.map((profesion: any) => ({
           label: profesion.descripcion,
-          value: profesion.idProfesion
+          value: profesion.id_profesion
         }));
         this.profesiones = transformedJson;
       },
@@ -463,21 +453,20 @@ export class DatGeneralesAfiliadoComponent implements OnInit {
     this.cargarMunicipios(departamentoId);
   }
 
-  // Método para recibir el evento de imagen capturada y emitirlo hacia el componente padre
   handleImageCaptured(image: string) {
     this.imageCaptured.emit(image);
   }
 
   getCtrl(key: string, form: FormGroup): any {
-    return form.get(key)
+    return form.get(key);
   }
 
   getErrors(i: number, fieldName: string): any {
     if (this.formParent instanceof FormGroup) {
       const controlesrefpers = (this.formParent.get('refpers') as FormGroup).controls;
-      const a = controlesrefpers[i].get(fieldName)!.errors
+      const a = controlesrefpers[i].get(fieldName)!.errors;
 
-      let errors = []
+      let errors = [];
       if (a) {
         if (a['required']) {
           errors.push('Este campo es requerido.');
@@ -499,45 +488,28 @@ export class DatGeneralesAfiliadoComponent implements OnInit {
     }
   }
 
-  // Método para agregar una discapacidad al FormArray
-  agregarDiscapacidad(i: number) {
+  isChecked(idDiscapacidad: number): boolean {
     const refpersArray = this.formParent.get('refpers') as FormArray;
-    const firstRefpersGroup = refpersArray.controls[i] as FormGroup;
+    const firstRefpersGroup = refpersArray.controls[0] as FormGroup;
     const discapacidadesArray = firstRefpersGroup.get('discapacidades') as FormArray;
 
-    const newDisabilityControl = new FormControl('', Validators.required);
-
-    discapacidadesArray.push(newDisabilityControl);
-
-    newDisabilityControl.valueChanges.subscribe(() => {
-      discapacidadesArray.controls.forEach((control: AbstractControl, index: number) => {
-        control.setValidators([
-          Validators.required,
-          uniqueDisabilityValidator(discapacidadesArray.value, index)
-        ]);
-        control.updateValueAndValidity({ emitEvent: false });
-      });
-    });
+    return discapacidadesArray.controls.some(control => control.value === idDiscapacidad);
   }
 
-  getAvailableDisabilities(discapacidadesArray: FormArray, currentIndex: number): { label: string; value: string }[] {
-    const selectedValues = discapacidadesArray.value.map((val: any, index: number) => index !== currentIndex ? val : null);
-    return this.tipo_discapacidad.filter(d => !selectedValues.includes(d.value));
-  }
-
-  // Método para eliminar una discapacidad del FormArray
-  eliminarDiscapacidad(i: number, index: number) {
+  onDiscapacidadChange(idDiscapacidad: number, isChecked: boolean) {
     const refpersArray = this.formParent.get('refpers') as FormArray;
-    const firstRefpersGroup = refpersArray.controls[i] as FormGroup;
+    const firstRefpersGroup = refpersArray.controls[0] as FormGroup;
     const discapacidadesArray = firstRefpersGroup.get('discapacidades') as FormArray;
-    discapacidadesArray.removeAt(index);
 
-    discapacidadesArray.controls.forEach((control: AbstractControl, idx: number) => {
-      control.setValidators([
-        Validators.required,
-        uniqueDisabilityValidator(discapacidadesArray.value, idx)
-      ]);
-      control.updateValueAndValidity({ emitEvent: false });
-    });
+    if (isChecked) {
+      discapacidadesArray.push(new FormControl(idDiscapacidad));
+    } else {
+      const index = discapacidadesArray.controls.findIndex(control => control.value === idDiscapacidad);
+      if (index !== -1) {
+        discapacidadesArray.removeAt(index);
+      }
+    }
+
+    this.onDatosGeneralesChange();
   }
 }

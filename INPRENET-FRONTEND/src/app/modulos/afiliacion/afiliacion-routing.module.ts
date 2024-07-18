@@ -22,6 +22,11 @@ import { PerfilComponent } from './verPerfil/perfil/perfil.component';
 import { VoluntarioComponent } from './verPerfil/voluntario/voluntario.component';
 import { AfilBancoComponent } from './gestion/afil-banco/afil-banco.component';
 import { AfiliacionDocentesComponent } from './gestion/afiliacion-docentes/afiliacion-docentes.component';
+import { MantenimientoAfiliacionComponent } from './mantenimiento/mantenimiento-afiliacion/mantenimiento-afiliacion.component';
+import { DiscapacidadComponent } from './mantenimiento/discapacidad/discapacidad.component';
+import { ProfesionComponent } from './mantenimiento/profesion/profesion.component';
+import { ColegioComponent } from './mantenimiento/colegio/colegio.component';
+import { BancoComponent } from './mantenimiento/banco/banco.component';
 
 const routes: Routes = [
   { path: 'admin-centro-educativo', component: AdminCentroEducativoComponent },
@@ -46,7 +51,12 @@ const routes: Routes = [
   { path: 'voluntario', component: VoluntarioComponent },
   { path: 'nuevo-afiliado', component: AfilBancoComponent },
   { path: 'nueva-afiliacion', component: AfiliacionDocentesComponent },
-  { path: '', redirectTo: 'afiliacion', pathMatch: 'full' }
+  { path: 'mantenimiento', component: MantenimientoAfiliacionComponent },
+  { path: 'mantenimiento/discapacidad', component: DiscapacidadComponent },
+  { path: 'mantenimiento/profesion', component: ProfesionComponent },
+  { path: 'mantenimiento/colegio', component: ColegioComponent },
+  { path: 'mantenimiento/banco', component: BancoComponent },
+  { path: '', redirectTo: 'afiliacion', pathMatch: 'full' },
 ];
 
 @NgModule({

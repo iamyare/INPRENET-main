@@ -805,38 +805,36 @@ crearTablaPDF(data: any[], titulo: string, totalTexto: string, margin: [number, 
 }
 
 
-  mostrarTotales() {
-    this.planillaService.getTotalesPorDedYBen(this.idPlanilla).subscribe({
+mostrarTotales() {
+  this.planillaService.getTotalesBeneficiosDeducciones(this.idPlanilla).subscribe({
+    next: (res) => {
+      const dialogData = res.map((item: any) => ({
+        nombreBeneficio: item.NOMBRE_BENEFICIO,
+        totalMontoBeneficio: item.TOTAL_MONTO_BENEFICIO,
+        deduccionesInprema: item.DEDUCCIONES_INPREMA,
+        deduccionesTerceros: item.DEDUCCIONES_DE_TERCEROS,
+        neto: item.NETO,
+        idBeneficio: item.ID_BENEFICIO,
+        idPlanilla: this.idPlanilla
+      }));
 
-      next: (res) => {
-          console.log(res);
-            const dialogData = {
-                beneficios: res.beneficios.map((b: any) => ({
-                    codigo: b.ID_BENEFICIO,
-                    nombre: b.NOMBRE_BENEFICIO,
-                    total: b.TOTAL_MONTO_BENEFICIO
-                })),
-                deducciones: res.deducciones.map((d: any) => ({
-                    codigo: d.CODIGO_DEDUCCION,
-                    nombre: d.NOMBRE_DEDUCCION,
-                    total: d.TOTAL_MONTO_APLICADO
-                })),
-                codigoPlanilla: this.detallePlanilla?.codigo_planilla || 'N/A',
-                nombrePlanilla: this.detallePlanilla?.nombre_planilla || 'Desconocido',
-                mesPlanilla: this.formatMonth(this.detallePlanilla?.fecha_apertura)
-            };
-
-            this.dialog.open(TotalesporbydDialogComponent, {
-                width: '1000px',
-                data: dialogData
-            });
-        },
-        error: (error) => {
-            console.error('Error al obtener los totales', error);
-            this.toastr.error('Error al obtener los totales');
+      this.dialog.open(TotalesporbydDialogComponent, {
+        width: '1000px',
+        data: {
+          totales: dialogData,
+          codigoPlanilla: this.detallePlanilla?.codigo_planilla || 'N/A',
+          nombrePlanilla: this.detallePlanilla?.nombre_planilla || 'Desconocido',
+          mesPlanilla: this.formatMonth(this.detallePlanilla?.fecha_apertura)
         }
-    });
+      });
+    },
+    error: (error) => {
+      console.error('Error al obtener los totales', error);
+      this.toastr.error('Error al obtener los totales');
+    }
+  });
 }
+
 
 
 async generarPDFMontosPorBanco() {

@@ -4,12 +4,14 @@ import { NuevaPlanillaComponentP } from './egresos/nueva-planilla/nueva-planilla
 import { VerPlanillasComponent } from './egresos/ver-planillas/ver-planillas.component';
 import { CargarPlanillaPrivadosComponent } from './ingresos/cargar-planilla-privados/cargar-planilla-privados.component';
 import { PlanillaColegiosPrivadosComponent } from './ingresos/planilla-colegios-privados/planilla-colegios-privados.component';
+import { DocumentosPlanillaComponent } from './egresos/documentosPlanilla/documentosPlanilla.component';
 
 const routes: Routes = [
   { path: 'nueva-planilla', component: NuevaPlanillaComponentP },
   { path: 'ver-planillas', component: VerPlanillasComponent },
   { path: 'planilla-colegios-privados', component: PlanillaColegiosPrivadosComponent },
   { path: 'cargar-planilla-privados', component: CargarPlanillaPrivadosComponent },
+  { path: 'documentos-planilla', component: DocumentosPlanillaComponent },
   { path: '', redirectTo: 'planilla', pathMatch: 'full' }
 ];
 

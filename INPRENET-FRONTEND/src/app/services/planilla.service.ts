@@ -9,6 +9,35 @@ import { environment } from 'src/environments/environment';
 export class PlanillaService {
   constructor(private http: HttpClient) { }
 
+
+  getTotalesBeneficiosDeducciones(idPlanilla: number): Observable<any> {
+    const url = `${environment.API_URL}/api/planilla/totales-beneficios-deducciones/${idPlanilla}`;
+    return this.http.get<any>(url).pipe(
+      catchError(error => {
+        console.error('Error al obtener los totales de beneficios y deducciones', error);
+        return throwError(error);
+      })
+    );
+  }
+
+  getBeneficiosConDeducciones(periodoInicio: string, periodoFinalizacion: string, idTiposPlanilla: number[]): Observable<any[]> {
+    const params = new HttpParams()
+      .set('periodoInicio', periodoInicio)
+      .set('periodoFinalizacion', periodoFinalizacion)
+      .set('idTiposPlanilla', idTiposPlanilla.join(','));
+
+    return this.http.get<any[]>(`${environment.API_URL}/api/planilla/beneficios-deducciones-planilla-mes`, { params }).pipe(
+      catchError(error => {
+        console.error('Error al obtener beneficios y deducciones', error);
+        return throwError(error);
+      })
+    );
+  }
+
+  getDesgloseDeduccionesDeBeneficioPorPlanilla(idPlanilla: number, idBeneficio: number): Observable<any> {
+    return this.http.get<any>(`${environment.API_URL}/api/planilla/desglose-deducciones/${idPlanilla}/${idBeneficio}`);
+  }
+
   getMontosPorBanco(term: string): Observable<any[]> {
     const url = `${environment.API_URL}/api/planilla/montos-banco/${term}`;
     return this.http.get<any[]>(url).pipe(

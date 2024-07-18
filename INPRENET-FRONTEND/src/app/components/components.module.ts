@@ -18,6 +18,7 @@ import { BuscadorComponent } from './dinamicos/buscador/buscador.component';
 import { UserMenuComponent } from './user-menu/user-menu.component';
 import { MapsComponent } from './maps/maps.component';
 import { GoogleMapsModule } from '@angular/google-maps';
+import { DynamicDialogAgregarComponent } from './dynamic-dialog-agregar/dynamic-dialog-agregar.component';
 
 
 
@@ -39,6 +40,7 @@ import { GoogleMapsModule } from '@angular/google-maps';
     BuscadorComponent,
     UserMenuComponent,
     MapsComponent,
+    DynamicDialogAgregarComponent
   ],
   imports: [
     CommonModule,
@@ -62,6 +64,7 @@ import { GoogleMapsModule } from '@angular/google-maps';
     BuscadorComponent,
     UserMenuComponent,
     MapsComponent,
+    DynamicDialogAgregarComponent
   ]
 })
 export class ComponentsModule { }

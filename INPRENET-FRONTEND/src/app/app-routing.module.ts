@@ -30,7 +30,7 @@ const routes: Routes = [
     children: [
       {
         path: 'afiliacion',
-        loadChildren: () => import('./modulos/afiliacion/afiliacion.module').then(m => m.AfiliacionModule)
+        loadChildren: () => import('./modulos/afiliacion/afiliacion.module').then(m => m.AfiliacionModule),
       },
       {
         path: 'planilla',

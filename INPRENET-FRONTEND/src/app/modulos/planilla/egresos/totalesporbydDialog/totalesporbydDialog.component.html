@@ -1,71 +1,78 @@
-
-
-<div class="dialog-header">
-  <button mat-icon-button (click)="closeDialog()" aria-label="Cerrar diálogo">
-    <mat-icon>close</mat-icon>
-  </button>
-  <h1 mat-dialog-title>Totales de Beneficios y Deducciones</h1>
-
-  <div class="filters">
-    <mat-form-field appearance="outline">
-      <mat-label>Buscar en Beneficios</mat-label>
-      <input matInput (input)="aplicarFiltro($event, dataSourceBeneficios)" placeholder="Ingrese término">
+<div>
+  <h1 mat-dialog-title>Totales Beneficios y Deducciones</h1>
+  <div mat-dialog-content>
+    <mat-form-field>
+      <mat-label>Filtrar</mat-label>
+      <input matInput (keyup)="aplicarFiltro($event, dataSourceTotales)" placeholder="Filtrar">
     </mat-form-field>
 
-    <mat-form-field appearance="outline">
-      <mat-label>Buscar en Deducciones</mat-label>
-      <input matInput (input)="aplicarFiltro($event, dataSourceDeducciones)" placeholder="Ingrese término">
-    </mat-form-field>
-  </div>
-</div>
-
-<div class="tables-container">
-  <!-- Tabla de Beneficios -->
-  <div class="table">
-    <h2>Beneficios</h2>
-    <table mat-table [dataSource]="dataSourceBeneficios">
-      <ng-container matColumnDef="nombre">
-        <th mat-header-cell *matHeaderCellDef> Nombre </th>
-        <td mat-cell *matCellDef="let elemento"> {{ elemento.nombre }} </td>
+    <table mat-table [dataSource]="dataSourceTotales">
+      <ng-container matColumnDef="nombreBeneficio">
+        <th mat-header-cell *matHeaderCellDef> Nombre Beneficio </th>
+        <td mat-cell *matCellDef="let element"> {{element.nombreBeneficio}} </td>
       </ng-container>
 
-      <ng-container matColumnDef="total">
-        <th mat-header-cell *matHeaderCellDef> Total </th>
-        <td mat-cell *matCellDef="let elemento"> {{ elemento.total}} </td>
+      <ng-container matColumnDef="totalMontoBeneficio">
+        <th mat-header-cell *matHeaderCellDef> Total Monto Beneficio </th>
+        <td mat-cell *matCellDef="let element"> {{element.totalMontoBeneficio | currency}} </td>
+      </ng-container>
+
+      <ng-container matColumnDef="deduccionesInprema">
+        <th mat-header-cell *matHeaderCellDef> Deducciones Inprema </th>
+        <td mat-cell *matCellDef="let element"> {{element.deduccionesInprema | currency}} </td>
+      </ng-container>
+
+      <ng-container matColumnDef="deduccionesTerceros">
+        <th mat-header-cell *matHeaderCellDef> Deducciones Terceros </th>
+        <td mat-cell *matCellDef="let element"> {{element.deduccionesTerceros | currency}} </td>
+      </ng-container>
+
+      <ng-container matColumnDef="neto">
+        <th mat-header-cell *matHeaderCellDef> Neto </th>
+        <td mat-cell *matCellDef="let element"> {{element.neto | currency}} </td>
+      </ng-container>
+
+      <ng-container matColumnDef="acciones">
+        <th mat-header-cell *matHeaderCellDef> Acciones </th>
+        <td mat-cell *matCellDef="let element">
+          <button mat-raised-button (click)="verDeducciones(element.idPlanilla, element.idBeneficio)">Ver Deducciones</button>
+        </td>
       </ng-container>
 
       <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
       <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
     </table>
-    <mat-paginator #paginatorBeneficios [pageSize]="10"></mat-paginator>
+
+    <mat-paginator [pageSizeOptions]="[5, 10, 20]" showFirstLastButtons></mat-paginator>
+
+    <div *ngIf="mostrandoDeducciones">
+      <h2>Deducciones</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Código Deducción</th>
+            <th>Nombre Deducción</th>
+            <th>Tipo Deducción</th>
+            <th>Monto Aplicado</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let deduccion of deducciones">
+            <td>{{deduccion.ID_DEDUCCION}}</td>
+            <td>{{deduccion.NOMBRE_DEDUCCION}}</td>
+            <td>{{deduccion.TIPO_DEDUCCION}}</td>
+            <td>{{deduccion.TOTAL_MONTO_APLICADO | currency : "L" : "symbol" : "1.2-2"}}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
   </div>
 
-  <!-- Tabla de Deducciones -->
-  <div class="table">
-    <h2>Deducciones</h2>
-    <table mat-table [dataSource]="dataSourceDeducciones" >
-      <ng-container matColumnDef="nombre">
-        <th mat-header-cell *matHeaderCellDef> Nombre </th>
-        <td mat-cell *matCellDef="let elemento"> {{ elemento.nombre }} </td>
-      </ng-container>
-
-      <ng-container matColumnDef="total">
-        <th mat-header-cell *matHeaderCellDef> Total </th>
-        <td mat-cell *matCellDef="let elemento"> {{ elemento.total}} </td>
-      </ng-container>
-
-      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-      <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
-    </table>
-    <mat-paginator #paginatorDeducciones [pageSize]="5"></mat-paginator>
-  </div>
   <button (click)="generarPDF()" mat-raised-button style="
-  margin: 2% 2%;
-  background-color: #628780;
-  color: #ffffff;
-  border-radius: 5px;
-  padding: 10px 20px;
-">Generar reporte</button>
+    margin: 2% 2%;
+    background-color: #628780;
+    color: #ffffff;
+    border-radius: 5px;
+    padding: 10px 20px;
+  ">Generar reporte</button>
 </div>
-
-<!--  -->

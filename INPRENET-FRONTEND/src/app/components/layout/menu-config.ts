@@ -22,6 +22,7 @@ export const MENU_CONFIG: Section[] = [
           { title: 'Buscar Persona', route: '/afiliacion/buscar-persona', icon: 'search' },
           { title: 'Nuevo Centro Educativo', route: '/afiliacion/nuevo-centro', icon: 'school' },
           { title: 'Ver Centro Educativo', route: '/afiliacion/ver-datos-centro', icon: 'visibility' },
+          { title: 'Mantenimiento', route: '/afiliacion/mantenimiento', icon: 'visibility' },
         ],
       },
     ],
@@ -35,6 +36,7 @@ export const MENU_CONFIG: Section[] = [
         children: [
           { title: 'Nueva Planilla', route: '/planilla/nueva-planilla', icon: 'post_add' },
           { title: 'Ver Planillas', route: '/planilla/ver-planillas', icon: 'receipt' },
+          { title: 'Generacion de documentos', route: '/planilla/documentos-planilla', icon: 'receipt' },
         ],
       },
       {

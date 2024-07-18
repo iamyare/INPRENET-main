@@ -1,0 +1,9 @@
+<div>
+  <label for="mes">Mes:</label>
+  <input id="mes" type="text" #mes placeholder="MM">
+  <label for="anio">Año:</label>
+  <input id="anio" type="text" #anio placeholder="YYYY">
+  <button (click)="generarDocumento('ordinaria', mes.value, anio.value)">Generar Planilla Ordinaria</button>
+  <button (click)="generarDocumento('complementaria', mes.value, anio.value)">Generar Planilla Complementaria</button>
+  <button (click)="generarDocumento('extraordinaria', mes.value, anio.value)">Generar Planilla Extraordinaria</button>
+</div>

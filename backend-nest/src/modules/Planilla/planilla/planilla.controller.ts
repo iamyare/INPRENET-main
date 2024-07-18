@@ -13,6 +13,37 @@ import { Net_Planilla } from './entities/net_planilla.entity';
 export class PlanillaController {
   constructor(private readonly planillaService: PlanillaService, @InjectEntityManager() private readonly entityManager: EntityManager) { }
 
+  @Get('beneficios-deducciones-planilla-mes')
+  async getBeneficiosConDeducciones(
+    @Query('periodoInicio') periodoInicio: string,
+    @Query('periodoFinalizacion') periodoFinalizacion: string,
+    @Query('idTiposPlanilla') idTiposPlanilla: string,
+  ): Promise<any[]> {
+    console.log(periodoInicio);
+    console.log(periodoFinalizacion);
+    console.log(idTiposPlanilla);
+    
+    const tiposPlanillaArray = idTiposPlanilla.split(',').map(Number);
+    return this.planillaService.getBeneficiosConDeduccionesDePLanillaPorMes(
+      periodoInicio,
+      periodoFinalizacion,
+      tiposPlanillaArray,
+    );
+  }
+
+  @Get('totales-beneficios-deducciones/:idPlanilla')
+  async getTotalesBeneficiosDeducciones(@Param('idPlanilla', ParseIntPipe) idPlanilla: number) {
+    return this.planillaService.getTotalesBeneficiosDeducciones(idPlanilla);
+  }
+
+  @Get('desglose-deducciones/:idPlanilla/:idBeneficio')
+  async getDesgloseDeducciones(
+    @Param('idPlanilla') idPlanilla: number,
+    @Param('idBeneficio') idBeneficio: number,
+  ): Promise<any> {
+    return this.planillaService.getDesgloseDeducciones(idPlanilla, idBeneficio);
+  }
+
   @Get('generar-excel')
   async generarExcel(
     @Query('codPlanilla') codPlanilla: string,

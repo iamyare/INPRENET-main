@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { PlanillaService } from 'src/app/services/planilla.service';
 import { TDocumentDefinitions } from 'pdfmake/interfaces';
 import pdfMake from 'pdfmake/build/pdfmake';
@@ -16,8 +16,7 @@ export class DocumentosPlanillaComponent implements OnInit {
 
   constructor(private http: HttpClient, private planillaService: PlanillaService) { }
 
-  ngOnInit() {
-  }
+  ngOnInit() { }
 
   async generarDocumento(tipo: string, mes: string, anio: string) {
     let idTiposPlanilla: number[];
@@ -51,7 +50,7 @@ export class DocumentosPlanillaComponent implements OnInit {
             height: pageSize.height,
             absolutePosition: { x: 0, y: 0 }
           }),
-          pageMargins: [40, 150, 40, 100],
+          pageMargins: [40, 150, 40, 80],
           header: (currentPage, pageCount, pageSize) => {
             return [
               {
@@ -84,7 +83,7 @@ export class DocumentosPlanillaComponent implements OnInit {
             ];
           },
           content: [
-            { text: 'Reporte de Totales', style: 'header' },
+            { text: 'Reporte de Totales', style: 'header', margin: [0, 0, 0, 20] },
             this.crearTablaPDF(data, 'Totales', `Total Neto: L${data.reduce((acc, cur) => acc + cur.NETO, 0).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",")}`),
             {
               columns: [
@@ -184,16 +183,28 @@ export class DocumentosPlanillaComponent implements OnInit {
           },
           footer: function (currentPage, pageCount) {
             return {
-              table: {
-                widths: ['*', '*', '*'],
-                body: [
-                  [
-                    { text: 'Fecha y Hora: ' + new Date().toLocaleString(), alignment: 'left', border: [false, false, false, false] },
-                    { text: 'Generó: ', alignment: 'left', border: [false, false, false, false] },
-                    { text: 'Página ' + currentPage.toString() + ' de ' + pageCount, alignment: 'right', border: [false, false, false, false] }
-                  ]
-                ]
-              },
+              columns: [
+                {
+                  width: '50%',
+                  text: 'Fecha y Hora: ' + new Date().toLocaleString(),
+                  alignment: 'left',
+                  margin: [20, -20, 0, 0],
+                  border: [false, false, false, false]
+                },
+                {
+                  width: '50%',
+                  text: 'Generó: ',
+                  alignment: 'left',
+                  margin: [0, -20, 20, 0],
+                  border: [false, false, false, false]
+                },
+                {
+                  text: 'Página ' + currentPage.toString() + ' de ' + pageCount,
+                  alignment: 'right',
+                  margin: [0, -20, 20, 0],
+                  border: [false, false, false, false]
+                }
+              ],
               margin: [20, 0, 20, 20]
             };
           },
@@ -227,6 +238,17 @@ export class DocumentosPlanillaComponent implements OnInit {
   }
 
   crearTablaPDF(data: any[], titulo: string, totalTexto: string) {
+    const totales = data.reduce(
+      (acc, cur) => {
+        acc.totalMontoBeneficio += cur.TOTAL_MONTO_BENEFICIO;
+        acc.totalDeduccionesInprema += cur.DEDUCCIONES_INPREMA;
+        acc.totalDeduccionesTerceros += cur.DEDUCCIONES_DE_TERCEROS;
+        acc.totalNeto += cur.NETO;
+        return acc;
+      },
+      { totalMontoBeneficio: 0, totalDeduccionesInprema: 0, totalDeduccionesTerceros: 0, totalNeto: 0 }
+    );
+
     return {
       style: 'tableExample',
       table: {
@@ -249,7 +271,13 @@ export class DocumentosPlanillaComponent implements OnInit {
             { text: `L${Number(el.DEDUCCIONES_DE_TERCEROS).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",")}`, alignment: 'right' },
             { text: `L${Number(el.NETO).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",")}`, alignment: 'right' }
           ]),
-          [{ text: totalTexto, style: 'tableTotal', alignment: 'right', colSpan: 6 }, {}, {}, {}, {}, {}]
+          [
+            { text: 'Totales', style: 'tableTotal', alignment: 'right', colSpan: 2 }, {},
+            { text: `L${totales.totalMontoBeneficio.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",")}`, alignment: 'right' },
+            { text: `L${totales.totalDeduccionesInprema.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",")}`, alignment: 'right' },
+            { text: `L${totales.totalDeduccionesTerceros.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",")}`, alignment: 'right' },
+            { text: `L${totales.totalNeto.toFixed(2).replace(/\B(?=(\d{3})+(?!d))/g, ",")}`, alignment: 'right' }
+          ]
         ]
       },
       layout: {

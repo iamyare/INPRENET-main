@@ -31,6 +31,7 @@ import { Net_SALARIO_COTIZABLE } from './Ingresos/detalle-plan-ingr/entities/net
 import { AfiliadoModule } from '../Persona/afiliado.module';
 import { TransaccionesModule } from '../transacciones/transacciones.module';
 import { Net_Beneficio_Tipo_Persona } from './beneficio_tipo_persona/entities/net_beneficio_tipo_persona.entity';
+import { Net_Clasificacion_Beneficios } from './planilla/entities/net_clasificacion_beneficios.entity';
 
 @Module({
   controllers: [DetallePlanIngrController, PlanillaController, BeneficioController, DetalleBeneficioController, DeduccionController,
@@ -40,6 +41,6 @@ import { Net_Beneficio_Tipo_Persona } from './beneficio_tipo_persona/entities/ne
   imports: [AfiliadoModule, TransaccionesModule,
     TypeOrmModule.forFeature([Net_Beneficio_Tipo_Persona, Net_SALARIO_COTIZABLE, Net_Beneficio, Net_Detalle_Pago_Beneficio,
       Net_Planilla, Net_Deduccion, Net_TipoPlanilla, Net_Detalle_Deduccion,
-      Net_Detalle_Beneficio_Afiliado, Net_Detalle_planilla_ingreso]),]
+      Net_Detalle_Beneficio_Afiliado, Net_Detalle_planilla_ingreso, Net_Clasificacion_Beneficios]),]
 })
 export class PlanillaModule { }

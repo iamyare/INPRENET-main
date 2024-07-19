@@ -1,6 +1,7 @@
 import { Column, CreateDateColumn, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 import { Net_Detalle_Beneficio_Afiliado } from "../../detalle_beneficio/entities/net_detalle_beneficio_afiliado.entity";
 import { Net_Beneficio_Tipo_Persona } from "../../beneficio_tipo_persona/entities/net_beneficio_tipo_persona.entity";
+import { Net_Clasificacion_Beneficios } from "../../planilla/entities/net_clasificacion_beneficios.entity";
 
 
 @Entity({ name: 'NET_BENEFICIO' })
@@ -35,4 +36,7 @@ export class Net_Beneficio {
 
     @OneToMany(() => Net_Beneficio_Tipo_Persona, beneficioTipoPersona => beneficioTipoPersona.beneficio)
     benefTipoPersona: Net_Beneficio_Tipo_Persona[];
+
+    @OneToMany(() => Net_Clasificacion_Beneficios, beneficio => beneficio.beneficio)
+    BenDedTipPlan: Net_Clasificacion_Beneficios[]
 }

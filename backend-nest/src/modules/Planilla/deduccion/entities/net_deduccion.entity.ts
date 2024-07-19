@@ -1,5 +1,7 @@
 import { Column, Entity, Index, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
-import { Net_Detalle_Deduccion } from '../../detalle-deduccion/entities/detalle-deduccion.entity';import { Net_Centro_Trabajo } from 'src/modules/Empresarial/entities/net_centro_trabajo.entity';
+import { Net_Detalle_Deduccion } from '../../detalle-deduccion/entities/detalle-deduccion.entity';import { Net_Centro_Trabajo } 
+from 'src/modules/Empresarial/entities/net_centro_trabajo.entity';
+import { Net_Clasificacion_Beneficios } from '../../planilla/entities/net_clasificacion_beneficios.entity';
 
 @Entity({ name: 'NET_DEDUCCION' })
 export class Net_Deduccion {
@@ -26,4 +28,7 @@ export class Net_Deduccion {
 
     @OneToMany(() => Net_Detalle_Deduccion, detalleDeduccion => detalleDeduccion.deduccion)
     detalleDeduccion: Net_Detalle_Deduccion[];
+    
+    @OneToMany(() => Net_Clasificacion_Beneficios, benDenTipoPlan => benDenTipoPlan.deduccion)
+    bendedtipplan: Net_Clasificacion_Beneficios[];
 }

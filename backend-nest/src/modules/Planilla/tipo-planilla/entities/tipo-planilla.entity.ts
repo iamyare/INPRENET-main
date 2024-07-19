@@ -1,5 +1,6 @@
 import { Check, Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 import { Net_Planilla } from '../../planilla/entities/net_planilla.entity';
+import { Net_Clasificacion_Beneficios } from '../../planilla/entities/net_clasificacion_beneficios.entity';
 
 @Entity({ name: 'NET_TIPO_PLANILLA' })
 @Check("CK_CLASE_PLANILLA",`CLASE_PLANILLA IN ('INGRESO', 'EGRESO')`)
@@ -19,4 +20,7 @@ export class Net_TipoPlanilla {
 
     @OneToMany(() => Net_Planilla, planilla => planilla.tipoPlanilla)
     planilla: Net_Planilla[];
+
+    @OneToMany(() => Net_Clasificacion_Beneficios, planilla => planilla.tipoPlanilla)
+    BenDedTipoPlan: Net_Clasificacion_Beneficios[];
 }

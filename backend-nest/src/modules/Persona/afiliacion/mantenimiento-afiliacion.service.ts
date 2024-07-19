@@ -13,6 +13,12 @@ import { UpdateColegioDto } from './dtos/update-colegio.dto';
 import { Net_Banco } from 'src/modules/banco/entities/net_banco.entity';
 import { CreateBancoDto } from './dtos/create-banco.dto';
 import { UpdateBancoDto } from './dtos/update-banco.dto';
+import { Net_Nivel_Educativo } from 'src/modules/Empresarial/entities/net_nivel_educativo.entity';
+import { Net_Jornada } from 'src/modules/Empresarial/entities/net_jornada.entity';
+import { CreateJornadaDto } from './dtos/create-jornada.dto';
+import { UpdateJornadaDto } from './dtos/update-jornada.dto';
+import { CreateNivelEducativoDto } from './dtos/create-nivel-educativo.dto';
+import { UpdateNivelEducativoDto } from './dtos/update-nivel-educativo.dto';
 
 @Injectable()
 export class MantenimientoAfiliacionService {
@@ -25,6 +31,10 @@ export class MantenimientoAfiliacionService {
     private colegiosRepository: Repository<Net_Colegios_Magisteriales>,
     @InjectRepository(Net_Banco)
     private bancoRepository: Repository<Net_Banco>,
+    @InjectRepository(Net_Jornada)
+    private jornadaRepository: Repository<Net_Jornada>,
+    @InjectRepository(Net_Nivel_Educativo)
+    private nivelEducativoRepository: Repository<Net_Nivel_Educativo>,
   ) {}
 
   // Métodos para Discapacidades
@@ -125,5 +135,55 @@ export class MantenimientoAfiliacionService {
     const banco = await this.findOneBanco(id);
     const updatedBanco = Object.assign(banco, updateBancoDto);
     return this.bancoRepository.save(updatedBanco);
+  }
+
+  // Métodos para Jornada
+
+  async findAllJornadas(): Promise<Net_Jornada[]> {
+    return this.jornadaRepository.find();
+  }
+
+  async findOneJornada(id: number): Promise<Net_Jornada> {
+    const jornada = await this.jornadaRepository.findOne({ where: { id_jornada: id } });
+    if (!jornada) {
+      throw new NotFoundException(`Jornada with ID ${id} not found`);
+    }
+    return jornada;
+  }
+
+  async createJornada(createJornadaDto: CreateJornadaDto): Promise<Net_Jornada> {
+    const newJornada = this.jornadaRepository.create(createJornadaDto);
+    return this.jornadaRepository.save(newJornada);
+  }
+
+  async updateJornada(id: number, updateJornadaDto: UpdateJornadaDto): Promise<Net_Jornada> {
+    const jornada = await this.findOneJornada(id);
+    const updatedJornada = Object.assign(jornada, updateJornadaDto);
+    return this.jornadaRepository.save(updatedJornada);
+  }
+
+  // Métodos para Nivel Educativo
+
+  async findAllNivelesEducativos(): Promise<Net_Nivel_Educativo[]> {
+    return this.nivelEducativoRepository.find();
+  }
+
+  async findOneNivelEducativo(id: number): Promise<Net_Nivel_Educativo> {
+    const nivelEducativo = await this.nivelEducativoRepository.findOne({ where: { id_nivel: id } });
+    if (!nivelEducativo) {
+      throw new NotFoundException(`Nivel Educativo with ID ${id} not found`);
+    }
+    return nivelEducativo;
+  }
+
+  async createNivelEducativo(createNivelEducativoDto: CreateNivelEducativoDto): Promise<Net_Nivel_Educativo> {
+    const newNivelEducativo = this.nivelEducativoRepository.create(createNivelEducativoDto);
+    return this.nivelEducativoRepository.save(newNivelEducativo);
+  }
+
+  async updateNivelEducativo(id: number, updateNivelEducativoDto: UpdateNivelEducativoDto): Promise<Net_Nivel_Educativo> {
+    const nivelEducativo = await this.findOneNivelEducativo(id);
+    const updatedNivelEducativo = Object.assign(nivelEducativo, updateNivelEducativoDto);
+    return this.nivelEducativoRepository.save(updatedNivelEducativo);
   }
 }

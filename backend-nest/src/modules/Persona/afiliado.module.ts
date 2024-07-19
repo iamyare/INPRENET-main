@@ -26,6 +26,8 @@ import { Net_Persona_Discapacidad } from './entities/net_persona_discapacidad.en
 import { Net_Familia } from './entities/net_familia.entity';
 import { MantenimientoAfiliacionService } from './afiliacion/mantenimiento-afiliacion.service';
 import { MantenimientoAfiliacionController } from './afiliacion/mantenimiento-afiliacion.controller';
+import { Net_Jornada } from '../Empresarial/entities/net_jornada.entity';
+import { Net_Nivel_Educativo } from '../Empresarial/entities/net_nivel_educativo.entity';
 
 @Module({
   controllers: [AfiliadoController, AfiliacionController, MantenimientoAfiliacionController],
@@ -35,7 +37,8 @@ import { MantenimientoAfiliacionController } from './afiliacion/mantenimiento-af
       Net_Ref_Per_Pers, Net_Persona_Discapacidad,
       Net_Persona_Por_Banco, Net_Departamento, Net_Familia,
       Net_Pais, Net_Tipo_Identificacion, net_causas_fallecimientos,
-      Net_Centro_Trabajo, Net_Banco, Net_Tipo_Persona, Net_Municipio])
+      Net_Centro_Trabajo, Net_Banco, Net_Tipo_Persona, Net_Municipio,
+      Net_Jornada, Net_Nivel_Educativo])
   ],
   exports: [TypeOrmModule, AfiliadoService],
 })

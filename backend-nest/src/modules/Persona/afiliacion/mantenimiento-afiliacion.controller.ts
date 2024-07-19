@@ -8,6 +8,10 @@ import { CreateColegioDto } from './dtos/create-colegio.dto';
 import { UpdateColegioDto } from './dtos/update-colegio.dto';
 import { CreateBancoDto } from './dtos/create-banco.dto';
 import { UpdateBancoDto } from './dtos/update-banco.dto';
+import { CreateNivelEducativoDto } from './dtos/create-nivel-educativo.dto';
+import { UpdateNivelEducativoDto } from './dtos/update-nivel-educativo.dto';
+import { UpdateJornadaDto } from './dtos/update-jornada.dto';
+import { CreateJornadaDto } from './dtos/create-jornada.dto';
 @Controller('mantenimiento-afiliacion')
 export class MantenimientoAfiliacionController {
   constructor(private readonly mantenimientoAfiliacionService: MantenimientoAfiliacionService) {}
@@ -98,5 +102,47 @@ export class MantenimientoAfiliacionController {
   @Put('bancos/actualizar/:id')
   updateBanco(@Param('id') id: number, @Body() updateBancoDto: UpdateBancoDto) {
     return this.mantenimientoAfiliacionService.updateBanco(id, updateBancoDto);
+  }
+
+  @Get('jornadas/listar')
+  findAllJornadas() {
+    return this.mantenimientoAfiliacionService.findAllJornadas();
+  }
+
+  @Get('jornadas/detalle/:id')
+  findOneJornada(@Param('id') id: number) {
+    return this.mantenimientoAfiliacionService.findOneJornada(id);
+  }
+
+  @Post('jornadas/crear')
+  createJornada(@Body() createJornadaDto: CreateJornadaDto) {
+    return this.mantenimientoAfiliacionService.createJornada(createJornadaDto);
+  }
+
+  @Put('jornadas/actualizar/:id')
+  updateJornada(@Param('id') id: number, @Body() updateJornadaDto: UpdateJornadaDto) {
+    return this.mantenimientoAfiliacionService.updateJornada(id, updateJornadaDto);
+  }
+
+  // Rutas para Nivel Educativo
+
+  @Get('niveles-educativos/listar')
+  findAllNivelesEducativos() {
+    return this.mantenimientoAfiliacionService.findAllNivelesEducativos();
+  }
+
+  @Get('niveles-educativos/detalle/:id')
+  findOneNivelEducativo(@Param('id') id: number) {
+    return this.mantenimientoAfiliacionService.findOneNivelEducativo(id);
+  }
+
+  @Post('niveles-educativos/crear')
+  createNivelEducativo(@Body() createNivelEducativoDto: CreateNivelEducativoDto) {
+    return this.mantenimientoAfiliacionService.createNivelEducativo(createNivelEducativoDto);
+  }
+
+  @Put('niveles-educativos/actualizar/:id')
+  updateNivelEducativo(@Param('id') id: number, @Body() updateNivelEducativoDto: UpdateNivelEducativoDto) {
+    return this.mantenimientoAfiliacionService.updateNivelEducativo(id, updateNivelEducativoDto);
   }
 }

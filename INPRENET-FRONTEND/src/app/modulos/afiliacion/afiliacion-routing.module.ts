@@ -27,6 +27,8 @@ import { DiscapacidadComponent } from './mantenimiento/discapacidad/discapacidad
 import { ProfesionComponent } from './mantenimiento/profesion/profesion.component';
 import { ColegioComponent } from './mantenimiento/colegio/colegio.component';
 import { BancoComponent } from './mantenimiento/banco/banco.component';
+import { JornadaComponent } from './mantenimiento/jornada/jornada.component';
+import { NivelEducativoComponent } from './mantenimiento/nivel-educativo/nivel-educativo.component';
 
 const routes: Routes = [
   { path: 'admin-centro-educativo', component: AdminCentroEducativoComponent },
@@ -56,6 +58,8 @@ const routes: Routes = [
   { path: 'mantenimiento/profesion', component: ProfesionComponent },
   { path: 'mantenimiento/colegio', component: ColegioComponent },
   { path: 'mantenimiento/banco', component: BancoComponent },
+  { path: 'mantenimiento/jornada', component: JornadaComponent },
+  { path: 'mantenimiento/nivel-educativo', component: NivelEducativoComponent },
   { path: '', redirectTo: 'afiliacion', pathMatch: 'full' },
 ];
 

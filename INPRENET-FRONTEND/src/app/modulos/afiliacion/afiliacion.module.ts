@@ -60,6 +60,9 @@ import { ProfesionComponent } from './mantenimiento/profesion/profesion.componen
 import { ColegioComponent } from './mantenimiento/colegio/colegio.component';
 import { BancoComponent } from './mantenimiento/banco/banco.component';
 import { MantenimientoAfiliacionComponent } from './mantenimiento/mantenimiento-afiliacion/mantenimiento-afiliacion.component';
+import { JornadaComponent } from './mantenimiento/jornada/jornada.component';
+import { NivelEducativoComponent } from './mantenimiento/nivel-educativo/nivel-educativo.component';
+import { DatFamiliaresComponent } from './gestion/dat-familiares/dat-familiares.component';
 
 @NgModule({
   declarations: [
@@ -115,7 +118,10 @@ import { MantenimientoAfiliacionComponent } from './mantenimiento/mantenimiento-
     DiscapacidadComponent,
     ProfesionComponent,
     ColegioComponent,
-    BancoComponent
+    BancoComponent,
+    JornadaComponent,
+    NivelEducativoComponent,
+    DatFamiliaresComponent
   ],
   imports: [
     CommonModule,

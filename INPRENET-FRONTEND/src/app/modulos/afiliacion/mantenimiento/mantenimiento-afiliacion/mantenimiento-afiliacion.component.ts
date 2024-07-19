@@ -8,9 +8,9 @@ import { Router } from '@angular/router';
 })
 export class MantenimientoAfiliacionComponent {
 
-  constructor(private router: Router) {}
+  constructor(private router: Router) { }
 
-  navigateTo(path: string) {
-    this.router.navigate([path]);
+  navigateTo(route: string): void {
+    this.router.navigate([`/afiliacion/mantenimiento/${route}`]);
   }
 }

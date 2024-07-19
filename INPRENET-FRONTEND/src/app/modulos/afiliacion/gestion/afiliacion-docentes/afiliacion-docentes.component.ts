@@ -11,6 +11,7 @@ import { DatosEstaticosService } from 'src/app/services/datos-estaticos.service'
 export class AfiliacionDocentesComponent implements OnInit {
   steps = [
     { label: 'Datos Generales Del Docente', isActive: true },
+    { label: 'Familiares', isActive: false },
     { label: 'Colegio Magisterial', isActive: false },
     { label: 'Datos Cuentas Bancarias', isActive: false },
     { label: 'Centros De Trabajo', isActive: false },

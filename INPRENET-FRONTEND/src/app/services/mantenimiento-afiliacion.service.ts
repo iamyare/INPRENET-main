@@ -97,4 +97,48 @@ export class MantenimientoAfiliacionService {
     const url = `${environment.API_URL}/api/mantenimiento-afiliacion/bancos/actualizar/${id}`;
     return this.http.put<any>(url, datos);
   }
+
+  // Métodos para Jornadas
+
+  getAllJornadas(): Observable<any[]> {
+    const url = `${environment.API_URL}/api/mantenimiento-afiliacion/jornadas/listar`;
+    return this.http.get<any[]>(url);
+  }
+
+  getJornadaById(id: number): Observable<any> {
+    const url = `${environment.API_URL}/api/mantenimiento-afiliacion/jornadas/detalle/${id}`;
+    return this.http.get<any>(url);
+  }
+
+  createJornada(datos: any): Observable<any> {
+    const url = `${environment.API_URL}/api/mantenimiento-afiliacion/jornadas/crear`;
+    return this.http.post<any>(url, datos);
+  }
+
+  updateJornada(id: number, datos: any): Observable<any> {
+    const url = `${environment.API_URL}/api/mantenimiento-afiliacion/jornadas/actualizar/${id}`;
+    return this.http.put<any>(url, datos);
+  }
+
+  // Métodos para Niveles Educativos
+
+  getAllNivelesEducativos(): Observable<any[]> {
+    const url = `${environment.API_URL}/api/mantenimiento-afiliacion/niveles-educativos/listar`;
+    return this.http.get<any[]>(url);
+  }
+
+  getNivelEducativoById(id: number): Observable<any> {
+    const url = `${environment.API_URL}/api/mantenimiento-afiliacion/niveles-educativos/detalle/${id}`;
+    return this.http.get<any>(url);
+  }
+
+  createNivelEducativo(datos: any): Observable<any> {
+    const url = `${environment.API_URL}/api/mantenimiento-afiliacion/niveles-educativos/crear`;
+    return this.http.post<any>(url, datos);
+  }
+
+  updateNivelEducativo(id: number, datos: any): Observable<any> {
+    const url = `${environment.API_URL}/api/mantenimiento-afiliacion/niveles-educativos/actualizar/${id}`;
+    return this.http.put<any>(url, datos);
+  }
 }

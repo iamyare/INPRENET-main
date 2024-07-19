@@ -1,9 +1,9 @@
 <mat-card class="mantenimiento-card">
   <mat-card-header>
-    <mat-card-title class="title">Gestión de Discapacidades</mat-card-title>
+    <mat-card-title class="title">Gestión de Jornadas</mat-card-title>
   </mat-card-header>
   <mat-card-content>
-    <button mat-raised-button color="primary" class="add-button" (click)="openDialogAgregar()">Agregar Discapacidad</button>
+    <button mat-raised-button color="primary" class="add-button" (click)="openDialogAgregar()">Agregar Jornada</button>
     <mat-table [dataSource]="dataSource">
 
       <ng-container matColumnDef="numero">
@@ -11,14 +11,9 @@
         <mat-cell *matCellDef="let element; let i = index"> {{i + 1}} </mat-cell>
       </ng-container>
 
-      <ng-container matColumnDef="tipo_discapacidad">
-        <mat-header-cell *matHeaderCellDef> Tipo de Discapacidad </mat-header-cell>
-        <mat-cell *matCellDef="let element"> {{element.tipo_discapacidad}} </mat-cell>
-      </ng-container>
-
-      <ng-container matColumnDef="descripcion">
-        <mat-header-cell *matHeaderCellDef> Descripción </mat-header-cell>
-        <mat-cell *matCellDef="let element"> {{element.descripcion}} </mat-cell>
+      <ng-container matColumnDef="nombre">
+        <mat-header-cell *matHeaderCellDef> Nombre </mat-header-cell>
+        <mat-cell *matCellDef="let element"> {{element.nombre}} </mat-cell>
       </ng-container>
 
       <ng-container matColumnDef="acciones">

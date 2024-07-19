@@ -1,38 +1,63 @@
-<div class="mantenimiento-container">
-  <mat-toolbar color="primary">
-    <span>Mantenimiento de Afiliación</span>
-  </mat-toolbar>
-  <div class="mantenimiento-content">
-    <mat-card class="mantenimiento-card" (click)="navigateTo('/afiliacion/mantenimiento/discapacidad')">
+<div class="container">
+  <h1 class="title">Gestión de Afiliaciones</h1>
+  <div class="card-container">
+    <mat-card class="card" (click)="navigateTo('discapacidad')">
       <mat-card-header>
-        <mat-card-title>Gestión de Discapacidades</mat-card-title>
+        <div mat-card-avatar class="card-icon"><mat-icon>accessibility</mat-icon></div>
+        <mat-card-title>Discapacidades</mat-card-title>
       </mat-card-header>
       <mat-card-content>
-        <p>Administra las discapacidades registradas en el sistema.</p>
+        <p>Gestiona las discapacidades.</p>
       </mat-card-content>
     </mat-card>
-    <mat-card class="mantenimiento-card" (click)="navigateTo('/afiliacion/mantenimiento/profesion')">
+
+    <mat-card class="card" (click)="navigateTo('profesion')">
       <mat-card-header>
-        <mat-card-title>Gestión de Profesiones</mat-card-title>
+        <div mat-card-avatar class="card-icon"><mat-icon>work</mat-icon></div>
+        <mat-card-title>Profesiones</mat-card-title>
       </mat-card-header>
       <mat-card-content>
-        <p>Administra las profesiones registradas en el sistema.</p>
+        <p>Gestiona las profesiones.</p>
       </mat-card-content>
     </mat-card>
-    <mat-card class="mantenimiento-card" (click)="navigateTo('/afiliacion/mantenimiento/colegio')">
+
+    <mat-card class="card" (click)="navigateTo('colegio')">
       <mat-card-header>
-        <mat-card-title>Gestión de Colegios Magisteriales</mat-card-title>
+        <div mat-card-avatar class="card-icon"><mat-icon>school</mat-icon></div>
+        <mat-card-title>Colegios Magisteriales</mat-card-title>
       </mat-card-header>
       <mat-card-content>
-        <p>Administra los colegios magisteriales registrados en el sistema.</p>
+        <p>Gestiona los colegios magisteriales.</p>
       </mat-card-content>
     </mat-card>
-    <mat-card class="mantenimiento-card" (click)="navigateTo('/afiliacion/mantenimiento/banco')">
+
+    <mat-card class="card" (click)="navigateTo('banco')">
       <mat-card-header>
-        <mat-card-title>Gestión de Bancos</mat-card-title>
+        <div mat-card-avatar class="card-icon"><mat-icon>account_balance</mat-icon></div>
+        <mat-card-title>Bancos</mat-card-title>
       </mat-card-header>
       <mat-card-content>
-        <p>Administra los bancos registrados en el sistema.</p>
+        <p>Gestiona los bancos.</p>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card class="card" (click)="navigateTo('jornada')">
+      <mat-card-header>
+        <div mat-card-avatar class="card-icon"><mat-icon>schedule</mat-icon></div>
+        <mat-card-title>Jornadas</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <p>Gestiona las jornadas.</p>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card class="card" (click)="navigateTo('nivel-educativo')">
+      <mat-card-header>
+        <div mat-card-avatar class="card-icon"><mat-icon>school</mat-icon></div>
+        <mat-card-title>Niveles Educativos</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <p>Gestiona los niveles educativos.</p>
       </mat-card-content>
     </mat-card>
   </div>

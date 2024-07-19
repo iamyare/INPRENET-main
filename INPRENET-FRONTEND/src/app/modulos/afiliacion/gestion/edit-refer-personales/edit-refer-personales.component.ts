@@ -3,6 +3,7 @@ import { Validators } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
 import { ToastrService } from 'ngx-toastr';
 import { AfiliadoService } from 'src/app/services/afiliado.service';
+import { AfiliacionService } from 'src/app/services/afiliacion.service';
 import { FieldConfig } from 'src/app/shared/Interfaces/field-config';
 import { TableColumn } from 'src/app/shared/Interfaces/table-column';
 import { convertirFechaInputs } from 'src/app/shared/functions/formatoFecha';
@@ -36,6 +37,7 @@ export class EditReferPersonalesComponent implements OnInit, OnChanges, OnDestro
 
   constructor(
     private svcAfiliado: AfiliadoService,
+    private svcAfiliacion: AfiliacionService,
     private toastr: ToastrService,
     private dialog: MatDialog,
     private datosEstaticosService: DatosEstaticosService
@@ -99,6 +101,12 @@ export class EditReferPersonalesComponent implements OnInit, OnChanges, OnDestro
         col: 'telefono_trabajo',
         isEditable: true
       },
+      {
+        header: 'Estado', // Nueva columna
+        col: 'estado',
+        isEditable: true,
+        validationRules: [Validators.required, Validators.pattern(/^(ACTIVO|INACTIVO)$/)]
+      },
     ];
     this.getFilas();
   }
@@ -120,17 +128,18 @@ export class EditReferPersonalesComponent implements OnInit, OnChanges, OnDestro
     this.mostrarMensaje = false;
     if (this.Afiliado) {
       try {
-        const data = await this.svcAfiliado.getAllReferenciasPersonales(this.Afiliado.n_identificacion).toPromise();
+        const data = await this.svcAfiliacion.obtenerReferenciasPorIdentificacion(this.Afiliado.n_identificacion).toPromise();
         this.filas = data.map((item: any) => {
           const filaProcesada = {
-            id_ref_personal: item.id_ref_personal ?? 'ID no disponible',
-            dni: item.dni ?? 'ID no disponible',
-            nombre_completo: item.nombre_completo ?? 'Nombre no disponible',
+            id_ref_personal: item.id_ref,
+            dni: item.personaReferenciada.n_identificacion ?? 'ID no disponible',
+            nombre_completo: `${item.personaReferenciada.primer_nombre} ${item.personaReferenciada.segundo_nombre ?? ''} ${item.personaReferenciada.primer_apellido} ${item.personaReferenciada.segundo_apellido ?? ''}`.trim(),
             parentesco: item.parentesco || 'No disponible',
-            direccion: item.direccion ?? 'Dirección no disponible',
-            telefono_domicilio: item.telefono_domicilio ?? 'No disponible',
-            telefono_personal: item.telefono_personal ?? 'No disponible',
-            telefono_trabajo: item.telefono_trabajo ?? 'No disponible',
+            direccion: item.personaReferenciada.direccion ?? 'Dirección no disponible',
+            telefono_domicilio: item.personaReferenciada.telefono_1 ?? 'No disponible',
+            telefono_personal: item.personaReferenciada.telefono_2 ?? 'No disponible',
+            telefono_trabajo: item.personaReferenciada.telefono_trabajo ?? 'No disponible',
+            estado: item.estado ?? 'No disponible', // Añadir estado
           };
           return filaProcesada;
         });
@@ -230,6 +239,15 @@ export class EditReferPersonalesComponent implements OnInit, OnChanges, OnDestro
         editable: true,
         icono: 'badge',
         validadores: [Validators.required, Validators.pattern(/^[0-9]{13}$|^[0-9]{4}-[0-9]{4}-[0-9]{5}$/)]
+      },
+      {
+        nombre: 'estado', // Nuevo campo en el formulario de edición
+        tipo: 'text',
+        requerido: true,
+        etiqueta: 'Estado',
+        editable: true,
+        icono: 'check_circle',
+        validadores: [Validators.required, Validators.pattern(/^(ACTIVO|INACTIVO)$/)] // Validación para aceptar solo 'ACTIVO' o 'INACTIVO'
       }
     ];
 
@@ -251,18 +269,18 @@ export class EditReferPersonalesComponent implements OnInit, OnChanges, OnDestro
     });
     dialogRef.afterClosed().subscribe((result: boolean) => {
       if (result) {
-        this.svcAfiliado.eliminarReferenciaPersonal(row.id_ref_personal).subscribe({
-          next: (response) => {
-            this.toastr.success(response.mensaje, 'Referencia Personal Eliminada');
-            this.getFilas(); // Volver a cargar las filas después de eliminar
+        this.svcAfiliacion.inactivarReferencia(row.id_ref_personal).subscribe({
+          next: () => {
+            this.toastr.success('Referencia personal inactivada correctamente.');
+            this.getFilas(); // Volver a cargar las filas después de inactivar
           },
           error: (error) => {
-            console.error('Error al eliminar la referencia personal:', error);
-            this.toastr.error('Error al eliminar la referencia personal.');
+            console.error('Error al inactivar la referencia personal:', error);
+            this.toastr.error('Error al inactivar la referencia personal.');
           }
         });
       } else {
-        console.log('Eliminación cancelada.');
+        console.log('Inactivación cancelada.');
       }
     });
   }

@@ -1,0 +1,81 @@
+<div *ngIf="Afiliado" style="background-color: white; padding: 1%">
+  <h1 style="font-size: 2rem">Datos Generales Afiliado</h1>
+  <div>
+    <table>
+      <tr style="background-color: #f2f2f2">
+        <th>DNI de afiliado</th>
+        <td>{{ Afiliado.dni }}</td>
+        <th>Nombre de afiliado</th>
+        <td>{{ Afiliado.nombreCompleto }}</td>
+        <th>Genero</th>
+        <td>{{ Afiliado.genero }}</td>
+        <th>Dirección de residencia</th>
+        <td>{{ Afiliado.direccion_residencia }}</td>
+        <th>Estado</th>
+        <td>{{ Afiliado.estado }}</td>
+        <th>Fecha nacimiento</th>
+        <td>{{ Afiliado.fecha_nacimiento }}</td>
+        <th>Colegio magisterial</th>
+        <td>{{ Afiliado.colegio_magisterial }}</td>
+      </tr>
+      <tr>
+        <th>Número de carnet</th>
+        <td>{{ Afiliado.numero_carnet }}</td>
+        <th>Profesión</th>
+        <td>{{ Afiliado.profesion }}</td>
+        <th>Teléfono 1</th>
+        <td>{{ Afiliado.telefono_1 }}</td>
+        <th>Salario base</th>
+        <td>{{ Afiliado.salario_base }}</td>
+        <th>Estado civil</th>
+        <td>{{ Afiliado.estado_civil }}</td>
+      </tr>
+    </table>
+  </div>
+</div>
+
+<div
+  style="
+    background-color: white;
+    margin: 1% 0% 1% 0%;
+    padding: 0% 0% 1% 0%;
+    text-align: center;
+  "
+>
+  <app-dynamic-form
+    [fields]="myFormFields"
+    titulo="Buscar Afiliado o Beneficiario Activos"
+    subtitulo="Completa la información correspondiente"
+    (newDatBenChange)="obtenerDatos($event)"
+  ></app-dynamic-form>
+
+  <button
+    mat-raised-button
+    color="primary"
+    style="color: white; margin: 1% 0 1% 0"
+    [disabled]="form.invalid"
+    (click)="previsualizarInfoAfil()"
+  >
+    Previsualizar información del afiliado
+  </button>
+</div>
+
+<div
+  *ngIf="monstrarBeneficios"
+  style="background-color: white; border-radius: 10px; padding: 20px"
+>
+  <app-dynamic-table
+    titulo="Editar Tipo De Ingreso"
+    subtitulo="Completa la información correspondiente"
+    [columns]="myColumns"
+    [data]="filasT"
+    [getData]="getFilas"
+    (ejecutarFuncionAsincronaEvent)="
+      ejecutarFuncionAsincronaDesdeOtroComponente($event)
+    "
+    [mostrarBotonUno]="true"
+    [etiquetaBotonUno]="'Editar'"
+    (accionBotonUno)="manejarAccionUno($event)"
+  >
+  </app-dynamic-table>
+</div>

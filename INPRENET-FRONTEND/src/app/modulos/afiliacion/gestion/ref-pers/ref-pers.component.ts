@@ -1,7 +1,7 @@
 import { FormStateService } from "src/app/services/form-state.service";
 import { DatosEstaticosService } from "src/app/services/datos-estaticos.service";
 import { Component, EventEmitter, Input, OnInit, Output } from "@angular/core";
-import { AbstractControl, FormArray, FormBuilder, FormControl, FormGroup, ValidatorFn, Validators } from "@angular/forms";
+import { FormArray, FormBuilder, FormControl, FormGroup, Validators } from "@angular/forms";
 
 export function generateRefPerFormGroup(datos?: any): FormGroup {
   return new FormGroup({
@@ -60,29 +60,12 @@ export function generateRefPerFormGroup(datos?: any): FormGroup {
     id_tipo_identificacion: new FormControl(datos?.id_tipo_identificacion, [
       Validators.required
     ]),
-    profesion: new FormControl(datos?.profesion, [
-      Validators.maxLength(50),
-      Validators.pattern(/^[^0-9]*$/)
-    ]),
-    discapacidad: new FormControl(datos?.discapacidad, [
-      Validators.maxLength(20),
-    ]),
     parentesco: new FormControl(datos?.parentesco, [
       Validators.required,
       Validators.minLength(2),
       Validators.maxLength(30)
     ]),
-    dependiente_economico: new FormControl(datos?.dependiente_economico, [
-      Validators.required
-    ]),
-    cargoPublico: new FormControl(datos?.cargoPublico, [
-      Validators.required
-    ]),
-    fecha_nacimiento: new FormControl(datos?.fecha_nacimiento),
-    es_afiliado: new FormControl(datos?.es_afiliado || false),
-    trabaja: new FormControl(datos?.trabaja || false),
-    tipo_referencia: new FormControl(datos?.tipo_referencia || false),
-    discapacidades: new FormArray([])
+    tipo_referencia: new FormControl(datos?.tipo_referencia || false)
   });
 }
 
@@ -99,28 +82,10 @@ export class RefPersComponent implements OnInit {
   sexo: any[] = [];
   tipo_referencia: any[] = [];
   tipo_identificacion: any[] = [];
-  tipo_discapacidad: any[] = [];
 
   @Input() nombreComp?: string;
   @Input() datos?: any;
   @Output() newDatRefPerChange = new EventEmitter<any>();
-
-  field = {
-    options: [
-      { value: 'si', label: 'SI' },
-      { value: 'no', label: 'NO' }
-    ]
-  };
-  dependienteEstado = {
-    si: false,
-    no: false
-  };
-  cargoEstado = {
-    si: false,
-    no: false
-  };
-  dependiente_economico: boolean = false;
-  cargoPublico: boolean = false;
 
   onDatosRefPerChange(): void {
     const data = this.formParent.value;
@@ -132,7 +97,6 @@ export class RefPersComponent implements OnInit {
     return refpersArray.map(ref => ({
       tipo_referencia: ref.tipo_referencia,
       parentesco: ref.parentesco,
-      dependiente_economico: ref.dependiente_economico === 'si' ? 'SI' : 'NO',
       persona_referencia: {
         id_tipo_identificacion: ref.id_tipo_identificacion,
         n_identificacion: ref.n_identificacion,
@@ -141,46 +105,12 @@ export class RefPersComponent implements OnInit {
         tercer_nombre: ref.tercer_nombre,
         primer_apellido: ref.primer_apellido,
         segundo_apellido: ref.segundo_apellido,
-        genero: ref.sexo === 'M' ? 'Masculino' : 'Femenino',
         sexo: ref.sexo,
         telefono_1: ref.telefono_personal,
         telefono_2: ref.telefono_trabajo,
         direccion_residencia: ref.direccion,
       }
     }));
-  }
-
-  onDatosGeneralesDiscChange(event: any) {
-    const value = event.value;
-    this.dependienteEstado = {
-      si: value === 'si',
-      no: value === 'no'
-    };
-    this.dependiente_economico = this.dependienteEstado.si;
-  }
-
-  onDatosGeneralesCargoPChange(event: any) {
-    const value = event.value;
-    this.cargoEstado = {
-      si: value === 'si',
-      no: value === 'no'
-    };
-    this.cargoPublico = this.cargoEstado.si;
-  }
-
-  onDiscapacidadChange(i: number, event: any) {
-    const refpersArray = this.formParent.get('refpers') as FormArray;
-    const refpersGroup = refpersArray.controls[i] as FormGroup;
-
-    if (event.value === 'si') {
-      if (!refpersGroup.contains('discapacidades')) {
-        refpersGroup.addControl('discapacidades', new FormArray([]));
-      }
-    } else {
-      if (refpersGroup.contains('discapacidades')) {
-        refpersGroup.removeControl('discapacidades');
-      }
-    }
   }
 
   constructor(private formStateService: FormStateService, private fb: FormBuilder, private datosEstaticosService: DatosEstaticosService) {
@@ -196,16 +126,6 @@ export class RefPersComponent implements OnInit {
       { label: "DNI", value: 1 },
       { label: "CARNET DE RESIDENCIA", value: 2 },
       { label: "PASAPORTE", value: 3 }
-    ];
-    this.tipo_discapacidad = [
-      { label: "MOTRIZ", value: "MOTRIZ" },
-      { label: "AUDITIVA", value: "AUDITIVA" },
-      { label: "VISUAL", value: "VISUAL" },
-      { label: "INTELECTUAL", value: "INTELECTUAL" },
-      { label: "MENTAL", value: "MENTAL" },
-      { label: "PSICOSOCIAL", value: "PSICOSOCIAL" },
-      { label: "MÚLTIPLE", value: "MÚLTIPLE" },
-      { label: "SENSORIAL", value: "SENSORIAL" }
     ];
   }
 
@@ -227,8 +147,6 @@ export class RefPersComponent implements OnInit {
     }
   }
 
-  ngOnDestroy() { }
-
   private initForm() {
     let existingForm = this.formStateService.getForm(this.formKey);
     if (existingForm) {
@@ -243,24 +161,6 @@ export class RefPersComponent implements OnInit {
   agregarRefPer(datos?: any): void {
     const ref_RefPers = this.formParent.get('refpers') as FormArray;
     const formGroup = generateRefPerFormGroup(datos);
-    const tipoControl = formGroup.get('tipo_referencia') as FormControl;
-
-    tipoControl.valueChanges.subscribe(value => {
-      if (value === 'REFERENCIA FAMILIAR') {
-        formGroup.addControl('discapacidad', new FormControl('', Validators.required));
-      } else {
-        formGroup.removeControl('discapacidad');
-      }
-    });
-
-    if (datos) {
-      const discapacidadesArray = formGroup.get('discapacidades') as FormArray;
-      if (datos.discapacidades) {
-        datos.discapacidades.forEach((discapacidad: any) => {
-          discapacidadesArray.push(new FormControl(discapacidad));
-        });
-      }
-    }
 
     ref_RefPers.push(formGroup);
     this.updateAvailableParentesco();
@@ -275,20 +175,6 @@ export class RefPersComponent implements OnInit {
 
   getCtrl(key: string, form: FormGroup): any {
     return form.get(key);
-  }
-
-  addValidation(index: number, key: string): void {
-    const refParent = this.formParent.get('refpers') as FormArray;
-    const refSingle = refParent.at(index).get(key) as FormGroup;
-
-    refSingle.setValidators(
-      [
-        Validators.required,
-        Validators.minLength(2),
-        Validators.maxLength(30)
-      ]
-    );
-    refSingle.updateValueAndValidity();
   }
 
   getErrors(i: number, fieldName: string): any {
@@ -321,12 +207,12 @@ export class RefPersComponent implements OnInit {
     return parentesco === 'CÓNYUGE';
   }
 
-  private existeConyugue(): boolean {
+  existeConyugue(): boolean {
     const refParent = this.formParent.get('refpers') as FormArray;
     return refParent.controls.some(ctrl => ctrl.get('parentesco')?.value === 'CÓNYUGE');
   }
 
-  private updateAvailableParentesco(): void {
+  updateAvailableParentesco(): void {
     if (this.existeConyugue()) {
       this.availableParentesco = this.parentesco.filter((item: any) => item.value !== 'CÓNYUGE');
     } else {
@@ -341,59 +227,5 @@ export class RefPersComponent implements OnInit {
       return this.parentesco;
     }
     return this.availableParentesco;
-  }
-
-  agregarDiscapacidad(i: number) {
-    const refpersArray = this.formParent.get('refpers') as FormArray;
-    const refpersGroup = refpersArray.controls[i] as FormGroup;
-    const discapacidadesArray = refpersGroup.get('discapacidades') as FormArray;
-
-    const newDisabilityControl = new FormControl('', Validators.required);
-
-    discapacidadesArray.push(newDisabilityControl);
-
-    newDisabilityControl.valueChanges.subscribe(() => {
-      discapacidadesArray.controls.forEach((control: AbstractControl, index: number) => {
-        if (control instanceof FormControl) {
-          control.setValidators([
-            Validators.required,
-            this.uniqueDisabilityValidator(discapacidadesArray.value, index)
-          ]);
-          control.updateValueAndValidity({ emitEvent: false });
-        }
-      });
-    });
-  }
-
-  eliminarDiscapacidad(i: number, index: number) {
-    const refpersArray = this.formParent.get('refpers') as FormArray;
-    const refpersGroup = refpersArray.controls[i] as FormGroup;
-    const discapacidadesArray = refpersGroup.get('discapacidades') as FormArray;
-
-    discapacidadesArray.removeAt(index);
-
-    discapacidadesArray.controls.forEach((control: AbstractControl, idx: number) => {
-      if (control instanceof FormControl) {
-        control.setValidators([
-          Validators.required,
-          this.uniqueDisabilityValidator(discapacidadesArray.value, idx)
-        ]);
-        control.updateValueAndValidity({ emitEvent: false });
-      }
-    });
-  }
-
-  uniqueDisabilityValidator(disabilityArray: string[], currentIndex: number): ValidatorFn {
-    return (control: AbstractControl): { [key: string]: any } | null => {
-      const currentValue = control.value;
-      const isDuplicate = disabilityArray.some((val: string, index: number) => index !== currentIndex && val === currentValue);
-
-      return isDuplicate ? { 'duplicateDisability': { value: currentValue } } : null;
-    };
-  }
-
-  getAvailableDisabilities(discapacidadesArray: FormArray, currentIndex: number): { label: string; value: string }[] {
-    const selectedValues = discapacidadesArray.value.map((val: any, index: number) => index !== currentIndex ? val : null);
-    return this.tipo_discapacidad.filter(d => !selectedValues.includes(d.value));
   }
 }

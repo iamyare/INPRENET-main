@@ -24,9 +24,19 @@ getAllDiscapacidades(): Observable<any[]> {
   return this.http.get<any[]>(url);
 }
 
-obtenerReferenciasPorPersona(id: number): Observable<any[]> {
-  const url = `${environment.API_URL}/api/afiliacion/${id}/referencias`;
-  return this.http.get<any[]>(url);
+obtenerReferenciasPorIdentificacion(nIdentificacion: string): Observable<any> {
+  const url = `${environment.API_URL}/api/afiliacion/referencias/${nIdentificacion}`;
+  return this.http.get<any>(url);
+}
+
+inactivarReferencia(idRefPersonal: number): Observable<void> {
+  const url = `${environment.API_URL}/api/afiliacion/referencia/inactivar/${idRefPersonal}`;
+  return this.http.patch<void>(url, {});
+}
+
+agregarReferencias(idPersona: number, referencias: any[]): Observable<any> {
+  const url = `${environment.API_URL}/api/afiliacion/agregar-referencias/${idPersona}`;
+  return this.http.post<any>(url, referencias);
 }
 
 }

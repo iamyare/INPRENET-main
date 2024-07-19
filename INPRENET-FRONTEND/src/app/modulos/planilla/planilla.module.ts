@@ -17,6 +17,16 @@ import { VerPlanillasComponent } from './egresos/ver-planillas/ver-planillas.com
 import { DetallePlanillaDialogComponent } from './egresos/detalle-planilla-dialog/detalle-planilla-dialog.component';
 import { CargarPlanillaPrivadosComponent } from './ingresos/cargar-planilla-privados/cargar-planilla-privados.component';
 import { DocumentosPlanillaComponent } from './egresos/documentosPlanilla/documentosPlanilla.component';
+import { EditarBeneficioComponent } from './egresos/Mantenimiento/editar-beneficio/editar-beneficio.component';
+import { EditarTipoDeduccionComponent } from './egresos/Mantenimiento/editar-tipo-deduccion/editar-tipo-deduccion.component';
+import { EditarTipoPlanillaComponent } from './egresos/Mantenimiento/editar-tipo-planilla/editar-tipo-planilla.component';
+import { NuevoBeneficioComponent } from './egresos/Mantenimiento/nuevo-beneficio/nuevo-beneficio.component';
+import { NuevoTipoDeduccionComponent } from './egresos/Mantenimiento/nuevo-tipo-deduccion/nuevo-tipo-deduccion.component';
+import { NuevoTipoPlanillaComponent } from './egresos/Mantenimiento/nuevo-tipo-planilla/nuevo-tipo-planilla.component';
+import { NuevoBeneficioAfilComponent } from './beneneficios/nuevo-beneficio-afil/nuevo-beneficio-afil.component';
+import { SubirDeduccionesformComponent } from './beneneficios/subir-deduccionesform/subir-deduccionesform.component';
+import { VerEditarBeneficioAfilComponent } from './beneneficios/ver-editar-beneficio-afil/ver-editar-beneficio-afil.component';
+import { VerEditarDeduccionAfilComponent } from './beneneficios/ver-editar-deduccion-afil/ver-editar-deduccion-afil.component';
 
 @NgModule({
   declarations: [
@@ -33,7 +43,17 @@ import { DocumentosPlanillaComponent } from './egresos/documentosPlanilla/docume
     VerPlanillasComponent,
     DetallePlanillaDialogComponent,
     CargarPlanillaPrivadosComponent,
-    DocumentosPlanillaComponent
+    DocumentosPlanillaComponent,
+    EditarBeneficioComponent,
+    EditarTipoDeduccionComponent,
+    EditarTipoPlanillaComponent,
+    NuevoBeneficioComponent,
+    NuevoTipoDeduccionComponent,
+    NuevoTipoPlanillaComponent,
+    NuevoBeneficioAfilComponent,
+    SubirDeduccionesformComponent,
+    VerEditarBeneficioAfilComponent,
+    VerEditarDeduccionAfilComponent
   ],
   imports: [
     CommonModule,

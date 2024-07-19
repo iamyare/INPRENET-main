@@ -1,0 +1,25 @@
+<div
+  style="
+    text-align: center;
+    background-color: white;
+    margin: 1% 0% 1% 0%;
+    padding: 0% 0% 1% 0%;
+  "
+>
+  <app-dynamic-form
+    [fields]="myFormFields"
+    titulo="Datos de Beneficio"
+    subtitulo="Completa la información correspondiente"
+    (newDatBenChange)="obtenerDatos($event)"
+  ></app-dynamic-form>
+
+  <button
+    mat-raised-button
+    [disabled]="form.invalid"
+    (click)="guardarTipoBeneficio()"
+    color="primary"
+    style="margin: 2% 0; color: #ffffff; border-radius: 5px; padding: 10px 20px"
+  >
+    Crear Tipo Beneficio
+  </button>
+</div>

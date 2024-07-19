@@ -11,11 +11,6 @@ export class CrearReferenciaDto {
 
   @IsNotEmpty()
   @IsString()
-  @IsOptional()
-  dependiente_economico?: string;
-
-  @IsNotEmpty()
-  @IsString()
   parentesco: string;
 
   @IsNotEmpty()

@@ -19,10 +19,6 @@ export class PlanillaController {
     @Query('periodoFinalizacion') periodoFinalizacion: string,
     @Query('idTiposPlanilla') idTiposPlanilla: string,
   ): Promise<any[]> {
-    console.log(periodoInicio);
-    console.log(periodoFinalizacion);
-    console.log(idTiposPlanilla);
-    
     const tiposPlanillaArray = idTiposPlanilla.split(',').map(Number);
     return this.planillaService.getBeneficiosConDeduccionesDePLanillaPorMes(
       periodoInicio,

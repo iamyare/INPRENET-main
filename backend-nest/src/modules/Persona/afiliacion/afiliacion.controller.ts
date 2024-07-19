@@ -1,18 +1,36 @@
-import { Body, Controller, Get, HttpException, HttpStatus, NotFoundException, Param, ParseIntPipe, Post, UploadedFile, UseInterceptors } from '@nestjs/common';
+import { Body, Controller, Get, HttpException, HttpStatus, NotFoundException, Param, Patch, Post, UploadedFile, UseInterceptors } from '@nestjs/common';
 import { AfiliacionService } from './afiliacion.service';
 import { net_persona } from '../entities/net_persona.entity';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { CrearDatosDto } from './dtos/crear-datos.dto';
 import { Net_Discapacidad } from '../entities/net_discapacidad.entity';
+import { Net_Ref_Per_Pers } from '../entities/net_ref-per-persona.entity';
+import { CrearReferenciaDto } from './dtos/crear-referencia.dto';
+import { Connection, EntityManager, getConnection, getManager } from 'typeorm';
 
 @Controller('afiliacion')
 export class AfiliacionController {
-  constructor(private readonly afiliacionService: AfiliacionService) {
+  constructor(private readonly afiliacionService: AfiliacionService,private readonly connection: Connection,) {
   }
 
   @Get('referencias/:nIdentificacion')
-  async obtenerReferencias(@Param('nIdentificacion') nIdentificacion: string) {
+  async obtenerReferenciasPorIdentificacion(@Param('nIdentificacion') nIdentificacion: string) {
     return await this.afiliacionService.obtenerReferenciasPorIdentificacion(nIdentificacion);
+  }
+
+  @Patch('referencia/inactivar/:id')
+  async inactivarReferencia(@Param('id') idRefPersonal: number): Promise<void> {
+    return this.afiliacionService.eliminarReferencia(idRefPersonal);
+  }
+
+  @Post('agregar-referencias/:idPersona')
+  async crearReferencia(
+    @Param('idPersona') idPersona: number,
+    @Body() crearReferenciasDtos: CrearReferenciaDto[],
+  ): Promise<Net_Ref_Per_Pers[]> {
+    return await this.connection.transaction(async (entityManager: EntityManager) => {
+      return this.afiliacionService.crearReferencias(crearReferenciasDtos, idPersona, entityManager);
+    });
   }
 
   @Get('discapacidades')

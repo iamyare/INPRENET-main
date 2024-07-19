@@ -338,7 +338,6 @@ export class AfiliacionService {
         persona: { id_persona: idPersona },
         referenciada: personaReferencia,
         tipo_referencia: crearReferenciaDto.tipo_referencia,
-        dependiente_economico: crearReferenciaDto.dependiente_economico,
         parentesco: crearReferenciaDto.parentesco,
       });
 
@@ -522,20 +521,69 @@ export class AfiliacionService {
   }
 
 
-  async obtenerReferenciasPorIdentificacion(nIdentificacion: string): Promise<any> {
+  async obtenerReferenciasPorIdentificacion(nIdentificacion: string) {
     const persona = await this.personaRepository.findOne({
       where: { n_identificacion: nIdentificacion },
-      relations: ['referenciasHechas', 'referenciasHechas.referenciada'],
     });
-
+  
     if (!persona) {
       throw new NotFoundException(`Persona con identificación ${nIdentificacion} no encontrada`);
     }
-
-    return persona.referenciasHechas.map(ref => ({
-      referencia: ref,
-      personaReferenciada: ref.referenciada,
+  
+    const referencias = await this.referenciaRepository.find({
+      where: { persona: { id_persona: persona.id_persona } },
+      relations: ['persona', 'referenciada'],
+    });
+  
+    if (!referencias.length) {
+      throw new NotFoundException(`No se encontraron referencias para la persona con identificación ${nIdentificacion}`);
+    }
+  
+    return referencias.map(ref => ({
+      id_ref: ref.id_ref_personal_afil,
+      id_persona: ref.persona.id_persona,
+      estado: ref.estado,
+      id_referenciada: ref.referenciada.id_persona,
+      tipo_referencia: ref.tipo_referencia,
+      parentesco: ref.parentesco,
+      personaReferenciada: {
+        id_persona: ref.referenciada.id_persona,
+        n_identificacion: ref.referenciada.n_identificacion,
+        fecha_vencimiento_ident: ref.referenciada.fecha_vencimiento_ident,
+        rtn: ref.referenciada.rtn,
+        grupo_etnico: ref.referenciada.grupo_etnico,
+        estado_civil: ref.referenciada.estado_civil,
+        primer_nombre: ref.referenciada.primer_nombre,
+        segundo_nombre: ref.referenciada.segundo_nombre,
+        tercer_nombre: ref.referenciada.tercer_nombre,
+        primer_apellido: ref.referenciada.primer_apellido,
+        segundo_apellido: ref.referenciada.segundo_apellido,
+        genero: ref.referenciada.genero,
+        sexo: ref.referenciada.sexo,
+        cantidad_hijos: ref.referenciada.cantidad_hijos,
+        grado_academico: ref.referenciada.grado_academico,
+        telefono_1: ref.referenciada.telefono_1,
+        telefono_2: ref.referenciada.telefono_2,
+        correo_1: ref.referenciada.correo_1,
+        correo_2: ref.referenciada.correo_2,
+        fecha_nacimiento: ref.referenciada.fecha_nacimiento,
+      },
     }));
   }
+
+  async eliminarReferencia(idRefPersonal: number): Promise<void> {
+    const referencia = await this.referenciaRepository.findOne({
+      where: { id_ref_personal_afil: idRefPersonal },
+    });
+    
+    if (!referencia) {
+      throw new NotFoundException(`Referencia con ID ${idRefPersonal} no encontrada`);
+    }
+
+    referencia.estado = 'INACTIVO';
+    await this.referenciaRepository.save(referencia);
+  }
+  
+  
 }
 

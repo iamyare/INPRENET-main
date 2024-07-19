@@ -90,6 +90,11 @@ export class CrearPersonaDto {
   telefono_2?: string;
 
   @IsOptional()
+  @IsString()
+  telefono_3?: string;
+
+
+  @IsOptional()
   @IsEmail()
   correo_1?: string;
 

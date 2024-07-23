@@ -7,6 +7,7 @@ import { ApiTags } from '@nestjs/swagger';
 import { EntityManager } from 'typeorm';
 import { InjectEntityManager } from '@nestjs/typeorm';
 import { Net_Planilla } from './entities/net_planilla.entity';
+import { GeneratePlanillaDto } from './dto/generate-planilla.dto';
 
 @ApiTags('planilla')
 @Controller('planilla')
@@ -696,5 +697,15 @@ export class PlanillaController {
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.planillaService.remove(+id);
+  }
+
+  @Post('generar-complementaria')
+  async generarComplementaria(@Body() generatePlanillaDto: GeneratePlanillaDto): Promise<void> {
+    await this.planillaService.generarPlanillaComplementaria(generatePlanillaDto.tipos_persona);
+  }
+
+  @Post('generar-ordinaria')
+  async generarOrdinaria(@Body() generatePlanillaDto: GeneratePlanillaDto): Promise<void> {
+    await this.planillaService.generarPlanillaOrdinaria(generatePlanillaDto.tipos_persona);
   }
 }

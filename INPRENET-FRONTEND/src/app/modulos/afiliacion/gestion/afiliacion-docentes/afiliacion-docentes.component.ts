@@ -23,6 +23,7 @@ export class AfiliacionDocentesComponent implements OnInit {
   activeStep = 0;
 
   datosGeneralesForm!: FormGroup;
+  familiaresForm!: FormGroup;
   colegioMagisterialForm!: FormGroup;
   bancosForm!: FormGroup;
   centrosTrabajoForm!: FormGroup;
@@ -31,6 +32,7 @@ export class AfiliacionDocentesComponent implements OnInit {
   benefForm!: FormGroup;
 
   datosGeneralesData: any = {};
+  familiaresData: any = [];
   colegioMagisterialData: any = {};
   bancosData: any = {};
   centrosTrabajoData: any = {};
@@ -42,6 +44,7 @@ export class AfiliacionDocentesComponent implements OnInit {
 
   constructor(private fb: FormBuilder, private afiliacionService: AfiliacionService, private datosEstaticos: DatosEstaticosService) {
     this.datosGeneralesForm = this.fb.group({});
+    this.familiaresForm = this.fb.group({});
     this.colegioMagisterialForm = this.fb.group({});
     this.bancosForm = this.fb.group({});
     this.centrosTrabajoForm = this.fb.group({});
@@ -67,6 +70,9 @@ export class AfiliacionDocentesComponent implements OnInit {
 
   initForms() {
     this.datosGeneralesForm = this.fb.group({});
+    this.familiaresForm = this.fb.group({
+      familiares: this.fb.array([])
+    });
     this.colegioMagisterialForm = this.fb.group({});
     this.bancosForm = this.fb.group({});
     this.centrosTrabajoForm = this.fb.group({});
@@ -83,6 +89,10 @@ export class AfiliacionDocentesComponent implements OnInit {
 
   handleDatosGeneralesChange(data: any): void {
     this.datosGeneralesData = data;
+  }
+
+  handleFamiliaresChange(data: any): void {
+    this.familiaresData = data;
   }
 
   handleOtrasFuentesIngreso(otrasFuentesData: any): void {
@@ -109,6 +119,10 @@ export class AfiliacionDocentesComponent implements OnInit {
     this.datosGeneralesData = formValues;
   }
 
+  onFamiliaresFormUpdate(formValues: any): void {
+    this.familiaresData = formValues;
+  }
+
   onColegioMagisterialFormUpdate(formValues: any): void {
     this.colegioMagisterialData = formValues;
   }
@@ -129,6 +143,13 @@ export class AfiliacionDocentesComponent implements OnInit {
     const selectedDiscapacidades = this.datosGeneralesData.refpers[0].discapacidades
       .map((d: any, index: number) => d ? { id_discapacidad: this.tipoDiscapacidad[index].value } : null)
       .filter((d: any) => d !== null);
+
+    const peps = this.datosGeneralesData.refpers[0].peps.map((pep: any) => ({
+      cargo: pep.pep_cargo_desempenado,
+      fecha_inicio: pep.startDate,
+      fecha_fin: pep.endDate,
+      referencias: pep.observacion
+    }));
 
     const persona = {
       id_tipo_identificacion: this.datosGeneralesData.refpers[0].id_tipo_identificacion,
@@ -159,7 +180,8 @@ export class AfiliacionDocentesComponent implements OnInit {
       id_municipio_nacimiento: this.datosGeneralesData.refpers[0].id_municipio_nacimiento,
       id_profesion: this.datosGeneralesData.refpers[0].id_profesion,
       representacion: this.datosGeneralesData.refpers[0].representacion,
-      discapacidades: selectedDiscapacidades
+      discapacidades: selectedDiscapacidades,
+      peps: peps
     };
 
     const detalle = {
@@ -167,6 +189,18 @@ export class AfiliacionDocentesComponent implements OnInit {
       tipo_persona: "AFILIADO",
       nombre_estado: "ACTIVO"
     };
+
+    const familiares = this.familiaresData.map((familiar: any) => ({
+      parentesco: familiar.parentesco,
+      persona_referencia: {
+        primer_nombre: familiar.primer_nombre,
+        segundo_nombre: familiar.segundo_nombre,
+        tercer_nombre: familiar.tercer_nombre,
+        primer_apellido: familiar.primer_apellido,
+        segundo_apellido: familiar.segundo_apellido,
+        n_identificacion: familiar.n_identificacion
+      }
+    }));
 
     const allData = {
       persona: persona,
@@ -176,7 +210,8 @@ export class AfiliacionDocentesComponent implements OnInit {
       centrosTrabajo: this.centrosTrabajoData.trabajo,
       otrasFuentesIngreso: this.otrasFuentesIngresoData.sociedadSocios,
       referencias: this.refPersData.referencias,
-      beneficiarios: this.benefData?.value?.beneficiarios || []
+      beneficiarios: this.benefData?.value?.beneficiarios || [],
+      familiares: familiares
     };
 
     console.log('Datos Completos:', allData);

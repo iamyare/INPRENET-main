@@ -6,6 +6,7 @@ import { Net_Persona_Por_Banco } from "src/modules/banco/entities/net_persona-ba
 
 @Entity({ name: 'NET_DETALLE_PAGO_BENEFICIO' })
 @Check("CK_ESTADO_DETBEN", `ESTADO IN ('PAGADA', 'NO PAGADA', 'EN PRELIMINAR', 'EN PLANILLA')`)
+@Check("CK_PROCESO", `PROCESO IN ('ORDINARIA - JUBILADOS', 'ORDINARIA - BENEFICIARIOS', 'COMPLEMENTARIA - JUBILADOS', 'COMPLEMENTARIA - BENEFICIARIOS')`)
 export class Net_Detalle_Pago_Beneficio {
     @PrimaryGeneratedColumn({ type: 'int', name: 'ID_BENEFICIO_PLANILLA', primaryKeyConstraintName: 'PK_BENPLAN_DETPLANB' })
     id_beneficio_planilla: number;
@@ -18,6 +19,9 @@ export class Net_Detalle_Pago_Beneficio {
 
     @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true, name: 'MONTO_A_PAGAR' })
     monto_a_pagar: number;
+
+    @Column({ type: 'varchar2', length: 30, nullable: false, name: 'PROCESO' })
+    proceso: string;
 
     @ManyToOne(() => Net_Planilla, planilla => planilla.detallepagobeneficio, { cascade: true })
     @JoinColumn({ name: 'ID_PLANILLA', foreignKeyConstraintName: "FK_ID_PLANILLA_DETPAGBEN" })

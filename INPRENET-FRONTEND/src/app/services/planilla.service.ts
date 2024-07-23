@@ -9,6 +9,26 @@ import { environment } from 'src/environments/environment';
 export class PlanillaService {
   constructor(private http: HttpClient) { }
 
+  generarPlanillaComplementaria(tiposPersona: string): Observable<void> {
+    const url = `${environment.API_URL}/api/planilla/generar-complementaria`;
+    return this.http.post<void>(url, { tipos_persona: tiposPersona }).pipe(
+      catchError(error => {
+        console.error('Error al generar planilla complementaria', error);
+        return throwError(error);
+      })
+    );
+  }
+
+  generarPlanillaOrdinaria(tiposPersona: string): Observable<void> {
+    const url = `${environment.API_URL}/api/planilla/generar-ordinaria`;
+    return this.http.post<void>(url, { tipos_persona: tiposPersona }).pipe(
+      catchError(error => {
+        console.error('Error al generar planilla ordinaria', error);
+        return throwError(error);
+      })
+    );
+  }
+
 
   getTotalesBeneficiosDeducciones(idPlanilla: number): Observable<any> {
     const url = `${environment.API_URL}/api/planilla/totales-beneficios-deducciones/${idPlanilla}`;

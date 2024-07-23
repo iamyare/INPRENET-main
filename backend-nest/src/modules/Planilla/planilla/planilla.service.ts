@@ -15,8 +15,6 @@ import { Net_Deduccion } from '../deduccion/entities/net_deduccion.entity';
 import { Net_Detalle_Beneficio_Afiliado } from '../detalle_beneficio/entities/net_detalle_beneficio_afiliado.entity';
 import { Workbook } from 'exceljs';
 import { Response } from 'express';
-import * as pdfMake from 'pdfmake/build/pdfmake';
-import * as pdfFonts from 'pdfmake/build/vfs_fonts';
 
 
 @Injectable()
@@ -2685,5 +2683,32 @@ ON deducciones."id_afiliado" = beneficios."id_afiliado"
     return await this.planillaRepository.query(query);
   }
   
+  async generarPlanillaComplementaria(tipos_persona: string): Promise<void> {
+    try {
+      await this.entityManager.query(
+        `BEGIN
+           InsertarPlanillaComplementaria(:tipos_persona);
+         END;`,
+        [tipos_persona]
+      );
+    } catch (error) {
+      this.logger.error('Error executing InsertarPlanillaComplementaria procedure', error.stack);
+      throw new InternalServerErrorException('Error executing InsertarPlanillaComplementaria procedure');
+    }
+  }
+
+  async generarPlanillaOrdinaria(tipos_persona: string): Promise<void> {
+    try {
+      await this.entityManager.query(
+        `BEGIN
+           InsertarPlanillaOrdinaria(:tipos_persona);
+         END;`,
+        [tipos_persona]
+      );
+    } catch (error) {
+      this.logger.error('Error executing InsertarPlanillaOrdinaria procedure', error.stack);
+      throw new InternalServerErrorException('Error executing InsertarPlanillaOrdinaria procedure');
+    }
+  }
   
 }

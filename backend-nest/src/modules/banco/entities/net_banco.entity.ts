@@ -10,7 +10,7 @@ export class Net_Banco {
     @Index("UQ_NOMB_BANC_NET_BANCO", { unique: true })
     nombre_banco: string;
 
-    @Column('varchar2', { length: 10, nullable: false, name: 'COD_BANCO' })
+    @Column('varchar2', { length: 20, nullable: false, name: 'COD_BANCO' })
     @Index("UQ_net_banco_cod_banco", { unique: true })
     cod_banco: string;
 

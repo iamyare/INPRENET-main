@@ -11,7 +11,10 @@
   </div>
 
   <div [hidden]="activeStep !== 1">
-    <app-dat-familiares></app-dat-familiares>
+    <app-dat-familiares
+      [parentForm]="familiaresForm"
+      (newDatosFamiliares)="handleFamiliaresChange($event)">
+    </app-dat-familiares>
   </div>
 
   <div [hidden]="activeStep !== 2">

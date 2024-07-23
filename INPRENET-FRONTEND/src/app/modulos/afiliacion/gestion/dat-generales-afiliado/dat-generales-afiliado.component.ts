@@ -6,6 +6,7 @@ import { FormStateService } from 'src/app/services/form-state.service';
 import { TipoIdentificacionService } from 'src/app/services/tipo-identificacion.service';
 import { CentroTrabajoService } from 'src/app/services/centro-trabajo.service';
 import * as moment from 'moment';
+
 const noSpecialCharsPattern = '^[a-zA-Z0-9\\s]*$';
 
 export function generateAddressFormGroup(datos?: any): FormGroup {
@@ -98,6 +99,7 @@ export function generateAddressFormGroup(datos?: any): FormGroup {
     grado_academico: new FormControl(datos?.grado_academico, [
       Validators.maxLength(75)
     ]),
+    peps: new FormArray([])
   });
 }
 
@@ -159,10 +161,10 @@ export class DatGeneralesAfiliadoComponent implements OnInit {
 
   @Input() useCamera: boolean = false;
   @Input() groupName = '';
-  @Input() datos?: any
+  @Input() datos?: any;
   @Output() imageCaptured = new EventEmitter<string>();
-  @Output() newDatBenChange = new EventEmitter<any>()
-  @Output() newDatosGenerales = new EventEmitter<any>()
+  @Output() newDatosGenerales = new EventEmitter<any>();
+  @Output() pepsDataChange = new EventEmitter<any>();
   private formKey = 'datGenForm';
 
   field = {
@@ -225,7 +227,7 @@ export class DatGeneralesAfiliadoComponent implements OnInit {
   }
 
   onDatosBenChange(fecha: any) {
-    this.newDatBenChange.emit(fecha._model.selection);
+    this.pepsDataChange.emit(fecha._model.selection);
   }
 
   constructor(
@@ -269,6 +271,18 @@ export class DatGeneralesAfiliadoComponent implements OnInit {
         if (i.discapacidades) {
           i.discapacidades.forEach((discapacidad: any) => {
             discapacidadesArray.push(new FormControl(discapacidad));
+          });
+        }
+        if (i.peps) {
+          const pepsArray = addressGroup.get('peps') as FormArray;
+          i.peps.forEach((pep: any) => {
+            const pepGroup = this.fb.group({
+              pep_cargo_desempenado: [pep.pep_cargo_desempenado, Validators.required],
+              startDate: [pep.startDate, Validators.required],
+              endDate: [pep.endDate, Validators.required],
+              observacion: [pep.observacion, Validators.required]
+            });
+            pepsArray.push(pepGroup);
           });
         }
         ref_RefPers.push(addressGroup);

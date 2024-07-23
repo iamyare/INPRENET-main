@@ -78,6 +78,8 @@ export class AsignacionAfilPlanComponent implements OnInit {
   /* Se ejecuta cuando un valor del formulario cambia */
   obtenerDatosForm(event: any): any {
     this.datosFormateados = event;
+    console.log(event);
+
   }
 
   /* Se ejecuta cuando da click en previsualizar datos planilla */

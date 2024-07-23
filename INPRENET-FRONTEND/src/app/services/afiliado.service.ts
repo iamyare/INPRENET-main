@@ -245,6 +245,16 @@ export class AfiliadoService {
       })
     );
   }
+  getAfilByDni(param: string | number): Observable<any | void> {
+    const url = `${environment.API_URL}/api/Persona/Afil/${param}`;
+    return this.http.get<any>(
+      url,
+    ).pipe(
+      map((res: any) => {
+        return res;
+      })
+    );
+  }
 
   getAllPersonas(param: string | number): Observable<any | void> {
     const url = `${environment.API_URL}/api/Persona/${param}`;

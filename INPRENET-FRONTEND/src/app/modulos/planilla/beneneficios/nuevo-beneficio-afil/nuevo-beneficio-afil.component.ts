@@ -7,6 +7,7 @@ import { FieldConfig } from 'src/app/shared/Interfaces/field-config';
 import { format } from 'date-fns';
 import { unirNombres } from '../../../../shared/functions/formatoNombresP';
 import { DynamicFormComponent } from 'src/app/components/dinamicos/dynamic-form/dynamic-form.component';
+import { convertirFecha } from 'src/app/shared/functions/formatoFecha';
 @Component({
   selector: 'app-nuevo-beneficio-afil',
   templateUrl: './nuevo-beneficio-afil.component.html',
@@ -60,13 +61,13 @@ export class NuevoBeneficioAfilComponent implements OnInit {
         validations: [Validators.required], display: true
       },
       {
-        type: 'dropdown', label: 'Metodo de pago', name: 'metodo_pago',
-        options: [{ label: 'Cheque', value: 'Cheque' }, { label: 'Transferencia', value: 'Transferencia' }], validations: [Validators.required], display: true
+        type: 'dropdown', label: 'Método de pago', name: 'metodo_pago',
+        options: [{ label: 'TRANSFERENCIA', value: 'TRANSFERENCIA' }], validations: [Validators.required], display: true
       },
       { type: 'number', label: 'Monto total', name: 'monto_total', validations: [Validators.required], display: true },
       { type: 'number', label: 'Monto por periodo', name: 'monto_por_periodo', validations: [Validators.required], display: true },
       { type: 'daterange', label: 'Periodo', name: 'periodo', validations: [], display: false },
-      { type: 'text', label: 'Ley Aplicable', name: 'ley_aplicable', validations: [], display: true },
+      /* { type: 'text', label: 'Ley Aplicable', name: 'ley_aplicable', validations: [], display: true }, */
     ];
 
     this.myFormFields2 = [
@@ -77,8 +78,8 @@ export class NuevoBeneficioAfilComponent implements OnInit {
         validations: [Validators.required], display: true
       },
       {
-        type: 'dropdown', label: 'Metodo de pago', name: 'metodo_pago',
-        options: [{ label: 'Cheque', value: 'Cheque' }, { label: 'Transferencia', value: 'Transferencia' }], validations: [Validators.required], display: true
+        type: 'dropdown', label: 'Método de pago', name: 'metodo_pago',
+        options: [{ label: 'TRANSFERENCIA', value: 'TRANSFERENCIA' }], validations: [Validators.required], display: true
       },
       { type: 'number', label: 'Monto total', name: 'monto_total', validations: [Validators.required], display: true },
       { type: 'number', label: 'Monto por periodo', name: 'monto_por_periodo', validations: [Validators.required], display: true },
@@ -356,10 +357,30 @@ export class NuevoBeneficioAfilComponent implements OnInit {
     this.Afiliado.nameAfil = ""
     if (this.form.value.dni) {
 
-      this.svcAfilServ.getAfilByParam(this.form.value.dni).subscribe(
-        async (result) => {
-          this.Afiliado = result
-          this.Afiliado.nameAfil = this.unirNombres(result.PRIMER_NOMBRE, result.SEGUNDO_NOMBRE, result.TERCER_NOMBRE, result.PRIMER_APELLIDO, result.SEGUNDO_APELLIDO);
+      this.svcAfilServ.getAfilByDni(this.form.value.dni).subscribe(
+        async (res) => {
+          const item = {
+            dni: res.N_IDENTIFICACION,
+            fallecido: res.FALLECIDO,
+            estado_persona: res.ESTADO_PERSONA,
+            tipo_persona: res.TIPO_PERSONA,
+            estado_civil: res.ESTADO_CIVIL,
+            nombreCompleto: unirNombres(res.PRIMER_NOMBRE, res.SEGUNDO_NOMBRE, res.PRIMER_APELLIDO, res.SEGUNDO_APELLIDO),
+            genero: res.GENERO,
+            profesion: res.PROFESION,
+            telefono_1: res.TELEFONO_1,
+            colegio_magisterial: res.COLEGIO_MAGISTERIAL,
+            numero_carnet: res.NUMERO_CARNET,
+            direccion_residencia: res.DIRECCION_RESIDENCIA,
+            estado: res.ESTADO,
+            salario_base: res.SALARIO_BASE,
+            fecha_nacimiento: convertirFecha(res.FECHA_NACIMIENTO, false)
+          }
+
+          console.log(item);
+          this.Afiliado = item;
+
+          this.Afiliado.nameAfil = this.unirNombres(res.PRIMER_NOMBRE, res.SEGUNDO_NOMBRE, res.TERCER_NOMBRE, res.PRIMER_APELLIDO, res.SEGUNDO_APELLIDO);
           //this.getBeneficios().then(() => this.cargar());
           this.getFilas().then(() => this.cargar());
         },
@@ -384,8 +405,11 @@ export class NuevoBeneficioAfilComponent implements OnInit {
   guardarNTBenef() {
     /* Asignar al afiliado si no ha fallecido */
     /* Asignar a los beneficioarios si el afiliado ya fallecio */
-    if (this.Afiliado.ESTADO != "FALLECIDO") {
-      this.datosFormateados["dni"] = this.form.value.dni;
+
+    console.log(this.Afiliado);
+
+    if (this.Afiliado.fallecido != "SI") {
+      /* this.datosFormateados["dni"] = this.form.value.dni;
       this.svcBeneficioServ.asigBeneficioAfil(this.datosFormateados).subscribe(
         {
           next: (response) => {
@@ -404,9 +428,9 @@ export class NuevoBeneficioAfilComponent implements OnInit {
             }
             this.toastr.error(mensajeError);
           }
-        })
+        }) */
     } else {
-      this.datosFormateados["dni"] = this.FormBen.value.dni;
+      /* this.datosFormateados["dni"] = this.FormBen.value.dni;
       this.svcBeneficioServ.asigBeneficioAfil(this.datosFormateados, this.Afiliado.id_persona).subscribe(
         {
           next: (response) => {
@@ -424,7 +448,7 @@ export class NuevoBeneficioAfilComponent implements OnInit {
             }
             this.toastr.error(mensajeError);
           }
-        })
+        }) */
 
     }
   }

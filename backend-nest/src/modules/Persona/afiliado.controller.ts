@@ -420,6 +420,11 @@ export class AfiliadoController {
     return this.afiliadoService.findOnePersona(term);
   }
 
+  @Get('Afil/:term')
+  findOneAFiliado(@Param('term') term: string) {
+    return this.afiliadoService.findOneAFiliado(term);
+  }
+
   @Get('Afiliado/:term')
   findOne(@Param('term') term: string) {
     return this.afiliadoService.findOne(term);

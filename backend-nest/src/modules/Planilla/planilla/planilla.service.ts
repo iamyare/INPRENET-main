@@ -23,23 +23,28 @@ export class PlanillaService {
 
   constructor(
     @InjectEntityManager() private entityManager: EntityManager,
-    @InjectRepository(Net_Detalle_Pago_Beneficio)
-    private detalleBeneficioRepository: Repository<Net_Detalle_Pago_Beneficio>,
-    @InjectRepository(net_persona)
-    private personaRepository: Repository<net_persona>,
+
     @InjectRepository(Net_Planilla)
     private planillaRepository: Repository<Net_Planilla>,
+
+    @InjectRepository(net_persona)
+    private personaRepository: Repository<net_persona>,
+
+    @InjectRepository(Net_Detalle_Pago_Beneficio)
+    private detallePagBeneficios: Repository<Net_Detalle_Pago_Beneficio>,
+
     @InjectRepository(Net_TipoPlanilla)
     private tipoPlanillaRepository: Repository<Net_TipoPlanilla>,
-    private detalleBeneficioService: DetalleBeneficioService,
-    @InjectRepository(Net_Detalle_Beneficio_Afiliado)
-    private readonly detalleBeneficioAfiliadoRepository: Repository<Net_Detalle_Beneficio_Afiliado>,
-    @InjectRepository(Net_Detalle_Pago_Beneficio)
-    private readonly detallePagoBeneficioRepository: Repository<Net_Detalle_Pago_Beneficio>,
+
     @InjectRepository(Net_Detalle_Deduccion)
     private readonly detalleDeduccionRepository: Repository<Net_Detalle_Deduccion>,
+
+    @InjectRepository(Net_Detalle_Beneficio_Afiliado)
+    private readonly detalleBenAfilRepository: Repository<Net_Detalle_Beneficio_Afiliado>,
+
     @InjectRepository(Net_Deduccion)
-    private readonly deduccionRepository: Repository<Net_Deduccion>,) {
+    private readonly deduccionRepository: Repository<Net_Deduccion>,
+  ) {
   };
 
   async getBeneficiosAgrupadosPorPlanilla(idPlanilla: number): Promise<any> {
@@ -73,7 +78,7 @@ export class PlanillaService {
       throw new InternalServerErrorException('Se produjo un error al obtener los beneficios agrupados por planilla.');
     }
   }
-  
+
 
   async findOne(codigoPlanilla: string): Promise<Net_Planilla | undefined> {
     const planilla = await this.planillaRepository.findOne({
@@ -1181,38 +1186,38 @@ WHERE
   }
 
   async GetBeneficiosPorPlanilla(idPlanilla: number) {
-    return this.detallePagoBeneficioRepository
-        .createQueryBuilder('detalle_pago')
-        .innerJoin('detalle_pago.detalleBeneficioAfiliado', 'detalleBeneficioAfiliado')
-        .innerJoin('detalleBeneficioAfiliado.beneficio', 'beneficio')
-        .select('beneficio.id_beneficio', 'ID_BENEFICIO')
-        .addSelect('beneficio.nombre_beneficio', 'NOMBRE_BENEFICIO')
-        .addSelect('beneficio.codigo', 'CODIGO_BENEFICIO')
-        .addSelect('SUM(detalle_pago.monto_a_pagar)', 'TOTAL_MONTO_BENEFICIO')
-        .where('detalle_pago.planilla.id_planilla = :idPlanilla', { idPlanilla })
-        .groupBy('beneficio.id_beneficio')
-        .addGroupBy('beneficio.nombre_beneficio')
-        .addGroupBy('beneficio.codigo')
-        .getRawMany();
-}
+    return this.detallePagBeneficios
+      .createQueryBuilder('detalle_pago')
+      .innerJoin('detalle_pago.detalleBeneficioAfiliado', 'detalleBeneficioAfiliado')
+      .innerJoin('detalleBeneficioAfiliado.beneficio', 'beneficio')
+      .select('beneficio.id_beneficio', 'ID_BENEFICIO')
+      .addSelect('beneficio.nombre_beneficio', 'NOMBRE_BENEFICIO')
+      .addSelect('beneficio.codigo', 'CODIGO_BENEFICIO')
+      .addSelect('SUM(detalle_pago.monto_a_pagar)', 'TOTAL_MONTO_BENEFICIO')
+      .where('detalle_pago.planilla.id_planilla = :idPlanilla', { idPlanilla })
+      .groupBy('beneficio.id_beneficio')
+      .addGroupBy('beneficio.nombre_beneficio')
+      .addGroupBy('beneficio.codigo')
+      .getRawMany();
+  }
 
 
   async GetDeduccionesPorPlanilla(idPlanilla: number) {
     return this.detalleDeduccionRepository
-        .createQueryBuilder('detalle_deduccion')
-        .innerJoin('detalle_deduccion.deduccion', 'deduccion')
-        .innerJoin('detalle_deduccion.detalle_pago_beneficio', 'detalle_pago_beneficio')
-        .innerJoin('detalle_pago_beneficio.planilla', 'planilla')
-        .select('deduccion.id_deduccion', 'ID_DEDUCCION')
-        .addSelect('deduccion.nombre_deduccion', 'NOMBRE_DEDUCCION')
-        .addSelect('deduccion.codigo_deduccion', 'CODIGO_DEDUCCION')
-        .addSelect('SUM(detalle_deduccion.monto_aplicado)', 'TOTAL_MONTO_APLICADO')
-        .where('planilla.id_planilla = :idPlanilla', { idPlanilla })
-        .groupBy('deduccion.id_deduccion')
-        .addGroupBy('deduccion.nombre_deduccion')
-        .addGroupBy('deduccion.codigo_deduccion')
-        .getRawMany();
-}
+      .createQueryBuilder('detalle_deduccion')
+      .innerJoin('detalle_deduccion.deduccion', 'deduccion')
+      .innerJoin('detalle_deduccion.detalle_pago_beneficio', 'detalle_pago_beneficio')
+      .innerJoin('detalle_pago_beneficio.planilla', 'planilla')
+      .select('deduccion.id_deduccion', 'ID_DEDUCCION')
+      .addSelect('deduccion.nombre_deduccion', 'NOMBRE_DEDUCCION')
+      .addSelect('deduccion.codigo_deduccion', 'CODIGO_DEDUCCION')
+      .addSelect('SUM(detalle_deduccion.monto_aplicado)', 'TOTAL_MONTO_APLICADO')
+      .where('planilla.id_planilla = :idPlanilla', { idPlanilla })
+      .groupBy('deduccion.id_deduccion')
+      .addGroupBy('deduccion.nombre_deduccion')
+      .addGroupBy('deduccion.codigo_deduccion')
+      .getRawMany();
+  }
 
 
 
@@ -1255,72 +1260,6 @@ WHERE
           'detallePersona.detalleBeneficio.detallePagBeneficio.planilla']
       })
 
-      /* const beneficios = await this.entityManager.query(
-        `SELECT DISTINCT
-          ben."NOMBRE_BENEFICIO",
-          detP."ID_PERSONA",
-          detP."ID_CAUSANTE",
-          detBA."ID_BENEFICIO",
-          detBs."MONTO_A_PAGAR" AS "MontoAPagar",
-          detBs."ESTADO",
-          detBA."METODO_PAGO",
-          detBs."ID_PLANILLA",
-          detBA."NUM_RENTAS_APLICADAS",
-          plan."PERIODO_INICIO",
-          plan."PERIODO_FINALIZACION",
-          detDed."MONTO_APLICADO",
-          detDed."ID_DEDUCCION",
-          ded."NOMBRE_DEDUCCION",
-          banco."NOMBRE_BANCO",
-          persPorBanco."NUM_CUENTA"
-          
-          FROM 
-              "NET_DETALLE_PAGO_BENEFICIO" detBs
-          JOIN 
-              "NET_PLANILLA" plan
-          ON 
-              plan."ID_PLANILLA" = detBs."ID_PLANILLA"
-          
-          FULL OUTER JOIN 
-              "NET_DETALLE_DEDUCCION" detDed
-          ON 
-              detBs."ID_BENEFICIO_PLANILLA" = detDed."ID_DETALLE_PAGO_BENEFICIO"
-          FULL OUTER JOIN 
-              "NET_DEDUCCION" ded
-          ON 
-              ded."ID_DEDUCCION" = detDed."ID_DEDUCCION"
-          
-          JOIN 
-              "NET_DETALLE_BENEFICIO_AFILIADO" detBA
-          ON 
-              detBs."ID_DETALLE_PERSONA" = detBA."ID_DETALLE_PERSONA" 
-              AND detBs."ID_PERSONA" = detBA."ID_PERSONA"
-              AND detBs."ID_CAUSANTE" = detBA."ID_CAUSANTE"
-              AND detBs."ID_BENEFICIO" = detBA."ID_BENEFICIO"
-          JOIN 
-              "NET_BENEFICIO" ben
-          ON 
-              detBA."ID_BENEFICIO" = ben."ID_BENEFICIO"
-          
-          LEFT JOIN 
-              "NET_PERSONA_POR_BANCO" persPorBanco 
-          ON 
-              pers."ID_PERSONA" = persPorBanco."ID_PERSONA" 
-          LEFT JOIN 
-              "NET_BANCO" banco 
-          ON 
-              banco."ID_BANCO" = persPorBanco."ID_BANCO"
-          
-          LEFT JOIN "NET_DETALLE_PAGO_BENEFICIO" persona 
-          ON 
-              detPagBen."ID_AF_BANCO" = persPorBanco."ID_AF_BANCO"
-          
-          WHERE
-                  detBs."ESTADO" = 'PAGADA' AND
-                  detBs."ID_PLANILLA" = ${idPlanilla} AND 
-                  pers."N_IDENTIFICACION" = '${dni}' AND
-                  persPorBanco."ESTADO" = 'ACTIVO'`
-      ); */
 
       return { persona };
     } catch (error) {
@@ -1338,7 +1277,7 @@ WHERE
       throw new NotFoundException(`Planilla con ID ${id_planilla} no encontrada`);
     }
 
-    const totalBeneficios = await this.detallePagoBeneficioRepository
+    const totalBeneficios = await this.detallePagBeneficios
       .createQueryBuilder('detallePagoBeneficio')
       .select('SUM(detallePagoBeneficio.monto_a_pagar)', 'totalBeneficios')
       .where('detallePagoBeneficio.planilla.id_planilla = :id_planilla', { id_planilla })
@@ -1346,10 +1285,12 @@ WHERE
 
     const totalDeducciones = await this.detalleDeduccionRepository
       .createQueryBuilder('detalleDeduccion')
-      .leftJoin(Net_Detalle_Pago_Beneficio, 'detallePagoB', 'detallePagoB.ID_BENEFICIO_PLANILLA = detalleDeduccion.ID_DETALLE_PAGO_BENEFICIO')
+      .leftJoin(Net_Detalle_Pago_Beneficio,
+        'detallePagoB',
+        'detallePagoB.ID_BENEFICIO_PLANILLA = detalleDeduccion.ID_DETALLE_PAGO_BENEFICIO')
       .innerJoin(Net_Planilla, 'plan', 'plan.ID_PLANILLA = detallePagoB.ID_PLANILLA')
       .select('SUM(detalleDeduccion.monto_aplicado)', 'totalDeducciones')
-      .where('plan.id_planilla = :id_planilla', { id_planilla })
+      .where('plan.ID_PLANILLA = :id_planilla', { id_planilla })
       .getRawOne();
 
 
@@ -1567,6 +1508,7 @@ WHERE
     let query = `
               SELECT DISTINCT
             per."N_IDENTIFICACION" AS "DNI",
+            tipoP."TIPO_PERSONA" AS "TIPO_PERSONA",
             per."ID_PERSONA",
             perPorBan."NUM_CUENTA",
             banco."NOMBRE_BANCO",
@@ -1603,6 +1545,10 @@ WHERE
             AND detBA."ID_DETALLE_PERSONA" = detP."ID_DETALLE_PERSONA"
             AND detBA."ID_CAUSANTE" = detP."ID_CAUSANTE"
         JOIN 
+            "NET_TIPO_PERSONA" tipoP
+        ON 
+            detP."ID_TIPO_PERSONA" = tipoP."ID_TIPO_PERSONA"
+        JOIN 
             "NET_PERSONA" per
         ON 
             per."ID_PERSONA" = detP."ID_PERSONA"
@@ -1622,6 +1568,7 @@ WHERE
         GROUP BY 
         per."N_IDENTIFICACION",
         per."ID_PERSONA",
+        tipoP."TIPO_PERSONA",
         perPorBan."NUM_CUENTA",
         banco."NOMBRE_BANCO",
             TRIM(
@@ -1760,28 +1707,28 @@ WHERE
 
   async GetDeduccionesPorPlanillaSeparadas(idPlanilla: number) {
     const deducciones = await this.detalleDeduccionRepository
-        .createQueryBuilder('detalle_deduccion')
-        .innerJoin('detalle_deduccion.deduccion', 'deduccion')
-        .innerJoin('detalle_deduccion.detalle_pago_beneficio', 'detalle_pago_beneficio')
-        .innerJoin('detalle_pago_beneficio.planilla', 'planilla')
-        .select('deduccion.id_deduccion', 'ID_DEDUCCION')
-        .addSelect('deduccion.nombre_deduccion', 'NOMBRE_DEDUCCION')
-        .addSelect('deduccion.codigo_deduccion', 'COD_DEDUCCION')
-        .addSelect('SUM(detalle_deduccion.monto_aplicado)', 'TOTAL_MONTO_APLICADO')
-        .where('planilla.id_planilla = :idPlanilla', { idPlanilla })
-        .groupBy('deduccion.id_deduccion')
-        .addGroupBy('deduccion.nombre_deduccion')
-        .addGroupBy('deduccion.codigo_deduccion')
-        .getRawMany();
+      .createQueryBuilder('detalle_deduccion')
+      .innerJoin('detalle_deduccion.deduccion', 'deduccion')
+      .innerJoin('detalle_deduccion.detalle_pago_beneficio', 'detalle_pago_beneficio')
+      .innerJoin('detalle_pago_beneficio.planilla', 'planilla')
+      .select('deduccion.id_deduccion', 'ID_DEDUCCION')
+      .addSelect('deduccion.nombre_deduccion', 'NOMBRE_DEDUCCION')
+      .addSelect('deduccion.codigo_deduccion', 'COD_DEDUCCION')
+      .addSelect('SUM(detalle_deduccion.monto_aplicado)', 'TOTAL_MONTO_APLICADO')
+      .where('planilla.id_planilla = :idPlanilla', { idPlanilla })
+      .groupBy('deduccion.id_deduccion')
+      .addGroupBy('deduccion.nombre_deduccion')
+      .addGroupBy('deduccion.codigo_deduccion')
+      .getRawMany();
 
     const deduccionesINPREMA = deducciones.filter(d => [1, 3, 51, 45].includes(d.ID_DEDUCCION));
     const deduccionesTerceros = deducciones.filter(d => ![1, 3, 51, 45].includes(d.ID_DEDUCCION));
 
     return {
-        deduccionesINPREMA,
-        deduccionesTerceros,
+      deduccionesINPREMA,
+      deduccionesTerceros,
     };
-}
+  }
 
 
 
@@ -2441,7 +2388,7 @@ ON deducciones."id_afiliado" = beneficios."id_afiliado"
   }
 
   async getBeneficiosNoAplicados(periodoInicio: string, periodoFinalizacion: string): Promise<any> {
-    const resultado = await this.detalleBeneficioRepository
+    const resultado = await this.detallePagBeneficios
       .createQueryBuilder('detBen')
       .select('detBen.id_afiliado', 'id_afiliado')
       .select('detBen.id_beneficio', 'id_beneficio')
@@ -2597,7 +2544,7 @@ ON deducciones."id_afiliado" = beneficios."id_afiliado"
       console.error('Error al obtener los totales de beneficios y deducciones:', error);
       throw new InternalServerErrorException('Error al obtener los totales de beneficios y deducciones');
     }
-  } 
+  }
 
   async getBeneficiosConDeduccionesDePLanillaPorMes(
     periodoInicio: string,
@@ -2679,10 +2626,10 @@ ON deducciones."id_afiliado" = beneficios."id_afiliado"
         ben."NOMBRE_BENEFICIO", 
         ben."CODIGO"
     `;
-    
+
     return await this.planillaRepository.query(query);
   }
-  
+
   async generarPlanillaComplementaria(tipos_persona: string): Promise<void> {
     try {
       await this.entityManager.query(
@@ -2710,5 +2657,5 @@ ON deducciones."id_afiliado" = beneficios."id_afiliado"
       throw new InternalServerErrorException('Error executing InsertarPlanillaOrdinaria procedure');
     }
   }
-  
+
 }

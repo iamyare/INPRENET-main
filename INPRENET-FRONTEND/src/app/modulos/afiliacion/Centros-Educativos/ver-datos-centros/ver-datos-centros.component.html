@@ -11,11 +11,16 @@
     </div>
 
     <div *ngIf="mostrar && activeStep == 1">
-        <app-admin-centro-educativo [parentForm]="adminCentroEducativoForm"></app-admin-centro-educativo>
+        <app-datos-propietario [parentForm]="datosPropietario"
+            (formUpdated)="onDatosGeneralesFormUpdate1($event)"></app-datos-propietario>
+        <app-datos-administrador [parentForm]="datosAdministrador"
+            (formUpdated)="onDatosGeneralesFormUpdate2($event)"></app-datos-administrador>
+        <app-datos-contador [parentForm]="datosContador"
+            (formUpdated)="onDatosGeneralesFormUpdate3($event)"></app-datos-contador>
     </div>
 
-    <div *ngIf="mostrar && activeStep=== 2">
-        <app-ver-referencias [parentForm]="datosGeneralesData"></app-ver-referencias>
+    <div *ngIf="mostrar && activeStep === 2">
+        <app-ver-referencias [parentForm]="datosGeneralesData" [idCentroT]=1></app-ver-referencias>
     </div>
 
     <div [hidden]="activeStep !== 3">

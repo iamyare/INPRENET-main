@@ -1,5 +1,6 @@
 import { ChangeDetectionStrategy, Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { FormArray, FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
+import { CentroTrabajoService } from 'src/app/services/centro-trabajo.service';
 import { DatosEstaticosService } from 'src/app/services/datos-estaticos.service';
 import { DireccionService } from 'src/app/services/direccion.service';
 import { FieldConfig } from 'src/app/shared/Interfaces/field-config';
@@ -12,12 +13,17 @@ import { FieldConfig } from 'src/app/shared/Interfaces/field-config';
 })
 export class AdminCentroEducativoComponent implements OnInit {
   @Input() parentForm!: FormGroup;
+  @Input() datosGen!: any;
+  @Input() datosPropietario!: FormGroup;
+  @Input() datosAdministrador!: FormGroup;
+  @Input() datosContador!: FormGroup;
+  @Output() formUpdated = new EventEmitter<any>();
+
   departamentos: any = [];
   municipios: any = [];
-  @Output() formUpdated = new EventEmitter<any>();
   parentFormIsExist: boolean = false;
 
-  constructor(private fb: FormBuilder, private datosEstaticosService: DatosEstaticosService, private direccionService: DireccionService) { }
+  constructor(private fb: FormBuilder, private datosEstaticosService: DatosEstaticosService, private direccionService: DireccionService, private centroTrabajoSVC: CentroTrabajoService) { }
 
 
   fields: FieldConfig[] = [
@@ -245,16 +251,16 @@ export class AdminCentroEducativoComponent implements OnInit {
     },
   ];
 
+
   async ngOnInit() {
     this.parentForm = this.fb.group({});
     await this.loadDepartamentos();
-
 
     if (this.fields) {
       this.addControlsToForm();
     }
     this.parentForm.valueChanges.subscribe(value => {
-      this.formUpdated.emit(this.convertNumberFields(value));
+      /* this.formUpdated.emit(this.convertNumberFields(value)); */
     });
   }
 
@@ -265,7 +271,6 @@ export class AdminCentroEducativoComponent implements OnInit {
       departamentoField.options = departamentos;
     }
   }
-
 
   addControlsToForm() {
     this.fields.forEach((field: any) => {
@@ -296,7 +301,6 @@ export class AdminCentroEducativoComponent implements OnInit {
         this.parentForm.value[field.name] = Number(this.parentForm.value[field.name]);
       }
     });
-
     return form;
   }
 
@@ -318,6 +322,32 @@ export class AdminCentroEducativoComponent implements OnInit {
     if (municipioControl) {
       municipioControl.setValue(null);
     }
+  }
+
+
+  async onDatosPropietarioFormUpdate(formData: FormGroup): Promise<void> {
+    this.handleSearchResultProp(formData);
+  }
+
+  async handleSearchResultProp(formData: FormGroup): Promise<void> {
+    this.datosPropietario = formData;
+
+  }
+
+  async onDatosAdministradorFormUpdate(formData: FormGroup): Promise<void> {
+    this.handleSearchResultAdm(formData);
+  }
+
+  handleSearchResultAdm(formData: FormGroup) {
+    this.datosAdministrador = formData
+  }
+
+  async onDatosContadorFormUpdate(formData: FormGroup): Promise<void> {
+    this.handleSearchResultCont(formData);
+  }
+
+  handleSearchResultCont(form: any) {
+    this.datosContador = form
   }
 
 }

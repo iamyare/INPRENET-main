@@ -6,11 +6,11 @@ export class Net_Banco {
     @PrimaryGeneratedColumn({ type: 'int', name: 'ID_BANCO', primaryKeyConstraintName: 'PK_id_banco_Banco' })
     id_banco: number;
 
-    @Column('varchar2', { length: 50, nullable: true, name: 'NOMBRE_BANCO' })
+    @Column('varchar2', { length: 80, nullable: true, name: 'NOMBRE_BANCO' })
     @Index("UQ_NOMB_BANC_NET_BANCO", { unique: true })
     nombre_banco: string;
 
-    @Column('varchar2', { length: 20, nullable: false, name: 'COD_BANCO' })
+    @Column('varchar2', { length: 80, nullable: true, name: 'COD_BANCO' })
     @Index("UQ_net_banco_cod_banco", { unique: true })
     cod_banco: string;
 

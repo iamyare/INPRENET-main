@@ -176,6 +176,41 @@ export class CentroTrabajoService {
     }
   }
 
+  async getPropietarioByCentro(idCentroTrabajo: number): Promise<any> {
+    try {
+      const result = await this.centroTrabajoRepository.findOne(
+        {
+          where: { empleadoCentroTrabajos: { centroTrabajo: { id_centro_trabajo: idCentroTrabajo }, nombrePuesto: "PROPIETARIO" } }, relations: ['empleadoCentroTrabajos', 'empleadoCentroTrabajos.centroTrabajo', 'empleadoCentroTrabajos.empleado']
+        });
+      return result
+    } catch (error) {
+      this.handleException(error);
+    }
+  }
+  async getAdministradorByCentro(idCentroTrabajo: number): Promise<any> {
+    try {
+      const result = await this.centroTrabajoRepository.findOne(
+        {
+          where: { empleadoCentroTrabajos: { centroTrabajo: { id_centro_trabajo: idCentroTrabajo }, nombrePuesto: "ADMINISTRADOR" } }, relations: ['empleadoCentroTrabajos', 'empleadoCentroTrabajos.centroTrabajo', 'empleadoCentroTrabajos.empleado']
+        });
+      return result
+
+    } catch (error) {
+      this.handleException(error);
+    }
+  }
+  async getContadorByCentro(idCentroTrabajo: number): Promise<any> {
+    console.log(idCentroTrabajo);
+    try {
+      const result = await this.centroTrabajoRepository.findOne(
+        {
+          where: { empleadoCentroTrabajos: { centroTrabajo: { id_centro_trabajo: idCentroTrabajo }, nombrePuesto: "CONTADOR" } }, relations: ['empleadoCentroTrabajos', 'empleadoCentroTrabajos.centroTrabajo', 'empleadoCentroTrabajos.empleado']
+        });
+      return result
+    } catch (error) {
+      this.handleException(error);
+    }
+  }
   async getAllReferenciasByCentro(idCentroTrabajo: number): Promise<any> {
     try {
       return await this.refcentroTrabajoRepository.find({ where: { centroTrabajo: { id_centro_trabajo: idCentroTrabajo } } });

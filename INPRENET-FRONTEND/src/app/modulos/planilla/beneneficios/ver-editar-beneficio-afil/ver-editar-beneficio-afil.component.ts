@@ -93,8 +93,11 @@ export class VerEditarBeneficioAfilComponent {
     try {
       /* Falta traer datos de la planilla */
       const data = await this.beneficioService.GetAllBeneficios(this.form.value.dni).toPromise();
+
       const dataAfil = data.map((item: any) => ({
-        dni: item.DNI,
+        dni: item.N_IDENTIFICACION,
+        fallecido: item.FALLECIDO,
+        tipo_persona: item.TIPO_PERSONA,
         estado_civil: item.ESTADO_CIVIL,
         nombreCompleto: unirNombres(item.PRIMER_NOMBRE, item.SEGUNDO_NOMBRE, item.PRIMER_APELLIDO, item.SEGUNDO_APELLIDO),
         genero: item.GENERO,

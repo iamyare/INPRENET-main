@@ -63,6 +63,7 @@ import { MantenimientoAfiliacionComponent } from './mantenimiento/mantenimiento-
 import { JornadaComponent } from './mantenimiento/jornada/jornada.component';
 import { NivelEducativoComponent } from './mantenimiento/nivel-educativo/nivel-educativo.component';
 import { DatFamiliaresComponent } from './gestion/dat-familiares/dat-familiares.component';
+import { VerSociosComponent } from './Centros-Educativos/ver-socios/ver-socios.component';
 
 @NgModule({
   declarations: [
@@ -121,7 +122,8 @@ import { DatFamiliaresComponent } from './gestion/dat-familiares/dat-familiares.
     BancoComponent,
     JornadaComponent,
     NivelEducativoComponent,
-    DatFamiliaresComponent
+    DatFamiliaresComponent,
+    VerSociosComponent
   ],
   imports: [
     CommonModule,

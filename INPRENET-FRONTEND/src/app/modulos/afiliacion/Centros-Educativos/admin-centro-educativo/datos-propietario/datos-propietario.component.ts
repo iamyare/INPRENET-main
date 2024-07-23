@@ -16,6 +16,7 @@ export class DatosPropietarioComponent {
   @Output() formUpdated = new EventEmitter<any>();
   parentFormIsExist: boolean = false;
 
+
   constructor(private fb: FormBuilder, private datosEstaticosService: DatosEstaticosService, private direccionService: DireccionService) { }
 
 
@@ -269,4 +270,5 @@ export class DatosPropietarioComponent {
       municipioControl.setValue(null);
     }
   }
+
 }

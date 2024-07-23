@@ -13,6 +13,7 @@ import { Net_Detalle_Beneficio_Afiliado } from './entities/net_detalle_beneficio
 import { net_detalle_persona } from 'src/modules/Persona/entities/net_detalle_persona.entity';
 import { net_estado_afiliacion } from 'src/modules/Persona/entities/net_estado_afiliacion.entity';
 import { NET_PROFESIONES } from 'src/modules/transacciones/entities/net_profesiones.entity';
+import { Net_Tipo_Persona } from 'src/modules/Persona/entities/net_tipo_persona.entity';
 @Injectable()
 export class DetalleBeneficioService {
   private readonly logger = new Logger(DetalleBeneficioService.name)
@@ -23,6 +24,10 @@ export class DetalleBeneficioService {
     private readonly benAfilRepository: Repository<Net_Detalle_Pago_Beneficio>,
     @InjectRepository(Net_Detalle_Beneficio_Afiliado)
     private detalleBeneficioAfiliadoRepository: Repository<Net_Detalle_Beneficio_Afiliado>,
+
+    @InjectRepository(net_persona)
+    private personaRepository: Repository<net_persona>,
+
     @InjectEntityManager() private readonly entityManager: EntityManager
   ) { }
   async actualizarEstadoPorPlanilla(idPlanilla: string, nuevoEstado: string): Promise<{ mensaje: string }> {
@@ -369,42 +374,42 @@ export class DetalleBeneficioService {
   /**modificar por cambio de estado a una tabla */
   async GetAllBeneficios(dni: string): Promise<any> {
     try {
-      return await this.detalleBeneficioAfiliadoRepository.createQueryBuilder('detBenA')
-        .distinct(true)
-        .addSelect('afil.DNI', 'DNI')
-        .addSelect('afil.PRIMER_NOMBRE', 'PRIMER_NOMBRE')
-        .addSelect('afil.SEGUNDO_NOMBRE', 'SEGUNDO_NOMBRE')
-        .addSelect('afil.PRIMER_APELLIDO', 'PRIMER_APELLIDO')
-        .addSelect('afil.SEGUNDO_APELLIDO', 'SEGUNDO_APELLIDO')
-        .addSelect('afil.GENERO', 'GENERO')
-        .addSelect('afil.DIRECCION_RESIDENCIA', 'DIRECCION_RESIDENCIA')
-        .addSelect('afil.FECHA_NACIMIENTO', 'FECHA_NACIMIENTO')
-        /* .addSelect('afil.COLEGIO_MAGISTERIAL', 'COLEGIO_MAGISTERIAL') */
-        .addSelect('afil.NUMERO_CARNET', 'NUMERO_CARNET')
-        .addSelect('prof.DESCRIPCION', 'DESCRIPCION')
-        .addSelect('afil.TELEFONO_1', 'TELEFONO_1')
-        .addSelect('afil.ESTADO_CIVIL', 'ESTADO_CIVIL')
+      return await this.personaRepository.createQueryBuilder('afil')
+        .select([
+          'afil.N_IDENTIFICACION',
+          'afil.PRIMER_NOMBRE',
+          'afil.SEGUNDO_NOMBRE',
+          'afil.PRIMER_APELLIDO',
+          'afil.SEGUNDO_APELLIDO',
+          'afil.GENERO',
+          'afil.DIRECCION_RESIDENCIA',
+          'afil.FECHA_NACIMIENTO',
+          'afil.TELEFONO_1',
+          'afil.ESTADO_CIVIL',
+          'afil.FALLECIDO',
+          'tipPer.TIPO_PERSONA',
+          'prof.DESCRIPCION',
+          'ben.PERIODICIDAD',
+          'ben.NUMERO_RENTAS_MAX',
+          'ben.NOMBRE_BENEFICIO',
+          'detBenA.PERIODO_INICIO',
+          'detBenA.PERIODO_FINALIZACION',
+          'detBenA.MONTO_POR_PERIODO',
+          'detBenA.MONTO_TOTAL',
+          'estadoAfil.NOMBRE_ESTADO AS ESTADO',
+        ])
 
-        .addSelect('ben.PERIODICIDAD', 'PERIODICIDAD')
-        .addSelect('ben.NUMERO_RENTAS_MAX', 'NUMERO_RENTAS_MAX')
-        .addSelect('ben.NOMBRE_BENEFICIO', 'NOMBRE_BENEFICIO')
-
-        .addSelect('detBenA.PERIODO_INICIO', 'PERIODO_INICIO')
-        .addSelect('detBenA.PERIODO_FINALIZACION', 'PERIODO_FINALIZACION')
-        .addSelect('detBenA.MONTO_POR_PERIODO', 'MONTO_POR_PERIODO')
-        .addSelect('detBenA.MONTO_TOTAL', 'MONTO_TOTAL')
-
-        .addSelect('estadoAfil.DESCRIPCION', 'ESTADO')
-
-        .innerJoin(net_persona, 'afil', 'afil.ID_PERSONA = detBenA.ID_BENEFICIARIO AND detBenA.ID_CAUSANTE = detBenA.ID_CAUSANTE')
-        .leftJoin(Net_Beneficio, 'ben', 'ben.ID_BENEFICIO = detBenA.ID_BENEFICIO')
         .leftJoin(NET_PROFESIONES, 'prof', 'prof.ID_PROFESION = afil.ID_PROFESION')
-        .innerJoin(net_detalle_persona, 'detA', 'afil.ID_PERSONA = detBenA.ID_BENEFICIARIO AND detBenA.ID_CAUSANTE = detBenA.ID_CAUSANTE ')
+        .innerJoin(net_detalle_persona, 'detA', 'afil.ID_PERSONA = detA.ID_PERSONA')
+        .innerJoin(Net_Tipo_Persona, 'tipPer', 'tipPer.ID_TIPO_PERSONA = detA.ID_TIPO_PERSONA')
+        .innerJoin(net_estado_afiliacion, 'estadoAfil', 'estadoAfil.CODIGO = detA.ID_ESTADO_AFILIACION')
+        .innerJoin(Net_Detalle_Beneficio_Afiliado, 'detBenA', 'afil.ID_PERSONA = detA.ID_PERSONA AND detBenA.ID_CAUSANTE = detA.ID_CAUSANTE AND  detBenA.ID_CAUSANTE = detA.ID_CAUSANTE')
+        .innerJoin(Net_Beneficio, 'ben', 'ben.ID_BENEFICIO = detBenA.ID_BENEFICIO')
 
-        .innerJoin(net_estado_afiliacion, 'estadoAfil', 'estadoAfil.CODIGO = detA.ID_ESTADO_PERSONA')
-        .where(`afil.dni = '${dni}'`)
+        .where('afil.N_IDENTIFICACION = :dni', { dni })
 
         .getRawMany();
+
     } catch (error) {
       console.log(error);
 

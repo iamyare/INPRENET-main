@@ -1,5 +1,6 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { ControlContainer, FormArray, FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { result } from 'lodash-es';
 import { ToastrService } from 'ngx-toastr';
 import { CentroTrabajoService } from 'src/app/services/centro-trabajo.service';
 import { FieldConfig } from 'src/app/shared/Interfaces/field-config';
@@ -19,7 +20,9 @@ import { FieldConfig } from 'src/app/shared/Interfaces/field-config';
 })
 export class VerDatosCentrosComponent {
   public temp: any = 1;
-
+  datosContador!: FormGroup
+  datosAdministrador!: FormGroup
+  datosPropietario!: FormGroup
   steps = [
     { label: 'Datos Generales De Centros', isActive: true },
     { label: 'Administración del Centro Educativo', isActive: false },
@@ -36,6 +39,7 @@ export class VerDatosCentrosComponent {
   sociedadSocioForm!: FormGroup;
   adminCentroEducativoForm!: FormGroup;
   datosGeneralesData: any = {};
+  adminCentroEducativoForm1: any = {};
   sociedadData: any = {};
 
   fieldsStep5: FieldConfig[] = [
@@ -158,8 +162,22 @@ export class VerDatosCentrosComponent {
   onDatosGeneralesFormUpdate(formData: FormGroup): void {
     this.datosGeneralesData = formData
     const temp = formData;
-    console.log(temp);
     this.handleSearchResult1(temp);
+  }
+  onDatosGeneralesFormUpdate1(formData: FormGroup): void {
+    this.datosGeneralesData = formData
+    const temp = formData;
+    this.handleSearchResult2(temp);
+  }
+  onDatosGeneralesFormUpdate2(formData: FormGroup): void {
+    this.datosGeneralesData = formData
+    const temp = formData;
+    this.handleSearchResult3(temp);
+  }
+  onDatosGeneralesFormUpdate3(formData: FormGroup): void {
+    this.datosGeneralesData = formData
+    const temp = formData;
+    this.handleSearchResult4(temp);
   }
 
   onSociedadFormUpdate(formValues: any): void {
@@ -172,7 +190,7 @@ export class VerDatosCentrosComponent {
       referencias: this.referenciasForm.value.referencias.length > 0 ? this.referenciasForm.value.referencias : [],
       sociedad: this.sociedadData,
       sociedadSocio: this.sociedadSocioForm.value.sociedadSocios.length > 0 ? this.sociedadSocioForm.value.sociedadSocios : [],
-      adminCentroEducativo: this.isFormGroupEmpty(this.adminCentroEducativoForm) ? {} : this.adminCentroEducativoForm.value
+      //adminCentroEducativo: this.isFormGroupEmpty(this.adminCentroEducativoForm) ? {} : this.adminCentroEducativoForm.value
     };
     console.log('Datos Completos:', allData);
   }
@@ -201,8 +219,6 @@ export class VerDatosCentrosComponent {
   }
 
   handleSearchResult1(form: any) {
-    console.log(form);
-
     form.controls["nombre_centro_trabajo"]!.patchValue(this.searchResults[0].nombre_centro_trabajo)
     form.controls["sector_economico"]!.patchValue(this.searchResults[0].sector_economico)
     form.controls["rtn"]!.patchValue(this.searchResults[0].rtn)
@@ -224,6 +240,7 @@ export class VerDatosCentrosComponent {
     form.controls["numero_acuerdo"]!.patchValue(this.searchResults[0].numero_acuerdo)
     form.controls["fecha_emision"]!.patchValue(this.searchResults[0].fecha_emision)
     form.controls["fecha_inicio_operaciones"]!.patchValue(this.searchResults[0].fecha_inicio_operaciones)
+
 
     const tipo_jornada = this.searchResults[0].centroTrabajoJornadas.map((jornada: { jornada: { nombre: string; }; }) => ({
       key: jornada.jornada.nombre,
@@ -266,11 +283,23 @@ export class VerDatosCentrosComponent {
 
     this.datosGeneralesData = form
   }
+  handleSearchResult2(form: any) {
+    this.datosPropietario = form
+    this.datosPropietario.controls["propietarioNombre"]!.patchValue("hola")
+  }
+
+  handleSearchResult3(form: any) {
+    this.datosAdministrador = form
+    this.datosAdministrador.controls["n_identificacion"]!.patchValue("hola")
+  }
+
+  handleSearchResult4(form: any) {
+    this.datosContador = form
+    this.datosContador.controls["n_identificacion"]!.patchValue("hola")
+  }
 
   async handleSearchResult(searchResult: any) {
     this.searchResults = await searchResult;
-    console.log(searchResult);
-
     this.datosGeneralesData = this.fb.group({})
     this.mostrar = true;
 

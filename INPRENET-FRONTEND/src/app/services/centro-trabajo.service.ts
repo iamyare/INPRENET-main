@@ -92,4 +92,16 @@ export class CentroTrabajoService {
     const url = `${environment.API_URL}/api/centro-trabajo/getAllReferenciasByCentro/${idCentro}`;
     return this.http.get<any[]>(url);
   }
+  getPropietarioByCentro(idCentro: number): Observable<any> {
+    const url = `${environment.API_URL}/api/centro-trabajo/getPropietarioByCentro/${idCentro}`;
+    return this.http.get<any[]>(url);
+  }
+  getAdministradorByCentro(idCentro: number): Observable<any> {
+    const url = `${environment.API_URL}/api/centro-trabajo/getAdministradorByCentro/${idCentro}`;
+    return this.http.get<any[]>(url);
+  }
+  getContadorByCentro(idCentro: number): Observable<any> {
+    const url = `${environment.API_URL}/api/centro-trabajo/getContadorByCentro/${idCentro}`;
+    return this.http.get<any[]>(url);
+  }
 }

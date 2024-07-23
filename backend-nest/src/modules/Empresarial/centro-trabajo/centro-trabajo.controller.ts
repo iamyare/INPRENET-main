@@ -26,37 +26,37 @@ export class CentroTrabajoController {
   }
 
   @Put('actualizar/:id')
-@UseInterceptors(
-  FileFieldsInterceptor(
-    [
-      { name: 'archivoIdentificacion', maxCount: 1 },
-      { name: 'fotoEmpleado', maxCount: 1 }
-    ]
+  @UseInterceptors(
+    FileFieldsInterceptor(
+      [
+        { name: 'archivoIdentificacion', maxCount: 1 },
+        { name: 'fotoEmpleado', maxCount: 1 }
+      ]
+    )
   )
-)
-async actualizarEmpleado(
-  @Param('id') id: number,
-  @Body() updateEmpleadoDto: UpdateEmpleadoDto,
-  @UploadedFiles() files: { archivoIdentificacion?: Express.Multer.File[], fotoEmpleado?: Express.Multer.File[] }
-): Promise<any> {
-  let archivoIdentificacion: Buffer | null = null;
-  let fotoEmpleado: Buffer | null = null;
+  async actualizarEmpleado(
+    @Param('id') id: number,
+    @Body() updateEmpleadoDto: UpdateEmpleadoDto,
+    @UploadedFiles() files: { archivoIdentificacion?: Express.Multer.File[], fotoEmpleado?: Express.Multer.File[] }
+  ): Promise<any> {
+    let archivoIdentificacion: Buffer | null = null;
+    let fotoEmpleado: Buffer | null = null;
 
-  if (files.archivoIdentificacion && files.archivoIdentificacion.length > 0) {
-    archivoIdentificacion = files.archivoIdentificacion[0].buffer;
+    if (files.archivoIdentificacion && files.archivoIdentificacion.length > 0) {
+      archivoIdentificacion = files.archivoIdentificacion[0].buffer;
+    }
+    if (files.fotoEmpleado && files.fotoEmpleado.length > 0) {
+      fotoEmpleado = files.fotoEmpleado[0].buffer;
+    }
+
+    const empleadoActualizado = await this.centroTrabajoService.actualizarEmpleado(id, updateEmpleadoDto, archivoIdentificacion, fotoEmpleado);
+
+    return {
+      message: 'Empleado actualizado con éxito',
+      empleado: empleadoActualizado,
+    };
   }
-  if (files.fotoEmpleado && files.fotoEmpleado.length > 0) {
-    fotoEmpleado = files.fotoEmpleado[0].buffer;
-  }
 
-  const empleadoActualizado = await this.centroTrabajoService.actualizarEmpleado(id, updateEmpleadoDto, archivoIdentificacion, fotoEmpleado);
-
-  return {
-    message: 'Empleado actualizado con éxito',
-    empleado: empleadoActualizado,
-  };
-}
-  
 
   @Get('tipo-e')
   async obtenerCentrosDeTrabajoConTipoE(): Promise<Net_Centro_Trabajo[]> {
@@ -106,6 +106,19 @@ async actualizarEmpleado(
   @Get('getAllReferenciasByCentro/:idCentroTrab')
   getAllReferenciasByCentro(@Param('idCentroTrab') idCentroTrab: number) {
     return this.centroTrabajoService.getAllReferenciasByCentro(idCentroTrab);
+  }
+
+  @Get('getPropietarioByCentro/:idCentroTrab')
+  getPropietarioByCentro(@Param('idCentroTrab') idCentroTrab: number) {
+    return this.centroTrabajoService.getPropietarioByCentro(idCentroTrab);
+  }
+  @Get('getAdministradorByCentro/:idCentroTrab')
+  getAdministradorByCentro(@Param('idCentroTrab') idCentroTrab: number) {
+    return this.centroTrabajoService.getAdministradorByCentro(idCentroTrab);
+  }
+  @Get('getContadorByCentro/:idCentroTrab')
+  getContadorByCentro(@Param('idCentroTrab') idCentroTrab: number) {
+    return this.centroTrabajoService.getContadorByCentro(idCentroTrab);
   }
 
   @Patch(':id')

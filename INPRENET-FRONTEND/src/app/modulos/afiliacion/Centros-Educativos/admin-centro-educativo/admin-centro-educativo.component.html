@@ -1,9 +1,9 @@
-<!-- <div *ngIf="parentFormIsExist"> -->
+<div *ngIf="datosPropietario">
+    <app-datos-propietario [parentForm]="datosPropietario"
+        (formUpdated)="onDatosPropietarioFormUpdate($event)"></app-datos-propietario>
+    <app-datos-administrador [parentForm]="datosAdministrador"
+        (formUpdated)="onDatosAdministradorFormUpdate($event)"></app-datos-administrador>
 
-<app-datos-propietario></app-datos-propietario>
-<app-datos-administrador></app-datos-administrador>
-<app-datos-contador></app-datos-contador>
-
-<!-- </div> -->
-
-<!-- <app-maps></app-maps> -->
+    <app-datos-contador [parentForm]="datosContador"
+        (formUpdated)="onDatosContadorFormUpdate($event)"></app-datos-contador>
+</div>

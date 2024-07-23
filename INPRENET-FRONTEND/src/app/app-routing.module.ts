@@ -16,17 +16,17 @@ import { DashboardComponent } from './views/dashboard/dashboard.component';
 import { MainLayoutComponent } from './components/main-layout/main-layout.component';
 
 const routes: Routes = [
-      { path: 'login', component: LoginComponent },
-      { path: 'login-privados', component: LoginPrivadosComponent },
-      { path: 'solicitud-restablecimiento', component: OlvidoContrasenaComponent },
-      { path: 'restablecer-contrasena/:token', component: RestablecerContrasenaComponent },
-      { path: 'register', component: RegisterComponent },
-      { path: 'pre-register', component: PreRegisterComponent },
-      //{ path: 'dashboard', component: DashboardComponent },
+  { path: 'login', component: LoginComponent },
+  { path: 'login-privados', component: LoginPrivadosComponent },
+  { path: 'solicitud-restablecimiento', component: OlvidoContrasenaComponent },
+  { path: 'restablecer-contrasena/:token', component: RestablecerContrasenaComponent },
+  { path: 'register', component: RegisterComponent },
+  { path: 'pre-register', component: PreRegisterComponent },
+  //{ path: 'dashboard', component: DashboardComponent },
 
   {
     path: '',
-    component: MainLayoutComponent,
+    /* component: MainLayoutComponent, */
     children: [
       {
         path: 'afiliacion',
@@ -38,11 +38,11 @@ const routes: Routes = [
       },
       {
         path: 'gestion',
-        loadChildren: () =>import('./modulos/admin/admin.module').then((m) => m.AdminModule),
+        loadChildren: () => import('./modulos/admin/admin.module').then((m) => m.AdminModule),
       },
       {
         path: 'menu',
-        loadChildren: () =>import('./views/views.module').then((m) => m.ViewsModule),
+        loadChildren: () => import('./views/views.module').then((m) => m.ViewsModule),
       },
       { path: 'usuario/editar', component: EditarPerfilComponent },
     ]

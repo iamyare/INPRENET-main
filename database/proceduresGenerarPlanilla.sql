@@ -78,13 +78,13 @@ END;
 
 --ORDINARIA - JUBILADOS
 BEGIN
-    InsertarPagoBeneficios('BENEFICIARIO,AFILIADO');
+    InsertarPlanillaOrdinaria('BENEFICIARIO,AFILIADO');
 END;
 /
 
 --ORDINARIA - BENEFICIARIOS
 BEGIN
-    InsertarPagoBeneficios('JUBILADO,VOLUNTARIO,PENSIONADO');
+    InsertarPlanillaOrdinaria('JUBILADO,VOLUNTARIO,PENSIONADO');
 END;
 /
 
@@ -162,12 +162,12 @@ END;
 
 --COMPLEMENTARIA - BENEFICIARIOS
 BEGIN
-    InsertarBeneficiosNuncaPagados('BENEFICIARIO,AFILIADO');
+    InsertarPlanillaComplementaria('BENEFICIARIO,AFILIADO');
 END;
 /
 
 --COMPLEMENTARIA - JUBILADOS
 BEGIN
-    InsertarBeneficiosNuncaPagados('JUBILADO,VOLUNTARIO,PENSIONADO');
+    InsertarPlanillaComplementaria('JUBILADO,VOLUNTARIO,PENSIONADO');
 END;
 /

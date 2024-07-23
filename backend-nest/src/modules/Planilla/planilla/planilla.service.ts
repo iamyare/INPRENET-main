@@ -2658,4 +2658,67 @@ ON deducciones."id_afiliado" = beneficios."id_afiliado"
     }
   }
 
+  async getPlanillasPreliminares(proceso: string): Promise<any[]> {
+    try {
+      let query = `
+        SELECT 
+          per.n_identificacion,
+          per.primer_nombre || ' ' || per.segundo_nombre || ' ' || per.primer_apellido || ' ' || per.segundo_apellido AS nombre_completo,
+          SUM(dpb.monto_a_pagar) AS total_ingresos
+        FROM 
+          NET_DETALLE_PAGO_BENEFICIO dpb
+        INNER JOIN 
+          NET_PERSONA per ON dpb.id_persona = per.id_persona
+        WHERE 
+          dpb.estado = 'NO PAGADA'
+          AND dpb.proceso = :proceso
+        GROUP BY 
+          per.n_identificacion,
+          per.primer_nombre,
+          per.segundo_nombre,
+          per.primer_apellido,
+          per.segundo_apellido
+      `;
+
+      const result = await this.entityManager.query(query, [proceso]);
+      return result;
+    } catch (error) {
+      this.logger.error('Error ejecutando la consulta', error.stack);
+      throw new InternalServerErrorException('Error ejecutando la consulta');
+    }
+  }
+
+  async getDesglosePersonaPorPlanillaPreliminar(proceso: string, n_identificacion: string): Promise<any[]> {
+    try {
+      const query = `
+        SELECT 
+          per.n_identificacion,
+          per.primer_nombre || ' ' || per.segundo_nombre || ' ' || per.primer_apellido || ' ' || per.segundo_apellido AS nombre_completo,
+          ben.codigo AS codigo_beneficio,
+          ben.nombre_beneficio,
+          dpb.monto_a_pagar
+        FROM 
+          NET_DETALLE_PAGO_BENEFICIO dpb
+        INNER JOIN 
+          NET_PERSONA per ON dpb.id_persona = per.id_persona
+        INNER JOIN 
+          NET_BENEFICIO ben ON dpb.id_beneficio = ben.id_beneficio
+        WHERE 
+          dpb.estado = 'NO PAGADA'
+          AND dpb.proceso = :proceso
+          AND per.n_identificacion = :n_identificacion
+        ORDER BY 
+          per.n_identificacion,
+          ben.codigo
+      `;
+
+      const result = await this.entityManager.query(query, [proceso, n_identificacion]);
+      return result;
+    } catch (error) {
+      this.logger.error('Error ejecutando la consulta', error.stack);
+      throw new InternalServerErrorException('Error ejecutando la consulta');
+    }
+  }
+  
+
 }

@@ -1,5 +1,5 @@
 --Generar planilla Ordinaria
-CREATE OR REPLACE PROCEDURE InsertarPagoBeneficios(
+CREATE OR REPLACE PROCEDURE InsertarPlanillaOrdinaria(
     tipos_persona IN VARCHAR2
 ) IS
     v_proceso VARCHAR2(30);
@@ -90,7 +90,7 @@ END;
 
 
 --Generar planilla Complementaria
-CREATE OR REPLACE PROCEDURE InsertarBeneficiosNuncaPagados(
+CREATE OR REPLACE PROCEDURE InsertarPlanillaComplementaria(
     tipos_persona IN VARCHAR2
 ) IS
     v_proceso VARCHAR2(30);

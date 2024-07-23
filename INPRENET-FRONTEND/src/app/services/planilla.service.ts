@@ -9,6 +9,26 @@ import { environment } from 'src/environments/environment';
 export class PlanillaService {
   constructor(private http: HttpClient) { }
 
+  getDesglosePersonaPorPlanillaPreliminar(proceso: string, n_identificacion: string): Observable<any> {
+    const url = `${environment.API_URL}/api/planilla/get-desglose-persona-planilla-preliminar`;
+    return this.http.post<any>(url, { proceso, n_identificacion }).pipe(
+      catchError(error => {
+        console.error('Error al obtener el desglose de persona por planilla preliminar', error);
+        return throwError(error);
+      })
+    );
+  }
+
+  getPlanillasPreliminares(proceso: string): Observable<any> {
+    const url = `${environment.API_URL}/api/planilla/get-preliminares`;
+    return this.http.post<any>(url, { proceso }).pipe(
+      catchError(error => {
+        console.error('Error al obtener planillas preliminares', error);
+        return throwError(error);
+      })
+    );
+  }
+
   generarPlanillaComplementaria(tiposPersona: string): Observable<void> {
     const url = `${environment.API_URL}/api/planilla/generar-complementaria`;
     return this.http.post<void>(url, { tipos_persona: tiposPersona }).pipe(

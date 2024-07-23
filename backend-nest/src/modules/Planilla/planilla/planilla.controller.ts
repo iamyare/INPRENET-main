@@ -8,6 +8,9 @@ import { EntityManager } from 'typeorm';
 import { InjectEntityManager } from '@nestjs/typeorm';
 import { Net_Planilla } from './entities/net_planilla.entity';
 import { GeneratePlanillaDto } from './dto/generate-planilla.dto';
+import { GetPlanillasPreliminaresDto } from './dto/get-planillas-preliminares.dto';
+import { Net_Detalle_Pago_Beneficio } from '../detalle_beneficio/entities/net_detalle_pago_beneficio.entity';
+import { GetDesglosePersonaPlanillaPreliminarDto } from './dto/get-desglose-persona-planilla-preliminar.dto';
 
 @ApiTags('planilla')
 @Controller('planilla')
@@ -707,5 +710,16 @@ export class PlanillaController {
   @Post('generar-ordinaria')
   async generarOrdinaria(@Body() generatePlanillaDto: GeneratePlanillaDto): Promise<void> {
     await this.planillaService.generarPlanillaOrdinaria(generatePlanillaDto.tipos_persona);
+  }
+
+  @Post('get-preliminares')
+  async getPlanillasPreliminares(@Body() getPlanillasPreliminaresDto: GetPlanillasPreliminaresDto): Promise<Net_Detalle_Pago_Beneficio[]> {
+    return this.planillaService.getPlanillasPreliminares(getPlanillasPreliminaresDto.proceso);
+  }
+
+  @Post('get-desglose-persona-planilla-preliminar')
+  async getDesglosePersonaPorPlanillaPreliminar(@Body() getDesglosePersonaPlanillaPreliminarDto: GetDesglosePersonaPlanillaPreliminarDto): Promise<any[]> {
+    const { proceso, n_identificacion } = getDesglosePersonaPlanillaPreliminarDto;
+    return this.planillaService.getDesglosePersonaPorPlanillaPreliminar(proceso, n_identificacion);
   }
 }

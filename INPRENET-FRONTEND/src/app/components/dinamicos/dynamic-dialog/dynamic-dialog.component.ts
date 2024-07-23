@@ -11,20 +11,19 @@ export class DynamicDialogComponent implements OnInit {
 
   @Input() titulo = "";
   @Input() subtitulo = "";
-  dialogTitle: string = ''; // Título del diálogo
+  dialogTitle: string = 'Desglose de Beneficios'; // Título del diálogo
 
-  displayedColumnsB: string[] = []; // Dejar esto vacío inicialmente
-  displayedColumnsD: string[] = []; // Dejar esto vacío inicialmente
+  displayedColumnsB: string[] = ['CODIGO_BENEFICIO', 'NOMBRE_BENEFICIO', 'MONTO_A_PAGAR', 'verDeducciones']; // Columnas para beneficios
+  displayedColumnsD: string[] = []; // Columnas para deducciones
 
-  constructor(@Inject(MAT_DIALOG_DATA) public data: { logs: any[] }, private deduccionSVC: DeduccionesService) { }
+  constructor(@Inject(MAT_DIALOG_DATA) public data: { logs: any[] }, private deduccionSVC: DeduccionesService) {
+    console.log(data);
+
+   }
 
   ngOnInit() {
-    for (let i = 0; i < this.data.logs.length; i++) {
-      const element = this.data.logs[i];
-      if (element.type === 'beneficios') {
-        this.displayedColumnsB = ['NOMBRE_BENEFICIO', 'MontoAPagar', 'verDeducciones'];
-      }
-    }
+    // Ajustar el título del diálogo según los datos proporcionados
+    this.dialogTitle = this.titulo || 'Desglose de Beneficios';
   }
 
   getDeduccionesByBeneficio(element: any) {

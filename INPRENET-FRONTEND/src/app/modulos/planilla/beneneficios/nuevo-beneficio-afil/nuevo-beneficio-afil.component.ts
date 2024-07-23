@@ -174,7 +174,7 @@ export class NuevoBeneficioAfilComponent implements OnInit {
     } */
 
   getFilas = async () => {
-    if (this.Afiliado.ESTADO == "FALLECIDO") {
+    if (this.Afiliado.fallecido == "SI") {
       try {
         await this.getColumns();
         const data = await this.svcAfilServ.obtenerBenDeAfil(this.form.value.dni).toPromise();

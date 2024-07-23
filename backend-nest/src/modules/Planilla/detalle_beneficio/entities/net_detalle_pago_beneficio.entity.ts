@@ -20,7 +20,7 @@ export class Net_Detalle_Pago_Beneficio {
     @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true, name: 'MONTO_A_PAGAR' })
     monto_a_pagar: number;
 
-    @Column({ type: 'varchar2', length: 30, nullable: false, name: 'PROCESO' })
+    @Column({ type: 'varchar2', length: 30, nullable: true, name: 'PROCESO' })
     proceso: string;
 
     @ManyToOne(() => Net_Planilla, planilla => planilla.detallepagobeneficio, { cascade: true })

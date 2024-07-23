@@ -624,78 +624,85 @@ export class AfiliadoService {
   }
 
   async findOneAFiliado(term: string) {
-    const detallePer = await this.detallePersonaRepository.findOne({
-      where: { tipoPersona: { tipo_persona: "AFILIADO" }, persona: { n_identificacion: term } },
-      relations: [
-        'persona',
-        'estadoAfiliacion',
-        'tipoPersona',
-        'persona.pais',
-        'persona.profesion',
-        'persona.municipio_nacimiento',
-        'persona.municipio',
-        'persona.tipoIdentificacion',
-        'persona.municipio_defuncion'
-      ]
-    });
 
-    if (!detallePer) {
-      throw new NotFoundException(`Afiliado con N_IDENTIFICACION ${term} no existe`);
+    try {
+      const detallePer = await this.detallePersonaRepository.findOne({
+        where: { tipoPersona: { tipo_persona: "AFILIADO" }, persona: { n_identificacion: term } },
+        relations: [
+          'persona',
+          'estadoAfiliacion',
+          'tipoPersona',
+          'persona.pais',
+          'persona.profesion',
+          'persona.municipio_nacimiento',
+          'persona.municipio',
+          'persona.tipoIdentificacion',
+          'persona.municipio_defuncion'
+        ]
+      });
+
+      if (!detallePer) {
+        throw new NotFoundException(`Afiliado con N_IDENTIFICACION ${term} no existe`);
+      }
+
+      //const detallePersona = persona.detallePersona.find(detalle => detalle.tipoPersona.tipo_persona === 'AFILIADO');
+
+      const result = {
+        N_IDENTIFICACION: detallePer.persona.n_identificacion,
+        ID_PERSONA: detallePer.persona.id_persona,
+        FALLECIDO: detallePer.persona.fallecido,
+        PRIMER_NOMBRE: detallePer.persona.primer_nombre,
+        SEGUNDO_NOMBRE: detallePer.persona.segundo_nombre,
+        TERCER_NOMBRE: detallePer.persona.tercer_nombre,
+        PRIMER_APELLIDO: detallePer.persona.primer_apellido,
+        SEGUNDO_APELLIDO: detallePer.persona.segundo_apellido,
+        GENERO: detallePer.persona.genero,
+        SEXO: detallePer.persona.sexo,
+        TELEFONO_1: detallePer.persona.telefono_1,
+        ESTADO_CIVIL: detallePer.persona.estado_civil,
+        DIRECCION_RESIDENCIA: detallePer.persona.direccion_residencia,
+        FECHA_NACIMIENTO: detallePer.persona.fecha_nacimiento,
+        TIPO_PERSONA: detallePer.tipoPersona.tipo_persona,
+        ESTADO_PERSONA: detallePer.estadoAfiliacion.nombre_estado,
+
+
+        //fallecido: detallePer.persona.fallecido,
+        //TIPO_PERSONA: detallePer.persona.detallePersona[0].tipoPersona.tipo_persona,
+        //GRADO_ACADEMICO: detallePer.persona.grado_academico,
+        //GRUPO_ETNICO: detallePer.persona.grupo_etnico,
+        //CANTIDAD_HIJOS: detallePer.persona.cantidad_hijos,
+        //REPRESENTACION: detallePer.persona.representacion,
+        //RTN: detallePer.persona.rtn,
+        //FOTO_PERFIL: detallePer.persona.foto_perfil ? Buffer.from(persona.foto_perfil).toString('base64') : null,
+        //DESCRIPCION: detallePer.persona.profesion?.descripcion,
+        //ID_PROFESION: detallePer.persona.profesion?.id_profesion,
+        //TELEFONO_2: detallePer.persona.telefono_2,
+        //CORREO_1: detallePer.persona.correo_1,
+        //CORREO_2: detallePer.persona.correo_2,
+        //ID_PAIS: detallePer.persona.pais?.id_pais,
+        //id_departamento_residencia: detallePer.persona.municipio?.departamento.id_departamento,
+        //ID_IDENTIFICACION: detallePer.persona.tipoIdentificacion?.id_identificacion,
+        //tipo_defuncion: detallePer.persona.tipo_defuncion,
+        //fecha_defuncion: detallePer.persona.fecha_defuncion,
+        //fecha_vencimiento_ident: detallePer.persona.fecha_vencimiento_ident,
+        //certificado_defuncion: detallePer.persona?.certificado_defuncion,
+        //ID_MUNICIPIO: detallePer.persona.municipio?.id_municipio,
+        //ID_MUNICIPIO_DEFUNCION: detallePer.persona?.municipio_defuncion?.id_municipio!,
+        //ID_DEPARTAMENTO_DEFUNCION: detallePer.persona?.municipio_defuncion?.departamento?.id_departamento!,
+        //estadoAfiliacion: detallePer.persona.detallePersona[0]?.estadoAfiliacion?.codigo,
+        //motivo_fallecimiento: detallePer.persona.causa_fallecimiento.nombre,
+        //CANTIDAD_DEPENDIENTES: detallePer.persona.cantidad_dependientes, 
+        //ESTADO: detallePersona.eliminado,
+      };
+
+      console.log(result);
+
+      return result;
+    } catch (error) {
+      console.log(error);
+
     }
 
-    //const detallePersona = persona.detallePersona.find(detalle => detalle.tipoPersona.tipo_persona === 'AFILIADO');
-
-    const result = {
-      N_IDENTIFICACION: detallePer.persona.n_identificacion,
-      ID_PERSONA: detallePer.persona.id_persona,
-      FALLECIDO: detallePer.persona.fallecido,
-      PRIMER_NOMBRE: detallePer.persona.primer_nombre,
-      SEGUNDO_NOMBRE: detallePer.persona.segundo_nombre,
-      TERCER_NOMBRE: detallePer.persona.tercer_nombre,
-      PRIMER_APELLIDO: detallePer.persona.primer_apellido,
-      SEGUNDO_APELLIDO: detallePer.persona.segundo_apellido,
-      GENERO: detallePer.persona.genero,
-      SEXO: detallePer.persona.sexo,
-      TELEFONO_1: detallePer.persona.telefono_1,
-      ESTADO_CIVIL: detallePer.persona.estado_civil,
-      DIRECCION_RESIDENCIA: detallePer.persona.direccion_residencia,
-      FECHA_NACIMIENTO: detallePer.persona.fecha_nacimiento,
-      TIPO_PERSONA: detallePer.tipoPersona.tipo_persona,
-      ESTADO_PERSONA: detallePer.estadoAfiliacion.nombre_estado,
-
-
-      //fallecido: detallePer.persona.fallecido,
-      //TIPO_PERSONA: detallePer.persona.detallePersona[0].tipoPersona.tipo_persona,
-      //GRADO_ACADEMICO: detallePer.persona.grado_academico,
-      //GRUPO_ETNICO: detallePer.persona.grupo_etnico,
-      //CANTIDAD_HIJOS: detallePer.persona.cantidad_hijos,
-      //REPRESENTACION: detallePer.persona.representacion,
-      //RTN: detallePer.persona.rtn,
-      //FOTO_PERFIL: detallePer.persona.foto_perfil ? Buffer.from(persona.foto_perfil).toString('base64') : null,
-      //DESCRIPCION: detallePer.persona.profesion?.descripcion,
-      //ID_PROFESION: detallePer.persona.profesion?.id_profesion,
-      //TELEFONO_2: detallePer.persona.telefono_2,
-      //CORREO_1: detallePer.persona.correo_1,
-      //CORREO_2: detallePer.persona.correo_2,
-      //ID_PAIS: detallePer.persona.pais?.id_pais,
-      //id_departamento_residencia: detallePer.persona.municipio?.departamento.id_departamento,
-      //ID_IDENTIFICACION: detallePer.persona.tipoIdentificacion?.id_identificacion,
-      //tipo_defuncion: detallePer.persona.tipo_defuncion,
-      //fecha_defuncion: detallePer.persona.fecha_defuncion,
-      //fecha_vencimiento_ident: detallePer.persona.fecha_vencimiento_ident,
-      //certificado_defuncion: detallePer.persona?.certificado_defuncion,
-      //ID_MUNICIPIO: detallePer.persona.municipio?.id_municipio,
-      //ID_MUNICIPIO_DEFUNCION: detallePer.persona?.municipio_defuncion?.id_municipio!,
-      //ID_DEPARTAMENTO_DEFUNCION: detallePer.persona?.municipio_defuncion?.departamento?.id_departamento!,
-      //estadoAfiliacion: detallePer.persona.detallePersona[0]?.estadoAfiliacion?.codigo,
-      //motivo_fallecimiento: detallePer.persona.causa_fallecimiento.nombre,
-      //CANTIDAD_DEPENDIENTES: detallePer.persona.cantidad_dependientes, 
-      //ESTADO: detallePersona.eliminado,
-    };
-
-    console.log(result);
-
-    return result;
   }
 
   async findOnePersona(term: string) {
@@ -809,14 +816,14 @@ export class AfiliadoService {
       net_estado_afiliacion "estadoPers" ON "detA"."ID_ESTADO_AFILIACION" = "estadoPers"."CODIGO"
     WHERE
       "Afil"."N_IDENTIFICACION" = '${n_identificacionAfil}' AND 
-      "estadoPers"."DESCRIPCION" = 'FALLECIDO'  AND
+      "Afil"."FALLECIDO" = 'SI'  AND
       "tipoP"."TIPO_PERSONA" = 'AFILIADO'
     `;
 
       const beneficios = await this.entityManager.query(query);
 
       const query1 = `
-        SELECT 
+      SELECT 
         "Afil"."ID_PERSONA",
         "Afil"."N_IDENTIFICACION",
         "Afil"."PRIMER_NOMBRE",
@@ -828,13 +835,13 @@ export class AfiliadoService {
         "detA"."PORCENTAJE",
         "tipoP"."TIPO_PERSONA"
       FROM
-          "net_detalle_persona" "detA" INNER JOIN 
-          "net_persona" "Afil" ON "detA"."ID_PERSONA" = "Afil"."ID_PERSONA"
+          NET_DETALLE_PERSONA "detA" INNER JOIN 
+          NET_PERSONA "Afil" ON "detA"."ID_PERSONA" = "Afil"."ID_PERSONA"
           INNER JOIN
-        NET_TIPO_PERSONA "tipoP" ON "Afil"."ID_TIPO_PERSONA" = "detA"."ID_TIPO_PERSONA"
+        NET_TIPO_PERSONA "tipoP" ON "tipoP"."ID_TIPO_PERSONA" = "detA"."ID_TIPO_PERSONA"
       WHERE 
           "detA"."ID_CAUSANTE_PADRE" = ${beneficios[0].ID_PERSONA} AND 
-          "tipoP"."TIPO_PERSONA" = 'BENEFICIARIO' 
+          "tipoP"."TIPO_PERSONA" = 'BENEFICIARIO'
         `;
       const beneficios2 = await this.entityManager.query(query1);
 

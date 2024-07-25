@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup } from '@angular/forms';
+import { AbstractControl, FormBuilder, FormGroup } from '@angular/forms';
 import { AfiliacionService } from 'src/app/services/afiliacion.service';
 import { DatosEstaticosService } from 'src/app/services/datos-estaticos.service';
 
@@ -41,6 +41,7 @@ export class AfiliacionDocentesComponent implements OnInit {
   benefData: any = {};
   fotoPerfil: string = '';
   tipoDiscapacidad: any[] = [];
+  pepsData: any = [];
 
   constructor(private fb: FormBuilder, private afiliacionService: AfiliacionService, private datosEstaticos: DatosEstaticosService) {
     this.datosGeneralesForm = this.fb.group({});
@@ -89,6 +90,7 @@ export class AfiliacionDocentesComponent implements OnInit {
 
   handleDatosGeneralesChange(data: any): void {
     this.datosGeneralesData = data;
+    this.pepsData = data.peps;
   }
 
   handleFamiliaresChange(data: any): void {
@@ -140,20 +142,41 @@ export class AfiliacionDocentesComponent implements OnInit {
   }
 
   gatherAllData(): void {
-    const selectedDiscapacidades = this.datosGeneralesData.refpers[0].discapacidades
-      .map((d: any, index: number) => d ? { id_discapacidad: this.tipoDiscapacidad[index].value } : null)
-      .filter((d: any) => d !== null);
+    // Recopilar discapacidades seleccionadas para la persona principal
+    const selectedDiscapacidades = this.datosGeneralesData?.refpers?.[0]?.discapacidades
+      ?.map((d: any, index: number) => d ? { id_discapacidad: this.tipoDiscapacidad[index].value } : null)
+      .filter((d: any) => d !== null) || [];
 
-    const peps = this.datosGeneralesData.refpers[0].peps.map((pep: any) => ({
+    // Recopilar datos de los beneficiarios, incluyendo las discapacidades seleccionadas
+    const beneficiarios = this.benefData?.value?.beneficiarios?.map((beneficiario: any, bIndex: number) => ({
+      persona: {
+        id_tipo_identificacion: beneficiario.persona.id_tipo_identificacion,
+        id_pais_nacionalidad: beneficiario.persona.id_pais_nacionalidad,
+        n_identificacion: beneficiario.persona.n_identificacion,
+        primer_nombre: beneficiario.persona.primer_nombre,
+        segundo_nombre: beneficiario.persona.segundo_nombre,
+        tercer_nombre: beneficiario.persona.tercer_nombre,
+        primer_apellido: beneficiario.persona.primer_apellido,
+        segundo_apellido: beneficiario.persona.segundo_apellido,
+        genero: beneficiario.persona.genero,
+        sexo: beneficiario.persona.sexo,
+        fecha_nacimiento: beneficiario.persona.fecha_nacimiento,
+        discapacidades: beneficiario.persona.discapacidades
+          .map((selected: boolean, dIndex: number) => selected ? { id_discapacidad: this.tipoDiscapacidad[dIndex].value } : null)
+          .filter((d: any) => d !== null)
+      },
+      porcentaje: beneficiario.persona.porcentaje,
+    })) || [];
+
+    const peps = this.pepsData?.map((pep: any) => ({
       cargo: pep.pep_cargo_desempenado,
       fecha_inicio: pep.startDate,
       fecha_fin: pep.endDate,
-      referencias: pep.observacion
-    }));
+    })) || [];
 
     const persona = {
       id_tipo_identificacion: this.datosGeneralesData.refpers[0].id_tipo_identificacion,
-      id_pais_nacionalidad: this.datosGeneralesData.refpers[0].id_pais_nacionalidad,
+      id_pais_nacionalidad: this.datosGeneralesData.refpers[0].id_pais,
       n_identificacion: this.datosGeneralesData.refpers[0].n_identificacion,
       fecha_vencimiento_ident: this.datosGeneralesData.refpers[0].fecha_vencimiento_ident,
       rtn: this.datosGeneralesData.refpers[0].rtn,
@@ -210,7 +233,7 @@ export class AfiliacionDocentesComponent implements OnInit {
       centrosTrabajo: this.centrosTrabajoData.trabajo,
       otrasFuentesIngreso: this.otrasFuentesIngresoData.sociedadSocios,
       referencias: this.refPersData.referencias,
-      beneficiarios: this.benefData?.value?.beneficiarios || [],
+      beneficiarios: beneficiarios,
       familiares: familiares
     };
 

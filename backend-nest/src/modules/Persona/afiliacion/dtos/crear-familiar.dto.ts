@@ -5,10 +5,6 @@ import { CrearPersonaDto } from './crear-persona.dto';
 export class CrearFamiliaDto {
   @IsNotEmpty()
   @IsString()
-  dependiente_economico: string;
-
-  @IsNotEmpty()
-  @IsString()
   parentesco: string;
 
   @ValidateNested()

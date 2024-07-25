@@ -7,13 +7,6 @@ export class Net_Familia {
     id_familia: number;
 
     @Column('varchar2', {
-        length: 50,
-        nullable: false,
-        name: 'DEPENDIENTE_ECONOMICO'
-    })
-    dependiente_economico: string;
-
-    @Column('varchar2', {
         length: 30,
         nullable: false,
         name: 'PARENTESCO'

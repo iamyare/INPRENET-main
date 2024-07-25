@@ -267,7 +267,6 @@ export class AfiliacionService {
     return resultados;
   }
   
-
   async crearPersonaCentrosTrabajo(
     crearPersonaCentrosTrabajoDtos: CrearPersonaCentroTrabajoDto[],
     idPersona: number,
@@ -354,23 +353,23 @@ export class AfiliacionService {
     entityManager: EntityManager,
   ): Promise<net_detalle_persona[]> {
     const resultados: net_detalle_persona[] = [];
-
+  
     const tipoPersonaBeneficiario = await this.tipoPersonaRepository.findOne({ where: { tipo_persona: 'BENEFICIARIO' } });
     if (!tipoPersonaBeneficiario) {
       throw new NotFoundException('Tipo de persona "BENEFICIARIO" no encontrado');
     }
-
+  
     for (const crearBeneficiarioDto of crearBeneficiariosDtos) {
       // Verificar si el beneficiario ya existe
       let beneficiario = await this.personaRepository.findOne({
         where: { n_identificacion: crearBeneficiarioDto.persona.n_identificacion }
       });
-
+  
       if (!beneficiario) {
         beneficiario = await this.crearPersona(crearBeneficiarioDto.persona, null, entityManager);
       }
-
-      // Crear el detalle del beneficiario
+  
+      // Crear el detalle del beneficiario con porcentaje
       const detalleBeneficiario = entityManager.create(net_detalle_persona, {
         ID_DETALLE_PERSONA: idDetallePersona,
         ID_PERSONA: beneficiario.id_persona,
@@ -378,13 +377,16 @@ export class AfiliacionService {
         ID_CAUSANTE_PADRE: idPersona,
         ID_TIPO_PERSONA: tipoPersonaBeneficiario.id_tipo_persona,
         eliminado: 'NO',
+        porcentaje: crearBeneficiarioDto.porcentaje,
       });
-
+  
       resultados.push(await entityManager.save(net_detalle_persona, detalleBeneficiario));
     }
-
+  
     return resultados;
   }
+  
+  
   
   async crearDiscapacidades(
     discapacidadesDto: CrearDiscapacidadDto[],
@@ -414,7 +416,9 @@ export class AfiliacionService {
   
     for (const peps of pepsDto) {
       const nuevoPeps = entityManager.create(Net_Peps, {
-        ...peps,
+        cargo: peps.cargo,
+        fecha_inicio: this.formatDateToYYYYMMDD(peps.fecha_inicio),
+        fecha_fin: peps.fecha_fin ? this.formatDateToYYYYMMDD(peps.fecha_fin) : null,
         persona: { id_persona: idPersona },
       });
   
@@ -423,6 +427,7 @@ export class AfiliacionService {
   
     return resultados;
   }
+  
 
   async crearFamilia(
     familiaresDto: CrearFamiliaDto[],
@@ -440,7 +445,6 @@ export class AfiliacionService {
       }
 
       const familia = entityManager.create(Net_Familia, {
-        dependiente_economico: familiaDto.dependiente_economico,
         parentesco: familiaDto.parentesco,
         persona: { id_persona: idPersona },
         referenciada: { id_persona: personaReferencia.id_persona },
@@ -453,6 +457,17 @@ export class AfiliacionService {
   async crearDatos(crearDatosDto: CrearDatosDto, fotoPerfil: Express.Multer.File): Promise<any> {
     return await this.personaRepository.manager.transaction(async (transactionalEntityManager) => {
       try {
+
+        console.log('--------------');
+        console.log(fotoPerfil);
+        
+      console.log(JSON.stringify(crearDatosDto, (key, value) => {
+        if (typeof value === 'object' && value !== null) {
+          return { ...value };
+        }
+        return value;
+      }, 2));
+      console.log('--------------');
         const resultados = [];
 
         // Crear la persona
@@ -509,7 +524,7 @@ export class AfiliacionService {
       }
     });
   }
-  
+   
   
   formatDateToYYYYMMDD(dateString: string): string {
     if (!dateString) return null;

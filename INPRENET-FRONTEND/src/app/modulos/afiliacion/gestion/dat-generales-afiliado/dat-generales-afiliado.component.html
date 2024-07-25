@@ -549,17 +549,16 @@
 
 
             <div class="col-lg-12 col-md-12">
-
               <label>¿Ha desempeñado un cargo público?</label>
               <mat-radio-group formControlName="cargoPublico" (change)="onDatosGeneralesCargChange($event)">
                 <mat-radio-button *ngFor="let option of field.options" [value]="option.value">
                   {{ option.label }}
                 </mat-radio-button>
               </mat-radio-group>
-
             </div>
-            <div class="col-lg-12 col-md-12">
-              <app-peps *ngIf="cargoPublico"></app-peps>
+
+            <div class="col-lg-12 col-md-12" *ngIf="cargoPublico">
+              <app-peps *ngIf="cargoPublico" [parentForm]="formParent" [field]="field" (pepsChange)="onPepsDataChange($event)"></app-peps>
             </div>
           </div>
         </div>

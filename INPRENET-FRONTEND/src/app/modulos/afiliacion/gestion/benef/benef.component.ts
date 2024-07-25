@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
-import { AbstractControl, FormArray, FormBuilder, FormControl, FormGroup, ValidationErrors, ValidatorFn, Validators } from '@angular/forms';
+import { AbstractControl, FormArray, FormBuilder, FormControl, FormGroup, ValidationErrors, Validators } from '@angular/forms';
 import { FormStateService } from 'src/app/services/form-state.service';
 import { DireccionService } from 'src/app/services/direccion.service';
 import { DatosEstaticosService } from 'src/app/services/datos-estaticos.service';
@@ -11,20 +11,22 @@ import { DatosEstaticosService } from 'src/app/services/datos-estaticos.service'
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class BenefComponent implements OnInit {
-  minDate: Date;
-  private formKey = 'FormBeneficiario';
   public formParent: FormGroup;
   public municipios: any[] = [];
   public municipiosNacimiento: any[] = [];
   public nacionalidades: any[] = [];
+  public tipo_discapacidad: any[] = [];
   sexo: { value: string; label: string }[] = [];
   generos: { value: string; label: string }[] = [];
   parentesco: any;
   departamentos: any = [];
-  tipo_discapacidad: any = [];
   departamentosNacimiento: any = [];
+  minDate: Date;
+
   @Input() datos: any;
   @Output() newDatBenChange = new EventEmitter<FormGroup>();
+
+  private formKey = 'FormBeneficiario';
 
   field = {
     options: [
@@ -38,50 +40,40 @@ export class BenefComponent implements OnInit {
     private fb: FormBuilder,
     private direccionService: DireccionService,
     private datosEstaticosService: DatosEstaticosService,
-    public direccionSer: DireccionService,
   ) {
     const currentYear = new Date();
     this.minDate = new Date(currentYear.getFullYear(), currentYear.getMonth(), currentYear.getDate());
     this.formParent = this.fb.group({
       beneficiario: this.fb.array([]),
     });
-    this.tipo_discapacidad = [
-      { label: "MOTRIZ", value: "MOTRIZ" },
-      { label: "AUDITIVA", value: "AUDITIVA" },
-      { label: "VISUAL", value: "VISUAL" },
-      { label: "INTELECTUAL", value: "INTELECTUAL" },
-      { label: "MENTAL", value: "MENTAL" },
-      { label: "PSICOSOCIAL", value: "PSICOSOCIAL" },
-      { label: "MÚLTIPLE", value: "MÚLTIPLE" },
-      { label: "SENSORIAL", value: "SENSORIAL" }
-    ];
   }
 
   ngOnInit(): void {
     this.initForm();
     this.cargarDepartamentos();
     this.cargarDepartamentosNacimiento();
+    this.loadDiscapacidades();
     this.loadNacionalidades();
 
     this.parentesco = this.datosEstaticosService.parentesco;
     const nuevoParentesco = { value: "OTRO", label: "OTRO" };
-    const existe = this.parentesco.some((item: { value: string; }) => item.value === nuevoParentesco.value);
-    if (!existe) {
+    if (!this.parentesco.some((item: { value: string }) => item.value === nuevoParentesco.value)) {
       this.parentesco.push(nuevoParentesco);
     }
 
     this.generos = this.datosEstaticosService.genero;
     this.sexo = this.datosEstaticosService.sexo;
+
     const beneficiariosArray = this.formParent.get('beneficiario') as FormArray;
-    if (this.datos && this.datos.value && this.datos.value.beneficiario && this.datos.value.beneficiario.length > 0 && beneficiariosArray.length === 0) {
-      for (let i of this.datos.value.beneficiario) {
-        this.agregarBen(i);
+    if (this.datos?.value?.beneficiario?.length && beneficiariosArray.length === 0) {
+      for (let ben of this.datos.value.beneficiario) {
+        this.agregarBen(ben);
       }
     }
   }
 
   private initForm() {
-    let existingForm = this.formStateService.getForm(this.formKey);
+    const existingForm = this.formStateService.getForm(this.formKey);
     if (existingForm) {
       this.formParent = existingForm;
     } else {
@@ -97,10 +89,6 @@ export class BenefComponent implements OnInit {
       id_tipo_identificacion: new FormControl(datosBeneficiario?.id_tipo_identificacion || 1),
       id_pais_nacionalidad: new FormControl(datosBeneficiario?.id_pais_nacionalidad || 1),
       n_identificacion: new FormControl(datosBeneficiario?.n_identificacion || '', [Validators.required, Validators.maxLength(40)]),
-      fecha_vencimiento_ident: new FormControl(datosBeneficiario?.fecha_vencimiento_ident || '', Validators.required),
-      rtn: new FormControl(datosBeneficiario?.rtn || '', [Validators.maxLength(40)]),
-      grupo_etnico: new FormControl(datosBeneficiario?.grupo_etnico || ''),
-      estado_civil: new FormControl(datosBeneficiario?.estado_civil || ''),
       primer_nombre: new FormControl(datosBeneficiario?.primer_nombre || '', [Validators.required, Validators.maxLength(40)]),
       segundo_nombre: new FormControl(datosBeneficiario?.segundo_nombre || '', [Validators.maxLength(40)]),
       tercer_nombre: new FormControl(datosBeneficiario?.tercer_nombre || ''),
@@ -108,15 +96,6 @@ export class BenefComponent implements OnInit {
       segundo_apellido: new FormControl(datosBeneficiario?.segundo_apellido || ''),
       genero: new FormControl(datosBeneficiario?.genero || ''),
       sexo: new FormControl(datosBeneficiario?.sexo || ''),
-      fallecido: new FormControl(datosBeneficiario?.fallecido || 'NO'),
-      cantidad_hijos: new FormControl(datosBeneficiario?.cantidad_hijos || 0),
-      primer_nombre_censo: new FormControl(datosBeneficiario?.primer_nombre_censo || ''),
-      segundo_nombre_censo: new FormControl(datosBeneficiario?.segundo_nombre_censo || ''),
-      nombre_apellido_escalafon: new FormControl(datosBeneficiario?.nombre_apellido_escalafon || ''),
-      primer_apellido_censo: new FormControl(datosBeneficiario?.primer_apellido_censo || ''),
-      segundo_apellido_censo: new FormControl(datosBeneficiario?.segundo_apellido_censo || ''),
-      representacion: new FormControl(datosBeneficiario?.representacion || ''),
-      grado_academico: new FormControl(datosBeneficiario?.grado_academico || ''),
       telefono_1: new FormControl(datosBeneficiario?.telefono_1 || ''),
       telefono_2: new FormControl(datosBeneficiario?.telefono_2 || ''),
       correo_1: new FormControl(datosBeneficiario?.correo_1 || ''),
@@ -141,10 +120,16 @@ export class BenefComponent implements OnInit {
       dependiente: new FormControl(datosBeneficiario?.dependiente, [
         Validators.required
       ]),
-      discapacidad: new FormControl(datosBeneficiario?.discapacidad || '', [
-        Validators.required
-      ]),
-      discapacidades: new FormArray([])
+      discapacidad: new FormControl(datosBeneficiario?.discapacidad || 'no', [Validators.required]),
+      discapacidades: this.fb.array(this.tipo_discapacidad.map(() => new FormControl(false)))
+    });
+  }
+
+  private loadNacionalidades() {
+    this.datosEstaticosService.getNacionalidad().then(data => {
+      this.nacionalidades = data;
+    }).catch(error => {
+      console.error('Error al cargar países:', error);
     });
   }
 
@@ -175,7 +160,7 @@ export class BenefComponent implements OnInit {
   }
 
   cargarMunicipios(departamentoId: number) {
-    this.direccionSer.getMunicipiosPorDepartamentoId(departamentoId).subscribe({
+    this.direccionService.getMunicipiosPorDepartamentoId(departamentoId).subscribe({
       next: (data) => {
         this.municipios = data;
       },
@@ -186,7 +171,7 @@ export class BenefComponent implements OnInit {
   }
 
   cargarMunicipiosNacimiento(departamentoId: number) {
-    this.direccionSer.getMunicipiosPorDepartamentoId(departamentoId).subscribe({
+    this.direccionService.getMunicipiosPorDepartamentoId(departamentoId).subscribe({
       next: (data) => {
         this.municipiosNacimiento = data;
       },
@@ -196,11 +181,28 @@ export class BenefComponent implements OnInit {
     });
   }
 
-  // Función para validar la suma de porcentajes
+  loadDiscapacidades() {
+    this.datosEstaticosService.getDiscapacidades().subscribe({
+      next: (data) => {
+        this.tipo_discapacidad = data.map((discapacidad: { label: string, value: string }) => ({
+          label: discapacidad.label,
+          value: discapacidad.value
+        }));
+        this.formParent.get('beneficiario')?.value.forEach((_: any, index: number) => {
+          const discapacidadesArray = this.getDiscapacidadesFormArray(index);
+          this.tipo_discapacidad.forEach(() => discapacidadesArray.push(new FormControl(false)));
+        });
+      },
+      error: (error) => {
+        console.error('Error al cargar discapacidades:', error);
+      }
+    });
+  }
+
   validarSumaPorcentajes(control: AbstractControl): ValidationErrors | null {
     const beneficiariosArray = this.formParent.get('beneficiario') as FormArray;
     if (!beneficiariosArray) {
-      return null; // No se puede validar si el grupo 'beneficiario' no existe
+      return null;
     }
 
     let porcentajeTotal = 0;
@@ -217,7 +219,6 @@ export class BenefComponent implements OnInit {
     if (porcentajeTotal !== 100) {
       return { invalidSumaPorcentajes: true };
     } else {
-      // Eliminar el error de invalidSumaPorcentajes si existe
       beneficiariosArray.controls.forEach((control: any) => {
         const controlporcentaje = control.get('porcentaje');
         if (controlporcentaje.errors) {
@@ -240,9 +241,10 @@ export class BenefComponent implements OnInit {
       control.removeAt(control.length - 1);
       control.controls.forEach((control: any) => {
         const controlporcentaje = control.get('porcentaje');
-        controlporcentaje.updateValueAndValidity(); // Actualizar la validación del porcentaje
+        controlporcentaje.updateValueAndValidity();
       });
     }
+    this.onDatosBenChange();  // Emitir evento con los datos actualizados
   }
 
   getCtrl(key: string, form: FormGroup): any {
@@ -251,148 +253,115 @@ export class BenefComponent implements OnInit {
 
   onDatosBenChange() {
     const beneficiariosArray = this.formParent.get('beneficiario') as FormArray;
-    const beneficiarios = beneficiariosArray.value.map((beneficiario: any) => ({
+    const beneficiarios = beneficiariosArray.controls.map((control: AbstractControl, index: number) => ({
       persona: {
-        id_tipo_identificacion: beneficiario.id_tipo_identificacion,
-        id_pais_nacionalidad: beneficiario.id_pais_nacionalidad,
-        n_identificacion: beneficiario.n_identificacion,
-        fecha_vencimiento_ident: beneficiario.fecha_vencimiento_ident,
-        rtn: beneficiario.rtn,
-        grupo_etnico: beneficiario.grupo_etnico,
-        estado_civil: beneficiario.estado_civil,
-        primer_nombre: beneficiario.primer_nombre,
-        segundo_nombre: beneficiario.segundo_nombre,
-        tercer_nombre: beneficiario.tercer_nombre,
-        primer_apellido: beneficiario.primer_apellido,
-        segundo_apellido: beneficiario.segundo_apellido,
-        genero: beneficiario.genero,
-        sexo: beneficiario.sexo,
-        fallecido: beneficiario.fallecido,
-        cantidad_hijos: beneficiario.cantidad_hijos,
-        primer_nombre_censo: beneficiario.primer_nombre_censo,
-        segundo_nombre_censo: beneficiario.segundo_nombre_censo,
-        nombre_apellido_escalafon: beneficiario.nombre_apellido_escalafon,
-        primer_apellido_censo: beneficiario.primer_apellido_censo,
-        segundo_apellido_censo: beneficiario.segundo_apellido_censo,
-        representacion: beneficiario.representacion,
-        grado_academico: beneficiario.grado_academico,
-        telefono_1: beneficiario.telefono_1,
-        telefono_2: beneficiario.telefono_2,
-        correo_1: beneficiario.correo_1,
-        correo_2: beneficiario.correo_2,
-        fecha_nacimiento: beneficiario.fecha_nacimiento,
-        direccion_residencia: beneficiario.direccion_residencia,
-        id_municipio_residencia: beneficiario.id_municipio_residencia,
-        id_profesion: beneficiario.id_profesion,
+        id_tipo_identificacion: control.get('id_tipo_identificacion')?.value,
+        id_pais_nacionalidad: control.get('id_pais_nacionalidad')?.value,
+        n_identificacion: control.get('n_identificacion')?.value,
+        primer_nombre: control.get('primer_nombre')?.value,
+        segundo_nombre: control.get('segundo_nombre')?.value,
+        tercer_nombre: control.get('tercer_nombre')?.value,
+        primer_apellido: control.get('primer_apellido')?.value,
+        segundo_apellido: control.get('segundo_apellido')?.value,
+        genero: control.get('genero')?.value,
+        sexo: control.get('sexo')?.value,
+        telefono_1: control.get('telefono_1')?.value,
+        telefono_2: control.get('telefono_2')?.value,
+        correo_1: control.get('correo_1')?.value,
+        correo_2: control.get('correo_2')?.value,
+        fecha_nacimiento: control.get('fecha_nacimiento')?.value,
+        direccion_residencia: control.get('direccion_residencia')?.value,
+        id_municipio_residencia: control.get('id_municipio_residencia')?.value,
+        discapacidades: this.getSelectedDiscapacidades(index),
+        porcentaje: control.get('porcentaje')?.value
       }
     }));
 
     const formattedFormGroup = this.fb.group({
-      beneficiarios: this.fb.array(beneficiarios.map((b:any) => this.fb.group(b)))
+      beneficiarios: this.fb.array(beneficiarios.map(b => this.fb.group(b)))
     });
 
     this.newDatBenChange.emit(formattedFormGroup);
     this.formStateService.setForm(this.formKey, this.formParent);
   }
 
-  private loadMunicipios() {
-    this.direccionService.getAllMunicipios().subscribe({
-      next: (data) => {
-        this.municipios = data;
-      },
-      error: (error) => {
-        console.error('Error al cargar municipios:', error);
-      }
-    });
+  getDiscapacidadesFormArray(index: number): FormArray {
+    return (this.formParent.get('beneficiario') as FormArray).at(index).get('discapacidades') as FormArray;
   }
 
-  private loadNacionalidades() {
-    this.datosEstaticosService.getNacionalidad().then(data => {
-      this.nacionalidades = data;
-    }).catch(error => {
-      console.error('Error al cargar países:', error);
-    });
+  getSelectedDiscapacidades(index: number): string[] {
+    const discapacidadesArray = this.getDiscapacidadesFormArray(index);
+    return discapacidadesArray.controls
+      .map((control, idx) => control.value ? this.tipo_discapacidad[idx].value : null)
+      .filter(value => value !== null);
   }
 
-  agregarDiscapacidad(i: number) {
+  onDiscapacidadChange(index: number, event: any) {
     const beneficiariosArray = this.formParent.get('beneficiario') as FormArray;
-    const beneficiarioGroup = beneficiariosArray.controls[i] as FormGroup;
+    const beneficiarioGroup = beneficiariosArray.controls[index] as FormGroup;
     const discapacidadesArray = beneficiarioGroup.get('discapacidades') as FormArray;
 
-    const newDisabilityControl = new FormControl('', Validators.required);
-
-    discapacidadesArray.push(newDisabilityControl);
-
-    newDisabilityControl.valueChanges.subscribe(() => {
-      discapacidadesArray.controls.forEach((control: AbstractControl, index: number) => {
-        if (control instanceof FormControl) {
-          control.setValidators([
-            Validators.required,
-            this.uniqueDisabilityValidator(discapacidadesArray.value, index)
-          ]);
-          control.updateValueAndValidity({ emitEvent: false });
-        }
-      });
+    discapacidadesArray.clear();
+    this.tipo_discapacidad.forEach(() => {
+      discapacidadesArray.push(new FormControl(false));
     });
+
+    if (event.value === 'si') {
+    }
   }
 
-  eliminarDiscapacidad(i: number, index: number) {
-    const beneficiariosArray = this.formParent.get('beneficiario') as FormArray;
-    const beneficiarioGroup = beneficiariosArray.controls[i] as FormGroup;
-    const discapacidadesArray = beneficiarioGroup.get('discapacidades') as FormArray;
+  getErrors(index: number, controlName: string): string[] {
+    const control = (this.formParent.get('beneficiario') as FormArray).at(index).get(controlName);
+    const errors: string[] = [];
 
-    discapacidadesArray.removeAt(index);
-
-    discapacidadesArray.controls.forEach((control: AbstractControl, idx: number) => {
-      if (control instanceof FormControl) {
-        control.setValidators([
-          Validators.required,
-          this.uniqueDisabilityValidator(discapacidadesArray.value, idx)
-        ]);
-        control.updateValueAndValidity({ emitEvent: false });
+    if (control && control.errors) {
+      if (control.errors['required']) {
+        errors.push('Este campo es obligatorio.');
       }
-    });
-  }
-
-  uniqueDisabilityValidator(disabilityArray: string[], currentIndex: number): ValidatorFn {
-    return (control: AbstractControl): { [key: string]: any } | null => {
-      const currentValue = control.value;
-      const isDuplicate = disabilityArray.some((val: string, index: number) => index !== currentIndex && val === currentValue);
-
-      return isDuplicate ? { 'duplicateDisability': { value: currentValue } } : null;
-    };
-  }
-
-  getAvailableDisabilities(discapacidadesArray: FormArray, currentIndex: number): { label: string; value: string }[] {
-    const selectedValues = discapacidadesArray.value.map((val: any, index: number) => index !== currentIndex ? val : null);
-    return this.tipo_discapacidad.filter((d: any) => !selectedValues.includes(d.value));
-  }
-
-  getErrors(i: number, fieldName: string): any {
-    const controlesBeneficiarios = (this.formParent.get('beneficiario') as FormArray).controls;
-    const temp = controlesBeneficiarios[i].get(fieldName)?.errors;
-
-    let errors = [];
-    if (temp) {
-      if (temp['required']) {
-        errors.push('Este campo es requerido.');
+      if (control.errors['minlength']) {
+        errors.push(`Debe tener al menos ${control.errors['minlength'].requiredLength} caracteres.`);
       }
-      if (temp['minlength']) {
-        errors.push(`Debe tener al menos ${temp['minlength'].requiredLength} caracteres.`);
+      if (control.errors['maxlength']) {
+        errors.push(`No puede tener más de ${control.errors['maxlength'].requiredLength} caracteres.`);
       }
-      if (temp['maxlength']) {
-        errors.push(`No puede tener más de ${temp['maxlength'].requiredLength} caracteres.`);
-      }
-      if (temp['pattern']) {
+      if (control.errors['pattern']) {
         errors.push('El formato no es válido.');
       }
-      if (temp['email']) {
+      if (control.errors['email']) {
         errors.push('Correo electrónico no válido.');
       }
-      if (temp['invalidPorcentaje']) {
+    }
+
+    return errors;
+  }
+
+  getErrors2(index: number, controlName: string): string[] {
+    const control = (this.formParent.get('beneficiario') as FormArray).at(index).get(controlName);
+    const errors: string[] = [];
+
+    if (control && control.errors) {
+      if (control.errors['min']) {
+        errors.push(`El valor mínimo es ${control.errors['min'].min}.`);
+      }
+      if (control.errors['required']) {
+        errors.push('Este campo es obligatorio.');
+      }
+      if (control.errors['minlength']) {
+        errors.push(`Debe tener al menos ${control.errors['minlength'].requiredLength} caracteres.`);
+      }
+      if (control.errors['maxlength']) {
+        errors.push(`No puede tener más de ${control.errors['maxlength'].requiredLength} caracteres.`);
+      }
+      if (control.errors['pattern']) {
+        errors.push('El formato no es válido.');
+      }
+      if (control.errors['email']) {
+        errors.push('Correo electrónico no válido.');
+      }
+      if (control.errors['invalidPorcentaje']) {
         errors.push('Valor no válido debe estar entre 0 - 100.');
       }
-      if (temp['invalidSumaPorcentajes']) {
+      if (control.errors['invalidSumaPorcentajes']) {
         errors.push('La suma de los porcentajes debe ser 100%.');
       }
     }
@@ -400,64 +369,15 @@ export class BenefComponent implements OnInit {
     return errors;
   }
 
-  getErrors2(i: number, fieldName: string): any {
-    const controlesBeneficiarios = (this.formParent.get('beneficiario') as FormArray).controls;
-    const temp = controlesBeneficiarios[i].get(fieldName)?.errors;
-
-    let errors = [];
-    if (temp) {
-      if (temp['min']) {
-        errors.push(`El valor mínimo es 1.`);
-      }
-      if (temp['required']) {
-        errors.push('Este campo es requerido.');
-      }
-      if (temp['minlength']) {
-        errors.push(`Debe tener al menos ${temp['minlength'].requiredLength} caracteres.`);
-      }
-      if (temp['maxlength']) {
-        errors.push(`No puede tener más de ${temp['maxlength'].requiredLength} caracteres.`);
-      }
-      if (temp['pattern']) {
-        errors.push('El formato no es válido.');
-      }
-      if (temp['email']) {
-        errors.push('Correo electrónico no válido.');
-      }
-      if (temp['invalidPorcentaje']) {
-        errors.push('Valor no válido debe estar entre 0 - 100.');
-      }
-    }
-    if (temp && temp['invalidSumaPorcentajes'] && fieldName == "porcentaje") {
-      errors.push('La suma de los porcentajes debe ser 100%.');
-    }
-    return errors;
-  }
-
-  onDatosGeneralesDiscChange(event: any, i: number) {
+  onDatosGeneralesDiscChange(event: any, index: number) {
     const value = event.value;
     const beneficiariosArray = this.formParent.get('beneficiario') as FormArray;
-    const beneficiarioGroup = beneficiariosArray.controls[i] as FormGroup;
+    const beneficiarioGroup = beneficiariosArray.controls[index] as FormGroup;
 
     if (value === 'si') {
       beneficiarioGroup.get('dependiente')?.setValue(true);
     } else {
       beneficiarioGroup.get('dependiente')?.setValue(false);
-    }
-  }
-
-  onDiscapacidadChange(i: number, event: any) {
-    const beneficiariosArray = this.formParent.get('beneficiario') as FormArray;
-    const beneficiarioGroup = beneficiariosArray.controls[i] as FormGroup;
-
-    if (event.value === 'si') {
-      if (!beneficiarioGroup.contains('discapacidades')) {
-        beneficiarioGroup.addControl('discapacidades', new FormArray([]));
-      }
-    } else {
-      if (beneficiarioGroup.contains('discapacidades')) {
-        beneficiarioGroup.removeControl('discapacidades');
-      }
     }
   }
 }

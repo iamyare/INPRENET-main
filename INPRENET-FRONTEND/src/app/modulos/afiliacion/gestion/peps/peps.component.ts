@@ -1,16 +1,18 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, EventEmitter, Input, Output, OnInit } from '@angular/core';
 import { AbstractControl, FormArray, FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { DireccionService } from 'src/app/services/direccion.service';
 import { FieldArrays } from 'src/app/shared/Interfaces/field-arrays';
-import { FieldConfig } from 'src/app/shared/Interfaces/field-config';
 
 @Component({
   selector: 'app-peps',
   templateUrl: './peps.component.html',
-  styleUrl: './peps.component.scss'
+  styleUrls: ['./peps.component.scss']
 })
-export class PepsComponent {
-  parentForm!: FormGroup;
+export class PepsComponent implements OnInit {
+  @Input() parentForm!: FormGroup;
+  @Input() field: any; // Recibiendo la propiedad `field` del componente padre
+  @Output() pepsChange = new EventEmitter<any>();
+
   departamentos: any = [];
   municipios: any = [];
 
@@ -23,7 +25,7 @@ export class PepsComponent {
       label: 'Cargo Desempeñado',
       type: 'text',
       value: '',
-      validations: [],
+      validations: [Validators.required],
       layout: { row: 1, col: 6 }
     },
     {
@@ -34,50 +36,26 @@ export class PepsComponent {
       endDateControlName: 'endDate',
       layout: { row: 1, col: 6 }
     },
-    {
-      name: 'fecha_resolucion',
-      label: 'Fecha Resolucion',
-      type: 'date',
-      maxDate: this.maxDate,
-      value: '',
-      validations: [],
-      layout: { row: 2, col: 6 }
-    },
-    {
-      name: 'fecha_ingreso_peps',
-      label: 'Fecha Ingreso A PEPS',
-      type: 'date',
-      maxDate: this.maxDate,
-      value: '',
-      validations: [],
-      layout: { row: 2, col: 6 }
-    },
-    {
-      name: 'observacion',
-      label: 'Observación',
-      type: 'text',
-      value: '',
-      validations: [],
-      layout: { row: 3, col: 12 }
-    },
-
   ];
 
-  constructor(private fb: FormBuilder, private direccionService: DireccionService) { }
+  constructor(private fb: FormBuilder, private direccionService: DireccionService) {}
 
   ngOnInit(): void {
     if (!this.parentForm) {
       this.parentForm = this.fb.group({
         peps: this.fb.array([])
       });
-    }
-    //this.addReferencia();
-  }
-
-  addControlsToForm() {
-    if (!this.parentForm.contains('peps')) {
+    } else if (!this.parentForm.contains('peps')) {
       this.parentForm.addControl('peps', this.fb.array([]));
     }
+
+    // Escuchar cambios en el control de "cargo público"
+    this.parentForm.get('cargoPublico')?.valueChanges.subscribe((value: string) => {
+      if (value === 'NO') {
+        this.peps.clear();
+        this.pepsChange.emit([]);
+      }
+    });
   }
 
   get peps(): FormArray {
@@ -88,19 +66,25 @@ export class PepsComponent {
     const referenciaGroup = this.fb.group({
       startDate: new FormControl(null, Validators.required),
       endDate: new FormControl(null, Validators.required),
-      nombre: ['', Validators.required],
-      observacion: ['', Validators.required],
-      pep_periodo: ['', Validators.required],
-      pep_cargo_desempenado: ['', Validators.required],
-      fecha_resolucion: ['', Validators.required],
-      fecha_ingreso_peps: ['', Validators.required]
+      pep_cargo_desempenado: new FormControl('', Validators.required),
     });
 
     this.peps.push(referenciaGroup);
+    this.emitPepsData();
   }
 
   removeReferencia(index: number): void {
     this.peps.removeAt(index);
+    this.emitPepsData();
+  }
+
+  emitPepsData(): void {
+    const validPeps = this.peps.controls.filter(control => {
+      const group = control as FormGroup;
+      return Object.values(group.value).some(value => value !== null && value !== '');
+    }).map(control => control.value);
+
+    this.pepsChange.emit(validPeps);
   }
 
   asFormGroup(control: AbstractControl): FormGroup {

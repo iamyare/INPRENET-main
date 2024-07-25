@@ -13,12 +13,18 @@
             <mat-form-field class="example-full-width inputs" appearance="outline">
               <mat-label>Primer Nombre</mat-label>
               <input matInput formControlName="primer_nombre">
+              <mat-error *ngFor="let error of getErrors(i, 'primer_nombre')">
+                {{ error }}
+              </mat-error>
             </mat-form-field>
           </div>
           <div class="col-md-6">
             <mat-form-field class="example-full-width inputs" appearance="outline">
               <mat-label>Segundo Nombre</mat-label>
               <input matInput formControlName="segundo_nombre">
+              <mat-error *ngFor="let error of getErrors(i, 'segundo_nombre')">
+                {{ error }}
+              </mat-error>
             </mat-form-field>
           </div>
         </div>
@@ -27,12 +33,18 @@
             <mat-form-field class="example-full-width inputs" appearance="outline">
               <mat-label>Tercer Nombre</mat-label>
               <input matInput formControlName="tercer_nombre">
+              <mat-error *ngFor="let error of getErrors(i, 'tercer_nombre')">
+                {{ error }}
+              </mat-error>
             </mat-form-field>
           </div>
           <div class="col-md-6">
             <mat-form-field class="example-full-width inputs" appearance="outline">
               <mat-label>Primer Apellido</mat-label>
               <input matInput formControlName="primer_apellido">
+              <mat-error *ngFor="let error of getErrors(i, 'primer_apellido')">
+                {{ error }}
+              </mat-error>
             </mat-form-field>
           </div>
         </div>
@@ -41,12 +53,18 @@
             <mat-form-field class="example-full-width inputs" appearance="outline">
               <mat-label>Segundo Apellido</mat-label>
               <input matInput formControlName="segundo_apellido">
+              <mat-error *ngFor="let error of getErrors(i, 'segundo_apellido')">
+                {{ error }}
+              </mat-error>
             </mat-form-field>
           </div>
           <div class="col-md-6">
             <mat-form-field class="example-full-width inputs" appearance="outline">
               <mat-label>Número de Identificación</mat-label>
               <input matInput formControlName="n_identificacion">
+              <mat-error *ngFor="let error of getErrors(i, 'n_identificacion')">
+                {{ error }}
+              </mat-error>
             </mat-form-field>
           </div>
         </div>
@@ -55,6 +73,9 @@
             <mat-form-field class="example-full-width inputs" appearance="outline">
               <mat-label>Parentesco</mat-label>
               <input matInput formControlName="parentesco">
+              <mat-error *ngFor="let error of getErrors(i, 'parentesco')">
+                {{ error }}
+              </mat-error>
             </mat-form-field>
           </div>
         </div>

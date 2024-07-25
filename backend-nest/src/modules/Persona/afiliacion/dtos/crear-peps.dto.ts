@@ -12,8 +12,4 @@ export class CrearPepsDto {
   @IsOptional()
   @IsDateString()
   fecha_fin?: string;
-
-  @IsOptional()
-  @IsString()
-  referencias?: string;
 }

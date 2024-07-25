@@ -43,3 +43,45 @@
     </button>
   </div>
 </div>
+
+<div class="card-body" style="text-align: center;">
+  <strong>Datos Generales Del Docente</strong><br>
+  <pre>{{ datosGeneralesForm.value | json }}</pre>
+  <strong>Status:</strong> {{ datosGeneralesForm.status }}
+  <br><br>
+
+  <strong>Familiares</strong><br>
+  <pre>{{ familiaresForm.value | json }}</pre>
+  <strong>Status:</strong> {{ familiaresForm.status }}
+  <br><br>
+
+  <strong>Colegio Magisterial:</strong>
+   {{ colegioMagisterialForm.value | json }}
+  <strong>Status:</strong> {{ colegioMagisterialForm.status }}
+  <br><br>
+
+  <strong>Datos Cuentas Bancarias</strong><br>
+  <pre>{{ bancosForm.value | json }}</pre>
+  <strong>Status:</strong> {{ bancosForm.status }}
+  <br><br>
+
+  <strong>Centros De Trabajo</strong><br>
+  <pre>{{ centrosTrabajoForm.value | json }}</pre>
+  <strong>Status:</strong> {{ centrosTrabajoForm.status }}
+  <br><br>
+
+  <strong>Referencias Personales / Familiares</strong><br>
+  <pre>{{ refPersForm.value | json }}</pre>
+  <strong>Status:</strong> {{ refPersForm.status }}
+  <br><br>
+
+  <strong>Beneficiarios</strong><br>
+  <pre>{{ benefForm.value | json }}</pre>
+  <strong>Status:</strong> {{ benefForm.status }}
+  <br><br>
+
+  <strong>Otras Fuentes de Ingreso</strong><br>
+  <pre>{{ otrasFuentesIngresoForm.value | json }}</pre>
+  <strong>Status:</strong> {{ otrasFuentesIngresoForm.status }}
+</div>
+

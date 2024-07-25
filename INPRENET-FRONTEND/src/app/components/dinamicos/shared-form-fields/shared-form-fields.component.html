@@ -61,7 +61,7 @@
 
       <!-- Date Range picker -->
       <div *ngIf="field.type === 'dateRange'">
-        <mat-form-field class="example-full-width">
+        <mat-form-field class="example-full-width inputs" appearance="outline" *ngIf="field.type === 'dateRange'">
           <mat-label>{{ field.label }}</mat-label>
           <mat-date-range-input [rangePicker]="picker">
             <input matStartDate placeholder="Fecha De Inicio" [formControl]="getControl(field.startDateControlName)">
@@ -70,6 +70,14 @@
           <mat-hint>MM/DD/YYYY – MM/DD/YYYY</mat-hint>
           <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
           <mat-date-range-picker #picker></mat-date-range-picker>
+          <mat-error
+            *ngIf="getControl(field.startDateControlName)?.invalid && (getControl(field.startDateControlName)?.dirty || getControl(field.startDateControlName)?.touched)">
+            <ng-container *ngIf="getControl(field.startDateControlName)?.errors?.['required']">Fecha de inicio requerida</ng-container>
+          </mat-error>
+          <mat-error
+            *ngIf="getControl(field.endDateControlName)?.invalid && (getControl(field.endDateControlName)?.dirty || getControl(field.endDateControlName)?.touched)">
+            <ng-container *ngIf="getControl(field.endDateControlName)?.errors?.['required']">Fecha de finalización requerida</ng-container>
+          </mat-error>
         </mat-form-field>
       </div>
     </div>

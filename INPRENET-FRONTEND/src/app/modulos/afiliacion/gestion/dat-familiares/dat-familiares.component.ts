@@ -34,6 +34,7 @@ export class DatFamiliaresComponent implements OnInit {
 
   ngOnInit(): void {
     this.initForm();
+    this.forceValidation();
   }
 
   private initForm() {
@@ -65,5 +66,36 @@ export class DatFamiliaresComponent implements OnInit {
 
   getCtrl(key: string, form: FormGroup): any {
     return form.get(key);
+  }
+
+  getErrors(i: number, fieldName: string): any {
+    if (this.parentForm instanceof FormGroup) {
+      const controlesFamiliares = (this.parentForm.get('familiares') as FormArray).controls;
+      const errors = controlesFamiliares[i].get(fieldName)!.errors;
+
+      let errorMessages = [];
+      if (errors) {
+        if (errors['required']) {
+          errorMessages.push('Este campo es requerido.');
+        }
+        if (errors['minlength']) {
+          errorMessages.push(`Debe tener al menos ${errors['minlength'].requiredLength} caracteres.`);
+        }
+        if (errors['maxlength']) {
+          errorMessages.push(`No puede tener más de ${errors['maxlength'].requiredLength} caracteres.`);
+        }
+        if (errors['pattern']) {
+          errorMessages.push('El formato no es válido.');
+        }
+        return errorMessages;
+      }
+    }
+  }
+
+  private forceValidation() {
+    const refFamiliares = this.parentForm.get('familiares') as FormArray;
+    refFamiliares.controls.forEach(control => {
+      control.updateValueAndValidity();
+    });
   }
 }

@@ -11,7 +11,7 @@ const noSpecialCharsPattern = '^[a-zA-Z0-9\\s]*$';
 
 export function generateAddressFormGroup(datos?: any): FormGroup {
   return new FormGroup({
-    n_identificacion: new FormControl(datos?.n_identificacion, [Validators.required, Validators.maxLength(15), Validators.pattern(/^[0-9]{13}$|^[0-9]{4}-[0-9]{4}-[0-9]{5}$/)]),
+    n_identificacion: new FormControl(datos?.n_identificacion, [Validators.required, Validators.maxLength(15), Validators.pattern(/^[0-9]{13}$/)]),
     primer_nombre: new FormControl(datos?.primer_nombre, [
       Validators.required,
       Validators.maxLength(40),
@@ -157,7 +157,9 @@ export class DatGeneralesAfiliadoComponent implements OnInit {
     { "label": "POST-GRADO", "value": "POST-GRADO" },
   ];
 
-  public formParent: FormGroup = new FormGroup({});
+  formParent: FormGroup = this.fb.group({
+    refpers: this.fb.array([])
+  });
 
   @Input() useCamera: boolean = false;
   @Input() groupName = '';
@@ -193,7 +195,9 @@ export class DatGeneralesAfiliadoComponent implements OnInit {
   onDatosGeneralesChange() {
     const data = this.formParent.value;
     this.newDatosGenerales.emit(data);
-  }
+    console.log(data);
+
+}
 
   onDatosGeneralesDiscChange(event: any, i: number) {
     const value = event.value;
@@ -224,7 +228,20 @@ export class DatGeneralesAfiliadoComponent implements OnInit {
       no: value === 'NO'
     };
     this.cargoPublico = this.cargoPublicoEstado.si;
+
+    if (!this.cargoPublico) {
+      // Si se selecciona "NO", eliminamos los datos de PEPS
+      const refpersArray = this.formParent.get('refpers') as FormArray;
+      refpersArray.controls.forEach((group: AbstractControl) => {
+        const pepsArray = (group as FormGroup).get('peps') as FormArray;
+        pepsArray.clear(); // Limpiamos los datos de PEPS
+      });
+
+      // Emitimos el cambio para que otros componentes estén al tanto
+      this.pepsDataChange.emit([]);
+    }
   }
+
 
   onDatosBenChange(fecha: any) {
     this.pepsDataChange.emit(fecha._model.selection);
@@ -526,4 +543,15 @@ export class DatGeneralesAfiliadoComponent implements OnInit {
 
     this.onDatosGeneralesChange();
   }
+
+
+  onPepsDataChange(data: any): void {
+    const validPeps = data.filter((pep: any) => {
+        return Object.values(pep).some(value => value !== null && value !== '');
+    });
+    this.pepsDataChange.emit(validPeps);
+    console.log(data);
+
+}
+
 }

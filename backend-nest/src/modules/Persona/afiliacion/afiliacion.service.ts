@@ -155,22 +155,25 @@ export class AfiliacionService {
   async crearPersona(crearPersonaDto: CrearPersonaDto, fotoPerfil: Express.Multer.File, entityManager: EntityManager): Promise<net_persona> {
     const tipoIdentificacion = await this.tipoIdentificacionRepository.findOne({ where: { id_identificacion: crearPersonaDto.id_tipo_identificacion } });
     if (!tipoIdentificacion) throw new NotFoundException(`El tipo de identificación con ID ${crearPersonaDto.id_tipo_identificacion} no existe`);
-
+  
     const pais = await this.paisRepository.findOne({ where: { id_pais: crearPersonaDto.id_pais_nacionalidad } });
     if (!pais) throw new NotFoundException(`El país con ID ${crearPersonaDto.id_pais_nacionalidad} no existe`);
-
+  
     const municipioResidencia = await this.municipioRepository.findOne({ where: { id_municipio: crearPersonaDto.id_municipio_residencia } });
     if (!municipioResidencia) throw new NotFoundException(`El municipio de residencia con ID ${crearPersonaDto.id_municipio_residencia} no existe`);
-
+  
     const municipioDefuncion = crearPersonaDto.id_municipio_defuncion ? await this.municipioRepository.findOne({ where: { id_municipio: crearPersonaDto.id_municipio_defuncion } }) : null;
     if (crearPersonaDto.id_municipio_defuncion && !municipioDefuncion) throw new NotFoundException(`El municipio de defunción con ID ${crearPersonaDto.id_municipio_defuncion} no existe`);
-
+  
+    const municipioNacimiento = await this.municipioRepository.findOne({ where: { id_municipio: crearPersonaDto.id_municipio_nacimiento } });
+    if (!municipioNacimiento) throw new NotFoundException(`El municipio de nacimiento con ID ${crearPersonaDto.id_municipio_nacimiento} no existe`);
+  
     const profesion = crearPersonaDto.id_profesion ? await this.profesionRepository.findOne({ where: { id_profesion: crearPersonaDto.id_profesion } }) : null;
     if (crearPersonaDto.id_profesion && !profesion) throw new NotFoundException(`La profesión con ID ${crearPersonaDto.id_profesion} no existe`);
-
+  
     const causaFallecimiento = crearPersonaDto.id_causa_fallecimiento ? await this.causasFallecimientosRepository.findOne({ where: { id_causa_fallecimiento: crearPersonaDto.id_causa_fallecimiento } }) : null;
     if (crearPersonaDto.id_causa_fallecimiento && !causaFallecimiento) throw new NotFoundException(`La causa de fallecimiento con ID ${crearPersonaDto.id_causa_fallecimiento} no existe`);
-
+  
     const persona = entityManager.create(net_persona, {
       ...crearPersonaDto,
       fecha_vencimiento_ident: this.formatDateToYYYYMMDD(crearPersonaDto.fecha_vencimiento_ident),
@@ -180,13 +183,15 @@ export class AfiliacionService {
       tipoIdentificacion,
       pais,
       municipio: municipioResidencia,
+      municipio_nacimiento: municipioNacimiento,
       municipio_defuncion: municipioDefuncion,
       profesion,
       causa_fallecimiento: causaFallecimiento,
     });
+  
     return await entityManager.save(net_persona, persona);
   }
-
+  
   async crearDetallePersona(
     crearDetallePersonaDto: CrearDetallePersonaDto,
     idPersona: number,
@@ -585,6 +590,7 @@ export class AfiliacionService {
       },
     }));
   }
+  
 
   async eliminarReferencia(idRefPersonal: number): Promise<void> {
     const referencia = await this.referenciaRepository.findOne({

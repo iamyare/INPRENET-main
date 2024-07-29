@@ -7,16 +7,29 @@ import { Net_Discapacidad } from '../entities/net_discapacidad.entity';
 import { Net_Ref_Per_Pers } from '../entities/net_ref-per-persona.entity';
 import { CrearReferenciaDto } from './dtos/crear-referencia.dto';
 import { Connection, EntityManager, getConnection, getManager } from 'typeorm';
+import { CrearPersonaBancoDto } from './dtos/crear-persona_por_banco.dto';
+import { Net_Persona_Por_Banco } from 'src/modules/banco/entities/net_persona-banco.entity';
 
 @Controller('afiliacion')
 export class AfiliacionController {
   constructor(private readonly afiliacionService: AfiliacionService,private readonly connection: Connection,) {
   }
 
+  @Post('asignar-bancos/:idPersona')
+  async asignarBancosAPersona(
+    @Param('idPersona') idPersona: number,
+    @Body() crearPersonaBancosDtos: CrearPersonaBancoDto[],
+  ): Promise<Net_Persona_Por_Banco[]> {
+    return await this.connection.transaction(async (entityManager: EntityManager) => {
+      return this.afiliacionService.crearPersonaBancos(crearPersonaBancosDtos, idPersona, entityManager);
+    });
+  }
+
   @Get('referencias/:nIdentificacion')
   async obtenerReferenciasPorIdentificacion(@Param('nIdentificacion') nIdentificacion: string) {
     return await this.afiliacionService.obtenerReferenciasPorIdentificacion(nIdentificacion);
   }
+
 
   @Patch('referencia/inactivar/:id')
   async inactivarReferencia(@Param('id') idRefPersonal: number): Promise<void> {

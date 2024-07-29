@@ -101,12 +101,6 @@ export class AfiliadoController {
         });
       } */
 
-      // Asignación de bancos
-      let bancosAsignados = [];
-      if (encapsulatedDto.bancos && encapsulatedDto.bancos.length > 0) {
-        bancosAsignados = await this.afiliadoService.assignBancosToPersona(persona.id_persona, encapsulatedDto.bancos);
-      }
-
       // Creación de beneficiarios
       let beneficiariosAsignados = [];
       if (encapsulatedDto.beneficiarios && encapsulatedDto.beneficiarios.length > 0) {
@@ -180,10 +174,6 @@ export class AfiliadoController {
   @Post('/createCentrosTrabajo/:idPersona')
   createCentrosTrabajo(@Param("idPersona") idPersona: number, @Body() centrosTrabajoData: any) {
     return this.afiliadoService.assignCentrosTrabajo(idPersona, centrosTrabajoData);
-  }
-  @Post('/createDatosBancarios/:idPersona')
-  createDatosBancarios(@Param("idPersona") idPersona: number, @Body() bancosData: any) {
-    return this.afiliadoService.assignBancosToPersona(idPersona, bancosData);
   }
 
   @Post('/createBeneficiarios/:idPersona')

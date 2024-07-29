@@ -47,7 +47,7 @@ export class NuevoBeneficioAfilComponent implements OnInit {
   ) { }
 
   ngOnInit(): void {
-    this.getTipoBen();
+
 
     this.myFormFields = [
       { type: 'text', label: 'DNI del afiliado', name: 'dni', validations: [Validators.required, Validators.minLength(13), Validators.maxLength(14)], display: true },
@@ -118,31 +118,21 @@ export class NuevoBeneficioAfilComponent implements OnInit {
      ] */
   }
 
-  getTipoBen = async () => {
+  getTipoBen = async (tipoPers: string) => {
     try {
-      const beneficios = await this.svcBeneficioServ.getTipoBeneficio().toPromise();
-      const tiposBen = beneficios.map((item: any) => {
+      const beneficios = await this.svcBeneficioServ.obtenerTipoBeneficioByTipoPersona(tipoPers).toPromise();
+      console.log("ENTRO");
+
+      //this.tiposBeneficios = [];
+      beneficios.map((item: any) => {
         this.tiposBeneficios.push({
-          label: `${item.nombre_beneficio}`,
-          value: `${item.nombre_beneficio}`,
-          periodicidad: `${item.periodicidad}`
-        }
-        )
-        return {
-          id: item.id_beneficio,
-          nombre_beneficio: item.nombre_beneficio,
-          descripcion_beneficio: item.descripcion_beneficio || 'No disponible',
-          estado: item.estado,
-          prioridad: item.prioridad,
-          monto_beneficio: item.monto_beneficio,
-          porcentaje_beneficio: item.porcentaje_beneficio,
-          anio_duracion: item.anio_duracion,
-          mes_duracion: item.mes_duracion,
-          dia_duracion: item.dia_duracion,
-          ley_aplicable: item.ley_aplicable,
-        };
+          label: `${item.beneficio.nombre_beneficio}`,
+          value: `${item.beneficio.nombre_beneficio}`,
+          periodicidad: `${item.beneficio.periodicidad}`
+        })
       });
-      return tiposBen;
+
+      return this.tiposBeneficios;
     } catch (error) {
       console.error("Error al obtener datos de beneficios", error);
     }
@@ -174,16 +164,16 @@ export class NuevoBeneficioAfilComponent implements OnInit {
     } */
 
   getFilas = async () => {
-    if (this.Afiliado.fallecido == "SI") {
+    if (this.Afiliado.fallecido == "SI" && this.Afiliado.tipo_persona == "AFILIADO") {
       try {
         await this.getColumns();
         const data = await this.svcAfilServ.obtenerBenDeAfil(this.form.value.dni).toPromise();
 
         this.filas = data.map((item: any) => ({
-          dni: item.dni,
+          dni: item.n_identificacion,
           nombre_completo: this.unirNombres(item.primer_nombre, item.segundo_nombre, item.tercer_nombre, item.primer_apellido, item.segundo_apellido),
           genero: item.genero,
-          tipo_afiliado: item.tipo_afiliado,
+          tipo_afiliado: item.tipo_persona,
           porcentaje: item.porcentaje,
         }));
 
@@ -233,7 +223,7 @@ export class NuevoBeneficioAfilComponent implements OnInit {
 
           const primerObjetoTransformado = this.transformarObjeto(response[0]);
           this.myColumns = [
-            { header: 'DNI', col: 'dni', isEditable: false },
+            { header: 'N_Identificacion', col: 'dni', isEditable: false },
             {
               header: 'Nombre Completo',
               col: 'nombre_completo',
@@ -377,12 +367,17 @@ export class NuevoBeneficioAfilComponent implements OnInit {
             fecha_nacimiento: convertirFecha(res.FECHA_NACIMIENTO, false)
           }
 
-          console.log(item);
           this.Afiliado = item;
-
           this.Afiliado.nameAfil = this.unirNombres(res.PRIMER_NOMBRE, res.SEGUNDO_NOMBRE, res.TERCER_NOMBRE, res.PRIMER_APELLIDO, res.SEGUNDO_APELLIDO);
+
           //this.getBeneficios().then(() => this.cargar());
           this.getFilas().then(() => this.cargar());
+          if (item.fallecido == "SI") {
+            this.getTipoBen("BENEFICIARIO");
+          } else {
+            this.getTipoBen(item.tipo_persona);
+          }
+
         },
         (error) => {
           this.Afiliado.estado = ""

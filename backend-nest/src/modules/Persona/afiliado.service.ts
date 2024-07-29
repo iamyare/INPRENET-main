@@ -1,7 +1,7 @@
 import { BadRequestException, Injectable, InternalServerErrorException, Logger, NotFoundException } from '@nestjs/common';
 import { NetPersonaDTO, PersonaResponse } from './dto/create-persona.dto';
 import { UpdatePersonaDto } from './dto/update-persona.dto';
-import { EntityManager, Repository } from 'typeorm';
+import { EntityManager, In, Repository } from 'typeorm';
 import { InjectEntityManager, InjectRepository } from '@nestjs/typeorm';
 import { Net_Persona_Por_Banco } from '../banco/entities/net_persona-banco.entity';
 import { Net_Centro_Trabajo } from '../Empresarial/entities/net_centro_trabajo.entity';
@@ -624,7 +624,11 @@ export class AfiliadoService {
 
     try {
       const detallePer = await this.detallePersonaRepository.findOne({
-        where: { tipoPersona: { tipo_persona: "AFILIADO" }, persona: { n_identificacion: term } },
+        where: {
+          tipoPersona: {
+            tipo_persona: In(["AFILIADO", "JUBILADO", "PENSIONADO", "VOLUNTARIO"])
+          }, persona: { n_identificacion: term }
+        },
         relations: [
           'persona',
           'estadoAfiliacion',
@@ -695,6 +699,39 @@ export class AfiliadoService {
       console.log(result);
 
       return result;
+    } catch (error) {
+      console.log(error);
+
+    }
+
+  }
+
+
+  async findTipoPersonaByN_ident(term: string) {
+
+    try {
+      const detallePer = await this.detallePersonaRepository.find({
+        where: {
+          tipoPersona: {
+          }, persona: { n_identificacion: term }
+        },
+        relations: [
+          'persona',
+          'padreIdPersona.persona',
+          'estadoAfiliacion',
+          'tipoPersona',
+        ]
+      });
+
+      if (!detallePer) {
+        throw new NotFoundException(`Afiliado con N_IDENTIFICACION ${term} no existe`);
+      }
+
+
+
+      console.log(detallePer);
+
+      return detallePer;
     } catch (error) {
       console.log(error);
 
@@ -831,15 +868,16 @@ export class AfiliadoService {
         "Afil"."GENERO",
         "detA"."PORCENTAJE",
         "tipoP"."TIPO_PERSONA"
-      FROM
+        FROM
           NET_DETALLE_PERSONA "detA" INNER JOIN 
           NET_PERSONA "Afil" ON "detA"."ID_PERSONA" = "Afil"."ID_PERSONA"
           INNER JOIN
         NET_TIPO_PERSONA "tipoP" ON "tipoP"."ID_TIPO_PERSONA" = "detA"."ID_TIPO_PERSONA"
-      WHERE 
-          "detA"."ID_CAUSANTE_PADRE" = ${beneficios[0].ID_PERSONA} AND 
-          "tipoP"."TIPO_PERSONA" = 'BENEFICIARIO'
+        WHERE 
+        "detA"."ID_CAUSANTE_PADRE" = ${beneficios[0].ID_PERSONA} AND 
+        "tipoP"."TIPO_PERSONA" = 'BENEFICIARIO'
         `;
+
       const beneficios2 = await this.entityManager.query(query1);
 
       return this.normalizarDatos(beneficios2);
@@ -877,7 +915,6 @@ export class AfiliadoService {
         genero: beneficiario.persona?.genero || null,
         sexo: beneficiario.persona?.sexo || null,
         fallecido: beneficiario.persona?.fallecido || null,
-        /* cantidadDependientes: beneficiario.persona?.cantidad_dependientes || null, */
         representacion: beneficiario.persona?.representacion || null,
         telefono1: beneficiario.persona?.telefono_1 || null,
         fechaNacimiento: beneficiario.persona?.fecha_nacimiento || null,
@@ -889,6 +926,7 @@ export class AfiliadoService {
         estadoDescripcion: beneficiario.estadoAfiliacion?.nombre_estado || null,
         porcentaje: beneficiario.porcentaje || null,
         tipoPersona: beneficiario.tipoPersona?.tipo_persona || null,
+        /* cantidadDependientes: beneficiario.persona?.cantidad_dependientes || null, */
       }));
 
       return beneficiariosFormatted;

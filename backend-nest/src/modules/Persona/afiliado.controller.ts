@@ -415,6 +415,11 @@ export class AfiliadoController {
     return this.afiliadoService.findOneAFiliado(term);
   }
 
+  @Get('findTipoPersonaByN_ident/:term')
+  findTipoPersonaByN_ident(@Param('term') term: string) {
+    return this.afiliadoService.findTipoPersonaByN_ident(term);
+  }
+
   @Get('Afiliado/:term')
   findOne(@Param('term') term: string) {
     return this.afiliadoService.findOne(term);

@@ -3,6 +3,7 @@ import { DetalleBeneficioService } from './detalle_beneficio.service';
 import { UpdateDetalleBeneficioDto } from './dto/update-detalle_beneficio_planilla.dto';
 import { CreateDetalleBeneficioDto } from './dto/create-detalle_beneficio.dto';
 import { ApiTags } from '@nestjs/swagger';
+import { log } from 'console';
 
 @ApiTags('beneficio-planilla')
 @Controller('beneficio-planilla')
@@ -103,6 +104,14 @@ export class DetalleBeneficioController {
       throw new BadRequestException('Se requiere el parámetro dni');
     }
     return this.detallebeneficioService.obtenerBeneficiosDeAfil(dni);
+  }
+
+  @Get('/obtenerTipoBeneficioByTipoPersona/:tipoPers')
+  async obtenerTipoBeneficioByTipoPersona(@Param('tipoPers') tipoPers: string) {
+    if (!tipoPers) {
+      throw new BadRequestException('Se requiere el parámetro tipoPers');
+    }
+    return this.detallebeneficioService.obtenerTipoBeneficioByTipoPersona(tipoPers);
   }
 
   @Get('/obtenerTodosBeneficios/:dni')

@@ -2,8 +2,8 @@ import { Column, PrimaryGeneratedColumn, OneToMany, Entity, Index, Check } from 
 import { Net_Persona_Por_Banco } from './net_persona-banco.entity';
 
 @Entity({ name: 'NET_BANCO' })
-@Check("UQ_NOMBRE_BANCO", `"NOMBRE_BANCO" IS NOT NULL`)
-@Check("UQ_COD_BANCO", `"COD_BANCO" IS NOT NULL`)
+@Check("CHK_NOMBRE_BANCO", `"NOMBRE_BANCO" IS NOT NULL`)
+@Check("CHK_COD_BANCO", `"COD_BANCO" IS NOT NULL`)
 export class Net_Banco {
     @PrimaryGeneratedColumn({ type: 'int', name: 'ID_BANCO', primaryKeyConstraintName: 'PK_id_banco_Banco' })
     id_banco: number;

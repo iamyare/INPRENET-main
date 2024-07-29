@@ -75,6 +75,13 @@ export class BeneficiosService {
     );
   }
 
+  obtenerTipoBeneficioByTipoPersona(tipoPers: string): Observable<any> {
+
+    return this.http.get<any>(
+      `${environment.API_URL}/api/beneficio-planilla/obtenerTipoBeneficioByTipoPersona/${tipoPers}`,
+    )
+  }
+
   obtenerDetallesBeneficioComplePorAfiliado(idAfiliado: string): Observable<any> {
     const params = new HttpParams().set('idAfiliado', idAfiliado);
     return this.http.get<any>(`${environment.API_URL}/api/beneficio-planilla/detallesBene-complementaria-afiliado`, { params }).pipe(

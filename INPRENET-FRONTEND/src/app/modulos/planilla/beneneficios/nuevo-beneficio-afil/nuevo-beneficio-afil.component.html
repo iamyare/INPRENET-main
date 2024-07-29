@@ -1,6 +1,18 @@
 <!-- <form class="example-form" [formGroup]="formGroup" ngNativeValidate>
   <mat-slide-toggle color="primary" formControlName="acceptTerms">¿Desea asignar los beneficios mediante documento de excel?</mat-slide-toggle>
 </form> -->
+
+<div style="margin: 1% 0% 1% 0%; text-align: center; background-color: white">
+  <app-dynamic-form [fields]="myFormFields" titulo="Buscar Afiliado/Jubilado/Pensionado"
+    subtitulo="Completa la información correspondiente" (newDatBenChange)="obtenerDatos($event)"></app-dynamic-form>
+
+  <button mat-raised-button color="primary" style="color: white; margin: 1% 0 1% 0" [disabled]="form.invalid"
+    (click)="previsualizarInfoAfil()">
+    Mostrar información del afiliado
+  </button>
+</div>
+
+
 <!-- Asignación de beneficios uno por uno -->
 <div style="background-color: white; margin: 1% 0% 1% 0%; padding: 1% 0% 1% 0%">
   <h1 style="font-size: 2rem">Datos Generales Cliente</h1>
@@ -34,7 +46,8 @@
     </table>
   </div>
 
-  <div *ngIf="Afiliado.fallecido == 'SI'" style="background-color: white; padding: 1%">
+  <div *ngIf="Afiliado.fallecido == 'SI' && Afiliado.tipo_persona == 'AFILIADO'"
+    style="background-color: white; padding: 1%">
     <h2>Beneficiarios</h2>
     <app-dynamic-table style="width: 10%" [columns]="myColumns" [data]="filas" [getData]="datosTabl"
       (ejecutarFuncionAsincronaEvent)="
@@ -43,17 +56,9 @@
   </div>
 </div>
 
-<div style="margin: 1% 0% 1% 0%; text-align: center; background-color: white">
-  <app-dynamic-form [fields]="myFormFields" titulo="Buscar Afiliado" subtitulo="Completa la información correspondiente"
-    (newDatBenChange)="obtenerDatos($event)"></app-dynamic-form>
 
-  <button mat-raised-button color="primary" style="color: white; margin: 1% 0 1% 0" [disabled]="form.invalid"
-    (click)="previsualizarInfoAfil()">
-    Mostrar información del afiliado
-  </button>
-</div>
-
-<div style="margin: 1% 0% 1% 0%; text-align: center; background-color: white">
+<div *ngIf="Afiliado.fallecido == 'SI' && Afiliado.tipo_persona == 'AFILIADO'"
+  style="margin: 1% 0% 1% 0%; text-align: center; background-color: white">
   <app-dynamic-form [fields]="myFormFields2" titulo="" subtitulo="Completa la información correspondiente"
     (newDatBenChange)="obtenerDatosFormBen($event)"></app-dynamic-form>
   <button mat-raised-button color="primary" style="color: white; margin: 1% 0 1% 0" [disabled]="FormBen.invalid"
@@ -62,7 +67,10 @@
   </button>
 </div>
 
-<div *ngIf="Afiliado.fallecido == 'NO'" style="margin: 1% 0% 1% 0%; text-align: center; background-color: white">
+<div *ngIf="Afiliado.fallecido == 'NO' && (
+  Afiliado.tipo_persona == 'AFILIADO' || 
+  Afiliado.tipo_persona == 'JUBILADO' || 
+  Afiliado.tipo_persona == 'PENSIONADO')" style="margin: 1% 0% 1% 0%; text-align: center; background-color: white">
   <app-dynamic-form [fields]="myFormFields1" titulo="Datos sobre el beneficio"
     subtitulo="Completa la información correspondiente" (newDatBenChange)="obtenerDatos1($event)"></app-dynamic-form>
 

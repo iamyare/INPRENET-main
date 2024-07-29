@@ -2,7 +2,7 @@ import * as oracledb from 'oracledb';
 import { BadRequestException, Injectable, InternalServerErrorException, Logger, NotFoundException } from '@nestjs/common';
 import { isUUID } from 'class-validator';
 import { InjectEntityManager, InjectRepository } from '@nestjs/typeorm';
-import { EntityManager, Repository, SelectQueryBuilder } from 'typeorm';
+import { EntityManager, In, Repository, SelectQueryBuilder } from 'typeorm';
 import { Net_Beneficio } from '../beneficio/entities/net_beneficio.entity';
 import { net_persona } from '../../Persona/entities/net_persona.entity';
 import { Net_Detalle_Pago_Beneficio } from './entities/net_detalle_pago_beneficio.entity';
@@ -14,6 +14,7 @@ import { net_detalle_persona } from 'src/modules/Persona/entities/net_detalle_pe
 import { net_estado_afiliacion } from 'src/modules/Persona/entities/net_estado_afiliacion.entity';
 import { NET_PROFESIONES } from 'src/modules/transacciones/entities/net_profesiones.entity';
 import { Net_Tipo_Persona } from 'src/modules/Persona/entities/net_tipo_persona.entity';
+import { Net_Beneficio_Tipo_Persona } from '../beneficio_tipo_persona/entities/net_beneficio_tipo_persona.entity';
 @Injectable()
 export class DetalleBeneficioService {
   private readonly logger = new Logger(DetalleBeneficioService.name)
@@ -27,6 +28,12 @@ export class DetalleBeneficioService {
 
     @InjectRepository(net_persona)
     private personaRepository: Repository<net_persona>,
+
+    @InjectRepository(net_detalle_persona)
+    private detPersonaRepository: Repository<net_detalle_persona>,
+
+    @InjectRepository(Net_Beneficio_Tipo_Persona)
+    private benTipoPerRepository: Repository<Net_Beneficio_Tipo_Persona>,
 
     @InjectEntityManager() private readonly entityManager: EntityManager
   ) { }
@@ -374,7 +381,19 @@ export class DetalleBeneficioService {
   /**modificar por cambio de estado a una tabla */
   async GetAllBeneficios(dni: string): Promise<any> {
     try {
-      return await this.personaRepository.createQueryBuilder('afil')
+      const detBen = await this.detalleBeneficioAfiliadoRepository.find({
+        where: { persona: { persona: { n_identificacion: `${dni}` }, tipoPersona: { tipo_persona: In(["AFILIADO", "JUBILADO", "PENSIONADO", "BENEFICIARIO"]) } } },
+        relations: [
+          'persona.padreIdPersona',
+          'persona.padreIdPersona.persona',
+          'persona.persona',
+          'persona.tipoPersona',
+          'persona.estadoAfiliacion',
+          'beneficio',
+        ],
+      });
+
+      const persona = await this.personaRepository.createQueryBuilder('afil')
         .select([
           'afil.N_IDENTIFICACION',
           'afil.PRIMER_NOMBRE',
@@ -389,35 +408,24 @@ export class DetalleBeneficioService {
           'afil.FALLECIDO',
           'tipPer.TIPO_PERSONA',
           'prof.DESCRIPCION',
-          'ben.PERIODICIDAD',
-          'ben.NUMERO_RENTAS_MAX',
-          'ben.NOMBRE_BENEFICIO',
-          'detBenA.PERIODO_INICIO',
-          'detBenA.PERIODO_FINALIZACION',
-          'detBenA.MONTO_POR_PERIODO',
-          'detBenA.MONTO_TOTAL',
           'estadoAfil.NOMBRE_ESTADO AS ESTADO',
         ])
-
         .leftJoin(NET_PROFESIONES, 'prof', 'prof.ID_PROFESION = afil.ID_PROFESION')
         .innerJoin(net_detalle_persona, 'detA', 'afil.ID_PERSONA = detA.ID_PERSONA')
         .innerJoin(Net_Tipo_Persona, 'tipPer', 'tipPer.ID_TIPO_PERSONA = detA.ID_TIPO_PERSONA')
         .innerJoin(net_estado_afiliacion, 'estadoAfil', 'estadoAfil.CODIGO = detA.ID_ESTADO_AFILIACION')
-        .innerJoin(Net_Detalle_Beneficio_Afiliado, 'detBenA', 'afil.ID_PERSONA = detA.ID_PERSONA AND detBenA.ID_CAUSANTE = detA.ID_CAUSANTE AND  detBenA.ID_CAUSANTE = detA.ID_CAUSANTE')
-        .innerJoin(Net_Beneficio, 'ben', 'ben.ID_BENEFICIO = detBenA.ID_BENEFICIO')
-
-        .where('afil.N_IDENTIFICACION = :dni', { dni })
-
+        .where(`afil.N_IDENTIFICACION = '${dni}' AND (tipPer.TIPO_PERSONA = 'AFILIADO' OR tipPer.TIPO_PERSONA = 'JUBILADO' OR tipPer.TIPO_PERSONA = 'PENSIONADO' OR tipPer.TIPO_PERSONA = 'BENEFICIARIO')`)
         .getRawMany();
+
+      return { persona, detBen }
+
 
     } catch (error) {
       console.log(error);
-
       this.logger.error(`Error al buscar beneficios inconsistentes por afiliado: ${error.message}`, error.stack);
       throw new InternalServerErrorException('Error al buscar beneficios inconsistentes por afiliado');
     }
   }
-
 
   async obtenerDetallesBeneficioComplePorAfiliado(idPersona: string): Promise<any[]> {
     try {
@@ -433,7 +441,7 @@ export class DetalleBeneficioService {
     afil."id_persona",
     afil."dni",
     TRIM(
-        afil."primer_nombre" || ' ' || 
+        afil."primer_nombre" OR ' ' || 
         COALESCE(afil."segundo_nombre", '') || ' ' || 
         COALESCE(afil."tercer_nombre", '') || ' ' || 
         afil."primer_apellido" || ' ' || 
@@ -499,6 +507,25 @@ export class DetalleBeneficioService {
     } catch (error) {
       this.logger.error('Error al obtener detalles de beneficio por afiliado', error.stack);
       throw new InternalServerErrorException('Error al obtener detalles de beneficio por afiliado');
+    }
+  }
+
+  async obtenerTipoBeneficioByTipoPersona(tipoPersona: string): Promise<any[]> {
+    try {
+
+      const tipoBen = await this.benTipoPerRepository.find({
+        where: { tipPersona: { tipo_persona: tipoPersona } },
+        relations: [
+          'beneficio'
+        ],
+      });
+
+      console.log(tipoBen);
+      return tipoBen
+
+    } catch (error) {
+      this.logger.error('Error al obtener detalles de Tipo Beneficio por Tipo Persona', error.stack);
+      throw new InternalServerErrorException('Error al obtener detalles de Tipo Beneficio por Tipo Persona');
     }
   }
 

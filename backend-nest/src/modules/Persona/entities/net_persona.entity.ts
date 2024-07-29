@@ -16,6 +16,7 @@ import { net_causas_fallecimientos } from "./net_causas_fallecimientos.entity";
 import { net_otra_fuente_ingreso } from "./net_otra_fuente_ingreso.entity";
 import { Net_Persona_Discapacidad } from "./net_persona_discapacidad.entity";
 import { Net_Familia } from "./net_familia.entity";
+import { Net_Beneficio } from "src/modules/Planilla/beneficio/entities/net_beneficio.entity";
 @Entity({
     name: 'NET_PERSONA',
 })

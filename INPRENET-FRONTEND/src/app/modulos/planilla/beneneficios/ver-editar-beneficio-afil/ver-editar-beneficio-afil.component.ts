@@ -10,6 +10,7 @@ import { FieldConfig } from 'src/app/shared/Interfaces/field-config';
 import { Validators } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
 import { EditarDialogComponent } from 'src/app/components/dinamicos/editar-dialog/editar-dialog.component';
+import { AfiliadoService } from 'src/app/services/afiliado.service';
 
 @Component({
   selector: 'app-ver-editar-beneficio-afil',
@@ -30,10 +31,15 @@ export class VerEditarBeneficioAfilComponent {
   filasT: any[] = [];
   ejecF: any;
 
+  myColumns1: TableColumn[] = [];
+  filasEst: any[] = [];
+  ejecF2: any;
+
   constructor(
     private dialog: MatDialog,
     private http: HttpClient,
     private beneficioService: BeneficiosService,
+    private afiliadoDVC: AfiliadoService,
     private datePipe: DatePipe,
     private toastr: ToastrService) {
   }
@@ -47,6 +53,16 @@ export class VerEditarBeneficioAfilComponent {
       {
         header: 'Nombre del beneficio',
         col: 'nombre_beneficio',
+        isEditable: false
+      },
+      {
+        header: 'DNI CAUSANTE',
+        col: 'dni_causante',
+        isEditable: false
+      },
+      {
+        header: 'Recibiendo beneficio',
+        col: 'recibiendo_beneficio',
         isEditable: false
       },
       {
@@ -82,6 +98,25 @@ export class VerEditarBeneficioAfilComponent {
         isEditable: true
       },
     ];
+
+    this.myColumns1 = [
+      {
+        header: 'Tipo Persona',
+        col: 'tipo_persona',
+        isEditable: false
+      },
+      /* {
+        header: 'Estado',
+        col: 'estado_persona',
+        isEditable: false
+      }, */
+      {
+        header: 'DNI CAUSANTE',
+        col: 'dni_causante',
+        isEditable: false
+      },
+
+    ];
   }
 
   async obtenerDatos(event: any): Promise<any> {
@@ -91,38 +126,35 @@ export class VerEditarBeneficioAfilComponent {
   //Funciones para llenar tabla
   getFilas = async () => {
     try {
-      /* Falta traer datos de la planilla */
       const data = await this.beneficioService.GetAllBeneficios(this.form.value.dni).toPromise();
 
-      const dataAfil = data.map((item: any) => ({
+      const dataAfil = data.persona.map((item: any) => ({
         dni: item.N_IDENTIFICACION,
         fallecido: item.FALLECIDO,
-        tipo_persona: item.TIPO_PERSONA,
         estado_civil: item.ESTADO_CIVIL,
         nombreCompleto: unirNombres(item.PRIMER_NOMBRE, item.SEGUNDO_NOMBRE, item.PRIMER_APELLIDO, item.SEGUNDO_APELLIDO),
         genero: item.GENERO,
         profesion: item.PROFESION,
         telefono_1: item.TELEFONO_1,
         colegio_magisterial: item.COLEGIO_MAGISTERIAL,
-        numero_carnet: item.NUMERO_CARNET,
         direccion_residencia: item.DIRECCION_RESIDENCIA,
-        estado: item.ESTADO,
-        salario_base: item.SALARIO_BASE,
         fecha_nacimiento: convertirFecha(item.FECHA_NACIMIENTO, false)
       }));
 
       this.Afiliado = dataAfil[0]
 
-      this.filasT = data.map((item: any) => ({
+      this.filasT = data.detBen.map((item: any) => ({
         dni: item.DNI,
+        dni_causante: item.persona?.padreIdPersona?.persona?.n_identificacion || "NO APLICA",
         fecha_aplicado: this.datePipe.transform(item.fecha_aplicado, 'dd/MM/yyyy HH:mm'),
-        nombre_beneficio: item.NOMBRE_BENEFICIO,
-        numero_rentas_max: item.NUMERO_RENTAS_MAX,
-        periodicidad: item.PERIODICIDAD,
-        monto_por_periodo: item.MONTO_POR_PERIODO,
-        monto_total: item.MONTO_TOTAL,
-        periodoInicio: convertirFecha(item.PERIODO_INICIO, false),
-        periodoFinalizacion: convertirFecha(item.PERIODO_FINALIZACION, false)
+        nombre_beneficio: item.beneficio.nombre_beneficio,
+        recibiendo_beneficio: item.recibiendo_beneficio,
+        numero_rentas_max: item.beneficio.numero_rentas_max,
+        periodicidad: item.beneficio.periodicidad,
+        monto_por_periodo: item.monto_por_periodo,
+        monto_total: item.monto_total,
+        periodoInicio: convertirFecha(item.periodo_inicio, false),
+        periodoFinalizacion: convertirFecha(item.periodo_finalizacion, false)
       }));
 
       return this.filasT;
@@ -131,34 +163,46 @@ export class VerEditarBeneficioAfilComponent {
       throw error;
     }
   };
+  getFilas2 = async () => {
+    try {
+
+      const datas = await this.afiliadoDVC.findTipoPersonaByN_ident(this.form.value.dni).toPromise();
+
+      const dataEstadosAfil = datas.map((item: any) => ({
+        tipo_persona: item.tipoPersona.tipo_persona,
+        estado_persona: item.estadoAfiliacion.nombre_estado,
+        dni_causante: item.padreIdPersona?.persona?.n_identificacion || "NO APLICA",
+      }));
+
+      this.filasEst = dataEstadosAfil;
+
+      return this.filasEst;
+    } catch (error) {
+      console.error("Error al obtener los detalles completos de deducción", error);
+      throw error;
+    }
+  };
+
 
   previsualizarInfoAfil() {
     this.monstrarBeneficios = true;
-    this.getFilas().then(() => this.cargar());
-    if (this.form.value.dni) {
-
-      /* this.svcAfilServ.getAfilByParam(this.form.value.dni).subscribe(
-        async (result) => {
-          this.Afiliado = result
-          this.Afiliado.nameAfil = this.unirNombres(result.primer_nombre,result.segundo_nombre, result.tercer_nombre, result.primer_apellido,result.segundo_apellido);
-          //this.getBeneficios().then(() => this.cargar());
-          this.getFilas().then(() => this.cargar());
-        },
-        (error) => {
-          this.Afiliado.estado = ""
-          this.toastr.error(`Error: ${error.error.message}`);
-      }) */
-
-    }
+    this.getFilas().then(() => this.cargar("ingresos"));
+    this.getFilas2().then(() => this.cargar("tipo"));
   }
 
   ejecutarFuncionAsincronaDesdeOtroComponente(funcion: (data: any) => Promise<void>) {
     this.ejecF = funcion;
   }
+  ejecutarFuncionAsincronaDesdeOtroComponente2(funcion: (data: any) => Promise<void>) {
+    this.ejecF2 = funcion;
+  }
 
-  cargar() {
-    if (this.ejecF) {
+  cargar(val: string) {
+    if (this.ejecF && val == "ingresos") {
       this.ejecF(this.filasT).then(() => {
+      });
+    } else if (this.ejecF2 && val == "tipo") {
+      this.ejecF2(this.filasEst).then(() => {
       });
     }
   }
@@ -166,6 +210,7 @@ export class VerEditarBeneficioAfilComponent {
   editar = (row: any) => {
     const beneficioData = {
       nombre_beneficio: row.nombre_beneficio,
+      recibiendo_beneficio: row.recibiendo_beneficio,
       descripcion_beneficio: row.descripcion_beneficio,
       numero_rentas_max: row.numero_rentas_max,
       periodicidad: row.periodicidad,

@@ -40,6 +40,9 @@ export class Net_Detalle_Beneficio_Afiliado {
     @Column({ type: 'date', nullable: true, name: 'PERIODO_FINALIZACION' })
     periodo_finalizacion: Date;
 
+    @Column({ nullable: true, name: 'RECIBIENDO_BENEFICIO' })
+    recibiendo_beneficio: number;
+
     @Column({ nullable: true, default: 0, name: 'NUM_RENTAS_APLICADAS' })
     num_rentas_aplicadas: number;
 

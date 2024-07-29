@@ -25,7 +25,4 @@ export class Net_Clasificacion_Beneficios {
     tipoPlanilla: Net_TipoPlanilla;
 
 
-    @ManyToOne(() => Net_Tipo_Persona, tipoPersona => tipoPersona.BenDedTipoPlan, { cascade: true })
-    @JoinColumn({ name: 'ID_TIPO_PERSONA', foreignKeyConstraintName: "FK_ID_TIPO_PERSONA_BENDED_TIP_PLAN" })
-    tipoPersona: Net_Tipo_Persona;
 }

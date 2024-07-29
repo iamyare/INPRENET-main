@@ -25,6 +25,7 @@ import { EditarPerfilComponent } from './editar-perfil/editar-perfil.component';
     CommonModule,
     MaterialAngularModule,
     ComponentsModule,
+    AuthModuleRoutingModule
   ]
 })
 export class AuthModule { }

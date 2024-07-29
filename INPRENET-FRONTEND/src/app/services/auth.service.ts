@@ -232,14 +232,13 @@ export class AuthService {
     localStorage.setItem('token', token);
   }
 
-  getUserRolesAndModules() {
+  getUserRolesAndModules(): { rol: string, modulo: string }[] {
     const token = sessionStorage.getItem('token');
     if (!token) return [];
 
     try {
       const decodedToken: any = jwtDecode(token);
-      const rolesModulos = decodedToken.rolesModulos || [];
-      return rolesModulos;
+      return decodedToken.rolesModulos || [];
     } catch (error) {
       console.error('Error decoding token:', error);
       return [];
@@ -348,5 +347,4 @@ export class AuthService {
       return of(result as T);
     };
   }
-
 }

@@ -210,7 +210,7 @@ export class UsuarioService {
     const token = this.jwtService.sign({ correo });
   
     // Enviar correo electrónico de verificación
-    const verificationUrl = `http://localhost:4200/#/register?token=${token}`;
+    const verificationUrl = `http://localhost:4200/register?token=${token}`;
     const htmlContent = `
       <div style="font-family: Arial, sans-serif; line-height: 1.6;">
         <h2 style="color: #13776B;">¡Bienvenido a INPRENET!</h2>

@@ -7,7 +7,7 @@ import { PreRegisterComponent } from './pre-register/pre-register.component';
 import { RegisterComponent } from './register/register.component';
 import { RestablecerContrasenaComponent } from './restablecer-contrasena/restablecer-contrasena.component';
 import { EditarPerfilComponent } from './editar-perfil/editar-perfil.component';
-
+import { LandingPageComponent } from 'src/app/components/landing-page/landing-page.component';
 
 const routes: Routes = [
   { path: 'login', component: LoginComponent },
@@ -15,8 +15,9 @@ const routes: Routes = [
   { path: 'solicitud-restablecimiento', component: OlvidoContrasenaComponent },
   { path: 'restablecer-contrasena/:token', component: RestablecerContrasenaComponent },
   { path: 'register', component: RegisterComponent },
-  { path: 'RestablecerContrasenaComponent', component: PreRegisterComponent },
+  { path: 'pre-register', component: PreRegisterComponent },
   { path: 'editar', component: EditarPerfilComponent },
+  { path: 'landing-page', component: LandingPageComponent },
   { path: '', redirectTo: 'login', pathMatch: 'full' }
 ];
 

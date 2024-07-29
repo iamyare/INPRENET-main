@@ -4,8 +4,6 @@ import { MaterialAngularModule } from '../material-angular/material-angular.modu
 import { DashboardComponent } from './dashboard/dashboard.component';
 import { ViewsRoutingModule } from './views-routing.module';
 
-
-
 @NgModule({
   declarations: [
     DashboardComponent

@@ -19,6 +19,13 @@ import { UserMenuComponent } from './user-menu/user-menu.component';
 import { MapsComponent } from './maps/maps.component';
 import { GoogleMapsModule } from '@angular/google-maps';
 import { DynamicDialogAgregarComponent } from './dynamic-dialog-agregar/dynamic-dialog-agregar.component';
+import { CustomHeaderComponent } from './custom-header/custom-header.component';
+import { CustomContainerComponent } from './custom-container/custom-container.component';
+import { LayoutComponent } from './layout/layout.component';
+import { HeaderComponent } from './header/header.component';
+import { FooterComponent } from './footer/footer.component';
+import { MainLayoutComponent } from './main-layout/main-layout.component';
+import { LandingPageComponent } from './landing-page/landing-page.component';
 
 
 
@@ -40,7 +47,14 @@ import { DynamicDialogAgregarComponent } from './dynamic-dialog-agregar/dynamic-
     BuscadorComponent,
     UserMenuComponent,
     MapsComponent,
-    DynamicDialogAgregarComponent
+    DynamicDialogAgregarComponent,
+    CustomHeaderComponent,
+    CustomContainerComponent,
+    LayoutComponent,
+    HeaderComponent,
+    FooterComponent,
+    MainLayoutComponent,
+    LandingPageComponent
   ],
   imports: [
     CommonModule,
@@ -64,7 +78,14 @@ import { DynamicDialogAgregarComponent } from './dynamic-dialog-agregar/dynamic-
     BuscadorComponent,
     UserMenuComponent,
     MapsComponent,
-    DynamicDialogAgregarComponent
+    DynamicDialogAgregarComponent,
+    CustomHeaderComponent,
+    CustomContainerComponent,
+    LayoutComponent,
+    HeaderComponent,
+    FooterComponent,
+    MainLayoutComponent,
+    LandingPageComponent
   ]
 })
 export class ComponentsModule { }

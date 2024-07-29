@@ -10,20 +10,12 @@ import { HttpClientModule } from '@angular/common/http';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { PlanillaModule } from './modulos/planilla/planilla.module';
 import { AuthModule } from './modulos/auth/auth.module';
-import { LayoutComponent } from './components/layout/layout.component';
 import { ComponentsModule } from './components/components.module';
 import { AdminModule } from './modulos/admin/admin.module';
 import { SidenavService } from './services/sidenav.service';
-import { HeaderComponent } from './components/header/header.component';
-import { FooterComponent } from './components/footer/footer.component';
-import { MainLayoutComponent } from './components/main-layout/main-layout.component';
 @NgModule({
   declarations: [
     AppComponent,
-    LayoutComponent,
-    HeaderComponent,
-    FooterComponent,
-    MainLayoutComponent
   ],
   imports: [
     BrowserModule,

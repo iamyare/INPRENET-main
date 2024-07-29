@@ -195,14 +195,6 @@
               </div>
               <div class="row">
               <div class="col-lg-4 col-md-12">
-                <label>¿Depende económicamente de usted?</label>
-                <mat-radio-group formControlName="dependiente" (change)="onDatosGeneralesDiscChange($event, i)">
-                  <mat-radio-button *ngFor="let option of field.options" [value]="option.value">
-                    {{ option.label }}
-                  </mat-radio-button>
-                </mat-radio-group>
-              </div>
-              <div class="col-lg-4 col-md-12">
                 <label>¿Posee alguna discapacidad?</label>
                 <mat-radio-group formControlName="discapacidad" (change)="onDiscapacidadChange(i, $event)">
                   <mat-radio-button *ngFor="let option of field.options" [value]="option.value">

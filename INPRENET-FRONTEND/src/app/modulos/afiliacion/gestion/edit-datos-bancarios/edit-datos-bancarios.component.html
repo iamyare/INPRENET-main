@@ -1,7 +1,3 @@
-<div *ngIf="loading" style="display: flex; justify-content: center; align-items: center; height: 200px;">
-  <mat-spinner class="spinner" diameter="50"></mat-spinner>
-</div>
-
 <div *ngIf="!loading">
   <div id="texto" style="text-align: center;" *ngIf="filas.length === 0">
     <h2 class="anaranjado desapareciendo">No se encuentra ningún dato bancario</h2>
@@ -27,9 +23,7 @@
       [nombreEncabezadoDos]="'Desactivar'"
       [mostrarBotonDos]="true"
       [etiquetaBotonDos]="'Desactivar'"
-      (accionBotonDos)="manejarAccionDos($event)"
-      [mostrarBotonEditar]="true"
-      (editar)="manejarAccionUno($event)">
+      (accionBotonDos)="manejarAccionDos($event)">
     </app-dynamic-table>
   </div>
 </div>

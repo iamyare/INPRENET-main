@@ -20,8 +20,6 @@
       [data]="filas"
       [getData]="getFilas.bind(this)"
       (ejecutarFuncionAsincronaEvent)="ejecutarFuncionAsincronaDesdeOtroComponente($event)"
-      [mostrarBotonEditar]="true"
-      (editar)="editarFila($event)"
       [mostrarBotonEliminar]="true"
       (eliminar)="eliminarFila($event)">
     </app-dynamic-table>

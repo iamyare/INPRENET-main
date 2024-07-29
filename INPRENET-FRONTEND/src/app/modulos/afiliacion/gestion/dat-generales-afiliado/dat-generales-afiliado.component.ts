@@ -1,11 +1,12 @@
-import { ChangeDetectionStrategy, Component, EventEmitter, inject, Input, OnInit, Output } from '@angular/core';
-import { AbstractControl, ControlContainer, FormArray, FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
+import { ChangeDetectionStrategy, Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import { AbstractControl, FormArray, FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { DireccionService } from 'src/app/services/direccion.service';
 import { DatosEstaticosService } from 'src/app/services/datos-estaticos.service';
 import { FormStateService } from 'src/app/services/form-state.service';
 import { TipoIdentificacionService } from 'src/app/services/tipo-identificacion.service';
 import { CentroTrabajoService } from 'src/app/services/centro-trabajo.service';
 import * as moment from 'moment';
+import { MatRadioChange } from '@angular/material/radio';
 
 const noSpecialCharsPattern = '^[a-zA-Z0-9\\s]*$';
 
@@ -55,7 +56,7 @@ export function generateAddressFormGroup(datos?: any): FormGroup {
     sexo: new FormControl(datos?.sexo, [Validators.required, Validators.maxLength(1), Validators.pattern(/^[FM]$/)]),
     grupo_etnico: new FormControl(datos?.grupo_etnico, [Validators.required]),
     discapacidad: new FormControl(datos?.discapacidad, [Validators.required]),
-    discapacidades: new FormArray([]),
+    discapacidades: new FormArray(datos?.discapacidades ? datos.discapacidades.map((d: any) => new FormControl(d.id_discapacidad || '')) : []),
     cantidad_hijos: new FormControl(datos?.cantidad_hijos, Validators.required),
     barrio_colonia: new FormControl(datos?.barrio_colonia, [
       Validators.maxLength(75),
@@ -107,14 +108,7 @@ export function generateAddressFormGroup(datos?: any): FormGroup {
   selector: 'app-dat-generales-afiliado',
   templateUrl: './dat-generales-afiliado.component.html',
   styleUrls: ['./dat-generales-afiliado.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  viewProviders: [
-    {
-      provide: ControlContainer,
-      useFactory: () =>
-        inject(ControlContainer, { skipSelf: true, host: true }),
-    },
-  ],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class DatGeneralesAfiliadoComponent implements OnInit {
   public estadoCargDatos: boolean = false;
@@ -195,30 +189,31 @@ export class DatGeneralesAfiliadoComponent implements OnInit {
   onDatosGeneralesChange() {
     const data = this.formParent.value;
     this.newDatosGenerales.emit(data);
-    console.log(data);
+  }
 
-}
-
-  onDatosGeneralesDiscChange(event: any, i: number) {
-    const value = event.value;
+  onDatosGeneralesDiscChange(event: MatRadioChange, i: number) {
+    const isChecked = event.value === 'SI';
     this.discapacidadEstado = {
-      si: value === 'SI',
-      no: value === 'NO'
+      si: isChecked,
+      no: !isChecked
     };
     this.discapacidad = this.discapacidadEstado.si;
 
-    if (this.discapacidad) {
-      const refpersArray = this.formParent.get('refpers') as FormArray;
-      const firstRefpersGroup = refpersArray.controls[i] as FormGroup;
-      const discapacidadesArray = firstRefpersGroup.get('discapacidades') as FormArray;
+    const refpersArray = this.formParent.get('refpers') as FormArray;
+    const firstRefpersGroup = refpersArray.controls[i] as FormGroup;
+    const discapacidadesArray = firstRefpersGroup.get('discapacidades') as FormArray;
 
-      if (discapacidadesArray) {
-        discapacidadesArray.clear();
-        this.tipo_discapacidad.forEach(() => {
-          discapacidadesArray.push(new FormControl(false));
-        });
-      }
+    if (isChecked) {
+      this.tipo_discapacidad.forEach((d: any) => {
+        if (!discapacidadesArray.controls.some(control => control.value === d.id)) {
+          discapacidadesArray.push(new FormControl(d.id));
+        }
+      });
+    } else {
+      discapacidadesArray.clear();
     }
+
+    this.onDatosGeneralesChange();
   }
 
   onDatosGeneralesCargChange(event: any) {
@@ -230,18 +225,15 @@ export class DatGeneralesAfiliadoComponent implements OnInit {
     this.cargoPublico = this.cargoPublicoEstado.si;
 
     if (!this.cargoPublico) {
-      // Si se selecciona "NO", eliminamos los datos de PEPS
       const refpersArray = this.formParent.get('refpers') as FormArray;
       refpersArray.controls.forEach((group: AbstractControl) => {
         const pepsArray = (group as FormGroup).get('peps') as FormArray;
-        pepsArray.clear(); // Limpiamos los datos de PEPS
+        pepsArray.clear();
       });
 
-      // Emitimos el cambio para que otros componentes estén al tanto
       this.pepsDataChange.emit([]);
     }
   }
-
 
   onDatosBenChange(fecha: any) {
     this.pepsDataChange.emit(fecha._model.selection);
@@ -275,22 +267,19 @@ export class DatGeneralesAfiliadoComponent implements OnInit {
     this.cargarDatosEstaticos();
     this.initForm();
     const ref_RefPers = this.formParent.get('refpers') as FormArray;
-    let temp = {};
 
     if (this.datos && this.datos.value && this.datos.value.refpers && this.datos.value.refpers.length > 0) {
-      for (let i of this.datos.value.refpers) {
-        temp = this.splitDireccionResidencia(i);
-
-        this.discapacidad = i.discapacidad == "SI" ? true : (i.discapacidad == "NO" ? false : this.discapacidad);
-
-        const addressGroup = generateAddressFormGroup(temp);
+      this.datos.value.refpers.forEach((i: any) => {
+        const addressGroup = generateAddressFormGroup(i);
         const discapacidadesArray = addressGroup.get('discapacidades') as FormArray;
-        if (i.discapacidades) {
+
+        if (i.discapacidades && i.discapacidades.length > 0) {
           i.discapacidades.forEach((discapacidad: any) => {
-            discapacidadesArray.push(new FormControl(discapacidad));
+            discapacidadesArray.push(new FormControl(discapacidad.id_discapacidad));
           });
         }
-        if (i.peps) {
+
+        if (i.peps && i.peps.length > 0) {
           const pepsArray = addressGroup.get('peps') as FormArray;
           i.peps.forEach((pep: any) => {
             const pepGroup = this.fb.group({
@@ -302,8 +291,9 @@ export class DatGeneralesAfiliadoComponent implements OnInit {
             pepsArray.push(pepGroup);
           });
         }
+
         ref_RefPers.push(addressGroup);
-      }
+      });
     } else {
       ref_RefPers.push(generateAddressFormGroup());
     }
@@ -319,29 +309,6 @@ export class DatGeneralesAfiliadoComponent implements OnInit {
         this.form.patchValue(savedForm.value, { emitEvent: false });
       }
     });
-  }
-
-  splitDireccionResidencia(datos: any): any {
-    const direccion = datos.direccion_residencia;
-    if (direccion) {
-      const partes = direccion.split(', ');
-      return {
-        ...datos,
-        barrio_colonia: partes[0]?.split(': ')[1] || '',
-        avenida: partes[1]?.split(': ')[1] || '',
-        calle: partes[2]?.split(': ')[1] || '',
-        sector: partes[3]?.split(': ')[1] || '',
-        bloque: partes[4]?.split(': ')[1] || '',
-        numero_casa: partes[5]?.split(': ')[1] || '',
-        color_casa: partes[6]?.split(': ')[1] || '',
-        aldea: partes[7]?.split(': ')[1] || '',
-        caserio: partes[8]?.split(': ')[1] || '',
-      };
-    } else {
-      return {
-        ...datos,
-      }
-    }
   }
 
   async cargarDatosEstaticos() {
@@ -370,7 +337,6 @@ export class DatGeneralesAfiliadoComponent implements OnInit {
     }
 
     this.tipo_discapacidad = await this.datosEstaticos.getDiscapacidades();
-
 
     this.estadoCargDatos = true;
   }
@@ -449,7 +415,7 @@ export class DatGeneralesAfiliadoComponent implements OnInit {
         this.profesiones = transformedJson;
       },
       error: (error) => {
-        console.error('Error al cargar municipios:', error);
+        console.error('Error al cargar profesiones:', error);
       }
     });
   }
@@ -527,31 +493,29 @@ export class DatGeneralesAfiliadoComponent implements OnInit {
     return discapacidadesArray.controls.some(control => control.value === idDiscapacidad);
   }
 
-  onDiscapacidadChange(idDiscapacidad: number, isChecked: boolean) {
+  onDiscapacidadChange(event: Event, i: number) {
+    const isChecked = (event.target as HTMLInputElement).checked;
     const refpersArray = this.formParent.get('refpers') as FormArray;
-    const firstRefpersGroup = refpersArray.controls[0] as FormGroup;
+    const firstRefpersGroup = refpersArray.controls[i] as FormGroup;
     const discapacidadesArray = firstRefpersGroup.get('discapacidades') as FormArray;
 
     if (isChecked) {
-      discapacidadesArray.push(new FormControl(idDiscapacidad));
+      this.tipo_discapacidad.forEach((d: any) => {
+        if (!discapacidadesArray.controls.some(control => control.value === d.id)) {
+          discapacidadesArray.push(new FormControl(d.id));
+        }
+      });
     } else {
-      const index = discapacidadesArray.controls.findIndex(control => control.value === idDiscapacidad);
-      if (index !== -1) {
-        discapacidadesArray.removeAt(index);
-      }
+      discapacidadesArray.clear();
     }
 
     this.onDatosGeneralesChange();
   }
 
-
   onPepsDataChange(data: any): void {
     const validPeps = data.filter((pep: any) => {
-        return Object.values(pep).some(value => value !== null && value !== '');
+      return Object.values(pep).some(value => value !== null && value !== '');
     });
     this.pepsDataChange.emit(validPeps);
-    console.log(data);
-
-}
-
+  }
 }

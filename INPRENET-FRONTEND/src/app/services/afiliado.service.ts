@@ -80,10 +80,6 @@ export class AfiliadoService {
     const url = `${environment.API_URL}/api/Persona/createCentrosTrabajo/${idPersona}`;
     return this.http.post<any>(url, encapsulatedData);
   }
-  createDatosBancarios(idPersona: string, encapsulatedData: any): Observable<any> {
-    const url = `${environment.API_URL}/api/Persona/createDatosBancarios/${idPersona}`;
-    return this.http.post<any>(url, encapsulatedData);
-  }
 
   createBeneficiarios(idPersona: string, encapsulatedData: any): Observable<any> {
     const url = `${environment.API_URL}/api/Persona/createBeneficiarios/${idPersona}`;

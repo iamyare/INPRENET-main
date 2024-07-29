@@ -41,13 +41,11 @@
         </th>
         <th *ngIf="mostrarBotonEliminar" class="custom-header">Eliminar</th>
         <th *ngIf="mostrarBotonEditar" class="custom-header">Editar</th>
+        <th *ngIf="mostrarBotonInhabilitar" class="custom-header">Inhabilitar</th> <!-- Nueva columna para inhabilitar -->
       </tr>
     </thead>
     <tbody>
-      <tr *ngFor="let row of searchResults && searchResults.slice(desde, hasta); let i = index"
-      class="custom-row"
-      (click)="onRowClick(row)"
-      [class.clickable-row]="enableRowClick">
+      <tr *ngFor="let row of searchResults && searchResults.slice(desde, hasta); let i = index" class="custom-row">
         <td *ngIf="verOpcEditar">
           <input type="checkbox" (change)="onSelectionChange(row)" />
         </td>
@@ -77,10 +75,7 @@
               </ng-container>
             </ng-container>
           </div>
-
         </td>
-
-
         <td *ngIf="verBotEditar">
           <button style="height: auto" color="primary" mat-icon-button *ngIf="!row.isEditing"
             (click)="startEditing(row)" class="boton-editar">
@@ -116,6 +111,12 @@
         <td *ngIf="mostrarBotonEditar">
           <button style="height: auto" mat-icon-button (click)="editarFila(row)" class="boton-editar">
             <mat-icon class="icono-editar">edit</mat-icon>
+          </button>
+        </td>
+
+        <td *ngIf="mostrarBotonInhabilitar" class="custom-actions">
+          <button mat-icon-button (click)="inhabilitarFila(row)" class="boton-inhabilitar">
+            <mat-icon>remove_circle_outline</mat-icon> <!-- Ícono actualizado para inhabilitar -->
           </button>
         </td>
       </tr>

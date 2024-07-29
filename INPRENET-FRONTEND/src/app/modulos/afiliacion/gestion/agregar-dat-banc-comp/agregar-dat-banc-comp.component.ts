@@ -2,7 +2,7 @@ import { Component, Inject, OnInit, ViewChild, Output, EventEmitter } from '@ang
 import { FormArray, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { ToastrService } from 'ngx-toastr';
-import { AfiliadoService } from 'src/app/services/afiliado.service';
+import { AfiliacionService } from 'src/app/services/afiliacion.service';
 import { HistorialSalarioComponent } from '../historial-salario/historial-salario.component'; // Ajusta la ruta si es necesario
 
 @Component({
@@ -14,13 +14,13 @@ export class AgregarDatBancCompComponent implements OnInit {
   form: FormGroup;
   formHistPag: FormGroup;
 
-  @Output() saved = new EventEmitter<any>();
+  @Output() saved = new EventEmitter<any>(); // Emisor de eventos
 
   @ViewChild(HistorialSalarioComponent) historialSalarioComponent!: HistorialSalarioComponent; // Obtén la referencia del componente hijo
 
   constructor(
     private fb: FormBuilder,
-    private afilService: AfiliadoService,
+    private afiliacionService: AfiliacionService,
     private dialogRef: MatDialogRef<AgregarDatBancCompComponent>,
     private toastr: ToastrService,
     @Inject(MAT_DIALOG_DATA) public data: { idPersona: string }
@@ -34,28 +34,35 @@ export class AgregarDatBancCompComponent implements OnInit {
   ngOnInit(): void { }
 
   setHistSal(datosHistSal: any) {
+    console.log('Datos recibidos en setHistSal:', datosHistSal);
+
     const bancoArray = this.formHistPag.get('banco') as FormArray;
     bancoArray.clear();
-    if (datosHistSal && Array.isArray(datosHistSal.value.banco)) {
-      datosHistSal.value.banco.forEach((banco: any) => {
+
+    if (datosHistSal && Array.isArray(datosHistSal.banco)) {
+      datosHistSal.banco.forEach((banco: any) => {
         bancoArray.push(this.fb.group({
           id_banco: [banco.id_banco, Validators.required],
-          num_cuenta: [banco.num_cuenta, Validators.required]
+          num_cuenta: [banco.num_cuenta, Validators.required],
+          estado: [banco.estado, Validators.required]
         }));
       });
+
+      console.log('Estado del formulario después de setHistSal:', this.formHistPag.value);
     } else {
-      console.error('Datos de historial bancario no son válidos:', datosHistSal);
+      console.warn('Datos de historial bancario no son válidos o están incompletos:', datosHistSal);
     }
   }
 
   guardar() {
-    if (this.formHistPag.valid) {
-      this.afilService.createDatosBancarios(this.data.idPersona, this.formHistPag.value.banco).subscribe(
+    if (this.formHistPag.valid && (this.formHistPag.value.banco || []).length > 0) {
+      this.afiliacionService.asignarBancosAPersona(+this.data.idPersona, this.formHistPag.value.banco).subscribe(
         (res: any) => {
+          console.log('Respuesta del servicio:', res);
           if (res.length > 0) {
             this.toastr.success("Dato Bancario agregado con éxito");
+            this.saved.emit(); // Emitir el evento cuando se guarda un banco
             this.resetForm();
-            this.saved.emit();
             this.cerrar();
           }
         },
@@ -65,9 +72,11 @@ export class AgregarDatBancCompComponent implements OnInit {
         }
       );
     } else {
-      this.toastr.error("El formulario contiene errores.");
+      console.error('Errores o formulario incompleto:', this.formHistPag.value.banco);
+      this.toastr.error("El formulario contiene errores o está incompleto.");
     }
   }
+
 
   resetForm() {
     this.formHistPag.reset();

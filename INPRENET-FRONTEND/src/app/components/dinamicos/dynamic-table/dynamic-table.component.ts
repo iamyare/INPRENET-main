@@ -1,7 +1,8 @@
 import { Component, EventEmitter, Input, OnDestroy, OnInit, Output, ViewChild } from '@angular/core';
-import { FormControl, ValidatorFn } from '@angular/forms';
+import { FormControl } from '@angular/forms';
 import { MatPaginator } from '@angular/material/paginator';
-import { Observable, Subject, debounceTime, distinctUntilChanged, of, switchMap, takeUntil } from 'rxjs';
+import { Observable, Subject, of } from 'rxjs';
+import { debounceTime, distinctUntilChanged, switchMap, takeUntil } from 'rxjs/operators';
 import { SelectionserviceService } from 'src/app/services/selectionservice.service';
 import { TableColumn } from 'src/app/shared/Interfaces/table-column';
 
@@ -41,19 +42,19 @@ export class DynamicTableComponent implements OnInit, OnDestroy {
 
   @Input() mostrarBotonEliminar: boolean = false;
   @Input() mostrarBotonEditar: boolean = false;
+  @Input() mostrarBotonInhabilitar: boolean = false; // Nuevo @Input para visibilidad del botón
   @Output() eliminar: EventEmitter<any> = new EventEmitter<any>();
   @Output() editar: EventEmitter<any> = new EventEmitter<any>();
+  @Output() inhabilitar: EventEmitter<any> = new EventEmitter<any>(); // Nuevo @Output para la acción de inhabilitar
 
   @Input() titulo = "";
   @Input() subtitulo = "";
 
-  @Input() enableRowClick: boolean = false; // Nueva entrada para habilitar la funcionalidad de clic en la fila
-  @Output() rowClicked: EventEmitter<any> = new EventEmitter<any>(); // Nueva salida para emitir el evento de clic en la fila
-
+  @Input() enableRowClick: boolean = false;
+  @Output() rowClicked: EventEmitter<any> = new EventEmitter<any>();
   @ViewChild(MatPaginator) paginator: MatPaginator | undefined;
 
   private destroy$: Subject<void> = new Subject<void>();
-
 
   formsearch = new FormControl('');
   searchResults: any = [];
@@ -80,7 +81,6 @@ export class DynamicTableComponent implements OnInit, OnDestroy {
         this.currentPage = 0;
         this.paginator?.firstPage();
       });
-
   }
 
   ngOnDestroy(): void {
@@ -90,7 +90,7 @@ export class DynamicTableComponent implements OnInit, OnDestroy {
 
   public async ejecutarFuncionAsincrona(data: any) {
     if (data) {
-      this.filas = data
+      this.filas = data;
       this.filas?.map((objeto: any) => ({ ...objeto, isSelected: false }));
     } else {
       this.filas = await this.getData();
@@ -108,8 +108,8 @@ export class DynamicTableComponent implements OnInit, OnDestroy {
 
     const startIndex = this.currentPage * this.itemsPerPage;
     if (!query) {
-      this.hasta = startIndex + this.itemsPerPage
-      this.searchResults = temp.slice(startIndex, this.hasta)
+      this.hasta = startIndex + this.itemsPerPage;
+      this.searchResults = temp.slice(startIndex, this.hasta);
       return of(this.searchResults.slice(startIndex, this.hasta));
     } else {
       // Realizar la búsqueda y devolver resultados filtrados
@@ -125,11 +125,9 @@ export class DynamicTableComponent implements OnInit, OnDestroy {
       });
       return of(filteredResults.slice(startIndex, this.currentPage + this.itemsPerPage));
     }
-
   }
 
   updateSearchResults(): void {
-
     const query = this.formsearch.value?.trim();
     if (query) {
       // Si hay un valor en el buscador, realizar la búsqueda y actualizar resultados
@@ -211,7 +209,7 @@ export class DynamicTableComponent implements OnInit, OnDestroy {
         }
       });
       row.isEditing = false;
-      this.editarFunc(row)
+      this.editarFunc(row);
     } else {
       // Manejar caso de datos no válidos
       console.log('Datos no válidos');
@@ -234,7 +232,6 @@ export class DynamicTableComponent implements OnInit, OnDestroy {
         case 'maxlength':
           message = `El campo ${column.header} no puede exceder ${control.errors['maxlength'].requiredLength} caracteres.`;
           break;
-        // Agrega aquí más casos según las validaciones que uses
         default:
           message = `Error en el campo ${column.header}.`;
       }
@@ -242,7 +239,6 @@ export class DynamicTableComponent implements OnInit, OnDestroy {
     });
   }
 
-  // En tu componente
   onSelectionChange(user: any) {
     if (user.isSelected) {
       this.selectionService.addSelectedItem(user);
@@ -251,6 +247,7 @@ export class DynamicTableComponent implements OnInit, OnDestroy {
     }
     this.obtenerFilasSeleccionadas();
   }
+
   obtenerFilasSeleccionadas() {
     const filasSeleccionadas = this.selectionService.getSelectedItems();
     this.getElemSeleccionados.emit(filasSeleccionadas);
@@ -277,7 +274,10 @@ export class DynamicTableComponent implements OnInit, OnDestroy {
     this.editar.emit(row);
   }
 
-  // Método para manejar el clic en la fila
+  inhabilitarFila(row: any) {
+    this.inhabilitar.emit(row); // Emitir el evento de inhabilitación
+  }
+
   onRowClick(row: any): void {
     if (this.enableRowClick) {
       this.rowClicked.emit(row);

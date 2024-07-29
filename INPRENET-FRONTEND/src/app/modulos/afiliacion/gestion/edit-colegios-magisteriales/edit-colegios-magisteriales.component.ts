@@ -119,24 +119,6 @@ export class EditColegiosMagisterialesComponent implements OnInit, OnChanges, On
     }
   }
 
-  async editarFila(row: any) {
-    /* this.colegiosMagisteriales = await this.datosEstaticosService.getColegiosMagisteriales();
-    const campos = [
-      {
-        nombre: 'colegio_magisterial',
-        tipo: 'list',
-        requerido: true,
-        etiqueta: 'Colegio Magisterial',
-        editable: true,
-        opciones: this.colegiosMagisteriales
-      }
-    ];
-    const valoresIniciales = {
-      colegio_magisterial: row.id_per_cole_mag
-    };
-    this.openDialog(campos, valoresIniciales); */
-  }
-
   eliminarFila(row: any) {
     const dialogRef = this.dialog.open(ConfirmDialogComponent, {
       width: '350px',

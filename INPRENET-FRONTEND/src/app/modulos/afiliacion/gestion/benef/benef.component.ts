@@ -117,9 +117,6 @@ export class BenefComponent implements OnInit {
         Validators.minLength(2),
         Validators.maxLength(30),
       ]),
-      dependiente: new FormControl(datosBeneficiario?.dependiente, [
-        Validators.required
-      ]),
       discapacidad: new FormControl(datosBeneficiario?.discapacidad || 'no', [Validators.required]),
       discapacidades: this.fb.array(this.tipo_discapacidad.map(() => new FormControl(false)))
     });

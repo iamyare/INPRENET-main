@@ -74,10 +74,7 @@ export class ColMagisterialesComponent implements OnInit {
     const col_ColMags = this.formParent.get('ColMags') as FormArray;
     const newFormGroup = generateColegMagistFormGroup(datos);
     col_ColMags.push(newFormGroup);
-
-    // Actualiza el estado de validez del formulario
     this.formParent.updateValueAndValidity();
-
     this.onDatosColMagChange();
   }
 
@@ -85,8 +82,6 @@ export class ColMagisterialesComponent implements OnInit {
     const col_ColMags = this.formParent.get('ColMags') as FormArray;
     if (col_ColMags.length > 0) {
       col_ColMags.removeAt(col_ColMags.length - 1);
-
-      // Actualiza el estado de validez del formulario
       this.formParent.updateValueAndValidity();
 
       this.onDatosColMagChange();
@@ -117,16 +112,12 @@ export class ColMagisterialesComponent implements OnInit {
     console.log("Errores en los controles:", this.formParent.controls);
 
     const formArray = this.formParent?.get('ColMags') as FormArray;
-    if (formArray) {
-      const data = formArray.value;
-      this.newDataColegioMagisterial.emit(data);
-    } else {
-      console.error('FormArray "ColMags" no está disponible');
-    }
-
-    // Forzar detección de cambios
-    this.changeDetectorRef.detectChanges();
+  if (formArray) {
+    const data = formArray.value;
+    this.newDataColegioMagisterial.emit(data);
   }
+  this.changeDetectorRef.detectChanges();
+}
 
   getErrors(i: number, fieldName: string): string[] {
     const control = (this.formParent.get('ColMags') as FormArray).controls[i].get(fieldName);

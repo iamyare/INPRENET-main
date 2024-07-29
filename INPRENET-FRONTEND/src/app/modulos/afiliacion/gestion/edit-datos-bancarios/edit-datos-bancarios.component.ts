@@ -89,18 +89,21 @@ export class EditDatosBancariosComponent implements OnInit, OnChanges {
   }
 
   async getFilas() {
-
     this.loading = true;
     if (this.Afiliado) {
       try {
         const data = await this.svcAfiliado.getAllPersonaPBanco(this.Afiliado.n_identificacion).toPromise();
-
-        this.filas = data.map((item: any) => ({
-          id: item.id_af_banco,
-          nombre_banco: item.banco.nombre_banco,
-          numero_cuenta: item.num_cuenta,
-          estado: item.estado
-        }));
+        console.log('Datos recibidos:', data); // Verifica los datos recibidos
+        if (data && Array.isArray(data)) {
+          this.filas = data.map((item: any) => ({
+            id: item.id_af_banco,
+            nombre_banco: item.banco.nombre_banco,
+            numero_cuenta: item.num_cuenta,
+            estado: item.estado
+          }));
+        } else {
+          this.filas = [];
+        }
       } catch (error) {
         this.toastr.error('Error al cargar los datos de los perfiles de los centros de trabajo');
         console.error('Error al obtener datos de datos de los perfiles de los centros de trabajo', error);
@@ -112,6 +115,8 @@ export class EditDatosBancariosComponent implements OnInit, OnChanges {
     this.cargar();
   }
 
+
+
   ejecutarFuncionAsincronaDesdeOtroComponente(funcion: (data: any) => Promise<void>) {
     this.ejecF = funcion;
   }
@@ -120,30 +125,6 @@ export class EditDatosBancariosComponent implements OnInit, OnChanges {
     if (this.ejecF) {
       this.ejecF(this.filas).then(() => {});
     }
-  }
-
-  async manejarAccionUno(row: any) {
-    /* this.bancos = await this.datosEstaticosService.getBancos();
-    const bancoSeleccionado = this.bancos.find(b => b.label === row.nombre_banco);
-    const codBanco = bancoSeleccionado ? bancoSeleccionado.value : '';
-
-    const campos = [
-      {
-        nombre: 'nombre_banco',
-        tipo: 'list',
-        requerido: true,
-        etiqueta: 'Nombre del Banco',
-        editable: true,
-        opciones: this.bancos
-      },
-      { nombre: 'numero_cuenta', tipo: 'text', requerido: true, etiqueta: 'Número de Cuenta', editable: true }
-    ];
-    const valoresIniciales = {
-      ...row,
-      nombre_banco: codBanco
-    };
-
-    this.openDialogEditar(campos, valoresIniciales); */
   }
 
   manejarAccionDos(row: any) {
@@ -161,7 +142,11 @@ export class EditDatosBancariosComponent implements OnInit, OnChanges {
         this.svcAfiliado.desactivarCuentaBancaria(row.id).subscribe({
           next: (response) => {
             this.toastr.success(response.mensaje, 'Cuenta Bancaria Desactivada');
-            this.getFilas();
+            // Actualiza el estado en la lista de filas sin recargar el componente
+            const index = this.filas.findIndex(item => item.id === row.id);
+            if (index > -1) {
+              this.filas[index].estado = 'INACTIVO';
+            }
           },
           error: (error) => {
             console.error('Error al desactivar el Cuenta Bancaria:', error);
@@ -184,13 +169,22 @@ export class EditDatosBancariosComponent implements OnInit, OnChanges {
         }
       });
 
+      dialogRef.componentInstance.saved.subscribe(() => {
+        console.log('Evento saved recibido'); // Verifica que se reciba el evento
+        this.getFilas(); // Actualiza la tabla de datos después de agregar un banco
+      });
+
       dialogRef.afterClosed().subscribe((result: any) => {
         if (result) {
-          this.getFilas();
+          console.log('Diálogo cerrado con resultado:', result);
+          this.getFilas(); // Asegúrate de que la tabla se actualice si se cierra el diálogo con éxito
         }
       });
     }
   }
+
+
+
 
   openDialogEditar(campos: any, valoresIniciales: any): void {
     const dialogRef = this.dialog.open(EditarDialogComponent, {
@@ -230,10 +224,17 @@ export class EditDatosBancariosComponent implements OnInit, OnChanges {
 
     dialogRef.afterClosed().subscribe((result: boolean) => {
       if (result) {
+        // Desactivar todas las cuentas activas antes de activar la nueva cuenta
+        this.filas.forEach(item => item.estado = 'INACTIVO');
+
         this.svcAfiliado.activarCuentaBancaria(row.id, this.Afiliado.id_persona).subscribe({
           next: (response) => {
             this.toastr.success(response.mensaje, 'Cuenta Bancaria Activada');
-            this.getFilas();
+            // Actualiza el estado en la lista de filas sin recargar el componente
+            const index = this.filas.findIndex(item => item.id === row.id);
+            if (index > -1) {
+              this.filas[index].estado = 'ACTIVO';
+            }
           },
           error: (error) => {
             console.error('Error al activar el Cuenta Bancaria:', error);

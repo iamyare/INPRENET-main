@@ -33,7 +33,6 @@ export class EditReferPersonalesComponent implements OnInit, OnChanges, OnDestro
   ejecF: any;
   private subscriptions: Subscription = new Subscription();
   public mostrarMensaje: boolean = false;
-  public loading: boolean = false;
 
   constructor(
     private svcAfiliado: AfiliadoService,
@@ -124,7 +123,6 @@ export class EditReferPersonalesComponent implements OnInit, OnChanges, OnDestro
   }
 
   async getFilas() {
-    this.loading = true; // Mostrar el spinner antes de cargar los datos
     this.mostrarMensaje = false;
     if (this.Afiliado) {
       try {
@@ -139,24 +137,21 @@ export class EditReferPersonalesComponent implements OnInit, OnChanges, OnDestro
             telefono_domicilio: item.personaReferenciada.telefono_1 ?? 'No disponible',
             telefono_personal: item.personaReferenciada.telefono_2 ?? 'No disponible',
             telefono_trabajo: item.personaReferenciada.telefono_trabajo ?? 'No disponible',
-            estado: item.estado ?? 'No disponible', // Añadir estado
+            estado: item.estado ?? 'No disponible',
           };
           return filaProcesada;
         });
+        this.mostrarMensaje = this.filas.length === 0;
       } catch (error) {
-        this.toastr.error('Error al cargar los datos de las referencias personales');
         console.error('Error al obtener datos de las referencias personales:', error);
+        this.filas = [];
+        this.mostrarMensaje = true;
+      } finally {
+        this.cargar();
       }
     } else {
       this.resetDatos();
     }
-    setTimeout(() => {
-      this.loading = false;
-      if (this.filas.length === 0) {
-        this.mostrarMensaje = true;
-      }
-      this.cargar();
-    }, 1000);
   }
 
   ejecutarFuncionAsincronaDesdeOtroComponente(funcion: (data: any) => Promise<void>) {
@@ -259,12 +254,12 @@ export class EditReferPersonalesComponent implements OnInit, OnChanges, OnDestro
     this.openDialog(campos, valoresIniciales);
   }
 
-  eliminarFila(row: any) {
+  inhabilitarFila(row: any) {
     const dialogRef = this.dialog.open(ConfirmDialogComponent, {
       width: '350px',
       data: {
-        title: 'Confirmación de eliminación',
-        message: '¿Estás seguro de querer eliminar esta referencia personal?'
+        title: 'Confirmación de inhabilitación',
+        message: '¿Estás seguro de querer inhabilitar esta referencia personal?'
       }
     });
     dialogRef.afterClosed().subscribe((result: boolean) => {

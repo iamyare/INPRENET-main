@@ -152,22 +152,92 @@ export class EditDatosGeneralesComponent implements OnInit {
   }
 
   setDatosGenerales(datosGenerales: any) {
-    this.formDatosGenerales = datosGenerales;
-    this.fallecido = this.formDatosGenerales.value.refpers[0].fallecido;
+    // Verifica que `datosGenerales` es un objeto válido
+    if (!datosGenerales || typeof datosGenerales !== 'object') {
+      console.error('datosGenerales no es un objeto válido:', datosGenerales);
+      return;
+    }
+
+    // Verifica si existe el FormGroup y FormArray, de lo contrario crea uno nuevo
+    if (!this.formDatosGenerales) {
+      this.formDatosGenerales = this.fb.group({
+        refpers: this.fb.array([])
+      });
+    }
+
+    const refpersArray = this.formDatosGenerales.get('refpers') as FormArray;
+    refpersArray.clear();
+
+    // Supongamos que `datosGenerales` es un objeto, no un arreglo
+    const dato = datosGenerales;
+    const discapacidadesArray = (dato.discapacidades || []).map((d: any) => new FormControl(d.id_discapacidad));
+
+    const newGroup = this.fb.group({
+      // Otros campos que necesitas incluir
+      discapacidades: this.fb.array(discapacidadesArray)
+    });
+
+    refpersArray.push(newGroup);
+
+    this.updateDiscapacidades();
+  }
+
+
+
+  createRefpersGroup(dato: any): FormGroup {
+    return this.fb.group({
+      n_identificacion: [dato.N_IDENTIFICACION, Validators.required],
+      rtn: [dato.RTN, Validators.required],
+      primer_nombre: [dato.PRIMER_NOMBRE, Validators.required],
+      segundo_nombre: [dato.SEGUNDO_NOMBRE],
+      tercer_nombre: [dato.TERCER_NOMBRE],
+      primer_apellido: [dato.PRIMER_APELLIDO, Validators.required],
+      segundo_apellido: [dato.SEGUNDO_APELLIDO],
+      fecha_nacimiento: [dato.FECHA_NACIMIENTO, Validators.required],
+      fecha_vencimiento_ident: [dato.fecha_vencimiento_ident],
+      cantidad_dependientes: [dato.CANTIDAD_DEPENDIENTES],
+      cantidad_hijos: [dato.CANTIDAD_HIJOS],
+      telefono_1: [dato.TELEFONO_1],
+      telefono_2: [dato.TELEFONO_2],
+      correo_1: [dato.CORREO_1],
+      correo_2: [dato.CORREO_2],
+      direccion_residencia: [dato.DIRECCION_RESIDENCIA],
+      numero_carnet: [dato.NUMERO_CARNET],
+      genero: [dato.GENERO],
+      estado_civil: [dato.ESTADO_CIVIL],
+      representacion: [dato.REPRESENTACION],
+      sexo: [dato.SEXO],
+      id_pais: [dato.ID_PAIS],
+      id_tipo_identificacion: [dato.ID_IDENTIFICACION],
+      id_profesion: [dato.ID_PROFESION],
+      id_departamento_residencia: [dato.id_departamento_residencia],
+      id_municipio_residencia: [dato.ID_MUNICIPIO_RESIDENCIA],
+      id_departamento_nacimiento: [dato.id_departamento_nacimiento],
+      id_municipio_nacimiento: [dato.ID_MUNICIPIO_NACIMIENTO],
+      fallecido: [dato.fallecido],
+      grupo_etnico: [dato.GRUPO_ETNICO],
+      grado_academico: [dato.GRADO_ACADEMICO],
+      discapacidad: [dato.TIPO_DISCAPACIDAD ? "SI" : "NO", Validators.required],
+      discapacidades: this.fb.array(dato.discapacidades ? dato.discapacidades.map((d:any) => new FormControl(d.id_discapacidad)) : [])
+    });
   }
 
   async previsualizarInfoAfil() {
     if (this.Afiliado) {
-
-      this.loading = true; // Mostrar el spinner antes de cargar los datos
+      this.loading = true;
       await this.svcAfiliado.getAfilByParam(this.Afiliado.n_identificacion).subscribe(
         (result) => {
+          console.log('Datos recibidos:', result);
+
           this.datos = result;
           this.Afiliado = result;
           this.estadoAfiliacion = result.estadoAfiliacion;
           this.fallecido = result.fallecido;
 
-          this.formDatosGenerales.value.refpers[0] = {
+          const refpersArray = this.formDatosGenerales.get('refpers') as FormArray;
+          refpersArray.clear();
+
+          const newGroup = this.fb.group({
             n_identificacion: result.N_IDENTIFICACION,
             rtn: result.RTN,
             primer_nombre: result.PRIMER_NOMBRE,
@@ -194,30 +264,20 @@ export class EditDatosGeneralesComponent implements OnInit {
             id_profesion: result.ID_PROFESION,
             id_departamento_residencia: result.id_departamento_residencia,
             id_municipio_residencia: result.ID_MUNICIPIO,
+            id_departamento_nacimiento: result.id_departamento_nacimiento,
+            id_municipio_nacimiento: result.ID_MUNICIPIO_NACIMIENTO,
             fallecido: result.fallecido,
             grupo_etnico: result.GRUPO_ETNICO,
             grado_academico: result.GRADO_ACADEMICO,
             discapacidad: result.TIPO_DISCAPACIDAD ? "SI" : "NO",
-            tipo_discapacidad: result.TIPO_DISCAPACIDAD,
-          };
+            discapacidades: this.fb.array(result.discapacidades ? result.discapacidades.map((d:any) => new FormControl(d.id_discapacidad)) : [])
+          });
 
+          refpersArray.push(newGroup);
 
-
-          if (result.ID_MUNICIPIO_DEFUNCION) {
-            this.cargarMunicipios(result.ID_MUNICIPIO_DEFUNCION);
-          }
-
-
-          this.form1.controls.estado.setValue(result.estadoAfiliacion);
-          this.form1.controls.observaciones.setValue(result.observaciones);
-          this.form1.controls.tipo_defuncion.setValue(result.tipo_defuncion);
-          this.form1.controls.fecha_defuncion.setValue(result.fecha_defuncion);
-          this.form1.controls.id_departamento_defuncion.setValue(result.ID_DEPARTAMENTO_DEFUNCION);
-          this.form1.controls.id_municipio_defuncion.setValue(result.ID_MUNICIPIO_DEFUNCION);
-          this.form1.controls.certificado_defuncion.setValue(result.certificado_defuncion);
+          this.updateDiscapacidades();
 
           this.Afiliado.nameAfil = this.unirNombres(result.PRIMER_NOMBRE, result.SEGUNDO_NOMBRE, result.TERCER_NOMBRE, result.PRIMER_APELLIDO, result.SEGUNDO_APELLIDO);
-
           this.loading = false;
         },
         (error) => {
@@ -225,6 +285,22 @@ export class EditDatosGeneralesComponent implements OnInit {
           this.loading = false;
         }
       );
+    }
+  }
+
+  updateDiscapacidades() {
+    const refpersArray = this.formDatosGenerales.get('refpers') as FormArray;
+    if (refpersArray.length > 0) {
+      const firstRefpersGroup = refpersArray.controls[0] as FormGroup;
+      const discapacidadesArray = firstRefpersGroup.get('discapacidades') as FormArray;
+
+      if (discapacidadesArray) {
+        const selectedDiscapacidades = discapacidadesArray.value;
+        discapacidadesArray.clear();
+        selectedDiscapacidades.forEach((id: number) => {
+          discapacidadesArray.push(new FormControl(id));
+        });
+      }
     }
   }
 

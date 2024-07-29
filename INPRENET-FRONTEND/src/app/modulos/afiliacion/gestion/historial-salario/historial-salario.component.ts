@@ -44,14 +44,12 @@ export class HistorialSalarioComponent implements OnInit {
 
   ngOnInit(): void {
     this.initForm();
-
     this.datosEstaticos.getBancos().subscribe(bancos => {
       this.Bancos = bancos;
-
-      if (this.datos && this.datos.value.banco && this.datos.value.banco.length > 0) {
-        for (let i of this.datos.value.banco) {
-          this.agregarBanco(i);
-        }
+      if (this.datos && this.datos.value && Array.isArray(this.datos.value.banco)) {
+        this.datos.value.banco.forEach((banco: any) => {
+          this.agregarBanco(banco);
+        });
       }
     });
 
@@ -59,6 +57,9 @@ export class HistorialSalarioComponent implements OnInit {
       this.onDatosHistSal();
     });
   }
+
+
+
 
   private initForm() {
     let existingForm = this.formStateService.getForm(this.formKey);

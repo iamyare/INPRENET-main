@@ -114,6 +114,7 @@ export class EditPerfilPuestTrabComponent implements OnInit, OnDestroy, OnChange
   async getCentrosTrabajo() {
     const response = await this.centrosTrabSVC.obtenerTodosLosCentrosTrabajo().toPromise();
     if (response) {
+
       const mappedResponse = response.map((item) => ({
         label: item.nombre_centro_trabajo,
         value: String(item.id_centro_trabajo),
@@ -138,9 +139,11 @@ export class EditPerfilPuestTrabComponent implements OnInit, OnDestroy, OnChange
   }
 
   async getFilas() {
+
     if (this.Afiliado.n_identificacion) {
       try {
         const data = await this.svcAfiliado.getAllPerfCentroTrabajo(this.Afiliado.n_identificacion).toPromise();
+
         this.filas = data.map((item: any) => ({
           id_perf_pers_centro_trab: item.id_perf_pers_centro_trab,
           id_centro_trabajo: item.centroTrabajo.id_centro_trabajo,

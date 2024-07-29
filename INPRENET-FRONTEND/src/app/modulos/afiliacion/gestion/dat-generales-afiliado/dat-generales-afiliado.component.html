@@ -541,8 +541,8 @@
             <div class="col-lg-12 col-md-12" *ngIf="discapacidad">
               <div formArrayName="discapacidades" >
                 <div>Tipos de Discapacidad</div>
-                <div *ngFor="let tipo of tipo_discapacidad; let j = index" class="discapacidad-item">
-                  <mat-checkbox [formControlName]="j">{{ tipo.label }}</mat-checkbox>
+                <div *ngFor="let tipo of tipo_discapacidad; let i = index" class="discapacidad-item">
+                  <mat-checkbox [formControlName]="i">{{ tipo.label }}</mat-checkbox>
                 </div>
               </div>
             </div>

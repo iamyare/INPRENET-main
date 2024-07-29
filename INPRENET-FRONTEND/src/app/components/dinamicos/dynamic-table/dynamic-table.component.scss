@@ -106,3 +106,26 @@
   background-color: #d9edf7; /* Color de fondo cuando se pasa el ratón por encima */
   transition: background-color 0.3s; /* Transición suave del color de fondo */
 }
+
+.boton-inhabilitar mat-icon {
+  color: #ff5252; /* Color del ícono de inhabilitar */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.boton-inhabilitar {
+  background-color: transparent; /* Fondo transparente */
+  border: none; /* Sin borde */
+  cursor: pointer; /* Cursor de mano */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.boton-inhabilitar:hover mat-icon {
+  color: #e04848; /* Color del ícono al pasar el ratón por encima */
+}
+
+
+

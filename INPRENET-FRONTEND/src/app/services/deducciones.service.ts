@@ -11,6 +11,21 @@ export class DeduccionesService {
 
   constructor(private toastr: ToastrService, private http: HttpClient) { }
 
+  obtenerDeduccionesPorAnioMes(dni: string, anio: number, mes: number): Observable<any> {
+    const params = new HttpParams()
+      .set('anio', anio.toString())
+      .set('mes', mes.toString());
+
+    return this.http.get(`${environment.API_URL}/api/deduccion/deducciones-por-anio-mes/${dni}`, { params })
+      .pipe(
+        catchError((error: HttpErrorResponse) => {
+          console.error('Error al obtener deducciones', error);
+          this.toastr.error('Error al obtener deducciones');
+          return throwError(() => new Error('Error al obtener deducciones'));
+        })
+      );
+  }
+
   crearDesdeExcel(data: any): Observable<any> {
     return this.http.post(`${environment.API_URL}/api/detalle-deduccion/crearDeExcel`, data);
   }

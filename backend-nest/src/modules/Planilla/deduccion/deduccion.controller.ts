@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseInterceptors, UploadedFile, Res } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseInterceptors, UploadedFile, Res, Query, ParseIntPipe, BadRequestException } from '@nestjs/common';
 import { DeduccionService } from './deduccion.service';
 import { CreateDeduccionDto } from './dto/create-deduccion.dto';
 import { UpdateDeduccionDto } from './dto/update-deduccion.dto';
@@ -8,6 +8,18 @@ import { ApiTags } from '@nestjs/swagger';
 @Controller('deduccion')
 export class DeduccionController {
   constructor(private readonly deduccionService: DeduccionService) { }
+
+  @Get('deducciones-por-anio-mes/:dni')
+  async getDeduccionesPorAnioMes(
+    @Param('dni') dni: string,
+    @Query('anio', ParseIntPipe) anio: number,
+    @Query('mes', ParseIntPipe) mes: number
+  ): Promise<any> {
+    if (anio < 0 || mes < 1 || mes > 12) {
+      throw new BadRequestException('Año o mes inválidos');
+    }
+    return await this.deduccionService.obtenerDeduccionesPorAnioMes(dni, anio, mes);
+  }
 
   @Post()
   create(@Body() createDeduccionDto: CreateDeduccionDto) {

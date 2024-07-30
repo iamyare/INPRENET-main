@@ -50,6 +50,6 @@ export class LoginComponent {
   }
 
   redirectOlvidoContrasena() {
-    this.router.navigate(['/solicitud-restablecimiento']);
+    this.router.navigate(['/auth/solicitud-restablecimiento']);
   }
 }

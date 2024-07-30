@@ -5,6 +5,8 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Net_Deduccion } from './entities/net_deduccion.entity';
 import { Net_Centro_Trabajo } from 'src/modules/Empresarial/entities/net_centro_trabajo.entity';
+import { Net_Detalle_Deduccion } from '../detalle-deduccion/entities/detalle-deduccion.entity';
+import { net_persona } from 'src/modules/Persona/entities/net_persona.entity';
 @Injectable()
 export class DeduccionService {
 
@@ -14,8 +16,67 @@ export class DeduccionService {
     @InjectRepository(Net_Deduccion)
     public deduccionRepository: Repository<Net_Deduccion>,
     @InjectRepository(Net_Centro_Trabajo)
-    private centroTrabajoRepository: Repository<Net_Centro_Trabajo>
+    private centroTrabajoRepository: Repository<Net_Centro_Trabajo>,
+    @InjectRepository(Net_Detalle_Deduccion)
+    private detalleDeduccionRepository: Repository<Net_Detalle_Deduccion>,
+    @InjectRepository(net_persona)
+    private personaRepository: Repository<net_persona>
   ) { }
+
+  async obtenerDeduccionesPorAnioMes(dni: string, anio: number, mes: number): Promise<any> {
+    try {
+      const persona = await this.personaRepository.findOne({ where: { n_identificacion: dni } });
+  
+      if (!persona) {
+        throw new InternalServerErrorException('Persona no encontrada');
+      }
+  
+      const deducciones = await this.detalleDeduccionRepository.find({
+        where: {
+          persona: { id_persona: persona.id_persona },
+          anio: anio,
+          mes: mes,
+        },
+        relations: [
+          'deduccion',
+          'detalle_pago_beneficio',
+          'detalle_pago_beneficio.planilla',
+          'deduccion.centroTrabajo', // Asegúrate de que esta relación esté bien definida en la entidad
+        ],
+      });
+  
+      const resultado = {
+        persona: {
+          n_identificacion: persona.n_identificacion,
+          nombre_completo: `${persona.primer_nombre} ${persona.segundo_nombre || ''} ${persona.primer_apellido} ${persona.segundo_apellido}`.trim(),
+          genero: persona.genero,
+          fecha_nacimiento: persona.fecha_nacimiento,
+          estado_civil: persona.estado_civil,
+          fallecido: persona.fallecido,
+          direccion_residencia: persona.direccion_residencia,
+          telefono: persona.telefono_1,
+        },
+        deducciones: deducciones.map(d => ({
+          deduccion_id: d.deduccion,
+          monto_aplicado: d.monto_aplicado,
+          estado_aplicacion: d.estado_aplicacion,
+          anio: d.anio,
+          mes: d.mes,
+          fecha_aplicado: d.fecha_aplicado,
+          //planilla: d.detalle_pago_beneficio.planilla ? d.detalle_pago_beneficio.planilla.codigo_planilla : 'N/A',
+          centro_trabajo: d.deduccion.centroTrabajo ? d.deduccion.centroTrabajo.nombre_centro_trabajo : 'N/A', // Ajuste aquí
+        })),
+      };
+  
+      return resultado;
+  
+    } catch (error) {
+      this.logger.error(`Error al obtener deducciones para el DNI ${dni}: ${error.message}`, error.stack);
+      throw new InternalServerErrorException('Error al obtener deducciones');
+    }
+  }
+  
+
 
   async create(createDeduccionDto: CreateDeduccionDto): Promise<Net_Deduccion> {
     const existingDeduccion = await this.deduccionRepository.findOne({

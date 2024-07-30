@@ -30,7 +30,6 @@ const routes: Routes = [
         loadChildren: () => import('./views/views.module').then(m => m.ViewsModule),
       },
       { path: 'usuario/editar', component: EditarPerfilComponent },
-      { path: '', redirectTo: 'menu', pathMatch: 'full' },
     ]
   },
   {
@@ -53,7 +52,8 @@ const routes: Routes = [
       },
       { path: '', redirectTo: 'login', pathMatch: 'full' }
     ]
-  }
+  },
+  { path: '**', redirectTo: 'auth/landing-page', pathMatch: 'full' }
 ];
 
 @NgModule({

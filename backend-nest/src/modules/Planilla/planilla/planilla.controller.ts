@@ -17,6 +17,11 @@ import { GetDesglosePersonaPlanillaPreliminarDto } from './dto/get-desglose-pers
 export class PlanillaController {
   constructor(private readonly planillaService: PlanillaService, @InjectEntityManager() private readonly entityManager: EntityManager) { }
 
+  @Get('activas')
+  async getActivePlanillas(@Query('clasePlanilla') clasePlanilla?: string) {
+    return this.planillaService.getActivePlanillas(clasePlanilla);
+  }
+
   @Get('beneficios-deducciones-planilla-mes')
   async getBeneficiosConDeducciones(
     @Query('periodoInicio') periodoInicio: string,

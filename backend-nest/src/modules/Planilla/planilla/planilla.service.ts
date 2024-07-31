@@ -9,10 +9,8 @@ import { Net_Beneficio } from '../beneficio/entities/net_beneficio.entity';
 import { Net_Planilla } from './entities/net_planilla.entity';
 import { Net_TipoPlanilla } from '../tipo-planilla/entities/tipo-planilla.entity';
 import { Net_Detalle_Pago_Beneficio } from '../detalle_beneficio/entities/net_detalle_pago_beneficio.entity';
-import { DetalleBeneficioService } from '../detalle_beneficio/detalle_beneficio.service';
 import { PaginationDto } from 'src/common/dtos/pagination.dto';
 import { Net_Deduccion } from '../deduccion/entities/net_deduccion.entity';
-import { Net_Detalle_Beneficio_Afiliado } from '../detalle_beneficio/entities/net_detalle_beneficio_afiliado.entity';
 import { Workbook } from 'exceljs';
 import { Response } from 'express';
 
@@ -23,29 +21,36 @@ export class PlanillaService {
 
   constructor(
     @InjectEntityManager() private entityManager: EntityManager,
-
     @InjectRepository(Net_Planilla)
     private planillaRepository: Repository<Net_Planilla>,
-
     @InjectRepository(net_persona)
     private personaRepository: Repository<net_persona>,
-
     @InjectRepository(Net_Detalle_Pago_Beneficio)
     private detallePagBeneficios: Repository<Net_Detalle_Pago_Beneficio>,
-
     @InjectRepository(Net_TipoPlanilla)
     private tipoPlanillaRepository: Repository<Net_TipoPlanilla>,
-
     @InjectRepository(Net_Detalle_Deduccion)
     private readonly detalleDeduccionRepository: Repository<Net_Detalle_Deduccion>,
-
-    @InjectRepository(Net_Detalle_Beneficio_Afiliado)
-    private readonly detalleBenAfilRepository: Repository<Net_Detalle_Beneficio_Afiliado>,
-
-    @InjectRepository(Net_Deduccion)
-    private readonly deduccionRepository: Repository<Net_Deduccion>,
   ) {
   };
+
+  async getActivePlanillas(clasePlanilla?: string): Promise<Net_Planilla[]> {
+    const query = this.planillaRepository.createQueryBuilder('planilla')
+        .leftJoinAndSelect('planilla.tipoPlanilla', 'tipoPlanilla')
+        .where('planilla.estado = :estado', { estado: 'ACTIVA' });
+
+    if (clasePlanilla) {
+        query.andWhere('tipoPlanilla.clase_planilla = :clasePlanilla', { clasePlanilla });
+    }
+
+    try {
+        return await query.getMany();
+    } catch (error) {
+        this.logger.error('Error al obtener planillas activas', error);
+        throw new InternalServerErrorException('Error al obtener planillas activas');
+    }
+}
+
 
   async getBeneficiosAgrupadosPorPlanilla(idPlanilla: number): Promise<any> {
     const query = `

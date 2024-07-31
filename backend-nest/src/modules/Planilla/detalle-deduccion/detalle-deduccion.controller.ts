@@ -116,7 +116,7 @@ export class DetalleDeduccionController {
   @Post()
   @HttpCode(HttpStatus.CREATED)
   create(@Body() createDetalleDeduccionDto: CreateDetalleDeduccionDto) {
-    return this.detalleDeduccionService.create(createDetalleDeduccionDto);
+    return this.detalleDeduccionService.createDetalleDeduccion(createDetalleDeduccionDto);
   }
 
   /* @Post('subirArchivo')
@@ -147,10 +147,10 @@ export class DetalleDeduccionController {
     return this.detalleDeduccionService.findOne(+id);
   }
 
-  @Patch(':id')
+  /* @Patch(':id')
   update(@Param('id') id: string, @Body() updateDetalleDeduccionDto: UpdateDetalleDeduccionDto) {
     return this.detalleDeduccionService.update(+id, updateDetalleDeduccionDto);
-  }
+  } */
 
   @Delete(':id')
   remove(@Param('id') id: string) {

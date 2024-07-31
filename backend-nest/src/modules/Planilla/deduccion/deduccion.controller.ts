@@ -3,11 +3,18 @@ import { DeduccionService } from './deduccion.service';
 import { CreateDeduccionDto } from './dto/create-deduccion.dto';
 import { UpdateDeduccionDto } from './dto/update-deduccion.dto';
 import { ApiTags } from '@nestjs/swagger';
+import { FileInterceptor } from '@nestjs/platform-express';
 
 @ApiTags('deduccion')
 @Controller('deduccion')
 export class DeduccionController {
   constructor(private readonly deduccionService: DeduccionService) { }
+
+  @Post('upload-excel-deducciones')
+  @UseInterceptors(FileInterceptor('file'))
+  uploadDeducciones(@UploadedFile() file: Express.Multer.File) {
+    return this.deduccionService.uploadDeducciones(file);
+  }
 
   @Get('deducciones-por-anio-mes/:dni')
   async getDeduccionesPorAnioMes(

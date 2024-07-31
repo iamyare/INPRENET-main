@@ -1,34 +1,23 @@
-import { IsNumber, IsOptional, IsString, IsUUID, Length, Max, Min, isNumber } from "class-validator";
+import { IsNotEmpty, IsNumber, IsOptional, IsString, Length } from 'class-validator';
 
 export class CreateDetalleDeduccionDto {
-    @IsString()
-    n_identificacion: string; // Asume que el DNI tiene una longitud específica
+    @IsNotEmpty({ message: 'El n_identificacion de la persona no debe estar vacío.' })
+    @IsString({ message: 'El n_identificacion debe ser una cadena de texto.' })
+    n_identificacion: string;
 
-    @IsString()
-    nombre_deduccion: string;
+    @IsNotEmpty({ message: 'El id_planilla no debe estar vacío.' })
+    @IsNumber({}, { message: 'El id_planilla debe ser numérico.' })
+    id_planilla: number;
 
-    @IsString()
-    nombre_centro_trabajo: string;
+    @IsNumber({}, { message: 'El valor de codigo deduccion debe ser numérico.' })
+    codigo_deduccion: number;
 
-    @IsNumber()
-    @Min(0)
-    monto_total: number;
-
-    @IsNumber()
-    @IsOptional()
-    monto_aplicado?: number;
-
-    @IsString()
-    @IsOptional()
-    estado_aplicacion?: string;
-
-    @IsNumber()
-    @Min(1900)
-    @Max(new Date().getFullYear())
+    @IsNumber({}, { message: 'El año debe ser numérico.' })
     anio: number;
 
-    @IsNumber()
-    @Min(1)
-    @Max(12)
+    @IsNumber({}, { message: 'El mes debe ser numérico.' })
     mes: number;
+
+    @IsNumber({}, { message: 'El monto total debe ser numérico.' })
+    monto_total: number;
 }

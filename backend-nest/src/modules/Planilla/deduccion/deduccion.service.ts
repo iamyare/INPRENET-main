@@ -2,11 +2,14 @@ import { BadRequestException, Injectable, InternalServerErrorException, Logger, 
 import { CreateDeduccionDto } from './dto/create-deduccion.dto';
 import { UpdateDeduccionDto } from './dto/update-deduccion.dto';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Between, Repository } from 'typeorm';
 import { Net_Deduccion } from './entities/net_deduccion.entity';
 import { Net_Centro_Trabajo } from 'src/modules/Empresarial/entities/net_centro_trabajo.entity';
 import { Net_Detalle_Deduccion } from '../detalle-deduccion/entities/detalle-deduccion.entity';
 import { net_persona } from 'src/modules/Persona/entities/net_persona.entity';
+import * as XLSX from 'xlsx';
+import { Net_Planilla } from '../planilla/entities/net_planilla.entity';
+import { Net_Tipo_Persona } from 'src/modules/Persona/entities/net_tipo_persona.entity';
 @Injectable()
 export class DeduccionService {
 
@@ -20,8 +23,134 @@ export class DeduccionService {
     @InjectRepository(Net_Detalle_Deduccion)
     private detalleDeduccionRepository: Repository<Net_Detalle_Deduccion>,
     @InjectRepository(net_persona)
-    private personaRepository: Repository<net_persona>
+    private personaRepository: Repository<net_persona>,
+    @InjectRepository(Net_Planilla)
+    private planillaRepository: Repository<Net_Planilla>,
+    @InjectRepository(Net_Tipo_Persona)
+    private tipoPersonaRepository: Repository<Net_Tipo_Persona>
   ) { }
+
+  async uploadDeducciones(file: Express.Multer.File): Promise<string> {
+    const workbook = XLSX.read(file.buffer, { type: 'buffer' });
+    const sheet = workbook.Sheets[workbook.SheetNames[0]];
+    const data = XLSX.utils.sheet_to_json(sheet, { header: 1, defval: null }) as any[][];
+
+    const [header, ...rows] = data;
+
+    for (const row of rows) {
+        const [anio, mes, dni, codigoDeduccion, montoTotal] = row;
+
+        if (
+            anio == null || anio === '' ||
+            mes == null || mes === '' ||
+            dni == null || dni === '' ||
+            codigoDeduccion == null || codigoDeduccion === '' ||
+            montoTotal == null || montoTotal === ''
+        ) {
+            this.logger.warn(`Fila ignorada por tener campos vacíos: ${JSON.stringify(row)}`);
+            continue;
+        }
+
+        const parsedAnio = Number(anio);
+        const parsedMes = Number(mes);
+        const parsedDni = dni ? dni.toString() : '';
+        const parsedCodigoDeduccion = Number(codigoDeduccion);
+        const parsedMontoTotal = parseFloat(montoTotal);
+
+        if (isNaN(parsedAnio) || isNaN(parsedMes) || parsedDni === '' || isNaN(parsedCodigoDeduccion) || isNaN(parsedMontoTotal)) {
+            this.logger.warn(`Datos inválidos en la fila (conversión fallida): ${JSON.stringify(row)}`);
+            continue;
+        }
+
+        const persona = await this.personaRepository.findOne({
+            where: { n_identificacion: parsedDni },
+            relations: ['detallePersona', 'detallePersona.tipoPersona']
+        });
+
+        if (!persona) {
+            this.logger.warn(`No se encontró persona con DNI: ${parsedDni}`);
+            continue;
+        }
+
+        const detallePersona = persona.detallePersona[0];
+        const tipoPersona = detallePersona ? detallePersona.tipoPersona.tipo_persona : null;
+
+        if (!tipoPersona) {
+            this.logger.warn(`No se encontró el tipo de persona para el DNI: ${parsedDni}`);
+            continue;
+        }
+
+        const deduccion = await this.deduccionRepository.findOne({
+            where: { codigo_deduccion: parsedCodigoDeduccion },
+        });
+
+        if (!deduccion) {
+            this.logger.warn(`No se encontró deducción con código: ${parsedCodigoDeduccion}`);
+            continue;
+        }
+
+        const planillas = await this.planillaRepository.createQueryBuilder('planilla')
+        .where('planilla.estado = :estado', { estado: 'ACTIVA' })
+        .andWhere(':mes BETWEEN TO_NUMBER(TO_CHAR(TO_DATE(planilla.periodoInicio, \'DD/MM/YYYY\'), \'MM\')) AND TO_NUMBER(TO_CHAR(TO_DATE(planilla.periodoFinalizacion, \'DD/MM/YYYY\'), \'MM\'))', { mes: parsedMes })
+        .andWhere(':anio BETWEEN TO_NUMBER(TO_CHAR(TO_DATE(planilla.periodoInicio, \'DD/MM/YYYY\'), \'YYYY\')) AND TO_NUMBER(TO_CHAR(TO_DATE(planilla.periodoFinalizacion, \'DD/MM/YYYY\'), \'YYYY\'))', { anio: parsedAnio })
+        .andWhere('planilla.secuencia = :secuencia', { secuencia: 1 })
+        .leftJoinAndSelect('planilla.tipoPlanilla', 'tipoPlanilla')
+        .getMany();
+        
+        if (!planillas || planillas.length === 0) {
+        this.logger.warn(`No se encontró planilla activa para el mes: ${parsedMes}-${parsedAnio}`);
+        continue;
+        }
+        
+        const planilla = planillas.find(p => {
+        if (tipoPersona === 'BENEFICIARIO' && p.tipoPlanilla.nombre_planilla === 'ORDINARIA - BENEFICIARIOS') {
+            return true;
+        }
+        if (['JUBILADO', 'PENSIONADO'].includes(tipoPersona) && p.tipoPlanilla.nombre_planilla === 'ORDINARIA - JUBILADOS') {
+            return true;
+        }
+        return false;
+        });
+        
+        if (!planilla) {
+        this.logger.warn(`No se encontró planilla adecuada para el tipo de persona: ${tipoPersona}`);
+        continue;
+        }
+
+
+        const deduccionExistente = await this.detalleDeduccionRepository.findOne({
+            where: {
+                anio: parsedAnio,
+                mes: parsedMes,
+                monto_total: parsedMontoTotal,
+                persona: { id_persona: persona.id_persona },
+                deduccion: { id_deduccion: deduccion.id_deduccion },
+                planilla: { id_planilla: planilla.id_planilla },
+            },
+        });
+
+        if (deduccionExistente) {
+            this.logger.warn(`Deducción duplicada detectada: ${JSON.stringify(row)}`);
+            continue;
+        }
+
+        const detalleDeduccion = this.detalleDeduccionRepository.create({
+            anio: parsedAnio,
+            mes: parsedMes,
+            monto_total: parsedMontoTotal,
+            estado_aplicacion: 'NO COBRADA',
+            persona,
+            deduccion,
+            planilla,
+        });
+
+        await this.detalleDeduccionRepository.save(detalleDeduccion);
+    }
+
+    return 'Deducciones procesadas correctamente';
+}
+
+
 
   async obtenerDeduccionesPorAnioMes(dni: string, anio: number, mes: number): Promise<any> {
     try {
@@ -77,7 +206,6 @@ export class DeduccionService {
   }
   
 
-
   async create(createDeduccionDto: CreateDeduccionDto): Promise<Net_Deduccion> {
     const existingDeduccion = await this.deduccionRepository.findOne({
         where: { codigo_deduccion: createDeduccionDto.codigo_deduccion }
@@ -111,26 +239,31 @@ export class DeduccionService {
     }
 }
 
-  async findAll() {
-    /* return this.deduccionRepository.find() */
-    try {
-      const queryBuilder = await this.deduccionRepository
-        .createQueryBuilder('net_deduccion')
-        .addSelect('net_deduccion.id_deduccion', 'id_deduccion')
-        .addSelect('net_deduccion.nombre_deduccion', 'nombre_deduccion')
-        .addSelect('net_deduccion.descripcion_deduccion', 'descripcion_deduccion')
-        .addSelect('net_deduccion.prioridad', 'prioridad')
-        .addSelect('centrotrabajo.nombre_centro_trabajo', 'nombre_centro_trabajo')
-        .innerJoin(Net_Centro_Trabajo, 'centrotrabajo', 'centrotrabajo.id_centro_trabajo = "centrotrabajo".id_centro_trabajo')
-        .getRawMany();
-
-      return queryBuilder;
-
-    } catch (error) {
-      console.log(error);
-
+async findAll(): Promise<any[]> {
+  return this.deduccionRepository.find({
+    relations: ['centroTrabajo'],
+    select: {
+      id_deduccion: true,
+      nombre_deduccion: true,
+      descripcion_deduccion: true,
+      codigo_deduccion: true,
+      prioridad: true,
+      centroTrabajo: {
+        id_centro_trabajo: true,
+        nombre_centro_trabajo: true,
+      }
     }
-  }
+  }).then(deducciones => {
+    return deducciones.map(deduccion => ({
+      id_deduccion: deduccion.id_deduccion,
+      nombre_deduccion: deduccion.nombre_deduccion,
+      descripcion_deduccion: deduccion.descripcion_deduccion,
+      codigo_deduccion: deduccion.codigo_deduccion,
+      prioridad: deduccion.prioridad,
+      nombre_centro_trabajo: deduccion.centroTrabajo ? deduccion.centroTrabajo.nombre_centro_trabajo : null,
+    }));
+  });
+}
 
   async findOneByNombInst(nombre_centro_trabajo: string) {
     if (nombre_centro_trabajo) {

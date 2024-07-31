@@ -62,13 +62,12 @@ export class DetalleDeduccionController {
   @Get('getDeduccionesByPersonaAndBenef')
   async getDeduccionesByPersonaAndBenef(
     @Query('idPersona') idPersona: number,
-    @Query('idBeneficio') idBeneficio: number,
     @Query('idPlanilla') idPlanilla: number,
     @Response() res
   ) {
 
     try {
-      const detalles = await this.detalleDeduccionService.getDeduccionesByPersonaAndBenef(idPersona, idBeneficio, idPlanilla);
+      const detalles = await this.detalleDeduccionService.getDeduccionesByPersonaAndBenef(idPersona, idPlanilla);
       return res.status(HttpStatus.OK).json(detalles);
     } catch (error) {
       return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: 'Error al obtener los detalles de deducción', error: error.message });

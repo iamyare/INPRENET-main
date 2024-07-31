@@ -53,13 +53,11 @@ export class NuevaplanillaComponent implements OnInit {
   obtenerDatos1(): any {
     this.getTiposPlanillas()
     this.myFormFields = [
-      { type: 'string', label: 'Código De Planilla', name: 'codigo_planilla', validations: [Validators.required], display: true },
       {
         type: 'dropdown', label: 'Nombre de Tipo Planilla', name: 'nombre_planilla',
         options: this.tiposPlanilla,
         validations: [Validators.required], display: true
       },
-      { type: 'daterange', label: 'Periodo', name: 'periodo', validations: [Validators.required], display: true },
       { type: 'number', label: 'Secuencia', name: 'secuencia', validations: [Validators.required, Validators.pattern("^\\d*\\.?\\d+$")], display: true },
     ]
   }
@@ -90,36 +88,16 @@ export class NuevaplanillaComponent implements OnInit {
   }
 
   formatRangFech(event: any) {
-    if (event?.value.periodo) {
-      const startDate = new Date(event.value.periodo.start);
-      const endDate = new Date(event.value.periodo.end);
-
-      const opciones: Intl.DateTimeFormatOptions = {
-        year: 'numeric',
-        month: '2-digit',
-        day: '2-digit'
-      };
-
-      const startDateFormatted = startDate.toLocaleDateString('es', opciones).replace(/\//g, '-');
-      const endDateFormatted = endDate.toLocaleDateString('es', opciones).replace(/\//g, '-');
-
-      // Preparar los datos formateados, excluyendo 'periodo'
-      const datosFormateados = {
-        ...event.value,
-        periodoInicio: startDateFormatted,
-        periodoFinalizacion: endDateFormatted
-      };
-
-      delete datosFormateados.periodo;
-
-      this.datosFormateados = datosFormateados;
-
-    } else {
-      console.error('La propiedad periodo no está definida en el evento');
-    }
+    const datosFormateados = {
+      ...event.value
+    };
+    this.datosFormateados = datosFormateados;
+    this.datosFormateados.secuencia = parseInt(datosFormateados.secuencia)
   }
 
   crearPlanilla() {
+    console.log(this.datosFormateados);
+
     this.planillaService.createPlanilla(this.datosFormateados).subscribe({
       next: (response) => {
         this.toastr.success('Planilla creada con éxito');

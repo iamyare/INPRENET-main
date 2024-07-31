@@ -11,8 +11,8 @@ export class Net_Planilla {
     @PrimaryGeneratedColumn({ type: 'int', name: 'ID_PLANILLA', primaryKeyConstraintName: 'PK_id_plan_Plan' })
     id_planilla: number;
 
-    @Column('varchar2', { nullable: false, name: 'CODIGO_PLANILLA' })
     @Index("UQ_codPlanilla_netPlan", { unique: true })
+    @Column('varchar2', { nullable: false, name: 'CODIGO_PLANILLA' })
     codigo_planilla: string;
 
     @Column('date', { nullable: false, default: () => 'SYSDATE', name: 'FECHA_APERTURA' })
@@ -45,4 +45,7 @@ export class Net_Planilla {
 
     @OneToMany(() => Net_Detalle_planilla_ingreso, detallePlanillaIngreso => detallePlanillaIngreso.planilla)
     detallesPlanillaIngreso: Net_Detalle_planilla_ingreso[];
+
+    /* @OneToMany(() => Net_Detalle_Deduccion, detalleDeduccion => detalleDeduccion.planilla)
+    detalleDeduccion: Net_Detalle_Deduccion[]; */
 }

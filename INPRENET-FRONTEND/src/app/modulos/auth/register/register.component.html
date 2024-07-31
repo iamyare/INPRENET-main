@@ -1,7 +1,7 @@
 <div class="register-wrapper">
   <div class="register-container mat-elevation-z8">
     <div class="logo-container">
-      <img src="../../../../../assets/images/LOGO INPRENET D.svg" alt="Logo de la Aplicación">
+      <img src="assets/images/LOGO INPRENET D.svg" alt="Logo de la Aplicación">
     </div>
     <h2>Completa tu Registro</h2>
     <form [formGroup]="form" (ngSubmit)="enviarInformacionDeSeguridad()">
@@ -95,18 +95,21 @@
         <div class="form-row">
           <div class="form-group col-6">
             <label for="archivo">Sube tu identificación</label>
-            <input id="archivo" type="file" (change)="onFileChange($event, 'archivo')" accept="image/*" class="form-control-file" />
+            <input id="archivo" type="file" (change)="onFileChange($event, 'archivo')" accept="image/*"
+              class="form-control-file" />
           </div>
 
           <div class="form-group col-6">
             <label for="fotografia">Sube tu fotografía</label>
-            <input id="fotografia" type="file" (change)="onFileChange($event, 'fotografia')" accept="image/*" class="form-control-file" />
+            <input id="fotografia" type="file" (change)="onFileChange($event, 'fotografia')" accept="image/*"
+              class="form-control-file" />
           </div>
         </div>
 
         <div class="form-row">
           <div class="button-container col-12">
-            <button mat-raised-button color="primary" type="submit" [disabled]="!isFormComplete()">Completar Registro</button>
+            <button mat-raised-button color="primary" type="submit" [disabled]="!isFormComplete()">Completar
+              Registro</button>
           </div>
         </div>
       </div>

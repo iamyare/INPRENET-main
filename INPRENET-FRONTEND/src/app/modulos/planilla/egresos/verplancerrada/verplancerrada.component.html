@@ -90,12 +90,28 @@
 <div style="background-color: white;margin-bottom: 1%; padding-top: 1%;margin-top: 1%; " *ngIf="verDat">
 
 
-  <app-dynamic-table-prueba titulo="Datos De Planilla Definitiva" [verOpcEditar]="false" [columns]="myColumnsDed"
-    [data]="datosTabl" (ejecutarFuncionAsincronaEvent)="
-      ejecutarFuncionAsincronaDesdeOtroComponente($event)
-      " [nombreEncabezadoUno]="'Detalle Ingresos'" [mostrarBotonUno]="true" [etiquetaBotonUno]="'Ver Detalle'"
-    (accionBotonUno)="manejarAccionUno($event)" [nombreEncabezadoTres]="'Voucher'" [mostrarBotonTres]="true"
-    [etiquetaBotonTres]="'Generar Voucher'" (accionBotonTres)="manejarAccionTres($event)">
+  <app-dynamic-table-prueba 
+    titulo="Datos De Planilla Definitiva" 
+    [verOpcEditar]="false" 
+    [columns]="myColumnsDed"
+    [data]="datosTabl" 
+
+    [nombreEncabezadoUno]="'Detalle Ingresos'" 
+    [etiquetaBotonUno]="'Ingresos'"
+    [mostrarBotonUno]="true" 
+    (ejecutarFuncionAsincronaEvent)="ejecutarFuncionAsincronaDesdeOtroComponente($event)" 
+    (accionBotonUno)="manejarAccionUno($event)" 
+    
+    [nombreEncabezadoDos]="'Detalle Deducciones'" 
+    [etiquetaBotonDos]="'Deducciones'"
+    [mostrarBotonDos]="true" 
+    (ejecutarFuncionAsincronaEvent)="ejecutarFuncionAsincronaDesdeOtroComponente($event)" 
+    (accionBotonDos)="manejarAccionDos($event)" 
+    
+    [nombreEncabezadoTres]="'Voucher'" 
+    [etiquetaBotonTres]="'Generar Voucher'" 
+    [mostrarBotonTres]="true"
+    (accionBotonTres)="manejarAccionTres($event)">
   </app-dynamic-table-prueba>
 </div>
 <!-- <div style="background-color: white;margin-bottom: 1%; padding-top: 1%;margin-top: 1%; " *ngIf="verDat">

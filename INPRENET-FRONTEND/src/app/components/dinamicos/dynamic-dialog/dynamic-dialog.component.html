@@ -14,10 +14,10 @@
     <div *ngIf="isArray(log.detail)">
       <table *ngIf="log.detail.length > 0 && log.type == 'beneficios'" mat-table [dataSource]="log.detail">
         <!-- Código Beneficio Column -->
-        <ng-container matColumnDef="CODIGO_BENEFICIO" *ngIf="displayedColumnsB.includes('CODIGO_BENEFICIO')">
+        <ng-container matColumnDef="CODIGO" *ngIf="displayedColumnsB.includes('CODIGO')">
           <th mat-header-cell *matHeaderCellDef>Código Beneficio</th>
           <td mat-cell *matCellDef="let element">
-            {{ element.CODIGO_BENEFICIO }}
+            {{ element.CODIGO }}
           </td>
         </ng-container>
 
@@ -30,20 +30,20 @@
         </ng-container>
 
         <!-- Monto a Pagar Column -->
-        <ng-container matColumnDef="MONTO_A_PAGAR" *ngIf="displayedColumnsB.includes('MONTO_A_PAGAR')">
+        <ng-container matColumnDef="MontoAPagar" *ngIf="displayedColumnsB.includes('MontoAPagar')">
           <th mat-header-cell *matHeaderCellDef>Monto a Pagar</th>
           <td mat-cell *matCellDef="let element" style="text-align: end">
-            {{ element.MONTO_A_PAGAR | currency : "L" : "symbol" : "1.2-2" }}
+            {{ element.MontoAPagar | currency : "L" : "symbol" : "1.2-2" }}
           </td>
         </ng-container>
 
         <!-- Ver Deducciones Column -->
-        <ng-container matColumnDef="verDeducciones" *ngIf="displayedColumnsB.includes('verDeducciones')">
+        <!-- <ng-container matColumnDef="verDeducciones" *ngIf="displayedColumnsB.includes('verDeducciones')">
           <th mat-header-cell *matHeaderCellDef>Ver Deducciones</th>
           <td mat-cell *matCellDef="let element">
             <button mat-button (click)="getDeduccionesByBeneficio(element)">Ver Deducciones</button>
           </td>
-        </ng-container>
+        </ng-container> -->
 
         <tr mat-header-row *matHeaderRowDef="displayedColumnsB"></tr>
         <tr mat-row *matRowDef="let row; columns: displayedColumnsB"></tr>

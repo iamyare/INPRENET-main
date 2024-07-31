@@ -13,6 +13,7 @@ import { Validators } from '@angular/forms';
 import pdfMake from 'pdfmake/build/pdfmake';
 import pdfFonts from 'pdfmake/build/vfs_fonts';
 import { TotalesporbydDialogComponent } from '../totalesporbydDialog/totalesporbydDialog.component';
+import { DeduccionesService } from 'src/app/services/deducciones.service';
 
 pdfMake.vfs = pdfFonts.pdfMake.vfs;
 
@@ -45,9 +46,10 @@ export class VerplancerradaComponent {
     private toastr: ToastrService,
     public dialog: MatDialog,
     private http: HttpClient,
-    private afiliadoService: AfiliadoService
+    private afiliadoService: AfiliadoService,
+    private deduccionSVC: DeduccionesService
   ) {
-    this.convertirImagenABase64('../../assets/images/HOJA-MEMBRETADA.jpg').then(base64 => {
+    this.convertirImagenABase64('assets/images/HOJA-MEMBRETADA.jpg').then(base64 => {
       this.backgroundImageBase64 = base64;
     }).catch(error => {
       console.error('Error al convertir la imagen a Base64', error);
@@ -252,27 +254,6 @@ export class VerplancerradaComponent {
     this.ejecF = funcion;
   }
 
-  manejarAccionDos(row: any) {
-    let logs: any[] = [];
-    logs.push({ message: `DNI:${row.dni}`, detail: row });
-    logs.push({ message: `Nombre Completo:${row.NOMBRE_COMPLETO}`, detail: row });
-
-    const openDialog = () => this.dialog.open(DynamicDialogComponent, {
-      width: '50%',
-      data: { logs: logs, type: 'deduccion' }
-    });
-
-    openDialog();
-    this.planillaService.getDeduccionesDefinitiva(this.idPlanilla, row.id_afiliado).subscribe({
-      next: (response) => {
-        logs.push({ message: 'Datos De Deducciones:', detail: response });
-      },
-      error: (error) => {
-        logs.push({ message: 'Error al obtener las deducciones inconsistentes:', detail: error });
-      }
-    });
-  }
-
   manejarAccionUno(row: any) {
     let logs: any[] = [];
 
@@ -296,11 +277,36 @@ export class VerplancerradaComponent {
     });
   }
 
-  openLogDialog(logs: any[]) {
-    this.dialog.open(DynamicDialogComponent, {
-      width: '1000px',
-      data: { logs }
+  manejarAccionDos(row: any) {
+    let logs: any[] = [];
+    logs.push({ message: `DNI:${row.dni}`, detail: row });
+    logs.push({ message: `Nombre Completo:${row.NOMBRE_COMPLETO}`, detail: row });
+
+    this.deduccionSVC.getDeduccionesByPersonaAndBenef(row.id_afiliado, row.ID_BENEFICIO, this.idPlanilla).subscribe({
+      next: (response1) => {
+        if (response1) {
+          const data = response1;
+          logs.push({ message: 'Datos De Deducciones:', detail: data || [], type: 'deducciones' });
+
+          const openDialog = () => this.dialog.open(DynamicDialogComponent, {
+            width: '50%',
+            data: { logs: logs, type: 'deduccion' }
+          });
+
+          openDialog();
+        }
+      },
     });
+
+
+    /* this.planillaService.getDeduccionesDefinitiva(this.idPlanilla, row.id_afiliado).subscribe({
+      next: (response) => {
+        logs.push({ message: 'Datos De Deducciones:', detail: response });
+      },
+      error: (error) => {
+        logs.push({ message: 'Error al obtener las deducciones inconsistentes:', detail: error });
+      }
+    }); */
   }
 
   manejarAccionTres(row: any) {
@@ -337,9 +343,17 @@ export class VerplancerradaComponent {
     });
   }
 
+  openLogDialog(logs: any[]) {
+    this.dialog.open(DynamicDialogComponent, {
+      width: '1000px',
+      data: { logs }
+    });
+  }
 
   construirPDFCaus(row: { Total: any; NOMBRE_COMPLETO: any; dni: any; correo_1: any; fecha_cierre: any; }, resultados: any, backgroundImageBase64: string) {
     const formatCurrency = (value: number) => new Intl.NumberFormat('es-HN', { style: 'currency', currency: 'HNL' }).format(value);
+
+    console.log(resultados);
 
     if (resultados) {
       const persona = resultados.persona;
@@ -358,19 +372,8 @@ export class VerplancerradaComponent {
         }
       });
 
-      const data = detallePersona.map((detalle: { detalleBeneficio: any[]; ID_DETALLE_PERSONA: number; }) => {
+      let data = detallePersona.map((detalle: { detalleBeneficio: any[]; ID_DETALLE_PERSONA: number; }) => {
         const beneficio = detalle.detalleBeneficio[0];
-        const deducciones = beneficio.detallePagBeneficio.flatMap((pagBeneficio: { detalleDeduccion: any[]; }) => {
-          return pagBeneficio.detalleDeduccion.map((deduccion) => {
-            const montoDeduccion = deduccion.monto_aplicado;
-            sumaDeducciones += montoDeduccion;
-            return {
-              NOMBRE_INSTITUCION: deduccion.deduccion.centroTrabajo.nombre_centro_trabajo,
-              NOMBRE_DEDUCCION: deduccion.deduccion.nombre_deduccion,
-              TotalMontoAplicado: montoDeduccion
-            };
-          });
-        });
 
         const montoPorPeriodo = beneficio.monto_por_periodo;
         sumaBeneficios += montoPorPeriodo;
@@ -379,15 +382,46 @@ export class VerplancerradaComponent {
           CAUSANTE: causantesMap.get(detalle.ID_DETALLE_PERSONA) || 'NO APLICA',
           NOMBRE_BENEFICIO: beneficio.beneficio.nombre_beneficio,
           MontoAPagar: montoPorPeriodo,
-          DEDUCCIONES: deducciones,
-          INSTITUCION: deducciones.centroTrabajo,
+
           METODO_PAGO: beneficio.metodo_pago,
           NOMBRE_BANCO: beneficio.detallePagBeneficio[0].personaporbanco ? beneficio.detallePagBeneficio[0].personaporbanco.banco.nombre_banco : 'NO PROPORCIONADO',
           NUM_CUENTA: beneficio.detallePagBeneficio[0].personaporbanco ? beneficio.detallePagBeneficio[0].personaporbanco.num_cuenta : 'NO PROPORCIONADO'
         };
       });
 
+
+      console.log(resultados.deduccion.detalleDeduccion);
+      let dataDed = resultados.deduccion.detalleDeduccion.map((deduccion: any) => {
+        const montoDeduccion = deduccion.monto_aplicado;
+        sumaDeducciones += montoDeduccion;
+
+        return {
+          NOMBRE_INSTITUCION: deduccion.deduccion.centroTrabajo.nombre_centro_trabajo,
+          NOMBRE_DEDUCCION: deduccion.deduccion.nombre_deduccion,
+          TotalMontoAplicado: montoDeduccion
+        };
+      });
+
+      /*
+       DEDUCCIONES: deducciones,
+          INSTITUCION: deducciones.centroTrabajo, 
+      const deducciones = beneficio.detallePagBeneficio.flatMap((pagBeneficio: any) => {
+          return pagBeneficio.planilla.detalleDeduccion.map((deduccion: any) => {
+            const montoDeduccion = deduccion.monto_aplicado;
+            sumaDeducciones += montoDeduccion;
+            return {
+              NOMBRE_INSTITUCION: deduccion.deduccion.centroTrabajo.nombre_centro_trabajo,
+              NOMBRE_DEDUCCION: deduccion.deduccion.nombre_deduccion,
+              TotalMontoAplicado: montoDeduccion
+            };
+          }); */
+      console.log(data);
+      console.log(dataDed);
+      console.log(sumaDeducciones);
+
       const neto = sumaBeneficios - sumaDeducciones;
+
+      console.log(neto);
 
       const docDefinition: TDocumentDefinitions = {
         background: function (currentPage, pageSize) {
@@ -801,7 +835,7 @@ export class VerplancerradaComponent {
 
   async generarPDFDeduccionesSeparadas() {
     try {
-      const base64Image = await this.convertirImagenABase64('../../assets/images/HOJA-MEMBRETADA.jpg');
+      const base64Image = await this.convertirImagenABase64('assets/images/HOJA-MEMBRETADA.jpg');
       this.planillaService.getDeduccionesPorPlanillaSeparadas(this.idPlanilla).subscribe(response => {
         const deduccionesInprema = response.deduccionesINPREMA || [];
         const deduccionesTerceros = response.deduccionesTerceros || [];
@@ -1032,8 +1066,6 @@ export class VerplancerradaComponent {
     });
   }
 
-
-
   async generarPDFMontosPorBanco() {
     try {
       const codigo_planilla = this.datosFormateados?.value?.codigo_planilla;
@@ -1043,7 +1075,7 @@ export class VerplancerradaComponent {
         return;
       }
 
-      const base64Image = await this.convertirImagenABase64('../../assets/images/HOJA-MEMBRETADA.jpg');
+      const base64Image = await this.convertirImagenABase64('assets/images/HOJA-MEMBRETADA.jpg');
       this.planillaService.getMontosPorBanco(codigo_planilla).subscribe(response => {
         const montosPorBanco = response || [];
 
@@ -1245,7 +1277,4 @@ export class VerplancerradaComponent {
       margin: margin
     };
   }
-
-
-
 }

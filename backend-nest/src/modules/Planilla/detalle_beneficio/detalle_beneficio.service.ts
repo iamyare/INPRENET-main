@@ -288,6 +288,7 @@ export class DetalleBeneficioService {
   async getBeneficiosDefinitiva(idPersona: string, idPlanilla: string): Promise<any> {
     const query = `
         SELECT 
+            ben."CODIGO",
             ben."NOMBRE_BENEFICIO",
             detP."ID_PERSONA",
             detP."ID_CAUSANTE",
@@ -520,7 +521,6 @@ export class DetalleBeneficioService {
         ],
       });
 
-      console.log(tipoBen);
       return tipoBen
 
     } catch (error) {
@@ -612,8 +612,6 @@ export class DetalleBeneficioService {
   }
 
   async findOne(term: number) {
-    console.log(term);
-
     let benAfil: Net_Detalle_Pago_Beneficio;
     if (isUUID(term)) {
       benAfil = await this.benAfilRepository.findOneBy({ id_beneficio_planilla: term });

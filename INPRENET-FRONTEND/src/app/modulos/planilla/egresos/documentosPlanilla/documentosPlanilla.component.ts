@@ -41,7 +41,7 @@ export class DocumentosPlanillaComponent implements OnInit {
 
     this.planillaService.getBeneficiosConDeducciones(periodoInicio, periodoFinalizacion, idTiposPlanilla).subscribe({
       next: async (data) => {
-        const base64Image = await this.convertirImagenABase64('../../assets/images/HOJA-MEMBRETADA.jpg');
+        const base64Image = await this.convertirImagenABase64('assets/images/HOJA-MEMBRETADA.jpg');
 
         const totales = {
           totalMontoBeneficio: 0,

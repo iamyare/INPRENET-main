@@ -60,6 +60,7 @@
 <div *ngIf="Afiliado.fallecido == 'SI' && Afiliado.tipo_persona == 'AFILIADO'"
   style="margin: 1% 0% 1% 0%; text-align: center; background-color: white">
   <app-dynamic-form [fields]="myFormFields2" titulo="" subtitulo="Completa la información correspondiente"
+  (selectChange)="prueba($event)" 
     (newDatBenChange)="obtenerDatosFormBen($event)"></app-dynamic-form>
   <button mat-raised-button color="primary" style="color: white; margin: 1% 0 1% 0" [disabled]="FormBen.invalid"
     (click)="guardarNTBenef()">
@@ -72,7 +73,7 @@
   Afiliado.tipo_persona == 'JUBILADO' || 
   Afiliado.tipo_persona == 'PENSIONADO')" style="margin: 1% 0% 1% 0%; text-align: center; background-color: white">
   <app-dynamic-form [fields]="myFormFields1" titulo="Datos sobre el beneficio"
-    subtitulo="Completa la información correspondiente" (newDatBenChange)="obtenerDatos1($event)"></app-dynamic-form>
+    subtitulo="Completa la información correspondiente" (selectChange)="prueba($event)" (newDatBenChange)="obtenerDatos1($event)"></app-dynamic-form>
 
   <button mat-raised-button color="primary" style="color: white; margin: 1% 0 1% 0" [disabled]="form1.invalid"
     (click)="guardarNTBenef()">

@@ -27,6 +27,7 @@ const routes: Routes = [
       { path: 'nuevo-usuario', component: NuevoUsuarioComponent },
     ],
   },
+  { path: '**', redirectTo: 'admin', pathMatch: 'full' },
 ];
 
 @NgModule({

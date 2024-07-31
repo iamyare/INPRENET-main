@@ -11,9 +11,9 @@ export class Net_Clasificacion_Beneficios {
     id_clasificacion_beneficios: string;
 
 
-    @ManyToOne(() => Net_Deduccion, deduccion => deduccion.bendedtipplan, { cascade: true })
-    @JoinColumn({ name: 'ID_DEDUCCION', foreignKeyConstraintName: "FK_ID_DEDUCCION_BENDED_TIP_PLAN" })
-    deduccion: Net_Deduccion;
+    /*     @ManyToOne(() => Net_Deduccion, deduccion => deduccion.bendedtipplan, { cascade: true })
+        @JoinColumn({ name: 'ID_DEDUCCION', foreignKeyConstraintName: "FK_ID_DEDUCCION_BENDED_TIP_PLAN" })
+        deduccion: Net_Deduccion; */
 
 
     @ManyToOne(() => Net_Beneficio, beneficio => beneficio.BenDedTipPlan, { cascade: true })

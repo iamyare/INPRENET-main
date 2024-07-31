@@ -47,8 +47,6 @@ export class NuevoBeneficioAfilComponent implements OnInit {
   ) { }
 
   ngOnInit(): void {
-
-
     this.myFormFields = [
       { type: 'text', label: 'DNI del afiliado', name: 'dni', validations: [Validators.required, Validators.minLength(13), Validators.maxLength(14)], display: true },
     ];
@@ -66,6 +64,7 @@ export class NuevoBeneficioAfilComponent implements OnInit {
       },
       { type: 'number', label: 'Monto total', name: 'monto_total', validations: [Validators.required], display: true },
       { type: 'number', label: 'Monto por periodo', name: 'monto_por_periodo', validations: [Validators.required], display: true },
+      { type: 'date', label: 'Fecha de efectividad', name: 'fecha_calculo', validations: [], display: true },
       { type: 'daterange', label: 'Periodo', name: 'periodo', validations: [], display: false },
       /* { type: 'text', label: 'Ley Aplicable', name: 'ley_aplicable', validations: [], display: true }, */
     ];
@@ -81,14 +80,15 @@ export class NuevoBeneficioAfilComponent implements OnInit {
         type: 'dropdown', label: 'Método de pago', name: 'metodo_pago',
         options: [{ label: 'TRANSFERENCIA', value: 'TRANSFERENCIA' }], validations: [Validators.required], display: true
       },
-      { type: 'number', label: 'Monto total', name: 'monto_total', validations: [Validators.required], display: true },
       { type: 'number', label: 'Monto por periodo', name: 'monto_por_periodo', validations: [Validators.required], display: true },
+      { type: 'number', label: 'Monto total', name: 'monto_total', validations: [Validators.required], display: true },
+      { type: 'date', label: 'Fecha de efectividad', name: 'fecha_calculo', validations: [], display: true },
       { type: 'daterange', label: 'Periodo', name: 'periodo', validations: [], display: false },
     ];
 
 
-    this.myFormFields1[4].display = false;
-    this.myFormFields2[5].display = false;
+    this.myFormFields1[5].display = false;
+    this.myFormFields2[6].display = false;
 
     /*  this.myColumnsBeneficios = [
        {
@@ -122,15 +122,14 @@ export class NuevoBeneficioAfilComponent implements OnInit {
     try {
       const beneficios = await this.svcBeneficioServ.obtenerTipoBeneficioByTipoPersona(tipoPers).toPromise();
 
-      //this.tiposBeneficios = [];
-      beneficios.map((item: any) => {
-        this.tiposBeneficios.push({
+      const temp: [] = beneficios.map((item: any) => {
+        return {
           label: `${item.beneficio.nombre_beneficio}`,
           value: `${item.beneficio.nombre_beneficio}`,
           periodicidad: `${item.beneficio.periodicidad}`
-        })
+        }
       });
-
+      this.tiposBeneficios = temp;
       return this.tiposBeneficios;
     } catch (error) {
       console.error("Error al obtener datos de beneficios", error);
@@ -146,7 +145,7 @@ export class NuevoBeneficioAfilComponent implements OnInit {
     for (let i = 0; i < arreglo.length; i++) {
       // Verificar si la etiqueta coincide
       if (etiqueta == arreglo[i].label) {
-        if (arreglo[i].periodicidad == "VITALICIO") {
+        if (arreglo[i].periodicidad == "V") {
           // Si coincide, retornar la periodicidad
           return arreglo[i].periodicidad;
         }
@@ -254,37 +253,38 @@ export class NuevoBeneficioAfilComponent implements OnInit {
     }
   }
 
-  async obtenerDatos1(event: any): Promise<any> {
-    this.form1 = event;
-
-    const temp = this.buscarPeriodicidad(this.tiposBeneficios, this.form1.value.nombre_beneficio)
-
+  async prueba(event: any): Promise<any> {
     let startDateFormatted
     let endDateFormatted
 
-    if (temp == "VITALICIO") {
-      this.myFormFields1[4].display = false
+    if (event.fieldName == "nombre_beneficio") {
+      const temp = this.buscarPeriodicidad(this.tiposBeneficios, event.value)
 
-      const fechaActual = new Date();
+      if (temp == "V") {
+        this.myFormFields1[5].display = false;
+        this.myFormFields2[6].display = false;
 
-      startDateFormatted = format(fechaActual, 'dd-MM-yyyy');
-      endDateFormatted = '01-01-2500';
+        const fechaActual = new Date();
 
-    } else if (!temp) {
-      this.myFormFields1[4].display = true
+        startDateFormatted = format(fechaActual, 'dd-MM-yyyy');
+        endDateFormatted = '01-01-2500';
+      } else if (!temp) {
+        this.myFormFields1[5].display = true;
+        this.myFormFields2[6].display = true;
 
-      const startDate = new Date(event.value.periodo.start);
-      const endDate = new Date(event.value.periodo.end);
 
-      const opciones: Intl.DateTimeFormatOptions = {
-        year: 'numeric',
-        month: '2-digit',
-        day: '2-digit'
-      };
+        /* const startDate = new Date(event.value.periodo.start);
+        const endDate = new Date(event.value.periodo.end); */
 
-      startDateFormatted = startDate.toLocaleDateString('es', opciones).replace(/\//g, '-');
-      endDateFormatted = endDate.toLocaleDateString('es', opciones).replace(/\//g, '-');
+        const opciones: Intl.DateTimeFormatOptions = {
+          year: 'numeric',
+          month: '2-digit',
+          day: '2-digit'
+        };
 
+        /* startDateFormatted = startDate.toLocaleDateString('es', opciones).replace(/\//g, '-');
+        endDateFormatted = endDate.toLocaleDateString('es', opciones).replace(/\//g, '-'); */
+      }
     }
 
     if (startDateFormatted != 'Invalid Date' && endDateFormatted != 'Invalid Date') {
@@ -299,8 +299,19 @@ export class NuevoBeneficioAfilComponent implements OnInit {
 
   }
 
+  async obtenerDatos1(event: any): Promise<any> {
+    this.form1 = event;
+    const datosFormateados = {
+      ...event.value
+    };
+    delete datosFormateados.periodo;
+    this.datosFormateados = datosFormateados;
+
+  }
+
   async obtenerDatosFormBen(event: any): Promise<any> {
     this.FormBen = event;
+    console.log(event);
     const temp = this.buscarPeriodicidad(this.tiposBeneficios, this.FormBen.value.nombre_beneficio);
 
     let startDateFormatted

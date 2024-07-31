@@ -1,0 +1,80 @@
+<div
+  style="text-align: center; background-color: white; margin: 1% 0% 1% 0%; padding: 0% 0% 1% 0%;">
+  <h1>Carga de deducciones por medio de documento excel</h1>
+  <hr />
+
+  <div class="upload-container">
+    <input type="file" #fileInput (change)="onFileSelected($event)" hidden />
+
+    <button
+      mat-raised-button
+      color="primary"
+      style="color: white; margin: 1% 0 1% 0"
+      (click)="fileInput.click()"
+    >
+      <i class="fa fa-plus"></i>
+      Agregar Archivos
+    </button>
+
+    <button
+      mat-raised-button
+      color="accent"
+      style="color: white; margin: 1% 0 1% 0"
+      (click)="clearFile()"
+    >
+      <i class="fa fa-trash"></i>
+      Limpiar Archivo
+    </button>
+
+    <button
+      mat-raised-button
+      color="primary"
+      style="color: white; margin: 1% 0 1% 0"
+      (click)="startUpload()"
+    >
+      <i class="fa fa-upload"></i> Iniciar Subida
+    </button>
+
+    <button
+      mat-raised-button
+      color="warn"
+      style="color: white; margin: 1% 0 1% 0"
+      (click)="cancelUpload()"
+    >
+      <i class="fa fa-ban"></i> Cancelar Subida
+    </button>
+
+    <div *ngIf="file" class="file-name-container">
+      <div class="file-name-background">{{ file.name }}</div>
+      <div class="file-name-progress" [style.width]="progressValue + '%'">
+        {{ file.name }}
+      </div>
+    </div>
+  </div>
+</div>
+
+<div *ngIf="datosCargados.length > 0 && datosCargadosExitosamente" class="mt-4">
+  <h3>Datos Cargados</h3>
+  <table class="table table-bordered">
+    <thead class="thead-light">
+      <tr>
+        <th scope="col">Año</th>
+        <th scope="col">Código de Deducción</th>
+        <th scope="col">DNI</th>
+        <th scope="col">Mes</th>
+        <th scope="col">Monto Total</th>
+        <th scope="col">Nombre de Institución</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let dato of datosCargados">
+        <td>{{ dato["año"] }}</td>
+        <td>{{ dato.codigo_deduccion }}</td>
+        <td>{{ dato.dni }}</td>
+        <td>{{ dato.mes }}</td>
+        <td>{{ dato.monto_total }}</td>
+        <td>{{ dato.nombre_institucion }}</td>
+      </tr>
+    </tbody>
+  </table>
+</div>

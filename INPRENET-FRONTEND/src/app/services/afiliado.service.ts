@@ -1,7 +1,7 @@
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { EventEmitter, Injectable, Output } from '@angular/core';
 import { Router } from '@angular/router';
-import { Observable, map } from 'rxjs';
+import { Observable, catchError, map, throwError } from 'rxjs';
 import { environment } from 'src/environments/environment';
 
 @Injectable({
@@ -262,6 +262,17 @@ export class AfiliadoService {
       })
     );
   }
+
+  getPersonaParaDeduccion(param: string | number): Observable<any | void> {
+    const url = `${environment.API_URL}/api/Persona/personaParaDeduccion/${param}`;
+    return this.http.get<any>(url).pipe(
+      catchError(error => {
+        console.error('Error al obtener persona para deducción:', error);
+        return throwError('No se encontró el afiliado con el DNI proporcionado.');
+      })
+    );
+  }
+
 
   getAllPersonas(param: string | number): Observable<any | void> {
     const url = `${environment.API_URL}/api/Persona/${param}`;

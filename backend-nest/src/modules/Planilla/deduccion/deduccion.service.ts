@@ -9,7 +9,6 @@ import { Net_Detalle_Deduccion } from '../detalle-deduccion/entities/detalle-ded
 import { net_persona } from 'src/modules/Persona/entities/net_persona.entity';
 import * as XLSX from 'xlsx';
 import { Net_Planilla } from '../planilla/entities/net_planilla.entity';
-import { Net_Tipo_Persona } from 'src/modules/Persona/entities/net_tipo_persona.entity';
 @Injectable()
 export class DeduccionService {
 
@@ -25,9 +24,7 @@ export class DeduccionService {
     @InjectRepository(net_persona)
     private personaRepository: Repository<net_persona>,
     @InjectRepository(Net_Planilla)
-    private planillaRepository: Repository<Net_Planilla>,
-    @InjectRepository(Net_Tipo_Persona)
-    private tipoPersonaRepository: Repository<Net_Tipo_Persona>
+    private planillaRepository: Repository<Net_Planilla>
   ) { }
 
   async uploadDeducciones(file: Express.Multer.File): Promise<string> {

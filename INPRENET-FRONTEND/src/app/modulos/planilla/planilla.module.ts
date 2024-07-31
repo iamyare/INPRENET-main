@@ -27,6 +27,9 @@ import { NuevoBeneficioAfilComponent } from './beneneficios/nuevo-beneficio-afil
 import { SubirDeduccionesformComponent } from './beneneficios/subir-deduccionesform/subir-deduccionesform.component';
 import { VerEditarBeneficioAfilComponent } from './beneneficios/ver-editar-beneficio-afil/ver-editar-beneficio-afil.component';
 import { VerEditarDeduccionAfilComponent } from './beneneficios/ver-editar-deduccion-afil/ver-editar-deduccion-afil.component';
+import { NuevaDeduccionPersComponent } from './beneneficios/nueva-deduccion-pers/nueva-deduccion-pers.component';
+import { AsignacionDeduccionesComponent } from './beneneficios/asignacion-deducciones/asignacion-deducciones.component';
+import { SubirDeduccionesTercerosComponent } from './beneneficios/subir-deducciones-terceros/subir-deducciones-terceros.component';
 
 @NgModule({
   declarations: [
@@ -53,7 +56,10 @@ import { VerEditarDeduccionAfilComponent } from './beneneficios/ver-editar-deduc
     NuevoBeneficioAfilComponent,
     SubirDeduccionesformComponent,
     VerEditarBeneficioAfilComponent,
-    VerEditarDeduccionAfilComponent
+    VerEditarDeduccionAfilComponent,
+    NuevaDeduccionPersComponent,
+    AsignacionDeduccionesComponent,
+    SubirDeduccionesTercerosComponent
   ],
   imports: [
     CommonModule,

@@ -10,6 +10,8 @@ import { VerEditarBeneficioAfilComponent } from './beneneficios/ver-editar-benef
 import { NuevaDeduccionAfilComponent } from './egresos/nueva-deduccion-afil/nueva-deduccion-afil.component';
 import { VerEditarDeduccionAfilComponent } from './beneneficios/ver-editar-deduccion-afil/ver-editar-deduccion-afil.component';
 import { RoleGuard } from '../../guards/role-guard.guard';
+import { NuevaDeduccionPersComponent } from './beneneficios/nueva-deduccion-pers/nueva-deduccion-pers.component';
+import { AsignacionDeduccionesComponent } from './beneneficios/asignacion-deducciones/asignacion-deducciones.component';
 
 const routes: Routes = [
   {
@@ -56,7 +58,7 @@ const routes: Routes = [
   },
   {
     path: 'Deducciones/nueva-deduccion-afil',
-    component: NuevaDeduccionAfilComponent,
+    component: AsignacionDeduccionesComponent,
     canActivate: [RoleGuard],
     data: { expectedRolesModules: [{role: 'ADMINISTRADOR'},{ role: 'ADMINISTRADOR DE PLANILLA', module: 'PLANILLA' }, { role: 'OFICIAL DE PLANILLA', module: 'PLANILLA' }] }
   },

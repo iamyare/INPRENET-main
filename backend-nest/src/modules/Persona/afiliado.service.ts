@@ -616,7 +616,55 @@ export class AfiliadoService {
     return result;
 }
 
+async findOnePersonaParaDeduccion(term: string) {
+  try {
+    const detallePer = await this.detallePersonaRepository.findOne({
+      where: {
+        tipoPersona: {
+          tipo_persona: In(["BENEFICIARIO", "JUBILADO", "PENSIONADO"])
+        }, persona: { n_identificacion: term }
+      },
+      relations: [
+        'persona',
+        'estadoAfiliacion',
+        'tipoPersona',
+        'persona.pais',
+        'persona.profesion',
+        'persona.municipio_nacimiento',
+        'persona.municipio',
+        'persona.tipoIdentificacion',
+        'persona.municipio_defuncion'
+      ]
+    });
 
+    if (!detallePer) {
+      throw new NotFoundException(`Afiliado con N_IDENTIFICACION ${term} no existe`);
+    }
+
+    const result = {
+      N_IDENTIFICACION: detallePer.persona.n_identificacion,
+      ID_PERSONA: detallePer.persona.id_persona,
+      FALLECIDO: detallePer.persona.fallecido,
+      PRIMER_NOMBRE: detallePer.persona.primer_nombre,
+      SEGUNDO_NOMBRE: detallePer.persona.segundo_nombre,
+      TERCER_NOMBRE: detallePer.persona.tercer_nombre,
+      PRIMER_APELLIDO: detallePer.persona.primer_apellido,
+      SEGUNDO_APELLIDO: detallePer.persona.segundo_apellido,
+      GENERO: detallePer.persona.genero,
+      SEXO: detallePer.persona.sexo,
+      TELEFONO_1: detallePer.persona.telefono_1,
+      ESTADO_CIVIL: detallePer.persona.estado_civil,
+      DIRECCION_RESIDENCIA: detallePer.persona.direccion_residencia,
+      FECHA_NACIMIENTO: detallePer.persona.fecha_nacimiento,
+      TIPO_PERSONA: detallePer.tipoPersona.tipo_persona
+    };
+
+    return result;
+  } catch (error) {
+    console.log(error);
+    throw new InternalServerErrorException('Error al obtener los datos de la persona.');
+  }
+}
 
 
 
@@ -695,8 +743,6 @@ export class AfiliadoService {
         //CANTIDAD_DEPENDIENTES: detallePer.persona.cantidad_dependientes, 
         //ESTADO: detallePersona.eliminado,
       };
-
-      console.log(result);
 
       return result;
     } catch (error) {

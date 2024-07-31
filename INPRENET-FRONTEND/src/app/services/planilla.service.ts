@@ -9,6 +9,22 @@ import { environment } from 'src/environments/environment';
 export class PlanillaService {
   constructor(private http: HttpClient) { }
 
+  getPlanillasActivas(clasePlanilla?: string): Observable<any> {
+    const url = `${environment.API_URL}/api/planilla/activas`;
+    let params = new HttpParams();
+
+    if (clasePlanilla) {
+      params = params.set('clasePlanilla', clasePlanilla);
+    }
+
+    return this.http.get<any>(url, { params }).pipe(
+      catchError(error => {
+        console.error('Error al obtener planillas activas', error);
+        return throwError(error);
+      })
+    );
+  }
+
   getDesglosePersonaPorPlanillaPreliminar(proceso: string, n_identificacion: string): Observable<any> {
     const url = `${environment.API_URL}/api/planilla/get-desglose-persona-planilla-preliminar`;
     return this.http.post<any>(url, { proceso, n_identificacion }).pipe(

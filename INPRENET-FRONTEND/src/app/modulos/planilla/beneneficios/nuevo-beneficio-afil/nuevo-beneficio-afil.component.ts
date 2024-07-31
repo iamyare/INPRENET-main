@@ -121,7 +121,6 @@ export class NuevoBeneficioAfilComponent implements OnInit {
   getTipoBen = async (tipoPers: string) => {
     try {
       const beneficios = await this.svcBeneficioServ.obtenerTipoBeneficioByTipoPersona(tipoPers).toPromise();
-      console.log("ENTRO");
 
       //this.tiposBeneficios = [];
       beneficios.map((item: any) => {

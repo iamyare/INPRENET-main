@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpErrorResponse, HttpParams } from '@angular/common/http';
+import { HttpClient, HttpErrorResponse, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Observable, catchError, map, tap, throwError } from 'rxjs';
 import { environment } from 'src/environments/environment';
 import { ToastrService } from 'ngx-toastr';
@@ -10,6 +10,34 @@ import { ToastrService } from 'ngx-toastr';
 export class DeduccionesService {
 
   constructor(private toastr: ToastrService, private http: HttpClient) { }
+
+  subirArchivoDeducciones(archivo: File): Observable<any> {
+    const formData = new FormData();
+    formData.append('file', archivo, archivo.name);
+
+    return this.http.post(`${environment.API_URL}/api/deduccion/upload-excel-deducciones`, formData, {
+      headers: new HttpHeaders({
+        'Accept': 'application/json' // Asegúrate de que el servidor devuelva JSON
+      }),
+      responseType: 'text' // Cambiar a 'text' si el backend devuelve texto plano
+    }).pipe(
+      tap(response => {
+        try {
+          // Intenta analizar como JSON
+          const jsonResponse = JSON.parse(response);
+          this.toastr.success(jsonResponse.message || 'Archivo subido con éxito');
+        } catch (e) {
+          // Si no es JSON válido, muestra el texto directamente
+          this.toastr.success(response || 'Archivo subido con éxito');
+        }
+      }),
+      catchError((error: HttpErrorResponse) => {
+        console.error('Error al subir el archivo de deducciones', error);
+        this.toastr.error('Error al subir el archivo de deducciones');
+        return throwError(() => new Error('Error al subir el archivo de deducciones'));
+      })
+    );
+  }
 
   obtenerDeduccionesPorAnioMes(dni: string, anio: number, mes: number): Observable<any> {
     const params = new HttpParams()
@@ -24,10 +52,6 @@ export class DeduccionesService {
           return throwError(() => new Error('Error al obtener deducciones'));
         })
       );
-  }
-
-  crearDesdeExcel(data: any): Observable<any> {
-    return this.http.post(`${environment.API_URL}/api/detalle-deduccion/crearDeExcel`, data);
   }
 
   actualizarEstadoDeduccion(idPlanilla: string, nuevoEstado: string): Observable<any> {
@@ -175,7 +199,12 @@ export class DeduccionesService {
 
   createDetalleDeduccion(detalleDeduccion: any): Observable<any> {
     const url = `${environment.API_URL}/api/detalle-deduccion`;
-    return this.http.post<any>(url, detalleDeduccion);
+    return this.http.post<any>(url, detalleDeduccion).pipe(
+      catchError(error => {
+        this.toastr.error('Error al crear el detalle de deducción', 'Error');
+        throw error;
+      })
+    );
   }
 
   updateDeduccion(id: string, deduccionData: any): Observable<any> {

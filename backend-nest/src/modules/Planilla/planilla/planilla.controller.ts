@@ -478,7 +478,7 @@ export class PlanillaController {
         error: error.message
       });
     }
-  }
+  } 
 
   @Get('totalesBYD/:idPlanilla')
   async getTotalesPorPlanilla(@Param('idPlanilla') idPlanilla: string) {

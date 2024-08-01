@@ -1,42 +1,22 @@
 <div>
   <h1 mat-dialog-title>Totales Beneficios y Deducciones</h1>
   <div mat-dialog-content>
+    <!-- Filtro para Beneficios -->
     <mat-form-field>
-      <mat-label>Filtrar</mat-label>
-      <input matInput (keyup)="aplicarFiltro($event, dataSourceTotales)" placeholder="Filtrar">
+      <mat-label>Filtrar Beneficios</mat-label>
+      <input matInput (keyup)="aplicarFiltro($event, dataSourceBeneficios)" placeholder="Filtrar Beneficios">
     </mat-form-field>
 
-    <table mat-table [dataSource]="dataSourceTotales">
-      <ng-container matColumnDef="nombreBeneficio">
-        <th mat-header-cell *matHeaderCellDef> Nombre Beneficio </th>
-        <td mat-cell *matCellDef="let element"> {{element.nombreBeneficio}} </td>
+    <!-- Tabla de Beneficios -->
+    <table mat-table [dataSource]="dataSourceBeneficios">
+      <ng-container matColumnDef="nombre">
+        <th mat-header-cell *matHeaderCellDef> Nombre </th>
+        <td mat-cell *matCellDef="let element"> {{element.nombre}} </td>
       </ng-container>
 
-      <ng-container matColumnDef="totalMontoBeneficio">
-        <th mat-header-cell *matHeaderCellDef> Total Monto Beneficio </th>
-        <td mat-cell *matCellDef="let element"> {{element.totalMontoBeneficio | currency}} </td>
-      </ng-container>
-
-      <ng-container matColumnDef="deduccionesInprema">
-        <th mat-header-cell *matHeaderCellDef> Deducciones Inprema </th>
-        <td mat-cell *matCellDef="let element"> {{element.deduccionesInprema | currency}} </td>
-      </ng-container>
-
-      <ng-container matColumnDef="deduccionesTerceros">
-        <th mat-header-cell *matHeaderCellDef> Deducciones Terceros </th>
-        <td mat-cell *matCellDef="let element"> {{element.deduccionesTerceros | currency}} </td>
-      </ng-container>
-
-      <ng-container matColumnDef="neto">
-        <th mat-header-cell *matHeaderCellDef> Neto </th>
-        <td mat-cell *matCellDef="let element"> {{element.neto | currency}} </td>
-      </ng-container>
-
-      <ng-container matColumnDef="acciones">
-        <th mat-header-cell *matHeaderCellDef> Acciones </th>
-        <td mat-cell *matCellDef="let element">
-          <button mat-raised-button (click)="verDeducciones(element.idPlanilla, element.idBeneficio)">Ver Deducciones</button>
-        </td>
+      <ng-container matColumnDef="total">
+        <th mat-header-cell *matHeaderCellDef> Total </th>
+        <td mat-cell *matCellDef="let element"> {{element.total | currency : "L" : "symbol" : "1.2-2"}} </td>
       </ng-container>
 
       <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
@@ -45,27 +25,53 @@
 
     <mat-paginator [pageSizeOptions]="[5, 10, 20]" showFirstLastButtons></mat-paginator>
 
-    <div *ngIf="mostrandoDeducciones">
-      <h2>Deducciones</h2>
-      <table>
-        <thead>
-          <tr>
-            <th>Código Deducción</th>
-            <th>Nombre Deducción</th>
-            <th>Tipo Deducción</th>
-            <th>Monto Aplicado</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr *ngFor="let deduccion of deducciones">
-            <td>{{deduccion.ID_DEDUCCION}}</td>
-            <td>{{deduccion.NOMBRE_DEDUCCION}}</td>
-            <td>{{deduccion.TIPO_DEDUCCION}}</td>
-            <td>{{deduccion.TOTAL_MONTO_APLICADO | currency : "L" : "symbol" : "1.2-2"}}</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
+    <!-- Filtro para Deducciones Inprema -->
+    <mat-form-field>
+      <mat-label>Filtrar Deducciones Inprema</mat-label>
+      <input matInput (keyup)="aplicarFiltro($event, dataSourceDeduccionesInprema)" placeholder="Filtrar Deducciones Inprema">
+    </mat-form-field>
+
+    <!-- Tabla de Deducciones Inprema -->
+    <table mat-table [dataSource]="dataSourceDeduccionesInprema">
+      <ng-container matColumnDef="nombre">
+        <th mat-header-cell *matHeaderCellDef> Nombre </th>
+        <td mat-cell *matCellDef="let element"> {{element.nombre}} </td>
+      </ng-container>
+
+      <ng-container matColumnDef="total">
+        <th mat-header-cell *matHeaderCellDef> Total </th>
+        <td mat-cell *matCellDef="let element"> {{element.total | currency : "L" : "symbol" : "1.2-2"}} </td>
+      </ng-container>
+
+      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+      <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+    </table>
+
+    <mat-paginator #paginatorDeduccionesInprema [pageSizeOptions]="[5, 10, 20]" showFirstLastButtons></mat-paginator>
+
+    <!-- Filtro para Deducciones Terceros -->
+    <mat-form-field>
+      <mat-label>Filtrar Deducciones Terceros</mat-label>
+      <input matInput (keyup)="aplicarFiltro($event, dataSourceDeduccionesTerceros)" placeholder="Filtrar Deducciones Terceros">
+    </mat-form-field>
+
+    <!-- Tabla de Deducciones Terceros -->
+    <table mat-table [dataSource]="dataSourceDeduccionesTerceros">
+      <ng-container matColumnDef="nombre">
+        <th mat-header-cell *matHeaderCellDef> Nombre </th>
+        <td mat-cell *matCellDef="let element"> {{element.nombre}} </td>
+      </ng-container>
+
+      <ng-container matColumnDef="total">
+        <th mat-header-cell *matHeaderCellDef> Total </th>
+        <td mat-cell *matCellDef="let element"> {{element.total | currency : "L" : "symbol" : "1.2-2"}} </td>
+      </ng-container>
+
+      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+      <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+    </table>
+
+    <mat-paginator #paginatorDeduccionesTerceros [pageSizeOptions]="[5, 10, 20]" showFirstLastButtons></mat-paginator>
   </div>
 
   <button (click)="generarPDF()" mat-raised-button style="

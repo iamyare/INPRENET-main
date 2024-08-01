@@ -404,7 +404,7 @@ export class VerplancerradaComponent {
 
       /*
        DEDUCCIONES: deducciones,
-          INSTITUCION: deducciones.centroTrabajo, 
+          INSTITUCION: deducciones.centroTrabajo,
       const deducciones = beneficio.detallePagBeneficio.flatMap((pagBeneficio: any) => {
           return pagBeneficio.planilla.detalleDeduccion.map((deduccion: any) => {
             const montoDeduccion = deduccion.monto_aplicado;
@@ -930,8 +930,8 @@ export class VerplancerradaComponent {
                       lineWidth: 1.5
                     }
                   ],
-                  alignment: 'center',
-                  margin: [0, 60, 0, 5]  // Aumentado el espacio entre la última tabla y la línea de firma
+                  alignment: 'center', // Aumentado el espacio entre la última tabla y la línea de firma
+                  margin: [0, 60, 0, 5]
                 }
               ]
             },
@@ -1037,22 +1037,29 @@ export class VerplancerradaComponent {
   }
 
   mostrarTotales() {
-    this.planillaService.getTotalesBeneficiosDeducciones(this.idPlanilla).subscribe({
+    this.planillaService.getTotalesPorDedYBen(this.idPlanilla).subscribe({
       next: (res) => {
-        const dialogData = res.map((item: any) => ({
-          nombreBeneficio: item.NOMBRE_BENEFICIO,
-          totalMontoBeneficio: item.TOTAL_MONTO_BENEFICIO,
-          deduccionesInprema: item.DEDUCCIONES_INPREMA,
-          deduccionesTerceros: item.DEDUCCIONES_DE_TERCEROS,
-          neto: item.NETO,
-          idBeneficio: item.ID_BENEFICIO,
-          idPlanilla: this.idPlanilla
-        }));
+        const dialogData = {
+          beneficios: res.beneficios.map((item: any) => ({
+            nombre: item.NOMBRE_BENEFICIO || 'N/A',
+            total: item.TOTAL_MONTO_BENEFICIO || 0
+          })),
+          deduccionesInprema: res.deduccionesInprema.map((item: any) => ({
+            nombre: item.NOMBRE_DEDUCCION || 'N/A',
+            total: item.TOTAL_MONTO_APLICADO || 0
+          })),
+          deduccionesTerceros: res.deduccionesTerceros.map((item: any) => ({
+            nombre: item.NOMBRE_DEDUCCION || 'N/A',
+            total: item.TOTAL_MONTO_APLICADO || 0
+          }))
+        };
 
         this.dialog.open(TotalesporbydDialogComponent, {
           width: '1000px',
           data: {
-            totales: dialogData,
+            beneficios: dialogData.beneficios,
+            deduccionesInprema: dialogData.deduccionesInprema,
+            deduccionesTerceros: dialogData.deduccionesTerceros,
             codigoPlanilla: this.detallePlanilla?.codigo_planilla || 'N/A',
             nombrePlanilla: this.detallePlanilla?.nombre_planilla || 'Desconocido',
             mesPlanilla: this.formatMonth(this.detallePlanilla?.fecha_apertura)
@@ -1065,6 +1072,9 @@ export class VerplancerradaComponent {
       }
     });
   }
+
+
+
 
   async generarPDFMontosPorBanco() {
     try {

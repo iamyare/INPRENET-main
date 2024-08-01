@@ -122,19 +122,31 @@ export class NuevoBeneficioAfilComponent implements OnInit {
     try {
       const beneficios = await this.svcBeneficioServ.obtenerTipoBeneficioByTipoPersona(tipoPers).toPromise();
 
-      const temp: [] = beneficios.map((item: any) => {
-        return {
-          label: `${item.beneficio.nombre_beneficio}`,
-          value: `${item.beneficio.nombre_beneficio}`,
-          periodicidad: `${item.beneficio.periodicidad}`
-        }
-      });
-      this.tiposBeneficios = temp;
+      if (beneficios && beneficios.length > 0) {
+        // Clear the array to avoid duplication
+        //this.tiposBeneficios = [];
+
+        beneficios.forEach((item: any) => {
+          this.tiposBeneficios.push({
+            label: item.beneficio.nombre_beneficio,
+            value: item.beneficio.nombre_beneficio,
+            periodicidad: item.beneficio.periodicidad
+          });
+        });
+
+        console.log("Tipos Beneficios populated:", this.tiposBeneficios);  // Debugging step
+      } else {
+        console.log("No beneficios found");  // Debugging step
+      }
+
       return this.tiposBeneficios;
     } catch (error) {
       console.error("Error al obtener datos de beneficios", error);
+      return [];
     }
   };
+
+
 
   async obtenerDatos(event: any): Promise<any> {
     this.form = event;
@@ -382,6 +394,7 @@ export class NuevoBeneficioAfilComponent implements OnInit {
 
           //this.getBeneficios().then(() => this.cargar());
           this.getFilas().then(() => this.cargar());
+          //this.tiposBeneficios = []
           if (item.fallecido == "SI") {
             this.getTipoBen("BENEFICIARIO");
           } else {

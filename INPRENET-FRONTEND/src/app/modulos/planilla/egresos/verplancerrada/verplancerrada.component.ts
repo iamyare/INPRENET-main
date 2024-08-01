@@ -352,9 +352,6 @@ export class VerplancerradaComponent {
 
   construirPDFCaus(row: { Total: any; NOMBRE_COMPLETO: any; dni: any; correo_1: any; fecha_cierre: any; }, resultados: any, backgroundImageBase64: string) {
     const formatCurrency = (value: number) => new Intl.NumberFormat('es-HN', { style: 'currency', currency: 'HNL' }).format(value);
-
-    console.log(resultados);
-
     if (resultados) {
       const persona = resultados.persona;
       const detallePersona = persona.detallePersona || [];
@@ -389,8 +386,6 @@ export class VerplancerradaComponent {
         };
       });
 
-
-      console.log(resultados.deduccion.detalleDeduccion);
       let dataDed = resultados.deduccion.detalleDeduccion.map((deduccion: any) => {
         const montoDeduccion = deduccion.monto_aplicado;
         sumaDeducciones += montoDeduccion;
@@ -415,13 +410,8 @@ export class VerplancerradaComponent {
               TotalMontoAplicado: montoDeduccion
             };
           }); */
-      console.log(data);
-      console.log(dataDed);
-      console.log(sumaDeducciones);
 
       const neto = sumaBeneficios - sumaDeducciones;
-
-      console.log(neto);
 
       const docDefinition: TDocumentDefinitions = {
         background: function (currentPage, pageSize) {
@@ -454,26 +444,40 @@ export class VerplancerradaComponent {
               },
               {
                 table: {
-                  widths: ['*', '*', '*', '*', '*'],
+                  widths: ['*', '*'],
                   body: [
-                    [{ text: 'INGRESO', style: 'tableHeader' }, { text: 'MONTO INGRESO', style: ['tableHeader', 'alignRight'] }, { text: 'INSTITUCIÓN', style: 'tableHeader' }, { text: 'DEDUCCIÓN', style: 'tableHeader' }, { text: 'MONTO DEDUCCIÓN', style: ['tableHeader', 'alignRight'] }],
+                    [{ text: 'INGRESO', style: 'tableHeader' }, { text: 'MONTO INGRESO', style: ['tableHeader', 'alignRight'] }],
                     ...data.flatMap((b: any) => {
-                      if (b.DEDUCCIONES.length === 0) {
+                      return [[
+                        { text: b.NOMBRE_BENEFICIO },
+                        { text: formatCurrency(b.MontoAPagar), style: 'alignRight' },
+                      ]];
+                    })
+                  ]
+                },
+                margin: [0, 5, 0, 0],
+                style: 'tableExample'
+              },
+
+              {
+                table: {
+                  widths: ['*', '*', '*'],
+                  body: [
+                    [{ text: 'INSTITUCIÓN', style: 'tableHeader' }, { text: 'DEDUCCIÓN', style: 'tableHeader' }, { text: 'MONTO DEDUCCIÓN', style: ['tableHeader', 'alignRight'] }],
+                    ...dataDed.flatMap((b: any) => {
+                      if (b.length === 0) {
                         return [[
-                          { text: b.NOMBRE_BENEFICIO },
-                          { text: formatCurrency(b.MontoAPagar), style: 'alignRight' },
                           { text: '---------------', alignment: 'center' },
                           { text: '---------------', alignment: 'center' },
                           { text: formatCurrency(0), style: 'alignRight' },
                         ]];
                       } else {
-                        return b.DEDUCCIONES.map((d: { NOMBRE_INSTITUCION: any; NOMBRE_DEDUCCION: any; TotalMontoAplicado: number; }, index: number) => [
-                          index === 0 ? { text: b.NOMBRE_BENEFICIO, rowSpan: b.DEDUCCIONES.length } : {},
-                          index === 0 ? { text: formatCurrency(b.MontoAPagar), rowSpan: b.DEDUCCIONES.length, style: 'alignRight' } : { text: formatCurrency(0), style: 'alignRight' },
-                          { text: d.NOMBRE_INSTITUCION },
-                          { text: d.NOMBRE_DEDUCCION },
-                          { text: formatCurrency(d.TotalMontoAplicado), style: 'alignRight' }
-                        ]);
+                        return [[
+                          { text: b.NOMBRE_INSTITUCION },
+                          { text: b.NOMBRE_DEDUCCION },
+                          { text: formatCurrency(b.TotalMontoAplicado), style: 'alignRight' }
+                        ]];
+
                       }
                     })
                   ]
@@ -481,6 +485,7 @@ export class VerplancerradaComponent {
                 margin: [0, 5, 0, 0],
                 style: 'tableExample'
               },
+
               {
                 table: {
                   widths: ['*', '*'],

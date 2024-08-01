@@ -15,7 +15,8 @@ export class LayoutComponent implements OnInit {
   constructor(private sidenavService: SidenavService, private authService: AuthService) {}
 
   ngOnInit(): void {
-    // Obtén los roles y módulos del usuario
+    this.menuConfig = this.sidenavService.getMenuConfig();
+    /* // Obtén los roles y módulos del usuario
     const rolesModulos = this.authService.getUserRolesAndModules();
 
     // Filtra el menú con base en los roles y módulos
@@ -50,7 +51,7 @@ export class LayoutComponent implements OnInit {
 
       // Mantén los demás menús sin cambios
       return true;
-    });
+    }); */
   }
 
   setExpandedPanel(panel: any): void {

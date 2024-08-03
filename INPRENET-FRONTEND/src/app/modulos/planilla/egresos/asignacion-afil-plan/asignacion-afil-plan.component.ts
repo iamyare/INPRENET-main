@@ -163,10 +163,10 @@ export class AsignacionAfilPlanComponent implements OnInit {
     const tipoPlanilla = this.detallePlanilla.tipoPlanilla.nombre_planilla;
     const dni = row.dni;
 
-    this.planillaService.getDesglosePersonaPorPlanillaPreliminar(tipoPlanilla, dni).subscribe({
+    /* this.planillaService.getDesglosePersonaPorPlanillaPreliminar(tipoPlanilla, dni).subscribe({
       next: (response: any) => openDialog(response),
       error: handleError
-    });
+    }); */
   }
 
 

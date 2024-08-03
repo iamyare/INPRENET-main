@@ -7,7 +7,7 @@ import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output } from 
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ProgressbarDynamicComponent {
-
+  @Input() title: string = '';
   @Input() steps: { label: string, isActive: boolean }[] = [];
   @Output() stepChange = new EventEmitter<number>();
 

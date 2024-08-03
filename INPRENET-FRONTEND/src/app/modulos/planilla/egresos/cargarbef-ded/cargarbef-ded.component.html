@@ -1,0 +1,31 @@
+<mat-tab-group>
+  <mat-tab label="Cargar Beneficios">
+    <div>
+      <!-- Contenido para cargar beneficios -->
+      <button mat-raised-button color="primary" (click)="asignarBeneficiosOrdinariaBeneficiariosAfiliados()">
+        Asignar beneficios a planilla ordinaria de Beneficiarios y Afiliados
+      </button>
+      <button mat-raised-button color="primary" (click)="asignarBeneficiosOrdinariaJubiladosPensionados()">
+        Asignar beneficios a planilla ordinaria de Jubilados y Pensionados
+      </button>
+      <button mat-raised-button color="primary" (click)="asignarBeneficiosComplementariaBeneficiariosAfiliados()">
+        Asignar beneficios a planilla complementaria de Beneficiarios y Afiliados
+      </button>
+      <button mat-raised-button color="primary" (click)="asignarBeneficiosComplementariaJubiladosPensionados()">
+        Asignar beneficios a planilla complementaria de Jubilados y Pensionados
+      </button>
+    </div>
+  </mat-tab>
+  <mat-tab label="Cargar Deducciones de INPREMA">
+    <div>
+      <!-- Contenido para cargar deducciones de INPREMA -->
+      <p>Formulario o contenido para cargar deducciones de INPREMA</p>
+    </div>
+  </mat-tab>
+  <mat-tab label="Cargar Deducciones de Terceros">
+    <div>
+      <!-- Incluir el nuevo componente para subir deducciones de terceros -->
+      <app-subir-deducciones-terceros></app-subir-deducciones-terceros>
+    </div>
+  </mat-tab>
+</mat-tab-group>

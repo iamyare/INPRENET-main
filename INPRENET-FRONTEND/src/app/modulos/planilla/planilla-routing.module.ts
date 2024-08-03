@@ -11,11 +11,12 @@ import { NuevaDeduccionAfilComponent } from './egresos/nueva-deduccion-afil/nuev
 import { VerEditarDeduccionAfilComponent } from './beneneficios/ver-editar-deduccion-afil/ver-editar-deduccion-afil.component';
 import { RoleGuard } from '../../guards/role-guard.guard';
 import { AsignacionDeduccionesComponent } from './beneneficios/asignacion-deducciones/asignacion-deducciones.component';
+import { ProcesoPlanillaComponent } from './egresos/proceso-planilla/proceso-planilla.component';
 
 const routes: Routes = [
   {
-    path: 'nueva-planilla',
-    component: NuevaPlanillaComponentP,
+    path: 'proceso-planilla',
+    component: ProcesoPlanillaComponent,
     //canActivate: [RoleGuard],
     //data: { expectedRolesModules: [{role: 'ADMINISTRADOR'},{ role: 'ADMINISTRADOR DE PLANILLA', module: 'PLANILLA' }, { role: 'OFICIAL DE PLANILLA', module: 'PLANILLA' }] }
   },

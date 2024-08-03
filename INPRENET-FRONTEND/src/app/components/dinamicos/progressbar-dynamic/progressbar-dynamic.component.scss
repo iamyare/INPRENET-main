@@ -1,4 +1,4 @@
-$brand-primary: #198754;
+$brand-primary: #178b7e;
 $white: #fff;
 $grey-light: White;
 
@@ -17,64 +17,74 @@ $grey-light: White;
   }
 }
 
-.multi-steps {
-  display: table;
-  table-layout: fixed;
-  width: 100%;
-
-  > li {
-    counter-increment: stepNum;
+.container-fluid {
+  .progressbar-title {
     text-align: center;
-    display: table-cell;
-    position: relative;
+    font-size: 24px;
+    font-weight: bold;
+    margin-bottom: 20px;
     color: $brand-primary;
+  }
 
-    &:before {
-      content: '\2713';
-      display: block;
-      margin: 0 auto 4px;
-      background-color: $white;
-      width: 36px;
-      height: 36px;
-      line-height: 32px;
+  .multi-steps {
+    display: table;
+    table-layout: fixed;
+    width: 100%;
+
+    > li {
+      counter-increment: stepNum;
       text-align: center;
-      font-weight: bold;
-      border: {
-        width: 2px;
-        style: solid;
-        color: $brand-primary;
-        radius: 50%;
-      }
-    }
-    &:after {
-      content: '';
-      height: 2px;
-      width: 100%;
-      background-color: $brand-primary;
-      position: absolute;
-      top: 16px;
-      left: 50%;
-      z-index: -1;
-    }
-    &:last-child {
-      &:after {
-        display: none;
-      }
-    }
+      display: table-cell;
+      position: relative;
+      color: $brand-primary;
 
-    &.is-active {
-      @extend %remain-steps;
       &:before {
+        content: '\2713';
+        display: block;
+        margin: 0 auto 4px;
         background-color: $white;
-        border-color: $brand-primary;
+        width: 36px;
+        height: 36px;
+        line-height: 32px;
+        text-align: center;
+        font-weight: bold;
+        border: {
+          width: 2px;
+          style: solid;
+          color: $brand-primary;
+          radius: 50%;
+        }
+      }
+      &:after {
+        content: '';
+        height: 2px;
+        width: 100%;
+        background-color: $brand-primary;
+        position: absolute;
+        top: 16px;
+        left: 50%;
+        z-index: -1;
+      }
+      &:last-child {
+        &:after {
+          display: none;
+        }
       }
 
-      ~ li {
-        color: #808080;
+      &.is-active {
         @extend %remain-steps;
         &:before {
-          background-color: $grey-light;
-          border-color: $grey-light;
+          background-color: $white;
+          border-color: $brand-primary;
+        }
+
+        ~ li {
+          color: #808080;
+          @extend %remain-steps;
+          &:before {
+            background-color: $grey-light;
+            border-color: $grey-light;
+          }
         }
       }
     }

@@ -30,6 +30,9 @@ import { VerEditarDeduccionAfilComponent } from './beneneficios/ver-editar-deduc
 import { NuevaDeduccionPersComponent } from './beneneficios/nueva-deduccion-pers/nueva-deduccion-pers.component';
 import { AsignacionDeduccionesComponent } from './beneneficios/asignacion-deducciones/asignacion-deducciones.component';
 import { SubirDeduccionesTercerosComponent } from './beneneficios/subir-deducciones-terceros/subir-deducciones-terceros.component';
+import { CargarbefDedComponent } from './egresos/cargarbef-ded/cargarbef-ded.component';
+import { ProcesoPlanillaComponent } from './egresos/proceso-planilla/proceso-planilla.component';
+import { DialogDesgloseComponent } from './egresos/dialog-desglose/dialog-desglose.component';
 
 @NgModule({
   declarations: [
@@ -59,7 +62,10 @@ import { SubirDeduccionesTercerosComponent } from './beneneficios/subir-deduccio
     VerEditarDeduccionAfilComponent,
     NuevaDeduccionPersComponent,
     AsignacionDeduccionesComponent,
-    SubirDeduccionesTercerosComponent
+    SubirDeduccionesTercerosComponent,
+    CargarbefDedComponent,
+    ProcesoPlanillaComponent,
+    DialogDesgloseComponent
   ],
   imports: [
     CommonModule,

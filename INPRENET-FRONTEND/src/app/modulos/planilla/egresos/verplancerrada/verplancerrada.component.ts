@@ -833,15 +833,23 @@ export class VerplancerradaComponent {
     });
   }
 
-  formatMonth(dateString: any) {
-    const date = new Date(dateString);
+  formatMonth(dateString: string) {
+    // Dividir la cadena de fecha en partes año, mes y día
+    const [year, month, day] = dateString.split('-');
+
+    // Crear un objeto Date utilizando estos valores
+    const date = new Date(Number(year), Number(month) - 1, Number(day));
+
+    // Formatear la fecha al mes y año en formato "mes largo de año"
     return date.toLocaleString('es-ES', { month: 'long', year: 'numeric' });
   }
+
 
   async generarPDFDeduccionesSeparadas() {
     try {
       const base64Image = await this.convertirImagenABase64('assets/images/HOJA-MEMBRETADA.jpg');
       this.planillaService.getDeduccionesPorPlanillaSeparadas(this.idPlanilla).subscribe(response => {
+
         const deduccionesInprema = response.deduccionesINPREMA || [];
         const deduccionesTerceros = response.deduccionesTerceros || [];
 
@@ -862,7 +870,7 @@ export class VerplancerradaComponent {
           header: (currentPage, pageCount, pageSize) => {
             return [
               {
-                text: `DESGLOSE DE DEDUCCIONES APLICADAS PARA PLANILLA ${this.detallePlanilla?.nombre_planilla || 'Desconocido'}`,
+                text: `DESGLOSE DE DEDUCCIONES APLICADAS PARA PLANILLA ${this.detallePlanilla?.tipoPlanilla.nombre_planilla || 'Desconocido'}`,
                 style: 'header',
                 alignment: 'center',
                 margin: [50, 80, 50, 0]
@@ -882,7 +890,7 @@ export class VerplancerradaComponent {
                   {
                     width: '50%',
                     text: [
-                      { text: 'Neto Total: ', bold: true },
+                      { text: 'Total de deducciones: ', bold: true },
                       `L ${neto.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",")}`
                     ],
                     alignment: 'right'
@@ -910,7 +918,7 @@ export class VerplancerradaComponent {
                     }
                   ],
                   alignment: 'center',
-                  margin: [0, 60, 0, 5]  // Aumentado el espacio entre la última tabla y la línea de firma
+                  margin: [0, 40, 0, 5]  // Ajustar el espacio entre la última tabla y la línea de firma
                 },
                 {
                   width: '33%',
@@ -923,7 +931,7 @@ export class VerplancerradaComponent {
                     }
                   ],
                   alignment: 'center',
-                  margin: [0, 60, 0, 5]  // Aumentado el espacio entre la última tabla y la línea de firma
+                  margin: [0, 40, 0, 5]  // Ajustar el espacio entre la última tabla y la línea de firma
                 },
                 {
                   width: '33%',
@@ -935,8 +943,8 @@ export class VerplancerradaComponent {
                       lineWidth: 1.5
                     }
                   ],
-                  alignment: 'center', // Aumentado el espacio entre la última tabla y la línea de firma
-                  margin: [0, 60, 0, 5]
+                  alignment: 'center',
+                  margin: [0, 40, 0, 5]  // Ajustar el espacio entre la última tabla y la línea de firma
                 }
               ]
             },
@@ -977,7 +985,7 @@ export class VerplancerradaComponent {
               margin: [0, 5, 0, 10]
             },
             signature: {
-              fontSize: 16,
+              fontSize: 10, // Reducido el tamaño de la fuente para las firmas a 10
               bold: true
             }
           },
@@ -1002,9 +1010,7 @@ export class VerplancerradaComponent {
           pageOrientation: 'portrait'
         };
         pdfMake.createPdf(docDefinition).download('reporte_deducciones_separadas.pdf');
-      },
-      )
-
+      });
     } catch (error) {
       console.error('Error al generar el PDF', error);
       this.toastr.error('Error al generar el PDF');
@@ -1044,29 +1050,30 @@ export class VerplancerradaComponent {
   mostrarTotales() {
     this.planillaService.getTotalesPorDedYBen(this.idPlanilla).subscribe({
       next: (res) => {
+
         const dialogData = {
           beneficios: res.beneficios.map((item: any) => ({
             nombre: item.NOMBRE_BENEFICIO || 'N/A',
             total: item.TOTAL_MONTO_BENEFICIO || 0
           })),
           deduccionesInprema: res.deduccionesInprema.map((item: any) => ({
-            nombre: item.NOMBRE_DEDUCCION || 'N/A',
-            total: item.TOTAL_MONTO_APLICADO || 0
+            NOMBRE_DEDUCCION: item.NOMBRE_DEDUCCION || 'N/A',
+            TOTAL_MONTO_DEDUCCION: item.TOTAL_MONTO_DEDUCCION || 0
           })),
           deduccionesTerceros: res.deduccionesTerceros.map((item: any) => ({
-            nombre: item.NOMBRE_DEDUCCION || 'N/A',
-            total: item.TOTAL_MONTO_APLICADO || 0
+            NOMBRE_DEDUCCION: item.NOMBRE_DEDUCCION || 'N/A',
+            TOTAL_MONTO_DEDUCCION: item.TOTAL_MONTO_DEDUCCION || 0
           }))
         };
-
         this.dialog.open(TotalesporbydDialogComponent, {
+
           width: '1000px',
           data: {
             beneficios: dialogData.beneficios,
             deduccionesInprema: dialogData.deduccionesInprema,
             deduccionesTerceros: dialogData.deduccionesTerceros,
             codigoPlanilla: this.detallePlanilla?.codigo_planilla || 'N/A',
-            nombrePlanilla: this.detallePlanilla?.nombre_planilla || 'Desconocido',
+            nombrePlanilla: this.detallePlanilla?.tipoPlanilla?.nombre_planilla || 'Desconocido',
             mesPlanilla: this.formatMonth(this.detallePlanilla?.fecha_apertura)
           }
         });
@@ -1077,8 +1084,6 @@ export class VerplancerradaComponent {
       }
     });
   }
-
-
 
 
   async generarPDFMontosPorBanco() {
@@ -1110,10 +1115,10 @@ export class VerplancerradaComponent {
           header: {
             stack: [
               {
-                text: `MONTOS PAGADOS POR PLANILLA ${this.detallePlanilla?.nombre_planilla}`,
+                text: `MONTOS PAGADOS POR PLANILLA ${this.detallePlanilla?.tipoPlanilla.nombre_planilla}`,
                 style: 'header',
                 alignment: 'center',
-                margin: [50, 80, 50, 0]
+                margin: [50, 70, 50, 0]
               },
               {
                 columns: [

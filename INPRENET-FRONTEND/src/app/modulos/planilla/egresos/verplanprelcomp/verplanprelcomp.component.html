@@ -3,14 +3,14 @@
     subtitulo="Completa la información correspondiente" (newDatBenChange)="obtenerDatosForm($event)">
   </app-dynamic-form>
   <div style="text-align: center">
-    <button color="primary" (click)="getPlanilla()" [disabled]="datosFormateados.invalid" mat-raised-button
+    <button color="primary" (click)="getPlanilla()" [disabled]="datosFormateados?.invalid" mat-raised-button
       style="margin: 2% 0; color: white; border-radius: 5px; padding: 10px 20px">
       Ver Planilla preliminar
     </button>
   </div>
 </div>
 
-<div class="card-header card-header-danger title" *ngIf="detallePlanilla ">
+<div class="card-header card-header-danger title" *ngIf="detallePlanilla">
   <div class="card-body" style="padding: 1% 1% 1% 1%">
     <h4 class="card-title" style="text-align: center">
       Datos Generales De La Planilla
@@ -18,7 +18,7 @@
     <table>
       <tr style="background-color: #f2f2f2">
         <th>Nombre Planilla</th>
-        <td>{{ detallePlanilla?.tipoPlanilla.nombre_planilla }}</td>
+        <td>{{ detallePlanilla?.tipoPlanilla?.nombre_planilla }}</td>
         <th>Fecha Apertura</th>
         <td>{{ convertirFecha(detallePlanilla?.fecha_apertura, true) }}</td>
       </tr>
@@ -48,18 +48,9 @@
       subtitulo="Completa la información correspondiente" [verOpcEditar]="false" [columns]="myColumnsDed"
       [data]="datosTabl" [getData]="getFilas"
       (ejecutarFuncionAsincronaEvent)="ejecutarFuncionAsincronaDesdeOtroComponente($event)"
-      [nombreEncabezadoUno]="'Detalle Ingresos'" [mostrarBotonUno]="true" [etiquetaBotonUno]="'Detalle Ingresos'"
-      (accionBotonUno)="manejarAccionUno($event)" [nombreEncabezadoDos]="'Detalle Deducciones'" [mostrarBotonDos]="true"
-      [etiquetaBotonDos]="'Detalle Deducciones'" (accionBotonDos)="manejarAccionDos($event)">
+      [nombreEncabezadoUno]="'Desglose'" [mostrarBotonUno]="true" [etiquetaBotonUno]="'Detalle de los montos'"
+      (accionBotonUno)="manejarAccionUno($event)">
     </app-dynamic-table>
-
-    <!-- <app-dynamic-table [verOpcEditar]="false" [columns]="myColumnsDed" [data]="datosTabl"
-      (ejecutarFuncionAsincronaEvent)="
-      ejecutarFuncionAsincronaDesdeOtroComponente($event)
-    " [nombreEncabezadoUno]="'Detalle Ingresos'" [mostrarBotonUno]="true" [etiquetaBotonUno]="'Detalle Ingresos'"
-      (accionBotonUno)="manejarAccionUno($event)" [nombreEncabezadoDos]="'Detalle Deducciones'" [mostrarBotonDos]="true"
-      [etiquetaBotonDos]="'Detalle Deducciones'" (accionBotonDos)="manejarAccionDos($event)">
-    </app-dynamic-table> -->
 
     <div style="background-color: white; margin-bottom: 1%; text-align: center">
       <button (click)="actualizarFechaCierrePlanilla()" mat-raised-button style="
@@ -72,8 +63,6 @@
       ">
         Cerrar planilla
       </button>
-
-
     </div>
   </div>
 </div>

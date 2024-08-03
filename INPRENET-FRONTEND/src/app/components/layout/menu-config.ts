@@ -34,7 +34,7 @@ export const MENU_CONFIG: Section[] = [
         title: 'EGRESOS',
         icon: 'money_off',
         children: [
-          { title: 'Nueva Planilla', route: '/planilla/nueva-planilla', icon: 'post_add' },
+          { title: 'Nueva Planilla', route: '/planilla/proceso-planilla', icon: 'post_add' },
           { title: 'Ver Planillas', route: '/planilla/ver-planillas', icon: 'receipt' },
           { title: 'Generacion de documentos', route: '/planilla/documentos-planilla', icon: 'description' },
         ],

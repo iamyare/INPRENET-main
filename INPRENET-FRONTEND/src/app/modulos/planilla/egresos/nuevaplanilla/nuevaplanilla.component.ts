@@ -2,7 +2,6 @@ import { Component, OnInit, ViewChild } from '@angular/core';
 import { FormBuilder, Validators } from '@angular/forms';
 import { PlanillaService } from 'src/app/services/planilla.service';
 import { AfiliadoService } from 'src/app/services/afiliado.service';
-import { TableColumn } from 'src/app/shared/Interfaces/table-column';
 import { ToastrService } from 'ngx-toastr';
 import { DynamicFormComponent } from 'src/app/components/dinamicos/dynamic-form/dynamic-form.component';
 import { FieldConfig } from 'src/app/shared/Interfaces/field-config';

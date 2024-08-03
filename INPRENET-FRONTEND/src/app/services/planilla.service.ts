@@ -1,5 +1,6 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
+import { ToastrService } from 'ngx-toastr';
 import { Observable, BehaviorSubject, catchError, throwError, map } from 'rxjs';
 import { environment } from 'src/environments/environment';
 
@@ -7,7 +8,28 @@ import { environment } from 'src/environments/environment';
   providedIn: 'root'
 })
 export class PlanillaService {
-  constructor(private http: HttpClient) { }
+  constructor(private http: HttpClient,private toastr: ToastrService) { }
+
+  updatePlanillaACerrada(codigo_planilla: string): Observable<void> {
+    const url = `${environment.API_URL}/api/planilla/actualizar-planilla-a-cerrada`;
+    return this.http.patch<void>(url, null, { params: { codigo_planilla } }).pipe(
+      catchError(error => {
+        console.error('Error al actualizar el estado de la planilla', error);
+        this.toastr.error('Error al actualizar el estado de la planilla');
+        return throwError(error);
+      })
+    );
+  }
+
+  getDesglosePorPersonaPlanilla(id_persona: string, codigo_planilla: string): Observable<any> {
+    const url = `${environment.API_URL}/api/planilla/desglose-persona-planilla`;
+    return this.http.get<any>(url, { params: { id_persona, codigo_planilla } }).pipe(
+      catchError(error => {
+        console.error('Error al obtener desglose por persona', error);
+        return throwError(error);
+      })
+    );
+}
 
   getPlanillasActivas(clasePlanilla?: string): Observable<any> {
     const url = `${environment.API_URL}/api/planilla/activas`;
@@ -25,19 +47,9 @@ export class PlanillaService {
     );
   }
 
-  getDesglosePersonaPorPlanillaPreliminar(proceso: string, n_identificacion: string): Observable<any> {
-    const url = `${environment.API_URL}/api/planilla/get-desglose-persona-planilla-preliminar`;
-    return this.http.post<any>(url, { proceso, n_identificacion }).pipe(
-      catchError(error => {
-        console.error('Error al obtener el desglose de persona por planilla preliminar', error);
-        return throwError(error);
-      })
-    );
-  }
-
-  getPlanillasPreliminares(proceso: string): Observable<any> {
+  getPlanillasPreliminares(codigo_planilla: string): Observable<any> {
     const url = `${environment.API_URL}/api/planilla/get-preliminares`;
-    return this.http.post<any>(url, { proceso }).pipe(
+    return this.http.post<any>(url, { codigo_planilla }).pipe(
       catchError(error => {
         console.error('Error al obtener planillas preliminares', error);
         return throwError(error);
@@ -49,6 +61,8 @@ export class PlanillaService {
     const url = `${environment.API_URL}/api/planilla/generar-complementaria`;
     return this.http.post<void>(url, { tipos_persona: tiposPersona }).pipe(
       catchError(error => {
+        const errorMessage = error.error.message || 'Error al generar planilla complementaria';
+        this.toastr.error(errorMessage);
         console.error('Error al generar planilla complementaria', error);
         return throwError(error);
       })
@@ -59,12 +73,13 @@ export class PlanillaService {
     const url = `${environment.API_URL}/api/planilla/generar-ordinaria`;
     return this.http.post<void>(url, { tipos_persona: tiposPersona }).pipe(
       catchError(error => {
+        const errorMessage = error.error.message || 'Error al generar planilla ordinaria';
+        this.toastr.error(errorMessage);
         console.error('Error al generar planilla ordinaria', error);
         return throwError(error);
       })
     );
   }
-
 
   getTotalesBeneficiosDeducciones(idPlanilla: number): Observable<any> {
     const url = `${environment.API_URL}/api/planilla/totales-beneficios-deducciones/${idPlanilla}`;
@@ -76,15 +91,29 @@ export class PlanillaService {
     );
   }
 
-  getBeneficiosConDeducciones(periodoInicio: string, periodoFinalizacion: string, idTiposPlanilla: number[]): Observable<any[]> {
+  getTotalBeneficiosYDeduccionesPorPeriodo(periodoInicio: string, periodoFinalizacion: string, idTiposPlanilla: number[]): Observable<any> {
     const params = new HttpParams()
       .set('periodoInicio', periodoInicio)
       .set('periodoFinalizacion', periodoFinalizacion)
       .set('idTiposPlanilla', idTiposPlanilla.join(','));
 
-    return this.http.get<any[]>(`${environment.API_URL}/api/planilla/beneficios-deducciones-planilla-mes`, { params }).pipe(
+    return this.http.get<any>(`${environment.API_URL}/api/planilla/beneficios-deducciones-periodo`, { params }).pipe(
       catchError(error => {
         console.error('Error al obtener beneficios y deducciones', error);
+        return throwError(error);
+      })
+    );
+  }
+
+  getTotalMontosPorBancoYPeriodo(periodoInicio: string, periodoFinalizacion: string, idTiposPlanilla: number[]): Observable<any> {
+    const params = new HttpParams()
+      .set('periodoInicio', periodoInicio)
+      .set('periodoFinalizacion', periodoFinalizacion)
+      .set('idTiposPlanilla', idTiposPlanilla.join(','));
+
+    return this.http.get<any>(`${environment.API_URL}/api/planilla/montos-banco-periodo`, { params }).pipe(
+      catchError(error => {
+        console.error('Error al obtener montos por banco en el periodo', error);
         return throwError(error);
       })
     );
@@ -375,6 +404,7 @@ export class PlanillaService {
       .set('codPlanilla', codPlanilla)
     return this.http.get(`${environment.API_URL}/api/planilla/preliminar`, { params });
   }
+
   getPlanillas(codPlanilla: string): Observable<any> {
     let params = new HttpParams()
       .set('codPlanilla', codPlanilla)

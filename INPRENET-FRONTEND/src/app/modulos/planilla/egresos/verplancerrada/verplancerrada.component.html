@@ -53,7 +53,7 @@
     <table>
       <tr style="background-color: #f2f2f2">
         <th>Nombre Planilla</th>
-        <td>{{ detallePlanilla?.nombre_planilla }}</td>
+        <td>{{ detallePlanilla?.tipoPlanilla.nombre_planilla }}</td>
         <th>Fecha Apertura</th>
         <td>{{ convertirFecha(detallePlanilla?.fecha_apertura, true) }}</td>
       </tr>
@@ -90,26 +90,26 @@
 <div style="background-color: white;margin-bottom: 1%; padding-top: 1%;margin-top: 1%; " *ngIf="verDat">
 
 
-  <app-dynamic-table-prueba 
-    titulo="Datos De Planilla Definitiva" 
-    [verOpcEditar]="false" 
+  <app-dynamic-table-prueba
+    titulo="Datos De Planilla Definitiva"
+    [verOpcEditar]="false"
     [columns]="myColumnsDed"
-    [data]="datosTabl" 
+    [data]="datosTabl"
 
-    [nombreEncabezadoUno]="'Detalle Ingresos'" 
+    [nombreEncabezadoUno]="'Detalle Ingresos'"
     [etiquetaBotonUno]="'Ingresos'"
-    [mostrarBotonUno]="true" 
-    (ejecutarFuncionAsincronaEvent)="ejecutarFuncionAsincronaDesdeOtroComponente($event)" 
-    (accionBotonUno)="manejarAccionUno($event)" 
-    
-    [nombreEncabezadoDos]="'Detalle Deducciones'" 
+    [mostrarBotonUno]="true"
+    (ejecutarFuncionAsincronaEvent)="ejecutarFuncionAsincronaDesdeOtroComponente($event)"
+    (accionBotonUno)="manejarAccionUno($event)"
+
+    [nombreEncabezadoDos]="'Detalle Deducciones'"
     [etiquetaBotonDos]="'Deducciones'"
-    [mostrarBotonDos]="true" 
-    (ejecutarFuncionAsincronaEvent)="ejecutarFuncionAsincronaDesdeOtroComponente($event)" 
-    (accionBotonDos)="manejarAccionDos($event)" 
-    
-    [nombreEncabezadoTres]="'Voucher'" 
-    [etiquetaBotonTres]="'Generar Voucher'" 
+    [mostrarBotonDos]="true"
+    (ejecutarFuncionAsincronaEvent)="ejecutarFuncionAsincronaDesdeOtroComponente($event)"
+    (accionBotonDos)="manejarAccionDos($event)"
+
+    [nombreEncabezadoTres]="'Voucher'"
+    [etiquetaBotonTres]="'Generar Voucher'"
     [mostrarBotonTres]="true"
     (accionBotonTres)="manejarAccionTres($event)">
   </app-dynamic-table-prueba>

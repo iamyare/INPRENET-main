@@ -1,3 +1,6 @@
+import { IsString } from 'class-validator';
+
 export class GeneratePlanillaDto {
-    tipos_persona: string;
-  }
+  @IsString()
+  tipos_persona: string;
+}

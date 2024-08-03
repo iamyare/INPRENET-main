@@ -4,6 +4,7 @@ import { IsEnum } from 'class-validator';
 import { Net_Deduccion } from '../../deduccion/entities/net_deduccion.entity';
 import { net_persona } from 'src/modules/Persona/entities/net_persona.entity';
 import { Net_Detalle_Pago_Beneficio } from '../../detalle_beneficio/entities/net_detalle_pago_beneficio.entity';
+import { Net_Deducciones_Asignadas } from './net-deducciones-asignadas.entity';
 
 @Entity({ name: 'NET_DETALLE_DEDUCCION' })
 @Check("CK_ESTADO_DED", `estado_aplicacion IN ('COBRADA', 'NO COBRADA', 'EN PRELIMINAR', 'EN PLANILLA')`)
@@ -41,4 +42,8 @@ export class Net_Detalle_Deduccion {
     @ManyToOne(() => Net_Deduccion, deduccion => deduccion.detalleDeduccion, { cascade: true })
     @JoinColumn({ name: 'ID_DEDUCCION', foreignKeyConstraintName: "FK_ID_DEDUCCION_DETDED" })
     deduccion: Net_Deduccion;
+
+    @ManyToOne(() => Net_Deducciones_Asignadas, deduccionAsignada => deduccionAsignada.detallesDeduccion, { cascade: true })
+  @JoinColumn({ name: 'ID_DEDUCCION_ASIGNADA', foreignKeyConstraintName: 'FK_ID_DEDUCCION_ASIGNADA_DETDED' })
+  deduccionAsignada: Net_Deducciones_Asignadas;
 }

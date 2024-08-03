@@ -6,6 +6,9 @@ import { Net_Detalle_planilla_ingreso } from '../../Ingresos/detalle-plan-ingr/e
 
 @Entity({ name: 'NET_PLANILLA' })
 @Check(`estado IN ('ACTIVA', 'CERRADA', 'PAGADA')`)
+@Check(`beneficios_cargados IN ('SI', 'NO')`)
+@Check(`deducc_inprema_cargadas IN ('SI', 'NO')`)
+@Check(`deducc_terceros_cargadas IN ('SI', 'NO')`)
 export class Net_Planilla {
 
     @PrimaryGeneratedColumn({ type: 'int', name: 'ID_PLANILLA', primaryKeyConstraintName: 'PK_id_plan_Plan' })
@@ -45,6 +48,15 @@ export class Net_Planilla {
 
     @OneToMany(() => Net_Detalle_planilla_ingreso, detallePlanillaIngreso => detallePlanillaIngreso.planilla)
     detallesPlanillaIngreso: Net_Detalle_planilla_ingreso[];
+
+    @Column('varchar2', { nullable: false, default: 'NO', name: 'BENEFICIOS_CARGADOS' })
+    beneficios_cargados: string;
+
+    @Column('varchar2', { nullable: false, default: 'NO', name: 'DEDUCC_INPREMA_CARGADAS' })
+    deducc_inprema_cargadas: string;
+
+    @Column('varchar2', { nullable: false, default: 'NO', name: 'DEDUCC_TERCEROS_CARGADAS' })
+    deducc_terceros_cargadas: string;
 
     /* @OneToMany(() => Net_Detalle_Deduccion, detalleDeduccion => detalleDeduccion.planilla)
     detalleDeduccion: Net_Detalle_Deduccion[]; */

@@ -16,7 +16,7 @@ import { net_causas_fallecimientos } from "./net_causas_fallecimientos.entity";
 import { net_otra_fuente_ingreso } from "./net_otra_fuente_ingreso.entity";
 import { Net_Persona_Discapacidad } from "./net_persona_discapacidad.entity";
 import { Net_Familia } from "./net_familia.entity";
-import { Net_Beneficio } from "src/modules/Planilla/beneficio/entities/net_beneficio.entity";
+import { Net_Deducciones_Asignadas } from "src/modules/Planilla/detalle-deduccion/entities/net-deducciones-asignadas.entity";
 @Entity({
     name: 'NET_PERSONA',
 })
@@ -202,5 +202,8 @@ export class net_persona {
 
     @OneToMany(() => Net_Familia, familia => familia.referenciada)
     familiaresReferenciados: Net_Familia[];
+
+    @OneToMany(() => Net_Deducciones_Asignadas, deduccionesAsignadas => deduccionesAsignadas.persona)
+    deduccionesAsignadas: Net_Deducciones_Asignadas[];
 
 }

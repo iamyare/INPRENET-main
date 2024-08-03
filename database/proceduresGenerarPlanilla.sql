@@ -3,30 +3,54 @@ CREATE OR REPLACE PROCEDURE InsertarPlanillaOrdinaria(
     tipos_persona IN VARCHAR2
 ) IS
     v_proceso VARCHAR2(30);
+    v_id_planilla NUMBER;
 BEGIN
     IF tipos_persona IN ('BENEFICIARIO,AFILIADO', 'AFILIADO,BENEFICIARIO') THEN
         v_proceso := 'ORDINARIA - BENEFICIARIOS';
+        -- Buscar ID_PLANILLA para Beneficiarios
+        BEGIN
+            SELECT ID_PLANILLA
+            INTO v_id_planilla
+            FROM NET_PLANILLA
+            WHERE ESTADO = 'ACTIVA'
+            AND ID_TIPO_PLANILLA = 2
+            AND ROWNUM = 1;
+        EXCEPTION
+            WHEN NO_DATA_FOUND THEN
+                RAISE_APPLICATION_ERROR(-20002, 'No se encontró una planilla activa para Beneficiarios');
+        END;
     ELSIF tipos_persona IN ('JUBILADO,VOLUNTARIO,PENSIONADO', 'JUBILADO,PENSIONADO,VOLUNTARIO', 'PENSIONADO,JUBILADO,VOLUNTARIO', 
                             'PENSIONADO,VOLUNTARIO,JUBILADO', 'VOLUNTARIO,JUBILADO,PENSIONADO', 'VOLUNTARIO,PENSIONADO,JUBILADO') THEN
         v_proceso := 'ORDINARIA - JUBILADOS';
+        -- Buscar ID_PLANILLA para Jubilados
+        BEGIN
+            SELECT ID_PLANILLA
+            INTO v_id_planilla
+            FROM NET_PLANILLA
+            WHERE ESTADO = 'ACTIVA'
+            AND ID_TIPO_PLANILLA = 1
+            AND ROWNUM = 1;
+        EXCEPTION
+            WHEN NO_DATA_FOUND THEN
+                RAISE_APPLICATION_ERROR(-20002, 'No se encontró una planilla activa para Jubilados');
+        END;
     ELSE
         RAISE_APPLICATION_ERROR(-20001, 'Tipos de persona no reconocidos');
     END IF;
 
     INSERT INTO NET_DETALLE_PAGO_BENEFICIO (
-        ESTADO, FECHA_CARGA, MONTO_A_PAGAR, ID_PLANILLA, ID_AF_BANCO, ID_PERSONA, ID_CAUSANTE, ID_DETALLE_PERSONA, ID_BENEFICIO, PROCESO
+        ESTADO, FECHA_CARGA, MONTO_A_PAGAR, ID_PLANILLA, ID_AF_BANCO, ID_PERSONA, ID_CAUSANTE, ID_DETALLE_PERSONA, ID_BENEFICIO
     )
     SELECT 
-        'NO PAGADA',
+        'EN PRELIMINAR',
         SYSDATE,
         sub_dpb.MONTO_A_PAGAR,
-        NULL,
+        v_id_planilla, -- Usar el ID_PLANILLA obtenido
         pb.ID_AF_BANCO,
         dp.ID_PERSONA,
         dp.ID_CAUSANTE,
         dp.ID_DETALLE_PERSONA,
-        sub_dpb.ID_BENEFICIO,
-        v_proceso -- Incluye el valor del proceso determinado
+        sub_dpb.ID_BENEFICIO
     FROM
         NET_DETALLE_PERSONA dp
     INNER JOIN
@@ -67,12 +91,16 @@ BEGIN
               AND existing_dpb.ID_CAUSANTE = dp.ID_CAUSANTE
               AND existing_dpb.ID_DETALLE_PERSONA = dp.ID_DETALLE_PERSONA
               AND existing_dpb.ID_BENEFICIO = sub_dpb.ID_BENEFICIO
-              AND existing_dpb.ESTADO = 'NO PAGADA'
+              AND existing_dpb.ESTADO = 'EN PRELIMINAR'
               AND TO_CHAR(existing_dpb.FECHA_CARGA, 'YYYY-MM') = TO_CHAR(SYSDATE, 'YYYY-MM')
         );
+
+    -- Actualizar beneficios_cargados a 'SI'
+    UPDATE NET_PLANILLA
+    SET BENEFICIOS_CARGADOS = 'SI'
+    WHERE ID_PLANILLA = v_id_planilla;
 END;
 /
-
 
 
 
@@ -94,30 +122,54 @@ CREATE OR REPLACE PROCEDURE InsertarPlanillaComplementaria(
     tipos_persona IN VARCHAR2
 ) IS
     v_proceso VARCHAR2(30);
+    v_id_planilla NUMBER;
 BEGIN
     IF tipos_persona IN ('BENEFICIARIO,AFILIADO', 'AFILIADO,BENEFICIARIO') THEN
         v_proceso := 'COMPLEMENTARIA - BENEFICIARIOS';
+        -- Buscar ID_PLANILLA para Beneficiarios
+        BEGIN
+            SELECT ID_PLANILLA
+            INTO v_id_planilla
+            FROM NET_PLANILLA
+            WHERE ESTADO = 'ACTIVA'
+            AND ID_TIPO_PLANILLA = 4
+            AND ROWNUM = 1;
+        EXCEPTION
+            WHEN NO_DATA_FOUND THEN
+                RAISE_APPLICATION_ERROR(-20002, 'No se encontró una planilla activa para Beneficiarios');
+        END;
     ELSIF tipos_persona IN ('JUBILADO,VOLUNTARIO,PENSIONADO', 'JUBILADO,PENSIONADO,VOLUNTARIO', 'PENSIONADO,JUBILADO,VOLUNTARIO', 
                             'PENSIONADO,VOLUNTARIO,JUBILADO', 'VOLUNTARIO,JUBILADO,PENSIONADO', 'VOLUNTARIO,PENSIONADO,JUBILADO') THEN
         v_proceso := 'COMPLEMENTARIA - JUBILADOS';
+        -- Buscar ID_PLANILLA para Jubilados
+        BEGIN
+            SELECT ID_PLANILLA
+            INTO v_id_planilla
+            FROM NET_PLANILLA
+            WHERE ESTADO = 'ACTIVA'
+            AND ID_TIPO_PLANILLA = 3
+            AND ROWNUM = 1;
+        EXCEPTION
+            WHEN NO_DATA_FOUND THEN
+                RAISE_APPLICATION_ERROR(-20002, 'No se encontró una planilla activa para Jubilados');
+        END;
     ELSE
         RAISE_APPLICATION_ERROR(-20001, 'Tipos de persona no reconocidos');
     END IF;
 
     INSERT INTO NET_DETALLE_PAGO_BENEFICIO (
-        ESTADO, FECHA_CARGA, MONTO_A_PAGAR, ID_PLANILLA, ID_AF_BANCO, ID_PERSONA, ID_CAUSANTE, ID_DETALLE_PERSONA, ID_BENEFICIO, PROCESO
+        ESTADO, FECHA_CARGA, MONTO_A_PAGAR, ID_PLANILLA, ID_AF_BANCO, ID_PERSONA, ID_CAUSANTE, ID_DETALLE_PERSONA, ID_BENEFICIO
     )
     SELECT 
-        'NO PAGADA',
+        'EN PRELIMINAR',
         SYSDATE,
         dba.MONTO_TOTAL,
-        NULL,
+        v_id_planilla, -- Usar el ID_PLANILLA obtenido
         pb.ID_AF_BANCO,
         dp.ID_PERSONA,
         dp.ID_CAUSANTE,
         dp.ID_DETALLE_PERSONA,
-        dba.ID_BENEFICIO,
-        v_proceso
+        dba.ID_BENEFICIO
     FROM
         NET_DETALLE_PERSONA dp
     INNER JOIN
@@ -155,8 +207,13 @@ BEGIN
               AND existing_dpb2.ID_CAUSANTE = dp.ID_CAUSANTE
               AND existing_dpb2.ID_DETALLE_PERSONA = dp.ID_DETALLE_PERSONA
               AND existing_dpb2.ID_BENEFICIO = dba.ID_BENEFICIO
-              AND existing_dpb2.ESTADO <> 'NO PAGADA'
+              AND existing_dpb2.ESTADO <> 'EN PRELIMINAR'
         );
+
+    -- Actualizar beneficios_cargados a 'SI'
+    UPDATE NET_PLANILLA
+    SET BENEFICIOS_CARGADOS = 'SI'
+    WHERE ID_PLANILLA = v_id_planilla;
 END;
 /
 

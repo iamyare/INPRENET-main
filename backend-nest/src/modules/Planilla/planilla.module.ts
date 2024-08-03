@@ -33,6 +33,7 @@ import { DetallePlanillaIngresoService } from './Ingresos/detalle-plan-ingr/deta
 import { DetallePlanIngrController } from './Ingresos/detalle-plan-ingr/detalle-plan-ingr.controller';
 import { Net_Regimen } from './beneficio/entities/net_regimen.entity';
 import { Net_Beneficio_Tipo_Persona } from './beneficio_tipo_persona/entities/net_beneficio_tipo_persona.entity';
+import { Net_Deducciones_Asignadas } from './detalle-deduccion/entities/net-deducciones-asignadas.entity';
 
 @Module({
   controllers: [DetallePlanIngrController, PlanillaController, BeneficioController, DetalleBeneficioController, DeduccionController,
@@ -42,6 +43,6 @@ import { Net_Beneficio_Tipo_Persona } from './beneficio_tipo_persona/entities/ne
   imports: [AfiliadoModule, TransaccionesModule,
     TypeOrmModule.forFeature([Net_Beneficio_Tipo_Persona, Net_Regimen, Net_SALARIO_COTIZABLE, Net_Beneficio, Net_Detalle_Pago_Beneficio,
       Net_Planilla, Net_Deduccion, Net_TipoPlanilla, Net_Detalle_Deduccion,
-      Net_Detalle_Beneficio_Afiliado, Net_Detalle_planilla_ingreso, Net_Clasificacion_Beneficios]),]
+      Net_Detalle_Beneficio_Afiliado, Net_Detalle_planilla_ingreso, Net_Clasificacion_Beneficios, Net_Deducciones_Asignadas]),]
 })
 export class PlanillaModule { }

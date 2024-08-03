@@ -7,29 +7,57 @@ import { ApiTags } from '@nestjs/swagger';
 import { EntityManager } from 'typeorm';
 import { InjectEntityManager } from '@nestjs/typeorm';
 import { Net_Planilla } from './entities/net_planilla.entity';
-import { GeneratePlanillaDto } from './dto/generate-planilla.dto';
 import { GetPlanillasPreliminaresDto } from './dto/get-planillas-preliminares.dto';
-import { Net_Detalle_Pago_Beneficio } from '../detalle_beneficio/entities/net_detalle_pago_beneficio.entity';
 import { GetDesglosePersonaPlanillaPreliminarDto } from './dto/get-desglose-persona-planilla-preliminar.dto';
+import { GeneratePlanillaDto } from './dto/generate-planilla.dto';
 
 @ApiTags('planilla')
 @Controller('planilla')
 export class PlanillaController {
   constructor(private readonly planillaService: PlanillaService, @InjectEntityManager() private readonly entityManager: EntityManager) { }
 
+  @Patch('actualizar-planilla-a-cerrada')
+async updatePlanillaACerrada(
+  @Query('codigo_planilla') codigo_planilla: string
+): Promise<void> {
+  return this.planillaService.updatePlanillaACerrada(codigo_planilla);
+}
+
+  @Get('desglose-persona-planilla')
+  async getDesglosePorPersonaPlanilla(
+    @Query('id_persona') id_persona: string,
+    @Query('codigo_planilla') codigo_planilla: string
+  ): Promise<any> {
+    return this.planillaService.getDesglosePorPersonaPlanilla(id_persona, codigo_planilla);
+  }
+
   @Get('activas')
   async getActivePlanillas(@Query('clasePlanilla') clasePlanilla?: string) {
     return this.planillaService.getActivePlanillas(clasePlanilla);
   }
-
-  @Get('beneficios-deducciones-planilla-mes')
-  async getBeneficiosConDeducciones(
+  
+  @Get('montos-banco-periodo')
+  async getMontosPorBancoYPeriodo(
     @Query('periodoInicio') periodoInicio: string,
     @Query('periodoFinalizacion') periodoFinalizacion: string,
     @Query('idTiposPlanilla') idTiposPlanilla: string,
-  ): Promise<any[]> {
+  ): Promise<any> {
     const tiposPlanillaArray = idTiposPlanilla.split(',').map(Number);
-    return this.planillaService.getBeneficiosConDeduccionesDePLanillaPorMes(
+    return this.planillaService.getTotalPorBancoYPeriodo(
+      periodoInicio,
+      periodoFinalizacion,
+      tiposPlanillaArray,
+    );
+  }
+
+  @Get('beneficios-deducciones-periodo')
+  async getBeneficiosDeducciones(
+    @Query('periodoInicio') periodoInicio: string,
+    @Query('periodoFinalizacion') periodoFinalizacion: string,
+    @Query('idTiposPlanilla') idTiposPlanilla: string,
+  ): Promise<any> {
+    const tiposPlanillaArray = idTiposPlanilla.split(',').map(Number);
+    return this.planillaService.getTotalPorBeneficiosYDeduccionesPorPeriodo(
       periodoInicio,
       periodoFinalizacion,
       tiposPlanillaArray,
@@ -607,8 +635,6 @@ export class PlanillaController {
     }
   }
 
-
-
   /* @Get('planillaOrdinaria')
   async obtenerAfilOrdinaria(
     @Query('periodoInicio') periodoInicio: string,
@@ -718,13 +744,9 @@ export class PlanillaController {
   }
 
   @Post('get-preliminares')
-  async getPlanillasPreliminares(@Body() getPlanillasPreliminaresDto: GetPlanillasPreliminaresDto): Promise<Net_Detalle_Pago_Beneficio[]> {
-    return this.planillaService.getPlanillasPreliminares(getPlanillasPreliminaresDto.proceso);
+  async getPlanillasPreliminares(@Body() getPlanillasPreliminaresDto: GetPlanillasPreliminaresDto): Promise<any[]> {
+    return this.planillaService.getPlanillasPreliminares(getPlanillasPreliminaresDto.codigo_planilla);
   }
 
-  @Post('get-desglose-persona-planilla-preliminar')
-  async getDesglosePersonaPorPlanillaPreliminar(@Body() getDesglosePersonaPlanillaPreliminarDto: GetDesglosePersonaPlanillaPreliminarDto): Promise<any[]> {
-    const { proceso, n_identificacion } = getDesglosePersonaPlanillaPreliminarDto;
-    return this.planillaService.getDesglosePersonaPorPlanillaPreliminar(proceso, n_identificacion);
-  }
+  
 }

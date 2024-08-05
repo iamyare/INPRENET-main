@@ -81,9 +81,7 @@ BEGIN
         tp.TIPO_PERSONA IN (SELECT TRIM(REGEXP_SUBSTR(tipos_persona, '[^,]+', 1, LEVEL))
                             FROM DUAL
                             CONNECT BY REGEXP_SUBSTR(tipos_persona, '[^,]+', 1, LEVEL) IS NOT NULL)
-        AND ea.NOMBRE_ESTADO = 'RECIBIENDO BENEFICIO'
         AND SYSDATE BETWEEN dba.PERIODO_INICIO AND dba.PERIODO_FINALIZACION
-        AND per.FALLECIDO = 'NO'
         AND NOT EXISTS (
             SELECT 1
             FROM NET_DETALLE_PAGO_BENEFICIO existing_dpb
@@ -188,9 +186,7 @@ BEGIN
         tp.TIPO_PERSONA IN (SELECT TRIM(REGEXP_SUBSTR(tipos_persona, '[^,]+', 1, LEVEL))
                             FROM DUAL
                             CONNECT BY REGEXP_SUBSTR(tipos_persona, '[^,]+', 1, LEVEL) IS NOT NULL)
-        AND ea.NOMBRE_ESTADO = 'RECIBIENDO BENEFICIO'
         AND SYSDATE BETWEEN dba.PERIODO_INICIO AND dba.PERIODO_FINALIZACION
-        AND per.FALLECIDO = 'NO'
         AND dba.ESTADO_SOLICITUD = 'APROBADO'
         AND NOT EXISTS (
             SELECT 1

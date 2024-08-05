@@ -28,7 +28,7 @@ export class HeaderComponent implements OnInit {
     }
   ];
 
-  constructor(private authService: AuthService, private sidenavService: SidenavService) {}
+  constructor(private authService: AuthService, private sidenavService: SidenavService) { }
 
   ngOnInit(): void {
     this.authService.getUserProfile().subscribe({
@@ -53,6 +53,6 @@ export class HeaderComponent implements OnInit {
     this.authService.clearSession();
     // Aquí puedes redirigir al usuario después de cerrar sesión
     // Por ejemplo, usando el Router
-    // this.router.navigate(['/auth/login']);
+    // this.router.navigate(['/auth/landing-page']);
   }
 }

@@ -16,15 +16,16 @@ const routes: Routes = [
       { path: 'dashboard-admin', component: DashboardAdminComponent },
       { path: 'user-management', component: UserManagementComponent },
       { path: 'add-admin', component: AddAdminComponent },
-      { path: '', redirectTo: 'dashboard-admin', pathMatch: 'full' }
+      { path: '**', redirectTo: 'dashboard-admin', pathMatch: 'full' }
     ]
   },
   {
-    path: '',
+    path: 'usuarios',
     children: [
       { path: 'editar-usuarios', component: GestionUsuariosComponent },
       { path: 'editar-perfil/:id', component: PerfilEdicionComponent },
       { path: 'nuevo-usuario', component: NuevoUsuarioComponent },
+      { path: '**', redirectTo: 'nuevo-usuario', pathMatch: 'full' }
     ],
   },
 ];

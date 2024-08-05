@@ -34,16 +34,16 @@ export const MENU_CONFIG: Section[] = [
         title: 'EGRESOS',
         icon: 'money_off',
         children: [
-          { title: 'Nueva Planilla', route: 'planilla/proceso-planilla', icon: 'post_add' },
-          { title: 'Ver Planillas', route: 'planilla/ver-planillas', icon: 'receipt' },
-          { title: 'Generacion de documentos', route: 'planilla/documentos-planilla', icon: 'description' },
+          { title: 'Nueva Planilla', route: 'planilla/Egresos/proceso-planilla', icon: 'post_add' },
+          { title: 'Ver Planillas', route: 'planilla/Egresos/ver-planillas', icon: 'receipt' },
+          { title: 'Generacion de documentos', route: 'planilla/Egresos/documentos-planilla', icon: 'description' },
         ],
       },
       {
         title: 'INGRESOS',
         icon: 'money',
         children: [
-          { title: 'Privados', route: 'planilla/planilla-colegios-privados', icon: 'business' },
+          { title: 'Privados', route: 'planilla/Ingresos/planilla-colegios-privados', icon: 'business' },
         ],
       },
     ],
@@ -55,8 +55,8 @@ export const MENU_CONFIG: Section[] = [
         title: 'USUARIOS',
         icon: 'group',
         children: [
-          { title: 'Gestión de Usuarios', route: 'gestion/editar-usuarios', icon: 'manage_accounts' },
-          { title: 'Nuevo Usuario', route: 'gestion/nuevo-usuario', icon: 'person_add' },
+          { title: 'Gestión de Usuarios', route: 'gestion/usuarios/editar-usuarios', icon: 'manage_accounts' },
+          { title: 'Nuevo Usuario', route: 'gestion/usuarios/nuevo-usuario', icon: 'person_add' },
         ],
       },
     ],

@@ -60,6 +60,7 @@ const routes: Routes = [
   { path: 'mantenimiento/banco', component: BancoComponent },
   { path: 'mantenimiento/jornada', component: JornadaComponent },
   { path: 'mantenimiento/nivel-educativo', component: NivelEducativoComponent },
+  { path: '**', redirectTo: "nuevo-afiliado" },
 ];
 
 @NgModule({

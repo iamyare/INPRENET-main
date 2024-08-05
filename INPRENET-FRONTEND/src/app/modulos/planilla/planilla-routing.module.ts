@@ -15,60 +15,84 @@ import { ProcesoPlanillaComponent } from './egresos/proceso-planilla/proceso-pla
 
 const routes: Routes = [
   {
-    path: 'proceso-planilla',
-    component: ProcesoPlanillaComponent,
-    //canActivate: [RoleGuard],
-    //data: { expectedRolesModules: [{role: 'ADMINISTRADOR'},{ role: 'ADMINISTRADOR DE PLANILLA', module: 'PLANILLA' }, { role: 'OFICIAL DE PLANILLA', module: 'PLANILLA' }] }
+    path: 'Beneficios',
+    children: [
+      {
+        path: 'nuevo-beneficio-afil',
+        component: NuevoBeneficioAfilComponent,
+        //canActivate: [RoleGuard],
+        //data: { expectedRolesModules: [{role: 'ADMINISTRADOR'},{ role: 'ADMINISTRADOR DE PLANILLA', module: 'PLANILLA' }, { role: 'OFICIAL DE PLANILLA', module: 'PLANILLA' }] }
+      },
+      {
+        path: 'Ver-editar-beneficio-afil',
+        component: VerEditarBeneficioAfilComponent,
+        //canActivate: [RoleGuard],
+        //data: { expectedRolesModules: [{role: 'ADMINISTRADOR'},{ role: 'ADMINISTRADOR DE PLANILLA', module: 'PLANILLA' }, { role: 'OFICIAL DE PLANILLA', module: 'PLANILLA' }] }
+      },
+      { path: '**', redirectTo: 'nuevo-beneficio-afil', pathMatch: 'full' }
+    ]
   },
   {
-    path: 'ver-planillas',
-    component: VerPlanillasComponent,
-    //canActivate: [RoleGuard],
-    //data: { expectedRolesModules: [{role: 'ADMINISTRADOR'},{ role: 'ADMINISTRADOR DE PLANILLA', module: 'PLANILLA' }, { role: 'OFICIAL DE PLANILLA', module: 'PLANILLA' }] }
+    path: 'Deducciones',
+    children: [
+      {
+        path: 'nueva-deduccion-afil',
+        component: AsignacionDeduccionesComponent,
+        //canActivate: [RoleGuard],
+        //data: { expectedRolesModules: [{role: 'ADMINISTRADOR'},{ role: 'ADMINISTRADOR DE PLANILLA', module: 'PLANILLA' }, { role: 'OFICIAL DE PLANILLA', module: 'PLANILLA' }] }
+      },
+      {
+        path: 'ver-editar-deduccion-afil',
+        component: VerEditarDeduccionAfilComponent,
+        //canActivate: [RoleGuard],
+        //data: { expectedRolesModules: [{role: 'ADMINISTRADOR'},{ role: 'ADMINISTRADOR DE PLANILLA', module: 'PLANILLA' }, { role: 'OFICIAL DE PLANILLA', module: 'PLANILLA' }] }
+      },
+      { path: '**', redirectTo: 'nueva-deduccion-afil', pathMatch: 'full' }
+    ]
   },
   {
-    path: 'planilla-colegios-privados',
-    component: PlanillaColegiosPrivadosComponent,
-    //canActivate: [RoleGuard],
-    //data: { expectedRolesModules: [{role: 'ADMINISTRADOR'},{ role: 'ADMINISTRADOR DE PLANILLA', module: 'PLANILLA' }, { role: 'OFICIAL DE PLANILLA', module: 'PLANILLA' }] }
+    path: 'Egresos',
+    children: [
+      {
+        path: 'proceso-planilla',
+        component: ProcesoPlanillaComponent,
+        //canActivate: [RoleGuard],
+        //data: { expectedRolesModules: [{role: 'ADMINISTRADOR'},{ role: 'ADMINISTRADOR DE PLANILLA', module: 'PLANILLA' }, { role: 'OFICIAL DE PLANILLA', module: 'PLANILLA' }] }
+      },
+      {
+        path: 'ver-planillas',
+        component: VerPlanillasComponent,
+        //canActivate: [RoleGuard],
+        //data: { expectedRolesModules: [{role: 'ADMINISTRADOR'},{ role: 'ADMINISTRADOR DE PLANILLA', module: 'PLANILLA' }, { role: 'OFICIAL DE PLANILLA', module: 'PLANILLA' }] }
+      },
+      {
+        path: 'documentos-planilla',
+        component: DocumentosPlanillaComponent,
+        //canActivate: [RoleGuard],
+        //data: { expectedRolesModules: [{role: 'ADMINISTRADOR'},{ role: 'ADMINISTRADOR DE PLANILLA', module: 'PLANILLA' }, { role: 'OFICIAL DE PLANILLA', module: 'PLANILLA' }] }
+      },
+      { path: '**', redirectTo: 'proceso-planilla', pathMatch: 'full' }
+    ]
   },
   {
-    path: 'cargar-planilla-privados',
-    component: CargarPlanillaPrivadosComponent,
-    //canActivate: [RoleGuard],
-    //data: { expectedRolesModules: [{role: 'ADMINISTRADOR'},{ role: 'ADMINISTRADOR DE PLANILLA', module: 'PLANILLA' }, { role: 'OFICIAL DE PLANILLA', module: 'PLANILLA' }] }
+    path: 'Ingresos',
+    children: [
+      {
+        path: 'planilla-colegios-privados',
+        component: PlanillaColegiosPrivadosComponent,
+        //canActivate: [RoleGuard],
+        //data: { expectedRolesModules: [{role: 'ADMINISTRADOR'},{ role: 'ADMINISTRADOR DE PLANILLA', module: 'PLANILLA' }, { role: 'OFICIAL DE PLANILLA', module: 'PLANILLA' }] }
+      },
+      {
+        path: 'cargar-planilla-privados',
+        component: CargarPlanillaPrivadosComponent,
+        //canActivate: [RoleGuard],
+        //data: { expectedRolesModules: [{role: 'ADMINISTRADOR'},{ role: 'ADMINISTRADOR DE PLANILLA', module: 'PLANILLA' }, { role: 'OFICIAL DE PLANILLA', module: 'PLANILLA' }] }
+      },
+
+      { path: '**', redirectTo: 'planilla-colegios-privados', pathMatch: 'full' }
+    ]
   },
-  {
-    path: 'documentos-planilla',
-    component: DocumentosPlanillaComponent,
-    //canActivate: [RoleGuard],
-    //data: { expectedRolesModules: [{role: 'ADMINISTRADOR'},{ role: 'ADMINISTRADOR DE PLANILLA', module: 'PLANILLA' }, { role: 'OFICIAL DE PLANILLA', module: 'PLANILLA' }] }
-  },
-  {
-    path: 'Beneficios/nuevo-beneficio-afil',
-    component: NuevoBeneficioAfilComponent,
-    //canActivate: [RoleGuard],
-    //data: { expectedRolesModules: [{role: 'ADMINISTRADOR'},{ role: 'ADMINISTRADOR DE PLANILLA', module: 'PLANILLA' }, { role: 'OFICIAL DE PLANILLA', module: 'PLANILLA' }] }
-  },
-  {
-    path: 'Beneficios/Ver-editar-beneficio-afil',
-    component: VerEditarBeneficioAfilComponent,
-    //canActivate: [RoleGuard],
-    //data: { expectedRolesModules: [{role: 'ADMINISTRADOR'},{ role: 'ADMINISTRADOR DE PLANILLA', module: 'PLANILLA' }, { role: 'OFICIAL DE PLANILLA', module: 'PLANILLA' }] }
-  },
-  {
-    path: 'Deducciones/nueva-deduccion-afil',
-    component: AsignacionDeduccionesComponent,
-    //canActivate: [RoleGuard],
-    //data: { expectedRolesModules: [{role: 'ADMINISTRADOR'},{ role: 'ADMINISTRADOR DE PLANILLA', module: 'PLANILLA' }, { role: 'OFICIAL DE PLANILLA', module: 'PLANILLA' }] }
-  },
-  {
-    path: 'Deducciones/ver-editar-deduccion-afil',
-    component: VerEditarDeduccionAfilComponent,
-    //canActivate: [RoleGuard],
-    //data: { expectedRolesModules: [{role: 'ADMINISTRADOR'},{ role: 'ADMINISTRADOR DE PLANILLA', module: 'PLANILLA' }, { role: 'OFICIAL DE PLANILLA', module: 'PLANILLA' }] }
-  },
-  { path: '', redirectTo: 'planilla', pathMatch: 'full' }
 ];
 
 @NgModule({

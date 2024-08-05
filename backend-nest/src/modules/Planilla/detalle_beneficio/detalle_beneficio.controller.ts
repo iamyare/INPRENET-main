@@ -11,7 +11,7 @@ export class DetalleBeneficioController {
   constructor(private readonly detallebeneficioService: DetalleBeneficioService) { }
 
   @Post('nuevoDetalle/:idAfiliadoPadre')
-  async createDetalleBeneficioBeneficiario(@Body() createDetalleBeneficioDto: CreateDetalleBeneficioDto, @Param('idAfiliadoPadre') idAfiliadoPadre: number) {
+  async createDetalleBeneficioBeneficiario(@Body() createDetalleBeneficioDto: any, @Param('idAfiliadoPadre') idAfiliadoPadre: number) {
     try {
       const nuevoDetalle = await this.detallebeneficioService.createDetalleBeneficioAfiliado(createDetalleBeneficioDto, idAfiliadoPadre);
       return {
@@ -25,7 +25,7 @@ export class DetalleBeneficioController {
   }
 
   @Post('nuevoDetalle')
-  async createDetalleBeneficioAfiliado(@Body() createDetalleBeneficioDto: CreateDetalleBeneficioDto) {
+  async createDetalleBeneficioAfiliado(@Body() createDetalleBeneficioDto: any) {
     try {
       const nuevoDetalle = await this.detallebeneficioService.createDetalleBeneficioAfiliado(createDetalleBeneficioDto);
       return {

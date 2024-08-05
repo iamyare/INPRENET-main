@@ -127,6 +127,8 @@ export class VerEditarBeneficioAfilComponent {
   getFilas = async () => {
     try {
       const data = await this.beneficioService.GetAllBeneficios(this.form.value.dni).toPromise();
+      console.log(data);
+
 
       const dataAfil = data.persona.map((item: any) => ({
         dni: item.N_IDENTIFICACION,

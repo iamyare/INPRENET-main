@@ -18,7 +18,7 @@ const routes: Routes = [
   { path: 'pre-register', component: PreRegisterComponent },
   { path: 'editar', component: EditarPerfilComponent },
   { path: 'landing-page', component: LandingPageComponent },
-  { path: '**', redirectTo: 'login', pathMatch: 'full' }
+  { path: '', redirectTo: '/auth/login', pathMatch: 'full' },
 ];
 
 @NgModule({

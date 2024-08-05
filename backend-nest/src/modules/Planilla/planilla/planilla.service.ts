@@ -36,20 +36,20 @@ export class PlanillaService {
 
   async getActivePlanillas(clasePlanilla?: string): Promise<Net_Planilla[]> {
     const query = this.planillaRepository.createQueryBuilder('planilla')
-        .leftJoinAndSelect('planilla.tipoPlanilla', 'tipoPlanilla')
-        .where('planilla.estado = :estado', { estado: 'ACTIVA' });
+      .leftJoinAndSelect('planilla.tipoPlanilla', 'tipoPlanilla')
+      .where('planilla.estado = :estado', { estado: 'ACTIVA' });
 
     if (clasePlanilla) {
-        query.andWhere('tipoPlanilla.clase_planilla = :clasePlanilla', { clasePlanilla });
+      query.andWhere('tipoPlanilla.clase_planilla = :clasePlanilla', { clasePlanilla });
     }
 
     try {
-        return await query.getMany();
+      return await query.getMany();
     } catch (error) {
-        this.logger.error('Error al obtener planillas activas', error);
-        throw new InternalServerErrorException('Error al obtener planillas activas');
+      this.logger.error('Error al obtener planillas activas', error);
+      throw new InternalServerErrorException('Error al obtener planillas activas');
     }
-}
+  }
 
 
   async getBeneficiosAgrupadosPorPlanilla(idPlanilla: number): Promise<any> {
@@ -1212,7 +1212,7 @@ WHERE
         ben."NOMBRE_BENEFICIO", 
         ben."CODIGO"
     `;
-  
+
     try {
       return await this.entityManager.query(query, [idPlanilla]);
     } catch (error) {
@@ -1220,7 +1220,7 @@ WHERE
       throw new InternalServerErrorException('Error al obtener los totales de beneficios');
     }
   }
-  
+
   async GetDeduccionesInpremaPorPlanilla(idPlanilla: number): Promise<any> {
     const query = `
       SELECT 
@@ -1242,15 +1242,15 @@ WHERE
         ded."ID_DEDUCCION", 
         ded."NOMBRE_DEDUCCION"
     `;
-  
+
     try {
-        return await this.entityManager.query(query, [idPlanilla]);
+      return await this.entityManager.query(query, [idPlanilla]);
     } catch (error) {
-        console.error('Error al obtener los totales de deducciones INPREMA:', error);
-        throw new InternalServerErrorException('Error al obtener los totales de deducciones INPREMA');
+      console.error('Error al obtener los totales de deducciones INPREMA:', error);
+      throw new InternalServerErrorException('Error al obtener los totales de deducciones INPREMA');
     }
   }
-  
+
   async GetDeduccionesTercerosPorPlanilla(idPlanilla: number): Promise<any> {
     const query = `
       SELECT 
@@ -1272,15 +1272,15 @@ WHERE
         ded."ID_DEDUCCION", 
         ded."NOMBRE_DEDUCCION"
     `;
-  
+
     try {
-        return await this.entityManager.query(query, [idPlanilla]);
+      return await this.entityManager.query(query, [idPlanilla]);
     } catch (error) {
-        console.error('Error al obtener los totales de deducciones Terceros:', error);
-        throw new InternalServerErrorException('Error al obtener los totales de deducciones Terceros');
+      console.error('Error al obtener los totales de deducciones Terceros:', error);
+      throw new InternalServerErrorException('Error al obtener los totales de deducciones Terceros');
     }
   }
-  
+
   async GetDeduccionesPorPlanilla(idPlanilla: number): Promise<any> {
     const query = `
       SELECT 
@@ -1304,33 +1304,33 @@ WHERE
     `;
 
     try {
-        return await this.entityManager.query(query, [idPlanilla]);
+      return await this.entityManager.query(query, [idPlanilla]);
     } catch (error) {
-        console.error('Error al obtener los totales de deducciones:', error);
-        throw new InternalServerErrorException('Error al obtener los totales de deducciones');
+      console.error('Error al obtener los totales de deducciones:', error);
+      throw new InternalServerErrorException('Error al obtener los totales de deducciones');
     }
-}
-
-async getTotalPorBeneficiosYDeducciones(idPlanilla: number): Promise<any> {
-  try {
-    const beneficios = await this.GetBeneficiosPorPlanilla(idPlanilla);
-    const deduccionesInprema = await this.GetDeduccionesInpremaPorPlanilla(idPlanilla);
-    const deduccionesTerceros = await this.GetDeduccionesTercerosPorPlanilla(idPlanilla);
-    
-    return { beneficios, deduccionesInprema, deduccionesTerceros };
-
-  } catch (error) {
-    console.error('Error al obtener los totales por planilla:', error);
-    throw new InternalServerErrorException('Error al obtener los totales por planilla');
   }
-}
 
-async getBeneficiosPorPeriodo(
-  periodoInicio: string,
-  periodoFinalizacion: string,
-  idTiposPlanilla: number[],
-): Promise<any[]> {
-  const query = `
+
+  async getTotalPorBeneficiosYDeducciones(idPlanilla: number): Promise<any> {
+    try {
+      const beneficios = await this.GetBeneficiosPorPlanilla(idPlanilla);
+      const deduccionesInprema = await this.GetDeduccionesInpremaPorPlanilla(idPlanilla);
+      const deduccionesTerceros = await this.GetDeduccionesTercerosPorPlanilla(idPlanilla);
+
+      return { beneficios, deduccionesInprema, deduccionesTerceros };
+
+    } catch (error) {
+      console.error('Error al obtener los totales por planilla:', error);
+      throw new InternalServerErrorException('Error al obtener los totales por planilla');
+    }
+  }
+  async getBeneficiosPorPeriodo(
+    periodoInicio: string,
+    periodoFinalizacion: string,
+    idTiposPlanilla: number[],
+  ): Promise<any[]> {
+    const query = `
     SELECT 
       ben."ID_BENEFICIO" AS "ID_BENEFICIO",
       ben."NOMBRE_BENEFICIO" AS "NOMBRE_BENEFICIO",
@@ -1353,20 +1353,20 @@ async getBeneficiosPorPeriodo(
       ben."CODIGO"
   `;
 
-  try {
-    return await this.entityManager.query(query, [periodoInicio, periodoFinalizacion]);
-  } catch (error) {
-    console.error('Error al obtener beneficios:', error);
-    throw new InternalServerErrorException('Error al obtener beneficios');
+    try {
+      return await this.entityManager.query(query, [periodoInicio, periodoFinalizacion]);
+    } catch (error) {
+      console.error('Error al obtener beneficios:', error);
+      throw new InternalServerErrorException('Error al obtener beneficios');
+    }
   }
-}
 
-async getDeduccionesInpremaPorPeriodo(
-  periodoInicio: string,
-  periodoFinalizacion: string,
-  idTiposPlanilla: number[],
-): Promise<any[]> {
-  const query = `
+  async getDeduccionesInpremaPorPeriodo(
+    periodoInicio: string,
+    periodoFinalizacion: string,
+    idTiposPlanilla: number[],
+  ): Promise<any[]> {
+    const query = `
     SELECT 
       ded."ID_DEDUCCION" AS "ID_DEDUCCION",
       ded."NOMBRE_DEDUCCION" AS "NOMBRE_DEDUCCION",
@@ -1388,20 +1388,20 @@ async getDeduccionesInpremaPorPeriodo(
       ded."NOMBRE_DEDUCCION"
   `;
 
-  try {
-    return await this.entityManager.query(query, [periodoInicio, periodoFinalizacion]);
-  } catch (error) {
-    console.error('Error al obtener deducciones INPREMA:', error);
-    throw new InternalServerErrorException('Error al obtener deducciones INPREMA');
+    try {
+      return await this.entityManager.query(query, [periodoInicio, periodoFinalizacion]);
+    } catch (error) {
+      console.error('Error al obtener deducciones INPREMA:', error);
+      throw new InternalServerErrorException('Error al obtener deducciones INPREMA');
+    }
   }
-}
 
-async getDeduccionesTercerosPorPeriodo(
-  periodoInicio: string,
-  periodoFinalizacion: string,
-  idTiposPlanilla: number[],
-): Promise<any[]> {
-  const query = `
+  async getDeduccionesTercerosPorPeriodo(
+    periodoInicio: string,
+    periodoFinalizacion: string,
+    idTiposPlanilla: number[],
+  ): Promise<any[]> {
+    const query = `
     SELECT 
       ded."ID_DEDUCCION" AS "ID_DEDUCCION",
       ded."NOMBRE_DEDUCCION" AS "NOMBRE_DEDUCCION",
@@ -1423,37 +1423,37 @@ async getDeduccionesTercerosPorPeriodo(
       ded."NOMBRE_DEDUCCION"
   `;
 
-  try {
-    return await this.entityManager.query(query, [periodoInicio, periodoFinalizacion]);
-  } catch (error) {
-    console.error('Error al obtener deducciones de terceros:', error);
-    throw new InternalServerErrorException('Error al obtener deducciones de terceros');
+    try {
+      return await this.entityManager.query(query, [periodoInicio, periodoFinalizacion]);
+    } catch (error) {
+      console.error('Error al obtener deducciones de terceros:', error);
+      throw new InternalServerErrorException('Error al obtener deducciones de terceros');
+    }
   }
-}
 
-async getTotalPorBeneficiosYDeduccionesPorPeriodo(
-  periodoInicio: string,
-  periodoFinalizacion: string,
-  idTiposPlanilla: number[],
-): Promise<any> {
-  try {
-    const beneficios = await this.getBeneficiosPorPeriodo(periodoInicio, periodoFinalizacion, idTiposPlanilla);
-    const deduccionesInprema = await this.getDeduccionesInpremaPorPeriodo(periodoInicio, periodoFinalizacion, idTiposPlanilla);
-    const deduccionesTerceros = await this.getDeduccionesTercerosPorPeriodo(periodoInicio, periodoFinalizacion, idTiposPlanilla);
+  async getTotalPorBeneficiosYDeduccionesPorPeriodo(
+    periodoInicio: string,
+    periodoFinalizacion: string,
+    idTiposPlanilla: number[],
+  ): Promise<any> {
+    try {
+      const beneficios = await this.getBeneficiosPorPeriodo(periodoInicio, periodoFinalizacion, idTiposPlanilla);
+      const deduccionesInprema = await this.getDeduccionesInpremaPorPeriodo(periodoInicio, periodoFinalizacion, idTiposPlanilla);
+      const deduccionesTerceros = await this.getDeduccionesTercerosPorPeriodo(periodoInicio, periodoFinalizacion, idTiposPlanilla);
 
-    return { beneficios, deduccionesInprema, deduccionesTerceros };
-  } catch (error) {
-    console.error('Error al obtener los totales por periodo:', error);
-    throw new InternalServerErrorException('Error al obtener los totales por periodo');
+      return { beneficios, deduccionesInprema, deduccionesTerceros };
+    } catch (error) {
+      console.error('Error al obtener los totales por periodo:', error);
+      throw new InternalServerErrorException('Error al obtener los totales por periodo');
+    }
   }
-}
 
-async getTotalPorBancoYPeriodo(
-  periodoInicio: string,
-  periodoFinalizacion: string,
-  idTiposPlanilla: number[],
-): Promise<any[]> {
-  const beneficiosQuery = `
+  async getTotalPorBancoYPeriodo(
+    periodoInicio: string,
+    periodoFinalizacion: string,
+    idTiposPlanilla: number[],
+  ): Promise<any[]> {
+    const beneficiosQuery = `
       SELECT
       COALESCE(b."NOMBRE_BANCO", 'SIN BANCO') AS NOMBRE_BANCO,
       SUM(dpb."MONTO_A_PAGAR") AS SUMA_BENEFICIOS
@@ -1473,7 +1473,7 @@ async getTotalPorBancoYPeriodo(
       b."NOMBRE_BANCO"
   `;
 
-  const deduccionesInpremaQuery = `
+    const deduccionesInpremaQuery = `
         SELECT
         COALESCE(b."NOMBRE_BANCO", 'SIN BANCO') AS NOMBRE_BANCO,
         SUM(dd."MONTO_APLICADO") AS SUMA_DEDUCCIONES_INPREMA
@@ -1497,7 +1497,7 @@ async getTotalPorBancoYPeriodo(
 
   `;
 
-  const deduccionesTercerosQuery = `
+    const deduccionesTercerosQuery = `
         SELECT
         COALESCE(b."NOMBRE_BANCO", 'SIN BANCO') AS NOMBRE_BANCO,
         SUM(dd."MONTO_APLICADO") AS SUMA_DEDUCCIONES_TERCEROS
@@ -1520,7 +1520,7 @@ async getTotalPorBancoYPeriodo(
         b."NOMBRE_BANCO"
   `;
 
-  const planillasQuery = `
+    const planillasQuery = `
     SELECT
         p."ID_PLANILLA"
     FROM
@@ -1530,52 +1530,52 @@ async getTotalPorBancoYPeriodo(
         AND p."ID_TIPO_PLANILLA" IN (${idTiposPlanilla.join(', ')})
   `;
 
-  try {
-    
-    const beneficios = await this.entityManager.query(beneficiosQuery, [periodoInicio, periodoFinalizacion]);
-    const deduccionesInprema = await this.entityManager.query(deduccionesInpremaQuery, [periodoInicio, periodoFinalizacion]);
-    const deduccionesTerceros = await this.entityManager.query(deduccionesTercerosQuery, [periodoInicio, periodoFinalizacion]);
-    const planillas = await this.entityManager.query(planillasQuery, [periodoInicio, periodoFinalizacion]);
+    try {
 
-    // Log de las planillas encontradas
-    //console.log('Planillas encontradas:', planillas.map(p => p.ID_PLANILLA));
+      const beneficios = await this.entityManager.query(beneficiosQuery, [periodoInicio, periodoFinalizacion]);
+      const deduccionesInprema = await this.entityManager.query(deduccionesInpremaQuery, [periodoInicio, periodoFinalizacion]);
+      const deduccionesTerceros = await this.entityManager.query(deduccionesTercerosQuery, [periodoInicio, periodoFinalizacion]);
+      const planillas = await this.entityManager.query(planillasQuery, [periodoInicio, periodoFinalizacion]);
 
-    const result = beneficios.map(beneficio => {
-      const deduccionInprema = deduccionesInprema.find(d => d.NOMBRE_BANCO === beneficio.NOMBRE_BANCO) || { SUMA_DEDUCCIONES_INPREMA: 0 };
-      const deduccionTerceros = deduccionesTerceros.find(d => d.NOMBRE_BANCO === beneficio.NOMBRE_BANCO) || { SUMA_DEDUCCIONES_TERCEROS: 0 };
+      // Log de las planillas encontradas
+      //console.log('Planillas encontradas:', planillas.map(p => p.ID_PLANILLA));
 
-      return {
-        NOMBRE_BANCO: beneficio.NOMBRE_BANCO,
-        TOTAL_BENEFICIO: beneficio.SUMA_BENEFICIOS,
-        DEDUCCIONES_INPREMA: deduccionInprema.SUMA_DEDUCCIONES_INPREMA,
-        DEDUCCIONES_TERCEROS: deduccionTerceros.SUMA_DEDUCCIONES_TERCEROS,
-        MONTO_NETO: beneficio.SUMA_BENEFICIOS - (deduccionInprema.SUMA_DEDUCCIONES_INPREMA + deduccionTerceros.SUMA_DEDUCCIONES_TERCEROS)
-      };
-    });
+      const result = beneficios.map(beneficio => {
+        const deduccionInprema = deduccionesInprema.find(d => d.NOMBRE_BANCO === beneficio.NOMBRE_BANCO) || { SUMA_DEDUCCIONES_INPREMA: 0 };
+        const deduccionTerceros = deduccionesTerceros.find(d => d.NOMBRE_BANCO === beneficio.NOMBRE_BANCO) || { SUMA_DEDUCCIONES_TERCEROS: 0 };
 
-    // Incluir bancos que solo tienen deducciones INPREMA o Terceros y no beneficios
-    const deduccionesSoloInprema = deduccionesInprema.filter(d => !beneficios.find(b => b.NOMBRE_BANCO === d.NOMBRE_BANCO)).map(d => ({
-      NOMBRE_BANCO: d.NOMBRE_BANCO,
-      TOTAL_BENEFICIO: 0,
-      DEDUCCIONES_INPREMA: d.SUMA_DEDUCCIONES_INPREMA,
-      DEDUCCIONES_TERCEROS: 0,
-      MONTO_NETO: -d.SUMA_DEDUCCIONES_INPREMA
-    }));
+        return {
+          NOMBRE_BANCO: beneficio.NOMBRE_BANCO,
+          TOTAL_BENEFICIO: beneficio.SUMA_BENEFICIOS,
+          DEDUCCIONES_INPREMA: deduccionInprema.SUMA_DEDUCCIONES_INPREMA,
+          DEDUCCIONES_TERCEROS: deduccionTerceros.SUMA_DEDUCCIONES_TERCEROS,
+          MONTO_NETO: beneficio.SUMA_BENEFICIOS - (deduccionInprema.SUMA_DEDUCCIONES_INPREMA + deduccionTerceros.SUMA_DEDUCCIONES_TERCEROS)
+        };
+      });
 
-    const deduccionesSoloTerceros = deduccionesTerceros.filter(d => !beneficios.find(b => b.NOMBRE_BANCO === d.NOMBRE_BANCO)).map(d => ({
-      NOMBRE_BANCO: d.NOMBRE_BANCO,
-      TOTAL_BENEFICIO: 0,
-      DEDUCCIONES_INPREMA: 0,
-      DEDUCCIONES_TERCEROS: d.SUMA_DEDUCCIONES_TERCEROS,
-      MONTO_NETO: -d.SUMA_DEDUCCIONES_TERCEROS
-    }));
+      // Incluir bancos que solo tienen deducciones INPREMA o Terceros y no beneficios
+      const deduccionesSoloInprema = deduccionesInprema.filter(d => !beneficios.find(b => b.NOMBRE_BANCO === d.NOMBRE_BANCO)).map(d => ({
+        NOMBRE_BANCO: d.NOMBRE_BANCO,
+        TOTAL_BENEFICIO: 0,
+        DEDUCCIONES_INPREMA: d.SUMA_DEDUCCIONES_INPREMA,
+        DEDUCCIONES_TERCEROS: 0,
+        MONTO_NETO: -d.SUMA_DEDUCCIONES_INPREMA
+      }));
 
-    return [...result, ...deduccionesSoloInprema, ...deduccionesSoloTerceros];
-  } catch (error) {
-    console.error('Error al obtener los totales por banco en el periodo:', error);
-    throw new InternalServerErrorException('Error al obtener los totales por banco en el periodo');
+      const deduccionesSoloTerceros = deduccionesTerceros.filter(d => !beneficios.find(b => b.NOMBRE_BANCO === d.NOMBRE_BANCO)).map(d => ({
+        NOMBRE_BANCO: d.NOMBRE_BANCO,
+        TOTAL_BENEFICIO: 0,
+        DEDUCCIONES_INPREMA: 0,
+        DEDUCCIONES_TERCEROS: d.SUMA_DEDUCCIONES_TERCEROS,
+        MONTO_NETO: -d.SUMA_DEDUCCIONES_TERCEROS
+      }));
+
+      return [...result, ...deduccionesSoloInprema, ...deduccionesSoloTerceros];
+    } catch (error) {
+      console.error('Error al obtener los totales por banco en el periodo:', error);
+      throw new InternalServerErrorException('Error al obtener los totales por banco en el periodo');
+    }
   }
-}
 
 
 
@@ -1585,13 +1585,13 @@ async getTotalPorBancoYPeriodo(
 
   async generarVoucher(idPlanilla: number, dni: string): Promise<any> {
     try {
+
       const persona = await this.personaRepository.findOne({
         where: {
           n_identificacion: dni, detallePersona: {
             detalleBeneficio: {
               detallePagBeneficio: {
                 estado: 'PAGADA',
-                personaporbanco: { estado: 'ACTIVO' },
                 planilla: { id_planilla: idPlanilla }
               },
             }
@@ -1748,11 +1748,11 @@ async getTotalPorBancoYPeriodo(
             'tipP.nombre_planilla', // Asegúrate de seleccionar el campo correcto
           ])
           .getOne();
-  
+
         if (!queryBuilder) {
           throw new NotFoundException(`Planilla con código ${codPlanilla} no encontrada.`);
         }
-  
+
         return queryBuilder;
       } else {
         throw new NotFoundException(`Código de planilla no proporcionado.`);
@@ -1762,7 +1762,7 @@ async getTotalPorBancoYPeriodo(
       throw new Error('Error al obtener la planilla definida.');
     }
   }
-  
+
 
   async ObtenerMontosPorBanco(codPlanilla: string): Promise<any> {
     const query = `
@@ -1811,7 +1811,7 @@ async getTotalPorBancoYPeriodo(
               b."NOMBRE_BANCO") beneficios
       ON deducciones."NOMBRE_BANCO" = beneficios."NOMBRE_BANCO"
     `;
-  
+
     interface Banco {
       ID_BANCO: number;
       NOMBRE_BANCO: string;
@@ -1820,10 +1820,10 @@ async getTotalPorBancoYPeriodo(
       DEDUCCIONES_TERCEROS?: number;
       MONTO_NETO?: number;
     }
-  
+
     try {
       const result: any[] = await this.entityManager.query(query, [codPlanilla]);
-  
+
       const formattedResult: Banco[] = result.map(banco => ({
         ID_BANCO: banco.ID_BANCO,
         NOMBRE_BANCO: banco.NOMBRE_BANCO,
@@ -1832,7 +1832,7 @@ async getTotalPorBancoYPeriodo(
         DEDUCCIONES_TERCEROS: banco.SUMA_DEDUCCIONES_TERCEROS,
         MONTO_NETO: banco.MONTO_NETO
       }));
-  
+
       return formattedResult;
     } catch (error) {
       this.logger.error(`Error al obtener totales por banco: ${error.message}`, error.stack);
@@ -2008,16 +2008,16 @@ GROUP BY
       .addGroupBy('deduccion.nombre_deduccion')
       .addGroupBy('deduccion.codigo_deduccion')
       .getRawMany();
-  
+
     const deduccionesINPREMA = deducciones.filter(d => [1, 3, 51, 45].includes(d.ID_DEDUCCION));
     const deduccionesTerceros = deducciones.filter(d => ![1, 3, 51, 45].includes(d.ID_DEDUCCION));
-  
+
     return {
       deduccionesINPREMA,
       deduccionesTerceros,
     };
   }
-  
+
 
 
 
@@ -2856,7 +2856,7 @@ ON deducciones."id_afiliado" = beneficios."id_afiliado"
         ben."CODIGO", 
         plan."ID_PLANILLA"
     `;
-  
+
     try {
       return await this.entityManager.query(query, [idPlanilla]);
     } catch (error) {
@@ -2905,7 +2905,7 @@ ON deducciones."id_afiliado" = beneficios."id_afiliado"
 
   async getPlanillasPreliminares(codigo_planilla: string): Promise<any[]> {
     try {
-        const query = `
+      const query = `
             SELECT 
                 p.ID_PERSONA,
                 p.N_IDENTIFICACION,
@@ -2928,17 +2928,17 @@ ON deducciones."id_afiliado" = beneficios."id_afiliado"
                 p.ID_PERSONA, p.N_IDENTIFICACION, p.PRIMER_NOMBRE, p.SEGUNDO_NOMBRE, p.PRIMER_APELLIDO, p.SEGUNDO_APELLIDO
         `;
 
-        const result = await this.entityManager.query(query, [codigo_planilla]);
-        return result;
+      const result = await this.entityManager.query(query, [codigo_planilla]);
+      return result;
     } catch (error) {
-        this.logger.error('Error ejecutando la consulta', error.stack);
-        throw new InternalServerErrorException('Error ejecutando la consulta');
+      this.logger.error('Error ejecutando la consulta', error.stack);
+      throw new InternalServerErrorException('Error ejecutando la consulta');
     }
-}
+  }
 
 
 
-  
+
   async getDesglosePorPersonaPlanilla(id_persona: string, codigo_planilla: string): Promise<any> {
     try {
       const beneficiosQuery = `
@@ -2973,7 +2973,7 @@ ON deducciones."id_afiliado" = beneficios."id_afiliado"
                 d.NOMBRE_DEDUCCION
         `;
 
-        const deduccionesTercerosQuery = `
+      const deduccionesTercerosQuery = `
             SELECT 
                 d.NOMBRE_DEDUCCION,
                 SUM(dd.MONTO_APLICADO) AS MONTO_APLICADO
@@ -3004,11 +3004,11 @@ ON deducciones."id_afiliado" = beneficios."id_afiliado"
       this.logger.error('Error ejecutando la consulta', error.stack);
       throw new InternalServerErrorException('Error ejecutando la consulta');
     }
-}
+  }
 
 
-async updatePlanillaACerrada(codigo_planilla: string): Promise<void> {
-  const queryUpdateBeneficios = `
+  async updatePlanillaACerrada(codigo_planilla: string): Promise<void> {
+    const queryUpdateBeneficios = `
     UPDATE NET_DETALLE_PAGO_BENEFICIO dpb
     SET dpb.ESTADO = 'PAGADA'
     WHERE dpb.ID_PLANILLA IN (
@@ -3018,7 +3018,7 @@ async updatePlanillaACerrada(codigo_planilla: string): Promise<void> {
     )
   `;
 
-  const queryUpdateDeducciones = `
+    const queryUpdateDeducciones = `
     UPDATE NET_DETALLE_DEDUCCION dd
     SET dd.ESTADO_APLICACION = 'COBRADA'
     WHERE dd.ID_PLANILLA IN (
@@ -3028,23 +3028,23 @@ async updatePlanillaACerrada(codigo_planilla: string): Promise<void> {
     )
   `;
 
-  const queryUpdatePlanilla = `
+    const queryUpdatePlanilla = `
     UPDATE NET_PLANILLA pl
     SET pl.ESTADO = 'CERRADA'
     WHERE pl.CODIGO_PLANILLA = :codigo_planilla
   `;
 
-  const queryParams:any = { codigo_planilla };
+    const queryParams: any = { codigo_planilla };
 
-  try {
-    await this.entityManager.query(queryUpdateBeneficios, queryParams);
-    await this.entityManager.query(queryUpdateDeducciones, queryParams);
-    await this.entityManager.query(queryUpdatePlanilla, queryParams);
-  } catch (error) {
-    this.logger.error('Error ejecutando la actualización', error.stack);
-    throw new InternalServerErrorException('Error ejecutando la actualización');
+    try {
+      await this.entityManager.query(queryUpdateBeneficios, queryParams);
+      await this.entityManager.query(queryUpdateDeducciones, queryParams);
+      await this.entityManager.query(queryUpdatePlanilla, queryParams);
+    } catch (error) {
+      this.logger.error('Error ejecutando la actualización', error.stack);
+      throw new InternalServerErrorException('Error ejecutando la actualización');
+    }
   }
-}
 
 
 

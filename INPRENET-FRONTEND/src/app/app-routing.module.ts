@@ -7,10 +7,37 @@ import { AddAdminComponent } from './modulos/admin/add-admin/add-admin.component
 import { MainLayoutComponent } from './components/main-layout/main-layout.component';
 import { EditarPerfilComponent } from './modulos/auth/editar-perfil/editar-perfil.component';
 import { CustomContainerComponent } from './components/custom-container/custom-container.component';
+import { LoginComponent } from './modulos/auth/login/login.component';
+import { LoginPrivadosComponent } from './modulos/auth/login-privados/login-privados.component';
+import { OlvidoContrasenaComponent } from './modulos/auth/olvido-contrasena/olvido-contrasena.component';
+import { RestablecerContrasenaComponent } from './modulos/auth/restablecer-contrasena/restablecer-contrasena.component';
+import { RegisterComponent } from './modulos/auth/register/register.component';
+import { PreRegisterComponent } from './modulos/auth/pre-register/pre-register.component';
+import { LandingPageComponent } from './components/landing-page/landing-page.component';
 
 const routes: Routes = [
   {
-    path: '',
+    path: 'auth',
+    component: CustomContainerComponent,
+    children: [
+      {
+        path: '',
+        loadChildren: () => import('./modulos/auth/auth.module').then(m => m.AuthModule),
+      },
+    ]
+  },
+  {
+    path: 'admin',
+    component: AdminLayoutComponent,
+    children: [
+      { path: 'dashboard-admin', component: DashboardAdminComponent },
+      { path: 'user-management', component: UserManagementComponent },
+      { path: 'add-admin', component: AddAdminComponent },
+      { path: '', redirectTo: 'dashboard-admin', pathMatch: 'full' }
+    ]
+  },
+  {
+    path: 'home',
     component: MainLayoutComponent,
     children: [
       {
@@ -32,28 +59,6 @@ const routes: Routes = [
       { path: 'usuario/editar', component: EditarPerfilComponent },
     ]
   },
-  {
-    path: 'admin',
-    component: AdminLayoutComponent,
-    children: [
-      { path: 'dashboard-admin', component: DashboardAdminComponent },
-      { path: 'user-management', component: UserManagementComponent },
-      { path: 'add-admin', component: AddAdminComponent },
-      { path: '', redirectTo: 'dashboard-admin', pathMatch: 'full' }
-    ]
-  },
-  {
-    path: 'auth',
-    component: CustomContainerComponent,
-    children: [
-      {
-        path: '',
-        loadChildren: () => import('./modulos/auth/auth.module').then(m => m.AuthModule),
-      },
-      { path: '', redirectTo: 'login', pathMatch: 'full' }
-    ]
-  },
-  { path: '**', redirectTo: 'auth/landing-page', pathMatch: 'full' }
 ];
 
 @NgModule({

@@ -57,7 +57,7 @@
 </div>
 
 
-<div *ngIf="Afiliado.fallecido == 'SI' && Afiliado.tipo_persona == 'AFILIADO'"
+<div *ngIf="mostrarDB && Afiliado.fallecido == 'SI' && Afiliado.tipo_persona == 'AFILIADO'"
   style="margin: 1% 0% 1% 0%; text-align: center; background-color: white">
   <app-dynamic-form [fields]="myFormFields2" titulo="" subtitulo="Completa la información correspondiente"
   (selectChange)="prueba($event)" 
@@ -68,7 +68,7 @@
   </button>
 </div>
 
-<div *ngIf="Afiliado.fallecido == 'NO' && (
+<div *ngIf="mostrarDB && Afiliado.fallecido == 'NO' && (
   Afiliado.tipo_persona == 'AFILIADO' || 
   Afiliado.tipo_persona == 'JUBILADO' || 
   Afiliado.tipo_persona == 'PENSIONADO')" style="margin: 1% 0% 1% 0%; text-align: center; background-color: white">
@@ -80,36 +80,3 @@
     Asignar Beneficio
   </button>
 </div>
-
-<!-- <div
-  style="background-color: white; padding: 1%"
-  *ngIf="Afiliado.fallecido == 'SI'"
->
-  <h2>Beneficios</h2>
-  <app-dynamic-table
-    [columns]="myColumnsBeneficios"
-    [data]="filasBeneficios"
-    [getData]="datosTablBeneficios"
-    (ejecutarFuncionAsincronaEvent)="
-      ejecutarFuncionAsincronaDesdeOtroComponentes($event)
-    "
-    (verOpcEditar)="(false)"
-  ></app-dynamic-table>
-</div> -->
-
-<!-- Asignacion de Beneficios por medio de un excel -->
-<!-- <div *ngIf="!formGroup.invalid">
-  <input type="file" (change)="onFileSelect($event)">
-</div> -->
-<!--
-      /*
-        Un botón para previsualizar estado del afiliado.
-          Si el afiliado es fallecido, que me muestre todos los beneficiarios: dni, nombre, porcentaje, estado
-            Si uno o varios beneficiario es fallecido podrá editar el porcentaje de los demás, en la pantalla de edición de beneficiarios.
-        Un botón para asignar beneficio Validar que este se active solo cuando le presione el boton de asignar beneficio.
-          ¿Qué beneficios puede asignarse a los beneficiarios?
-          podrá asignarle el beneficio al afiliado si aún dado caso no ha fallecido.
-          si ya ha fallecido podrá asignarle el beneficio a los beneficiarios.
-          si el beneficiario cambia algunna informacion tendra que cambiarlo en otra pantalla no aqui.
-      */
--->

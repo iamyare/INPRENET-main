@@ -49,14 +49,14 @@ export class Net_Planilla {
     @OneToMany(() => Net_Detalle_planilla_ingreso, detallePlanillaIngreso => detallePlanillaIngreso.planilla)
     detallesPlanillaIngreso: Net_Detalle_planilla_ingreso[];
 
-    /* @Column('varchar2', { nullable: false, default: 'NO', name: 'BENEFICIOS_CARGADOS' })
+    @Column('varchar2', { nullable: false, default: 'NO', name: 'BENEFICIOS_CARGADOS' })
     beneficios_cargados: string;
 
     @Column('varchar2', { nullable: false, default: 'NO', name: 'DEDUCC_INPREMA_CARGADAS' })
     deducc_inprema_cargadas: string;
 
     @Column('varchar2', { nullable: false, default: 'NO', name: 'DEDUCC_TERCEROS_CARGADAS' })
-    deducc_terceros_cargadas: string; */
+    deducc_terceros_cargadas: string;
 
     /* @OneToMany(() => Net_Detalle_Deduccion, detalleDeduccion => detalleDeduccion.planilla)
     detalleDeduccion: Net_Detalle_Deduccion[]; */

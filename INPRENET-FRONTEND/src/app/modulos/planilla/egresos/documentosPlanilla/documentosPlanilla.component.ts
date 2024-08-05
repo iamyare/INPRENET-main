@@ -4,6 +4,7 @@ import { PlanillaService } from 'src/app/services/planilla.service';
 import { TDocumentDefinitions } from 'pdfmake/interfaces';
 import pdfMake from 'pdfmake/build/pdfmake';
 import pdfFonts from 'pdfmake/build/vfs_fonts';
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 
 pdfMake.vfs = pdfFonts.pdfMake.vfs;
 
@@ -13,8 +14,14 @@ pdfMake.vfs = pdfFonts.pdfMake.vfs;
   styleUrls: ['./documentosPlanilla.component.scss']
 })
 export class DocumentosPlanillaComponent implements OnInit {
+  planillaForm: FormGroup;
 
-  constructor(private http: HttpClient, private planillaService: PlanillaService) { }
+  constructor(private fb: FormBuilder, private http: HttpClient, private planillaService: PlanillaService) {
+    this.planillaForm = this.fb.group({
+      mes: ['', [Validators.required, Validators.pattern('^(0[1-9]|1[0-2])$')]],
+      anio: ['', [Validators.required, Validators.pattern('^\\d{4}$')]]
+    });
+  }
 
   ngOnInit() {
   }

@@ -18,7 +18,7 @@
   <mat-menu #userMenu="matMenu">
     <ng-container *ngFor="let section of sections">
       <mat-divider></mat-divider>
-      <div mat-menu-item *ngFor="let item of section.items" [routerLink]="item.route">
+      <div mat-menu-item *ngFor="let item of section.items" (click)="item.action ? logout() : null" [routerLink]="!item.action ? item.route : null">
         <mat-icon>{{ item.icon }}</mat-icon>
         <span>{{ item.title }}</span>
       </div>

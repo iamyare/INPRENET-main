@@ -23,7 +23,7 @@ export class HeaderComponent implements OnInit {
     {
       title: 'Opciones',
       items: [
-        { title: 'Cerrar Sesión', icon: 'exit_to_app', route: '/logout' }
+        { title: 'Cerrar Sesión', icon: 'exit_to_app', action: 'logout' }
       ]
     }
   ];
@@ -51,5 +51,8 @@ export class HeaderComponent implements OnInit {
 
   logout(): void {
     this.authService.clearSession();
+    // Aquí puedes redirigir al usuario después de cerrar sesión
+    // Por ejemplo, usando el Router
+    // this.router.navigate(['/auth/login']);
   }
 }

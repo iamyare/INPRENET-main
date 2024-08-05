@@ -172,6 +172,8 @@ export class VerplancerradaComponent {
         {
           next: async (response) => {
             if (response) {
+              console.log(response);
+
               this.detallePlanilla = response;
               this.getFilas(response.codigo_planilla).then(() => this.cargar());
               this.calcularTotales(this.datosFormateados.value.codigo_planilla)
@@ -1332,7 +1334,7 @@ export class VerplancerradaComponent {
                       { text: 'Código de Planilla: ', bold: true },
                       `${codigo_planilla}\n`,
                       { text: 'Mes de la Planilla: ', bold: true },
-                      `${this.detallePlanilla?.mes_planilla || 'N/A'}`,
+                      `${this.formatMonth(this.detallePlanilla?.fecha_apertura) || 'N/A'}`,
                     ],
                     alignment: 'left'
                   },
@@ -1400,21 +1402,21 @@ export class VerplancerradaComponent {
                 {
                   width: '33%',
                   text: 'ELABORÓ',
-                  style: 'signature',
+                  style: 'signatureSmall',
                   alignment: 'center',
                   margin: [0, 5, 0, 20]
                 },
                 {
                   width: '33%',
                   text: 'REVISÓ',
-                  style: 'signature',
+                  style: 'signatureSmall',
                   alignment: 'center',
                   margin: [0, 5, 0, 20]
                 },
                 {
                   width: '33%',
                   text: 'AUTORIZÓ',
-                  style: 'signature',
+                  style: 'signatureSmall',
                   alignment: 'center',
                   margin: [0, 5, 0, 20]
                 }
@@ -1431,8 +1433,8 @@ export class VerplancerradaComponent {
               bold: false,
               margin: [0, 5, 0, 10]
             },
-            signature: {
-              fontSize: 16,
+            signatureSmall: {
+              fontSize: 10,
               bold: true
             }
           },
@@ -1501,4 +1503,6 @@ export class VerplancerradaComponent {
       margin: margin
     };
   }
+
+
 }

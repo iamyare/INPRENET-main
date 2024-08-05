@@ -1767,14 +1767,14 @@ WHERE
   async ObtenerMontosPorBanco(codPlanilla: string): Promise<any> {
     const query = `
       SELECT
-          COALESCE(deducciones.NOMBRE_BANCO, beneficios.NOMBRE_BANCO) AS NOMBRE_BANCO,
+          COALESCE(deducciones.NOMBRE_BANCO, beneficios.NOMBRE_BANCO, 'SIN BANCO') AS NOMBRE_BANCO,
           COALESCE(deducciones.SUMA_DEDUCCIONES_INPREMA, 0) AS SUMA_DEDUCCIONES_INPREMA,
           COALESCE(deducciones.SUMA_DEDUCCIONES_TERCEROS, 0) AS SUMA_DEDUCCIONES_TERCEROS,
           COALESCE(beneficios.SUMA_BENEFICIOS, 0) AS SUMA_BENEFICIOS,
           COALESCE(beneficios.SUMA_BENEFICIOS, 0) - (COALESCE(deducciones.SUMA_DEDUCCIONES_INPREMA, 0) + COALESCE(deducciones.SUMA_DEDUCCIONES_TERCEROS, 0)) AS MONTO_NETO
       FROM
           (SELECT
-              b."NOMBRE_BANCO",
+              COALESCE(b."NOMBRE_BANCO", 'SIN BANCO') AS NOMBRE_BANCO,
               SUM(CASE WHEN d."ID_CENTRO_TRABAJO" = 1 THEN dd."MONTO_APLICADO" ELSE 0 END) AS SUMA_DEDUCCIONES_INPREMA,
               SUM(CASE WHEN d."ID_CENTRO_TRABAJO" <> 1 THEN dd."MONTO_APLICADO" ELSE 0 END) AS SUMA_DEDUCCIONES_TERCEROS
           FROM
@@ -1783,9 +1783,9 @@ WHERE
               "NET_DETALLE_DEDUCCION" dd ON p."ID_PLANILLA" = dd."ID_PLANILLA"
           JOIN
               "NET_DEDUCCION" d ON dd."ID_DEDUCCION" = d."ID_DEDUCCION"
-          JOIN
+          LEFT JOIN
               "NET_PERSONA_POR_BANCO" pb ON dd."ID_PERSONA" = pb."ID_PERSONA"
-          JOIN
+          LEFT JOIN
               "NET_BANCO" b ON pb."ID_BANCO" = b."ID_BANCO"
           WHERE
               p."CODIGO_PLANILLA" = :codPlanilla
@@ -1794,15 +1794,15 @@ WHERE
               b."NOMBRE_BANCO") deducciones
       FULL OUTER JOIN
           (SELECT
-              b."NOMBRE_BANCO",
+              COALESCE(b."NOMBRE_BANCO", 'SIN BANCO') AS NOMBRE_BANCO,
               SUM(dpb."MONTO_A_PAGAR") AS SUMA_BENEFICIOS
           FROM
               "NET_PLANILLA" p
           JOIN
               "NET_DETALLE_PAGO_BENEFICIO" dpb ON p."ID_PLANILLA" = dpb."ID_PLANILLA"
-          JOIN
+          LEFT JOIN
               "NET_PERSONA_POR_BANCO" pb ON dpb."ID_PERSONA" = pb."ID_PERSONA"
-          JOIN
+          LEFT JOIN
               "NET_BANCO" b ON pb."ID_BANCO" = b."ID_BANCO"
           WHERE
               p."CODIGO_PLANILLA" = :codPlanilla
@@ -1811,7 +1811,7 @@ WHERE
               b."NOMBRE_BANCO") beneficios
       ON deducciones."NOMBRE_BANCO" = beneficios."NOMBRE_BANCO"
     `;
-
+  
     interface Banco {
       ID_BANCO: number;
       NOMBRE_BANCO: string;
@@ -1820,10 +1820,10 @@ WHERE
       DEDUCCIONES_TERCEROS?: number;
       MONTO_NETO?: number;
     }
-
+  
     try {
       const result: any[] = await this.entityManager.query(query, [codPlanilla]);
-
+  
       const formattedResult: Banco[] = result.map(banco => ({
         ID_BANCO: banco.ID_BANCO,
         NOMBRE_BANCO: banco.NOMBRE_BANCO,
@@ -1832,13 +1832,14 @@ WHERE
         DEDUCCIONES_TERCEROS: banco.SUMA_DEDUCCIONES_TERCEROS,
         MONTO_NETO: banco.MONTO_NETO
       }));
-
+  
       return formattedResult;
     } catch (error) {
       this.logger.error(`Error al obtener totales por banco: ${error.message}`, error.stack);
       throw new InternalServerErrorException('Se produjo un error al obtener los totales por banco.');
     }
   }
+  
 
   async ObtenerPlanDefinPersonas(codPlanilla: string, page?: number, limit?: number): Promise<any> {
     let query = `

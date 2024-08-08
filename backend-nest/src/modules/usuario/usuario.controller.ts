@@ -1,9 +1,9 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Query, UseGuards, BadRequestException, HttpCode, HttpStatus, UnauthorizedException, Req, UseInterceptors, UploadedFile, ParseIntPipe, Res, Put, UploadedFiles } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Query, UseGuards, BadRequestException, HttpCode, HttpStatus, Req, UseInterceptors, ParseIntPipe, Res, Put, UploadedFiles } from '@nestjs/common';
 import { UsuarioService } from './usuario.service';
 import { UpdateUsuarioDto } from './dto/update-usuario.dto';
 import { PaginationDto } from 'src/common/dtos/pagination.dto';
 import { ApiTags } from '@nestjs/swagger';
-import { FileFieldsInterceptor, FileInterceptor } from '@nestjs/platform-express';
+import { FileFieldsInterceptor } from '@nestjs/platform-express';
 import { CreatePreRegistroDto } from './dto/create-pre-registro.dto';
 import { CompleteRegistrationDto } from './dto/complete-registration.dto';
 import { LoginDto } from './dto/login.dto';
@@ -16,6 +16,21 @@ import { ForgotPasswordDto } from './dto/forgot-password.dto';
 @Controller('usuario')
 export class UsuarioController {
   constructor(private readonly usuarioService: UsuarioService) { }
+
+  @Post('login')
+  async login(@Body() loginDto: LoginDto, @Res() res: Response) {
+    return this.usuarioService.login(loginDto, res);
+  }
+
+  @Post('logout')
+  async logout(@Req() req: Request, @Res() res: Response) {
+    return this.usuarioService.logout(req, res);
+  }
+
+  @Post('refresh-token')
+  async refreshToken(@Req() req: Request, @Res() res: Response) {
+    return this.usuarioService.refreshTokens(req, res);
+  }
 
   @Patch(':id/desactivar')
   async desactivarUsuario(
@@ -75,19 +90,10 @@ async completarRegistro(
     return this.usuarioService.cambiarContrasena(cambiarContrasenaDto.correo, cambiarContrasenaDto.nuevaContrasena);
   }
 
-  
-  
-
-  @Post('login')
-  async login(@Body() loginDto: LoginDto){
-    return this.usuarioService.login(loginDto);
-  }
-
   @Get('roles')
   async getRolesByEmpresa(@Query() query: any) {
     return this.usuarioService.getRolesPorEmpresa(query.idEmpresa);
   }
-
 
   @Post('/loginPrivada')
   @HttpCode(HttpStatus.OK)

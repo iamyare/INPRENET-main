@@ -13,6 +13,7 @@ import { TransaccionesModule } from './modules/transacciones/transacciones.modul
 import * as oracledb from 'oracledb';
 import { AppDataSource } from '../ormconfig';
 import { MantenimientoAfiliacionService } from './modules/Persona/afiliacion/mantenimiento-afiliacion.service';
+import { AuthModule } from './modules/auth/auth.module';
 
 @Module({
   imports: [
@@ -61,6 +62,7 @@ import { MantenimientoAfiliacionService } from './modules/Persona/afiliacion/man
     RegionalModule,
     EmpresarialModule,
     TransaccionesModule,
+    AuthModule
   ],
   providers: [MantenimientoAfiliacionService],
 })

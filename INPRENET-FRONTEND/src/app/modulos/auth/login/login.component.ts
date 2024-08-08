@@ -10,7 +10,6 @@ import { AuthService } from 'src/app/services/auth.service';
   styleUrls: ['./login.component.scss']
 })
 export class LoginComponent {
-
   loginForm: FormGroup;
   loading: boolean = false;
 
@@ -34,7 +33,7 @@ export class LoginComponent {
           this.loading = false;
           this.router.navigate(['/home']);
           this.toastr.success('Inicio de sesión exitoso', 'Bienvenido');
-        }, 1000); // Retraso de 1 segundo
+        }, 1000);
       },
       error: (err) => {
         setTimeout(() => {
@@ -44,7 +43,7 @@ export class LoginComponent {
             timeOut: 3000,
           });
           console.error('Login failed:', err);
-        }, 1000); // Retraso de 1 segundo
+        }, 1000);
       }
     });
   }

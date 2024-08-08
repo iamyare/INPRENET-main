@@ -1,7 +1,6 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
-import { FormBuilder, Validators } from '@angular/forms';
+import { Validators } from '@angular/forms';
 import { PlanillaService } from 'src/app/services/planilla.service';
-import { AfiliadoService } from 'src/app/services/afiliado.service';
 import { ToastrService } from 'ngx-toastr';
 import { DynamicFormComponent } from 'src/app/components/dinamicos/dynamic-form/dynamic-form.component';
 import { FieldConfig } from 'src/app/shared/Interfaces/field-config';
@@ -20,10 +19,9 @@ export class NuevaplanillaComponent implements OnInit {
   datosFormateados: any;
   datosForm: any
 
-  constructor(private _formBuilder: FormBuilder,
+  constructor(
     private planillaService: PlanillaService,
-    private toastr: ToastrService,
-    private svcAfilServ: AfiliadoService) {
+    private toastr: ToastrService) {
     this.obtenerDatos1();
   }
 
@@ -60,26 +58,6 @@ export class NuevaplanillaComponent implements OnInit {
       { type: 'number', label: 'Secuencia', name: 'secuencia', validations: [Validators.required, Validators.pattern("^\\d*\\.?\\d+$")], display: true },
     ]
   }
-
-  /*     getFilasBenef = async (periodoInicio: string, periodoFinalizacion: string) => {
-        try {
-          // Asegúrate de pasar los parámetros mes y anio a la función getDeduccionesNoAplicadas
-          const data = await this.planillaService.getBeneficiosNoAplicadas(periodoInicio, periodoFinalizacion).toPromise();
-          this.filasBen = data.map((item: any) => {
-            return {
-              id_afiliado: item.id_afiliado,
-              nombre_completo: `${item.primer_nombre} ${item.segundo_nombre ? item.segundo_nombre : ''} ${item.primer_apellido} ${item.segundo_apellido}`,
-              dni: item.dni,
-              monto: item.monto
-            };
-          });
-
-          return this.filasBen;
-        } catch (error) {
-          console.error("Error al obtener datos de deducciones", error);
-          throw error;
-        }
-      } */
 
   obtenerDatos(event: any): any {
     this.datosForm = event;

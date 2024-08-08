@@ -6,13 +6,14 @@ import { AppComponent } from './app.component';
 import { AfiliacionModule } from './modulos/afiliacion/afiliacion.module';
 import { MaterialAngularModule } from './material-angular/material-angular.module';
 import { ToastrModule } from 'ngx-toastr';
-import { HttpClientModule } from '@angular/common/http';
+import { HTTP_INTERCEPTORS, HttpClientModule } from '@angular/common/http';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { PlanillaModule } from './modulos/planilla/planilla.module';
 import { AuthModule } from './modulos/auth/auth.module';
 import { ComponentsModule } from './components/components.module';
 import { AdminModule } from './modulos/admin/admin.module';
 import { SidenavService } from './services/sidenav.service';
+import { TokenInterceptor } from './interceptors/token.interceptor';
 @NgModule({
   declarations: [
     AppComponent,
@@ -36,7 +37,9 @@ import { SidenavService } from './services/sidenav.service';
       preventDuplicates: true,
     }),
   ],
-  providers: [SidenavService],
+  providers: [SidenavService,
+    { provide: HTTP_INTERCEPTORS, useClass: TokenInterceptor, multi: true }
+  ],
   bootstrap: [AppComponent]
 })
 export class AppModule { }

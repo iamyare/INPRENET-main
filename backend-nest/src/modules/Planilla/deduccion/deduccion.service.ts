@@ -166,9 +166,6 @@ export class DeduccionService {
     return 'Deducciones procesadas correctamente';
 }
 
-
-
-
   async obtenerDeduccionesPorAnioMes(dni: string, anio: number, mes: number): Promise<any> {
     try {
       const persona = await this.personaRepository.findOne({ where: { n_identificacion: dni } });

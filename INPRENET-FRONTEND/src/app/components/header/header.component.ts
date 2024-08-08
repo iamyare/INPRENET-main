@@ -50,9 +50,6 @@ export class HeaderComponent implements OnInit {
   }
 
   logout(): void {
-    this.authService.clearSession();
-    // Aquí puedes redirigir al usuario después de cerrar sesión
-    // Por ejemplo, usando el Router
-    // this.router.navigate(['/auth/landing-page']);
+    this.authService.logout();
   }
 }

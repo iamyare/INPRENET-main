@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Query, Res, BadRequestException, InternalServerErrorException, HttpCode, HttpStatus, HttpException, NotFoundException, ParseIntPipe } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Query, Res, BadRequestException, InternalServerErrorException, HttpStatus, NotFoundException, ParseIntPipe, UseGuards } from '@nestjs/common';
 import { PlanillaService } from './planilla.service';
 import { CreatePlanillaDto } from './dto/create-planilla.dto';
 import { UpdatePlanillaDto } from './dto/update-planilla.dto';
@@ -8,20 +8,36 @@ import { EntityManager } from 'typeorm';
 import { InjectEntityManager } from '@nestjs/typeorm';
 import { Net_Planilla } from './entities/net_planilla.entity';
 import { GetPlanillasPreliminaresDto } from './dto/get-planillas-preliminares.dto';
-import { GetDesglosePersonaPlanillaPreliminarDto } from './dto/get-desglose-persona-planilla-preliminar.dto';
 import { GeneratePlanillaDto } from './dto/generate-planilla.dto';
+import { RolesGuard } from 'src/modules/auth/roles.guard';
+import { JwtAuthGuard } from 'src/modules/auth/jwt-auth.guard';
+import { Roles } from 'src/modules/auth/roles.decorator';
 
 @ApiTags('planilla')
 @Controller('planilla')
 export class PlanillaController {
   constructor(private readonly planillaService: PlanillaService, @InjectEntityManager() private readonly entityManager: EntityManager) { }
 
+  @Get('total/:id_planilla')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles({ rol: 'admin', modulo: 'planilla' })
+  async getPlanilla(@Param('id_planilla', ParseIntPipe) id_planilla: number) {
+    try {
+      return await this.planillaService.getPlanillaById(id_planilla);
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw new NotFoundException(`Planilla con ID ${id_planilla} no encontrada`);
+      }
+      throw new InternalServerErrorException('Error interno del servidor');
+    }
+  }
+
   @Patch('actualizar-planilla-a-cerrada')
-async updatePlanillaACerrada(
-  @Query('codigo_planilla') codigo_planilla: string
-): Promise<void> {
-  return this.planillaService.updatePlanillaACerrada(codigo_planilla);
-}
+  async updatePlanillaACerrada(
+    @Query('codigo_planilla') codigo_planilla: string
+  ): Promise<void> {
+    return this.planillaService.updatePlanillaACerrada(codigo_planilla);
+  }
 
   @Get('desglose-persona-planilla')
   async getDesglosePorPersonaPlanilla(
@@ -32,6 +48,7 @@ async updatePlanillaACerrada(
   }
 
   @Get('activas')
+  //@Roles({ rol: 'ADMINISTRADOR DE PLANILLA', modulo: 'PLANILLA' })
   async getActivePlanillas(@Query('clasePlanilla') clasePlanilla?: string) {
     return this.planillaService.getActivePlanillas(clasePlanilla);
   }
@@ -88,426 +105,6 @@ async updatePlanillaACerrada(
     await this.planillaService.generarExcel(data, res);
   }
 
-  @Post('/actualizar-planilla')
-  async actualizar(@Body() body: any): Promise<string> {
-    const { tipo, idPlanilla, periodoInicio, periodoFinalizacion } = body;
-    switch (tipo) {
-      case 'ORDINARIA - AFILIADO':
-        return this.planillaService.actualizarOrdinariaAfiliadosAPreliminar(idPlanilla, periodoInicio, periodoFinalizacion);
-      case 'ORDINARIA - BENEFICIARIO':
-        return this.planillaService.actualizarOrdinariaBeneficiariosAPreliminar(idPlanilla, periodoInicio, periodoFinalizacion);
-      case 'COMPLEMENTARIA - AFILIADO':
-        return this.planillaService.actualizarComplementariaAfiliadosAPreliminar(idPlanilla, periodoInicio, periodoFinalizacion);
-      case 'COMPLEMENTARIA - BENEFICIARIO':
-        return this.planillaService.actualizarComplementariBeneficiariosAPreliminar(idPlanilla, periodoInicio, periodoFinalizacion);
-      default:
-        throw new Error('Tipo de actualización no soportado');
-    }
-  }
-
-  @Get('/desglose-beneficios-OA')
-  async getDesgloseBeneficiosOA(
-    @Query('periodoInicio') periodoInicio: string,
-    @Query('periodoFinalizacion') periodoFinalizacion: string,
-    @Res() res
-  ) {
-    try {
-      const resultado = await this.planillaService.getDesgloseBeneficiosOrdinariaAfiliados(periodoInicio, periodoFinalizacion);
-      return res.status(HttpStatus.OK).json({
-        message: 'Consulta de desglose de beneficios realizada con éxito',
-        data: resultado
-      });
-    } catch (error) {
-      console.log(error);
-      return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
-        message: 'Error al realizar la consulta de desglose de beneficios',
-        error: error.message
-
-      });
-    }
-  }
-
-  @Get('/desglose-deducciones-OA')
-  async getDesgloseDeduccionesOA(
-    @Query('periodoInicio') periodoInicio: string,
-    @Query('periodoFinalizacion') periodoFinalizacion: string,
-    @Res() res
-  ) {
-    try {
-      const resultado = await this.planillaService.getDesgloseDeduccionesOrdinariaAfiliados(periodoInicio, periodoFinalizacion);
-      return res.status(HttpStatus.OK).json({
-        message: 'Consulta de desglose de deducciones realizada con éxito',
-        data: resultado
-      });
-    } catch (error) {
-      return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
-        message: 'Error al realizar la consulta de desglose de deducciones',
-        error: error.message
-      });
-    }
-  }
-
-
-  @Get('desglose-beneficios-OB')
-  async getDesgloseBeneficiosOB(
-    @Query('periodoInicio') periodoInicio: string,
-    @Query('periodoFinalizacion') periodoFinalizacion: string,
-    @Res() res
-  ) {
-    try {
-      const resultado = await this.planillaService.getDesgloseBeneficiosOrdinariaBeneficiarios(periodoInicio, periodoFinalizacion);
-      return res.status(HttpStatus.OK).json({
-        message: 'Consulta de desglose de beneficios realizada con éxito',
-        data: resultado
-      });
-    } catch (error) {
-      return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
-        message: 'Error al realizar la consulta de desglose de beneficios',
-        error: error.message
-      });
-    }
-  }
-
-  @Get('desglose-deducciones-OB')
-  async getDesgloseDeduccionesOB(
-    @Query('periodoInicio') periodoInicio: string,
-    @Query('periodoFinalizacion') periodoFinalizacion: string,
-    @Res() res
-  ) {
-    try {
-      const resultado = await this.planillaService.getDesgloseDeduccionesOrdinariaBeneficiarios(periodoInicio, periodoFinalizacion);
-      return res.status(HttpStatus.OK).json({
-        message: 'Consulta de desglose de deducciones realizada con éxito',
-        data: resultado
-      });
-    } catch (error) {
-      return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
-        message: 'Error al realizar la consulta de desglose de deducciones',
-        error: error.message
-      });
-    }
-  }
-
-  @Get('desglose-beneficios-CA')
-  async getDesgloseBeneficiosComplementarios(
-    @Query('periodoInicio') periodoInicio: string,
-    @Query('periodoFinalizacion') periodoFinalizacion: string,
-    @Res() res
-  ) {
-    try {
-      const resultado = await this.planillaService.getDesgloseBeneficiosComplemenariaAfiliados(periodoInicio, periodoFinalizacion);
-      return res.status(HttpStatus.OK).json({
-        message: 'Consulta de desglose de beneficios complementarios realizada con éxito',
-        data: resultado
-      });
-    } catch (error) {
-      return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
-        message: 'Error al realizar la consulta de desglose de beneficios complementarios',
-        error: error.message
-      });
-    }
-  }
-
-  @Get('desglose-deducciones-CA')
-  async getDesgloseDeduccionesComplementarias(
-    @Query('periodoInicio') periodoInicio: string,
-    @Query('periodoFinalizacion') periodoFinalizacion: string,
-    @Res() res
-  ) {
-    try {
-      const resultado = await this.planillaService.getDesgloseDeduccionesComplementariaAfiliados(periodoInicio, periodoFinalizacion);
-      return res.status(HttpStatus.OK).json({
-        message: 'Consulta de desglose de deducciones complementarias realizada con éxito',
-        data: resultado
-      });
-    } catch (error) {
-      return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
-        message: 'Error al realizar la consulta de desglose de deducciones complementarias',
-        error: error.message
-      });
-    }
-  }
-
-  @Get('desglose-beneficios-CB')
-  async getDesgloseBeneficiosComplementariaBenef(
-    @Query('periodoInicio') periodoInicio: string,
-    @Query('periodoFinalizacion') periodoFinalizacion: string,
-    @Res() res
-  ) {
-    try {
-      const resultado = await this.planillaService.getDesgloseBeneficiosComplemenariaBeneficiarios(periodoInicio, periodoFinalizacion);
-      return res.status(HttpStatus.OK).json({
-        message: 'Consulta de desglose de beneficios realizada con éxito',
-        data: resultado
-      });
-    } catch (error) {
-      return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
-        message: 'Error al realizar la consulta de desglose de beneficios',
-        error: error.message
-      });
-    }
-  }
-
-  @Get('desglose-deducciones-CB')
-  async getDesgloseDeduccionesComplementariaBenef(
-    @Query('periodoInicio') periodoInicio: string,
-    @Query('periodoFinalizacion') periodoFinalizacion: string,
-    @Res() res
-  ) {
-    try {
-      const resultado = await this.planillaService.getDesgloseDeduccionesComplementariaBeneficiarios(periodoInicio, periodoFinalizacion);
-      return res.status(HttpStatus.OK).json({
-        message: 'Consulta de desglose de deducciones realizada con éxito',
-        data: resultado
-      });
-    } catch (error) {
-      return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
-        message: 'Error al realizar la consulta de desglose de deducciones',
-        error: error.message
-      });
-    }
-  }
-
-
-  @Get('ordinaria-afiliado')
-  async getConsulta(@Query('periodoInicio') periodoInicio: string, @Query('periodoFinalizacion') periodoFinalizacion: string, @Res() res) {
-    try {
-      const resultado = await this.planillaService.getPlanillaOrdinariaAfiliados(periodoInicio, periodoFinalizacion);
-      return res.status(HttpStatus.OK).json({
-        message: 'Consulta realizada con éxito',
-        data: resultado
-      });
-    } catch (error) {
-      return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
-        message: 'Error al realizar la consulta',
-        error: error.message
-      });
-    }
-  }
-
-  @Get('beneficios-ordinaria-afil')
-  async getMontoPagarPorBeneficio(@Query('dni') dni: string, @Query('periodoInicio') periodoInicio: string, @Query('periodoFinalizacion') periodoFinalizacion: string, @Res() res) {
-    try {
-      const resultado = await this.planillaService.beneficiosOrdinariaDeAfil(dni, periodoInicio, periodoFinalizacion);
-      return res.status(HttpStatus.OK).json({
-        message: 'Consulta realizada con éxito',
-        data: resultado
-      });
-    } catch (error) {
-      return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
-        message: 'Error al realizar la consulta',
-        error: error.message
-      });
-    }
-  }
-
-  @Get('deduccion-ordinaria-afil')
-  async getMontoPorBeneficio(
-    @Query('dni') dni: string,
-    @Query('periodoInicio') periodoInicio: string,
-    @Query('periodoFinalizacion') periodoFinalizacion: string,
-    @Res() res
-  ) {
-    try {
-      const resultado = await this.planillaService.deduccionesOrdinariaDeAfil(dni, periodoInicio, periodoFinalizacion);
-      return res.status(HttpStatus.OK).json({
-        message: 'Consulta realizada con éxito',
-        data: resultado
-      });
-    } catch (error) {
-      return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
-        message: 'Error al realizar la consulta',
-        error: error.message
-      });
-    }
-  }
-
-  @Get('ordinaria-beneficiario')
-  async getResumenBeneficiosYDeducciones(
-    @Query('periodoInicio') periodoInicio: string,
-    @Query('periodoFinalizacion') periodoFinalizacion: string,
-    @Res() res
-  ) {
-    try {
-      const resultado = await this.planillaService.getPlanillaOrdinariaBenef(periodoInicio, periodoFinalizacion);
-      return res.status(HttpStatus.OK).json({
-        message: 'Consulta realizada con éxito',
-        data: resultado
-      });
-    } catch (error) {
-      return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
-        message: 'Error al realizar la consulta',
-        error: error.message
-      });
-    }
-  }
-
-  @Get('beneficios-ordinaria-benef')
-  async getDetallePagos(
-    @Query('dni') dni: string,
-    @Query('periodoInicio') periodoInicio: string,
-    @Query('periodoFinalizacion') periodoFinalizacion: string,
-    @Res() res
-  ) {
-    try {
-      const resultado = await this.planillaService.beneficiosOrdinariaDeBenef(dni, periodoInicio, periodoFinalizacion);
-      return res.status(HttpStatus.OK).json({
-        message: 'Consulta realizada con éxito',
-        data: resultado
-      });
-    } catch (error) {
-      return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
-        message: 'Error al realizar la consulta',
-        error: error.message
-      });
-    }
-  }
-
-  @Get('deduccion-ordinaria-benef')
-  async getDetalleDeducciones(
-    @Query('dni') dni: string,
-    @Query('periodoInicio') periodoInicio: string,
-    @Query('periodoFinalizacion') periodoFinalizacion: string,
-    @Res() res
-  ) {
-    try {
-      const resultado = await this.planillaService.deduccionesOrdinariaDeBenef(dni, periodoInicio, periodoFinalizacion);
-      return res.status(HttpStatus.OK).json({
-        message: 'Consulta realizada con éxito',
-        data: resultado
-      });
-    } catch (error) {
-      return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
-        message: 'Error al realizar la consulta',
-        error: error.message
-      });
-    }
-  }
-
-  @Get('complementaria-afiliado')
-  async getDetalleResumen(
-    @Query('periodoInicio') periodoInicio: string,
-    @Query('periodoFinalizacion') periodoFinalizacion: string,
-    @Res() res
-  ) {
-    try {
-      const resultado = await this.planillaService.getPlanillaComplementariaAfiliados(periodoInicio, periodoFinalizacion);
-      return res.status(HttpStatus.OK).json({
-        message: 'Consulta realizada con éxito',
-        data: resultado
-      });
-    } catch (error) {
-      return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
-        message: 'Error al realizar la consulta',
-        error: error.message
-      });
-    }
-  }
-
-  @Get('beneficios-complementaria-afil')
-  async getDetallePagosBeneficios(
-    @Query('dni') dni: string,
-    @Query('periodoInicio') periodoInicio: string,
-    @Query('periodoFinalizacion') periodoFinalizacion: string,
-    @Res() res
-  ) {
-    try {
-      const resultado = await this.planillaService.beneficiosComplementariaDeAfil(dni, periodoInicio, periodoFinalizacion);
-      return res.status(HttpStatus.OK).json({
-        message: 'Consulta realizada con éxito',
-        data: resultado
-      });
-    } catch (error) {
-      return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
-        message: 'Error al realizar la consulta',
-        error: error.message
-      });
-    }
-  }
-
-  @Get('deducciones-complementaria-afil')
-  async getDetalleDeduccionesEspecificas(
-    @Query('dni') dni: string,
-    @Query('periodoInicio') periodoInicio: string,
-    @Query('periodoFinalizacion') periodoFinalizacion: string,
-    @Res() res
-  ) {
-    try {
-      const resultado = await this.planillaService.deduccionesComplementariaDeAfil(dni, periodoInicio, periodoFinalizacion);
-      return res.status(HttpStatus.OK).json({
-        message: 'Consulta realizada con éxito',
-        data: resultado
-      });
-    } catch (error) {
-      return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
-        message: 'Error al realizar la consulta',
-        error: error.message
-      });
-    }
-  }
-
-  @Get('complementaria-beneficiario')
-  async getDetalleResumenBeneficiosDeducciones(
-    @Query('periodoInicio') periodoInicio: string,
-    @Query('periodoFinalizacion') periodoFinalizacion: string,
-    @Res() res
-  ) {
-    try {
-      const resultado = await this.planillaService.getPlanillaComplementariaBenef(periodoInicio, periodoFinalizacion);
-      return res.status(HttpStatus.OK).json({
-        message: 'Consulta realizada con éxito',
-        data: resultado
-      });
-    } catch (error) {
-      return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
-        message: 'Error al realizar la consulta',
-        error: error.message
-      });
-    }
-  }
-
-  @Get('beneficios-complementaria-benef')
-  async getDetallePagoBeneficio(
-    @Query('dni') dni: string,
-    @Query('periodoInicio') periodoInicio: string,
-    @Query('periodoFinalizacion') periodoFinalizacion: string,
-    @Res() res
-  ) {
-    try {
-      const resultado = await this.planillaService.beneficiosComplementariaDeBenef(dni, periodoInicio, periodoFinalizacion);
-      return res.status(HttpStatus.OK).json({
-        message: 'Consulta realizada con éxito',
-        data: resultado
-      });
-    } catch (error) {
-      return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
-        message: 'Error al realizar la consulta',
-        error: error.message
-      });
-    }
-  }
-
-  @Get('deducciones-complementaria-benef')
-  async getDetalleDeduccionesDeBenef(
-    @Query('dni') dni: string,
-    @Query('periodoInicio') periodoInicio: string,
-    @Query('periodoFinalizacion') periodoFinalizacion: string,
-    @Res() res
-  ) {
-    try {
-      const resultado = await this.planillaService.deduccionesComplementariaDeBenef(dni, periodoInicio, periodoFinalizacion);
-      return res.status(HttpStatus.OK).json({
-        message: 'Consulta realizada con éxito',
-        data: resultado
-      });
-    } catch (error) {
-      return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
-        message: 'Error al realizar la consulta',
-        error: error.message
-      });
-    }
-  } 
-
   @Get('totalesBYD/:idPlanilla')
   async getTotalesPorPlanilla(@Param('idPlanilla') idPlanilla: string) {
     return this.planillaService.getTotalPorBeneficiosYDeducciones(Number(idPlanilla));
@@ -550,46 +147,7 @@ async updatePlanillaACerrada(
     }
   }
 
-  @Get('total/:id_planilla')
-  async getPlanilla(@Param('id_planilla', ParseIntPipe) id_planilla: number) {
-    try {
-      return await this.planillaService.getPlanillaById(id_planilla);
-    } catch (error) {
-
-      if (error instanceof NotFoundException) {
-        throw new NotFoundException(`Planilla con ID ${id_planilla} no encontrada`);
-      }
-      throw new InternalServerErrorException('Error interno del servidor');
-    }
-  }
-
-  @Get('preliminar')
-  async ObtenerPlanillaPreliminar(
-    @Query('codPlanilla') codPlanilla: string,
-  ) {
-    if (!codPlanilla) {
-      throw new BadRequestException('Los parámetros codPlanilla son obligatorios');
-    }
-    try {
-      return await this.planillaService.ObtenerPreliminar(codPlanilla);
-    } catch (error) {
-      throw new InternalServerErrorException('Error al obtener planilla preliminar');
-    }
-  }
-
-  @Get('todas')
-  async ObtenerTodasPlanillas(
-    @Query('codPlanilla') codPlanilla: string,
-  ) {
-    if (!codPlanilla) {
-      throw new BadRequestException('Los parámetros codPlanilla son obligatorios');
-    }
-    try {
-      return await this.planillaService.ObtenerTodasPlanillas(codPlanilla);
-    } catch (error) {
-      throw new InternalServerErrorException('Error al obtener planilla preliminar');
-    }
-  }
+  
 
   @Get('Definitiva/:term')
   async ObtenerPlanDefin(
@@ -634,66 +192,15 @@ async updatePlanillaACerrada(
       throw new InternalServerErrorException('Error al obtener los montos por banco');
     }
   }
-
-  /* @Get('planillaOrdinaria')
-  async obtenerAfilOrdinaria(
-    @Query('periodoInicio') periodoInicio: string,
-    @Query('periodoFinalizacion') periodoFinalizacion: string,
-  ) {
-    if (!periodoInicio || !periodoFinalizacion) {
-      throw new BadRequestException('Los parámetros periodoInicio y periodoFinalizacion son obligatorios');
-    }
-
-    try {
-      return await this.planillaService.obtenerAfilOrdinaria(periodoInicio, periodoFinalizacion);
-    } catch (error) {
-      throw new InternalServerErrorException('Error al obtener el resumen de afiliados');
-    }
-  } */
-
-  /* @Get('planillaComplementaria')
-  async ObtenerAfilComplementaria() {
-    return this.planillaService.obtenerAfilComplementaria();
-  }
-
-  @Get('planillaExtraordinaria')
-  async ObtenerAfilExtraordinaria() {
-    return this.planillaService.obtenerAfilExtraordinaria();
-  } */
-
   @Post()
   create(@Body() createPlanillaDto: CreatePlanillaDto) {
     return this.planillaService.create(createPlanillaDto);
   }
 
-  @Get('deducciones-no-aplicadas')
-  getDeduccionesNoAplicadas(
-    @Query('periodoInicio') periodoInicio: string,
-    @Query('periodoFinalizacion') periodoFinalizacion: string
-  ) {
-    return this.planillaService.getDeduccionesNoAplicadas(periodoInicio, periodoFinalizacion);
-  }
-
-  @Get('beneficios-no-aplicadas')
-  getBeneficiosNoAplicados(
-    @Query('periodoInicio') periodoInicio: string,
-    @Query('periodoFinalizacion') periodoFinalizacion: string
-  ) {
-    return this.planillaService.getBeneficiosNoAplicados(periodoInicio, periodoFinalizacion);
-  }
-
-
   @Get()
   findAll(@Query() paginationDto: PaginationDto) {
     return this.planillaService.findAll(paginationDto);
   }
-
-  /*  
-    @Get(':id')
-    findOne(@Param('id') id: string) {
-      return this.planillaService.findOne(+id);
-    } 
-  */
 
   @Get(':codigoPlanilla')
   async findOne(@Param('codigoPlanilla') codigoPlanilla: string, @Res() res) {
@@ -714,7 +221,7 @@ async updatePlanillaACerrada(
         } else {
           return res.status(HttpStatus.OK).json({
             message: "Consulta realizada con éxito",
-            data: planilla, // Asumiendo que deseas devolver un objeto único, si esperas un array, debes ajustarlo
+            data: planilla,
           });
         }
       });

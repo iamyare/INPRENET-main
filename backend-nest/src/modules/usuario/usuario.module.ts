@@ -16,11 +16,12 @@ import { net_modulo } from './entities/net_modulo.entity';
 import { net_rol_modulo } from './entities/net_rol_modulo.entity';
 import { Net_Usuario_Empresa } from './entities/net_usuario_empresa.entity';
 import { net_usuario_modulo } from './entities/net_usuario_modulo.entity';
-import { JwtAuthGuard } from './jwt-auth.guard';
+import { AuthModule } from '../auth/auth.module';
+import { Net_Invalid_Refresh_Token } from '../auth/entities/Net_Invalid_Refresh_Token.entity';
 
 @Module({
   controllers: [UsuarioController],
-  providers: [UsuarioService, MailService, JwtAuthGuard],
+  providers: [UsuarioService, MailService],
   imports: [
     TypeOrmModule.forFeature([
       net_empleado, 
@@ -33,20 +34,10 @@ import { JwtAuthGuard } from './jwt-auth.guard';
       net_modulo,
       Net_Usuario_Empresa,
       net_usuario_modulo,
+      Net_Invalid_Refresh_Token
     ]),
-    PassportModule.register({ defaultStrategy: 'jwt' }),
-    JwtModule.registerAsync({
-      inject: [],
-      useFactory: () => {
-        return {
-          secret: process.env.JWT_SECRET,
-          signOptions: {
-            expiresIn: '8h'
-          }
-        };
-      }
-    }),
-    CommonModule
+    CommonModule,
+    AuthModule
   ]
 })
 export class UsuarioModule {}

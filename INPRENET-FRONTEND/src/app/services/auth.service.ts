@@ -1,5 +1,5 @@
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { Injectable } from '@angular/core';
+import { Injectable, NgZone } from '@angular/core';
 import { Observable, catchError, map, of, throwError } from 'rxjs';
 import { environment } from 'src/environments/environment';
 import { jwtDecode } from 'jwt-decode';
@@ -11,10 +11,39 @@ import { Router } from '@angular/router';
   providedIn: 'root'
 })
 export class AuthService {
+  private timeout: any;
+  private readonly idleTime: number = 20 * 60 * 1000;
 
-  constructor( private http: HttpClient,private router: Router,
-    private toastr: ToastrService) {
-   }
+  constructor(
+    private http: HttpClient,
+    private router: Router,
+    private toastr: ToastrService,
+    private ngZone: NgZone
+  ) {
+    this.startIdleWatch();
+    this.resetIdleTimer();
+  }
+
+  public startIdleWatch(): void {
+    ['mousemove', 'keydown', 'wheel', 'touchmove', 'click'].forEach(event => {
+      window.addEventListener(event, () => this.resetIdleTimer());
+    });
+    this.resetIdleTimer();
+  }
+
+  private resetIdleTimer(): void {
+    clearTimeout(this.timeout);
+    this.timeout = setTimeout(() => this.handleIdleTimeout(), this.idleTime);
+  }
+
+  private handleIdleTimeout(): void {
+    this.ngZone.run(() => {
+      const token = sessionStorage.getItem('token');
+      if (token) {
+        this.logout();
+      }
+    });
+  }
 
    olvidoContrasena(dto: any): Observable<{ message: string }> {
     const url = `${environment.API_URL}/api/usuario/olvido-contrasena`;
@@ -32,7 +61,7 @@ export class AuthService {
   login(correo: string, contrasena: string): Observable<{ accessToken: string }> {
     const url = `${environment.API_URL}/api/usuario/login`;
     const body = { correo, contrasena };
-    return this.http.post<{ accessToken: string }>(url, body).pipe(
+    return this.http.post<{ accessToken: string }>(url, body, { withCredentials: true }).pipe(
       map(response => {
         sessionStorage.setItem('token', response.accessToken);
         return response;
@@ -40,6 +69,20 @@ export class AuthService {
       catchError(error => {
         console.error('Login failed:', error);
         this.toastr.error('Inicio de sesión fallido', 'Error');
+        return throwError(error);
+      })
+    );
+  }
+
+  refreshToken(): Observable<any> {
+    const url = `${environment.API_URL}/api/usuario/refresh-token`;
+    return this.http.post<{ accessToken: string }>(url, {}, { withCredentials: true }).pipe(
+      map(response => {
+        sessionStorage.setItem('token', response.accessToken);
+        return response;
+      }),
+      catchError(error => {
+        this.logout();
         return throwError(error);
       })
     );
@@ -111,16 +154,19 @@ export class AuthService {
   }
 
 
-   logout(): Observable<void> {
+  logout(): void {
     const url = `${environment.API_URL}/api/usuario/logout`;
-    const token = localStorage.getItem('token');
-    const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
-
-    return this.http.post<void>(url, {}, { headers }).pipe(
-      map(() => {
-        this.clearToken();
-      })
-    );
+    this.http.post(url, {}, { withCredentials: true }).subscribe({
+      next: () => {
+        sessionStorage.removeItem('token');
+        this.toastr.info('Sesión cerrada');
+        this.router.navigate(['/login']);
+      },
+      error: error => {
+        console.error('Logout failed:', error);
+        this.toastr.error('Error al cerrar sesión', 'Error');
+      }
+    });
   }
 
   verificarEstadoSesion(): Observable<{ sesionActiva: boolean }> {

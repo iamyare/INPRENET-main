@@ -30,12 +30,12 @@ export class GestionUsuariosComponent implements OnInit {
       this.rolesModulos = this.authService.decodeToken(token).rolesModulos;
     }
 
-    if (this.rolesModulos.length === 0) {
+    if (!this.rolesModulos || this.rolesModulos.length === 0) {
       console.error("No se pudieron obtener los módulos del token");
       return;
     }
 
-    this.adminRolesModulos = this.rolesModulos.filter(rm => rm.rol === 'ADMINISTRADOR');
+    this.adminRolesModulos = this.rolesModulos.filter(rm => rm.rol.includes('ADMINISTRADOR'));
 
     if (this.adminRolesModulos.length === 0) {
       console.error("No se encontraron módulos donde el usuario es administrador");

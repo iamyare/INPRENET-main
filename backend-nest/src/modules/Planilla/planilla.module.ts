@@ -34,13 +34,14 @@ import { DetallePlanIngrController } from './Ingresos/detalle-plan-ingr/detalle-
 import { Net_Regimen } from './beneficio/entities/net_regimen.entity';
 import { Net_Beneficio_Tipo_Persona } from './beneficio_tipo_persona/entities/net_beneficio_tipo_persona.entity';
 import { Net_Deducciones_Asignadas } from './detalle-deduccion/entities/net-deducciones-asignadas.entity';
+import { AuthModule } from '../auth/auth.module';
 
 @Module({
   controllers: [DetallePlanIngrController, PlanillaController, BeneficioController, DetalleBeneficioController, DeduccionController,
     DeduccionController, DetalleDeduccionController, TipoPlanillaController, AfiliadoController],
   providers: [PlanillaService, DetallePlanillaIngresoService, BeneficioService, DetalleBeneficioService, DeduccionService,
     TipoPlanillaService, DetalleDeduccionService, AfiliadoService],
-  imports: [AfiliadoModule, TransaccionesModule,
+  imports: [AfiliadoModule, TransaccionesModule, AuthModule,
     TypeOrmModule.forFeature([Net_Beneficio_Tipo_Persona, Net_Regimen, Net_SALARIO_COTIZABLE, Net_Beneficio, Net_Detalle_Pago_Beneficio,
       Net_Planilla, Net_Deduccion, Net_TipoPlanilla, Net_Detalle_Deduccion,
       Net_Detalle_Beneficio_Afiliado, Net_Detalle_planilla_ingreso, Net_Clasificacion_Beneficios, Net_Deducciones_Asignadas]),]

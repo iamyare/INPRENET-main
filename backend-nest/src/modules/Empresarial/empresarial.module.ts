@@ -29,6 +29,7 @@ import { net_empleado_centro_trabajo } from './entities/net_empleado_centro_trab
   providers: [CentroTrabajoService, EmpresasService],
   imports: [
     TypeOrmModule.forFeature([
+      net_empleado_centro_trabajo,
       Net_Centro_Trabajo,
       Net_Estado_Centro_Trabajo,
       Net_Deduccion,
@@ -46,7 +47,6 @@ import { net_empleado_centro_trabajo } from './entities/net_empleado_centro_trab
       Net_Peps,
       Net_Socio,
       Net_Sociedad_Socio,
-      net_empleado_centro_trabajo,
       Net_Usuario_Empresa
     ]),
   ],

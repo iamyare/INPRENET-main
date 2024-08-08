@@ -210,7 +210,7 @@ export class AsignacionAfilPlanComponent implements OnInit {
     });
   }
 
-  actualizarPlanilla(): void {
+  /* actualizarPlanilla(): void {
     const tipo = this.detallePlanilla.tipoPlanilla.nombre_planilla;
     const idPlanilla = this.detallePlanilla.id_planilla;
     const periodoInicio = this.convertirFormatoFecha(this.detallePlanilla.periodoInicio);
@@ -232,7 +232,7 @@ export class AsignacionAfilPlanComponent implements OnInit {
           this.toastr.error(mensajeError);
         }
       });
-  }
+  } */
 
   convertirFormatoFecha(fecha: string): string {
     return fecha.replace(/-/g, '.');

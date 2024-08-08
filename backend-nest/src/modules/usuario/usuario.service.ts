@@ -2,7 +2,7 @@ import { BadRequestException, Injectable, InternalServerErrorException, Logger, 
 import { UpdateUsuarioDto } from './dto/update-usuario.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { PaginationDto } from 'src/common/dtos/pagination.dto';
-import { In, LessThan, Repository } from 'typeorm';
+import { LessThan, Repository } from 'typeorm';
 import { JwtService } from '@nestjs/jwt';
 import { MailService } from 'src/common/services/mail.service';
 import * as bcrypt from 'bcrypt';
@@ -45,6 +45,75 @@ export class UsuarioService {
     @InjectRepository(net_modulo)
     private readonly moduloRepository: Repository<net_modulo>,
   ) { }
+
+  async login(loginDto: LoginDto, res) {
+    const { correo, contrasena } = loginDto;
+    const usuario = await this.usuarioEmpresaRepository.findOne({
+      where: {
+        empleadoCentroTrabajo: {
+          correo_1: correo,
+        },
+      },
+      relations: ['empleadoCentroTrabajo', 'empleadoCentroTrabajo.centroTrabajo', 'usuarioModulos', 'usuarioModulos.rolModulo', 'usuarioModulos.rolModulo.modulo'],
+    });
+
+    if (!usuario) {
+      throw new UnauthorizedException('Credenciales inválidas');
+    }
+
+    const isPasswordValid = await bcrypt.compare(contrasena, usuario.contrasena);
+    if (!isPasswordValid) {
+      throw new UnauthorizedException('Credenciales inválidas');
+    }
+
+    const rolesModulos = usuario.usuarioModulos.map(um => ({
+      rol: um.rolModulo.nombre,
+      modulo: um.rolModulo.modulo.nombre
+    }));
+
+    const payload = {
+      correo,
+      sub: usuario.id_usuario_empresa,
+      rolesModulos,
+      idCentroTrabajo: usuario.empleadoCentroTrabajo.centroTrabajo.id_centro_trabajo,
+    };
+
+    const accessToken = this.jwtService.sign(payload, { expiresIn: '15m' });
+    const refreshToken = this.jwtService.sign(payload, { expiresIn: '7d' });
+
+    res.cookie('refreshToken', refreshToken, {
+      httpOnly: true,
+      secure: false, // Cambia a true en producción
+      sameSite: 'strict',
+      maxAge: 7 * 24 * 60 * 60 * 1000
+    });
+
+    return res.json({ accessToken });
+  }
+
+  async logout(req, res) {
+    res.clearCookie('refreshToken', {
+      httpOnly: true,
+      secure: false, // Cambia a true en producción
+      sameSite: 'strict',
+    });
+    return res.json({ message: 'Sesión cerrada' });
+  }
+
+  async refreshTokens(req, res) {
+    const refreshToken = req.cookies['refreshToken'];
+    if (!refreshToken) {
+      throw new UnauthorizedException('Refresh token no encontrado');
+    }
+
+    try {
+      const payload = this.jwtService.verify(refreshToken, { secret: process.env.JWT_SECRET });
+      const newAccessToken = this.jwtService.sign(payload, { expiresIn: '15m' });
+      return res.json({ accessToken: newAccessToken });
+    } catch (e) {
+      throw new UnauthorizedException('Refresh token inválido');
+    }
+  }
 
   async obtenerPerfilPorCorreo(correo: string) {
     const usuario = await this.usuarioEmpresaRepository.findOne({
@@ -380,38 +449,7 @@ export class UsuarioService {
   } 
  
 
-  async login(loginDto: LoginDto) {
-    const { correo, contrasena } = loginDto;
-    const usuario = await this.usuarioEmpresaRepository.findOne({
-      where: {
-        empleadoCentroTrabajo: {
-          correo_1: correo,
-        },
-      },
-      relations: ['empleadoCentroTrabajo', 'empleadoCentroTrabajo.centroTrabajo', 'usuarioModulos', 'usuarioModulos.rolModulo', 'usuarioModulos.rolModulo.modulo'],
-    });
-
-    if (!usuario) {
-      throw new UnauthorizedException('Credenciales inválidas');
-    }
-    const isPasswordValid = await bcrypt.compare(contrasena, usuario.contrasena);
-    if (!isPasswordValid) {
-      throw new UnauthorizedException('Credenciales inválidas');
-    }
-    const rolesModulos = usuario.usuarioModulos.map(um => ({
-      rol: um.rolModulo.nombre,
-      modulo: um.rolModulo.modulo.nombre
-    }));
-
-    const payload = {
-      correo,
-      sub: usuario.id_usuario_empresa,
-      rolesModulos: rolesModulos,
-      idCentroTrabajo: usuario.empleadoCentroTrabajo.centroTrabajo.id_centro_trabajo,
-    };
-    const accessToken = this.jwtService.sign(payload);
-    return { accessToken };
-  }
+  
 
   async getRolesPorEmpresa(centroId: number) {
     /* return this.rolEmpresaRepository.find({

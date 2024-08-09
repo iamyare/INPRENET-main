@@ -6,8 +6,8 @@ import { Net_Centro_Trabajo } from '../entities/net_centro_trabajo.entity';
 import { Repository } from 'typeorm';
 import { Net_Departamento } from '../../Regional/provincia/entities/net_departamento.entity';
 import { CreatePrivateCentroTrabajoDto } from './dto/create-private-centro-trabajo.dto';
-import { Net_Nivel_Educativo } from '../entities/net_nivel_educativo.entity';
-import { Net_Jornada } from '../entities/net_jornada.entity';
+import { Net_Nivel_Educativo } from '../entities/Net_Nivel_Educativo.entity';
+import { Net_Jornada } from '../entities/Net_Jornada.entity';
 import { Net_Centro_Trabajo_Jornada } from '../entities/net_centro_trabajo_jornada.entity';
 import { Net_Centro_Trabajo_Nivel } from '../entities/net_centro_trabajo_nivel.entity';
 import { Net_Municipio } from 'src/modules/Regional/municipio/entities/net_municipio.entity';
@@ -23,10 +23,10 @@ import { Net_Peps } from '../entities/net_peps.entity';
 import { CreatePrivateSociedadSocioDto } from './dto/create-private-sociedad-socio.dto';
 import { CreatePrivatePepsDto } from './dto/create-private-peps.dto';
 import { CreatePrivateSocioDto } from './dto/create-private-socio.dto';
-import { net_empleado } from '../entities/net_empleado.entity';
 import { UpdateEmpleadoDto } from './dto/update-empleado.dto';
-import { net_empleado_centro_trabajo } from '../entities/net_empleado_centro_trabajo.entity';
 import { Net_Usuario_Empresa } from 'src/modules/usuario/entities/net_usuario_empresa.entity';
+import { Net_Empleado } from '../entities/net_empleado.entity';
+import { Net_Empleado_Centro_Trabajo } from '../entities/net_empleado_centro_trabajo.entity';
 @Injectable()
 export class CentroTrabajoService {
 
@@ -64,10 +64,10 @@ export class CentroTrabajoService {
     private readonly sociedadSocioRepository: Repository<Net_Sociedad_Socio>,
     @InjectRepository(Net_Peps)
     private readonly pepsRepository: Repository<Net_Peps>,
-    @InjectRepository(net_empleado)
-    private readonly empleadoRepository: Repository<net_empleado>,
-    @InjectRepository(net_empleado_centro_trabajo)
-    private readonly empleadoCentroTrabajoRepository: Repository<net_empleado_centro_trabajo>,
+    @InjectRepository(Net_Empleado)
+    private readonly empleadoRepository: Repository<Net_Empleado>,
+    @InjectRepository(Net_Empleado_Centro_Trabajo)
+    private readonly empleadoCentroTrabajoRepository: Repository<Net_Empleado_Centro_Trabajo>,
     @InjectRepository(Net_Usuario_Empresa)
     private readonly usuarioEmpresaRepository: Repository<Net_Usuario_Empresa>
   ) { }
@@ -103,7 +103,7 @@ export class CentroTrabajoService {
     updateEmpleadoDto: UpdateEmpleadoDto,
     archivoIdentificacion: Buffer | null,
     fotoEmpleado: Buffer | null
-  ): Promise<net_empleado> {
+  ): Promise<Net_Empleado> {
     const usuarioEmpresa = await this.usuarioEmpresaRepository.findOne({
       where: { id_usuario_empresa: id },
       relations: ['empleadoCentroTrabajo', 'empleadoCentroTrabajo.empleado']
@@ -326,7 +326,7 @@ export class CentroTrabajoService {
     const centroTrabajo = await this.centroTrabajoRepository.save(newCentroTrabajo);
 
     // Insertar los niveles educativos
-    if (modalidad_ensenanza && modalidad_ensenanza.length > 0) {
+    /* if (modalidad_ensenanza && modalidad_ensenanza.length > 0) {
       for (const nivelNombre of modalidad_ensenanza) {
         const nivel = await this.nivelEducativoRepository.findOne({ where: { nombre: nivelNombre } });
         if (nivel) {
@@ -337,7 +337,7 @@ export class CentroTrabajoService {
           await this.centroTrabajoNivelRepository.save(centroTrabajoNivel);
         }
       }
-    }
+    } */
 
     // Insertar las jornadas
     if (tipo_jornada && tipo_jornada.length > 0) {

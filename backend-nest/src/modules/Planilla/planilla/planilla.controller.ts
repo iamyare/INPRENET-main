@@ -9,9 +9,6 @@ import { InjectEntityManager } from '@nestjs/typeorm';
 import { Net_Planilla } from './entities/net_planilla.entity';
 import { GetPlanillasPreliminaresDto } from './dto/get-planillas-preliminares.dto';
 import { GeneratePlanillaDto } from './dto/generate-planilla.dto';
-import { RolesGuard } from 'src/modules/auth/roles.guard';
-import { JwtAuthGuard } from 'src/modules/auth/jwt-auth.guard';
-import { Roles } from 'src/modules/auth/roles.decorator';
 
 @ApiTags('planilla')
 @Controller('planilla')
@@ -19,8 +16,6 @@ export class PlanillaController {
   constructor(private readonly planillaService: PlanillaService, @InjectEntityManager() private readonly entityManager: EntityManager) { }
 
   @Get('total/:id_planilla')
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles({ rol: 'admin', modulo: 'planilla' })
   async getPlanilla(@Param('id_planilla', ParseIntPipe) id_planilla: number) {
     try {
       return await this.planillaService.getPlanillaById(id_planilla);

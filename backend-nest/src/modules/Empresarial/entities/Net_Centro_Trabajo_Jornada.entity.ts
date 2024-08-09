@@ -1,6 +1,6 @@
 import { Entity, ManyToOne, PrimaryGeneratedColumn, JoinColumn } from 'typeorm';
 import { Net_Centro_Trabajo } from './net_centro_trabajo.entity';
-import { Net_Jornada } from './net_jornada.entity';
+import { Net_Jornada } from 'src/modules/Empresarial/entities/net_jornada.entity';
 
 @Entity({ name: 'NET_CENTRO_TRABAJO_JORNADA' })
 export class Net_Centro_Trabajo_Jornada {

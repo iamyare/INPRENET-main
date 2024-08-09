@@ -355,56 +355,56 @@ export class PlanillaService {
       p."FECHA_APERTURA" BETWEEN TO_DATE(:periodoInicio, 'DD/MM/YYYY') AND TO_DATE(:periodoFinalizacion, 'DD/MM/YYYY')
       AND p."ID_TIPO_PLANILLA" IN (${idTiposPlanilla.join(', ')})
       AND dpb."ESTADO" = 'PAGADA'
+      AND dpb.ID_AF_BANCO = pb.ID_AF_BANCO
   GROUP BY
       b."NOMBRE_BANCO"
   `;
 
-    const deduccionesInpremaQuery = `
-        SELECT
+      const deduccionesInpremaQuery = `
+      SELECT
         COALESCE(b."NOMBRE_BANCO", 'SIN BANCO') AS NOMBRE_BANCO,
         SUM(dd."MONTO_APLICADO") AS SUMA_DEDUCCIONES_INPREMA
-    FROM
+      FROM
         "NET_PLANILLA" p
-    JOIN
+      JOIN
         "NET_DETALLE_DEDUCCION" dd ON p."ID_PLANILLA" = dd."ID_PLANILLA"
-    JOIN
+      JOIN
         "NET_DEDUCCION" d ON dd."ID_DEDUCCION" = d."ID_DEDUCCION"
-    LEFT JOIN
+      LEFT JOIN
         "NET_PERSONA_POR_BANCO" pb ON dd."ID_PERSONA" = pb."ID_PERSONA"
-    LEFT JOIN
+      LEFT JOIN
         "NET_BANCO" b ON pb."ID_BANCO" = b."ID_BANCO"
-    WHERE
+      WHERE
         p."FECHA_APERTURA" BETWEEN TO_DATE(:periodoInicio, 'DD/MM/YYYY') AND TO_DATE(:periodoFinalizacion, 'DD/MM/YYYY')
         AND p."ID_TIPO_PLANILLA" IN (${idTiposPlanilla.join(', ')})
         AND dd."ESTADO_APLICACION" = 'COBRADA'
         AND d."ID_CENTRO_TRABAJO" = 1
-    GROUP BY
+      GROUP BY
         b."NOMBRE_BANCO"
-
-  `;
-
+    `;
+    
     const deduccionesTercerosQuery = `
-        SELECT
+      SELECT
         COALESCE(b."NOMBRE_BANCO", 'SIN BANCO') AS NOMBRE_BANCO,
         SUM(dd."MONTO_APLICADO") AS SUMA_DEDUCCIONES_TERCEROS
-    FROM
+      FROM
         "NET_PLANILLA" p
-    JOIN
+      JOIN
         "NET_DETALLE_DEDUCCION" dd ON p."ID_PLANILLA" = dd."ID_PLANILLA"
-    JOIN
+      JOIN
         "NET_DEDUCCION" d ON dd."ID_DEDUCCION" = d."ID_DEDUCCION"
-    LEFT JOIN
+      LEFT JOIN
         "NET_PERSONA_POR_BANCO" pb ON dd."ID_PERSONA" = pb."ID_PERSONA"
-    LEFT JOIN
+      LEFT JOIN
         "NET_BANCO" b ON pb."ID_BANCO" = b."ID_BANCO"
-    WHERE
+      WHERE
         p."FECHA_APERTURA" BETWEEN TO_DATE(:periodoInicio, 'DD/MM/YYYY') AND TO_DATE(:periodoFinalizacion, 'DD/MM/YYYY')
         AND p."ID_TIPO_PLANILLA" IN (${idTiposPlanilla.join(', ')})
         AND dd."ESTADO_APLICACION" = 'COBRADA'
         AND d."ID_CENTRO_TRABAJO" <> 1
-    GROUP BY
+      GROUP BY
         b."NOMBRE_BANCO"
-  `;
+    `;
 
     const planillasQuery = `
     SELECT

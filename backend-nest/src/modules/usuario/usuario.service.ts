@@ -8,17 +8,17 @@ import { MailService } from 'src/common/services/mail.service';
 import * as bcrypt from 'bcrypt';
 import { NET_USUARIO_PRIVADA } from './entities/net_usuario_privada.entity';
 import { CreatePreRegistroDto } from './dto/create-pre-registro.dto';
-import { net_empleado } from '../Empresarial/entities/net_empleado.entity';
 import { Net_Seguridad } from './entities/net_seguridad.entity';
 import { CompleteRegistrationDto } from './dto/complete-registration.dto';
 import { LoginDto } from './dto/login.dto';
-import { net_empleado_centro_trabajo } from '../Empresarial/entities/net_empleado_centro_trabajo.entity';
 import { net_rol_modulo } from './entities/net_rol_modulo.entity';
 import { Net_Usuario_Empresa } from './entities/net_usuario_empresa.entity';
 import { net_usuario_modulo } from './entities/net_usuario_modulo.entity';
 import { net_modulo } from './entities/net_modulo.entity';
 import { ForgotPasswordDto } from './dto/forgot-password.dto';
 import { Cron } from '@nestjs/schedule';
+import { Net_Empleado } from '../Empresarial/entities/net_empleado.entity';
+import { Net_Empleado_Centro_Trabajo } from '../Empresarial/entities/net_empleado_centro_trabajo.entity';
 
 @Injectable()
 export class UsuarioService {
@@ -28,14 +28,14 @@ export class UsuarioService {
 
     @InjectRepository(NET_USUARIO_PRIVADA)
     private readonly usuarioPrivadaRepository: Repository<NET_USUARIO_PRIVADA>,
-    @InjectRepository(net_empleado)
-    private readonly empleadoRepository: Repository<net_empleado>,
+    @InjectRepository(Net_Empleado)
+    private readonly empleadoRepository: Repository<Net_Empleado>,
     private readonly jwtService: JwtService,
     private readonly mailService: MailService,
     @InjectRepository(Net_Seguridad)
     private readonly seguridadRepository: Repository<Net_Seguridad>,
-    @InjectRepository(net_empleado_centro_trabajo)
-    private readonly empleadoCentroTrabajoRepository: Repository<net_empleado_centro_trabajo>,
+    @InjectRepository(Net_Empleado_Centro_Trabajo)
+    private readonly empleadoCentroTrabajoRepository: Repository<Net_Empleado_Centro_Trabajo>,
     @InjectRepository(Net_Usuario_Empresa)
     private readonly usuarioEmpresaRepository: Repository<Net_Usuario_Empresa>,
     @InjectRepository(net_rol_modulo)

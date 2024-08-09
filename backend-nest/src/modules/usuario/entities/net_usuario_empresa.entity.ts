@@ -1,7 +1,7 @@
 import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, OneToMany, ManyToOne, JoinColumn } from 'typeorm';
 import { Net_Seguridad } from './net_seguridad.entity';
 import { net_usuario_modulo } from './net_usuario_modulo.entity';
-import { net_empleado_centro_trabajo } from 'src/modules/Empresarial/entities/net_empleado_centro_trabajo.entity';
+import { Net_Empleado_Centro_Trabajo } from 'src/modules/Empresarial/entities/net_empleado_centro_trabajo.entity';
 
 @Entity({ name: 'NET_USUARIO_EMPRESA' })
 export class Net_Usuario_Empresa {
@@ -38,7 +38,7 @@ export class Net_Usuario_Empresa {
   @OneToMany(() => net_usuario_modulo, usuarioModulo => usuarioModulo.usuarioEmpresa)
   usuarioModulos: net_usuario_modulo[];
 
-  @ManyToOne(() => net_empleado_centro_trabajo, empleadoCentroTrabajo => empleadoCentroTrabajo.usuarioEmpresas, { nullable: false })
+  @ManyToOne(() => Net_Empleado_Centro_Trabajo, empleadoCentroTrabajo => empleadoCentroTrabajo.usuarioEmpresas, { nullable: false })
   @JoinColumn({ name: 'ID_EMPLEADO_CENTRO_TRABAJO', referencedColumnName: 'id_empleado_centro_trabajo', foreignKeyConstraintName: 'FK_id_empleado_centro_trabajo_usuario_empresa' })
-  empleadoCentroTrabajo: net_empleado_centro_trabajo;
+  empleadoCentroTrabajo: Net_Empleado_Centro_Trabajo;
 }

@@ -224,3 +224,107 @@ BEGIN
     InsertarPlanillaComplementaria('JUBILADO,VOLUNTARIO,PENSIONADO');
 END;
 /
+
+
+--COPIAR PLANILLA ORDINARIA DE MES ANTERIOR
+CREATE OR REPLACE PROCEDURE sp_insertar_detalles_en_preliminar(p_id_tipo_planilla IN NUMBER) IS
+    v_beneficios_cargados VARCHAR2(2);
+    v_id_planilla NUMBER;
+BEGIN
+    -- Buscar la ID_PLANILLA que esté en estado ACTIVA y dentro del mes actual
+    SELECT p.ID_PLANILLA, p.BENEFICIOS_CARGADOS
+    INTO v_id_planilla, v_beneficios_cargados
+    FROM NET_PLANILLA p
+    WHERE p.ID_TIPO_PLANILLA = p_id_tipo_planilla
+    AND p.ESTADO = 'ACTIVA'
+    AND TO_DATE(p.PERIODO_INICIO, 'DD/MM/YYYY') <= TRUNC(SYSDATE, 'MM')
+    AND TO_DATE(p.PERIODO_FINALIZACION, 'DD/MM/YYYY') >= TRUNC(SYSDATE, 'MM')
+    FOR UPDATE;
+
+    -- Si no existe una planilla con BENEFICIOS_CARGADOS = 'SI', proceder con las inserciones y actualizar el valor a 'SI'
+    IF v_beneficios_cargados IS NULL OR v_beneficios_cargados = 'NO' THEN
+        -- Insertar en NET_DETALLE_PAGO_BENEFICIO
+        INSERT INTO NET_DETALLE_PAGO_BENEFICIO (
+            ESTADO,
+            MONTO_A_PAGAR,
+            ID_PLANILLA,
+            ID_AF_BANCO,
+            ID_PERSONA,
+            ID_CAUSANTE,
+            ID_DETALLE_PERSONA,
+            ID_BENEFICIO
+        )
+        SELECT
+            'EN PRELIMINAR',
+            dpb.MONTO_A_PAGAR,
+            v_id_planilla,
+            dpb.ID_AF_BANCO,
+            dpb.ID_PERSONA,
+            dpb.ID_CAUSANTE,
+            dpb.ID_DETALLE_PERSONA,
+            dpb.ID_BENEFICIO
+        FROM 
+            NET_DETALLE_PAGO_BENEFICIO dpb
+        JOIN 
+            NET_PLANILLA p ON dpb.ID_PLANILLA = p.ID_PLANILLA
+        JOIN 
+            NET_TIPO_PLANILLA tp ON p.ID_TIPO_PLANILLA = tp.ID_TIPO_PLANILLA
+        WHERE 
+            dpb.FECHA_CARGA >= TRUNC(ADD_MONTHS(SYSDATE, -1), 'MM')
+            AND dpb.FECHA_CARGA < TRUNC(SYSDATE, 'MM')
+            AND tp.ID_TIPO_PLANILLA = p_id_tipo_planilla;
+
+        -- Insertar en NET_DETALLE_DEDUCCION
+        INSERT INTO NET_DETALLE_DEDUCCION (
+            MONTO_TOTAL,
+            MONTO_APLICADO,
+            ESTADO_APLICACION,
+            ANIO,
+            MES,
+            ID_PERSONA,
+            ID_PLANILLA,
+            ID_DEDUCCION,
+            ID_DEDUCCION_ASIGNADA
+        )
+        SELECT
+            dd.MONTO_TOTAL,
+            dd.MONTO_APLICADO,
+            'EN PRELIMINAR',
+            dd.ANIO,
+            dd.MES,
+            dd.ID_PERSONA,
+            v_id_planilla,
+            dd.ID_DEDUCCION,
+            dd.ID_DEDUCCION_ASIGNADA
+        FROM 
+            NET_DETALLE_DEDUCCION dd
+        JOIN 
+            NET_PLANILLA p ON dd.ID_PLANILLA = p.ID_PLANILLA
+        JOIN 
+            NET_TIPO_PLANILLA tp ON p.ID_TIPO_PLANILLA = tp.ID_TIPO_PLANILLA
+        WHERE 
+            dd.FECHA_APLICADO >= TRUNC(ADD_MONTHS(SYSDATE, -1), 'MM')
+            AND dd.FECHA_APLICADO < TRUNC(SYSDATE, 'MM')
+            AND tp.ID_TIPO_PLANILLA = p_id_tipo_planilla;
+
+        -- Actualizar BENEFICIOS_CARGADOS a 'SI' en la tabla NET_PLANILLA
+        UPDATE NET_PLANILLA p
+        SET p.BENEFICIOS_CARGADOS = 'SI'
+        WHERE p.ID_PLANILLA = v_id_planilla;
+
+        COMMIT;
+    END IF;
+EXCEPTION
+    WHEN NO_DATA_FOUND THEN
+        -- Manejo del caso donde no se encuentra una planilla activa
+        RAISE_APPLICATION_ERROR(-20001, 'No se encontró una planilla activa para el mes actual.');
+    WHEN OTHERS THEN
+        ROLLBACK;
+        RAISE;
+END sp_insertar_detalles_en_preliminar;
+/
+
+BEGIN
+    sp_insertar_detalles_en_preliminar(2);
+END;
+/

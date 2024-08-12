@@ -101,7 +101,6 @@ END;
 /
 
 
-
 --ORDINARIA - JUBILADOS
 BEGIN
     InsertarPlanillaOrdinaria('BENEFICIARIO,AFILIADO');

@@ -2,7 +2,6 @@ import { Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, OneToMany, Pri
 import { Net_Detalle_Beneficio_Afiliado } from "../../detalle_beneficio/entities/net_detalle_beneficio_afiliado.entity";
 import { Net_Clasificacion_Beneficios } from "../../planilla/entities/net_clasificacion_beneficios.entity";
 import { Net_Regimen } from "./net_regimen.entity";
-import { Net_Tipo_Persona } from "src/modules/Persona/entities/net_tipo_persona.entity";
 import { Net_Beneficio_Tipo_Persona } from "../../beneficio_tipo_persona/entities/net_beneficio_tipo_persona.entity";
 
 
@@ -17,7 +16,6 @@ export class Net_Beneficio {
 
     @Column('varchar2', { length: 20, nullable: false, name: 'CODIGO' })
     codigo: string;
-
 
     @Column('varchar2', { length: 200, nullable: true, name: 'DESCRIPCION_BENEFICIO' })
     descripcion_beneficio: string;

@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Query, Res, BadRequestException, InternalServerErrorException, HttpStatus, NotFoundException, ParseIntPipe, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Query, Res, BadRequestException, InternalServerErrorException, HttpStatus, NotFoundException, ParseIntPipe, UseGuards, UseInterceptors, UploadedFile } from '@nestjs/common';
 import { PlanillaService } from './planilla.service';
 import { CreatePlanillaDto } from './dto/create-planilla.dto';
 import { UpdatePlanillaDto } from './dto/update-planilla.dto';
@@ -9,12 +9,35 @@ import { InjectEntityManager } from '@nestjs/typeorm';
 import { Net_Planilla } from './entities/net_planilla.entity';
 import { GetPlanillasPreliminaresDto } from './dto/get-planillas-preliminares.dto';
 import { GeneratePlanillaDto } from './dto/generate-planilla.dto';
+import { FileInterceptor } from '@nestjs/platform-express';
+import * as multer from 'multer';
+import * as path from 'path';
+import * as fs from 'fs';
 
 @ApiTags('planilla')
 @Controller('planilla')
 export class PlanillaController {
   constructor(private readonly planillaService: PlanillaService, @InjectEntityManager() private readonly entityManager: EntityManager) { }
 
+  /* @Post('upload-excel')
+  @UseInterceptors(FileInterceptor('file'))
+  uploadExcel(@UploadedFile() file: Express.Multer.File) {
+    return this.planillaService.uploadExcel(file);
+  } */
+
+    @Post('verificar-beneficios')
+  @UseInterceptors(FileInterceptor('file'))
+  async verificarBeneficios(@UploadedFile() file: Express.Multer.File): Promise<void> {
+    const tempDir = path.join('D:', 'tmp');
+    const filePath = path.join(tempDir, file.originalname);
+    if (!fs.existsSync(tempDir)) {
+      fs.mkdirSync(tempDir, { recursive: true });
+    }
+    fs.writeFileSync(filePath, file.buffer);
+    await this.planillaService.verificarBeneficioEnExcel(filePath);
+    fs.unlinkSync(filePath);
+  }
+ 
   @Get('total/:id_planilla')
   async getPlanilla(@Param('id_planilla', ParseIntPipe) id_planilla: number) {
     try {

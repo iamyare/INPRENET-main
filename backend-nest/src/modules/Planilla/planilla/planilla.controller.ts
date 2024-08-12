@@ -112,6 +112,11 @@ export class PlanillaController {
     return this.planillaService.getDesgloseDeducciones(idPlanilla, idBeneficio);
   }
 
+  @Get('detalle-pago-beneficios/:id_planilla')
+  async obtenerDetallePorPlanilla(@Param('id_planilla') id_planilla: number, @Res() res) {
+    return this.planillaService.obtenerDetallePagoBeneficioPorPlanilla(id_planilla, res);
+  }
+
   @Get('generar-excel')
   async generarExcel(
     @Query('codPlanilla') codPlanilla: string,

@@ -63,7 +63,7 @@ export class TotalesporbydDialogComponent implements OnInit {
 
   async generarPDF() {
     try {
-      const base64Image = await this.convertirImagenABase64('assets/images/HOJA-MEMBRETADA.jpg');
+      const base64Image = await this.convertirImagenABase64('assets/images/membratadoFinal.jpg');
 
       const totalBeneficios = this.data.beneficios.reduce((acc, cur) => acc + (cur.total ? parseFloat(cur.total) : 0), 0);
       const totalDeduccionesInprema = this.data.deduccionesInprema.reduce((acc, cur) => acc + (cur.TOTAL_MONTO_DEDUCCION ? parseFloat(cur.TOTAL_MONTO_DEDUCCION) : 0), 0);

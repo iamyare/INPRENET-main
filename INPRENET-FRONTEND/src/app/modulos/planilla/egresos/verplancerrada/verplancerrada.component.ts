@@ -49,7 +49,7 @@ export class VerplancerradaComponent {
     private afiliadoService: AfiliadoService,
     private deduccionSVC: DeduccionesService
   ) {
-    this.convertirImagenABase64('assets/images/HOJA-MEMBRETADA.jpg').then(base64 => {
+    this.convertirImagenABase64('assets/images/membratadoFinal.jpg').then(base64 => {
       this.backgroundImageBase64 = base64;
     }).catch(error => {
       console.error('Error al convertir la imagen a Base64', error);
@@ -172,7 +172,6 @@ export class VerplancerradaComponent {
         {
           next: async (response) => {
             if (response) {
-              console.log(response);
 
               this.detallePlanilla = response;
               this.getFilas(response.codigo_planilla).then(() => this.cargar());
@@ -220,6 +219,7 @@ export class VerplancerradaComponent {
     try {
       this.dataPlan = [];
       this.data = await this.planillaService.getPersPlanillaDefin(cod_planilla).toPromise();
+
 
       if (this.data) {
         this.dataPlan = this.data.map((item: any) => {
@@ -1053,7 +1053,7 @@ export class VerplancerradaComponent {
 
   async generarPDFDeduccionesSeparadas() {
     try {
-      const base64Image = await this.convertirImagenABase64('assets/images/HOJA-MEMBRETADA.jpg');
+      const base64Image = await this.convertirImagenABase64('assets/images/membratadoFinal.jpg');
       this.planillaService.getDeduccionesPorPlanillaSeparadas(this.idPlanilla).subscribe(response => {
 
         const deduccionesInprema = response.deduccionesINPREMA || [];
@@ -1301,7 +1301,7 @@ export class VerplancerradaComponent {
         return;
       }
 
-      const base64Image = await this.convertirImagenABase64('assets/images/HOJA-MEMBRETADA.jpg');
+      const base64Image = await this.convertirImagenABase64('assets/images/membratadoFinal.jpg');
       this.planillaService.getMontosPorBanco(codigo_planilla).subscribe(response => {
         const montosPorBanco = response || [];
 
@@ -1317,14 +1317,14 @@ export class VerplancerradaComponent {
               absolutePosition: { x: 0, y: 0 }
             };
           },
-          pageMargins: [40, 150, 40, 100],
+          pageMargins: [40, 180, 40, 100],
           header: {
             stack: [
               {
                 text: `MONTOS PAGADOS POR PLANILLA ${this.detallePlanilla?.tipoPlanilla.nombre_planilla}`,
                 style: 'header',
                 alignment: 'center',
-                margin: [50, 70, 50, 0]
+                margin: [50, 90, 50, 0]
               },
               {
                 columns: [
@@ -1504,5 +1504,25 @@ export class VerplancerradaComponent {
     };
   }
 
+  descargarExcelparaBanco(): void {
+    const codigoPlanillaNumber = this.idPlanilla;
+
+    if (isNaN(codigoPlanillaNumber)) {
+        console.error('El código de planilla no es un número válido');
+        this.toastr.error('El código de planilla no es un número válido');
+        return;
+    }
+
+    this.planillaService.descargarPlanillaExcel(codigoPlanillaNumber).subscribe(blob => {
+        const a = document.createElement('a');
+        const objectUrl = URL.createObjectURL(blob);
+        a.href = objectUrl;
+        a.download = 'planilla.xlsx';
+        a.click();
+        URL.revokeObjectURL(objectUrl);
+    }, error => {
+        console.error('Error al descargar el Excel', error);
+    });
+}
 
 }

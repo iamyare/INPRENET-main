@@ -10,6 +10,17 @@ import { environment } from 'src/environments/environment';
 export class PlanillaService {
   constructor(private http: HttpClient,private toastr: ToastrService) { }
 
+  descargarPlanillaExcel(id_planilla: number): Observable<Blob> {
+    const url = `${environment.API_URL}/api/planilla/detalle-pago-beneficios/${id_planilla}`;
+    return this.http.get(url, { responseType: 'blob' }).pipe(
+      catchError(error => {
+        console.error('Error al descargar el archivo Excel', error);
+        this.toastr.error('Error al descargar el archivo Excel');
+        return throwError(error);
+      })
+    );
+  }
+
   updatePlanillaACerrada(codigo_planilla: string): Observable<void> {
     const url = `${environment.API_URL}/api/planilla/actualizar-planilla-a-cerrada`;
     return this.http.patch<void>(url, null, { params: { codigo_planilla } }).pipe(

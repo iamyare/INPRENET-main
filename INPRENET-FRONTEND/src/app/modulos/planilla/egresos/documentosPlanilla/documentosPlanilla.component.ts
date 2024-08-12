@@ -48,7 +48,7 @@ export class DocumentosPlanillaComponent implements OnInit {
 
     this.planillaService.getTotalBeneficiosYDeduccionesPorPeriodo(periodoInicio, periodoFinalizacion, idTiposPlanilla).subscribe({
       next: async (data) => {
-        const base64Image = await this.convertirImagenABase64('assets/images/HOJA-MEMBRETADA.jpg');
+        const base64Image = await this.convertirImagenABase64('assets/images/membratadoFinal.jpg');
 
         const totalBeneficios = data.beneficios.reduce((acc:any, cur:any) => acc + (cur.TOTAL_MONTO_BENEFICIO ? parseFloat(cur.TOTAL_MONTO_BENEFICIO) : 0), 0);
         const totalDeduccionesInprema = data.deduccionesInprema.reduce((acc:any, cur:any) => acc + (cur.TOTAL_MONTO_DEDUCCION ? parseFloat(cur.TOTAL_MONTO_DEDUCCION) : 0), 0);
@@ -63,7 +63,7 @@ export class DocumentosPlanillaComponent implements OnInit {
             height: pageSize.height,
             absolutePosition: { x: 0, y: 0 }
           }),
-          pageMargins: [40, 150, 40, 100],
+          pageMargins: [40, 130, 40, 100],
           header: {
             text: `TOTALES BENEFICIOS Y DEDUCCIONES DE PLANILLA ${nombrePlanilla}`,
             style: 'header',
@@ -177,6 +177,7 @@ export class DocumentosPlanillaComponent implements OnInit {
             header: { fontSize: 18, bold: true },
             subheader: { fontSize: 14, bold: false, margin: [0, 5, 0, 10] },
             tableHeader: { bold: true, fontSize: 13, color: 'black' },
+            tableBody: { fontSize: 8, color: 'black' },  // Texto más pequeño para las celdas de la tabla
             tableTotal: { bold: true, fontSize: 13, color: 'black', alignment: 'right' },
             signature: { fontSize: 10, bold: true }
           },
@@ -280,7 +281,7 @@ export class DocumentosPlanillaComponent implements OnInit {
 
     this.planillaService.getTotalMontosPorBancoYPeriodo(periodoInicio, periodoFinalizacion, idTiposPlanilla).subscribe({
       next: async (data) => {
-        const base64Image = await this.convertirImagenABase64('assets/images/HOJA-MEMBRETADA.jpg');
+        const base64Image = await this.convertirImagenABase64('assets/images/membratadoFinal.jpg');
 
         const totalMonto = data.reduce((acc: any, cur: any) => acc + (cur.MONTO_NETO ? parseFloat(cur.MONTO_NETO) : 0), 0);
 
@@ -292,12 +293,12 @@ export class DocumentosPlanillaComponent implements OnInit {
             height: pageSize.height,
             absolutePosition: { x: 0, y: 0 }
           }),
-          pageMargins: [40, 150, 40, 100],
+          pageMargins: [40, 130, 40, 100],
           header: {
             text: `MONTOS PAGADOS POR PLANILLA ${nombrePlanilla}`,
             style: 'header',
             alignment: 'center',
-            margin: [50, 80, 50, 0]
+            margin: [50, 100, 50, 0]
           },
           content: [
             {
@@ -321,8 +322,8 @@ export class DocumentosPlanillaComponent implements OnInit {
               ],
               margin: [40, 5, 40, 10]
             },
-            { text: 'Montos Pagados por Banco', style: 'subheader', margin: [0, 0, 0, 5] },
-            this.crearTablaMontosPorBanco(data, 'Montos Pagados por Banco', `Total de montos pagados: L ${totalMonto.toFixed(2)}`, [0, 0, 0, 10]),
+            { text: 'Montos Pagados por Banco', style: 'subheader', margin: [0, 5, 0, 10] },  // Bajamos un poco el título de la sección
+            this.crearTablaMontosPorBanco(data, 'Montos Pagados por Banco', `Total de montos pagados: L ${totalMonto.toFixed(2)}`, [10, 10, 10, 10]),  // Aumentamos el margen en la tabla
             {
               columns: [
                 {
@@ -396,6 +397,7 @@ export class DocumentosPlanillaComponent implements OnInit {
             header: { fontSize: 18, bold: true },
             subheader: { fontSize: 14, bold: false, margin: [0, 5, 0, 10] },
             tableHeader: { bold: true, fontSize: 13, color: 'black' },
+            tableBody: { fontSize: 8, color: 'black' },  // Texto más pequeño para las celdas de la tabla
             tableTotal: { bold: true, fontSize: 13, color: 'black', alignment: 'right' },
             signature: { fontSize: 10, bold: true }
           },
@@ -420,7 +422,6 @@ export class DocumentosPlanillaComponent implements OnInit {
       },
       error: (error) => {
         console.error('Error al obtener los datos', error);
-        //this.toastr.error('Error al obtener los datos');
       }
     });
   }
@@ -461,19 +462,19 @@ export class DocumentosPlanillaComponent implements OnInit {
             const deduccionesTerceros = el.DEDUCCIONES_TERCEROS ? formatAmount(parseFloat(el.DEDUCCIONES_TERCEROS)) : '0.00';
             const montoNeto = el.MONTO_NETO ? formatAmount(parseFloat(el.MONTO_NETO)) : '0.00';
             return [
-              nombre,
-              { text: `L ${totalBeneficio}`, alignment: 'right' },
-              { text: `L ${deduccionesInprema}`, alignment: 'right' },
-              { text: `L ${deduccionesTerceros}`, alignment: 'right' },
-              { text: `L ${montoNeto}`, alignment: 'right' }
+              { text: nombre, style: 'tableBody' },
+              { text: `L ${totalBeneficio}`, style: 'tableBody', alignment: 'right', lineHeight: 1.15 },
+              { text: `L ${deduccionesInprema}`, style: 'tableBody', alignment: 'right', lineHeight: 1.15 },
+              { text: `L ${deduccionesTerceros}`, style: 'tableBody', alignment: 'right', lineHeight: 1.15 },
+              { text: `L ${montoNeto}`, style: 'tableBody', alignment: 'right', lineHeight: 1.15 }
             ];
           }),
           [
             { text: 'Total', style: 'tableTotal', alignment: 'right' },
-            { text: `L ${formatAmount(totals.totalBeneficio)}`, alignment: 'right' },
-            { text: `L ${formatAmount(totals.deduccionesInprema)}`, alignment: 'right' },
-            { text: `L ${formatAmount(totals.deduccionesTerceros)}`, alignment: 'right' },
-            { text: `L ${formatAmount(totals.montoNeto)}`, alignment: 'right' }
+            { text: `L ${formatAmount(totals.totalBeneficio)}`, style: 'tableBody', alignment: 'right', lineHeight: 1.15 },
+            { text: `L ${formatAmount(totals.deduccionesInprema)}`, style: 'tableBody', alignment: 'right', lineHeight: 1.15 },
+            { text: `L ${formatAmount(totals.deduccionesTerceros)}`, style: 'tableBody', alignment: 'right', lineHeight: 1.15 },
+            { text: `L ${formatAmount(totals.montoNeto)}`, style: 'tableBody', alignment: 'right', lineHeight: 1.15 }
           ]
         ]
       },
@@ -481,5 +482,6 @@ export class DocumentosPlanillaComponent implements OnInit {
       margin: margin
     };
   }
+
 
 }

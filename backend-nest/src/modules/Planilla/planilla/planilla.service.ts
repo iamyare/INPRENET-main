@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable, InternalServerErrorException, Logger, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, InternalServerErrorException, Logger, NotFoundException, Res } from '@nestjs/common';
 import { CreatePlanillaDto } from './dto/create-planilla.dto';
 import { UpdatePlanillaDto } from './dto/update-planilla.dto';
 import { InjectEntityManager, InjectRepository } from '@nestjs/typeorm';
@@ -11,12 +11,14 @@ import { Net_Detalle_Pago_Beneficio } from '../detalle_beneficio/entities/net_de
 import { PaginationDto } from 'src/common/dtos/pagination.dto';
 import { Workbook } from 'exceljs';
 import { Response } from 'express';
-import { startOfMonth, endOfMonth, getMonth, getYear } from 'date-fns';
+import { startOfMonth, endOfMonth, getMonth, getYear, format } from 'date-fns';
 import { Net_Detalle_Beneficio_Afiliado } from '../detalle_beneficio/entities/net_detalle_beneficio_afiliado.entity';
 import { Net_Beneficio } from '../beneficio/entities/net_beneficio.entity';
 import * as ExcelJS from 'exceljs';
 import { net_detalle_persona } from 'src/modules/Persona/entities/net_detalle_persona.entity';
 import * as XLSX from 'xlsx';
+import path from 'path';
+import * as fs from 'fs';
 
 @Injectable()
 export class PlanillaService {
@@ -43,6 +45,56 @@ export class PlanillaService {
     private detallePersonaRepository: Repository<net_detalle_persona>,
   ) {
   };
+
+  async obtenerDetallePagoBeneficioPorPlanilla(id_planilla: number, @Res() res: Response) {
+    const results = await this.detallePagBeneficios
+      .createQueryBuilder('detallePago')
+      .select([
+        'banco.cod_banco AS "codigo_banco"', 
+        'personaPorBanco.num_cuenta AS "numero_cuenta"',
+        'detallePago.monto_a_pagar AS "monto_a_pagar"',
+        `persona.primer_apellido || ' ' || COALESCE(persona.segundo_apellido, '') || ' ' || persona.primer_nombre || ' ' || COALESCE(persona.segundo_nombre, '') AS "nombre_completo"`,
+        'tipoPlanilla.id_tipo_planilla AS "id_tipo_planilla"',
+        'persona.n_identificacion AS "n_identificacion"',
+      ])
+      .innerJoin('detallePago.personaporbanco', 'personaPorBanco')
+      .innerJoin('personaPorBanco.banco', 'banco')
+      .innerJoin('personaPorBanco.persona', 'persona')
+      .innerJoin('detallePago.planilla', 'planilla')
+      .innerJoin('planilla.tipoPlanilla', 'tipoPlanilla')
+      .where('planilla.id_planilla = :id_planilla', { id_planilla })
+      .getRawMany();
+
+    const workbook = new ExcelJS.Workbook();
+    const worksheet = workbook.addWorksheet('Sheet 1');
+
+    const currentDate = format(new Date(), 'dd/MM/yyyy');
+
+    results.forEach(result => {
+      const concatenatedRow = [
+        result.codigo_banco,
+        result.numero_cuenta,
+        result.monto_a_pagar,
+        result.nombre_completo.replace(/\s+/g, ''), // Elimina espacios innecesarios
+        currentDate,
+        result.id_tipo_planilla,
+        result.n_identificacion,
+      ].join(',');
+
+      worksheet.addRow([concatenatedRow]);
+    });
+
+    // Configura la respuesta para enviar el archivo
+    res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+    res.setHeader('Content-Disposition', 'attachment; filename=concatenated_results.xlsx');
+
+    // Escribe el archivo Excel en la respuesta
+    await workbook.xlsx.write(res);
+
+    res.end();
+  }
+
+
 
   async verificarBeneficioEnExcel(filePath: string): Promise<void> {
     const workbook = XLSX.readFile(filePath);
@@ -505,7 +557,7 @@ export class PlanillaService {
         FROM
         "NET_PLANILLA" p
         JOIN
-        "NET_DETALLE_DEDUCCION_PRUEBA" ddp ON p."ID_PLANILLA" = ddp."ID_PLANILLA"
+        "NET_DETALLE_DEDUCCION" ddp ON p."ID_PLANILLA" = ddp."ID_PLANILLA"
         JOIN
         "NET_DEDUCCION" d ON ddp."ID_DEDUCCION" = d."ID_DEDUCCION"
         LEFT JOIN
@@ -528,7 +580,7 @@ export class PlanillaService {
         FROM
         "NET_PLANILLA" p
         JOIN
-        "NET_DETALLE_DEDUCCION_PRUEBA" ddp ON p."ID_PLANILLA" = ddp."ID_PLANILLA"
+        "NET_DETALLE_DEDUCCION" ddp ON p."ID_PLANILLA" = ddp."ID_PLANILLA"
         JOIN
         "NET_DEDUCCION" d ON ddp."ID_DEDUCCION" = d."ID_DEDUCCION"
         LEFT JOIN
@@ -539,7 +591,7 @@ export class PlanillaService {
         p."FECHA_APERTURA" BETWEEN TO_DATE(:periodoInicio, 'DD/MM/YYYY') AND TO_DATE(:periodoFinalizacion, 'DD/MM/YYYY')
         AND p."ID_TIPO_PLANILLA" IN (${idTiposPlanilla.join(', ')})
         AND ddp."ESTADO_APLICACION" = 'COBRADA'
-        AND d."ID_CENTRO_TRABAJO" <> 1
+        AND d."ID_DEDUCCION" NOT IN (1,2,3)
         GROUP BY
         COALESCE(b."NOMBRE_BANCO", 'SIN BANCO')
     `;
@@ -583,9 +635,7 @@ export class PlanillaService {
         console.error('Error al obtener los totales por banco en el periodo:', error);
         throw new InternalServerErrorException('Error al obtener los totales por banco en el periodo');
     }
-}
-
-  
+}  
 
   async generarVoucher(idPlanilla: number, dni: string): Promise<any> {
     try {

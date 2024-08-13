@@ -3,7 +3,7 @@ import { PlanillaService } from './planilla.service';
 import { CreatePlanillaDto } from './dto/create-planilla.dto';
 import { UpdatePlanillaDto } from './dto/update-planilla.dto';
 import { PaginationDto } from 'src/common/dtos/pagination.dto';
-import { ApiTags } from '@nestjs/swagger';
+import { ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { EntityManager } from 'typeorm';
 import { InjectEntityManager } from '@nestjs/typeorm';
 import { Net_Planilla } from './entities/net_planilla.entity';
@@ -24,6 +24,33 @@ export class PlanillaController {
   uploadExcel(@UploadedFile() file: Express.Multer.File) {
     return this.planillaService.uploadExcel(file);
   } */
+
+    @Get('detalle-pago-beneficio')
+    async obtenerDetallePagoBeneficioPorPlanilla(
+      @Query('periodoInicio') periodoInicio: string,
+      @Query('periodoFinalizacion') periodoFinalizacion: string,
+      @Query('idTiposPlanilla') idTiposPlanilla: string,
+    ): Promise<any[]> {
+      
+      if (!periodoInicio || !periodoFinalizacion || !idTiposPlanilla) {
+        throw new BadRequestException('Todos los parámetros son obligatorios.');
+      }
+    
+      // Convertir la cadena `idTiposPlanilla` a un array de números
+      const idTiposPlanillaArray = idTiposPlanilla.split(',').map(Number);
+    
+      try {
+        return await this.planillaService.obtenerDetallePagoBeneficioPorPlanillaPrueba(
+          periodoInicio,
+          periodoFinalizacion,
+          idTiposPlanillaArray,
+        );
+      } catch (error) {
+        console.error('Error al procesar la solicitud:', error);
+        throw new BadRequestException('Error al procesar la solicitud: ' + error.message);
+      }
+    }
+
 
     @Post('verificar-beneficios')
   @UseInterceptors(FileInterceptor('file'))

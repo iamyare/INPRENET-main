@@ -437,7 +437,6 @@ export class PlanillaService {
       throw new InternalServerErrorException('Error al obtener beneficios');
     }
   }
-
   async getDeduccionesInpremaPorPeriodo(
     periodoInicio: string,
     periodoFinalizacion: string,
@@ -472,7 +471,6 @@ export class PlanillaService {
       throw new InternalServerErrorException('Error al obtener deducciones INPREMA');
     }
   }
-
   async getDeduccionesTercerosPorPeriodo(
     periodoInicio: string,
     periodoFinalizacion: string,
@@ -1611,4 +1609,117 @@ export class PlanillaService {
       throw new InternalServerErrorException('Ocurrió un error al procesar su solicitud');
     }
   }
+
+  async obtenerDetallePagoBeneficioPorPlanillaPrueba(
+    periodoInicio: string,
+    periodoFinalizacion: string,
+    idTiposPlanilla: number[],
+  ): Promise<any[]> {
+    
+    const beneficiosQuery = `
+      SELECT 
+        banco.cod_banco AS "codigo_banco", 
+        personaPorBanco.num_cuenta AS "numero_cuenta",
+        SUM(detallePago.monto_a_pagar) AS "monto_a_pagar",
+        persona.primer_apellido || ' ' || COALESCE(persona.segundo_apellido, '') || ' ' || persona.primer_nombre || ' ' || COALESCE(persona.segundo_nombre, '') AS "nombre_completo",
+        tipoPlanilla.id_tipo_planilla AS "id_tipo_planilla",
+        persona.n_identificacion AS "n_identificacion",
+        persona.ID_PERSONA AS "ID_PERSONA" -- Asegurándonos de que se incluye este campo
+      FROM 
+        "NET_PLANILLA" planilla
+      JOIN 
+        "NET_DETALLE_PAGO_BENEFICIO" detallePago ON planilla."ID_PLANILLA" = detallePago."ID_PLANILLA"
+      JOIN 
+        "NET_PERSONA_POR_BANCO" personaPorBanco ON detallePago."ID_AF_BANCO" = personaPorBanco."ID_AF_BANCO"
+      JOIN 
+        "NET_BANCO" banco ON personaPorBanco."ID_BANCO" = banco."ID_BANCO"
+      JOIN 
+        "NET_PERSONA" persona ON personaPorBanco."ID_PERSONA" = persona."ID_PERSONA"
+      JOIN 
+        "NET_TIPO_PLANILLA" tipoPlanilla ON planilla."ID_TIPO_PLANILLA" = tipoPlanilla."ID_TIPO_PLANILLA"
+      WHERE 
+        TO_DATE(planilla."PERIODO_INICIO", 'DD/MM/YYYY') >= TO_DATE(:1, 'DD/MM/YYYY')
+        AND TO_DATE(planilla."PERIODO_FINALIZACION", 'DD/MM/YYYY') <= TO_DATE(:2, 'DD/MM/YYYY')
+        AND planilla."ID_TIPO_PLANILLA" IN (${idTiposPlanilla.join(', ')})
+        AND detallePago."ESTADO" = 'PAGADA'
+      GROUP BY 
+        banco.cod_banco, personaPorBanco.num_cuenta, persona.primer_apellido, persona.segundo_apellido, persona.primer_nombre, persona.segundo_nombre, tipoPlanilla.id_tipo_planilla, persona.n_identificacion, persona.ID_PERSONA
+    `;
+
+    const deduccionesInpremaQuery = `
+      SELECT 
+        dd."ID_PERSONA",
+        SUM(dd.MONTO_APLICADO) AS "deducciones_inprema"
+      FROM 
+        "NET_PLANILLA" planilla
+      JOIN 
+        "NET_DETALLE_DEDUCCION" dd ON planilla."ID_PLANILLA" = dd."ID_PLANILLA"
+      JOIN 
+        "NET_DEDUCCION" ded ON dd."ID_DEDUCCION" = ded."ID_DEDUCCION"
+      WHERE 
+        TO_DATE(planilla."PERIODO_INICIO", 'DD/MM/YYYY') >= TO_DATE(:periodoInicio, 'DD/MM/YYYY')
+        AND TO_DATE(planilla."PERIODO_FINALIZACION", 'DD/MM/YYYY') <= TO_DATE(:periodoFinalizacion, 'DD/MM/YYYY')
+        AND planilla."ID_TIPO_PLANILLA" IN (${idTiposPlanilla.join(', ')})
+        AND dd."ESTADO_APLICACION" = 'COBRADA'
+        AND ded."ID_CENTRO_TRABAJO" = 1
+      GROUP BY 
+        dd."ID_PERSONA"
+    `;
+
+    const deduccionesTercerosQuery = `
+       SELECT 
+        dd."ID_PERSONA",
+        SUM(dd.MONTO_APLICADO) AS "deducciones_terceros"
+      FROM 
+        "NET_PLANILLA" planilla
+      JOIN 
+        "NET_DETALLE_DEDUCCION" dd ON planilla."ID_PLANILLA" = dd."ID_PLANILLA"
+      JOIN 
+        "NET_DEDUCCION" ded ON dd."ID_DEDUCCION" = ded."ID_DEDUCCION"
+      WHERE 
+        TO_DATE(planilla."PERIODO_INICIO", 'DD/MM/YYYY') >= TO_DATE(:periodoInicio, 'DD/MM/YYYY')
+        AND TO_DATE(planilla."PERIODO_FINALIZACION", 'DD/MM/YYYY') <= TO_DATE(:periodoFinalizacion, 'DD/MM/YYYY')
+        AND planilla."ID_TIPO_PLANILLA" IN (${idTiposPlanilla.join(', ')})
+        AND dd."ESTADO_APLICACION" = 'COBRADA'
+        AND ded."ID_CENTRO_TRABAJO" != 1
+      GROUP BY 
+        dd."ID_PERSONA"
+    `;
+  
+    try {
+      const beneficios = await this.entityManager.query(beneficiosQuery, [periodoInicio, periodoFinalizacion]);
+      const deduccionesInprema = await this.entityManager.query(deduccionesInpremaQuery, [periodoInicio, periodoFinalizacion]);
+      const deduccionesTerceros = await this.entityManager.query(deduccionesTercerosQuery, [periodoInicio, periodoFinalizacion]);
+   
+      const result = beneficios.map(beneficio => {
+        // Asegúrate de que estás usando la propiedad correcta para identificar ID_PERSONA
+        const personaID = beneficio.ID_PERSONA;
+        
+        const deduccionInprema = deduccionesInprema.find(d => d.ID_PERSONA === personaID) || { deducciones_inprema: 0 };
+        const deduccionTerceros = deduccionesTerceros.find(d => d.ID_PERSONA === personaID) || { deducciones_terceros: 0 };
+   
+        const totalDeducciones = (deduccionInprema.deducciones_inprema || 0) + (deduccionTerceros.deducciones_terceros || 0);
+   
+        return {
+          codigo_banco: beneficio.codigo_banco,
+          numero_cuenta: beneficio.numero_cuenta,
+          monto_a_pagar: beneficio.monto_a_pagar,
+          nombre_completo: beneficio.nombre_completo,
+          id_tipo_planilla: beneficio.id_tipo_planilla,
+          n_identificacion: beneficio.n_identificacion,
+          deducciones_inprema: deduccionInprema.deducciones_inprema,
+          deducciones_terceros: deduccionTerceros.deducciones_terceros,
+          beneficio: beneficio.monto_a_pagar,
+          neto: beneficio.monto_a_pagar - totalDeducciones,
+        };
+      });
+   
+      return result;
+    } catch (error) {
+      console.error('Error al obtener los detalles de pago por planilla:', error);
+      throw new InternalServerErrorException('Error al obtener los detalles de pago por planilla.');
+    }
+  }
+
+  
 }

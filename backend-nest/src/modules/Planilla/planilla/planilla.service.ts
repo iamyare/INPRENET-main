@@ -428,6 +428,7 @@ export class PlanillaService {
       ben."ID_BENEFICIO", 
       ben."NOMBRE_BENEFICIO", 
       ben."CODIGO"
+    ORDER BY ben."NOMBRE_BENEFICIO" ASC
   `;
 
     try {
@@ -462,6 +463,7 @@ export class PlanillaService {
     GROUP BY 
       ded."ID_DEDUCCION", 
       ded."NOMBRE_DEDUCCION"
+    ORDER BY ded."NOMBRE_DEDUCCION" ASC
   `;
 
     try {
@@ -496,6 +498,7 @@ export class PlanillaService {
     GROUP BY 
       ded."ID_DEDUCCION", 
       ded."NOMBRE_DEDUCCION"
+    ORDER BY ded."NOMBRE_DEDUCCION" ASC
   `;
 
     try {
@@ -546,6 +549,7 @@ export class PlanillaService {
         AND dpb."ESTADO" = 'PAGADA'
         GROUP BY
         COALESCE(b."NOMBRE_BANCO", 'SIN BANCO')
+        ORDER BY  COALESCE(b."NOMBRE_BANCO", 'SIN BANCO') ASC
     `;
 
     const deduccionesInpremaQuery = `
@@ -569,6 +573,7 @@ export class PlanillaService {
         AND d."ID_CENTRO_TRABAJO" = 1
         GROUP BY
         COALESCE(b."NOMBRE_BANCO", 'SIN BANCO')
+        ORDER BY  COALESCE(b."NOMBRE_BANCO", 'SIN BANCO') ASC
     `;
 
     const deduccionesTercerosQuery = `
@@ -592,6 +597,7 @@ export class PlanillaService {
         AND d."ID_DEDUCCION" NOT IN (1,2,3)
         GROUP BY
         COALESCE(b."NOMBRE_BANCO", 'SIN BANCO')
+        ORDER BY  COALESCE(b."NOMBRE_BANCO", 'SIN BANCO') ASC
     `;
 
     try {
@@ -830,20 +836,20 @@ export class PlanillaService {
 
   async ObtenerPlanDefinPersonas(codPlanilla: string, page?: number, limit?: number): Promise<any> {
     let query = `
-              SELECT DISTINCT
+               SELECT DISTINCT
             per."N_IDENTIFICACION" AS "DNI",
             tipoP."TIPO_PERSONA" AS "TIPO_PERSONA",
             per."ID_PERSONA",
             perPorBan."NUM_CUENTA",
             banco."NOMBRE_BANCO",
             SUM(detBs."MONTO_A_PAGAR") AS "TOTAL_BENEFICIO",
-            TRIM(
+             TRIM(
+                per."PRIMER_APELLIDO" || ' ' ||
+                COALESCE(per."SEGUNDO_APELLIDO", '') || ' ' ||
                 per."PRIMER_NOMBRE" || ' ' ||
                 COALESCE(per."SEGUNDO_NOMBRE", '') || ' ' ||
-                COALESCE(per."TERCER_NOMBRE", '') || ' ' ||
-                per."PRIMER_APELLIDO" || ' ' ||
-                COALESCE(per."SEGUNDO_APELLIDO", '')
-            ) AS "NOMBRE_COMPLETO"
+                COALESCE(per."TERCER_NOMBRE", '')
+            )  AS "NOMBRE_COMPLETO"
         FROM 
             "NET_DETALLE_PAGO_BENEFICIO" detBs
         
@@ -896,12 +902,19 @@ export class PlanillaService {
         perPorBan."NUM_CUENTA",
         banco."NOMBRE_BANCO",
             TRIM(
+                per."PRIMER_APELLIDO" || ' ' ||
+                COALESCE(per."SEGUNDO_APELLIDO", '') || ' ' ||
                 per."PRIMER_NOMBRE" || ' ' ||
                 COALESCE(per."SEGUNDO_NOMBRE", '') || ' ' ||
-                COALESCE(per."TERCER_NOMBRE", '') || ' ' ||
+                COALESCE(per."TERCER_NOMBRE", '')
+            ) 
+        ORDER BY  TRIM(
                 per."PRIMER_APELLIDO" || ' ' ||
-                COALESCE(per."SEGUNDO_APELLIDO", '')
-            )
+                COALESCE(per."SEGUNDO_APELLIDO", '') || ' ' ||
+                per."PRIMER_NOMBRE" || ' ' ||
+                COALESCE(per."SEGUNDO_NOMBRE", '') || ' ' ||
+                COALESCE(per."TERCER_NOMBRE", '')
+            ) 
     `;
 
     let queryI = `
@@ -1106,7 +1119,7 @@ export class PlanillaService {
       },
       relations: ['tipoPlanilla'], // Carga la relación
       order: {
-        codigo_planilla: 'DESC' // Ordena por id_planilla en forma descendente
+        fecha_cierre: 'DESC' // Ordena por id_planilla en forma descendente
       }
     });
   }

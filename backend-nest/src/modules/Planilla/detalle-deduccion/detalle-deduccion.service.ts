@@ -202,6 +202,7 @@ export class DetalleDeduccionService {
         WHERE
             dedd."ID_PERSONA" = ${idPersona} AND
             plan."ID_PLANILLA" = ${idPlanilla}
+        ORDER BY dedd."MONTO_APLICADO" DESC
 
     `;
     try {

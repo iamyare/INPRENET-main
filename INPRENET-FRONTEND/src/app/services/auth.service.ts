@@ -160,7 +160,7 @@ export class AuthService {
       next: () => {
         sessionStorage.removeItem('token');
         this.toastr.info('Sesión cerrada');
-        this.router.navigate(['/login']);
+        this.router.navigate(['/']);
       },
       error: error => {
         console.error('Logout failed:', error);

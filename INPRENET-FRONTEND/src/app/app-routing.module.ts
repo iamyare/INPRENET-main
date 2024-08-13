@@ -17,17 +17,18 @@ import { LandingPageComponent } from './components/landing-page/landing-page.com
 import { PagenotfoundComponent } from './components/pagenotfound/pagenotfound.component';
 
 const routes: Routes = [
+  { path: '', component: CustomContainerComponent, children: [{ path: '', component: LandingPageComponent, pathMatch: 'full' }] },
   {
     path: 'auth',
     component: CustomContainerComponent,
     children: [
+      { path: '', redirectTo: 'login', pathMatch: 'prefix' },
       { path: 'login', component: LoginComponent },
       { path: 'login-privados', component: LoginPrivadosComponent },
       { path: 'solicitud-restablecimiento', component: OlvidoContrasenaComponent },
       { path: 'restablecer-contrasena/:token', component: RestablecerContrasenaComponent },
       { path: 'register', component: RegisterComponent },
-      { path: '', redirectTo: 'login', pathMatch: 'full' },
-      { path: '**', redirectTo: '/pagenotfound', pathMatch: 'full' },
+      { path: '**', redirectTo: 'login', pathMatch: 'prefix' },
     ],
   },
   {
@@ -49,20 +50,20 @@ const routes: Routes = [
       {
         path: 'afiliacion',
         loadChildren: () => import('./modulos/afiliacion/afiliacion.module').then(m => m.AfiliacionModule),
-        /* canActivate: [RoleGuard],
-        data: { expectedRolesModules: [{ role: 'ADMINISTRADOR' }, { role: 'ADMINISTRADOR DE PLANILLA', module: 'PLANILLA' }, { role: 'OFICIAL DE PLANILLA', module: 'PLANILLA' }] } */
+        canActivate: [RoleGuard],
+        data: { expectedRolesModules: [{ role: 'ADMINISTRADOR' }, { role: 'ADMINISTRADOR DE PLANILLA', module: 'PLANILLA' }, { role: 'OFICIAL DE PLANILLA', module: 'PLANILLA' }] }
       },
       {
         path: 'planilla',
         loadChildren: () => import('./modulos/planilla/planilla.module').then(m => m.PlanillaModule),
-        /* canActivate: [RoleGuard],
-        data: { expectedRolesModules: [{ role: 'ADMINISTRADOR' }, { role: 'ADMINISTRADOR DE PLANILLA', module: 'PLANILLA' }, { role: 'OFICIAL DE PLANILLA', module: 'PLANILLA' }] } */
+        canActivate: [RoleGuard],
+        data: { expectedRolesModules: [{ role: 'ADMINISTRADOR' }, { role: 'ADMINISTRADOR DE PLANILLA', module: 'PLANILLA' }, { role: 'OFICIAL DE PLANILLA', module: 'PLANILLA' }] }
       },
       {
         path: 'gestion',
         loadChildren: () => import('./modulos/admin/admin.module').then(m => m.AdminModule),
-        /* canActivate: [RoleGuard],
-        data: { expectedRolesModules: [{ role: 'ADMINISTRADOR' }, { role: 'ADMINISTRADOR DE PLANILLA', module: 'PLANILLA' }, { role: 'OFICIAL DE PLANILLA', module: 'PLANILLA' }] } */
+        canActivate: [RoleGuard],
+        data: { expectedRolesModules: [{ role: 'ADMINISTRADOR' }, { role: 'ADMINISTRADOR DE PLANILLA', module: 'PLANILLA' }, { role: 'OFICIAL DE PLANILLA', module: 'PLANILLA' }] }
       },
       {
         path: 'menu',
@@ -70,14 +71,13 @@ const routes: Routes = [
       },
       { path: 'usuario/editar', component: EditarPerfilComponent },
     ],
-    /* canActivate: [RoleGuard],
-    data: { expectedRolesModules: [{ role: 'ADMINISTRADOR' }, { role: 'ADMINISTRADOR DE PLANILLA', module: 'PLANILLA' }, { role: 'OFICIAL DE PLANILLA', module: 'PLANILLA' }] } */
+    canActivate: [RoleGuard],
+    data: { expectedRolesModules: [{ role: 'ADMINISTRADOR' }, { role: 'ADMINISTRADOR DE PLANILLA', module: 'PLANILLA' }, { role: 'OFICIAL DE PLANILLA', module: 'PLANILLA' }] }
   },
-  { path: '', component: CustomContainerComponent, children: [{ path: '', component: LandingPageComponent }] },
-  { path: 'pagenotfound', component: PagenotfoundComponent},
-  { 
+  {
     path: '**',  redirectTo: 'pagenotfound', pathMatch: 'full'
-  }
+  },
+  { path: 'pagenotfound', component: PagenotfoundComponent},
 ];
 
 @NgModule({
@@ -85,3 +85,4 @@ const routes: Routes = [
   exports: [RouterModule]
 })
 export class AppRoutingModule { }
+

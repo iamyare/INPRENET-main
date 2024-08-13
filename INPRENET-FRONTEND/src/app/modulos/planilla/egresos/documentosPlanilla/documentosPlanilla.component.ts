@@ -65,10 +65,10 @@ export class DocumentosPlanillaComponent implements OnInit {
           }),
           pageMargins: [40, 130, 40, 100],
           header: {
-            text: `TOTALES BENEFICIOS Y DEDUCCIONES DE PLANILLA ${nombrePlanilla}`,
+            text: `TOTAL DE BENEFICIOS Y DEDUCCIONES EN LA PLANILLA ${nombrePlanilla}`,
             style: 'header',
             alignment: 'center',
-            margin: [50, 80, 50, 0]
+            margin: [50, 90, 50, 0]
           },
           content: [
             {
@@ -87,7 +87,7 @@ export class DocumentosPlanillaComponent implements OnInit {
                 {
                   width: '50%',
                   text: [
-                    { text: 'Total de planilla: ', bold: true },
+                    { text: 'Neto de planilla: ', bold: true },
                     `L ${netoTotal.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",")}`
                   ],
                   alignment: 'right'
@@ -174,7 +174,7 @@ export class DocumentosPlanillaComponent implements OnInit {
             }
           ],
           styles: {
-            header: { fontSize: 18, bold: true },
+            header: { fontSize: 16, bold: true },
             subheader: { fontSize: 14, bold: false, margin: [0, 5, 0, 10] },
             tableHeader: { bold: true, fontSize: 13, color: 'black' },
             tableBody: { fontSize: 8, color: 'black' },  // Texto más pequeño para las celdas de la tabla
@@ -314,7 +314,7 @@ export class DocumentosPlanillaComponent implements OnInit {
                 {
                   width: '50%',
                   text: [
-                    { text: 'Total de planilla: ', bold: true },
+                    { text: 'Neto de planilla: ', bold: true },
                     `L ${totalMonto.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",")}`
                   ],
                   alignment: 'right'
@@ -394,7 +394,7 @@ export class DocumentosPlanillaComponent implements OnInit {
             }
           ],
           styles: {
-            header: { fontSize: 18, bold: true },
+            header: { fontSize: 16, bold: true },
             subheader: { fontSize: 14, bold: false, margin: [0, 5, 0, 10] },
             tableHeader: { bold: true, fontSize: 13, color: 'black' },
             tableBody: { fontSize: 8, color: 'black' },  // Texto más pequeño para las celdas de la tabla

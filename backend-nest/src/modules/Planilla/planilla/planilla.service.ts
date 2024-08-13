@@ -1688,7 +1688,7 @@ export class PlanillaService {
         const personaID = beneficio.ID_PERSONA;
         
         const deduccionInprema = deduccionesInprema.find(d => d.ID_PERSONA === personaID) || { deducciones_inprema: 0 };
-        const deduccionTerceros = deduccionesTerceros.find(d => d.ID_PERSONA === personaID) || { deducciones_terceros: 0 };
+        const deduccionTerceros = deduccionesTerceros.find(dd=> dd.ID_PERSONA === personaID) || { deducciones_terceros: 0 };
    
         const totalDeducciones = (deduccionInprema.deducciones_inprema || 0) + (deduccionTerceros.deducciones_terceros || 0);
    

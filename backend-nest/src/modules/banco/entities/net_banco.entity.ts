@@ -16,6 +16,10 @@ export class Net_Banco {
     @Index("UQ_net_banco_cod_banco")
     cod_banco: string;
 
+    @Column('varchar2', {nullable:true, length: 80, name: 'CODIGO_ACH' })
+    @Index("UQ_net_banco_codigo_ach")
+    codigo_ach: string;
+
     @OneToMany(() => Net_Persona_Por_Banco, personasPorBanco => personasPorBanco.banco)
     personasDeBanco: Net_Persona_Por_Banco[];
 }

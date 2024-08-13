@@ -283,7 +283,10 @@ export class DocumentosPlanillaComponent implements OnInit {
       next: async (data) => {
         const base64Image = await this.convertirImagenABase64('assets/images/membratadoFinal.jpg');
 
-        const totalMonto = data.reduce((acc: any, cur: any) => acc + (cur.MONTO_NETO ? parseFloat(cur.MONTO_NETO) : 0), 0);
+        // Calcular solo el monto de "CON CUENTA"
+        const totalMontoConCuenta = data
+          .filter((cur:any) => cur.NOMBRE_BANCO !== 'SIN BANCO')
+          .reduce((acc: any, cur: any) => acc + (cur.MONTO_NETO ? parseFloat(cur.MONTO_NETO) : 0), 0);
 
         const docDefinition: TDocumentDefinitions = {
           pageSize: 'LETTER',
@@ -315,89 +318,21 @@ export class DocumentosPlanillaComponent implements OnInit {
                   width: '50%',
                   text: [
                     { text: 'Neto de planilla: ', bold: true },
-                    `L ${totalMonto.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",")}`
+                    `L ${totalMontoConCuenta.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",")}`
                   ],
                   alignment: 'right'
                 }
               ],
               margin: [40, 5, 40, 10]
             },
-            { text: 'Montos Pagados por Banco', style: 'subheader', margin: [0, 5, 0, 10] },  // Bajamos un poco el título de la sección
-            this.crearTablaMontosPorBanco(data, 'Montos Pagados por Banco', `Total de montos pagados: L ${totalMonto.toFixed(2)}`, [10, 10, 10, 10]),  // Aumentamos el margen en la tabla
-            {
-              columns: [
-                {
-                  width: '33%',
-                  canvas: [
-                    {
-                      type: 'line',
-                      x1: 0, y1: 0,
-                      x2: 150, y2: 0,
-                      lineWidth: 1.5
-                    }
-                  ],
-                  alignment: 'center',
-                  margin: [0, 60, 0, 5]
-                },
-                {
-                  width: '33%',
-                  canvas: [
-                    {
-                      type: 'line',
-                      x1: 0, y1: 0,
-                      x2: 150, y2: 0,
-                      lineWidth: 1.5
-                    }
-                  ],
-                  alignment: 'center',
-                  margin: [0, 60, 0, 5]
-                },
-                {
-                  width: '33%',
-                  canvas: [
-                    {
-                      type: 'line',
-                      x1: 0, y1: 0,
-                      x2: 150, y2: 0,
-                      lineWidth: 1.5
-                    }
-                  ],
-                  alignment: 'center',
-                  margin: [0, 60, 0, 5]
-                }
-              ]
-            },
-            {
-              columns: [
-                {
-                  width: '33%',
-                  text: 'ELABORÓ',
-                  style: 'signature',
-                  alignment: 'center',
-                  margin: [0, 5, 0, 20]
-                },
-                {
-                  width: '33%',
-                  text: 'REVISÓ',
-                  style: 'signature',
-                  alignment: 'center',
-                  margin: [0, 5, 0, 20]
-                },
-                {
-                  width: '33%',
-                  text: 'AUTORIZÓ',
-                  style: 'signature',
-                  alignment: 'center',
-                  margin: [0, 5, 0, 20]
-                }
-              ]
-            }
+            { text: 'Montos Pagados por Banco', style: 'subheader', margin: [0, 5, 0, 10] },
+            ...this.crearTablaMontosPorBanco(data, 'Montos Pagados por Banco', `Total de montos pagados: L ${totalMontoConCuenta.toFixed(2)}`, [10, 10, 10, 10])
           ],
           styles: {
             header: { fontSize: 16, bold: true },
             subheader: { fontSize: 14, bold: false, margin: [0, 5, 0, 10] },
             tableHeader: { bold: true, fontSize: 13, color: 'black' },
-            tableBody: { fontSize: 8, color: 'black' },  // Texto más pequeño para las celdas de la tabla
+            tableBody: { fontSize: 8, color: 'black' },
             tableTotal: { bold: true, fontSize: 13, color: 'black', alignment: 'right' },
             signature: { fontSize: 10, bold: true }
           },
@@ -425,6 +360,7 @@ export class DocumentosPlanillaComponent implements OnInit {
       }
     });
   }
+
 
   crearTablaMontosPorBanco(data: any[], titulo: string, totalTexto: string, margin: [number, number, number, number]) {
     const formatAmount = (amount: number) => amount.toLocaleString('en-US', {

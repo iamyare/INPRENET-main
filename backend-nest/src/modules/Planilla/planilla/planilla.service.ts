@@ -577,27 +577,7 @@ export class PlanillaService {
     `;
 
     const deduccionesTercerosQuery = `
-        SELECT
-        COALESCE(b."NOMBRE_BANCO", 'SIN BANCO') AS NOMBRE_BANCO,
-        SUM(ddp."MONTO_APLICADO") AS SUMA_DEDUCCIONES_TERCEROS
-        FROM
-        "NET_PLANILLA" p
-        JOIN
-        "NET_DETALLE_DEDUCCION" ddp ON p."ID_PLANILLA" = ddp."ID_PLANILLA"
-        JOIN
-        "NET_DEDUCCION" d ON ddp."ID_DEDUCCION" = d."ID_DEDUCCION"
-        LEFT JOIN
-        "NET_PERSONA_POR_BANCO" pb ON ddp."ID_AF_BANCO" = pb."ID_AF_BANCO"
-        LEFT JOIN
-        "NET_BANCO" b ON pb."ID_BANCO" = b."ID_BANCO"
-        WHERE
-        p."FECHA_APERTURA" BETWEEN TO_DATE(:periodoInicio, 'DD/MM/YYYY') AND TO_DATE(:periodoFinalizacion, 'DD/MM/YYYY')
-        AND p."ID_TIPO_PLANILLA" IN (${idTiposPlanilla.join(', ')})
-        AND ddp."ESTADO_APLICACION" = 'COBRADA'
-        AND d."ID_DEDUCCION" NOT IN (1,2,3)
-        GROUP BY
-        COALESCE(b."NOMBRE_BANCO", 'SIN BANCO')
-        ORDER BY  COALESCE(b."NOMBRE_BANCO", 'SIN BANCO') ASC
+        
     `;
 
     try {
@@ -1630,34 +1610,34 @@ export class PlanillaService {
   ): Promise<any[]> {
     
     const beneficiosQuery = `
-      SELECT 
+      SELECT
         banco.cod_banco AS "codigo_banco", 
         personaPorBanco.num_cuenta AS "numero_cuenta",
         SUM(detallePago.monto_a_pagar) AS "monto_a_pagar",
         persona.primer_apellido || ' ' || COALESCE(persona.segundo_apellido, '') || ' ' || persona.primer_nombre || ' ' || COALESCE(persona.segundo_nombre, '') AS "nombre_completo",
         tipoPlanilla.id_tipo_planilla AS "id_tipo_planilla",
         persona.n_identificacion AS "n_identificacion",
-        persona.ID_PERSONA AS "ID_PERSONA" -- Asegurándonos de que se incluye este campo
-      FROM 
+        persona.ID_PERSONA AS "ID_PERSONA" 
+      FROM
         "NET_PLANILLA" planilla
-      JOIN 
+      JOIN
         "NET_DETALLE_PAGO_BENEFICIO" detallePago ON planilla."ID_PLANILLA" = detallePago."ID_PLANILLA"
-      JOIN 
+      LEFT JOIN
         "NET_PERSONA_POR_BANCO" personaPorBanco ON detallePago."ID_AF_BANCO" = personaPorBanco."ID_AF_BANCO"
-      JOIN 
+      LEFT JOIN
         "NET_BANCO" banco ON personaPorBanco."ID_BANCO" = banco."ID_BANCO"
-      JOIN 
+      JOIN
         "NET_PERSONA" persona ON personaPorBanco."ID_PERSONA" = persona."ID_PERSONA"
-      JOIN 
+      JOIN
         "NET_TIPO_PLANILLA" tipoPlanilla ON planilla."ID_TIPO_PLANILLA" = tipoPlanilla."ID_TIPO_PLANILLA"
-      WHERE 
+      WHERE
         TO_DATE(planilla."PERIODO_INICIO", 'DD/MM/YYYY') >= TO_DATE(:1, 'DD/MM/YYYY')
         AND TO_DATE(planilla."PERIODO_FINALIZACION", 'DD/MM/YYYY') <= TO_DATE(:2, 'DD/MM/YYYY')
         AND planilla."ID_TIPO_PLANILLA" IN (${idTiposPlanilla.join(', ')})
         AND detallePago."ESTADO" = 'PAGADA'
-      GROUP BY 
+      GROUP BY
         banco.cod_banco, personaPorBanco.num_cuenta, persona.primer_apellido, persona.segundo_apellido, persona.primer_nombre, persona.segundo_nombre, tipoPlanilla.id_tipo_planilla, persona.n_identificacion, persona.ID_PERSONA
-    `;
+        `;
 
     const deduccionesInpremaQuery = `
       SELECT 
@@ -1694,7 +1674,7 @@ export class PlanillaService {
         AND TO_DATE(planilla."PERIODO_FINALIZACION", 'DD/MM/YYYY') <= TO_DATE(:periodoFinalizacion, 'DD/MM/YYYY')
         AND planilla."ID_TIPO_PLANILLA" IN (${idTiposPlanilla.join(', ')})
         AND dd."ESTADO_APLICACION" = 'COBRADA'
-        AND ded."ID_CENTRO_TRABAJO" != 1
+        AND ded."ID_DEDUCCION" NOT IN (1, 2, 3)
       GROUP BY 
         dd."ID_PERSONA"
     `;
@@ -1705,7 +1685,6 @@ export class PlanillaService {
       const deduccionesTerceros = await this.entityManager.query(deduccionesTercerosQuery, [periodoInicio, periodoFinalizacion]);
    
       const result = beneficios.map(beneficio => {
-        // Asegúrate de que estás usando la propiedad correcta para identificar ID_PERSONA
         const personaID = beneficio.ID_PERSONA;
         
         const deduccionInprema = deduccionesInprema.find(d => d.ID_PERSONA === personaID) || { deducciones_inprema: 0 };
@@ -1716,14 +1695,10 @@ export class PlanillaService {
         return {
           codigo_banco: beneficio.codigo_banco,
           numero_cuenta: beneficio.numero_cuenta,
-          monto_a_pagar: beneficio.monto_a_pagar,
+          neto: beneficio.monto_a_pagar - totalDeducciones,
           nombre_completo: beneficio.nombre_completo,
           id_tipo_planilla: beneficio.id_tipo_planilla,
           n_identificacion: beneficio.n_identificacion,
-          deducciones_inprema: deduccionInprema.deducciones_inprema,
-          deducciones_terceros: deduccionTerceros.deducciones_terceros,
-          beneficio: beneficio.monto_a_pagar,
-          neto: beneficio.monto_a_pagar - totalDeducciones,
         };
       });
    
@@ -1731,6 +1706,71 @@ export class PlanillaService {
     } catch (error) {
       console.error('Error al obtener los detalles de pago por planilla:', error);
       throw new InternalServerErrorException('Error al obtener los detalles de pago por planilla.');
+    }
+  }
+
+  async generarReporteDetallePago(
+    data: any[],
+    res: Response,
+  ): Promise<void> {
+    try {
+      const workbook = new ExcelJS.Workbook();
+      const detailedSheet = workbook.addWorksheet('Detalle de Pago');
+      const concatenatedSheet = workbook.addWorksheet('Concatenado');
+
+      // Agregar encabezados a la hoja detallada
+      detailedSheet.columns = [
+        { header: 'Código Banco', key: 'codigo_banco', width: 20 },
+        { header: 'Número de Cuenta', key: 'numero_cuenta', width: 20 },
+        { header: 'Monto a Pagar', key: 'monto_a_pagar', width: 20 },
+        { header: 'Nombre Completo', key: 'nombre_completo', width: 30 },
+        { header: 'Fecha Actual', key: 'fecha_actual', width: 15 },
+        { header: 'Tipo de Planilla', key: 'id_tipo_planilla', width: 20 },
+        { header: 'DNI', key: 'n_identificacion', width: 20 },
+      ];
+
+      // Obtener la fecha actual en el formato "dd/MM/yyyy"
+      const currentDate = format(new Date(), 'dd/MM/yyyy');
+
+      // Llenar la hoja detallada
+      data.forEach(item => {
+        detailedSheet.addRow({
+          codigo_banco: item.codigo_banco,
+          numero_cuenta: item.numero_cuenta,
+          monto_a_pagar: item.neto,
+          nombre_completo: item.nombre_completo,
+          fecha_actual: currentDate,
+          id_tipo_planilla: item.id_tipo_planilla,
+          n_identificacion: item.n_identificacion,
+        });
+      });
+
+      // Llenar la hoja concatenada
+      data.forEach(item => {
+        const concatenatedRow = [
+          item.codigo_banco,
+          item.numero_cuenta,
+          item.neto,
+          item.nombre_completo.replace(/\s+/g, ''), // Elimina espacios innecesarios
+          currentDate,
+          item.id_tipo_planilla,
+          item.n_identificacion,
+        ].join(',');
+
+        concatenatedSheet.addRow([concatenatedRow]);
+      });
+
+      // Configura la respuesta para enviar el archivo
+      res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+      res.setHeader('Content-Disposition', 'attachment; filename=detalle_pago.xlsx');
+
+      // Escribe el archivo Excel en la respuesta
+      await workbook.xlsx.write(res);
+
+      res.end();
+    } catch (error) {
+      console.error('Error al generar el archivo Excel:', error);
+      throw new InternalServerErrorException('Error al generar el archivo Excel');
     }
   }
 

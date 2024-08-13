@@ -1502,7 +1502,7 @@ export class VerplancerradaComponent {
     };
   }
 
-  descargarExcelparaBanco(): void {
+  /* descargarExcelparaBanco(): void {
     const codigoPlanillaNumber = this.idPlanilla;
 
     if (isNaN(codigoPlanillaNumber)) {
@@ -1521,5 +1521,23 @@ export class VerplancerradaComponent {
     }, error => {
         console.error('Error al descargar el Excel', error);
     });
-}
+} */
+
+    descargarReporte() {
+      const periodoInicio = '01/08/2024';
+      const periodoFinalizacion = '31/08/2024';
+      const idTiposPlanilla = [1, 2]; // Ejemplo de IDs de tipos de planilla
+
+      this.planillaService.descargarReporteDetallePago(periodoInicio, periodoFinalizacion, idTiposPlanilla)
+        .subscribe(blob => {
+          const url = window.URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = 'detalle_pago.xlsx';
+          a.click();
+          window.URL.revokeObjectURL(url);
+        }, error => {
+          console.error('Error al descargar el archivo', error);
+        });
+    }
 }

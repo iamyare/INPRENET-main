@@ -25,6 +25,24 @@ export class PlanillaController {
     return this.planillaService.uploadExcel(file);
   } */
 
+    @Get('generar-reporte-detalle-pago')
+  async generarReporte(
+    @Query('periodoInicio') periodoInicio: string,
+    @Query('periodoFinalizacion') periodoFinalizacion: string,
+    @Query('idTiposPlanilla') idTiposPlanilla: string,
+    @Res() res,
+  ) {
+    const idTiposPlanillaArray = idTiposPlanilla.split(',').map(Number);
+
+    const data = await this.planillaService.obtenerDetallePagoBeneficioPorPlanillaPrueba(
+      periodoInicio,
+      periodoFinalizacion,
+      idTiposPlanillaArray,
+    );
+
+    await this.planillaService.generarReporteDetallePago(data, res);
+  }
+
     @Get('detalle-pago-beneficio')
     async obtenerDetallePagoBeneficioPorPlanilla(
       @Query('periodoInicio') periodoInicio: string,

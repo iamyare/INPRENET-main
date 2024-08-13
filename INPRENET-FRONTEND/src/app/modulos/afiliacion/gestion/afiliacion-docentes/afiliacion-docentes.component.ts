@@ -237,7 +237,6 @@ export class AfiliacionDocentesComponent implements OnInit {
       familiares: familiares
     };
 
-    console.log('Datos Completos:', allData);
     //this.enviarDatos(allData);
   }
 

@@ -35,7 +35,6 @@ export class VerReferenciasComponent {
   constructor(
     private dialog: MatDialog,
     private SVCCentrosTrab: CentroTrabajoService,) {
-    console.log(this.parentForm);
     this.getFilas().then(() => this.cargar());
   }
 
@@ -67,8 +66,6 @@ export class VerReferenciasComponent {
   getFilas = async () => {
     try {
       const data = await this.SVCCentrosTrab.getAllReferenciasByCentro(1).toPromise();
-      console.log(data);
-
 
       this.filasT = data.map((item: any) => ({
         id_referencia: item.id_referencia,

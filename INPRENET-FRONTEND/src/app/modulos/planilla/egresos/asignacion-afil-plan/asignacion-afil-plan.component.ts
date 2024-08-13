@@ -31,7 +31,7 @@ export class AsignacionAfilPlanComponent implements OnInit {
     private planillaService: PlanillaService,
     private toastr: ToastrService,
     public dialog: MatDialog
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     this.myColumnsDed = [
@@ -76,7 +76,6 @@ export class AsignacionAfilPlanComponent implements OnInit {
 
   obtenerDatosForm(event: any): any {
     this.datosFormateados = event;
-    console.log(event);
   }
 
   getPlanilla = async () => {
@@ -84,8 +83,6 @@ export class AsignacionAfilPlanComponent implements OnInit {
       this.planillaService.getPlanillaBy(this.datosFormateados.value.codigo_planilla).subscribe(
         {
           next: async (response) => {
-            console.log(response);
-
             if (response.data) {
               this.detallePlanilla = response.data;
 
@@ -122,7 +119,6 @@ export class AsignacionAfilPlanComponent implements OnInit {
   getFilas = async (proceso: string) => {
     try {
       const data = await this.planillaService.getPlanillasPreliminares(proceso).toPromise();
-      console.log(data);
 
       this.dataPlan = data.map((item: any) => ({
         dni: item.N_IDENTIFICACION,

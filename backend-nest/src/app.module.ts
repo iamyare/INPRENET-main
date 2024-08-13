@@ -42,7 +42,7 @@ import { AuthModule } from './modules/auth/auth.module';
           password,
           connectString,
           extra: { pool },
-          autoLoadEntities: false,
+          //autoLoadEntities: true,
           //synchronize: true,
           entities: [__dirname + '/../**/*.entity{.ts,.js}'],
           migrations: [__dirname + '/../migrations/*{.ts,.js}'],

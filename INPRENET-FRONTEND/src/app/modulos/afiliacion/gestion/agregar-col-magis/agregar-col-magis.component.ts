@@ -24,8 +24,6 @@ export class AgregarColMagisComponent implements OnInit {
 
   ngOnInit(): void {
     this.initFormColMag();
-    console.log(this.data);
-
   }
 
   private initFormColMag(): void {

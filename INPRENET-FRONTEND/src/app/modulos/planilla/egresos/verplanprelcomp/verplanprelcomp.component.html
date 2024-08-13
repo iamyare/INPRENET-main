@@ -3,7 +3,7 @@
     subtitulo="Completa la información correspondiente" (newDatBenChange)="obtenerDatosForm($event)">
   </app-dynamic-form>
   <div style="text-align: center">
-    <button color="primary" (click)="getPlanilla()" [disabled]="datosFormateados?.invalid" mat-raised-button
+    <button mat-raised-button color="primary" (click)="getPlanilla()" [disabled]="datosFormateados?.invalid" 
       style="margin: 2% 0; color: white; border-radius: 5px; padding: 10px 20px">
       Ver Planilla preliminar
     </button>
@@ -11,10 +11,8 @@
 </div>
 
 <div class="card-header card-header-danger title" *ngIf="detallePlanilla">
-  <div class="card-body" style="padding: 1% 1% 1% 1%">
-    <h4 class="card-title" style="text-align: center">
-      Datos Generales De La Planilla
-    </h4>
+  <div class="card-body" style="padding: 1%">
+    <h4 class="card-title">Datos Generales De La Planilla</h4>
     <table>
       <tr style="background-color: #f2f2f2">
         <th>Nombre Planilla</th>
@@ -34,6 +32,20 @@
         <th>Período Finalización</th>
         <td>{{ detallePlanilla?.periodoFinalizacion }}</td>
       </tr>
+      <tr>
+        <th>Total Beneficios</th>
+        <td>{{ detallePlanilla?.totalBeneficios | currency: "L" }}</td>
+        <th>Deducciones INPREMA</th>
+        <td>{{ detallePlanilla?.deduccionesI | currency: "L" }}</td>
+
+      </tr>
+      <tr style="background-color: #f2f2f2">
+        <th>Total Neto</th>
+        <td>{{ detallePlanilla?.totalNeto | currency: "L" }}</td>
+        <th>Deducciones Terceros</th>
+        <td>{{ detallePlanilla?.deduccionesT | currency: "L" }}</td>
+        <td></td>
+      </tr>
     </table>
   </div>
 </div>
@@ -44,23 +56,41 @@
   </h4>
 
   <div style="padding: 1% 1% 1% 1%">
-    <app-dynamic-table style="width: 100%" titulo="Datos de personas en planilla"
-      subtitulo="Completa la información correspondiente" [verOpcEditar]="false" [columns]="myColumnsDed"
-      [data]="datosTabl" [getData]="getFilas"
+    <app-dynamic-table 
+      titulo="Datos de personas en planilla"
+      subtitulo="Completa la información correspondiente" 
+      style="width: 100%" 
+      [nombreEncabezadoUno]="'Desglose'"
+      [verOpcEditar]="false"
+
+      [mostrarBotonUno]="true" 
+      [etiquetaBotonUno]="'Ingresos'"
+      [nombreEncabezadoUno]="'Detalle Ingresos'"
       (ejecutarFuncionAsincronaEvent)="ejecutarFuncionAsincronaDesdeOtroComponente($event)"
-      [nombreEncabezadoUno]="'Desglose'" [mostrarBotonUno]="true" [etiquetaBotonUno]="'Detalle de los montos'"
-      (accionBotonUno)="manejarAccionUno($event)">
+      (accionBotonUno)="manejarAccionUno($event)"
+
+      [nombreEncabezadoDos]="'Detalle Deducciones'"
+      [etiquetaBotonDos]="'Deducciones'"
+      [mostrarBotonDos]="true"
+      (ejecutarFuncionAsincronaEvent)="ejecutarFuncionAsincronaDesdeOtroComponente($event)"
+      (accionBotonDos)="manejarAccionDos($event)"
+
+      [columns]="myColumnsDed"
+      [data]="datosTabl"
+      [getData]="getFilas">
+
     </app-dynamic-table>
 
     <div style="background-color: white; margin-bottom: 1%; text-align: center">
-      <button (click)="actualizarFechaCierrePlanilla()" mat-raised-button style="
+      <button  mat-raised-button color="primary" 
+      [disabled]="detallePlanilla.beneficios_cargados == 'NO' || detallePlanilla.deducc_inprema_cargadas == 'NO' || detallePlanilla.deducc_terceros_cargadas == 'NO' " (click)="actualizarFechaCierrePlanilla()"
+      style="
         margin: 2% 2%;
         padding: 2% 1% 1% 1%;
-        background-color: #628780;
         color: #ffffff;
         border-radius: 5px;
-        padding: 10px 20px;
-      ">
+        padding: 10px 20px;" 
+        >
         Cerrar planilla
       </button>
     </div>

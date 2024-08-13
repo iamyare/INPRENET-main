@@ -126,7 +126,7 @@ export class UsuarioService {
         'usuarioModulos.rolModulo',
         'usuarioModulos.rolModulo.modulo',
       ],
-    }); 
+    });
 
     if (!usuario) {
       throw new NotFoundException('Usuario no encontrado');
@@ -137,7 +137,7 @@ export class UsuarioService {
 
   async desactivarUsuario(idUsuario: number, fechaReactivacion: Date | null = null): Promise<void> {
     const usuario = await this.usuarioEmpresaRepository.findOne({ where: { id_usuario_empresa: idUsuario } });
-    
+
     if (!usuario) {
       throw new NotFoundException('Usuario no encontrado');
     }
@@ -190,23 +190,23 @@ export class UsuarioService {
     const usuario = await this.usuarioEmpresaRepository.findOne({
       where: { empleadoCentroTrabajo: { correo_1: correo } },
     });
-  
+
     if (!usuario) {
       throw new NotFoundException('Usuario no encontrado');
     }
-  
+
     const salt = await bcrypt.genSalt(10);
     usuario.contrasena = await bcrypt.hash(nuevaContrasena, salt);
-    
+
     await this.usuarioEmpresaRepository.save(usuario);
-  
+
     return { message: 'Contraseña cambiada con éxito' };
   }
-  
+
 
   async preRegistroAdmin(createPreRegistroDto: CreatePreRegistroDto): Promise<void> {
     const { nombreEmpleado, nombrePuesto, correo, numeroEmpleado, idModulo } = createPreRegistroDto;
-  
+
     // Verificar si el usuario ya existe
     const usuarioExistente = await this.usuarioEmpresaRepository.findOne({
       relations: ['empleadoCentroTrabajo'],
@@ -216,37 +216,37 @@ export class UsuarioService {
         },
       },
     });
-  
+
     if (usuarioExistente) {
       throw new BadRequestException('El correo ya está registrado');
     }
-  
+
     // Verificar si el módulo existe y obtener el centro de trabajo
     const modulo = await this.moduloRepository.findOne({
       where: { id_modulo: idModulo },
       relations: ['centroTrabajo'],
     });
-  
+
     if (!modulo) {
       throw new BadRequestException('El módulo especificado no existe');
     }
-  
+
     // Asignar el rol de administrador (ID_ROLE_ADMIN)
     const rolAdmin = await this.rolModuloRepository.findOne({
       where: { modulo: { id_modulo: idModulo }, nombre: 'ADMINISTRADOR' },
     });
-  
+
     if (!rolAdmin) {
       throw new BadRequestException('El rol de administrador no existe para el módulo especificado');
     }
-  
+
     // Crear un nuevo empleado
     const nuevoEmpleado = this.empleadoRepository.create({
       nombreEmpleado,
     });
-  
+
     const empleado = await this.empleadoRepository.save(nuevoEmpleado);
-  
+
     // Crear una nueva relación de empleado con centro de trabajo
     const nuevoEmpleadoCentroTrabajo = this.empleadoCentroTrabajoRepository.create({
       empleado,
@@ -255,31 +255,31 @@ export class UsuarioService {
       nombrePuesto,
       centroTrabajo: modulo.centroTrabajo,
     });
-  
+
     const empleadoCentroTrabajo = await this.empleadoCentroTrabajoRepository.save(nuevoEmpleadoCentroTrabajo);
-  
+
     // Crear un nuevo usuario
     const nuevoUsuario = this.usuarioEmpresaRepository.create({
       estado: 'PENDIENTE',
       contrasena: await bcrypt.hash('temporal', 10),
       empleadoCentroTrabajo: empleadoCentroTrabajo,
     });
-  
+
     const usuarioGuardado = await this.usuarioEmpresaRepository.save(nuevoUsuario);
-  
+
     // Crear la relación en Net_Usuario_Modulo
     const usuarioModulo = this.usuarioModuloRepository.create({
       usuarioEmpresa: usuarioGuardado,
       rolModulo: rolAdmin,
     });
-  
+
     await this.usuarioModuloRepository.save(usuarioModulo);
-  
+
     // Generar un token JWT para la verificación de correo
     const token = this.jwtService.sign({ correo });
-  
+
     // Enviar correo electrónico de verificación
-    const verificationUrl = `http://localhost:4200/register?token=${token}`;
+    const verificationUrl = `${process.env.HOST_FRONTEND}/auth/register?token=${token}`;
     const htmlContent = `
       <div style="font-family: Arial, sans-serif; line-height: 1.6;">
         <h2 style="color: #13776B;">¡Bienvenido a INPRENET!</h2>
@@ -296,10 +296,10 @@ export class UsuarioService {
         <p>¡Gracias por unirte a nosotros!</p>
         <p>El equipo de INPRENET</p>
       </div>`;
-  
+
     await this.mailService.sendMail(correo, 'Completa tu registro', '', htmlContent);
   }
-  
+
 
   async preRegistro(createPreRegistroDto: CreatePreRegistroDto): Promise<void> {
     const { nombreEmpleado, nombrePuesto, correo, numeroEmpleado, idRole } = createPreRegistroDto;
@@ -367,7 +367,7 @@ export class UsuarioService {
     const token = this.jwtService.sign({ correo });
 
     // Enviar correo electrónico de verificación
-    const verificationUrl = `http://localhost:4200/#/register?token=${token}`;
+    const verificationUrl = `${process.env.HOST_FRONTEND}/auth/register?token=${token}`;
     const htmlContent = `
     <div style="font-family: Arial, sans-serif; line-height: 1.6;">
       <h2 style="color: #13776B;">¡Bienvenido a INPRENET!</h2>
@@ -384,7 +384,7 @@ export class UsuarioService {
       <p>¡Gracias por unirte a nosotros!</p>
       <p>El equipo de INPRENET</p>
     </div>`;
-    
+
 
     await this.mailService.sendMail(correo, 'Completa tu registro', '', htmlContent);
   }
@@ -446,8 +446,8 @@ export class UsuarioService {
     });
 
     await this.seguridadRepository.save([seguridad1, seguridad2, seguridad3]);
-  } 
- 
+  }
+
 
   
 
@@ -469,7 +469,7 @@ export class UsuarioService {
 
 
   async loginPrivada(email: string, contrasena: string): Promise<any> {
-    
+
     const usuario = await this.usuarioPrivadaRepository.findOne({
       where: { email },
       relations: ['centroTrabajo'],
@@ -482,8 +482,8 @@ export class UsuarioService {
     if (!passwordValid) {
       throw new UnauthorizedException('Credenciales inválidas');
     }
-    const payload = { 
-      sub: usuario.id_usuario, 
+    const payload = {
+      sub: usuario.id_usuario,
       email: usuario.email,
       ...(usuario.centroTrabajo && { idCentroTrabajo: usuario.centroTrabajo.id_centro_trabajo }),
     };
@@ -510,7 +510,7 @@ export class UsuarioService {
       throw new Error(`Failed to get users for center with id ${centroTrabajoId}`);
     } */
   }
-  
+
   async createPrivada(email: string, contrasena: string, nombre_usuario: string, idCentroTrabajo?: number) {
     /* const usuarioExistente = await this.usuarioPrivadaRepository.findOne({ where: { email } });
     if (usuarioExistente) {
@@ -540,7 +540,7 @@ export class UsuarioService {
   
     return this.usuarioPrivadaRepository.save(nuevoUsuario); */
   }
-  
+
 
   findAll(paginationDto: PaginationDto) {
     /* const { limit = 10, offset = 0 } = paginationDto
@@ -555,136 +555,136 @@ export class UsuarioService {
   }
 
   async update(updateUsuarioDto: UpdateUsuarioDto) {
-   /*  const { token, contrasena, nombre_puesto, telefono_empleado, numero_empleado, ...restUsuario } = updateUsuarioDto;
-
-    if (!contrasena) {
-      throw new BadRequestException('La contraseña es requerida');
-    }
-
-    let decoded;
-    try {
-      decoded = this.jwtService.verify(token);
-    } catch (error) {
-      throw new BadRequestException('Token inválido');
-    }
-
-    const { correo, id_usuario } = decoded;
-    const usuario = await this.usuarioRepository.findOne({
-      where: { correo, id_usuario },
-      relations: ['empleado']
-    });
-
-    if (!usuario) {
-      throw new NotFoundException('Usuario no encontrado');
-    }
-
-    usuario.contrasena = await bcrypt.hash(contrasena, 10);
-    Object.assign(usuario, restUsuario); // Actualiza propiedades del usuario
-    usuario.estado = 'ACTIVO';
-    usuario.fecha_verificacion = new Date();
-
-    // Actualizar datos del usuario
-    await this.usuarioRepository.save(usuario);
-
-    // Verificar y actualizar el empleado relacionado
-    if (usuario.empleado) {
-      usuario.empleado.nombre_puesto = nombre_puesto;
-      usuario.empleado.telefono_empleado = telefono_empleado;
-      usuario.empleado.numero_empleado = numero_empleado; 
-      await this.empleadoRepository.save(usuario.empleado);
-    } else {
-      throw new NotFoundException('Empleado asociado no encontrado');
-    }
-
-    return { success: true, msg: 'Usuario y empleado actualizados correctamente' }; */
+    /*  const { token, contrasena, nombre_puesto, telefono_empleado, numero_empleado, ...restUsuario } = updateUsuarioDto;
+ 
+     if (!contrasena) {
+       throw new BadRequestException('La contraseña es requerida');
+     }
+ 
+     let decoded;
+     try {
+       decoded = this.jwtService.verify(token);
+     } catch (error) {
+       throw new BadRequestException('Token inválido');
+     }
+ 
+     const { correo, id_usuario } = decoded;
+     const usuario = await this.usuarioRepository.findOne({
+       where: { correo, id_usuario },
+       relations: ['empleado']
+     });
+ 
+     if (!usuario) {
+       throw new NotFoundException('Usuario no encontrado');
+     }
+ 
+     usuario.contrasena = await bcrypt.hash(contrasena, 10);
+     Object.assign(usuario, restUsuario); // Actualiza propiedades del usuario
+     usuario.estado = 'ACTIVO';
+     usuario.fecha_verificacion = new Date();
+ 
+     // Actualizar datos del usuario
+     await this.usuarioRepository.save(usuario);
+ 
+     // Verificar y actualizar el empleado relacionado
+     if (usuario.empleado) {
+       usuario.empleado.nombre_puesto = nombre_puesto;
+       usuario.empleado.telefono_empleado = telefono_empleado;
+       usuario.empleado.numero_empleado = numero_empleado; 
+       await this.empleadoRepository.save(usuario.empleado);
+     } else {
+       throw new NotFoundException('Empleado asociado no encontrado');
+     }
+ 
+     return { success: true, msg: 'Usuario y empleado actualizados correctamente' }; */
   }
 
   remove(id: number) {
     return `This action removes a #${id} usuario`;
-  } 
+  }
 
   async obtenerUsuariosPorModuloYCentroTrabajo(modulos: string[], idCentroTrabajo: number): Promise<any[]> {
     try {
-        const queryBuilder = this.usuarioEmpresaRepository.createQueryBuilder('usuarioEmpresa')
-            .leftJoinAndSelect('usuarioEmpresa.empleadoCentroTrabajo', 'empleadoCentroTrabajo')
-            .leftJoinAndSelect('empleadoCentroTrabajo.empleado', 'empleado')
-            .leftJoinAndSelect('empleadoCentroTrabajo.centroTrabajo', 'centroTrabajo')
-            .leftJoinAndSelect('centroTrabajo.municipio', 'municipio')
-            .leftJoinAndSelect('centroTrabajo.modulos', 'modulos')
-            .leftJoinAndSelect('modulos.roles', 'roles')
-            .leftJoinAndSelect('roles.modulo', 'rolesModulo')
-            .where('centroTrabajo.id_centro_trabajo = :idCentroTrabajo', { idCentroTrabajo })
-            .andWhere('modulos.nombre IN (:...modulos)', { modulos })
-            .select([
-                'usuarioEmpresa.id_usuario_empresa',
-                'usuarioEmpresa.estado',
-                'usuarioEmpresa.fecha_creacion',
-                'usuarioEmpresa.fecha_verificacion',
-                'usuarioEmpresa.fecha_modificacion',
-                'empleadoCentroTrabajo.id_empleado_centro_trabajo',
-                'empleadoCentroTrabajo.correo_1',
-                'empleadoCentroTrabajo.correo_2',
-                'empleadoCentroTrabajo.numeroEmpleado',
-                'empleadoCentroTrabajo.nombrePuesto',
-                'empleado.id_empleado',
-                'empleado.nombreEmpleado',
-                'empleado.telefono_1',
-                'empleado.telefono_2',
-                'empleado.numero_identificacion',
-                'empleado.archivo_identificacion',
-                'empleado.foto_empleado',
-                'centroTrabajo.id_centro_trabajo',
-                'centroTrabajo.nombre_centro_trabajo',
-                'municipio.id_municipio',
-                'municipio.nombre_municipio',
-                'modulos.id_modulo',
-                'modulos.nombre',
-                'roles.id_rol_modulo',
-                'roles.nombre',
-                'rolesModulo.id_modulo',
-                'rolesModulo.nombre'
-            ]);
+      const queryBuilder = this.usuarioEmpresaRepository.createQueryBuilder('usuarioEmpresa')
+        .leftJoinAndSelect('usuarioEmpresa.empleadoCentroTrabajo', 'empleadoCentroTrabajo')
+        .leftJoinAndSelect('empleadoCentroTrabajo.empleado', 'empleado')
+        .leftJoinAndSelect('empleadoCentroTrabajo.centroTrabajo', 'centroTrabajo')
+        .leftJoinAndSelect('centroTrabajo.municipio', 'municipio')
+        .leftJoinAndSelect('centroTrabajo.modulos', 'modulos')
+        .leftJoinAndSelect('modulos.roles', 'roles')
+        .leftJoinAndSelect('roles.modulo', 'rolesModulo')
+        .where('centroTrabajo.id_centro_trabajo = :idCentroTrabajo', { idCentroTrabajo })
+        .andWhere('modulos.nombre IN (:...modulos)', { modulos })
+        .select([
+          'usuarioEmpresa.id_usuario_empresa',
+          'usuarioEmpresa.estado',
+          'usuarioEmpresa.fecha_creacion',
+          'usuarioEmpresa.fecha_verificacion',
+          'usuarioEmpresa.fecha_modificacion',
+          'empleadoCentroTrabajo.id_empleado_centro_trabajo',
+          'empleadoCentroTrabajo.correo_1',
+          'empleadoCentroTrabajo.correo_2',
+          'empleadoCentroTrabajo.numeroEmpleado',
+          'empleadoCentroTrabajo.nombrePuesto',
+          'empleado.id_empleado',
+          'empleado.nombreEmpleado',
+          'empleado.telefono_1',
+          'empleado.telefono_2',
+          'empleado.numero_identificacion',
+          'empleado.archivo_identificacion',
+          'empleado.foto_empleado',
+          'centroTrabajo.id_centro_trabajo',
+          'centroTrabajo.nombre_centro_trabajo',
+          'municipio.id_municipio',
+          'municipio.nombre_municipio',
+          'modulos.id_modulo',
+          'modulos.nombre',
+          'roles.id_rol_modulo',
+          'roles.nombre',
+          'rolesModulo.id_modulo',
+          'rolesModulo.nombre'
+        ]);
 
-        const usuariosModulos = await queryBuilder.getMany();
+      const usuariosModulos = await queryBuilder.getMany();
 
-        // Convertir los blobs a base64 antes de retornar los datos
-        const usuariosModulosConBase64 = usuariosModulos.map(usuario => {
-            if (usuario.empleadoCentroTrabajo && usuario.empleadoCentroTrabajo.empleado) {
-                return {
-                    ...usuario,
-                    empleadoCentroTrabajo: {
-                        ...usuario.empleadoCentroTrabajo,
-                        empleado: {
-                            ...usuario.empleadoCentroTrabajo.empleado,
-                            archivo_identificacion: usuario.empleadoCentroTrabajo.empleado.archivo_identificacion
-                                ? Buffer.from(usuario.empleadoCentroTrabajo.empleado.archivo_identificacion).toString('base64')
-                                : null,
-                            foto_empleado: usuario.empleadoCentroTrabajo.empleado.foto_empleado
-                                ? Buffer.from(usuario.empleadoCentroTrabajo.empleado.foto_empleado).toString('base64')
-                                : null,
-                        },
-                    },
-                };
-            }
-            return usuario;
-        });
+      // Convertir los blobs a base64 antes de retornar los datos
+      const usuariosModulosConBase64 = usuariosModulos.map(usuario => {
+        if (usuario.empleadoCentroTrabajo && usuario.empleadoCentroTrabajo.empleado) {
+          return {
+            ...usuario,
+            empleadoCentroTrabajo: {
+              ...usuario.empleadoCentroTrabajo,
+              empleado: {
+                ...usuario.empleadoCentroTrabajo.empleado,
+                archivo_identificacion: usuario.empleadoCentroTrabajo.empleado.archivo_identificacion
+                  ? Buffer.from(usuario.empleadoCentroTrabajo.empleado.archivo_identificacion).toString('base64')
+                  : null,
+                foto_empleado: usuario.empleadoCentroTrabajo.empleado.foto_empleado
+                  ? Buffer.from(usuario.empleadoCentroTrabajo.empleado.foto_empleado).toString('base64')
+                  : null,
+              },
+            },
+          };
+        }
+        return usuario;
+      });
 
-        return usuariosModulosConBase64;
+      return usuariosModulosConBase64;
     } catch (error) {
-        console.error('Error al obtener usuarios por módulo y centro de trabajo:', error);
-        throw new Error('Error al obtener usuarios por módulo y centro de trabajo.');
+      console.error('Error al obtener usuarios por módulo y centro de trabajo:', error);
+      throw new Error('Error al obtener usuarios por módulo y centro de trabajo.');
     }
-}
+  }
 
 
 
   async obtenerRolesPorModulo(modulo: string): Promise<net_rol_modulo[]> {
     return await this.rolModuloRepository.createQueryBuilder('rol')
-        .innerJoinAndSelect('rol.modulo', 'modulo')
-        .where('modulo.nombre = :modulo', { modulo })
-        .andWhere('rol.nombre != :nombre', { nombre: 'ADMINISTRADOR' })
-        .getMany();
-}
+      .innerJoinAndSelect('rol.modulo', 'modulo')
+      .where('modulo.nombre = :modulo', { modulo })
+      .andWhere('rol.nombre != :nombre', { nombre: 'ADMINISTRADOR' })
+      .getMany();
+  }
 
 
 
@@ -698,7 +698,7 @@ export class UsuarioService {
       relations: ['centroTrabajo'],
     });
   }
-  
+
 
   private handleException(error: any): void {
     this.logger.error(error);
@@ -745,7 +745,7 @@ export class UsuarioService {
   }
 
   async enviarCorreoRestablecimiento(correo: string, token: string): Promise<void> {
-    const urlRestablecimiento = `http://localhost:4200/#/restablecer-contrasena/${token}`;
+    const urlRestablecimiento = `${process.env.HOST_FRONTEND}/auth/restablecer-contrasena/${token}`;
     const asunto = 'Restablecimiento de contraseña';
     const texto = `Haga clic en el siguiente enlace para restablecer su contraseña: ${urlRestablecimiento}`;
     const html = `<p>Haga clic en el siguiente enlace para restablecer su contraseña:</p><a href="${urlRestablecimiento}">${urlRestablecimiento}</a>`;
@@ -788,7 +788,7 @@ export class UsuarioService {
 
     return usuario.seguridad.map(pregunta => pregunta.pregunta);
   }
-  
+
 
 
 }

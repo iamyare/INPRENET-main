@@ -287,8 +287,6 @@ export class AfilBancoComponent implements OnInit {
       formData.append('foto_perfil', file);
     }
 
-    console.log(formData);
-
     // Log para ver qué contiene el FormData antes de enviar
     formData.forEach((value, key) => {
       console.log(`Key ${key}:`, value);
@@ -344,32 +342,32 @@ export class AfilBancoComponent implements OnInit {
 
 
   createPDF() {
-    const documentDefinition:any = this.getDocumentDefinition();
+    const documentDefinition: any = this.getDocumentDefinition();
     pdfMake.createPdf(documentDefinition).download('example.pdf');
   }
 
 
   getDocumentDefinition() {
     const data = [
-        {
-            numero: '1',
-            nombre: 'Juan Perez',
-            fechaNacimiento: '01/01/1980',
-            identidad: '0801-1980-12345',
-            parentesco: 'Padre',
-            porcentaje: '100%',
-            direccion: 'Av. Principal 123',
-            telefono: '555-1234'
-        },
+      {
+        numero: '1',
+        nombre: 'Juan Perez',
+        fechaNacimiento: '01/01/1980',
+        identidad: '0801-1980-12345',
+        parentesco: 'Padre',
+        porcentaje: '100%',
+        direccion: 'Av. Principal 123',
+        telefono: '555-1234'
+      },
     ];
 
     const userDetails = {
-        nombre: 'Juan Perez',
-        nivel: 'Secundario',
-        centroEducativo: 'Instituto Nacional',
-        municipio: 'Tegucigalpa',
-        departamento: 'Francisco Morazán',
-        identidad: '0801-1980-12345'
+      nombre: 'Juan Perez',
+      nivel: 'Secundario',
+      centroEducativo: 'Instituto Nacional',
+      municipio: 'Tegucigalpa',
+      departamento: 'Francisco Morazán',
+      identidad: '0801-1980-12345'
     };
 
     // Función auxiliar para aplicar múltiples estilos
@@ -377,222 +375,222 @@ export class AfilBancoComponent implements OnInit {
 
     // Definir el tipo correcto para los objetos de la tabla
     interface TableCell {
-        text?: string;
-        style?: string;
-        rowSpan?: number;
-        colSpan?: number;
-        fillColor?: string;
-        alignment?: string;
+      text?: string;
+      style?: string;
+      rowSpan?: number;
+      colSpan?: number;
+      fillColor?: string;
+      alignment?: string;
     }
 
     // Transformar los datos en el formato requerido por pdfMake
     const body: TableCell[][] = [
-        [
-            { text: 'N°', style: applyStyles('tableHeader'), fillColor: '#CCCCCC', alignment: 'center' },
-            { text: 'NOMBRE COMPLETO', style: applyStyles('tableHeader'), alignment: 'center' },
-            { text: 'FECHA DE NACIMIENTO', style: applyStyles('tableHeader'), alignment: 'center' },
-            { text: 'IDENTIDAD', style: applyStyles('tableHeader'), alignment: 'center' },
-            { text: 'PARENTESCO', style: applyStyles('tableHeader'), alignment: 'center' },
-            { text: '%', style: applyStyles('tableHeader'), alignment: 'center' },
-        ]
+      [
+        { text: 'N°', style: applyStyles('tableHeader'), fillColor: '#CCCCCC', alignment: 'center' },
+        { text: 'NOMBRE COMPLETO', style: applyStyles('tableHeader'), alignment: 'center' },
+        { text: 'FECHA DE NACIMIENTO', style: applyStyles('tableHeader'), alignment: 'center' },
+        { text: 'IDENTIDAD', style: applyStyles('tableHeader'), alignment: 'center' },
+        { text: 'PARENTESCO', style: applyStyles('tableHeader'), alignment: 'center' },
+        { text: '%', style: applyStyles('tableHeader'), alignment: 'center' },
+      ]
     ];
 
     data.forEach((item) => {
-        body.push(
-            [
-                { text: item.numero, rowSpan: 2, style: applyStyles('tableRowLarge'), fillColor: '#CCCCCC', alignment: 'center' },
-                { text: item.nombre, style: applyStyles('tableRowLarge'), alignment: 'center' },
-                { text: item.fechaNacimiento, style: applyStyles('tableRowLarge'), alignment: 'center' },
-                { text: item.identidad, style: applyStyles('tableRowLarge'), alignment: 'center' },
-                { text: item.parentesco, style: applyStyles('tableRowLarge'), alignment: 'center' },
-                { text: item.porcentaje, style: applyStyles('tableRowLarge'), alignment: 'center' },
-            ],
-            [
-                {},
-                { text: 'DIRECCIÓN', style: applyStyles('tableRowLarge'), fillColor: '#CCCCCC', alignment: 'center' },
-                { text: item.direccion, style: applyStyles('tableRowLarge'), colSpan: 2, alignment: 'center' },
-                { text: '', style: applyStyles('tableRowLarge') },
-                { text: 'TELEFONO/CEL', style: applyStyles('tableRowLarge'), fillColor: '#CCCCCC', alignment: 'center' },
-                { text: item.telefono, style: applyStyles('tableRowLarge'), alignment: 'center' },
-            ]
-        );
+      body.push(
+        [
+          { text: item.numero, rowSpan: 2, style: applyStyles('tableRowLarge'), fillColor: '#CCCCCC', alignment: 'center' },
+          { text: item.nombre, style: applyStyles('tableRowLarge'), alignment: 'center' },
+          { text: item.fechaNacimiento, style: applyStyles('tableRowLarge'), alignment: 'center' },
+          { text: item.identidad, style: applyStyles('tableRowLarge'), alignment: 'center' },
+          { text: item.parentesco, style: applyStyles('tableRowLarge'), alignment: 'center' },
+          { text: item.porcentaje, style: applyStyles('tableRowLarge'), alignment: 'center' },
+        ],
+        [
+          {},
+          { text: 'DIRECCIÓN', style: applyStyles('tableRowLarge'), fillColor: '#CCCCCC', alignment: 'center' },
+          { text: item.direccion, style: applyStyles('tableRowLarge'), colSpan: 2, alignment: 'center' },
+          { text: '', style: applyStyles('tableRowLarge') },
+          { text: 'TELEFONO/CEL', style: applyStyles('tableRowLarge'), fillColor: '#CCCCCC', alignment: 'center' },
+          { text: item.telefono, style: applyStyles('tableRowLarge'), alignment: 'center' },
+        ]
+      );
     });
 
     return {
-        content: [
+      content: [
+        {
+          text: [
+            'Señores de la Comisión Interventora del INPREMA\nPresente.\n\nYo ',
+            { text: userDetails.nombre, bold: true },
+            ', mayor de edad, laborando como docente en el nivel ',
+            { text: userDetails.nivel, bold: true },
+            ', del Centro Educativo ',
+            { text: userDetails.centroEducativo, bold: true },
+            ', ubicado en el Municipio ',
+            { text: userDetails.municipio, bold: true },
+            ' del Departamento ',
+            { text: userDetails.departamento, bold: true },
+            ', con Identidad N°. ',
+            { text: userDetails.identidad, bold: true },
+            ', comparezco ante el Instituto Nacional de Previsión del magisterio a registrar mis beneficiarios legales de la manera siguiente:\n\n'
+          ],
+          style: 'introText'
+        },
+        {
+          table: {
+            widths: [20, '*', '*', '*', '*', '*'],
+            body: body
+          }
+        },
+        {
+          text: '', // Separación adicional
+          margin: [0, 20, 0, 0]
+        },
+        {
+          stack: [
             {
-                text: [
-                    'Señores de la Comisión Interventora del INPREMA\nPresente.\n\nYo ',
-                    { text: userDetails.nombre, bold: true },
-                    ', mayor de edad, laborando como docente en el nivel ',
-                    { text: userDetails.nivel, bold: true },
-                    ', del Centro Educativo ',
-                    { text: userDetails.centroEducativo, bold: true },
-                    ', ubicado en el Municipio ',
-                    { text: userDetails.municipio, bold: true },
-                    ' del Departamento ',
-                    { text: userDetails.departamento, bold: true },
-                    ', con Identidad N°. ',
-                    { text: userDetails.identidad, bold: true },
-                    ', comparezco ante el Instituto Nacional de Previsión del magisterio a registrar mis beneficiarios legales de la manera siguiente:\n\n'
-                ],
-                style: 'introText'
+              text: [
+                'También dispongo, que si alguno de mis beneficiarios (as) designados en este instrumento falleciere, el porcentaje de él o ella asignado, se distribuya en partes iguales entre los sobrevivientes registrados. Me reservo el derecho de actualizar, modificar o cancelar la presente DESIGNACIÓN, cuando lo estime conveniente.\n\n',
+                { text: 'Nota: Con esta designación dejo sin valor ni efecto la presentada anteriormente.\n\n', bold: true }
+              ],
+              style: 'mainText'
             },
             {
-                table: {
-                    widths: [20, '*', '*', '*', '*', '*'],
-                    body: body
-                }
-            },
-            {
-                text: '', // Separación adicional
-                margin: [0, 20, 0, 0]
-            },
-            {
-                stack: [
+              columns: [
+                {
+                  width: '*',
+                  stack: [
                     {
-                        text: [
-                            'También dispongo, que si alguno de mis beneficiarios (as) designados en este instrumento falleciere, el porcentaje de él o ella asignado, se distribuya en partes iguales entre los sobrevivientes registrados. Me reservo el derecho de actualizar, modificar o cancelar la presente DESIGNACIÓN, cuando lo estime conveniente.\n\n',
-                            { text: 'Nota: Con esta designación dejo sin valor ni efecto la presentada anteriormente.\n\n', bold: true }
-                        ],
-                        style: 'mainText'
+                      text: 'Lugar y Fecha: _______________________________________________________________',
+                      margin: [0, 20, 0, 15]  // Añadir margen adicional
                     },
                     {
-                        columns: [
-                            {
-                                width: '*',
-                                stack: [
-                                    {
-                                        text: 'Lugar y Fecha: _______________________________________________________________',
-                                        margin: [0, 20, 0, 15]  // Añadir margen adicional
-                                    },
-                                    {
-                                        text: '(f) _______________________________',
-                                        margin: [0, 15, 0, 0]  // Añadir margen adicional
-                                    }
-                                ]
-                            },
-                            {
-                                width: 'auto',
-                                stack: [
-                                    {
-                                        canvas: [
-                                            {
-                                                type: 'rect',
-                                                x: 0,
-                                                y: 0,
-                                                w: 80,
-                                                h: 80,
-                                                lineWidth: 1,
-                                                lineColor: 'black'
-                                            }
-                                        ],
-                                        margin: [0, -25, 0, 0]  // Ajustar la posición vertical del cuadro de huella
-                                    },
-                                    {
-                                        text: 'Huella',
-                                        alignment: 'center',
-                                        margin: [0, -60, 0, 0]  // Ajustar la posición vertical de la palabra "Huella"
-                                    }
-                                ]
-                            }
-                        ]
-                    },
-                    {
-                        style: 'usoExclusivo',
-                        table: {
-                            widths: ['*'],
-                            body: [
-                                [{ text: 'PARA USO EXCLUSIVO DEL INPREMA', style: 'tableHeader', alignment: 'center', fillColor: '#CCCCCC' }],
-                                [
-                                    {
-                                        columns: [
-                                            {
-                                                width: '50%',
-                                                stack: [
-                                                    { text: 'Nombre del empleado: ___________________________', margin: [0, 10] },
-                                                    { text: 'Código: _______', margin: [0, 10] }
-                                                ],
-                                                style: 'subHeader'
-                                            },
-                                            {
-                                                width: '50%',
-                                                stack: [
-                                                    { text: '________________________________', alignment: 'right', margin: [0, 10] },
-                                                    { text: 'Firma', alignment: 'center', margin: [0, 10] }
-                                                ],
-                                                style: 'subHeader'
-                                            }
-                                        ]
-                                    }
-                                ]
-                            ]
-                        },
-                        layout: {
-                            hLineWidth: function (i:any, node:any) {
-                                return (i === 0 || i === node.table.body.length) ? 1 : 0.5;
-                            },
-                            vLineWidth: function (i:any, node:any) {
-                                return (i === 0 || i === node.table.widths.length) ? 1 : 0.5;
-                            }
-                        },
-                        margin: [0, 20, 0, 0]  // Añadir margen adicional para evitar solapamiento
+                      text: '(f) _______________________________',
+                      margin: [0, 15, 0, 0]  // Añadir margen adicional
                     }
+                  ]
+                },
+                {
+                  width: 'auto',
+                  stack: [
+                    {
+                      canvas: [
+                        {
+                          type: 'rect',
+                          x: 0,
+                          y: 0,
+                          w: 80,
+                          h: 80,
+                          lineWidth: 1,
+                          lineColor: 'black'
+                        }
+                      ],
+                      margin: [0, -25, 0, 0]  // Ajustar la posición vertical del cuadro de huella
+                    },
+                    {
+                      text: 'Huella',
+                      alignment: 'center',
+                      margin: [0, -60, 0, 0]  // Ajustar la posición vertical de la palabra "Huella"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              style: 'usoExclusivo',
+              table: {
+                widths: ['*'],
+                body: [
+                  [{ text: 'PARA USO EXCLUSIVO DEL INPREMA', style: 'tableHeader', alignment: 'center', fillColor: '#CCCCCC' }],
+                  [
+                    {
+                      columns: [
+                        {
+                          width: '50%',
+                          stack: [
+                            { text: 'Nombre del empleado: ___________________________', margin: [0, 10] },
+                            { text: 'Código: _______', margin: [0, 10] }
+                          ],
+                          style: 'subHeader'
+                        },
+                        {
+                          width: '50%',
+                          stack: [
+                            { text: '________________________________', alignment: 'right', margin: [0, 10] },
+                            { text: 'Firma', alignment: 'center', margin: [0, 10] }
+                          ],
+                          style: 'subHeader'
+                        }
+                      ]
+                    }
+                  ]
                 ]
+              },
+              layout: {
+                hLineWidth: function (i: any, node: any) {
+                  return (i === 0 || i === node.table.body.length) ? 1 : 0.5;
+                },
+                vLineWidth: function (i: any, node: any) {
+                  return (i === 0 || i === node.table.widths.length) ? 1 : 0.5;
+                }
+              },
+              margin: [0, 20, 0, 0]  // Añadir margen adicional para evitar solapamiento
             }
-        ],
-        styles: {
-            introText: {
-                fontSize: 12, // Ajusta el tamaño del texto aquí
-                margin: [0, 0, 0, 10]
-            },
-            mainText: {
-                fontSize: 12, // Ajusta el tamaño del texto aquí
-                margin: [0, 0, 0, 10]
-            },
-            subHeader: {
-                fontSize: 10,
-                bold: false,
-                margin: [0, 0, 0, 10]
-            },
-            tableHeader: {
-                bold: true,
-                fontSize: 10,
-                color: 'black',
-                fillColor: '#CCCCCC',
-                alignment: 'center'
-            },
-            tableRow: {
-                fontSize: 9,
-                color: 'black',
-                alignment: 'center'
-            },
-            tableRowLarge: {
-                fontSize: 11,
-                color: 'black',
-                alignment: 'center'
-            },
-            grayBackground: {
-                fillColor: '#CCCCCC'
-            },
-            usoExclusivo: {
-                margin: [0, 20, 0, 0]
-            }
+          ]
         }
+      ],
+      styles: {
+        introText: {
+          fontSize: 12, // Ajusta el tamaño del texto aquí
+          margin: [0, 0, 0, 10]
+        },
+        mainText: {
+          fontSize: 12, // Ajusta el tamaño del texto aquí
+          margin: [0, 0, 0, 10]
+        },
+        subHeader: {
+          fontSize: 10,
+          bold: false,
+          margin: [0, 0, 0, 10]
+        },
+        tableHeader: {
+          bold: true,
+          fontSize: 10,
+          color: 'black',
+          fillColor: '#CCCCCC',
+          alignment: 'center'
+        },
+        tableRow: {
+          fontSize: 9,
+          color: 'black',
+          alignment: 'center'
+        },
+        tableRowLarge: {
+          fontSize: 11,
+          color: 'black',
+          alignment: 'center'
+        },
+        grayBackground: {
+          fillColor: '#CCCCCC'
+        },
+        usoExclusivo: {
+          margin: [0, 20, 0, 0]
+        }
+      }
     };
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
   }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+}

@@ -62,7 +62,6 @@ export class AgregarReferenciasPersonalesComponent implements OnInit {
 
     this.afilService.agregarReferencias(this.data.idPersona, referencias).subscribe(
       (res: any) => {
-        console.log(res);
         if (res.length > 0) {
           this.toastr.success("Referencia personal agregada con éxito");
           this.cerrar();

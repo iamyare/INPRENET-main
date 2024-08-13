@@ -1,6 +1,6 @@
 import { Component, EventEmitter, OnInit, Output } from '@angular/core';
-import {Subject, Observable} from 'rxjs';
-import {WebcamImage, WebcamInitError, WebcamUtil} from 'ngx-webcam';
+import { Subject, Observable } from 'rxjs';
+import { WebcamImage, WebcamInitError, WebcamUtil } from 'ngx-webcam';
 import { FormStateService } from 'src/app/services/form-state.service';
 import { FormBuilder, FormGroup } from '@angular/forms';
 
@@ -38,14 +38,14 @@ export class CamaraComponent {
   public trigger: Subject<void> = new Subject<void>();
 
   // Cambiar a la siguiente o anterior cámara
-  private siguienteWebcam: Subject<boolean|string> = new Subject<boolean|string>();
+  private siguienteWebcam: Subject<boolean | string> = new Subject<boolean | string>();
 
   public ngOnInit(): void {
     this.formStateService.getFotoPerfil().subscribe(foto => {
       if (foto) {
-          this.form.get('FotoPerfil')?.setValue(foto);
+        this.form.get('FotoPerfil')?.setValue(foto);
       }
-  });
+    });
     WebcamUtil.getAvailableVideoInputs()
       .then((mediaDevices: MediaDeviceInfo[]) => {
         this.multiplesCamarasDisponibles = mediaDevices && mediaDevices.length > 1;
@@ -64,7 +64,7 @@ export class CamaraComponent {
     this.errors.push(error);
   }
 
-  public showNextWebcam(directionOnDeviceId: boolean|string): void {
+  public showNextWebcam(directionOnDeviceId: boolean | string): void {
     this.siguienteWebcam.next(directionOnDeviceId);
   }
 
@@ -79,7 +79,6 @@ export class CamaraComponent {
   }
 
   public cameraSwitched(dispositivoId: string): void {
-    console.log('Dispositivo Actual: ' + dispositivoId);
     this.dispositivoId = dispositivoId;
   }
 

@@ -116,7 +116,6 @@ export class SociedadSocioComponent implements OnInit {
 
     const municipioField = this.fields.find(field => field.name === 'municipio');
     if (municipioField && municipios) {
-      console.log(municipios);
       municipioField.options = municipios.map((mun: any) => ({
         value: mun.value,
         label: mun.label

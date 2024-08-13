@@ -30,150 +30,151 @@ export class DeduccionService {
   async uploadDeducciones(file: Express.Multer.File): Promise<string> {
     const workbook = XLSX.read(file.buffer, { type: 'buffer' });
     const sheetNames = workbook.SheetNames;
-    
+
     for (const sheetName of sheetNames) {
-        const sheet = workbook.Sheets[sheetName];
-        const data = XLSX.utils.sheet_to_json(sheet, { header: 1, defval: null }) as any[][];
+      const sheet = workbook.Sheets[sheetName];
+      const data = XLSX.utils.sheet_to_json(sheet, { header: 1, defval: null }) as any[][];
 
-        const [header, ...rows] = data;
+      const [header, ...rows] = data;
 
-        for (const row of rows) {
-            const [anio, mes, dni, codigoDeduccion, montoTotal] = row;
+      for (const row of rows) {
+        const [anio, mes, dni, codigoDeduccion, montoTotal] = row;
 
-            // Validación para asegurarse de que todas las columnas estén llenas
-            if (!anio || !mes || !dni || !codigoDeduccion || !montoTotal) {
-                this.logger.warn(`Fila ignorada por no tener todas las columnas llenas: ${JSON.stringify(row)}`);
-                continue;
-            }
-
-            if (
-                anio == null || anio === '' ||
-                mes == null || mes === '' ||
-                dni == null || dni === '' ||
-                codigoDeduccion == null || codigoDeduccion === '' ||
-                montoTotal == null || montoTotal === ''
-            ) {
-                this.logger.warn(`Fila ignorada por tener campos vacíos: ${JSON.stringify(row)}`);
-                continue;
-            }
-
-            const parsedAnio = Number(anio);
-            const parsedMes = Number(mes);
-            const parsedDni = dni ? dni.toString() : '';
-            const parsedCodigoDeduccion = Number(codigoDeduccion);
-            const parsedMontoTotal = parseFloat(montoTotal);
-
-            if (isNaN(parsedAnio) || isNaN(parsedMes) || parsedDni === '' || isNaN(parsedCodigoDeduccion) || isNaN(parsedMontoTotal)) {
-                this.logger.warn(`Datos inválidos en la fila (conversión fallida): ${JSON.stringify(row)}`);
-                continue;
-            }
-
-            const persona = await this.personaRepository.findOne({
-                where: { n_identificacion: parsedDni },
-                relations: ['detallePersona', 'detallePersona.tipoPersona']
-            });
-
-            if (!persona) {
-                this.logger.warn(`No se encontró persona con DNI: ${parsedDni}`);
-                continue;
-            }
-
-            const detallePersona = persona.detallePersona[0];
-            const tipoPersona = detallePersona ? detallePersona.tipoPersona.tipo_persona : null;
-
-            if (!tipoPersona) {
-                this.logger.warn(`No se encontró el tipo de persona para el DNI: ${parsedDni}`);
-                continue;
-            }
-
-            const deduccion = await this.deduccionRepository.findOne({
-                where: { codigo_deduccion: parsedCodigoDeduccion },
-            });
-
-            if (!deduccion) {
-                this.logger.warn(`No se encontró deducción con código: ${parsedCodigoDeduccion}`);
-                continue;
-            }
-
-            let planillas;
-            try {
-                const queryBuilder = this.planillaRepository.createQueryBuilder('planilla')
-                    .where('planilla.estado = :estado', { estado: 'ACTIVA' })
-                    .andWhere('planilla.secuencia = :secuencia', { secuencia: 1 })
-                    .leftJoinAndSelect('planilla.tipoPlanilla', 'tipoPlanilla');
-
-                const [query, parameters] = queryBuilder.getQueryAndParameters();
-                this.logger.log(`Query: ${query}`);
-                this.logger.log(`Parameters: ${JSON.stringify(parameters)}`);
-
-                planillas = await queryBuilder.getMany();
-            } catch (err) {
-                this.logger.error(`Error en la consulta de planillas: ${err.message}`);
-                planillas = [];
-            }
-
-            if (!planillas || planillas.length === 0) {
-                this.logger.warn(`No se encontró planilla activa para el mes: ${parsedMes}-${parsedAnio}`);
-                continue;
-            }
-
-            const planilla = planillas.find(p => {
-                if (['BENEFICIARIO', 'AFILIADO'].includes(tipoPersona) && p.tipoPlanilla.nombre_planilla === 'ORDINARIA BENEFICIARIO') {
-                    return true;
-                }
-                if (['JUBILADO', 'PENSIONADO'].includes(tipoPersona) && p.tipoPlanilla.nombre_planilla === 'ORDINARIA JUBILADOS Y PENSIONADOS') {
-                    return true;
-                }
-                return false;
-            });
-
-            console.log('Planilla Seleccionada:', planilla);
-
-            if (!planilla) {
-                this.logger.warn(`No se encontró planilla adecuada para el tipo de persona: ${tipoPersona}`);
-                continue;
-            }
-
-            const deduccionExistente = await this.detalleDeduccionRepository.findOne({
-                where: {
-                    anio: parsedAnio,
-                    mes: parsedMes,
-                    monto_total: parsedMontoTotal,
-                    persona: { id_persona: persona.id_persona },
-                    deduccion: { id_deduccion: deduccion.id_deduccion },
-                    planilla: { id_planilla: planilla.id_planilla },
-                },
-            });
-
-            if (deduccionExistente) {
-                this.logger.warn(`Deducción duplicada detectada: ${JSON.stringify(row)}`);
-                continue;
-            }
-
-            const detalleDeduccion = this.detalleDeduccionRepository.create({
-                anio: parsedAnio,
-                mes: parsedMes,
-                monto_total: parsedMontoTotal,
-                estado_aplicacion: 'NO COBRADA',
-                persona,
-                deduccion,
-                planilla,
-            });
-            await this.detalleDeduccionRepository.save(detalleDeduccion);
+        // Validación para asegurarse de que todas las columnas estén llenas
+        if (!anio || !mes || !dni || !codigoDeduccion || !montoTotal) {
+          this.logger.warn(`Fila ignorada por no tener todas las columnas llenas: ${JSON.stringify(row)}`);
+          continue;
         }
+
+        if (
+          anio == null || anio === '' ||
+          mes == null || mes === '' ||
+          dni == null || dni === '' ||
+          codigoDeduccion == null || codigoDeduccion === '' ||
+          montoTotal == null || montoTotal === ''
+        ) {
+          this.logger.warn(`Fila ignorada por tener campos vacíos: ${JSON.stringify(row)}`);
+          continue;
+        }
+
+        const parsedAnio = Number(anio);
+        const parsedMes = Number(mes);
+        const parsedDni = dni ? dni.toString() : '';
+        const parsedCodigoDeduccion = Number(codigoDeduccion);
+        const parsedMontoTotal = parseFloat(montoTotal);
+
+        if (isNaN(parsedAnio) || isNaN(parsedMes) || parsedDni === '' || isNaN(parsedCodigoDeduccion) || isNaN(parsedMontoTotal)) {
+          this.logger.warn(`Datos inválidos en la fila (conversión fallida): ${JSON.stringify(row)}`);
+          continue;
+        }
+
+        const persona = await this.personaRepository.findOne({
+          where: { n_identificacion: parsedDni },
+          relations: ['detallePersona', 'detallePersona.tipoPersona']
+        });
+
+        if (!persona) {
+          this.logger.warn(`No se encontró persona con DNI: ${parsedDni}`);
+          continue;
+        }
+
+        const detallePersona = persona.detallePersona[0];
+        const tipoPersona = detallePersona ? detallePersona.tipoPersona.tipo_persona : null;
+
+        if (!tipoPersona) {
+          this.logger.warn(`No se encontró el tipo de persona para el DNI: ${parsedDni}`);
+          continue;
+        }
+
+        const deduccion = await this.deduccionRepository.findOne({
+          where: { codigo_deduccion: parsedCodigoDeduccion },
+        });
+
+        if (!deduccion) {
+          this.logger.warn(`No se encontró deducción con código: ${parsedCodigoDeduccion}`);
+          continue;
+        }
+
+        let planillas;
+        try {
+          const queryBuilder = this.planillaRepository.createQueryBuilder('planilla')
+            .where('planilla.estado = :estado', { estado: 'ACTIVA' })
+            .andWhere('planilla.secuencia = :secuencia', { secuencia: 1 })
+            .leftJoinAndSelect('planilla.tipoPlanilla', 'tipoPlanilla');
+
+          const [query, parameters] = queryBuilder.getQueryAndParameters();
+          this.logger.log(`Query: ${query}`);
+          this.logger.log(`Parameters: ${JSON.stringify(parameters)}`);
+
+          planillas = await queryBuilder.getMany();
+        } catch (err) {
+          this.logger.error(`Error en la consulta de planillas: ${err.message}`);
+          planillas = [];
+        }
+
+        if (!planillas || planillas.length === 0) {
+          this.logger.warn(`No se encontró planilla activa para el mes: ${parsedMes}-${parsedAnio}`);
+          continue;
+        }
+
+        const planilla = planillas.find(p => {
+          if (['BENEFICIARIO', 'AFILIADO'].includes(tipoPersona) && p.tipoPlanilla.nombre_planilla === 'ORDINARIA BENEFICIARIO') {
+            return true;
+          }
+          if (['JUBILADO', 'PENSIONADO'].includes(tipoPersona) && p.tipoPlanilla.nombre_planilla === 'ORDINARIA JUBILADOS Y PENSIONADOS') {
+            return true;
+          }
+          return false;
+        });
+
+        console.log('Planilla Seleccionada:', planilla);
+
+        if (!planilla) {
+          this.logger.warn(`No se encontró planilla adecuada para el tipo de persona: ${tipoPersona}`);
+          continue;
+        }
+
+        const deduccionExistente = await this.detalleDeduccionRepository.findOne({
+          where: {
+            anio: parsedAnio,
+            mes: parsedMes,
+            monto_total: parsedMontoTotal,
+            persona: { id_persona: persona.id_persona },
+            deduccion: { id_deduccion: deduccion.id_deduccion },
+            planilla: { id_planilla: planilla.id_planilla },
+          },
+        });
+
+        if (deduccionExistente) {
+          this.logger.warn(`Deducción duplicada detectada: ${JSON.stringify(row)}`);
+          continue;
+        }
+
+        const detalleDeduccion = this.detalleDeduccionRepository.create({
+          anio: parsedAnio,
+          mes: parsedMes,
+          monto_total: parsedMontoTotal,
+          estado_aplicacion: 'NO COBRADA',
+          persona,
+          deduccion,
+          planilla,
+        });
+        await this.detalleDeduccionRepository.save(detalleDeduccion);
+      }
     }
 
     return 'Deducciones procesadas correctamente';
-}
+  }
 
   async obtenerDeduccionesPorAnioMes(dni: string, anio: number, mes: number): Promise<any> {
     try {
       const persona = await this.personaRepository.findOne({ where: { n_identificacion: dni } });
-  
+      ///console.log(persona);
+
       if (!persona) {
         throw new InternalServerErrorException('Persona no encontrada');
       }
-  
+
       const deducciones = await this.detalleDeduccionRepository.find({
         where: {
           persona: { id_persona: persona.id_persona },
@@ -182,12 +183,13 @@ export class DeduccionService {
         },
         relations: [
           'deduccion',
-          'detalle_pago_beneficio',
-          'detalle_pago_beneficio.planilla',
+          'planilla',
           'deduccion.centroTrabajo', // Asegúrate de que esta relación esté bien definida en la entidad
         ],
       });
-  
+
+      console.log(deducciones);
+
       const resultado = {
         persona: {
           n_identificacion: persona.n_identificacion,
@@ -210,74 +212,74 @@ export class DeduccionService {
           centro_trabajo: d.deduccion.centroTrabajo ? d.deduccion.centroTrabajo.nombre_centro_trabajo : 'N/A', // Ajuste aquí
         })),
       };
-  
+
       return resultado;
-  
+
     } catch (error) {
       this.logger.error(`Error al obtener deducciones para el DNI ${dni}: ${error.message}`, error.stack);
       throw new InternalServerErrorException('Error al obtener deducciones');
     }
   }
-  
+
 
   async create(createDeduccionDto: CreateDeduccionDto): Promise<Net_Deduccion> {
     const existingDeduccion = await this.deduccionRepository.findOne({
-        where: { codigo_deduccion: createDeduccionDto.codigo_deduccion }
+      where: { codigo_deduccion: createDeduccionDto.codigo_deduccion }
     });
 
     if (existingDeduccion) {
-        throw new BadRequestException('El código de deducción ya existe.');
+      throw new BadRequestException('El código de deducción ya existe.');
     }
     const institucion = await this.centroTrabajoRepository.findOne({
-        where: { nombre_centro_trabajo: createDeduccionDto.nombre_institucion }
+      where: { nombre_centro_trabajo: createDeduccionDto.nombre_institucion }
     });
 
     if (!institucion && createDeduccionDto.nombre_institucion) {
-        throw new NotFoundException(`Institución con nombre '${createDeduccionDto.nombre_institucion}' no encontrada.`);
+      throw new NotFoundException(`Institución con nombre '${createDeduccionDto.nombre_institucion}' no encontrada.`);
     }
     const deduccion = this.deduccionRepository.create({
-        ...createDeduccionDto,
-        centroTrabajo: institucion
+      ...createDeduccionDto,
+      centroTrabajo: institucion
     });
 
     try {
-        await this.deduccionRepository.save(deduccion);
-        return deduccion;
+      await this.deduccionRepository.save(deduccion);
+      return deduccion;
     } catch (error) {
-        if (error.code === 'ORA-00001') {
-            throw new BadRequestException('El código de deducción ya existe.');
-        } else {
-            console.error('Error al guardar la deducción:', error);
-            throw new InternalServerErrorException('Ha ocurrido un error al crear la deducción.');
-        }
-    }
-}
-
-async findAll(): Promise<any[]> {
-  return this.deduccionRepository.find({
-    relations: ['centroTrabajo'],
-    select: {
-      id_deduccion: true,
-      nombre_deduccion: true,
-      descripcion_deduccion: true,
-      codigo_deduccion: true,
-      prioridad: true,
-      centroTrabajo: {
-        id_centro_trabajo: true,
-        nombre_centro_trabajo: true,
+      if (error.code === 'ORA-00001') {
+        throw new BadRequestException('El código de deducción ya existe.');
+      } else {
+        console.error('Error al guardar la deducción:', error);
+        throw new InternalServerErrorException('Ha ocurrido un error al crear la deducción.');
       }
     }
-  }).then(deducciones => {
-    return deducciones.map(deduccion => ({
-      id_deduccion: deduccion.id_deduccion,
-      nombre_deduccion: deduccion.nombre_deduccion,
-      descripcion_deduccion: deduccion.descripcion_deduccion,
-      codigo_deduccion: deduccion.codigo_deduccion,
-      prioridad: deduccion.prioridad,
-      nombre_centro_trabajo: deduccion.centroTrabajo ? deduccion.centroTrabajo.nombre_centro_trabajo : null,
-    }));
-  });
-}
+  }
+
+  async findAll(): Promise<any[]> {
+    return this.deduccionRepository.find({
+      relations: ['centroTrabajo'],
+      select: {
+        id_deduccion: true,
+        nombre_deduccion: true,
+        descripcion_deduccion: true,
+        codigo_deduccion: true,
+        prioridad: true,
+        centroTrabajo: {
+          id_centro_trabajo: true,
+          nombre_centro_trabajo: true,
+        }
+      }
+    }).then(deducciones => {
+      return deducciones.map(deduccion => ({
+        id_deduccion: deduccion.id_deduccion,
+        nombre_deduccion: deduccion.nombre_deduccion,
+        descripcion_deduccion: deduccion.descripcion_deduccion,
+        codigo_deduccion: deduccion.codigo_deduccion,
+        prioridad: deduccion.prioridad,
+        nombre_centro_trabajo: deduccion.centroTrabajo ? deduccion.centroTrabajo.nombre_centro_trabajo : null,
+      }));
+    });
+  }
 
   async findOneByNombInst(nombre_centro_trabajo: string) {
     if (nombre_centro_trabajo) {

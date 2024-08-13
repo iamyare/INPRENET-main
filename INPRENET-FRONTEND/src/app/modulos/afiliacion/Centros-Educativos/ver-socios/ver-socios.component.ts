@@ -118,9 +118,6 @@ export class VerSociosComponent {
       periodicidad: row.periodicidad,
     };
 
-    console.log(beneficioData);
-
-
     /* this.svcBeneficioServ.updateBeneficio(row.id, beneficioData).subscribe(
       response => {
         this.toastr.success('Beneficio editado con éxito');

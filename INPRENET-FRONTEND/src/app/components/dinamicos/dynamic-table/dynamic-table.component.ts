@@ -251,7 +251,6 @@ export class DynamicTableComponent implements OnInit, OnDestroy {
   obtenerFilasSeleccionadas() {
     const filasSeleccionadas = this.selectionService.getSelectedItems();
     this.getElemSeleccionados.emit(filasSeleccionadas);
-    console.log(filasSeleccionadas);
   }
 
   ejecutarAccionUno(row: any) {

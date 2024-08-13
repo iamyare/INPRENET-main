@@ -202,6 +202,33 @@ export class PlanillaController {
     }
   }
 
+  @Get('todas')
+  async ObtenerTodasPlanillas(
+    @Query('codPlanilla') codPlanilla: string,
+  ) {
+    if (!codPlanilla) {
+      throw new BadRequestException('Los parámetros codPlanilla son obligatorios');
+    }
+    try {
+      return await this.planillaService.ObtenerTodasPlanillas(codPlanilla);
+    } catch (error) {
+      throw new InternalServerErrorException('Error al obtener planilla preliminar');
+    }
+  }
+  @Get('ObtenerPreliminar')
+  async ObtenerPreliminar(
+    @Query('codPlanilla') codPlanilla: string,
+  ) {
+    if (!codPlanilla) {
+      throw new BadRequestException('Los parámetros codPlanilla son obligatorios');
+    }
+    try {
+      return await this.planillaService.ObtenerPreliminar(codPlanilla);
+    } catch (error) {
+      throw new InternalServerErrorException('Error al obtener planilla preliminar');
+    }
+  }
+
   @Get('montos-banco/:term')
   async ObtenerMontosPorBanco(
     @Param('term') term: string

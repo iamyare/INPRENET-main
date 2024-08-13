@@ -22,7 +22,7 @@ export class GestionUsuariosComponent implements OnInit {
     private usuarioService: AuthService,
     private authService: AuthService,
     private router: Router
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     const token = sessionStorage.getItem('token');
@@ -105,10 +105,10 @@ export class GestionUsuariosComponent implements OnInit {
 
   manejarRowClick(row: any) {
     const usuarioSeleccionado = this.data.find((usuario: any) => usuario.id_usuario_empresa === row.id);
-    this.router.navigate(['/gestion/editar-perfil', row.id], { state: { usuario: usuarioSeleccionado } });
+    this.router.navigate(['home/gestion/usuarios/editar-perfil', row.id], { state: { usuario: usuarioSeleccionado } });
   }
 
   irANuevaPagina() {
-    this.router.navigate(['/gestion/nuevo-usuario']);
+    this.router.navigate(['home/gestion/usuarios/nuevo-usuario']);
   }
 }

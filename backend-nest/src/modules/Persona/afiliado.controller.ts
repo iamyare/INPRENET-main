@@ -63,8 +63,6 @@ export class AfiliadoController {
     @UploadedFile() fotoPerfil: Express.Multer.File,
     @Body('encapsulatedDto') encapsulatedDtoStr: string
   ) {
-    console.log(encapsulatedDtoStr);
-
     try {
       // Convertir el string JSON a un objeto
       const encapsulatedDto: EncapsulatedPersonaDTO = JSON.parse(encapsulatedDtoStr);
@@ -420,7 +418,7 @@ export class AfiliadoController {
     return this.afiliadoService.findOnePersonaParaDeduccion(term);
   }
 
-  
+
   @Get('findTipoPersonaByN_ident/:term')
   findTipoPersonaByN_ident(@Param('term') term: string) {
     return this.afiliadoService.findTipoPersonaByN_ident(term);

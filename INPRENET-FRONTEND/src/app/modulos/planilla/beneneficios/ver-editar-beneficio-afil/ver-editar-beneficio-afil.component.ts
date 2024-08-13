@@ -127,8 +127,6 @@ export class VerEditarBeneficioAfilComponent {
   getFilas = async () => {
     try {
       const data = await this.beneficioService.GetAllBeneficios(this.form.value.dni).toPromise();
-      console.log(data);
-
 
       const dataAfil = data.persona.map((item: any) => ({
         dni: item.N_IDENTIFICACION,
@@ -217,9 +215,6 @@ export class VerEditarBeneficioAfilComponent {
       numero_rentas_max: row.numero_rentas_max,
       periodicidad: row.periodicidad,
     };
-
-    console.log(beneficioData);
-
 
     /* this.svcBeneficioServ.updateBeneficio(row.id, beneficioData).subscribe(
       response => {

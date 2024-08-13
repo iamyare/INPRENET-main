@@ -209,8 +209,6 @@ export class NuevoBeneficioAfilComponent implements OnInit {
 
       this.svcAfilServ.obtenerBenDeAfil(this.form.value.dni).subscribe(
         async (response) => {
-          console.log(response);
-
           const primerObjetoTransformado = this.transformarObjeto(response[0]);
           this.myColumns = [
             { header: 'N_Identificacion', col: 'dni', isEditable: false },
@@ -289,8 +287,6 @@ export class NuevoBeneficioAfilComponent implements OnInit {
   }
 
   async obtenerDatos1(event: any): Promise<any> {
-    console.log(event.value);
-
     this.form1 = event;
     const datosFormateados = {
       ...event.value
@@ -301,7 +297,6 @@ export class NuevoBeneficioAfilComponent implements OnInit {
 
   async obtenerDatosFormBen(event: any): Promise<any> {
     this.FormBen = event;
-    console.log(event);
     const temp = this.buscarPeriodicidad(this.tiposBeneficios, this.FormBen.value.nombre_beneficio);
 
     let startDateFormatted
@@ -356,8 +351,6 @@ export class NuevoBeneficioAfilComponent implements OnInit {
     /* Asignar a los beneficioarios si el afiliado ya fallecio */
     if (this.Afiliado.fallecido != "SI") {
       this.datosFormateados["dni"] = this.form.value.dni;
-      console.log(this.datosFormateados);
-
       this.svcBeneficioServ.asigBeneficioAfil(this.datosFormateados).subscribe(
         {
           next: (response) => {

@@ -37,7 +37,6 @@ export class DynamicFormComponent implements OnInit {
   }
 
   onDatosBenChange1(e: any) {
-    console.log(e);
     const transformedForm = this.transformFormValues(this.form!);
 
     this.newDatBenChange.emit(transformedForm);

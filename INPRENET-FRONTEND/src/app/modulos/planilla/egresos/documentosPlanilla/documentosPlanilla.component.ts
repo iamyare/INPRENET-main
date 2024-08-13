@@ -187,7 +187,7 @@ export class DocumentosPlanillaComponent implements OnInit {
               body: [
                 [
                   { text: 'Fecha y Hora: ' + new Date().toLocaleString(), alignment: 'left', border: [false, false, false, false] },
-                  { text: 'Generó: ', alignment: 'left', border: [false, false, false, false] },
+                  { text: 'Generó: INPRENET', alignment: 'left', border: [false, false, false, false] },
                   { text: 'Página ' + currentPage.toString() + ' de ' + pageCount, alignment: 'right', border: [false, false, false, false] }
                 ]
               ]
@@ -407,7 +407,7 @@ export class DocumentosPlanillaComponent implements OnInit {
               body: [
                 [
                   { text: 'Fecha y Hora: ' + new Date().toLocaleString(), alignment: 'left', border: [false, false, false, false] },
-                  { text: 'Generó: ', alignment: 'left', border: [false, false, false, false] },
+                  { text: 'Generó: INPRENET', alignment: 'left', border: [false, false, false, false] },
                   { text: 'Página ' + currentPage.toString() + ' de ' + pageCount, alignment: 'right', border: [false, false, false, false] }
                 ]
               ]
@@ -432,17 +432,68 @@ export class DocumentosPlanillaComponent implements OnInit {
       maximumFractionDigits: 2
     });
 
-    const totals = data.reduce((acc, cur) => {
-      acc.totalBeneficio += cur.TOTAL_BENEFICIO ? parseFloat(cur.TOTAL_BENEFICIO) : 0;
-      acc.deduccionesInprema += cur.DEDUCCIONES_INPREMA ? parseFloat(cur.DEDUCCIONES_INPREMA) : 0;
-      acc.deduccionesTerceros += cur.DEDUCCIONES_TERCEROS ? parseFloat(cur.DEDUCCIONES_TERCEROS) : 0;
-      acc.montoNeto += cur.MONTO_NETO ? parseFloat(cur.MONTO_NETO) : 0;
-      return acc;
-    }, { totalBeneficio: 0, deduccionesInprema: 0, deduccionesTerceros: 0, montoNeto: 0 });
+    // Calcular montos agrupados
+    const montosAgrupados = data.reduce((acc, cur) => {
+        if (cur.NOMBRE_BANCO === 'SIN BANCO') {
+            acc.sinCuenta.totalBeneficio += cur.TOTAL_BENEFICIO ? parseFloat(cur.TOTAL_BENEFICIO) : 0;
+            acc.sinCuenta.deduccionesInprema += cur.DEDUCCIONES_INPREMA ? parseFloat(cur.DEDUCCIONES_INPREMA) : 0;
+            acc.sinCuenta.deduccionesTerceros += cur.DEDUCCIONES_TERCEROS ? parseFloat(cur.DEDUCCIONES_TERCEROS) : 0;
+            acc.sinCuenta.montoNeto += cur.MONTO_NETO ? parseFloat(cur.MONTO_NETO) : 0;
+        } else {
+            acc.conCuenta.totalBeneficio += cur.TOTAL_BENEFICIO ? parseFloat(cur.TOTAL_BENEFICIO) : 0;
+            acc.conCuenta.deduccionesInprema += cur.DEDUCCIONES_INPREMA ? parseFloat(cur.DEDUCCIONES_INPREMA) : 0;
+            acc.conCuenta.deduccionesTerceros += cur.DEDUCCIONES_TERCEROS ? parseFloat(cur.DEDUCCIONES_TERCEROS) : 0;
+            acc.conCuenta.montoNeto += cur.MONTO_NETO ? parseFloat(cur.MONTO_NETO) : 0;
+        }
+        return acc;
+    }, {
+        conCuenta: { totalBeneficio: 0, deduccionesInprema: 0, deduccionesTerceros: 0, montoNeto: 0 },
+        sinCuenta: { totalBeneficio: 0, deduccionesInprema: 0, deduccionesTerceros: 0, montoNeto: 0 }
+    });
 
-    const formattedTotalText = `Total de ${titulo}: L ${formatAmount(totals.montoNeto)}`;
+    // Primera tabla con las filas "CON CUENTA" y "SIN CUENTA"
+    const tablaResumen = {
+      style: 'tableExample',
+      table: {
+        headerRows: 1,
+        widths: ['*', 'auto', 'auto', 'auto', 'auto'],
+        body: [
+          [
+            { text: 'Tipo de Cuenta', style: 'tableHeader' },
+            { text: 'Total Beneficio', style: 'tableHeader', alignment: 'right' },
+            { text: 'Deducciones INPREMA', style: 'tableHeader', alignment: 'right' },
+            { text: 'Deducciones Terceros', style: 'tableHeader', alignment: 'right' },
+            { text: 'Monto Neto Pagado', style: 'tableHeader', alignment: 'right' }
+          ],
+          [
+            { text: 'CON CUENTA', style: 'tableBody' },
+            { text: `L ${formatAmount(montosAgrupados.conCuenta.totalBeneficio)}`, style: 'tableBody', alignment: 'right', lineHeight: 1.15 },
+            { text: `L ${formatAmount(montosAgrupados.conCuenta.deduccionesInprema)}`, style: 'tableBody', alignment: 'right', lineHeight: 1.15 },
+            { text: `L ${formatAmount(montosAgrupados.conCuenta.deduccionesTerceros)}`, style: 'tableBody', alignment: 'right', lineHeight: 1.15 },
+            { text: `L ${formatAmount(montosAgrupados.conCuenta.montoNeto)}`, style: 'tableBody', alignment: 'right', lineHeight: 1.15 }
+          ],
+          [
+            { text: 'SIN CUENTA', style: 'tableBody' },
+            { text: `L ${formatAmount(montosAgrupados.sinCuenta.totalBeneficio)}`, style: 'tableBody', alignment: 'right', lineHeight: 1.15 },
+            { text: `L ${formatAmount(montosAgrupados.sinCuenta.deduccionesInprema)}`, style: 'tableBody', alignment: 'right', lineHeight: 1.15 },
+            { text: `L ${formatAmount(montosAgrupados.sinCuenta.deduccionesTerceros)}`, style: 'tableBody', alignment: 'right', lineHeight: 1.15 },
+            { text: `L ${formatAmount(montosAgrupados.sinCuenta.montoNeto)}`, style: 'tableBody', alignment: 'right', lineHeight: 1.15 }
+          ],
+          [
+            { text: 'Total', style: 'tableTotal', alignment: 'right' },
+            { text: `L ${formatAmount(montosAgrupados.conCuenta.totalBeneficio + montosAgrupados.sinCuenta.totalBeneficio)}`, style: 'tableBody', alignment: 'right', lineHeight: 1.15 },
+            { text: `L ${formatAmount(montosAgrupados.conCuenta.deduccionesInprema + montosAgrupados.sinCuenta.deduccionesInprema)}`, style: 'tableBody', alignment: 'right', lineHeight: 1.15 },
+            { text: `L ${formatAmount(montosAgrupados.conCuenta.deduccionesTerceros + montosAgrupados.sinCuenta.deduccionesTerceros)}`, style: 'tableBody', alignment: 'right', lineHeight: 1.15 },
+            { text: `L ${formatAmount(montosAgrupados.conCuenta.montoNeto + montosAgrupados.sinCuenta.montoNeto)}`, style: 'tableBody', alignment: 'right', lineHeight: 1.15 }
+          ]
+        ]
+      },
+      layout: 'lightHorizontalLines',
+      margin: margin
+    };
 
-    return {
+    // Segunda tabla con detalles por banco
+    const tablaPorBanco = {
       style: 'tableExample',
       table: {
         headerRows: 1,
@@ -455,8 +506,8 @@ export class DocumentosPlanillaComponent implements OnInit {
             { text: 'Deducciones Terceros', style: 'tableHeader', alignment: 'right' },
             { text: 'Monto Neto Pagado', style: 'tableHeader', alignment: 'right' }
           ],
-          ...data.map(el => {
-            const nombre = el.NOMBRE_BANCO || 'NO TIENE CUENTA';
+          ...data.filter(el => el.NOMBRE_BANCO !== 'SIN BANCO').map(el => {
+            const nombre = el.NOMBRE_BANCO;
             const totalBeneficio = el.TOTAL_BENEFICIO ? formatAmount(parseFloat(el.TOTAL_BENEFICIO)) : '0.00';
             const deduccionesInprema = el.DEDUCCIONES_INPREMA ? formatAmount(parseFloat(el.DEDUCCIONES_INPREMA)) : '0.00';
             const deduccionesTerceros = el.DEDUCCIONES_TERCEROS ? formatAmount(parseFloat(el.DEDUCCIONES_TERCEROS)) : '0.00';
@@ -471,17 +522,22 @@ export class DocumentosPlanillaComponent implements OnInit {
           }),
           [
             { text: 'Total', style: 'tableTotal', alignment: 'right' },
-            { text: `L ${formatAmount(totals.totalBeneficio)}`, style: 'tableBody', alignment: 'right', lineHeight: 1.15 },
-            { text: `L ${formatAmount(totals.deduccionesInprema)}`, style: 'tableBody', alignment: 'right', lineHeight: 1.15 },
-            { text: `L ${formatAmount(totals.deduccionesTerceros)}`, style: 'tableBody', alignment: 'right', lineHeight: 1.15 },
-            { text: `L ${formatAmount(totals.montoNeto)}`, style: 'tableBody', alignment: 'right', lineHeight: 1.15 }
+            { text: `L ${formatAmount(montosAgrupados.conCuenta.totalBeneficio)}`, style: 'tableBody', alignment: 'right', lineHeight: 1.15 },
+            { text: `L ${formatAmount(montosAgrupados.conCuenta.deduccionesInprema)}`, style: 'tableBody', alignment: 'right', lineHeight: 1.15 },
+            { text: `L ${formatAmount(montosAgrupados.conCuenta.deduccionesTerceros)}`, style: 'tableBody', alignment: 'right', lineHeight: 1.15 },
+            { text: `L ${formatAmount(montosAgrupados.conCuenta.montoNeto)}`, style: 'tableBody', alignment: 'right', lineHeight: 1.15 }
           ]
         ]
       },
       layout: 'lightHorizontalLines',
       margin: margin
     };
+
+    return [tablaResumen, tablaPorBanco];
   }
+
+
+
 
 
 }

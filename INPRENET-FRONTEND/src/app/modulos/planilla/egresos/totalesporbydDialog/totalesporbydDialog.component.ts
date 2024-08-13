@@ -201,7 +201,7 @@ export class TotalesporbydDialogComponent implements OnInit {
             body: [
               [
                 { text: 'Fecha y Hora: ' + new Date().toLocaleString(), alignment: 'left', border: [false, false, false, false] },
-                { text: 'Generó: ', alignment: 'left', border: [false, false, false, false] },
+                { text: 'Generó: INPRENET', alignment: 'left', border: [false, false, false, false] },
                 { text: 'Página ' + currentPage.toString() + ' de ' + pageCount, alignment: 'right', border: [false, false, false, false] }
               ]
             ]

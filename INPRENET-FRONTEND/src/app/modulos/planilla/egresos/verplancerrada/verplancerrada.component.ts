@@ -517,7 +517,7 @@ export class VerplancerradaComponent {
               body: [
                 [
                   { text: 'Fecha y Hora: ' + new Date().toLocaleString(), alignment: 'left', border: [false, false, false, false] },
-                  { text: 'Generó: ', alignment: 'left', border: [false, false, false, false] },
+                  { text: 'Generó: INPRENET', alignment: 'left', border: [false, false, false, false] },
                   { text: 'Página ' + currentPage.toString() + ' de ' + pageCount, alignment: 'right', border: [false, false, false, false] }
                 ]
               ]
@@ -1050,7 +1050,6 @@ export class VerplancerradaComponent {
     return date.toLocaleString('es-ES', { month: 'long', year: 'numeric' });
   }
 
-
   async generarPDFDeduccionesSeparadas() {
     try {
       const base64Image = await this.convertirImagenABase64('assets/images/membratadoFinal.jpg');
@@ -1202,7 +1201,7 @@ export class VerplancerradaComponent {
                 body: [
                   [
                     { text: 'Fecha y Hora: ' + new Date().toLocaleString(), alignment: 'left', border: [false, false, false, false] },
-                    { text: 'Generó: ', alignment: 'left', border: [false, false, false, false] },
+                    { text: 'Generó: INPRENET', alignment: 'left', border: [false, false, false, false] },
                     { text: 'Página ' + currentPage.toString() + ' de ' + pageCount, alignment: 'right', border: [false, false, false, false] }
                   ]
                 ]
@@ -1290,7 +1289,6 @@ export class VerplancerradaComponent {
       }
     });
   }
-
 
   async generarPDFMontosPorBanco() {
     try {
@@ -1445,7 +1443,7 @@ export class VerplancerradaComponent {
                 body: [
                   [
                     { text: 'Fecha y Hora: ' + new Date().toLocaleString(), alignment: 'left', border: [false, false, false, false] },
-                    { text: 'Generó: ', alignment: 'left', border: [false, false, false, false] },
+                    { text: 'Generó: INPRENET', alignment: 'left', border: [false, false, false, false] },
                     { text: 'Página ' + currentPage.toString() + ' de ' + pageCount, alignment: 'right', border: [false, false, false, false] }
                   ]
                 ]
@@ -1524,5 +1522,4 @@ export class VerplancerradaComponent {
         console.error('Error al descargar el Excel', error);
     });
 }
-
 }

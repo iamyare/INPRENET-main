@@ -279,7 +279,9 @@ export class DocumentosPlanillaComponent implements OnInit {
       return;
     }
 
+    console.log(periodoFinalizacion);
     this.planillaService.getTotalMontosPorBancoYPeriodo(periodoInicio, periodoFinalizacion, idTiposPlanilla).subscribe({
+
       next: async (data) => {
         const base64Image = await this.convertirImagenABase64('assets/images/membratadoFinal.jpg');
 
@@ -473,7 +475,12 @@ export class DocumentosPlanillaComponent implements OnInit {
   }
 
 
-
+  formatearFecha(fecha: Date): string {
+    const dia = ("0" + fecha.getDate()).slice(-2);
+    const mes = ("0" + (fecha.getMonth() + 1)).slice(-2);
+    const anio = fecha.getFullYear();
+    return `${dia}/${mes}/${anio}`;
+}
 
 
 }

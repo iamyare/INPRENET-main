@@ -549,7 +549,6 @@ export class PlanillaService {
         AND dpb."ESTADO" = 'PAGADA'
         GROUP BY
         COALESCE(b."NOMBRE_BANCO", 'SIN BANCO')
-        ORDER BY  COALESCE(b."NOMBRE_BANCO", 'SIN BANCO') ASC
     `;
 
     const deduccionesInpremaQuery = `
@@ -573,11 +572,29 @@ export class PlanillaService {
         AND d."ID_CENTRO_TRABAJO" = 1
         GROUP BY
         COALESCE(b."NOMBRE_BANCO", 'SIN BANCO')
-        ORDER BY  COALESCE(b."NOMBRE_BANCO", 'SIN BANCO') ASC
     `;
 
     const deduccionesTercerosQuery = `
-        
+        SELECT
+        COALESCE(b."NOMBRE_BANCO", 'SIN BANCO') AS NOMBRE_BANCO,
+        SUM(ddp."MONTO_APLICADO") AS SUMA_DEDUCCIONES_TERCEROS
+        FROM
+        "NET_PLANILLA" p
+        JOIN
+        "NET_DETALLE_DEDUCCION" ddp ON p."ID_PLANILLA" = ddp."ID_PLANILLA"
+        JOIN
+        "NET_DEDUCCION" d ON ddp."ID_DEDUCCION" = d."ID_DEDUCCION"
+        LEFT JOIN
+        "NET_PERSONA_POR_BANCO" pb ON ddp."ID_AF_BANCO" = pb."ID_AF_BANCO"
+        LEFT JOIN
+        "NET_BANCO" b ON pb."ID_BANCO" = b."ID_BANCO"
+        WHERE
+        p."FECHA_APERTURA" BETWEEN TO_DATE(:periodoInicio, 'DD/MM/YYYY') AND TO_DATE(:periodoFinalizacion, 'DD/MM/YYYY')
+        AND p."ID_TIPO_PLANILLA" IN (${idTiposPlanilla.join(', ')})
+        AND ddp."ESTADO_APLICACION" = 'COBRADA'
+        AND d."ID_DEDUCCION" NOT IN (1,2,3)
+        GROUP BY
+        COALESCE(b."NOMBRE_BANCO", 'SIN BANCO')
     `;
 
     try {
@@ -619,7 +636,7 @@ export class PlanillaService {
         console.error('Error al obtener los totales por banco en el periodo:', error);
         throw new InternalServerErrorException('Error al obtener los totales por banco en el periodo');
     }
-}  
+}   
 
   async generarVoucher(idPlanilla: number, dni: string): Promise<any> {
     try {
@@ -1607,47 +1624,54 @@ export class PlanillaService {
     periodoInicio: string,
     periodoFinalizacion: string,
     idTiposPlanilla: number[],
-  ): Promise<any[]> {
-    
+): Promise<any[]> {
     const beneficiosQuery = `
-      SELECT
-        banco.cod_banco AS "codigo_banco", 
-        personaPorBanco.num_cuenta AS "numero_cuenta",
-        SUM(detallePago.monto_a_pagar) AS "monto_a_pagar",
-        persona.primer_apellido || ' ' || COALESCE(persona.segundo_apellido, '') || ' ' || persona.primer_nombre || ' ' || COALESCE(persona.segundo_nombre, '') AS "nombre_completo",
-        tipoPlanilla.id_tipo_planilla AS "id_tipo_planilla",
-        persona.n_identificacion AS "n_identificacion",
-        persona.ID_PERSONA AS "ID_PERSONA" 
-      FROM
-        "NET_PLANILLA" planilla
-      JOIN
-        "NET_DETALLE_PAGO_BENEFICIO" detallePago ON planilla."ID_PLANILLA" = detallePago."ID_PLANILLA"
-      LEFT JOIN
-        "NET_PERSONA_POR_BANCO" personaPorBanco ON detallePago."ID_AF_BANCO" = personaPorBanco."ID_AF_BANCO"
-      LEFT JOIN
-        "NET_BANCO" banco ON personaPorBanco."ID_BANCO" = banco."ID_BANCO"
-      JOIN
-        "NET_PERSONA" persona ON personaPorBanco."ID_PERSONA" = persona."ID_PERSONA"
-      JOIN
-        "NET_TIPO_PLANILLA" tipoPlanilla ON planilla."ID_TIPO_PLANILLA" = tipoPlanilla."ID_TIPO_PLANILLA"
-      WHERE
-        TO_DATE(planilla."PERIODO_INICIO", 'DD/MM/YYYY') >= TO_DATE(:1, 'DD/MM/YYYY')
-        AND TO_DATE(planilla."PERIODO_FINALIZACION", 'DD/MM/YYYY') <= TO_DATE(:2, 'DD/MM/YYYY')
-        AND planilla."ID_TIPO_PLANILLA" IN (${idTiposPlanilla.join(', ')})
-        AND detallePago."ESTADO" = 'PAGADA'
-      GROUP BY
-        banco.cod_banco, personaPorBanco.num_cuenta, persona.primer_apellido, persona.segundo_apellido, persona.primer_nombre, persona.segundo_nombre, tipoPlanilla.id_tipo_planilla, persona.n_identificacion, persona.ID_PERSONA
-        `;
-
+        SELECT
+    banco.codigo_ach AS "codigo_banco", 
+    personaPorBanco.num_cuenta AS "numero_cuenta",
+    SUM(detallePago.monto_a_pagar) AS "monto_a_pagar",
+    TRIM(
+        persona.primer_apellido ||
+        CASE 
+            WHEN persona.segundo_apellido IS NOT NULL THEN ' ' || persona.segundo_apellido 
+            ELSE '' 
+        END || 
+        ' ' || persona.primer_nombre ||
+        CASE 
+            WHEN persona.segundo_nombre IS NOT NULL THEN ' ' || persona.segundo_nombre 
+            ELSE '' 
+        END
+    ) AS "nombre_completo",
+    persona.n_identificacion AS "n_identificacion",
+    persona.ID_PERSONA AS "ID_PERSONA" 
+FROM
+    "NET_PLANILLA" planilla
+JOIN
+    "NET_DETALLE_PAGO_BENEFICIO" detallePago ON planilla."ID_PLANILLA" = detallePago."ID_PLANILLA"
+LEFT JOIN
+    "NET_PERSONA_POR_BANCO" personaPorBanco ON detallePago."ID_AF_BANCO" = personaPorBanco."ID_AF_BANCO"
+LEFT JOIN
+    "NET_BANCO" banco ON personaPorBanco."ID_BANCO" = banco."ID_BANCO"
+JOIN
+    "NET_PERSONA" persona ON personaPorBanco."ID_PERSONA" = persona."ID_PERSONA"
+WHERE
+    TO_DATE(planilla."PERIODO_INICIO", 'DD/MM/YYYY') >= TO_DATE(:1, 'DD/MM/YYYY')
+    AND TO_DATE(planilla."PERIODO_FINALIZACION", 'DD/MM/YYYY') <= TO_DATE(:2, 'DD/MM/YYYY')
+    AND planilla."ID_TIPO_PLANILLA" IN (${idTiposPlanilla.join(', ')})
+    AND detallePago."ESTADO" = 'PAGADA'
+GROUP BY
+    banco.codigo_ach, personaPorBanco.num_cuenta, persona.primer_apellido, persona.segundo_apellido, persona.primer_nombre, persona.segundo_nombre, persona.n_identificacion, persona.ID_PERSONA
+`;
+  
     const deduccionesInpremaQuery = `
       SELECT 
         dd."ID_PERSONA",
         SUM(dd.MONTO_APLICADO) AS "deducciones_inprema"
       FROM 
         "NET_PLANILLA" planilla
-      JOIN 
+      LEFT JOIN 
         "NET_DETALLE_DEDUCCION" dd ON planilla."ID_PLANILLA" = dd."ID_PLANILLA"
-      JOIN 
+      LEFT JOIN 
         "NET_DEDUCCION" ded ON dd."ID_DEDUCCION" = ded."ID_DEDUCCION"
       WHERE 
         TO_DATE(planilla."PERIODO_INICIO", 'DD/MM/YYYY') >= TO_DATE(:periodoInicio, 'DD/MM/YYYY')
@@ -1658,21 +1682,20 @@ export class PlanillaService {
       GROUP BY 
         dd."ID_PERSONA"
     `;
-
+  
     const deduccionesTercerosQuery = `
-       SELECT 
+      SELECT 
         dd."ID_PERSONA",
         SUM(dd.MONTO_APLICADO) AS "deducciones_terceros"
       FROM 
         "NET_PLANILLA" planilla
-      JOIN 
+      LEFT JOIN 
         "NET_DETALLE_DEDUCCION" dd ON planilla."ID_PLANILLA" = dd."ID_PLANILLA"
-      JOIN 
+      LEFT JOIN 
         "NET_DEDUCCION" ded ON dd."ID_DEDUCCION" = ded."ID_DEDUCCION"
       WHERE 
         TO_DATE(planilla."PERIODO_INICIO", 'DD/MM/YYYY') >= TO_DATE(:periodoInicio, 'DD/MM/YYYY')
         AND TO_DATE(planilla."PERIODO_FINALIZACION", 'DD/MM/YYYY') <= TO_DATE(:periodoFinalizacion, 'DD/MM/YYYY')
-        AND planilla."ID_TIPO_PLANILLA" IN (${idTiposPlanilla.join(', ')})
         AND dd."ESTADO_APLICACION" = 'COBRADA'
         AND ded."ID_DEDUCCION" NOT IN (1, 2, 3)
       GROUP BY 
@@ -1683,96 +1706,96 @@ export class PlanillaService {
       const beneficios = await this.entityManager.query(beneficiosQuery, [periodoInicio, periodoFinalizacion]);
       const deduccionesInprema = await this.entityManager.query(deduccionesInpremaQuery, [periodoInicio, periodoFinalizacion]);
       const deduccionesTerceros = await this.entityManager.query(deduccionesTercerosQuery, [periodoInicio, periodoFinalizacion]);
-   
+  
       const result = beneficios.map(beneficio => {
         const personaID = beneficio.ID_PERSONA;
-        
-        const deduccionInprema = deduccionesInprema.find(d => d.ID_PERSONA === personaID) || { deducciones_inprema: 0 };
-        const deduccionTerceros = deduccionesTerceros.find(dd=> dd.ID_PERSONA === personaID) || { deducciones_terceros: 0 };
-   
-        const totalDeducciones = (deduccionInprema.deducciones_inprema || 0) + (deduccionTerceros.deducciones_terceros || 0);
-   
+  
+        const totalDeduccionInprema = deduccionesInprema
+          .filter(d => d.ID_PERSONA === personaID)
+          .reduce((acc, curr) => acc + curr.deducciones_inprema, 0);
+  
+        const totalDeduccionTerceros = deduccionesTerceros
+          .filter(d => d.ID_PERSONA === personaID)
+          .reduce((acc, curr) => acc + curr.deducciones_terceros, 0);
+  
+        const totalDeducciones = totalDeduccionInprema + totalDeduccionTerceros;
+  
         return {
           codigo_banco: beneficio.codigo_banco,
           numero_cuenta: beneficio.numero_cuenta,
-          neto: beneficio.monto_a_pagar - totalDeducciones,
+          neto: (beneficio.monto_a_pagar - totalDeducciones).toFixed(2),
           nombre_completo: beneficio.nombre_completo,
-          id_tipo_planilla: beneficio.id_tipo_planilla,
+          id_tipo_planilla: 1, 
           n_identificacion: beneficio.n_identificacion,
         };
       });
-   
+  
       return result;
     } catch (error) {
       console.error('Error al obtener los detalles de pago por planilla:', error);
       throw new InternalServerErrorException('Error al obtener los detalles de pago por planilla.');
     }
-  }
+} 
 
-  async generarReporteDetallePago(
-    data: any[],
-    res: Response,
-  ): Promise<void> {
-    try {
-      const workbook = new ExcelJS.Workbook();
-      const detailedSheet = workbook.addWorksheet('Detalle de Pago');
-      const concatenatedSheet = workbook.addWorksheet('Concatenado');
+      async generarReporteDetallePago(
+        data: any[],
+        res: Response,
+      ): Promise<void> {
+        try {
+            const workbook = new ExcelJS.Workbook();
+            const detailedSheet = workbook.addWorksheet('Detalle de Pago');
+            const concatenatedSheet = workbook.addWorksheet('Concatenado');
+      
+            detailedSheet.columns = [
+                { header: 'Código Banco', key: 'codigo_banco', width: 20 },
+                { header: 'Número de Cuenta', key: 'numero_cuenta', width: 20 },
+                { header: 'Monto a Pagar', key: 'monto_a_pagar', width: 20 },
+                { header: 'Nombre Completo', key: 'nombre_completo', width: 30 },
+                { header: 'Fecha Actual', key: 'fecha_actual', width: 15 },
+                { header: 'Tipo de Planilla', key: 'id_tipo_planilla', width: 20 },
+                { header: 'DNI', key: 'n_identificacion', width: 20 },
+            ];
+      
+            const currentDate = format(new Date(), 'dd/MM/yyyy');
+      
+            data.forEach(item => {
+                detailedSheet.addRow({
+                    codigo_banco: item.codigo_banco,
+                    numero_cuenta: item.numero_cuenta,
+                    monto_a_pagar: parseFloat(item.neto).toFixed(2),  
+                    nombre_completo: item.nombre_completo,
+                    fecha_actual: currentDate,
+                    id_tipo_planilla: 1, 
+                    n_identificacion: item.n_identificacion,
+                });
+            });
+      
+            data.forEach(item => {
+                const concatenatedRow = [
+                    item.codigo_banco,
+                    item.numero_cuenta,
+                    parseFloat(item.neto).toFixed(2),
+                    item.nombre_completo,
+                    currentDate,
+                    1,
+                    item.n_identificacion,
+                ].join(',');
+      
+                concatenatedSheet.addRow([concatenatedRow]);
+            });
+      
+            res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+            res.setHeader('Content-Disposition', 'attachment; filename=detalle_pago.xlsx');
+      
+            await workbook.xlsx.write(res);
+            res.end();
+        } catch (error) {
+            console.error('Error al generar el archivo Excel:', error);
+            throw new InternalServerErrorException('Error al generar el archivo Excel');
+        }
+      }
 
-      // Agregar encabezados a la hoja detallada
-      detailedSheet.columns = [
-        { header: 'Código Banco', key: 'codigo_banco', width: 20 },
-        { header: 'Número de Cuenta', key: 'numero_cuenta', width: 20 },
-        { header: 'Monto a Pagar', key: 'monto_a_pagar', width: 20 },
-        { header: 'Nombre Completo', key: 'nombre_completo', width: 30 },
-        { header: 'Fecha Actual', key: 'fecha_actual', width: 15 },
-        { header: 'Tipo de Planilla', key: 'id_tipo_planilla', width: 20 },
-        { header: 'DNI', key: 'n_identificacion', width: 20 },
-      ];
 
-      // Obtener la fecha actual en el formato "dd/MM/yyyy"
-      const currentDate = format(new Date(), 'dd/MM/yyyy');
-
-      // Llenar la hoja detallada
-      data.forEach(item => {
-        detailedSheet.addRow({
-          codigo_banco: item.codigo_banco,
-          numero_cuenta: item.numero_cuenta,
-          monto_a_pagar: item.neto,
-          nombre_completo: item.nombre_completo,
-          fecha_actual: currentDate,
-          id_tipo_planilla: item.id_tipo_planilla,
-          n_identificacion: item.n_identificacion,
-        });
-      });
-
-      // Llenar la hoja concatenada
-      data.forEach(item => {
-        const concatenatedRow = [
-          item.codigo_banco,
-          item.numero_cuenta,
-          item.neto,
-          item.nombre_completo.replace(/\s+/g, ''), // Elimina espacios innecesarios
-          currentDate,
-          item.id_tipo_planilla,
-          item.n_identificacion,
-        ].join(',');
-
-        concatenatedSheet.addRow([concatenatedRow]);
-      });
-
-      // Configura la respuesta para enviar el archivo
-      res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-      res.setHeader('Content-Disposition', 'attachment; filename=detalle_pago.xlsx');
-
-      // Escribe el archivo Excel en la respuesta
-      await workbook.xlsx.write(res);
-
-      res.end();
-    } catch (error) {
-      console.error('Error al generar el archivo Excel:', error);
-      throw new InternalServerErrorException('Error al generar el archivo Excel');
-    }
-  }
 
   
 }

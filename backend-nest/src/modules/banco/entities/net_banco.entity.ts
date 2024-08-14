@@ -22,4 +22,4 @@ export class Net_Banco {
 
     @OneToMany(() => Net_Persona_Por_Banco, personasPorBanco => personasPorBanco.banco)
     personasDeBanco: Net_Persona_Por_Banco[];
-}
+} 

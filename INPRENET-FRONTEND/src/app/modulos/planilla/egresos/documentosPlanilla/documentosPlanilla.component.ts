@@ -53,7 +53,15 @@ export class DocumentosPlanillaComponent implements OnInit {
         const totalBeneficios = data.beneficios.reduce((acc:any, cur:any) => acc + (cur.TOTAL_MONTO_BENEFICIO ? parseFloat(cur.TOTAL_MONTO_BENEFICIO) : 0), 0);
         const totalDeduccionesInprema = data.deduccionesInprema.reduce((acc:any, cur:any) => acc + (cur.TOTAL_MONTO_DEDUCCION ? parseFloat(cur.TOTAL_MONTO_DEDUCCION) : 0), 0);
         const totalDeduccionesTerceros = data.deduccionesTerceros.reduce((acc:any, cur:any) => acc + (cur.TOTAL_MONTO_DEDUCCION ? parseFloat(cur.TOTAL_MONTO_DEDUCCION) : 0), 0);
-        const netoTotal = totalBeneficios - (totalDeduccionesInprema + totalDeduccionesTerceros);
+
+        console.log(data);
+        
+        const totalMontoConCuenta = data
+        .filter((cur:any) => cur.NOMBRE_BANCO !== 'SIN BANCO')
+        .reduce((acc: any, cur: any) => acc + (cur.MONTO_NETO ? parseFloat(cur.MONTO_NETO) : 0), 0);
+        console.log(totalMontoConCuenta);
+        
+        const netoTotal = totalBeneficios - (totalDeduccionesInprema + totalDeduccionesTerceros) ;
 
         const docDefinition: TDocumentDefinitions = {
           pageSize: 'LETTER',
@@ -65,7 +73,7 @@ export class DocumentosPlanillaComponent implements OnInit {
           }),
           pageMargins: [40, 130, 40, 100],
           header: {
-            text: `TOTAL DE BENEFICIOS Y DEDUCCIONES EN LA PLANILLA ${nombrePlanilla}`,
+            text: `RESUMEN DE PLANILLA ${nombrePlanilla}`,
             style: 'header',
             alignment: 'center',
             margin: [50, 90, 50, 0]
@@ -79,7 +87,7 @@ export class DocumentosPlanillaComponent implements OnInit {
                     /* { text: 'Código de Planilla: ', bold: true },
                     nombrePlanilla,
                     '\n', */
-                    { text: 'Mes de la Planilla: ', bold: true },
+                    { text: 'MES DE LA PLANILLA: ', bold: true },
                     `${mes}/${anio}`
                   ],
                   alignment: 'left'
@@ -87,7 +95,7 @@ export class DocumentosPlanillaComponent implements OnInit {
                 {
                   width: '50%',
                   text: [
-                    { text: 'Neto de planilla: ', bold: true },
+                    { text: 'MONTO NETO DE LA PLANILLA: ', bold: true },
                     `L ${netoTotal.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",")}`
                   ],
                   alignment: 'right'
@@ -95,14 +103,14 @@ export class DocumentosPlanillaComponent implements OnInit {
               ],
               margin: [40, 5, 40, 10]
             },
-            { text: 'Beneficios', style: 'subheader', margin: [0, 10, 0, 5] },
-            this.crearTablaPDF(data.beneficios, 'Beneficios', `Total Beneficios: L${totalBeneficios.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",")}`),
+            { text: 'BENEFICIOS A PAGAR', style: 'subheader', margin: [0, 10, 0, 5] },
+            this.crearTablaPDF(data.beneficios, 'Beneficios', `TOTAL BENEFICIOS: L${totalBeneficios.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",")}`),
 
-            { text: 'Deducciones INPREMA', style: 'subheader', margin: [0, 10, 0, 5] },
-            this.crearTablaPDF(data.deduccionesInprema, 'Deducciones INPREMA', `Total Deducciones INPREMA: L${totalDeduccionesInprema.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",")}`),
+            { text: 'DEDUCCIONES INPREMA', style: 'subheader', margin: [0, 10, 0, 5] },
+            this.crearTablaPDF(data.deduccionesInprema, 'DEDUCCIONES INPREMA', `TOTAL DEDUCCIONES INPREMA: L${totalDeduccionesInprema.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",")}`),
 
-            { text: 'Deducciones de Terceros', style: 'subheader', margin: [0, 10, 0, 5] },
-            this.crearTablaPDF(data.deduccionesTerceros, 'Deducciones Terceros', `Total Deducciones Terceros: L${totalDeduccionesTerceros.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",")}`),
+            { text: 'DEDUCCIONES DE TERCEROS', style: 'subheader', margin: [0, 10, 0, 5] },
+            this.crearTablaPDF(data.deduccionesTerceros, 'DEDUCCIONES TERCEROS', `TOTAL DEDUCCIONES TERCEROS: L${totalDeduccionesTerceros.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",")}`),
 
             {
               columns: [
@@ -186,9 +194,9 @@ export class DocumentosPlanillaComponent implements OnInit {
               widths: ['*', '*', '*'],
               body: [
                 [
-                  { text: 'Fecha y Hora: ' + new Date().toLocaleString(), alignment: 'left', border: [false, false, false, false] },
-                  { text: 'Generó: INPRENET', alignment: 'left', border: [false, false, false, false] },
-                  { text: 'Página ' + currentPage.toString() + ' de ' + pageCount, alignment: 'right', border: [false, false, false, false] }
+                  { text: 'FECHA Y HORA: ' + new Date().toLocaleString(), alignment: 'left', border: [false, false, false, false],  fontSize: 8 },
+                  { text: 'GENERÓ: INPRENET', alignment: 'left', border: [false, false, false, false] },
+                  { text: 'PÁGINA ' + currentPage.toString() + ' DE ' + pageCount, alignment: 'right', border: [false, false, false, false], fontSize: 8 }
                 ]
               ]
             },
@@ -300,7 +308,7 @@ export class DocumentosPlanillaComponent implements OnInit {
           }),
           pageMargins: [40, 130, 40, 100],
           header: {
-            text: `MONTOS PAGADOS POR PLANILLA ${nombrePlanilla}`,
+            text: `DESGLOSE POR BANCO EN LA PLANILLA ${nombrePlanilla}`,
             style: 'header',
             alignment: 'center',
             margin: [50, 100, 50, 0]
@@ -311,7 +319,7 @@ export class DocumentosPlanillaComponent implements OnInit {
                 {
                   width: '50%',
                   text: [
-                    { text: 'Mes de la Planilla: ', bold: true },
+                    { text: 'MES DE LA PLANILLA: ', bold: true },
                     `${mes}/${anio}`
                   ],
                   alignment: 'left'
@@ -319,7 +327,7 @@ export class DocumentosPlanillaComponent implements OnInit {
                 {
                   width: '50%',
                   text: [
-                    { text: 'Neto de planilla: ', bold: true },
+                    { text: 'MONTO NETO DE LA PLANILLA: ', bold: true },
                     `L ${totalMontoConCuenta.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",")}`
                   ],
                   alignment: 'right'
@@ -327,14 +335,14 @@ export class DocumentosPlanillaComponent implements OnInit {
               ],
               margin: [40, 5, 40, 10]
             },
-            { text: 'Montos Pagados por Banco', style: 'subheader', margin: [0, 5, 0, 10] },
-            ...this.crearTablaMontosPorBanco(data, 'Montos Pagados por Banco', `Total de montos pagados: L ${totalMontoConCuenta.toFixed(2)}`, [10, 10, 10, 10])
+            { text: 'MONTOS A PAGAR POR BANCO', style: 'subheader', margin: [0, 5, 0, 10] },
+            ...this.crearTablaMontosPorBanco(data, 'MONTOS A PAGAR POR BANCO', `TOTAL DE MONTOS A PAGAR: L ${totalMontoConCuenta.toFixed(2)}`, [10, 10, 10, 10])
           ],
           styles: {
             header: { fontSize: 16, bold: true },
             subheader: { fontSize: 14, bold: false, margin: [0, 5, 0, 10] },
             tableHeader: { bold: true, fontSize: 13, color: 'black' },
-            tableBody: { fontSize: 8, color: 'black' },
+            tableBody: { fontSize: 10, color: 'black' },
             tableTotal: { bold: true, fontSize: 13, color: 'black', alignment: 'right' },
             signature: { fontSize: 10, bold: true }
           },
@@ -343,9 +351,9 @@ export class DocumentosPlanillaComponent implements OnInit {
               widths: ['*', '*', '*'],
               body: [
                 [
-                  { text: 'Fecha y Hora: ' + new Date().toLocaleString(), alignment: 'left', border: [false, false, false, false] },
-                  { text: 'Generó: INPRENET', alignment: 'left', border: [false, false, false, false] },
-                  { text: 'Página ' + currentPage.toString() + ' de ' + pageCount, alignment: 'right', border: [false, false, false, false] }
+                  { text: 'FECHA Y HORA: ' + new Date().toLocaleString(), alignment: 'left', border: [false, false, false, false], fontSize: 8 },
+                  { text: 'GENERÓ: INPRENET', alignment: 'left', border: [false, false, false, false] },
+                  { text: 'PÁGINA ' + currentPage.toString() + ' DE ' + pageCount, alignment: 'right', border: [false, false, false, false], fontSize: 8 }
                 ]
               ]
             },
@@ -397,11 +405,11 @@ export class DocumentosPlanillaComponent implements OnInit {
         widths: ['*', 'auto', 'auto', 'auto', 'auto'],
         body: [
           [
-            { text: 'Tipo de Cuenta', style: 'tableHeader' },
-            { text: 'Total Beneficio', style: 'tableHeader', alignment: 'right' },
-            { text: 'Deducciones INPREMA', style: 'tableHeader', alignment: 'right' },
-            { text: 'Deducciones Terceros', style: 'tableHeader', alignment: 'right' },
-            { text: 'Monto Neto Pagado', style: 'tableHeader', alignment: 'right' }
+            { text: 'TIPO DE CUENTA', style: 'tableHeader' },
+            { text: 'TOTAL BENEFICIO', style: 'tableHeader', },
+            { text: 'DEDUCCIONES INPREMA', style: 'tableHeader', },
+            { text: 'DEDUCCIONES TERCEROS', style: 'tableHeader', },
+            { text: 'MONTO NETO A PAGAR', style: 'tableHeader', }
           ],
           [
             { text: 'CON CUENTA', style: 'tableBody' },
@@ -418,7 +426,7 @@ export class DocumentosPlanillaComponent implements OnInit {
             { text: `L ${formatAmount(montosAgrupados.sinCuenta.montoNeto)}`, style: 'tableBody', alignment: 'right', lineHeight: 1.15 }
           ],
           [
-            { text: 'Total', style: 'tableTotal', alignment: 'right' },
+            { text: 'TOTAL', style: 'tableBody',  bold: true, alignment: 'center' },
             { text: `L ${formatAmount(montosAgrupados.conCuenta.totalBeneficio + montosAgrupados.sinCuenta.totalBeneficio)}`, style: 'tableBody', alignment: 'right', lineHeight: 1.15 },
             { text: `L ${formatAmount(montosAgrupados.conCuenta.deduccionesInprema + montosAgrupados.sinCuenta.deduccionesInprema)}`, style: 'tableBody', alignment: 'right', lineHeight: 1.15 },
             { text: `L ${formatAmount(montosAgrupados.conCuenta.deduccionesTerceros + montosAgrupados.sinCuenta.deduccionesTerceros)}`, style: 'tableBody', alignment: 'right', lineHeight: 1.15 },
@@ -438,11 +446,11 @@ export class DocumentosPlanillaComponent implements OnInit {
         widths: ['*', 'auto', 'auto', 'auto', 'auto'],
         body: [
           [
-            { text: 'Nombre del Banco', style: 'tableHeader' },
-            { text: 'Total Beneficio', style: 'tableHeader', alignment: 'right' },
-            { text: 'Deducciones INPREMA', style: 'tableHeader', alignment: 'right' },
-            { text: 'Deducciones Terceros', style: 'tableHeader', alignment: 'right' },
-            { text: 'Monto Neto Pagado', style: 'tableHeader', alignment: 'right' }
+            { text: 'NOMBRE DEL BANCO', style: 'tableHeader' },
+            { text: 'TOTAL DEL BENEFICIO', style: 'tableHeader', },
+            { text: 'DEDUCCIONES INPREMA', style: 'tableHeader', },
+            { text: 'DEDUCCIONES TERCEROS', style: 'tableHeader', },
+            { text: 'MONTO NETO A PAGAR', style: 'tableHeader', }
           ],
           ...data.filter(el => el.NOMBRE_BANCO !== 'SIN BANCO').map(el => {
             const nombre = el.NOMBRE_BANCO;
@@ -459,7 +467,7 @@ export class DocumentosPlanillaComponent implements OnInit {
             ];
           }),
           [
-            { text: 'Total', style: 'tableTotal', alignment: 'right' },
+            { text: 'TOTAL', style: 'tableBody',   bold: true , alignment: 'center' },
             { text: `L ${formatAmount(montosAgrupados.conCuenta.totalBeneficio)}`, style: 'tableBody', alignment: 'right', lineHeight: 1.15 },
             { text: `L ${formatAmount(montosAgrupados.conCuenta.deduccionesInprema)}`, style: 'tableBody', alignment: 'right', lineHeight: 1.15 },
             { text: `L ${formatAmount(montosAgrupados.conCuenta.deduccionesTerceros)}`, style: 'tableBody', alignment: 'right', lineHeight: 1.15 },

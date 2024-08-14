@@ -473,6 +473,7 @@ export class PlanillaService {
       throw new InternalServerErrorException('Error al obtener deducciones INPREMA');
     }
   }
+
   async getDeduccionesTercerosPorPeriodo(
     periodoInicio: string,
     periodoFinalizacion: string,
@@ -515,16 +516,20 @@ export class PlanillaService {
     idTiposPlanilla: number[],
   ): Promise<any[]> {
     const query = `
-    SELECT 
-      ben."ID_BENEFICIO" AS "ID_BENEFICIO",
-      ben."NOMBRE_BENEFICIO" AS "NOMBRE_BENEFICIO",
-      ben."CODIGO" AS "CODIGO_BENEFICIO",
-      SUM(detBs."MONTO_A_PAGAR") AS "TOTAL_MONTO_BENEFICIO"
+     SELECT 
+      SUM(detBs."MONTO_A_PAGAR") AS "TOTAL_MONTO_BENEFICIO",
+      COALESCE(b."NOMBRE_BANCO", 'SIN BANCO') AS NOMBRE_BANCO
+      
     FROM 
       "NET_DETALLE_PAGO_BENEFICIO" detBs
     INNER JOIN 
       "NET_BENEFICIO" ben 
       ON detBs."ID_BENEFICIO" = ben."ID_BENEFICIO"
+    LEFT JOIN 
+      "NET_PERSONA_POR_BANCO" pb 
+      ON detBs."ID_AF_BANCO" = pb."ID_AF_BANCO"
+    LEFT JOIN
+        "NET_BANCO" b ON pb."ID_BANCO" = b."ID_BANCO"
     INNER JOIN 
       "NET_PLANILLA" plan 
       ON detBs."ID_PLANILLA" = plan."ID_PLANILLA"
@@ -532,10 +537,8 @@ export class PlanillaService {
       plan."FECHA_APERTURA" BETWEEN TO_DATE(:periodoInicio, 'DD/MM/YYYY') AND TO_DATE(:periodoFinalizacion, 'DD/MM/YYYY')
       AND plan."ID_TIPO_PLANILLA" IN (${idTiposPlanilla.join(', ')})
     GROUP BY 
-      ben."ID_BENEFICIO", 
-      ben."NOMBRE_BENEFICIO", 
-      ben."CODIGO"
-    ORDER BY ben."NOMBRE_BENEFICIO" ASC
+      COALESCE(b."NOMBRE_BANCO", 'SIN BANCO')
+
   `;
 
     try {
@@ -545,7 +548,7 @@ export class PlanillaService {
       throw new InternalServerErrorException('Error al obtener beneficios');
     }
   }
-  async getDeduccionesSC(
+  async getDeduccionesPorPeriodoSC(
     periodoInicio: string,
     periodoFinalizacion: string,
     idTiposPlanilla: number[],
@@ -592,11 +595,10 @@ export class PlanillaService {
       const deduccionesInprema = await this.getDeduccionesInpremaPorPeriodo(periodoInicio, periodoFinalizacion, idTiposPlanilla);
       const deduccionesTerceros = await this.getDeduccionesTercerosPorPeriodo(periodoInicio, periodoFinalizacion, idTiposPlanilla);
 
-      /* const beneficiosSC = await this.getBeneficiosPorPeriodoSC(periodoInicio, periodoFinalizacion, idTiposPlanilla);
-      const deduccionesInpremaSC = await this.getDeduccionesInpremaPorPeriodoSC(periodoInicio, periodoFinalizacion, idTiposPlanilla);
-      const deduccionesTercerosSC = await this.getDeduccionesTercerosPorPeriodoSC(periodoInicio, periodoFinalizacion, idTiposPlanilla);
- */
-      return { beneficios, deduccionesInprema, deduccionesTerceros, /* beneficiosSC, deduccionesInpremaSC, deduccionesTercerosSC */ };
+      const beneficiosSC = await this.getBeneficiosPorPeriodoSC(periodoInicio, periodoFinalizacion, idTiposPlanilla);
+      const deduccionesSC = await this.getDeduccionesPorPeriodoSC(periodoInicio, periodoFinalizacion, idTiposPlanilla);
+     
+      return { beneficios, deduccionesInprema, deduccionesTerceros,  beneficiosSC, deduccionesSC };
     } catch (error) {
       console.error('Error al obtener los totales por periodo:', error);
       throw new InternalServerErrorException('Error al obtener los totales por periodo');

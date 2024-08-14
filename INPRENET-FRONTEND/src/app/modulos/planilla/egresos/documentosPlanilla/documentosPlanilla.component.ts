@@ -54,14 +54,11 @@ export class DocumentosPlanillaComponent implements OnInit {
         const totalDeduccionesInprema = data.deduccionesInprema.reduce((acc:any, cur:any) => acc + (cur.TOTAL_MONTO_DEDUCCION ? parseFloat(cur.TOTAL_MONTO_DEDUCCION) : 0), 0);
         const totalDeduccionesTerceros = data.deduccionesTerceros.reduce((acc:any, cur:any) => acc + (cur.TOTAL_MONTO_DEDUCCION ? parseFloat(cur.TOTAL_MONTO_DEDUCCION) : 0), 0);
 
-        console.log(data);
+        const totalMontoConCuenta = data.beneficiosSC
+        .filter((cur:any) => cur.NOMBRE_BANCO == 'SIN BANCO')
+        .reduce((acc: any, cur: any) => acc + (cur.TOTAL_MONTO_BENEFICIO ? parseFloat(cur.TOTAL_MONTO_BENEFICIO) : 0), 0);
         
-        const totalMontoConCuenta = data
-        .filter((cur:any) => cur.NOMBRE_BANCO !== 'SIN BANCO')
-        .reduce((acc: any, cur: any) => acc + (cur.MONTO_NETO ? parseFloat(cur.MONTO_NETO) : 0), 0);
-        console.log(totalMontoConCuenta);
-        
-        const netoTotal = totalBeneficios - (totalDeduccionesInprema + totalDeduccionesTerceros) ;
+        const netoTotal = totalBeneficios - (totalDeduccionesInprema + totalDeduccionesTerceros + totalMontoConCuenta) ;
 
         const docDefinition: TDocumentDefinitions = {
           pageSize: 'LETTER',

@@ -1,14 +1,15 @@
 import { BadRequestException, Injectable, Logger, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import { CreateDetalleDeduccionDto } from './dto/create-detalle-deduccion.dto';
-import { InjectEntityManager, InjectRepository } from '@nestjs/typeorm';
+import { InjectDataSource, InjectEntityManager, InjectRepository } from '@nestjs/typeorm';
 import { Net_Detalle_Deduccion } from './entities/detalle-deduccion.entity';
-import { EntityManager, Repository } from 'typeorm';
+import { DataSource, EntityManager, Repository } from 'typeorm';
 import * as xlsx from 'xlsx';
 import { net_persona } from '../../Persona/entities/net_persona.entity';
 import { Net_Planilla } from '../planilla/entities/net_planilla.entity';
 import { isUUID } from 'class-validator';
 import { Net_Deduccion } from '../deduccion/entities/net_deduccion.entity';
 import { Net_Centro_Trabajo } from 'src/modules/Empresarial/entities/net_centro_trabajo.entity';
+import * as ExcelJS from 'exceljs';
 
 @Injectable()
 export class DetalleDeduccionService {
@@ -27,9 +28,86 @@ export class DetalleDeduccionService {
     @InjectEntityManager() private readonly entityManager: EntityManager,
     @InjectRepository(Net_Planilla)
     private planillaRepository: Repository<Net_Planilla>,
+    @InjectDataSource() private readonly dataSource: DataSource,
   
   ) { }
 
+  async obtenerDetallePorDeduccionPorCodigoYGenerarExcel(
+    periodoInicio: string,
+    periodoFinalizacion: string,
+    idTiposPlanilla: number[],
+    codDeduccion: number
+  ): Promise<Buffer> {
+    const detallesQuery = `
+      SELECT 
+          dd."ANIO" AS "anio",
+          dd."MES" AS "mes",
+          ded."COD_DEDUCCION" AS "cod_deduccion",
+          SUM(dd.MONTO_APLICADO) AS "monto_aplicado",
+          persona."PRIMER_APELLIDO" || ' ' || NVL(persona."SEGUNDO_APELLIDO", '') || ' ' || persona."PRIMER_NOMBRE" || ' ' || NVL(persona."SEGUNDO_NOMBRE", '') AS "nombre_completo",
+          persona."N_IDENTIFICACION" AS "n_identificacion"
+      FROM 
+          "NET_PLANILLA" planilla
+      LEFT JOIN 
+          "NET_DETALLE_DEDUCCION" dd ON planilla."ID_PLANILLA" = dd."ID_PLANILLA"
+      LEFT JOIN 
+          "NET_DEDUCCION" ded ON dd."ID_DEDUCCION" = ded."ID_DEDUCCION"
+      LEFT JOIN 
+          "NET_PERSONA" persona ON dd."ID_PERSONA" = persona."ID_PERSONA"
+      WHERE 
+          TO_DATE(planilla."PERIODO_INICIO", 'DD/MM/YYYY') >= TO_DATE(:1, 'DD/MM/YYYY')
+          AND TO_DATE(planilla."PERIODO_FINALIZACION", 'DD/MM/YYYY') <= TO_DATE(:2, 'DD/MM/YYYY')
+          AND planilla."ID_TIPO_PLANILLA" IN (${idTiposPlanilla.join(', ')})
+          AND dd."ESTADO_APLICACION" = 'COBRADA'
+          AND ded."COD_DEDUCCION" = :3
+      GROUP BY 
+          dd."ANIO",
+          dd."MES",
+          ded."COD_DEDUCCION",
+          persona."PRIMER_APELLIDO",
+          persona."SEGUNDO_APELLIDO",
+          persona."PRIMER_NOMBRE",
+          persona."SEGUNDO_NOMBRE",
+          persona."N_IDENTIFICACION"
+      ORDER BY 
+          dd."ANIO",
+          dd."MES",
+          persona."PRIMER_APELLIDO",
+          persona."SEGUNDO_APELLIDO",
+          persona."PRIMER_NOMBRE",
+          persona."SEGUNDO_NOMBRE"
+    `;
+
+    try {
+      const detalles = await this.dataSource.query(detallesQuery, [periodoInicio, periodoFinalizacion, codDeduccion]);
+      const workbook = new ExcelJS.Workbook();
+      const worksheet = workbook.addWorksheet('Deducciones');
+      worksheet.columns = [
+        { header: 'N. Identificación', key: 'n_identificacion', width: 20 },
+        { header: 'Nombre Completo', key: 'nombre_completo', width: 30 },
+        { header: 'Monto Aplicado', key: 'monto_aplicado', width: 15 },
+        { header: 'Código Deducción', key: 'cod_deduccion', width: 15 },
+        { header: 'Año', key: 'anio', width: 10 },
+        { header: 'Mes', key: 'mes', width: 10 },
+      ];
+      detalles.forEach(detalle => {
+        worksheet.addRow({
+          anio: detalle.anio,
+          mes: detalle.mes,
+          cod_deduccion: detalle.cod_deduccion,
+          monto_aplicado: detalle.monto_aplicado,
+          nombre_completo: detalle.nombre_completo,
+          n_identificacion: detalle.n_identificacion,
+        });
+      });
+      const buffer = await workbook.xlsx.writeBuffer();
+      return Buffer.from(buffer);
+    } catch (error) {
+      console.error('Error al obtener los detalles por deducción y generar el Excel:', error);
+      throw new InternalServerErrorException('Error al generar el Excel.');
+    }
+  }
+  
   async insertarDetalles(data: any[]): Promise<void> {
     const queryRunner = this.entityManager.connection.createQueryRunner();
     await queryRunner.connect();

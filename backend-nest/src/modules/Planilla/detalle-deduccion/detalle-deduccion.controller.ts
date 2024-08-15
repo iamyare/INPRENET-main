@@ -9,6 +9,36 @@ import { ApiTags } from '@nestjs/swagger';
 export class DetalleDeduccionController {
   constructor(private readonly detalleDeduccionService: DetalleDeduccionService) { }
 
+  @Get('detallePorCodDeduccion')
+  async obtenerDetalleYDescargarExcel(
+    @Query('periodoInicio') periodoInicio: string,
+    @Query('periodoFinalizacion') periodoFinalizacion: string,
+    @Query('idTiposPlanilla') idTiposPlanilla: string,
+    @Query('codDeduccion') codDeduccion: number,
+    @Res() res
+  ) {
+    const tiposPlanillaArray = idTiposPlanilla.split(',').map(Number);
+    
+    const buffer = await this.detalleDeduccionService.obtenerDetallePorDeduccionPorCodigoYGenerarExcel(
+      periodoInicio,
+      periodoFinalizacion,
+      tiposPlanillaArray,
+      codDeduccion
+    );
+
+    // Configurar respuesta para descargar el archivo Excel
+    res.set({
+      'Content-Type': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      'Content-Disposition': `attachment; filename="Deducciones_${codDeduccion}.xlsx"`,
+    });
+
+    res.send(buffer);
+  }
+
+
+
+
+
   @Post('crearDeExcel')
   @HttpCode(HttpStatus.CREATED)
   async insertarDetalles(@Body() data: any[]) {

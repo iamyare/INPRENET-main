@@ -247,6 +247,26 @@ export class PlanillaController {
     }
   }
 
+  @Get('Definitiva/personas/ord/:perI/:perF')
+  async ObtenerPlanDefinPersonasOrd(
+    @Param('perI') perI: string,
+    @Param('perF') perF: string,
+    @Query('page') page?: number,
+    @Query('limit') limit?: number,
+    @Res() res?,
+  ) {
+    if (!perI && !perF) {
+      throw new BadRequestException('Los parámetros idPlanilla son obligatorios');
+    }
+    try {  
+      const data =  await this.planillaService.ObtenerPlanDefinPersonasOrd(perI, perF, page, limit);
+      
+      await this.planillaService.generarExcelInv(data, res);
+    } catch (error) {
+      throw new InternalServerErrorException('Error al obtener planilla preliminar');
+    }
+  }
+
   @Get('todas')
   async ObtenerTodasPlanillas(
     @Query('codPlanilla') codPlanilla: string,

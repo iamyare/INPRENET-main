@@ -6,7 +6,7 @@ import pdfMake from 'pdfmake/build/pdfmake';
 import pdfFonts from 'pdfmake/build/vfs_fonts';
 import { AbstractControl, FormBuilder, FormGroup, ValidationErrors, ValidatorFn, Validators } from '@angular/forms';
 import { DeduccionesService } from 'src/app/services/deducciones.service';
-
+import { format } from 'date-fns';
 pdfMake.vfs = pdfFonts.pdfMake.vfs;
 
 @Component({
@@ -111,10 +111,10 @@ export class DocumentosPlanillaComponent implements OnInit {
         const totalDeduccionesTerceros = data.deduccionesTerceros.reduce((acc: any, cur: any) => acc + (cur.TOTAL_MONTO_DEDUCCION ? parseFloat(cur.TOTAL_MONTO_DEDUCCION) : 0), 0);
 
         const totalMontoConCuenta = data.beneficiosSC
-          .filter((cur: any) => cur.NOMBRE_BANCO == 'SIN BANCO')
-          .reduce((acc: any, cur: any) => acc + (cur.TOTAL_MONTO_BENEFICIO ? parseFloat(cur.TOTAL_MONTO_BENEFICIO) : 0), 0);
-
-        const netoTotal = totalBeneficios - (totalDeduccionesInprema + totalDeduccionesTerceros + totalMontoConCuenta);
+        .filter((cur:any) => cur.NOMBRE_BANCO == 'SIN BANCO')
+        .reduce((acc: any, cur: any) => acc + (cur.TOTAL_MONTO_BENEFICIO ? parseFloat(cur.TOTAL_MONTO_BENEFICIO) : 0), 0);
+        
+        const netoTotal = totalBeneficios - (totalDeduccionesInprema + totalDeduccionesTerceros) ;
 
         const docDefinition: TDocumentDefinitions = {
           pageSize: 'LETTER',
@@ -395,14 +395,82 @@ export class DocumentosPlanillaComponent implements OnInit {
             },
             { text: 'MONTOS A PAGAR POR BANCO', style: 'subheader', margin: [0, 5, 0, 10] },
             ...this.crearTablaMontosPorBanco(data, 'MONTOS A PAGAR POR BANCO', `TOTAL DE MONTOS A PAGAR: L ${totalMontoConCuenta.toFixed(2)}`, [10, 10, 10, 10])
+            ,{
+              columns: [
+                {
+                  width: '33%',
+                  canvas: [
+                    {
+                      type: 'line',
+                      x1: 0, y1: 0,
+                      x2: 150, y2: 0,
+                      lineWidth: 1.5
+                    }
+                  ],
+                  alignment: 'center',
+                  margin: [0, 40, 0, 5]  // Ajustar el espacio entre la última tabla y la línea de firma
+                },
+                {
+                  width: '33%',
+                  canvas: [
+                    {
+                      type: 'line',
+                      x1: 0, y1: 0,
+                      x2: 150, y2: 0,
+                      lineWidth: 1.5
+                    }
+                  ],
+                  alignment: 'center',
+                  margin: [0, 40, 0, 5]  // Ajustar el espacio entre la última tabla y la línea de firma
+                },
+                {
+                  width: '33%',
+                  canvas: [
+                    {
+                      type: 'line',
+                      x1: 0, y1: 0,
+                      x2: 150, y2: 0,
+                      lineWidth: 1.5
+                    }
+                  ],
+                  alignment: 'center',
+                  margin: [0, 40, 0, 5]  // Ajustar el espacio entre la última tabla y la línea de firma
+                }
+              ]
+            },
+            {
+              columns: [
+                {
+                  width: '33%',
+                  text: 'ELABORÓ',
+                  style: 'signature',
+                  alignment: 'center',
+                  margin: [0, 5, 0, 20]  // Espaciado después de la línea de firma
+                },
+                {
+                  width: '33%',
+                  text: 'REVISÓ',
+                  style: 'signature',
+                  alignment: 'center',
+                  margin: [0, 5, 0, 20]  // Espaciado después de la línea de firma
+                },
+                {
+                  width: '33%',
+                  text: 'AUTORIZÓ',
+                  style: 'signature',
+                  alignment: 'center',
+                  margin: [0, 5, 0, 20]  // Espaciado después de la línea de firma
+                }
+              ]
+            }
           ],
           styles: {
-            header: { fontSize: 16, bold: true },
-            subheader: { fontSize: 14, bold: false, margin: [0, 5, 0, 10] },
+            header: { fontSize: 14, bold: true },
+            subheader: { fontSize: 12, bold: false, margin: [0, 5, 0, 10] },
             tableHeader: { bold: true, fontSize: 13, color: 'black' },
-            tableBody: { fontSize: 10, color: 'black' },
+            tableBody: { fontSize: 9, color: 'black' },
             tableTotal: { bold: true, fontSize: 13, color: 'black', alignment: 'right' },
-            signature: { fontSize: 10, bold: true }
+            signature: { fontSize: 9, bold: true }
           },
           footer: (currentPage, pageCount) => ({
             table: {
@@ -591,6 +659,34 @@ export class DocumentosPlanillaComponent implements OnInit {
       error: (error) => {
         console.error('Error al descargar el archivo Excel:', error);
       }
+    });
+  }
+
+  descargarExcelInv(): void {
+    //let perI = "01-08-2024";
+    //let perF = "31-08-2024";
+
+    const fechaInicio = this.planillaForm.get('rangoFechas.fechaInicio')?.value;
+    const fechaFin = this.planillaForm.get('rangoFechas.fechaFin')?.value;
+
+    console.log(fechaInicio);
+    console.log(fechaFin);
+
+    const perI = format(fechaInicio, 'dd-MM-yyyy');
+    const perF = format(fechaFin, 'dd-MM-yyyy');
+    //const fechaInicioFormateada = this.formatearFecha(new Date(fechaInicio));
+    //const fechaFinFormateada = this.formatearFecha(new Date(fechaFin));
+    //console.log(fechaInicioFormateada);
+    
+    this.planillaService.generarExcelPlanillaInv(perI, perF).subscribe(blob => {
+      const a = document.createElement('a');
+      const objectUrl = URL.createObjectURL(blob);
+      a.href = objectUrl;
+      a.download = 'reporte_inversiones.xlsx';
+      a.click();
+      URL.revokeObjectURL(objectUrl);
+    }, error => {
+      console.error('Error al descargar el Excel', error);
     });
   }
 }

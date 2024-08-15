@@ -421,6 +421,9 @@ export class PlanillaService {
     INNER JOIN 
       "NET_PLANILLA" plan 
       ON detBs."ID_PLANILLA" = plan."ID_PLANILLA"
+    INNER JOIN 
+      "NET_PERSONA_POR_BANCO" ppb 
+      ON detBs."ID_AF_BANCO" = ppb."ID_AF_BANCO"
     WHERE 
       plan."FECHA_APERTURA" BETWEEN TO_DATE(:periodoInicio, 'DD/MM/YYYY') AND TO_DATE(:periodoFinalizacion, 'DD/MM/YYYY')
       AND plan."ID_TIPO_PLANILLA" IN (${idTiposPlanilla.join(', ')})
@@ -911,7 +914,190 @@ export class PlanillaService {
     }
   }
 
-  async ObtenerPlanDefinPersonas(codPlanilla: string, page?: number, limit?: number): Promise<any> {
+  async ObtenerPlanDefinPersonasOrd(perI: string, perF: string, page?: number, limit?: number): Promise<any> {
+
+    let query = `
+        SELECT 
+            per."N_IDENTIFICACION" AS "DNI",
+            plan."ID_PLANILLA",
+            TO_CHAR(TO_DATE(plan."PERIODO_INICIO", 'DD-MM-YYYY'), 'MM') AS "MES",
+            TO_CHAR(TO_DATE(plan."PERIODO_INICIO", 'DD-MM-YYYY'), 'YYYY') AS "ANIO",
+            tipoP."TIPO_PERSONA" AS "TIPO_PERSONA",
+            per."ID_PERSONA",
+            perPorBan."NUM_CUENTA",
+            banco."NOMBRE_BANCO",
+            banco."COD_BANCO",
+            ben."ID_BENEFICIO",
+            SUM(detBs."MONTO_A_PAGAR") AS "TOTAL_BENEFICIO",
+             TRIM(
+                per."PRIMER_APELLIDO" || ' ' ||
+                COALESCE(per."SEGUNDO_APELLIDO", '') || ' ' ||
+                per."PRIMER_NOMBRE" || ' ' ||
+                COALESCE(per."SEGUNDO_NOMBRE", '') || ' ' ||
+                COALESCE(per."TERCER_NOMBRE", '')
+            )  AS "NOMBRE_COMPLETO"
+        FROM
+            "NET_DETALLE_PAGO_BENEFICIO" detBs
+
+        JOIN
+            "NET_PLANILLA" plan
+        ON
+            plan."ID_PLANILLA" = detBs."ID_PLANILLA"
+        JOIN
+            "NET_TIPO_PLANILLA" tipoPlan
+        ON
+            plan."ID_TIPO_PLANILLA" = tipoPlan."ID_TIPO_PLANILLA"
+        JOIN
+            "NET_DETALLE_BENEFICIO_AFILIADO" detBA
+        ON
+            detBs."ID_DETALLE_PERSONA" = detBA."ID_DETALLE_PERSONA"
+            AND detBs."ID_PERSONA" = detBA."ID_PERSONA"
+            AND detBs."ID_CAUSANTE" = detBA."ID_CAUSANTE"
+            AND detBs."ID_BENEFICIO" = detBA."ID_BENEFICIO"
+        JOIN
+            "NET_BENEFICIO" ben
+        ON
+            detBA."ID_BENEFICIO" = ben."ID_BENEFICIO"
+        JOIN
+            "NET_DETALLE_PERSONA" detP
+        ON
+            detBA."ID_PERSONA" = detP."ID_PERSONA"
+            AND detBA."ID_DETALLE_PERSONA" = detP."ID_DETALLE_PERSONA"
+            AND detBA."ID_CAUSANTE" = detP."ID_CAUSANTE"
+        JOIN
+            "NET_TIPO_PERSONA" tipoP
+        ON
+            detP."ID_TIPO_PERSONA" = tipoP."ID_TIPO_PERSONA"
+        JOIN
+            "NET_PERSONA" per
+        ON
+            per."ID_PERSONA" = detP."ID_PERSONA"
+        INNER JOIN
+            "NET_PERSONA_POR_BANCO" perPorBan
+        ON
+            detBs."ID_AF_BANCO" = perPorBan."ID_AF_BANCO"
+        INNER JOIN
+            "NET_BANCO" banco
+        ON
+            banco."ID_BANCO" = perPorBan."ID_BANCO"
+
+        WHERE
+                detBs."ESTADO" = 'PAGADA' AND
+                tipoPlan."ID_TIPO_PLANILLA" IN (1,2) AND
+                TO_DATE(plan."PERIODO_INICIO", 'DD-MM-YYYY') >= TO_DATE('${perI}', 'DD-MM-YYYY') AND
+                TO_DATE(plan."PERIODO_FINALIZACION", 'DD-MM-YYYY') <= TO_DATE('${perF}', 'DD-MM-YYYY')
+
+        GROUP BY
+        per."N_IDENTIFICACION",
+        plan."ID_PLANILLA",
+        per."ID_PERSONA",
+        tipoP."TIPO_PERSONA",
+        perPorBan."NUM_CUENTA",
+        banco."NOMBRE_BANCO",
+        banco."COD_BANCO",
+        ben."ID_BENEFICIO",
+         TO_CHAR(TO_DATE(plan."PERIODO_INICIO", 'DD-MM-YYYY'), 'MM'),
+            TO_CHAR(TO_DATE(plan."PERIODO_INICIO", 'DD-MM-YYYY'), 'YYYY'),
+            TRIM(
+                per."PRIMER_APELLIDO" || ' ' ||
+                COALESCE(per."SEGUNDO_APELLIDO", '') || ' ' ||
+                per."PRIMER_NOMBRE" || ' ' ||
+                COALESCE(per."SEGUNDO_NOMBRE", '') || ' ' ||
+                COALESCE(per."TERCER_NOMBRE", '')
+            )
+        ORDER BY  TRIM(
+                per."PRIMER_APELLIDO" || ' ' ||
+                COALESCE(per."SEGUNDO_APELLIDO", '') || ' ' ||
+                per."PRIMER_NOMBRE" || ' ' ||
+                COALESCE(per."SEGUNDO_NOMBRE", '') || ' ' ||
+                COALESCE(per."TERCER_NOMBRE", '')
+            ) 
+    `;
+
+    let queryI = `
+          SELECT 
+              per."ID_PERSONA",
+              plan."ID_PLANILLA",
+                      SUM(dd."MONTO_APLICADO") AS "DEDUCCIONES"
+              FROM "NET_PLANILLA" plan
+              JOIN "NET_TIPO_PLANILLA" tipoPlan ON plan."ID_TIPO_PLANILLA" = tipoPlan."ID_TIPO_PLANILLA"
+              INNER JOIN "NET_DETALLE_DEDUCCION" dd ON dd."ID_PLANILLA" = plan."ID_PLANILLA"
+              INNER JOIN "NET_DEDUCCION" ded ON ded."ID_DEDUCCION" = dd."ID_DEDUCCION"
+              INNER JOIN "NET_CENTRO_TRABAJO" instFin ON instFin."ID_CENTRO_TRABAJO" = ded."ID_CENTRO_TRABAJO" 
+          JOIN
+                      "NET_PERSONA_POR_BANCO" perPorBan
+                  ON
+                      dd."ID_AF_BANCO" = perPorBan."ID_AF_BANCO"
+                  JOIN
+                      "NET_BANCO" banco
+                  ON
+                      banco."ID_BANCO" = perPorBan."ID_BANCO"
+
+                      INNER JOIN "NET_PERSONA" per ON per."ID_PERSONA" = dd."ID_PERSONA"
+
+                      WHERE
+                          dd."ESTADO_APLICACION" = 'COBRADA' AND
+                          tipoPlan."ID_TIPO_PLANILLA" IN (1,2) AND
+                          TO_DATE(plan."PERIODO_INICIO", 'DD-MM-YYYY') >= TO_DATE('${perI}', 'DD-MM-YYYY') AND 
+                          TO_DATE(plan."PERIODO_FINALIZACION", 'DD-MM-YYYY') <= TO_DATE('${perF}', 'DD-MM-YYYY')
+                      GROUP BY
+                      plan."ID_PLANILLA",
+                          per."ID_PERSONA"
+    `;
+
+
+    interface Persona {
+      DNI: string;
+      MES: string;
+      ANIO: string;
+      ID_PLANILLA: number;
+      ID_PERSONA: number;
+      TOTAL_BENEFICIO: number;
+      NOMBRE_COMPLETO: string;
+      TOTAL_DEDUCCIONES?: number;
+      DEDUCCIONES?: number;
+    }
+
+    interface Deduccion {
+      ID_PERSONA: number;
+      ID_PLANILLA: number;
+      DEDUCCIONES?: number;
+    }
+
+    try {
+      const result: any = await this.entityManager.query(query);
+      const resultI: any = await this.entityManager.query(queryI);
+
+      const newResult = result.map(persona => {
+        const deduccionI = resultI.find(d => d.ID_PERSONA === persona.ID_PERSONA && d.ID_PLANILLA === persona.ID_PLANILLA);
+
+        
+        let totD = 0;
+        if (deduccionI) {
+          totD = (deduccionI?.['DEDUCCIONES'] || 0);
+        }
+
+        return {
+          DNI: persona.DNI,
+          NOMBRE_COMPLETO: persona.NOMBRE_COMPLETO,
+          ID_BENEFICIO: persona.ID_BENEFICIO,
+          MES: persona.MES,
+          ANIO: persona.ANIO,
+          NUM_CUENTA: persona.NUM_CUENTA,
+          COD_BANCO: persona.COD_BANCO,
+          NOMBRE_BANCO: persona.NOMBRE_BANCO,
+          TOTAL_NETO: persona.TOTAL_BENEFICIO - totD,
+        };
+      });
+
+      return newResult;
+    } catch (error) {
+      this.logger.error(`Error al obtener totales por planilla: ${error.message}`, error.stack);
+      throw new InternalServerErrorException('Se produjo un error al obtener los totales por planilla.');
+    }
+  }
+
+  async ObtenerPlanDefinPersonas(codPlanilla:string, page?: number, limit?: number): Promise<any> {
     let query = `
                SELECT DISTINCT
             per."N_IDENTIFICACION" AS "DNI",
@@ -919,6 +1105,8 @@ export class PlanillaService {
             per."ID_PERSONA",
             perPorBan."NUM_CUENTA",
             banco."NOMBRE_BANCO",
+            banco."COD_BANCO",
+            ben."ID_BENEFICIO",
             SUM(detBs."MONTO_A_PAGAR") AS "TOTAL_BENEFICIO",
              TRIM(
                 per."PRIMER_APELLIDO" || ' ' ||
@@ -978,6 +1166,8 @@ export class PlanillaService {
         tipoP."TIPO_PERSONA",
         perPorBan."NUM_CUENTA",
         banco."NOMBRE_BANCO",
+        banco."COD_BANCO",
+        ben."ID_BENEFICIO",
             TRIM(
                 per."PRIMER_APELLIDO" || ' ' ||
                 COALESCE(per."SEGUNDO_APELLIDO", '') || ' ' ||
@@ -1110,6 +1300,36 @@ export class PlanillaService {
       { header: 'DEDUCCIONES INPREMA', key: 'DEDUCCIONES_INPREMA', width: 15 },
       { header: 'NUMERO DE CUENTA', key: 'NUM_CUENTA', width: 25 },
       { header: 'NOMBRE BANCO', key: 'NOMBRE_BANCO', width: 15 },
+    ];
+
+    // Agregar los datos al worksheet
+    data.forEach(item => {
+      worksheet.addRow(item);
+    });
+
+    // Formatear el archivo como buffer y enviarlo al cliente
+    const buffer = await workbook.xlsx.writeBuffer();
+
+    response.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+    response.setHeader('Content-Disposition', 'attachment; filename=planilla.xlsx');
+    response.send(buffer);
+  }
+
+  async generarExcelInv(data: any[], response: Response): Promise<void> {
+    const workbook = new Workbook();
+    const worksheet = workbook.addWorksheet('Planilla');
+
+    // Definir las columnas
+    worksheet.columns = [
+      { header: 'DNI', key: 'DNI', width: 15 },
+      { header: 'NOMBRE_COMPLETO', key: 'NOMBRE_COMPLETO', width: 30 },
+      { header: 'ID_BENEFICIO', key: 'ID_BENEFICIO', width: 15 },
+      { header: 'MES', key: 'MES', width: 15 },
+      { header: 'ANIO', key: 'ANIO', width: 15 },
+      { header: 'NUMERO DE CUENTA', key: 'NUM_CUENTA', width: 25 },
+      { header: 'COD_BANCO', key: 'COD_BANCO', width: 25 },
+      { header: 'NOMBRE BANCO', key: 'NOMBRE_BANCO', width: 15 },
+      { header: 'TOTAL_NETO', key: 'TOTAL_NETO', width: 15 },
     ];
 
     // Agregar los datos al worksheet

@@ -165,6 +165,21 @@ export class PlanillaService {
     );
   }
 
+  generarExcelPlanillaInv(perI: string, perF: string): Observable<Blob> {
+    /* const params = new HttpParams().
+    set('perI', perI).
+    set('perF', perF); */
+
+    const url = `${environment.API_URL}/api/planilla/Definitiva/personas/ord/${perI}/${perF}`;
+    
+    return this.http.get(url, { responseType: 'blob' }).pipe(
+      catchError(error => {
+        console.error('Error al generar el Excel de la planilla', error);
+        return throwError(() => new Error('Error al generar el Excel de la planilla'));
+      })
+    );
+  }
+
 
   getDeduccionesPorPlanillaSeparadas(idPlanilla: number): Observable<{ deduccionesINPREMA: any[], deduccionesTerceros: any[] }> {
     const url = `${environment.API_URL}/api/planilla/deducciones-separadas/${idPlanilla}`;

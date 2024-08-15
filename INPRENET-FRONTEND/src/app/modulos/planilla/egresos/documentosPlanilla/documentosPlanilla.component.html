@@ -1,35 +1,38 @@
 <div class="container mat-elevation-z4">
   <h2 class="title">Generar Reportes de Planilla</h2>
   <form [formGroup]="planillaForm">
+    <div class="button-group">
+      <!-- Botones de selección de tipo de planilla -->
+      <button mat-raised-button color="primary" [ngClass]="{'selected': tipoPlanilla === 'ordinaria'}" (click)="seleccionarTipoPlanilla('ordinaria')">ORDINARIA</button>
+      <button mat-raised-button color="primary" [ngClass]="{'selected': tipoPlanilla === 'complementaria'}" (click)="seleccionarTipoPlanilla('complementaria')">COMPLEMENTARIA</button>
+      <button mat-raised-button color="primary" [ngClass]="{'selected': tipoPlanilla === 'extraordinaria'}" (click)="seleccionarTipoPlanilla('extraordinaria')">EXTRAORDINARIA</button>
+    </div>
     <div class="form-fields">
+      <!-- Campo de rango de fechas -->
       <mat-form-field appearance="outline" class="field">
-        <mat-label>Mes</mat-label>
-        <input matInput id="mes" formControlName="mes" placeholder="MM">
-        <mat-error *ngIf="planillaForm.get('mes')?.hasError('required')">
-          El mes es requerido.
+        <mat-label>Rango de Fechas</mat-label>
+        <mat-date-range-input [rangePicker]="picker" formGroupName="rangoFechas">
+          <input matStartDate formControlName="fechaInicio" placeholder="Fecha de inicio">
+          <input matEndDate formControlName="fechaFin" placeholder="Fecha de fin">
+        </mat-date-range-input>
+        <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+        <mat-date-range-picker #picker></mat-date-range-picker>
+
+        <!-- Mensajes de error -->
+        <mat-error *ngIf="planillaForm.get('rangoFechas')?.hasError('differentMonths')">
+          Las fechas deben pertenecer al mismo mes y año.
         </mat-error>
-        <mat-error *ngIf="planillaForm.get('mes')?.hasError('pattern')">
-          Formato inválido. Debe ser MM.
+        <mat-error *ngIf="planillaForm.get('rangoFechas')?.hasError('invalidRange')">
+          La fecha de inicio no puede ser posterior a la fecha de fin.
         </mat-error>
       </mat-form-field>
-      <mat-form-field appearance="outline" class="field">
-        <mat-label>Año</mat-label>
-        <input matInput id="anio" formControlName="anio" placeholder="YYYY">
-        <mat-error *ngIf="planillaForm.get('anio')?.hasError('required')">
-          El año es requerido.
-        </mat-error>
-        <mat-error *ngIf="planillaForm.get('anio')?.hasError('pattern')">
-          Formato inválido. Debe ser YYYY.
-        </mat-error>
-      </mat-form-field>
+
     </div>
     <div class="button-group">
-      <button mat-raised-button color="primary" [disabled]="!planillaForm.valid" (click)="generarDocumento('ordinaria', planillaForm.value.mes, planillaForm.value.anio)">Generar Reporte de Planilla Ordinaria</button>
-      <button mat-raised-button color="primary" [disabled]="!planillaForm.valid" (click)="generarDocumento('complementaria', planillaForm.value.mes, planillaForm.value.anio)">Generar Reporte de Planilla Complementaria</button>
-      <button mat-raised-button color="primary" [disabled]="!planillaForm.valid" (click)="generarDocumento('extraordinaria', planillaForm.value.mes, planillaForm.value.anio)">Generar Reporte de Planilla Extraordinaria</button>
-      <button mat-raised-button color="accent" [disabled]="!planillaForm.valid" (click)="generarPDFMontosPorBancoPeriodo('ordinaria', planillaForm.value.mes, planillaForm.value.anio)">Generar Reporte de Montos por Banco Ordinaria</button>
-      <button mat-raised-button color="accent" [disabled]="!planillaForm.valid" (click)="generarPDFMontosPorBancoPeriodo('complementaria', planillaForm.value.mes, planillaForm.value.anio)">Generar Reporte de Montos por Banco Complementaria</button>
-      <button mat-raised-button color="accent" [disabled]="!planillaForm.valid" (click)="generarPDFMontosPorBancoPeriodo('extraordinaria', planillaForm.value.mes, planillaForm.value.anio)">Generar Reporte de Montos por Banco Extraordinaria</button>
+      <!-- Botones de generación de reportes -->
+      <button mat-raised-button color="primary" [disabled]="!planillaForm.valid || !tipoPlanilla" (click)="generarDocumento()">Generar Reporte de Planilla</button>
+      <button mat-raised-button color="accent" [disabled]="!planillaForm.valid || !tipoPlanilla" (click)="generarPDFMontosPorBancoPeriodo()">Generar Reporte de Montos por Banco</button>
+      <button mat-raised-button color="warn" [disabled]="!planillaForm.valid || !tipoPlanilla" (click)="descargarExcelDeduccionPorCodigo()">Descargar Excel de Deducciones</button>
     </div>
   </form>
 </div>

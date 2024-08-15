@@ -3,6 +3,8 @@ import { HttpClient, HttpErrorResponse, HttpHeaders, HttpParams } from '@angular
 import { Observable, catchError, map, tap, throwError } from 'rxjs';
 import { environment } from 'src/environments/environment';
 import { ToastrService } from 'ngx-toastr';
+import { saveAs } from 'file-saver';
+
 
 @Injectable({
   providedIn: 'root'
@@ -11,15 +13,44 @@ export class DeduccionesService {
 
   constructor(private toastr: ToastrService, private http: HttpClient) { }
 
+  descargarExcelDeduccionPorCodigo(
+    periodoInicio: string,
+    periodoFinalizacion: string,
+    idTiposPlanilla: number[],
+    codDeduccion: number
+  ): Observable<Blob> {
+    const params = new HttpParams()
+      .set('periodoInicio', periodoInicio)
+      .set('periodoFinalizacion', periodoFinalizacion)
+      .set('idTiposPlanilla', idTiposPlanilla.join(','))
+      .set('codDeduccion', codDeduccion.toString());
+
+    return this.http.get(`${environment.API_URL}/api/detalle-deduccion/detallePorCodDeduccion`, {
+      params,
+      responseType: 'blob'
+    }).pipe(
+      tap((response: Blob) => {
+        const fileName = `Deducciones_${codDeduccion}.xlsx`;
+        saveAs(response, fileName);
+        this.toastr.success('El archivo Excel se ha descargado correctamente.');
+      }),
+      catchError((error: HttpErrorResponse) => {
+        console.error('Error al descargar el archivo Excel', error);
+        this.toastr.error('Error al descargar el archivo Excel');
+        return throwError(() => new Error('Error al descargar el archivo Excel'));
+      })
+    );
+  }
+
   subirArchivoDeducciones(archivo: File): Observable<any> {
     const formData = new FormData();
     formData.append('file', archivo, archivo.name);
 
     return this.http.post(`${environment.API_URL}/api/deduccion/upload-excel-deducciones`, formData, {
       headers: new HttpHeaders({
-        'Accept': 'application/json' // Asegúrate de que el servidor devuelva JSON
+        'Accept': 'application/json'
       }),
-      responseType: 'text' // Cambiar a 'text' si el backend devuelve texto plano
+      responseType: 'text'
     }).pipe(
       tap(response => {
         try {

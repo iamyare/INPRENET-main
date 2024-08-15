@@ -4,7 +4,8 @@ import { PlanillaService } from 'src/app/services/planilla.service';
 import { TDocumentDefinitions } from 'pdfmake/interfaces';
 import pdfMake from 'pdfmake/build/pdfmake';
 import pdfFonts from 'pdfmake/build/vfs_fonts';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { AbstractControl, FormBuilder, FormGroup, ValidationErrors, ValidatorFn, Validators } from '@angular/forms';
+import { DeduccionesService } from 'src/app/services/deducciones.service';
 
 pdfMake.vfs = pdfFonts.pdfMake.vfs;
 
@@ -15,22 +16,72 @@ pdfMake.vfs = pdfFonts.pdfMake.vfs;
 })
 export class DocumentosPlanillaComponent implements OnInit {
   planillaForm: FormGroup;
+  tipoPlanilla: string | null = null;
 
-  constructor(private fb: FormBuilder, private http: HttpClient, private planillaService: PlanillaService) {
+  constructor(private fb: FormBuilder, private http: HttpClient, private planillaService: PlanillaService, private deduccionesService: DeduccionesService) {
     this.planillaForm = this.fb.group({
-      mes: ['', [Validators.required, Validators.pattern('^(0[1-9]|1[0-2])$')]],
-      anio: ['', [Validators.required, Validators.pattern('^\\d{4}$')]]
+      rangoFechas: this.fb.group({
+        fechaInicio: ['', Validators.required],
+        fechaFin: ['', Validators.required],
+      }, { validators: this.sameMonthValidator })
     });
   }
 
   ngOnInit() {
+    this.planillaForm.get('rangoFechas.fechaInicio')?.valueChanges.subscribe(() => this.checkFechasCompletas());
+    this.planillaForm.get('rangoFechas.fechaFin')?.valueChanges.subscribe(() => this.checkFechasCompletas());
   }
 
-  async generarDocumento(tipo: string, mes: string, anio: string) {
+  sameMonthValidator: ValidatorFn = (formGroup: AbstractControl): ValidationErrors | null => {
+    const fechaInicio = formGroup.get('fechaInicio')?.value;
+    const fechaFin = formGroup.get('fechaFin')?.value;
+
+    if (fechaInicio && fechaFin) {
+      const fechaInicioDate = new Date(fechaInicio);
+      const fechaFinDate = new Date(fechaFin);
+      if (fechaInicioDate.getMonth() !== fechaFinDate.getMonth() || fechaInicioDate.getFullYear() !== fechaFinDate.getFullYear()) {
+        console.log('Error: Las fechas no pertenecen al mismo mes y año');
+        return { differentMonths: true };
+      }
+
+      // Verificar que fechaInicio <= fechaFin
+      if (fechaInicioDate > fechaFinDate) {
+        return { invalidRange: true };
+      }
+    }
+
+    return null;
+  }
+
+
+
+
+  seleccionarTipoPlanilla(tipo: string) {
+    this.tipoPlanilla = tipo;
+  }
+
+  checkFechasCompletas() {
+    const fechaInicio = this.planillaForm.get('rangoFechas.fechaInicio')?.value;
+    const fechaFin = this.planillaForm.get('rangoFechas.fechaFin')?.value;
+
+    if (fechaInicio && fechaFin) {
+      const fechaInicioFormateada = this.formatearFecha(fechaInicio);
+      const fechaFinFormateada = this.formatearFecha(fechaFin);
+    }
+  }
+
+  async generarDocumento() {
+    const fechaInicio = this.planillaForm.get('rangoFechas.fechaInicio')?.value;
+    const fechaFin = this.planillaForm.get('rangoFechas.fechaFin')?.value;
+    const tipo = this.tipoPlanilla;
+
+    if (!tipo) {
+      console.error('No se ha seleccionado un tipo de planilla');
+      return;
+    }
+
     let idTiposPlanilla: number[];
     let nombrePlanilla: string;
-    const periodoInicio = `01/${mes}/${anio}`;
-    const periodoFinalizacion = new Date(Number(anio), Number(mes), 0).toLocaleDateString('es-ES');
 
     if (tipo === 'ordinaria') {
       idTiposPlanilla = [1, 2];
@@ -46,19 +97,24 @@ export class DocumentosPlanillaComponent implements OnInit {
       return;
     }
 
-    this.planillaService.getTotalBeneficiosYDeduccionesPorPeriodo(periodoInicio, periodoFinalizacion, idTiposPlanilla).subscribe({
+    // Formatear las fechas antes de enviarlas al servicio
+    const fechaInicioFormateada = this.formatearFecha(new Date(fechaInicio));
+    const fechaFinFormateada = this.formatearFecha(new Date(fechaFin));
+
+    this.planillaService.getTotalBeneficiosYDeduccionesPorPeriodo(fechaInicioFormateada, fechaFinFormateada, idTiposPlanilla).subscribe({
+
       next: async (data) => {
         const base64Image = await this.convertirImagenABase64('assets/images/membratadoFinal.jpg');
 
-        const totalBeneficios = data.beneficios.reduce((acc:any, cur:any) => acc + (cur.TOTAL_MONTO_BENEFICIO ? parseFloat(cur.TOTAL_MONTO_BENEFICIO) : 0), 0);
-        const totalDeduccionesInprema = data.deduccionesInprema.reduce((acc:any, cur:any) => acc + (cur.TOTAL_MONTO_DEDUCCION ? parseFloat(cur.TOTAL_MONTO_DEDUCCION) : 0), 0);
-        const totalDeduccionesTerceros = data.deduccionesTerceros.reduce((acc:any, cur:any) => acc + (cur.TOTAL_MONTO_DEDUCCION ? parseFloat(cur.TOTAL_MONTO_DEDUCCION) : 0), 0);
+        const totalBeneficios = data.beneficios.reduce((acc: any, cur: any) => acc + (cur.TOTAL_MONTO_BENEFICIO ? parseFloat(cur.TOTAL_MONTO_BENEFICIO) : 0), 0);
+        const totalDeduccionesInprema = data.deduccionesInprema.reduce((acc: any, cur: any) => acc + (cur.TOTAL_MONTO_DEDUCCION ? parseFloat(cur.TOTAL_MONTO_DEDUCCION) : 0), 0);
+        const totalDeduccionesTerceros = data.deduccionesTerceros.reduce((acc: any, cur: any) => acc + (cur.TOTAL_MONTO_DEDUCCION ? parseFloat(cur.TOTAL_MONTO_DEDUCCION) : 0), 0);
 
         const totalMontoConCuenta = data.beneficiosSC
-        .filter((cur:any) => cur.NOMBRE_BANCO == 'SIN BANCO')
-        .reduce((acc: any, cur: any) => acc + (cur.TOTAL_MONTO_BENEFICIO ? parseFloat(cur.TOTAL_MONTO_BENEFICIO) : 0), 0);
-        
-        const netoTotal = totalBeneficios - (totalDeduccionesInprema + totalDeduccionesTerceros + totalMontoConCuenta) ;
+          .filter((cur: any) => cur.NOMBRE_BANCO == 'SIN BANCO')
+          .reduce((acc: any, cur: any) => acc + (cur.TOTAL_MONTO_BENEFICIO ? parseFloat(cur.TOTAL_MONTO_BENEFICIO) : 0), 0);
+
+        const netoTotal = totalBeneficios - (totalDeduccionesInprema + totalDeduccionesTerceros + totalMontoConCuenta);
 
         const docDefinition: TDocumentDefinitions = {
           pageSize: 'LETTER',
@@ -81,11 +137,8 @@ export class DocumentosPlanillaComponent implements OnInit {
                 {
                   width: '50%',
                   text: [
-                    /* { text: 'Código de Planilla: ', bold: true },
-                    nombrePlanilla,
-                    '\n', */
-                    { text: 'MES DE LA PLANILLA: ', bold: true },
-                    `${mes}/${anio}`
+                    { text: 'PERIODO DE LA PLANILLA: ', bold: true },
+                    `${this.formatearFecha(fechaInicio)} - ${this.formatearFecha(fechaFin)}`
                   ],
                   alignment: 'left'
                 },
@@ -102,7 +155,6 @@ export class DocumentosPlanillaComponent implements OnInit {
             },
             { text: 'BENEFICIOS A PAGAR', style: 'subheader', margin: [0, 10, 0, 5] },
             this.crearTablaPDF(data.beneficios, 'Beneficios', `TOTAL BENEFICIOS: L${totalBeneficios.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",")}`),
-
             { text: 'DEDUCCIONES INPREMA', style: 'subheader', margin: [0, 10, 0, 5] },
             this.crearTablaPDF(data.deduccionesInprema, 'DEDUCCIONES INPREMA', `TOTAL DEDUCCIONES INPREMA: L${totalDeduccionesInprema.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",")}`),
 
@@ -191,7 +243,7 @@ export class DocumentosPlanillaComponent implements OnInit {
               widths: ['*', '*', '*'],
               body: [
                 [
-                  { text: 'FECHA Y HORA: ' + new Date().toLocaleString(), alignment: 'left', border: [false, false, false, false],  fontSize: 8 },
+                  { text: 'FECHA Y HORA: ' + new Date().toLocaleString(), alignment: 'left', border: [false, false, false, false], fontSize: 8 },
                   { text: 'GENERÓ: INPRENET', alignment: 'left', border: [false, false, false, false] },
                   { text: 'PÁGINA ' + currentPage.toString() + ' DE ' + pageCount, alignment: 'right', border: [false, false, false, false], fontSize: 8 }
                 ]
@@ -264,11 +316,18 @@ export class DocumentosPlanillaComponent implements OnInit {
     };
   }
 
-  async generarPDFMontosPorBancoPeriodo(tipo: string, mes: string, anio: string) {
+  async generarPDFMontosPorBancoPeriodo() {
+    const fechaInicio = this.planillaForm.get('rangoFechas.fechaInicio')?.value;
+    const fechaFin = this.planillaForm.get('rangoFechas.fechaFin')?.value;
+    const tipo = this.tipoPlanilla;
+
+    if (!tipo) {
+      console.error('No se ha seleccionado un tipo de planilla');
+      return;
+    }
+
     let idTiposPlanilla: number[];
     let nombrePlanilla: string;
-    const periodoInicio = `01/${mes}/${anio}`;
-    const periodoFinalizacion = new Date(Number(anio), Number(mes), 0).toLocaleDateString('es-ES');
 
     if (tipo === 'ordinaria') {
       idTiposPlanilla = [1, 2];
@@ -284,15 +343,17 @@ export class DocumentosPlanillaComponent implements OnInit {
       return;
     }
 
-    console.log(periodoFinalizacion);
-    this.planillaService.getTotalMontosPorBancoYPeriodo(periodoInicio, periodoFinalizacion, idTiposPlanilla).subscribe({
+    // Formatear las fechas antes de enviarlas al servicio
+    const fechaInicioFormateada = this.formatearFecha(new Date(fechaInicio));
+    const fechaFinFormateada = this.formatearFecha(new Date(fechaFin));
 
+    this.planillaService.getTotalMontosPorBancoYPeriodo(fechaInicioFormateada, fechaFinFormateada, idTiposPlanilla).subscribe({
       next: async (data) => {
         const base64Image = await this.convertirImagenABase64('assets/images/membratadoFinal.jpg');
 
         // Calcular solo el monto de "CON CUENTA"
         const totalMontoConCuenta = data
-          .filter((cur:any) => cur.NOMBRE_BANCO !== 'SIN BANCO')
+          .filter((cur: any) => cur.NOMBRE_BANCO !== 'SIN BANCO')
           .reduce((acc: any, cur: any) => acc + (cur.MONTO_NETO ? parseFloat(cur.MONTO_NETO) : 0), 0);
 
         const docDefinition: TDocumentDefinitions = {
@@ -316,8 +377,8 @@ export class DocumentosPlanillaComponent implements OnInit {
                 {
                   width: '50%',
                   text: [
-                    { text: 'MES DE LA PLANILLA: ', bold: true },
-                    `${mes}/${anio}`
+                    { text: 'PERIODO DE LA PLANILLA: ', bold: true },
+                    `${this.formatearFecha(fechaInicio)} - ${this.formatearFecha(fechaFin)}`
                   ],
                   alignment: 'left'
                 },
@@ -368,7 +429,6 @@ export class DocumentosPlanillaComponent implements OnInit {
     });
   }
 
-
   crearTablaMontosPorBanco(data: any[], titulo: string, totalTexto: string, margin: [number, number, number, number]) {
     const formatAmount = (amount: number) => amount.toLocaleString('en-US', {
       minimumFractionDigits: 2,
@@ -377,21 +437,21 @@ export class DocumentosPlanillaComponent implements OnInit {
 
     // Calcular montos agrupados
     const montosAgrupados = data.reduce((acc, cur) => {
-        if (cur.NOMBRE_BANCO === 'SIN BANCO') {
-            acc.sinCuenta.totalBeneficio += cur.TOTAL_BENEFICIO ? parseFloat(cur.TOTAL_BENEFICIO) : 0;
-            acc.sinCuenta.deduccionesInprema += cur.DEDUCCIONES_INPREMA ? parseFloat(cur.DEDUCCIONES_INPREMA) : 0;
-            acc.sinCuenta.deduccionesTerceros += cur.DEDUCCIONES_TERCEROS ? parseFloat(cur.DEDUCCIONES_TERCEROS) : 0;
-            acc.sinCuenta.montoNeto += cur.MONTO_NETO ? parseFloat(cur.MONTO_NETO) : 0;
-        } else {
-            acc.conCuenta.totalBeneficio += cur.TOTAL_BENEFICIO ? parseFloat(cur.TOTAL_BENEFICIO) : 0;
-            acc.conCuenta.deduccionesInprema += cur.DEDUCCIONES_INPREMA ? parseFloat(cur.DEDUCCIONES_INPREMA) : 0;
-            acc.conCuenta.deduccionesTerceros += cur.DEDUCCIONES_TERCEROS ? parseFloat(cur.DEDUCCIONES_TERCEROS) : 0;
-            acc.conCuenta.montoNeto += cur.MONTO_NETO ? parseFloat(cur.MONTO_NETO) : 0;
-        }
-        return acc;
+      if (cur.NOMBRE_BANCO === 'SIN BANCO') {
+        acc.sinCuenta.totalBeneficio += cur.TOTAL_BENEFICIO ? parseFloat(cur.TOTAL_BENEFICIO) : 0;
+        acc.sinCuenta.deduccionesInprema += cur.DEDUCCIONES_INPREMA ? parseFloat(cur.DEDUCCIONES_INPREMA) : 0;
+        acc.sinCuenta.deduccionesTerceros += cur.DEDUCCIONES_TERCEROS ? parseFloat(cur.DEDUCCIONES_TERCEROS) : 0;
+        acc.sinCuenta.montoNeto += cur.MONTO_NETO ? parseFloat(cur.MONTO_NETO) : 0;
+      } else {
+        acc.conCuenta.totalBeneficio += cur.TOTAL_BENEFICIO ? parseFloat(cur.TOTAL_BENEFICIO) : 0;
+        acc.conCuenta.deduccionesInprema += cur.DEDUCCIONES_INPREMA ? parseFloat(cur.DEDUCCIONES_INPREMA) : 0;
+        acc.conCuenta.deduccionesTerceros += cur.DEDUCCIONES_TERCEROS ? parseFloat(cur.DEDUCCIONES_TERCEROS) : 0;
+        acc.conCuenta.montoNeto += cur.MONTO_NETO ? parseFloat(cur.MONTO_NETO) : 0;
+      }
+      return acc;
     }, {
-        conCuenta: { totalBeneficio: 0, deduccionesInprema: 0, deduccionesTerceros: 0, montoNeto: 0 },
-        sinCuenta: { totalBeneficio: 0, deduccionesInprema: 0, deduccionesTerceros: 0, montoNeto: 0 }
+      conCuenta: { totalBeneficio: 0, deduccionesInprema: 0, deduccionesTerceros: 0, montoNeto: 0 },
+      sinCuenta: { totalBeneficio: 0, deduccionesInprema: 0, deduccionesTerceros: 0, montoNeto: 0 }
     });
 
     // Primera tabla con las filas "CON CUENTA" y "SIN CUENTA"
@@ -423,7 +483,7 @@ export class DocumentosPlanillaComponent implements OnInit {
             { text: `L ${formatAmount(montosAgrupados.sinCuenta.montoNeto)}`, style: 'tableBody', alignment: 'right', lineHeight: 1.15 }
           ],
           [
-            { text: 'TOTAL', style: 'tableBody',  bold: true, alignment: 'center' },
+            { text: 'TOTAL', style: 'tableBody', bold: true, alignment: 'center' },
             { text: `L ${formatAmount(montosAgrupados.conCuenta.totalBeneficio + montosAgrupados.sinCuenta.totalBeneficio)}`, style: 'tableBody', alignment: 'right', lineHeight: 1.15 },
             { text: `L ${formatAmount(montosAgrupados.conCuenta.deduccionesInprema + montosAgrupados.sinCuenta.deduccionesInprema)}`, style: 'tableBody', alignment: 'right', lineHeight: 1.15 },
             { text: `L ${formatAmount(montosAgrupados.conCuenta.deduccionesTerceros + montosAgrupados.sinCuenta.deduccionesTerceros)}`, style: 'tableBody', alignment: 'right', lineHeight: 1.15 },
@@ -464,7 +524,7 @@ export class DocumentosPlanillaComponent implements OnInit {
             ];
           }),
           [
-            { text: 'TOTAL', style: 'tableBody',   bold: true , alignment: 'center' },
+            { text: 'TOTAL', style: 'tableBody', bold: true, alignment: 'center' },
             { text: `L ${formatAmount(montosAgrupados.conCuenta.totalBeneficio)}`, style: 'tableBody', alignment: 'right', lineHeight: 1.15 },
             { text: `L ${formatAmount(montosAgrupados.conCuenta.deduccionesInprema)}`, style: 'tableBody', alignment: 'right', lineHeight: 1.15 },
             { text: `L ${formatAmount(montosAgrupados.conCuenta.deduccionesTerceros)}`, style: 'tableBody', alignment: 'right', lineHeight: 1.15 },
@@ -479,13 +539,58 @@ export class DocumentosPlanillaComponent implements OnInit {
     return [tablaResumen, tablaPorBanco];
   }
 
-
   formatearFecha(fecha: Date): string {
     const dia = ("0" + fecha.getDate()).slice(-2);
     const mes = ("0" + (fecha.getMonth() + 1)).slice(-2);
     const anio = fecha.getFullYear();
     return `${dia}/${mes}/${anio}`;
-}
+  }
 
+  descargarExcelDeduccionPorCodigo(): void {
+    const fechaInicio = this.planillaForm.get('rangoFechas.fechaInicio')?.value;
+    const fechaFin = this.planillaForm.get('rangoFechas.fechaFin')?.value;
+    const tipo = this.tipoPlanilla;
 
+    if (!tipo) {
+      console.error('No se ha seleccionado un tipo de planilla');
+      return;
+    }
+
+    let idTiposPlanilla: number[];
+    let nombrePlanilla: string;
+
+    if (tipo === 'ordinaria') {
+      idTiposPlanilla = [1, 2];
+      nombrePlanilla = 'ORDINARIA';
+    } else if (tipo === 'complementaria') {
+      idTiposPlanilla = [3, 4, 10];
+      nombrePlanilla = 'COMPLEMENTARIA';
+    } else if (tipo === 'extraordinaria') {
+      idTiposPlanilla = [9, 8];
+      nombrePlanilla = 'EXTRAORDINARIA';
+    } else {
+      console.error('Tipo de planilla no válido');
+      return;
+    }
+
+    // Formatear las fechas antes de enviarlas al servicio
+    const fechaInicioFormateada = this.formatearFecha(new Date(fechaInicio));
+    const fechaFinFormateada = this.formatearFecha(new Date(fechaFin));
+
+    const codDeduccion = 71;
+
+    this.deduccionesService.descargarExcelDeduccionPorCodigo(
+      fechaInicioFormateada,
+      fechaFinFormateada,
+      idTiposPlanilla,
+      codDeduccion
+    ).subscribe({
+      next: () => {
+        console.log('Archivo Excel descargado exitosamente');
+      },
+      error: (error) => {
+        console.error('Error al descargar el archivo Excel:', error);
+      }
+    });
+  }
 }

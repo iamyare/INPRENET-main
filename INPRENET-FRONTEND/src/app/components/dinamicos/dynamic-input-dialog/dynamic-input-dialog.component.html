@@ -1,0 +1,23 @@
+<h1 mat-dialog-title>{{ data.title }}</h1>
+<div mat-dialog-content>
+  <form [formGroup]="form">
+    <div *ngFor="let input of data.inputs">
+      <mat-form-field appearance="outline" *ngIf="input.type !== 'select'">
+        <mat-label>{{ input.label }}</mat-label>
+        <input matInput [formControlName]="input.name" [type]="input.type" />
+      </mat-form-field>
+      <mat-form-field appearance="outline" *ngIf="input.type === 'select'">
+        <mat-label>{{ input.label }}</mat-label>
+        <mat-select [formControlName]="input.name">
+          <mat-option *ngFor="let option of input.options" [value]="option.value">
+            {{ option.label }}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+    </div>
+  </form>
+</div>
+<div mat-dialog-actions>
+  <button mat-button (click)="onCancel()">Cancelar</button>
+  <button mat-button (click)="onConfirm()" cdkFocusInitial>Confirmar</button>
+</div>

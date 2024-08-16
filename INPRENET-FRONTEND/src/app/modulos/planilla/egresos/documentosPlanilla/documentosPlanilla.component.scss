@@ -1,6 +1,6 @@
 .container {
   padding: 20px;
-  max-width: 600px;
+  max-width: 800px;
   margin: auto;
   background-color: #fff;
   border-radius: 8px;
@@ -42,19 +42,29 @@
 }
 
 button.selected {
-  background-color: #1976d2; /* Cambia el color de fondo cuando está seleccionado */
-  color: white; /* Cambia el color del texto cuando está seleccionado */
-  box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5); /* Agrega una sombra para resaltar */
-  border: 2px solid #004ba0; /* Agrega un borde más oscuro para el botón seleccionado */
+  background-color: #1976d2;
+  color: white;
+  box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5);
+  border: 2px solid #004ba0;
 }
 
-.button-group-column {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+.button-group-reportes {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
 }
 
-.button-group-column button {
-  margin-bottom: 10px;
-  width: 80%;
+.button-group-reportes button {
+  margin: 0;
+  width: 100%;
+  padding: 10px 0;
+  font-weight: bold;
+  border-radius: 8px;
+  transition: transform 0.2s ease;
+  font-size: 0.875rem;
+}
+
+.button-group-reportes button:hover {
+  transform: scale(1.05);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 }

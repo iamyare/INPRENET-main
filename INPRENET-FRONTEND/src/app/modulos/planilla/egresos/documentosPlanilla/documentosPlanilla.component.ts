@@ -7,6 +7,8 @@ import pdfFonts from 'pdfmake/build/vfs_fonts';
 import { AbstractControl, FormBuilder, FormGroup, ValidationErrors, ValidatorFn, Validators } from '@angular/forms';
 import { DeduccionesService } from 'src/app/services/deducciones.service';
 import { format } from 'date-fns';
+import { MatDialog } from '@angular/material/dialog';
+import { DynamicInputDialogComponent } from 'src/app/components/dinamicos/dynamic-input-dialog/dynamic-input-dialog.component';
 pdfMake.vfs = pdfFonts.pdfMake.vfs;
 
 @Component({
@@ -18,7 +20,7 @@ export class DocumentosPlanillaComponent implements OnInit {
   planillaForm: FormGroup;
   tipoPlanilla: string | null = null;
 
-  constructor(private fb: FormBuilder, private http: HttpClient, private planillaService: PlanillaService, private deduccionesService: DeduccionesService) {
+  constructor(private fb: FormBuilder, private http: HttpClient, private planillaService: PlanillaService, private deduccionesService: DeduccionesService,public dialog: MatDialog) {
     this.planillaForm = this.fb.group({
       rangoFechas: this.fb.group({
         fechaInicio: ['', Validators.required],
@@ -70,36 +72,29 @@ export class DocumentosPlanillaComponent implements OnInit {
     }
   }
 
-  async generarDocumento() {
+  private obtenerIdYNombrePlanilla(): { idTiposPlanilla: number[], nombrePlanilla: string } {
+    switch (this.tipoPlanilla) {
+      case 'ordinaria': return { idTiposPlanilla: [1, 2], nombrePlanilla: 'ORDINARIA' };
+      case 'complementaria': return { idTiposPlanilla: [3, 4, 10], nombrePlanilla: 'COMPLEMENTARIA' };
+      case 'extraordinaria': return { idTiposPlanilla: [9, 8], nombrePlanilla: 'EXTRAORDINARIA' };
+      default: console.error('Tipo de planilla no válido'); return { idTiposPlanilla: [], nombrePlanilla: '' };
+    }
+  }
+
+  private obtenerFechasFormateadas() {
     const fechaInicio = this.planillaForm.get('rangoFechas.fechaInicio')?.value;
     const fechaFin = this.planillaForm.get('rangoFechas.fechaFin')?.value;
-    const tipo = this.tipoPlanilla;
+    return {
+      fechaInicioFormateada: this.formatearFecha(new Date(fechaInicio)),
+      fechaFinFormateada: this.formatearFecha(new Date(fechaFin))
+    };
+  }
 
-    if (!tipo) {
-      console.error('No se ha seleccionado un tipo de planilla');
-      return;
-    }
+  async generarDocumento() {
+    const { idTiposPlanilla, nombrePlanilla } = this.obtenerIdYNombrePlanilla();
+    const { fechaInicioFormateada, fechaFinFormateada } = this.obtenerFechasFormateadas();
 
-    let idTiposPlanilla: number[];
-    let nombrePlanilla: string;
-
-    if (tipo === 'ordinaria') {
-      idTiposPlanilla = [1, 2];
-      nombrePlanilla = 'ORDINARIA';
-    } else if (tipo === 'complementaria') {
-      idTiposPlanilla = [3, 4, 10];
-      nombrePlanilla = 'COMPLEMENTARIA';
-    } else if (tipo === 'extraordinaria') {
-      idTiposPlanilla = [9, 8];
-      nombrePlanilla = 'EXTRAORDINARIA';
-    } else {
-      console.error('Tipo de planilla no válido');
-      return;
-    }
-
-    // Formatear las fechas antes de enviarlas al servicio
-    const fechaInicioFormateada = this.formatearFecha(new Date(fechaInicio));
-    const fechaFinFormateada = this.formatearFecha(new Date(fechaFin));
+    if (idTiposPlanilla.length === 0) return;
 
     this.planillaService.getTotalBeneficiosYDeduccionesPorPeriodo(fechaInicioFormateada, fechaFinFormateada, idTiposPlanilla).subscribe({
 
@@ -113,7 +108,7 @@ export class DocumentosPlanillaComponent implements OnInit {
         const totalMontoConCuenta = data.beneficiosSC
         .filter((cur:any) => cur.NOMBRE_BANCO == 'SIN BANCO')
         .reduce((acc: any, cur: any) => acc + (cur.TOTAL_MONTO_BENEFICIO ? parseFloat(cur.TOTAL_MONTO_BENEFICIO) : 0), 0);
-        
+
         const netoTotal = totalBeneficios - (totalDeduccionesInprema + totalDeduccionesTerceros) ;
 
         const docDefinition: TDocumentDefinitions = {
@@ -138,7 +133,7 @@ export class DocumentosPlanillaComponent implements OnInit {
                   width: '50%',
                   text: [
                     { text: 'PERIODO DE LA PLANILLA: ', bold: true },
-                    `${this.formatearFecha(fechaInicio)} - ${this.formatearFecha(fechaFin)}`
+                    `${fechaInicioFormateada} - ${fechaFinFormateada}`
                   ],
                   alignment: 'left'
                 },
@@ -317,35 +312,10 @@ export class DocumentosPlanillaComponent implements OnInit {
   }
 
   async generarPDFMontosPorBancoPeriodo() {
-    const fechaInicio = this.planillaForm.get('rangoFechas.fechaInicio')?.value;
-    const fechaFin = this.planillaForm.get('rangoFechas.fechaFin')?.value;
-    const tipo = this.tipoPlanilla;
+    const { idTiposPlanilla, nombrePlanilla } = this.obtenerIdYNombrePlanilla();
+    const { fechaInicioFormateada, fechaFinFormateada } = this.obtenerFechasFormateadas();
 
-    if (!tipo) {
-      console.error('No se ha seleccionado un tipo de planilla');
-      return;
-    }
-
-    let idTiposPlanilla: number[];
-    let nombrePlanilla: string;
-
-    if (tipo === 'ordinaria') {
-      idTiposPlanilla = [1, 2];
-      nombrePlanilla = 'ORDINARIA';
-    } else if (tipo === 'complementaria') {
-      idTiposPlanilla = [3, 4, 10];
-      nombrePlanilla = 'COMPLEMENTARIA';
-    } else if (tipo === 'extraordinaria') {
-      idTiposPlanilla = [9, 8];
-      nombrePlanilla = 'EXTRAORDINARIA';
-    } else {
-      console.error('Tipo de planilla no válido');
-      return;
-    }
-
-    // Formatear las fechas antes de enviarlas al servicio
-    const fechaInicioFormateada = this.formatearFecha(new Date(fechaInicio));
-    const fechaFinFormateada = this.formatearFecha(new Date(fechaFin));
+    if (idTiposPlanilla.length === 0) return;
 
     this.planillaService.getTotalMontosPorBancoYPeriodo(fechaInicioFormateada, fechaFinFormateada, idTiposPlanilla).subscribe({
       next: async (data) => {
@@ -378,7 +348,7 @@ export class DocumentosPlanillaComponent implements OnInit {
                   width: '50%',
                   text: [
                     { text: 'PERIODO DE LA PLANILLA: ', bold: true },
-                    `${this.formatearFecha(fechaInicio)} - ${this.formatearFecha(fechaFin)}`
+                    `${fechaInicioFormateada} - ${fechaFinFormateada}`
                   ],
                   alignment: 'left'
                 },
@@ -614,38 +584,19 @@ export class DocumentosPlanillaComponent implements OnInit {
     return `${dia}/${mes}/${anio}`;
   }
 
-  descargarExcelDeduccionPorCodigo(): void {
-    const fechaInicio = this.planillaForm.get('rangoFechas.fechaInicio')?.value;
-    const fechaFin = this.planillaForm.get('rangoFechas.fechaFin')?.value;
-    const tipo = this.tipoPlanilla;
+  descargarExcelDeduccionPorCodigo(codDeduccion: number): void {
+    const { idTiposPlanilla } = this.obtenerIdYNombrePlanilla();
+    const { fechaInicioFormateada, fechaFinFormateada } = this.obtenerFechasFormateadas();
 
-    if (!tipo) {
-      console.error('No se ha seleccionado un tipo de planilla');
+    if (idTiposPlanilla.length === 0) {
+      console.error('No se ha seleccionado un tipo de planilla válido.');
       return;
     }
 
-    let idTiposPlanilla: number[];
-    let nombrePlanilla: string;
-
-    if (tipo === 'ordinaria') {
-      idTiposPlanilla = [1, 2];
-      nombrePlanilla = 'ORDINARIA';
-    } else if (tipo === 'complementaria') {
-      idTiposPlanilla = [3, 4, 10];
-      nombrePlanilla = 'COMPLEMENTARIA';
-    } else if (tipo === 'extraordinaria') {
-      idTiposPlanilla = [9, 8];
-      nombrePlanilla = 'EXTRAORDINARIA';
-    } else {
-      console.error('Tipo de planilla no válido');
+    if (!codDeduccion || isNaN(codDeduccion)) {
+      console.error('Código de deducción no válido.');
       return;
     }
-
-    // Formatear las fechas antes de enviarlas al servicio
-    const fechaInicioFormateada = this.formatearFecha(new Date(fechaInicio));
-    const fechaFinFormateada = this.formatearFecha(new Date(fechaFin));
-
-    const codDeduccion = 71;
 
     this.deduccionesService.descargarExcelDeduccionPorCodigo(
       fechaInicioFormateada,
@@ -653,14 +604,48 @@ export class DocumentosPlanillaComponent implements OnInit {
       idTiposPlanilla,
       codDeduccion
     ).subscribe({
-      next: () => {
-        console.log('Archivo Excel descargado exitosamente');
+      next: (blob) => {
+        this.descargarArchivo(blob, `deducciones_${codDeduccion}.xlsx`);
       },
       error: (error) => {
         console.error('Error al descargar el archivo Excel:', error);
       }
     });
   }
+
+  private descargarArchivo(blob: Blob, nombreArchivo: string) {
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = nombreArchivo;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    window.URL.revokeObjectURL(url);
+  }
+
+  descargarReporte(): void {
+    const { idTiposPlanilla, nombrePlanilla } = this.obtenerIdYNombrePlanilla();
+    const { fechaInicioFormateada, fechaFinFormateada } = this.obtenerFechasFormateadas();
+
+    if (idTiposPlanilla.length === 0) return;
+
+    this.planillaService.descargarReporteDetallePago(fechaInicioFormateada, fechaFinFormateada, idTiposPlanilla)
+      .subscribe({
+        next: (blob) => {
+          const url = window.URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = 'detalle_pago.xlsx';
+          a.click();
+          window.URL.revokeObjectURL(url);
+        },
+        error: (error) => {
+          console.error('Error al descargar el archivo', error);
+        }
+      });
+  }
+
 
   descargarExcelInv(): void {
     //let perI = "01-08-2024";
@@ -677,7 +662,7 @@ export class DocumentosPlanillaComponent implements OnInit {
     //const fechaInicioFormateada = this.formatearFecha(new Date(fechaInicio));
     //const fechaFinFormateada = this.formatearFecha(new Date(fechaFin));
     //console.log(fechaInicioFormateada);
-    
+
     this.planillaService.generarExcelPlanillaInv(perI, perF).subscribe(blob => {
       const a = document.createElement('a');
       const objectUrl = URL.createObjectURL(blob);
@@ -688,5 +673,29 @@ export class DocumentosPlanillaComponent implements OnInit {
     }, error => {
       console.error('Error al descargar el Excel', error);
     });
+  }
+
+  openDynamicDialog(inputs: any[]) {
+    const dialogRef = this.dialog.open(DynamicInputDialogComponent, {
+      width: '400px',
+      data: {
+        title: 'Ingrese los detalles',
+        inputs: inputs
+      }
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) {
+        this.procesarResultadoDialogo(result);
+      }
+    });
+  }
+
+  procesarResultadoDialogo(result: any): void {
+    // Aquí puedes manejar el resultado del diálogo, por ejemplo:
+    if (result.codDeduccion) {
+      this.descargarExcelDeduccionPorCodigo(result.codDeduccion);
+    }
+    // Puedes manejar otros resultados según los inputs
   }
 }

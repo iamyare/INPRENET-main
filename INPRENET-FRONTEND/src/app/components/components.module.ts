@@ -26,6 +26,7 @@ import { HeaderComponent } from './header/header.component';
 import { FooterComponent } from './footer/footer.component';
 import { MainLayoutComponent } from './main-layout/main-layout.component';
 import { LandingPageComponent } from './landing-page/landing-page.component';
+import { DynamicInputDialogComponent } from './dinamicos/dynamic-input-dialog/dynamic-input-dialog.component';
 
 
 
@@ -54,7 +55,8 @@ import { LandingPageComponent } from './landing-page/landing-page.component';
     HeaderComponent,
     FooterComponent,
     MainLayoutComponent,
-    LandingPageComponent
+    LandingPageComponent,
+    DynamicInputDialogComponent
   ],
   imports: [
     CommonModule,
@@ -85,7 +87,8 @@ import { LandingPageComponent } from './landing-page/landing-page.component';
     HeaderComponent,
     FooterComponent,
     MainLayoutComponent,
-    LandingPageComponent
+    LandingPageComponent,
+    DynamicInputDialogComponent
   ]
 })
 export class ComponentsModule { }

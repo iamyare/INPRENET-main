@@ -26,8 +26,8 @@ import { Net_Persona_Discapacidad } from './entities/net_persona_discapacidad.en
 import { Net_Familia } from './entities/net_familia.entity';
 import { MantenimientoAfiliacionService } from './afiliacion/mantenimiento-afiliacion.service';
 import { MantenimientoAfiliacionController } from './afiliacion/mantenimiento-afiliacion.controller';
-import { Net_Jornada } from '../Empresarial/entities/Net_Jornada.entity';
-import { Net_Nivel_Educativo } from '../Empresarial/entities/Net_Nivel_Educativo.entity';
+import { Net_Jornada } from '../Empresarial/entities/net_jornada.entity';
+import { Net_Nivel_Educativo } from '../Empresarial/entities/net_nivel_educativo.entity';
 
 @Module({
   controllers: [AfiliadoController, AfiliacionController, MantenimientoAfiliacionController],

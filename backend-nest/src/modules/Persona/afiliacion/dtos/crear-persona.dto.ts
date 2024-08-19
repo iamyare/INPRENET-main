@@ -57,7 +57,7 @@ export class CrearPersonaDto {
   genero?: string;
 
   @IsNotEmpty()
-  @IsEnum(['F', 'M'])
+  @IsEnum(['F', 'M', 'NO BINARIO', 'OTRO'], { message: 'El sexo debe ser uno de los siguientes valores: F, M, NO BINARIO, OTRO' })
   sexo: string;
 
   @IsNotEmpty()

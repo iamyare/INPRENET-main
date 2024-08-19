@@ -11,7 +11,8 @@ export class Net_Centro_Trabajo_Nivel {
   @JoinColumn({ name: 'ID_CENTRO_TRABAJO', foreignKeyConstraintName: 'FK_id_centro_trabajo_nivel' })
   centroTrabajo: Net_Centro_Trabajo;
 
-  /* @ManyToOne(() => Net_Nivel_Educativo, nivel => nivel.centroTrabajoNiveles)
+  @ManyToOne(() => Net_Nivel_Educativo, nivel => nivel.centroTrabajoNiveles)
   @JoinColumn({ name: 'ID_NIVEL', foreignKeyConstraintName: 'FK_id_nivel_centro_trabajo' })
-  nivel: Net_Nivel_Educativo; */
+  nivel: Net_Nivel_Educativo;
+
 }

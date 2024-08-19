@@ -28,5 +28,5 @@ export class BancoService {
 
   remove(id: number) {
     return `This action removes a #${id} banco`;
-  }
+  } 
 }

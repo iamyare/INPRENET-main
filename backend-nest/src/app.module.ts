@@ -14,6 +14,7 @@ import * as oracledb from 'oracledb';
 import { AppDataSource } from '../ormconfig';
 import { MantenimientoAfiliacionService } from './modules/Persona/afiliacion/mantenimiento-afiliacion.service';
 import { AuthModule } from './modules/auth/auth.module';
+import { DocumentsModule } from './modules/documents/documents.module';
 
 @Module({
   imports: [
@@ -54,13 +55,14 @@ import { AuthModule } from './modules/auth/auth.module';
       inject: [ConfigService],
     }),
     CommonModule,
+    EmpresarialModule,
+    DocumentsModule,
     AfiliadoModule,
     BancoModule,
     TipoIdentificacionModule,
     UsuarioModule,
     PlanillaModule,
     RegionalModule,
-    EmpresarialModule,
     TransaccionesModule,
     AuthModule
   ],

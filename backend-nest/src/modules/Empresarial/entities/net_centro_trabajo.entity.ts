@@ -22,7 +22,7 @@ export class Net_Centro_Trabajo {
     @Index("UQ_rtn_netCenTrab", { unique: true })
     rtn: string;
 
-    @Column('varchar2', { length: 40, nullable: false, name: 'NOMBRE_CENTRO_TRABAJO' })
+    @Column('varchar2', { length: 100, nullable: true, name: 'NOMBRE_CENTRO_TRABAJO' })
     nombre_centro_trabajo: string;
 
     @Column('int', { nullable: true, name: 'NUMERO_EMPLEADOS' })

@@ -20,7 +20,7 @@ import { Net_Deducciones_Asignadas } from "src/modules/Planilla/detalle-deduccio
 @Entity({
     name: 'NET_PERSONA',
 })
-@Check("CK_SEXO_NET_PERSONA", `sexo IN ('F', 'M')`)
+@Check("CK_SEXO_NET_PERSONA", `sexo IN ('F', 'M', 'NO BINARIO', 'OTRO')`)
 @Check("CK_FALLECIDO_NET_PERSONA", `fallecido IN ('SI', 'NO')`)
 @Check("CK_REPRESENTACION_NET_PERSONA", `REPRESENTACION IN ('POR CUENTA PROPIA', 'POR TERCEROS')`)
 export class net_persona {
@@ -69,7 +69,7 @@ export class net_persona {
     @Column('varchar2', { length: 30, nullable: true, name: 'GENERO' })
     genero: string;
 
-    @Column('varchar2', { length: 1, nullable: true, name: 'SEXO' })
+    @Column('varchar2', { length: 10, nullable: true, name: 'SEXO' })
     sexo: string;
 
     @Column('varchar2', { length: 2, nullable: true, name: 'FALLECIDO', default: "NO" })

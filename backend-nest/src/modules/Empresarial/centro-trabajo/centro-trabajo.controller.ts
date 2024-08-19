@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Res, HttpStatus, Put, UseInterceptors, UploadedFiles, NotFoundException } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Res, HttpStatus, Put, UseInterceptors, UploadedFiles } from '@nestjs/common';
 import { CentroTrabajoService } from './centro-trabajo.service';
 import { CreateCentroTrabajoDto } from './dto/create-centro-trabajo.dto';
 import { UpdateCentroTrabajoDto } from './dto/update-centro-trabajo.dto';
@@ -7,8 +7,8 @@ import { CreatePrivateCentroTrabajoCompleteDto } from './dto/create-private-cent
 import { Net_Centro_Trabajo } from '../entities/net_centro_trabajo.entity';
 import { FileFieldsInterceptor, FilesInterceptor } from '@nestjs/platform-express';
 import { UpdateEmpleadoDto } from './dto/update-empleado.dto';
-import { Net_Jornada } from '../entities/Net_Jornada.entity';
-import { Net_Nivel_Educativo } from '../entities/Net_Nivel_Educativo.entity';
+import { Net_Jornada } from '../entities/net_jornada.entity';
+import { Net_Nivel_Educativo } from '../entities/net_nivel_educativo.entity';
 
 @ApiTags('centro-trabajo')
 @Controller('centro-trabajo')

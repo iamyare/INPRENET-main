@@ -4,22 +4,27 @@ import * as nodemailer from 'nodemailer';
 @Injectable()
 export class MailService {
   private transporter: nodemailer.Transporter;
-
+ 
   constructor() {
     this.transporter = nodemailer.createTransport({
-      host: 'smtp.gmail.com', // SMTP Host
-      port: 587,                // SMTP Port
-      secure: false,            // true for 465, false for other ports
+      service: 'outlook',
+      host: 'smtp.office365.com',
+      port: 587,                
+      secure: false,            
       auth: {
-        user: 'ematronix77@gmail.com',  // SMTP username
-        pass: 'oixl yqpv lckq qhdf',          // SMTP password
+        user: 'inpre_net@inprema.gob.hn',  
+        pass: 'Inprema*2024',
       },
+      /* tls: {
+        ciphers: 'SSLv3',
+        rejectUnauthorized: false, 
+      } */
     });
   }
 
   async sendMail(to: string, subject: string, text: string, html: string): Promise<void> {
     const mailOptions = {
-      from: '"Registro" <no-reply@gmail.com>',
+      from: '"Registro" <inpre_net@inprema.gob.hn>',
       to: to,
       subject: subject,
       text: text,

@@ -6,8 +6,8 @@ import { Net_Centro_Trabajo } from '../entities/net_centro_trabajo.entity';
 import { Repository } from 'typeorm';
 import { Net_Departamento } from '../../Regional/provincia/entities/net_departamento.entity';
 import { CreatePrivateCentroTrabajoDto } from './dto/create-private-centro-trabajo.dto';
-import { Net_Nivel_Educativo } from '../entities/Net_Nivel_Educativo.entity';
-import { Net_Jornada } from '../entities/Net_Jornada.entity';
+import { Net_Nivel_Educativo } from '../entities/net_nivel_educativo.entity';
+import { Net_Jornada } from '../entities/net_jornada.entity';
 import { Net_Centro_Trabajo_Jornada } from '../entities/net_centro_trabajo_jornada.entity';
 import { Net_Centro_Trabajo_Nivel } from '../entities/net_centro_trabajo_nivel.entity';
 import { Net_Municipio } from 'src/modules/Regional/municipio/entities/net_municipio.entity';
@@ -169,11 +169,7 @@ export class CentroTrabajoService {
   }
 
   async findAll(): Promise<Net_Centro_Trabajo[]> {
-    try {
-      return await this.centroTrabajoRepository.find();
-    } catch (error) {
-      this.handleException(error);
-    }
+    return this.centroTrabajoRepository.find({ where: { tipo: 'EDUCACION' } });
   }
 
   async getPropietarioByCentro(idCentroTrabajo: number): Promise<any> {

@@ -24,6 +24,4 @@ export class Net_Persona_Por_Banco {
     @ManyToOne(() => net_persona, persona => persona.personasPorBanco, { cascade: true })
     @JoinColumn({ name: 'ID_PERSONA', foreignKeyConstraintName: "FK_ID_PERSONA_PERSBANC" })
     persona: net_persona;
-
-
 }

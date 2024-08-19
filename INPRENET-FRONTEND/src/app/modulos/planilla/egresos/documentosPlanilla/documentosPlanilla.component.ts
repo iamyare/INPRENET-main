@@ -99,7 +99,7 @@ export class DocumentosPlanillaComponent implements OnInit {
     this.planillaService.getTotalBeneficiosYDeduccionesPorPeriodo(fechaInicioFormateada, fechaFinFormateada, idTiposPlanilla).subscribe({
 
       next: async (data) => {
-        const base64Image = await this.convertirImagenABase64('assets/images/membratadoFinal.jpg');
+        const base64Image = await this.convertirImagenABase64('../assets/images/membratadoFinal.jpg');
 
         const totalBeneficios = data.beneficios.reduce((acc: any, cur: any) => acc + (cur.TOTAL_MONTO_BENEFICIO ? parseFloat(cur.TOTAL_MONTO_BENEFICIO) : 0), 0);
         const totalDeduccionesInprema = data.deduccionesInprema.reduce((acc: any, cur: any) => acc + (cur.TOTAL_MONTO_DEDUCCION ? parseFloat(cur.TOTAL_MONTO_DEDUCCION) : 0), 0);
@@ -319,7 +319,7 @@ export class DocumentosPlanillaComponent implements OnInit {
 
     this.planillaService.getTotalMontosPorBancoYPeriodo(fechaInicioFormateada, fechaFinFormateada, idTiposPlanilla).subscribe({
       next: async (data) => {
-        const base64Image = await this.convertirImagenABase64('assets/images/membratadoFinal.jpg');
+        const base64Image = await this.convertirImagenABase64('../assets/images/membratadoFinal.jpg');
 
         // Calcular solo el monto de "CON CUENTA"
         const totalMontoConCuenta = data
@@ -648,14 +648,8 @@ export class DocumentosPlanillaComponent implements OnInit {
 
 
   descargarExcelInv(): void {
-    //let perI = "01-08-2024";
-    //let perF = "31-08-2024";
-
     const fechaInicio = this.planillaForm.get('rangoFechas.fechaInicio')?.value;
     const fechaFin = this.planillaForm.get('rangoFechas.fechaFin')?.value;
-
-    console.log(fechaInicio);
-    console.log(fechaFin);
 
     const perI = format(fechaInicio, 'dd-MM-yyyy');
     const perF = format(fechaFin, 'dd-MM-yyyy');

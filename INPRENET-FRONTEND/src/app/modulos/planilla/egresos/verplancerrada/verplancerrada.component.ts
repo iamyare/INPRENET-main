@@ -49,7 +49,7 @@ export class VerplancerradaComponent {
     private afiliadoService: AfiliadoService,
     private deduccionSVC: DeduccionesService
   ) {
-    this.convertirImagenABase64('assets/images/membratadoFinal.jpg').then(base64 => {
+    this.convertirImagenABase64('../assets/images/membratadoFinal.jpg').then(base64 => {
       this.backgroundImageBase64 = base64;
     }).catch(error => {
       console.error('Error al convertir la imagen a Base64', error);
@@ -355,202 +355,203 @@ export class VerplancerradaComponent {
   construirPDFCaus(row: { Total: any; NOMBRE_COMPLETO: any; dni: any; correo_1: any; fecha_cierre: any; }, resultados: any, backgroundImageBase64: string) {
     const formatCurrency = (value: number) => new Intl.NumberFormat('es-HN', { style: 'currency', currency: 'HNL' }).format(value);
     if (resultados) {
-      const persona = resultados.persona;
-      const detallePersona = persona.detallePersona || [];
-      const nombreCompleto = `${persona.primer_apellido} ${persona.segundo_apellido || ''} ${persona.primer_nombre} ${persona.segundo_nombre || ''}`.trim();
-      const dni = persona.n_identificacion || 'NO PROPORCIONADO';
-      const correo = persona.correo_1 || 'NO PROPORCIONADO';
-      let sumaBeneficios = 0;
-      let sumaDeducciones = 0;
+        const persona = resultados.persona;
+        const detallePersona = persona.detallePersona || [];
+        const nombreCompleto = `${persona.primer_apellido} ${persona.segundo_apellido || ''} ${persona.primer_nombre} ${persona.segundo_nombre || ''}`.trim();
+        const dni = persona.n_identificacion || 'NO PROPORCIONADO';
+        const correo = persona.correo_1 || 'NO PROPORCIONADO';
+        let sumaBeneficios = 0;
+        let sumaDeducciones = 0;
 
-      // Mapeo de ID_DETALLE_PERSONA a n_identificacion del padre
-      const causantesMap = new Map();
-      detallePersona.forEach((detalle: { ID_DETALLE_PERSONA: number; padreIdPersona: { persona: { n_identificacion: string; } }; }) => {
-        if (detalle.padreIdPersona && detalle.padreIdPersona.persona && detalle.padreIdPersona.persona.n_identificacion) {
-          causantesMap.set(detalle.ID_DETALLE_PERSONA, detalle.padreIdPersona.persona.n_identificacion);
-        }
-      });
-
-      let data = detallePersona.map((detalle: { detalleBeneficio: any[]; ID_DETALLE_PERSONA: number; }) => {
-        const beneficio = detalle.detalleBeneficio[0];
-
-        const montoPorPeriodo = beneficio.monto_por_periodo;
-        sumaBeneficios += montoPorPeriodo;
-
-        return {
-          CAUSANTE: causantesMap.get(detalle.ID_DETALLE_PERSONA) || 'NO APLICA',
-          NOMBRE_BENEFICIO: beneficio.beneficio.nombre_beneficio,
-          MontoAPagar: montoPorPeriodo,
-
-          METODO_PAGO: beneficio.metodo_pago,
-          NOMBRE_BANCO: beneficio.detallePagBeneficio[0].personaporbanco ? beneficio.detallePagBeneficio[0].personaporbanco.banco.nombre_banco : 'NO PROPORCIONADO',
-          NUM_CUENTA: beneficio.detallePagBeneficio[0].personaporbanco ? beneficio.detallePagBeneficio[0].personaporbanco.num_cuenta : 'NO PROPORCIONADO'
-        };
-      });
-      let tablaDed: any = {};
-      if (resultados.deduccion) {
-        let dataDed = resultados.deduccion.detalleDeduccion.map((deduccion: any) => {
-          const montoDeduccion = deduccion.monto_aplicado;
-          sumaDeducciones += montoDeduccion;
-
-          return {
-            NOMBRE_INSTITUCION: deduccion.deduccion.centroTrabajo.nombre_centro_trabajo,
-            NOMBRE_DEDUCCION: deduccion.deduccion.nombre_deduccion,
-            TotalMontoAplicado: montoDeduccion
-          };
+        // Mapeo de ID_DETALLE_PERSONA a n_identificacion del padre
+        const causantesMap = new Map();
+        detallePersona.forEach((detalle: { ID_DETALLE_PERSONA: number; padreIdPersona: { persona: { n_identificacion: string; } }; }) => {
+            if (detalle.padreIdPersona && detalle.padreIdPersona.persona && detalle.padreIdPersona.persona.n_identificacion) {
+                causantesMap.set(detalle.ID_DETALLE_PERSONA, detalle.padreIdPersona.persona.n_identificacion);
+            }
         });
 
-        tablaDed = {
-          table: {
-            widths: ['*', '*', '*'],
-            body: [
-              [{ text: 'INSTITUCIÓN', style: 'tableHeader' }, { text: 'DEDUCCIÓN', style: 'tableHeader' }, { text: 'MONTO DEDUCCIÓN', style: ['tableHeader', 'alignRight'] }],
+        let data = detallePersona.flatMap((detalle: { detalleBeneficio: any[]; ID_DETALLE_PERSONA: number; }) => {
+            return detalle.detalleBeneficio.map((beneficio: any) => {
+                const montoPorPeriodo = beneficio.monto_por_periodo;
+                sumaBeneficios += montoPorPeriodo;
 
-              ...dataDed.flatMap((b: any) => {
-                if (b.length === 0) {
-                  return [[
-                    { text: '---------------', alignment: 'center' },
-                    { text: '---------------', alignment: 'center' },
-                    { text: formatCurrency(0), style: 'alignRight' },
-                  ]];
-                } else {
-                  return [[
-                    { text: b.NOMBRE_INSTITUCION },
-                    { text: b.NOMBRE_DEDUCCION },
-                    { text: formatCurrency(b.TotalMontoAplicado), style: 'alignRight' }
-                  ]];
+                return {
+                    CAUSANTE: causantesMap.get(detalle.ID_DETALLE_PERSONA) || 'NO APLICA',
+                    NOMBRE_BENEFICIO: beneficio.beneficio.nombre_beneficio,
+                    MontoAPagar: montoPorPeriodo,
+                    METODO_PAGO: beneficio.metodo_pago,
+                    NOMBRE_BANCO: beneficio.detallePagBeneficio[0]?.personaporbanco?.banco?.nombre_banco || 'NO PROPORCIONADO',
+                    NUM_CUENTA: beneficio.detallePagBeneficio[0]?.personaporbanco?.num_cuenta || 'NO PROPORCIONADO'
+                };
+            });
+        });
 
-                }
-              })
-            ]
-          },
-          margin: [0, 5, 0, 0],
-          style: 'tableExample'
-        }
-      }
+        let tablaDed: any = {};
 
-      const neto = sumaBeneficios - sumaDeducciones;
+        if (resultados.deduccion) {
+            let dataDed = resultados.deduccion.detalleDeduccion.map((deduccion: any) => {
+                const montoDeduccion = deduccion.monto_aplicado;
+                sumaDeducciones += montoDeduccion;
 
-      const docDefinition: TDocumentDefinitions = {
-        background: function (currentPage, pageSize) {
-          return {
-            image: backgroundImageBase64,
-            width: pageSize.width,
-            height: pageSize.height,
-            absolutePosition: { x: 0, y: 2 }
-          };
-        },
-        content: [
-          {
-            stack: [
-              { text: 'VOUCHER DEL MES DE: ' + obtenerNombreMes(resultados.persona.detallePersona[0].detalleBeneficio[0].detallePagBeneficio[0].planilla.periodoInicio), style: 'subheader', alignment: 'center' },
-              {
-                columns: [
-                  [
-                    { text: 'DOCENTE', style: 'subheader' },
-                    { text: 'NOMBRE: ' + nombreCompleto },
-                    { text: 'DNI: ' + dni },
-                  ],
-                  [
-                    { text: 'DETALLE DE PAGO', style: 'subheader' },
-                    { text: 'PAGO TOTAL: ' + formatCurrency(neto) },
-                    { text: 'MÉTODO DE PAGO: ' + (data[0]?.METODO_PAGO || 'NO PROPORCIONADO') },
-                    { text: 'BANCO: ' + (data[0]?.NOMBRE_BANCO || 'NO PROPORCIONADO') },
-                  ]
-                ],
-                margin: [0, 10, 0, 0]  // Añade 5px de margen superior
-              },
-              {
+                return {
+                    NOMBRE_INSTITUCION: deduccion.deduccion.centroTrabajo.nombre_centro_trabajo,
+                    NOMBRE_DEDUCCION: deduccion.deduccion.nombre_deduccion,
+                    TotalMontoAplicado: montoDeduccion
+                };
+            });
+
+            tablaDed = {
                 table: {
-                  widths: ['*', '*'],
-                  body: [
-                    [{ text: 'INGRESO', style: 'tableHeader' }, { text: 'MONTO INGRESO', style: ['tableHeader', 'alignRight'] }],
-                    ...data.flatMap((b: any) => {
-                      return [[
-                        { text: b.NOMBRE_BENEFICIO },
-                        { text: formatCurrency(b.MontoAPagar), style: 'alignRight' },
-                      ]];
-                    })
-                  ]
+                    widths: ['*', '*', '*'],
+                    body: [
+                        [{ text: 'INSTITUCIÓN', style: 'tableHeader' }, { text: 'DEDUCCIÓN', style: 'tableHeader' }, { text: 'MONTO DEDUCCIÓN', style: ['tableHeader', 'alignRight'] }],
+
+                        ...dataDed.flatMap((b: any) => {
+                            if (b.length === 0) {
+                                return [[
+                                    { text: '---------------', alignment: 'center' },
+                                    { text: '---------------', alignment: 'center' },
+                                    { text: formatCurrency(0), style: 'alignRight' },
+                                ]];
+                            } else {
+                                return [[
+                                    { text: b.NOMBRE_INSTITUCION },
+                                    { text: b.NOMBRE_DEDUCCION },
+                                    { text: formatCurrency(b.TotalMontoAplicado), style: 'alignRight' }
+                                ]];
+                            }
+                        })
+                    ]
                 },
                 margin: [0, 5, 0, 0],
                 style: 'tableExample'
-              },
-              tablaDed,
-              {
-                table: {
-                  widths: ['*', '*'],
-                  body: [
-                    [{ text: 'TOTAL INGRESOS', style: 'tableHeader' }, { text: formatCurrency(sumaBeneficios), style: ['tableHeader', 'alignRight'] }]
-                  ]
-                },
-                style: 'tableExample'
-              },
-              {
-                table: {
-                  widths: ['*', '*'],
-                  body: [
-                    [{ text: 'TOTAL DEDUCCIONES', style: 'tableHeader' }, { text: formatCurrency(sumaDeducciones), style: ['tableHeader', 'alignRight'] }]
-                  ]
-                },
-                style: 'tableExample'
-              },
-              {
-                table: {
-                  widths: ['*', '*'],
-                  body: [
-                    [{ text: 'NETO A PAGAR', style: 'tableHeader' }, { text: formatCurrency(neto), style: ['tableHeader', 'alignRight'] }]
-                  ]
-                },
-                style: 'tableExample'
-              },
-              { canvas: [{ type: 'line', x1: 0, y1: 0, x2: 250, y2: 0, lineWidth: 1 }], margin: [127, 70, 0, 10] }, // Aumenta el margen inferior en 10px
-              { text: 'FIRMA UNIDAD DE PLANILLAS', style: 'signatureTitle', margin: [0, 5, 0, 0] } // Aumenta el margen superior en 10px
-            ],
-            margin: [0, 0, 0, 0]  // Establece el margen superior a 40px
-          }
-        ],
-        footer: function (currentPage, pageCount) {
-          return {
-            table: {
-              widths: ['*', '*', '*'],
-              body: [
-                [
-                  { text: 'Fecha y Hora: ' + new Date().toLocaleString(), alignment: 'left', border: [false, false, false, false] },
-                  { text: 'Generó: INPRENET', alignment: 'left', border: [false, false, false, false] },
-                  { text: 'Página ' + currentPage.toString() + ' de ' + pageCount, alignment: 'right', border: [false, false, false, false] }
-                ]
-              ]
+            };
+        }
+
+        const neto = sumaBeneficios - sumaDeducciones;
+
+        const docDefinition: TDocumentDefinitions = {
+            background: function (currentPage, pageSize) {
+                return {
+                    image: backgroundImageBase64,
+                    width: pageSize.width,
+                    height: pageSize.height,
+                    absolutePosition: { x: 0, y: 2 }
+                };
             },
-            margin: [20, 0, 20, 20]
-          };
-        },
-        pageMargins: [50, 80, 50, 85],
-        styles: {
-          header: {
-            fontSize: 16,
-            bold: true,
-            margin: [0, 0, 0, 0]
-          },
-          subheader: {
-            fontSize: 12,
-            bold: true
-          },
-          tableHeader: {
-            bold: true,
-            fontSize: 13,
-            color: 'black'
-          },
-          tableExample: {
-            margin: [0, 5, 0, 15]
-          },
-          alignRight: {
-            alignment: 'right'
-          },
-          signatureTitle: {
-            alignment: 'center',
-            bold: true,
-            fontSize: 12,
+            content: [
+                {
+                    stack: [
+                        { text: 'VOUCHER DEL MES DE: ' + obtenerNombreMes(resultados.persona.detallePersona[0].detalleBeneficio[0].detallePagBeneficio[0].planilla.periodoInicio), style: 'subheader', alignment: 'center' },
+                        {
+                            columns: [
+                                [
+                                    { text: 'DOCENTE', style: 'subheader' },
+                                    { text: 'NOMBRE: ' + nombreCompleto },
+                                    { text: 'DNI: ' + dni },
+                                ],
+                                [
+                                    { text: 'DETALLE DE PAGO', style: 'subheader' },
+                                    { text: 'PAGO TOTAL: ' + formatCurrency(neto) },
+                                    { text: 'MÉTODO DE PAGO: ' + (data[0]?.METODO_PAGO || 'NO PROPORCIONADO') },
+                                    { text: 'BANCO: ' + (data[0]?.NOMBRE_BANCO || 'NO PROPORCIONADO') },
+                                ]
+                            ],
+                            margin: [0, 10, 0, 0]
+                        },
+                        {
+                            table: {
+                                widths: ['*', '*'],
+                                body: [
+                                    [{ text: 'INGRESO', style: 'tableHeader' }, { text: 'MONTO INGRESO', style: ['tableHeader', 'alignRight'] }],
+                                    ...data.map((b: any) => {
+                                        return [
+                                            { text: b.NOMBRE_BENEFICIO },
+                                            { text: formatCurrency(b.MontoAPagar), style: 'alignRight' },
+                                        ];
+                                    })
+                                ]
+                            },
+                            margin: [0, 5, 0, 0],
+                            style: 'tableExample'
+                        },
+                        tablaDed,
+                        {
+                            table: {
+                                widths: ['*', '*'],
+                                body: [
+                                    [{ text: 'TOTAL INGRESOS', style: 'tableHeader' }, { text: formatCurrency(sumaBeneficios), style: ['tableHeader', 'alignRight'] }]
+                                ]
+                            },
+                            style: 'tableExample'
+                        },
+                        {
+                            table: {
+                                widths: ['*', '*'],
+                                body: [
+                                    [{ text: 'TOTAL DEDUCCIONES', style: 'tableHeader' }, { text: formatCurrency(sumaDeducciones), style: ['tableHeader', 'alignRight'] }]
+                                ]
+                            },
+                            style: 'tableExample'
+                        },
+                        {
+                            table: {
+                                widths: ['*', '*'],
+                                body: [
+                                    [{ text: 'NETO A PAGAR', style: 'tableHeader' }, { text: formatCurrency(neto), style: ['tableHeader', 'alignRight'] }]
+                                ]
+                            },
+                            style: 'tableExample'
+                        },
+                        { canvas: [{ type: 'line', x1: 0, y1: 0, x2: 250, y2: 0, lineWidth: 1 }], margin: [127, 70, 0, 10] },
+                        { text: 'FIRMA UNIDAD DE PLANILLAS', style: 'signatureTitle', margin: [0, 5, 0, 0] }
+                    ],
+                    margin: [0, 0, 0, 0]
+                }
+            ],
+            footer: function (currentPage, pageCount) {
+                return {
+                    table: {
+                        widths: ['*', '*', '*'],
+                        body: [
+                            [
+                                { text: 'Fecha y Hora: ' + new Date().toLocaleString(), alignment: 'left', border: [false, false, false, false] },
+                                { text: 'Generó: INPRENET', alignment: 'left', border: [false, false, false, false] },
+                                { text: 'Página ' + currentPage.toString() + ' de ' + pageCount, alignment: 'right', border: [false, false, false, false] }
+                            ]
+                        ]
+                    },
+                    margin: [20, 0, 20, 20]
+                };
+            },
+            pageMargins: [50, 80, 50, 85],
+            styles: {
+                header: {
+                    fontSize: 16,
+                    bold: true,
+                    margin: [0, 0, 0, 0]
+                },
+                subheader: {
+                    fontSize: 12,
+                    bold: true
+                },
+                tableHeader: {
+                    bold: true,
+                    fontSize: 13,
+                    color: 'black'
+                },
+                tableExample: {
+                    margin: [0, 5, 0, 15]
+                },
+                alignRight: {
+                    alignment: 'right'
+                },
+                signatureTitle: {
+                    alignment: 'center',
+                    bold: true,
+                    fontSize: 12
+
           }
         },
         defaultStyle: {
@@ -568,6 +569,7 @@ export class VerplancerradaComponent {
 
   construirPDFBen(row: { Total: any; NOMBRE_COMPLETO: any; dni: any; correo_1: any; fecha_cierre: any; }, resultados: any, backgroundImageBase64: string) {
     const formatCurrency = (value: number) => new Intl.NumberFormat('es-HN', { style: 'currency', currency: 'HNL' }).format(value);
+    
     if (resultados) {
       const persona = resultados.persona;
       const detallePersona = persona.detallePersona || [];
@@ -576,50 +578,49 @@ export class VerplancerradaComponent {
       const correo = persona.correo_1 || 'NO PROPORCIONADO';
       let sumaBeneficios = 0;
       let sumaDeducciones = 0;
-
-      // Mapeo de ID_DETALLE_PERSONA a n_identificacion del padre
+  
       const causantesMap = new Map();
       detallePersona.forEach((detalle: { ID_DETALLE_PERSONA: number; padreIdPersona: { persona: { n_identificacion: string; } }; }) => {
         if (detalle.padreIdPersona && detalle.padreIdPersona.persona && detalle.padreIdPersona.persona.n_identificacion) {
           causantesMap.set(detalle.ID_DETALLE_PERSONA, detalle.padreIdPersona.persona.n_identificacion);
         }
       });
-
-      let data = detallePersona.map((detalle: { detalleBeneficio: any[]; ID_DETALLE_PERSONA: number; }) => {
-        const beneficio = detalle.detalleBeneficio[0];
-
-        const montoPorPeriodo = beneficio.monto_por_periodo;
-        sumaBeneficios += montoPorPeriodo;
-
-        return {
-          CAUSANTE: causantesMap.get(detalle.ID_DETALLE_PERSONA) || 'NO APLICA',
-          NOMBRE_BENEFICIO: beneficio.beneficio.nombre_beneficio,
-          MontoAPagar: montoPorPeriodo,
-
-          METODO_PAGO: beneficio.metodo_pago,
-          NOMBRE_BANCO: beneficio.detallePagBeneficio[0].personaporbanco ? beneficio.detallePagBeneficio[0].personaporbanco.banco.nombre_banco : 'NO PROPORCIONADO',
-          NUM_CUENTA: beneficio.detallePagBeneficio[0].personaporbanco ? beneficio.detallePagBeneficio[0].personaporbanco.num_cuenta : 'NO PROPORCIONADO'
-        };
+  
+      let data: any[] = [];
+      detallePersona.forEach((detalle: { detalleBeneficio: any[]; ID_DETALLE_PERSONA: number; }) => {
+        detalle.detalleBeneficio.forEach((beneficio: any) => {
+          const montoPorPeriodo = beneficio.monto_por_periodo;
+          sumaBeneficios += montoPorPeriodo;
+  
+          data.push({
+            CAUSANTE: causantesMap.get(detalle.ID_DETALLE_PERSONA) || 'NO APLICA',
+            NOMBRE_BENEFICIO: beneficio.beneficio.nombre_beneficio,
+            MontoAPagar: montoPorPeriodo,
+            METODO_PAGO: beneficio.metodo_pago,
+            NOMBRE_BANCO: beneficio.detallePagBeneficio[0].personaporbanco ? beneficio.detallePagBeneficio[0].personaporbanco.banco.nombre_banco : 'NO PROPORCIONADO',
+            NUM_CUENTA: beneficio.detallePagBeneficio[0].personaporbanco ? beneficio.detallePagBeneficio[0].personaporbanco.num_cuenta : 'NO PROPORCIONADO'
+          });
+        });
       });
+  
       let tablaDed: any = {};
       if (resultados.deduccion) {
         let dataDed = resultados.deduccion.detalleDeduccion.map((deduccion: any) => {
           const montoDeduccion = deduccion.monto_aplicado;
           sumaDeducciones += montoDeduccion;
-
+  
           return {
             NOMBRE_INSTITUCION: deduccion.deduccion.centroTrabajo.nombre_centro_trabajo,
             NOMBRE_DEDUCCION: deduccion.deduccion.nombre_deduccion,
             TotalMontoAplicado: montoDeduccion
           };
         });
-
+  
         tablaDed = {
           table: {
             widths: ['*', '*', '*'],
             body: [
               [{ text: 'INSTITUCIÓN', style: 'tableHeader' }, { text: 'DEDUCCIÓN', style: 'tableHeader' }, { text: 'MONTO DEDUCCIÓN', style: ['tableHeader', 'alignRight'] }],
-
               ...dataDed.flatMap((b: any) => {
                 if (b.length === 0) {
                   return [[
@@ -633,7 +634,6 @@ export class VerplancerradaComponent {
                     { text: b.NOMBRE_DEDUCCION },
                     { text: formatCurrency(b.TotalMontoAplicado), style: 'alignRight' }
                   ]];
-
                 }
               })
             ]
@@ -642,9 +642,9 @@ export class VerplancerradaComponent {
           style: 'tableExample'
         }
       }
-
+  
       const neto = sumaBeneficios - sumaDeducciones;
-
+  
       const docDefinition: TDocumentDefinitions = {
         background: function (currentPage, pageSize) {
           return {
@@ -672,7 +672,7 @@ export class VerplancerradaComponent {
                     { text: 'BANCO: ' + (data[0]?.NOMBRE_BANCO || 'NO PROPORCIONADO') },
                   ]
                 ],
-                margin: [0, 10, 0, 0]  // Añade 5px de margen superior
+                margin: [0, 10, 0, 0]
               },
               {
                 table: {
@@ -719,10 +719,10 @@ export class VerplancerradaComponent {
                 },
                 style: 'tableExample'
               },
-              { canvas: [{ type: 'line', x1: 0, y1: 0, x2: 250, y2: 0, lineWidth: 1 }], margin: [127, 70, 0, 10] }, // Aumenta el margen inferior en 10px
-              { text: 'FIRMA UNIDAD DE PLANILLAS', style: 'signatureTitle', margin: [0, 5, 0, 0] } // Aumenta el margen superior en 10px
+              { canvas: [{ type: 'line', x1: 0, y1: 0, x2: 250, y2: 0, lineWidth: 1 }], margin: [127, 70, 0, 10] },
+              { text: 'FIRMA UNIDAD DE PLANILLAS', style: 'signatureTitle', margin: [0, 5, 0, 0] }
             ],
-            margin: [0, 0, 0, 0]  // Establece el margen superior a 40px
+            margin: [0, 0, 0, 0]
           }
         ],
         footer: function (currentPage, pageCount) {
@@ -774,7 +774,6 @@ export class VerplancerradaComponent {
         pageSize: 'LETTER',
         pageOrientation: 'portrait'
       };
-
       pdfMake.createPdf(docDefinition).open();
     } else {
       console.log("ERROR. FALTA INFORMACIÓN");
@@ -1052,7 +1051,7 @@ export class VerplancerradaComponent {
 
   async generarPDFDeduccionesSeparadas() {
     try {
-      const base64Image = await this.convertirImagenABase64('assets/images/membratadoFinal.jpg');
+      const base64Image = await this.convertirImagenABase64('../assets/images/membratadoFinal.jpg');
       this.planillaService.getDeduccionesPorPlanillaSeparadas(this.idPlanilla).subscribe(response => {
 
         const deduccionesInprema = response.deduccionesINPREMA || [];
@@ -1299,7 +1298,7 @@ export class VerplancerradaComponent {
         return;
       }
 
-      const base64Image = await this.convertirImagenABase64('assets/images/membratadoFinal.jpg');
+      const base64Image = await this.convertirImagenABase64('../assets/images/membratadoFinal.jpg');
       this.planillaService.getMontosPorBanco(codigo_planilla).subscribe(response => {
         const montosPorBanco = response || [];
 

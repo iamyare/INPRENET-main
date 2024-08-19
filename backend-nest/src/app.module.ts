@@ -43,11 +43,11 @@ import { DocumentsModule } from './modules/documents/documents.module';
           password,
           connectString,
           extra: { pool },
-          //autoLoadEntities: true,
-          //synchronize: true,
           entities: [__dirname + '/../**/*.entity{.ts,.js}'],
           migrations: [__dirname + '/../migrations/*{.ts,.js}'],
           dataSource: AppDataSource,
+          //autoLoadEntities: true,
+          //synchronize: true,
           //migrations: ['src/database/migrations/*{.ts,.js}'],
           //logging: ["query", "schema", "error", "warn", "info", "log", "migration"]
         };

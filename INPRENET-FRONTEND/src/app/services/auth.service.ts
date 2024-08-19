@@ -54,7 +54,7 @@ export class AuthService {
 
    clearSession(): void {
     sessionStorage.removeItem('token');
-    this.router.navigate(['/auth/login']);
+    this.router.navigate(['/login']);
     this.toastr.success('Sesión cerrada con éxito', 'Logout');
   }
 

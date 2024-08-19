@@ -5,6 +5,7 @@ import { InjectEntityManager, InjectRepository } from '@nestjs/typeorm';
 import { Net_Detalle_Deduccion } from '../detalle-deduccion/entities/detalle-deduccion.entity';
 import { EntityManager, Repository } from 'typeorm';
 import { net_persona } from '../../Persona/entities/net_persona.entity';
+import { Net_Persona_Por_Banco } from '../../banco/entities/net_persona-banco.entity';
 import { Net_Planilla } from './entities/net_planilla.entity';
 import { Net_TipoPlanilla } from '../tipo-planilla/entities/tipo-planilla.entity';
 import { Net_Detalle_Pago_Beneficio } from '../detalle_beneficio/entities/net_detalle_pago_beneficio.entity';
@@ -783,6 +784,7 @@ export class PlanillaService {
 
     const totalBeneficios = await this.detallePagBeneficios
       .createQueryBuilder('detallePagoBeneficio')
+      .innerJoin(Net_Persona_Por_Banco, 'perpb', 'perpb.ID_AF_BANCO = detallePagoBeneficio.ID_AF_BANCO')
       .select('SUM(detallePagoBeneficio.monto_a_pagar)', 'totalBeneficios')
       .where('detallePagoBeneficio.planilla.id_planilla = :id_planilla', { id_planilla })
       .getRawOne();
@@ -790,6 +792,7 @@ export class PlanillaService {
     const totalDeducciones = await this.detalleDeduccionRepository
       .createQueryBuilder('detalleDeduccion')
       .innerJoin(Net_Planilla, 'plan', 'plan.ID_PLANILLA = detalleDeduccion.ID_PLANILLA')
+      .innerJoin(Net_Persona_Por_Banco, 'perpb', 'perpb.ID_AF_BANCO = detalleDeduccion.ID_AF_BANCO')
       .select('SUM(detalleDeduccion.monto_aplicado)', 'totalDeducciones')
       .where('plan.ID_PLANILLA = :id_planilla', { id_planilla })
       .getRawOne();
@@ -1097,7 +1100,7 @@ export class PlanillaService {
     }
   }
 
-  async ObtenerPlanDefinPersonas(codPlanilla:string, page?: number, limit?: number): Promise<any> {
+  async ObtenerPlanDefinPersonas(codPlanilla: string, page?: number, limit?: number): Promise<any> {
     let query = `
                SELECT DISTINCT
             per."N_IDENTIFICACION" AS "DNI",
@@ -1105,8 +1108,6 @@ export class PlanillaService {
             per."ID_PERSONA",
             perPorBan."NUM_CUENTA",
             banco."NOMBRE_BANCO",
-            banco."COD_BANCO",
-            ben."ID_BENEFICIO",
             SUM(detBs."MONTO_A_PAGAR") AS "TOTAL_BENEFICIO",
              TRIM(
                 per."PRIMER_APELLIDO" || ' ' ||
@@ -1166,8 +1167,6 @@ export class PlanillaService {
         tipoP."TIPO_PERSONA",
         perPorBan."NUM_CUENTA",
         banco."NOMBRE_BANCO",
-        banco."COD_BANCO",
-        ben."ID_BENEFICIO",
             TRIM(
                 per."PRIMER_APELLIDO" || ' ' ||
                 COALESCE(per."SEGUNDO_APELLIDO", '') || ' ' ||

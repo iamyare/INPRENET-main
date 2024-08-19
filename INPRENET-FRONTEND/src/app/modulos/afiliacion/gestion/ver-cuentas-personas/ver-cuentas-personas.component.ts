@@ -251,7 +251,7 @@ export class VerCuentasPersonasComponent implements OnInit, OnChanges, OnDestroy
   }
 
   async getMembreteBase64() {
-    const response: any = await this.http.get('/assets/images/MEMBRETADO.jpg', { responseType: 'blob' }).toPromise();
+    const response: any = await this.http.get('../assets/images/MEMBRETADO.jpg', { responseType: 'blob' }).toPromise();
     return new Promise<string>((resolve) => {
       const reader = new FileReader();
       reader.onloadend = () => {

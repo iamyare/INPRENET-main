@@ -279,7 +279,7 @@ export class UsuarioService {
     const token = this.jwtService.sign({ correo });
 
     // Enviar correo electrónico de verificación
-    const verificationUrl = `${process.env.HOST_FRONTEND}/auth/register?token=${token}`;
+    const verificationUrl = `${process.env.HOST_FRONTEND}/register?token=${token}`;
     const htmlContent = `
       <div style="font-family: Arial, sans-serif; line-height: 1.6;">
         <h2 style="color: #13776B;">¡Bienvenido a INPRENET!</h2>
@@ -367,7 +367,7 @@ export class UsuarioService {
     const token = this.jwtService.sign({ correo });
 
     // Enviar correo electrónico de verificación
-    const verificationUrl = `${process.env.HOST_FRONTEND}/auth/register?token=${token}`;
+    const verificationUrl = `${process.env.HOST_FRONTEND}/register?token=${token}`;
     const htmlContent = `
     <div style="font-family: Arial, sans-serif; line-height: 1.6;">
       <h2 style="color: #13776B;">¡Bienvenido a INPRENET!</h2>
@@ -745,7 +745,7 @@ export class UsuarioService {
   }
 
   async enviarCorreoRestablecimiento(correo: string, token: string): Promise<void> {
-    const urlRestablecimiento = `${process.env.HOST_FRONTEND}/auth/restablecer-contrasena/${token}`;
+    const urlRestablecimiento = `${process.env.HOST_FRONTEND}/restablecer-contrasena/${token}`;
     const asunto = 'Restablecimiento de contraseña';
     const texto = `Haga clic en el siguiente enlace para restablecer su contraseña: ${urlRestablecimiento}`;
     const html = `<p>Haga clic en el siguiente enlace para restablecer su contraseña:</p><a href="${urlRestablecimiento}">${urlRestablecimiento}</a>`;

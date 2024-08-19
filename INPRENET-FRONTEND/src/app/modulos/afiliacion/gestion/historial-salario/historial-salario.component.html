@@ -20,6 +20,7 @@
               </mat-select>
             </mat-form-field>
             <mat-error *ngFor="let error of getErrors(i, 'id_banco')">
+              <mat-icon aria-hidden="true" class="error-icon-small">error_outline</mat-icon>
               {{ error }}
             </mat-error>
           </div>
@@ -30,6 +31,7 @@
               <input matInput type="text" formControlName="num_cuenta">
             </mat-form-field>
             <mat-error *ngFor="let error of getErrors(i, 'num_cuenta')">
+              <mat-icon aria-hidden="true" class="error-icon-small">error_outline</mat-icon>
               {{ error }}
             </mat-error>
           </div>

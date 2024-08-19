@@ -4,6 +4,7 @@
     <p class="card-category">Completa la información correspondiente</p>
   </div>
   <div class="card-body">
+
     <form *ngIf="peps" [formGroup]="parentForm" style="margin: 1%;">
       <div formArrayName="peps">
         <div *ngFor="let pep of peps.controls; let i = index" [formGroupName]="i" class="row">

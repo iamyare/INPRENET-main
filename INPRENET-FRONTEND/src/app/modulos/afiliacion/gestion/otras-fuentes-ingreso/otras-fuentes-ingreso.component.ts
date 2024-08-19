@@ -18,7 +18,7 @@ export class OtrasFuentesIngresoComponent implements OnInit {
   private formKey = 'FormOtrasFuentesIngreso';
 
   fields: FieldArrays[] = [
-    { name: 'actividad_economica', label: 'Actividad Económica', icon: 'business', layout: { row: 0, col: 4 }, type: 'select', value: '', options: [{ label: "SECRETARIO GENERAL", value: "SECRETARIO GENERAL" }], validations: [] },
+    { name: 'actividad_economica', label: 'Actividad Económica', icon: 'business', layout: { row: 0, col: 4 }, type: 'text', value: '', options: [{ label: "SECRETARIO GENERAL", value: "SECRETARIO GENERAL" }], validations: [] },
     { name: 'monto_ingreso', label: 'Monto De Ingreso', layout: { row: 0, col: 4 }, type: 'number', value: '', validations: [] },
     { name: 'observacion', label: 'Observación', icon: 'visibility', layout: { row: 0, col: 4 }, type: 'text', value: '', validations: [Validators.required, Validators.maxLength(14), Validators.minLength(14), Validators.pattern('^[0-9]{14}$')] },
   ];

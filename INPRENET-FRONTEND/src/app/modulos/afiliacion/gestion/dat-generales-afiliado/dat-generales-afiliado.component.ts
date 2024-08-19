@@ -53,7 +53,11 @@ export function generateAddressFormGroup(datos?: any): FormGroup {
     id_municipio_nacimiento: new FormControl(datos?.id_municipio_nacimiento, Validators.required),
     id_tipo_identificacion: new FormControl(datos?.id_tipo_identificacion, Validators.required),
     id_pais: new FormControl(datos?.id_pais, Validators.required),
-    sexo: new FormControl(datos?.sexo, [Validators.required, Validators.maxLength(1), Validators.pattern(/^[FM]$/)]),
+    sexo: new FormControl(datos?.sexo, [
+      Validators.required,
+      Validators.maxLength(10),
+      Validators.pattern(/^(F|M|NO BINARIO|OTRO)$/)
+    ]),
     grupo_etnico: new FormControl(datos?.grupo_etnico, [Validators.required]),
     discapacidad: new FormControl(datos?.discapacidad, [Validators.required]),
     discapacidades: new FormArray(datos?.discapacidades ? datos.discapacidades.map((d: any) => new FormControl(d.id_discapacidad || '')) : []),

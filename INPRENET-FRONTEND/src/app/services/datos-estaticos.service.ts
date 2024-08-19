@@ -333,24 +333,24 @@ export class DatosEstaticosService {
       "label": "FEMENINO"
     },
     {
-      "value": "NO BINARIO",
-      "label": "NO BINARIO"
-    },
-    {
       "value": "OTRO",
       "label": "OTRO"
-    }
+    },
   ];
 
   sexo = [
+    {
+      "value": "M",
+      "label": "MASCULINO"
+    },
     {
       "value": "F",
       "label": "FEMENINO"
     },
     {
-      "value": "M",
-      "label": "MASCULINO"
-    },
+      "value": "OTRO",
+      "label": "OTRO"
+    }
   ];
 
   tipoCotizante = [

@@ -34,6 +34,21 @@ export class DocumentosPlanillaComponent implements OnInit {
     this.planillaForm.get('rangoFechas.fechaFin')?.valueChanges.subscribe(() => this.checkFechasCompletas());
   }
 
+  convertirImagenABase64(url: string): Promise<string> {
+    return this.http.get(url, { responseType: 'blob' }).toPromise().then(blob => {
+      return new Promise<string>((resolve, reject) => {
+        if (blob) {
+          const reader = new FileReader();
+          reader.readAsDataURL(blob);
+          reader.onloadend = () => resolve(reader.result as string);
+          reader.onerror = error => reject(error);
+        } else {
+          reject('No se pudo cargar la imagen. El blob es undefined.');
+        }
+      });
+    });
+  }
+
   sameMonthValidator: ValidatorFn = (formGroup: AbstractControl): ValidationErrors | null => {
     const fechaInicio = formGroup.get('fechaInicio')?.value;
     const fechaFin = formGroup.get('fechaFin')?.value;
@@ -54,9 +69,6 @@ export class DocumentosPlanillaComponent implements OnInit {
 
     return null;
   }
-
-
-
 
   seleccionarTipoPlanilla(tipo: string) {
     this.tipoPlanilla = tipo;
@@ -258,20 +270,170 @@ export class DocumentosPlanillaComponent implements OnInit {
     });
   }
 
-  convertirImagenABase64(url: string): Promise<string> {
-    return this.http.get(url, { responseType: 'blob' }).toPromise().then(blob => {
-      return new Promise<string>((resolve, reject) => {
-        if (blob) {
-          const reader = new FileReader();
-          reader.readAsDataURL(blob);
-          reader.onloadend = () => resolve(reader.result as string);
-          reader.onerror = error => reject(error);
-        } else {
-          reject('No se pudo cargar la imagen. El blob es undefined.');
-        }
-      });
+  async generarDocumentoSinCuenta() {
+    const { idTiposPlanilla, nombrePlanilla } = this.obtenerIdYNombrePlanilla();
+    const { fechaInicioFormateada, fechaFinFormateada } = this.obtenerFechasFormateadas();
+
+    if (idTiposPlanilla.length === 0) return;
+
+    this.planillaService.getTotalBeneficiosYDeduccionesPorPeriodo(fechaInicioFormateada, fechaFinFormateada, idTiposPlanilla).subscribe({
+
+      next: async (data) => {
+        const base64Image = await this.convertirImagenABase64('../assets/images/membratadoFinal.jpg');
+
+        const totalBeneficiosSC = data.beneficiosSC.reduce((acc: any, cur: any) => acc + (cur.TOTAL_MONTO_BENEFICIO ? parseFloat(cur.TOTAL_MONTO_BENEFICIO) : 0), 0);
+        const totalDeduccionesInpremaSC = data.deduccionesInpremaSC.reduce((acc: any, cur: any) => acc + (cur.TOTAL_MONTO_DEDUCCION ? parseFloat(cur.TOTAL_MONTO_DEDUCCION) : 0), 0);
+        const totalDeduccionesTercerosSC = data.deduccionesTercerosSC.reduce((acc: any, cur: any) => acc + (cur.TOTAL_MONTO_DEDUCCION ? parseFloat(cur.TOTAL_MONTO_DEDUCCION) : 0), 0);
+
+        const netoTotalSC = totalBeneficiosSC - (totalDeduccionesInpremaSC + totalDeduccionesTercerosSC);
+
+        const docDefinition: TDocumentDefinitions = {
+          pageSize: 'LETTER',
+          background: (currentPage, pageSize) => ({
+            image: base64Image,
+            width: pageSize.width,
+            height: pageSize.height,
+            absolutePosition: { x: 0, y: 0 }
+          }),
+          pageMargins: [40, 130, 40, 100],
+          header: {
+            text: `RESUMEN DE PLANILLA ${nombrePlanilla} (Sin Cuenta)`,
+            style: 'header',
+            alignment: 'center',
+            margin: [50, 90, 50, 0]
+          },
+          content: [
+            {
+              columns: [
+                {
+                  width: '50%',
+                  text: [
+                    { text: 'PERIODO DE LA PLANILLA: ', bold: true },
+                    `${fechaInicioFormateada} - ${fechaFinFormateada}`
+                  ],
+                  alignment: 'left'
+                },
+                {
+                  width: '50%',
+                  text: [
+                    { text: 'MONTO NETO DE LA PLANILLA: ', bold: true },
+                    `L ${netoTotalSC.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",")}`
+                  ],
+                  alignment: 'right'
+                }
+              ],
+              margin: [40, 5, 40, 10]
+            },
+            { text: 'BENEFICIOS A PAGAR', style: 'subheader', margin: [0, 10, 0, 5] },
+            this.crearTablaPDF(data.beneficiosSC, 'Beneficios', `TOTAL BENEFICIOS: L${totalBeneficiosSC.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",")}`),
+            { text: 'DEDUCCIONES INPREMA', style: 'subheader', margin: [0, 10, 0, 5] },
+            this.crearTablaPDF(data.deduccionesInpremaSC, 'DEDUCCIONES INPREMA', `TOTAL DEDUCCIONES INPREMA: L${totalDeduccionesInpremaSC.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",")}`),
+
+            { text: 'DEDUCCIONES DE TERCEROS', style: 'subheader', margin: [0, 10, 0, 5] },
+            this.crearTablaPDF(data.deduccionesTercerosSC, 'DEDUCCIONES TERCEROS', `TOTAL DEDUCCIONES TERCEROS: L${totalDeduccionesTercerosSC.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",")}`),
+
+            {
+              columns: [
+                {
+                  width: '33%',
+                  canvas: [
+                    {
+                      type: 'line',
+                      x1: 0, y1: 0,
+                      x2: 150, y2: 0,
+                      lineWidth: 1.5
+                    }
+                  ],
+                  alignment: 'center',
+                  margin: [0, 40, 0, 5]
+                },
+                {
+                  width: '33%',
+                  canvas: [
+                    {
+                      type: 'line',
+                      x1: 0, y1: 0,
+                      x2: 150, y2: 0,
+                      lineWidth: 1.5
+                    }
+                  ],
+                  alignment: 'center',
+                  margin: [0, 40, 0, 5]
+                },
+                {
+                  width: '33%',
+                  canvas: [
+                    {
+                      type: 'line',
+                      x1: 0, y1: 0,
+                      x2: 150, y2: 0,
+                      lineWidth: 1.5
+                    }
+                  ],
+                  alignment: 'center',
+                  margin: [0, 40, 0, 5]
+                }
+              ]
+            },
+            {
+              columns: [
+                {
+                  width: '33%',
+                  text: 'ELABORÓ',
+                  style: 'signature',
+                  alignment: 'center',
+                  margin: [0, 5, 0, 20]
+                },
+                {
+                  width: '33%',
+                  text: 'REVISÓ',
+                  style: 'signature',
+                  alignment: 'center',
+                  margin: [0, 5, 0, 20]
+                },
+                {
+                  width: '33%',
+                  text: 'AUTORIZÓ',
+                  style: 'signature',
+                  alignment: 'center',
+                  margin: [0, 5, 0, 20]
+                }
+              ]
+            }
+          ],
+          styles: {
+            header: { fontSize: 16, bold: true },
+            subheader: { fontSize: 14, bold: false, margin: [0, 5, 0, 10] },
+            tableHeader: { bold: true, fontSize: 13, color: 'black' },
+            tableBody: { fontSize: 8, color: 'black' },
+            tableTotal: { bold: true, fontSize: 13, color: 'black', alignment: 'right' },
+            signature: { fontSize: 10, bold: true }
+          },
+          footer: (currentPage, pageCount) => ({
+            table: {
+              widths: ['*', '*', '*'],
+              body: [
+                [
+                  { text: 'FECHA Y HORA: ' + new Date().toLocaleString(), alignment: 'left', border: [false, false, false, false], fontSize: 8 },
+                  { text: 'GENERÓ: INPRENET', alignment: 'left', border: [false, false, false, false] },
+                  { text: 'PÁGINA ' + currentPage.toString() + ' DE ' + pageCount, alignment: 'right', border: [false, false, false, false], fontSize: 8 }
+                ]
+              ]
+            },
+            margin: [20, 0, 20, 20]
+          }),
+          defaultStyle: { fontSize: 10 },
+          pageOrientation: 'portrait'
+        };
+
+        pdfMake.createPdf(docDefinition).download(`Reporte_Totales_Beneficios_Deducciones_SinCuenta_${nombrePlanilla}.pdf`);
+      },
+      error: (error) => {
+        console.error('Error al obtener los datos', error);
+      }
     });
   }
+
 
   crearTablaPDF(data: any[], titulo: string, totalTexto: string) {
     const headers = [

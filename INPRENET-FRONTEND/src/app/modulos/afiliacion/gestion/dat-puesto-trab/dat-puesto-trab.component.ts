@@ -146,7 +146,7 @@ export class DatPuestoTrabComponent implements OnInit {
       if (selectedCentro) {
         formGroup.get('sectorEconomico')?.setValue(selectedCentro.sector);
         const sector = selectedCentro.sector;
-        if (sector === 'PRIVADO' || sector === 'PROHECO') {
+        if (sector === 'PUBLICO' || sector === 'PROHECO') {
           formGroup.get('numero_acuerdo')?.setValidators([
             Validators.required,
             Validators.maxLength(40)
@@ -158,7 +158,7 @@ export class DatPuestoTrabComponent implements OnInit {
           ]);
         }
         formGroup.get('numero_acuerdo')?.updateValueAndValidity();
-        formGroup.get('showNumeroAcuerdo')?.setValue(sector === 'PRIVADO' || sector === 'PROHECO');
+        formGroup.get('showNumeroAcuerdo')?.setValue(sector === 'PUBLICO' || sector === 'PROHECO');
       }
     });
 

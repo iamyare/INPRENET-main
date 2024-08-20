@@ -48,7 +48,6 @@ export class PepsComponent implements OnInit {
     } else if (!this.parentForm.contains('peps')) {
       this.parentForm.addControl('peps', this.fb.array([]));
     }
-
     // Escuchar cambios en el control de "cargo público"
     this.parentForm.get('cargoPublico')?.valueChanges.subscribe((value: string) => {
       if (value === 'NO') {

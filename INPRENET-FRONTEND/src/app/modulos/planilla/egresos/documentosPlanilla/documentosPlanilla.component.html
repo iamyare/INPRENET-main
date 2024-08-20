@@ -31,6 +31,7 @@
     <div class="button-group-reportes">
       <!-- Botones de generación de reportes -->
       <button mat-raised-button color="primary" [disabled]="!planillaForm.valid || !tipoPlanilla" (click)="generarDocumento()">Generar Reporte de Planilla</button>
+      <button mat-raised-button color="accent" [disabled]="!planillaForm.valid || !tipoPlanilla" (click)="generarDocumentoSinCuenta()">Generar Reporte Sin Cuenta</button>
       <button mat-raised-button color="accent" [disabled]="!planillaForm.valid || !tipoPlanilla" (click)="generarPDFMontosPorBancoPeriodo()">Generar Reporte de Montos por Banco</button>
       <button mat-raised-button color="warn" (click)="openDynamicDialog([{ name: 'codDeduccion', label: 'Código de Deducción', type: 'number' }])">
         Descargar Excel de Deducciones

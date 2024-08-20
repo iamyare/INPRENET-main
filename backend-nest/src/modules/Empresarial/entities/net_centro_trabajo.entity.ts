@@ -34,9 +34,6 @@ export class Net_Centro_Trabajo {
     @Column('varchar2', { length: 40, nullable: true, name: 'SECTOR_ECONOMICO' })
     sector_economico: string;
 
-    @Column('varchar2', { length: 40, nullable: true, name: 'MONTO_APROX_ACTIVOS_TOTAL' })
-    monto_aprox_activos_total: string;
-
     @Column('varchar2', { length: 30, nullable: true, name: 'NUMERO_ACUERDO' })
     numero_acuerdo: string;
 
@@ -88,6 +85,9 @@ export class Net_Centro_Trabajo {
 
     @Column('decimal', { precision: 10, scale: 7, nullable: true, name: 'LONGITUD' })
     longitud: number;
+
+    @Column('nvarchar2', { length: 20, nullable: true, name: 'CODIGO' })
+    codigo: string;
 
     @ManyToOne(() => Net_Municipio, municipio => municipio.centrosTrabajo)
     @JoinColumn({ name: 'ID_MUNICIPIO', foreignKeyConstraintName: 'FK_ID_MUNICIPIO_CENT_TRAB' })

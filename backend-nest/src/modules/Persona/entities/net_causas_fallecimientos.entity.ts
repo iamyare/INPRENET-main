@@ -1,4 +1,4 @@
-import { Column, Entity, Index, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn } from "typeorm";
+import { Column, Entity, Index,OneToMany, PrimaryGeneratedColumn } from "typeorm";
 import { net_persona } from "./net_persona.entity";
 
 @Entity({

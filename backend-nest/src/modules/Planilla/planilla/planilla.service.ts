@@ -520,74 +520,111 @@ export class PlanillaService {
     idTiposPlanilla: number[],
   ): Promise<any[]> {
     const query = `
-     SELECT 
-      SUM(detBs."MONTO_A_PAGAR") AS "TOTAL_MONTO_BENEFICIO",
-      COALESCE(b."NOMBRE_BANCO", 'SIN BANCO') AS NOMBRE_BANCO
-      
+    SELECT 
+      ben."ID_BENEFICIO" AS "ID_BENEFICIO",
+      ben."NOMBRE_BENEFICIO" AS "NOMBRE_BENEFICIO",
+      ben."CODIGO" AS "CODIGO_BENEFICIO",
+      SUM(detBs."MONTO_A_PAGAR") AS "TOTAL_MONTO_BENEFICIO"
     FROM 
       "NET_DETALLE_PAGO_BENEFICIO" detBs
     INNER JOIN 
       "NET_BENEFICIO" ben 
       ON detBs."ID_BENEFICIO" = ben."ID_BENEFICIO"
-    LEFT JOIN 
-      "NET_PERSONA_POR_BANCO" pb 
-      ON detBs."ID_AF_BANCO" = pb."ID_AF_BANCO"
-    LEFT JOIN
-        "NET_BANCO" b ON pb."ID_BANCO" = b."ID_BANCO"
     INNER JOIN 
       "NET_PLANILLA" plan 
       ON detBs."ID_PLANILLA" = plan."ID_PLANILLA"
     WHERE 
       plan."FECHA_APERTURA" BETWEEN TO_DATE(:periodoInicio, 'DD/MM/YYYY') AND TO_DATE(:periodoFinalizacion, 'DD/MM/YYYY')
       AND plan."ID_TIPO_PLANILLA" IN (${idTiposPlanilla.join(', ')})
+      AND detBs."ID_AF_BANCO" IS NULL
     GROUP BY 
-      COALESCE(b."NOMBRE_BANCO", 'SIN BANCO')
-
-  `;
-
+      ben."ID_BENEFICIO", 
+      ben."NOMBRE_BENEFICIO", 
+      ben."CODIGO"
+    ORDER BY ben."NOMBRE_BENEFICIO" ASC
+    `;
+  
     try {
       return await this.entityManager.query(query, [periodoInicio, periodoFinalizacion]);
     } catch (error) {
-      console.error('Error al obtener beneficios:', error);
-      throw new InternalServerErrorException('Error al obtener beneficios');
+      console.error('Error al obtener beneficios sin cuenta:', error);
+      throw new InternalServerErrorException('Error al obtener beneficios sin cuenta');
     }
   }
-  async getDeduccionesPorPeriodoSC(
+
+  async getDeduccionesInpremaPorPeriodoSC(
     periodoInicio: string,
     periodoFinalizacion: string,
     idTiposPlanilla: number[],
   ): Promise<any[]> {
     const query = `
-    SELECT
-        COALESCE(b."NOMBRE_BANCO", 'SIN BANCO') AS NOMBRE_BANCO,
-        SUM(ddp."MONTO_APLICADO") AS SUMA_DEDUCCIONES_INPREMA
-        FROM
-        "NET_PLANILLA" p
-        JOIN
-        "NET_DETALLE_DEDUCCION" ddp ON p."ID_PLANILLA" = ddp."ID_PLANILLA"
-        JOIN
-        "NET_DEDUCCION" d ON ddp."ID_DEDUCCION" = d."ID_DEDUCCION"
-        LEFT JOIN
-        "NET_PERSONA_POR_BANCO" pb ON ddp."ID_AF_BANCO" = pb."ID_AF_BANCO"
-        LEFT JOIN
-        "NET_BANCO" b ON pb."ID_BANCO" = b."ID_BANCO"
-        WHERE
-        p."FECHA_APERTURA" BETWEEN TO_DATE(:periodoInicio, 'DD/MM/YYYY') AND TO_DATE(:periodoFinalizacion, 'DD/MM/YYYY')
-        AND p."ID_TIPO_PLANILLA" IN (${idTiposPlanilla.join(', ')})
-        AND ddp."ESTADO_APLICACION" = 'COBRADA'
-        GROUP BY
-        COALESCE(b."NOMBRE_BANCO", 'SIN BANCO')
-        ORDER BY  COALESCE(b."NOMBRE_BANCO", 'SIN BANCO') ASC
-  `;
-
+    SELECT 
+      ded."ID_DEDUCCION" AS "ID_DEDUCCION",
+      ded."NOMBRE_DEDUCCION" AS "NOMBRE_DEDUCCION",
+      SUM(dedd."MONTO_APLICADO") AS "TOTAL_MONTO_DEDUCCION"
+    FROM 
+      "NET_DETALLE_DEDUCCION" dedd
+    INNER JOIN 
+      "NET_DEDUCCION" ded 
+      ON dedd."ID_DEDUCCION" = ded."ID_DEDUCCION"
+    INNER JOIN 
+      "NET_PLANILLA" plan 
+      ON dedd."ID_PLANILLA" = plan."ID_PLANILLA"
+    WHERE 
+      plan."FECHA_APERTURA" BETWEEN TO_DATE(:periodoInicio, 'DD/MM/YYYY') AND TO_DATE(:periodoFinalizacion, 'DD/MM/YYYY')
+      AND plan."ID_TIPO_PLANILLA" IN (${idTiposPlanilla.join(', ')})
+      AND ded."ID_CENTRO_TRABAJO" = 1
+      AND dedd."ID_AF_BANCO" IS NULL
+    GROUP BY 
+      ded."ID_DEDUCCION", 
+      ded."NOMBRE_DEDUCCION"
+    ORDER BY ded."NOMBRE_DEDUCCION" ASC
+    `;
+  
     try {
       return await this.entityManager.query(query, [periodoInicio, periodoFinalizacion]);
     } catch (error) {
-      console.error('Error al obtener deducciones INPREMA:', error);
-      throw new InternalServerErrorException('Error al obtener deducciones INPREMA');
+      console.error('Error al obtener deducciones INPREMA sin cuenta:', error);
+      throw new InternalServerErrorException('Error al obtener deducciones INPREMA sin cuenta');
     }
   }
+
+  async getDeduccionesTercerosPorPeriodoSC(
+    periodoInicio: string,
+    periodoFinalizacion: string,
+    idTiposPlanilla: number[],
+  ): Promise<any[]> {
+    const query = `
+    SELECT 
+      ded."ID_DEDUCCION" AS "ID_DEDUCCION",
+      ded."NOMBRE_DEDUCCION" AS "NOMBRE_DEDUCCION",
+      SUM(dedd."MONTO_APLICADO") AS "TOTAL_MONTO_DEDUCCION"
+    FROM 
+      "NET_DETALLE_DEDUCCION" dedd
+    INNER JOIN 
+      "NET_DEDUCCION" ded 
+      ON dedd."ID_DEDUCCION" = ded."ID_DEDUCCION"
+    INNER JOIN 
+      "NET_PLANILLA" plan 
+      ON dedd."ID_PLANILLA" = plan."ID_PLANILLA"
+    WHERE 
+      plan."FECHA_APERTURA" BETWEEN TO_DATE(:periodoInicio, 'DD/MM/YYYY') AND TO_DATE(:periodoFinalizacion, 'DD/MM/YYYY')
+      AND plan."ID_TIPO_PLANILLA" IN (${idTiposPlanilla.join(', ')})
+      AND ded."ID_CENTRO_TRABAJO" != 1
+      AND dedd."ID_AF_BANCO" IS NULL
+    GROUP BY 
+      ded."ID_DEDUCCION", 
+      ded."NOMBRE_DEDUCCION"
+    ORDER BY ded."NOMBRE_DEDUCCION" ASC
+    `;
   
+    try {
+      return await this.entityManager.query(query, [periodoInicio, periodoFinalizacion]);
+    } catch (error) {
+      console.error('Error al obtener deducciones de terceros sin cuenta:', error);
+      throw new InternalServerErrorException('Error al obtener deducciones de terceros sin cuenta');
+    }
+  }
 
   async getTotalPorBeneficiosYDeduccionesPorPeriodo(
     periodoInicio: string,
@@ -598,16 +635,18 @@ export class PlanillaService {
       const beneficios = await this.getBeneficiosPorPeriodo(periodoInicio, periodoFinalizacion, idTiposPlanilla);
       const deduccionesInprema = await this.getDeduccionesInpremaPorPeriodo(periodoInicio, periodoFinalizacion, idTiposPlanilla);
       const deduccionesTerceros = await this.getDeduccionesTercerosPorPeriodo(periodoInicio, periodoFinalizacion, idTiposPlanilla);
-
+  
       const beneficiosSC = await this.getBeneficiosPorPeriodoSC(periodoInicio, periodoFinalizacion, idTiposPlanilla);
-      const deduccionesSC = await this.getDeduccionesPorPeriodoSC(periodoInicio, periodoFinalizacion, idTiposPlanilla);
-     
-      return { beneficios, deduccionesInprema, deduccionesTerceros,  beneficiosSC, deduccionesSC };
+      const deduccionesInpremaSC = await this.getDeduccionesInpremaPorPeriodoSC(periodoInicio, periodoFinalizacion, idTiposPlanilla);
+      const deduccionesTercerosSC = await this.getDeduccionesTercerosPorPeriodoSC(periodoInicio, periodoFinalizacion, idTiposPlanilla);
+  
+      return { beneficios, deduccionesInprema, deduccionesTerceros, beneficiosSC, deduccionesInpremaSC, deduccionesTercerosSC };
     } catch (error) {
       console.error('Error al obtener los totales por periodo:', error);
       throw new InternalServerErrorException('Error al obtener los totales por periodo');
     }
   }
+  
 
   async getTotalPorBancoYPeriodo(
     periodoInicio: string,

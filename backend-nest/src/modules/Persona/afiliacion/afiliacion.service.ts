@@ -34,7 +34,6 @@ import { CrearFamiliaDto } from './dtos/crear-familiar.dto';
 import { Net_Familia } from '../entities/net_familia.entity';
 import { Net_Peps } from 'src/modules/Empresarial/entities/net_peps.entity';
 import { CrearPepsDto } from './dtos/crear-peps.dto';
-import { ReferenciaDto } from './dtos/Referencia.dto';
 
 @Injectable()
 export class AfiliacionService {
@@ -53,24 +52,14 @@ export class AfiliacionService {
     private readonly profesionRepository: Repository<NET_PROFESIONES>,
     @InjectRepository(net_causas_fallecimientos)
     private readonly causasFallecimientosRepository: Repository<net_causas_fallecimientos>,
-    @InjectRepository(net_detalle_persona)
-    private readonly detallePersonaRepository: Repository<net_detalle_persona>,
     @InjectRepository(net_estado_afiliacion)
     private readonly estadoAfiliacionRepository: Repository<net_estado_afiliacion>,
     @InjectRepository(Net_Colegios_Magisteriales)
     private readonly colegiosMagisterialesRepository: Repository<Net_Colegios_Magisteriales>,
-    @InjectRepository(Net_Persona_Colegios)
-    private readonly personaColegiosRepository: Repository<Net_Persona_Colegios>,
     @InjectRepository(Net_Banco)
     private readonly bancoRepository: Repository<Net_Banco>,
-    @InjectRepository(Net_Persona_Por_Banco)
-    private readonly personaBancoRepository: Repository<Net_Persona_Por_Banco>,
     @InjectRepository(Net_Centro_Trabajo)
     private readonly centroTrabajoRepository: Repository<Net_Centro_Trabajo>,
-    @InjectRepository(Net_perf_pers_cent_trab)
-    private readonly personaCentroTrabajoRepository: Repository<Net_perf_pers_cent_trab>,
-    @InjectRepository(net_otra_fuente_ingreso)
-    private readonly otraFuenteIngresoRepository: Repository<net_otra_fuente_ingreso>,
     @InjectRepository(Net_Ref_Per_Pers)
     private readonly referenciaRepository: Repository<Net_Ref_Per_Pers>,
     @InjectRepository(Net_Discapacidad)

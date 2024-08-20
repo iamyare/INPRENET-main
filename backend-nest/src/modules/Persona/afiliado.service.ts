@@ -5,7 +5,6 @@ import { EntityManager, In, Repository } from 'typeorm';
 import { InjectEntityManager, InjectRepository } from '@nestjs/typeorm';
 import { Net_Persona_Por_Banco } from '../banco/entities/net_persona-banco.entity';
 import { Net_Centro_Trabajo } from '../Empresarial/entities/net_centro_trabajo.entity';
-import { Net_Banco } from '../banco/entities/net_banco.entity';
 import { Net_Pais } from '../Regional/pais/entities/pais.entity';
 import { validate as isUUID } from 'uuid';
 import { net_persona } from './entities/net_persona.entity';
@@ -14,7 +13,6 @@ import { net_detalle_persona } from './entities/net_detalle_persona.entity';
 import { CreateDetallePersonaDto } from './dto/create-detalle.dto';
 import { Net_Municipio } from '../Regional/municipio/entities/net_municipio.entity';
 import { AsignarReferenciasDTO } from './dto/asignarReferencia.dto';
-import { CreatePersonaBancoDTO } from './dto/create-persona-banco.dto';
 import { CreateDetalleBeneficiarioDto } from './dto/create-detalle-beneficiario-dto';
 import { Net_Colegios_Magisteriales } from '../transacciones/entities/net_colegios_magisteriales.entity';
 import { Net_Persona_Colegios } from '../transacciones/entities/net_persona_colegios.entity';
@@ -51,10 +49,6 @@ export class AfiliadoService {
     private estadoAfiliacionRepository: Repository<net_estado_afiliacion>,
     @InjectRepository(Net_Centro_Trabajo)
     private centroTrabajoRepository: Repository<Net_Centro_Trabajo>,
-    @InjectRepository(Net_Persona_Por_Banco)
-    private personaBancoRepository: Repository<Net_Persona_Por_Banco>,
-    @InjectRepository(Net_Banco)
-    private bancoRepository: Repository<Net_Banco>,
     @InjectRepository(Net_Persona_Colegios)
     private readonly netPersonaColegiosRepository: Repository<Net_Persona_Colegios>,
     @InjectRepository(Net_Colegios_Magisteriales)

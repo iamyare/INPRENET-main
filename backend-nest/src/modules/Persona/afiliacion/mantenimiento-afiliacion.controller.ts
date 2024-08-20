@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Put, Param } from '@nestjs/common';
+import { Controller, Get, Post, Body, Put, Param, Delete } from '@nestjs/common';
 import { MantenimientoAfiliacionService } from './mantenimiento-afiliacion.service';
 import { CreateDiscapacidadDto } from './dtos/create-discapacidad.dto';
 import { UpdateDiscapacidadDto } from './dtos/update-discapacidad.dto';
@@ -12,6 +12,8 @@ import { CreateNivelEducativoDto } from './dtos/create-nivel-educativo.dto';
 import { UpdateNivelEducativoDto } from './dtos/update-nivel-educativo.dto';
 import { UpdateJornadaDto } from './dtos/update-jornada.dto';
 import { CreateJornadaDto } from './dtos/create-jornada.dto';
+import { CreateCausaFallecimientoDto } from './dtos/create-causa-fallecimiento.dto';
+import { UpdateCausaFallecimientoDto } from './dtos/update-causa-fallecimiento.dto';
 @Controller('mantenimiento-afiliacion')
 export class MantenimientoAfiliacionController {
   constructor(private readonly mantenimientoAfiliacionService: MantenimientoAfiliacionService) {}
@@ -144,5 +146,31 @@ export class MantenimientoAfiliacionController {
   @Put('niveles-educativos/actualizar/:id')
   updateNivelEducativo(@Param('id') id: number, @Body() updateNivelEducativoDto: UpdateNivelEducativoDto) {
     return this.mantenimientoAfiliacionService.updateNivelEducativo(id, updateNivelEducativoDto);
+  }
+  // Rutas para Causas de Fallecimiento
+
+  @Get('causas-fallecimiento/listar')
+  findAllCausasFallecimiento() {
+    return this.mantenimientoAfiliacionService.findAllCausasFallecimiento();
+  }
+
+  @Get('causas-fallecimiento/detalle/:id')
+  findOneCausaFallecimiento(@Param('id') id: number) {
+    return this.mantenimientoAfiliacionService.findOneCausaFallecimiento(id);
+  }
+
+  @Post('causas-fallecimiento/crear')
+  createCausaFallecimiento(@Body() createCausaFallecimientoDto: CreateCausaFallecimientoDto) {
+    return this.mantenimientoAfiliacionService.createCausaFallecimiento(createCausaFallecimientoDto);
+  }
+
+  @Put('causas-fallecimiento/actualizar/:id')
+  updateCausaFallecimiento(@Param('id') id: number, @Body() updateCausaFallecimientoDto: UpdateCausaFallecimientoDto) {
+    return this.mantenimientoAfiliacionService.updateCausaFallecimiento(id, updateCausaFallecimientoDto);
+  }
+
+  @Delete('causas-fallecimiento/eliminar/:id')
+  removeCausaFallecimiento(@Param('id') id: number) {
+    return this.mantenimientoAfiliacionService.removeCausaFallecimiento(id);
   }
 }

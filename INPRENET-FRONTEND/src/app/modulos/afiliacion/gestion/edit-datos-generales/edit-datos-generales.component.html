@@ -38,14 +38,14 @@
         <div class="col-md-4">
           <mat-form-field style="flex-direction: column-reverse;" class="example-full-width inputs"
             appearance="outline">
-            <mat-label>Tipo De Defunción</mat-label>
-            <mat-select matNativeControl formControlName="tipo_defuncion">
-              <mat-option *ngFor="let p of TipoDefuncion" [value]="p.value">
-                {{ p.value }}
+            <mat-label>Causa de Fallecimiento</mat-label>
+            <mat-select matNativeControl formControlName="causa_fallecimiento">
+              <mat-option *ngFor="let p of CausaFallecimiento" [value]="p.value">
+                {{ p.label }}
               </mat-option>
             </mat-select>
           </mat-form-field>
-          <mat-error *ngFor="let error of getErrors('tipo_defuncion')">
+          <mat-error *ngFor="let error of getErrors('causa_fallecimiento')">
             {{ error }}
           </mat-error>
         </div>

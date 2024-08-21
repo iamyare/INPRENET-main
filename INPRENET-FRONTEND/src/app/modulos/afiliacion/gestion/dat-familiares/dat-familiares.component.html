@@ -7,15 +7,13 @@
   <form [formGroup]="parentForm" style="margin: 1%;" (change)="onDatosFamiliaresChange()">
     <div formArrayName="familiares">
       <div *ngFor="let familiar of getCtrl('familiares', parentForm).controls; index as i" [formGroupName]="i">
-        <h4 class="card-title" *ngIf="getCtrl('parentesco', familiar).value !== 'Cónyuge'">Familiar Número: {{i}}</h4>
-        <h4 class="card-title" *ngIf="getCtrl('parentesco', familiar).value === 'Cónyuge'">Cónyuge</h4>
+        <h4 class="card-title">Familiar Número: {{i + 1}}</h4>
         <div class="row">
           <div class="col-md-6">
             <mat-form-field class="example-full-width inputs" appearance="outline">
               <mat-label>Primer Nombre</mat-label>
               <input matInput formControlName="primer_nombre">
-              <mat-error class="error-text-small" *ngFor="let error of getErrors(i, 'primer_nombre')">
-                <mat-icon aria-hidden="true" class="error-icon-small">error_outline</mat-icon>
+              <mat-error *ngFor="let error of getErrors(i, 'primer_nombre')">
                 {{ error }}
               </mat-error>
             </mat-form-field>
@@ -24,8 +22,7 @@
             <mat-form-field class="example-full-width inputs" appearance="outline">
               <mat-label>Segundo Nombre</mat-label>
               <input matInput formControlName="segundo_nombre">
-              <mat-error class="error-text-small" *ngFor="let error of getErrors(i, 'segundo_nombre')">
-                <mat-icon aria-hidden="true" class="error-icon-small">error_outline</mat-icon>
+              <mat-error *ngFor="let error of getErrors(i, 'segundo_nombre')">
                 {{ error }}
               </mat-error>
             </mat-form-field>
@@ -36,8 +33,7 @@
             <mat-form-field class="example-full-width inputs" appearance="outline">
               <mat-label>Tercer Nombre</mat-label>
               <input matInput formControlName="tercer_nombre">
-              <mat-error class="error-text-small" *ngFor="let error of getErrors(i, 'tercer_nombre')">
-                <mat-icon aria-hidden="true" class="error-icon-small">error_outline</mat-icon>
+              <mat-error *ngFor="let error of getErrors(i, 'tercer_nombre')">
                 {{ error }}
               </mat-error>
             </mat-form-field>
@@ -46,8 +42,7 @@
             <mat-form-field class="example-full-width inputs" appearance="outline">
               <mat-label>Primer Apellido</mat-label>
               <input matInput formControlName="primer_apellido">
-              <mat-error class="error-text-small" *ngFor="let error of getErrors(i, 'primer_apellido')">
-                <mat-icon aria-hidden="true" class="error-icon-small">error_outline</mat-icon>
+              <mat-error *ngFor="let error of getErrors(i, 'primer_apellido')">
                 {{ error }}
               </mat-error>
             </mat-form-field>
@@ -58,8 +53,7 @@
             <mat-form-field class="example-full-width inputs" appearance="outline">
               <mat-label>Segundo Apellido</mat-label>
               <input matInput formControlName="segundo_apellido">
-              <mat-error class="error-text-small" *ngFor="let error of getErrors(i, 'segundo_apellido')">
-                <mat-icon aria-hidden="true" class="error-icon-small">error_outline</mat-icon>
+              <mat-error *ngFor="let error of getErrors(i, 'segundo_apellido')">
                 {{ error }}
               </mat-error>
             </mat-form-field>
@@ -68,69 +62,20 @@
             <mat-form-field class="example-full-width inputs" appearance="outline">
               <mat-label>Número de Identificación</mat-label>
               <input matInput formControlName="n_identificacion">
-              <mat-error class="error-text-small" *ngFor="let error of getErrors(i, 'n_identificacion')">
-                <mat-icon aria-hidden="true" class="error-icon-small">error_outline</mat-icon>
+              <mat-error *ngFor="let error of getErrors(i, 'n_identificacion')">
                 {{ error }}
               </mat-error>
             </mat-form-field>
           </div>
         </div>
-        <div class="row" *ngIf="getCtrl('parentesco', familiar).value === 'Cónyuge'">
-          <div class="col-md-6">
-            <mat-form-field class="example-full-width inputs" appearance="outline">
-              <mat-label>Fecha de Nacimiento</mat-label>
-              <mat-datepicker-toggle matSuffix [for]="fechaNacimiento"></mat-datepicker-toggle>
-              <mat-datepicker #fechaNacimiento></mat-datepicker>
-              <input matInput formControlName="fecha_nacimiento" [matDatepicker]="fechaNacimiento">
-            </mat-form-field>
-           <!--  <mat-error class="error-text-small" *ngFor="let error of getErrors(i, 'fecha_nacimiento')">
-              <mat-icon aria-hidden="true" class="error-icon-small">error_outline</mat-icon>
-              {{ error }}
-            </mat-error> -->
-          </div>
-
-          <div class="col-md-6">
-            <mat-form-field class="example-full-width inputs" appearance="outline">
-              <mat-label>Teléfono de Casa</mat-label>
-              <input matInput formControlName="telefono_casa" type="tel">
-              <mat-error class="error-text-small" *ngFor="let error of getErrors(i, 'telefono_casa')">
-                <mat-icon aria-hidden="true" class="error-icon-small">error_outline</mat-icon>
-                {{ error }}
-              </mat-error>
-            </mat-form-field>
-          </div>
-        </div>
-        <div class="row" *ngIf="getCtrl('parentesco', familiar).value === 'Cónyuge'">
-          <div class="col-md-6">
-            <mat-form-field class="example-full-width inputs" appearance="outline">
-              <mat-label>Teléfono Celular</mat-label>
-              <input matInput formControlName="telefono_celular" type="tel">
-              <mat-error class="error-text-small" *ngFor="let error of getErrors(i, 'telefono_celular')">
-                <mat-icon aria-hidden="true" class="error-icon-small">error_outline</mat-icon>
-                {{ error }}
-              </mat-error>
-            </mat-form-field>
-          </div>
-          <div class="col-md-6">
-            <mat-form-field class="example-full-width inputs" appearance="outline">
-              <mat-label>Teléfono de Trabajo</mat-label>
-              <input matInput formControlName="telefono_trabajo" type="tel">
-              <mat-error class="error-text-small" *ngFor="let error of getErrors(i, 'telefono_trabajo')">
-                <mat-icon aria-hidden="true" class="error-icon-small">error_outline</mat-icon>
-                {{ error }}
-              </mat-error>
-            </mat-form-field>
-          </div>
-        </div>
-        <div class="row" *ngIf="getCtrl('parentesco', familiar).value !== 'Cónyuge'">
+        <div class="row">
           <div class="col-md-6">
             <mat-form-field class="example-full-width inputs" appearance="outline">
               <mat-label>Parentesco</mat-label>
               <mat-select formControlName="parentesco">
                 <mat-option *ngFor="let item of availableParentescos" [value]="item.value">{{ item.label }}</mat-option>
               </mat-select>
-              <mat-error class="error-text-small" *ngFor="let error of getErrors(i, 'parentesco')">
-                <mat-icon aria-hidden="true" class="error-icon-small">error_outline</mat-icon>
+              <mat-error *ngFor="let error of getErrors(i, 'parentesco')">
                 {{ error }}
               </mat-error>
             </mat-form-field>

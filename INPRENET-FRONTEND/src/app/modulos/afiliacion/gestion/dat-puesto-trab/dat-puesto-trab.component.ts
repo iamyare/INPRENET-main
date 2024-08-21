@@ -1,5 +1,6 @@
 import { ChangeDetectionStrategy, Component, EventEmitter, Input, OnInit, Output, inject } from '@angular/core';
 import { ControlContainer, FormArray, FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
+import { map, startWith } from 'rxjs';
 import { CentroTrabajoService } from 'src/app/services/centro-trabajo.service';
 import { DatosEstaticosService } from 'src/app/services/datos-estaticos.service';
 import { FormStateService } from 'src/app/services/form-state.service';
@@ -26,13 +27,12 @@ export function generatePuestoTrabFormGroup(datos?: any): FormGroup {
     ]),
     fecha_egreso: new FormControl(datos?.fecha_egreso, [
     ]),
-    sectorEconomico: new FormControl(datos?.sectorEconomico, [
-      Validators.required,
-      Validators.maxLength(40),
-    ]),
+    sectorEconomico: new FormControl({value: datos?.sectorEconomico|| '', disabled: true }),
     estado: new FormControl(datos?.estado, [
       Validators.maxLength(40),
     ]),
+    nombreCentro: new FormControl({ value: datos?.nombreCentro || '', disabled: true }),
+    direccionCentro: new FormControl({ value: datos?.direccionCentro || '', disabled: true }),
     showNumeroAcuerdo: new FormControl(true),
     jornada: new FormControl(datos?.jornada, [
       Validators.required,
@@ -71,9 +71,9 @@ export class DatPuestoTrabComponent implements OnInit {
   @Output() newOtrasFuentesIngreso = new EventEmitter<FormGroup>();
 
   onDatosDatosPuestTrab() {
-  const data = this.formParent.value;
-  this.newDatDatosPuestTrab.emit(data);
-}
+    const data = this.formParent.value;
+    this.newDatDatosPuestTrab.emit(data);
+  }
 
   constructor(
     private formStateService: FormStateService,
@@ -107,20 +107,45 @@ export class DatPuestoTrabComponent implements OnInit {
         }
       }
     }
+    this.searchControl.valueChanges
+    .pipe(
+      startWith(''),
+      map(value => this.filterOptions(value))
+    )
+    .subscribe(filtered => this.filteredOptions = filtered);
+
+  }
+
+  selectControl = new FormControl();
+  searchControl = new FormControl();
+  options = [
+    { value: '1', label: 'Option 1' },
+    { value: '2', label: 'Option 2' },
+    { value: '3', label: 'Option 3' },
+    { value: '4', label: 'Option 4' },
+  ];
+  filteredOptions = this.options;
+
+  private filterOptions(searchTerm: string) {
+    return this.options.filter(option =>
+      option.label.toLowerCase().includes(searchTerm.toLowerCase())
+    );
   }
 
   cargarPuestosTrabajo() {
     this.centrosTrabSVC.obtenerTodosLosCentrosTrabajo().subscribe({
       next: (data) => {
-        const transformedJson = data!.map((item: { id_centro_trabajo: any; nombre_centro_trabajo: any; sector_economico: any }) => ({
-          label: item.nombre_centro_trabajo,
+        const transformedJson = data!.map((item: { id_centro_trabajo: any; nombre_centro_trabajo: any; sector_economico: any; direccion_1: any; direccion_2: any; codigo: any }) => ({
+          label: item.codigo,
           value: String(item.id_centro_trabajo),
+          nombreCentro: item.nombre_centro_trabajo,
+          direccion: item.direccion_1 || item.direccion_2 || 'No disponible',
           sector: item.sector_economico,
         }));
         this.centrosTrabajo = transformedJson;
       },
       error: (error) => {
-        console.error('Error al cargar municipios:', error);
+        console.error('Error al cargar centros de trabajo:', error);
       }
     });
   }
@@ -144,7 +169,10 @@ export class DatPuestoTrabComponent implements OnInit {
     formGroup.get('id_centro_trabajo')?.valueChanges.subscribe(value => {
       const selectedCentro = this.centrosTrabajo.find((centro: any) => centro.value === value);
       if (selectedCentro) {
+        formGroup.get('nombreCentro')?.setValue(selectedCentro.nombreCentro);
+        formGroup.get('direccionCentro')?.setValue(selectedCentro.direccion);
         formGroup.get('sectorEconomico')?.setValue(selectedCentro.sector);
+
         const sector = selectedCentro.sector;
         if (sector === 'PUBLICO' || sector === 'PROHECO') {
           formGroup.get('numero_acuerdo')?.setValidators([
@@ -177,7 +205,6 @@ export class DatPuestoTrabComponent implements OnInit {
     this.newOtrasFuentesIngreso.emit(form.value);
   }
 
-
   getCtrl(key: string, form: FormGroup): any {
     return form.get(key);
   }
@@ -202,4 +229,5 @@ export class DatPuestoTrabComponent implements OnInit {
       return errors;
     }
   }
+
 }

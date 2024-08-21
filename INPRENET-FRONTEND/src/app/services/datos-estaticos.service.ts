@@ -10,6 +10,7 @@ import { TransaccionesService } from './transacciones.service';
 import { AuthService } from './auth.service';
 import { map, Observable } from 'rxjs';
 import { AfiliacionService } from './afiliacion.service';
+import { MantenimientoAfiliacionService } from './mantenimiento-afiliacion.service';
 
 @Injectable({
   providedIn: 'root'
@@ -32,6 +33,7 @@ export class DatosEstaticosService {
   jornadas: any = [];
   nivelesEducativos: any = [];
   discapacidades: any = [];
+  causasFallecimiento: any = [];
 
   constructor(
     private colegiosMagSVC: ColegiosMagisterialesService,
@@ -42,10 +44,10 @@ export class DatosEstaticosService {
     private tipoIdentificacionService: TipoIdentificacionService,
     private centroTrabajoService: CentroTrabajoService,
     private transaccionesSVC: TransaccionesService,
-    private http: HttpClient,
-    private authService: AuthService,
-    private afiliacionService: AfiliacionService
+    private afiliacionService: AfiliacionService,
+    private mantenimientoAfiliacionService: MantenimientoAfiliacionService
   ) {
+    this.getCausasFallecimiento();
     this.getNacionalidad();
     this.gettipoIdent();
     this.getTipoCuenta();
@@ -60,6 +62,18 @@ export class DatosEstaticosService {
     this.getJornadas();
     this.getNivelesEducativos();
     this.getDiscapacidades();
+  }
+
+  getCausasFallecimiento(): Observable<any[]> {
+    return this.mantenimientoAfiliacionService.getAllCausasFallecimiento().pipe(
+      map(response => {
+        this.causasFallecimiento = response.map((item: { id_causa_fallecimiento: any; nombre: any; }) => ({
+          label: item.nombre,
+          value: item.id_causa_fallecimiento
+        }));
+        return this.causasFallecimiento;
+      })
+    );
   }
 
   getDiscapacidades(): Observable<any[]> {

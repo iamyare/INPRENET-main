@@ -5,67 +5,67 @@ import { FormArray, FormBuilder, FormControl, FormGroup, Validators } from "@ang
 
 export function generateRefPerFormGroup(datos?: any): FormGroup {
   return new FormGroup({
-    primer_nombre: new FormControl(datos?.primer_nombre, [
-      Validators.required,
-      Validators.minLength(2),
-      Validators.maxLength(50),
-      Validators.pattern(/^[^0-9]*$/)
+    tipo_referencia: new FormControl(datos?.tipo_referencia || '', [
+      Validators.required
     ]),
-    segundo_nombre: new FormControl(datos?.segundo_nombre, [
-      Validators.maxLength(50),
-      Validators.pattern(/^[^0-9]*$/)
+    id_tipo_identificacion: new FormControl(datos?.id_tipo_identificacion || '', [
+      Validators.required
     ]),
-    tercer_nombre: new FormControl(datos?.tercer_nombre, [
-      Validators.maxLength(50),
-      Validators.pattern(/^[^0-9]*$/)
-    ]),
-    primer_apellido: new FormControl(datos?.primer_apellido, [
-      Validators.required,
-      Validators.minLength(2),
-      Validators.maxLength(50),
-      Validators.pattern(/^[^0-9]*$/)
-    ]),
-    segundo_apellido: new FormControl(datos?.segundo_apellido, [
-      Validators.maxLength(50),
-      Validators.pattern(/^[^0-9]*$/)
-    ]),
-    sexo: new FormControl(datos?.sexo, [
-      Validators.required,
-      Validators.pattern(/^(F|M)$/)
-    ]),
-    direccion: new FormControl(datos?.direccion, [
-      Validators.maxLength(200)
-    ]),
-    telefono_domicilio: new FormControl(datos?.telefono_domicilio, [
-      Validators.minLength(8),
-      Validators.maxLength(12),
-      Validators.pattern(/^[0-9]*$/)
-    ]),
-    telefono_trabajo: new FormControl(datos?.telefono_trabajo, [
-      Validators.required,
-      Validators.minLength(8),
-      Validators.maxLength(12),
-      Validators.pattern(/^[0-9]*$/)
-    ]),
-    telefono_personal: new FormControl(datos?.telefono_personal, [
-      Validators.required,
-      Validators.minLength(8),
-      Validators.maxLength(12),
-      Validators.pattern(/^[0-9]*$/)
-    ]),
-    n_identificacion: new FormControl(datos?.n_identificacion, [
+    n_identificacion: new FormControl(datos?.n_identificacion || '', [
       Validators.required,
       Validators.maxLength(15)
     ]),
-    id_tipo_identificacion: new FormControl(datos?.id_tipo_identificacion, [
-      Validators.required
+    primer_nombre: new FormControl(datos?.primer_nombre || '', [
+      Validators.required,
+      Validators.minLength(2),
+      Validators.maxLength(50),
+      Validators.pattern(/^[^0-9]*$/)
     ]),
-    parentesco: new FormControl(datos?.parentesco, [
+    segundo_nombre: new FormControl(datos?.segundo_nombre || '', [
+      Validators.maxLength(50),
+      Validators.pattern(/^[^0-9]*$/)
+    ]),
+    tercer_nombre: new FormControl(datos?.tercer_nombre || '', [
+      Validators.maxLength(50),
+      Validators.pattern(/^[^0-9]*$/)
+    ]),
+    primer_apellido: new FormControl(datos?.primer_apellido || '', [
+      Validators.required,
+      Validators.minLength(2),
+      Validators.maxLength(50),
+      Validators.pattern(/^[^0-9]*$/)
+    ]),
+    segundo_apellido: new FormControl(datos?.segundo_apellido || '', [
+      Validators.maxLength(50),
+      Validators.pattern(/^[^0-9]*$/)
+    ]),
+    sexo: new FormControl(datos?.sexo || '', [
+      Validators.required,
+      Validators.pattern(/^(F|M)$/)
+    ]),
+    direccion: new FormControl(datos?.direccion || '', [
+      Validators.maxLength(200)
+    ]),
+    telefono_domicilio: new FormControl(datos?.telefono_domicilio || '', [
+      Validators.minLength(8),
+      Validators.maxLength(12),
+      Validators.pattern(/^[0-9]*$/)
+    ]),
+    telefono_trabajo: new FormControl(datos?.telefono_trabajo || '', [
+      Validators.minLength(8),
+      Validators.maxLength(12),
+      Validators.pattern(/^[0-9]*$/)
+    ]),
+    telefono_personal: new FormControl(datos?.telefono_personal || '', [
+      Validators.minLength(8),
+      Validators.maxLength(12),
+      Validators.pattern(/^[0-9]*$/)
+    ]),
+    parentesco: new FormControl(datos?.parentesco || '', [
       Validators.required,
       Validators.minLength(2),
       Validators.maxLength(30)
     ]),
-    tipo_referencia: new FormControl(datos?.tipo_referencia || false)
   });
 }
 
@@ -87,32 +87,6 @@ export class RefPersComponent implements OnInit {
   @Input() datos?: any;
   @Output() newDatRefPerChange = new EventEmitter<any>();
 
-  onDatosRefPerChange(): void {
-    const data = this.formParent.value;
-    const formattedData = this.formatData(data.refpers);
-    this.newDatRefPerChange.emit({ referencias: formattedData });
-  }
-
-  formatData(refpersArray: any[]): any[] {
-    return refpersArray.map(ref => ({
-      tipo_referencia: ref.tipo_referencia,
-      parentesco: ref.parentesco,
-      persona_referencia: {
-        id_tipo_identificacion: ref.id_tipo_identificacion,
-        n_identificacion: ref.n_identificacion,
-        primer_nombre: ref.primer_nombre,
-        segundo_nombre: ref.segundo_nombre,
-        tercer_nombre: ref.tercer_nombre,
-        primer_apellido: ref.primer_apellido,
-        segundo_apellido: ref.segundo_apellido,
-        sexo: ref.sexo,
-        telefono_1: ref.telefono_personal,
-        telefono_2: ref.telefono_trabajo,
-        direccion_residencia: ref.direccion,
-      }
-    }));
-  }
-
   constructor(private formStateService: FormStateService, private fb: FormBuilder, private datosEstaticosService: DatosEstaticosService) {
     this.sexo = [
       { label: "MASCULINO", value: "M" },
@@ -131,8 +105,7 @@ export class RefPersComponent implements OnInit {
 
   ngOnInit(): void {
     this.parentesco = this.datosEstaticosService.parentesco;
-    this.initForm();
-    this.updateAvailableParentesco();
+    this.initForm();;
 
     this.formParent.valueChanges.subscribe(values => {
       this.onDatosRefPerChange();
@@ -153,6 +126,20 @@ export class RefPersComponent implements OnInit {
       this.formParent = existingForm;
     } else {
       this.formParent = this.fb.group({
+        conyuge: new FormGroup({
+          primer_nombre: new FormControl('', [Validators.required]),
+          segundo_nombre: new FormControl(''),
+          tercer_nombre: new FormControl(''),
+          primer_apellido: new FormControl('', [Validators.required]),
+          segundo_apellido: new FormControl(''),
+          n_identificacion: new FormControl('', [Validators.required]),
+          fecha_nacimiento: new FormControl('', [Validators.required]),
+          telefono_domicilio: new FormControl('', [Validators.required]),
+          telefono_celular: new FormControl('', [Validators.required]),
+          telefono_trabajo: new FormControl(''),
+          trabaja: new FormControl('', [Validators.required]),
+          es_afiliado: new FormControl('', [Validators.required])
+        }),
         refpers: this.fb.array([])
       });
     }
@@ -163,13 +150,11 @@ export class RefPersComponent implements OnInit {
     const formGroup = generateRefPerFormGroup(datos);
 
     ref_RefPers.push(formGroup);
-    this.updateAvailableParentesco();
   }
 
   eliminarRefPer(): void {
     const ref_RefPers = this.formParent.get('refpers') as FormArray;
     ref_RefPers.removeAt(-1);
-    this.updateAvailableParentesco();
     this.onDatosRefPerChange();
   }
 
@@ -201,31 +186,30 @@ export class RefPersComponent implements OnInit {
     }
   }
 
-  isConyugue(index: number): boolean {
-    const refParent = this.formParent.get('refpers') as FormArray;
-    const parentesco = refParent.at(index).get('parentesco')?.value;
-    return parentesco === 'CÓNYUGE';
+
+  onDatosRefPerChange(): void {
+    const data = this.formParent.value;
+    const formattedData = this.formatData(data.refpers);
+    this.newDatRefPerChange.emit({ referencias: formattedData });
   }
 
-  existeConyugue(): boolean {
-    const refParent = this.formParent.get('refpers') as FormArray;
-    return refParent.controls.some(ctrl => ctrl.get('parentesco')?.value === 'CÓNYUGE');
-  }
-
-  updateAvailableParentesco(): void {
-    if (this.existeConyugue()) {
-      this.availableParentesco = this.parentesco.filter((item: any) => item.value !== 'CÓNYUGE');
-    } else {
-      this.availableParentesco = this.parentesco;
-    }
-  }
-
-  getAvailableParentesco(index: number): any[] {
-    const refParent = this.formParent.get('refpers') as FormArray;
-    const currentParentesco = refParent.at(index).get('parentesco')?.value;
-    if (currentParentesco === 'CÓNYUGE') {
-      return this.parentesco;
-    }
-    return this.availableParentesco;
+  formatData(refpersArray: any[]): any[] {
+    return refpersArray.map(ref => ({
+      tipo_referencia: ref.tipo_referencia,
+      parentesco: ref.parentesco,
+      persona_referencia: {
+        id_tipo_identificacion: ref.id_tipo_identificacion,
+        n_identificacion: ref.n_identificacion,
+        primer_nombre: ref.primer_nombre,
+        segundo_nombre: ref.segundo_nombre,
+        tercer_nombre: ref.tercer_nombre,
+        primer_apellido: ref.primer_apellido,
+        segundo_apellido: ref.segundo_apellido,
+        sexo: ref.sexo,
+        telefono_1: ref.telefono_personal,
+        telefono_2: ref.telefono_trabajo,
+        direccion_residencia: ref.direccion,
+      }
+    }));
   }
 }

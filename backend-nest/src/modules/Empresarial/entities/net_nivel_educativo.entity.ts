@@ -12,4 +12,3 @@ export class Net_Nivel_Educativo {
   @OneToMany(() => Net_Centro_Trabajo_Nivel, centroTrabajoNivel => centroTrabajoNivel.nivel)
   centroTrabajoNiveles: Net_Centro_Trabajo_Nivel[];
 }
-

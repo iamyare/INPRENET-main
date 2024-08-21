@@ -16,3 +16,6 @@ export class Net_Centro_Trabajo_Nivel {
   nivel: Net_Nivel_Educativo;
 
 }
+
+//backend-nest\src\modules\Empresarial\entities\net_centro_trabajo_nivel.entity.ts
+//prueba

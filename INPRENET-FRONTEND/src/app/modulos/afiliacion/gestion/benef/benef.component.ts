@@ -95,7 +95,6 @@ export class BenefComponent implements OnInit {
       primer_apellido: new FormControl(datosBeneficiario?.primer_apellido || '', [Validators.required, Validators.maxLength(40)]),
       segundo_apellido: new FormControl(datosBeneficiario?.segundo_apellido || ''),
       genero: new FormControl(datosBeneficiario?.genero || ''),
-      sexo: new FormControl(datosBeneficiario?.sexo || ''),
       telefono_1: new FormControl(datosBeneficiario?.telefono_1 || ''),
       telefono_2: new FormControl(datosBeneficiario?.telefono_2 || ''),
       correo_1: new FormControl(datosBeneficiario?.correo_1 || ''),

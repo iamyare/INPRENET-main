@@ -517,9 +517,29 @@ export class DatGeneralesAfiliadoComponent implements OnInit {
   }
 
   onPepsDataChange(data: any): void {
-    const validPeps = data.filter((pep: any) => {
-      return Object.values(pep).some(value => value !== null && value !== '');
-    });
-    this.pepsDataChange.emit(validPeps);
-  }
+    if (data && typeof data === 'object') {
+        const { peps, familiares } = data;
+
+        if (Array.isArray(peps)) {
+            const validPeps = peps.filter((pep: any) => {
+                return Object.values(pep).some(value => value !== null && value !== '');
+            });
+            this.pepsDataChange.emit(validPeps);
+        }
+
+        if (Array.isArray(familiares)) {
+            const validFamiliares = familiares.filter((familiar: any) => {
+                return Object.values(familiar).some(value => value !== null && value !== '');
+            });
+            this.pepsDataChange.emit(validFamiliares); // O puedes emitir ambos arrays juntos como necesites
+        }
+        console.log(familiares);
+
+    } else {
+        console.error('Data no es el formato esperado:', data);
+    }
+}
+
+
+
 }

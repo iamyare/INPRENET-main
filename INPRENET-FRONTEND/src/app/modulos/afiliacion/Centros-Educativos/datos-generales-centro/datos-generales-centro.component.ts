@@ -18,6 +18,18 @@ export class DatosGeneralesCentroComponent implements OnInit {
 
   fields: FieldConfig[] = [
     {
+      name: 'codigo',
+      label: 'Código',
+      type: 'text',
+      icon: 'code',
+      value: '',
+      display: true,
+      readOnly: false,
+      validations: [Validators.required, Validators.maxLength(20)],
+      row: 1,
+      col: 4
+    },
+    {
       name: 'nombre_centro_trabajo',
       label: 'Nombre del Centro Educativo',
       type: 'text',
@@ -27,7 +39,7 @@ export class DatosGeneralesCentroComponent implements OnInit {
       readOnly: false,
       validations: [Validators.required, Validators.maxLength(40)],
       row: 1,
-      col: 6
+      col: 4
     },
     {
       name: 'rtn',
@@ -39,7 +51,7 @@ export class DatosGeneralesCentroComponent implements OnInit {
       readOnly: false,
       validations: [Validators.required, Validators.maxLength(14)],
       row: 1,
-      col: 6
+      col: 4
     },
     {
       name: 'departamento',

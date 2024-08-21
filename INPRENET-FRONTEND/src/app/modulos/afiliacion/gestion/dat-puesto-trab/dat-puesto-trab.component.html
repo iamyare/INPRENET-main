@@ -13,7 +13,7 @@
             <div class="row">
               <div class="col-lg-6 col-md-12">
                 <mat-form-field class="example-full-width inputs" appearance="outline">
-                  <mat-label>Centro De Trabajo</mat-label>
+                  <mat-label>Código del Centro de Trabajo</mat-label>
                   <mat-icon matPrefix>business</mat-icon>
                   <mat-select formControlName="id_centro_trabajo">
                     <mat-option *ngFor="let p of centrosTrabajo" [value]="p.value">
@@ -23,8 +23,24 @@
                 </mat-form-field>
                 <mat-error *ngFor="let error of getErrors(i, 'id_centro_trabajo')">
                   <mat-icon aria-hidden="true" class="error-icon-small">error_outline</mat-icon>
-              {{ error }}
+                  {{ error }}
                 </mat-error>
+              </div>
+
+              <div class="col-lg-6 col-md-12">
+                <mat-form-field class="example-full-width inputs" appearance="outline">
+                  <mat-label>Nombre del Centro</mat-label>
+                  <mat-icon matPrefix>business</mat-icon>
+                  <input matInput formControlName="nombreCentro" readonly>
+                </mat-form-field>
+              </div>
+
+              <div class="col-lg-6 col-md-12">
+                <mat-form-field class="example-full-width inputs" appearance="outline">
+                  <mat-label>Dirección del Centro</mat-label>
+                  <mat-icon matPrefix>home</mat-icon>
+                  <input matInput formControlName="direccionCentro" readonly>
+                </mat-form-field>
               </div>
 
               <div class="col-lg-6 col-md-12">
@@ -33,10 +49,6 @@
                   <mat-icon matPrefix>domain</mat-icon>
                   <input matInput formControlName="sectorEconomico" readonly>
                 </mat-form-field>
-                <mat-error *ngFor="let error of getErrors(i, 'sectorEconomico')">
-                  <mat-icon aria-hidden="true" class="error-icon-small">error_outline</mat-icon>
-              {{ error }}
-                </mat-error>
               </div>
             </div>
 
@@ -49,7 +61,7 @@
                 </mat-form-field>
                 <mat-error *ngFor="let error of getErrors(i, 'salario_base')">
                   <mat-icon aria-hidden="true" class="error-icon-small">error_outline</mat-icon>
-              {{ error }}
+                  {{ error }}
                 </mat-error>
               </div>
 
@@ -64,13 +76,14 @@
                 </mat-form-field>
                 <mat-error *ngFor="let error of getErrors(i, 'fecha_ingreso')">
                   <mat-icon aria-hidden="true" class="error-icon-small">error_outline</mat-icon>
-              {{ error }}
+                  {{ error }}
                 </mat-error>
               </div>
 
               <div class="col-lg-4 col-md-12">
                 <mat-form-field class="example-full-width inputs" appearance="outline">
                   <mat-label>Fecha de Egreso</mat-label>
+                  <mat-icon matPrefix>calendar_today</mat-icon>
                   <input matInput formControlName="fecha_egreso" [matDatepicker]="pickerEgreso" placeholder="d/m/aaaa"
                     [max]="minDate">
                   <mat-datepicker-toggle matSuffix [for]="pickerEgreso"></mat-datepicker-toggle>
@@ -78,7 +91,7 @@
                 </mat-form-field>
                 <mat-error *ngFor="let error of getErrors(i, 'fecha_egreso')">
                   <mat-icon aria-hidden="true" class="error-icon-small">error_outline</mat-icon>
-              {{ error }}
+                  {{ error }}
                 </mat-error>
               </div>
             </div>
@@ -92,7 +105,7 @@
                 </mat-form-field>
                 <mat-error *ngFor="let error of getErrors(i, 'cargo')">
                   <mat-icon aria-hidden="true" class="error-icon-small">error_outline</mat-icon>
-              {{ error }}
+                  {{ error }}
                 </mat-error>
               </div>
 
@@ -104,7 +117,7 @@
                 </mat-form-field>
                 <mat-error *ngFor="let error of getErrors(i, 'numero_acuerdo')">
                   <mat-icon aria-hidden="true" class="error-icon-small">error_outline</mat-icon>
-              {{ error }}
+                  {{ error }}
                 </mat-error>
               </div>
 
@@ -118,7 +131,7 @@
                 </mat-form-field>
                 <mat-error *ngFor="let error of getErrors(i, 'jornada')">
                   <mat-icon aria-hidden="true" class="error-icon-small">error_outline</mat-icon>
-              {{ error }}
+                  {{ error }}
                 </mat-error>
               </div>
 
@@ -132,7 +145,7 @@
                 </mat-form-field>
                 <mat-error *ngFor="let error of getErrors(i, 'tipoJornada')">
                   <mat-icon aria-hidden="true" class="error-icon-small">error_outline</mat-icon>
-              {{ error }}
+                  {{ error }}
                 </mat-error>
               </div>
             </div>
@@ -158,3 +171,22 @@
     <app-otras-fuentes-ingreso (onOtrasFuentesIngresoChange)="onOtrasFuentesIngresoChange($event)"></app-otras-fuentes-ingreso>
   </mat-tab>
 </mat-tab-group>
+
+<mat-form-field class="example-full-width">
+  <mat-label>Seleccione una opción</mat-label>
+  <input type="text" placeholder="Buscar..." matInput [formControl]="searchControl" [matAutocomplete]="auto">
+  <mat-autocomplete autoActiveFirstOption #auto="matAutocomplete">
+    <mat-option *ngFor="let option of filteredOptions" [value]="option.value">
+      {{ option.label }}
+    </mat-option>
+  </mat-autocomplete>
+</mat-form-field>
+
+<mat-form-field class="example-full-width">
+  <mat-label>Opciones</mat-label>
+  <mat-select [formControl]="selectControl">
+    <mat-option *ngFor="let option of filteredOptions" [value]="option.value">
+      {{ option.label }}
+    </mat-option>
+  </mat-select>
+</mat-form-field>

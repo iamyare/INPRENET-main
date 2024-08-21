@@ -3,6 +3,7 @@ import { FormArray, FormBuilder, FormControl, FormGroup, Validators } from '@ang
 import { ToastrService } from 'ngx-toastr';
 import { AfiliadoService } from 'src/app/services/afiliado.service';
 import { DireccionService } from 'src/app/services/direccion.service';
+import { DatosEstaticosService } from 'src/app/services/datos-estaticos.service'; // Importa el servicio
 import { FieldConfig } from 'src/app/shared/Interfaces/field-config';
 import { TableColumn } from 'src/app/shared/Interfaces/table-column';
 import { convertirFechaInputs } from 'src/app/shared/functions/formatoFecha';
@@ -20,7 +21,7 @@ export class EditDatosGeneralesComponent implements OnInit {
   departamentos: any = [];
   unirNombres: any = unirNombres;
   datosTabl: any[] = [];
-  TipoDefuncion: any[] = [];
+  CausaFallecimiento: any[] = [];
   estado: any[] = [];
 
   estadoAfiliacion: any;
@@ -38,7 +39,7 @@ export class EditDatosGeneralesComponent implements OnInit {
   form1 = this.fb.group({
     estado: ["", [Validators.required]],
     certificado_defuncion: ["", [Validators.required]],
-    tipo_defuncion: ["", [Validators.required]],
+    causa_fallecimiento: ["", [Validators.required]],
     observaciones: ["", [Validators.required]],
     fecha_defuncion: ["", [Validators.required]],
     id_departamento_defuncion: ["", [Validators.required]],
@@ -57,6 +58,7 @@ export class EditDatosGeneralesComponent implements OnInit {
     private svcAfiliado: AfiliadoService,
     private toastr: ToastrService,
     public direccionSer: DireccionService,
+    private datosEstaticosService: DatosEstaticosService // Inyecta el servicio
   ) {
     const currentYear = new Date();
     this.minDate = new Date(currentYear.getFullYear(), currentYear.getMonth(), currentYear.getDate(), currentYear.getHours(), currentYear.getMinutes(), currentYear.getSeconds());
@@ -94,16 +96,25 @@ export class EditDatosGeneralesComponent implements OnInit {
         isEditable: true
       }
     ];
-    this.TipoDefuncion = [
-      { value: "ACCIDENTAL" },
-      { value: "ASESINATO" },
-      { value: "HOMICIDIO" },
-      { value: "NATURAL" },
-      { value: "SUICIDIO" },
-    ];
+
+    this.cargarCausasFallecimiento(); // Llama al método para cargar las causas de fallecimiento
     this.cargarEstadosAfiliado();
     this.previsualizarInfoAfil();
     this.cargarDepartamentos();
+  }
+
+  cargarCausasFallecimiento() {
+    this.datosEstaticosService.getCausasFallecimiento().subscribe({
+      next: (data) => {
+        this.CausaFallecimiento = data.map((item: any) => ({
+          label: item.label,
+          value: item.value
+        }));
+      },
+      error: (error) => {
+        console.error('Error al cargar causas de fallecimiento:', error);
+      }
+    });
   }
 
   async cargarEstadosAfiliado() {
@@ -182,8 +193,6 @@ export class EditDatosGeneralesComponent implements OnInit {
     this.updateDiscapacidades();
   }
 
-
-
   createRefpersGroup(dato: any): FormGroup {
     return this.fb.group({
       n_identificacion: [dato.N_IDENTIFICACION, Validators.required],
@@ -227,8 +236,6 @@ export class EditDatosGeneralesComponent implements OnInit {
       this.loading = true;
       await this.svcAfiliado.getAfilByParam(this.Afiliado.n_identificacion).subscribe(
         (result) => {
-          console.log('Datos recibidos:', result);
-
           this.datos = result;
           this.Afiliado = result;
           this.estadoAfiliacion = result.estadoAfiliacion;
@@ -317,7 +324,7 @@ export class EditDatosGeneralesComponent implements OnInit {
     const a = this.formDatosGenerales.value.refpers[0] = {
       ...this.formDatosGenerales.value.refpers[0],
       estado: this.form1.value.estado,
-      tipo_defuncion: this.form1.value.tipo_defuncion,
+      causa_fallecimiento: this.form1.value.causa_fallecimiento,
       fecha_defuncion: convertirFechaInputs(this.form1.value.fecha_defuncion!),
       observaciones: this.form1.value.observaciones,
       id_departamento_defuncion: this.form1.value.id_departamento_defuncion,

@@ -117,11 +117,17 @@ export class NuevoBeneficioAfilComponent implements OnInit {
             type: 'dropdown', label: 'Método de pago', name: 'metodo_pago',
             options: [{ label: 'TRANSFERENCIA', value: 'TRANSFERENCIA' }], validations: [Validators.required], display: true
           },
+          {
+            type: 'dropdown', label: 'Estado Solicitud', name: 'estado_solicitud',
+            options: [{ label: 'APROBADA', value: 'APROBADA' }, { label: 'RECHAZADA', value: 'RECHAZADA' }], validations: [Validators.required], display: true
+          },
           { type: 'number', label: 'Monto total', name: 'monto_total', validations: [Validators.required], display: true },
           { type: 'number', label: 'Monto por periodo', name: 'monto_por_periodo', validations: [Validators.required], display: true },
+          { type: 'number', label: 'Monto ultima cuota', name: 'monto_ultima_cuota', validations: [Validators.required], display: true },
+          { type: 'number', label: 'Monto primera cuota', name: 'monto_primera_cuota', validations: [Validators.required], display: true },
           { type: 'date', label: 'Fecha de efectividad', name: 'fecha_calculo', validations: [], display: true },
+          { type: 'text', label: 'Observación', name: 'observacion', validations: [], display: true },
           { type: 'daterange', label: 'Periodo', name: 'periodo', validations: [], display: false },
-          /* { type: 'text', label: 'Ley Aplicable', name: 'ley_aplicable', validations: [], display: true }, */
         ];
 
         this.myFormFields2 = [
@@ -135,14 +141,21 @@ export class NuevoBeneficioAfilComponent implements OnInit {
             type: 'dropdown', label: 'Método de pago', name: 'metodo_pago',
             options: [{ label: 'TRANSFERENCIA', value: 'TRANSFERENCIA' }], validations: [Validators.required], display: true
           },
+          {
+            type: 'dropdown', label: 'Estado Solicitud', name: 'estado_solicitud',
+            options: [{ label: 'APROBADA', value: 'APROBADA' }, { label: 'RECHAZADA', value: 'RECHAZADA' }], validations: [Validators.required], display: true
+          },
+          { type: 'number', label: 'Monto ultima cuota', name: 'monto_ultima_cuota', validations: [Validators.required], display: true },
+          { type: 'number', label: 'Monto primera cuota', name: 'monto_primera_cuota', validations: [Validators.required], display: true },
+          { type: 'text', label: 'Observación', name: 'observacion', validations: [], display: true },
           { type: 'number', label: 'Monto por periodo', name: 'monto_por_periodo', validations: [Validators.required], display: true },
           { type: 'number', label: 'Monto total', name: 'monto_total', validations: [Validators.required], display: true },
           { type: 'date', label: 'Fecha de efectividad', name: 'fecha_calculo', validations: [], display: true },
           { type: 'daterange', label: 'Periodo', name: 'periodo', validations: [], display: false },
         ];
 
-        this.myFormFields1[5].display = false;
-        this.myFormFields2[6].display = false;
+        this.myFormFields1[9].display = false;
+        this.myFormFields2[10].display = false;
 
         this.mostrarDB = true;
       }
@@ -251,16 +264,16 @@ export class NuevoBeneficioAfilComponent implements OnInit {
       const temp = this.buscarPeriodicidad(this.tiposBeneficios, event.value)
 
       if (temp == "V") {
-        this.myFormFields1[5].display = false;
-        this.myFormFields2[6].display = false;
+        this.myFormFields1[9].display = false;
+        this.myFormFields2[10].display = false;
 
         const fechaActual = new Date();
 
         startDateFormatted = format(fechaActual, 'dd-MM-yyyy');
         endDateFormatted = '01-01-2500';
       } else if (!temp) {
-        this.myFormFields1[5].display = true;
-        this.myFormFields2[6].display = true;
+        this.myFormFields1[9].display = true;
+        this.myFormFields2[10].display = true;
 
 
         /* const startDate = new Date(event.value.periodo.start);
@@ -303,7 +316,7 @@ export class NuevoBeneficioAfilComponent implements OnInit {
     let endDateFormatted
 
     if (temp == "VITALICIO") {
-      this.myFormFields2[5].display = false
+      this.myFormFields2[9].display = false
 
       const fechaActual = new Date();
 
@@ -311,7 +324,7 @@ export class NuevoBeneficioAfilComponent implements OnInit {
       endDateFormatted = '01-01-2500';
 
     } else if (!temp) {
-      this.myFormFields2[5].display = true
+      this.myFormFields2[9].display = true
 
       const startDate = new Date(event.value.periodo.start);
       const endDate = new Date(event.value.periodo.end);

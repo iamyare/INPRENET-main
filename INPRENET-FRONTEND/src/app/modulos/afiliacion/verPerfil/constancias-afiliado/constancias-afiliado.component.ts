@@ -21,6 +21,7 @@ export class ConstanciasAfiliadoComponent {
   menuItems = [
     { name: 'Generar Constancia de Renuncia CAP', action: this.generarConstanciaRenunciaCap.bind(this) },
     { name: 'Generar Constancia de Afiliación', action: this.generarConstanciaAfiliacion.bind(this) },
+    { name: 'Generar Constancia de Afiliación 2', action: this.generarConstanciaAfiliacion2.bind(this) },
     { name: 'Generar Constancia de No Cotizar', action: this.generarConstanciaNoCotizar.bind(this) },
     { name: 'Generar Constancia de Débitos', action: this.generarConstanciaDebitos.bind(this) },
     { name: 'Generar Constancia de Tiempo De Cotizar Con Monto', action: this.generarConstanciaTiempoCotizarConMonto.bind(this) }
@@ -50,6 +51,29 @@ export class ConstanciasAfiliadoComponent {
       const link = document.createElement('a');
       link.href = downloadURL;
       link.download = this.generarNombreArchivo('afiliacion');
+      link.click();
+      window.URL.revokeObjectURL(downloadURL); // Liberar el objeto URL
+    });
+  }
+
+  generarConstanciaAfiliacion2() {
+    const data = {
+      primer_nombre: this.persona.primer_nombre,
+      segundo_nombre: this.persona.segundo_nombre,
+      tercer_nombre: this.persona.tercer_nombre,
+      primer_apellido: this.persona.primer_apellido,
+      segundo_apellido: this.persona.segundo_apellido,
+      n_identificacion: this.persona.n_identificacion,
+    };
+
+    this.afiliadoService.generarConstanciaAfiliacion2(data).subscribe((response: any) => {
+    });
+
+    this.afiliadoService.generarConstanciaQR(data, 'afiliacion2').subscribe((blob: Blob) => {
+      const downloadURL = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = downloadURL;
+      link.download = this.generarNombreArchivo('afiliacion2');
       link.click();
       window.URL.revokeObjectURL(downloadURL); // Liberar el objeto URL
     });

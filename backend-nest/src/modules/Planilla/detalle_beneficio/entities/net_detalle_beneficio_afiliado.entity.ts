@@ -28,8 +28,14 @@ export class Net_Detalle_Beneficio_Afiliado {
     @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true, name: 'MONTO_TOTAL' })
     monto_total: number;
 
+    @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true, name: 'MONTO_ULTIMA_CUOTA' })
+    monto_ultima_cuota: number;
+    
     @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true, name: 'MONTO_POR_PERIODO' })
     monto_por_periodo: number;
+
+    @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true, name: 'MONTO_PRIMERA_CUOTA' })
+    monto_primera_cuota: number;
 
     @Column({ nullable: true, name: 'METODO_PAGO' })
     metodo_pago: string;
@@ -41,7 +47,10 @@ export class Net_Detalle_Beneficio_Afiliado {
     periodo_finalizacion: Date;
 
     @Column({ nullable: true, name: 'RECIBIENDO_BENEFICIO' })
-    recibiendo_beneficio: number;
+    recibiendo_beneficio: string;
+
+    @Column({ nullable: true, name: 'OBSERVACIONES' })
+    observaciones: string;
 
     @Column({ nullable: true, default: 0, name: 'NUM_RENTAS_APLICADAS' })
     num_rentas_aplicadas: number;

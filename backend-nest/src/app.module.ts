@@ -18,15 +18,12 @@ import { DocumentsModule } from './modules/documents/documents.module';
 
 @Module({
   imports: [
-    ConfigModule.forRoot({
-      envFilePath: `development.env`,
-    }),
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
       useFactory: async (configService: ConfigService) => {
-        const user = configService.get('DB_USERNAME');
-        const password = configService.get('DB_PASSWORD');
-        const connectString = configService.get('CONNECT_STRING');
+        const user = process.env.DB_USERNAME;
+        const password = process.env.DB_PASSWORD;
+        const connectString = process.env.CONNECT_STRING;
 
         // Ensure Thin mode is used
         oracledb.initOracleClient({ configDir: '', libDir: '', errorDir: '' });

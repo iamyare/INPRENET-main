@@ -12,6 +12,13 @@ export class DocumentsController {
     res.json({ fileId });
   }
 
+  @Post('constancia-afiliacion2')
+  async postConstanciaAfiliacion2(@Body() data: any, @Res() res: Response) {
+
+    const fileId = await this.pdfService.generateAndUploadConstancia(data, 'afiliacion2');
+    res.json({ fileId });
+  }
+
   @Post('constancia-renuncia-cap')
   async postConstanciaRenunciaCap(@Body() data: any, @Res() res: Response) {
 

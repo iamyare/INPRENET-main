@@ -1187,18 +1187,22 @@ export class PlanillaService {
             "NET_PERSONA" per
         ON 
             per."ID_PERSONA" = detP."ID_PERSONA"
-        LEFT JOIN 
+        JOIN 
             "NET_PERSONA_POR_BANCO" perPorBan
         ON 
             detBs."ID_AF_BANCO" = perPorBan."ID_AF_BANCO"
-        LEFT JOIN 
+        JOIN 
             "NET_BANCO" banco
         ON 
             banco."ID_BANCO" = perPorBan."ID_BANCO"
         
         WHERE
                 detBs."ESTADO" = 'PAGADA' AND
-                plan."CODIGO_PLANILLA" = '${codPlanilla}'
+                plan."CODIGO_PLANILLA" = '${codPlanilla}' AND
+                plan."DEDUCC_INPREMA_CARGADAS" = 'SI' AND
+                plan."DEDUCC_TERCEROS_CARGADAS" = 'SI' AND
+                plan."ALTAS_CARGADAS" = 'SI' AND
+                plan."BAJAS_CARGADAS" = 'SI' 
                 
         GROUP BY 
         per."N_IDENTIFICACION",
@@ -1229,15 +1233,29 @@ export class PlanillaService {
             FROM "NET_PLANILLA" plan 
             INNER JOIN "NET_DETALLE_DEDUCCION" dd ON dd."ID_PLANILLA" = plan."ID_PLANILLA"
             INNER JOIN "NET_DEDUCCION" ded ON ded."ID_DEDUCCION" = dd."ID_DEDUCCION"
-            INNER JOIN "NET_CENTRO_TRABAJO" instFin ON instFin."ID_CENTRO_TRABAJO" = ded."ID_CENTRO_TRABAJO" 
+            INNER JOIN "NET_CENTRO_TRABAJO" instFin ON instFin."ID_CENTRO_TRABAJO" = ded."ID_CENTRO_TRABAJO"
+            JOIN
+                      "NET_PERSONA_POR_BANCO" perPorBan
+                  ON
+                      dd."ID_AF_BANCO" = perPorBan."ID_AF_BANCO"
+                  JOIN
+                      "NET_BANCO" banco
+                  ON
+                      banco."ID_BANCO" = perPorBan."ID_BANCO"
+
+                      INNER JOIN "NET_PERSONA" per ON per."ID_PERSONA" = dd."ID_PERSONA" 
 
 
             INNER JOIN "NET_PERSONA" per ON per."ID_PERSONA" = dd."ID_PERSONA"
 
             WHERE
                 dd."ESTADO_APLICACION" = 'COBRADA' AND
+                instFin."NOMBRE_CENTRO_TRABAJO" = 'INPREMA' AND
                 plan."CODIGO_PLANILLA" = '${codPlanilla}' AND
-                instFin."NOMBRE_CENTRO_TRABAJO" = 'INPREMA'
+                plan."DEDUCC_INPREMA_CARGADAS" = 'SI' AND
+                plan."DEDUCC_TERCEROS_CARGADAS" = 'SI' AND
+                plan."ALTAS_CARGADAS" = 'SI' AND
+                plan."BAJAS_CARGADAS" = 'SI' 
             GROUP BY 
                 per."ID_PERSONA"
     `;
@@ -1250,14 +1268,28 @@ export class PlanillaService {
           INNER JOIN "NET_DETALLE_DEDUCCION" dd ON dd."ID_PLANILLA" = plan."ID_PLANILLA"
           INNER JOIN "NET_DEDUCCION" ded ON ded."ID_DEDUCCION" = dd."ID_DEDUCCION"
           INNER JOIN "NET_CENTRO_TRABAJO" instFin ON instFin."ID_CENTRO_TRABAJO" = ded."ID_CENTRO_TRABAJO" 
+          JOIN
+                      "NET_PERSONA_POR_BANCO" perPorBan
+                  ON
+                      dd."ID_AF_BANCO" = perPorBan."ID_AF_BANCO"
+                  JOIN
+                      "NET_BANCO" banco
+                  ON
+                      banco."ID_BANCO" = perPorBan."ID_BANCO"
+
+                      INNER JOIN "NET_PERSONA" per ON per."ID_PERSONA" = dd."ID_PERSONA"
 
 
           INNER JOIN "NET_PERSONA" per ON per."ID_PERSONA" = dd."ID_PERSONA"
 
           WHERE
               dd."ESTADO_APLICACION" = 'COBRADA' AND
+              instFin."NOMBRE_CENTRO_TRABAJO" != 'INPREMA' AND
               plan."CODIGO_PLANILLA" = '${codPlanilla}' AND
-              instFin."NOMBRE_CENTRO_TRABAJO" != 'INPREMA'
+                plan."DEDUCC_INPREMA_CARGADAS" = 'SI' AND
+                plan."DEDUCC_TERCEROS_CARGADAS" = 'SI' AND
+                plan."ALTAS_CARGADAS" = 'SI' AND
+                plan."BAJAS_CARGADAS" = 'SI' 
           GROUP BY 
           per."ID_PERSONA"
     `;

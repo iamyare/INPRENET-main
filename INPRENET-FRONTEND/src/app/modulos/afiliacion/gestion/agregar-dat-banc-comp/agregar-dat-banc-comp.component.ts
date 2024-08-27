@@ -3,7 +3,6 @@ import { FormArray, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { ToastrService } from 'ngx-toastr';
 import { AfiliacionService } from 'src/app/services/afiliacion.service';
-import { HistorialSalarioComponent } from '../historial-salario/historial-salario.component'; // Ajusta la ruta si es necesario
 
 @Component({
   selector: 'app-agregar-dat-banc-comp',
@@ -16,7 +15,7 @@ export class AgregarDatBancCompComponent implements OnInit {
 
   @Output() saved = new EventEmitter<any>(); // Emisor de eventos
 
-  @ViewChild(HistorialSalarioComponent) historialSalarioComponent!: HistorialSalarioComponent; // Obtén la referencia del componente hijo
+  //@ViewChild(HistorialSalarioComponent) historialSalarioComponent!: HistorialSalarioComponent; // Obtén la referencia del componente hijo
 
   constructor(
     private fb: FormBuilder,

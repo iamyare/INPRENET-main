@@ -42,13 +42,11 @@
                 </mat-error>
               </div>
               <div class="col-lg-4 col-md-12">
-                <mat-form-field style="flex-direction: column-reverse;" class="example-full-width inputs"
-                  appearance="outline">
-                  <mat-label>Fecha De Vencimiento Identificación </mat-label>
+                <mat-form-field style="flex-direction: column-reverse;" class="example-full-width inputs" appearance="outline">
+                  <mat-label>Fecha De Vencimiento Identificación</mat-label>
                   <mat-datepicker-toggle matSuffix [for]="fechaVencIdent"></mat-datepicker-toggle>
                   <mat-datepicker #fechaVencIdent></mat-datepicker>
-                  <input matInput formControlName="fecha_vencimiento_ident" [matDatepicker]="fechaVencIdent"
-                    [max]="minDate">
+                  <input matInput formControlName="fecha_vencimiento_ident" [matDatepicker]="fechaVencIdent">
                 </mat-form-field>
                 <mat-error class="error-text-small" *ngFor="let error of getErrors(i, 'fecha_vencimiento_ident')">
                    <mat-icon aria-hidden="true" class="error-icon-small">error_outline</mat-icon>
@@ -58,21 +56,6 @@
             </div>
 
             <div class="row">
-              <!-- <div class="col-lg-4 col-md-12">
-                <mat-form-field style="flex-direction: column-reverse;" class="example-full-width inputs"
-                  appearance="outline">
-                  <mat-label>Fallecido</mat-label>
-                  <mat-select matNativeControl formControlName="fallecido" (selectionChange)="onDatosGeneralesChange()">
-                    <mat-option *ngFor="let p of fallecido" [value]="p.value">
-                      {{ p.value }}
-                    </mat-option>
-                  </mat-select>
-                </mat-form-field>
-                <mat-error class="error-text-small" *ngFor="let error of getErrors(i, 'estado_civil')">
-                   <mat-icon aria-hidden="true" class="error-icon-small">error_outline</mat-icon>
-                  {{ error }}
-                </mat-error>
-              </div> -->
               <div class="col-lg-4 col-md-12">
                 <mat-form-field style="flex-direction: column-reverse;" class="example-full-width inputs"
                   appearance="outline">

@@ -12,7 +12,7 @@ const noSpecialCharsPattern = '^[a-zA-Z0-9\\s]*$';
 
 export function generateAddressFormGroup(datos?: any): FormGroup {
   return new FormGroup({
-    n_identificacion: new FormControl(datos?.n_identificacion, [Validators.required, Validators.maxLength(15), Validators.pattern(/^[0-9]{13}$/)]),
+    n_identificacion: new FormControl(datos?.n_identificacion, [Validators.required]),
     primer_nombre: new FormControl(datos?.primer_nombre, [
       Validators.required,
       Validators.maxLength(40),
@@ -116,8 +116,6 @@ export function generateAddressFormGroup(datos?: any): FormGroup {
 })
 export class DatGeneralesAfiliadoComponent implements OnInit {
   public estadoCargDatos: boolean = false;
-  public archivo: any;
-  public dataEdit: any;
   tipoIdentData: any = [];
   nacionalidades: any = [];
   municipios: any = [];
@@ -184,16 +182,24 @@ export class DatGeneralesAfiliadoComponent implements OnInit {
   };
 
   form: FormGroup = this.fb.group({});
-  formArchivos: any;
-  minDate: Date;
+  minDate: Date = new Date(); // Hoy
+  maxDate: Date = new Date(this.minDate.getFullYear() + 80, this.minDate.getMonth(), this.minDate.getDate());
   fallecido: any;
   discapacidad: boolean = false;
   cargoPublico: boolean = false;
 
   onDatosGeneralesChange() {
     const data = this.formParent.value;
-    this.newDatosGenerales.emit(data);
+    const departamentoResidencia = this.departamentos.find((d: any) => d.value === data.refpers[0].id_departamento_residencia)?.label || 'N/A';
+    const municipioResidencia = this.municipios.find((m: any) => m.value === data.refpers[0].id_municipio_residencia)?.label || 'N/A';
+    const dataToEmit = {
+      ...data,
+      departamentoResidencia,
+      municipioResidencia,
+    };
+    this.newDatosGenerales.emit(dataToEmit);
   }
+
 
   onDatosGeneralesDiscChange(event: MatRadioChange, i: number) {
     const isChecked = event.value === 'SI';
@@ -290,7 +296,6 @@ export class DatGeneralesAfiliadoComponent implements OnInit {
               pep_cargo_desempenado: [pep.pep_cargo_desempenado, Validators.required],
               startDate: [pep.startDate, Validators.required],
               endDate: [pep.endDate, Validators.required],
-              observacion: [pep.observacion, Validators.required]
             });
             pepsArray.push(pepGroup);
           });
@@ -539,7 +544,4 @@ export class DatGeneralesAfiliadoComponent implements OnInit {
         console.error('Data no es el formato esperado:', data);
     }
 }
-
-
-
 }

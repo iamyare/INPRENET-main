@@ -8,7 +8,6 @@ import { ConfirmDialogComponent } from 'src/app/components/dinamicos/confirm-dia
 import { EditarDialogComponent } from 'src/app/components/dinamicos/editar-dialog/editar-dialog.component';
 import { AfiliadoService } from 'src/app/services/afiliado.service';
 import { CentroTrabajoService } from 'src/app/services/centro-trabajo.service';
-import { DatosEstaticosService } from 'src/app/services/datos-estaticos.service';
 import { FieldConfig } from 'src/app/shared/Interfaces/field-config';
 import { TableColumn } from 'src/app/shared/Interfaces/table-column';
 import { convertirFechaInputs } from 'src/app/shared/functions/formatoFecha';
@@ -43,7 +42,6 @@ export class VerOtrasFuentesIngresoComponent implements OnInit, OnDestroy, OnCha
     private svcAfiliado: AfiliadoService,
     private toastr: ToastrService,
     private dialog: MatDialog,
-    private datosEstaticosService: DatosEstaticosService,
     private datePipe: DatePipe,
     private centrosTrabSVC: CentroTrabajoService,
   ) { }

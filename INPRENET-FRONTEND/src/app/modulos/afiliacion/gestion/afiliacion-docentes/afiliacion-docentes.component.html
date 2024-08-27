@@ -14,10 +14,6 @@
     <app-col-magisteriales [parentForm]="colegioMagisterialForm" (newDataColegioMagisterial)="onColegioMagisterialFormUpdate($event)"></app-col-magisteriales>
   </div>
 
-  <div [hidden]="activeStep !== 2">
-    <app-historial-salario [parentForm]="bancosForm" (newDatHistSal)="onBancosFormUpdate($event)"></app-historial-salario>
-  </div>
-
   <div [hidden]="activeStep !== 3">
     <app-dat-puesto-trab (newDatDatosPuestTrab)="handleDatosPuestTrab($event)" (newOtrasFuentesIngreso)="handleOtrasFuentesIngreso($event)"></app-dat-puesto-trab>
   </div>
@@ -26,9 +22,9 @@
     <app-ref-pers (newDatRefPerChange)="handleRefPersData($event)"></app-ref-pers>
   </div>
 
-  <div [hidden]="activeStep !== 5">
+  <!-- <div [hidden]="activeStep !== 5">
     <app-benef [formParent]="benefForm" (newDatBenChange)="handleBenefData($event)"></app-benef>
-  </div>
+  </div> -->
 
   <div [hidden]="activeStep !== 6">
     <button mat-button color="primary" (click)="gatherAllData()">

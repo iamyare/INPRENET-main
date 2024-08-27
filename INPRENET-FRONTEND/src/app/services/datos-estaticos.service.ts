@@ -239,6 +239,7 @@ export class DatosEstaticosService {
       return this.nacionalidades;
     }
   }
+
   async getMunicipios() {
     try {
       const response = await this.direccionSer.getAllMunicipios().toPromise();
@@ -290,28 +291,22 @@ export class DatosEstaticosService {
 
   estadoCivil = [
     {
-      "idEstadoCivil": 1,
-      "value": "CASADO/A"
+      "label": "CASADO/A"
     },
     {
-      "idEstadoCivil": 2,
-      "value": "DIVORCIADO/A"
+      "label": "DIVORCIADO/A"
     },
     {
-      "idEstadoCivil": 3,
-      "value": "SEPARADO/A"
+      "label": "SEPARADO/A"
     },
     {
-      "idEstadoCivil": 4,
-      "value": "SOLTERO/A"
+      "label": "SOLTERO/A"
     },
     {
-      "idEstadoCivil": 5,
-      "value": "UNION LIBRE"
+      "label": "UNION LIBRE"
     },
     {
-      "idEstadoCivil": 6,
-      "value": "VIUDO/A"
+      "label": "VIUDO/A"
     }
   ];
 

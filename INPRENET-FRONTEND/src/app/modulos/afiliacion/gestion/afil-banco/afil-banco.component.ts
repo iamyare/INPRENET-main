@@ -1,12 +1,10 @@
 import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
-import { AfiliadoService } from 'src/app/services/afiliado.service';
 import { FormStateService } from 'src/app/services/form-state.service';
 import { ToastrService } from 'ngx-toastr';
 import { generateDatBancFormGroup } from '../../nose/dat-banc/dat-banc.component';
 import { generateFormArchivo } from 'src/app/components/dinamicos/botonarchivos/botonarchivos.component';
 import { FormArray, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import pdfMake from 'pdfmake/build/pdfmake';
-import pdfFonts from 'pdfmake/build/vfs_fonts';
 import { AfiliacionService } from 'src/app/services/afiliacion.service';
 
 @Component({

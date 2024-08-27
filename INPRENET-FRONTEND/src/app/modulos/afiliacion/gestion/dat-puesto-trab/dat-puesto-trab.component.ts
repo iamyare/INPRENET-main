@@ -1,91 +1,29 @@
-import { ChangeDetectionStrategy, Component, EventEmitter, Input, OnInit, Output, inject } from '@angular/core';
-import { ControlContainer, FormArray, FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
-import { map, startWith } from 'rxjs';
+import { ChangeDetectionStrategy, Component, Input, OnInit } from '@angular/core';
+import { FormArray, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { CentroTrabajoService } from 'src/app/services/centro-trabajo.service';
 import { DatosEstaticosService } from 'src/app/services/datos-estaticos.service';
-import { FormStateService } from 'src/app/services/form-state.service';
-
-export function generatePuestoTrabFormGroup(datos?: any): FormGroup {
-  return new FormGroup({
-    id_centro_trabajo: new FormControl(datos?.id_centro_trabajo, [
-      Validators.required
-    ]),
-    cargo: new FormControl(datos?.cargo, [
-      Validators.required,
-      Validators.maxLength(40),
-    ]),
-    numero_acuerdo: new FormControl(datos?.numero_acuerdo, [
-      Validators.maxLength(40),
-    ]),
-    salario_base: new FormControl(datos?.salario_base, [
-      Validators.required,
-      Validators.min(0),
-      Validators.pattern(/^[0-9]+(\.[0-9]{1,2})?$/)
-    ]),
-    fecha_ingreso: new FormControl(datos?.fecha_ingreso, [
-      Validators.required,
-    ]),
-    fecha_egreso: new FormControl(datos?.fecha_egreso, [
-    ]),
-    sectorEconomico: new FormControl({value: datos?.sectorEconomico|| '', disabled: true }),
-    estado: new FormControl(datos?.estado, [
-      Validators.maxLength(40),
-    ]),
-    nombreCentro: new FormControl({ value: datos?.nombreCentro || '', disabled: true }),
-    direccionCentro: new FormControl({ value: datos?.direccionCentro || '', disabled: true }),
-    showNumeroAcuerdo: new FormControl(true),
-    jornada: new FormControl(datos?.jornada, [
-      Validators.required,
-    ]),
-    tipoJornada: new FormControl(datos?.tipoJornada, [
-      Validators.required,
-    ])
-  });
-}
 
 @Component({
   selector: 'app-dat-puesto-trab',
   templateUrl: './dat-puesto-trab.component.html',
   styleUrls: ['./dat-puesto-trab.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  viewProviders: [
-    {
-      provide: ControlContainer,
-      useFactory: () =>
-        inject(ControlContainer, { skipSelf: true, host: true }),
-    },
-  ],
 })
 export class DatPuestoTrabComponent implements OnInit {
-  public formParent: FormGroup = new FormGroup({});
-  private formKey = 'FormTrabajo';
+  @Input() formGroup!: FormGroup;
 
-  centrosTrabajo: any;
-  sector: any;
+  centrosTrabajo: any[] = [];
   jornadas: any[];
   tiposJornada: any[];
   minDate: Date;
-  @Input() datos: any;
-  @Input() editing?: boolean = false;
-  @Output() newDatDatosPuestTrab = new EventEmitter<any>();
-  @Output() newOtrasFuentesIngreso = new EventEmitter<FormGroup>();
-
-  onDatosDatosPuestTrab() {
-    const data = this.formParent.value;
-    this.newDatDatosPuestTrab.emit(data);
-  }
 
   constructor(
-    private formStateService: FormStateService,
     private fb: FormBuilder,
     private datosEstaticos: DatosEstaticosService,
-    private centrosTrabSVC: CentroTrabajoService,
+    private centrosTrabSVC: CentroTrabajoService
   ) {
     const currentYear = new Date();
     this.minDate = new Date(currentYear.getFullYear(), currentYear.getMonth(), currentYear.getDate());
-    this.cargarPuestosTrabajo();
-
-    this.sector = this.datosEstaticos.sector;
     this.jornadas = [
       { label: 'MATUTINA', value: 'MATUTINA' },
       { label: 'DIURNA', value: 'DIURNA' },
@@ -98,51 +36,22 @@ export class DatPuestoTrabComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.initForm();
-    const trabajoArray = this.formParent.get('trabajo') as FormArray;
-    if (this.datos && this.datos.value && Array.isArray(this.datos.value.trabajo)) {
-      if (this.datos.value.trabajo.length > 0) {
-        for (let i of this.datos.value.trabajo) {
-          this.agregarTrabajo(i);
-        }
-      }
+    if (!this.formGroup.get('trabajo')) {
+      this.formGroup.addControl('trabajo', this.fb.array([]));
     }
-    this.searchControl.valueChanges
-    .pipe(
-      startWith(''),
-      map(value => this.filterOptions(value))
-    )
-    .subscribe(filtered => this.filteredOptions = filtered);
-
+    this.loadCentrosTrabajo();
   }
 
-  selectControl = new FormControl();
-  searchControl = new FormControl();
-  options = [
-    { value: '1', label: 'Option 1' },
-    { value: '2', label: 'Option 2' },
-    { value: '3', label: 'Option 3' },
-    { value: '4', label: 'Option 4' },
-  ];
-  filteredOptions = this.options;
-
-  private filterOptions(searchTerm: string) {
-    return this.options.filter(option =>
-      option.label.toLowerCase().includes(searchTerm.toLowerCase())
-    );
-  }
-
-  cargarPuestosTrabajo() {
+  private loadCentrosTrabajo() {
     this.centrosTrabSVC.obtenerTodosLosCentrosTrabajo().subscribe({
       next: (data) => {
-        const transformedJson = data!.map((item: { id_centro_trabajo: any; nombre_centro_trabajo: any; sector_economico: any; direccion_1: any; direccion_2: any; codigo: any }) => ({
+        this.centrosTrabajo = data.map(item => ({
           label: item.codigo,
           value: String(item.id_centro_trabajo),
           nombreCentro: item.nombre_centro_trabajo,
           direccion: item.direccion_1 || item.direccion_2 || 'No disponible',
           sector: item.sector_economico,
         }));
-        this.centrosTrabajo = transformedJson;
       },
       error: (error) => {
         console.error('Error al cargar centros de trabajo:', error);
@@ -150,84 +59,74 @@ export class DatPuestoTrabComponent implements OnInit {
     });
   }
 
-  private initForm() {
-    let existingForm = this.formStateService.getForm(this.formKey);
-    if (existingForm) {
-      this.formParent = existingForm;
-    } else {
-      this.formParent = this.fb.group({
-        trabajo: this.fb.array([])
-      });
-    }
+  get trabajosArray(): FormArray {
+    return this.formGroup.get('trabajo') as FormArray;
   }
 
-  agregarTrabajo(datos?: any): void {
-    const ref_trabajo = this.formParent.get('trabajo') as FormArray;
-    const formGroup = generatePuestoTrabFormGroup(datos || {});
-    ref_trabajo.push(formGroup);
+  agregarTrabajo(): void {
+    const trabajoFormGroup = this.fb.group({
+      id_centro_trabajo: ['', Validators.required],
+      cargo: ['', [Validators.required, Validators.maxLength(40)]],
+      numero_acuerdo: ['', Validators.maxLength(40)],
+      salario_base: ['', [Validators.required, Validators.min(0), Validators.pattern(/^[0-9]+(\.[0-9]{1,2})?$/)]],
+      fecha_ingreso: ['', Validators.required],
+      fecha_egreso: [''],
+      sectorEconomico: [{ value: '', disabled: true }],
+      estado: ['', Validators.maxLength(40)],
+      nombreCentro: [{ value: '', disabled: true }],
+      direccionCentro: [{ value: '', disabled: true }],
+      showNumeroAcuerdo: [true],
+      jornada: ['', Validators.required],
+      tipoJornada: ['', Validators.required]
+    });
 
-    formGroup.get('id_centro_trabajo')?.valueChanges.subscribe(value => {
-      const selectedCentro = this.centrosTrabajo.find((centro: any) => centro.value === value);
+    trabajoFormGroup.get('id_centro_trabajo')?.valueChanges.subscribe(value => {
+      const selectedCentro = this.centrosTrabajo.find(centro => centro.value === value);
       if (selectedCentro) {
-        formGroup.get('nombreCentro')?.setValue(selectedCentro.nombreCentro);
-        formGroup.get('direccionCentro')?.setValue(selectedCentro.direccion);
-        formGroup.get('sectorEconomico')?.setValue(selectedCentro.sector);
+        trabajoFormGroup.patchValue({
+          nombreCentro: selectedCentro.nombreCentro,
+          direccionCentro: selectedCentro.direccion,
+          sectorEconomico: selectedCentro.sector,
+          showNumeroAcuerdo: selectedCentro.sector === 'PUBLICO' || selectedCentro.sector === 'PROHECO'
+        });
 
-        const sector = selectedCentro.sector;
-        if (sector === 'PUBLICO' || sector === 'PROHECO') {
-          formGroup.get('numero_acuerdo')?.setValidators([
-            Validators.required,
-            Validators.maxLength(40)
-          ]);
+        const numeroAcuerdoControl = trabajoFormGroup.get('numero_acuerdo');
+        if (selectedCentro.sector === 'PUBLICO' || selectedCentro.sector === 'PROHECO') {
+          numeroAcuerdoControl?.setValidators([Validators.required, Validators.maxLength(40)]);
         } else {
-          formGroup.get('numero_acuerdo')?.clearValidators();
-          formGroup.get('numero_acuerdo')?.setValidators([
-            Validators.maxLength(40)
-          ]);
+          numeroAcuerdoControl?.clearValidators();
+          numeroAcuerdoControl?.setValidators([Validators.maxLength(40)]);
         }
-        formGroup.get('numero_acuerdo')?.updateValueAndValidity();
-        formGroup.get('showNumeroAcuerdo')?.setValue(sector === 'PUBLICO' || sector === 'PROHECO');
+        numeroAcuerdoControl?.updateValueAndValidity();
       }
     });
 
-    this.onDatosDatosPuestTrab();
+    this.trabajosArray.push(trabajoFormGroup);
+    trabajoFormGroup.markAllAsTouched(); // Mostrar validaciones inmediatamente
+    this.formGroup.markAsTouched(); // Forzar la verificación en el step también
   }
 
-  eliminarTrabajo(): void {
-    const ref_trabajo = this.formParent.get('trabajo') as FormArray;
-    if (ref_trabajo.length > 0) {
-      ref_trabajo.removeAt(ref_trabajo.length - 1);
-      this.onDatosDatosPuestTrab();
+  eliminarTrabajo(index: number): void {
+    if (this.trabajosArray.length > 0) {
+      this.trabajosArray.removeAt(index);
     }
   }
 
-  onOtrasFuentesIngresoChange(form: FormGroup): void {
-    this.newOtrasFuentesIngreso.emit(form.value);
-  }
-
-  getCtrl(key: string, form: FormGroup): any {
-    return form.get(key);
-  }
-
-  getErrors(i: number, fieldName: string): any {
-    const controlestrabajo = (this.formParent.get('trabajo') as FormArray).controls;
-    const a = controlestrabajo[i].get(fieldName)!.errors;
-    let errors = [];
-    if (a) {
-      if (a['required']) {
-        errors.push('Este campo es requerido.');
-      }
-      if (a['minlength']) {
-        errors.push(`Debe tener al menos ${a['minlength'].requiredLength} caracteres.`);
-      }
-      if (a['maxlength']) {
-        errors.push(`No puede tener más de ${a['maxlength'].requiredLength} caracteres.`);
-      }
-      if (a['pattern']) {
-        errors.push('El formato no es válido.');
-      }
-      return errors;
+  getErrors(i: number, fieldName: string): string[] {
+    const control:any = this.trabajosArray.at(i).get(fieldName);
+    if (control && control.errors) {
+      return Object.keys(control.errors).map(key => this.getErrorMessage(key, control.errors[key]));
     }
+    return [];
   }
 
+  private getErrorMessage(errorType: string, errorValue: any): string {
+    const errorMessages: any = {
+      required: 'Este campo es requerido.',
+      minlength: `Debe tener al menos ${errorValue.requiredLength} caracteres.`,
+      maxlength: `No puede tener más de ${errorValue.requiredLength} caracteres.`,
+      pattern: 'El formato no es válido.'
+    };
+    return errorMessages[errorType] || 'Error desconocido.';
+  }
 }

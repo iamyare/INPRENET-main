@@ -17,9 +17,6 @@
       (newDatDatosPuestTrab)="setDatosPuetTrab1($event)" (newOtrasFuentesIngreso)="setOtrasFuentesIngreso($event)">
     </app-dat-puesto-trab>
 
-    <app-historial-salario *ngIf="DatosHS" [datos]="formHistPag"
-      (newDatHistSal)="setHistSal($event)"></app-historial-salario>
-
     <app-ref-pers *ngIf="referenc" [datos]="formReferencias"
       (newDatRefPerChange)="setDatosRefPer($event)"></app-ref-pers>
 
@@ -42,10 +39,6 @@
         <strong>Datos Colegios Magisteriales:</strong>
         {{ formColegiosMagisteriales.controls.ColMags.value | json }}
         <strong>Status:</strong> {{ formColegiosMagisteriales.controls.ColMags.status }}
-        <br>
-        <strong>Datos Cuentas Bancarias:</strong>
-        {{formHistPag.controls.banco.value | json }}
-        <strong>Status:</strong> {{ formHistPag.controls.banco.status }}
         <br>
         <strong>Datos Centros de Trabajo:</strong>
         {{ formPuestTrab.controls.trabajo.value | json }}

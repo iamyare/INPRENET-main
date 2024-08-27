@@ -138,12 +138,12 @@ export class PepsComponent implements OnInit {
     });
 
     this.peps.push(referenciaGroup);
-    this.emitPepsData();
+
   }
 
   removeReferencia(index: number): void {
     this.peps.removeAt(index);
-    this.emitPepsData();
+
   }
 
   addFamiliar(): void {
@@ -157,34 +157,13 @@ export class PepsComponent implements OnInit {
     });
 
     this.familiares.push(familiarGroup);
-    this.emitPepsData();
+
   }
 
   removeFamiliar(index: number): void {
     this.familiares.removeAt(index);
-    this.emitPepsData();
+
   }
-
-  emitPepsData(): void {
-    const validPeps = this.peps.controls.filter(control => {
-        const group = control as FormGroup;
-        return Object.values(group.value).some(value => value !== null && value !== '');
-    }).map(control => control.value);
-
-    const validFamiliares = this.familiares.controls.filter(control => {
-        const group = control as FormGroup;
-        return Object.values(group.value).some(value => value !== null && value !== '');
-    }).map(control => control.value);
-
-    // Emitir un objeto que contenga ambos arrays: peps y familiares
-    this.pepsChange.emit({
-        peps: validPeps,
-        familiares: validFamiliares
-    });
-}
-
-
-
 
   asFormGroup(control: AbstractControl): FormGroup {
     return control as FormGroup;

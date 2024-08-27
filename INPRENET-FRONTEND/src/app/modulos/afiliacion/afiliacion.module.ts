@@ -29,7 +29,6 @@ import { AgregarMovimientoComponent } from './gestion/agregar-movimiento/agregar
 import { AgregarBenefCompComponent } from './gestion/agregar-benef-comp/agregar-benef-comp.component';
 import { EditBeneficiariosComponent } from './gestion/edit-beneficiarios/edit-beneficiarios.component';
 import { AgregarColMagisComponent } from './gestion/agregar-col-magis/agregar-col-magis.component';
-import { HistorialSalarioComponent } from './gestion/historial-salario/historial-salario.component';
 import { AgregarDatBancCompComponent } from './gestion/agregar-dat-banc-comp/agregar-dat-banc-comp.component';
 import { EditDatosBancariosComponent } from './gestion/edit-datos-bancarios/edit-datos-bancarios.component';
 import { EditDatosGeneralesComponent } from './gestion/edit-datos-generales/edit-datos-generales.component';
@@ -48,7 +47,6 @@ import { OtrasFuentesIngresoComponent } from './gestion/otras-fuentes-ingreso/ot
 import { DatPuestoTrabComponent } from './gestion/dat-puesto-trab/dat-puesto-trab.component';
 import { RefPersComponent } from './gestion/ref-pers/ref-pers.component';
 import { BenefComponent } from './gestion/benef/benef.component';
-import { VerOtrasFuentesIngresoComponent } from './verPerfil/ver-otras-fuentes-ingreso/ver-otras-fuentes-ingreso.component';
 import { EditPerfilPuestTrabComponent } from './gestion/edit-perfil-puest-trab/edit-perfil-puest-trab.component';
 import { EditColegiosMagisterialesComponent } from './gestion/edit-colegios-magisteriales/edit-colegios-magisteriales.component';
 import { AfiliacionDocentesComponent } from './gestion/afiliacion-docentes/afiliacion-docentes.component';
@@ -64,6 +62,10 @@ import { JornadaComponent } from './mantenimiento/jornada/jornada.component';
 import { NivelEducativoComponent } from './mantenimiento/nivel-educativo/nivel-educativo.component';
 import { DatFamiliaresComponent } from './gestion/dat-familiares/dat-familiares.component';
 import { VerSociosComponent } from './Centros-Educativos/ver-socios/ver-socios.component';
+import { AfiliarDocenteComponent } from './gestion/afiliar-docente/afiliar-docente.component';
+import { DatosGeneralesComponent } from './gestion/datos-generales/datos-generales.component';
+import { BancosComponent } from './gestion/bancos/bancos.component';
+import { VerOtrasFuentesIngresoComponent } from './verPerfil/ver-otras-fuentes-ingreso/ver-otras-fuentes-ingreso.component';
 
 @NgModule({
   declarations: [
@@ -92,7 +94,6 @@ import { VerSociosComponent } from './Centros-Educativos/ver-socios/ver-socios.c
     EditBeneficiariosComponent,
     AgregarBenefCompComponent,
     AgregarColMagisComponent,
-    HistorialSalarioComponent,
     AgregarDatBancCompComponent,
     EditDatosBancariosComponent,
     EditDatosGeneralesComponent,
@@ -110,7 +111,7 @@ import { VerSociosComponent } from './Centros-Educativos/ver-socios/ver-socios.c
     DatPuestoTrabComponent,
     RefPersComponent,
     BenefComponent,
-    VerOtrasFuentesIngresoComponent, EditPerfilPuestTrabComponent, EditColegiosMagisterialesComponent,
+    EditPerfilPuestTrabComponent, EditColegiosMagisterialesComponent,
     AfiliacionDocentesComponent,
     DatosPropietarioComponent,
     DatosContadorComponent,
@@ -123,7 +124,11 @@ import { VerSociosComponent } from './Centros-Educativos/ver-socios/ver-socios.c
     JornadaComponent,
     NivelEducativoComponent,
     DatFamiliaresComponent,
-    VerSociosComponent
+    VerSociosComponent,
+    AfiliarDocenteComponent,
+    DatosGeneralesComponent,
+    BancosComponent,
+    VerOtrasFuentesIngresoComponent
   ],
   imports: [
     CommonModule,

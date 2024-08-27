@@ -27,6 +27,7 @@ import { FooterComponent } from './footer/footer.component';
 import { MainLayoutComponent } from './main-layout/main-layout.component';
 import { LandingPageComponent } from './landing-page/landing-page.component';
 import { DynamicInputDialogComponent } from './dinamicos/dynamic-input-dialog/dynamic-input-dialog.component';
+import { DynamicStepsComponent } from './dinamicos/dynamic-steps/dynamic-steps.component';
 
 
 
@@ -56,7 +57,8 @@ import { DynamicInputDialogComponent } from './dinamicos/dynamic-input-dialog/dy
     FooterComponent,
     MainLayoutComponent,
     LandingPageComponent,
-    DynamicInputDialogComponent
+    DynamicInputDialogComponent,
+    DynamicStepsComponent
   ],
   imports: [
     CommonModule,
@@ -88,7 +90,8 @@ import { DynamicInputDialogComponent } from './dinamicos/dynamic-input-dialog/dy
     FooterComponent,
     MainLayoutComponent,
     LandingPageComponent,
-    DynamicInputDialogComponent
+    DynamicInputDialogComponent,
+    DynamicStepsComponent
   ]
 })
 export class ComponentsModule { }

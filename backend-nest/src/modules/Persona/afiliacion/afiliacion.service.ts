@@ -291,54 +291,60 @@ export class AfiliacionService {
   }
 
   async crearOtrasFuentesIngreso(
-    crearOtrasFuentesIngresoDtos: CrearOtraFuenteIngresoDto[],
+    crearOtrasFuentesIngresoDtos: CrearOtraFuenteIngresoDto[] | undefined,
     idPersona: number,
     entityManager: EntityManager,
   ): Promise<net_otra_fuente_ingreso[]> {
     const resultados: net_otra_fuente_ingreso[] = [];
-
-    for (const crearOtraFuenteIngresoDto of crearOtrasFuentesIngresoDtos) {
-      const otraFuenteIngreso = entityManager.create(net_otra_fuente_ingreso, {
-        persona: { id_persona: idPersona },
-        actividad_economica: crearOtraFuenteIngresoDto.actividad_economica,
-        monto_ingreso: crearOtraFuenteIngresoDto.monto_ingreso,
-        observacion: crearOtraFuenteIngresoDto.observacion,
-      });
-
-      resultados.push(await entityManager.save(net_otra_fuente_ingreso, otraFuenteIngreso));
+  
+    if (crearOtrasFuentesIngresoDtos && crearOtrasFuentesIngresoDtos.length > 0) {
+      for (const crearOtraFuenteIngresoDto of crearOtrasFuentesIngresoDtos) {
+        const otraFuenteIngreso = entityManager.create(net_otra_fuente_ingreso, {
+          persona: { id_persona: idPersona },
+          actividad_economica: crearOtraFuenteIngresoDto.actividad_economica,
+          monto_ingreso: crearOtraFuenteIngresoDto.monto_ingreso,
+          observacion: crearOtraFuenteIngresoDto.observacion,
+        });
+  
+        resultados.push(await entityManager.save(net_otra_fuente_ingreso, otraFuenteIngreso));
+      }
     }
-
+  
     return resultados;
   }
+  
 
   async crearReferencias(
-    crearReferenciasDtos: CrearReferenciaDto[],
+    crearReferenciasDtos: CrearReferenciaDto[] | undefined,
     idPersona: number,
     entityManager: EntityManager,
   ): Promise<Net_Ref_Per_Pers[]> {
     const resultados: Net_Ref_Per_Pers[] = [];
-
-    for (const crearReferenciaDto of crearReferenciasDtos) {
-      let personaReferencia = await this.personaRepository.findOne({
-        where: { n_identificacion: crearReferenciaDto.persona_referencia.n_identificacion }
-      });
-
-      if (!personaReferencia) {
-        personaReferencia = await this.crearPersona(crearReferenciaDto.persona_referencia, null, entityManager);
+  
+    if (crearReferenciasDtos && crearReferenciasDtos.length > 0) {
+      for (const crearReferenciaDto of crearReferenciasDtos) {
+        let personaReferencia = await this.personaRepository.findOne({
+          where: { n_identificacion: crearReferenciaDto.persona_referencia.n_identificacion }
+        });
+  
+        if (!personaReferencia) {
+          personaReferencia = await this.crearPersona(crearReferenciaDto.persona_referencia, null, entityManager);
+        }
+  
+        const referencia = entityManager.create(Net_Ref_Per_Pers, {
+          persona: { id_persona: idPersona },
+          referenciada: personaReferencia,
+          tipo_referencia: crearReferenciaDto.tipo_referencia,
+          parentesco: crearReferenciaDto.parentesco,
+        });
+  
+        resultados.push(await entityManager.save(Net_Ref_Per_Pers, referencia));
       }
-
-      const referencia = entityManager.create(Net_Ref_Per_Pers, {
-        persona: { id_persona: idPersona },
-        referenciada: personaReferencia,
-        tipo_referencia: crearReferenciaDto.tipo_referencia,
-        parentesco: crearReferenciaDto.parentesco,
-      });
-
-      resultados.push(await entityManager.save(Net_Ref_Per_Pers, referencia));
     }
-
+  
     return resultados;
   }
+  
   
   async crearBeneficiarios(
     crearBeneficiariosDtos: CrearBeneficiarioDto[],

@@ -1,4 +1,4 @@
-import { Component, OnInit, Input } from '@angular/core';
+import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
 import { FormGroup, FormBuilder, Validators, FormControl, FormArray, AbstractControl } from '@angular/forms';
 import { CentroTrabajoService } from 'src/app/services/centro-trabajo.service';
 import { DatosEstaticosService } from 'src/app/services/datos-estaticos.service';
@@ -10,8 +10,9 @@ import { DireccionService } from 'src/app/services/direccion.service';
   styleUrls: ['./datos-generales.component.scss']
 })
 export class DatosGeneralesComponent implements OnInit {
-
   @Input() formGroup!: FormGroup;
+  @Output() imageCaptured = new EventEmitter<string>();
+
   departamentos: { value: number, label: string }[] = [];
   municipios: { value: number, label: string }[] = [];
   departamentosNacimiento: { value: number, label: string }[] = [];
@@ -24,6 +25,7 @@ export class DatosGeneralesComponent implements OnInit {
   nacionalidades: { value: number, label: string }[] = [];
   discapacidades: { label: string, value: number }[] = [];
   discapacidadSeleccionada: boolean = false;
+  useCamera: boolean = true;
 
   constructor(private fb: FormBuilder,
               private direccionSer: DireccionService,
@@ -37,7 +39,10 @@ export class DatosGeneralesComponent implements OnInit {
       this.formGroup = this.fb.group({
         peps: this.fb.array([]),
         discapacidades: this.fb.array([]),
+        FotoPerfil: new FormControl(null, Validators.required)
       });
+    } else {
+      this.formGroup.addControl('FotoPerfil', new FormControl(null, Validators.required));
     }
 
     this.formGroup.addControl('discapacidad', new FormControl(false, Validators.required));
@@ -124,9 +129,6 @@ export class DatosGeneralesComponent implements OnInit {
     this.formGroup.addControl('caserio', new FormControl('', [
       Validators.maxLength(75),
       Validators.pattern(noSpecialCharsPattern)
-    ]));
-    this.formGroup.addControl('cargoPublico', new FormControl('', [
-      Validators.maxLength(75)
     ]));
     this.formGroup.addControl('grado_academico', new FormControl('', [
       Validators.maxLength(75)
@@ -313,4 +315,17 @@ export class DatosGeneralesComponent implements OnInit {
 
     this.formGroup.setControl('discapacidades', nuevaDiscapacidadesArray);
   }
+
+  handleImageCaptured(image: string): void {
+    this.formGroup.patchValue({ FotoPerfil: image });
+    this.imageCaptured.emit(image);
+  }
+
+
+
+  get isPhotoInvalid(): boolean {
+    const control = this.formGroup.get('FotoPerfil');
+    return control ? control.invalid && (control.touched || control.dirty) : false;
+  }
+
 }

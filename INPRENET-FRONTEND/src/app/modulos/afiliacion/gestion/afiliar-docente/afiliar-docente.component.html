@@ -1,6 +1,10 @@
 <ng-template #datosGeneralesTemplate>
-  <app-datos-generales [formGroup]="steps[0].formGroup"></app-datos-generales>
+  <app-datos-generales
+    [formGroup]="steps[0].formGroup"
+    (imageCaptured)="handleImageCaptured($event)">
+  </app-datos-generales>
 </ng-template>
+
 
 <ng-template #referenciasPersonalesTemplate>
   <app-ref-pers [formGroup]="steps[1].formGroup"></app-ref-pers>

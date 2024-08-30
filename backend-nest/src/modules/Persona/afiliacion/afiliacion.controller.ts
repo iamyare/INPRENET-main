@@ -6,13 +6,31 @@ import { CrearDatosDto } from './dtos/crear-datos.dto';
 import { Net_Discapacidad } from '../entities/net_discapacidad.entity';
 import { Net_Ref_Per_Pers } from '../entities/net_ref-per-persona.entity';
 import { CrearReferenciaDto } from './dtos/crear-referencia.dto';
-import { Connection, EntityManager, getConnection, getManager } from 'typeorm';
+import { Connection, EntityManager} from 'typeorm';
 import { CrearPersonaBancoDto } from './dtos/crear-persona_por_banco.dto';
 import { Net_Persona_Por_Banco } from 'src/modules/banco/entities/net_persona-banco.entity';
+import { Net_perf_pers_cent_trab } from '../entities/net_perf_pers_cent_trab.entity';
+import { CrearPersonaCentroTrabajoDto } from './dtos/crear-perf_pers_cent_trab.dto';
+import { CrearPersonaColegiosDto } from './dtos/crear-persona_colegios.dto';
+import { Net_Persona_Colegios } from 'src/modules/transacciones/entities/net_persona_colegios.entity';
+import { CrearOtraFuenteIngresoDto } from './dtos/crear-otra_fuente_ingreso.dto';
+import { net_otra_fuente_ingreso } from '../entities/net_otra_fuente_ingreso.entity';
+import { CrearBeneficiarioDto } from './dtos/crear-beneficiario.dto';
+import { net_detalle_persona } from '../entities/net_detalle_persona.entity';
 
 @Controller('afiliacion')
 export class AfiliacionController {
   constructor(private readonly afiliacionService: AfiliacionService,private readonly connection: Connection,) {
+  }
+
+  @Post('asignar-centros-trabajo/:idPersona')
+  async asignarCentrosTrabajoAPersona(
+    @Param('idPersona') idPersona: number,
+    @Body() crearPersonaCentrosTrabajoDtos: CrearPersonaCentroTrabajoDto[],
+  ): Promise<Net_perf_pers_cent_trab[]> {
+    return await this.connection.transaction(async (entityManager: EntityManager) => {
+      return this.afiliacionService.crearPersonaCentrosTrabajo(crearPersonaCentrosTrabajoDtos, idPersona, entityManager);
+    });
   }
 
   @Post('asignar-bancos/:idPersona')
@@ -22,6 +40,37 @@ export class AfiliacionController {
   ): Promise<Net_Persona_Por_Banco[]> {
     return await this.connection.transaction(async (entityManager: EntityManager) => {
       return this.afiliacionService.crearPersonaBancos(crearPersonaBancosDtos, idPersona, entityManager);
+    });
+  }
+
+  @Post('asignar-colegios/:idPersona')
+  async asignarColegiosAPersona(
+    @Param('idPersona') idPersona: number,
+    @Body() crearPersonaColegiosDtos: CrearPersonaColegiosDto[],
+  ): Promise<Net_Persona_Colegios[]> {
+    return await this.connection.transaction(async (entityManager: EntityManager) => {
+      return this.afiliacionService.crearPersonaColegios(crearPersonaColegiosDtos, idPersona, entityManager);
+    });
+  }
+
+  @Post('asignar-fuentes-ingreso/:idPersona')
+  async asignarFuentesIngresoAPersona(
+    @Param('idPersona') idPersona: number,
+    @Body() crearOtrasFuentesIngresoDtos: CrearOtraFuenteIngresoDto[],
+  ): Promise<net_otra_fuente_ingreso[]> {
+    return await this.connection.transaction(async (entityManager: EntityManager) => {
+      return this.afiliacionService.crearOtrasFuentesIngreso(crearOtrasFuentesIngresoDtos, idPersona, entityManager);
+    });
+  }
+
+  @Post('asignar-beneficiarios/:idPersona/:idDetallePersona')
+  async asignarBeneficiariosAPersona(
+    @Param('idPersona') idPersona: number,
+    @Param('idDetallePersona') idDetallePersona: number,
+    @Body() crearBeneficiariosDtos: CrearBeneficiarioDto[],
+  ): Promise<net_detalle_persona[]> {
+    return await this.connection.transaction(async (entityManager: EntityManager) => {
+      return this.afiliacionService.crearBeneficiarios(crearBeneficiariosDtos, idPersona, idDetallePersona, entityManager);
     });
   }
 

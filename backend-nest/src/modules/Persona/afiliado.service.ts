@@ -131,7 +131,6 @@ export class AfiliadoService {
   }
 
   async assignCentrosTrabajo(idPersona: number, centrosTrabajoData: any[]): Promise<Net_perf_pers_cent_trab[]> {
-
     try {
       const persona = await this.personaRepository.findOne({ where: { id_persona: idPersona } });
       if (!persona) {
@@ -603,9 +602,8 @@ export class AfiliadoService {
         estadoAfiliacion: persona.detallePersona[0]?.estadoAfiliacion?.codigo,
         CANTIDAD_DEPENDIENTES: persona.cantidad_dependientes,
         discapacidades: discapacidades,
-        peps: peps, // Incluye la información de PEPS
+        peps: peps,
     };
-    console.log(result);
     
     return result;
 }

@@ -40,8 +40,8 @@ export class BancosComponent implements OnInit {
       estado: ['INACTIVO', Validators.required]
     });
     this.bancosArray.push(bancoForm);
-    this.markAllAsTouched(bancoForm);  // Mostrar validaciones inmediatamente
-    this.formGroup.markAsTouched(); // Forzar la verificación en el step también
+    this.markAllAsTouched(bancoForm);
+    this.formGroup.markAsTouched();
   }
 
   eliminarBanco(index: number): void {

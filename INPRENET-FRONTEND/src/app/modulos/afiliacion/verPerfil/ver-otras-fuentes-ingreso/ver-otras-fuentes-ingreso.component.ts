@@ -12,13 +12,13 @@ import { FieldConfig } from 'src/app/shared/Interfaces/field-config';
 import { TableColumn } from 'src/app/shared/Interfaces/table-column';
 import { convertirFechaInputs } from 'src/app/shared/functions/formatoFecha';
 import { unirNombres } from 'src/app/shared/functions/formatoNombresP';
-import { AgregarPuestTrabComponent } from '../../gestion/agregar-puest-trab/agregar-puest-trab.component';
+import { AgregarOtrasFuentesIngresoComponent } from '../../gestion/agregar-otras-fuentes-ingreso/agregar-otras-fuentes-ingreso.component';
 
 @Component({
   selector: 'ver-otras-fuentes-ingreso',
   templateUrl: './ver-otras-fuentes-ingreso.component.html',
   styleUrl: './ver-otras-fuentes-ingreso.component.scss',
-  providers: [DatePipe] // Añadir el DatePipe como proveedor
+  providers: [DatePipe]
 })
 export class VerOtrasFuentesIngresoComponent implements OnInit, OnDestroy, OnChanges {
   @Input() Afiliado!: any;
@@ -272,11 +272,11 @@ export class VerOtrasFuentesIngresoComponent implements OnInit, OnDestroy, OnCha
   }
 
   AgregarOtraFuenteIngreso() {
-    const dialogRef = this.dialog.open(AgregarPuestTrabComponent, {
+    const dialogRef = this.dialog.open(AgregarOtrasFuentesIngresoComponent, {
       width: '55%',
       height: '75%',
       data: {
-        idPersona: this.Afiliado.ID_PERSONA
+        idPersona: this.Afiliado.id_persona
       }
     });
 

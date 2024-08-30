@@ -6,11 +6,9 @@ import { AfiliadoService } from 'src/app/services/afiliado.service';
 import { FieldConfig } from 'src/app/shared/Interfaces/field-config';
 import { TableColumn } from 'src/app/shared/Interfaces/table-column';
 import { convertirFechaInputs } from 'src/app/shared/functions/formatoFecha';
-import { measureAsyncExecutionTime } from 'src/app/shared/functions/calculoTiempoEjecucion';
 import { unirNombres } from 'src/app/shared/functions/formatoNombresP';
 import { DatosEstaticosService } from 'src/app/services/datos-estaticos.service';
 import { DatePipe } from '@angular/common';
-import { Subscription } from 'rxjs';
 import { EditarDialogComponent } from 'src/app/components/dinamicos/editar-dialog/editar-dialog.component';
 import { ConfirmDialogComponent } from 'src/app/components/dinamicos/confirm-dialog/confirm-dialog.component';
 import { AgregarBenefCompComponent } from '../agregar-benef-comp/agregar-benef-comp.component';
@@ -20,10 +18,9 @@ import { AgregarBenefCompComponent } from '../agregar-benef-comp/agregar-benef-c
   templateUrl: './edit-beneficiarios.component.html',
   styleUrls: ['./edit-beneficiarios.component.scss']
 })
-export class EditBeneficiariosComponent implements OnInit, OnChanges, OnDestroy {
+export class EditBeneficiariosComponent implements OnInit, OnChanges {
   convertirFechaInputs = convertirFechaInputs;
   public myFormFields: FieldConfig[] = [];
-  form: any;
   @Input() persona: any;
   unirNombres: any = unirNombres;
   datosTabl: any[] = [];
@@ -34,7 +31,6 @@ export class EditBeneficiariosComponent implements OnInit, OnChanges, OnDestroy 
   ejecF: any;
   municipios: { label: string, value: any }[] = [];
   estados: { label: string, value: any }[] = [];
-  private subscriptions: Subscription = new Subscription();
 
   constructor(
     private svcAfiliado: AfiliadoService,
@@ -54,12 +50,9 @@ export class EditBeneficiariosComponent implements OnInit, OnChanges, OnDestroy 
     }
   }
 
-  ngOnDestroy(): void {
-    this.subscriptions.unsubscribe();
-  }
-
   initializeComponent(): void {
     if (!this.persona) {
+      this.resetDatos();
       return;
     }
 
@@ -68,7 +61,7 @@ export class EditBeneficiariosComponent implements OnInit, OnChanges, OnDestroy 
     ];
 
     this.myColumns = [
-      { header: 'Numero De Identificacion', col: 'n_identificacion', validationRules: [Validators.required, Validators.minLength(3)] },
+      { header: 'Número De Identificación', col: 'n_identificacion', validationRules: [Validators.required, Validators.minLength(3)] },
       { header: 'Nombres', col: 'nombres' },
       { header: 'Apellidos', col: 'apellidos' },
       { header: 'Porcentaje', col: 'porcentaje' },
@@ -76,26 +69,18 @@ export class EditBeneficiariosComponent implements OnInit, OnChanges, OnDestroy 
       { header: 'Fecha de Nacimiento', col: 'fecha_nacimiento' }
     ];
 
-    this.getFilas();
-  }
-
-  async obtenerDatos(event: any): Promise<any> {
-    this.form = event;
+    this.getFilas().then(() => this.cargar());
   }
 
   resetDatos() {
-    if (this.form) {
-      this.form.reset();
-    }
     this.filas = [];
     this.persona = undefined;
   }
 
   async getFilas() {
-    this.filas = [];
     if (this.persona) {
       try {
-        const { data, time } = await measureAsyncExecutionTime(() => this.svcAfiliado.getAllBenDeAfil(this.persona.n_identificacion).toPromise());
+        const data = await this.svcAfiliado.getAllBenDeAfil(this.persona.n_identificacion).toPromise();
         this.filas = data.map((item: any) => {
           const nombres = [item.primerNombre, item.segundoNombre, item.tercerNombre].filter(part => part).join(' ');
           const apellidos = [item.primerApellido, item.segundoApellido].filter(part => part).join(' ');
@@ -127,8 +112,8 @@ export class EditBeneficiariosComponent implements OnInit, OnChanges, OnDestroy 
     } else {
       this.resetDatos();
     }
-    this.cargar();
   }
+
 
   ejecutarFuncionAsincronaDesdeOtroComponente(funcion: (data: any) => Promise<void>) {
     this.ejecF = funcion;
@@ -172,7 +157,6 @@ export class EditBeneficiariosComponent implements OnInit, OnChanges, OnDestroy 
           porcentaje: result.porcentaje
         };
 
-        console.log('Updating beneficiario:', updatedBeneficiario);
         this.svcAfiliado.updateBeneficiario(row.id, updatedBeneficiario).subscribe(
           (response) => {
             this.toastr.success('Beneficiario actualizado exitosamente');
@@ -195,7 +179,7 @@ export class EditBeneficiariosComponent implements OnInit, OnChanges, OnDestroy 
 
   editarFila(row: any) {
     const campos = [
-      { nombre: 'n_identificacion', tipo: 'text', etiqueta: 'Numero de Identificacion', editable: true, icono: 'badge' },
+      { nombre: 'n_identificacion', tipo: 'text', etiqueta: 'Número de Identificación', editable: true, icono: 'badge' },
       { nombre: 'nombres', tipo: 'text', etiqueta: 'Nombres', editable: true, icono: 'person' },
       { nombre: 'apellidos', tipo: 'text', etiqueta: 'Apellidos', editable: true, icono: 'person_outline' },
       { nombre: 'sexo', tipo: 'list', etiqueta: 'Sexo', editable: true, opciones: this.datosEstaticosService.sexo, icono: 'transgender' },
@@ -231,14 +215,13 @@ export class EditBeneficiariosComponent implements OnInit, OnChanges, OnDestroy 
       width: '55%',
       height: '75%',
       data: {
-        idPersona: this.persona.id_persona
+        idPersona: this.persona.id_persona,
+        id_detalle_persona: this.persona.detallePersona[0].ID_DETALLE_PERSONA
       }
     });
 
     dialogRef.afterClosed().subscribe((result: any) => {
-      if (result) {
-        this.getFilas();
-      }
+      this.ngOnInit();
     });
   }
 

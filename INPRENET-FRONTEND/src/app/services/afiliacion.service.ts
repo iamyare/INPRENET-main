@@ -29,10 +29,8 @@ obtenerReferenciasPorIdentificacion(nIdentificacion: string): Observable<any> {
   return this.http.get<any>(url).pipe(
     catchError((error) => {
       if (error.status === 404) {
-        // Maneja el caso de que no se encuentren referencias devolviendo un array vacío y no propagando el error
         return of([]);
       } else {
-        // Lanza el error para otros casos
         return throwError(() => error);
       }
     })
@@ -55,6 +53,46 @@ asignarBancosAPersona(idPersona: number, bancos: any[]): Observable<any> {
     catchError(error => {
       console.error('Error asignando bancos a persona:', error);
       return throwError(() => new Error('Error al asignar bancos'));
+    })
+  );
+}
+
+asignarCentrosTrabajoAPersona(idPersona: number, centrosTrabajo: any[]): Observable<any> {
+  const url = `${environment.API_URL}/api/afiliacion/asignar-centros-trabajo/${idPersona}`;
+  return this.http.post<any>(url, centrosTrabajo).pipe(
+    catchError(error => {
+      console.error('Error asignando centros de trabajo a persona:', error);
+      return throwError(() => new Error('Error al asignar centros de trabajo'));
+    })
+  );
+}
+
+asignarColegiosAPersona(idPersona: number, colegios: any[]): Observable<any> {
+  const url = `${environment.API_URL}/api/afiliacion/asignar-colegios/${idPersona}`;
+  return this.http.post<any>(url, colegios).pipe(
+    catchError(error => {
+      console.error('Error asignando colegios magisteriales a persona:', error);
+      return throwError(() => new Error('Error al asignar colegios magisteriales'));
+    })
+  );
+}
+
+asignarFuentesIngresoAPersona(idPersona: number, fuentesIngreso: any[]): Observable<any> {
+  const url = `${environment.API_URL}/api/afiliacion/asignar-fuentes-ingreso/${idPersona}`;
+  return this.http.post<any>(url, fuentesIngreso).pipe(
+    catchError(error => {
+      console.error('Error asignando fuentes de ingreso a persona:', error);
+      return throwError(() => new Error('Error al asignar fuentes de ingreso'));
+    })
+  );
+}
+
+asignarBeneficiariosAPersona(idPersona: number, idDetallePersona: number, beneficiarios: any[]): Observable<any> {
+  const url = `${environment.API_URL}/api/afiliacion/asignar-beneficiarios/${idPersona}/${idDetallePersona}`;
+  return this.http.post<any>(url, beneficiarios).pipe(
+    catchError(error => {
+      console.error('Error asignando beneficiarios a persona:', error);
+      return throwError(() => new Error('Error al asignar beneficiarios'));
     })
   );
 }

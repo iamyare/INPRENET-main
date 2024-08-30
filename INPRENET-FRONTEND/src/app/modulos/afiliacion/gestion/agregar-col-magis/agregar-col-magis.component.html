@@ -1,13 +1,11 @@
-<form [formGroup]="form" #myForm="ngForm">
+<form [formGroup]="formColMag">
   <app-col-magisteriales
-    [editing]="true"
-    [datos]="formColMag"
-    (newDataColegioMagisterial)="setHistSal($event)">
+    [formGroup]="formColMag">
   </app-col-magisteriales>
 </form>
 
 <div style="text-align: center;">
-  <button mat-raised-button color="primary" style="color: white; margin: 1% 0 1% 0" [disabled]="form.invalid"
+  <button mat-raised-button color="primary" style="color: white; margin: 1% 0 1% 0" [disabled]="formColMag.invalid"
     (click)="guardar()">
     Guardar
   </button>

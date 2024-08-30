@@ -8,7 +8,6 @@ import { ConfirmDialogComponent } from 'src/app/components/dinamicos/confirm-dia
 import { EditarDialogComponent } from 'src/app/components/dinamicos/editar-dialog/editar-dialog.component';
 import { AfiliadoService } from 'src/app/services/afiliado.service';
 import { CentroTrabajoService } from 'src/app/services/centro-trabajo.service';
-import { DatosEstaticosService } from 'src/app/services/datos-estaticos.service';
 import { FieldConfig } from 'src/app/shared/Interfaces/field-config';
 import { TableColumn } from 'src/app/shared/Interfaces/table-column';
 import { convertirFechaInputs } from 'src/app/shared/functions/formatoFecha';
@@ -19,7 +18,7 @@ import { AgregarPuestTrabComponent } from '../agregar-puest-trab/agregar-puest-t
   selector: 'app-edit-perfil-puest-trab',
   templateUrl: './edit-perfil-puest-trab.component.html',
   styleUrls: ['./edit-perfil-puest-trab.component.scss'],
-  providers: [DatePipe] // Añadir el DatePipe como proveedor
+  providers: [DatePipe]
 })
 export class EditPerfilPuestTrabComponent implements OnInit, OnDestroy, OnChanges {
   @Input() Afiliado!: any;
@@ -27,7 +26,6 @@ export class EditPerfilPuestTrabComponent implements OnInit, OnDestroy, OnChange
   private subscriptions: Subscription = new Subscription();
 
   convertirFechaInputs = convertirFechaInputs;
-  form: any;
 
   unirNombres: any = unirNombres;
   datosTabl: any[] = [];
@@ -43,12 +41,14 @@ export class EditPerfilPuestTrabComponent implements OnInit, OnDestroy, OnChange
     private svcAfiliado: AfiliadoService,
     private toastr: ToastrService,
     private dialog: MatDialog,
-    private datosEstaticosService: DatosEstaticosService,
     private datePipe: DatePipe,
     private centrosTrabSVC: CentroTrabajoService,
   ) { }
+
+
   ngOnInit(): void {
     this.initializeComponent();
+
   }
 
   ngOnChanges(changes: SimpleChanges): void {
@@ -126,14 +126,7 @@ export class EditPerfilPuestTrabComponent implements OnInit, OnDestroy, OnChange
     //this.centrosTrabajo = await this.datosEstaticosService.getAllCentrosTrabajo();
   }
 
-  async obtenerDatos(event: any): Promise<any> {
-    this.form = event;
-  }
-
   resetDatos() {
-    if (this.form) {
-      this.form.reset();
-    }
     this.filas = [];
     this.Afiliado = undefined;
   }
@@ -143,7 +136,6 @@ export class EditPerfilPuestTrabComponent implements OnInit, OnDestroy, OnChange
     if (this.Afiliado.n_identificacion) {
       try {
         const data = await this.svcAfiliado.getAllPerfCentroTrabajo(this.Afiliado.n_identificacion).toPromise();
-
         this.filas = data.map((item: any) => ({
           id_perf_pers_centro_trab: item.id_perf_pers_centro_trab,
           id_centro_trabajo: item.centroTrabajo.id_centro_trabajo,
@@ -154,7 +146,6 @@ export class EditPerfilPuestTrabComponent implements OnInit, OnDestroy, OnChange
           fechaEgreso: this.datePipe.transform(item.fecha_egreso, 'dd/MM/yyyy') || 'Fecha no disponible',
           cargo: item.cargo,
         }));
-
       } catch (error) {
         this.toastr.error('Error al cargar los datos de los perfiles de los centros de trabajo');
         console.error('Error al obtener datos de los perfiles de los centros de trabajo', error);
@@ -310,7 +301,7 @@ export class EditPerfilPuestTrabComponent implements OnInit, OnDestroy, OnChange
       width: '55%',
       height: '75%',
       data: {
-        idPersona: this.Afiliado.ID_PERSONA
+        idPersona: this.Afiliado.id_persona
       }
     });
 

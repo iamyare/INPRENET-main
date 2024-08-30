@@ -25,36 +25,52 @@ body {
   width: 100%;
 }
 
+.mat-form-field {
+  position: relative;
+  margin-bottom: 24px; /* Espacio debajo del mat-form-field */
+}
+
+.mat-form-field-flex {
+  display: flex;
+  flex-direction: column;
+}
+
 .mat-error {
-  font-size: 8px; /* Reduce el tamaño del texto de error */
+  font-size: 12px;
   display: flex;
   align-items: center;
+  background-color: #fdecea;
+  padding: 4px 8px;
+  border-radius: 4px;
+  border: 1px solid #f44336;
+  color: #f44336;
+  width: 100%;
+  box-sizing: border-box;
+  margin-top: 4px; /* Espacio entre el input y el mensaje de error */
 }
 
 .error-icon-small {
-  font-size: 10px; /* Ajusta el tamaño del ícono de error */
+  font-size: 14px; /* Tamaño del ícono de error */
   margin-right: 4px; /* Espacio entre el ícono y el texto */
 }
 
-
-.error-message {
-  color: #f44336; /* Color rojo típico para mensajes de error */
-  font-size: 12px; /* Tamaño del texto */
-  margin-top: 10px; /* Espacio superior */
-  display: flex;
-  align-items: center; /* Alinea verticalmente el texto e íconos */
-  background-color: #fdecea; /* Fondo rojo claro para resaltar el mensaje */
-  padding: 8px; /* Añade un poco de padding alrededor del texto */
-  border-radius: 4px; /* Bordes redondeados */
-  border: 1px solid #f44336; /* Borde rojo para resaltar aún más */
+.mat-form-field-underline {
+  bottom: 0;
+  position: absolute;
 }
 
-.error-message mat-icon {
-  font-size: 16px; /* Tamaño del ícono */
-  margin-right: 8px; /* Espacio entre el ícono y el texto */
+.mat-form-field-infix {
+  padding: 0;
 }
 
-.error-message mat-icon.error-icon-small {
-  font-size: 14px; /* Ajusta el tamaño del ícono para ser más pequeño */
-  margin-right: 6px; /* Ajusta el espacio */
+.mat-form-field-label-wrapper {
+  position: absolute;
+  top: -1.5em; /* Ajusta el espacio para que el label no interfiera con el input */
+  left: 0;
+  right: 0;
 }
+
+.mat-form-field-wrapper {
+  padding-bottom: 0;
+}
+

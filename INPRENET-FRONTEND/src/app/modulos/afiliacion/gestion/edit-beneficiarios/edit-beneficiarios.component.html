@@ -1,5 +1,4 @@
-<div *ngIf="persona">
-  <div id="texto" style="text-align: center;" *ngIf="filas.length === 0">
+ <div id="texto" style="text-align: center;" *ngIf="filas.length === 0">
     <h2 class="anaranjado desapareciendo">No se encuentra ningún beneficiario</h2>
   </div>
 
@@ -14,7 +13,7 @@
       subtitulo="Completa la información correspondiente"
       [columns]="myColumns"
       [data]="filas"
-      [getData]="getFilas.bind(this)"
+      [getData]="getFilas"
       (ejecutarFuncionAsincronaEvent)="ejecutarFuncionAsincronaDesdeOtroComponente($event)"
       [mostrarBotonEditar]="true"
       (editar)="editarFila($event)"
@@ -22,4 +21,3 @@
       (eliminar)="eliminarFila($event)">
     </app-dynamic-table>
   </div>
-</div>

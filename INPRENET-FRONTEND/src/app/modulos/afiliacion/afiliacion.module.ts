@@ -66,6 +66,7 @@ import { AfiliarDocenteComponent } from './gestion/afiliar-docente/afiliar-docen
 import { DatosGeneralesComponent } from './gestion/datos-generales/datos-generales.component';
 import { BancosComponent } from './gestion/bancos/bancos.component';
 import { VerOtrasFuentesIngresoComponent } from './verPerfil/ver-otras-fuentes-ingreso/ver-otras-fuentes-ingreso.component';
+import { AgregarOtrasFuentesIngresoComponent } from './gestion/agregar-otras-fuentes-ingreso/agregar-otras-fuentes-ingreso.component';
 
 @NgModule({
   declarations: [
@@ -128,7 +129,8 @@ import { VerOtrasFuentesIngresoComponent } from './verPerfil/ver-otras-fuentes-i
     AfiliarDocenteComponent,
     DatosGeneralesComponent,
     BancosComponent,
-    VerOtrasFuentesIngresoComponent
+    VerOtrasFuentesIngresoComponent,
+    AgregarOtrasFuentesIngresoComponent
   ],
   imports: [
     CommonModule,

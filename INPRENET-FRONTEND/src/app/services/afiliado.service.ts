@@ -71,18 +71,8 @@ export class AfiliadoService {
     return this.http.put(url, updatedData);
   }
 
-  createReferPersonales(idPersona: string, encapsulatedData: any): Observable<any> {
-    const encapsulatedDataE = { referencias: encapsulatedData }
-    const url = `${environment.API_URL}/api/Persona/createReferPersonales/${idPersona}`;
-    return this.http.post<any>(url, encapsulatedDataE);
-  }
-
   createColegiosMagisteriales(idPersona: string, encapsulatedData: any): Observable<any> {
     const url = `${environment.API_URL}/api/Persona/createColegiosMagisteriales/${idPersona}`;
-    return this.http.post<any>(url, encapsulatedData);
-  }
-  createCentrosTrabajo(idPersona: string, encapsulatedData: any): Observable<any> {
-    const url = `${environment.API_URL}/api/Persona/createCentrosTrabajo/${idPersona}`;
     return this.http.post<any>(url, encapsulatedData);
   }
 

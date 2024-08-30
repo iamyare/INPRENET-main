@@ -35,13 +35,13 @@ export class ColMagisterialesComponent implements OnInit {
   }
 
   agregarColMag(): void {
-    const nuevoColMag = this.fb.group({
+    const colMagFormGroup = this.fb.group({
       id_colegio: ['', Validators.required]
     });
 
-    this.colMags.push(nuevoColMag);
-    this.markAllAsTouched(nuevoColMag); // Marcar todos los controles como tocados
-    this.formGroup.markAsTouched(); // Forzar la verificación en el step también
+    this.colMags.push(colMagFormGroup);
+    colMagFormGroup.markAllAsTouched();
+    this.formGroup.markAsTouched();
   }
 
   eliminarColMag(index: number): void {

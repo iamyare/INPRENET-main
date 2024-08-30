@@ -2,11 +2,8 @@ import { Component, Input, OnInit, OnChanges, SimpleChanges } from '@angular/cor
 import { MatDialog } from '@angular/material/dialog';
 import { ToastrService } from 'ngx-toastr';
 import { AfiliadoService } from 'src/app/services/afiliado.service';
-import { DatosEstaticosService } from 'src/app/services/datos-estaticos.service';
 import { FieldConfig } from 'src/app/shared/Interfaces/field-config';
 import { TableColumn } from 'src/app/shared/Interfaces/table-column';
-import { convertirFechaInputs } from 'src/app/shared/functions/formatoFecha';
-import { unirNombres } from 'src/app/shared/functions/formatoNombresP';
 import { Validators } from '@angular/forms';
 import { ConfirmDialogComponent } from 'src/app/components/dinamicos/confirm-dialog/confirm-dialog.component';
 import { AgregarDatBancCompComponent } from '../agregar-dat-banc-comp/agregar-dat-banc-comp.component';
@@ -18,24 +15,16 @@ import { EditarDialogComponent } from 'src/app/components/dinamicos/editar-dialo
   styleUrls: ['./edit-datos-bancarios.component.scss']
 })
 export class EditDatosBancariosComponent implements OnInit, OnChanges {
-  convertirFechaInputs = convertirFechaInputs;
   public myFormFields: FieldConfig[] = [];
-  form: any;
   @Input() Afiliado: any;
-  unirNombres: any = unirNombres;
-  datosTabl: any[] = [];
-  bancos: { label: string, value: string }[] = [];
-  prevAfil: boolean = false;
   public myColumns: TableColumn[] = [];
   public filas: any[] = [];
-  ejecF: any;
-  public loading: boolean = false;
+  private ejecF: any;
 
   constructor(
     private svcAfiliado: AfiliadoService,
     private toastr: ToastrService,
-    private dialog: MatDialog,
-    private datosEstaticosService: DatosEstaticosService
+    private dialog: MatDialog
   ) { }
 
   ngOnInit(): void {
@@ -77,45 +66,32 @@ export class EditDatosBancariosComponent implements OnInit, OnChanges {
       },
     ];
 
-    this.getFilas();
+    this.getFilas().then(() => this.cargar());
   }
 
   resetDatos() {
-    if (this.form) {
-      this.form.reset();
-    }
     this.filas = [];
     this.Afiliado = undefined;
   }
 
   async getFilas() {
-    this.loading = true;
     if (this.Afiliado) {
       try {
         const data = await this.svcAfiliado.getAllPersonaPBanco(this.Afiliado.n_identificacion).toPromise();
-        console.log('Datos recibidos:', data); // Verifica los datos recibidos
-        if (data && Array.isArray(data)) {
           this.filas = data.map((item: any) => ({
             id: item.id_af_banco,
             nombre_banco: item.banco.nombre_banco,
             numero_cuenta: item.num_cuenta,
             estado: item.estado
           }));
-        } else {
-          this.filas = [];
-        }
       } catch (error) {
-        this.toastr.error('Error al cargar los datos de los perfiles de los centros de trabajo');
-        console.error('Error al obtener datos de datos de los perfiles de los centros de trabajo', error);
+        this.toastr.error('Error al cargar los datos bancarios');
+        console.error('Error al obtener datos bancarios', error);
       }
     } else {
       this.resetDatos();
     }
-    this.loading = false; // Ocultar el spinner después de cargar los datos
-    this.cargar();
   }
-
-
 
   ejecutarFuncionAsincronaDesdeOtroComponente(funcion: (data: any) => Promise<void>) {
     this.ejecF = funcion;
@@ -142,15 +118,14 @@ export class EditDatosBancariosComponent implements OnInit, OnChanges {
         this.svcAfiliado.desactivarCuentaBancaria(row.id).subscribe({
           next: (response) => {
             this.toastr.success(response.mensaje, 'Cuenta Bancaria Desactivada');
-            // Actualiza el estado en la lista de filas sin recargar el componente
             const index = this.filas.findIndex(item => item.id === row.id);
             if (index > -1) {
               this.filas[index].estado = 'INACTIVO';
             }
           },
           error: (error) => {
-            console.error('Error al desactivar el Cuenta Bancaria:', error);
-            this.toastr.error('Ocurrió un error al desactivar el Cuenta Bancaria.');
+            console.error('Error al desactivar la Cuenta Bancaria:', error);
+            this.toastr.error('Ocurrió un error al desactivar la Cuenta Bancaria.');
           }
         });
       } else {
@@ -169,22 +144,11 @@ export class EditDatosBancariosComponent implements OnInit, OnChanges {
         }
       });
 
-      dialogRef.componentInstance.saved.subscribe(() => {
-        console.log('Evento saved recibido'); // Verifica que se reciba el evento
-        this.getFilas(); // Actualiza la tabla de datos después de agregar un banco
-      });
-
       dialogRef.afterClosed().subscribe((result: any) => {
-        if (result) {
-          console.log('Diálogo cerrado con resultado:', result);
-          this.getFilas(); // Asegúrate de que la tabla se actualice si se cierra el diálogo con éxito
-        }
+        this.ngOnInit();
       });
     }
   }
-
-
-
 
   openDialogEditar(campos: any, valoresIniciales: any): void {
     const dialogRef = this.dialog.open(EditarDialogComponent, {
@@ -194,10 +158,6 @@ export class EditDatosBancariosComponent implements OnInit, OnChanges {
 
     dialogRef.afterClosed().subscribe(async (result: any) => {
       if (result) {
-        const bancoSeleccionado = this.bancos.find(b => b.value === result.nombre_banco);
-        const nombreBanco = bancoSeleccionado ? bancoSeleccionado.label : 'Banco desconocido';
-
-        // Actualiza los datos bancarios llamando al servicio correspondiente
         this.svcAfiliado.updateDatosBancarios(valoresIniciales.id, result).subscribe(
           async (response) => {
             this.toastr.success('Datos bancarios actualizados con éxito.');
@@ -224,21 +184,18 @@ export class EditDatosBancariosComponent implements OnInit, OnChanges {
 
     dialogRef.afterClosed().subscribe((result: boolean) => {
       if (result) {
-        // Desactivar todas las cuentas activas antes de activar la nueva cuenta
         this.filas.forEach(item => item.estado = 'INACTIVO');
-
         this.svcAfiliado.activarCuentaBancaria(row.id, this.Afiliado.id_persona).subscribe({
           next: (response) => {
             this.toastr.success(response.mensaje, 'Cuenta Bancaria Activada');
-            // Actualiza el estado en la lista de filas sin recargar el componente
             const index = this.filas.findIndex(item => item.id === row.id);
             if (index > -1) {
               this.filas[index].estado = 'ACTIVO';
             }
           },
           error: (error) => {
-            console.error('Error al activar el Cuenta Bancaria:', error);
-            this.toastr.error('Ocurrió un error al activar el Cuenta Bancaria.');
+            console.error('Error al activar la Cuenta Bancaria:', error);
+            this.toastr.error('Ocurrió un error al activar la Cuenta Bancaria.');
           }
         });
       } else {

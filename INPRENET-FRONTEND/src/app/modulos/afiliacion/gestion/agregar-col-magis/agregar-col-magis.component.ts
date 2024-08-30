@@ -1,8 +1,8 @@
-import { ChangeDetectionStrategy, Component, EventEmitter, Inject, Input, Output, OnInit } from '@angular/core';
-import { ControlContainer, FormArray, FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { Component, Inject, OnInit } from '@angular/core';
+import { FormBuilder, FormGroup } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { ToastrService } from 'ngx-toastr';
-import { AfiliadoService } from 'src/app/services/afiliado.service';
+import { AfiliacionService } from 'src/app/services/afiliacion.service';
 
 @Component({
   selector: 'app-agregar-col-magis',
@@ -10,17 +10,15 @@ import { AfiliadoService } from 'src/app/services/afiliado.service';
   styleUrls: ['./agregar-col-magis.component.scss'],
 })
 export class AgregarColMagisComponent implements OnInit {
-  form = this.fb.group({});
-  dataColMag: any;
   formColMag!: FormGroup;
 
   constructor(
     private toastr: ToastrService,
     private dialogRef: MatDialogRef<AgregarColMagisComponent>,
     private fb: FormBuilder,
-    private afilService: AfiliadoService,
+    private afiliacionService: AfiliacionService,
     @Inject(MAT_DIALOG_DATA) public data: { idPersona: string }
-  ) { }
+  ) {}
 
   ngOnInit(): void {
     this.initFormColMag();
@@ -28,32 +26,34 @@ export class AgregarColMagisComponent implements OnInit {
 
   private initFormColMag(): void {
     this.formColMag = this.fb.group({
-      ColMags: this.fb.array([]) // Inicializa el FormArray
+      ColMags: this.fb.array([])
     });
   }
 
-  setHistSal(datosHistSal: any) {
-    this.dataColMag = datosHistSal;
-  }
-
   guardar() {
-    this.afilService.createColegiosMagisteriales(this.data.idPersona, this.dataColMag).subscribe(
-      (res: any) => {
-        if (res.length > 0) {
-          this.toastr.success("Colegio magisterial agregado con éxito");
-          this.cerrar();
+    const datosAGuardar = this.formColMag.get('ColMags')?.value;
+
+    if (!datosAGuardar || datosAGuardar.length === 0) {
+        this.toastr.error("No hay datos para guardar.");
+        return;
+    }
+
+    this.afiliacionService.asignarColegiosAPersona(Number(this.data.idPersona), datosAGuardar).subscribe(
+        (res: any) => {
+            if (res.length > 0) {
+                this.toastr.success("Colegio magisterial agregado con éxito");
+                this.cerrar();
+            }
+        },
+        (error) => {
+            this.toastr.error("Error al asignar colegios magisteriales.");
+            console.error('Error al crear colegios magisteriales pertenecientes al afiliado', error);
         }
-      },
-      (error) => {
-        this.toastr.error(error);
-        console.error('Error al crear colegios magisteriales pertenecientes al afiliado', error);
-      }
     );
   }
 
   cerrar() {
     this.formColMag.reset();
-    this.form.reset();
     this.dialogRef.close();
   }
 }

@@ -3,6 +3,7 @@
     <h4 class="card-title">Colegio Magisterial</h4>
     <p class="card-category">Completa la información correspondiente</p>
   </div>
+  <div class="card-body">
   <div [formGroup]="formGroup">
     <div formArrayName="ColMags">
       <div *ngFor="let colMag of colMags.controls; let i = index" [formGroupName]="i" class="row">
@@ -37,5 +38,6 @@
         </button>
       </div>
     </div>
+  </div>
   </div>
 </div>

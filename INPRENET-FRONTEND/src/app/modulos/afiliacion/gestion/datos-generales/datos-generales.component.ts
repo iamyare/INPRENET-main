@@ -321,8 +321,6 @@ export class DatosGeneralesComponent implements OnInit {
     this.imageCaptured.emit(image);
   }
 
-
-
   get isPhotoInvalid(): boolean {
     const control = this.formGroup.get('FotoPerfil');
     return control ? control.invalid && (control.touched || control.dirty) : false;

@@ -22,7 +22,7 @@ export class CamaraComponent implements OnInit {
   public trigger: Subject<void> = new Subject<void>();
   private siguienteWebcam: Subject<boolean | string> = new Subject<boolean | string>();
 
-  constructor(private formStateService: FormStateService, private fb: FormBuilder) {}
+  constructor(private formStateService: FormStateService) {}
 
   ngOnInit(): void {
     WebcamUtil.getAvailableVideoInputs()

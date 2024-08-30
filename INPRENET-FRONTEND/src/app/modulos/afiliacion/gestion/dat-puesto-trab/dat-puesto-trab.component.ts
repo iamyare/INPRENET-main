@@ -1,7 +1,6 @@
 import { ChangeDetectionStrategy, Component, Input, OnInit } from '@angular/core';
 import { FormArray, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { CentroTrabajoService } from 'src/app/services/centro-trabajo.service';
-import { DatosEstaticosService } from 'src/app/services/datos-estaticos.service';
 
 @Component({
   selector: 'app-dat-puesto-trab',
@@ -19,7 +18,6 @@ export class DatPuestoTrabComponent implements OnInit {
 
   constructor(
     private fb: FormBuilder,
-    private datosEstaticos: DatosEstaticosService,
     private centrosTrabSVC: CentroTrabajoService
   ) {
     const currentYear = new Date();
@@ -102,8 +100,8 @@ export class DatPuestoTrabComponent implements OnInit {
     });
 
     this.trabajosArray.push(trabajoFormGroup);
-    trabajoFormGroup.markAllAsTouched(); // Mostrar validaciones inmediatamente
-    this.formGroup.markAsTouched(); // Forzar la verificación en el step también
+    trabajoFormGroup.markAllAsTouched();
+    this.formGroup.markAsTouched();
   }
 
   eliminarTrabajo(index: number): void {
@@ -129,4 +127,6 @@ export class DatPuestoTrabComponent implements OnInit {
     };
     return errorMessages[errorType] || 'Error desconocido.';
   }
+
+
 }

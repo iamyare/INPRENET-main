@@ -4,6 +4,7 @@ import { MatStepper } from '@angular/material/stepper';
 import { BenefComponent } from '../benef/benef.component';
 import { DatosGeneralesComponent } from '../datos-generales/datos-generales.component';
 import { AfiliacionService } from 'src/app/services/afiliacion.service'; // Asegúrate de importar tu servicio
+import { ToastrService } from 'ngx-toastr';
 
 @Component({
   selector: 'app-afiliar-docente',
@@ -24,9 +25,9 @@ export class AfiliarDocenteComponent implements OnInit {
 
   steps: any[] = [];
   formGroup!: FormGroup;
-  fotoPerfil: string = ''; // Propiedad para almacenar la imagen
+  fotoPerfil: string = '';
 
-  constructor(private fb: FormBuilder, private afiliacionService: AfiliacionService) {} // Inyecta el servicio
+  constructor(private fb: FormBuilder, private afiliacionService: AfiliacionService, private toastr: ToastrService) {}
 
   ngOnInit(): void {
     this.formGroup = this.fb.group({});
@@ -85,17 +86,14 @@ export class AfiliarDocenteComponent implements OnInit {
     }
   }
 
-  // Método para verificar si un paso es inválido
   isStepInvalid(formGroup: FormGroup): boolean {
     return formGroup.invalid && (formGroup.touched || formGroup.dirty);
   }
 
-  // Método que se ejecuta al intentar avanzar o enviar el formulario
   onSubmit(): void {
     this.benefComponent.transformarDiscapacidadesSeleccionadas();
     this.datosGeneralesComponent.transformarDiscapacidadesSeleccionadas();
 
-    // Verifica si el formulario es válido
     if (this.formGroup.valid) {
       const datosGenerales = this.formGroup.get('datosGenerales')?.value;
       const referenciasPersonales = this.formGroup.get('referenciasPersonales')?.value;
@@ -104,7 +102,6 @@ export class AfiliarDocenteComponent implements OnInit {
       const centrosTrabajo = this.formGroup.get('centrosTrabajo')?.value;
       const beneficiarios = this.formGroup.get('beneficiarios')?.value;
 
-      // Procesar datos
       const formattedData = {
         persona: {
           id_tipo_identificacion: datosGenerales.id_tipo_identificacion,
@@ -161,18 +158,22 @@ export class AfiliarDocenteComponent implements OnInit {
     this.afiliacionService.crearAfiliacion(formattedData, file).subscribe(
       response => {
         console.log('Datos enviados con éxito:', response);
+        this.toastr.success('Datos enviados con éxito', 'Éxito');
+        this.resetForm();
       },
       error => {
         console.error('Error al enviar los datos:', error);
+        const errorMessage = error.error?.mensaje || 'Hubo un error al enviar los datos';
+        this.toastr.error(errorMessage, 'Error');
       }
     );
   } else {
     this.markAllAsTouched(this.formGroup);
+    this.toastr.warning('El formulario contiene información inválida', 'Advertencia');
     console.log('El formulario no es válido');
   }
   }
 
-  // Métodos auxiliares para formatear los datos
   private formatDireccion(datosGenerales: any): string {
     return [
       datosGenerales.avenida,
@@ -209,23 +210,18 @@ export class AfiliarDocenteComponent implements OnInit {
   }
 
   private formatCentrosTrabajo(trabajos: any[]): any[] {
-    return trabajos.map(trabajo => {
-      const formattedTrabajo = {
-        id_centro_trabajo: trabajo.id_centro_trabajo,
-        cargo: trabajo.cargo,
-        numero_acuerdo: trabajo.numero_acuerdo,
-        salario_base: trabajo.salario_base,
-        fecha_ingreso: trabajo.fecha_ingreso,
-        fecha_egreso: trabajo.fecha_egreso,
-        estado: trabajo.estado,
-        jornada: trabajo.jornada,
-        tipo_jornada: trabajo.tipo_jornada
-      };
-      console.log('Formatted Trabajo:', formattedTrabajo);
-      return formattedTrabajo;
-    });
+    return trabajos.map(trabajo => ({
+      id_centro_trabajo: trabajo.id_centro_trabajo,
+      cargo: trabajo.cargo,
+      numero_acuerdo: trabajo.numero_acuerdo,
+      salario_base: trabajo.salario_base,
+      fecha_ingreso: trabajo.fecha_ingreso,
+      fecha_egreso: trabajo.fecha_egreso,
+      estado: trabajo.estado,
+      jornada: trabajo.jornada,
+      tipo_jornada: trabajo.tipo_jornada
+    }));
   }
-
 
   private formatOtrasFuentesIngreso(otrasFuentesIngreso: any[]): any[] {
     return otrasFuentesIngreso.map(fuente => ({
@@ -307,7 +303,6 @@ export class AfiliarDocenteComponent implements OnInit {
     ];
   }
 
-  // Método para convertir base64 a Blob
   dataURItoBlob(dataURI: string): Blob {
     const byteString = atob(dataURI.split(',')[1]);
     const mimeString = dataURI.split(',')[0].split(':')[1].split(';')[0];
@@ -322,10 +317,17 @@ export class AfiliarDocenteComponent implements OnInit {
     return new Blob([buffer], { type: mimeString });
   }
 
-
-  // Método para capturar la imagen
   handleImageCaptured(image: string): void {
     this.fotoPerfil = image;
+}
+
+resetForm(): void {
+  this.formGroup.reset();
+  this.steps.forEach(step => {
+    step.formGroup.reset();
+  });
+  this.fotoPerfil = '';
+  this.stepper.reset();
 }
 
 }

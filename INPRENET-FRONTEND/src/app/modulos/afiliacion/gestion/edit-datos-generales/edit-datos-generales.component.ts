@@ -296,7 +296,6 @@ export class EditDatosGeneralesComponent implements OnInit {
           };
           
           if (result.discapacidades.length > 0){
-            console.log(result.discapacidades);
             this.discapacidadSeleccionada = true
             this.indicesSeleccionados = result.discapacidades
           }
@@ -340,7 +339,6 @@ export class EditDatosGeneralesComponent implements OnInit {
   }
 
   updateDiscapacidades() {
-    console.log(this.formDatosGenerales.value.refpers[0]);
     const refpersArray = this.formDatosGenerales.get('refpers') as FormArray;
     if (refpersArray.length > 0) {
       const firstRefpersGroup = refpersArray.controls[0] as FormGroup;
@@ -354,7 +352,6 @@ export class EditDatosGeneralesComponent implements OnInit {
         });
       }
     }
-    console.log(this.formDatosGenerales.value.refpers[0]);
   }
 
   resetDatos() {

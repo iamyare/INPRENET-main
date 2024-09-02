@@ -142,6 +142,10 @@ export class DatosGeneralesComponent implements OnInit {
       Validators.maxLength(75),
       Validators.pattern(noSpecialCharsPattern)
     ]));
+    this.formGroup.addControl('cargoPublico', new FormControl('', [
+      Validators.maxLength(75),
+      Validators.pattern(noSpecialCharsPattern)
+    ]));
     this.formGroup.addControl('grado_academico', new FormControl('', [
       Validators.maxLength(75)
     ]));
@@ -317,39 +321,15 @@ export class DatosGeneralesComponent implements OnInit {
   }
 
   resetDiscapacidadesFormArray(indicesSeleccionados: any[]) {
-    console.log(indicesSeleccionados);
-    console.log(this.discapacidades);
-    
     const discapacidadesArray = this.fb.array(
-      this.test(indicesSeleccionados)
+      this.discapacidades.map(discapacidad => {
+        const match = indicesSeleccionados.some(
+          indice => indice.tipo === discapacidad.label
+        );
+        return new FormControl(match);
+      })
     );
-    
-    
-      /* this.discapacidades.forEach((element) => {
-        console.log(element);
-        this.discapacidades.forEach((element2) => {
-          if (element.label == element2.tipo){
-            return new FormControl(indicesSeleccionados.includes(index))
-          }
-
-        })
-      }
-    ) */
-   console.log(discapacidadesArray);
-   
     this.formGroup.setControl('discapacidades', discapacidadesArray);
-  }
-
-  test(indicesSeleccionados:any):any{
-    for (let i = 0; i < this.discapacidades.length; i++) {
-      //discapacidadesArray.value[i] = new FormControl(false)
-      for (let j = 0; j < indicesSeleccionados.length; j++) {
-        if (this.discapacidades[i].label == indicesSeleccionados[j].tipo){
-          return  new FormControl(true)
-          //return new FormControl(indicesSeleccionados.includes(i))
-        }
-      }
-    }
   }
 
   transformarDiscapacidadesSeleccionadas(): void {

@@ -13,6 +13,12 @@ export class DatosGeneralesComponent implements OnInit {
   @Input() formGroup!: FormGroup;
   @Output() imageCaptured = new EventEmitter<string>();
 
+  
+  @Input() initialData!: any;
+  @Input() discapacidadSeleccionada!: boolean;
+  @Input() indicesSeleccionados: any[] = [];
+
+  @Output() newDatosGenerales = new EventEmitter<any>();
   departamentos: { value: number, label: string }[] = [];
   municipios: { value: number, label: string }[] = [];
   departamentosNacimiento: { value: number, label: string }[] = [];
@@ -24,7 +30,6 @@ export class DatosGeneralesComponent implements OnInit {
   genero: { value: string, label: string }[] = [];
   nacionalidades: { value: number, label: string }[] = [];
   discapacidades: { label: string, value: number }[] = [];
-  discapacidadSeleccionada: boolean = false;
   useCamera: boolean = true;
 
   constructor(private fb: FormBuilder,
@@ -34,20 +39,27 @@ export class DatosGeneralesComponent implements OnInit {
 
   ngOnInit(): void {
     const noSpecialCharsPattern = '^[a-zA-Z0-9\\s]*$';
-
     if (!this.formGroup) {
-      this.formGroup = this.fb.group({
-        peps: this.fb.array([]),
-        discapacidades: this.fb.array([]),
-        FotoPerfil: new FormControl(null, Validators.required)
-      });
-    } else {
-      this.formGroup.addControl('FotoPerfil', new FormControl(null, Validators.required));
+      if (this.initialData){
+        this.formGroup = this.fb.group({
+          peps: this.fb.array([]),
+          discapacidades: this.fb.array([]),
+          ...this.initialData 
+        });
+        this.cargarDiscapacidades();
+      }
+      else{
+        this.formGroup = this.fb.group({
+          peps: this.fb.array([]),
+          discapacidades: this.fb.array([]),
+          FotoPerfil: new FormControl(null, Validators.required)
+        });
+        this.formGroup.addControl('FotoPerfil', new FormControl(null, Validators.required));
+        const indicesSeleccionados = [];
+      }
     }
 
     this.formGroup.addControl('discapacidad', new FormControl(false, Validators.required));
-    this.cargarDiscapacidades();
-
     this.formGroup.get('discapacidad')?.valueChanges.subscribe(value => {
       this.onDiscapacidadChange({ value });
     });
@@ -135,6 +147,11 @@ export class DatosGeneralesComponent implements OnInit {
     ]));
 
     this.cargarDatosIniciales();
+  }
+
+  onDatosGeneralesChange() {
+    const data = this.formGroup;
+    this.newDatosGenerales.emit(data);
   }
 
   async cargarDatosIniciales() {
@@ -284,14 +301,14 @@ export class DatosGeneralesComponent implements OnInit {
   cargarDiscapacidades() {
     this.datosEstaticos.getDiscapacidades().subscribe(discapacidades => {
       this.discapacidades = discapacidades;
-      this.resetDiscapacidadesFormArray();
+      this.resetDiscapacidadesFormArray(this.indicesSeleccionados);
     });
   }
 
   onDiscapacidadChange(event: any) {
     this.discapacidadSeleccionada = event.value;
     if (this.discapacidadSeleccionada) {
-      this.resetDiscapacidadesFormArray();
+      this.resetDiscapacidadesFormArray(this.indicesSeleccionados);
     } else {
       this.formGroup.get('discapacidades')?.clearValidators();
       this.formGroup.get('discapacidades')?.updateValueAndValidity();
@@ -299,9 +316,40 @@ export class DatosGeneralesComponent implements OnInit {
     }
   }
 
-  resetDiscapacidadesFormArray() {
-    const discapacidadesArray = this.fb.array(this.discapacidades.map(() => new FormControl(false)));
+  resetDiscapacidadesFormArray(indicesSeleccionados: any[]) {
+    console.log(indicesSeleccionados);
+    console.log(this.discapacidades);
+    
+    const discapacidadesArray = this.fb.array(
+      this.test(indicesSeleccionados)
+    );
+    
+    
+      /* this.discapacidades.forEach((element) => {
+        console.log(element);
+        this.discapacidades.forEach((element2) => {
+          if (element.label == element2.tipo){
+            return new FormControl(indicesSeleccionados.includes(index))
+          }
+
+        })
+      }
+    ) */
+   console.log(discapacidadesArray);
+   
     this.formGroup.setControl('discapacidades', discapacidadesArray);
+  }
+
+  test(indicesSeleccionados:any):any{
+    for (let i = 0; i < this.discapacidades.length; i++) {
+      //discapacidadesArray.value[i] = new FormControl(false)
+      for (let j = 0; j < indicesSeleccionados.length; j++) {
+        if (this.discapacidades[i].label == indicesSeleccionados[j].tipo){
+          return  new FormControl(true)
+          //return new FormControl(indicesSeleccionados.includes(i))
+        }
+      }
+    }
   }
 
   transformarDiscapacidadesSeleccionadas(): void {

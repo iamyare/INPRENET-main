@@ -8,6 +8,7 @@ import { FieldConfig } from 'src/app/shared/Interfaces/field-config';
 import { TableColumn } from 'src/app/shared/Interfaces/table-column';
 import { convertirFechaInputs } from 'src/app/shared/functions/formatoFecha';
 import { unirNombres } from 'src/app/shared/functions/formatoNombresP';
+import { ChangeDetectorRef } from '@angular/core';
 
 @Component({
   selector: 'app-edit-datos-generales',
@@ -52,8 +53,13 @@ export class EditDatosGeneralesComponent implements OnInit {
   });
 
   @Input() Afiliado!: any;
+  cargada: any = false;
+  initialData = {}
+  indicesSeleccionados: any[] = []
+  discapacidadSeleccionada!:boolean
 
   constructor(
+    private cdRef: ChangeDetectorRef,
     private fb: FormBuilder,
     private svcAfiliado: AfiliadoService,
     private toastr: ToastrService,
@@ -65,9 +71,11 @@ export class EditDatosGeneralesComponent implements OnInit {
   }
 
   ngOnInit(): void {
+
     this.myFormFields = [
       { type: 'text', label: 'N_IDENTIFICACION del afiliado', name: 'n_identificacion', validations: [Validators.required, Validators.minLength(13), Validators.maxLength(14)], display: true },
     ];
+
     this.myColumns = [
       {
         header: 'Nombre del Centro Trabajo',
@@ -146,8 +154,7 @@ export class EditDatosGeneralesComponent implements OnInit {
     this.direccionSer.getMunicipiosPorDepartamentoId(departamentoId).subscribe({
       next: (data) => {
         this.municipios = data;
-      },
-      error: (error) => {
+      },error: (error) => {
         console.error('Error al cargar municipios:', error);
       }
     });
@@ -163,6 +170,8 @@ export class EditDatosGeneralesComponent implements OnInit {
   }
 
   setDatosGenerales(datosGenerales: any) {
+    console.log(datosGenerales);
+    
     // Verifica que `datosGenerales` es un objeto válido
     if (!datosGenerales || typeof datosGenerales !== 'object') {
       console.error('datosGenerales no es un objeto válido:', datosGenerales);
@@ -185,6 +194,7 @@ export class EditDatosGeneralesComponent implements OnInit {
 
     const newGroup = this.fb.group({
       // Otros campos que necesitas incluir
+      dato,
       discapacidades: this.fb.array(discapacidadesArray)
     });
 
@@ -244,43 +254,77 @@ export class EditDatosGeneralesComponent implements OnInit {
           const refpersArray = this.formDatosGenerales.get('refpers') as FormArray;
           refpersArray.clear();
 
-          const newGroup = this.fb.group({
+          this.initialData = {
             n_identificacion: result.N_IDENTIFICACION,
-            rtn: result.RTN,
             primer_nombre: result.PRIMER_NOMBRE,
             segundo_nombre: result.SEGUNDO_NOMBRE,
+            tercer_nombre: result.TERCER_NOMBRE,
             primer_apellido: result.PRIMER_APELLIDO,
             segundo_apellido: result.SEGUNDO_APELLIDO,
-            tercer_nombre: result.TERCER_NOMBRE,
             fecha_nacimiento: result.FECHA_NACIMIENTO,
             fecha_vencimiento_ident: result.fecha_vencimiento_ident,
             cantidad_dependientes: result.CANTIDAD_DEPENDIENTES,
-            cantidad_hijos: result.CANTIDAD_HIJOS,
+            representacion: result.REPRESENTACION,
             telefono_1: result.TELEFONO_1,
             telefono_2: result.TELEFONO_2,
             correo_1: result.CORREO_1,
             correo_2: result.CORREO_2,
-            direccion_residencia: result.DIRECCION_RESIDENCIA,
-            numero_carnet: result.NUMERO_CARNET,
+            rtn: result.RTN,
             genero: result.GENERO,
-            estado_civil: result.ESTADO_CIVIL,
-            representacion: result.REPRESENTACION,
-            sexo: result.SEXO,
-            id_pais: 1,
-            id_tipo_identificacion: result.ID_IDENTIFICACION,
-            id_profesion: result.ID_PROFESION,
-            id_departamento_residencia: result.id_departamento_residencia,
-            id_municipio_residencia: result.ID_MUNICIPIO,
-            id_departamento_nacimiento: result.id_departamento_nacimiento,
-            id_municipio_nacimiento: result.ID_MUNICIPIO_NACIMIENTO,
-            fallecido: result.fallecido,
             grupo_etnico: result.GRUPO_ETNICO,
             grado_academico: result.GRADO_ACADEMICO,
-            discapacidad: result.TIPO_DISCAPACIDAD ? "SI" : "NO",
-            discapacidades: this.fb.array(result.discapacidades ? result.discapacidades.map((d:any) => new FormControl(d.id_discapacidad)) : [])
-          });
+            discapacidad: true,
+            estado_civil: "SOLTERO/A",           
+            id_profesion: 1,
+            id_departamento_residencia: 1,
+            id_municipio_residencia: 1,
+            id_departamento_nacimiento: 1,
+            id_municipio_nacimiento: 1,
+            id_tipo_identificacion: 1,
+            id_pais: 1,
+            cantidad_hijos: 0,
+            barrio_colonia: "Hola",
+            avenida: "Hola",
+            calle: "Hola",
+            sector: "Hola",
+            bloque: "Hola",
+            numero_casa: "Hola",
+            color_casa: "Hola",
+            aldea: "Hola",
+            caserio: "Hola",
+            cargoPublico: '',
+          };
+          
+          if (result.discapacidades.length > 0){
+            console.log(result.discapacidades);
+            this.discapacidadSeleccionada = true
+            this.indicesSeleccionados = result.discapacidades
+          }
+          
 
-          refpersArray.push(newGroup);
+          this.form1.controls.certificado_defuncion.setValue("12345")
+          this.form1.controls.fecha_defuncion.setValue("2024-08-28")
+          this.form1.controls.observaciones.setValue("Ninguna")
+
+          this.form1.controls.causa_fallecimiento.setValue('COVID-19');
+          this.form1.controls.estado.setValue('ACTIVO');
+          this.form1.controls.id_departamento_defuncion.setValue('OLANCHO');
+          this.form1.controls.id_municipio_defuncion.setValue('OLANCHO');
+          
+
+          this.cargada = true          
+          
+          //this.form1.controls.id_departamento_defuncion.setValue("COLON")
+          //console.log(this.form1.controls.id_departamento_defuncion )
+          /* this.form1.setValue({
+            estado: 'ACTIVO',
+            causa_fallecimiento: '1',
+            id_departamento_defuncion: '1',
+            id_municipio_defuncion: '860'
+          }); */
+          
+
+          //refpersArray.push(newGroup);
 
           this.updateDiscapacidades();
 
@@ -296,6 +340,7 @@ export class EditDatosGeneralesComponent implements OnInit {
   }
 
   updateDiscapacidades() {
+    console.log(this.formDatosGenerales.value.refpers[0]);
     const refpersArray = this.formDatosGenerales.get('refpers') as FormArray;
     if (refpersArray.length > 0) {
       const firstRefpersGroup = refpersArray.controls[0] as FormGroup;
@@ -309,6 +354,7 @@ export class EditDatosGeneralesComponent implements OnInit {
         });
       }
     }
+    console.log(this.formDatosGenerales.value.refpers[0]);
   }
 
   resetDatos() {
@@ -319,6 +365,8 @@ export class EditDatosGeneralesComponent implements OnInit {
   }
 
   GuardarInformacion() {
+    console.log(this.formDatosGenerales.value.refpers[0]);
+    
     this.formDatosGenerales.value.refpers[0].fecha_nacimiento = convertirFechaInputs(this.formDatosGenerales.value.refpers[0].fecha_nacimiento);
 
     const a = this.formDatosGenerales.value.refpers[0] = {
@@ -332,14 +380,17 @@ export class EditDatosGeneralesComponent implements OnInit {
       certificado_defuncion: this.form1.value.certificado_defuncion
     };
 
-    this.svcAfiliado.updateDatosGenerales(this.Afiliado.ID_PERSONA, this.formDatosGenerales.value.refpers[0]).subscribe(
+    console.log(a);
+    
+
+    /* this.svcAfiliado.updateDatosGenerales(this.Afiliado.ID_PERSONA, this.formDatosGenerales.value.refpers[0]).subscribe(
       async (result) => {
         this.toastr.success(`Datos generales modificados correctamente`);
       },
       (error) => {
         this.toastr.error(`Error: ${error.error.message}`);
       }
-    );
+    ); */
   }
 
   getErrors(fieldName: string): any {
@@ -347,6 +398,6 @@ export class EditDatosGeneralesComponent implements OnInit {
   }
 
   mostrarCamposFallecido(e: any) {
-    this.estadoAfiliacion = e.value;
+    //this.estadoAfiliacion = e.value;
   }
 }

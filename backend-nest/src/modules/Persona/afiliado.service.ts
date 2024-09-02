@@ -1174,8 +1174,14 @@ async findOnePersonaParaDeduccion(term: string) {
   }
 
   async updateDatosGenerales(idPersona: number, datosGenerales: any): Promise<any> {
-    const estadoP = await this.estadoAfiliacionRepository.findOne({ where: { Descripcion: datosGenerales.estado } });
+    console.log(idPersona);
+    console.log(datosGenerales);
+    
+    const estadoP = await this.estadoAfiliacionRepository.findOne({ where: { nombre_estado: datosGenerales.estado } });
+    
+    console.log(estadoP); 
     try {
+      /* 
       const afiliado = await this.personaRepository.preload({
         id_persona: idPersona,
         tipo_defuncion: datosGenerales.tipo_defuncion,
@@ -1187,9 +1193,10 @@ async findOnePersonaParaDeduccion(term: string) {
       });
       if (!afiliado) throw new NotFoundException(`la persona con: ${idPersona} no se ha encontrado`);
 
-      await this.personaRepository.save(afiliado);
-
+      await this.personaRepository.save(afiliado);  
+      
       return afiliado;
+      */
     } catch (error) {
       this.handleException(error); // Asegúrate de tener un método para manejar las excepciones
     }

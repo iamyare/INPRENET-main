@@ -18,6 +18,7 @@ export class PerfilComponent implements OnInit {
 
   ngOnInit() {
     this.personaService.currentPersona.subscribe(persona => {
+      
       this.persona = persona;
       if (persona && persona.detallePersona) {
         this.detallePersonaUnico = this.filtrarDetallePersona(persona.detallePersona);

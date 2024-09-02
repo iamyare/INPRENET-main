@@ -134,8 +134,10 @@ export class PdfService {
   }
 
   async generateConstanciaAfiliacionTemplate2(data: any, includeQR: boolean) {
-    let dataCentTrab = [{},{}];
-    let dataRef = [{},{}];
+    console.log(data);
+    
+    let dataCentTrab = data.perfPersCentTrabs;
+    let dataRef = data.referenciasPersonalPersona;
 
     const content: Array<any> = [
       {
@@ -147,45 +149,45 @@ export class PdfService {
                   {}, {}, {}, {}, {}, {text: 'FOTO',rowSpan: 3, alignment: 'center'}
                 ],
                 [ 
-                  { text: 'NOMBRE DEL DOCENTE', alignment: 'left', style:['subheader'] }, { text: '', alignment: 'center', colSpan: 5,  },
+                  { text: 'NOMBRE DEL DOCENTE', alignment: 'left', style:['subheader'] }, { text: `${data.primer_apellido} ${data.segundo_apellido} ${data.primer_nombre} ${data.segundo_nombre}`, alignment: 'center', colSpan: 5,  },
                   {}, {}, {}, {}, {}
                 ],
                 [ 
                   { text: 'No DE IDENTIDAD Y/O CARNET DEL RESIDENTE VIGENTE', alignment: 'left', colSpan: 2, style:['subheader']  },
-                   {}, {text: '', alignment: 'center', colSpan: 4}, {}, {}, {}, {}
+                   {}, {text: `${data.n_identificacion}`, alignment: 'center', colSpan: 4}, {}, {}, {}, {}
                 ],
                 [ 
                   { text: 'GÉNERO', alignment: 'left' , style:['subheader'] },  
-                  { text: '', alignment: 'center', colSpan: 3}, 
+                  { text: `${data.genero}`, alignment: 'left', colSpan: 3}, 
                   {}, 
                   {},
                   { text: 'ESTADO CIVIL', alignment: 'left' , style:['subheader']},
-                  { text: '', alignment: 'center', colSpan: 2},
+                  { text: `${data.estado_civil}`, alignment: 'left', colSpan: 2},
                   {}
                 ],
                 [ 
-                  { text: 'NÚMERO DE DEPENDIENTES', alignment: 'left', style:['subheader'] }, { text: '', alignment: 'left', colSpan: 3}, {}, {}, { text: 'PROFESIÓN', alignment: 'left', style:['subheader']},  { text: '', alignment: 'left', colSpan: 2}, {}],
+                  { text: 'NÚMERO DE DEPENDIENTES', alignment: 'left', style:['subheader'] }, { text: `${data.cantidad_dependientes}`, alignment: 'left', colSpan: 3}, {}, {}, { text: 'PROFESIÓN', alignment: 'left', style:['subheader']},  { text: `${data.profesion.descripcion}`, alignment: 'left', colSpan: 2}, {}],
                 [ 
-                  { text: 'NACIONALIDAD', alignment: 'left', style:['subheader'] },  { text: '', alignment: 'left', colSpan: 3}, {}, {}, 
-                  { text: 'RTN', alignment: 'left' , style:['subheader'] },  { text: '', alignment: 'left', colSpan: 2}, {}
+                  { text: 'NACIONALIDAD', alignment: 'left', style:['subheader'] },  { text: `${data.pais.nacionalidad}`, alignment: 'left', colSpan: 3}, {}, {}, 
+                  { text: 'RTN', alignment: 'left' , style:['subheader'] },  { text: `${data.rtn}`, alignment: 'left', colSpan: 2}, {}
                 ],
                 [ 
                   { text: 'LUGAR Y FECHA DE NACIMIENTO', alignment: 'center', colSpan: 7, style:['header']}, 
                   {}, {}, {}, {}, {}, {}
                 ],
                 [ 
-                  { text: 'PAÍS', alignment: 'left', style:['subheader'] },  { text: '', alignment: 'left', colSpan: 2},  {}, 
-                  { text: 'DEPARTAMENTO', alignment: 'left', style:['subheader'] },  { text: '', alignment: 'left', colSpan: 3}, {},{} 
+                  { text: 'PAÍS', alignment: 'left', style:['subheader'] },  { text: `${data.pais.nombre_pais}`, alignment: 'left', colSpan: 2},  {}, 
+                  { text: 'DEPARTAMENTO', alignment: 'left', style:['subheader'] },  { text: ``, alignment: 'left', colSpan: 3}, {},{} 
                 ],
                 [ 
-                  { text: 'CIUDAD', alignment: 'left', style:['subheader'] },  { text: '', alignment: 'left', colSpan: 2},  {}, 
-                  { text: 'FECHA DE NACIMIENTO', alignment: 'left', style:['subheader'] }, { text: '', alignment: 'left'}, {text: 'Edad', alignment: 'left', style:['subheader']},{} 
+                  { text: 'CIUDAD', alignment: 'left', style:['subheader'] },  { text: ``, alignment: 'left', colSpan: 2},  {}, 
+                  { text: 'FECHA DE NACIMIENTO', alignment: 'left', style:['subheader'] }, { text: `${data.fecha_nacimiento}`, alignment: 'left'}, {text: 'Edad', alignment: 'left', style:['subheader']},{} 
                 ],
                 [ 
-                  { text: '¿ACTÚA POR CUENTA PROPIA?', alignment: 'left', style:['subheader'] }, 
-                  { text: '', alignment: 'left', colSpan: 2}, {}, {text: '¿ACTÚA EN REPRESENTACIÓN DE TERCEROS?', alignment: 'left', colSpan: 2, style:['subheader'] }, 
+                  { text: 'REPRESENTACIÓN', alignment: 'left', style:['subheader'] }, 
+                  { text: `${data.representacion}`, alignment: 'left', colSpan: 6}, {}, {}, 
                   {},  
-                  { text: '', alignment: 'left', colSpan: 2}, {}
+                  {}, {}
                 ],
 
                 [ { text: 'DECLARACIÓN DE PERSONA POLÍTICAMENTE EXPUESTA (PEPS)', alignment: 'center', colSpan: 7, style:['header']}, 
@@ -243,11 +245,11 @@ export class PdfService {
                 ],
                 [ 
                   { text: 'NÚMEROS DE TELEFÓNICOS', alignment: 'left', rowSpan: 2, style:['subheader'] }, 
-                  {text: 'CASA', alignment: 'left', style:['subheader']}, { text: '', alignment: 'left', colSpan: 2 }, {}, {text: 'CORREO ELECTRÓNICO 1', alignment: 'left', style:['subheader'] }, { text: '', alignment: 'left', colSpan: 2}, {}
+                  {text: 'CASA', alignment: 'left', style:['subheader']}, { text: `${data.telefono_1}`, alignment: 'left', colSpan: 2 }, {}, {text: 'CORREO ELECTRÓNICO 1', alignment: 'left', style:['subheader'] }, { text: `${data.correo_1}`, alignment: 'left', colSpan: 2}, {}
                 ],
                 [ 
                   {}, 
-                  {text: 'CELULAR', alignment: 'left', style:['subheader'] }, { text: '', alignment: 'left', colSpan: 2}, {}, {text: 'CORREO ELECTRÓNICO 2', alignment: 'left', style:['subheader'] }, { text: '', alignment: 'left', colSpan: 2}, {}
+                  {text: 'CELULAR', alignment: 'left', style:['subheader'] }, { text: `${data.telefono_2}`, alignment: 'left', colSpan: 2}, {}, {text: 'CORREO ELECTRÓNICO 2', alignment: 'left', style:['subheader'] }, { text: `${data.correo_2}`, alignment: 'left', colSpan: 2}, {}
                 ],
                 [ 
                   { text: 'DATOS DE CUENTAS BANCARIAS', alignment: 'center', colSpan: 7, style:['header']}, 
@@ -263,6 +265,7 @@ export class PdfService {
                   { text: 'INSTITUCIONES EDUCATIVAS', alignment: 'center', colSpan: 7, style:['header']}, 
                   {},{}, {}, {}, {}, {}
                 ],
+                
                 ...dataCentTrab.flatMap((b: any) => {
                       return [
                         [ 
@@ -272,26 +275,26 @@ export class PdfService {
                             {}, {}, {}
                         ],
                         [ 
-                          { text: 'NOMBRE DEL CENTRO EDUCATIVO', alignment: 'left' , style:['subheader']  }, 
-                          { text: 'SECTOR', alignment: 'center', colSpan:6, style:['subheader'] }, {}, {}, {}, {}, {}
+                          { text: 'NOMBRE DEL CENTRO EDUCATIVO', alignment: 'left' , style:['subheader'], colSpan:3 }, {}, {},
+                          { text: 'SECTOR', alignment: 'center', colSpan:4, style:['subheader'] },  {}, {}, {}
                         ],
                         [ 
-                          {}, 
-                          { text: '', alignment: 'left', colSpan:6}, {}, {}, {}, {}, {}
+                          {text: `${b.centroTrabajo.nombre_centro_trabajo}`, alignment: 'left', colSpan:3}, {}, {},
+                          { text: `${b.centroTrabajo.sector_economico}`, alignment: 'left', colSpan:4},  {}, {}, {}
                         ],
                         [ 
                           { text: 'CARGO', alignment: 'left', style:['subheader'] }, 
-                          { text: '', alignment: 'left', colSpan: 6}, {}, {}, {}, {}, {}
+                          { text: `${b.cargo}`, alignment: 'left', colSpan: 6}, {}, {}, {}, {}, {}
                         ],
                         [ 
                           { text: 'FECHA DE INGRESO', alignment: 'left', style:['subheader'] }, 
-                          { text: '', alignment: 'left', colSpan: 2}, {}, 
+                          { text: `${b.fecha_ingreso}`, alignment: 'left', colSpan: 2}, {}, 
                           { text: 'FECHA DE PAGO', alignment: 'left', style:['subheader'] }, 
-                          { text: '', alignment: 'left', colSpan: 3}, {}, {}
+                          { text: `${b.fecha_pago}`, alignment: 'left', colSpan: 3}, {}, {}
                         ],
                         [ 
                           { text: 'INGRESO / SALARIO MENSUAL', alignment: 'left', style:['subheader'] },
-                          { text: '', alignment: 'left', colSpan: 6},  
+                          { text: `L. ${b.salario_base}`, alignment: 'left', colSpan: 6},  
                           {}, {}, 
                           {}, {}, {}
                         ],
@@ -310,8 +313,8 @@ export class PdfService {
                           { text: 'SECTOR', alignment: 'center', style:['subheader'] },
                         ],
                         [ 
-                          { text: '', alignment: 'center'},
-                          { text: '', alignment: 'center'},
+                          { text: `${b.centroTrabajo.municipio.departamento.nombre_departamento}`, alignment: 'center'},
+                          { text: `${b.centroTrabajo.municipio.nombre_municipio}`, alignment: 'center'},
                           { text: '', alignment: 'center'},
                           { text: '', alignment: 'center'},
                           { text: '', alignment: 'center'},
@@ -320,10 +323,10 @@ export class PdfService {
                         ],
                         [ 
                           { text: 'TELÉFONO 1', alignment: 'center', style:['subheader'] },
-                          { text: '', alignment: 'center',colSpan:2},
+                          { text: `${b.centroTrabajo.telefono_1}`, alignment: 'center',colSpan:2},
                           { },
                           { text: 'TELÉFONO 2', alignment: 'center', style:['subheader'] },
-                          { text: '', alignment: 'center',colSpan:3},
+                          { text: `${b.centroTrabajo.telefono_2}`, alignment: 'center',colSpan:3},
                           { },
                           { },
                         ],
@@ -398,7 +401,7 @@ export class PdfService {
                       {text: 'CASA', alignment: 'center', style:['subheader'] }, {text: '', alignment: 'center', colSpan: 4}, {}, {}, {}
                     ],
                     [ 
-                      {}, 
+                      {text: `${b.parentesco}`, alignment: 'center'}, 
                       {},
                       {text: 'CELULAR', alignment: 'center', style:['subheader'] }, {text: '', alignment: 'center', colSpan: 4}, {}, {}, {}
                     ],
@@ -407,7 +410,6 @@ export class PdfService {
                       {},
                       {text: 'TRABAJO', alignment: 'center', style:['subheader'] }, {text: '', alignment: 'center', colSpan: 4}, {}, {}, {}
                     ],
-    
                   ];
             }),
           ]
@@ -493,8 +495,6 @@ export class PdfService {
     const fechaActual = new Date().toISOString().split('T')[0];
     const fileName = `${nombreCompleto}_${fechaActual}_constancia_${type}`;
 
-    console.log(data);
-    
     // Generar documento sin QR
     let pdfBufferWithoutQR;
     switch (type) {

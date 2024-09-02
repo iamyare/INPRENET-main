@@ -4,8 +4,15 @@
   </div>
 
   <div *ngIf="datos && !loading">
-    <app-dat-generales-afiliado [datos]="formDatosGenerales"
-      (newDatosGenerales)="setDatosGenerales($event)"></app-dat-generales-afiliado>
+    <!-- <app-dat-generales-afiliado [datos]="formDatosGenerales"
+      (newDatosGenerales)="setDatosGenerales($event)"></app-dat-generales-afiliado> -->
+
+    <app-datos-generales 
+      [initialData]="initialData"
+      [indicesSeleccionados]="indicesSeleccionados"
+      [discapacidadSeleccionada]="true" 
+      (newDatosGenerales)="setDatosGenerales($event)">
+    </app-datos-generales>
 
     <form style="margin: 0 0 1.5rem;" [formGroup]="form1">
       <div class="row" style="margin: 0px 20px 0 20px;">
@@ -14,7 +21,7 @@
             appearance="outline">
             <mat-label>Estado de Afiliación de la Persona</mat-label>
             <mat-select matNativeControl formControlName="estado" (selectionChange)="mostrarCamposFallecido($event)">
-              <mat-option *ngFor="let p of estado" [value]="p.value">
+              <mat-option *ngFor="let p of estado" [value]="p.label">
                 {{ p.label }}
               </mat-option>
             </mat-select>
@@ -40,7 +47,7 @@
             appearance="outline">
             <mat-label>Causa de Fallecimiento</mat-label>
             <mat-select matNativeControl formControlName="causa_fallecimiento">
-              <mat-option *ngFor="let p of CausaFallecimiento" [value]="p.value">
+              <mat-option *ngFor="let p of CausaFallecimiento" [value]="p.label">
                 {{ p.label }}
               </mat-option>
             </mat-select>
@@ -77,7 +84,7 @@
             <mat-label>Departamento De Defunción</mat-label>
             <mat-icon matPrefix>location_city</mat-icon>
             <mat-select formControlName="id_departamento_defuncion" (selectionChange)="onDepartamentoChange($event)">
-              <mat-option *ngFor="let departamento of departamentos" [value]="departamento.value">
+              <mat-option *ngFor="let departamento of departamentos"  [value]="departamento.label">
                 {{ departamento.label }}
               </mat-option>
             </mat-select>
@@ -92,7 +99,7 @@
             <mat-label>Municipio De Defunción</mat-label>
             <mat-icon matPrefix>location_city</mat-icon>
             <mat-select formControlName="id_municipio_defuncion">
-              <mat-option *ngFor="let municipio of municipios" [value]="municipio.value">
+              <mat-option *ngFor="let municipio of municipios" [value]="municipio.label">
                 {{ municipio.label }}
               </mat-option>
             </mat-select>
@@ -105,7 +112,7 @@
       </div>
     </form>
 
-    <app-maps></app-maps>
+    <!-- <app-maps></app-maps> -->
 
     <button mat-raised-button color="primary" style="color: white; margin: 1% 0 1% 0" (click)="GuardarInformacion()">
       Guardar

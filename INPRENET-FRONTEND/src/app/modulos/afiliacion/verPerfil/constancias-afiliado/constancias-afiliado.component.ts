@@ -57,14 +57,7 @@ export class ConstanciasAfiliadoComponent {
   }
 
   generarConstanciaAfiliacion2() {
-    const data = {
-      primer_nombre: this.persona.primer_nombre,
-      segundo_nombre: this.persona.segundo_nombre,
-      tercer_nombre: this.persona.tercer_nombre,
-      primer_apellido: this.persona.primer_apellido,
-      segundo_apellido: this.persona.segundo_apellido,
-      n_identificacion: this.persona.n_identificacion,
-    };
+    const data = this.persona;
 
     this.afiliadoService.generarConstanciaAfiliacion2(data).subscribe((response: any) => {
     });

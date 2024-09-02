@@ -291,22 +291,28 @@ export class DatosEstaticosService {
 
   estadoCivil = [
     {
-      "label": "CASADO/A"
+      "label": "CASADO/A",
+      "value": "CASADO/A"
     },
     {
-      "label": "DIVORCIADO/A"
+      "label": "DIVORCIADO/A",
+      "value": "DIVORCIADO/A"
     },
     {
-      "label": "SEPARADO/A"
+      "label": "SEPARADO/A",
+      "value": "SEPARADO/A"
     },
     {
-      "label": "SOLTERO/A"
+      "label": "SOLTERO/A",
+      "value": "SOLTERO/A"
     },
     {
-      "label": "UNION LIBRE"
+      "label": "UNION LIBRE",
+      "value": "UNION LIBRE"
     },
     {
-      "label": "VIUDO/A"
+      "label": "VIUDO/A",
+      "value": "VIUDO/A"
     }
   ];
 

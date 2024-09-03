@@ -521,6 +521,7 @@ export class AfiliadoService {
         where: { n_identificacion: term },
         relations: [
             'detallePersona',
+            'causa_fallecimiento',
             'detallePersona.tipoPersona',
             'detallePersona.estadoAfiliacion',
             'pais',
@@ -597,13 +598,18 @@ export class AfiliadoService {
         fecha_vencimiento_ident: persona.fecha_vencimiento_ident,
         certificado_defuncion: persona?.certificado_defuncion,
         ID_MUNICIPIO_DEFUNCION: persona?.municipio_defuncion?.id_municipio!,
+        MUNICIPIO_DEFUNCION: persona?.municipio_defuncion?.nombre_municipio!,
         ID_DEPARTAMENTO_DEFUNCION: persona?.municipio_defuncion?.departamento?.id_departamento!,
+        DEPARTAMENTO_DEFUNCION: persona?.municipio_defuncion?.departamento?.nombre_departamento!,
+        ID_CAUSA_FALLECIMIENTO: persona?.causa_fallecimiento?.id_causa_fallecimiento!,
+        CAUSA_FALLECIMIENTO: persona?.causa_fallecimiento?.nombre!,
         fallecido: persona.fallecido,
         estadoAfiliacion: persona.detallePersona[0]?.estadoAfiliacion?.codigo,
         CANTIDAD_DEPENDIENTES: persona.cantidad_dependientes,
         discapacidades: discapacidades,
         peps: peps,
     };
+    console.log(result);
     
     return result;
 }

@@ -13,6 +13,13 @@ export class Net_Familia {
     })
     parentesco: string;
 
+    @Column('varchar2', {
+        length: 30,
+        nullable: true,
+        name: 'TRABAJA'
+    })
+    trabaja: string;
+
     @ManyToOne(() => net_persona, persona => persona.familiares, { cascade: true })
     @JoinColumn({ name: 'ID_PERSONA', foreignKeyConstraintName: 'FK_ID_PERSONA_NET_FAMILIA' })
     persona: net_persona;

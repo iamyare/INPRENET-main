@@ -374,7 +374,7 @@ export class PdfService {
                 ],
                 [ 
                   { text: '¿TRABAJA?', alignment: 'left', style:['subheader'] }, 
-                  { text: '', alignment: 'left', colSpan: 2}, {}, 
+                  { text: `${conyuge.trabaja}`, alignment: 'left', colSpan: 2}, {}, 
                   { text: '¿ES AFILIADO?', alignment: 'left', style:['subheader'] }, 
                   { text: '', alignment: 'left', colSpan: 3}, {}, {}
                 ],

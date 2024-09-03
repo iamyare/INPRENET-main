@@ -20,8 +20,8 @@ export class PerfilComponent implements OnInit {
     this.personaService.currentPersona.subscribe(persona => {
       
       this.persona = persona;
-      if (persona && persona.detallePersona) {
-        this.detallePersonaUnico = this.filtrarDetallePersona(persona.detallePersona);
+      if (persona.persona && persona.persona.detallePersona) {
+        this.detallePersonaUnico = this.filtrarDetallePersona(persona.persona.detallePersona);
       }
     });
   }

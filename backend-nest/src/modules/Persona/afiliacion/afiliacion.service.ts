@@ -66,6 +66,9 @@ export class AfiliacionService {
     private readonly discapacidadRepository: Repository<Net_Discapacidad>,
     @InjectRepository(net_detalle_persona)  // Inyección del repositorio faltante
     private readonly detallePersonaRepository: Repository<net_detalle_persona>,
+
+    @InjectRepository(Net_Familia)  // Inyección del repositorio faltante
+    private readonly familiaRepository: Repository<Net_Familia>,
     
   ) { }
 
@@ -78,7 +81,7 @@ export class AfiliacionService {
     return await this.personaRepository.save(persona);
   }
 
-  async getPersonaByn_identificacioni(n_identificacion: string): Promise<net_persona> {
+  async getPersonaByn_identificacioni(n_identificacion: string): Promise<any> {
     const persona = await this.personaRepository.findOne({
       where: { n_identificacion },
       relations: [
@@ -91,7 +94,9 @@ export class AfiliacionService {
         'detallePersona.tipoPersona',
         'detallePersona.estadoAfiliacion',
         'referenciasPersonalPersona',
+        'referenciasPersonalPersona.referenciada',
         'personasPorBanco',
+        'personasPorBanco.banco',
         'detalleDeduccion',
         'perfPersCentTrabs',
         'perfPersCentTrabs.centroTrabajo',
@@ -103,11 +108,16 @@ export class AfiliacionService {
       ],
     });
 
+    const conyuge = await this.familiaRepository.findOne({
+      where: { persona: {id_persona: persona.id_persona}, parentesco: 'CONYUGE' },
+      relations: ['persona'],
+    });
+
     if (!persona) {
       throw new NotFoundException(`Persona with DNI ${n_identificacion} not found`);
     }
-
-    return persona;
+    
+    return {persona, conyuge};
   }
 
   async getCausantesByDniBeneficiario(n_identificacion: string): Promise<net_persona[]> {

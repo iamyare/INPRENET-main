@@ -170,8 +170,6 @@ export class EditDatosGeneralesComponent implements OnInit {
   }
 
   setDatosGenerales(datosGenerales: any) {
-    console.log(datosGenerales);
-    
     // Verifica que `datosGenerales` es un objeto válido
     if (!datosGenerales || typeof datosGenerales !== 'object') {
       console.error('datosGenerales no es un objeto válido:', datosGenerales);
@@ -362,7 +360,7 @@ export class EditDatosGeneralesComponent implements OnInit {
   }
 
   GuardarInformacion() {
-    console.log(this.formDatosGenerales.value.refpers[0]);
+    console.log(this.formDatosGenerales.value);
     
     this.formDatosGenerales.value.refpers[0].fecha_nacimiento = convertirFechaInputs(this.formDatosGenerales.value.refpers[0].fecha_nacimiento);
 

@@ -35,12 +35,12 @@ export class ConstanciasAfiliadoComponent {
 
   generarConstanciaAfiliacion() {
     const data = {
-      primer_nombre: this.persona.primer_nombre,
-      segundo_nombre: this.persona.segundo_nombre,
-      tercer_nombre: this.persona.tercer_nombre,
-      primer_apellido: this.persona.primer_apellido,
-      segundo_apellido: this.persona.segundo_apellido,
-      n_identificacion: this.persona.n_identificacion,
+      primer_nombre: this.persona.persona.primer_nombre,
+      segundo_nombre: this.persona.persona.segundo_nombre,
+      tercer_nombre: this.persona.persona.tercer_nombre,
+      primer_apellido: this.persona.persona.primer_apellido,
+      segundo_apellido: this.persona.persona.segundo_apellido,
+      n_identificacion: this.persona.persona.n_identificacion,
     };
 
     this.afiliadoService.generarConstanciaAfiliacion(data).subscribe((response: any) => {
@@ -74,12 +74,12 @@ export class ConstanciasAfiliadoComponent {
 
   generarConstanciaRenunciaCap() {
     const data = {
-      primer_nombre: this.persona.primer_nombre,
-      segundo_nombre: this.persona.segundo_nombre,
-      tercer_nombre: this.persona.tercer_nombre,
-      primer_apellido: this.persona.primer_apellido,
-      segundo_apellido: this.persona.segundo_apellido,
-      n_identificacion: this.persona.n_identificacion,
+      primer_nombre: this.persona.persona.primer_nombre,
+      segundo_nombre: this.persona.persona.segundo_nombre,
+      tercer_nombre: this.persona.persona.tercer_nombre,
+      primer_apellido: this.persona.persona.primer_apellido,
+      segundo_apellido: this.persona.persona.segundo_apellido,
+      n_identificacion: this.persona.persona.n_identificacion,
     };
 
     this.afiliadoService.generarConstanciaRenunciaCap(data).subscribe((response: any) => {
@@ -97,12 +97,12 @@ export class ConstanciasAfiliadoComponent {
 
   generarConstanciaNoCotizar() {
     const data = {
-      primer_nombre: this.persona.primer_nombre,
-      segundo_nombre: this.persona.segundo_nombre,
-      tercer_nombre: this.persona.tercer_nombre,
-      primer_apellido: this.persona.primer_apellido,
-      segundo_apellido: this.persona.segundo_apellido,
-      n_identificacion: this.persona.n_identificacion,
+      primer_nombre: this.persona.persona.primer_nombre,
+      segundo_nombre: this.persona.persona.segundo_nombre,
+      tercer_nombre: this.persona.persona.tercer_nombre,
+      primer_apellido: this.persona.persona.primer_apellido,
+      segundo_apellido: this.persona.persona.segundo_apellido,
+      n_identificacion: this.persona.persona.n_identificacion,
     };
 
     this.afiliadoService.generarConstanciaNoCotizar(data).subscribe((response: any) => {
@@ -120,12 +120,12 @@ export class ConstanciasAfiliadoComponent {
 
   generarConstanciaDebitos() {
     const data = {
-      primer_nombre: this.persona.primer_nombre,
-      segundo_nombre: this.persona.segundo_nombre,
-      tercer_nombre: this.persona.tercer_nombre,
-      primer_apellido: this.persona.primer_apellido,
-      segundo_apellido: this.persona.segundo_apellido,
-      n_identificacion: this.persona.n_identificacion,
+      primer_nombre: this.persona.persona.primer_nombre,
+      segundo_nombre: this.persona.persona.segundo_nombre,
+      tercer_nombre: this.persona.persona.tercer_nombre,
+      primer_apellido: this.persona.persona.primer_apellido,
+      segundo_apellido: this.persona.persona.segundo_apellido,
+      n_identificacion: this.persona.persona.n_identificacion,
     };
 
     this.afiliadoService.generarConstanciaDebitos(data).subscribe((response: any) => {
@@ -143,12 +143,12 @@ export class ConstanciasAfiliadoComponent {
 
   generarConstanciaTiempoCotizarConMonto() {
     const data = {
-      primer_nombre: this.persona.primer_nombre,
-      segundo_nombre: this.persona.segundo_nombre,
-      tercer_nombre: this.persona.tercer_nombre,
-      primer_apellido: this.persona.primer_apellido,
-      segundo_apellido: this.persona.segundo_apellido,
-      n_identificacion: this.persona.n_identificacion,
+      primer_nombre: this.persona.persona.primer_nombre,
+      segundo_nombre: this.persona.persona.segundo_nombre,
+      tercer_nombre: this.persona.persona.tercer_nombre,
+      primer_apellido: this.persona.persona.primer_apellido,
+      segundo_apellido: this.persona.persona.segundo_apellido,
+      n_identificacion: this.persona.persona.n_identificacion,
     };
 
     this.afiliadoService.generarConstanciaTiempoCotizarConMonto(data).subscribe((response: any) => {

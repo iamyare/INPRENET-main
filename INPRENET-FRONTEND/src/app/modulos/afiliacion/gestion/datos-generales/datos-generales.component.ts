@@ -58,6 +58,7 @@ export class DatosGeneralesComponent implements OnInit {
         const indicesSeleccionados = [];
       }
     }
+    this.cargarDiscapacidades1();
 
     this.formGroup.addControl('discapacidad', new FormControl(false, Validators.required));
     this.formGroup.get('discapacidad')?.valueChanges.subscribe(value => {
@@ -305,14 +306,20 @@ export class DatosGeneralesComponent implements OnInit {
   cargarDiscapacidades() {
     this.datosEstaticos.getDiscapacidades().subscribe(discapacidades => {
       this.discapacidades = discapacidades;
-      this.resetDiscapacidadesFormArray(this.indicesSeleccionados);
+      this.resetDiscapacidadesFormArray();
+    });
+  }
+  
+  cargarDiscapacidades1() {
+    this.datosEstaticos.getDiscapacidades().subscribe(discapacidades => {
+      this.discapacidades = discapacidades;
     });
   }
 
   onDiscapacidadChange(event: any) {
     this.discapacidadSeleccionada = event.value;
     if (this.discapacidadSeleccionada) {
-      this.resetDiscapacidadesFormArray(this.indicesSeleccionados);
+      this.resetDiscapacidadesFormArray();
     } else {
       this.formGroup.get('discapacidades')?.clearValidators();
       this.formGroup.get('discapacidades')?.updateValueAndValidity();
@@ -320,15 +327,18 @@ export class DatosGeneralesComponent implements OnInit {
     }
   }
 
-  resetDiscapacidadesFormArray(indicesSeleccionados: any[]) {
+  resetDiscapacidadesFormArray() {
     const discapacidadesArray = this.fb.array(
       this.discapacidades.map(discapacidad => {
-        const match = indicesSeleccionados.some(
+        // Siempre se creará un FormControl, y su valor será 'true' o 'false'
+        // dependiendo de si hay coincidencia en this.indicesSeleccionados.
+        const match = this.indicesSeleccionados.some(
           indice => indice.tipo === discapacidad.label
         );
         return new FormControl(match);
       })
     );
+  
     this.formGroup.setControl('discapacidades', discapacidadesArray);
   }
 

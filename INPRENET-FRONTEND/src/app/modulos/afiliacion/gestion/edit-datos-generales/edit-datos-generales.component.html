@@ -56,7 +56,7 @@
             {{ error }}
           </mat-error>
         </div>
-        <div class="col-md-4">
+        <!-- <div class="col-md-4">
           <mat-form-field style="flex-direction: column-reverse;" class="example-full-width inputs"
             appearance="outline">
             <mat-label>Observaciones</mat-label>
@@ -65,7 +65,7 @@
           <mat-error *ngFor="let error of getErrors('observaciones')">
             {{ error }}
           </mat-error>
-        </div>
+        </div> -->
         <div class="col-md-4">
           <mat-form-field style="flex-direction: column-reverse;" class="example-full-width inputs"
             appearance="outline">
@@ -84,7 +84,7 @@
             <mat-label>Departamento De Defunción</mat-label>
             <mat-icon matPrefix>location_city</mat-icon>
             <mat-select formControlName="id_departamento_defuncion" (selectionChange)="onDepartamentoChange($event)">
-              <mat-option *ngFor="let departamento of departamentos"  [value]="departamento.label">
+              <mat-option *ngFor="let departamento of departamentos"  [value]="departamento.value">
                 {{ departamento.label }}
               </mat-option>
             </mat-select>
@@ -99,7 +99,7 @@
             <mat-label>Municipio De Defunción</mat-label>
             <mat-icon matPrefix>location_city</mat-icon>
             <mat-select formControlName="id_municipio_defuncion">
-              <mat-option *ngFor="let municipio of municipios" [value]="municipio.label">
+              <mat-option *ngFor="let municipio of municipios" [value]="municipio.value">
                 {{ municipio.label }}
               </mat-option>
             </mat-select>

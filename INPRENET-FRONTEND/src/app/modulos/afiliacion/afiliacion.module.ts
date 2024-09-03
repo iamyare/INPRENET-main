@@ -49,6 +49,7 @@ import { RefPersComponent } from './gestion/ref-pers/ref-pers.component';
 import { BenefComponent } from './gestion/benef/benef.component';
 import { EditPerfilPuestTrabComponent } from './gestion/edit-perfil-puest-trab/edit-perfil-puest-trab.component';
 import { EditColegiosMagisterialesComponent } from './gestion/edit-colegios-magisteriales/edit-colegios-magisteriales.component';
+import { EditPepsComponent } from './gestion/edit-peps/edit-peps.component';
 import { AfiliacionDocentesComponent } from './gestion/afiliacion-docentes/afiliacion-docentes.component';
 import { DatosPropietarioComponent } from './Centros-Educativos/admin-centro-educativo/datos-propietario/datos-propietario.component';
 import { DatosContadorComponent } from './Centros-Educativos/admin-centro-educativo/datos-contador/datos-contador.component';
@@ -130,7 +131,8 @@ import { AgregarOtrasFuentesIngresoComponent } from './gestion/agregar-otras-fue
     DatosGeneralesComponent,
     BancosComponent,
     VerOtrasFuentesIngresoComponent,
-    AgregarOtrasFuentesIngresoComponent
+    AgregarOtrasFuentesIngresoComponent,
+    EditPepsComponent
   ],
   imports: [
     CommonModule,

@@ -41,7 +41,7 @@ export class EditDatosGeneralesComponent implements OnInit {
     estado: ["", [Validators.required]],
     certificado_defuncion: ["", [Validators.required]],
     causa_fallecimiento: ["", [Validators.required]],
-    observaciones: ["", [Validators.required]],
+    //observaciones: ["", [Validators.required]],
     fecha_defuncion: ["", [Validators.required]],
     id_departamento_defuncion: ["", [Validators.required]],
     id_municipio_defuncion: ["", [Validators.required]]
@@ -251,6 +251,8 @@ export class EditDatosGeneralesComponent implements OnInit {
 
           const refpersArray = this.formDatosGenerales.get('refpers') as FormArray;
           refpersArray.clear();
+          console.log(result);
+          
 
           this.initialData = {
             n_identificacion: result.N_IDENTIFICACION,
@@ -271,16 +273,20 @@ export class EditDatosGeneralesComponent implements OnInit {
             genero: result.GENERO,
             grupo_etnico: result.GRUPO_ETNICO,
             grado_academico: result.GRADO_ACADEMICO,
-            discapacidad: true,
-            estado_civil: "SOLTERO/A",           
-            id_profesion: 1,
-            id_departamento_residencia: 1,
-            id_municipio_residencia: 1,
-            id_departamento_nacimiento: 1,
-            id_municipio_nacimiento: 1,
-            id_tipo_identificacion: 1,
-            id_pais: 1,
-            cantidad_hijos: 0,
+            estado_civil: result.ESTADO_CIVIL,           
+            cantidad_hijos: result.CANTIDAD_HIJOS,
+            id_profesion: result.ID_PROFESION,
+            
+            id_pais: result.ID_PAIS,
+            id_departamento_residencia: result.id_departamento_residencia,
+            id_municipio_residencia: result.ID_MUNICIPIO,
+            
+            id_departamento_nacimiento: result.id_departamento_nacimiento,
+            id_municipio_nacimiento: result.ID_MUNICIPIO_NACIMIENTO,
+
+            discapacidad: result.discapacidades.length > 0 ? true : false,
+            id_tipo_identificacion: result.ID_PROFESION,
+
             barrio_colonia: "Hola",
             avenida: "Hola",
             calle: "Hola",
@@ -299,16 +305,15 @@ export class EditDatosGeneralesComponent implements OnInit {
           }
           
 
-          this.form1.controls.certificado_defuncion.setValue("12345")
-          this.form1.controls.fecha_defuncion.setValue("2024-08-28")
-          this.form1.controls.observaciones.setValue("Ninguna")
-
-          this.form1.controls.causa_fallecimiento.setValue('COVID-19');
-          this.form1.controls.estado.setValue('ACTIVO');
-          this.form1.controls.id_departamento_defuncion.setValue('OLANCHO');
-          this.form1.controls.id_municipio_defuncion.setValue('OLANCHO');
+          this.form1.controls.fecha_defuncion.setValue(result.fecha_defuncion)
+          this.form1.controls.causa_fallecimiento.setValue(result.CAUSA_FALLECIMIENTO);
+          this.form1.controls.id_departamento_defuncion.setValue(result.ID_DEPARTAMENTO_DEFUNCION);
+          this.form1.controls.id_municipio_defuncion.setValue(result.ID_MUNICIPIO_DEFUNCION);
           
-
+          //this.form1.controls.certificado_defuncion.setValue("12345")
+          //this.form1.controls.observaciones.setValue("Ninguna")
+          //this.form1.controls.estado.setValue('ACTIVO');
+            
           this.cargada = true          
           
           //this.form1.controls.id_departamento_defuncion.setValue("COLON")
@@ -369,7 +374,7 @@ export class EditDatosGeneralesComponent implements OnInit {
       estado: this.form1.value.estado,
       causa_fallecimiento: this.form1.value.causa_fallecimiento,
       fecha_defuncion: convertirFechaInputs(this.form1.value.fecha_defuncion!),
-      observaciones: this.form1.value.observaciones,
+      //observaciones: this.form1.value.observaciones,
       id_departamento_defuncion: this.form1.value.id_departamento_defuncion,
       id_municipio_defuncion: this.form1.value.id_municipio_defuncion,
       certificado_defuncion: this.form1.value.certificado_defuncion

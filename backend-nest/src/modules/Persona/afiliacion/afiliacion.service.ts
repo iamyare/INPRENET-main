@@ -308,7 +308,7 @@ export class AfiliacionService {
         salario_base: crearPersonaCentrosTrabajoDto.salario_base,
         fecha_ingreso: this.formatDateToYYYYMMDD(crearPersonaCentrosTrabajoDto.fecha_ingreso),
         fecha_egreso: this.formatDateToYYYYMMDD(crearPersonaCentrosTrabajoDto.fecha_egreso),
-        estado: crearPersonaCentrosTrabajoDto.estado,
+        estado: "ACTIVO",
       });
 
       resultados.push(await entityManager.save(Net_perf_pers_cent_trab, personaCentroTrabajo));

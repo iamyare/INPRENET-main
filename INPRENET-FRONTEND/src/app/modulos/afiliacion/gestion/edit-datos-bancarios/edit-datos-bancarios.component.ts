@@ -79,9 +79,9 @@ export class EditDatosBancariosComponent implements OnInit, OnChanges {
         const data = await this.svcAfiliado.getAllPersonaPBanco(this.Afiliado.n_identificacion).toPromise();
           this.filas = data.map((item: any) => ({
             id: item.id_af_banco,
-            nombre_banco: item.banco.nombre_banco,
+            nombre_banco: item.banco?.nombre_banco || 'N/A',
             numero_cuenta: item.num_cuenta,
-            estado: item.estado
+            estado: item.estado || 'N/A'
           }));
       } catch (error) {
         this.toastr.error('Error al cargar los datos bancarios');

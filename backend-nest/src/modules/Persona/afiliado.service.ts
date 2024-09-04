@@ -537,6 +537,7 @@ export class AfiliadoService {
             'personaDiscapacidades.discapacidad',
             'peps', // Incluye la relación peps
             'peps.socio', // Incluye la relación socio si es relevante
+            'peps.cargo_publico', // Incluye la relación peps
         ],
     });
 
@@ -550,7 +551,7 @@ export class AfiliadoService {
         descripcion: discapacidad.discapacidad.descripcion,
     }));
 
-    const peps = persona.peps.map(peps => ({
+    const peps = []/* persona.peps.map(peps => ({
         id: peps.id_peps,
         cargo: peps.cargo,
         fecha_inicio: peps.fecha_inicio,
@@ -561,7 +562,7 @@ export class AfiliadoService {
             nombre: peps.socio?.nombre,
             // Añadir más campos según la entidad Net_Socio
         }
-    }));
+    })); */
 
     const result = {
         N_IDENTIFICACION: persona.n_identificacion,

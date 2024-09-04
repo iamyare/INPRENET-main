@@ -546,8 +546,8 @@ export class AfiliacionService {
           await this.crearFamilia(crearDatosDto.familiares, persona.id_persona, transactionalEntityManager);
         }
 
-        if (crearDatosDto.persona.peps && crearDatosDto.persona.peps.length > 0) {
-          const peps = await this.crearPeps(crearDatosDto.persona.peps, persona.id_persona, transactionalEntityManager);
+        if (crearDatosDto.peps && crearDatosDto.peps.length > 0) {
+          const peps = await this.crearPeps(crearDatosDto.peps, persona.id_persona, transactionalEntityManager);
           resultados.push(...peps);
         }
 

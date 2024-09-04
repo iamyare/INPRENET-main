@@ -165,11 +165,11 @@ export class CrearPersonaDto {
   @Type(() => CrearDiscapacidadDto)
   discapacidades?: CrearDiscapacidadDto[];
 
-  @IsOptional()
+  /* @IsOptional()
   @IsArray()
   @ValidateNested({ each: true })
   @Type(() => CrearPepsDto)
-  peps?: CrearPepsDto[];
+  peps?: CrearPepsDto[]; */
 
 
   @IsOptional()

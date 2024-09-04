@@ -429,10 +429,10 @@ export class CentroTrabajoService {
     const { cargo, fecha_inicio, fecha_fin, referencias } = createPrivatePepsDto;
 
     const newPeps = this.pepsRepository.create({
-      cargo,
+      /* cargo,
       fecha_inicio,
-      fecha_fin,
-      referencias,
+      fecha_fin, 
+      referencias, */
       socio,
     });
 

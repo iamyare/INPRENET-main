@@ -3,11 +3,13 @@ import { IsNotEmpty, IsOptional, IsString, IsDateString } from 'class-validator'
 export class CrearPepsDto {
   @IsNotEmpty()
   @IsString()
-  cargo: string;
+  @IsOptional()
+  cargo?: string;
 
   @IsNotEmpty()
+  @IsOptional()
   @IsDateString()
-  fecha_inicio: string;
+  fecha_inicio?: string;
 
   @IsOptional()
   @IsDateString()

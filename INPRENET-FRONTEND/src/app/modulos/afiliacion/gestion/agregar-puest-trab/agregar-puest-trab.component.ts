@@ -28,7 +28,9 @@ export class AgregarPuestTrabComponent{
     const datosParseados = this.formPuestTrab.value.trabajo;
 
     this.afiliacionService.asignarCentrosTrabajoAPersona(Number(this.data.idPersona), datosParseados).subscribe(
+
       (res: any) => {
+        console.log(res);
         if (res.length > 0) {
           this.toastr.success("Centro de trabajo agregado con éxito");
           this.cerrar();

@@ -241,6 +241,8 @@ export class EditDatosGeneralesComponent implements OnInit {
 
   async previsualizarInfoAfil() {
     if (this.Afiliado) {
+      console.log(this.Afiliado);
+
       this.loading = true;
       await this.svcAfiliado.getAfilByParam(this.Afiliado.n_identificacion).subscribe(
         (result) => {
@@ -252,7 +254,7 @@ export class EditDatosGeneralesComponent implements OnInit {
           const refpersArray = this.formDatosGenerales.get('refpers') as FormArray;
           refpersArray.clear();
           console.log(result);
-          
+
 
           this.initialData = {
             n_identificacion: result.N_IDENTIFICACION,
@@ -273,14 +275,14 @@ export class EditDatosGeneralesComponent implements OnInit {
             genero: result.GENERO,
             grupo_etnico: result.GRUPO_ETNICO,
             grado_academico: result.GRADO_ACADEMICO,
-            estado_civil: result.ESTADO_CIVIL,           
+            estado_civil: result.ESTADO_CIVIL,
             cantidad_hijos: result.CANTIDAD_HIJOS,
             id_profesion: result.ID_PROFESION,
-            
+
             id_pais: result.ID_PAIS,
             id_departamento_residencia: result.id_departamento_residencia,
             id_municipio_residencia: result.ID_MUNICIPIO,
-            
+
             id_departamento_nacimiento: result.id_departamento_nacimiento,
             id_municipio_nacimiento: result.ID_MUNICIPIO_NACIMIENTO,
 
@@ -298,24 +300,24 @@ export class EditDatosGeneralesComponent implements OnInit {
             caserio: "Hola",
             cargoPublico: '',
           };
-          
+
           if (result.discapacidades.length > 0){
             this.discapacidadSeleccionada = true
             this.indicesSeleccionados = result.discapacidades
           }
-          
+
 
           this.form1.controls.fecha_defuncion.setValue(result.fecha_defuncion)
           this.form1.controls.causa_fallecimiento.setValue(result.CAUSA_FALLECIMIENTO);
           this.form1.controls.id_departamento_defuncion.setValue(result.ID_DEPARTAMENTO_DEFUNCION);
           this.form1.controls.id_municipio_defuncion.setValue(result.ID_MUNICIPIO_DEFUNCION);
-          
+
           //this.form1.controls.certificado_defuncion.setValue("12345")
           //this.form1.controls.observaciones.setValue("Ninguna")
           //this.form1.controls.estado.setValue('ACTIVO');
-            
-          this.cargada = true          
-          
+
+          this.cargada = true
+
           //this.form1.controls.id_departamento_defuncion.setValue("COLON")
           //console.log(this.form1.controls.id_departamento_defuncion )
           /* this.form1.setValue({
@@ -324,7 +326,7 @@ export class EditDatosGeneralesComponent implements OnInit {
             id_departamento_defuncion: '1',
             id_municipio_defuncion: '860'
           }); */
-          
+
 
           //refpersArray.push(newGroup);
 
@@ -366,7 +368,7 @@ export class EditDatosGeneralesComponent implements OnInit {
 
   GuardarInformacion() {
     console.log(this.formDatosGenerales.value);
-    
+
     this.formDatosGenerales.value.refpers[0].fecha_nacimiento = convertirFechaInputs(this.formDatosGenerales.value.refpers[0].fecha_nacimiento);
 
     const a = this.formDatosGenerales.value.refpers[0] = {
@@ -381,7 +383,7 @@ export class EditDatosGeneralesComponent implements OnInit {
     };
 
     console.log(a);
-    
+
 
     /* this.svcAfiliado.updateDatosGenerales(this.Afiliado.ID_PERSONA, this.formDatosGenerales.value.refpers[0]).subscribe(
       async (result) => {

@@ -1,4 +1,4 @@
-import { Component, Input, OnInit, OnChanges, SimpleChanges, OnDestroy } from '@angular/core';
+import { Component, Input, OnInit, OnChanges, SimpleChanges } from '@angular/core';
 import { Validators } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
 import { ToastrService } from 'ngx-toastr';
@@ -81,12 +81,15 @@ export class EditBeneficiariosComponent implements OnInit, OnChanges {
     if (this.persona) {
       try {
         const data = await this.svcAfiliado.getAllBenDeAfil(this.persona.n_identificacion).toPromise();
+        console.log(data);
+
         this.filas = data.map((item: any) => {
           const nombres = [item.primerNombre, item.segundoNombre, item.tercerNombre].filter(part => part).join(' ');
           const apellidos = [item.primerApellido, item.segundoApellido].filter(part => part).join(' ');
           const fechaNacimiento = this.datePipe.transform(item.fechaNacimiento, 'dd/MM/yyyy') || 'Fecha no disponible';
           const respData = {
-            id: item.idPersona,
+            id: item.idDetallePersona,
+            id_persona: item.idPersona,
             n_identificacion: item.nIdentificacion,
             nombres,
             apellidos,
@@ -131,15 +134,19 @@ export class EditBeneficiariosComponent implements OnInit, OnChanges {
       data: { campos: campos, valoresIniciales: row }
     });
 
+    console.log(row);
+    console.log(campos);
+
+
     dialogRef.afterClosed().subscribe((result: any) => {
       if (result) {
-        const [primer_nombre, segundo_nombre, tercer_nombre] = result.nombres.split(' ');
+        /* const [primer_nombre, segundo_nombre, tercer_nombre] = result.nombres.split(' ');
         const [primer_apellido, segundo_apellido] = result.apellidos.split(' ');
 
-        const fecha_nacimiento = this.datePipe.transform(result.fecha_nacimiento, 'dd-MM-yyyy') || '';
+        const fecha_nacimiento = this.datePipe.transform(result.fecha_nacimiento, 'dd-MM-yyyy') || ''; */
 
         const updatedBeneficiario = {
-          id_pais: result.idPaisNacionalidad,
+          /* id_pais: result.idPaisNacionalidad,
           n_identificacion: result.n_identificacion ?? 'ID no disponible',
           primer_nombre,
           segundo_nombre: segundo_nombre || '',
@@ -153,7 +160,7 @@ export class EditBeneficiariosComponent implements OnInit, OnChanges {
           fecha_nacimiento,
           direccion_residencia: result.direccion_residencia,
           id_municipio_residencia: result.id_municipio_residencia,
-          id_estado_persona: result.id_estado_persona,
+          id_estado_persona: result.id_estado_persona, */
           porcentaje: result.porcentaje
         };
 
@@ -179,7 +186,7 @@ export class EditBeneficiariosComponent implements OnInit, OnChanges {
 
   editarFila(row: any) {
     const campos = [
-      { nombre: 'n_identificacion', tipo: 'text', etiqueta: 'Número de Identificación', editable: true, icono: 'badge' },
+      /* { nombre: 'n_identificacion', tipo: 'text', etiqueta: 'Número de Identificación', editable: true, icono: 'badge' },
       { nombre: 'nombres', tipo: 'text', etiqueta: 'Nombres', editable: true, icono: 'person' },
       { nombre: 'apellidos', tipo: 'text', etiqueta: 'Apellidos', editable: true, icono: 'person_outline' },
       { nombre: 'sexo', tipo: 'list', etiqueta: 'Sexo', editable: true, opciones: this.datosEstaticosService.sexo, icono: 'transgender' },
@@ -188,7 +195,7 @@ export class EditBeneficiariosComponent implements OnInit, OnChanges {
       { nombre: 'direccion_residencia', tipo: 'text', etiqueta: 'Dirección de Residencia', editable: true, icono: 'home' },
       { nombre: 'idPaisNacionalidad', tipo: 'list', etiqueta: 'País Nacionalidad', editable: true, opciones: this.datosEstaticosService.nacionalidades, icono: 'public' },
       { nombre: 'id_municipio_residencia', tipo: 'list', etiqueta: 'Municipio Residencia', editable: true, opciones: this.datosEstaticosService.municipios, icono: 'location_city' },
-      { nombre: 'id_estado_persona', tipo: 'list', etiqueta: 'Estado Persona', editable: true, opciones: this.datosEstaticosService.estados, icono: 'assignment_ind' },
+      { nombre: 'id_estado_persona', tipo: 'list', etiqueta: 'Estado Persona', editable: true, opciones: this.datosEstaticosService.estados, icono: 'assignment_ind' }, */
       { nombre: 'porcentaje', tipo: 'number', etiqueta: 'Porcentaje', editable: true, icono: 'pie_chart' }
     ];
 

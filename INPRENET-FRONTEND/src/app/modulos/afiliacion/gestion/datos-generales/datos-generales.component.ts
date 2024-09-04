@@ -12,13 +12,8 @@ import { DireccionService } from 'src/app/services/direccion.service';
 export class DatosGeneralesComponent implements OnInit {
   @Input() formGroup!: FormGroup;
   @Output() imageCaptured = new EventEmitter<string>();
-
-  
-  @Input() initialData!: any;
-  @Input() discapacidadSeleccionada!: boolean;
   @Input() indicesSeleccionados: any[] = [];
 
-  @Output() newDatosGenerales = new EventEmitter<any>();
   departamentos: { value: number, label: string }[] = [];
   municipios: { value: number, label: string }[] = [];
   departamentosNacimiento: { value: number, label: string }[] = [];
@@ -30,6 +25,7 @@ export class DatosGeneralesComponent implements OnInit {
   genero: { value: string, label: string }[] = [];
   nacionalidades: { value: number, label: string }[] = [];
   discapacidades: { label: string, value: number }[] = [];
+  discapacidadSeleccionada: boolean = false;
   useCamera: boolean = true;
 
   constructor(private fb: FormBuilder,
@@ -39,28 +35,20 @@ export class DatosGeneralesComponent implements OnInit {
 
   ngOnInit(): void {
     const noSpecialCharsPattern = '^[a-zA-Z0-9\\s]*$';
+
     if (!this.formGroup) {
-      if (this.initialData){
-        this.formGroup = this.fb.group({
-          peps: this.fb.array([]),
-          discapacidades: this.fb.array([]),
-          ...this.initialData 
-        });
-        this.cargarDiscapacidades();
-      }
-      else{
-        this.formGroup = this.fb.group({
-          peps: this.fb.array([]),
-          discapacidades: this.fb.array([]),
-          FotoPerfil: new FormControl(null, Validators.required)
-        });
-        this.formGroup.addControl('FotoPerfil', new FormControl(null, Validators.required));
-        const indicesSeleccionados = [];
-      }
+      this.formGroup = this.fb.group({
+        peps: this.fb.array([]),
+        discapacidades: this.fb.array([]),
+        FotoPerfil: new FormControl(null, Validators.required)
+      });
+    } else {
+      this.formGroup.addControl('FotoPerfil', new FormControl(null, Validators.required));
     }
-    this.cargarDiscapacidades1();
 
     this.formGroup.addControl('discapacidad', new FormControl(false, Validators.required));
+    this.cargarDiscapacidades();
+
     this.formGroup.get('discapacidad')?.valueChanges.subscribe(value => {
       this.onDiscapacidadChange({ value });
     });
@@ -143,20 +131,11 @@ export class DatosGeneralesComponent implements OnInit {
       Validators.maxLength(75),
       Validators.pattern(noSpecialCharsPattern)
     ]));
-    this.formGroup.addControl('cargoPublico', new FormControl('', [
-      Validators.maxLength(75),
-      Validators.pattern(noSpecialCharsPattern)
-    ]));
     this.formGroup.addControl('grado_academico', new FormControl('', [
       Validators.maxLength(75)
     ]));
 
     this.cargarDatosIniciales();
-  }
-
-  onDatosGeneralesChange() {
-    const data = this.formGroup;
-    this.newDatosGenerales.emit(data);
   }
 
   async cargarDatosIniciales() {
@@ -309,12 +288,6 @@ export class DatosGeneralesComponent implements OnInit {
       this.resetDiscapacidadesFormArray();
     });
   }
-  
-  cargarDiscapacidades1() {
-    this.datosEstaticos.getDiscapacidades().subscribe(discapacidades => {
-      this.discapacidades = discapacidades;
-    });
-  }
 
   onDiscapacidadChange(event: any) {
     this.discapacidadSeleccionada = event.value;
@@ -338,7 +311,7 @@ export class DatosGeneralesComponent implements OnInit {
         return new FormControl(match);
       })
     );
-  
+
     this.formGroup.setControl('discapacidades', discapacidadesArray);
   }
 
@@ -358,6 +331,8 @@ export class DatosGeneralesComponent implements OnInit {
     this.formGroup.patchValue({ FotoPerfil: image });
     this.imageCaptured.emit(image);
   }
+
+
 
   get isPhotoInvalid(): boolean {
     const control = this.formGroup.get('FotoPerfil');

@@ -39,7 +39,6 @@ export class EditDatosBancariosComponent implements OnInit, OnChanges {
 
   initializeComponent(): void {
     if (!this.Afiliado) {
-      this.resetDatos();
       return;
     }
 

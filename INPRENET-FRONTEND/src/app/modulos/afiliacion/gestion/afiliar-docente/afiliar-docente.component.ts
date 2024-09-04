@@ -35,7 +35,10 @@ export class AfiliarDocenteComponent implements OnInit {
     this.steps = [
       {
         label: 'Datos Generales',
-        formGroup: this.fb.group({}),
+        formGroup: this.fb.group({
+          peps: this.fb.array([]),
+          familiares: this.fb.array([])
+        }),
         template: this.datosGeneralesTemplate
       },
       {
@@ -129,9 +132,10 @@ export class AfiliarDocenteComponent implements OnInit {
           id_municipio_residencia: datosGenerales.id_municipio_residencia,
           id_municipio_nacimiento: datosGenerales.id_municipio_nacimiento,
           id_profesion: datosGenerales.id_profesion,
-          discapacidades: datosGenerales.discapacidades || [],
-          peps: this.formatPeps(datosGenerales.peps || [])
+          discapacidades: datosGenerales.discapacidades || []
         },
+        familiares: this.formatFamiliares(datosGenerales, referenciasPersonales),
+        peps: this.formatPeps(datosGenerales.peps || []),
         detallePersona: {
           eliminado: "NO",
           tipo_persona: "AFILIADO",
@@ -143,7 +147,6 @@ export class AfiliarDocenteComponent implements OnInit {
         otrasFuentesIngreso: this.formatOtrasFuentesIngreso(centrosTrabajo.otrasFuentesIngreso || []),
         referencias: this.formatReferencias(referenciasPersonales.refpers || []),
         beneficiarios: this.formatBeneficiarios(beneficiarios.beneficiario || []),
-        familiares: this.formatFamiliares(datosGenerales, referenciasPersonales)
       };
 
       const fotoPerfilBase64 = this.fotoPerfil || '';
@@ -154,6 +157,7 @@ export class AfiliarDocenteComponent implements OnInit {
       file = new File([fotoBlob], 'perfil.jpg', { type: 'image/jpeg' });
     }
 
+    console.log(formattedData);
 
     this.afiliacionService.crearAfiliacion(formattedData, file).subscribe(
       response => {
@@ -189,11 +193,16 @@ export class AfiliarDocenteComponent implements OnInit {
 
   private formatPeps(peps: any[]): any[] {
     return peps.map(pep => ({
-      cargo: pep.pep_cargo_desempenado || '',
-      fecha_inicio: pep.startDate || '',
-      fecha_fin: pep.endDate || ''
+      cargosPublicos: [
+        {
+          cargo: pep.pep_cargo_desempenado || '',
+          fecha_inicio: pep.startDate || '',
+          fecha_fin: pep.endDate || ''
+        }
+      ]
     }));
   }
+
 
   private formatColegiosMagisteriales(colMags: any[]): any[] {
     return colMags.map(col => ({
@@ -269,8 +278,9 @@ export class AfiliarDocenteComponent implements OnInit {
   }
 
   private formatFamiliares(datosGenerales: any, referenciasPersonales: any): any[] {
+    const familiares = datosGenerales.familiares || [];
     return [
-      ...datosGenerales.familiares.map((familiar: any) => ({
+      ...familiares.map((familiar: any) => ({
         parentesco: familiar.parentesco,
         persona_referencia: {
           primer_nombre: familiar.primer_nombre,

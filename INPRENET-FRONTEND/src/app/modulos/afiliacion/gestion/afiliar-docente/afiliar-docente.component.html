@@ -3,9 +3,8 @@
     [formGroup]="steps[0].formGroup"
     (imageCaptured)="handleImageCaptured($event)">
   </app-datos-generales>
-  <app-peps></app-peps>
+  <app-peps [parentForm]="steps[0].formGroup"></app-peps>
 </ng-template>
-
 
 <ng-template #referenciasPersonalesTemplate>
   <app-ref-pers [formGroup]="steps[1].formGroup"></app-ref-pers>

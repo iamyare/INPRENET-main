@@ -29,6 +29,7 @@ import { net_persona } from './entities/net_persona.entity';
 import { CreateDetalleBeneficiarioDto } from './dto/create-detalle-beneficiario-dto';
 import { Benef } from './dto/pruebaBeneficiario.dto';
 import { net_estado_afiliacion } from './entities/net_estado_afiliacion.entity';
+import { net_detalle_persona } from './entities/net_detalle_persona.entity';
 
 @ApiTags('Persona')
 @Controller('Persona')
@@ -362,8 +363,8 @@ export class AfiliadoController {
   updatePersona(
     @Param('id') id: number,
     @Body() updateBeneficiarioDto: any,
-  ): Promise<net_persona> {
-    return this.afiliadoService.updateBeneficario(id, updateBeneficiarioDto);
+  ): Promise<net_detalle_persona> {
+    return this.afiliadoService.updateBeneficiario(id, updateBeneficiarioDto);
   }
 
   @Put('desactivarCuentaBancaria/:id')

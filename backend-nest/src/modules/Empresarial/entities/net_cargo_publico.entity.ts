@@ -1,7 +1,4 @@
 import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn } from 'typeorm';
-import { Net_Socio } from './net_socio.entity';
-import { net_persona } from 'src/modules/Persona/entities/net_persona.entity';
-
 import { Net_Peps } from './net_peps.entity';
 
 @Entity({ name: 'NET_CARGO_PUBLICO' })
@@ -13,15 +10,15 @@ export class Net_Cargo_Publico {
   cargo: string;
 
   @Column('date', { nullable: false, name: 'FECHA_INICIO' })
-  fecha_inicio: Date;
+  fecha_inicio: string;
 
   @Column('date', { nullable: true, name: 'FECHA_FIN' })
-  fecha_fin: Date;
+  fecha_fin: string;
 
   @Column('varchar2', { length: 255, nullable: true, name: 'REFERENCIAS' })
   referencias: string; 
  
   @ManyToOne(() => Net_Peps, pep => pep.cargo_publico)
-  @JoinColumn({ name: 'ID_PEPS', foreignKeyConstraintName: 'FK_ID_PEPS_CARG_PUB' })
+  @JoinColumn({ name: 'ID_PEPS', foreignKeyConstraintName: 'FK_ID_PEPS_CARG_PUBL' })
   peps: Net_Peps;
 }

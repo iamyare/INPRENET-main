@@ -164,14 +164,4 @@ export class CrearPersonaDto {
   @ValidateNested({ each: true })
   @Type(() => CrearDiscapacidadDto)
   discapacidades?: CrearDiscapacidadDto[];
-
-  /* @IsOptional()
-  @IsArray()
-  @ValidateNested({ each: true })
-  @Type(() => CrearPepsDto)
-  peps?: CrearPepsDto[]; */
-
-
-  @IsOptional()
-  cargoPublico?
 }

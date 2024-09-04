@@ -329,53 +329,30 @@ export class AfiliadoService {
     return persona;
   }
 
-  async updateBeneficario(id: number, updatePersonaDto: UpdateBeneficiarioDto): Promise<net_persona> {
-    console.log(updatePersonaDto);
-
-    const persona = await this.personaRepository.findOne({
-      where: { id_persona: id },
-      relations: ['detallePersona'],
-    });
-
-    if (!persona) {
-      throw new NotFoundException(`Persona with ID ${id} not found`);
-    }
+  async updateBeneficiario(id: number, updatePersonaDto: UpdateBeneficiarioDto): Promise<net_detalle_persona> {
+    console.log(updatePersonaDto); 
+    console.log(id);
+    
+    // Busca el detalle de la persona utilizando ID_DETALLE_PERSONA
     const detallePersona = await this.detallePersonaRepository.findOne({
-      where: { ID_PERSONA: id },
+      where: { ID_DETALLE_PERSONA: id }, // Aquí utilizamos ID_DETALLE_PERSONA
     });
-
+  
     if (!detallePersona) {
       throw new NotFoundException(`Detalle persona with ID ${id} not found`);
     }
-
-    if (updatePersonaDto.fecha_nacimiento) {
-      updatePersonaDto.fecha_nacimiento = this.formatDateToYYYYMMDD(updatePersonaDto.fecha_nacimiento);
+  
+    // Actualiza solo el porcentaje en el detalle de la persona
+    if (updatePersonaDto.porcentaje !== undefined) {
+      detallePersona.porcentaje = updatePersonaDto.porcentaje;
     }
-
-    Object.assign(persona, updatePersonaDto);
-
-    if (updatePersonaDto.eliminado) {
-      detallePersona.eliminado = "SI";
-    }
-
-    if (updatePersonaDto.id_estado_persona) {
-      const estadoP = await this.estadoAfiliacionRepository.findOne({
-        where: { codigo: updatePersonaDto.id_estado_persona }
-      });
-      detallePersona.estadoAfiliacion = estadoP;
-    }
-
-    if (updatePersonaDto.id_municipio_residencia) {
-      persona.municipio = await this.municipioRepository.findOne({ where: { id_municipio: updatePersonaDto.id_municipio_residencia } });
-    }
-
-    if (updatePersonaDto.id_pais) {
-      persona.pais = await this.paisRepository.findOne({ where: { id_pais: updatePersonaDto.id_pais } });
-    }
-
+  
+    // Guarda los cambios en la base de datos
     await this.detallePersonaRepository.save(detallePersona);
-    return this.personaRepository.save(persona);
+    
+    return detallePersona;
   }
+  
 
 
 
@@ -610,7 +587,6 @@ export class AfiliadoService {
         discapacidades: discapacidades,
         peps: peps,
     };
-    console.log(result);
     
     return result;
 }
@@ -938,18 +914,20 @@ async findOnePersonaParaDeduccion(term: string) {
         where: { n_identificacion: n_identificacionAfil },
         relations: ['detallePersona'],
       });
-
+  
       if (!afiliado) {
         throw new Error(`No se encontró el afiliado con N_IDENTIFICACION: ${n_identificacionAfil}`);
       }
+  
       const beneficiarios = await this.detallePersonaRepository.find({
         where: {
           ID_CAUSANTE: afiliado.id_persona,
-          ID_CAUSANTE_PADRE: afiliado.id_persona
+          ID_CAUSANTE_PADRE: afiliado.id_persona,
         },
         relations: ['persona', 'tipoPersona', 'estadoAfiliacion'],
       });
       const beneficiariosFormatted = beneficiarios.map(beneficiario => ({
+        idDetallePersona: beneficiario.ID_DETALLE_PERSONA, // Agregando el ID_DETALLE_PERSONA
         idPersona: beneficiario.ID_PERSONA,
         nIdentificacion: beneficiario.persona?.n_identificacion || null,
         primerNombre: beneficiario.persona?.primer_nombre || null,
@@ -971,15 +949,15 @@ async findOnePersonaParaDeduccion(term: string) {
         estadoDescripcion: beneficiario.estadoAfiliacion?.nombre_estado || null,
         porcentaje: beneficiario.porcentaje || null,
         tipoPersona: beneficiario.tipoPersona?.tipo_persona || null,
-        /* cantidadDependientes: beneficiario.persona?.cantidad_dependientes || null, */
       }));
-
+  
       return beneficiariosFormatted;
     } catch (error) {
       this.logger.error(`Error al consultar beneficios: ${error.message}`);
       throw new Error(`Error al consultar beneficios: ${error.message}`);
     }
   }
+  
 
 
   normalizarDatos(data: any): PersonaResponse[] {
@@ -1128,8 +1106,9 @@ async findOnePersonaParaDeduccion(term: string) {
         .leftJoinAndSelect('persona.perfPersCentTrabs', 'perfPersCentTrabs')
         .leftJoinAndSelect('perfPersCentTrabs.centroTrabajo', 'centroTrabajo')
         .where('persona.n_identificacion = :n_identificacion', { n_identificacion })
+        .andWhere('perfPersCentTrabs.estado = :estado', { estado: 'ACTIVO' }) 
         .getOne();
-        
+  
       if (!persona || !persona.perfPersCentTrabs) {
         return [];
       }
@@ -1139,6 +1118,7 @@ async findOnePersonaParaDeduccion(term: string) {
       throw new Error('Error al obtener los perfiles de la persona');
     }
   }
+  
   
   
   async getAllOtrasFuentesIngres(n_identificacion: string): Promise<any[]> {
@@ -1210,6 +1190,8 @@ async findOnePersonaParaDeduccion(term: string) {
   }
 
   async updatePerfCentroTrabajo(id: number, updateDto: UpdatePerfCentTrabDto): Promise<Net_perf_pers_cent_trab> {
+    console.log(updateDto);
+    
     const existingPerf = await this.perfPersoCentTrabRepository.findOne({ where: { id_perf_pers_centro_trab: id } });
     if (!existingPerf) {
       throw new NotFoundException(`Perfil centro trabajo con ID ${id} no encontrado`);

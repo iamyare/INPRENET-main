@@ -140,7 +140,7 @@ export class PdfService {
     let dataCentTrab = persona.perfPersCentTrabs;
     let dataRef = persona.referenciasPersonalPersona;
     let dataCuenBan = persona.personasPorBanco;
-    let cargos_publicos = persona.peps[0].cargo_publico;
+    let cargos_publicos = persona.peps[0]?.cargo_publico;
     let conyuge = data.conyuge
 
     const jsonObj = data.persona.direccion_residencia.split(',').reduce((acc:any, curr:any) => {
@@ -148,6 +148,15 @@ export class PdfService {
       acc[key] = value;
       return acc;
     }, {} as { [key: string]: string });
+
+    const jsonObj: any = data.persona.direccion_residencia 
+          ? data.persona.direccion_residencia.split(',').reduce((acc: any, curr: any) => {
+              const [key, value] = curr.split(':').map((s: string) => s.trim());
+              acc[key] = value;
+              return acc;
+            }, {} as { [key: string]: string })
+          : {}; // Si no existe DIRECCION_RESIDENCIA, asigna un objeto vacío
+
     
     const content: Array<any> = [
       {
@@ -231,13 +240,13 @@ export class PdfService {
                   {text: 'COLOR DE CASA', alignment: 'center', style:['subheader'] }
                 ],
                 [ 
-                  { text: jsonObj["BARRIO_COLONIA"], alignment: 'center'}, 
-                  {text: jsonObj.AVENIDA, alignment: 'center'}, 
-                  {text: jsonObj.CALLE, alignment: 'center'}, 
-                  {text: jsonObj.SECTOR, alignment: 'center'}, 
-                  {text: jsonObj.BLOQUE, alignment: 'center'}, 
-                  {text: jsonObj["N° DE CASA"], alignment: 'center'}, 
-                  {text: jsonObj["COLOR CASA"], alignment: 'center'}
+                  { text: jsonObj?.["BARRIO_COLONIA"], alignment: 'center'}, 
+                  {text: jsonObj?.AVENIDA, alignment: 'center'}, 
+                  {text: jsonObj?.CALLE, alignment: 'center'}, 
+                  {text: jsonObj?.SECTOR, alignment: 'center'}, 
+                  {text: jsonObj?.BLOQUE, alignment: 'center'}, 
+                  {text: jsonObj?.["N° DE CASA"], alignment: 'center'}, 
+                  {text: jsonObj?.["COLOR CASA"], alignment: 'center'}
                 ],
                 [ 
                   { text: 'ALDEA', alignment: 'center', style:['subheader'] }, 
@@ -249,8 +258,8 @@ export class PdfService {
                   {text: 'CIUDAD', alignment: 'center', style:['subheader'] }
                 ],
                 [ 
-                  { text: jsonObj.ALDEA, alignment: 'center'}, 
-                  { text: jsonObj.CASERIO, alignment: 'center'}, 
+                  { text: jsonObj?.ALDEA, alignment: 'center'}, 
+                  { text: jsonObj?.CASERIO, alignment: 'center'}, 
                   { text: '', alignment: 'center',colSpan:2}, 
                   {}, 
                   {text: '', alignment: 'center',colSpan:2}, 

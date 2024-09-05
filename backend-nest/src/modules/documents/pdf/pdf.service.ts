@@ -143,12 +143,6 @@ export class PdfService {
     let cargos_publicos = persona.peps[0]?.cargo_publico;
     let conyuge = data.conyuge
 
-    const jsonObj = data.persona.direccion_residencia.split(',').reduce((acc:any, curr:any) => {
-      const [key, value] = curr.split(':').map((s:string) => s.trim());
-      acc[key] = value;
-      return acc;
-    }, {} as { [key: string]: string });
-
     const jsonObj: any = data.persona.direccion_residencia 
           ? data.persona.direccion_residencia.split(',').reduce((acc: any, curr: any) => {
               const [key, value] = curr.split(':').map((s: string) => s.trim());

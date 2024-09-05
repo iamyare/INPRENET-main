@@ -252,9 +252,15 @@ export class EditDatosGeneralesComponent implements OnInit {
           this.fallecido = result.fallecido;
 
           const refpersArray = this.formDatosGenerales.get('refpers') as FormArray;
-          refpersArray.clear();
+          //refpersArray.clear();
           console.log(result);
 
+
+          const jsonObj = result.DIRECCION_RESIDENCIA.split(',').reduce((acc:any, curr:any) => {
+            const [key, value] = curr.split(':').map((s:string) => s.trim());
+            acc[key] = value;
+            return acc;
+          }, {} as { [key: string]: string });
 
           this.initialData = {
             n_identificacion: result.N_IDENTIFICACION,
@@ -289,15 +295,17 @@ export class EditDatosGeneralesComponent implements OnInit {
             discapacidad: result.discapacidades.length > 0 ? true : false,
             id_tipo_identificacion: result.ID_PROFESION,
 
-            barrio_colonia: "Hola",
-            avenida: "Hola",
-            calle: "Hola",
-            sector: "Hola",
-            bloque: "Hola",
-            numero_casa: "Hola",
-            color_casa: "Hola",
-            aldea: "Hola",
-            caserio: "Hola",
+            avenida: jsonObj.AVENIDA,
+            calle: jsonObj.CALLE,
+            sector: jsonObj.SECTOR,
+            bloque: jsonObj.BLOQUE,
+            aldea: jsonObj.ALDEA,
+            caserio: jsonObj.CASERIO,
+
+            barrio_colonia: jsonObj["BARRIO_COLONIA"],
+            numero_casa: jsonObj["N° DE CASA"],
+            color_casa: jsonObj["COLOR CASA"],
+
             cargoPublico: '',
           };
 

@@ -1118,6 +1118,25 @@ async findOnePersonaParaDeduccion(term: string) {
       throw new Error('Error al obtener los perfiles de la persona');
     }
   }
+
+  async getAllCargoPublicPeps(n_identificacion: string): Promise<any> {
+    try {
+      const persona = await this.personaRepository.createQueryBuilder('persona')
+        .leftJoinAndSelect('persona.peps', 'peps')
+        .leftJoinAndSelect('peps.cargo_publico', 'cargo_publico')
+        .where('persona.n_identificacion = :n_identificacion', { n_identificacion })
+        .getOne();
+        
+      if (!persona || !persona.peps) {
+        return [];
+      }
+      
+      return persona.peps;
+    } catch (error) {
+      console.error('Error al obtener los perfiles de la persona:', error);
+      throw new Error('Error al obtener los perfiles de la persona');
+    }
+  }
   
   
   

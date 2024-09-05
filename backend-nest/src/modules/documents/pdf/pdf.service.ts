@@ -5,6 +5,7 @@ import * as pdfMake from 'pdfmake/build/pdfmake';
 import * as pdfFonts from 'pdfmake/build/vfs_fonts';
 import { DriveService } from '../drive/drive.service';
 import { unirNombres } from '../../../shared/formatoNombresP';
+import { calcularEdad } from '../../../shared/calcularEdad';
 import * as path from 'path';
 
 @Injectable()
@@ -139,9 +140,15 @@ export class PdfService {
     let dataCentTrab = persona.perfPersCentTrabs;
     let dataRef = persona.referenciasPersonalPersona;
     let dataCuenBan = persona.personasPorBanco;
-    
+    let cargos_publicos = persona.peps[0].cargo_publico;
     let conyuge = data.conyuge
 
+    const jsonObj = data.persona.direccion_residencia.split(',').reduce((acc:any, curr:any) => {
+      const [key, value] = curr.split(':').map((s:string) => s.trim());
+      acc[key] = value;
+      return acc;
+    }, {} as { [key: string]: string });
+    
     const content: Array<any> = [
       {
         table: {
@@ -184,7 +191,9 @@ export class PdfService {
                 ],
                 [ 
                   { text: 'CIUDAD', alignment: 'left', style:['subheader'] },  { text: ``, alignment: 'left', colSpan: 2},  {}, 
-                  { text: 'FECHA DE NACIMIENTO', alignment: 'left', style:['subheader'] }, { text: `${persona.fecha_nacimiento}`, alignment: 'left'}, {text: 'Edad', alignment: 'left', style:['subheader']},{} 
+                  { text: 'FECHA DE NACIMIENTO', alignment: 'left', style:['subheader'] }, { text: `${persona.fecha_nacimiento}`, alignment: 'left'}, 
+                  { text: 'Edad', alignment: 'left', style:['subheader']}, 
+                  { text: `${calcularEdad(persona.fecha_nacimiento)} Años`, alignment: 'left'} 
                 ],
                 [ 
                   { text: 'REPRESENTACIÓN', alignment: 'left', style:['subheader'] }, 
@@ -201,8 +210,14 @@ export class PdfService {
                   {text: '', colSpan: 6}, 
                   {},{},{},{},{}
                 ],
-                [ { text: 'CARGO DESEMPEÑADO', alignment: 'center', colSpan: 2, style:['subheader']}, {}, {}, { text: 'PERÍODO', alignment: 'left', style:['subheader']}, {text: '', alignment: 'left', colSpan: 3}, {}, {}], 
 
+                ...cargos_publicos.flatMap((b: any) => {
+                  return [
+                    [ 
+                      { text: 'CARGO DESEMPEÑADO', alignment: 'center', colSpan: 2, style:['subheader']}, {}, {text: `${b.cargo}`, alignment: 'left'}, 
+                      { text: 'PERÍODO', alignment: 'left', style:['subheader']}, {text: `${b.fecha_inicio} - ${b.fecha_fin}`, alignment: 'left', colSpan: 3}, {}, {}
+                    ], 
+                ]}),
                 [ 
                   { text: 'DIRECCIÓN DOMICILIARIA DEL DOCENTE', alignment: 'center', colSpan: 7, style:['header']}
                 ],
@@ -216,13 +231,13 @@ export class PdfService {
                   {text: 'COLOR DE CASA', alignment: 'center', style:['subheader'] }
                 ],
                 [ 
-                  { text: '', alignment: 'center'}, 
-                  {text: '', alignment: 'center'}, 
-                  {text: '', alignment: 'center'}, 
-                  {text: '', alignment: 'center'}, 
-                  {text: '', alignment: 'center'}, 
-                  {text: '', alignment: 'center'}, 
-                  {text: '', alignment: 'center'}
+                  { text: jsonObj["BARRIO_COLONIA"], alignment: 'center'}, 
+                  {text: jsonObj.AVENIDA, alignment: 'center'}, 
+                  {text: jsonObj.CALLE, alignment: 'center'}, 
+                  {text: jsonObj.SECTOR, alignment: 'center'}, 
+                  {text: jsonObj.BLOQUE, alignment: 'center'}, 
+                  {text: jsonObj["N° DE CASA"], alignment: 'center'}, 
+                  {text: jsonObj["COLOR CASA"], alignment: 'center'}
                 ],
                 [ 
                   { text: 'ALDEA', alignment: 'center', style:['subheader'] }, 
@@ -234,8 +249,8 @@ export class PdfService {
                   {text: 'CIUDAD', alignment: 'center', style:['subheader'] }
                 ],
                 [ 
-                  { text: '', alignment: 'center'}, 
-                  { text: '', alignment: 'center'}, 
+                  { text: jsonObj.ALDEA, alignment: 'center'}, 
+                  { text: jsonObj.CASERIO, alignment: 'center'}, 
                   { text: '', alignment: 'center',colSpan:2}, 
                   {}, 
                   {text: '', alignment: 'center',colSpan:2}, 
@@ -485,6 +500,8 @@ export class PdfService {
       }
     };
   }
+
+
 
 
   async generateConstanciaAfiliacion(data: any, includeQR: boolean): Promise<Buffer> {

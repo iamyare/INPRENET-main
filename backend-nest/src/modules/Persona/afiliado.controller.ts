@@ -270,6 +270,22 @@ export class AfiliadoController {
       }
     }
   }
+  @Get('/getAllCargoPublicPeps/:n_identificacion')
+  async getAllCargoPublicPeps(@Param("n_identificacion") n_identificacion: string) {
+    try {
+      const resultado =
+        await this.afiliadoService.getAllCargoPublicPeps(n_identificacion);
+      return resultado;
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw error;
+      } else {
+        throw new NotFoundException(
+          `No se pudo procesar la solicitud`,
+        );
+      }
+    }
+  }
 
   @Get('/getAllReferenciasPersonales/:n_identificacion')
   async getAllReferenciasPersonales(@Param("n_identificacion") n_identificacion: string) {

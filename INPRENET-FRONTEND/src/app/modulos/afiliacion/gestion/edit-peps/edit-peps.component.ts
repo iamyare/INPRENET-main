@@ -65,10 +65,6 @@ export class EditPepsComponent {
       return;
     }
 
-    this.myFormFields = [
-      { type: 'text', label: 'DNI del afiliado', name: 'dni', validations: [Validators.required, Validators.minLength(13), Validators.maxLength(14)], display: true }
-    ];
-
     this.myColumns = [
       {
         header: 'Cargo',
@@ -119,17 +115,15 @@ export class EditPepsComponent {
 
     if (this.Afiliado.n_identificacion) {
       try {
-        const data = await this.svcAfiliado.getAllPerfCentroTrabajo(this.Afiliado.n_identificacion).toPromise();
-        this.filas = data.map((item: any) => ({
-          id_perf_pers_centro_trab: item.id_perf_pers_centro_trab,
-          id_centro_trabajo: item.centroTrabajo.id_centro_trabajo,
-          nombre_centro_trabajo: item.centroTrabajo.nombre_centro_trabajo,
-          numeroAcuerdo: item.numero_acuerdo || 'No disponible',
-          salarioBase: item.salario_base,
-          fechaIngreso: this.datePipe.transform(item.fecha_ingreso, 'dd/MM/yyyy') || 'Fecha no disponible',
-          fechaEgreso: this.datePipe.transform(item.fecha_egreso, 'dd/MM/yyyy') || 'Fecha no disponible',
-          cargo: item.cargo,
-        }));
+        const data = await this.svcAfiliado.getAllCargoPublicPeps(this.Afiliado.n_identificacion).toPromise();
+        this.filas = data[0].cargo_publico.map((item: any) => {
+          return {
+            cargo: item.cargo,
+            fecha_inicio: item.fecha_inicio,
+            fecha_fin: item.fecha_fin,
+          }
+        }
+      );
       } catch (error) {
         this.toastr.error('Error al cargar los datos de los perfiles de los centros de trabajo');
         console.error('Error al obtener datos de los perfiles de los centros de trabajo', error);
@@ -152,58 +146,33 @@ export class EditPepsComponent {
   async manejarAccionUno(row: any) {
     const campos = [
       {
-        nombre: 'id_centro_trabajo',
-        tipo: 'list',
-        requerido: true,
-        etiqueta: 'Nombre Centro Trabajo',
-        editable: true,
-        opciones: this.centrosTrabajo,
-        icono: 'business'
-      },
-      {
-        nombre: 'numeroAcuerdo',
+        nombre: 'cargo',
         tipo: 'text',
         requerido: true,
-        etiqueta: 'Número Acuerdo',
+        etiqueta: 'Cargo',
         editable: true,
         icono: 'description',
         validaciones: [Validators.required, Validators.maxLength(40)]
       },
       {
-        nombre: 'salarioBase',
-        tipo: 'number',
-        requerido: true,
-        etiqueta: 'Salario Base',
-        editable: true,
-        icono: 'attach_money',
-        validaciones: [Validators.required, Validators.min(0)]
-      },
-      {
-        nombre: 'fechaIngreso',
+        nombre: 'fecha_inicio',
         tipo: 'date',
-        requerido: false,
-        etiqueta: 'Fecha Ingreso',
+        requerido: true,
+        etiqueta: 'Fecha Inicio',
         editable: true,
         icono: 'event',
         validaciones: [Validators.required]
       },
       {
-        nombre: 'fechaEgreso',
+        nombre: 'fecha_fin',
         tipo: 'date',
-        requerido: false,
-        etiqueta: 'Fecha Egreso',
+        requerido: true,
+        etiqueta: 'F  echa Fin',
         editable: true,
-        icono: 'event_busy'
+        icono: 'event',
+        validaciones: [Validators.required]
       },
-      {
-        nombre: 'cargo',
-        tipo: 'text',
-        requerido: false,
-        etiqueta: 'Cargo',
-        editable: true,
-        icono: 'work_outline',
-        validaciones: [Validators.required, Validators.maxLength(40)]
-      }
+      
     ];
 
 

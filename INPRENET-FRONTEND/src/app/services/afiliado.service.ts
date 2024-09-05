@@ -164,6 +164,18 @@ export class AfiliadoService {
     );
   }
 
+  getAllCargoPublicPeps(dni: string): Observable<any | void> {
+    const url = `${environment.API_URL}/api/Persona/getAllCargoPublicPeps/${dni}`;
+
+    return this.http.get<any>(
+      url,
+    ).pipe(
+      map((res: any) => {
+        return res;
+      })
+    );
+  }
+
   getAllOtrasFuentesIngres(dni: string): Observable<any | void> {
     const url = `${environment.API_URL}/api/Persona/getAllOtrasFuentesIngres/${dni}`;
 

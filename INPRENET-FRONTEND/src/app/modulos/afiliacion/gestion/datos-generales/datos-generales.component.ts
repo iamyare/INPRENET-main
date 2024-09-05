@@ -13,6 +13,8 @@ export class DatosGeneralesComponent implements OnInit {
   @Input() formGroup!: FormGroup;
   @Output() imageCaptured = new EventEmitter<string>();
   @Input() indicesSeleccionados: any[] = [];
+  @Input() initialData!: any;
+  @Input() discapacidadSeleccionada!: boolean;
 
   departamentos: { value: number, label: string }[] = [];
   municipios: { value: number, label: string }[] = [];
@@ -25,7 +27,6 @@ export class DatosGeneralesComponent implements OnInit {
   genero: { value: string, label: string }[] = [];
   nacionalidades: { value: number, label: string }[] = [];
   discapacidades: { label: string, value: number }[] = [];
-  discapacidadSeleccionada: boolean = false;
   useCamera: boolean = true;
 
   constructor(private fb: FormBuilder,
@@ -37,11 +38,22 @@ export class DatosGeneralesComponent implements OnInit {
     const noSpecialCharsPattern = '^[a-zA-Z0-9\\s]*$';
 
     if (!this.formGroup) {
-      this.formGroup = this.fb.group({
-        peps: this.fb.array([]),
-        discapacidades: this.fb.array([]),
-        FotoPerfil: new FormControl(null, Validators.required)
-      });
+      //para mostrar los datos y poder editarlos
+      if (this.initialData){
+        this.formGroup = this.fb.group({
+          peps: this.fb.array([]),
+          discapacidades: this.fb.array([]),
+          ...this.initialData 
+        });
+        this.cargarDiscapacidades();
+      }else{
+        this.formGroup = this.fb.group({
+          peps: this.fb.array([]),
+          discapacidades: this.fb.array([]),
+          FotoPerfil: new FormControl(null, Validators.required)
+        });
+
+      }
     } else {
       this.formGroup.addControl('FotoPerfil', new FormControl(null, Validators.required));
     }

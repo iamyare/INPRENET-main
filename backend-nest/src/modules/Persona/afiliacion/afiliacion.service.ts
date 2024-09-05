@@ -91,6 +91,8 @@ export class AfiliacionService {
         'municipio_defuncion',
         'profesion',
         'detallePersona',
+        'peps',
+        'peps.cargo_publico',
         'detallePersona.tipoPersona',
         'detallePersona.estadoAfiliacion',
         'referenciasPersonalPersona',

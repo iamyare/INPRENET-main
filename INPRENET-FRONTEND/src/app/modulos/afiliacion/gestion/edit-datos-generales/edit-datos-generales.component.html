@@ -16,7 +16,7 @@
 
     <form style="margin: 0 0 1.5rem;" [formGroup]="form1">
       <div class="row" style="margin: 0px 20px 0 20px;">
-        <div class="col-md-4" *ngIf="fallecido == 'NO'">
+       <!--  <div class="col-md-4" *ngIf="fallecido == 'NO'">
           <mat-form-field style="flex-direction: column-reverse;" class="example-full-width inputs"
             appearance="outline">
             <mat-label>Estado de Afiliación de la Persona</mat-label>
@@ -29,7 +29,7 @@
           <mat-error *ngFor="let error of getErrors('estado')">
             {{ error }}
           </mat-error>
-        </div>
+        </div> -->
 
         <div class="col-md-4">
           <mat-form-field style="flex-direction: column-reverse;" class="example-full-width inputs"
@@ -47,7 +47,7 @@
             appearance="outline">
             <mat-label>Causa de Fallecimiento</mat-label>
             <mat-select matNativeControl formControlName="causa_fallecimiento">
-              <mat-option *ngFor="let p of CausaFallecimiento" [value]="p.label">
+              <mat-option *ngFor="let p of CausaFallecimiento" [value]="p.value">
                 {{ p.label }}
               </mat-option>
             </mat-select>

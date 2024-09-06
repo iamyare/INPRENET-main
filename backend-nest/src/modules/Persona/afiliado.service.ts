@@ -24,6 +24,9 @@ import * as moment from 'moment';
 import { Net_Tipo_Persona } from './entities/net_tipo_persona.entity';
 import { Net_Tipo_Identificacion } from '../tipo_identificacion/entities/net_tipo_identificacion.entity';
 import { net_estado_afiliacion } from './entities/net_estado_afiliacion.entity';
+
+import { Net_Discapacidad } from './entities/net_discapacidad.entity';
+import { Net_Persona_Discapacidad } from './entities/net_persona_discapacidad.entity';
 @Injectable()
 export class AfiliadoService {
 
@@ -57,6 +60,13 @@ export class AfiliadoService {
     private readonly netProfesionesRepository: Repository<NET_PROFESIONES>,
     @InjectRepository(Net_Persona_Por_Banco)
     private readonly BancosToPersonaRepository: Repository<Net_Persona_Por_Banco>,
+
+    @InjectRepository(Net_Discapacidad)
+    private readonly discapacidadRepository: Repository<Net_Discapacidad>,
+
+    @InjectRepository(Net_Persona_Discapacidad)
+    private readonly perDiscapacidadRepository: Repository<Net_Persona_Discapacidad>,
+
   ) { }
 
   async getCausanteByDniBeneficiario(n_identificacion: string): Promise<net_persona> {
@@ -566,7 +576,6 @@ export class AfiliadoService {
         ID_MUNICIPIO: persona.municipio?.id_municipio,
         id_departamento_nacimiento: persona.municipio_nacimiento?.departamento.id_departamento,
         ID_MUNICIPIO_NACIMIENTO: persona.municipio_nacimiento?.id_municipio,
-        tipo_defuncion: persona.tipo_defuncion,
         fecha_defuncion: persona.fecha_defuncion,
         fecha_vencimiento_ident: persona.fecha_vencimiento_ident,
         certificado_defuncion: persona?.certificado_defuncion,
@@ -1176,29 +1185,47 @@ async findOnePersonaParaDeduccion(term: string) {
   }
 
   async updateDatosGenerales(idPersona: number, datosGenerales: any): Promise<any> {
-    console.log(idPersona);
-    console.log(datosGenerales);
-    
-    const estadoP = await this.estadoAfiliacionRepository.findOne({ where: { nombre_estado: datosGenerales.estado } });
-    
-    console.log(estadoP); 
+    const keysWithTrueValues = Object.entries(datosGenerales.dato.discapacidades)
+      .filter(([key, value]) => value === true)
+      .map(([key]) => key);
+
+      const estadoP = await this.estadoAfiliacionRepository.findOne({ where: { nombre_estado: datosGenerales.dato.estado } });
+      
+      const datosAnt = await this.perDiscapacidadRepository.delete({persona: {id_persona: idPersona } });
+      const discapacidades = await this.discapacidadRepository.find({
+        where: { tipo_discapacidad: In(keysWithTrueValues) }
+      });
+      const nuevosRegistros = discapacidades.map(discapacidad => ({
+        persona: { id_persona: idPersona },
+        discapacidad: discapacidad // Relación con el objeto de discapacidad
+      }));
+      await this.perDiscapacidadRepository.save(nuevosRegistros);
+      
+      const temp = datosGenerales
+
+      delete temp.dato.peps;
+      delete temp.dato.discapacidades;
+
+      temp.dato.direccion_residencia = `BARRIO_COLONIA: ${temp.dato.barrio_colonia},AVENIDA: ${temp.dato.avenida},CALLE: ${temp.dato.calle},SECTOR: ${temp.dato.sector},BLOQUE: ${temp.dato.bloque},N° DE CASA: ${temp.dato.numero_casa},COLOR CASA: ${temp.dato.color_casa},ALDEA: ${temp.dato.aldea},CASERIO: ${temp.dato.caserio}`;
+
     try {
-      /* 
       const afiliado = await this.personaRepository.preload({
         id_persona: idPersona,
-        tipo_defuncion: datosGenerales.tipo_defuncion,
-        motivo_fallecimiento: datosGenerales.motivo_fallecimiento,
-        estadoPersona: estadoP.codigo,
-        municipio_defuncion: datosGenerales.id_municipio_defuncion,
-        certificado_defuncion: datosGenerales.certificado_defuncion,
-        ...datosGenerales
+        causa_fallecimiento: temp.causa_fallecimiento,
+        municipio_defuncion: temp.id_municipio_defuncion,
+        certificado_defuncion: temp.certificado_defuncion,
+        ...temp.dato
       });
+
+     /*  const detPer = await this.detallePersonaRepository.preload({
+        id_persona: idPersona,
+      }); */
+
       if (!afiliado) throw new NotFoundException(`la persona con: ${idPersona} no se ha encontrado`);
 
-      await this.personaRepository.save(afiliado);  
+      await this.personaRepository.save(afiliado);   
       
-      return afiliado;
-      */
+      return afiliado;     
     } catch (error) {
       this.handleException(error); // Asegúrate de tener un método para manejar las excepciones
     }

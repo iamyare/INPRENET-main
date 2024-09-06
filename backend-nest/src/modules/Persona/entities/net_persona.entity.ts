@@ -121,8 +121,8 @@ export class net_persona {
     @Column('date', { nullable: true, name: 'FECHA_NACIMIENTO' })
     fecha_nacimiento: string;
 
-    @Column('varchar', { nullable: true, name: 'TIPO_DEFUNCION' })
-    tipo_defuncion: number;
+/*     @Column('varchar', { nullable: true, name: 'TIPO_DEFUNCION' })
+    tipo_defuncion: number; */
 
     @Column('varchar', { nullable: true, name: 'CERTIFICADO_DEFUNCION' })
     certificado_defuncion: number;

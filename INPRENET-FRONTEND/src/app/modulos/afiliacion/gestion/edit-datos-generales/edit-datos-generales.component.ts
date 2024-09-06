@@ -38,9 +38,9 @@ export class EditDatosGeneralesComponent implements OnInit {
   datos!: any;
 
   form1 = this.fb.group({
-    estado: ["", [Validators.required]],
     certificado_defuncion: ["", [Validators.required]],
     causa_fallecimiento: ["", [Validators.required]],
+    /* estado: ["", [Validators.required]], */
     //observaciones: ["", [Validators.required]],
     fecha_defuncion: ["", [Validators.required]],
     id_departamento_defuncion: ["", [Validators.required]],
@@ -106,7 +106,7 @@ export class EditDatosGeneralesComponent implements OnInit {
     ];
 
     this.cargarCausasFallecimiento(); // Llama al método para cargar las causas de fallecimiento
-    this.cargarEstadosAfiliado();
+    /* this.cargarEstadosAfiliado(); */
     this.previsualizarInfoAfil();
     this.cargarDepartamentos();
   }
@@ -175,30 +175,24 @@ export class EditDatosGeneralesComponent implements OnInit {
       console.error('datosGenerales no es un objeto válido:', datosGenerales);
       return;
     }
-
-    // Verifica si existe el FormGroup y FormArray, de lo contrario crea uno nuevo
+  
     if (!this.formDatosGenerales) {
       this.formDatosGenerales = this.fb.group({
         refpers: this.fb.array([])
       });
     }
-
+  
     const refpersArray = this.formDatosGenerales.get('refpers') as FormArray;
     refpersArray.clear();
-
+  
     // Supongamos que `datosGenerales` es un objeto, no un arreglo
     const dato = datosGenerales;
-    const discapacidadesArray = (dato.discapacidades || []).map((d: any) => new FormControl(d.id_discapacidad));
-
+    
     const newGroup = this.fb.group({
-      // Otros campos que necesitas incluir
       dato,
-      discapacidades: this.fb.array(discapacidadesArray)
     });
-
+  
     refpersArray.push(newGroup);
-
-    this.updateDiscapacidades();
   }
 
   createRefpersGroup(dato: any): FormGroup {
@@ -310,15 +304,15 @@ export class EditDatosGeneralesComponent implements OnInit {
             this.indicesSeleccionados = result.discapacidades
           }
 
-
           this.form1.controls.fecha_defuncion.setValue(result.fecha_defuncion)
-          this.form1.controls.causa_fallecimiento.setValue(result.CAUSA_FALLECIMIENTO);
+          this.form1.controls.causa_fallecimiento.setValue(result.ID_CAUSA_FALLECIMIENTO);
           this.form1.controls.id_departamento_defuncion.setValue(result.ID_DEPARTAMENTO_DEFUNCION);
           this.form1.controls.id_municipio_defuncion.setValue(result.ID_MUNICIPIO_DEFUNCION);
+          this.form1.controls.certificado_defuncion.setValue(result.certificado_defuncion)
 
-          //this.form1.controls.certificado_defuncion.setValue("12345")
-          //this.form1.controls.observaciones.setValue("Ninguna")
           //this.form1.controls.estado.setValue('ACTIVO');
+          
+          //this.form1.controls.observaciones.setValue("Ninguna")
 
           this.cargada = true
 
@@ -334,7 +328,7 @@ export class EditDatosGeneralesComponent implements OnInit {
 
           //refpersArray.push(newGroup);
 
-          this.updateDiscapacidades();
+          //this.updateDiscapacidades();
 
           this.Afiliado.nameAfil = this.unirNombres(result.PRIMER_NOMBRE, result.SEGUNDO_NOMBRE, result.TERCER_NOMBRE, result.PRIMER_APELLIDO, result.SEGUNDO_APELLIDO);
           this.loading = false;
@@ -371,32 +365,29 @@ export class EditDatosGeneralesComponent implements OnInit {
   }
 
   GuardarInformacion() {
-    console.log(this.formDatosGenerales.value);
-
-    this.formDatosGenerales.value.refpers[0].fecha_nacimiento = convertirFechaInputs(this.formDatosGenerales.value.refpers[0].fecha_nacimiento);
+    //this.formDatosGenerales.value.refpers[0].fecha_nacimiento = convertirFechaInputs(this.formDatosGenerales.value.refpers[0].fecha_nacimiento);
 
     const a = this.formDatosGenerales.value.refpers[0] = {
       ...this.formDatosGenerales.value.refpers[0],
-      estado: this.form1.value.estado,
+      /* estado: this.form1.value.estado, */
       causa_fallecimiento: this.form1.value.causa_fallecimiento,
       fecha_defuncion: convertirFechaInputs(this.form1.value.fecha_defuncion!),
-      //observaciones: this.form1.value.observaciones,
       id_departamento_defuncion: this.form1.value.id_departamento_defuncion,
       id_municipio_defuncion: this.form1.value.id_municipio_defuncion,
       certificado_defuncion: this.form1.value.certificado_defuncion
+      //observaciones: this.form1.value.observaciones,
     };
 
     console.log(a);
-
-
-    /* this.svcAfiliado.updateDatosGenerales(this.Afiliado.ID_PERSONA, this.formDatosGenerales.value.refpers[0]).subscribe(
+    
+    this.svcAfiliado.updateDatosGenerales(this.Afiliado.ID_PERSONA, a).subscribe(
       async (result) => {
         this.toastr.success(`Datos generales modificados correctamente`);
       },
       (error) => {
         this.toastr.error(`Error: ${error.error.message}`);
       }
-    ); */
+    );
   }
 
   getErrors(fieldName: string): any {

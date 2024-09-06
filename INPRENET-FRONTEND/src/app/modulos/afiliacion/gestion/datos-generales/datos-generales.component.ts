@@ -15,6 +15,7 @@ export class DatosGeneralesComponent implements OnInit {
   @Input() indicesSeleccionados: any[] = [];
   @Input() initialData!: any;
   @Input() discapacidadSeleccionada!: boolean;
+  @Output() newDatosGenerales = new EventEmitter<any>();
 
   departamentos: { value: number, label: string }[] = [];
   municipios: { value: number, label: string }[] = [];
@@ -158,6 +159,11 @@ export class DatosGeneralesComponent implements OnInit {
     await this.cargarTiposIdentificacion();
     this.cargarGenero();
     await this.cargarNacionalidades();
+  }
+
+  onDatosGeneralesChange() {
+    const data = this.formGroup;
+    this.newDatosGenerales.emit(data);
   }
 
   grupo_etnico = [
@@ -313,18 +319,16 @@ export class DatosGeneralesComponent implements OnInit {
   }
 
   resetDiscapacidadesFormArray() {
-    const discapacidadesArray = this.fb.array(
-      this.discapacidades.map(discapacidad => {
-        // Siempre se creará un FormControl, y su valor será 'true' o 'false'
-        // dependiendo de si hay coincidencia en this.indicesSeleccionados.
-        const match = this.indicesSeleccionados.some(
-          indice => indice.tipo === discapacidad.label
-        );
-        return new FormControl(match);
-      })
-    );
-
-    this.formGroup.setControl('discapacidades', discapacidadesArray);
+    const discapacidadesGroup = this.fb.group({}); // Creamos un grupo vacío
+  
+    this.discapacidades.forEach(discapacidad => {
+      const match = this.indicesSeleccionados.some(
+        indice => indice.tipo === discapacidad.label
+      );
+      discapacidadesGroup.addControl(discapacidad.label, new FormControl(match)); // Agregamos cada control basado en 'label'
+    });
+  
+    this.formGroup.setControl('discapacidades', discapacidadesGroup); // Establecemos el nuevo grupo de discapacidades
   }
 
   transformarDiscapacidadesSeleccionadas(): void {

@@ -125,8 +125,8 @@ export class EditPepsComponent {
         }
       );
       } catch (error) {
-        this.toastr.error('Error al cargar los datos de los perfiles de los centros de trabajo');
-        console.error('Error al obtener datos de los perfiles de los centros de trabajo', error);
+        this.toastr.error('Error al cargar los datos de los puestos públicos');
+        console.error('Error al obtener datos de los puestos públicos', error);
       }
     } else {
       /* this.resetDatos(); */

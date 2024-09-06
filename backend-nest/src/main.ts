@@ -4,7 +4,7 @@ import { BadRequestException, ValidationPipe } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { HttpExceptionFilter } from './filters/http-exception.filter';
 import * as cookieParser from 'cookie-parser';
-
+const express = require('express');
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   app.enableCors({
@@ -34,7 +34,7 @@ async function bootstrap() {
   app.useGlobalFilters(new HttpExceptionFilter());
 
   app.use(cookieParser());
-
+  app.use(express.json({ limit: '8mb' }));
   await app.listen(process.env.PORT);
 }
 bootstrap();

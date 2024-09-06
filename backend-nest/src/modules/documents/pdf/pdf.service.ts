@@ -134,7 +134,7 @@ export class PdfService {
     };
   }
 
-  async generateConstanciaAfiliacionTemplate2(data: any, includeQR: boolean) {
+  public  async generateConstanciaAfiliacionTemplate2(data: any, includeQR: boolean) {
     let persona = data?.persona
     let dataCentTrab = persona?.perfPersCentTrabs;
     let dataRef = persona?.referenciasPersonalPersona;
@@ -157,12 +157,28 @@ export class PdfService {
         table: {
           widths: ['14%', '14%', '14%', '14%', '14%', '14%', '14%'],
             body: [
-                [
-                  { text: 'DATOS GENERALES DEL DOCENTE', colSpan: 6, alignment: 'center', style:['header']},
-                  {}, {}, {}, {}, {}, {text: 'FOTO',rowSpan: 3, alignment: 'center'}
-                ],
+              [
+                { text: 'DATOS GENERALES DEL DOCENTE', colSpan: 6, alignment: 'center', style: ['header'] },
+                {}, {}, {}, {}, {},  // Estas celdas vacías completan la fila para el colSpan
+                
+                {
+                  // Aquí está la condición para mostrar la foto o el texto 'SIN FOTO'
+                  ...(data.persona.foto_perfil && data.persona.foto_perfil.data.length > 0
+                    ? {
+                        image: `data:image/png;base64,${Buffer.from(data.persona.foto_perfil.data).toString('base64')}`,
+                        fit: [80, 150],  // Ajusta el tamaño según sea necesario
+                        alignment: 'center',
+                        rowSpan: 3
+                      }
+                    : {
+                        text: 'SIN FOTO',
+                        alignment: 'center',
+                        rowSpan: 3
+                      })
+                }
+              ],
                 [ 
-                  { text: 'NOMBRE DEL DOCENTE', alignment: 'left', style:['subheader'] }, { text: `${persona?.primer_apellido} ${persona?.segundo_apellido} ${persona.primer_nombre} ${persona?.segundo_nombre}`, alignment: 'center', colSpan: 5,  },
+                  { text: 'NOMBRE DEL DOCENTE', alignment: 'left', style:['subheader'] }, { text: `${persona?.primer_apellido} ${persona?.segundo_apellido} ${persona?.primer_nombre} ${persona?.segundo_nombre}`, alignment: 'center', colSpan: 5,  },
                   {}, {}, {}, {}, {}
                 ],
                 [ 
@@ -171,36 +187,36 @@ export class PdfService {
                 ],
                 [ 
                   { text: 'GÉNERO', alignment: 'left' , style:['subheader'] },  
-                  { text: `${persona?.genero}`, alignment: 'left', colSpan: 3}, 
+                  { text: persona?.genero, alignment: 'left', colSpan: 3}, 
                   {}, 
                   {},
                   { text: 'ESTADO CIVIL', alignment: 'left' , style:['subheader']},
-                  { text: `${persona?.estado_civil}`, alignment: 'left', colSpan: 2},
+                  { text: persona?.estado_civil, alignment: 'left', colSpan: 2},
                   {}
                 ],
                 [ 
-                  { text: 'NÚMERO DE DEPENDIENTES', alignment: 'left', style:['subheader'] }, { text: `${persona?.cantidad_dependientes}`, alignment: 'left', colSpan: 3}, {}, {}, { text: 'PROFESIÓN', alignment: 'left', style:['subheader']},  { text: `${persona?.profesion?.descripcion}`, alignment: 'left', colSpan: 2}, {}],
+                  { text: 'NÚMERO DE DEPENDIENTES', alignment: 'left', style:['subheader'] }, { text: persona?.cantidad_dependientes, alignment: 'left', colSpan: 3}, {}, {}, { text: 'PROFESIÓN', alignment: 'left', style:['subheader']},  { text: persona?.profesion?.descripcion, alignment: 'left', colSpan: 2}, {}],
                 [ 
-                  { text: 'NACIONALIDAD', alignment: 'left', style:['subheader'] },  { text: `${persona?.pais?.nacionalidad}`, alignment: 'left', colSpan: 3}, {}, {}, 
-                  { text: 'RTN', alignment: 'left' , style:['subheader'] },  { text: `${persona?.rtn}`, alignment: 'left', colSpan: 2}, {}
+                  { text: 'NACIONALIDAD', alignment: 'left', style:['subheader'] },  { text: persona?.pais?.nacionalidad, alignment: 'left', colSpan: 3}, {}, {}, 
+                  { text: 'RTN', alignment: 'left' , style:['subheader'] },  { text: persona?.rtn, alignment: 'left', colSpan: 2}, {}
                 ],
                 [ 
                   { text: 'LUGAR Y FECHA DE NACIMIENTO', alignment: 'center', colSpan: 7, style:['header']}, 
                   {}, {}, {}, {}, {}, {}
                 ],
                 [ 
-                  { text: 'PAÍS', alignment: 'left', style:['subheader'] },  { text: `${persona?.pais?.nombre_pais}`, alignment: 'left', colSpan: 2},  {}, 
+                  { text: 'PAÍS', alignment: 'left', style:['subheader'] },  { text: persona?.pais?.nombre_pais, alignment: 'left', colSpan: 2},  {}, 
                   { text: 'DEPARTAMENTO', alignment: 'left', style:['subheader'] },  { text: ``, alignment: 'left', colSpan: 3}, {},{} 
                 ],
                 [ 
                   { text: 'CIUDAD', alignment: 'left', style:['subheader'] },  { text: ``, alignment: 'left', colSpan: 2},  {}, 
-                  { text: 'FECHA DE NACIMIENTO', alignment: 'left', style:['subheader'] }, { text: `${persona?.fecha_nacimiento}`, alignment: 'left'}, 
+                  { text: 'FECHA DE NACIMIENTO', alignment: 'left', style:['subheader'] }, { text: persona?.fecha_nacimiento, alignment: 'left'}, 
                   { text: 'Edad', alignment: 'left', style:['subheader']}, 
                   { text: `${calcularEdad(persona?.fecha_nacimiento)} Años`, alignment: 'left'} 
                 ],
                 [ 
                   { text: 'REPRESENTACIÓN', alignment: 'left', style:['subheader'] }, 
-                  { text: `${persona?.representacion}`, alignment: 'left', colSpan: 6}, {}, {}, 
+                  { text: persona?.representacion, alignment: 'left', colSpan: 6}, {}, {}, 
                   {},  
                   {}, {}
                 ],
@@ -210,7 +226,16 @@ export class PdfService {
                 ],
                 [ 
                   { text: '¿DESEMPEÑA O HA DESEMPEÑADO UN CARGO PÚBLICO?', alignment: 'center', style:['subheader']}, 
-                  {text: '', colSpan: 6}, 
+                  {
+                    ...(cargos_publicos?.length > 0
+                      ? {
+                          text: `SI`, alignment: 'center', colSpan: 6
+                        }
+                      : {
+                          text: 'NO',
+                          alignment: 'center', colSpan: 6
+                        })
+                  }, 
                   {},{},{},{},{}
                 ],
 
@@ -266,11 +291,11 @@ export class PdfService {
                 ],
                 [ 
                   { text: 'NÚMEROS DE TELEFÓNICOS', alignment: 'left', rowSpan: 2, style:['subheader'] }, 
-                  {text: 'CASA', alignment: 'left', style:['subheader']}, { text: `${persona?.telefono_1}`, alignment: 'left', colSpan: 2 }, {}, {text: 'CORREO ELECTRÓNICO 1', alignment: 'left', style:['subheader'] }, { text: `${persona?.correo_1}`, alignment: 'left', colSpan: 2}, {}
+                  {text: 'CASA', alignment: 'left', style:['subheader']}, { text: persona?.telefono_1, alignment: 'left', colSpan: 2 }, {}, {text: 'CORREO ELECTRÓNICO 1', alignment: 'left', style:['subheader'] }, { text: persona?.correo_1, alignment: 'left', colSpan: 2}, {}
                 ],
                 [ 
                   {}, 
-                  {text: 'CELULAR', alignment: 'left', style:['subheader'] }, { text: `${persona?.telefono_2}`, alignment: 'left', colSpan: 2}, {}, {text: 'CORREO ELECTRÓNICO 2', alignment: 'left', style:['subheader'] }, { text: `${persona?.correo_2}`, alignment: 'left', colSpan: 2}, {}
+                  {text: 'CELULAR', alignment: 'left', style:['subheader'] }, { text: persona?.telefono_2, alignment: 'left', colSpan: 2}, {}, {text: 'CORREO ELECTRÓNICO 2', alignment: 'left', style:['subheader'] }, { text: persona?.correo_2, alignment: 'left', colSpan: 2}, {}
                 ],
                 [ 
                   { text: 'DATOS DE CUENTAS BANCARIAS', alignment: 'center', colSpan: 7, style:['header']}, 
@@ -282,7 +307,7 @@ export class PdfService {
                       { text: 'BANCO', alignment: 'left', style:['subheader'] }, 
                       { text: `${b?.banco?.nombre_banco}`, alignment: 'left', colSpan: 2}, {}, 
                       { text: 'No. DE CUENTA BANCARIA ACTUAL', alignment: 'left', style:['subheader'] }, 
-                      { text: `${b?.num_cuenta}`, alignment: 'left', colSpan: 3}, {}, {}
+                      { text: b?.num_cuenta, alignment: 'left', colSpan: 3}, {}, {}
                     ],
                 ]}) : [],
                 [ 
@@ -302,18 +327,18 @@ export class PdfService {
                           { text: 'SECTOR', alignment: 'center', colSpan:4, style:['subheader'] },  {}, {}, {}
                         ],
                         [ 
-                          {text: `${b?.centroTrabajo.nombre_centro_trabajo}`, alignment: 'left', colSpan:3}, {}, {},
-                          { text: `${b?.centroTrabajo.sector_economico}`, alignment: 'left', colSpan:4},  {}, {}, {}
+                          {text: b?.centroTrabajo?.nombre_centro_trabajo, alignment: 'left', colSpan:3}, {}, {},
+                          { text: b?.centroTrabajo?.sector_economico, alignment: 'left', colSpan:4},  {}, {}, {}
                         ],
                         [ 
                           { text: 'CARGO', alignment: 'left', style:['subheader'] }, 
-                          { text: `${b?.cargo}`, alignment: 'left', colSpan: 6}, {}, {}, {}, {}, {}
+                          { text: b?.cargo, alignment: 'left', colSpan: 6}, {}, {}, {}, {}, {}
                         ],
                         [ 
                           { text: 'FECHA DE INGRESO', alignment: 'left', style:['subheader'] }, 
-                          { text: `${b?.fecha_ingreso}`, alignment: 'left', colSpan: 2}, {}, 
+                          { text: b?.fecha_ingreso, alignment: 'left', colSpan: 2}, {}, 
                           { text: 'FECHA DE PAGO', alignment: 'left', style:['subheader'] }, 
-                          { text: `${b?.fecha_pago}`, alignment: 'left', colSpan: 3}, {}, {}
+                          { text: b?.fecha_pago, alignment: 'left', colSpan: 3}, {}, {}
                         ],
                         [ 
                           { text: 'INGRESO / SALARIO MENSUAL', alignment: 'left', style:['subheader'] },
@@ -346,10 +371,10 @@ export class PdfService {
                         ],
                         [ 
                           { text: 'TELÉFONO 1', alignment: 'center', style:['subheader'] },
-                          { text: `${b?.centroTrabajo.telefono_1}`, alignment: 'center',colSpan:2},
+                          { text: b?.centroTrabajo?.telefono_1, alignment: 'center',colSpan:2},
                           { },
                           { text: 'TELÉFONO 2', alignment: 'center', style:['subheader'] },
-                          { text: `${b?.centroTrabajo.telefono_2}`, alignment: 'center',colSpan:3},
+                          { text: b?.centroTrabajo?.telefono_2, alignment: 'center',colSpan:3},
                           { },
                           { },
                         ],
@@ -367,28 +392,37 @@ export class PdfService {
                 ],
                 [ 
                   { text: 'NOMBRE COMPLETO DEL CÓNYUGE', alignment: 'center', style:['subheader'] }, 
-                  { text: `${conyuge?.persona.primer_apellido} ${conyuge?.persona.segundo_apellido} ${conyuge?.persona.primer_nombre} ${conyuge?.persona.segundo_nombre}`|| '', alignment: 'center', colSpan: 6}, 
+                  { 
+                    ...(conyuge?.persona?.primer_apellido
+                      ? {
+                          text: `${conyuge?.persona?.primer_apellido} ${conyuge?.persona?.segundo_apellido} ${conyuge?.persona?.primer_nombre} ${conyuge?.persona?.segundo_nombre}`, alignment: 'center', colSpan: 6
+                        }
+                      : {
+                          text: '',
+                          alignment: 'center', colSpan: 6
+                        })
+                  }, 
                   {},{}, {}, {}, {}
                 ],
                 [ 
                   { text: 'No DE IDENTIDAD', alignment: 'center', style:['subheader']  }, 
-                  { text: conyuge?.persona.n_identificacion || '', alignment: 'center', colSpan: 6}, 
+                  { text: conyuge?.persona?.n_identificacion || '', alignment: 'center', colSpan: 6}, 
                   {},{}, {}, {}, {}
                 ],
                 [ 
                   { text: 'FECHA DE NACIMIENTO', alignment: 'center', rowSpan: 2, style:['subheader'] }, 
                   {text: 'NÚMEROS TELEFÓNICOS', alignment: 'center', rowSpan: 3, style:['subheader'] }, 
-                  { text: 'CASA', alignment: 'center', style:['subheader']}, {text: conyuge?.persona.telefono_1 || '', alignment: 'center', colSpan: 4 }, {}, {}, {}
+                  { text: 'CASA', alignment: 'center', style:['subheader']}, {text: conyuge?.persona?.telefono_1 || '', alignment: 'center', colSpan: 4 }, {}, {}, {}
                 ],
                 [ 
                   {}, 
                   {},
-                  { text: 'CELULAR', alignment: 'center', style:['subheader']}, {text: conyuge?.persona.telefono_2  || '', alignment: 'center', colSpan: 4 }, {}, {}, {}
+                  { text: 'CELULAR', alignment: 'center', style:['subheader']}, {text: conyuge?.persona?.telefono_2  || '', alignment: 'center', colSpan: 4 }, {}, {}, {}
                 ],
                 [ 
-                  {text: conyuge?.persona.fecha_nacimiento || '', alignment: 'center'},
+                  {text: conyuge?.persona?.fecha_nacimiento || '', alignment: 'center'},
                   {},
-                  { text: 'TRABAJO', alignment: 'center', style:['subheader']}, {text: conyuge?.persona.telefono_3 || '', alignment: 'center', colSpan: 4 }, {}, {}, {}
+                  { text: 'TRABAJO', alignment: 'center', style:['subheader']}, {text: conyuge?.persona?.telefono_3 || '', alignment: 'center', colSpan: 4 }, {}, {}, {}
                 ],
                 [ 
                   { text: '¿TRABAJA?', alignment: 'left', style:['subheader'] }, 
@@ -412,26 +446,26 @@ export class PdfService {
                     ],
                     [ 
                       { text: 'NOMBRE COMPLETO', alignment: 'center', style:['subheader'] }, 
-                      {text: `${b?.referenciada.primer_apellido || ''}  ${b?.referenciada.segundo_apellido|| ''} ${b?.referenciada.primer_nombre|| ''} ${b?.referenciada.segundo_nombre|| ''}`, alignment: 'center', colSpan: 6},{}, {}, {}, {}, {}
+                      {text: `${b?.referenciada?.primer_apellido || ''}  ${b?.referenciada?.segundo_apellido|| ''} ${b?.referenciada?.primer_nombre|| ''} ${b?.referenciada?.segundo_nombre|| ''}`, alignment: 'center', colSpan: 6},{}, {}, {}, {}, {}
                     ],
                     [ 
                       { text: 'DIRECCIÓN', alignment: 'center', style:['subheader'] }, 
-                      {text: `${b?.referenciada.direccion_residencia}`, alignment: 'center', colSpan: 6},{}, {}, {}, {}, {}
+                      {text: `${b?.referenciada?.direccion_residencia}`, alignment: 'center', colSpan: 6},{}, {}, {}, {}, {}
                     ],
                     [ 
                       { text: 'PARENTESCO', alignment: 'center', rowSpan: 2, style:['subheader'] }, 
                       {text: 'NÚMEROS TELEFÓNICOS', alignment: 'center', rowSpan: 3, style:['subheader'] }, 
-                      {text: 'CASA', alignment: 'center', style:['subheader'] }, {text: `${b?.referenciada.telefono_1}`, alignment: 'center', colSpan: 4}, {}, {}, {}
+                      {text: 'CASA', alignment: 'center', style:['subheader'] }, {text: `${b?.referenciada?.telefono_1}`, alignment: 'center', colSpan: 4}, {}, {}, {}
                     ],
                     [ 
                       {}, 
                       {},
-                      {text: 'CELULAR', alignment: 'center', style:['subheader'] }, {text: `${b?.referenciada.telefono_2}`, alignment: 'center', colSpan: 4}, {}, {}, {}
+                      {text: 'CELULAR', alignment: 'center', style:['subheader'] }, {text: `${b?.referenciada?.telefono_2}`, alignment: 'center', colSpan: 4}, {}, {}, {}
                     ],
                     [ 
                       {text: `${b?.parentesco}`, alignment: 'center'}, 
                       {},
-                      {text: 'TRABAJO', alignment: 'center', style:['subheader'] }, {text:  `${b?.referenciada.telefono_3}`, alignment: 'center', colSpan: 4}, {}, {}, {}
+                      {text: 'TRABAJO', alignment: 'center', style:['subheader'] }, {text:  `${b?.referenciada?.telefono_3}`, alignment: 'center', colSpan: 4}, {}, {}, {}
                     ],
                   ];
             }) : [],

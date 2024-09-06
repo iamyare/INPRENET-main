@@ -28,6 +28,7 @@ import { MantenimientoAfiliacionService } from './afiliacion/mantenimiento-afili
 import { MantenimientoAfiliacionController } from './afiliacion/mantenimiento-afiliacion.controller';
 import { Net_Jornada } from '../Empresarial/entities/net_jornada.entity';
 import { Net_Nivel_Educativo } from '../Empresarial/entities/net_nivel_educativo.entity';
+import { Net_Referencias } from './entities/net_referencias.entity';
 
 @Module({
   controllers: [AfiliadoController, AfiliacionController, MantenimientoAfiliacionController],
@@ -38,7 +39,7 @@ import { Net_Nivel_Educativo } from '../Empresarial/entities/net_nivel_educativo
       Net_Persona_Por_Banco, Net_Departamento, Net_Familia,
       Net_Pais, Net_Tipo_Identificacion, net_causas_fallecimientos,
       Net_Centro_Trabajo, Net_Banco, Net_Tipo_Persona, Net_Municipio,
-      Net_Jornada, Net_Nivel_Educativo])
+      Net_Jornada, Net_Nivel_Educativo, Net_Referencias])
   ],
   exports: [TypeOrmModule, AfiliadoService],
 })

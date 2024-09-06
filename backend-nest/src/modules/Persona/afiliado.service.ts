@@ -330,31 +330,26 @@ export class AfiliadoService {
   }
 
   async updateBeneficiario(id: number, updatePersonaDto: UpdateBeneficiarioDto): Promise<net_detalle_persona> {
-    console.log(updatePersonaDto); 
-    console.log(id);
-    
-    // Busca el detalle de la persona utilizando ID_DETALLE_PERSONA
     const detallePersona = await this.detallePersonaRepository.findOne({
-      where: { ID_DETALLE_PERSONA: id }, // Aquí utilizamos ID_DETALLE_PERSONA
+      where: { 
+        ID_DETALLE_PERSONA: id,
+        ID_PERSONA: updatePersonaDto.id_persona,
+        ID_CAUSANTE_PADRE: updatePersonaDto.id_causante_padre
+      },
     });
   
     if (!detallePersona) {
       throw new NotFoundException(`Detalle persona with ID ${id} not found`);
     }
-  
-    // Actualiza solo el porcentaje en el detalle de la persona
     if (updatePersonaDto.porcentaje !== undefined) {
       detallePersona.porcentaje = updatePersonaDto.porcentaje;
     }
-  
-    // Guarda los cambios en la base de datos
     await this.detallePersonaRepository.save(detallePersona);
     
     return detallePersona;
-  }
+}
+
   
-
-
 
   async updateSalarioBase(n_identificacion: string, idCentroTrabajo: number, salarioBase: number): Promise<void> {
 
@@ -929,6 +924,7 @@ async findOnePersonaParaDeduccion(term: string) {
       const beneficiariosFormatted = beneficiarios.map(beneficiario => ({
         idDetallePersona: beneficiario.ID_DETALLE_PERSONA, // Agregando el ID_DETALLE_PERSONA
         idPersona: beneficiario.ID_PERSONA,
+        ID_CAUSANTE_PADRE: beneficiario.ID_CAUSANTE_PADRE,
         nIdentificacion: beneficiario.persona?.n_identificacion || null,
         primerNombre: beneficiario.persona?.primer_nombre || null,
         segundoNombre: beneficiario.persona?.segundo_nombre || null,

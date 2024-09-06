@@ -17,6 +17,7 @@ import { net_otra_fuente_ingreso } from "./net_otra_fuente_ingreso.entity";
 import { Net_Persona_Discapacidad } from "./net_persona_discapacidad.entity";
 import { Net_Familia } from "./net_familia.entity";
 import { Net_Deducciones_Asignadas } from "src/modules/Planilla/detalle-deduccion/entities/net-deducciones-asignadas.entity";
+import { Net_Referencias } from "./net_referencias.entity";
 @Entity({
     name: 'NET_PERSONA',
 })
@@ -153,12 +154,6 @@ export class net_persona {
     @JoinColumn({ name: 'ID_MUNICIPIO_NACIMIENTO', foreignKeyConstraintName: "FK_ID_MUNIC_NACIMIENTO_NET_PERSONA" })
     municipio_nacimiento: Net_Municipio;
 
-    @OneToMany(() => Net_Ref_Per_Pers, referenciasPersonalPersona => referenciasPersonalPersona.persona)
-    referenciasPersonalPersona: Net_Ref_Per_Pers[];
-
-    @OneToMany(() => Net_Ref_Per_Pers, referencia => referencia.referenciada)
-    referenciasHechas: Net_Ref_Per_Pers[];
-
     @OneToMany(() => Net_Persona_Por_Banco, personasPorBanco => personasPorBanco.persona)
     personasPorBanco: Net_Persona_Por_Banco[];
 
@@ -205,5 +200,8 @@ export class net_persona {
 
     @OneToMany(() => Net_Deducciones_Asignadas, deduccionesAsignadas => deduccionesAsignadas.persona)
     deduccionesAsignadas: Net_Deducciones_Asignadas[];
+
+    @OneToMany(() => Net_Referencias, referencia => referencia.persona)
+    referencias: Net_Referencias[];
 
 }

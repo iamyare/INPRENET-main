@@ -4,8 +4,6 @@ import { net_persona } from '../entities/net_persona.entity';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { CrearDatosDto } from './dtos/crear-datos.dto';
 import { Net_Discapacidad } from '../entities/net_discapacidad.entity';
-import { Net_Ref_Per_Pers } from '../entities/net_ref-per-persona.entity';
-import { CrearReferenciaDto } from './dtos/crear-referencia.dto';
 import { Connection, EntityManager} from 'typeorm';
 import { CrearPersonaBancoDto } from './dtos/crear-persona_por_banco.dto';
 import { Net_Persona_Por_Banco } from 'src/modules/banco/entities/net_persona-banco.entity';
@@ -17,6 +15,7 @@ import { CrearOtraFuenteIngresoDto } from './dtos/crear-otra_fuente_ingreso.dto'
 import { net_otra_fuente_ingreso } from '../entities/net_otra_fuente_ingreso.entity';
 import { CrearBeneficiarioDto } from './dtos/crear-beneficiario.dto';
 import { net_detalle_persona } from '../entities/net_detalle_persona.entity';
+import { CrearReferenciaDto } from './dtos/crear-referencia.dto';
 
 @Controller('afiliacion')
 export class AfiliacionController {
@@ -89,7 +88,7 @@ export class AfiliacionController {
   async crearReferencia(
     @Param('idPersona') idPersona: number,
     @Body() crearReferenciasDtos: CrearReferenciaDto[],
-  ): Promise<Net_Ref_Per_Pers[]> {
+  ){
     return await this.connection.transaction(async (entityManager: EntityManager) => {
       return this.afiliacionService.crearReferencias(crearReferenciasDtos, idPersona, entityManager);
     });
@@ -120,7 +119,7 @@ export class AfiliacionController {
 
   @Post(':id/foto-perfil')
   @UseInterceptors(FileInterceptor('fotoPerfil', {
-    limits: { fileSize: 5 * 1024 * 1024 }, // 5MB file size limit
+    limits: { fileSize: 5 * 1024 * 1024 },
     fileFilter: (req, file, callback) => {
       if (file.mimetype.startsWith('image/')) {
         callback(null, true);
@@ -149,4 +148,12 @@ export class AfiliacionController {
       throw new HttpException(error.message, HttpStatus.BAD_REQUEST);
     }
 }
+
+  @Patch('referencia/actualizar/:idReferencia')
+    async actualizarReferencia(
+      @Param('idReferencia') idReferencia: number,
+      @Body() datosActualizados: CrearReferenciaDto
+    ): Promise<void> {
+      return this.afiliacionService.actualizarReferencia(idReferencia, datosActualizados);
+    }
 }

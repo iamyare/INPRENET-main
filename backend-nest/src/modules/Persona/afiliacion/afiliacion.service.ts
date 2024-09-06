@@ -1,4 +1,4 @@
-import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { Net_Tipo_Persona } from '../entities/net_tipo_persona.entity';
 import { net_persona } from '../entities/net_persona.entity';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -25,7 +25,6 @@ import { CrearPersonaCentroTrabajoDto } from './dtos/crear-perf_pers_cent_trab.d
 import { net_otra_fuente_ingreso } from '../entities/net_otra_fuente_ingreso.entity';
 import { CrearOtraFuenteIngresoDto } from './dtos/crear-otra_fuente_ingreso.dto';
 import { Net_Ref_Per_Pers } from '../entities/net_ref-per-persona.entity';
-import { CrearReferenciaDto } from './dtos/crear-referencia.dto';
 import { CrearBeneficiarioDto } from './dtos/crear-beneficiario.dto';
 import { CrearDiscapacidadDto } from './dtos/crear-discapacidad.dto';
 import { Net_Discapacidad } from '../entities/net_discapacidad.entity';
@@ -35,6 +34,9 @@ import { Net_Familia } from '../entities/net_familia.entity';
 import { Net_Peps } from 'src/modules/Empresarial/entities/net_peps.entity';
 import { CrearPepsDto } from './dtos/crear-peps.dto';
 import { Net_Cargo_Publico } from 'src/modules/Empresarial/entities/net_cargo_publico.entity';
+import { Net_Referencias } from '../entities/net_referencias.entity';
+import { CrearReferenciaDto } from './dtos/crear-referencia.dto';
+import { validate, ValidationError } from 'class-validator';
 
 @Injectable()
 export class AfiliacionService {
@@ -61,8 +63,8 @@ export class AfiliacionService {
     private readonly bancoRepository: Repository<Net_Banco>,
     @InjectRepository(Net_Centro_Trabajo)
     private readonly centroTrabajoRepository: Repository<Net_Centro_Trabajo>,
-    @InjectRepository(Net_Ref_Per_Pers)
-    private readonly referenciaRepository: Repository<Net_Ref_Per_Pers>,
+    @InjectRepository(Net_Referencias)
+    private readonly referenciaRepository: Repository<Net_Referencias>,
     @InjectRepository(Net_Discapacidad)
     private readonly discapacidadRepository: Repository<Net_Discapacidad>,
     @InjectRepository(net_detalle_persona)
@@ -95,8 +97,7 @@ export class AfiliacionService {
         'peps.cargo_publico',
         'detallePersona.tipoPersona',
         'detallePersona.estadoAfiliacion',
-        'referenciasPersonalPersona',
-        'referenciasPersonalPersona.referenciada',
+        'referencias',
         'personasPorBanco',
         'personasPorBanco.banco',
         'detalleDeduccion',
@@ -343,31 +344,30 @@ export class AfiliacionService {
   }
   
   async crearReferencias(
-    crearReferenciasDtos: CrearReferenciaDto[] | undefined,
+    crearReferenciasDtos: CrearReferenciaDto[],
     idPersona: number,
-    entityManager: EntityManager,
-  ): Promise<Net_Ref_Per_Pers[]> {
-    const resultados: Net_Ref_Per_Pers[] = [];
+    entityManager: EntityManager
+  ): Promise<Net_Referencias[]> {
+    const resultados: Net_Referencias[] = [];
   
-    if (crearReferenciasDtos && crearReferenciasDtos.length > 0) {
-      for (const crearReferenciaDto of crearReferenciasDtos) {
-        let personaReferencia = await this.personaRepository.findOne({
-          where: { n_identificacion: crearReferenciaDto.persona_referencia.n_identificacion }
-        });
+    for (const crearReferenciaDto of crearReferenciasDtos) {
+      const nuevaReferencia = entityManager.create(Net_Referencias, {
+        tipo_referencia: crearReferenciaDto.tipo_referencia,
+        primer_nombre: crearReferenciaDto.primer_nombre,
+        segundo_nombre: crearReferenciaDto.segundo_nombre,
+        tercer_nombre: crearReferenciaDto.tercer_nombre,
+        primer_apellido: crearReferenciaDto.primer_apellido,
+        segundo_apellido: crearReferenciaDto.segundo_apellido,
+        parentesco: crearReferenciaDto.parentesco,
+        direccion: crearReferenciaDto.direccion,
+        telefono_domicilio: crearReferenciaDto.telefono_domicilio,
+        telefono_trabajo: crearReferenciaDto.telefono_trabajo,
+        telefono_personal: crearReferenciaDto.telefono_personal,
+        n_identificacion: crearReferenciaDto.n_identificacion,
+        persona: { id_persona: idPersona },
+      });
   
-        if (!personaReferencia) {
-          personaReferencia = await this.crearPersona(crearReferenciaDto.persona_referencia, null, entityManager);
-        }
-  
-        const referencia = entityManager.create(Net_Ref_Per_Pers, {
-          persona: { id_persona: idPersona },
-          referenciada: personaReferencia,
-          tipo_referencia: crearReferenciaDto.tipo_referencia,
-          parentesco: crearReferenciaDto.parentesco,
-        });
-  
-        resultados.push(await entityManager.save(Net_Ref_Per_Pers, referencia));
-      }
+      resultados.push(await entityManager.save(Net_Referencias, nuevaReferencia));
     }
   
     return resultados;
@@ -387,7 +387,6 @@ export class AfiliacionService {
     }
   
     for (const crearBeneficiarioDto of crearBeneficiariosDtos) {
-      // Verificar si el beneficiario ya existe
       let beneficiario = await this.personaRepository.findOne({
         where: { n_identificacion: crearBeneficiarioDto.persona.n_identificacion }
       });
@@ -584,66 +583,78 @@ export class AfiliacionService {
     const persona = await this.personaRepository.findOne({
       where: { n_identificacion: nIdentificacion },
     });
-  
     if (!persona) {
       throw new NotFoundException(`Persona con identificación ${nIdentificacion} no encontrada`);
     }
   
     const referencias = await this.referenciaRepository.find({
       where: { persona: { id_persona: persona.id_persona } },
-      relations: ['persona', 'referenciada'],
+      relations: ['persona'], 
     });
   
     if (!referencias.length) {
       throw new NotFoundException(`No se encontraron referencias para la persona con identificación ${nIdentificacion}`);
     }
-  
+
     return referencias.map(ref => ({
-      id_ref: ref.id_ref_personal_afil,
+      id_referencia: ref.id_referencia,
       id_persona: ref.persona.id_persona,
-      estado: ref.estado,
-      id_referenciada: ref.referenciada.id_persona,
       tipo_referencia: ref.tipo_referencia,
       parentesco: ref.parentesco,
-      personaReferenciada: {
-        id_persona: ref.referenciada.id_persona,
-        n_identificacion: ref.referenciada.n_identificacion,
-        fecha_vencimiento_ident: ref.referenciada.fecha_vencimiento_ident,
-        rtn: ref.referenciada.rtn,
-        grupo_etnico: ref.referenciada.grupo_etnico,
-        estado_civil: ref.referenciada.estado_civil,
-        primer_nombre: ref.referenciada.primer_nombre,
-        segundo_nombre: ref.referenciada.segundo_nombre,
-        tercer_nombre: ref.referenciada.tercer_nombre,
-        primer_apellido: ref.referenciada.primer_apellido,
-        segundo_apellido: ref.referenciada.segundo_apellido,
-        genero: ref.referenciada.genero,
-        sexo: ref.referenciada.sexo,
-        cantidad_hijos: ref.referenciada.cantidad_hijos,
-        grado_academico: ref.referenciada.grado_academico,
-        telefono_1: ref.referenciada.telefono_1,
-        telefono_2: ref.referenciada.telefono_2,
-        correo_1: ref.referenciada.correo_1,
-        correo_2: ref.referenciada.correo_2,
-        fecha_nacimiento: ref.referenciada.fecha_nacimiento,
-      },
+      primer_nombre: ref.primer_nombre,
+      segundo_nombre: ref.segundo_nombre,
+      tercer_nombre: ref.tercer_nombre,
+      primer_apellido: ref.primer_apellido,
+      segundo_apellido: ref.segundo_apellido,
+      direccion: ref.direccion,
+      telefono_domicilio: ref.telefono_domicilio,
+      telefono_trabajo: ref.telefono_trabajo,
+      telefono_personal: ref.telefono_personal,
+      n_identificacion: ref.n_identificacion,
     }));
   }
   
+  
 
-  async eliminarReferencia(idRefPersonal: number): Promise<void> {
+  async eliminarReferencia(idReferencia: number): Promise<void> {
     const referencia = await this.referenciaRepository.findOne({
-      where: { id_ref_personal_afil: idRefPersonal },
+      where: { id_referencia: idReferencia },
     });
-    
     if (!referencia) {
-      throw new NotFoundException(`Referencia con ID ${idRefPersonal} no encontrada`);
+      throw new NotFoundException(`Referencia con ID ${idReferencia} no encontrada`);
     }
-
     referencia.estado = 'INACTIVO';
     await this.referenciaRepository.save(referencia);
   }
-  
-  
+  async actualizarReferencia(idReferencia: number, datosActualizados: CrearReferenciaDto): Promise<void> {
+    const validationErrors: ValidationError[] = await validate(datosActualizados);
+    
+    if (validationErrors.length > 0) {
+      const errorMessages = validationErrors.map(error => 
+        Object.values(error.constraints || {}).join(', ')
+      ).join('; ');
+      throw new BadRequestException(`Datos inválidos: ${errorMessages}`);
+    }
+    const referencia = await this.referenciaRepository.findOne({
+      where: { id_referencia: idReferencia },
+    });
+    if (!referencia) {
+      throw new NotFoundException(`Referencia con ID ${idReferencia} no encontrada`);
+    }
+    referencia.tipo_referencia = datosActualizados.tipo_referencia ?? referencia.tipo_referencia;
+    referencia.primer_nombre = datosActualizados.primer_nombre ?? referencia.primer_nombre;
+    referencia.segundo_nombre = datosActualizados.segundo_nombre ?? referencia.segundo_nombre;
+    referencia.tercer_nombre = datosActualizados.tercer_nombre ?? referencia.tercer_nombre;
+    referencia.primer_apellido = datosActualizados.primer_apellido ?? referencia.primer_apellido;
+    referencia.segundo_apellido = datosActualizados.segundo_apellido ?? referencia.segundo_apellido;
+    referencia.parentesco = datosActualizados.parentesco ?? referencia.parentesco;
+    referencia.direccion = datosActualizados.direccion ?? referencia.direccion;
+    referencia.telefono_domicilio = datosActualizados.telefono_domicilio ?? referencia.telefono_domicilio;
+    referencia.telefono_trabajo = datosActualizados.telefono_trabajo ?? referencia.telefono_trabajo;
+    referencia.telefono_personal = datosActualizados.telefono_personal ?? referencia.telefono_personal;
+    referencia.n_identificacion = datosActualizados.n_identificacion ?? referencia.n_identificacion;
+    referencia.estado = datosActualizados.estado ?? referencia.estado;
+    await this.referenciaRepository.save(referencia);
+  }
 }
 

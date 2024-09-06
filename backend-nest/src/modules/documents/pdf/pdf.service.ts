@@ -280,7 +280,7 @@ export class PdfService {
                   return [
                     [ 
                       { text: 'BANCO', alignment: 'left', style:['subheader'] }, 
-                      { text: `${b?.banco.nombre_banco}`, alignment: 'left', colSpan: 2}, {}, 
+                      { text: `${b?.banco?.nombre_banco}`, alignment: 'left', colSpan: 2}, {}, 
                       { text: 'No. DE CUENTA BANCARIA ACTUAL', alignment: 'left', style:['subheader'] }, 
                       { text: `${b?.num_cuenta}`, alignment: 'left', colSpan: 3}, {}, {}
                     ],
@@ -336,8 +336,8 @@ export class PdfService {
                           { text: 'SECTOR', alignment: 'center', style:['subheader'] },
                         ],
                         [ 
-                          { text: `${b?.centroTrabajo.municipio.departamento.nombre_departamento}`, alignment: 'center'},
-                          { text: `${b?.centroTrabajo.municipio.nombre_municipio}`, alignment: 'center'},
+                          { text: `${b?.centroTrabajo?.municipio?.departamento?.nombre_departamento}`, alignment: 'center'},
+                          { text: `${b?.centroTrabajo?.municipio?.nombre_municipio}`, alignment: 'center'},
                           { text: '', alignment: 'center'},
                           { text: '', alignment: 'center'},
                           { text: '', alignment: 'center'},

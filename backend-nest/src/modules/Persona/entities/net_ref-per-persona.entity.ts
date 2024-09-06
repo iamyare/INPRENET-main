@@ -30,11 +30,11 @@ export class Net_Ref_Per_Pers {
     })
     estado: string;
 
-    @ManyToOne(() => net_persona, persona => persona.referenciasPersonalPersona, { cascade: true })
+    /* @ManyToOne(() => net_persona, persona => persona.referenciasPersonalPersona, { cascade: true })
     @JoinColumn({ name: 'ID_PERSONA', foreignKeyConstraintName: 'FK_ID_PERSONA_NET_REF_PER_PERS' })
     persona: net_persona;
 
     @ManyToOne(() => net_persona, persona => persona.referenciasHechas, { cascade: true })
     @JoinColumn({ name: 'ID_PERSONA_REFERENCIA', foreignKeyConstraintName: 'FK_ID_PERSONA_REFERENCIA_NET_REF_PER_PERS' })
-    referenciada: net_persona;
+    referenciada: net_persona; */
 }

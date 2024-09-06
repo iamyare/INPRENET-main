@@ -242,18 +242,18 @@ export class AfiliarDocenteComponent implements OnInit {
 
   private formatReferencias(refpers: any[]): any[] {
     return refpers.map(referencia => ({
-      tipo_referencia: referencia.tipo_referencia,
-      parentesco: referencia.parentesco,
-      persona_referencia: {
+        tipo_referencia: referencia.tipo_referencia,
+        parentesco: referencia.parentesco,
         primer_nombre: referencia.primer_nombre,
         segundo_nombre: referencia.segundo_nombre,
         tercer_nombre: referencia.tercer_nombre,
         primer_apellido: referencia.primer_apellido,
         segundo_apellido: referencia.segundo_apellido,
-        genero: referencia.genero,
-        telefono_1: referencia.telefono_domicilio,
-        telefono_2: referencia.telefono_trabajo
-      }
+        telefono_domicilio: referencia.telefono_domicilio,
+        telefono_trabajo: referencia.telefono_trabajo,
+        telefono_personal: referencia.telefono_personal,
+        n_identificacion: referencia.n_identificacion,
+        direccion: referencia.direccion,
     }));
   }
 

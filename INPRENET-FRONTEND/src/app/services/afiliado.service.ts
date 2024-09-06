@@ -136,7 +136,7 @@ export class AfiliadoService {
   }
 
   updateReferenciaPersonal(id: string, updateDto: any): Observable<any> {
-    return this.http.patch(`${environment.API_URL}/api/Persona/updateReferenciaPerson/${id}`, updateDto);
+    return this.http.patch(`${environment.API_URL}/api/afiliacion/referencia/actualizar/${id}`, updateDto);
   }
 
   eliminarReferenciaPersonal(id: string): Observable<any> {

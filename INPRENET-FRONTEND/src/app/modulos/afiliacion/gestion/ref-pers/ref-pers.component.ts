@@ -65,9 +65,10 @@ export class RefPersComponent implements OnInit {
       telefono_trabajo: [datos?.telefono_trabajo || '', [Validators.minLength(8), Validators.maxLength(12), Validators.pattern(/^[0-9]*$/)]],
       telefono_personal: [datos?.telefono_personal || '', [Validators.minLength(8), Validators.maxLength(12), Validators.pattern(/^[0-9]*$/)]],
       parentesco: [datos?.parentesco || '', [Validators.required, Validators.minLength(2), Validators.maxLength(30)]],
+      n_identificacion: ['', []],
     });
     this.referencias.push(referenciaForm);
-    this.markAllAsTouched(referenciaForm); // Marcar todos los controles como "tocados"
+    this.markAllAsTouched(referenciaForm);
   }
 
   // Función para eliminar una referencia personal
@@ -158,9 +159,11 @@ export class RefPersComponent implements OnInit {
         tercer_nombre: ref.tercer_nombre,
         primer_apellido: ref.primer_apellido,
         segundo_apellido: ref.segundo_apellido,
-        telefono_1: ref.telefono_personal,
-        telefono_2: ref.telefono_trabajo,
-        direccion_residencia: ref.direccion,
+        telefono_personal: ref.telefono_personal,
+        telefono_trabajo: ref.telefono_trabajo,
+        telefono_domicilio: ref.telefono_domicilio,
+        direccion: ref.direccion,
+        n_identificacion: ref.n_identificacion
       }
     }));
   }

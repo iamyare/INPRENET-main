@@ -58,9 +58,6 @@ export class EditReferPersonalesComponent implements OnInit, OnChanges, OnDestro
 
   initializeComponent(): void {
     this.listaParentesco = this.datosEstaticosService.parentesco;
-    this.myFormFields = [
-      { type: 'text', label: 'DNI del afiliado', name: 'dni', validations: [Validators.required, Validators.minLength(13), Validators.maxLength(14)], display: true },
-    ];
 
     this.myColumns = [
       {
@@ -70,10 +67,16 @@ export class EditReferPersonalesComponent implements OnInit, OnChanges, OnDestro
         validationRules: [Validators.required, Validators.minLength(3)]
       },
       {
-        header: 'DNI',
-        col: 'dni',
+        header: 'Numero De Identificacion',
+        col: 'n_identificacion',
         isEditable: true,
         validationRules: [Validators.required, Validators.minLength(3)]
+      },
+      {
+        header: 'Tipo De Referencia',
+        col: 'tipo_referencia',
+        isEditable: true,
+        validationRules: [Validators.required]
       },
       {
         header: 'Parentesco',
@@ -101,7 +104,7 @@ export class EditReferPersonalesComponent implements OnInit, OnChanges, OnDestro
         isEditable: true
       },
       {
-        header: 'Estado', // Nueva columna
+        header: 'Estado',
         col: 'estado',
         isEditable: true,
         validationRules: [Validators.required, Validators.pattern(/^(ACTIVO|INACTIVO)$/)]
@@ -123,24 +126,31 @@ export class EditReferPersonalesComponent implements OnInit, OnChanges, OnDestro
   }
 
   async getFilas() {
+
     this.mostrarMensaje = false;
     if (this.Afiliado) {
       try {
         const data = await this.svcAfiliacion.obtenerReferenciasPorIdentificacion(this.Afiliado.n_identificacion).toPromise();
         this.filas = data.map((item: any) => {
           const filaProcesada = {
-            id_ref_personal: item.id_ref,
-            dni: item.personaReferenciada.n_identificacion ?? 'ID no disponible',
-            nombre_completo: `${item.personaReferenciada.primer_nombre} ${item.personaReferenciada.segundo_nombre ?? ''} ${item.personaReferenciada.primer_apellido} ${item.personaReferenciada.segundo_apellido ?? ''}`.trim(),
+            id_referencia: item.id_referencia ?? 'ID no disponible',
+            n_identificacion: item.n_identificacion ?? 'ID no disponible',
+            nombre_completo: `${item.primer_nombre ?? ''} ${item.segundo_nombre ?? ''} ${item.primer_apellido ?? ''} ${item.segundo_apellido ?? ''}`.trim(),
             parentesco: item.parentesco || 'No disponible',
-            direccion: item.personaReferenciada.direccion ?? 'Dirección no disponible',
-            telefono_domicilio: item.personaReferenciada.telefono_1 ?? 'No disponible',
-            telefono_personal: item.personaReferenciada.telefono_2 ?? 'No disponible',
-            telefono_trabajo: item.personaReferenciada.telefono_trabajo ?? 'No disponible',
+            direccion: item.direccion ?? 'Dirección no disponible',
+            telefono_domicilio: item.telefono_1 ?? 'No disponible',
+            telefono_personal: item.telefono_2 ?? 'No disponible',
+            telefono_trabajo: item.telefono_trabajo ?? 'No disponible',
             estado: item.estado ?? 'No disponible',
+            tipo_referencia: item.tipo_referencia ?? 'No disponible',
+            primer_nombre: item.primer_nombre ?? 'No disponible',
+            segundo_nombre: item.segundo_nombre ?? 'No disponible',
+            primer_apellido: item.primer_apellido ?? 'No disponible',
+            segundo_apellido: item.segundo_apellido ?? 'No disponible',
           };
           return filaProcesada;
         });
+
         this.mostrarMensaje = this.filas.length === 0;
       } catch (error) {
         console.error('Error al obtener datos de las referencias personales:', error);
@@ -153,6 +163,7 @@ export class EditReferPersonalesComponent implements OnInit, OnChanges, OnDestro
       this.resetDatos();
     }
   }
+
 
   ejecutarFuncionAsincronaDesdeOtroComponente(funcion: (data: any) => Promise<void>) {
     this.ejecF = funcion;
@@ -172,10 +183,37 @@ export class EditReferPersonalesComponent implements OnInit, OnChanges, OnDestro
 
     const campos = [
       {
-        nombre: 'nombre_completo',
+        nombre: 'primer_nombre',
         tipo: 'text',
         requerido: true,
-        etiqueta: 'Nombre completo',
+        etiqueta: 'Primer Nombre',
+        editable: true,
+        icono: 'person',
+        validadores: [Validators.required, Validators.minLength(2), Validators.maxLength(100)]
+      },
+      {
+        nombre: 'segundo_nombre',
+        tipo: 'text',
+        requerido: true,
+        etiqueta: 'Segundo Nombre',
+        editable: true,
+        icono: 'person',
+        validadores: [Validators.required, Validators.minLength(2), Validators.maxLength(100)]
+      },
+      {
+        nombre: 'primer_apellido',
+        tipo: 'text',
+        requerido: true,
+        etiqueta: 'Primer Apellido',
+        editable: true,
+        icono: 'person',
+        validadores: [Validators.required, Validators.minLength(2), Validators.maxLength(100)]
+      },
+      {
+        nombre: 'segundo_apellido',
+        tipo: 'text',
+        requerido: true,
+        etiqueta: 'Segundo Apellido',
         editable: true,
         icono: 'person',
         validadores: [Validators.required, Validators.minLength(2), Validators.maxLength(100)]
@@ -227,22 +265,31 @@ export class EditReferPersonalesComponent implements OnInit, OnChanges, OnDestro
         validadores: [Validators.required, Validators.minLength(8), Validators.maxLength(12), Validators.pattern(/^\+?[0-9]+(-?[0-9]+)*$/)]
       },
       {
-        nombre: 'dni',
+        nombre: 'n_identificacion',
         tipo: 'text',
         requerido: true,
-        etiqueta: 'DNI',
+        etiqueta: 'Numero de Identificacion',
         editable: true,
         icono: 'badge',
         validadores: [Validators.required, Validators.pattern(/^[0-9]{13}$|^[0-9]{4}-[0-9]{4}-[0-9]{5}$/)]
       },
       {
-        nombre: 'estado', // Nuevo campo en el formulario de edición
+        nombre: 'tipo_referencia',
+        tipo: 'text',
+        requerido: true,
+        etiqueta: 'Tipo De Referencia',
+        editable: true,
+        icono: 'badge',
+        validadores: [Validators.required]
+      },
+      {
+        nombre: 'estado',
         tipo: 'text',
         requerido: true,
         etiqueta: 'Estado',
         editable: true,
         icono: 'check_circle',
-        validadores: [Validators.required, Validators.pattern(/^(ACTIVO|INACTIVO)$/)] // Validación para aceptar solo 'ACTIVO' o 'INACTIVO'
+        validadores: [Validators.required, Validators.pattern(/^(ACTIVO|INACTIVO)$/)]
       }
     ];
 
@@ -264,10 +311,11 @@ export class EditReferPersonalesComponent implements OnInit, OnChanges, OnDestro
     });
     dialogRef.afterClosed().subscribe((result: boolean) => {
       if (result) {
-        this.svcAfiliacion.inactivarReferencia(row.id_ref_personal).subscribe({
+
+        this.svcAfiliacion.inactivarReferencia(row.id_referencia).subscribe({
           next: () => {
             this.toastr.success('Referencia personal inactivada correctamente.');
-            this.getFilas(); // Volver a cargar las filas después de inactivar
+            this.getFilas();
           },
           error: (error) => {
             console.error('Error al inactivar la referencia personal:', error);
@@ -288,15 +336,28 @@ export class EditReferPersonalesComponent implements OnInit, OnChanges, OnDestro
 
     dialogRef.afterClosed().subscribe((result: any) => {
       if (result) {
-        this.svcAfiliado.updateReferenciaPersonal(row.id_ref_personal, result).subscribe({
+        const updateDto = {
+          primer_nombre: result.primer_nombre,
+          segundo_nombre: result.segundo_nombre,
+          primer_apellido: result.primer_apellido,
+          segundo_apellido: result.segundo_apellido,
+          direccion: result.direccion,
+          telefono_domicilio: result.telefono_domicilio,
+          telefono_personal: result.telefono_personal,
+          telefono_trabajo: result.telefono_trabajo,
+          n_identificacion: result.n_identificacion,
+          estado: result.estado,
+          tipo_referencia: result.tipo_referencia
+        };
+        this.svcAfiliado.updateReferenciaPersonal(row.id_referencia, updateDto).subscribe({
           next: (response) => {
             this.toastr.success('Datos modificados correctamente.');
-            this.getFilas(); // Volver a cargar las filas después de actualizar
+            this.getFilas();
           },
           error: (error) => {
             this.toastr.error('Error al actualizar la referencia personal.');
             console.error('Error al actualizar la referencia personal:', error);
-            this.getFilas(); // Volver a cargar las filas incluso si hay un error
+            this.getFilas();
           }
         });
       } else {
@@ -316,7 +377,7 @@ export class EditReferPersonalesComponent implements OnInit, OnChanges, OnDestro
 
     dialogRef.afterClosed().subscribe((result: any) => {
       if (result) {
-        this.getFilas(); // Volver a cargar las filas después de agregar una nueva referencia
+        this.getFilas();
       }
     });
   }

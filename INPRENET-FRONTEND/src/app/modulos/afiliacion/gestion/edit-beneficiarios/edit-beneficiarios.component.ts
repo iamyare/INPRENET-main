@@ -7,7 +7,6 @@ import { FieldConfig } from 'src/app/shared/Interfaces/field-config';
 import { TableColumn } from 'src/app/shared/Interfaces/table-column';
 import { convertirFechaInputs } from 'src/app/shared/functions/formatoFecha';
 import { unirNombres } from 'src/app/shared/functions/formatoNombresP';
-import { DatosEstaticosService } from 'src/app/services/datos-estaticos.service';
 import { DatePipe } from '@angular/common';
 import { EditarDialogComponent } from 'src/app/components/dinamicos/editar-dialog/editar-dialog.component';
 import { ConfirmDialogComponent } from 'src/app/components/dinamicos/confirm-dialog/confirm-dialog.component';
@@ -36,7 +35,6 @@ export class EditBeneficiariosComponent implements OnInit, OnChanges {
     private svcAfiliado: AfiliadoService,
     private toastr: ToastrService,
     private dialog: MatDialog,
-    private datosEstaticosService: DatosEstaticosService,
     private datePipe: DatePipe
   ) { }
 
@@ -81,8 +79,6 @@ export class EditBeneficiariosComponent implements OnInit, OnChanges {
     if (this.persona) {
       try {
         const data = await this.svcAfiliado.getAllBenDeAfil(this.persona.n_identificacion).toPromise();
-        console.log(data);
-
         this.filas = data.map((item: any) => {
           const nombres = [item.primerNombre, item.segundoNombre, item.tercerNombre].filter(part => part).join(' ');
           const apellidos = [item.primerApellido, item.segundoApellido].filter(part => part).join(' ');
@@ -134,9 +130,6 @@ export class EditBeneficiariosComponent implements OnInit, OnChanges {
       data: { campos: campos, valoresIniciales: row }
     });
 
-    console.log(row);
-    console.log(campos);
-
 
     dialogRef.afterClosed().subscribe((result: any) => {
       if (result) {
@@ -161,6 +154,8 @@ export class EditBeneficiariosComponent implements OnInit, OnChanges {
           direccion_residencia: result.direccion_residencia,
           id_municipio_residencia: result.id_municipio_residencia,
           id_estado_persona: result.id_estado_persona, */
+          id_causante_padre: result.ID_CAUSANTE_PADRE,
+          id_persona: result.idPersona,
           porcentaje: result.porcentaje
         };
 
@@ -226,7 +221,6 @@ export class EditBeneficiariosComponent implements OnInit, OnChanges {
         id_detalle_persona: this.persona.detallePersona[0].ID_DETALLE_PERSONA
       }
     });
-
     dialogRef.afterClosed().subscribe((result: any) => {
       this.ngOnInit();
     });

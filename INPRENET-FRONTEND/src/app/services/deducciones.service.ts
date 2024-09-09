@@ -13,6 +13,32 @@ export class DeduccionesService {
 
   constructor(private toastr: ToastrService, private http: HttpClient) { }
 
+  eliminarDetalleDeduccion(id: number): Observable<void> {
+    return this.http.delete<void>(`${environment.API_URL}/api/detalle-deduccion/${id}`)
+      .pipe(
+        catchError((error: HttpErrorResponse) => {
+          console.error('Error al eliminar el detalle de deducción:', error);
+          this.toastr.error('Error al eliminar el detalle de deducción');
+          return throwError(() => new Error('Error al eliminar el detalle de deducción'));
+        })
+      );
+  }
+
+  obtenerDeduccionesPorAnioMes(dni: string, anio: number, mes: number): Observable<any> {
+    const params = new HttpParams()
+      .set('anio', anio.toString())
+      .set('mes', mes.toString());
+
+    return this.http.get(`${environment.API_URL}/api/deduccion/deducciones-por-anio-mes/${dni}`, { params })
+      .pipe(
+        catchError((error: HttpErrorResponse) => {
+          console.error('Error al obtener deducciones', error);
+          this.toastr.error('Error al obtener deducciones');
+          return throwError(() => new Error('Error al obtener deducciones'));
+        })
+      );
+  }
+
   descargarExcelDeduccionPorCodigo(
     periodoInicio: string,
     periodoFinalizacion: string,
@@ -70,20 +96,6 @@ export class DeduccionesService {
     );
   }
 
-  obtenerDeduccionesPorAnioMes(dni: string, anio: number, mes: number): Observable<any> {
-    const params = new HttpParams()
-      .set('anio', anio.toString())
-      .set('mes', mes.toString());
-
-    return this.http.get(`${environment.API_URL}/api/deduccion/deducciones-por-anio-mes/${dni}`, { params })
-      .pipe(
-        catchError((error: HttpErrorResponse) => {
-          console.error('Error al obtener deducciones', error);
-          this.toastr.error('Error al obtener deducciones');
-          return throwError(() => new Error('Error al obtener deducciones'));
-        })
-      );
-  }
 
   actualizarEstadoDeduccion(idPlanilla: string, nuevoEstado: string): Observable<any> {
     return this.http.patch(`${environment.API_URL}/api/detalle-deduccion/actualizar-estado/${idPlanilla}`, { nuevoEstado })
@@ -114,7 +126,7 @@ export class DeduccionesService {
 
     return this.http.get<any>(`${environment.API_URL}/api/detalle-deduccion/getDeduccionesByPersonaAndBenef`, { params }).pipe(
       tap(() => {
-        this.toastr.success('Detalle de Deducciones obtenido con éxito');
+        //this.toastr.success('Detalle de Deducciones obtenido con éxito');
       }),
       catchError(this.handleError)
     );
@@ -231,7 +243,6 @@ export class DeduccionesService {
     const url = `${environment.API_URL}/api/detalle-deduccion`;
     return this.http.post<any>(url, detalleDeduccion).pipe(
       catchError(error => {
-        this.toastr.error('Error al crear el detalle de deducción', 'Error');
         throw error;
       })
     );

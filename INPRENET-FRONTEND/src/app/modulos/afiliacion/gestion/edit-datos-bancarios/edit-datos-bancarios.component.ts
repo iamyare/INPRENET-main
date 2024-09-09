@@ -1,4 +1,4 @@
-import { Component, Input, OnInit, OnChanges, SimpleChanges } from '@angular/core';
+import { Component, Input, OnInit, OnChanges, SimpleChanges, EventEmitter, Output } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { ToastrService } from 'ngx-toastr';
 import { AfiliadoService } from 'src/app/services/afiliado.service';
@@ -20,6 +20,8 @@ export class EditDatosBancariosComponent implements OnInit, OnChanges {
   public myColumns: TableColumn[] = [];
   public filas: any[] = [];
   private ejecF: any;
+  @Input() mostrarResetBusqueda: boolean = false;
+  @Output() resetBusqueda = new EventEmitter<void>();
 
   constructor(
     private svcAfiliado: AfiliadoService,
@@ -201,5 +203,9 @@ export class EditDatosBancariosComponent implements OnInit, OnChanges {
         console.log('Activación cancelada por el usuario.');
       }
     });
+  }
+
+  resetBusqueda2() {
+    this.resetBusqueda.emit();
   }
 }

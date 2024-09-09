@@ -139,7 +139,7 @@ import { AgregarOtrasFuentesIngresoComponent } from './gestion/agregar-otras-fue
     MaterialAngularModule,
     ComponentsModule,
     AfiliacionRoutingModule,
-    ReactiveFormsModule,
+    ReactiveFormsModule
   ],
   exports: [
     AdminCentroEducativoComponent,
@@ -148,7 +148,8 @@ import { AgregarOtrasFuentesIngresoComponent } from './gestion/agregar-otras-fue
     BeneficiarioComponent,
     AfiliadoComponent,
     VoluntarioComponent,
-    DatBancComponent
+    DatBancComponent,
+    EditDatosBancariosComponent
   ],
   providers: [
     { provide: MAT_DATE_LOCALE, useValue: 'es', },

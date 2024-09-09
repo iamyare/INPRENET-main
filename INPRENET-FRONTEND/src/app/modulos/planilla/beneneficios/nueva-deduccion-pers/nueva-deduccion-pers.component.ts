@@ -147,7 +147,12 @@ export class NuevaDeduccionPersComponent implements OnInit {
           this.limpiarFormulario();
         },
         (error) => {
-          this.toastr.error('Error al asignar la deducción.');
+          // Verifica si el backend ha devuelto un mensaje de error específico
+          if (error && error.error && error.error.mensaje) {
+            this.toastr.error(`Error: ${error.error.mensaje}`, 'Error al asignar la deducción');
+          } else {
+            this.toastr.error('Error desconocido al asignar la deducción.');
+          }
           console.error('Error al asignar la deducción:', error);
         }
       );
@@ -155,7 +160,6 @@ export class NuevaDeduccionPersComponent implements OnInit {
       this.toastr.error('Por favor, completa todos los campos obligatorios.');
     }
   }
-
 
   limpiarFormulario(): void {
     this.Afiliado = {};

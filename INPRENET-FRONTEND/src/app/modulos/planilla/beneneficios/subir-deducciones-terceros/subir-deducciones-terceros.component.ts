@@ -60,39 +60,45 @@ export class SubirDeduccionesTercerosComponent {
       // Filtrar filas completamente vacías
       data = data.filter(row => Object.values(row).some(cell => cell != null && cell.toString().trim() !== ''));
 
-      // Validar que no haya columnas vacías
-      let errorDetails: { row: number; columns: string[] }[] = [];
-      data.forEach((row, rowIndex) => {
-        const emptyColumns = Object.keys(row).filter(key => {
-          const value = row[key];
-          return value == null || value.toString().trim() === '';
-        });
-
-        if (emptyColumns.length > 0) {
-          errorDetails.push({ row: rowIndex + 1, columns: emptyColumns });
-        }
-      });
-
-      if (errorDetails.length > 0) {
-        const errorMessage = errorDetails.map(error => `Error en la fila ${error.row}: las columnas ${error.columns.join(', ')} están vacías.`).join(' ');
-        this.toastr.error(errorMessage, 'Error en la carga');
-        this.resetState();
-        return;
-      }
-
-      // Enviar datos procesados y validados al backend
+      // Enviar los datos procesados y validados al backend
       this.deduccionesService.subirArchivoDeducciones(this.file!).subscribe({
         next: (response) => {
-          console.log('Datos insertados exitosamente:', response);
-          this.datosCargados = data; // Guardar los datos cargados exitosamente
-          this.datosCargadosExitosamente = true;
+          if (typeof response === 'string') {
+            response = JSON.parse(response);
+          }
+
+          // Filtrar los datos que no tuvieron errores (excluyendo los que están en failedRows)
+          const failedDniList = response.failedRows?.map((row: any) => row[2]); // Recogemos los DNI de los errores
+
+          this.datosCargados = data
+            .filter((row: any) => !failedDniList?.includes(row.dni))  // Solo incluimos los que no están en failedRows
+            .map((row: any) => ({
+              año: row['año'],  // Columna año
+              mes: row['mes'],  // Columna mes
+              dni: row['dni'],  // Columna dni
+              codigo_deduccion: row['codigo_deduccion'],  // Columna codigo_deduccion
+              monto_total: row['monto_motal'],  // Corrigiendo el nombre a monto_total si es necesario
+            }));
+
+          console.log("Datos cargados exitosamente:", this.datosCargados);
+
+          // Asegurarnos de que la tabla se muestre solo si hay datos cargados
+          this.datosCargadosExitosamente = this.datosCargados.length > 0;
+
           this.toastr.success('Todos los datos se cargaron correctamente.', 'Carga exitosa');
-          this.resetState(); // Reiniciar estado después de la carga exitosa
+
+          // Verifica si hay filas fallidas y genera el archivo Excel
+          if (response && Array.isArray(response.failedRows) && response.failedRows.length > 0) {
+            this.generateFailedRowsExcel(response.failedRows);
+            this.toastr.warning('Algunas filas no se insertaron. Se ha descargado un archivo con los errores.', 'Advertencia');
+          }
+
+          // Limpiar el archivo después de la subida exitosa
+          this.clearFile();
         },
         error: (error) => {
           this.datosCargadosExitosamente = false;
           this.toastr.error('Error al cargar los datos.', 'Error de carga');
-          this.resetState(); // Reiniciar estado en caso de error
 
           if (error.error && error.error.details) {
             error.error.details.forEach((detail: any) => {
@@ -101,6 +107,9 @@ export class SubirDeduccionesTercerosComponent {
           } else {
             this.toastr.error(error.message || 'Ocurrió un error desconocido.', 'Error');
           }
+
+          // Limpiar el archivo después de una subida fallida
+          this.clearFile();
         }
       });
     };
@@ -108,9 +117,38 @@ export class SubirDeduccionesTercerosComponent {
     reader.onerror = () => {
       this.toastr.error('Ocurrió un error al leer el archivo. Asegúrate de que el formato del archivo sea correcto.', 'Error');
       this.resetState(); // Reiniciar estado en caso de error de lectura
+      this.clearFile(); // Limpiar el archivo después de un error de lectura
     };
 
     reader.readAsBinaryString(this.file as Blob);
+  }
+
+  generateFailedRowsExcel(failedRows: any[]) {
+    const headers = ['anio', 'mes', 'dni', 'codigoDeduccion', 'montoTotal', 'razón'];
+
+    // Mapear filas a un formato de objetos con claves
+    const formattedRows = failedRows.map(row => {
+      return {
+        anio: row[0],
+        mes: row[1],
+        dni: row[2],
+        codigoDeduccion: row[3],
+        montoTotal: row[4],
+        razón: row[5]
+      };
+    });
+
+    // Verificar si hay filas formateadas
+    if (formattedRows && formattedRows.length > 0) {
+      const worksheet = XLSX.utils.json_to_sheet(formattedRows, { header: headers });
+      const workbook = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(workbook, worksheet, 'Deducciones Fallidas');
+
+      // Generar y descargar el archivo Excel
+      XLSX.writeFile(workbook, 'deducciones_fallidas.xlsx');
+    } else {
+      console.error("No hay filas fallidas para generar el archivo.");
+    }
   }
 
   cancelUpload() {
@@ -125,7 +163,6 @@ export class SubirDeduccionesTercerosComponent {
     this.isUploading = false;
     this.progressValue = 0;
     this.file = null;
-    this.datosCargados = [];
     if (this.fileInput && this.fileInput.nativeElement) {
       this.fileInput.nativeElement.value = '';
     }

@@ -60,6 +60,16 @@ export class VerplanprelcompComponent implements OnInit {
         isEditable: true
       },
       {
+        header: 'Banco',
+        col: 'nombre_banco',
+        isEditable: true
+      },
+      {
+        header: 'Numero de cuenta',
+        col: 'num_cuenta',
+        isEditable: true
+      },
+      {
         header: 'Total de Ingresos',
         col: 'total_beneficios',
         moneda: true,
@@ -95,6 +105,8 @@ export class VerplanprelcompComponent implements OnInit {
       this.planillaService.getPlanillaPrelimiar(this.datosFormateados.value.codigo_planilla).subscribe(
         {
           next: async (response) => {
+            console.log();
+
             if (response) {
               this.calcularTotales(this.datosFormateados.value.codigo_planilla)
 
@@ -164,7 +176,7 @@ export class VerplanprelcompComponent implements OnInit {
                 fecha_cierre: item.fecha_cierre,
                 tipo_afiliado: item.tipo_afiliado,
                 "total": item.TOTAL_BENEFICIOS || 0 - (item.TOTAL_TOTAL_DEDUCCIONES_INPREMA || 0 + item.TOTAL_DEDUCCIONES_TERCEROS || 0),
-                
+
                 //correo_1: item.correo_1
                 //beneficiosNombres: item.beneficiosNombres,
                 //BENEFICIOSIDS: item.BENEFICIOSIDS,
@@ -172,7 +184,7 @@ export class VerplanprelcompComponent implements OnInit {
 
               return respons
             });
-            
+
             this.detallePlanilla.totalBeneficios = totalBeneficios;
             this.detallePlanilla.deduccionesI = deduccionesI;
             this.detallePlanilla.deduccionesT = deduccionesT;
@@ -253,6 +265,8 @@ export class VerplanprelcompComponent implements OnInit {
       this.data = await this.planillaService.getPlanillasPreliminares(cod_planilla).toPromise();
       if (this.data) {
         this.dataPlan = this.data.map((item: any) => {
+          console.log(item);
+
           const deduccionesI: number = parseFloat(item.TOTAL_DEDUCCIONES_INPREMA) || 0
           const deduccionesT: number = parseFloat(item.TOTAL_DEDUCCIONES_TERCEROS) || 0
           const deducciones: number = deduccionesI + deduccionesT
@@ -267,7 +281,9 @@ export class VerplanprelcompComponent implements OnInit {
             total_deducciones_terceros: item.TOTAL_DEDUCCIONES_TERCEROS || 0,
             "total": item.TOTAL_BENEFICIOS - (parseFloat(item.TOTAL_DEDUCCIONES_INPREMA) || 0 + parseFloat(item.TOTAL_DEDUCCIONES_TERCEROS) || 0),
             correo_1: item.correo_1,
-            fecha_cierre: item.fecha_cierre
+            fecha_cierre: item.fecha_cierre,
+            num_cuenta: item.NUM_CUENTA,
+            nombre_banco : item.NOMBRE_BANCO
 
             /* BENEFICIOSIDS: item.BENEFICIOSIDS,
             beneficiosNombres: item.beneficiosNombres, */
@@ -323,16 +339,22 @@ export class VerplanprelcompComponent implements OnInit {
 
     this.deduccionSVC.getDeduccionesByPersonaAndBenef(row.id_afiliado, row.ID_BENEFICIO, this.idPlanilla).subscribe({
       next: (response1) => {
+        console.log(response1);
+
         if (response1) {
           const data = response1;
           logs.push({ message: 'Datos De Deducciones:', detail: data || [], type: 'deducciones' });
 
-          const openDialog = () => this.dialog.open(DynamicDialogComponent, {
+          const dialogRef = this.dialog.open(DynamicDialogComponent, {
             width: '50%',
             data: { logs: logs, type: 'deduccion' }
           });
 
-          openDialog();
+          // Escuchar el evento deduccionEliminada para refrescar los datos
+          dialogRef.componentInstance.deduccionEliminada.subscribe(() => {
+
+            this.getFilas(this.datosFormateados.value.codigo_planilla).then(() => this.cargar());
+          });
         }
       },
     });

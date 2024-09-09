@@ -66,7 +66,7 @@ export const MENU_CONFIG: Section[] = [
         title: 'GESTIÓN DE DEDUCCIONES',
         icon: 'money',
         children: [
-          /* { title: 'Asignar Deduccion', route: 'planilla/Deducciones/nueva-deduccion-afil', icon: 'remove_circle' }, */
+          { title: 'Asignar Deduccion', route: 'planilla/Deducciones/nueva-deduccion-afil', icon: 'remove_circle' },
           { title: 'Ver Deducciones Asignadas', route: 'planilla/Deducciones/ver-editar-deduccion-afil', icon: 'visibility' },
         ],
       },
@@ -79,9 +79,10 @@ export const MENU_CONFIG: Section[] = [
         title: 'EGRESOS',
         icon: 'money_off',
         children: [
-          { title: 'Nueva Planilla', route: 'planilla/Egresos/proceso-planilla', icon: 'post_add' },
+          { title: 'Proceso de Planilla', route: 'planilla/Egresos/proceso-planilla', icon: 'post_add' },
           { title: 'Ver Planillas', route: 'planilla/Egresos/ver-planillas', icon: 'receipt' },
           { title: 'Generación de documentos', route: 'planilla/Egresos/documentos-planilla', icon: 'description' },
+          { title: 'Cambiar Banco', route: 'planilla/Egresos/editar-banco', icon: 'description' },
         ],
       },
       {
@@ -93,5 +94,5 @@ export const MENU_CONFIG: Section[] = [
       },
     ],
   },
-  
+
 ];

@@ -53,28 +53,29 @@
   </div>
 </div>
 
-<div *ngIf="datosCargados.length > 0 && datosCargadosExitosamente" class="mt-4">
+<div *ngIf="datosCargados.length > 0" class="mt-4">
   <h3>Datos Cargados</h3>
   <table class="table table-bordered">
     <thead class="thead-light">
       <tr>
         <th scope="col">Año</th>
-        <th scope="col">Código de Deducción</th>
-        <th scope="col">DNI</th>
         <th scope="col">Mes</th>
+        <th scope="col">DNI</th>
+        <th scope="col">Código de Deducción</th>
         <th scope="col">Monto Total</th>
-        <th scope="col">Nombre de Institución</th>
       </tr>
     </thead>
     <tbody>
       <tr *ngFor="let dato of datosCargados">
         <td>{{ dato["año"] }}</td>
-        <td>{{ dato.codigo_deduccion }}</td>
-        <td>{{ dato.dni }}</td>
         <td>{{ dato.mes }}</td>
+        <td>{{ dato.dni }}</td>
+        <td>{{ dato.codigo_deduccion }}</td>
         <td>{{ dato.monto_total }}</td>
-        <td>{{ dato.nombre_institucion }}</td>
       </tr>
     </tbody>
   </table>
 </div>
+
+
+

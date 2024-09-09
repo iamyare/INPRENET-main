@@ -1,7 +1,9 @@
+import { DatePipe, CommonModule } from '@angular/common';
 import { NgModule } from '@angular/core';
-import { CommonModule, DatePipe } from '@angular/common';
-import { NuevaDeduccionAfilComponent } from './egresos/nueva-deduccion-afil/nueva-deduccion-afil.component';
+import { ComponentsModule } from 'src/app/components/components.module';
 import { MaterialAngularModule } from 'src/app/material-angular/material-angular.module';
+import { PlanillaRoutingModule } from './planilla-routing.module';
+import { NuevaDeduccionAfilComponent } from './egresos/nueva-deduccion-afil/nueva-deduccion-afil.component';
 import { NuevaPlanillaComponentP } from './egresos/nueva-planilla/nueva-planilla.component';
 import { ProgressplanillComponent } from './egresos/progressplanill/progressplanill.component';
 import { NuevaplanillaComponent } from './egresos/nuevaplanilla/nuevaplanilla.component';
@@ -9,10 +11,8 @@ import { VerplanprelcompComponent } from './egresos/verplanprelcomp/verplanprelc
 import { TotalesporbydDialogComponent } from './egresos/totalesporbydDialog/totalesporbydDialog.component';
 import { AsignacionAfilPlanComponent } from './egresos/asignacion-afil-plan/asignacion-afil-plan.component';
 import { VerplancerradaComponent } from './egresos/verplancerrada/verplancerrada.component';
-import { ComponentsModule } from 'src/app/components/components.module';
 import { PlanillaColegiosPrivadosComponent } from './ingresos/planilla-colegios-privados/planilla-colegios-privados.component';
 import { VerDatPlanIngComponent } from './ingresos/ver-dat-plan-ing/ver-dat-plan-ing.component';
-import { PlanillaRoutingModule } from './planilla-routing.module';
 import { VerPlanillasComponent } from './egresos/ver-planillas/ver-planillas.component';
 import { DetallePlanillaDialogComponent } from './egresos/detalle-planilla-dialog/detalle-planilla-dialog.component';
 import { CargarPlanillaPrivadosComponent } from './ingresos/cargar-planilla-privados/cargar-planilla-privados.component';
@@ -33,6 +33,8 @@ import { SubirDeduccionesTercerosComponent } from './beneneficios/subir-deduccio
 import { CargarbefDedComponent } from './egresos/cargarbef-ded/cargarbef-ded.component';
 import { ProcesoPlanillaComponent } from './egresos/proceso-planilla/proceso-planilla.component';
 import { DialogDesgloseComponent } from './egresos/dialog-desglose/dialog-desglose.component';
+import { GestionBancoComponent } from './gestion-banco/gestion-banco.component';
+import { AfiliacionModule } from '../afiliacion/afiliacion.module';
 
 @NgModule({
   declarations: [
@@ -65,11 +67,13 @@ import { DialogDesgloseComponent } from './egresos/dialog-desglose/dialog-desglo
     SubirDeduccionesTercerosComponent,
     CargarbefDedComponent,
     ProcesoPlanillaComponent,
-    DialogDesgloseComponent
+    DialogDesgloseComponent,
+    GestionBancoComponent
   ],
   imports: [
     CommonModule,
     PlanillaRoutingModule,
+    AfiliacionModule,
     MaterialAngularModule,
     ComponentsModule,
   ],

@@ -60,6 +60,8 @@ export class VerEditarDeduccionAfilComponent implements OnInit {
     try {
       const { dni, anio, mes } = this.form.value;
       const data = await this.deduccionesService.obtenerDeduccionesPorAnioMes(dni, anio, mes).toPromise();
+      console.log(data);
+
 
       this.filasT = data.deducciones.map((item: any) => ({
         anio: item.anio,
@@ -69,7 +71,7 @@ export class VerEditarDeduccionAfilComponent implements OnInit {
         monto_total: item.monto_aplicado,
         nombre_deduccion: item.deduccion_id ? item.deduccion_id.nombre_deduccion : 'No especificado',
         nombre_institucion: item.centro_trabajo ? item.centro_trabajo : 'No especificado',
-        codigo_planilla: item.planilla
+        codigo_planilla: item.codigo_planilla
       }));
 
       this.Afiliado = data.persona;

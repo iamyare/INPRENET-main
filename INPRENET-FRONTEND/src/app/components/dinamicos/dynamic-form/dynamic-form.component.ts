@@ -26,10 +26,14 @@ export class DynamicFormComponent implements OnInit {
   }
 
   ngOnInit() {
+    // Si tienes un formulario que llega a través del Input, lo usas para inicializar
+  if (this.incomingForm) {
+    this.form = this.mergeForms(this.incomingForm);
+  } else {
     this.form = this.createControl();
-    this.form = this.mergeForms(this.form);
+  }
 
-    this.newDatBenChange.emit(this.form);
+  this.newDatBenChange.emit(this.form);
   }
 
   onDatosBenChange() {

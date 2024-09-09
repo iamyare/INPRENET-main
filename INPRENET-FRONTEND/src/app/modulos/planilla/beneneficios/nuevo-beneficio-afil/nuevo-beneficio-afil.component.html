@@ -46,22 +46,37 @@
     </table>
   </div>
 
-  <div *ngIf="Afiliado.fallecido == 'SI' && Afiliado.tipo_persona == 'AFILIADO'"
-    style="background-color: white; padding: 1%">
-    <h2>Beneficiarios</h2>
-    <app-dynamic-table style="width: 10%" [columns]="myColumns" [data]="filas" [getData]="datosTabl"
-      (ejecutarFuncionAsincronaEvent)="
-        ejecutarFuncionAsincronaDesdeOtroComponente($event)
-      "></app-dynamic-table>
+  <div *ngIf="Afiliado.fallecido == 'SI' && (
+  Afiliado.tipo_persona == 'AFILIADO' || 
+  Afiliado.tipo_persona == 'JUBILADO' || 
+  Afiliado.tipo_persona == 'PENSIONADO')"
+    style="padding: 1%">
+    <app-dynamic-table-prueba 
+    titulo="Beneficiarios Del {{Afiliado.tipo_persona}}"
+    subtitulo="Haga Click sobre un item de la siguiente tabla"
+    [columns]="myColumns" 
+    [data]="filas" 
+    [getData]="getFilas"
+    (ejecutarFuncionAsincronaEvent)="ejecutarFuncionAsincronaDesdeOtroComponente($event)"
+    (rowClicked)="manejarRowClick($event)"
+    [enableRowClick]="true"
+      ></app-dynamic-table-prueba>
   </div>
 </div>
 
 
-<div *ngIf="mostrarDB && Afiliado.fallecido == 'SI' && Afiliado.tipo_persona == 'AFILIADO'"
+<div *ngIf="mostrarB && Afiliado.fallecido == 'SI' && (
+  Afiliado.tipo_persona == 'AFILIADO' || 
+  Afiliado.tipo_persona == 'JUBILADO' || 
+  Afiliado.tipo_persona == 'PENSIONADO')"
   style="margin: 1% 0% 1% 0%; text-align: center; background-color: white">
-  <app-dynamic-form [fields]="myFormFields2" titulo="" subtitulo="Completa la información correspondiente"
-  (selectChange)="prueba($event)" 
-    (newDatBenChange)="obtenerDatosFormBen($event)"></app-dynamic-form>
+  <app-dynamic-form 
+    [fields]="myFormFields2" 
+    titulo="Datos sobre el beneficio" 
+    subtitulo="Completa la información correspondiente"
+    (selectChange)="prueba($event)" 
+    (newDatBenChange)="obtenerDatosFormBen($event)"
+  ></app-dynamic-form>
   <button mat-raised-button color="primary" style="color: white; margin: 1% 0 1% 0" [disabled]="FormBen.invalid"
     (click)="guardarNTBenef()">
     Asignar beneficio al beneficiario

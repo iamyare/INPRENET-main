@@ -46,6 +46,10 @@ tr.mat-header-row {
   background-color: rgba(0, 0, 0, 0.1);
 }
 
+tr.selected {
+  background-color: springgreen; // Cambia este color por el que prefieras
+}
+
 .clickable-row {
   cursor: pointer;
 }

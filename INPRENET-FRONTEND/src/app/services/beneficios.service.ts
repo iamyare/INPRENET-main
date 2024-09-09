@@ -141,7 +141,7 @@ export class BeneficiosService {
     );
   }
 
-  asigBeneficioAfil(data: TipoBeneficio, idAfiliadoPadre?: string): Observable<any> {
+  asigBeneficioAfil(datos: TipoBeneficio, itemSeleccionado:any,idAfiliadoPadre?: string): Observable<any> {
     if (idAfiliadoPadre) {
       var url = `${environment.API_URL}/api/beneficio-planilla/nuevoDetalle/${idAfiliadoPadre}`;
     } else {
@@ -150,7 +150,7 @@ export class BeneficiosService {
 
     return this.http.post<TipoBeneficio>(
       url,
-      data,
+      {datos,itemSeleccionado},
     ).pipe(
       map((res: any) => {
         return res;

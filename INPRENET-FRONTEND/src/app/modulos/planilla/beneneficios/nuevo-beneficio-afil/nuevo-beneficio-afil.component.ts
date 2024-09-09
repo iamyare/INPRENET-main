@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { Component, OnInit, ViewChild, ChangeDetectorRef  } from '@angular/core';
 import { FormBuilder, FormGroup, ValidatorFn, Validators } from '@angular/forms';
 import { ToastrService, ToastrModule } from 'ngx-toastr';
 import { AfiliadoService } from 'src/app/services/afiliado.service';
@@ -16,8 +16,9 @@ import { BehaviorSubject } from 'rxjs';
 })
 export class NuevoBeneficioAfilComponent implements OnInit {
   @ViewChild(DynamicFormComponent) dynamicForm!: DynamicFormComponent;
-  form: any;
-  form1: any
+  form!: FormGroup;
+  form1!: FormGroup;
+  
   FormBen: any
   datosFormateados: any;
   unirNombres: any = unirNombres;
@@ -31,12 +32,29 @@ export class NuevoBeneficioAfilComponent implements OnInit {
 
   Afiliado: any = {}
 
-  myColumns: any = []
+  myColumns: any =[
+    { header: 'N_Identificacion', col: 'dni', },
+    {
+      header: 'Nombre Completo',
+      col: 'nombre_completo',
+      
+    },
+    { header: 'Genero', col: 'genero',  },
+    {
+      header: 'Tipo Afiliado',
+      col: 'tipo_afiliado',
+      
+    },
+    { header: 'Porcentaje', col: 'porcentaje',  },
+  ];
   datosTabl: any[] = [];
   filas: any
   ejecF: any;
+  desOBenSeleccionado :any 
+  mostrarB: any;
 
   constructor(
+    private cdr: ChangeDetectorRef,
     private svcBeneficioServ: BeneficiosService,
     private svcAfilServ: AfiliadoService, private fb: FormBuilder,
     private toastr: ToastrService, private _formBuilder: FormBuilder
@@ -82,7 +100,7 @@ export class NuevoBeneficioAfilComponent implements OnInit {
           this.Afiliado = item;
           this.Afiliado.nameAfil = this.unirNombres(res.PRIMER_NOMBRE, res.SEGUNDO_NOMBRE, res.TERCER_NOMBRE, res.PRIMER_APELLIDO, res.SEGUNDO_APELLIDO);
           this.getFilas().then(() => this.cargar());
-
+          this.cargar();
         },
         (error) => {
           this.Afiliado.estado = ""
@@ -128,10 +146,11 @@ export class NuevoBeneficioAfilComponent implements OnInit {
           { type: 'date', label: 'Fecha de efectividad', name: 'fecha_calculo', validations: [], display: true },
           { type: 'text', label: 'Observación', name: 'observacion', validations: [], display: true },
           { type: 'daterange', label: 'Periodo', name: 'periodo', validations: [], display: false },
+          { type: 'number', label: 'Número de rentas aprobadas', name: 'num_rentas_aplicadas', validations: [], display: false },
         ];
 
         this.myFormFields2 = [
-          { type: 'text', label: 'DNI del beneficiario', name: 'dni', validations: [Validators.required, Validators.minLength(13), Validators.maxLength(14)], display: true },
+          { type: 'text', label: 'DNI del beneficiario', name: 'dni', value:"", validations: [Validators.required, Validators.minLength(13), Validators.maxLength(14)], display: true, readOnly:true },
           {
             type: 'dropdown', label: 'Tipo de beneficio', name: 'nombre_beneficio',
             options: this.tiposBeneficios,
@@ -152,10 +171,13 @@ export class NuevoBeneficioAfilComponent implements OnInit {
           { type: 'number', label: 'Monto total', name: 'monto_total', validations: [Validators.required], display: true },
           { type: 'date', label: 'Fecha de efectividad', name: 'fecha_calculo', validations: [], display: true },
           { type: 'daterange', label: 'Periodo', name: 'periodo', validations: [], display: false },
+          { type: 'number', label: 'Número de rentas aprobadas', name: 'num_rentas_aplicadas', validations: [], display: false },
         ];
 
         this.myFormFields1[9].display = false;
+        this.myFormFields1[10].display = false;
         this.myFormFields2[10].display = false;
+        this.myFormFields2[11].display = false;
 
         this.mostrarDB = true;
       }
@@ -182,16 +204,17 @@ export class NuevoBeneficioAfilComponent implements OnInit {
     }
   }
 
-  ejecutarFuncionAsincronaDesdeOtroComponente(funcion: (data: any) => Promise<void>) {
-    this.ejecF = funcion;
-  }
+
+
 
   getFilas = async () => {
-    if (this.Afiliado.fallecido == "SI" && this.Afiliado.tipo_persona == "AFILIADO") {
-      try {
+    if (this.Afiliado.fallecido == "SI" && (this.Afiliado.tipo_persona == 'AFILIADO' || 
+      this.Afiliado.tipo_persona == 'JUBILADO' || 
+      this.Afiliado.tipo_persona == 'PENSIONADO')) {
+        try {
         await this.getColumns();
         const data = await this.svcAfilServ.obtenerBenDeAfil(this.form.value.dni).toPromise();
-
+        
         this.filas = data.map((item: any) => ({
           dni: item.n_identificacion,
           nombre_completo: this.unirNombres(item.primer_nombre, item.segundo_nombre, item.tercer_nombre, item.primer_apellido, item.segundo_apellido),
@@ -208,7 +231,7 @@ export class NuevoBeneficioAfilComponent implements OnInit {
           num_rentas_aplicadas: item.num_rentas_aplicadas,
           numero_rentas_max: item.numero_rentas_max
         })); */
-
+        //this.cargar();
         return data;
       } catch (error) {
         console.error("Error al obtener datos de beneficios", error);
@@ -224,19 +247,19 @@ export class NuevoBeneficioAfilComponent implements OnInit {
         async (response) => {
           const primerObjetoTransformado = this.transformarObjeto(response[0]);
           this.myColumns = [
-            { header: 'N_Identificacion', col: 'dni', isEditable: false },
+            { header: 'N_Identificacion', col: 'dni',  },
             {
               header: 'Nombre Completo',
               col: 'nombre_completo',
-              isEditable: false
+              
             },
-            { header: 'Genero', col: 'genero', isEditable: false },
+            { header: 'Genero', col: 'genero',  },
             {
               header: 'Tipo Afiliado',
               col: 'tipo_afiliado',
-              isEditable: false
+              
             },
-            { header: 'Porcentaje', col: 'porcentaje', isEditable: false },
+            { header: 'Porcentaje', col: 'porcentaje',  },
           ];
         },
         (error) => {
@@ -247,13 +270,33 @@ export class NuevoBeneficioAfilComponent implements OnInit {
     }
   }
 
+  ejecutarFuncionAsincronaDesdeOtroComponente(funcion: (data: any) => Promise<void>) {
+    this.ejecF = funcion;
+  }
+
   cargar() {
-    if (this.ejecF /* && this.ejecFBeneficios */) {
+    if (this.ejecF ) {
       this.ejecF(this.filas).then(() => {
       });
-      /* this.ejecFBeneficios(this.filasBeneficios).then(() => {
-      }); */
     }
+  }
+
+  manejarRowClick(row: any) {
+    // Ocultamos el formulario temporalmente
+    this.mostrarB = false;
+  
+    // Asignamos el valor del DNI de la fila seleccionada al campo de DNI del beneficiario
+    this.desOBenSeleccionado = row;
+    this.myFormFields2[0].value = row.dni;
+  
+    // Forzamos la detección de cambios
+    this.cdr.detectChanges();
+  
+    // Mostramos el formulario nuevamente
+    this.mostrarB = true;
+  
+    // Forzamos una segunda detección de cambios para asegurarnos de que el valor se haya reflejado
+    this.cdr.detectChanges();
   }
 
   async prueba(event: any): Promise<any> {
@@ -265,7 +308,9 @@ export class NuevoBeneficioAfilComponent implements OnInit {
 
       if (temp == "V") {
         this.myFormFields1[9].display = false;
+        this.myFormFields1[10].display = false;
         this.myFormFields2[10].display = false;
+        this.myFormFields2[11].display = false;
 
         const fechaActual = new Date();
 
@@ -273,7 +318,9 @@ export class NuevoBeneficioAfilComponent implements OnInit {
         endDateFormatted = '01-01-2500';
       } else if (!temp) {
         this.myFormFields1[9].display = true;
+        this.myFormFields1[10].display = true;
         this.myFormFields2[10].display = true;
+        this.myFormFields2[11].display = true;
 
 
         /* const startDate = new Date(event.value.periodo.start);
@@ -359,20 +406,21 @@ export class NuevoBeneficioAfilComponent implements OnInit {
     });
   }
 
+
+
   guardarNTBenef() {
     /* Asignar al afiliado si no ha fallecido */
-    /* Asignar a los beneficioarios si el afiliado ya fallecio */
+    /* Asignar a los beneficiarios si el afiliado ya falleció */
     if (this.Afiliado.fallecido != "SI") {
       this.datosFormateados["dni"] = this.form.value.dni;
-      this.svcBeneficioServ.asigBeneficioAfil(this.datosFormateados).subscribe(
+      this.svcBeneficioServ.asigBeneficioAfil(this.datosFormateados, this.desOBenSeleccionado).subscribe(
         {
           next: (response) => {
             this.toastr.success("se asignó correctamente el beneficio");
             this.limpiarFormulario()
-
           },
           error: (error) => {
-            let mensajeError = 'Error desconocido al crear Detalle de deducción';
+            let mensajeError = 'Error desconocido al crear Detalle de beneficio';
             // Verifica si el error tiene una estructura específica
             if (error.error && error.error.message) {
               mensajeError = error.error.message;
@@ -385,14 +433,14 @@ export class NuevoBeneficioAfilComponent implements OnInit {
         })
     } else {
       this.datosFormateados["dni"] = this.FormBen.value.dni;
-      this.svcBeneficioServ.asigBeneficioAfil(this.datosFormateados, this.Afiliado.id_persona).subscribe(
+      this.svcBeneficioServ.asigBeneficioAfil(this.datosFormateados, this.desOBenSeleccionado, this.Afiliado.id_persona).subscribe(
         {
           next: (response) => {
             this.toastr.success("se asignó correctamente el beneficio");
             this.limpiarFormulario()
           },
           error: (error) => {
-            let mensajeError = 'Error desconocido al crear Detalle de deducción';
+            let mensajeError = 'Error desconocido al crear Detalle de beneficio';
             // Verifica si el error tiene una estructura específica
             if (error.error && error.error.message) {
               mensajeError = error.error.message;

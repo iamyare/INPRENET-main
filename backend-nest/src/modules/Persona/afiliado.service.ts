@@ -876,7 +876,11 @@ async findOnePersonaParaDeduccion(term: string) {
     WHERE
       "Afil"."N_IDENTIFICACION" = '${n_identificacionAfil}' AND 
       "Afil"."FALLECIDO" = 'SI'  AND
-      "tipoP"."TIPO_PERSONA" = 'AFILIADO'
+      ("tipoP"."TIPO_PERSONA" = 'AFILIADO' OR 
+      "tipoP"."TIPO_PERSONA" = 'JUBILADO' OR 
+      "tipoP"."TIPO_PERSONA" = 'PENSIONADO' OR 
+      "tipoP"."TIPO_PERSONA" = 'BENEFICIARIO'
+    )
     `;
 
       const beneficios = await this.entityManager.query(query);
@@ -899,8 +903,10 @@ async findOnePersonaParaDeduccion(term: string) {
           INNER JOIN
         NET_TIPO_PERSONA "tipoP" ON "tipoP"."ID_TIPO_PERSONA" = "detA"."ID_TIPO_PERSONA"
         WHERE 
-        "detA"."ID_CAUSANTE_PADRE" = ${beneficios[0].ID_PERSONA} AND 
-        "tipoP"."TIPO_PERSONA" = 'BENEFICIARIO'
+        "detA"."ID_CAUSANTE_PADRE" = ${beneficios[0].ID_PERSONA} AND (
+          "tipoP"."TIPO_PERSONA" = 'BENEFICIARIO' OR 
+          "tipoP"."TIPO_PERSONA" = 'DESIGNADO'
+        )
         `;
 
       const beneficios2 = await this.entityManager.query(query1);
@@ -1211,6 +1217,7 @@ async findOnePersonaParaDeduccion(term: string) {
     try {
       const afiliado = await this.personaRepository.preload({
         id_persona: idPersona,
+        fallecido: temp.causa_fallecimiento ? "SI" : "NO",
         causa_fallecimiento: temp.causa_fallecimiento,
         municipio_defuncion: temp.id_municipio_defuncion,
         certificado_defuncion: temp.certificado_defuncion,

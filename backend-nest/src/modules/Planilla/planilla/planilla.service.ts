@@ -76,7 +76,7 @@ export class PlanillaService {
         result.codigo_banco,
         result.numero_cuenta,
         result.monto_a_pagar,
-        result.nombre_completo.replace(/\s+/g, ''), // Elimina espacios innecesarios
+        result.nombre_completo.replace(/\s+/g, ''),
         currentDate,
         result.id_tipo_planilla,
         result.n_identificacion,
@@ -1900,7 +1900,7 @@ export class PlanillaService {
       if (codPlanilla) {
         const result = await this.planillaRepository
           .createQueryBuilder('planilla')
-          .leftJoinAndSelect('planilla.tipoPlanilla', 'tipP') // Asegúrate de usar leftJoinAndSelect
+          .leftJoinAndSelect('planilla.tipoPlanilla', 'tipP')
           .where('planilla.CODIGO_PLANILLA = :codPlanilla', { codPlanilla })
           .andWhere('planilla.ESTADO = :estado', { estado: 'ACTIVA' })
           .select([
@@ -1915,7 +1915,7 @@ export class PlanillaService {
             'planilla.estado',
             'planilla.periodoInicio',
             'planilla.periodoFinalizacion',
-            'tipP.nombre_planilla', // Asegúrate de seleccionar el campo correcto
+            'tipP.nombre_planilla',
           ])
           .getOne();
 

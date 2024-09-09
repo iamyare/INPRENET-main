@@ -31,7 +31,4 @@ export class Net_Deduccion {
 
     @OneToMany(() => Net_Deducciones_Asignadas, deduccionesAsignadas => deduccionesAsignadas.deduccion)
     deduccionesAsignadas: Net_Deducciones_Asignadas[];
-
-    /*     @OneToMany(() => Net_Clasificacion_Beneficios, benDenTipoPlan => benDenTipoPlan.deduccion)
-        bendedtipplan: Net_Clasificacion_Beneficios[]; */
 }

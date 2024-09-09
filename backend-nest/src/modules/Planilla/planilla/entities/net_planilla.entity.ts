@@ -63,7 +63,4 @@ export class Net_Planilla {
 
     @Column('varchar2', { nullable: false, default: 'NO', name: 'BAJAS_CARGADAS' })
     bajas_cargadas: string;
-
-    /* @OneToMany(() => Net_Detalle_Deduccion, detalleDeduccion => detalleDeduccion.planilla)
-    detalleDeduccion: Net_Detalle_Deduccion[]; */
 }

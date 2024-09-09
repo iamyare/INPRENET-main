@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseInterceptors, UploadedFile, Response, HttpCode, HttpStatus, Query, BadRequestException, Res, HttpException } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseInterceptors, UploadedFile, Response, HttpCode, HttpStatus, Query, BadRequestException, Res, HttpException, ParseIntPipe } from '@nestjs/common';
 import { DetalleDeduccionService } from './detalle-deduccion.service';
 import { CreateDetalleDeduccionDto } from './dto/create-detalle-deduccion.dto';
 import { UpdateDetalleDeduccionDto } from './dto/update-detalle-deduccion.dto';
@@ -182,9 +182,9 @@ export class DetalleDeduccionController {
   } */
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.detalleDeduccionService.remove(+id);
-  }
+  async delete(@Param('id', ParseIntPipe) id: number): Promise<void> {
+     return this.detalleDeduccionService.deleteDetalleDeduccion(id);
+    }
 
 
 }

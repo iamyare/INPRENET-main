@@ -11,7 +11,6 @@ import { BenefComponent } from '../benef/benef.component';
   styleUrls: ['./agregar-benef-comp.component.scss']
 })
 export class AgregarBenefCompComponent implements OnInit {
-  @ViewChild(BenefComponent) benefComponent!: BenefComponent;
   formBeneficiarios: FormGroup;
 
   constructor(
@@ -31,8 +30,6 @@ export class AgregarBenefCompComponent implements OnInit {
   }
 
   guardar(): void {
-    this.benefComponent.transformarDiscapacidadesSeleccionadas();
-
     const beneficiariosFormateados = this.formBeneficiarios.value.beneficiario.map((beneficiario: any) => ({
       persona: {
         n_identificacion: beneficiario.n_identificacion,

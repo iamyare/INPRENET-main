@@ -274,17 +274,4 @@ export class BenefComponent implements OnInit {
 
     return errors;
   }
-
-  transformarDiscapacidadesSeleccionadas(): void {
-  this.beneficiarios.controls.forEach((beneficiarioGroup: AbstractControl) => {
-    const discapacidadesArray = beneficiarioGroup.get('discapacidades') as FormArray;
-    const discapacidadesSeleccionadas = discapacidadesArray.controls
-      .map((control, idx) => control.value ? { id_discapacidad: this.tipo_discapacidad[idx].value } : null)
-      .filter(discapacidad => discapacidad !== null);
-    const nuevaDiscapacidadesArray = this.fb.array(discapacidadesSeleccionadas);
-    if (beneficiarioGroup instanceof FormGroup) {
-      beneficiarioGroup.setControl('discapacidades', nuevaDiscapacidadesArray);
-    }
-  });
-}
 }

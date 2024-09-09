@@ -424,22 +424,14 @@ export class AfiliacionService {
     entityManager: EntityManager,
   ): Promise<void> {
     for (const discapacidadDto of discapacidadesDto) {
-      const discapacidad = await this.discapacidadRepository.findOne({ where: { id_discapacidad: discapacidadDto.id_discapacidad } });
-      if (!discapacidad) {
-        throw new NotFoundException(`Discapacidad con ID ${discapacidadDto.id_discapacidad} no encontrada`);
-      }
-
-      await entityManager
-        .createQueryBuilder()
-        .insert()
-        .into(Net_Persona_Discapacidad)
-        .values({
-          discapacidad: discapacidad,
-          persona: { id_persona: idPersona },
-        })
-        .execute();
+      const nuevaDiscapacidad = entityManager.create(Net_Persona_Discapacidad, {
+        tipo_discapacidad: discapacidadDto.tipo_discapacidad,
+        persona: { id_persona: idPersona },
+      });
+      await entityManager.save(Net_Persona_Discapacidad, nuevaDiscapacidad);
     }
   }
+  
 
   async crearPeps(pepsDto: CrearPepsDto[], idPersona: number, entityManager: EntityManager): Promise<Net_Peps[]> {
     const resultados: Net_Peps[] = [];
@@ -614,8 +606,6 @@ export class AfiliacionService {
     }));
   }
   
-  
-
   async eliminarReferencia(idReferencia: number): Promise<void> {
     const referencia = await this.referenciaRepository.findOne({
       where: { id_referencia: idReferencia },

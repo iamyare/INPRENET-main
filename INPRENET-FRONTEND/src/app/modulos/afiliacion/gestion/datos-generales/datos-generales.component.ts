@@ -1,5 +1,5 @@
 import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
-import { FormGroup, FormBuilder, Validators, FormControl, FormArray, AbstractControl } from '@angular/forms';
+import { FormGroup, FormBuilder, Validators, FormControl, FormArray } from '@angular/forms';
 import { CentroTrabajoService } from 'src/app/services/centro-trabajo.service';
 import { DatosEstaticosService } from 'src/app/services/datos-estaticos.service';
 import { DireccionService } from 'src/app/services/direccion.service';
@@ -44,7 +44,7 @@ export class DatosGeneralesComponent implements OnInit {
         this.formGroup = this.fb.group({
           peps: this.fb.array([]),
           discapacidades: this.fb.array([]),
-          ...this.initialData 
+          ...this.initialData
         });
         this.cargarDiscapacidades();
       }else{
@@ -320,35 +320,21 @@ export class DatosGeneralesComponent implements OnInit {
 
   resetDiscapacidadesFormArray() {
     const discapacidadesGroup = this.fb.group({}); // Creamos un grupo vacío
-  
+
     this.discapacidades.forEach(discapacidad => {
       const match = this.indicesSeleccionados.some(
         indice => indice.tipo === discapacidad.label
       );
       discapacidadesGroup.addControl(discapacidad.label, new FormControl(match)); // Agregamos cada control basado en 'label'
     });
-  
-    this.formGroup.setControl('discapacidades', discapacidadesGroup); // Establecemos el nuevo grupo de discapacidades
-  }
 
-  transformarDiscapacidadesSeleccionadas(): void {
-    const discapacidadesArray = this.formGroup.get('discapacidades') as FormArray;
-
-    const discapacidadesSeleccionadas = discapacidadesArray.controls
-      .map((control, idx) => control.value ? { id_discapacidad: this.discapacidades[idx].value } : null)
-      .filter(discapacidad => discapacidad !== null);
-
-    const nuevaDiscapacidadesArray = this.fb.array(discapacidadesSeleccionadas);
-
-    this.formGroup.setControl('discapacidades', nuevaDiscapacidadesArray);
+    this.formGroup.setControl('discapacidades', discapacidadesGroup);
   }
 
   handleImageCaptured(image: string): void {
     this.formGroup.patchValue({ FotoPerfil: image });
     this.imageCaptured.emit(image);
   }
-
-
 
   get isPhotoInvalid(): boolean {
     const control = this.formGroup.get('FotoPerfil');

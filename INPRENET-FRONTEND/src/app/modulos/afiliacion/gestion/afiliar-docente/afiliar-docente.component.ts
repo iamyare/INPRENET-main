@@ -20,8 +20,6 @@ export class AfiliarDocenteComponent implements OnInit {
   @ViewChild('centrosTrabajoTemplate', { static: true }) centrosTrabajoTemplate!: TemplateRef<any>;
   @ViewChild('beneficiariosTemplate', { static: true }) beneficiariosTemplate!: TemplateRef<any>;
   @ViewChild(MatStepper) stepper!: MatStepper;
-  @ViewChild(BenefComponent) benefComponent!: BenefComponent;
-  @ViewChild(DatosGeneralesComponent) datosGeneralesComponent!: DatosGeneralesComponent;
 
   steps: any[] = [];
   formGroup!: FormGroup;
@@ -94,9 +92,6 @@ export class AfiliarDocenteComponent implements OnInit {
   }
 
   onSubmit(): void {
-    this.benefComponent.transformarDiscapacidadesSeleccionadas();
-    this.datosGeneralesComponent.transformarDiscapacidadesSeleccionadas();
-
     if (this.formGroup.valid) {
       const datosGenerales = this.formGroup.get('datosGenerales')?.value;
       const referenciasPersonales = this.formGroup.get('referenciasPersonales')?.value;
@@ -104,6 +99,9 @@ export class AfiliarDocenteComponent implements OnInit {
       const bancos = this.formGroup.get('bancos')?.value;
       const centrosTrabajo = this.formGroup.get('centrosTrabajo')?.value;
       const beneficiarios = this.formGroup.get('beneficiarios')?.value;
+
+      console.log(datosGenerales);
+
 
       const formattedData = {
         persona: {
@@ -132,7 +130,7 @@ export class AfiliarDocenteComponent implements OnInit {
           id_municipio_residencia: datosGenerales.id_municipio_residencia,
           id_municipio_nacimiento: datosGenerales.id_municipio_nacimiento,
           id_profesion: datosGenerales.id_profesion,
-          discapacidades: datosGenerales.discapacidades || []
+          discapacidades: this.formatDiscapacidades(datosGenerales.discapacidades) || []
         },
         familiares: this.formatFamiliares(datosGenerales, referenciasPersonales),
         peps: this.formatPeps(datosGenerales.peps || []),
@@ -339,5 +337,13 @@ resetForm(): void {
   this.fotoPerfil = '';
   this.stepper.reset();
 }
+
+formatDiscapacidades(discapacidades: any): any[] {
+  // Filtra solo las discapacidades que están en 'true' y formatea el resultado
+  return Object.keys(discapacidades)
+    .filter(key => discapacidades[key]) // Filtra las discapacidades activas
+    .map(key => ({ tipo_discapacidad: key })); // Mapea al formato deseado
+}
+
 
 }

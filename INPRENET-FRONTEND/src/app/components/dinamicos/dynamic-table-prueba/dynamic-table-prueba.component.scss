@@ -47,7 +47,11 @@ tr.mat-header-row {
 }
 
 tr.selected {
-  background-color: #229e92; // Cambia este color por el que prefieras
+  background-color: #229e92; 
+  color: white; 
+  font-weight: bold;
+  font-size: 14;
+  letter-spacing: 2px;
 }
 
 .clickable-row {

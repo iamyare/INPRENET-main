@@ -120,7 +120,7 @@
     </ng-container>
 
     <!-- Header and Row Declarations -->
-    <tr mat-header-row *matHeaderRowDef="columnDefs"></tr>
+    <tr mat-header-row *matHeaderRowDef="columnDefs" style="font-weight: bold;"></tr>
     <tr mat-row *matRowDef="let row; columns: columnDefs; let i = index" [class.selected]="row === selectedItem"
       [class.clickable-row]="enableRowClick" [class.highlight-on-hover]="highlightOnHover"
       [class.even-row]="i % 2 === 0" [class.odd-row]="i % 2 !== 0" (click)="onRowClick(row)">

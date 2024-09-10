@@ -32,7 +32,7 @@ export class NuevoBeneficioAfilComponent implements OnInit {
 
   Afiliado: any = {}
 
-  myColumns: any =[
+  myColumns: any = [
     { header: 'N_Identificacion', col: 'dni', },
     {
       header: 'Nombre Completo',
@@ -72,35 +72,40 @@ export class NuevoBeneficioAfilComponent implements OnInit {
 
       this.svcAfilServ.getAfilByDni(this.form.value.dni).subscribe(
         async (res) => {
-          const item = {
-            id_persona: res.ID_PERSONA,
-            dni: res.N_IDENTIFICACION,
-            fallecido: res.FALLECIDO,
-            estado_persona: res.ESTADO_PERSONA,
-            tipo_persona: res.TIPO_PERSONA,
-            estado_civil: res.ESTADO_CIVIL,
-            nombreCompleto: unirNombres(res.PRIMER_NOMBRE, res.SEGUNDO_NOMBRE, res.PRIMER_APELLIDO, res.SEGUNDO_APELLIDO),
-            genero: res.GENERO,
-            profesion: res.PROFESION,
-            telefono_1: res.TELEFONO_1,
-            colegio_magisterial: res.COLEGIO_MAGISTERIAL,
-            numero_carnet: res.NUMERO_CARNET,
-            direccion_residencia: res.DIRECCION_RESIDENCIA,
-            estado: res.ESTADO,
-            salario_base: res.SALARIO_BASE,
-            fecha_nacimiento: convertirFecha(res.FECHA_NACIMIENTO, false)
+          if (res) {
+            const item = {
+              id_persona: res.ID_PERSONA,
+              dni: res.N_IDENTIFICACION,
+              fallecido: res.FALLECIDO,
+              estado_persona: res.ESTADO_PERSONA,
+              tipo_persona: res.TIPO_PERSONA,
+              estado_civil: res.ESTADO_CIVIL,
+              nombreCompleto: unirNombres(res.PRIMER_NOMBRE, res.SEGUNDO_NOMBRE, res.PRIMER_APELLIDO, res.SEGUNDO_APELLIDO),
+              genero: res.GENERO,
+              profesion: res.PROFESION,
+              telefono_1: res.TELEFONO_1,
+              colegio_magisterial: res.COLEGIO_MAGISTERIAL,
+              numero_carnet: res.NUMERO_CARNET,
+              direccion_residencia: res.DIRECCION_RESIDENCIA,
+              estado: res.ESTADO,
+              salario_base: res.SALARIO_BASE,
+              fecha_nacimiento: convertirFecha(res.FECHA_NACIMIENTO, false)
+            }
+  
+            if (item.fallecido == "SI") {
+              this.getTipoBen("BENEFICIARIO");
+            } else {
+              this.getTipoBen(item.tipo_persona);
+            }
+  
+            this.Afiliado = item;
+            this.Afiliado.nameAfil = this.unirNombres(res.PRIMER_NOMBRE, res.SEGUNDO_NOMBRE, res.TERCER_NOMBRE, res.PRIMER_APELLIDO, res.SEGUNDO_APELLIDO);
+            this.getFilas().then(() => this.cargar());
+            this.cargar();  
+          }else{
+            this.toastr.error(`asegúrese que el docente a buscar sea Afiliado Activo ó Jubilado ó Pensionado`,"Error: Registro no encontrado" );
+            this.limpiarFormulario();
           }
-
-          if (item.fallecido == "SI") {
-            this.getTipoBen("BENEFICIARIO");
-          } else {
-            this.getTipoBen(item.tipo_persona);
-          }
-
-          this.Afiliado = item;
-          this.Afiliado.nameAfil = this.unirNombres(res.PRIMER_NOMBRE, res.SEGUNDO_NOMBRE, res.TERCER_NOMBRE, res.PRIMER_APELLIDO, res.SEGUNDO_APELLIDO);
-          this.getFilas().then(() => this.cargar());
-          this.cargar();
         },
         (error) => {
           this.Afiliado.estado = ""

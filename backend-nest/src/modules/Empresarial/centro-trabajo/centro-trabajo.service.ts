@@ -72,6 +72,23 @@ export class CentroTrabajoService {
     private readonly usuarioEmpresaRepository: Repository<Net_Usuario_Empresa>
   ) { }
 
+  async updateArchivoIdentificacion(id_empleado: number, archivoBuffer: Buffer): Promise<Net_Empleado> {
+    const empleado = await this.empleadoRepository.findOne({ where: { id_empleado } });
+    
+    if (!empleado) {
+      throw new NotFoundException(`Empleado con ID ${id_empleado} no encontrado.`);
+    }
+  
+    // Actualizar el archivo de identificación
+    empleado.archivo_identificacion = archivoBuffer;
+  
+    // Guardar los cambios en la base de datos
+    await this.empleadoRepository.save(empleado);
+  
+    return empleado;
+  }
+  
+
   async getAllJornadas(): Promise<Net_Jornada[]> {
     try {
       const jornadas = await this.jornadaRepository.find({ relations: ['centroTrabajoJornadas'] });

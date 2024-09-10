@@ -24,7 +24,6 @@ import * as moment from 'moment';
 import { Net_Tipo_Persona } from './entities/net_tipo_persona.entity';
 import { Net_Tipo_Identificacion } from '../tipo_identificacion/entities/net_tipo_identificacion.entity';
 import { net_estado_afiliacion } from './entities/net_estado_afiliacion.entity';
-
 import { Net_Discapacidad } from './entities/net_discapacidad.entity';
 import { Net_Persona_Discapacidad } from './entities/net_persona_discapacidad.entity';
 @Injectable()
@@ -60,10 +59,8 @@ export class AfiliadoService {
     private readonly netProfesionesRepository: Repository<NET_PROFESIONES>,
     @InjectRepository(Net_Persona_Por_Banco)
     private readonly BancosToPersonaRepository: Repository<Net_Persona_Por_Banco>,
-
     @InjectRepository(Net_Discapacidad)
     private readonly discapacidadRepository: Repository<Net_Discapacidad>,
-
     @InjectRepository(Net_Persona_Discapacidad)
     private readonly perDiscapacidadRepository: Repository<Net_Persona_Discapacidad>,
 
@@ -619,7 +616,6 @@ async findOnePersonaParaDeduccion(term: string) {
       ]
     });
 
-    // Excepción si no se encuentra la persona
     if (!detallePer) {
       throw new HttpException(
         { message: `Afiliado con N_IDENTIFICACION ${term} no existe.` },
@@ -627,7 +623,6 @@ async findOnePersonaParaDeduccion(term: string) {
       );
     }
 
-    // Excepción si la persona está fallecida
     if (detallePer.persona.fallecido === 'SI') {
       throw new HttpException(
         { message: `La persona con N_IDENTIFICACION ${term} está fallecida.` },
@@ -655,14 +650,9 @@ async findOnePersonaParaDeduccion(term: string) {
 
     return result;
   } catch (error) {
-    console.log(error);
-    throw error;  // Aseguramos que los errores personalizados no se reemplacen.
+    throw error;
   }
 }
-
-
-  
-
 
   async findOneAFiliado(term: string) {
 

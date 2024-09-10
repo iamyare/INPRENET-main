@@ -1,9 +1,9 @@
-import { BadRequestException, Injectable, InternalServerErrorException, Logger, NotFoundException, Res } from '@nestjs/common';
+import { BadRequestException, ConflictException, Injectable, InternalServerErrorException, Logger, NotFoundException, Res } from '@nestjs/common';
 import { CreatePlanillaDto } from './dto/create-planilla.dto';
 import { UpdatePlanillaDto } from './dto/update-planilla.dto';
 import { InjectEntityManager, InjectRepository } from '@nestjs/typeorm';
 import { Net_Detalle_Deduccion } from '../detalle-deduccion/entities/detalle-deduccion.entity';
-import { EntityManager, Repository } from 'typeorm';
+import { Between, EntityManager, QueryFailedError, Repository } from 'typeorm';
 import { net_persona } from '../../Persona/entities/net_persona.entity';
 import { Net_Persona_Por_Banco } from '../../banco/entities/net_persona-banco.entity';
 import { Net_Planilla } from './entities/net_planilla.entity';
@@ -1439,18 +1439,23 @@ export class PlanillaService {
 
   async create(createPlanillaDto: CreatePlanillaDto) {
     const { secuencia, nombre_planilla } = createPlanillaDto;
-
+  
     try {
       const tipoPlanilla = await this.tipoPlanillaRepository.findOneBy({ nombre_planilla });
-
+  
+      if (!tipoPlanilla) {
+        throw new BadRequestException(`No se encontró ningún tipo de planilla con el nombre '${nombre_planilla}'.`);
+      }
+  
       let codPlanilla = "";
       const fechaActual: Date = new Date();
-
-      const primerDia: Date = startOfMonth(fechaActual);
-      const ultimoDia: Date = endOfMonth(fechaActual);
-      const mes: number = getMonth(fechaActual) + 1; // getMonth() devuelve el mes de 0 (enero) a 11 (diciembre), por lo que sumamos 1
+      const mes: number = getMonth(fechaActual) + 1;
       const anio: number = getYear(fechaActual);
-
+  
+      // Formato de fecha dd/MM/yyyy
+      const primerDia: string = format(startOfMonth(fechaActual), 'dd/MM/yyyy');
+      const ultimoDia: string = format(endOfMonth(fechaActual), 'dd/MM/yyyy');
+  
       switch (nombre_planilla) {
         case "ORDINARIA JUBILADOS Y PENSIONADOS":
           codPlanilla = `ORD-JUB-PEN-${mes}-${anio}-${secuencia}`;
@@ -1474,30 +1479,35 @@ export class PlanillaService {
           codPlanilla = `EXTRA-JUB-${mes}-${anio}-${secuencia}`;
           break;
         default:
-          throw new Error("Tipo de planilla no reconocido");
+          throw new BadRequestException('Tipo de planilla no reconocido');
       }
-
-      const arregloFinal = [{
+  
+      const planillaExistente = await this.planillaRepository.findOneBy({ codigo_planilla: codPlanilla });
+  
+      if (planillaExistente) {
+        throw new ConflictException(`Ya existe una planilla con el código '${codPlanilla}' para el mes ${mes}/${anio}.`);
+      }
+  
+      const newPlanilla = this.planillaRepository.create({
         codigo_planilla: codPlanilla,
         secuencia,
-        periodoInicio: `${primerDia}`,
-        periodoFinalizacion: `${ultimoDia}`,
+        periodoInicio: primerDia,
+        periodoFinalizacion: ultimoDia, 
         tipoPlanilla
-      }];
-
-      if (tipoPlanilla && tipoPlanilla.id_tipo_planilla) {
-        const planilla = this.planillaRepository.create(arregloFinal);
-        await this.planillaRepository.save(planilla);
-        return planilla;
-      } else {
-        throw new Error("No se encontró ningún tipo de planilla con el nombre proporcionado");
-      }
-
+      });
+  
+      await this.planillaRepository.save(newPlanilla);
+      return newPlanilla;
+  
     } catch (error) {
-      this.handleException(error);
+      if (error instanceof QueryFailedError && error.message.includes('ORA-00001')) {
+        throw new ConflictException(`La planilla con la secuencia ya existe, por favor cambie la secuencia o revise los datos.`);
+      }
+      throw error;
     }
-    return 'This action adds a new planilla';
   }
+
+  
 
   findAll(paginationDto: PaginationDto) {
     const { offset = 0 } = paginationDto;
@@ -1506,9 +1516,9 @@ export class PlanillaService {
       where: {
         tipoPlanilla: { clase_planilla: "EGRESO" }
       },
-      relations: ['tipoPlanilla'], // Carga la relación
+      relations: ['tipoPlanilla'],
       order: {
-        fecha_cierre: 'DESC' // Ordena por id_planilla en forma descendente
+        fecha_cierre: 'DESC'
       }
     });
   }

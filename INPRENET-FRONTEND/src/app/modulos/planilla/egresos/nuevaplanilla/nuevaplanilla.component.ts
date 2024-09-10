@@ -79,18 +79,25 @@ export class NuevaplanillaComponent implements OnInit {
         this.limpiarFormulario();
       },
       error: (error) => {
-        let mensajeError = 'Error desconocido al crear TipoPlanilla';
+        // Revisar si el backend envía el mensaje correcto
+        let mensajeError = 'Error desconocido al crear la planilla';
 
+        // Verifica si el error proviene del backend y tiene la propiedad "message"
         if (error.error && error.error.message) {
-          mensajeError = error.error.message;
+          mensajeError = error.error.message; // Este debería ser el mensaje del backend
         } else if (typeof error.error === 'string') {
           mensajeError = error.error;
+        } else if (error.status === 409) {  // Si es un conflicto (error 409)
+          mensajeError = 'Ya existe una planilla para este mes con la misma secuencia.';
         }
 
-        this.toastr.error(mensajeError);
+        // Mostrar el mensaje en el Toastr
+        this.toastr.error(mensajeError, 'Error');
       }
     });
   }
+
+
   limpiarFormulario(): void {
     // Utiliza la referencia al componente DynamicFormComponent para resetear el formulario
     if (this.dynamicForm) {

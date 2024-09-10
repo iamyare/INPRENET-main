@@ -1,4 +1,4 @@
-import { HttpClient, HttpParams } from '@angular/common/http';
+import { HttpClient, HttpErrorResponse, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { ToastrService } from 'ngx-toastr';
 import { Observable, BehaviorSubject, catchError, throwError, map } from 'rxjs';
@@ -260,8 +260,15 @@ export class PlanillaService {
   }
 
   createPlanilla(tipoPlanillaData: any): Observable<any> {
-    return this.http.post(`${environment.API_URL}/api/planilla`, tipoPlanillaData);
+    return this.http.post(`${environment.API_URL}/api/planilla`, tipoPlanillaData).pipe(
+      catchError((error: HttpErrorResponse) => {
+        // Propagar el error al frontend para manejarlo correctamente
+        return throwError(() => error);
+      })
+    );
   }
+
+
 
   findAllTipoPlanilla(limit: number = 10, offset: number = 0): Observable<any> {
     let params = new HttpParams()

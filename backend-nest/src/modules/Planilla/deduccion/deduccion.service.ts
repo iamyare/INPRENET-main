@@ -174,7 +174,7 @@ export class DeduccionService {
           persona,
           deduccion,
           planilla,
-          personaPorBanco: bancoActivo  // Asignar el banco activo aquí
+          personaPorBanco: bancoActivo
         });
   
         await this.detalleDeduccionRepository.save(detalleDeduccion);

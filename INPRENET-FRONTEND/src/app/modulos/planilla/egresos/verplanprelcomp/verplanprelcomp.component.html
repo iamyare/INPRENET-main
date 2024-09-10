@@ -3,7 +3,7 @@
     subtitulo="Completa la información correspondiente" (newDatBenChange)="obtenerDatosForm($event)">
   </app-dynamic-form>
   <div style="text-align: center">
-    <button mat-raised-button color="primary" (click)="getPlanilla()" [disabled]="datosFormateados?.invalid" 
+    <button mat-raised-button color="primary" (click)="getPlanilla()" [disabled]="datosFormateados?.invalid"
       style="margin: 2% 0; color: white; border-radius: 5px; padding: 10px 20px">
       Ver Planilla preliminar
     </button>
@@ -56,14 +56,14 @@
   </h4>
 
   <div style="padding: 1% 1% 1% 1%">
-    <app-dynamic-table 
+    <app-dynamic-table
       titulo="Datos de personas en planilla"
-      subtitulo="Completa la información correspondiente" 
-      style="width: 100%" 
+      subtitulo="Completa la información correspondiente"
+      style="width: 100%"
       [nombreEncabezadoUno]="'Desglose'"
       [verOpcEditar]="false"
 
-      [mostrarBotonUno]="true" 
+      [mostrarBotonUno]="true"
       [etiquetaBotonUno]="'Ingresos'"
       [nombreEncabezadoUno]="'Detalle Ingresos'"
       (ejecutarFuncionAsincronaEvent)="ejecutarFuncionAsincronaDesdeOtroComponente($event)"
@@ -82,17 +82,20 @@
     </app-dynamic-table>
 
     <div style="background-color: white; margin-bottom: 1%; text-align: center">
-      <button  mat-raised-button color="primary" 
-      [disabled]="detallePlanilla.beneficios_cargados == 'NO' || detallePlanilla.deducc_inprema_cargadas == 'NO' || detallePlanilla.deducc_terceros_cargadas == 'NO' " (click)="actualizarFechaCierrePlanilla()"
+      <button  mat-raised-button color="primary"
+      [disabled]="detallePlanilla.beneficios_cargados == 'NO' " (click)="actualizarFechaCierrePlanilla()"
       style="
         margin: 2% 2%;
         padding: 2% 1% 1% 1%;
         color: #ffffff;
         border-radius: 5px;
-        padding: 10px 20px;" 
+        padding: 10px 20px;"
         >
         Cerrar planilla
       </button>
     </div>
   </div>
 </div>
+
+
+<!-- || detallePlanilla.deducc_inprema_cargadas == 'NO' || detallePlanilla.deducc_terceros_cargadas == 'NO' -->

@@ -1218,11 +1218,12 @@ export class PlanillaService {
         
         WHERE
                 detBs."ESTADO" = 'PAGADA' AND
-                plan."CODIGO_PLANILLA" = '${codPlanilla}' AND
-                plan."DEDUCC_INPREMA_CARGADAS" = 'SI' AND
-                plan."DEDUCC_TERCEROS_CARGADAS" = 'SI' AND
-                plan."ALTAS_CARGADAS" = 'SI' AND
-                plan."BAJAS_CARGADAS" = 'SI' 
+                plan."CODIGO_PLANILLA" = '${codPlanilla}' 
+                --AND
+                --plan."DEDUCC_INPREMA_CARGADAS" = 'SI' AND
+                --plan."DEDUCC_TERCEROS_CARGADAS" = 'SI' AND
+                --plan."ALTAS_CARGADAS" = 'SI' AND
+                --plan."BAJAS_CARGADAS" = 'SI' 
                 
         GROUP BY 
         per."N_IDENTIFICACION",
@@ -1271,11 +1272,12 @@ export class PlanillaService {
             WHERE
                 dd."ESTADO_APLICACION" = 'COBRADA' AND
                 instFin."NOMBRE_CENTRO_TRABAJO" = 'INPREMA' AND
-                plan."CODIGO_PLANILLA" = '${codPlanilla}' AND
-                plan."DEDUCC_INPREMA_CARGADAS" = 'SI' AND
-                plan."DEDUCC_TERCEROS_CARGADAS" = 'SI' AND
-                plan."ALTAS_CARGADAS" = 'SI' AND
-                plan."BAJAS_CARGADAS" = 'SI' 
+                plan."CODIGO_PLANILLA" = '${codPlanilla}'
+                --AND
+                --plan."DEDUCC_INPREMA_CARGADAS" = 'SI' AND
+                --plan."DEDUCC_TERCEROS_CARGADAS" = 'SI' AND
+                --plan."ALTAS_CARGADAS" = 'SI' AND
+                --plan."BAJAS_CARGADAS" = 'SI' 
             GROUP BY 
                 per."ID_PERSONA"
     `;
@@ -1305,15 +1307,15 @@ export class PlanillaService {
           WHERE
               dd."ESTADO_APLICACION" = 'COBRADA' AND
               instFin."NOMBRE_CENTRO_TRABAJO" != 'INPREMA' AND
-              plan."CODIGO_PLANILLA" = '${codPlanilla}' AND
-                plan."DEDUCC_INPREMA_CARGADAS" = 'SI' AND
-                plan."DEDUCC_TERCEROS_CARGADAS" = 'SI' AND
-                plan."ALTAS_CARGADAS" = 'SI' AND
-                plan."BAJAS_CARGADAS" = 'SI' 
+              plan."CODIGO_PLANILLA" = '${codPlanilla}' 
+                --AND
+                --plan."DEDUCC_INPREMA_CARGADAS" = 'SI' AND
+                --plan."DEDUCC_TERCEROS_CARGADAS" = 'SI' AND
+                --plan."ALTAS_CARGADAS" = 'SI' AND
+                --plan."BAJAS_CARGADAS" = 'SI' 
           GROUP BY 
           per."ID_PERSONA"
     `;
-
     interface Persona {
       DNI: string;
       ID_PERSONA: number;

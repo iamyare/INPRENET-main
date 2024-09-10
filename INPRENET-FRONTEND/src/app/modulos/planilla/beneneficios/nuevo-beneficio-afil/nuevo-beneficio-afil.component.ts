@@ -68,8 +68,8 @@ export class NuevoBeneficioAfilComponent implements OnInit {
 
   previsualizarInfoAfil() {
     this.Afiliado.nameAfil = ""
+    
     if (this.form.value.dni) {
-
       this.svcAfilServ.getAfilByDni(this.form.value.dni).subscribe(
         async (res) => {
           if (res) {
@@ -90,20 +90,24 @@ export class NuevoBeneficioAfilComponent implements OnInit {
               estado: res.ESTADO,
               salario_base: res.SALARIO_BASE,
               fecha_nacimiento: convertirFecha(res.FECHA_NACIMIENTO, false)
+            };
+          
+            const tipoPersona = item.fallecido === "SI" ? "BENEFICIARIO" : item.tipo_persona;
+            this.getTipoBen(tipoPersona);
+          
+            if (this.Afiliado.tipo_persona === "AFILIADO" && this.Afiliado.estado_persona === "INACTIVO") {
+              this.toastr.warning(`No se puede asignar beneficios a los Afiliados INACTIVOS`, "Advertencia");
             }
-  
-            if (item.fallecido == "SI") {
-              this.getTipoBen("BENEFICIARIO");
-            } else {
-              this.getTipoBen(item.tipo_persona);
-            }
-  
-            this.Afiliado = item;
-            this.Afiliado.nameAfil = this.unirNombres(res.PRIMER_NOMBRE, res.SEGUNDO_NOMBRE, res.TERCER_NOMBRE, res.PRIMER_APELLIDO, res.SEGUNDO_APELLIDO);
+          
+            this.Afiliado = {
+              ...item,
+              nameAfil: unirNombres(res.PRIMER_NOMBRE, res.SEGUNDO_NOMBRE, res.TERCER_NOMBRE, res.PRIMER_APELLIDO, res.SEGUNDO_APELLIDO)
+            };
+          
             this.getFilas().then(() => this.cargar());
-            this.cargar();  
-          }else{
-            this.toastr.error(`asegúrese que el docente a buscar sea Afiliado Activo ó Jubilado ó Pensionado`,"Error: Registro no encontrado" );
+            this.cargar();
+          } else {
+            this.toastr.error(`Asegúrese que el docente a buscar sea Afiliado Activo, Jubilado o Pensionado`, "Error: Registro no encontrado");
             this.limpiarFormulario();
           }
         },
@@ -111,10 +115,8 @@ export class NuevoBeneficioAfilComponent implements OnInit {
           this.Afiliado.estado = ""
           this.toastr.error(`Error: ${error.error.message}`);
         })
-
     }
   }
-
 
   getTipoBen = async (tipoPers: string) => {
     try {
@@ -412,8 +414,6 @@ export class NuevoBeneficioAfilComponent implements OnInit {
     });
   }
 
-
-
   guardarNTBenef() {
     /* Asignar al afiliado si no ha fallecido */
     /* Asignar a los beneficiarios si el afiliado ya falleció */
@@ -461,20 +461,6 @@ export class NuevoBeneficioAfilComponent implements OnInit {
     }
   }
 
-  onFileSelect(event: any) {
-    if (event.target.files.length > 0) {
-      const file = event.target.files[0];
-      /*       this.deduccionesService.uploadDetalleDeduccion(file).subscribe({
-              next: (res: any) => {
-                console.log('Upload successful', res);
-              },
-              error: (err: any) => {
-                console.error('Upload failed', err);
-              }
-            }); */
-    }
-  }
-
   limpiarFormulario(): void {
     // Utiliza la referencia al componente DynamicFormComponent para resetear el formulario
     this.Afiliado = []
@@ -489,22 +475,4 @@ export class NuevoBeneficioAfilComponent implements OnInit {
     }
   }
 
-  editar = (row: any) => {
-    /* const deduccionData = {
-      nombre_deduccion: row.nombre_deduccion,
-      descripcion_deduccion: row.descripcion_deduccion,
-      tipo_deduccion: row.tipo_deduccion,
-      prioridad: row.prioridad,
-
-    }
-
-    this.deduccionesService.updateDeduccion(row.id, deduccionData).subscribe(
-      (response) => {
-        this.toastr.success('Deduccion editada con éxito');
-      },
-      (error) => {
-        this.toastr.error('Error al actualizar Deduccion');
-      }
-    ); */
-  };
 }

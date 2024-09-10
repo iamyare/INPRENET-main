@@ -461,7 +461,6 @@ export class AfiliadoService {
   }
 
   async getAllReferenciasPersonales(n_identificacion: string) {
-    console.log(n_identificacion);
     /* id_ref_personal: item.id_ref_personal ?? 'ID no disponible',
                 dni: item.dni ?? 'ID no disponible',
                 nombre_completo: item.nombre_completo ?? 'Nombre no disponible',
@@ -733,14 +732,10 @@ async findOnePersonaParaDeduccion(term: string) {
       return result;
     } catch (error) {
       console.log(error);
-
     }
-
   }
 
-
   async findTipoPersonaByN_ident(term: string) {
-
     try {
       const detallePer = await this.detallePersonaRepository.find({
         where: {
@@ -759,14 +754,9 @@ async findOnePersonaParaDeduccion(term: string) {
         throw new NotFoundException(`Afiliado con N_IDENTIFICACION ${term} no existe`);
       }
 
-
-
-      console.log(detallePer);
-
       return detallePer;
     } catch (error) {
       console.log(error);
-
     }
 
   }
@@ -979,8 +969,6 @@ async findOnePersonaParaDeduccion(term: string) {
 
 
   normalizarDatos(data: any): PersonaResponse[] {
-    console.log(data);
-
     const newList: PersonaResponse[] = []
     data.map((el: any) => {
       const newPersona: PersonaResponse = {
@@ -1246,8 +1234,6 @@ async findOnePersonaParaDeduccion(term: string) {
   }
 
   async updatePerfCentroTrabajo(id: number, updateDto: UpdatePerfCentTrabDto): Promise<Net_perf_pers_cent_trab> {
-    console.log(updateDto);
-    
     const existingPerf = await this.perfPersoCentTrabRepository.findOne({ where: { id_perf_pers_centro_trab: id } });
     if (!existingPerf) {
       throw new NotFoundException(`Perfil centro trabajo con ID ${id} no encontrado`);

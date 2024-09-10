@@ -84,7 +84,7 @@
 </div>
 
 <div *ngIf="mostrarDB && Afiliado.fallecido == 'NO' && (
-  Afiliado.tipo_persona == 'AFILIADO' || 
+  (Afiliado.tipo_persona == 'AFILIADO' && Afiliado.estado_persona == 'ACTIVO') || 
   Afiliado.tipo_persona == 'JUBILADO' || 
   Afiliado.tipo_persona == 'PENSIONADO')" style="margin: 1% 0% 1% 0%; text-align: center; background-color: white">
   <app-dynamic-form [fields]="myFormFields1" titulo="Datos sobre el beneficio"

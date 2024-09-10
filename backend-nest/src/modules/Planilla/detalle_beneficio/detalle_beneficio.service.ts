@@ -64,8 +64,6 @@ export class DetalleBeneficioService {
 
   async createDetalleBeneficioAfiliado(data: any, idPersonaPadre?: number): Promise<any> {
     const {datos , itemSeleccionado} = data
-    console.log(itemSeleccionado);
-    console.log(idPersonaPadre);
     return await this.entityManager.transaction(async manager => {
       try {
         const beneficio = await manager.findOne(Net_Beneficio, { where: { nombre_beneficio: datos.nombre_beneficio } });
@@ -191,8 +189,6 @@ export class DetalleBeneficioService {
                     '${datos.observacion}'
                   )`;
   
-            console.log(queryInsDeBBenf);
-            
             const detBeneBeneficia = await this.entityManager.query(queryInsDeBBenf);
             return detBeneBeneficia;
           }
@@ -465,8 +461,6 @@ export class DetalleBeneficioService {
         ],
       });
 
-      console.log(detBen);
-
       return { persona, detBen }
     } catch (error) {
       console.log(error);
@@ -560,16 +554,14 @@ export class DetalleBeneficioService {
 
   async obtenerTipoBeneficioByTipoPersona(tipoPersona: string): Promise<any[]> {
     try {
-
       console.log(tipoPersona);
+      
       const tipoBen = await this.benTipoPerRepository.find({
         where: { tipPersona: { tipo_persona: "JUBILADO" } },
         relations: [
           'beneficio'
         ],
       });
-      
-      console.log("ENTRO");
       console.log(tipoBen);
       
       return tipoBen

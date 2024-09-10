@@ -1,0 +1,49 @@
+<div style="text-align: center; background-color: white; margin: 1% 0%; padding: 1%;">
+  <h1>Actualizar Fallecidos desde Excel</h1>
+  <hr />
+
+  <div class="upload-container">
+    <input type="file" #fileInput (change)="onFileSelected($event)" hidden />
+
+    <button
+      mat-raised-button
+      color="primary"
+      style="color: white; margin: 1% 0"
+      (click)="fileInput.click()"
+    >
+      <i class="fa fa-plus"></i> Agregar Archivo
+    </button>
+
+    <button
+      mat-raised-button
+      color="accent"
+      style="color: white; margin: 1% 0"
+      (click)="clearFile()"
+    >
+      <i class="fa fa-trash"></i> Limpiar Archivo
+    </button>
+
+    <button
+      mat-raised-button
+      color="primary"
+      style="color: white; margin: 1% 0"
+      (click)="startUpload()"
+    >
+      <i class="fa fa-upload"></i> Iniciar Subida
+    </button>
+
+    <button
+      mat-raised-button
+      color="warn"
+      style="color: white; margin: 1% 0"
+      (click)="cancelUpload()"
+    >
+      <i class="fa fa-ban"></i> Cancelar Subida
+    </button>
+
+    <div *ngIf="file" class="file-name-container">
+      <div class="file-name-background">{{ file.name }}</div>
+      <div class="file-name-progress" [style.width]="progressValue + '%'">{{ file.name }}</div>
+    </div>
+  </div>
+</div>

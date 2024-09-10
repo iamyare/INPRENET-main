@@ -18,7 +18,7 @@ export class NuevoBeneficioAfilComponent implements OnInit {
   @ViewChild(DynamicFormComponent) dynamicForm!: DynamicFormComponent;
   form!: FormGroup;
   form1!: FormGroup;
-  
+
   FormBen: any
   datosFormateados: any;
   unirNombres: any = unirNombres;
@@ -37,20 +37,20 @@ export class NuevoBeneficioAfilComponent implements OnInit {
     {
       header: 'Nombre Completo',
       col: 'nombre_completo',
-      
+
     },
     { header: 'Genero', col: 'genero',  },
     {
       header: 'Tipo Afiliado',
       col: 'tipo_afiliado',
-      
+
     },
     { header: 'Porcentaje', col: 'porcentaje',  },
   ];
   datosTabl: any[] = [];
   filas: any
   ejecF: any;
-  desOBenSeleccionado :any 
+  desOBenSeleccionado :any
   mostrarB: any;
 
   constructor(
@@ -208,13 +208,13 @@ export class NuevoBeneficioAfilComponent implements OnInit {
 
 
   getFilas = async () => {
-    if (this.Afiliado.fallecido == "SI" && (this.Afiliado.tipo_persona == 'AFILIADO' || 
-      this.Afiliado.tipo_persona == 'JUBILADO' || 
+    if (this.Afiliado.fallecido == "SI" && (this.Afiliado.tipo_persona == 'AFILIADO' ||
+      this.Afiliado.tipo_persona == 'JUBILADO' ||
       this.Afiliado.tipo_persona == 'PENSIONADO')) {
         try {
         await this.getColumns();
         const data = await this.svcAfilServ.obtenerBenDeAfil(this.form.value.dni).toPromise();
-        
+
         this.filas = data.map((item: any) => ({
           dni: item.n_identificacion,
           nombre_completo: this.unirNombres(item.primer_nombre, item.segundo_nombre, item.tercer_nombre, item.primer_apellido, item.segundo_apellido),
@@ -251,13 +251,13 @@ export class NuevoBeneficioAfilComponent implements OnInit {
             {
               header: 'Nombre Completo',
               col: 'nombre_completo',
-              
+
             },
             { header: 'Genero', col: 'genero',  },
             {
               header: 'Tipo Afiliado',
               col: 'tipo_afiliado',
-              
+
             },
             { header: 'Porcentaje', col: 'porcentaje',  },
           ];
@@ -284,17 +284,18 @@ export class NuevoBeneficioAfilComponent implements OnInit {
   manejarRowClick(row: any) {
     // Ocultamos el formulario temporalmente
     this.mostrarB = false;
-  
+
     // Asignamos el valor del DNI de la fila seleccionada al campo de DNI del beneficiario
     this.desOBenSeleccionado = row;
+
     this.myFormFields2[0].value = row.dni;
-  
+
     // Forzamos la detección de cambios
     this.cdr.detectChanges();
-  
+
     // Mostramos el formulario nuevamente
     this.mostrarB = true;
-  
+
     // Forzamos una segunda detección de cambios para asegurarnos de que el valor se haya reflejado
     this.cdr.detectChanges();
   }

@@ -10,6 +10,20 @@ import { environment } from 'src/environments/environment';
 export class PlanillaService {
   constructor(private http: HttpClient,private toastr: ToastrService) { }
 
+  actualizarFallecidosDesdeExcel(file: File): Observable<any> {
+    const url = `${environment.API_URL}/api/planilla/update-fallecidos-from-excel`;
+    const formData: FormData = new FormData();
+    formData.append('file', file, file.name);
+
+    return this.http.post(url, formData).pipe(
+      catchError(error => {
+        console.error('Error al subir el archivo Excel', error);
+        this.toastr.error('Error al subir el archivo Excel');
+        return throwError(error);
+      })
+    );
+  }
+
   descargarReporteDetallePago(
     periodoInicio: string,
     periodoFinalizacion: string,
@@ -171,7 +185,7 @@ export class PlanillaService {
     set('perF', perF); */
 
     const url = `${environment.API_URL}/api/planilla/Definitiva/personas/ord/${perI}/${perF}`;
-    
+
     return this.http.get(url, { responseType: 'blob' }).pipe(
       catchError(error => {
         console.error('Error al generar el Excel de la planilla', error);

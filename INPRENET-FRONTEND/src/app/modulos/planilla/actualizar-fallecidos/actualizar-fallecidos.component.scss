@@ -1,0 +1,34 @@
+.upload-container {
+  text-align: center;
+  margin: 20px 0;
+
+  button {
+    margin: 0 10px;
+  }
+
+  .file-name-container {
+    position: relative;
+    height: 25px;
+    background-color: #f0f0f0;
+    border-radius: 5px;
+    margin: 10px 0;
+    overflow: hidden;
+    text-align: left;
+
+    .file-name-background {
+      padding-left: 10px;
+      line-height: 25px;
+    }
+
+    .file-name-progress {
+      background-color: #4caf50;
+      height: 100%;
+      position: absolute;
+      top: 0;
+      left: 0;
+      color: white;
+      padding-left: 10px;
+      line-height: 25px;
+    }
+  }
+}

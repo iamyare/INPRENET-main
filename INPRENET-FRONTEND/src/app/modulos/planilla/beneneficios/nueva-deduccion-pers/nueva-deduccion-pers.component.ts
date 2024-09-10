@@ -118,12 +118,11 @@ export class NuevaDeduccionPersComponent implements OnInit {
         },
         (error) => {
           this.Afiliado = {};
-          this.toastr.error('Error: No se puede asignar deduccion a la persona con el DNI proporcionado.');
+          this.toastr.error(`Error: ${error.message}`);
         }
       );
     }
   }
-
 
   onDeduccionChange(event: any) {
     const selectedNombreDeduccion = event.value;

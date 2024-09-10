@@ -40,12 +40,32 @@ export class PlanillaService {
     @InjectRepository(net_persona)
     @InjectRepository(Net_Detalle_Beneficio_Afiliado)
     private readonly detalleBeneficioRepository: Repository<Net_Detalle_Beneficio_Afiliado>,
-    @InjectRepository(Net_Beneficio)
-    private beneficioRepository: Repository<Net_Beneficio>,
-    @InjectRepository(net_detalle_persona)
-    private detallePersonaRepository: Repository<net_detalle_persona>,
   ) {
   };
+
+  async updateFallecidoStatusFromExcel(file: Express.Multer.File) {
+    // Leer el archivo Excel
+    const workbook = XLSX.read(file.buffer, { type: 'buffer' });
+    const worksheet = workbook.Sheets[workbook.SheetNames[0]];
+    const data = XLSX.utils.sheet_to_json(worksheet);
+
+    // Recorrer los datos del Excel
+    for (const row of data) {
+      const nIdentificacion = row['IDENTIDAD'];
+      // Buscar la persona por N_IDENTIFICACION
+      const persona = await this.personaRepository.findOne({
+        where: { n_identificacion: nIdentificacion },
+      });
+
+      if (persona) {
+        // Actualizar el campo FALLECIDO a 'SI'
+        persona.fallecido = 'SI';
+        await this.personaRepository.save(persona);
+      }
+    }
+
+    return { message: 'Actualización completada' };
+  }
 
   async obtenerDetallePagoBeneficioPorPlanilla(id_planilla: number, @Res() res: Response) {
     const results = await this.detallePagBeneficios

@@ -107,42 +107,6 @@ export class DetalleDeduccionService {
       throw new InternalServerErrorException('Error al generar el Excel.');
     }
   }
-  
-  async insertarDetalles(data: any[]): Promise<void> {
-    const queryRunner = this.entityManager.connection.createQueryRunner();
-    await queryRunner.connect();
-    await queryRunner.startTransaction();
-
-    try {
-      for (const item of data) {
-        const centrotrabajo = await this.centroTrabajoRepository.findOne({ where: { nombre_centro_trabajo: item.nombre_centro_trabajo } });
-        if (!centrotrabajo) throw new NotFoundException(`Institucion ${item.nombre_centro_trabajo} no encontrada`);
-
-        const persona = await this.personaRepository.findOne({ where: { n_identificacion: item.n_identificacion } });
-        if (!persona) throw new NotFoundException(`Pfiliado con DNI ${item.n_identificacion} no encontrado`);
-
-        /* const deduccion = await this.deduccionRepository.findOne({ where: { codigo_deduccion: item.codigo_deduccion, centroTrabajo } });
-        if (!deduccion) throw new NotFoundException(`Deducción con código ${item.codigo_deduccion} no encontrada en la institución ${item.nombre_centro_trabajo}`); */
-
-        const detalleDeduccion = new Net_Detalle_Deduccion();
-        //detalleDeduccion.persona = persona;
-        //detalleDeduccion.deduccion = deduccion;
-        detalleDeduccion.anio = parseInt(item.año);
-        detalleDeduccion.mes = parseInt(item.mes);
-        detalleDeduccion.monto_total = parseFloat(item.monto_motal);
-
-
-        await queryRunner.manager.save(detalleDeduccion);
-      }
-      await queryRunner.commitTransaction();
-    } catch (error) {
-      await queryRunner.rollbackTransaction();
-      /* this.logger.error(`Error al insertar detalles de deducción: ${error.message}`);
-      throw new InternalServerErrorException(`Error al insertar detalles de deducción: ${error.message}`); */
-    } finally {
-      await queryRunner.release();
-    }
-  }
 
   async actualizarEstadoAplicacionPorPlanilla(idPlanilla: string, nuevoEstado: string): Promise<{ mensaje: string }> {
     try {
@@ -424,29 +388,34 @@ SELECT
     const deduccion = await this.deduccionRepository.findOne({
       where: { codigo_deduccion: createDetalleDeduccionDto.codigo_deduccion },
     });
-
+  
     if (!deduccion) {
       throw new NotFoundException('Deducción no encontrada con el código proporcionado.');
     }
-
+  
     // Buscar a la persona usando el n_identificacion
     const persona = await this.personaRepository.findOne({
       where: { n_identificacion: createDetalleDeduccionDto.n_identificacion },
     });
-
+  
     if (!persona) {
       throw new NotFoundException(`Persona con n_identificacion '${createDetalleDeduccionDto.n_identificacion}' no encontrada.`);
     }
-
+  
+    // Verificar si la persona está fallecida
+    if (persona.fallecido === 'SI') {
+      throw new BadRequestException(`La persona con n_identificacion '${createDetalleDeduccionDto.n_identificacion}' está marcada como fallecida.`);
+    }
+  
     // Buscar la planilla usando el id_planilla
     const planilla = await this.planillaRepository.findOne({
       where: { id_planilla: createDetalleDeduccionDto.id_planilla },
     });
-
+  
     if (!planilla) {
       throw new NotFoundException(`Planilla con id '${createDetalleDeduccionDto.id_planilla}' no encontrada.`);
     }
-
+  
     // Verificar si ya existe un detalle de deducción con el mismo ID_PLANILLA, ID_DEDUCCION, MONTO_TOTAL, ANIO y MES
     const detalleExistente = await this.detalleDeduccionRepository.findOne({
       where: {
@@ -458,13 +427,13 @@ SELECT
         persona: { id_persona: persona.id_persona },
       },
     });
-
+  
     if (detalleExistente) {
       throw new ConflictException(
         'Ya existe un detalle de deducción para esta persona con el mismo monto, año, mes, planilla, y deducción.'
       );
     }
-
+  
     // Crear el detalle de deducción
     const detalleDeduccion = this.detalleDeduccionRepository.create({
       persona: persona,
@@ -473,10 +442,11 @@ SELECT
       anio: createDetalleDeduccionDto.anio,
       mes: createDetalleDeduccionDto.mes,
       monto_total: createDetalleDeduccionDto.monto_total,
-      estado_aplicacion: 'NO COBRADA',
+      estado_aplicacion: 'EN PRELIMINAR',
+      monto_aplicado: createDetalleDeduccionDto.monto_total,
       fecha_aplicado: new Date().toISOString(), // Asegurando que la fecha esté en el formato correcto
     });
-
+  
     try {
       await this.detalleDeduccionRepository.save(detalleDeduccion);
       return detalleDeduccion;
@@ -486,8 +456,6 @@ SELECT
     }
   }
   
-
-
   findAll() {
     const detalleDeduccion = this.detalleDeduccionRepository.find()
     return detalleDeduccion;

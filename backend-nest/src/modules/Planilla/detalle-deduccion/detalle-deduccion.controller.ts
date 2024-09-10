@@ -35,27 +35,6 @@ export class DetalleDeduccionController {
     res.send(buffer);
   }
 
-
-
-
-
-  @Post('crearDeExcel')
-  @HttpCode(HttpStatus.CREATED)
-  async insertarDetalles(@Body() data: any[]) {
-    try {
-      await this.detalleDeduccionService.insertarDetalles(data);
-      return {
-        message: 'Detalles de deducción insertados exitosamente',
-      };
-    } catch (error) {
-      if (error instanceof HttpException) {
-        throw error;
-      } else {
-        throw new HttpException('Error interno del servidor', HttpStatus.INTERNAL_SERVER_ERROR);
-      }
-    }
-  }
-
   @Patch('actualizar-estado/:idPlanilla')
   async actualizarEstadoAplicacionPorPlanilla(
     @Param('idPlanilla') idPlanilla: string,

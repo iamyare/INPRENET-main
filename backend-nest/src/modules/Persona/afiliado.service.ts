@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable, InternalServerErrorException, Logger, NotFoundException } from '@nestjs/common';
+import { BadRequestException, HttpException, HttpStatus, Injectable, InternalServerErrorException, Logger, NotFoundException } from '@nestjs/common';
 import { NetPersonaDTO, PersonaResponse } from './dto/create-persona.dto';
 import { UpdatePersonaDto } from './dto/update-persona.dto';
 import { EntityManager, In, Repository } from 'typeorm';
@@ -601,7 +601,10 @@ async findOnePersonaParaDeduccion(term: string) {
       where: {
         tipoPersona: {
           tipo_persona: In(["BENEFICIARIO", "JUBILADO", "PENSIONADO"])
-        }, persona: { n_identificacion: term }
+        },
+        persona: {
+          n_identificacion: term
+        }
       },
       relations: [
         'persona',
@@ -616,8 +619,20 @@ async findOnePersonaParaDeduccion(term: string) {
       ]
     });
 
+    // Excepción si no se encuentra la persona
     if (!detallePer) {
-      throw new NotFoundException(`Afiliado con N_IDENTIFICACION ${term} no existe`);
+      throw new HttpException(
+        { message: `Afiliado con N_IDENTIFICACION ${term} no existe.` },
+        HttpStatus.NOT_FOUND
+      );
+    }
+
+    // Excepción si la persona está fallecida
+    if (detallePer.persona.fallecido === 'SI') {
+      throw new HttpException(
+        { message: `La persona con N_IDENTIFICACION ${term} está fallecida.` },
+        HttpStatus.BAD_REQUEST
+      );
     }
 
     const result = {
@@ -641,10 +656,12 @@ async findOnePersonaParaDeduccion(term: string) {
     return result;
   } catch (error) {
     console.log(error);
-    throw new InternalServerErrorException('Error al obtener los datos de la persona.');
+    throw error;  // Aseguramos que los errores personalizados no se reemplacen.
   }
 }
 
+
+  
 
 
   async findOneAFiliado(term: string) {

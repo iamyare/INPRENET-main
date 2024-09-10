@@ -25,6 +25,12 @@ export class PlanillaController {
     return this.planillaService.uploadExcel(file);
   } */
 
+    @Post('update-fallecidos-from-excel')
+    @UseInterceptors(FileInterceptor('file'))
+    async uploadExcel(@UploadedFile() file: Express.Multer.File) {
+      return this.planillaService.updateFallecidoStatusFromExcel(file);
+    }
+
     @Get('generar-reporte-detalle-pago')
   async generarReporte(
     @Query('periodoInicio') periodoInicio: string,

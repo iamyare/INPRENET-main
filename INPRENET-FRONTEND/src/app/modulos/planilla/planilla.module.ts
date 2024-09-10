@@ -35,6 +35,7 @@ import { ProcesoPlanillaComponent } from './egresos/proceso-planilla/proceso-pla
 import { DialogDesgloseComponent } from './egresos/dialog-desglose/dialog-desglose.component';
 import { GestionBancoComponent } from './gestion-banco/gestion-banco.component';
 import { AfiliacionModule } from '../afiliacion/afiliacion.module';
+import { ActualizarFallecidosComponent } from './actualizar-fallecidos/actualizar-fallecidos.component';
 
 @NgModule({
   declarations: [
@@ -68,7 +69,8 @@ import { AfiliacionModule } from '../afiliacion/afiliacion.module';
     CargarbefDedComponent,
     ProcesoPlanillaComponent,
     DialogDesgloseComponent,
-    GestionBancoComponent
+    GestionBancoComponent,
+    ActualizarFallecidosComponent
   ],
   imports: [
     CommonModule,

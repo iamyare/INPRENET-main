@@ -1,14 +1,28 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete, Query, Response, BadRequestException, HttpStatus } from '@nestjs/common';
 import { DetalleBeneficioService } from './detalle_beneficio.service';
 import { UpdateDetalleBeneficioDto } from './dto/update-detalle_beneficio_planilla.dto';
-import { CreateDetalleBeneficioDto } from './dto/create-detalle_beneficio.dto';
 import { ApiTags } from '@nestjs/swagger';
-import { log } from 'console';
+import { net_persona } from 'src/modules/Persona/entities/net_persona.entity';
+import { Net_Detalle_Beneficio_Afiliado } from './entities/net_detalle_beneficio_afiliado.entity';
 
 @ApiTags('beneficio-planilla')
 @Controller('beneficio-planilla')
 export class DetalleBeneficioController {
   constructor(private readonly detallebeneficioService: DetalleBeneficioService) { }
+
+  @Get('detalle-pago')
+obtenerDetallePago(@Query('n_identificacion') n_identificacion: string, @Query('causante_identificacion') causante_identificacion: string, @Query('id_beneficio') id_beneficio: number) {
+    return this.detallebeneficioService.obtenerDetallePagoConPlanilla(n_identificacion, causante_identificacion, id_beneficio);
+}
+
+
+  @Get('causante/:dni')
+  async getCausanteByDniBeneficiario(
+    @Param('dni') dni: string
+  ): Promise<{ causante: { nombres: string, apellidos: string, n_identificacion: string }, beneficios: Net_Detalle_Beneficio_Afiliado[] }[]> {
+    return this.detallebeneficioService.getCausanteByDniBeneficiario(dni);
+  }
+
 
   @Post('nuevoDetalle/:idAfiliadoPadre')
   async createDetalleBeneficioBeneficiario(@Body() createDetalleBeneficioDto: any, @Param('idAfiliadoPadre') idAfiliadoPadre: number) {

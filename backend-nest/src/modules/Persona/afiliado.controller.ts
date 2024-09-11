@@ -1,6 +1,5 @@
 import {
   Controller,
-  Post,
   Get,
   Put,
   Delete,
@@ -10,26 +9,19 @@ import {
   NotFoundException,
   HttpCode,
   HttpStatus,
-  Res,
-  ParseIntPipe,
-  UseInterceptors,
-  UploadedFile,
+  ParseIntPipe
 } from '@nestjs/common';
 import { AfiliadoService } from './afiliado.service';
 import { UpdatePersonaDto } from './dto/update-persona.dto';
 import { ApiTags } from '@nestjs/swagger';
-import { EncapsulatedPersonaDTO } from './dto/encapsulated-persona.dto';
 import { Repository } from 'typeorm';
 import { Net_Tipo_Persona } from './entities/net_tipo_persona.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { UpdatePerfCentTrabDto } from './dto/update.perfAfilCentTrab.dto';
-import { UpdateReferenciaPersonalDTO } from './dto/update-referencia-personal.dto';
-import { FileInterceptor } from '@nestjs/platform-express';
 import { net_persona } from './entities/net_persona.entity';
-import { CreateDetalleBeneficiarioDto } from './dto/create-detalle-beneficiario-dto';
-import { Benef } from './dto/pruebaBeneficiario.dto';
 import { net_estado_afiliacion } from './entities/net_estado_afiliacion.entity';
 import { net_detalle_persona } from './entities/net_detalle_persona.entity';
+import { Net_Detalle_Beneficio_Afiliado } from '../Planilla/detalle_beneficio/entities/net_detalle_beneficio_afiliado.entity';
 
 @ApiTags('Persona')
 @Controller('Persona')
@@ -38,105 +30,6 @@ export class AfiliadoController {
   private readonly tipoPersonaRepos: Repository<Net_Tipo_Persona>
 
   constructor(private readonly afiliadoService: AfiliadoService) { }
-
-  @Get('causante/:dni')
-  async getCausanteByDniBeneficiario(@Param('dni') dni: string): Promise<net_persona> {
-    return this.afiliadoService.getCausanteByDniBeneficiario(dni);
-  }
-
-  @Post('create-with-detalle')
-  async create(@Body() benef: Benef): Promise<net_persona> {
-    return this.afiliadoService.createBenef(benef);
-  }
-
-  @Post('afiliacion')
-  @UseInterceptors(FileInterceptor('foto_perfil', {
-    limits: { fileSize: 5 * 1024 * 1024 },
-    fileFilter: (req, file, callback) => {
-      if (file.mimetype.startsWith('image/')) {
-        callback(null, true);
-      } else {
-        callback(new Error('Solo se permiten archivos de imagen'), false);
-      }
-    },
-  }))
-  async createPersonaWithDetailsAndWorkCenters(
-    @UploadedFile() fotoPerfil: Express.Multer.File,
-    @Body('encapsulatedDto') encapsulatedDtoStr: string
-  ) {
-    try {
-      // Convertir el string JSON a un objeto
-      const encapsulatedDto: EncapsulatedPersonaDTO = JSON.parse(encapsulatedDtoStr);
-
-      // Procesar la imagen de perfil si está presente
-      if (fotoPerfil) {
-        encapsulatedDto.datosGenerales.foto_perfil = fotoPerfil.buffer; // Usar el buffer directamente
-      }
-
-      // Creación de la persona principal
-      const createPersonaDto = encapsulatedDto.datosGenerales;
-      const persona = await this.afiliadoService.createPersona(createPersonaDto);
-
-      // Creación del detalle de la persona
-      const detallePersonaDto = {
-        idPersona: persona.id_persona,
-        idTipoPersona: 1,
-        porcentaje: 0,
-        idEstadoPersona: 1
-      };
-      const detallePersona = await this.afiliadoService.createDetallePersona(detallePersonaDto);
-
-      // Asignación de centros de trabajo
-      let centrosTrabajoAsignados = [];
-      if (encapsulatedDto.centrosTrabajo && encapsulatedDto.centrosTrabajo.length > 0) {
-        centrosTrabajoAsignados = await this.afiliadoService.assignCentrosTrabajo(persona.id_persona, encapsulatedDto.centrosTrabajo);
-      }
-
-      // Creación y asignación de referencias personales
-      let referenciasAsignadas = [];
-      /* if (encapsulatedDto.referenciasPersonales && encapsulatedDto.referenciasPersonales.length > 0) {
-        referenciasAsignadas = await this.afiliadoService.createAndAssignReferences(persona.id_persona, {
-          referencias: encapsulatedDto.referenciasPersonales
-        });
-      } */
-
-      // Creación de beneficiarios
-      let beneficiariosAsignados = [];
-      if (encapsulatedDto.beneficiarios && encapsulatedDto.beneficiarios.length > 0) {
-        for (const beneficiario of encapsulatedDto.beneficiarios) {
-          const beneficiarioData = beneficiario.datosBeneficiario;
-          const nuevoBeneficiario = await this.afiliadoService.createPersona(beneficiarioData);
-          const detalleBeneficiarioDto: CreateDetalleBeneficiarioDto = {
-            idPersona: nuevoBeneficiario.id_persona,
-            idCausante: persona.id_persona,
-            idCausantePadre: persona.id_persona,
-            idTipoPersona: 2,
-            porcentaje: beneficiarioData.porcentaje,
-            idEstadoPersona: 1,
-            idDetallePersona: detallePersona.ID_DETALLE_PERSONA // Asigna el mismo ID_DETALLE_PERSONA
-          };
-          await this.afiliadoService.createDetalleBeneficiario(detalleBeneficiarioDto);
-          beneficiariosAsignados.push(nuevoBeneficiario);
-        }
-      }
-
-      // Asignación de colegios magisteriales
-      let colegiosMagisterialesAsignados = [];
-      if (encapsulatedDto.colegiosMagisteriales && encapsulatedDto.colegiosMagisteriales.length > 0) {
-        colegiosMagisterialesAsignados = await this.afiliadoService.assignColegiosMagisteriales(persona.id_persona, encapsulatedDto.colegiosMagisteriales);
-      }
-
-      return {
-        message: 'Persona creada con detalles, centros de trabajo, referencias personales, bancos, beneficiarios, colegios magisteriales y relaciones familiares asignadas correctamente.'
-      };
-    } catch (error) {
-      return {
-        error: true,
-        message: error.message
-      };
-    }
-  }
-
 
   @Patch('inactivar/:idPersona/:idCausante')
   async inactivarPersona(
@@ -153,66 +46,9 @@ export class AfiliadoController {
     }
   }
 
-
-
-
-
   @Get('obtenerEstados')
   async getAllEstados(): Promise<net_estado_afiliacion[]> {
     return this.afiliadoService.getAllEstados();
-  }
-
-  @Post('/createReferPersonales/:idPersona')
-  createReferPersonales(@Param("idPersona") idPersona: number, @Body() createAfiliadoTempDto: any) {
-    return this.afiliadoService.createAndAssignReferences(idPersona, createAfiliadoTempDto);
-  }
-  @Post('/createColegiosMagisteriales/:idPersona')
-  createColegiosMagisteriales(@Param("idPersona") idPersona: number, @Body() colegiosMagisterialesData: any) {
-    return this.afiliadoService.assignColegiosMagisteriales(idPersona, colegiosMagisterialesData);
-  }
-  @Post('/createCentrosTrabajo/:idPersona')
-  createCentrosTrabajo(@Param("idPersona") idPersona: number, @Body() centrosTrabajoData: any) {
-    return this.afiliadoService.assignCentrosTrabajo(idPersona, centrosTrabajoData);
-  }
-
-  @Post('/createBeneficiarios/:idPersona')
-  async createBeneficiarios(@Param("idPersona") idPersona: number, @Body() encapsulatedDto: any) {
-    const personaReferente = await this.tipoPersonaRepos.findOne({
-      where: { tipo_persona: "BENEFICIARIO" },
-    });
-
-    try {
-      /* let beneficiariosAsignados = [];
-      if (encapsulatedDto.beneficiarios && encapsulatedDto.beneficiarios.length > 0) {
-        for (const beneficiario of encapsulatedDto.beneficiarios) {
-          const beneficiarioData = beneficiario.datosBeneficiario;
-          const nuevoBeneficiario = await this.afiliadoService.createBeneficiario(beneficiarioData);
-          const detalleBeneficiario = {
-            idPersona: nuevoBeneficiario.id_persona,
-            idCausante: idPersona,
-            idCausantePadre: idPersona,
-            idTipoPersona: personaReferente.id_tipo_persona,
-            porcentaje: beneficiario.porcentaje,
-            idEstadoPersona: 1
-          };
-          const detalle = await this.afiliadoService.createDetalleBeneficiario(detalleBeneficiario);
-          beneficiariosAsignados.push(detalle);
-        }
-      }
-      return beneficiariosAsignados; */
-    } catch (error) {
-      console.log(error);
-    }
-  }
-
-  @Post('createRefPers/:dnireferente')
-  createRefPers(@Body() data: any, @Param() dnireferente) {
-    return this.afiliadoService.createRefPers(data, dnireferente);
-  }
-
-  @Post('createCentrosTrabPersona/:dnireferente')
-  createCentrosTrabPersona(@Body() data: any, @Param() dnireferente) {
-    return this.afiliadoService.createCentrosTrabPersona(data, dnireferente);
   }
 
   @Get()

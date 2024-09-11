@@ -1,49 +1,115 @@
 import * as oracledb from 'oracledb';
-import { BadRequestException, Injectable, InternalServerErrorException, Logger, NotFoundException } from '@nestjs/common';
+import { BadRequestException, HttpException, HttpStatus, Injectable, InternalServerErrorException, Logger, NotFoundException } from '@nestjs/common';
 import { isUUID } from 'class-validator';
 import { format, parseISO } from 'date-fns';
 import { InjectEntityManager, InjectRepository } from '@nestjs/typeorm';
-import { EntityManager, In, Repository, SelectQueryBuilder } from 'typeorm';
+import { EntityManager, In, Repository } from 'typeorm';
 import { Net_Beneficio } from '../beneficio/entities/net_beneficio.entity';
 import { net_persona } from '../../Persona/entities/net_persona.entity';
 import { Net_Detalle_Pago_Beneficio } from './entities/net_detalle_pago_beneficio.entity';
 import { UpdateDetalleBeneficioDto } from './dto/update-detalle_beneficio_planilla.dto';
-import { CreateDetalleBeneficioDto } from './dto/create-detalle_beneficio.dto';
 import { Net_Planilla } from '../planilla/entities/net_planilla.entity';
 import { Net_Detalle_Beneficio_Afiliado } from './entities/net_detalle_beneficio_afiliado.entity';
 import { net_detalle_persona } from 'src/modules/Persona/entities/net_detalle_persona.entity';
-
 import { Net_Tipo_Persona } from 'src/modules/Persona/entities/net_tipo_persona.entity';
-
 import { net_estado_afiliacion } from 'src/modules/Persona/entities/net_estado_afiliacion.entity';
 import { NET_PROFESIONES } from 'src/modules/transacciones/entities/net_profesiones.entity';
-//import { Net_Tipo_Persona } from 'src/modules/Persona/entities/net_tipo_persona.entity';
 import { Net_Beneficio_Tipo_Persona } from '../beneficio_tipo_persona/entities/net_beneficio_tipo_persona.entity';
 @Injectable()
 export class DetalleBeneficioService {
   private readonly logger = new Logger(DetalleBeneficioService.name)
 
   constructor(
-
     @InjectRepository(Net_Detalle_Pago_Beneficio)
     private readonly benAfilRepository: Repository<Net_Detalle_Pago_Beneficio>,
     @InjectRepository(Net_Detalle_Beneficio_Afiliado)
     private detalleBeneficioAfiliadoRepository: Repository<Net_Detalle_Beneficio_Afiliado>,
-
     @InjectRepository(net_persona)
     private personaRepository: Repository<net_persona>,
-
     @InjectRepository(net_detalle_persona)
     private detPersonaRepository: Repository<net_detalle_persona>,
-
     @InjectRepository(Net_Beneficio_Tipo_Persona)
     private benTipoPerRepository: Repository<Net_Beneficio_Tipo_Persona>,
-
     @InjectRepository(Net_Tipo_Persona)
     private tipoPersonaRepos: Repository<Net_Tipo_Persona>,
-
     @InjectEntityManager() private readonly entityManager: EntityManager
   ) { }
+
+  async obtenerDetallePagoConPlanilla(n_identificacion: string, causante_identificacion: string, id_beneficio: number) {
+    const persona = await this.personaRepository.findOne({ where: { n_identificacion } });
+    if (!persona) {
+        throw new HttpException({
+            status: HttpStatus.NOT_FOUND,
+            message: 'Persona beneficiaria no encontrada',
+        }, HttpStatus.NOT_FOUND);
+    }
+    const causante = await this.personaRepository.findOne({ where: { n_identificacion: causante_identificacion } });
+    if (!causante) {
+        throw new HttpException({
+            status: HttpStatus.NOT_FOUND,
+            message: 'Causante no encontrado',
+        }, HttpStatus.NOT_FOUND);
+    }
+    const detallePagoBeneficio = await this.benAfilRepository.find({
+        where: {
+            detalleBeneficioAfiliado: {
+                ID_PERSONA: persona.id_persona,
+                ID_CAUSANTE: causante.id_persona,
+                ID_BENEFICIO: id_beneficio
+            }
+        },
+        relations: ['planilla'] 
+    });
+    if (!detallePagoBeneficio || detallePagoBeneficio.length === 0) {
+        throw new HttpException({
+            status: HttpStatus.NOT_FOUND,
+            message: 'No se encontraron detalles de pago para este beneficio.',
+        }, HttpStatus.NOT_FOUND);
+    }
+    return detallePagoBeneficio;
+}
+
+  
+
+  async getCausanteByDniBeneficiario(n_identificacion: string): Promise<{ causante: { nombres: string, apellidos: string, n_identificacion: string }, beneficios: Net_Detalle_Beneficio_Afiliado[] }[]> {
+    const beneficiario = await this.personaRepository.findOne({ where: { n_identificacion }, relations: ['detallePersona'] });
+  
+    if (!beneficiario) {
+      throw new Error('Beneficiario no encontrado');
+    }
+    const tipoPersona = await this.tipoPersonaRepos.findOne({ where: { tipo_persona: 'BENEFICIARIO' } });
+    if (!tipoPersona) {
+      throw new Error('Tipo de persona "BENEFICIARIO" no encontrado');
+    }
+    const detalles = beneficiario.detallePersona.filter(d => d.ID_TIPO_PERSONA === tipoPersona.id_tipo_persona);
+  
+    if (detalles.length === 0) {
+      throw new Error('Detalle de beneficiario no encontrado');
+    }
+    const beneficiosPorCausante = await Promise.all(detalles.map(async (detalle) => {
+      const causante = await this.personaRepository.findOne({ where: { id_persona: detalle.ID_CAUSANTE } });
+  
+      if (!causante) {
+        throw new Error(`Causante con ID ${detalle.ID_CAUSANTE} no encontrado`);
+      }
+      const beneficios = await this.detalleBeneficioAfiliadoRepository.find({
+        where: { ID_CAUSANTE: causante.id_persona },
+        relations: ['beneficio']
+      });
+  
+      return {
+        causante: {
+          nombres: `${causante.primer_nombre || ''} ${causante.segundo_nombre || ''}`.trim(),
+          apellidos: `${causante.primer_apellido || ''} ${causante.segundo_apellido || ''}`.trim(),
+          n_identificacion: causante.n_identificacion || ''
+        },
+        beneficios
+      };
+    }));
+  
+    return beneficiosPorCausante;
+  }
+
   async actualizarEstadoPorPlanilla(idPlanilla: string, nuevoEstado: string): Promise<{ mensaje: string }> {
     try {
       const resultado = await this.benAfilRepository.createQueryBuilder()

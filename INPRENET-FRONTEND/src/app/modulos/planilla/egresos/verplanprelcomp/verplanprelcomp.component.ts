@@ -283,7 +283,7 @@ export class VerplanprelcompComponent implements OnInit {
             correo_1: item.correo_1,
             fecha_cierre: item.fecha_cierre,
             num_cuenta: item.NUM_CUENTA,
-            nombre_banco : item.NOMBRE_BANCO
+            nombre_banco: item.NOMBRE_BANCO
 
             /* BENEFICIOSIDS: item.BENEFICIOSIDS,
             beneficiosNombres: item.beneficiosNombres, */
@@ -312,18 +312,27 @@ export class VerplanprelcompComponent implements OnInit {
 
   /* Maneja los beneficios y deducciones */
   manejarAccionUno(row: any) {
+    let logs: any[] = [];
     this.planillaService.getDesglosePorPersonaPlanilla(row.id_afiliado, this.datosFormateados.value.codigo_planilla).subscribe({
       next: (response) => {
-        const { beneficios, deduccionesInprema, deduccionesTerceros } = response;
-        const data = {
-          beneficios,
-          deduccionesInprema,
-          deduccionesTerceros
-        };
-        this.dialog.open(DialogDesgloseComponent, {
-          width: '70%',
-          data: data
+        const { beneficios } = response;
+
+        const data = beneficios;
+        console.log(data);
+
+        logs.push({ message: 'Datos De Beneficios:', detail: data || [], type: 'beneficios' });
+
+        const dialogRef = this.dialog.open(DynamicDialogComponent, {
+          width: '50%',
+          data: { logs: logs, type: 'beneficios', mostrarAccion: true, }
         });
+
+        // Escuchar el evento deduccionEliminada para refrescar los datos
+        dialogRef.componentInstance.deduccionEliminada.subscribe(() => {
+
+          this.getFilas(this.datosFormateados.value.codigo_planilla).then(() => this.cargar());
+        });
+
       },
       error: (error) => {
         console.error('Error al obtener desglose por persona', error);
@@ -339,15 +348,14 @@ export class VerplanprelcompComponent implements OnInit {
 
     this.deduccionSVC.getDeduccionesByPersonaAndBenef(row.id_afiliado, row.ID_BENEFICIO, this.idPlanilla).subscribe({
       next: (response1) => {
-        console.log(response1);
-
         if (response1) {
           const data = response1;
+
           logs.push({ message: 'Datos De Deducciones:', detail: data || [], type: 'deducciones' });
 
           const dialogRef = this.dialog.open(DynamicDialogComponent, {
             width: '50%',
-            data: { logs: logs, type: 'deduccion' }
+            data: { logs: logs, type: 'deduccion', mostrarAccion: true, }
           });
 
           // Escuchar el evento deduccionEliminada para refrescar los datos

@@ -71,7 +71,7 @@ export class PlanillaService {
     const results = await this.detallePagBeneficios
       .createQueryBuilder('detallePago')
       .select([
-        'banco.cod_banco AS "codigo_banco"', 
+        'banco.cod_banco AS "codigo_banco"',
         'personaPorBanco.num_cuenta AS "numero_cuenta"',
         'detallePago.monto_a_pagar AS "monto_a_pagar"',
         `persona.primer_apellido || ' ' || COALESCE(persona.segundo_apellido, '') || ' ' || persona.primer_nombre || ' ' || COALESCE(persona.segundo_nombre, '') AS "nombre_completo"`,
@@ -129,7 +129,7 @@ export class PlanillaService {
 
     for (let i = 1; i < data.length; i++) {
       const row = data[i];
-      const nIdentificacion = row[0]?.toString().trim(); 
+      const nIdentificacion = row[0]?.toString().trim();
       const idBeneficio = row[1]?.toString().trim();
 
       if (!nIdentificacion || !idBeneficio) {
@@ -239,10 +239,10 @@ export class PlanillaService {
       throw new InternalServerErrorException(error.message);
     }
   } */
-  
-  
-  
-  
+
+
+
+
 
   async getActivePlanillas(clasePlanilla?: string): Promise<Net_Planilla[]> {
     const query = this.planillaRepository.createQueryBuilder('planilla')
@@ -563,7 +563,7 @@ export class PlanillaService {
       ben."CODIGO"
     ORDER BY ben."NOMBRE_BENEFICIO" ASC
     `;
-  
+
     try {
       return await this.entityManager.query(query, [periodoInicio, periodoFinalizacion]);
     } catch (error) {
@@ -600,7 +600,7 @@ export class PlanillaService {
       ded."NOMBRE_DEDUCCION"
     ORDER BY ded."NOMBRE_DEDUCCION" ASC
     `;
-  
+
     try {
       return await this.entityManager.query(query, [periodoInicio, periodoFinalizacion]);
     } catch (error) {
@@ -637,7 +637,7 @@ export class PlanillaService {
       ded."NOMBRE_DEDUCCION"
     ORDER BY ded."NOMBRE_DEDUCCION" ASC
     `;
-  
+
     try {
       return await this.entityManager.query(query, [periodoInicio, periodoFinalizacion]);
     } catch (error) {
@@ -655,24 +655,24 @@ export class PlanillaService {
       const beneficios = await this.getBeneficiosPorPeriodo(periodoInicio, periodoFinalizacion, idTiposPlanilla);
       const deduccionesInprema = await this.getDeduccionesInpremaPorPeriodo(periodoInicio, periodoFinalizacion, idTiposPlanilla);
       const deduccionesTerceros = await this.getDeduccionesTercerosPorPeriodo(periodoInicio, periodoFinalizacion, idTiposPlanilla);
-  
+
       const beneficiosSC = await this.getBeneficiosPorPeriodoSC(periodoInicio, periodoFinalizacion, idTiposPlanilla);
       const deduccionesInpremaSC = await this.getDeduccionesInpremaPorPeriodoSC(periodoInicio, periodoFinalizacion, idTiposPlanilla);
       const deduccionesTercerosSC = await this.getDeduccionesTercerosPorPeriodoSC(periodoInicio, periodoFinalizacion, idTiposPlanilla);
-  
+
       return { beneficios, deduccionesInprema, deduccionesTerceros, beneficiosSC, deduccionesInpremaSC, deduccionesTercerosSC };
     } catch (error) {
       console.error('Error al obtener los totales por periodo:', error);
       throw new InternalServerErrorException('Error al obtener los totales por periodo');
     }
   }
-  
+
 
   async getTotalPorBancoYPeriodo(
     periodoInicio: string,
     periodoFinalizacion: string,
     idTiposPlanilla: number[],
-): Promise<any[]> {
+  ): Promise<any[]> {
     const beneficiosQuery = `
         SELECT
         COALESCE(b."NOMBRE_BANCO", 'SIN BANCO') AS NOMBRE_BANCO,
@@ -741,45 +741,45 @@ export class PlanillaService {
     `;
 
     try {
-        const beneficios = await this.entityManager.query(beneficiosQuery, [periodoInicio, periodoFinalizacion]);
-        const deduccionesInprema = await this.entityManager.query(deduccionesInpremaQuery, [periodoInicio, periodoFinalizacion]);
-        const deduccionesTerceros = await this.entityManager.query(deduccionesTercerosQuery, [periodoInicio, periodoFinalizacion]);
+      const beneficios = await this.entityManager.query(beneficiosQuery, [periodoInicio, periodoFinalizacion]);
+      const deduccionesInprema = await this.entityManager.query(deduccionesInpremaQuery, [periodoInicio, periodoFinalizacion]);
+      const deduccionesTerceros = await this.entityManager.query(deduccionesTercerosQuery, [periodoInicio, periodoFinalizacion]);
 
-        const result = beneficios.map(beneficio => {
-            const deduccionInprema = deduccionesInprema.find(d => d.NOMBRE_BANCO === beneficio.NOMBRE_BANCO) || { SUMA_DEDUCCIONES_INPREMA: 0 };
-            const deduccionTerceros = deduccionesTerceros.find(d => d.NOMBRE_BANCO === beneficio.NOMBRE_BANCO) || { SUMA_DEDUCCIONES_TERCEROS: 0 };
+      const result = beneficios.map(beneficio => {
+        const deduccionInprema = deduccionesInprema.find(d => d.NOMBRE_BANCO === beneficio.NOMBRE_BANCO) || { SUMA_DEDUCCIONES_INPREMA: 0 };
+        const deduccionTerceros = deduccionesTerceros.find(d => d.NOMBRE_BANCO === beneficio.NOMBRE_BANCO) || { SUMA_DEDUCCIONES_TERCEROS: 0 };
 
-            return {
-                NOMBRE_BANCO: beneficio.NOMBRE_BANCO,
-                TOTAL_BENEFICIO: beneficio.SUMA_BENEFICIOS,
-                DEDUCCIONES_INPREMA: deduccionInprema.SUMA_DEDUCCIONES_INPREMA,
-                DEDUCCIONES_TERCEROS: deduccionTerceros.SUMA_DEDUCCIONES_TERCEROS,
-                MONTO_NETO: beneficio.SUMA_BENEFICIOS - (deduccionInprema.SUMA_DEDUCCIONES_INPREMA + deduccionTerceros.SUMA_DEDUCCIONES_TERCEROS)
-            };
-        });
+        return {
+          NOMBRE_BANCO: beneficio.NOMBRE_BANCO,
+          TOTAL_BENEFICIO: beneficio.SUMA_BENEFICIOS,
+          DEDUCCIONES_INPREMA: deduccionInprema.SUMA_DEDUCCIONES_INPREMA,
+          DEDUCCIONES_TERCEROS: deduccionTerceros.SUMA_DEDUCCIONES_TERCEROS,
+          MONTO_NETO: beneficio.SUMA_BENEFICIOS - (deduccionInprema.SUMA_DEDUCCIONES_INPREMA + deduccionTerceros.SUMA_DEDUCCIONES_TERCEROS)
+        };
+      });
 
-        const deduccionesSoloInprema = deduccionesInprema.filter(d => !beneficios.find(b => b.NOMBRE_BANCO === d.NOMBRE_BANCO)).map(d => ({
-            NOMBRE_BANCO: d.NOMBRE_BANCO,
-            TOTAL_BENEFICIO: 0,
-            DEDUCCIONES_INPREMA: d.SUMA_DEDUCCIONES_INPREMA,
-            DEDUCCIONES_TERCEROS: 0,
-            MONTO_NETO: -d.SUMA_DEDUCCIONES_INPREMA
-        }));
+      const deduccionesSoloInprema = deduccionesInprema.filter(d => !beneficios.find(b => b.NOMBRE_BANCO === d.NOMBRE_BANCO)).map(d => ({
+        NOMBRE_BANCO: d.NOMBRE_BANCO,
+        TOTAL_BENEFICIO: 0,
+        DEDUCCIONES_INPREMA: d.SUMA_DEDUCCIONES_INPREMA,
+        DEDUCCIONES_TERCEROS: 0,
+        MONTO_NETO: -d.SUMA_DEDUCCIONES_INPREMA
+      }));
 
-        const deduccionesSoloTerceros = deduccionesTerceros.filter(d => !beneficios.find(b => b.NOMBRE_BANCO === d.NOMBRE_BANCO)).map(d => ({
-            NOMBRE_BANCO: d.NOMBRE_BANCO,
-            TOTAL_BENEFICIO: 0,
-            DEDUCCIONES_INPREMA: 0,
-            DEDUCCIONES_TERCEROS: d.SUMA_DEDUCCIONES_TERCEROS,
-            MONTO_NETO: -d.SUMA_DEDUCCIONES_TERCEROS
-        }));
+      const deduccionesSoloTerceros = deduccionesTerceros.filter(d => !beneficios.find(b => b.NOMBRE_BANCO === d.NOMBRE_BANCO)).map(d => ({
+        NOMBRE_BANCO: d.NOMBRE_BANCO,
+        TOTAL_BENEFICIO: 0,
+        DEDUCCIONES_INPREMA: 0,
+        DEDUCCIONES_TERCEROS: d.SUMA_DEDUCCIONES_TERCEROS,
+        MONTO_NETO: -d.SUMA_DEDUCCIONES_TERCEROS
+      }));
 
-        return [...result, ...deduccionesSoloInprema, ...deduccionesSoloTerceros];
+      return [...result, ...deduccionesSoloInprema, ...deduccionesSoloTerceros];
     } catch (error) {
-        console.error('Error al obtener los totales por banco en el periodo:', error);
-        throw new InternalServerErrorException('Error al obtener los totales por banco en el periodo');
+      console.error('Error al obtener los totales por banco en el periodo:', error);
+      throw new InternalServerErrorException('Error al obtener los totales por banco en el periodo');
     }
-}   
+  }
 
   async generarVoucher(idPlanilla: number, dni: string): Promise<any> {
     try {
@@ -1133,7 +1133,7 @@ export class PlanillaService {
       const newResult = result.map(persona => {
         const deduccionI = resultI.find(d => d.ID_PERSONA === persona.ID_PERSONA && d.ID_PLANILLA === persona.ID_PLANILLA);
 
-        
+
         let totD = 0;
         if (deduccionI) {
           totD = (deduccionI?.['DEDUCCIONES'] || 0);
@@ -1441,7 +1441,7 @@ export class PlanillaService {
     const { nombre_planilla, periodo_inicio, periodo_finalizacion } = createPlanillaDto;
     try {
       const tipoPlanilla = await this.tipoPlanillaRepository.findOneBy({ nombre_planilla });
-  
+
       if (!tipoPlanilla) {
         throw new BadRequestException(`No se encontró ningún tipo de planilla con el nombre '${nombre_planilla}'.`);
       }
@@ -1451,7 +1451,7 @@ export class PlanillaService {
           estado: 'ACTIVA',
         },
       });
-  
+
       if (planillaActiva) {
         throw new ConflictException(`Ya existe una planilla activa para el tipo de planilla '${nombre_planilla}'.`);
       }
@@ -1463,7 +1463,7 @@ export class PlanillaService {
       const ultimoDia: string = format(endOfMonth(fechaActual), 'dd/MM/yyyy');
       let secuencia = 1;
       let planillaExistente;
-  
+
       do {
         switch (nombre_planilla) {
           case "ORDINARIA JUBILADOS Y PENSIONADOS":
@@ -1495,7 +1495,7 @@ export class PlanillaService {
           secuencia++;
         }
       } while (planillaExistente);
-  
+
       const tipoPlanillaInstance = new Net_TipoPlanilla();
       tipoPlanillaInstance.id_tipo_planilla = tipoPlanilla.id_tipo_planilla;
       const newPlanilla = this.planillaRepository.create({
@@ -1506,10 +1506,10 @@ export class PlanillaService {
         tipoPlanilla: tipoPlanillaInstance,
         estado: 'ACTIVA',
       });
-  
+
       await this.planillaRepository.save(newPlanilla);
       return newPlanilla;
-  
+
     } catch (error) {
       if (error instanceof QueryFailedError && error.message.includes('ORA-00001')) {
         throw new ConflictException(`La planilla con la secuencia ya existe, por favor cambie la secuencia o revise los datos.`);
@@ -1517,7 +1517,7 @@ export class PlanillaService {
       throw error;
     }
   }
-  
+
   findAll(paginationDto: PaginationDto) {
     const { offset = 0 } = paginationDto;
     return this.planillaRepository.find({
@@ -1689,32 +1689,32 @@ export class PlanillaService {
   }
 
   async getPlanillasPreliminares(codigo_planilla: string): Promise<any[]> {
-      /* const query = `
-            SELECT 
-                p.ID_PERSONA,
-                p.N_IDENTIFICACION,
-                p.PRIMER_NOMBRE || ' ' || NVL(p.SEGUNDO_NOMBRE, '') || ' ' || p.PRIMER_APELLIDO || ' ' || NVL(p.SEGUNDO_APELLIDO, '') AS NOMBRE_COMPLETO,
-                COALESCE(SUM(dpb.MONTO_A_PAGAR), 0) AS TOTAL_BENEFICIOS,
-                COALESCE(SUM(CASE WHEN d.ID_CENTRO_TRABAJO = 1 THEN dd.MONTO_APLICADO ELSE 0 END), 0) AS TOTAL_DEDUCCIONES_INPREMA,
-                COALESCE(SUM(CASE WHEN d.ID_CENTRO_TRABAJO IS NULL OR d.ID_CENTRO_TRABAJO != 1 THEN dd.MONTO_APLICADO ELSE 0 END), 0) AS TOTAL_DEDUCCIONES_TERCEROS
-            FROM 
-                NET_PERSONA p
-            LEFT JOIN 
-                NET_DETALLE_PAGO_BENEFICIO dpb ON p.ID_PERSONA = dpb.ID_PERSONA AND dpb.ID_PLANILLA = (SELECT ID_PLANILLA FROM NET_PLANILLA WHERE CODIGO_PLANILLA = :codigo_planilla AND ESTADO = 'ACTIVA')
-            LEFT JOIN 
-                NET_DETALLE_DEDUCCION dd ON p.ID_PERSONA = dd.ID_PERSONA AND dd.ID_PLANILLA = (SELECT ID_PLANILLA FROM NET_PLANILLA WHERE CODIGO_PLANILLA = :codigo_planilla AND ESTADO = 'ACTIVA')
-            LEFT JOIN
-                NET_DEDUCCION d ON dd.ID_DEDUCCION = d.ID_DEDUCCION
-            WHERE 
-                (dpb.ID_PLANILLA = (SELECT ID_PLANILLA FROM NET_PLANILLA WHERE CODIGO_PLANILLA = :codigo_planilla AND ESTADO = 'ACTIVA')
-                OR dd.ID_PLANILLA = (SELECT ID_PLANILLA FROM NET_PLANILLA WHERE CODIGO_PLANILLA = :codigo_planilla AND ESTADO = 'ACTIVA'))
-            GROUP BY 
-                p.ID_PERSONA, p.N_IDENTIFICACION, p.PRIMER_NOMBRE, p.SEGUNDO_NOMBRE, p.PRIMER_APELLIDO, p.SEGUNDO_APELLIDO
-        `;
+    /* const query = `
+          SELECT 
+              p.ID_PERSONA,
+              p.N_IDENTIFICACION,
+              p.PRIMER_NOMBRE || ' ' || NVL(p.SEGUNDO_NOMBRE, '') || ' ' || p.PRIMER_APELLIDO || ' ' || NVL(p.SEGUNDO_APELLIDO, '') AS NOMBRE_COMPLETO,
+              COALESCE(SUM(dpb.MONTO_A_PAGAR), 0) AS TOTAL_BENEFICIOS,
+              COALESCE(SUM(CASE WHEN d.ID_CENTRO_TRABAJO = 1 THEN dd.MONTO_APLICADO ELSE 0 END), 0) AS TOTAL_DEDUCCIONES_INPREMA,
+              COALESCE(SUM(CASE WHEN d.ID_CENTRO_TRABAJO IS NULL OR d.ID_CENTRO_TRABAJO != 1 THEN dd.MONTO_APLICADO ELSE 0 END), 0) AS TOTAL_DEDUCCIONES_TERCEROS
+          FROM 
+              NET_PERSONA p
+          LEFT JOIN 
+              NET_DETALLE_PAGO_BENEFICIO dpb ON p.ID_PERSONA = dpb.ID_PERSONA AND dpb.ID_PLANILLA = (SELECT ID_PLANILLA FROM NET_PLANILLA WHERE CODIGO_PLANILLA = :codigo_planilla AND ESTADO = 'ACTIVA')
+          LEFT JOIN 
+              NET_DETALLE_DEDUCCION dd ON p.ID_PERSONA = dd.ID_PERSONA AND dd.ID_PLANILLA = (SELECT ID_PLANILLA FROM NET_PLANILLA WHERE CODIGO_PLANILLA = :codigo_planilla AND ESTADO = 'ACTIVA')
+          LEFT JOIN
+              NET_DEDUCCION d ON dd.ID_DEDUCCION = d.ID_DEDUCCION
+          WHERE 
+              (dpb.ID_PLANILLA = (SELECT ID_PLANILLA FROM NET_PLANILLA WHERE CODIGO_PLANILLA = :codigo_planilla AND ESTADO = 'ACTIVA')
+              OR dd.ID_PLANILLA = (SELECT ID_PLANILLA FROM NET_PLANILLA WHERE CODIGO_PLANILLA = :codigo_planilla AND ESTADO = 'ACTIVA'))
+          GROUP BY 
+              p.ID_PERSONA, p.N_IDENTIFICACION, p.PRIMER_NOMBRE, p.SEGUNDO_NOMBRE, p.PRIMER_APELLIDO, p.SEGUNDO_APELLIDO
+      `;
 
-      const result = await this.entityManager.query(query, [codigo_planilla]);
-      
-      return result; */
+    const result = await this.entityManager.query(query, [codigo_planilla]);
+    
+    return result; */
 
     let query = `
         SELECT DISTINCT
@@ -1873,7 +1873,12 @@ export class PlanillaService {
     try {
       const beneficiosQuery = `
         SELECT 
-          dpb.MONTO_A_PAGAR,
+          dpb.ID_BENEFICIO_PLANILLA,
+          dpb.ID_DETALLE_PERSONA,
+          dpb.ID_PERSONA,
+          dpb.ID_CAUSANTE,
+          dpb.ID_BENEFICIO,
+          dpb.MONTO_A_PAGAR  as "MontoAPagar",
           b.NOMBRE_BENEFICIO
         FROM 
           NET_DETALLE_PAGO_BENEFICIO dpb
@@ -2035,7 +2040,7 @@ export class PlanillaService {
     periodoInicio: string,
     periodoFinalizacion: string,
     idTiposPlanilla: number[],
-): Promise<any[]> {
+  ): Promise<any[]> {
     const beneficiosQuery = `
         SELECT
             banco.codigo_ach AS "codigo_banco", 
@@ -2073,7 +2078,7 @@ export class PlanillaService {
         GROUP BY
             banco.codigo_ach, personaPorBanco.num_cuenta, persona.primer_apellido, persona.segundo_apellido, persona.primer_nombre, persona.segundo_nombre, persona.n_identificacion, persona.ID_PERSONA
     `;
-  
+
     const deduccionesInpremaQuery = `
         SELECT 
             dd."ID_PERSONA",
@@ -2093,7 +2098,7 @@ export class PlanillaService {
         GROUP BY 
             dd."ID_PERSONA"
     `;
-  
+
     const deduccionesTercerosQuery = `
         SELECT 
             dd."ID_PERSONA",
@@ -2112,96 +2117,96 @@ export class PlanillaService {
         GROUP BY 
             dd."ID_PERSONA"
     `;
-  
-    try {
-        const beneficios = await this.entityManager.query(beneficiosQuery, [periodoInicio, periodoFinalizacion]);
-        const deduccionesInprema = await this.entityManager.query(deduccionesInpremaQuery, [periodoInicio, periodoFinalizacion]);
-        const deduccionesTerceros = await this.entityManager.query(deduccionesTercerosQuery, [periodoInicio, periodoFinalizacion]);
-  
-        const result = beneficios.map(beneficio => {
-            const personaID = beneficio.ID_PERSONA;
-  
-            const totalDeduccionInprema = deduccionesInprema
-                .filter(d => d.ID_PERSONA === personaID)
-                .reduce((acc, curr) => acc + curr.deducciones_inprema, 0);
-  
-            const totalDeduccionTerceros = deduccionesTerceros
-                .filter(d => d.ID_PERSONA === personaID)
-                .reduce((acc, curr) => acc + curr.deducciones_terceros, 0);
-  
-            const totalDeducciones = totalDeduccionInprema + totalDeduccionTerceros;
-  
-            return {
-                codigo_banco: beneficio.codigo_banco,
-                numero_cuenta: beneficio.numero_cuenta,
-                neto: parseFloat((beneficio.monto_a_pagar - totalDeducciones).toFixed(2)), // Asegurar dos decimales
-                nombre_completo: beneficio.nombre_completo,
-                id_tipo_planilla: 1, 
-                n_identificacion: beneficio.n_identificacion,
-            };
-        });
-  
-        return result;
-    } catch (error) {
-        console.error('Error al obtener los detalles de pago por planilla:', error);
-        throw new InternalServerErrorException('Error al obtener los detalles de pago por planilla.');
-    }
-}
 
-async generarReporteDetallePago(
+    try {
+      const beneficios = await this.entityManager.query(beneficiosQuery, [periodoInicio, periodoFinalizacion]);
+      const deduccionesInprema = await this.entityManager.query(deduccionesInpremaQuery, [periodoInicio, periodoFinalizacion]);
+      const deduccionesTerceros = await this.entityManager.query(deduccionesTercerosQuery, [periodoInicio, periodoFinalizacion]);
+
+      const result = beneficios.map(beneficio => {
+        const personaID = beneficio.ID_PERSONA;
+
+        const totalDeduccionInprema = deduccionesInprema
+          .filter(d => d.ID_PERSONA === personaID)
+          .reduce((acc, curr) => acc + curr.deducciones_inprema, 0);
+
+        const totalDeduccionTerceros = deduccionesTerceros
+          .filter(d => d.ID_PERSONA === personaID)
+          .reduce((acc, curr) => acc + curr.deducciones_terceros, 0);
+
+        const totalDeducciones = totalDeduccionInprema + totalDeduccionTerceros;
+
+        return {
+          codigo_banco: beneficio.codigo_banco,
+          numero_cuenta: beneficio.numero_cuenta,
+          neto: parseFloat((beneficio.monto_a_pagar - totalDeducciones).toFixed(2)), // Asegurar dos decimales
+          nombre_completo: beneficio.nombre_completo,
+          id_tipo_planilla: 1,
+          n_identificacion: beneficio.n_identificacion,
+        };
+      });
+
+      return result;
+    } catch (error) {
+      console.error('Error al obtener los detalles de pago por planilla:', error);
+      throw new InternalServerErrorException('Error al obtener los detalles de pago por planilla.');
+    }
+  }
+
+  async generarReporteDetallePago(
     data: any[],
     res: Response,
-): Promise<void> {
+  ): Promise<void> {
     try {
-        const workbook = new ExcelJS.Workbook();
-        const detailedSheet = workbook.addWorksheet('Detalle de Pago');
-        const concatenatedSheet = workbook.addWorksheet('Concatenado');
+      const workbook = new ExcelJS.Workbook();
+      const detailedSheet = workbook.addWorksheet('Detalle de Pago');
+      const concatenatedSheet = workbook.addWorksheet('Concatenado');
 
-        // Definir columnas de la hoja detallada
-        detailedSheet.columns = [
-            { header: 'Código Banco', key: 'codigo_banco', width: 20 },
-            { header: 'Número de Cuenta', key: 'numero_cuenta', width: 20 },
-            { header: 'Monto a Pagar', key: 'monto_a_pagar', width: 20 },
-            { header: 'Nombre Completo', key: 'nombre_completo', width: 30 },
-            { header: 'Fecha Actual', key: 'fecha_actual', width: 15 },
-            { header: 'Tipo de Planilla', key: 'id_tipo_planilla', width: 20 },
-            { header: 'DNI', key: 'n_identificacion', width: 20 },
-        ];
+      // Definir columnas de la hoja detallada
+      detailedSheet.columns = [
+        { header: 'Código Banco', key: 'codigo_banco', width: 20 },
+        { header: 'Número de Cuenta', key: 'numero_cuenta', width: 20 },
+        { header: 'Monto a Pagar', key: 'monto_a_pagar', width: 20 },
+        { header: 'Nombre Completo', key: 'nombre_completo', width: 30 },
+        { header: 'Fecha Actual', key: 'fecha_actual', width: 15 },
+        { header: 'Tipo de Planilla', key: 'id_tipo_planilla', width: 20 },
+        { header: 'DNI', key: 'n_identificacion', width: 20 },
+      ];
 
-        const currentDate = format(new Date(), 'dd/MM/yyyy');
+      const currentDate = format(new Date(), 'dd/MM/yyyy');
 
-        data.forEach(item => {
-            detailedSheet.addRow({
-                codigo_banco: item.codigo_banco,
-                numero_cuenta: item.numero_cuenta,
-                monto_a_pagar: parseFloat(item.neto).toFixed(2),
-                nombre_completo: item.nombre_completo,
-                fecha_actual: currentDate,
-                id_tipo_planilla: 1, 
-                n_identificacion: item.n_identificacion,
-            });
+      data.forEach(item => {
+        detailedSheet.addRow({
+          codigo_banco: item.codigo_banco,
+          numero_cuenta: item.numero_cuenta,
+          monto_a_pagar: parseFloat(item.neto).toFixed(2),
+          nombre_completo: item.nombre_completo,
+          fecha_actual: currentDate,
+          id_tipo_planilla: 1,
+          n_identificacion: item.n_identificacion,
         });
-        data.forEach(item => {
-            const concatenatedRow = [
-                item.codigo_banco,
-                item.numero_cuenta,
-                parseFloat(item.neto).toFixed(2),
-                item.nombre_completo,
-                currentDate,
-                '1',
-                item.n_identificacion
-            ].join(',');
+      });
+      data.forEach(item => {
+        const concatenatedRow = [
+          item.codigo_banco,
+          item.numero_cuenta,
+          parseFloat(item.neto).toFixed(2),
+          item.nombre_completo,
+          currentDate,
+          '1',
+          item.n_identificacion
+        ].join(',');
 
-            concatenatedSheet.addRow([concatenatedRow]);
-        });
-        res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-        res.setHeader('Content-Disposition', 'attachment; filename=detalle_pago.xlsx');
-        await workbook.xlsx.write(res);
-        res.end();
+        concatenatedSheet.addRow([concatenatedRow]);
+      });
+      res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+      res.setHeader('Content-Disposition', 'attachment; filename=detalle_pago.xlsx');
+      await workbook.xlsx.write(res);
+      res.end();
     } catch (error) {
-        console.error('Error al generar el archivo Excel:', error);
-        throw new InternalServerErrorException('Error al generar el archivo Excel');
+      console.error('Error al generar el archivo Excel:', error);
+      throw new InternalServerErrorException('Error al generar el archivo Excel');
     }
-}  
+  }
 
 }

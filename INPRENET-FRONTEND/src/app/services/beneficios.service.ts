@@ -167,7 +167,7 @@ export class BeneficiosService {
     );
   }
 
-  asigBeneficioAfil(datos: TipoBeneficio, itemSeleccionado:any,idAfiliadoPadre?: string): Observable<any> {
+  asigBeneficioAfil(datos: TipoBeneficio, itemSeleccionado: any, idAfiliadoPadre?: string): Observable<any> {
     if (idAfiliadoPadre) {
       var url = `${environment.API_URL}/api/beneficio-planilla/nuevoDetalle/${idAfiliadoPadre}`;
     } else {
@@ -176,7 +176,7 @@ export class BeneficiosService {
 
     return this.http.post<TipoBeneficio>(
       url,
-      {datos,itemSeleccionado},
+      { datos, itemSeleccionado },
     ).pipe(
       map((res: any) => {
         return res;
@@ -192,6 +192,17 @@ export class BeneficiosService {
     var url = `${environment.API_URL}/api/beneficio-planilla/cargarDetBen`;
     return this.http.get<any>(
       url,
+    ).pipe(
+      map((res: any) => {
+        return res;
+      })
+    )
+  }
+
+  eliminarBenPlan(data: any): Observable<TipoBeneficio | void> {
+    return this.http.patch<any>(
+      `${environment.API_URL}/api/beneficio-planilla/eliminar-ben-plan`,
+      { data }
     ).pipe(
       map((res: any) => {
         return res;

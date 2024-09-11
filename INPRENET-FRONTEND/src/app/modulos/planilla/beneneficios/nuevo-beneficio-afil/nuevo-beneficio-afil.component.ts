@@ -39,7 +39,7 @@ export class NuevoBeneficioAfilComponent implements OnInit {
       col: 'nombre_completo',
 
     },
-    { header: 'Genero', col: 'genero',  },
+    { header: 'Género', col: 'genero',  },
     {
       header: 'Tipo Afiliado',
       col: 'tipo_afiliado',

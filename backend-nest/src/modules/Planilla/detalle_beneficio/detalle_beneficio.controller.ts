@@ -171,6 +171,14 @@ obtenerDetallePago(@Query('n_identificacion') n_identificacion: string, @Query('
     return respuesta;
   }
 
+  @Patch('eliminar-ben-plan')
+  async eliminarBenPlan(
+    @Body('data') data: any
+  ) {
+    const respuesta = await this.detallebeneficioService.eliminarBenPlan(data);
+    return respuesta;
+  }
+
   /* @Patch('/actualizar-beneficio-planilla')
   actualizarPlanillasYEstados(@Body() detalles: { idBeneficioPlanilla: string; codigoPlanilla: string; estado: string }[]) {
     return this.detallebeneficioService.actualizarPlanillaYEstadoDeBeneficio(detalles);

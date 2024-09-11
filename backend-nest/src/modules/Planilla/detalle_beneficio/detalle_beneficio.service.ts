@@ -15,13 +15,16 @@ import { Net_Tipo_Persona } from 'src/modules/Persona/entities/net_tipo_persona.
 import { net_estado_afiliacion } from 'src/modules/Persona/entities/net_estado_afiliacion.entity';
 import { NET_PROFESIONES } from 'src/modules/transacciones/entities/net_profesiones.entity';
 import { Net_Beneficio_Tipo_Persona } from '../beneficio_tipo_persona/entities/net_beneficio_tipo_persona.entity';
+
+import { addMonths } from 'date-fns';
 @Injectable()
 export class DetalleBeneficioService {
   private readonly logger = new Logger(DetalleBeneficioService.name)
 
   constructor(
     @InjectRepository(Net_Detalle_Pago_Beneficio)
-    private readonly benAfilRepository: Repository<Net_Detalle_Pago_Beneficio>,
+    private readonly detPagBenRepository: Repository<Net_Detalle_Pago_Beneficio>,
+
     @InjectRepository(Net_Detalle_Beneficio_Afiliado)
     private detalleBeneficioAfiliadoRepository: Repository<Net_Detalle_Beneficio_Afiliado>,
     @InjectRepository(net_persona)
@@ -38,42 +41,42 @@ export class DetalleBeneficioService {
   async obtenerDetallePagoConPlanilla(n_identificacion: string, causante_identificacion: string, id_beneficio: number) {
     const persona = await this.personaRepository.findOne({ where: { n_identificacion } });
     if (!persona) {
-        throw new HttpException({
-            status: HttpStatus.NOT_FOUND,
-            message: 'Persona beneficiaria no encontrada',
-        }, HttpStatus.NOT_FOUND);
+      throw new HttpException({
+        status: HttpStatus.NOT_FOUND,
+        message: 'Persona beneficiaria no encontrada',
+      }, HttpStatus.NOT_FOUND);
     }
     const causante = await this.personaRepository.findOne({ where: { n_identificacion: causante_identificacion } });
     if (!causante) {
-        throw new HttpException({
-            status: HttpStatus.NOT_FOUND,
-            message: 'Causante no encontrado',
-        }, HttpStatus.NOT_FOUND);
+      throw new HttpException({
+        status: HttpStatus.NOT_FOUND,
+        message: 'Causante no encontrado',
+      }, HttpStatus.NOT_FOUND);
     }
-    const detallePagoBeneficio = await this.benAfilRepository.find({
-        where: {
-            detalleBeneficioAfiliado: {
-                ID_PERSONA: persona.id_persona,
-                ID_CAUSANTE: causante.id_persona,
-                ID_BENEFICIO: id_beneficio
-            }
-        },
-        relations: ['planilla'] 
+    const detallePagoBeneficio = await this.detPagBenRepository.find({
+      where: {
+        detalleBeneficioAfiliado: {
+          ID_PERSONA: persona.id_persona,
+          ID_CAUSANTE: causante.id_persona,
+          ID_BENEFICIO: id_beneficio
+        }
+      },
+      relations: ['planilla']
     });
     if (!detallePagoBeneficio || detallePagoBeneficio.length === 0) {
-        throw new HttpException({
-            status: HttpStatus.NOT_FOUND,
-            message: 'No se encontraron detalles de pago para este beneficio.',
-        }, HttpStatus.NOT_FOUND);
+      throw new HttpException({
+        status: HttpStatus.NOT_FOUND,
+        message: 'No se encontraron detalles de pago para este beneficio.',
+      }, HttpStatus.NOT_FOUND);
     }
     return detallePagoBeneficio;
-}
+  }
 
-  
+
 
   async getCausanteByDniBeneficiario(n_identificacion: string): Promise<{ causante: { nombres: string, apellidos: string, n_identificacion: string }, beneficios: Net_Detalle_Beneficio_Afiliado[] }[]> {
     const beneficiario = await this.personaRepository.findOne({ where: { n_identificacion }, relations: ['detallePersona'] });
-  
+
     if (!beneficiario) {
       throw new Error('Beneficiario no encontrado');
     }
@@ -82,13 +85,13 @@ export class DetalleBeneficioService {
       throw new Error('Tipo de persona "BENEFICIARIO" no encontrado');
     }
     const detalles = beneficiario.detallePersona.filter(d => d.ID_TIPO_PERSONA === tipoPersona.id_tipo_persona);
-  
+
     if (detalles.length === 0) {
       throw new Error('Detalle de beneficiario no encontrado');
     }
     const beneficiosPorCausante = await Promise.all(detalles.map(async (detalle) => {
       const causante = await this.personaRepository.findOne({ where: { id_persona: detalle.ID_CAUSANTE } });
-  
+
       if (!causante) {
         throw new Error(`Causante con ID ${detalle.ID_CAUSANTE} no encontrado`);
       }
@@ -96,7 +99,7 @@ export class DetalleBeneficioService {
         where: { ID_CAUSANTE: causante.id_persona },
         relations: ['beneficio']
       });
-  
+
       return {
         causante: {
           nombres: `${causante.primer_nombre || ''} ${causante.segundo_nombre || ''}`.trim(),
@@ -106,13 +109,13 @@ export class DetalleBeneficioService {
         beneficios
       };
     }));
-  
+
     return beneficiosPorCausante;
   }
 
   async actualizarEstadoPorPlanilla(idPlanilla: string, nuevoEstado: string): Promise<{ mensaje: string }> {
     try {
-      const resultado = await this.benAfilRepository.createQueryBuilder()
+      const resultado = await this.detPagBenRepository.createQueryBuilder()
         .update(Net_Detalle_Pago_Beneficio)
         .set({ estado: nuevoEstado })
         .where("planilla.id_planilla = :idPlanilla", { idPlanilla })
@@ -128,8 +131,59 @@ export class DetalleBeneficioService {
     }
   }
 
+  async eliminarBenPlan(data: any): Promise<any> {
+    const { idBenPlanilla, ID_DETALLE_PERSONA, ID_PERSONA, ID_CAUSANTE, ID_BENEFICIO, observacion } = data
+
+    try {
+      const resultado2 = await this.detalleBeneficioAfiliadoRepository.findOne({
+        where: {
+          ID_DETALLE_PERSONA: ID_DETALLE_PERSONA,
+          ID_PERSONA: ID_PERSONA,
+          ID_CAUSANTE: ID_CAUSANTE,
+          ID_BENEFICIO: ID_BENEFICIO
+        }
+      });
+
+      const fechaActual = new Date(resultado2.periodo_finalizacion);
+      const nuevaFecha = addMonths(fechaActual, 1); // Sumar 1 mes
+
+      console.log(fechaActual);
+      console.log(nuevaFecha);
+
+      const detalleBeneficioAfiliadoRepository = await this.detalleBeneficioAfiliadoRepository.update(
+        {
+          ID_DETALLE_PERSONA: resultado2.ID_DETALLE_PERSONA,
+          ID_PERSONA: resultado2.ID_PERSONA,
+          ID_CAUSANTE: resultado2.ID_CAUSANTE,
+          ID_BENEFICIO: resultado2.ID_BENEFICIO
+        },
+        { periodo_finalizacion: nuevaFecha }
+      );
+      console.log(detalleBeneficioAfiliadoRepository);
+
+      const detPagBenRepository = await this.detPagBenRepository.update(
+        {
+          id_beneficio_planilla: idBenPlanilla,
+        },
+        {
+          estado: "NO PAGADA",
+          observacion: observacion
+        }
+      );
+      console.log(detPagBenRepository);
+
+      /* if (resultado.affected === 0) {
+        throw new NotFoundException(`No se encontraron detalles de beneficio para la planilla con ID ${idPlanilla}`);
+      }
+
+      return { mensaje: `Estado actualizado a '${nuevoEstado}' para los detalles de beneficio de la planilla con ID ${idPlanilla}` }; */
+    } catch (error) {
+      throw new InternalServerErrorException('Se produjo un error al actualizar los estados de los detalles de beneficio');
+    }
+  }
+
   async createDetalleBeneficioAfiliado(data: any, idPersonaPadre?: number): Promise<any> {
-    const {datos , itemSeleccionado} = data
+    const { datos, itemSeleccionado } = data
     return await this.entityManager.transaction(async manager => {
       try {
         const beneficio = await manager.findOne(Net_Beneficio, { where: { nombre_beneficio: datos.nombre_beneficio } });
@@ -137,7 +191,7 @@ export class DetalleBeneficioService {
         if (!beneficio) {
           throw new BadRequestException('Tipo de beneficio no encontrado');
         }
-  
+
         if (!idPersonaPadre) {
           const detPer = await manager.findOne(
             net_detalle_persona,
@@ -187,7 +241,7 @@ export class DetalleBeneficioService {
                   '${datos.estado_solicitud}',
                   '${datos.observacion}'
               )`;
-            
+
             const detBeneBeneficia = await this.entityManager.query(queryInsDeBBenf);
             return detBeneBeneficia;
           }
@@ -206,8 +260,8 @@ export class DetalleBeneficioService {
               relations: ['persona', 'padreIdPersona']
             }
           );
-          
-          if (detPer){
+
+          if (detPer) {
             const estadoP = await this.tipoPersonaRepos.findOne({ where: { tipo_persona: "BENEFICIARIO" } });
 
             const detPers = await this.detPersonaRepository.preload({
@@ -217,9 +271,9 @@ export class DetalleBeneficioService {
               ID_CAUSANTE_PADRE: detPer.ID_CAUSANTE_PADRE,
               ID_TIPO_PERSONA: estadoP.id_tipo_persona
             });
-  
-            await this.detPersonaRepository.save(detPers);   
-  
+
+            await this.detPersonaRepository.save(detPers);
+
             const queryInsDeBBenf = `
                   INSERT INTO NET_DETALLE_BENEFICIO_AFILIADO (
                     ID_DETALLE_PERSONA,
@@ -254,12 +308,12 @@ export class DetalleBeneficioService {
                     '${datos.estado_solicitud}',
                     '${datos.observacion}'
                   )`;
-  
+
             const detBeneBeneficia = await this.entityManager.query(queryInsDeBBenf);
             return detBeneBeneficia;
           }
-          
-      }
+
+        }
         //throw new BadRequestException('Detalle de persona no encontrado');
       } catch (error) {
         this.logger.error(`Error al crear DetalleBeneficioAfiliado y DetalleBeneficio: ${error.message}`, error.stack);
@@ -481,7 +535,7 @@ export class DetalleBeneficioService {
     `;
     try {
       const parametros = { idPersona, fechaInicio, fechaFin };
-      return await this.benAfilRepository.query(query, [idPersona, fechaInicio, fechaFin, fechaInicio, fechaFin]);
+      return await this.detPagBenRepository.query(query, [idPersona, fechaInicio, fechaFin, fechaInicio, fechaFin]);
     } catch (error) {
       this.logger.error('Error al obtener los detalles de beneficio', error.stack);
       throw new InternalServerErrorException('Error al consultar los detalles de beneficio en la base de datos');
@@ -590,7 +644,7 @@ export class DetalleBeneficioService {
         ben."id_beneficio"
     `;
 
-      return await this.benAfilRepository.query(query, [idPersona]); // Usando un array para los parámetros
+      return await this.detPagBenRepository.query(query, [idPersona]); // Usando un array para los parámetros
     } catch (error) {
       this.logger.error('Error al obtener detalles de beneficio por afiliado', error.stack);
       throw new InternalServerErrorException('Error al obtener detalles de beneficio por afiliado');
@@ -611,7 +665,7 @@ export class DetalleBeneficioService {
       detBenAfil."id_persona" = afil."id_persona"
       WHERE 
       afil."dni" = '${dni}'`;
-      return await this.benAfilRepository.query(query); // Usando un array para los parámetros
+      return await this.detPagBenRepository.query(query); // Usando un array para los parámetros
     } catch (error) {
       this.logger.error('Error al obtener detalles de beneficio por afiliado', error.stack);
       throw new InternalServerErrorException('Error al obtener detalles de beneficio por afiliado');
@@ -621,7 +675,7 @@ export class DetalleBeneficioService {
   async obtenerTipoBeneficioByTipoPersona(tipoPersona: string): Promise<any[]> {
     try {
       console.log(tipoPersona);
-      
+
       const tipoBen = await this.benTipoPerRepository.find({
         where: { tipPersona: { tipo_persona: "JUBILADO" } },
         relations: [
@@ -629,7 +683,7 @@ export class DetalleBeneficioService {
         ],
       });
       console.log(tipoBen);
-      
+
       return tipoBen
 
     } catch (error) {
@@ -687,7 +741,7 @@ export class DetalleBeneficioService {
       }
 
       // Creación del nuevo detalle de beneficio
-      const nuevoDetalle = this.benAfilRepository.create({
+      const nuevoDetalle = this.detPagBenRepository.create({
         afiliado,
         beneficio: tipoBeneficio,
         periodoInicio,
@@ -698,7 +752,7 @@ export class DetalleBeneficioService {
         num_rentas_aplicadas: datos.num_rentas_aplicadas,
       });
 
-      return await this.benAfilRepository.save(nuevoDetalle);
+      return await this.detPagBenRepository.save(nuevoDetalle);
     } catch (error) {
       this.handleException(error);
     }
@@ -721,10 +775,10 @@ export class DetalleBeneficioService {
   async findOne(term: number) {
     let benAfil: Net_Detalle_Pago_Beneficio;
     if (isUUID(term)) {
-      benAfil = await this.benAfilRepository.findOneBy({ id_beneficio_planilla: term });
+      benAfil = await this.detPagBenRepository.findOneBy({ id_beneficio_planilla: term });
     } else {
 
-      const queryBuilder = this.benAfilRepository.createQueryBuilder('afiliado');
+      const queryBuilder = this.detPagBenRepository.createQueryBuilder('afiliado');
       benAfil = await queryBuilder
         .where('"id_beneficio_planilla" = :term', { term })
         .getOne();
@@ -777,7 +831,7 @@ export class DetalleBeneficioService {
       INNER JOIN "net_beneficio" ben ON ben."id_beneficio" = detBA."id_beneficio"
       WHERE detB."estado" = 'INCONSISTENCIA'
     `;
-      return await this.benAfilRepository.query(query);
+      return await this.detPagBenRepository.query(query);
     } catch (error) {
       this.logger.error(`Error al buscar beneficios inconsistentes por afiliado: ${error.message}`, error.stack);
       throw new InternalServerErrorException('Error al buscar beneficios inconsistentes por afiliado');

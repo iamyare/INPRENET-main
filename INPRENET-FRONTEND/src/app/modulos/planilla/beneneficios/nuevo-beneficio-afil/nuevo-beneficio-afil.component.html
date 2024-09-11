@@ -30,7 +30,7 @@
         <td>{{ Afiliado.dni }}</td>
         <th>Nombre de afiliado</th>
         <td>{{ Afiliado.nombreCompleto }}</td>
-        <th>Genero</th>
+        <th>Género</th>
         <td>{{ Afiliado.genero }}</td>
       </tr>
       <tr>
@@ -53,7 +53,7 @@
     style="padding: 1%">
     <app-dynamic-table-prueba 
     titulo="Beneficiarios Del {{Afiliado.tipo_persona}}"
-    subtitulo="Haga Click sobre un item de la siguiente tabla"
+    subtitulo="Para asignar Beneficios haga click sobre un item de la siguiente tabla"
     [columns]="myColumns" 
     [data]="filas" 
     [getData]="getFilas"

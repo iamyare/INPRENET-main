@@ -1,6 +1,5 @@
 import { HttpClient, HttpErrorResponse, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Router } from '@angular/router';
 import { Observable, Subject, catchError, map, tap, throwError } from 'rxjs';
 import { environment } from 'src/environments/environment';
 import { ToastrService } from 'ngx-toastr';
@@ -11,9 +10,37 @@ import { ToastrService } from 'ngx-toastr';
 export class BeneficiosService {
   private _refresh$ = new Subject<void>();
 
-  constructor(private toastr: ToastrService, private http: HttpClient, private router: Router) {
+  constructor(private toastr: ToastrService, private http: HttpClient) {
   }
 
+  obtenerDetallePagoConPlanilla(n_identificacion: string, causante_identificacion: string, id_beneficio: number): Observable<any> {
+    const params = new HttpParams()
+      .set('n_identificacion', n_identificacion)
+      .set('causante_identificacion', causante_identificacion)
+      .set('id_beneficio', id_beneficio);
+
+    return this.http.get(`${environment.API_URL}/api/beneficio-planilla/detalle-pago`, { params })
+      .pipe(
+        catchError((error: HttpErrorResponse) => {
+          // Aquí capturamos el mensaje del backend y lo reemitimos.
+          const errorMessage = error.error.mensaje || 'Error al obtener detalle de pago';
+          return throwError(() => new Error(errorMessage));
+        })
+      );
+  }
+
+
+
+  obtenerCausantesYBeneficios(dni: string): Observable<any> {
+    return this.http.get(`${environment.API_URL}/api/beneficio-planilla/causante/${dni}`)
+      .pipe(
+        catchError((error: HttpErrorResponse) => {
+          console.error('Error al obtener causantes y beneficios', error);
+          this.toastr.error('Error al obtener causantes y beneficios');
+          return throwError(() => new Error('Error al obtener causantes y beneficios'));
+        })
+      );
+  }
 
   actualizarEstado(idPlanilla: string, nuevoEstado: string): Observable<any> {
     return this.http.patch(`${environment.API_URL}/api/beneficio-planilla/actualizar-estado/${idPlanilla}`, { nuevoEstado })
@@ -24,7 +51,6 @@ export class BeneficiosService {
         })
       );
   }
-
 
   actualizarBeneficiosPlanillas(detalles: { idBeneficioPlanilla: string; codigoPlanilla: string; estado: string }[]): Observable<any> {
     const url = `${environment.API_URL}/api/beneficio-planilla/actualizar-beneficio-planilla`; // Asegúrate de reemplazar 'ruta-del-endpoint' con la ruta real del endpoint

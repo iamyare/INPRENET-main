@@ -1438,62 +1438,73 @@ export class PlanillaService {
   }
 
   async create(createPlanillaDto: CreatePlanillaDto) {
-    const { secuencia, nombre_planilla } = createPlanillaDto;
-  
+    const { nombre_planilla, periodo_inicio, periodo_finalizacion } = createPlanillaDto;
     try {
       const tipoPlanilla = await this.tipoPlanillaRepository.findOneBy({ nombre_planilla });
   
       if (!tipoPlanilla) {
         throw new BadRequestException(`No se encontró ningún tipo de planilla con el nombre '${nombre_planilla}'.`);
       }
+      const planillaActiva = await this.planillaRepository.findOne({
+        where: {
+          tipoPlanilla: { id_tipo_planilla: tipoPlanilla.id_tipo_planilla },
+          estado: 'ACTIVA',
+        },
+      });
   
+      if (planillaActiva) {
+        throw new ConflictException(`Ya existe una planilla activa para el tipo de planilla '${nombre_planilla}'.`);
+      }
       let codPlanilla = "";
       const fechaActual: Date = new Date();
       const mes: number = getMonth(fechaActual) + 1;
       const anio: number = getYear(fechaActual);
-  
-      // Formato de fecha dd/MM/yyyy
       const primerDia: string = format(startOfMonth(fechaActual), 'dd/MM/yyyy');
       const ultimoDia: string = format(endOfMonth(fechaActual), 'dd/MM/yyyy');
+      let secuencia = 1;
+      let planillaExistente;
   
-      switch (nombre_planilla) {
-        case "ORDINARIA JUBILADOS Y PENSIONADOS":
-          codPlanilla = `ORD-JUB-PEN-${mes}-${anio}-${secuencia}`;
-          break;
-        case "ORDINARIA BENEFICIARIO":
-          codPlanilla = `ORD-BEN-${mes}-${anio}-${secuencia}`;
-          break;
-        case "COMPLEMENTARIA JUBILADO Y PENSIONADO":
-          codPlanilla = `COMP-JUB-PEN-${mes}-${anio}-${secuencia}`;
-          break;
-        case "COMPLEMENTARIA BENEFICIARIO":
-          codPlanilla = `COMP-BEN-${mes}-${anio}-${secuencia}`;
-          break;
-        case "COMPLEMENTARIA AFILIADO":
-          codPlanilla = `COMP-AFIL-${mes}-${anio}-${secuencia}`;
-          break;
-        case "EXTRAORDINARIA JUBILADO Y PENSIONADO":
-          codPlanilla = `EXTRA-JUB-PEN-${mes}-${anio}-${secuencia}`;
-          break;
-        case "EXTRAORDINARIA BENEFICIARIO":
-          codPlanilla = `EXTRA-JUB-${mes}-${anio}-${secuencia}`;
-          break;
-        default:
-          throw new BadRequestException('Tipo de planilla no reconocido');
-      }
+      do {
+        switch (nombre_planilla) {
+          case "ORDINARIA JUBILADOS Y PENSIONADOS":
+            codPlanilla = `ORD-JUB-PEN-${mes}-${anio}-${secuencia}`;
+            break;
+          case "ORDINARIA BENEFICIARIO":
+            codPlanilla = `ORD-BEN-${mes}-${anio}-${secuencia}`;
+            break;
+          case "COMPLEMENTARIA JUBILADO Y PENSIONADO":
+            codPlanilla = `COMP-JUB-PEN-${mes}-${anio}-${secuencia}`;
+            break;
+          case "COMPLEMENTARIA BENEFICIARIO":
+            codPlanilla = `COMP-BEN-${mes}-${anio}-${secuencia}`;
+            break;
+          case "COMPLEMENTARIA AFILIADO":
+            codPlanilla = `COMP-AFIL-${mes}-${anio}-${secuencia}`;
+            break;
+          case "EXTRAORDINARIA JUBILADO Y PENSIONADO":
+            codPlanilla = `EXTRA-JUB-PEN-${mes}-${anio}-${secuencia}`;
+            break;
+          case "EXTRAORDINARIA BENEFICIARIO":
+            codPlanilla = `EXTRA-JUB-${mes}-${anio}-${secuencia}`;
+            break;
+          default:
+            throw new BadRequestException('Tipo de planilla no reconocido');
+        }
+        planillaExistente = await this.planillaRepository.findOneBy({ codigo_planilla: codPlanilla });
+        if (planillaExistente) {
+          secuencia++;
+        }
+      } while (planillaExistente);
   
-      const planillaExistente = await this.planillaRepository.findOneBy({ codigo_planilla: codPlanilla });
-  
-      if (planillaExistente) {
-        throw new ConflictException(`Ya existe una planilla con el código '${codPlanilla}' para el mes ${mes}/${anio}.`);
-      }
-  
+      const tipoPlanillaInstance = new Net_TipoPlanilla();
+      tipoPlanillaInstance.id_tipo_planilla = tipoPlanilla.id_tipo_planilla;
       const newPlanilla = this.planillaRepository.create({
         codigo_planilla: codPlanilla,
         secuencia,
-        periodoInicio: primerDia,
-        periodoFinalizacion: ultimoDia, 
-        tipoPlanilla
+        periodoInicio: periodo_inicio ? periodo_inicio : primerDia,
+        periodoFinalizacion: periodo_finalizacion ? periodo_finalizacion : ultimoDia,
+        tipoPlanilla: tipoPlanillaInstance,
+        estado: 'ACTIVA',
       });
   
       await this.planillaRepository.save(newPlanilla);
@@ -1506,9 +1517,7 @@ export class PlanillaService {
       throw error;
     }
   }
-
   
-
   findAll(paginationDto: PaginationDto) {
     const { offset = 0 } = paginationDto;
     return this.planillaRepository.find({

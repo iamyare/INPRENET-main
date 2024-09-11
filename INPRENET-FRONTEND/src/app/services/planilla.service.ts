@@ -262,7 +262,6 @@ export class PlanillaService {
   createPlanilla(tipoPlanillaData: any): Observable<any> {
     return this.http.post(`${environment.API_URL}/api/planilla`, tipoPlanillaData).pipe(
       catchError((error: HttpErrorResponse) => {
-        // Propagar el error al frontend para manejarlo correctamente
         return throwError(() => error);
       })
     );

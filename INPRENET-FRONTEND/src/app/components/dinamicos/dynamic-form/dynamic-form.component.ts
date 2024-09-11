@@ -171,12 +171,57 @@ export class DynamicFormComponent implements OnInit {
   }
 
   onSelectChange(fieldName: string, event: any) {
-    this.selectChange.emit({ fieldName, value: event.value });
-    if (fieldName === 'showCheckboxes') {
-      this.selectedOption = event.value;
-      this.updateDependentFields();
+    const selectedValue = event.value;
+    if (this.form.get(fieldName)) {
+      this.form.get(fieldName)?.setValue(selectedValue);
+    }
+    this.selectChange.emit({ fieldName, value: selectedValue });
+    const field = this.fields.find(f => f.name === fieldName);
+
+    if (field?.conditionalFields) {
+      const { showIfValueIncludes, fieldsToAdd } = field.conditionalFields;
+      if (selectedValue.includes(showIfValueIncludes)) {
+        fieldsToAdd.forEach((newField: FieldConfig) => {
+          if (!this.form.contains(newField.name)) {
+            this.addField(newField);
+          }
+        });
+      } else {
+        fieldsToAdd.forEach((newField: FieldConfig) => {
+          if (this.form.contains(newField.name)) {
+            this.form.removeControl(newField.name);
+          }
+        });
+      }
     }
   }
+
+
+
+
+
+  updateFields(newFields: FieldConfig[]) {
+    this.fields = newFields;
+    newFields.forEach((field: FieldConfig) => {
+      if (!this.form.contains(field.name)) {
+        if (field.type === 'daterange') {
+          const dateRangeGroup = this.fb.group({
+            start: ['', field.validations],
+            end: ['', field.validations]
+          });
+          this.form.addControl(field.name, dateRangeGroup);
+        } else {
+          const control = this.fb.control(
+            field.type === 'checkbox' ? field.value || false : field.value || '',
+            field.validations
+          );
+          this.form.addControl(field.name, control);
+        }
+      }
+    });
+  }
+
+
 
   updateDependentFields() {
     const selectedField = this.fields.find(field => field.name === 'showCheckboxes');
@@ -196,4 +241,29 @@ export class DynamicFormComponent implements OnInit {
       }
     }
   }
+
+  addField(newField: FieldConfig) {
+    this.fields.push(newField);
+    if (newField.type === 'daterange') {
+      const dateRangeGroup = this.fb.group({
+        start: ['', newField.validations],
+        end: ['', newField.validations]
+      });
+      this.form.addControl(newField.name, dateRangeGroup);
+    } else {
+      const control = this.fb.control(
+        newField.type === 'checkbox' ? newField.value || false : newField.value || '',
+        newField.validations
+      );
+      this.form.addControl(newField.name, control);
+    }
+  }
+
+
+  recreateForm() {
+    this.form = this.createControl();
+    this.newDatBenChange.emit(this.form);
+  }
+
+
 }

@@ -13,4 +13,8 @@ export interface FieldConfig {
   row?: number;
   icon?: string;
   dependentFields?: { [key: string]: FieldConfig[] };
+  conditionalFields?: {
+    showIfValueIncludes: string;
+    fieldsToAdd: FieldConfig[];
+  };
 }

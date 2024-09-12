@@ -102,13 +102,13 @@ export class VerplanprelcompComponent implements OnInit {
 
   getPlanilla = async () => {
     try {
-      this.planillaService.getPlanillaPrelimiar(this.datosFormateados.value.codigo_planilla).subscribe(
+      this.planillaService.getPlanillaPrelimiar(this.codigoPlanilla).subscribe(
         {
           next: async (response) => {
             console.log();
 
             if (response) {
-              this.calcularTotales(this.datosFormateados.value.codigo_planilla)
+              this.calcularTotales(this.codigoPlanilla)
 
               this.detallePlanilla = response;
               this.getFilas(response.codigo_planilla).then(() => this.cargar());
@@ -117,7 +117,7 @@ export class VerplanprelcompComponent implements OnInit {
             } else {
               this.detallePlanilla = [];
               this.datosTabl = [];
-              this.toastr.error(`La planilla con el código de planilla:${this.datosFormateados.value.codigo_planilla}  no existe `);
+              this.toastr.error(`La planilla con el código de planilla:${this.codigoPlanilla}  no existe `);
             }
             if (this.ejecF) {
               this.getFilas("").then(async () => {
@@ -212,14 +212,14 @@ export class VerplanprelcompComponent implements OnInit {
     });
 
     try {
-      this.planillaService.getPlanillasPreliminares(this.datosFormateados.value.codigo_planilla).subscribe(
+      this.planillaService.getPlanillasPreliminares(this.codigoPlanilla).subscribe(
         {
           next: async (response) => {
             console.log(response);
 
             if (response && response.length > 0) {
               this.detallePlanilla = response[0];
-              this.datosTabl = await this.getFilas(this.datosFormateados.value.codigo_planilla);
+              this.datosTabl = await this.getFilas(this.codigoPlanilla);
               console.log(this.datosTabl);
 
               this.codigoPlanilla = response[0]?.codigo_planilla || '';
@@ -228,7 +228,7 @@ export class VerplanprelcompComponent implements OnInit {
             } else {
               this.detallePlanilla = null;
               this.datosTabl = [];
-              this.toastr.error(`La planilla con el código de planilla: ${this.datosFormateados.value.codigo_planilla} no existe`);
+              this.toastr.error(`La planilla con el código de planilla: ${this.codigoPlanilla} no existe`);
             }
 
             if (this.ejecF) {
@@ -313,7 +313,7 @@ export class VerplanprelcompComponent implements OnInit {
   /* Maneja los beneficios y deducciones */
   manejarAccionUno(row: any) {
     let logs: any[] = [];
-    this.planillaService.getDesglosePorPersonaPlanilla(row.id_afiliado, this.datosFormateados.value.codigo_planilla).subscribe({
+    this.planillaService.getDesglosePorPersonaPlanilla(row.id_afiliado, this.codigoPlanilla).subscribe({
       next: (response) => {
         const { beneficios } = response;
 
@@ -330,7 +330,7 @@ export class VerplanprelcompComponent implements OnInit {
         // Escuchar el evento deduccionEliminada para refrescar los datos
         dialogRef.componentInstance.deduccionEliminada.subscribe(() => {
 
-          this.getFilas(this.datosFormateados.value.codigo_planilla).then(() => this.cargar());
+          this.getFilas(this.codigoPlanilla).then(() => this.cargar());
         });
 
       },
@@ -361,7 +361,7 @@ export class VerplanprelcompComponent implements OnInit {
           // Escuchar el evento deduccionEliminada para refrescar los datos
           dialogRef.componentInstance.deduccionEliminada.subscribe(() => {
 
-            this.getFilas(this.datosFormateados.value.codigo_planilla).then(() => this.cargar());
+            this.getFilas(this.codigoPlanilla).then(() => this.cargar());
           });
         }
       },
@@ -386,7 +386,7 @@ export class VerplanprelcompComponent implements OnInit {
   }
 
   actualizarFechaCierrePlanilla(): void {
-    this.updatePlanillaACerrada(this.datosFormateados.value.codigo_planilla);
+    this.updatePlanillaACerrada(this.codigoPlanilla);
   }
 
   updatePlanillaACerrada(codigo_planilla: string): void {
@@ -438,5 +438,11 @@ export class VerplanprelcompComponent implements OnInit {
         this.toastr.error('Error al actualizar el estado de los beneficios');
       }
     }); */
+  }
+
+  getElemSeleccionados(event: any) {
+    console.log(event);
+    this.codigoPlanilla = event.codigo_planilla;
+    this.getPlanilla()
   }
 }

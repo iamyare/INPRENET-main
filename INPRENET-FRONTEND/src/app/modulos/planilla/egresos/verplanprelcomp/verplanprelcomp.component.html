@@ -1,4 +1,6 @@
-<div style="background-color: white; margin-bottom: 1%">
+<app-ver-planillas-activas (getElemSeleccionados)="getElemSeleccionados($event)"></app-ver-planillas-activas>
+
+<!-- <div style="background-color: white; margin-bottom: 1%">
   <app-dynamic-form [fields]="myFormFields" titulo="Detalles De Planilla Preliminar"
     subtitulo="Completa la información correspondiente" (newDatBenChange)="obtenerDatosForm($event)">
   </app-dynamic-form>
@@ -8,7 +10,7 @@
       Ver Planilla preliminar
     </button>
   </div>
-</div>
+</div> -->
 
 <div class="card-header card-header-danger title" *ngIf="detallePlanilla">
   <div class="card-body" style="padding: 1%">

@@ -33,6 +33,7 @@ import { SubirDeduccionesTercerosComponent } from './beneneficios/subir-deduccio
 import { CargarbefDedComponent } from './egresos/cargarbef-ded/cargarbef-ded.component';
 import { ProcesoPlanillaComponent } from './egresos/proceso-planilla/proceso-planilla.component';
 import { DialogDesgloseComponent } from './egresos/dialog-desglose/dialog-desglose.component';
+import { VerPlanillasActivasComponent } from './egresos/ver-planillas-activas/ver-planillas-activas.component';
 import { GestionBancoComponent } from './gestion-banco/gestion-banco.component';
 import { AfiliacionModule } from '../afiliacion/afiliacion.module';
 import { ActualizarFallecidosComponent } from './actualizar-fallecidos/actualizar-fallecidos.component';
@@ -70,7 +71,8 @@ import { ActualizarFallecidosComponent } from './actualizar-fallecidos/actualiza
     ProcesoPlanillaComponent,
     DialogDesgloseComponent,
     GestionBancoComponent,
-    ActualizarFallecidosComponent
+    ActualizarFallecidosComponent,
+    VerPlanillasActivasComponent
   ],
   imports: [
     CommonModule,

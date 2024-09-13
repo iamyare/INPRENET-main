@@ -13,6 +13,33 @@ export class DeduccionesService {
 
   constructor(private toastr: ToastrService, private http: HttpClient) { }
 
+  eliminarDetallesDeduccionPorCentro(idCentroTrabajo: number, codigoDeduccion: number): Observable<any> {
+    return this.http.delete<any>(
+      `${environment.API_URL}/api/deduccion/${idCentroTrabajo}/deduccion/${codigoDeduccion}/eliminar`
+    ).pipe(
+      catchError((error: HttpErrorResponse) => {
+        console.error('Error al eliminar detalles de deducción por centro de trabajo:', error);
+        this.toastr.error('Error al eliminar detalles de deducción por centro de trabajo');
+        return throwError(() => new Error('Error al eliminar detalles de deducción por centro de trabajo'));
+      })
+    );
+  }
+
+  obtenerDetallesDeduccionPorCentro(idCentroTrabajo: number, codigoDeduccion: number): Observable<any[]> {
+    return this.http.get<any[]>(
+      `${environment.API_URL}/api/deduccion/${idCentroTrabajo}/detalles-deduccion`,
+      {
+        params: { codigoDeduccion: codigoDeduccion.toString() },
+      }
+    ).pipe(
+      catchError((error: HttpErrorResponse) => {
+        console.error('Error al obtener detalles de deducción por centro de trabajo:', error);
+        this.toastr.error('Error al obtener detalles de deducción por centro de trabajo');
+        return throwError(() => new Error('Error al obtener detalles de deducción por centro de trabajo'));
+      })
+    );
+  }
+
   eliminarDetalleDeduccion(id: number): Observable<void> {
     return this.http.delete<void>(`${environment.API_URL}/api/detalle-deduccion/${id}`)
       .pipe(

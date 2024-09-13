@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseInterceptors, UploadedFile, Res, Query, ParseIntPipe, BadRequestException } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseInterceptors, UploadedFile, Res, Query, ParseIntPipe, BadRequestException, HttpStatus } from '@nestjs/common';
 import { DeduccionService } from './deduccion.service';
 import { CreateDeduccionDto } from './dto/create-deduccion.dto';
 import { UpdateDeduccionDto } from './dto/update-deduccion.dto';
@@ -9,6 +9,34 @@ import { FileInterceptor } from '@nestjs/platform-express';
 @Controller('deduccion')
 export class DeduccionController {
   constructor(private readonly deduccionService: DeduccionService) { }
+
+  @Get(':idCentroTrabajo/detalles-deduccion')
+  async obtenerDetallesDeduccionPorCentro(
+    @Param('idCentroTrabajo') idCentroTrabajo: number,
+    @Query('codigoDeduccion') codigoDeduccion: number,
+    @Res() res
+  ) {
+    try {
+      const detallesDeduccion = await this.deduccionService.obtenerDetallesDeduccionPorCentro(idCentroTrabajo, codigoDeduccion);
+      return res.status(HttpStatus.OK).json(detallesDeduccion);
+    } catch (error) {
+      console.error('Error al obtener los detalles de deducción:', error);
+      return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
+        message: 'Error al obtener los detalles de deducción',
+        error: error.message,
+      });
+    }
+  }
+
+  @Delete(':idCentroTrabajo/deduccion/:codigoDeduccion/eliminar')
+  async eliminarDeduccionesPorCentro(
+    @Param('idCentroTrabajo') idCentroTrabajo: number,
+    @Param('codigoDeduccion') codigoDeduccion: number,
+  ) {
+    await this.deduccionService.eliminarDetallesDeduccionPorCentro(idCentroTrabajo, codigoDeduccion);
+    return { message: 'Registros eliminados correctamente' };
+  }
+
 
   @Post('upload-excel-deducciones')
   @UseInterceptors(FileInterceptor('file'))

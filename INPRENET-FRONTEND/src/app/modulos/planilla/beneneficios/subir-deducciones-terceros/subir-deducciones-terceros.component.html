@@ -1,81 +1,90 @@
-<div
-  style="text-align: center; background-color: white; margin: 1% 0% 1% 0%; padding: 0% 0% 1% 0%;">
+<div style="text-align: center; background-color: white; margin: 1% 0% 1% 0%; padding: 0% 0% 1% 0%;">
   <h1>Carga de deducciones por medio de documento excel</h1>
-  <hr />
+  <hr/>
 
   <div class="upload-container">
     <input type="file" #fileInput (change)="onFileSelected($event)" hidden />
 
-    <button
-      mat-raised-button
-      color="primary"
-      style="color: white; margin: 1% 0 1% 0"
-      (click)="fileInput.click()"
-    >
-      <i class="fa fa-plus"></i>
-      Agregar Archivos
+    <button mat-raised-button color="primary" style="color: white; margin: 1% 0 1% 0" (click)="fileInput.click()">
+      <i class="fa fa-plus"></i> Agregar Archivos
     </button>
 
-    <button
-      mat-raised-button
-      color="accent"
-      style="color: white; margin: 1% 0 1% 0"
-      (click)="clearFile()"
-    >
-      <i class="fa fa-trash"></i>
-      Limpiar Archivo
+    <button mat-raised-button color="accent" style="color: white; margin: 1% 0 1% 0" (click)="clearFile()">
+      <i class="fa fa-trash"></i> Borrar Archivo
     </button>
 
-    <button
-      mat-raised-button
-      color="primary"
-      style="color: white; margin: 1% 0 1% 0"
-      (click)="startUpload()"
-    >
+    <button mat-raised-button color="primary" style="color: white; margin: 1% 0 1% 0" (click)="startUpload()">
       <i class="fa fa-upload"></i> Iniciar Subida
     </button>
 
-    <button
-      mat-raised-button
-      color="warn"
-      style="color: white; margin: 1% 0 1% 0"
-      (click)="cancelUpload()"
-    >
+    <button mat-raised-button color="warn" style="color: white; margin: 1% 0 1% 0" (click)="cancelUpload()">
       <i class="fa fa-ban"></i> Cancelar Subida
     </button>
 
     <div *ngIf="file" class="file-name-container">
       <div class="file-name-background">{{ file.name }}</div>
-      <div class="file-name-progress" [style.width]="progressValue + '%'">
-        {{ file.name }}
-      </div>
+      <div class="file-name-progress" [style.width]="progressValue + '%'">{{ file.name }}</div>
     </div>
   </div>
 </div>
 
-<div *ngIf="datosCargados.length > 0" class="mt-4">
-  <h3>Datos Cargados</h3>
+<div class="deducciones-container">
+  <div class="form-group listas">
+    <mat-form-field appearance="fill" class="full-width">
+      <mat-label>Seleccione un Centro de Trabajo</mat-label>
+      <mat-select (selectionChange)="onCentroSeleccionadoChange($event)">
+        <mat-option *ngFor="let centro of centrosTrabajo" [value]="centro.id_centro_trabajo">
+          {{ centro.nombre_centro_trabajo }}
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
+
+    <mat-form-field appearance="fill" class="full-width" *ngIf="deduccionesCentro.length > 0">
+      <mat-label>Seleccione una Deducción</mat-label>
+      <mat-select (selectionChange)="onDeduccionSeleccionadaChange($event)">
+        <mat-option *ngFor="let deduccion of deduccionesCentro" [value]="deduccion.codigo_deduccion">
+          {{ deduccion.nombre_deduccion }} (Código {{ deduccion.codigo_deduccion }})
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
+  </div>
+</div>
+
+<div *ngIf="detallesDeduccion.length > 0" class="titulo-exportar">
+  <h3>Detalles de Deducción</h3>
+  <button mat-raised-button color="primary" (click)="exportarAExcel()">
+    Exportar a Excel
+  </button>
+  <button mat-raised-button color="warn" (click)="eliminarDatos()" *ngIf="detallesDeduccion.length > 0">
+    Eliminar Excel Cargado
+  </button>
+</div>
+
+<div *ngIf="detallesDeduccion.length > 0" class="mt-4">
   <table class="table table-bordered">
     <thead class="thead-light">
       <tr>
-        <th scope="col">Año</th>
-        <th scope="col">Mes</th>
-        <th scope="col">DNI</th>
+        <th scope="col">Nº Identificación</th>
+        <th scope="col">Nombre Completo</th>
         <th scope="col">Código de Deducción</th>
+        <th scope="col">Nombre de Deducción</th>
         <th scope="col">Monto Total</th>
+        <th scope="col">Monto Aplicado</th>
+        <th scope="col">Estado Aplicación</th>
       </tr>
     </thead>
     <tbody>
-      <tr *ngFor="let dato of datosCargados">
-        <td>{{ dato["año"] }}</td>
-        <td>{{ dato.mes }}</td>
-        <td>{{ dato.dni }}</td>
-        <td>{{ dato.codigo_deduccion }}</td>
-        <td>{{ dato.monto_total }}</td>
+      <tr *ngFor="let detalle of detallesDeduccion">
+        <td>{{ detalle.N_IDENTIFICACION }}</td>
+        <td>{{ detalle.NOMBRE_COMPLETO }}</td>
+        <td>{{ detalle.CODIGO_DEDUCCION }}</td>
+        <td>{{ detalle.NOMBRE_DEDUCCION }}</td>
+        <td>{{ detalle.MONTO_TOTAL }}</td>
+        <td>{{ detalle.MONTO_APLICADO }}</td>
+        <td>{{ detalle.ESTADO_APLICACION }}</td>
       </tr>
     </tbody>
   </table>
 </div>
-
 
 

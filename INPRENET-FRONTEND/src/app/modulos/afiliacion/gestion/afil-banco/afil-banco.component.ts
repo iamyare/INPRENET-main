@@ -221,7 +221,9 @@ export class AfilBancoComponent implements OnInit {
   enviar() {
     const formData = new FormData();
     const formGenerales = this.formDatosGenerales?.value?.refpers[0] || {};
-    const direccion_residencia = `AVENIDA: ${formGenerales.avenida},CALLE: ${formGenerales.calle},SECTOR: ${formGenerales.sector},BLOQUE: ${formGenerales.bloque},N° DE CASA: ${formGenerales.numero_casa},COLOR CASA: ${formGenerales.color_casa},ALDEA: ${formGenerales.aldea},CASERIO: ${formGenerales.caserio}`;
+    const direccion_residencia = `AVENIDA: ${formGenerales.avenida},CALLE: ${formGenerales.calle},SECTOR:
+    ${formGenerales.sector},BLOQUE: ${formGenerales.bloque},N° DE CASA: ${formGenerales.numero_casa},COLOR CASA: ${formGenerales.color_casa},ALDEA:
+    ${formGenerales.aldea},CASERIO: ${formGenerales.caserio}`;
 
     const persona = { ...formGenerales, direccion_residencia };
 

@@ -10,6 +10,7 @@ import { net_persona } from 'src/modules/Persona/entities/net_persona.entity';
 import * as XLSX from 'xlsx';
 import { Net_Planilla } from '../planilla/entities/net_planilla.entity';
 import { Net_Persona_Por_Banco } from 'src/modules/banco/entities/net_persona-banco.entity';
+import { Workbook } from 'exceljs';
 @Injectable()
 export class DeduccionService {
 
@@ -30,23 +31,60 @@ export class DeduccionService {
     private personaPorBancoRepository: Repository<Net_Persona_Por_Banco>
   ) { }
 
+  async obtenerDetallesDeduccionPorCentro(idCentroTrabajo: number, codigoDeduccion: number): Promise<any[]> {
+    return this.detalleDeduccionRepository.createQueryBuilder('detalle_deduccion')
+      .innerJoin('detalle_deduccion.deduccion', 'deduccion')
+      .innerJoin('deduccion.centroTrabajo', 'centroTrabajo')
+      .innerJoin('detalle_deduccion.persona', 'persona')
+      .select([
+        'detalle_deduccion.monto_total AS monto_total',
+        'detalle_deduccion.monto_aplicado AS monto_aplicado',
+        'detalle_deduccion.estado_aplicacion AS estado_aplicacion',
+        'persona.n_identificacion AS n_identificacion',
+        `(persona.primer_nombre || ' ' || 
+          COALESCE(persona.segundo_nombre, '') || ' ' || 
+          persona.primer_apellido || ' ' || 
+          COALESCE(persona.segundo_apellido, '')) AS nombre_completo`,
+        'deduccion.nombre_deduccion AS nombre_deduccion',
+        'deduccion.codigo_deduccion AS codigo_deduccion'
+      ])
+      .where('centroTrabajo.id_centro_trabajo = :idCentroTrabajo', { idCentroTrabajo })
+      .andWhere('detalle_deduccion.estado_aplicacion = :estado', { estado: 'EN PRELIMINAR' })
+      .andWhere('deduccion.codigo_deduccion = :codigoDeduccion', { codigoDeduccion })
+      .getRawMany();
+  }
+
+  async eliminarDetallesDeduccionPorCentro(idCentroTrabajo: number, codigoDeduccion: number): Promise<void> {
+    await this.detalleDeduccionRepository.createQueryBuilder()
+      .delete()
+      .from('detalle_deduccion')
+      .where('detalle_deduccion.id_centro_trabajo = :idCentroTrabajo', { idCentroTrabajo }) 
+      .andWhere('detalle_deduccion.codigo_deduccion = :codigoDeduccion', { codigoDeduccion }) 
+      .execute();
+  }
+  
+
+
   async uploadDeducciones(file: Express.Multer.File): Promise<{ message: string, failedRows: any[] }> {
     const workbook = XLSX.read(file.buffer, { type: 'buffer' });
     const sheetNames = workbook.SheetNames;
-    const failedRows: any[] = [];  // Array para almacenar las filas que fallan con su razón
-  
+    const failedRows: any[] = [];
     for (const sheetName of sheetNames) {
       const sheet = workbook.Sheets[sheetName];
-      const data = XLSX.utils.sheet_to_json(sheet, { header: 1, defval: null }) as any[][];
-  
+      const data = XLSX.utils.sheet_to_json(sheet, {
+        header: 1,
+        defval: null,
+        raw: false, // Este parámetro hace que todos los datos se lean como cadenas
+      }) as any[][];
       const [header, ...rows] = data;
-  
       for (const row of rows) {
         const [anio, mes, dni, codigoDeduccion, montoTotal] = row;
+        console.log(dni);
+        
   
         if (!anio || !mes || !dni || !codigoDeduccion || !montoTotal) {
           this.logger.warn(`Fila ignorada por no tener todas las columnas llenas: ${JSON.stringify(row)}`);
-          failedRows.push([...row, 'Faltan columnas obligatorias']);  // Guardar la fila que falla con la razón
+          failedRows.push([...row, 'Faltan columnas obligatorias']);
           continue;
         }
   
@@ -58,7 +96,7 @@ export class DeduccionService {
   
         if (isNaN(parsedAnio) || isNaN(parsedMes) || parsedDni === '' || isNaN(parsedCodigoDeduccion) || isNaN(parsedMontoTotal)) {
           this.logger.warn(`Datos inválidos en la fila (conversión fallida): ${JSON.stringify(row)}`);
-          failedRows.push([...row, 'Error en la conversión de datos']);  // Guardar la fila que falla con la razón
+          failedRows.push([...row, 'Error en la conversión de datos']);
           continue;
         }
   

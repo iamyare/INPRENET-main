@@ -105,8 +105,6 @@ export class VerplanprelcompComponent implements OnInit {
       this.planillaService.getPlanillaPrelimiar(this.codigoPlanilla).subscribe(
         {
           next: async (response) => {
-            console.log();
-
             if (response) {
               this.calcularTotales(this.codigoPlanilla)
 
@@ -318,7 +316,6 @@ export class VerplanprelcompComponent implements OnInit {
         const { beneficios } = response;
 
         const data = beneficios;
-        console.log(data);
 
         logs.push({ message: 'Datos De Beneficios:', detail: data || [], type: 'beneficios' });
 
@@ -441,7 +438,6 @@ export class VerplanprelcompComponent implements OnInit {
   }
 
   getElemSeleccionados(event: any) {
-    console.log(event);
     this.codigoPlanilla = event.codigo_planilla;
     this.getPlanilla()
   }

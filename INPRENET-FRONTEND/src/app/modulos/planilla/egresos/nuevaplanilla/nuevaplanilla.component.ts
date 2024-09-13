@@ -18,7 +18,7 @@ export class NuevaplanillaComponent implements OnInit {
   tiposPlanilla: any[] = [];
   datosFormateados: any;
   datosForm: any;
-  planillasActivas: any[] = []; // Para almacenar las planillas activas
+  planillasActivas: any[] = [];
 
   constructor(
     private planillaService: PlanillaService,
@@ -26,7 +26,7 @@ export class NuevaplanillaComponent implements OnInit {
 
   ngOnInit(): void {
     this.cargarDatosIniciales();
-    this.getPlanillasActivas(); // Cargar las planillas activas
+    this.getPlanillasActivas();
   }
 
   async cargarDatosIniciales() {
@@ -40,8 +40,6 @@ export class NuevaplanillaComponent implements OnInit {
   getTiposPlanillas = async () => {
     try {
       const data = await this.planillaService.findTipoPlanillaByclasePlanilla("EGRESO").toPromise();
-      console.log(data);
-
       this.tiposPlanilla = data.map((item: any) => ({
         label: `${item.nombre_planilla}`,
         value: `${item.nombre_planilla}`
@@ -52,7 +50,6 @@ export class NuevaplanillaComponent implements OnInit {
     }
   };
 
-  // Nueva función para obtener planillas activas
   getPlanillasActivas() {
     this.planillaService.getPlanillasActivas().subscribe({
       next: (response) => {
@@ -116,14 +113,12 @@ export class NuevaplanillaComponent implements OnInit {
         periodo_finalizacion: periodoFinalizacion
       };
     }
-
-    console.log(datosFormulario);
-
     this.planillaService.createPlanilla(datosFormulario).subscribe({
       next: (response) => {
         const codPlanilla = response?.codigo_planilla || 'Desconocido';
         this.toastr.success(`Planilla creada con éxito. Código: ${codPlanilla}`);
         this.limpiarFormulario();
+        this.getPlanillasActivas();
       },
       error: (error) => {
         let mensajeError = 'Error desconocido al crear la planilla';

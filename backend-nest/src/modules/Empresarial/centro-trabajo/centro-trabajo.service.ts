@@ -162,12 +162,12 @@ export class CentroTrabajoService {
 
 
   async obtenerCentrosDeTrabajoConTipoE(): Promise<Net_Centro_Trabajo[]> {
-    return await this.centroTrabajoRepository.find({
-      where: {
-        tipo: 'INSTITUCION',
-      },
-    });
-  }
+    return await this.centroTrabajoRepository.createQueryBuilder('centroTrabajo')
+      .leftJoinAndSelect('centroTrabajo.deduccion', 'deduccion') // Hacer el join con la tabla de deducciones
+      .where('centroTrabajo.tipo = :tipo', { tipo: 'INSTITUCION' }) // Filtrar por el tipo de centro de trabajo
+      .getMany();
+}
+
 
   async create(createCentroTrabajoDto: CreateCentroTrabajoDto) {
     try {

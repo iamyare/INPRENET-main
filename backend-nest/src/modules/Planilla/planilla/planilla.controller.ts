@@ -10,7 +10,6 @@ import { Net_Planilla } from './entities/net_planilla.entity';
 import { GetPlanillasPreliminaresDto } from './dto/get-planillas-preliminares.dto';
 import { GeneratePlanillaDto } from './dto/generate-planilla.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
-import * as multer from 'multer';
 import * as path from 'path';
 import * as fs from 'fs';
 
@@ -18,6 +17,35 @@ import * as fs from 'fs';
 @Controller('planilla')
 export class PlanillaController {
   constructor(private readonly planillaService: PlanillaService, @InjectEntityManager() private readonly entityManager: EntityManager) { }
+
+  @Get('pagos-persona/:dni')
+  async obtenerPlanillasPorPersona(@Param('dni') dni: string) {
+    try {
+      const planillas = await this.planillaService.obtenerPlanillasPorPersona(dni);
+      return {
+        message: 'Planillas obtenidas correctamente',
+        data: planillas,
+      };
+    } catch (error) {
+      return {
+        message: 'Error al obtener planillas',
+        error: error.message,
+      };
+    }
+  }
+
+  @Get('pagos-beneficios')
+  async obtenerPagosYBeneficiosPorPersona(
+    @Query('idPlanilla') idPlanilla: number,
+    @Query('dni') dni: string,
+  ): Promise<any> {
+    try {
+      const resultado = await this.planillaService.obtenerPagosYBeneficiosPorPersona(idPlanilla, dni);
+      return resultado;
+    } catch (error) {
+      throw error;
+    }
+  }
 
   /* @Post('upload-excel')
   @UseInterceptors(FileInterceptor('file'))

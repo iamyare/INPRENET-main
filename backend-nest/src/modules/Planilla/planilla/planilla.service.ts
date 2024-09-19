@@ -3,7 +3,7 @@ import { CreatePlanillaDto } from './dto/create-planilla.dto';
 import { UpdatePlanillaDto } from './dto/update-planilla.dto';
 import { InjectEntityManager, InjectRepository } from '@nestjs/typeorm';
 import { Net_Detalle_Deduccion } from '../detalle-deduccion/entities/detalle-deduccion.entity';
-import { Between, EntityManager, QueryFailedError, Repository } from 'typeorm';
+import { EntityManager, QueryFailedError, Repository } from 'typeorm';
 import { net_persona } from '../../Persona/entities/net_persona.entity';
 import { Net_Persona_Por_Banco } from '../../banco/entities/net_persona-banco.entity';
 import { Net_Planilla } from './entities/net_planilla.entity';
@@ -14,12 +14,8 @@ import { Workbook } from 'exceljs';
 import { Response } from 'express';
 import { startOfMonth, endOfMonth, getMonth, getYear, format } from 'date-fns';
 import { Net_Detalle_Beneficio_Afiliado } from '../detalle_beneficio/entities/net_detalle_beneficio_afiliado.entity';
-import { Net_Beneficio } from '../beneficio/entities/net_beneficio.entity';
 import * as ExcelJS from 'exceljs';
-import { net_detalle_persona } from 'src/modules/Persona/entities/net_detalle_persona.entity';
 import * as XLSX from 'xlsx';
-import path from 'path';
-import * as fs from 'fs';
 
 @Injectable()
 export class PlanillaService {
@@ -42,6 +38,148 @@ export class PlanillaService {
     private readonly detalleBeneficioRepository: Repository<Net_Detalle_Beneficio_Afiliado>,
   ) {
   };
+
+  async obtenerPlanillasPorPersona(dni: string): Promise<any> {
+    try {
+        // Buscar la persona con sus detalles de beneficios y pagos
+        const persona = await this.personaRepository.findOne({
+            where: { n_identificacion: dni },
+            relations: [
+                'detallePersona',
+                'detallePersona.detalleBeneficio',
+                'detallePersona.detalleBeneficio.detallePagBeneficio',
+                'detallePersona.detalleBeneficio.detallePagBeneficio.planilla'
+            ]
+        });
+
+        if (!persona) {
+            throw new Error('No se encontró persona con ese DNI');
+        }
+
+        // Extraer las planillas de los pagos realizados
+        const planillas = persona.detallePersona.flatMap(detalle =>
+            detalle.detalleBeneficio.flatMap(beneficio =>
+                beneficio.detallePagBeneficio.map(pago => ({
+                    id_planilla: pago.planilla.id_planilla,
+                    codigo_planilla: pago.planilla.codigo_planilla,
+                    fecha_apertura: pago.planilla.fecha_apertura,
+                    fecha_cierre: pago.planilla.fecha_cierre,
+                    secuencia: pago.planilla.secuencia,
+                    estado: pago.planilla.estado,
+                    periodoInicio: pago.planilla.periodoInicio,
+                    periodoFinalizacion: pago.planilla.periodoFinalizacion
+                }))
+            )
+        );
+
+        // Organizar planillas por id para evitar duplicados
+        const planillasUnicas = {};
+        planillas.forEach(planilla => {
+            planillasUnicas[planilla.id_planilla] = planilla;
+        });
+
+        // Convertir el objeto a un array
+        const planillasResult = Object.values(planillasUnicas);
+
+        // Retornar el resultado de las planillas
+        return planillasResult;
+
+    } catch (error) {
+        console.error(error);
+        throw new Error('Error al obtener las planillas');
+    }
+}
+
+  async obtenerPagosYBeneficiosPorPersona(idPlanilla: number, dni: string): Promise<any> {
+      try {
+          const persona = await this.personaRepository.findOne({
+              where: { n_identificacion: dni },
+              relations: [
+                  'detallePersona',
+                  'detallePersona.detalleBeneficio',
+                  'detallePersona.detalleBeneficio.beneficio',
+                  'detallePersona.detalleBeneficio.detallePagBeneficio',
+                  'detallePersona.detalleBeneficio.detallePagBeneficio.planilla',
+                  'detallePersona.detalleBeneficio.detallePagBeneficio.personaporbanco',
+                  'detallePersona.detalleBeneficio.detallePagBeneficio.personaporbanco.banco',
+                  'personasPorBanco',
+                  'personasPorBanco.banco',
+                  'detalleDeduccion',
+                  'detalleDeduccion.deduccion',
+                  'detalleDeduccion.planilla'
+              ]
+          });
+          if (!persona) {
+              throw new Error('No se encontró persona con ese DNI');
+          }
+          const personaDatos = {
+              id_persona: persona.id_persona,
+              dni: persona.n_identificacion,
+              primer_nombre: persona.primer_nombre,
+              segundo_nombre: persona.segundo_nombre,
+              primer_apellido: persona.primer_apellido,
+              segundo_apellido: persona.segundo_apellido,
+              direccion: persona.direccion_residencia,
+              correo: persona.correo_1,
+              telefono: persona.telefono_1,
+          };
+          const bancos = persona.personasPorBanco.map(bancoInfo => ({
+              banco: bancoInfo.banco.nombre_banco,
+              num_cuenta: bancoInfo.num_cuenta,
+              estado: bancoInfo.estado
+          }));
+          const beneficios = persona.detallePersona.flatMap(detalle =>
+              detalle.detalleBeneficio.flatMap(beneficio => {
+                  const pagos = beneficio.detallePagBeneficio.filter(pago => pago.planilla.id_planilla === idPlanilla);
+                  if (pagos.length > 0) {
+                      return {
+                          beneficio: beneficio.beneficio.nombre_beneficio,
+                          monto_total: beneficio.monto_total,
+                          monto_por_periodo: beneficio.monto_por_periodo,
+                          metodo_pago: beneficio.metodo_pago,
+                          pagos: pagos.map(pago => ({
+                              monto_a_pagar: pago.monto_a_pagar,
+                              estado: pago.estado,
+                              banco: pago.personaporbanco?.banco?.nombre_banco || null,
+                              num_cuenta: pago.personaporbanco?.num_cuenta || null,
+                              fecha_pago: pago.fecha_carga,
+                          }))
+                      };
+                  }
+                  return [];
+              })
+          );
+          const deducciones = persona.detalleDeduccion.filter(deduccion => deduccion.planilla.id_planilla === idPlanilla).map(deduccion => ({
+              deduccion: deduccion.deduccion.nombre_deduccion,
+              monto_total: deduccion.monto_total,
+              estado_aplicacion: deduccion.estado_aplicacion,
+              monto_aplicado: deduccion.monto_aplicado,
+          }));
+          const planilla = await this.planillaRepository.findOne({
+              where: { id_planilla: idPlanilla }
+          });
+          const planillaDatos = {
+              codigo_planilla: planilla.codigo_planilla,
+              fecha_apertura: planilla.fecha_apertura,
+              fecha_cierre: planilla.fecha_cierre,
+              secuencia: planilla.secuencia,
+              estado: planilla.estado,
+              periodoInicio: planilla.periodoInicio,
+              periodoFinalizacion: planilla.periodoFinalizacion
+          };
+          return {
+              persona: personaDatos,
+              planilla: planillaDatos,
+              bancos,
+              beneficios,
+              deducciones
+          };
+      } catch (error) {
+          console.error(error);
+          throw new Error('Error al obtener los pagos, deducciones y bancos');
+      }
+  }
+
 
   async updateFallecidoStatusFromExcel(file: Express.Multer.File) {
     // Leer el archivo Excel

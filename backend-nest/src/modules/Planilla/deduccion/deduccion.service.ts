@@ -40,6 +40,8 @@ export class DeduccionService {
         'detalle_deduccion.monto_total AS monto_total',
         'detalle_deduccion.monto_aplicado AS monto_aplicado',
         'detalle_deduccion.estado_aplicacion AS estado_aplicacion',
+        'detalle_deduccion.anio AS anio',
+        'detalle_deduccion.mes AS mes',
         'persona.n_identificacion AS n_identificacion',
         `(persona.primer_nombre || ' ' || 
           COALESCE(persona.segundo_nombre, '') || ' ' || 
@@ -54,15 +56,14 @@ export class DeduccionService {
       .getRawMany();
   }
 
-  async eliminarDetallesDeduccionPorCentro(idCentroTrabajo: number, codigoDeduccion: number): Promise<void> {
+  async eliminarDetallesDeduccionPorCentro(idCentroTrabajo: number, codDeduccion: number): Promise<void> {
     await this.detalleDeduccionRepository.createQueryBuilder()
       .delete()
-      .from('detalle_deduccion')
-      .where('detalle_deduccion.id_centro_trabajo = :idCentroTrabajo', { idCentroTrabajo }) 
-      .andWhere('detalle_deduccion.codigo_deduccion = :codigoDeduccion', { codigoDeduccion }) 
+      .from('NET_DETALLE_DEDUCCION')
+      .where('id_deduccion IN (SELECT d.id_deduccion FROM NET_DEDUCCION d WHERE d.cod_deduccion = :codDeduccion AND d.id_centro_trabajo = :idCentroTrabajo)', { codDeduccion, idCentroTrabajo })
+      .andWhere('estado_aplicacion = :estado', { estado: 'EN PRELIMINAR' })
       .execute();
-  }
-  
+}
 
 
   async uploadDeducciones(file: Express.Multer.File): Promise<{ message: string, failedRows: any[] }> {
@@ -107,14 +108,14 @@ export class DeduccionService {
   
         if (!persona) {
           this.logger.warn(`No se encontró persona con DNI: ${parsedDni}`);
-          failedRows.push([...row, `No se encontró persona con DNI: ${parsedDni}`]);  // Guardar la fila que falla con la razón
+          failedRows.push([...row, `No se encontró persona con DNI: ${parsedDni}`]); 
           continue;
         }
   
         // Verificación si la persona está marcada como fallecida
         if (persona.fallecido === 'SI') {
           this.logger.warn(`La persona con DNI: ${parsedDni} está marcada como fallecida`);
-          failedRows.push([...row, `La persona está marcada como fallecida`]);  // Guardar la fila que falla con la razón
+          failedRows.push([...row, `La persona está marcada como fallecida`]); 
           continue;
         }
   
@@ -126,7 +127,7 @@ export class DeduccionService {
   
         if (!deduccion) {
           this.logger.warn(`No se encontró deducción con código: ${parsedCodigoDeduccion}`);
-          failedRows.push([...row, `No se encontró deducción con código: ${parsedCodigoDeduccion}`]);  // Guardar la fila que falla con la razón
+          failedRows.push([...row, `No se encontró deducción con código: ${parsedCodigoDeduccion}`]); 
           continue;
         }
   
@@ -140,7 +141,7 @@ export class DeduccionService {
   
         if (!bancoActivo) {
           this.logger.warn(`No se encontró un banco activo para la persona con DNI: ${parsedDni}`);
-          failedRows.push([...row, `No se encontró un banco activo para la persona`]);  // Guardar la fila que falla con la razón
+          failedRows.push([...row, `No se encontró un banco activo para la persona`]); 
           continue;
         }
   
@@ -155,13 +156,13 @@ export class DeduccionService {
           });
         } catch (err) {
           this.logger.error(`Error en la consulta de planillas: ${err.message}`);
-          failedRows.push([...row, `Error en la consulta de planillas: ${err.message}`]);  // Guardar la fila que falla con la razón
+          failedRows.push([...row, `Error en la consulta de planillas: ${err.message}`]); 
           continue;
         }
   
         if (!planillas || planillas.length === 0) {
           this.logger.warn(`No se encontró planilla activa para el mes: ${parsedMes}-${parsedAnio}`);
-          failedRows.push([...row, `No se encontró planilla activa para el mes: ${parsedMes}-${parsedAnio}`]);  // Guardar la fila que falla con la razón
+          failedRows.push([...row, `No se encontró planilla activa para el mes: ${parsedMes}-${parsedAnio}`]); 
           continue;
         }
   
@@ -182,7 +183,7 @@ export class DeduccionService {
   
         if (!planilla) {
           this.logger.warn(`No se encontró planilla adecuada para el mes/año proporcionado o el tipo de persona: ${tipoPersona}`);
-          failedRows.push([...row, `No se encontró planilla adecuada para el mes/año proporcionado o el tipo de persona: ${tipoPersona}`]);  // Guardar la fila que falla con la razón
+          failedRows.push([...row, `No se encontró planilla adecuada para el mes/año proporcionado o el tipo de persona: ${tipoPersona}`]); 
           continue;
         }
   
@@ -199,7 +200,7 @@ export class DeduccionService {
   
         if (deduccionExistente) {
           this.logger.warn(`Deducción duplicada detectada: ${JSON.stringify(row)}`);
-          failedRows.push([...row, `Deducción duplicada detectada`]);  // Guardar la fila que falla con la razón
+          failedRows.push([...row, `Deducción duplicada detectada`]); 
           continue;
         }
   

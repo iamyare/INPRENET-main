@@ -159,8 +159,6 @@ export class SubirDeduccionesTercerosComponent {
     this.centrosTrabajoService.obtenerCentrosTrabajoTipoE().subscribe({
       next: (response) => {
         this.centrosTrabajo = response;
-        console.log(response);
-
       },
       error: (error) => {
         this.toastr.error('Error al obtener los centros de trabajo', 'Error');
@@ -197,7 +195,14 @@ export class SubirDeduccionesTercerosComponent {
       this.toastr.warning('No hay detalles de deducción para exportar.', 'Advertencia');
       return;
     }
-    const ws: XLSX.WorkSheet = XLSX.utils.json_to_sheet(this.detallesDeduccion);
+    const dataToExport = this.detallesDeduccion.map(detalle => ({
+      año: detalle.ANIO,
+      mes: detalle.MES,
+      dni: detalle.N_IDENTIFICACION,
+      codigo_deduccion: detalle.CODIGO_DEDUCCION,
+      monto_motal: detalle.MONTO_TOTAL
+    }));
+    const ws: XLSX.WorkSheet = XLSX.utils.json_to_sheet(dataToExport);
     const wb: XLSX.WorkBook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, 'Detalles Deducción');
     XLSX.writeFile(wb, 'detalles_deduccion.xlsx');

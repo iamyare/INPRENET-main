@@ -1,0 +1,47 @@
+.planillas-container {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.planilla-card {
+  background-color: #f9f9f9;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 16px;
+  margin: 8px 0;
+  width: calc(33.333% - 16px);
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  transition: transform 0.2s ease-in-out;
+
+  &:hover {
+    transform: translateY(-5px);
+  }
+}
+
+.card-content h4 {
+  margin: 0 0 8px 0;
+}
+
+.card-actions {
+  display: flex;
+  justify-content: flex-end;
+}
+
+@media (max-width: 768px) {
+  .planilla-card {
+    width: calc(50% - 16px); /* 2 columnas por fila en pantallas medianas */
+  }
+}
+
+@media (max-width: 480px) {
+  .planilla-card {
+    width: 100%; /* 1 columna por fila en pantallas pequeñas */
+    margin-bottom: 16px; /* Añade más espacio entre las tarjetas en pantallas pequeñas */
+  }
+}

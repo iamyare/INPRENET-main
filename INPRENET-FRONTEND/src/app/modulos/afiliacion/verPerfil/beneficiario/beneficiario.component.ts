@@ -7,13 +7,15 @@ import { PersonaService } from 'src/app/services/persona.service';
   styleUrls: ['./beneficiario.component.scss']
 })
 export class BeneficiarioComponent implements OnInit {
-  @Input() persona: any; // Recibe el objeto completo de la persona
+  @Input() persona: any;
   causantes: any[] = [];
 
   steps = [
     { label: 'Constancias', isActive: true },
+    { label: 'Detalles de pagos', isActive: false },
+    { label: 'Todos los pagos', isActive: false },
     { label: 'Beneficios Asignados', isActive: false },
-    { label: 'Causantes Detalles', isActive: false }
+    //{ label: 'Causantes Detalles', isActive: false }
   ];
 
   currentStepIndex = 0;

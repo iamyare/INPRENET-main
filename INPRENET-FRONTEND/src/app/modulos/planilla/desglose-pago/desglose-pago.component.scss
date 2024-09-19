@@ -1,0 +1,92 @@
+/* Estilo general para el modal */
+.mat-dialog-container {
+  padding: 20px;
+  max-width: 700px;
+  width: 100%;
+  max-height: 80vh; /* Limita la altura del modal al 80% del viewport */
+  overflow-y: auto; /* Habilita el scroll en todo el modal */
+  background-color: #ffffff;
+  border-radius: 8px; /* Añade un borde redondeado */
+  top: 50px; /* Ajuste para evitar que el modal llegue hasta la parte superior */
+}
+
+/* Encabezado del modal */
+h2 {
+  text-align: center;
+  font-size: 24px;
+  margin-bottom: 20px;
+  color: #333;
+}
+
+/* Estilos para las secciones */
+.section {
+  margin-bottom: 20px;
+  padding: 15px;
+  border-radius: 8px;
+  background-color: #f9f9f9;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.section-title {
+  font-size: 20px;
+  margin-bottom: 10px;
+  color: #005b55;
+  border-bottom: 2px solid #26a69a;
+  padding-bottom: 5px;
+}
+
+.beneficio-title {
+  font-size: 18px;
+  font-weight: bold;
+  margin-top: 10px;
+  color: #333;
+}
+
+/* Estilos para las tarjetas */
+.card {
+  background-color: #e8f8f8;
+  border: 1px solid #bee4e1;
+  border-radius: 8px;
+  padding: 15px;
+  margin-bottom: 15px;
+}
+
+.pagos-section {
+  background-color: #f0f8f8;
+  padding: 10px;
+  border-radius: 8px;
+}
+
+.pago-item, .deduccion-item {
+  margin-bottom: 15px;
+  padding: 10px;
+  background-color: #e0f4f4;
+  border-radius: 6px;
+}
+
+/* Botón de cierre */
+.mat-dialog-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 20px;
+}
+
+button[mat-dialog-close] {
+  background-color: #26a69a;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+button[mat-dialog-close]:hover {
+  background-color: #1d8f86;
+}
+
+/* Ajuste para el contenido interno con scroll */
+.detalles-pago-container {
+  max-height: 60vh; /* Altura máxima ajustada del contenido del diálogo */
+  overflow-y: auto; /* Habilita el scroll en el contenido interno */
+}

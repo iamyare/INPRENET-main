@@ -196,10 +196,6 @@ export class DynamicFormComponent implements OnInit {
     }
   }
 
-
-
-
-
   updateFields(newFields: FieldConfig[]) {
     this.fields = newFields;
     newFields.forEach((field: FieldConfig) => {

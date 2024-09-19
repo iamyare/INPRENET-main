@@ -10,6 +10,30 @@ import { environment } from 'src/environments/environment';
 export class PlanillaService {
   constructor(private http: HttpClient,private toastr: ToastrService) { }
 
+  obtenerPagosYBeneficiosPorPersona(idPlanilla: number, dni: string): Observable<any> {
+    const url = `${environment.API_URL}/api/planilla/pagos-beneficios`;
+    const params = { idPlanilla: idPlanilla.toString(), dni: dni };
+
+    return this.http.get(url, { params }).pipe(
+      catchError((error: HttpErrorResponse) => {
+        console.error('Error al obtener los pagos y beneficios', error);
+        this.toastr.error('Error al obtener los pagos y beneficios');
+        return throwError(error);
+      })
+    );
+  }
+
+  obtenerPlanillasPagosPorPersona(dni: string): Observable<any> {
+    const url = `${environment.API_URL}/api/planilla/pagos-persona/${dni}`;
+    return this.http.get(url).pipe(
+      catchError((error: HttpErrorResponse) => {
+        console.error('Error al obtener las planillas de pagos', error);
+        this.toastr.error('Error al obtener las planillas de pagos');
+        return throwError(error);
+      })
+    );
+  }
+
   actualizarFallecidosDesdeExcel(file: File): Observable<any> {
     const url = `${environment.API_URL}/api/planilla/update-fallecidos-from-excel`;
     const formData: FormData = new FormData();

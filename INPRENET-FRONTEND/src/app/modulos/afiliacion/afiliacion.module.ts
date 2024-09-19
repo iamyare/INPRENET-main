@@ -68,6 +68,9 @@ import { DatosGeneralesComponent } from './gestion/datos-generales/datos-general
 import { BancosComponent } from './gestion/bancos/bancos.component';
 import { VerOtrasFuentesIngresoComponent } from './verPerfil/ver-otras-fuentes-ingreso/ver-otras-fuentes-ingreso.component';
 import { AgregarOtrasFuentesIngresoComponent } from './gestion/agregar-otras-fuentes-ingreso/agregar-otras-fuentes-ingreso.component';
+import { DetallePagosComponent } from '../planilla/detalle-pagos/detalle-pagos.component';
+import { DesglosePagoComponent } from '../planilla/desglose-pago/desglose-pago.component';
+import { TodosPagosComponent } from '../planilla/todos-pagos/todos-pagos.component';
 
 @NgModule({
   declarations: [
@@ -132,7 +135,10 @@ import { AgregarOtrasFuentesIngresoComponent } from './gestion/agregar-otras-fue
     BancosComponent,
     VerOtrasFuentesIngresoComponent,
     AgregarOtrasFuentesIngresoComponent,
-    EditPepsComponent
+    EditPepsComponent,
+    DetallePagosComponent,
+    DesglosePagoComponent,
+    TodosPagosComponent
   ],
   imports: [
     CommonModule,
@@ -149,7 +155,7 @@ import { AgregarOtrasFuentesIngresoComponent } from './gestion/agregar-otras-fue
     AfiliadoComponent,
     VoluntarioComponent,
     DatBancComponent,
-    EditDatosBancariosComponent
+    EditDatosBancariosComponent,
   ],
   providers: [
     { provide: MAT_DATE_LOCALE, useValue: 'es', },

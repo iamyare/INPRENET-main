@@ -1,4 +1,4 @@
-import { Body, Controller, Get, HttpException, HttpStatus, NotFoundException, Param, Patch, Post, UploadedFile, UseInterceptors } from '@nestjs/common';
+import { Body, Controller, Delete, Get, HttpException, HttpStatus, NotFoundException, Param, ParseIntPipe, Patch, Post, UploadedFile, UseInterceptors } from '@nestjs/common';
 import { AfiliacionService } from './afiliacion.service';
 import { net_persona } from '../entities/net_persona.entity';
 import { FileInterceptor } from '@nestjs/platform-express';
@@ -16,10 +16,51 @@ import { net_otra_fuente_ingreso } from '../entities/net_otra_fuente_ingreso.ent
 import { CrearBeneficiarioDto } from './dtos/crear-beneficiario.dto';
 import { net_detalle_persona } from '../entities/net_detalle_persona.entity';
 import { CrearReferenciaDto } from './dtos/crear-referencia.dto';
+import { Net_Familia } from '../entities/net_familia.entity';
+import { CrearFamiliaDto } from './dtos/crear-familiar.dto';
 
 @Controller('afiliacion')
 export class AfiliacionController {
-  constructor(private readonly afiliacionService: AfiliacionService,private readonly connection: Connection,) {
+  constructor(private readonly afiliacionService: AfiliacionService,private readonly connection: Connection, private readonly entityManager: EntityManager,) {
+  }
+
+  @Post('persona/:idPersona/familia')
+  async crearFamilia(
+    @Param('idPersona') idPersona: number,
+    @Body() familiaresDto: CrearFamiliaDto[],
+  ): Promise<void> {
+    await this.afiliacionService.crearFamilia(familiaresDto, idPersona, this.entityManager);
+  }
+
+
+  @Patch('conyuge/:n_identificacion')
+  async actualizarConyuge(
+    @Param('n_identificacion') n_identificacion: string,
+    @Body() updateConyugeDto: any
+  ) {
+    try {
+      return this.afiliacionService.actualizarConyuge(n_identificacion, updateConyugeDto);
+    } catch (error) {
+      throw new HttpException('Error al actualizar los datos del cónyuge', HttpStatus.BAD_REQUEST);
+    }
+  }
+
+  @Get('conyuge/:n_identificacion')
+  async obtenerConyuge(@Param('n_identificacion') n_identificacion: string): Promise<Net_Familia> {
+    return this.afiliacionService.obtenerConyugePorIdentificacion(n_identificacion);
+  }
+
+  @Delete('otra-fuente-ingreso/:id')
+  async eliminarOtraFuenteIngreso(@Param('id', ParseIntPipe) id: number) {
+    return this.afiliacionService.eliminarOtraFuenteIngreso(id);
+  }
+
+  @Patch('otra-fuente-ingreso/:id')
+  async editarOtraFuenteIngreso(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() dto: CrearOtraFuenteIngresoDto
+  ) {
+    return this.afiliacionService.editarOtraFuenteIngreso(id, dto);
   }
 
   @Post('asignar-centros-trabajo/:idPersona')

@@ -63,7 +63,6 @@ export class EditBeneficiariosComponent implements OnInit, OnChanges {
       { header: 'Nombres', col: 'nombres' },
       { header: 'Apellidos', col: 'apellidos' },
       { header: 'Porcentaje', col: 'porcentaje' },
-      { header: 'Estado', col: 'estado_descripcion' },
       { header: 'Fecha de Nacimiento', col: 'fecha_nacimiento' }
     ];
 
@@ -98,7 +97,6 @@ export class EditBeneficiariosComponent implements OnInit, OnChanges {
             idPaisNacionalidad: item.idPaisNacionalidad,
             id_municipio_residencia: item.idMunicipioResidencia,
             id_estado_persona: item.idEstadoPersona,
-            estado_descripcion: item.estadoDescripcion,
             porcentaje: item.porcentaje,
             tipo_persona: item.tipoPersona
           };
@@ -191,7 +189,19 @@ export class EditBeneficiariosComponent implements OnInit, OnChanges {
       { nombre: 'idPaisNacionalidad', tipo: 'list', etiqueta: 'País Nacionalidad', editable: true, opciones: this.datosEstaticosService.nacionalidades, icono: 'public' },
       { nombre: 'id_municipio_residencia', tipo: 'list', etiqueta: 'Municipio Residencia', editable: true, opciones: this.datosEstaticosService.municipios, icono: 'location_city' },
       { nombre: 'id_estado_persona', tipo: 'list', etiqueta: 'Estado Persona', editable: true, opciones: this.datosEstaticosService.estados, icono: 'assignment_ind' }, */
-      { nombre: 'porcentaje', tipo: 'number', etiqueta: 'Porcentaje', editable: true, icono: 'pie_chart' }
+      {
+        nombre: 'porcentaje',
+        tipo: 'number',
+        etiqueta: 'Porcentaje',
+        editable: true,
+        icono: 'pie_chart',
+        validadores: [
+          Validators.required,
+          Validators.min(1),
+          Validators.max(100)
+        ]
+      }
+
     ];
 
     this.openDialog(campos, row);

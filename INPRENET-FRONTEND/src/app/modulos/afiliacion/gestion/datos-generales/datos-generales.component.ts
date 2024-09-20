@@ -107,7 +107,7 @@ export class DatosGeneralesComponent implements OnInit {
     this.formGroup.addControl('id_tipo_identificacion', new FormControl('', Validators.required));
     this.formGroup.addControl('id_pais', new FormControl('', Validators.required));
     this.formGroup.addControl('grupo_etnico', new FormControl('', [Validators.required]));
-    this.formGroup.addControl('cantidad_hijos', new FormControl('', Validators.required));
+    this.formGroup.addControl('cantidad_hijos', new FormControl('', [Validators.pattern("^[0-9]+$"), Validators.required]));
     this.formGroup.addControl('barrio_colonia', new FormControl('', [
       Validators.maxLength(75),
       Validators.pattern(noSpecialCharsPattern)

@@ -11,6 +11,7 @@ export class InformacionGeneralComponent {
   steps = [
     { label: 'Información General', isActive: true },
     { label: 'Datos Bancarios', isActive: false },
+    { label: 'Cónyugue', isActive: false },
     { label: 'PEPS', isActive: false }
   ];
 

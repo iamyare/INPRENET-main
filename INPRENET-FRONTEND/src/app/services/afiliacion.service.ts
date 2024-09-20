@@ -10,6 +10,56 @@ export class AfiliacionService {
 
 constructor(private http: HttpClient) { }
 
+crearFamilia(idPersona: number, familiares: any[]): Observable<any> {
+  const url = `${environment.API_URL}/api/afiliacion/persona/${idPersona}/familia`;
+  return this.http.post<any>(url, familiares).pipe(
+    catchError((error) => {
+      console.error('Error al crear la familia', error);
+      return throwError(error);
+    })
+  );
+}
+
+actualizarConyuge(n_identificacion: string, datos: any): Observable<any> {
+  const url = `${environment.API_URL}/api/afiliacion/conyuge/${n_identificacion}`;
+  return this.http.patch<any>(url, datos).pipe(
+    catchError((error) => {
+      console.error('Error al actualizar la información del cónyuge', error);
+      return throwError(error);
+    })
+  );
+}
+
+obtenerConyugePorIdentificacion(n_identificacion: string): Observable<any> {
+  const url = `${environment.API_URL}/api/afiliacion/conyuge/${n_identificacion}`;
+  return this.http.get<any>(url).pipe(
+    catchError((error) => {
+      console.error('Error al obtener la información del cónyuge', error);
+      return throwError(error);
+    })
+  );
+}
+
+eliminarOtraFuenteIngreso(id: number): Observable<any> {
+  const url = `${environment.API_URL}/api/afiliacion/otra-fuente-ingreso/${id}`;
+  return this.http.delete<any>(url).pipe(
+    catchError((error) => {
+      console.error('Error al eliminar la fuente de ingreso', error);
+      return throwError(error);
+    })
+  );
+}
+
+editarOtraFuenteIngreso(id: number, datos: any): Observable<any> {
+  const url = `${environment.API_URL}/api/afiliacion/otra-fuente-ingreso/${id}`;
+  return this.http.patch<any>(url, datos).pipe(
+    catchError((error) => {
+      console.error('Error al editar la fuente de ingreso', error);
+      return throwError(error);
+    })
+  );
+}
+
 crearAfiliacion(datos: any, fotoPerfil: File): Observable<any> {
   const url = `${environment.API_URL}/api/afiliacion/crear`;
   const formData: FormData = new FormData();

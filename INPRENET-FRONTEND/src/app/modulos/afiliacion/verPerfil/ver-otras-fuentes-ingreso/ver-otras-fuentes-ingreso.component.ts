@@ -6,13 +6,14 @@ import { ToastrService } from 'ngx-toastr';
 import { Subscription } from 'rxjs';
 import { ConfirmDialogComponent } from 'src/app/components/dinamicos/confirm-dialog/confirm-dialog.component';
 import { EditarDialogComponent } from 'src/app/components/dinamicos/editar-dialog/editar-dialog.component';
-import { AfiliadoService } from 'src/app/services/afiliado.service';
 import { CentroTrabajoService } from 'src/app/services/centro-trabajo.service';
 import { FieldConfig } from 'src/app/shared/Interfaces/field-config';
 import { TableColumn } from 'src/app/shared/Interfaces/table-column';
 import { convertirFechaInputs } from 'src/app/shared/functions/formatoFecha';
 import { unirNombres } from 'src/app/shared/functions/formatoNombresP';
 import { AgregarOtrasFuentesIngresoComponent } from '../../gestion/agregar-otras-fuentes-ingreso/agregar-otras-fuentes-ingreso.component';
+import { AfiliacionService } from 'src/app/services/afiliacion.service';
+import { AfiliadoService } from 'src/app/services/afiliado.service';
 
 @Component({
   selector: 'ver-otras-fuentes-ingreso',
@@ -40,6 +41,7 @@ export class VerOtrasFuentesIngresoComponent implements OnInit, OnDestroy, OnCha
 
   constructor(
     private svcAfiliado: AfiliadoService,
+    private afiliacionService: AfiliacionService,
     private toastr: ToastrService,
     private dialog: MatDialog,
     private datePipe: DatePipe,
@@ -91,7 +93,6 @@ export class VerOtrasFuentesIngresoComponent implements OnInit, OnDestroy, OnCha
     this.getCentrosTrabajo();
     this.getFilas().then(() => this.cargar());
   }
-
 
   async getCentrosTrabajo() {
     const response = await this.centrosTrabSVC.obtenerTodosLosCentrosTrabajo().toPromise();
@@ -153,50 +154,34 @@ export class VerOtrasFuentesIngresoComponent implements OnInit, OnDestroy, OnCha
   async manejarAccionUno(row: any) {
     const campos = [
       {
-        nombre: 'n_identificacion',
-        tipo: 'list',
-        requerido: true,
-        etiqueta: 'Número De Identificación',
-        editable: true,
-        opciones: this.centrosTrabajo,
-        icono: 'business'
-      },
-      {
-        nombre: 'nombre_completo',
-        tipo: 'text',
-        requerido: true,
-        etiqueta: 'Nombre Completo',
-        editable: true,
-        icono: 'description',
-        validaciones: [Validators.required, Validators.maxLength(40)]
-      },
-      {
         nombre: 'actividad_economica',
-        tipo: 'number',
+        tipo: 'text',
         requerido: true,
         etiqueta: 'Actividad Económica',
         editable: true,
-        icono: 'attach_money',
+        icono: 'work',
         validaciones: [Validators.required, Validators.min(0)]
       },
       {
         nombre: 'monto_ingreso',
-        tipo: 'date',
+        tipo: 'text',
         requerido: false,
         etiqueta: 'Monto Ingreso',
         editable: true,
-        icono: 'event',
+        icono: 'attach_money',
         validaciones: [Validators.required]
       },
       {
         nombre: 'observacion',
-        tipo: 'date',
+        tipo: 'text',
         requerido: false,
         etiqueta: 'Observación',
         editable: true,
-        icono: 'event_busy'
+        icono: 'note',
+        validaciones: []
       },
     ];
+
 
     const dialogRef = this.dialog.open(EditarDialogComponent, {
       width: '500px',
@@ -205,35 +190,26 @@ export class VerOtrasFuentesIngresoComponent implements OnInit, OnDestroy, OnCha
 
     dialogRef.afterClosed().subscribe(async (result: any) => {
       if (result) {
-        // Formateo de fechas antes de enviar los datos
-        result.fechaIngreso = this.datePipe.transform(result.fechaIngreso, 'dd/MM/yyyy');
-        result.fechaEgreso = this.datePipe.transform(result.fechaEgreso, 'dd/MM/yyyy');
-
-        const idCentroTrabajo = result.id_centro_trabajo;
-        delete result.nombre_centro_trabajo;
-
         const dataToSend = {
-          ...result,
-          idCentroTrabajo: idCentroTrabajo
+          actividad_economica: result.actividad_economica,
+          monto_ingreso: result.monto_ingreso,
+          observacion: result.observacion
         };
-
-        this.svcAfiliado.updatePerfCentroTrabajo(row.id, result).subscribe({
-
+        this.afiliacionService.editarOtraFuenteIngreso(row.id_otra_fuente_ingreso, dataToSend).subscribe({
           next: (response) => {
-            const index = this.filas.findIndex(item => item.id === row.id);
+            const index = this.filas.findIndex(item => item.id_otra_fuente_ingreso === row.id_otra_fuente_ingreso);
             if (index !== -1) {
               this.filas[index] = {
                 ...this.filas[index],
-                ...result,
-                nombre_centro_trabajo: row.nombre_centro_trabajo
+                ...result
               };
             }
-            this.toastr.success("Se actualizó el perfil de trabajo correctamente")
+            this.toastr.success('Fuente de ingreso actualizada correctamente');
             this.cargar();
           },
           error: (error) => {
-            this.toastr.error("Error", "No se actualizo el perfil de trabajo")
-            console.error("Error al actualizar:", error);
+            this.toastr.error('Error', 'No se actualizó la fuente de ingreso');
+            console.error('Error al actualizar:', error);
           }
         });
       } else {
@@ -242,31 +218,29 @@ export class VerOtrasFuentesIngresoComponent implements OnInit, OnDestroy, OnCha
     });
   }
 
-
   manejarAccionDos(row: any) {
     const dialogRef = this.dialog.open(ConfirmDialogComponent, {
       width: '350px',
       data: {
-        title: 'Confirmar Desactivación',
-        message: '¿Está seguro de que desea desactivar este perfil?',
-        idPersona: this.Afiliado.ID_PERSONA
+        title: 'Confirmar Eliminación',
+        message: '¿Está seguro de que desea eliminar esta fuente de ingreso?',
+        idFuenteIngreso: row.id_otra_fuente_ingreso
       }
     });
-
     dialogRef.afterClosed().subscribe((result: boolean) => {
       if (result) {
-        this.svcAfiliado.desactivarPerfCentroTrabajo(row.id).subscribe({
-          next: (response) => {
-            this.toastr.success(response.mensaje, 'Perfil Desactivado');
+        this.afiliacionService.eliminarOtraFuenteIngreso(row.id_otra_fuente_ingreso).subscribe({
+          next: () => {
+            this.toastr.success('Fuente de ingreso eliminada correctamente');
             this.getFilas().then(() => this.cargar());
           },
           error: (error) => {
-            console.error('Error al desactivar el perfil:', error);
-            this.toastr.error('Ocurrió un error al desactivar el perfil.');
+            console.error('Error al eliminar la fuente de ingreso:', error);
+            this.toastr.error('Ocurrió un error al eliminar la fuente de ingreso.');
           }
         });
       } else {
-        console.log('Desactivación cancelada por el usuario.');
+        console.log('Eliminación cancelada por el usuario.');
       }
     });
   }

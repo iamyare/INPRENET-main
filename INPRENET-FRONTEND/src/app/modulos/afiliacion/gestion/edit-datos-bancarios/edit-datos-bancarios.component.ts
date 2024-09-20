@@ -27,7 +27,7 @@ export class EditDatosBancariosComponent implements OnInit, OnChanges {
     private svcAfiliado: AfiliadoService,
     private toastr: ToastrService,
     private dialog: MatDialog
-  ) { }
+  ) {}
 
   ngOnInit(): void {
     this.initializeComponent();
@@ -87,7 +87,6 @@ export class EditDatosBancariosComponent implements OnInit, OnChanges {
           }));
       } catch (error) {
         this.toastr.error('Error al cargar los datos bancarios');
-        console.error('Error al obtener datos bancarios', error);
       }
     } else {
       this.resetDatos();

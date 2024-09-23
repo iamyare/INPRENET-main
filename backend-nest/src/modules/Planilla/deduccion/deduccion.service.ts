@@ -11,6 +11,11 @@ import * as XLSX from 'xlsx';
 import { Net_Planilla } from '../planilla/entities/net_planilla.entity';
 import { Net_Persona_Por_Banco } from 'src/modules/banco/entities/net_persona-banco.entity';
 import { Workbook } from 'exceljs';
+import { Worker } from 'worker_threads';
+import * as pLimit from 'p-limit';
+import * as fs from 'fs';
+import * as csv from 'fast-csv';
+
 @Injectable()
 export class DeduccionService {
 
@@ -66,168 +71,186 @@ export class DeduccionService {
   }
 
 
-  async uploadDeducciones(file: Express.Multer.File): Promise<{ message: string, failedRows: any[] }> {
-    const workbook = XLSX.read(file.buffer, { type: 'buffer' });
-    const sheetNames = workbook.SheetNames;
-    const failedRows: any[] = [];
-    for (const sheetName of sheetNames) {
-      const sheet = workbook.Sheets[sheetName];
-      const data = XLSX.utils.sheet_to_json(sheet, {
-        header: 1,
-        defval: null,
-        raw: false, // Este parámetro hace que todos los datos se lean como cadenas
-      }) as any[][];
-      const [header, ...rows] = data;
-      let i = 1
-      for (const row of rows) {
-        const [anio, mes, dni, codigoDeduccion, montoTotal] = row;
-        i += 1;
-        if (!anio && !mes && !dni && !codigoDeduccion && !montoTotal) {
-          this.logger.warn(`Fila ignorada por no tener todas las columnas llenas: ${JSON.stringify(row)}`);
-          failedRows.push([...row, `Se detuvo porque encontró la fila N. ${i} vacía. Los registros anteriores a la fila vacia fueron procesados correctamente`]);
-          break;
-        }
 
-        if (!anio || !mes || !dni || !codigoDeduccion || !montoTotal) {
-          this.logger.warn(`Fila ignorada por no tener todas las columnas llenas: ${JSON.stringify(row)}`);
-          failedRows.push([...row, 'Faltan columnas obligatorias']);
-          continue;
-        }
 
-        const parsedAnio = Number(anio);
-        const parsedMes = Number(mes);
-        const parsedDni = dni.toString();
-        const parsedCodigoDeduccion = Number(codigoDeduccion);
-        const parsedMontoTotal = parseFloat(montoTotal);
 
-        if (isNaN(parsedAnio) || isNaN(parsedMes) || parsedDni === '' || isNaN(parsedCodigoDeduccion) || isNaN(parsedMontoTotal)) {
-          this.logger.warn(`Datos inválidos en la fila (conversión fallida): ${JSON.stringify(row)}`);
-          failedRows.push([...row, 'Error en la conversión de datos']);
-          continue;
-        }
 
-        const persona = await this.personaRepository.findOne({
-          where: { n_identificacion: parsedDni },
-          relations: ['detallePersona', 'detallePersona.tipoPersona']
-        });
 
-        if (!persona) {
-          this.logger.warn(`No se encontró persona con DNI: ${parsedDni}`);
-          failedRows.push([...row, `No se encontró persona con DNI: ${parsedDni}`]);
-          continue;
-        }
 
-        // Verificación si la persona está marcada como fallecida
-        if (persona.fallecido === 'SI') {
-          this.logger.warn(`La persona con DNI: ${parsedDni} está marcada como fallecida`);
-          failedRows.push([...row, `La persona está marcada como fallecida`]);
-          continue;
-        }
 
-        const tipoPersona = persona.detallePersona[0]?.tipoPersona?.tipo_persona;
+  private async processRow(row: any, repositories: any): Promise<any> {
+    // Acceder directamente a las propiedades del objeto
+    const { anio, mes, dni, codigoDeduccion, montoTotal } = row;
 
-        const deduccion = await this.deduccionRepository.findOne({
-          where: { codigo_deduccion: parsedCodigoDeduccion },
-        });
+    console.log(row);
 
-        if (!deduccion) {
-          this.logger.warn(`No se encontró deducción con código: ${parsedCodigoDeduccion}`);
-          failedRows.push([...row, `No se encontró deducción con código: ${parsedCodigoDeduccion}`]);
-          continue;
-        }
-
-        // Buscar banco activo para la persona
-        const bancoActivo = await this.personaPorBancoRepository.findOne({
-          where: {
-            persona: { id_persona: persona.id_persona },
-            estado: 'ACTIVO'
-          }
-        });
-
-        if (!bancoActivo) {
-          this.logger.warn(`No se encontró un banco activo para la persona con DNI: ${parsedDni}`);
-          failedRows.push([...row, `No se encontró un banco activo para la persona`]);
-          continue;
-        }
-
-        let planillas;
-        try {
-          planillas = await this.planillaRepository.find({
-            where: {
-              estado: 'ACTIVA',
-              secuencia: 1
-            },
-            relations: ['tipoPlanilla']
-          });
-        } catch (err) {
-          this.logger.error(`Error en la consulta de planillas: ${err.message}`);
-          failedRows.push([...row, `Error en la consulta de planillas: ${err.message}`]);
-          continue;
-        }
-
-        if (!planillas || planillas.length === 0) {
-          this.logger.warn(`No se encontró planilla activa para el mes: ${parsedMes}-${parsedAnio}`);
-          failedRows.push([...row, `No se encontró planilla activa para el mes: ${parsedMes}-${parsedAnio}`]);
-          continue;
-        }
-
-        // Validación del periodo de la planilla
-        const planilla = planillas.find(p => {
-          const periodoInicio = new Date(p.periodoInicio.split('/').reverse().join('-'));
-          const periodoFinalizacion = new Date(p.periodoFinalizacion.split('/').reverse().join('-'));
-
-          const fechaDeduccion = new Date(parsedAnio, parsedMes - 1);
-
-          return (
-            fechaDeduccion >= periodoInicio &&
-            fechaDeduccion <= periodoFinalizacion &&
-            ((['BENEFICIARIO', 'AFILIADO'].includes(tipoPersona) && p.tipoPlanilla.nombre_planilla === 'ORDINARIA BENEFICIARIO') ||
-              (['JUBILADO', 'PENSIONADO'].includes(tipoPersona) && p.tipoPlanilla.nombre_planilla === 'ORDINARIA JUBILADOS Y PENSIONADOS'))
-          );
-        });
-
-        if (!planilla) {
-          this.logger.warn(`No se encontró planilla adecuada para el mes/año proporcionado o el tipo de persona: ${tipoPersona}`);
-          failedRows.push([...row, `No se encontró planilla adecuada para el mes/año proporcionado o el tipo de persona: ${tipoPersona}`]);
-          continue;
-        }
-
-        const deduccionExistente = await this.detalleDeduccionRepository.findOne({
-          where: {
-            anio: parsedAnio,
-            mes: parsedMes,
-            monto_total: parsedMontoTotal,
-            persona: { id_persona: persona.id_persona },
-            deduccion: { id_deduccion: deduccion.id_deduccion },
-            planilla: { id_planilla: planilla.id_planilla },
-          },
-        });
-
-        if (deduccionExistente) {
-          this.logger.warn(`Deducción duplicada detectada: ${JSON.stringify(row)}`);
-          failedRows.push([...row, `Deducción duplicada detectada`]);
-          continue;
-        }
-
-        const detalleDeduccion = this.detalleDeduccionRepository.create({
-          anio: parsedAnio,
-          mes: parsedMes,
-          monto_total: parsedMontoTotal,
-          monto_aplicado: parsedMontoTotal,
-          estado_aplicacion: 'EN PRELIMINAR',
-          persona,
-          deduccion,
-          planilla,
-          personaPorBanco: bancoActivo
-        });
-
-        await this.detalleDeduccionRepository.save(detalleDeduccion);
-      }
+    if (!anio && !mes && !dni && !codigoDeduccion && !montoTotal) {
+      return { error: `Fila vacía: ${JSON.stringify(row)}`, processed: false };
     }
 
-    // Retornar las filas que no se insertaron junto con el mensaje
-    return { message: 'Deducciones procesadas correctamente', failedRows };
+    if (!anio || !mes || !dni || !codigoDeduccion || !montoTotal) {
+      return { error: 'Faltan columnas obligatorias', processed: false };
+    }
+
+    const parsedAnio = Number(anio);
+    const parsedMes = Number(mes);
+    const parsedDni = dni.toString();
+    const parsedCodigoDeduccion = Number(codigoDeduccion);
+    const parsedMontoTotal = parseFloat(montoTotal);
+
+    if (isNaN(parsedAnio) || isNaN(parsedMes) || parsedDni === '' || isNaN(parsedCodigoDeduccion) || isNaN(parsedMontoTotal)) {
+      return { error: 'Error en la conversión de datos', processed: false };
+    }
+
+    const persona = await repositories.personaRepository.findOne({
+      where: { n_identificacion: parsedDni },
+      relations: ['detallePersona', 'detallePersona.tipoPersona'],
+    });
+
+    if (!persona) {
+      return { error: `No se encontró persona con DNI: ${parsedDni}`, processed: false };
+    }
+
+    if (persona.fallecido === 'SI') {
+      return { error: `La persona está marcada como fallecida`, processed: false };
+    }
+
+    const tipoPersona = persona.detallePersona[0]?.tipoPersona?.tipo_persona;
+
+    const deduccion = await repositories.deduccionRepository.findOne({
+      where: { codigo_deduccion: parsedCodigoDeduccion },
+    });
+
+    if (!deduccion) {
+      return { error: `No se encontró deducción con código: ${parsedCodigoDeduccion}`, processed: false };
+    }
+
+    const bancoActivo = await repositories.personaPorBancoRepository.findOne({
+      where: {
+        persona: { id_persona: persona.id_persona },
+        estado: 'ACTIVO',
+      },
+    });
+
+    if (!bancoActivo) {
+      return { error: `No se encontró un banco activo para la persona`, processed: false };
+    }
+
+    let planillas;
+    try {
+      planillas = await repositories.planillaRepository.find({
+        where: {
+          estado: 'ACTIVA',
+          secuencia: 1,
+        },
+        relations: ['tipoPlanilla'],
+      });
+    } catch (err) {
+      return { error: `Error en la consulta de planillas: ${err.message}`, processed: false };
+    }
+
+    if (!planillas || planillas.length === 0) {
+      return { error: `No se encontró planilla activa para el mes: ${parsedMes}-${parsedAnio}`, processed: false };
+    }
+
+    const planilla = planillas.find(p => {
+      const periodoInicio = new Date(p.periodoInicio.split('/').reverse().join('-'));
+      const periodoFinalizacion = new Date(p.periodoFinalizacion.split('/').reverse().join('-'));
+      const fechaDeduccion = new Date(parsedAnio, parsedMes - 1);
+
+      return (
+        fechaDeduccion >= periodoInicio &&
+        fechaDeduccion <= periodoFinalizacion &&
+        ((['BENEFICIARIO', 'AFILIADO'].includes(tipoPersona) && p.tipoPlanilla.nombre_planilla === 'ORDINARIA BENEFICIARIO') ||
+          (['JUBILADO', 'PENSIONADO'].includes(tipoPersona) && p.tipoPlanilla.nombre_planilla === 'ORDINARIA JUBILADOS Y PENSIONADOS'))
+      );
+    });
+
+    if (!planilla) {
+      return { error: `No se encontró planilla adecuada para el mes/año proporcionado o el tipo de persona: ${tipoPersona}`, processed: false };
+    }
+
+    const deduccionExistente = await repositories.detalleDeduccionRepository.findOne({
+      where: {
+        anio: parsedAnio,
+        mes: parsedMes,
+        monto_total: parsedMontoTotal,
+        persona: { id_persona: persona.id_persona },
+        deduccion: { id_deduccion: deduccion.id_deduccion },
+        planilla: { id_planilla: planilla.id_planilla },
+      },
+    });
+
+    if (deduccionExistente) {
+      return { error: `Deducción duplicada detectada`, processed: false };
+    }
+
+    const detalleDeduccion = repositories.detalleDeduccionRepository.create({
+      anio: parsedAnio,
+      mes: parsedMes,
+      monto_total: parsedMontoTotal,
+      monto_aplicado: parsedMontoTotal,
+      estado_aplicacion: 'EN PRELIMINAR',
+      persona,
+      deduccion,
+      planilla,
+      personaPorBanco: bancoActivo,
+    });
+
+    await repositories.detalleDeduccionRepository.save(detalleDeduccion);
+    return { processed: true };
   }
+
+  async uploadDeducciones(file: Express.Multer.File): Promise<{ message: string; failedRows: any[] }> {
+    const failedRows: any[] = [];
+    const rows: any[] = [];
+
+    return new Promise((resolve, reject) => {
+      csv
+        .parseString(file.buffer.toString(), { headers: true })
+        .on('data', row => {
+          // Aquí asumimos que el CSV tiene columnas separadas
+          // Separamos el string usando el delimitador ';'
+          const dataString = row['anio;mes;dni;codigoDeduccion;montoTotal'];
+          const [anio, mes, dni, codigoDeduccion, montoTotal] = dataString.split(';');
+
+          // Se agrega cada fila como un objeto con las propiedades necesarias
+          rows.push({ anio, mes, dni, codigoDeduccion, montoTotal });
+        })
+        .on('end', async () => {
+          const repositories = {
+            personaRepository: this.personaRepository,
+            deduccionRepository: this.deduccionRepository,
+            personaPorBancoRepository: this.personaPorBancoRepository,
+            planillaRepository: this.planillaRepository,
+            detalleDeduccionRepository: this.detalleDeduccionRepository,
+          };
+
+          const limit = pLimit(10); // Limitar a 10 conexiones concurrentes
+          const workerPromises = rows.map(row =>
+            limit(() => this.processRow(row, repositories).then(result => {
+              if (result.error) {
+                failedRows.push({ ...row, error: result.error });
+              }
+              return result;
+            }))
+          );
+
+          await Promise.all(workerPromises);
+          resolve({ message: 'Deducciones procesadas correctamente', failedRows });
+        })
+        .on('error', (error) => reject(error));
+    });
+  }
+
+
+
+
+
+
+
+
+
 
 
   async obtenerDeduccionesPorAnioMes(dni: string, anio: number, mes: number): Promise<any> {
@@ -280,7 +303,6 @@ export class DeduccionService {
       throw new InternalServerErrorException('Error al obtener deducciones');
     }
   }
-
 
   async create(createDeduccionDto: CreateDeduccionDto): Promise<Net_Deduccion> {
     const existingDeduccion = await this.deduccionRepository.findOne({

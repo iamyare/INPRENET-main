@@ -183,6 +183,8 @@ export class DetalleBeneficioService {
   }
 
   async createDetalleBeneficioAfiliado(data: any, idPersonaPadre?: number): Promise<any> {
+    console.log(data);
+
     const { datos, itemSeleccionado } = data
     return await this.entityManager.transaction(async manager => {
       try {
@@ -230,8 +232,8 @@ export class DetalleBeneficioService {
                   ${detPer.ID_PERSONA},
                   ${beneficio.id_beneficio},
                   '${this.convertirCadenaAFecha(datos.fecha_calculo)}',
-                  ${datos.periodo && datos.periodo.start ? `'${this.convertirCadenaAFecha(datos.periodo.start)}'` : 'null'},
-                  ${datos.periodo && datos.periodo.end ? `'${this.convertirCadenaAFecha(datos.periodo.end)}'` : 'null'},
+                  ${datos.periodo_inicio ? `'${datos.periodo_inicio}'` : 'null'},
+                  ${datos.periodo_finalizacion ? `'${datos.periodo_finalizacion}'` : 'null'},
                   ${parseFloat(datos.monto_total)},
                   '${datos.metodo_pago}',
                   ${parseFloat(datos.monto_por_periodo)},
@@ -241,6 +243,7 @@ export class DetalleBeneficioService {
                   '${datos.estado_solicitud}',
                   '${datos.observacion}'
               )`;
+            console.log(queryInsDeBBenf);
 
             const detBeneBeneficia = await this.entityManager.query(queryInsDeBBenf);
             return detBeneBeneficia;
@@ -297,8 +300,8 @@ export class DetalleBeneficioService {
                     ${detPer.ID_PERSONA},
                     ${beneficio.id_beneficio},
                     '${this.convertirCadenaAFecha(datos.fecha_calculo)}',
-                    ${datos.periodo && datos.periodo.start ? `'${this.convertirCadenaAFecha(datos.periodo.start)}'` : 'null'},
-                    ${datos.periodo && datos.periodo.end ? `'${this.convertirCadenaAFecha(datos.periodo.end)}'` : 'null'},
+                    ${datos.periodo_inicio ? `'${datos.periodo_inicio}'` : 'null'},
+                    ${datos.periodo_finalizacion ? `'${datos.periodo_finalizacion}'` : 'null'},
                     ${datos.monto_total},
                     '${datos.metodo_pago}',
                     ${datos.monto_por_periodo},

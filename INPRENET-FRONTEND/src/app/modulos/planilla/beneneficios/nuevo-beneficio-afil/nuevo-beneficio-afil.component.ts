@@ -1,10 +1,10 @@
-import { Component, OnInit, ViewChild, ChangeDetectorRef  } from '@angular/core';
+import { Component, OnInit, ViewChild, ChangeDetectorRef } from '@angular/core';
 import { FormBuilder, FormGroup, ValidatorFn, Validators } from '@angular/forms';
 import { ToastrService, ToastrModule } from 'ngx-toastr';
 import { AfiliadoService } from 'src/app/services/afiliado.service';
 import { BeneficiosService } from 'src/app/services/beneficios.service';
 import { FieldConfig } from 'src/app/shared/Interfaces/field-config';
-import { format } from 'date-fns';
+import { addDays, addMonths, format } from 'date-fns';
 import { unirNombres } from '../../../../shared/functions/formatoNombresP';
 import { DynamicFormComponent } from 'src/app/components/dinamicos/dynamic-form/dynamic-form.component';
 import { convertirFecha } from 'src/app/shared/functions/formatoFecha';
@@ -39,18 +39,18 @@ export class NuevoBeneficioAfilComponent implements OnInit {
       col: 'nombre_completo',
 
     },
-    { header: 'Género', col: 'genero',  },
+    { header: 'Género', col: 'genero', },
     {
       header: 'Tipo Afiliado',
       col: 'tipo_afiliado',
 
     },
-    { header: 'Porcentaje', col: 'porcentaje',  },
+    { header: 'Porcentaje', col: 'porcentaje', },
   ];
   datosTabl: any[] = [];
   filas: any
   ejecF: any;
-  desOBenSeleccionado :any
+  desOBenSeleccionado: any
   mostrarB: any;
 
   constructor(
@@ -68,7 +68,7 @@ export class NuevoBeneficioAfilComponent implements OnInit {
 
   previsualizarInfoAfil() {
     this.Afiliado.nameAfil = ""
-    
+
     if (this.form.value.dni) {
       this.svcAfilServ.getAfilByDni(this.form.value.dni).subscribe(
         async (res) => {
@@ -91,19 +91,19 @@ export class NuevoBeneficioAfilComponent implements OnInit {
               salario_base: res.SALARIO_BASE,
               fecha_nacimiento: convertirFecha(res.FECHA_NACIMIENTO, false)
             };
-          
+
             const tipoPersona = item.fallecido === "SI" ? "BENEFICIARIO" : item.tipo_persona;
             this.getTipoBen(tipoPersona);
-          
+
             if (this.Afiliado.tipo_persona === "AFILIADO" && this.Afiliado.estado_persona === "INACTIVO") {
               this.toastr.warning(`No se puede asignar beneficios a los Afiliados INACTIVOS`, "Advertencia");
             }
-          
+
             this.Afiliado = {
               ...item,
               nameAfil: unirNombres(res.PRIMER_NOMBRE, res.SEGUNDO_NOMBRE, res.TERCER_NOMBRE, res.PRIMER_APELLIDO, res.SEGUNDO_APELLIDO)
             };
-          
+
             this.getFilas().then(() => this.cargar());
             this.cargar();
           } else {
@@ -152,12 +152,12 @@ export class NuevoBeneficioAfilComponent implements OnInit {
           { type: 'number', label: 'Monto primera cuota', name: 'monto_primera_cuota', validations: [Validators.required], display: true },
           { type: 'date', label: 'Fecha de efectividad', name: 'fecha_calculo', validations: [], display: true },
           { type: 'text', label: 'Observación', name: 'observacion', validations: [], display: true },
-          { type: 'daterange', label: 'Periodo', name: 'periodo', validations: [], display: false },
           { type: 'number', label: 'Número de rentas aprobadas', name: 'num_rentas_aplicadas', validations: [], display: false },
+          { type: 'number', label: 'dia', name: 'dia', validations: [], display: false },
         ];
 
         this.myFormFields2 = [
-          { type: 'text', label: 'DNI del beneficiario', name: 'dni', value:"", validations: [Validators.required, Validators.minLength(13), Validators.maxLength(14)], display: true, readOnly:true },
+          { type: 'text', label: 'DNI del beneficiario', name: 'dni', value: "", validations: [Validators.required, Validators.minLength(13), Validators.maxLength(14)], display: true, readOnly: true },
           {
             type: 'dropdown', label: 'Tipo de beneficio', name: 'nombre_beneficio',
             options: this.tiposBeneficios,
@@ -177,8 +177,8 @@ export class NuevoBeneficioAfilComponent implements OnInit {
           { type: 'number', label: 'Monto por periodo', name: 'monto_por_periodo', validations: [Validators.required], display: true },
           { type: 'number', label: 'Monto total', name: 'monto_total', validations: [Validators.required], display: true },
           { type: 'date', label: 'Fecha de efectividad', name: 'fecha_calculo', validations: [], display: true },
-          { type: 'daterange', label: 'Periodo', name: 'periodo', validations: [], display: false },
           { type: 'number', label: 'Número de rentas aprobadas', name: 'num_rentas_aplicadas', validations: [], display: false },
+          { type: 'number', label: 'dia', name: 'dia', validations: [], display: false },
         ];
 
         this.myFormFields1[9].display = false;
@@ -218,7 +218,7 @@ export class NuevoBeneficioAfilComponent implements OnInit {
     if (this.Afiliado.fallecido == "SI" && (this.Afiliado.tipo_persona == 'AFILIADO' ||
       this.Afiliado.tipo_persona == 'JUBILADO' ||
       this.Afiliado.tipo_persona == 'PENSIONADO')) {
-        try {
+      try {
         await this.getColumns();
         const data = await this.svcAfilServ.obtenerBenDeAfil(this.form.value.dni).toPromise();
 
@@ -254,19 +254,19 @@ export class NuevoBeneficioAfilComponent implements OnInit {
         async (response) => {
           const primerObjetoTransformado = this.transformarObjeto(response[0]);
           this.myColumns = [
-            { header: 'N_Identificacion', col: 'dni',  },
+            { header: 'N_Identificacion', col: 'dni', },
             {
               header: 'Nombre Completo',
               col: 'nombre_completo',
 
             },
-            { header: 'Genero', col: 'genero',  },
+            { header: 'Genero', col: 'genero', },
             {
               header: 'Tipo Afiliado',
               col: 'tipo_afiliado',
 
             },
-            { header: 'Porcentaje', col: 'porcentaje',  },
+            { header: 'Porcentaje', col: 'porcentaje', },
           ];
         },
         (error) => {
@@ -282,7 +282,7 @@ export class NuevoBeneficioAfilComponent implements OnInit {
   }
 
   cargar() {
-    if (this.ejecF ) {
+    if (this.ejecF) {
       this.ejecF(this.filas).then(() => {
       });
     }
@@ -370,37 +370,22 @@ export class NuevoBeneficioAfilComponent implements OnInit {
     let startDateFormatted
     let endDateFormatted
 
+    const fechaActual = new Date();
     if (temp == "VITALICIO") {
       this.myFormFields2[9].display = false
-
-      const fechaActual = new Date();
 
       startDateFormatted = format(fechaActual, 'dd-MM-yyyy');
       endDateFormatted = '01-01-2500';
 
     } else if (!temp) {
       this.myFormFields2[9].display = true
-
-      const startDate = new Date(event.value.periodo.start);
-      const endDate = new Date(event.value.periodo.end);
-
-      const opciones: Intl.DateTimeFormatOptions = {
-        year: 'numeric',
-        month: '2-digit',
-        day: '2-digit'
-      };
-
-      startDateFormatted = startDate.toLocaleDateString('es', opciones).replace(/\//g, '-');
-      endDateFormatted = endDate.toLocaleDateString('es', opciones).replace(/\//g, '-');
-
     }
 
-    if (startDateFormatted != 'Invalid Date' && endDateFormatted != 'Invalid Date') {
-      const datosFormateados = {
-        ...event.value,
-      };
-      this.datosFormateados = datosFormateados;
-    }
+    const datosFormateados = {
+      ...event.value
+    };
+    this.datosFormateados = datosFormateados;
+
   }
 
   transformarObjeto(objeto: any) {
@@ -417,13 +402,28 @@ export class NuevoBeneficioAfilComponent implements OnInit {
   guardarNTBenef() {
     /* Asignar al afiliado si no ha fallecido */
     /* Asignar a los beneficiarios si el afiliado ya falleció */
+    const fechaActual = new Date();
     if (this.Afiliado.fallecido != "SI") {
       this.datosFormateados["dni"] = this.form.value.dni;
+      const startDateFormatted = format(fechaActual, 'dd-MM-yyyy');
+      let fechaFormateada = '01-01-2500';
+
+      if (this.datosFormateados?.num_rentas_aplicadas && this.datosFormateados?.dia) {
+        const endDateFormatted = addDays(addMonths(fechaActual, parseInt(this.datosFormateados?.num_rentas_aplicadas, 10)), parseInt(this.datosFormateados?.dia, 10));
+        fechaFormateada = format(endDateFormatted, 'dd-MM-yyyy');
+      }
+
+      this.datosFormateados["periodo_inicio"] = startDateFormatted;
+      this.datosFormateados["periodo_finalizacion"] = fechaFormateada;
+
+
+      console.log(this.datosFormateados);
+
       this.svcBeneficioServ.asigBeneficioAfil(this.datosFormateados, this.desOBenSeleccionado).subscribe(
         {
           next: (response) => {
             this.toastr.success("se asignó correctamente el beneficio");
-            this.limpiarFormulario()
+            //this.limpiarFormulario()
           },
           error: (error) => {
             let mensajeError = 'Error desconocido al crear Detalle de beneficio';
@@ -443,7 +443,7 @@ export class NuevoBeneficioAfilComponent implements OnInit {
         {
           next: (response) => {
             this.toastr.success("se asignó correctamente el beneficio");
-            this.limpiarFormulario()
+            //this.limpiarFormulario()
           },
           error: (error) => {
             let mensajeError = 'Error desconocido al crear Detalle de beneficio';

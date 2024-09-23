@@ -232,7 +232,7 @@ export class VerplancerradaComponent {
             dni: item.DNI,
             NOMBRE_COMPLETO: item.NOMBRE_COMPLETO,
             TIPO_PERSONA: item.TIPO_PERSONA,
-            correo_1: item.correo_1,
+            //correo_1: item.correo_1,
             TOTAL_BENEFICIO: item.TOTAL_BENEFICIO,
             DEDUCCIONES_INPREMA: item.DEDUCCIONES_INPREMA || 0,
             DEDUCCIONES_TERCEROS: item.DEDUCCIONES_TERCEROS || 0,
@@ -259,8 +259,10 @@ export class VerplancerradaComponent {
   manejarAccionUno(row: any) {
     let logs: any[] = [];
 
+    console.log(row);
     this.planillaService.getBeneficiosDefinitiva(this.idPlanilla, row.id_afiliado).subscribe({
       next: (response) => {
+
         logs.push({ message: `DNI:${row.dni}`, detail: row });
         logs.push({ message: `Nombre Completo:${row.NOMBRE_COMPLETO}`, detail: row });
         logs.push({ message: 'Datos De Beneficios:', detail: response, type: 'beneficios' });

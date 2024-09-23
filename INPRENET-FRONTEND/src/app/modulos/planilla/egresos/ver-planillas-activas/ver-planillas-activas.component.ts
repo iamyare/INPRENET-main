@@ -74,6 +74,8 @@ export class VerPlanillasActivasComponent {
   getFilas = async () => {
     try {
       const data = await this.planillaService.getPlanillasActivas().toPromise();
+      console.log(data);
+
       this.filas = data.map((item: any) => ({
         id_planilla: item.id_planilla,
         codigo_planilla: item.codigo_planilla,
@@ -82,7 +84,8 @@ export class VerPlanillasActivasComponent {
         secuencia: item.secuencia,
         estado: item.estado,
         periodoInicio: item.periodoInicio,
-        periodoFinalizacion: item.periodoFinalizacion
+        periodoFinalizacion: item.periodoFinalizacion,
+        tipoPlanilla: item.tipoPlanilla.nombre_planilla
       }));
 
       return data;

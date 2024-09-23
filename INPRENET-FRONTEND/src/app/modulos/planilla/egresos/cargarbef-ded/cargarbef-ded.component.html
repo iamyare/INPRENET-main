@@ -1,36 +1,43 @@
+<app-ver-planillas-activas (getElemSeleccionados)="getElemSeleccionados($event)"></app-ver-planillas-activas>
+
 <mat-tab-group>
   <mat-tab label="Cargar Beneficios">
     <div>
       <!-- Contenido para cargar beneficios -->
-      <button
+      <button  *ngIf="tipoPlanilla=='ORDINARIA BENEFICIARIO'"
         mat-raised-button
         color="primary"
         (click)="asignarBeneficiosOrdinariaBeneficiariosAfiliados()"
       >
         Asignar beneficios a planilla ordinaria de Beneficiarios y Afiliados
       </button>
-      <button
+      <button *ngIf="tipoPlanilla=='ORDINARIA JUBILADOS Y PENSIONADOS'"
         mat-raised-button
         color="primary"
         (click)="asignarBeneficiosOrdinariaJubiladosPensionados()"
       >
         Asignar beneficios a planilla ordinaria de Jubilados y Pensionados
       </button>
-      <!--       <button
-        mat-raised-button
-        color="primary"
-        (click)="asignarBeneficiosComplementariaBeneficiariosAfiliados()"
-      >
-        Asignar beneficios a planilla complementaria de Beneficiarios y
-        Afiliados
-      </button>
-      <button
-        mat-raised-button
-        color="primary"
-        (click)="asignarBeneficiosComplementariaJubiladosPensionados()"
-      >
-        Asignar beneficios a planilla complementaria de Jubilados y Pensionados
-      </button> -->
+
+      <div >
+        <button *ngIf="tipoPlanilla=='COMPLEMENTARIA BENEFICIARIO'"
+          mat-raised-button
+          color="primary"
+          (click)="asignarBeneficiosComplementariaBeneficiariosAfiliados()"
+        >
+          Asignar beneficios a planilla complementaria de Beneficiarios y
+          Afiliados
+        </button>
+        <button *ngIf="tipoPlanilla=='COMPLEMENTARIA JUBILADO Y PENSIONADO'"
+          mat-raised-button
+          color="primary"
+          (click)="asignarBeneficiosComplementariaJubiladosPensionados()"
+        >
+          Asignar beneficios a planilla complementaria de Jubilados y Pensionados
+        </button>
+
+      </div>
+
     </div>
   </mat-tab>
   <!-- <mat-tab label="Cargar Deducciones de INPREMA">
@@ -39,7 +46,7 @@
       <p>Formulario o contenido para cargar deducciones de INPREMA</p>
     </div>
   </mat-tab> -->
-  <mat-tab label="Cargar Deducciones de Terceros">
+  <mat-tab label="Cargar Deducciones de Terceros" *ngIf="tipoPlanilla!='COMPLEMENTARIA BENEFICIARIO' && tipoPlanilla!='COMPLEMENTARIA JUBILADO Y PENSIONADO'" >
     <div>
       <!-- Incluir el nuevo componente para subir deducciones de terceros -->
       <!-- <app-nueva-deduccion-afil></app-nueva-deduccion-afil> -->
@@ -47,7 +54,7 @@
       <!-- <app-subir-deducciones-terceros></app-subir-deducciones-terceros> -->
     </div>
   </mat-tab>
-  <mat-tab label="Bajas">
+  <mat-tab label="Bajas" *ngIf="tipoPlanilla!='COMPLEMENTARIA BENEFICIARIO' && tipoPlanilla!='COMPLEMENTARIA JUBILADO Y PENSIONADO'">
     <app-actualizar-fallecidos></app-actualizar-fallecidos>
   </mat-tab>
 </mat-tab-group>

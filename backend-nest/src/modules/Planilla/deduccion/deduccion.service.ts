@@ -63,7 +63,7 @@ export class DeduccionService {
       .where('id_deduccion IN (SELECT d.id_deduccion FROM NET_DEDUCCION d WHERE d.cod_deduccion = :codDeduccion AND d.id_centro_trabajo = :idCentroTrabajo)', { codDeduccion, idCentroTrabajo })
       .andWhere('estado_aplicacion = :estado', { estado: 'EN PRELIMINAR' })
       .execute();
-}
+  }
 
 
   async uploadDeducciones(file: Express.Multer.File): Promise<{ message: string, failedRows: any[] }> {
@@ -78,59 +78,64 @@ export class DeduccionService {
         raw: false, // Este parámetro hace que todos los datos se lean como cadenas
       }) as any[][];
       const [header, ...rows] = data;
+      let i = 1
       for (const row of rows) {
         const [anio, mes, dni, codigoDeduccion, montoTotal] = row;
-        console.log(dni);
-        
-  
+        i += 1;
+        if (!anio && !mes && !dni && !codigoDeduccion && !montoTotal) {
+          this.logger.warn(`Fila ignorada por no tener todas las columnas llenas: ${JSON.stringify(row)}`);
+          failedRows.push([...row, `Se detuvo porque encontró la fila N. ${i} vacía. Los registros anteriores a la fila vacia fueron procesados correctamente`]);
+          break;
+        }
+
         if (!anio || !mes || !dni || !codigoDeduccion || !montoTotal) {
           this.logger.warn(`Fila ignorada por no tener todas las columnas llenas: ${JSON.stringify(row)}`);
           failedRows.push([...row, 'Faltan columnas obligatorias']);
           continue;
         }
-  
+
         const parsedAnio = Number(anio);
         const parsedMes = Number(mes);
         const parsedDni = dni.toString();
         const parsedCodigoDeduccion = Number(codigoDeduccion);
         const parsedMontoTotal = parseFloat(montoTotal);
-  
+
         if (isNaN(parsedAnio) || isNaN(parsedMes) || parsedDni === '' || isNaN(parsedCodigoDeduccion) || isNaN(parsedMontoTotal)) {
           this.logger.warn(`Datos inválidos en la fila (conversión fallida): ${JSON.stringify(row)}`);
           failedRows.push([...row, 'Error en la conversión de datos']);
           continue;
         }
-  
+
         const persona = await this.personaRepository.findOne({
           where: { n_identificacion: parsedDni },
           relations: ['detallePersona', 'detallePersona.tipoPersona']
         });
-  
+
         if (!persona) {
           this.logger.warn(`No se encontró persona con DNI: ${parsedDni}`);
-          failedRows.push([...row, `No se encontró persona con DNI: ${parsedDni}`]); 
+          failedRows.push([...row, `No se encontró persona con DNI: ${parsedDni}`]);
           continue;
         }
-  
+
         // Verificación si la persona está marcada como fallecida
         if (persona.fallecido === 'SI') {
           this.logger.warn(`La persona con DNI: ${parsedDni} está marcada como fallecida`);
-          failedRows.push([...row, `La persona está marcada como fallecida`]); 
+          failedRows.push([...row, `La persona está marcada como fallecida`]);
           continue;
         }
-  
+
         const tipoPersona = persona.detallePersona[0]?.tipoPersona?.tipo_persona;
-  
+
         const deduccion = await this.deduccionRepository.findOne({
           where: { codigo_deduccion: parsedCodigoDeduccion },
         });
-  
+
         if (!deduccion) {
           this.logger.warn(`No se encontró deducción con código: ${parsedCodigoDeduccion}`);
-          failedRows.push([...row, `No se encontró deducción con código: ${parsedCodigoDeduccion}`]); 
+          failedRows.push([...row, `No se encontró deducción con código: ${parsedCodigoDeduccion}`]);
           continue;
         }
-  
+
         // Buscar banco activo para la persona
         const bancoActivo = await this.personaPorBancoRepository.findOne({
           where: {
@@ -138,13 +143,13 @@ export class DeduccionService {
             estado: 'ACTIVO'
           }
         });
-  
+
         if (!bancoActivo) {
           this.logger.warn(`No se encontró un banco activo para la persona con DNI: ${parsedDni}`);
-          failedRows.push([...row, `No se encontró un banco activo para la persona`]); 
+          failedRows.push([...row, `No se encontró un banco activo para la persona`]);
           continue;
         }
-  
+
         let planillas;
         try {
           planillas = await this.planillaRepository.find({
@@ -156,37 +161,37 @@ export class DeduccionService {
           });
         } catch (err) {
           this.logger.error(`Error en la consulta de planillas: ${err.message}`);
-          failedRows.push([...row, `Error en la consulta de planillas: ${err.message}`]); 
+          failedRows.push([...row, `Error en la consulta de planillas: ${err.message}`]);
           continue;
         }
-  
+
         if (!planillas || planillas.length === 0) {
           this.logger.warn(`No se encontró planilla activa para el mes: ${parsedMes}-${parsedAnio}`);
-          failedRows.push([...row, `No se encontró planilla activa para el mes: ${parsedMes}-${parsedAnio}`]); 
+          failedRows.push([...row, `No se encontró planilla activa para el mes: ${parsedMes}-${parsedAnio}`]);
           continue;
         }
-  
+
         // Validación del periodo de la planilla
         const planilla = planillas.find(p => {
           const periodoInicio = new Date(p.periodoInicio.split('/').reverse().join('-'));
           const periodoFinalizacion = new Date(p.periodoFinalizacion.split('/').reverse().join('-'));
-  
+
           const fechaDeduccion = new Date(parsedAnio, parsedMes - 1);
-  
+
           return (
             fechaDeduccion >= periodoInicio &&
             fechaDeduccion <= periodoFinalizacion &&
             ((['BENEFICIARIO', 'AFILIADO'].includes(tipoPersona) && p.tipoPlanilla.nombre_planilla === 'ORDINARIA BENEFICIARIO') ||
-            (['JUBILADO', 'PENSIONADO'].includes(tipoPersona) && p.tipoPlanilla.nombre_planilla === 'ORDINARIA JUBILADOS Y PENSIONADOS'))
+              (['JUBILADO', 'PENSIONADO'].includes(tipoPersona) && p.tipoPlanilla.nombre_planilla === 'ORDINARIA JUBILADOS Y PENSIONADOS'))
           );
         });
-  
+
         if (!planilla) {
           this.logger.warn(`No se encontró planilla adecuada para el mes/año proporcionado o el tipo de persona: ${tipoPersona}`);
-          failedRows.push([...row, `No se encontró planilla adecuada para el mes/año proporcionado o el tipo de persona: ${tipoPersona}`]); 
+          failedRows.push([...row, `No se encontró planilla adecuada para el mes/año proporcionado o el tipo de persona: ${tipoPersona}`]);
           continue;
         }
-  
+
         const deduccionExistente = await this.detalleDeduccionRepository.findOne({
           where: {
             anio: parsedAnio,
@@ -197,13 +202,13 @@ export class DeduccionService {
             planilla: { id_planilla: planilla.id_planilla },
           },
         });
-  
+
         if (deduccionExistente) {
           this.logger.warn(`Deducción duplicada detectada: ${JSON.stringify(row)}`);
-          failedRows.push([...row, `Deducción duplicada detectada`]); 
+          failedRows.push([...row, `Deducción duplicada detectada`]);
           continue;
         }
-  
+
         const detalleDeduccion = this.detalleDeduccionRepository.create({
           anio: parsedAnio,
           mes: parsedMes,
@@ -215,15 +220,15 @@ export class DeduccionService {
           planilla,
           personaPorBanco: bancoActivo
         });
-  
+
         await this.detalleDeduccionRepository.save(detalleDeduccion);
       }
     }
-  
+
     // Retornar las filas que no se insertaron junto con el mensaje
     return { message: 'Deducciones procesadas correctamente', failedRows };
   }
-  
+
 
   async obtenerDeduccionesPorAnioMes(dni: string, anio: number, mes: number): Promise<any> {
     try {
@@ -263,7 +268,7 @@ export class DeduccionService {
           anio: d.anio,
           mes: d.mes,
           fecha_aplicado: d.fecha_aplicado,
-          centro_trabajo: d.deduccion.centroTrabajo ? d.deduccion.centroTrabajo.nombre_centro_trabajo : 'N/A', 
+          centro_trabajo: d.deduccion.centroTrabajo ? d.deduccion.centroTrabajo.nombre_centro_trabajo : 'N/A',
           codigo_planilla: d.planilla ? d.planilla.codigo_planilla : 'N/A',
         })),
       };

@@ -173,7 +173,7 @@ export class VerplanprelcompComponent implements OnInit {
                 TOTAL_DEDUCCIONES_TERCEROS: item.TOTAL_DEDUCCIONES_TERCEROS || 0,
                 fecha_cierre: item.fecha_cierre,
                 tipo_afiliado: item.tipo_afiliado,
-                "total": item.TOTAL_BENEFICIOS || 0 - (item.TOTAL_TOTAL_DEDUCCIONES_INPREMA || 0 + item.TOTAL_DEDUCCIONES_TERCEROS || 0),
+                "total": item.TOTAL_NETO,
 
                 //correo_1: item.correo_1
                 //beneficiosNombres: item.beneficiosNombres,
@@ -277,7 +277,7 @@ export class VerplanprelcompComponent implements OnInit {
             total_beneficios: item.TOTAL_BENEFICIOS,
             total_deducciones_inprema: item.TOTAL_DEDUCCIONES_INPREMA || 0,
             total_deducciones_terceros: item.TOTAL_DEDUCCIONES_TERCEROS || 0,
-            "total": item.TOTAL_BENEFICIOS - (parseFloat(item.TOTAL_DEDUCCIONES_INPREMA) || 0 + parseFloat(item.TOTAL_DEDUCCIONES_TERCEROS) || 0),
+            "total": item.TOTAL_NETO,
             correo_1: item.correo_1,
             fecha_cierre: item.fecha_cierre,
             num_cuenta: item.NUM_CUENTA,

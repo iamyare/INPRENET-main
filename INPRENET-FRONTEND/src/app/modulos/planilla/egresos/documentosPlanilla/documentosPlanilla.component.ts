@@ -20,7 +20,7 @@ export class DocumentosPlanillaComponent implements OnInit {
   planillaForm: FormGroup;
   tipoPlanilla: string | null = null;
 
-  constructor(private fb: FormBuilder, private http: HttpClient, private planillaService: PlanillaService, private deduccionesService: DeduccionesService,public dialog: MatDialog) {
+  constructor(private fb: FormBuilder, private http: HttpClient, private planillaService: PlanillaService, private deduccionesService: DeduccionesService, public dialog: MatDialog) {
     this.planillaForm = this.fb.group({
       rangoFechas: this.fb.group({
         fechaInicio: ['', Validators.required],
@@ -118,10 +118,10 @@ export class DocumentosPlanillaComponent implements OnInit {
         const totalDeduccionesTerceros = data.deduccionesTerceros.reduce((acc: any, cur: any) => acc + (cur.TOTAL_MONTO_DEDUCCION ? parseFloat(cur.TOTAL_MONTO_DEDUCCION) : 0), 0);
 
         const totalMontoConCuenta = data.beneficiosSC
-        .filter((cur:any) => cur.NOMBRE_BANCO == 'SIN BANCO')
-        .reduce((acc: any, cur: any) => acc + (cur.TOTAL_MONTO_BENEFICIO ? parseFloat(cur.TOTAL_MONTO_BENEFICIO) : 0), 0);
+          .filter((cur: any) => cur.NOMBRE_BANCO == 'SIN BANCO')
+          .reduce((acc: any, cur: any) => acc + (cur.TOTAL_MONTO_BENEFICIO ? parseFloat(cur.TOTAL_MONTO_BENEFICIO) : 0), 0);
 
-        const netoTotal = totalBeneficios - (totalDeduccionesInprema + totalDeduccionesTerceros) ;
+        const netoTotal = totalBeneficios - (totalDeduccionesInprema + totalDeduccionesTerceros);
 
         const docDefinition: TDocumentDefinitions = {
           pageSize: 'LETTER',
@@ -527,7 +527,7 @@ export class DocumentosPlanillaComponent implements OnInit {
             },
             { text: 'MONTOS A PAGAR POR BANCO', style: 'subheader', margin: [0, 5, 0, 10] },
             ...this.crearTablaMontosPorBanco(data, 'MONTOS A PAGAR POR BANCO', `TOTAL DE MONTOS A PAGAR: L ${totalMontoConCuenta.toFixed(2)}`, [10, 10, 10, 10])
-            ,{
+            , {
               columns: [
                 {
                   width: '33%',
@@ -597,11 +597,11 @@ export class DocumentosPlanillaComponent implements OnInit {
             }
           ],
           styles: {
-            header: { fontSize: 14, bold: true },
-            subheader: { fontSize: 12, bold: false, margin: [0, 5, 0, 10] },
+            header: { fontSize: 10, bold: true },
+            subheader: { fontSize: 9, bold: false, margin: [0, 5, 0, 10] },
             tableHeader: { bold: true, fontSize: 13, color: 'black' },
             tableBody: { fontSize: 9, color: 'black' },
-            tableTotal: { bold: true, fontSize: 13, color: 'black', alignment: 'right' },
+            tableTotal: { bold: true, fontSize: 11, color: 'black', alignment: 'right' },
             signature: { fontSize: 9, bold: true }
           },
           footer: (currentPage, pageCount) => ({

@@ -1995,8 +1995,10 @@ export class PlanillaService {
 
         return {
           ...persona,
-          TOTAL_DEDUCCIONES_INPREMA: deduccionI ? deduccionI['TOTAL_DEDUCCIONES_INPREMA'] : null,
-          TOTAL_DEDUCCIONES_TERCEROS: deduccionT ? deduccionT['TOTAL_DEDUCCIONES_TERCEROS'] : null
+          TOTAL_DEDUCCIONES_INPREMA: deduccionI ? deduccionI['TOTAL_DEDUCCIONES_INPREMA'] : 0,
+          TOTAL_DEDUCCIONES_TERCEROS: deduccionT ? deduccionT['TOTAL_DEDUCCIONES_TERCEROS'] : 0,
+          TOTAL_NETO: persona.TOTAL_BENEFICIOS - ((deduccionI ? deduccionI['TOTAL_DEDUCCIONES_INPREMA'] : 0) + (deduccionT ? deduccionT['TOTAL_DEDUCCIONES_TERCEROS'] : 0))
+
         };
       });
 

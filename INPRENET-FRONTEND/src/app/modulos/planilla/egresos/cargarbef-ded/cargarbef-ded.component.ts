@@ -8,6 +8,7 @@ import { ToastrService } from 'ngx-toastr'; // Importar ToastrService
   styleUrls: ['./cargarbef-ded.component.scss']
 })
 export class CargarbefDedComponent {
+  tipoPlanilla: any;
   constructor(private planillaService: PlanillaService, private toastr: ToastrService) { }
 
   asignarBeneficiosOrdinariaBeneficiariosAfiliados() {
@@ -60,5 +61,9 @@ export class CargarbefDedComponent {
         this.toastr.error('Error al generar la planilla complementaria para Jubilados y Pensionados', 'Error');
       }
     });
+  }
+
+  getElemSeleccionados(event: any) {
+    this.tipoPlanilla = event.tipoPlanilla;
   }
 }

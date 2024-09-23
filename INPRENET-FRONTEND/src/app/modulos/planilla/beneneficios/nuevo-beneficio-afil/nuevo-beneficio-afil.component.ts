@@ -426,9 +426,6 @@ export class NuevoBeneficioAfilComponent implements OnInit {
       this.datosFormateados["periodo_inicio"] = startDateFormatted;
       this.datosFormateados["periodo_finalizacion"] = fechaFormateada;
 
-
-      console.log(this.datosFormateados);
-
       this.svcBeneficioServ.asigBeneficioAfil(this.datosFormateados, this.desOBenSeleccionado).subscribe(
         {
           next: (response) => {

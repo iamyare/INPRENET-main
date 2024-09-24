@@ -24,7 +24,6 @@ import { Net_Centro_Trabajo } from 'src/modules/Empresarial/entities/net_centro_
 import { CrearPersonaCentroTrabajoDto } from './dtos/crear-perf_pers_cent_trab.dto';
 import { net_otra_fuente_ingreso } from '../entities/net_otra_fuente_ingreso.entity';
 import { CrearOtraFuenteIngresoDto } from './dtos/crear-otra_fuente_ingreso.dto';
-import { Net_Ref_Per_Pers } from '../entities/net_ref-per-persona.entity';
 import { CrearBeneficiarioDto } from './dtos/crear-beneficiario.dto';
 import { CrearDiscapacidadDto } from './dtos/crear-discapacidad.dto';
 import { Net_Discapacidad } from '../entities/net_discapacidad.entity';
@@ -37,6 +36,7 @@ import { Net_Cargo_Publico } from 'src/modules/Empresarial/entities/net_cargo_pu
 import { Net_Referencias } from '../entities/net_referencias.entity';
 import { CrearReferenciaDto } from './dtos/crear-referencia.dto';
 import { validate, ValidationError } from 'class-validator';
+import { UpdateConyugeDto } from './dtos/update-conyuge.dto';
 
 @Injectable()
 export class AfiliacionService {
@@ -71,6 +71,8 @@ export class AfiliacionService {
     private readonly detallePersonaRepository: Repository<net_detalle_persona>,
     @InjectRepository(Net_Familia)
     private readonly familiaRepository: Repository<Net_Familia>,
+    @InjectRepository(net_otra_fuente_ingreso)
+    private readonly otraFuenteIngresoRepository: Repository<net_otra_fuente_ingreso>,
     
   ) { }
 
@@ -277,19 +279,21 @@ export class AfiliacionService {
       if (!banco) {
         throw new NotFoundException(`Banco con ID ${crearPersonaBancosDto.id_banco} no encontrado`);
       }
-  
+      if (crearPersonaBancosDto.estado === 'ACTIVO') {
+        await entityManager.update(Net_Persona_Por_Banco, { persona: { id_persona: idPersona }, estado: 'ACTIVO' }, { estado: 'INACTIVO' });
+      }
       const personaBanco = entityManager.create(Net_Persona_Por_Banco, {
         persona: { id_persona: idPersona },
         banco,
         num_cuenta: crearPersonaBancosDto.num_cuenta,
         estado: crearPersonaBancosDto.estado,
       });
-  
       resultados.push(await entityManager.save(Net_Persona_Por_Banco, personaBanco));
     }
   
     return resultados;
   }
+  
   
   async crearPersonaCentrosTrabajo(
     crearPersonaCentrosTrabajoDtos: CrearPersonaCentroTrabajoDto[],
@@ -473,20 +477,17 @@ export class AfiliacionService {
       let personaReferencia = await this.personaRepository.findOne({
         where: { n_identificacion: familiaDto.persona_referencia.n_identificacion }
       });
-
       if (!personaReferencia) {
         personaReferencia = await this.crearPersona(familiaDto.persona_referencia, null, entityManager);
       }
-
       const familia = entityManager.create(Net_Familia, {
         parentesco: familiaDto.parentesco,
         persona: { id_persona: idPersona },
         referenciada: { id_persona: personaReferencia.id_persona },
       });
-
       await entityManager.save(Net_Familia, familia);
     }
-  }
+  } 
 
   async crearDatos(crearDatosDto: CrearDatosDto, fotoPerfil: Express.Multer.File): Promise<any> {
     return await this.personaRepository.manager.transaction(async (transactionalEntityManager) => {
@@ -646,5 +647,109 @@ export class AfiliacionService {
     referencia.estado = datosActualizados.estado ?? referencia.estado;
     await this.referenciaRepository.save(referencia);
   }
+
+  async editarOtraFuenteIngreso(id: number, dto: CrearOtraFuenteIngresoDto): Promise<net_otra_fuente_ingreso> {
+    const otraFuenteIngreso = await this.otraFuenteIngresoRepository.findOne({ where: { id_otra_fuente_ingreso: id } });
+    if (!otraFuenteIngreso) {
+      throw new NotFoundException(`La fuente de ingreso con ID ${id} no fue encontrada`);
+    }
+    otraFuenteIngreso.actividad_economica = dto.actividad_economica;
+    if (dto.monto_ingreso) {
+      otraFuenteIngreso.monto_ingreso = dto.monto_ingreso;
+    }
+    if (dto.observacion) {
+      otraFuenteIngreso.observacion = dto.observacion;
+    }
+    return await this.otraFuenteIngresoRepository.save(otraFuenteIngreso);
+  }
+
+  async eliminarOtraFuenteIngreso(id: number): Promise<void> {
+    const fuenteIngreso = await this.otraFuenteIngresoRepository.findOne({ where: { id_otra_fuente_ingreso: id } });
+    
+    if (!fuenteIngreso) {
+      throw new NotFoundException(`La fuente de ingreso con ID ${id} no fue encontrada`);
+    }
+    await this.otraFuenteIngresoRepository.remove(fuenteIngreso);
+  }
+
+  async obtenerConyugePorIdentificacion(n_identificacion: string): Promise<any> {
+    const persona = await this.personaRepository.createQueryBuilder("persona")
+        .where("persona.n_identificacion = :n_identificacion", { n_identificacion })
+        .getOne();
+
+    if (!persona) {
+        throw new NotFoundException(`No se encontró la persona con identificación ${n_identificacion}`);
+    }
+    const conyuge = await this.familiaRepository.createQueryBuilder("familia")
+        .leftJoinAndSelect("familia.referenciada", "referenciada")
+        .where("familia.persona.id_persona = :id_persona", { id_persona: persona.id_persona })
+        .andWhere("familia.parentesco = :parentesco", { parentesco: 'CÓNYUGUE' })
+        .getOne();
+
+    if (!conyuge || !conyuge.referenciada) {
+        throw new NotFoundException(`No se encontró cónyuge para la persona con identificación ${n_identificacion}`);
+    }
+    const detallePersona = await this.detallePersonaRepository.createQueryBuilder("detallePersona")
+        .where("detallePersona.ID_PERSONA = :id_persona", { id_persona: conyuge.referenciada.id_persona })
+        .andWhere("detallePersona.ID_TIPO_PERSONA = :id_tipo_persona", { id_tipo_persona: 1 })
+        .getOne();
+
+    const esAfiliado = detallePersona ? 'SI' : 'NO';
+    return {
+        primer_nombre: conyuge.referenciada.primer_nombre,
+        segundo_nombre: conyuge.referenciada.segundo_nombre,
+        tercer_nombre: conyuge.referenciada.tercer_nombre,
+        primer_apellido: conyuge.referenciada.primer_apellido,
+        segundo_apellido: conyuge.referenciada.segundo_apellido,
+        n_identificacion: conyuge.referenciada.n_identificacion,
+        fecha_nacimiento: conyuge.referenciada.fecha_nacimiento,
+        telefono_1: conyuge.referenciada.telefono_1,
+        telefono_2: conyuge.referenciada.telefono_2,
+        telefono_3: conyuge.referenciada.telefono_3,
+        trabaja: conyuge.trabaja,
+        esAfiliado
+    };
+}
+
+
+  async actualizarConyuge(n_identificacion: string, body: any): Promise<any> {
+    const persona = await this.personaRepository.createQueryBuilder("persona")
+      .where("persona.n_identificacion = :n_identificacion", { n_identificacion })
+      .getOne();
+  
+    if (!persona) {
+      throw new NotFoundException(`No se encontró la persona con identificación ${n_identificacion}`);
+    }
+  
+    const conyuge = await this.familiaRepository.createQueryBuilder("familia")
+      .leftJoinAndSelect("familia.referenciada", "referenciada")
+      .where("familia.persona.id_persona = :id_persona", { id_persona: persona.id_persona })
+      .andWhere("familia.parentesco = :parentesco", { parentesco: 'CÓNYUGUE' })
+      .getOne();
+  
+    if (!conyuge || !conyuge.referenciada) {
+      throw new NotFoundException(`No se encontró cónyuge para la persona con identificación ${n_identificacion}`);
+    }
+    conyuge.referenciada.primer_nombre = body.primer_nombre ?? conyuge.referenciada.primer_nombre;
+    conyuge.referenciada.segundo_nombre = body.segundo_nombre ?? conyuge.referenciada.segundo_nombre;
+    conyuge.referenciada.tercer_nombre = body.tercer_nombre ?? conyuge.referenciada.tercer_nombre;
+    conyuge.referenciada.primer_apellido = body.primer_apellido ?? conyuge.referenciada.primer_apellido;
+    conyuge.referenciada.segundo_apellido = body.segundo_apellido ?? conyuge.referenciada.segundo_apellido;
+    conyuge.referenciada.n_identificacion = body.n_identificacion ?? conyuge.referenciada.n_identificacion;
+    conyuge.referenciada.fecha_nacimiento = body.fecha_nacimiento ? this.formatDateToYYYYMMDD(body.fecha_nacimiento) : conyuge.referenciada.fecha_nacimiento;
+    conyuge.referenciada.telefono_1 = body.telefono_domicilio ?? conyuge.referenciada.telefono_1;
+    conyuge.referenciada.telefono_2 = body.telefono_celular ?? conyuge.referenciada.telefono_2;
+    conyuge.referenciada.telefono_3 = body.telefono_trabajo ?? conyuge.referenciada.telefono_3;
+    conyuge.trabaja = body.trabaja ?? conyuge.trabaja;
+    await this.personaRepository.save(conyuge.referenciada);
+    await this.familiaRepository.save(conyuge);
+  
+    return { message: 'Cónyuge actualizado correctamente' };
+  }
+
+
+
+
+
 }
 

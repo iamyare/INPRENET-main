@@ -51,7 +51,7 @@ export const MENU_CONFIG: Section[] = [
       },
     ],
   },
-  {
+  /* {
     name: 'BENEFICIOS',
     items: [
       {
@@ -93,6 +93,6 @@ export const MENU_CONFIG: Section[] = [
         ],
       },
     ],
-  },
+  }, */
 
 ];

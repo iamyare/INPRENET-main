@@ -175,6 +175,7 @@ export class EditPerfilPuestTrabComponent implements OnInit, OnDestroy, OnChange
   }
 
   async manejarAccionUno(row: any) {
+
     const campos = [
       {
         nombre: 'codigo',
@@ -273,8 +274,8 @@ export class EditPerfilPuestTrabComponent implements OnInit, OnDestroy, OnChange
           ...result,
           idCentroTrabajo: idCentroTrabajo
         };
-
         this.svcAfiliado.updatePerfCentroTrabajo(row.id_perf_pers_centro_trab, result).subscribe({
+
 
           next: (response) => {
             const index = this.filas.findIndex(item => item.id === row.id);

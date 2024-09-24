@@ -17,6 +17,7 @@ import { NET_PROFESIONES } from 'src/modules/transacciones/entities/net_profesio
 import { Net_Beneficio_Tipo_Persona } from '../beneficio_tipo_persona/entities/net_beneficio_tipo_persona.entity';
 
 import { addMonths } from 'date-fns';
+import { Net_Persona_Por_Banco } from 'src/modules/banco/entities/net_persona-banco.entity';
 @Injectable()
 export class DetalleBeneficioService {
   private readonly logger = new Logger(DetalleBeneficioService.name)
@@ -24,7 +25,6 @@ export class DetalleBeneficioService {
   constructor(
     @InjectRepository(Net_Detalle_Pago_Beneficio)
     private readonly detPagBenRepository: Repository<Net_Detalle_Pago_Beneficio>,
-
     @InjectRepository(Net_Detalle_Beneficio_Afiliado)
     private detalleBeneficioAfiliadoRepository: Repository<Net_Detalle_Beneficio_Afiliado>,
     @InjectRepository(net_persona)
@@ -35,9 +35,76 @@ export class DetalleBeneficioService {
     private benTipoPerRepository: Repository<Net_Beneficio_Tipo_Persona>,
     @InjectRepository(Net_Tipo_Persona)
     private tipoPersonaRepos: Repository<Net_Tipo_Persona>,
+    @InjectRepository(Net_Persona_Por_Banco)
+    private readonly personaPorBancoRepository: Repository<Net_Persona_Por_Banco>,
     @InjectEntityManager() private readonly entityManager: EntityManager
   ) { }
 
+  async verificarSiEsAfiliado(dni: string): Promise<boolean> {
+    const persona = await this.personaRepository.findOne({
+      where: { n_identificacion: dni },
+    });
+
+    if (!persona) {
+      throw new NotFoundException(`Persona con DNI ${dni} no encontrada`);
+    }
+    const detallePersona = await this.detPersonaRepository.findOne({
+      where: {
+        persona: { id_persona: persona.id_persona },
+        tipoPersona: { tipo_persona: 'AFILIADO' },
+      },
+      relations: ['tipoPersona'],
+    });
+    return !!detallePersona;
+  }
+
+  async insertarDetallePagoBeneficio(
+    id_persona: number,
+    id_causante: number,
+    id_detalle_persona: number,
+    id_beneficio: number,
+    id_planilla: number,
+    monto_a_pagar: number
+  ): Promise<Net_Detalle_Pago_Beneficio> {
+    const detalleBeneficioAfiliado = await this.detalleBeneficioAfiliadoRepository.findOne({
+      where: {
+        ID_PERSONA: id_persona,
+        ID_CAUSANTE: id_causante,
+        ID_DETALLE_PERSONA: id_detalle_persona,
+        ID_BENEFICIO: id_beneficio,
+      },
+    });
+    if (!detalleBeneficioAfiliado) {
+      throw new NotFoundException('No se encontró el detalle del beneficio afiliado.');
+    }
+  
+    // Buscamos la cuenta bancaria activa de la persona
+    const personaBancoActivo = await this.personaPorBancoRepository.findOne({
+      where: {
+        persona: { id_persona },
+        estado: 'ACTIVO',
+      },
+    });
+  
+    if (!personaBancoActivo) {
+      throw new NotFoundException('No se encontró una cuenta bancaria activa para esta persona.');
+    }
+  
+    // Creamos un nuevo registro de pago de beneficio
+    const nuevoDetallePagoBeneficio = this.detPagBenRepository.create({
+      estado: 'EN PRELIMINAR',
+      monto_a_pagar,
+      personaporbanco: personaBancoActivo,
+      detalleBeneficioAfiliado: [detalleBeneficioAfiliado], // Convertimos el objeto en un arreglo
+      planilla: { id_planilla },
+    });
+  
+    // Guardamos el registro en la base de datos
+    return await this.detPagBenRepository.save(nuevoDetallePagoBeneficio);
+  }
+  
+  
+  
   async obtenerDetallePagoConPlanilla(n_identificacion: string, causante_identificacion: string, id_beneficio: number) {
     const persona = await this.personaRepository.findOne({ where: { n_identificacion } });
     if (!persona) {
@@ -71,8 +138,6 @@ export class DetalleBeneficioService {
     }
     return detallePagoBeneficio;
   }
-
-
 
   async getCausanteByDniBeneficiario(n_identificacion: string): Promise<{ causante: { nombres: string, apellidos: string, n_identificacion: string }, beneficios: Net_Detalle_Beneficio_Afiliado[] }[]> {
     const beneficiario = await this.personaRepository.findOne({ where: { n_identificacion }, relations: ['detallePersona'] });

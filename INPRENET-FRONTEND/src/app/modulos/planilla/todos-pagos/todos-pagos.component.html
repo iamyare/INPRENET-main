@@ -18,8 +18,8 @@
       <th mat-header-cell *matHeaderCellDef> Banco </th>
       <td mat-cell *matCellDef="let pago">
         <ul>
-          <li *ngFor="let banco of pago.bancos">
-            {{ banco.banco }} - {{ banco.num_cuenta }}
+          <li *ngFor="let beneficio of pago.beneficios">
+            {{ beneficio.pagos[0]?.banco }} - {{ beneficio.pagos[0]?.num_cuenta }}
           </li>
         </ul>
       </td>

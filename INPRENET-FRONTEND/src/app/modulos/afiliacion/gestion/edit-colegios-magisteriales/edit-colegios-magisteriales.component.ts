@@ -69,7 +69,7 @@ export class EditColegiosMagisterialesComponent implements OnInit, OnChanges, On
       try {
         const data = await this.svcAfiliado.getAllColMagPPersona(this.Afiliado.n_identificacion).toPromise();
         this.filas = data.map((item: any) => ({
-          id_per_cole_mag: item.colegio.id_colegio,
+          id_per_cole_mag: item.id,
           colegio_magisterial: item.colegio.descripcion
         }));
       } catch (error) {

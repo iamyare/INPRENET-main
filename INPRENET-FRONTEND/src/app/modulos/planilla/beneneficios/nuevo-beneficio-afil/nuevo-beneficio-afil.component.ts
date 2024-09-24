@@ -146,14 +146,19 @@ export class NuevoBeneficioAfilComponent implements OnInit {
             type: 'dropdown', label: 'Estado Solicitud', name: 'estado_solicitud',
             options: [{ label: 'APROBADA', value: 'APROBADA' }, { label: 'RECHAZADA', value: 'RECHAZADA' }], validations: [Validators.required], display: true
           },
-          { type: 'number', label: 'Monto total', name: 'monto_total', validations: [Validators.required], display: true },
-          { type: 'number', label: 'Monto por periodo', name: 'monto_por_periodo', validations: [Validators.required], display: true },
-          { type: 'number', label: 'Monto ultima cuota', name: 'monto_ultima_cuota', validations: [Validators.required], display: true },
-          { type: 'number', label: 'Monto primera cuota', name: 'monto_primera_cuota', validations: [Validators.required], display: true },
+          { type: 'number', label: 'Monto total', name: 'monto_total', validations: [Validators.required, Validators.min(0)], display: true },
+          { type: 'number', label: 'Monto por periodo', name: 'monto_por_periodo', validations: [Validators.required, Validators.min(0)], display: true },
+          { type: 'number', label: 'Monto ultima cuota', name: 'monto_ultima_cuota', validations: [Validators.required, Validators.min(0)], display: true },
+          { type: 'number', label: 'Monto primera cuota', name: 'monto_primera_cuota', validations: [Validators.required, Validators.min(0)], display: true },
           { type: 'date', label: 'Fecha de efectividad', name: 'fecha_calculo', validations: [], display: true },
           { type: 'text', label: 'Observación', name: 'observacion', validations: [], display: true },
-          { type: 'number', label: 'Número de rentas aprobadas', name: 'num_rentas_aplicadas', validations: [], display: false },
-          { type: 'number', label: 'dia', name: 'dia', validations: [], display: false },
+          { type: 'number', label: 'Número de rentas aprobadas', name: 'num_rentas_aplicadas', validations: [Validators.min(1)], display: false },
+          {
+            type: 'number', label: 'dia', name: 'dia', validations: [
+              Validators.min(1),
+              Validators.max(31),
+            ], display: false
+          },
         ];
 
         this.myFormFields2 = [
@@ -171,14 +176,19 @@ export class NuevoBeneficioAfilComponent implements OnInit {
             type: 'dropdown', label: 'Estado Solicitud', name: 'estado_solicitud',
             options: [{ label: 'APROBADA', value: 'APROBADA' }, { label: 'RECHAZADA', value: 'RECHAZADA' }], validations: [Validators.required], display: true
           },
-          { type: 'number', label: 'Monto ultima cuota', name: 'monto_ultima_cuota', validations: [Validators.required], display: true },
-          { type: 'number', label: 'Monto primera cuota', name: 'monto_primera_cuota', validations: [Validators.required], display: true },
+          { type: 'number', label: 'Monto total', name: 'monto_total', validations: [Validators.required, Validators.min(0)], display: true },
+          { type: 'number', label: 'Monto ultima cuota', name: 'monto_ultima_cuota', validations: [Validators.required, Validators.min(0)], display: true },
+          { type: 'number', label: 'Monto primera cuota', name: 'monto_primera_cuota', validations: [Validators.required, Validators.min(0)], display: true },
           { type: 'text', label: 'Observación', name: 'observacion', validations: [], display: true },
           { type: 'number', label: 'Monto por periodo', name: 'monto_por_periodo', validations: [Validators.required], display: true },
-          { type: 'number', label: 'Monto total', name: 'monto_total', validations: [Validators.required], display: true },
           { type: 'date', label: 'Fecha de efectividad', name: 'fecha_calculo', validations: [], display: true },
-          { type: 'number', label: 'Número de rentas aprobadas', name: 'num_rentas_aplicadas', validations: [], display: false },
-          { type: 'number', label: 'dia', name: 'dia', validations: [], display: false },
+          { type: 'number', label: 'Número de rentas aprobadas', name: 'num_rentas_aplicadas', validations: [Validators.min(1)], display: false },
+          {
+            type: 'number', label: 'dia', name: 'dia', validations: [
+              Validators.min(1),
+              Validators.max(31),
+            ], display: false
+          },
         ];
 
         this.myFormFields1[9].display = false;
@@ -416,23 +426,19 @@ export class NuevoBeneficioAfilComponent implements OnInit {
       this.datosFormateados["periodo_inicio"] = startDateFormatted;
       this.datosFormateados["periodo_finalizacion"] = fechaFormateada;
 
-
-      console.log(this.datosFormateados);
-
       this.svcBeneficioServ.asigBeneficioAfil(this.datosFormateados, this.desOBenSeleccionado).subscribe(
         {
           next: (response) => {
             this.toastr.success("se asignó correctamente el beneficio");
-            //this.limpiarFormulario()
+            this.limpiarFormulario()
           },
           error: (error) => {
-            let mensajeError = 'Error desconocido al crear Detalle de beneficio';
+            console.log(error);
+
+            let mensajeError = '';
             // Verifica si el error tiene una estructura específica
-            if (error.error && error.error.message) {
-              mensajeError = error.error.message;
-            } else if (typeof error.error === 'string') {
-              // Para errores que vienen como un string simple
-              mensajeError = error.error;
+            if (error.error.mensaje) {
+              mensajeError = error.error.mensaje;
             }
             this.toastr.error(mensajeError);
           }
@@ -443,16 +449,15 @@ export class NuevoBeneficioAfilComponent implements OnInit {
         {
           next: (response) => {
             this.toastr.success("se asignó correctamente el beneficio");
-            //this.limpiarFormulario()
+            this.limpiarFormulario()
           },
           error: (error) => {
-            let mensajeError = 'Error desconocido al crear Detalle de beneficio';
+            console.log(error);
+
+            let mensajeError = '';
             // Verifica si el error tiene una estructura específica
-            if (error.error && error.error.message) {
-              mensajeError = error.error.message;
-            } else if (typeof error.error === 'string') {
-              // Para errores que vienen como un string simple
-              mensajeError = error.error;
+            if (error.error.mensaje) {
+              mensajeError = error.error.mensaje;
             }
             this.toastr.error(mensajeError);
           }

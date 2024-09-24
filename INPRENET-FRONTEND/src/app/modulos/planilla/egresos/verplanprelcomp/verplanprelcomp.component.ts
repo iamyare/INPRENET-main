@@ -263,7 +263,6 @@ export class VerplanprelcompComponent implements OnInit {
       this.data = await this.planillaService.getPlanillasPreliminares(cod_planilla).toPromise();
       if (this.data) {
         this.dataPlan = this.data.map((item: any) => {
-          console.log(item);
 
           const deduccionesI: number = parseFloat(item.TOTAL_DEDUCCIONES_INPREMA) || 0
           const deduccionesT: number = parseFloat(item.TOTAL_DEDUCCIONES_TERCEROS) || 0

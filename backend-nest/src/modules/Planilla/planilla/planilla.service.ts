@@ -90,95 +90,101 @@ export class PlanillaService {
     }
 }
 
-  async obtenerPagosYBeneficiosPorPersona(idPlanilla: number, dni: string): Promise<any> {
-      try {
-          const persona = await this.personaRepository.findOne({
-              where: { n_identificacion: dni },
-              relations: [
-                  'detallePersona',
-                  'detallePersona.detalleBeneficio',
-                  'detallePersona.detalleBeneficio.beneficio',
-                  'detallePersona.detalleBeneficio.detallePagBeneficio',
-                  'detallePersona.detalleBeneficio.detallePagBeneficio.planilla',
-                  'detallePersona.detalleBeneficio.detallePagBeneficio.personaporbanco',
-                  'detallePersona.detalleBeneficio.detallePagBeneficio.personaporbanco.banco',
-                  'personasPorBanco',
-                  'personasPorBanco.banco',
-                  'detalleDeduccion',
-                  'detalleDeduccion.deduccion',
-                  'detalleDeduccion.planilla'
-              ]
-          });
-          if (!persona) {
-              throw new Error('No se encontró persona con ese DNI');
-          }
-          const personaDatos = {
-              id_persona: persona.id_persona,
-              dni: persona.n_identificacion,
-              primer_nombre: persona.primer_nombre,
-              segundo_nombre: persona.segundo_nombre,
-              primer_apellido: persona.primer_apellido,
-              segundo_apellido: persona.segundo_apellido,
-              direccion: persona.direccion_residencia,
-              correo: persona.correo_1,
-              telefono: persona.telefono_1,
-          };
-          const bancos = persona.personasPorBanco.map(bancoInfo => ({
-              banco: bancoInfo.banco.nombre_banco,
-              num_cuenta: bancoInfo.num_cuenta,
-              estado: bancoInfo.estado
-          }));
-          const beneficios = persona.detallePersona.flatMap(detalle =>
-              detalle.detalleBeneficio.flatMap(beneficio => {
-                  const pagos = beneficio.detallePagBeneficio.filter(pago => pago.planilla.id_planilla === idPlanilla);
-                  if (pagos.length > 0) {
-                      return {
-                          beneficio: beneficio.beneficio.nombre_beneficio,
-                          monto_total: beneficio.monto_total,
-                          monto_por_periodo: beneficio.monto_por_periodo,
-                          metodo_pago: beneficio.metodo_pago,
-                          pagos: pagos.map(pago => ({
-                              monto_a_pagar: pago.monto_a_pagar,
-                              estado: pago.estado,
-                              banco: pago.personaporbanco?.banco?.nombre_banco || null,
-                              num_cuenta: pago.personaporbanco?.num_cuenta || null,
-                              fecha_pago: pago.fecha_carga,
-                          }))
-                      };
-                  }
-                  return [];
-              })
-          );
-          const deducciones = persona.detalleDeduccion.filter(deduccion => deduccion.planilla.id_planilla === idPlanilla).map(deduccion => ({
-              deduccion: deduccion.deduccion.nombre_deduccion,
-              monto_total: deduccion.monto_total,
-              estado_aplicacion: deduccion.estado_aplicacion,
-              monto_aplicado: deduccion.monto_aplicado,
-          }));
-          const planilla = await this.planillaRepository.findOne({
-              where: { id_planilla: idPlanilla }
-          });
-          const planillaDatos = {
-              codigo_planilla: planilla.codigo_planilla,
-              fecha_apertura: planilla.fecha_apertura,
-              fecha_cierre: planilla.fecha_cierre,
-              secuencia: planilla.secuencia,
-              estado: planilla.estado,
-              periodoInicio: planilla.periodoInicio,
-              periodoFinalizacion: planilla.periodoFinalizacion
-          };
+async obtenerPagosYBeneficiosPorPersona(idPlanilla: number, dni: string): Promise<any> {
+  try {
+    const persona = await this.personaRepository.findOne({
+      where: { n_identificacion: dni },
+      relations: [
+        'detallePersona',
+        'detallePersona.detalleBeneficio',
+        'detallePersona.detalleBeneficio.beneficio',
+        'detallePersona.detalleBeneficio.detallePagBeneficio',
+        'detallePersona.detalleBeneficio.detallePagBeneficio.planilla',
+        'detallePersona.detalleBeneficio.detallePagBeneficio.personaporbanco',
+        'detallePersona.detalleBeneficio.detallePagBeneficio.personaporbanco.banco',
+        'detalleDeduccion',
+        'detalleDeduccion.deduccion',
+        'detalleDeduccion.planilla'
+      ]
+    });
+
+    if (!persona) {
+      throw new Error('No se encontró persona con ese DNI');
+    }
+
+    // Extraer los datos básicos de la persona
+    const personaDatos = {
+      id_persona: persona.id_persona,
+      dni: persona.n_identificacion,
+      primer_nombre: persona.primer_nombre,
+      segundo_nombre: persona.segundo_nombre,
+      primer_apellido: persona.primer_apellido,
+      segundo_apellido: persona.segundo_apellido,
+      direccion: persona.direccion_residencia,
+      correo: persona.correo_1,
+      telefono: persona.telefono_1,
+    };
+
+    // Filtrar solo los beneficios que tengan pagos asociados
+    const beneficios = persona.detallePersona.flatMap(detalle =>
+      detalle.detalleBeneficio.flatMap(beneficio => {
+        const pagos = beneficio.detallePagBeneficio.filter(pago => pago.planilla.id_planilla === idPlanilla);
+        if (pagos.length > 0) {
           return {
-              persona: personaDatos,
-              planilla: planillaDatos,
-              bancos,
-              beneficios,
-              deducciones
+            beneficio: beneficio.beneficio.nombre_beneficio,
+            monto_total: beneficio.monto_total,
+            monto_por_periodo: beneficio.monto_por_periodo,
+            metodo_pago: beneficio.metodo_pago,
+            pagos: pagos.map(pago => ({
+              monto_a_pagar: pago.monto_a_pagar,
+              estado: pago.estado,
+              banco: pago.personaporbanco?.banco?.nombre_banco || null,
+              num_cuenta: pago.personaporbanco?.num_cuenta || null,
+              fecha_pago: pago.fecha_carga,
+            }))
           };
-      } catch (error) {
-          console.error(error);
-          throw new Error('Error al obtener los pagos, deducciones y bancos');
-      }
+        }
+        return [];
+      })
+    );
+
+    // Agrupar las deducciones sin incluir información redundante de la planilla
+    const deducciones = persona.detalleDeduccion.filter(deduccion => deduccion.planilla.id_planilla === idPlanilla).map(deduccion => ({
+      deduccion: deduccion.deduccion.nombre_deduccion,
+      monto_total: deduccion.monto_total,
+      estado_aplicacion: deduccion.estado_aplicacion,
+      monto_aplicado: deduccion.monto_aplicado,
+    }));
+
+    // Obtener información completa de la planilla
+    const planilla = await this.planillaRepository.findOne({
+      where: { id_planilla: idPlanilla }
+    });
+
+    const planillaDatos = {
+      codigo_planilla: planilla.codigo_planilla,
+      fecha_apertura: planilla.fecha_apertura,
+      fecha_cierre: planilla.fecha_cierre,
+      secuencia: planilla.secuencia,
+      estado: planilla.estado,
+      periodoInicio: planilla.periodoInicio,
+      periodoFinalizacion: planilla.periodoFinalizacion
+    };
+
+    // Retornar la respuesta organizada
+    return {
+      persona: personaDatos,
+      planilla: planillaDatos,
+      beneficios,
+      deducciones
+    };
+
+  } catch (error) {
+    console.error(error);
+    throw new Error('Error al obtener los pagos, deducciones y bancos');
   }
+}
+
 
 
   async updateFallecidoStatusFromExcel(file: Express.Multer.File) {

@@ -15,7 +15,6 @@ export class PdfService {
   }
 
   async getMembreteBase64(): Promise<string> {
-
     const imagesPath = process.env.IMAGES_PATH || path.resolve(__dirname, '../../../../assets/images');
     const imagePath = path.join(imagesPath, 'membratadoFinal.jpg');
 

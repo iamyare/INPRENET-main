@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Query, Response, BadRequestException, HttpStatus } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Query, Response, BadRequestException, HttpStatus, HttpException } from '@nestjs/common';
 import { DetalleBeneficioService } from './detalle_beneficio.service';
 import { UpdateDetalleBeneficioDto } from './dto/update-detalle_beneficio_planilla.dto';
 import { ApiTags } from '@nestjs/swagger';
@@ -10,10 +10,44 @@ import { Net_Detalle_Beneficio_Afiliado } from './entities/net_detalle_beneficio
 export class DetalleBeneficioController {
   constructor(private readonly detallebeneficioService: DetalleBeneficioService) { }
 
-  @Get('detalle-pago')
-obtenerDetallePago(@Query('n_identificacion') n_identificacion: string, @Query('causante_identificacion') causante_identificacion: string, @Query('id_beneficio') id_beneficio: number) {
-    return this.detallebeneficioService.obtenerDetallePagoConPlanilla(n_identificacion, causante_identificacion, id_beneficio);
-}
+  @Get('verificar-afiliado/:dni')
+  async verificarAfiliado(@Param('dni') dni: string): Promise<{ esAfiliado: boolean }> {
+    const esAfiliado = await this.detallebeneficioService.verificarSiEsAfiliado(dni);
+    return { esAfiliado };
+  }
+
+  @Post('insertar-detalle-pago-beneficio')
+  async insertarDetallePagoBeneficio(
+    @Body() body: { id_persona: number, id_causante: number, id_detalle_persona: number, id_beneficio: number, id_planilla: number, monto_a_pagar: number }
+  ) {
+    try {
+      // Insertamos el detalle del pago de beneficio
+      const nuevoDetallePagoBeneficio = await this.detallebeneficioService.insertarDetallePagoBeneficio(
+        body.id_persona,
+        body.id_causante,
+        body.id_detalle_persona,
+        body.id_beneficio,
+        body.id_planilla,
+        body.monto_a_pagar
+      );
+      
+      return {
+        message: 'Detalle de pago de beneficio insertado correctamente.',
+        data: nuevoDetallePagoBeneficio,
+      };
+    } catch (error) {
+      console.error('Error al insertar el detalle de pago del beneficio:', error);
+      throw new HttpException({
+        status: HttpStatus.INTERNAL_SERVER_ERROR,
+        error: 'Ocurrió un error inesperado. Inténtelo de nuevo más tarde.',
+      }, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+  }
+
+    @Get('detalle-pago')
+  obtenerDetallePago(@Query('n_identificacion') n_identificacion: string, @Query('causante_identificacion') causante_identificacion: string, @Query('id_beneficio') id_beneficio: number) {
+      return this.detallebeneficioService.obtenerDetallePagoConPlanilla(n_identificacion, causante_identificacion, id_beneficio);
+  }
 
 
   @Get('causante/:dni')

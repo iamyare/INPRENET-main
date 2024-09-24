@@ -72,12 +72,6 @@ export class DeduccionService {
 
 
 
-
-
-
-
-
-
   async uploadDeducciones(file: Express.Multer.File): Promise<{ message: string; failedRows: any[] }> {
     const workbook = XLSX.read(file.buffer, { type: 'buffer' });
     const sheetNames = workbook.SheetNames;
@@ -176,37 +170,33 @@ export class DeduccionService {
       return { error: `No se encontró planilla activa para el mes: ${parsedMes}-${parsedAnio}`, processed: false };
     }
 
-        // Validación del periodo de la planilla
-        const planilla = planillas.find(p => {
-          const periodoInicio = new Date(p.periodoInicio.split('/').reverse().join('-'));
-          const periodoFinalizacion = new Date(p.periodoFinalizacion.split('/').reverse().join('-'));
+    const planilla = planillas.find(p => {
+      const periodoInicio = new Date(p.periodoInicio.split('/').reverse().join('-'));
+      const periodoFinalizacion = new Date(p.periodoFinalizacion.split('/').reverse().join('-'));
+      const fechaDeduccion = new Date(parsedAnio, parsedMes - 1);
 
-          const fechaDeduccion = new Date(parsedAnio, parsedMes - 1);
+      return (
+        fechaDeduccion >= periodoInicio &&
+        fechaDeduccion <= periodoFinalizacion &&
+        ((['BENEFICIARIO', 'AFILIADO'].includes(tipoPersona) && p.tipoPlanilla.nombre_planilla === 'ORDINARIA BENEFICIARIO') ||
+          (['JUBILADO', 'PENSIONADO'].includes(tipoPersona) && p.tipoPlanilla.nombre_planilla === 'ORDINARIA JUBILADOS Y PENSIONADOS'))
+      );
+    });
 
-          return (
-            fechaDeduccion >= periodoInicio &&
-            fechaDeduccion <= periodoFinalizacion &&
-            ((['BENEFICIARIO', 'AFILIADO'].includes(tipoPersona) && p.tipoPlanilla.nombre_planilla === 'ORDINARIA BENEFICIARIO') ||
-              (['JUBILADO', 'PENSIONADO'].includes(tipoPersona) && p.tipoPlanilla.nombre_planilla === 'ORDINARIA JUBILADOS Y PENSIONADOS'))
-          );
-        });
+    if (!planilla) {
+      return { error: `No se encontró planilla adecuada para el mes/año proporcionado o el tipo de persona: ${tipoPersona}`, processed: false };
+    }
 
-        if (!planilla) {
-          this.logger.warn(`No se encontró planilla adecuada para el mes/año proporcionado o el tipo de persona: ${tipoPersona}`);
-          failedRows.push([...row, `No se encontró planilla adecuada para el mes/año proporcionado o el tipo de persona: ${tipoPersona}`]);
-          continue;
-        }
-
-        const deduccionExistente = await this.detalleDeduccionRepository.findOne({
-          where: {
-            anio: parsedAnio,
-            mes: parsedMes,
-            monto_total: parsedMontoTotal,
-            persona: { id_persona: persona.id_persona },
-            deduccion: { id_deduccion: deduccion.id_deduccion },
-            planilla: { id_planilla: planilla.id_planilla },
-          },
-        });
+    const deduccionExistente = await this.detalleDeduccionRepository.findOne({
+      where: {
+        anio: parsedAnio,
+        mes: parsedMes,
+        monto_total: parsedMontoTotal,
+        persona: { id_persona: persona.id_persona },
+        deduccion: { id_deduccion: deduccion.id_deduccion },
+        planilla: { id_planilla: planilla.id_planilla },
+      },
+    });
 
     if (deduccionExistente) {
       return { error: `Deducción duplicada detectada`, processed: false };

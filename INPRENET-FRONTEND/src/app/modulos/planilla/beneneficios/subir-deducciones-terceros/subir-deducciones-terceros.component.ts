@@ -28,7 +28,7 @@ export class SubirDeduccionesTercerosComponent {
     private deduccionesService: DeduccionesService,
     private toastr: ToastrService,
     private centrosTrabajoService: CentroTrabajoService
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     this.obtenerCentrosTrabajo();
@@ -120,12 +120,12 @@ export class SubirDeduccionesTercerosComponent {
     const headers = ['anio', 'mes', 'dni', 'codigoDeduccion', 'montoTotal', 'razón'];
     const formattedRows = failedRows.map(row => {
       return {
-        anio: row[0],
-        mes: row[1],
-        dni: row[2],
-        codigoDeduccion: row[3],
-        montoTotal: row[4],
-        razón: row[5]
+        anio: row.anio,
+        mes: row.mes,
+        dni: row.dni,
+        codigoDeduccion: row.codigoDeduccion,
+        montoTotal: row.montoTotal,
+        razón: row.error
       };
     });
     if (formattedRows && formattedRows.length > 0) {

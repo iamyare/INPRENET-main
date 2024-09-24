@@ -20,8 +20,8 @@ export class ConstanciasAfiliadoComponent {
 
   menuItems = [
     { name: 'Generar Constancia de Renuncia CAP', action: this.generarConstanciaRenunciaCap.bind(this) },
+    { name: 'Generar Constancia datos generales', action: this.generarConstanciaAfiliacion2.bind(this) },
     { name: 'Generar Constancia de Afiliación', action: this.generarConstanciaAfiliacion.bind(this) },
-    { name: 'Generar Constancia de Afiliación 2', action: this.generarConstanciaAfiliacion2.bind(this) },
     { name: 'Generar Constancia de No Cotizar', action: this.generarConstanciaNoCotizar.bind(this) },
     { name: 'Generar Constancia de Débitos', action: this.generarConstanciaDebitos.bind(this) },
     { name: 'Generar Constancia de Tiempo De Cotizar Con Monto', action: this.generarConstanciaTiempoCotizarConMonto.bind(this) }

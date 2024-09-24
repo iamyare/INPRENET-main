@@ -78,34 +78,9 @@ export class DeduccionService {
 
 
 
-  async uploadDeducciones(file: Express.Multer.File): Promise<{ message: string; failedRows: any[] }> {
-    const workbook = XLSX.read(file.buffer, { type: 'buffer' });
-    const sheetNames = workbook.SheetNames;
-    const failedRows: any[] = [];
-
-    for (const sheetName of sheetNames) {
-      const sheet = workbook.Sheets[sheetName];
-      const data = XLSX.utils.sheet_to_json(sheet, {
-        header: 1,
-        defval: null,
-        raw: false,
-      }) as any[][];
-
-      const [header, ...rows] = data;
-
-      for (const row of rows) {
-        const result = await this.processRow(row);
-        if (!result.processed) {
-          failedRows.push([...row, result.error]);
-        }
-      }
-    }
-
-    return { message: 'Deducciones procesadas correctamente', failedRows };
-  }
-
-  private async processRow(row: any): Promise<{ processed: boolean; error?: string }> {
-    const [anio, mes, dni, codigoDeduccion, montoTotal] = row;
+  private async processRow(row: any, repositories: any): Promise<any> {
+    // Acceder directamente a las propiedades del objeto
+    const { anio, mes, dni, codigoDeduccion, montoTotal } = row;
 
     if (!anio && !mes && !dni && !codigoDeduccion && !montoTotal) {
       return { error: `Fila vacía: ${JSON.stringify(row)}`, processed: false };
@@ -125,7 +100,7 @@ export class DeduccionService {
       return { error: 'Error en la conversión de datos', processed: false };
     }
 
-    const persona = await this.personaRepository.findOne({
+    const persona = await repositories.personaRepository.findOne({
       where: { n_identificacion: parsedDni },
       relations: ['detallePersona', 'detallePersona.tipoPersona'],
     });
@@ -140,7 +115,7 @@ export class DeduccionService {
 
     const tipoPersona = persona.detallePersona[0]?.tipoPersona?.tipo_persona;
 
-    const deduccion = await this.deduccionRepository.findOne({
+    const deduccion = await repositories.deduccionRepository.findOne({
       where: { codigo_deduccion: parsedCodigoDeduccion },
     });
 
@@ -148,7 +123,7 @@ export class DeduccionService {
       return { error: `No se encontró deducción con código: ${parsedCodigoDeduccion}`, processed: false };
     }
 
-    const bancoActivo = await this.personaPorBancoRepository.findOne({
+    const bancoActivo = await repositories.personaPorBancoRepository.findOne({
       where: {
         persona: { id_persona: persona.id_persona },
         estado: 'ACTIVO',
@@ -161,7 +136,7 @@ export class DeduccionService {
 
     let planillas;
     try {
-      planillas = await this.planillaRepository.find({
+      planillas = await repositories.planillaRepository.find({
         where: {
           estado: 'ACTIVA',
           secuencia: 1,
@@ -193,7 +168,7 @@ export class DeduccionService {
       return { error: `No se encontró planilla adecuada para el mes/año proporcionado o el tipo de persona: ${tipoPersona}`, processed: false };
     }
 
-    const deduccionExistente = await this.detalleDeduccionRepository.findOne({
+    const deduccionExistente = await repositories.detalleDeduccionRepository.findOne({
       where: {
         anio: parsedAnio,
         mes: parsedMes,
@@ -208,7 +183,7 @@ export class DeduccionService {
       return { error: `Deducción duplicada detectada`, processed: false };
     }
 
-    const detalleDeduccion = this.detalleDeduccionRepository.create({
+    const detalleDeduccion = repositories.detalleDeduccionRepository.create({
       anio: parsedAnio,
       mes: parsedMes,
       monto_total: parsedMontoTotal,
@@ -220,8 +195,62 @@ export class DeduccionService {
       personaPorBanco: bancoActivo,
     });
 
-    await this.detalleDeduccionRepository.save(detalleDeduccion);
+    await repositories.detalleDeduccionRepository.save(detalleDeduccion);
     return { processed: true };
+  }
+
+  async uploadDeducciones(file: Express.Multer.File): Promise<{ message: string; failedRows: any[] }> {
+    const failedRows: any[] = [];
+    const rows: any[] = [];
+
+    return new Promise((resolve, reject) => {
+      csv
+        .parseString(file.buffer.toString(), { headers: true })
+        .on('data', row => {
+          // Aquí asumimos que el CSV tiene columnas separadas
+          // Separamos el string usando el delimitador ';'
+          const dataString = row['anio;mes;dni;codigoDeduccion;montoTotal'];
+          const [anio, mes, dni, codigoDeduccion, montoTotal] = dataString.split(';');
+
+          // Se agrega cada fila como un objeto con las propiedades necesarias
+          rows.push({ anio, mes, dni, codigoDeduccion, montoTotal });
+        })
+        .on('end', async () => {
+          const repositories = {
+            personaRepository: this.personaRepository,
+            deduccionRepository: this.deduccionRepository,
+            personaPorBancoRepository: this.personaPorBancoRepository,
+            planillaRepository: this.planillaRepository,
+            detalleDeduccionRepository: this.detalleDeduccionRepository,
+          };
+
+          const limit = pLimit(10); // Limitar a 10 conexiones concurrentes
+          const workerPromises = rows.map(row =>
+            limit(() => this.processRow(row, repositories).then(result => {
+
+              if (result.error) {
+                failedRows.push({ ...row, error: result.error });
+                this.logger.warn(`${result.error}`);
+              }
+              return result;
+            }))
+          );
+
+          try {
+            await Promise.all(workerPromises);
+            resolve({ message: 'Deducciones procesadas correctamente', failedRows });
+
+          } catch (error) {
+            this.logger.error(`Error processing deductions: ${error.message}`);
+            resolve({ message: 'Error', failedRows });
+          }
+        })
+        .on('error', (error) => {
+          // Handle CSV parsing errors
+          this.logger.error(`Error parsing CSV: ${error.message}`);
+          resolve({ message: 'Error', failedRows });
+        });
+    });
   }
 
 

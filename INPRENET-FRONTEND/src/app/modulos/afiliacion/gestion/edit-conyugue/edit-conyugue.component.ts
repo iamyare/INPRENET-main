@@ -72,7 +72,6 @@ export class EditConyugueComponent implements OnChanges {
         }
       },
       error: (error) => {
-        this.toastr.error('Error al cargar los datos del cónyuge');
         console.error('Error al cargar la información del cónyuge', error);
       }
     });

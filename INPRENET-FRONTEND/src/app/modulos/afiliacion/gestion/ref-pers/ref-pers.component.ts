@@ -1,5 +1,7 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { FormArray, FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
+import { debounceTime, distinctUntilChanged } from 'rxjs';
+import { BeneficiosService } from 'src/app/services/beneficios.service';
 import { DatosEstaticosService } from 'src/app/services/datos-estaticos.service';
 
 @Component({
@@ -13,9 +15,12 @@ export class RefPersComponent implements OnInit {
   public parentesco: any[] = [];
   public tipo_referencia: any[] = [];
 
+  esAfiliadoText: string = '';
+
   constructor(
     private fb: FormBuilder,
-    private datosEstaticosService: DatosEstaticosService
+    private datosEstaticosService: DatosEstaticosService,
+    private beneficiosService: BeneficiosService
   ) {}
 
   ngOnInit(): void {
@@ -28,7 +33,17 @@ export class RefPersComponent implements OnInit {
     this.cargarDatosEstaticos();
   }
 
-  // Getter para obtener el FormArray de referencias personales
+  verificarAfiliadoBlur(): void {
+    const nIdentificacionControl = this.formGroup.get('conyuge')?.get('n_identificacion');
+    const n_identificacion = nIdentificacionControl?.value;
+
+    if (n_identificacion) {
+      this.verificarAfiliado(n_identificacion);
+    } else {
+      this.esAfiliadoText = 'NO';
+    }
+  }
+
   get referencias(): FormArray {
     return this.formGroup.get('refpers') as FormArray;
   }
@@ -48,6 +63,18 @@ export class RefPersComponent implements OnInit {
       telefono_trabajo: [''],
       trabaja: ['', []],
       es_afiliado: ['', []]
+    });
+  }
+
+  verificarAfiliado(n_identificacion: string): void {
+    this.beneficiosService.verificarSiEsAfiliado(n_identificacion).subscribe({
+      next: (esAfiliado) => {
+        this.esAfiliadoText = esAfiliado ? 'SÍ' : 'NO'; // Asigna el texto
+      },
+      error: (error) => {
+        this.esAfiliadoText = 'NO'; // Maneja el error como 'NO'
+        console.error('Error al verificar si es afiliado', error); // Log para depuración
+      }
     });
   }
 

@@ -5,6 +5,8 @@ import { BenefComponent } from '../benef/benef.component';
 import { DatosGeneralesComponent } from '../datos-generales/datos-generales.component';
 import { AfiliacionService } from 'src/app/services/afiliacion.service'; // Asegúrate de importar tu servicio
 import { ToastrService } from 'ngx-toastr';
+import pdfMake from 'pdfmake/build/pdfmake';
+import { HttpClient } from '@angular/common/http';
 
 @Component({
   selector: 'app-afiliar-docente',
@@ -12,7 +14,7 @@ import { ToastrService } from 'ngx-toastr';
   styleUrls: ['./afiliar-docente.component.scss']
 })
 export class AfiliarDocenteComponent implements OnInit {
-
+  backgroundImageBase64: string = '';
   @ViewChild('datosGeneralesTemplate', { static: true }) datosGeneralesTemplate!: TemplateRef<any>;
   @ViewChild('referenciasPersonalesTemplate', { static: true }) referenciasPersonalesTemplate!: TemplateRef<any>;
   @ViewChild('colegiosMagisterialesTemplate', { static: true }) colegiosMagisterialesTemplate!: TemplateRef<any>;
@@ -25,7 +27,14 @@ export class AfiliarDocenteComponent implements OnInit {
   formGroup!: FormGroup;
   fotoPerfil: string = '';
 
-  constructor(private fb: FormBuilder, private afiliacionService: AfiliacionService, private toastr: ToastrService) {}
+  constructor(private fb: FormBuilder, private afiliacionService: AfiliacionService,
+     private toastr: ToastrService,private http: HttpClient) {
+      this.convertirImagenABase64('../assets/images/membratadoFinal.jpg').then(base64 => {
+        this.backgroundImageBase64 = base64;
+      }).catch(error => {
+        console.error('Error al convertir la imagen a Base64', error);
+      });
+     }
 
   ngOnInit(): void {
     this.formGroup = this.fb.group({});
@@ -98,10 +107,18 @@ export class AfiliarDocenteComponent implements OnInit {
       const colegiosMagisteriales = this.formGroup.get('colegiosMagisteriales')?.value;
       const bancos = this.formGroup.get('bancos')?.value;
       const centrosTrabajo = this.formGroup.get('centrosTrabajo')?.value;
-      const beneficiarios = this.formGroup.get('beneficiarios')?.value;
+      const beneficiarios = this.formGroup.get('beneficiarios')?.value.beneficiario || [];
 
-      console.log(datosGenerales);
+        // Verifica si hay beneficiarios antes de generar el documento
+        if (beneficiarios && beneficiarios.length > 0) {
+          console.log('Generando PDF de beneficiarios...');
 
+          // Aquí debes pasar el valor de `backgroundImageBase64` a la función
+          const documentDefinition = this.getDocumentDefinition(beneficiarios, datosGenerales, this.backgroundImageBase64);
+          pdfMake.createPdf(documentDefinition).download('beneficiarios.pdf');
+        } else {
+          this.toastr.warning('No se han agregado beneficiarios.', 'Advertencia');
+        }
 
       const formattedData = {
         persona: {
@@ -157,7 +174,7 @@ export class AfiliarDocenteComponent implements OnInit {
 
     console.log(formattedData);
 
-    this.afiliacionService.crearAfiliacion(formattedData, file).subscribe(
+    /* this.afiliacionService.crearAfiliacion(formattedData, file).subscribe(
       response => {
         console.log('Datos enviados con éxito:', response);
         this.toastr.success('Datos enviados con éxito', 'Éxito');
@@ -168,11 +185,10 @@ export class AfiliarDocenteComponent implements OnInit {
         const errorMessage = error.error?.mensaje || 'Hubo un error al enviar los datos';
         this.toastr.error(errorMessage, 'Error');
       }
-    );
+    ); */
   } else {
-    this.markAllAsTouched(this.formGroup);
+    //this.markAllAsTouched(this.formGroup);
     this.toastr.warning('El formulario contiene información inválida', 'Advertencia');
-    console.log('El formulario no es válido');
   }
   }
 
@@ -343,6 +359,269 @@ formatDiscapacidades(discapacidades: any): any[] {
   return Object.keys(discapacidades)
     .filter(key => discapacidades[key]) // Filtra las discapacidades activas
     .map(key => ({ tipo_discapacidad: key })); // Mapea al formato deseado
+}
+
+getDocumentDefinition(userDetails: any[], beneficiarios: any, backgroundImageBase64: string): any {
+  console.log(userDetails);
+  console.log(beneficiarios);
+
+  // Revisar los datos y asignar valores por defecto si no existen
+  userDetails.forEach(item => {
+      item.nombre = `${item.primer_nombre || 'N/A'} ${item.segundo_nombre || ''} ${item.primer_apellido || 'N/A'} ${item.segundo_apellido || ''}`;
+      item.fechaNacimiento = item.fecha_nacimiento || 'N/A';
+      item.identidad = item.n_identificacion || 'N/A';
+      item.parentesco = item.parentesco || 'N/A';
+      item.porcentaje = item.porcentaje || 'N/A';
+      item.direccion_residencia = item.direccion_residencia || 'N/A';
+      item.telefono_1 = item.telefono_1 || 'N/A';
+  });
+
+  // Detalles del usuario
+  beneficiarios.nombre = `${beneficiarios.primer_nombre} ${beneficiarios.segundo_nombre || ''} ${beneficiarios.primer_apellido} ${beneficiarios.segundo_apellido || ''}` || 'N/A';
+  beneficiarios.grado_academico = beneficiarios.grado_academico || 'N/A';
+  beneficiarios.centroEducativo = beneficiarios.centroEducativo || 'N/A';
+  beneficiarios.municipioResidencia = beneficiarios.id_municipio_residencia || 'N/A';
+  beneficiarios.departamentoResidencia = beneficiarios.id_departamento_residencia || 'N/A';
+  beneficiarios.n_identificacion = beneficiarios.n_identificacion || 'N/A';
+
+  // Definir el tipo correcto para los objetos de la tabla
+  interface TableCell {
+      text?: string;
+      style?: string;
+      rowSpan?: number;
+      colSpan?: number;
+      fillColor?: string;
+      alignment?: string;
+  }
+
+  // Transformar los datos en el formato requerido por pdfMake
+  const body: TableCell[][] = [
+      [
+          { text: 'N°', style: 'tableHeader', fillColor: '#CCCCCC', alignment: 'center' },
+          { text: 'NOMBRE COMPLETO', style: 'tableHeader', alignment: 'center' },
+          { text: 'FECHA DE NACIMIENTO', style: 'tableHeader', alignment: 'center' },
+          { text: 'IDENTIDAD', style: 'tableHeader', alignment: 'center' },
+          { text: 'PARENTESCO', style: 'tableHeader', alignment: 'center' },
+          { text: '%', style: 'tableHeader', alignment: 'center' },
+      ]
+  ];
+
+  userDetails.forEach((item, index) => {
+    const fechaNacimiento = item.fechaNacimiento
+        ? new Date(item.fechaNacimiento).toLocaleDateString('es-ES', {
+            day: '2-digit',
+            month: '2-digit',
+            year: 'numeric',
+        })
+        : 'N/A';
+
+    body.push(
+        [
+            { text: (index + 1).toString(), rowSpan: 2, style: 'tableRowLarge', fillColor: '#CCCCCC', alignment: 'center' },
+            { text: item.nombre, style: 'tableRowLarge', alignment: 'center' },
+            { text: fechaNacimiento, style: 'tableRowLarge', alignment: 'center' }, // Usar la fecha formateada
+            { text: item.identidad, style: 'tableRowLarge', alignment: 'center' },
+            { text: item.parentesco, style: 'tableRowLarge', alignment: 'center' },
+            { text: item.porcentaje, style: 'tableRowLarge', alignment: 'center' },
+        ],
+        [
+            {},
+            { text: 'DIRECCIÓN', style: 'tableRowLarge', fillColor: '#CCCCCC', alignment: 'center' },
+            { text: item.direccion_residencia, style: 'tableRowLarge', colSpan: 2, alignment: 'center' },
+            { text: '', style: 'tableRowLarge' },
+            { text: 'TELEFONO/CEL', style: 'tableRowLarge', fillColor: '#CCCCCC', alignment: 'center' },
+            { text: item.telefono_1, style: 'tableRowLarge', alignment: 'center' },
+        ]
+    );
+  });
+
+  return {
+    background: function (currentPage:any, pageSize:any) {
+      return {
+        image: backgroundImageBase64,
+        width: pageSize.width,
+        height: pageSize.height,
+        absolutePosition: { x: 0, y: 2 }
+      };
+    },
+    content: [
+        {
+            text: [
+                'Señores de la Comisión Interventora del INPREMA\nPresente.\n\nYo ',
+                { text: beneficiarios.nombre, bold: true },
+                ', mayor de edad, laborando como docente en el nivel ',
+                { text: beneficiarios.grado_academico, bold: true },
+                ', del Centro Educativo ',
+                { text: beneficiarios.centroEducativo, bold: true },
+               ', ubicado en el Municipio ',
+              { text: beneficiarios.municipioResidencia, bold: true },
+              ' del Departamento ',
+              { text: beneficiarios.departamentoResidencia, bold: true },
+                ', con Identidad N°. ',
+                { text: beneficiarios.n_identificacion, bold: true },
+                ', comparezco ante el Instituto Nacional de Previsión del magisterio a registrar mis beneficiarios legales de la manera siguiente:\n\n'
+            ],
+            style: 'introText',
+            margin: [0, 100, 0, 0] // Aumentar el margen superior a 100 para bajarlo
+        },
+        {
+            table: {
+                widths: [20, '*', '*', '*', '*', '*'],
+                body: body
+            }
+        },
+        {
+            text: '', // Separación adicional
+            margin: [0, 20, 0, 0]
+        },
+        {
+            stack: [
+                {
+                    text: [
+                        'También dispongo, que si alguno de mis beneficiarios (as) designados en este instrumento falleciere, el porcentaje de él o ella asignado, se distribuya en partes iguales entre los sobrevivientes registrados. Me reservo el derecho de actualizar, modificar o cancelar la presente DESIGNACIÓN, cuando lo estime conveniente.\n\n',
+                        { text: 'Nota: Con esta designación dejo sin valor ni efecto la presentada anteriormente.\n\n', bold: true }
+                    ],
+                    style: 'mainText'
+                },
+                {
+                    columns: [
+                        {
+                            width: '*',
+                            stack: [
+                                {
+                                    text: 'Lugar y Fecha: _______________________________________________________________',
+                                    margin: [0, 20, 0, 15]  // Añadir margen adicional
+                                },
+                                {
+                                    text: '(f) _______________________________',
+                                    margin: [0, 15, 0, 0]  // Añadir margen adicional
+                                }
+                            ]
+                        },
+                        {
+                            width: 'auto',
+                            stack: [
+                                {
+                                    canvas: [
+                                        {
+                                            type: 'rect',
+                                            x: 0,
+                                            y: 0,
+                                            w: 80,
+                                            h: 80,
+                                            lineWidth: 1,
+                                            lineColor: 'black'
+                                        }
+                                    ],
+                                    margin: [0, -25, 0, 0]  // Ajustar la posición vertical del cuadro de huella
+                                },
+                                {
+                                    text: 'Huella',
+                                    alignment: 'center',
+                                    margin: [0, -60, 0, 0]  // Ajustar la posición vertical de la palabra "Huella"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    style: 'usoExclusivo',
+                    table: {
+                        widths: ['*'],
+                        body: [
+                            [{ text: 'PARA USO EXCLUSIVO DEL INPREMA', style: 'tableHeader', alignment: 'center', fillColor: '#CCCCCC' }],
+                            [
+                                {
+                                    columns: [
+                                        {
+                                            width: '50%',
+                                            stack: [
+                                                { text: 'Nombre del empleado: ___________________________', margin: [0, 10] },
+                                                { text: 'Código: _______', margin: [0, 10] }
+                                            ],
+                                            style: 'subHeader'
+                                        },
+                                        {
+                                            width: '50%',
+                                            stack: [
+                                                { text: '________________________________', alignment: 'right', margin: [0, 10] },
+                                                { text: 'Firma', alignment: 'center', margin: [0, 10] }
+                                            ],
+                                            style: 'subHeader'
+                                        }
+                                    ]
+                                }
+                            ]
+                        ]
+                    },
+                    layout: {
+                        hLineWidth: function (i: any, node: any) {
+                            return (i === 0 || i === node.table.body.length) ? 1 : 0.5;
+                        },
+                        vLineWidth: function (i: any, node: any) {
+                            return (i === 0 || i === node.table.widths.length) ? 1 : 0.5;
+                        }
+                    },
+                    margin: [0, 20, 0, 0]  // Añadir margen adicional para evitar solapamiento
+                }
+            ]
+        }
+    ],
+    styles: {
+        introText: {
+            fontSize: 12, // Ajusta el tamaño del texto aquí
+            margin: [0, 0, 0, 10]
+        },
+        mainText: {
+            fontSize: 12, // Ajusta el tamaño del texto aquí
+            margin: [0, 0, 0, 10]
+        },
+        subHeader: {
+            fontSize: 10,
+            bold: false,
+            margin: [0, 0, 0, 10]
+        },
+        tableHeader: {
+            bold: true,
+            fontSize: 10,
+            color: 'black',
+            fillColor: '#CCCCCC',
+            alignment: 'center'
+        },
+        tableRow: {
+            fontSize: 9,
+            color: 'black',
+            alignment: 'center'
+        },
+        tableRowLarge: {
+            fontSize: 11,
+            color: 'black',
+            alignment: 'center'
+        },
+        grayBackground: {
+            fillColor: '#CCCCCC'
+        },
+        usoExclusivo: {
+            margin: [0, 20, 0, 0]
+        }
+    }
+};
+
+}
+
+convertirImagenABase64(url: string): Promise<string> {
+  return this.http.get(url, { responseType: 'blob' }).toPromise().then(blob => {
+    return new Promise<string>((resolve, reject) => {
+      if (blob) {
+        const reader = new FileReader();
+        reader.readAsDataURL(blob);
+        reader.onloadend = () => resolve(reader.result as string);
+        reader.onerror = error => reject(error);
+      } else {
+        reject('No se pudo cargar la imagen. El blob es undefined.');
+      }
+    });
+  });
 }
 
 

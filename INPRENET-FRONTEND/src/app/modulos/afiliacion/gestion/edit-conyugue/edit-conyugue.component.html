@@ -6,7 +6,7 @@
 
   <div class="card-body">
     <!-- Mostrar botón para agregar cónyuge si no existe -->
-    <div *ngIf="!conyugeExisteFlag && !mostrandoFormularioAgregar" style="text-align: center;">
+    <div *ngIf="!conyugeExisteFlag" style="text-align: center;">
       <button mat-raised-button color="primary" (click)="mostrarFormularioAgregar()">
         Agregar Cónyuge
       </button>

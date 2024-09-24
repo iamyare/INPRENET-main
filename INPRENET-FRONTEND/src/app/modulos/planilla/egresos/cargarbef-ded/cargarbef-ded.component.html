@@ -4,56 +4,80 @@
   <mat-tab label="Cargar Beneficios">
     <div>
       <!-- Contenido para cargar beneficios -->
-      <button  *ngIf="tipoPlanilla=='ORDINARIA BENEFICIARIO'"
-        mat-raised-button
-        color="primary"
-        (click)="asignarBeneficiosOrdinariaBeneficiariosAfiliados()"
-      >
+      <button *ngIf="tipoPlanilla === 'ORDINARIA BENEFICIARIO'" mat-raised-button color="primary" (click)="asignarBeneficiosOrdinariaBeneficiariosAfiliados()">
         Asignar beneficios a planilla ordinaria de Beneficiarios y Afiliados
       </button>
-      <button *ngIf="tipoPlanilla=='ORDINARIA JUBILADOS Y PENSIONADOS'"
-        mat-raised-button
-        color="primary"
-        (click)="asignarBeneficiosOrdinariaJubiladosPensionados()"
-      >
+      <button *ngIf="tipoPlanilla === 'ORDINARIA JUBILADOS Y PENSIONADOS'" mat-raised-button color="primary" (click)="asignarBeneficiosOrdinariaJubiladosPensionados()">
         Asignar beneficios a planilla ordinaria de Jubilados y Pensionados
       </button>
 
-      <div >
-        <button *ngIf="tipoPlanilla=='COMPLEMENTARIA BENEFICIARIO'"
-          mat-raised-button
-          color="primary"
-          (click)="asignarBeneficiosComplementariaBeneficiariosAfiliados()"
-        >
-          Asignar beneficios a planilla complementaria de Beneficiarios y
-          Afiliados
+      <div>
+        <button *ngIf="tipoPlanilla === 'COMPLEMENTARIA BENEFICIARIO'" mat-raised-button color="primary" (click)="asignarBeneficiosComplementariaBeneficiariosAfiliados()">
+          Asignar beneficios a planilla complementaria de Beneficiarios y Afiliados
         </button>
-        <button *ngIf="tipoPlanilla=='COMPLEMENTARIA JUBILADO Y PENSIONADO'"
-          mat-raised-button
-          color="primary"
-          (click)="asignarBeneficiosComplementariaJubiladosPensionados()"
-        >
+        <button *ngIf="tipoPlanilla === 'COMPLEMENTARIA JUBILADO Y PENSIONADO'" mat-raised-button color="primary" (click)="asignarBeneficiosComplementariaJubiladosPensionados()">
           Asignar beneficios a planilla complementaria de Jubilados y Pensionados
         </button>
-
       </div>
 
+      <!-- Mostrar solo si se ha seleccionado una planilla -->
+      <div class="manual-benefits-section" *ngIf="id_planilla">
+        <h3>Asignar Beneficios Manualmente</h3>
+        <mat-form-field appearance="outline">
+          <mat-label>Buscar por DNI</mat-label>
+          <input matInput [(ngModel)]="dni" placeholder="Ingrese el DNI">
+          <button mat-raised-button color="primary" (click)="buscarBeneficiosPorDni()">Buscar Beneficios</button>
+        </mat-form-field>
+
+        <table mat-table [dataSource]="beneficios" class="mat-elevation-z8" *ngIf="beneficios.length > 0">
+          <!-- Causante Column -->
+          <ng-container matColumnDef="causante">
+            <th mat-header-cell *matHeaderCellDef> Causante </th>
+            <td mat-cell *matCellDef="let beneficio">
+              {{ beneficio?.causante?.nombres }} {{ beneficio?.causante?.apellidos }} - {{ beneficio?.causante?.n_identificacion }}
+            </td>
+          </ng-container>
+
+          <!-- Beneficio Column -->
+          <ng-container matColumnDef="beneficio">
+            <th mat-header-cell *matHeaderCellDef> Beneficio </th>
+            <td mat-cell *matCellDef="let beneficio">
+              {{ beneficio?.beneficio?.nombre_beneficio }}
+            </td>
+          </ng-container>
+
+          <!-- Monto Por Periodo Column -->
+          <ng-container matColumnDef="montoPorPeriodo">
+            <th mat-header-cell *matHeaderCellDef> Monto por Periodo </th>
+            <td mat-cell *matCellDef="let beneficio">
+              {{ beneficio?.detalleBeneficio?.monto_por_periodo | currency : "L" : "symbol" : "1.2-2" }}
+            </td>
+          </ng-container>
+
+          <!-- Seleccionar Column -->
+          <ng-container matColumnDef="select">
+            <th mat-header-cell *matHeaderCellDef> Asignar </th>
+            <td mat-cell *matCellDef="let beneficio">
+              <button mat-raised-button color="accent" (click)="seleccionarBeneficio(beneficio)">Asignar</button>
+            </td>
+          </ng-container>
+
+          <!-- Table Header -->
+          <tr mat-header-row *matHeaderRowDef="['causante', 'beneficio', 'montoPorPeriodo', 'select']"></tr>
+          <!-- Table Rows -->
+          <tr mat-row *matRowDef="let row; columns: ['causante', 'beneficio', 'montoPorPeriodo', 'select']"></tr>
+        </table>
+
+      </div>
     </div>
   </mat-tab>
-  <!-- <mat-tab label="Cargar Deducciones de INPREMA">
+
+  <mat-tab label="Cargar Deducciones de Terceros" *ngIf="tipoPlanilla!='COMPLEMENTARIA BENEFICIARIO' && tipoPlanilla!='COMPLEMENTARIA JUBILADO Y PENSIONADO'">
     <div>
-       Contenido para cargar deducciones de INPREMA
-      <p>Formulario o contenido para cargar deducciones de INPREMA</p>
-    </div>
-  </mat-tab> -->
-  <mat-tab label="Cargar Deducciones de Terceros" *ngIf="tipoPlanilla!='COMPLEMENTARIA BENEFICIARIO' && tipoPlanilla!='COMPLEMENTARIA JUBILADO Y PENSIONADO'" >
-    <div>
-      <!-- Incluir el nuevo componente para subir deducciones de terceros -->
-      <!-- <app-nueva-deduccion-afil></app-nueva-deduccion-afil> -->
       <app-asignacion-deducciones></app-asignacion-deducciones>
-      <!-- <app-subir-deducciones-terceros></app-subir-deducciones-terceros> -->
     </div>
   </mat-tab>
+
   <mat-tab label="Bajas" *ngIf="tipoPlanilla!='COMPLEMENTARIA BENEFICIARIO' && tipoPlanilla!='COMPLEMENTARIA JUBILADO Y PENSIONADO'">
     <app-actualizar-fallecidos></app-actualizar-fallecidos>
   </mat-tab>

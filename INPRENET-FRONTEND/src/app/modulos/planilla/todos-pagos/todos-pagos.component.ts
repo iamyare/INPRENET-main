@@ -59,10 +59,15 @@ export class TodosPagosComponent implements OnInit {
 
   // Función para calcular el total (beneficios - deducciones)
   calcularTotal(pago: any): number {
-    const totalBeneficios = pago.beneficios.reduce((acc: number, beneficio: any) => acc + beneficio.totalPagado, 0);
+    const totalBeneficios = pago.beneficios.reduce((acc: number, beneficio: any) => {
+      return acc + beneficio.pagos.reduce((accPago: number, pagoBeneficio: any) => accPago + pagoBeneficio.monto_a_pagar, 0);
+    }, 0);
+
     const totalDeducciones = pago.deducciones.reduce((acc: number, deduccion: any) => acc + deduccion.monto_total, 0);
+
     return totalBeneficios - totalDeducciones;
   }
+
 
   // Función para generar el PDF
   generarPDF() {
@@ -77,10 +82,15 @@ export class TodosPagosComponent implements OnInit {
     ];
 
     this.allPagosData.forEach(pago => {
-      const bancos = pago.bancos.map((banco:any) => `${banco.banco} - ${banco.num_cuenta}`).join('\n');
-      const beneficios = pago.beneficios.map((beneficio:any) => `${beneficio.beneficio}: ${beneficio.totalPagado}`).join('\n');
-      const deducciones = pago.deducciones.map((deduccion:any) => `${deduccion.deduccion}: ${deduccion.monto_total}`).join('\n');
+      // Aquí se acceden a los bancos a nivel de beneficios y no a nivel global
+      const bancos = pago.beneficios.map((beneficio: any) =>
+        beneficio.pagos.map((pago: any) => `${pago.banco} - ${pago.num_cuenta}`).join('\n')
+      ).join('\n') || 'Sin información de bancos';
+
+      const beneficios = pago.beneficios.map((beneficio: any) => `${beneficio.beneficio}: ${beneficio.totalPagado}`).join('\n');
+      const deducciones = pago.deducciones.map((deduccion: any) => `${deduccion.deduccion}: ${deduccion.monto_total}`).join('\n');
       const total = this.calcularTotal(pago);
+
       tableBody.push([
         pago.planilla.codigo_planilla,
         bancos,
@@ -115,4 +125,6 @@ export class TodosPagosComponent implements OnInit {
       }
     };
   }
+
+
 }

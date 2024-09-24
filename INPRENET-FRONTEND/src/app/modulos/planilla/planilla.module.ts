@@ -37,6 +37,7 @@ import { VerPlanillasActivasComponent } from './egresos/ver-planillas-activas/ve
 import { GestionBancoComponent } from './gestion-banco/gestion-banco.component';
 import { AfiliacionModule } from '../afiliacion/afiliacion.module';
 import { ActualizarFallecidosComponent } from './actualizar-fallecidos/actualizar-fallecidos.component';
+import { MontoDialogComponent } from './monto-dialog/monto-dialog.component';
 
 @NgModule({
   declarations: [
@@ -72,7 +73,8 @@ import { ActualizarFallecidosComponent } from './actualizar-fallecidos/actualiza
     DialogDesgloseComponent,
     GestionBancoComponent,
     ActualizarFallecidosComponent,
-    VerPlanillasActivasComponent
+    VerPlanillasActivasComponent,
+    MontoDialogComponent
   ],
   imports: [
     CommonModule,

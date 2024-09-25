@@ -5,7 +5,6 @@ import { Net_Municipio } from "../../Regional/municipio/entities/net_municipio.e
 import { NET_CUENTA_PERSONA } from "../../transacciones/entities/net_cuenta_persona.entity";
 import { Net_Detalle_planilla_ingreso } from "../../Planilla/Ingresos/detalle-plan-ingr/entities/net_detalle_plani_ing.entity";
 import { Net_perf_pers_cent_trab } from "./net_perf_pers_cent_trab.entity";
-import { Net_Ref_Per_Pers } from "./net_ref-per-persona.entity";
 import { NET_PROFESIONES } from "src/modules/transacciones/entities/net_profesiones.entity";
 import { Net_Peps } from "src/modules/Empresarial/entities/net_peps.entity";
 import { Net_Tipo_Identificacion } from '../../tipo_identificacion/entities/net_tipo_identificacion.entity';
@@ -121,9 +120,6 @@ export class net_persona {
     @Column('date', { nullable: true, name: 'FECHA_NACIMIENTO' })
     fecha_nacimiento: string;
 
-/*     @Column('varchar', { nullable: true, name: 'TIPO_DEFUNCION' })
-    tipo_defuncion: number; */
-
     @Column('varchar', { nullable: true, name: 'CERTIFICADO_DEFUNCION' })
     certificado_defuncion: number;
 
@@ -203,5 +199,4 @@ export class net_persona {
 
     @OneToMany(() => Net_Referencias, referencia => referencia.persona)
     referencias: Net_Referencias[];
-
 }

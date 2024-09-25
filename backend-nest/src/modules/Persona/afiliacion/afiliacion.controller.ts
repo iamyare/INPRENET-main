@@ -195,6 +195,8 @@ export class AfiliacionController {
       @Param('idReferencia') idReferencia: number,
       @Body() datosActualizados: CrearReferenciaDto
     ): Promise<void> {
+      console.log(datosActualizados);
+      
       return this.afiliacionService.actualizarReferencia(idReferencia, datosActualizados);
     }
 }

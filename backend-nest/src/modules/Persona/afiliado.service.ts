@@ -910,21 +910,27 @@ export class AfiliadoService {
     perfil.estado = 'INACTIVO';
     await this.BancosToPersonaRepository.save(perfil);
   }
+
+
   async activarCuentaBancaria(id: number, id_persona: number): Promise<void> {
     const perfil1 = await this.BancosToPersonaRepository.find({ where: { persona: { id_persona: id_persona } } });
     const perfil = await this.BancosToPersonaRepository.findOne({ where: { persona: { id_persona: id_persona }, id_af_banco: id } });
-
     if (!perfil) {
-      throw new NotFoundException(`Cuenta Bancaria con ID ${id} no encontrado`);
+        throw new NotFoundException(`Cuenta Bancaria con ID ${id} no encontrado`);
     }
-
-    perfil1.forEach((val) => val.estado = 'INACTIVO');
-
+    perfil1.forEach((val) => {
+        if (val.estado === 'ACTIVO') {
+            val.estado = 'INACTIVO';
+            val.fecha_inactivacion = new Date();
+        }
+    });
     perfil.estado = 'ACTIVO';
-
+    perfil.fecha_activacion = new Date();
+    perfil.fecha_inactivacion = null;
     await this.BancosToPersonaRepository.save(perfil1);
     await this.BancosToPersonaRepository.save(perfil);
-  }
+}
+
 
 
   async getAllEstados(): Promise<net_estado_afiliacion[]> {

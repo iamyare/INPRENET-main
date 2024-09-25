@@ -273,26 +273,33 @@ export class AfiliacionService {
     entityManager: EntityManager,
   ): Promise<Net_Persona_Por_Banco[]> {
     const resultados: Net_Persona_Por_Banco[] = [];
-  
     for (const crearPersonaBancosDto of crearPersonaBancosDtos) {
       const banco = await this.bancoRepository.findOne({ where: { id_banco: crearPersonaBancosDto.id_banco } });
       if (!banco) {
         throw new NotFoundException(`Banco con ID ${crearPersonaBancosDto.id_banco} no encontrado`);
       }
       if (crearPersonaBancosDto.estado === 'ACTIVO') {
-        await entityManager.update(Net_Persona_Por_Banco, { persona: { id_persona: idPersona }, estado: 'ACTIVO' }, { estado: 'INACTIVO' });
+        await entityManager.update(
+          Net_Persona_Por_Banco,
+          { persona: { id_persona: idPersona }, estado: 'ACTIVO' },
+          { estado: 'INACTIVO', fecha_inactivacion: new Date() }
+        );
       }
       const personaBanco = entityManager.create(Net_Persona_Por_Banco, {
         persona: { id_persona: idPersona },
         banco,
         num_cuenta: crearPersonaBancosDto.num_cuenta,
         estado: crearPersonaBancosDto.estado,
+        fecha_activacion: crearPersonaBancosDto.estado === 'ACTIVO' ? new Date() : null,
+        fecha_inactivacion: crearPersonaBancosDto.estado === 'INACTIVO' ? new Date() : null,
       });
+  
       resultados.push(await entityManager.save(Net_Persona_Por_Banco, personaBanco));
     }
   
     return resultados;
   }
+  
   
   
   async crearPersonaCentrosTrabajo(
@@ -604,6 +611,7 @@ export class AfiliacionService {
       telefono_trabajo: ref.telefono_trabajo,
       telefono_personal: ref.telefono_personal,
       n_identificacion: ref.n_identificacion,
+      estado: ref.estado,
     }));
   }
   
@@ -617,36 +625,42 @@ export class AfiliacionService {
     referencia.estado = 'INACTIVO';
     await this.referenciaRepository.save(referencia);
   }
+
   async actualizarReferencia(idReferencia: number, datosActualizados: CrearReferenciaDto): Promise<void> {
-    const validationErrors: ValidationError[] = await validate(datosActualizados);
+    console.log(datosActualizados);
     
+    const validationErrors: ValidationError[] = await validate(datosActualizados);
     if (validationErrors.length > 0) {
-      const errorMessages = validationErrors.map(error => 
-        Object.values(error.constraints || {}).join(', ')
-      ).join('; ');
-      throw new BadRequestException(`Datos inválidos: ${errorMessages}`);
+        const errorMessages = validationErrors.map(error =>
+            Object.values(error.constraints || {}).join(', ')
+        ).join('; ');
+        throw new BadRequestException(`Datos inválidos: ${errorMessages}`);
     }
+
     const referencia = await this.referenciaRepository.findOne({
-      where: { id_referencia: idReferencia },
+        where: { id_referencia: idReferencia },
     });
     if (!referencia) {
-      throw new NotFoundException(`Referencia con ID ${idReferencia} no encontrada`);
+        throw new NotFoundException(`Referencia con ID ${idReferencia} no encontrada`);
     }
-    referencia.tipo_referencia = datosActualizados.tipo_referencia ?? referencia.tipo_referencia;
-    referencia.primer_nombre = datosActualizados.primer_nombre ?? referencia.primer_nombre;
-    referencia.segundo_nombre = datosActualizados.segundo_nombre ?? referencia.segundo_nombre;
-    referencia.tercer_nombre = datosActualizados.tercer_nombre ?? referencia.tercer_nombre;
-    referencia.primer_apellido = datosActualizados.primer_apellido ?? referencia.primer_apellido;
-    referencia.segundo_apellido = datosActualizados.segundo_apellido ?? referencia.segundo_apellido;
-    referencia.parentesco = datosActualizados.parentesco ?? referencia.parentesco;
-    referencia.direccion = datosActualizados.direccion ?? referencia.direccion;
-    referencia.telefono_domicilio = datosActualizados.telefono_domicilio ?? referencia.telefono_domicilio;
-    referencia.telefono_trabajo = datosActualizados.telefono_trabajo ?? referencia.telefono_trabajo;
-    referencia.telefono_personal = datosActualizados.telefono_personal ?? referencia.telefono_personal;
-    referencia.n_identificacion = datosActualizados.n_identificacion ?? referencia.n_identificacion;
-    referencia.estado = datosActualizados.estado ?? referencia.estado;
-    await this.referenciaRepository.save(referencia);
-  }
+
+    await this.referenciaRepository.update(idReferencia, {
+        tipo_referencia: datosActualizados.tipo_referencia ?? referencia.tipo_referencia,
+        primer_nombre: datosActualizados.primer_nombre ?? referencia.primer_nombre,
+        segundo_nombre: datosActualizados.segundo_nombre ?? referencia.segundo_nombre,
+        tercer_nombre: datosActualizados.tercer_nombre ?? referencia.tercer_nombre,
+        primer_apellido: datosActualizados.primer_apellido ?? referencia.primer_apellido,
+        segundo_apellido: datosActualizados.segundo_apellido ?? referencia.segundo_apellido,
+        parentesco: datosActualizados.parentesco ?? referencia.parentesco,
+        direccion: datosActualizados.direccion ?? referencia.direccion,
+        telefono_domicilio: datosActualizados.telefono_domicilio ?? referencia.telefono_domicilio,
+        telefono_trabajo: datosActualizados.telefono_trabajo ?? referencia.telefono_trabajo,
+        telefono_personal: datosActualizados.telefono_personal ?? referencia.telefono_personal,
+        n_identificacion: datosActualizados.n_identificacion ?? referencia.n_identificacion,
+        estado: datosActualizados.estado ?? referencia.estado,
+    });
+}
+
 
   async editarOtraFuenteIngreso(id: number, dto: CrearOtraFuenteIngresoDto): Promise<net_otra_fuente_ingreso> {
     const otraFuenteIngreso = await this.otraFuenteIngresoRepository.findOne({ where: { id_otra_fuente_ingreso: id } });

@@ -65,6 +65,16 @@ export class EditDatosBancariosComponent implements OnInit, OnChanges {
         col: 'estado',
         isEditable: true
       },
+      {
+        header: 'Fecha de Activación',
+        col: 'fecha_activacion',
+        isEditable: true
+      },
+      {
+        header: 'Fecha de Inactivación',
+        col: 'fecha_inactivacion',
+        isEditable: true
+      },
     ];
 
     this.getFilas().then(() => this.cargar());
@@ -79,12 +89,14 @@ export class EditDatosBancariosComponent implements OnInit, OnChanges {
     if (this.Afiliado) {
       try {
         const data = await this.svcAfiliado.getAllPersonaPBanco(this.Afiliado.n_identificacion).toPromise();
-          this.filas = data.map((item: any) => ({
-            id: item.id_af_banco,
-            nombre_banco: item.banco?.nombre_banco || 'N/A',
-            numero_cuenta: item.num_cuenta,
-            estado: item.estado || 'N/A'
-          }));
+        this.filas = data.map((item: any) => ({
+          id: item.id_af_banco,
+          nombre_banco: item.banco?.nombre_banco || 'N/A',
+          numero_cuenta: item.num_cuenta,
+          estado: item.estado || 'N/A',
+          fecha_activacion: item.fecha_activacion ? this.formatDate(item.fecha_activacion) : 'N/A',
+          fecha_inactivacion: item.fecha_inactivacion ? this.formatDate(item.fecha_inactivacion) : 'N/A'
+        }));
       } catch (error) {
         this.toastr.error('Error al cargar los datos bancarios');
       }
@@ -124,7 +136,6 @@ export class EditDatosBancariosComponent implements OnInit, OnChanges {
             }
           },
           error: (error) => {
-            console.error('Error al desactivar la Cuenta Bancaria:', error);
             this.toastr.error('Ocurrió un error al desactivar la Cuenta Bancaria.');
           }
         });
@@ -206,5 +217,17 @@ export class EditDatosBancariosComponent implements OnInit, OnChanges {
 
   resetBusqueda2() {
     this.resetBusqueda.emit();
+  }
+
+  formatDate(dateString: string): string {
+    const date = new Date(dateString);
+    return date.toLocaleString('es-ES', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit'
+    });
   }
 }

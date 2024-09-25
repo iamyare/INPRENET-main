@@ -362,8 +362,6 @@ formatDiscapacidades(discapacidades: any): any[] {
 }
 
 getDocumentDefinition(userDetails: any[], beneficiarios: any, backgroundImageBase64: string): any {
-  console.log(userDetails);
-  console.log(beneficiarios);
 
   // Revisar los datos y asignar valores por defecto si no existen
   userDetails.forEach(item => {

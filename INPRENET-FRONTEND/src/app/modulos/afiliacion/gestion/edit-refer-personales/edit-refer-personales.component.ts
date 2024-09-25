@@ -58,7 +58,6 @@ export class EditReferPersonalesComponent implements OnInit, OnChanges, OnDestro
 
   initializeComponent(): void {
     this.listaParentesco = this.datosEstaticosService.parentesco;
-
     this.myColumns = [
       {
         header: 'Nombre Completo',
@@ -102,13 +101,7 @@ export class EditReferPersonalesComponent implements OnInit, OnChanges, OnDestro
         header: 'Teléfono trabajo',
         col: 'telefono_trabajo',
         isEditable: true
-      },
-      {
-        header: 'Estado',
-        col: 'estado',
-        isEditable: true,
-        validationRules: [Validators.required, Validators.pattern(/^(ACTIVO|INACTIVO)$/)]
-      },
+      }
     ];
     this.getFilas();
   }
@@ -131,25 +124,27 @@ export class EditReferPersonalesComponent implements OnInit, OnChanges, OnDestro
     if (this.Afiliado) {
       try {
         const data = await this.svcAfiliacion.obtenerReferenciasPorIdentificacion(this.Afiliado.n_identificacion).toPromise();
-        this.filas = data.map((item: any) => {
-          const filaProcesada = {
-            id_referencia: item.id_referencia ?? 'ID no disponible',
-            n_identificacion: item.n_identificacion ?? 'ID no disponible',
-            nombre_completo: `${item.primer_nombre ?? ''} ${item.segundo_nombre ?? ''} ${item.primer_apellido ?? ''} ${item.segundo_apellido ?? ''}`.trim(),
-            parentesco: item.parentesco || 'No disponible',
-            direccion: item.direccion ?? 'Dirección no disponible',
-            telefono_domicilio: item.telefono_1 ?? 'No disponible',
-            telefono_personal: item.telefono_2 ?? 'No disponible',
-            telefono_trabajo: item.telefono_trabajo ?? 'No disponible',
-            estado: item.estado ?? 'No disponible',
-            tipo_referencia: item.tipo_referencia ?? 'No disponible',
-            primer_nombre: item.primer_nombre ?? 'No disponible',
-            segundo_nombre: item.segundo_nombre ?? 'No disponible',
-            primer_apellido: item.primer_apellido ?? 'No disponible',
-            segundo_apellido: item.segundo_apellido ?? 'No disponible',
-          };
-          return filaProcesada;
-        });
+        this.filas = data
+          .filter((item: any) => item.estado === 'ACTIVO')
+          .map((item: any) => {
+            const filaProcesada = {
+              id_referencia: item.id_referencia ?? 'ID no disponible',
+              n_identificacion: item.n_identificacion ?? 'ID no disponible',
+              nombre_completo: `${item.primer_nombre ?? ''} ${item.segundo_nombre ?? ''} ${item.primer_apellido ?? ''} ${item.segundo_apellido ?? ''}`.trim(),
+              parentesco: item.parentesco || 'No disponible',
+              direccion: item.direccion ?? 'Dirección no disponible',
+              telefono_domicilio: item.telefono_domicilio ?? '00000000',
+              telefono_personal: item.telefono_personal ?? '00000000',
+              telefono_trabajo: item.telefono_trabajo ?? '00000000',
+              estado: item.estado ?? 'No disponible',
+              tipo_referencia: item.tipo_referencia ?? 'No disponible',
+              primer_nombre: item.primer_nombre ?? 'No disponible',
+              segundo_nombre: item.segundo_nombre ?? 'No disponible',
+              primer_apellido: item.primer_apellido ?? 'No disponible',
+              segundo_apellido: item.segundo_apellido ?? 'No disponible',
+            };
+            return filaProcesada;
+          });
 
         this.mostrarMensaje = this.filas.length === 0;
       } catch (error) {
@@ -163,7 +158,6 @@ export class EditReferPersonalesComponent implements OnInit, OnChanges, OnDestro
       this.resetDatos();
     }
   }
-
 
   ejecutarFuncionAsincronaDesdeOtroComponente(funcion: (data: any) => Promise<void>) {
     this.ejecF = funcion;
@@ -180,7 +174,6 @@ export class EditReferPersonalesComponent implements OnInit, OnChanges, OnDestro
     const parentescoSeleccionado = this.listaParentesco.find(
       (item: any) => item.label.toLowerCase() === rowParentesco
     );
-
     const campos = [
       {
         nombre: 'primer_nombre',
@@ -271,7 +264,7 @@ export class EditReferPersonalesComponent implements OnInit, OnChanges, OnDestro
         etiqueta: 'Numero de Identificacion',
         editable: true,
         icono: 'badge',
-        validadores: [Validators.required, Validators.pattern(/^[0-9]{13}$|^[0-9]{4}-[0-9]{4}-[0-9]{5}$/)]
+        validadores: []
       },
       {
         nombre: 'tipo_referencia',
@@ -281,15 +274,6 @@ export class EditReferPersonalesComponent implements OnInit, OnChanges, OnDestro
         editable: true,
         icono: 'badge',
         validadores: [Validators.required]
-      },
-      {
-        nombre: 'estado',
-        tipo: 'text',
-        requerido: true,
-        etiqueta: 'Estado',
-        editable: true,
-        icono: 'check_circle',
-        validadores: [Validators.required, Validators.pattern(/^(ACTIVO|INACTIVO)$/)]
       }
     ];
 
@@ -333,7 +317,6 @@ export class EditReferPersonalesComponent implements OnInit, OnChanges, OnDestro
       width: '500px',
       data: { campos: campos, valoresIniciales: row }
     });
-
     dialogRef.afterClosed().subscribe((result: any) => {
       if (result) {
         const updateDto = {
@@ -346,9 +329,11 @@ export class EditReferPersonalesComponent implements OnInit, OnChanges, OnDestro
           telefono_personal: result.telefono_personal,
           telefono_trabajo: result.telefono_trabajo,
           n_identificacion: result.n_identificacion,
-          estado: result.estado,
-          tipo_referencia: result.tipo_referencia
+          tipo_referencia: result.tipo_referencia,
+          parentesco: result.parentesco,
+          estado: 'ACTIVO'
         };
+
         this.svcAfiliado.updateReferenciaPersonal(row.id_referencia, updateDto).subscribe({
           next: (response) => {
             this.toastr.success('Datos modificados correctamente.');

@@ -14,6 +14,7 @@ import { ComponentsModule } from './components/components.module';
 import { AdminModule } from './modulos/admin/admin.module';
 import { SidenavService } from './services/sidenav.service';
 import { TokenInterceptor } from './interceptors/token.interceptor';
+import { MovimientosInpremaModule } from './modulos/movimientos-inprema/movimientos-inprema.module';
 @NgModule({
   declarations: [
     AppComponent,
@@ -25,6 +26,7 @@ import { TokenInterceptor } from './interceptors/token.interceptor';
     BrowserAnimationsModule,
     MaterialAngularModule,
     AfiliacionModule,
+    MovimientosInpremaModule,
     PlanillaModule,
     AuthModule,
     ComponentsModule,

@@ -93,5 +93,17 @@ export const MENU_CONFIG: Section[] = [
         ],
       },
     ],
+  },
+  {
+    name: 'CUENTAS INPREMA',
+    items: [
+      {
+        title: 'Movimientos de cuentas',
+        icon: 'money',
+        children: [
+          { title: 'Ver movimiento', route: 'cuentas/Movimientos/Ver-movimientos', icon: 'business' },
+        ],
+      },
+    ],
   }
 ];

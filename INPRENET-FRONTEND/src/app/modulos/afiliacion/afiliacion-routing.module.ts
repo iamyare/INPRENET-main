@@ -21,7 +21,6 @@ import { PensionadoComponent } from './verPerfil/pensionado/pensionado.component
 import { PerfilComponent } from './verPerfil/perfil/perfil.component';
 import { VoluntarioComponent } from './verPerfil/voluntario/voluntario.component';
 import { AfilBancoComponent } from './gestion/afil-banco/afil-banco.component';
-import { AfiliacionDocentesComponent } from './gestion/afiliacion-docentes/afiliacion-docentes.component';
 import { MantenimientoAfiliacionComponent } from './mantenimiento/mantenimiento-afiliacion/mantenimiento-afiliacion.component';
 import { DiscapacidadComponent } from './mantenimiento/discapacidad/discapacidad.component';
 import { ProfesionComponent } from './mantenimiento/profesion/profesion.component';

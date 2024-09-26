@@ -162,7 +162,6 @@ export class PepsComponent implements OnInit {
 
   removeFamiliar(index: number): void {
     this.familiares.removeAt(index);
-
   }
 
   asFormGroup(control: AbstractControl): FormGroup {

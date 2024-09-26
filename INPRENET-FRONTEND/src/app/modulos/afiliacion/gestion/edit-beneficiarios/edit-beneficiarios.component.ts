@@ -111,7 +111,6 @@ export class EditBeneficiariosComponent implements OnInit, OnChanges {
     }
   }
 
-
   ejecutarFuncionAsincronaDesdeOtroComponente(funcion: (data: any) => Promise<void>) {
     this.ejecF = funcion;
   }
@@ -127,36 +126,13 @@ export class EditBeneficiariosComponent implements OnInit, OnChanges {
       width: '500px',
       data: { campos: campos, valoresIniciales: row }
     });
-
-
     dialogRef.afterClosed().subscribe((result: any) => {
       if (result) {
-        /* const [primer_nombre, segundo_nombre, tercer_nombre] = result.nombres.split(' ');
-        const [primer_apellido, segundo_apellido] = result.apellidos.split(' ');
-
-        const fecha_nacimiento = this.datePipe.transform(result.fecha_nacimiento, 'dd-MM-yyyy') || ''; */
-
         const updatedBeneficiario = {
-          /* id_pais: result.idPaisNacionalidad,
-          n_identificacion: result.n_identificacion ?? 'ID no disponible',
-          primer_nombre,
-          segundo_nombre: segundo_nombre || '',
-          tercer_nombre: tercer_nombre || '',
-          primer_apellido,
-          segundo_apellido: segundo_apellido || '',
-          genero: result.genero,
-          sexo: result.sexo,
-          cantidad_dependientes: result.cantidad_dependientes,
-          telefono_1: result.telefono_1,
-          fecha_nacimiento,
-          direccion_residencia: result.direccion_residencia,
-          id_municipio_residencia: result.id_municipio_residencia,
-          id_estado_persona: result.id_estado_persona, */
-          id_causante_padre: result.ID_CAUSANTE_PADRE,
-          id_persona: result.idPersona,
+          id_causante_padre: this.persona.id_persona,
+          id_persona: row.id_persona,
           porcentaje: result.porcentaje
         };
-
         this.svcAfiliado.updateBeneficiario(row.id, updatedBeneficiario).subscribe(
           (response) => {
             this.toastr.success('Beneficiario actualizado exitosamente');
@@ -178,18 +154,7 @@ export class EditBeneficiariosComponent implements OnInit, OnChanges {
   }
 
   editarFila(row: any) {
-    const campos = [
-      /* { nombre: 'n_identificacion', tipo: 'text', etiqueta: 'Número de Identificación', editable: true, icono: 'badge' },
-      { nombre: 'nombres', tipo: 'text', etiqueta: 'Nombres', editable: true, icono: 'person' },
-      { nombre: 'apellidos', tipo: 'text', etiqueta: 'Apellidos', editable: true, icono: 'person_outline' },
-      { nombre: 'sexo', tipo: 'list', etiqueta: 'Sexo', editable: true, opciones: this.datosEstaticosService.sexo, icono: 'transgender' },
-      { nombre: 'telefono_1', tipo: 'text', etiqueta: 'Teléfono 1', editable: true, icono: 'phone' },
-      { nombre: 'fecha_nacimiento', tipo: 'date', etiqueta: 'Fecha de Nacimiento', editable: true, icono: 'calendar_today' },
-      { nombre: 'direccion_residencia', tipo: 'text', etiqueta: 'Dirección de Residencia', editable: true, icono: 'home' },
-      { nombre: 'idPaisNacionalidad', tipo: 'list', etiqueta: 'País Nacionalidad', editable: true, opciones: this.datosEstaticosService.nacionalidades, icono: 'public' },
-      { nombre: 'id_municipio_residencia', tipo: 'list', etiqueta: 'Municipio Residencia', editable: true, opciones: this.datosEstaticosService.municipios, icono: 'location_city' },
-      { nombre: 'id_estado_persona', tipo: 'list', etiqueta: 'Estado Persona', editable: true, opciones: this.datosEstaticosService.estados, icono: 'assignment_ind' }, */
-      {
+    const campos = [{
         nombre: 'porcentaje',
         tipo: 'number',
         etiqueta: 'Porcentaje',
@@ -201,9 +166,7 @@ export class EditBeneficiariosComponent implements OnInit, OnChanges {
           Validators.max(100)
         ]
       }
-
     ];
-
     this.openDialog(campos, row);
   }
 

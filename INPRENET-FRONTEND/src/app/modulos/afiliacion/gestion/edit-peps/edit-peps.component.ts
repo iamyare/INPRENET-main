@@ -7,47 +7,50 @@ import { Subscription } from 'rxjs';
 import { ConfirmDialogComponent } from 'src/app/components/dinamicos/confirm-dialog/confirm-dialog.component';
 import { EditarDialogComponent } from 'src/app/components/dinamicos/editar-dialog/editar-dialog.component';
 import { AfiliadoService } from 'src/app/services/afiliado.service';
-import { CentroTrabajoService } from 'src/app/services/centro-trabajo.service';
+import { AfiliacionService } from 'src/app/services/afiliacion.service'; // Servicio para familiares
 import { FieldConfig } from 'src/app/shared/Interfaces/field-config';
 import { TableColumn } from 'src/app/shared/Interfaces/table-column';
 import { convertirFechaInputs } from 'src/app/shared/functions/formatoFecha';
 import { unirNombres } from 'src/app/shared/functions/formatoNombresP';
-import { AgregarPuestTrabComponent } from '../agregar-puest-trab/agregar-puest-trab.component';
+import { AgregarPepsComponent } from '../agregar-peps/agregar-peps.component';
+import { AgregarFamiliarComponent } from '../agregar-familiar/agregar-familiar.component';
 
 @Component({
   selector: 'app-edit-peps',
   templateUrl: './edit-peps.component.html',
-  styleUrl: './edit-peps.component.scss'
+  styleUrls: ['./edit-peps.component.scss']
 })
-export class EditPepsComponent {
+export class EditPepsComponent implements OnInit, OnDestroy, OnChanges {
   @Input() Afiliado!: any;
 
   private subscriptions: Subscription = new Subscription();
-
   convertirFechaInputs = convertirFechaInputs;
-
   unirNombres: any = unirNombres;
+
+  // Variables para PEPs (Cargos Públicos)
   datosTabl: any[] = [];
   centrosTrabajo: any = [];
   prevAfil: boolean = false;
-
   public myColumns: TableColumn[] = [];
   public myFormFields: FieldConfig[] = [];
   public filas: any[] = [];
-  ejecF: any;
+  ejecFPEPs: any;
+
+  // Variables para Familiares
+  public familiaresColumns: TableColumn[] = [];
+  public familiares: any[] = [];
+  ejecFFamiliares: any;
 
   constructor(
     private svcAfiliado: AfiliadoService,
+    private afiliacionService: AfiliacionService, // Servicio para obtener familiares
     private toastr: ToastrService,
     private dialog: MatDialog,
-    private datePipe: DatePipe,
-    private centrosTrabSVC: CentroTrabajoService,
+    private datePipe: DatePipe
   ) { }
-
 
   ngOnInit(): void {
     this.initializeComponent();
-
   }
 
   ngOnChanges(changes: SimpleChanges): void {
@@ -81,38 +84,38 @@ export class EditPepsComponent {
         header: 'Fecha Fin',
         col: 'fecha_fin',
         isEditable: true
-      },
-      
+      }
     ];
 
-    //this.getCentrosTrabajo();
-    this.getFilas().then(() => this.cargar());
+    // Definir columnas para la tabla de Familiares
+    this.familiaresColumns = [
+      {
+        header: 'Nombre Completo',
+        col: 'nombre_completo'
+      },
+      {
+        header: 'Parentesco',
+        col: 'parentesco'
+      }
+    ];
 
+    this.loadData();  // Usar un método para cargar ambas tablas
   }
 
+  loadData(): void {
+    // Cargar ambas tablas de manera independiente
+    Promise.all([this.getFilas(), this.getFamiliares()])
+      .then(() => {
+        this.cargar();          // Cargar tabla de PEPs
+        this.cargarFamiliares(); // Cargar tabla de Familiares
+      })
+      .catch(error => {
+        this.toastr.error('Error al cargar los datos.');
+        console.error('Error en la carga de datos:', error);
+      });
+  }
 
-  /* async getCentrosTrabajo() {
-    const response = await this.centrosTrabSVC.obtenerTodosLosCentrosTrabajo().toPromise();
-    if (response) {
-
-      const mappedResponse = response.map((item) => ({
-        label: item.nombre_centro_trabajo,
-        value: String(item.id_centro_trabajo),
-        sector: item.sector_economico,
-      }));
-      this.centrosTrabajo = mappedResponse;
-    }
-
-    //this.centrosTrabajo = await this.datosEstaticosService.getAllCentrosTrabajo();
-  } */
-
- /*  resetDatos() {
-    this.filas = [];
-    this.Afiliado = undefined;
-  } */
-
-  async getFilas() {
-
+  async getFilas(): Promise<void> {
     if (this.Afiliado.n_identificacion) {
       try {
         const data = await this.svcAfiliado.getAllCargoPublicPeps(this.Afiliado.n_identificacion).toPromise();
@@ -120,27 +123,53 @@ export class EditPepsComponent {
           return {
             cargo: item.cargo,
             fecha_inicio: item.fecha_inicio,
-            fecha_fin: item.fecha_fin,
-          }
-        }
-      );
+            fecha_fin: item.fecha_fin
+          };
+        });
       } catch (error) {
         this.toastr.error('Error al cargar los datos de los puestos públicos');
         console.error('Error al obtener datos de los puestos públicos', error);
       }
-    } else {
-      /* this.resetDatos(); */
     }
   }
 
-  ejecutarFuncionAsincronaDesdeOtroComponente(funcion: (data: any) => Promise<void>) {
-    this.ejecF = funcion;
+  async getFamiliares(): Promise<void> {
+    if (this.Afiliado.id_persona) {
+      try {
+        const data = await this.afiliacionService.obtenerFamiliares(this.Afiliado.id_persona).toPromise();
+        this.familiares = data.map((familiar: any) => ({
+          nombre_completo: `${familiar.referenciada.primer_nombre || ''} ${familiar.referenciada.segundo_nombre || ''} ${familiar.referenciada.primer_apellido || ''} ${familiar.referenciada.segundo_apellido || ''}`.trim(),
+          parentesco: familiar.parentesco
+        }));
+      } catch (error) {
+        this.toastr.error('Error al cargar los familiares');
+        console.error('Error al obtener familiares:', error);
+      }
+    }
   }
 
+  // Función para cargar los datos de la tabla de PEPs
   cargar() {
-    if (this.ejecF) {
-      this.ejecF(this.filas).then(() => { });
+    if (this.ejecFPEPs) {
+      this.ejecFPEPs(this.filas).then(() => { });
     }
+  }
+
+  // Función para cargar los datos de la tabla de Familiares
+  cargarFamiliares() {
+    if (this.ejecFFamiliares) {
+      this.ejecFFamiliares(this.familiares).then(() => { });
+    }
+  }
+
+  // Método para ejecutar funciones asíncronas desde la tabla de PEPs
+  ejecutarFuncionAsincronaDesdeOtroComponentePEPs(funcion: (data: any) => Promise<void>) {
+    this.ejecFPEPs = funcion;
+  }
+
+  // Método para ejecutar funciones asíncronas desde la tabla de Familiares
+  ejecutarFuncionAsincronaDesdeOtroComponenteFamiliares(funcion: (data: any) => Promise<void>) {
+    this.ejecFFamiliares = funcion;
   }
 
   async manejarAccionUno(row: any) {
@@ -167,14 +196,12 @@ export class EditPepsComponent {
         nombre: 'fecha_fin',
         tipo: 'date',
         requerido: true,
-        etiqueta: 'F  echa Fin',
+        etiqueta: 'Fecha Fin',
         editable: true,
         icono: 'event',
         validaciones: [Validators.required]
-      },
-      
+      }
     ];
-
 
     const dialogRef = this.dialog.open(EditarDialogComponent, {
       width: '500px',
@@ -183,43 +210,25 @@ export class EditPepsComponent {
 
     dialogRef.afterClosed().subscribe(async (result: any) => {
       if (result) {
-        // Formateo de fechas antes de enviar los datos
         result.fechaIngreso = this.datePipe.transform(result.fechaIngreso, 'dd/MM/yyyy');
         result.fechaEgreso = this.datePipe.transform(result.fechaEgreso, 'dd/MM/yyyy');
 
-        const idCentroTrabajo = result.id_centro_trabajo;
-        delete result.nombre_centro_trabajo;
-
-        const dataToSend = {
-          ...result,
-          idCentroTrabajo: idCentroTrabajo
-        };
-
         this.svcAfiliado.updatePerfCentroTrabajo(row.id, result).subscribe({
-
-          next: (response) => {
+          next: () => {
             const index = this.filas.findIndex(item => item.id === row.id);
             if (index !== -1) {
-              this.filas[index] = {
-                ...this.filas[index],
-                ...result,
-                nombre_centro_trabajo: row.nombre_centro_trabajo
-              };
+              this.filas[index] = { ...this.filas[index], ...result };
             }
-            this.toastr.success("Se actualizó el perfil de trabajo correctamente")
+            this.toastr.success("Se actualizó el perfil de trabajo correctamente");
             this.cargar();
           },
-          error: (error) => {
-            this.toastr.error("Error", "No se actualizo el perfil de trabajo")
-            console.error("Error al actualizar:", error);
+          error: () => {
+            this.toastr.error("Error", "No se actualizó el perfil de trabajo");
           }
         });
-      } else {
-        console.log('No se realizaron cambios.');
       }
     });
   }
-
 
   manejarAccionDos(row: any) {
     const dialogRef = this.dialog.open(ConfirmDialogComponent, {
@@ -234,33 +243,41 @@ export class EditPepsComponent {
     dialogRef.afterClosed().subscribe((result: boolean) => {
       if (result) {
         this.svcAfiliado.desactivarPerfCentroTrabajo(row.id).subscribe({
-          next: (response) => {
-            this.toastr.success(response.mensaje, 'Perfil Desactivado');
+          next: () => {
+            this.toastr.success('Perfil Desactivado');
             this.getFilas().then(() => this.cargar());
           },
-          error: (error) => {
-            console.error('Error al desactivar el perfil:', error);
+          error: () => {
             this.toastr.error('Ocurrió un error al desactivar el perfil.');
           }
         });
-      } else {
-        console.log('Desactivación cancelada por el usuario.');
       }
     });
   }
 
-  AgregarPuestoTrabajo() {
-    const dialogRef = this.dialog.open(AgregarPuestTrabComponent, {
+  agregarFamiliar() {
+    const dialogRef = this.dialog.open(AgregarFamiliarComponent, {
       width: '55%',
       height: '75%',
       data: {
         idPersona: this.Afiliado.id_persona
       }
     });
-
-    dialogRef.afterClosed().subscribe((result: any) => {
-      this.ngOnInit();
+    dialogRef.afterClosed().subscribe(() => {
+      this.getFamiliares().then(() => this.cargarFamiliares());
     });
   }
 
+  agregarPEP() {
+    const dialogRef = this.dialog.open(AgregarPepsComponent, {
+      width: '55%',
+      height: '75%',
+      data: {
+        idPersona: this.Afiliado.id_persona
+      }
+    });
+    dialogRef.afterClosed().subscribe(() => {
+      this.ngOnInit();
+    });
+  }
 }

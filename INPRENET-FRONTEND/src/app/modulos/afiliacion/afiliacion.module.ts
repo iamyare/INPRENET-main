@@ -72,6 +72,8 @@ import { DetallePagosComponent } from '../planilla/detalle-pagos/detalle-pagos.c
 import { DesglosePagoComponent } from '../planilla/desglose-pago/desglose-pago.component';
 import { TodosPagosComponent } from '../planilla/todos-pagos/todos-pagos.component';
 import { EditConyugueComponent } from './gestion/edit-conyugue/edit-conyugue.component';
+import { AgregarPepsComponent } from './gestion/agregar-peps/agregar-peps.component';
+import { AgregarFamiliarComponent } from './gestion/agregar-familiar/agregar-familiar.component';
 
 @NgModule({
   declarations: [
@@ -140,7 +142,9 @@ import { EditConyugueComponent } from './gestion/edit-conyugue/edit-conyugue.com
     DetallePagosComponent,
     DesglosePagoComponent,
     TodosPagosComponent,
-    EditConyugueComponent
+    EditConyugueComponent,
+    AgregarPepsComponent,
+    AgregarFamiliarComponent
   ],
   imports: [
     CommonModule,

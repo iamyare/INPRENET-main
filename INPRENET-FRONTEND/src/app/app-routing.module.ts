@@ -61,6 +61,10 @@ const routes: Routes = [
         path: 'menu',
         loadChildren: () => import('./views/views.module').then(m => m.ViewsModule),
       },
+      {
+        path: 'cuentas',
+        loadChildren: () => import('./modulos/movimientos-inprema/movimientos-inprema.module').then(m => m.MovimientosInpremaModule),
+      },
       { path: 'usuario/editar', component: EditarPerfilComponent },
     ],
     canActivate: [RoleGuard],

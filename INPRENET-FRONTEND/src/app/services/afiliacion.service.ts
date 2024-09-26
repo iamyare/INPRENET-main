@@ -10,6 +10,26 @@ export class AfiliacionService {
 
 constructor(private http: HttpClient) { }
 
+obtenerFamiliares(idPersona: number): Observable<any> {
+  const url = `${environment.API_URL}/api/afiliacion/${idPersona}/familiares`;
+  return this.http.get<any>(url).pipe(
+    catchError((error) => {
+      console.error('Error al obtener los familiares', error);
+      return throwError(error);
+    })
+  );
+}
+
+crearPeps(idPersona: number, pepsData: any[]): Observable<any> {
+  const url = `${environment.API_URL}/api/afiliacion/persona/${idPersona}/peps`;
+  return this.http.post<any>(url, pepsData).pipe(
+    catchError((error) => {
+      console.error('Error al crear los PEPs', error);
+      return throwError(error);
+    })
+  );
+}
+
 crearFamilia(idPersona: number, familiares: any[]): Observable<any> {
   const url = `${environment.API_URL}/api/afiliacion/persona/${idPersona}/familia`;
   return this.http.post<any>(url, familiares).pipe(

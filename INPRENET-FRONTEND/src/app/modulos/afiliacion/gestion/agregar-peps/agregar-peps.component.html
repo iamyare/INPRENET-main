@@ -23,6 +23,13 @@
           </button>
         </div>
       </div>
+
+      <!-- Botón para guardar, solo si el formulario es válido -->
+      <div class="row" style="text-align: center; margin-top: 2%;" *ngIf="formPeps.valid && peps.length > 0">
+        <button mat-button color="primary" type="button" (click)="savePeps()">
+          <mat-icon matSuffix>save</mat-icon> Guardar PEPs
+        </button>
+      </div>
     </form>
   </div>
 </div>

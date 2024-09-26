@@ -23,6 +23,15 @@
           </button>
         </div>
       </div>
+
+      <!-- Botón de guardar familiares, habilitado solo si el formulario es válido -->
+      <div class="row" *ngIf="familiares.length > 0" style="text-align: center; margin-top: 20px;">
+        <div class="col-md-12">
+          <button mat-button color="primary" type="button" [disabled]="!isFormValid()" (click)="saveFamiliares()">
+            <mat-icon matSuffix>save</mat-icon> Guardar Familiares
+          </button>
+        </div>
+      </div>
     </form>
   </div>
 </div>

@@ -103,11 +103,10 @@ export class EditPepsComponent implements OnInit, OnDestroy, OnChanges {
   }
 
   loadData(): void {
-    // Cargar ambas tablas de manera independiente
     Promise.all([this.getFilas(), this.getFamiliares()])
       .then(() => {
-        this.cargar();          // Cargar tabla de PEPs
-        this.cargarFamiliares(); // Cargar tabla de Familiares
+        this.cargar();
+        this.cargarFamiliares();
       })
       .catch(error => {
         this.toastr.error('Error al cargar los datos.');
@@ -119,13 +118,14 @@ export class EditPepsComponent implements OnInit, OnDestroy, OnChanges {
     if (this.Afiliado.n_identificacion) {
       try {
         const data = await this.svcAfiliado.getAllCargoPublicPeps(this.Afiliado.n_identificacion).toPromise();
-        this.filas = data[0].cargo_publico.map((item: any) => {
-          return {
+        this.filas = data.flatMap((peps: any) =>
+          peps.cargo_publico.map((item: any) => ({
             cargo: item.cargo,
             fecha_inicio: item.fecha_inicio,
             fecha_fin: item.fecha_fin
-          };
-        });
+          }))
+        );
+
       } catch (error) {
         this.toastr.error('Error al cargar los datos de los puestos públicos');
         console.error('Error al obtener datos de los puestos públicos', error);
@@ -133,13 +133,17 @@ export class EditPepsComponent implements OnInit, OnDestroy, OnChanges {
     }
   }
 
+
   async getFamiliares(): Promise<void> {
     if (this.Afiliado.id_persona) {
       try {
         const data = await this.afiliacionService.obtenerFamiliares(this.Afiliado.id_persona).toPromise();
+        console.log(data);
+
         this.familiares = data.map((familiar: any) => ({
           nombre_completo: `${familiar.referenciada.primer_nombre || ''} ${familiar.referenciada.segundo_nombre || ''} ${familiar.referenciada.primer_apellido || ''} ${familiar.referenciada.segundo_apellido || ''}`.trim(),
-          parentesco: familiar.parentesco
+          parentesco: familiar.parentesco,
+          id_persona : familiar.referenciada.id_persona
         }));
       } catch (error) {
         this.toastr.error('Error al cargar los familiares');
@@ -148,26 +152,22 @@ export class EditPepsComponent implements OnInit, OnDestroy, OnChanges {
     }
   }
 
-  // Función para cargar los datos de la tabla de PEPs
   cargar() {
     if (this.ejecFPEPs) {
       this.ejecFPEPs(this.filas).then(() => { });
     }
   }
 
-  // Función para cargar los datos de la tabla de Familiares
   cargarFamiliares() {
     if (this.ejecFFamiliares) {
       this.ejecFFamiliares(this.familiares).then(() => { });
     }
   }
 
-  // Método para ejecutar funciones asíncronas desde la tabla de PEPs
   ejecutarFuncionAsincronaDesdeOtroComponentePEPs(funcion: (data: any) => Promise<void>) {
     this.ejecFPEPs = funcion;
   }
 
-  // Método para ejecutar funciones asíncronas desde la tabla de Familiares
   ejecutarFuncionAsincronaDesdeOtroComponenteFamiliares(funcion: (data: any) => Promise<void>) {
     this.ejecFFamiliares = funcion;
   }
@@ -280,4 +280,20 @@ export class EditPepsComponent implements OnInit, OnDestroy, OnChanges {
       this.ngOnInit();
     });
   }
+
+  eliminarFamiliar(familiar: any): void {
+    const idFamiliar = familiar.id_familia;  // Cambia a id_familia en lugar de id_persona
+    this.afiliacionService.eliminarFamiliar(this.Afiliado.id_persona, idFamiliar).subscribe({
+      next: () => {
+        this.toastr.success('Familiar eliminado correctamente');
+        this.getFamiliares().then(() => this.cargarFamiliares());
+      },
+      error: (error) => {
+        this.toastr.error('Error al eliminar el familiar');
+        console.error('Error al eliminar familiar:', error);
+      }
+    });
+  }
+
+
 }

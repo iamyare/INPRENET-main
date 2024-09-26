@@ -10,6 +10,16 @@ export class AfiliacionService {
 
 constructor(private http: HttpClient) { }
 
+eliminarFamiliar(idPersona: number, idFamiliar: number): Observable<any> {
+  const url = `${environment.API_URL}/api/afiliacion/${idPersona}/familiares/${idFamiliar}`;
+  return this.http.delete<any>(url).pipe(
+    catchError((error) => {
+      console.error('Error al eliminar el familiar', error);
+      return throwError(error);
+    })
+  );
+}
+
 obtenerFamiliares(idPersona: number): Observable<any> {
   const url = `${environment.API_URL}/api/afiliacion/${idPersona}/familiares`;
   return this.http.get<any>(url).pipe(

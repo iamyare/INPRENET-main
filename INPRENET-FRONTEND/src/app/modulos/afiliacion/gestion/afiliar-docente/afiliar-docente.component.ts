@@ -217,7 +217,6 @@ export class AfiliarDocenteComponent implements OnInit {
     }));
   }
 
-
   private formatColegiosMagisteriales(colMags: any[]): any[] {
     return colMags.map(col => ({
       id_colegio: col.id_colegio

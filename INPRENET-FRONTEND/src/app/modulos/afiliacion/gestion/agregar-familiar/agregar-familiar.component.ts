@@ -1,7 +1,10 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, Inject } from '@angular/core';
 import { FormBuilder, FormGroup, FormArray, FormControl, Validators, AbstractControl } from '@angular/forms';
-import { FieldArrays } from 'src/app/shared/Interfaces/field-arrays';
 import { DatosEstaticosService } from 'src/app/services/datos-estaticos.service';
+import { AfiliacionService } from 'src/app/services/afiliacion.service';
+import { ToastrService } from 'ngx-toastr';
+import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
+import { FieldArrays } from 'src/app/shared/Interfaces/field-arrays';
 
 @Component({
   selector: 'app-agregar-familiar',
@@ -10,6 +13,7 @@ import { DatosEstaticosService } from 'src/app/services/datos-estaticos.service'
 })
 export class AgregarFamiliarComponent implements OnInit {
   formFamiliares!: FormGroup;
+  idPersona: number;
 
   familiaresFields: FieldArrays[] = [
     {
@@ -62,7 +66,16 @@ export class AgregarFamiliarComponent implements OnInit {
     }
   ];
 
-  constructor(private fb: FormBuilder, private datosEstaticosService: DatosEstaticosService) {}
+  constructor(
+    private fb: FormBuilder,
+    private datosEstaticosService: DatosEstaticosService,
+    private afiliacionService: AfiliacionService,
+    private toastr: ToastrService,
+    private dialogRef: MatDialogRef<AgregarFamiliarComponent>,
+    @Inject(MAT_DIALOG_DATA) public data: any
+  ) {
+    this.idPersona = data.idPersona;
+  }
 
   ngOnInit(): void {
     this.formFamiliares = this.fb.group({
@@ -92,5 +105,43 @@ export class AgregarFamiliarComponent implements OnInit {
 
   asFormGroup(control: AbstractControl): FormGroup {
     return control as FormGroup;
+  }
+
+  saveFamiliares(): void {
+    if (this.formFamiliares.valid) {
+      const familiaresData = this.formatFamiliares(this.familiares.value);
+      console.log(familiaresData);
+
+      this.afiliacionService.crearFamilia(this.idPersona, familiaresData).subscribe({
+        next: () => {
+          this.toastr.success('Familiares guardados exitosamente');
+          this.dialogRef.close();
+        },
+        error: (error) => {
+          this.toastr.error('Error al guardar los familiares');
+          console.error('Error al guardar los familiares:', error);
+        }
+      });
+    } else {
+      this.toastr.error('Por favor, completa todos los campos requeridos');
+    }
+  }
+
+  isFormValid(): boolean {
+    return this.formFamiliares.valid;
+  }
+
+  private formatFamiliares(datosFamiliares: any[]): any[] {
+    return datosFamiliares.map((familiar: any) => ({
+      parentesco: familiar.parentesco,
+      persona_referencia: {
+        primer_nombre: familiar.primer_nombre,
+        segundo_nombre: familiar.segundo_nombre || '',
+        tercer_nombre: familiar.tercer_nombre || '',
+        primer_apellido: familiar.primer_apellido,
+        segundo_apellido: familiar.segundo_apellido,
+        n_identificacion: familiar.n_identificacion
+      }
+    }));
   }
 }

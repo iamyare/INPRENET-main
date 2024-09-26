@@ -1,3 +1,16 @@
+<div id="texto" style="text-align: center;" *ngIf="filas.length == 0">
+  <h2 class="anaranjado desapareciendo">No se encuentra ningún cargo público</h2>
+</div>
+
+<!-- Botones para agregar Familiar y PEP -->
+<div style="text-align: center; margin-bottom: 20px;">
+  <button mat-raised-button color="primary" style="color: white; margin-right: 10px;" (click)="agregarFamiliar()">
+    Agregar Familiar
+  </button>
+  <button mat-raised-button color="accent" style="color: white;" (click)="agregarPEP()">
+    Agregar PEP
+  </button>
+</div>
 <!-- Tabla de Cargos Públicos (PEP) -->
 <div *ngIf="filas.length != 0" style="background-color: white; border-radius: 10px; padding: 20px">
   <app-dynamic-table
@@ -28,6 +41,9 @@
     [columns]="familiaresColumns"
     [data]="familiares"
     [getData]="getFamiliares"
+    [mostrarBotonEliminar]="true"
+    (eliminar)="eliminarFamiliar($event)"
     (ejecutarFuncionAsincronaEvent)="ejecutarFuncionAsincronaDesdeOtroComponenteFamiliares($event)">
   </app-dynamic-table>
 </div>
+

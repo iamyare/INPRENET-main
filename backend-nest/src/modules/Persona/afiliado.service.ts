@@ -44,6 +44,8 @@ export class AfiliadoService {
   ) { }
 
   async updateBeneficiario(id: number, updatePersonaDto: UpdateBeneficiarioDto): Promise<net_detalle_persona> {
+    console.log(id);
+    console.log(updatePersonaDto);
     const detallePersona = await this.detallePersonaRepository.findOne({
       where: {
         ID_DETALLE_PERSONA: id,
@@ -51,7 +53,6 @@ export class AfiliadoService {
         ID_CAUSANTE_PADRE: updatePersonaDto.id_causante_padre
       },
     });
-
     if (!detallePersona) {
       throw new NotFoundException(`Detalle persona with ID ${id} not found`);
     }
@@ -59,7 +60,6 @@ export class AfiliadoService {
       detallePersona.porcentaje = updatePersonaDto.porcentaje;
     }
     await this.detallePersonaRepository.save(detallePersona);
-
     return detallePersona;
   }
 

@@ -12,23 +12,20 @@ export class MailService {
       port: 587,                
       secure: false,            
       auth: {
-        user: 'inpre_net@inprema.gob.hn',  
-        pass: 'Inprema*2024',
+        user: process.env.mail,  
+        pass: process.env.password,
       },
-      /* tls: {
-        ciphers: 'SSLv3',
-        rejectUnauthorized: false, 
-      } */
     });
   }
 
-  async sendMail(to: string, subject: string, text: string, html: string): Promise<void> {
+  async sendMail(to: string, subject: string, text: string, html: string, attachments?: any[]): Promise<void> {
     const mailOptions = {
       from: '"Registro" <inpre_net@inprema.gob.hn>',
       to: to,
       subject: subject,
       text: text,
       html: html,
+      attachments: attachments,
     };
 
     await this.transporter.sendMail(mailOptions);

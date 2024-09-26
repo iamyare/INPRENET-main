@@ -1,10 +1,10 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, HttpStatus, HttpException, Res, HttpCode, ParseIntPipe, NotFoundException, Put } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, HttpStatus, HttpException, Res, HttpCode, ParseIntPipe, NotFoundException, Put, Query } from '@nestjs/common';
 import { UpdateTranssacionesDto } from './dto/update-transacciones.dto';
 import { TransaccionesService } from './transacciones.service';
 import { ApiTags } from '@nestjs/swagger';
 import { CrearMovimientoDTO } from './dto/voucher.dto';
-import { NET_PROFESIONES } from './entities/net_profesiones.entity';
 import { crearCuentaDTO } from './dto/cuenta-transaccioens.dto';
+import { PaginationDto } from 'src/common/dtos/pagination.dto';
 
 @ApiTags('transacciones')
 @Controller('transacciones')
@@ -20,10 +20,22 @@ export class TransaccionesController {
     return await this.transaccionesService.findAlltipoMovimientos();
   }
 
-  @Get('voucher/:dni')
-  obtenerVouchersDeMovimientos(@Param('dni') dni: string): Promise<any> {
-    return this.transaccionesService.obtenerVoucherDeMovimientos(dni);
-  }
+  @Get('vouchers')
+    async obtenerVouchersDeMovimientos(
+      @Query('dni') dni: string,
+      @Query('limit') limit: number = 10,
+      @Query('offset') offset: number = 0,
+      @Query('search') search: string = ''
+    ): Promise<any> {
+      try {
+        const { movimientos, total } = await this.transaccionesService.obtenerVoucherDeMovimientos(dni, limit, offset, search);
+        return { movimientos, total };
+      } catch (error) {
+        return { error: error.message };
+      }
+    }
+
+
 
   @Get('voucherEspecifico/:dni/:idMovimientoCuenta')
   obtenerVoucherMovimientoEspecifico(@Param('dni') dni: string, @Param('idMovimientoCuenta') idMovimientoCuenta: number): Promise<any> {

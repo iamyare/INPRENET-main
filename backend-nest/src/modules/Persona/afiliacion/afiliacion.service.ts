@@ -446,14 +446,11 @@ export class AfiliacionService {
 
   async crearPeps(pepsDto: CrearPepsDto[], idPersona: number, entityManager: EntityManager): Promise<Net_Peps[]> {
     const resultados: Net_Peps[] = [];
-  
     for (const pepsData of pepsDto) {
       const nuevoPeps = entityManager.create(Net_Peps, {
         estado: 'HABILITADO',
         persona: { id_persona: idPersona },
-        
       });
-  
       const pepsGuardado = await entityManager.save(Net_Peps, nuevoPeps);
       if (pepsData.cargosPublicos && pepsData.cargosPublicos.length > 0) {
         for (const cargo of pepsData.cargosPublicos) {
@@ -464,14 +461,11 @@ export class AfiliacionService {
             referencias: cargo.referencias,
             peps: pepsGuardado,
           });
-  
           await entityManager.save(Net_Cargo_Publico, nuevoCargoPublico);
         }
       }
-  
       resultados.push(pepsGuardado);
     }
-  
     return resultados;
   }
   
@@ -761,7 +755,22 @@ export class AfiliacionService {
     return { message: 'Cónyuge actualizado correctamente' };
   }
 
-
+  async obtenerFamiliaresPorPersona(idPersona: number): Promise<any[]> {
+    return this.familiaRepository
+      .createQueryBuilder('familia')
+      .leftJoinAndSelect('familia.referenciada', 'referenciada')
+      .select([
+        'referenciada.id_persona',
+        'referenciada.primer_nombre',
+        'referenciada.segundo_nombre',
+        'referenciada.primer_apellido',
+        'referenciada.segundo_apellido',
+        'referenciada.n_identificacion',
+        'familia.parentesco',
+      ])
+      .where('familia.persona = :idPersona', { idPersona })
+      .getMany();
+  }
 
 
 

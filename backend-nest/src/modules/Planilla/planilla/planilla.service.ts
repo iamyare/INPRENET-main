@@ -16,6 +16,10 @@ import { startOfMonth, endOfMonth, getMonth, getYear, format } from 'date-fns';
 import { Net_Detalle_Beneficio_Afiliado } from '../detalle_beneficio/entities/net_detalle_beneficio_afiliado.entity';
 import * as ExcelJS from 'exceljs';
 import * as XLSX from 'xlsx';
+import { MailService } from 'src/common/services/mail.service';
+import * as path from 'path';
+import * as fs from 'fs';
+import * as PDFDocument from 'pdfkit';
 
 @Injectable()
 export class PlanillaService {
@@ -36,8 +40,120 @@ export class PlanillaService {
     @InjectRepository(net_persona)
     @InjectRepository(Net_Detalle_Beneficio_Afiliado)
     private readonly detalleBeneficioRepository: Repository<Net_Detalle_Beneficio_Afiliado>,
+    private readonly mailService: MailService,
   ) {
   };
+
+  async procesarPagoBeneficio(): Promise<void> {
+    try {
+      // Rutas de las imágenes para el contenido del correo
+      const logoInprenetPath = path.join(process.cwd(), 'assets', 'images', 'LOGO-INPRENET.png');
+      const logoInpremaPath = path.join(process.cwd(), 'assets', 'images', 'logo-INPREMA H-Transparente.png');
+      
+      // Ruta del archivo PDF para enviar como adjunto
+      const pdfPath = path.join(process.cwd(), 'assets', 'images', 'voucher.pdf');
+  
+      // Verificar que las imágenes existan
+      if (!fs.existsSync(logoInprenetPath)) {
+        this.logger.error('El archivo LOGO-INPRENET.png no se encontró en la ruta: ' + logoInprenetPath);
+        throw new InternalServerErrorException('Error: El archivo LOGO-INPRENET.png no se encuentra en la ruta especificada.');
+      }
+  
+      if (!fs.existsSync(logoInpremaPath)) {
+        this.logger.error('El archivo logo-INPREMA H-Transparente.png no se encontró en la ruta: ' + logoInpremaPath);
+        throw new InternalServerErrorException('Error: El archivo logo-INPREMA H-Transparente.png no se encuentra en la ruta especificada.');
+      }
+  
+      if (!fs.existsSync(pdfPath)) {
+        this.logger.error('El archivo voucher.pdf no se encontró en la ruta: ' + pdfPath);
+        throw new InternalServerErrorException('Error: El archivo voucher.pdf no se encuentra en la ruta especificada.');
+      }
+  
+      // Contenido del correo
+      const to = 'oespinoza@inprema.gob.hn';
+      const subject = 'Confirmación de Pago de Beneficio - 60 Rentas';
+      const text = 'Se ha realizado el pago de su beneficio de 60 rentas.'; 
+      const html = `
+        <div style="font-family: Arial, sans-serif; color: #333;">
+          <h2 style="color: #0D7665; margin-bottom: 10px;">Pago de Beneficio Anticipo de Suma Adicional (60 Rentas) Realizado</h2>
+          <p style="margin-bottom: 10px;">Estimado usuario,</p>
+          <p style="margin-bottom: 10px;">Nos complace informarle que se ha realizado exitosamente el pago de su beneficio correspondiente a <strong>60 rentas</strong>.</p>
+          <p style="margin-bottom: 10px;">Por favor, revise su cuenta bancaria para confirmar la recepción de los fondos.</p>
+          <p style="margin-bottom: 10px;">Gracias por confiar en nosotros.</p>
+          <p style="margin-bottom: 10px;"><strong>INPRENET</strong></p>
+          <p style="margin-bottom: 10px;">A continuación, se detalla el pago realizado:</p>
+          <div style="display: flex; justify-content: center; align-items: center; gap: 20px; margin: 10px 0;">
+            <img src="cid:logoInprenet" alt="Logo INPRENET" style="width: 250px; margin: 0;" />
+            <img src="cid:logoInprema" alt="Logo INPREMA" style="width: 300px; margin: 0;" />
+          </div>
+        </div>
+      `;
+  
+      // Enviar el correo con las imágenes visibles y el PDF adjunto como archivo descargable
+      await this.mailService.sendMail(to, subject, text, html, [
+        {
+          filename: 'LOGO-INPRENET.png',
+          path: logoInprenetPath,
+          cid: 'logoInprenet' // Muestra la imagen en el cuerpo del correo
+        },
+        {
+          filename: 'logo-INPREMA H-Transparente.png',
+          path: logoInpremaPath,
+          cid: 'logoInprema' // Muestra la imagen en el cuerpo del correo
+        },
+        {
+          filename: 'voucher.pdf',  // El archivo PDF que se enviará como adjunto
+          path: pdfPath,            // Ruta del PDF para descargar
+          contentType: 'application/pdf' // Definir el tipo de contenido como PDF
+        }
+      ]);
+  
+      this.logger.log('Correo de notificación enviado exitosamente.');
+    } catch (error) {
+      this.logger.error('Error al enviar el correo de notificación:', error.message);
+      throw new InternalServerErrorException('Error al enviar el correo de notificación.');
+    }
+  }
+  
+  
+  
+  
+  
+  
+  
+  
+  async realizarPagoBeneficiosEstatico() {
+    const emailSubject = 'Confirmación de Pago de Beneficios';
+    const emailText = 'Este es un mensaje estático de confirmación de pago de beneficios.';
+    const emailHtml = `
+      <div style="font-family: Arial, sans-serif; padding: 20px; background-color: #f4f4f4;">
+        <div style="text-align: center; background-color: #0D7665; padding: 20px; border-radius: 8px 8px 0 0;">
+          <img src="/assets/images/logo INPREMA H Transparente.png" alt="Logo INPREMA" style="max-width: 120px; margin-bottom: 10px;">
+          <h1 style="color: #ffffff; margin: 0;">Pago de Beneficios</h1>
+        </div>
+        <div style="background-color: #ffffff; padding: 20px; border-radius: 0 0 8px 8px;">
+          <p>Estimado/a beneficiario/a,</p>
+          <p>Nos complace informarle que el pago de sus beneficios ha sido procesado exitosamente.</p>
+          <p>Si tiene alguna pregunta, no dude en ponerse en contacto con nosotros.</p>
+          <p>Atentamente,</p>
+          <p>El equipo de INPREMA</p>
+        </div>
+        <footer style="text-align: center; margin-top: 20px; font-size: 12px; color: #888;">
+          <small>Este es un correo generado automáticamente, por favor no responda.</small>
+        </footer>
+      </div>
+    `;
+    const destinatario = 'emanuel070801@gmail.com';
+    try {
+      await this.mailService.sendMail(destinatario, emailSubject, emailText, emailHtml);
+      this.logger.log(`Correo de confirmación enviado a ${destinatario}`);
+    } catch (error) {
+      this.logger.error('Error al enviar el correo de confirmación', error);
+      throw new InternalServerErrorException('No se pudo enviar el correo de confirmación');
+    }
+}
+
+  
 
   async obtenerPlanillasPorPersona(dni: string): Promise<any> {
     try {

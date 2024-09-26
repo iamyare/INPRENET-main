@@ -18,10 +18,24 @@ import { net_detalle_persona } from '../entities/net_detalle_persona.entity';
 import { CrearReferenciaDto } from './dtos/crear-referencia.dto';
 import { Net_Familia } from '../entities/net_familia.entity';
 import { CrearFamiliaDto } from './dtos/crear-familiar.dto';
+import { CrearPepsDto } from './dtos/crear-peps.dto';
 
 @Controller('afiliacion')
 export class AfiliacionController {
-  constructor(private readonly afiliacionService: AfiliacionService,private readonly connection: Connection, private readonly entityManager: EntityManager,) {
+  constructor(private readonly afiliacionService: AfiliacionService, private readonly connection: Connection, private readonly entityManager: EntityManager,) {
+  }
+
+  @Post('persona/:idPersona/peps')
+  async crearPeps(
+    @Param('idPersona') idPersona: number,
+    @Body() pepsDto: CrearPepsDto[],
+  ): Promise<void> {
+    try {
+      await this.afiliacionService.crearPeps(pepsDto, idPersona, this.entityManager);
+    } catch (error) {
+      console.error('Error al crear los PEPs:', error);
+      throw new HttpException('Error al crear los PEPs', HttpStatus.BAD_REQUEST);
+    }
   }
 
   @Post('persona/:idPersona/familia')
@@ -31,7 +45,6 @@ export class AfiliacionController {
   ): Promise<void> {
     await this.afiliacionService.crearFamilia(familiaresDto, idPersona, this.entityManager);
   }
-
 
   @Patch('conyuge/:n_identificacion')
   async actualizarConyuge(
@@ -198,5 +211,10 @@ export class AfiliacionController {
       console.log(datosActualizados);
       
       return this.afiliacionService.actualizarReferencia(idReferencia, datosActualizados);
+    }
+
+    @Get(':idPersona/familiares')
+    async obtenerFamiliaresDePersona(@Param('idPersona', ParseIntPipe) idPersona: number): Promise<Net_Familia[]> {
+      return this.afiliacionService.obtenerFamiliaresPorPersona(idPersona);
     }
 }

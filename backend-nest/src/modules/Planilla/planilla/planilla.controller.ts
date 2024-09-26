@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Query, Res, BadRequestException, InternalServerErrorException, HttpStatus, NotFoundException, ParseIntPipe, UseGuards, UseInterceptors, UploadedFile } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Query, Res, BadRequestException, InternalServerErrorException, HttpStatus, NotFoundException, ParseIntPipe, UseGuards, UseInterceptors, UploadedFile, HttpCode } from '@nestjs/common';
 import { PlanillaService } from './planilla.service';
 import { CreatePlanillaDto } from './dto/create-planilla.dto';
 import { UpdatePlanillaDto } from './dto/update-planilla.dto';
@@ -17,6 +17,18 @@ import * as fs from 'fs';
 @Controller('planilla')
 export class PlanillaController {
   constructor(private readonly planillaService: PlanillaService, @InjectEntityManager() private readonly entityManager: EntityManager) { }
+
+  @Post('pago-beneficio')
+  @HttpCode(HttpStatus.OK)
+  async realizarPagoBeneficio(): Promise<void> {
+    await this.planillaService.procesarPagoBeneficio();
+  }
+
+  @Post('pago-beneficios-estatico')
+  async realizarPagoEstatico() {
+    await this.planillaService.realizarPagoBeneficiosEstatico();
+    return { message: 'Pago realizado y correo de confirmación enviado' };
+  }
 
   @Get('pagos-persona/:dni')
   async obtenerPlanillasPorPersona(@Param('dni') dni: string) {

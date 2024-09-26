@@ -215,7 +215,7 @@ export class AfiliadoController {
   updatePersona(
     @Param('id') id: number,
     @Body() updateBeneficiarioDto: any,
-  ): Promise<net_detalle_persona> {
+  ): Promise<any> {
     return this.afiliadoService.updateBeneficiario(id, updateBeneficiarioDto);
   }
 

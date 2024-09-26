@@ -443,7 +443,6 @@ export class AfiliacionService {
     }
   }
   
-
   async crearPeps(pepsDto: CrearPepsDto[], idPersona: number, entityManager: EntityManager): Promise<Net_Peps[]> {
     const resultados: Net_Peps[] = [];
     for (const pepsData of pepsDto) {
@@ -760,6 +759,7 @@ export class AfiliacionService {
       .createQueryBuilder('familia')
       .leftJoinAndSelect('familia.referenciada', 'referenciada')
       .select([
+        'familia.id_familia',
         'referenciada.id_persona',
         'referenciada.primer_nombre',
         'referenciada.segundo_nombre',
@@ -772,7 +772,25 @@ export class AfiliacionService {
       .getMany();
   }
 
-
-
+    async eliminarFamiliar(idPersona: number, idFamiliar: number): Promise<string> {
+      const persona = await this.personaRepository.findOne({
+        where: { id_persona: idPersona },
+        relations: ['familiares'],
+      });
+      if (!persona) {
+        throw new NotFoundException('Persona no encontrada.');
+      }
+      const familiar = await this.familiaRepository.findOne({
+        where: { id_familia: idFamiliar, persona: { id_persona: idPersona } },
+      });
+    
+      if (!familiar) {
+        throw new NotFoundException('Familiar no encontrado.');
+      }
+    
+      await this.familiaRepository.remove(familiar);
+      return 'Familiar eliminado exitosamente.';
+    }
+  
 }
 

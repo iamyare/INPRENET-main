@@ -25,6 +25,14 @@ export class AfiliacionController {
   constructor(private readonly afiliacionService: AfiliacionService, private readonly connection: Connection, private readonly entityManager: EntityManager,) {
   }
 
+  @Delete(':idPersona/familiares/:idFamiliar')
+  async eliminarFamiliar(
+    @Param('idPersona', ParseIntPipe) idPersona: number,
+    @Param('idFamiliar', ParseIntPipe) idFamiliar: number,
+  ): Promise<string> {
+    return this.afiliacionService.eliminarFamiliar(idPersona, idFamiliar);
+  }
+
   @Post('persona/:idPersona/peps')
   async crearPeps(
     @Param('idPersona') idPersona: number,

@@ -15,11 +15,11 @@ export class CargarbefDedComponent {
   dni: string = '';
   beneficios: any[] = [];
   loading: boolean = false;
-  id_planilla : any
+  id_planilla: any
 
   displayedColumns: string[] = ['causante', 'beneficio', 'select'];
 
-  constructor(private planillaService: PlanillaService, private toastr: ToastrService, private SVCBeneficios: BeneficiosService,private dialog: MatDialog) { }
+  constructor(private planillaService: PlanillaService, private toastr: ToastrService, private SVCBeneficios: BeneficiosService, private dialog: MatDialog) { }
 
   asignarBeneficiosOrdinariaBeneficiariosAfiliados() {
     this.planillaService.generarPlanillaOrdinaria('BENEFICIARIO,AFILIADO,BENEFICIARIO SIN CAUSANTE').subscribe({
@@ -68,6 +68,8 @@ export class CargarbefDedComponent {
   getElemSeleccionados(event: any) {
     this.tipoPlanilla = event.tipoPlanilla;
     this.id_planilla = event.id_planilla; // Almacena el id_planilla
+    console.log(this.id_planilla);
+
   }
 
 

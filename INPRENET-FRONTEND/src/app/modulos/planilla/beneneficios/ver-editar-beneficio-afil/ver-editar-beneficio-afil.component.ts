@@ -143,20 +143,25 @@ export class VerEditarBeneficioAfilComponent {
 
       this.Afiliado = dataAfil[0]
 
-      this.filasT = data.detBen.map((item: any) => ({
-        dni: item.DNI,
-        dni_causante: item.persona?.padreIdPersona?.persona?.n_identificacion || "NO APLICA",
-        fecha_aplicado: this.datePipe.transform(item.fecha_aplicado, 'dd/MM/yyyy HH:mm'),
-        nombre_beneficio: item.beneficio.nombre_beneficio,
-        recibiendo_beneficio: item.recibiendo_beneficio,
-        numero_rentas_max: item.beneficio.numero_rentas_max,
-        periodicidad: item.beneficio.periodicidad,
-        monto_por_periodo: item.monto_por_periodo,
-        monto_total: item.monto_total,
-        periodoInicio: convertirFecha(item.periodo_inicio, false),
-        periodoFinalizacion: convertirFecha(item.periodo_finalizacion, false)
-      }));
-
+      this.filasT = data.detBen.map((item: any) => {
+        return {
+          estado_solicitud: item.estado_solicitud,
+          dni: item.persona.n_identificacion,
+          dni_causante: item.persona?.padreIdPersona?.persona?.n_identificacion || "NO APLICA",
+          fecha_aplicado: this.datePipe.transform(item.fecha_aplicado, 'dd/MM/yyyy HH:mm'),
+          nombre_beneficio: item.beneficio.nombre_beneficio,
+          recibiendo_beneficio: item.recibiendo_beneficio,
+          numero_rentas_max: item.beneficio.numero_rentas_max,
+          periodicidad: item.beneficio.periodicidad,
+          monto_por_periodo: item.monto_por_periodo,
+          monto_total: item.monto_total,
+          periodoInicio: convertirFecha(item.periodo_inicio, false),
+          periodoFinalizacion: convertirFecha(item.periodo_finalizacion, false),
+          monto_primera_cuota: item.monto_primera_cuota,
+          monto_ultima_cuota: item.monto_ultima_cuota,
+          observaciones: item.observaciones
+        }
+      });
       return this.filasT;
     } catch (error) {
       console.error("Error al obtener los detalles completos de deducción", error);
@@ -227,12 +232,18 @@ export class VerEditarBeneficioAfilComponent {
   };
 
   manejarAccionUno(row: any) {
+    console.log(row);
+
     const campos = [
-      { nombre: 'numero_rentas_max', tipo: 'number', requerido: true, etiqueta: 'Número de rentas máximas', editable: false },
-      { nombre: 'periodoInicio', tipo: 'number', requerido: true, etiqueta: 'Periodo de inicio' },
-      { nombre: 'periodoFinalizacion', tipo: 'number', requerido: true, etiqueta: 'Periodo de finalización' },
-      { nombre: 'monto_por_periodo', tipo: 'text', requerido: true, etiqueta: 'Monto por periodo' },
-      { nombre: 'Monto_total', tipo: 'number', requerido: true, etiqueta: 'Monto Total' },
+      { nombre: 'numero_rentas_max', tipo: 'number', requerido: true, etiqueta: 'Número de rentas aprobadas' },
+      { nombre: 'periodoInicio', tipo: 'date', requerido: true, etiqueta: 'Periodo de inicio' },
+      { nombre: 'periodoFinalizacion', tipo: 'date', requerido: true, etiqueta: 'Periodo de finalización', editable: true },
+      { nombre: 'Monto_total', tipo: 'number', requerido: true, etiqueta: 'Monto Total', editable: true },
+      { nombre: 'monto_por_periodo', tipo: 'text', requerido: true, etiqueta: 'Monto por periodo', editable: true },
+      { nombre: 'monto_ultima_cuota', tipo: 'number', requerido: true, etiqueta: 'monto_ultima_cuota', editable: true },
+      { nombre: 'monto_primera_cuota', tipo: 'number', requerido: true, etiqueta: 'monto_primera_cuota', editable: true },
+      { nombre: 'estado_solicitud', tipo: 'list', requerido: true, opciones: [{ label: "APROBADO", value: "APROBADO" }, { label: "RECHAZADO", value: "RECHAZADO" }], etiqueta: 'Estado Solicitud', editable: true },
+      { nombre: 'observaciones', tipo: 'text', requerido: true, etiqueta: 'observaciones', editable: true },
 
     ];
 
@@ -244,6 +255,8 @@ export class VerEditarBeneficioAfilComponent {
     dialogRef.afterClosed().subscribe((result: any) => {
       if (result) {
         console.log('Datos editados:', result);
+
+        //actualizar beneficio
       }
     });
   }

@@ -12,7 +12,7 @@ export class LayoutComponent implements OnInit {
   menuConfig: Section[] = [];
   expandedPanel: any = null;
 
-  constructor(private sidenavService: SidenavService, private authService: AuthService) {}
+  constructor(private sidenavService: SidenavService, private authService: AuthService) { }
 
   ngOnInit(): void {
     this.menuConfig = this.sidenavService.getMenuConfig();

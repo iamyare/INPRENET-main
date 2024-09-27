@@ -49,30 +49,30 @@ export class PlanillaService {
       // Rutas de las imágenes para el contenido del correo
       const logoInprenetPath = path.join(process.cwd(), 'assets', 'images', 'LOGO-INPRENET.png');
       const logoInpremaPath = path.join(process.cwd(), 'assets', 'images', 'logo-INPREMA H-Transparente.png');
-      
+
       // Ruta del archivo PDF para enviar como adjunto
       const pdfPath = path.join(process.cwd(), 'assets', 'images', 'voucher.pdf');
-  
+
       // Verificar que las imágenes existan
       if (!fs.existsSync(logoInprenetPath)) {
         this.logger.error('El archivo LOGO-INPRENET.png no se encontró en la ruta: ' + logoInprenetPath);
         throw new InternalServerErrorException('Error: El archivo LOGO-INPRENET.png no se encuentra en la ruta especificada.');
       }
-  
+
       if (!fs.existsSync(logoInpremaPath)) {
         this.logger.error('El archivo logo-INPREMA H-Transparente.png no se encontró en la ruta: ' + logoInpremaPath);
         throw new InternalServerErrorException('Error: El archivo logo-INPREMA H-Transparente.png no se encuentra en la ruta especificada.');
       }
-  
+
       if (!fs.existsSync(pdfPath)) {
         this.logger.error('El archivo voucher.pdf no se encontró en la ruta: ' + pdfPath);
         throw new InternalServerErrorException('Error: El archivo voucher.pdf no se encuentra en la ruta especificada.');
       }
-  
+
       // Contenido del correo
       const to = 'oespinoza@inprema.gob.hn';
       const subject = 'Confirmación de Pago de Beneficio - 60 Rentas';
-      const text = 'Se ha realizado el pago de su beneficio de 60 rentas.'; 
+      const text = 'Se ha realizado el pago de su beneficio de 60 rentas.';
       const html = `
         <div style="font-family: Arial, sans-serif; color: #333;">
           <h2 style="color: #0D7665; margin-bottom: 10px;">Pago de Beneficio Anticipo de Suma Adicional (60 Rentas) Realizado</h2>
@@ -88,7 +88,7 @@ export class PlanillaService {
           </div>
         </div>
       `;
-  
+
       // Enviar el correo con las imágenes visibles y el PDF adjunto como archivo descargable
       await this.mailService.sendMail(to, subject, text, html, [
         {
@@ -107,21 +107,21 @@ export class PlanillaService {
           contentType: 'application/pdf' // Definir el tipo de contenido como PDF
         }
       ]);
-  
+
       this.logger.log('Correo de notificación enviado exitosamente.');
     } catch (error) {
       this.logger.error('Error al enviar el correo de notificación:', error.message);
       throw new InternalServerErrorException('Error al enviar el correo de notificación.');
     }
   }
-  
-  
-  
-  
-  
-  
-  
-  
+
+
+
+
+
+
+
+
   async realizarPagoBeneficiosEstatico() {
     const emailSubject = 'Confirmación de Pago de Beneficios';
     const emailText = 'Este es un mensaje estático de confirmación de pago de beneficios.';
@@ -151,155 +151,155 @@ export class PlanillaService {
       this.logger.error('Error al enviar el correo de confirmación', error);
       throw new InternalServerErrorException('No se pudo enviar el correo de confirmación');
     }
-}
+  }
 
-  
+
 
   async obtenerPlanillasPorPersona(dni: string): Promise<any> {
     try {
-        // Buscar la persona con sus detalles de beneficios y pagos
-        const persona = await this.personaRepository.findOne({
-            where: { n_identificacion: dni },
-            relations: [
-                'detallePersona',
-                'detallePersona.detalleBeneficio',
-                'detallePersona.detalleBeneficio.detallePagBeneficio',
-                'detallePersona.detalleBeneficio.detallePagBeneficio.planilla'
-            ]
-        });
+      // Buscar la persona con sus detalles de beneficios y pagos
+      const persona = await this.personaRepository.findOne({
+        where: { n_identificacion: dni },
+        relations: [
+          'detallePersona',
+          'detallePersona.detalleBeneficio',
+          'detallePersona.detalleBeneficio.detallePagBeneficio',
+          'detallePersona.detalleBeneficio.detallePagBeneficio.planilla'
+        ]
+      });
 
-        if (!persona) {
-            throw new Error('No se encontró persona con ese DNI');
-        }
+      if (!persona) {
+        throw new Error('No se encontró persona con ese DNI');
+      }
 
-        // Extraer las planillas de los pagos realizados
-        const planillas = persona.detallePersona.flatMap(detalle =>
-            detalle.detalleBeneficio.flatMap(beneficio =>
-                beneficio.detallePagBeneficio.map(pago => ({
-                    id_planilla: pago.planilla.id_planilla,
-                    codigo_planilla: pago.planilla.codigo_planilla,
-                    fecha_apertura: pago.planilla.fecha_apertura,
-                    fecha_cierre: pago.planilla.fecha_cierre,
-                    secuencia: pago.planilla.secuencia,
-                    estado: pago.planilla.estado,
-                    periodoInicio: pago.planilla.periodoInicio,
-                    periodoFinalizacion: pago.planilla.periodoFinalizacion
-                }))
-            )
-        );
+      // Extraer las planillas de los pagos realizados
+      const planillas = persona.detallePersona.flatMap(detalle =>
+        detalle.detalleBeneficio.flatMap(beneficio =>
+          beneficio.detallePagBeneficio.map(pago => ({
+            id_planilla: pago.planilla.id_planilla,
+            codigo_planilla: pago.planilla.codigo_planilla,
+            fecha_apertura: pago.planilla.fecha_apertura,
+            fecha_cierre: pago.planilla.fecha_cierre,
+            secuencia: pago.planilla.secuencia,
+            estado: pago.planilla.estado,
+            periodoInicio: pago.planilla.periodoInicio,
+            periodoFinalizacion: pago.planilla.periodoFinalizacion
+          }))
+        )
+      );
 
-        // Organizar planillas por id para evitar duplicados
-        const planillasUnicas = {};
-        planillas.forEach(planilla => {
-            planillasUnicas[planilla.id_planilla] = planilla;
-        });
+      // Organizar planillas por id para evitar duplicados
+      const planillasUnicas = {};
+      planillas.forEach(planilla => {
+        planillasUnicas[planilla.id_planilla] = planilla;
+      });
 
-        // Convertir el objeto a un array
-        const planillasResult = Object.values(planillasUnicas);
+      // Convertir el objeto a un array
+      const planillasResult = Object.values(planillasUnicas);
 
-        // Retornar el resultado de las planillas
-        return planillasResult;
+      // Retornar el resultado de las planillas
+      return planillasResult;
 
     } catch (error) {
-        console.error(error);
-        throw new Error('Error al obtener las planillas');
+      console.error(error);
+      throw new Error('Error al obtener las planillas');
     }
-}
-
-async obtenerPagosYBeneficiosPorPersona(idPlanilla: number, dni: string): Promise<any> {
-  try {
-    const persona = await this.personaRepository.findOne({
-      where: { n_identificacion: dni },
-      relations: [
-        'detallePersona',
-        'detallePersona.detalleBeneficio',
-        'detallePersona.detalleBeneficio.beneficio',
-        'detallePersona.detalleBeneficio.detallePagBeneficio',
-        'detallePersona.detalleBeneficio.detallePagBeneficio.planilla',
-        'detallePersona.detalleBeneficio.detallePagBeneficio.personaporbanco',
-        'detallePersona.detalleBeneficio.detallePagBeneficio.personaporbanco.banco',
-        'detalleDeduccion',
-        'detalleDeduccion.deduccion',
-        'detalleDeduccion.planilla'
-      ]
-    });
-
-    if (!persona) {
-      throw new Error('No se encontró persona con ese DNI');
-    }
-
-    // Extraer los datos básicos de la persona
-    const personaDatos = {
-      id_persona: persona.id_persona,
-      dni: persona.n_identificacion,
-      primer_nombre: persona.primer_nombre,
-      segundo_nombre: persona.segundo_nombre,
-      primer_apellido: persona.primer_apellido,
-      segundo_apellido: persona.segundo_apellido,
-      direccion: persona.direccion_residencia,
-      correo: persona.correo_1,
-      telefono: persona.telefono_1,
-    };
-
-    // Filtrar solo los beneficios que tengan pagos asociados
-    const beneficios = persona.detallePersona.flatMap(detalle =>
-      detalle.detalleBeneficio.flatMap(beneficio => {
-        const pagos = beneficio.detallePagBeneficio.filter(pago => pago.planilla.id_planilla === idPlanilla);
-        if (pagos.length > 0) {
-          return {
-            beneficio: beneficio.beneficio.nombre_beneficio,
-            monto_total: beneficio.monto_total,
-            monto_por_periodo: beneficio.monto_por_periodo,
-            metodo_pago: beneficio.metodo_pago,
-            pagos: pagos.map(pago => ({
-              monto_a_pagar: pago.monto_a_pagar,
-              estado: pago.estado,
-              banco: pago.personaporbanco?.banco?.nombre_banco || null,
-              num_cuenta: pago.personaporbanco?.num_cuenta || null,
-              fecha_pago: pago.fecha_carga,
-            }))
-          };
-        }
-        return [];
-      })
-    );
-
-    // Agrupar las deducciones sin incluir información redundante de la planilla
-    const deducciones = persona.detalleDeduccion.filter(deduccion => deduccion.planilla.id_planilla === idPlanilla).map(deduccion => ({
-      deduccion: deduccion.deduccion.nombre_deduccion,
-      monto_total: deduccion.monto_total,
-      estado_aplicacion: deduccion.estado_aplicacion,
-      monto_aplicado: deduccion.monto_aplicado,
-    }));
-
-    // Obtener información completa de la planilla
-    const planilla = await this.planillaRepository.findOne({
-      where: { id_planilla: idPlanilla }
-    });
-
-    const planillaDatos = {
-      codigo_planilla: planilla.codigo_planilla,
-      fecha_apertura: planilla.fecha_apertura,
-      fecha_cierre: planilla.fecha_cierre,
-      secuencia: planilla.secuencia,
-      estado: planilla.estado,
-      periodoInicio: planilla.periodoInicio,
-      periodoFinalizacion: planilla.periodoFinalizacion
-    };
-
-    // Retornar la respuesta organizada
-    return {
-      persona: personaDatos,
-      planilla: planillaDatos,
-      beneficios,
-      deducciones
-    };
-
-  } catch (error) {
-    console.error(error);
-    throw new Error('Error al obtener los pagos, deducciones y bancos');
   }
-}
+
+  async obtenerPagosYBeneficiosPorPersona(idPlanilla: number, dni: string): Promise<any> {
+    try {
+      const persona = await this.personaRepository.findOne({
+        where: { n_identificacion: dni },
+        relations: [
+          'detallePersona',
+          'detallePersona.detalleBeneficio',
+          'detallePersona.detalleBeneficio.beneficio',
+          'detallePersona.detalleBeneficio.detallePagBeneficio',
+          'detallePersona.detalleBeneficio.detallePagBeneficio.planilla',
+          'detallePersona.detalleBeneficio.detallePagBeneficio.personaporbanco',
+          'detallePersona.detalleBeneficio.detallePagBeneficio.personaporbanco.banco',
+          'detalleDeduccion',
+          'detalleDeduccion.deduccion',
+          'detalleDeduccion.planilla'
+        ]
+      });
+
+      if (!persona) {
+        throw new Error('No se encontró persona con ese DNI');
+      }
+
+      // Extraer los datos básicos de la persona
+      const personaDatos = {
+        id_persona: persona.id_persona,
+        dni: persona.n_identificacion,
+        primer_nombre: persona.primer_nombre,
+        segundo_nombre: persona.segundo_nombre,
+        primer_apellido: persona.primer_apellido,
+        segundo_apellido: persona.segundo_apellido,
+        direccion: persona.direccion_residencia,
+        correo: persona.correo_1,
+        telefono: persona.telefono_1,
+      };
+
+      // Filtrar solo los beneficios que tengan pagos asociados
+      const beneficios = persona.detallePersona.flatMap(detalle =>
+        detalle.detalleBeneficio.flatMap(beneficio => {
+          const pagos = beneficio.detallePagBeneficio.filter(pago => pago.planilla.id_planilla === idPlanilla);
+          if (pagos.length > 0) {
+            return {
+              beneficio: beneficio.beneficio.nombre_beneficio,
+              monto_total: beneficio.monto_total,
+              monto_por_periodo: beneficio.monto_por_periodo,
+              metodo_pago: beneficio.metodo_pago,
+              pagos: pagos.map(pago => ({
+                monto_a_pagar: pago.monto_a_pagar,
+                estado: pago.estado,
+                banco: pago.personaporbanco?.banco?.nombre_banco || null,
+                num_cuenta: pago.personaporbanco?.num_cuenta || null,
+                fecha_pago: pago.fecha_carga,
+              }))
+            };
+          }
+          return [];
+        })
+      );
+
+      // Agrupar las deducciones sin incluir información redundante de la planilla
+      const deducciones = persona.detalleDeduccion.filter(deduccion => deduccion.planilla.id_planilla === idPlanilla).map(deduccion => ({
+        deduccion: deduccion.deduccion.nombre_deduccion,
+        monto_total: deduccion.monto_total,
+        estado_aplicacion: deduccion.estado_aplicacion,
+        monto_aplicado: deduccion.monto_aplicado,
+      }));
+
+      // Obtener información completa de la planilla
+      const planilla = await this.planillaRepository.findOne({
+        where: { id_planilla: idPlanilla }
+      });
+
+      const planillaDatos = {
+        codigo_planilla: planilla.codigo_planilla,
+        fecha_apertura: planilla.fecha_apertura,
+        fecha_cierre: planilla.fecha_cierre,
+        secuencia: planilla.secuencia,
+        estado: planilla.estado,
+        periodoInicio: planilla.periodoInicio,
+        periodoFinalizacion: planilla.periodoFinalizacion
+      };
+
+      // Retornar la respuesta organizada
+      return {
+        persona: personaDatos,
+        planilla: planillaDatos,
+        beneficios,
+        deducciones
+      };
+
+    } catch (error) {
+      console.error(error);
+      throw new Error('Error al obtener los pagos, deducciones y bancos');
+    }
+  }
 
 
 
@@ -912,6 +912,7 @@ async obtenerPagosYBeneficiosPorPersona(idPlanilla: number, dni: string): Promis
     idTiposPlanilla: number[],
   ): Promise<any> {
     try {
+
       const beneficios = await this.getBeneficiosPorPeriodo(periodoInicio, periodoFinalizacion, idTiposPlanilla);
       const deduccionesInprema = await this.getDeduccionesInpremaPorPeriodo(periodoInicio, periodoFinalizacion, idTiposPlanilla);
       const deduccionesTerceros = await this.getDeduccionesTercerosPorPeriodo(periodoInicio, periodoFinalizacion, idTiposPlanilla);
@@ -1747,6 +1748,9 @@ async obtenerPagosYBeneficiosPorPersona(idPlanilla: number, dni: string): Promis
           case "EXTRAORDINARIA BENEFICIARIO":
             codPlanilla = `EXTRA-JUB-${mes}-${anio}-${secuencia}`;
             break;
+          case "60 RENTAS":
+            codPlanilla = `60-RENTAS-${mes}-${anio}-${secuencia}`;
+            break;
           default:
             throw new BadRequestException('Tipo de planilla no reconocido');
         }
@@ -1930,6 +1934,8 @@ async obtenerPagosYBeneficiosPorPersona(idPlanilla: number, dni: string): Promis
   }
 
   async generarPlanillaOrdinaria(tipos_persona: string): Promise<void> {
+    console.log(tipos_persona);
+
     try {
       await this.entityManager.query(
         `BEGIN
@@ -2303,23 +2309,29 @@ async obtenerPagosYBeneficiosPorPersona(idPlanilla: number, dni: string): Promis
     periodoFinalizacion: string,
     idTiposPlanilla: number[],
   ): Promise<any[]> {
+    console.log(idTiposPlanilla);
+
     const beneficiosQuery = `
         SELECT
             banco.codigo_ach AS "codigo_banco", 
             personaPorBanco.num_cuenta AS "numero_cuenta",
             SUM(detallePago.monto_a_pagar) AS "monto_a_pagar",
             TRIM(
-                persona.primer_apellido ||
-                CASE 
-                    WHEN persona.segundo_apellido IS NOT NULL THEN ' ' || persona.segundo_apellido 
-                    ELSE '' 
-                END || 
-                ' ' || persona.primer_nombre ||
-                CASE 
-                    WHEN persona.segundo_nombre IS NOT NULL THEN ' ' || persona.segundo_nombre 
-                    ELSE '' 
-                END
-            ) AS "nombre_completo",
+              persona.primer_apellido ||
+              CASE 
+                  WHEN persona.segundo_apellido IS NOT NULL THEN ' ' || persona.segundo_apellido 
+                  ELSE '' 
+              END || 
+              ' ' || persona.primer_nombre ||
+              CASE 
+                  WHEN persona.segundo_nombre IS NOT NULL THEN ' ' || persona.segundo_nombre 
+                  ELSE '' 
+              END ||
+              CASE
+                  WHEN persona.tercer_nombre IS NOT NULL THEN ' ' || persona.tercer_nombre
+                  ELSE ''
+              END
+          ) AS "nombre_completo",
             persona.n_identificacion AS "n_identificacion",
             persona.ID_PERSONA AS "ID_PERSONA" 
         FROM
@@ -2338,8 +2350,11 @@ async obtenerPagosYBeneficiosPorPersona(idPlanilla: number, dni: string): Promis
             AND planilla."ID_TIPO_PLANILLA" IN (${idTiposPlanilla.join(', ')})
             AND detallePago."ESTADO" = 'PAGADA'
         GROUP BY
-            banco.codigo_ach, personaPorBanco.num_cuenta, persona.primer_apellido, persona.segundo_apellido, persona.primer_nombre, persona.segundo_nombre, persona.n_identificacion, persona.ID_PERSONA
+            banco.codigo_ach, personaPorBanco.num_cuenta, persona.primer_apellido, persona.segundo_apellido, persona.primer_nombre, persona.segundo_nombre, persona.tercer_nombre, persona.n_identificacion, persona.ID_PERSONA
     `;
+
+    console.log(beneficiosQuery);
+
 
     const deduccionesInpremaQuery = `
         SELECT 

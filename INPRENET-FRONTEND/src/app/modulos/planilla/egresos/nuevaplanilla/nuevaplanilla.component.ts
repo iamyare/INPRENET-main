@@ -22,7 +22,7 @@ export class NuevaplanillaComponent implements OnInit {
 
   constructor(
     private planillaService: PlanillaService,
-    private toastr: ToastrService) {}
+    private toastr: ToastrService) { }
 
   ngOnInit(): void {
     this.cargarDatosIniciales();
@@ -144,7 +144,7 @@ export class NuevaplanillaComponent implements OnInit {
     const selectedPlanilla = event.value;
     this.dynamicForm.form.get('nombre_planilla')?.setValue(selectedPlanilla);
 
-    if (selectedPlanilla.includes('COMPLEMENTARIA')) {
+    if (selectedPlanilla.includes('COMPLEMENTARIA', '60 RENTAS')) {
       if (!this.myFormFields.some(field => field.name === 'periodo_planilla')) {
         this.myFormFields.push({
           type: 'daterange',

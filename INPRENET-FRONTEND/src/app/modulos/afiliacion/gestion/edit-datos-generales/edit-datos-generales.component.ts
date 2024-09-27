@@ -421,4 +421,15 @@ export class EditDatosGeneralesComponent implements OnInit {
   mostrarCamposFallecido(e: any) {
     //this.estadoAfiliacion = e.value;
   }
+
+  getArchivo(event: File): any {
+    // Si no lo has agregado aún, puedes agregar el control aquí
+    console.log(event);
+
+    if (!this.formDatosGenerales?.contains('archivoCertIdent')) {
+      this.formDatosGenerales.addControl('archivoCertIdent', new FormControl('', []));
+    }
+    // Asignar el archivo al control del formulario
+    this.formDatosGenerales.get('archivoCertIdent')?.setValue(event);
+  }
 }

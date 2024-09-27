@@ -3,6 +3,7 @@
   <form [formGroup]="planillaForm">
     <div class="button-group">
       <!-- Botones de selección de tipo de planilla -->
+      <button mat-raised-button color="primary" [ngClass]="{'selected': tipoPlanilla === '60 RENTAS'}" (click)="seleccionarTipoPlanilla('60 RENTAS')">60 RENTAS</button>
       <button mat-raised-button color="primary" [ngClass]="{'selected': tipoPlanilla === 'ordinaria'}" (click)="seleccionarTipoPlanilla('ordinaria')">ORDINARIA</button>
       <button mat-raised-button color="primary" [ngClass]="{'selected': tipoPlanilla === 'complementaria'}" (click)="seleccionarTipoPlanilla('complementaria')">COMPLEMENTARIA</button>
       <button mat-raised-button color="primary" [ngClass]="{'selected': tipoPlanilla === 'extraordinaria'}" (click)="seleccionarTipoPlanilla('extraordinaria')">EXTRAORDINARIA</button>

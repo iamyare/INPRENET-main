@@ -1,4 +1,4 @@
-import { Component, ElementRef, ViewChild } from '@angular/core';
+import { Component, ElementRef, Input, ViewChild } from '@angular/core';
 import { ToastrService } from 'ngx-toastr';
 import { CentroTrabajoService } from 'src/app/services/centro-trabajo.service';
 import { DeduccionesService } from 'src/app/services/deducciones.service';
@@ -23,6 +23,7 @@ export class SubirDeduccionesTercerosComponent {
   deduccionSeleccionada: number | null = null;
 
   @ViewChild('fileInput') fileInput!: ElementRef;
+  @Input() id_planilla: any;
 
   constructor(
     private deduccionesService: DeduccionesService,
@@ -66,7 +67,7 @@ export class SubirDeduccionesTercerosComponent {
       const ws: XLSX.WorkSheet = wb.Sheets[wsname];
       let data: any[] = XLSX.utils.sheet_to_json(ws, { raw: false, defval: null });
       data = data.filter(row => Object.values(row).some(cell => cell != null && cell.toString().trim() !== ''));
-      this.deduccionesService.subirArchivoDeducciones(this.file!).subscribe({
+      this.deduccionesService.subirArchivoDeducciones(this.id_planilla, this.file!).subscribe({
         next: (response) => {
           if (typeof response === 'string') {
             response = JSON.parse(response);

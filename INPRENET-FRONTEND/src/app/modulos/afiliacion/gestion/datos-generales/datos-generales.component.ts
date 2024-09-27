@@ -21,7 +21,7 @@ export class DatosGeneralesComponent implements OnInit {
   municipios: { value: number, label: string }[] = [];
   departamentosNacimiento: { value: number, label: string }[] = [];
   municipiosNacimiento: { value: number, label: string }[] = [];
-  estadoCivil: {label: string }[] = [];
+  estadoCivil: { label: string }[] = [];
   profesiones: { value: number, label: string }[] = [];
   representacion: { value: string, label: string }[] = [];
   tipoIdent: { value: number, label: string }[] = [];
@@ -31,23 +31,23 @@ export class DatosGeneralesComponent implements OnInit {
   useCamera: boolean = true;
 
   constructor(private fb: FormBuilder,
-              private direccionSer: DireccionService,
-              private datosEstaticos: DatosEstaticosService,
-              private centroTrabajoService: CentroTrabajoService) {}
+    private direccionSer: DireccionService,
+    private datosEstaticos: DatosEstaticosService,
+    private centroTrabajoService: CentroTrabajoService) { }
 
   ngOnInit(): void {
     const noSpecialCharsPattern = '^[a-zA-Z0-9\\s]*$';
 
     if (!this.formGroup) {
       //para mostrar los datos y poder editarlos
-      if (this.initialData){
+      if (this.initialData) {
         this.formGroup = this.fb.group({
           peps: this.fb.array([]),
           discapacidades: this.fb.array([]),
           ...this.initialData
         });
         this.cargarDiscapacidades();
-      }else{
+      } else {
         this.formGroup = this.fb.group({
           peps: this.fb.array([]),
           discapacidades: this.fb.array([]),
@@ -244,7 +244,7 @@ export class DatosGeneralesComponent implements OnInit {
   }
 
   cargarEstadoCivil() {
-    this.estadoCivil = this.datosEstaticos.estadoCivil.map((estado: { label: string}) => {
+    this.estadoCivil = this.datosEstaticos.estadoCivil.map((estado: { label: string }) => {
       return {
         label: estado.label
       };
@@ -339,6 +339,16 @@ export class DatosGeneralesComponent implements OnInit {
   get isPhotoInvalid(): boolean {
     const control = this.formGroup.get('FotoPerfil');
     return control ? control.invalid && (control.touched || control.dirty) : false;
+  }
+
+  getArchivo(event: File): any {
+    // Si no lo has agregado aún, puedes agregar el control aquí
+
+    if (!this.formGroup?.contains('archivoIdentificacion')) {
+      this.formGroup.addControl('archivoIdentificacion', new FormControl('', []));
+    }
+    // Asignar el archivo al control del formulario
+    this.formGroup.get('archivoIdentificacion')?.setValue(event);
   }
 
 }

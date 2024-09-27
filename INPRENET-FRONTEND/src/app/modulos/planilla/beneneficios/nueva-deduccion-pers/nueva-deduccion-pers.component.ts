@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { Component, Input, OnInit, ViewChild } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ToastrService } from 'ngx-toastr';
 import { AfiliadoService } from 'src/app/services/afiliado.service';
@@ -16,6 +16,8 @@ import { convertirFecha } from 'src/app/shared/functions/formatoFecha';
 })
 export class NuevaDeduccionPersComponent implements OnInit {
   @ViewChild(DynamicFormComponent) dynamicForm!: DynamicFormComponent;
+  //@Input() id_planilla: any;
+
   form!: FormGroup;
   formDeduccion!: FormGroup;
   Afiliado: any = {};
@@ -32,7 +34,7 @@ export class NuevaDeduccionPersComponent implements OnInit {
     private planillaService: PlanillaService,
     private fb: FormBuilder,
     private toastr: ToastrService
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     this.myFormFields = [

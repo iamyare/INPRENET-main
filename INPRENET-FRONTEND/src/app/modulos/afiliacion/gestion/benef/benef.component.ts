@@ -89,7 +89,8 @@ export class BenefComponent implements OnInit {
         Validators.maxLength(30),
       ]),
       discapacidad: new FormControl(datosBeneficiario?.discapacidad || 'no', [Validators.required]),
-      discapacidades: discapacidadesFormArray
+      discapacidades: discapacidadesFormArray,
+      archivo_identificacion: [null] // Control para el archivo
     });
 
     this.beneficiarios.push(beneficiarioForm);
@@ -273,5 +274,15 @@ export class BenefComponent implements OnInit {
     }
 
     return errors;
+  }
+
+  getArchivo(index: number, event: any) {
+    if (event) {
+      const beneficiarios = this.formGroup.get('beneficiario') as FormArray;
+      const group = beneficiarios.at(index) as FormGroup;
+
+      const archivo = event ? event : null;
+      (group.get('archivo_identificacion') as FormControl)?.setValue(archivo);
+    }
   }
 }

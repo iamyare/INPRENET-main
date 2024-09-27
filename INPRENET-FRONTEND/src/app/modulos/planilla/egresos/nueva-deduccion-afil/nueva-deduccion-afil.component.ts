@@ -228,7 +228,7 @@ export class NuevaDeduccionAfilComponent {
       }
 
       // Enviar datos procesados y validados al backend
-      this.deduccionesService.subirArchivoDeducciones(this.file!).subscribe({
+      /* this.deduccionesService.subirArchivoDeducciones(id_planilla, this.file!).subscribe({
         next: (response) => {
           console.log('Datos insertados exitosamente:', response);
           this.datosCargados = data; // Guardar los datos cargados exitosamente
@@ -249,7 +249,7 @@ export class NuevaDeduccionAfilComponent {
             this.toastr.error(error.message || 'Ocurrió un error desconocido.', 'Error');
           }
         }
-      });
+      });*/
     };
 
     reader.onerror = () => {

@@ -40,8 +40,8 @@ export class DeduccionController {
 
   @Post('upload-excel-deducciones')
   @UseInterceptors(FileInterceptor('file'))
-  uploadDeducciones(@UploadedFile() file: Express.Multer.File) {
-    return this.deduccionService.uploadDeducciones(file);
+  uploadDeducciones(@UploadedFile() file: Express.Multer.File, @Body('id_planilla') id_planilla: string,) {
+    return this.deduccionService.uploadDeducciones(id_planilla, file);
   }
 
   @Get('deducciones-por-anio-mes/:dni')

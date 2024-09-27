@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, Input } from '@angular/core';
 
 @Component({
   selector: 'app-asignacion-deducciones',
@@ -6,5 +6,7 @@ import { Component } from '@angular/core';
   styleUrls: ['./asignacion-deducciones.component.scss']
 })
 export class AsignacionDeduccionesComponent {
+  @Input() id_planilla: any;
+
   mostrarFormularioIndividual: boolean = true;
 }

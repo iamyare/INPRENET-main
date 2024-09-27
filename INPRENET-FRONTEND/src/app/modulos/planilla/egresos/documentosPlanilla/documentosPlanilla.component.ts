@@ -86,6 +86,7 @@ export class DocumentosPlanillaComponent implements OnInit {
 
   private obtenerIdYNombrePlanilla(): { idTiposPlanilla: number[], nombrePlanilla: string } {
     switch (this.tipoPlanilla) {
+      case '60 RENTAS': return { idTiposPlanilla: [10], nombrePlanilla: '60 RENTAS' };
       case 'ordinaria': return { idTiposPlanilla: [1, 2], nombrePlanilla: 'ORDINARIA' };
       case 'complementaria': return { idTiposPlanilla: [3, 4, 10], nombrePlanilla: 'COMPLEMENTARIA' };
       case 'extraordinaria': return { idTiposPlanilla: [9, 8], nombrePlanilla: 'EXTRAORDINARIA' };
@@ -104,6 +105,8 @@ export class DocumentosPlanillaComponent implements OnInit {
 
   async generarDocumento() {
     const { idTiposPlanilla, nombrePlanilla } = this.obtenerIdYNombrePlanilla();
+    console.log(idTiposPlanilla, nombrePlanilla);
+
     const { fechaInicioFormateada, fechaFinFormateada } = this.obtenerFechasFormateadas();
 
     if (idTiposPlanilla.length === 0) return;
@@ -498,7 +501,7 @@ export class DocumentosPlanillaComponent implements OnInit {
           }),
           pageMargins: [40, 130, 40, 100],
           header: {
-            text: `DESGLOSE POR BANCO EN LA PLANILLA ${nombrePlanilla}`,
+            text: `DESGLOSE POR BANCO EN LA PLANILLA 60 RENTAS`,
             style: 'header',
             alignment: 'center',
             margin: [50, 100, 50, 0]

@@ -65,19 +65,20 @@ export class PlanillaController {
     return this.planillaService.uploadExcel(file);
   } */
 
-    @Post('update-fallecidos-from-excel')
-    @UseInterceptors(FileInterceptor('file'))
-    async uploadExcel(@UploadedFile() file: Express.Multer.File) {
-      return this.planillaService.updateFallecidoStatusFromExcel(file);
-    }
+  @Post('update-fallecidos-from-excel')
+  @UseInterceptors(FileInterceptor('file'))
+  async uploadExcel(@UploadedFile() file: Express.Multer.File) {
+    return this.planillaService.updateFallecidoStatusFromExcel(file);
+  }
 
-    @Get('generar-reporte-detalle-pago')
+  @Get('generar-reporte-detalle-pago')
   async generarReporte(
     @Query('periodoInicio') periodoInicio: string,
     @Query('periodoFinalizacion') periodoFinalizacion: string,
     @Query('idTiposPlanilla') idTiposPlanilla: string,
     @Res() res,
   ) {
+
     const idTiposPlanillaArray = idTiposPlanilla.split(',').map(Number);
 
     const data = await this.planillaService.obtenerDetallePagoBeneficioPorPlanillaPrueba(
@@ -89,34 +90,34 @@ export class PlanillaController {
     await this.planillaService.generarReporteDetallePago(data, res);
   }
 
-    @Get('detalle-pago-beneficio')
-    async obtenerDetallePagoBeneficioPorPlanilla(
-      @Query('periodoInicio') periodoInicio: string,
-      @Query('periodoFinalizacion') periodoFinalizacion: string,
-      @Query('idTiposPlanilla') idTiposPlanilla: string,
-    ): Promise<any[]> {
-      
-      if (!periodoInicio || !periodoFinalizacion || !idTiposPlanilla) {
-        throw new BadRequestException('Todos los parámetros son obligatorios.');
-      }
-    
-      // Convertir la cadena `idTiposPlanilla` a un array de números
-      const idTiposPlanillaArray = idTiposPlanilla.split(',').map(Number);
-    
-      try {
-        return await this.planillaService.obtenerDetallePagoBeneficioPorPlanillaPrueba(
-          periodoInicio,
-          periodoFinalizacion,
-          idTiposPlanillaArray,
-        );
-      } catch (error) {
-        console.error('Error al procesar la solicitud:', error);
-        throw new BadRequestException('Error al procesar la solicitud: ' + error.message);
-      }
+  @Get('detalle-pago-beneficio')
+  async obtenerDetallePagoBeneficioPorPlanilla(
+    @Query('periodoInicio') periodoInicio: string,
+    @Query('periodoFinalizacion') periodoFinalizacion: string,
+    @Query('idTiposPlanilla') idTiposPlanilla: string,
+  ): Promise<any[]> {
+
+    if (!periodoInicio || !periodoFinalizacion || !idTiposPlanilla) {
+      throw new BadRequestException('Todos los parámetros son obligatorios.');
     }
 
+    // Convertir la cadena `idTiposPlanilla` a un array de números
+    const idTiposPlanillaArray = idTiposPlanilla.split(',').map(Number);
 
-    @Post('verificar-beneficios')
+    try {
+      return await this.planillaService.obtenerDetallePagoBeneficioPorPlanillaPrueba(
+        periodoInicio,
+        periodoFinalizacion,
+        idTiposPlanillaArray,
+      );
+    } catch (error) {
+      console.error('Error al procesar la solicitud:', error);
+      throw new BadRequestException('Error al procesar la solicitud: ' + error.message);
+    }
+  }
+
+
+  @Post('verificar-beneficios')
   @UseInterceptors(FileInterceptor('file'))
   async verificarBeneficios(@UploadedFile() file: Express.Multer.File): Promise<void> {
     const tempDir = path.join('D:', 'tmp');
@@ -128,7 +129,7 @@ export class PlanillaController {
     await this.planillaService.verificarBeneficioEnExcel(filePath);
     fs.unlinkSync(filePath);
   }
- 
+
   @Get('total/:id_planilla')
   async getPlanilla(@Param('id_planilla', ParseIntPipe) id_planilla: number) {
     try {
@@ -161,7 +162,7 @@ export class PlanillaController {
   async getActivePlanillas(@Query('clasePlanilla') clasePlanilla?: string) {
     return this.planillaService.getActivePlanillas(clasePlanilla);
   }
-  
+
   @Get('montos-banco-periodo')
   async getMontosPorBancoYPeriodo(
     @Query('periodoInicio') periodoInicio: string,
@@ -261,7 +262,7 @@ export class PlanillaController {
     }
   }
 
-  
+
 
   @Get('Definitiva/:term')
   async ObtenerPlanDefin(
@@ -304,15 +305,15 @@ export class PlanillaController {
     if (!perI && !perF) {
       throw new BadRequestException('Los parámetros idPlanilla son obligatorios');
     }
-    try {  
-      const data =  await this.planillaService.ObtenerPlanDefinPersonasOrd(perI, perF, page, limit);
-      
+    try {
+      const data = await this.planillaService.ObtenerPlanDefinPersonasOrd(perI, perF, page, limit);
+
       await this.planillaService.generarExcelInv(data, res);
     } catch (error) {
       throw new InternalServerErrorException('Error al obtener planilla preliminar');
     }
   }
-  
+
   @Get('ObtenerPreliminar')
   async ObtenerPreliminar(
     @Query('codPlanilla') codPlanilla: string,
@@ -403,5 +404,5 @@ export class PlanillaController {
     return this.planillaService.getPlanillasPreliminares(getPlanillasPreliminaresDto.codigo_planilla);
   }
 
-  
+
 }

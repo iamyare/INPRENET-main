@@ -72,13 +72,13 @@
     </div>
   </mat-tab>
 
-  <mat-tab label="Cargar Deducciones de Terceros" *ngIf="tipoPlanilla!='COMPLEMENTARIA BENEFICIARIO' && tipoPlanilla!='COMPLEMENTARIA JUBILADO Y PENSIONADO'">
+  <mat-tab label="Cargar Deducciones de Terceros" *ngIf="tipoPlanilla!='COMPLEMENTARIA BENEFICIARIO' && tipoPlanilla!='ORDINARIA BENEFICIARIO'">
     <div>
-      <app-asignacion-deducciones></app-asignacion-deducciones>
+      <app-asignacion-deducciones [id_planilla]="id_planilla"></app-asignacion-deducciones>
     </div>
   </mat-tab>
 
-  <mat-tab label="Bajas" *ngIf="tipoPlanilla!='COMPLEMENTARIA BENEFICIARIO' && tipoPlanilla!='COMPLEMENTARIA JUBILADO Y PENSIONADO'">
+  <mat-tab label="Bajas" *ngIf="tipoPlanilla!='COMPLEMENTARIA BENEFICIARIO' && tipoPlanilla!='ORDINARIA BENEFICIARIO'">
     <app-actualizar-fallecidos></app-actualizar-fallecidos>
   </mat-tab>
 </mat-tab-group>

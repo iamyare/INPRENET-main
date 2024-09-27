@@ -8,7 +8,7 @@ import { environment } from 'src/environments/environment';
   providedIn: 'root'
 })
 export class PlanillaService {
-  constructor(private http: HttpClient,private toastr: ToastrService) { }
+  constructor(private http: HttpClient, private toastr: ToastrService) { }
 
   obtenerPagosYBeneficiosPorPersona(idPlanilla: number, dni: string): Observable<any> {
     const url = `${environment.API_URL}/api/planilla/pagos-beneficios`;
@@ -88,7 +88,7 @@ export class PlanillaService {
         return throwError(error);
       })
     );
-}
+  }
 
   getPlanillasActivas(clasePlanilla?: string): Observable<any> {
     const url = `${environment.API_URL}/api/planilla/activas`;
@@ -151,6 +151,8 @@ export class PlanillaService {
   }
 
   getTotalBeneficiosYDeduccionesPorPeriodo(periodoInicio: string, periodoFinalizacion: string, idTiposPlanilla: number[]): Observable<any> {
+    console.log(idTiposPlanilla);
+
     const params = new HttpParams()
       .set('periodoInicio', periodoInicio)
       .set('periodoFinalizacion', periodoFinalizacion)
@@ -227,7 +229,7 @@ export class PlanillaService {
         return throwError(error);
       })
     );
-}
+  }
 
 
   getTotalesPorDedYBen(idPlanilla: string): Observable<any> {

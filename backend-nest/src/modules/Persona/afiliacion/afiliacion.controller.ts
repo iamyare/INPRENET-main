@@ -1,10 +1,10 @@
-import { Body, Controller, Delete, Get, HttpException, HttpStatus, NotFoundException, Param, ParseIntPipe, Patch, Post, UploadedFile, UseInterceptors } from '@nestjs/common';
+import { Body, Controller, Delete, Get, HttpException, HttpStatus, NotFoundException, Param, ParseIntPipe, Patch, Post, UploadedFile, UploadedFiles, UseInterceptors } from '@nestjs/common';
 import { AfiliacionService } from './afiliacion.service';
 import { net_persona } from '../entities/net_persona.entity';
-import { FileInterceptor } from '@nestjs/platform-express';
+import { AnyFilesInterceptor, FileInterceptor, FilesInterceptor } from '@nestjs/platform-express';
 import { CrearDatosDto } from './dtos/crear-datos.dto';
 import { Net_Discapacidad } from '../entities/net_discapacidad.entity';
-import { Connection, EntityManager} from 'typeorm';
+import { Connection, EntityManager } from 'typeorm';
 import { CrearPersonaBancoDto } from './dtos/crear-persona_por_banco.dto';
 import { Net_Persona_Por_Banco } from 'src/modules/banco/entities/net_persona-banco.entity';
 import { Net_perf_pers_cent_trab } from '../entities/net_perf_pers_cent_trab.entity';
@@ -150,7 +150,7 @@ export class AfiliacionController {
   async crearReferencia(
     @Param('idPersona') idPersona: number,
     @Body() crearReferenciasDtos: CrearReferenciaDto[],
-  ){
+  ) {
     return await this.connection.transaction(async (entityManager: EntityManager) => {
       return this.afiliacionService.crearReferencias(crearReferenciasDtos, idPersona, entityManager);
     });
@@ -198,31 +198,49 @@ export class AfiliacionController {
   }
 
   @Post('/crear')
-  @UseInterceptors(FileInterceptor('foto_perfil'))
+  @UseInterceptors(AnyFilesInterceptor())  // Para manejar múltiples archivos de varios campos
   async crear(
-    @Body('datos') datos: string,
-    @UploadedFile() fotoPerfil: Express.Multer.File
+    @Body('datos') datos: any,
+    @Body('Beneficiarios') beneficiarios?: any,
+    @UploadedFiles() files?: Express.Multer.File[],  // Todos los archivos serán capturados aquí
   ): Promise<any> {
     try {
       const crearDatosDto: CrearDatosDto = JSON.parse(datos);
-      return await this.afiliacionService.crearDatos(crearDatosDto, fotoPerfil);
+
+      console.log(datos);
+      console.log(beneficiarios);
+
+      // Filtrar cada archivo por su campo de entrada (fieldname)
+      const fotoPerfil = files?.find(file => file.fieldname === 'foto_perfil');
+      const fileIdent = files?.find(file => file.fieldname === 'file_ident');
+
+      // Si `file_identB` contiene múltiples archivos, usa `filter()`
+      const filesIdentB = files?.filter(file => file.fieldname === 'file_identB');
+
+      // Ver qué archivos fueron enviados
+      console.log('Foto de perfil:', fotoPerfil);
+      console.log('Archivo de Identificación:', fileIdent);
+      console.log('Archivos de Identificación B:', filesIdentB);
+
+      // Aquí puedes enviar todos los archivos y datos a tu servicio
+      // return await this.afiliacionService.crearDatos(crearDatosDto, fotoPerfil, fileIdent, filesIdentB);
     } catch (error) {
       throw new HttpException(error.message, HttpStatus.BAD_REQUEST);
     }
-}
+  }
 
   @Patch('referencia/actualizar/:idReferencia')
-    async actualizarReferencia(
-      @Param('idReferencia') idReferencia: number,
-      @Body() datosActualizados: CrearReferenciaDto
-    ): Promise<void> {
-      console.log(datosActualizados);
-      
-      return this.afiliacionService.actualizarReferencia(idReferencia, datosActualizados);
-    }
+  async actualizarReferencia(
+    @Param('idReferencia') idReferencia: number,
+    @Body() datosActualizados: CrearReferenciaDto
+  ): Promise<void> {
+    console.log(datosActualizados);
 
-    @Get(':idPersona/familiares')
-    async obtenerFamiliaresDePersona(@Param('idPersona', ParseIntPipe) idPersona: number): Promise<Net_Familia[]> {
-      return this.afiliacionService.obtenerFamiliaresPorPersona(idPersona);
-    }
+    return this.afiliacionService.actualizarReferencia(idReferencia, datosActualizados);
+  }
+
+  @Get(':idPersona/familiares')
+  async obtenerFamiliaresDePersona(@Param('idPersona', ParseIntPipe) idPersona: number): Promise<Net_Familia[]> {
+    return this.afiliacionService.obtenerFamiliaresPorPersona(idPersona);
+  }
 }

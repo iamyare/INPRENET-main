@@ -1503,6 +1503,10 @@ export class VerplancerradaComponent {
     };
   }
 
+  sendEmail() {
+
+  }
+
   /* descargarExcelparaBanco(): void {
     const codigoPlanillaNumber = this.idPlanilla;
 

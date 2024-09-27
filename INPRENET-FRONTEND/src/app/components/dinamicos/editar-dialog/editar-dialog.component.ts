@@ -79,6 +79,8 @@ export class EditarDialogComponent implements OnInit {
 
   guardar() {
     const formValues = this.formGroup.value;
+    console.log(formValues);
+
     if (formValues.fechaNacimiento instanceof Date) {
       const year = formValues.fechaNacimiento.getFullYear();
       const month = (formValues.fechaNacimiento.getMonth() + 1).toString().padStart(2, '0');

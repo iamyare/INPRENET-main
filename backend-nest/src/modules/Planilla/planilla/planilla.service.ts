@@ -2309,8 +2309,6 @@ export class PlanillaService {
     periodoFinalizacion: string,
     idTiposPlanilla: number[],
   ): Promise<any[]> {
-    console.log(idTiposPlanilla);
-
     const beneficiosQuery = `
         SELECT
             banco.codigo_ach AS "codigo_banco", 
@@ -2352,10 +2350,6 @@ export class PlanillaService {
         GROUP BY
             banco.codigo_ach, personaPorBanco.num_cuenta, persona.primer_apellido, persona.segundo_apellido, persona.primer_nombre, persona.segundo_nombre, persona.tercer_nombre, persona.n_identificacion, persona.ID_PERSONA
     `;
-
-    console.log(beneficiosQuery);
-
-
     const deduccionesInpremaQuery = `
         SELECT 
             dd."ID_PERSONA",
@@ -2375,7 +2369,6 @@ export class PlanillaService {
         GROUP BY 
             dd."ID_PERSONA"
     `;
-
     const deduccionesTercerosQuery = `
         SELECT 
             dd."ID_PERSONA",
@@ -2394,35 +2387,28 @@ export class PlanillaService {
         GROUP BY 
             dd."ID_PERSONA"
     `;
-
     try {
       const beneficios = await this.entityManager.query(beneficiosQuery, [periodoInicio, periodoFinalizacion]);
       const deduccionesInprema = await this.entityManager.query(deduccionesInpremaQuery, [periodoInicio, periodoFinalizacion]);
       const deduccionesTerceros = await this.entityManager.query(deduccionesTercerosQuery, [periodoInicio, periodoFinalizacion]);
-
       const result = beneficios.map(beneficio => {
         const personaID = beneficio.ID_PERSONA;
-
         const totalDeduccionInprema = deduccionesInprema
           .filter(d => d.ID_PERSONA === personaID)
           .reduce((acc, curr) => acc + curr.deducciones_inprema, 0);
-
         const totalDeduccionTerceros = deduccionesTerceros
           .filter(d => d.ID_PERSONA === personaID)
           .reduce((acc, curr) => acc + curr.deducciones_terceros, 0);
-
         const totalDeducciones = totalDeduccionInprema + totalDeduccionTerceros;
-
         return {
           codigo_banco: beneficio.codigo_banco,
           numero_cuenta: beneficio.numero_cuenta,
-          neto: parseFloat((beneficio.monto_a_pagar - totalDeducciones).toFixed(2)), // Asegurar dos decimales
+          neto: parseFloat((beneficio.monto_a_pagar - totalDeducciones).toFixed(2)),
           nombre_completo: beneficio.nombre_completo,
           id_tipo_planilla: 1,
           n_identificacion: beneficio.n_identificacion,
         };
       });
-
       return result;
     } catch (error) {
       console.error('Error al obtener los detalles de pago por planilla:', error);

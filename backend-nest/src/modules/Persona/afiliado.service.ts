@@ -560,20 +560,25 @@ export class AfiliadoService {
         where: { n_identificacion: n_identificacionAfil },
         relations: ['detallePersona'],
       });
-
       if (!afiliado) {
         throw new Error(`No se encontró el afiliado con N_IDENTIFICACION: ${n_identificacionAfil}`);
       }
-
       const beneficiarios = await this.detallePersonaRepository.find({
         where: {
           ID_CAUSANTE: afiliado.id_persona,
           ID_CAUSANTE_PADRE: afiliado.id_persona,
+          eliminado: "NO"
         },
-        relations: ['persona', 'tipoPersona', 'estadoAfiliacion'],
+        relations: [
+          'persona', 
+          'tipoPersona', 
+          'estadoAfiliacion', 
+          'persona.personaDiscapacidades',
+          'persona.personaDiscapacidades.discapacidad'
+        ],
       });
       const beneficiariosFormatted = beneficiarios.map(beneficiario => ({
-        idDetallePersona: beneficiario.ID_DETALLE_PERSONA, // Agregando el ID_DETALLE_PERSONA
+        idDetallePersona: beneficiario.ID_DETALLE_PERSONA,
         idPersona: beneficiario.ID_PERSONA,
         ID_CAUSANTE_PADRE: beneficiario.ID_CAUSANTE_PADRE,
         nIdentificacion: beneficiario.persona?.n_identificacion || null,
@@ -596,17 +601,21 @@ export class AfiliadoService {
         estadoDescripcion: beneficiario.estadoAfiliacion?.nombre_estado || null,
         porcentaje: beneficiario.porcentaje || null,
         tipoPersona: beneficiario.tipoPersona?.tipo_persona || null,
+        discapacidades: beneficiario.persona?.personaDiscapacidades
+          ?.filter(discapacidad => discapacidad.discapacidad?.id_discapacidad)
+          .map(discapacidad => ({
+            idDiscapacidad: discapacidad.discapacidad?.id_discapacidad || null,
+            tipoDiscapacidad: discapacidad.discapacidad?.tipo_discapacidad || null,
+            descripcion: discapacidad.discapacidad?.descripcion || null,
+          })) || []
       }));
-
       return beneficiariosFormatted;
     } catch (error) {
       this.logger.error(`Error al consultar beneficios: ${error.message}`);
       throw new Error(`Error al consultar beneficios: ${error.message}`);
     }
   }
-
-
-
+  
   normalizarDatos(data: any): PersonaResponse[] {
     const newList: PersonaResponse[] = []
     data.map((el: any) => {
@@ -743,8 +752,6 @@ export class AfiliadoService {
     };
   }
 
-
-
   async getAllPerfCentroTrabajo(n_identificacion: string): Promise<any[]> {
     try {
       const persona = await this.personaRepository.createQueryBuilder('persona')
@@ -769,22 +776,20 @@ export class AfiliadoService {
       const persona = await this.personaRepository.createQueryBuilder('persona')
         .leftJoinAndSelect('persona.peps', 'peps')
         .leftJoinAndSelect('peps.cargo_publico', 'cargo_publico')
+        .addSelect("TO_CHAR(cargo_publico.fecha_inicio, 'DD/MM/YYYY')", 'cargo_publico.fecha_inicio')
+        .addSelect("TO_CHAR(cargo_publico.fecha_fin, 'DD/MM/YYYY')", 'cargo_publico.fecha_fin')
         .where('persona.n_identificacion = :n_identificacion', { n_identificacion })
         .getOne();
-
       if (!persona || !persona.peps) {
         return [];
       }
-
       return persona.peps;
     } catch (error) {
       console.error('Error al obtener los perfiles de la persona:', error);
       throw new Error('Error al obtener los perfiles de la persona');
     }
   }
-
-
-
+  
   async getAllOtrasFuentesIngres(n_identificacion: string): Promise<any[]> {
     try {
       const persona = await this.personaRepository.createQueryBuilder('persona')
@@ -802,20 +807,18 @@ export class AfiliadoService {
   }
 
   async inactivarPersona(idPersona: number, idCausante: number): Promise<void> {
-    const estadoInactivo = await this.estadoAfiliacionRepository.findOne({ where: { Descripcion: 'INACTIVO' } });
-    if (!estadoInactivo) {
-      throw new NotFoundException('Estado INACTIVO no encontrado');
-    }
     const result = await this.detallePersonaRepository.update(
       { ID_PERSONA: idPersona, ID_CAUSANTE: idCausante },
-      { eliminado: "SI" }
+      { 
+        eliminado: "SI",
+        porcentaje: 0
+      }
     );
     if (result.affected === 0) {
       throw new NotFoundException(`Registro con ID_PERSONA ${idPersona} y ID_CAUSANTE ${idCausante} no encontrado`);
     }
   }
-
-
+  
   async eliminarColegioMagisterialPersona(id: number): Promise<void> {
     const referencia = await this.netPersonaColegiosRepository.findOne({ where: { id: id } });
     if (!referencia) {

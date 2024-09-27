@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, HttpException, HttpStatus, NotFoundException, Param, ParseIntPipe, Patch, Post, UploadedFile, UploadedFiles, UseInterceptors } from '@nestjs/common';
+import { Body, Controller, Delete, Get, HttpException, HttpStatus, NotFoundException, Param, ParseIntPipe, Patch, Post, Put, UploadedFile, UploadedFiles, UseInterceptors } from '@nestjs/common';
 import { AfiliacionService } from './afiliacion.service';
 import { net_persona } from '../entities/net_persona.entity';
 import { AnyFilesInterceptor, FileInterceptor, FilesInterceptor } from '@nestjs/platform-express';
@@ -23,6 +23,20 @@ import { CrearPepsDto } from './dtos/crear-peps.dto';
 @Controller('afiliacion')
 export class AfiliacionController {
   constructor(private readonly afiliacionService: AfiliacionService, private readonly connection: Connection, private readonly entityManager: EntityManager,) {
+  }
+
+  @Put('actualizar-peps/:idPersona')
+  async actualizarPeps(
+    @Param('idPersona', ParseIntPipe) idPersona: number,
+    @Body() pepsDto: CrearPepsDto[],
+  ) {
+    const persona = await this.entityManager.findOne('net_persona', { where: { id_persona: idPersona } });
+    if (!persona) {
+      throw new HttpException('Persona no encontrada', HttpStatus.NOT_FOUND);
+    }
+    return this.entityManager.transaction(async (transactionalEntityManager) => {
+      return this.afiliacionService.actualizarPeps(pepsDto, idPersona, transactionalEntityManager);
+    });
   }
 
   @Delete(':idPersona/familiares/:idFamiliar')

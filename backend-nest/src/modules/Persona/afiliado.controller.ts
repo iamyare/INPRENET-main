@@ -18,10 +18,7 @@ import { Repository } from 'typeorm';
 import { Net_Tipo_Persona } from './entities/net_tipo_persona.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { UpdatePerfCentTrabDto } from './dto/update.perfAfilCentTrab.dto';
-import { net_persona } from './entities/net_persona.entity';
 import { net_estado_afiliacion } from './entities/net_estado_afiliacion.entity';
-import { net_detalle_persona } from './entities/net_detalle_persona.entity';
-import { Net_Detalle_Beneficio_Afiliado } from '../Planilla/detalle_beneficio/entities/net_detalle_beneficio_afiliado.entity';
 
 @ApiTags('Persona')
 @Controller('Persona')

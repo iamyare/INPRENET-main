@@ -13,12 +13,13 @@ export class PerfilComponent implements OnInit {
   persona: any;
   @Output() resetBusqueda = new EventEmitter<void>();
   detallePersonaUnico: any[] = [];
+  defaultFotoUrl = '../../../../../assets/images/AvatarDefecto.png';
 
   constructor(private personaService: PersonaService, private datePipe: DatePipe) { }
 
   ngOnInit() {
     this.personaService.currentPersona.subscribe(persona => {
-      
+
       this.persona = persona;
       if (persona.persona && persona.persona.detallePersona) {
         this.detallePersonaUnico = this.filtrarDetallePersona(persona.persona.detallePersona);
@@ -45,7 +46,7 @@ export class PerfilComponent implements OnInit {
     if (foto && foto.data) {
       return 'data:image/jpeg;base64,' + this.arrayBufferToBase64(foto.data);
     }
-    return '';
+    return this.defaultFotoUrl;
   }
 
   arrayBufferToBase64(buffer: any): string {

@@ -63,9 +63,9 @@ export class EditBeneficiariosComponent implements OnInit, OnChanges {
       { header: 'Nombres', col: 'nombres' },
       { header: 'Apellidos', col: 'apellidos' },
       { header: 'Porcentaje', col: 'porcentaje' },
-      { header: 'Fecha de Nacimiento', col: 'fecha_nacimiento' }
+      { header: 'Fecha de Nacimiento', col: 'fecha_nacimiento' },
+      { header: 'Discapacidades', col: 'discapacidades' }
     ];
-
     this.getFilas().then(() => this.cargar());
   }
 
@@ -82,8 +82,9 @@ export class EditBeneficiariosComponent implements OnInit, OnChanges {
           const nombres = [item.primerNombre, item.segundoNombre, item.tercerNombre].filter(part => part).join(' ');
           const apellidos = [item.primerApellido, item.segundoApellido].filter(part => part).join(' ');
           const fechaNacimiento = this.datePipe.transform(item.fechaNacimiento, 'dd/MM/yyyy') || 'Fecha no disponible';
+          const discapacidades = item.discapacidades.map((disc: any) => disc.tipoDiscapacidad).filter((disc:any) => disc).join(', ') || 'No tiene';
           const respData = {
-            id: item.idDetallePersona,
+            id_causante: item.ID_CAUSANTE_PADRE,
             id_persona: item.idPersona,
             n_identificacion: item.nIdentificacion,
             nombres,
@@ -98,7 +99,8 @@ export class EditBeneficiariosComponent implements OnInit, OnChanges {
             id_municipio_residencia: item.idMunicipioResidencia,
             id_estado_persona: item.idEstadoPersona,
             porcentaje: item.porcentaje,
-            tipo_persona: item.tipoPersona
+            tipo_persona: item.tipoPersona,
+            discapacidades
           };
           return respData;
         });
@@ -180,7 +182,7 @@ export class EditBeneficiariosComponent implements OnInit, OnChanges {
     });
     dialogRef.afterClosed().subscribe((result: any) => {
       if (result) {
-        this.inactivarPersona(row.id, this.persona.ID_PERSONA);
+        this.inactivarPersona(row.id_persona, row.id_causante,);
       }
     });
   }

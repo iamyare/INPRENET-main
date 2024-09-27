@@ -10,6 +10,16 @@ export class AfiliacionService {
 
   constructor(private http: HttpClient) { }
 
+  actualizarPeps(idPersona: number, pepsDto: any[]): Observable<any> {
+    const url = `${environment.API_URL}/api/afiliacion/actualizar-peps/${idPersona}`;
+    return this.http.put<any>(url, pepsDto).pipe(
+      catchError((error) => {
+        console.error('Error al actualizar los PEPs', error);
+        return throwError(error);
+      })
+    );
+  }
+
   eliminarFamiliar(idPersona: number, idFamiliar: number): Observable<any> {
     const url = `${environment.API_URL}/api/afiliacion/${idPersona}/familiares/${idFamiliar}`;
     return this.http.delete<any>(url).pipe(

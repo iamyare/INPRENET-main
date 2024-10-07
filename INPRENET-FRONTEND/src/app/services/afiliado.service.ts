@@ -122,7 +122,15 @@ export class AfiliadoService {
   }
 
   updateDatosGenerales(idPersona: string, datosGenerales: any): Observable<any> {
-    return this.http.put(`${environment.API_URL}/api/Persona/updateDatosGenerales/${idPersona}`, datosGenerales);
+    console.log(datosGenerales);
+
+    const formData: FormData = new FormData();
+    formData.append('datosGenerales', JSON.stringify(datosGenerales));
+    formData.append('arch_cert_def', datosGenerales.certificado_defuncion
+    );
+    formData.append('file_ident', datosGenerales.dato.archivo_identificacion);
+
+    return this.http.put(`${environment.API_URL}/api/Persona/updateDatosGenerales/${idPersona}`, formData);
   }
 
   updateReferenciaPersonal(id: string, updateDto: any): Observable<any> {

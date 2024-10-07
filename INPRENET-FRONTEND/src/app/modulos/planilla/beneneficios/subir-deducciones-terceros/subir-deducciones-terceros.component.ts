@@ -1,3 +1,4 @@
+import { HttpEventType } from '@angular/common/http';
 import { Component, ElementRef, Input, ViewChild } from '@angular/core';
 import { ToastrService } from 'ngx-toastr';
 import { CentroTrabajoService } from 'src/app/services/centro-trabajo.service';
@@ -57,9 +58,12 @@ export class SubirDeduccionesTercerosComponent {
       this.toastr.error('No se seleccionó ningún archivo.', 'Error');
       return;
     }
+
     this.isUploading = true;
     this.progressValue = 0;
+
     const reader: FileReader = new FileReader();
+
     reader.onload = (e: any) => {
       const bstr: string = e.target.result;
       const wb: XLSX.WorkBook = XLSX.read(bstr, { type: 'binary' });
@@ -67,30 +71,40 @@ export class SubirDeduccionesTercerosComponent {
       const ws: XLSX.WorkSheet = wb.Sheets[wsname];
       let data: any[] = XLSX.utils.sheet_to_json(ws, { raw: false, defval: null });
       data = data.filter(row => Object.values(row).some(cell => cell != null && cell.toString().trim() !== ''));
+
       this.deduccionesService.subirArchivoDeducciones(this.id_planilla, this.file!).subscribe({
-        next: (response) => {
-          if (typeof response === 'string') {
-            response = JSON.parse(response);
-          }
-          const failedDniList = response.failedRows?.map((row: any) => row[2]);
+        next: (event) => {
+          if (event.type === HttpEventType.UploadProgress && event.total) {
+            const progress = Math.round(100 * (event.loaded / (event.total || 1)));
+            this.progressValue = Math.min(progress, 99);  // Progreso hasta 99%
+          } else if (event.type === HttpEventType.Response) {
+            this.progressValue = 100;
+            // El archivo se ha subido completamente, procesamos la respuesta del servidor
+            let response = event.body;
+            if (typeof response === 'string') {
+              response = JSON.parse(response);
+            }
 
-          this.datosCargados = data
-            .filter((row: any) => !failedDniList?.includes(row.dni))
-            .map((row: any) => ({
-              año: row['año'],
-              mes: row['mes'],
-              dni: row['dni'],
-              codigo_deduccion: row['codigo_deduccion'],
-              monto_total: row['monto_motal'],
-            }));
-          this.datosCargadosExitosamente = this.datosCargados.length > 0;
+            const failedDniList = response.failedRows?.map((row: any) => row[2]);
 
-          this.toastr.success('Todos los datos se cargaron correctamente.', 'Carga exitosa');
-          if (response && Array.isArray(response.failedRows) && response.failedRows.length > 0) {
-            this.generateFailedRowsExcel(response.failedRows);
-            this.toastr.warning('Algunas filas no se insertaron. Se ha descargado un archivo con los errores.', 'Advertencia');
+            this.datosCargados = data
+              .filter((row: any) => !failedDniList?.includes(row.dni))
+              .map((row: any) => ({
+                año: row['anio'],
+                mes: row['mes'],
+                dni: row['dni'],
+                codigo_deduccion: row['codigoDeduccion'],
+                monto_total: row['montoTotal'],
+              }));
+            this.datosCargadosExitosamente = this.datosCargados.length > 0;
+
+            this.toastr.success('Todos los datos se cargaron correctamente.', 'Carga exitosa');
+            if (response && Array.isArray(response.failedRows) && response.failedRows.length > 0) {
+              this.generateFailedRowsExcel(response.failedRows);
+              this.toastr.warning('Algunas filas no se insertaron. Se ha descargado un archivo con los errores.', 'Advertencia');
+            }
+            this.clearFile();
           }
-          this.clearFile();
         },
         error: (error) => {
           this.datosCargadosExitosamente = false;
@@ -116,6 +130,10 @@ export class SubirDeduccionesTercerosComponent {
 
     reader.readAsBinaryString(this.file as Blob);
   }
+
+
+
+
 
   generateFailedRowsExcel(failedRows: any[]) {
     const headers = ['anio', 'mes', 'dni', 'codigoDeduccion', 'montoTotal', 'razón'];

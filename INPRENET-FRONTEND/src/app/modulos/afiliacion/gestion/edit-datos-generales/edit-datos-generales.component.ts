@@ -38,13 +38,13 @@ export class EditDatosGeneralesComponent implements OnInit {
   datos!: any;
 
   form1 = this.fb.group({
-    certificado_defuncion: ["", [Validators.required]],
     causa_fallecimiento: ["", [Validators.required]],
-    /* estado: ["", [Validators.required]], */
-    //observaciones: ["", [Validators.required]],
+    estado: ["", [Validators.required]],
     fecha_defuncion: ["", [Validators.required]],
     id_departamento_defuncion: ["", [Validators.required]],
     id_municipio_defuncion: ["", [Validators.required]]
+    //certificado_defuncion: ["", [Validators.required]],
+    //observaciones: ["", [Validators.required]],
   });
 
   form: any;
@@ -106,7 +106,7 @@ export class EditDatosGeneralesComponent implements OnInit {
     ];
 
     this.cargarCausasFallecimiento(); // Llama al método para cargar las causas de fallecimiento
-    /* this.cargarEstadosAfiliado(); */
+    this.cargarEstadosAfiliado();
     this.previsualizarInfoAfil();
     this.cargarDepartamentos();
   }
@@ -318,10 +318,9 @@ export class EditDatosGeneralesComponent implements OnInit {
           this.form1.controls.causa_fallecimiento.setValue(result?.ID_CAUSA_FALLECIMIENTO);
           this.form1.controls.id_departamento_defuncion.setValue(result?.ID_DEPARTAMENTO_DEFUNCION);
           this.form1.controls.id_municipio_defuncion.setValue(result?.ID_MUNICIPIO_DEFUNCION);
-          this.form1.controls.certificado_defuncion.setValue(result?.certificado_defuncion)
-
           //this.form1.controls.estado.setValue('ACTIVO');
 
+          //this.form1.controls.certificado_defuncion.setValue(result?.certificado_defuncion)
           //this.form1.controls.observaciones.setValue("Ninguna")
 
           this.cargada = true
@@ -380,12 +379,13 @@ export class EditDatosGeneralesComponent implements OnInit {
     if (this.formDatosGenerales.value.refpers[0]) {
       a = {
         ...this.formDatosGenerales.value.refpers[0],
-        /* estado: this.form1.value.estado, */
+        estado: this.form1.value.estado,
         causa_fallecimiento: this.form1.value.causa_fallecimiento,
         fecha_defuncion: convertirFechaInputs(this.form1.value.fecha_defuncion!),
         id_departamento_defuncion: this.form1.value.id_departamento_defuncion,
         id_municipio_defuncion: this.form1.value.id_municipio_defuncion,
-        certificado_defuncion: this.form1.value.certificado_defuncion
+        certificado_defuncion: this.formDatosGenerales.value.archivoCertDef
+        //certificado_defuncion: this.form1.value.certificado_defuncion
         //observaciones: this.form1.value.observaciones,
       };
     } else {
@@ -394,12 +394,13 @@ export class EditDatosGeneralesComponent implements OnInit {
           ...this.initialData
         },
         ...this.formDatosGenerales.value.refpers[0],
-        /* estado: this.form1.value.estado, */
+        estado: this.form1.value.estado,
         causa_fallecimiento: this.form1.value.causa_fallecimiento,
         fecha_defuncion: convertirFechaInputs(this.form1.value.fecha_defuncion!),
         id_departamento_defuncion: this.form1.value.id_departamento_defuncion,
         id_municipio_defuncion: this.form1.value.id_municipio_defuncion,
-        certificado_defuncion: this.form1.value.certificado_defuncion
+        certificado_defuncion: this.formDatosGenerales.value.archivoCertDef
+        //certificado_defuncion: this.form1.value.certificado_defuncion
         //observaciones: this.form1.value.observaciones,
       };
     }
@@ -422,14 +423,12 @@ export class EditDatosGeneralesComponent implements OnInit {
     //this.estadoAfiliacion = e.value;
   }
 
-  getArchivo(event: File): any {
+  getArchivoDef(event: File): any {
     // Si no lo has agregado aún, puedes agregar el control aquí
-    console.log(event);
-
-    if (!this.formDatosGenerales?.contains('archivoCertIdent')) {
-      this.formDatosGenerales.addControl('archivoCertIdent', new FormControl('', []));
+    if (!this.formDatosGenerales?.contains('archivoCertDef')) {
+      this.formDatosGenerales.addControl('archivoCertDef', new FormControl('', []));
     }
     // Asignar el archivo al control del formulario
-    this.formDatosGenerales.get('archivoCertIdent')?.setValue(event);
+    this.formDatosGenerales.get('archivoCertDef')?.setValue(event);
   }
 }

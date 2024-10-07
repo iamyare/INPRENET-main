@@ -73,7 +73,7 @@ export class AfiliacionService {
     private readonly familiaRepository: Repository<Net_Familia>,
     @InjectRepository(net_otra_fuente_ingreso)
     private readonly otraFuenteIngresoRepository: Repository<net_otra_fuente_ingreso>,
-    
+
   ) { }
 
   async updateFotoPerfil(id: number, fotoPerfil: Buffer): Promise<net_persona> {
@@ -114,15 +114,15 @@ export class AfiliacionService {
     });
 
     const conyuge = await this.familiaRepository.findOne({
-      where: { persona: {id_persona: persona.id_persona}, parentesco: 'CONYUGE' },
+      where: { persona: { id_persona: persona.id_persona }, parentesco: 'CONYUGE' },
       relations: ['persona'],
     });
 
     if (!persona) {
       throw new NotFoundException(`Persona with DNI ${n_identificacion} not found`);
     }
-    
-    return {persona, conyuge};
+
+    return { persona, conyuge };
   }
 
   async getCausantesByDniBeneficiario(n_identificacion: string): Promise<net_persona[]> {
@@ -160,23 +160,23 @@ export class AfiliacionService {
     return this.discapacidadRepository.find();
   }
 
-  async crearPersona(crearPersonaDto: CrearPersonaDto, fotoPerfil: Express.Multer.File, entityManager: EntityManager): Promise<net_persona> {
+  async crearPersona(crearPersonaDto: CrearPersonaDto, fotoPerfil: Express.Multer.File, fileIdent: Express.Multer.File, entityManager: EntityManager): Promise<net_persona> {
     // Verificar si la persona ya existe
     let persona = await this.personaRepository.findOne({ where: { n_identificacion: crearPersonaDto.n_identificacion } });
 
     if (persona) {
-        // Si la persona ya existe, verificar si ya tiene un detalle como AFILIADO
-        const detalleExistente = await this.detallePersonaRepository.findOne({
-            where: { ID_PERSONA: persona.id_persona, tipoPersona: { tipo_persona: 'AFILIADO' } }
-        });
+      // Si la persona ya existe, verificar si ya tiene un detalle como AFILIADO
+      const detalleExistente = await this.detallePersonaRepository.findOne({
+        where: { ID_PERSONA: persona.id_persona, tipoPersona: { tipo_persona: 'AFILIADO' } }
+      });
 
-        if (detalleExistente) {
-            throw new ConflictException('La persona ya existe como AFILIADO.');
-        }
+      if (detalleExistente) {
+        throw new ConflictException('La persona ya existe como AFILIADO.');
+      }
 
-        // No se crea una nueva persona, pero se continúa con la función
+      // No se crea una nueva persona, pero se continúa con la función
     } else {
-        
+
       const [tipoIdentificacion, pais, municipioResidencia, municipioNacimiento, municipioDefuncion, profesion, causaFallecimiento] = await Promise.all([
         this.tipoIdentificacionRepository.findOne({ where: { id_identificacion: crearPersonaDto.id_tipo_identificacion } }),
         this.paisRepository.findOne({ where: { id_pais: crearPersonaDto.id_pais_nacionalidad } }),
@@ -185,32 +185,33 @@ export class AfiliacionService {
         crearPersonaDto.id_municipio_defuncion ? this.municipioRepository.findOne({ where: { id_municipio: crearPersonaDto.id_municipio_defuncion } }) : null,
         crearPersonaDto.id_profesion ? this.profesionRepository.findOne({ where: { id_profesion: crearPersonaDto.id_profesion } }) : null,
         crearPersonaDto.id_causa_fallecimiento ? this.causasFallecimientosRepository.findOne({ where: { id_causa_fallecimiento: crearPersonaDto.id_causa_fallecimiento } }) : null
-     ]);
-     
-     if (!tipoIdentificacion) throw new NotFoundException(`El tipo de identificación con ID ${crearPersonaDto.id_tipo_identificacion} no existe`);
-     if (!pais) throw new NotFoundException(`El país con ID ${crearPersonaDto.id_pais_nacionalidad} no existe`);
-     if (!municipioResidencia) throw new NotFoundException(`El municipio de residencia con ID ${crearPersonaDto.id_municipio_residencia} no existe`);
-     if (!municipioNacimiento) throw new NotFoundException(`El municipio de nacimiento con ID ${crearPersonaDto.id_municipio_nacimiento} no existe`);
+      ]);
 
-        persona = entityManager.create(net_persona, {
-            ...crearPersonaDto,
-            fecha_vencimiento_ident: this.formatDateToYYYYMMDD(crearPersonaDto.fecha_vencimiento_ident),
-            fecha_nacimiento: this.formatDateToYYYYMMDD(crearPersonaDto.fecha_nacimiento),
-            fecha_defuncion: this.formatDateToYYYYMMDD(crearPersonaDto.fecha_defuncion),
-            foto_perfil: fotoPerfil?.buffer,
-            tipoIdentificacion,
-            pais,
-            municipio: municipioResidencia,
-            municipio_nacimiento: municipioNacimiento,
-            municipio_defuncion: municipioDefuncion,
-            profesion,
-            causa_fallecimiento: causaFallecimiento,
-        });
-        await entityManager.save(net_persona, persona);
+      if (!tipoIdentificacion) throw new NotFoundException(`El tipo de identificación con ID ${crearPersonaDto.id_tipo_identificacion} no existe`);
+      if (!pais) throw new NotFoundException(`El país con ID ${crearPersonaDto.id_pais_nacionalidad} no existe`);
+      if (!municipioResidencia) throw new NotFoundException(`El municipio de residencia con ID ${crearPersonaDto.id_municipio_residencia} no existe`);
+      if (!municipioNacimiento) throw new NotFoundException(`El municipio de nacimiento con ID ${crearPersonaDto.id_municipio_nacimiento} no existe`);
+
+      persona = entityManager.create(net_persona, {
+        ...crearPersonaDto,
+        fecha_vencimiento_ident: this.formatDateToYYYYMMDD(crearPersonaDto.fecha_vencimiento_ident),
+        fecha_nacimiento: this.formatDateToYYYYMMDD(crearPersonaDto.fecha_nacimiento),
+        fecha_defuncion: this.formatDateToYYYYMMDD(crearPersonaDto.fecha_defuncion),
+        foto_perfil: fotoPerfil?.buffer,
+        archivo_identificacion: fileIdent?.buffer,
+        tipoIdentificacion,
+        pais,
+        municipio: municipioResidencia,
+        municipio_nacimiento: municipioNacimiento,
+        municipio_defuncion: municipioDefuncion,
+        profesion,
+        causa_fallecimiento: causaFallecimiento,
+      });
+      await entityManager.save(net_persona, persona);
     }
 
     return persona;
-}
+  }
 
   async crearDetallePersona(
     crearDetallePersonaDto: CrearDetallePersonaDto,
@@ -225,7 +226,7 @@ export class AfiliacionService {
     if (!estadoAfiliacion) {
       throw new NotFoundException('Estado de afiliación no encontrado');
     }
-  
+
     const detallePersona = entityManager.create(net_detalle_persona, {
       ID_PERSONA: idPersona,
       ID_CAUSANTE: idPersona,
@@ -235,10 +236,10 @@ export class AfiliacionService {
       ID_TIPO_PERSONA: tipoPersona.id_tipo_persona,
       ID_ESTADO_AFILIACION: estadoAfiliacion.codigo,
     });
-  
+
     return await entityManager.save(net_detalle_persona, detallePersona);
   }
-  
+
   async crearPersonaColegios(
     crearPersonaColegiosDtos: CrearPersonaColegiosDto[],
     idPersona: number,
@@ -289,15 +290,15 @@ export class AfiliacionService {
         fecha_activacion: crearPersonaBancosDto.estado === 'ACTIVO' ? new Date() : null,
         fecha_inactivacion: crearPersonaBancosDto.estado === 'INACTIVO' ? new Date() : null,
       });
-  
+
       resultados.push(await entityManager.save(Net_Persona_Por_Banco, personaBanco));
     }
-  
+
     return resultados;
   }
-  
-  
-  
+
+
+
   async crearPersonaCentrosTrabajo(
     crearPersonaCentrosTrabajoDtos: CrearPersonaCentroTrabajoDto[],
     idPersona: number,
@@ -333,7 +334,7 @@ export class AfiliacionService {
     entityManager: EntityManager,
   ): Promise<net_otra_fuente_ingreso[]> {
     const resultados: net_otra_fuente_ingreso[] = [];
-  
+
     if (crearOtrasFuentesIngresoDtos && crearOtrasFuentesIngresoDtos.length > 0) {
       for (const crearOtraFuenteIngresoDto of crearOtrasFuentesIngresoDtos) {
         const otraFuenteIngreso = entityManager.create(net_otra_fuente_ingreso, {
@@ -342,21 +343,21 @@ export class AfiliacionService {
           monto_ingreso: crearOtraFuenteIngresoDto.monto_ingreso,
           observacion: crearOtraFuenteIngresoDto.observacion,
         });
-  
+
         resultados.push(await entityManager.save(net_otra_fuente_ingreso, otraFuenteIngreso));
       }
     }
-  
+
     return resultados;
   }
-  
+
   async crearReferencias(
     crearReferenciasDtos: CrearReferenciaDto[],
     idPersona: number,
     entityManager: EntityManager
   ): Promise<Net_Referencias[]> {
     const resultados: Net_Referencias[] = [];
-  
+
     for (const crearReferenciaDto of crearReferenciasDtos) {
       const nuevaReferencia = entityManager.create(Net_Referencias, {
         tipo_referencia: crearReferenciaDto.tipo_referencia,
@@ -373,35 +374,38 @@ export class AfiliacionService {
         n_identificacion: crearReferenciaDto.n_identificacion,
         persona: { id_persona: idPersona },
       });
-  
+
       resultados.push(await entityManager.save(Net_Referencias, nuevaReferencia));
     }
-  
+
     return resultados;
   }
-  
+
   async crearBeneficiarios(
     crearBeneficiariosDtos: CrearBeneficiarioDto[],
     idPersona: number,
     idDetallePersona: number,
     entityManager: EntityManager,
+    files?: any
   ): Promise<net_detalle_persona[]> {
     const resultados: net_detalle_persona[] = [];
-  
+
     const tipoPersonaBeneficiario = await this.tipoPersonaRepository.findOne({ where: { tipo_persona: 'BENEFICIARIO' } });
     if (!tipoPersonaBeneficiario) {
       throw new NotFoundException('Tipo de persona "BENEFICIARIO" no encontrado');
     }
-  
+
     for (const crearBeneficiarioDto of crearBeneficiariosDtos) {
       let beneficiario = await this.personaRepository.findOne({
         where: { n_identificacion: crearBeneficiarioDto.persona.n_identificacion }
       });
-  
+
       if (!beneficiario) {
-        beneficiario = await this.crearPersona(crearBeneficiarioDto.persona, null, entityManager);
+        const fileIdent = files?.find(file => file.fieldname === `file_identB[${crearBeneficiarioDto.persona.n_identificacion}]`);
+
+        beneficiario = await this.crearPersona(crearBeneficiarioDto.persona, null, fileIdent, entityManager);
       }
-  
+
       // Crear el detalle del beneficiario con porcentaje
       const detalleBeneficiario = entityManager.create(net_detalle_persona, {
         ID_DETALLE_PERSONA: idDetallePersona,
@@ -412,19 +416,19 @@ export class AfiliacionService {
         eliminado: 'NO',
         porcentaje: crearBeneficiarioDto.porcentaje,
       });
-  
+
       const detalleGuardado = await entityManager.save(net_detalle_persona, detalleBeneficiario);
       resultados.push(detalleGuardado);
-  
+
       // Insertar discapacidades para el beneficiario, si existen
       if (crearBeneficiarioDto.discapacidades && crearBeneficiarioDto.discapacidades.length > 0) {
         await this.crearDiscapacidades(crearBeneficiarioDto.discapacidades, beneficiario.id_persona, entityManager);
       }
     }
-  
+
     return resultados;
   }
-  
+
   async crearDiscapacidades(
     discapacidadesDto: CrearDiscapacidadDto[],
     idPersona: number,
@@ -438,7 +442,7 @@ export class AfiliacionService {
       await entityManager.save(Net_Persona_Discapacidad, nuevaDiscapacidad);
     }
   }
-  
+
   async crearPeps(pepsDto: CrearPepsDto[], idPersona: number, entityManager: EntityManager): Promise<Net_Peps[]> {
     const resultados: Net_Peps[] = [];
     for (const pepsData of pepsDto) {
@@ -463,7 +467,7 @@ export class AfiliacionService {
     }
     return resultados;
   }
-  
+
   async crearFamilia(
     familiaresDto: CrearFamiliaDto[],
     idPersona: number,
@@ -474,7 +478,7 @@ export class AfiliacionService {
         where: { n_identificacion: familiaDto.persona_referencia.n_identificacion }
       });
       if (!personaReferencia) {
-        personaReferencia = await this.crearPersona(familiaDto.persona_referencia, null, entityManager);
+        personaReferencia = await this.crearPersona(familiaDto.persona_referencia, null, null, entityManager);
       }
       const familia = entityManager.create(Net_Familia, {
         parentesco: familiaDto.parentesco,
@@ -483,26 +487,26 @@ export class AfiliacionService {
       });
       await entityManager.save(Net_Familia, familia);
     }
-  } 
+  }
 
-  async crearDatos(crearDatosDto: CrearDatosDto, fotoPerfil: Express.Multer.File): Promise<any> {
+  async crearDatos(crearDatosDto: CrearDatosDto, fotoPerfil: Express.Multer.File, fileIdent: Express.Multer.File, files: any): Promise<any> {
     return await this.personaRepository.manager.transaction(async (transactionalEntityManager) => {
       try {
 
         console.log('--------------');
         console.log(fotoPerfil);
-        
-      console.log(JSON.stringify(crearDatosDto, (key, value) => {
-        if (typeof value === 'object' && value !== null) {
-          return { ...value };
-        }
-        return value;
-      }, 2));
-      console.log('--------------');
+
+        console.log(JSON.stringify(crearDatosDto, (key, value) => {
+          if (typeof value === 'object' && value !== null) {
+            return { ...value };
+          }
+          return value;
+        }, 2));
+        console.log('--------------');
         const resultados = [];
 
         // Crear la persona
-        const persona = await this.crearPersona(crearDatosDto.persona, fotoPerfil, transactionalEntityManager);
+        const persona = await this.crearPersona(crearDatosDto.persona, fotoPerfil, fileIdent, transactionalEntityManager);
         resultados.push(persona);
 
         // Crear el detalle de la persona
@@ -530,7 +534,7 @@ export class AfiliacionService {
         resultados.push(...referencias);
 
         // Crear los beneficiarios de la persona
-        const beneficiarios = await this.crearBeneficiarios(crearDatosDto.beneficiarios, persona.id_persona, detallePersona.ID_DETALLE_PERSONA, transactionalEntityManager);
+        const beneficiarios = await this.crearBeneficiarios(crearDatosDto.beneficiarios, persona.id_persona, detallePersona.ID_DETALLE_PERSONA, transactionalEntityManager, files);
         resultados.push(...beneficiarios);
 
         // Crear las discapacidades de la persona, si existen
@@ -555,7 +559,7 @@ export class AfiliacionService {
       }
     });
   }
-  
+
   formatDateToYYYYMMDD(dateString: string): string {
     if (!dateString) return null;
     const date = new Date(dateString);
@@ -572,12 +576,12 @@ export class AfiliacionService {
     if (!persona) {
       throw new NotFoundException(`Persona con identificación ${nIdentificacion} no encontrada`);
     }
-  
+
     const referencias = await this.referenciaRepository.find({
       where: { persona: { id_persona: persona.id_persona } },
-      relations: ['persona'], 
+      relations: ['persona'],
     });
-  
+
     if (!referencias.length) {
       throw new NotFoundException(`No se encontraron referencias para la persona con identificación ${nIdentificacion}`);
     }
@@ -600,7 +604,7 @@ export class AfiliacionService {
       estado: ref.estado,
     }));
   }
-  
+
   async eliminarReferencia(idReferencia: number): Promise<void> {
     const referencia = await this.referenciaRepository.findOne({
       where: { id_referencia: idReferencia },
@@ -614,38 +618,38 @@ export class AfiliacionService {
 
   async actualizarReferencia(idReferencia: number, datosActualizados: CrearReferenciaDto): Promise<void> {
     console.log(datosActualizados);
-    
+
     const validationErrors: ValidationError[] = await validate(datosActualizados);
     if (validationErrors.length > 0) {
-        const errorMessages = validationErrors.map(error =>
-            Object.values(error.constraints || {}).join(', ')
-        ).join('; ');
-        throw new BadRequestException(`Datos inválidos: ${errorMessages}`);
+      const errorMessages = validationErrors.map(error =>
+        Object.values(error.constraints || {}).join(', ')
+      ).join('; ');
+      throw new BadRequestException(`Datos inválidos: ${errorMessages}`);
     }
 
     const referencia = await this.referenciaRepository.findOne({
-        where: { id_referencia: idReferencia },
+      where: { id_referencia: idReferencia },
     });
     if (!referencia) {
-        throw new NotFoundException(`Referencia con ID ${idReferencia} no encontrada`);
+      throw new NotFoundException(`Referencia con ID ${idReferencia} no encontrada`);
     }
 
     await this.referenciaRepository.update(idReferencia, {
-        tipo_referencia: datosActualizados.tipo_referencia ?? referencia.tipo_referencia,
-        primer_nombre: datosActualizados.primer_nombre ?? referencia.primer_nombre,
-        segundo_nombre: datosActualizados.segundo_nombre ?? referencia.segundo_nombre,
-        tercer_nombre: datosActualizados.tercer_nombre ?? referencia.tercer_nombre,
-        primer_apellido: datosActualizados.primer_apellido ?? referencia.primer_apellido,
-        segundo_apellido: datosActualizados.segundo_apellido ?? referencia.segundo_apellido,
-        parentesco: datosActualizados.parentesco ?? referencia.parentesco,
-        direccion: datosActualizados.direccion ?? referencia.direccion,
-        telefono_domicilio: datosActualizados.telefono_domicilio ?? referencia.telefono_domicilio,
-        telefono_trabajo: datosActualizados.telefono_trabajo ?? referencia.telefono_trabajo,
-        telefono_personal: datosActualizados.telefono_personal ?? referencia.telefono_personal,
-        n_identificacion: datosActualizados.n_identificacion ?? referencia.n_identificacion,
-        estado: datosActualizados.estado ?? referencia.estado,
+      tipo_referencia: datosActualizados.tipo_referencia ?? referencia.tipo_referencia,
+      primer_nombre: datosActualizados.primer_nombre ?? referencia.primer_nombre,
+      segundo_nombre: datosActualizados.segundo_nombre ?? referencia.segundo_nombre,
+      tercer_nombre: datosActualizados.tercer_nombre ?? referencia.tercer_nombre,
+      primer_apellido: datosActualizados.primer_apellido ?? referencia.primer_apellido,
+      segundo_apellido: datosActualizados.segundo_apellido ?? referencia.segundo_apellido,
+      parentesco: datosActualizados.parentesco ?? referencia.parentesco,
+      direccion: datosActualizados.direccion ?? referencia.direccion,
+      telefono_domicilio: datosActualizados.telefono_domicilio ?? referencia.telefono_domicilio,
+      telefono_trabajo: datosActualizados.telefono_trabajo ?? referencia.telefono_trabajo,
+      telefono_personal: datosActualizados.telefono_personal ?? referencia.telefono_personal,
+      n_identificacion: datosActualizados.n_identificacion ?? referencia.n_identificacion,
+      estado: datosActualizados.estado ?? referencia.estado,
     });
-}
+  }
 
 
   async editarOtraFuenteIngreso(id: number, dto: CrearOtraFuenteIngresoDto): Promise<net_otra_fuente_ingreso> {
@@ -665,7 +669,7 @@ export class AfiliacionService {
 
   async eliminarOtraFuenteIngreso(id: number): Promise<void> {
     const fuenteIngreso = await this.otraFuenteIngresoRepository.findOne({ where: { id_otra_fuente_ingreso: id } });
-    
+
     if (!fuenteIngreso) {
       throw new NotFoundException(`La fuente de ingreso con ID ${id} no fue encontrada`);
     }
@@ -674,42 +678,42 @@ export class AfiliacionService {
 
   async obtenerConyugePorIdentificacion(n_identificacion: string): Promise<any> {
     const persona = await this.personaRepository.createQueryBuilder("persona")
-        .where("persona.n_identificacion = :n_identificacion", { n_identificacion })
-        .getOne();
+      .where("persona.n_identificacion = :n_identificacion", { n_identificacion })
+      .getOne();
 
     if (!persona) {
-        throw new NotFoundException(`No se encontró la persona con identificación ${n_identificacion}`);
+      throw new NotFoundException(`No se encontró la persona con identificación ${n_identificacion}`);
     }
     const conyuge = await this.familiaRepository.createQueryBuilder("familia")
-        .leftJoinAndSelect("familia.referenciada", "referenciada")
-        .where("familia.persona.id_persona = :id_persona", { id_persona: persona.id_persona })
-        .andWhere("familia.parentesco = :parentesco", { parentesco: 'CÓNYUGUE' })
-        .getOne();
+      .leftJoinAndSelect("familia.referenciada", "referenciada")
+      .where("familia.persona.id_persona = :id_persona", { id_persona: persona.id_persona })
+      .andWhere("familia.parentesco = :parentesco", { parentesco: 'CÓNYUGUE' })
+      .getOne();
 
     if (!conyuge || !conyuge.referenciada) {
-        throw new NotFoundException(`No se encontró cónyuge para la persona con identificación ${n_identificacion}`);
+      throw new NotFoundException(`No se encontró cónyuge para la persona con identificación ${n_identificacion}`);
     }
     const detallePersona = await this.detallePersonaRepository.createQueryBuilder("detallePersona")
-        .where("detallePersona.ID_PERSONA = :id_persona", { id_persona: conyuge.referenciada.id_persona })
-        .andWhere("detallePersona.ID_TIPO_PERSONA = :id_tipo_persona", { id_tipo_persona: 1 })
-        .getOne();
+      .where("detallePersona.ID_PERSONA = :id_persona", { id_persona: conyuge.referenciada.id_persona })
+      .andWhere("detallePersona.ID_TIPO_PERSONA = :id_tipo_persona", { id_tipo_persona: 1 })
+      .getOne();
 
     const esAfiliado = detallePersona ? 'SI' : 'NO';
     return {
-        primer_nombre: conyuge.referenciada.primer_nombre,
-        segundo_nombre: conyuge.referenciada.segundo_nombre,
-        tercer_nombre: conyuge.referenciada.tercer_nombre,
-        primer_apellido: conyuge.referenciada.primer_apellido,
-        segundo_apellido: conyuge.referenciada.segundo_apellido,
-        n_identificacion: conyuge.referenciada.n_identificacion,
-        fecha_nacimiento: conyuge.referenciada.fecha_nacimiento,
-        telefono_1: conyuge.referenciada.telefono_1,
-        telefono_2: conyuge.referenciada.telefono_2,
-        telefono_3: conyuge.referenciada.telefono_3,
-        trabaja: conyuge.trabaja,
-        esAfiliado
+      primer_nombre: conyuge.referenciada.primer_nombre,
+      segundo_nombre: conyuge.referenciada.segundo_nombre,
+      tercer_nombre: conyuge.referenciada.tercer_nombre,
+      primer_apellido: conyuge.referenciada.primer_apellido,
+      segundo_apellido: conyuge.referenciada.segundo_apellido,
+      n_identificacion: conyuge.referenciada.n_identificacion,
+      fecha_nacimiento: conyuge.referenciada.fecha_nacimiento,
+      telefono_1: conyuge.referenciada.telefono_1,
+      telefono_2: conyuge.referenciada.telefono_2,
+      telefono_3: conyuge.referenciada.telefono_3,
+      trabaja: conyuge.trabaja,
+      esAfiliado
     };
-}
+  }
 
 
   async actualizarConyuge(n_identificacion: string, body: any): Promise<any> {
@@ -740,7 +744,7 @@ export class AfiliacionService {
     conyuge.trabaja = body.trabaja ?? conyuge.trabaja;
     await this.personaRepository.save(conyuge.referenciada);
     await this.familiaRepository.save(conyuge);
-    return { message: 'Cónyuge actualizado correctamente'};
+    return { message: 'Cónyuge actualizado correctamente' };
   }
 
   async obtenerFamiliaresPorPersona(idPersona: number): Promise<any[]> {
@@ -778,7 +782,7 @@ export class AfiliacionService {
     await this.familiaRepository.remove(familiar);
     return { message: 'Familiar eliminado exitosamente.' };
   }
-  
+
   async actualizarPeps(pepsDto: CrearPepsDto[], idPersona: number, entityManager: EntityManager): Promise<Net_Peps[]> {
     const resultados: Net_Peps[] = [];
     const pepsExistentes = await entityManager.find(Net_Peps, {
@@ -803,6 +807,6 @@ export class AfiliacionService {
     }
     return resultados;
   }
-  
+
 }
 

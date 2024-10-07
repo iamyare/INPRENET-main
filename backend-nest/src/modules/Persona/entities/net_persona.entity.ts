@@ -120,14 +120,14 @@ export class net_persona {
     @Column('date', { nullable: true, name: 'FECHA_NACIMIENTO' })
     fecha_nacimiento: string;
 
-    @Column('varchar', { nullable: true, name: 'CERTIFICADO_DEFUNCION' })
-    certificado_defuncion: number;
+    @Column('blob', { nullable: true, name: 'CERTIFICADO_DEFUNCION' })
+    certificado_defuncion: any;
 
     @Column('date', { nullable: true, name: 'FECHA_DEFUNCION' })
     fecha_defuncion: string;
 
-    @Column('varchar2', { length: 200, nullable: true, name: 'ARCHIVO_IDENTIFICACION' })
-    archivo_identificacion: string;
+    @Column('blob', { nullable: true, name: 'ARCHIVO_IDENTIFICACION' })
+    archivo_identificacion: any;
 
     @Column('varchar2', { length: 500, nullable: true, name: 'DIRECCION_RESIDENCIA' })
     direccion_residencia: string;

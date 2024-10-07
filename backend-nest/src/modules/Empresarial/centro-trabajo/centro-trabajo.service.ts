@@ -11,7 +11,6 @@ import { Net_Jornada } from '../entities/net_jornada.entity';
 import { Net_Centro_Trabajo_Jornada } from '../entities/net_centro_trabajo_jornada.entity';
 import { Net_Centro_Trabajo_Nivel } from '../entities/net_centro_trabajo_nivel.entity';
 import { Net_Municipio } from 'src/modules/Regional/municipio/entities/net_municipio.entity';
-import { CreatePrivateReferenciaCentroTrabajoDto } from './dto/create-private-referencia-centro-trabajo.dto';
 import { Net_Referencia_Centro_Trabajo } from '../entities/net_referencia_centro_trabajo.entity';
 import { CreatePrivateCentroTrabajoCompleteDto } from './dto/create-private-centro-trabajo-complete.dto';
 import { Net_Sociedad_Centro_Trabajo } from '../entities/net_sociedad_centro.entity';
@@ -27,6 +26,7 @@ import { UpdateEmpleadoDto } from './dto/update-empleado.dto';
 import { Net_Usuario_Empresa } from 'src/modules/usuario/entities/net_usuario_empresa.entity';
 import { Net_Empleado } from '../entities/net_empleado.entity';
 import { Net_Empleado_Centro_Trabajo } from '../entities/net_empleado_centro_trabajo.entity';
+import { CreatePrivateReferenciaCentroTrabajoDto } from './dto/create-private-referencia-centro-trabajo.dto';
 @Injectable()
 export class CentroTrabajoService {
 
@@ -74,20 +74,20 @@ export class CentroTrabajoService {
 
   async updateArchivoIdentificacion(id_empleado: number, archivoBuffer: Buffer): Promise<Net_Empleado> {
     const empleado = await this.empleadoRepository.findOne({ where: { id_empleado } });
-    
+
     if (!empleado) {
       throw new NotFoundException(`Empleado con ID ${id_empleado} no encontrado.`);
     }
-  
+
     // Actualizar el archivo de identificación
     empleado.archivo_identificacion = archivoBuffer;
-  
+
     // Guardar los cambios en la base de datos
     await this.empleadoRepository.save(empleado);
-  
+
     return empleado;
   }
-  
+
 
   async getAllJornadas(): Promise<Net_Jornada[]> {
     try {
@@ -166,7 +166,7 @@ export class CentroTrabajoService {
       .leftJoinAndSelect('centroTrabajo.deduccion', 'deduccion') // Hacer el join con la tabla de deducciones
       .where('centroTrabajo.tipo = :tipo', { tipo: 'INSTITUCION' }) // Filtrar por el tipo de centro de trabajo
       .getMany();
-}
+  }
 
 
   async create(createCentroTrabajoDto: CreateCentroTrabajoDto) {

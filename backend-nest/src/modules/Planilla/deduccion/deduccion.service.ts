@@ -81,7 +81,6 @@ export class DeduccionService {
     // Acceder directamente a las propiedades del objeto
     const { anio, mes, dni, codigoDeduccion, montoTotal } = row;
 
-    console.log(row);
 
     if (!anio && !mes && !dni && !codigoDeduccion && !montoTotal) {
       return { error: `Fila vacía: ${JSON.stringify(row)}`, processed: false };
@@ -128,6 +127,7 @@ export class DeduccionService {
       relations: ['detallePersona', 'detallePersona.tipoPersona'],
     });
 
+
     if (!detpersona) {
       return { error: `No se encontró persona con DNI: ${persona.n_identificacion} en detalle_persona`, processed: false };
     }
@@ -149,7 +149,6 @@ export class DeduccionService {
     });
 
 
-
     if (!bancoActivo) {
       return { error: `No se encontró un banco activo para la persona`, processed: false };
     }
@@ -164,6 +163,7 @@ export class DeduccionService {
         },
         relations: ['tipoPlanilla'],
       });
+
     } catch (err) {
       return { error: `Error en la consulta de planillas: ${err.message}`, processed: false };
     }
@@ -171,7 +171,8 @@ export class DeduccionService {
     if (!planillas || planillas.length === 0) {
       return { error: `No se encontró planilla activa para el mes: ${parsedMes}-${parsedAnio}`, processed: false };
     }
-    const tipoPersona = persona.detallePersona[0]?.tipoPersona?.tipo_persona;
+    const tipoPersona = detpersona.detallePersona[0]?.tipoPersona?.tipo_persona;
+
 
     const planilla = planillas.find(p => {
       const periodoInicio = new Date(p.periodoInicio.split('/').reverse().join('-'));

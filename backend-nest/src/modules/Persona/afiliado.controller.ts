@@ -9,7 +9,9 @@ import {
   NotFoundException,
   HttpCode,
   HttpStatus,
-  ParseIntPipe
+  ParseIntPipe,
+  UseInterceptors,
+  UploadedFiles
 } from '@nestjs/common';
 import { AfiliadoService } from './afiliado.service';
 import { UpdatePersonaDto } from './dto/update-persona.dto';
@@ -19,6 +21,7 @@ import { Net_Tipo_Persona } from './entities/net_tipo_persona.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { UpdatePerfCentTrabDto } from './dto/update.perfAfilCentTrab.dto';
 import { net_estado_afiliacion } from './entities/net_estado_afiliacion.entity';
+import { AnyFilesInterceptor } from '@nestjs/platform-express';
 
 @ApiTags('Persona')
 @Controller('Persona')
@@ -229,11 +232,18 @@ export class AfiliadoController {
   }
 
   @Put('/updateDatosGenerales/:idPersona')
+  @UseInterceptors(AnyFilesInterceptor())
   updateDatosGenerales(
     @Param('idPersona') idPersona: number,
-    @Body() datosGenerales: any,
+    @Body('datosGenerales') datosGenerales: any,
+    @UploadedFiles() files?: Express.Multer.File[],
   ) {
-    return this.afiliadoService.updateDatosGenerales(idPersona, datosGenerales);
+
+    const crearDatosDto: any = JSON.parse(datosGenerales);
+    const fileIdent = files?.find(file => file.fieldname === 'file_ident');
+    const arch_cert_def = files?.find(file => file.fieldname === 'arch_cert_def');
+
+    return this.afiliadoService.updateDatosGenerales(idPersona, crearDatosDto, fileIdent, arch_cert_def);
   }
 
   @Put('activarCuentaBancaria/:id/:id_persona')

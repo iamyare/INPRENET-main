@@ -21,9 +21,9 @@
       <i class="fa fa-ban"></i> Cancelar Subida
     </button>
 
-    <div *ngIf="file" class="file-name-container">
-      <div class="file-name-background">{{ file.name }}</div>
-      <div class="file-name-progress" [style.width]="progressValue + '%'">{{ file.name }}</div>
+    <div class="file-name-container">
+      <div class="file-name-background">{{ file?.name }}</div>
+      <div class="file-name-progress" [style.width]="progressValue + '%'">{{ progressValue + '%' }}</div>
     </div>
   </div>
 </div>

@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpErrorResponse, HttpHeaders, HttpParams } from '@angular/common/http';
+import { HttpClient, HttpErrorResponse, HttpEvent, HttpEventType, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Observable, catchError, map, tap, throwError } from 'rxjs';
 import { environment } from 'src/environments/environment';
 import { ToastrService } from 'ngx-toastr';
@@ -95,7 +95,7 @@ export class DeduccionesService {
     );
   }
 
-  subirArchivoDeducciones(id_planilla: number, archivo: File): Observable<any> {
+  subirArchivoDeducciones(id_planilla: number, archivo: File): Observable<HttpEvent<any>> {
     const formData = new FormData();
     formData.append('id_planilla', String(id_planilla));
     formData.append('file', archivo, archivo.name);
@@ -104,16 +104,30 @@ export class DeduccionesService {
       headers: new HttpHeaders({
         'Accept': 'application/json'
       }),
-      responseType: 'text'
+      reportProgress: true, // Habilitar el informe de progreso
+      observe: 'events'     // Observar los eventos HTTP para capturar el progreso
     }).pipe(
-      tap(response => {
-        try {
-          // Intenta analizar como JSON
-          const jsonResponse = JSON.parse(response);
-          this.toastr.success(jsonResponse.message || 'Archivo subido con éxito');
-        } catch (e) {
-          // Si no es JSON válido, muestra el texto directamente
-          this.toastr.success(response || 'Archivo subido con éxito');
+      tap(event => {
+        if (event.type === HttpEventType.UploadProgress) {
+          // Progreso de la subida
+          const progress = Math.round(100 * (event.loaded / (event.total || 1)));
+          console.log(`Progreso: ${progress}%`);
+        } else if (event.type === HttpEventType.Response) {
+          // La respuesta final del servidor
+          const response = event.body;
+
+          if (typeof response === 'string') {
+            try {
+              const jsonResponse = JSON.parse(response);
+              this.toastr.success(jsonResponse.message || 'Archivo subido con éxito');
+            } catch (e) {
+              // Si no es un JSON válido, mostramos el texto directamente
+              this.toastr.success(response || 'Archivo subido con éxito');
+            }
+          } else {
+            // Si la respuesta no es un string, mostramos un mensaje por defecto
+            this.toastr.success('Archivo subido con éxito');
+          }
         }
       }),
       catchError((error: HttpErrorResponse) => {
@@ -123,6 +137,8 @@ export class DeduccionesService {
       })
     );
   }
+
+
 
 
   actualizarEstadoDeduccion(idPlanilla: string, nuevoEstado: string): Observable<any> {

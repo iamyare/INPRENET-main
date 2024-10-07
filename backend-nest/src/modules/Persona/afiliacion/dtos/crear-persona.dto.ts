@@ -119,7 +119,7 @@ export class CrearPersonaDto {
 
   @IsOptional()
   @IsString()
-  archivo_identificacion?: string;
+  archivo_identificacion?: any;
 
   @IsOptional()
   @IsString()

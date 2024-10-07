@@ -104,8 +104,6 @@ export class AfiliacionService {
     const url = `${environment.API_URL}/api/afiliacion/crear`;
     const formData: FormData = new FormData();
 
-    console.log(datos);
-
     formData.append('datos', JSON.stringify(datos));
     formData.append('foto_perfil', fotoPerfil);
 
@@ -115,8 +113,7 @@ export class AfiliacionService {
 
     if (datos.beneficiarios) {
       datos.beneficiarios.forEach((persona: any, index: Number) => {
-        formData.append('beneficiarios', persona);
-        formData.append(`file_identB[${index}]`, persona.archivoIdentificacion);
+        formData.append(`file_identB[${persona.persona.n_identificacion}]`, persona.persona.archivo_identificacion);
       });
     }
 

@@ -344,11 +344,11 @@ export class DatosGeneralesComponent implements OnInit {
   getArchivo(event: File): any {
     // Si no lo has agregado aún, puedes agregar el control aquí
 
-    if (!this.formGroup?.contains('archivoIdentificacion')) {
-      this.formGroup.addControl('archivoIdentificacion', new FormControl('', []));
+    if (!this.formGroup?.contains('archivo_identificacion')) {
+      this.formGroup.addControl('archivo_identificacion', new FormControl('', []));
     }
     // Asignar el archivo al control del formulario
-    this.formGroup.get('archivoIdentificacion')?.setValue(event);
+    this.formGroup.get('archivo_identificacion')?.setValue(event);
   }
 
 }

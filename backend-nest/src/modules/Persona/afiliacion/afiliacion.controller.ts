@@ -215,29 +215,19 @@ export class AfiliacionController {
   @UseInterceptors(AnyFilesInterceptor())  // Para manejar múltiples archivos de varios campos
   async crear(
     @Body('datos') datos: any,
-    @Body('Beneficiarios') beneficiarios?: any,
     @UploadedFiles() files?: Express.Multer.File[],  // Todos los archivos serán capturados aquí
   ): Promise<any> {
     try {
-      const crearDatosDto: CrearDatosDto = JSON.parse(datos);
+      console.log(files);
 
-      console.log(datos);
-      console.log(beneficiarios);
+      const crearDatosDto: CrearDatosDto = JSON.parse(datos);
 
       // Filtrar cada archivo por su campo de entrada (fieldname)
       const fotoPerfil = files?.find(file => file.fieldname === 'foto_perfil');
       const fileIdent = files?.find(file => file.fieldname === 'file_ident');
 
-      // Si `file_identB` contiene múltiples archivos, usa `filter()`
-      const filesIdentB = files?.filter(file => file.fieldname === 'file_identB');
-
-      // Ver qué archivos fueron enviados
-      console.log('Foto de perfil:', fotoPerfil);
-      console.log('Archivo de Identificación:', fileIdent);
-      console.log('Archivos de Identificación B:', filesIdentB);
-
       // Aquí puedes enviar todos los archivos y datos a tu servicio
-      // return await this.afiliacionService.crearDatos(crearDatosDto, fotoPerfil, fileIdent, filesIdentB);
+      return await this.afiliacionService.crearDatos(crearDatosDto, fotoPerfil, fileIdent, files);
     } catch (error) {
       throw new HttpException(error.message, HttpStatus.BAD_REQUEST);
     }

@@ -12,7 +12,8 @@ export class InformacionGeneralComponent {
     { label: 'Información General', isActive: true },
     { label: 'Datos Bancarios', isActive: false },
     { label: 'Cónyugue', isActive: false },
-    { label: 'PEPS', isActive: false }
+    { label: 'PEPS', isActive: false },
+    //{ label: 'Ahorro', isActive: false },
   ];
 
   currentStepIndex = 0;

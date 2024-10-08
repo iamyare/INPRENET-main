@@ -2,6 +2,7 @@ import { Component, Input, OnChanges, SimpleChanges } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { AfiliacionService } from 'src/app/services/afiliacion.service';
 import { ToastrService } from 'ngx-toastr';
+import { PermisosService } from 'src/app/services/permisos.service'; // Importa el servicio de permisos
 
 @Component({
   selector: 'app-edit-conyugue',
@@ -13,11 +14,13 @@ export class EditConyugueComponent implements OnChanges {
   @Input() Afiliado: any;
   conyugeExisteFlag: boolean = false;
   mostrandoFormularioAgregar: boolean = false;
+  mostrarBotonAgregar: boolean = false;
 
   constructor(
     private fb: FormBuilder,
     private afiliacionService: AfiliacionService,
-    private toastr: ToastrService
+    private toastr: ToastrService,
+    private permisosService: PermisosService // Inyecta el PermisosService
   ) {
     this.formGroup = this.fb.group({
       conyuge: this.fb.group({
@@ -35,6 +38,9 @@ export class EditConyugueComponent implements OnChanges {
         es_afiliado: ['NO'],
       })
     });
+
+    // Determina la visibilidad del botón de agregar cónyuge usando el servicio
+    this.mostrarBotonAgregar = this.permisosService.tieneAccesoCompletoAfiliacion();
   }
 
   ngOnChanges(changes: SimpleChanges): void {

@@ -2,8 +2,13 @@
     <h2 class="anaranjado desapareciendo">No se encuentra ningún beneficiario</h2>
   </div>
 
-  <button mat-raised-button color="primary" style="color: white; margin: 1% 0 1% 0" (click)="AgregarBeneficiario()">
-    Agregar Beneficiario
+  <button
+  mat-raised-button
+  color="primary"
+  style="color: white; margin: 1% 0 1% 0"
+  (click)="AgregarBeneficiario()"
+  *ngIf="mostrarBotonAgregar">
+  Agregar Beneficiario
   </button>
 
   <div *ngIf="filas.length !== 0" style="background-color: white; border-radius: 10px; padding: 20px">
@@ -15,9 +20,10 @@
       [data]="filas"
       [getData]="getFilas"
       (ejecutarFuncionAsincronaEvent)="ejecutarFuncionAsincronaDesdeOtroComponente($event)"
-      [mostrarBotonEditar]="true"
+      [mostrarBotonEditar]="mostrarBotonEditar"
       (editar)="editarFila($event)"
-      [mostrarBotonEliminar]="true"
+      [mostrarBotonEliminar]="mostrarBotonEliminar"
       (eliminar)="eliminarFila($event)">
     </app-dynamic-table>
   </div>
+

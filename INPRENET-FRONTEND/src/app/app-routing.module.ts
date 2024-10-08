@@ -33,7 +33,7 @@ const routes: Routes = [
       //{ path: '', redirectTo: 'dashboard-admin', pathMatch: 'full' }
     ],
     canActivate: [RoleGuard],
-    data: { expectedRolesModules: [{ role: 'ADMINISTRADOR' }, { role: 'ADMINISTRADOR DE PLANILLA', module: 'PLANILLA' }, { role: 'OFICIAL DE PLANILLA', module: 'PLANILLA' }] }
+    data: { expectedRolesModules: [{ role: 'ADMINISTRADOR' }, { role: 'OFICIAL DE PLANILLA', module: 'PLANILLA' }] }
   },
   {
     path: 'home',
@@ -43,19 +43,19 @@ const routes: Routes = [
         path: 'afiliacion',
         loadChildren: () => import('./modulos/afiliacion/afiliacion.module').then(m => m.AfiliacionModule),
         canActivate: [RoleGuard],
-        data: { expectedRolesModules: [{ role: 'ADMINISTRADOR' }, { role: 'ADMINISTRADOR DE PLANILLA', module: 'PLANILLA' }, { role: 'OFICIAL DE PLANILLA', module: 'PLANILLA' }] }
+        data: { expectedRolesModules: [{ role: 'ADMINISTRADOR' }, { role: 'MODIFICACION AFILIACION', module: 'AFILIACION' }, { role: 'CONSULTA AFILIACION', module: 'AFILIACION' }] }
       },
       {
         path: 'planilla',
         loadChildren: () => import('./modulos/planilla/planilla.module').then(m => m.PlanillaModule),
         canActivate: [RoleGuard],
-        data: { expectedRolesModules: [{ role: 'ADMINISTRADOR' }, { role: 'ADMINISTRADOR DE PLANILLA', module: 'PLANILLA' }, { role: 'OFICIAL DE PLANILLA', module: 'PLANILLA' }] }
+        data: { expectedRolesModules: [{ role: 'ADMINISTRADOR' }, { role: 'OFICIAL DE PLANILLA', module: 'PLANILLA' }] }
       },
       {
         path: 'gestion',
         loadChildren: () => import('./modulos/admin/admin.module').then(m => m.AdminModule),
         canActivate: [RoleGuard],
-        data: { expectedRolesModules: [{ role: 'ADMINISTRADOR' }, { role: 'ADMINISTRADOR DE PLANILLA', module: 'PLANILLA' }, { role: 'OFICIAL DE PLANILLA', module: 'PLANILLA' }] }
+        data: { expectedRolesModules: [{ role: 'ADMINISTRADOR' }, { role: 'OFICIAL DE PLANILLA', module: 'PLANILLA' }] }
       },
       {
         path: 'menu',
@@ -66,9 +66,7 @@ const routes: Routes = [
         loadChildren: () => import('./modulos/movimientos-inprema/movimientos-inprema.module').then(m => m.MovimientosInpremaModule),
       },
       { path: 'usuario/editar', component: EditarPerfilComponent },
-    ],
-    canActivate: [RoleGuard],
-    data: { expectedRolesModules: [{ role: 'ADMINISTRADOR' }, { role: 'ADMINISTRADOR DE PLANILLA', module: 'PLANILLA' }, { role: 'OFICIAL DE PLANILLA', module: 'PLANILLA' }] }
+    ]
   },
   { path: '**',  component: LandingPageComponent, pathMatch: 'full' },
 ];

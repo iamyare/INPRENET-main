@@ -3,10 +3,20 @@
 </div>
 
 <div style="text-align: center; margin-bottom: 20px;">
-  <button mat-raised-button color="primary" style="color: white; margin-right: 10px;" (click)="agregarFamiliar()">
+  <button
+    mat-raised-button
+    color="primary"
+    style="color: white; margin-right: 10px;"
+    (click)="agregarFamiliar()"
+    *ngIf="mostrarBotonAgregarFamiliar">
     Agregar Familiar
   </button>
-  <button mat-raised-button color="accent" style="color: white;" (click)="agregarPEP()">
+  <button
+    mat-raised-button
+    color="accent"
+    style="color: white;"
+    (click)="agregarPEP()"
+    *ngIf="mostrarBotonAgregarPEP">
     Agregar PEP
   </button>
 </div>
@@ -20,9 +30,9 @@
     [data]="filas"
     [getData]="getFilas.bind(this)"
     (ejecutarFuncionAsincronaEvent)="ejecutarFuncionAsincronaDesdeOtroComponentePEPs($event)"
-    [mostrarBotonEditar]="true"
+    [mostrarBotonEditar]="mostrarBotonEditar"
     (editar)="editarFila($event)"
-    [mostrarBotonEliminar]="true"
+    [mostrarBotonEliminar]="mostrarBotonEliminar"
     (eliminar)="desactivarPep($event)">
   </app-dynamic-table>
 </div>
@@ -35,9 +45,8 @@
     [columns]="familiaresColumns"
     [data]="familiares"
     [getData]="getFamiliares"
-    [mostrarBotonEliminar]="true"
+    [mostrarBotonEliminar]="mostrarBotonEliminar"
     (eliminar)="eliminarFamiliar($event)"
     (ejecutarFuncionAsincronaEvent)="ejecutarFuncionAsincronaDesdeOtroComponenteFamiliares($event)">
   </app-dynamic-table>
 </div>
-

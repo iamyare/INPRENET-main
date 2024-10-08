@@ -9,7 +9,12 @@
     <h2 class="anaranjado desapareciendo">No se encuentra ningún dato bancario</h2>
   </div>
 
-  <button mat-raised-button color="primary" style="color: white; margin: 1% 0 1% 0" (click)="AgregarDatoBancario()">
+    <button
+    mat-raised-button
+    color="primary"
+    style="color: white; margin: 1% 0 1% 0"
+    (click)="AgregarDatoBancario()"
+    *ngIf="mostrarBotonAgregar">
     Agregar Dato Bancario
   </button>
 
@@ -22,14 +27,17 @@
       [data]="filas"
       [getData]="getFilas"
       (ejecutarFuncionAsincronaEvent)="ejecutarFuncionAsincronaDesdeOtroComponente($event)"
+
       [nombreEncabezadoUno]="'Activar'"
-      [mostrarBotonUno]="true"
+      [mostrarBotonUno]="mostrarBotonActivar"
       [etiquetaBotonUno]="'Activar'"
       (accionBotonUno)="openDialog($event, $event)"
+
       [nombreEncabezadoDos]="'Desactivar'"
-      [mostrarBotonDos]="true"
+      [mostrarBotonDos]="mostrarBotonDesactivar"
       [etiquetaBotonDos]="'Desactivar'"
       (accionBotonDos)="manejarAccionDos($event)">
     </app-dynamic-table>
   </div>
+
 

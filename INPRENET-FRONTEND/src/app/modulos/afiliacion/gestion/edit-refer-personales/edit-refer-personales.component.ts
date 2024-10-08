@@ -13,6 +13,7 @@ import { DatosEstaticosService } from 'src/app/services/datos-estaticos.service'
 import { ConfirmDialogComponent } from 'src/app/components/dinamicos/confirm-dialog/confirm-dialog.component';
 import { EditarDialogComponent } from 'src/app/components/dinamicos/editar-dialog/editar-dialog.component';
 import { AgregarReferenciasPersonalesComponent } from '../agregar-referencias-personales/agregar-referencias-personales.component';
+import { PermisosService } from 'src/app/services/permisos.service';
 
 @Component({
   selector: 'app-edit-refer-personales',
@@ -33,17 +34,26 @@ export class EditReferPersonalesComponent implements OnInit, OnChanges, OnDestro
   ejecF: any;
   private subscriptions: Subscription = new Subscription();
   public mostrarMensaje: boolean = false;
+  public mostrarBotonAgregar: boolean = false;
+  public mostrarBotonEditar: boolean = false;
+  public mostrarBotonInhabilitar: boolean = false;
+
 
   constructor(
     private svcAfiliado: AfiliadoService,
     private svcAfiliacion: AfiliacionService,
     private toastr: ToastrService,
     private dialog: MatDialog,
-    private datosEstaticosService: DatosEstaticosService
+    private datosEstaticosService: DatosEstaticosService,
+    private permisosService: PermisosService
   ) { }
 
   ngOnInit(): void {
     this.initializeComponent();
+    const tieneAccesoCompleto = this.permisosService.tieneAccesoCompletoAfiliacion();
+    this.mostrarBotonAgregar = tieneAccesoCompleto;
+    this.mostrarBotonEditar = tieneAccesoCompleto;
+    this.mostrarBotonInhabilitar = tieneAccesoCompleto;
   }
 
   ngOnChanges(changes: SimpleChanges): void {

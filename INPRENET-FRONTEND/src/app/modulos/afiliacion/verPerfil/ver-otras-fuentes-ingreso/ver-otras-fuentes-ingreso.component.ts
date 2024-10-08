@@ -14,6 +14,7 @@ import { unirNombres } from 'src/app/shared/functions/formatoNombresP';
 import { AgregarOtrasFuentesIngresoComponent } from '../../gestion/agregar-otras-fuentes-ingreso/agregar-otras-fuentes-ingreso.component';
 import { AfiliacionService } from 'src/app/services/afiliacion.service';
 import { AfiliadoService } from 'src/app/services/afiliado.service';
+import { PermisosService } from 'src/app/services/permisos.service';
 
 @Component({
   selector: 'ver-otras-fuentes-ingreso',
@@ -38,17 +39,24 @@ export class VerOtrasFuentesIngresoComponent implements OnInit, OnDestroy, OnCha
   public myFormFields: FieldConfig[] = [];
   public filas: any[] = [];
   ejecF: any;
+  public mostrarBotonFuente: boolean = false;
+  public mostrarBotonEditar: boolean = false;
+  public mostrarBotonEliminar: boolean = false;
+
 
   constructor(
     private svcAfiliado: AfiliadoService,
     private afiliacionService: AfiliacionService,
     private toastr: ToastrService,
     private dialog: MatDialog,
-    private datePipe: DatePipe,
     private centrosTrabSVC: CentroTrabajoService,
+    private permisosService: PermisosService
   ) { }
   ngOnInit(): void {
     this.initializeComponent();
+    this.mostrarBotonFuente = this.permisosService.tieneAccesoCompletoAfiliacion();
+    this.mostrarBotonEditar = this.permisosService.tieneAccesoCompletoAfiliacion();
+    this.mostrarBotonEliminar = this.permisosService.tieneAccesoCompletoAfiliacion();
   }
 
   ngOnChanges(changes: SimpleChanges): void {

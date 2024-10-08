@@ -13,6 +13,7 @@ import { TableColumn } from 'src/app/shared/Interfaces/table-column';
 import { convertirFechaInputs } from 'src/app/shared/functions/formatoFecha';
 import { unirNombres } from 'src/app/shared/functions/formatoNombresP';
 import { AgregarPuestTrabComponent } from '../agregar-puest-trab/agregar-puest-trab.component';
+import { PermisosService } from 'src/app/services/permisos.service';
 
 @Component({
   selector: 'app-edit-perfil-puest-trab',
@@ -36,6 +37,9 @@ export class EditPerfilPuestTrabComponent implements OnInit, OnDestroy, OnChange
   public myFormFields: FieldConfig[] = [];
   public filas: any[] = [];
   ejecF: any;
+  public mostrarBotonTrab: boolean = false;
+  public mostrarBotonEditar: boolean = false;
+  public mostrarBotonEliminar: boolean = false;
 
   constructor(
     private svcAfiliado: AfiliadoService,
@@ -43,13 +47,16 @@ export class EditPerfilPuestTrabComponent implements OnInit, OnDestroy, OnChange
     private dialog: MatDialog,
     private datePipe: DatePipe,
     private centrosTrabSVC: CentroTrabajoService,
+    private permisosService: PermisosService
   ) { }
 
 
   ngOnInit(): void {
     this.initializeComponent();
-
-  }
+    this.mostrarBotonTrab = this.permisosService.tieneAccesoCompletoAfiliacion();
+    this.mostrarBotonEditar = this.permisosService.tieneAccesoCompletoAfiliacion();
+    this.mostrarBotonEliminar = this.permisosService.tieneAccesoCompletoAfiliacion();
+}
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['Afiliado'] && this.Afiliado) {

@@ -1,4 +1,4 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable, catchError, throwError } from 'rxjs';
 import { environment } from 'src/environments/environment';
@@ -9,6 +9,22 @@ import { environment } from 'src/environments/environment';
 export class TransaccionesService {
 
   constructor(private http: HttpClient) { }
+
+  generarMovimientosPdf(data: any): Observable<Blob> {
+    const url = `${environment.API_URL}/api/documents/movimientos-pdf`;
+    const headers = new HttpHeaders().set('Content-Type', 'application/json');
+
+    return this.http.post(url, data, { headers, responseType: 'blob' }).pipe(
+      catchError(error => throwError(() => new Error('Error al generar PDF de movimientos: ' + error.message)))
+    );
+  }
+
+  obtenerMovimientos(idPersona: number, idTipoCuenta: number): Observable<any> {
+    const url = `${environment.API_URL}/api/persona/${idPersona}/movimientos-ordenados/${idTipoCuenta}`;
+    return this.http.get<any>(url).pipe(
+        catchError(error => throwError(() => new Error('Error al obtener movimientos: ' + error.message)))
+    );
+  }
 
   obtenerVouchersDeMovimientos(dni: string, limit: number, offset: number, search: string): Observable<any> {
     const url = `${environment.API_URL}/api/transacciones/vouchers?dni=${dni}&limit=${limit}&offset=${offset}&search=${search}`;

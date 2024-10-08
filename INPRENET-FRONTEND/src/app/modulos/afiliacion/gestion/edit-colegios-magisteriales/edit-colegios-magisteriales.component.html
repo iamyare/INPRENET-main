@@ -3,7 +3,12 @@
     <h2 class="anaranjado desapareciendo">No se encuentra ningún colegio magisterial</h2>
   </div>
 
-  <button mat-raised-button color="primary" style="color: white; margin: 1% 0 1% 0" (click)="AgregarColegioMagisterial()">
+  <button
+    mat-raised-button
+    color="primary"
+    style="color: white; margin: 1% 0 1% 0"
+    (click)="AgregarColegioMagisterial()"
+    *ngIf="mostrarBotonAgregar">
     Agregar Colegio Magisterial
   </button>
 
@@ -16,7 +21,7 @@
       [data]="filas"
       [getData]="getFilas"
       (ejecutarFuncionAsincronaEvent)="ejecutarFuncionAsincronaDesdeOtroComponente($event)"
-      [mostrarBotonEliminar]="true"
+      [mostrarBotonEliminar]="mostrarBotonEliminar"
       (eliminar)="eliminarFila($event)">
     </app-dynamic-table>
   </div>

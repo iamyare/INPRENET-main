@@ -1,9 +1,7 @@
 import { Component, ViewChild, TemplateRef, OnInit } from '@angular/core';
 import { FormArray, FormBuilder, FormGroup } from '@angular/forms';
 import { MatStepper } from '@angular/material/stepper';
-import { BenefComponent } from '../benef/benef.component';
-import { DatosGeneralesComponent } from '../datos-generales/datos-generales.component';
-import { AfiliacionService } from 'src/app/services/afiliacion.service'; // Asegúrate de importar tu servicio
+import { AfiliacionService } from 'src/app/services/afiliacion.service';
 import { ToastrService } from 'ngx-toastr';
 import pdfMake from 'pdfmake/build/pdfmake';
 import { HttpClient } from '@angular/common/http';
@@ -75,7 +73,6 @@ export class AfiliarDocenteComponent implements OnInit {
       }
     ];
 
-    // Asignar los subformularios al formGroup principal
     this.formGroup.addControl('datosGenerales', this.steps[0].formGroup);
     this.formGroup.addControl('referenciasPersonales', this.steps[1].formGroup);
     this.formGroup.addControl('colegiosMagisteriales', this.steps[2].formGroup);
@@ -84,7 +81,6 @@ export class AfiliarDocenteComponent implements OnInit {
     this.formGroup.addControl('beneficiarios', this.steps[5].formGroup);
   }
 
-  // Método para marcar todos los campos de un FormGroup o FormArray como tocados
   markAllAsTouched(control: FormGroup | FormArray): void {
     if (control instanceof FormGroup || control instanceof FormArray) {
       Object.values(control.controls).forEach(ctrl => {
@@ -108,14 +104,9 @@ export class AfiliarDocenteComponent implements OnInit {
       const bancos = this.formGroup.get('bancos')?.value;
       const centrosTrabajo = this.formGroup.get('centrosTrabajo')?.value;
       const beneficiarios = this.formGroup.get('beneficiarios')?.value.beneficiario || [];
-
-      // Verifica si hay beneficiarios antes de generar el documento
       if (beneficiarios && beneficiarios.length > 0) {
-        // Aquí debes pasar el valor de `backgroundImageBase64` a la función
         const documentDefinition = this.getDocumentDefinition(beneficiarios, datosGenerales, this.backgroundImageBase64);
         pdfMake.createPdf(documentDefinition).download('beneficiarios.pdf');
-      } else {
-        this.toastr.warning('No se han agregado beneficiarios.', 'Advertencia');
       }
 
       const formattedData = {
@@ -161,7 +152,6 @@ export class AfiliarDocenteComponent implements OnInit {
         referencias: this.formatReferencias(referenciasPersonales.refpers || []),
         beneficiarios: this.formatBeneficiarios(beneficiarios || []),
       };
-
       const fotoPerfilBase64 = this.fotoPerfil || '';
       let fileFoto: any;
 
@@ -185,7 +175,7 @@ export class AfiliarDocenteComponent implements OnInit {
         }
       );
     } else {
-      //this.markAllAsTouched(this.formGroup);
+      this.markAllAsTouched(this.formGroup);
       this.toastr.warning('El formulario contiene información inválida', 'Advertencia');
     }
   }
@@ -353,9 +343,8 @@ export class AfiliarDocenteComponent implements OnInit {
   }
 
   formatDiscapacidades(discapacidades: any): any[] {
-    // Filtra solo las discapacidades que están en 'true' y formatea el resultado
     return Object.keys(discapacidades)
-      .filter(key => discapacidades[key]) // Filtra las discapacidades activas
+      .filter(key => discapacidades[key])
       .map(key => ({ tipo_discapacidad: key })); // Mapea al formato deseado
   }
 
@@ -390,7 +379,6 @@ export class AfiliarDocenteComponent implements OnInit {
       alignment?: string;
     }
 
-    // Transformar los datos en el formato requerido por pdfMake
     const body: TableCell[][] = [
       [
         { text: 'N°', style: 'tableHeader', fillColor: '#CCCCCC', alignment: 'center' },
@@ -558,18 +546,18 @@ export class AfiliarDocenteComponent implements OnInit {
                   return (i === 0 || i === node.table.widths.length) ? 1 : 0.5;
                 }
               },
-              margin: [0, 20, 0, 0]  // Añadir margen adicional para evitar solapamiento
+              margin: [0, 20, 0, 0]
             }
           ]
         }
       ],
       styles: {
         introText: {
-          fontSize: 12, // Ajusta el tamaño del texto aquí
+          fontSize: 12,
           margin: [0, 0, 0, 10]
         },
         mainText: {
-          fontSize: 12, // Ajusta el tamaño del texto aquí
+          fontSize: 12,
           margin: [0, 0, 0, 10]
         },
         subHeader: {

@@ -14,6 +14,7 @@ import { convertirFechaInputs } from 'src/app/shared/functions/formatoFecha';
 import { unirNombres } from 'src/app/shared/functions/formatoNombresP';
 import { AgregarPepsComponent } from '../agregar-peps/agregar-peps.component';
 import { AgregarFamiliarComponent } from '../agregar-familiar/agregar-familiar.component';
+import { PermisosService } from 'src/app/services/permisos.service';
 
 @Component({
   selector: 'app-edit-peps',
@@ -36,18 +37,27 @@ export class EditPepsComponent implements OnInit, OnDestroy, OnChanges {
   public familiaresColumns: TableColumn[] = [];
   public familiares: any[] = [];
   ejecFFamiliares: any;
+  public mostrarBotonAgregarFamiliar: boolean = false;
+  public mostrarBotonAgregarPEP: boolean = false;
+  public mostrarBotonEditar: boolean = false;
+  public mostrarBotonEliminar: boolean = false;
 
   constructor(
     private svcAfiliado: AfiliadoService,
     private afiliacionService: AfiliacionService,
     private toastr: ToastrService,
     private dialog: MatDialog,
-    private datePipe: DatePipe
+    private datePipe: DatePipe,
+    private permisosService: PermisosService
   ) { }
 
   ngOnInit(): void {
     this.initializeComponent();
-  }
+    this.mostrarBotonAgregarFamiliar = this.permisosService.tieneAccesoCompletoAfiliacion();
+    this.mostrarBotonAgregarPEP = this.permisosService.tieneAccesoCompletoAfiliacion();
+    this.mostrarBotonEditar = this.permisosService.tieneAccesoCompletoAfiliacion();
+    this.mostrarBotonEliminar = this.permisosService.tieneAccesoCompletoAfiliacion();
+}
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['Afiliado'] && this.Afiliado) {

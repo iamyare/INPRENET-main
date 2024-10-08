@@ -16,7 +16,6 @@ export class AfiliadoComponent {
     { label: 'Colegios Magisteriales', isActive: true },
     { label: 'Referencias Personales', isActive: true },
     { label: 'Constancias', isActive: true },
-    { label: 'Ahorro', isActive: true },
   ];
 
   onStepChange(index: number) {

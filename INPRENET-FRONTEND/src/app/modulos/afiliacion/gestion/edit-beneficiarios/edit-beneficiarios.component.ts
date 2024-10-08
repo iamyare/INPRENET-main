@@ -11,6 +11,7 @@ import { DatePipe } from '@angular/common';
 import { EditarDialogComponent } from 'src/app/components/dinamicos/editar-dialog/editar-dialog.component';
 import { ConfirmDialogComponent } from 'src/app/components/dinamicos/confirm-dialog/confirm-dialog.component';
 import { AgregarBenefCompComponent } from '../agregar-benef-comp/agregar-benef-comp.component';
+import { PermisosService } from 'src/app/services/permisos.service';
 
 @Component({
   selector: 'app-edit-beneficiarios',
@@ -30,16 +31,23 @@ export class EditBeneficiariosComponent implements OnInit, OnChanges {
   ejecF: any;
   municipios: { label: string, value: any }[] = [];
   estados: { label: string, value: any }[] = [];
+  public mostrarBotonAgregar: boolean = false;
+  public mostrarBotonEditar: boolean = false;
+  public mostrarBotonEliminar: boolean = false;
 
   constructor(
     private svcAfiliado: AfiliadoService,
     private toastr: ToastrService,
     private dialog: MatDialog,
-    private datePipe: DatePipe
+    private datePipe: DatePipe,
+    private permisosService: PermisosService
   ) { }
 
   ngOnInit(): void {
     this.initializeComponent();
+    this.mostrarBotonAgregar = this.permisosService.tieneAccesoCompletoAfiliacion();
+    this.mostrarBotonEditar = this.permisosService.tieneAccesoCompletoAfiliacion();
+    this.mostrarBotonEliminar = this.permisosService.tieneAccesoCompletoAfiliacion();
   }
 
   ngOnChanges(changes: SimpleChanges): void {

@@ -4,10 +4,10 @@ import { ToastrService } from 'ngx-toastr';
 import { Subscription } from 'rxjs';
 import { ConfirmDialogComponent } from 'src/app/components/dinamicos/confirm-dialog/confirm-dialog.component';
 import { AgregarColMagisComponent } from '../agregar-col-magis/agregar-col-magis.component';
-import { EditarDialogComponent } from 'src/app/components/dinamicos/editar-dialog/editar-dialog.component';
 import { AfiliadoService } from 'src/app/services/afiliado.service';
 import { TableColumn } from 'src/app/shared/Interfaces/table-column';
 import { Validators } from '@angular/forms';
+import { PermisosService } from 'src/app/services/permisos.service';
 
 @Component({
   selector: 'app-edit-colegios-magisteriales',
@@ -20,16 +20,22 @@ export class EditColegiosMagisterialesComponent implements OnInit, OnChanges, On
   public filas: any[] = [];
   private ejecF: any;
   private subscriptions: Subscription = new Subscription();
+  public mostrarBotonAgregar: boolean = false;
+  public mostrarBotonEliminar: boolean = false;
 
   constructor(
     private svcAfiliado: AfiliadoService,
     private toastr: ToastrService,
-    private dialog: MatDialog
+    private dialog: MatDialog,
+    private permisosService: PermisosService
   ) {}
 
   ngOnInit(): void {
     this.initializeComponent();
+    this.mostrarBotonAgregar = this.permisosService.tieneAccesoCompletoAfiliacion();
+    this.mostrarBotonEliminar = this.permisosService.tieneAccesoCompletoAfiliacion();
   }
+
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['Afiliado'] && this.Afiliado) {

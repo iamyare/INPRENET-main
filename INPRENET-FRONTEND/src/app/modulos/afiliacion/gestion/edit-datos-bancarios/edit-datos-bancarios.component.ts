@@ -8,6 +8,7 @@ import { Validators } from '@angular/forms';
 import { ConfirmDialogComponent } from 'src/app/components/dinamicos/confirm-dialog/confirm-dialog.component';
 import { AgregarDatBancCompComponent } from '../agregar-dat-banc-comp/agregar-dat-banc-comp.component';
 import { EditarDialogComponent } from 'src/app/components/dinamicos/editar-dialog/editar-dialog.component';
+import { PermisosService } from 'src/app/services/permisos.service';
 
 @Component({
   selector: 'app-edit-datos-bancarios',
@@ -22,15 +23,22 @@ export class EditDatosBancariosComponent implements OnInit, OnChanges {
   private ejecF: any;
   @Input() mostrarResetBusqueda: boolean = false;
   @Output() resetBusqueda = new EventEmitter<void>();
+  public mostrarBotonAgregar: boolean = false;
+  public mostrarBotonActivar: boolean = false;
+  public mostrarBotonDesactivar: boolean = false;
 
   constructor(
     private svcAfiliado: AfiliadoService,
     private toastr: ToastrService,
-    private dialog: MatDialog
+    private dialog: MatDialog,
+    private permisosService: PermisosService
   ) {}
 
   ngOnInit(): void {
     this.initializeComponent();
+    this.mostrarBotonAgregar = this.permisosService.tieneAccesoCompletoAfiliacion();
+    this.mostrarBotonActivar = this.permisosService.tieneAccesoCompletoAfiliacion();
+    this.mostrarBotonDesactivar = this.permisosService.tieneAccesoCompletoAfiliacion();
   }
 
   ngOnChanges(changes: SimpleChanges): void {

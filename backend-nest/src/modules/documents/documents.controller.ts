@@ -1,10 +1,28 @@
-import { Body, Controller, Post, Res } from '@nestjs/common';
+import { Body, Controller, HttpException, HttpStatus, Post, Res } from '@nestjs/common';
 import { Response } from 'express';
 import { PdfService } from './pdf/pdf.service';
 
 @Controller('documents')
 export class DocumentsController {
   constructor(private readonly pdfService: PdfService) { }
+
+  @Post('movimientos-pdf')
+  async postMovimientosPdf(@Body() data: any, @Res() res: Response) {
+    console.log('entro');
+    
+    try {
+      const pdfBuffer = await this.pdfService.generateMovimientosPdf(data);
+      res.set({
+        'Content-Type': 'application/pdf',
+        'Content-Disposition': 'attachment; filename=movimientos.pdf',
+        'Content-Length': pdfBuffer.length,
+      });
+      res.end(pdfBuffer);
+    } catch (error) {
+      throw new HttpException('Error al generar el PDF', HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+  }
+
   @Post('constancia-afiliacion')
   async postConstanciaAfiliacion(@Body() data: any, @Res() res: Response) {
 

@@ -16,7 +16,7 @@ import { net_estado_afiliacion } from './entities/net_estado_afiliacion.entity';
 import { Net_Discapacidad } from './entities/net_discapacidad.entity';
 import { Net_Persona_Discapacidad } from './entities/net_persona_discapacidad.entity';
 import { format } from 'date-fns';
-import { es } from 'date-fns/locale'; // Si deseas usar el idioma español
+import { NET_MOVIMIENTO_CUENTA } from '../transacciones/entities/net_movimiento_cuenta.entity';
 
 @Injectable()
 export class AfiliadoService {
@@ -42,13 +42,56 @@ export class AfiliadoService {
     @InjectRepository(Net_Discapacidad)
     private readonly discapacidadRepository: Repository<Net_Discapacidad>,
     @InjectRepository(Net_Persona_Discapacidad)
-    private readonly perDiscapacidadRepository: Repository<Net_Persona_Discapacidad>
-
+    private readonly perDiscapacidadRepository: Repository<Net_Persona_Discapacidad>,
+    @InjectRepository(NET_MOVIMIENTO_CUENTA)
+    private readonly movimientoCuentaRepository: Repository<NET_MOVIMIENTO_CUENTA>
   ) { }
 
+  async getMovimientosOrdenados(id_persona: number, id_tipo_cuenta: number): Promise<any> {
+    const movimientos = await this.movimientoCuentaRepository.find({
+        where: { 
+            cuentaPersona: { 
+                persona: { id_persona },
+                tipoCuenta: { ID_TIPO_CUENTA: id_tipo_cuenta }
+            } 
+        },
+        order: { ANO: 'ASC', MES: 'ASC' },
+        relations: ['cuentaPersona', 'cuentaPersona.tipoCuenta'],
+    });
+
+    const movimientosOrdenados = movimientos.reduce((acc, movimiento) => {
+        const { ANO: year, MES: month } = movimiento;
+
+        if (!acc[year]) {
+            acc[year] = {};
+        }
+
+        if (!acc[year][month]) {
+            acc[year][month] = [];
+        }
+        
+        acc[year][month].push({
+            ID_MOVIMIENTO_CUENTA: movimiento.ID_MOVIMIENTO_CUENTA,
+            MONTO: movimiento.MONTO,
+            FECHA_MOVIMIENTO: movimiento.FECHA_MOVIMIENTO,
+            DESCRIPCION: movimiento.DESCRIPCION,
+            CREADA_POR: movimiento.CREADA_POR,
+            tipoMovimiento: movimiento.tipoMovimiento,
+            cuentaPersona: {
+                NUMERO_CUENTA: movimiento.cuentaPersona.NUMERO_CUENTA,
+            },
+            ANO: movimiento.ANO,
+            MES: movimiento.MES,
+        });
+
+        return acc;
+    }, {});
+
+    return movimientosOrdenados;
+}
+
+
   async updateBeneficiario(id: number, updatePersonaDto: UpdateBeneficiarioDto): Promise<net_detalle_persona> {
-    console.log(id);
-    console.log(updatePersonaDto);
     const detallePersona = await this.detallePersonaRepository.findOne({
       where: {
         ID_DETALLE_PERSONA: id,
@@ -155,21 +198,22 @@ export class AfiliadoService {
         'municipio_nacimiento.departamento',
         'personaDiscapacidades',
         'personaDiscapacidades.discapacidad',
-        'peps', // Incluye la relación peps
-        'peps.socio', // Incluye la relación socio si es relevante
-        'peps.cargo_publico', // Incluye la relación peps
+        'peps',
+        'peps.socio',
+        'peps.cargo_publico',
       ],
     });
-
+    
     if (!persona) {
       throw new NotFoundException(`Afiliado con N_IDENTIFICACION ${term} no existe`);
     }
-
-    const discapacidades = persona.personaDiscapacidades.map(discapacidad => ({
-      id_discapacidad: discapacidad.discapacidad.id_discapacidad,
-      tipo: discapacidad.discapacidad.tipo_discapacidad,
-      descripcion: discapacidad.discapacidad.descripcion,
-    }));
+    const discapacidades = persona.personaDiscapacidades.map(function (discapacidad) {
+      return {
+        id_discapacidad: discapacidad.discapacidad.id_discapacidad,
+        tipo: discapacidad.discapacidad.tipo_discapacidad,
+        descripcion: discapacidad.discapacidad.descripcion,
+      };
+    });
 
     const peps = []/* persona.peps.map(peps => ({
         id: peps.id_peps,

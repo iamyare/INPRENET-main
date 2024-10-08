@@ -36,7 +36,6 @@ import { Net_Cargo_Publico } from 'src/modules/Empresarial/entities/net_cargo_pu
 import { Net_Referencias } from '../entities/net_referencias.entity';
 import { CrearReferenciaDto } from './dtos/crear-referencia.dto';
 import { validate, ValidationError } from 'class-validator';
-import { UpdateConyugeDto } from './dtos/update-conyuge.dto';
 
 @Injectable()
 export class AfiliacionService {
@@ -126,7 +125,6 @@ export class AfiliacionService {
   }
 
   async getCausantesByDniBeneficiario(n_identificacion: string): Promise<net_persona[]> {
-    // Obtener la persona (beneficiario) por n_identificacion
     const beneficiario = await this.personaRepository.findOne({ where: { n_identificacion }, relations: ['detallePersona'] });
 
     if (!beneficiario) {
@@ -405,8 +403,6 @@ export class AfiliacionService {
 
         beneficiario = await this.crearPersona(crearBeneficiarioDto.persona, null, fileIdent, entityManager);
       }
-
-      // Crear el detalle del beneficiario con porcentaje
       const detalleBeneficiario = entityManager.create(net_detalle_persona, {
         ID_DETALLE_PERSONA: idDetallePersona,
         ID_PERSONA: beneficiario.id_persona,
@@ -419,8 +415,6 @@ export class AfiliacionService {
 
       const detalleGuardado = await entityManager.save(net_detalle_persona, detalleBeneficiario);
       resultados.push(detalleGuardado);
-
-      // Insertar discapacidades para el beneficiario, si existen
       if (crearBeneficiarioDto.discapacidades && crearBeneficiarioDto.discapacidades.length > 0) {
         await this.crearDiscapacidades(crearBeneficiarioDto.discapacidades, beneficiario.id_persona, entityManager);
       }
@@ -433,15 +427,21 @@ export class AfiliacionService {
     discapacidadesDto: CrearDiscapacidadDto[],
     idPersona: number,
     entityManager: EntityManager,
-  ): Promise<void> {
+): Promise<void> {
     for (const discapacidadDto of discapacidadesDto) {
-      const nuevaDiscapacidad = entityManager.create(Net_Persona_Discapacidad, {
-        tipo_discapacidad: discapacidadDto.tipo_discapacidad,
-        persona: { id_persona: idPersona },
-      });
-      await entityManager.save(Net_Persona_Discapacidad, nuevaDiscapacidad);
+        const discapacidad = await this.discapacidadRepository.findOne({
+            where: { tipo_discapacidad: discapacidadDto.tipo_discapacidad }
+        });
+        if (!discapacidad) {
+            throw new NotFoundException(`Discapacidad con tipo ${discapacidadDto.tipo_discapacidad} no encontrada`);
+        }
+        const nuevaDiscapacidad = entityManager.create(Net_Persona_Discapacidad, {
+            discapacidad: discapacidad,
+            persona: { id_persona: idPersona },
+        });
+        await entityManager.save(Net_Persona_Discapacidad, nuevaDiscapacidad);
     }
-  }
+}
 
   async crearPeps(pepsDto: CrearPepsDto[], idPersona: number, entityManager: EntityManager): Promise<Net_Peps[]> {
     const resultados: Net_Peps[] = [];

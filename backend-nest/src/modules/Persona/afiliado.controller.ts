@@ -11,11 +11,12 @@ import {
   HttpStatus,
   ParseIntPipe,
   UseInterceptors,
-  UploadedFiles
+  UploadedFiles,
+  HttpException
 } from '@nestjs/common';
 import { AfiliadoService } from './afiliado.service';
 import { UpdatePersonaDto } from './dto/update-persona.dto';
-import { ApiTags } from '@nestjs/swagger';
+import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { Repository } from 'typeorm';
 import { Net_Tipo_Persona } from './entities/net_tipo_persona.entity';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -30,6 +31,25 @@ export class AfiliadoController {
   private readonly tipoPersonaRepos: Repository<Net_Tipo_Persona>
 
   constructor(private readonly afiliadoService: AfiliadoService) { }
+
+  @Get(':id_persona/movimientos-ordenados/:id_tipo_cuenta')
+  async getMovimientosOrdenados(
+    @Param('id_persona', ParseIntPipe) id_persona: number,
+    @Param('id_tipo_cuenta', ParseIntPipe) id_tipo_cuenta: number
+  ) {
+    try {
+      const movimientos = await this.afiliadoService.getMovimientosOrdenados(id_persona, id_tipo_cuenta);
+      if (!movimientos) {
+        throw new NotFoundException(`Movimientos no encontrados para el id_persona ${id_persona} y id_tipo_cuenta ${id_tipo_cuenta}`);
+      }
+      return { status: HttpStatus.OK, data: movimientos };
+    } catch (error) {
+      throw new HttpException(
+        'Error al obtener los movimientos ordenados',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
 
   @Patch('inactivar/:idPersona/:idCausante')
   async inactivarPersona(

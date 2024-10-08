@@ -979,4 +979,70 @@ export class PdfService {
 
     return this.generateConstancia(data, includeQR, templateFunction);
   }
+
+  async generateMovimientosPdf(data: any): Promise<Buffer> {
+    const base64data = await this.getMembreteBase64();
+    const docDefinition: any = this.getMovimientosPdfTemplate(data, base64data);
+
+    return new Promise((resolve, reject) => {
+        const pdfDoc = pdfMake.createPdf(docDefinition);
+        pdfDoc.getBuffer((buffer) => {
+            resolve(buffer);
+        });
+    });
+}
+
+  getMovimientosPdfTemplate(data: any, base64data: string) {
+    const months = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
+    
+    // Cuerpo de la tabla
+    const tableBody = [
+        // Encabezados de la tabla (solo una vez)
+        [{ text: 'Año', style: 'tableHeader' }, ...months.map(month => ({ text: month, style: 'tableHeader' }))],
+        // Filas de datos por año
+        ...Object.keys(data).map(year => [
+            { text: year, style: 'year' }, // Columna del año
+            ...Array(12).fill('').map((_, i) => {
+                const movimientos = data[year][i + 1] || [];
+                return {
+                    text: movimientos.length ? movimientos.map(mov => mov.MONTO).join('\n') : '-',
+                    style: 'movementCell'
+                };
+            })
+        ])
+    ];
+  
+    return {
+      pageSize: 'A4',
+      pageOrientation: 'landscape',
+      pageMargins: [40, 60, 40, 40],
+      background: {
+        image: base64data,
+        width: 841.89,
+        height: 595.28
+      },
+      content: [
+        { text: 'Nombre: Juan Pérez', style: 'subheader', alignment: 'left', margin: [0, 0, 0, 5] },
+        { text: 'Identidad: 0801-1990-12345', style: 'subheader', alignment: 'left', margin: [0, 0, 0, 10] },
+        {
+          table: {
+            widths: Array(13).fill('*'), // Ajuste de 13 columnas (1 para el año y 12 para los meses)
+            body: tableBody
+          },
+          layout: 'lightHorizontalLines',
+          margin: [0, 10, 0, 10]
+        }
+      ],
+      styles: {
+        subheader: { fontSize: 10, alignment: 'left', margin: [0, 0, 0, 5] },
+        year: { fontSize: 8, bold: true, alignment: 'center' }, // Año más pequeño
+        tableHeader: { bold: true, fontSize: 9, alignment: 'center' }, // Encabezado de meses
+        movementCell: { fontSize: 8, alignment: 'center' } // Tamaño de los movimientos más pequeño
+      }
+    };
+  }
+  
+
+
+
 }

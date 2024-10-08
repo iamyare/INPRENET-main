@@ -301,32 +301,23 @@ export class PlanillaService {
     }
   }
 
-
-
   async updateFallecidoStatusFromExcel(file: Express.Multer.File) {
-    // Leer el archivo Excel
-    const workbook = XLSX.read(file.buffer, { type: 'buffer' });
+    const workbook = XLSX.read(file.buffer, { type: 'buffer', cellText: false, cellDates: true });
     const worksheet = workbook.Sheets[workbook.SheetNames[0]];
-    const data = XLSX.utils.sheet_to_json(worksheet);
-
-    // Recorrer los datos del Excel
+    const data = XLSX.utils.sheet_to_json(worksheet, { raw: false, defval: "" });
     for (const row of data) {
-      const nIdentificacion = row['IDENTIDAD'];
-      // Buscar la persona por N_IDENTIFICACION
+      const nIdentificacion = row['IDENTIDAD'].toString().padStart(14, '0');
       const persona = await this.personaRepository.findOne({
         where: { n_identificacion: nIdentificacion },
       });
-
       if (persona) {
-        // Actualizar el campo FALLECIDO a 'SI'
         persona.fallecido = 'SI';
         await this.personaRepository.save(persona);
       }
     }
-
     return { message: 'Actualización completada' };
   }
-
+  
   async obtenerDetallePagoBeneficioPorPlanilla(id_planilla: number, @Res() res: Response) {
     const results = await this.detallePagBeneficios
       .createQueryBuilder('detallePago')
@@ -345,12 +336,9 @@ export class PlanillaService {
       .innerJoin('planilla.tipoPlanilla', 'tipoPlanilla')
       .where('planilla.id_planilla = :id_planilla', { id_planilla })
       .getRawMany();
-
     const workbook = new ExcelJS.Workbook();
     const worksheet = workbook.addWorksheet('Sheet 1');
-
     const currentDate = format(new Date(), 'dd/MM/yyyy');
-
     results.forEach(result => {
       const concatenatedRow = [
         result.codigo_banco,
@@ -364,18 +352,11 @@ export class PlanillaService {
 
       worksheet.addRow([concatenatedRow]);
     });
-
-    // Configura la respuesta para enviar el archivo
     res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
     res.setHeader('Content-Disposition', 'attachment; filename=concatenated_results.xlsx');
-
-    // Escribe el archivo Excel en la respuesta
     await workbook.xlsx.write(res);
-
     res.end();
   }
-
-
 
   async verificarBeneficioEnExcel(filePath: string): Promise<void> {
     const workbook = XLSX.readFile(filePath);

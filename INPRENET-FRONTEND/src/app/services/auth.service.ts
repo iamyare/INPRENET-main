@@ -12,7 +12,7 @@ import { Router } from '@angular/router';
 })
 export class AuthService {
   private timeout: any;
-  private readonly idleTime: number = 20 * 60 * 1000;
+  private readonly idleTime: number = 5 * 60 * 1000;
 
   constructor(
     private http: HttpClient,
@@ -24,6 +24,9 @@ export class AuthService {
     this.resetIdleTimer();
   }
 
+  private apiRequestsCount: number = 0;
+  private idleTimeout: any;
+
   public startIdleWatch(): void {
     ['mousemove', 'keydown', 'wheel', 'touchmove', 'click'].forEach(event => {
       window.addEventListener(event, () => this.resetIdleTimer());
@@ -33,8 +36,44 @@ export class AuthService {
 
   private resetIdleTimer(): void {
     clearTimeout(this.timeout);
-    this.timeout = setTimeout(() => this.handleIdleTimeout(), this.idleTime);
+
+    // Solo comienza el conteo de inactividad si no hay solicitudes de API pendientes
+    if (this.apiRequestsCount === 0) {
+      this.timeout = setTimeout(() => {
+        console.log('Sesión cerrada por inactividad');
+        this.handleIdleTimeout();
+      }, this.idleTime); // Tiempo de inactividad antes de cerrar la sesión, por ejemplo, 60 segundos
+    }
   }
+
+  // Incrementar el contador cuando se inicia una petición API
+  public onApiRequestStart(): void {
+    this.apiRequestsCount++;
+    console.log(this.apiRequestsCount);
+
+    clearTimeout(this.idleTimeout); // Pausar el temporizador de inactividad mientras hay solicitudes
+  }
+
+  // Decrementar el contador cuando una petición API termina
+  public onApiRequestEnd(): void {
+    this.apiRequestsCount--;
+    if (this.apiRequestsCount === 0) {
+      this.resetIdleTimer(); // Reiniciar el temporizador cuando no hay solicitudes pendientes
+    }
+  }
+
+  /* private handleIdleTimeout(): void {
+    if (this.apiRequestsCount === 0) {
+      // Aquí cierras la sesión o realizas cualquier acción para manejar la inactividad
+      console.log('Sesión cerrada por inactividad');
+      // Cerrar sesión o redirigir
+    }
+  } */
+
+  /* private resetIdleTimer(): void {
+    clearTimeout(this.timeout);
+    this.timeout = setTimeout(() => this.handleIdleTimeout(), this.idleTime);
+  } */
 
   private handleIdleTimeout(): void {
     this.ngZone.run(() => {
@@ -45,14 +84,14 @@ export class AuthService {
     });
   }
 
-   olvidoContrasena(dto: any): Observable<{ message: string }> {
+  olvidoContrasena(dto: any): Observable<{ message: string }> {
     const url = `${environment.API_URL}/api/usuario/olvido-contrasena`;
     return this.http.post<{ message: string }>(url, dto).pipe(
       catchError(this.handleError<{ message: string }>('olvidoContrasena'))
     );
   }
 
-   clearSession(): void {
+  clearSession(): void {
     sessionStorage.removeItem('token');
     this.router.navigate(['/login']);
     this.toastr.success('Sesión cerrada con éxito', 'Logout');
@@ -139,7 +178,7 @@ export class AuthService {
   }
 
 
-   preRegistro(datos: any): Observable<void> {
+  preRegistro(datos: any): Observable<void> {
     const url = `${environment.API_URL}/api/usuario/preregistro`;
     return this.http.post<void>(url, datos).pipe(
       catchError(this.handleError<void>('preRegistro'))
@@ -259,7 +298,7 @@ export class AuthService {
     localStorage.removeItem('token');
   }
 
-   loginPrivada(email: string, password: string): Observable<{ access_token: string }> {
+  loginPrivada(email: string, password: string): Observable<{ access_token: string }> {
     const url = `${environment.API_URL}/api/usuario/loginPrivada`;
     return this.http.post<{ access_token: string }>(url, { email, contrasena: password });
   }
@@ -335,16 +374,16 @@ export class AuthService {
   }
 
 
-  crearCuenta(data:any): Observable<any>{
+  crearCuenta(data: any): Observable<any> {
     var url = `${environment.API_URL}/api/usuario/auth/signup`;
     return this.http.post<any>(
       url,
       data,
-      ).pipe(
-        map((res:any) => {
-          return res;
-        }),
-      )
+    ).pipe(
+      map((res: any) => {
+        return res;
+      }),
+    )
   }
 
   confirmarYActualizarSeguridad(data: any): Observable<any> {

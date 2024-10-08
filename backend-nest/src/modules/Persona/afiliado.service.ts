@@ -17,6 +17,7 @@ import { Net_Discapacidad } from './entities/net_discapacidad.entity';
 import { Net_Persona_Discapacidad } from './entities/net_persona_discapacidad.entity';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale'; // Si deseas usar el idioma español
+import { log } from 'console';
 
 @Injectable()
 export class AfiliadoService {
@@ -165,11 +166,15 @@ export class AfiliadoService {
       throw new NotFoundException(`Afiliado con N_IDENTIFICACION ${term} no existe`);
     }
 
-    const discapacidades = persona.personaDiscapacidades.map(discapacidad => ({
-      id_discapacidad: discapacidad.discapacidad.id_discapacidad,
-      tipo: discapacidad.discapacidad.tipo_discapacidad,
-      descripcion: discapacidad.discapacidad.descripcion,
-    }));
+    const discapacidades = persona.personaDiscapacidades.map(function (discapacidad) {
+      return {
+        id_discapacidad: discapacidad.discapacidad.id_discapacidad,
+        tipo: discapacidad.discapacidad.tipo_discapacidad,
+        descripcion: discapacidad.discapacidad.descripcion,
+      };
+    });
+
+
 
     const peps = []/* persona.peps.map(peps => ({
         id: peps.id_peps,

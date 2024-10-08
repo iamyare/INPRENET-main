@@ -1,6 +1,10 @@
 <app-ver-planillas-activas (getElemSeleccionados)="getElemSeleccionados($event)"></app-ver-planillas-activas>
 
 <mat-tab-group>
+  <mat-tab label="Bajas" *ngIf="tipoPlanilla!='COMPLEMENTARIA BENEFICIARIO' && tipoPlanilla!='ORDINARIA BENEFICIARIO'">
+    <app-actualizar-fallecidos></app-actualizar-fallecidos>
+  </mat-tab>
+
   <mat-tab label="Cargar Beneficios">
     <div>
       <!-- Contenido para cargar beneficios -->
@@ -78,7 +82,4 @@
     </div>
   </mat-tab>
 
-  <mat-tab label="Bajas" *ngIf="tipoPlanilla!='COMPLEMENTARIA BENEFICIARIO' && tipoPlanilla!='ORDINARIA BENEFICIARIO'">
-    <app-actualizar-fallecidos></app-actualizar-fallecidos>
-  </mat-tab>
 </mat-tab-group>

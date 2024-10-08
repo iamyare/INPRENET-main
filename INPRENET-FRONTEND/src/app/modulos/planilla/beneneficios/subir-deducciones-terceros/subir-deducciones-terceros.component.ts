@@ -4,6 +4,7 @@ import { ToastrService } from 'ngx-toastr';
 import { CentroTrabajoService } from 'src/app/services/centro-trabajo.service';
 import { DeduccionesService } from 'src/app/services/deducciones.service';
 import * as XLSX from 'xlsx';
+import { AuthService } from '../../../../services/auth.service';
 
 @Component({
   selector: 'app-subir-deducciones-terceros',
@@ -28,6 +29,7 @@ export class SubirDeduccionesTercerosComponent {
 
   constructor(
     private deduccionesService: DeduccionesService,
+    private AuthService: AuthService,
     private toastr: ToastrService,
     private centrosTrabajoService: CentroTrabajoService
   ) { }
@@ -71,7 +73,7 @@ export class SubirDeduccionesTercerosComponent {
       const ws: XLSX.WorkSheet = wb.Sheets[wsname];
       let data: any[] = XLSX.utils.sheet_to_json(ws, { raw: false, defval: null });
       data = data.filter(row => Object.values(row).some(cell => cell != null && cell.toString().trim() !== ''));
-
+      this.AuthService.onApiRequestStart();
       this.deduccionesService.subirArchivoDeducciones(this.id_planilla, this.file!).subscribe({
         next: (event) => {
           if (event.type === HttpEventType.UploadProgress && event.total) {
@@ -79,6 +81,7 @@ export class SubirDeduccionesTercerosComponent {
             this.progressValue = Math.min(progress, 99);  // Progreso hasta 99%
           } else if (event.type === HttpEventType.Response) {
             this.progressValue = 100;
+            this.AuthService.onApiRequestEnd();
             // El archivo se ha subido completamente, procesamos la respuesta del servidor
             let response = event.body;
             if (typeof response === 'string') {

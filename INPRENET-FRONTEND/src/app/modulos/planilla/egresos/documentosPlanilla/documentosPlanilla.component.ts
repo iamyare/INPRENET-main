@@ -56,10 +56,10 @@ export class DocumentosPlanillaComponent implements OnInit {
     if (fechaInicio && fechaFin) {
       const fechaInicioDate = new Date(fechaInicio);
       const fechaFinDate = new Date(fechaFin);
-      if (fechaInicioDate.getMonth() !== fechaFinDate.getMonth() || fechaInicioDate.getFullYear() !== fechaFinDate.getFullYear()) {
+      /* if (fechaInicioDate.getMonth() !== fechaFinDate.getMonth() || fechaInicioDate.getFullYear() !== fechaFinDate.getFullYear()) {
         console.log('Error: Las fechas no pertenecen al mismo mes y año');
         return { differentMonths: true };
-      }
+      } */
 
       // Verificar que fechaInicio <= fechaFin
       if (fechaInicioDate > fechaFinDate) {
@@ -88,7 +88,7 @@ export class DocumentosPlanillaComponent implements OnInit {
     switch (this.tipoPlanilla) {
       case '60 RENTAS': return { idTiposPlanilla: [10], nombrePlanilla: '60 RENTAS' };
       case 'ordinaria': return { idTiposPlanilla: [1, 2], nombrePlanilla: 'ORDINARIA' };
-      case 'complementaria': return { idTiposPlanilla: [3, 4, 10], nombrePlanilla: 'COMPLEMENTARIA' };
+      case 'complementaria': return { idTiposPlanilla: [3, 4], nombrePlanilla: 'COMPLEMENTARIA' };
       case 'extraordinaria': return { idTiposPlanilla: [9, 8], nombrePlanilla: 'EXTRAORDINARIA' };
       default: console.error('Tipo de planilla no válido'); return { idTiposPlanilla: [], nombrePlanilla: '' };
     }

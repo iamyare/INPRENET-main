@@ -28,6 +28,7 @@ import { MainLayoutComponent } from './main-layout/main-layout.component';
 import { LandingPageComponent } from './landing-page/landing-page.component';
 import { DynamicInputDialogComponent } from './dinamicos/dynamic-input-dialog/dynamic-input-dialog.component';
 import { DynamicStepsComponent } from './dinamicos/dynamic-steps/dynamic-steps.component';
+import { PerfilHeaderComponent } from './perfil-header/perfil-header.component';
 
 
 
@@ -58,7 +59,8 @@ import { DynamicStepsComponent } from './dinamicos/dynamic-steps/dynamic-steps.c
     MainLayoutComponent,
     LandingPageComponent,
     DynamicInputDialogComponent,
-    DynamicStepsComponent
+    DynamicStepsComponent,
+    PerfilHeaderComponent
   ],
   imports: [
     CommonModule,
@@ -91,7 +93,8 @@ import { DynamicStepsComponent } from './dinamicos/dynamic-steps/dynamic-steps.c
     MainLayoutComponent,
     LandingPageComponent,
     DynamicInputDialogComponent,
-    DynamicStepsComponent
+    DynamicStepsComponent,
+    PerfilHeaderComponent
   ]
 })
 export class ComponentsModule { }

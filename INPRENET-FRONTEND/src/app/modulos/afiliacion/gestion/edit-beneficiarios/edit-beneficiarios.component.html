@@ -23,7 +23,11 @@
       [mostrarBotonEditar]="mostrarBotonEditar"
       (editar)="editarFila($event)"
       [mostrarBotonEliminar]="mostrarBotonEliminar"
-      (eliminar)="eliminarFila($event)">
+      (eliminar)="eliminarFila($event)"
+      [nombreEncabezadoUno]="'Agregar'"
+      [mostrarBotonUno]="mostrarBotonAgregarDiscapacidad"
+      etiquetaBotonUno="Agregar Discapacidad"
+      (accionBotonUno)="agregarDiscapacidad($event)">
     </app-dynamic-table>
   </div>
 

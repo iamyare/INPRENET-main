@@ -6,13 +6,12 @@ import { jwtDecode } from 'jwt-decode';
 import { ToastrService } from 'ngx-toastr';
 import { Router } from '@angular/router';
 
-
 @Injectable({
   providedIn: 'root'
 })
 export class AuthService {
   private timeout: any;
-  private readonly idleTime: number = 5 * 60 * 1000;
+  private readonly idleTime: number = 30 * 60 * 1000;
 
   constructor(
     private http: HttpClient,

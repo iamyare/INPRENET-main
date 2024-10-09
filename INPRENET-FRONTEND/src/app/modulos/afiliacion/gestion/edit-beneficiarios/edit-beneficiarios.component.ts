@@ -12,6 +12,9 @@ import { EditarDialogComponent } from 'src/app/components/dinamicos/editar-dialo
 import { ConfirmDialogComponent } from 'src/app/components/dinamicos/confirm-dialog/confirm-dialog.component';
 import { AgregarBenefCompComponent } from '../agregar-benef-comp/agregar-benef-comp.component';
 import { PermisosService } from 'src/app/services/permisos.service';
+import { AfiliacionService } from 'src/app/services/afiliacion.service';
+import { DynamicInputDialogComponent } from 'src/app/components/dinamicos/dynamic-input-dialog/dynamic-input-dialog.component';
+import { DatosEstaticosService } from 'src/app/services/datos-estaticos.service';
 
 @Component({
   selector: 'app-edit-beneficiarios',
@@ -34,13 +37,16 @@ export class EditBeneficiariosComponent implements OnInit, OnChanges {
   public mostrarBotonAgregar: boolean = false;
   public mostrarBotonEditar: boolean = false;
   public mostrarBotonEliminar: boolean = false;
+  public mostrarBotonAgregarDiscapacidad: boolean = false;
 
   constructor(
     private svcAfiliado: AfiliadoService,
     private toastr: ToastrService,
     private dialog: MatDialog,
     private datePipe: DatePipe,
-    private permisosService: PermisosService
+    private permisosService: PermisosService,
+    private afiliacionServicio : AfiliacionService,
+    private datosEstaticosService: DatosEstaticosService
   ) { }
 
   ngOnInit(): void {
@@ -48,6 +54,7 @@ export class EditBeneficiariosComponent implements OnInit, OnChanges {
     this.mostrarBotonAgregar = this.permisosService.tieneAccesoCompletoAfiliacion();
     this.mostrarBotonEditar = this.permisosService.tieneAccesoCompletoAfiliacion();
     this.mostrarBotonEliminar = this.permisosService.tieneAccesoCompletoAfiliacion();
+    this.mostrarBotonAgregarDiscapacidad = this.permisosService.tieneAccesoCompletoAfiliacion();
   }
 
   ngOnChanges(changes: SimpleChanges): void {
@@ -220,5 +227,42 @@ export class EditBeneficiariosComponent implements OnInit, OnChanges {
         console.error('Error al inactivar beneficiario', error);
       }
     );
+  }
+
+  agregarDiscapacidad(row: any) {
+    this.datosEstaticosService.getDiscapacidades().subscribe(discapacidades => {
+      const dialogRef = this.dialog.open(DynamicInputDialogComponent, {
+        width: '400px',
+        data: {
+          title: 'Agregar Discapacidad',
+          inputs: [
+            {
+              type: 'select',
+              label: 'Seleccionar Discapacidad',
+              name: 'tipo_discapacidad',
+              options: discapacidades
+            }
+          ]
+        }
+      });
+
+      dialogRef.afterClosed().subscribe(result => {
+        if (result && result.tipo_discapacidad) {
+          const discapacidades = [{ tipo_discapacidad: result.tipo_discapacidad }];
+          console.log(row.id_persona);
+          console.log(discapacidades);
+          /* this.afiliacionServicio.crearDiscapacidades(row.id_persona, discapacidades).subscribe(
+            () => {
+              this.toastr.success('Discapacidad agregada exitosamente');
+              this.getFilas();
+            },
+            error => {
+              this.toastr.error('Error al agregar discapacidad');
+              console.error('Error al agregar discapacidad:', error);
+            }
+          ); */
+        }
+      });
+    });
   }
 }

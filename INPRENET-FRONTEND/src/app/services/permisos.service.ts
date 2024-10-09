@@ -13,10 +13,12 @@ export class PermisosService {
   tieneAccesoCompletoAfiliacion(): boolean {
     const rolesUsuario = this.authService.getUserRolesAndModules();
     return rolesUsuario.some(roleModulo =>
-      roleModulo.modulo === 'AFILIACION' &&
-      this.rolesAccesoCompletoAfiliacion.includes(roleModulo.rol)
+      roleModulo.rol === 'TODO' ||
+      (roleModulo.modulo === 'AFILIACION' &&
+      this.rolesAccesoCompletoAfiliacion.includes(roleModulo.rol))
     );
   }
+
   tieneAccesoLimitadoAfiliacion(): boolean {
     const rolesUsuario = this.authService.getUserRolesAndModules();
     return rolesUsuario.some(roleModulo =>

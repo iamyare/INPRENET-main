@@ -10,6 +10,16 @@ export class AfiliacionService {
 
   constructor(private http: HttpClient) { }
 
+  crearDiscapacidades(idPersona: number, discapacidades: any): Observable<void> {
+    const url = `${environment.API_URL}/api/afiliacion/${idPersona}/discapacidades`;
+    return this.http.post<void>(url, discapacidades).pipe(
+      catchError((error) => {
+        console.error('Error al crear discapacidades', error);
+        return throwError(error);
+      })
+    );
+  }
+
   actualizarPeps(idPersona: number, pepsDto: any[]): Observable<any> {
     const url = `${environment.API_URL}/api/afiliacion/actualizar-peps/${idPersona}`;
     return this.http.put<any>(url, pepsDto).pipe(

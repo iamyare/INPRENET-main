@@ -3,12 +3,11 @@ import { FormArray, FormBuilder, FormControl, FormGroup, Validators } from '@ang
 import { ToastrService } from 'ngx-toastr';
 import { AfiliadoService } from 'src/app/services/afiliado.service';
 import { DireccionService } from 'src/app/services/direccion.service';
-import { DatosEstaticosService } from 'src/app/services/datos-estaticos.service'; // Importa el servicio
+import { DatosEstaticosService } from 'src/app/services/datos-estaticos.service';
 import { FieldConfig } from 'src/app/shared/Interfaces/field-config';
 import { TableColumn } from 'src/app/shared/Interfaces/table-column';
 import { convertirFechaInputs } from 'src/app/shared/functions/formatoFecha';
 import { unirNombres } from 'src/app/shared/functions/formatoNombresP';
-import { ChangeDetectorRef } from '@angular/core';
 
 @Component({
   selector: 'app-edit-datos-generales',
@@ -59,12 +58,11 @@ export class EditDatosGeneralesComponent implements OnInit {
   discapacidadSeleccionada!: boolean
 
   constructor(
-    private cdRef: ChangeDetectorRef,
     private fb: FormBuilder,
     private svcAfiliado: AfiliadoService,
     private toastr: ToastrService,
     public direccionSer: DireccionService,
-    private datosEstaticosService: DatosEstaticosService // Inyecta el servicio
+    private datosEstaticosService: DatosEstaticosService
   ) {
     const currentYear = new Date();
     this.minDate = new Date(currentYear.getFullYear(), currentYear.getMonth(), currentYear.getDate(), currentYear.getHours(), currentYear.getMinutes(), currentYear.getSeconds());
@@ -105,7 +103,7 @@ export class EditDatosGeneralesComponent implements OnInit {
       }
     ];
 
-    this.cargarCausasFallecimiento(); // Llama al método para cargar las causas de fallecimiento
+    this.cargarCausasFallecimiento();
     this.cargarEstadosAfiliado();
     this.previsualizarInfoAfil();
     this.cargarDepartamentos();

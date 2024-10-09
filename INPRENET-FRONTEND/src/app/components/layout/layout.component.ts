@@ -25,7 +25,7 @@ export class LayoutComponent implements OnInit {
         case 'afiliación':
           isSectionVisible = this.permisosService.tieneAccesoCompletoAfiliacion() || this.permisosService.tieneAccesoLimitadoAfiliacion();
           break;
-        /* case 'planilla':
+        case 'planilla':
           isSectionVisible = this.permisosService.tieneAccesoCompletoAfiliacion(); // Actualizar si hay método específico para PLANILLA
           break;
         case 'gestión de personal':
@@ -33,7 +33,10 @@ export class LayoutComponent implements OnInit {
           break;
         case 'beneficios':
           isSectionVisible = this.permisosService.tieneAccesoCompletoAfiliacion(); // Actualizar si hay método específico para BENEFICIOS
-          break; */
+          break;
+        case 'cuentas inprema':
+          isSectionVisible = this.permisosService.tieneAccesoCompletoAfiliacion(); // Actualizar si hay método específico para BENEFICIOS
+          break;
         default:
           isSectionVisible = false;
       }

@@ -3,6 +3,7 @@ import { MatTableDataSource } from '@angular/material/table';
 import { MatPaginator } from '@angular/material/paginator';
 import { MatSort } from '@angular/material/sort';
 import { TransaccionesService } from 'src/app/services/transacciones.service';
+import { AfiliadoService } from 'src/app/services/afiliado.service';
 
 @Component({
   selector: 'app-movimientos',
@@ -11,15 +12,18 @@ import { TransaccionesService } from 'src/app/services/transacciones.service';
 })
 export class MovimientosComponent implements OnInit {
   idPersona!: number;
-  idTipoCuenta!: number; // Nuevo input para el tipo de cuenta
+  idTipoCuenta!: number;
   displayedColumns: string[] = ['ano', 'mes', 'monto', 'descripcion', 'fechaMovimiento', 'numeroCuenta'];
   dataSource: MatTableDataSource<any>;
-  movimientosData: any = {}; // Almacena los datos estructurados de los movimientos
+  movimientosData: any = {};
+  dni!: string;
+  persona: any = null;
+  errorMessage: string | null = null;
 
   @ViewChild(MatPaginator) paginator!: MatPaginator;
   @ViewChild(MatSort) sort!: MatSort;
 
-  constructor(private movimientosService: TransaccionesService) {
+  constructor(private transaccionesService: TransaccionesService, private afiliadoService: AfiliadoService) {
     this.dataSource = new MatTableDataSource();
   }
 
@@ -27,9 +31,9 @@ export class MovimientosComponent implements OnInit {
 
   obtenerMovimientos(): void {
     if (this.idPersona && this.idTipoCuenta) {
-      this.movimientosService.obtenerMovimientos(this.idPersona, this.idTipoCuenta).subscribe(
+      this.transaccionesService.obtenerMovimientos(this.idPersona, this.idTipoCuenta).subscribe(
         (response) => {
-          this.movimientosData = response.data;  // Guardamos la data para usarla en el PDF
+          this.movimientosData = response.data;
           const movimientos = this.convertirMovimientosArray(response.data);
           this.dataSource.data = movimientos;
           this.dataSource.paginator = this.paginator;
@@ -42,6 +46,33 @@ export class MovimientosComponent implements OnInit {
     } else {
       console.warn('Debe ingresar el ID de Persona y el Tipo de Cuenta');
     }
+  }
+
+  buscarPorDni(): void {
+    if (this.dni) {
+      this.afiliadoService.getAfilByParam(this.dni).subscribe(
+        (response) => {
+          if (response) {
+            this.persona = response;
+            this.errorMessage = null;
+          } else {
+            this.errorMessage = 'Persona no encontrada o ocurrió un error.';
+          }
+        },
+        (error) => {
+          this.errorMessage = 'Error al buscar por DNI.';
+          console.error('Error al buscar por DNI:', error);
+        }
+      );
+    } else {
+      this.errorMessage = 'Debe ingresar un DNI válido';
+    }
+  }
+
+  resetBusqueda(): void {
+    this.persona = null;
+    this.dni = '';
+    this.errorMessage = null;
   }
 
   convertirMovimientosArray(data: any): any[] {
@@ -68,7 +99,7 @@ export class MovimientosComponent implements OnInit {
   }
 
   descargarMovimientosPdf(): void {
-    this.movimientosService.generarMovimientosPdf(this.movimientosData).subscribe(
+    this.transaccionesService.generarMovimientosPdf(this.movimientosData).subscribe(
       (pdfBlob) => {
         const blob = new Blob([pdfBlob], { type: 'application/pdf' });
         const url = window.URL.createObjectURL(blob);

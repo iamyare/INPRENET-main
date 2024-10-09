@@ -1,4 +1,8 @@
-<div>
+<div >
+  <app-perfil-header [persona]="persona"></app-perfil-header>
+</div>
+
+  <div *ngIf="!persona">
   <mat-form-field appearance="fill">
     <mat-label>ID de Persona</mat-label>
     <input matInput [(ngModel)]="idPersona" placeholder="Ingrese el ID de Persona" type="number">
@@ -13,10 +17,8 @@
   <button mat-raised-button color="accent" (click)="descargarMovimientosPdf()" [disabled]="!dataSource.data.length">Descargar PDF</button>
 </div>
 
-<div class="table-container">
-  <!-- Tabla de movimientos -->
+<div class="table-container" *ngIf="!persona">
   <table mat-table [dataSource]="dataSource" matSort class="mat-elevation-z8">
-    <!-- Columnas de la tabla como en el ejemplo anterior -->
     <ng-container matColumnDef="ano">
       <th mat-header-cell *matHeaderCellDef mat-sort-header>Año</th>
       <td mat-cell *matCellDef="let element">{{ element.ANO }}</td>

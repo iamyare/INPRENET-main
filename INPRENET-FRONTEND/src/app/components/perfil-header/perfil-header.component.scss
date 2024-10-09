@@ -1,0 +1,87 @@
+.buscar-persona-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 20px;
+  padding: 10px 20px;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  background-color: #fafafa;
+  max-width: 500px;
+  margin: 20px auto;
+}
+
+.buscar-persona-container h1 {
+  margin-bottom: 10px;
+  font-size: 1.5em;
+}
+
+.buscar-persona-container mat-form-field {
+  width: 100%;
+  max-width: 400px;
+  margin-bottom: 10px;
+}
+
+.buscar-persona-container button {
+  margin-bottom: 10px;
+  width: 100%;
+  max-width: 400px;
+}
+
+.error-message {
+  color: red;
+  font-weight: bold;
+  margin-top: 10px;
+}
+
+.perfil-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 20px;
+  border-bottom: 2px solid #bee4e1;
+  padding-bottom: 10px;
+}
+
+.perfil-foto {
+  flex: 0 0 150px;
+  height: 150px;
+  margin-right: 20px;
+}
+
+.perfil-foto img {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  border: 3px solid #26a69a;
+}
+
+.perfil-datos {
+  flex: 1;
+}
+
+.perfil-datos h2 {
+  margin: 0;
+  font-size: 24px;
+  font-weight: bold;
+  color: #0d7b6c;
+}
+
+.perfil-datos p {
+  margin: 5px 0;
+  font-size: 16px;
+  color: #1c9588;
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.search-again {
+  margin-right: 10px;
+  background-color: white;
+}

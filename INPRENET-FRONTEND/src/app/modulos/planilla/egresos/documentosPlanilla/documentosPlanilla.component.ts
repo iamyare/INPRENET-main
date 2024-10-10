@@ -105,15 +105,13 @@ export class DocumentosPlanillaComponent implements OnInit {
 
   async generarDocumento() {
     const { idTiposPlanilla, nombrePlanilla } = this.obtenerIdYNombrePlanilla();
-    console.log(idTiposPlanilla, nombrePlanilla);
-
     const { fechaInicioFormateada, fechaFinFormateada } = this.obtenerFechasFormateadas();
 
     if (idTiposPlanilla.length === 0) return;
 
     this.planillaService.getTotalBeneficiosYDeduccionesPorPeriodo(fechaInicioFormateada, fechaFinFormateada, idTiposPlanilla).subscribe({
-
       next: async (data) => {
+        console.log(data);
         const base64Image = await this.convertirImagenABase64('../assets/images/membratadoFinal.jpg');
 
         const totalBeneficios = data.beneficios.reduce((acc: any, cur: any) => acc + (cur.TOTAL_MONTO_BENEFICIO ? parseFloat(cur.TOTAL_MONTO_BENEFICIO) : 0), 0);
@@ -244,7 +242,7 @@ export class DocumentosPlanillaComponent implements OnInit {
             header: { fontSize: 16, bold: true },
             subheader: { fontSize: 14, bold: false, margin: [0, 5, 0, 10] },
             tableHeader: { bold: true, fontSize: 13, color: 'black' },
-            tableBody: { fontSize: 8, color: 'black' },  // Texto más pequeño para las celdas de la tabla
+            tableBody: { fontSize: 8, color: 'black' },
             tableTotal: { bold: true, fontSize: 13, color: 'black', alignment: 'right' },
             signature: { fontSize: 10, bold: true }
           },
@@ -501,7 +499,7 @@ export class DocumentosPlanillaComponent implements OnInit {
           }),
           pageMargins: [40, 130, 40, 100],
           header: {
-            text: `DESGLOSE POR BANCO EN LA PLANILLA 60 RENTAS`,
+            text: `DESGLOSE POR BANCO EN LA PLANILLA ${nombrePlanilla}`,
             style: 'header',
             alignment: 'center',
             margin: [50, 100, 50, 0]

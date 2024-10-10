@@ -1,23 +1,8 @@
-<div >
-  <app-perfil-header [persona]="persona"></app-perfil-header>
+<br>
+<div>
+  <app-perfil-header (personaEncontrada)="onPersonaEncontrada($event)" [persona]="persona"></app-perfil-header>
 </div>
-
-  <div *ngIf="!persona">
-  <mat-form-field appearance="fill">
-    <mat-label>ID de Persona</mat-label>
-    <input matInput [(ngModel)]="idPersona" placeholder="Ingrese el ID de Persona" type="number">
-  </mat-form-field>
-
-  <mat-form-field appearance="fill">
-    <mat-label>Tipo de Cuenta</mat-label>
-    <input matInput [(ngModel)]="idTipoCuenta" placeholder="Ingrese el Tipo de Cuenta" type="number">
-  </mat-form-field>
-
-  <button mat-raised-button color="primary" (click)="obtenerMovimientos()">Buscar</button>
-  <button mat-raised-button color="accent" (click)="descargarMovimientosPdf()" [disabled]="!dataSource.data.length">Descargar PDF</button>
-</div>
-
-<div class="table-container" *ngIf="!persona">
+<div class="table-container" *ngIf="persona">
   <table mat-table [dataSource]="dataSource" matSort class="mat-elevation-z8">
     <ng-container matColumnDef="ano">
       <th mat-header-cell *matHeaderCellDef mat-sort-header>Año</th>
@@ -46,7 +31,6 @@
     <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
     <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
   </table>
-
-  <!-- Paginador -->
   <mat-paginator [pageSizeOptions]="[5, 10, 20]" showFirstLastButtons></mat-paginator>
+  <button mat-raised-button color="accent" (click)="descargarMovimientosPdf()" [disabled]="!dataSource.data.length">Descargar PDF</button>
 </div>

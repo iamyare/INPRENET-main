@@ -11,14 +11,13 @@ import { AfiliadoService } from 'src/app/services/afiliado.service';
   styleUrls: ['./movimientos.component.scss'],
 })
 export class MovimientosComponent implements OnInit {
-  idPersona!: number;
-  idTipoCuenta!: number;
   displayedColumns: string[] = ['ano', 'mes', 'monto', 'descripcion', 'fechaMovimiento', 'numeroCuenta'];
   dataSource: MatTableDataSource<any>;
   movimientosData: any = {};
   dni!: string;
   persona: any = null;
   errorMessage: string | null = null;
+  idTipoCuenta: number = 2;
 
   @ViewChild(MatPaginator) paginator!: MatPaginator;
   @ViewChild(MatSort) sort!: MatSort;
@@ -29,9 +28,14 @@ export class MovimientosComponent implements OnInit {
 
   ngOnInit(): void {}
 
+  onPersonaEncontrada(persona: any): void {
+    this.persona = persona;
+    this.obtenerMovimientos();
+  }
+
   obtenerMovimientos(): void {
-    if (this.idPersona && this.idTipoCuenta) {
-      this.transaccionesService.obtenerMovimientos(this.idPersona, this.idTipoCuenta).subscribe(
+    if (this.persona?.ID_PERSONA) {
+      this.transaccionesService.obtenerMovimientos(this.persona.ID_PERSONA, this.idTipoCuenta).subscribe(
         (response) => {
           this.movimientosData = response.data;
           const movimientos = this.convertirMovimientosArray(response.data);
@@ -44,35 +48,8 @@ export class MovimientosComponent implements OnInit {
         }
       );
     } else {
-      console.warn('Debe ingresar el ID de Persona y el Tipo de Cuenta');
+      console.warn('No se encontró ID_PERSONA para obtener movimientos.');
     }
-  }
-
-  buscarPorDni(): void {
-    if (this.dni) {
-      this.afiliadoService.getAfilByParam(this.dni).subscribe(
-        (response) => {
-          if (response) {
-            this.persona = response;
-            this.errorMessage = null;
-          } else {
-            this.errorMessage = 'Persona no encontrada o ocurrió un error.';
-          }
-        },
-        (error) => {
-          this.errorMessage = 'Error al buscar por DNI.';
-          console.error('Error al buscar por DNI:', error);
-        }
-      );
-    } else {
-      this.errorMessage = 'Debe ingresar un DNI válido';
-    }
-  }
-
-  resetBusqueda(): void {
-    this.persona = null;
-    this.dni = '';
-    this.errorMessage = null;
   }
 
   convertirMovimientosArray(data: any): any[] {

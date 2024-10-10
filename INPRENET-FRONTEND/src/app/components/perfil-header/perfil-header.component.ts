@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, Output, EventEmitter } from '@angular/core';
 import { catchError } from 'rxjs/operators';
 import { of } from 'rxjs';
 import { AfiliadoService } from 'src/app/services/afiliado.service';
@@ -14,6 +14,8 @@ export class PerfilHeaderComponent {
   persona: any = null;
   defaultFotoUrl = '../../../../../assets/images/AvatarDefecto.png';
 
+  @Output() personaEncontrada = new EventEmitter<any>();
+
   constructor(private afiliadoService: AfiliadoService) { }
 
   buscarPersona(): void {
@@ -26,6 +28,8 @@ export class PerfilHeaderComponent {
       if (response) {
         this.persona = response;
         this.errorMessage = null;
+        this.personaEncontrada.emit(this.persona); // Emitimos la persona encontrada
+        console.log('Persona encontrada:', this.persona); // Log de la información en PerfilHeaderComponent
       }
     });
   }
@@ -34,6 +38,7 @@ export class PerfilHeaderComponent {
     this.persona = null;
     this.n_identificacion = '';
     this.errorMessage = null;
+    this.personaEncontrada.emit(null); // Emite null para limpiar la persona en MovimientosComponent
   }
 
   getFotoUrl(foto: any): string {

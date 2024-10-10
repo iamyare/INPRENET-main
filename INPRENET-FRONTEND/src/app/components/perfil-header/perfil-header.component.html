@@ -16,15 +16,15 @@
     <span class="search-text">Buscar otra persona</span>
   </div>
   <div class="perfil-foto">
-    <img *ngIf="persona?.foto_perfil" [src]="getFotoUrl(persona.foto_perfil)" alt="Foto de Perfil">
+    <img *ngIf="persona?.foto_perfil" [src]="getFotoUrl(persona.FOTO_PERFIL)" alt="Foto de Perfil">
     <img *ngIf="!persona?.foto_perfil" [src]="defaultFotoUrl" alt="Foto de Perfil por Defecto">
   </div>
   <div class="perfil-datos">
-    <h2>{{ persona?.primer_nombre }} {{ persona?.segundo_nombre }} {{ persona?.tercer_nombre }} {{ persona?.primer_apellido }} {{ persona?.segundo_apellido }}</h2>
-    <p><strong>DNI:</strong> {{ persona?.n_identificacion }}</p>
-    <p><strong>Teléfono:</strong> {{ persona?.telefono_1 }}</p>
-    <p><strong>Correo Principal:</strong> {{ persona?.correo_1 }}</p>
-    <p><strong>Género:</strong> {{ persona?.genero || 'No especificado' }}</p>
-    <p><strong>Fecha de Nacimiento:</strong> {{ persona?.fecha_nacimiento | date: 'dd MMMM yyyy' }}</p>
+    <h2>{{ persona?.PRIMER_NOMBRE }} {{ persona?.SEGUNDO_NOMBRE }} {{ persona?.TERCER_NOMBRE }} {{ persona?.PRIMER_APELLIDO }} {{ persona?.SEGUNDO_APELLIDO }}</h2>
+    <p><strong>DNI:</strong> {{ persona?.N_IDENTIFICACION }}</p>
+    <p><strong>Teléfono:</strong> {{ persona?.TELEFONO_1 }}</p>
+    <p><strong>Correo Principal:</strong> {{ persona?.CORREO_1 }}</p>
+    <p><strong>Género:</strong> {{ persona?.GENERO || 'No especificado' }}</p>
+    <p><strong>Fecha de Nacimiento:</strong> {{ persona?.FECHA_NACIMIENTO | date: 'dd MMMM yyyy' }}</p>
   </div>
 </div>

@@ -105,5 +105,17 @@ export const MENU_CONFIG: Section[] = [
         ],
       },
     ],
+  },
+  {
+    name: 'ESCALAFÓN',
+    items: [
+      {
+        title: 'GESTIÓN DE ESCALAFÓN',
+        icon: 'grading',
+        children: [
+          { title: 'Detalle Envío', route: 'escalafon/detalle-envio', icon: 'description' },
+        ],
+      },
+    ],
   }
 ];

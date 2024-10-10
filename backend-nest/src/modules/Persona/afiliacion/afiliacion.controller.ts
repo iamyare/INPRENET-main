@@ -19,11 +19,27 @@ import { CrearReferenciaDto } from './dtos/crear-referencia.dto';
 import { Net_Familia } from '../entities/net_familia.entity';
 import { CrearFamiliaDto } from './dtos/crear-familiar.dto';
 import { CrearPepsDto } from './dtos/crear-peps.dto';
+import { CrearDiscapacidadDto } from './dtos/crear-discapacidad.dto';
 
 @Controller('afiliacion')
 export class AfiliacionController {
   constructor(private readonly afiliacionService: AfiliacionService, private readonly connection: Connection, private readonly entityManager: EntityManager,) {
   }
+
+    @Post(':idPersona/discapacidades')
+    async crearDiscapacidades(
+      @Param('idPersona', ParseIntPipe) idPersona: number,
+      @Body() discapacidadesDto: CrearDiscapacidadDto[],
+    ): Promise<void> {
+      const persona = await this.entityManager.findOne('net_persona', { where: { id_persona: idPersona } });
+      if (!persona) {
+        throw new NotFoundException(`Persona con ID ${idPersona} no encontrada`);
+      }
+  
+      await this.connection.transaction(async (entityManager) => {
+        await this.afiliacionService.crearDiscapacidades(discapacidadesDto, idPersona, entityManager);
+      });
+    }
 
   @Put('actualizar-peps/:idPersona')
   async actualizarPeps(

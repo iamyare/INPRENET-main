@@ -37,6 +37,9 @@ export class LayoutComponent implements OnInit {
         case 'cuentas inprema':
           isSectionVisible = this.permisosService.tieneAccesoCompletoAfiliacion(); // Actualizar si hay método específico para BENEFICIOS
           break;
+        case 'escalafón':
+            isSectionVisible = this.permisosService.tieneAccesoCompletoAfiliacion(); // Actualizar si hay método específico para BENEFICIOS
+            break;
         default:
           isSectionVisible = false;
       }

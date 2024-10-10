@@ -143,23 +143,6 @@ export class AfiliadoController {
     }
   }
 
-  @Get('/getAllReferenciasPersonales/:n_identificacion')
-  async getAllReferenciasPersonales(@Param("n_identificacion") n_identificacion: string) {
-    try {
-      const resultado =
-        await this.afiliadoService.getAllReferenciasPersonales(n_identificacion);
-      return resultado;
-    } catch (error) {
-      if (error instanceof NotFoundException) {
-        throw error;
-      } else {
-        throw new NotFoundException(
-          `No se pudo procesar la solicitud`,
-        );
-      }
-    }
-  }
-
   @Get('/getAllOtrasFuentesIngres/:n_identificacion')
   async getAllOtrasFuentesIngres(@Param("n_identificacion") n_identificacion: string) {
     try {
@@ -306,7 +289,7 @@ export class AfiliadoController {
 
   @Get('Afiliado/:term')
   findOne(@Param('term') term: string) {
-    return this.afiliadoService.findOne(term);
+    return this.afiliadoService.findOne(term); 
   }
   @Get('/getAllPersonaPBanco/:dni')
   getAllPersonaPBanco(@Param('dni') dni: string) {

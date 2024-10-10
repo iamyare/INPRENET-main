@@ -78,15 +78,12 @@ export class PlanillaController {
     @Query('idTiposPlanilla') idTiposPlanilla: string,
     @Res() res,
   ) {
-
     const idTiposPlanillaArray = idTiposPlanilla.split(',').map(Number);
-
     const data = await this.planillaService.obtenerDetallePagoBeneficioPorPlanillaPrueba(
       periodoInicio,
       periodoFinalizacion,
-      idTiposPlanillaArray,
+      idTiposPlanillaArray
     );
-
     await this.planillaService.generarReporteDetallePago(data, res);
   }
 

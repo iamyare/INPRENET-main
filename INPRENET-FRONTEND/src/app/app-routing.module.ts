@@ -64,6 +64,13 @@ const routes: Routes = [
         path: 'cuentas',
         loadChildren: () => import('./modulos/movimientos-inprema/movimientos-inprema.module').then(m => m.MovimientosInpremaModule),
       },
+      {
+        path: 'escalafon',
+        loadChildren: () => import('./modulos/escalafon/escalafon.module').then(m => m.EscalafonModule),
+        canActivate: [RoleGuard],
+        data: { expectedRolesModules: [{ role: 'TODO' }] }
+      },
+
       { path: 'usuario/editar', component: EditarPerfilComponent },
     ]
   },

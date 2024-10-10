@@ -669,70 +669,84 @@ export class PlanillaService {
     periodoFinalizacion: string,
     idTiposPlanilla: number[],
   ): Promise<any[]> {
+    console.log(periodoInicio);
+    console.log(periodoFinalizacion);
+    console.log(idTiposPlanilla);
+    
     const query = `
-    SELECT 
-      ben."ID_BENEFICIO" AS "ID_BENEFICIO",
-      ben."NOMBRE_BENEFICIO" AS "NOMBRE_BENEFICIO",
-      ben."CODIGO" AS "CODIGO_BENEFICIO",
-      SUM(detBs."MONTO_A_PAGAR") AS "TOTAL_MONTO_BENEFICIO"
-    FROM 
-      "NET_DETALLE_PAGO_BENEFICIO" detBs
-    INNER JOIN 
-      "NET_BENEFICIO" ben 
-      ON detBs."ID_BENEFICIO" = ben."ID_BENEFICIO"
-    INNER JOIN 
-      "NET_PLANILLA" plan 
-      ON detBs."ID_PLANILLA" = plan."ID_PLANILLA"
-    INNER JOIN 
-      "NET_PERSONA_POR_BANCO" ppb 
-      ON detBs."ID_AF_BANCO" = ppb."ID_AF_BANCO"
-    WHERE 
-      plan."FECHA_APERTURA" BETWEEN TO_DATE(:periodoInicio, 'DD/MM/YYYY') AND TO_DATE(:periodoFinalizacion, 'DD/MM/YYYY')
-      AND plan."ID_TIPO_PLANILLA" IN (${idTiposPlanilla.join(', ')})
-    GROUP BY 
-      ben."ID_BENEFICIO", 
-      ben."NOMBRE_BENEFICIO", 
-      ben."CODIGO"
-    ORDER BY ben."NOMBRE_BENEFICIO" ASC
-  `;
-
+      SELECT 
+        ben."ID_BENEFICIO" AS "ID_BENEFICIO",
+        ben."NOMBRE_BENEFICIO" AS "NOMBRE_BENEFICIO",
+        ben."CODIGO" AS "CODIGO_BENEFICIO",
+        plan."ID_PLANILLA" AS "ID_PLANILLA",
+        SUM(detBs."MONTO_A_PAGAR") AS "TOTAL_MONTO_BENEFICIO"
+      FROM 
+        "NET_DETALLE_PAGO_BENEFICIO" detBs
+      INNER JOIN 
+        "NET_BENEFICIO" ben 
+        ON detBs."ID_BENEFICIO" = ben."ID_BENEFICIO"
+      INNER JOIN 
+        "NET_PLANILLA" plan 
+        ON detBs."ID_PLANILLA" = plan."ID_PLANILLA"
+      INNER JOIN 
+        "NET_PERSONA_POR_BANCO" ppb 
+        ON detBs."ID_AF_BANCO" = ppb."ID_AF_BANCO"
+      WHERE 
+        plan."PERIODO_INICIO" >= TO_DATE(:periodoInicio, 'DD/MM/YYYY') 
+        AND plan."PERIODO_FINALIZACION" <= TO_DATE(:periodoFinalizacion, 'DD/MM/YYYY')
+        AND plan."ID_TIPO_PLANILLA" IN (${idTiposPlanilla.join(', ')})
+      GROUP BY 
+        ben."ID_BENEFICIO", 
+        ben."NOMBRE_BENEFICIO", 
+        ben."CODIGO",
+        plan."ID_PLANILLA"
+      ORDER BY ben."NOMBRE_BENEFICIO" ASC
+    `;
     try {
-      return await this.entityManager.query(query, [periodoInicio, periodoFinalizacion]);
+      const result = await this.entityManager.query(query, [periodoInicio, periodoFinalizacion]);
+      /* const idPlanillas = result.map((item) => item.ID_PLANILLA);
+      console.log('ID_PLANILLA considerados:', idPlanillas); */
+      return result;
     } catch (error) {
       console.error('Error al obtener beneficios:', error);
       throw new InternalServerErrorException('Error al obtener beneficios');
     }
   }
+  
   async getDeduccionesInpremaPorPeriodo(
     periodoInicio: string,
     periodoFinalizacion: string,
     idTiposPlanilla: number[],
   ): Promise<any[]> {
     const query = `
-    SELECT 
-      ded."ID_DEDUCCION" AS "ID_DEDUCCION",
-      ded."NOMBRE_DEDUCCION" AS "NOMBRE_DEDUCCION",
-      SUM(dedd."MONTO_APLICADO") AS "TOTAL_MONTO_DEDUCCION"
-    FROM 
-      "NET_DETALLE_DEDUCCION" dedd
-    INNER JOIN 
-      "NET_DEDUCCION" ded 
-      ON dedd."ID_DEDUCCION" = ded."ID_DEDUCCION"
-    INNER JOIN 
-      "NET_PLANILLA" plan 
-      ON dedd."ID_PLANILLA" = plan."ID_PLANILLA"
-    WHERE 
-      plan."FECHA_APERTURA" BETWEEN TO_DATE(:periodoInicio, 'DD/MM/YYYY') AND TO_DATE(:periodoFinalizacion, 'DD/MM/YYYY')
-      AND plan."ID_TIPO_PLANILLA" IN (${idTiposPlanilla.join(', ')})
-      AND ded."ID_CENTRO_TRABAJO" = 1
-    GROUP BY 
-      ded."ID_DEDUCCION", 
-      ded."NOMBRE_DEDUCCION"
-    ORDER BY ded."NOMBRE_DEDUCCION" ASC
-  `;
-
+      SELECT 
+        ded."ID_DEDUCCION" AS "ID_DEDUCCION",
+        ded."NOMBRE_DEDUCCION" AS "NOMBRE_DEDUCCION",
+        plan."ID_PLANILLA" AS "ID_PLANILLA",
+        SUM(dedd."MONTO_APLICADO") AS "TOTAL_MONTO_DEDUCCION"
+      FROM 
+        "NET_DETALLE_DEDUCCION" dedd
+      INNER JOIN 
+        "NET_DEDUCCION" ded 
+        ON dedd."ID_DEDUCCION" = ded."ID_DEDUCCION"
+      INNER JOIN 
+        "NET_PLANILLA" plan 
+        ON dedd."ID_PLANILLA" = plan."ID_PLANILLA"
+      WHERE 
+        plan."PERIODO_INICIO" >= TO_DATE(:periodoInicio, 'DD/MM/YYYY') 
+        AND plan."PERIODO_FINALIZACION" <= TO_DATE(:periodoFinalizacion, 'DD/MM/YYYY')
+        AND plan."ID_TIPO_PLANILLA" IN (${idTiposPlanilla.join(', ')})
+        AND ded."ID_CENTRO_TRABAJO" = 1
+        AND dedd."ID_AF_BANCO" IS NOT NULL
+      GROUP BY 
+        ded."ID_DEDUCCION", 
+        ded."NOMBRE_DEDUCCION", 
+        plan."ID_PLANILLA"
+      ORDER BY ded."NOMBRE_DEDUCCION" ASC
+    `;
     try {
-      return await this.entityManager.query(query, [periodoInicio, periodoFinalizacion]);
+      const result = await this.entityManager.query(query, [periodoInicio, periodoFinalizacion]);
+      return result;
     } catch (error) {
       console.error('Error al obtener deducciones INPREMA:', error);
       throw new InternalServerErrorException('Error al obtener deducciones INPREMA');
@@ -745,68 +759,76 @@ export class PlanillaService {
     idTiposPlanilla: number[],
   ): Promise<any[]> {
     const query = `
-    SELECT 
-      ded."ID_DEDUCCION" AS "ID_DEDUCCION",
-      ded."NOMBRE_DEDUCCION" AS "NOMBRE_DEDUCCION",
-      SUM(dedd."MONTO_APLICADO") AS "TOTAL_MONTO_DEDUCCION"
-    FROM 
-      "NET_DETALLE_DEDUCCION" dedd
-    INNER JOIN 
-      "NET_DEDUCCION" ded 
-      ON dedd."ID_DEDUCCION" = ded."ID_DEDUCCION"
-    INNER JOIN 
-      "NET_PLANILLA" plan 
-      ON dedd."ID_PLANILLA" = plan."ID_PLANILLA"
-    WHERE 
-      plan."FECHA_APERTURA" BETWEEN TO_DATE(:periodoInicio, 'DD/MM/YYYY') AND TO_DATE(:periodoFinalizacion, 'DD/MM/YYYY')
-      AND plan."ID_TIPO_PLANILLA" IN (${idTiposPlanilla.join(', ')})
-      AND ded."ID_CENTRO_TRABAJO" != 1
-    GROUP BY 
-      ded."ID_DEDUCCION", 
-      ded."NOMBRE_DEDUCCION"
-    ORDER BY ded."NOMBRE_DEDUCCION" ASC
-  `;
-
+      SELECT 
+        ded."ID_DEDUCCION" AS "ID_DEDUCCION",
+        ded."NOMBRE_DEDUCCION" AS "NOMBRE_DEDUCCION",
+        plan."ID_PLANILLA" AS "ID_PLANILLA",
+        SUM(dedd."MONTO_APLICADO") AS "TOTAL_MONTO_DEDUCCION"
+      FROM 
+        "NET_DETALLE_DEDUCCION" dedd
+      INNER JOIN 
+        "NET_DEDUCCION" ded 
+        ON dedd."ID_DEDUCCION" = ded."ID_DEDUCCION"
+      INNER JOIN 
+        "NET_PLANILLA" plan 
+        ON dedd."ID_PLANILLA" = plan."ID_PLANILLA"
+      WHERE 
+        plan."PERIODO_INICIO" >= TO_DATE(:periodoInicio, 'DD/MM/YYYY') 
+        AND plan."PERIODO_FINALIZACION" <= TO_DATE(:periodoFinalizacion, 'DD/MM/YYYY')
+        AND plan."ID_TIPO_PLANILLA" IN (${idTiposPlanilla.join(', ')})
+        AND ded."ID_CENTRO_TRABAJO" != 1
+        AND dedd."ID_AF_BANCO" IS NOT NULL
+      GROUP BY 
+        ded."ID_DEDUCCION", 
+        ded."NOMBRE_DEDUCCION",
+        plan."ID_PLANILLA"
+      ORDER BY ded."NOMBRE_DEDUCCION" ASC
+    `;
     try {
-      return await this.entityManager.query(query, [periodoInicio, periodoFinalizacion]);
+      const result = await this.entityManager.query(query, [periodoInicio, periodoFinalizacion]);
+      return result;
     } catch (error) {
       console.error('Error al obtener deducciones de terceros:', error);
       throw new InternalServerErrorException('Error al obtener deducciones de terceros');
     }
   }
 
+  
   async getBeneficiosPorPeriodoSC(
     periodoInicio: string,
     periodoFinalizacion: string,
     idTiposPlanilla: number[],
   ): Promise<any[]> {
     const query = `
-    SELECT 
-      ben."ID_BENEFICIO" AS "ID_BENEFICIO",
-      ben."NOMBRE_BENEFICIO" AS "NOMBRE_BENEFICIO",
-      ben."CODIGO" AS "CODIGO_BENEFICIO",
-      SUM(detBs."MONTO_A_PAGAR") AS "TOTAL_MONTO_BENEFICIO"
-    FROM 
-      "NET_DETALLE_PAGO_BENEFICIO" detBs
-    INNER JOIN 
-      "NET_BENEFICIO" ben 
-      ON detBs."ID_BENEFICIO" = ben."ID_BENEFICIO"
-    INNER JOIN 
-      "NET_PLANILLA" plan 
-      ON detBs."ID_PLANILLA" = plan."ID_PLANILLA"
-    WHERE 
-      plan."FECHA_APERTURA" BETWEEN TO_DATE(:periodoInicio, 'DD/MM/YYYY') AND TO_DATE(:periodoFinalizacion, 'DD/MM/YYYY')
-      AND plan."ID_TIPO_PLANILLA" IN (${idTiposPlanilla.join(', ')})
-      AND detBs."ID_AF_BANCO" IS NULL
-    GROUP BY 
-      ben."ID_BENEFICIO", 
-      ben."NOMBRE_BENEFICIO", 
-      ben."CODIGO"
-    ORDER BY ben."NOMBRE_BENEFICIO" ASC
+      SELECT 
+        ben."ID_BENEFICIO" AS "ID_BENEFICIO",
+        ben."NOMBRE_BENEFICIO" AS "NOMBRE_BENEFICIO",
+        ben."CODIGO" AS "CODIGO_BENEFICIO",
+        plan."ID_PLANILLA" AS "ID_PLANILLA",
+        SUM(detBs."MONTO_A_PAGAR") AS "TOTAL_MONTO_BENEFICIO"
+      FROM 
+        "NET_DETALLE_PAGO_BENEFICIO" detBs
+      INNER JOIN 
+        "NET_BENEFICIO" ben 
+        ON detBs."ID_BENEFICIO" = ben."ID_BENEFICIO"
+      INNER JOIN 
+        "NET_PLANILLA" plan 
+        ON detBs."ID_PLANILLA" = plan."ID_PLANILLA"
+      WHERE 
+        plan."PERIODO_INICIO" >= TO_DATE(:periodoInicio, 'DD/MM/YYYY') 
+        AND plan."PERIODO_FINALIZACION" <= TO_DATE(:periodoFinalizacion, 'DD/MM/YYYY')
+        AND plan."ID_TIPO_PLANILLA" IN (${idTiposPlanilla.join(', ')})
+        AND detBs."ID_AF_BANCO" IS NULL
+      GROUP BY 
+        ben."ID_BENEFICIO", 
+        ben."NOMBRE_BENEFICIO", 
+        ben."CODIGO",
+        plan."ID_PLANILLA"
+      ORDER BY ben."NOMBRE_BENEFICIO" ASC
     `;
-
     try {
-      return await this.entityManager.query(query, [periodoInicio, periodoFinalizacion]);
+      const result = await this.entityManager.query(query, [periodoInicio, periodoFinalizacion]);
+      return result;
     } catch (error) {
       console.error('Error al obtener beneficios sin cuenta:', error);
       throw new InternalServerErrorException('Error al obtener beneficios sin cuenta');
@@ -819,73 +841,80 @@ export class PlanillaService {
     idTiposPlanilla: number[],
   ): Promise<any[]> {
     const query = `
-    SELECT 
-      ded."ID_DEDUCCION" AS "ID_DEDUCCION",
-      ded."NOMBRE_DEDUCCION" AS "NOMBRE_DEDUCCION",
-      SUM(dedd."MONTO_APLICADO") AS "TOTAL_MONTO_DEDUCCION"
-    FROM 
-      "NET_DETALLE_DEDUCCION" dedd
-    INNER JOIN 
-      "NET_DEDUCCION" ded 
-      ON dedd."ID_DEDUCCION" = ded."ID_DEDUCCION"
-    INNER JOIN 
-      "NET_PLANILLA" plan 
-      ON dedd."ID_PLANILLA" = plan."ID_PLANILLA"
-    WHERE 
-      plan."FECHA_APERTURA" BETWEEN TO_DATE(:periodoInicio, 'DD/MM/YYYY') AND TO_DATE(:periodoFinalizacion, 'DD/MM/YYYY')
-      AND plan."ID_TIPO_PLANILLA" IN (${idTiposPlanilla.join(', ')})
-      AND ded."ID_CENTRO_TRABAJO" = 1
-      AND dedd."ID_AF_BANCO" IS NULL
-    GROUP BY 
-      ded."ID_DEDUCCION", 
-      ded."NOMBRE_DEDUCCION"
-    ORDER BY ded."NOMBRE_DEDUCCION" ASC
+      SELECT 
+        ded."ID_DEDUCCION" AS "ID_DEDUCCION",
+        ded."NOMBRE_DEDUCCION" AS "NOMBRE_DEDUCCION",
+        plan."ID_PLANILLA" AS "ID_PLANILLA",
+        SUM(dedd."MONTO_APLICADO") AS "TOTAL_MONTO_DEDUCCION"
+      FROM 
+        "NET_DETALLE_DEDUCCION" dedd
+      INNER JOIN 
+        "NET_DEDUCCION" ded 
+        ON dedd."ID_DEDUCCION" = ded."ID_DEDUCCION"
+      INNER JOIN 
+        "NET_PLANILLA" plan 
+        ON dedd."ID_PLANILLA" = plan."ID_PLANILLA"
+      WHERE 
+        plan."PERIODO_INICIO" >= TO_DATE(:periodoInicio, 'DD/MM/YYYY') 
+        AND plan."PERIODO_FINALIZACION" <= TO_DATE(:periodoFinalizacion, 'DD/MM/YYYY')
+        AND plan."ID_TIPO_PLANILLA" IN (${idTiposPlanilla.join(', ')})
+        AND ded."ID_CENTRO_TRABAJO" = 1
+        AND dedd."ID_AF_BANCO" IS NULL
+      GROUP BY 
+        ded."ID_DEDUCCION", 
+        ded."NOMBRE_DEDUCCION",
+        plan."ID_PLANILLA"
+      ORDER BY ded."NOMBRE_DEDUCCION" ASC
     `;
-
     try {
-      return await this.entityManager.query(query, [periodoInicio, periodoFinalizacion]);
+      const result = await this.entityManager.query(query, [periodoInicio, periodoFinalizacion]);
+      return result;
     } catch (error) {
       console.error('Error al obtener deducciones INPREMA sin cuenta:', error);
       throw new InternalServerErrorException('Error al obtener deducciones INPREMA sin cuenta');
     }
   }
-
+  
   async getDeduccionesTercerosPorPeriodoSC(
     periodoInicio: string,
     periodoFinalizacion: string,
     idTiposPlanilla: number[],
   ): Promise<any[]> {
     const query = `
-    SELECT 
-      ded."ID_DEDUCCION" AS "ID_DEDUCCION",
-      ded."NOMBRE_DEDUCCION" AS "NOMBRE_DEDUCCION",
-      SUM(dedd."MONTO_APLICADO") AS "TOTAL_MONTO_DEDUCCION"
-    FROM 
-      "NET_DETALLE_DEDUCCION" dedd
-    INNER JOIN 
-      "NET_DEDUCCION" ded 
-      ON dedd."ID_DEDUCCION" = ded."ID_DEDUCCION"
-    INNER JOIN 
-      "NET_PLANILLA" plan 
-      ON dedd."ID_PLANILLA" = plan."ID_PLANILLA"
-    WHERE 
-      plan."FECHA_APERTURA" BETWEEN TO_DATE(:periodoInicio, 'DD/MM/YYYY') AND TO_DATE(:periodoFinalizacion, 'DD/MM/YYYY')
-      AND plan."ID_TIPO_PLANILLA" IN (${idTiposPlanilla.join(', ')})
-      AND ded."ID_CENTRO_TRABAJO" != 1
-      AND dedd."ID_AF_BANCO" IS NULL
-    GROUP BY 
-      ded."ID_DEDUCCION", 
-      ded."NOMBRE_DEDUCCION"
-    ORDER BY ded."NOMBRE_DEDUCCION" ASC
+      SELECT 
+        ded."ID_DEDUCCION" AS "ID_DEDUCCION",
+        ded."NOMBRE_DEDUCCION" AS "NOMBRE_DEDUCCION",
+        plan."ID_PLANILLA" AS "ID_PLANILLA",
+        SUM(dedd."MONTO_APLICADO") AS "TOTAL_MONTO_DEDUCCION"
+      FROM 
+        "NET_DETALLE_DEDUCCION" dedd
+      INNER JOIN 
+        "NET_DEDUCCION" ded 
+        ON dedd."ID_DEDUCCION" = ded."ID_DEDUCCION"
+      INNER JOIN 
+        "NET_PLANILLA" plan 
+        ON dedd."ID_PLANILLA" = plan."ID_PLANILLA"
+      WHERE 
+        plan."PERIODO_INICIO" >= TO_DATE(:periodoInicio, 'DD/MM/YYYY') 
+        AND plan."PERIODO_FINALIZACION" <= TO_DATE(:periodoFinalizacion, 'DD/MM/YYYY')
+        AND plan."ID_TIPO_PLANILLA" IN (${idTiposPlanilla.join(', ')})
+        AND dedd."ID_AF_BANCO" IS NULL
+        AND ded."ID_DEDUCCION" NOT IN (1, 2, 3, 44, 51)
+      GROUP BY 
+        ded."ID_DEDUCCION",
+        ded."NOMBRE_DEDUCCION",
+        plan."ID_PLANILLA"
+      ORDER BY ded."NOMBRE_DEDUCCION" ASC
     `;
-
     try {
-      return await this.entityManager.query(query, [periodoInicio, periodoFinalizacion]);
+      const result = await this.entityManager.query(query, [periodoInicio, periodoFinalizacion]);
+      return result;
     } catch (error) {
       console.error('Error al obtener deducciones de terceros sin cuenta:', error);
       throw new InternalServerErrorException('Error al obtener deducciones de terceros sin cuenta');
     }
   }
+
 
   async getTotalPorBeneficiosYDeduccionesPorPeriodo(
     periodoInicio: string,
@@ -893,7 +922,6 @@ export class PlanillaService {
     idTiposPlanilla: number[],
   ): Promise<any> {
     try {
-
       const beneficios = await this.getBeneficiosPorPeriodo(periodoInicio, periodoFinalizacion, idTiposPlanilla);
       const deduccionesInprema = await this.getDeduccionesInpremaPorPeriodo(periodoInicio, periodoFinalizacion, idTiposPlanilla);
       const deduccionesTerceros = await this.getDeduccionesTercerosPorPeriodo(periodoInicio, periodoFinalizacion, idTiposPlanilla);
@@ -908,7 +936,6 @@ export class PlanillaService {
       throw new InternalServerErrorException('Error al obtener los totales por periodo');
     }
   }
-
 
   async getTotalPorBancoYPeriodo(
     periodoInicio: string,
@@ -976,7 +1003,7 @@ export class PlanillaService {
         p."FECHA_APERTURA" BETWEEN TO_DATE(:periodoInicio, 'DD/MM/YYYY') AND TO_DATE(:periodoFinalizacion, 'DD/MM/YYYY')
         AND p."ID_TIPO_PLANILLA" IN (${idTiposPlanilla.join(', ')})
         AND ddp."ESTADO_APLICACION" = 'COBRADA'
-        AND d."ID_DEDUCCION" NOT IN (1,2,3)
+        AND d."ID_DEDUCCION" NOT IN (1,2,3,44,51)
         GROUP BY
         COALESCE(b."NOMBRE_BANCO", 'SIN BANCO')
         ORDER BY  COALESCE(b."NOMBRE_BANCO", 'SIN BANCO') ASC
@@ -2363,8 +2390,9 @@ export class PlanillaService {
         WHERE 
             TO_DATE(planilla."PERIODO_INICIO", 'DD/MM/YYYY') >= TO_DATE(:periodoInicio, 'DD/MM/YYYY')
             AND TO_DATE(planilla."PERIODO_FINALIZACION", 'DD/MM/YYYY') <= TO_DATE(:periodoFinalizacion, 'DD/MM/YYYY')
+            AND planilla."ID_TIPO_PLANILLA" IN (${idTiposPlanilla.join(', ')})
             AND dd."ESTADO_APLICACION" = 'COBRADA'
-            AND ded."ID_DEDUCCION" NOT IN (1, 2, 3)
+            AND ded."ID_DEDUCCION" NOT IN (1, 2, 3, 44, 51)
         GROUP BY 
             dd."ID_PERSONA"
     `;

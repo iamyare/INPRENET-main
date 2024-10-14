@@ -19,7 +19,6 @@ import * as XLSX from 'xlsx';
 import { MailService } from 'src/common/services/mail.service';
 import * as path from 'path';
 import * as fs from 'fs';
-import * as PDFDocument from 'pdfkit';
 
 @Injectable()
 export class PlanillaService {
@@ -48,7 +47,7 @@ export class PlanillaService {
     try {
       // Rutas de las imágenes para el contenido del correo
       const logoInprenetPath = path.join(process.cwd(), 'assets', 'images', 'LOGO-INPRENET.png');
-      const logoInpremaPath = path.join(process.cwd(), 'assets', 'images', 'logo-INPREMA H-Transparente.png');
+      const logoInpremaPath = path.join(process.cwd(), 'assets', 'images', 'logo-INPREMA-H-Transparente.png');
 
       // Ruta del archivo PDF para enviar como adjunto
       const pdfPath = path.join(process.cwd(), 'assets', 'images', 'voucher.pdf');
@@ -115,20 +114,13 @@ export class PlanillaService {
     }
   }
 
-
-
-
-
-
-
-
   async realizarPagoBeneficiosEstatico() {
     const emailSubject = 'Confirmación de Pago de Beneficios';
     const emailText = 'Este es un mensaje estático de confirmación de pago de beneficios.';
     const emailHtml = `
       <div style="font-family: Arial, sans-serif; padding: 20px; background-color: #f4f4f4;">
         <div style="text-align: center; background-color: #0D7665; padding: 20px; border-radius: 8px 8px 0 0;">
-          <img src="/assets/images/logo INPREMA H Transparente.png" alt="Logo INPREMA" style="max-width: 120px; margin-bottom: 10px;">
+          <img src="/assets/images/logo-INPREMA-H-Transparente.png" alt="Logo INPREMA" style="max-width: 120px; margin-bottom: 10px;">
           <h1 style="color: #ffffff; margin: 0;">Pago de Beneficios</h1>
         </div>
         <div style="background-color: #ffffff; padding: 20px; border-radius: 0 0 8px 8px;">
@@ -240,8 +232,6 @@ export class PlanillaService {
         correo: persona.correo_1,
         telefono: persona.telefono_1,
       };
-
-      // Filtrar solo los beneficios que tengan pagos asociados
       const beneficios = persona.detallePersona.flatMap(detalle =>
         detalle.detalleBeneficio.flatMap(beneficio => {
           const pagos = beneficio.detallePagBeneficio.filter(pago => pago.planilla.id_planilla === idPlanilla);
@@ -263,16 +253,12 @@ export class PlanillaService {
           return [];
         })
       );
-
-      // Agrupar las deducciones sin incluir información redundante de la planilla
       const deducciones = persona.detalleDeduccion.filter(deduccion => deduccion.planilla.id_planilla === idPlanilla).map(deduccion => ({
         deduccion: deduccion.deduccion.nombre_deduccion,
         monto_total: deduccion.monto_total,
         estado_aplicacion: deduccion.estado_aplicacion,
         monto_aplicado: deduccion.monto_aplicado,
       }));
-
-      // Obtener información completa de la planilla
       const planilla = await this.planillaRepository.findOne({
         where: { id_planilla: idPlanilla }
       });
@@ -286,8 +272,6 @@ export class PlanillaService {
         periodoInicio: planilla.periodoInicio,
         periodoFinalizacion: planilla.periodoFinalizacion
       };
-
-      // Retornar la respuesta organizada
       return {
         persona: personaDatos,
         planilla: planillaDatos,
@@ -300,13 +284,13 @@ export class PlanillaService {
       throw new Error('Error al obtener los pagos, deducciones y bancos');
     }
   }
-
+ 
   async updateFallecidoStatusFromExcel(file: Express.Multer.File) {
     const workbook = XLSX.read(file.buffer, { type: 'buffer', cellText: false, cellDates: true });
     const worksheet = workbook.Sheets[workbook.SheetNames[0]];
     const data = XLSX.utils.sheet_to_json(worksheet, { raw: false, defval: "" });
     for (const row of data) {
-      const nIdentificacion = row['IDENTIDAD'].toString().padStart(14, '0');
+      const nIdentificacion = row['IDENTIDAD'].toString().trim();
       const persona = await this.personaRepository.findOne({
         where: { n_identificacion: nIdentificacion },
       });
@@ -2312,7 +2296,6 @@ export class PlanillaService {
   `;
 
     const queryParams: any = { codigo_planilla };
-
     try {
       await this.entityManager.query(queryUpdateBeneficios, queryParams);
       await this.entityManager.query(queryUpdateDeducciones, queryParams);

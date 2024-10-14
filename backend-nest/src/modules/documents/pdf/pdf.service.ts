@@ -1000,99 +1000,137 @@ export class PdfService {
 }
 
   getMovimientosPdfTemplate(data: any, base64data: string) {
-      const months = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
-      const tableBody = [
-          [{ text: 'Año', style: 'tableHeader' }, ...months.map(month => ({ text: month, style: 'tableHeader' })), { text: 'Total', style: 'tableHeader' }],
-          ...Object.keys(data).map(year => {
-              const yearTotal = Array(12).fill(0).reduce((acc, _, i) => {
-                  const movimientos = data[year][i + 1] || [];
-                  const totalMes = movimientos.reduce((sum, mov) => sum + mov.MONTO, 0);
-                  return acc + totalMes;
-              }, 0);
-              return [
-                  { text: year, style: 'year' },
-                  ...Array(12).fill('').map((_, i) => {
-                      const movimientos = data[year][i + 1] || [];
-                      return {
-                          text: movimientos.length ? movimientos.map(mov => mov.MONTO).join('\n') : '-',
-                          style: 'movementCell'
-                      };
-                  }),
-                  { text: yearTotal.toFixed(2), style: 'totalCell' }
-              ];
-          })
-      ];
+    const months = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
+    const tipoCuenta = data.tipoCuenta || 'N/A';
+    const numeroCuenta = data.numeroCuenta || 'N/A';
   
-      const totalDelTotal = Object.keys(data).reduce((acc, year) => {
-          const yearTotal = Array(12).fill(0).reduce((sum, _, i) => {
-              const movimientos = data[year][i + 1] || [];
-              return sum + movimientos.reduce((mesSum, mov) => mesSum + mov.MONTO, 0);
-          }, 0);
-          return acc + yearTotal;
+    const tableBody = [
+      [{ text: 'Año', style: 'tableHeader' }, ...months.map(month => ({ text: month, style: 'tableHeader' })), { text: 'Total', style: 'tableHeader' }],
+      ...Object.keys(data.movimientos).map(year => {
+        const yearTotal = Array(12).fill(0).reduce((acc, _, i) => {
+          const movimientos = data.movimientos[year][i + 1] || [];
+          const totalMes = movimientos.reduce((sum, mov) => sum + mov.MONTO, 0);
+          return acc + totalMes;
+        }, 0);
+    
+        return [
+          { text: year, style: 'year' },
+          ...Array(12).fill('').map((_, i) => {
+            const movimientos = data.movimientos[year][i + 1] || [];
+            return {
+              text: movimientos.length ? movimientos.map(mov => mov.MONTO.toLocaleString('en-US', { minimumFractionDigits: 2 })).join('\n') : '-',
+              style: 'movementCell'
+            };
+          }),
+          { text: yearTotal.toLocaleString('en-US', { minimumFractionDigits: 2 }), style: 'totalCell' } // Formato con comas
+        ];
+      })
+    ];
+    
+    // Totales calculados
+    const totalAportaciones = Object.keys(data.movimientos).reduce((acc, year) => {
+      const yearTotal = Array(12).fill(0).reduce((sum, _, i) => {
+        const movimientos = data.movimientos[year][i + 1] || [];
+        return sum + movimientos.reduce((mesSum, mov) => mesSum + mov.MONTO, 0);
       }, 0);
-  
-      tableBody.push([
-          { text: 'Total aportado', colSpan: 13, alignment: 'right', bold: true, style: 'tableHeader' },
-          ...Array(12).fill({}),
-          { text: totalDelTotal.toFixed(2), style: 'totalCell' }
-      ]);
-  
-      return {
-        pageSize: 'A3',
-        pageOrientation: 'landscape',
-        pageMargins: [40, 60, 40, 40], // Márgenes ajustados
-        background: {
-            image: base64data,
-            width: 900, // Ajuste de ancho para que se vea más proporcionado
-            height: 600, // Altura ajustada para darle más espacio al contenido
-            alignment: 'center', 
-            margin: [0, 0, 0, 10] // Margen inferior para espacio entre la imagen y el contenido
+      return acc + yearTotal;
+    }, 0);
+    
+    // Ejemplos de débitos y créditos, puedes ajustar estos valores según corresponda
+    const totalDebitos = 0; 
+    const totalCreditos = 0; 
+    const totalDelTotal = totalAportaciones - totalDebitos + totalCreditos;
+    
+    // Agregar las filas adicionales
+    tableBody.push(
+      [
+        { text: 'Aportaciones', colSpan: 13, alignment: 'right', bold: true, style: 'tableHeader' },
+        ...Array(12).fill({}),
+        { text: totalAportaciones.toLocaleString('en-US', { minimumFractionDigits: 2 }), style: 'totalCell' } // Formato con comas
+      ],
+      [
+        { text: 'Débitos', colSpan: 13, alignment: 'right', bold: true, style: 'tableHeader' },
+        ...Array(12).fill({}),
+        { text: totalDebitos.toLocaleString('en-US', { minimumFractionDigits: 2 }), style: 'totalCell' } // Formato con comas
+      ],
+      [
+        { text: 'Créditos', colSpan: 13, alignment: 'right', bold: true, style: 'tableHeader' },
+        ...Array(12).fill({}),
+        { text: totalCreditos.toLocaleString('en-US', { minimumFractionDigits: 2 }), style: 'totalCell' } // Formato con comas
+      ],
+      [
+        { text: 'Total aportado', colSpan: 13, alignment: 'right', bold: true, style: 'tableHeader' },
+        ...Array(12).fill({}),
+        { text: totalDelTotal.toLocaleString('en-US', { minimumFractionDigits: 2 }), style: 'totalCell' } // Formato con comas
+      ]
+    );
+    
+    return {
+      pageSize: 'A3',
+      pageOrientation: 'landscape',
+      pageMargins: [40, 100, 40, 40],
+      background: {
+        image: base64data,
+        width: 900,
+        height: 600,
+        alignment: 'center',
+        margin: [0, -10, 0, 0]
+      },
+      content: [
+        {
+          columns: [
+            { text: `Nombre: CHINCHILLA CRUZ ELISA`, style: 'personaInfo' },
+            { text: `Identidad: 0801198523056`, style: 'personaInfo' },
+            { text: `Tipo de Cuenta: APORTACIÓN`, style: 'personaInfo' },
+            { text: `Número de Cuenta: ${numeroCuenta}`, style: 'personaInfo' }
+          ],
+          columnGap: 20,
+          margin: [0, 10, 0, 10]
         },
-        content: [
-            { 
-                text: 'Nombre: CHINCHILLA CRUZ ELISA', 
-                style: 'personaInfo', 
-                alignment: 'left', 
-                margin: [0, 20, 0, 5] 
-            },
-            { 
-                text: 'Identidad: 0801198523056', 
-                style: 'personaInfo', 
-                alignment: 'left', 
-                margin: [0, 0, 0, 10] 
-            },
-            {
-                table: {
-                    // Cambiar todos los anchos a proporcionales
-                    widths: Array(14).fill('*'), // Ajuste de ancho uniforme para todas las columnas
-                    body: tableBody
-                },
-                layout: {
-                    hLineWidth: function () { return 0.5; },
-                    vLineWidth: function () { return 0.5; },
-                    hLineColor: function () { return '#aaaaaa'; },
-                    vLineColor: function () { return '#aaaaaa'; },
-                },
-                margin: [0, 10, 0, 10]
-            }
-        ],
-        styles: {
-            subheader: { fontSize: 10, alignment: 'left', margin: [0, 0, 0, 5] },
-            personaInfo: { 
-                fontSize: 12, 
-                bold: true, 
-                decoration: 'underline' 
-            },
-            year: { fontSize: 10, bold: true, alignment: 'center' },
-            tableHeader: { bold: true, fontSize: 10, alignment: 'center', fillColor: '#eeeeee' },
-            movementCell: { fontSize: 9, alignment: 'center' },
-            totalCell: { fontSize: 10, alignment: 'center', bold: true, color: '#000' }
+        {
+          table: {
+            widths: Array(14).fill('*'),
+            body: tableBody
+          },
+          layout: {
+            hLineWidth: function () { return 0.5; },
+            vLineWidth: function () { return 0.5; },
+            hLineColor: function () { return '#aaaaaa'; },
+            vLineColor: function () { return '#aaaaaa'; },
+          },
+          margin: [0, 0, 0, 10]
         }
+      ],
+      footer: (currentPage, pageCount) => ({
+        table: {
+          widths: ['*', '*', '*'],
+          body: [
+            [
+              { text: 'FECHA Y HORA: ' + new Date().toLocaleString(), alignment: 'left', border: [false, false, false, false], fontSize: 8 },
+              { text: 'GENERÓ: INPRENET', alignment: 'center', border: [false, false, false, false], fontSize: 8 },
+              { text: 'PÁGINA ' + currentPage.toString() + ' DE ' + pageCount, alignment: 'right', border: [false, false, false, false], fontSize: 8 }
+            ]
+          ]
+        },
+        margin: [20, 0, 20, 20]
+      }),
+      styles: {
+        subheader: { fontSize: 10, alignment: 'left', margin: [0, 0, 0, 5] },
+        personaInfo: { fontSize: 12, bold: true },
+        year: { fontSize: 10, bold: true, alignment: 'center' },
+        tableHeader: { bold: true, fontSize: 10, alignment: 'center', fillColor: '#eeeeee' },
+        movementCell: { fontSize: 9, alignment: 'center' },
+        totalCell: { fontSize: 10, alignment: 'center', bold: true, color: '#000' }
+      }
     };
     
-    
-  }
 
   
+
+  }
+
+
+
+
 
 }

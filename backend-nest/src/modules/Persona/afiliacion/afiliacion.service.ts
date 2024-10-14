@@ -72,7 +72,7 @@ export class AfiliacionService {
     private readonly familiaRepository: Repository<Net_Familia>,
     @InjectRepository(net_otra_fuente_ingreso)
     private readonly otraFuenteIngresoRepository: Repository<net_otra_fuente_ingreso>,
-
+    private readonly entityManager: EntityManager,
   ) { }
 
   async updateFotoPerfil(id: number, fotoPerfil: Buffer): Promise<net_persona> {
@@ -295,8 +295,6 @@ export class AfiliacionService {
     return resultados;
   }
 
-
-
   async crearPersonaCentrosTrabajo(
     crearPersonaCentrosTrabajoDtos: CrearPersonaCentroTrabajoDto[],
     idPersona: number,
@@ -423,25 +421,25 @@ export class AfiliacionService {
     return resultados;
   }
 
-  async crearDiscapacidades(
-    discapacidadesDto: CrearDiscapacidadDto[],
-    idPersona: number,
-    entityManager: EntityManager,
-): Promise<void> {
-    for (const discapacidadDto of discapacidadesDto) {
-        const discapacidad = await this.discapacidadRepository.findOne({
-            where: { tipo_discapacidad: discapacidadDto.tipo_discapacidad }
-        });
-        if (!discapacidad) {
-            throw new NotFoundException(`Discapacidad con tipo ${discapacidadDto.tipo_discapacidad} no encontrada`);
-        }
-        const nuevaDiscapacidad = entityManager.create(Net_Persona_Discapacidad, {
-            discapacidad: discapacidad,
-            persona: { id_persona: idPersona },
-        });
-        await entityManager.save(Net_Persona_Discapacidad, nuevaDiscapacidad);
-    }
-}
+    async crearDiscapacidades(
+      discapacidadesDto: CrearDiscapacidadDto[],
+      idPersona: number,
+      entityManager: EntityManager,
+  ): Promise<void> {
+      for (const discapacidadDto of discapacidadesDto) {
+          const discapacidad = await this.discapacidadRepository.findOne({
+              where: { tipo_discapacidad: discapacidadDto.tipo_discapacidad }
+          });
+          if (!discapacidad) {
+              throw new NotFoundException(`Discapacidad con tipo ${discapacidadDto.tipo_discapacidad} no encontrada`);
+          }
+          const nuevaDiscapacidad = entityManager.create(Net_Persona_Discapacidad, {
+              discapacidad: discapacidad,
+              persona: { id_persona: idPersona },
+          });
+          await entityManager.save(Net_Persona_Discapacidad, nuevaDiscapacidad);
+      }
+  }
 
   async crearPeps(pepsDto: CrearPepsDto[], idPersona: number, entityManager: EntityManager): Promise<Net_Peps[]> {
     const resultados: Net_Peps[] = [];
@@ -806,6 +804,20 @@ export class AfiliacionService {
       resultados.push(peps);
     }
     return resultados;
+  }
+
+  async eliminarDiscapacidad(idPersona: number, tipoDiscapacidad: string): Promise<void> {
+    const discapacidadRelacion = await this.entityManager.findOne(Net_Persona_Discapacidad, {
+      where: {
+        persona: { id_persona: idPersona },
+        discapacidad: { tipo_discapacidad: tipoDiscapacidad },
+      },
+      relations: ['persona', 'discapacidad'],
+    });
+    if (!discapacidadRelacion) {
+      throw new NotFoundException(`Discapacidad de tipo ${tipoDiscapacidad} no encontrada para la persona con ID ${idPersona}`);
+    }
+    await this.entityManager.remove(Net_Persona_Discapacidad, discapacidadRelacion);
   }
 
 }

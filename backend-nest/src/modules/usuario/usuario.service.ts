@@ -19,6 +19,8 @@ import { ForgotPasswordDto } from './dto/forgot-password.dto';
 import { Cron } from '@nestjs/schedule';
 import { Net_Empleado } from '../Empresarial/entities/net_empleado.entity';
 import { Net_Empleado_Centro_Trabajo } from '../Empresarial/entities/net_empleado_centro_trabajo.entity';
+import * as fs from 'fs';
+import * as path from 'path';
 
 @Injectable()
 export class UsuarioService {
@@ -280,31 +282,28 @@ export class UsuarioService {
 
     // Enviar correo electrónico de verificación
     const verificationUrl = `${process.env.HOST_FRONTEND}/register?token=${token}`;
+    const imageUrl="https://inprema.gob.hn/servicios-electronicos/"
     const htmlContent = `
-      <div style="font-family: Arial, sans-serif; line-height: 1.6;">
-        <h2 style="color: #13776B;">¡Bienvenido a INPRENET!</h2>
-        <p>Hola ${nombreEmpleado},</p>
-        <p>Estamos encantados de tenerte con nosotros y queremos asegurarnos de que tengas la mejor experiencia posible desde el primer día.</p>
-        <div style="text-align: center;">
-        <img src="https://inprema.gob.hn/wp-content/uploads/2021/11/inprema-logo-dorado.png" alt="Descripción de la imagen" width="150" height="auto">
-        <p>Para empezar, necesitamos que completes tu registro como administrador. Esto nos ayudará a personalizar tu experiencia y asegurarnos de que tienes acceso a todas las funcionalidades de nuestra aplicación.</p>
-        <p>Por favor, completa tu registro haciendo clic en el siguiente enlace:</p>
-        <div style="text-align: center; margin: 20px 0;">
-          <a href="${verificationUrl}" style="background-color: #13776B; color: white; padding: 10px 20px; text-decoration: none; border-radius: 4px;">Completar Registro</a>
-        </div>
-        <p>Si tienes alguna pregunta o necesitas ayuda, no dudes en contactarnos.</p>
-        <p>¡Gracias por unirte a nosotros!</p>
-        <p>El equipo de INPRENET</p>
-      </div>`;
-
+   <div style="font-family: Arial, sans-serif; line-height: 1.6;">
+     <h2 style="color: #13776B;">¡Bienvenido a INPRENET!</h2>
+     <p>Hola ${nombreEmpleado},</p>
+     <p>Estamos encantados de tenerte con nosotros y queremos asegurarnos de que tengas la mejor experiencia posible desde el primer día.</p>
+     <div style="text-align: center;">
+     <img src="${imageUrl}" alt="Logo INPREMA" style="max-width: 120px; margin-bottom: 10px;">
+     <p>Para empezar, necesitamos que completes tu registro como administrador. Esto nos ayudará a personalizar tu experiencia y asegurarnos de que tienes acceso a todas las funcionalidades de nuestra aplicación.</p>
+     <p>Por favor, completa tu registro haciendo clic en el siguiente enlace:</p>
+     <div style="text-align: center; margin: 20px 0;">
+       <a href="${verificationUrl}" style="background-color: #13776B; color: white; padding: 10px 20px; text-decoration: none; border-radius: 4px;">Completar Registro</a>
+     </div>
+     <p>Si tienes alguna pregunta o necesitas ayuda, no dudes en contactarnos.</p>
+     <p>¡Gracias por unirte a nosotros!</p>
+     <p>El equipo de INPRENET</p>
+   </div>`;
     await this.mailService.sendMail(correo, 'Completa tu registro', '', htmlContent);
   }
 
-
   async preRegistro(createPreRegistroDto: CreatePreRegistroDto): Promise<void> {
     const { nombreEmpleado, nombrePuesto, correo, numeroEmpleado, idRole } = createPreRegistroDto;
-
-    // Verificar si el usuario ya existe
     const usuarioExistente = await this.usuarioEmpresaRepository.findOne({
       relations: ['empleadoCentroTrabajo'],
       where: {
@@ -313,29 +312,20 @@ export class UsuarioService {
         },
       },
     });
-
     if (usuarioExistente) {
       throw new BadRequestException('El correo ya está registrado');
     }
-
-    // Verificar si el rol existe
     const rol = await this.rolModuloRepository.findOne({
       where: { id_rol_modulo: idRole },
       relations: ['modulo', 'modulo.centroTrabajo'],
     });
-
     if (!rol) {
       throw new BadRequestException('El rol especificado no existe');
     }
-
-    // Crear un nuevo empleado
     const nuevoEmpleado = this.empleadoRepository.create({
       nombreEmpleado,
     });
-
     const empleado = await this.empleadoRepository.save(nuevoEmpleado);
-
-    // Crear una nueva relación de empleado con centro de trabajo
     const nuevoEmpleadoCentroTrabajo = this.empleadoCentroTrabajoRepository.create({
       empleado,
       correo_1: correo,
@@ -343,50 +333,55 @@ export class UsuarioService {
       nombrePuesto,
       centroTrabajo: rol.modulo.centroTrabajo,
     });
-
     const empleadoCentroTrabajo = await this.empleadoCentroTrabajoRepository.save(nuevoEmpleadoCentroTrabajo);
-
-    // Crear un nuevo usuario
     const nuevoUsuario = this.usuarioEmpresaRepository.create({
       estado: 'PENDIENTE',
       contrasena: await bcrypt.hash('temporal', 10),
       empleadoCentroTrabajo: empleadoCentroTrabajo,
     });
-
     const usuarioGuardado = await this.usuarioEmpresaRepository.save(nuevoUsuario);
-
-    // Crear la relación en Net_Usuario_Modulo
     const usuarioModulo = this.usuarioModuloRepository.create({
       usuarioEmpresa: usuarioGuardado,
       rolModulo: rol,
     });
-
     await this.usuarioModuloRepository.save(usuarioModulo);
-
-    // Generar un token JWT para la verificación de correo
     const token = this.jwtService.sign({ correo });
-
-    // Enviar correo electrónico de verificación
+    const logoPath = path.join(process.cwd(), 'assets', 'images', 'LOGO-INPRENET.png');
+    if (!fs.existsSync(logoPath)) {
+      this.logger.error('El archivo LOGO-INPRENET.png no se encontró en la ruta: ' + logoPath);
+      throw new InternalServerErrorException('Error: El archivo LOGO-INPRENET.png no se encuentra en la ruta especificada.');
+    }
     const verificationUrl = `${process.env.HOST_FRONTEND}/register?token=${token}`;
     const htmlContent = `
-    <div style="font-family: Arial, sans-serif; line-height: 1.6;">
-      <h2 style="color: #13776B;">¡Bienvenido a INPRENET!</h2>
-      <p>Hola ${nombreEmpleado},</p>
-      <p>Estamos encantados de tenerte con nosotros y queremos asegurarnos de que tengas la mejor experiencia posible desde el primer día.</p>
-      <div style="text-align: center;">
-      <img src="https://inprema.gob.hn/wp-content/uploads/2021/11/inprema-logo-dorado.png" alt="Descripción de la imagen" width="150" height="auto">
-      <p>Para empezar, necesitamos que completes tu registro. Esto nos ayudará a personalizar tu experiencia y asegurarnos de que tienes acceso a todas las funcionalidades de nuestra aplicación.</p>
-      <p>Por favor, completa tu registro haciendo clic en el siguiente enlace:</p>
-      <div style="text-align: center; margin: 20px 0;">
-        <a href="${verificationUrl}" style="background-color: #13776B; color: white; padding: 10px 20px; text-decoration: none; border-radius: 4px;">Completar Registro</a>
-      </div>
-      <p>Si tienes alguna pregunta o necesitas ayuda, no dudes en contactarnos.</p>
-      <p>¡Gracias por unirte a nosotros!</p>
-      <p>El equipo de INPRENET</p>
-    </div>`;
+      <div style="font-family: Arial, sans-serif; line-height: 1.6;">
+        <h2 style="color: #13776B;">¡Bienvenido a 
+          <span style="color: #14776B;">INPRE</span><span style="color: #33E4DC;">NET</span>!
+        </h2>
+        <p>Hola ${nombreEmpleado},</p>
+        <p>Estamos encantados de tenerte con nosotros y queremos asegurarnos de que tengas la mejor experiencia posible desde el primer día.</p>
+        <div style="text-align: center;">
+          <img src="cid:logoInprema" alt="Logo INPREMA" style="width: 250px; height: auto; margin-bottom: 10px;">
+          <p>Para empezar, necesitamos que completes tu registro. Esto nos ayudará a personalizar tu experiencia y asegurarnos de que tienes acceso a todas las funcionalidades de nuestra aplicación.</p>
+          <p>Por favor, completa tu registro haciendo clic en el siguiente enlace:</p>
+          <div style="text-align: center; margin: 20px 0;">
+            <a href="${verificationUrl}" style="background-color: #13776B; color: white; padding: 10px 20px; text-decoration: none; border-radius: 4px;">Completar Registro</a>
+          </div>
+          <p>Si tienes alguna pregunta o necesitas ayuda, no dudes en contactarnos.</p>
+          <p>¡Gracias por unirte a nosotros!</p>
+          <p>El equipo de INPRENET</p>
+        </div>
+      </div>`;
+    
+    await this.mailService.sendMail(correo, 'Completa tu registro', '', htmlContent, [
+      {
+        filename: 'LOGO-INPRENET.png',
+        path: logoPath,
+        cid: 'logoInprema'
+      }
+    ]);
 
 
-    await this.mailService.sendMail(correo, 'Completa tu registro', '', htmlContent);
+
   }
 
   async completarRegistro(token: string, completeRegistrationDto: CompleteRegistrationDto, archivoIdentificacionBuffer: Buffer, fotoEmpleadoBuffer: Buffer): Promise<void> {

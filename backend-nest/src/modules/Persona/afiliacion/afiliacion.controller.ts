@@ -26,6 +26,14 @@ export class AfiliacionController {
   constructor(private readonly afiliacionService: AfiliacionService, private readonly connection: Connection, private readonly entityManager: EntityManager,) {
   }
 
+    @Delete(':idPersona/discapacidades/:tipoDiscapacidad')
+    async eliminarDiscapacidad(
+      @Param('idPersona', ParseIntPipe) idPersona: number,
+      @Param('tipoDiscapacidad') tipoDiscapacidad: string,
+    ): Promise<void> {
+      await this.afiliacionService.eliminarDiscapacidad(idPersona, tipoDiscapacidad);
+    }
+
     @Post(':idPersona/discapacidades')
     async crearDiscapacidades(
       @Param('idPersona', ParseIntPipe) idPersona: number,
@@ -35,25 +43,24 @@ export class AfiliacionController {
       if (!persona) {
         throw new NotFoundException(`Persona con ID ${idPersona} no encontrada`);
       }
-  
       await this.connection.transaction(async (entityManager) => {
         await this.afiliacionService.crearDiscapacidades(discapacidadesDto, idPersona, entityManager);
       });
     }
 
-  @Put('actualizar-peps/:idPersona')
-  async actualizarPeps(
-    @Param('idPersona', ParseIntPipe) idPersona: number,
-    @Body() pepsDto: CrearPepsDto[],
-  ) {
-    const persona = await this.entityManager.findOne('net_persona', { where: { id_persona: idPersona } });
-    if (!persona) {
-      throw new HttpException('Persona no encontrada', HttpStatus.NOT_FOUND);
+    @Put('actualizar-peps/:idPersona')
+    async actualizarPeps(
+      @Param('idPersona', ParseIntPipe) idPersona: number,
+      @Body() pepsDto: CrearPepsDto[],
+    ) {
+      const persona = await this.entityManager.findOne('net_persona', { where: { id_persona: idPersona } });
+      if (!persona) {
+        throw new HttpException('Persona no encontrada', HttpStatus.NOT_FOUND);
+      }
+      return this.entityManager.transaction(async (transactionalEntityManager) => {
+        return this.afiliacionService.actualizarPeps(pepsDto, idPersona, transactionalEntityManager);
+      });
     }
-    return this.entityManager.transaction(async (transactionalEntityManager) => {
-      return this.afiliacionService.actualizarPeps(pepsDto, idPersona, transactionalEntityManager);
-    });
-  }
 
   @Delete(':idPersona/familiares/:idFamiliar')
   async eliminarFamiliar(

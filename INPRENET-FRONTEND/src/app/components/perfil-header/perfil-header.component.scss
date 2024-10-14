@@ -35,6 +35,58 @@
   margin-top: 10px;
 }
 
+.perfil-container {
+  margin: 20px;
+  padding: 20px;
+  background-color: #ffffff;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  position: relative;
+  overflow: hidden;
+}
+
+.perfil-container::before {
+  content: "";
+  position: absolute;
+  top: -4px;
+  left: -4px;
+  right: -4px;
+  bottom: -4px;
+  background: linear-gradient(45deg, #e5f4f3, #bee4e1, #93d3cd, #67c1b8, #47b3a9, #26a69a, #229e92, #1c9588, #178b7e, #0d7b6c);
+  z-index: -1;
+  border-radius: 10px;
+  padding: 2px;
+  box-sizing: border-box;
+}
+
+.perfil-container::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #ffffff;
+  border-radius: 10px;
+  z-index: -1;
+}
+
+.header-actions {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.search-again {
+  margin-right: 10px;
+}
+
+.search-text {
+  font-size: 14px;
+  color: #1c9588;
+}
+
 .perfil-header {
   display: flex;
   align-items: center;
@@ -73,15 +125,4 @@
   margin: 5px 0;
   font-size: 16px;
   color: #1c9588;
-}
-
-.header-actions {
-  display: flex;
-  align-items: center;
-  margin-bottom: 10px;
-}
-
-.search-again {
-  margin-right: 10px;
-  background-color: white;
 }

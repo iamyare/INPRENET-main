@@ -13,8 +13,8 @@ import { ConfirmDialogComponent } from 'src/app/components/dinamicos/confirm-dia
 import { AgregarBenefCompComponent } from '../agregar-benef-comp/agregar-benef-comp.component';
 import { PermisosService } from 'src/app/services/permisos.service';
 import { AfiliacionService } from 'src/app/services/afiliacion.service';
-import { DynamicInputDialogComponent } from 'src/app/components/dinamicos/dynamic-input-dialog/dynamic-input-dialog.component';
 import { DatosEstaticosService } from 'src/app/services/datos-estaticos.service';
+import { GestionarDiscapacidadDialogComponent } from 'src/app/components/dinamicos/gestionar-discapacidad-dialog/gestionar-discapacidad-dialog.component';
 
 @Component({
   selector: 'app-edit-beneficiarios',
@@ -97,7 +97,10 @@ export class EditBeneficiariosComponent implements OnInit, OnChanges {
           const nombres = [item.primerNombre, item.segundoNombre, item.tercerNombre].filter(part => part).join(' ');
           const apellidos = [item.primerApellido, item.segundoApellido].filter(part => part).join(' ');
           const fechaNacimiento = this.datePipe.transform(item.fechaNacimiento, 'dd/MM/yyyy') || 'Fecha no disponible';
-          const discapacidades = item.discapacidades.map((disc: any) => disc.tipoDiscapacidad).filter((disc:any) => disc).join(', ') || 'No tiene';
+          const discapacidades = Array.isArray(item.discapacidades)
+            ? item.discapacidades.map((disc: any) => disc.tipoDiscapacidad).join(', ')
+            : '';
+
           const respData = {
             id_causante: item.ID_CAUSANTE_PADRE,
             id_persona: item.idPersona,
@@ -231,38 +234,54 @@ export class EditBeneficiariosComponent implements OnInit, OnChanges {
 
   agregarDiscapacidad(row: any) {
     this.datosEstaticosService.getDiscapacidades().subscribe(discapacidades => {
-      const dialogRef = this.dialog.open(DynamicInputDialogComponent, {
-        width: '400px',
+      const discapacidadesArray = typeof row.discapacidades === 'string'
+        ? row.discapacidades.split(', ').map((disc: string) => disc.trim())
+        : row.discapacidades || [];
+
+      const dialogRef = this.dialog.open(GestionarDiscapacidadDialogComponent, {
+        width: '500px',
         data: {
-          title: 'Agregar Discapacidad',
-          inputs: [
-            {
-              type: 'select',
-              label: 'Seleccionar Discapacidad',
-              name: 'tipo_discapacidad',
-              options: discapacidades
-            }
-          ]
+          discapacidades: discapacidades,
+          personaDiscapacidades: discapacidadesArray
         }
       });
 
       dialogRef.afterClosed().subscribe(result => {
-        if (result && result.tipo_discapacidad) {
-          const discapacidades = [{ tipo_discapacidad: result.tipo_discapacidad }];
-          console.log(row.id_persona);
-          console.log(discapacidades);
-          /* this.afiliacionServicio.crearDiscapacidades(row.id_persona, discapacidades).subscribe(
-            () => {
-              this.toastr.success('Discapacidad agregada exitosamente');
-              this.getFilas();
-            },
-            error => {
-              this.toastr.error('Error al agregar discapacidad');
-              console.error('Error al agregar discapacidad:', error);
+        if (result) {
+          if (result.agregar) {
+            const discapacidadSeleccionada = discapacidades.find(disc => disc.value === result.tipo_discapacidad);
+            if (discapacidadSeleccionada) {
+              const discapacidadesPayload = [{ tipo_discapacidad: discapacidadSeleccionada.label }];
+              this.afiliacionServicio.crearDiscapacidades(row.id_persona, discapacidadesPayload).subscribe(
+                () => {
+                  this.toastr.success('Discapacidad agregada exitosamente');
+                  this.getFilas().then(() => this.cargar());
+                },
+                error => {
+                  this.toastr.error('Error al agregar discapacidad');
+                  console.error('Error al agregar discapacidad:', error);
+                }
+              );
+            } else {
+              console.error("No se encontró la discapacidad seleccionada");
             }
-          ); */
+          }
+          else if (result.eliminar) {
+            this.afiliacionServicio.eliminarDiscapacidad(row.id_persona, result.discapacidadId).subscribe(
+              () => {
+                this.toastr.success('Discapacidad eliminada exitosamente');
+                this.getFilas().then(() => this.cargar());
+              },
+              error => {
+                this.toastr.error('Error al eliminar discapacidad');
+                console.error('Error al eliminar discapacidad:', error);
+              }
+            );
+          }
+
         }
       });
     });
   }
+
 }

@@ -29,6 +29,8 @@ import { LandingPageComponent } from './landing-page/landing-page.component';
 import { DynamicInputDialogComponent } from './dinamicos/dynamic-input-dialog/dynamic-input-dialog.component';
 import { DynamicStepsComponent } from './dinamicos/dynamic-steps/dynamic-steps.component';
 import { PerfilHeaderComponent } from './perfil-header/perfil-header.component';
+import { GestionarDiscapacidadDialogComponent } from './dinamicos/gestionar-discapacidad-dialog/gestionar-discapacidad-dialog.component';
+import { ReactiveFormsModule } from '@angular/forms';
 
 
 
@@ -60,7 +62,8 @@ import { PerfilHeaderComponent } from './perfil-header/perfil-header.component';
     LandingPageComponent,
     DynamicInputDialogComponent,
     DynamicStepsComponent,
-    PerfilHeaderComponent
+    PerfilHeaderComponent,
+    GestionarDiscapacidadDialogComponent
   ],
   imports: [
     CommonModule,
@@ -94,7 +97,8 @@ import { PerfilHeaderComponent } from './perfil-header/perfil-header.component';
     LandingPageComponent,
     DynamicInputDialogComponent,
     DynamicStepsComponent,
-    PerfilHeaderComponent
+    PerfilHeaderComponent,
+    GestionarDiscapacidadDialogComponent
   ]
 })
 export class ComponentsModule { }

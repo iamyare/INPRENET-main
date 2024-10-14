@@ -1,4 +1,5 @@
 <br>
+<br>
 <div>
   <app-perfil-header (personaEncontrada)="onPersonaEncontrada($event)" [persona]="persona"></app-perfil-header>
 </div>
@@ -26,11 +27,20 @@
     </ng-container>
     <ng-container matColumnDef="numeroCuenta">
       <th mat-header-cell *matHeaderCellDef>Número Cuenta</th>
-      <td mat-cell *matCellDef="let element">{{ element.cuentaPersona.NUMERO_CUENTA }}</td>
+      <td mat-cell *matCellDef="let element">{{ element.NUMERO_CUENTA }}</td>
     </ng-container>
     <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
     <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
   </table>
   <mat-paginator [pageSizeOptions]="[5, 10, 20]" showFirstLastButtons></mat-paginator>
-  <button mat-raised-button color="accent" (click)="descargarMovimientosPdf()" [disabled]="!dataSource.data.length">Descargar PDF</button>
+
+  <!-- Botón para descargar PDF -->
+  <button mat-raised-button color="accent" (click)="descargarMovimientosPdf()" [disabled]="!dataSource.data.length">
+    Descargar PDF
+  </button>
+
+  <!-- Botón para agregar movimiento -->
+  <button mat-raised-button color="primary" (click)="openAgregarMovimientoDialog()">
+    Agregar Movimiento
+  </button>
 </div>

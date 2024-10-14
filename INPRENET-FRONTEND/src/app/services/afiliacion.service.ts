@@ -20,6 +20,16 @@ export class AfiliacionService {
     );
   }
 
+  eliminarDiscapacidad(idPersona: number, tipoDiscapacidad: string): Observable<void> {
+    const url = `${environment.API_URL}/api/afiliacion/${idPersona}/discapacidades/${tipoDiscapacidad}`;
+    return this.http.delete<void>(url).pipe(
+      catchError((error) => {
+        console.error('Error al eliminar la discapacidad', error);
+        return throwError(error);
+      })
+    );
+  }
+
   actualizarPeps(idPersona: number, pepsDto: any[]): Observable<any> {
     const url = `${environment.API_URL}/api/afiliacion/actualizar-peps/${idPersona}`;
     return this.http.put<any>(url, pepsDto).pipe(

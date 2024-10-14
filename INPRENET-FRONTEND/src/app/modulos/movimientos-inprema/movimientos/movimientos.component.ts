@@ -2,8 +2,10 @@ import { Component, OnInit, ViewChild } from '@angular/core';
 import { MatTableDataSource } from '@angular/material/table';
 import { MatPaginator } from '@angular/material/paginator';
 import { MatSort } from '@angular/material/sort';
+import { MatDialog } from '@angular/material/dialog';
 import { TransaccionesService } from 'src/app/services/transacciones.service';
 import { AfiliadoService } from 'src/app/services/afiliado.service';
+import { AgregarMovimientoComponent } from '../../afiliacion/gestion/agregar-movimiento/agregar-movimiento.component';
 
 @Component({
   selector: 'app-movimientos',
@@ -22,7 +24,11 @@ export class MovimientosComponent implements OnInit {
   @ViewChild(MatPaginator) paginator!: MatPaginator;
   @ViewChild(MatSort) sort!: MatSort;
 
-  constructor(private transaccionesService: TransaccionesService, private afiliadoService: AfiliadoService) {
+  constructor(
+    private transaccionesService: TransaccionesService,
+    private afiliadoService: AfiliadoService,
+    private dialog: MatDialog
+  ) {
     this.dataSource = new MatTableDataSource();
   }
 
@@ -54,15 +60,28 @@ export class MovimientosComponent implements OnInit {
 
   convertirMovimientosArray(data: any): any[] {
     const result: any[] = [];
-    for (const year in data) {
-      if (data.hasOwnProperty(year)) {
-        for (const month in data[year]) {
-          if (data[year].hasOwnProperty(month) && Array.isArray(data[year][month])) {
-            data[year][month].forEach((movimiento: any) => {
-              result.push(movimiento);
+    const tipoCuenta = data.tipoCuenta;
+    const numeroCuenta = data.numeroCuenta;
+
+    for (const year in data.movimientos) {
+      if (data.movimientos.hasOwnProperty(year)) {
+        const yearData = data.movimientos[year];
+
+        for (const month in yearData) {
+          if (yearData.hasOwnProperty(month) && Array.isArray(yearData[month])) {
+            yearData[month].forEach((movimiento: any) => {
+              result.push({
+                ANO: year,
+                MES: month,
+                MONTO: movimiento.MONTO,
+                DESCRIPCION: movimiento.DESCRIPCION,
+                FECHA_MOVIMIENTO: movimiento.FECHA_MOVIMIENTO,
+                NUMERO_CUENTA: numeroCuenta, // Se utiliza el número de cuenta del nivel superior
+                TIPO_CUENTA: tipoCuenta,     // Se utiliza el tipo de cuenta del nivel superior
+              });
             });
           } else {
-            console.warn(`Esperaba un arreglo en data[${year}][${month}] pero encontré:`, data[year][month]);
+            console.warn(`Esperaba un arreglo en data.movimientos[${year}][${month}] pero encontré:`, yearData[month]);
           }
         }
       }
@@ -91,5 +110,28 @@ export class MovimientosComponent implements OnInit {
         console.error('Error al descargar el PDF:', error);
       }
     );
+  }
+
+  // Método para abrir el diálogo de agregar movimiento
+  openAgregarMovimientoDialog(): void {
+    const dialogRef = this.dialog.open(AgregarMovimientoComponent, {
+      width: '400px',
+      data: { numeroCuenta: this.persona?.NUMERO_CUENTA }
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) {
+        const nuevoMovimiento = {
+          ANO: new Date().getFullYear().toString(),
+          MES: (new Date().getMonth() + 1).toString(),
+          MONTO: result.monto,
+          DESCRIPCION: result.descripcion,
+          FECHA_MOVIMIENTO: new Date(),
+          NUMERO_CUENTA: this.persona?.NUMERO_CUENTA,
+          TIPO_CUENTA: 'Nueva'
+        };
+        this.dataSource.data = [...this.dataSource.data, nuevoMovimiento];
+      }
+    });
   }
 }

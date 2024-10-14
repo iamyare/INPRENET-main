@@ -325,7 +325,6 @@ export class VerplanprelcompComponent implements OnInit {
 
         // Escuchar el evento deduccionEliminada para refrescar los datos
         dialogRef.componentInstance.deduccionEliminada.subscribe(() => {
-
           this.getFilas(this.codigoPlanilla).then(() => this.cargar());
         });
 

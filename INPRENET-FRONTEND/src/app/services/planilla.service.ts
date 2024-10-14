@@ -106,6 +106,25 @@ export class PlanillaService {
     );
   }
 
+  getPlanillasCerradaByFechas(fechaInicio: string, fechaFinalizacion: string): Observable<any> {
+    const url = `${environment.API_URL}/api/planilla/cerradas_fecha`;
+    let params = new HttpParams();
+
+    if (fechaInicio && fechaFinalizacion) {
+      params = params.set('fechaInicio', fechaInicio);
+      params = params.set('fechaFinalizacion', fechaFinalizacion);
+    }
+
+    return this.http.get<any>(url, { params }).pipe(
+      catchError(error => {
+        console.error('Error al obtener planillas cerradas', error);
+        return throwError(error);
+      })
+    );
+
+    /* } */
+  }
+
   getPlanillasPreliminares(codigo_planilla: string): Observable<any> {
     const url = `${environment.API_URL}/api/planilla/get-preliminares`;
     return this.http.post<any>(url, { codigo_planilla }).pipe(
@@ -151,8 +170,6 @@ export class PlanillaService {
   }
 
   getTotalBeneficiosYDeduccionesPorPeriodo(periodoInicio: string, periodoFinalizacion: string, idTiposPlanilla: number[]): Observable<any> {
-    console.log(idTiposPlanilla);
-
     const params = new HttpParams()
       .set('periodoInicio', periodoInicio)
       .set('periodoFinalizacion', periodoFinalizacion)

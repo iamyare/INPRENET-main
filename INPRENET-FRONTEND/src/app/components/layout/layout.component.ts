@@ -15,39 +15,39 @@ export class LayoutComponent implements OnInit {
   constructor(
     private sidenavService: SidenavService,
     private permisosService: PermisosService
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     this.menuConfig = this.sidenavService.getMenuConfig().filter(section => {
       let isSectionVisible = false;
-
       switch (section.name.toLowerCase()) {
         case 'afiliación':
           isSectionVisible = this.permisosService.tieneAccesoCompletoAfiliacion() || this.permisosService.tieneAccesoLimitadoAfiliacion();
           break;
         case 'planilla':
-          isSectionVisible = this.permisosService.tieneAccesoCompletoAfiliacion(); // Actualizar si hay método específico para PLANILLA
+          isSectionVisible = this.permisosService.tieneAccesoCompletoPlanilla() || this.permisosService.tieneAccesoLimitadoPlanilla(); // Actualizar si hay método específico para PLANILLA
+          if (isSectionVisible) {
+            section.items.forEach(item => {
+              item.children = item.children?.filter(child => {
+                return this.permisosService.tieneAccesoAChilPlanilla(child.title)
+              });
+            });
+          }
           break;
         case 'gestión de personal':
-          isSectionVisible = this.permisosService.tieneAccesoCompletoAfiliacion(); // Actualizar si hay método específico para este módulo
+          isSectionVisible = false; // Actualizar si hay método específico para este módulo
           break;
         case 'beneficios':
-          isSectionVisible = this.permisosService.tieneAccesoCompletoAfiliacion(); // Actualizar si hay método específico para BENEFICIOS
+          isSectionVisible = false; // Actualizar si hay método específico para BENEFICIOS
           break;
         case 'cuentas inprema':
-          isSectionVisible = this.permisosService.tieneAccesoCompletoAfiliacion(); // Actualizar si hay método específico para BENEFICIOS
+          isSectionVisible = false; // Actualizar si hay método específico para BENEFICIOS
           break;
         case 'escalafón':
-            isSectionVisible = this.permisosService.tieneAccesoCompletoAfiliacion(); // Actualizar si hay método específico para BENEFICIOS
-            break;
+          isSectionVisible = this.permisosService.tieneAccesoCompletoAfiliacion(); // Actualizar si hay método específico para BENEFICIOS
+          break;
         default:
           isSectionVisible = false;
-      }
-
-      if (isSectionVisible) {
-        section.items.forEach(item => {
-          item.children = item.children?.filter(child => this.permisosService.tieneAccesoAChildAfiliacion(child.title));
-        });
       }
 
       return isSectionVisible;

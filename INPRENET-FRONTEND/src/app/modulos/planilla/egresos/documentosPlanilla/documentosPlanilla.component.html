@@ -27,9 +27,23 @@
           La fecha de inicio no puede ser posterior a la fecha de fin.
         </mat-error>
       </mat-form-field>
-
     </div>
-    <div class="button-group-reportes">
+
+    <!-- <div  *ngIf="fechaInicioFormateada && fechaFinFormateada">
+      <app-dynamic-table-prueba
+        titulo="Planillas Cerradas"
+        subtitulo="Haga click sobre un un item de la tabla para ver el detalle de la planilla"
+        [columns]="myColumns"
+        [data]="filas"
+        [getData]="getFilas"
+        (ejecutarFuncionAsincronaEvent)="ejecutarFuncionAsincronaDesdeOtroComponente($event)"
+        (rowClicked)="manejarRowClick($event)"
+        [enableRowClick]="true"
+      ></app-dynamic-table-prueba>
+    </div> -->
+
+    <div class="button-group-reportes" *ngIf="fechaInicioFormateada && fechaFinFormateada">
+
       <!-- Botones de generación de reportes -->
       <button mat-raised-button color="primary" [disabled]="!planillaForm.valid " (click)="generarDocumento()">Generar Reporte de Planilla</button>
       <button mat-raised-button color="accent" [disabled]="!planillaForm.valid " (click)="generarDocumentoSinCuenta()">Generar Reporte Sin Cuenta</button>

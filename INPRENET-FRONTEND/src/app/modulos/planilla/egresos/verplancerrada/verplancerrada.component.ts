@@ -397,8 +397,8 @@ export class VerplancerradaComponent {
           sumaDeducciones += montoDeduccion;
 
           return {
-            NOMBRE_INSTITUCION: deduccion.deduccion.centroTrabajo.nombre_centro_trabajo,
-            NOMBRE_DEDUCCION: deduccion.deduccion.nombre_deduccion,
+            NOMBRE_INSTITUCION: deduccion.deduccion?.centroTrabajo?.nombre_centro_trabajo,
+            NOMBRE_DEDUCCION: deduccion.deduccion?.nombre_deduccion,
             TotalMontoAplicado: montoDeduccion
           };
         });

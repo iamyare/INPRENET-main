@@ -32,13 +32,13 @@ export class EditDatosBancariosComponent implements OnInit, OnChanges {
     private toastr: ToastrService,
     private dialog: MatDialog,
     private permisosService: PermisosService
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     this.initializeComponent();
-    this.mostrarBotonAgregar = this.permisosService.tieneAccesoCompletoAfiliacion();
-    this.mostrarBotonActivar = this.permisosService.tieneAccesoCompletoAfiliacion();
-    this.mostrarBotonDesactivar = this.permisosService.tieneAccesoCompletoAfiliacion();
+    this.mostrarBotonAgregar = this.permisosService.tieneAccesoAChildAfiliacion("Cambiar Cuenta Bancaria");
+    this.mostrarBotonActivar = this.permisosService.tieneAccesoAChildAfiliacion("Cambiar Cuenta Bancaria");
+    this.mostrarBotonDesactivar = this.permisosService.tieneAccesoAChildAfiliacion("Cambiar Cuenta Bancaria");
   }
 
   ngOnChanges(changes: SimpleChanges): void {
@@ -119,7 +119,7 @@ export class EditDatosBancariosComponent implements OnInit, OnChanges {
 
   cargar() {
     if (this.ejecF) {
-      this.ejecF(this.filas).then(() => {});
+      this.ejecF(this.filas).then(() => { });
     }
   }
 
@@ -192,6 +192,8 @@ export class EditDatosBancariosComponent implements OnInit, OnChanges {
   }
 
   openDialog(campos: any, row: any): void {
+    console.log(this.Afiliado);
+
     const dialogRef = this.dialog.open(ConfirmDialogComponent, {
       width: '350px',
       data: {

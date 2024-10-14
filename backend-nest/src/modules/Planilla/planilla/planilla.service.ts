@@ -317,7 +317,7 @@ export class PlanillaService {
     }
     return { message: 'Actualización completada' };
   }
-  
+
   async obtenerDetallePagoBeneficioPorPlanilla(id_planilla: number, @Res() res: Response) {
     const results = await this.detallePagBeneficios
       .createQueryBuilder('detallePago')
@@ -502,6 +502,33 @@ export class PlanillaService {
     }
   }
 
+  async getcerradas_fecha(fechaInicio: string, fechaFinalizacion: string): Promise<Net_Planilla[]> {
+    console.log(fechaInicio);
+    console.log(fechaFinalizacion);
+
+    try {
+      if (fechaInicio && fechaFinalizacion) {
+        const query = this.planillaRepository.createQueryBuilder('planilla')
+          .innerJoinAndSelect('planilla.tipoPlanilla', 'tipoPlanilla')
+          .where('planilla.estado = :estado', { estado: 'CERRADA' })
+          .andWhere('planilla.PERIODO_INICIO BETWEEN :fechaInicio AND :fechaFinalizacion', { fechaInicio, fechaFinalizacion });
+
+        const planillas = await query.getMany();
+        console.log(planillas)
+        if (planillas.length === 0) {
+          // Si no existen filas
+          return null; // o cualquier otro valor que desees retornar cuando no haya resultados
+        }
+
+        // Retorna las filas si existen
+        return planillas;
+      }
+    } catch (error) {
+      this.logger.error('Error al obtener planillas activas', error);
+      throw new InternalServerErrorException('Error al obtener planillas activas');
+    }
+  }
+
   async findOne(codigoPlanilla: string): Promise<Net_Planilla | undefined> {
     const planilla = await this.planillaRepository.findOne({
       where: { codigo_planilla: codigoPlanilla, estado: 'ACTIVA' },
@@ -672,7 +699,7 @@ export class PlanillaService {
     console.log(periodoInicio);
     console.log(periodoFinalizacion);
     console.log(idTiposPlanilla);
-    
+
     const query = `
       SELECT 
         ben."ID_BENEFICIO" AS "ID_BENEFICIO",
@@ -688,11 +715,12 @@ export class PlanillaService {
       INNER JOIN 
         "NET_PLANILLA" plan 
         ON detBs."ID_PLANILLA" = plan."ID_PLANILLA"
-      INNER JOIN 
+      LEFT JOIN 
         "NET_PERSONA_POR_BANCO" ppb 
         ON detBs."ID_AF_BANCO" = ppb."ID_AF_BANCO"
       WHERE 
-        plan."PERIODO_INICIO" >= TO_DATE(:periodoInicio, 'DD/MM/YYYY') 
+        plan."PERIODO_INICIO" >= TO_DATE(:periodoInicio, 'DD/MM/YYYY') AND
+        plan.ESTADO = 'CERRADA'
         AND plan."PERIODO_FINALIZACION" <= TO_DATE(:periodoFinalizacion, 'DD/MM/YYYY')
         AND plan."ID_TIPO_PLANILLA" IN (${idTiposPlanilla.join(', ')})
       GROUP BY 
@@ -712,7 +740,7 @@ export class PlanillaService {
       throw new InternalServerErrorException('Error al obtener beneficios');
     }
   }
-  
+
   async getDeduccionesInpremaPorPeriodo(
     periodoInicio: string,
     periodoFinalizacion: string,
@@ -793,7 +821,7 @@ export class PlanillaService {
     }
   }
 
-  
+
   async getBeneficiosPorPeriodoSC(
     periodoInicio: string,
     periodoFinalizacion: string,
@@ -874,7 +902,7 @@ export class PlanillaService {
       throw new InternalServerErrorException('Error al obtener deducciones INPREMA sin cuenta');
     }
   }
-  
+
   async getDeduccionesTercerosPorPeriodoSC(
     periodoInicio: string,
     periodoFinalizacion: string,
@@ -944,69 +972,55 @@ export class PlanillaService {
   ): Promise<any[]> {
     const beneficiosQuery = `
         SELECT
-        COALESCE(b."NOMBRE_BANCO", 'SIN BANCO') AS NOMBRE_BANCO,
-        SUM(dpb."MONTO_A_PAGAR") AS SUMA_BENEFICIOS
-        FROM
-        "NET_PLANILLA" p
-        JOIN
-        "NET_DETALLE_PAGO_BENEFICIO" dpb ON p."ID_PLANILLA" = dpb."ID_PLANILLA"
-        LEFT JOIN
-        "NET_PERSONA_POR_BANCO" pb ON dpb."ID_AF_BANCO" = pb."ID_AF_BANCO"
-        LEFT JOIN
-        "NET_BANCO" b ON pb."ID_BANCO" = b."ID_BANCO"
+          COALESCE(b."NOMBRE_BANCO", 'SIN BANCO') AS NOMBRE_BANCO,
+          SUM(dpb."MONTO_A_PAGAR") AS SUMA_BENEFICIOS
+        FROM "NET_PLANILLA" p
+        JOIN "NET_DETALLE_PAGO_BENEFICIO" dpb ON p."ID_PLANILLA" = dpb."ID_PLANILLA"
+        LEFT JOIN "NET_PERSONA_POR_BANCO" pb ON dpb."ID_AF_BANCO" = pb."ID_AF_BANCO"
+        LEFT JOIN "NET_BANCO" b ON pb."ID_BANCO" = b."ID_BANCO"
         WHERE
-        p."FECHA_APERTURA" BETWEEN TO_DATE(:periodoInicio, 'DD/MM/YYYY') AND TO_DATE(:periodoFinalizacion, 'DD/MM/YYYY')
-        AND p."ID_TIPO_PLANILLA" IN (${idTiposPlanilla.join(', ')})
-        AND dpb."ESTADO" = 'PAGADA'
-        GROUP BY
-        COALESCE(b."NOMBRE_BANCO", 'SIN BANCO')
+          p."PERIODO_INICIO" BETWEEN TO_DATE(:periodoInicio, 'DD/MM/YYYY') AND TO_DATE(:periodoFinalizacion, 'DD/MM/YYYY')
+          AND p."ID_TIPO_PLANILLA" IN (${idTiposPlanilla.join(', ')})
+          AND dpb."ESTADO" = 'PAGADA'
+        GROUP BY 
+          COALESCE(b."NOMBRE_BANCO", 'SIN BANCO')
     `;
 
     const deduccionesInpremaQuery = `
         SELECT
-        COALESCE(b."NOMBRE_BANCO", 'SIN BANCO') AS NOMBRE_BANCO,
-        SUM(ddp."MONTO_APLICADO") AS SUMA_DEDUCCIONES_INPREMA
-        FROM
-        "NET_PLANILLA" p
-        JOIN
-        "NET_DETALLE_DEDUCCION" ddp ON p."ID_PLANILLA" = ddp."ID_PLANILLA"
-        JOIN
-        "NET_DEDUCCION" d ON ddp."ID_DEDUCCION" = d."ID_DEDUCCION"
-        LEFT JOIN
-        "NET_PERSONA_POR_BANCO" pb ON ddp."ID_AF_BANCO" = pb."ID_AF_BANCO"
-        LEFT JOIN
-        "NET_BANCO" b ON pb."ID_BANCO" = b."ID_BANCO"
+          COALESCE(b."NOMBRE_BANCO", 'SIN BANCO') AS NOMBRE_BANCO,
+          SUM(ddp."MONTO_APLICADO") AS SUMA_DEDUCCIONES_INPREMA
+        FROM "NET_PLANILLA" p
+        JOIN "NET_DETALLE_DEDUCCION" ddp ON p."ID_PLANILLA" = ddp."ID_PLANILLA"
+        JOIN "NET_DEDUCCION" d ON ddp."ID_DEDUCCION" = d."ID_DEDUCCION"
+        LEFT JOIN "NET_PERSONA_POR_BANCO" pb ON ddp."ID_AF_BANCO" = pb."ID_AF_BANCO"
+        LEFT JOIN "NET_BANCO" b ON pb."ID_BANCO" = b."ID_BANCO"
         WHERE
-        p."FECHA_APERTURA" BETWEEN TO_DATE(:periodoInicio, 'DD/MM/YYYY') AND TO_DATE(:periodoFinalizacion, 'DD/MM/YYYY')
-        AND p."ID_TIPO_PLANILLA" IN (${idTiposPlanilla.join(', ')})
-        AND ddp."ESTADO_APLICACION" = 'COBRADA'
-        AND d."ID_CENTRO_TRABAJO" = 1
-        GROUP BY
-        COALESCE(b."NOMBRE_BANCO", 'SIN BANCO')
+          p."PERIODO_INICIO" BETWEEN TO_DATE(:periodoInicio, 'DD/MM/YYYY') AND TO_DATE(:periodoFinalizacion, 'DD/MM/YYYY')
+          AND p."ID_TIPO_PLANILLA" IN (${idTiposPlanilla.join(', ')})
+          AND ddp."ESTADO_APLICACION" = 'COBRADA'
+          AND d."ID_CENTRO_TRABAJO" = 1
+        GROUP BY 
+          COALESCE(b."NOMBRE_BANCO", 'SIN BANCO')
     `;
 
     const deduccionesTercerosQuery = `
         SELECT
-        COALESCE(b."NOMBRE_BANCO", 'SIN BANCO') AS NOMBRE_BANCO,
-        SUM(ddp."MONTO_APLICADO") AS SUMA_DEDUCCIONES_TERCEROS
-        FROM
-        "NET_PLANILLA" p
-        JOIN
-        "NET_DETALLE_DEDUCCION" ddp ON p."ID_PLANILLA" = ddp."ID_PLANILLA"
-        JOIN
-        "NET_DEDUCCION" d ON ddp."ID_DEDUCCION" = d."ID_DEDUCCION"
-        LEFT JOIN
-        "NET_PERSONA_POR_BANCO" pb ON ddp."ID_AF_BANCO" = pb."ID_AF_BANCO"
-        LEFT JOIN
-        "NET_BANCO" b ON pb."ID_BANCO" = b."ID_BANCO"
+          COALESCE(b."NOMBRE_BANCO", 'SIN BANCO') AS NOMBRE_BANCO,
+          SUM(ddp."MONTO_APLICADO") AS SUMA_DEDUCCIONES_TERCEROS
+        FROM  "NET_PLANILLA" p
+        JOIN "NET_DETALLE_DEDUCCION" ddp ON p."ID_PLANILLA" = ddp."ID_PLANILLA"
+        JOIN "NET_DEDUCCION" d ON ddp."ID_DEDUCCION" = d."ID_DEDUCCION"
+        LEFT JOIN  "NET_PERSONA_POR_BANCO" pb ON ddp."ID_AF_BANCO" = pb."ID_AF_BANCO"
+        LEFT JOIN "NET_BANCO" b ON pb."ID_BANCO" = b."ID_BANCO"
         WHERE
-        p."FECHA_APERTURA" BETWEEN TO_DATE(:periodoInicio, 'DD/MM/YYYY') AND TO_DATE(:periodoFinalizacion, 'DD/MM/YYYY')
-        AND p."ID_TIPO_PLANILLA" IN (${idTiposPlanilla.join(', ')})
-        AND ddp."ESTADO_APLICACION" = 'COBRADA'
-        AND d."ID_DEDUCCION" NOT IN (1,2,3,44,51)
+          p."PERIODO_INICIO" BETWEEN TO_DATE(:periodoInicio, 'DD/MM/YYYY') AND TO_DATE(:periodoFinalizacion, 'DD/MM/YYYY')
+          AND p."ID_TIPO_PLANILLA" IN (${idTiposPlanilla.join(', ')})
+          AND ddp."ESTADO_APLICACION" = 'COBRADA'
+          AND d."ID_DEDUCCION" NOT IN (1,2,3,44,51)
         GROUP BY
-        COALESCE(b."NOMBRE_BANCO", 'SIN BANCO')
-        ORDER BY  COALESCE(b."NOMBRE_BANCO", 'SIN BANCO') ASC
+          COALESCE(b."NOMBRE_BANCO", 'SIN BANCO')
+          ORDER BY  COALESCE(b."NOMBRE_BANCO", 'SIN BANCO') ASC
     `;
 
     try {
@@ -1081,6 +1095,7 @@ export class PlanillaService {
         where: {
           n_identificacion: dni,
           detalleDeduccion: {
+            estado_aplicacion: 'COBRADA',
             planilla: {
               id_planilla: idPlanilla
             }
@@ -1114,7 +1129,7 @@ export class PlanillaService {
       .createQueryBuilder('detallePagoBeneficio')
       .innerJoin(Net_Persona_Por_Banco, 'perpb', 'perpb.ID_AF_BANCO = detallePagoBeneficio.ID_AF_BANCO')
       .select('SUM(detallePagoBeneficio.monto_a_pagar)', 'totalBeneficios')
-      .where('detallePagoBeneficio.planilla.id_planilla = :id_planilla', { id_planilla })
+      .where('detallePagoBeneficio.planilla.id_planilla = :id_planilla AND detallePagoBeneficio.ESTADO = \'PAGADA\'', { id_planilla })
       .getRawOne();
 
     const totalDeducciones = await this.detalleDeduccionRepository
@@ -1122,7 +1137,7 @@ export class PlanillaService {
       .innerJoin(Net_Planilla, 'plan', 'plan.ID_PLANILLA = detalleDeduccion.ID_PLANILLA')
       .innerJoin(Net_Persona_Por_Banco, 'perpb', 'perpb.ID_AF_BANCO = detalleDeduccion.ID_AF_BANCO')
       .select('SUM(detalleDeduccion.monto_aplicado)', 'totalDeducciones')
-      .where('plan.ID_PLANILLA = :id_planilla', { id_planilla })
+      .where('plan.ID_PLANILLA = :id_planilla AND detalleDeduccion.ESTADO_APLICACION = \'COBRADA\'', { id_planilla })
       .getRawOne();
 
 
@@ -2163,6 +2178,7 @@ export class PlanillaService {
         JOIN 
           NET_PLANILLA p ON dpb.ID_PLANILLA = p.ID_PLANILLA
         WHERE 
+          dpb.ESTADO != 'NO PAGADA' AND
           dpb.ID_PERSONA = :id_persona AND p.CODIGO_PLANILLA = :codigo_planilla
       `;
 
@@ -2177,6 +2193,7 @@ export class PlanillaService {
             INNER JOIN 
                 NET_PLANILLA p ON dd.ID_PLANILLA = p.ID_PLANILLA
             WHERE 
+                dd.ESTADO_APLICACION != 'NO COBRADA' AND
                 dd.ID_PERSONA = :id_persona
                 AND p.CODIGO_PLANILLA = :codigo_planilla
                 AND d.ID_CENTRO_TRABAJO = 1
@@ -2195,6 +2212,7 @@ export class PlanillaService {
             INNER JOIN 
                 NET_PLANILLA p ON dd.ID_PLANILLA = p.ID_PLANILLA
             WHERE 
+                dd.ESTADO_APLICACION != 'NO COBRADA' AND
                 dd.ID_PERSONA = :id_persona
                 AND p.CODIGO_PLANILLA = :codigo_planilla
                 AND (d.ID_CENTRO_TRABAJO IS NULL OR d.ID_CENTRO_TRABAJO != 1)
@@ -2271,7 +2289,8 @@ export class PlanillaService {
     WHERE dpb.ID_PLANILLA IN (
       SELECT pl.ID_PLANILLA
       FROM NET_PLANILLA pl
-      WHERE pl.CODIGO_PLANILLA = :codigo_planilla
+      WHERE pl.CODIGO_PLANILLA = :codigo_planilla AND
+      dpb.ESTADO != 'NO PAGADA'
     )
   `;
 
@@ -2281,7 +2300,8 @@ export class PlanillaService {
     WHERE dd.ID_PLANILLA IN (
       SELECT pl.ID_PLANILLA
       FROM NET_PLANILLA pl
-      WHERE pl.CODIGO_PLANILLA = :codigo_planilla
+      WHERE pl.CODIGO_PLANILLA = :codigo_planilla AND
+      dd.ESTADO_APLICACION != 'NO COBRADA'
     )
   `;
 

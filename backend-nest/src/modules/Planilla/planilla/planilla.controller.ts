@@ -201,6 +201,16 @@ export class PlanillaController {
     return this.planillaService.getDesgloseDeducciones(idPlanilla, idBeneficio);
   }
 
+  @Get('cerradas_fecha')
+  async getcerradas_fecha(
+    @Query('fechaInicio') fechaInicio: string,
+    @Query('fechaFinalizacion') fechaFinalizacion: string,
+  ): Promise<any> {
+    console.log(fechaInicio);  // La fecha se recibirá como parte de los query params
+
+    return this.planillaService.getcerradas_fecha(fechaInicio, fechaFinalizacion);
+  }
+
   @Get('detalle-pago-beneficios/:id_planilla')
   async obtenerDetallePorPlanilla(@Param('id_planilla') id_planilla: number, @Res() res) {
     return this.planillaService.obtenerDetallePagoBeneficioPorPlanilla(id_planilla, res);

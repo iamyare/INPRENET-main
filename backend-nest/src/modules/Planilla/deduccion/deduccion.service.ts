@@ -94,7 +94,9 @@ export class DeduccionService {
     const parsedMes = Number(mes);
     const parsedDni = dni.toString();
     const parsedCodigoDeduccion = Number(codigoDeduccion);
-    const parsedMontoTotal = parseFloat(montoTotal);
+    const parsedMontoTotal = Number(montoTotal);
+    console.log(montoTotal);
+    console.log(parsedMontoTotal);
 
     if (isNaN(parsedAnio) || isNaN(parsedMes) || parsedDni === '' || isNaN(parsedCodigoDeduccion) || isNaN(parsedMontoTotal)) {
       return { error: 'Error en la conversión de datos', processed: false };
@@ -111,10 +113,12 @@ export class DeduccionService {
     }
 
     if (persona.fallecido === 'SI') {
-      const dedPermitidasPlan = [1, 44];
-      if (!dedPermitidasPlan.includes(parsedCodigoDeduccion)) {
-        return { error: `La persona está marcada como fallecida`, processed: false };
-      }
+      return { error: `La persona está marcada como fallecida`, processed: false };
+    }
+
+    const dedPermitidasPlan = 44;
+    if (dedPermitidasPlan == parsedCodigoDeduccion) {
+      return { error: `La deduccion con codigo 44 no van en la ordinaria`, processed: false };
     }
 
     const detpersona = await repositories.personaRepository.findOne({
@@ -230,17 +234,15 @@ export class DeduccionService {
 
     return new Promise((resolve, reject) => {
       csv
-        .parseString(file.buffer.toString(), { headers: true })
+        .parseString(file.buffer.toString(), { headers: true, delimiter: ';' })  // Asegúrate de especificar el delimitador correcto
         .on('data', row => {
-          // Obtenemos el primer valor del objeto, asegurándonos de acceder correctamente a la propiedad
-          const csvString = row['anio;mes;dni;codigoDeduccion;montoTotal'].trim();
+          // Accedemos directamente a las propiedades del objeto fila
+          const { anio, mes, dni, codigoDeduccion, montoTotal } = row;
 
-          if (!csvString) {
-            throw new Error('El valor CSV está vacío o indefinido');
+          if (!anio || !mes || !dni || !codigoDeduccion || !montoTotal) {
+            failedRows.push({ ...row, error: 'Campos faltantes o inválidos' });
+            return;
           }
-
-          // Utilizamos split para separar los valores
-          const [anio, mes, dni, codigoDeduccion, montoTotal] = csvString.split(';');
 
           // Se agrega cada fila como un objeto con las propiedades necesarias
           rows.push({ anio, mes, dni, codigoDeduccion, montoTotal });
@@ -256,7 +258,6 @@ export class DeduccionService {
 
           const limit = pLimit(10); // Limitar a 10 conexiones concurrentes
           const workerPromises = rows.map(row =>
-
             limit(() => this.processRow(id_planilla, row, repositories).then(result => {
               if (result.error) {
                 failedRows.push({ ...row, error: result.error });
@@ -265,22 +266,22 @@ export class DeduccionService {
               return result;
             }))
           );
+
           try {
             await Promise.all(workerPromises);
             resolve({ message: 'Deducciones procesadas correctamente', failedRows });
-
           } catch (error) {
             this.logger.error(`Error processing deductions: ${error}`);
             resolve({ message: 'Error', failedRows });
           }
         })
         .on('error', (error) => {
-          // Handle CSV parsing errors
           this.logger.error(`Error parsing CSV: ${error.message}`);
           resolve({ message: 'Error', failedRows });
         });
     });
   }
+
 
 
 

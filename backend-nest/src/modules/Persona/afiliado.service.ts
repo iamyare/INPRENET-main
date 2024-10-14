@@ -49,46 +49,46 @@ export class AfiliadoService {
 
   async getMovimientosOrdenados(id_persona: number, id_tipo_cuenta: number): Promise<any> {
     const movimientos = await this.movimientoCuentaRepository.find({
-        where: { 
-            cuentaPersona: { 
-                persona: { id_persona },
-                tipoCuenta: { ID_TIPO_CUENTA: id_tipo_cuenta }
-            } 
-        },
-        order: { ANO: 'ASC', MES: 'ASC' },
-        relations: ['cuentaPersona', 'cuentaPersona.tipoCuenta'],
+      where: {
+        cuentaPersona: {
+          persona: { id_persona },
+          tipoCuenta: { ID_TIPO_CUENTA: id_tipo_cuenta }
+        }
+      },
+      order: { ANO: 'ASC', MES: 'ASC' },
+      relations: ['cuentaPersona', 'cuentaPersona.tipoCuenta'],
     });
 
     const movimientosOrdenados = movimientos.reduce((acc, movimiento) => {
-        const { ANO: year, MES: month } = movimiento;
+      const { ANO: year, MES: month } = movimiento;
 
-        if (!acc[year]) {
-            acc[year] = {};
-        }
+      if (!acc[year]) {
+        acc[year] = {};
+      }
 
-        if (!acc[year][month]) {
-            acc[year][month] = [];
-        }
-        
-        acc[year][month].push({
-            ID_MOVIMIENTO_CUENTA: movimiento.ID_MOVIMIENTO_CUENTA,
-            MONTO: movimiento.MONTO,
-            FECHA_MOVIMIENTO: movimiento.FECHA_MOVIMIENTO,
-            DESCRIPCION: movimiento.DESCRIPCION,
-            CREADA_POR: movimiento.CREADA_POR,
-            tipoMovimiento: movimiento.tipoMovimiento,
-            cuentaPersona: {
-                NUMERO_CUENTA: movimiento.cuentaPersona.NUMERO_CUENTA,
-            },
-            ANO: movimiento.ANO,
-            MES: movimiento.MES,
-        });
+      if (!acc[year][month]) {
+        acc[year][month] = [];
+      }
 
-        return acc;
+      acc[year][month].push({
+        ID_MOVIMIENTO_CUENTA: movimiento.ID_MOVIMIENTO_CUENTA,
+        MONTO: movimiento.MONTO,
+        FECHA_MOVIMIENTO: movimiento.FECHA_MOVIMIENTO,
+        DESCRIPCION: movimiento.DESCRIPCION,
+        CREADA_POR: movimiento.CREADA_POR,
+        tipoMovimiento: movimiento.tipoMovimiento,
+        cuentaPersona: {
+          NUMERO_CUENTA: movimiento.cuentaPersona.NUMERO_CUENTA,
+        },
+        ANO: movimiento.ANO,
+        MES: movimiento.MES,
+      });
+
+      return acc;
     }, {});
 
     return movimientosOrdenados;
-}
+  }
 
 
   async updateBeneficiario(id: number, updatePersonaDto: UpdateBeneficiarioDto): Promise<net_detalle_persona> {
@@ -181,7 +181,7 @@ export class AfiliadoService {
         'peps.cargo_publico',
       ],
     });
-    
+
     if (!persona) {
       throw new NotFoundException(`Afiliado con N_IDENTIFICACION ${term} no existe`);
     }

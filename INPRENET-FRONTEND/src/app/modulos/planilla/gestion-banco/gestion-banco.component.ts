@@ -1,5 +1,7 @@
 import { Component } from '@angular/core';
 import { ToastrService } from 'ngx-toastr';
+import { catchError, of } from 'rxjs';
+import { PersonaService } from 'src/app/services/persona.service';
 
 @Component({
   selector: 'app-gestion-banco',
@@ -12,20 +14,22 @@ export class GestionBancoComponent {
   public errorMessage: string | null = null; // Para mostrar mensajes de error
 
   constructor(
-    private toastr: ToastrService
-  ) {}
+    private toastr: ToastrService, private personaService: PersonaService
+  ) { }
 
   buscarAfiliado() {
-    if (!this.dniAfiliado || this.dniAfiliado.length < 13) {
-      this.errorMessage = 'El DNI debe tener al menos 13 caracteres.';
-      this.toastr.error('El DNI debe tener al menos 13 caracteres.', 'Error');
-      return;
-    }
-
-    // Actualizamos el valor de afiliado con el DNI ingresado
-    this.afiliado = { n_identificacion: this.dniAfiliado };
-    this.errorMessage = null;
-    this.toastr.success('DNI asignado correctamente.', 'Éxito');
+    this.personaService.getPersonaByDni(this.dniAfiliado).pipe(
+      catchError(error => {
+        this.errorMessage = 'Persona no encontrada o ocurrió un error.';
+        return of(null);
+      })
+    ).subscribe(persona => {
+      if (persona) {
+        this.afiliado = persona.persona;
+        this.personaService.changePersona(persona.persona);
+        this.errorMessage = null;
+      }
+    });
   }
 
   resetBusqueda() {

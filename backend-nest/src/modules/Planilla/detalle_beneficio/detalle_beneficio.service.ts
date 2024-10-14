@@ -18,11 +18,15 @@ import { Net_Beneficio_Tipo_Persona } from '../beneficio_tipo_persona/entities/n
 
 import { addMonths } from 'date-fns';
 import { Net_Persona_Por_Banco } from 'src/modules/banco/entities/net_persona-banco.entity';
+import { Net_Detalle_Deduccion } from '../detalle-deduccion/entities/detalle-deduccion.entity';
 @Injectable()
 export class DetalleBeneficioService {
   private readonly logger = new Logger(DetalleBeneficioService.name)
 
   constructor(
+    @InjectRepository(Net_Detalle_Deduccion)
+    private readonly detDedRepository: Repository<Net_Detalle_Deduccion>,
+
     @InjectRepository(Net_Detalle_Pago_Beneficio)
     private readonly detPagBenRepository: Repository<Net_Detalle_Pago_Beneficio>,
     @InjectRepository(Net_Detalle_Beneficio_Afiliado)
@@ -77,7 +81,7 @@ export class DetalleBeneficioService {
     if (!detalleBeneficioAfiliado) {
       throw new NotFoundException('No se encontró el detalle del beneficio afiliado.');
     }
-  
+
     // Buscamos la cuenta bancaria activa de la persona
     const personaBancoActivo = await this.personaPorBancoRepository.findOne({
       where: {
@@ -85,11 +89,11 @@ export class DetalleBeneficioService {
         estado: 'ACTIVO',
       },
     });
-  
+
     if (!personaBancoActivo) {
       throw new NotFoundException('No se encontró una cuenta bancaria activa para esta persona.');
     }
-  
+
     // Creamos un nuevo registro de pago de beneficio
     const nuevoDetallePagoBeneficio = this.detPagBenRepository.create({
       estado: 'EN PRELIMINAR',
@@ -98,13 +102,13 @@ export class DetalleBeneficioService {
       detalleBeneficioAfiliado: [detalleBeneficioAfiliado], // Convertimos el objeto en un arreglo
       planilla: { id_planilla },
     });
-  
+
     // Guardamos el registro en la base de datos
     return await this.detPagBenRepository.save(nuevoDetallePagoBeneficio);
   }
-  
-  
-  
+
+
+
   async obtenerDetallePagoConPlanilla(n_identificacion: string, causante_identificacion: string, id_beneficio: number) {
     const persona = await this.personaRepository.findOne({ where: { n_identificacion } });
     if (!persona) {
@@ -208,12 +212,7 @@ export class DetalleBeneficioService {
           ID_BENEFICIO: ID_BENEFICIO
         }
       });
-
-      const fechaActual = new Date(resultado2.periodo_finalizacion);
-      const nuevaFecha = addMonths(fechaActual, 1); // Sumar 1 mes
-
-      console.log(fechaActual);
-      console.log(nuevaFecha);
+      console.log(resultado2);
 
       const detalleBeneficioAfiliadoRepository = await this.detalleBeneficioAfiliadoRepository.update(
         {
@@ -222,7 +221,7 @@ export class DetalleBeneficioService {
           ID_CAUSANTE: resultado2.ID_CAUSANTE,
           ID_BENEFICIO: resultado2.ID_BENEFICIO
         },
-        { periodo_finalizacion: nuevaFecha }
+        { estado_solicitud: "RECHAZADO", observaciones: observacion }
       );
       console.log(detalleBeneficioAfiliadoRepository);
 
@@ -235,13 +234,40 @@ export class DetalleBeneficioService {
           observacion: observacion
         }
       );
+      console.log(detPagBenRepository);
 
-      /* if (resultado.affected === 0) {
-        throw new NotFoundException(`No se encontraron detalles de beneficio para la planilla con ID ${idPlanilla}`);
+      const resultado3 = await this.detalleBeneficioAfiliadoRepository.findOne({
+        where: {
+          ID_DETALLE_PERSONA: ID_DETALLE_PERSONA,
+          ID_PERSONA: ID_PERSONA,
+          ID_CAUSANTE: ID_CAUSANTE,
+          ID_BENEFICIO: ID_BENEFICIO,
+          estado_solicitud: "APROBADO",
+          detallePagBeneficio: {
+            id_beneficio_planilla: idBenPlanilla,
+          }
+        },
+        relations: ["detallePagBeneficio"]
+      });
+      console.log(resultado3);
+
+      if (!resultado3) {
+        console.log("ENTRO");
+
+        const detDedRepository = await this.detDedRepository.update(
+          {
+            persona: { id_persona: ID_PERSONA },
+          },
+          { estado_aplicacion: "NO COBRADA" }
+        );
+        console.log(detDedRepository);
       }
 
-      return { mensaje: `Estado actualizado a '${nuevoEstado}' para los detalles de beneficio de la planilla con ID ${idPlanilla}` }; */
+      /*
+        return { mensaje: `Estado actualizado a '${nuevoEstado}' para los detalles de beneficio de la planilla con ID ${idPlanilla}` }; */
     } catch (error) {
+      console.log(error);
+
       throw new InternalServerErrorException('Se produjo un error al actualizar los estados de los detalles de beneficio');
     }
   }

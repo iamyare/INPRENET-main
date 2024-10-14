@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, EventEmitter, OnInit, Output } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { PlanillaService } from 'src/app/services/planilla.service';
 import { TDocumentDefinitions } from 'pdfmake/interfaces';
@@ -17,8 +17,29 @@ pdfMake.vfs = pdfFonts.pdfMake.vfs;
   styleUrls: ['./documentosPlanilla.component.scss']
 })
 export class DocumentosPlanillaComponent implements OnInit {
+  @Output() getElemSeleccionados = new EventEmitter<any>()
   planillaForm: FormGroup;
   tipoPlanilla: string | null = null;
+
+  myColumns: any = [
+    {
+      header: 'codigo_planilla',
+      col: 'codigo_planilla',
+
+    },
+    { header: 'secuencia', col: 'secuencia', },
+    {
+      header: 'estado',
+      col: 'estado',
+    },
+    { header: 'periodoInicio', col: 'periodoInicio', },
+    { header: 'periodoFinalizacion', col: 'periodoFinalizacion', },
+  ];
+  filas: any
+  ejecF: any;
+  desOBenSeleccionado: any
+  fechaInicioFormateada: any;
+  fechaFinFormateada: any;
 
   constructor(private fb: FormBuilder, private http: HttpClient, private planillaService: PlanillaService, private deduccionesService: DeduccionesService, public dialog: MatDialog) {
     this.planillaForm = this.fb.group({
@@ -32,6 +53,58 @@ export class DocumentosPlanillaComponent implements OnInit {
   ngOnInit() {
     this.planillaForm.get('rangoFechas.fechaInicio')?.valueChanges.subscribe(() => this.checkFechasCompletas());
     this.planillaForm.get('rangoFechas.fechaFin')?.valueChanges.subscribe(() => this.checkFechasCompletas());
+    // Escuchar los cambios en el rango de fechas
+    this.planillaForm.get('rangoFechas')?.valueChanges.subscribe((value) => {
+      this.getFilas().then(() => this.cargar());
+    });
+  }
+
+  getFilas = async () => {
+    try {
+      const { fechaInicioFormateada, fechaFinFormateada } = this.obtenerFechasFormateadas();
+      if (fechaInicioFormateada && fechaFinFormateada) {
+        const data = await this.planillaService.getPlanillasCerradaByFechas(fechaInicioFormateada, fechaFinFormateada).toPromise();
+        this.filas = data.map((item: any) => ({
+          id_planilla: item.id_planilla,
+          codigo_planilla: item.codigo_planilla,
+          fecha_apertura: item.fecha_apertura,
+          fecha_cierre: item.fecha_cierre,
+          secuencia: item.secuencia,
+          estado: item.estado,
+          periodoInicio: item.periodoInicio,
+          periodoFinalizacion: item.periodoFinalizacion,
+          tipoPlanilla: item.tipoPlanilla.nombre_planilla
+        }));
+
+        return data;
+      }
+    } catch (error) {
+      console.error("Error al obtener datos de beneficios", error);
+      throw error;
+    }
+  };
+
+  ejecutarFuncionAsincronaDesdeOtroComponente(funcion: (data: any) => Promise<void>) {
+    this.ejecF = funcion;
+  }
+
+  manejarRowClick(row: any) {
+    // Ocultamos el formulario temporalmente
+    //this.mostrarB = false;
+
+    // Asignamos el valor del DNI de la fila seleccionada al campo de DNI del beneficiario
+    console.log(row);
+
+    this.desOBenSeleccionado = row;
+    this.getElemSeleccionados.emit(this.desOBenSeleccionado);
+
+  }
+
+  cargar() {
+    if (this.ejecF) {
+      this.ejecF(this.filas).then(() => {
+      });
+    }
   }
 
   convertirImagenABase64(url: string): Promise<string> {
@@ -97,6 +170,8 @@ export class DocumentosPlanillaComponent implements OnInit {
   private obtenerFechasFormateadas() {
     const fechaInicio = this.planillaForm.get('rangoFechas.fechaInicio')?.value;
     const fechaFin = this.planillaForm.get('rangoFechas.fechaFin')?.value;
+    this.fechaInicioFormateada = this.formatearFecha(new Date(fechaInicio)),
+      this.fechaFinFormateada = this.formatearFecha(new Date(fechaFin))
     return {
       fechaInicioFormateada: this.formatearFecha(new Date(fechaInicio)),
       fechaFinFormateada: this.formatearFecha(new Date(fechaFin))
@@ -749,7 +824,6 @@ export class DocumentosPlanillaComponent implements OnInit {
 
   descargarExcelDeduccionPorCodigo(codDeduccion: number): void {
     const { idTiposPlanilla } = this.obtenerIdYNombrePlanilla();
-    const { fechaInicioFormateada, fechaFinFormateada } = this.obtenerFechasFormateadas();
 
     if (idTiposPlanilla.length === 0) {
       console.error('No se ha seleccionado un tipo de planilla válido.');
@@ -762,8 +836,8 @@ export class DocumentosPlanillaComponent implements OnInit {
     }
 
     this.deduccionesService.descargarExcelDeduccionPorCodigo(
-      fechaInicioFormateada,
-      fechaFinFormateada,
+      this.fechaInicioFormateada,
+      this.fechaFinFormateada,
       idTiposPlanilla,
       codDeduccion
     ).subscribe({

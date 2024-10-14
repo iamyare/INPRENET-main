@@ -79,10 +79,11 @@ export const MENU_CONFIG: Section[] = [
         title: 'EGRESOS',
         icon: 'money_off',
         children: [
+          { title: 'Cargar Bajas (FALLECIDOS)', route: 'planilla/Egresos/cargar-fallecidos', icon: 'description' },
+          { title: 'Cambiar Cuenta Bancaria', route: 'planilla/Egresos/editar-banco', icon: 'description' },
           { title: 'Proceso de Planilla', route: 'planilla/Egresos/proceso-planilla', icon: 'post_add' },
-          { title: 'Ver Planillas', route: 'planilla/Egresos/ver-planillas', icon: 'receipt' },
+          { title: 'Ver Todas Las Planillas', route: 'planilla/Egresos/ver-planillas', icon: 'receipt' },
           { title: 'Generación de documentos', route: 'planilla/Egresos/documentos-planilla', icon: 'description' },
-          { title: 'Cambiar Banco', route: 'planilla/Egresos/editar-banco', icon: 'description' },
         ],
       },
       {

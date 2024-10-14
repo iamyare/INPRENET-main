@@ -29,7 +29,7 @@ export class DetalleDeduccionService {
     @InjectRepository(Net_Planilla)
     private planillaRepository: Repository<Net_Planilla>,
     @InjectDataSource() private readonly dataSource: DataSource,
-  
+
   ) { }
 
   async obtenerDetallePorDeduccionPorCodigoYGenerarExcel(
@@ -243,6 +243,7 @@ export class DetalleDeduccionService {
       INNER JOIN "NET_PLANILLA" plan ON plan.ID_PLANILLA = dedd."ID_PLANILLA"
       INNER JOIN "NET_CENTRO_TRABAJO" inst ON inst."ID_CENTRO_TRABAJO" = dd."ID_CENTRO_TRABAJO"
       WHERE
+        dedd.ESTADO_APLICACION != 'NO COBRADA' AND
         dedd."ID_PERSONA" = ${idPersona} AND
         plan."ID_PLANILLA" = ${idPlanilla}
       ORDER BY dedd."MONTO_APLICADO" DESC
@@ -255,7 +256,7 @@ export class DetalleDeduccionService {
       throw new InternalServerErrorException('Se produjo un error al obtener los detalles de deducción por persona y planilla.');
     }
   }
-  
+
 
   /*           
 SELECT 
@@ -388,34 +389,34 @@ SELECT
     const deduccion = await this.deduccionRepository.findOne({
       where: { codigo_deduccion: createDetalleDeduccionDto.codigo_deduccion },
     });
-  
+
     if (!deduccion) {
       throw new NotFoundException('Deducción no encontrada con el código proporcionado.');
     }
-  
+
     // Buscar a la persona usando el n_identificacion
     const persona = await this.personaRepository.findOne({
       where: { n_identificacion: createDetalleDeduccionDto.n_identificacion },
     });
-  
+
     if (!persona) {
       throw new NotFoundException(`Persona con n_identificacion '${createDetalleDeduccionDto.n_identificacion}' no encontrada.`);
     }
-  
+
     // Verificar si la persona está fallecida
     if (persona.fallecido === 'SI') {
       throw new BadRequestException(`La persona con n_identificacion '${createDetalleDeduccionDto.n_identificacion}' está marcada como fallecida.`);
     }
-  
+
     // Buscar la planilla usando el id_planilla
     const planilla = await this.planillaRepository.findOne({
       where: { id_planilla: createDetalleDeduccionDto.id_planilla },
     });
-  
+
     if (!planilla) {
       throw new NotFoundException(`Planilla con id '${createDetalleDeduccionDto.id_planilla}' no encontrada.`);
     }
-  
+
     // Verificar si ya existe un detalle de deducción con el mismo ID_PLANILLA, ID_DEDUCCION, MONTO_TOTAL, ANIO y MES
     const detalleExistente = await this.detalleDeduccionRepository.findOne({
       where: {
@@ -427,13 +428,13 @@ SELECT
         persona: { id_persona: persona.id_persona },
       },
     });
-  
+
     if (detalleExistente) {
       throw new ConflictException(
         'Ya existe un detalle de deducción para esta persona con el mismo monto, año, mes, planilla, y deducción.'
       );
     }
-  
+
     // Crear el detalle de deducción
     const detalleDeduccion = this.detalleDeduccionRepository.create({
       persona: persona,
@@ -446,7 +447,7 @@ SELECT
       monto_aplicado: createDetalleDeduccionDto.monto_total,
       fecha_aplicado: new Date().toISOString(), // Asegurando que la fecha esté en el formato correcto
     });
-  
+
     try {
       await this.detalleDeduccionRepository.save(detalleDeduccion);
       return detalleDeduccion;
@@ -455,7 +456,7 @@ SELECT
       throw new InternalServerErrorException('Ha ocurrido un error al crear el detalle de deducción.');
     }
   }
-  
+
   findAll() {
     const detalleDeduccion = this.detalleDeduccionRepository.find()
     return detalleDeduccion;
@@ -495,7 +496,7 @@ SELECT
       ])
       .getMany();
   }
-  
+
   async deleteDetalleDeduccion(id: number): Promise<void> {
     const detalleDeduccion = await this.detalleDeduccionRepository.findOne({
       where: { id_ded_deduccion: id },
@@ -506,7 +507,7 @@ SELECT
     await this.detalleDeduccionRepository.remove(detalleDeduccion);
   }
 
-  
+
   remove(id: number) {
     return `This action removes a #${id} detalleDeduccion`;
   }

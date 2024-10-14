@@ -6,26 +6,45 @@ import { AuthService } from './auth.service';
 })
 export class PermisosService {
   private rolesAccesoCompletoAfiliacion = ['MODIFICACION AFILIACION', 'ADMINISTRADOR'];
-  private rolesAccesoLimitadoAfiliacion = ['CONSULTA AFILIACION'];
+  private rolesAccesoLimitadoAfiliacion = ['CONSULTA AFILIACION', 'ADMINISTRADOR'];
 
-  constructor(private authService: AuthService) {}
+  constructor(private authService: AuthService) { }
 
   tieneAccesoCompletoAfiliacion(): boolean {
     const rolesUsuario = this.authService.getUserRolesAndModules();
     return rolesUsuario.some(roleModulo =>
       roleModulo.rol === 'TODO' ||
       (roleModulo.modulo === 'AFILIACION' &&
-      this.rolesAccesoCompletoAfiliacion.includes(roleModulo.rol))
+        this.rolesAccesoCompletoAfiliacion.includes(roleModulo.rol))
     );
   }
 
   tieneAccesoLimitadoAfiliacion(): boolean {
     const rolesUsuario = this.authService.getUserRolesAndModules();
     return rolesUsuario.some(roleModulo =>
-      roleModulo.modulo === 'AFILIACION' &&
+      (roleModulo.modulo === 'AFILIACION') &&
       this.rolesAccesoLimitadoAfiliacion.includes(roleModulo.rol)
     );
   }
+
+
+  tieneAccesoLimitadoPlanilla(): boolean {
+    const rolesUsuario = this.authService.getUserRolesAndModules();
+    return rolesUsuario.some(roleModulo =>
+      roleModulo.modulo === 'PLANILLA' &&
+      this.rolesAccesoLimitadoAfiliacion.includes(roleModulo.rol)
+    );
+  }
+
+  tieneAccesoCompletoPlanilla(): boolean {
+    const rolesUsuario = this.authService.getUserRolesAndModules();
+    return rolesUsuario.some(roleModulo =>
+      roleModulo.rol === 'OFICIAL DE PLANILLA' ||
+      (roleModulo.modulo === 'PLANILLA' &&
+        this.rolesAccesoCompletoAfiliacion.includes(roleModulo.rol))
+    );
+  }
+
 
   tieneAccesoAChildAfiliacion(childTitle: string): boolean {
     if (this.tieneAccesoCompletoAfiliacion()) {
@@ -33,6 +52,20 @@ export class PermisosService {
     }
     if (this.tieneAccesoLimitadoAfiliacion()) {
       return ['Buscar Persona', 'Ver Centro Educativo'].includes(childTitle);
+    }
+    if (childTitle == 'Cambiar Cuenta Bancaria') {
+      return ['Cambiar Cuenta Bancaria'].includes(childTitle);
+    }
+
+    return false;
+  }
+
+  tieneAccesoAChilPlanilla(childTitle: string): boolean {
+    if (this.tieneAccesoCompletoPlanilla()) {
+      return true;
+    }
+    if (this.tieneAccesoLimitadoPlanilla()) {
+      return ['Proceso de Planilla', 'Ver Planillas'].includes(childTitle);
     }
 
     return false;

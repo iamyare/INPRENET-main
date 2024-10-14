@@ -21,7 +21,7 @@ const routes: Routes = [
   { path: 'solicitud-restablecimiento', component: OlvidoContrasenaComponent, pathMatch: 'full' },
   { path: 'restablecer-contrasena/:token', component: RestablecerContrasenaComponent, pathMatch: 'full' },
   { path: 'register', component: RegisterComponent, pathMatch: 'full' },
-  { path: 'pagenotfound', component: PagenotfoundComponent, pathMatch: 'full'},
+  { path: 'pagenotfound', component: PagenotfoundComponent, pathMatch: 'full' },
   {
     path: 'admin',
     component: AdminLayoutComponent,
@@ -74,7 +74,7 @@ const routes: Routes = [
       { path: 'usuario/editar', component: EditarPerfilComponent },
     ]
   },
-  { path: '**',  component: LandingPageComponent, pathMatch: 'full' },
+  { path: '**', component: LandingPageComponent, pathMatch: 'full' },
 ];
 
 @NgModule({

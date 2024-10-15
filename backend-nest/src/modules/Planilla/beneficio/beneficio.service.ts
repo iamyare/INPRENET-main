@@ -49,7 +49,7 @@ export class BeneficioService {
                   if (!dniBeneficiario || isNaN(tipoPersona)) {
                       throw new BadRequestException("Los datos requeridos no están presentes o no son válidos.");
                   }
-                  if (dniBeneficiario === dniCausante) {
+                  if (!dniCausante) {
                       let persona = await this.personaRepository.findOne({ where: { n_identificacion: dniBeneficiario } });
                       if (!persona) {
                           persona = this.personaRepository.create({
@@ -65,9 +65,9 @@ export class BeneficioService {
                       const detallePersona = this.detallePersonaRepository.create({
                           ID_PERSONA: persona.id_persona,
                           ID_CAUSANTE: persona.id_persona,
-                          ID_CAUSANTE_PADRE: persona.id_persona,
+                          ID_CAUSANTE_PADRE: null,
                           ID_DETALLE_PERSONA: persona.id_persona,
-                          ID_TIPO_PERSONA: 6,
+                          ID_TIPO_PERSONA: tipoPersona,
                       });
                       await this.detallePersonaRepository.save(detallePersona);
                       insertedRows.push({ row: index + 1, dni: dniBeneficiario, status: 'Inserted' });
@@ -117,7 +117,6 @@ export class BeneficioService {
                       });
                       persona = await this.personaRepository.save(persona);
                   }
-  
                   const detallePersona = this.detallePersonaRepository.create({
                       ID_PERSONA: persona.id_persona,
                       ID_CAUSANTE: causantePersona.id_persona,
@@ -132,13 +131,13 @@ export class BeneficioService {
                   failedRows.push({ row: index + 1, error: rowError.message });
               }
           }
-  
           return { message: 'Proceso completado', insertedRows, failedRows };
       } catch (error) {
           this.logger.error('Error al procesar el archivo Excel', error);
           throw new InternalServerErrorException('No se pudo procesar el archivo');
       }
   }
+
 
 
   async create(createBeneficioDto: CreateBeneficioDto) {

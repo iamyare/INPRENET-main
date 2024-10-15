@@ -39,7 +39,7 @@ export class BeneficioService {
         const dni = row['DNI'] ? row['DNI'].toString().trim() : "";
         const dniCausante = row['DNI_CAUSANTE'] ? row['DNI_CAUSANTE'].toString().trim() : "";
         const tipoPersona = parseInt(row['ID_TIPO_PERSONA'], 10);
-        const codigoBeneficio = parseInt(row['CODIGO_BENEFICIO'], 10);
+        const idBeneficio = parseInt(row['CODIGO_BENEFICIO'], 10);  // Usamos CODIGO_BENEFICIO como ID_BENEFICIO
         const primerPago = parseFloat(row['PRIMER_PAGO']);
         const ultimoPago = parseFloat(row['ULTIMO_PAGO']);
         const fechaCalculo = new Date(row['FECHA_CALCULO']);
@@ -53,11 +53,7 @@ export class BeneficioService {
         if (!dni || isNaN(tipoPersona)) {
           throw new BadRequestException("Los datos requeridos no están presentes o no son válidos.");
         }
-        const beneficio = await this.beneficioRepository.findOne({ where: { codigo: codigoBeneficio.toString() } });
-        if (!beneficio) {
-          throw new BadRequestException(`No se encontró un beneficio con el código ${codigoBeneficio}`);
-        }
-        const idBeneficio = typeof beneficio.id_beneficio === 'string' ? parseInt(beneficio.id_beneficio, 10) : beneficio.id_beneficio;
+
         let causantePersona = await this.personaRepository.findOne({ where: { n_identificacion: dniCausante } });
         let causanteDetallePersona;
         if (!causantePersona) {
@@ -97,6 +93,7 @@ export class BeneficioService {
           ID_TIPO_PERSONA: tipoPersona,                   
         });
         const savedDetallePersona = await this.detallePersonaRepository.save(detallePersona);
+
         const banco = await this.bancoRepository.findOne({ where: { cod_banco: codigoBanco } });
         if (!banco) {
           throw new BadRequestException(`No se encontró un banco con el código ${codigoBanco}`);
@@ -110,6 +107,7 @@ export class BeneficioService {
           fecha_activacion: new Date()
         });
         await this.personaPorBancoRepository.save(personaPorBanco);
+
         const detalleBeneficioAfiliado = this.detalleBeneficioAfiliadoRepository.create({
           ID_DETALLE_PERSONA: savedDetallePersona.ID_DETALLE_PERSONA,
           ID_PERSONA: savedDetallePersona.ID_PERSONA,

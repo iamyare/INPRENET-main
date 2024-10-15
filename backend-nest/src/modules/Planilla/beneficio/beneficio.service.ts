@@ -39,14 +39,13 @@ export class BeneficioService {
         const dni = row['DNI'] ? row['DNI'].toString().trim() : "";
         const dniCausante = row['DNI_CAUSANTE'] ? row['DNI_CAUSANTE'].toString().trim() : "";
         const tipoPersona = parseInt(row['ID_TIPO_PERSONA'], 10);
-        const idBeneficio = parseInt(row['CODIGO_BENEFICIO'], 10);  // Usamos CODIGO_BENEFICIO como ID_BENEFICIO
+        const idBeneficio = parseInt(row['CODIGO_BENEFICIO'], 10);
         const primerPago = parseFloat(row['PRIMER_PAGO']);
-        const ultimoPago = parseFloat(row['ULTIMO_PAGO']);
+        const ultimoPago = row['ULTIMO_PAGO'] ? parseFloat(row['ULTIMO_PAGO']) : null;
         const fechaCalculo = new Date(row['FECHA_CALCULO']);
         const numeroRentas = parseInt(row['NUMERO_RENTAS'], 10);
         const montoPorPeriodo = parseFloat(row['MONTO_POR_PERIODO(ORDINARIA)']);
         const periodoInicio = new Date(row['PERIODO_INICIO']);
-        const periodoFinalizacion = new Date(row['PERIODO_FINALIZACION']);
         const codigoBanco = row['CODIGO_BANCO'].toString().trim();
         const numeroCuenta = row['NUMERO_CUENTA'].toString().trim();
 
@@ -63,7 +62,7 @@ export class BeneficioService {
           causanteDetallePersona = this.detallePersonaRepository.create({
             ID_PERSONA: causantePersona.id_persona,
             ID_CAUSANTE: causantePersona.id_persona,
-            ID_TIPO_PERSONA: 1,
+            ID_TIPO_PERSONA: 2,
           });
           causanteDetallePersona = await this.detallePersonaRepository.save(causanteDetallePersona);
         } else {
@@ -119,7 +118,6 @@ export class BeneficioService {
           num_rentas_aplicadas: numeroRentas,
           monto_por_periodo: montoPorPeriodo,
           periodo_inicio: periodoInicio,
-          periodo_finalizacion: periodoFinalizacion,
           estado_solicitud: 'APROBADO'
         });
         await this.detalleBeneficioAfiliadoRepository.save(detalleBeneficioAfiliado);

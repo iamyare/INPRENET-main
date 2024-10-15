@@ -20,93 +20,127 @@ export class BeneficioService {
   @InjectRepository(net_detalle_persona)
   private detallePersonaRepository: Repository<net_detalle_persona>;
   
-  async uploadExcel(file: Express.Multer.File) {
-    try {
-        const workbook = XLSX.read(file.buffer, { type: 'buffer', cellText: false, cellDates: true, cellNF: true });
-        const worksheet = workbook.Sheets[workbook.SheetNames[0]];
-        const data = XLSX.utils.sheet_to_json(worksheet, { raw: false, defval: "" });
-        
-        for (const row of data) {
-            const dniBeneficiario = row['DNI_BENEFICIARIO'] ? row['DNI_BENEFICIARIO'].toString().trim() : "";
-            const dniCausante = row['DNI_CAUSANTE'] ? row['DNI_CAUSANTE'].toString().trim() : "";
-            const tipoPersona = parseInt(row['ID_TIPO_PERSONA'], 10);
-
-            const primerNombreBeneficiario = row['PRIMER_NOMBRE_BENEFICIARIO'] || "";
-            const segundoNombreBeneficiario = row['SEGUNDO_NOMBRE_BENEFICIARIO'] || null;
-            const tercerNombreBeneficiario = row['TERCER_NOMBRE_BENEFICIARIO'] || null;
-            const primerApellidoBeneficiario = row['PRIMER_APELLIDO_BENEFICIARIO'] || "";
-            const segundoApellidoBeneficiario = row['SEGUNDO_APELLIDO_BENEFICIARIO'] || null;
-
-            const primerNombreCausante = row['PRIMER_NOMBRE_CAUSANTE'] || "";
-            const segundoNombreCausante = row['SEGUNDO_NOMBRE_CAUSANTE'] || null;
-            const tercerNombreCausante = row['TERCER_NOMBRE_CAUSANTE'] || null;
-            const primerApellidoCausante = row['PRIMER_APELLIDO_CAUSANTE'] || "";
-            const segundoApellidoCausante = row['SEGUNDO_APELLIDO_CAUSANTE'] || null;
-
-            if (!dniBeneficiario || isNaN(tipoPersona)) {
-                throw new BadRequestException("Los datos requeridos no están presentes o no son válidos.");
-            }
-            let causantePersona = await this.personaRepository.findOne({ where: { n_identificacion: dniCausante } });
-            let causanteDetallePersona;
-            if (!causantePersona) {
-                const causante = this.personaRepository.create({
-                    n_identificacion: dniCausante,
-                    primer_nombre: primerNombreCausante,
-                    segundo_nombre: segundoNombreCausante,
-                    tercer_nombre: tercerNombreCausante,
-                    primer_apellido: primerApellidoCausante,
-                    segundo_apellido: segundoApellidoCausante
-                });
-                causantePersona = await this.personaRepository.save(causante);
-                causanteDetallePersona = this.detallePersonaRepository.create({
-                    ID_PERSONA: causantePersona.id_persona,
-                    ID_CAUSANTE: causantePersona.id_persona,
-                    ID_TIPO_PERSONA: 1,
-                });
-                causanteDetallePersona = await this.detallePersonaRepository.save(causanteDetallePersona);
-            } else {
-                causanteDetallePersona = await this.detallePersonaRepository.findOne({ 
-                    where: { 
-                        ID_PERSONA: causantePersona.id_persona, 
-                        ID_CAUSANTE: causantePersona.id_persona,
-                        ID_CAUSANTE_PADRE: null 
-                    } 
-                });
-                if (!causanteDetallePersona) {
-                    throw new InternalServerErrorException("No se encontró el detalle correspondiente para el DNI_CAUSANTE con ID_CAUSANTE_PADRE = null.");
-                }
-            }
-            let persona = await this.personaRepository.findOne({ where: { n_identificacion: dniBeneficiario } });
-            if (!persona) {
-                persona = this.personaRepository.create({
-                    n_identificacion: dniBeneficiario,
-                    primer_nombre: primerNombreBeneficiario,
-                    segundo_nombre: segundoNombreBeneficiario,
-                    tercer_nombre: tercerNombreBeneficiario,
-                    primer_apellido: primerApellidoBeneficiario,
-                    segundo_apellido: segundoApellidoBeneficiario
-                });
-                persona = await this.personaRepository.save(persona);
-            }
-            const detallePersona = this.detallePersonaRepository.create({
-                ID_PERSONA: persona.id_persona, 
-                ID_CAUSANTE: causantePersona.id_persona,          // ID del DNI_CAUSANTE como el causante
-                ID_CAUSANTE_PADRE: causantePersona.id_persona,    // ID_CAUSANTE_PADRE igual al ID del DNI_CAUSANTE
-                ID_DETALLE_PERSONA: causanteDetallePersona.ID_DETALLE_PERSONA, // Usar el ID_DETALLE_PERSONA del registro encontrado
-                ID_TIPO_PERSONA: tipoPersona,                     // Tipo persona según el Excel
-            });
-            await this.detallePersonaRepository.save(detallePersona);
-        }
-
-        return { message: 'Datos cargados correctamente' };
-    } catch (error) {
-        this.logger.error('Error al procesar el archivo Excel', error);
-        throw new InternalServerErrorException('No se pudo procesar el archivo');
-    }
-}
-
-
+    async uploadExcel(file: Express.Multer.File) {
+      const insertedRows = [];
+      const failedRows = [];
+      try {
+          const workbook = XLSX.read(file.buffer, { type: 'buffer', cellText: false, cellDates: true, cellNF: true });
+          const worksheet = workbook.Sheets[workbook.SheetNames[0]];
+          const data = XLSX.utils.sheet_to_json(worksheet, { raw: false, defval: "" });
+          
+          for (const [index, row] of data.entries()) {
+              try {
+                  const dniBeneficiario = row['DNI_BENEFICIARIO'] ? row['DNI_BENEFICIARIO'].toString().trim() : "";
+                  const dniCausante = row['DNI_CAUSANTE'] ? row['DNI_CAUSANTE'].toString().trim() : "";
+                  const tipoPersona = parseInt(row['ID_TIPO_PERSONA'], 10);
   
+                  const primerNombreBeneficiario = row['PRIMER_NOMBRE_BENEFICIARIO'] || "";
+                  const segundoNombreBeneficiario = row['SEGUNDO_NOMBRE_BENEFICIARIO'] || null;
+                  const tercerNombreBeneficiario = row['TERCER_NOMBRE_BENEFICIARIO'] || null;
+                  const primerApellidoBeneficiario = row['PRIMER_APELLIDO_BENEFICIARIO'] || "";
+                  const segundoApellidoBeneficiario = row['SEGUNDO_APELLIDO_BENEFICIARIO'] || null;
+  
+                  const primerNombreCausante = row['PRIMER_NOMBRE_CAUSANTE'] || "";
+                  const segundoNombreCausante = row['SEGUNDO_NOMBRE_CAUSANTE'] || null;
+                  const tercerNombreCausante = row['TERCER_NOMBRE_CAUSANTE'] || null;
+                  const primerApellidoCausante = row['PRIMER_APELLIDO_CAUSANTE'] || "";
+                  const segundoApellidoCausante = row['SEGUNDO_APELLIDO_CAUSANTE'] || null;
+  
+                  if (!dniBeneficiario || isNaN(tipoPersona)) {
+                      throw new BadRequestException("Los datos requeridos no están presentes o no son válidos.");
+                  }
+                  if (dniBeneficiario === dniCausante) {
+                      let persona = await this.personaRepository.findOne({ where: { n_identificacion: dniBeneficiario } });
+                      if (!persona) {
+                          persona = this.personaRepository.create({
+                              n_identificacion: dniBeneficiario,
+                              primer_nombre: primerNombreBeneficiario,
+                              segundo_nombre: segundoNombreBeneficiario,
+                              tercer_nombre: tercerNombreBeneficiario,
+                              primer_apellido: primerApellidoBeneficiario,
+                              segundo_apellido: segundoApellidoBeneficiario
+                          });
+                          persona = await this.personaRepository.save(persona);
+                      }
+                      const detallePersona = this.detallePersonaRepository.create({
+                          ID_PERSONA: persona.id_persona,
+                          ID_CAUSANTE: persona.id_persona,
+                          ID_CAUSANTE_PADRE: persona.id_persona,
+                          ID_DETALLE_PERSONA: persona.id_persona,
+                          ID_TIPO_PERSONA: 6,
+                      });
+                      await this.detallePersonaRepository.save(detallePersona);
+                      insertedRows.push({ row: index + 1, dni: dniBeneficiario, status: 'Inserted' });
+                      continue;
+                  }
+                  let causantePersona = await this.personaRepository.findOne({ where: { n_identificacion: dniCausante } });
+                  let causanteDetallePersona;
+                  if (!causantePersona) {
+                      const causante = this.personaRepository.create({
+                          n_identificacion: dniCausante,
+                          primer_nombre: primerNombreCausante,
+                          segundo_nombre: segundoNombreCausante,
+                          tercer_nombre: tercerNombreCausante,
+                          primer_apellido: primerApellidoCausante,
+                          segundo_apellido: segundoApellidoCausante
+                      });
+                      causantePersona = await this.personaRepository.save(causante);
+  
+                      causanteDetallePersona = this.detallePersonaRepository.create({
+                          ID_PERSONA: causantePersona.id_persona,
+                          ID_CAUSANTE: causantePersona.id_persona,
+                          ID_TIPO_PERSONA: 1,
+                      });
+                      causanteDetallePersona = await this.detallePersonaRepository.save(causanteDetallePersona);
+                  } else {
+                      causanteDetallePersona = await this.detallePersonaRepository.findOne({ 
+                          where: { 
+                              ID_PERSONA: causantePersona.id_persona, 
+                              ID_CAUSANTE: causantePersona.id_persona,
+                              ID_CAUSANTE_PADRE: null 
+                          } 
+                      });
+                      if (!causanteDetallePersona) {
+                          throw new InternalServerErrorException("No se encontró el detalle correspondiente para el DNI_CAUSANTE con ID_CAUSANTE_PADRE = null.");
+                      }
+                  }
+  
+                  let persona = await this.personaRepository.findOne({ where: { n_identificacion: dniBeneficiario } });
+                  if (!persona) {
+                      persona = this.personaRepository.create({
+                          n_identificacion: dniBeneficiario,
+                          primer_nombre: primerNombreBeneficiario,
+                          segundo_nombre: segundoNombreBeneficiario,
+                          tercer_nombre: tercerNombreBeneficiario,
+                          primer_apellido: primerApellidoBeneficiario,
+                          segundo_apellido: segundoApellidoBeneficiario
+                      });
+                      persona = await this.personaRepository.save(persona);
+                  }
+  
+                  const detallePersona = this.detallePersonaRepository.create({
+                      ID_PERSONA: persona.id_persona,
+                      ID_CAUSANTE: causantePersona.id_persona,
+                      ID_CAUSANTE_PADRE: causantePersona.id_persona,
+                      ID_DETALLE_PERSONA: causanteDetallePersona.ID_DETALLE_PERSONA,
+                      ID_TIPO_PERSONA: tipoPersona,
+                  });
+                  await this.detallePersonaRepository.save(detallePersona);
+                  insertedRows.push({ row: index + 1, dni: dniBeneficiario, status: 'Inserted' });
+              } catch (rowError) {
+                  this.logger.error(`Error en la fila ${index + 1}`, rowError);
+                  failedRows.push({ row: index + 1, error: rowError.message });
+              }
+          }
+  
+          return { message: 'Proceso completado', insertedRows, failedRows };
+      } catch (error) {
+          this.logger.error('Error al procesar el archivo Excel', error);
+          throw new InternalServerErrorException('No se pudo procesar el archivo');
+      }
+  }
+
+
   async create(createBeneficioDto: CreateBeneficioDto) {
     delete createBeneficioDto['numero_rentas_max']
     try {

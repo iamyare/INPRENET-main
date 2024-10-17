@@ -74,7 +74,6 @@ export class VerPlanillasActivasComponent {
   getFilas = async () => {
     try {
       const data = await this.planillaService.getPlanillasActivas().toPromise();
-      console.log(data);
 
       this.filas = data.map((item: any) => ({
         id_planilla: item.id_planilla,

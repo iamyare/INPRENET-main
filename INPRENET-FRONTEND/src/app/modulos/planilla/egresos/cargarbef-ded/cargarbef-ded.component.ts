@@ -44,7 +44,7 @@ export class CargarbefDedComponent {
   }
 
   asignarBeneficiosComplementariaBeneficiariosAfiliados() {
-    this.planillaService.generarPlanillaComplementaria('BENEFICIARIO,AFILIADO').subscribe({
+    this.planillaService.generarPlanillaComplementaria('BENEFICIARIO,AFILIADO,BENEFICIARIO SIN CAUSANTE').subscribe({
       next: () => {
         this.toastr.success('Planilla complementaria generada para Beneficiarios y Afiliados', 'Éxito');
       },
@@ -67,9 +67,7 @@ export class CargarbefDedComponent {
 
   getElemSeleccionados(event: any) {
     this.tipoPlanilla = event.tipoPlanilla;
-    this.id_planilla = event.id_planilla; // Almacena el id_planilla
-    console.log(this.id_planilla);
-
+    this.id_planilla = event.id_planilla;
   }
 
 

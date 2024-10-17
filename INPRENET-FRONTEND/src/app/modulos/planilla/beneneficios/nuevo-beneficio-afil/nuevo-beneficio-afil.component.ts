@@ -92,11 +92,20 @@ export class NuevoBeneficioAfilComponent implements OnInit {
               fecha_nacimiento: convertirFecha(res.FECHA_NACIMIENTO, false)
             };
 
-            const tipoPersona = item.fallecido === "SI" ? "BENEFICIARIO" : item.tipo_persona;
-            this.getTipoBen(tipoPersona);
-
-            if (this.Afiliado.tipo_persona === "AFILIADO" && this.Afiliado.estado_persona === "INACTIVO") {
-              this.toastr.warning(`No se puede asignar beneficios a los Afiliados INACTIVOS`, "Advertencia");
+            //const tipoPersona = item.fallecido === "SI" ? "BENEFICIARIO" : item.tipo_persona;
+            if (item.fallecido === "NO") {
+              if (item.estado_persona == 'ACTIVO') {
+                this.getTipoBen(item.tipo_persona);
+              } else if (item.estado_persona == 'INACTIVO') {
+                this.toastr.error("La persona se encuentra INACTIVA.");
+                this.toastr.warning(`No se puede asignar beneficios a los Afiliados INACTIVOS`, "Advertencia");
+              } else if (item.estado_persona == 'SUSPENDIDA') {
+                this.toastr.error("La persona se encuentra SUSPENDIDA.");
+                this.toastr.warning(`No se puede asignar beneficios a los Afiliados SUSPENDIDA`, "Advertencia");
+              } else if (item.estado_persona == 'NO REGISTRADO') {
+                this.toastr.error("La persona se encuentra NO REGISTRADO (ESCALAFON).");
+                this.toastr.warning(`No se puede asignar beneficios a los Afiliados NO REGISTRADO`, "Advertencia");
+              }
             }
 
             this.Afiliado = {
@@ -118,20 +127,25 @@ export class NuevoBeneficioAfilComponent implements OnInit {
     }
   }
 
-  getTipoBen = async (tipoPers: string) => {
+  getTipoBen = async (tipoPers: any) => {
     try {
+      console.log(tipoPers);
       const beneficios = await this.svcBeneficioServ.obtenerTipoBeneficioByTipoPersona(tipoPers).toPromise();
 
       if (beneficios && beneficios.length > 0) {
+        // Mapea los beneficios para generar una lista
         let temp = beneficios.map((item: any) => {
           return {
             label: item.beneficio.nombre_beneficio,
             value: item.beneficio.nombre_beneficio,
             periodicidad: item.beneficio.periodicidad
-          }
+          };
         });
+
+        // Actualiza la lista de beneficios disponibles para los dropdowns
         this.tiposBeneficios = temp;
 
+        // Actualiza las configuraciones de los campos del formulario (myFormFields1)
         this.myFormFields1 = [
           {
             type: 'dropdown', label: 'Tipo de beneficio', name: 'nombre_beneficio',
@@ -144,7 +158,8 @@ export class NuevoBeneficioAfilComponent implements OnInit {
           },
           {
             type: 'dropdown', label: 'Estado Solicitud', name: 'estado_solicitud',
-            options: [{ label: 'APROBADA', value: 'APROBADA' }, { label: 'RECHAZADA', value: 'RECHAZADA' }], validations: [Validators.required], display: true
+            options: [{ label: 'APROBADA', value: 'APROBADA' }, { label: 'RECHAZADA', value: 'RECHAZADA' }],
+            validations: [Validators.required], display: true
           },
           { type: 'number', label: 'Monto total', name: 'monto_total', validations: [Validators.required, Validators.min(0)], display: true },
           { type: 'number', label: 'Monto por periodo', name: 'monto_por_periodo', validations: [Validators.required, Validators.min(0)], display: true },
@@ -161,6 +176,7 @@ export class NuevoBeneficioAfilComponent implements OnInit {
           },
         ];
 
+        // Actualiza las configuraciones de los campos del formulario (myFormFields2)
         this.myFormFields2 = [
           { type: 'text', label: 'DNI del beneficiario', name: 'dni', value: "", validations: [Validators.required, Validators.minLength(13), Validators.maxLength(14)], display: true, readOnly: true },
           {
@@ -191,18 +207,28 @@ export class NuevoBeneficioAfilComponent implements OnInit {
           },
         ];
 
+        // Oculta ciertos campos adicionales si es necesario
         this.myFormFields1[9].display = false;
         this.myFormFields1[10].display = false;
         this.myFormFields2[10].display = false;
         this.myFormFields2[11].display = false;
 
+        // Muestra el formulario después de configurar los campos
         this.mostrarDB = true;
+
+        // Retorna la lista de beneficios mapeados
+        return temp;
+      } else {
+        // Si no hay beneficios, retorna null o un arreglo vacío
+        return null;
       }
+
     } catch (error) {
       console.error("Error al obtener datos de beneficios", error);
-      this.tiposBeneficiosLoaded.next(true);  // Notifica para evitar que se quede esperando
+      return null;  // En caso de error, retornar null o manejar el error como sea necesario
     }
   };
+
 
   async obtenerDatos(event: any): Promise<any> {
     this.form = event;
@@ -298,23 +324,35 @@ export class NuevoBeneficioAfilComponent implements OnInit {
     }
   }
 
-  manejarRowClick(row: any) {
-    // Ocultamos el formulario temporalmente
-    this.mostrarB = false;
+  async manejarRowClick(row: any) {
+    try {
 
-    // Asignamos el valor del DNI de la fila seleccionada al campo de DNI del beneficiario
-    this.desOBenSeleccionado = row;
+      // Obtiene los beneficios basados en el tipo de afiliado seleccionado
+      if (row.tipo_afiliado === "BENEFICIARIO") {
+        this.toastr.error("La persona se encuentra como beneficiario.");
+        this.toastr.warning(`No se puede asignar beneficios a los beneficiarios del mismo causante, solo a los designados`, "Advertencia");
+      }
 
-    this.myFormFields2[0].value = row.dni;
+      const temp = await this.getTipoBen(row.tipo_afiliado);
+      // Si getTipoBen devuelve null o vacío, no mostrar el formulario
+      if (!temp || temp.length === 0) {
+        this.mostrarB = false;  // No mostrar el formulario de beneficios
+        //this.form1.reset();     // Opcionalmente, reinicia el formulario
+        //this.FormBen.reset();   // Opcionalmente, reinicia el formulario
+        return;  // Detener la ejecución
+      } else {
+        this.desOBenSeleccionado = row;
+        // Si hay beneficios, proceder con la lógica y mostrar el formulario
+        this.myFormFields2[0].value = row.dni;
+        this.mostrarB = true;
+        // Actualizar el formulario con los beneficios obtenidos
+        //this.form1.patchValue(temp);  // O cualquier lógica para manejar los beneficios
+      }
 
-    // Forzamos la detección de cambios
-    this.cdr.detectChanges();
 
-    // Mostramos el formulario nuevamente
-    this.mostrarB = true;
-
-    // Forzamos una segunda detección de cambios para asegurarnos de que el valor se haya reflejado
-    this.cdr.detectChanges();
+    } catch (error) {
+      console.error('Error al manejar la fila seleccionada:', error);
+    }
   }
 
   async prueba(event: any): Promise<any> {
@@ -425,6 +463,7 @@ export class NuevoBeneficioAfilComponent implements OnInit {
 
       this.datosFormateados["periodo_inicio"] = startDateFormatted;
       this.datosFormateados["periodo_finalizacion"] = fechaFormateada;
+      console.log(this.desOBenSeleccionado);
 
       this.svcBeneficioServ.asigBeneficioAfil(this.datosFormateados, this.desOBenSeleccionado).subscribe(
         {

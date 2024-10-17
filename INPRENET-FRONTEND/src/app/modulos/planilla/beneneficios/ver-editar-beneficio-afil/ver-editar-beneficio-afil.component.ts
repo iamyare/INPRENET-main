@@ -1,6 +1,6 @@
 import { DatePipe } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
-import { Component } from '@angular/core';
+import { ChangeDetectorRef, Component } from '@angular/core';
 import { ToastrService } from 'ngx-toastr';
 import { TableColumn } from 'src/app/shared/Interfaces/table-column';
 import { unirNombres } from '../../../../shared/functions/formatoNombresP';
@@ -36,6 +36,7 @@ export class VerEditarBeneficioAfilComponent {
   ejecF2: any;
 
   constructor(
+    private cdr: ChangeDetectorRef,
     private dialog: MatDialog,
     private http: HttpClient,
     private beneficioService: BeneficiosService,
@@ -145,6 +146,11 @@ export class VerEditarBeneficioAfilComponent {
 
       this.filasT = data.detBen.map((item: any) => {
         return {
+          prestamo: item.prestamo,
+          ID_DETALLE_PERSONA: item.ID_DETALLE_PERSONA,
+          ID_PERSONA: item.ID_PERSONA,
+          ID_CAUSANTE: item.ID_CAUSANTE,
+          ID_BENEFICIO: item.ID_BENEFICIO,
           estado_solicitud: item.estado_solicitud,
           dni: item.persona.n_identificacion,
           dni_causante: item.persona?.padreIdPersona?.persona?.n_identificacion || "NO APLICA",
@@ -232,8 +238,6 @@ export class VerEditarBeneficioAfilComponent {
   };
 
   manejarAccionUno(row: any) {
-    console.log(row);
-
     const campos = [
       { nombre: 'numero_rentas_max', tipo: 'number', requerido: true, etiqueta: 'Número de rentas aprobadas' },
       { nombre: 'periodoInicio', tipo: 'date', requerido: true, etiqueta: 'Periodo de inicio' },
@@ -244,7 +248,7 @@ export class VerEditarBeneficioAfilComponent {
       { nombre: 'monto_primera_cuota', tipo: 'number', requerido: true, etiqueta: 'monto_primera_cuota', editable: true },
       { nombre: 'estado_solicitud', tipo: 'list', requerido: true, opciones: [{ label: "APROBADO", value: "APROBADO" }, { label: "RECHAZADO", value: "RECHAZADO" }], etiqueta: 'Estado Solicitud', editable: true },
       { nombre: 'observaciones', tipo: 'text', requerido: true, etiqueta: 'observaciones', editable: true },
-
+      { nombre: 'prestamo', tipo: 'list', requerido: true, opciones: [{ label: "SI", value: "SI" }, { label: "NO", value: "NO" }], etiqueta: '¿Tiene algún prestamo?', editable: true },
     ];
 
     const dialogRef = this.dialog.open(EditarDialogComponent, {
@@ -254,10 +258,40 @@ export class VerEditarBeneficioAfilComponent {
 
     dialogRef.afterClosed().subscribe((result: any) => {
       if (result) {
-        console.log('Datos editados:', result);
+        result["ID_DETALLE_PERSONA"] = row.ID_DETALLE_PERSONA;
+        result["ID_PERSONA"] = row.ID_PERSONA;
+        result["ID_CAUSANTE"] = row.ID_CAUSANTE;
+        result["ID_BENEFICIO"] = row.ID_BENEFICIO;
 
-        //actualizar beneficio
+        this.beneficioService.updateBeneficioPersona(result).subscribe(
+          () => {
+            // Después de actualizar el beneficio, recargar los datos
+            this.toastr.success("Registro actualizado con éxito");
+            this.cargarDatosActualizados();
+            // Forzar la detección de cambios
+            this.cdr.detectChanges();
+          },
+          error => {
+            this.toastr.error("Error al actualizar el beneficio");
+            console.error('Error al actualizar el beneficio', error);
+          }
+        );
       }
     });
   }
+
+  cargarDatosActualizados() {
+    this.beneficioService.GetAllBeneficios(this.form.value.dni).subscribe(
+      (data: any) => {
+        this.filasT = data;  // Actualiza los datos de la tabla
+        // Forzar la detección de cambios
+        this.cdr.detectChanges();
+      },
+      error => {
+        console.error('Error al cargar los beneficios actualizados', error);
+      }
+    );
+  }
+
+
 }

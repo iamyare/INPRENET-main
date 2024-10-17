@@ -57,7 +57,7 @@ export class EditPepsComponent implements OnInit, OnDestroy, OnChanges {
     this.mostrarBotonAgregarPEP = this.permisosService.tieneAccesoCompletoAfiliacion();
     this.mostrarBotonEditar = this.permisosService.tieneAccesoCompletoAfiliacion();
     this.mostrarBotonEliminar = this.permisosService.tieneAccesoCompletoAfiliacion();
-}
+  }
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['Afiliado'] && this.Afiliado) {
@@ -144,7 +144,7 @@ export class EditPepsComponent implements OnInit, OnDestroy, OnChanges {
         this.familiares = data.map((familiar: any) => ({
           nombre_completo: `${familiar.referenciada.primer_nombre || ''} ${familiar.referenciada.segundo_nombre || ''} ${familiar.referenciada.primer_apellido || ''} ${familiar.referenciada.segundo_apellido || ''}`.trim(),
           parentesco: familiar.parentesco,
-          id_persona : familiar.referenciada.id_persona,
+          id_persona: familiar.referenciada.id_persona,
           id_familia: familiar.id_familia
         }));
       } catch (error) {
@@ -275,39 +275,39 @@ export class EditPepsComponent implements OnInit, OnDestroy, OnChanges {
   }
   openDialog(campos: any, row: any): void {
     const dialogRef = this.dialog.open(EditarDialogComponent, {
-        width: '500px',
-        data: { campos: campos, valoresIniciales: row }
+      width: '500px',
+      data: { campos: campos, valoresIniciales: row }
     });
 
     dialogRef.afterClosed().subscribe((result: any) => {
-        if (result) {
-            const pepsData = [{
-                cargosPublicos: [
-                    {
-                        cargo: result.cargo,
-                        fecha_inicio: this.datePipe.transform(result.fecha_inicio, 'yyyy-MM-dd'),
-                        fecha_fin: this.datePipe.transform(result.fecha_fin, 'yyyy-MM-dd')
-                    }
-                ]
-            }];
-            console.log(pepsData);
+      if (result) {
+        const pepsData = [{
+          cargosPublicos: [
+            {
+              cargo: result.cargo,
+              fecha_inicio: this.datePipe.transform(result.fecha_inicio, 'yyyy-MM-dd'),
+              fecha_fin: this.datePipe.transform(result.fecha_fin, 'yyyy-MM-dd')
+            }
+          ]
+        }];
+        //console.log(pepsData);
 
-            this.afiliacionService.actualizarPeps(this.Afiliado.id_persona, pepsData).subscribe({
-                next: () => {
-                    const index = this.filas.findIndex(item => item === row);
-                    if (index !== -1) {
-                        this.filas[index] = { ...this.filas[index], ...result };
-                    }
-                    this.toastr.success('Se actualizó correctamente');
-                    this.cargar();
-                },
-                error: () => {
-                    this.toastr.error('Error al actualizar');
-                }
-            });
-        }
+        this.afiliacionService.actualizarPeps(this.Afiliado.id_persona, pepsData).subscribe({
+          next: () => {
+            const index = this.filas.findIndex(item => item === row);
+            if (index !== -1) {
+              this.filas[index] = { ...this.filas[index], ...result };
+            }
+            this.toastr.success('Se actualizó correctamente');
+            this.cargar();
+          },
+          error: () => {
+            this.toastr.error('Error al actualizar');
+          }
+        });
+      }
     });
-}
+  }
 
 
 

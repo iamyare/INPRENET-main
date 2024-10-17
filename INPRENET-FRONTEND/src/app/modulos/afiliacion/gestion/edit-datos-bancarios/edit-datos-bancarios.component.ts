@@ -192,7 +192,7 @@ export class EditDatosBancariosComponent implements OnInit, OnChanges {
   }
 
   openDialog(campos: any, row: any): void {
-    console.log(this.Afiliado);
+    //console.log(this.Afiliado);
 
     const dialogRef = this.dialog.open(ConfirmDialogComponent, {
       width: '350px',

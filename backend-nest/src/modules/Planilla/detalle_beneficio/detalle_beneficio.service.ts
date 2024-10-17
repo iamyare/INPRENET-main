@@ -21,6 +21,7 @@ import { Net_Persona_Por_Banco } from 'src/modules/banco/entities/net_persona-ba
 import { Net_Detalle_Deduccion } from '../detalle-deduccion/entities/detalle-deduccion.entity';
 @Injectable()
 export class DetalleBeneficioService {
+
   private readonly logger = new Logger(DetalleBeneficioService.name)
 
   constructor(
@@ -37,10 +38,15 @@ export class DetalleBeneficioService {
     private detPersonaRepository: Repository<net_detalle_persona>,
     @InjectRepository(Net_Beneficio_Tipo_Persona)
     private benTipoPerRepository: Repository<Net_Beneficio_Tipo_Persona>,
+
     @InjectRepository(Net_Tipo_Persona)
     private tipoPersonaRepos: Repository<Net_Tipo_Persona>,
+
     @InjectRepository(Net_Persona_Por_Banco)
     private readonly personaPorBancoRepository: Repository<Net_Persona_Por_Banco>,
+
+    @InjectRepository(net_estado_afiliacion)
+    private readonly estadoAfilRepository: Repository<net_estado_afiliacion>,
     @InjectEntityManager() private readonly entityManager: EntityManager
   ) { }
 
@@ -274,11 +280,12 @@ export class DetalleBeneficioService {
 
   async createDetalleBeneficioAfiliado(data: any, idPersonaPadre?: number): Promise<any> {
     const { datos, itemSeleccionado } = data
-
     return await this.entityManager.transaction(async manager => {
       try {
         const beneficio = await manager.findOne(Net_Beneficio, { where: { nombre_beneficio: datos.nombre_beneficio } });
 
+        console.log(beneficio)
+        console.log(data)
         if (!beneficio) {
           throw new BadRequestException('Tipo de beneficio no encontrado');
         }
@@ -302,7 +309,7 @@ export class DetalleBeneficioService {
                 where: {
                   persona: { n_identificacion: datos.dni },
                   tipoPersona: {
-                    tipo_persona: In(['AFILIADO', 'JUBILADO', 'PENSIONADO']),
+                    tipo_persona: In(['AFILIADO', 'JUBILADO', 'PENSIONADO', 'VOLUNTARIO']),
                   },
                   eliminado: "NO"
                 },
@@ -343,13 +350,30 @@ export class DetalleBeneficioService {
                     ${datos.num_rentas_aplicadas ? parseFloat(datos.num_rentas_aplicadas) : 'null'},
                     '${datos.estado_solicitud}',
                     '${datos.observacion}'
-                )`;
-              console.log(queryInsDeBBenf);
+              )`;
 
               const detBeneBeneficia = await this.entityManager.query(queryInsDeBBenf);
+
+              //ACTUALIZAR A INHABILITADO solo si se le otorga el beneficio de separacion del sistema.
+              if (datos.nombre_beneficio == "SEPARACION DEL SISTEMA VOLUNTARIO" ||
+                datos.nombre_beneficio == "SEPARACION DEL SISTEMA DE OFICIO" ||
+                datos.nombre_beneficio == "SEPARACION DE JUBILACION POR OFICIO" ||
+                datos.nombre_beneficio == "SEPARACION POR MUERTE"
+              ) {
+                const estadoP = await this.estadoAfilRepository.findOne({ where: { nombre_estado: "INACTIVO" } });
+                const detPers = await this.detPersonaRepository.preload({
+                  ID_DETALLE_PERSONA: detPer.ID_DETALLE_PERSONA,
+                  ID_PERSONA: detPer.ID_PERSONA,
+                  ID_CAUSANTE: detPer.ID_CAUSANTE,
+                  ID_CAUSANTE_PADRE: detPer.ID_CAUSANTE_PADRE,
+                  ID_TIPO_PERSONA: estadoP.codigo
+                });
+                await this.detPersonaRepository.save(detPers);
+              }
               return detBeneBeneficia;
             }
           } else if (idPersonaPadre) {
+
             const detPer = await manager.findOne(
               net_detalle_persona,
               {
@@ -366,6 +390,7 @@ export class DetalleBeneficioService {
 
             if (detPer) {
               const estadoP = await this.tipoPersonaRepos.findOne({ where: { tipo_persona: "BENEFICIARIO" } });
+              console.log(estadoP);
 
               const detPers = await this.detPersonaRepository.preload({
                 ID_DETALLE_PERSONA: detPer.ID_DETALLE_PERSONA,
@@ -410,7 +435,7 @@ export class DetalleBeneficioService {
                       ${datos.num_rentas_aplicadas ? parseFloat(datos.num_rentas_aplicadas) : 'null'},
                       '${datos.estado_solicitud}',
                       '${datos.observacion}'
-                    )`;
+              )`;
 
               const detBeneBeneficia = await this.entityManager.query(queryInsDeBBenf);
               return detBeneBeneficia;
@@ -678,7 +703,7 @@ export class DetalleBeneficioService {
         .getRawMany();
 
       const detBen = await this.detalleBeneficioAfiliadoRepository.find({
-        where: { persona: { persona: { n_identificacion: `${dni}` }, tipoPersona: { tipo_persona: In(["AFILIADO", "JUBILADO", "PENSIONADO", "BENEFICIARIO"]) } } },
+        where: { persona: { persona: { n_identificacion: `${dni}` }, tipoPersona: { tipo_persona: In(["AFILIADO", "JUBILADO", "PENSIONADO", "BENEFICIARIO", "BENEFICIARIO SIN CAUSANTE"]) } } },
         relations: [
           'persona.padreIdPersona',
           'persona.padreIdPersona.persona',
@@ -782,16 +807,12 @@ export class DetalleBeneficioService {
 
   async obtenerTipoBeneficioByTipoPersona(tipoPersona: string): Promise<any[]> {
     try {
-      console.log(tipoPersona);
-
       const tipoBen = await this.benTipoPerRepository.find({
-        where: { tipPersona: { tipo_persona: "JUBILADO" } },
+        where: { tipPersona: { tipo_persona: tipoPersona } },
         relations: [
           'beneficio'
         ],
       });
-      console.log(tipoBen);
-
       return tipoBen
 
     } catch (error) {
@@ -946,7 +967,32 @@ export class DetalleBeneficioService {
     }
   }
 
+  async updateBeneficioPersona(data: any) {
+    try {
+      const detBenAfil = await this.detalleBeneficioAfiliadoRepository.preload({
+        ID_DETALLE_PERSONA: data.ID_DETALLE_PERSONA,
+        ID_PERSONA: data.ID_PERSONA,
+        ID_CAUSANTE: data.ID_CAUSANTE,
+        ID_BENEFICIO: data.ID_BENEFICIO,
+        estado_solicitud: data.estado_solicitud,
+        monto_total: data.Monto_total === '' ? null : parseFloat(data.Monto_total),
+        monto_ultima_cuota: data.monto_ultima_cuota === '' ? null : parseFloat(data.monto_ultima_cuota),
+        monto_por_periodo: data.monto_por_periodo === '' ? null : parseFloat(data.monto_por_periodo),
+        monto_primera_cuota: data.monto_primera_cuota === '' ? null : parseFloat(data.monto_primera_cuota),
+        periodo_finalizacion: data.periodoFinalizacion,
+        observaciones: data.observaciones,
+        prestamo: data.prestamo
+      });
+
+      await this.detalleBeneficioAfiliadoRepository.save(detBenAfil);
+
+    } catch (error) {
+      this.logger.error(`Error al actualizar beneficios: ${error.message}`, error.stack);
+      throw new InternalServerErrorException('Error al actualizar beneficios.');
+    }
+  }
 }
+
 /* 
 function Net_Estado_Afiliado(qb: SelectQueryBuilder<any>): SelectQueryBuilder<any> {
   throw new Error('Function not implemented.');

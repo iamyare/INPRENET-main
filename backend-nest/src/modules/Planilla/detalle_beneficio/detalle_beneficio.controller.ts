@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Query, Response, BadRequestException, HttpStatus, HttpException } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Query, Response, BadRequestException, HttpStatus, HttpException, Put, HttpCode } from '@nestjs/common';
 import { DetalleBeneficioService } from './detalle_beneficio.service';
 import { UpdateDetalleBeneficioDto } from './dto/update-detalle_beneficio_planilla.dto';
 import { ApiTags } from '@nestjs/swagger';
@@ -30,7 +30,7 @@ export class DetalleBeneficioController {
         body.id_planilla,
         body.monto_a_pagar
       );
-      
+
       return {
         message: 'Detalle de pago de beneficio insertado correctamente.',
         data: nuevoDetallePagoBeneficio,
@@ -44,9 +44,9 @@ export class DetalleBeneficioController {
     }
   }
 
-    @Get('detalle-pago')
+  @Get('detalle-pago')
   obtenerDetallePago(@Query('n_identificacion') n_identificacion: string, @Query('causante_identificacion') causante_identificacion: string, @Query('id_beneficio') id_beneficio: number) {
-      return this.detallebeneficioService.obtenerDetallePagoConPlanilla(n_identificacion, causante_identificacion, id_beneficio);
+    return this.detallebeneficioService.obtenerDetallePagoConPlanilla(n_identificacion, causante_identificacion, id_beneficio);
   }
 
 
@@ -226,6 +226,15 @@ export class DetalleBeneficioController {
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.detallebeneficioService.remove(+id);
+  }
+
+  @Put('/updateBeneficioPersona')
+  @HttpCode(HttpStatus.OK)
+  async actualizarSalarioBase(
+    @Body('data') data: any,
+  ): Promise<{ message: string }> {
+    this.detallebeneficioService.updateBeneficioPersona(data);
+    return { message: 'Beneficio actualizado con éxito.' };
   }
 
 }

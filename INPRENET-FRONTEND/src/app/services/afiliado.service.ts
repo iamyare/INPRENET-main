@@ -122,8 +122,6 @@ export class AfiliadoService {
   }
 
   updateDatosGenerales(idPersona: string, datosGenerales: any): Observable<any> {
-    console.log(datosGenerales);
-
     const formData: FormData = new FormData();
     formData.append('datosGenerales', JSON.stringify(datosGenerales));
     formData.append('arch_cert_def', datosGenerales.certificado_defuncion

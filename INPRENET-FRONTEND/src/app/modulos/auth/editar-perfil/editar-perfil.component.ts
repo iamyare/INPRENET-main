@@ -49,7 +49,7 @@ export class EditarPerfilComponent implements OnInit {
   obtenerPerfil(): void {
     this.authService.obtenerPerfil(this.correo).subscribe({
       next: (perfil: any) => {
-        console.log(perfil);
+        //console.log(perfil);
 
         this.perfilForm.patchValue({
           nombre: perfil.empleadoCentroTrabajo.empleado.nombreEmpleado,

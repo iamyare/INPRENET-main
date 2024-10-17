@@ -38,7 +38,7 @@ export class LayoutComponent implements OnInit {
           isSectionVisible = true; // Actualizar si hay método específico para este módulo
           break;
         case 'beneficios':
-          isSectionVisible = false; // Actualizar si hay método específico para BENEFICIOS
+          isSectionVisible = true; // Actualizar si hay método específico para BENEFICIOS
           break;
         case 'cuentas inprema':
           isSectionVisible = true; // Actualizar si hay método específico para BENEFICIOS

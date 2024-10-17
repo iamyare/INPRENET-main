@@ -62,14 +62,14 @@ export const MENU_CONFIG: Section[] = [
           { title: 'Ver Beneficios Asignados', route: 'planilla/Beneficios/Ver-editar-beneficio-afil', icon: 'visibility' },
         ],
       },
-      {
+      /* {
         title: 'GESTIÓN DE DEDUCCIONES',
         icon: 'money',
         children: [
           { title: 'Asignar Deduccion', route: 'planilla/Deducciones/nueva-deduccion-afil', icon: 'remove_circle' },
           { title: 'Ver Deducciones Asignadas', route: 'planilla/Deducciones/ver-editar-deduccion-afil', icon: 'visibility' },
         ],
-      },
+      }, */
     ],
   },
   {
@@ -86,13 +86,13 @@ export const MENU_CONFIG: Section[] = [
           { title: 'Generación de documentos', route: 'planilla/Egresos/documentos-planilla', icon: 'description' },
         ],
       },
-      {
+      /* {
         title: 'INGRESOS',
         icon: 'money',
         children: [
           { title: 'Privados', route: 'planilla/Ingresos/planilla-colegios-privados', icon: 'business' },
         ],
-      },
+      }, */
     ],
   },
   {

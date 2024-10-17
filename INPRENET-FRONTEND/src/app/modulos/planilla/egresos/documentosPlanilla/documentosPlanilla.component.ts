@@ -93,7 +93,7 @@ export class DocumentosPlanillaComponent implements OnInit {
     //this.mostrarB = false;
 
     // Asignamos el valor del DNI de la fila seleccionada al campo de DNI del beneficiario
-    console.log(row);
+    //console.log(row);
 
     this.desOBenSeleccionado = row;
     this.getElemSeleccionados.emit(this.desOBenSeleccionado);
@@ -186,7 +186,6 @@ export class DocumentosPlanillaComponent implements OnInit {
 
     this.planillaService.getTotalBeneficiosYDeduccionesPorPeriodo(fechaInicioFormateada, fechaFinFormateada, idTiposPlanilla).subscribe({
       next: async (data) => {
-        console.log(data);
         const base64Image = await this.convertirImagenABase64('../assets/images/membratadoFinal.jpg');
 
         const totalBeneficios = data.beneficios.reduce((acc: any, cur: any) => acc + (cur.TOTAL_MONTO_BENEFICIO ? parseFloat(cur.TOTAL_MONTO_BENEFICIO) : 0), 0);

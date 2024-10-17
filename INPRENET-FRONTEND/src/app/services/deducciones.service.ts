@@ -111,7 +111,6 @@ export class DeduccionesService {
         if (event.type === HttpEventType.UploadProgress) {
           // Progreso de la subida
           const progress = Math.round(100 * (event.loaded / (event.total || 1)));
-          console.log(`Progreso: ${progress}%`);
         } else if (event.type === HttpEventType.Response) {
           // La respuesta final del servidor
           const response = event.body;

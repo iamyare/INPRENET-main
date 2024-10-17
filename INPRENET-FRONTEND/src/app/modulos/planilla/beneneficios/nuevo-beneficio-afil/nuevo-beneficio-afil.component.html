@@ -45,17 +45,18 @@
       </tr>
     </table>
   </div>
-
+  <!--Afiliado.tipo_persona == 'REGISTRADO' ||-->
   <div *ngIf="Afiliado.fallecido == 'SI' && (
-  Afiliado.tipo_persona == 'AFILIADO' || 
-  Afiliado.tipo_persona == 'JUBILADO' || 
-  Afiliado.tipo_persona == 'PENSIONADO')"
+  Afiliado.tipo_persona == 'AFILIADO' ||
+  Afiliado.tipo_persona == 'JUBILADO' ||
+  Afiliado.tipo_persona == 'PENSIONADO' ||
+  Afiliado.tipo_persona == 'VOLUNTARIO')"
     style="padding: 1%">
-    <app-dynamic-table-prueba 
+    <app-dynamic-table-prueba
     titulo="Beneficiarios Del {{Afiliado.tipo_persona}}"
     subtitulo="Para asignar Beneficios haga click sobre un item de la siguiente tabla"
-    [columns]="myColumns" 
-    [data]="filas" 
+    [columns]="myColumns"
+    [data]="filas"
     [getData]="getFilas"
     (ejecutarFuncionAsincronaEvent)="ejecutarFuncionAsincronaDesdeOtroComponente($event)"
     (rowClicked)="manejarRowClick($event)"
@@ -64,17 +65,18 @@
   </div>
 </div>
 
-
+<!-- PARA DESIGNADOS BENEFICIARIOS Y BENEFICIARIOS-->
 <div *ngIf="mostrarB && Afiliado.fallecido == 'SI' && (
-  Afiliado.tipo_persona == 'AFILIADO' || 
-  Afiliado.tipo_persona == 'JUBILADO' || 
-  Afiliado.tipo_persona == 'PENSIONADO')"
+  Afiliado.tipo_persona == 'AFILIADO' ||
+  Afiliado.tipo_persona == 'JUBILADO' ||
+  Afiliado.tipo_persona == 'PENSIONADO' ||
+  Afiliado.tipo_persona == 'VOLUNTARIO' )"
   style="margin: 1% 0% 1% 0%; text-align: center; background-color: white">
-  <app-dynamic-form 
-    [fields]="myFormFields2" 
-    titulo="Datos sobre el beneficio" 
+  <app-dynamic-form
+    [fields]="myFormFields2"
+    titulo="Datos sobre el beneficio"
     subtitulo="Completa la información correspondiente"
-    (selectChange)="prueba($event)" 
+    (selectChange)="prueba($event)"
     (newDatBenChange)="obtenerDatosFormBen($event)"
   ></app-dynamic-form>
   <button mat-raised-button color="primary" style="color: white; margin: 1% 0 1% 0" [disabled]="FormBen.invalid"
@@ -84,9 +86,11 @@
 </div>
 
 <div *ngIf="mostrarDB && Afiliado.fallecido == 'NO' && (
-  (Afiliado.tipo_persona == 'AFILIADO' && Afiliado.estado_persona == 'ACTIVO') || 
-  Afiliado.tipo_persona == 'JUBILADO' || 
-  Afiliado.tipo_persona == 'PENSIONADO')" style="margin: 1% 0% 1% 0%; text-align: center; background-color: white">
+  (Afiliado.tipo_persona == 'AFILIADO' && Afiliado.estado_persona == 'ACTIVO') ||
+  Afiliado.tipo_persona == 'JUBILADO' ||
+  Afiliado.tipo_persona == 'PENSIONADO' ||
+  Afiliado.tipo_persona == 'VOLUNTARIO'
+  )" style="margin: 1% 0% 1% 0%; text-align: center; background-color: white">
   <app-dynamic-form [fields]="myFormFields1" titulo="Datos sobre el beneficio"
     subtitulo="Completa la información correspondiente" (selectChange)="prueba($event)" (newDatBenChange)="obtenerDatos1($event)"></app-dynamic-form>
 

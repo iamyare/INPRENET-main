@@ -110,7 +110,7 @@ export class AgregarFamiliarComponent implements OnInit {
   saveFamiliares(): void {
     if (this.formFamiliares.valid) {
       const familiaresData = this.formatFamiliares(this.familiares.value);
-      console.log(familiaresData);
+      //console.log(familiaresData);
 
       this.afiliacionService.crearFamilia(this.idPersona, familiaresData).subscribe({
         next: () => {

@@ -45,7 +45,7 @@ export class EditBeneficiariosComponent implements OnInit, OnChanges {
     private dialog: MatDialog,
     private datePipe: DatePipe,
     private permisosService: PermisosService,
-    private afiliacionServicio : AfiliacionService,
+    private afiliacionServicio: AfiliacionService,
     private datosEstaticosService: DatosEstaticosService
   ) { }
 
@@ -175,17 +175,17 @@ export class EditBeneficiariosComponent implements OnInit, OnChanges {
 
   editarFila(row: any) {
     const campos = [{
-        nombre: 'porcentaje',
-        tipo: 'number',
-        etiqueta: 'Porcentaje',
-        editable: true,
-        icono: 'pie_chart',
-        validadores: [
-          Validators.required,
-          Validators.min(1),
-          Validators.max(100)
-        ]
-      }
+      nombre: 'porcentaje',
+      tipo: 'number',
+      etiqueta: 'Porcentaje',
+      editable: true,
+      icono: 'pie_chart',
+      validadores: [
+        Validators.required,
+        Validators.min(1),
+        Validators.max(100)
+      ]
+    }
     ];
     this.openDialog(campos, row);
   }

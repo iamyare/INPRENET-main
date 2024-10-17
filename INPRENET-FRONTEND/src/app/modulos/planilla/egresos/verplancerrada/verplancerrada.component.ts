@@ -259,7 +259,6 @@ export class VerplancerradaComponent {
   manejarAccionUno(row: any) {
     let logs: any[] = [];
 
-    console.log(row);
     this.planillaService.getBeneficiosDefinitiva(this.idPlanilla, row.id_afiliado).subscribe({
       next: (response) => {
 

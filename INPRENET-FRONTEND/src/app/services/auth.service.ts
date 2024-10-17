@@ -46,8 +46,6 @@ export class AuthService {
   // Incrementar el contador cuando se inicia una petición API
   public onApiRequestStart(): void {
     this.apiRequestsCount++;
-    console.log(this.apiRequestsCount);
-
     clearTimeout(this.idleTimeout); // Pausar el temporizador de inactividad mientras hay solicitudes
   }
 

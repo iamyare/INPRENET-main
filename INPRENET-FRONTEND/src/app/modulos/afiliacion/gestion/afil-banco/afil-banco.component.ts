@@ -289,12 +289,12 @@ export class AfilBancoComponent implements OnInit {
 
     // Log para ver qué contiene el FormData antes de enviar
     formData.forEach((value, key) => {
-      console.log(`Key ${key}:`, value);
+      ///console.log(`Key ${key}:`, value);
     });
 
     this.afiliacionService.crearAfiliacion(encapsulatedDto, file).subscribe(
       response => {
-        console.log('Datos enviados con éxito:', response);
+        //console.log('Datos enviados con éxito:', response);
         this.toastr.success('Datos enviados con éxito');
       },
       error => {

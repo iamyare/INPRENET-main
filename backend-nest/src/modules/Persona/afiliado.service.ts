@@ -49,55 +49,55 @@ export class AfiliadoService {
 
   async getMovimientosOrdenados(id_persona: number, id_tipo_cuenta: number): Promise<any> {
     try {
-        const movimientos = await this.movimientoCuentaRepository.find({
-            where: { 
-                cuentaPersona: { 
-                    persona: { id_persona },
-                    tipoCuenta: { ID_TIPO_CUENTA: id_tipo_cuenta }
-                } 
-            },
-            order: { ANO: 'ASC', MES: 'ASC' },
-            relations: ['cuentaPersona', 'cuentaPersona.tipoCuenta', 'tipoMovimiento'],
+      const movimientos = await this.movimientoCuentaRepository.find({
+        where: {
+          cuentaPersona: {
+            persona: { id_persona },
+            tipoCuenta: { ID_TIPO_CUENTA: id_tipo_cuenta }
+          }
+        },
+        order: { ANO: 'ASC', MES: 'ASC' },
+        relations: ['cuentaPersona', 'cuentaPersona.tipoCuenta', 'tipoMovimiento'],
+      });
+
+      // Extraer información del tipo de cuenta y número de cuenta
+      const tipoCuenta = movimientos.length > 0 ? movimientos[0].cuentaPersona.tipoCuenta.DESCRIPCION : null;
+      const numeroCuenta = movimientos.length > 0 ? movimientos[0].cuentaPersona.NUMERO_CUENTA : null;
+
+      // Organizar movimientos por año y mes
+      const movimientosOrdenados = movimientos.reduce((acc, movimiento) => {
+        const { ANO: year, MES: month } = movimiento;
+
+        if (!acc[year]) {
+          acc[year] = {};
+        }
+
+        if (!acc[year][month]) {
+          acc[year][month] = [];
+        }
+
+        acc[year][month].push({
+          ID_MOVIMIENTO_CUENTA: movimiento.ID_MOVIMIENTO_CUENTA,
+          MONTO: movimiento.MONTO,
+          FECHA_MOVIMIENTO: movimiento.FECHA_MOVIMIENTO,
+          DESCRIPCION: movimiento.DESCRIPCION,
+          CREADA_POR: movimiento.CREADA_POR,
+          tipoMovimiento: movimiento.tipoMovimiento.DESCRIPCION, // Se asume que tiene una descripción
+          ANO: movimiento.ANO,
+          MES: movimiento.MES,
         });
 
-        // Extraer información del tipo de cuenta y número de cuenta
-        const tipoCuenta = movimientos.length > 0 ? movimientos[0].cuentaPersona.tipoCuenta.DESCRIPCION : null;
-        const numeroCuenta = movimientos.length > 0 ? movimientos[0].cuentaPersona.NUMERO_CUENTA : null;
+        return acc;
+      }, {});
 
-        // Organizar movimientos por año y mes
-        const movimientosOrdenados = movimientos.reduce((acc, movimiento) => {
-            const { ANO: year, MES: month } = movimiento;
-
-            if (!acc[year]) {
-                acc[year] = {};
-            }
-
-            if (!acc[year][month]) {
-                acc[year][month] = [];
-            }
-
-            acc[year][month].push({
-                ID_MOVIMIENTO_CUENTA: movimiento.ID_MOVIMIENTO_CUENTA,
-                MONTO: movimiento.MONTO,
-                FECHA_MOVIMIENTO: movimiento.FECHA_MOVIMIENTO,
-                DESCRIPCION: movimiento.DESCRIPCION,
-                CREADA_POR: movimiento.CREADA_POR,
-                tipoMovimiento: movimiento.tipoMovimiento.DESCRIPCION, // Se asume que tiene una descripción
-                ANO: movimiento.ANO,
-                MES: movimiento.MES,
-            });
-
-            return acc;
-        }, {});
-
-        return {
-            tipoCuenta,
-            numeroCuenta,
-            movimientos: movimientosOrdenados
-        };
+      return {
+        tipoCuenta,
+        numeroCuenta,
+        movimientos: movimientosOrdenados
+      };
     } catch (error) {
-        console.error('Error al obtener los movimientos ordenados:', error);
-        throw new InternalServerErrorException('Error al obtener los movimientos ordenados');
+      console.error('Error al obtener los movimientos ordenados:', error);
+      throw new InternalServerErrorException('Error al obtener los movimientos ordenados');
     }
   }
 
@@ -143,7 +143,7 @@ export class AfiliadoService {
     try {
       const personas = await this.personaRepository.findOne({
         where: { n_identificacion: n_identificacion },
-        relations: ['personasPorBanco', 'personasPorBanco.banco'], 
+        relations: ['personasPorBanco', 'personasPorBanco.banco'],
       });
       return personas.personasPorBanco;
     } catch (error) {
@@ -187,7 +187,7 @@ export class AfiliadoService {
         'peps.cargo_publico',
       ],
     });
-    
+
     if (!persona) {
       throw new NotFoundException(`Afiliado con N_IDENTIFICACION ${term} no existe`);
     }
@@ -863,66 +863,66 @@ export class AfiliadoService {
 
   async updateDatosGenerales(idPersona: number, datosGenerales: any, fileIdent: any, arch_cert_def: any): Promise<any> {
     try {
-        if (datosGenerales.dato?.discapacidades) {
-            const datosAnt = await this.perDiscapacidadRepository.delete({ persona: { id_persona: idPersona } });
-            const keysWithTrueValues = Object.entries(datosGenerales.dato.discapacidades)
-                .filter(([key, value]) => value === true)
-                .map(([key]) => key);
-            const discapacidades = await this.discapacidadRepository.find({
-                where: { tipo_discapacidad: In(keysWithTrueValues) }
-            });
-            const nuevosRegistros = discapacidades.map(discapacidad => ({
-                persona: { id_persona: idPersona },
-                discapacidad: discapacidad
-            }));
-            await this.perDiscapacidadRepository.save(nuevosRegistros);
+      if (datosGenerales.dato?.discapacidades) {
+        const datosAnt = await this.perDiscapacidadRepository.delete({ persona: { id_persona: idPersona } });
+        const keysWithTrueValues = Object.entries(datosGenerales.dato.discapacidades)
+          .filter(([key, value]) => value === true)
+          .map(([key]) => key);
+        const discapacidades = await this.discapacidadRepository.find({
+          where: { tipo_discapacidad: In(keysWithTrueValues) }
+        });
+        const nuevosRegistros = discapacidades.map(discapacidad => ({
+          persona: { id_persona: idPersona },
+          discapacidad: discapacidad
+        }));
+        await this.perDiscapacidadRepository.save(nuevosRegistros);
+      }
+
+      const estadoP = await this.estadoAfiliacionRepository.findOne({ where: { nombre_estado: datosGenerales.dato.estado } });
+
+      const temp = datosGenerales;
+      delete temp.dato.peps;
+      delete temp.dato.discapacidades;
+
+      temp.dato.direccion_residencia = `BARRIO_COLONIA: ${temp.dato.barrio_colonia},AVENIDA: ${temp.dato.avenida},CALLE: ${temp.dato.calle},SECTOR: ${temp.dato.sector},BLOQUE: ${temp.dato.bloque},N° DE CASA: ${temp.dato.numero_casa},COLOR CASA: ${temp.dato.color_casa},ALDEA: ${temp.dato.aldea},CASERIO: ${temp.dato.caserio}`;
+
+      const fechaDefuncion = new Date(temp.dato.fecha_defuncion);
+      const fechaFormateada = format(fechaDefuncion, 'yyyy-MM-dd');
+
+      delete temp.dato.archivo_identificacion;
+      delete temp.dato.fecha_defuncion;
+
+      const data = {
+        id_persona: idPersona,
+        fallecido: temp.causa_fallecimiento ? "SI" : "NO",
+        causa_fallecimiento: temp.causa_fallecimiento,
+        municipio_defuncion: temp.id_municipio_defuncion,
+        archivo_identificacion: fileIdent?.buffer ? Buffer.from(fileIdent.buffer) : null,
+        certificado_defuncion: arch_cert_def?.buffer ? Buffer.from(arch_cert_def.buffer) : null,
+        fecha_defuncion: fechaFormateada,
+        ...temp.dato
+      };
+
+      const afiliado = await this.personaRepository.preload(data);
+
+      if (!afiliado) throw new NotFoundException(`La persona con ID ${idPersona} no se ha encontrado`);
+
+      await this.personaRepository.save(afiliado);
+      if (datosGenerales.tipo_persona) {
+        const result = await this.detallePersonaRepository.update(
+          { ID_PERSONA: idPersona, ID_CAUSANTE: idPersona },
+          { ID_TIPO_PERSONA: datosGenerales.tipo_persona }
+        );
+        if (result.affected === 0) {
+          console.warn(`No se encontró un registro en NET_DETALLE_PERSONA para la persona con ID ${idPersona} y padre nulo.`);
         }
+      }
 
-        const estadoP = await this.estadoAfiliacionRepository.findOne({ where: { nombre_estado: datosGenerales.dato.estado } });
-
-        const temp = datosGenerales;
-        delete temp.dato.peps;
-        delete temp.dato.discapacidades;
-
-        temp.dato.direccion_residencia = `BARRIO_COLONIA: ${temp.dato.barrio_colonia},AVENIDA: ${temp.dato.avenida},CALLE: ${temp.dato.calle},SECTOR: ${temp.dato.sector},BLOQUE: ${temp.dato.bloque},N° DE CASA: ${temp.dato.numero_casa},COLOR CASA: ${temp.dato.color_casa},ALDEA: ${temp.dato.aldea},CASERIO: ${temp.dato.caserio}`;
-
-        const fechaDefuncion = new Date(temp.dato.fecha_defuncion);
-        const fechaFormateada = format(fechaDefuncion, 'yyyy-MM-dd');
-
-        delete temp.dato.archivo_identificacion;
-        delete temp.dato.fecha_defuncion;
-
-        const data = {
-            id_persona: idPersona,
-            fallecido: temp.causa_fallecimiento ? "SI" : "NO",
-            causa_fallecimiento: temp.causa_fallecimiento,
-            municipio_defuncion: temp.id_municipio_defuncion,
-            archivo_identificacion: fileIdent?.buffer ? Buffer.from(fileIdent.buffer) : null,
-            certificado_defuncion: arch_cert_def?.buffer ? Buffer.from(arch_cert_def.buffer) : null,
-            fecha_defuncion: fechaFormateada,
-            ...temp.dato
-        };
-
-        const afiliado = await this.personaRepository.preload(data);
-
-        if (!afiliado) throw new NotFoundException(`La persona con ID ${idPersona} no se ha encontrado`);
-
-        await this.personaRepository.save(afiliado);
-        if (datosGenerales.tipo_persona) {
-            const result = await this.detallePersonaRepository.update(
-                { ID_PERSONA: idPersona, ID_CAUSANTE: idPersona},
-                { ID_TIPO_PERSONA: datosGenerales.tipo_persona }
-            );
-            if (result.affected === 0) {
-                console.warn(`No se encontró un registro en NET_DETALLE_PERSONA para la persona con ID ${idPersona} y padre nulo.`);
-            }
-        }
-
-        return afiliado;
+      return afiliado;
     } catch (error) {
-        this.handleException(error);
+      this.handleException(error);
     }
-}
+  }
 
 
   async updatePerfCentroTrabajo(id: number, updateDto: UpdatePerfCentTrabDto): Promise<Net_perf_pers_cent_trab> {

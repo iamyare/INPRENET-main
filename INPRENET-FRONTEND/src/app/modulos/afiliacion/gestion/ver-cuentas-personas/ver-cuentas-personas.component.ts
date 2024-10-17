@@ -154,7 +154,7 @@ export class VerCuentasPersonasComponent implements OnInit, OnChanges, OnDestroy
     });
   }
 
-  ejecutarFuncionAsincronaDesdeOtroComponente(funcion: (data: any) => Promise<void>) {
+  ejecutarFuncionAsincronaDesdeOtroComponente(funcion: (data: any) => Promise<boolean>) {
     this.ejecF = funcion;
   }
 

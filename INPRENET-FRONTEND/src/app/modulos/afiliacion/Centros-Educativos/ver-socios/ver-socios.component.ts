@@ -99,7 +99,7 @@ export class VerSociosComponent {
     }
   }
 
-  ejecutarFuncionAsincronaDesdeOtroComponente(funcion: (data: any) => Promise<void>) {
+  ejecutarFuncionAsincronaDesdeOtroComponente(funcion: (data: any) => Promise<boolean>) {
     this.ejecF = funcion;
   }
 

@@ -92,7 +92,7 @@ export class VerEditarDeduccionAfilComponent implements OnInit {
     this.getFilas().then(() => this.cargar());
   }
 
-  ejecutarFuncionAsincronaDesdeOtroComponente(funcion: (data: any) => Promise<void>) {
+  ejecutarFuncionAsincronaDesdeOtroComponente(funcion: (data: any) => Promise<boolean>) {
     this.ejecF = funcion;
   }
 

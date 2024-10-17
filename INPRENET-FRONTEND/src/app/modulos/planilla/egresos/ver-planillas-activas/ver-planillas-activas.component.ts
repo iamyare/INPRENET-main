@@ -94,7 +94,7 @@ export class VerPlanillasActivasComponent {
     }
   };
 
-  ejecutarFuncionAsincronaDesdeOtroComponente(funcion: (data: any) => Promise<void>) {
+  ejecutarFuncionAsincronaDesdeOtroComponente(funcion: (data: any) => Promise<boolean>) {
     this.ejecF = funcion;
   }
 

@@ -42,7 +42,7 @@ export class DetalleEnvioEscalafonComponent {
     return this.prestamos;
   }
 
-  ejecutarFuncionAsincronaDesdeOtroComponente(funcion: (data: any) => Promise<void>) {
+  ejecutarFuncionAsincronaDesdeOtroComponente(funcion: (data: any) => Promise<boolean>) {
     funcion(this.prestamos).then(() => {
       console.log("Función asincrónica ejecutada con éxito");
     }).catch((error) => {

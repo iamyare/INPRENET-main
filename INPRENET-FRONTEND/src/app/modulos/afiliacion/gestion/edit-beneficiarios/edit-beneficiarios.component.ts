@@ -131,7 +131,7 @@ export class EditBeneficiariosComponent implements OnInit, OnChanges {
     }
   }
 
-  ejecutarFuncionAsincronaDesdeOtroComponente(funcion: (data: any) => Promise<void>) {
+  ejecutarFuncionAsincronaDesdeOtroComponente(funcion: (data: any) => Promise<boolean>) {
     this.ejecF = funcion;
   }
 

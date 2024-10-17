@@ -28,7 +28,7 @@ export class EditColegiosMagisterialesComponent implements OnInit, OnChanges, On
     private toastr: ToastrService,
     private dialog: MatDialog,
     private permisosService: PermisosService
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     this.initializeComponent();
@@ -87,13 +87,13 @@ export class EditColegiosMagisterialesComponent implements OnInit, OnChanges, On
     }
   }
 
-  ejecutarFuncionAsincronaDesdeOtroComponente(funcion: (data: any) => Promise<void>) {
+  ejecutarFuncionAsincronaDesdeOtroComponente(funcion: (data: any) => Promise<boolean>) {
     this.ejecF = funcion;
   }
 
   cargar() {
     if (this.ejecF) {
-      this.ejecF(this.filas).then(() => {});
+      this.ejecF(this.filas).then(() => { });
     }
   }
 

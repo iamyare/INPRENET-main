@@ -235,8 +235,6 @@ export class BeneficiosService {
   }
 
   updateBeneficioPersona(data: any): Observable<any> {
-    console.log(data);
-
     return this.http.put(`${environment.API_URL}/api/beneficio-planilla/updateBeneficioPersona`, { data: data });
   }
 

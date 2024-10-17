@@ -88,7 +88,7 @@ export class EditarBeneficioComponent implements OnInit {
     console.log('Acción del botón en la fila:', row);
   }
 
-  ejecutarFuncionAsincronaDesdeOtroComponente(funcion: (data: any) => Promise<void>) {
+  ejecutarFuncionAsincronaDesdeOtroComponente(funcion: (data: any) => Promise<boolean>) {
     this.ejecF = funcion;
   }
 

@@ -56,7 +56,7 @@ export class EditPerfilPuestTrabComponent implements OnInit, OnDestroy, OnChange
     this.mostrarBotonTrab = this.permisosService.tieneAccesoCompletoAfiliacion();
     this.mostrarBotonEditar = this.permisosService.tieneAccesoCompletoAfiliacion();
     this.mostrarBotonEliminar = this.permisosService.tieneAccesoCompletoAfiliacion();
-}
+  }
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['Afiliado'] && this.Afiliado) {
@@ -171,7 +171,7 @@ export class EditPerfilPuestTrabComponent implements OnInit, OnDestroy, OnChange
     }
   }
 
-  ejecutarFuncionAsincronaDesdeOtroComponente(funcion: (data: any) => Promise<void>) {
+  ejecutarFuncionAsincronaDesdeOtroComponente(funcion: (data: any) => Promise<boolean>) {
     this.ejecF = funcion;
   }
 

@@ -39,7 +39,7 @@ export class MovimientosComponent implements OnInit {
     });
   }
 
-  ngOnInit(): void {}
+  ngOnInit(): void { }
 
   onPersonaEncontrada(persona: any): void {
     this.persona = persona;
@@ -102,7 +102,7 @@ export class MovimientosComponent implements OnInit {
         descripcion: this.movimientoForm.value.descripcion,
         tipoMovimientoDescripcion: this.movimientoForm.value.tipo,
         ANO: this.movimientoForm.value.ano,
-      MES: this.movimientoForm.value.mes
+        MES: this.movimientoForm.value.mes
       };
 
       if (!nuevoMovimiento.numeroCuenta) {
@@ -179,9 +179,9 @@ export class MovimientosComponent implements OnInit {
         console.error('Error al descargar el PDF:', error);
       }
     );
-}
+  }
 
-  ejecutarFuncionAsincronaDesdeOtroComponente(funcion: (data: any) => Promise<void>) {
+  ejecutarFuncionAsincronaDesdeOtroComponente(funcion: (data: any) => Promise<boolean>) {
     this.ejecF = funcion;
   }
 

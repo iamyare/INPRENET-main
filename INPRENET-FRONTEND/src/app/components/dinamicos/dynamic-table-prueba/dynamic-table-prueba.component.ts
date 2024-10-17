@@ -19,7 +19,7 @@ export class DynamicTablePruebaComponent implements OnInit, OnDestroy {
   @Input() data?: any;
   filas: any = [];
 
-  @Output() ejecutarFuncionAsincronaEvent: EventEmitter<(param: any) => Promise<void>> = new EventEmitter<(param: any) => Promise<void>>();
+  @Output() ejecutarFuncionAsincronaEvent: EventEmitter<(param: any) => Promise<boolean>> = new EventEmitter<(param: any) => Promise<boolean>>();
 
   @Input() columns: TableColumn[] = [];
   @Input() editarFunc: any;
@@ -96,10 +96,13 @@ export class DynamicTablePruebaComponent implements OnInit, OnDestroy {
     if (data) {
       this.filas = data;
       this.filas?.map((objeto: any) => ({ ...objeto, isSelected: false }));
+      this.filtrarUsuarios().subscribe();
+      return true
     } else {
       this.filas = await this.getData();
+      this.filtrarUsuarios().subscribe();
+      return false
     }
-    this.filtrarUsuarios().subscribe();
   }
 
   ngOnInit(): void {

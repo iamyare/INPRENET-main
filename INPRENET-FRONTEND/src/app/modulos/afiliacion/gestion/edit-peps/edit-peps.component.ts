@@ -166,11 +166,11 @@ export class EditPepsComponent implements OnInit, OnDestroy, OnChanges {
     }
   }
 
-  ejecutarFuncionAsincronaDesdeOtroComponentePEPs(funcion: (data: any) => Promise<void>) {
+  ejecutarFuncionAsincronaDesdeOtroComponentePEPs(funcion: (data: any) => Promise<boolean>) {
     this.ejecFPEPs = funcion;
   }
 
-  ejecutarFuncionAsincronaDesdeOtroComponenteFamiliares(funcion: (data: any) => Promise<void>) {
+  ejecutarFuncionAsincronaDesdeOtroComponenteFamiliares(funcion: (data: any) => Promise<boolean>) {
     this.ejecFFamiliares = funcion;
   }
 

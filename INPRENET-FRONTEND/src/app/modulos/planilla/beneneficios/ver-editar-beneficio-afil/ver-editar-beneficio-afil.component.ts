@@ -28,12 +28,13 @@ export class VerEditarBeneficioAfilComponent {
 
   //Para generar tabla
   myColumns: TableColumn[] = [];
-  filasT: any[] = [];
-  ejecF: any;
+  filasT?: any[];
+  ejecF?: Function;
 
   myColumns1: TableColumn[] = [];
-  filasEst: any[] = [];
+  filasEst?: any[];
   ejecF2: any;
+  monstrarBeneficiarios: boolean = false;
 
   constructor(
     private cdr: ChangeDetectorRef,
@@ -168,12 +169,14 @@ export class VerEditarBeneficioAfilComponent {
           observaciones: item.observaciones
         }
       });
+
       return this.filasT;
     } catch (error) {
       console.error("Error al obtener los detalles completos de deducción", error);
       throw error;
     }
   };
+
   getFilas2 = async () => {
     try {
 
@@ -186,6 +189,8 @@ export class VerEditarBeneficioAfilComponent {
       }));
 
       this.filasEst = dataEstadosAfil;
+      console.log(this.filasEst);
+
 
       return this.filasEst;
     } catch (error) {
@@ -196,24 +201,34 @@ export class VerEditarBeneficioAfilComponent {
 
 
   previsualizarInfoAfil() {
-    this.monstrarBeneficios = true;
-    this.getFilas().then(() => this.cargar("ingresos"));
-    this.getFilas2().then(() => this.cargar("tipo"));
+    this.getFilas2().then(() => this.cargar2());
+    this.getFilas().then(() => this.cargar2());
   }
 
-  ejecutarFuncionAsincronaDesdeOtroComponente(funcion: (data: any) => Promise<void>) {
+  ejecutarFuncionAsincronaDesdeOtroComponente(funcion: (data: any) => Promise<boolean>) {
     this.ejecF = funcion;
   }
-  ejecutarFuncionAsincronaDesdeOtroComponente2(funcion: (data: any) => Promise<void>) {
+  ejecutarFuncionAsincronaDesdeOtroComponente2(funcion: (data: any) => Promise<boolean>) {
     this.ejecF2 = funcion;
   }
 
-  cargar(val: string) {
-    if (this.ejecF && val == "ingresos") {
-      this.ejecF(this.filasT).then(() => {
+  cargar2() {
+    this.cdr.detectChanges();
+    this.monstrarBeneficiarios = false;
+    this.monstrarBeneficios = false;
+
+    if (this.ejecF2 && this.ejecF) {
+      this.ejecF2(this.filasEst).then((val: boolean) => {
+        if (val) {
+          this.monstrarBeneficiarios = true;
+          this.cdr.detectChanges();
+        }
       });
-    } else if (this.ejecF2 && val == "tipo") {
-      this.ejecF2(this.filasEst).then(() => {
+      this.ejecF(this.filasT).then((val: boolean) => {
+        if (val) {
+          this.monstrarBeneficios = true;
+          this.cdr.detectChanges();
+        }
       });
     }
   }
@@ -268,6 +283,7 @@ export class VerEditarBeneficioAfilComponent {
             // Después de actualizar el beneficio, recargar los datos
             this.toastr.success("Registro actualizado con éxito");
             this.cargarDatosActualizados();
+            this.previsualizarInfoAfil();
             // Forzar la detección de cambios
             this.cdr.detectChanges();
           },

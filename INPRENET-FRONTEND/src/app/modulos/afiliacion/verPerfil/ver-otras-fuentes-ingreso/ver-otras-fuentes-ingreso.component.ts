@@ -147,7 +147,7 @@ export class VerOtrasFuentesIngresoComponent implements OnInit, OnDestroy, OnCha
     }
   }
 
-  ejecutarFuncionAsincronaDesdeOtroComponente(funcion: (data: any) => Promise<void>) {
+  ejecutarFuncionAsincronaDesdeOtroComponente(funcion: (data: any) => Promise<boolean>) {
     this.ejecF = funcion;
 
 

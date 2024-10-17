@@ -15,7 +15,7 @@ export class GestionUsuariosComponent implements OnInit {
   selectedModulos: string[] = [];
   public columns: TableColumn[] = [];
   public usuarios: any[] = [];
-  ejecF: any;
+  ejecF?: Function;
   data: any;
 
   constructor(
@@ -93,7 +93,7 @@ export class GestionUsuariosComponent implements OnInit {
     }
   }
 
-  ejecutarFuncionAsincronaDesdeOtroComponente(funcion: (data: any) => Promise<void>) {
+  ejecutarFuncionAsincronaDesdeOtroComponente(funcion: (data: any) => Promise<boolean>) {
     this.ejecF = funcion;
   }
 

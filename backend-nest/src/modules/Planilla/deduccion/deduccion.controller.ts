@@ -28,15 +28,15 @@ export class DeduccionController {
     }
   }
 
-  @Delete(':idCentroTrabajo/deduccion/:codigoDeduccion/eliminar')
+  @Delete(':idCentroTrabajo/deduccion/:codigoDeduccion/planilla/:idPlanilla/eliminar')
   async eliminarDeduccionesPorCentro(
     @Param('idCentroTrabajo') idCentroTrabajo: number,
     @Param('codigoDeduccion') codigoDeduccion: number,
+    @Param('idPlanilla') idPlanilla: number
   ) {
-    await this.deduccionService.eliminarDetallesDeduccionPorCentro(idCentroTrabajo, codigoDeduccion);
+    await this.deduccionService.eliminarDetallesDeduccionPorCentro(idCentroTrabajo, codigoDeduccion, idPlanilla);
     return { message: 'Registros eliminados correctamente' };
   }
-
 
   @Post('upload-excel-deducciones')
   @UseInterceptors(FileInterceptor('file'))

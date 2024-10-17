@@ -988,22 +988,33 @@ export class PdfService {
   }
 
   async generateMovimientosPdf(data: any): Promise<Buffer> {
-    const base64data = await this.getMembreteHorizontalBase64();
-    const docDefinition: any = this.getMovimientosPdfTemplate(data, base64data);
+    try {
+      const base64data = await this.getMembreteHorizontalBase64();
+      const docDefinition: any = this.getMovimientosPdfTemplate(data, base64data);
 
-    return new Promise((resolve, reject) => {
+      return new Promise((resolve, reject) => {
         const pdfDoc = pdfMake.createPdf(docDefinition);
         pdfDoc.getBuffer((buffer) => {
+          if (buffer) {
             resolve(buffer);
+          } else {
+            reject(new Error('Error al crear el buffer del PDF.'));
+          }
         });
-    });
+      });
+    } catch (error) {
+      console.error('Error en generateMovimientosPdf:', error);
+      throw error;
+    }
 }
 
-  getMovimientosPdfTemplate(data: any, base64data: string) {
+getMovimientosPdfTemplate(data: any, base64data: string) {
     const months = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
     const tipoCuenta = data.tipoCuenta || 'N/A';
     const numeroCuenta = data.numeroCuenta || 'N/A';
-  
+    const nombreCompleto = `${data.PRIMER_NOMBRE || ''} ${data.SEGUNDO_NOMBRE || ''} ${data.PRIMER_APELLIDO || ''} ${data.SEGUNDO_APELLIDO || ''}`.trim();
+    const identificacion = data.N_IDENTIFICACION || 'N/A';
+
     const tableBody = [
       [{ text: 'Año', style: 'tableHeader' }, ...months.map(month => ({ text: month, style: 'tableHeader' })), { text: 'Total', style: 'tableHeader' }],
       ...Object.keys(data.movimientos).map(year => {
@@ -1012,7 +1023,7 @@ export class PdfService {
           const totalMes = movimientos.reduce((sum, mov) => sum + mov.MONTO, 0);
           return acc + totalMes;
         }, 0);
-    
+
         return [
           { text: year, style: 'year' },
           ...Array(12).fill('').map((_, i) => {
@@ -1026,7 +1037,7 @@ export class PdfService {
         ];
       })
     ];
-    
+
     // Totales calculados
     const totalAportaciones = Object.keys(data.movimientos).reduce((acc, year) => {
       const yearTotal = Array(12).fill(0).reduce((sum, _, i) => {
@@ -1035,36 +1046,7 @@ export class PdfService {
       }, 0);
       return acc + yearTotal;
     }, 0);
-    
-    // Ejemplos de débitos y créditos, puedes ajustar estos valores según corresponda
-    const totalDebitos = 0; 
-    const totalCreditos = 0; 
-    const totalDelTotal = totalAportaciones - totalDebitos + totalCreditos;
-    
-    // Agregar las filas adicionales
-    tableBody.push(
-      [
-        { text: 'Aportaciones', colSpan: 13, alignment: 'right', bold: true, style: 'tableHeader' },
-        ...Array(12).fill({}),
-        { text: totalAportaciones.toLocaleString('en-US', { minimumFractionDigits: 2 }), style: 'totalCell' } // Formato con comas
-      ],
-      [
-        { text: 'Débitos', colSpan: 13, alignment: 'right', bold: true, style: 'tableHeader' },
-        ...Array(12).fill({}),
-        { text: totalDebitos.toLocaleString('en-US', { minimumFractionDigits: 2 }), style: 'totalCell' } // Formato con comas
-      ],
-      [
-        { text: 'Créditos', colSpan: 13, alignment: 'right', bold: true, style: 'tableHeader' },
-        ...Array(12).fill({}),
-        { text: totalCreditos.toLocaleString('en-US', { minimumFractionDigits: 2 }), style: 'totalCell' } // Formato con comas
-      ],
-      [
-        { text: 'Total aportado', colSpan: 13, alignment: 'right', bold: true, style: 'tableHeader' },
-        ...Array(12).fill({}),
-        { text: totalDelTotal.toLocaleString('en-US', { minimumFractionDigits: 2 }), style: 'totalCell' } // Formato con comas
-      ]
-    );
-    
+
     return {
       pageSize: 'A3',
       pageOrientation: 'landscape',
@@ -1079,9 +1061,9 @@ export class PdfService {
       content: [
         {
           columns: [
-            { text: `Nombre: CHINCHILLA CRUZ ELISA`, style: 'personaInfo' },
-            { text: `Identidad: 0801198523056`, style: 'personaInfo' },
-            { text: `Tipo de Cuenta: APORTACIÓN`, style: 'personaInfo' },
+            { text: `Nombre: ${nombreCompleto}`, style: 'personaInfo' },
+            { text: `Identidad: ${identificacion}`, style: 'personaInfo' },
+            { text: `Tipo de Cuenta: ${tipoCuenta}`, style: 'personaInfo' },
             { text: `Número de Cuenta: ${numeroCuenta}`, style: 'personaInfo' }
           ],
           columnGap: 20,
@@ -1115,7 +1097,6 @@ export class PdfService {
         margin: [20, 0, 20, 20]
       }),
       styles: {
-        subheader: { fontSize: 10, alignment: 'left', margin: [0, 0, 0, 5] },
         personaInfo: { fontSize: 12, bold: true },
         year: { fontSize: 10, bold: true, alignment: 'center' },
         tableHeader: { bold: true, fontSize: 10, alignment: 'center', fillColor: '#eeeeee' },
@@ -1123,11 +1104,9 @@ export class PdfService {
         totalCell: { fontSize: 10, alignment: 'center', bold: true, color: '#000' }
       }
     };
-    
+}
 
   
-
-  }
 
 
 

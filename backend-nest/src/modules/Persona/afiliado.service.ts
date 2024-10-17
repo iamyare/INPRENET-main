@@ -99,10 +99,7 @@ export class AfiliadoService {
         console.error('Error al obtener los movimientos ordenados:', error);
         throw new InternalServerErrorException('Error al obtener los movimientos ordenados');
     }
-}
-
-
-
+  }
 
   async updateBeneficiario(id: number, updatePersonaDto: UpdateBeneficiarioDto): Promise<net_detalle_persona> {
     const detallePersona = await this.detallePersonaRepository.findOne({
@@ -123,20 +120,16 @@ export class AfiliadoService {
   }
 
 
-
   async updateSalarioBase(n_identificacion: string, idCentroTrabajo: number, salarioBase: number): Promise<void> {
-
     const perfil = await this.perfPersoCentTrabRepository
       .createQueryBuilder('perfil')
       .leftJoinAndSelect('perfil.persona', 'persona')
       .where('persona.N_IDENTIFICACION = :n_identificacion', { n_identificacion })
       .andWhere('perfil.centroTrabajo = :idCentroTrabajo', { idCentroTrabajo })
       .getOne();
-
     if (!perfil) {
       throw new NotFoundException(`El perfil con N_IDENTIFICACION ${n_identificacion} y centro de trabajo ID ${idCentroTrabajo} no fue encontrado.`);
     }
-
     perfil.salario_base = salarioBase;
     await this.perfPersoCentTrabRepository.save(perfil);
   }
@@ -150,7 +143,7 @@ export class AfiliadoService {
     try {
       const personas = await this.personaRepository.findOne({
         where: { n_identificacion: n_identificacion },
-        relations: ['personasPorBanco', 'personasPorBanco.banco'], // Asegúrate de cargar la relación
+        relations: ['personasPorBanco', 'personasPorBanco.banco'], 
       });
       return personas.personasPorBanco;
     } catch (error) {
@@ -194,7 +187,7 @@ export class AfiliadoService {
         'peps.cargo_publico',
       ],
     });
-
+    
     if (!persona) {
       throw new NotFoundException(`Afiliado con N_IDENTIFICACION ${term} no existe`);
     }
@@ -263,6 +256,8 @@ export class AfiliadoService {
       CANTIDAD_DEPENDIENTES: persona.cantidad_dependientes,
       discapacidades: discapacidades,
       peps: peps,
+      ID_TIPO_PERSONA: persona.detallePersona[0]?.tipoPersona?.id_tipo_persona,
+      TIPO_PERSONA: persona.detallePersona[0]?.tipoPersona?.tipo_persona,
     };
 
     return result;
@@ -553,7 +548,8 @@ export class AfiliadoService {
       ("tipoP"."TIPO_PERSONA" = 'AFILIADO' OR 
       "tipoP"."TIPO_PERSONA" = 'JUBILADO' OR 
       "tipoP"."TIPO_PERSONA" = 'PENSIONADO' OR 
-      "tipoP"."TIPO_PERSONA" = 'BENEFICIARIO'
+      "tipoP"."TIPO_PERSONA" = 'BENEFICIARIO' OR
+      "tipoP"."TIPO_PERSONA" = 'BENEFICIARIO SIN CAUSANTE'
     )
     `;
 
@@ -867,61 +863,67 @@ export class AfiliadoService {
 
   async updateDatosGenerales(idPersona: number, datosGenerales: any, fileIdent: any, arch_cert_def: any): Promise<any> {
     try {
-      if (datosGenerales.dato?.discapacidades) {
-        const datosAnt = await this.perDiscapacidadRepository.delete({ persona: { id_persona: idPersona } });
-        const keysWithTrueValues = Object.entries(datosGenerales.dato.discapacidades)
-          .filter(([key, value]) => value === true)
-          .map(([key]) => key);
-        const discapacidades = await this.discapacidadRepository.find({
-          where: { tipo_discapacidad: In(keysWithTrueValues) }
-        });
-        const nuevosRegistros = discapacidades.map(discapacidad => ({
-          persona: { id_persona: idPersona },
-          discapacidad: discapacidad // Relación con el objeto de discapacidad
-        }));
-        await this.perDiscapacidadRepository.save(nuevosRegistros);
-      }
+        if (datosGenerales.dato?.discapacidades) {
+            const datosAnt = await this.perDiscapacidadRepository.delete({ persona: { id_persona: idPersona } });
+            const keysWithTrueValues = Object.entries(datosGenerales.dato.discapacidades)
+                .filter(([key, value]) => value === true)
+                .map(([key]) => key);
+            const discapacidades = await this.discapacidadRepository.find({
+                where: { tipo_discapacidad: In(keysWithTrueValues) }
+            });
+            const nuevosRegistros = discapacidades.map(discapacidad => ({
+                persona: { id_persona: idPersona },
+                discapacidad: discapacidad
+            }));
+            await this.perDiscapacidadRepository.save(nuevosRegistros);
+        }
 
-      const estadoP = await this.estadoAfiliacionRepository.findOne({ where: { nombre_estado: datosGenerales.dato.estado } });
+        const estadoP = await this.estadoAfiliacionRepository.findOne({ where: { nombre_estado: datosGenerales.dato.estado } });
 
-      const temp = datosGenerales
-      delete temp.dato.peps;
-      delete temp.dato.discapacidades;
+        const temp = datosGenerales;
+        delete temp.dato.peps;
+        delete temp.dato.discapacidades;
 
-      temp.dato.direccion_residencia = `BARRIO_COLONIA: ${temp.dato.barrio_colonia},AVENIDA: ${temp.dato.avenida},CALLE: ${temp.dato.calle},SECTOR: ${temp.dato.sector},BLOQUE: ${temp.dato.bloque},N° DE CASA: ${temp.dato.numero_casa},COLOR CASA: ${temp.dato.color_casa},ALDEA: ${temp.dato.aldea},CASERIO: ${temp.dato.caserio}`;
+        temp.dato.direccion_residencia = `BARRIO_COLONIA: ${temp.dato.barrio_colonia},AVENIDA: ${temp.dato.avenida},CALLE: ${temp.dato.calle},SECTOR: ${temp.dato.sector},BLOQUE: ${temp.dato.bloque},N° DE CASA: ${temp.dato.numero_casa},COLOR CASA: ${temp.dato.color_casa},ALDEA: ${temp.dato.aldea},CASERIO: ${temp.dato.caserio}`;
 
-      const fechaDefuncion = new Date(temp.dato.fecha_defuncion);
-      const fechaFormateada = format(fechaDefuncion, 'yyyy-MM-dd');
+        const fechaDefuncion = new Date(temp.dato.fecha_defuncion);
+        const fechaFormateada = format(fechaDefuncion, 'yyyy-MM-dd');
 
-      delete temp.dato.archivo_identificacion
-      delete temp.dato.fecha_defuncion
+        delete temp.dato.archivo_identificacion;
+        delete temp.dato.fecha_defuncion;
 
-      const data = {
-        id_persona: idPersona,
-        fallecido: temp.causa_fallecimiento ? "SI" : "NO",
-        causa_fallecimiento: temp.causa_fallecimiento,
-        municipio_defuncion: temp.id_municipio_defuncion,
-        archivo_identificacion: fileIdent?.buffer ? Buffer.from(fileIdent.buffer) : null,
-        certificado_defuncion: arch_cert_def?.buffer ? Buffer.from(arch_cert_def.buffer) : null,
-        fecha_defuncion: fechaFormateada,
-        ...temp.dato
-      }
+        const data = {
+            id_persona: idPersona,
+            fallecido: temp.causa_fallecimiento ? "SI" : "NO",
+            causa_fallecimiento: temp.causa_fallecimiento,
+            municipio_defuncion: temp.id_municipio_defuncion,
+            archivo_identificacion: fileIdent?.buffer ? Buffer.from(fileIdent.buffer) : null,
+            certificado_defuncion: arch_cert_def?.buffer ? Buffer.from(arch_cert_def.buffer) : null,
+            fecha_defuncion: fechaFormateada,
+            ...temp.dato
+        };
 
-      const afiliado = await this.personaRepository.preload(data);
+        const afiliado = await this.personaRepository.preload(data);
 
-      /*  const detPer = await this.detallePersonaRepository.preload({
-         id_persona: idPersona,
-       }); */
+        if (!afiliado) throw new NotFoundException(`La persona con ID ${idPersona} no se ha encontrado`);
 
-      if (!afiliado) throw new NotFoundException(`la persona con: ${idPersona} no se ha encontrado`);
+        await this.personaRepository.save(afiliado);
+        if (datosGenerales.tipo_persona) {
+            const result = await this.detallePersonaRepository.update(
+                { ID_PERSONA: idPersona, ID_CAUSANTE: idPersona},
+                { ID_TIPO_PERSONA: datosGenerales.tipo_persona }
+            );
+            if (result.affected === 0) {
+                console.warn(`No se encontró un registro en NET_DETALLE_PERSONA para la persona con ID ${idPersona} y padre nulo.`);
+            }
+        }
 
-      await this.personaRepository.save(afiliado);
-
-      return afiliado;
+        return afiliado;
     } catch (error) {
-      this.handleException(error); // Asegúrate de tener un método para manejar las excepciones
+        this.handleException(error);
     }
-  }
+}
+
 
   async updatePerfCentroTrabajo(id: number, updateDto: UpdatePerfCentTrabDto): Promise<Net_perf_pers_cent_trab> {
     const existingPerf = await this.perfPersoCentTrabRepository.findOne({ where: { id_perf_pers_centro_trab: id } });

@@ -1,5 +1,4 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { CreateTransaccionesDto } from './dto/create-transacciones.dto';
 import { UpdateTranssacionesDto } from './dto/update-transacciones.dto';
 import { NET_MOVIMIENTO_CUENTA } from './entities/net_movimiento_cuenta.entity';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -29,11 +28,18 @@ export class TransaccionesService {
     private tipoMovimientoRepository: Repository<NET_TIPO_MOVIMIENTO>,
     @InjectRepository(NET_PROFESIONES)
     private readonly profesionesRepository: Repository<NET_PROFESIONES>,
-
     @InjectRepository(Net_Colegios_Magisteriales)
     private colegiosMRepository: Repository<Net_Colegios_Magisteriales>,
   ) {
+  }
 
+  async eliminarMovimiento(id: number): Promise<boolean> {
+    const movimiento = await this.movimientoCuentaRepository.findOne({ where: { ID_MOVIMIENTO_CUENTA: id } });
+    if (!movimiento) {
+      return false;
+    }
+    await this.movimientoCuentaRepository.remove(movimiento);
+    return true;
   }
 
   async findAllProfesiones(): Promise<NET_PROFESIONES[]> {
@@ -43,6 +49,7 @@ export class TransaccionesService {
 
     }
   }
+
   async findAlltipoMovimientos(): Promise<NET_TIPO_MOVIMIENTO[]> {
     try {
       return await this.tipoMovimientoRepository.find();
@@ -108,10 +115,6 @@ export class TransaccionesService {
       throw new Error('Error fetching movimientos');
     }
   }
-  
-
-
-
 
   async obtenerVoucherDeMovimientoEspecifico(dni: string, idMovimientoCuenta: number): Promise<CrearMovimientoDTO> {
     const movimiento = await this.movimientoCuentaRepository
@@ -142,30 +145,33 @@ export class TransaccionesService {
     const cuentaExistente = await this.cuentaPersonaRepository.findOne({
       where: { NUMERO_CUENTA: dto.numeroCuenta }
     });
-
+  
     if (!cuentaExistente) {
       throw new NotFoundException(`No se encontró una cuenta con el número: ${dto.numeroCuenta}`);
     }
-
+  
     const tipoMovimiento = await this.tipoMovimientoRepository.findOne({
       where: { DESCRIPCION: dto.tipoMovimientoDescripcion }
     });
-
+  
     if (!tipoMovimiento) {
       throw new NotFoundException('Tipo de movimiento no encontrado.');
     }
-
+  
     const nuevoMovimiento = this.movimientoCuentaRepository.create({
       cuentaPersona: cuentaExistente,
       tipoMovimiento: tipoMovimiento,
       MONTO: dto.monto,
       DESCRIPCION: dto.descripcion,
       FECHA_MOVIMIENTO: new Date(),
-      CREADA_POR: "OFICIAL"
+      CREADA_POR: "OFICIAL",
+      ANO: dto.ANO,
+      MES: dto.MES
     });
-
+  
     return this.movimientoCuentaRepository.save(nuevoMovimiento);
   }
+  
 
   async crearCuenta(idPersona: number, dto: [crearCuentaDTO]): Promise<any> {
     const persona = await this.personaRepository.findOne({
@@ -205,8 +211,6 @@ export class TransaccionesService {
     if (!persona) {
       throw new Error('Persona no encontrada');
     }
-
-    // Encuentra todas las cuentas asociadas a la persona
     const cuentasPersona = await this.cuentaPersonaRepository.find({
       where: { persona: { id_persona: persona.id_persona } },
       relations: ['tipoCuenta']

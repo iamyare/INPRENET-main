@@ -1,5 +1,5 @@
 // complete-registration.dto.ts
-import { IsString, IsEmail, IsNotEmpty, Length, Matches } from 'class-validator';
+import { IsString, IsEmail, IsNotEmpty, Length, Matches, IsOptional } from 'class-validator';
 
 export class CompleteRegistrationDto {
   @IsEmail()
@@ -61,5 +61,6 @@ export class CompleteRegistrationDto {
 
   @IsString()
   @IsNotEmpty()
-  foto_empleado: Buffer;
+  @IsOptional()
+  foto_empleado?: Buffer;
 }

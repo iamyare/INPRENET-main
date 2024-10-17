@@ -16,10 +16,7 @@ import {
 } from '@nestjs/common';
 import { AfiliadoService } from './afiliado.service';
 import { UpdatePersonaDto } from './dto/update-persona.dto';
-import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
-import { Repository } from 'typeorm';
-import { Net_Tipo_Persona } from './entities/net_tipo_persona.entity';
-import { InjectRepository } from '@nestjs/typeorm';
+import { ApiTags } from '@nestjs/swagger';
 import { UpdatePerfCentTrabDto } from './dto/update.perfAfilCentTrab.dto';
 import { net_estado_afiliacion } from './entities/net_estado_afiliacion.entity';
 import { AnyFilesInterceptor } from '@nestjs/platform-express';
@@ -27,8 +24,6 @@ import { AnyFilesInterceptor } from '@nestjs/platform-express';
 @ApiTags('Persona')
 @Controller('Persona')
 export class AfiliadoController {
-  @InjectRepository(Net_Tipo_Persona)
-  private readonly tipoPersonaRepos: Repository<Net_Tipo_Persona>
 
   constructor(private readonly afiliadoService: AfiliadoService) { }
 
@@ -241,11 +236,9 @@ export class AfiliadoController {
     @Body('datosGenerales') datosGenerales: any,
     @UploadedFiles() files?: Express.Multer.File[],
   ) {
-
     const crearDatosDto: any = JSON.parse(datosGenerales);
     const fileIdent = files?.find(file => file.fieldname === 'file_ident');
     const arch_cert_def = files?.find(file => file.fieldname === 'arch_cert_def');
-
     return this.afiliadoService.updateDatosGenerales(idPersona, crearDatosDto, fileIdent, arch_cert_def);
   }
 
@@ -291,6 +284,7 @@ export class AfiliadoController {
   findOne(@Param('term') term: string) {
     return this.afiliadoService.findOne(term); 
   }
+  
   @Get('/getAllPersonaPBanco/:dni')
   getAllPersonaPBanco(@Param('dni') dni: string) {
     return this.afiliadoService.getAllPersonaPBanco(dni);

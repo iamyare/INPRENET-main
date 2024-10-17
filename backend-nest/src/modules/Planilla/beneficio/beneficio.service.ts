@@ -18,9 +18,13 @@ export class BeneficioService {
   constructor(
     @InjectRepository(Net_Beneficio)
     private beneficioRepository: Repository<Net_Beneficio>,
+    @InjectRepository(net_persona)
+    private personaRepository: Repository<net_persona>,
+    @InjectRepository(net_detalle_persona)
+    private detallePersonaRepository: Repository<net_detalle_persona>,
     private dataSource: DataSource
   ){}
-  
+
   async uploadExcel(file: Express.Multer.File) {
     const insertedRows = [];
     const failedRows = [];
@@ -63,38 +67,7 @@ export class BeneficioService {
                     }
 
                     let causantePersona;
-                    if (dniCausante) {
-                        causantePersona = await manager.findOne(net_persona, { where: { n_identificacion: dniCausante } });
-                        if (!causantePersona) {
-                            causantePersona = manager.create(net_persona, {
-                                n_identificacion: dniCausante,
-                                primer_nombre: primerNombreCausante,
-                                segundo_nombre: segundoNombreCausante,
-                                tercer_nombre: tercerNombreCausante,
-                                primer_apellido: primerApellidoCausante,
-                                segundo_apellido: segundoApellidoCausante
-                            });
-                            causantePersona = await manager.save(causantePersona);
-
-                            const causanteDetallePersona = manager.create(net_detalle_persona, {
-                                ID_PERSONA: causantePersona.id_persona,
-                                ID_CAUSANTE: causantePersona.id_persona,
-                                ID_TIPO_PERSONA: 1,
-                            });
-                            await manager.save(causanteDetallePersona);
-                        } else {
-                            const causanteDetallePersona = await manager.findOne(net_detalle_persona, { 
-                                where: { 
-                                    ID_PERSONA: causantePersona.id_persona, 
-                                    ID_CAUSANTE: causantePersona.id_persona,
-                                    ID_CAUSANTE_PADRE: null 
-                                } 
-                            });
-                            if (!causanteDetallePersona) {
-                                throw new InternalServerErrorException("No se encontró el detalle correspondiente para el DNI_CAUSANTE con ID_CAUSANTE_PADRE = null.");
-                            }
-                        }
-                    } else {
+                    if (!dniCausante) {
                         causantePersona = await manager.findOne(net_persona, { where: { n_identificacion: dniBeneficiario } });
                         if (!causantePersona) {
                             causantePersona = manager.create(net_persona, {
@@ -107,13 +80,68 @@ export class BeneficioService {
                             });
                             causantePersona = await manager.save(causantePersona);
                         }
+
+                        const detallePersona = manager.create(net_detalle_persona, {
+                            ID_PERSONA: causantePersona.id_persona,
+                            ID_CAUSANTE: causantePersona.id_persona,
+                            ID_CAUSANTE_PADRE: null,
+                            ID_TIPO_PERSONA: tipoPersona,
+                        });
+                        await manager.save(detallePersona);
+                        insertedRows.push({ row: index + 1, dni: dniBeneficiario, status: 'Inserted' });
+                        return; // No se procesa más esta fila si no hay causante
+                    }
+
+                    causantePersona = await manager.findOne(net_persona, { where: { n_identificacion: dniCausante } });
+                    let causanteDetallePersona;
+                    if (!causantePersona) {
+                        causantePersona = manager.create(net_persona, {
+                            n_identificacion: dniCausante,
+                            primer_nombre: primerNombreCausante,
+                            segundo_nombre: segundoNombreCausante,
+                            tercer_nombre: tercerNombreCausante,
+                            primer_apellido: primerApellidoCausante,
+                            segundo_apellido: segundoApellidoCausante
+                        });
+                        causantePersona = await manager.save(causantePersona);
+
+                        causanteDetallePersona = manager.create(net_detalle_persona, {
+                            ID_PERSONA: causantePersona.id_persona,
+                            ID_CAUSANTE: causantePersona.id_persona,
+                            ID_TIPO_PERSONA: 1,
+                        });
+                        await manager.save(causanteDetallePersona);
+                    } else {
+                        causanteDetallePersona = await manager.findOne(net_detalle_persona, { 
+                            where: { 
+                                ID_PERSONA: causantePersona.id_persona, 
+                                ID_CAUSANTE: causantePersona.id_persona,
+                                ID_CAUSANTE_PADRE: null 
+                            } 
+                        });
+                        if (!causanteDetallePersona) {
+                            throw new InternalServerErrorException("No se encontró el detalle correspondiente para el DNI_CAUSANTE con ID_CAUSANTE_PADRE = null.");
+                        }
+                    }
+                    let persona = await manager.findOne(net_persona, { where: { n_identificacion: dniBeneficiario } });
+                    if (!persona) {
+                        persona = manager.create(net_persona, {
+                            n_identificacion: dniBeneficiario,
+                            primer_nombre: primerNombreBeneficiario,
+                            segundo_nombre: segundoNombreBeneficiario,
+                            tercer_nombre: tercerNombreBeneficiario,
+                            primer_apellido: primerApellidoBeneficiario,
+                            segundo_apellido: segundoApellidoBeneficiario
+                        });
+                        persona = await manager.save(persona);
                     }
 
                     const detallePersona = manager.create(net_detalle_persona, {
-                        ID_PERSONA: causantePersona.id_persona,
+                        ID_PERSONA: persona.id_persona,
                         ID_CAUSANTE: causantePersona.id_persona,
                         ID_CAUSANTE_PADRE: causantePersona.id_persona,
-                        ID_TIPO_PERSONA: tipoPersona
+                        ID_DETALLE_PERSONA: causanteDetallePersona.ID_DETALLE_PERSONA,
+                        ID_TIPO_PERSONA: tipoPersona,
                     });
                     const savedDetallePersona = await manager.save(detallePersona);
 
@@ -123,7 +151,7 @@ export class BeneficioService {
                     }
 
                     const personaPorBanco = manager.create(Net_Persona_Por_Banco, {
-                        persona: causantePersona,
+                        persona: persona,
                         banco: banco,
                         num_cuenta: numeroCuenta,
                         estado: 'ACTIVO',
@@ -159,8 +187,6 @@ export class BeneficioService {
         throw new InternalServerErrorException('No se pudo procesar el archivo');
     }
 }
-
-
 
   async create(createBeneficioDto: CreateBeneficioDto) {
     delete createBeneficioDto['numero_rentas_max']

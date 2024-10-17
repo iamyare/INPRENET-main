@@ -113,8 +113,6 @@ BEGIN
 END;
 /
 
-
---Generar planilla Complementaria
 CREATE OR REPLACE PROCEDURE InsertarPlanillaComplementaria(
     tipos_persona IN VARCHAR2
 ) IS
@@ -123,8 +121,6 @@ CREATE OR REPLACE PROCEDURE InsertarPlanillaComplementaria(
 BEGIN
     IF tipos_persona IN ('BENEFICIARIO,AFILIADO', 'AFILIADO,BENEFICIARIO') THEN
         v_proceso := 'COMPLEMENTARIA - BENEFICIARIOS';
-        -- Buscar ID_PLANILLA para Beneficiarios
-        BEGIN
             SELECT ID_PLANILLA
             INTO v_id_planilla
             FROM NET_PLANILLA
@@ -138,7 +134,6 @@ BEGIN
     ELSIF tipos_persona IN ('JUBILADO,VOLUNTARIO,PENSIONADO', 'JUBILADO,PENSIONADO,VOLUNTARIO', 'PENSIONADO,JUBILADO,VOLUNTARIO', 
                             'PENSIONADO,VOLUNTARIO,JUBILADO', 'VOLUNTARIO,JUBILADO,PENSIONADO', 'VOLUNTARIO,PENSIONADO,JUBILADO') THEN
         v_proceso := 'COMPLEMENTARIA - JUBILADOS';
-        -- Buscar ID_PLANILLA para Jubilados
         BEGIN
             SELECT ID_PLANILLA
             INTO v_id_planilla
@@ -161,7 +156,7 @@ BEGIN
         'EN PRELIMINAR',
         SYSDATE,
         dba.MONTO_TOTAL,
-        v_id_planilla, -- Usar el ID_PLANILLA obtenido
+        v_id_planilla,
         pb.ID_AF_BANCO,
         dp.ID_PERSONA,
         dp.ID_CAUSANTE,
@@ -199,7 +194,7 @@ BEGIN
             'EN PRELIMINAR',
             SYSDATE,
             sub_dpb.MONTO_A_PAGAR,
-            v_id_planilla, -- Usar el ID_PLANILLA obtenido
+            v_id_planilla,
             pb.ID_AF_BANCO,
             dp.ID_PERSONA,
             dp.ID_CAUSANTE,
@@ -246,8 +241,7 @@ BEGIN
                 AND existing_dpb.ESTADO = 'EN PRELIMINAR'
                 AND TO_CHAR(existing_dpb.FECHA_CARGA, 'YYYY-MM') = TO_CHAR(SYSDATE, 'YYYY-MM')
             );
-
-        -- Actualizar beneficios_cargados a 'SI'
+            
         UPDATE NET_PLANILLA
         SET BENEFICIOS_CARGADOS = 'SI'
         WHERE ID_PLANILLA = v_id_planilla;
@@ -261,13 +255,10 @@ BEGIN
 END;
 /
 
-
---COPIAR PLANILLA ORDINARIA DE MES ANTERIOR
 CREATE OR REPLACE PROCEDURE sp_insertar_detalles_en_preliminar(p_id_tipo_planilla IN NUMBER) IS
     v_beneficios_cargados VARCHAR2(2);
     v_id_planilla NUMBER;
 BEGIN
-    -- Buscar la ID_PLANILLA que esté en estado ACTIVA y dentro del mes actual
     SELECT p.ID_PLANILLA, p.BENEFICIOS_CARGADOS
     INTO v_id_planilla, v_beneficios_cargados
     FROM NET_PLANILLA p
@@ -277,9 +268,7 @@ BEGIN
     AND TO_DATE(p.PERIODO_FINALIZACION, 'DD/MM/YYYY') >= TRUNC(SYSDATE, 'MM')
     FOR UPDATE;
 
-    -- Si no existe una planilla con BENEFICIOS_CARGADOS = 'SI', proceder con las inserciones y actualizar el valor a 'SI'
     IF v_beneficios_cargados IS NULL OR v_beneficios_cargados = 'NO' THEN
-        -- Insertar en NET_DETALLE_PAGO_BENEFICIO
         INSERT INTO NET_DETALLE_PAGO_BENEFICIO (
             ESTADO,
             MONTO_A_PAGAR,
@@ -310,7 +299,6 @@ BEGIN
             AND dpb.FECHA_CARGA < TRUNC(SYSDATE, 'MM')
             AND tp.ID_TIPO_PLANILLA = p_id_tipo_planilla;
 
-        -- Insertar en NET_DETALLE_DEDUCCION
         INSERT INTO NET_DETALLE_DEDUCCION (
             MONTO_TOTAL,
             MONTO_APLICADO,
@@ -343,7 +331,6 @@ BEGIN
             AND dd.FECHA_APLICADO < TRUNC(SYSDATE, 'MM')
             AND tp.ID_TIPO_PLANILLA = p_id_tipo_planilla;
 
-        -- Actualizar BENEFICIOS_CARGADOS a 'SI' en la tabla NET_PLANILLA
         UPDATE NET_PLANILLA p
         SET p.BENEFICIOS_CARGADOS = 'SI'
         WHERE p.ID_PLANILLA = v_id_planilla;
@@ -352,7 +339,6 @@ BEGIN
     END IF;
 EXCEPTION
     WHEN NO_DATA_FOUND THEN
-        -- Manejo del caso donde no se encuentra una planilla activa
         RAISE_APPLICATION_ERROR(-20001, 'No se encontró una planilla activa para el mes actual.');
     WHEN OTHERS THEN
         ROLLBACK;

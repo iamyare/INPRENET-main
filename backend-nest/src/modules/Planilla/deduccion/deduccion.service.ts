@@ -61,20 +61,15 @@ export class DeduccionService {
       .getRawMany();
   }
 
-  async eliminarDetallesDeduccionPorCentro(idCentroTrabajo: number, codDeduccion: number): Promise<void> {
+  async eliminarDetallesDeduccionPorCentro(idCentroTrabajo: number, codDeduccion: number, idPlanilla: number): Promise<void> {
     await this.detalleDeduccionRepository.createQueryBuilder()
       .delete()
       .from('NET_DETALLE_DEDUCCION')
       .where('id_deduccion IN (SELECT d.id_deduccion FROM NET_DEDUCCION d WHERE d.cod_deduccion = :codDeduccion AND d.id_centro_trabajo = :idCentroTrabajo)', { codDeduccion, idCentroTrabajo })
       .andWhere('estado_aplicacion = :estado', { estado: 'EN PRELIMINAR' })
+      .andWhere('id_planilla = :idPlanilla', { idPlanilla })  // Agregando la condición de id_planilla
       .execute();
   }
-
-
-
-
-
-
 
 
   private async processRow(id_planilla: any, row: any, repositories: any): Promise<any> {

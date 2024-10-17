@@ -18,18 +18,13 @@ export class UsuarioController {
   constructor(private readonly usuarioService: UsuarioService) { }
 
   @Post('login')
-  async login(@Body() loginDto: LoginDto, @Res() res: Response) {
-    return this.usuarioService.login(loginDto, res);
+  async login(@Body() loginDto: LoginDto) {
+    return this.usuarioService.login(loginDto);
   }
 
   @Post('logout')
   async logout(@Req() req: Request, @Res() res: Response) {
     return this.usuarioService.logout(req, res);
-  }
-
-  @Post('refresh-token')
-  async refreshToken(@Req() req: Request, @Res() res: Response) {
-    return this.usuarioService.refreshTokens(req, res);
   }
 
   @Patch(':id/desactivar')
@@ -63,22 +58,23 @@ export class UsuarioController {
   }
 
   @Post('completar-registro')
-@UseInterceptors(
-  FileFieldsInterceptor([
-    { name: 'archivo_identificacion', maxCount: 1 },
-    { name: 'foto_empleado', maxCount: 1 }
-  ])
-)
-async completarRegistro(
-  @Query('token') token: string,
-  @Body('datos') datos: string,
-  @UploadedFiles() files: { archivo_identificacion?: Express.Multer.File[], foto_empleado?: Express.Multer.File[] },
-): Promise<void> {
-  const completeRegistrationDto: CompleteRegistrationDto = JSON.parse(datos);
-  const archivoIdentificacionBuffer = files.archivo_identificacion[0].buffer;
-  const fotoEmpleadoBuffer = files.foto_empleado[0].buffer;
-  return this.usuarioService.completarRegistro(token, completeRegistrationDto, archivoIdentificacionBuffer, fotoEmpleadoBuffer);
-}
+  @UseInterceptors(
+    FileFieldsInterceptor([
+      { name: 'archivo_identificacion', maxCount: 1 },
+      { name: 'foto_empleado', maxCount: 1 }
+    ])
+  )
+  
+  async completarRegistro(
+    @Query('token') token: string,
+    @Body('datos') datos: string,
+    @UploadedFiles() files: { archivo_identificacion?: Express.Multer.File[], foto_empleado?: Express.Multer.File[] },
+    ): Promise<void> {
+      const completeRegistrationDto: CompleteRegistrationDto = JSON.parse(datos);
+      const archivoIdentificacionBuffer = files?.archivo_identificacion?.[0]?.buffer || null;
+      const fotoEmpleadoBuffer = files?.foto_empleado?.[0]?.buffer || null;
+      return this.usuarioService.completarRegistro(token, completeRegistrationDto, archivoIdentificacionBuffer, fotoEmpleadoBuffer);
+  }
 
   @Get('perfil')
   async obtenerPerfilUsuario(@Query('correo') correo: string) {

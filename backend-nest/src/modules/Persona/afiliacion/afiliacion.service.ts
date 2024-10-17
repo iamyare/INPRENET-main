@@ -125,34 +125,37 @@ export class AfiliacionService {
   }
 
   async getCausantesByDniBeneficiario(n_identificacion: string): Promise<net_persona[]> {
-    const beneficiario = await this.personaRepository.findOne({ where: { n_identificacion }, relations: ['detallePersona'] });
-
+    const beneficiario = await this.personaRepository.findOne({ 
+        where: { n_identificacion }, 
+        relations: ['detallePersona'] 
+    });
     if (!beneficiario) {
-      throw new Error('Beneficiario no encontrado');
+        throw new Error('Beneficiario no encontrado');
     }
-
-    // Obtener el ID del tipo de persona basado en el nombre "BENEFICIARIO"
-    const tipoPersona = await this.tipoPersonaRepository.findOne({ where: { tipo_persona: 'BENEFICIARIO' } });
-    if (!tipoPersona) {
-      throw new Error('Tipo de persona "BENEFICIARIO" no encontrado');
+    const tiposPersona = await this.tipoPersonaRepository.find({
+        where: [
+            { tipo_persona: 'BENEFICIARIO' },
+            { tipo_persona: 'BENEFICIARIO SIN CAUSANTE' }
+        ]
+    });
+    if (tiposPersona.length === 0) {
+        throw new Error('Tipos de persona "BENEFICIARIO" o "BENEFICIARIO SIN CAUSANTE" no encontrados');
     }
-
-    // Obtener todos los detalles de la persona del beneficiario
-    const detalles = beneficiario.detallePersona.filter(d => d.ID_TIPO_PERSONA === tipoPersona.id_tipo_persona);
+    const tipoPersonaIds = tiposPersona.map(tipo => tipo.id_tipo_persona);
+    const detalles = beneficiario.detallePersona.filter(d => tipoPersonaIds.includes(d.ID_TIPO_PERSONA));
 
     if (detalles.length === 0) {
-      throw new Error('Detalle de beneficiario no encontrado');
+        throw new Error('Detalle de beneficiario no encontrado');
     }
-
-    // Obtener todos los causantes usando los IDs_CAUSANTE de los detalles del beneficiario
     const causantes = await this.personaRepository.findByIds(detalles.map(d => d.ID_CAUSANTE));
 
     if (causantes.length === 0) {
-      throw new Error('Causantes no encontrados');
+        throw new Error('Causantes no encontrados');
     }
 
     return causantes;
-  }
+}
+
 
   async getAllDiscapacidades(): Promise<Net_Discapacidad[]> {
     return this.discapacidadRepository.find();
@@ -386,9 +389,9 @@ export class AfiliacionService {
   ): Promise<net_detalle_persona[]> {
     const resultados: net_detalle_persona[] = [];
 
-    const tipoPersonaBeneficiario = await this.tipoPersonaRepository.findOne({ where: { tipo_persona: 'BENEFICIARIO' } });
+    const tipoPersonaBeneficiario = await this.tipoPersonaRepository.findOne({ where: { tipo_persona: 'BENEFICIARIO SIN CAUSANTE' } });
     if (!tipoPersonaBeneficiario) {
-      throw new NotFoundException('Tipo de persona "BENEFICIARIO" no encontrado');
+      throw new NotFoundException('Tipo de persona "BENEFICIARIO SIN CAUSANTE" no encontrado');
     }
 
     for (const crearBeneficiarioDto of crearBeneficiariosDtos) {
@@ -421,7 +424,7 @@ export class AfiliacionService {
     return resultados;
   }
 
-    async crearDiscapacidades(
+  async crearDiscapacidades(
       discapacidadesDto: CrearDiscapacidadDto[],
       idPersona: number,
       entityManager: EntityManager,
@@ -667,7 +670,6 @@ export class AfiliacionService {
 
   async eliminarOtraFuenteIngreso(id: number): Promise<void> {
     const fuenteIngreso = await this.otraFuenteIngresoRepository.findOne({ where: { id_otra_fuente_ingreso: id } });
-
     if (!fuenteIngreso) {
       throw new NotFoundException(`La fuente de ingreso con ID ${id} no fue encontrada`);
     }
@@ -678,7 +680,6 @@ export class AfiliacionService {
     const persona = await this.personaRepository.createQueryBuilder("persona")
       .where("persona.n_identificacion = :n_identificacion", { n_identificacion })
       .getOne();
-
     if (!persona) {
       throw new NotFoundException(`No se encontró la persona con identificación ${n_identificacion}`);
     }

@@ -1,5 +1,4 @@
-// src/dto/crear-movimiento.dto.ts
-import { IsString, IsNumber, IsNotEmpty } from 'class-validator';
+import { IsString, IsNumber, IsNotEmpty, IsOptional, IsDate } from 'class-validator';
 
 export class CrearMovimientoDTO {
     @IsNotEmpty()
@@ -14,7 +13,19 @@ export class CrearMovimientoDTO {
     @IsString()
     descripcion: string;
 
+    @IsOptional()
+    @IsDate()
+    fechaMovimiento?: Date;
+
     @IsNotEmpty()
     @IsString()
     tipoMovimientoDescripcion: string;
+
+    @IsNotEmpty()
+      @IsNumber()
+      ANO: number;
+    
+      @IsNotEmpty()
+      @IsNumber()
+      MES: number;
 }

@@ -8,8 +8,6 @@ export class DocumentsController {
 
   @Post('movimientos-pdf')
   async postMovimientosPdf(@Body() data: any, @Res() res: Response) {
-    console.log('entro');
-    
     try {
       const pdfBuffer = await this.pdfService.generateMovimientosPdf(data);
       res.set({

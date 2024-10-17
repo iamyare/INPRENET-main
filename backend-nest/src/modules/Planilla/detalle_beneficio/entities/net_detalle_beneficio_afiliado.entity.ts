@@ -58,6 +58,9 @@ export class Net_Detalle_Beneficio_Afiliado {
     @Column({ nullable: true, default: 0, name: 'NUM_RENTAS_APLICADAS' })
     num_rentas_aplicadas: number;
 
+    @Column({ nullable: true, default: 0, name: 'ULTIMO_DIA_ULTIMA_RENTA' })
+    ultimo_dia_ultima_renta: number;
+
     @ManyToOne(() => Net_Beneficio, beneficio => beneficio.detalleBeneficioAfiliado)
     @JoinColumn({ name: 'ID_BENEFICIO', foreignKeyConstraintName: "FK_ID_BENEFICIO_DETBENAFIL" })
     beneficio: Net_Beneficio;

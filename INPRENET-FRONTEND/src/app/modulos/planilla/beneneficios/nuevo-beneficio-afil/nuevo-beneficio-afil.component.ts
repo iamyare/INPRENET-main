@@ -158,7 +158,7 @@ export class NuevoBeneficioAfilComponent implements OnInit {
           },
           {
             type: 'dropdown', label: 'Estado Solicitud', name: 'estado_solicitud',
-            options: [{ label: 'APROBADA', value: 'APROBADA' }, { label: 'RECHAZADA', value: 'RECHAZADA' }],
+            options: [{ label: 'APROBADO', value: 'APROBADO' }, { label: 'RECHAZADA', value: 'RECHAZADA' }],
             validations: [Validators.required], display: true
           },
           { type: 'number', label: 'Monto total', name: 'monto_total', validations: [Validators.required, Validators.min(0)], display: true },
@@ -169,7 +169,7 @@ export class NuevoBeneficioAfilComponent implements OnInit {
           { type: 'text', label: 'Observación', name: 'observacion', validations: [], display: true },
           { type: 'number', label: 'Número de rentas aprobadas', name: 'num_rentas_aplicadas', validations: [Validators.min(1)], display: false },
           {
-            type: 'number', label: 'dia', name: 'dia', validations: [
+            type: 'number', label: 'último día de última renta', name: 'ultimo_dia_ultima_renta', validations: [
               Validators.min(1),
               Validators.max(31),
             ], display: false
@@ -190,7 +190,7 @@ export class NuevoBeneficioAfilComponent implements OnInit {
           },
           {
             type: 'dropdown', label: 'Estado Solicitud', name: 'estado_solicitud',
-            options: [{ label: 'APROBADA', value: 'APROBADA' }, { label: 'RECHAZADA', value: 'RECHAZADA' }], validations: [Validators.required], display: true
+            options: [{ label: 'APROBADO', value: 'APROBADO' }, { label: 'RECHAZADA', value: 'RECHAZADA' }], validations: [Validators.required], display: true
           },
           { type: 'number', label: 'Monto total', name: 'monto_total', validations: [Validators.required, Validators.min(0)], display: true },
           { type: 'number', label: 'Monto ultima cuota', name: 'monto_ultima_cuota', validations: [Validators.required, Validators.min(0)], display: true },
@@ -200,7 +200,7 @@ export class NuevoBeneficioAfilComponent implements OnInit {
           { type: 'date', label: 'Fecha de efectividad', name: 'fecha_calculo', validations: [], display: true },
           { type: 'number', label: 'Número de rentas aprobadas', name: 'num_rentas_aplicadas', validations: [Validators.min(1)], display: false },
           {
-            type: 'number', label: 'dia', name: 'dia', validations: [
+            type: 'number', label: 'último día de última renta', name: 'ultimo_dia_ultima_renta', validations: [
               Validators.min(1),
               Validators.max(31),
             ], display: false
@@ -437,6 +437,8 @@ export class NuevoBeneficioAfilComponent implements OnInit {
   }
 
   transformarObjeto(objeto: any) {
+    console.log(objeto);
+
     return Object.keys(objeto).map(key => {
       return {
         header: key,
@@ -464,6 +466,7 @@ export class NuevoBeneficioAfilComponent implements OnInit {
       this.datosFormateados["periodo_inicio"] = startDateFormatted;
       this.datosFormateados["periodo_finalizacion"] = fechaFormateada;
       console.log(this.desOBenSeleccionado);
+      console.log(this.datosFormateados);
 
       this.svcBeneficioServ.asigBeneficioAfil(this.datosFormateados, this.desOBenSeleccionado).subscribe(
         {
@@ -483,6 +486,7 @@ export class NuevoBeneficioAfilComponent implements OnInit {
           }
         })
     } else {
+      console.log(this.datosFormateados);
       this.datosFormateados["dni"] = this.FormBen.value.dni;
       this.svcBeneficioServ.asigBeneficioAfil(this.datosFormateados, this.desOBenSeleccionado, this.Afiliado.id_persona).subscribe(
         {

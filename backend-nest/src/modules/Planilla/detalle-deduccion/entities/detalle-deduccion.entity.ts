@@ -5,6 +5,7 @@ import { Net_Deduccion } from '../../deduccion/entities/net_deduccion.entity';
 import { net_persona } from 'src/modules/Persona/entities/net_persona.entity';
 import { Net_Detalle_Pago_Beneficio } from '../../detalle_beneficio/entities/net_detalle_pago_beneficio.entity';
 import { Net_Deducciones_Asignadas } from './net-deducciones-asignadas.entity';
+import { Net_Persona_Por_Banco } from 'src/modules/banco/entities/net_persona-banco.entity';
 
 @Entity({ name: 'NET_DETALLE_DEDUCCION' })
 @Check("CK_ESTADO_DED", `estado_aplicacion IN ('COBRADA', 'NO COBRADA', 'EN PRELIMINAR', 'EN PLANILLA')`)
@@ -44,6 +45,10 @@ export class Net_Detalle_Deduccion {
     deduccion: Net_Deduccion;
 
     @ManyToOne(() => Net_Deducciones_Asignadas, deduccionAsignada => deduccionAsignada.detallesDeduccion, { cascade: true })
-  @JoinColumn({ name: 'ID_DEDUCCION_ASIGNADA', foreignKeyConstraintName: 'FK_ID_DEDUCCION_ASIGNADA_DETDED' })
-  deduccionAsignada: Net_Deducciones_Asignadas;
+    @JoinColumn({ name: 'ID_DEDUCCION_ASIGNADA', foreignKeyConstraintName: 'FK_ID_DEDUCCION_ASIGNADA_DETDED' })
+    deduccionAsignada: Net_Deducciones_Asignadas;
+
+    @ManyToOne(() => Net_Persona_Por_Banco, personaPorBanco => personaPorBanco.detallePagoBen, { cascade: true })
+    @JoinColumn({ name: 'ID_AF_BANCO', foreignKeyConstraintName: "FK_ID_AF_BANCO_DETDED" })
+    personaPorBanco: Net_Persona_Por_Banco;
 }

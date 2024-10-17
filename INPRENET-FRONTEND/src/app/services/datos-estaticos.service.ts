@@ -10,6 +10,7 @@ import { TransaccionesService } from './transacciones.service';
 import { AuthService } from './auth.service';
 import { map, Observable } from 'rxjs';
 import { AfiliacionService } from './afiliacion.service';
+import { MantenimientoAfiliacionService } from './mantenimiento-afiliacion.service';
 
 @Injectable({
   providedIn: 'root'
@@ -32,6 +33,7 @@ export class DatosEstaticosService {
   jornadas: any = [];
   nivelesEducativos: any = [];
   discapacidades: any = [];
+  causasFallecimiento: any = [];
 
   constructor(
     private colegiosMagSVC: ColegiosMagisterialesService,
@@ -42,10 +44,10 @@ export class DatosEstaticosService {
     private tipoIdentificacionService: TipoIdentificacionService,
     private centroTrabajoService: CentroTrabajoService,
     private transaccionesSVC: TransaccionesService,
-    private http: HttpClient,
-    private authService: AuthService,
-    private afiliacionService: AfiliacionService
+    private afiliacionService: AfiliacionService,
+    private mantenimientoAfiliacionService: MantenimientoAfiliacionService
   ) {
+    this.getCausasFallecimiento();
     this.getNacionalidad();
     this.gettipoIdent();
     this.getTipoCuenta();
@@ -60,6 +62,18 @@ export class DatosEstaticosService {
     this.getJornadas();
     this.getNivelesEducativos();
     this.getDiscapacidades();
+  }
+
+  getCausasFallecimiento(): Observable<any[]> {
+    return this.mantenimientoAfiliacionService.getAllCausasFallecimiento().pipe(
+      map(response => {
+        this.causasFallecimiento = response.map((item: { id_causa_fallecimiento: any; nombre: any; }) => ({
+          label: item.nombre,
+          value: item.id_causa_fallecimiento
+        }));
+        return this.causasFallecimiento;
+      })
+    );
   }
 
   getDiscapacidades(): Observable<any[]> {
@@ -225,6 +239,7 @@ export class DatosEstaticosService {
       return this.nacionalidades;
     }
   }
+
   async getMunicipios() {
     try {
       const response = await this.direccionSer.getAllMunicipios().toPromise();
@@ -276,27 +291,27 @@ export class DatosEstaticosService {
 
   estadoCivil = [
     {
-      "idEstadoCivil": 1,
+      "label": "CASADO/A",
       "value": "CASADO/A"
     },
     {
-      "idEstadoCivil": 2,
+      "label": "DIVORCIADO/A",
       "value": "DIVORCIADO/A"
     },
     {
-      "idEstadoCivil": 3,
+      "label": "SEPARADO/A",
       "value": "SEPARADO/A"
     },
     {
-      "idEstadoCivil": 4,
+      "label": "SOLTERO/A",
       "value": "SOLTERO/A"
     },
     {
-      "idEstadoCivil": 5,
+      "label": "UNION LIBRE",
       "value": "UNION LIBRE"
     },
     {
-      "idEstadoCivil": 6,
+      "label": "VIUDO/A",
       "value": "VIUDO/A"
     }
   ];
@@ -333,24 +348,24 @@ export class DatosEstaticosService {
       "label": "FEMENINO"
     },
     {
-      "value": "NO BINARIO",
-      "label": "NO BINARIO"
-    },
-    {
       "value": "OTRO",
       "label": "OTRO"
-    }
+    },
   ];
 
   sexo = [
+    {
+      "value": "M",
+      "label": "MASCULINO"
+    },
     {
       "value": "F",
       "label": "FEMENINO"
     },
     {
-      "value": "M",
-      "label": "MASCULINO"
-    },
+      "value": "OTRO",
+      "label": "OTRO"
+    }
   ];
 
   tipoCotizante = [

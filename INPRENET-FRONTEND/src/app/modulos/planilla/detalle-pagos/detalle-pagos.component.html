@@ -1,0 +1,16 @@
+<div *ngIf="planillas.length > 0; else noPlanillas" class="planillas-container">
+  <div class="planilla-card" *ngFor="let planilla of planillas">
+    <div class="card-content">
+      <h4>{{ planilla.codigo_planilla }}</h4>
+      <p><strong>Fecha Apertura:</strong> {{ planilla.fecha_apertura | date:'dd/MM/yyyy' }}</p>
+      <p><strong>Fecha De Pago:</strong> {{ planilla.fecha_cierre ? (planilla.fecha_cierre | date:'dd/MM/yyyy') : 'N/A' }}</p>
+    </div>
+    <div class="card-actions">
+      <button mat-raised-button color="primary" (click)="openDialog(planilla)">Ver Detalles</button>
+    </div>
+  </div>
+</div>
+
+<ng-template #noPlanillas>
+  <p>No se encontraron planillas de pagos para esta persona.</p>
+</ng-template>

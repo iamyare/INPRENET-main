@@ -1,0 +1,67 @@
+<div class="container">
+  <h1>Actualizar Fallecidos desde Excel</h1>
+  <hr class="divider" />
+
+  <div class="upload-container">
+    <input type="file" #fileInput (change)="onFileSelected($event)" hidden />
+
+    <!-- Botones de Gestión de Archivos -->
+    <div class="button-group">
+      <button
+        mat-raised-button
+        color="primary"
+        (click)="fileInput.click()"
+        class="button"
+      >
+        <i class="fa fa-plus"></i> Agregar Archivo
+      </button>
+
+      <button
+        mat-raised-button
+        color="accent"
+        (click)="clearFile()"
+        class="button"
+      >
+        <i class="fa fa-trash"></i> Limpiar Archivo
+      </button>
+
+      <button
+        mat-raised-button
+        color="primary"
+        (click)="startUpload()"
+        class="button"
+      >
+        <i class="fa fa-upload"></i> Iniciar Subida
+      </button>
+
+      <button
+        mat-raised-button
+        color="warn"
+        (click)="cancelUpload()"
+        class="button"
+      >
+        <i class="fa fa-ban"></i> Cancelar Subida
+      </button>
+    </div>
+
+    <!-- Información del Archivo y Barra de Progreso -->
+    <div *ngIf="file" class="file-info">
+      <div class="file-name-container">
+        <div class="file-name-background">{{ file.name }}</div>
+        <div class="file-name-progress" [style.width]="progressValue + '%'"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Botón de Descargar Ejemplo -->
+  <div class="example-download">
+    <button
+      mat-raised-button
+      color="primary"
+      (click)="downloadExample()"
+      class="download-button"
+    >
+      <i class="fa fa-download"></i> Descargar Ejemplo De Formato
+    </button>
+  </div>
+</div>

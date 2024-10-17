@@ -1,7 +1,7 @@
-import { IsNotEmpty, IsNumber } from 'class-validator';
+import { IsNotEmpty, IsString } from 'class-validator';
 
 export class CrearDiscapacidadDto {
   @IsNotEmpty()
-  @IsNumber()
-  id_discapacidad: number;
+  @IsString()
+  tipo_discapacidad: string;
 }

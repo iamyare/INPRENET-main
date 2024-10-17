@@ -8,18 +8,18 @@ import { ConfirmDialogComponent } from 'src/app/components/dinamicos/confirm-dia
 import { EditarDialogComponent } from 'src/app/components/dinamicos/editar-dialog/editar-dialog.component';
 import { AfiliadoService } from 'src/app/services/afiliado.service';
 import { CentroTrabajoService } from 'src/app/services/centro-trabajo.service';
-import { DatosEstaticosService } from 'src/app/services/datos-estaticos.service';
 import { FieldConfig } from 'src/app/shared/Interfaces/field-config';
 import { TableColumn } from 'src/app/shared/Interfaces/table-column';
 import { convertirFechaInputs } from 'src/app/shared/functions/formatoFecha';
 import { unirNombres } from 'src/app/shared/functions/formatoNombresP';
 import { AgregarPuestTrabComponent } from '../agregar-puest-trab/agregar-puest-trab.component';
+import { PermisosService } from 'src/app/services/permisos.service';
 
 @Component({
   selector: 'app-edit-perfil-puest-trab',
   templateUrl: './edit-perfil-puest-trab.component.html',
   styleUrls: ['./edit-perfil-puest-trab.component.scss'],
-  providers: [DatePipe] // Añadir el DatePipe como proveedor
+  providers: [DatePipe]
 })
 export class EditPerfilPuestTrabComponent implements OnInit, OnDestroy, OnChanges {
   @Input() Afiliado!: any;
@@ -27,7 +27,6 @@ export class EditPerfilPuestTrabComponent implements OnInit, OnDestroy, OnChange
   private subscriptions: Subscription = new Subscription();
 
   convertirFechaInputs = convertirFechaInputs;
-  form: any;
 
   unirNombres: any = unirNombres;
   datosTabl: any[] = [];
@@ -38,17 +37,25 @@ export class EditPerfilPuestTrabComponent implements OnInit, OnDestroy, OnChange
   public myFormFields: FieldConfig[] = [];
   public filas: any[] = [];
   ejecF: any;
+  public mostrarBotonTrab: boolean = false;
+  public mostrarBotonEditar: boolean = false;
+  public mostrarBotonEliminar: boolean = false;
 
   constructor(
     private svcAfiliado: AfiliadoService,
     private toastr: ToastrService,
     private dialog: MatDialog,
-    private datosEstaticosService: DatosEstaticosService,
     private datePipe: DatePipe,
     private centrosTrabSVC: CentroTrabajoService,
+    private permisosService: PermisosService
   ) { }
+
+
   ngOnInit(): void {
     this.initializeComponent();
+    this.mostrarBotonTrab = this.permisosService.tieneAccesoCompletoAfiliacion();
+    this.mostrarBotonEditar = this.permisosService.tieneAccesoCompletoAfiliacion();
+    this.mostrarBotonEliminar = this.permisosService.tieneAccesoCompletoAfiliacion();
   }
 
   ngOnChanges(changes: SimpleChanges): void {
@@ -72,6 +79,12 @@ export class EditPerfilPuestTrabComponent implements OnInit, OnDestroy, OnChange
 
     this.myColumns = [
       {
+        header: 'Codigo del Centro Trabajo',
+        col: 'codigo',
+        isEditable: true,
+        validationRules: [Validators.required]
+      },
+      {
         header: 'Nombre del Centro Trabajo',
         col: 'nombre_centro_trabajo',
         isEditable: true,
@@ -79,7 +92,7 @@ export class EditPerfilPuestTrabComponent implements OnInit, OnDestroy, OnChange
       },
       {
         header: 'Número de Acuerdo',
-        col: 'numeroAcuerdo',
+        col: 'numero_acuerdo',
         isEditable: true
       },
       {
@@ -126,35 +139,29 @@ export class EditPerfilPuestTrabComponent implements OnInit, OnDestroy, OnChange
     //this.centrosTrabajo = await this.datosEstaticosService.getAllCentrosTrabajo();
   }
 
-  async obtenerDatos(event: any): Promise<any> {
-    this.form = event;
-  }
-
   resetDatos() {
-    if (this.form) {
-      this.form.reset();
-    }
     this.filas = [];
     this.Afiliado = undefined;
   }
 
   async getFilas() {
-
     if (this.Afiliado.n_identificacion) {
       try {
         const data = await this.svcAfiliado.getAllPerfCentroTrabajo(this.Afiliado.n_identificacion).toPromise();
 
         this.filas = data.map((item: any) => ({
           id_perf_pers_centro_trab: item.id_perf_pers_centro_trab,
+          codigo: item.centroTrabajo.codigo,
           id_centro_trabajo: item.centroTrabajo.id_centro_trabajo,
+          direccion_1: item.centroTrabajo.direccion_1,
+          direccion_2: item.centroTrabajo.direccion_2,
           nombre_centro_trabajo: item.centroTrabajo.nombre_centro_trabajo,
-          numeroAcuerdo: item.numero_acuerdo || 'No disponible',
+          numero_acuerdo: item.numero_acuerdo || 'No disponible',
           salarioBase: item.salario_base,
           fechaIngreso: this.datePipe.transform(item.fecha_ingreso, 'dd/MM/yyyy') || 'Fecha no disponible',
           fechaEgreso: this.datePipe.transform(item.fecha_egreso, 'dd/MM/yyyy') || 'Fecha no disponible',
           cargo: item.cargo,
         }));
-
       } catch (error) {
         this.toastr.error('Error al cargar los datos de los perfiles de los centros de trabajo');
         console.error('Error al obtener datos de los perfiles de los centros de trabajo', error);
@@ -164,7 +171,7 @@ export class EditPerfilPuestTrabComponent implements OnInit, OnDestroy, OnChange
     }
   }
 
-  ejecutarFuncionAsincronaDesdeOtroComponente(funcion: (data: any) => Promise<void>) {
+  ejecutarFuncionAsincronaDesdeOtroComponente(funcion: (data: any) => Promise<boolean>) {
     this.ejecF = funcion;
   }
 
@@ -175,18 +182,42 @@ export class EditPerfilPuestTrabComponent implements OnInit, OnDestroy, OnChange
   }
 
   async manejarAccionUno(row: any) {
+
     const campos = [
       {
-        nombre: 'id_centro_trabajo',
-        tipo: 'list',
+        nombre: 'codigo',
+        tipo: 'text',
         requerido: true,
-        etiqueta: 'Nombre Centro Trabajo',
-        editable: true,
-        opciones: this.centrosTrabajo,
+        etiqueta: 'Codigo de Centro Trabajo',
+        editable: false,
         icono: 'business'
       },
       {
-        nombre: 'numeroAcuerdo',
+        nombre: 'nombre_centro_trabajo',
+        tipo: 'text',
+        requerido: true,
+        etiqueta: 'Nombre Centro Trabajo',
+        editable: false,
+        icono: 'business'
+      },
+      {
+        nombre: 'direccion_1',
+        tipo: 'text',
+        requerido: true,
+        etiqueta: 'Direccion 1',
+        editable: false,
+        icono: 'place'
+      },
+      {
+        nombre: 'direccion_2',
+        tipo: 'text',
+        requerido: true,
+        etiqueta: 'Direccion 2',
+        editable: false,
+        icono: 'place'
+      },
+      {
+        nombre: 'numero_acuerdo',
         tipo: 'text',
         requerido: true,
         etiqueta: 'Número Acuerdo',
@@ -238,8 +269,8 @@ export class EditPerfilPuestTrabComponent implements OnInit, OnDestroy, OnChange
     });
 
     dialogRef.afterClosed().subscribe(async (result: any) => {
+
       if (result) {
-        // Formateo de fechas antes de enviar los datos
         result.fechaIngreso = this.datePipe.transform(result.fechaIngreso, 'dd/MM/yyyy');
         result.fechaEgreso = this.datePipe.transform(result.fechaEgreso, 'dd/MM/yyyy');
 
@@ -250,8 +281,8 @@ export class EditPerfilPuestTrabComponent implements OnInit, OnDestroy, OnChange
           ...result,
           idCentroTrabajo: idCentroTrabajo
         };
+        this.svcAfiliado.updatePerfCentroTrabajo(row.id_perf_pers_centro_trab, result).subscribe({
 
-        this.svcAfiliado.updatePerfCentroTrabajo(row.id, result).subscribe({
 
           next: (response) => {
             const index = this.filas.findIndex(item => item.id === row.id);
@@ -289,7 +320,7 @@ export class EditPerfilPuestTrabComponent implements OnInit, OnDestroy, OnChange
 
     dialogRef.afterClosed().subscribe((result: boolean) => {
       if (result) {
-        this.svcAfiliado.desactivarPerfCentroTrabajo(row.id).subscribe({
+        this.svcAfiliado.desactivarPerfCentroTrabajo(row.id_perf_pers_centro_trab).subscribe({
           next: (response) => {
             this.toastr.success(response.mensaje, 'Perfil Desactivado');
             this.getFilas().then(() => this.cargar());
@@ -310,7 +341,7 @@ export class EditPerfilPuestTrabComponent implements OnInit, OnDestroy, OnChange
       width: '55%',
       height: '75%',
       data: {
-        idPersona: this.Afiliado.ID_PERSONA
+        idPersona: this.Afiliado.id_persona
       }
     });
 

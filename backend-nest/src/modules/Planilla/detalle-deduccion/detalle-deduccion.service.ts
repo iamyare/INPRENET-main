@@ -1,14 +1,15 @@
-import { BadRequestException, Injectable, Logger, InternalServerErrorException, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, Logger, InternalServerErrorException, NotFoundException, ConflictException } from '@nestjs/common';
 import { CreateDetalleDeduccionDto } from './dto/create-detalle-deduccion.dto';
-import { InjectEntityManager, InjectRepository } from '@nestjs/typeorm';
+import { InjectDataSource, InjectEntityManager, InjectRepository } from '@nestjs/typeorm';
 import { Net_Detalle_Deduccion } from './entities/detalle-deduccion.entity';
-import { EntityManager, Repository } from 'typeorm';
+import { DataSource, EntityManager, Repository } from 'typeorm';
 import * as xlsx from 'xlsx';
 import { net_persona } from '../../Persona/entities/net_persona.entity';
 import { Net_Planilla } from '../planilla/entities/net_planilla.entity';
 import { isUUID } from 'class-validator';
 import { Net_Deduccion } from '../deduccion/entities/net_deduccion.entity';
 import { Net_Centro_Trabajo } from 'src/modules/Empresarial/entities/net_centro_trabajo.entity';
+import * as ExcelJS from 'exceljs';
 
 @Injectable()
 export class DetalleDeduccionService {
@@ -27,42 +28,83 @@ export class DetalleDeduccionService {
     @InjectEntityManager() private readonly entityManager: EntityManager,
     @InjectRepository(Net_Planilla)
     private planillaRepository: Repository<Net_Planilla>,
-  
+    @InjectDataSource() private readonly dataSource: DataSource,
+
   ) { }
 
-  async insertarDetalles(data: any[]): Promise<void> {
-    const queryRunner = this.entityManager.connection.createQueryRunner();
-    await queryRunner.connect();
-    await queryRunner.startTransaction();
+  async obtenerDetallePorDeduccionPorCodigoYGenerarExcel(
+    periodoInicio: string,
+    periodoFinalizacion: string,
+    idTiposPlanilla: number[],
+    codDeduccion: number
+  ): Promise<Buffer> {
+    const detallesQuery = `
+      SELECT 
+          dd."ANIO" AS "anio",
+          dd."MES" AS "mes",
+          ded."COD_DEDUCCION" AS "cod_deduccion",
+          SUM(dd.MONTO_APLICADO) AS "monto_aplicado",
+          persona."PRIMER_APELLIDO" || ' ' || NVL(persona."SEGUNDO_APELLIDO", '') || ' ' || persona."PRIMER_NOMBRE" || ' ' || NVL(persona."SEGUNDO_NOMBRE", '') AS "nombre_completo",
+          persona."N_IDENTIFICACION" AS "n_identificacion"
+      FROM 
+          "NET_PLANILLA" planilla
+      LEFT JOIN 
+          "NET_DETALLE_DEDUCCION" dd ON planilla."ID_PLANILLA" = dd."ID_PLANILLA"
+      LEFT JOIN 
+          "NET_DEDUCCION" ded ON dd."ID_DEDUCCION" = ded."ID_DEDUCCION"
+      LEFT JOIN 
+          "NET_PERSONA" persona ON dd."ID_PERSONA" = persona."ID_PERSONA"
+      WHERE 
+          TO_DATE(planilla."PERIODO_INICIO", 'DD/MM/YYYY') >= TO_DATE(:1, 'DD/MM/YYYY')
+          AND TO_DATE(planilla."PERIODO_FINALIZACION", 'DD/MM/YYYY') <= TO_DATE(:2, 'DD/MM/YYYY')
+          AND planilla."ID_TIPO_PLANILLA" IN (${idTiposPlanilla.join(', ')})
+          AND dd."ESTADO_APLICACION" = 'COBRADA'
+          AND ded."COD_DEDUCCION" = :3
+      GROUP BY 
+          dd."ANIO",
+          dd."MES",
+          ded."COD_DEDUCCION",
+          persona."PRIMER_APELLIDO",
+          persona."SEGUNDO_APELLIDO",
+          persona."PRIMER_NOMBRE",
+          persona."SEGUNDO_NOMBRE",
+          persona."N_IDENTIFICACION"
+      ORDER BY 
+          dd."ANIO",
+          dd."MES",
+          persona."PRIMER_APELLIDO",
+          persona."SEGUNDO_APELLIDO",
+          persona."PRIMER_NOMBRE",
+          persona."SEGUNDO_NOMBRE"
+    `;
 
     try {
-      for (const item of data) {
-        const centrotrabajo = await this.centroTrabajoRepository.findOne({ where: { nombre_centro_trabajo: item.nombre_centro_trabajo } });
-        if (!centrotrabajo) throw new NotFoundException(`Institucion ${item.nombre_centro_trabajo} no encontrada`);
-
-        const persona = await this.personaRepository.findOne({ where: { n_identificacion: item.n_identificacion } });
-        if (!persona) throw new NotFoundException(`Pfiliado con DNI ${item.n_identificacion} no encontrado`);
-
-        /* const deduccion = await this.deduccionRepository.findOne({ where: { codigo_deduccion: item.codigo_deduccion, centroTrabajo } });
-        if (!deduccion) throw new NotFoundException(`Deducción con código ${item.codigo_deduccion} no encontrada en la institución ${item.nombre_centro_trabajo}`); */
-
-        const detalleDeduccion = new Net_Detalle_Deduccion();
-        //detalleDeduccion.persona = persona;
-        //detalleDeduccion.deduccion = deduccion;
-        detalleDeduccion.anio = parseInt(item.año);
-        detalleDeduccion.mes = parseInt(item.mes);
-        detalleDeduccion.monto_total = parseFloat(item.monto_motal);
-
-
-        await queryRunner.manager.save(detalleDeduccion);
-      }
-      await queryRunner.commitTransaction();
+      const detalles = await this.dataSource.query(detallesQuery, [periodoInicio, periodoFinalizacion, codDeduccion]);
+      const workbook = new ExcelJS.Workbook();
+      const worksheet = workbook.addWorksheet('Deducciones');
+      worksheet.columns = [
+        { header: 'N. Identificación', key: 'n_identificacion', width: 20 },
+        { header: 'Nombre Completo', key: 'nombre_completo', width: 30 },
+        { header: 'Monto Aplicado', key: 'monto_aplicado', width: 15 },
+        { header: 'Código Deducción', key: 'cod_deduccion', width: 15 },
+        { header: 'Año', key: 'anio', width: 10 },
+        { header: 'Mes', key: 'mes', width: 10 },
+      ];
+      detalles.forEach(detalle => {
+        worksheet.addRow({
+          anio: detalle.anio,
+          mes: detalle.mes,
+          cod_deduccion: detalle.cod_deduccion,
+          monto_aplicado: detalle.monto_aplicado,
+          nombre_completo: detalle.nombre_completo,
+          n_identificacion: detalle.n_identificacion,
+        });
+      });
+      const buffer = await workbook.xlsx.writeBuffer();
+      return Buffer.from(buffer);
     } catch (error) {
-      await queryRunner.rollbackTransaction();
-      /* this.logger.error(`Error al insertar detalles de deducción: ${error.message}`);
-      throw new InternalServerErrorException(`Error al insertar detalles de deducción: ${error.message}`); */
-    } finally {
-      await queryRunner.release();
+      console.error('Error al obtener los detalles por deducción y generar el Excel:', error);
+      throw new InternalServerErrorException('Error al generar el Excel.');
     }
   }
 
@@ -190,19 +232,21 @@ export class DetalleDeduccionService {
 
   async getDeduccionesByPersonaAndBenef(idPersona: number, idPlanilla: number): Promise<any> {
     const query = `
-    SELECT      
-            dd."ID_DEDUCCION",
-            dd."NOMBRE_DEDUCCION",
-            inst."NOMBRE_CENTRO_TRABAJO" AS "NOMBRE_INSTITUCION",
-            dedd."MONTO_APLICADO" AS "MontoAplicado"
-        FROM "NET_DEDUCCION" dd
-        INNER JOIN "NET_DETALLE_DEDUCCION" dedd ON dd.ID_DEDUCCION = dedd."ID_DEDUCCION"
-        INNER JOIN "NET_PLANILLA" plan ON plan.ID_PLANILLA = dedd."ID_PLANILLA"
-        INNER JOIN "NET_CENTRO_TRABAJO" inst ON inst."ID_CENTRO_TRABAJO" = dd."ID_CENTRO_TRABAJO"
-        WHERE
-            dedd."ID_PERSONA" = ${idPersona} AND
-            plan."ID_PLANILLA" = ${idPlanilla}
-
+      SELECT
+        dedd."ID_DED_DEDUCCION",
+        dd."ID_DEDUCCION",
+        dd."NOMBRE_DEDUCCION",
+        inst."NOMBRE_CENTRO_TRABAJO" AS "NOMBRE_INSTITUCION",
+        dedd."MONTO_APLICADO" AS "MontoAplicado"
+      FROM "NET_DEDUCCION" dd
+      INNER JOIN "NET_DETALLE_DEDUCCION" dedd ON dd.ID_DEDUCCION = dedd."ID_DEDUCCION"
+      INNER JOIN "NET_PLANILLA" plan ON plan.ID_PLANILLA = dedd."ID_PLANILLA"
+      INNER JOIN "NET_CENTRO_TRABAJO" inst ON inst."ID_CENTRO_TRABAJO" = dd."ID_CENTRO_TRABAJO"
+      WHERE
+        dedd.ESTADO_APLICACION != 'NO COBRADA' AND
+        dedd."ID_PERSONA" = ${idPersona} AND
+        plan."ID_PLANILLA" = ${idPlanilla}
+      ORDER BY dedd."MONTO_APLICADO" DESC
     `;
     try {
       const detalleDeducciones = await this.entityManager.query(query);
@@ -212,6 +256,7 @@ export class DetalleDeduccionService {
       throw new InternalServerErrorException('Se produjo un error al obtener los detalles de deducción por persona y planilla.');
     }
   }
+
 
   /*           
 SELECT 
@@ -339,8 +384,6 @@ SELECT
     return resultados;
   }
 
-
-
   async createDetalleDeduccion(createDetalleDeduccionDto: CreateDetalleDeduccionDto): Promise<Net_Detalle_Deduccion> {
     // Buscar la deducción existente usando el código de deducción
     const deduccion = await this.deduccionRepository.findOne({
@@ -360,13 +403,37 @@ SELECT
       throw new NotFoundException(`Persona con n_identificacion '${createDetalleDeduccionDto.n_identificacion}' no encontrada.`);
     }
 
+    // Verificar si la persona está fallecida
+    if (persona.fallecido === 'SI') {
+      throw new BadRequestException(`La persona con n_identificacion '${createDetalleDeduccionDto.n_identificacion}' está marcada como fallecida.`);
+    }
+
+    // Buscar la planilla usando el id_planilla
     const planilla = await this.planillaRepository.findOne({
       where: { id_planilla: createDetalleDeduccionDto.id_planilla },
-  });
+    });
 
-  if (!planilla) {
+    if (!planilla) {
       throw new NotFoundException(`Planilla con id '${createDetalleDeduccionDto.id_planilla}' no encontrada.`);
-  }
+    }
+
+    // Verificar si ya existe un detalle de deducción con el mismo ID_PLANILLA, ID_DEDUCCION, MONTO_TOTAL, ANIO y MES
+    const detalleExistente = await this.detalleDeduccionRepository.findOne({
+      where: {
+        monto_total: createDetalleDeduccionDto.monto_total,
+        anio: createDetalleDeduccionDto.anio,
+        mes: createDetalleDeduccionDto.mes,
+        planilla: { id_planilla: createDetalleDeduccionDto.id_planilla },
+        deduccion: { id_deduccion: deduccion.id_deduccion },
+        persona: { id_persona: persona.id_persona },
+      },
+    });
+
+    if (detalleExistente) {
+      throw new ConflictException(
+        'Ya existe un detalle de deducción para esta persona con el mismo monto, año, mes, planilla, y deducción.'
+      );
+    }
 
     // Crear el detalle de deducción
     const detalleDeduccion = this.detalleDeduccionRepository.create({
@@ -376,8 +443,9 @@ SELECT
       anio: createDetalleDeduccionDto.anio,
       mes: createDetalleDeduccionDto.mes,
       monto_total: createDetalleDeduccionDto.monto_total,
-      estado_aplicacion: 'NO COBRADA',
-      fecha_aplicado: new Date(),
+      estado_aplicacion: 'EN PRELIMINAR',
+      monto_aplicado: createDetalleDeduccionDto.monto_total,
+      fecha_aplicado: new Date().toISOString(), // Asegurando que la fecha esté en el formato correcto
     });
 
     try {
@@ -388,7 +456,6 @@ SELECT
       throw new InternalServerErrorException('Ha ocurrido un error al crear el detalle de deducción.');
     }
   }
-
 
   findAll() {
     const detalleDeduccion = this.detalleDeduccionRepository.find()
@@ -430,7 +497,17 @@ SELECT
       .getMany();
   }
 
-  
+  async deleteDetalleDeduccion(id: number): Promise<void> {
+    const detalleDeduccion = await this.detalleDeduccionRepository.findOne({
+      where: { id_ded_deduccion: id },
+    });
+    if (!detalleDeduccion) {
+      throw new NotFoundException(`El detalle de deducción con id ${id} no fue encontrado.`);
+    }
+    await this.detalleDeduccionRepository.remove(detalleDeduccion);
+  }
+
+
   remove(id: number) {
     return `This action removes a #${id} detalleDeduccion`;
   }

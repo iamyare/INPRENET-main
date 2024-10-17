@@ -170,7 +170,7 @@ export class VerDatosAfiliadosComponent implements OnInit {
     this.Afiliado = undefined;
   }
 
-  ejecutarFuncionAsincronaDesdeOtroComponente(funcion: (data: any) => Promise<void>) {
+  ejecutarFuncionAsincronaDesdeOtroComponente(funcion: (data: any) => Promise<boolean>) {
     this.ejecF = funcion;
   }
 

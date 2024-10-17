@@ -13,25 +13,25 @@ export class CreatePlanillaDto {
     fecha_cierre?: Date;
 
     @IsNumber()
-    secuencia: number;
+    @IsOptional({ message: '' })
+    secuencia?: number;
 
     @IsString()
     @IsOptional({ message: '' })
     estado?: string;
 
-    /*     @IsString({ message: '' })
-        @IsNotEmpty({ message: '' })
-        periodoInicio: string;
+    @IsOptional({ message: '' })
+    @IsString({ message: '' })
+    @IsNotEmpty({ message: '' })
+    periodo_inicio?: string;
     
-        @IsString({ message: '' })
-        @IsNotEmpty({ message: '' })
-        periodoFinalizacion: string; */
+    @IsOptional({ message: '' })
+    @IsString({ message: '' })
+    @IsNotEmpty({ message: '' })
+    periodo_finalizacion?: string;
 
     @IsString({ message: '' })
     @IsNotEmpty({ message: '' })
     @IsOptional({ message: '' })
     nombre_planilla?: string;
-
-
-
 }

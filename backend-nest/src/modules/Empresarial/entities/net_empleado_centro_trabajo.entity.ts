@@ -1,16 +1,16 @@
 import { Entity, PrimaryGeneratedColumn, ManyToOne, JoinColumn, Column, OneToMany } from 'typeorm';
-import { net_empleado } from './net_empleado.entity';
 import { Net_Centro_Trabajo } from './net_centro_trabajo.entity';
 import { Net_Usuario_Empresa } from 'src/modules/usuario/entities/net_usuario_empresa.entity';
+import { Net_Empleado } from './net_empleado.entity';
 
 @Entity({ name: 'NET_EMPLEADO_CENTRO_TRABAJO' })
-export class net_empleado_centro_trabajo {
+export class Net_Empleado_Centro_Trabajo {
   @PrimaryGeneratedColumn({ type: 'int', name: 'ID_EMPLEADO_CENTRO_TRABAJO', primaryKeyConstraintName: 'PK_id_empleado_centro_trabajo' })
   id_empleado_centro_trabajo: number;
 
-  @ManyToOne(() => net_empleado, empleado => empleado.empleadoCentroTrabajos)
+  @ManyToOne(() => Net_Empleado, empleado => empleado.empleadoCentroTrabajos)
   @JoinColumn({ name: 'ID_EMPLEADO', foreignKeyConstraintName: 'FK_id_empleado' })
-  empleado: net_empleado;
+  empleado: Net_Empleado;
 
   @ManyToOne(() => Net_Centro_Trabajo, centroTrabajo => centroTrabajo.empleadoCentroTrabajos)
   @JoinColumn({ name: 'ID_CENTRO_TRABAJO', foreignKeyConstraintName: 'FK_id_centro_trab' })

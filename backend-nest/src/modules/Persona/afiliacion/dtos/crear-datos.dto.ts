@@ -10,12 +10,19 @@ import { CrearReferenciaDto } from './crear-referencia.dto';
 import { CrearBeneficiarioDto } from './crear-beneficiario.dto';
 import { CrearDiscapacidadDto } from './crear-discapacidad.dto';
 import { CrearFamiliaDto } from './crear-familiar.dto';
+import { CrearPepsDto } from './crear-peps.dto';
 
 export class CrearDatosDto {
   @IsObject()
   @ValidateNested()
   @Type(() => CrearPersonaDto)
   persona: CrearPersonaDto;
+
+  @IsOptional()
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => CrearPepsDto)
+  peps?: CrearPepsDto[];
 
   @IsObject()
   @ValidateNested()

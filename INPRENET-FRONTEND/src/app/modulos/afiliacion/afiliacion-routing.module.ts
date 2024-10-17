@@ -21,7 +21,6 @@ import { PensionadoComponent } from './verPerfil/pensionado/pensionado.component
 import { PerfilComponent } from './verPerfil/perfil/perfil.component';
 import { VoluntarioComponent } from './verPerfil/voluntario/voluntario.component';
 import { AfilBancoComponent } from './gestion/afil-banco/afil-banco.component';
-import { AfiliacionDocentesComponent } from './gestion/afiliacion-docentes/afiliacion-docentes.component';
 import { MantenimientoAfiliacionComponent } from './mantenimiento/mantenimiento-afiliacion/mantenimiento-afiliacion.component';
 import { DiscapacidadComponent } from './mantenimiento/discapacidad/discapacidad.component';
 import { ProfesionComponent } from './mantenimiento/profesion/profesion.component';
@@ -29,6 +28,7 @@ import { ColegioComponent } from './mantenimiento/colegio/colegio.component';
 import { BancoComponent } from './mantenimiento/banco/banco.component';
 import { JornadaComponent } from './mantenimiento/jornada/jornada.component';
 import { NivelEducativoComponent } from './mantenimiento/nivel-educativo/nivel-educativo.component';
+import { AfiliarDocenteComponent } from './gestion/afiliar-docente/afiliar-docente.component';
 
 const routes: Routes = [
   { path: 'admin-centro-educativo', component: AdminCentroEducativoComponent },
@@ -52,7 +52,7 @@ const routes: Routes = [
   { path: 'perfil', component: PerfilComponent },
   { path: 'voluntario', component: VoluntarioComponent },
   { path: 'nuevo-afiliado', component: AfilBancoComponent },
-  { path: 'nueva-afiliacion', component: AfiliacionDocentesComponent },
+  { path: 'nueva-afiliacion', component: AfiliarDocenteComponent },
   { path: 'mantenimiento', component: MantenimientoAfiliacionComponent },
   { path: 'mantenimiento/discapacidad', component: DiscapacidadComponent },
   { path: 'mantenimiento/profesion', component: ProfesionComponent },
@@ -60,7 +60,7 @@ const routes: Routes = [
   { path: 'mantenimiento/banco', component: BancoComponent },
   { path: 'mantenimiento/jornada', component: JornadaComponent },
   { path: 'mantenimiento/nivel-educativo', component: NivelEducativoComponent },
-  { path: '**', redirectTo: "nuevo-afiliado" },
+  { path: '**', redirectTo: "nuevo-afiliado", pathMatch: 'full' },
 ];
 
 @NgModule({

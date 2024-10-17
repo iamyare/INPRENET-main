@@ -31,9 +31,9 @@ export class DashboardComponent implements OnInit {
   private initMap(): void {
     // Configurar la ruta de las imágenes de los iconos
     L.Icon.Default.mergeOptions({
-      iconRetinaUrl: 'assets/images/marker-icon-2x.png',
-      iconUrl: 'assets/images/marker-icon.png',
-      shadowUrl: 'assets/images/marker-shadow.png'
+      iconRetinaUrl: '../assets/images/marker-icon-2x.png',
+      iconUrl: '../assets/images/marker-icon.png',
+      shadowUrl: '../assets/images/marker-shadow.png'
     });
 
     this.map = L.map('map').setView([14.5, -86.5], 7); // Coordenadas centradas en Honduras

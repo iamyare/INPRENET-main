@@ -1,63 +1,45 @@
 import { Component, Inject } from '@angular/core';
-import { FormArray, FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { FormBuilder, FormGroup } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { ToastrService } from 'ngx-toastr';
-import { AfiliadoService } from 'src/app/services/afiliado.service';
-import { convertirFechaInputs } from 'src/app/shared/functions/formatoFecha';
+import { AfiliacionService } from 'src/app/services/afiliacion.service';
 
 @Component({
   selector: 'app-agregar-puest-trab',
   templateUrl: './agregar-puest-trab.component.html',
-  styleUrl: './agregar-puest-trab.component.scss'
+  styleUrls: ['./agregar-puest-trab.component.scss']
 })
-export class AgregarPuestTrabComponent {
-  form = this.fb.group({
-  });
-  formPuestTrab: any = new FormGroup(
-    {
-      refpers: new FormArray([], [Validators.required])
-    });
+export class AgregarPuestTrabComponent{
+  formPuestTrab: FormGroup;
 
-  constructor(private fb: FormBuilder, private afilService: AfiliadoService,
+  constructor(
+    private fb: FormBuilder,
+    private afiliacionService: AfiliacionService,
     private toastr: ToastrService,
     private dialogRef: MatDialogRef<AgregarPuestTrabComponent>,
     @Inject(MAT_DIALOG_DATA) public data: { idPersona: string }
-  ) { }
-  ngOnInit(): void { }
-
-  setDatosPuetTrab1(datosPuestTrab: any) {
-    this.formPuestTrab = datosPuestTrab
+  ) {
+    this.formPuestTrab = this.fb.group({
+      trabajo: this.fb.array([])
+    });
   }
 
   guardar() {
-    console.log(this.formPuestTrab);
+    const datosParseados = this.formPuestTrab.value.trabajo;
 
-    const datosParseados = this.formPuestTrab.value.trabajo.map((dato: any) => {
-      const fechaIngresoFormateada = convertirFechaInputs(dato.fechaIngreso.toISOString());
-      const fechaEgresoFormateada = convertirFechaInputs(dato.fechaEgreso.toISOString());
+    this.afiliacionService.asignarCentrosTrabajoAPersona(Number(this.data.idPersona), datosParseados).subscribe(
 
-      return {
-        ...dato,
-        fechaIngreso: fechaIngresoFormateada,
-        fechaEgreso: fechaEgresoFormateada
-      };
-
-    });
-
-    this.afilService.createCentrosTrabajo(this.data.idPersona, datosParseados).subscribe(
       (res: any) => {
         if (res.length > 0) {
-          /* this.formPuestTrab.reset(); */
           this.toastr.success("Centro de trabajo agregado con éxito");
           this.cerrar();
         }
       },
       (error) => {
-        this.toastr.error(error);
+        this.toastr.error("Error al crear el centro de trabajo");
         console.error('Error al crear centros de trabajo pertenecientes al afiliado', error);
       }
     );
-
   }
 
   cerrar() {

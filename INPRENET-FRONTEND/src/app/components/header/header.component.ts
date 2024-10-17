@@ -16,8 +16,8 @@ export class HeaderComponent implements OnInit {
     {
       title: 'Configuración',
       items: [
-        { title: 'Perfil', icon: 'person', route: '/usuario/editar' },
-        { title: 'Ajustes', icon: 'settings', route: '/ajustes' }
+        { title: 'Perfil', icon: 'person', route: '/home/usuario/editar' },
+        { title: 'Ajustes', icon: 'settings', route: '/home/ajustes' }
       ]
     },
     {
@@ -50,9 +50,6 @@ export class HeaderComponent implements OnInit {
   }
 
   logout(): void {
-    this.authService.clearSession();
-    // Aquí puedes redirigir al usuario después de cerrar sesión
-    // Por ejemplo, usando el Router
-    // this.router.navigate(['/auth/landing-page']);
+    this.authService.logout();
   }
 }

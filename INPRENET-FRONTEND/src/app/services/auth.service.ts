@@ -1,32 +1,89 @@
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { Injectable } from '@angular/core';
+import { Injectable, NgZone } from '@angular/core';
 import { Observable, catchError, map, of, throwError } from 'rxjs';
 import { environment } from 'src/environments/environment';
 import { jwtDecode } from 'jwt-decode';
 import { ToastrService } from 'ngx-toastr';
 import { Router } from '@angular/router';
 
-
 @Injectable({
   providedIn: 'root'
 })
 export class AuthService {
+  private timeout: any;
+  private readonly idleTime: number = 30 * 60 * 1000;
 
-  constructor( private http: HttpClient,private router: Router,
-    private toastr: ToastrService) {
-   }
+  constructor(
+    private http: HttpClient,
+    private router: Router,
+    private toastr: ToastrService,
+    private ngZone: NgZone
+  ) {
+    this.startIdleWatch();
+    this.resetIdleTimer();
+  }
 
-   olvidoContrasena(dto: any): Observable<{ message: string }> {
+  private apiRequestsCount: number = 0;
+  private idleTimeout: any;
+
+  public startIdleWatch(): void {
+    ['mousemove', 'keydown', 'wheel', 'touchmove', 'click'].forEach(event => {
+      window.addEventListener(event, () => this.resetIdleTimer());
+    });
+    this.resetIdleTimer();
+  }
+
+  private resetIdleTimer(): void {
+    clearTimeout(this.timeout);
+    if (this.apiRequestsCount === 0) {
+      this.timeout = setTimeout(() => {
+        console.log('Sesión cerrada por inactividad');
+        this.handleIdleTimeout();
+      }, this.idleTime);
+    }
+  }
+
+  // Incrementar el contador cuando se inicia una petición API
+  public onApiRequestStart(): void {
+    this.apiRequestsCount++;
+    clearTimeout(this.idleTimeout); // Pausar el temporizador de inactividad mientras hay solicitudes
+  }
+
+  // Decrementar el contador cuando una petición API termina
+  public onApiRequestEnd(): void {
+    this.apiRequestsCount--;
+    if (this.apiRequestsCount === 0) {
+      this.resetIdleTimer(); // Reiniciar el temporizador cuando no hay solicitudes pendientes
+    }
+  }
+
+  /* private handleIdleTimeout(): void {
+    if (this.apiRequestsCount === 0) {
+      // Aquí cierras la sesión o realizas cualquier acción para manejar la inactividad
+      console.log('Sesión cerrada por inactividad');
+      // Cerrar sesión o redirigir
+    }
+  } */
+
+  /* private resetIdleTimer(): void {
+    clearTimeout(this.timeout);
+    this.timeout = setTimeout(() => this.handleIdleTimeout(), this.idleTime);
+  } */
+
+  private handleIdleTimeout(): void {
+    this.ngZone.run(() => {
+      const token = sessionStorage.getItem('token');
+      if (token) {
+        this.logout();
+      }
+    });
+  }
+
+  olvidoContrasena(dto: any): Observable<{ message: string }> {
     const url = `${environment.API_URL}/api/usuario/olvido-contrasena`;
     return this.http.post<{ message: string }>(url, dto).pipe(
       catchError(this.handleError<{ message: string }>('olvidoContrasena'))
     );
-  }
-
-   clearSession(): void {
-    sessionStorage.removeItem('token');
-    this.router.navigate(['/auth/login']);
-    this.toastr.success('Sesión cerrada con éxito', 'Logout');
   }
 
   login(correo: string, contrasena: string): Observable<{ accessToken: string }> {
@@ -45,10 +102,15 @@ export class AuthService {
     );
   }
 
+  logout(): void {
+    sessionStorage.removeItem('token');
+    this.toastr.info('Sesión cerrada');
+    this.router.navigate(['/']);
+  }
+
   isAuthenticated(): boolean {
     return sessionStorage.getItem('token') !== null;
   }
-
 
   desactivarUsuario(idUsuario: number, fechaReactivacion: Date | null = null): Observable<{ message: string }> {
     const url = `${environment.API_URL}/api/usuario/${idUsuario}/desactivar`;
@@ -96,7 +158,7 @@ export class AuthService {
   }
 
 
-   preRegistro(datos: any): Observable<void> {
+  preRegistro(datos: any): Observable<void> {
     const url = `${environment.API_URL}/api/usuario/preregistro`;
     return this.http.post<void>(url, datos).pipe(
       catchError(this.handleError<void>('preRegistro'))
@@ -110,40 +172,20 @@ export class AuthService {
     );
   }
 
-
-   logout(): Observable<void> {
-    const url = `${environment.API_URL}/api/usuario/logout`;
-    const token = localStorage.getItem('token');
-    const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
-
-    return this.http.post<void>(url, {}, { headers }).pipe(
-      map(() => {
-        this.clearToken();
-      })
-    );
-  }
-
-  verificarEstadoSesion(): Observable<{ sesionActiva: boolean }> {
-    const url = `${environment.API_URL}/api/usuario/verificarEstado`;
-    const token = localStorage.getItem('token');
-    const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
-    return this.http.get<{ sesionActiva: boolean }>(url, { headers });
-  }
-
-
-
-  completarRegistro(token: string, datos: any, archivoIdentificacion: File, fotoEmpleado: File): Observable<void> {
+  completarRegistro(token: string, datos: any, archivoIdentificacion?: File, fotoEmpleado?: File): Observable<void> {
     const url = `${environment.API_URL}/api/usuario/completar-registro?token=${token}`;
     const formData = new FormData();
     formData.append('datos', JSON.stringify(datos));
-    formData.append('archivo_identificacion', archivoIdentificacion);
-    formData.append('foto_empleado', fotoEmpleado);
-
+    if (archivoIdentificacion) {
+      formData.append('archivo_identificacion', archivoIdentificacion);
+    }
+    if (fotoEmpleado) {
+      formData.append('foto_empleado', fotoEmpleado);
+    }
     return this.http.post<void>(url, formData).pipe(
       catchError(this.handleError<void>('completarRegistro'))
     );
   }
-
 
   obtenerUsuarioPorModuloYCentroTrabajo(modulo: string, idCentroTrabajo: number): Observable<any[]> {
     const url = `${environment.API_URL}/api/usuario/modulo-centro-trabajo?modulos=${modulo}&idCentroTrabajo=${idCentroTrabajo}`;
@@ -161,7 +203,6 @@ export class AuthService {
       catchError(this.handleError<any[]>('obtenerRolesPorModulo', []))
     );
   }
-
 
   getRolesModulos(): { rol: string, modulo: string }[] {
     const token = sessionStorage.getItem('token');
@@ -213,7 +254,7 @@ export class AuthService {
     localStorage.removeItem('token');
   }
 
-   loginPrivada(email: string, password: string): Observable<{ access_token: string }> {
+  loginPrivada(email: string, password: string): Observable<{ access_token: string }> {
     const url = `${environment.API_URL}/api/usuario/loginPrivada`;
     return this.http.post<{ access_token: string }>(url, { email, contrasena: password });
   }
@@ -289,16 +330,16 @@ export class AuthService {
   }
 
 
-  crearCuenta(data:any): Observable<any>{
+  crearCuenta(data: any): Observable<any> {
     var url = `${environment.API_URL}/api/usuario/auth/signup`;
     return this.http.post<any>(
       url,
       data,
-      ).pipe(
-        map((res:any) => {
-          return res;
-        }),
-      )
+    ).pipe(
+      map((res: any) => {
+        return res;
+      }),
+    )
   }
 
   confirmarYActualizarSeguridad(data: any): Observable<any> {

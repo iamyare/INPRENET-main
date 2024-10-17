@@ -1,5 +1,4 @@
-import { Check, Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
-import { net_persona } from "./net_persona.entity";
+import { Check, Column, Entity, PrimaryGeneratedColumn } from "typeorm";
 
 @Entity({ name: 'NET_REF_PER_PERS' })
 @Check("CK_TIPO_REFERENCIA_NET_REF_PER_PERS", `TIPO_REFERENCIA IN ('REFERENCIA PERSONAL', 'REFERENCIA FAMILIAR')`)
@@ -29,12 +28,4 @@ export class Net_Ref_Per_Pers {
         default: 'ACTIVO'
     })
     estado: string;
-
-    @ManyToOne(() => net_persona, persona => persona.referenciasPersonalPersona, { cascade: true })
-    @JoinColumn({ name: 'ID_PERSONA', foreignKeyConstraintName: 'FK_ID_PERSONA_NET_REF_PER_PERS' })
-    persona: net_persona;
-
-    @ManyToOne(() => net_persona, persona => persona.referenciasHechas, { cascade: true })
-    @JoinColumn({ name: 'ID_PERSONA_REFERENCIA', foreignKeyConstraintName: 'FK_ID_PERSONA_REFERENCIA_NET_REF_PER_PERS' })
-    referenciada: net_persona;
 }

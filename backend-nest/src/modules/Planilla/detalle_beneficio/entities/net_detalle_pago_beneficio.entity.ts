@@ -12,6 +12,9 @@ export class Net_Detalle_Pago_Beneficio {
     @Column({ default: "NO PAGADA", name: 'ESTADO' })
     estado: string;
 
+    @Column({ name: 'OBSERVACION', nullable: true, })
+    observacion: string;
+
     @CreateDateColumn({ name: 'FECHA_CARGA' })
     fecha_carga: Date;
 

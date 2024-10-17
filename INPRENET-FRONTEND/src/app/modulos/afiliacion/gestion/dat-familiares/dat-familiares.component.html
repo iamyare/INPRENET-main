@@ -72,7 +72,9 @@
           <div class="col-md-6">
             <mat-form-field class="example-full-width inputs" appearance="outline">
               <mat-label>Parentesco</mat-label>
-              <input matInput formControlName="parentesco">
+              <mat-select formControlName="parentesco">
+                <mat-option *ngFor="let item of availableParentescos" [value]="item.value">{{ item.label }}</mat-option>
+              </mat-select>
               <mat-error *ngFor="let error of getErrors(i, 'parentesco')">
                 {{ error }}
               </mat-error>

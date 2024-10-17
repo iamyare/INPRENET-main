@@ -1,10 +1,14 @@
-<div *ngIf="persona">
-  <div id="texto" style="text-align: center;" *ngIf="filas.length === 0">
+ <div id="texto" style="text-align: center;" *ngIf="filas.length === 0">
     <h2 class="anaranjado desapareciendo">No se encuentra ningún beneficiario</h2>
   </div>
 
-  <button mat-raised-button color="primary" style="color: white; margin: 1% 0 1% 0" (click)="AgregarBeneficiario()">
-    Agregar Beneficiario
+  <button
+  mat-raised-button
+  color="primary"
+  style="color: white; margin: 1% 0 1% 0"
+  (click)="AgregarBeneficiario()"
+  *ngIf="mostrarBotonAgregar">
+  Agregar Beneficiario
   </button>
 
   <div *ngIf="filas.length !== 0" style="background-color: white; border-radius: 10px; padding: 20px">
@@ -14,12 +18,16 @@
       subtitulo="Completa la información correspondiente"
       [columns]="myColumns"
       [data]="filas"
-      [getData]="getFilas.bind(this)"
+      [getData]="getFilas"
       (ejecutarFuncionAsincronaEvent)="ejecutarFuncionAsincronaDesdeOtroComponente($event)"
-      [mostrarBotonEditar]="true"
+      [mostrarBotonEditar]="mostrarBotonEditar"
       (editar)="editarFila($event)"
-      [mostrarBotonEliminar]="true"
-      (eliminar)="eliminarFila($event)">
+      [mostrarBotonEliminar]="mostrarBotonEliminar"
+      (eliminar)="eliminarFila($event)"
+      [nombreEncabezadoUno]="'Agregar'"
+      [mostrarBotonUno]="mostrarBotonAgregarDiscapacidad"
+      etiquetaBotonUno="Agregar Discapacidad"
+      (accionBotonUno)="agregarDiscapacidad($event)">
     </app-dynamic-table>
   </div>
-</div>
+

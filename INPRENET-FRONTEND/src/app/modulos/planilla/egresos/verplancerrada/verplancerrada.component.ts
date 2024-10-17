@@ -49,7 +49,7 @@ export class VerplancerradaComponent {
     private afiliadoService: AfiliadoService,
     private deduccionSVC: DeduccionesService
   ) {
-    this.convertirImagenABase64('assets/images/HOJA-MEMBRETADA.jpg').then(base64 => {
+    this.convertirImagenABase64('../assets/images/membratadoFinal.jpg').then(base64 => {
       this.backgroundImageBase64 = base64;
     }).catch(error => {
       console.error('Error al convertir la imagen a Base64', error);
@@ -172,7 +172,6 @@ export class VerplancerradaComponent {
         {
           next: async (response) => {
             if (response) {
-              console.log(response);
 
               this.detallePlanilla = response;
               this.getFilas(response.codigo_planilla).then(() => this.cargar());
@@ -221,6 +220,7 @@ export class VerplancerradaComponent {
       this.dataPlan = [];
       this.data = await this.planillaService.getPersPlanillaDefin(cod_planilla).toPromise();
 
+
       if (this.data) {
         this.dataPlan = this.data.map((item: any) => {
           const deduccionesI: number = parseFloat(item.DEDUCCIONES_INPREMA) || 0
@@ -232,7 +232,7 @@ export class VerplancerradaComponent {
             dni: item.DNI,
             NOMBRE_COMPLETO: item.NOMBRE_COMPLETO,
             TIPO_PERSONA: item.TIPO_PERSONA,
-            correo_1: item.correo_1,
+            //correo_1: item.correo_1,
             TOTAL_BENEFICIO: item.TOTAL_BENEFICIO,
             DEDUCCIONES_INPREMA: item.DEDUCCIONES_INPREMA || 0,
             DEDUCCIONES_TERCEROS: item.DEDUCCIONES_TERCEROS || 0,
@@ -252,7 +252,7 @@ export class VerplancerradaComponent {
     }
   }
 
-  ejecutarFuncionAsincronaDesdeOtroComponente(funcion: (data: any) => Promise<void>) {
+  ejecutarFuncionAsincronaDesdeOtroComponente(funcion: (data: any) => Promise<boolean>) {
     this.ejecF = funcion;
   }
 
@@ -261,6 +261,7 @@ export class VerplancerradaComponent {
 
     this.planillaService.getBeneficiosDefinitiva(this.idPlanilla, row.id_afiliado).subscribe({
       next: (response) => {
+
         logs.push({ message: `DNI:${row.dni}`, detail: row });
         logs.push({ message: `Nombre Completo:${row.NOMBRE_COMPLETO}`, detail: row });
         logs.push({ message: 'Datos De Beneficios:', detail: response, type: 'beneficios' });
@@ -292,7 +293,7 @@ export class VerplancerradaComponent {
 
           const openDialog = () => this.dialog.open(DynamicDialogComponent, {
             width: '50%',
-            data: { logs: logs, type: 'deduccion' }
+            data: { logs: logs, type: 'deduccion' },
           });
 
           openDialog();
@@ -371,31 +372,32 @@ export class VerplancerradaComponent {
         }
       });
 
-      let data = detallePersona.map((detalle: { detalleBeneficio: any[]; ID_DETALLE_PERSONA: number; }) => {
-        const beneficio = detalle.detalleBeneficio[0];
+      let data = detallePersona.flatMap((detalle: { detalleBeneficio: any[]; ID_DETALLE_PERSONA: number; }) => {
+        return detalle.detalleBeneficio.map((beneficio: any) => {
+          const montoPorPeriodo = beneficio.monto_por_periodo;
+          sumaBeneficios += montoPorPeriodo;
 
-        const montoPorPeriodo = beneficio.monto_por_periodo;
-        sumaBeneficios += montoPorPeriodo;
-
-        return {
-          CAUSANTE: causantesMap.get(detalle.ID_DETALLE_PERSONA) || 'NO APLICA',
-          NOMBRE_BENEFICIO: beneficio.beneficio.nombre_beneficio,
-          MontoAPagar: montoPorPeriodo,
-
-          METODO_PAGO: beneficio.metodo_pago,
-          NOMBRE_BANCO: beneficio.detallePagBeneficio[0].personaporbanco ? beneficio.detallePagBeneficio[0].personaporbanco.banco.nombre_banco : 'NO PROPORCIONADO',
-          NUM_CUENTA: beneficio.detallePagBeneficio[0].personaporbanco ? beneficio.detallePagBeneficio[0].personaporbanco.num_cuenta : 'NO PROPORCIONADO'
-        };
+          return {
+            CAUSANTE: causantesMap.get(detalle.ID_DETALLE_PERSONA) || 'NO APLICA',
+            NOMBRE_BENEFICIO: beneficio.beneficio.nombre_beneficio,
+            MontoAPagar: montoPorPeriodo,
+            METODO_PAGO: beneficio.metodo_pago,
+            NOMBRE_BANCO: beneficio.detallePagBeneficio[0]?.personaporbanco?.banco?.nombre_banco || 'NO PROPORCIONADO',
+            NUM_CUENTA: beneficio.detallePagBeneficio[0]?.personaporbanco?.num_cuenta || 'NO PROPORCIONADO'
+          };
+        });
       });
+
       let tablaDed: any = {};
+
       if (resultados.deduccion) {
         let dataDed = resultados.deduccion.detalleDeduccion.map((deduccion: any) => {
           const montoDeduccion = deduccion.monto_aplicado;
           sumaDeducciones += montoDeduccion;
 
           return {
-            NOMBRE_INSTITUCION: deduccion.deduccion.centroTrabajo.nombre_centro_trabajo,
-            NOMBRE_DEDUCCION: deduccion.deduccion.nombre_deduccion,
+            NOMBRE_INSTITUCION: deduccion.deduccion?.centroTrabajo?.nombre_centro_trabajo,
+            NOMBRE_DEDUCCION: deduccion.deduccion?.nombre_deduccion,
             TotalMontoAplicado: montoDeduccion
           };
         });
@@ -419,14 +421,13 @@ export class VerplancerradaComponent {
                     { text: b.NOMBRE_DEDUCCION },
                     { text: formatCurrency(b.TotalMontoAplicado), style: 'alignRight' }
                   ]];
-
                 }
               })
             ]
           },
           margin: [0, 5, 0, 0],
           style: 'tableExample'
-        }
+        };
       }
 
       const neto = sumaBeneficios - sumaDeducciones;
@@ -458,18 +459,18 @@ export class VerplancerradaComponent {
                     { text: 'BANCO: ' + (data[0]?.NOMBRE_BANCO || 'NO PROPORCIONADO') },
                   ]
                 ],
-                margin: [0, 10, 0, 0]  // Añade 5px de margen superior
+                margin: [0, 10, 0, 0]
               },
               {
                 table: {
                   widths: ['*', '*'],
                   body: [
                     [{ text: 'INGRESO', style: 'tableHeader' }, { text: 'MONTO INGRESO', style: ['tableHeader', 'alignRight'] }],
-                    ...data.flatMap((b: any) => {
-                      return [[
+                    ...data.map((b: any) => {
+                      return [
                         { text: b.NOMBRE_BENEFICIO },
                         { text: formatCurrency(b.MontoAPagar), style: 'alignRight' },
-                      ]];
+                      ];
                     })
                   ]
                 },
@@ -504,10 +505,10 @@ export class VerplancerradaComponent {
                 },
                 style: 'tableExample'
               },
-              { canvas: [{ type: 'line', x1: 0, y1: 0, x2: 250, y2: 0, lineWidth: 1 }], margin: [127, 70, 0, 10] }, // Aumenta el margen inferior en 10px
-              { text: 'FIRMA UNIDAD DE PLANILLAS', style: 'signatureTitle', margin: [0, 5, 0, 0] } // Aumenta el margen superior en 10px
+              { canvas: [{ type: 'line', x1: 0, y1: 0, x2: 250, y2: 0, lineWidth: 1 }], margin: [127, 70, 0, 10] },
+              { text: 'FIRMA UNIDAD DE PLANILLAS', style: 'signatureTitle', margin: [0, 5, 0, 0] }
             ],
-            margin: [0, 0, 0, 0]  // Establece el margen superior a 40px
+            margin: [0, 0, 0, 0]
           }
         ],
         footer: function (currentPage, pageCount) {
@@ -517,7 +518,7 @@ export class VerplancerradaComponent {
               body: [
                 [
                   { text: 'Fecha y Hora: ' + new Date().toLocaleString(), alignment: 'left', border: [false, false, false, false] },
-                  { text: 'Generó: ', alignment: 'left', border: [false, false, false, false] },
+                  { text: 'Generó: INPRENET', alignment: 'left', border: [false, false, false, false] },
                   { text: 'Página ' + currentPage.toString() + ' de ' + pageCount, alignment: 'right', border: [false, false, false, false] }
                 ]
               ]
@@ -550,7 +551,8 @@ export class VerplancerradaComponent {
           signatureTitle: {
             alignment: 'center',
             bold: true,
-            fontSize: 12,
+            fontSize: 12
+
           }
         },
         defaultStyle: {
@@ -568,6 +570,7 @@ export class VerplancerradaComponent {
 
   construirPDFBen(row: { Total: any; NOMBRE_COMPLETO: any; dni: any; correo_1: any; fecha_cierre: any; }, resultados: any, backgroundImageBase64: string) {
     const formatCurrency = (value: number) => new Intl.NumberFormat('es-HN', { style: 'currency', currency: 'HNL' }).format(value);
+
     if (resultados) {
       const persona = resultados.persona;
       const detallePersona = persona.detallePersona || [];
@@ -577,7 +580,6 @@ export class VerplancerradaComponent {
       let sumaBeneficios = 0;
       let sumaDeducciones = 0;
 
-      // Mapeo de ID_DETALLE_PERSONA a n_identificacion del padre
       const causantesMap = new Map();
       detallePersona.forEach((detalle: { ID_DETALLE_PERSONA: number; padreIdPersona: { persona: { n_identificacion: string; } }; }) => {
         if (detalle.padreIdPersona && detalle.padreIdPersona.persona && detalle.padreIdPersona.persona.n_identificacion) {
@@ -585,22 +587,23 @@ export class VerplancerradaComponent {
         }
       });
 
-      let data = detallePersona.map((detalle: { detalleBeneficio: any[]; ID_DETALLE_PERSONA: number; }) => {
-        const beneficio = detalle.detalleBeneficio[0];
+      let data: any[] = [];
+      detallePersona.forEach((detalle: { detalleBeneficio: any[]; ID_DETALLE_PERSONA: number; }) => {
+        detalle.detalleBeneficio.forEach((beneficio: any) => {
+          const montoPorPeriodo = beneficio.monto_por_periodo;
+          sumaBeneficios += montoPorPeriodo;
 
-        const montoPorPeriodo = beneficio.monto_por_periodo;
-        sumaBeneficios += montoPorPeriodo;
-
-        return {
-          CAUSANTE: causantesMap.get(detalle.ID_DETALLE_PERSONA) || 'NO APLICA',
-          NOMBRE_BENEFICIO: beneficio.beneficio.nombre_beneficio,
-          MontoAPagar: montoPorPeriodo,
-
-          METODO_PAGO: beneficio.metodo_pago,
-          NOMBRE_BANCO: beneficio.detallePagBeneficio[0].personaporbanco ? beneficio.detallePagBeneficio[0].personaporbanco.banco.nombre_banco : 'NO PROPORCIONADO',
-          NUM_CUENTA: beneficio.detallePagBeneficio[0].personaporbanco ? beneficio.detallePagBeneficio[0].personaporbanco.num_cuenta : 'NO PROPORCIONADO'
-        };
+          data.push({
+            CAUSANTE: causantesMap.get(detalle.ID_DETALLE_PERSONA) || 'NO APLICA',
+            NOMBRE_BENEFICIO: beneficio.beneficio.nombre_beneficio,
+            MontoAPagar: montoPorPeriodo,
+            METODO_PAGO: beneficio.metodo_pago,
+            NOMBRE_BANCO: beneficio.detallePagBeneficio[0].personaporbanco ? beneficio.detallePagBeneficio[0].personaporbanco.banco.nombre_banco : 'NO PROPORCIONADO',
+            NUM_CUENTA: beneficio.detallePagBeneficio[0].personaporbanco ? beneficio.detallePagBeneficio[0].personaporbanco.num_cuenta : 'NO PROPORCIONADO'
+          });
+        });
       });
+
       let tablaDed: any = {};
       if (resultados.deduccion) {
         let dataDed = resultados.deduccion.detalleDeduccion.map((deduccion: any) => {
@@ -619,7 +622,6 @@ export class VerplancerradaComponent {
             widths: ['*', '*', '*'],
             body: [
               [{ text: 'INSTITUCIÓN', style: 'tableHeader' }, { text: 'DEDUCCIÓN', style: 'tableHeader' }, { text: 'MONTO DEDUCCIÓN', style: ['tableHeader', 'alignRight'] }],
-
               ...dataDed.flatMap((b: any) => {
                 if (b.length === 0) {
                   return [[
@@ -633,7 +635,6 @@ export class VerplancerradaComponent {
                     { text: b.NOMBRE_DEDUCCION },
                     { text: formatCurrency(b.TotalMontoAplicado), style: 'alignRight' }
                   ]];
-
                 }
               })
             ]
@@ -672,7 +673,7 @@ export class VerplancerradaComponent {
                     { text: 'BANCO: ' + (data[0]?.NOMBRE_BANCO || 'NO PROPORCIONADO') },
                   ]
                 ],
-                margin: [0, 10, 0, 0]  // Añade 5px de margen superior
+                margin: [0, 10, 0, 0]
               },
               {
                 table: {
@@ -719,10 +720,10 @@ export class VerplancerradaComponent {
                 },
                 style: 'tableExample'
               },
-              { canvas: [{ type: 'line', x1: 0, y1: 0, x2: 250, y2: 0, lineWidth: 1 }], margin: [127, 70, 0, 10] }, // Aumenta el margen inferior en 10px
-              { text: 'FIRMA UNIDAD DE PLANILLAS', style: 'signatureTitle', margin: [0, 5, 0, 0] } // Aumenta el margen superior en 10px
+              { canvas: [{ type: 'line', x1: 0, y1: 0, x2: 250, y2: 0, lineWidth: 1 }], margin: [127, 70, 0, 10] },
+              { text: 'FIRMA UNIDAD DE PLANILLAS', style: 'signatureTitle', margin: [0, 5, 0, 0] }
             ],
-            margin: [0, 0, 0, 0]  // Establece el margen superior a 40px
+            margin: [0, 0, 0, 0]
           }
         ],
         footer: function (currentPage, pageCount) {
@@ -774,7 +775,6 @@ export class VerplancerradaComponent {
         pageSize: 'LETTER',
         pageOrientation: 'portrait'
       };
-
       pdfMake.createPdf(docDefinition).open();
     } else {
       console.log("ERROR. FALTA INFORMACIÓN");
@@ -1050,10 +1050,9 @@ export class VerplancerradaComponent {
     return date.toLocaleString('es-ES', { month: 'long', year: 'numeric' });
   }
 
-
   async generarPDFDeduccionesSeparadas() {
     try {
-      const base64Image = await this.convertirImagenABase64('assets/images/HOJA-MEMBRETADA.jpg');
+      const base64Image = await this.convertirImagenABase64('../assets/images/membratadoFinal.jpg');
       this.planillaService.getDeduccionesPorPlanillaSeparadas(this.idPlanilla).subscribe(response => {
 
         const deduccionesInprema = response.deduccionesINPREMA || [];
@@ -1202,7 +1201,7 @@ export class VerplancerradaComponent {
                 body: [
                   [
                     { text: 'Fecha y Hora: ' + new Date().toLocaleString(), alignment: 'left', border: [false, false, false, false] },
-                    { text: 'Generó: ', alignment: 'left', border: [false, false, false, false] },
+                    { text: 'Generó: INPRENET', alignment: 'left', border: [false, false, false, false] },
                     { text: 'Página ' + currentPage.toString() + ' de ' + pageCount, alignment: 'right', border: [false, false, false, false] }
                   ]
                 ]
@@ -1291,7 +1290,6 @@ export class VerplancerradaComponent {
     });
   }
 
-
   async generarPDFMontosPorBanco() {
     try {
       const codigo_planilla = this.datosFormateados?.value?.codigo_planilla;
@@ -1301,7 +1299,7 @@ export class VerplancerradaComponent {
         return;
       }
 
-      const base64Image = await this.convertirImagenABase64('assets/images/HOJA-MEMBRETADA.jpg');
+      const base64Image = await this.convertirImagenABase64('../assets/images/membratadoFinal.jpg');
       this.planillaService.getMontosPorBanco(codigo_planilla).subscribe(response => {
         const montosPorBanco = response || [];
 
@@ -1317,14 +1315,14 @@ export class VerplancerradaComponent {
               absolutePosition: { x: 0, y: 0 }
             };
           },
-          pageMargins: [40, 150, 40, 100],
+          pageMargins: [40, 180, 40, 100],
           header: {
             stack: [
               {
                 text: `MONTOS PAGADOS POR PLANILLA ${this.detallePlanilla?.tipoPlanilla.nombre_planilla}`,
                 style: 'header',
                 alignment: 'center',
-                margin: [50, 70, 50, 0]
+                margin: [50, 90, 50, 0]
               },
               {
                 columns: [
@@ -1445,7 +1443,7 @@ export class VerplancerradaComponent {
                 body: [
                   [
                     { text: 'Fecha y Hora: ' + new Date().toLocaleString(), alignment: 'left', border: [false, false, false, false] },
-                    { text: 'Generó: ', alignment: 'left', border: [false, false, false, false] },
+                    { text: 'Generó: INPRENET', alignment: 'left', border: [false, false, false, false] },
                     { text: 'Página ' + currentPage.toString() + ' de ' + pageCount, alignment: 'right', border: [false, false, false, false] }
                   ]
                 ]
@@ -1503,6 +1501,31 @@ export class VerplancerradaComponent {
       margin: margin
     };
   }
+
+  sendEmail() {
+
+  }
+
+  /* descargarExcelparaBanco(): void {
+    const codigoPlanillaNumber = this.idPlanilla;
+
+    if (isNaN(codigoPlanillaNumber)) {
+        console.error('El código de planilla no es un número válido');
+        this.toastr.error('El código de planilla no es un número válido');
+        return;
+    }
+
+    this.planillaService.descargarPlanillaExcel(codigoPlanillaNumber).subscribe(blob => {
+        const a = document.createElement('a');
+        const objectUrl = URL.createObjectURL(blob);
+        a.href = objectUrl;
+        a.download = 'planilla.xlsx';
+        a.click();
+        URL.revokeObjectURL(objectUrl);
+    }, error => {
+        console.error('Error al descargar el Excel', error);
+    });
+} */
 
 
 }

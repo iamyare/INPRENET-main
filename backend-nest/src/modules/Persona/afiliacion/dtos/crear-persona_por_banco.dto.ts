@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsString, IsNumber } from 'class-validator';
+import { IsNotEmpty, IsString, IsNumber, IsOptional, IsDate } from 'class-validator';
 
 export class CrearPersonaBancoDto {
   @IsNotEmpty()
@@ -12,4 +12,12 @@ export class CrearPersonaBancoDto {
   @IsNotEmpty()
   @IsString()
   estado: string;
+
+  @IsOptional()
+  @IsDate()
+  fecha_activacion?: Date;
+  
+  @IsOptional()
+  @IsDate()
+  fecha_inactivacion?: Date;
 }

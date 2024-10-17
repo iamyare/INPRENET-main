@@ -1,8 +1,10 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpErrorResponse, HttpHeaders, HttpParams } from '@angular/common/http';
+import { HttpClient, HttpErrorResponse, HttpEvent, HttpEventType, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Observable, catchError, map, tap, throwError } from 'rxjs';
 import { environment } from 'src/environments/environment';
 import { ToastrService } from 'ngx-toastr';
+import { saveAs } from 'file-saver';
+
 
 @Injectable({
   providedIn: 'root'
@@ -11,32 +13,42 @@ export class DeduccionesService {
 
   constructor(private toastr: ToastrService, private http: HttpClient) { }
 
-  subirArchivoDeducciones(archivo: File): Observable<any> {
-    const formData = new FormData();
-    formData.append('file', archivo, archivo.name);
-
-    return this.http.post(`${environment.API_URL}/api/deduccion/upload-excel-deducciones`, formData, {
-      headers: new HttpHeaders({
-        'Accept': 'application/json' // Asegúrate de que el servidor devuelva JSON
-      }),
-      responseType: 'text' // Cambiar a 'text' si el backend devuelve texto plano
-    }).pipe(
-      tap(response => {
-        try {
-          // Intenta analizar como JSON
-          const jsonResponse = JSON.parse(response);
-          this.toastr.success(jsonResponse.message || 'Archivo subido con éxito');
-        } catch (e) {
-          // Si no es JSON válido, muestra el texto directamente
-          this.toastr.success(response || 'Archivo subido con éxito');
-        }
-      }),
+  eliminarDetallesDeduccionPorCentro(idCentroTrabajo: number, codigoDeduccion: number, idPlanilla: number): Observable<any> {
+    return this.http.delete<any>(
+      `${environment.API_URL}/api/deduccion/${idCentroTrabajo}/deduccion/${codigoDeduccion}/planilla/${idPlanilla}/eliminar`
+    ).pipe(
       catchError((error: HttpErrorResponse) => {
-        console.error('Error al subir el archivo de deducciones', error);
-        this.toastr.error('Error al subir el archivo de deducciones');
-        return throwError(() => new Error('Error al subir el archivo de deducciones'));
+        console.error('Error al eliminar detalles de deducción por centro de trabajo:', error);
+        this.toastr.error('Error al eliminar detalles de deducción por centro de trabajo');
+        return throwError(() => new Error('Error al eliminar detalles de deducción por centro de trabajo'));
       })
     );
+  }
+
+  obtenerDetallesDeduccionPorCentro(idCentroTrabajo: number, codigoDeduccion: number): Observable<any[]> {
+    return this.http.get<any[]>(
+      `${environment.API_URL}/api/deduccion/${idCentroTrabajo}/detalles-deduccion`,
+      {
+        params: { codigoDeduccion: codigoDeduccion.toString() },
+      }
+    ).pipe(
+      catchError((error: HttpErrorResponse) => {
+        console.error('Error al obtener detalles de deducción por centro de trabajo:', error);
+        this.toastr.error('Error al obtener detalles de deducción por centro de trabajo');
+        return throwError(() => new Error('Error al obtener detalles de deducción por centro de trabajo'));
+      })
+    );
+  }
+
+  eliminarDetalleDeduccion(id: number): Observable<void> {
+    return this.http.delete<void>(`${environment.API_URL}/api/detalle-deduccion/${id}`)
+      .pipe(
+        catchError((error: HttpErrorResponse) => {
+          console.error('Error al eliminar el detalle de deducción:', error);
+          this.toastr.error('Error al eliminar el detalle de deducción');
+          return throwError(() => new Error('Error al eliminar el detalle de deducción'));
+        })
+      );
   }
 
   obtenerDeduccionesPorAnioMes(dni: string, anio: number, mes: number): Observable<any> {
@@ -53,6 +65,80 @@ export class DeduccionesService {
         })
       );
   }
+
+  descargarExcelDeduccionPorCodigo(
+    periodoInicio: string,
+    periodoFinalizacion: string,
+    idTiposPlanilla: number[],
+    codDeduccion: number
+  ): Observable<Blob> {
+    const params = new HttpParams()
+      .set('periodoInicio', periodoInicio)
+      .set('periodoFinalizacion', periodoFinalizacion)
+      .set('idTiposPlanilla', idTiposPlanilla.join(','))
+      .set('codDeduccion', codDeduccion.toString());
+
+    return this.http.get(`${environment.API_URL}/api/detalle-deduccion/detallePorCodDeduccion`, {
+      params,
+      responseType: 'blob'
+    }).pipe(
+      tap((response: Blob) => {
+        const fileName = `Deducciones_${codDeduccion}.xlsx`;
+        saveAs(response, fileName);
+        this.toastr.success('El archivo Excel se ha descargado correctamente.');
+      }),
+      catchError((error: HttpErrorResponse) => {
+        console.error('Error al descargar el archivo Excel', error);
+        this.toastr.error('Error al descargar el archivo Excel');
+        return throwError(() => new Error('Error al descargar el archivo Excel'));
+      })
+    );
+  }
+
+  subirArchivoDeducciones(id_planilla: number, archivo: File): Observable<HttpEvent<any>> {
+    const formData = new FormData();
+    formData.append('id_planilla', String(id_planilla));
+    formData.append('file', archivo, archivo.name);
+
+    return this.http.post(`${environment.API_URL}/api/deduccion/upload-excel-deducciones`, formData, {
+      headers: new HttpHeaders({
+        'Accept': 'application/json'
+      }),
+      reportProgress: true, // Habilitar el informe de progreso
+      observe: 'events'     // Observar los eventos HTTP para capturar el progreso
+    }).pipe(
+      tap(event => {
+        if (event.type === HttpEventType.UploadProgress) {
+          // Progreso de la subida
+          const progress = Math.round(100 * (event.loaded / (event.total || 1)));
+        } else if (event.type === HttpEventType.Response) {
+          // La respuesta final del servidor
+          const response = event.body;
+
+          if (typeof response === 'string') {
+            try {
+              const jsonResponse = JSON.parse(response);
+              this.toastr.success(jsonResponse.message || 'Archivo subido con éxito');
+            } catch (e) {
+              // Si no es un JSON válido, mostramos el texto directamente
+              this.toastr.success(response || 'Archivo subido con éxito');
+            }
+          } else {
+            // Si la respuesta no es un string, mostramos un mensaje por defecto
+            this.toastr.success('Archivo subido con éxito');
+          }
+        }
+      }),
+      catchError((error: HttpErrorResponse) => {
+        console.error('Error al subir el archivo de deducciones', error);
+        this.toastr.error('Error al subir el archivo de deducciones');
+        return throwError(() => new Error('Error al subir el archivo de deducciones'));
+      })
+    );
+  }
+
+
+
 
   actualizarEstadoDeduccion(idPlanilla: string, nuevoEstado: string): Observable<any> {
     return this.http.patch(`${environment.API_URL}/api/detalle-deduccion/actualizar-estado/${idPlanilla}`, { nuevoEstado })
@@ -83,7 +169,7 @@ export class DeduccionesService {
 
     return this.http.get<any>(`${environment.API_URL}/api/detalle-deduccion/getDeduccionesByPersonaAndBenef`, { params }).pipe(
       tap(() => {
-        this.toastr.success('Detalle de Deducciones obtenido con éxito');
+        //this.toastr.success('Detalle de Deducciones obtenido con éxito');
       }),
       catchError(this.handleError)
     );
@@ -200,7 +286,6 @@ export class DeduccionesService {
     const url = `${environment.API_URL}/api/detalle-deduccion`;
     return this.http.post<any>(url, detalleDeduccion).pipe(
       catchError(error => {
-        this.toastr.error('Error al crear el detalle de deducción', 'Error');
         throw error;
       })
     );

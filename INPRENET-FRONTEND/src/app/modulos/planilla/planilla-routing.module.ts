@@ -12,6 +12,8 @@ import { VerEditarDeduccionAfilComponent } from './beneneficios/ver-editar-deduc
 import { RoleGuard } from '../../guards/role-guard.guard';
 import { AsignacionDeduccionesComponent } from './beneneficios/asignacion-deducciones/asignacion-deducciones.component';
 import { ProcesoPlanillaComponent } from './egresos/proceso-planilla/proceso-planilla.component';
+import { GestionBancoComponent } from './gestion-banco/gestion-banco.component';
+import { ActualizarFallecidosComponent } from './actualizar-fallecidos/actualizar-fallecidos.component';
 
 const routes: Routes = [
   {
@@ -68,6 +70,18 @@ const routes: Routes = [
       {
         path: 'documentos-planilla',
         component: DocumentosPlanillaComponent,
+        //canActivate: [RoleGuard],
+        //data: { expectedRolesModules: [{role: 'ADMINISTRADOR'},{ role: 'ADMINISTRADOR DE PLANILLA', module: 'PLANILLA' }, { role: 'OFICIAL DE PLANILLA', module: 'PLANILLA' }] }
+      },
+      {
+        path: 'editar-banco',
+        component: GestionBancoComponent,
+        //canActivate: [RoleGuard],
+        //data: { expectedRolesModules: [{role: 'ADMINISTRADOR'},{ role: 'ADMINISTRADOR DE PLANILLA', module: 'PLANILLA' }, { role: 'OFICIAL DE PLANILLA', module: 'PLANILLA' }] }
+      },
+      {
+        path: 'cargar-fallecidos',
+        component: ActualizarFallecidosComponent,
         //canActivate: [RoleGuard],
         //data: { expectedRolesModules: [{role: 'ADMINISTRADOR'},{ role: 'ADMINISTRADOR DE PLANILLA', module: 'PLANILLA' }, { role: 'OFICIAL DE PLANILLA', module: 'PLANILLA' }] }
       },

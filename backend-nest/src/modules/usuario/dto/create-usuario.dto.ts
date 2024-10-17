@@ -71,5 +71,4 @@ export class CreateUsuarioDto {
     @IsNumber()
     @IsOptional()
     numero_empleado? : string;
-
 }

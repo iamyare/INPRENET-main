@@ -1,6 +1,7 @@
-import { IsNotEmpty, IsOptional, IsString, IsDateString } from 'class-validator';
+import { IsNotEmpty, IsOptional, IsString, ValidateNested, IsDateString, IsArray } from 'class-validator';
+import { Type } from 'class-transformer';
 
-export class CrearPepsDto {
+export class CrearCargoPublicoDto {
   @IsNotEmpty()
   @IsString()
   cargo: string;
@@ -12,4 +13,15 @@ export class CrearPepsDto {
   @IsOptional()
   @IsDateString()
   fecha_fin?: string;
+
+  @IsOptional()
+  @IsString()
+  referencias?: string;
+}
+
+export class CrearPepsDto {
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => CrearCargoPublicoDto)
+  cargosPublicos: CrearCargoPublicoDto[];
 }

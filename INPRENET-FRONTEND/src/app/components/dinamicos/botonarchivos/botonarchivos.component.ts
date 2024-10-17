@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, EventEmitter, Input, OnInit, Output, inject } from '@angular/core';
 import { ControlContainer, FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 
-export function generateFormArchivo(label?:any): FormGroup {
+export function generateFormArchivo(label?: any): FormGroup {
   return new FormGroup({
     Archivos: new FormControl("", Validators.required),
   });
@@ -24,22 +24,20 @@ export class BotonarchivosComponent implements OnInit {
   public archivo: any;
   public uniqueId!: string;
 
-  @Input() labelBoton: any = ""; 
-  @Input() datos: any; 
+  @Input() labelBoton: any = "";
+  @Input() datos: any;
   @Input() groupName = ""
 
   @Output() setArchivo = new EventEmitter<any>()
-  
-  constructor( private fb: FormBuilder) {
-    this.fb.group({
-      Archivos: [null, Validators.required],
-    });
+
+  constructor(private fb: FormBuilder) {
+
   }
   ngOnInit(): void {
-    
-    
+
+
     this.prueba()
-    
+
     this.uniqueId = 'archivo_' + Date.now();
   }
 
@@ -48,14 +46,14 @@ export class BotonarchivosComponent implements OnInit {
 
     if (file) {
       const fileSize = file.size / Math.pow(1024, 2); // El tamaño del archivo viene en bytes por lo que se convierte a MB para una mejor comprensión.
-        
+
       if (fileSize > 3) {
-          
+
       } else {
-        if(this.datos?.Archivos){
+        if (this.datos?.Archivos) {
           this.archivo = this.datos?.Arch;
           this.labelBoton = this.archivo.name
-        }else{
+        } else {
           this.archivo = file
           this.labelBoton = file?.name;
         }
@@ -64,11 +62,11 @@ export class BotonarchivosComponent implements OnInit {
     }
   }
 
-  prueba():any{
+  prueba(): any {
     this.setArchivo.emit(this.archivo);
-    if(this.datos?.value?.Arch){
+    if (this.datos?.value?.Arch) {
       this.archivo = this.datos?.value?.Arch;
       this.labelBoton = this.archivo?.name
-    }    
+    }
   }
 }

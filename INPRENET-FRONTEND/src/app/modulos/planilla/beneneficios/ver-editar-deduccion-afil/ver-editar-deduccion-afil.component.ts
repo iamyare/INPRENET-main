@@ -69,7 +69,7 @@ export class VerEditarDeduccionAfilComponent implements OnInit {
         monto_total: item.monto_aplicado,
         nombre_deduccion: item.deduccion_id ? item.deduccion_id.nombre_deduccion : 'No especificado',
         nombre_institucion: item.centro_trabajo ? item.centro_trabajo : 'No especificado',
-        codigo_planilla: item.planilla
+        codigo_planilla: item.codigo_planilla
       }));
 
       this.Afiliado = data.persona;
@@ -92,7 +92,7 @@ export class VerEditarDeduccionAfilComponent implements OnInit {
     this.getFilas().then(() => this.cargar());
   }
 
-  ejecutarFuncionAsincronaDesdeOtroComponente(funcion: (data: any) => Promise<void>) {
+  ejecutarFuncionAsincronaDesdeOtroComponente(funcion: (data: any) => Promise<boolean>) {
     this.ejecF = funcion;
   }
 

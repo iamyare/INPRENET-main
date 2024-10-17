@@ -1,0 +1,32 @@
+<div class="buscar-persona-container" *ngIf="!persona">
+  <h1>Buscar Persona</h1>
+  <mat-form-field appearance="outline">
+    <mat-label>Número De Identificación</mat-label>
+    <input matInput type="text" [(ngModel)]="n_identificacion" placeholder="Ingrese El Número De Identificación">
+  </mat-form-field>
+  <button style="color: white;" mat-raised-button color="primary" (click)="buscarPersona()">Buscar</button>
+  <div *ngIf="errorMessage" class="error-message">{{ errorMessage }}</div>
+</div>
+
+<div *ngIf="persona" class="perfil-container">
+  <div class="header-actions">
+    <button mat-icon-button (click)="resetBusqueda()" class="search-again">
+      <mat-icon>search</mat-icon>
+    </button>
+    <span class="search-text">Buscar otra persona</span>
+  </div>
+  <div class="perfil-header">
+    <div class="perfil-foto">
+      <img *ngIf="persona?.FOTO_PERFIL" [src]="getFotoUrl(persona.FOTO_PERFIL)" alt="Foto de Perfil">
+      <img *ngIf="!persona?.FOTO_PERFIL" [src]="defaultFotoUrl" alt="Foto de Perfil por Defecto">
+    </div>
+    <div class="perfil-datos">
+      <h2>{{ persona?.PRIMER_NOMBRE }} {{ persona?.SEGUNDO_NOMBRE }} {{ persona?.TERCER_NOMBRE }} {{ persona?.PRIMER_APELLIDO }} {{ persona?.SEGUNDO_APELLIDO }}</h2>
+      <p><strong>DNI:</strong> {{ persona?.N_IDENTIFICACION }}</p>
+      <p><strong>Teléfono:</strong> {{ persona?.TELEFONO_1 }}</p>
+      <p><strong>Correo Principal:</strong> {{ persona?.CORREO_1 }}</p>
+      <p><strong>Género:</strong> {{ persona?.GENERO || 'No especificado' }}</p>
+      <p><strong>Fecha de Nacimiento:</strong> {{ persona?.FECHA_NACIMIENTO | date: 'dd MMMM yyyy' }}</p>
+    </div>
+  </div>
+</div>

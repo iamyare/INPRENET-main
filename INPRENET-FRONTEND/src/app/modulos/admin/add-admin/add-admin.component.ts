@@ -39,7 +39,6 @@ export class AddAdminComponent implements OnInit {
 
   onCentroTrabajoChange(event: any): void {
     const idCentroTrabajo = event.value;
-    console.log(idCentroTrabajo);
 
     this.authService.obtenerModulosPorCentroTrabajo(idCentroTrabajo).subscribe((modulos) => {
       this.modulos = modulos.map(modulo => ({
@@ -59,9 +58,6 @@ export class AddAdminComponent implements OnInit {
         numeroEmpleado,
         idModulo: modulo,
       };
-
-      console.log(newUser);
-
 
       this.authService.preRegistroAdmin(newUser).subscribe(
         () => {

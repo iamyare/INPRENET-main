@@ -8,4 +8,15 @@
   <div *ngIf="currentStepIndex === 1">
     <app-edit-datos-bancarios [Afiliado]="persona"></app-edit-datos-bancarios>
   </div>
+
+  <div *ngIf="currentStepIndex === 2">
+    <app-edit-conyugue [Afiliado]="persona"></app-edit-conyugue>
+  </div>
+
+  <div *ngIf="currentStepIndex === 3">
+    <app-edit-peps  [Afiliado]="persona"></app-edit-peps>
+  </div>
+  <!-- <div *ngIf="currentStepIndex === 4">
+    <app-ver-cuentas-personas [Afiliado]="persona"></app-ver-cuentas-personas>
+  </div> -->
 </div>

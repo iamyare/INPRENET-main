@@ -20,7 +20,7 @@ export class DynamicTableComponent implements OnInit, OnDestroy {
   @Input() data?: any;
   filas: any = [];
 
-  @Output() ejecutarFuncionAsincronaEvent: EventEmitter<(param: any) => Promise<void>> = new EventEmitter<(param: any) => Promise<void>>();
+  @Output() ejecutarFuncionAsincronaEvent: EventEmitter<(param: any) => Promise<boolean>> = new EventEmitter<(param: any) => Promise<boolean>>();
 
   @Input() columns: TableColumn[] = [];
   @Input() editarFunc: any;
@@ -66,6 +66,7 @@ export class DynamicTableComponent implements OnInit, OnDestroy {
   editingRow: any | null = null;
   editFormControls: { [rowKey: string]: { [colKey: string]: FormControl } } = {};
   editableRows: any[] = []
+  mostrar: boolean = false;
 
   constructor(private selectionService: SelectionserviceService) {
 
@@ -88,14 +89,19 @@ export class DynamicTableComponent implements OnInit, OnDestroy {
     this.destroy$.complete();
   }
 
-  public async ejecutarFuncionAsincrona(data: any) {
+  public async ejecutarFuncionAsincrona(data: any): Promise<boolean> {
     if (data) {
       this.filas = data;
       this.filas?.map((objeto: any) => ({ ...objeto, isSelected: false }));
+      this.filtrarUsuarios().subscribe();
+      this.mostrar = true
+      return true
     } else {
       this.filas = await this.getData();
+      this.mostrar = false
+      this.filtrarUsuarios().subscribe();
+      return false
     }
-    this.filtrarUsuarios().subscribe();
   }
 
   ngOnInit(): void {
@@ -251,7 +257,6 @@ export class DynamicTableComponent implements OnInit, OnDestroy {
   obtenerFilasSeleccionadas() {
     const filasSeleccionadas = this.selectionService.getSelectedItems();
     this.getElemSeleccionados.emit(filasSeleccionadas);
-    console.log(filasSeleccionadas);
   }
 
   ejecutarAccionUno(row: any) {

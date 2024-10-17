@@ -1,6 +1,5 @@
 import {
   Controller,
-  Post,
   Get,
   Put,
   Delete,
@@ -10,134 +9,42 @@ import {
   NotFoundException,
   HttpCode,
   HttpStatus,
-  Res,
   ParseIntPipe,
   UseInterceptors,
-  UploadedFile,
+  UploadedFiles,
+  HttpException
 } from '@nestjs/common';
 import { AfiliadoService } from './afiliado.service';
 import { UpdatePersonaDto } from './dto/update-persona.dto';
 import { ApiTags } from '@nestjs/swagger';
-import { EncapsulatedPersonaDTO } from './dto/encapsulated-persona.dto';
-import { Repository } from 'typeorm';
-import { Net_Tipo_Persona } from './entities/net_tipo_persona.entity';
-import { InjectRepository } from '@nestjs/typeorm';
 import { UpdatePerfCentTrabDto } from './dto/update.perfAfilCentTrab.dto';
-import { UpdateReferenciaPersonalDTO } from './dto/update-referencia-personal.dto';
-import { FileInterceptor } from '@nestjs/platform-express';
-import { net_persona } from './entities/net_persona.entity';
-import { CreateDetalleBeneficiarioDto } from './dto/create-detalle-beneficiario-dto';
-import { Benef } from './dto/pruebaBeneficiario.dto';
 import { net_estado_afiliacion } from './entities/net_estado_afiliacion.entity';
+import { AnyFilesInterceptor } from '@nestjs/platform-express';
 
 @ApiTags('Persona')
 @Controller('Persona')
 export class AfiliadoController {
-  @InjectRepository(Net_Tipo_Persona)
-  private readonly tipoPersonaRepos: Repository<Net_Tipo_Persona>
 
   constructor(private readonly afiliadoService: AfiliadoService) { }
 
-  @Get('causante/:dni')
-  async getCausanteByDniBeneficiario(@Param('dni') dni: string): Promise<net_persona> {
-    return this.afiliadoService.getCausanteByDniBeneficiario(dni);
-  }
-
-  @Post('create-with-detalle')
-  async create(@Body() benef: Benef): Promise<net_persona> {
-    return this.afiliadoService.createBenef(benef);
-  }
-
-  @Post('afiliacion')
-  @UseInterceptors(FileInterceptor('foto_perfil', {
-    limits: { fileSize: 5 * 1024 * 1024 },
-    fileFilter: (req, file, callback) => {
-      if (file.mimetype.startsWith('image/')) {
-        callback(null, true);
-      } else {
-        callback(new Error('Solo se permiten archivos de imagen'), false);
-      }
-    },
-  }))
-  async createPersonaWithDetailsAndWorkCenters(
-    @UploadedFile() fotoPerfil: Express.Multer.File,
-    @Body('encapsulatedDto') encapsulatedDtoStr: string
+  @Get(':id_persona/movimientos-ordenados/:id_tipo_cuenta')
+  async getMovimientosOrdenados(
+    @Param('id_persona', ParseIntPipe) id_persona: number,
+    @Param('id_tipo_cuenta', ParseIntPipe) id_tipo_cuenta: number
   ) {
-    console.log(encapsulatedDtoStr);
-
     try {
-      // Convertir el string JSON a un objeto
-      const encapsulatedDto: EncapsulatedPersonaDTO = JSON.parse(encapsulatedDtoStr);
-
-      // Procesar la imagen de perfil si está presente
-      if (fotoPerfil) {
-        encapsulatedDto.datosGenerales.foto_perfil = fotoPerfil.buffer; // Usar el buffer directamente
+      const movimientos = await this.afiliadoService.getMovimientosOrdenados(id_persona, id_tipo_cuenta);
+      if (!movimientos) {
+        throw new NotFoundException(`Movimientos no encontrados para el id_persona ${id_persona} y id_tipo_cuenta ${id_tipo_cuenta}`);
       }
-
-      // Creación de la persona principal
-      const createPersonaDto = encapsulatedDto.datosGenerales;
-      const persona = await this.afiliadoService.createPersona(createPersonaDto);
-
-      // Creación del detalle de la persona
-      const detallePersonaDto = {
-        idPersona: persona.id_persona,
-        idTipoPersona: 1,
-        porcentaje: 0,
-        idEstadoPersona: 1
-      };
-      const detallePersona = await this.afiliadoService.createDetallePersona(detallePersonaDto);
-
-      // Asignación de centros de trabajo
-      let centrosTrabajoAsignados = [];
-      if (encapsulatedDto.centrosTrabajo && encapsulatedDto.centrosTrabajo.length > 0) {
-        centrosTrabajoAsignados = await this.afiliadoService.assignCentrosTrabajo(persona.id_persona, encapsulatedDto.centrosTrabajo);
-      }
-
-      // Creación y asignación de referencias personales
-      let referenciasAsignadas = [];
-      /* if (encapsulatedDto.referenciasPersonales && encapsulatedDto.referenciasPersonales.length > 0) {
-        referenciasAsignadas = await this.afiliadoService.createAndAssignReferences(persona.id_persona, {
-          referencias: encapsulatedDto.referenciasPersonales
-        });
-      } */
-
-      // Creación de beneficiarios
-      let beneficiariosAsignados = [];
-      if (encapsulatedDto.beneficiarios && encapsulatedDto.beneficiarios.length > 0) {
-        for (const beneficiario of encapsulatedDto.beneficiarios) {
-          const beneficiarioData = beneficiario.datosBeneficiario;
-          const nuevoBeneficiario = await this.afiliadoService.createPersona(beneficiarioData);
-          const detalleBeneficiarioDto: CreateDetalleBeneficiarioDto = {
-            idPersona: nuevoBeneficiario.id_persona,
-            idCausante: persona.id_persona,
-            idCausantePadre: persona.id_persona,
-            idTipoPersona: 2,
-            porcentaje: beneficiarioData.porcentaje,
-            idEstadoPersona: 1,
-            idDetallePersona: detallePersona.ID_DETALLE_PERSONA // Asigna el mismo ID_DETALLE_PERSONA
-          };
-          await this.afiliadoService.createDetalleBeneficiario(detalleBeneficiarioDto);
-          beneficiariosAsignados.push(nuevoBeneficiario);
-        }
-      }
-
-      // Asignación de colegios magisteriales
-      let colegiosMagisterialesAsignados = [];
-      if (encapsulatedDto.colegiosMagisteriales && encapsulatedDto.colegiosMagisteriales.length > 0) {
-        colegiosMagisterialesAsignados = await this.afiliadoService.assignColegiosMagisteriales(persona.id_persona, encapsulatedDto.colegiosMagisteriales);
-      }
-
-      return {
-        message: 'Persona creada con detalles, centros de trabajo, referencias personales, bancos, beneficiarios, colegios magisteriales y relaciones familiares asignadas correctamente.'
-      };
+      return { status: HttpStatus.OK, data: movimientos };
     } catch (error) {
-      return {
-        error: true,
-        message: error.message
-      };
+      throw new HttpException(
+        'Error al obtener los movimientos ordenados',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
     }
   }
-
 
   @Patch('inactivar/:idPersona/:idCausante')
   async inactivarPersona(
@@ -154,66 +61,9 @@ export class AfiliadoController {
     }
   }
 
-
-
-
-
   @Get('obtenerEstados')
   async getAllEstados(): Promise<net_estado_afiliacion[]> {
     return this.afiliadoService.getAllEstados();
-  }
-
-  @Post('/createReferPersonales/:idPersona')
-  createReferPersonales(@Param("idPersona") idPersona: number, @Body() createAfiliadoTempDto: any) {
-    return this.afiliadoService.createAndAssignReferences(idPersona, createAfiliadoTempDto);
-  }
-  @Post('/createColegiosMagisteriales/:idPersona')
-  createColegiosMagisteriales(@Param("idPersona") idPersona: number, @Body() colegiosMagisterialesData: any) {
-    return this.afiliadoService.assignColegiosMagisteriales(idPersona, colegiosMagisterialesData);
-  }
-  @Post('/createCentrosTrabajo/:idPersona')
-  createCentrosTrabajo(@Param("idPersona") idPersona: number, @Body() centrosTrabajoData: any) {
-    return this.afiliadoService.assignCentrosTrabajo(idPersona, centrosTrabajoData);
-  }
-
-  @Post('/createBeneficiarios/:idPersona')
-  async createBeneficiarios(@Param("idPersona") idPersona: number, @Body() encapsulatedDto: any) {
-    const personaReferente = await this.tipoPersonaRepos.findOne({
-      where: { tipo_persona: "BENEFICIARIO" },
-    });
-
-    try {
-      /* let beneficiariosAsignados = [];
-      if (encapsulatedDto.beneficiarios && encapsulatedDto.beneficiarios.length > 0) {
-        for (const beneficiario of encapsulatedDto.beneficiarios) {
-          const beneficiarioData = beneficiario.datosBeneficiario;
-          const nuevoBeneficiario = await this.afiliadoService.createBeneficiario(beneficiarioData);
-          const detalleBeneficiario = {
-            idPersona: nuevoBeneficiario.id_persona,
-            idCausante: idPersona,
-            idCausantePadre: idPersona,
-            idTipoPersona: personaReferente.id_tipo_persona,
-            porcentaje: beneficiario.porcentaje,
-            idEstadoPersona: 1
-          };
-          const detalle = await this.afiliadoService.createDetalleBeneficiario(detalleBeneficiario);
-          beneficiariosAsignados.push(detalle);
-        }
-      }
-      return beneficiariosAsignados; */
-    } catch (error) {
-      console.log(error);
-    }
-  }
-
-  @Post('createRefPers/:dnireferente')
-  createRefPers(@Body() data: any, @Param() dnireferente) {
-    return this.afiliadoService.createRefPers(data, dnireferente);
-  }
-
-  @Post('createCentrosTrabPersona/:dnireferente')
-  createCentrosTrabPersona(@Body() data: any, @Param() dnireferente) {
-    return this.afiliadoService.createCentrosTrabPersona(data, dnireferente);
   }
 
   @Get()
@@ -271,12 +121,11 @@ export class AfiliadoController {
       }
     }
   }
-
-  @Get('/getAllReferenciasPersonales/:n_identificacion')
-  async getAllReferenciasPersonales(@Param("n_identificacion") n_identificacion: string) {
+  @Get('/getAllCargoPublicPeps/:n_identificacion')
+  async getAllCargoPublicPeps(@Param("n_identificacion") n_identificacion: string) {
     try {
       const resultado =
-        await this.afiliadoService.getAllReferenciasPersonales(n_identificacion);
+        await this.afiliadoService.getAllCargoPublicPeps(n_identificacion);
       return resultado;
     } catch (error) {
       if (error instanceof NotFoundException) {
@@ -364,8 +213,8 @@ export class AfiliadoController {
   updatePersona(
     @Param('id') id: number,
     @Body() updateBeneficiarioDto: any,
-  ): Promise<net_persona> {
-    return this.afiliadoService.updateBeneficario(id, updateBeneficiarioDto);
+  ): Promise<any> {
+    return this.afiliadoService.updateBeneficiario(id, updateBeneficiarioDto);
   }
 
   @Put('desactivarCuentaBancaria/:id')
@@ -381,11 +230,16 @@ export class AfiliadoController {
   }
 
   @Put('/updateDatosGenerales/:idPersona')
+  @UseInterceptors(AnyFilesInterceptor())
   updateDatosGenerales(
     @Param('idPersona') idPersona: number,
-    @Body() datosGenerales: any,
+    @Body('datosGenerales') datosGenerales: any,
+    @UploadedFiles() files?: Express.Multer.File[],
   ) {
-    return this.afiliadoService.updateDatosGenerales(idPersona, datosGenerales);
+    const crearDatosDto: any = JSON.parse(datosGenerales);
+    const fileIdent = files?.find(file => file.fieldname === 'file_ident');
+    const arch_cert_def = files?.find(file => file.fieldname === 'arch_cert_def');
+    return this.afiliadoService.updateDatosGenerales(idPersona, crearDatosDto, fileIdent, arch_cert_def);
   }
 
   @Put('activarCuentaBancaria/:id/:id_persona')
@@ -420,7 +274,7 @@ export class AfiliadoController {
     return this.afiliadoService.findOnePersonaParaDeduccion(term);
   }
 
-  
+
   @Get('findTipoPersonaByN_ident/:term')
   findTipoPersonaByN_ident(@Param('term') term: string) {
     return this.afiliadoService.findTipoPersonaByN_ident(term);
@@ -428,8 +282,9 @@ export class AfiliadoController {
 
   @Get('Afiliado/:term')
   findOne(@Param('term') term: string) {
-    return this.afiliadoService.findOne(term);
+    return this.afiliadoService.findOne(term); 
   }
+  
   @Get('/getAllPersonaPBanco/:dni')
   getAllPersonaPBanco(@Param('dni') dni: string) {
     return this.afiliadoService.getAllPersonaPBanco(dni);

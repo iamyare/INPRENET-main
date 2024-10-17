@@ -46,6 +46,14 @@ tr.mat-header-row {
   background-color: rgba(0, 0, 0, 0.1);
 }
 
+tr.selected {
+  background-color: #229e92; 
+  color: white; 
+  font-weight: bold;
+  font-size: 14;
+  letter-spacing: 2px;
+}
+
 .clickable-row {
   cursor: pointer;
 }

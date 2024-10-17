@@ -99,7 +99,7 @@ export class VerSociosComponent {
     }
   }
 
-  ejecutarFuncionAsincronaDesdeOtroComponente(funcion: (data: any) => Promise<void>) {
+  ejecutarFuncionAsincronaDesdeOtroComponente(funcion: (data: any) => Promise<boolean>) {
     this.ejecF = funcion;
   }
 
@@ -117,9 +117,6 @@ export class VerSociosComponent {
       numero_rentas_max: row.numero_rentas_max,
       periodicidad: row.periodicidad,
     };
-
-    console.log(beneficioData);
-
 
     /* this.svcBeneficioServ.updateBeneficio(row.id, beneficioData).subscribe(
       response => {

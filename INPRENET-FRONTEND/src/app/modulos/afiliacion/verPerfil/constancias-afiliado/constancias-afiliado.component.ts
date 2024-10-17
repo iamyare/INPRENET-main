@@ -20,6 +20,7 @@ export class ConstanciasAfiliadoComponent {
 
   menuItems = [
     { name: 'Generar Constancia de Renuncia CAP', action: this.generarConstanciaRenunciaCap.bind(this) },
+    { name: 'Generar Constancia datos generales', action: this.generarConstanciaAfiliacion2.bind(this) },
     { name: 'Generar Constancia de Afiliación', action: this.generarConstanciaAfiliacion.bind(this) },
     { name: 'Generar Constancia de No Cotizar', action: this.generarConstanciaNoCotizar.bind(this) },
     { name: 'Generar Constancia de Débitos', action: this.generarConstanciaDebitos.bind(this) },
@@ -34,12 +35,12 @@ export class ConstanciasAfiliadoComponent {
 
   generarConstanciaAfiliacion() {
     const data = {
-      primer_nombre: this.persona.primer_nombre,
-      segundo_nombre: this.persona.segundo_nombre,
-      tercer_nombre: this.persona.tercer_nombre,
-      primer_apellido: this.persona.primer_apellido,
-      segundo_apellido: this.persona.segundo_apellido,
-      n_identificacion: this.persona.n_identificacion,
+      primer_nombre: this.persona.persona.primer_nombre,
+      segundo_nombre: this.persona.persona.segundo_nombre,
+      tercer_nombre: this.persona.persona.tercer_nombre,
+      primer_apellido: this.persona.persona.primer_apellido,
+      segundo_apellido: this.persona.persona.segundo_apellido,
+      n_identificacion: this.persona.persona.n_identificacion,
     };
 
     this.afiliadoService.generarConstanciaAfiliacion(data).subscribe((response: any) => {
@@ -55,14 +56,30 @@ export class ConstanciasAfiliadoComponent {
     });
   }
 
+  generarConstanciaAfiliacion2() {
+    const data = this.persona;
+
+    this.afiliadoService.generarConstanciaAfiliacion2(data).subscribe((response: any) => {
+    });
+
+    this.afiliadoService.generarConstanciaQR(data, 'afiliacion2').subscribe((blob: Blob) => {
+      const downloadURL = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = downloadURL;
+      link.download = this.generarNombreArchivo('afiliacion2');
+      link.click();
+      window.URL.revokeObjectURL(downloadURL); // Liberar el objeto URL
+    });
+  }
+
   generarConstanciaRenunciaCap() {
     const data = {
-      primer_nombre: this.persona.primer_nombre,
-      segundo_nombre: this.persona.segundo_nombre,
-      tercer_nombre: this.persona.tercer_nombre,
-      primer_apellido: this.persona.primer_apellido,
-      segundo_apellido: this.persona.segundo_apellido,
-      n_identificacion: this.persona.n_identificacion,
+      primer_nombre: this.persona.persona.primer_nombre,
+      segundo_nombre: this.persona.persona.segundo_nombre,
+      tercer_nombre: this.persona.persona.tercer_nombre,
+      primer_apellido: this.persona.persona.primer_apellido,
+      segundo_apellido: this.persona.persona.segundo_apellido,
+      n_identificacion: this.persona.persona.n_identificacion,
     };
 
     this.afiliadoService.generarConstanciaRenunciaCap(data).subscribe((response: any) => {
@@ -80,12 +97,12 @@ export class ConstanciasAfiliadoComponent {
 
   generarConstanciaNoCotizar() {
     const data = {
-      primer_nombre: this.persona.primer_nombre,
-      segundo_nombre: this.persona.segundo_nombre,
-      tercer_nombre: this.persona.tercer_nombre,
-      primer_apellido: this.persona.primer_apellido,
-      segundo_apellido: this.persona.segundo_apellido,
-      n_identificacion: this.persona.n_identificacion,
+      primer_nombre: this.persona.persona.primer_nombre,
+      segundo_nombre: this.persona.persona.segundo_nombre,
+      tercer_nombre: this.persona.persona.tercer_nombre,
+      primer_apellido: this.persona.persona.primer_apellido,
+      segundo_apellido: this.persona.persona.segundo_apellido,
+      n_identificacion: this.persona.persona.n_identificacion,
     };
 
     this.afiliadoService.generarConstanciaNoCotizar(data).subscribe((response: any) => {
@@ -103,12 +120,12 @@ export class ConstanciasAfiliadoComponent {
 
   generarConstanciaDebitos() {
     const data = {
-      primer_nombre: this.persona.primer_nombre,
-      segundo_nombre: this.persona.segundo_nombre,
-      tercer_nombre: this.persona.tercer_nombre,
-      primer_apellido: this.persona.primer_apellido,
-      segundo_apellido: this.persona.segundo_apellido,
-      n_identificacion: this.persona.n_identificacion,
+      primer_nombre: this.persona.persona.primer_nombre,
+      segundo_nombre: this.persona.persona.segundo_nombre,
+      tercer_nombre: this.persona.persona.tercer_nombre,
+      primer_apellido: this.persona.persona.primer_apellido,
+      segundo_apellido: this.persona.persona.segundo_apellido,
+      n_identificacion: this.persona.persona.n_identificacion,
     };
 
     this.afiliadoService.generarConstanciaDebitos(data).subscribe((response: any) => {
@@ -126,12 +143,12 @@ export class ConstanciasAfiliadoComponent {
 
   generarConstanciaTiempoCotizarConMonto() {
     const data = {
-      primer_nombre: this.persona.primer_nombre,
-      segundo_nombre: this.persona.segundo_nombre,
-      tercer_nombre: this.persona.tercer_nombre,
-      primer_apellido: this.persona.primer_apellido,
-      segundo_apellido: this.persona.segundo_apellido,
-      n_identificacion: this.persona.n_identificacion,
+      primer_nombre: this.persona.persona.primer_nombre,
+      segundo_nombre: this.persona.persona.segundo_nombre,
+      tercer_nombre: this.persona.persona.tercer_nombre,
+      primer_apellido: this.persona.persona.primer_apellido,
+      segundo_apellido: this.persona.persona.segundo_apellido,
+      n_identificacion: this.persona.persona.n_identificacion,
     };
 
     this.afiliadoService.generarConstanciaTiempoCotizarConMonto(data).subscribe((response: any) => {

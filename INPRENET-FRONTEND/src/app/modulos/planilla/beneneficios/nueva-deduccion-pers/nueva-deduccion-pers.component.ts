@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { Component, Input, OnInit, ViewChild } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ToastrService } from 'ngx-toastr';
 import { AfiliadoService } from 'src/app/services/afiliado.service';
@@ -16,6 +16,8 @@ import { convertirFecha } from 'src/app/shared/functions/formatoFecha';
 })
 export class NuevaDeduccionPersComponent implements OnInit {
   @ViewChild(DynamicFormComponent) dynamicForm!: DynamicFormComponent;
+  //@Input() id_planilla: any;
+
   form!: FormGroup;
   formDeduccion!: FormGroup;
   Afiliado: any = {};
@@ -32,7 +34,7 @@ export class NuevaDeduccionPersComponent implements OnInit {
     private planillaService: PlanillaService,
     private fb: FormBuilder,
     private toastr: ToastrService
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     this.myFormFields = [
@@ -118,12 +120,11 @@ export class NuevaDeduccionPersComponent implements OnInit {
         },
         (error) => {
           this.Afiliado = {};
-          this.toastr.error('Error: No se puede asignar deduccion a la persona con el DNI proporcionado.');
+          this.toastr.error(`Error: ${error.message}`);
         }
       );
     }
   }
-
 
   onDeduccionChange(event: any) {
     const selectedNombreDeduccion = event.value;
@@ -147,7 +148,12 @@ export class NuevaDeduccionPersComponent implements OnInit {
           this.limpiarFormulario();
         },
         (error) => {
-          this.toastr.error('Error al asignar la deducción.');
+          // Verifica si el backend ha devuelto un mensaje de error específico
+          if (error && error.error && error.error.mensaje) {
+            this.toastr.error(`Error: ${error.error.mensaje}`, 'Error al asignar la deducción');
+          } else {
+            this.toastr.error('Error desconocido al asignar la deducción.');
+          }
           console.error('Error al asignar la deducción:', error);
         }
       );
@@ -155,7 +161,6 @@ export class NuevaDeduccionPersComponent implements OnInit {
       this.toastr.error('Por favor, completa todos los campos obligatorios.');
     }
   }
-
 
   limpiarFormulario(): void {
     this.Afiliado = {};

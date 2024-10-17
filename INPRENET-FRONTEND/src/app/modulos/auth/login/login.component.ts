@@ -10,7 +10,6 @@ import { AuthService } from 'src/app/services/auth.service';
   styleUrls: ['./login.component.scss']
 })
 export class LoginComponent {
-
   loginForm: FormGroup;
   loading: boolean = false;
 
@@ -34,22 +33,27 @@ export class LoginComponent {
           this.loading = false;
           this.router.navigate(['/home']);
           this.toastr.success('Inicio de sesión exitoso', 'Bienvenido');
-        }, 1000); // Retraso de 1 segundo
+        }, 1000);
       },
       error: (err) => {
         setTimeout(() => {
           this.loading = false;
-          this.toastr.error('Credenciales incorrectas. Por favor, intente de nuevo.', 'Error de inicio de sesión', {
-            closeButton: true,
-            timeOut: 3000,
-          });
-          console.error('Login failed:', err);
-        }, 1000); // Retraso de 1 segundo
+          if (err.status === 401) {
+            this.toastr.error('Credenciales incorrectas. Por favor, intente de nuevo.', 'Error de inicio de sesión', {
+              closeButton: true,
+              timeOut: 3000,
+            });
+          } else {
+            this.toastr.error('Ocurrió un error. Por favor, intente de nuevo.', 'Error');
+            console.error('Login failed:', err);
+          }
+        }, 1000);
       }
     });
   }
 
+
   redirectOlvidoContrasena() {
-    this.router.navigate(['/auth/solicitud-restablecimiento']);
+    this.router.navigate(['/solicitud-restablecimiento']);
   }
 }

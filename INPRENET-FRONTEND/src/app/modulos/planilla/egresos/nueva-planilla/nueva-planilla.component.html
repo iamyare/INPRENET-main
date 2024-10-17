@@ -1,4 +1,4 @@
-<h1 style="text-align: center">Planilla</h1>
+<!-- <h1 style="text-align: center">Planilla</h1>
 
 <form [formGroup]="form" #myForm="ngForm">
   <mat-slide-toggle color="primary" formControlName="isChecked" (change)="onChangeToggle()">
@@ -8,23 +8,23 @@
   <app-progressplanill (newDatBenChange)="setEstadoDatGen($event)" [estadoSubDed]="form.get('isChecked')?.value"
     (newEstCentrTrab)="setEstadoTable($event)" (newdatosHS)="setEstadoVerPlanP($event)"
     (newdatosRP)="setEstadoVerPlanDef($event)">
-  </app-progressplanill>
+  </app-progressplanill> -->
 
-  <form [formGroup]="formplanilla" *ngIf="datosG">
+  <!-- <form [formGroup]="formplanilla" *ngIf="datosG">
     <app-nuevaplanilla groupName="planilla"></app-nuevaplanilla>
-  </form>
+  </form> -->
 
-  <form [formGroup]="formplanilla" *ngIf="datosCT">
+<!--   <form [formGroup]="formplanilla" *ngIf="datosCT">
     <app-asignacion-afil-plan groupName="planilla"></app-asignacion-afil-plan>
-  </form>
+  </form> -->
 
-  <form [formGroup]="formplanilla" *ngIf="datosHS">
+  <!-- <form [formGroup]="formplanilla" *ngIf="datosHS">
     <app-verplanprelcomp groupName="planilla"></app-verplanprelcomp>
   </form>
 
   <form [formGroup]="formplanilla" *ngIf="datosRP">
     <app-verplancerrada groupName="planilla"></app-verplancerrada>
-  </form>
+  </form> -->
 
   <!-- <div class="row" *ngIf="datosG && form.get('isChecked')?.value">
         <div class="col-md-6">
@@ -44,4 +44,4 @@
             <button mat-button color="primary">Enviar Formulario</button>
         </div>
     </div> -->
-</form>
+<!-- </form> -->

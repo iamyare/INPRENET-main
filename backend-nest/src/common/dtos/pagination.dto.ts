@@ -6,12 +6,12 @@ export class PaginationDto {
 
     @IsOptional()
     @IsPositive()
-    @Type( ()=> Number )
-    limit?: number;
+    @Type( () => Number )
+    limit: number = 10;
 
     @IsOptional()
     @Min(0)
-    @Type( ()=> Number )
-    offset?: number;
-
+    @Type( () => Number )
+    offset: number = 0;
 }
+

@@ -1,91 +1,63 @@
-import { ChangeDetectionStrategy, Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
-import { AbstractControl, FormArray, FormBuilder, FormControl, FormGroup, ValidationErrors, Validators } from '@angular/forms';
-import { FormStateService } from 'src/app/services/form-state.service';
+import { Component, Input, OnInit } from '@angular/core';
+import { FormArray, FormBuilder, FormControl, FormGroup, Validators, AbstractControl, ValidationErrors } from '@angular/forms';
 import { DireccionService } from 'src/app/services/direccion.service';
 import { DatosEstaticosService } from 'src/app/services/datos-estaticos.service';
 
 @Component({
   selector: 'app-benef',
   templateUrl: './benef.component.html',
-  styleUrls: ['./benef.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush,
+  styleUrls: ['./benef.component.scss']
 })
 export class BenefComponent implements OnInit {
-  public formParent: FormGroup;
+  @Input() formGroup!: FormGroup;
+
   public municipios: any[] = [];
   public municipiosNacimiento: any[] = [];
-  public nacionalidades: any[] = [];
   public tipo_discapacidad: any[] = [];
-  sexo: { value: string; label: string }[] = [];
-  generos: { value: string; label: string }[] = [];
-  parentesco: any;
-  departamentos: any = [];
-  departamentosNacimiento: any = [];
-  minDate: Date;
+  public parentesco: any;
+  public departamentos: any = [];
+  public departamentosNacimiento: any = [];
+  public minDate: Date;
 
-  @Input() datos: any;
-  @Output() newDatBenChange = new EventEmitter<FormGroup>();
-
-  private formKey = 'FormBeneficiario';
-
-  field = {
-    options: [
-      { value: 'si', label: 'SI' },
-      { value: 'no', label: 'NO' }
-    ]
-  };
+  fieldOptions = [
+    { value: 'si', label: 'SI' },
+    { value: 'no', label: 'NO' }
+  ];
 
   constructor(
-    private formStateService: FormStateService,
     private fb: FormBuilder,
     private direccionService: DireccionService,
-    private datosEstaticosService: DatosEstaticosService,
+    private datosEstaticosService: DatosEstaticosService
   ) {
     const currentYear = new Date();
     this.minDate = new Date(currentYear.getFullYear(), currentYear.getMonth(), currentYear.getDate());
-    this.formParent = this.fb.group({
-      beneficiario: this.fb.array([]),
-    });
   }
 
   ngOnInit(): void {
-    this.initForm();
+    if (!this.formGroup.get('beneficiario')) {
+      this.formGroup.addControl('beneficiario', this.fb.array([]));
+    }
     this.cargarDepartamentos();
     this.cargarDepartamentosNacimiento();
     this.loadDiscapacidades();
-    this.loadNacionalidades();
 
     this.parentesco = this.datosEstaticosService.parentesco;
     const nuevoParentesco = { value: "OTRO", label: "OTRO" };
     if (!this.parentesco.some((item: { value: string }) => item.value === nuevoParentesco.value)) {
       this.parentesco.push(nuevoParentesco);
     }
-
-    this.generos = this.datosEstaticosService.genero;
-    this.sexo = this.datosEstaticosService.sexo;
-
-    const beneficiariosArray = this.formParent.get('beneficiario') as FormArray;
-    if (this.datos?.value?.beneficiario?.length && beneficiariosArray.length === 0) {
-      for (let ben of this.datos.value.beneficiario) {
-        this.agregarBen(ben);
-      }
-    }
   }
 
-  private initForm() {
-    const existingForm = this.formStateService.getForm(this.formKey);
-    if (existingForm) {
-      this.formParent = existingForm;
-    } else {
-      this.formParent = this.fb.group({
-        beneficiario: this.fb.array([]),
-      });
-      this.formStateService.setForm(this.formKey, this.formParent);
-    }
+  // Getter para obtener el FormArray de beneficiarios
+  get beneficiarios(): FormArray {
+    return this.formGroup.get('beneficiario') as FormArray;
   }
 
-  initFormBeneficiario(datosBeneficiario?: any): FormGroup {
-    return this.fb.group({
+  // Función para agregar un nuevo beneficiario
+  agregarBeneficiario(datosBeneficiario?: any): void {
+    const discapacidadesFormArray = this.fb.array(this.tipo_discapacidad.map(() => new FormControl(false)));
+
+    const beneficiarioForm = this.fb.group({
       id_tipo_identificacion: new FormControl(datosBeneficiario?.id_tipo_identificacion || 1),
       id_pais_nacionalidad: new FormControl(datosBeneficiario?.id_pais_nacionalidad || 1),
       n_identificacion: new FormControl(datosBeneficiario?.n_identificacion || '', [Validators.required, Validators.maxLength(40)]),
@@ -95,7 +67,6 @@ export class BenefComponent implements OnInit {
       primer_apellido: new FormControl(datosBeneficiario?.primer_apellido || '', [Validators.required, Validators.maxLength(40)]),
       segundo_apellido: new FormControl(datosBeneficiario?.segundo_apellido || ''),
       genero: new FormControl(datosBeneficiario?.genero || ''),
-      sexo: new FormControl(datosBeneficiario?.sexo || ''),
       telefono_1: new FormControl(datosBeneficiario?.telefono_1 || ''),
       telefono_2: new FormControl(datosBeneficiario?.telefono_2 || ''),
       correo_1: new FormControl(datosBeneficiario?.correo_1 || ''),
@@ -118,18 +89,36 @@ export class BenefComponent implements OnInit {
         Validators.maxLength(30),
       ]),
       discapacidad: new FormControl(datosBeneficiario?.discapacidad || 'no', [Validators.required]),
-      discapacidades: this.fb.array(this.tipo_discapacidad.map(() => new FormControl(false)))
+      discapacidades: discapacidadesFormArray,
+      archivo_identificacion: [null] // Control para el archivo
     });
+
+    this.beneficiarios.push(beneficiarioForm);
+    this.markAllAsTouched(beneficiarioForm);
   }
 
-  private loadNacionalidades() {
-    this.datosEstaticosService.getNacionalidad().then(data => {
-      this.nacionalidades = data;
-    }).catch(error => {
-      console.error('Error al cargar países:', error);
-    });
+
+
+  // Función para marcar todos los controles como "tocados"
+  markAllAsTouched(control: FormGroup | FormArray): void {
+    if (control instanceof FormGroup || control instanceof FormArray) {
+      Object.values(control.controls).forEach(ctrl => {
+        ctrl.markAsTouched();
+        if (ctrl instanceof FormGroup || ctrl instanceof FormArray) {
+          this.markAllAsTouched(ctrl);
+        }
+      });
+    }
   }
 
+  // Función para eliminar un beneficiario
+  eliminarBeneficiario(index: number): void {
+    if (this.beneficiarios.length > 0) {
+      this.beneficiarios.removeAt(index);
+    }
+  }
+
+  // Cargar departamentos
   cargarDepartamentos() {
     this.datosEstaticosService.getDepartamentos().then(data => {
       this.departamentos = data;
@@ -138,6 +127,7 @@ export class BenefComponent implements OnInit {
     });
   }
 
+  // Cargar departamentos de nacimiento
   cargarDepartamentosNacimiento() {
     this.datosEstaticosService.getDepartamentos().then(data => {
       this.departamentosNacimiento = data;
@@ -146,6 +136,7 @@ export class BenefComponent implements OnInit {
     });
   }
 
+  // Cargar municipios según el departamento seleccionado
   onDepartamentoChange(event: any) {
     const departamentoId = event.value;
     this.cargarMunicipios(departamentoId);
@@ -178,6 +169,7 @@ export class BenefComponent implements OnInit {
     });
   }
 
+  // Cargar discapacidades
   loadDiscapacidades() {
     this.datosEstaticosService.getDiscapacidades().subscribe({
       next: (data) => {
@@ -185,7 +177,8 @@ export class BenefComponent implements OnInit {
           label: discapacidad.label,
           value: discapacidad.value
         }));
-        this.formParent.get('beneficiario')?.value.forEach((_: any, index: number) => {
+        const beneficiariosArray = this.beneficiarios;
+        beneficiariosArray.controls.forEach((_, index: number) => {
           const discapacidadesArray = this.getDiscapacidadesFormArray(index);
           this.tipo_discapacidad.forEach(() => discapacidadesArray.push(new FormControl(false)));
         });
@@ -196,8 +189,25 @@ export class BenefComponent implements OnInit {
     });
   }
 
+  // Método para manejar el cambio de discapacidad
+  onDiscapacidadChange(index: number, event: any) {
+    const beneficiariosArray = this.beneficiarios;
+    const beneficiarioGroup = beneficiariosArray.controls[index] as FormGroup;
+    const discapacidadesArray = beneficiarioGroup.get('discapacidades') as FormArray;
+
+    discapacidadesArray.clear();
+    this.tipo_discapacidad.forEach(() => {
+      discapacidadesArray.push(new FormControl(false));
+    });
+
+    if (event.value === 'si') {
+      // Aquí puedes agregar lógica adicional si es necesario
+    }
+  }
+
+  // Validación personalizada para asegurar que la suma de porcentajes sea 100
   validarSumaPorcentajes(control: AbstractControl): ValidationErrors | null {
-    const beneficiariosArray = this.formParent.get('beneficiario') as FormArray;
+    const beneficiariosArray = this.beneficiarios;
     if (!beneficiariosArray) {
       return null;
     }
@@ -227,88 +237,13 @@ export class BenefComponent implements OnInit {
     return null;
   }
 
-  agregarBen(datosBeneficiario?: any): void {
-    const control = this.getCtrl('beneficiario', this.formParent) as FormArray;
-    control.push(this.initFormBeneficiario(datosBeneficiario));
-  }
-
-  eliminarRefPer(): void {
-    const control = this.getCtrl('beneficiario', this.formParent) as FormArray;
-    if (control.length > 0) {
-      control.removeAt(control.length - 1);
-      control.controls.forEach((control: any) => {
-        const controlporcentaje = control.get('porcentaje');
-        controlporcentaje.updateValueAndValidity();
-      });
-    }
-    this.onDatosBenChange();  // Emitir evento con los datos actualizados
-  }
-
-  getCtrl(key: string, form: FormGroup): any {
-    return form.get(key);
-  }
-
-  onDatosBenChange() {
-    const beneficiariosArray = this.formParent.get('beneficiario') as FormArray;
-    const beneficiarios = beneficiariosArray.controls.map((control: AbstractControl, index: number) => ({
-      persona: {
-        id_tipo_identificacion: control.get('id_tipo_identificacion')?.value,
-        id_pais_nacionalidad: control.get('id_pais_nacionalidad')?.value,
-        n_identificacion: control.get('n_identificacion')?.value,
-        primer_nombre: control.get('primer_nombre')?.value,
-        segundo_nombre: control.get('segundo_nombre')?.value,
-        tercer_nombre: control.get('tercer_nombre')?.value,
-        primer_apellido: control.get('primer_apellido')?.value,
-        segundo_apellido: control.get('segundo_apellido')?.value,
-        genero: control.get('genero')?.value,
-        sexo: control.get('sexo')?.value,
-        telefono_1: control.get('telefono_1')?.value,
-        telefono_2: control.get('telefono_2')?.value,
-        correo_1: control.get('correo_1')?.value,
-        correo_2: control.get('correo_2')?.value,
-        fecha_nacimiento: control.get('fecha_nacimiento')?.value,
-        direccion_residencia: control.get('direccion_residencia')?.value,
-        id_municipio_residencia: control.get('id_municipio_residencia')?.value,
-        discapacidades: this.getSelectedDiscapacidades(index),
-        porcentaje: control.get('porcentaje')?.value
-      }
-    }));
-
-    const formattedFormGroup = this.fb.group({
-      beneficiarios: this.fb.array(beneficiarios.map(b => this.fb.group(b)))
-    });
-
-    this.newDatBenChange.emit(formattedFormGroup);
-    this.formStateService.setForm(this.formKey, this.formParent);
-  }
-
   getDiscapacidadesFormArray(index: number): FormArray {
-    return (this.formParent.get('beneficiario') as FormArray).at(index).get('discapacidades') as FormArray;
+    return (this.beneficiarios.at(index).get('discapacidades') as FormArray);
   }
 
-  getSelectedDiscapacidades(index: number): string[] {
-    const discapacidadesArray = this.getDiscapacidadesFormArray(index);
-    return discapacidadesArray.controls
-      .map((control, idx) => control.value ? this.tipo_discapacidad[idx].value : null)
-      .filter(value => value !== null);
-  }
-
-  onDiscapacidadChange(index: number, event: any) {
-    const beneficiariosArray = this.formParent.get('beneficiario') as FormArray;
-    const beneficiarioGroup = beneficiariosArray.controls[index] as FormGroup;
-    const discapacidadesArray = beneficiarioGroup.get('discapacidades') as FormArray;
-
-    discapacidadesArray.clear();
-    this.tipo_discapacidad.forEach(() => {
-      discapacidadesArray.push(new FormControl(false));
-    });
-
-    if (event.value === 'si') {
-    }
-  }
-
+  // Método para obtener errores de un control específico
   getErrors(index: number, controlName: string): string[] {
-    const control = (this.formParent.get('beneficiario') as FormArray).at(index).get(controlName);
+    const control = this.beneficiarios.at(index).get(controlName);
     const errors: string[] = [];
 
     if (control && control.errors) {
@@ -327,33 +262,8 @@ export class BenefComponent implements OnInit {
       if (control.errors['email']) {
         errors.push('Correo electrónico no válido.');
       }
-    }
-
-    return errors;
-  }
-
-  getErrors2(index: number, controlName: string): string[] {
-    const control = (this.formParent.get('beneficiario') as FormArray).at(index).get(controlName);
-    const errors: string[] = [];
-
-    if (control && control.errors) {
       if (control.errors['min']) {
         errors.push(`El valor mínimo es ${control.errors['min'].min}.`);
-      }
-      if (control.errors['required']) {
-        errors.push('Este campo es obligatorio.');
-      }
-      if (control.errors['minlength']) {
-        errors.push(`Debe tener al menos ${control.errors['minlength'].requiredLength} caracteres.`);
-      }
-      if (control.errors['maxlength']) {
-        errors.push(`No puede tener más de ${control.errors['maxlength'].requiredLength} caracteres.`);
-      }
-      if (control.errors['pattern']) {
-        errors.push('El formato no es válido.');
-      }
-      if (control.errors['email']) {
-        errors.push('Correo electrónico no válido.');
       }
       if (control.errors['invalidPorcentaje']) {
         errors.push('Valor no válido debe estar entre 0 - 100.');
@@ -366,15 +276,13 @@ export class BenefComponent implements OnInit {
     return errors;
   }
 
-  onDatosGeneralesDiscChange(event: any, index: number) {
-    const value = event.value;
-    const beneficiariosArray = this.formParent.get('beneficiario') as FormArray;
-    const beneficiarioGroup = beneficiariosArray.controls[index] as FormGroup;
+  getArchivo(index: number, event: any) {
+    if (event) {
+      const beneficiarios = this.formGroup.get('beneficiario') as FormArray;
+      const group = beneficiarios.at(index) as FormGroup;
 
-    if (value === 'si') {
-      beneficiarioGroup.get('dependiente')?.setValue(true);
-    } else {
-      beneficiarioGroup.get('dependiente')?.setValue(false);
+      const archivo = event ? event : null;
+      (group.get('archivo_identificacion') as FormControl)?.setValue(archivo);
     }
   }
 }

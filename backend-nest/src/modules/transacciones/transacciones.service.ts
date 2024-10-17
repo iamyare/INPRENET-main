@@ -1,5 +1,4 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { CreateTransaccionesDto } from './dto/create-transacciones.dto';
 import { UpdateTranssacionesDto } from './dto/update-transacciones.dto';
 import { NET_MOVIMIENTO_CUENTA } from './entities/net_movimiento_cuenta.entity';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -29,11 +28,18 @@ export class TransaccionesService {
     private tipoMovimientoRepository: Repository<NET_TIPO_MOVIMIENTO>,
     @InjectRepository(NET_PROFESIONES)
     private readonly profesionesRepository: Repository<NET_PROFESIONES>,
-
     @InjectRepository(Net_Colegios_Magisteriales)
     private colegiosMRepository: Repository<Net_Colegios_Magisteriales>,
   ) {
+  }
 
+  async eliminarMovimiento(id: number): Promise<boolean> {
+    const movimiento = await this.movimientoCuentaRepository.findOne({ where: { ID_MOVIMIENTO_CUENTA: id } });
+    if (!movimiento) {
+      return false;
+    }
+    await this.movimientoCuentaRepository.remove(movimiento);
+    return true;
   }
 
   async findAllProfesiones(): Promise<NET_PROFESIONES[]> {
@@ -43,6 +49,7 @@ export class TransaccionesService {
 
     }
   }
+
   async findAlltipoMovimientos(): Promise<NET_TIPO_MOVIMIENTO[]> {
     try {
       return await this.tipoMovimientoRepository.find();
@@ -51,33 +58,62 @@ export class TransaccionesService {
     }
   }
 
-  async obtenerVoucherDeMovimientos(dni: string): Promise<CrearMovimientoDTO[]> {
-    const movimientos = await this.movimientoCuentaRepository
-      .createQueryBuilder('movimiento')
-      .innerJoin('movimiento.cuentaPersona', 'cuenta')
-      .innerJoin('cuenta.persona', 'persona')
-      .innerJoin('movimiento.tipoMovimiento', 'tipoMovimiento')
-      .innerJoin('cuenta.tipoCuenta', 'tipoCuenta')
-      .select([
-        'movimiento.ID_MOVIMIENTO_CUENTA as ID_MOVIMIENTO_CUENTA',
-        'movimiento.DESCRIPCION as DESCRIPCION',
-        `TO_CHAR(movimiento.MONTO, 'FM999,990.00') || ' L' as MONTO`,
-        'TO_CHAR(movimiento.FECHA_MOVIMIENTO, \'DD/MM/YYYY\') as FECHA_MOVIMIENTO',
-        'tipoMovimiento.DESCRIPCION as TIPO_MOVIMIENTO',
-        `CASE tipoMovimiento.DEBITO_CREDITO_B WHEN 'D' THEN 'DEBITO' WHEN 'C' THEN 'CREDITO' ELSE tipoMovimiento.DEBITO_CREDITO_B END as DEBITO_CREDITO_B`,
-        'tipoMovimiento.CUENTA_CONTABLE as CUENTA_CONTABLE',
-        'cuenta.NUMERO_CUENTA as NUMERO_CUENTA',
-        'persona.CORREO_1 as CORREO_1',
-        'persona.DNI as DNI',
-        'persona.TELEFONO_1 as TELEFONO_1',
-        `CASE tipoMovimiento.ACTIVA_B WHEN 'S' THEN 'ACTIVO' WHEN 'N' THEN 'INACTIVO' ELSE tipoMovimiento.ACTIVA_B END as ESTADO_TIPO_MOVIMIENTO`,
-        'tipoCuenta.DESCRIPCION as TIPO_CUENTA_DESCRIPCION',
-        'TRIM(NVL(persona.PRIMER_NOMBRE, \'\') || \' \' || NVL(persona.SEGUNDO_NOMBRE, \'\') || \' \' || NVL(persona.PRIMER_APELLIDO, \'\') || \' \' || NVL(persona.SEGUNDO_APELLIDO, \'\')) as NOMBRE_COMPLETO'
-      ])
-      .where('persona.DNI = :dni', { dni })
-      .getRawMany();
-
-    return movimientos;
+  async obtenerVoucherDeMovimientos(dni: string, limit: number = 10, offset: number = 0, search: string = ''): Promise<{ movimientos: CrearMovimientoDTO[], total: number }> {
+    try {
+      const query = this.movimientoCuentaRepository
+        .createQueryBuilder('movimiento')
+        .innerJoin('movimiento.cuentaPersona', 'cuenta')
+        .innerJoin('cuenta.persona', 'persona')
+        .innerJoin('movimiento.tipoMovimiento', 'tipoMovimiento')
+        .innerJoin('cuenta.tipoCuenta', 'tipoCuenta')
+        .select([
+          'movimiento.ID_MOVIMIENTO_CUENTA as ID_MOVIMIENTO_CUENTA',
+          'movimiento.DESCRIPCION as DESCRIPCION',
+          `TO_CHAR(movimiento.MONTO, 'FM999,990.00') || ' L' as MONTO`,
+          `TO_CHAR(movimiento.FECHA_MOVIMIENTO, 'DD/MM/YYYY') as FECHA_MOVIMIENTO`,
+          'tipoMovimiento.DESCRIPCION as TIPO_MOVIMIENTO',
+          `CASE tipoMovimiento.DEBITO_CREDITO_B 
+              WHEN 'D' THEN 'DEBITO' 
+              WHEN 'C' THEN 'CREDITO' 
+              ELSE tipoMovimiento.DEBITO_CREDITO_B 
+            END as DEBITO_CREDITO_B`,
+          'tipoMovimiento.CUENTA_CONTABLE as CUENTA_CONTABLE',
+          'cuenta.NUMERO_CUENTA as NUMERO_CUENTA',
+          `CASE tipoMovimiento.ACTIVA_B 
+              WHEN 'S' THEN 'ACTIVO' 
+              WHEN 'N' THEN 'INACTIVO' 
+              ELSE tipoMovimiento.ACTIVA_B 
+            END as ESTADO_TIPO_MOVIMIENTO`, 
+          'tipoCuenta.DESCRIPCION as TIPO_CUENTA_DESCRIPCION'
+        ])
+        .where('persona.n_identificacion = :dni', { dni });
+  
+      if (search) {
+        query.andWhere(
+          `(
+            cuenta.NUMERO_CUENTA LIKE :search OR 
+            movimiento.DESCRIPCION LIKE :search OR 
+            TO_CHAR(movimiento.MONTO, 'FM999,990.00') LIKE :search OR 
+            TO_CHAR(movimiento.FECHA_MOVIMIENTO, 'DD/MM/YYYY') LIKE :search OR
+            tipoMovimiento.DESCRIPCION LIKE :search OR 
+            tipoCuenta.DESCRIPCION LIKE :search
+          )`,
+          { search: `%${search}%` }
+        );
+      }
+  
+      const total = await query.getCount();
+      const movimientos = await query
+        .orderBy('movimiento.FECHA_MOVIMIENTO', 'DESC')
+        .offset(offset)
+        .limit(limit)
+        .getRawMany();
+  
+      return { movimientos, total };
+    } catch (error) {
+      console.error('Error fetching data:', error);
+      throw new Error('Error fetching movimientos');
+    }
   }
 
   async obtenerVoucherDeMovimientoEspecifico(dni: string, idMovimientoCuenta: number): Promise<CrearMovimientoDTO> {
@@ -109,30 +145,33 @@ export class TransaccionesService {
     const cuentaExistente = await this.cuentaPersonaRepository.findOne({
       where: { NUMERO_CUENTA: dto.numeroCuenta }
     });
-
+  
     if (!cuentaExistente) {
       throw new NotFoundException(`No se encontró una cuenta con el número: ${dto.numeroCuenta}`);
     }
-
+  
     const tipoMovimiento = await this.tipoMovimientoRepository.findOne({
       where: { DESCRIPCION: dto.tipoMovimientoDescripcion }
     });
-
+  
     if (!tipoMovimiento) {
       throw new NotFoundException('Tipo de movimiento no encontrado.');
     }
-
+  
     const nuevoMovimiento = this.movimientoCuentaRepository.create({
       cuentaPersona: cuentaExistente,
       tipoMovimiento: tipoMovimiento,
       MONTO: dto.monto,
       DESCRIPCION: dto.descripcion,
       FECHA_MOVIMIENTO: new Date(),
-      CREADA_POR: "OFICIAL"
+      CREADA_POR: "OFICIAL",
+      ANO: dto.ANO,
+      MES: dto.MES
     });
-
+  
     return this.movimientoCuentaRepository.save(nuevoMovimiento);
   }
+  
 
   async crearCuenta(idPersona: number, dto: [crearCuentaDTO]): Promise<any> {
     const persona = await this.personaRepository.findOne({
@@ -172,8 +211,6 @@ export class TransaccionesService {
     if (!persona) {
       throw new Error('Persona no encontrada');
     }
-
-    // Encuentra todas las cuentas asociadas a la persona
     const cuentasPersona = await this.cuentaPersonaRepository.find({
       where: { persona: { id_persona: persona.id_persona } },
       relations: ['tipoCuenta']

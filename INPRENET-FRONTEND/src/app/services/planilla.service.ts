@@ -1,4 +1,4 @@
-import { HttpClient, HttpParams } from '@angular/common/http';
+import { HttpClient, HttpErrorResponse, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { ToastrService } from 'ngx-toastr';
 import { Observable, BehaviorSubject, catchError, throwError, map } from 'rxjs';
@@ -8,7 +8,66 @@ import { environment } from 'src/environments/environment';
   providedIn: 'root'
 })
 export class PlanillaService {
-  constructor(private http: HttpClient,private toastr: ToastrService) { }
+  constructor(private http: HttpClient, private toastr: ToastrService) { }
+
+  obtenerPagosYBeneficiosPorPersona(idPlanilla: number, dni: string): Observable<any> {
+    const url = `${environment.API_URL}/api/planilla/pagos-beneficios`;
+    const params = { idPlanilla: idPlanilla.toString(), dni: dni };
+
+    return this.http.get(url, { params }).pipe(
+      catchError((error: HttpErrorResponse) => {
+        console.error('Error al obtener los pagos y beneficios', error);
+        this.toastr.error('Error al obtener los pagos y beneficios');
+        return throwError(error);
+      })
+    );
+  }
+
+  obtenerPlanillasPagosPorPersona(dni: string): Observable<any> {
+    const url = `${environment.API_URL}/api/planilla/pagos-persona/${dni}`;
+    return this.http.get(url).pipe(
+      catchError((error: HttpErrorResponse) => {
+        console.error('Error al obtener las planillas de pagos', error);
+        this.toastr.error('Error al obtener las planillas de pagos');
+        return throwError(error);
+      })
+    );
+  }
+
+  actualizarFallecidosDesdeExcel(file: File): Observable<any> {
+    const url = `${environment.API_URL}/api/planilla/update-fallecidos-from-excel`;
+    const formData: FormData = new FormData();
+    formData.append('file', file, file.name);
+
+    return this.http.post(url, formData).pipe(
+      catchError(error => {
+        console.error('Error al subir el archivo Excel', error);
+        this.toastr.error('Error al subir el archivo Excel');
+        return throwError(error);
+      })
+    );
+  }
+
+  descargarReporteDetallePago(
+    periodoInicio: string,
+    periodoFinalizacion: string,
+    idTiposPlanilla: number[]
+  ): Observable<Blob> {
+    const url = `${environment.API_URL}/api/planilla/generar-reporte-detalle-pago`;
+
+    let params = new HttpParams()
+      .set('periodoInicio', periodoInicio)
+      .set('periodoFinalizacion', periodoFinalizacion)
+      .set('idTiposPlanilla', idTiposPlanilla.join(','));
+
+    return this.http.get(url, { params, responseType: 'blob' }).pipe(
+      catchError(error => {
+        console.error('Error al descargar el archivo Excel', error);
+        this.toastr.error('Error al descargar el archivo Excel');
+        return throwError(error);
+      })
+    );
+  }
 
   updatePlanillaACerrada(codigo_planilla: string): Observable<void> {
     const url = `${environment.API_URL}/api/planilla/actualizar-planilla-a-cerrada`;
@@ -29,7 +88,7 @@ export class PlanillaService {
         return throwError(error);
       })
     );
-}
+  }
 
   getPlanillasActivas(clasePlanilla?: string): Observable<any> {
     const url = `${environment.API_URL}/api/planilla/activas`;
@@ -45,6 +104,25 @@ export class PlanillaService {
         return throwError(error);
       })
     );
+  }
+
+  getPlanillasCerradaByFechas(fechaInicio: string, fechaFinalizacion: string): Observable<any> {
+    const url = `${environment.API_URL}/api/planilla/cerradas_fecha`;
+    let params = new HttpParams();
+
+    if (fechaInicio && fechaFinalizacion) {
+      params = params.set('fechaInicio', fechaInicio);
+      params = params.set('fechaFinalizacion', fechaFinalizacion);
+    }
+
+    return this.http.get<any>(url, { params }).pipe(
+      catchError(error => {
+        console.error('Error al obtener planillas cerradas', error);
+        return throwError(error);
+      })
+    );
+
+    /* } */
   }
 
   getPlanillasPreliminares(codigo_planilla: string): Observable<any> {
@@ -144,6 +222,21 @@ export class PlanillaService {
     );
   }
 
+  generarExcelPlanillaInv(perI: string, perF: string): Observable<Blob> {
+    /* const params = new HttpParams().
+    set('perI', perI).
+    set('perF', perF); */
+
+    const url = `${environment.API_URL}/api/planilla/Definitiva/personas/ord/${perI}/${perF}`;
+
+    return this.http.get(url, { responseType: 'blob' }).pipe(
+      catchError(error => {
+        console.error('Error al generar el Excel de la planilla', error);
+        return throwError(() => new Error('Error al generar el Excel de la planilla'));
+      })
+    );
+  }
+
 
   getDeduccionesPorPlanillaSeparadas(idPlanilla: number): Observable<{ deduccionesINPREMA: any[], deduccionesTerceros: any[] }> {
     const url = `${environment.API_URL}/api/planilla/deducciones-separadas/${idPlanilla}`;
@@ -153,77 +246,13 @@ export class PlanillaService {
         return throwError(error);
       })
     );
-}
+  }
 
 
   getTotalesPorDedYBen(idPlanilla: string): Observable<any> {
     const url = `${environment.API_URL}/api/planilla/totalesBYD/${idPlanilla}`;
     return this.http.get(url).pipe(
       catchError(this.handleError)
-    );
-  }
-
-
-  actualizarPlanillaAPreliminar(tipo: string, idPlanilla: string, periodoInicio: string, periodoFinalizacion: string): Observable<string> {
-    const url = `${environment.API_URL}/api/planilla/actualizar-planilla`;
-    const body = { tipo, idPlanilla, periodoInicio, periodoFinalizacion };
-    return this.http.post<string>(url, body, { responseType: 'text' as 'json' }).pipe(
-      catchError(error => {
-        console.error('Error al actualizar la planilla', error);
-        return throwError(() => new Error('Error al actualizar la planilla'));
-      })
-    );
-  }
-
-  getPlanillaOrdinariaAfiliados(periodoInicio: string, periodoFinalizacion: string): Observable<any> {
-    const params = new HttpParams()
-      .set('periodoInicio', periodoInicio)
-      .set('periodoFinalizacion', periodoFinalizacion);
-
-    return this.http.get(`${environment.API_URL}/api/planilla/ordinaria-afiliado`, { params }).pipe(
-      catchError(error => {
-        console.error('Error al obtener las planilla ordinaria para afiliados', error);
-        return throwError(() => new Error('Error al obtener la planilla ordinaria para afiliados'));
-      })
-    );
-  }
-
-  getPlanillaOrdinariaBeneficiarios(periodoInicio: string, periodoFinalizacion: string): Observable<any> {
-    const params = new HttpParams()
-      .set('periodoInicio', periodoInicio)
-      .set('periodoFinalizacion', periodoFinalizacion);
-
-    return this.http.get(`${environment.API_URL}/api/planilla/ordinaria-beneficiario`, { params }).pipe(
-      catchError(error => {
-        console.error('Error al obtener las planilla ordinaria para beneficiarios', error);
-        return throwError(() => new Error('Error al obtener la planilla ordinaria para beneficiarios'));
-      })
-    );
-  }
-
-  getPlanillaComplementariaAfiliados(periodoInicio: string, periodoFinalizacion: string): Observable<any> {
-    const params = new HttpParams()
-      .set('periodoInicio', periodoInicio)
-      .set('periodoFinalizacion', periodoFinalizacion);
-
-    return this.http.get(`${environment.API_URL}/api/planilla/complementaria-afiliado`, { params }).pipe(
-      catchError(error => {
-        console.error('Error al obtener las planilla complementaria para afiliados', error);
-        return throwError(() => new Error('Error al obtener las planilla complementaria para afiliados'));
-      })
-    );
-  }
-
-  getPlanillaComplementariaBeneficiarios(periodoInicio: string, periodoFinalizacion: string): Observable<any> {
-    const params = new HttpParams()
-      .set('periodoInicio', periodoInicio)
-      .set('periodoFinalizacion', periodoFinalizacion);
-
-    return this.http.get(`${environment.API_URL}/api/planilla/complementaria-beneficiario`, { params }).pipe(
-      catchError(error => {
-        console.error('Error al obtener las planilla complementaria para Beneficiarios', error);
-        return throwError(() => new Error('Error al obtener las planilla complementaria para Beneficiarios'));
-      })
     );
   }
 
@@ -234,59 +263,10 @@ export class PlanillaService {
       .set('periodoFinalizacion', periodoFinalizacion);
   }
 
-  getPagoBeneficioCompleBenef(dni: string, periodoInicio: string, periodoFinalizacion: string): Observable<any> {
-    const params = this.getRequestParams(dni, periodoInicio, periodoFinalizacion);
-    return this.http.get(`${environment.API_URL}/api/planilla/beneficios-complementaria-benef`, { params }).pipe(
-      catchError(error => throwError(() => new Error('Error al obtener el detalle del pago de beneficio')))
-    );
-  }
-
-  getPagoDeduccionesCompleBenef(dni: string, periodoInicio: string, periodoFinalizacion: string): Observable<any> {
-    const params = this.getRequestParams(dni, periodoInicio, periodoFinalizacion);
-    return this.http.get(`${environment.API_URL}/api/planilla/deducciones-complementaria-benef`, { params }).pipe(
-      catchError(error => throwError(() => new Error('Error al obtener el detalle de deducciones de beneficio')))
-    );
-  }
-
-  getPagoBeneficioCompleAfil(dni: string, periodoInicio: string, periodoFinalizacion: string): Observable<any> {
-    const params = this.getRequestParams(dni, periodoInicio, periodoFinalizacion);
-    return this.http.get(`${environment.API_URL}/api/planilla/beneficios-complementaria-afil`, { params }).pipe(
-      catchError(error => throwError(() => new Error('Error al obtener los detalles de pagos de beneficios')))
-    );
-  }
-
-  getPagoDeduccionesCompleAfil(dni: string, periodoInicio: string, periodoFinalizacion: string): Observable<any> {
-    const params = this.getRequestParams(dni, periodoInicio, periodoFinalizacion);
-    return this.http.get(`${environment.API_URL}/api/planilla/deducciones-complementaria-afil`, { params }).pipe(
-      catchError(error => throwError(() => new Error('Error al obtener las deducciones específicas')))
-    );
-  }
-
-  getPagoBeneficioOrdiBenef(dni: string, periodoInicio: string, periodoFinalizacion: string): Observable<any> {
-    const params = this.getRequestParams(dni, periodoInicio, periodoFinalizacion);
-    return this.http.get(`${environment.API_URL}/api/planilla/beneficios-ordinaria-benef`, { params }).pipe(
-      catchError(error => throwError(() => new Error('Error al obtener los detalles de pagos')))
-    );
-  }
-
   getPagoDeduccionesOrdiBenef(dni: string, periodoInicio: string, periodoFinalizacion: string): Observable<any> {
     const params = this.getRequestParams(dni, periodoInicio, periodoFinalizacion);
     return this.http.get(`${environment.API_URL}/api/planilla/deduccion-ordinaria-benef`, { params }).pipe(
       catchError(error => throwError(() => new Error('Error al obtener los detalles de deducciones')))
-    );
-  }
-
-  getPagoBeneficioOrdiAfil(dni: string, periodoInicio: string, periodoFinalizacion: string): Observable<any> {
-    const params = this.getRequestParams(dni, periodoInicio, periodoFinalizacion);
-    return this.http.get(`${environment.API_URL}/api/planilla/beneficios-ordinaria-afil`, { params }).pipe(
-      catchError(error => throwError(() => new Error('Error al obtener el monto a pagar por beneficio')))
-    );
-  }
-
-  getPagoDeduccionesOrdiAfil(dni: string, periodoInicio: string, periodoFinalizacion: string): Observable<any> {
-    const params = this.getRequestParams(dni, periodoInicio, periodoFinalizacion);
-    return this.http.get(`${environment.API_URL}/api/planilla/deduccion-ordinaria-afil`, { params }).pipe(
-      catchError(error => throwError(() => new Error('Error al obtener el monto por deducciones')))
     );
   }
 
@@ -311,8 +291,6 @@ export class PlanillaService {
     throw 'Error en la llamada HTTP';
   }
 
-
-
   obtenerTotalPlanilla(idPlanilla: string): Observable<any> {
     return this.http.get(`${environment.API_URL}/api/planilla/total/${idPlanilla}`).pipe(
       catchError(this.handleError)
@@ -325,8 +303,14 @@ export class PlanillaService {
   }
 
   createPlanilla(tipoPlanillaData: any): Observable<any> {
-    return this.http.post(`${environment.API_URL}/api/planilla`, tipoPlanillaData);
+    return this.http.post(`${environment.API_URL}/api/planilla`, tipoPlanillaData).pipe(
+      catchError((error: HttpErrorResponse) => {
+        return throwError(() => error);
+      })
+    );
   }
+
+
 
   findAllTipoPlanilla(limit: number = 10, offset: number = 0): Observable<any> {
     let params = new HttpParams()
@@ -367,17 +351,6 @@ export class PlanillaService {
     return this.http.get(`${environment.API_URL}/api/planilla/Definitiva/personas/${codigo_planilla}`);
   }
 
-  getBeneficiosNoAplicadas(periodoInicio: string, periodoFinalizacion: string): Observable<any> {
-
-    // Construye los parámetros de la consulta
-    let params = new HttpParams()
-      .set('periodoInicio', periodoInicio)
-      .set('periodoFinalizacion', periodoFinalizacion);
-
-    // Realiza la petición GET al backend con los parámetros
-    return this.http.get(`${environment.API_URL}/api/planilla/beneficios-no-aplicadas`, { params });
-  }
-
   updateTipoPlanilla(id: string, tipoPlanillaData: any): Observable<any> {
     return this.http.patch(`${environment.API_URL}/api/tipo-planilla/${id}`, tipoPlanillaData);
   }
@@ -399,16 +372,16 @@ export class PlanillaService {
     this.usersSource.next(users);
   }
 
-  getPlanillaPrelimiar(codPlanilla: string): Observable<any> {
-    let params = new HttpParams()
-      .set('codPlanilla', codPlanilla)
-    return this.http.get(`${environment.API_URL}/api/planilla/preliminar`, { params });
-  }
-
   getPlanillas(codPlanilla: string): Observable<any> {
     let params = new HttpParams()
       .set('codPlanilla', codPlanilla)
     return this.http.get(`${environment.API_URL}/api/planilla/todas`, { params });
+  }
+
+  getPlanillaPrelimiar(codPlanilla: string): Observable<any> {
+    let params = new HttpParams()
+      .set('codPlanilla', codPlanilla)
+    return this.http.get(`${environment.API_URL}/api/planilla/ObtenerPreliminar`, { params });
   }
 
   getBeneficiosDefinitiva(idPlanilla: string, idPersona: string): Observable<any> {

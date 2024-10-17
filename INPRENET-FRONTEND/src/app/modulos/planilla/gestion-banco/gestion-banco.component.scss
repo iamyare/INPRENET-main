@@ -1,0 +1,52 @@
+.buscar-persona-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 20px;
+  padding: 10px 20px;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  background-color: #fafafa;
+  max-width: 500px;
+  margin: 20px auto;
+}
+
+.buscar-persona-container h1 {
+  margin-bottom: 10px;
+  font-size: 1.5em;
+}
+
+.buscar-persona-container mat-form-field {
+  width: 100%;
+  max-width: 400px;
+  margin-bottom: 10px;
+}
+
+.buscar-persona-container button {
+  margin-bottom: 10px;
+  width: 100%;
+  max-width: 400px;
+}
+
+.error-message {
+  color: red;
+  font-weight: bold;
+  margin-top: 10px;
+}
+
+.header-actions {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.search-again {
+  margin-right: 10px;
+}
+
+.search-text {
+  font-size: 14px;
+  color: #1c9588;
+}

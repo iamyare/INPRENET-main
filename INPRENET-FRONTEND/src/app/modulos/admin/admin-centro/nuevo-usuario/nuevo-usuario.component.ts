@@ -91,8 +91,6 @@ export class NuevoUsuarioComponent implements OnInit {
         numeroEmpleado: this.form.value.numeroEmpleado
       };
 
-      console.log(formData);
-
       this.authSvc.preRegistro(formData).subscribe({
         next: () => {
           this.toastr.success('Cuenta creada exitosamente!', 'Éxito');

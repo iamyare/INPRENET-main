@@ -1,9 +1,9 @@
-<form [formGroup]="form" #myForm="ngForm" change="getLabel()">
-  <app-dat-puesto-trab [datos]="formPuestTrab" (newDatDatosPuestTrab)="setDatosPuetTrab1($event)"></app-dat-puesto-trab>
+<form [formGroup]="formPuestTrab">
+  <app-dat-puesto-trab [formGroup]="formPuestTrab"></app-dat-puesto-trab>
 </form>
 
 <div style="text-align: center;">
-  <button mat-raised-button color="primary" style="color: white; margin: 1% 0 1% 0" [disabled]="form.invalid"
+  <button mat-raised-button color="primary" style="color: white; margin: 1% 0 1% 0" [disabled]="formPuestTrab.invalid"
     (click)="guardar()">
     Guardar
   </button>

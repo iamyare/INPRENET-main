@@ -7,6 +7,8 @@ import { FieldConfig } from 'src/app/shared/Interfaces/field-config';
 import { TableColumn } from 'src/app/shared/Interfaces/table-column';
 import { convertirFecha } from 'src/app/shared/functions/formatoFecha';
 import { DialogDesgloseComponent } from '../dialog-desglose/dialog-desglose.component';
+import { DeduccionesService } from 'src/app/services/deducciones.service';
+import { DynamicDialogComponent } from 'src/app/components/dinamicos/dynamic-dialog/dynamic-dialog.component';
 
 @Component({
   selector: 'app-verplanprelcomp',
@@ -15,7 +17,7 @@ import { DialogDesgloseComponent } from '../dialog-desglose/dialog-desglose.comp
 })
 export class VerplanprelcompComponent implements OnInit {
   convertirFecha = convertirFecha;
-
+  idPlanilla: any = "";
   dataPlan: any;
   codigoPlanilla = "";
   datosFormateados: any;
@@ -33,7 +35,8 @@ export class VerplanprelcompComponent implements OnInit {
   constructor(
     private planillaService: PlanillaService,
     private toastr: ToastrService,
-    public dialog: MatDialog
+    public dialog: MatDialog,
+    private deduccionSVC: DeduccionesService
   ) {
   }
 
@@ -54,6 +57,16 @@ export class VerplanprelcompComponent implements OnInit {
       {
         header: 'Nombre Completo',
         col: 'nombre_completo',
+        isEditable: true
+      },
+      {
+        header: 'Banco',
+        col: 'nombre_banco',
+        isEditable: true
+      },
+      {
+        header: 'Numero de cuenta',
+        col: 'num_cuenta',
         isEditable: true
       },
       {
@@ -88,6 +101,108 @@ export class VerplanprelcompComponent implements OnInit {
   }
 
   getPlanilla = async () => {
+    try {
+      this.planillaService.getPlanillaPrelimiar(this.codigoPlanilla).subscribe(
+        {
+          next: async (response) => {
+            if (response) {
+              this.calcularTotales(this.codigoPlanilla)
+
+              this.detallePlanilla = response;
+              this.getFilas(response.codigo_planilla).then(() => this.cargar());
+              this.idPlanilla = response.id_planilla;
+              this.verDat = true;
+            } else {
+              this.detallePlanilla = [];
+              this.datosTabl = [];
+              this.toastr.error(`La planilla con el código de planilla:${this.codigoPlanilla}  no existe `);
+            }
+            if (this.ejecF) {
+              this.getFilas("").then(async () => {
+                const temp = await this.cargar();
+                this.verDat = true;
+                return temp;
+              });
+            }
+          },
+          error: (error) => {
+            let mensajeError = 'Error desconocido al buscar la planilla';
+
+            if (error.error && error.error.message) {
+              mensajeError = error.error.message;
+            } else if (typeof error.error === 'string') {
+              mensajeError = error.error;
+            }
+
+            this.toastr.error(mensajeError);
+          }
+        }
+      );
+    } catch (error) {
+      console.error("Error al obtener datos de Tipo Planilla", error);
+    }
+  };
+
+  calcularTotales = async (cod_planilla: string) => {
+    try {
+      if (!cod_planilla) {
+        this.toastr.error('Debe proporcionar un código de planilla válido');
+        return;
+      }
+
+      this.planillaService.getPlanillasPreliminares(cod_planilla).subscribe(
+        {
+          next: (response) => {
+            let totalBeneficios = 0;
+            let deduccionesI = 0;
+            let deduccionesT = 0;
+            let totalDeducciones = 0
+
+            this.datosTabl = response.map((item: any) => {
+              totalBeneficios += item.TOTAL_BENEFICIOS || 0;
+              deduccionesI += item.TOTAL_DEDUCCIONES_INPREMA || 0;
+              deduccionesT += item.TOTAL_DEDUCCIONES_TERCEROS || 0;
+              totalDeducciones = deduccionesI + deduccionesT;
+
+              let respons: any = {
+                id_afiliado: item.ID_PERSONA,
+                dni: item.DNI,
+                NOMBRE_COMPLETO: item.NOMBRE_COMPLETO,
+                TOTAL_BENEFICIOS: item.TOTAL_BENEFICIOS,
+                TOTAL_DEDUCCIONES_INPREMA: item.TOTAL_TOTAL_DEDUCCIONES_INPREMA || 0,
+                TOTAL_DEDUCCIONES_TERCEROS: item.TOTAL_DEDUCCIONES_TERCEROS || 0,
+                fecha_cierre: item.fecha_cierre,
+                tipo_afiliado: item.tipo_afiliado,
+                "total": item.TOTAL_NETO,
+
+                //correo_1: item.correo_1
+                //beneficiosNombres: item.beneficiosNombres,
+                //BENEFICIOSIDS: item.BENEFICIOSIDS,
+              };
+
+              return respons
+            });
+
+            this.detallePlanilla.totalBeneficios = totalBeneficios;
+            this.detallePlanilla.deduccionesI = deduccionesI;
+            this.detallePlanilla.deduccionesT = deduccionesT;
+            this.detallePlanilla.totalNeto = totalBeneficios - (totalDeducciones);
+
+            this.verDat = true;
+          },
+          error: (error) => {
+            console.error("Error al obtener datos de Tipo Planilla", error);
+            this.toastr.error('Error al obtener datos de la planilla');
+          }
+        }
+      );
+    } catch (error) {
+      console.error("Error al calcular totales", error);
+      this.toastr.error('Error al calcular totales');
+    }
+  };
+
+  /* getPlanilla = async () => {
     this.getFilas([]).then(async () => {
       const temp = await this.cargar();
       this.verDat = true;
@@ -95,19 +210,23 @@ export class VerplanprelcompComponent implements OnInit {
     });
 
     try {
-      this.planillaService.getPlanillasPreliminares(this.datosFormateados.value.codigo_planilla).subscribe(
+      this.planillaService.getPlanillasPreliminares(this.codigoPlanilla).subscribe(
         {
           next: async (response) => {
+            console.log(response);
+
             if (response && response.length > 0) {
               this.detallePlanilla = response[0];
-              this.datosTabl = await this.getFilas(response);
+              this.datosTabl = await this.getFilas(this.codigoPlanilla);
+              console.log(this.datosTabl);
+
               this.codigoPlanilla = response[0]?.codigo_planilla || '';
 
               this.verDat = true;
             } else {
               this.detallePlanilla = null;
               this.datosTabl = [];
-              this.toastr.error(`La planilla con el código de planilla: ${this.datosFormateados.value.codigo_planilla} no existe`);
+              this.toastr.error(`La planilla con el código de planilla: ${this.codigoPlanilla} no existe`);
             }
 
             if (this.ejecF) {
@@ -136,34 +255,48 @@ export class VerplanprelcompComponent implements OnInit {
     } catch (error) {
       console.error("Error al obtener datos de la planilla", error);
     }
-  };
+  }; */
 
-  getFilas = async (data: any) => {
-
+  getFilas = async (cod_planilla: string) => {
     try {
-      if (!data) {
-        throw new Error('Datos no disponibles');
+      this.dataPlan = [];
+      this.data = await this.planillaService.getPlanillasPreliminares(cod_planilla).toPromise();
+      if (this.data) {
+        this.dataPlan = this.data.map((item: any) => {
+
+          const deduccionesI: number = parseFloat(item.TOTAL_DEDUCCIONES_INPREMA) || 0
+          const deduccionesT: number = parseFloat(item.TOTAL_DEDUCCIONES_TERCEROS) || 0
+          const deducciones: number = deduccionesI + deduccionesT
+
+          return {
+            id_afiliado: item.ID_PERSONA,
+            n_identificacion: item.N_IDENTIFICACION,
+            TIPO_PERSONA: item.TIPO_PERSONA,
+            nombre_completo: item.NOMBRE_COMPLETO,
+            total_beneficios: item.TOTAL_BENEFICIOS,
+            total_deducciones_inprema: item.TOTAL_DEDUCCIONES_INPREMA || 0,
+            total_deducciones_terceros: item.TOTAL_DEDUCCIONES_TERCEROS || 0,
+            "total": item.TOTAL_NETO,
+            correo_1: item.correo_1,
+            fecha_cierre: item.fecha_cierre,
+            num_cuenta: item.NUM_CUENTA,
+            nombre_banco: item.NOMBRE_BANCO
+
+            /* BENEFICIOSIDS: item.BENEFICIOSIDS,
+            beneficiosNombres: item.beneficiosNombres, */
+          };
+        });
+        return this.dataPlan;
       }
 
-      this.dataPlan = data.map((item: any) => {
-        return {
-          id_afiliado: item.ID_PERSONA,
-          n_identificacion: item.N_IDENTIFICACION,
-          nombre_completo: item.NOMBRE_COMPLETO,
-          total_beneficios: item.TOTAL_BENEFICIOS,
-          total_deducciones_terceros: item.TOTAL_DEDUCCIONES_TERCEROS,
-          total_deducciones_inprema: item.TOTAL_DEDUCCIONES_INPREMA,
-          total: item.total_beneficios - (item.total_deducciones_terceros + item.total_deducciones_inprema)
-        };
-      });
-      return this.dataPlan;
     } catch (error) {
       console.error("Error al obtener datos de deducciones", error);
       throw error;
     }
   }
 
-  ejecutarFuncionAsincronaDesdeOtroComponente(funcion: (data: any) => Promise<void>) {
+
+  ejecutarFuncionAsincronaDesdeOtroComponente(funcion: (data: any) => Promise<boolean>) {
     this.ejecF = funcion;
   }
 
@@ -176,24 +309,68 @@ export class VerplanprelcompComponent implements OnInit {
 
   /* Maneja los beneficios y deducciones */
   manejarAccionUno(row: any) {
-    this.planillaService.getDesglosePorPersonaPlanilla(row.id_afiliado, this.datosFormateados.value.codigo_planilla).subscribe({
+    let logs: any[] = [];
+    this.planillaService.getDesglosePorPersonaPlanilla(row.id_afiliado, this.codigoPlanilla).subscribe({
       next: (response) => {
-        const { beneficios, deduccionesInprema, deduccionesTerceros } = response;
-        const data = {
-          beneficios,
-          deduccionesInprema,
-          deduccionesTerceros
-        };
-        this.dialog.open(DialogDesgloseComponent, {
-          width: '70%',
-          data: data
+        const { beneficios } = response;
+
+        const data = beneficios;
+
+        logs.push({ message: 'Datos De Beneficios:', detail: data || [], type: 'beneficios' });
+
+        const dialogRef = this.dialog.open(DynamicDialogComponent, {
+          width: '50%',
+          data: { logs: logs, type: 'beneficios', mostrarAccion: true, }
         });
+
+        // Escuchar el evento deduccionEliminada para refrescar los datos
+        dialogRef.componentInstance.deduccionEliminada.subscribe(() => {
+          this.getFilas(this.codigoPlanilla).then(() => this.cargar());
+        });
+
       },
       error: (error) => {
         console.error('Error al obtener desglose por persona', error);
         this.toastr.error('Error al obtener desglose por persona');
       }
     });
+  }
+
+  manejarAccionDos(row: any) {
+    let logs: any[] = [];
+    logs.push({ message: `DNI:${row.n_identificacion}`, detail: row });
+    logs.push({ message: `Nombre Completo:${row.nombre_completo}`, detail: row });
+
+    this.deduccionSVC.getDeduccionesByPersonaAndBenef(row.id_afiliado, row.ID_BENEFICIO, this.idPlanilla).subscribe({
+      next: (response1) => {
+        if (response1) {
+          const data = response1;
+
+          logs.push({ message: 'Datos De Deducciones:', detail: data || [], type: 'deducciones' });
+
+          const dialogRef = this.dialog.open(DynamicDialogComponent, {
+            width: '50%',
+            data: { logs: logs, type: 'deduccion', mostrarAccion: true, }
+          });
+
+          // Escuchar el evento deduccionEliminada para refrescar los datos
+          dialogRef.componentInstance.deduccionEliminada.subscribe(() => {
+
+            this.getFilas(this.codigoPlanilla).then(() => this.cargar());
+          });
+        }
+      },
+    });
+
+
+    /* this.planillaService.getDeduccionesDefinitiva(this.idPlanilla, row.id_afiliado).subscribe({
+      next: (response) => {
+        logs.push({ message: 'Datos De Deducciones:', detail: response });
+      },
+      error: (error) => {
+        logs.push({ message: 'Error al obtener las deducciones inconsistentes:', detail: error });
+      }
+    }); */
   }
 
   openLogDialog(logs: any[]) {
@@ -204,7 +381,7 @@ export class VerplanprelcompComponent implements OnInit {
   }
 
   actualizarFechaCierrePlanilla(): void {
-    this.updatePlanillaACerrada(this.datosFormateados.value.codigo_planilla);
+    this.updatePlanillaACerrada(this.codigoPlanilla);
   }
 
   updatePlanillaACerrada(codigo_planilla: string): void {
@@ -256,5 +433,10 @@ export class VerplanprelcompComponent implements OnInit {
         this.toastr.error('Error al actualizar el estado de los beneficios');
       }
     }); */
+  }
+
+  getElemSeleccionados(event: any) {
+    this.codigoPlanilla = event.codigo_planilla;
+    this.getPlanilla()
   }
 }

@@ -9,6 +9,6 @@ export interface FieldArrays {
   validations?: any[];
   maxDate?: Date;
   minDate?: Date;
-  startDateControlName?: string;  // Añadido para el rango de fechas
-  endDateControlName?: string;    // Añadido para el rango de fechas
+  startDateControlName?: string;
+  endDateControlName?: string;
 }

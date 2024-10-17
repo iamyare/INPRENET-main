@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseInterceptors, UploadedFile, Response, HttpCode, HttpStatus, Query, BadRequestException, Res, HttpException } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseInterceptors, UploadedFile, Response, HttpCode, HttpStatus, Query, BadRequestException, Res, HttpException, ParseIntPipe } from '@nestjs/common';
 import { DetalleDeduccionService } from './detalle-deduccion.service';
 import { CreateDetalleDeduccionDto } from './dto/create-detalle-deduccion.dto';
 import { UpdateDetalleDeduccionDto } from './dto/update-detalle-deduccion.dto';
@@ -9,21 +9,30 @@ import { ApiTags } from '@nestjs/swagger';
 export class DetalleDeduccionController {
   constructor(private readonly detalleDeduccionService: DetalleDeduccionService) { }
 
-  @Post('crearDeExcel')
-  @HttpCode(HttpStatus.CREATED)
-  async insertarDetalles(@Body() data: any[]) {
-    try {
-      await this.detalleDeduccionService.insertarDetalles(data);
-      return {
-        message: 'Detalles de deducción insertados exitosamente',
-      };
-    } catch (error) {
-      if (error instanceof HttpException) {
-        throw error;
-      } else {
-        throw new HttpException('Error interno del servidor', HttpStatus.INTERNAL_SERVER_ERROR);
-      }
-    }
+  @Get('detallePorCodDeduccion')
+  async obtenerDetalleYDescargarExcel(
+    @Query('periodoInicio') periodoInicio: string,
+    @Query('periodoFinalizacion') periodoFinalizacion: string,
+    @Query('idTiposPlanilla') idTiposPlanilla: string,
+    @Query('codDeduccion') codDeduccion: number,
+    @Res() res
+  ) {
+    const tiposPlanillaArray = idTiposPlanilla.split(',').map(Number);
+    
+    const buffer = await this.detalleDeduccionService.obtenerDetallePorDeduccionPorCodigoYGenerarExcel(
+      periodoInicio,
+      periodoFinalizacion,
+      tiposPlanillaArray,
+      codDeduccion
+    );
+
+    // Configurar respuesta para descargar el archivo Excel
+    res.set({
+      'Content-Type': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      'Content-Disposition': `attachment; filename="Deducciones_${codDeduccion}.xlsx"`,
+    });
+
+    res.send(buffer);
   }
 
   @Patch('actualizar-estado/:idPlanilla')
@@ -152,9 +161,9 @@ export class DetalleDeduccionController {
   } */
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.detalleDeduccionService.remove(+id);
-  }
+  async delete(@Param('id', ParseIntPipe) id: number): Promise<void> {
+     return this.detalleDeduccionService.deleteDetalleDeduccion(id);
+    }
 
 
 }

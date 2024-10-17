@@ -6,7 +6,7 @@ import { AuthService } from './auth.service';
   providedIn: 'root'
 })
 export class NavService {
-  constructor(private authService: AuthService) {}
+  constructor(private authService: AuthService) { }
 
   getNavItems(): INavData[] {
     //const userRole = this.authService.getUserRole();
@@ -139,7 +139,7 @@ export class NavService {
           },
           {
             url: '/Planilla/ver-planillas',
-            name: 'Ver Planillas',
+            name: 'Ver Todas Las Planillas',
           },
         ]
       }

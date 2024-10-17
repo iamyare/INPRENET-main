@@ -1,6 +1,8 @@
 import { Net_Tipo_Persona } from "src/modules/Persona/entities/net_tipo_persona.entity";
 import { Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 import { Net_Beneficio } from "../../beneficio/entities/net_beneficio.entity";
+import { Net_Planilla } from "../../planilla/entities/net_planilla.entity";
+import { Net_TipoPlanilla } from "../../tipo-planilla/entities/tipo-planilla.entity";
 
 @Entity({ name: 'NET_BENEFICIO_TIPO_PERSONA' })
 export class Net_Beneficio_Tipo_Persona {
@@ -14,5 +16,9 @@ export class Net_Beneficio_Tipo_Persona {
     @ManyToOne(() => Net_Tipo_Persona, tipPersona => tipPersona.benfTipoPersona)
     @JoinColumn({ name: 'ID_TIPO_PERSONA', foreignKeyConstraintName: "FK_ID_TIPO_PERSONA_BEN_TIPO_PERS" })
     tipPersona: Net_Tipo_Persona;
+
+    @ManyToOne(() => Net_TipoPlanilla, tipoP => tipoP.bentipPer)
+    @JoinColumn({ name: 'ID_TIPO_PLANILLA', foreignKeyConstraintName: "FK_ID_TIPO_PLANILLA_BEN_TIPO_PERS" })
+    tipo_planilla: Net_TipoPlanilla;
 
 }

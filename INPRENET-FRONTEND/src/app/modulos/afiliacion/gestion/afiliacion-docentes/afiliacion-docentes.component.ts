@@ -1,7 +1,8 @@
 import { Component, OnInit } from '@angular/core';
-import { AbstractControl, FormBuilder, FormGroup } from '@angular/forms';
+import { FormBuilder, FormGroup } from '@angular/forms';
 import { AfiliacionService } from 'src/app/services/afiliacion.service';
 import { DatosEstaticosService } from 'src/app/services/datos-estaticos.service';
+import pdfMake from 'pdfmake/build/pdfmake';
 
 @Component({
   selector: 'app-afiliacion-docentes',
@@ -11,7 +12,6 @@ import { DatosEstaticosService } from 'src/app/services/datos-estaticos.service'
 export class AfiliacionDocentesComponent implements OnInit {
   steps = [
     { label: 'Datos Generales Del Docente', isActive: true },
-    { label: 'Familiares', isActive: false },
     { label: 'Colegio Magisterial', isActive: false },
     { label: 'Datos Cuentas Bancarias', isActive: false },
     { label: 'Centros De Trabajo', isActive: false },
@@ -91,10 +91,7 @@ export class AfiliacionDocentesComponent implements OnInit {
   handleDatosGeneralesChange(data: any): void {
     this.datosGeneralesData = data;
     this.pepsData = data.peps;
-  }
-
-  handleFamiliaresChange(data: any): void {
-    this.familiaresData = data;
+    this.familiaresData = data.familiares;
   }
 
   handleOtrasFuentesIngreso(otrasFuentesData: any): void {
@@ -119,10 +116,6 @@ export class AfiliacionDocentesComponent implements OnInit {
 
   onDatosGeneralesFormUpdate(formValues: any): void {
     this.datosGeneralesData = formValues;
-  }
-
-  onFamiliaresFormUpdate(formValues: any): void {
-    this.familiaresData = formValues;
   }
 
   onColegioMagisterialFormUpdate(formValues: any): void {
@@ -155,11 +148,13 @@ export class AfiliacionDocentesComponent implements OnInit {
         n_identificacion: beneficiario.persona.n_identificacion,
         primer_nombre: beneficiario.persona.primer_nombre,
         segundo_nombre: beneficiario.persona.segundo_nombre,
+        direccion_residencia: beneficiario.persona.direccion_residencia,
         tercer_nombre: beneficiario.persona.tercer_nombre,
         primer_apellido: beneficiario.persona.primer_apellido,
         segundo_apellido: beneficiario.persona.segundo_apellido,
+        parentesco: beneficiario.persona.parentesco,
+        telefono_1: beneficiario.persona.telefono_1,
         genero: beneficiario.persona.genero,
-        sexo: beneficiario.persona.sexo,
         fecha_nacimiento: beneficiario.persona.fecha_nacimiento,
         discapacidades: beneficiario.persona.discapacidades
           .map((selected: boolean, dIndex: number) => selected ? { id_discapacidad: this.tipoDiscapacidad[dIndex].value } : null)
@@ -174,7 +169,10 @@ export class AfiliacionDocentesComponent implements OnInit {
       fecha_fin: pep.endDate,
     })) || [];
 
+
     const persona = {
+      departamentoResidencia: this.datosGeneralesData.departamentoResidencia || 'N/A',
+      municipioResidencia: this.datosGeneralesData.municipioResidencia || 'N/A',
       id_tipo_identificacion: this.datosGeneralesData.refpers[0].id_tipo_identificacion,
       id_pais_nacionalidad: this.datosGeneralesData.refpers[0].id_pais,
       n_identificacion: this.datosGeneralesData.refpers[0].n_identificacion,
@@ -207,13 +205,14 @@ export class AfiliacionDocentesComponent implements OnInit {
       peps: peps
     };
 
+
     const detalle = {
       eliminado: "NO",
       tipo_persona: "AFILIADO",
       nombre_estado: "ACTIVO"
     };
 
-    const familiares = this.familiaresData.map((familiar: any) => ({
+    const familiares = Array.isArray(this.familiaresData) ? this.familiaresData.map((familiar: any) => ({
       parentesco: familiar.parentesco,
       persona_referencia: {
         primer_nombre: familiar.primer_nombre,
@@ -223,7 +222,23 @@ export class AfiliacionDocentesComponent implements OnInit {
         segundo_apellido: familiar.segundo_apellido,
         n_identificacion: familiar.n_identificacion
       }
-    }));
+    })) : [];
+
+    const conyugeData = this.refPersData?.conyuge;
+    if (conyugeData) {
+      familiares.push({
+        parentesco: 'CÓNYUGUE',
+        persona_referencia: {
+          primer_nombre: conyugeData.persona_referencia.primer_nombre,
+          segundo_nombre: conyugeData.persona_referencia.segundo_nombre,
+          tercer_nombre: conyugeData.persona_referencia.tercer_nombre,
+          primer_apellido: conyugeData.persona_referencia.primer_apellido,
+          segundo_apellido: conyugeData.persona_referencia.segundo_apellido,
+          n_identificacion: conyugeData.persona_referencia.n_identificacion
+        }
+      });
+    }
+
 
     const allData = {
       persona: persona,
@@ -236,8 +251,13 @@ export class AfiliacionDocentesComponent implements OnInit {
       beneficiarios: beneficiarios,
       familiares: familiares
     };
+    //console.log(allData);
 
-    console.log('Datos Completos:', allData);
+    const docDefinition: any = this.getDocumentDefinition(allData.beneficiarios, allData.persona);
+
+    // Generar el PDF con pdfMake
+    pdfMake.createPdf(docDefinition).download('afiliacion-docentes.pdf');
+
     //this.enviarDatos(allData);
   }
 
@@ -277,4 +297,244 @@ export class AfiliacionDocentesComponent implements OnInit {
   handleImageCaptured(image: string): void {
     this.fotoPerfil = image;
   }
+
+  getDocumentDefinition(data: any[], userDetails: any) {
+    // Revisar los datos y asignar valores por defecto si no existen
+    data.forEach(item => {
+      item.numero = item.numero || 'N/A';
+      item.nombre = `${item.persona.primer_nombre || 'N/A'} ${item.persona.segundo_nombre || ''} ${item.persona.primer_apellido || 'N/A'} ${item.persona.segundo_apellido || ''}`;
+      item.fechaNacimiento = item.persona.fecha_nacimiento || 'N/A';
+      item.identidad = item.persona.n_identificacion || 'N/A';
+      item.parentesco = item.parentesco || 'N/A';
+      item.porcentaje = item.porcentaje || 'N/A';
+      item.direccion_residencia = item.direccion_residencia || 'N/A';
+      item.telefono_1 = item.telefono_1 || 'N/A';
+    });
+
+    userDetails.nombre = userDetails.primer_nombre + " " + userDetails.segundo_nombre + " " + userDetails.primer_apellido + " " + userDetails.segundo_apellido || 'N/A';
+    userDetails.grado_academico = userDetails.grado_academico || 'N/A';
+    userDetails.centroEducativo = userDetails.centroEducativo || 'N/A';
+    userDetails.municipio = userDetails.municipio || 'N/A';
+    userDetails.departamento = userDetails.departamento || 'N/A';
+    userDetails.n_identificacion = userDetails.n_identificacion || 'N/A';
+
+    // Definir el tipo correcto para los objetos de la tabla
+    interface TableCell {
+      text?: string;
+      style?: string;
+      rowSpan?: number;
+      colSpan?: number;
+      fillColor?: string;
+      alignment?: string;
+    }
+
+    // Transformar los datos en el formato requerido por pdfMake
+    const body: TableCell[][] = [
+      [
+        { text: 'N°', style: 'tableHeader', fillColor: '#CCCCCC', alignment: 'center' },
+        { text: 'NOMBRE COMPLETO', style: 'tableHeader', alignment: 'center' },
+        { text: 'FECHA DE NACIMIENTO', style: 'tableHeader', alignment: 'center' },
+        { text: 'IDENTIDAD', style: 'tableHeader', alignment: 'center' },
+        { text: 'PARENTESCO', style: 'tableHeader', alignment: 'center' },
+        { text: '%', style: 'tableHeader', alignment: 'center' },
+      ]
+    ];
+
+    data.forEach((item, index) => {
+      // Verificar que la fecha sea válida y convertirla al formato deseado
+      const fechaNacimiento = item.fechaNacimiento
+        ? new Date(item.fechaNacimiento).toLocaleDateString('es-ES', {
+          day: '2-digit',
+          month: '2-digit',
+          year: 'numeric',
+        })
+        : 'N/A';
+
+      body.push(
+        [
+          { text: (index + 1).toString(), rowSpan: 2, style: 'tableRowLarge', fillColor: '#CCCCCC', alignment: 'center' },
+          { text: item.nombre, style: 'tableRowLarge', alignment: 'center' },
+          { text: fechaNacimiento, style: 'tableRowLarge', alignment: 'center' }, // Usar la fecha formateada
+          { text: item.identidad, style: 'tableRowLarge', alignment: 'center' },
+          { text: item.persona.parentesco, style: 'tableRowLarge', alignment: 'center' },
+          { text: item.porcentaje, style: 'tableRowLarge', alignment: 'center' },
+        ],
+        [
+          {},
+          { text: 'DIRECCIÓN', style: 'tableRowLarge', fillColor: '#CCCCCC', alignment: 'center' },
+          { text: item.persona.direccion_residencia, style: 'tableRowLarge', colSpan: 2, alignment: 'center' },
+          { text: '', style: 'tableRowLarge' },
+          { text: 'TELEFONO/CEL', style: 'tableRowLarge', fillColor: '#CCCCCC', alignment: 'center' },
+          { text: item.persona.telefono_1, style: 'tableRowLarge', alignment: 'center' },
+        ]
+      );
+    });
+
+    return {
+      content: [
+        {
+          text: [
+            'Señores de la Comisión Interventora del INPREMA\nPresente.\n\nYo ',
+            { text: userDetails.nombre, bold: true },
+            ', mayor de edad, laborando como docente en el nivel ',
+            { text: userDetails.grado_academico, bold: true },
+            ', del Centro Educativo ',
+            { text: userDetails.centroEducativo, bold: true },
+            ', ubicado en el Municipio ',
+            { text: userDetails.municipioResidencia, bold: true },
+            ' del Departamento ',
+            { text: userDetails.departamentoResidencia, bold: true },
+            ', con Identidad N°. ',
+            { text: userDetails.n_identificacion, bold: true },
+            ', comparezco ante el Instituto Nacional de Previsión del magisterio a registrar mis beneficiarios legales de la manera siguiente:\n\n'
+          ],
+          style: 'introText'
+        },
+        {
+          table: {
+            widths: [20, '*', '*', '*', '*', '*'],
+            body: body
+          }
+        },
+        {
+          text: '', // Separación adicional
+          margin: [0, 20, 0, 0]
+        },
+        {
+          stack: [
+            {
+              text: [
+                'También dispongo, que si alguno de mis beneficiarios (as) designados en este instrumento falleciere, el porcentaje de él o ella asignado, se distribuya en partes iguales entre los sobrevivientes registrados. Me reservo el derecho de actualizar, modificar o cancelar la presente DESIGNACIÓN, cuando lo estime conveniente.\n\n',
+                { text: 'Nota: Con esta designación dejo sin valor ni efecto la presentada anteriormente.\n\n', bold: true }
+              ],
+              style: 'mainText'
+            },
+            {
+              columns: [
+                {
+                  width: '*',
+                  stack: [
+                    {
+                      text: 'Lugar y Fecha: _______________________________________________________________',
+                      margin: [0, 20, 0, 15]  // Añadir margen adicional
+                    },
+                    {
+                      text: '(f) _______________________________',
+                      margin: [0, 15, 0, 0]  // Añadir margen adicional
+                    }
+                  ]
+                },
+                {
+                  width: 'auto',
+                  stack: [
+                    {
+                      canvas: [
+                        {
+                          type: 'rect',
+                          x: 0,
+                          y: 0,
+                          w: 80,
+                          h: 80,
+                          lineWidth: 1,
+                          lineColor: 'black'
+                        }
+                      ],
+                      margin: [0, -25, 0, 0]  // Ajustar la posición vertical del cuadro de huella
+                    },
+                    {
+                      text: 'Huella',
+                      alignment: 'center',
+                      margin: [0, -60, 0, 0]  // Ajustar la posición vertical de la palabra "Huella"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              style: 'usoExclusivo',
+              table: {
+                widths: ['*'],
+                body: [
+                  [{ text: 'PARA USO EXCLUSIVO DEL INPREMA', style: 'tableHeader', alignment: 'center', fillColor: '#CCCCCC' }],
+                  [
+                    {
+                      columns: [
+                        {
+                          width: '50%',
+                          stack: [
+                            { text: 'Nombre del empleado: ___________________________', margin: [0, 10] },
+                            { text: 'Código: _______', margin: [0, 10] }
+                          ],
+                          style: 'subHeader'
+                        },
+                        {
+                          width: '50%',
+                          stack: [
+                            { text: '________________________________', alignment: 'right', margin: [0, 10] },
+                            { text: 'Firma', alignment: 'center', margin: [0, 10] }
+                          ],
+                          style: 'subHeader'
+                        }
+                      ]
+                    }
+                  ]
+                ]
+              },
+              layout: {
+                hLineWidth: function (i: any, node: any) {
+                  return (i === 0 || i === node.table.body.length) ? 1 : 0.5;
+                },
+                vLineWidth: function (i: any, node: any) {
+                  return (i === 0 || i === node.table.widths.length) ? 1 : 0.5;
+                }
+              },
+              margin: [0, 20, 0, 0]  // Añadir margen adicional para evitar solapamiento
+            }
+          ]
+        }
+      ],
+      styles: {
+        introText: {
+          fontSize: 12, // Ajusta el tamaño del texto aquí
+          margin: [0, 0, 0, 10]
+        },
+        mainText: {
+          fontSize: 12, // Ajusta el tamaño del texto aquí
+          margin: [0, 0, 0, 10]
+        },
+        subHeader: {
+          fontSize: 10,
+          bold: false,
+          margin: [0, 0, 0, 10]
+        },
+        tableHeader: {
+          bold: true,
+          fontSize: 10,
+          color: 'black',
+          fillColor: '#CCCCCC',
+          alignment: 'center'
+        },
+        tableRow: {
+          fontSize: 9,
+          color: 'black',
+          alignment: 'center'
+        },
+        tableRowLarge: {
+          fontSize: 11,
+          color: 'black',
+          alignment: 'center'
+        },
+        grayBackground: {
+          fillColor: '#CCCCCC'
+        },
+        usoExclusivo: {
+          margin: [0, 20, 0, 0]
+        }
+      }
+    };
+  }
+
+
+
+
 }

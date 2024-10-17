@@ -18,9 +18,7 @@ export class NavDefaultComponent {
 
   cerrarSesion() {
     this.authService.logout().subscribe({
-      next: () => {
-        this.router.navigate(['/login-privados']);
-      },
+      next: () => {},
       error: (error) => {
         console.error('Error al cerrar sesión:', error);
         this.toastr.error('Error al cerrar sesión.');

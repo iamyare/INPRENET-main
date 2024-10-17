@@ -19,6 +19,9 @@ import { CreateJornadaDto } from './dtos/create-jornada.dto';
 import { UpdateJornadaDto } from './dtos/update-jornada.dto';
 import { CreateNivelEducativoDto } from './dtos/create-nivel-educativo.dto';
 import { UpdateNivelEducativoDto } from './dtos/update-nivel-educativo.dto';
+import { net_causas_fallecimientos } from '../entities/net_causas_fallecimientos.entity';
+import { CreateCausaFallecimientoDto } from './dtos/create-causa-fallecimiento.dto';
+import { UpdateCausaFallecimientoDto } from './dtos/update-causa-fallecimiento.dto';
 
 @Injectable()
 export class MantenimientoAfiliacionService {
@@ -35,6 +38,8 @@ export class MantenimientoAfiliacionService {
     private jornadaRepository: Repository<Net_Jornada>,
     @InjectRepository(Net_Nivel_Educativo)
     private nivelEducativoRepository: Repository<Net_Nivel_Educativo>,
+    @InjectRepository(net_causas_fallecimientos)
+    private causasFallecimientoRepository: Repository<net_causas_fallecimientos>,
   ) {}
 
   // Métodos para Discapacidades
@@ -185,5 +190,38 @@ export class MantenimientoAfiliacionService {
     const nivelEducativo = await this.findOneNivelEducativo(id);
     const updatedNivelEducativo = Object.assign(nivelEducativo, updateNivelEducativoDto);
     return this.nivelEducativoRepository.save(updatedNivelEducativo);
+  }
+
+  // Métodos para Causas de Fallecimiento
+
+  async findAllCausasFallecimiento(): Promise<net_causas_fallecimientos[]> {
+    return this.causasFallecimientoRepository.find();
+  }
+
+  async findOneCausaFallecimiento(id: number): Promise<net_causas_fallecimientos> {
+    const causaFallecimiento = await this.causasFallecimientoRepository.findOne({ where: { id_causa_fallecimiento: id } });
+    if (!causaFallecimiento) {
+      throw new NotFoundException(`Causa de fallecimiento with ID ${id} not found`);
+    }
+    return causaFallecimiento;
+  }
+
+  async createCausaFallecimiento(createCausaFallecimientoDto: CreateCausaFallecimientoDto): Promise<net_causas_fallecimientos> {
+    const newCausaFallecimiento = this.causasFallecimientoRepository.create(createCausaFallecimientoDto);
+    return this.causasFallecimientoRepository.save(newCausaFallecimiento);
+  }
+
+  async updateCausaFallecimiento(id: number, updateCausaFallecimientoDto: UpdateCausaFallecimientoDto): Promise<net_causas_fallecimientos> {
+    const causaFallecimiento = await this.findOneCausaFallecimiento(id);
+    const updatedCausaFallecimiento = Object.assign(causaFallecimiento, updateCausaFallecimientoDto);
+    return this.causasFallecimientoRepository.save(updatedCausaFallecimiento);
+  }
+
+  async removeCausaFallecimiento(id: number): Promise<void> {
+    const causaFallecimiento = await this.findOneCausaFallecimiento(id);
+    if (!causaFallecimiento) {
+      throw new NotFoundException(`Causa de fallecimiento with ID ${id} not found`);
+    }
+    await this.causasFallecimientoRepository.delete(id);
   }
 }

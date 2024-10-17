@@ -141,4 +141,31 @@ export class MantenimientoAfiliacionService {
     const url = `${environment.API_URL}/api/mantenimiento-afiliacion/niveles-educativos/actualizar/${id}`;
     return this.http.put<any>(url, datos);
   }
+
+   // Métodos para Causas de Fallecimiento
+
+   getAllCausasFallecimiento(): Observable<any[]> {
+    const url = `${environment.API_URL}/api/mantenimiento-afiliacion/causas-fallecimiento/listar`;
+    return this.http.get<any[]>(url);
+  }
+
+  getCausaFallecimientoById(id: number): Observable<any> {
+    const url = `${environment.API_URL}/api/mantenimiento-afiliacion/causas-fallecimiento/detalle/${id}`;
+    return this.http.get<any>(url);
+  }
+
+  createCausaFallecimiento(datos: any): Observable<any> {
+    const url = `${environment.API_URL}/api/mantenimiento-afiliacion/causas-fallecimiento/crear`;
+    return this.http.post<any>(url, datos);
+  }
+
+  updateCausaFallecimiento(id: number, datos: any): Observable<any> {
+    const url = `${environment.API_URL}/api/mantenimiento-afiliacion/causas-fallecimiento/actualizar/${id}`;
+    return this.http.put<any>(url, datos);
+  }
+
+  deleteCausaFallecimiento(id: number): Observable<any> {
+    const url = `${environment.API_URL}/api/mantenimiento-afiliacion/causas-fallecimiento/eliminar/${id}`;
+    return this.http.delete<any>(url);
+  }
 }

@@ -5,7 +5,6 @@ import { Net_Municipio } from "../../Regional/municipio/entities/net_municipio.e
 import { NET_CUENTA_PERSONA } from "../../transacciones/entities/net_cuenta_persona.entity";
 import { Net_Detalle_planilla_ingreso } from "../../Planilla/Ingresos/detalle-plan-ingr/entities/net_detalle_plani_ing.entity";
 import { Net_perf_pers_cent_trab } from "./net_perf_pers_cent_trab.entity";
-import { Net_Ref_Per_Pers } from "./net_ref-per-persona.entity";
 import { NET_PROFESIONES } from "src/modules/transacciones/entities/net_profesiones.entity";
 import { Net_Peps } from "src/modules/Empresarial/entities/net_peps.entity";
 import { Net_Tipo_Identificacion } from '../../tipo_identificacion/entities/net_tipo_identificacion.entity';
@@ -17,10 +16,11 @@ import { net_otra_fuente_ingreso } from "./net_otra_fuente_ingreso.entity";
 import { Net_Persona_Discapacidad } from "./net_persona_discapacidad.entity";
 import { Net_Familia } from "./net_familia.entity";
 import { Net_Deducciones_Asignadas } from "src/modules/Planilla/detalle-deduccion/entities/net-deducciones-asignadas.entity";
+import { Net_Referencias } from "./net_referencias.entity";
 @Entity({
     name: 'NET_PERSONA',
 })
-@Check("CK_SEXO_NET_PERSONA", `sexo IN ('F', 'M')`)
+@Check("CK_SEXO_NET_PERSONA", `sexo IN ('F', 'M', 'NO BINARIO', 'OTRO')`)
 @Check("CK_FALLECIDO_NET_PERSONA", `fallecido IN ('SI', 'NO')`)
 @Check("CK_REPRESENTACION_NET_PERSONA", `REPRESENTACION IN ('POR CUENTA PROPIA', 'POR TERCEROS')`)
 export class net_persona {
@@ -69,7 +69,7 @@ export class net_persona {
     @Column('varchar2', { length: 30, nullable: true, name: 'GENERO' })
     genero: string;
 
-    @Column('varchar2', { length: 1, nullable: true, name: 'SEXO' })
+    @Column('varchar2', { length: 10, nullable: true, name: 'SEXO' })
     sexo: string;
 
     @Column('varchar2', { length: 2, nullable: true, name: 'FALLECIDO', default: "NO" })
@@ -120,17 +120,14 @@ export class net_persona {
     @Column('date', { nullable: true, name: 'FECHA_NACIMIENTO' })
     fecha_nacimiento: string;
 
-    @Column('varchar', { nullable: true, name: 'TIPO_DEFUNCION' })
-    tipo_defuncion: number;
-
-    @Column('varchar', { nullable: true, name: 'CERTIFICADO_DEFUNCION' })
-    certificado_defuncion: number;
+    @Column('blob', { nullable: true, name: 'CERTIFICADO_DEFUNCION' })
+    certificado_defuncion: any;
 
     @Column('date', { nullable: true, name: 'FECHA_DEFUNCION' })
     fecha_defuncion: string;
 
-    @Column('varchar2', { length: 200, nullable: true, name: 'ARCHIVO_IDENTIFICACION' })
-    archivo_identificacion: string;
+    @Column('blob', { nullable: true, name: 'ARCHIVO_IDENTIFICACION' })
+    archivo_identificacion: any;
 
     @Column('varchar2', { length: 500, nullable: true, name: 'DIRECCION_RESIDENCIA' })
     direccion_residencia: string;
@@ -152,12 +149,6 @@ export class net_persona {
     @ManyToOne(() => Net_Municipio, municipio => municipio.persona, { cascade: true })
     @JoinColumn({ name: 'ID_MUNICIPIO_NACIMIENTO', foreignKeyConstraintName: "FK_ID_MUNIC_NACIMIENTO_NET_PERSONA" })
     municipio_nacimiento: Net_Municipio;
-
-    @OneToMany(() => Net_Ref_Per_Pers, referenciasPersonalPersona => referenciasPersonalPersona.persona)
-    referenciasPersonalPersona: Net_Ref_Per_Pers[];
-
-    @OneToMany(() => Net_Ref_Per_Pers, referencia => referencia.referenciada)
-    referenciasHechas: Net_Ref_Per_Pers[];
 
     @OneToMany(() => Net_Persona_Por_Banco, personasPorBanco => personasPorBanco.persona)
     personasPorBanco: Net_Persona_Por_Banco[];
@@ -206,4 +197,6 @@ export class net_persona {
     @OneToMany(() => Net_Deducciones_Asignadas, deduccionesAsignadas => deduccionesAsignadas.persona)
     deduccionesAsignadas: Net_Deducciones_Asignadas[];
 
+    @OneToMany(() => Net_Referencias, referencia => referencia.persona)
+    referencias: Net_Referencias[];
 }

@@ -1,89 +1,88 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
-import { FormBuilder, Validators } from '@angular/forms';
+import { Validators } from '@angular/forms';
 import { PlanillaService } from 'src/app/services/planilla.service';
-import { AfiliadoService } from 'src/app/services/afiliado.service';
 import { ToastrService } from 'ngx-toastr';
 import { DynamicFormComponent } from 'src/app/components/dinamicos/dynamic-form/dynamic-form.component';
 import { FieldConfig } from 'src/app/shared/Interfaces/field-config';
+import { format } from 'date-fns';
 
 @Component({
   selector: 'app-nuevaplanilla',
   templateUrl: './nuevaplanilla.component.html',
-  styleUrl: './nuevaplanilla.component.scss'
+  styleUrls: ['./nuevaplanilla.component.scss']
 })
 export class NuevaplanillaComponent implements OnInit {
   @ViewChild(DynamicFormComponent) dynamicForm!: DynamicFormComponent;
 
   myFormFields: FieldConfig[] = [];
-  filas: any;
   tiposPlanilla: any[] = [];
   datosFormateados: any;
-  datosForm: any
+  datosForm: any;
+  planillasActivas: any[] = [];
 
-  constructor(private _formBuilder: FormBuilder,
+  constructor(
     private planillaService: PlanillaService,
-    private toastr: ToastrService,
-    private svcAfilServ: AfiliadoService) {
-    this.obtenerDatos1();
+    private toastr: ToastrService) { }
+
+  ngOnInit(): void {
+    this.cargarDatosIniciales();
+    this.getPlanillasActivas();
   }
 
-  ngOnInit(): void { }
+  async cargarDatosIniciales() {
+    await this.getTiposPlanillas();
+    this.configurarCamposFormulario();
+    if (this.dynamicForm) {
+      this.dynamicForm.form = this.dynamicForm.createControl();
+    }
+  }
 
   getTiposPlanillas = async () => {
     try {
       const data = await this.planillaService.findTipoPlanillaByclasePlanilla("EGRESO").toPromise();
-      this.filas = data.map((item: any) => {
-        this.tiposPlanilla.push({ label: `${item.nombre_planilla}`, value: `${item.nombre_planilla}` })
-        return {
-          id: item.id_tipo_planilla,
-          nombre_planilla: item.nombre_planilla,
-          descripcion: item.descripcion || 'No disponible',
-          periodoInicio: item.periodoInicio,
-          periodoFinalizacion: item.periodoFinalizacion,
-          estado: item.estado,
-        };
-      });
-      return this.filas;
+      this.tiposPlanilla = data.map((item: any) => ({
+        label: `${item.nombre_planilla}`,
+        value: `${item.nombre_planilla}`
+      }));
     } catch (error) {
       console.error("Error al obtener datos de Tipo Planilla", error);
+      this.toastr.error("Error al cargar los tipos de planilla.");
     }
   };
 
-  obtenerDatos1(): any {
-    this.getTiposPlanillas()
-    this.myFormFields = [
-      {
-        type: 'dropdown', label: 'Nombre de Tipo Planilla', name: 'nombre_planilla',
-        options: this.tiposPlanilla,
-        validations: [Validators.required], display: true
+  getPlanillasActivas() {
+    this.planillaService.getPlanillasActivas().subscribe({
+      next: (response) => {
+        this.planillasActivas = response;
       },
-      { type: 'number', label: 'Secuencia', name: 'secuencia', validations: [Validators.required, Validators.pattern("^\\d*\\.?\\d+$")], display: true },
-    ]
+      error: (error) => {
+        console.error('Error al obtener planillas activas', error);
+        this.toastr.error('Error al cargar planillas activas.');
+      }
+    });
   }
 
-  /*     getFilasBenef = async (periodoInicio: string, periodoFinalizacion: string) => {
-        try {
-          // Asegúrate de pasar los parámetros mes y anio a la función getDeduccionesNoAplicadas
-          const data = await this.planillaService.getBeneficiosNoAplicadas(periodoInicio, periodoFinalizacion).toPromise();
-          this.filasBen = data.map((item: any) => {
-            return {
-              id_afiliado: item.id_afiliado,
-              nombre_completo: `${item.primer_nombre} ${item.segundo_nombre ? item.segundo_nombre : ''} ${item.primer_apellido} ${item.segundo_apellido}`,
-              dni: item.dni,
-              monto: item.monto
-            };
-          });
+  configurarCamposFormulario(): void {
+    this.myFormFields = [
+      {
+        type: 'dropdown',
+        label: 'Nombre de Tipo Planilla',
+        name: 'nombre_planilla',
+        options: this.tiposPlanilla,
+        validations: [Validators.required],
+        display: true
+      }
+    ];
 
-          return this.filasBen;
-        } catch (error) {
-          console.error("Error al obtener datos de deducciones", error);
-          throw error;
-        }
-      } */
+    if (this.dynamicForm) {
+      this.dynamicForm.fields = this.myFormFields;
+      this.dynamicForm.form = this.dynamicForm.createControl();
+    }
+  }
 
   obtenerDatos(event: any): any {
     this.datosForm = event;
-    this.formatRangFech(event)
+    this.formatRangFech(event);
   }
 
   formatRangFech(event: any) {
@@ -91,34 +90,76 @@ export class NuevaplanillaComponent implements OnInit {
       ...event.value
     };
     this.datosFormateados = datosFormateados;
-    this.datosFormateados.secuencia = parseInt(datosFormateados.secuencia)
   }
 
   crearPlanilla() {
-    console.log(this.datosFormateados);
+    if (this.dynamicForm.form.invalid) {
+      this.toastr.error('El formulario no es válido, por favor completa todos los campos requeridos.');
+      return;
+    }
 
-    this.planillaService.createPlanilla(this.datosFormateados).subscribe({
+    const nombrePlanillaSeleccionada = this.dynamicForm.form.get('nombre_planilla')?.value;
+    const periodoPlanilla = this.dynamicForm.form.get('periodo_planilla')?.value;
+    let datosFormulario: any = {
+      nombre_planilla: nombrePlanillaSeleccionada
+    };
+    if (periodoPlanilla) {
+      const periodoInicio = format(new Date(periodoPlanilla.start), 'dd/MM/yyyy');
+      const periodoFinalizacion = format(new Date(periodoPlanilla.end), 'dd/MM/yyyy');
+
+      datosFormulario = {
+        ...datosFormulario,
+        periodo_inicio: periodoInicio,
+        periodo_finalizacion: periodoFinalizacion
+      };
+    }
+    this.planillaService.createPlanilla(datosFormulario).subscribe({
       next: (response) => {
-        this.toastr.success('Planilla creada con éxito');
+        const codPlanilla = response?.codigo_planilla || 'Desconocido';
+        this.toastr.success(`Planilla creada con éxito. Código: ${codPlanilla}`);
         this.limpiarFormulario();
+        this.getPlanillasActivas();
       },
       error: (error) => {
-        let mensajeError = 'Error desconocido al crear TipoPlanilla';
-
+        let mensajeError = 'Error desconocido al crear la planilla';
         if (error.error && error.error.message) {
           mensajeError = error.error.message;
         } else if (typeof error.error === 'string') {
           mensajeError = error.error;
+        } else if (error.status === 409) {
+          mensajeError = 'Ya existe una planilla activa de este tipo. No se puede crear otra hasta que la planilla actual sea cerrada.';
         }
-
-        this.toastr.error(mensajeError);
+        this.toastr.error(mensajeError, 'Error');
       }
     });
   }
+
   limpiarFormulario(): void {
-    // Utiliza la referencia al componente DynamicFormComponent para resetear el formulario
     if (this.dynamicForm) {
       this.dynamicForm.form.reset();
     }
+  }
+
+  onSelectChange(event: any) {
+    const selectedPlanilla = event.value;
+    this.dynamicForm.form.get('nombre_planilla')?.setValue(selectedPlanilla);
+
+    if (selectedPlanilla.includes('COMPLEMENTARIA', '60 RENTAS')) {
+      if (!this.myFormFields.some(field => field.name === 'periodo_planilla')) {
+        this.myFormFields.push({
+          type: 'daterange',
+          label: 'Periodo de Planilla',
+          name: 'periodo_planilla',
+          validations: [Validators.required],
+          display: true
+        });
+      }
+    } else {
+      this.myFormFields = this.myFormFields.filter(field => field.name !== 'periodo_planilla');
+      if (this.dynamicForm.form.contains('periodo_planilla')) {
+        this.dynamicForm.form.removeControl('periodo_planilla');
+      }
+    }
+    this.dynamicForm.updateFields(this.myFormFields);
   }
 }

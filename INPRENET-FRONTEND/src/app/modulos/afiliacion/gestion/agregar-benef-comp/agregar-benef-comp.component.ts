@@ -1,9 +1,9 @@
-import { DatePipe } from '@angular/common';
-import { Component, Inject, OnInit } from '@angular/core';
-import { FormArray, FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { Component, Inject, OnInit, ViewChild } from '@angular/core';
+import { FormBuilder, FormGroup, FormArray } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { ToastrService } from 'ngx-toastr';
-import { AfiliadoService } from 'src/app/services/afiliado.service';
+import { AfiliacionService } from 'src/app/services/afiliacion.service';
+import { BenefComponent } from '../benef/benef.component';
 
 @Component({
   selector: 'app-agregar-benef-comp',
@@ -11,82 +11,58 @@ import { AfiliadoService } from 'src/app/services/afiliado.service';
   styleUrls: ['./agregar-benef-comp.component.scss']
 })
 export class AgregarBenefCompComponent implements OnInit {
-  form = this.fb.group({});
   formBeneficiarios: FormGroup;
 
   constructor(
     private fb: FormBuilder,
-    @Inject(MAT_DIALOG_DATA) public data: { idPersona: string },
-    private dialogRef: MatDialogRef<AgregarBenefCompComponent>,
+    private afiliacionService: AfiliacionService,
     private toastr: ToastrService,
-    private afilService: AfiliadoService,
-    private datePipe: DatePipe,
+    private dialogRef: MatDialogRef<AgregarBenefCompComponent>,
+    @Inject(MAT_DIALOG_DATA) public data: { idPersona: string, id_detalle_persona: number }
   ) {
     this.formBeneficiarios = this.fb.group({
-      beneficiario: this.fb.array([], [Validators.required])
+      beneficiario: this.fb.array([])
     });
   }
 
   ngOnInit(): void {
+
   }
 
-  setDatosBen(DatosBancBen: any) {
-    this.formBeneficiarios = DatosBancBen;
-  }
-
-  get beneficiarios(): FormArray {
-    return this.formBeneficiarios.get('beneficiario') as FormArray;
-  }
-
-  guardar() {
-    const beneficiariosData = this.beneficiarios.value.map((beneficiario: any) => {
-      const datosBeneficiario = beneficiario.datosBeneficiario;
-      const formattedDate = this.datePipe.transform(datosBeneficiario.fecha_nacimiento, 'yyyy-MM-dd');
-
-      const benef = {
-        primer_nombre: datosBeneficiario.primer_nombre,
-        segundo_nombre: datosBeneficiario.segundo_nombre,
-        tercer_nombre: datosBeneficiario.tercer_nombre,
-        primer_apellido: datosBeneficiario.primer_apellido,
-        segundo_apellido: datosBeneficiario.segundo_apellido,
-        genero: datosBeneficiario.genero,
-        dni: datosBeneficiario.dni,
-        sexo: datosBeneficiario.sexo,
-        representacion: datosBeneficiario.representacion,
-        direccion_residencia: datosBeneficiario.direccion_residencia,
-        id_municipio_residencia: datosBeneficiario.id_municipio_residencia,
-        fecha_nacimiento: formattedDate,
-        cantidad_dependientes: datosBeneficiario.cantidad_dependientes,
-        telefono_1: datosBeneficiario.telefono_1,
-        id_pais: datosBeneficiario.id_pais,
-        detalleBenef: {
-          ID_CAUSANTE: this.data.idPersona,
-          porcentaje: datosBeneficiario.porcentaje,
-          ID_CAUSANTE_PADRE: this.data.idPersona
-        }
-      };
-
-      return benef;
-    });
-
-    const payload = beneficiariosData[0];
-
-    this.afilService.createBeneficiarioConDetalle(payload).subscribe(
-      response => {
-        this.toastr.success("Beneficiarios agregados con éxito");
-        this.formBeneficiarios.reset();
-        this.cerrar();
+  guardar(): void {
+    const beneficiariosFormateados = this.formBeneficiarios.value.beneficiario.map((beneficiario: any) => ({
+      persona: {
+        n_identificacion: beneficiario.n_identificacion,
+        primer_nombre: beneficiario.primer_nombre,
+        segundo_nombre: beneficiario.segundo_nombre,
+        tercer_nombre: beneficiario.tercer_nombre,
+        primer_apellido: beneficiario.primer_apellido,
+        segundo_apellido: beneficiario.segundo_apellido,
+        telefono_1: beneficiario.telefono_1,
+        fecha_nacimiento: beneficiario.fecha_nacimiento,
+        direccion_residencia: beneficiario.direccion_residencia,
+        id_municipio_residencia: beneficiario.id_municipio_residencia,
+        id_municipio_nacimiento: beneficiario.id_municipio_nacimiento
       },
-      error => {
-        this.toastr.error("Error al agregar beneficiarios");
-        console.error('Error al agregar beneficiarios', error);
+      discapacidades: beneficiario.discapacidades,
+      porcentaje: beneficiario.porcentaje || null
+    }));
+
+    this.afiliacionService.asignarBeneficiariosAPersona(Number(this.data.idPersona), this.data.id_detalle_persona, beneficiariosFormateados).subscribe(
+      (res: any) => {
+        if (res.length > 0) {
+          this.toastr.success("Beneficiario agregado con éxito");
+          this.cerrar();
+        }
+      },
+      (error) => {
+        this.toastr.error("Error al agregar el beneficiario");
+        console.error('Error al agregar beneficiarios al afiliado', error);
       }
     );
   }
 
-
-  cerrar() {
+  cerrar(): void {
     this.dialogRef.close();
   }
-
 }

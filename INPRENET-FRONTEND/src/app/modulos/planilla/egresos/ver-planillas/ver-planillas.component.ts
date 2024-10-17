@@ -131,7 +131,7 @@ export class VerPlanillasComponent implements OnInit {
     }
   }
 
-  ejecutarFuncionAsincronaDesdeOtroComponente(funcion: (data: any) => Promise<void>) {
+  ejecutarFuncionAsincronaDesdeOtroComponente(funcion: (data: any) => Promise<boolean>) {
     this.ejecF = funcion;
   }
 
@@ -146,7 +146,6 @@ export class VerPlanillasComponent implements OnInit {
   manejarAccionUno(row: any) {
     this.planillaService.getPlanillas(row.CODIGO_PLANILLA).subscribe(
       (response) => {
-        console.log('Planilla Preliminar:', response);
         this.detallePlanillas = response;
         this.dataSource.data = this.detallePlanillas;
         this.dataSource.paginator = this.paginator;

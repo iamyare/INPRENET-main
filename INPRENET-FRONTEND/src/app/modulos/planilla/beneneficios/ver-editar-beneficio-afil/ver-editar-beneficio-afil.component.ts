@@ -1,6 +1,6 @@
 import { DatePipe } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
-import { Component } from '@angular/core';
+import { ChangeDetectorRef, Component } from '@angular/core';
 import { ToastrService } from 'ngx-toastr';
 import { TableColumn } from 'src/app/shared/Interfaces/table-column';
 import { unirNombres } from '../../../../shared/functions/formatoNombresP';
@@ -28,14 +28,16 @@ export class VerEditarBeneficioAfilComponent {
 
   //Para generar tabla
   myColumns: TableColumn[] = [];
-  filasT: any[] = [];
-  ejecF: any;
+  filasT?: any[];
+  ejecF?: Function;
 
   myColumns1: TableColumn[] = [];
-  filasEst: any[] = [];
+  filasEst?: any[];
   ejecF2: any;
+  monstrarBeneficiarios: boolean = false;
 
   constructor(
+    private cdr: ChangeDetectorRef,
     private dialog: MatDialog,
     private http: HttpClient,
     private beneficioService: BeneficiosService,
@@ -127,8 +129,6 @@ export class VerEditarBeneficioAfilComponent {
   getFilas = async () => {
     try {
       const data = await this.beneficioService.GetAllBeneficios(this.form.value.dni).toPromise();
-      console.log(data);
-
 
       const dataAfil = data.persona.map((item: any) => ({
         dni: item.N_IDENTIFICACION,
@@ -145,19 +145,30 @@ export class VerEditarBeneficioAfilComponent {
 
       this.Afiliado = dataAfil[0]
 
-      this.filasT = data.detBen.map((item: any) => ({
-        dni: item.DNI,
-        dni_causante: item.persona?.padreIdPersona?.persona?.n_identificacion || "NO APLICA",
-        fecha_aplicado: this.datePipe.transform(item.fecha_aplicado, 'dd/MM/yyyy HH:mm'),
-        nombre_beneficio: item.beneficio.nombre_beneficio,
-        recibiendo_beneficio: item.recibiendo_beneficio,
-        numero_rentas_max: item.beneficio.numero_rentas_max,
-        periodicidad: item.beneficio.periodicidad,
-        monto_por_periodo: item.monto_por_periodo,
-        monto_total: item.monto_total,
-        periodoInicio: convertirFecha(item.periodo_inicio, false),
-        periodoFinalizacion: convertirFecha(item.periodo_finalizacion, false)
-      }));
+      this.filasT = data.detBen.map((item: any) => {
+        return {
+          prestamo: item.prestamo,
+          ID_DETALLE_PERSONA: item.ID_DETALLE_PERSONA,
+          ID_PERSONA: item.ID_PERSONA,
+          ID_CAUSANTE: item.ID_CAUSANTE,
+          ID_BENEFICIO: item.ID_BENEFICIO,
+          estado_solicitud: item.estado_solicitud,
+          dni: item.persona.n_identificacion,
+          dni_causante: item.persona?.padreIdPersona?.persona?.n_identificacion || "NO APLICA",
+          fecha_aplicado: this.datePipe.transform(item.fecha_aplicado, 'dd/MM/yyyy HH:mm'),
+          nombre_beneficio: item.beneficio.nombre_beneficio,
+          recibiendo_beneficio: item.recibiendo_beneficio,
+          numero_rentas_max: item.beneficio.numero_rentas_max,
+          periodicidad: item.beneficio.periodicidad,
+          monto_por_periodo: item.monto_por_periodo,
+          monto_total: item.monto_total,
+          periodoInicio: convertirFecha(item.periodo_inicio, false),
+          periodoFinalizacion: convertirFecha(item.periodo_finalizacion, false),
+          monto_primera_cuota: item.monto_primera_cuota,
+          monto_ultima_cuota: item.monto_ultima_cuota,
+          observaciones: item.observaciones
+        }
+      });
 
       return this.filasT;
     } catch (error) {
@@ -165,6 +176,7 @@ export class VerEditarBeneficioAfilComponent {
       throw error;
     }
   };
+
   getFilas2 = async () => {
     try {
 
@@ -177,6 +189,8 @@ export class VerEditarBeneficioAfilComponent {
       }));
 
       this.filasEst = dataEstadosAfil;
+      console.log(this.filasEst);
+
 
       return this.filasEst;
     } catch (error) {
@@ -187,24 +201,34 @@ export class VerEditarBeneficioAfilComponent {
 
 
   previsualizarInfoAfil() {
-    this.monstrarBeneficios = true;
-    this.getFilas().then(() => this.cargar("ingresos"));
-    this.getFilas2().then(() => this.cargar("tipo"));
+    this.getFilas2().then(() => this.cargar2());
+    this.getFilas().then(() => this.cargar2());
   }
 
-  ejecutarFuncionAsincronaDesdeOtroComponente(funcion: (data: any) => Promise<void>) {
+  ejecutarFuncionAsincronaDesdeOtroComponente(funcion: (data: any) => Promise<boolean>) {
     this.ejecF = funcion;
   }
-  ejecutarFuncionAsincronaDesdeOtroComponente2(funcion: (data: any) => Promise<void>) {
+  ejecutarFuncionAsincronaDesdeOtroComponente2(funcion: (data: any) => Promise<boolean>) {
     this.ejecF2 = funcion;
   }
 
-  cargar(val: string) {
-    if (this.ejecF && val == "ingresos") {
-      this.ejecF(this.filasT).then(() => {
+  cargar2() {
+    this.cdr.detectChanges();
+    this.monstrarBeneficiarios = false;
+    this.monstrarBeneficios = false;
+
+    if (this.ejecF2 && this.ejecF) {
+      this.ejecF2(this.filasEst).then((val: boolean) => {
+        if (val) {
+          this.monstrarBeneficiarios = true;
+          this.cdr.detectChanges();
+        }
       });
-    } else if (this.ejecF2 && val == "tipo") {
-      this.ejecF2(this.filasEst).then(() => {
+      this.ejecF(this.filasT).then((val: boolean) => {
+        if (val) {
+          this.monstrarBeneficios = true;
+          this.cdr.detectChanges();
+        }
       });
     }
   }
@@ -218,9 +242,6 @@ export class VerEditarBeneficioAfilComponent {
       periodicidad: row.periodicidad,
     };
 
-    console.log(beneficioData);
-
-
     /* this.svcBeneficioServ.updateBeneficio(row.id, beneficioData).subscribe(
       response => {
         this.toastr.success('Beneficio editado con éxito');
@@ -233,12 +254,16 @@ export class VerEditarBeneficioAfilComponent {
 
   manejarAccionUno(row: any) {
     const campos = [
-      { nombre: 'numero_rentas_max', tipo: 'number', requerido: true, etiqueta: 'Número de rentas máximas', editable: false },
-      { nombre: 'periodoInicio', tipo: 'number', requerido: true, etiqueta: 'Periodo de inicio' },
-      { nombre: 'periodoFinalizacion', tipo: 'number', requerido: true, etiqueta: 'Periodo de finalización' },
-      { nombre: 'monto_por_periodo', tipo: 'text', requerido: true, etiqueta: 'Monto por periodo' },
-      { nombre: 'Monto_total', tipo: 'number', requerido: true, etiqueta: 'Monto Total' },
-
+      { nombre: 'numero_rentas_max', tipo: 'number', requerido: true, etiqueta: 'Número de rentas aprobadas' },
+      { nombre: 'periodoInicio', tipo: 'date', requerido: true, etiqueta: 'Periodo de inicio' },
+      { nombre: 'periodoFinalizacion', tipo: 'date', requerido: true, etiqueta: 'Periodo de finalización', editable: true },
+      { nombre: 'Monto_total', tipo: 'number', requerido: true, etiqueta: 'Monto Total', editable: true },
+      { nombre: 'monto_por_periodo', tipo: 'text', requerido: true, etiqueta: 'Monto por periodo', editable: true },
+      { nombre: 'monto_ultima_cuota', tipo: 'number', requerido: true, etiqueta: 'monto_ultima_cuota', editable: true },
+      { nombre: 'monto_primera_cuota', tipo: 'number', requerido: true, etiqueta: 'monto_primera_cuota', editable: true },
+      { nombre: 'estado_solicitud', tipo: 'list', requerido: true, opciones: [{ label: "APROBADO", value: "APROBADO" }, { label: "RECHAZADO", value: "RECHAZADO" }], etiqueta: 'Estado Solicitud', editable: true },
+      { nombre: 'observaciones', tipo: 'text', requerido: true, etiqueta: 'observaciones', editable: true },
+      { nombre: 'prestamo', tipo: 'list', requerido: true, opciones: [{ label: "SI", value: "SI" }, { label: "NO", value: "NO" }], etiqueta: '¿Tiene algún prestamo?', editable: true },
     ];
 
     const dialogRef = this.dialog.open(EditarDialogComponent, {
@@ -248,8 +273,41 @@ export class VerEditarBeneficioAfilComponent {
 
     dialogRef.afterClosed().subscribe((result: any) => {
       if (result) {
-        console.log('Datos editados:', result);
+        result["ID_DETALLE_PERSONA"] = row.ID_DETALLE_PERSONA;
+        result["ID_PERSONA"] = row.ID_PERSONA;
+        result["ID_CAUSANTE"] = row.ID_CAUSANTE;
+        result["ID_BENEFICIO"] = row.ID_BENEFICIO;
+
+        this.beneficioService.updateBeneficioPersona(result).subscribe(
+          () => {
+            // Después de actualizar el beneficio, recargar los datos
+            this.toastr.success("Registro actualizado con éxito");
+            this.cargarDatosActualizados();
+            this.previsualizarInfoAfil();
+            // Forzar la detección de cambios
+            this.cdr.detectChanges();
+          },
+          error => {
+            this.toastr.error("Error al actualizar el beneficio");
+            console.error('Error al actualizar el beneficio', error);
+          }
+        );
       }
     });
   }
+
+  cargarDatosActualizados() {
+    this.beneficioService.GetAllBeneficios(this.form.value.dni).subscribe(
+      (data: any) => {
+        this.filasT = data;  // Actualiza los datos de la tabla
+        // Forzar la detección de cambios
+        this.cdr.detectChanges();
+      },
+      error => {
+        console.error('Error al cargar los beneficios actualizados', error);
+      }
+    );
+  }
+
+
 }

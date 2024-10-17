@@ -3,19 +3,24 @@ import { AppModule } from './app.module';
 import { BadRequestException, ValidationPipe } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { HttpExceptionFilter } from './filters/http-exception.filter';
-
+import * as cookieParser from 'cookie-parser';
+const express = require('express');
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
-  app.enableCors();
+  app.enableCors({
+    origin: process.env.BACKEND_HOST,
+    credentials: true,
+  });
 
-  app.setGlobalPrefix('api')
+  app.setGlobalPrefix('api');
 
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,
       forbidNonWhitelisted: true,
-      transform: true
-    })
+      transform: true,
+      exceptionFactory: (errors) => new BadRequestException(errors),
+    }),
   );
 
   const config = new DocumentBuilder()
@@ -26,8 +31,10 @@ async function bootstrap() {
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('docs', app, document);
 
- //app.useGlobalFilters(new HttpExceptionFilter());
+  app.useGlobalFilters(new HttpExceptionFilter());
 
-  await app.listen(3000);
+  app.use(cookieParser());
+  app.use(express.json({ limit: '8mb' }));
+  await app.listen(process.env.PORT);
 }
 bootstrap();

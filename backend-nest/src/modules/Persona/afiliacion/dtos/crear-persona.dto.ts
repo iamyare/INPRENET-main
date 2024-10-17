@@ -1,7 +1,6 @@
 import { IsNotEmpty, IsOptional, IsString, IsNumber, IsDate, IsEnum, IsEmail, ValidateNested, IsArray, IsDateString } from 'class-validator';
 import { CrearDiscapacidadDto } from './crear-discapacidad.dto';
 import { Type } from 'class-transformer';
-import { CrearPepsDto } from './crear-peps.dto';
 
 export class CrearPersonaDto {
   @IsNotEmpty()
@@ -57,7 +56,7 @@ export class CrearPersonaDto {
   genero?: string;
 
   @IsNotEmpty()
-  @IsEnum(['F', 'M'])
+  @IsEnum(['F', 'M', 'NO BINARIO', 'OTRO'], { message: 'El sexo debe ser uno de los siguientes valores: F, M, NO BINARIO, OTRO' })
   sexo: string;
 
   @IsNotEmpty()
@@ -120,7 +119,7 @@ export class CrearPersonaDto {
 
   @IsOptional()
   @IsString()
-  archivo_identificacion?: string;
+  archivo_identificacion?: any;
 
   @IsOptional()
   @IsString()
@@ -164,14 +163,4 @@ export class CrearPersonaDto {
   @ValidateNested({ each: true })
   @Type(() => CrearDiscapacidadDto)
   discapacidades?: CrearDiscapacidadDto[];
-
-  @IsOptional()
-  @IsArray()
-  @ValidateNested({ each: true })
-  @Type(() => CrearPepsDto)
-  peps?: CrearPepsDto[];
-
-
-  @IsOptional()
-  cargoPublico?
 }

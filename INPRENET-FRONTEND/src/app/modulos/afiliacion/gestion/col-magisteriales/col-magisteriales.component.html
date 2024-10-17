@@ -1,40 +1,43 @@
 <div class="card">
-  <div class="card-header card-header-danger tittle" style="background: #229e92;">
+  <div class="card-header tittle" style="background: #229e92;">
     <h4 class="card-title">Colegio Magisterial</h4>
     <p class="card-category">Completa la información correspondiente</p>
   </div>
-
-  <form [formGroup]="formParent" style="margin: 1%;" (change)="onDatosColMagChange()">
+  <div class="card-body">
+  <div [formGroup]="formGroup">
     <div formArrayName="ColMags">
-      <div *ngFor="let colMag of getCtrl('ColMags', formParent).controls; index as i">
+      <div *ngFor="let colMag of colMags.controls; let i = index" [formGroupName]="i" class="row">
         <h4 class="card-title">Colegio Magisterial Número: {{i + 1}}</h4>
-        <div [formGroupName]="i" class="row">
-          <div class="col-md-12">
-            <mat-form-field style="flex-direction: column-reverse;" class="example-full-width inputs" appearance="outline">
-              <mat-label>Colegio Magisterial</mat-label>
-              <mat-select (ngModelChange)="onDatosColMagChange()" matNativeControl formControlName="id_colegio">
-                <mat-option *ngFor="let item of getAvailableColegios(i)" [value]="item.value">
-                  {{ item.label }}
-                </mat-option>
-              </mat-select>
-            </mat-form-field>
-            <mat-error *ngFor="let error of getErrors(i, 'id_colegio')">
-              {{ error }}
+        <div class="col-md-12">
+          <mat-form-field appearance="outline" style="flex-direction: column-reverse;" class="example-full-width inputs">
+            <mat-label>Colegio Magisterial</mat-label>
+            <mat-icon matPrefix>school</mat-icon>
+            <mat-select formControlName="id_colegio">
+              <mat-option *ngFor="let item of getAvailableColegios(i)" [value]="item.value">
+                {{ item.label }}
+              </mat-option>
+            </mat-select>
+            <mat-error *ngIf="colMag.get('id_colegio')?.invalid && colMag.get('id_colegio')?.touched">
+              <mat-icon aria-hidden="true" class="error-icon-small">error_outline</mat-icon>
+              El colegio es requerido.
             </mat-error>
-          </div>
+          </mat-form-field>
         </div>
       </div>
     </div>
-  </form>
 
-  <div class="row" style="text-align: center; margin: 1%;">
-    <div class="col-md-6">
-      <button mat-button color="primary" (click)="agregarColMag()"><mat-icon matSuffix>exposure_plus_1</mat-icon>Agregar
-        Colegio Magisterial</button>
+    <div class="row" style="text-align: center; margin: 1%;">
+      <div class="col-md-6">
+        <button mat-button color="primary" (click)="agregarColMag()">
+          <mat-icon matSuffix>exposure_plus_1</mat-icon> Agregar Colegio Magisterial
+        </button>
+      </div>
+      <div class="col-md-6">
+        <button mat-button color="warn" (click)="eliminarColMag(colMags.length - 1)">
+          <mat-icon matSuffix>exposure_neg_1</mat-icon> Eliminar Colegio Magisterial
+        </button>
+      </div>
     </div>
-    <div class="col-md-6">
-      <button mat-button color="warn" (click)="eliminarColMag()"><mat-icon matSuffix>exposure_neg_1</mat-icon>Eliminar
-        Colegio Magisterial</button>
-    </div>
+  </div>
   </div>
 </div>

@@ -1,15 +1,23 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, HttpStatus, HttpException, Res, HttpCode, ParseIntPipe, NotFoundException, Put } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, HttpStatus, HttpException, Res, HttpCode, ParseIntPipe, NotFoundException, Put, Query } from '@nestjs/common';
 import { UpdateTranssacionesDto } from './dto/update-transacciones.dto';
 import { TransaccionesService } from './transacciones.service';
 import { ApiTags } from '@nestjs/swagger';
 import { CrearMovimientoDTO } from './dto/voucher.dto';
-import { NET_PROFESIONES } from './entities/net_profesiones.entity';
 import { crearCuentaDTO } from './dto/cuenta-transaccioens.dto';
 
 @ApiTags('transacciones')
 @Controller('transacciones')
 export class TransaccionesController {
   constructor(private readonly transaccionesService: TransaccionesService) { }
+
+  @Delete('eliminar-movimiento/:id')
+  async eliminarMovimiento(@Param('id') id: number) {
+    const resultado = await this.transaccionesService.eliminarMovimiento(id);
+    if (!resultado) {
+      throw new NotFoundException(`Movimiento con ID ${id} no encontrado.`);
+    }
+    return { message: 'Movimiento eliminado exitosamente' };
+  }
 
   @Get('profesiones')
   async findAllProfesiones(): Promise<any> {
@@ -20,10 +28,20 @@ export class TransaccionesController {
     return await this.transaccionesService.findAlltipoMovimientos();
   }
 
-  @Get('voucher/:dni')
-  obtenerVouchersDeMovimientos(@Param('dni') dni: string): Promise<any> {
-    return this.transaccionesService.obtenerVoucherDeMovimientos(dni);
-  }
+  @Get('vouchers')
+    async obtenerVouchersDeMovimientos(
+      @Query('dni') dni: string,
+      @Query('limit') limit: number = 10,
+      @Query('offset') offset: number = 0,
+      @Query('search') search: string = ''
+    ): Promise<any> {
+      try {
+        const { movimientos, total } = await this.transaccionesService.obtenerVoucherDeMovimientos(dni, limit, offset, search);
+        return { movimientos, total };
+      } catch (error) {
+        return { error: error.message };
+      }
+    }
 
   @Get('voucherEspecifico/:dni/:idMovimientoCuenta')
   obtenerVoucherMovimientoEspecifico(@Param('dni') dni: string, @Param('idMovimientoCuenta') idMovimientoCuenta: number): Promise<any> {
@@ -34,6 +52,7 @@ export class TransaccionesController {
   crearMovimiento(@Body() crearMovimientoDto: CrearMovimientoDTO) {
     return this.transaccionesService.crearMovimiento(crearMovimientoDto);
   }
+
   @Post('crear-cuenta/:idPersona')
   crearCuenta(@Param("idPersona") idPersona: number, @Body() crearCuentaDto: [crearCuentaDTO]) {
     return this.transaccionesService.crearCuenta(idPersona, crearCuentaDto);
@@ -55,6 +74,7 @@ export class TransaccionesController {
       }, HttpStatus.BAD_REQUEST);
     }
   }
+
   @Get('/tipos-de-cuenta/')
   async obtenerTiposDeCuenta() {
     try {

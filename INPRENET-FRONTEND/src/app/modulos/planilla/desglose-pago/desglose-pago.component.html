@@ -1,0 +1,63 @@
+<div *ngIf="loading" class="loading">
+  <p>Cargando detalles...</p>
+</div>
+
+<div *ngIf="!loading" class="detalles-pago-container">
+  <h2>Detalles del pago</h2>
+
+  <!-- Sección de Bancos -->
+  <div class="section card bancos-section">
+    <h3 class="section-title">Banco</h3>
+    <ul>
+      <li *ngFor="let banco of bancos">
+        <p><strong>Banco:</strong> {{ banco.banco }} - <strong>Número de cuenta:</strong> {{ banco.num_cuenta }}</p>
+      </li>
+    </ul>
+  </div>
+
+  <!-- Sección de Beneficios -->
+  <div class="section card beneficios-section" *ngIf="beneficios.length > 0; else noBeneficios">
+    <h3 class="section-title">Beneficios</h3>
+    <div *ngFor="let beneficio of beneficios">
+      <h4 class="beneficio-title">{{ beneficio.beneficio }}</h4>
+
+      <!-- Aquí iteramos sobre los pagos asociados al beneficio -->
+      <div *ngIf="beneficio.pagos.length > 0; else noPagos">
+        <ul>
+          <li *ngFor="let pago of beneficio.pagos">
+            <p><strong>Monto pagado:</strong> {{ pago.monto_a_pagar }}</p>
+          </li>
+        </ul>
+      </div>
+      <ng-template #noPagos>
+        <p>No se encontraron pagos para este beneficio.</p>
+      </ng-template>
+    </div>
+  </div>
+  <ng-template #noBeneficios>
+    <p>No se encontraron beneficios para esta planilla.</p>
+  </ng-template>
+
+  <!-- Sección de Deducciones -->
+  <div class="section card deducciones-section" *ngIf="deducciones.length > 0; else noDeducciones">
+    <h3 class="section-title">Deducciones</h3>
+    <ul>
+      <li *ngFor="let deduccion of deducciones" class="deduccion-item">
+        <p><strong>Deducción:</strong> {{ deduccion.deduccion }}</p>
+        <p><strong>Monto Aplicado:</strong> {{ deduccion.monto_aplicado }}</p>
+      </li>
+    </ul>
+  </div>
+  <ng-template #noDeducciones>
+    <p>No se encontraron deducciones para esta planilla.</p>
+  </ng-template>
+
+  <div class="section card total-pagado-section">
+    <h3 class="section-title">Total Pagado</h3>
+    <p><strong>Total:</strong> {{ totalPagado | currency : "L" : "symbol" : "1.2-2" }}</p>
+  </div>
+
+  <div class="mat-dialog-actions">
+    <button mat-button mat-dialog-close>Cerrar</button>
+  </div>
+</div>

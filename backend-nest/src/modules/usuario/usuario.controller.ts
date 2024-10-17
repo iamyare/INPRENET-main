@@ -1,9 +1,9 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Query, UseGuards, BadRequestException, HttpCode, HttpStatus, UnauthorizedException, Req, UseInterceptors, UploadedFile, ParseIntPipe, Res, Put, UploadedFiles } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Query, UseGuards, BadRequestException, HttpCode, HttpStatus, Req, UseInterceptors, ParseIntPipe, Res, Put, UploadedFiles } from '@nestjs/common';
 import { UsuarioService } from './usuario.service';
 import { UpdateUsuarioDto } from './dto/update-usuario.dto';
 import { PaginationDto } from 'src/common/dtos/pagination.dto';
 import { ApiTags } from '@nestjs/swagger';
-import { FileFieldsInterceptor, FileInterceptor } from '@nestjs/platform-express';
+import { FileFieldsInterceptor } from '@nestjs/platform-express';
 import { CreatePreRegistroDto } from './dto/create-pre-registro.dto';
 import { CompleteRegistrationDto } from './dto/complete-registration.dto';
 import { LoginDto } from './dto/login.dto';
@@ -16,6 +16,16 @@ import { ForgotPasswordDto } from './dto/forgot-password.dto';
 @Controller('usuario')
 export class UsuarioController {
   constructor(private readonly usuarioService: UsuarioService) { }
+
+  @Post('login')
+  async login(@Body() loginDto: LoginDto) {
+    return this.usuarioService.login(loginDto);
+  }
+
+  @Post('logout')
+  async logout(@Req() req: Request, @Res() res: Response) {
+    return this.usuarioService.logout(req, res);
+  }
 
   @Patch(':id/desactivar')
   async desactivarUsuario(
@@ -48,22 +58,23 @@ export class UsuarioController {
   }
 
   @Post('completar-registro')
-@UseInterceptors(
-  FileFieldsInterceptor([
-    { name: 'archivo_identificacion', maxCount: 1 },
-    { name: 'foto_empleado', maxCount: 1 }
-  ])
-)
-async completarRegistro(
-  @Query('token') token: string,
-  @Body('datos') datos: string,
-  @UploadedFiles() files: { archivo_identificacion?: Express.Multer.File[], foto_empleado?: Express.Multer.File[] },
-): Promise<void> {
-  const completeRegistrationDto: CompleteRegistrationDto = JSON.parse(datos);
-  const archivoIdentificacionBuffer = files.archivo_identificacion[0].buffer;
-  const fotoEmpleadoBuffer = files.foto_empleado[0].buffer;
-  return this.usuarioService.completarRegistro(token, completeRegistrationDto, archivoIdentificacionBuffer, fotoEmpleadoBuffer);
-}
+  @UseInterceptors(
+    FileFieldsInterceptor([
+      { name: 'archivo_identificacion', maxCount: 1 },
+      { name: 'foto_empleado', maxCount: 1 }
+    ])
+  )
+  
+  async completarRegistro(
+    @Query('token') token: string,
+    @Body('datos') datos: string,
+    @UploadedFiles() files: { archivo_identificacion?: Express.Multer.File[], foto_empleado?: Express.Multer.File[] },
+    ): Promise<void> {
+      const completeRegistrationDto: CompleteRegistrationDto = JSON.parse(datos);
+      const archivoIdentificacionBuffer = files?.archivo_identificacion?.[0]?.buffer || null;
+      const fotoEmpleadoBuffer = files?.foto_empleado?.[0]?.buffer || null;
+      return this.usuarioService.completarRegistro(token, completeRegistrationDto, archivoIdentificacionBuffer, fotoEmpleadoBuffer);
+  }
 
   @Get('perfil')
   async obtenerPerfilUsuario(@Query('correo') correo: string) {
@@ -75,19 +86,10 @@ async completarRegistro(
     return this.usuarioService.cambiarContrasena(cambiarContrasenaDto.correo, cambiarContrasenaDto.nuevaContrasena);
   }
 
-  
-  
-
-  @Post('login')
-  async login(@Body() loginDto: LoginDto){
-    return this.usuarioService.login(loginDto);
-  }
-
   @Get('roles')
   async getRolesByEmpresa(@Query() query: any) {
     return this.usuarioService.getRolesPorEmpresa(query.idEmpresa);
   }
-
 
   @Post('/loginPrivada')
   @HttpCode(HttpStatus.OK)

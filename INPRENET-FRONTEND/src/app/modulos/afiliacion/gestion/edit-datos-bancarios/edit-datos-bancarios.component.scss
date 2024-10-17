@@ -69,9 +69,19 @@
   .desapareciendo {
     animation: desaparecer 2s infinite;
   }
+
   .spinner-container {
     display: flex;
     justify-content: center;
     align-items: center;
     height: 200px;
+  }
+
+  .search-again {
+    margin-right: 10px;
+  }
+
+  .search-text {
+    font-size: 14px;
+    color: #1c9588;
   }

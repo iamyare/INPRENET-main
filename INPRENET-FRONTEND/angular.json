@@ -43,7 +43,9 @@
               "node_modules/leaflet/dist/leaflet.css",
               "node_modules/bootstrap/dist/css/bootstrap.min.css"
             ],
-            "scripts": ["node_modules/leaflet/dist/leaflet.js"],
+            "scripts": [
+              "node_modules/leaflet/dist/leaflet.js"
+            ],
             "allowedCommonJsDependencies": [
               "lodash"
             ]

@@ -28,6 +28,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { RouterModule } from '@angular/router';
+import {MatAutocompleteModule} from '@angular/material/autocomplete';
 
 @NgModule({
   imports: [
@@ -60,7 +61,8 @@ import { RouterModule } from '@angular/router';
     MatProgressSpinnerModule,
     MatSlideToggleModule,
     MatSnackBarModule,
-    RouterModule
+    RouterModule,
+    MatAutocompleteModule
   ],
   providers: [
     { provide: MAT_DATE_LOCALE, useValue: 'es' },
@@ -96,7 +98,8 @@ import { RouterModule } from '@angular/router';
     MatProgressSpinnerModule,
     MatSlideToggleModule,
     MatSnackBarModule,
-    RouterModule
+    RouterModule,
+    MatAutocompleteModule
   ]
 })
 export class MaterialAngularModule { }

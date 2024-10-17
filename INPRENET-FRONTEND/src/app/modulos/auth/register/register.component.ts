@@ -96,7 +96,7 @@ export class RegisterComponent implements OnInit {
   }
 
   isFormComplete(): boolean {
-    return this.form.valid && this.archivo !== null && this.fotografia !== null;
+    return this.form.valid;
   }
 
   getAvailableQuestions(currentIndex: number): string[] {
@@ -115,7 +115,7 @@ export class RegisterComponent implements OnInit {
   }
 
   enviarInformacionDeSeguridad() {
-    if (this.isFormComplete()) {
+    if (this.form.valid) {
       const datos = {
         correo: this.form.get('correo')!.value,
         contrasena: this.form.get('contrasena')!.value,
@@ -126,11 +126,17 @@ export class RegisterComponent implements OnInit {
         pregunta_de_usuario_3: this.form.get('preguntaseguridad3')!.value,
         respuesta_de_usuario_3: this.form.get('respuestaSeguridad3')!.value,
         telefonoEmpleado: this.form.get('telefonoEmpleado')!.value,
-        telefonoEmpleado2: this.form.get('telefonoEmpleado2')!.value, // Nuevo campo
+        telefonoEmpleado2: this.form.get('telefonoEmpleado2')!.value,
         numero_identificacion: this.form.get('numero_identificacion')!.value
       };
 
-      this.authService.completarRegistro(this.token, datos, this.archivo!, this.fotografia!).subscribe({
+      // Convierte null a undefined si el archivo no está presente
+      this.authService.completarRegistro(
+        this.token,
+        datos,
+        this.archivo ?? undefined,
+        this.fotografia ?? undefined
+      ).subscribe({
         next: () => {
           this.toastr.success('Registro completado con éxito', 'Éxito');
           this.router.navigate(['/login']);
@@ -141,8 +147,10 @@ export class RegisterComponent implements OnInit {
         }
       });
     } else {
-      this.toastr.error('Por favor, completa todos los campos y sube los archivos requeridos.', 'Error');
+      this.toastr.error('Por favor, completa todos los campos requeridos.', 'Error');
     }
   }
+
+
 
 }

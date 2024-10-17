@@ -10,14 +10,15 @@ import { AfiliacionService } from 'src/app/services/afiliacion.service';
   styleUrls: ['./agregar-referencias-personales.component.scss']
 })
 export class AgregarReferenciasPersonalesComponent implements OnInit {
-  form = this.fb.group({});
   formReferencias: FormGroup;
+  tipo_referencia: any[] = [];
+  parentesco: any[] = [];
 
   constructor(
-    private toastr: ToastrService,
     private fb: FormBuilder,
-    private dialogRef: MatDialogRef<AgregarReferenciasPersonalesComponent>,
+    private toastr: ToastrService,
     private afilService: AfiliacionService,
+    private dialogRef: MatDialogRef<AgregarReferenciasPersonalesComponent>,
     @Inject(MAT_DIALOG_DATA) public data: { idPersona: number }
   ) {
     this.formReferencias = this.fb.group({
@@ -26,46 +27,65 @@ export class AgregarReferenciasPersonalesComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    // Any additional initialization logic if needed
+    this.cargarDatosEstaticos();
   }
 
-  setDatosRefPer(datosRefPer: any) {
-    if (datosRefPer && datosRefPer.referencias) {
-      this.formReferencias.setControl('refpers', this.fb.array(datosRefPer.referencias, [Validators.required]));
+  get referencias(): FormArray {
+    return this.formReferencias.get('refpers') as FormArray;
+  }
+
+  agregarReferencia(datos?: any): void {
+    const referenciaForm = this.fb.group({
+      tipo_referencia: [datos?.tipo_referencia || '', [Validators.required]],
+      primer_nombre: [datos?.primer_nombre || '', [Validators.required]],
+      segundo_nombre: [datos?.segundo_nombre || ''],
+      tercer_nombre: [datos?.tercer_nombre || ''],
+      primer_apellido: [datos?.primer_apellido || '', [Validators.required]],
+      segundo_apellido: [datos?.segundo_apellido || ''],
+      direccion: [datos?.direccion || ''],
+      telefono_domicilio: [datos?.telefono_domicilio || ''],
+      telefono_trabajo: [datos?.telefono_trabajo || ''],
+      telefono_personal: [datos?.telefono_personal || ''],
+      parentesco: [datos?.parentesco || '', [Validators.required]],
+      n_identificacion: [datos?.n_identificacion || ''],
+    });
+    this.referencias.push(referenciaForm);
+  }
+
+  eliminarReferencia(index: number): void {
+    if (this.referencias.length > 0) {
+      this.referencias.removeAt(index);
     }
   }
 
-  guardar() {
+  cargarDatosEstaticos(): void {
+    // Simulando la carga de datos para tipo de referencia y parentesco
+    this.tipo_referencia = [
+      { label: 'REFERENCIA PERSONAL', value: 'REFERENCIA PERSONAL' },
+      { label: 'REFERENCIA FAMILIAR', value: 'REFERENCIA FAMILIAR' }
+    ];
+
+    this.parentesco = [
+      { label: 'Padre', value: 'Padre' },
+      { label: 'Madre', value: 'Madre' },
+      { label: 'Hermano/a', value: 'Hermano/a' },
+      { label: 'Amigo/a', value: 'Amigo/a' },
+    ];
+  }
+
+  guardarReferencias() {
     if (!this.formReferencias.get('refpers')) {
       this.toastr.error('No hay referencias para guardar');
       return;
     }
 
-    const referencias = this.formReferencias.value.refpers.map((ref: any) => ({
-      tipo_referencia: ref.tipo_referencia,
-      parentesco: ref.parentesco,
-      persona_referencia: {
-        id_tipo_identificacion: ref.id_tipo_identificacion,
-        n_identificacion: ref.n_identificacion,
-        primer_nombre: ref.primer_nombre,
-        segundo_nombre: ref.segundo_nombre,
-        tercer_nombre: ref.tercer_nombre,
-        primer_apellido: ref.primer_apellido,
-        segundo_apellido: ref.segundo_apellido,
-        sexo: ref.sexo,
-        telefono_1: ref.telefono_personal,
-        telefono_2: ref.telefono_trabajo,
-        telefono_3: ref.telefono_domicilio,
-        direccion_residencia: ref.direccion
-      }
-    }));
+    const referencias = this.formatReferencias(this.formReferencias.value.refpers);
 
     this.afilService.agregarReferencias(this.data.idPersona, referencias).subscribe(
       (res: any) => {
-        console.log(res);
         if (res.length > 0) {
           this.toastr.success("Referencia personal agregada con éxito");
-          this.cerrar();
+          this.dialogRef.close(true);
         }
       },
       (error) => {
@@ -75,7 +95,24 @@ export class AgregarReferenciasPersonalesComponent implements OnInit {
     );
   }
 
-  cerrar() {
+  private formatReferencias(refpers: any[]): any[] {
+    return refpers.map(referencia => ({
+      tipo_referencia: referencia.tipo_referencia,
+      parentesco: referencia.parentesco,
+      primer_nombre: referencia.primer_nombre,
+      segundo_nombre: referencia.segundo_nombre,
+      tercer_nombre: referencia.tercer_nombre,
+      primer_apellido: referencia.primer_apellido,
+      segundo_apellido: referencia.segundo_apellido,
+      telefono_domicilio: referencia.telefono_domicilio,
+      telefono_trabajo: referencia.telefono_trabajo,
+      telefono_personal: referencia.telefono_personal,
+      n_identificacion: referencia.n_identificacion,
+      direccion: referencia.direccion,
+    }));
+  }
+
+  cerrar(): void {
     this.dialogRef.close();
   }
 }

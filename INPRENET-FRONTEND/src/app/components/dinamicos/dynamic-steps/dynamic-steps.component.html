@@ -1,0 +1,14 @@
+<div *ngIf="steps.length > 0">
+  <ng-container *ngFor="let step of steps; let i = index">
+    <ng-container *ngIf="currentStep === i">
+      <form [formGroup]="step.formGroup">
+        <ng-template [ngTemplateOutlet]="step.template"></ng-template>
+      </form>
+    </ng-container>
+  </ng-container>
+
+  <div class="navigation-buttons">
+    <button (click)="previousStep()" [disabled]="currentStep === 0">Anterior</button>
+    <button (click)="nextStep()">Siguiente</button>
+  </div>
+</div>

@@ -1,51 +1,30 @@
 import { Component, EventEmitter, OnInit, Output } from '@angular/core';
-import {Subject, Observable} from 'rxjs';
-import {WebcamImage, WebcamInitError, WebcamUtil} from 'ngx-webcam';
+import { Subject, Observable } from 'rxjs';
+import { WebcamImage, WebcamInitError, WebcamUtil } from 'ngx-webcam';
 import { FormStateService } from 'src/app/services/form-state.service';
 import { FormBuilder, FormGroup } from '@angular/forms';
 
 @Component({
   selector: 'app-camara',
   templateUrl: './camara.component.html',
-  styleUrl: './camara.component.scss'
+  styleUrls: ['./camara.component.scss']
 })
-export class CamaraComponent {
-  title = 'camaraapp';
-  form: FormGroup = this.fb.group({});
-
+export class CamaraComponent implements OnInit {
   @Output() imageCaptured = new EventEmitter<string>();
 
-  constructor(private formStateService: FormStateService, private fb: FormBuilder,) {
-    this.form = this.fb.group({
-      FotoPerfil: ['']  // Asegúrate de añadir esto
-    });
-  }
-
-  // Hacer Toogle on/off
   public mostrarWebcam = true;
   public permitirCambioCamara = true;
   public multiplesCamarasDisponibles = false;
   public dispositivoId!: string;
   public opcionesVideo: MediaTrackConstraints = {};
-
-  // Errores al iniciar la cámara
   public errors: WebcamInitError[] = [];
-
-  // Ultima captura o foto
   public imagenWebcam!: WebcamImage;
-
-  // Cada Trigger para una nueva captura o foto
   public trigger: Subject<void> = new Subject<void>();
+  private siguienteWebcam: Subject<boolean | string> = new Subject<boolean | string>();
 
-  // Cambiar a la siguiente o anterior cámara
-  private siguienteWebcam: Subject<boolean|string> = new Subject<boolean|string>();
+  constructor(private formStateService: FormStateService) {}
 
-  public ngOnInit(): void {
-    this.formStateService.getFotoPerfil().subscribe(foto => {
-      if (foto) {
-          this.form.get('FotoPerfil')?.setValue(foto);
-      }
-  });
+  ngOnInit(): void {
     WebcamUtil.getAvailableVideoInputs()
       .then((mediaDevices: MediaDeviceInfo[]) => {
         this.multiplesCamarasDisponibles = mediaDevices && mediaDevices.length > 1;
@@ -64,7 +43,7 @@ export class CamaraComponent {
     this.errors.push(error);
   }
 
-  public showNextWebcam(directionOnDeviceId: boolean|string): void {
+  public showNextWebcam(directionOnDeviceId: boolean | string): void {
     this.siguienteWebcam.next(directionOnDeviceId);
   }
 
@@ -79,7 +58,6 @@ export class CamaraComponent {
   }
 
   public cameraSwitched(dispositivoId: string): void {
-    console.log('Dispositivo Actual: ' + dispositivoId);
     this.dispositivoId = dispositivoId;
   }
 
@@ -91,4 +69,3 @@ export class CamaraComponent {
     return this.siguienteWebcam.asObservable();
   }
 }
-

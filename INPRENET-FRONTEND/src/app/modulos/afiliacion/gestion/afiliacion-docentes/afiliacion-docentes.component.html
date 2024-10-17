@@ -11,40 +11,29 @@
   </div>
 
   <div [hidden]="activeStep !== 1">
-    <app-dat-familiares
-      [parentForm]="familiaresForm"
-      (newDatosFamiliares)="handleFamiliaresChange($event)">
-    </app-dat-familiares>
-  </div>
-
-  <div [hidden]="activeStep !== 2">
     <app-col-magisteriales [parentForm]="colegioMagisterialForm" (newDataColegioMagisterial)="onColegioMagisterialFormUpdate($event)"></app-col-magisteriales>
   </div>
 
   <div [hidden]="activeStep !== 3">
-    <app-historial-salario [parentForm]="bancosForm" (newDatHistSal)="onBancosFormUpdate($event)"></app-historial-salario>
-  </div>
-
-  <div [hidden]="activeStep !== 4">
     <app-dat-puesto-trab (newDatDatosPuestTrab)="handleDatosPuestTrab($event)" (newOtrasFuentesIngreso)="handleOtrasFuentesIngreso($event)"></app-dat-puesto-trab>
   </div>
 
-  <div [hidden]="activeStep !== 5">
+  <div [hidden]="activeStep !== 4">
     <app-ref-pers (newDatRefPerChange)="handleRefPersData($event)"></app-ref-pers>
   </div>
 
-  <div [hidden]="activeStep !== 6">
+  <!-- <div [hidden]="activeStep !== 5">
     <app-benef [formParent]="benefForm" (newDatBenChange)="handleBenefData($event)"></app-benef>
-  </div>
+  </div> -->
 
-  <div [hidden]="activeStep !== 7">
+  <div [hidden]="activeStep !== 6">
     <button mat-button color="primary" (click)="gatherAllData()">
       <mat-icon>save</mat-icon> Enviar y Mostrar Datos
     </button>
   </div>
 </div>
 
-<div class="card-body" style="text-align: center;">
+<!-- <div class="card-body" style="text-align: center;">
   <strong>Datos Generales Del Docente</strong><br>
   <pre>{{ datosGeneralesForm.value | json }}</pre>
   <strong>Status:</strong> {{ datosGeneralesForm.status }}
@@ -83,5 +72,5 @@
   <strong>Otras Fuentes de Ingreso</strong><br>
   <pre>{{ otrasFuentesIngresoForm.value | json }}</pre>
   <strong>Status:</strong> {{ otrasFuentesIngresoForm.status }}
-</div>
+</div> -->
 

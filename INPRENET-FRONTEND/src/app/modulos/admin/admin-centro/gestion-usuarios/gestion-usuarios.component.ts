@@ -15,14 +15,14 @@ export class GestionUsuariosComponent implements OnInit {
   selectedModulos: string[] = [];
   public columns: TableColumn[] = [];
   public usuarios: any[] = [];
-  ejecF: any;
+  ejecF?: Function;
   data: any;
 
   constructor(
     private usuarioService: AuthService,
     private authService: AuthService,
     private router: Router
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     const token = sessionStorage.getItem('token');
@@ -30,12 +30,12 @@ export class GestionUsuariosComponent implements OnInit {
       this.rolesModulos = this.authService.decodeToken(token).rolesModulos;
     }
 
-    if (this.rolesModulos.length === 0) {
+    if (!this.rolesModulos || this.rolesModulos.length === 0) {
       console.error("No se pudieron obtener los módulos del token");
       return;
     }
 
-    this.adminRolesModulos = this.rolesModulos.filter(rm => rm.rol === 'ADMINISTRADOR');
+    this.adminRolesModulos = this.rolesModulos.filter(rm => rm.rol.includes('ADMINISTRADOR'));
 
     if (this.adminRolesModulos.length === 0) {
       console.error("No se encontraron módulos donde el usuario es administrador");
@@ -93,7 +93,7 @@ export class GestionUsuariosComponent implements OnInit {
     }
   }
 
-  ejecutarFuncionAsincronaDesdeOtroComponente(funcion: (data: any) => Promise<void>) {
+  ejecutarFuncionAsincronaDesdeOtroComponente(funcion: (data: any) => Promise<boolean>) {
     this.ejecF = funcion;
   }
 
@@ -105,10 +105,10 @@ export class GestionUsuariosComponent implements OnInit {
 
   manejarRowClick(row: any) {
     const usuarioSeleccionado = this.data.find((usuario: any) => usuario.id_usuario_empresa === row.id);
-    this.router.navigate(['/gestion/editar-perfil', row.id], { state: { usuario: usuarioSeleccionado } });
+    this.router.navigate(['home/gestion/usuarios/editar-perfil', row.id], { state: { usuario: usuarioSeleccionado } });
   }
 
   irANuevaPagina() {
-    this.router.navigate(['/gestion/nuevo-usuario']);
+    this.router.navigate(['home/gestion/usuarios/nuevo-usuario']);
   }
 }

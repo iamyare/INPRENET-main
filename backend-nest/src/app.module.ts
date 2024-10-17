@@ -13,18 +13,17 @@ import { TransaccionesModule } from './modules/transacciones/transacciones.modul
 import * as oracledb from 'oracledb';
 import { AppDataSource } from '../ormconfig';
 import { MantenimientoAfiliacionService } from './modules/Persona/afiliacion/mantenimiento-afiliacion.service';
+import { AuthModule } from './modules/auth/auth.module';
+import { DocumentsModule } from './modules/documents/documents.module';
 
 @Module({
   imports: [
-    ConfigModule.forRoot({
-      envFilePath: `development.env`,
-    }),
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
       useFactory: async (configService: ConfigService) => {
-        const user = configService.get('DB_USERNAME');
-        const password = configService.get('DB_PASSWORD');
-        const connectString = configService.get('CONNECT_STRING');
+        const user = process.env.DB_USERNAME;
+        const password = process.env.DB_PASSWORD;
+        const connectString = process.env.CONNECT_STRING;
 
         // Ensure Thin mode is used
         oracledb.initOracleClient({ configDir: '', libDir: '', errorDir: '' });
@@ -41,11 +40,11 @@ import { MantenimientoAfiliacionService } from './modules/Persona/afiliacion/man
           password,
           connectString,
           extra: { pool },
-          autoLoadEntities: false,
-          //synchronize: true,
           entities: [__dirname + '/../**/*.entity{.ts,.js}'],
           migrations: [__dirname + '/../migrations/*{.ts,.js}'],
           dataSource: AppDataSource,
+          //autoLoadEntities: true,
+          //synchronize: true,
           //migrations: ['src/database/migrations/*{.ts,.js}'],
           //logging: ["query", "schema", "error", "warn", "info", "log", "migration"]
         };
@@ -53,14 +52,16 @@ import { MantenimientoAfiliacionService } from './modules/Persona/afiliacion/man
       inject: [ConfigService],
     }),
     CommonModule,
+    EmpresarialModule,
+    DocumentsModule,
     AfiliadoModule,
     BancoModule,
     TipoIdentificacionModule,
     UsuarioModule,
     PlanillaModule,
     RegionalModule,
-    EmpresarialModule,
     TransaccionesModule,
+    AuthModule
   ],
   providers: [MantenimientoAfiliacionService],
 })

@@ -38,14 +38,14 @@
               <ng-container *ngIf="field.type === 'dropdown'; else dateField">
                 <mat-form-field appearance="outline" style="width: 100%">
                   <mat-label>{{ field.label }}</mat-label>
-                  <mat-select [formControlName]="field.name" (selectionChange)="onSelectChange(field.name, $event)"
-                    [attr.readonly]="field.readOnly">
+                  <mat-select [formControlName]="field.name" (selectionChange)="onSelectChange(field.name, $event)">
                     <mat-option *ngFor="let option of field.options" [value]="option.value">
                       {{ option.label }}
                     </mat-option>
                   </mat-select>
                   <mat-icon *ngIf="field.icon" matSuffix>{{ field.icon }}</mat-icon>
                 </mat-form-field>
+
               </ng-container>
 
               <!-- Fecha -->
@@ -88,7 +88,7 @@
                     </mat-checkbox>
                   </div>
                 </div>
-              </ng-container>              
+              </ng-container>
 
               <!-- Radio Buttons -->
               <ng-container *ngIf="field.type === 'radio'">

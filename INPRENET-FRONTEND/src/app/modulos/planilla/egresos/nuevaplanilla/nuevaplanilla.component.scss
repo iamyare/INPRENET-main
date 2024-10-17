@@ -1,7 +1,7 @@
-
 body {
   font-family: Roboto, Arial, sans-serif;
   margin: 0;
+  background-color: #f5f5f5;
 }
 
 .basic-container {
@@ -14,10 +14,80 @@ body {
 }
 
 .inputs {
-  width: 100%
+  width: 100%;
 }
 
 .tittle {
-  color:white;
+  color: white;
   background: #628780;
+}
+
+.card {
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  padding: 20px;
+  background-color: white;
+  margin-bottom: 20px;
+}
+
+h3 {
+  font-size: 1.5rem;
+  font-weight: bold;
+  margin-bottom: 20px;
+  color: #229e92;
+}
+
+.table-container {
+  background-color: white;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+th, td {
+  padding: 12px 15px;
+  text-align: left;
+}
+
+th {
+  background-color: #229e92;
+  color: black;
+  border: 1px solid #ddd;
+}
+
+td {
+  border: 1px solid #ddd;
+  color: #333;
+}
+
+button {
+  background-color: #229e92;
+  color: white;
+  border-radius: 5px;
+  padding: 10px 20px;
+  border: none;
+  cursor: pointer;
+}
+
+button:hover {
+  background-color: #1b7a70;
+}
+
+.mat-header-row, .mat-row {
+  border-bottom: 1px solid #ddd;
+}
+
+.mat-header-cell {
+  font-weight: bold;
+  background-color: #229e92;
+  color: white;
+}
+
+.mat-cell {
+  padding: 10px;
 }

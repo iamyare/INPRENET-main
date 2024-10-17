@@ -3,13 +3,13 @@ import { Net_Municipio } from 'src/modules/Regional/municipio/entities/net_munic
 import { Net_perf_pers_cent_trab } from 'src/modules/Persona/entities/net_perf_pers_cent_trab.entity';
 import { Net_Detalle_planilla_ingreso } from 'src/modules/Planilla/Ingresos/detalle-plan-ingr/entities/net_detalle_plani_ing.entity';
 import { Net_Deduccion } from 'src/modules/Planilla/deduccion/entities/net_deduccion.entity';
-import { net_empleado_centro_trabajo } from './net_empleado_centro_trabajo.entity';
 import { Net_Sociedad_Centro_Trabajo } from './net_sociedad_centro.entity';
 import { Net_Referencia_Centro_Trabajo } from './net_referencia_centro_trabajo.entity';
 import { Net_Centro_Trabajo_Jornada } from './net_centro_trabajo_jornada.entity';
 import { Net_Centro_Trabajo_Nivel } from './net_centro_trabajo_nivel.entity';
 import { net_modulo } from 'src/modules/usuario/entities/net_modulo.entity';
 import { Net_Estado_Centro_Trabajo } from './net_estado_centro_trabajo.entity';
+import { Net_Empleado_Centro_Trabajo } from './net_empleado_centro_trabajo.entity';
 
 @Entity({ name: 'NET_CENTRO_TRABAJO' })
 @Check('CK_TIPO_CENTRO_TRAB', `TIPO IN ('EDUCACION', 'INSTITUCION')`)
@@ -22,7 +22,7 @@ export class Net_Centro_Trabajo {
     @Index("UQ_rtn_netCenTrab", { unique: true })
     rtn: string;
 
-    @Column('varchar2', { length: 40, nullable: false, name: 'NOMBRE_CENTRO_TRABAJO' })
+    @Column('varchar2', { length: 100, nullable: true, name: 'NOMBRE_CENTRO_TRABAJO' })
     nombre_centro_trabajo: string;
 
     @Column('int', { nullable: true, name: 'NUMERO_EMPLEADOS' })
@@ -33,9 +33,6 @@ export class Net_Centro_Trabajo {
 
     @Column('varchar2', { length: 40, nullable: true, name: 'SECTOR_ECONOMICO' })
     sector_economico: string;
-
-    @Column('varchar2', { length: 40, nullable: true, name: 'MONTO_APROX_ACTIVOS_TOTAL' })
-    monto_aprox_activos_total: string;
 
     @Column('varchar2', { length: 30, nullable: true, name: 'NUMERO_ACUERDO' })
     numero_acuerdo: string;
@@ -89,6 +86,9 @@ export class Net_Centro_Trabajo {
     @Column('decimal', { precision: 10, scale: 7, nullable: true, name: 'LONGITUD' })
     longitud: number;
 
+    @Column('nvarchar2', { length: 20, nullable: true, name: 'CODIGO' })
+    codigo: string;
+
     @ManyToOne(() => Net_Municipio, municipio => municipio.centrosTrabajo)
     @JoinColumn({ name: 'ID_MUNICIPIO', foreignKeyConstraintName: 'FK_ID_MUNICIPIO_CENT_TRAB' })
     municipio: Net_Municipio;
@@ -103,8 +103,8 @@ export class Net_Centro_Trabajo {
     @OneToMany(() => Net_Deduccion, deduccion => deduccion.centroTrabajo)
     deduccion: Net_Deduccion[];
 
-    @OneToMany(() => net_empleado_centro_trabajo, empleadoCentroTrabajo => empleadoCentroTrabajo.centroTrabajo)
-    empleadoCentroTrabajos: net_empleado_centro_trabajo[];
+    @OneToMany(() => Net_Empleado_Centro_Trabajo, empleadoCentroTrabajo => empleadoCentroTrabajo.centroTrabajo)
+    empleadoCentroTrabajos: Net_Empleado_Centro_Trabajo[];
 
     @OneToMany(() => Net_Sociedad_Centro_Trabajo, sociedadCentroTrabajo => sociedadCentroTrabajo.centroTrabajo)
     sociedadCentroTrabajos: Net_Sociedad_Centro_Trabajo[];

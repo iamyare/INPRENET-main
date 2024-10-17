@@ -1,19 +1,44 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Res, HttpStatus, Put, UseInterceptors, UploadedFiles, NotFoundException } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Res, HttpStatus, Put, UseInterceptors, UploadedFiles, ParseIntPipe, UploadedFile, BadRequestException, NotFoundException } from '@nestjs/common';
 import { CentroTrabajoService } from './centro-trabajo.service';
 import { CreateCentroTrabajoDto } from './dto/create-centro-trabajo.dto';
 import { UpdateCentroTrabajoDto } from './dto/update-centro-trabajo.dto';
 import { ApiTags } from '@nestjs/swagger';
 import { CreatePrivateCentroTrabajoCompleteDto } from './dto/create-private-centro-trabajo-complete.dto';
 import { Net_Centro_Trabajo } from '../entities/net_centro_trabajo.entity';
-import { FileFieldsInterceptor, FilesInterceptor } from '@nestjs/platform-express';
+import { FileFieldsInterceptor, FileInterceptor, FilesInterceptor } from '@nestjs/platform-express';
 import { UpdateEmpleadoDto } from './dto/update-empleado.dto';
 import { Net_Jornada } from '../entities/net_jornada.entity';
 import { Net_Nivel_Educativo } from '../entities/net_nivel_educativo.entity';
+import { diskStorage } from 'multer';
+import { extname } from 'path';
+import { Net_Empleado } from '../entities/net_empleado.entity';
 
 @ApiTags('centro-trabajo')
 @Controller('centro-trabajo')
 export class CentroTrabajoController {
   constructor(private readonly centroTrabajoService: CentroTrabajoService) { }
+
+  @Patch('empleado/:id/archivo-identificacion')
+  @UseInterceptors(FileInterceptor('archivo_identificacion'))
+  async actualizarArchivoIdentificacion(
+    @Param('id') id_empleado: number,
+    @UploadedFile() archivo: Express.Multer.File,
+  ): Promise<Net_Empleado> {
+    // Validar si se recibió un archivo
+    if (!archivo) {
+      throw new BadRequestException('No se ha subido ningún archivo');
+    }
+
+    // Llamar al servicio para actualizar el archivo de identificación
+    const empleadoActualizado = await this.centroTrabajoService.updateArchivoIdentificacion(id_empleado, archivo.buffer);
+
+    // Verificar si el empleado fue encontrado y actualizado
+    if (!empleadoActualizado) {
+      throw new NotFoundException(`Empleado con ID ${id_empleado} no encontrado.`);
+    }
+
+    return empleadoActualizado;
+  }
 
   @Get('jornadas')
   async getAllJornadas(): Promise<Net_Jornada[]> {

@@ -1,4 +1,4 @@
-import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
+import { HttpClient, HttpErrorResponse, HttpParams } from '@angular/common/http';
 import { EventEmitter, Injectable, Output } from '@angular/core';
 import { Router } from '@angular/router';
 import { Observable, catchError, map, throwError } from 'rxjs';
@@ -13,6 +13,11 @@ export class AfiliadoService {
 
   generarConstanciaAfiliacion(data: any): Observable<any> {
     const url = `${environment.API_URL}/api/documents/constancia-afiliacion`;
+    return this.http.post<any>(url, data);
+  }
+
+  generarConstanciaAfiliacion2(data: any): Observable<any> {
+    const url = `${environment.API_URL}/api/documents/constancia-afiliacion2`;
     return this.http.post<any>(url, data);
   }
 
@@ -66,26 +71,6 @@ export class AfiliadoService {
     return this.http.put(url, updatedData);
   }
 
-  createReferPersonales(idPersona: string, encapsulatedData: any): Observable<any> {
-    const encapsulatedDataE = { referencias: encapsulatedData }
-    const url = `${environment.API_URL}/api/Persona/createReferPersonales/${idPersona}`;
-    return this.http.post<any>(url, encapsulatedDataE);
-  }
-
-  createColegiosMagisteriales(idPersona: string, encapsulatedData: any): Observable<any> {
-    const url = `${environment.API_URL}/api/Persona/createColegiosMagisteriales/${idPersona}`;
-    return this.http.post<any>(url, encapsulatedData);
-  }
-  createCentrosTrabajo(idPersona: string, encapsulatedData: any): Observable<any> {
-    const url = `${environment.API_URL}/api/Persona/createCentrosTrabajo/${idPersona}`;
-    return this.http.post<any>(url, encapsulatedData);
-  }
-
-  createBeneficiarios(idPersona: string, encapsulatedData: any): Observable<any> {
-    const url = `${environment.API_URL}/api/Persona/createBeneficiarios/${idPersona}`;
-    return this.http.post<any>(url, encapsulatedData);
-  }
-
   buscarMovimientosPorDNI(dni: string): Observable<any> {
     const url = `${environment.API_URL}/api/Persona/movimientos/${dni}`;
     return this.http.get<any>(url);
@@ -137,11 +122,17 @@ export class AfiliadoService {
   }
 
   updateDatosGenerales(idPersona: string, datosGenerales: any): Observable<any> {
-    return this.http.put(`${environment.API_URL}/api/Persona/updateDatosGenerales/${idPersona}`, datosGenerales);
+    const formData: FormData = new FormData();
+    formData.append('datosGenerales', JSON.stringify(datosGenerales));
+    formData.append('arch_cert_def', datosGenerales.certificado_defuncion
+    );
+    formData.append('file_ident', datosGenerales.dato.archivo_identificacion);
+
+    return this.http.put(`${environment.API_URL}/api/Persona/updateDatosGenerales/${idPersona}`, formData);
   }
 
   updateReferenciaPersonal(id: string, updateDto: any): Observable<any> {
-    return this.http.patch(`${environment.API_URL}/api/Persona/updateReferenciaPerson/${id}`, updateDto);
+    return this.http.patch(`${environment.API_URL}/api/afiliacion/referencia/actualizar/${id}`, updateDto);
   }
 
   eliminarReferenciaPersonal(id: string): Observable<any> {
@@ -159,6 +150,18 @@ export class AfiliadoService {
 
   getAllPerfCentroTrabajo(dni: string): Observable<any | void> {
     const url = `${environment.API_URL}/api/Persona/getAllPerfCentroTrabajo/${dni}`;
+
+    return this.http.get<any>(
+      url,
+    ).pipe(
+      map((res: any) => {
+        return res;
+      })
+    );
+  }
+
+  getAllCargoPublicPeps(dni: string): Observable<any | void> {
+    const url = `${environment.API_URL}/api/Persona/getAllCargoPublicPeps/${dni}`;
 
     return this.http.get<any>(
       url,
@@ -192,9 +195,6 @@ export class AfiliadoService {
 
   updateDatosBancarios(idPerf: string, datosBancarios: any): Observable<any> {
     return this.http.put(`${environment.API_URL}/api/Persona/updateDatosBancarios/${idPerf}`, datosBancarios);
-  }
-  updateColegiosMagist(idPerf: string, datosColegioMagist: any): Observable<any> {
-    return this.http.put(`${environment.API_URL}/api/Persona/updateColegiosMagist/${idPerf}`, datosColegioMagist);
   }
 
   desactivarPerfCentroTrabajo(id: number): Observable<any> {
@@ -252,6 +252,7 @@ export class AfiliadoService {
       })
     );
   }
+
   getAfilByDni(param: string | number): Observable<any | void> {
     const url = `${environment.API_URL}/api/Persona/Afil/${param}`;
     return this.http.get<any>(
@@ -266,21 +267,10 @@ export class AfiliadoService {
   getPersonaParaDeduccion(param: string | number): Observable<any | void> {
     const url = `${environment.API_URL}/api/Persona/personaParaDeduccion/${param}`;
     return this.http.get<any>(url).pipe(
-      catchError(error => {
+      catchError((error: HttpErrorResponse) => {
         console.error('Error al obtener persona para deducción:', error);
-        return throwError('No se encontró el afiliado con el DNI proporcionado.');
-      })
-    );
-  }
-
-
-  getAllPersonas(param: string | number): Observable<any | void> {
-    const url = `${environment.API_URL}/api/Persona/${param}`;
-    return this.http.get<any>(
-      url,
-    ).pipe(
-      map((res: any) => {
-        return res;
+        const errorMessage = error.error?.mensaje || 'Error desconocido al buscar el afiliado.';
+        return throwError(() => new Error(errorMessage));
       })
     );
   }
@@ -295,6 +285,7 @@ export class AfiliadoService {
       })
     );
   }
+
   getAllColMagPPersona(param: string | number): Observable<any | void> {
     const url = `${environment.API_URL}/api/Persona/getAllColMagPPersona/${param}`;
     return this.http.get<any>(
@@ -304,89 +295,6 @@ export class AfiliadoService {
         return res;
       })
     );
-  }
-
-  agregarAfiliados(data: any): Observable<any> {
-    var url = `${environment.API_URL}/Personas/agregarAfiliado`;
-
-    return this.http.post<any>(
-      url,
-      data,
-    ).pipe(
-      map((res: any) => {
-        return res;
-      })
-    )
-  }
-
-  agregDatosGen(data: any): Observable<any> {
-    var url = `${environment.API_URL}/auth/signup`;
-
-    return this.http.post<any>(
-      url,
-      data,
-    ).pipe(
-      map((res: any) => {
-        return res;
-      }),
-      //catchError((err) => this.handlerError2(err))
-    )
-  }
-
-  agregDatosBanc(data: any): Observable<any> {
-    var url = `${environment.API_URL}/auth/signup`;
-
-    return this.http.post<any>(
-      url,
-      data,
-    ).pipe(
-      map((res: any) => {
-        return res;
-      }),
-      //catchError((err) => this.handlerError2(err))
-    )
-  }
-
-  agregDatosPuestTra(data: any, dnireferente: any): Observable<any> {
-    var url = `${environment.API_URL}/Persona/createCentrosTrabPersona/${dnireferente}`;
-
-    return this.http.post<any>(
-      url,
-      data,
-    ).pipe(
-      map((res: any) => {
-        return res;
-      }),
-      //catchError((err) => this.handlerError2(err))
-    )
-  }
-
-  agregDatosRefPer(data: any, dnireferente: any): Observable<any> {
-    var url = `${environment.API_URL}/Persona/createRefPers/${dnireferente}`;
-
-    return this.http.post<any>(
-      url,
-      data,
-    ).pipe(
-      map((res: any) => {
-        return res;
-      }),
-      //catchError((err) => this.handlerError2(err))
-    )
-  }
-
-  agregDatosBeneficiarios(data: any): Observable<any> {
-    var url = `${environment.API_URL}/auth/signup`;
-
-    return this.http.post<any>(
-      url,
-      data,
-    ).pipe(
-      map((res: any) => {
-        return res;
-      }),
-      //catchError((err) => this.handlerError2(err))
-    )
   }
 
   /* BENEFICIARIOS PARA UN CAUSANTE FALLECIDO*/

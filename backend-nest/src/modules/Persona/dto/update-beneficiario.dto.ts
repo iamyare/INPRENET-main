@@ -82,6 +82,14 @@ export class UpdateBeneficiarioDto {
 
   @IsInt()
   @IsOptional()
+  id_persona
+
+  @IsInt()
+  @IsOptional()
+  id_causante_padre
+
+  @IsInt()
+  @IsOptional()
   eliminado: number;
 
   @IsInt()

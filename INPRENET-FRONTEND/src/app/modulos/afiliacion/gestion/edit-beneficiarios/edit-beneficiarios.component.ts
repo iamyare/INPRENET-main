@@ -1,4 +1,4 @@
-import { Component, Input, OnInit, OnChanges, SimpleChanges, OnDestroy } from '@angular/core';
+import { Component, Input, OnInit, OnChanges, SimpleChanges } from '@angular/core';
 import { Validators } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
 import { ToastrService } from 'ngx-toastr';
@@ -6,24 +6,24 @@ import { AfiliadoService } from 'src/app/services/afiliado.service';
 import { FieldConfig } from 'src/app/shared/Interfaces/field-config';
 import { TableColumn } from 'src/app/shared/Interfaces/table-column';
 import { convertirFechaInputs } from 'src/app/shared/functions/formatoFecha';
-import { measureAsyncExecutionTime } from 'src/app/shared/functions/calculoTiempoEjecucion';
 import { unirNombres } from 'src/app/shared/functions/formatoNombresP';
-import { DatosEstaticosService } from 'src/app/services/datos-estaticos.service';
 import { DatePipe } from '@angular/common';
-import { Subscription } from 'rxjs';
 import { EditarDialogComponent } from 'src/app/components/dinamicos/editar-dialog/editar-dialog.component';
 import { ConfirmDialogComponent } from 'src/app/components/dinamicos/confirm-dialog/confirm-dialog.component';
 import { AgregarBenefCompComponent } from '../agregar-benef-comp/agregar-benef-comp.component';
+import { PermisosService } from 'src/app/services/permisos.service';
+import { AfiliacionService } from 'src/app/services/afiliacion.service';
+import { DatosEstaticosService } from 'src/app/services/datos-estaticos.service';
+import { GestionarDiscapacidadDialogComponent } from 'src/app/components/dinamicos/gestionar-discapacidad-dialog/gestionar-discapacidad-dialog.component';
 
 @Component({
   selector: 'app-edit-beneficiarios',
   templateUrl: './edit-beneficiarios.component.html',
   styleUrls: ['./edit-beneficiarios.component.scss']
 })
-export class EditBeneficiariosComponent implements OnInit, OnChanges, OnDestroy {
+export class EditBeneficiariosComponent implements OnInit, OnChanges {
   convertirFechaInputs = convertirFechaInputs;
   public myFormFields: FieldConfig[] = [];
-  form: any;
   @Input() persona: any;
   unirNombres: any = unirNombres;
   datosTabl: any[] = [];
@@ -34,18 +34,27 @@ export class EditBeneficiariosComponent implements OnInit, OnChanges, OnDestroy 
   ejecF: any;
   municipios: { label: string, value: any }[] = [];
   estados: { label: string, value: any }[] = [];
-  private subscriptions: Subscription = new Subscription();
+  public mostrarBotonAgregar: boolean = false;
+  public mostrarBotonEditar: boolean = false;
+  public mostrarBotonEliminar: boolean = false;
+  public mostrarBotonAgregarDiscapacidad: boolean = false;
 
   constructor(
     private svcAfiliado: AfiliadoService,
     private toastr: ToastrService,
     private dialog: MatDialog,
-    private datosEstaticosService: DatosEstaticosService,
-    private datePipe: DatePipe
+    private datePipe: DatePipe,
+    private permisosService: PermisosService,
+    private afiliacionServicio: AfiliacionService,
+    private datosEstaticosService: DatosEstaticosService
   ) { }
 
   ngOnInit(): void {
     this.initializeComponent();
+    this.mostrarBotonAgregar = this.permisosService.tieneAccesoCompletoAfiliacion();
+    this.mostrarBotonEditar = this.permisosService.tieneAccesoCompletoAfiliacion();
+    this.mostrarBotonEliminar = this.permisosService.tieneAccesoCompletoAfiliacion();
+    this.mostrarBotonAgregarDiscapacidad = this.permisosService.tieneAccesoCompletoAfiliacion();
   }
 
   ngOnChanges(changes: SimpleChanges): void {
@@ -54,12 +63,9 @@ export class EditBeneficiariosComponent implements OnInit, OnChanges, OnDestroy 
     }
   }
 
-  ngOnDestroy(): void {
-    this.subscriptions.unsubscribe();
-  }
-
   initializeComponent(): void {
     if (!this.persona) {
+      this.resetDatos();
       return;
     }
 
@@ -68,40 +74,36 @@ export class EditBeneficiariosComponent implements OnInit, OnChanges, OnDestroy 
     ];
 
     this.myColumns = [
-      { header: 'Numero De Identificacion', col: 'n_identificacion', validationRules: [Validators.required, Validators.minLength(3)] },
+      { header: 'Número De Identificación', col: 'n_identificacion', validationRules: [Validators.required, Validators.minLength(3)] },
       { header: 'Nombres', col: 'nombres' },
       { header: 'Apellidos', col: 'apellidos' },
       { header: 'Porcentaje', col: 'porcentaje' },
-      { header: 'Estado', col: 'estado_descripcion' },
-      { header: 'Fecha de Nacimiento', col: 'fecha_nacimiento' }
+      { header: 'Fecha de Nacimiento', col: 'fecha_nacimiento' },
+      { header: 'Discapacidades', col: 'discapacidades' }
     ];
-
-    this.getFilas();
-  }
-
-  async obtenerDatos(event: any): Promise<any> {
-    this.form = event;
+    this.getFilas().then(() => this.cargar());
   }
 
   resetDatos() {
-    if (this.form) {
-      this.form.reset();
-    }
     this.filas = [];
     this.persona = undefined;
   }
 
   async getFilas() {
-    this.filas = [];
     if (this.persona) {
       try {
-        const { data, time } = await measureAsyncExecutionTime(() => this.svcAfiliado.getAllBenDeAfil(this.persona.n_identificacion).toPromise());
+        const data = await this.svcAfiliado.getAllBenDeAfil(this.persona.n_identificacion).toPromise();
         this.filas = data.map((item: any) => {
           const nombres = [item.primerNombre, item.segundoNombre, item.tercerNombre].filter(part => part).join(' ');
           const apellidos = [item.primerApellido, item.segundoApellido].filter(part => part).join(' ');
           const fechaNacimiento = this.datePipe.transform(item.fechaNacimiento, 'dd/MM/yyyy') || 'Fecha no disponible';
+          const discapacidades = Array.isArray(item.discapacidades)
+            ? item.discapacidades.map((disc: any) => disc.tipoDiscapacidad).join(', ')
+            : '';
+
           const respData = {
-            id: item.idPersona,
+            id_causante: item.ID_CAUSANTE_PADRE,
+            id_persona: item.idPersona,
             n_identificacion: item.nIdentificacion,
             nombres,
             apellidos,
@@ -114,9 +116,9 @@ export class EditBeneficiariosComponent implements OnInit, OnChanges, OnDestroy 
             idPaisNacionalidad: item.idPaisNacionalidad,
             id_municipio_residencia: item.idMunicipioResidencia,
             id_estado_persona: item.idEstadoPersona,
-            estado_descripcion: item.estadoDescripcion,
             porcentaje: item.porcentaje,
-            tipo_persona: item.tipoPersona
+            tipo_persona: item.tipoPersona,
+            discapacidades
           };
           return respData;
         });
@@ -127,10 +129,9 @@ export class EditBeneficiariosComponent implements OnInit, OnChanges, OnDestroy 
     } else {
       this.resetDatos();
     }
-    this.cargar();
   }
 
-  ejecutarFuncionAsincronaDesdeOtroComponente(funcion: (data: any) => Promise<void>) {
+  ejecutarFuncionAsincronaDesdeOtroComponente(funcion: (data: any) => Promise<boolean>) {
     this.ejecF = funcion;
   }
 
@@ -145,34 +146,13 @@ export class EditBeneficiariosComponent implements OnInit, OnChanges, OnDestroy 
       width: '500px',
       data: { campos: campos, valoresIniciales: row }
     });
-
     dialogRef.afterClosed().subscribe((result: any) => {
       if (result) {
-        const [primer_nombre, segundo_nombre, tercer_nombre] = result.nombres.split(' ');
-        const [primer_apellido, segundo_apellido] = result.apellidos.split(' ');
-
-        const fecha_nacimiento = this.datePipe.transform(result.fecha_nacimiento, 'dd-MM-yyyy') || '';
-
         const updatedBeneficiario = {
-          id_pais: result.idPaisNacionalidad,
-          n_identificacion: result.n_identificacion ?? 'ID no disponible',
-          primer_nombre,
-          segundo_nombre: segundo_nombre || '',
-          tercer_nombre: tercer_nombre || '',
-          primer_apellido,
-          segundo_apellido: segundo_apellido || '',
-          genero: result.genero,
-          sexo: result.sexo,
-          cantidad_dependientes: result.cantidad_dependientes,
-          telefono_1: result.telefono_1,
-          fecha_nacimiento,
-          direccion_residencia: result.direccion_residencia,
-          id_municipio_residencia: result.id_municipio_residencia,
-          id_estado_persona: result.id_estado_persona,
+          id_causante_padre: this.persona.id_persona,
+          id_persona: row.id_persona,
           porcentaje: result.porcentaje
         };
-
-        console.log('Updating beneficiario:', updatedBeneficiario);
         this.svcAfiliado.updateBeneficiario(row.id, updatedBeneficiario).subscribe(
           (response) => {
             this.toastr.success('Beneficiario actualizado exitosamente');
@@ -194,20 +174,19 @@ export class EditBeneficiariosComponent implements OnInit, OnChanges, OnDestroy 
   }
 
   editarFila(row: any) {
-    const campos = [
-      { nombre: 'n_identificacion', tipo: 'text', etiqueta: 'Numero de Identificacion', editable: true, icono: 'badge' },
-      { nombre: 'nombres', tipo: 'text', etiqueta: 'Nombres', editable: true, icono: 'person' },
-      { nombre: 'apellidos', tipo: 'text', etiqueta: 'Apellidos', editable: true, icono: 'person_outline' },
-      { nombre: 'sexo', tipo: 'list', etiqueta: 'Sexo', editable: true, opciones: this.datosEstaticosService.sexo, icono: 'transgender' },
-      { nombre: 'telefono_1', tipo: 'text', etiqueta: 'Teléfono 1', editable: true, icono: 'phone' },
-      { nombre: 'fecha_nacimiento', tipo: 'date', etiqueta: 'Fecha de Nacimiento', editable: true, icono: 'calendar_today' },
-      { nombre: 'direccion_residencia', tipo: 'text', etiqueta: 'Dirección de Residencia', editable: true, icono: 'home' },
-      { nombre: 'idPaisNacionalidad', tipo: 'list', etiqueta: 'País Nacionalidad', editable: true, opciones: this.datosEstaticosService.nacionalidades, icono: 'public' },
-      { nombre: 'id_municipio_residencia', tipo: 'list', etiqueta: 'Municipio Residencia', editable: true, opciones: this.datosEstaticosService.municipios, icono: 'location_city' },
-      { nombre: 'id_estado_persona', tipo: 'list', etiqueta: 'Estado Persona', editable: true, opciones: this.datosEstaticosService.estados, icono: 'assignment_ind' },
-      { nombre: 'porcentaje', tipo: 'number', etiqueta: 'Porcentaje', editable: true, icono: 'pie_chart' }
+    const campos = [{
+      nombre: 'porcentaje',
+      tipo: 'number',
+      etiqueta: 'Porcentaje',
+      editable: true,
+      icono: 'pie_chart',
+      validadores: [
+        Validators.required,
+        Validators.min(1),
+        Validators.max(100)
+      ]
+    }
     ];
-
     this.openDialog(campos, row);
   }
 
@@ -221,7 +200,7 @@ export class EditBeneficiariosComponent implements OnInit, OnChanges, OnDestroy 
     });
     dialogRef.afterClosed().subscribe((result: any) => {
       if (result) {
-        this.inactivarPersona(row.id, this.persona.ID_PERSONA);
+        this.inactivarPersona(row.id_persona, row.id_causante,);
       }
     });
   }
@@ -231,14 +210,12 @@ export class EditBeneficiariosComponent implements OnInit, OnChanges, OnDestroy 
       width: '55%',
       height: '75%',
       data: {
-        idPersona: this.persona.id_persona
+        idPersona: this.persona.id_persona,
+        id_detalle_persona: this.persona.detallePersona[0].ID_DETALLE_PERSONA
       }
     });
-
     dialogRef.afterClosed().subscribe((result: any) => {
-      if (result) {
-        this.getFilas();
-      }
+      this.ngOnInit();
     });
   }
 
@@ -254,4 +231,57 @@ export class EditBeneficiariosComponent implements OnInit, OnChanges, OnDestroy 
       }
     );
   }
+
+  agregarDiscapacidad(row: any) {
+    this.datosEstaticosService.getDiscapacidades().subscribe(discapacidades => {
+      const discapacidadesArray = typeof row.discapacidades === 'string'
+        ? row.discapacidades.split(', ').map((disc: string) => disc.trim())
+        : row.discapacidades || [];
+
+      const dialogRef = this.dialog.open(GestionarDiscapacidadDialogComponent, {
+        width: '500px',
+        data: {
+          discapacidades: discapacidades,
+          personaDiscapacidades: discapacidadesArray
+        }
+      });
+
+      dialogRef.afterClosed().subscribe(result => {
+        if (result) {
+          if (result.agregar) {
+            const discapacidadSeleccionada = discapacidades.find(disc => disc.value === result.tipo_discapacidad);
+            if (discapacidadSeleccionada) {
+              const discapacidadesPayload = [{ tipo_discapacidad: discapacidadSeleccionada.label }];
+              this.afiliacionServicio.crearDiscapacidades(row.id_persona, discapacidadesPayload).subscribe(
+                () => {
+                  this.toastr.success('Discapacidad agregada exitosamente');
+                  this.getFilas().then(() => this.cargar());
+                },
+                error => {
+                  this.toastr.error('Error al agregar discapacidad');
+                  console.error('Error al agregar discapacidad:', error);
+                }
+              );
+            } else {
+              console.error("No se encontró la discapacidad seleccionada");
+            }
+          }
+          else if (result.eliminar) {
+            this.afiliacionServicio.eliminarDiscapacidad(row.id_persona, result.discapacidadId).subscribe(
+              () => {
+                this.toastr.success('Discapacidad eliminada exitosamente');
+                this.getFilas().then(() => this.cargar());
+              },
+              error => {
+                this.toastr.error('Error al eliminar discapacidad');
+                console.error('Error al eliminar discapacidad:', error);
+              }
+            );
+          }
+
+        }
+      });
+    });
+  }
+
 }

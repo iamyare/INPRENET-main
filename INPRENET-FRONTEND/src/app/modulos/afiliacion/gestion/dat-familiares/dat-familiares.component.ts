@@ -1,5 +1,6 @@
 import { ChangeDetectionStrategy, Component, EventEmitter, Input, OnInit, Output, inject } from '@angular/core';
 import { FormBuilder, FormGroup, FormArray, FormControl, Validators, ControlContainer } from '@angular/forms';
+import { DatosEstaticosService } from 'src/app/services/datos-estaticos.service';
 
 export function generateFamiliaresFormGroup(datos?: any): FormGroup {
   return new FormGroup({
@@ -29,12 +30,18 @@ export function generateFamiliaresFormGroup(datos?: any): FormGroup {
 export class DatFamiliaresComponent implements OnInit {
   @Input() parentForm!: FormGroup;
   @Output() newDatosFamiliares = new EventEmitter<any>();
+  availableParentescos: any[] = [];
 
-  constructor(private fb: FormBuilder) {}
+  constructor(private fb: FormBuilder,private datosEstaticosService: DatosEstaticosService) {}
 
   ngOnInit(): void {
     this.initForm();
     this.forceValidation();
+    this.loadParentescos();
+  }
+
+  private loadParentescos() {
+    this.availableParentescos = this.datosEstaticosService.parentesco;
   }
 
   private initForm() {

@@ -1,10 +1,12 @@
+<app-custom-container></app-custom-container>
+
 <div class="login-container">
   <mat-card class="login-card">
     <div class="text-center">
-      <img src="assets/images/LOGO INPRENET.png" width="320px" height="70px" alt="Descripción de la imagen">
+      <img src="../assets/images/LOGO INPRENET.png" width="320px" height="70px" alt="Descripción de la imagen">
     </div>
     <form [formGroup]="loginForm" (ngSubmit)="onLogin()">
-      <h1 style="color:grey">Inicio de sesión</h1>
+      <h1 style="color:grey; text-align: center;">Inicio de sesión</h1>
       <p class="text-medium-emphasis">Para ingresar a tu cuenta</p>
       <mat-form-field appearance="fill" class="full-width">
         <mat-label>Correo Electrónico</mat-label>

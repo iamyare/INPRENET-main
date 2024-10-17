@@ -13,9 +13,27 @@ body {
 
 .inputs {
   width: 100%;
+  display: flex;
+  align-items: center;
+}
+
+.mat-form-field {
+  display: flex;
+  flex-direction: column;
 }
 
 .tittle {
   color: white;
   background: #628780;
 }
+
+.error-text-small {
+  font-size: 0.75rem;
+}
+
+.error-icon-small {
+  font-size: 1rem;
+  vertical-align: middle;
+  margin-right: 4px;
+}
+

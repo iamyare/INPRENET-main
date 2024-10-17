@@ -1,5 +1,7 @@
 import { Component, Input, OnInit, TemplateRef, ViewChild } from '@angular/core';
+import { BeneficiosService } from 'src/app/services/beneficios.service';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
+import { ToastrService } from 'ngx-toastr';
 
 @Component({
   selector: 'app-beneficiario-beneficios-asignados',
@@ -10,39 +12,48 @@ export class BeneficiarioBeneficiosAsignadosComponent implements OnInit {
   @Input() datos: any;
   @ViewChild('historialDialog') historialDialog!: TemplateRef<any>;
   historialPagos: any[] = [];
+  beneficiosPorCausante: any[] = [];
 
-  beneficios = [
-    {
-      nombreBeneficio: 'SEPARACION DEL SISTEMA VOLUNTARIO',
-      monto: 'L 5,000',
-      causante: 'Juan Carlos Pérez Gómez'
-    },
-    {
-      nombreBeneficio: 'PENSION POR VEJEZ',
-      monto: 'L 2,500',
-      causante: 'Juan Carlos Pérez Gómez'
-    },
-    {
-      nombreBeneficio: 'SEGURO DE VIDA Y SEPARACION',
-      monto: 'L 1,200',
-      causante: 'Juan Carlos Pérez Gómez'
-    }
-  ];
-
-  constructor(private modalService: NgbModal) {}
+  constructor(
+    private beneficiosService: BeneficiosService,
+    private modalService: NgbModal,
+    private toastr: ToastrService
+  ) {}
 
   ngOnInit() {
-    /* console.log(this.datos); */
+    if (this.datos && this.datos.n_identificacion) {
+      this.cargarBeneficios(this.datos.n_identificacion);
+    }
   }
 
-  openHistorial(beneficio: any) {
-    // Aquí puedes cargar el historial de pagos del beneficio seleccionado
-    this.historialPagos = [
-      { fecha: '01/01/2024', monto: 'L 500' },
-      { fecha: '01/02/2024', monto: 'L 500' },
-      { fecha: '01/03/2024', monto: 'L 500' }
-    ];
+  cargarBeneficios(dni: string) {
+    this.beneficiosService.obtenerCausantesYBeneficios(dni).subscribe({
+      next: (res) => {
+        this.beneficiosPorCausante = res || [];
+      },
+      error: (err) => {
+        this.beneficiosPorCausante = [];
+        this.toastr.error('Error al cargar los beneficios', 'Error');
+      }
+    });
+  }
 
-    this.modalService.open(this.historialDialog);
+  verHistorial(beneficio: any, causante: any) {
+    const { n_identificacion } = this.datos;
+    const causanteIdentificacion = causante.n_identificacion;
+    const idBeneficio = beneficio.beneficio.id_beneficio;
+    this.beneficiosService.obtenerDetallePagoConPlanilla(n_identificacion, causanteIdentificacion, idBeneficio).subscribe({
+      next: (res) => {
+        if (res.length > 0) {
+          this.historialPagos = res;
+          this.modalService.open(this.historialDialog);
+        } else {
+          this.toastr.warning('No se encontraron detalles de pago para este beneficio.');
+        }
+      },
+      error: (err) => {
+        this.toastr.error(err || 'Error al cargar el historial de pagos', 'Error');
+      }
+    });
   }
 }

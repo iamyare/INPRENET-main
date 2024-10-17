@@ -1,14 +1,62 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Query, Response, BadRequestException, HttpStatus } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Query, Response, BadRequestException, HttpStatus, HttpException, Put, HttpCode } from '@nestjs/common';
 import { DetalleBeneficioService } from './detalle_beneficio.service';
 import { UpdateDetalleBeneficioDto } from './dto/update-detalle_beneficio_planilla.dto';
-import { CreateDetalleBeneficioDto } from './dto/create-detalle_beneficio.dto';
 import { ApiTags } from '@nestjs/swagger';
-import { log } from 'console';
+import { net_persona } from 'src/modules/Persona/entities/net_persona.entity';
+import { Net_Detalle_Beneficio_Afiliado } from './entities/net_detalle_beneficio_afiliado.entity';
 
 @ApiTags('beneficio-planilla')
 @Controller('beneficio-planilla')
 export class DetalleBeneficioController {
   constructor(private readonly detallebeneficioService: DetalleBeneficioService) { }
+
+  @Get('verificar-afiliado/:dni')
+  async verificarAfiliado(@Param('dni') dni: string): Promise<{ esAfiliado: boolean }> {
+    const esAfiliado = await this.detallebeneficioService.verificarSiEsAfiliado(dni);
+    return { esAfiliado };
+  }
+
+  @Post('insertar-detalle-pago-beneficio')
+  async insertarDetallePagoBeneficio(
+    @Body() body: { id_persona: number, id_causante: number, id_detalle_persona: number, id_beneficio: number, id_planilla: number, monto_a_pagar: number }
+  ) {
+    try {
+      // Insertamos el detalle del pago de beneficio
+      const nuevoDetallePagoBeneficio = await this.detallebeneficioService.insertarDetallePagoBeneficio(
+        body.id_persona,
+        body.id_causante,
+        body.id_detalle_persona,
+        body.id_beneficio,
+        body.id_planilla,
+        body.monto_a_pagar
+      );
+
+      return {
+        message: 'Detalle de pago de beneficio insertado correctamente.',
+        data: nuevoDetallePagoBeneficio,
+      };
+    } catch (error) {
+      console.error('Error al insertar el detalle de pago del beneficio:', error);
+      throw new HttpException({
+        status: HttpStatus.INTERNAL_SERVER_ERROR,
+        error: 'Ocurrió un error inesperado. Inténtelo de nuevo más tarde.',
+      }, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+  }
+
+  @Get('detalle-pago')
+  obtenerDetallePago(@Query('n_identificacion') n_identificacion: string, @Query('causante_identificacion') causante_identificacion: string, @Query('id_beneficio') id_beneficio: number) {
+    return this.detallebeneficioService.obtenerDetallePagoConPlanilla(n_identificacion, causante_identificacion, id_beneficio);
+  }
+
+
+  @Get('causante/:dni')
+  async getCausanteByDniBeneficiario(
+    @Param('dni') dni: string
+  ): Promise<{ causante: { nombres: string, apellidos: string, n_identificacion: string }, beneficios: Net_Detalle_Beneficio_Afiliado[] }[]> {
+    return this.detallebeneficioService.getCausanteByDniBeneficiario(dni);
+  }
+
 
   @Post('nuevoDetalle/:idAfiliadoPadre')
   async createDetalleBeneficioBeneficiario(@Body() createDetalleBeneficioDto: any, @Param('idAfiliadoPadre') idAfiliadoPadre: number) {
@@ -48,7 +96,7 @@ export class DetalleBeneficioController {
     }
   }
 
-  @Post('createBenBenefic/:idAfiliado')
+  /* @Post('createBenBenefic/:idAfiliado')
   async createBenBenefic(@Body() createDetalleBeneficioDto: CreateDetalleBeneficioDto, @Param('idAfiliado') idAfiliado: string) {
     try {
       const nuevoDetalle = await this.detallebeneficioService.createBenBenefic(createDetalleBeneficioDto, idAfiliado);
@@ -60,7 +108,7 @@ export class DetalleBeneficioController {
     } catch (error) {
       throw new BadRequestException(error.message);
     }
-  }
+  } */
 
   @Get('detallesPreliminar')
   async getDetalleBeneficiosPreliminar(
@@ -157,6 +205,14 @@ export class DetalleBeneficioController {
     return respuesta;
   }
 
+  @Patch('eliminar-ben-plan')
+  async eliminarBenPlan(
+    @Body('data') data: any
+  ) {
+    const respuesta = await this.detallebeneficioService.eliminarBenPlan(data);
+    return respuesta;
+  }
+
   /* @Patch('/actualizar-beneficio-planilla')
   actualizarPlanillasYEstados(@Body() detalles: { idBeneficioPlanilla: string; codigoPlanilla: string; estado: string }[]) {
     return this.detallebeneficioService.actualizarPlanillaYEstadoDeBeneficio(detalles);
@@ -170,6 +226,15 @@ export class DetalleBeneficioController {
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.detallebeneficioService.remove(+id);
+  }
+
+  @Put('/updateBeneficioPersona')
+  @HttpCode(HttpStatus.OK)
+  async actualizarSalarioBase(
+    @Body('data') data: any,
+  ): Promise<{ message: string }> {
+    this.detallebeneficioService.updateBeneficioPersona(data);
+    return { message: 'Beneficio actualizado con éxito.' };
   }
 
 }

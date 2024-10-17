@@ -1,8 +1,7 @@
 import { net_persona } from "../../Persona/entities/net_persona.entity";
-import { Check, Column, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryColumn, PrimaryGeneratedColumn } from "typeorm";
+import { Check, Column, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryColumn} from "typeorm";
 import { NET_TIPO_CUENTA } from "./net_tipo_cuenta.entity";
 import { NET_MOVIMIENTO_CUENTA } from "./net_movimiento_cuenta.entity";
-import { NOW } from "sequelize";
 
 @Entity({ name: 'NET_CUENTA_PERSONA' })
 @Check("CK1_NET_CUENTA_PERSONA", `ACTIVA_B IN ('A', 'I')`)

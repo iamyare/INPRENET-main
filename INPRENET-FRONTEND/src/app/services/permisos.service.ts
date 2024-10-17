@@ -8,6 +8,9 @@ export class PermisosService {
   private rolesAccesoCompletoAfiliacion = ['MODIFICACION AFILIACION', 'ADMINISTRADOR'];
   private rolesAccesoLimitadoAfiliacion = ['CONSULTA AFILIACION', 'ADMINISTRADOR'];
 
+  private rolesAccesoCompletoPlanilla = ['OFICIAL DE PLANILLA', 'ADMINISTRADOR'];
+  private rolesAccesoLimitadoPlanilla = ['CONSULTA PLANILLA', 'ADMINISTRADOR'];
+
   constructor(private authService: AuthService) { }
 
   tieneAccesoCompletoAfiliacion(): boolean {
@@ -27,24 +30,22 @@ export class PermisosService {
     );
   }
 
+  tieneAccesoCompletoPlanilla(): boolean {
+    const rolesUsuario = this.authService.getUserRolesAndModules();
+    return rolesUsuario.some(roleModulo =>
+      roleModulo.rol === 'TODO' ||
+      (roleModulo.modulo === 'PLANILLA' &&
+        this.rolesAccesoCompletoPlanilla.includes(roleModulo.rol))
+    );
+  }
 
   tieneAccesoLimitadoPlanilla(): boolean {
     const rolesUsuario = this.authService.getUserRolesAndModules();
     return rolesUsuario.some(roleModulo =>
       roleModulo.modulo === 'PLANILLA' &&
-      this.rolesAccesoLimitadoAfiliacion.includes(roleModulo.rol)
+      this.rolesAccesoLimitadoPlanilla.includes(roleModulo.rol)
     );
   }
-
-  tieneAccesoCompletoPlanilla(): boolean {
-    const rolesUsuario = this.authService.getUserRolesAndModules();
-    return rolesUsuario.some(roleModulo =>
-      roleModulo.rol === 'OFICIAL DE PLANILLA' ||
-      (roleModulo.modulo === 'PLANILLA' &&
-        this.rolesAccesoCompletoAfiliacion.includes(roleModulo.rol))
-    );
-  }
-
 
   tieneAccesoAChildAfiliacion(childTitle: string): boolean {
     if (this.tieneAccesoCompletoAfiliacion()) {
@@ -53,7 +54,7 @@ export class PermisosService {
     if (this.tieneAccesoLimitadoAfiliacion()) {
       return ['Buscar Persona', 'Ver Centro Educativo'].includes(childTitle);
     }
-    if (childTitle == 'Cambiar Cuenta Bancaria') {
+    if (childTitle === 'Cambiar Cuenta Bancaria') {
       return ['Cambiar Cuenta Bancaria'].includes(childTitle);
     }
 

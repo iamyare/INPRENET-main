@@ -1,5 +1,5 @@
 import { Component, ElementRef, ViewChild } from '@angular/core';
-import { PlanillaService } from 'src/app/services/planilla.service'; // Ajusta la ruta según sea necesario
+import { PlanillaService } from 'src/app/services/planilla.service';
 import { ToastrService } from 'ngx-toastr';
 import * as XLSX from 'xlsx';
 
@@ -79,4 +79,21 @@ export class ActualizarFallecidosComponent {
       this.fileInput.nativeElement.value = '';
     }
   }
+
+  downloadExample() {
+    const exampleData = [
+      { IDENTIDAD: 'IDENTIDAD', NOMBRE: 'NOMBRE' }
+    ];
+    const ws: XLSX.WorkSheet = XLSX.utils.json_to_sheet(exampleData);
+    ws['A2'] = undefined;
+    ws['B2'] = undefined;
+    const wb: XLSX.WorkBook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'Ejemplo');
+    const fechaActual = new Date().toISOString().split('T')[0];
+    const nombreArchivo = `fallecidos_${fechaActual}.xlsx`;
+    XLSX.writeFile(wb, nombreArchivo);
+  }
+
+
+
 }

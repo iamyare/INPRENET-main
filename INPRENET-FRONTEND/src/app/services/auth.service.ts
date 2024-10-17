@@ -35,13 +35,11 @@ export class AuthService {
 
   private resetIdleTimer(): void {
     clearTimeout(this.timeout);
-
-    // Solo comienza el conteo de inactividad si no hay solicitudes de API pendientes
     if (this.apiRequestsCount === 0) {
       this.timeout = setTimeout(() => {
         console.log('Sesión cerrada por inactividad');
         this.handleIdleTimeout();
-      }, this.idleTime); // Tiempo de inactividad antes de cerrar la sesión, por ejemplo, 60 segundos
+      }, this.idleTime);
     }
   }
 
@@ -90,16 +88,10 @@ export class AuthService {
     );
   }
 
-  clearSession(): void {
-    sessionStorage.removeItem('token');
-    this.router.navigate(['/login']);
-    this.toastr.success('Sesión cerrada con éxito', 'Logout');
-  }
-
   login(correo: string, contrasena: string): Observable<{ accessToken: string }> {
     const url = `${environment.API_URL}/api/usuario/login`;
     const body = { correo, contrasena };
-    return this.http.post<{ accessToken: string }>(url, body, { withCredentials: true }).pipe(
+    return this.http.post<{ accessToken: string }>(url, body).pipe(
       map(response => {
         sessionStorage.setItem('token', response.accessToken);
         return response;
@@ -112,24 +104,15 @@ export class AuthService {
     );
   }
 
-  refreshToken(): Observable<any> {
-    const url = `${environment.API_URL}/api/usuario/refresh-token`;
-    return this.http.post<{ accessToken: string }>(url, {}, { withCredentials: true }).pipe(
-      map(response => {
-        sessionStorage.setItem('token', response.accessToken);
-        return response;
-      }),
-      catchError(error => {
-        this.logout();
-        return throwError(error);
-      })
-    );
+  logout(): void {
+    sessionStorage.removeItem('token');
+    this.toastr.info('Sesión cerrada');
+    this.router.navigate(['/']);
   }
 
   isAuthenticated(): boolean {
     return sessionStorage.getItem('token') !== null;
   }
-
 
   desactivarUsuario(idUsuario: number, fechaReactivacion: Date | null = null): Observable<{ message: string }> {
     const url = `${environment.API_URL}/api/usuario/${idUsuario}/desactivar`;
@@ -191,43 +174,20 @@ export class AuthService {
     );
   }
 
-
-  logout(): void {
-    const url = `${environment.API_URL}/api/usuario/logout`;
-    this.http.post(url, {}, { withCredentials: true }).subscribe({
-      next: () => {
-        sessionStorage.removeItem('token');
-        this.toastr.info('Sesión cerrada');
-        this.router.navigate(['/']);
-      },
-      error: error => {
-        console.error('Logout failed:', error);
-        this.toastr.error('Error al cerrar sesión', 'Error');
-      }
-    });
-  }
-
-  verificarEstadoSesion(): Observable<{ sesionActiva: boolean }> {
-    const url = `${environment.API_URL}/api/usuario/verificarEstado`;
-    const token = localStorage.getItem('token');
-    const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
-    return this.http.get<{ sesionActiva: boolean }>(url, { headers });
-  }
-
-
-
-  completarRegistro(token: string, datos: any, archivoIdentificacion: File, fotoEmpleado: File): Observable<void> {
+  completarRegistro(token: string, datos: any, archivoIdentificacion?: File, fotoEmpleado?: File): Observable<void> {
     const url = `${environment.API_URL}/api/usuario/completar-registro?token=${token}`;
     const formData = new FormData();
     formData.append('datos', JSON.stringify(datos));
-    formData.append('archivo_identificacion', archivoIdentificacion);
-    formData.append('foto_empleado', fotoEmpleado);
-
+    if (archivoIdentificacion) {
+      formData.append('archivo_identificacion', archivoIdentificacion);
+    }
+    if (fotoEmpleado) {
+      formData.append('foto_empleado', fotoEmpleado);
+    }
     return this.http.post<void>(url, formData).pipe(
       catchError(this.handleError<void>('completarRegistro'))
     );
   }
-
 
   obtenerUsuarioPorModuloYCentroTrabajo(modulo: string, idCentroTrabajo: number): Observable<any[]> {
     const url = `${environment.API_URL}/api/usuario/modulo-centro-trabajo?modulos=${modulo}&idCentroTrabajo=${idCentroTrabajo}`;
@@ -245,7 +205,6 @@ export class AuthService {
       catchError(this.handleError<any[]>('obtenerRolesPorModulo', []))
     );
   }
-
 
   getRolesModulos(): { rol: string, modulo: string }[] {
     const token = sessionStorage.getItem('token');

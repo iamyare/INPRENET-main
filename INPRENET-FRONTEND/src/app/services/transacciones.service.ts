@@ -10,6 +10,13 @@ export class TransaccionesService {
 
   constructor(private http: HttpClient) { }
 
+  eliminarMovimiento(idMovimiento: number): Observable<any> {
+    const url = `${environment.API_URL}/api/transacciones/eliminar-movimiento/${idMovimiento}`;
+    return this.http.delete<any>(url).pipe(
+      catchError(error => throwError(() => new Error('Error al eliminar el movimiento: ' + error.message)))
+    );
+  }
+
   generarMovimientosPdf(data: any): Observable<Blob> {
     const url = `${environment.API_URL}/api/documents/movimientos-pdf`;
     const headers = new HttpHeaders().set('Content-Type', 'application/json');

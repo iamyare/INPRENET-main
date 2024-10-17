@@ -1,11 +1,7 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
-import { MatTableDataSource } from '@angular/material/table';
-import { MatPaginator } from '@angular/material/paginator';
-import { MatSort } from '@angular/material/sort';
-import { MatDialog } from '@angular/material/dialog';
+import { Component, OnInit } from '@angular/core';
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { TransaccionesService } from 'src/app/services/transacciones.service';
-import { AfiliadoService } from 'src/app/services/afiliado.service';
-import { AgregarMovimientoComponent } from '../../afiliacion/gestion/agregar-movimiento/agregar-movimiento.component';
+import { TableColumn } from 'src/app/shared/Interfaces/table-column';
 
 @Component({
   selector: 'app-movimientos',
@@ -13,48 +9,57 @@ import { AgregarMovimientoComponent } from '../../afiliacion/gestion/agregar-mov
   styleUrls: ['./movimientos.component.scss'],
 })
 export class MovimientosComponent implements OnInit {
-  displayedColumns: string[] = ['ano', 'mes', 'monto', 'descripcion', 'fechaMovimiento', 'numeroCuenta'];
-  dataSource: MatTableDataSource<any>;
-  movimientosData: any = {};
-  dni!: string;
-  persona: any = null;
-  errorMessage: string | null = null;
-  idTipoCuenta: number = 2;
+  columns: TableColumn[] = [
+    { header: 'Año', col: 'ANO' },
+    { header: 'Mes', col: 'MES' },
+    { header: 'Monto', col: 'MONTO', moneda: true },
+    { header: 'Descripción', col: 'DESCRIPCION' },
+    { header: 'Fecha Movimiento', col: 'FECHA_MOVIMIENTO', customRender: (row: any) => new Date(row.FECHA_MOVIMIENTO).toLocaleDateString('es-ES') },
+    { header: 'Número Cuenta', col: 'NUMERO_CUENTA' }
+  ];
 
-  @ViewChild(MatPaginator) paginator!: MatPaginator;
-  @ViewChild(MatSort) sort!: MatSort;
+  movimientosData: any[] = [];
+  movimientoForm: FormGroup;
+  persona: any = null;
+  ejecF: any;
 
   constructor(
     private transaccionesService: TransaccionesService,
-    private afiliadoService: AfiliadoService,
-    private dialog: MatDialog
+    private fb: FormBuilder
   ) {
-    this.dataSource = new MatTableDataSource();
+
+    this.movimientoForm = this.fb.group({
+      tipoCuenta: ['', Validators.required],
+      monto: [null, [Validators.required, Validators.min(1)]],
+      descripcion: ['', [Validators.required, Validators.maxLength(30)]],
+      tipo: ['', Validators.required],
+      numeroCuenta: ['', Validators.required],
+      ano: [null, [Validators.required, Validators.min(2000), Validators.max(2100)]],
+      mes: [null, Validators.required]
+    });
   }
 
   ngOnInit(): void {}
 
   onPersonaEncontrada(persona: any): void {
     this.persona = persona;
-    this.obtenerMovimientos();
+
+    this.getFilas();
   }
 
-  obtenerMovimientos(): void {
+  async getFilas(): Promise<void> {
     if (this.persona?.ID_PERSONA) {
-      this.transaccionesService.obtenerMovimientos(this.persona.ID_PERSONA, this.idTipoCuenta).subscribe(
-        (response) => {
-          this.movimientosData = response.data;
-          const movimientos = this.convertirMovimientosArray(response.data);
-          this.dataSource.data = movimientos;
-          this.dataSource.paginator = this.paginator;
-          this.dataSource.sort = this.sort;
-        },
-        (error) => {
-          console.error('Error al obtener movimientos:', error);
+      try {
+        const response = await this.transaccionesService.obtenerMovimientos(this.persona.ID_PERSONA, 2).toPromise();
+        this.movimientosData = this.convertirMovimientosArray(response.data);
+        if (this.ejecF) {
+          this.ejecF(this.movimientosData);
         }
-      );
+      } catch (error) {
+        console.error('Error al obtener movimientos:', error);
+      }
     } else {
-      console.warn('No se encontró ID_PERSONA para obtener movimientos.');
+      this.movimientosData = [];
     }
   }
 
@@ -71,17 +76,16 @@ export class MovimientosComponent implements OnInit {
           if (yearData.hasOwnProperty(month) && Array.isArray(yearData[month])) {
             yearData[month].forEach((movimiento: any) => {
               result.push({
+                ID_MOVIMIENTO_CUENTA: movimiento.ID_MOVIMIENTO_CUENTA,
                 ANO: year,
                 MES: month,
                 MONTO: movimiento.MONTO,
                 DESCRIPCION: movimiento.DESCRIPCION,
                 FECHA_MOVIMIENTO: movimiento.FECHA_MOVIMIENTO,
-                NUMERO_CUENTA: numeroCuenta, // Se utiliza el número de cuenta del nivel superior
-                TIPO_CUENTA: tipoCuenta,     // Se utiliza el tipo de cuenta del nivel superior
+                NUMERO_CUENTA: numeroCuenta,
+                TIPO_CUENTA: tipoCuenta,
               });
             });
-          } else {
-            console.warn(`Esperaba un arreglo en data.movimientos[${year}][${month}] pero encontré:`, yearData[month]);
           }
         }
       }
@@ -89,17 +93,82 @@ export class MovimientosComponent implements OnInit {
     return result;
   }
 
-  aplicarFiltro(event: Event) {
-    const filterValue = (event.target as HTMLInputElement).value;
-    this.dataSource.filter = filterValue.trim().toLowerCase();
+  onSubmitMovimiento(): void {
+    if (this.movimientoForm.valid) {
+      const now = new Date();
+      const nuevoMovimiento = {
+        numeroCuenta: this.movimientoForm.value.numeroCuenta,
+        monto: this.movimientoForm.value.monto,
+        descripcion: this.movimientoForm.value.descripcion,
+        tipoMovimientoDescripcion: this.movimientoForm.value.tipo,
+        ANO: this.movimientoForm.value.ano,
+      MES: this.movimientoForm.value.mes
+      };
+
+      if (!nuevoMovimiento.numeroCuenta) {
+        console.error('El número de cuenta no está definido. Asegúrate de que se ha cargado la información de la persona.');
+        return;
+      }
+
+      this.transaccionesService.crearMovimiento(nuevoMovimiento).subscribe(
+        (response) => {
+          const formattedMovimiento = {
+            ANO: nuevoMovimiento.ANO,
+            MES: nuevoMovimiento.MES,
+            MONTO: nuevoMovimiento.monto,
+            DESCRIPCION: nuevoMovimiento.descripcion,
+            FECHA_MOVIMIENTO: now,
+            NUMERO_CUENTA: nuevoMovimiento.numeroCuenta,
+            TIPO_CUENTA: this.movimientoForm.value.tipoCuenta,
+          };
+          this.movimientosData = [...this.movimientosData, formattedMovimiento];
+          if (this.ejecF) {
+            this.ejecF(this.movimientosData).then(() => {
+              console.log('Tabla actualizada.');
+            });
+          }
+          this.movimientoForm.reset();
+        },
+        (error) => {
+          console.error('Error al crear el movimiento:', error);
+        }
+      );
+    }
   }
 
   descargarMovimientosPdf(): void {
-    this.transaccionesService.generarMovimientosPdf(this.movimientosData).subscribe(
+    const data: any = {
+      movimientos: {},
+      tipoCuenta: this.movimientosData[0]?.TIPO_CUENTA || 'N/A',
+      numeroCuenta: this.movimientosData[0]?.NUMERO_CUENTA || 'N/A',
+      PRIMER_NOMBRE: this.persona?.PRIMER_NOMBRE || '',
+      SEGUNDO_NOMBRE: this.persona?.SEGUNDO_NOMBRE || '',
+      PRIMER_APELLIDO: this.persona?.PRIMER_APELLIDO || '',
+      SEGUNDO_APELLIDO: this.persona?.SEGUNDO_APELLIDO || '',
+      N_IDENTIFICACION: this.persona?.N_IDENTIFICACION || 'N/A'
+    };
+
+    this.movimientosData.forEach((mov) => {
+      const year = mov.ANO;
+      const month = mov.MES;
+
+      if (!data.movimientos[year]) {
+        data.movimientos[year] = {};
+      }
+      if (!data.movimientos[year][month]) {
+        data.movimientos[year][month] = [];
+      }
+      data.movimientos[year][month].push({
+        MONTO: mov.MONTO,
+        DESCRIPCION: mov.DESCRIPCION,
+        FECHA_MOVIMIENTO: mov.FECHA_MOVIMIENTO
+      });
+    });
+
+    this.transaccionesService.generarMovimientosPdf(data).subscribe(
       (pdfBlob) => {
         const blob = new Blob([pdfBlob], { type: 'application/pdf' });
         const url = window.URL.createObjectURL(blob);
-
         const a = document.createElement('a');
         a.href = url;
         a.download = 'movimientos.pdf';
@@ -110,28 +179,44 @@ export class MovimientosComponent implements OnInit {
         console.error('Error al descargar el PDF:', error);
       }
     );
+}
+
+  ejecutarFuncionAsincronaDesdeOtroComponente(funcion: (data: any) => Promise<void>) {
+    this.ejecF = funcion;
   }
 
-  // Método para abrir el diálogo de agregar movimiento
-  openAgregarMovimientoDialog(): void {
-    const dialogRef = this.dialog.open(AgregarMovimientoComponent, {
-      width: '400px',
-      data: { numeroCuenta: this.persona?.NUMERO_CUENTA }
-    });
+  meses = [
+    { value: 1, viewValue: 'Enero' },
+    { value: 2, viewValue: 'Febrero' },
+    { value: 3, viewValue: 'Marzo' },
+    { value: 4, viewValue: 'Abril' },
+    { value: 5, viewValue: 'Mayo' },
+    { value: 6, viewValue: 'Junio' },
+    { value: 7, viewValue: 'Julio' },
+    { value: 8, viewValue: 'Agosto' },
+    { value: 9, viewValue: 'Septiembre' },
+    { value: 10, viewValue: 'Octubre' },
+    { value: 11, viewValue: 'Noviembre' },
+    { value: 12, viewValue: 'Diciembre' }
+  ];
 
-    dialogRef.afterClosed().subscribe(result => {
-      if (result) {
-        const nuevoMovimiento = {
-          ANO: new Date().getFullYear().toString(),
-          MES: (new Date().getMonth() + 1).toString(),
-          MONTO: result.monto,
-          DESCRIPCION: result.descripcion,
-          FECHA_MOVIMIENTO: new Date(),
-          NUMERO_CUENTA: this.persona?.NUMERO_CUENTA,
-          TIPO_CUENTA: 'Nueva'
-        };
-        this.dataSource.data = [...this.dataSource.data, nuevoMovimiento];
+
+  eliminarMovimiento(movimiento: any): void {
+    this.transaccionesService.eliminarMovimiento(movimiento.ID_MOVIMIENTO_CUENTA).subscribe(
+      () => {
+        this.movimientosData = this.movimientosData.filter(m => m.ID_MOVIMIENTO_CUENTA !== movimiento.ID_MOVIMIENTO_CUENTA);
+        if (this.ejecF) {
+          this.ejecF(this.movimientosData).then(() => {
+          });
+        }
+      },
+      (error) => {
+        console.error('Error al eliminar el movimiento:', error);
       }
-    });
+    );
   }
+
+
+
+
 }

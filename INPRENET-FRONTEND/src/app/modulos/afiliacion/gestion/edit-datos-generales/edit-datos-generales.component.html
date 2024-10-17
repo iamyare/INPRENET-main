@@ -16,6 +16,20 @@
 
     <form style="margin: 0 0 1.5rem;" [formGroup]="form1">
       <div class="row" style="margin: 0px 20px 0 20px;">
+        <div class="col-md-4">
+          <mat-form-field style="flex-direction: column-reverse;" class="example-full-width inputs" appearance="outline">
+            <mat-label>Tipo de Persona</mat-label>
+            <mat-select formControlName="tipo_persona">
+              <mat-option *ngFor="let tipo of tiposPersona" [value]="tipo.ID_TIPO_PERSONA">
+                {{ tipo.TIPO_PERSONA }}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+          <mat-error *ngFor="let error of getErrors('tipo_persona')">
+            {{ error }}
+          </mat-error>
+        </div>
+
         <div class="col-md-4" >
           <mat-form-field style="flex-direction: column-reverse;" class="example-full-width inputs"
             appearance="outline">

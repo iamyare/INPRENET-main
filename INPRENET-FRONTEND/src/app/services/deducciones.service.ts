@@ -13,9 +13,9 @@ export class DeduccionesService {
 
   constructor(private toastr: ToastrService, private http: HttpClient) { }
 
-  eliminarDetallesDeduccionPorCentro(idCentroTrabajo: number, codigoDeduccion: number): Observable<any> {
+  eliminarDetallesDeduccionPorCentro(idCentroTrabajo: number, codigoDeduccion: number, idPlanilla: number): Observable<any> {
     return this.http.delete<any>(
-      `${environment.API_URL}/api/deduccion/${idCentroTrabajo}/deduccion/${codigoDeduccion}/eliminar`
+      `${environment.API_URL}/api/deduccion/${idCentroTrabajo}/deduccion/${codigoDeduccion}/planilla/${idPlanilla}/eliminar`
     ).pipe(
       catchError((error: HttpErrorResponse) => {
         console.error('Error al eliminar detalles de deducción por centro de trabajo:', error);

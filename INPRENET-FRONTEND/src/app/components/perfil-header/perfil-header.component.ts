@@ -28,8 +28,7 @@ export class PerfilHeaderComponent {
       if (response) {
         this.persona = response;
         this.errorMessage = null;
-        this.personaEncontrada.emit(this.persona); // Emitimos la persona encontrada
-        console.log('Persona encontrada:', this.persona); // Log de la información en PerfilHeaderComponent
+        this.personaEncontrada.emit(this.persona);
       }
     });
   }
@@ -38,7 +37,7 @@ export class PerfilHeaderComponent {
     this.persona = null;
     this.n_identificacion = '';
     this.errorMessage = null;
-    this.personaEncontrada.emit(null); // Emite null para limpiar la persona en MovimientosComponent
+    this.personaEncontrada.emit(null);
   }
 
   getFotoUrl(foto: any): string {

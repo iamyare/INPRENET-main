@@ -1,34 +1,90 @@
-.upload-container {
+.container {
   text-align: center;
-  margin: 20px 0;
+  background-color: #ffffff;
+  padding: 2%;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  margin: 2% auto;
+  max-width: 600px;
+}
 
-  button {
-    margin: 0 10px;
+h1 {
+  font-size: 1.8rem;
+  color: #333;
+}
+
+.divider {
+  width: 80%;
+  margin: 1% auto 2%;
+  border-top: 2px solid #ddd;
+}
+
+.upload-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 20px;
+
+  .button-group {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px;
+    margin-bottom: 15px;
+
+    .button {
+      color: white !important;
+      padding: 10px 20px;
+      min-width: 150px;
+      font-size: 0.9rem;
+    }
   }
 
-  .file-name-container {
-    position: relative;
-    height: 25px;
-    background-color: #f0f0f0;
-    border-radius: 5px;
-    margin: 10px 0;
-    overflow: hidden;
-    text-align: left;
+  .file-info {
+    width: 100%;
+    max-width: 80%;
+    margin: 10px auto;
 
-    .file-name-background {
-      padding-left: 10px;
-      line-height: 25px;
-    }
+    .file-name-container {
+      position: relative;
+      height: 25px;
+      background-color: #f0f0f0;
+      border-radius: 5px;
+      overflow: hidden;
+      text-align: left;
 
-    .file-name-progress {
-      background-color: #4caf50;
-      height: 100%;
-      position: absolute;
-      top: 0;
-      left: 0;
-      color: white;
-      padding-left: 10px;
-      line-height: 25px;
+      .file-name-background {
+        padding-left: 10px;
+        line-height: 25px;
+        font-size: 0.9rem;
+        color: #555;
+      }
+
+      .file-name-progress {
+        background-color: #4caf50;
+        height: 100%;
+        position: absolute;
+        top: 0;
+        left: 0;
+        padding-left: 10px;
+        line-height: 25px;
+        color: white;
+        font-size: 0.9rem;
+        transition: width 0.4s ease;
+      }
     }
+  }
+}
+
+.example-download {
+  margin-top: 20px;
+  text-align: center;
+
+  .download-button {
+    color: white !important;
+    background-color: #007bff !important;
+    padding: 10px 20px;
+    font-size: 0.9rem;
+    min-width: 200px;
   }
 }

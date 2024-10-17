@@ -15,7 +15,7 @@ export class BeneficiarioComponent implements OnInit {
     { label: 'Detalles de pagos', isActive: false },
     { label: 'Todos los pagos', isActive: false },
     { label: 'Beneficios Asignados', isActive: false },
-    //{ label: 'Causantes Detalles', isActive: false }
+    { label: 'Causantes Detalles', isActive: false }
   ];
 
   currentStepIndex = 0;
@@ -23,7 +23,6 @@ export class BeneficiarioComponent implements OnInit {
   constructor(private personaService: PersonaService) {}
 
   ngOnInit() {
-
     if (this.persona) {
       this.loadCausantes(this.persona.n_identificacion);
     }

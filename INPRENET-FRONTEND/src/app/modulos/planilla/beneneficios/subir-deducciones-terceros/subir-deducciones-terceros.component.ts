@@ -134,10 +134,6 @@ export class SubirDeduccionesTercerosComponent {
     reader.readAsBinaryString(this.file as Blob);
   }
 
-
-
-
-
   generateFailedRowsExcel(failedRows: any[]) {
     const headers = ['anio', 'mes', 'dni', 'codigoDeduccion', 'montoTotal', 'razón'];
     const formattedRows = failedRows.map(row => {
@@ -235,8 +231,15 @@ export class SubirDeduccionesTercerosComponent {
       this.toastr.error('Debe seleccionar un centro de trabajo y una deducción antes de eliminar.', 'Error');
       return;
     }
-
-    this.deduccionesService.eliminarDetallesDeduccionPorCentro(this.centroSeleccionado.id_centro_trabajo, this.deduccionSeleccionada).subscribe({
+    if (!this.id_planilla) {
+      this.toastr.error('Debe proporcionar un ID de planilla válido.', 'Error');
+      return;
+    }
+    this.deduccionesService.eliminarDetallesDeduccionPorCentro(
+      this.centroSeleccionado.id_centro_trabajo,
+      this.deduccionSeleccionada,
+      this.id_planilla
+    ).subscribe({
       next: () => {
         this.toastr.success('Datos de deducción eliminados correctamente.');
         this.detallesDeduccion = [];
@@ -246,4 +249,5 @@ export class SubirDeduccionesTercerosComponent {
       }
     });
   }
+
 }

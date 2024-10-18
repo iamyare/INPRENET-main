@@ -280,12 +280,13 @@ export class DetalleBeneficioService {
 
   async createDetalleBeneficioAfiliado(data: any, idPersonaPadre?: number): Promise<any> {
     const { datos, itemSeleccionado } = data
+    const fechaActual = new Date();
+    const startDateFormatted = format(fechaActual, 'dd-MM-yyyy');
+
     return await this.entityManager.transaction(async manager => {
       try {
         const beneficio = await manager.findOne(Net_Beneficio, { where: { nombre_beneficio: datos.nombre_beneficio } });
 
-        console.log(beneficio)
-        console.log(data)
         if (!beneficio) {
           throw new BadRequestException('Tipo de beneficio no encontrado');
         }
@@ -333,23 +334,25 @@ export class DetalleBeneficioService {
                     MONTO_ULTIMA_CUOTA,
                     NUM_RENTAS_APLICADAS,
                     ESTADO_SOLICITUD,
-                    OBSERVACIONES
+                    OBSERVACIONES,
+                    ULTIMO_DIA_ULTIMA_RENTA
                   ) VALUES (
                     ${detPer.ID_DETALLE_PERSONA},
                     ${detPer.ID_CAUSANTE},
                     ${detPer.ID_PERSONA},
                     ${beneficio.id_beneficio},
                     '${this.convertirCadenaAFecha(datos.fecha_calculo)}',
-                    ${datos.periodo_inicio ? `'${datos.periodo_inicio}'` : 'null'},
-                    ${datos.periodo_finalizacion ? `'${datos.periodo_finalizacion}'` : 'null'},
+                    '${startDateFormatted}',
+                    ${datos.periodo_finalizacion ? `'${datos.periodo_finalizacion}'` : null},
                     ${parseFloat(datos.monto_total)},
-                    '${datos.metodo_pago}',
+                    'TRANSFERENCIA',
                     ${parseFloat(datos.monto_por_periodo)},
                     ${parseFloat(datos.monto_primera_cuota)},
                     ${parseFloat(datos.monto_ultima_cuota)},
-                    ${datos.num_rentas_aplicadas ? parseFloat(datos.num_rentas_aplicadas) : 'null'},
+                    ${datos.num_rentas_aplicadas ? parseFloat(datos.num_rentas_aplicadas) : null},
                     '${datos.estado_solicitud}',
-                    '${datos.observacion}'
+                    '${datos.observacion}',
+                     ${datos.ultimo_dia_ultima_renta ? parseFloat(datos.ultimo_dia_ultima_renta) : null}
               )`;
 
               const detBeneBeneficia = await this.entityManager.query(queryInsDeBBenf);
@@ -390,7 +393,6 @@ export class DetalleBeneficioService {
 
             if (detPer) {
               const estadoP = await this.tipoPersonaRepos.findOne({ where: { tipo_persona: "BENEFICIARIO" } });
-              console.log(estadoP);
 
               const detPers = await this.detPersonaRepository.preload({
                 ID_DETALLE_PERSONA: detPer.ID_DETALLE_PERSONA,
@@ -418,23 +420,25 @@ export class DetalleBeneficioService {
                       MONTO_ULTIMA_CUOTA,
                       NUM_RENTAS_APLICADAS,
                       ESTADO_SOLICITUD,
-                      OBSERVACIONES
+                      OBSERVACIONES,
+                    ULTIMO_DIA_ULTIMA_RENTA
                     ) VALUES (
                       ${detPer.ID_DETALLE_PERSONA},
                       ${detPer.ID_CAUSANTE},
                       ${detPer.ID_PERSONA},
                       ${beneficio.id_beneficio},
                       '${this.convertirCadenaAFecha(datos.fecha_calculo)}',
-                      ${datos.periodo_inicio ? `'${datos.periodo_inicio}'` : 'null'},
-                      ${datos.periodo_finalizacion ? `'${datos.periodo_finalizacion}'` : 'null'},
+                      '${startDateFormatted}',
+                      ${datos.periodo_finalizacion ? `'${datos.periodo_finalizacion}'` : null},
                       ${datos.monto_total},
-                      '${datos.metodo_pago}',
+                      'TRANSFERENCIA',
                       ${datos.monto_por_periodo},
                       ${parseFloat(datos.monto_primera_cuota)},
                       ${parseFloat(datos.monto_ultima_cuota)},
-                      ${datos.num_rentas_aplicadas ? parseFloat(datos.num_rentas_aplicadas) : 'null'},
+                      ${datos.num_rentas_aplicadas ? parseFloat(datos.num_rentas_aplicadas) : null},
                       '${datos.estado_solicitud}',
-                      '${datos.observacion}'
+                      '${datos.observacion}',
+                     ${datos.ultimo_dia_ultima_renta ? parseFloat(datos.ultimo_dia_ultima_renta) : null}
               )`;
 
               const detBeneBeneficia = await this.entityManager.query(queryInsDeBBenf);
@@ -975,11 +979,12 @@ export class DetalleBeneficioService {
         ID_CAUSANTE: data.ID_CAUSANTE,
         ID_BENEFICIO: data.ID_BENEFICIO,
         estado_solicitud: data.estado_solicitud,
-        monto_total: data.Monto_total === '' ? null : parseFloat(data.Monto_total),
+        monto_total: data.monto_total === '' ? null : parseFloat(data.monto_total),
         monto_ultima_cuota: data.monto_ultima_cuota === '' ? null : parseFloat(data.monto_ultima_cuota),
         monto_por_periodo: data.monto_por_periodo === '' ? null : parseFloat(data.monto_por_periodo),
         monto_primera_cuota: data.monto_primera_cuota === '' ? null : parseFloat(data.monto_primera_cuota),
-        periodo_finalizacion: data.periodoFinalizacion,
+        num_rentas_aplicadas: data.num_rentas_aplicadas === undefined || data.num_rentas_aplicadas === '' ? null : parseInt(data.num_rentas_aplicadas),
+        ultimo_dia_ultima_renta: data.ultimo_dia_ultima_renta === undefined || data.ultimo_dia_ultima_renta === '' ? null : parseInt(data.num_rentas_aplicadas),
         observaciones: data.observaciones,
         prestamo: data.prestamo
       });
@@ -988,7 +993,7 @@ export class DetalleBeneficioService {
 
     } catch (error) {
       this.logger.error(`Error al actualizar beneficios: ${error.message}`, error.stack);
-      throw new InternalServerErrorException('Error al actualizar beneficios.');
+      throw new InternalServerErrorException(`Error al actualizar beneficios. ${error}}`);
     }
   }
 }

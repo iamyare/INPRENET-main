@@ -30,14 +30,14 @@ export class AfiliacionService {
     );
   }
 
-  actualizarPeps(idPersona: number, pepsDto: any[]): Observable<any> {
-    const url = `${environment.API_URL}/api/afiliacion/actualizar-peps/${idPersona}`;
-    return this.http.put<any>(url, pepsDto).pipe(
+  actualizarPeps(pepsData: any[]): Observable<any> {
+    const url = `${environment.API_URL}/api/afiliacion/actualizar-peps`;
+    return this.http.put<any>(url, pepsData).pipe(
       catchError((error) => {
         console.error('Error al actualizar los PEPs', error);
         return throwError(error);
       })
-    );
+      );
   }
 
   eliminarFamiliar(idPersona: number, idFamiliar: number): Observable<any> {

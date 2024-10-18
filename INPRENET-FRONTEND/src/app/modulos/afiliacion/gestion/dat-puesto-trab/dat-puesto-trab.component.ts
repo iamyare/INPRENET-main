@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, Input, OnInit } from '@angular/core';
-import { FormArray, FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { AbstractControl, FormArray, FormBuilder, FormGroup, ValidationErrors, Validators } from '@angular/forms';
 import { CentroTrabajoService } from 'src/app/services/centro-trabajo.service';
 
 @Component({
@@ -76,7 +76,7 @@ export class DatPuestoTrabComponent implements OnInit {
       showNumeroAcuerdo: [true],
       jornada: ['', Validators.required],
       tipoJornada: ['', Validators.required]
-    });
+    }, { validators: this.fechasValidator });
 
     trabajoFormGroup.get('id_centro_trabajo')?.valueChanges.subscribe(value => {
       const selectedCentro = this.centrosTrabajo.find(centro => centro.value === value);
@@ -128,5 +128,17 @@ export class DatPuestoTrabComponent implements OnInit {
     return errorMessages[errorType] || 'Error desconocido.';
   }
 
+  fechasValidator(control: AbstractControl): ValidationErrors | null {
+    const fechaIngreso = control.get('fecha_ingreso')?.value;
+    const fechaEgreso = control.get('fecha_egreso')?.value;
+
+    if (fechaIngreso && fechaEgreso && new Date(fechaIngreso) > new Date(fechaEgreso)) {
+      return { fechaIncorrecta: 'La fecha de ingreso no puede ser mayor a la fecha de egreso.' };
+    }
+    return null;
+  }
+
 
 }
+
+

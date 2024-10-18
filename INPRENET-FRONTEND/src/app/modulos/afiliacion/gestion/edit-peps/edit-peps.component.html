@@ -28,7 +28,7 @@
     subtitulo="Completa la información correspondiente"
     [columns]="myColumns"
     [data]="filas"
-    [getData]="getFilas.bind(this)"
+    [getData]="getFilas"
     (ejecutarFuncionAsincronaEvent)="ejecutarFuncionAsincronaDesdeOtroComponentePEPs($event)"
     [mostrarBotonEditar]="mostrarBotonEditar"
     (editar)="editarFila($event)"

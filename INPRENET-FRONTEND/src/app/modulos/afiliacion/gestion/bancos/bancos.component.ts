@@ -36,7 +36,7 @@ export class BancosComponent implements OnInit {
   agregarBanco(): void {
     const bancoForm = this.fb.group({
       id_banco: ['', Validators.required],
-      num_cuenta: ['', [Validators.required, Validators.minLength(8)]],
+      num_cuenta: ['', [Validators.required, Validators.minLength(8), Validators.pattern('^[0-9]*$')]],
       estado: ['INACTIVO', Validators.required]
     });
     this.bancosArray.push(bancoForm);

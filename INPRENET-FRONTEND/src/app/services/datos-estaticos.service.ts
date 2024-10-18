@@ -426,33 +426,24 @@ export class DatosEstaticosService {
   ];
 
   parentesco = [
+    { value: "PADRE", label: "PADRE" },
+    { value: "MADRE", label: "MADRE" },
+    { value: "CÓNYUGE", label: "CÓNYUGE" },
+    { value: "HIJA", label: "HIJA" },
+    { value: "HIJO", label: "HIJO" },
     { value: "ABUELA MATERNA", label: "ABUELA MATERNA" },
     { value: "ABUELA PATERNA", label: "ABUELA PATERNA" },
     { value: "ABUELO MATERNO", label: "ABUELO MATERNO" },
     { value: "ABUELO PATERNO", label: "ABUELO PATERNO" },
-    { value: "CUÑADA", label: "CUÑADA" },
-    { value: "CUÑADO", label: "CUÑADO" },
-    { value: "ESPOSA", label: "ESPOSA" },
-    { value: "ESPOSO", label: "ESPOSO" },
     { value: "HERMANA", label: "HERMANA" },
     { value: "HERMANO", label: "HERMANO" },
-    { value: "HIJA", label: "HIJA" },
-    { value: "HIJO", label: "HIJO" },
-    { value: "MADRE", label: "MADRE" },
     { value: "NIETA", label: "NIETA" },
     { value: "NIETO", label: "NIETO" },
-    { value: "NUERA", label: "NUERA" },
-    { value: "PADRE", label: "PADRE" },
-    { value: "PRIMA", label: "PRIMA" },
-    { value: "PRIMO", label: "PRIMO" },
-    { value: "SOBRINA", label: "SOBRINA" },
-    { value: "SOBRINO", label: "SOBRINO" },
     { value: "SUEGRA", label: "SUEGRA" },
     { value: "SUEGRO", label: "SUEGRO" },
-    { value: "TÍA MATERNA", label: "TÍA MATERNA" },
-    { value: "TÍA PATERNA", label: "TÍA PATERNA" },
-    { value: "TÍO MATERNO", label: "TÍO MATERNO" },
-    { value: "TÍO PATERNO", label: "TÍO PATERNO" },
-    { value: "YERNO", label: "YERNO" }
+    { value: "CUÑADA", label: "CUÑADA" },
+    { value: "CUÑADO", label: "CUÑADO" },
+    { value: "YERNO", label: "YERNO" },
+    { value: "NUERA", label: "NUERA" }
   ];
 }

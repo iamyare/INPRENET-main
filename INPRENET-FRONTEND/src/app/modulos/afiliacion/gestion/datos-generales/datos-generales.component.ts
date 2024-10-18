@@ -10,6 +10,7 @@ import { DireccionService } from 'src/app/services/direccion.service';
   styleUrls: ['./datos-generales.component.scss']
 })
 export class DatosGeneralesComponent implements OnInit {
+  minDate = new Date();
   @Input() formGroup!: FormGroup;
   @Output() imageCaptured = new EventEmitter<string>();
   @Input() indicesSeleccionados: any[] = [];
@@ -93,8 +94,15 @@ export class DatosGeneralesComponent implements OnInit {
     this.formGroup.addControl('cantidad_dependientes', new FormControl('', [Validators.pattern("^[0-9]+$"), Validators.required]));
     this.formGroup.addControl('estado_civil', new FormControl('', [Validators.required, Validators.maxLength(40)]));
     this.formGroup.addControl('representacion', new FormControl('', [Validators.required, Validators.maxLength(40)]));
-    this.formGroup.addControl('telefono_1', new FormControl('', [Validators.required, Validators.maxLength(12)]));
-    this.formGroup.addControl('telefono_2', new FormControl('', [Validators.maxLength(12)]));
+    this.formGroup.addControl('telefono_1', new FormControl('', [
+      Validators.required,
+      Validators.maxLength(12),
+      Validators.pattern("^[0-9]*$")
+    ]));
+    this.formGroup.addControl('telefono_2', new FormControl('', [
+      Validators.maxLength(12),
+      Validators.pattern("^[0-9]*$")
+    ]));
     this.formGroup.addControl('correo_1', new FormControl('', [Validators.required, Validators.maxLength(40), Validators.email]));
     this.formGroup.addControl('correo_2', new FormControl('', [Validators.maxLength(40), Validators.email]));
     this.formGroup.addControl('rtn', new FormControl('', [Validators.required, Validators.maxLength(14), Validators.pattern(/^[0-9]{14}$/)]));

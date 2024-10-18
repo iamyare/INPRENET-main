@@ -70,7 +70,6 @@ export class CargarbefDedComponent {
     this.id_planilla = event.id_planilla;
   }
 
-
   buscarBeneficiosPorDni() {
     if (this.dni) {
       this.loading = true;

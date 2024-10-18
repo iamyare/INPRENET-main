@@ -30,9 +30,6 @@ import { DynamicInputDialogComponent } from './dinamicos/dynamic-input-dialog/dy
 import { DynamicStepsComponent } from './dinamicos/dynamic-steps/dynamic-steps.component';
 import { PerfilHeaderComponent } from './perfil-header/perfil-header.component';
 import { GestionarDiscapacidadDialogComponent } from './dinamicos/gestionar-discapacidad-dialog/gestionar-discapacidad-dialog.component';
-import { ReactiveFormsModule } from '@angular/forms';
-
-
 
 @NgModule({
   declarations: [

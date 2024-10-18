@@ -3,6 +3,7 @@ import { FormArray, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { ToastrService } from 'ngx-toastr';
 import { AfiliacionService } from 'src/app/services/afiliacion.service';
+import { DatosEstaticosService } from 'src/app/services/datos-estaticos.service';
 
 @Component({
   selector: 'app-agregar-referencias-personales',
@@ -18,6 +19,7 @@ export class AgregarReferenciasPersonalesComponent implements OnInit {
     private fb: FormBuilder,
     private toastr: ToastrService,
     private afilService: AfiliacionService,
+    private datosEstaticosService: DatosEstaticosService,
     private dialogRef: MatDialogRef<AgregarReferenciasPersonalesComponent>,
     @Inject(MAT_DIALOG_DATA) public data: { idPersona: number }
   ) {
@@ -47,7 +49,10 @@ export class AgregarReferenciasPersonalesComponent implements OnInit {
       telefono_trabajo: [datos?.telefono_trabajo || ''],
       telefono_personal: [datos?.telefono_personal || ''],
       parentesco: [datos?.parentesco || '', [Validators.required]],
-      n_identificacion: [datos?.n_identificacion || ''],
+      n_identificacion: [datos?.n_identificacion || '', [
+        Validators.required,
+        Validators.pattern(/^\d{13}$/)
+      ]]
     });
     this.referencias.push(referenciaForm);
   }
@@ -59,18 +64,13 @@ export class AgregarReferenciasPersonalesComponent implements OnInit {
   }
 
   cargarDatosEstaticos(): void {
-    // Simulando la carga de datos para tipo de referencia y parentesco
     this.tipo_referencia = [
       { label: 'REFERENCIA PERSONAL', value: 'REFERENCIA PERSONAL' },
       { label: 'REFERENCIA FAMILIAR', value: 'REFERENCIA FAMILIAR' }
     ];
 
-    this.parentesco = [
-      { label: 'Padre', value: 'Padre' },
-      { label: 'Madre', value: 'Madre' },
-      { label: 'Hermano/a', value: 'Hermano/a' },
-      { label: 'Amigo/a', value: 'Amigo/a' },
-    ];
+    // Cargando parentesco desde el servicio
+    this.parentesco = this.datosEstaticosService.parentesco;
   }
 
   guardarReferencias() {
@@ -78,9 +78,7 @@ export class AgregarReferenciasPersonalesComponent implements OnInit {
       this.toastr.error('No hay referencias para guardar');
       return;
     }
-
     const referencias = this.formatReferencias(this.formReferencias.value.refpers);
-
     this.afilService.agregarReferencias(this.data.idPersona, referencias).subscribe(
       (res: any) => {
         if (res.length > 0) {

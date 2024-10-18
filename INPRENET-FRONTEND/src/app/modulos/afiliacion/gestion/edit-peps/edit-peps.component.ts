@@ -48,7 +48,7 @@ export class EditPepsComponent implements OnInit, OnDestroy, OnChanges {
     private toastr: ToastrService,
     private dialog: MatDialog,
     private datePipe: DatePipe,
-    private permisosService: PermisosService
+    private permisosService: PermisosService,
   ) { }
 
   ngOnInit(): void {
@@ -123,11 +123,13 @@ export class EditPepsComponent implements OnInit, OnDestroy, OnChanges {
     if (this.Afiliado.n_identificacion) {
       try {
         const data = await this.svcAfiliado.getAllCargoPublicPeps(this.Afiliado.n_identificacion).toPromise();
+        console.log(data);
         this.filas = data.flatMap((peps: any) =>
           peps.cargo_publico.map((item: any) => ({
             cargo: item.cargo,
             fecha_inicio: this.datePipe.transform(item.fecha_inicio, 'dd/MM/yyyy'),
-            fecha_fin: this.datePipe.transform(item.fecha_fin, 'dd/MM/yyyy')
+            fecha_fin: this.datePipe.transform(item.fecha_fin, 'dd/MM/yyyy'),
+            id_cargo_publico: item.id_cargo_publico
           }))
         );
       } catch (error) {
@@ -242,6 +244,8 @@ export class EditPepsComponent implements OnInit, OnDestroy, OnChanges {
   }
 
   editarFila(row: any) {
+    console.log(row);
+
     const campos = [
       {
         nombre: 'cargo',
@@ -249,57 +253,70 @@ export class EditPepsComponent implements OnInit, OnDestroy, OnChanges {
         requerido: true,
         etiqueta: 'Cargo',
         editable: true,
-        icono: 'person',
         validadores: [Validators.required, Validators.maxLength(40)]
       },
       {
-        nombre: 'fecha_inicio',
-        tipo: 'date',
+        nombre: 'fecha_rango',
+        tipo: 'daterange',
         requerido: true,
-        etiqueta: 'Fecha Inicio',
+        etiqueta: 'Rango de Fecha',
         editable: true,
-        icono: 'event',
-        validadores: [Validators.required]
-      },
-      {
-        nombre: 'fecha_fin',
-        tipo: 'date',
-        requerido: true,
-        etiqueta: 'Fecha Fin',
-        editable: true,
-        icono: 'event',
         validadores: [Validators.required]
       }
     ];
-    this.openDialog(campos, row);
+
+    const fechaInicio = this.convertirCadenaAFecha(row.fecha_inicio);
+    const fechaFin = this.convertirCadenaAFecha(row.fecha_fin);
+
+    const valoresIniciales = {
+      cargo: row.cargo,
+      fecha_rango: {
+        start: fechaInicio,
+        end: fechaFin
+      }
+    };
+
+    this.openDialog(campos, valoresIniciales, row);
   }
-  openDialog(campos: any, row: any): void {
+
+  openDialog(campos: any, valoresIniciales: any, row: any): void {
     const dialogRef = this.dialog.open(EditarDialogComponent, {
       width: '500px',
-      data: { campos: campos, valoresIniciales: row }
+      data: { campos: campos, valoresIniciales: valoresIniciales }
     });
 
     dialogRef.afterClosed().subscribe((result: any) => {
       if (result) {
-        const pepsData = [{
-          cargosPublicos: [
-            {
-              cargo: result.cargo,
-              fecha_inicio: this.datePipe.transform(result.fecha_inicio, 'yyyy-MM-dd'),
-              fecha_fin: this.datePipe.transform(result.fecha_fin, 'yyyy-MM-dd')
-            }
-          ]
-        }];
-        //console.log(pepsData);
+        // Asegurarnos de que las fechas no sean nulas o indefinidas
+        if (!result.fecha_rango.start || !result.fecha_rango.end) {
+          console.error("Las fechas no están definidas correctamente", result.fecha_rango);
+          this.toastr.error('Las fechas no pueden estar vacías.');
+          return;
+        }
 
-        this.afiliacionService.actualizarPeps(this.Afiliado.id_persona, pepsData).subscribe({
+        const fechaInicio = `${result.fecha_rango.start.getFullYear()}-${(result.fecha_rango.start.getMonth() + 1)
+          .toString().padStart(2, '0')}-${result.fecha_rango.start.getDate().toString().padStart(2, '0')}`;
+        const fechaFin = `${result.fecha_rango.end.getFullYear()}-${(result.fecha_rango.end.getMonth() + 1)
+          .toString().padStart(2, '0')}-${result.fecha_rango.end.getDate().toString().padStart(2, '0')}`;
+
+        // Solo enviamos los datos necesarios, incluyendo id_cargo_publico para identificar el registro
+        const pepsData = {
+          id_cargo_publico: row.id_cargo_publico,
+          cargo: result.cargo,
+          fecha_inicio: fechaInicio,  // Asegúrate de que estas fechas estén en formato válido
+          fecha_fin: fechaFin
+      };
+
+        this.afiliacionService.actualizarPeps([pepsData]).subscribe({
           next: () => {
             const index = this.filas.findIndex(item => item === row);
             if (index !== -1) {
-              this.filas[index] = { ...this.filas[index], ...result };
+              this.filas[index].cargo = result.cargo;
+              this.filas[index].fecha_inicio = this.datePipe.transform(result.fecha_rango.start, 'dd/MM/yyyy');
+              this.filas[index].fecha_fin = this.datePipe.transform(result.fecha_rango.end, 'dd/MM/yyyy');
             }
+
             this.toastr.success('Se actualizó correctamente');
-            this.cargar();
           },
           error: () => {
             this.toastr.error('Error al actualizar');
@@ -310,7 +327,9 @@ export class EditPepsComponent implements OnInit, OnDestroy, OnChanges {
   }
 
 
-
-
-
+  convertirCadenaAFecha(fecha: string): Date | null {
+    const [day, month, year] = fecha.split('/').map(Number);
+    const date = new Date(Date.UTC(year, month - 1, day));
+    return isNaN(date.getTime()) ? null : date;
+  }
 }

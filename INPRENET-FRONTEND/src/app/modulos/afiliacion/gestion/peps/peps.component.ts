@@ -84,7 +84,7 @@ export class PepsComponent implements OnInit {
         name: 'n_identificacion',
         label: 'Número de Identificación',
         type: 'text',
-        icon: 'badge', // Icono para el campo 'Número de Identificación'
+        icon: 'badge',
         validations: [Validators.required],
         layout: { row: 1, col: 6 }
       },
@@ -92,7 +92,7 @@ export class PepsComponent implements OnInit {
         name: 'parentesco',
         label: 'Parentesco',
         type: 'select',
-        icon: 'family_restroom', // Icono para el campo 'Parentesco'
+        icon: 'family_restroom',
         options: this.datosEstaticosService.parentesco,
         validations: [Validators.required],
         layout: { row: 1, col: 6 }

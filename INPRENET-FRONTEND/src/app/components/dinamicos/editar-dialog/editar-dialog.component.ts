@@ -48,23 +48,23 @@ export class EditarDialogComponent implements OnInit {
   }
 
   crearFormulario() {
-    const group: { [key: string]: FormControl } = {};
+    const group: { [key: string]: FormControl | FormGroup } = {};
 
     this.data.campos.forEach(campo => {
       let valorInicial = this.data.valoresIniciales[campo.nombre] || '';
-
-      if (campo.tipo === 'date' && valorInicial) {
-        const fecha = this.convertToDate(valorInicial);
-        valorInicial = fecha ? fecha : '';
-        console.warn(`Fecha inválida para ${campo.nombre}:`, valorInicial);
-      }
-
       const validadores = campo.validadores || [];
 
-      group[campo.nombre] = new FormControl(
-        { value: valorInicial, disabled: !campo.editable },
-        validadores
-      );
+      if (campo.tipo === 'daterange') {
+        const dateRangeGroup = this.fb.group({
+          start: [valorInicial?.start || '', validadores],
+          end: [valorInicial?.end || '', validadores]
+        });
+        group[campo.nombre] = dateRangeGroup;
+      } else if (campo.tipo === 'date') {
+        group[campo.nombre] = new FormControl({ value: valorInicial, disabled: !campo.editable }, validadores);
+      } else {
+        group[campo.nombre] = new FormControl({ value: valorInicial, disabled: !campo.editable }, validadores);
+      }
     });
 
     this.formGroup = this.fb.group(group);
@@ -119,7 +119,6 @@ export class EditarDialogComponent implements OnInit {
     return errors;
   }
 
-  // Ejemplo de un validador personalizado
   minCurrentValueValidator(minValue: number): ValidatorFn {
     return (control: AbstractControl): { [key: string]: any } | null => {
       if (!control.value) {
@@ -128,4 +127,18 @@ export class EditarDialogComponent implements OnInit {
       return control.value >= minValue ? null : { 'valueTooLow': { value: control.value } };
     };
   }
+
+  getRangeFormGroup(fieldName: string): FormGroup {
+    const control = this.formGroup.get(fieldName);
+    if (control instanceof FormGroup) {
+      return control;
+    } else {
+      console.warn(`No FormGroup found for field: ${fieldName}`);
+      return this.fb.group({
+        start: [''],
+        end: ['']
+      });
+    }
+  }
+
 }

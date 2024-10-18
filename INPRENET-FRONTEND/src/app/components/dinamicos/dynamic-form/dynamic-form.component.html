@@ -53,8 +53,13 @@
                 <ng-container *ngIf="field.type === 'date'; else daterangeField">
                   <mat-form-field appearance="outline" style="width: 100%">
                     <mat-label>{{ field.label }}</mat-label>
-                    <input (dateChange)="onDatosBenChange()" [readonly]="field.readOnly" matInput
-                      [matDatepicker]="picker" [formControlName]="field.name" />
+                    <input matInput
+                           [matDatepicker]="picker"
+                           [formControlName]="field.name"
+                           [readonly]="field.readOnly"
+                           [min]="field.min"
+                           [max]="field.max"
+                           (dateChange)="onDatosBenChange()" />
                     <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
                     <mat-datepicker #picker></mat-datepicker>
                   </mat-form-field>
@@ -63,19 +68,29 @@
 
               <!-- Rango de Fecha -->
               <ng-template #daterangeField>
-                <ng-container *ngIf="field.type === 'daterange'">
-                  <mat-form-field appearance="outline" style="width: 100%" class="full-width">
-                    <mat-label>{{ field.label }}</mat-label>
-                    <mat-date-range-input [rangePicker]="picker" [formGroup]="getRangeFormGroup(field.name)">
-                      <input (dateChange)="onDatosBenChange()" [readonly]="field.readOnly" matInput matStartDate
-                        placeholder="Inicio" formControlName="start" />
-                      <input (dateChange)="onDatosBenChange()" [readonly]="field.readOnly" matInput matEndDate
-                        placeholder="Fin" formControlName="end" />
-                    </mat-date-range-input>
-                    <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
-                    <mat-date-range-picker #picker></mat-date-range-picker>
-                  </mat-form-field>
-                </ng-container>
+                <ng-template #daterangeField>
+                  <ng-container *ngIf="field.type === 'daterange'">
+                    <mat-form-field appearance="outline" style="width: 100%" class="full-width">
+                      <mat-label>{{ field.label }}</mat-label>
+                      <mat-date-range-input [rangePicker]="picker" [formGroup]="getRangeFormGroup(field.name)">
+                        <input matInput matStartDate
+                               placeholder="Inicio"
+                               formControlName="start"
+                               [min]="field.min"
+                               [max]="field.max"
+                               (dateChange)="onDatosBenChange()" />
+                        <input matInput matEndDate
+                               placeholder="Fin"
+                               formControlName="end"
+                               [min]="field.min"
+                               [max]="field.max"
+                               (dateChange)="onDatosBenChange()" />
+                      </mat-date-range-input>
+                      <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+                      <mat-date-range-picker #picker></mat-date-range-picker>
+                    </mat-form-field>
+                  </ng-container>
+                </ng-template>
               </ng-template>
 
               <!-- Checkbox Group -->

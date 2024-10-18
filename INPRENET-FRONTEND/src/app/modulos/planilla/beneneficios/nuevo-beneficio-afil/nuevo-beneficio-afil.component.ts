@@ -1,5 +1,5 @@
 import { Component, OnInit, ViewChild, ChangeDetectorRef } from '@angular/core';
-import { FormBuilder, FormGroup, ValidatorFn, Validators } from '@angular/forms';
+import { AbstractControl, FormBuilder, FormGroup, ValidationErrors, ValidatorFn, Validators } from '@angular/forms';
 import { ToastrService, ToastrModule } from 'ngx-toastr';
 import { AfiliadoService } from 'src/app/services/afiliado.service';
 import { BeneficiosService } from 'src/app/services/beneficios.service';
@@ -9,6 +9,14 @@ import { unirNombres } from '../../../../shared/functions/formatoNombresP';
 import { DynamicFormComponent } from 'src/app/components/dinamicos/dynamic-form/dynamic-form.component';
 import { convertirFecha } from 'src/app/shared/functions/formatoFecha';
 import { BehaviorSubject } from 'rxjs';
+function noFutureDateValidator(control: AbstractControl): ValidationErrors | null {
+  const selectedDate = new Date(control.value);
+  const currentDate = new Date();
+
+  // Si la fecha es válida y no se pasa de la fecha actual
+  return selectedDate <= currentDate ? null : { noFutureDate: true };
+}
+
 @Component({
   selector: 'app-nuevo-beneficio-afil',
   templateUrl: './nuevo-beneficio-afil.component.html',
@@ -61,6 +69,8 @@ export class NuevoBeneficioAfilComponent implements OnInit {
     private svcAfilServ: AfiliadoService, private fb: FormBuilder,
     private toastr: ToastrService, private _formBuilder: FormBuilder
   ) { }
+
+
 
   ngOnInit(): void {
     this.myFormFields = [
@@ -136,6 +146,7 @@ export class NuevoBeneficioAfilComponent implements OnInit {
     try {
       console.log(tipoPers);
       const beneficios = await this.svcBeneficioServ.obtenerTipoBeneficioByTipoPersona(tipoPers).toPromise();
+      console.log(beneficios);
 
       if (beneficios && beneficios.length > 0) {
         // Mapea los beneficios para generar una lista
@@ -170,7 +181,14 @@ export class NuevoBeneficioAfilComponent implements OnInit {
           { type: 'number', label: 'Monto por periodo', name: 'monto_por_periodo', validations: [Validators.required, Validators.min(0)], display: true },
           { type: 'number', label: 'Monto ultima cuota', name: 'monto_ultima_cuota', validations: [Validators.required, Validators.min(0)], display: true },
           { type: 'number', label: 'Monto primera cuota', name: 'monto_primera_cuota', validations: [Validators.required, Validators.min(0)], display: true },
-          { type: 'date', label: 'Fecha de efectividad', name: 'fecha_calculo', validations: [], display: true },
+          {
+            type: 'date',
+            label: 'Fecha de efectividad',
+            name: 'fecha_calculo',
+            max: new Date().toISOString().split('T')[0],
+            validations: [Validators.required, noFutureDateValidator],
+            display: true
+          },
           { type: 'text', label: 'Observación', name: 'observacion', validations: [], display: true },
           { type: 'number', label: 'Número de rentas aprobadas', name: 'num_rentas_aplicadas', validations: [Validators.min(1)], display: false },
           {

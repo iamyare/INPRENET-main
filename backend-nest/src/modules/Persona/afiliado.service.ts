@@ -569,7 +569,6 @@ export class AfiliadoService {
       "tipoP"."TIPO_PERSONA" = 'JUBILADO' OR 
       "tipoP"."TIPO_PERSONA" = 'PENSIONADO' OR 
       "tipoP"."TIPO_PERSONA" = 'BENEFICIARIO' OR
-      "tipoP"."TIPO_PERSONA" = 'BENEFICIARIO SIN CAUSANTE'
       "tipoP"."TIPO_PERSONA" = 'DESIGNADO'
     )
     `;

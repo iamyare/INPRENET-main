@@ -68,7 +68,7 @@ export class VerEditarBeneficioAfilComponent {
         isEditable: false
       },
       {
-        header: 'DNI CAUSANTE',
+        header: 'DNI Causante',
         col: 'dni_causante',
         isEditable: false
       },
@@ -121,7 +121,7 @@ export class VerEditarBeneficioAfilComponent {
         isEditable: true
       },
       {
-        header: 'Monto ultima cuota',
+        header: 'Monto última cuota',
         col: 'monto_ultima_cuota',
         moneda: true,
         isEditable: true
@@ -147,7 +147,7 @@ export class VerEditarBeneficioAfilComponent {
         isEditable: false
       }, */
       {
-        header: 'DNI CAUSANTE',
+        header: 'DNI Causante',
         col: 'dni_causante',
         isEditable: false
       },
@@ -181,7 +181,7 @@ export class VerEditarBeneficioAfilComponent {
 
       this.filasT = data.detBen.map((item: any) => {
         return {
-          prestamo: item.prestamo,
+          prestamo: item.prestamo || "NO",
           ID_DETALLE_PERSONA: item.ID_DETALLE_PERSONA,
           ID_PERSONA: item.ID_PERSONA,
           ID_CAUSANTE: item.ID_CAUSANTE,
@@ -192,16 +192,18 @@ export class VerEditarBeneficioAfilComponent {
           fecha_aplicado: this.datePipe.transform(item.fecha_aplicado, 'dd/MM/yyyy HH:mm'),
           nombre_beneficio: item.beneficio.nombre_beneficio,
           recibiendo_beneficio: item.recibiendo_beneficio,
-          num_rentas_aplicadas: item.num_rentas_aplicadas,
+          num_rentas_aplicadas: item.num_rentas_aplicadas || "NO APLICA",
           ultimo_dia_ultima_renta: item.ultimo_dia_ultima_renta,
           periodicidad: item.beneficio.periodicidad,
           monto_por_periodo: item.monto_por_periodo,
           monto_total: item.monto_total,
           periodoInicio: convertirFecha(item.periodo_inicio, false),
-          periodoFinalizacion: convertirFecha(item.periodo_finalizacion, false),
+          periodoFinalizacion: item.beneficio.periodicidad === "V"
+            ? "NO APLICA"
+            : convertirFecha(item.periodo_finalizacion, false),
           monto_primera_cuota: item.monto_primera_cuota,
           monto_ultima_cuota: item.monto_ultima_cuota,
-          observaciones: item.observaciones
+          observaciones: item.observaciones || "NO TIENE"
         }
       });
 
@@ -292,7 +294,7 @@ export class VerEditarBeneficioAfilComponent {
     console.log(row);
     let campos: any = [];
 
-    if (row.periodicidad = "p") {
+    if (row.periodicidad == "P") {
       campos = [
         /* { nombre: 'periodoInicio', tipo: 'date', requerido: true, etiqueta: 'Periodo de inicio' },
         { nombre: 'periodoFinalizacion', tipo: 'date', requerido: true, etiqueta: 'Periodo de finalización', editable: false }, */
@@ -307,7 +309,7 @@ export class VerEditarBeneficioAfilComponent {
         { nombre: 'monto_primera_cuota', tipo: 'number', requerido: true, etiqueta: 'monto_primera_cuota', editable: true, validadores: [Validators.min(0)] },
         { nombre: 'estado_solicitud', tipo: 'list', requerido: true, opciones: [{ label: "APROBADO", value: "APROBADO" }, { label: "RECHAZADO", value: "RECHAZADO" }], etiqueta: 'Estado Solicitud', editable: true },
         { nombre: 'observaciones', tipo: 'text', requerido: true, etiqueta: 'observaciones', editable: true },
-        { nombre: 'prestamo', tipo: 'list', requerido: true, opciones: [{ label: "SI", value: "SI" }, { label: "NO", value: "NO" }], etiqueta: '¿Tiene algún prestamo?', editable: true },
+        { nombre: 'prestamo', tipo: 'list', requerido: true, opciones: [{ label: "SI", value: "SI" }, { label: "NO", value: "NO" }], etiqueta: '¿Tiene algún prestamo pendiente con INPREMA?', editable: true },
       ];
     } else {
       campos = [

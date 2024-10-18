@@ -343,16 +343,16 @@ export class DetalleBeneficioService {
                     ${beneficio.id_beneficio},
                     '${this.convertirCadenaAFecha(datos.fecha_calculo)}',
                     '${startDateFormatted}',
-                    ${datos.periodo_finalizacion ? `'${datos.periodo_finalizacion}'` : 'null'},
+                    ${datos.periodo_finalizacion ? `'${datos.periodo_finalizacion}'` : null},
                     ${parseFloat(datos.monto_total)},
-                    '${datos.metodo_pago}',
+                    'TRANSFERENCIA',
                     ${parseFloat(datos.monto_por_periodo)},
                     ${parseFloat(datos.monto_primera_cuota)},
                     ${parseFloat(datos.monto_ultima_cuota)},
-                    ${datos.num_rentas_aplicadas ? parseFloat(datos.num_rentas_aplicadas) : 'null'},
+                    ${datos.num_rentas_aplicadas ? parseFloat(datos.num_rentas_aplicadas) : null},
                     '${datos.estado_solicitud}',
                     '${datos.observacion}',
-                     ${datos.ultimo_dia_ultima_renta ? parseFloat(datos.ultimo_dia_ultima_renta) : 'null'}
+                     ${datos.ultimo_dia_ultima_renta ? parseFloat(datos.ultimo_dia_ultima_renta) : null}
               )`;
 
               const detBeneBeneficia = await this.entityManager.query(queryInsDeBBenf);
@@ -429,16 +429,16 @@ export class DetalleBeneficioService {
                       ${beneficio.id_beneficio},
                       '${this.convertirCadenaAFecha(datos.fecha_calculo)}',
                       '${startDateFormatted}',
-                      ${datos.periodo_finalizacion ? `'${datos.periodo_finalizacion}'` : 'null'},
+                      ${datos.periodo_finalizacion ? `'${datos.periodo_finalizacion}'` : null},
                       ${datos.monto_total},
-                      '${datos.metodo_pago}',
+                      'TRANSFERENCIA',
                       ${datos.monto_por_periodo},
                       ${parseFloat(datos.monto_primera_cuota)},
                       ${parseFloat(datos.monto_ultima_cuota)},
-                      ${datos.num_rentas_aplicadas ? parseFloat(datos.num_rentas_aplicadas) : 'null'},
+                      ${datos.num_rentas_aplicadas ? parseFloat(datos.num_rentas_aplicadas) : null},
                       '${datos.estado_solicitud}',
                       '${datos.observacion}',
-                     ${datos.ultimo_dia_ultima_renta ? parseFloat(datos.ultimo_dia_ultima_renta) : 'null'}
+                     ${datos.ultimo_dia_ultima_renta ? parseFloat(datos.ultimo_dia_ultima_renta) : null}
               )`;
 
               const detBeneBeneficia = await this.entityManager.query(queryInsDeBBenf);
@@ -972,8 +972,6 @@ export class DetalleBeneficioService {
   }
 
   async updateBeneficioPersona(data: any) {
-    console.log(data);
-
     try {
       const detBenAfil = await this.detalleBeneficioAfiliadoRepository.preload({
         ID_DETALLE_PERSONA: data.ID_DETALLE_PERSONA,
@@ -985,8 +983,8 @@ export class DetalleBeneficioService {
         monto_ultima_cuota: data.monto_ultima_cuota === '' ? null : parseFloat(data.monto_ultima_cuota),
         monto_por_periodo: data.monto_por_periodo === '' ? null : parseFloat(data.monto_por_periodo),
         monto_primera_cuota: data.monto_primera_cuota === '' ? null : parseFloat(data.monto_primera_cuota),
-        num_rentas_aplicadas: data.num_rentas_aplicadas === '' ? null : parseInt(data.num_rentas_aplicadas),
-        ultimo_dia_ultima_renta: data.ultimo_dia_ultima_renta === '' ? null : parseInt(data.ultimo_dia_ultima_renta),
+        num_rentas_aplicadas: data.num_rentas_aplicadas === undefined || data.num_rentas_aplicadas === '' ? null : parseInt(data.num_rentas_aplicadas),
+        ultimo_dia_ultima_renta: data.ultimo_dia_ultima_renta === undefined || data.ultimo_dia_ultima_renta === '' ? null : parseInt(data.num_rentas_aplicadas),
         observaciones: data.observaciones,
         prestamo: data.prestamo
       });

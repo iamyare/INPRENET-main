@@ -47,11 +47,13 @@ export class NuevoBeneficioAfilComponent implements OnInit {
     },
     { header: 'Porcentaje', col: 'porcentaje', },
   ];
+
   datosTabl: any[] = [];
   filas: any
   ejecF: any;
   desOBenSeleccionado: any
   mostrarB: any;
+  hasBeneficios: any = [];
 
   constructor(
     private cdr: ChangeDetectorRef,
@@ -72,6 +74,8 @@ export class NuevoBeneficioAfilComponent implements OnInit {
     if (this.form.value.dni) {
       this.svcAfilServ.getAfilByDni(this.form.value.dni).subscribe(
         async (res) => {
+          console.log(res);
+          this.hasBeneficios = res.BENEFICIOS;
           if (res) {
             const item = {
               id_persona: res.ID_PERSONA,
@@ -89,7 +93,8 @@ export class NuevoBeneficioAfilComponent implements OnInit {
               direccion_residencia: res.DIRECCION_RESIDENCIA,
               estado: res.ESTADO,
               salario_base: res.SALARIO_BASE,
-              fecha_nacimiento: convertirFecha(res.FECHA_NACIMIENTO, false)
+              fecha_nacimiento: convertirFecha(res.FECHA_NACIMIENTO, false),
+              beneficios: res.BENEFICIOS
             };
 
             //const tipoPersona = item.fallecido === "SI" ? "BENEFICIARIO" : item.tipo_persona;
@@ -152,13 +157,13 @@ export class NuevoBeneficioAfilComponent implements OnInit {
             options: this.tiposBeneficios,
             validations: [Validators.required], display: true
           },
-          {
+          /* {
             type: 'dropdown', label: 'Método de pago', name: 'metodo_pago',
             options: [{ label: 'TRANSFERENCIA', value: 'TRANSFERENCIA' }], validations: [Validators.required], display: true
-          },
+          }, */
           {
             type: 'dropdown', label: 'Estado Solicitud', name: 'estado_solicitud',
-            options: [{ label: 'APROBADO', value: 'APROBADO' }, { label: 'RECHAZADA', value: 'RECHAZADA' }],
+            options: [{ label: 'APROBADO', value: 'APROBADO' }, { label: 'RECHAZADO', value: 'RECHAZADO' }],
             validations: [Validators.required], display: true
           },
           { type: 'number', label: 'Monto total', name: 'monto_total', validations: [Validators.required, Validators.min(0)], display: true },
@@ -184,13 +189,13 @@ export class NuevoBeneficioAfilComponent implements OnInit {
             options: this.tiposBeneficios,
             validations: [Validators.required], display: true
           },
-          {
+          /* {
             type: 'dropdown', label: 'Método de pago', name: 'metodo_pago',
             options: [{ label: 'TRANSFERENCIA', value: 'TRANSFERENCIA' }], validations: [Validators.required], display: true
-          },
+          }, */
           {
             type: 'dropdown', label: 'Estado Solicitud', name: 'estado_solicitud',
-            options: [{ label: 'APROBADO', value: 'APROBADO' }, { label: 'RECHAZADA', value: 'RECHAZADA' }], validations: [Validators.required], display: true
+            options: [{ label: 'APROBADO', value: 'APROBADO' }, { label: 'RECHAZADO', value: 'RECHAZADO' }], validations: [Validators.required], display: true
           },
           { type: 'number', label: 'Monto total', name: 'monto_total', validations: [Validators.required, Validators.min(0)], display: true },
           { type: 'number', label: 'Monto ultima cuota', name: 'monto_ultima_cuota', validations: [Validators.required, Validators.min(0)], display: true },
@@ -208,10 +213,10 @@ export class NuevoBeneficioAfilComponent implements OnInit {
         ];
 
         // Oculta ciertos campos adicionales si es necesario
+        this.myFormFields1[8].display = false;
         this.myFormFields1[9].display = false;
-        this.myFormFields1[10].display = false;
+        this.myFormFields2[9].display = false;
         this.myFormFields2[10].display = false;
-        this.myFormFields2[11].display = false;
 
         // Muestra el formulario después de configurar los campos
         this.mostrarDB = true;
@@ -362,21 +367,23 @@ export class NuevoBeneficioAfilComponent implements OnInit {
     if (event.fieldName == "nombre_beneficio") {
       const temp = this.buscarPeriodicidad(this.tiposBeneficios, event.value)
 
+      console.log(temp);
+
       if (temp == "V") {
+        this.myFormFields1[8].display = false;
         this.myFormFields1[9].display = false;
-        this.myFormFields1[10].display = false;
+        this.myFormFields2[9].display = false;
         this.myFormFields2[10].display = false;
-        this.myFormFields2[11].display = false;
 
         const fechaActual = new Date();
 
         startDateFormatted = format(fechaActual, 'dd-MM-yyyy');
         endDateFormatted = '01-01-2500';
       } else if (!temp) {
+        this.myFormFields1[8].display = true;
         this.myFormFields1[9].display = true;
-        this.myFormFields1[10].display = true;
+        this.myFormFields2[9].display = true;
         this.myFormFields2[10].display = true;
-        this.myFormFields2[11].display = true;
 
 
         /* const startDate = new Date(event.value.periodo.start);
@@ -420,13 +427,13 @@ export class NuevoBeneficioAfilComponent implements OnInit {
 
     const fechaActual = new Date();
     if (temp == "VITALICIO") {
-      this.myFormFields2[9].display = false
+      this.myFormFields2[8].display = false
 
       startDateFormatted = format(fechaActual, 'dd-MM-yyyy');
       endDateFormatted = '01-01-2500';
 
     } else if (!temp) {
-      this.myFormFields2[9].display = true
+      this.myFormFields2[8].display = true
     }
 
     const datosFormateados = {

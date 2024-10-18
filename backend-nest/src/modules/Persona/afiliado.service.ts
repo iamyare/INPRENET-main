@@ -17,6 +17,9 @@ import { Net_Discapacidad } from './entities/net_discapacidad.entity';
 import { Net_Persona_Discapacidad } from './entities/net_persona_discapacidad.entity';
 import { format } from 'date-fns';
 import { NET_MOVIMIENTO_CUENTA } from '../transacciones/entities/net_movimiento_cuenta.entity';
+import { DetalleBenef } from './dto/pruebaBeneficiario.dto';
+import { DetalleBeneficioService } from '../Planilla/detalle_beneficio/detalle_beneficio.service';
+import { Net_Detalle_Beneficio_Afiliado } from '../Planilla/detalle_beneficio/entities/net_detalle_beneficio_afiliado.entity';
 
 @Injectable()
 export class AfiliadoService {
@@ -41,10 +44,15 @@ export class AfiliadoService {
     private readonly BancosToPersonaRepository: Repository<Net_Persona_Por_Banco>,
     @InjectRepository(Net_Discapacidad)
     private readonly discapacidadRepository: Repository<Net_Discapacidad>,
+
     @InjectRepository(Net_Persona_Discapacidad)
     private readonly perDiscapacidadRepository: Repository<Net_Persona_Discapacidad>,
+
     @InjectRepository(NET_MOVIMIENTO_CUENTA)
-    private readonly movimientoCuentaRepository: Repository<NET_MOVIMIENTO_CUENTA>
+    private readonly movimientoCuentaRepository: Repository<NET_MOVIMIENTO_CUENTA>,
+
+    /*     @InjectRepository(Net_Detalle_Beneficio_Afiliado)
+        private readonly detBenAfilRepository: Repository<Net_Detalle_Beneficio_Afiliado> */
   ) { }
 
   async getMovimientosOrdenados(id_persona: number, id_tipo_cuenta: number): Promise<any> {
@@ -336,6 +344,7 @@ export class AfiliadoService {
         },
         relations: [
           'persona',
+          'detalleBeneficio',
           'estadoAfiliacion',
           'tipoPersona',
           'persona.pais',
@@ -347,9 +356,19 @@ export class AfiliadoService {
         ]
       });
 
+      console.log(detallePer);
+
       if (!detallePer) {
         throw new NotFoundException(`Afiliado con N_IDENTIFICACION ${term} no existe`);
       }
+
+      /* const beneficios = await this.detBenAfilRepository.find({
+        where: {
+          ID_CAUSANTE: detallePer.ID_CAUSANTE,
+          ID_DETALLE_PERSONA: detallePer.ID_DETALLE_PERSONA,
+          ID_PERSONA: detallePer.ID_PERSONA
+        },
+      }); */
 
       //const detallePersona = persona.detallePersona.find(detalle => detalle.tipoPersona.tipo_persona === 'AFILIADO');
 
@@ -370,6 +389,7 @@ export class AfiliadoService {
         FECHA_NACIMIENTO: detallePer.persona.fecha_nacimiento,
         TIPO_PERSONA: detallePer.tipoPersona.tipo_persona,
         ESTADO_PERSONA: detallePer.estadoAfiliacion.nombre_estado,
+        BENEFICIOS: detallePer.detalleBeneficio
 
 
         //fallecido: detallePer.persona.fallecido,
@@ -401,7 +421,7 @@ export class AfiliadoService {
         //ESTADO: detallePersona.eliminado,
       };
 
-      return result;
+      return result /* beneficios */;
     } catch (error) {
       console.log(error);
     }

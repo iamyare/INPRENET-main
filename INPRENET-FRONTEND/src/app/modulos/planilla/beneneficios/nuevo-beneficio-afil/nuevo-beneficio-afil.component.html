@@ -23,8 +23,9 @@
         <td>{{ Afiliado.tipo_persona }}</td>
         <th>Fallecido</th>
         <td>{{ Afiliado.fallecido }}</td>
-        <th>Estado</th>
-        <td>{{ Afiliado.estado_persona }}</td>
+
+        <th *ngIf="Afiliado.tipo_persona == 'AFILIADO'">Estado</th>
+        <td *ngIf="Afiliado.tipo_persona  == 'AFILIADO'">{{ Afiliado.estado_persona }}</td>
 
         <th>DNI de afiliado</th>
         <td>{{ Afiliado.dni }}</td>
@@ -85,7 +86,7 @@
   </button>
 </div>
 
-<div *ngIf="mostrarDB && Afiliado.fallecido == 'NO' && (
+<div *ngIf="mostrarDB && Afiliado.fallecido == 'NO' && hasBeneficios.length == 0 && (
   (Afiliado.tipo_persona == 'AFILIADO' && Afiliado.estado_persona == 'ACTIVO') ||
   Afiliado.tipo_persona == 'JUBILADO' ||
   Afiliado.tipo_persona == 'PENSIONADO' ||

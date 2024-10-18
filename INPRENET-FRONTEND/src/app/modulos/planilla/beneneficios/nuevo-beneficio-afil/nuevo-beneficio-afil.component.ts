@@ -38,7 +38,7 @@ export class NuevoBeneficioAfilComponent implements OnInit {
   public myFormFields1: FieldConfig[] = []
   public myFormFields2: FieldConfig[] = []
 
-  Afiliado: any = {}
+  Afiliado?: any
 
   myColumns: any = [
     { header: 'N_Identificacion', col: 'dni', },
@@ -74,17 +74,18 @@ export class NuevoBeneficioAfilComponent implements OnInit {
 
   ngOnInit(): void {
     this.myFormFields = [
-      { type: 'text', label: 'DNI del afiliado', name: 'dni', validations: [Validators.required, Validators.minLength(13), Validators.maxLength(14)], display: true },
+      { type: 'text', label: 'N° de identificación del afiliado', name: 'dni', validations: [Validators.required], display: true },
     ];
   }
 
   previsualizarInfoAfil() {
-    this.Afiliado.nameAfil = ""
+
+    this.Afiliado = { nameAfil: "" }
 
     if (this.form.value.dni) {
       this.svcAfilServ.getAfilByDni(this.form.value.dni).subscribe(
         async (res) => {
-          console.log(res);
+
           this.hasBeneficios = res.BENEFICIOS;
           if (res) {
             const item = {
@@ -144,9 +145,7 @@ export class NuevoBeneficioAfilComponent implements OnInit {
 
   getTipoBen = async (tipoPers: any) => {
     try {
-      console.log(tipoPers);
       const beneficios = await this.svcBeneficioServ.obtenerTipoBeneficioByTipoPersona(tipoPers).toPromise();
-      console.log(beneficios);
 
       if (beneficios && beneficios.length > 0) {
         // Mapea los beneficios para generar una lista
@@ -154,7 +153,8 @@ export class NuevoBeneficioAfilComponent implements OnInit {
           return {
             label: item.beneficio.nombre_beneficio,
             value: item.beneficio.nombre_beneficio,
-            periodicidad: item.beneficio.periodicidad
+            periodicidad: item.beneficio.periodicidad,
+            numero_rentas_max: item.beneficio.numero_rentas_max
           };
         });
 
@@ -168,19 +168,15 @@ export class NuevoBeneficioAfilComponent implements OnInit {
             options: this.tiposBeneficios,
             validations: [Validators.required], display: true
           },
-          /* {
-            type: 'dropdown', label: 'Método de pago', name: 'metodo_pago',
-            options: [{ label: 'TRANSFERENCIA', value: 'TRANSFERENCIA' }], validations: [Validators.required], display: true
-          }, */
           {
             type: 'dropdown', label: 'Estado Solicitud', name: 'estado_solicitud',
             options: [{ label: 'APROBADO', value: 'APROBADO' }, { label: 'RECHAZADO', value: 'RECHAZADO' }],
             validations: [Validators.required], display: true
           },
-          { type: 'number', label: 'Monto total', name: 'monto_total', validations: [Validators.required, Validators.min(0)], display: true },
-          { type: 'number', label: 'Monto por periodo', name: 'monto_por_periodo', validations: [Validators.required, Validators.min(0)], display: true },
-          { type: 'number', label: 'Monto primera cuota', name: 'monto_primera_cuota', validations: [Validators.required, Validators.min(0)], display: true },
-          { type: 'number', label: 'Monto útima cuota', name: 'monto_ultima_cuota', validations: [Validators.required, Validators.min(0)], display: true },
+          { type: 'number', label: 'Monto total', name: 'monto_total', validations: [Validators.required, Validators.min(0)], display: true, },
+          { type: 'number', label: 'Monto por periodo', name: 'monto_por_periodo', validations: [Validators.required, Validators.min(0)], display: true, },
+          { type: 'number', label: 'Monto primera cuota', name: 'monto_primera_cuota', validations: [Validators.required, Validators.min(0)], display: true, },
+          { type: 'number', label: 'Monto útima cuota', name: 'monto_ultima_cuota', validations: [Validators.required, Validators.required, Validators.min(0)], display: true },
           {
             type: 'date',
             label: 'Fecha de efectividad',
@@ -207,19 +203,15 @@ export class NuevoBeneficioAfilComponent implements OnInit {
             options: this.tiposBeneficios,
             validations: [Validators.required], display: true
           },
-          /* {
-            type: 'dropdown', label: 'Método de pago', name: 'metodo_pago',
-            options: [{ label: 'TRANSFERENCIA', value: 'TRANSFERENCIA' }], validations: [Validators.required], display: true
-          }, */
           {
             type: 'dropdown', label: 'Estado Solicitud', name: 'estado_solicitud',
             options: [{ label: 'APROBADO', value: 'APROBADO' }, { label: 'RECHAZADO', value: 'RECHAZADO' }], validations: [Validators.required], display: true
           },
-          { type: 'number', label: 'Monto total', name: 'monto_total', validations: [Validators.required, Validators.min(0)], display: true },
-          { type: 'number', label: 'Monto primera cuota', name: 'monto_primera_cuota', validations: [Validators.required, Validators.min(0)], display: true },
+          { type: 'number', label: 'Monto total', name: 'monto_total', validations: [Validators.required, Validators.min(0)], display: true, },
+          { type: 'number', label: 'Monto por periodo', name: 'monto_por_periodo', validations: [Validators.required,], display: true, },
+          { type: 'number', label: 'Monto primera cuota', name: 'monto_primera_cuota', validations: [Validators.required, Validators.min(0)], display: true, },
           { type: 'number', label: 'Monto ultima cuota', name: 'monto_ultima_cuota', validations: [Validators.required, Validators.min(0)], display: true },
           { type: 'text', label: 'Observación', name: 'observacion', validations: [], display: true },
-          { type: 'number', label: 'Monto por periodo', name: 'monto_por_periodo', validations: [Validators.required], display: true },
           {
             type: 'date',
             label: 'Fecha de efectividad',
@@ -277,9 +269,6 @@ export class NuevoBeneficioAfilComponent implements OnInit {
     }
   }
 
-
-
-
   getFilas = async () => {
     if (this.Afiliado.fallecido == "SI" && (this.Afiliado.tipo_persona == 'AFILIADO' ||
       this.Afiliado.tipo_persona == 'JUBILADO' ||
@@ -315,7 +304,6 @@ export class NuevoBeneficioAfilComponent implements OnInit {
 
   getColumns = async () => {
     try {
-
       this.svcAfilServ.obtenerBenDeAfil(this.form.value.dni).subscribe(
         async (response) => {
           const primerObjetoTransformado = this.transformarObjeto(response[0]);
@@ -337,7 +325,6 @@ export class NuevoBeneficioAfilComponent implements OnInit {
         },
         (error) => {
         })
-
     } catch (error) {
       console.log(error);
     }

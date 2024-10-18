@@ -58,20 +58,25 @@ export class UsuarioService {
       },
       relations: ['empleadoCentroTrabajo', 'empleadoCentroTrabajo.centroTrabajo', 'usuarioModulos', 'usuarioModulos.rolModulo', 'usuarioModulos.rolModulo.modulo'],
     });
+    console.log(usuario);
+
     if (!usuario) {
       throw new UnauthorizedException('Credenciales inválidas');
     }
-  
+    if (usuario.usuarioModulos.length == 0) {
+      throw new UnauthorizedException('No tiene roles asignados a ese usuario.');
+    }
+
     const isPasswordValid = await bcrypt.compare(contrasena, usuario.contrasena);
     if (!isPasswordValid) {
       throw new UnauthorizedException('Credenciales inválidas');
     }
-  
+
     const rolesModulos = usuario.usuarioModulos.map(um => ({
       rol: um.rolModulo.nombre,
       modulo: um.rolModulo.modulo.nombre
     }));
-  
+
     const payload = {
       correo,
       sub: usuario.id_usuario_empresa,
@@ -79,14 +84,14 @@ export class UsuarioService {
       idCentroTrabajo: usuario.empleadoCentroTrabajo.centroTrabajo.id_centro_trabajo,
     };
     const accessToken = this.jwtService.sign(payload, { expiresIn: '15m' });
-  
+
     return { accessToken };
   }
-  
+
   async logout(req, res) {
     return res.json({ message: 'Sesión cerrada' });
   }
-  
+
   async obtenerPerfilPorCorreo(correo: string) {
     const usuario = await this.usuarioEmpresaRepository.findOne({
       where: { empleadoCentroTrabajo: { correo_1: correo } },
@@ -251,7 +256,7 @@ export class UsuarioService {
 
     // Enviar correo electrónico de verificación
     const verificationUrl = `${process.env.HOST_FRONTEND}/register?token=${token}`;
-    const imageUrl="https://inprema.gob.hn/servicios-electronicos/"
+    const imageUrl = "https://inprema.gob.hn/servicios-electronicos/"
     const htmlContent = `
    <div style="font-family: Arial, sans-serif; line-height: 1.6;">
      <h2 style="color: #13776B;">¡Bienvenido a INPRENET!</h2>
@@ -340,7 +345,7 @@ export class UsuarioService {
           <p>El equipo de INPRENET</p>
         </div>
       </div>`;
-    
+
     await this.mailService.sendMail(correo, 'Completa tu registro', '', htmlContent, [
       {
         filename: 'LOGO-INPRENET.png',
@@ -355,7 +360,7 @@ export class UsuarioService {
 
   async completarRegistro(token: string, completeRegistrationDto: CompleteRegistrationDto, archivoIdentificacionBuffer: Buffer | null, fotoEmpleadoBuffer: Buffer | null): Promise<void> {
     const { correo, contrasena, pregunta_de_usuario_1, respuesta_de_usuario_1, pregunta_de_usuario_2, respuesta_de_usuario_2, pregunta_de_usuario_3, respuesta_de_usuario_3, telefonoEmpleado, telefonoEmpleado2, numero_identificacion } = completeRegistrationDto;
-  
+
     try {
       const decoded = this.jwtService.verify(token);
       if (decoded.correo !== correo) {
@@ -364,7 +369,7 @@ export class UsuarioService {
     } catch (error) {
       throw new BadRequestException('Token inválido o expirado');
     }
-  
+
     const usuario = await this.usuarioEmpresaRepository.findOne({
       where: {
         estado: 'PENDIENTE',
@@ -374,18 +379,18 @@ export class UsuarioService {
       },
       relations: ['empleadoCentroTrabajo', 'empleadoCentroTrabajo.empleado'],
     });
-  
+
     if (!usuario) {
       throw new BadRequestException('Usuario no encontrado o ya registrado');
     }
-  
+
     usuario.contrasena = await bcrypt.hash(contrasena, 10);
     usuario.estado = 'ACTIVO';
     usuario.fecha_verificacion = new Date();
     usuario.empleadoCentroTrabajo.empleado.telefono_1 = telefonoEmpleado;
     usuario.empleadoCentroTrabajo.empleado.telefono_2 = telefonoEmpleado2;
     usuario.empleadoCentroTrabajo.empleado.numero_identificacion = numero_identificacion;
-  
+
     // Solo asigna los archivos si están definidos
     if (archivoIdentificacionBuffer) {
       usuario.empleadoCentroTrabajo.empleado.archivo_identificacion = archivoIdentificacionBuffer;
@@ -393,31 +398,31 @@ export class UsuarioService {
     if (fotoEmpleadoBuffer) {
       usuario.empleadoCentroTrabajo.empleado.foto_empleado = fotoEmpleadoBuffer;
     }
-  
+
     await this.empleadoRepository.save(usuario.empleadoCentroTrabajo.empleado);
     await this.usuarioEmpresaRepository.save(usuario);
-  
+
     const seguridad1 = this.seguridadRepository.create({
       pregunta: pregunta_de_usuario_1,
       respuesta: respuesta_de_usuario_1,
       usuarioEmpresa: usuario,
     });
-  
+
     const seguridad2 = this.seguridadRepository.create({
       pregunta: pregunta_de_usuario_2,
       respuesta: respuesta_de_usuario_2,
       usuarioEmpresa: usuario,
     });
-  
+
     const seguridad3 = this.seguridadRepository.create({
       pregunta: pregunta_de_usuario_3,
       respuesta: respuesta_de_usuario_3,
       usuarioEmpresa: usuario,
     });
-  
+
     await this.seguridadRepository.save([seguridad1, seguridad2, seguridad3]);
   }
-  
+
 
   async getRolesPorEmpresa(centroId: number) {
     /* return this.rolEmpresaRepository.find({

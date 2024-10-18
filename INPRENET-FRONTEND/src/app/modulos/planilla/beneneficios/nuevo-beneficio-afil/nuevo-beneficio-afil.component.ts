@@ -179,8 +179,8 @@ export class NuevoBeneficioAfilComponent implements OnInit {
           },
           { type: 'number', label: 'Monto total', name: 'monto_total', validations: [Validators.required, Validators.min(0)], display: true },
           { type: 'number', label: 'Monto por periodo', name: 'monto_por_periodo', validations: [Validators.required, Validators.min(0)], display: true },
-          { type: 'number', label: 'Monto ultima cuota', name: 'monto_ultima_cuota', validations: [Validators.required, Validators.min(0)], display: true },
           { type: 'number', label: 'Monto primera cuota', name: 'monto_primera_cuota', validations: [Validators.required, Validators.min(0)], display: true },
+          { type: 'number', label: 'Monto útima cuota', name: 'monto_ultima_cuota', validations: [Validators.required, Validators.min(0)], display: true },
           {
             type: 'date',
             label: 'Fecha de efectividad',
@@ -216,11 +216,18 @@ export class NuevoBeneficioAfilComponent implements OnInit {
             options: [{ label: 'APROBADO', value: 'APROBADO' }, { label: 'RECHAZADO', value: 'RECHAZADO' }], validations: [Validators.required], display: true
           },
           { type: 'number', label: 'Monto total', name: 'monto_total', validations: [Validators.required, Validators.min(0)], display: true },
-          { type: 'number', label: 'Monto ultima cuota', name: 'monto_ultima_cuota', validations: [Validators.required, Validators.min(0)], display: true },
           { type: 'number', label: 'Monto primera cuota', name: 'monto_primera_cuota', validations: [Validators.required, Validators.min(0)], display: true },
+          { type: 'number', label: 'Monto ultima cuota', name: 'monto_ultima_cuota', validations: [Validators.required, Validators.min(0)], display: true },
           { type: 'text', label: 'Observación', name: 'observacion', validations: [], display: true },
           { type: 'number', label: 'Monto por periodo', name: 'monto_por_periodo', validations: [Validators.required], display: true },
-          { type: 'date', label: 'Fecha de efectividad', name: 'fecha_calculo', validations: [], display: true },
+          {
+            type: 'date',
+            label: 'Fecha de efectividad',
+            name: 'fecha_calculo',
+            max: new Date().toISOString().split('T')[0],
+            validations: [Validators.required, noFutureDateValidator],
+            display: true
+          },
           { type: 'number', label: 'Número de rentas aprobadas', name: 'num_rentas_aplicadas', validations: [Validators.min(1)], display: false },
           {
             type: 'number', label: 'último día de última renta', name: 'ultimo_dia_ultima_renta', validations: [

@@ -89,7 +89,6 @@
             </mat-error>
           </div>
 
-          <!-- Mostrar el error de validación de fechas -->
           <mat-error *ngIf="trabajo.errors?.['fechaIncorrecta']">
             <mat-icon aria-hidden="true" class="error-icon-small">error_outline</mat-icon>
             {{ trabajo.errors?.['fechaIncorrecta'] }}

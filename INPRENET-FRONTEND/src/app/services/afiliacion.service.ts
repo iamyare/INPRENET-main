@@ -10,6 +10,16 @@ export class AfiliacionService {
 
   constructor(private http: HttpClient) { }
 
+  eliminarCargoPublico(idCargoPublico: number): Observable<void> {
+    const url = `${environment.API_URL}/api/afiliacion/cargos-publicos/${idCargoPublico}`;
+    return this.http.delete<void>(url).pipe(
+      catchError((error) => {
+        console.error('Error al eliminar el cargo público', error);
+        return throwError(error);
+      })
+    );
+  }
+
   crearDiscapacidades(idPersona: number, discapacidades: any): Observable<void> {
     const url = `${environment.API_URL}/api/afiliacion/${idPersona}/discapacidades`;
     return this.http.post<void>(url, discapacidades).pipe(

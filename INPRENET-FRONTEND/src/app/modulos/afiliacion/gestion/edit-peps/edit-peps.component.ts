@@ -180,21 +180,21 @@ export class EditPepsComponent implements OnInit, OnDestroy, OnChanges {
     const dialogRef = this.dialog.open(ConfirmDialogComponent, {
       width: '350px',
       data: {
-        title: 'Confirmar Desactivación',
-        message: '¿Está seguro de que desea desactivar este perfil?',
-        idPersona: this.Afiliado.ID_PERSONA
+        title: 'Confirmar Eliminación',
+        message: '¿Está seguro de que desea eliminar este cargo público?',
       }
     });
 
     dialogRef.afterClosed().subscribe((result: boolean) => {
       if (result) {
-        this.svcAfiliado.desactivarPerfCentroTrabajo(row.id).subscribe({
+        this.afiliacionService.eliminarCargoPublico(row.id_cargo_publico).subscribe({
           next: () => {
-            this.toastr.success('Perfil Desactivado');
+            this.toastr.success('Cargo público eliminado correctamente');
             this.getFilas().then(() => this.cargar());
           },
-          error: () => {
-            this.toastr.error('Ocurrió un error al desactivar el perfil.');
+          error: (error) => {
+            this.toastr.error('Error al eliminar el cargo público');
+            console.error('Error al eliminar cargo público:', error);
           }
         });
       }
@@ -244,7 +244,6 @@ export class EditPepsComponent implements OnInit, OnDestroy, OnChanges {
   }
 
   editarFila(row: any) {
-    console.log(row);
 
     const campos = [
       {

@@ -26,6 +26,13 @@ export class AfiliacionController {
   constructor(private readonly afiliacionService: AfiliacionService, private readonly connection: Connection, private readonly entityManager: EntityManager,) {
   }
 
+    @Delete('cargos-publicos/:idCargoPublico')
+    async eliminarCargoPublico(
+      @Param('idCargoPublico', ParseIntPipe) idCargoPublico: number
+    ): Promise<void> {
+      await this.afiliacionService.eliminarCargoPublico(idCargoPublico);
+    }
+
     @Delete(':idPersona/discapacidades/:tipoDiscapacidad')
     async eliminarDiscapacidad(
       @Param('idPersona', ParseIntPipe) idPersona: number,

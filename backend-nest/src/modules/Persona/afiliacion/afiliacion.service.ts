@@ -764,6 +764,18 @@ export class AfiliacionService {
       .getMany();
   }
 
+  async eliminarCargoPublico(id_cargo_publico: number): Promise<void> {
+    const cargo = await this.entityManager.findOne(Net_Cargo_Publico, {
+      where: { id_cargo_publico },
+    });
+
+    if (!cargo) {
+      throw new NotFoundException(`El cargo público con ID ${id_cargo_publico} no fue encontrado.`);
+    }
+
+    await this.entityManager.delete(Net_Cargo_Publico, id_cargo_publico);
+  }
+
   async eliminarFamiliar(idPersona: number, idFamiliar: number): Promise<any> {
     const persona = await this.personaRepository.findOne({
       where: { id_persona: idPersona },

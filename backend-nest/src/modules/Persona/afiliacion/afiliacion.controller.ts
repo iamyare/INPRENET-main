@@ -48,19 +48,13 @@ export class AfiliacionController {
       });
     }
 
-    @Put('actualizar-peps/:idPersona')
-    async actualizarPeps(
-      @Param('idPersona', ParseIntPipe) idPersona: number,
-      @Body() pepsDto: CrearPepsDto[],
-    ) {
-      const persona = await this.entityManager.findOne('net_persona', { where: { id_persona: idPersona } });
-      if (!persona) {
-        throw new HttpException('Persona no encontrada', HttpStatus.NOT_FOUND);
-      }
+    @Put('actualizar-peps')
+    async actualizarPeps(@Body() pepsData: any) {
       return this.entityManager.transaction(async (transactionalEntityManager) => {
-        return this.afiliacionService.actualizarPeps(pepsDto, idPersona, transactionalEntityManager);
+        return this.afiliacionService.actualizarPeps(pepsData, transactionalEntityManager);
       });
     }
+
 
   @Delete(':idPersona/familiares/:idFamiliar')
   async eliminarFamiliar(

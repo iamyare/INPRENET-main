@@ -703,7 +703,7 @@ export class DetalleBeneficioService {
         .getRawMany();
 
       const detBen = await this.detalleBeneficioAfiliadoRepository.find({
-        where: { persona: { persona: { n_identificacion: `${dni}` }, tipoPersona: { tipo_persona: In(["AFILIADO", "JUBILADO", "PENSIONADO", "BENEFICIARIO", "BENEFICIARIO SIN CAUSANTE"]) } } },
+        where: { persona: { persona: { n_identificacion: `${dni}` }, tipoPersona: { tipo_persona: In(["AFILIADO", "JUBILADO", "PENSIONADO", "BENEFICIARIO", "BENEFICIARIO SIN CAUSANTE", "DESIGNADO"]) } } },
         relations: [
           'persona.padreIdPersona',
           'persona.padreIdPersona.persona',

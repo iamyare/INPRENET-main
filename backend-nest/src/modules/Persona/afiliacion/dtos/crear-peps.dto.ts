@@ -17,6 +17,10 @@ export class CrearCargoPublicoDto {
   @IsOptional()
   @IsString()
   referencias?: string;
+
+  @IsNotEmpty()
+  @IsOptional()
+  id_cargo_publico: number;
 }
 
 export class CrearPepsDto {

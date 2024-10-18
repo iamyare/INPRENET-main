@@ -167,7 +167,7 @@ export class DeduccionService {
       where: {
         n_identificacion: persona.n_identificacion,
         detallePersona: {
-          tipoPersona: { tipo_persona: In(["BENEFICIARIO SIN CAUSANTE", "BENEFICIARIO"]) }
+          tipoPersona: { tipo_persona: In(["BENEFICIARIO SIN CAUSANTE", "BENEFICIARIO", "DESIGNADO"]) }
         }
       },
       relations: ['detallePersona', 'detallePersona.tipoPersona'],
@@ -234,7 +234,7 @@ export class DeduccionService {
           fechaDeduccion >= periodoInicio &&
           fechaDeduccion <= periodoFinalizacion &&
           (
-            (['BENEFICIARIO', 'BENEFICIARIO SIN CAUSANTE'].includes(tipoPersonaBE) && p.tipoPlanilla.nombre_planilla === 'ORDINARIA BENEFICIARIO'))
+            (['BENEFICIARIO', 'BENEFICIARIO SIN CAUSANTE', 'DESIGNADO'].includes(tipoPersonaBE) && p.tipoPlanilla.nombre_planilla === 'ORDINARIA BENEFICIARIO'))
         );
       });
 

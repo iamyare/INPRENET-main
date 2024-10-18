@@ -135,11 +135,11 @@ export class AfiliacionService {
     const tiposPersona = await this.tipoPersonaRepository.find({
         where: [
             { tipo_persona: 'BENEFICIARIO' },
-            { tipo_persona: 'BENEFICIARIO SIN CAUSANTE' }
+            { tipo_persona: 'DESIGNADO' }
         ]
     });
     if (tiposPersona.length === 0) {
-        throw new Error('Tipos de persona "BENEFICIARIO" o "BENEFICIARIO SIN CAUSANTE" no encontrados');
+        throw new Error('Tipos de persona "BENEFICIARIO" o "DESIGNADO" no encontrados');
     }
     const tipoPersonaIds = tiposPersona.map(tipo => tipo.id_tipo_persona);
     const detalles = beneficiario.detallePersona.filter(d => tipoPersonaIds.includes(d.ID_TIPO_PERSONA));
@@ -389,9 +389,9 @@ export class AfiliacionService {
   ): Promise<net_detalle_persona[]> {
     const resultados: net_detalle_persona[] = [];
 
-    const tipoPersonaBeneficiario = await this.tipoPersonaRepository.findOne({ where: { tipo_persona: 'BENEFICIARIO SIN CAUSANTE' } });
+    const tipoPersonaBeneficiario = await this.tipoPersonaRepository.findOne({ where: { tipo_persona: 'DESIGNADO' } });
     if (!tipoPersonaBeneficiario) {
-      throw new NotFoundException('Tipo de persona "BENEFICIARIO SIN CAUSANTE" no encontrado');
+      throw new NotFoundException('Tipo de persona "DESIGNADO" no encontrado');
     }
 
     for (const crearBeneficiarioDto of crearBeneficiariosDtos) {
@@ -564,11 +564,11 @@ export class AfiliacionService {
   formatDateToYYYYMMDD(dateString: string): string {
     if (!dateString) return null;
     const date = new Date(dateString);
-    const day = ('0' + date.getDate()).slice(-2);
-    const month = ('0' + (date.getMonth() + 1)).slice(-2);
-    const year = date.getFullYear();
-    return `${year}-${month}-${day}`;
-  }
+    const utcDay = ('0' + date.getUTCDate()).slice(-2);
+    const utcMonth = ('0' + (date.getUTCMonth() + 1)).slice(-2);
+    const utcYear = date.getUTCFullYear();
+    return `${utcYear}-${utcMonth}-${utcDay}`;
+}
 
   async obtenerReferenciasPorIdentificacion(nIdentificacion: string) {
     const persona = await this.personaRepository.findOne({
@@ -782,31 +782,26 @@ export class AfiliacionService {
     return { message: 'Familiar eliminado exitosamente.' };
   }
 
-  async actualizarPeps(pepsDto: CrearPepsDto[], idPersona: number, entityManager: EntityManager): Promise<Net_Peps[]> {
-    const resultados: Net_Peps[] = [];
-    const pepsExistentes = await entityManager.find(Net_Peps, {
-      where: { persona: { id_persona: idPersona } },
-      relations: ['cargo_publico'],
-    });
-    for (const peps of pepsExistentes) {
-      const pepsData = pepsDto.find(p => p.cargosPublicos.some(c => c.cargo === peps.cargo_publico[0]?.cargo));
-      if (pepsData && peps.cargo_publico.length > 0) {
-        for (const cargo of peps.cargo_publico) {
-          const nuevoCargo = pepsData.cargosPublicos.find(c => c.cargo === cargo.cargo);
-          if (nuevoCargo) {
-            cargo.cargo = nuevoCargo.cargo;
-            cargo.fecha_inicio = this.formatDateToYYYYMMDD(nuevoCargo.fecha_inicio);
-            cargo.fecha_fin = this.formatDateToYYYYMMDD(nuevoCargo.fecha_fin);
-            cargo.referencias = nuevoCargo.referencias;
-            await entityManager.save(Net_Cargo_Publico, cargo);
-          }
-        }
-      }
-      resultados.push(peps);
+  async actualizarPeps(pepsData: any, entityManager: EntityManager): Promise<Net_Cargo_Publico> {
+    if (Array.isArray(pepsData)) {
+        pepsData = pepsData[0];
     }
-    return resultados;
+    const cargoExistente = await entityManager.findOne(Net_Cargo_Publico, {
+      where: { id_cargo_publico: pepsData.id_cargo_publico }
+    });
+    if (!cargoExistente) {
+      throw new Error('Cargo público no encontrado');
+    }
+    if (!pepsData.fecha_inicio || !pepsData.fecha_fin) {
+      throw new Error('Fecha de inicio o fin no puede ser null o undefined');
+    }
+    cargoExistente.cargo = pepsData.cargo;
+    cargoExistente.fecha_inicio = this.formatDateToYYYYMMDD(pepsData.fecha_inicio);
+    cargoExistente.fecha_fin = this.formatDateToYYYYMMDD(pepsData.fecha_fin);
+    return await entityManager.save(Net_Cargo_Publico, cargoExistente);
   }
 
+  
   async eliminarDiscapacidad(idPersona: number, tipoDiscapacidad: string): Promise<void> {
     const discapacidadRelacion = await this.entityManager.findOne(Net_Persona_Discapacidad, {
       where: {

@@ -17,4 +17,6 @@ export interface FieldConfig {
     showIfValueIncludes: string;
     fieldsToAdd: FieldConfig[];
   };
+  min?: string; // Nueva propiedad para la fecha mínima
+  max?: string; // Nueva propiedad para la fecha máxima
 }

@@ -369,7 +369,7 @@ export class DetalleBeneficioService {
                   ID_PERSONA: detPer.ID_PERSONA,
                   ID_CAUSANTE: detPer.ID_CAUSANTE,
                   ID_CAUSANTE_PADRE: detPer.ID_CAUSANTE_PADRE,
-                  ID_TIPO_PERSONA: estadoP.codigo
+                  ID_ESTADO_AFILIACION: estadoP.codigo
                 });
                 await this.detPersonaRepository.save(detPers);
               }

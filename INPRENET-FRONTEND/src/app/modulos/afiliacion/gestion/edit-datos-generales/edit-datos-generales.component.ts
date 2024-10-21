@@ -49,7 +49,7 @@ export class EditDatosGeneralesComponent implements OnInit {
     fecha_defuncion: ["", [Validators.required]],
     id_departamento_defuncion: ["", [Validators.required]],
     id_municipio_defuncion: ["", [Validators.required]],
-    tipo_persona: ["", [Validators.required]]
+    /* tipo_persona: ["", [Validators.required]] */
     //certificado_defuncion: ["", [Validators.required]],
     //observaciones: ["", [Validators.required]],
   });
@@ -270,7 +270,7 @@ export class EditDatosGeneralesComponent implements OnInit {
             }, {} as { [key: string]: string })
             : {}; // Si no existe DIRECCION_RESIDENCIA, asigna un objeto vacío
 
-            console.log(result);
+          console.log(result);
 
           this.initialData = {
             n_identificacion: result?.N_IDENTIFICACION,
@@ -326,7 +326,7 @@ export class EditDatosGeneralesComponent implements OnInit {
           this.form1.controls.causa_fallecimiento.setValue(result?.ID_CAUSA_FALLECIMIENTO);
           this.form1.controls.id_departamento_defuncion.setValue(result?.ID_DEPARTAMENTO_DEFUNCION);
           this.form1.controls.id_municipio_defuncion.setValue(result?.ID_MUNICIPIO_DEFUNCION);
-          this.form1.controls.tipo_persona.setValue(result?.ID_TIPO_PERSONA)
+          /* this.form1.controls.tipo_persona.setValue(result?.ID_TIPO_PERSONA) */
           //this.form1.controls.estado.setValue('ACTIVO');
 
           //this.form1.controls.certificado_defuncion.setValue(result?.certificado_defuncion)
@@ -388,13 +388,13 @@ export class EditDatosGeneralesComponent implements OnInit {
     if (this.formDatosGenerales.value.refpers[0]) {
       a = {
         ...this.formDatosGenerales.value.refpers[0],
-        estado: this.form1.value.estado,
+        /*  estado: this.form1.value.estado, */
         causa_fallecimiento: this.form1.value.causa_fallecimiento,
         fecha_defuncion: convertirFechaInputs(this.form1.value.fecha_defuncion!),
         id_departamento_defuncion: this.form1.value.id_departamento_defuncion,
         id_municipio_defuncion: this.form1.value.id_municipio_defuncion,
         certificado_defuncion: this.formDatosGenerales.value.archivoCertDef,
-        tipo_persona: this.form1.value.tipo_persona,
+        /* tipo_persona: this.form1.value.tipo_persona, */
         //certificado_defuncion: this.form1.value.certificado_defuncion
         //observaciones: this.form1.value.observaciones,
       };
@@ -410,7 +410,7 @@ export class EditDatosGeneralesComponent implements OnInit {
         id_departamento_defuncion: this.form1.value.id_departamento_defuncion,
         id_municipio_defuncion: this.form1.value.id_municipio_defuncion,
         certificado_defuncion: this.formDatosGenerales.value.archivoCertDef,
-        tipo_persona: this.form1.value.tipo_persona
+        /* tipo_persona: this.form1.value.tipo_persona */
         //certificado_defuncion: this.form1.value.certificado_defuncion
         //observaciones: this.form1.value.observaciones,
       };

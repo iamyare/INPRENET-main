@@ -55,13 +55,12 @@ export class AfiliacionController {
       });
     }
 
-    @Put('actualizar-peps')
+   @Put('actualizar-peps')
     async actualizarPeps(@Body() pepsData: any) {
       return this.entityManager.transaction(async (transactionalEntityManager) => {
         return this.afiliacionService.actualizarPeps(pepsData, transactionalEntityManager);
       });
-    }
-
+    } 
 
   @Delete(':idPersona/familiares/:idFamiliar')
   async eliminarFamiliar(
@@ -178,7 +177,6 @@ export class AfiliacionController {
     return await this.afiliacionService.obtenerReferenciasPorIdentificacion(nIdentificacion);
   }
 
-
   @Patch('referencia/inactivar/:id')
   async inactivarReferencia(@Param('id') idRefPersonal: number): Promise<void> {
     return this.afiliacionService.eliminarReferencia(idRefPersonal);
@@ -249,8 +247,6 @@ export class AfiliacionController {
       // Filtrar cada archivo por su campo de entrada (fieldname)
       const fotoPerfil = files?.find(file => file.fieldname === 'foto_perfil');
       const fileIdent = files?.find(file => file.fieldname === 'file_ident');
-
-      // Aquí puedes enviar todos los archivos y datos a tu servicio
       return await this.afiliacionService.crearDatos(crearDatosDto, fotoPerfil, fileIdent, files);
     } catch (error) {
       throw new HttpException(error.message, HttpStatus.BAD_REQUEST);
@@ -262,8 +258,6 @@ export class AfiliacionController {
     @Param('idReferencia') idReferencia: number,
     @Body() datosActualizados: CrearReferenciaDto
   ): Promise<void> {
-    console.log(datosActualizados);
-
     return this.afiliacionService.actualizarReferencia(idReferencia, datosActualizados);
   }
 

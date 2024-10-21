@@ -1,5 +1,5 @@
 import { Component, Input, OnInit } from '@angular/core';
-import { FormArray, FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
+import { AbstractControl, FormArray, FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { debounceTime, distinctUntilChanged } from 'rxjs';
 import { BeneficiosService } from 'src/app/services/beneficios.service';
 import { DatosEstaticosService } from 'src/app/services/datos-estaticos.service';
@@ -28,7 +28,9 @@ export class RefPersComponent implements OnInit {
       this.formGroup.addControl('conyuge', this.initFormConyuge());
     }
     if (!this.formGroup.get('refpers')) {
-      this.formGroup.addControl('refpers', this.fb.array([]));
+      const referenciasArray = this.fb.array([]);
+      referenciasArray.setValidators(this.identidadUnicaValidator.bind(this));
+      this.formGroup.addControl('refpers', referenciasArray);
     }
     this.cargarDatosEstaticos();
   }
@@ -37,7 +39,7 @@ export class RefPersComponent implements OnInit {
     const nIdentificacionControl = this.formGroup.get('conyuge')?.get('n_identificacion');
     const n_identificacion = nIdentificacionControl?.value;
 
-    if (n_identificacion) {
+    if (n_identificacion) {``
       this.verificarAfiliado(n_identificacion);
     } else {
       this.esAfiliadoText = 'NO';
@@ -56,11 +58,23 @@ export class RefPersComponent implements OnInit {
       tercer_nombre: [''],
       primer_apellido: ['', []],
       segundo_apellido: [''],
-      n_identificacion: ['', []],
+      n_identificacion: ['', [
+        Validators.pattern(/^[0-9]*$/),
+        Validators.maxLength(15)
+      ]],
       fecha_nacimiento: ['', []],
-      telefono_domicilio: ['', []],
-      telefono_celular: ['', []],
-      telefono_trabajo: [''],
+      telefono_domicilio: ['', [
+        Validators.pattern(/^[0-9]*$/),
+        Validators.maxLength(12)
+      ]],
+      telefono_celular: ['', [
+        Validators.pattern(/^[0-9]*$/),
+        Validators.maxLength(12)
+      ]],
+      telefono_trabajo: ['', [
+        Validators.pattern(/^[0-9]*$/),
+        Validators.maxLength(12)
+      ]],
       trabaja: ['', []],
       es_afiliado: ['', []]
     });
@@ -69,11 +83,11 @@ export class RefPersComponent implements OnInit {
   verificarAfiliado(n_identificacion: string): void {
     this.beneficiosService.verificarSiEsAfiliado(n_identificacion).subscribe({
       next: (esAfiliado) => {
-        this.esAfiliadoText = esAfiliado ? 'SÍ' : 'NO'; // Asigna el texto
+        this.esAfiliadoText = esAfiliado ? 'SÍ' : 'NO';
       },
       error: (error) => {
-        this.esAfiliadoText = 'NO'; // Maneja el error como 'NO'
-        console.error('Error al verificar si es afiliado', error); // Log para depuración
+        this.esAfiliadoText = 'NO';
+        console.error('Error al verificar si es afiliado', error);
       }
     });
   }
@@ -92,7 +106,10 @@ export class RefPersComponent implements OnInit {
       telefono_trabajo: [datos?.telefono_trabajo || '', [Validators.minLength(8), Validators.maxLength(12), Validators.pattern(/^[0-9]*$/)]],
       telefono_personal: [datos?.telefono_personal || '', [Validators.minLength(8), Validators.maxLength(12), Validators.pattern(/^[0-9]*$/)]],
       parentesco: [datos?.parentesco || '', [Validators.required, Validators.minLength(2), Validators.maxLength(30)]],
-      n_identificacion: ['', []],
+      n_identificacion: ['', [
+        Validators.pattern(/^[0-9]*$/),
+        Validators.maxLength(15)
+      ]],
     });
     this.referencias.push(referenciaForm);
     this.markAllAsTouched(referenciaForm);
@@ -194,4 +211,14 @@ export class RefPersComponent implements OnInit {
       }
     }));
   }
+
+  identidadUnicaValidator(control: AbstractControl): { [key: string]: any } | null {
+    const formArray = control as FormArray;
+    const identificaciones = formArray.controls
+      .map(ref => ref.get('n_identificacion')?.value)
+      .filter(value => value !== null && value !== '');
+    const duplicados = identificaciones.filter((item, index) => identificaciones.indexOf(item) !== index);
+    return duplicados.length > 0 ? { identidadDuplicada: true } : null;
+  }
+
 }

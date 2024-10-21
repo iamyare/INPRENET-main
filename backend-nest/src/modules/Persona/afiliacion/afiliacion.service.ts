@@ -385,25 +385,23 @@ export class AfiliacionService {
     idPersona: number,
     idDetallePersona: number,
     entityManager: EntityManager,
-    files?: any
+    files?: any,
+    personasCreadasMap?: Map<string, net_persona>
   ): Promise<net_detalle_persona[]> {
     const resultados: net_detalle_persona[] = [];
-
+  
+    // Si no se proporciona el mapa, creamos uno nuevo
+    const personasMap = personasCreadasMap || new Map<string, net_persona>();
+  
     const tipoPersonaBeneficiario = await this.tipoPersonaRepository.findOne({ where: { tipo_persona: 'DESIGNADO' } });
     if (!tipoPersonaBeneficiario) {
       throw new NotFoundException('Tipo de persona "DESIGNADO" no encontrado');
     }
-
+  
     for (const crearBeneficiarioDto of crearBeneficiariosDtos) {
-      let beneficiario = await this.personaRepository.findOne({
-        where: { n_identificacion: crearBeneficiarioDto.persona.n_identificacion }
-      });
-
-      if (!beneficiario) {
-        const fileIdent = files?.find(file => file.fieldname === `file_identB[${crearBeneficiarioDto.persona.n_identificacion}]`);
-
-        beneficiario = await this.crearPersona(crearBeneficiarioDto.persona, null, fileIdent, entityManager);
-      }
+      const fileIdent = files?.find(file => file.fieldname === `file_identB[${crearBeneficiarioDto.persona.n_identificacion}]`);
+      const beneficiario = await this.crearOObtenerPersona(crearBeneficiarioDto.persona, fileIdent, entityManager, personasMap);
+  
       const detalleBeneficiario = entityManager.create(net_detalle_persona, {
         ID_DETALLE_PERSONA: idDetallePersona,
         ID_PERSONA: beneficiario.id_persona,
@@ -413,17 +411,46 @@ export class AfiliacionService {
         eliminado: 'NO',
         porcentaje: crearBeneficiarioDto.porcentaje,
       });
-
+  
       const detalleGuardado = await entityManager.save(net_detalle_persona, detalleBeneficiario);
       resultados.push(detalleGuardado);
+  
       if (crearBeneficiarioDto.discapacidades && crearBeneficiarioDto.discapacidades.length > 0) {
         await this.crearDiscapacidades(crearBeneficiarioDto.discapacidades, beneficiario.id_persona, entityManager);
       }
     }
-
+  
     return resultados;
   }
-
+  
+  async crearFamilia(
+    familiaresDto: CrearFamiliaDto[],
+    idPersona: number,
+    entityManager: EntityManager,
+    personasCreadasMap?: Map<string, net_persona>
+  ): Promise<void> {
+    const personasMap = personasCreadasMap || new Map<string, net_persona>();
+    const familiaSinDuplicados = familiaresDto.filter((familia, index, self) => {
+      return (
+        familia.parentesco !== 'CÓNYUGUE' || 
+        index === self.findIndex(f => f.parentesco === 'CÓNYUGUE')
+      );
+    });
+  
+    for (const familiaDto of familiaSinDuplicados) {
+      const personaReferencia = await this.crearOObtenerPersona(familiaDto.persona_referencia, null, entityManager, personasMap);
+  
+      const familia = entityManager.create(Net_Familia, {
+        parentesco: familiaDto.parentesco,
+        persona: { id_persona: idPersona },
+        referenciada: { id_persona: personaReferencia.id_persona },
+      });
+  
+      await entityManager.save(Net_Familia, familia);
+    }
+  }
+  
+  
   async crearDiscapacidades(
       discapacidadesDto: CrearDiscapacidadDto[],
       idPersona: number,
@@ -469,90 +496,67 @@ export class AfiliacionService {
     return resultados;
   }
 
-  async crearFamilia(
-    familiaresDto: CrearFamiliaDto[],
-    idPersona: number,
-    entityManager: EntityManager,
-  ): Promise<void> {
-    for (const familiaDto of familiaresDto) {
-      let personaReferencia = await this.personaRepository.findOne({
-        where: { n_identificacion: familiaDto.persona_referencia.n_identificacion }
-      });
-      if (!personaReferencia) {
-        personaReferencia = await this.crearPersona(familiaDto.persona_referencia, null, null, entityManager);
-      }
-      const familia = entityManager.create(Net_Familia, {
-        parentesco: familiaDto.parentesco,
-        persona: { id_persona: idPersona },
-        referenciada: { id_persona: personaReferencia.id_persona },
-      });
-      await entityManager.save(Net_Familia, familia);
-    }
-  }
+  
 
-  async crearDatos(crearDatosDto: CrearDatosDto, fotoPerfil: Express.Multer.File, fileIdent: Express.Multer.File, files: any): Promise<any> {
+  async crearDatos(
+    crearDatosDto: CrearDatosDto,
+    fotoPerfil: Express.Multer.File,
+    fileIdent: Express.Multer.File,
+    files: any
+  ): Promise<any> {
     return await this.personaRepository.manager.transaction(async (transactionalEntityManager) => {
       try {
-
-        console.log('--------------');
-        console.log(fotoPerfil);
-
-        console.log(JSON.stringify(crearDatosDto, (key, value) => {
-          if (typeof value === 'object' && value !== null) {
-            return { ...value };
-          }
-          return value;
-        }, 2));
-        console.log('--------------');
         const resultados = [];
-
+        const personasCreadasMap = new Map<string, net_persona>();
+  
         // Crear la persona
         const persona = await this.crearPersona(crearDatosDto.persona, fotoPerfil, fileIdent, transactionalEntityManager);
         resultados.push(persona);
-
+  
         // Crear el detalle de la persona
         const detallePersona = await this.crearDetallePersona(crearDatosDto.detallePersona, persona.id_persona, transactionalEntityManager);
         resultados.push(detallePersona);
-
+  
         // Crear las relaciones de la persona con los colegios magisteriales
         const personaColegios = await this.crearPersonaColegios(crearDatosDto.colegiosMagisteriales, persona.id_persona, transactionalEntityManager);
         resultados.push(...personaColegios);
-
+  
         // Crear las relaciones de la persona con los bancos
         const personaBancos = await this.crearPersonaBancos(crearDatosDto.bancos, persona.id_persona, transactionalEntityManager);
         resultados.push(...personaBancos);
-
+  
         // Crear las relaciones de la persona con los centros de trabajo
         const personaCentrosTrabajo = await this.crearPersonaCentrosTrabajo(crearDatosDto.centrosTrabajo, persona.id_persona, transactionalEntityManager);
         resultados.push(...personaCentrosTrabajo);
-
+  
         // Crear las relaciones de la persona con las otras fuentes de ingreso
         const otrasFuentesIngreso = await this.crearOtrasFuentesIngreso(crearDatosDto.otrasFuentesIngreso, persona.id_persona, transactionalEntityManager);
         resultados.push(...otrasFuentesIngreso);
-
+  
         // Crear las referencias de la persona
         const referencias = await this.crearReferencias(crearDatosDto.referencias, persona.id_persona, transactionalEntityManager);
         resultados.push(...referencias);
-
+  
         // Crear los beneficiarios de la persona
-        const beneficiarios = await this.crearBeneficiarios(crearDatosDto.beneficiarios, persona.id_persona, detallePersona.ID_DETALLE_PERSONA, transactionalEntityManager, files);
+        const beneficiarios = await this.crearBeneficiarios(crearDatosDto.beneficiarios, persona.id_persona, detallePersona.ID_DETALLE_PERSONA, transactionalEntityManager, files, personasCreadasMap);
         resultados.push(...beneficiarios);
-
+  
         // Crear las discapacidades de la persona, si existen
         if (crearDatosDto.persona.discapacidades && crearDatosDto.persona.discapacidades.length > 0) {
           await this.crearDiscapacidades(crearDatosDto.persona.discapacidades, persona.id_persona, transactionalEntityManager);
         }
-
+  
         // Crear la familia de la persona, si existen
         if (crearDatosDto.familiares && crearDatosDto.familiares.length > 0) {
-          await this.crearFamilia(crearDatosDto.familiares, persona.id_persona, transactionalEntityManager);
+          await this.crearFamilia(crearDatosDto.familiares, persona.id_persona, transactionalEntityManager, personasCreadasMap);
         }
-
+  
+        // Crear los registros PEPs de la persona, si existen
         if (crearDatosDto.peps && crearDatosDto.peps.length > 0) {
           const peps = await this.crearPeps(crearDatosDto.peps, persona.id_persona, transactionalEntityManager);
           resultados.push(...peps);
         }
-
+  
         return resultados;
       } catch (error) {
         console.error('Error al crear los datos:', error);
@@ -560,6 +564,35 @@ export class AfiliacionService {
       }
     });
   }
+  
+
+  async crearOObtenerPersona(
+    crearPersonaDto: CrearPersonaDto,
+    fileIdent: Express.Multer.File,
+    entityManager: EntityManager,
+    personasCreadasMap: Map<string, net_persona>
+  ): Promise<net_persona> {
+    // Verificar si ya hemos creado a esta persona en esta transacción
+    if (personasCreadasMap.has(crearPersonaDto.n_identificacion)) {
+      return personasCreadasMap.get(crearPersonaDto.n_identificacion);
+    }
+  
+    // Verificar si la persona ya existe en la base de datos
+    let persona = await this.personaRepository.findOne({
+      where: { n_identificacion: crearPersonaDto.n_identificacion }
+    });
+  
+    if (!persona) {
+      // Crear la persona si no existe
+      persona = await this.crearPersona(crearPersonaDto, null, fileIdent, entityManager);
+    }
+  
+    // Guardar la persona en el mapa para futuras referencias
+    personasCreadasMap.set(crearPersonaDto.n_identificacion, persona);
+    
+    return persona;
+  }
+  
 
   formatDateToYYYYMMDD(dateString: string): string {
     if (!dateString) return null;

@@ -12,7 +12,12 @@ const noSpecialCharsPattern = '^[a-zA-Z0-9\\s]*$';
 
 export function generateAddressFormGroup(datos?: any): FormGroup {
   return new FormGroup({
-    n_identificacion: new FormControl(datos?.n_identificacion, [Validators.required]),
+    n_identificacion: new FormControl(datos?.n_identificacion, [
+      Validators.required,
+      Validators.pattern('^[0-9]*$'),
+      Validators.minLength(13),
+      Validators.maxLength(15)
+    ]),
     primer_nombre: new FormControl(datos?.primer_nombre, [
       Validators.required,
       Validators.maxLength(40),
@@ -28,7 +33,6 @@ export function generateAddressFormGroup(datos?: any): FormGroup {
       Validators.pattern(/^[^\s]+$/)
     ]),
     primer_apellido: new FormControl(datos?.primer_apellido, [
-      Validators.required,
       Validators.maxLength(40),
       Validators.minLength(1),
       Validators.pattern(/^[^\s]+$/)
@@ -467,32 +471,30 @@ export class DatGeneralesAfiliadoComponent implements OnInit {
     return form.get(key);
   }
 
-  getErrors(i: number, fieldName: string): any {
-    if (this.formParent instanceof FormGroup) {
-      const controlesrefpers = (this.formParent.get('refpers') as FormGroup).controls;
-      const a = controlesrefpers[i].get(fieldName)!.errors;
+  getErrors(i: number, fieldName: string): any[] {
+    const formArray = this.formParent.get('refpers') as FormArray;
+    const control = formArray.at(i).get(fieldName);
 
-      let errors = [];
-      if (a) {
-        if (a['required']) {
-          errors.push('Este campo es requerido.');
-        }
-        if (a['minlength']) {
-          errors.push(`Debe tener al menos ${a['minlength'].requiredLength} caracteres.`);
-        }
-        if (a['maxlength']) {
-          errors.push(`No puede tener más de ${a['maxlength'].requiredLength} caracteres.`);
-        }
-        if (a['pattern']) {
-          errors.push('El formato no es válido.');
-        }
-        if (a['email']) {
-          errors.push('Correo electrónico no válido.');
-        }
-        return errors;
+    if (control && control.errors) {
+      const errors = [];
+      if (control.errors['required']) {
+        errors.push('Este campo es requerido.');
       }
+      if (control.errors['minlength']) {
+        errors.push(`Debe tener al menos ${control.errors['minlength'].requiredLength} caracteres.`);
+      }
+      if (control.errors['maxlength']) {
+        errors.push(`No puede tener más de ${control.errors['maxlength'].requiredLength} caracteres.`);
+      }
+      if (control.errors['pattern']) {
+        errors.push('Solo se permiten números.');
+      }
+      return errors;
     }
+
+    return [];
   }
+
 
   isChecked(idDiscapacidad: number): boolean {
     const refpersArray = this.formParent.get('refpers') as FormArray;

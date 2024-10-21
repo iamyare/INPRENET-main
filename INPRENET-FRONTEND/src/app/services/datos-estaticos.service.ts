@@ -446,4 +446,11 @@ export class DatosEstaticosService {
     { value: "YERNO", label: "YERNO" },
     { value: "NUERA", label: "NUERA" }
   ];
+
+  parentescoReferenciasPersonales = [
+    { value: "AMIGO", label: "AMIGO" },
+    { value: "COMPAÑERO DE TRABAJO", label: "COMPAÑERO DE TRABAJO" },
+    { value: "VECINO", label: "VECINO" },
+    { value: "OTRO", label: "OTRO" },
+  ];
 }

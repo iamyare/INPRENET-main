@@ -1,5 +1,5 @@
 import { Component, Input, OnInit } from '@angular/core';
-import { FormArray, FormBuilder, FormControl, FormGroup, Validators, AbstractControl, ValidationErrors } from '@angular/forms';
+import { FormArray, FormBuilder, FormControl, FormGroup, Validators, AbstractControl, ValidationErrors, ValidatorFn } from '@angular/forms';
 import { DireccionService } from 'src/app/services/direccion.service';
 import { DatosEstaticosService } from 'src/app/services/datos-estaticos.service';
 
@@ -35,7 +35,9 @@ export class BenefComponent implements OnInit {
 
   ngOnInit(): void {
     if (!this.formGroup.get('beneficiario')) {
-      this.formGroup.addControl('beneficiario', this.fb.array([]));
+      const beneficiariosArray = this.fb.array([]);
+      beneficiariosArray.setValidators(this.identidadUnicaValidator.bind(this)); // Validador para evitar duplicados
+      this.formGroup.addControl('beneficiario', beneficiariosArray);
     }
     this.cargarDepartamentos();
     this.cargarDepartamentosNacimiento();
@@ -56,11 +58,16 @@ export class BenefComponent implements OnInit {
   // Función para agregar un nuevo beneficiario
   agregarBeneficiario(datosBeneficiario?: any): void {
     const discapacidadesFormArray = this.fb.array(this.tipo_discapacidad.map(() => new FormControl(false)));
-
     const beneficiarioForm = this.fb.group({
       id_tipo_identificacion: new FormControl(datosBeneficiario?.id_tipo_identificacion || 1),
       id_pais_nacionalidad: new FormControl(datosBeneficiario?.id_pais_nacionalidad || 1),
-      n_identificacion: new FormControl(datosBeneficiario?.n_identificacion || '', [Validators.required, Validators.maxLength(40)]),
+      n_identificacion: new FormControl(datosBeneficiario?.n_identificacion || '', [
+        Validators.required,
+        Validators.pattern('^[0-9]*$'),
+        Validators.minLength(13),
+        Validators.maxLength(15),
+        this.validarIdentificacionUnica()
+      ]),
       primer_nombre: new FormControl(datosBeneficiario?.primer_nombre || '', [Validators.required, Validators.maxLength(40)]),
       segundo_nombre: new FormControl(datosBeneficiario?.segundo_nombre || '', [Validators.maxLength(40)]),
       tercer_nombre: new FormControl(datosBeneficiario?.tercer_nombre || ''),
@@ -271,8 +278,10 @@ export class BenefComponent implements OnInit {
       if (control.errors['invalidSumaPorcentajes']) {
         errors.push('La suma de los porcentajes debe ser 100%.');
       }
+      if (this.formGroup.get('beneficiario')?.hasError('identidadDuplicada')) {
+        errors.push('Este número de identificación ya ha sido registrado.');
+      }
     }
-
     return errors;
   }
 
@@ -285,4 +294,31 @@ export class BenefComponent implements OnInit {
       (group.get('archivo_identificacion') as FormControl)?.setValue(archivo);
     }
   }
+
+
+  validarIdentificacionUnica(): ValidatorFn {
+    return (control: AbstractControl): ValidationErrors | null => {
+      const formGroup = control?.parent?.parent as FormGroup;
+      const datosGeneralesIdentificacion = formGroup?.root?.get('datosGenerales')?.get('n_identificacion')?.value;
+
+      const nIdentificacionBeneficiario = control.value;
+      if (!nIdentificacionBeneficiario || nIdentificacionBeneficiario !== datosGeneralesIdentificacion) {
+        return null;
+      }
+      return { identificacionDuplicada: true };
+    };
+  }
+
+  identidadUnicaValidator(control: AbstractControl): ValidationErrors | null {
+    const formArray = control as FormArray;
+    const identificaciones = formArray.controls
+      .map(benef => benef.get('n_identificacion')?.value)
+      .filter(value => value !== null && value !== '');
+
+    const duplicados = identificaciones.filter((item, index) => identificaciones.indexOf(item) !== index);
+
+    return duplicados.length > 0 ? { identidadDuplicada: true } : null;
+  }
+
+
 }

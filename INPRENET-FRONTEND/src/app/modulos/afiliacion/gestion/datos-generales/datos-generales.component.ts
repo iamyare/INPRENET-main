@@ -302,6 +302,7 @@ export class DatosGeneralesComponent implements OnInit {
   async cargarTiposIdentificacion() {
     try {
       const response = await this.datosEstaticos.gettipoIdent();
+
       this.tipoIdent = response;
     } catch (error) {
       console.error('Error al obtener los tipos de identificación', error);

@@ -9,8 +9,7 @@
       <div formArrayName="peps">
         <div *ngFor="let pep of peps.controls; let i = index" [formGroupName]="i" class="row">
           <h4 class="card-title">Cargo {{ i + 1 }}</h4>
-          <app-shared-form-fields [parentForm]="asFormGroup(pep)" [fields]="fields">
-          </app-shared-form-fields>
+          <app-shared-form-fields [parentForm]="asFormGroup(pep)" [fields]="fields"></app-shared-form-fields>
         </div>
       </div>
       <div class="row" style="text-align: center; margin: 1%;">
@@ -37,8 +36,7 @@
         <div formArrayName="familiares">
           <div *ngFor="let familiar of familiares.controls; let j = index" [formGroupName]="j" class="row">
             <h4 class="card-title">Familiar {{ j + 1 }}</h4>
-            <app-shared-form-fields [parentForm]="asFormGroup(familiar)" [fields]="familiaresFields">
-            </app-shared-form-fields>
+            <app-shared-form-fields [parentForm]="asFormGroup(familiar)" [fields]="familiaresFields"></app-shared-form-fields>
           </div>
         </div>
         <div class="row" style="text-align: center; margin: 1%;">

@@ -63,6 +63,16 @@ export class NuevoBeneficioAfilComponent implements OnInit {
   mostrarB: any;
   hasBeneficios: any = [];
 
+  tiposPersona: any[] = [
+    { label: "AFILIADO", value: 'AFILIADO' },
+    { label: "JUBILADO", value: 'JUBILADO' },
+    { label: "PENSIONADO", value: 'PENSIONADO' },
+    { label: "VOLUNTARIO", value: 'VOLUNTARIO' }
+  ];
+  tipoPersonaSelected: any;
+  tipoBenefSelected: any;
+  beneficios: any;
+
   constructor(
     private cdr: ChangeDetectorRef,
     private svcBeneficioServ: BeneficiosService,
@@ -86,7 +96,7 @@ export class NuevoBeneficioAfilComponent implements OnInit {
       this.svcAfilServ.getAfilByDni(this.form.value.dni).subscribe(
         async (res) => {
 
-          this.hasBeneficios = res.BENEFICIOS;
+          this.hasBeneficios = res?.BENEFICIOS;
           if (res) {
             const item = {
               id_persona: res.ID_PERSONA,
@@ -109,18 +119,23 @@ export class NuevoBeneficioAfilComponent implements OnInit {
             };
 
             //const tipoPersona = item.fallecido === "SI" ? "BENEFICIARIO" : item.tipo_persona;
+
+
             if (item.fallecido === "NO") {
               if (item.estado_persona == 'ACTIVO') {
                 this.getTipoBen(item.tipo_persona);
-              } else if (item.estado_persona == 'INACTIVO') {
-                this.toastr.error("La persona se encuentra INACTIVA.");
-                this.toastr.warning(`No se puede asignar beneficios a los Afiliados INACTIVOS`, "Advertencia");
-              } else if (item.estado_persona == 'SUSPENDIDA') {
-                this.toastr.error("La persona se encuentra SUSPENDIDA.");
-                this.toastr.warning(`No se puede asignar beneficios a los Afiliados SUSPENDIDA`, "Advertencia");
-              } else if (item.estado_persona == 'NO REGISTRADO') {
-                this.toastr.error("La persona se encuentra NO REGISTRADO (ESCALAFON).");
-                this.toastr.warning(`No se puede asignar beneficios a los Afiliados NO REGISTRADO`, "Advertencia");
+              } if (item.estado_persona == 'INACTIVO' || item.estado_persona == 'SUSPENDIDA' || item.estado_persona == 'NO REGISTRADO') {
+                this.toastr.error(`La persona se encuentra ${item.estado_persona}`);
+                this.toastr.warning(`No se puede asignar beneficios a los Afiliados ${item.estado_persona}`, "Advertencia");
+              } if (item.tipo_persona == 'JUBILADO' || item.tipo_persona == 'PENSIONADO') {
+                this.toastr.error(`La persona se encuentra: ${item.tipo_persona}`);
+                this.toastr.warning(`No se puede asignar beneficios a la persona porque se encuentra: ${item.tipo_persona}`, "Advertencia");
+              } if (item.tipo_persona == 'VOULUNTARIO') {
+                this.toastr.error(`Este tipo de persona todavia no esta en funcionamiento: ${item.tipo_persona}`);
+                this.toastr.warning(`Este tipo de persona todavia no esta en funcionamiento: ${item.tipo_persona}`, "Advertencia");
+              } if (this.hasBeneficios.length > 0) {
+                this.toastr.error(`ya cuenta con un beneficio`);
+                this.toastr.warning(`ya cuenta con un beneficio`, "Advertencia");
               }
             }
 
@@ -145,105 +160,143 @@ export class NuevoBeneficioAfilComponent implements OnInit {
 
   getTipoBen = async (tipoPers: any) => {
     try {
+
+      const beneficios = await this.svcBeneficioServ.obtenerTipoBeneficioByTipoPersona(this.tipoPersonaSelected).toPromise();
+
+      // Mapea los beneficios para generar una lista
+      let temp = beneficios.map((item: any) => {
+        return {
+          label: item.beneficio.nombre_beneficio,
+          value: item.beneficio.nombre_beneficio,
+          periodicidad: item.beneficio.periodicidad,
+          numero_rentas_max: item.beneficio.numero_rentas_max
+        };
+      });
+
+      // Actualiza las configuraciones de los campos del formulario (myFormFields1)
+      this.myFormFields1 = [
+        {
+          type: 'dropdown', label: 'Tipo persona', name: 'tipo_persona',
+          options: this.tiposPersona,
+          validations: [Validators.required], display: true
+        },
+        {
+          type: 'dropdown', label: 'Tipo de beneficio', name: 'nombre_beneficio',
+          options: [],
+          validations: [Validators.required], display: true
+        },
+        {
+          type: 'text', label: 'regimen', name: 'regimen',
+          readOnly: true,
+          value: "",
+          validations: [], display: true,
+        },
+        {
+          type: 'dropdown', label: 'Estado Solicitud', name: 'estado_solicitud',
+          options: [{ label: 'APROBADO', value: 'APROBADO' }, { label: 'RECHAZADO', value: 'RECHAZADO' }],
+          validations: [Validators.required], display: true
+        },
+        { type: 'number', label: 'Monto total', name: 'monto_total', validations: [Validators.required, Validators.min(0)], display: true, },
+        { type: 'number', label: 'Monto por periodo', name: 'monto_por_periodo', validations: [Validators.required, Validators.min(0)], display: true, },
+        { type: 'number', label: 'Monto primera cuota', name: 'monto_primera_cuota', validations: [Validators.required, Validators.min(0)], display: true, },
+        { type: 'number', label: 'Monto útima cuota', name: 'monto_ultima_cuota', validations: [Validators.required, Validators.required, Validators.min(0)], display: true },
+        {
+          type: 'date',
+          label: 'Fecha de efectividad',
+          name: 'fecha_calculo',
+          max: new Date().toISOString().split('T')[0],
+          validations: [Validators.required, noFutureDateValidator],
+          display: true
+        },
+        { type: 'text', label: 'Observación', name: 'observacion', validations: [], display: true },
+        { type: 'number', label: 'Número de rentas aprobadas', name: 'num_rentas_aplicadas', validations: [Validators.min(1)], display: false },
+        {
+          type: 'number', label: 'último día de última renta', name: 'ultimo_dia_ultima_renta', validations: [
+            Validators.min(1),
+            Validators.max(31),
+          ], display: false
+        },
+      ];
+
+
+      // Oculta ciertos campos adicionales si es necesario
+      this.myFormFields1[this.myFormFields1.length - 1].display = false;
+      this.myFormFields1[this.myFormFields1.length - 2].display = false;
+
+      // Muestra el formulario después de configurar los campos
+      this.mostrarDB = true;
+
+      // Retorna la lista de beneficios mapeados
+      return temp;
+
+    } catch (error) {
+      console.error("Error al obtener datos de beneficios", error);
+      return null;  // En caso de error, retornar null o manejar el error como sea necesario
+    }
+  };
+  getTipoBenBeneficiarios = async (tipoPers: any) => {
+    try {
+
       const beneficios = await this.svcBeneficioServ.obtenerTipoBeneficioByTipoPersona(tipoPers).toPromise();
+      // Mapea los beneficios para generar una lista
+      let temp = beneficios.map((item: any) => {
+        return {
+          label: item.beneficio.nombre_beneficio,
+          value: item.beneficio.nombre_beneficio,
+          periodicidad: item.beneficio.periodicidad,
+          numero_rentas_max: item.beneficio.numero_rentas_max,
+          regimen: item.beneficio.regimen.ley
+        };
+      });
 
-      if (beneficios && beneficios.length > 0) {
-        // Mapea los beneficios para generar una lista
-        let temp = beneficios.map((item: any) => {
-          return {
-            label: item.beneficio.nombre_beneficio,
-            value: item.beneficio.nombre_beneficio,
-            periodicidad: item.beneficio.periodicidad,
-            numero_rentas_max: item.beneficio.numero_rentas_max
-          };
-        });
+      // Actualiza las configuraciones de los campos del formulario (myFormFields2)
+      this.myFormFields2 = [
+        { type: 'text', label: 'DNI del beneficiario', name: 'dni', value: "", validations: [Validators.required, Validators.minLength(13), Validators.maxLength(14)], display: true, readOnly: true },
+        {
+          type: 'dropdown', label: 'Tipo de beneficio', name: 'nombre_beneficio',
+          options: temp,
+          validations: [Validators.required], display: true
+        },
+        {
+          type: 'text', label: 'regimen', name: 'regimen',
+          readOnly: true,
+          value: "",
+          validations: [], display: true,
+        },
+        {
+          type: 'dropdown', label: 'Estado Solicitud', name: 'estado_solicitud',
+          options: [{ label: 'APROBADO', value: 'APROBADO' }, { label: 'RECHAZADO', value: 'RECHAZADO' }], validations: [Validators.required], display: true
+        },
+        { type: 'number', label: 'Monto total', name: 'monto_total', validations: [Validators.required, Validators.min(0)], display: true, },
+        { type: 'number', label: 'Monto por periodo', name: 'monto_por_periodo', validations: [Validators.required,], display: true, },
+        { type: 'number', label: 'Monto primera cuota', name: 'monto_primera_cuota', validations: [Validators.required, Validators.min(0)], display: true, },
+        { type: 'number', label: 'Monto ultima cuota', name: 'monto_ultima_cuota', validations: [Validators.required, Validators.min(0)], display: true },
+        {
+          type: 'date',
+          label: 'Fecha de efectividad',
+          name: 'fecha_calculo',
+          max: new Date().toISOString().split('T')[0],
+          validations: [Validators.required, noFutureDateValidator],
+          display: true
+        },
+        { type: 'text', label: 'Observación', name: 'observacion', validations: [], display: true },
+        { type: 'number', label: 'Número de rentas aprobadas', name: 'num_rentas_aplicadas', validations: [Validators.min(1)], display: false },
+        {
+          type: 'number', label: 'último día de última renta', name: 'ultimo_dia_ultima_renta', validations: [
+            Validators.min(1),
+            Validators.max(31),
+          ], display: false
+        },
+      ];
 
-        // Actualiza la lista de beneficios disponibles para los dropdowns
-        this.tiposBeneficios = temp;
+      this.myFormFields2[this.myFormFields2.length - 1].display = false;
+      this.myFormFields2[this.myFormFields2.length - 2].display = false;
 
-        // Actualiza las configuraciones de los campos del formulario (myFormFields1)
-        this.myFormFields1 = [
-          {
-            type: 'dropdown', label: 'Tipo de beneficio', name: 'nombre_beneficio',
-            options: this.tiposBeneficios,
-            validations: [Validators.required], display: true
-          },
-          {
-            type: 'dropdown', label: 'Estado Solicitud', name: 'estado_solicitud',
-            options: [{ label: 'APROBADO', value: 'APROBADO' }, { label: 'RECHAZADO', value: 'RECHAZADO' }],
-            validations: [Validators.required], display: true
-          },
-          { type: 'number', label: 'Monto total', name: 'monto_total', validations: [Validators.required, Validators.min(0)], display: true, },
-          { type: 'number', label: 'Monto por periodo', name: 'monto_por_periodo', validations: [Validators.required, Validators.min(0)], display: true, },
-          { type: 'number', label: 'Monto primera cuota', name: 'monto_primera_cuota', validations: [Validators.required, Validators.min(0)], display: true, },
-          { type: 'number', label: 'Monto útima cuota', name: 'monto_ultima_cuota', validations: [Validators.required, Validators.required, Validators.min(0)], display: true },
-          {
-            type: 'date',
-            label: 'Fecha de efectividad',
-            name: 'fecha_calculo',
-            max: new Date().toISOString().split('T')[0],
-            validations: [Validators.required, noFutureDateValidator],
-            display: true
-          },
-          { type: 'text', label: 'Observación', name: 'observacion', validations: [], display: true },
-          { type: 'number', label: 'Número de rentas aprobadas', name: 'num_rentas_aplicadas', validations: [Validators.min(1)], display: false },
-          {
-            type: 'number', label: 'último día de última renta', name: 'ultimo_dia_ultima_renta', validations: [
-              Validators.min(1),
-              Validators.max(31),
-            ], display: false
-          },
-        ];
+      // Muestra el formulario después de configurar los campos
+      this.mostrarDB = true;
 
-        // Actualiza las configuraciones de los campos del formulario (myFormFields2)
-        this.myFormFields2 = [
-          { type: 'text', label: 'DNI del beneficiario', name: 'dni', value: "", validations: [Validators.required, Validators.minLength(13), Validators.maxLength(14)], display: true, readOnly: true },
-          {
-            type: 'dropdown', label: 'Tipo de beneficio', name: 'nombre_beneficio',
-            options: this.tiposBeneficios,
-            validations: [Validators.required], display: true
-          },
-          {
-            type: 'dropdown', label: 'Estado Solicitud', name: 'estado_solicitud',
-            options: [{ label: 'APROBADO', value: 'APROBADO' }, { label: 'RECHAZADO', value: 'RECHAZADO' }], validations: [Validators.required], display: true
-          },
-          { type: 'number', label: 'Monto total', name: 'monto_total', validations: [Validators.required, Validators.min(0)], display: true, },
-          { type: 'number', label: 'Monto por periodo', name: 'monto_por_periodo', validations: [Validators.required,], display: true, },
-          { type: 'number', label: 'Monto primera cuota', name: 'monto_primera_cuota', validations: [Validators.required, Validators.min(0)], display: true, },
-          { type: 'number', label: 'Monto ultima cuota', name: 'monto_ultima_cuota', validations: [Validators.required, Validators.min(0)], display: true },
-          { type: 'text', label: 'Observación', name: 'observacion', validations: [], display: true },
-          {
-            type: 'date',
-            label: 'Fecha de efectividad',
-            name: 'fecha_calculo',
-            max: new Date().toISOString().split('T')[0],
-            validations: [Validators.required, noFutureDateValidator],
-            display: true
-          },
-          { type: 'number', label: 'Número de rentas aprobadas', name: 'num_rentas_aplicadas', validations: [Validators.min(1)], display: false },
-          {
-            type: 'number', label: 'último día de última renta', name: 'ultimo_dia_ultima_renta', validations: [
-              Validators.min(1),
-              Validators.max(31),
-            ], display: false
-          },
-        ];
-
-        // Oculta ciertos campos adicionales si es necesario
-        this.myFormFields1[8].display = false;
-        this.myFormFields1[9].display = false;
-        this.myFormFields2[9].display = false;
-        this.myFormFields2[10].display = false;
-
-        // Muestra el formulario después de configurar los campos
-        this.mostrarDB = true;
-
-        // Retorna la lista de beneficios mapeados
-        return temp;
-      } else {
-        // Si no hay beneficios, retorna null o un arreglo vacío
-        return null;
-      }
+      // Retorna la lista de beneficios mapeados
+      return temp;
 
     } catch (error) {
       console.error("Error al obtener datos de beneficios", error);
@@ -350,8 +403,7 @@ export class NuevoBeneficioAfilComponent implements OnInit {
         this.toastr.warning(`No se puede asignar beneficios a los beneficiarios del mismo causante, solo a los designados`, "Advertencia");
       }
 
-      const temp = await this.getTipoBen(row.tipo_afiliado);
-      // Si getTipoBen devuelve null o vacío, no mostrar el formulario
+      const temp = await this.getTipoBenBeneficiarios(row.tipo_afiliado);
       if (!temp || temp.length === 0) {
         this.mostrarB = false;  // No mostrar el formulario de beneficios
         //this.form1.reset();     // Opcionalmente, reinicia el formulario
@@ -373,30 +425,87 @@ export class NuevoBeneficioAfilComponent implements OnInit {
   }
 
   async prueba(event: any): Promise<any> {
-    let startDateFormatted
-    let endDateFormatted
+    if (event.fieldName == "tipo_persona") {
+      this.tipoPersonaSelected = event.value;
+      this.tiposPersona = event.value;
+
+      let ben = await this.svcBeneficioServ.obtenerTipoBeneficioByTipoPersona(event.value).toPromise();
+      this.beneficios = ben.map((item: any) => {
+        return {
+          label: item.beneficio.nombre_beneficio,
+          value: item.beneficio.nombre_beneficio,
+          periodicidad: item.beneficio.periodicidad,
+          numero_rentas_max: item.beneficio.numero_rentas_max,
+          regimen: item.beneficio.regimen
+        };
+      });
+      this.myFormFields1[1].options = this.beneficios;
+
+    } else if (event.fieldName == "nombre_beneficio") {
+      this.tipoBenefSelected = event.value;
+
+      this.temp(event, this.beneficios, this.tipoBenefSelected);
+    }
+
+  }
+  async prueba1(event: any): Promise<any> {
+    let ben = await this.svcBeneficioServ.obtenerTipoBeneficioByTipoPersona("DESIGNADO").toPromise();
+    this.beneficios = ben.map((item: any) => {
+      return {
+        label: item.beneficio.nombre_beneficio,
+        value: item.beneficio.nombre_beneficio,
+        periodicidad: item.beneficio.periodicidad,
+        numero_rentas_max: item.beneficio.numero_rentas_max,
+        regimen: item.beneficio.regimen
+      };
+    });
+    this.myFormFields2[1].options = this.beneficios;
 
     if (event.fieldName == "nombre_beneficio") {
-      const temp = this.buscarPeriodicidad(this.tiposBeneficios, event.value)
+      this.tipoBenefSelected = event.value;
 
-      console.log(temp);
+      this.temp(event, this.beneficios, this.tipoBenefSelected);
+    }
 
+  }
+
+  temp(data: any, beneficios: any, tipoBenefSelected?: any) {
+    let startDateFormatted;
+    let endDateFormatted;
+
+    if (tipoBenefSelected) {
+      for (let i of beneficios) {
+        if (i.value == tipoBenefSelected) {
+          if (this.myFormFields1.length > 0) {
+            this.myFormFields1[2].value = i.regimen.ley;
+          } else if (this.myFormFields2.length > 0) {
+            this.myFormFields2[2].value = i.regimen.ley;
+          }
+        }
+      }
+
+      const temp = this.buscarPeriodicidad(beneficios, tipoBenefSelected)
       if (temp == "V") {
-        this.myFormFields1[8].display = false;
-        this.myFormFields1[9].display = false;
-        this.myFormFields2[9].display = false;
-        this.myFormFields2[10].display = false;
+        if (this.myFormFields1.length > 0) {
+          this.myFormFields1[this.myFormFields1.length - 1].display = false;
+          this.myFormFields1[this.myFormFields1.length - 2].display = false;
+        } else if (this.myFormFields2.length > 0) {
+          this.myFormFields2[this.myFormFields2.length - 1].display = false;
+          this.myFormFields2[this.myFormFields2.length - 2].display = false;
+        }
 
         const fechaActual = new Date();
 
         startDateFormatted = format(fechaActual, 'dd-MM-yyyy');
         endDateFormatted = '01-01-2500';
       } else if (!temp) {
-        this.myFormFields1[8].display = true;
-        this.myFormFields1[9].display = true;
-        this.myFormFields2[9].display = true;
-        this.myFormFields2[10].display = true;
-
+        if (this.myFormFields1.length > 0) {
+          this.myFormFields1[this.myFormFields1.length - 1].display = true;
+          this.myFormFields1[this.myFormFields1.length - 2].display = true;
+        } else if (this.myFormFields2.length > 0) {
+          this.myFormFields2[this.myFormFields2.length - 1].display = true;
+          this.myFormFields2[this.myFormFields2.length - 2].display = true;
+        }
 
         /* const startDate = new Date(event.value.periodo.start);
         const endDate = new Date(event.value.periodo.end); */
@@ -413,12 +522,13 @@ export class NuevoBeneficioAfilComponent implements OnInit {
     }
 
     if (startDateFormatted != 'Invalid Date' && endDateFormatted != 'Invalid Date') {
+      console.log(data);
+
       const datosFormateados = {
-        ...event.value,
+        ...data.value,
       };
       this.datosFormateados = datosFormateados;
     }
-
   }
 
   async obtenerDatos1(event: any): Promise<any> {
@@ -438,6 +548,7 @@ export class NuevoBeneficioAfilComponent implements OnInit {
     let endDateFormatted
 
     const fechaActual = new Date();
+
     if (temp == "VITALICIO") {
       this.myFormFields2[8].display = false
 
@@ -484,8 +595,9 @@ export class NuevoBeneficioAfilComponent implements OnInit {
 
       this.datosFormateados["periodo_inicio"] = startDateFormatted;
       this.datosFormateados["periodo_finalizacion"] = fechaFormateada;
-      console.log(this.desOBenSeleccionado);
+
       console.log(this.datosFormateados);
+      console.log(this.desOBenSeleccionado);
 
       this.svcBeneficioServ.asigBeneficioAfil(this.datosFormateados, this.desOBenSeleccionado).subscribe(
         {
@@ -505,8 +617,10 @@ export class NuevoBeneficioAfilComponent implements OnInit {
           }
         })
     } else {
-      console.log(this.datosFormateados);
       this.datosFormateados["dni"] = this.FormBen.value.dni;
+      console.log(this.datosFormateados);
+      console.log(this.desOBenSeleccionado);
+
       this.svcBeneficioServ.asigBeneficioAfil(this.datosFormateados, this.desOBenSeleccionado, this.Afiliado.id_persona).subscribe(
         {
           next: (response) => {

@@ -357,11 +357,22 @@ export class DetalleBeneficioService {
 
               const detBeneBeneficia = await this.entityManager.query(queryInsDeBBenf);
 
+              const tipoP = await this.tipoPersonaRepos.findOne({ where: { tipo_persona: datos.tipo_persona } });
+              const detPers = await this.detPersonaRepository.preload({
+                ID_DETALLE_PERSONA: detPer.ID_DETALLE_PERSONA,
+                ID_PERSONA: detPer.ID_PERSONA,
+                ID_CAUSANTE: detPer.ID_CAUSANTE,
+                ID_CAUSANTE_PADRE: detPer.ID_CAUSANTE_PADRE,
+                ID_TIPO_PERSONA: tipoP.id_tipo_persona
+              });
+              await this.detPersonaRepository.save(detPers);
+
               //ACTUALIZAR A INHABILITADO solo si se le otorga el beneficio de separacion del sistema.
               if (datos.nombre_beneficio == "SEPARACION DEL SISTEMA VOLUNTARIO" ||
                 datos.nombre_beneficio == "SEPARACION DEL SISTEMA DE OFICIO" ||
                 datos.nombre_beneficio == "SEPARACION DE JUBILACION POR OFICIO" ||
-                datos.nombre_beneficio == "SEPARACION POR MUERTE"
+                datos.nombre_beneficio == "SEPARACION DE JUBILACION POR OFICIO" ||
+                datos.nombre_beneficio == "SEGURO DE VIDA Y SEPARACION"
               ) {
                 const estadoP = await this.estadoAfilRepository.findOne({ where: { nombre_estado: "INACTIVO" } });
                 const detPers = await this.detPersonaRepository.preload({
@@ -373,6 +384,7 @@ export class DetalleBeneficioService {
                 });
                 await this.detPersonaRepository.save(detPers);
               }
+
               return detBeneBeneficia;
             }
           } else if (idPersonaPadre) {
@@ -814,7 +826,7 @@ export class DetalleBeneficioService {
       const tipoBen = await this.benTipoPerRepository.find({
         where: { tipPersona: { tipo_persona: tipoPersona } },
         relations: [
-          'beneficio'
+          'beneficio', 'beneficio.regimen'
         ],
       });
       return tipoBen

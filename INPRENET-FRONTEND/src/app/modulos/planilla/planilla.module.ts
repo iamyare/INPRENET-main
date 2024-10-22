@@ -35,6 +35,7 @@ import { ProcesoPlanillaComponent } from './egresos/proceso-planilla/proceso-pla
 import { DialogDesgloseComponent } from './egresos/dialog-desglose/dialog-desglose.component';
 import { VerPlanillasActivasComponent } from './egresos/ver-planillas-activas/ver-planillas-activas.component';
 import { GestionBancoComponent } from './gestion-banco/gestion-banco.component';
+import { CambioEstadoTipoPerComponent } from '../afiliacion/gestion/cambio-estado-tipo-per/cambio-estado-tipo-per.component';
 import { AfiliacionModule } from '../afiliacion/afiliacion.module';
 import { ActualizarFallecidosComponent } from './actualizar-fallecidos/actualizar-fallecidos.component';
 import { MontoDialogComponent } from './monto-dialog/monto-dialog.component';
@@ -74,7 +75,8 @@ import { MontoDialogComponent } from './monto-dialog/monto-dialog.component';
     GestionBancoComponent,
     ActualizarFallecidosComponent,
     VerPlanillasActivasComponent,
-    MontoDialogComponent
+    MontoDialogComponent,
+    CambioEstadoTipoPerComponent
   ],
   imports: [
     CommonModule,

@@ -14,18 +14,14 @@
                 *ngIf="field.type !== 'dropdown' && field.type !== 'date' && field.type !== 'daterange' && field.type !== 'checkboxGroup' && field.type !== 'radio' && field.type !== 'conditionalRadio'; else customField">
                 <mat-form-field appearance="outline" style="width: 100%">
                   <mat-label>{{ field.label }}</mat-label>
-                  <input matInput [type]="field.type" [formControlName]="field.name" [readonly]="field.readOnly" />
+                  <input matInput [type]="field.type" [value]="field.value" [formControlName]="field.name" [readonly]="field.readOnly" />
                   <mat-icon *ngIf="field.icon" matSuffix>{{ field.icon }}</mat-icon>
                   <mat-error
                     *ngIf="form.get(field.name)?.invalid && (form.get(field.name)?.dirty || form.get(field.name)?.touched)">
-                    <ng-container *ngIf="form.get(field.name)?.errors?.['required']">Este campo es
-                      requerido</ng-container>
-                    <ng-container *ngIf="form.get(field.name)?.errors?.['maxlength']">Ha excedido el número máximo de
-                      caracteres</ng-container>
-                    <ng-container *ngIf="form.get(field.name)?.errors?.['email']">Correo electrónico
-                      inválido</ng-container>
-                    <ng-container *ngIf="form.get(field.name)?.errors?.['min']">El valor debe ser mayor o igual a {{
-                      form.get(field.name)?.errors?.['min']?.min }}</ng-container>
+                    <ng-container *ngIf="form.get(field.name)?.errors?.['required']">Este campo es requerido</ng-container>
+                    <ng-container *ngIf="form.get(field.name)?.errors?.['maxlength']">Ha excedido el número máximo de caracteres</ng-container>
+                    <ng-container *ngIf="form.get(field.name)?.errors?.['email']">Correo electrónico inválido</ng-container>
+                    <ng-container *ngIf="form.get(field.name)?.errors?.['min']">El valor debe ser mayor o igual a {{ form.get(field.name)?.errors?.['min']?.min }}</ng-container>
                     <ng-container *ngIf="form.get(field.name)?.errors?.['pattern']">Formato incorrecto</ng-container>
                   </mat-error>
                 </mat-form-field>
@@ -45,7 +41,6 @@
                   </mat-select>
                   <mat-icon *ngIf="field.icon" matSuffix>{{ field.icon }}</mat-icon>
                 </mat-form-field>
-
               </ng-container>
 
               <!-- Fecha -->
@@ -68,29 +63,17 @@
 
               <!-- Rango de Fecha -->
               <ng-template #daterangeField>
-                <ng-template #daterangeField>
-                  <ng-container *ngIf="field.type === 'daterange'">
-                    <mat-form-field appearance="outline" style="width: 100%" class="full-width">
-                      <mat-label>{{ field.label }}</mat-label>
-                      <mat-date-range-input [rangePicker]="picker" [formGroup]="getRangeFormGroup(field.name)">
-                        <input matInput matStartDate
-                               placeholder="Inicio"
-                               formControlName="start"
-                               [min]="field.min"
-                               [max]="field.max"
-                               (dateChange)="onDatosBenChange()" />
-                        <input matInput matEndDate
-                               placeholder="Fin"
-                               formControlName="end"
-                               [min]="field.min"
-                               [max]="field.max"
-                               (dateChange)="onDatosBenChange()" />
-                      </mat-date-range-input>
-                      <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
-                      <mat-date-range-picker #picker></mat-date-range-picker>
-                    </mat-form-field>
-                  </ng-container>
-                </ng-template>
+                <ng-container *ngIf="field.type === 'daterange'">
+                  <mat-form-field appearance="outline" style="width: 100%" class="full-width">
+                    <mat-label>{{ field.label }}</mat-label>
+                    <mat-date-range-input [rangePicker]="picker" [formGroup]="getRangeFormGroup(field.name)">
+                      <input matInput matStartDate placeholder="Inicio" formControlName="start" [min]="field.min" [max]="field.max" (dateChange)="onDatosBenChange()" />
+                      <input matInput matEndDate placeholder="Fin" formControlName="end" [min]="field.min" [max]="field.max" (dateChange)="onDatosBenChange()" />
+                    </mat-date-range-input>
+                    <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+                    <mat-date-range-picker #picker></mat-date-range-picker>
+                  </mat-form-field>
+                </ng-container>
               </ng-template>
 
               <!-- Checkbox Group -->

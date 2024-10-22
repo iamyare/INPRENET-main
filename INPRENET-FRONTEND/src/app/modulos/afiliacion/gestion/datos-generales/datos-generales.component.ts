@@ -39,8 +39,15 @@ export class DatosGeneralesComponent implements OnInit {
   ngOnInit(): void {
     const noSpecialCharsPattern = '^[a-zA-Z0-9\\s]*$';
 
+    this.formGroup.addControl('id_tipo_identificacion', new FormControl('', Validators.required));
+
+    this.formGroup.get('id_tipo_identificacion')?.valueChanges.subscribe(value => {
+      this.onTipoIdentificacionChange(value);
+    });
+
+    this.setValidacionesIdentificacion(false);
+
     if (!this.formGroup) {
-      //para mostrar los datos y poder editarlos
       if (this.initialData) {
         this.formGroup = this.fb.group({
           peps: this.fb.array([]),
@@ -66,8 +73,12 @@ export class DatosGeneralesComponent implements OnInit {
     this.formGroup.get('discapacidad')?.valueChanges.subscribe(value => {
       this.onDiscapacidadChange({ value });
     });
-
-    this.formGroup.addControl('n_identificacion', new FormControl('', [Validators.required]));
+    this.formGroup.addControl('n_identificacion', new FormControl('', [
+      Validators.required,
+      Validators.minLength(13),
+      Validators.maxLength(15),
+      Validators.pattern(/^[0-9]+$/)
+    ]));
     this.formGroup.addControl('primer_nombre', new FormControl('', [
       Validators.required,
       Validators.maxLength(40),
@@ -328,13 +339,13 @@ export class DatosGeneralesComponent implements OnInit {
   }
 
   resetDiscapacidadesFormArray() {
-    const discapacidadesGroup = this.fb.group({}); // Creamos un grupo vacío
+    const discapacidadesGroup = this.fb.group({});
 
     this.discapacidades.forEach(discapacidad => {
       const match = this.indicesSeleccionados.some(
         indice => indice.tipo === discapacidad.label
       );
-      discapacidadesGroup.addControl(discapacidad.label, new FormControl(match)); // Agregamos cada control basado en 'label'
+      discapacidadesGroup.addControl(discapacidad.label, new FormControl(match));
     });
 
     this.formGroup.setControl('discapacidades', discapacidadesGroup);
@@ -358,6 +369,47 @@ export class DatosGeneralesComponent implements OnInit {
     }
     // Asignar el archivo al control del formulario
     this.formGroup.get('archivo_identificacion')?.setValue(event);
+  }
+
+  onTipoIdentificacionChange(tipoIdentificacion: number) {
+    if (tipoIdentificacion === 3) {
+      this.setValidacionesIdentificacion(true);
+    } else if (tipoIdentificacion === 1) {
+      this.setValidacionesDNI();
+    } else {
+      this.setValidacionesIdentificacion(false);
+    }
+  }
+
+  setValidacionesIdentificacion(permitirLetras: boolean) {
+    const control = this.formGroup.get('n_identificacion');
+    if (permitirLetras) {
+      control?.setValidators([
+        Validators.required,
+        Validators.minLength(9),
+        Validators.maxLength(15),
+        Validators.pattern(/^[a-zA-Z0-9]+$/)
+      ]);
+    } else {
+      control?.setValidators([
+        Validators.required,
+        Validators.minLength(13),
+        Validators.maxLength(15),
+        Validators.pattern(/^[0-9]+$/)
+      ]);
+    }
+    control?.updateValueAndValidity();
+  }
+
+  setValidacionesDNI() {
+    const control = this.formGroup.get('n_identificacion');
+    control?.setValidators([
+      Validators.required,
+      Validators.minLength(13),
+      Validators.maxLength(13),
+      Validators.pattern(/^[0-9]+$/)
+    ]);
+    control?.updateValueAndValidity();
   }
 
 }

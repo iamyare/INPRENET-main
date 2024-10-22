@@ -166,7 +166,6 @@ export class AfiliacionService {
     let persona = await this.personaRepository.findOne({ where: { n_identificacion: crearPersonaDto.n_identificacion } });
 
     if (persona) {
-      // Si la persona ya existe, verificar si ya tiene un detalle como AFILIADO
       const detalleExistente = await this.detallePersonaRepository.findOne({
         where: { ID_PERSONA: persona.id_persona, tipoPersona: { tipo_persona: 'AFILIADO' } }
       });
@@ -449,7 +448,6 @@ export class AfiliacionService {
       await entityManager.save(Net_Familia, familia);
     }
   }
-  
   
   async crearDiscapacidades(
       discapacidadesDto: CrearDiscapacidadDto[],

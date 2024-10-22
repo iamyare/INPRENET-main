@@ -36,7 +36,7 @@ export class BenefComponent implements OnInit {
   ngOnInit(): void {
     if (!this.formGroup.get('beneficiario')) {
       const beneficiariosArray = this.fb.array([]);
-      beneficiariosArray.setValidators(this.identidadUnicaValidator.bind(this)); // Validador para evitar duplicados
+      beneficiariosArray.setValidators(this.identidadUnicaValidator.bind(this));
       this.formGroup.addControl('beneficiario', beneficiariosArray);
     }
     this.cargarDepartamentos();
@@ -65,7 +65,7 @@ export class BenefComponent implements OnInit {
         Validators.required,
         Validators.pattern('^[0-9]*$'),
         Validators.minLength(13),
-        Validators.maxLength(15),
+        Validators.maxLength(13),
         this.validarIdentificacionUnica()
       ]),
       primer_nombre: new FormControl(datosBeneficiario?.primer_nombre || '', [Validators.required, Validators.maxLength(40)]),
@@ -278,9 +278,6 @@ export class BenefComponent implements OnInit {
       if (control.errors['invalidSumaPorcentajes']) {
         errors.push('La suma de los porcentajes debe ser 100%.');
       }
-      if (this.formGroup.get('beneficiario')?.hasError('identidadDuplicada')) {
-        errors.push('Este número de identificación ya ha sido registrado.');
-      }
     }
     return errors;
   }
@@ -312,13 +309,22 @@ export class BenefComponent implements OnInit {
   identidadUnicaValidator(control: AbstractControl): ValidationErrors | null {
     const formArray = control as FormArray;
     const identificaciones = formArray.controls
-      .map(benef => benef.get('n_identificacion')?.value)
-      .filter(value => value !== null && value !== '');
+        .map(benef => benef.get('n_identificacion')?.value)
+        .filter(value => value !== null && value !== '');
+    identificaciones.forEach((identificacion, index) => {
+        const duplicados = identificaciones.filter((item, idx) => item === identificacion && idx !== index);
 
-    const duplicados = identificaciones.filter((item, index) => identificaciones.indexOf(item) !== index);
+        const controlIdentificacion = formArray.at(index).get('n_identificacion');
+        if (duplicados.length > 0) {
+            controlIdentificacion?.setErrors({ identidadDuplicada: true });
+        } else {
+            if (controlIdentificacion?.hasError('identidadDuplicada')) {
+                controlIdentificacion.setErrors(null);
+            }
+        }
+    });
 
-    return duplicados.length > 0 ? { identidadDuplicada: true } : null;
-  }
-
+    return null;
+}
 
 }

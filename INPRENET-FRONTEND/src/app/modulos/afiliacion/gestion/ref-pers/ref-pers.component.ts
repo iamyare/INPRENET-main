@@ -14,6 +14,7 @@ export class RefPersComponent implements OnInit {
 
   public parentesco: any[] = [];
   public tipo_referencia: any[] = [];
+  public maxDate!: Date;
 
   esAfiliadoText: string = '';
 
@@ -21,7 +22,9 @@ export class RefPersComponent implements OnInit {
     private fb: FormBuilder,
     private datosEstaticosService: DatosEstaticosService,
     private beneficiosService: BeneficiosService
-  ) {}
+  ) {
+    this.maxDate = new Date();
+  }
 
   ngOnInit(): void {
     if (!this.formGroup.get('conyuge')) {
@@ -113,6 +116,20 @@ export class RefPersComponent implements OnInit {
     });
     this.referencias.push(referenciaForm);
     this.markAllAsTouched(referenciaForm);
+
+    referenciaForm.get('tipo_referencia')?.valueChanges.subscribe(value => {
+      this.cambiarListadoParentesco(value, referenciaForm);
+    });
+  }
+
+  cambiarListadoParentesco(tipoReferencia: string, referenciaForm: FormGroup) {
+    if (tipoReferencia === 'REFERENCIA FAMILIAR') {
+      this.parentesco = this.datosEstaticosService.parentesco;
+    } else if (tipoReferencia === 'REFERENCIA PERSONAL') {
+      this.parentesco = this.datosEstaticosService.parentescoReferenciasPersonales;
+    }
+
+    referenciaForm.get('parentesco')?.setValue(''); // Resetear el parentesco cuando cambia el tipo de referencia
   }
 
   // Función para eliminar una referencia personal

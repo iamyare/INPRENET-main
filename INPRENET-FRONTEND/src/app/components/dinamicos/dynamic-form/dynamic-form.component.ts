@@ -27,13 +27,13 @@ export class DynamicFormComponent implements OnInit {
 
   ngOnInit() {
     // Si tienes un formulario que llega a través del Input, lo usas para inicializar
-  if (this.incomingForm) {
-    this.form = this.mergeForms(this.incomingForm);
-  } else {
-    this.form = this.createControl();
-  }
+    if (this.incomingForm) {
+      this.form = this.mergeForms(this.incomingForm);
+    } else {
+      this.form = this.createControl();
+    }
 
-  this.newDatBenChange.emit(this.form);
+    this.newDatBenChange.emit(this.form);
   }
 
   onDatosBenChange() {
@@ -57,24 +57,19 @@ export class DynamicFormComponent implements OnInit {
         });
         group.addControl(field.name, dateRangeGroup);
       } else if (field.type === 'checkboxGroup') {
-        const checkboxArray = this.fb.array(field.options ? field.options.map(() => this.fb.control(false)) : []);
+        const checkboxArray = this.fb.array(
+          field.options ? field.options.map((option: { selected: any; }) => this.fb.control(option.selected || false)) : []
+        );
         group.addControl(field.name, checkboxArray);
-      } else if (field.type === 'radio') {
-        const radioGroup = this.fb.control(field.value || '', field.validations);
-        group.addControl(field.name, radioGroup);
-      } else if (field.type === 'conditionalRadio') {
-        const radioGroup = this.fb.control(field.value || '', field.validations);
-        group.addControl(field.name, radioGroup);
       } else {
-        const control = field.type === 'number'
-          ? this.fb.control(
-            +field.value || null,
-            field.validations
-          )
-          : this.fb.control(
-            field.type === 'checkbox' ? field.value || false : field.value || '',
-            field.validations
-          );
+        const control = this.fb.control(
+          field.type === 'number'
+            ? +field.value || null
+            : field.type === 'checkbox'
+              ? field.value || false
+              : field.value || '', // Ensure the value is passed correctly here
+          field.validations
+        );
         group.addControl(field.name, control);
       }
     });

@@ -221,7 +221,7 @@ export class VerEditarBeneficioAfilComponent {
 
       const dataEstadosAfil = datas.map((item: any) => ({
         tipo_persona: item.tipoPersona.tipo_persona,
-        estado_persona: item.estadoAfiliacion.nombre_estado,
+        estado_persona: item?.estadoAfiliacion?.nombre_estado,
         dni_causante: item.padreIdPersona?.persona?.n_identificacion || "NO APLICA",
       }));
 

@@ -76,4 +76,28 @@ export class SharedFormFieldsComponent implements OnInit {
   onSelectChange(fieldName: string, event: any) {
     this.selectChange.emit({ fieldName, value: event.value, formGroup: this.parentForm });
   }
+
+  // Función para hacer el track de los elementos de las filas y mejorar rendimiento
+  trackByFn(index: number, item: any): any {
+    return index;
+  }
+
+  // Función para obtener el mensaje de error basado en el tipo de error
+  getErrorMessage(control: FormControl, errorKey: string): string {
+    const errorMessages: { [key: string]: string } = {
+      required: 'Este campo es requerido',
+      maxlength: `Ha excedido el número máximo de caracteres`,
+      minlength: `El número mínimo de caracteres es ${control.errors?.['minlength']?.requiredLength}`,
+      email: 'Correo electrónico inválido',
+      min: `El valor debe ser mayor o igual a ${control.errors?.['min']?.min}`,
+      max: `El valor debe ser menor o igual a ${control.errors?.['max']?.max}`,
+      pattern: 'Formato incorrecto'
+    };
+    return errorMessages[errorKey] || 'Error desconocido';
+  }
+  getErrorKeys(controlName: string): string[] {
+    const control = this.getControl(controlName);
+    return control.errors ? Object.keys(control.errors) : [];
+  }
+
 }

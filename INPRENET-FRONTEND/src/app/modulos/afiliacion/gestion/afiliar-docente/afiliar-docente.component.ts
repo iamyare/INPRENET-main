@@ -117,7 +117,7 @@ export class AfiliarDocenteComponent implements OnInit {
           id_pais_nacionalidad: datosGenerales.id_pais,
           n_identificacion: datosGenerales.n_identificacion.toUpperCase(),
           fecha_vencimiento_ident: datosGenerales.fecha_vencimiento_ident,
-          rtn: datosGenerales.rtn.toUpperCase(),
+          rtn: datosGenerales.rtn,
           grupo_etnico: datosGenerales.grupo_etnico.toUpperCase(),
           estado_civil: datosGenerales.estado_civil.toUpperCase(),
           primer_nombre: datosGenerales.primer_nombre.toUpperCase(),
@@ -167,7 +167,7 @@ export class AfiliarDocenteComponent implements OnInit {
       console.log(formattedData);
 
 
-      this.afiliacionService.crearAfiliacion(formattedData, fileFoto, fileIdent).subscribe(
+      /* this.afiliacionService.crearAfiliacion(formattedData, fileFoto, fileIdent).subscribe(
         response => {
           console.log('Datos enviados con éxito:', response);
           this.toastr.success('Datos enviados con éxito', 'Éxito');
@@ -178,7 +178,7 @@ export class AfiliarDocenteComponent implements OnInit {
           const errorMessage = error.error?.mensaje || 'Hubo un error al enviar los datos';
           this.toastr.error(errorMessage, 'Error');
         }
-      );
+      ); */
     } else {
       this.markAllAsTouched(this.formGroup);
       this.toastr.warning('El formulario contiene información inválida', 'Advertencia');
@@ -262,7 +262,7 @@ export class AfiliarDocenteComponent implements OnInit {
       telefono_domicilio: referencia.telefono_domicilio,
       telefono_trabajo: referencia.telefono_trabajo,
       telefono_personal: referencia.telefono_personal,
-      n_identificacion: referencia.n_identificacion.toUpperCase(),
+      n_identificacion: referencia.n_identificacion,
       direccion: referencia.direccion.toUpperCase(),
     }));
   }
@@ -273,7 +273,7 @@ export class AfiliarDocenteComponent implements OnInit {
       return {
         persona: {
           archivo_identificacion: beneficiario.archivo_identificacion,
-          n_identificacion: beneficiario.n_identificacion.toUpperCase(),
+          n_identificacion: beneficiario.n_identificacion,
           primer_nombre: beneficiario.primer_nombre.toUpperCase(),
           segundo_nombre: beneficiario.segundo_nombre?.toUpperCase(),
           tercer_nombre: beneficiario.tercer_nombre?.toUpperCase(),
@@ -285,7 +285,7 @@ export class AfiliarDocenteComponent implements OnInit {
           id_municipio_residencia: beneficiario.id_municipio_residencia,
           id_municipio_nacimiento: beneficiario.id_municipio_nacimiento
         },
-        discapacidades: discapacidades,
+        discapacidades: this.formatDiscapacidades(discapacidades),
         porcentaje: beneficiario.porcentaje || null
       };
     });
@@ -320,7 +320,7 @@ export class AfiliarDocenteComponent implements OnInit {
           telefono_domicilio: referenciasPersonales.conyuge.telefono_domicilio,
           telefono_trabajo: referenciasPersonales.conyuge.telefono_trabajo,
           telefono_personal: referenciasPersonales.conyuge.telefono_celular,
-          n_identificacion: referenciasPersonales.conyuge.n_identificacion.toUpperCase(),
+          n_identificacion: referenciasPersonales.conyuge.n_identificacion,
           fecha_nacimiento: referenciasPersonales.conyuge.fecha_nacimiento
         }
       }] : [])
@@ -357,7 +357,7 @@ export class AfiliarDocenteComponent implements OnInit {
   formatDiscapacidades(discapacidades: any): any[] {
   return Object.keys(discapacidades)
     .filter(key => discapacidades[key])
-    .map(key => ({ tipo_discapacidad: key.toUpperCase() }));
+    .map(key => ({ tipo_discapacidad: key }));
 }
 
   private mapDiscapacidades(discapacidadesArray: boolean[]): any {
@@ -366,7 +366,6 @@ export class AfiliarDocenteComponent implements OnInit {
       return acc;
     }, {});
   }
-
 
   getDocumentDefinition(userDetails: any[], beneficiarios: any, backgroundImageBase64: string): any {
     userDetails.forEach(item => {

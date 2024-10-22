@@ -167,7 +167,7 @@ export class AfiliarDocenteComponent implements OnInit {
       console.log(formattedData);
 
 
-      /* this.afiliacionService.crearAfiliacion(formattedData, fileFoto, fileIdent).subscribe(
+      this.afiliacionService.crearAfiliacion(formattedData, fileFoto, fileIdent).subscribe(
         response => {
           console.log('Datos enviados con éxito:', response);
           this.toastr.success('Datos enviados con éxito', 'Éxito');
@@ -178,7 +178,7 @@ export class AfiliarDocenteComponent implements OnInit {
           const errorMessage = error.error?.mensaje || 'Hubo un error al enviar los datos';
           this.toastr.error(errorMessage, 'Error');
         }
-      ); */
+      );
     } else {
       this.markAllAsTouched(this.formGroup);
       this.toastr.warning('El formulario contiene información inválida', 'Advertencia');

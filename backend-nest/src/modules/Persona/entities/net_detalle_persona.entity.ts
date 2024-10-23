@@ -6,6 +6,7 @@ import { Net_Detalle_Beneficio_Afiliado } from "src/modules/Planilla/detalle_ben
 
 @Entity({ name: 'NET_DETALLE_PERSONA' })
 @Check(`ELIMINADO IN ('SI', 'NO')`)
+@Check(`VOLUNTARIO IN ('SI', 'NO') OR VOLUNTARIO IS NULL`)
 export class net_detalle_persona {
     @PrimaryColumn({ name: 'ID_PERSONA' })
     ID_PERSONA: number;
@@ -21,6 +22,9 @@ export class net_detalle_persona {
 
     @Column('varchar2', { length: 2, nullable: true, name: 'ELIMINADO', default: "NO" })
     eliminado: string;
+
+    @Column('varchar2', { length: 2, nullable: false, name: 'VOLUNTARIO', default: 'NO' }) 
+    voluntario: string;
 
     @ManyToOne(() => net_persona, persona => persona.detallePersona)
     @JoinColumn({ name: 'ID_PERSONA', referencedColumnName: 'id_persona' })

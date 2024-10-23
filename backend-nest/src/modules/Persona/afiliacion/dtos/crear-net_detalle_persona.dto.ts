@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsString } from 'class-validator';
+import { IsNotEmpty, IsOptional, IsString } from 'class-validator';
 
 export class CrearDetallePersonaDto {
     @IsNotEmpty()
@@ -12,4 +12,8 @@ export class CrearDetallePersonaDto {
     @IsNotEmpty()
     @IsString()
     nombre_estado: string;
+
+    @IsOptional()
+    @IsString()
+    voluntario: string = 'NO';
 }

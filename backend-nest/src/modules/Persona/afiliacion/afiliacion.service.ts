@@ -235,6 +235,7 @@ export class AfiliacionService {
       estadoAfiliacion,
       ID_TIPO_PERSONA: tipoPersona.id_tipo_persona,
       ID_ESTADO_AFILIACION: estadoAfiliacion.codigo,
+      voluntario: crearDetallePersonaDto.voluntario || 'NO',
     });
 
     return await entityManager.save(net_detalle_persona, detallePersona);

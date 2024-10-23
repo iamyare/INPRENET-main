@@ -164,6 +164,8 @@ export class VerEditarBeneficioAfilComponent {
     try {
       const data = await this.beneficioService.GetAllBeneficios(this.form.value.dni).toPromise();
 
+      console.log(data);
+
       const dataAfil = data.persona.map((item: any) => ({
         dni: item.N_IDENTIFICACION,
         fallecido: item.FALLECIDO,
@@ -174,13 +176,28 @@ export class VerEditarBeneficioAfilComponent {
         telefono_1: item.TELEFONO_1,
         colegio_magisterial: item.COLEGIO_MAGISTERIAL,
         direccion_residencia: item.DIRECCION_RESIDENCIA,
-        fecha_nacimiento: convertirFecha(item.FECHA_NACIMIENTO, false)
+        fecha_nacimiento: convertirFecha(item.FECHA_NACIMIENTO, false),
+        voluntario: item.VOLUNTARIO || "NO APLICA"
       }));
 
-      this.Afiliado = dataAfil[0]
-
-      console.log(data);
-
+      if (dataAfil.length > 0) {
+        this.Afiliado = dataAfil[0]
+      } else {
+        const temp = data.detBen[0].persona.persona
+        this.Afiliado = {
+          dni: temp.n_identificacion,
+          fallecido: temp.fallecido,
+          estado_civil: temp.estado_civil,
+          nombreCompleto: unirNombres(temp.primer_nombre, temp.segundo_nombre, temp.primer_apellido, temp.segundo_apellido),
+          genero: temp.genero,
+          profesion: temp.profesion,
+          telefono_1: temp.telefono_1,
+          colegio_magisterial: temp.colegio_magisterial,
+          direccion_residencia: temp.direccion_residencia,
+          fecha_nacimiento: convertirFecha(temp.fecha_nacimiento, false),
+          voluntario: data.detBen[0].persona.voluntario || "NO APLICA"
+        }
+      }
 
       this.filasT = data.detBen.map((item: any) => {
         return {
@@ -207,7 +224,8 @@ export class VerEditarBeneficioAfilComponent {
             : convertirFecha(item.periodo_finalizacion, false),
           monto_primera_cuota: item.monto_primera_cuota,
           monto_ultima_cuota: item.monto_ultima_cuota,
-          observaciones: item.observaciones || "NO TIENE"
+          observaciones: item.observaciones || "NO TIENE",
+          voluntario: item.persona.voluntario || "NO TIENE"
         }
       });
 

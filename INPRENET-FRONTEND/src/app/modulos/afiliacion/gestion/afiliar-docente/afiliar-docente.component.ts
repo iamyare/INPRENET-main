@@ -26,7 +26,7 @@ export class AfiliarDocenteComponent implements OnInit {
   formGroup!: FormGroup;
   fotoPerfil: string = '';
 
-  constructor(private fb: FormBuilder, private afiliacionService: AfiliacionService,private datosEstaticosService: DatosEstaticosService,
+  constructor(private fb: FormBuilder, private afiliacionService: AfiliacionService, private datosEstaticosService: DatosEstaticosService,
     private toastr: ToastrService, private http: HttpClient) {
     this.convertirImagenABase64('../assets/images/membratadoFinal.jpg').then(base64 => {
       this.backgroundImageBase64 = base64;
@@ -161,8 +161,6 @@ export class AfiliarDocenteComponent implements OnInit {
       }
 
       let fileIdent = datosGenerales?.archivo_identificacion
-
-      console.log(formattedData);
 
 
       this.afiliacionService.crearAfiliacion(formattedData, fileFoto, fileIdent).subscribe(
@@ -353,10 +351,10 @@ export class AfiliarDocenteComponent implements OnInit {
   }
 
   formatDiscapacidades(discapacidades: any): any[] {
-  return Object.keys(discapacidades)
-    .filter(key => discapacidades[key])
-    .map(key => ({ tipo_discapacidad: key }));
-}
+    return Object.keys(discapacidades)
+      .filter(key => discapacidades[key])
+      .map(key => ({ tipo_discapacidad: key }));
+  }
 
   private mapDiscapacidades(discapacidadesArray: boolean[]): any {
     return this.datosEstaticosService.discapacidades.reduce((acc: any, discapacidad: any, index: number) => {

@@ -90,7 +90,6 @@ export class CargarbefDedComponent {
 
   flattenBeneficios(causantes: any[]): any[] {
     let beneficiosAplanados: any[] = [];
-    console.log(causantes);
 
     causantes.forEach(causante => {
       causante.beneficios.forEach((beneficio: any) => {

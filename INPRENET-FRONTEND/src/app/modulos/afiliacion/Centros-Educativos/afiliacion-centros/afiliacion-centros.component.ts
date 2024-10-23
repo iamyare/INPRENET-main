@@ -65,7 +65,7 @@ export class AfiliacionCentrosComponent implements OnInit {
       sociedadSocio: this.sociedadSocioForm.value.sociedadSocios.length > 0 ? this.sociedadSocioForm.value.sociedadSocios : [],
       adminCentroEducativo: this.isFormGroupEmpty(this.adminCentroEducativoForm) ? {} : this.adminCentroEducativoForm.value
     };
-    console.log('Datos Completos:', allData);
+
   }
 
   private isFormGroupEmpty(formGroup: FormGroup): boolean {

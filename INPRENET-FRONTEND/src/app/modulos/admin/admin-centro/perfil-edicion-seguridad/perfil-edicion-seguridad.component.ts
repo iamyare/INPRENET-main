@@ -11,6 +11,6 @@ export class PerfilEdicionSeguridadComponent implements OnInit {
   constructor() { }
 
   ngOnInit(): void {
-    console.log('Cargar información de seguridad del usuario con ID:', this.userId);
+
   }
 }

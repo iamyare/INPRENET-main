@@ -268,8 +268,6 @@ export class EditDatosGeneralesComponent implements OnInit {
             }, {} as { [key: string]: string })
             : {}; // Si no existe DIRECCION_RESIDENCIA, asigna un objeto vacío
 
-          console.log(result);
-
           this.initialData = {
             n_identificacion: result?.N_IDENTIFICACION,
             primer_nombre: result?.PRIMER_NOMBRE,

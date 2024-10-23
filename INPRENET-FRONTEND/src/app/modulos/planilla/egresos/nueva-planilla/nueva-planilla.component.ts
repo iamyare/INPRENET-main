@@ -46,7 +46,7 @@ export class NuevaPlanillaComponentP {
       const file = event.target.files[0];
       this.planillaService.uploadExcel(file).subscribe(
         response => {
-          console.log('Respuesta del servidor:', response);
+
           // Actualiza los datos compartidos a través del PlanillaService
           this.planillaService.updateUsers(response);
         },

@@ -89,6 +89,8 @@ export class NuevoBeneficioAfilComponent implements OnInit {
   }
 
   previsualizarInfoAfil() {
+    this.FormBen?.reset()
+    this.form1?.reset()
 
     this.Afiliado = { nameAfil: "" }
 
@@ -420,7 +422,7 @@ export class NuevoBeneficioAfilComponent implements OnInit {
   async prueba(event: any): Promise<any> {
     if (event.fieldName == "tipo_persona") {
       this.tipoPersonaSelected = event.value;
-      this.tiposPersona = event.value;
+      //this.tiposPersona = event.value;
 
       let ben = await this.svcBeneficioServ.obtenerTipoBeneficioByTipoPersona(event.value).toPromise();
       this.beneficios = ben.map((item: any) => {
@@ -432,7 +434,11 @@ export class NuevoBeneficioAfilComponent implements OnInit {
           regimen: item.beneficio.regimen
         };
       });
+
       this.myFormFields1[1].options = this.beneficios;
+      this.form1.get("nombre_beneficio")?.setValue(null)
+      this.form1.get("regimen")?.setValue(null)
+
 
     } else if (event.fieldName == "nombre_beneficio") {
       this.tipoBenefSelected = event.value;
@@ -452,6 +458,7 @@ export class NuevoBeneficioAfilComponent implements OnInit {
         regimen: item.beneficio.regimen
       };
     });
+
     this.myFormFields2[1].options = this.beneficios;
 
     if (event.fieldName == "nombre_beneficio") {
@@ -486,11 +493,10 @@ export class NuevoBeneficioAfilComponent implements OnInit {
           this.myFormFields2[this.myFormFields2.length - 1].display = false;
           this.myFormFields2[this.myFormFields2.length - 2].display = false;
         }
-
         const fechaActual = new Date();
-
         startDateFormatted = format(fechaActual, 'dd-MM-yyyy');
         endDateFormatted = '01-01-2500';
+
       } else if (!temp) {
         if (this.myFormFields1.length > 0) {
           this.myFormFields1[this.myFormFields1.length - 1].display = true;
@@ -515,8 +521,6 @@ export class NuevoBeneficioAfilComponent implements OnInit {
     }
 
     if (startDateFormatted != 'Invalid Date' && endDateFormatted != 'Invalid Date') {
-      console.log(data);
-
       const datosFormateados = {
         ...data.value,
       };
@@ -560,8 +564,6 @@ export class NuevoBeneficioAfilComponent implements OnInit {
   }
 
   transformarObjeto(objeto: any) {
-    console.log(objeto);
-
     return Object.keys(objeto).map(key => {
       return {
         header: key,
@@ -589,9 +591,6 @@ export class NuevoBeneficioAfilComponent implements OnInit {
       this.datosFormateados["periodo_inicio"] = startDateFormatted;
       this.datosFormateados["periodo_finalizacion"] = fechaFormateada;
 
-      console.log(this.datosFormateados);
-      console.log(this.desOBenSeleccionado);
-
       this.svcBeneficioServ.asigBeneficioAfil(this.datosFormateados, this.desOBenSeleccionado).subscribe(
         {
           next: (response) => {
@@ -611,9 +610,6 @@ export class NuevoBeneficioAfilComponent implements OnInit {
         })
     } else {
       this.datosFormateados["dni"] = this.FormBen.value.dni;
-      console.log(this.datosFormateados);
-      console.log(this.desOBenSeleccionado);
-
       this.svcBeneficioServ.asigBeneficioAfil(this.datosFormateados, this.desOBenSeleccionado, this.Afiliado.id_persona).subscribe(
         {
           next: (response) => {

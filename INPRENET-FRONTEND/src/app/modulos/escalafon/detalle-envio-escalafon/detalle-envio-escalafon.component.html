@@ -6,10 +6,15 @@
       style="width: 100%"
       titulo="Listado de Préstamos"
       subtitulo="Detalles de los préstamos asignados"
-      [columns]="columns"
+      [columns]="myColumns"
       [data]="prestamos"
-      [getData]="getData"
+      [getData]="getFilas"
       (ejecutarFuncionAsincronaEvent)="ejecutarFuncionAsincronaDesdeOtroComponente($event)">
     </app-dynamic-table>
+
+    <!-- Mostrar el total de las cuotas debajo de la tabla -->
+    <div class="total-cuotas">
+      <strong>Total de Cuotas:</strong> {{ totalCuotas | currency:'L' }}
+    </div>
   </div>
 </div>

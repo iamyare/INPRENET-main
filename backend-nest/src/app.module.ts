@@ -15,6 +15,7 @@ import { AppDataSource } from '../ormconfig';
 import { MantenimientoAfiliacionService } from './modules/Persona/afiliacion/mantenimiento-afiliacion.service';
 import { AuthModule } from './modules/auth/auth.module';
 import { DocumentsModule } from './modules/documents/documents.module';
+import { EscalafonModule } from './modules/escalafon/escalafon.module';
 
 @Module({
   imports: [
@@ -61,7 +62,8 @@ import { DocumentsModule } from './modules/documents/documents.module';
     PlanillaModule,
     RegionalModule,
     TransaccionesModule,
-    AuthModule
+    AuthModule,
+    EscalafonModule
   ],
   providers: [MantenimientoAfiliacionService],
 })

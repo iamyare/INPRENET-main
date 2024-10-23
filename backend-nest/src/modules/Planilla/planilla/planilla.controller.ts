@@ -206,8 +206,6 @@ export class PlanillaController {
     @Query('fechaInicio') fechaInicio: string,
     @Query('fechaFinalizacion') fechaFinalizacion: string,
   ): Promise<any> {
-    console.log(fechaInicio);  // La fecha se recibirá como parte de los query params
-
     return this.planillaService.getcerradas_fecha(fechaInicio, fechaFinalizacion);
   }
 

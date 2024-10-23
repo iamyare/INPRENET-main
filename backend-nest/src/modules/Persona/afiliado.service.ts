@@ -356,8 +356,6 @@ export class AfiliadoService {
         ]
       });
 
-      console.log(detallePer);
-
       if (!detallePer) {
         throw new NotFoundException(`Afiliado con N_IDENTIFICACION ${term} no existe`);
       }

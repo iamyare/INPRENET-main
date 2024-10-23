@@ -179,9 +179,13 @@ export class VerEditarBeneficioAfilComponent {
 
       this.Afiliado = dataAfil[0]
 
+      console.log(data);
+
+
       this.filasT = data.detBen.map((item: any) => {
         return {
           prestamo: item.prestamo || "NO",
+          tipoPersona: item.persona.tipoPersona.tipo_persona,
           ID_DETALLE_PERSONA: item.ID_DETALLE_PERSONA,
           ID_PERSONA: item.ID_PERSONA,
           ID_CAUSANTE: item.ID_CAUSANTE,
@@ -291,7 +295,6 @@ export class VerEditarBeneficioAfilComponent {
 
 
   manejarAccionUno(row: any) {
-    console.log(row);
     let campos: any = [];
 
     if (row.periodicidad == "P") {
@@ -325,6 +328,10 @@ export class VerEditarBeneficioAfilComponent {
         { nombre: 'prestamo', tipo: 'list', requerido: true, opciones: [{ label: "SI", value: "SI" }, { label: "NO", value: "NO" }], etiqueta: '¿Tiene algún prestamo?', editable: true },
       ];
 
+    }
+
+    if (row.tipoPersona == "BENEFICIARIO" || row.tipoPersona == "DESIGNADO") {
+      campos.pop()
     }
 
     const dialogRef = this.dialog.open(EditarDialogComponent, {

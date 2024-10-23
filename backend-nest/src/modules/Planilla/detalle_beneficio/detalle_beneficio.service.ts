@@ -218,7 +218,6 @@ export class DetalleBeneficioService {
           ID_BENEFICIO: ID_BENEFICIO
         }
       });
-      console.log(resultado2);
 
       const detalleBeneficioAfiliadoRepository = await this.detalleBeneficioAfiliadoRepository.update(
         {
@@ -229,7 +228,6 @@ export class DetalleBeneficioService {
         },
         { estado_solicitud: "RECHAZADO", observaciones: observacion }
       );
-      console.log(detalleBeneficioAfiliadoRepository);
 
       const detPagBenRepository = await this.detPagBenRepository.update(
         {
@@ -240,7 +238,6 @@ export class DetalleBeneficioService {
           observacion: observacion
         }
       );
-      console.log(detPagBenRepository);
 
       const resultado3 = await this.detalleBeneficioAfiliadoRepository.findOne({
         where: {
@@ -255,10 +252,8 @@ export class DetalleBeneficioService {
         },
         relations: ["detallePagBeneficio"]
       });
-      console.log(resultado3);
 
       if (!resultado3) {
-        console.log("ENTRO");
 
         const detDedRepository = await this.detDedRepository.update(
           {
@@ -266,14 +261,11 @@ export class DetalleBeneficioService {
           },
           { estado_aplicacion: "NO COBRADA" }
         );
-        console.log(detDedRepository);
       }
 
       /*
         return { mensaje: `Estado actualizado a '${nuevoEstado}' para los detalles de beneficio de la planilla con ID ${idPlanilla}` }; */
     } catch (error) {
-      console.log(error);
-
       throw new InternalServerErrorException('Se produjo un error al actualizar los estados de los detalles de beneficio');
     }
   }
@@ -732,7 +724,6 @@ export class DetalleBeneficioService {
 
       return { persona, detBen }
     } catch (error) {
-      console.log(error);
       this.logger.error(`Error al buscar beneficios inconsistentes por afiliado: ${error.message}`, error.stack);
       throw new InternalServerErrorException('Error al buscar beneficios inconsistentes por afiliado');
     }
@@ -998,7 +989,7 @@ export class DetalleBeneficioService {
         num_rentas_aplicadas: data.num_rentas_aplicadas === undefined || data.num_rentas_aplicadas === '' ? null : parseInt(data.num_rentas_aplicadas),
         ultimo_dia_ultima_renta: data.ultimo_dia_ultima_renta === undefined || data.ultimo_dia_ultima_renta === '' ? null : parseInt(data.num_rentas_aplicadas),
         observaciones: data.observaciones,
-        prestamo: data.prestamo
+        prestamo: data.prestamo === undefined || data.prestamo === '' ? null : data.prestamo,
       });
 
       await this.detalleBeneficioAfiliadoRepository.save(detBenAfil);

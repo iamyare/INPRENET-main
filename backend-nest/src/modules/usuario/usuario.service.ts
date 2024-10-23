@@ -58,7 +58,6 @@ export class UsuarioService {
       },
       relations: ['empleadoCentroTrabajo', 'empleadoCentroTrabajo.centroTrabajo', 'usuarioModulos', 'usuarioModulos.rolModulo', 'usuarioModulos.rolModulo.modulo'],
     });
-    console.log(usuario);
 
     if (!usuario) {
       throw new UnauthorizedException('Credenciales inválidas');

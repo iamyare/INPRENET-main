@@ -83,9 +83,11 @@
     Asignar beneficio
   </button>
 </div>
-<!-- [disabled]="FormBen.invalid" -->
 
-<div *ngIf="mostrarDB && Afiliado.fallecido == 'NO' && hasBeneficios.length == 0 && (
+<!-- [disabled]="FormBen.invalid" -->
+<!-- && hasBeneficios.length == 0 -->
+
+<div *ngIf="mostrarDB && Afiliado.fallecido == 'NO'  && (
   (Afiliado.tipo_persona == 'AFILIADO' && Afiliado.estado_persona == 'ACTIVO') ||
   Afiliado.tipo_persona == 'VOLUNTARIO'
   )" style="margin: 1% 0% 1% 0%; text-align: center; background-color: white">

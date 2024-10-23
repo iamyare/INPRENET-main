@@ -117,26 +117,20 @@ export class NuevoBeneficioAfilComponent implements OnInit {
               fecha_nacimiento: convertirFecha(res.FECHA_NACIMIENTO, false),
               beneficios: res.BENEFICIOS
             };
-
             //const tipoPersona = item.fallecido === "SI" ? "BENEFICIARIO" : item.tipo_persona;
-
 
             if (item.fallecido === "NO") {
               if (item.estado_persona == 'ACTIVO') {
                 this.getTipoBen(item.tipo_persona);
               } if (item.estado_persona == 'INACTIVO' || item.estado_persona == 'SUSPENDIDA' || item.estado_persona == 'NO REGISTRADO') {
-                this.toastr.error(`La persona se encuentra ${item.estado_persona}`);
-                this.toastr.warning(`No se puede asignar beneficios a los Afiliados ${item.estado_persona}`, "Advertencia");
+                this.toastr.warning(`La persona se encuentra ${item.estado_persona}. No se puede asignar beneficios a los Afiliados ${item.estado_persona}`, "Advertencia");
               } if (item.tipo_persona == 'JUBILADO' || item.tipo_persona == 'PENSIONADO') {
-                this.toastr.error(`La persona se encuentra: ${item.tipo_persona}`);
-                this.toastr.warning(`No se puede asignar beneficios a la persona porque se encuentra: ${item.tipo_persona}`, "Advertencia");
+                this.toastr.warning(`La persona se encuentra: ${item.tipo_persona}. No se puede asignar beneficios a la persona porque se encuentra: ${item.tipo_persona}`, "Advertencia");
               } if (item.tipo_persona == 'VOULUNTARIO') {
-                this.toastr.error(`Este tipo de persona todavia no esta en funcionamiento: ${item.tipo_persona}`);
                 this.toastr.warning(`Este tipo de persona todavia no esta en funcionamiento: ${item.tipo_persona}`, "Advertencia");
-              } if (this.hasBeneficios.length > 0) {
-                this.toastr.error(`ya cuenta con un beneficio`);
-                this.toastr.warning(`ya cuenta con un beneficio`, "Advertencia");
-              }
+              } /* if (this.hasBeneficios.length > 0) {
+
+              } */
             }
 
             this.Afiliado = {
@@ -399,8 +393,7 @@ export class NuevoBeneficioAfilComponent implements OnInit {
 
       // Obtiene los beneficios basados en el tipo de afiliado seleccionado
       if (row.tipo_afiliado === "BENEFICIARIO") {
-        this.toastr.error("La persona se encuentra como beneficiario.");
-        this.toastr.warning(`No se puede asignar beneficios a los beneficiarios del mismo causante, solo a los designados`, "Advertencia");
+        this.toastr.warning(`La persona se encuentra como beneficiario. No se puede asignar beneficios a los beneficiarios del mismo causante, solo a los designados`, "Advertencia");
       }
 
       const temp = await this.getTipoBenBeneficiarios(row.tipo_afiliado);

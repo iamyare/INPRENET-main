@@ -284,7 +284,7 @@ export class PlanillaService {
       throw new Error('Error al obtener los pagos, deducciones y bancos');
     }
   }
- 
+
   async updateFallecidoStatusFromExcel(file: Express.Multer.File) {
     const workbook = XLSX.read(file.buffer, { type: 'buffer', cellText: false, cellDates: true });
     const worksheet = workbook.Sheets[workbook.SheetNames[0]];
@@ -487,8 +487,6 @@ export class PlanillaService {
   }
 
   async getcerradas_fecha(fechaInicio: string, fechaFinalizacion: string): Promise<Net_Planilla[]> {
-    console.log(fechaInicio);
-    console.log(fechaFinalizacion);
 
     try {
       if (fechaInicio && fechaFinalizacion) {
@@ -498,7 +496,6 @@ export class PlanillaService {
           .andWhere('planilla.PERIODO_INICIO BETWEEN :fechaInicio AND :fechaFinalizacion', { fechaInicio, fechaFinalizacion });
 
         const planillas = await query.getMany();
-        console.log(planillas)
         if (planillas.length === 0) {
           // Si no existen filas
           return null; // o cualquier otro valor que desees retornar cuando no haya resultados
@@ -680,9 +677,6 @@ export class PlanillaService {
     periodoFinalizacion: string,
     idTiposPlanilla: number[],
   ): Promise<any[]> {
-    console.log(periodoInicio);
-    console.log(periodoFinalizacion);
-    console.log(idTiposPlanilla);
 
     const query = `
       SELECT 
@@ -1941,7 +1935,7 @@ export class PlanillaService {
   }
 
   async generarPlanillaOrdinaria(tipos_persona: string): Promise<void> {
-    console.log(tipos_persona);
+    ;
 
     try {
       await this.entityManager.query(

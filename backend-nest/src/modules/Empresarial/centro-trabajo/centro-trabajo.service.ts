@@ -213,7 +213,6 @@ export class CentroTrabajoService {
     }
   }
   async getContadorByCentro(idCentroTrabajo: number): Promise<any> {
-    console.log(idCentroTrabajo);
     try {
       const result = await this.centroTrabajoRepository.findOne(
         {

@@ -387,7 +387,8 @@ export class AfiliadoService {
         FECHA_NACIMIENTO: detallePer.persona.fecha_nacimiento,
         TIPO_PERSONA: detallePer.tipoPersona.tipo_persona,
         ESTADO_PERSONA: detallePer.estadoAfiliacion.nombre_estado,
-        BENEFICIOS: detallePer.detalleBeneficio
+        BENEFICIOS: detallePer.detalleBeneficio,
+        VOLUNTARIO: detallePer.voluntario
 
 
         //fallecido: detallePer.persona.fallecido,

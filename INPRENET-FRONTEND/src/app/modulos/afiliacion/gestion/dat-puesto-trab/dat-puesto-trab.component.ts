@@ -64,7 +64,11 @@ export class DatPuestoTrabComponent implements OnInit {
   agregarTrabajo(): void {
     const trabajoFormGroup = this.fb.group({
       id_centro_trabajo: ['', Validators.required],
-      cargo: ['', [Validators.required, Validators.maxLength(40)]],
+      cargo: ['', [
+        Validators.required,
+        Validators.maxLength(40),
+        Validators.pattern('^[a-zA-ZÀ-ÿ\u00f1\u00d1 ]+$')
+      ]],
       numero_acuerdo: ['', Validators.maxLength(40)],
       salario_base: ['', [Validators.required, Validators.min(0), Validators.pattern(/^[0-9]+(\.[0-9]{1,2})?$/)]],
       fecha_ingreso: ['', Validators.required],

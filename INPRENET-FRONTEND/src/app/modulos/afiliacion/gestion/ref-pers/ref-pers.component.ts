@@ -192,7 +192,7 @@ export class RefPersComponent implements OnInit {
     const data = this.formGroup.value;
 
     const conyugeData = {
-      parentesco: 'CÓNYUGUE',
+      parentesco: 'CÓNYUGE',
       persona_referencia: {
         primer_nombre: data.conyuge.primer_nombre,
         segundo_nombre: data.conyuge.segundo_nombre,

@@ -107,10 +107,12 @@ export class DatosGeneralesTemporalComponent implements OnInit {
     this.formGroup.addControl('representacion', new FormControl('', [Validators.required, Validators.maxLength(40)]));
     this.formGroup.addControl('telefono_1', new FormControl('', [
       Validators.required,
+      Validators.minLength(8),
       Validators.maxLength(12),
       Validators.pattern("^[0-9]*$")
     ]));
     this.formGroup.addControl('telefono_2', new FormControl('', [
+      Validators.minLength(8),
       Validators.maxLength(12),
       Validators.pattern("^[0-9]*$")
     ]));
@@ -166,6 +168,7 @@ export class DatosGeneralesTemporalComponent implements OnInit {
     this.formGroup.addControl('grado_academico', new FormControl('', [
       Validators.maxLength(75)
     ]));
+    this.formGroup.addControl('voluntario', new FormControl(false, Validators.required));
 
     this.cargarDatosIniciales();
   }
@@ -183,7 +186,6 @@ export class DatosGeneralesTemporalComponent implements OnInit {
   onDatosGeneralesChange() {
     const data = this.formGroup;
     this.newDatosGenerales.emit(data);
-    console.log(data);
   }
 
   grupo_etnico = [

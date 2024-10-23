@@ -92,7 +92,7 @@ export class EditConyugueComponent implements OnChanges {
 
     const formattedData = [
       {
-        parentesco: 'CÓNYUGUE',
+        parentesco: 'CÓNYUGE',
         persona_referencia: {
           primer_nombre: datosConyuge.primer_nombre,
           segundo_nombre: datosConyuge.segundo_nombre,

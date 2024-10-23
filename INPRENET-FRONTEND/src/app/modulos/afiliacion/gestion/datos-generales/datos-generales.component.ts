@@ -101,10 +101,12 @@ export class DatosGeneralesComponent implements OnInit {
     this.formGroup.addControl('representacion', new FormControl('', [Validators.required, Validators.maxLength(40)]));
     this.formGroup.addControl('telefono_1', new FormControl('', [
       Validators.required,
+      Validators.minLength(8),
       Validators.maxLength(12),
       Validators.pattern("^[0-9]*$")
     ]));
     this.formGroup.addControl('telefono_2', new FormControl('', [
+      Validators.minLength(8),
       Validators.maxLength(12),
       Validators.pattern("^[0-9]*$")
     ]));
@@ -332,13 +334,13 @@ export class DatosGeneralesComponent implements OnInit {
   }
 
   resetDiscapacidadesFormArray() {
-    const discapacidadesGroup = this.fb.group({}); // Creamos un grupo vacío
+    const discapacidadesGroup = this.fb.group({});
 
     this.discapacidades.forEach(discapacidad => {
       const match = this.indicesSeleccionados.some(
         indice => indice.tipo === discapacidad.label
       );
-      discapacidadesGroup.addControl(discapacidad.label, new FormControl(match)); // Agregamos cada control basado en 'label'
+      discapacidadesGroup.addControl(discapacidad.label, new FormControl(match));
     });
 
     this.formGroup.setControl('discapacidades', discapacidadesGroup);

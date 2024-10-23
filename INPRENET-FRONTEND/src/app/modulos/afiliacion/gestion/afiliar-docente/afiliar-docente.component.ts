@@ -143,7 +143,8 @@ export class AfiliarDocenteComponent implements OnInit {
         detallePersona: {
           eliminado: "NO",
           tipo_persona: "AFILIADO",
-          nombre_estado: "ACTIVO"
+          nombre_estado: "ACTIVO",
+          voluntario: datosGenerales.voluntario ? 'SI' : 'NO'
         },
         colegiosMagisteriales: this.formatColegiosMagisteriales(colegiosMagisteriales.ColMags || []),
         bancos: this.formatBancos(bancos.bancos || []),
@@ -162,6 +163,7 @@ export class AfiliarDocenteComponent implements OnInit {
 
       let fileIdent = datosGenerales?.archivo_identificacion
 
+      console.log(formattedData);
 
       this.afiliacionService.crearAfiliacion(formattedData, fileFoto, fileIdent).subscribe(
         response => {
@@ -306,7 +308,7 @@ export class AfiliarDocenteComponent implements OnInit {
         }
       })),
       ...(referenciasPersonales.conyuge && referenciasPersonales.conyuge.primer_nombre ? [{
-        parentesco: "CÓNYUGUE",
+        parentesco: "CÓNYUGE",
         persona_referencia: {
           primer_nombre: referenciasPersonales.conyuge.primer_nombre.toUpperCase(),
           segundo_nombre: referenciasPersonales.conyuge.segundo_nombre.toUpperCase(),

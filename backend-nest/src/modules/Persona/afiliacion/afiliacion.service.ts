@@ -432,8 +432,8 @@ export class AfiliacionService {
     const personasMap = personasCreadasMap || new Map<string, net_persona>();
     const familiaSinDuplicados = familiaresDto.filter((familia, index, self) => {
       return (
-        familia.parentesco !== 'CÓNYUGUE' || 
-        index === self.findIndex(f => f.parentesco === 'CÓNYUGUE')
+        familia.parentesco !== 'CÓNYUGE' || 
+        index === self.findIndex(f => f.parentesco === 'CÓNYUGE')
       );
     });
   
@@ -718,7 +718,7 @@ export class AfiliacionService {
     const conyuge = await this.familiaRepository.createQueryBuilder("familia")
       .leftJoinAndSelect("familia.referenciada", "referenciada")
       .where("familia.persona.id_persona = :id_persona", { id_persona: persona.id_persona })
-      .andWhere("familia.parentesco = :parentesco", { parentesco: 'CÓNYUGUE' })
+      .andWhere("familia.parentesco = :parentesco", { parentesco: 'CÓNYUGE' })
       .getOne();
 
     if (!conyuge || !conyuge.referenciada) {
@@ -757,7 +757,7 @@ export class AfiliacionService {
     const conyuge = await this.familiaRepository.createQueryBuilder("familia")
       .leftJoinAndSelect("familia.referenciada", "referenciada")
       .where("familia.persona.id_persona = :id_persona", { id_persona: persona.id_persona })
-      .andWhere("familia.parentesco = :parentesco", { parentesco: 'CÓNYUGUE' })
+      .andWhere("familia.parentesco = :parentesco", { parentesco: 'CÓNYUGE' })
       .getOne();
     if (!conyuge || !conyuge.referenciada) {
       throw new NotFoundException(`No se encontró cónyuge para la persona con identificación ${n_identificacion}`);

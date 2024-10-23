@@ -227,7 +227,7 @@ export class AfiliacionDocentesComponent implements OnInit {
     const conyugeData = this.refPersData?.conyuge;
     if (conyugeData) {
       familiares.push({
-        parentesco: 'CÓNYUGUE',
+        parentesco: 'CÓNYUGE',
         persona_referencia: {
           primer_nombre: conyugeData.persona_referencia.primer_nombre,
           segundo_nombre: conyugeData.persona_referencia.segundo_nombre,

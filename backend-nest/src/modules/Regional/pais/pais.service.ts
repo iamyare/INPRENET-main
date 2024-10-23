@@ -19,14 +19,18 @@ export class PaisService {
     return 'This action adds a new pai';
   }
 
-  async findAll( paginationDto: PaginationDto){
-    const { limit = 10, offset = 0 } = paginationDto
-    return this.paisRepository.find({
-      take: limit,
-      skip : offset
-    });
+  async findAll(paginationDto: PaginationDto) {
+    const { limit = 10, offset = 0 } = paginationDto;
+    
+    const queryBuilder = this.paisRepository.createQueryBuilder('pais')
+      .take(limit)
+      .skip(offset)
+      .orderBy('CASE WHEN pais.nombre_pais = :nombre THEN 1 ELSE 2 END', 'ASC')
+      .addOrderBy('pais.nombre_pais', 'ASC')
+      .setParameter('nombre', 'HONDURAS');
+    return queryBuilder.getMany();
   }
-
+  
   findOne(id: number) {
     return `This action returns a #${id} pai`;
   }

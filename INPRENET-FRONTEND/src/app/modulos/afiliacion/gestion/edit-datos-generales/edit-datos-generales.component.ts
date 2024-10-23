@@ -26,8 +26,6 @@ export class EditDatosGeneralesComponent implements OnInit {
 
   tiposPersona: any[] = [
     { ID_TIPO_PERSONA: 1, TIPO_PERSONA: 'AFILIADO' },
-    { ID_TIPO_PERSONA: 2, TIPO_PERSONA: 'JUBILADO' },
-    { ID_TIPO_PERSONA: 3, TIPO_PERSONA: 'PENSIONADO' },
     { ID_TIPO_PERSONA: 5, TIPO_PERSONA: 'VOLUNTARIO' }
   ];
 

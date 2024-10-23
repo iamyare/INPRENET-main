@@ -5,11 +5,11 @@ import { DatosEstaticosService } from 'src/app/services/datos-estaticos.service'
 import { DireccionService } from 'src/app/services/direccion.service';
 
 @Component({
-  selector: 'app-datos-generales',
-  templateUrl: './datos-generales.component.html',
-  styleUrls: ['./datos-generales.component.scss']
+  selector: 'app-datos-generales-temporal',
+  templateUrl: './datos-generales-temporal.component.html',
+  styleUrl: './datos-generales-temporal.component.scss'
 })
-export class DatosGeneralesComponent implements OnInit {
+export class DatosGeneralesTemporalComponent implements OnInit {
   minDate = new Date();
   @Input() formGroup!: FormGroup;
   @Output() imageCaptured = new EventEmitter<string>();
@@ -39,8 +39,15 @@ export class DatosGeneralesComponent implements OnInit {
   ngOnInit(): void {
     const noSpecialCharsPattern = '^[a-zA-Z0-9\\s]*$';
 
+    this.formGroup.addControl('id_tipo_identificacion', new FormControl('', Validators.required));
+
+    this.formGroup.get('id_tipo_identificacion')?.valueChanges.subscribe(value => {
+      this.onTipoIdentificacionChange(value);
+    });
+
+    this.setValidacionesIdentificacion(false);
+
     if (!this.formGroup) {
-      //para mostrar los datos y poder editarlos
       if (this.initialData) {
         this.formGroup = this.fb.group({
           peps: this.fb.array([]),
@@ -66,7 +73,6 @@ export class DatosGeneralesComponent implements OnInit {
     this.formGroup.get('discapacidad')?.valueChanges.subscribe(value => {
       this.onDiscapacidadChange({ value });
     });
-
     this.formGroup.addControl('n_identificacion', new FormControl('', [
       Validators.required,
       Validators.minLength(13),
@@ -177,6 +183,7 @@ export class DatosGeneralesComponent implements OnInit {
   onDatosGeneralesChange() {
     const data = this.formGroup;
     this.newDatosGenerales.emit(data);
+    console.log(data);
   }
 
   grupo_etnico = [
@@ -307,6 +314,7 @@ export class DatosGeneralesComponent implements OnInit {
   async cargarTiposIdentificacion() {
     try {
       const response = await this.datosEstaticos.gettipoIdent();
+
       this.tipoIdent = response;
     } catch (error) {
       console.error('Error al obtener los tipos de identificación', error);
@@ -332,13 +340,13 @@ export class DatosGeneralesComponent implements OnInit {
   }
 
   resetDiscapacidadesFormArray() {
-    const discapacidadesGroup = this.fb.group({}); // Creamos un grupo vacío
+    const discapacidadesGroup = this.fb.group({});
 
     this.discapacidades.forEach(discapacidad => {
       const match = this.indicesSeleccionados.some(
         indice => indice.tipo === discapacidad.label
       );
-      discapacidadesGroup.addControl(discapacidad.label, new FormControl(match)); // Agregamos cada control basado en 'label'
+      discapacidadesGroup.addControl(discapacidad.label, new FormControl(match));
     });
 
     this.formGroup.setControl('discapacidades', discapacidadesGroup);
@@ -355,10 +363,54 @@ export class DatosGeneralesComponent implements OnInit {
   }
 
   getArchivo(event: File): any {
+    // Si no lo has agregado aún, puedes agregar el control aquí
+
     if (!this.formGroup?.contains('archivo_identificacion')) {
       this.formGroup.addControl('archivo_identificacion', new FormControl('', []));
     }
+    // Asignar el archivo al control del formulario
     this.formGroup.get('archivo_identificacion')?.setValue(event);
+  }
+
+  onTipoIdentificacionChange(tipoIdentificacion: number) {
+    if (tipoIdentificacion === 2) {
+      this.setValidacionesIdentificacion(true);
+    } else if (tipoIdentificacion === 1) {
+      this.setValidacionesDNI();
+    } else {
+      this.setValidacionesIdentificacion(false);
+    }
+  }
+
+  setValidacionesIdentificacion(permitirLetras: boolean) {
+    const control = this.formGroup.get('n_identificacion');
+    if (permitirLetras) {
+      control?.setValidators([
+        Validators.required,
+        Validators.minLength(9),
+        Validators.maxLength(15),
+        Validators.pattern(/^[a-zA-Z0-9]+$/)
+      ]);
+    } else {
+      control?.setValidators([
+        Validators.required,
+        Validators.minLength(13),
+        Validators.maxLength(15),
+        Validators.pattern(/^[0-9]+$/)
+      ]);
+    }
+    control?.updateValueAndValidity();
+  }
+
+  setValidacionesDNI() {
+    const control = this.formGroup.get('n_identificacion');
+    control?.setValidators([
+      Validators.required,
+      Validators.minLength(13),
+      Validators.maxLength(13),
+      Validators.pattern(/^[0-9]+$/)
+    ]);
+    control?.updateValueAndValidity();
   }
 
 }

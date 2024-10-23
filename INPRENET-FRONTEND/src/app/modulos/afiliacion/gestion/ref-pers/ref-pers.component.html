@@ -57,11 +57,17 @@
             <mat-form-field class="example-full-width inputs" appearance="outline">
               <mat-label>Número de Identificación</mat-label>
               <input matInput type="text" formControlName="n_identificacion" (blur)="verificarAfiliadoBlur()">
+              <mat-error *ngIf="formGroup.get('conyuge')?.get('n_identificacion')?.hasError('identificacionDuplicada') && formGroup.get('conyuge')?.touched">
+                El número de identificación no puede ser igual al del afiliado.
+              </mat-error>
               <mat-error *ngIf="formGroup.get('conyuge')?.get('n_identificacion')?.hasError('pattern') && formGroup.get('conyuge')?.get('n_identificacion')?.touched">
                 Solo se permiten números.
               </mat-error>
+              <mat-error *ngIf="formGroup.get('conyuge')?.get('n_identificacion')?.hasError('minlength') && formGroup.get('conyuge')?.get('n_identificacion')?.touched">
+                El número de identificación debe tener exactamente 13 dígitos.
+              </mat-error>
               <mat-error *ngIf="formGroup.get('conyuge')?.get('n_identificacion')?.hasError('maxlength') && formGroup.get('conyuge')?.get('n_identificacion')?.touched">
-                No puede exceder 15 dígitos.
+                El número de identificación debe tener exactamente 13 dígitos.
               </mat-error>
             </mat-form-field>
           </div>
@@ -153,11 +159,14 @@
                 <mat-label>Número de Identificación</mat-label>
                 <input matInput type="text" formControlName="n_identificacion">
               </mat-form-field>
+              <mat-error *ngIf="formGroup.get('refpers')?.get([i])?.get('n_identificacion')?.hasError('identificacionDuplicada') && formGroup.get('refpers')?.get([i])?.touched">
+                El número de identificación no puede ser igual al del afiliado.
+              </mat-error>
               <mat-error *ngIf="formGroup.get('refpers')?.get([i])?.get('n_identificacion')?.hasError('pattern') && formGroup.get('refpers')?.get([i])?.get('n_identificacion')?.touched">
                 Solo se permiten números.
               </mat-error>
-              <mat-error *ngIf="formGroup.get('refpers')?.get([i])?.get('n_identificacion')?.hasError('maxlength') && formGroup.get('refpers')?.get([i])?.get('n_identificacion')?.touched">
-                No puede exceder 15 dígitos.
+              <mat-error *ngIf="formGroup.get('refpers')?.get([i])?.get('n_identificacion')?.hasError('minlength') && formGroup.get('refpers')?.get([i])?.get('n_identificacion')?.touched">
+                El número de identificación debe tener exactamente 13 dígitos.
               </mat-error>
               <mat-error *ngIf="formGroup.get('refpers')?.hasError('identidadDuplicada')">
                 Existe una referencia con el mismo número de identificación.

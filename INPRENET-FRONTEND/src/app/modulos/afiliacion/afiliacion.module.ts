@@ -74,6 +74,7 @@ import { TodosPagosComponent } from '../planilla/todos-pagos/todos-pagos.compone
 import { EditConyugueComponent } from './gestion/edit-conyugue/edit-conyugue.component';
 import { AgregarPepsComponent } from './gestion/agregar-peps/agregar-peps.component';
 import { AgregarFamiliarComponent } from './gestion/agregar-familiar/agregar-familiar.component';
+import { DatosGeneralesTemporalComponent } from './gestion/datos-generales-temporal/datos-generales-temporal.component';
 
 @NgModule({
   declarations: [
@@ -144,7 +145,8 @@ import { AgregarFamiliarComponent } from './gestion/agregar-familiar/agregar-fam
     TodosPagosComponent,
     EditConyugueComponent,
     AgregarPepsComponent,
-    AgregarFamiliarComponent
+    AgregarFamiliarComponent,
+    DatosGeneralesTemporalComponent
   ],
   imports: [
     CommonModule,

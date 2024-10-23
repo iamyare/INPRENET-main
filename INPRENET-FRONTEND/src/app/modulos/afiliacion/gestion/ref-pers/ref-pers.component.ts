@@ -1,5 +1,5 @@
 import { Component, Input, OnInit } from '@angular/core';
-import { AbstractControl, FormArray, FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
+import { AbstractControl, FormArray, FormBuilder, FormControl, FormGroup, ValidationErrors, ValidatorFn, Validators } from '@angular/forms';
 import { debounceTime, distinctUntilChanged } from 'rxjs';
 import { BeneficiosService } from 'src/app/services/beneficios.service';
 import { DatosEstaticosService } from 'src/app/services/datos-estaticos.service';
@@ -63,7 +63,9 @@ export class RefPersComponent implements OnInit {
       segundo_apellido: [''],
       n_identificacion: ['', [
         Validators.pattern(/^[0-9]*$/),
-        Validators.maxLength(15)
+        Validators.minLength(13),
+        Validators.maxLength(13),
+        this.validarIdentificacionUnica()
       ]],
       fecha_nacimiento: ['', []],
       telefono_domicilio: ['', [
@@ -109,9 +111,11 @@ export class RefPersComponent implements OnInit {
       telefono_trabajo: [datos?.telefono_trabajo || '', [Validators.minLength(8), Validators.maxLength(12), Validators.pattern(/^[0-9]*$/)]],
       telefono_personal: [datos?.telefono_personal || '', [Validators.minLength(8), Validators.maxLength(12), Validators.pattern(/^[0-9]*$/)]],
       parentesco: [datos?.parentesco || '', [Validators.required, Validators.minLength(2), Validators.maxLength(30)]],
-      n_identificacion: ['', [
+      n_identificacion: [datos?.n_identificacion || '', [
         Validators.pattern(/^[0-9]*$/),
-        Validators.maxLength(15)
+        Validators.minLength(13),
+        Validators.maxLength(13),
+        this.validarIdentificacionUnica()
       ]],
     });
     this.referencias.push(referenciaForm);
@@ -237,5 +241,19 @@ export class RefPersComponent implements OnInit {
     const duplicados = identificaciones.filter((item, index) => identificaciones.indexOf(item) !== index);
     return duplicados.length > 0 ? { identidadDuplicada: true } : null;
   }
+
+  validarIdentificacionUnica(): ValidatorFn {
+    return (control: AbstractControl): ValidationErrors | null => {
+      const formGroup = control?.parent?.parent as FormGroup; // Acceder al grupo de la referencia personal
+      const afiliadoIdentificacion = formGroup?.root?.get('datosGenerales')?.get('n_identificacion')?.value; // Obtener identificación del afiliado
+
+      const nIdentificacionReferencia = control.value;
+      if (!nIdentificacionReferencia || nIdentificacionReferencia !== afiliadoIdentificacion) {
+        return null;
+      }
+      return { identificacionDuplicada: true };
+    };
+  }
+
 
 }

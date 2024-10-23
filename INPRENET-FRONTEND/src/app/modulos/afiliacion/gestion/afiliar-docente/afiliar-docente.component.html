@@ -1,8 +1,8 @@
 <ng-template #datosGeneralesTemplate>
-  <app-datos-generales
+  <app-datos-generales-temporal
     [formGroup]="steps[0].formGroup"
     (imageCaptured)="handleImageCaptured($event)">
-  </app-datos-generales>
+  </app-datos-generales-temporal>
   <app-peps [parentForm]="steps[0].formGroup"></app-peps>
 </ng-template>
 

@@ -109,16 +109,14 @@ export class AfiliarDocenteComponent implements OnInit {
         const documentDefinition = this.getDocumentDefinition(beneficiarios, datosGenerales, this.backgroundImageBase64);
         pdfMake.createPdf(documentDefinition).download('beneficiarios.pdf');
       }
-      console.log(datosGenerales.discapacidades);
       const formattedData = {
-
         persona: {
           id_tipo_identificacion: datosGenerales.id_tipo_identificacion,
           id_pais_nacionalidad: datosGenerales.id_pais,
-          n_identificacion: datosGenerales.n_identificacion.toUpperCase(),
+          n_identificacion: datosGenerales.n_identificacion,
           fecha_vencimiento_ident: datosGenerales.fecha_vencimiento_ident,
           rtn: datosGenerales.rtn,
-          grupo_etnico: datosGenerales.grupo_etnico.toUpperCase(),
+          grupo_etnico: datosGenerales.grupo_etnico,
           estado_civil: datosGenerales.estado_civil.toUpperCase(),
           primer_nombre: datosGenerales.primer_nombre.toUpperCase(),
           segundo_nombre: datosGenerales.segundo_nombre?.toUpperCase(),
@@ -167,7 +165,7 @@ export class AfiliarDocenteComponent implements OnInit {
       console.log(formattedData);
 
 
-      /* this.afiliacionService.crearAfiliacion(formattedData, fileFoto, fileIdent).subscribe(
+      this.afiliacionService.crearAfiliacion(formattedData, fileFoto, fileIdent).subscribe(
         response => {
           console.log('Datos enviados con éxito:', response);
           this.toastr.success('Datos enviados con éxito', 'Éxito');
@@ -178,7 +176,7 @@ export class AfiliarDocenteComponent implements OnInit {
           const errorMessage = error.error?.mensaje || 'Hubo un error al enviar los datos';
           this.toastr.error(errorMessage, 'Error');
         }
-      ); */
+      );
     } else {
       this.markAllAsTouched(this.formGroup);
       this.toastr.warning('El formulario contiene información inválida', 'Advertencia');
@@ -246,7 +244,7 @@ export class AfiliarDocenteComponent implements OnInit {
     return otrasFuentesIngreso.map(fuente => ({
       actividad_economica: fuente.actividad_economica.toUpperCase(),
       monto_ingreso: fuente.monto_ingreso,
-      observacion: fuente.observacion.toUpperCase()
+      observacion: fuente.observacion
     }));
   }
 
@@ -297,15 +295,15 @@ export class AfiliarDocenteComponent implements OnInit {
       ...familiares.map((familiar: any) => ({
         parentesco: familiar.parentesco,
         persona_referencia: {
-          primer_nombre: familiar.primer_nombre.toUpperCase(),
-          segundo_nombre: familiar.segundo_nombre.toUpperCase(),
-          tercer_nombre: familiar.tercer_nombre.toUpperCase(),
-          primer_apellido: familiar.primer_apellido.toUpperCase(),
-          segundo_apellido: familiar.segundo_apellido.toUpperCase(),
+          primer_nombre: familiar.primer_nombre?.toUpperCase() || '',
+          segundo_nombre: familiar.segundo_nombre?.toUpperCase() || '',
+          tercer_nombre: familiar.tercer_nombre?.toUpperCase() || '',
+          primer_apellido: familiar.primer_apellido?.toUpperCase() || '',
+          segundo_apellido: familiar.segundo_apellido?.toUpperCase() || '',
           telefono_domicilio: familiar.telefono_domicilio,
           telefono_trabajo: familiar.telefono_trabajo,
           telefono_personal: familiar.telefono_personal,
-          n_identificacion: familiar.n_identificacion.toUpperCase(),
+          n_identificacion: familiar.n_identificacion,
           fecha_nacimiento: familiar.fecha_nacimiento
         }
       })),

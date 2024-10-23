@@ -74,8 +74,12 @@ export class BenefComponent implements OnInit {
       primer_apellido: new FormControl(datosBeneficiario?.primer_apellido || '', [Validators.required, Validators.maxLength(40)]),
       segundo_apellido: new FormControl(datosBeneficiario?.segundo_apellido || ''),
       genero: new FormControl(datosBeneficiario?.genero || ''),
-      telefono_1: new FormControl(datosBeneficiario?.telefono_1 || ''),
-      telefono_2: new FormControl(datosBeneficiario?.telefono_2 || ''),
+      telefono_1: new FormControl('', [
+        Validators.required,
+        Validators.pattern('^[0-9]*$'),
+        Validators.minLength(8),
+        Validators.maxLength(15)
+      ]),
       correo_1: new FormControl(datosBeneficiario?.correo_1 || ''),
       correo_2: new FormControl(datosBeneficiario?.correo_2 || ''),
       fecha_nacimiento: new FormControl(datosBeneficiario?.fecha_nacimiento || '', Validators.required),
@@ -97,7 +101,7 @@ export class BenefComponent implements OnInit {
       ]),
       discapacidad: new FormControl(datosBeneficiario?.discapacidad || 'no', [Validators.required]),
       discapacidades: discapacidadesFormArray,
-      archivo_identificacion: [null] // Control para el archivo
+      archivo_identificacion: [null]
     });
 
     this.beneficiarios.push(beneficiarioForm);

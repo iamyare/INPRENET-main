@@ -157,7 +157,8 @@ export class PepsComponent implements OnInit {
       segundo_apellido: new FormControl('',),
       n_identificacion: new FormControl('', [
         Validators.required,
-        Validators.maxLength(15),
+        Validators.minLength(13),
+        Validators.maxLength(13),
         Validators.pattern(/^[0-9]+$/),
         this.uniqueIdentificacionValidator()
       ]),

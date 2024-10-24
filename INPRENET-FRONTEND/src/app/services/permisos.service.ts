@@ -68,7 +68,6 @@ export class PermisosService {
     if (this.tieneAccesoLimitadoPlanilla()) {
       return ['Proceso de Planilla', 'Ver Planillas'].includes(childTitle);
     }
-
     return false;
   }
 }

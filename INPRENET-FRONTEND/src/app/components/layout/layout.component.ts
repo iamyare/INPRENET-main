@@ -20,32 +20,54 @@ export class LayoutComponent implements OnInit {
   ngOnInit(): void {
     this.menuConfig = this.sidenavService.getMenuConfig().filter(section => {
       let isSectionVisible = false;
+
       switch (section.name.toLowerCase()) {
         case 'afiliación':
-          isSectionVisible = this.permisosService.tieneAccesoCompletoAfiliacion() || this.permisosService.tieneAccesoLimitadoAfiliacion();
-          break;
-        case 'planilla':
-          isSectionVisible = this.permisosService.tieneAccesoCompletoAfiliacion() || this.permisosService.tieneAccesoCompletoAfiliacion(); // Actualizar si hay método específico para PLANILLA
-          /* if (isSectionVisible) {
+          isSectionVisible = this.permisosService.tieneAccesoCompletoPlanilla() || this.permisosService.tieneAccesoLimitadoPlanilla();
+          if (isSectionVisible) {
             section.items.forEach(item => {
               item.children = item.children?.filter(child => {
-                return this.permisosService.tieneAccesoAChilPlanilla(child.title)
+                if (['Nuevo Centro Educativo', 'Ver Centro Educativo'].includes(child.title)) {
+                  return false;
+                }
+                return this.permisosService.tieneAccesoAChilPlanilla(child.title);
               });
             });
-          } */
+          }
           break;
+
+        case 'planilla':
+          isSectionVisible = this.permisosService.tieneAccesoCompletoPlanilla() || this.permisosService.tieneAccesoLimitadoPlanilla();
+          if (isSectionVisible) {
+            section.items.forEach(item => {
+              item.children = item.children?.filter(child => {
+                return this.permisosService.tieneAccesoAChilPlanilla(child.title);
+              });
+            });
+          }
+          break;
+
         case 'gestión de personal':
-          isSectionVisible = true; // Actualizar si hay método específico para este módulo
-          break;
+          isSectionVisible = false
+            break;
+
         case 'beneficios':
-          isSectionVisible = true; // Actualizar si hay método específico para BENEFICIOS
+          isSectionVisible = true;
+          section.items.forEach(item => {
+            item.children = item.children?.filter(child => {
+              return this.permisosService.tieneAccesoAChilPlanilla(child.title);
+            });
+          });
           break;
+
         case 'cuentas inprema':
-          isSectionVisible = true; // Actualizar si hay método específico para BENEFICIOS
+          isSectionVisible = false
           break;
-        case 'escalafón':
-          isSectionVisible = this.permisosService.tieneAccesoCompletoAfiliacion(); // Actualizar si hay método específico para BENEFICIOS
-          break;
+
+          case 'escalafón':
+            isSectionVisible = false
+            break;
+
         default:
           isSectionVisible = false;
       }

@@ -48,7 +48,7 @@ export class PermisosService {
   }
 
   tieneAccesoAChildAfiliacion(childTitle: string): boolean {
-    if (this.tieneAccesoCompletoAfiliacion()) {
+    if (this.tieneAccesoCompletoPlanilla()) {
       return true;
     }
     if (this.tieneAccesoLimitadoAfiliacion()) {

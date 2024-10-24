@@ -54,9 +54,9 @@ export class VerOtrasFuentesIngresoComponent implements OnInit, OnDestroy, OnCha
   ) { }
   ngOnInit(): void {
     this.initializeComponent();
-    this.mostrarBotonFuente = this.permisosService.tieneAccesoCompletoAfiliacion();
-    this.mostrarBotonEditar = this.permisosService.tieneAccesoCompletoAfiliacion();
-    this.mostrarBotonEliminar = this.permisosService.tieneAccesoCompletoAfiliacion();
+    this.mostrarBotonFuente = this.permisosService.tieneAccesoCompletoPlanilla();
+    this.mostrarBotonEditar = this.permisosService.tieneAccesoCompletoPlanilla();
+    this.mostrarBotonEliminar = this.permisosService.tieneAccesoCompletoPlanilla();
   }
 
   ngOnChanges(changes: SimpleChanges): void {

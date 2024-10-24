@@ -42,7 +42,7 @@ const routes: Routes = [
         path: 'afiliacion',
         loadChildren: () => import('./modulos/afiliacion/afiliacion.module').then(m => m.AfiliacionModule),
         canActivate: [RoleGuard],
-        data: { expectedRolesModules: [{ role: 'TODO' }, { role: 'ADMINISTRADOR', module: 'AFILIACION' }, { role: 'MODIFICACION AFILIACION', module: 'AFILIACION' }, { role: 'CONSULTA AFILIACION', module: 'AFILIACION' }] }
+        data: { expectedRolesModules: [{ role: 'TODO' },{ role: 'OFICIAL DE PLANILLA', module: 'PLANILLA' }, { role: 'ADMINISTRADOR', module: 'AFILIACION' }, { role: 'MODIFICACION AFILIACION', module: 'AFILIACION' }, { role: 'CONSULTA AFILIACION', module: 'AFILIACION' }] }
       },
       {
         path: 'planilla',

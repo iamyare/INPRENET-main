@@ -17,8 +17,10 @@ export class PermisosService {
     const rolesUsuario = this.authService.getUserRolesAndModules();
     return rolesUsuario.some(roleModulo =>
       roleModulo.rol === 'TODO' ||
-      (roleModulo.modulo === 'AFILIACION' &&
-        this.rolesAccesoCompletoAfiliacion.includes(roleModulo.rol))
+      (
+        (roleModulo.modulo === 'AFILIACION' || roleModulo.modulo === 'PLANILLA') &&
+        this.rolesAccesoCompletoAfiliacion.includes(roleModulo.rol)
+      )
     );
   }
 

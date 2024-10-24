@@ -713,13 +713,29 @@ export class UsuarioService {
 
   async enviarCorreoRestablecimiento(correo: string, token: string): Promise<void> {
     const urlRestablecimiento = `${process.env.HOST_FRONTEND}/restablecer-contrasena/${token}`;
-    const asunto = 'Restablecimiento de contraseña';
-    const texto = `Haga clic en el siguiente enlace para restablecer su contraseña: ${urlRestablecimiento}`;
-    const html = `<p>Haga clic en el siguiente enlace para restablecer su contraseña:</p><a href="${urlRestablecimiento}">${urlRestablecimiento}</a>`;
-
-    await this.mailService.sendMail(correo, asunto, texto, html);
+    const asunto = 'Solicitud de restablecimiento de contraseña - INPRENET';
+    const htmlContent = `
+      <div style="font-family: Arial, sans-serif; line-height: 1.6; text-align: center;">
+        <h2 style="color: #13776B;">
+          Solicitud de restablecimiento de contraseña en 
+          <span style="color: #14776B;">INPRE</span><span style="color: #33E4DC;">NET</span>
+        </h2>
+        <p>Hola,</p>
+        <p>Recientemente has solicitado restablecer tu contraseña en nuestra plataforma.</p>
+        <p>Para proceder con el restablecimiento, por favor haz clic en el siguiente enlace:</p>
+        <div style="text-align: center; margin: 20px 0;">
+          <a href="${urlRestablecimiento}" style="background-color: #13776B; color: white; padding: 10px 20px; text-decoration: none; border-radius: 4px;">Restablecer contraseña</a>
+        </div>
+        <p>Este enlace es válido por un tiempo limitado. Si no solicitaste este cambio, puedes ignorar este mensaje.</p>
+        <p>Si tienes alguna pregunta o necesitas asistencia, no dudes en contactarnos.</p>
+        <p>El equipo de <strong><span style="color: #14776B;">INPRE</span><span style="color: #33E4DC;">NET</span></strong></p>
+      </div>`;
+  
+    const textoPlano = `Hola,\n\nHas solicitado restablecer tu contraseña en nuestra plataforma INPRENET.\n\nPara hacerlo, por favor, haz clic en el siguiente enlace o cópialo en tu navegador: ${urlRestablecimiento}\n\nSi no solicitaste este cambio, puedes ignorar este correo.\n\nEl equipo de INPRENET`;
+  
+    await this.mailService.sendMail(correo, asunto, textoPlano, htmlContent);
   }
-
+  
   async restablecerContrasena(token: string, nuevaContrasena: string): Promise<void> {
     let payload;
 
@@ -755,7 +771,5 @@ export class UsuarioService {
 
     return usuario.seguridad.map(pregunta => pregunta.pregunta);
   }
-
-
 
 }

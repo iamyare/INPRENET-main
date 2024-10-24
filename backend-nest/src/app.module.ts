@@ -16,6 +16,7 @@ import { MantenimientoAfiliacionService } from './modules/Persona/afiliacion/man
 import { AuthModule } from './modules/auth/auth.module';
 import { DocumentsModule } from './modules/documents/documents.module';
 import { EscalafonModule } from './modules/escalafon/escalafon.module';
+import { BitacoraModule } from './modules/bitacora/bitacora.module';
 
 @Module({
   imports: [
@@ -53,6 +54,7 @@ import { EscalafonModule } from './modules/escalafon/escalafon.module';
       inject: [ConfigService],
     }),
     CommonModule,
+    BitacoraModule,
     EmpresarialModule,
     DocumentsModule,
     AfiliadoModule,
@@ -63,7 +65,7 @@ import { EscalafonModule } from './modules/escalafon/escalafon.module';
     RegionalModule,
     TransaccionesModule,
     AuthModule,
-    EscalafonModule
+    EscalafonModule,
   ],
   providers: [MantenimientoAfiliacionService],
 })

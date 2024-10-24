@@ -2,6 +2,7 @@ import { Check, Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, OneToMa
 import { Net_Planilla } from "../../planilla/entities/net_planilla.entity";
 import { Net_Detalle_Beneficio_Afiliado } from "./net_detalle_beneficio_afiliado.entity";
 import { Net_Persona_Por_Banco } from "src/modules/banco/entities/net_persona-banco.entity";
+import { Net_Usuario_Empresa } from "src/modules/usuario/entities/net_usuario_empresa.entity";
 
 @Entity({ name: 'NET_DETALLE_PAGO_BENEFICIO' })
 @Check("CK_ESTADO_DETBEN", `ESTADO IN ('PAGADA', 'NO PAGADA', 'EN PRELIMINAR', 'EN PLANILLA')`)
@@ -35,5 +36,12 @@ export class Net_Detalle_Pago_Beneficio {
     @JoinColumn({ name: 'ID_DETALLE_PERSONA', referencedColumnName: 'ID_DETALLE_PERSONA', foreignKeyConstraintName: "FK_ID_BEN_PLAN_AFIL_DETPAGBEN" })
     @JoinColumn({ name: 'ID_BENEFICIO', referencedColumnName: 'ID_BENEFICIO', foreignKeyConstraintName: "FK_ID_BEN_PLAN_AFIL_DETPAGBEN" })
     detalleBeneficioAfiliado: Net_Detalle_Beneficio_Afiliado[];
+
+    @ManyToOne(() => Net_Usuario_Empresa, { nullable: true })
+    @JoinColumn({ name: 'ID_USUARIO_EMPRESA', referencedColumnName: 'id_usuario_empresa', foreignKeyConstraintName: 'FK_ID_USUARIO_EMPRESA_DET_PAG_BENEFICIO' })
+    usuarioEmpresa: Net_Usuario_Empresa;
+    
+    @Column({ type: 'int', nullable: true, name: 'ID_USUARIO_EMPRESA' })
+    ID_USUARIO_EMPRESA: number;
 }
 

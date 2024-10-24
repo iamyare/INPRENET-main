@@ -3,6 +3,7 @@ import { Net_Tipo_Persona } from "./net_tipo_persona.entity";
 import { net_estado_afiliacion } from "./net_estado_afiliacion.entity";
 import { net_persona } from "./net_persona.entity";
 import { Net_Detalle_Beneficio_Afiliado } from "src/modules/Planilla/detalle_beneficio/entities/net_detalle_beneficio_afiliado.entity";
+import { Net_Usuario_Empresa } from "src/modules/usuario/entities/net_usuario_empresa.entity";
 
 @Entity({ name: 'NET_DETALLE_PERSONA' })
 @Check(`ELIMINADO IN ('SI', 'NO')`)
@@ -56,4 +57,12 @@ export class net_detalle_persona {
 
     @Column({ type: 'int', nullable: true, name: 'ID_ESTADO_AFILIACION' })
     ID_ESTADO_AFILIACION: number;
+
+    @ManyToOne(() => Net_Usuario_Empresa, usuarioEmpresa => usuarioEmpresa.detallePersonas, { nullable: true })
+    @JoinColumn({ name: 'ID_USUARIO_EMPRESA', referencedColumnName: 'id_usuario_empresa', foreignKeyConstraintName: 'FK_ID_USUARIO_EMPRESA_DET_PERSONA' })
+    usuarioEmpresa: Net_Usuario_Empresa;
+    
+    @Column({ type: 'int', nullable: true, name: 'ID_USUARIO_EMPRESA' })
+    ID_USUARIO_EMPRESA: number;
+
 }

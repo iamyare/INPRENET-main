@@ -6,6 +6,7 @@ import { net_persona } from 'src/modules/Persona/entities/net_persona.entity';
 import { Net_Detalle_Pago_Beneficio } from '../../detalle_beneficio/entities/net_detalle_pago_beneficio.entity';
 import { Net_Deducciones_Asignadas } from './net-deducciones-asignadas.entity';
 import { Net_Persona_Por_Banco } from 'src/modules/banco/entities/net_persona-banco.entity';
+import { Net_Usuario_Empresa } from 'src/modules/usuario/entities/net_usuario_empresa.entity';
 
 @Entity({ name: 'NET_DETALLE_DEDUCCION' })
 @Check("CK_ESTADO_DED", `estado_aplicacion IN ('COBRADA', 'NO COBRADA', 'EN PRELIMINAR', 'EN PLANILLA')`)
@@ -51,4 +52,11 @@ export class Net_Detalle_Deduccion {
     @ManyToOne(() => Net_Persona_Por_Banco, personaPorBanco => personaPorBanco.detallePagoBen, { cascade: true })
     @JoinColumn({ name: 'ID_AF_BANCO', foreignKeyConstraintName: "FK_ID_AF_BANCO_DETDED" })
     personaPorBanco: Net_Persona_Por_Banco;
+
+    @ManyToOne(() => Net_Usuario_Empresa, { nullable: true })
+    @JoinColumn({ name: 'ID_USUARIO_EMPRESA', referencedColumnName: 'id_usuario_empresa', foreignKeyConstraintName: 'FK_ID_USUARIO_EMPRESA_DET_DEDUCCION' })
+    usuarioEmpresa: Net_Usuario_Empresa;
+    
+    @Column({ type: 'int', nullable: true, name: 'ID_USUARIO_EMPRESA' })
+    ID_USUARIO_EMPRESA: number;
 }

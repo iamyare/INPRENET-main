@@ -17,6 +17,7 @@ import { Net_Persona_Discapacidad } from "./net_persona_discapacidad.entity";
 import { Net_Familia } from "./net_familia.entity";
 import { Net_Deducciones_Asignadas } from "src/modules/Planilla/detalle-deduccion/entities/net-deducciones-asignadas.entity";
 import { Net_Referencias } from "./net_referencias.entity";
+import { Net_Usuario_Empresa } from "src/modules/usuario/entities/net_usuario_empresa.entity";
 @Entity({
     name: 'NET_PERSONA',
 })
@@ -199,4 +200,11 @@ export class net_persona {
 
     @OneToMany(() => Net_Referencias, referencia => referencia.persona)
     referencias: Net_Referencias[];
+
+    @ManyToOne(() => Net_Usuario_Empresa, { nullable: true })
+    @JoinColumn({ name: 'ID_USUARIO_EMPRESA', referencedColumnName: 'id_usuario_empresa', foreignKeyConstraintName: 'FK_ID_USUARIO_EMPRESA_PERSONA' })
+    usuarioEmpresa: Net_Usuario_Empresa;
+    
+    @Column({ type: 'int', nullable: true, name: 'ID_USUARIO_EMPRESA' })
+    ID_USUARIO_EMPRESA: number;
 }

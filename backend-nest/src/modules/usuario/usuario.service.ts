@@ -21,6 +21,7 @@ import { Net_Empleado } from '../Empresarial/entities/net_empleado.entity';
 import { Net_Empleado_Centro_Trabajo } from '../Empresarial/entities/net_empleado_centro_trabajo.entity';
 import * as fs from 'fs';
 import * as path from 'path';
+import { UpdateEmpleadoDto } from '../Empresarial/centro-trabajo/dto/update-empleado.dto';
 
 @Injectable()
 export class UsuarioService {
@@ -422,7 +423,34 @@ export class UsuarioService {
     await this.seguridadRepository.save([seguridad1, seguridad2, seguridad3]);
   }
 
+  async actualizarEmpleado(
+    id: number,
+    updateEmpleadoParcialDto: any,
+    archivoIdentificacionBuffer: Buffer | null,
+    fotoEmpleadoBuffer: Buffer | null
+  ) {
+    const empleado = await this.empleadoRepository.findOne({
+      where: { id_empleado: id },
+    });
 
+    if (!empleado) {
+      throw new NotFoundException('Empleado no encontrado');
+    }
+    empleado.nombreEmpleado = updateEmpleadoParcialDto.nombreEmpleado || empleado.nombreEmpleado;
+    empleado.telefono_1 = updateEmpleadoParcialDto.telefono_1 || empleado.telefono_1;
+    empleado.telefono_2 = updateEmpleadoParcialDto.telefono_2 || empleado.telefono_2;
+    empleado.numero_identificacion = updateEmpleadoParcialDto.numero_identificacion || empleado.numero_identificacion;
+    if (archivoIdentificacionBuffer) {
+      empleado.archivo_identificacion = archivoIdentificacionBuffer;
+    }
+
+    if (fotoEmpleadoBuffer) {
+      empleado.foto_empleado = fotoEmpleadoBuffer;
+    }
+
+    return this.empleadoRepository.save(empleado);
+  }
+  
   async getRolesPorEmpresa(centroId: number) {
     /* return this.rolEmpresaRepository.find({
       where: {

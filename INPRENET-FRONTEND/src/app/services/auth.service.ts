@@ -26,6 +26,16 @@ export class AuthService {
   private apiRequestsCount: number = 0;
   private idleTimeout: any;
 
+  actualizarEmpleado(idEmpleado: number, formData: FormData): Observable<any> {
+    const url = `${environment.API_URL}/api/usuario/actualizar-informacion-empleado/${idEmpleado}`;
+    return this.http.patch(url, formData).pipe(
+      catchError(error => {
+        console.error('Error al actualizar los datos del empleado:', error);
+        return throwError(error);
+      })
+    );
+  }
+
   public startIdleWatch(): void {
     ['mousemove', 'keydown', 'wheel', 'touchmove', 'click'].forEach(event => {
       window.addEventListener(event, () => this.resetIdleTimer());

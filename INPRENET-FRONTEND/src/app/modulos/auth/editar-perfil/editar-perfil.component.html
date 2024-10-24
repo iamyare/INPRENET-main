@@ -42,15 +42,18 @@
   </mat-card>
 
   <form [formGroup]="perfilForm" class="form-container">
+    <!-- Campo oculto para idEmpleado -->
+    <input type="hidden" formControlName="idEmpleado">
+
     <mat-card class="perfil-card">
       <mat-form-field appearance="fill" class="full-width">
         <mat-label>Nombre</mat-label>
         <input matInput formControlName="nombre">
       </mat-form-field>
-      <mat-form-field appearance="fill" class="full-width">
+      <!-- <mat-form-field appearance="fill" class="full-width">
         <mat-label>Correo</mat-label>
-        <input matInput formControlName="correo">
-      </mat-form-field>
+        <input matInput formControlName="correo" disabled>
+      </mat-form-field> -->
       <mat-form-field appearance="fill" class="full-width">
         <mat-label>Teléfono 1</mat-label>
         <input matInput formControlName="telefono1">
@@ -64,6 +67,8 @@
         <input matInput formControlName="numeroIdentificacion">
       </mat-form-field>
     </mat-card>
+
+    <button mat-raised-button color="primary" (click)="guardar()">Guardar Cambios</button>
   </form>
 
   <div class="modules-container">

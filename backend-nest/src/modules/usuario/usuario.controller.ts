@@ -11,6 +11,7 @@ import { Net_Usuario_Empresa } from './entities/net_usuario_empresa.entity';
 import { net_rol_modulo } from './entities/net_rol_modulo.entity';
 import { net_modulo } from './entities/net_modulo.entity';
 import { ForgotPasswordDto } from './dto/forgot-password.dto';
+import { UpdateEmpleadoDto } from '../Empresarial/centro-trabajo/dto/update-empleado.dto';
 
 @ApiTags('usuario')
 @Controller('usuario')
@@ -80,6 +81,24 @@ export class UsuarioController {
   async obtenerPerfilUsuario(@Query('correo') correo: string) {
   return this.usuarioService.obtenerPerfilPorCorreo(correo);
 }
+
+@Patch('actualizar-informacion-empleado/:id')
+  @UseInterceptors(FileFieldsInterceptor([
+    { name: 'archivo_identificacion', maxCount: 1 },
+    { name: 'foto_empleado', maxCount: 1 }
+  ]))
+  async actualizarInformacionEmpleado(
+    @Param('id') id: number,
+    @UploadedFiles() files: { archivo_identificacion?: Express.Multer.File[], foto_empleado?: Express.Multer.File[] },
+    @Body() updateEmpleadoParcialDto: any
+  ) {
+    const archivoIdentificacionBuffer = files?.archivo_identificacion?.[0]?.buffer || null;
+    const fotoEmpleadoBuffer = files?.foto_empleado?.[0]?.buffer || null;
+    if (!updateEmpleadoParcialDto.nombreEmpleado && !updateEmpleadoParcialDto.telefono_1 && !updateEmpleadoParcialDto.telefono_2 && !archivoIdentificacionBuffer && !fotoEmpleadoBuffer) {
+      throw new BadRequestException('No se han proporcionado datos para actualizar.');
+    }
+    return this.usuarioService.actualizarEmpleado(+id, updateEmpleadoParcialDto, archivoIdentificacionBuffer, fotoEmpleadoBuffer);
+  }
 
   @Put('cambiar-contrasena')
   async cambiarContrasena(@Body() cambiarContrasenaDto: { correo: string; nuevaContrasena: string }) {

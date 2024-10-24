@@ -11,6 +11,9 @@ export class PermisosService {
   private rolesAccesoCompletoPlanilla = ['OFICIAL DE PLANILLA', 'ADMINISTRADOR'];
   private rolesAccesoLimitadoPlanilla = ['CONSULTA PLANILLA', 'ADMINISTRADOR'];
 
+  private rolesAccesoCompletoEscalafon = ['ADMINISTRADOR', 'CONSULTA PRESTAMOS'];
+  private rolesAccesoLimitadoEscalafon = ['CONSULTA ESCALAFON'];
+
   constructor(private authService: AuthService) { }
 
   tieneAccesoCompletoAfiliacion(): boolean {
@@ -49,6 +52,23 @@ export class PermisosService {
     );
   }
 
+  tieneAccesoCompletoEscalafon(): boolean {
+    const rolesUsuario = this.authService.getUserRolesAndModules();
+    return rolesUsuario.some(roleModulo =>
+      roleModulo.rol === 'TODO' ||
+      (roleModulo.modulo === 'ESCALAFON' &&
+        this.rolesAccesoCompletoEscalafon.includes(roleModulo.rol))
+    );
+  }
+
+  tieneAccesoLimitadoEscalafon(): boolean {
+    const rolesUsuario = this.authService.getUserRolesAndModules();
+    return rolesUsuario.some(roleModulo =>
+      roleModulo.modulo === 'ESCALAFON' &&
+      this.rolesAccesoLimitadoEscalafon.includes(roleModulo.rol)
+    );
+  }
+
   tieneAccesoAChildAfiliacion(childTitle: string): boolean {
     if (this.tieneAccesoCompletoPlanilla()) {
       return true;
@@ -69,6 +89,16 @@ export class PermisosService {
     }
     if (this.tieneAccesoLimitadoPlanilla()) {
       return ['Proceso de Planilla', 'Ver Planillas'].includes(childTitle);
+    }
+    return false;
+  }
+
+  tieneAccesoAChildEscalafon(childTitle: string): boolean {
+    if (this.tieneAccesoCompletoEscalafon()) {
+      return true;
+    }
+    if (this.tieneAccesoLimitadoEscalafon()) {
+      return ['Detalle Envío'].includes(childTitle);
     }
     return false;
   }

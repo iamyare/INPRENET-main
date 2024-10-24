@@ -68,7 +68,7 @@ const routes: Routes = [
         path: 'escalafon',
         loadChildren: () => import('./modulos/escalafon/escalafon.module').then(m => m.EscalafonModule),
         canActivate: [RoleGuard],
-        data: { expectedRolesModules: [{ role: 'TODO' }] }
+        data: { expectedRolesModules: [{ role: 'TODO' },{ role: 'ADMINISTRADOR', module: 'ESCALAFON' }, { role: 'CONSULTA PRESTAMOS', module: 'ESCALAFON' }] }
       },
 
       { path: 'usuario/editar', component: EditarPerfilComponent },

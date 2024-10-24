@@ -52,7 +52,7 @@ export class LayoutComponent implements OnInit {
             break;
 
         case 'beneficios':
-          isSectionVisible = true;
+          isSectionVisible = this.permisosService.tieneAccesoCompletoAfiliacion() || this.permisosService.tieneAccesoLimitadoPlanilla();
           section.items.forEach(item => {
             item.children = item.children?.filter(child => {
               return this.permisosService.tieneAccesoAChilPlanilla(child.title);
@@ -65,8 +65,15 @@ export class LayoutComponent implements OnInit {
           break;
 
           case 'escalafón':
-            isSectionVisible = false
-            break;
+          isSectionVisible = this.permisosService.tieneAccesoCompletoEscalafon() || this.permisosService.tieneAccesoLimitadoEscalafon();
+          if (isSectionVisible) {
+            section.items.forEach(item => {
+              item.children = item.children?.filter(child => {
+                return this.permisosService.tieneAccesoAChildEscalafon(child.title);
+              });
+            });
+          }
+          break;
 
         default:
           isSectionVisible = false;

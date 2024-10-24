@@ -23,7 +23,7 @@ export class LayoutComponent implements OnInit {
 
       switch (section.name.toLowerCase()) {
         case 'afiliación':
-          isSectionVisible = this.permisosService.tieneAccesoCompletoPlanilla() || this.permisosService.tieneAccesoLimitadoPlanilla();
+          isSectionVisible = this.permisosService.tieneAccesoCompletoAfiliacion() || this.permisosService.tieneAccesoLimitadoPlanilla();
           if (isSectionVisible) {
             section.items.forEach(item => {
               item.children = item.children?.filter(child => {
@@ -37,7 +37,7 @@ export class LayoutComponent implements OnInit {
           break;
 
         case 'planilla':
-          isSectionVisible = this.permisosService.tieneAccesoCompletoPlanilla() || this.permisosService.tieneAccesoLimitadoPlanilla();
+          isSectionVisible = this.permisosService.tieneAccesoCompletoAfiliacion() || this.permisosService.tieneAccesoLimitadoPlanilla();
           if (isSectionVisible) {
             section.items.forEach(item => {
               item.children = item.children?.filter(child => {

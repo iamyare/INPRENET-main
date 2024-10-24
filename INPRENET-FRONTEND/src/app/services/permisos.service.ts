@@ -5,7 +5,7 @@ import { AuthService } from './auth.service';
   providedIn: 'root'
 })
 export class PermisosService {
-  private rolesAccesoCompletoAfiliacion = ['MODIFICACION AFILIACION', 'ADMINISTRADOR'];
+  private rolesAccesoCompletoAfiliacion = ['MODIFICACION AFILIACION', 'OFICIAL DE PLANILLA', 'ADMINISTRADOR'];
   private rolesAccesoLimitadoAfiliacion = ['CONSULTA AFILIACION', 'ADMINISTRADOR'];
 
   private rolesAccesoCompletoPlanilla = ['OFICIAL DE PLANILLA', 'ADMINISTRADOR'];

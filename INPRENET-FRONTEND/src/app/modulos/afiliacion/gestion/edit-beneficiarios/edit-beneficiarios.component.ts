@@ -51,10 +51,10 @@ export class EditBeneficiariosComponent implements OnInit, OnChanges {
 
   ngOnInit(): void {
     this.initializeComponent();
-    this.mostrarBotonAgregar = this.permisosService.tieneAccesoCompletoPlanilla();
-    this.mostrarBotonEditar = this.permisosService.tieneAccesoCompletoPlanilla();
-    this.mostrarBotonEliminar = this.permisosService.tieneAccesoCompletoPlanilla();
-    this.mostrarBotonAgregarDiscapacidad = this.permisosService.tieneAccesoCompletoPlanilla();
+    this.mostrarBotonAgregar = this.permisosService.tieneAccesoCompletoAfiliacion();
+    this.mostrarBotonEditar = this.permisosService.tieneAccesoCompletoAfiliacion();
+    this.mostrarBotonEliminar = this.permisosService.tieneAccesoCompletoAfiliacion();
+    this.mostrarBotonAgregarDiscapacidad = this.permisosService.tieneAccesoCompletoAfiliacion();
   }
 
   ngOnChanges(changes: SimpleChanges): void {

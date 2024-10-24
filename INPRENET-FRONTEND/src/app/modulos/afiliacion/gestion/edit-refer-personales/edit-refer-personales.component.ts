@@ -50,7 +50,7 @@ export class EditReferPersonalesComponent implements OnInit, OnChanges, OnDestro
 
   ngOnInit(): void {
     this.initializeComponent();
-    const tieneAccesoCompleto = this.permisosService.tieneAccesoCompletoPlanilla();
+    const tieneAccesoCompleto = this.permisosService.tieneAccesoCompletoAfiliacion();
     this.mostrarBotonAgregar = tieneAccesoCompleto;
     this.mostrarBotonEditar = tieneAccesoCompleto;
     this.mostrarBotonInhabilitar = tieneAccesoCompleto;

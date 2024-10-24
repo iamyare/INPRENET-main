@@ -32,8 +32,8 @@ export class EditColegiosMagisterialesComponent implements OnInit, OnChanges, On
 
   ngOnInit(): void {
     this.initializeComponent();
-    this.mostrarBotonAgregar = this.permisosService.tieneAccesoCompletoPlanilla();
-    this.mostrarBotonEliminar = this.permisosService.tieneAccesoCompletoPlanilla();
+    this.mostrarBotonAgregar = this.permisosService.tieneAccesoCompletoAfiliacion();
+    this.mostrarBotonEliminar = this.permisosService.tieneAccesoCompletoAfiliacion();
   }
 
 

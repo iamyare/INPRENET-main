@@ -53,10 +53,10 @@ export class EditPepsComponent implements OnInit, OnDestroy, OnChanges {
 
   ngOnInit(): void {
     this.initializeComponent();
-    this.mostrarBotonAgregarFamiliar = this.permisosService.tieneAccesoCompletoPlanilla();
-    this.mostrarBotonAgregarPEP = this.permisosService.tieneAccesoCompletoPlanilla();
-    this.mostrarBotonEditar = this.permisosService.tieneAccesoCompletoPlanilla();
-    this.mostrarBotonEliminar = this.permisosService.tieneAccesoCompletoPlanilla();
+    this.mostrarBotonAgregarFamiliar = this.permisosService.tieneAccesoCompletoAfiliacion();
+    this.mostrarBotonAgregarPEP = this.permisosService.tieneAccesoCompletoAfiliacion();
+    this.mostrarBotonEditar = this.permisosService.tieneAccesoCompletoAfiliacion();
+    this.mostrarBotonEliminar = this.permisosService.tieneAccesoCompletoAfiliacion();
   }
 
   ngOnChanges(changes: SimpleChanges): void {

@@ -40,7 +40,7 @@ export class EditConyugueComponent implements OnChanges {
     });
 
     // Determina la visibilidad del botón de agregar cónyuge usando el servicio
-    this.mostrarBotonAgregar = this.permisosService.tieneAccesoCompletoPlanilla();
+    this.mostrarBotonAgregar = this.permisosService.tieneAccesoCompletoAfiliacion();
   }
 
   ngOnChanges(changes: SimpleChanges): void {

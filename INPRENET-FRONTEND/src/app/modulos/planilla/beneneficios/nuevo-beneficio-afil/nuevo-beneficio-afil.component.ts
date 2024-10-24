@@ -9,6 +9,30 @@ import { unirNombres } from '../../../../shared/functions/formatoNombresP';
 import { DynamicFormComponent } from 'src/app/components/dinamicos/dynamic-form/dynamic-form.component';
 import { convertirFecha } from 'src/app/shared/functions/formatoFecha';
 import { BehaviorSubject } from 'rxjs';
+
+
+// Función de validación personalizada que retorna un mensaje de error
+export function montoTotalValidator(): ValidatorFn {
+  return (control: AbstractControl): { [key: string]: any } | null => {
+    const value = control.value;
+
+    // Si el valor no está definido o está vacío, no hacemos nada (esto se maneja con Validators.required)
+    if (!value) return null;
+
+    // Expresión regular para validar el formato: hasta 7 dígitos antes del decimal, 2 dígitos después
+    const regex = /^\d{1,7}(\.\d{1,2})?$/;
+
+    // Si no coincide con el patrón, retorna un objeto con el mensaje de error
+    if (!regex.test(value)) {
+      return { montoTotalInvalid: 'El monto debe tener hasta 7 dígitos antes del punto decimal y 2 decimales.' };
+    }
+
+    // Si todo está correcto, retorna null (sin errores)
+    return null;
+  };
+}
+
+
 function noFutureDateValidator(control: AbstractControl): ValidationErrors | null {
   const selectedDate = new Date(control.value);
   const currentDate = new Date();
@@ -117,7 +141,8 @@ export class NuevoBeneficioAfilComponent implements OnInit {
               estado: res.ESTADO,
               salario_base: res.SALARIO_BASE,
               fecha_nacimiento: convertirFecha(res.FECHA_NACIMIENTO, false),
-              beneficios: res.BENEFICIOS
+              beneficios: res.BENEFICIOS,
+              voluntario: res.VOLUNTARIO || "NO APLICA"
             };
             //const tipoPersona = item.fallecido === "SI" ? "BENEFICIARIO" : item.tipo_persona;
 
@@ -192,10 +217,10 @@ export class NuevoBeneficioAfilComponent implements OnInit {
           options: [{ label: 'APROBADO', value: 'APROBADO' }, { label: 'RECHAZADO', value: 'RECHAZADO' }],
           validations: [Validators.required], display: true
         },
-        { type: 'number', label: 'Monto total', name: 'monto_total', validations: [Validators.required, Validators.min(0)], display: true, },
-        { type: 'number', label: 'Monto por periodo', name: 'monto_por_periodo', validations: [Validators.required, Validators.min(0)], display: true, },
-        { type: 'number', label: 'Monto primera cuota', name: 'monto_primera_cuota', validations: [Validators.required, Validators.min(0)], display: true, },
-        { type: 'number', label: 'Monto útima cuota', name: 'monto_ultima_cuota', validations: [Validators.required, Validators.required, Validators.min(0)], display: true },
+        { type: 'number', label: 'Monto total', name: 'monto_total', validations: [Validators.required, Validators.min(0), montoTotalValidator()], display: true, },
+        { type: 'number', label: 'Monto por periodo', name: 'monto_por_periodo', validations: [Validators.required, Validators.min(0), montoTotalValidator()], display: true, },
+        { type: 'number', label: 'Monto primera cuota', name: 'monto_primera_cuota', validations: [Validators.required, Validators.min(0), montoTotalValidator()], display: true, },
+        { type: 'number', label: 'Monto útima cuota', name: 'monto_ultima_cuota', validations: [Validators.required, Validators.required, Validators.min(0), montoTotalValidator()], display: true },
         {
           type: 'date',
           label: 'Fecha de efectividad',
@@ -263,10 +288,10 @@ export class NuevoBeneficioAfilComponent implements OnInit {
           type: 'dropdown', label: 'Estado Solicitud', name: 'estado_solicitud',
           options: [{ label: 'APROBADO', value: 'APROBADO' }, { label: 'RECHAZADO', value: 'RECHAZADO' }], validations: [Validators.required], display: true
         },
-        { type: 'number', label: 'Monto total', name: 'monto_total', validations: [Validators.required, Validators.min(0)], display: true, },
-        { type: 'number', label: 'Monto por periodo', name: 'monto_por_periodo', validations: [Validators.required,], display: true, },
-        { type: 'number', label: 'Monto primera cuota', name: 'monto_primera_cuota', validations: [Validators.required, Validators.min(0)], display: true, },
-        { type: 'number', label: 'Monto ultima cuota', name: 'monto_ultima_cuota', validations: [Validators.required, Validators.min(0)], display: true },
+        { type: 'number', label: 'Monto total', name: 'monto_total', validations: [Validators.required, Validators.min(0), montoTotalValidator()], display: true, },
+        { type: 'number', label: 'Monto por periodo', name: 'monto_por_periodo', validations: [Validators.required, Validators.min(0), montoTotalValidator()], display: true, },
+        { type: 'number', label: 'Monto primera cuota', name: 'monto_primera_cuota', validations: [Validators.required, Validators.min(0), montoTotalValidator()], display: true, },
+        { type: 'number', label: 'Monto ultima cuota', name: 'monto_ultima_cuota', validations: [Validators.required, Validators.min(0), montoTotalValidator()], display: true },
         {
           type: 'date',
           label: 'Fecha de efectividad',

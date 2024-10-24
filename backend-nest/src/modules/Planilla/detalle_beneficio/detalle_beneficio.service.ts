@@ -700,6 +700,7 @@ export class DetalleBeneficioService {
           'afil.ESTADO_CIVIL',
           'afil.FALLECIDO',
           'tipPer.TIPO_PERSONA',
+          'detA.VOLUNTARIO',
           'prof.DESCRIPCION',
           'estadoAfil.NOMBRE_ESTADO AS ESTADO',
         ])

@@ -362,7 +362,6 @@ export class EditReferPersonalesComponent implements OnInit, OnChanges, OnDestro
           }
         });
       } else {
-        console.log('Edición cancelada.');
       }
     });
   }

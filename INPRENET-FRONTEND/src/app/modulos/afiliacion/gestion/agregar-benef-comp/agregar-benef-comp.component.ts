@@ -1,9 +1,9 @@
-import { Component, Inject, OnInit, ViewChild } from '@angular/core';
+import { Component, Inject, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, FormArray } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { ToastrService } from 'ngx-toastr';
 import { AfiliacionService } from 'src/app/services/afiliacion.service';
-import { BenefComponent } from '../benef/benef.component';
+import { DatosEstaticosService } from 'src/app/services/datos-estaticos.service';
 
 @Component({
   selector: 'app-agregar-benef-comp',
@@ -12,12 +12,14 @@ import { BenefComponent } from '../benef/benef.component';
 })
 export class AgregarBenefCompComponent implements OnInit {
   formBeneficiarios: FormGroup;
+  tipoDiscapacidad: any[] = [];
 
   constructor(
     private fb: FormBuilder,
     private afiliacionService: AfiliacionService,
     private toastr: ToastrService,
     private dialogRef: MatDialogRef<AgregarBenefCompComponent>,
+    private datosEstaticosService: DatosEstaticosService,
     @Inject(MAT_DIALOG_DATA) public data: { idPersona: string, id_detalle_persona: number }
   ) {
     this.formBeneficiarios = this.fb.group({
@@ -26,7 +28,9 @@ export class AgregarBenefCompComponent implements OnInit {
   }
 
   ngOnInit(): void {
-
+    this.datosEstaticosService.getDiscapacidades().subscribe(discapacidades => {
+      this.tipoDiscapacidad = discapacidades.map(d => d.label);
+    });
   }
 
   guardar(): void {
@@ -44,10 +48,9 @@ export class AgregarBenefCompComponent implements OnInit {
         id_municipio_residencia: beneficiario.id_municipio_residencia,
         id_municipio_nacimiento: beneficiario.id_municipio_nacimiento
       },
-      discapacidades: beneficiario.discapacidades,
+      discapacidades: this.formatDiscapacidades(this.mapDiscapacidades(beneficiario.discapacidades)),
       porcentaje: beneficiario.porcentaje || null
     }));
-
     this.afiliacionService.asignarBeneficiariosAPersona(Number(this.data.idPersona), this.data.id_detalle_persona, beneficiariosFormateados).subscribe(
       (res: any) => {
         if (res.length > 0) {
@@ -60,6 +63,19 @@ export class AgregarBenefCompComponent implements OnInit {
         console.error('Error al agregar beneficiarios al afiliado', error);
       }
     );
+  }
+
+  private mapDiscapacidades(discapacidadesArray: boolean[]): any {
+    return this.tipoDiscapacidad.reduce((acc: any, tipo: string, index: number) => {
+      acc[tipo] = discapacidadesArray[index];
+      return acc;
+    }, {});
+  }
+
+  private formatDiscapacidades(discapacidades: any): any[] {
+    return Object.keys(discapacidades)
+      .filter(key => discapacidades[key])
+      .map(key => ({ tipo_discapacidad: key }));
   }
 
   cerrar(): void {

@@ -53,12 +53,11 @@ export class EditPepsComponent implements OnInit, OnDestroy, OnChanges {
 
   ngOnInit(): void {
     this.initializeComponent();
-    this.mostrarBotonAgregarFamiliar = this.permisosService.tieneAccesoCompletoAfiliacion();
-    this.mostrarBotonAgregarPEP = this.permisosService.tieneAccesoCompletoAfiliacion();
-    this.mostrarBotonEditar = this.permisosService.tieneAccesoCompletoAfiliacion();
-    this.mostrarBotonEliminar = this.permisosService.tieneAccesoCompletoAfiliacion();
+    this.mostrarBotonAgregarFamiliar = this.permisosService.userHasPermission('AFILIACIÓN', 'afiliacion/buscar-persona', 'editar');
+    this.mostrarBotonAgregarPEP = this.permisosService.userHasPermission('AFILIACIÓN', 'afiliacion/buscar-persona', 'editar');
+    this.mostrarBotonEditar = this.permisosService.userHasPermission('AFILIACIÓN', 'afiliacion/buscar-persona', 'editar');
+    this.mostrarBotonEliminar = this.permisosService.userHasPermission('AFILIACIÓN', 'afiliacion/buscar-persona', 'editar');
   }
-
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['Afiliado'] && this.Afiliado) {
       this.initializeComponent();
@@ -123,7 +122,6 @@ export class EditPepsComponent implements OnInit, OnDestroy, OnChanges {
     if (this.Afiliado.n_identificacion) {
       try {
         const data = await this.svcAfiliado.getAllCargoPublicPeps(this.Afiliado.n_identificacion).toPromise();
-        console.log(data);
         this.filas = data.flatMap((peps: any) =>
           peps.cargo_publico.map((item: any) => ({
             cargo: item.cargo,

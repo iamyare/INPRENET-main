@@ -14,6 +14,7 @@ export class AddAdminComponent implements OnInit {
   userForm: FormGroup;
   centrosTrabajoTipoE: any[] = [];
   modulos: any[] = [];
+  tipoRol: any[] = [];  // Para almacenar los roles
 
   constructor(
     private fb: FormBuilder,
@@ -28,6 +29,7 @@ export class AddAdminComponent implements OnInit {
       numeroEmpleado: ['', Validators.required],
       centroTrabajo: ['', Validators.required],
       modulo: ['', Validators.required],
+      rol: ['', Validators.required],  // Nuevo campo para rol
     });
   }
 
@@ -48,18 +50,37 @@ export class AddAdminComponent implements OnInit {
     });
   }
 
+  onModuloChange(modulo: { label: string; value: any }): void {
+    this.cargarRolesPorModulo(modulo.label);
+  }
+
+  cargarRolesPorModulo(moduloLabel: string): void {
+    this.authService.obtenerRolesPorModulo(moduloLabel).subscribe({
+      next: (roles) => {
+        this.tipoRol = roles.map((rol: any) => ({
+          label: rol.nombre,
+          value: rol.id_rol_modulo
+        }));
+      },
+      error: (err) => {
+        console.error('Error al obtener roles:', err);
+        this.snackBar.open('Error al obtener roles', 'Cerrar', { duration: 3000 });
+      }
+    });
+  }
+
   onSubmit(): void {
     if (this.userForm.valid) {
-      const { nombreEmpleado, nombrePuesto, correo, numeroEmpleado, centroTrabajo, modulo } = this.userForm.value;
+      const { nombreEmpleado, nombrePuesto, correo, numeroEmpleado, centroTrabajo, modulo, rol } = this.userForm.value;
       const newUser = {
         nombreEmpleado,
         nombrePuesto,
         correo,
         numeroEmpleado,
         idModulo: modulo,
+        idRole: rol,
       };
-
-      this.authService.preRegistroAdmin(newUser).subscribe(
+      this.authService.preRegistro(newUser).subscribe(
         () => {
           this.snackBar.open('Usuario creado exitosamente', 'Cerrar', {
             duration: 3000

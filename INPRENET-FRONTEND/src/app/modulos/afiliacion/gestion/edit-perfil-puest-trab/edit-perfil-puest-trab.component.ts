@@ -53,9 +53,9 @@ export class EditPerfilPuestTrabComponent implements OnInit, OnDestroy, OnChange
 
   ngOnInit(): void {
     this.initializeComponent();
-    this.mostrarBotonTrab = this.permisosService.tieneAccesoCompletoAfiliacion();
-    this.mostrarBotonEditar = this.permisosService.tieneAccesoCompletoAfiliacion();
-    this.mostrarBotonEliminar = this.permisosService.tieneAccesoCompletoAfiliacion();
+    this.mostrarBotonTrab = this.permisosService.userHasPermission('AFILIACIÓN', 'afiliacion/nueva-afiliacion', 'editar');
+    this.mostrarBotonEditar = this.permisosService.userHasPermission('AFILIACIÓN', 'afiliacion/nueva-afiliacion', 'editar');
+    this.mostrarBotonEliminar = this.permisosService.userHasPermission('AFILIACIÓN', 'afiliacion/nueva-afiliacion', 'editar');
   }
 
   ngOnChanges(changes: SimpleChanges): void {

@@ -8,6 +8,7 @@ import { FieldConfig } from 'src/app/shared/Interfaces/field-config';
 import { TableColumn } from 'src/app/shared/Interfaces/table-column';
 import { convertirFechaInputs } from 'src/app/shared/functions/formatoFecha';
 import { unirNombres } from 'src/app/shared/functions/formatoNombresP';
+import { PermisosService } from 'src/app/services/permisos.service';
 
 @Component({
   selector: 'app-edit-datos-generales',
@@ -23,6 +24,7 @@ export class EditDatosGeneralesComponent implements OnInit {
   datosTabl: any[] = [];
   CausaFallecimiento: any[] = [];
   estado: any[] = [];
+  public mostrarBotonGuardar: boolean = false;
 
   tiposPersona: any[] = [
     { ID_TIPO_PERSONA: 1, TIPO_PERSONA: 'AFILIADO' },
@@ -47,7 +49,7 @@ export class EditDatosGeneralesComponent implements OnInit {
     fecha_defuncion: ["", [Validators.required]],
     id_departamento_defuncion: ["", [Validators.required]],
     id_municipio_defuncion: ["", [Validators.required]],
-    /* tipo_persona: ["", [Validators.required]] */
+    tipo_persona: ["", [Validators.required]]
     //certificado_defuncion: ["", [Validators.required]],
     //observaciones: ["", [Validators.required]],
   });
@@ -68,13 +70,19 @@ export class EditDatosGeneralesComponent implements OnInit {
     private svcAfiliado: AfiliadoService,
     private toastr: ToastrService,
     public direccionSer: DireccionService,
-    private datosEstaticosService: DatosEstaticosService
+    private datosEstaticosService: DatosEstaticosService,
+    private permisosService: PermisosService,
   ) {
     const currentYear = new Date();
     this.minDate = new Date(currentYear.getFullYear(), currentYear.getMonth(), currentYear.getDate(), currentYear.getHours(), currentYear.getMinutes(), currentYear.getSeconds());
   }
 
   ngOnInit(): void {
+    this.mostrarBotonGuardar = this.permisosService.userHasPermission(
+      'AFILIACIÓN',
+      'afiliacion/buscar-persona',
+      'editar'
+    );
 
     this.myFormFields = [
       { type: 'text', label: 'N_IDENTIFICACION del afiliado', name: 'n_identificacion', validations: [Validators.required, Validators.minLength(13), Validators.maxLength(14)], display: true },
@@ -322,7 +330,7 @@ export class EditDatosGeneralesComponent implements OnInit {
           this.form1.controls.causa_fallecimiento.setValue(result?.ID_CAUSA_FALLECIMIENTO);
           this.form1.controls.id_departamento_defuncion.setValue(result?.ID_DEPARTAMENTO_DEFUNCION);
           this.form1.controls.id_municipio_defuncion.setValue(result?.ID_MUNICIPIO_DEFUNCION);
-          /* this.form1.controls.tipo_persona.setValue(result?.ID_TIPO_PERSONA) */
+          this.form1.controls.tipo_persona.setValue(result?.ID_TIPO_PERSONA)
           //this.form1.controls.estado.setValue('ACTIVO');
 
           //this.form1.controls.certificado_defuncion.setValue(result?.certificado_defuncion)

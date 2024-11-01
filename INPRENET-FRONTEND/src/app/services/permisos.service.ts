@@ -5,101 +5,189 @@ import { AuthService } from './auth.service';
   providedIn: 'root'
 })
 export class PermisosService {
-  private rolesAccesoCompletoAfiliacion = ['MODIFICACION AFILIACION', 'OFICIAL DE PLANILLA', 'ADMINISTRADOR'];
-  private rolesAccesoLimitadoAfiliacion = ['CONSULTA AFILIACION', 'ADMINISTRADOR'];
+  constructor(private authService: AuthService) {}
 
-  private rolesAccesoCompletoPlanilla = ['OFICIAL DE PLANILLA', 'ADMINISTRADOR'];
-  private rolesAccesoLimitadoPlanilla = ['CONSULTA PLANILLA', 'ADMINISTRADOR'];
+  private static permisosPorModulo: Record<string, {
+    rutas: Record<string, { title: string; permisos: { role: string; module: string, permiso?: string }[] }>;
+  }> = {
+    MANTENIMIENTO: {
+      rutas: {
+        'afiliacion/mantenimiento': {
+          title: 'Mantenimiento',
+          permisos: [
+            { role: 'ADMINISTRADOR', module: 'AFILIACION' }
+          ]
+        }
+      }
+    },
+    'GESTIÓN DE PERSONAL': {
+      rutas: {
+        'gestion/usuarios/editar-usuarios': {
+          title: 'Gestión de Usuarios',
+          permisos: [
+          ]
+        },
+        'gestion/usuarios/nuevo-usuario': {
+          title: 'Nuevo Usuario',
+          permisos: [
+          ]
+        }
+      }
+    },
+    AFILIACIÓN: {
+      rutas: {
+        'afiliacion/nueva-afiliacion': {
+          title: 'Nueva Afiliación',
+          permisos: [
+            { role: 'MODIFICACION AFILIACION', module: 'AFILIACION', permiso: 'editar' },
+            { role: 'CONSULTA AFILIACION', module: 'AFILIACION', permiso: 'ver' },
+            { role: 'ADMINISTRADOR', module: 'AFILIACION', permiso: 'editar' }
+          ]
+        },
+        'afiliacion/buscar-persona': {
+          title: 'Buscar Persona',
+          permisos: [
+            { role: 'CONSULTA AFILIACION', module: 'AFILIACION' },
+            { role: 'MODIFICACION AFILIACION', module: 'AFILIACION', permiso: 'editar' },
+            { role: 'ADMINISTRADOR', module: 'AFILIACION' }
+          ]
+        },
+        'afiliacion/nuevo-centro': {
+          title: 'Nuevo Centro Educativo',
+          permisos: [
+            { role: 'MODIFICACION AFILIACION', module: 'AFILIACION' },
+            { role: 'ADMINISTRADOR', module: 'AFILIACION' }
+          ]
+        },
+        'afiliacion/ver-datos-centro': {
+          title: 'Ver Centro Educativo',
+          permisos: [
+            { role: 'CONSULTA AFILIACION', module: 'AFILIACION' },
+            { role: 'ADMINISTRADOR', module: 'AFILIACION' }
+          ]
+        }
+      }
+    },
+    BENEFICIOS: {
+      rutas: {
+        'planilla/Beneficios/nuevo-beneficio-afil': {
+          title: 'Asignar Beneficio',
+          permisos: [
+            { role: 'ADMINISTRADOR', module: 'PLANILLA' },
+            { role: 'OFICIAL DE PLANILLA', module: 'PLANILLA' }
+          ]
+        },
+        'planilla/Beneficios/Ver-editar-beneficio-afil': {
+          title: 'Ver Beneficios Asignados',
+          permisos: [
+            { role: 'ADMINISTRADOR', module: 'PLANILLA' },
+            { role: 'CONSULTA PLANILLA', module: 'PLANILLA' }
+          ]
+        }
+      }
+    },
+    PLANILLA: {
+      rutas: {
+        'planilla/Egresos/cargar-fallecidos': {
+          title: 'Cargar Bajas (FALLECIDOS)',
+          permisos: [
+            { role: 'ADMINISTRADOR', module: 'PLANILLA' },
+            { role: 'OFICIAL DE PLANILLA', module: 'PLANILLA' },
+          ]
+        },
+        'planilla/Egresos/editar-banco': {
+          title: 'Cambiar Cuenta Bancaria',
+          permisos: [
+            { role: 'ADMINISTRADOR', module: 'PLANILLA' },
+            { role: 'OFICIAL DE PLANILLA', module: 'PLANILLA' }
+          ]
+        },
+        'planilla/Egresos/proceso-planilla': {
+          title: 'Proceso de Planilla',
+          permisos: [
+            { role: 'ADMINISTRADOR', module: 'PLANILLA' },
+            { role: 'OFICIAL DE PLANILLA', module: 'PLANILLA' },
+          ]
+        },
+        'planilla/Egresos/ver-planillas': {
+          title: 'Ver Todas Las Planillas',
+          permisos: [
+            { role: 'ADMINISTRADOR', module: 'PLANILLA' },
+            { role: 'CONSULTA PLANILLA', module: 'PLANILLA' },
+          ]
+        },
+        'planilla/Egresos/documentos-planilla': {
+          title: 'Generación de Documentos',
+          permisos: [
+            { role: 'ADMINISTRADOR', module: 'PLANILLA' },
+            { role: 'OFICIAL DE PLANILLA', module: 'PLANILLA' },
+          ]
+        }
+      }
+    },
+    'CUENTAS INPREMA': {
+      rutas: {
+        'cuentas/Movimientos/Ver-movimientos': {
+          title: 'Ver Movimiento',
+          permisos: [
+            { role: 'ADMINISTRADOR', module: 'CUENTAS INPREMA' },
+            { role: 'ADMINISTRADOR', module: 'ESCALAFON' }
+          ]
+        }
+      }
+    },
+    ESCALAFÓN: {
+      rutas: {
+        'escalafon/detalle-envio': {
+          title: 'Detalle Envío',
+          permisos: [
+            { role: 'CONSULTA PRESTAMOS', module: 'ESCALAFON' },
+            { role: 'ADMINISTRADOR', module: 'ESCALAFON' }
+          ]
+        }
+      }
+    }
+  };
 
-  private rolesAccesoCompletoEscalafon = ['ADMINISTRADOR', 'CONSULTA PRESTAMOS'];
-  private rolesAccesoLimitadoEscalafon = ['CONSULTA ESCALAFON'];
+  static getExpectedRolesForRoute(module: keyof typeof PermisosService.permisosPorModulo, route: string) {
+    return PermisosService.permisosPorModulo[module]?.rutas[route]?.permisos || [];
+  }
 
-  constructor(private authService: AuthService) { }
-
-  tieneAccesoCompletoAfiliacion(): boolean {
-    const rolesUsuario = this.authService.getUserRolesAndModules();
-    return rolesUsuario.some(roleModulo =>
-      roleModulo.rol === 'TODO' ||
-      (
-        (roleModulo.modulo === 'AFILIACION' || roleModulo.modulo === 'PLANILLA') &&
-        this.rolesAccesoCompletoAfiliacion.includes(roleModulo.rol)
+  userHasAccess(module: string, route: string): boolean {
+    const rolesForRoute = PermisosService.getExpectedRolesForRoute(module, route);
+    const userRolesAndModules = this.authService.getUserRolesAndModules();
+    const hasGlobalAccess = userRolesAndModules.some(userRole => userRole.rol === 'TODO' && userRole.modulo === 'TODO');
+    if (hasGlobalAccess) {
+      return true;
+    }
+    return userRolesAndModules.some(userRole =>
+      rolesForRoute.some(role =>
+        role.role.toLowerCase().trim() === userRole.rol.toLowerCase().trim() &&
+        role.module.toLowerCase().trim() === userRole.modulo.toLowerCase().trim()
       )
     );
   }
 
-  tieneAccesoLimitadoAfiliacion(): boolean {
-    const rolesUsuario = this.authService.getUserRolesAndModules();
-    return rolesUsuario.some(roleModulo =>
-      (roleModulo.modulo === 'AFILIACION') &&
-      this.rolesAccesoLimitadoAfiliacion.includes(roleModulo.rol)
-    );
+  getTitleForRoute(module: string, route: string): string | null {
+    return PermisosService.permisosPorModulo[module]?.rutas[route]?.title || null;
   }
 
-  tieneAccesoCompletoPlanilla(): boolean {
-    const rolesUsuario = this.authService.getUserRolesAndModules();
-    return rolesUsuario.some(roleModulo =>
-      roleModulo.rol === 'TODO' ||
-      (roleModulo.modulo === 'PLANILLA' &&
-        this.rolesAccesoCompletoPlanilla.includes(roleModulo.rol))
+  userHasPermission(module: string, route: string, permiso: string): boolean {
+    const rolesForRoute = PermisosService.getExpectedRolesForRoute(module, route);
+    const userRolesAndModules = this.authService.getUserRolesAndModules();
+    const hasGlobalAccess = userRolesAndModules.some(userRole =>
+      userRole.rol === 'TODO' && userRole.modulo === 'TODO'
     );
-  }
-
-  tieneAccesoLimitadoPlanilla(): boolean {
-    const rolesUsuario = this.authService.getUserRolesAndModules();
-    return rolesUsuario.some(roleModulo =>
-      roleModulo.modulo === 'PLANILLA' &&
-      this.rolesAccesoLimitadoPlanilla.includes(roleModulo.rol)
-    );
-  }
-
-  tieneAccesoCompletoEscalafon(): boolean {
-    const rolesUsuario = this.authService.getUserRolesAndModules();
-    return rolesUsuario.some(roleModulo =>
-      roleModulo.rol === 'TODO' ||
-      (roleModulo.modulo === 'ESCALAFON' &&
-        this.rolesAccesoCompletoEscalafon.includes(roleModulo.rol))
-    );
-  }
-
-  tieneAccesoLimitadoEscalafon(): boolean {
-    const rolesUsuario = this.authService.getUserRolesAndModules();
-    return rolesUsuario.some(roleModulo =>
-      roleModulo.modulo === 'ESCALAFON' &&
-      this.rolesAccesoLimitadoEscalafon.includes(roleModulo.rol)
-    );
-  }
-
-  tieneAccesoAChildAfiliacion(childTitle: string): boolean {
-    if (this.tieneAccesoCompletoPlanilla()) {
+    if (hasGlobalAccess) {
       return true;
     }
-    if (this.tieneAccesoLimitadoAfiliacion()) {
-      return ['Buscar Persona', 'Ver Centro Educativo'].includes(childTitle);
-    }
-    if (childTitle === 'Cambiar Cuenta Bancaria') {
-      return ['Cambiar Cuenta Bancaria'].includes(childTitle);
-    }
-
-    return false;
+    return userRolesAndModules.some(userRole =>
+      rolesForRoute.some(role =>
+        role.role.toLowerCase().trim() === userRole.rol.toLowerCase().trim() &&
+        role.module.toLowerCase().trim() === userRole.modulo.toLowerCase().trim() &&
+        (role.permiso === permiso || role.permiso === 'todos')
+      )
+    );
   }
 
-  tieneAccesoAChilPlanilla(childTitle: string): boolean {
-    if (this.tieneAccesoCompletoPlanilla()) {
-      return true;
-    }
-    if (this.tieneAccesoLimitadoPlanilla()) {
-      return ['Proceso de Planilla', 'Ver Planillas'].includes(childTitle);
-    }
-    return false;
-  }
-
-  tieneAccesoAChildEscalafon(childTitle: string): boolean {
-    if (this.tieneAccesoCompletoEscalafon()) {
-      return true;
-    }
-    if (this.tieneAccesoLimitadoEscalafon()) {
-      return ['Detalle Envío'].includes(childTitle);
-    }
-    return false;
-  }
 }

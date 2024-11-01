@@ -130,8 +130,13 @@
 
     <!-- <app-maps></app-maps> -->
 
-    <button mat-raised-button color="primary" style="color: white; margin: 1% 0 1% 0" (click)="GuardarInformacion()">
-      Guardar
-    </button>
+    <button
+    mat-raised-button
+    color="primary"
+    style="color: white; margin: 1% 0 1% 0"
+    (click)="GuardarInformacion()"
+    *ngIf="mostrarBotonGuardar">
+    Guardar
+  </button>
   </div>
 </div>

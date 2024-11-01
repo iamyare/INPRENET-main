@@ -39,8 +39,7 @@ export class EditConyugueComponent implements OnChanges {
       })
     });
 
-    // Determina la visibilidad del botón de agregar cónyuge usando el servicio
-    this.mostrarBotonAgregar = this.permisosService.tieneAccesoCompletoAfiliacion();
+    this.mostrarBotonAgregar = this.permisosService.userHasPermission('AFILIACIÓN', 'afiliacion/buscar-persona', 'editar');
   }
 
   ngOnChanges(changes: SimpleChanges): void {

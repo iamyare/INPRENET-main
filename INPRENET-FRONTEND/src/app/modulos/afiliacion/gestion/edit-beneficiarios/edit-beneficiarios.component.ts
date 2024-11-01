@@ -51,10 +51,10 @@ export class EditBeneficiariosComponent implements OnInit, OnChanges {
 
   ngOnInit(): void {
     this.initializeComponent();
-    this.mostrarBotonAgregar = this.permisosService.tieneAccesoCompletoAfiliacion();
-    this.mostrarBotonEditar = this.permisosService.tieneAccesoCompletoAfiliacion();
-    this.mostrarBotonEliminar = this.permisosService.tieneAccesoCompletoAfiliacion();
-    this.mostrarBotonAgregarDiscapacidad = this.permisosService.tieneAccesoCompletoAfiliacion();
+    this.mostrarBotonAgregar = this.permisosService.userHasPermission('AFILIACIÓN', 'afiliacion/buscar-persona', 'editar');
+    this.mostrarBotonEditar = this.permisosService.userHasPermission('AFILIACIÓN', 'afiliacion/buscar-persona', 'editar');
+    this.mostrarBotonEliminar = this.permisosService.userHasPermission('AFILIACIÓN', 'afiliacion/buscar-persona', 'editar');
+    this.mostrarBotonAgregarDiscapacidad = this.permisosService.userHasPermission('AFILIACIÓN', 'afiliacion/buscar-persona', 'editar')
   }
 
   ngOnChanges(changes: SimpleChanges): void {
@@ -100,8 +100,8 @@ export class EditBeneficiariosComponent implements OnInit, OnChanges {
           const discapacidades = Array.isArray(item.discapacidades)
             ? item.discapacidades.map((disc: any) => disc.tipoDiscapacidad).join(', ')
             : '';
-
           const respData = {
+            idDetallePersona : item.idDetallePersona,
             id_causante: item.ID_CAUSANTE_PADRE,
             id_persona: item.idPersona,
             n_identificacion: item.nIdentificacion,
@@ -153,7 +153,7 @@ export class EditBeneficiariosComponent implements OnInit, OnChanges {
           id_persona: row.id_persona,
           porcentaje: result.porcentaje
         };
-        this.svcAfiliado.updateBeneficiario(row.id, updatedBeneficiario).subscribe(
+        this.svcAfiliado.updateBeneficiario(row.idDetallePersona, updatedBeneficiario).subscribe(
           (response) => {
             this.toastr.success('Beneficiario actualizado exitosamente');
             this.getFilas().then(() => {
@@ -206,12 +206,19 @@ export class EditBeneficiariosComponent implements OnInit, OnChanges {
   }
 
   AgregarBeneficiario() {
+    const afiliadoDetalle = this.persona.detallePersona.find(
+      (detalle: any) => detalle.tipoPersona && detalle.tipoPersona.tipo_persona === 'AFILIADO'
+    );
+    if (!afiliadoDetalle) {
+      this.toastr.error("No se encontró un registro de tipo 'AFILIADO'");
+      return;
+    }
     const dialogRef = this.dialog.open(AgregarBenefCompComponent, {
       width: '55%',
       height: '75%',
       data: {
         idPersona: this.persona.id_persona,
-        id_detalle_persona: this.persona.detallePersona[0].ID_DETALLE_PERSONA
+        id_detalle_persona: afiliadoDetalle.ID_DETALLE_PERSONA
       }
     });
     dialogRef.afterClosed().subscribe((result: any) => {
@@ -278,7 +285,6 @@ export class EditBeneficiariosComponent implements OnInit, OnChanges {
               }
             );
           }
-
         }
       });
     });

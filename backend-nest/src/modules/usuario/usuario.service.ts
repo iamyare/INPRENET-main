@@ -444,7 +444,7 @@ export class UsuarioService {
 
     return this.empleadoRepository.save(empleado);
   }
-  
+
   async getRolesPorEmpresa(centroId: number) {
     /* return this.rolEmpresaRepository.find({
       where: {
@@ -646,7 +646,7 @@ export class UsuarioService {
       .innerJoinAndSelect('rol.modulo', 'modulo')
       .where('modulo.nombre = :modulo', { modulo })
       .getMany();
-}
+  }
 
   async obtenerModulosPorCentroTrabajo(idCentroTrabajo: number): Promise<net_modulo[]> {
     return this.moduloRepository.find({
@@ -722,12 +722,12 @@ export class UsuarioService {
         <p>Si tienes alguna pregunta o necesitas asistencia, no dudes en contactarnos.</p>
         <p>El equipo de <strong><span style="color: #14776B;">INPRE</span><span style="color: #33E4DC;">NET</span></strong></p>
       </div>`;
-  
+
     const textoPlano = `Hola,\n\nHas solicitado restablecer tu contraseña en nuestra plataforma INPRENET.\n\nPara hacerlo, por favor, haz clic en el siguiente enlace o cópialo en tu navegador: ${urlRestablecimiento}\n\nSi no solicitaste este cambio, puedes ignorar este correo.\n\nEl equipo de INPRENET`;
-  
+
     await this.mailService.sendMail(correo, asunto, textoPlano, htmlContent);
   }
-  
+
   async restablecerContrasena(token: string, nuevaContrasena: string): Promise<void> {
     let payload;
 

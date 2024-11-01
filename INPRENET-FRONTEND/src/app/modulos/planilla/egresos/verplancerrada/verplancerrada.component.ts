@@ -372,10 +372,12 @@ export class VerplancerradaComponent {
         }
       });
 
+
       let data = detallePersona.flatMap((detalle: { detalleBeneficio: any[]; ID_DETALLE_PERSONA: number; }) => {
         return detalle.detalleBeneficio.map((beneficio: any) => {
           const montoPorPeriodo = beneficio.monto_por_periodo;
           sumaBeneficios += montoPorPeriodo;
+          console.log(beneficio);
 
           return {
             CAUSANTE: causantesMap.get(detalle.ID_DETALLE_PERSONA) || 'NO APLICA',
@@ -383,10 +385,15 @@ export class VerplancerradaComponent {
             MontoAPagar: montoPorPeriodo,
             METODO_PAGO: beneficio.metodo_pago,
             NOMBRE_BANCO: beneficio.detallePagBeneficio[0]?.personaporbanco?.banco?.nombre_banco || 'NO PROPORCIONADO',
-            NUM_CUENTA: beneficio.detallePagBeneficio[0]?.personaporbanco?.num_cuenta || 'NO PROPORCIONADO'
+            NUM_CUENTA: beneficio.detallePagBeneficio[0]?.personaporbanco?.num_cuenta || 'NO PROPORCIONADO',
+            NUMERO_PAGOS: beneficio.detallePagBeneficio[0]?.planilla?.numero_pagos || 'NO PROPORCIONADO',
+            NUMERO_LOTE: beneficio.detallePagBeneficio[0]?.planilla?.numero_lote || 'NO PROPORCIONADO'
           };
         });
       });
+
+      console.log(data);
+
 
       let tablaDed: any = {};
 
@@ -463,12 +470,14 @@ export class VerplancerradaComponent {
               },
               {
                 table: {
-                  widths: ['*', '*'],
+                  widths: ['*', '*', '*', '*'],
                   body: [
-                    [{ text: 'INGRESO', style: 'tableHeader' }, { text: 'MONTO INGRESO', style: ['tableHeader', 'alignRight'] }],
+                    [{ text: 'INGRESO', style: 'tableHeader' }, { text: 'NÚMERO DE PAGO', style: 'tableHeader' }, { text: 'LOTE', style: 'tableHeader' }, { text: 'MONTO INGRESO', style: ['tableHeader', 'alignRight'] }],
                     ...data.map((b: any) => {
                       return [
                         { text: b.NOMBRE_BENEFICIO },
+                        { text: b.NUMERO_PAGOS },
+                        { text: b.NUMERO_LOTE },
                         { text: formatCurrency(b.MontoAPagar), style: 'alignRight' },
                       ];
                     })

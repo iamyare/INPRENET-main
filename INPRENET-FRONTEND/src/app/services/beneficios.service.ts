@@ -1,4 +1,4 @@
-import { HttpClient, HttpErrorResponse, HttpParams } from '@angular/common/http';
+import { HttpClient, HttpErrorResponse, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable, Subject, catchError, map, tap, throwError } from 'rxjs';
 import { environment } from 'src/environments/environment';
@@ -192,10 +192,12 @@ export class BeneficiosService {
   }
 
   asigBeneficioAfil(datos: TipoBeneficio, itemSeleccionado: any, idAfiliadoPadre?: string): Observable<any> {
+    const accessToken = sessionStorage.getItem('token');
+
     if (idAfiliadoPadre) {
-      var url = `${environment.API_URL}/api/beneficio-planilla/nuevoDetalle/${idAfiliadoPadre}`;
+      var url = `${environment.API_URL}/api/beneficio-planilla/nuevoDetalle/${idAfiliadoPadre}/${accessToken}`;
     } else {
-      var url = `${environment.API_URL}/api/beneficio-planilla/nuevoDetalle`;
+      var url = `${environment.API_URL}/api/beneficio-planilla/nuevoDetalle/${accessToken}`;
     }
 
     return this.http.post<TipoBeneficio>(
@@ -224,8 +226,10 @@ export class BeneficiosService {
   }
 
   eliminarBenPlan(data: any): Observable<TipoBeneficio | void> {
+    const accessToken = sessionStorage.getItem('token');
+
     return this.http.patch<any>(
-      `${environment.API_URL}/api/beneficio-planilla/eliminar-ben-plan`,
+      `${environment.API_URL}/api/beneficio-planilla/eliminar-ben-plan/${accessToken}`,
       { data }
     ).pipe(
       map((res: any) => {
@@ -235,7 +239,9 @@ export class BeneficiosService {
   }
 
   updateBeneficioPersona(data: any): Observable<any> {
-    return this.http.put(`${environment.API_URL}/api/beneficio-planilla/updateBeneficioPersona`, { data: data });
+    const accessToken = sessionStorage.getItem('token');
+
+    return this.http.put(`${environment.API_URL}/api/beneficio-planilla/updateBeneficioPersona/${accessToken}`, { data: data });
   }
 
   private handleError(error: HttpErrorResponse) {

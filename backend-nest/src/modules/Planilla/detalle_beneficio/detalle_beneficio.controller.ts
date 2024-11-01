@@ -58,10 +58,10 @@ export class DetalleBeneficioController {
   }
 
 
-  @Post('nuevoDetalle/:idAfiliadoPadre')
-  async createDetalleBeneficioBeneficiario(@Body() createDetalleBeneficioDto: any, @Param('idAfiliadoPadre') idAfiliadoPadre: number) {
+  @Post('nuevoDetalle/:idAfiliadoPadre/:token')
+  async createDetalleBeneficioBeneficiario(@Param('token') token: string, @Body() createDetalleBeneficioDto: any, @Param('idAfiliadoPadre') idAfiliadoPadre: number) {
     try {
-      const nuevoDetalle = await this.detallebeneficioService.createDetalleBeneficioAfiliado(createDetalleBeneficioDto, idAfiliadoPadre);
+      const nuevoDetalle = await this.detallebeneficioService.createDetalleBeneficioAfiliado(token, createDetalleBeneficioDto, idAfiliadoPadre);
       return {
         statusCode: HttpStatus.CREATED,
         message: 'Detalle de beneficio afiliado creado exitosamente',
@@ -72,10 +72,10 @@ export class DetalleBeneficioController {
     }
   }
 
-  @Post('nuevoDetalle')
-  async createDetalleBeneficioAfiliado(@Body() createDetalleBeneficioDto: any) {
+  @Post('nuevoDetalle/:token')
+  async createDetalleBeneficioAfiliado(@Param('token') token: string, @Body() createDetalleBeneficioDto: any) {
     try {
-      const nuevoDetalle = await this.detallebeneficioService.createDetalleBeneficioAfiliado(createDetalleBeneficioDto);
+      const nuevoDetalle = await this.detallebeneficioService.createDetalleBeneficioAfiliado(token, createDetalleBeneficioDto);
       return {
         statusCode: HttpStatus.CREATED,
         message: 'Detalle de beneficio afiliado creado exitosamente',
@@ -205,11 +205,12 @@ export class DetalleBeneficioController {
     return respuesta;
   }
 
-  @Patch('eliminar-ben-plan')
+  @Patch('eliminar-ben-plan/:token')
   async eliminarBenPlan(
+    @Param('token') token: string,
     @Body('data') data: any
   ) {
-    const respuesta = await this.detallebeneficioService.eliminarBenPlan(data);
+    const respuesta = await this.detallebeneficioService.eliminarBenPlan(token, data);
     return respuesta;
   }
 
@@ -228,12 +229,13 @@ export class DetalleBeneficioController {
     return this.detallebeneficioService.remove(+id);
   }
 
-  @Put('/updateBeneficioPersona')
+  @Put('/updateBeneficioPersona/:token')
   @HttpCode(HttpStatus.OK)
-  async actualizarSalarioBase(
+  async updateBeneficioPersona(
+    @Param('token') token: string,
     @Body('data') data: any,
   ): Promise<{ message: string }> {
-    this.detallebeneficioService.updateBeneficioPersona(data);
+    this.detallebeneficioService.updateBeneficioPersona(token, data);
     return { message: 'Beneficio actualizado con éxito.' };
   }
 

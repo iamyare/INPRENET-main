@@ -24,7 +24,7 @@ export class net_detalle_persona {
     @Column('varchar2', { length: 2, nullable: true, name: 'ELIMINADO', default: "NO" })
     eliminado: string;
 
-    @Column('varchar2', { length: 2, nullable: false, name: 'VOLUNTARIO', default: 'NO' }) 
+    @Column('varchar2', { length: 2, nullable: false, name: 'VOLUNTARIO', default: 'NO' })
     voluntario: string;
 
     @ManyToOne(() => net_persona, persona => persona.detallePersona)
@@ -60,10 +60,13 @@ export class net_detalle_persona {
     @ManyToOne(() => Net_Usuario_Empresa, usuarioEmpresa => usuarioEmpresa.detallePersonas, { nullable: true })
     @JoinColumn({ name: 'ID_USUARIO_EMPRESA', referencedColumnName: 'id_usuario_empresa', foreignKeyConstraintName: 'FK_ID_USUARIO_EMPRESA_DET_PERSONA' })
     usuarioEmpresa: Net_Usuario_Empresa;
-    
+
     @Column({ type: 'int', nullable: true, name: 'ID_USUARIO_EMPRESA' })
     ID_USUARIO_EMPRESA: number;
 
     @Column({ type: 'date', nullable: true, name: 'FECHA_AFILIACION' })
     fecha_afiliacion: Date;
+
+    @Column('varchar2', { length: 500, nullable: true, name: 'OBSERVACION' })
+    observacion: string;
 }

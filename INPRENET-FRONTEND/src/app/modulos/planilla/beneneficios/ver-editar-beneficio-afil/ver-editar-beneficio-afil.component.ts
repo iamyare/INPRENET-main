@@ -238,20 +238,22 @@ export class VerEditarBeneficioAfilComponent {
 
   getFilas2 = async () => {
     try {
-
       const datas = await this.afiliadoDVC.findTipoPersonaByN_ident(this.form.value.dni).toPromise();
 
-      const dataEstadosAfil = datas.map((item: any) => ({
-        tipo_persona: item.tipoPersona.tipo_persona,
-        estado_persona: item?.estadoAfiliacion?.nombre_estado,
-        dni_causante: item.padreIdPersona?.persona?.n_identificacion || "NO APLICA",
-      }));
+      if (datas) {
+        const dataEstadosAfil = datas.map((item: any) => ({
+          tipo_persona: item.tipoPersona.tipo_persona,
+          estado_persona: item?.estadoAfiliacion?.nombre_estado,
+          dni_causante: item.padreIdPersona?.persona?.n_identificacion || "NO APLICA",
+        }));
 
-      this.filasEst = dataEstadosAfil;
-      console.log(this.filasEst);
+        this.filasEst = dataEstadosAfil;
 
+        return this.filasEst;
+      } else {
+        return []
+      }
 
-      return this.filasEst;
     } catch (error) {
       console.error("Error al obtener los detalles completos de deducción", error);
       throw error;

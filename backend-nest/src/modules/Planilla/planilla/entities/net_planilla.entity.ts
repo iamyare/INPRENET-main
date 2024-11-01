@@ -30,6 +30,12 @@ export class Net_Planilla {
     @Column('varchar2', { nullable: true, default: 'ACTIVA', name: 'ESTADO' })
     estado: string;
 
+    @Column('varchar2', { nullable: true, name: 'NUMERO_PAGOS' })
+    numero_pagos: string;
+
+    @Column('varchar2', { nullable: true, name: 'NUMERO_LOTE' })
+    numero_lote: number;
+
     @Column('varchar2', { nullable: false, name: 'PERIODO_INICIO' })
     periodoInicio: string;
 

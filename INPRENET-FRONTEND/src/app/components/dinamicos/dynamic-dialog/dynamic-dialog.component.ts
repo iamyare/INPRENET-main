@@ -19,7 +19,7 @@ export class DynamicDialogComponent implements OnInit {
   mostrarAccion: boolean = false;
 
   constructor(
-    @Inject(MAT_DIALOG_DATA) public data: { logs: any[], mostrarAccion: boolean },
+    @Inject(MAT_DIALOG_DATA) public data: { cod_planilla: string, logs: any[], mostrarAccion: boolean },
     private deduccionSVC: DeduccionesService,
     private detBenSVC: BeneficiosService,
     private toastr: ToastrService,
@@ -57,8 +57,12 @@ export class DynamicDialogComponent implements OnInit {
       ID_PERSONA: element.ID_PERSONA,
       ID_CAUSANTE: element.ID_CAUSANTE,
       ID_BENEFICIO: element.ID_BENEFICIO,
-      observacion: element.observacion
+      observacion: element.observacion,
+      cod_planilla: this.data.cod_planilla
     };
+
+    console.log(data);
+
 
     this.detBenSVC.eliminarBenPlan(data).subscribe(
       (response) => {

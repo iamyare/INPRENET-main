@@ -19,12 +19,18 @@ import * as XLSX from 'xlsx';
 import { MailService } from 'src/common/services/mail.service';
 import * as path from 'path';
 import * as fs from 'fs';
+import { JwtService } from '@nestjs/jwt';
+import { Net_Usuario_Empresa } from 'src/modules/usuario/entities/net_usuario_empresa.entity';
 
 @Injectable()
 export class PlanillaService {
   private readonly logger = new Logger(PlanillaService.name)
 
+  @InjectRepository(Net_Usuario_Empresa)
+  private readonly usuarioEmpRepository: Repository<Net_Usuario_Empresa>
+
   constructor(
+    private jwtService: JwtService,
     @InjectEntityManager() private entityManager: EntityManager,
     @InjectRepository(Net_Planilla)
     private planillaRepository: Repository<Net_Planilla>,
@@ -677,7 +683,7 @@ export class PlanillaService {
     periodoFinalizacion: string,
     idTiposPlanilla: number[],
   ): Promise<any[]> {
-  
+
     const query = `
       SELECT 
         ben."ID_BENEFICIO" AS "ID_BENEFICIO",
@@ -701,13 +707,13 @@ export class PlanillaService {
         plan.ESTADO = 'CERRADA'
         AND plan."PERIODO_FINALIZACION" <= TO_DATE(:periodoFinalizacion, 'DD/MM/YYYY')
         AND plan."ID_TIPO_PLANILLA" IN (${idTiposPlanilla.join(', ')})
-        AND detBs."ESTADO" != 'RECHAZADO'
+        AND detBs."ESTADO" != 'RECHAZADO' AND detBs.ESTADO != 'NO PAGADA'
       GROUP BY 
         ben."ID_BENEFICIO", 
         ben."NOMBRE_BENEFICIO", 
         ben."CODIGO",
         plan."ID_PLANILLA"
-      ORDER BY ben."NOMBRE_BENEFICIO" ASC
+      ORDER BY ben."ID_BENEFICIO" ASC
     `;
     try {
       const result = await this.entityManager.query(query, [periodoInicio, periodoFinalizacion]);
@@ -717,7 +723,7 @@ export class PlanillaService {
       throw new InternalServerErrorException('Error al obtener beneficios');
     }
   }
-  
+
   async getDeduccionesInpremaPorPeriodo(
     periodoInicio: string,
     periodoFinalizacion: string,
@@ -758,7 +764,7 @@ export class PlanillaService {
       throw new InternalServerErrorException('Error al obtener deducciones INPREMA');
     }
   }
-  
+
   async getDeduccionesTercerosPorPeriodo(
     periodoInicio: string,
     periodoFinalizacion: string,
@@ -799,7 +805,7 @@ export class PlanillaService {
       throw new InternalServerErrorException('Error al obtener deducciones de terceros');
     }
   }
-  
+
   async getBeneficiosPorPeriodoSC(
     periodoInicio: string,
     periodoFinalizacion: string,
@@ -841,7 +847,7 @@ export class PlanillaService {
       throw new InternalServerErrorException('Error al obtener beneficios sin cuenta');
     }
   }
-  
+
   async getDeduccionesInpremaPorPeriodoSC(
     periodoInicio: string,
     periodoFinalizacion: string,
@@ -965,7 +971,7 @@ export class PlanillaService {
         COALESCE(b."NOMBRE_BANCO", 'SIN BANCO')
     `;
 
-      const deduccionesInpremaQuery = `
+    const deduccionesInpremaQuery = `
       SELECT
         COALESCE(b."NOMBRE_BANCO", 'SIN BANCO') AS NOMBRE_BANCO,
         SUM(ddp."MONTO_APLICADO") AS SUMA_DEDUCCIONES_INPREMA
@@ -984,7 +990,7 @@ export class PlanillaService {
         COALESCE(b."NOMBRE_BANCO", 'SIN BANCO')
   `;
 
-      const deduccionesTercerosQuery = `
+    const deduccionesTercerosQuery = `
       SELECT
         COALESCE(b."NOMBRE_BANCO", 'SIN BANCO') AS NOMBRE_BANCO,
         SUM(ddp."MONTO_APLICADO") AS SUMA_DEDUCCIONES_TERCEROS
@@ -1917,13 +1923,22 @@ export class PlanillaService {
     }
   }
 
-  async generarPlanillaComplementaria(tipos_persona: string): Promise<void> {
+  async generarPlanillaComplementaria(token: string, tipos_persona: string): Promise<void> {
+
+    const decoded = this.jwtService.verify(token);
+    const estadoPP = await this.usuarioEmpRepository.findOne({ where: { empleadoCentroTrabajo: { correo_1: decoded?.correo } } });
+    const id_usuario_empresa_in = estadoPP.id_usuario_empresa;
+
+    console.log(token);
+    console.log(decoded);
+    console.log(id_usuario_empresa_in);
+
     try {
       await this.entityManager.query(
         `BEGIN
-           InsertarPlanillaComplementaria(:tipos_persona);
+           InsertarPlanillaComplementaria(:tipos_persona, :id_usuario_empresa_in);
          END;`,
-        [tipos_persona]
+        [tipos_persona, id_usuario_empresa_in]
       );
     } catch (error) {
       if (error.message.includes('No se encontró una planilla activa para Beneficiarios')) {
@@ -1936,15 +1951,18 @@ export class PlanillaService {
     }
   }
 
-  async generarPlanillaOrdinaria(tipos_persona: string): Promise<void> {
-    ;
+  async generarPlanillaOrdinaria(token: string, tipos_persona: string): Promise<void> {
+    const decoded = this.jwtService.verify(token);
 
+    const estadoPP = await this.usuarioEmpRepository.findOne({ where: { empleadoCentroTrabajo: { correo_1: decoded?.correo } } });
+
+    const id_usuario_empresa_in = estadoPP.id_usuario_empresa;
     try {
       await this.entityManager.query(
         `BEGIN
-           InsertarPlanillaOrdinaria(:tipos_persona);
+           InsertarPlanillaOrdinaria(:tipos_persona, :id_usuario_empresa_in);
          END;`,
-        [tipos_persona]
+        [tipos_persona, id_usuario_empresa_in]
       );
     } catch (error) {
       if (error.message.includes('No se encontró una planilla activa para Beneficiarios')) {

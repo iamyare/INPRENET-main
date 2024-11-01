@@ -186,6 +186,8 @@ export class DocumentosPlanillaComponent implements OnInit {
 
     this.planillaService.getTotalBeneficiosYDeduccionesPorPeriodo(fechaInicioFormateada, fechaFinFormateada, idTiposPlanilla).subscribe({
       next: async (data) => {
+        console.log(data);
+
         const base64Image = await this.convertirImagenABase64('../assets/images/membratadoFinal.jpg');
 
         const totalBeneficios = data.beneficios.reduce((acc: any, cur: any) => acc + (cur.TOTAL_MONTO_BENEFICIO ? parseFloat(cur.TOTAL_MONTO_BENEFICIO) : 0), 0);
@@ -208,7 +210,7 @@ export class DocumentosPlanillaComponent implements OnInit {
           }),
           pageMargins: [40, 130, 40, 100],
           header: {
-            text: `RESUMEN DE PLANILLA ${nombrePlanilla}`,
+            text: `RESUMEN DE PLANILLA ${nombrePlanilla} LOTE 2.2`,
             style: 'header',
             alignment: 'center',
             margin: [50, 90, 50, 0]

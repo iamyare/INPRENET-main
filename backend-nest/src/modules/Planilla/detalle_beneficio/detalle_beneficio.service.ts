@@ -1,9 +1,9 @@
 import * as oracledb from 'oracledb';
 import { BadRequestException, HttpException, HttpStatus, Injectable, InternalServerErrorException, Logger, NotFoundException } from '@nestjs/common';
 import { isUUID } from 'class-validator';
-import { format, parseISO } from 'date-fns';
+import { addDays, format, parseISO } from 'date-fns';
 import { InjectEntityManager, InjectRepository } from '@nestjs/typeorm';
-import { EntityManager, In, Repository } from 'typeorm';
+import { EntityManager, In, Not, Repository } from 'typeorm';
 import { Net_Beneficio } from '../beneficio/entities/net_beneficio.entity';
 import { net_persona } from '../../Persona/entities/net_persona.entity';
 import { Net_Detalle_Pago_Beneficio } from './entities/net_detalle_pago_beneficio.entity';
@@ -19,6 +19,8 @@ import { Net_Beneficio_Tipo_Persona } from '../beneficio_tipo_persona/entities/n
 import { addMonths } from 'date-fns';
 import { Net_Persona_Por_Banco } from 'src/modules/banco/entities/net_persona-banco.entity';
 import { Net_Detalle_Deduccion } from '../detalle-deduccion/entities/detalle-deduccion.entity';
+import { Net_Usuario_Empresa } from 'src/modules/usuario/entities/net_usuario_empresa.entity';
+import { JwtService } from '@nestjs/jwt';
 @Injectable()
 export class DetalleBeneficioService {
 
@@ -27,6 +29,10 @@ export class DetalleBeneficioService {
   constructor(
     @InjectRepository(Net_Detalle_Deduccion)
     private readonly detDedRepository: Repository<Net_Detalle_Deduccion>,
+
+    @InjectRepository(Net_Usuario_Empresa)
+    private readonly usuarioEmpRepository: Repository<Net_Usuario_Empresa>,
+    private jwtService: JwtService,
 
     @InjectRepository(Net_Detalle_Pago_Beneficio)
     private readonly detPagBenRepository: Repository<Net_Detalle_Pago_Beneficio>,
@@ -206,72 +212,110 @@ export class DetalleBeneficioService {
     }
   }
 
-  async eliminarBenPlan(data: any): Promise<any> {
-    const { idBenPlanilla, ID_DETALLE_PERSONA, ID_PERSONA, ID_CAUSANTE, ID_BENEFICIO, observacion } = data
+  async eliminarBenPlan(token: string, data: any): Promise<any> {
+    const { idBenPlanilla, ID_DETALLE_PERSONA, ID_PERSONA, ID_CAUSANTE, ID_BENEFICIO, observacion, cod_planilla } = data
 
     try {
-      const resultado2 = await this.detalleBeneficioAfiliadoRepository.findOne({
-        where: {
-          ID_DETALLE_PERSONA: ID_DETALLE_PERSONA,
-          ID_PERSONA: ID_PERSONA,
-          ID_CAUSANTE: ID_CAUSANTE,
-          ID_BENEFICIO: ID_BENEFICIO
-        }
-      });
+      const decoded = this.jwtService.verify(token);
 
-      const detalleBeneficioAfiliadoRepository = await this.detalleBeneficioAfiliadoRepository.update(
-        {
-          ID_DETALLE_PERSONA: resultado2.ID_DETALLE_PERSONA,
-          ID_PERSONA: resultado2.ID_PERSONA,
-          ID_CAUSANTE: resultado2.ID_CAUSANTE,
-          ID_BENEFICIO: resultado2.ID_BENEFICIO
-        },
-        { estado_solicitud: "RECHAZADO", observaciones: observacion }
-      );
+      const estadoPP = await this.usuarioEmpRepository.findOne({ where: { empleadoCentroTrabajo: { correo_1: decoded?.correo } } });
 
-      const detPagBenRepository = await this.detPagBenRepository.update(
-        {
-          id_beneficio_planilla: idBenPlanilla,
-        },
-        {
-          estado: "NO PAGADA",
-          observacion: observacion
-        }
-      );
 
-      const resultado3 = await this.detalleBeneficioAfiliadoRepository.findOne({
-        where: {
-          ID_DETALLE_PERSONA: ID_DETALLE_PERSONA,
-          ID_PERSONA: ID_PERSONA,
-          ID_CAUSANTE: ID_CAUSANTE,
-          ID_BENEFICIO: ID_BENEFICIO,
-          estado_solicitud: "APROBADO",
-          detallePagBeneficio: {
-            id_beneficio_planilla: idBenPlanilla,
+      try {
+        const resultado2 = await this.detalleBeneficioAfiliadoRepository.findOne({
+          where: {
+            ID_DETALLE_PERSONA: ID_DETALLE_PERSONA,
+            ID_PERSONA: ID_PERSONA,
+            ID_CAUSANTE: ID_CAUSANTE,
+            ID_BENEFICIO: ID_BENEFICIO
           }
-        },
-        relations: ["detallePagBeneficio"]
-      });
+        });
 
-      if (!resultado3) {
-
-        const detDedRepository = await this.detDedRepository.update(
+        const detalleBeneficioAfiliadoRepository = await this.detalleBeneficioAfiliadoRepository.update(
           {
-            persona: { id_persona: ID_PERSONA },
+            ID_DETALLE_PERSONA: resultado2.ID_DETALLE_PERSONA,
+            ID_PERSONA: resultado2.ID_PERSONA,
+            ID_CAUSANTE: resultado2.ID_CAUSANTE,
+            ID_BENEFICIO: resultado2.ID_BENEFICIO,
+
           },
-          { estado_aplicacion: "NO COBRADA" }
+          { estado_solicitud: "RECHAZADO", ID_USUARIO_EMPRESA: estadoPP.id_usuario_empresa, observaciones: observacion }
         );
+
+        const detPagBenRepository = await this.detPagBenRepository.update(
+          {
+            id_beneficio_planilla: idBenPlanilla,
+          },
+          {
+            estado: "NO PAGADA",
+            observacion: observacion,
+            ID_USUARIO_EMPRESA: estadoPP.id_usuario_empresa
+          }
+        );
+
+        const resultado3 = await this.detalleBeneficioAfiliadoRepository.findOne({
+          where: {
+            ID_DETALLE_PERSONA: ID_DETALLE_PERSONA,
+            ID_PERSONA: ID_PERSONA,
+            ID_CAUSANTE: ID_CAUSANTE,
+            ID_BENEFICIO: ID_BENEFICIO,
+            estado_solicitud: "APROBADO",
+            detallePagBeneficio: {
+              id_beneficio_planilla: idBenPlanilla,
+            }
+          },
+          relations: ["detallePagBeneficio"]
+        });
+
+        if (!resultado3) {
+
+          const detDedRepository = await this.detDedRepository.update(
+            {
+              persona: { id_persona: ID_PERSONA },
+              planilla: { codigo_planilla: cod_planilla }
+            },
+            {
+              estado_aplicacion: "NO COBRADA",
+              ID_USUARIO_EMPRESA: estadoPP.id_usuario_empresa
+            }
+          );
+        }
+
+        /*
+          return { mensaje: `Estado actualizado a '${nuevoEstado}' para los detalles de beneficio de la planilla con ID ${idPlanilla}` }; */
+      } catch (error) {
+        throw new InternalServerErrorException('Se produjo un error al actualizar los estados de los detalles de beneficio');
       }
 
-      /*
-        return { mensaje: `Estado actualizado a '${nuevoEstado}' para los detalles de beneficio de la planilla con ID ${idPlanilla}` }; */
     } catch (error) {
-      throw new InternalServerErrorException('Se produjo un error al actualizar los estados de los detalles de beneficio');
+      throw new InternalServerErrorException(error.message);
+      console.log(error);
+      return error.name === "TokenExpiredError";  // True si está vencido
     }
+
+
+
   }
 
-  async createDetalleBeneficioAfiliado(data: any, idPersonaPadre?: number): Promise<any> {
+  async createDetalleBeneficioAfiliado(token: string, data: any, idPersonaPadre?: number): Promise<any> {
     const { datos, itemSeleccionado } = data
+
+    //CALCULO DE MONTO_TOTAL
+    if (!datos.monto_por_periodo && !datos.monto_primera_cuota && !datos.monto_ultima_cuota) {
+      datos["monto_por_periodo"] = datos.monto_total
+      datos["monto_primera_cuota"] = datos.monto_total
+      datos["monto_ultima_cuota"] = datos.monto_total
+    } else if (datos.monto_total) {
+      if (datos.num_rentas_aplicadas) {
+        datos["monto_total"] = (
+          (parseFloat(datos.monto_total || 0) +
+            parseFloat(datos.monto_ultima_cuota || 0))
+        )
+      }
+    }
+
+    const decoded = this.jwtService.verify(token);
+    const estadoPP = await this.usuarioEmpRepository.findOne({ where: { empleadoCentroTrabajo: { correo_1: decoded?.correo } } });
     const fechaActual = new Date();
     const startDateFormatted = format(fechaActual, 'dd-MM-yyyy');
 
@@ -302,7 +346,7 @@ export class DetalleBeneficioService {
                 where: {
                   persona: { n_identificacion: datos.dni },
                   tipoPersona: {
-                    tipo_persona: In(['AFILIADO', 'JUBILADO', 'PENSIONADO', 'VOLUNTARIO']),
+                    tipo_persona: In(['AFILIADO', 'JUBILADO', 'PENSIONADO']),
                   },
                   eliminado: "NO"
                 },
@@ -311,41 +355,43 @@ export class DetalleBeneficioService {
             );
             if (detPer) {
               const queryInsDeBBenf = `
-                  INSERT INTO NET_DETALLE_BENEFICIO_AFILIADO (
-                    ID_DETALLE_PERSONA,
-                    ID_CAUSANTE,
-                    ID_PERSONA,
-                    ID_BENEFICIO,
-                    FECHA_CALCULO,
-                    PERIODO_INICIO,
-                    PERIODO_FINALIZACION,
-                    MONTO_TOTAL,
-                    METODO_PAGO,
-                    MONTO_POR_PERIODO,
-                    MONTO_PRIMERA_CUOTA,
-                    MONTO_ULTIMA_CUOTA,
-                    NUM_RENTAS_APLICADAS,
-                    ESTADO_SOLICITUD,
-                    OBSERVACIONES,
-                    ULTIMO_DIA_ULTIMA_RENTA
-                  ) VALUES (
-                    ${detPer.ID_DETALLE_PERSONA},
-                    ${detPer.ID_CAUSANTE},
-                    ${detPer.ID_PERSONA},
-                    ${beneficio.id_beneficio},
-                    '${this.convertirCadenaAFecha(datos.fecha_calculo)}',
-                    '${startDateFormatted}',
-                    ${datos.periodo_finalizacion ? `'${datos.periodo_finalizacion}'` : null},
-                    ${parseFloat(datos.monto_total)},
-                    'TRANSFERENCIA',
-                    ${parseFloat(datos.monto_por_periodo)},
-                    ${parseFloat(datos.monto_primera_cuota)},
-                    ${parseFloat(datos.monto_ultima_cuota)},
-                    ${datos.num_rentas_aplicadas ? parseFloat(datos.num_rentas_aplicadas) : null},
-                    '${datos.estado_solicitud}',
-                    '${datos.observacion}',
-                     ${datos.ultimo_dia_ultima_renta ? parseFloat(datos.ultimo_dia_ultima_renta) : null}
-              )`;
+                   INSERT INTO NET_DETALLE_BENEFICIO_AFILIADO (
+                     ID_DETALLE_PERSONA,
+                     ID_CAUSANTE,
+                     ID_PERSONA,
+                     ID_BENEFICIO,
+                     FECHA_CALCULO,
+                     PERIODO_INICIO,
+                     PERIODO_FINALIZACION,
+                     MONTO_TOTAL,
+                     METODO_PAGO,
+                     MONTO_POR_PERIODO,
+                     MONTO_PRIMERA_CUOTA,
+                     MONTO_ULTIMA_CUOTA,
+                     NUM_RENTAS_APLICADAS,
+                     ESTADO_SOLICITUD,
+                     OBSERVACIONES,
+                     ULTIMO_DIA_ULTIMA_RENTA,
+                     ID_USUARIO_EMPRESA
+                   ) VALUES (
+                     ${detPer.ID_DETALLE_PERSONA},
+                     ${detPer.ID_CAUSANTE},
+                     ${detPer.ID_PERSONA},
+                     ${beneficio.id_beneficio},
+                     '${this.convertirCadenaAFecha(datos.fecha_calculo)}',
+                     '${startDateFormatted}',
+                     ${datos.periodo_finalizacion ? `'${datos.periodo_finalizacion}'` : null},
+                     ${parseFloat(datos.monto_total) ? parseFloat(datos.monto_total) : null},
+                     'TRANSFERENCIA',
+                     ${parseFloat(datos.monto_por_periodo) ? parseFloat(datos.monto_por_periodo) : null},
+                     ${parseFloat(datos.monto_primera_cuota) ? parseFloat(datos.monto_primera_cuota) : null},
+                     ${parseFloat(datos.monto_ultima_cuota) ? parseFloat(datos.monto_ultima_cuota) : null},
+                     ${datos.num_rentas_aplicadas ? parseFloat(datos.num_rentas_aplicadas) : null},
+                     '${datos.estado_solicitud}',
+                     '${datos.observacion}',
+                      ${datos.ultimo_dia_ultima_renta ? parseFloat(datos.ultimo_dia_ultima_renta) : null},
+                     ${estadoPP.id_usuario_empresa}
+               )`;
 
               const detBeneBeneficia = await this.entityManager.query(queryInsDeBBenf);
 
@@ -355,7 +401,8 @@ export class DetalleBeneficioService {
                 ID_PERSONA: detPer.ID_PERSONA,
                 ID_CAUSANTE: detPer.ID_CAUSANTE,
                 ID_CAUSANTE_PADRE: detPer.ID_CAUSANTE_PADRE,
-                ID_TIPO_PERSONA: tipoP.id_tipo_persona
+                ID_TIPO_PERSONA: tipoP.id_tipo_persona,
+                ID_USUARIO_EMPRESA: estadoPP.id_usuario_empresa
               });
               await this.detPersonaRepository.save(detPers);
 
@@ -372,7 +419,8 @@ export class DetalleBeneficioService {
                   ID_PERSONA: detPer.ID_PERSONA,
                   ID_CAUSANTE: detPer.ID_CAUSANTE,
                   ID_CAUSANTE_PADRE: detPer.ID_CAUSANTE_PADRE,
-                  ID_ESTADO_AFILIACION: estadoP.codigo
+                  ID_ESTADO_AFILIACION: estadoP.codigo,
+                  ID_USUARIO_EMPRESA: estadoPP.id_usuario_empresa
                 });
                 await this.detPersonaRepository.save(detPers);
               }
@@ -403,47 +451,50 @@ export class DetalleBeneficioService {
                 ID_PERSONA: detPer.ID_PERSONA,
                 ID_CAUSANTE: detPer.ID_CAUSANTE,
                 ID_CAUSANTE_PADRE: detPer.ID_CAUSANTE_PADRE,
-                ID_TIPO_PERSONA: estadoP.id_tipo_persona
+                ID_TIPO_PERSONA: estadoP.id_tipo_persona,
+                ID_USUARIO_EMPRESA: estadoPP.id_usuario_empresa
               });
 
               await this.detPersonaRepository.save(detPers);
 
               const queryInsDeBBenf = `
-                    INSERT INTO NET_DETALLE_BENEFICIO_AFILIADO (
-                      ID_DETALLE_PERSONA,
-                      ID_CAUSANTE,
-                      ID_PERSONA,
-                      ID_BENEFICIO,
-                      FECHA_CALCULO,
-                      PERIODO_INICIO,
-                      PERIODO_FINALIZACION,
-                      MONTO_TOTAL,
-                      METODO_PAGO,
-                      MONTO_POR_PERIODO,
-                      MONTO_PRIMERA_CUOTA,
-                      MONTO_ULTIMA_CUOTA,
-                      NUM_RENTAS_APLICADAS,
-                      ESTADO_SOLICITUD,
-                      OBSERVACIONES,
-                    ULTIMO_DIA_ULTIMA_RENTA
-                    ) VALUES (
-                      ${detPer.ID_DETALLE_PERSONA},
-                      ${detPer.ID_CAUSANTE},
-                      ${detPer.ID_PERSONA},
-                      ${beneficio.id_beneficio},
-                      '${this.convertirCadenaAFecha(datos.fecha_calculo)}',
-                      '${startDateFormatted}',
-                      ${datos.periodo_finalizacion ? `'${datos.periodo_finalizacion}'` : null},
-                      ${datos.monto_total},
-                      'TRANSFERENCIA',
-                      ${datos.monto_por_periodo},
-                      ${parseFloat(datos.monto_primera_cuota)},
-                      ${parseFloat(datos.monto_ultima_cuota)},
-                      ${datos.num_rentas_aplicadas ? parseFloat(datos.num_rentas_aplicadas) : null},
-                      '${datos.estado_solicitud}',
-                      '${datos.observacion}',
-                     ${datos.ultimo_dia_ultima_renta ? parseFloat(datos.ultimo_dia_ultima_renta) : null}
-              )`;
+                     INSERT INTO NET_DETALLE_BENEFICIO_AFILIADO (
+                       ID_DETALLE_PERSONA,
+                       ID_CAUSANTE,
+                       ID_PERSONA,
+                       ID_BENEFICIO,
+                       FECHA_CALCULO,
+                       PERIODO_INICIO,
+                       PERIODO_FINALIZACION,
+                       MONTO_TOTAL,
+                       METODO_PAGO,
+                       MONTO_POR_PERIODO,
+                       MONTO_PRIMERA_CUOTA,
+                       MONTO_ULTIMA_CUOTA,
+                       NUM_RENTAS_APLICADAS,
+                       ESTADO_SOLICITUD,
+                       OBSERVACIONES,
+                       ID_USUARIO_EMPRESA,
+                       ULTIMO_DIA_ULTIMA_RENTA
+                     ) VALUES (
+                       ${detPer.ID_DETALLE_PERSONA},
+                       ${detPer.ID_CAUSANTE},
+                       ${detPer.ID_PERSONA},
+                       ${beneficio.id_beneficio},
+                       '${this.convertirCadenaAFecha(datos.fecha_calculo)}',
+                       '${startDateFormatted}',
+                       ${datos.periodo_finalizacion ? `'${datos.periodo_finalizacion}'` : null},
+                       ${parseFloat(datos.monto_total) ? parseFloat(datos.monto_total) : null},
+                       'TRANSFERENCIA',
+                       ${parseFloat(datos.monto_por_periodo) ? parseFloat(datos.monto_por_periodo) : null},
+                       ${parseFloat(datos.monto_primera_cuota) ? parseFloat(datos.monto_primera_cuota) : null},
+                       ${parseFloat(datos.monto_ultima_cuota) ? parseFloat(datos.monto_ultima_cuota) : null},
+                       ${datos.num_rentas_aplicadas ? parseFloat(datos.num_rentas_aplicadas) : null},
+                       '${datos.estado_solicitud}',
+                       '${datos.observacion}',
+                       ${estadoPP.id_usuario_empresa},
+                      ${datos.ultimo_dia_ultima_renta ? parseFloat(datos.ultimo_dia_ultima_renta) : null}
+               )`;
 
               const detBeneBeneficia = await this.entityManager.query(queryInsDeBBenf);
               return detBeneBeneficia;
@@ -816,11 +867,16 @@ export class DetalleBeneficioService {
   async obtenerTipoBeneficioByTipoPersona(tipoPersona: string): Promise<any[]> {
     try {
       const tipoBen = await this.benTipoPerRepository.find({
-        where: { tipPersona: { tipo_persona: tipoPersona } },
+        where: {
+          tipPersona: { tipo_persona: tipoPersona },
+          beneficio: { nombre_beneficio: Not('PENSION POR VIUDEZ Y ORFANDAD') }
+        },
         relations: [
-          'beneficio', 'beneficio.regimen'
+          'beneficio',
+          'beneficio.regimen'
         ],
       });
+
       return tipoBen
 
     } catch (error) {
@@ -975,14 +1031,24 @@ export class DetalleBeneficioService {
     }
   }
 
-  async updateBeneficioPersona(data: any) {
+  async updateBeneficioPersona(token: string, data: any) {
+    const decoded = this.jwtService.verify(token);
+
+    const estadoPP = await this.usuarioEmpRepository.findOne({ where: { empleadoCentroTrabajo: { correo_1: decoded?.correo } } });
+    const id_usuario_empresa_in = estadoPP.id_usuario_empresa
+    console.log(token);
+    console.log(decoded);
+    console.log(id_usuario_empresa_in);
+
+
     try {
-      const detBenAfil = await this.detalleBeneficioAfiliadoRepository.preload({
+      const dataEnv = {
         ID_DETALLE_PERSONA: data.ID_DETALLE_PERSONA,
         ID_PERSONA: data.ID_PERSONA,
         ID_CAUSANTE: data.ID_CAUSANTE,
         ID_BENEFICIO: data.ID_BENEFICIO,
         estado_solicitud: data.estado_solicitud,
+        ID_USUARIO_EMPRESA: id_usuario_empresa_in,
         monto_total: data.monto_total === '' ? null : parseFloat(data.monto_total),
         monto_ultima_cuota: data.monto_ultima_cuota === '' ? null : parseFloat(data.monto_ultima_cuota),
         monto_por_periodo: data.monto_por_periodo === '' ? null : parseFloat(data.monto_por_periodo),
@@ -991,9 +1057,12 @@ export class DetalleBeneficioService {
         ultimo_dia_ultima_renta: data.ultimo_dia_ultima_renta === undefined || data.ultimo_dia_ultima_renta === '' ? null : parseInt(data.num_rentas_aplicadas),
         observaciones: data.observaciones,
         prestamo: data.prestamo === undefined || data.prestamo === '' ? null : data.prestamo,
-      });
+      };
 
-      await this.detalleBeneficioAfiliadoRepository.save(detBenAfil);
+      console.log(dataEnv);
+
+      //const detBenAfil = await this.detalleBeneficioAfiliadoRepository.preload(dataEnv);
+      //await this.detalleBeneficioAfiliadoRepository.save(detBenAfil);
 
     } catch (error) {
       this.logger.error(`Error al actualizar beneficios: ${error.message}`, error.stack);

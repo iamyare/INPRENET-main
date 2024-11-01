@@ -389,19 +389,15 @@ export class AfiliacionService {
     personasCreadasMap?: Map<string, net_persona>
   ): Promise<net_detalle_persona[]> {
     const resultados: net_detalle_persona[] = [];
-  
-    // Si no se proporciona el mapa, creamos uno nuevo
     const personasMap = personasCreadasMap || new Map<string, net_persona>();
   
     const tipoPersonaBeneficiario = await this.tipoPersonaRepository.findOne({ where: { tipo_persona: 'DESIGNADO' } });
     if (!tipoPersonaBeneficiario) {
       throw new NotFoundException('Tipo de persona "DESIGNADO" no encontrado');
     }
-  
     for (const crearBeneficiarioDto of crearBeneficiariosDtos) {
       const fileIdent = files?.find(file => file.fieldname === `file_identB[${crearBeneficiarioDto.persona.n_identificacion}]`);
       const beneficiario = await this.crearOObtenerPersona(crearBeneficiarioDto.persona, fileIdent, entityManager, personasMap);
-  
       const detalleBeneficiario = entityManager.create(net_detalle_persona, {
         ID_DETALLE_PERSONA: idDetallePersona,
         ID_PERSONA: beneficiario.id_persona,
@@ -411,15 +407,12 @@ export class AfiliacionService {
         eliminado: 'NO',
         porcentaje: crearBeneficiarioDto.porcentaje,
       });
-  
       const detalleGuardado = await entityManager.save(net_detalle_persona, detalleBeneficiario);
       resultados.push(detalleGuardado);
-  
       if (crearBeneficiarioDto.discapacidades && crearBeneficiarioDto.discapacidades.length > 0) {
         await this.crearDiscapacidades(crearBeneficiarioDto.discapacidades, beneficiario.id_persona, entityManager);
       }
     }
-  
     return resultados;
   }
   
@@ -615,10 +608,6 @@ export class AfiliacionService {
       relations: ['persona'],
     });
 
-    if (!referencias.length) {
-      throw new NotFoundException(`No se encontraron referencias para la persona con identificación ${nIdentificacion}`);
-    }
-
     return referencias.map(ref => ({
       id_referencia: ref.id_referencia,
       id_persona: ref.persona.id_persona,
@@ -650,8 +639,6 @@ export class AfiliacionService {
   }
 
   async actualizarReferencia(idReferencia: number, datosActualizados: CrearReferenciaDto): Promise<void> {
-    console.log(datosActualizados);
-
     const validationErrors: ValidationError[] = await validate(datosActualizados);
     if (validationErrors.length > 0) {
       const errorMessages = validationErrors.map(error =>

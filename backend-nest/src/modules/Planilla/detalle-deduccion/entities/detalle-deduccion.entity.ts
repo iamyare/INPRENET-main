@@ -3,13 +3,12 @@ import { Net_Planilla } from '../../planilla/entities/net_planilla.entity';
 import { IsEnum } from 'class-validator';
 import { Net_Deduccion } from '../../deduccion/entities/net_deduccion.entity';
 import { net_persona } from 'src/modules/Persona/entities/net_persona.entity';
-import { Net_Detalle_Pago_Beneficio } from '../../detalle_beneficio/entities/net_detalle_pago_beneficio.entity';
 import { Net_Deducciones_Asignadas } from './net-deducciones-asignadas.entity';
 import { Net_Persona_Por_Banco } from 'src/modules/banco/entities/net_persona-banco.entity';
 import { Net_Usuario_Empresa } from 'src/modules/usuario/entities/net_usuario_empresa.entity';
 
 @Entity({ name: 'NET_DETALLE_DEDUCCION' })
-@Check("CK_ESTADO_DED", `estado_aplicacion IN ('COBRADA', 'NO COBRADA', 'EN PRELIMINAR', 'EN PLANILLA')`)
+@Check("CK_ESTADO_DED", `estado_aplicacion IN ('COBRADA', 'NO COBRADA', 'EN PRELIMINAR', 'EN PLANILLA', 'RECHAZADO')`)
 export class Net_Detalle_Deduccion {
     @PrimaryGeneratedColumn({ type: 'int', name: 'ID_DED_DEDUCCION', primaryKeyConstraintName: 'PK_id_detD' })
     id_ded_deduccion: number;

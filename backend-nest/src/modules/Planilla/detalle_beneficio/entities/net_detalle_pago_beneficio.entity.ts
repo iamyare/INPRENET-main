@@ -5,7 +5,7 @@ import { Net_Persona_Por_Banco } from "src/modules/banco/entities/net_persona-ba
 import { Net_Usuario_Empresa } from "src/modules/usuario/entities/net_usuario_empresa.entity";
 
 @Entity({ name: 'NET_DETALLE_PAGO_BENEFICIO' })
-@Check("CK_ESTADO_DETBEN", `ESTADO IN ('PAGADA', 'NO PAGADA', 'EN PRELIMINAR', 'EN PLANILLA')`)
+@Check("CK_ESTADO_DETBEN", `ESTADO IN ('PAGADA', 'NO PAGADA', 'EN PRELIMINAR', 'EN PLANILLA', 'RECHAZADO')`)
 export class Net_Detalle_Pago_Beneficio {
     @PrimaryGeneratedColumn({ type: 'int', name: 'ID_BENEFICIO_PLANILLA', primaryKeyConstraintName: 'PK_BENPLAN_DETPLANB' })
     id_beneficio_planilla: number;

@@ -4,7 +4,6 @@ import { UsuarioController } from './usuario.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { CommonModule } from 'src/common/common.module';
 import { Net_Tipo_Identificacion } from '../tipo_identificacion/entities/net_tipo_identificacion.entity';
-import { NET_USUARIO_PRIVADA } from './entities/net_usuario_privada.entity';
 import { Net_Centro_Trabajo } from '../Empresarial/entities/net_centro_trabajo.entity';
 import { MailService } from 'src/common/services/mail.service';
 import { Net_Seguridad } from './entities/net_seguridad.entity';
@@ -22,8 +21,7 @@ import { Net_Empleado } from '../Empresarial/entities/net_empleado.entity';
   imports: [
     TypeOrmModule.forFeature([
       Net_Empleado, 
-      Net_Tipo_Identificacion, 
-      NET_USUARIO_PRIVADA, 
+      Net_Tipo_Identificacion,
       Net_Centro_Trabajo,
       Net_Seguridad,
       Net_Empleado_Centro_Trabajo,

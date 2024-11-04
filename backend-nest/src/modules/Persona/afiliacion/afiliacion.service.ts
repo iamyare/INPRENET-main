@@ -197,6 +197,7 @@ export class AfiliacionService {
         fecha_vencimiento_ident: this.formatDateToYYYYMMDD(crearPersonaDto.fecha_vencimiento_ident),
         fecha_nacimiento: this.formatDateToYYYYMMDD(crearPersonaDto.fecha_nacimiento),
         fecha_defuncion: this.formatDateToYYYYMMDD(crearPersonaDto.fecha_defuncion),
+        fecha_afiliacion: this.formatDateToYYYYMMDD(crearPersonaDto.fecha_afiliacion),
         foto_perfil: fotoPerfil?.buffer,
         archivo_identificacion: fileIdent?.buffer,
         tipoIdentificacion,
@@ -313,6 +314,8 @@ export class AfiliacionService {
       const personaCentroTrabajo = entityManager.create(Net_perf_pers_cent_trab, {
         persona: { id_persona: idPersona },
         centroTrabajo,
+        jornada : crearPersonaCentrosTrabajoDto.jornada,
+        tipo_jornada : crearPersonaCentrosTrabajoDto.tipo_jornada, 
         cargo: crearPersonaCentrosTrabajoDto.cargo,
         numero_acuerdo: crearPersonaCentrosTrabajoDto.numero_acuerdo,
         salario_base: crearPersonaCentrosTrabajoDto.salario_base,
@@ -320,10 +323,8 @@ export class AfiliacionService {
         fecha_egreso: this.formatDateToYYYYMMDD(crearPersonaCentrosTrabajoDto.fecha_egreso),
         estado: "ACTIVO",
       });
-
       resultados.push(await entityManager.save(Net_perf_pers_cent_trab, personaCentroTrabajo));
     }
-
     return resultados;
   }
 
@@ -422,6 +423,8 @@ export class AfiliacionService {
     entityManager: EntityManager,
     personasCreadasMap?: Map<string, net_persona>
   ): Promise<void> {
+    console.log(familiaresDto);
+    
     const personasMap = personasCreadasMap || new Map<string, net_persona>();
     const familiaSinDuplicados = familiaresDto.filter((familia, index, self) => {
       return (
@@ -707,10 +710,6 @@ export class AfiliacionService {
       .where("familia.persona.id_persona = :id_persona", { id_persona: persona.id_persona })
       .andWhere("familia.parentesco = :parentesco", { parentesco: 'CÓNYUGE' })
       .getOne();
-
-    if (!conyuge || !conyuge.referenciada) {
-      throw new NotFoundException(`No se encontró cónyuge para la persona con identificación ${n_identificacion}`);
-    }
     const detallePersona = await this.detallePersonaRepository.createQueryBuilder("detallePersona")
       .where("detallePersona.ID_PERSONA = :id_persona", { id_persona: conyuge.referenciada.id_persona })
       .andWhere("detallePersona.ID_TIPO_PERSONA = :id_tipo_persona", { id_tipo_persona: 1 })
@@ -718,6 +717,7 @@ export class AfiliacionService {
 
     const esAfiliado = detallePersona ? 'SI' : 'NO';
     return {
+      id_familia: conyuge.id_familia,
       primer_nombre: conyuge.referenciada.primer_nombre,
       segundo_nombre: conyuge.referenciada.segundo_nombre,
       tercer_nombre: conyuge.referenciada.tercer_nombre,
@@ -749,6 +749,8 @@ export class AfiliacionService {
     if (!conyuge || !conyuge.referenciada) {
       throw new NotFoundException(`No se encontró cónyuge para la persona con identificación ${n_identificacion}`);
     }
+    console.log(body);
+    
     conyuge.referenciada.primer_nombre = body.primer_nombre ?? conyuge.referenciada.primer_nombre;
     conyuge.referenciada.segundo_nombre = body.segundo_nombre ?? conyuge.referenciada.segundo_nombre;
     conyuge.referenciada.tercer_nombre = body.tercer_nombre ?? conyuge.referenciada.tercer_nombre;
@@ -756,9 +758,9 @@ export class AfiliacionService {
     conyuge.referenciada.segundo_apellido = body.segundo_apellido ?? conyuge.referenciada.segundo_apellido;
     conyuge.referenciada.n_identificacion = body.n_identificacion ?? conyuge.referenciada.n_identificacion;
     conyuge.referenciada.fecha_nacimiento = body.fecha_nacimiento ? this.formatDateToYYYYMMDD(body.fecha_nacimiento) : conyuge.referenciada.fecha_nacimiento;
-    conyuge.referenciada.telefono_1 = body.telefono_domicilio ?? conyuge.referenciada.telefono_1;
-    conyuge.referenciada.telefono_2 = body.telefono_celular ?? conyuge.referenciada.telefono_2;
-    conyuge.referenciada.telefono_3 = body.telefono_trabajo ?? conyuge.referenciada.telefono_3;
+    conyuge.referenciada.telefono_3 = body.telefono_domicilio ?? conyuge.referenciada.telefono_3;
+    conyuge.referenciada.telefono_1 = body.telefono_celular ?? conyuge.referenciada.telefono_1;
+    conyuge.referenciada.telefono_2 = body.telefono_trabajo ?? conyuge.referenciada.telefono_2;
     conyuge.trabaja = body.trabaja ?? conyuge.trabaja;
     await this.personaRepository.save(conyuge.referenciada);
     await this.familiaRepository.save(conyuge);
@@ -806,9 +808,6 @@ export class AfiliacionService {
     const familiar = await this.familiaRepository.findOne({
       where: { id_familia: idFamiliar, persona: { id_persona: idPersona } },
     });
-    if (!familiar) {
-      throw new NotFoundException('Familiar no encontrado.');
-    }
     await this.familiaRepository.remove(familiar);
     return { message: 'Familiar eliminado exitosamente.' };
   }

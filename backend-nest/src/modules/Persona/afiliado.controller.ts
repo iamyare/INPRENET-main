@@ -239,7 +239,9 @@ export class AfiliadoController {
     const crearDatosDto: any = JSON.parse(datosGenerales);
     const fileIdent = files?.find(file => file.fieldname === 'file_ident');
     const arch_cert_def = files?.find(file => file.fieldname === 'arch_cert_def');
-    return this.afiliadoService.updateDatosGenerales(idPersona, crearDatosDto, fileIdent, arch_cert_def);
+    const fotoPerfil = files?.find(file => file.fieldname === 'FotoPerfil');
+  
+    return this.afiliadoService.updateDatosGenerales(idPersona, crearDatosDto, fileIdent, arch_cert_def, fotoPerfil);
   }
 
   @Put('activarCuentaBancaria/:id/:id_persona')

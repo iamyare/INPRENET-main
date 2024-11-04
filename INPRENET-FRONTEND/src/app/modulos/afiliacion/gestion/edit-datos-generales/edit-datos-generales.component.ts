@@ -27,10 +27,10 @@ export class EditDatosGeneralesComponent implements OnInit {
   public mostrarBotonGuardar: boolean = false;
   image:any;
 
-  tiposPersona: any[] = [
+  /* tiposPersona: any[] = [
     { ID_TIPO_PERSONA: 1, TIPO_PERSONA: 'AFILIADO' },
     { ID_TIPO_PERSONA: 5, TIPO_PERSONA: 'VOLUNTARIO' }
-  ];
+  ]; */
 
   estadoAfiliacion: any;
   fallecido: any;

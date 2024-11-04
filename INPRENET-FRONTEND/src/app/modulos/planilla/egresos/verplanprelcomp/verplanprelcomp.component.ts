@@ -320,7 +320,7 @@ export class VerplanprelcompComponent implements OnInit {
 
         const dialogRef = this.dialog.open(DynamicDialogComponent, {
           width: '50%',
-          data: { logs: logs, type: 'beneficios', mostrarAccion: true, }
+          data: { cod_planilla: this.codigoPlanilla, logs: logs, type: 'beneficios', mostrarAccion: true, }
         });
 
         // Escuchar el evento deduccionEliminada para refrescar los datos

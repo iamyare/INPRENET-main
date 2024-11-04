@@ -136,7 +136,12 @@ export class PlanillaService {
   }
 
   generarPlanillaComplementaria(tiposPersona: string): Observable<void> {
-    const url = `${environment.API_URL}/api/planilla/generar-complementaria`;
+    const accessToken = sessionStorage.getItem('token');
+    console.log(accessToken);
+
+    const url = `${environment.API_URL}/api/planilla/generar-complementaria/${accessToken}`;
+
+
     return this.http.post<void>(url, { tipos_persona: tiposPersona }).pipe(
       catchError(error => {
         const errorMessage = error.error.message || 'Error al generar planilla complementaria';
@@ -148,7 +153,11 @@ export class PlanillaService {
   }
 
   generarPlanillaOrdinaria(tiposPersona: string): Observable<void> {
-    const url = `${environment.API_URL}/api/planilla/generar-ordinaria`;
+    const accessToken = sessionStorage.getItem('token');
+    console.log(accessToken);
+
+    const url = `${environment.API_URL}/api/planilla/generar-ordinaria/${accessToken}`;
+
     return this.http.post<void>(url, { tipos_persona: tiposPersona }).pipe(
       catchError(error => {
         const errorMessage = error.error.message || 'Error al generar planilla ordinaria';

@@ -394,14 +394,14 @@ export class PlanillaController {
     return this.planillaService.remove(+id);
   }
 
-  @Post('generar-complementaria')
-  async generarComplementaria(@Body() generatePlanillaDto: GeneratePlanillaDto): Promise<void> {
-    await this.planillaService.generarPlanillaComplementaria(generatePlanillaDto.tipos_persona);
+  @Post('generar-complementaria/:token')
+  async generarComplementaria(@Param('token') token: string, @Body() generatePlanillaDto: GeneratePlanillaDto): Promise<void> {
+    await this.planillaService.generarPlanillaComplementaria(token, generatePlanillaDto.tipos_persona);
   }
 
-  @Post('generar-ordinaria')
-  async generarOrdinaria(@Body() generatePlanillaDto: GeneratePlanillaDto): Promise<void> {
-    await this.planillaService.generarPlanillaOrdinaria(generatePlanillaDto.tipos_persona);
+  @Post('generar-ordinaria/:token')
+  async generarOrdinaria(@Param('token') token: string, @Body() generatePlanillaDto: GeneratePlanillaDto): Promise<void> {
+    await this.planillaService.generarPlanillaOrdinaria(token, generatePlanillaDto.tipos_persona);
   }
 
   @Post('get-preliminares')

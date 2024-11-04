@@ -166,7 +166,7 @@ export class VerOtrasFuentesIngresoComponent implements OnInit, OnDestroy, OnCha
         etiqueta: 'Actividad Económica',
         editable: true,
         icono: 'work',
-        validaciones: [Validators.required, Validators.min(0)]
+        validaciones: [Validators.required, Validators.min(5), Validators.max(100)]
       },
       {
         nombre: 'monto_ingreso',
@@ -219,7 +219,6 @@ export class VerOtrasFuentesIngresoComponent implements OnInit, OnDestroy, OnCha
           }
         });
       } else {
-        console.log('No se realizaron cambios.');
       }
     });
   }
@@ -259,7 +258,6 @@ export class VerOtrasFuentesIngresoComponent implements OnInit, OnDestroy, OnCha
         idPersona: this.Afiliado.id_persona
       }
     });
-
     dialogRef.afterClosed().subscribe((result: any) => {
       this.ngOnInit();
     });

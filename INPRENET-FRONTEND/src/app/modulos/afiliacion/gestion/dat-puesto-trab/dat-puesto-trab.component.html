@@ -136,11 +136,11 @@
             <mat-form-field appearance="outline" style="flex-direction: column-reverse;" class="example-full-width inputs">
               <mat-label>Tipo de Jornada</mat-label>
               <mat-icon matPrefix>assignment_turned_in</mat-icon>
-              <mat-select formControlName="tipoJornada">
+              <mat-select formControlName="tipo_jornada">
                 <mat-option *ngFor="let option of tiposJornada" [value]="option.value">{{ option.label }}</mat-option>
               </mat-select>
             </mat-form-field>
-            <mat-error *ngFor="let error of getErrors(i, 'tipoJornada')">
+            <mat-error *ngFor="let error of getErrors(i, 'tipo_jornada')">
               <mat-icon aria-hidden="true" class="error-icon-small">error_outline</mat-icon>
               {{ error }}
             </mat-error>

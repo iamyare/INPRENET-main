@@ -133,25 +133,24 @@ export class EditReferPersonalesComponent implements OnInit, OnChanges, OnDestro
     if (this.Afiliado) {
       try {
         const data = await this.svcAfiliacion.obtenerReferenciasPorIdentificacion(this.Afiliado.n_identificacion).toPromise();
-        console.log('Datos obtenidos:', data); // Verifica si se obtienen los datos
         this.filas = data
           .filter((item: any) => item.estado === 'ACTIVO')
           .map((item: any) => {
             const filaProcesada = {
-              id_referencia: item.id_referencia ?? 'ID no disponible',
-              n_identificacion: item.n_identificacion ?? 'ID no disponible',
+              id_referencia: item.id_referencia ?? '',
+              n_identificacion: item.n_identificacion ?? '',
               nombre_completo: `${item.primer_nombre ?? ''} ${item.segundo_nombre ?? ''} ${item.primer_apellido ?? ''} ${item.segundo_apellido ?? ''}`.trim(),
-              parentesco: item.parentesco || 'No disponible',
-              direccion: item.direccion ?? 'Dirección no disponible',
+              parentesco: item.parentesco || '',
+              direccion: item.direccion ?? '',
               telefono_domicilio: item.telefono_domicilio ?? '',
               telefono_personal: item.telefono_personal ?? '',
               telefono_trabajo: item.telefono_trabajo ?? '',
-              estado: item.estado ?? 'No disponible',
-              tipo_referencia: item.tipo_referencia ?? 'No disponible',
-              primer_nombre: item.primer_nombre ?? 'No disponible',
-              segundo_nombre: item.segundo_nombre ?? 'No disponible',
-              primer_apellido: item.primer_apellido ?? 'No disponible',
-              segundo_apellido: item.segundo_apellido ?? 'No disponible',
+              estado: item.estado ?? '',
+              tipo_referencia: item.tipo_referencia ?? '',
+              primer_nombre: item.primer_nombre ?? '',
+              segundo_nombre: item.segundo_nombre ?? '',
+              primer_apellido: item.primer_apellido ?? '',
+              segundo_apellido: item.segundo_apellido ?? '',
             };
             return filaProcesada;
           });
@@ -322,8 +321,6 @@ export class EditReferPersonalesComponent implements OnInit, OnChanges, OnDestro
             this.toastr.error('Error al inactivar la referencia personal.');
           }
         });
-      } else {
-        console.log('Inactivación cancelada.');
       }
     });
   }

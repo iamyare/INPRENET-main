@@ -78,6 +78,14 @@
             </mat-form-field>
           </div>
 
+          <!-- Teléfono Celular -->
+          <div class="col-lg-3 col-md-12">
+            <mat-form-field class="example-full-width inputs" appearance="outline">
+              <mat-label>Teléfono Celular</mat-label>
+              <input matInput type="text" formControlName="telefono_celular">
+            </mat-form-field>
+          </div>
+
           <!-- Teléfono de Casa -->
           <div class="col-lg-3 col-md-12">
             <mat-form-field class="example-full-width inputs" appearance="outline">
@@ -86,13 +94,7 @@
             </mat-form-field>
           </div>
 
-          <!-- Teléfono Celular -->
-          <div class="col-lg-3 col-md-12">
-            <mat-form-field class="example-full-width inputs" appearance="outline">
-              <mat-label>Teléfono Celular</mat-label>
-              <input matInput type="text" formControlName="telefono_celular">
-            </mat-form-field>
-          </div>
+
 
           <!-- Teléfono de Trabajo -->
           <div class="col-lg-3 col-md-12">
@@ -125,11 +127,14 @@
         <!-- Botón de agregar o actualizar -->
         <div class="row">
           <div class="col-lg-12" style="text-align: center; margin-top: 20px;">
-            <button mat-raised-button color="primary" *ngIf="!conyugeExisteFlag" (click)="agregarConyuge()">
+            <button mat-raised-button color="primary" *ngIf="!conyugeExisteFlag" (click)="agregarConyuge()" [disabled]="formGroup.invalid">
               Agregar Cónyuge
             </button>
-            <button mat-raised-button color="primary" *ngIf="conyugeExisteFlag" (click)="actualizarConyuge()">
+            <button mat-raised-button color="primary" *ngIf="conyugeExisteFlag" (click)="actualizarConyuge()" [disabled]="formGroup.invalid">
               Actualizar Cónyuge
+            </button>
+            <button mat-raised-button color="warn" *ngIf="conyugeExisteFlag" (click)="eliminarConyuge()">
+              Eliminar Cónyuge
             </button>
           </div>
         </div>

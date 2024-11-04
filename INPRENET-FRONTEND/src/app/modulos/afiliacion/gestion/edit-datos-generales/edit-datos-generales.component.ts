@@ -25,6 +25,7 @@ export class EditDatosGeneralesComponent implements OnInit {
   CausaFallecimiento: any[] = [];
   estado: any[] = [];
   public mostrarBotonGuardar: boolean = false;
+  image:any;
 
   tiposPersona: any[] = [
     { ID_TIPO_PERSONA: 1, TIPO_PERSONA: 'AFILIADO' },
@@ -121,6 +122,15 @@ export class EditDatosGeneralesComponent implements OnInit {
     this.cargarEstadosAfiliado();
     this.previsualizarInfoAfil();
     this.cargarDepartamentos();
+  }
+
+  onImageCaptured(image: string): void {
+    if (image) {
+      const imageBlob = this.dataURItoBlob(image);
+      if (imageBlob) {
+        this.image = new File([imageBlob], 'perfil.jpg', { type: 'image/jpeg' });
+      }
+    }
   }
 
   cargarCausasFallecimiento() {
@@ -260,20 +270,26 @@ export class EditDatosGeneralesComponent implements OnInit {
       this.loading = true;
       await this.svcAfiliado.getAfilByParam(this.Afiliado.n_identificacion).subscribe(
         (result) => {
+          console.log(result);
+
           this.datos = result;
           this.Afiliado = result;
           this.estadoAfiliacion = result.estadoAfiliacion;
           this.fallecido = result.fallecido;
 
+          // Si existe una foto de perfil en el backend, asignarla a this.image
+          if (result.FOTO_PERFIL) {
+            this.image = this.dataURItoBlob(`data:image/jpeg;base64,${result.FOTO_PERFIL}`);
+          }
+
           const refpersArray = this.formDatosGenerales.get('refpers') as FormArray;
-          //refpersArray.clear();
 
           const jsonObj: any = result.DIRECCION_RESIDENCIA
             ? result.DIRECCION_RESIDENCIA.split(',').reduce((acc: any, curr: any) => {
-              const [key, value] = curr.split(':').map((s: string) => s.trim());
-              acc[key] = value;
-              return acc;
-            }, {} as { [key: string]: string })
+                const [key, value] = curr.split(':').map((s: string) => s.trim());
+                acc[key] = value;
+                return acc;
+              }, {} as { [key: string]: string })
             : {}; // Si no existe DIRECCION_RESIDENCIA, asigna un objeto vacío
 
           this.initialData = {
@@ -298,14 +314,11 @@ export class EditDatosGeneralesComponent implements OnInit {
             estado_civil: result?.ESTADO_CIVIL,
             cantidad_hijos: result?.CANTIDAD_HIJOS,
             id_profesion: result?.ID_PROFESION,
-
             id_pais: result?.ID_PAIS,
             id_departamento_residencia: result?.id_departamento_residencia,
             id_municipio_residencia: result?.ID_MUNICIPIO,
-
             id_departamento_nacimiento: result?.id_departamento_nacimiento,
             id_municipio_nacimiento: result?.ID_MUNICIPIO_NACIMIENTO,
-
             discapacidad: result?.discapacidades.length > 0 ? true : false,
             id_tipo_identificacion: result?.ID_PROFESION,
 
@@ -322,37 +335,18 @@ export class EditDatosGeneralesComponent implements OnInit {
           };
 
           if (result?.discapacidades.length > 0) {
-            this.discapacidadSeleccionada = true
-            this.indicesSeleccionados = result?.discapacidades
+            this.discapacidadSeleccionada = true;
+            this.indicesSeleccionados = result?.discapacidades;
           }
 
-          this.form1.controls.fecha_defuncion.setValue(result?.fecha_defuncion)
+          this.form1.controls.fecha_defuncion.setValue(result?.fecha_defuncion);
           this.form1.controls.causa_fallecimiento.setValue(result?.ID_CAUSA_FALLECIMIENTO);
           this.form1.controls.id_departamento_defuncion.setValue(result?.ID_DEPARTAMENTO_DEFUNCION);
           this.form1.controls.id_municipio_defuncion.setValue(result?.ID_MUNICIPIO_DEFUNCION);
-          this.form1.controls.tipo_persona.setValue(result?.ID_TIPO_PERSONA)
-          //this.form1.controls.estado.setValue('ACTIVO');
+          this.form1.controls.tipo_persona.setValue(result?.ID_TIPO_PERSONA);
 
-          //this.form1.controls.certificado_defuncion.setValue(result?.certificado_defuncion)
-          //this.form1.controls.observaciones.setValue("Ninguna")
-
-          this.cargada = true
-
-          //this.form1.controls.id_departamento_defuncion.setValue("COLON")
-          //console.log(this.form1.controls.id_departamento_defuncion )
-          /* this.form1.setValue({
-            estado: 'ACTIVO',
-            causa_fallecimiento: '1',
-            id_departamento_defuncion: '1',
-            id_municipio_defuncion: '860'
-          }); */
-
-
-          //refpersArray.push(newGroup);
-
-          //this.updateDiscapacidades();
-
-          this.Afiliado.nameAfil = this.unirNombres(result?.PRIMER_NOMBRE, result?.SEGUNDO_NOMBRE, result?.TERCER_NOMBRE, result?.PRIMER_APELLIDO, result?.SEGUNDO_APELLIDO);
+          // Indicar que los datos han sido cargados
+          this.cargada = true;
           this.loading = false;
         },
         (error) => {
@@ -386,48 +380,32 @@ export class EditDatosGeneralesComponent implements OnInit {
     this.Afiliado = {};
   }
 
-  GuardarInformacion() {
-    //this.formDatosGenerales.value.refpers[0].fecha_nacimiento = convertirFechaInputs(this.formDatosGenerales.value.refpers[0].fecha_nacimiento);
-    let a: any
-    if (this.formDatosGenerales.value.refpers[0]) {
-      a = {
-        ...this.formDatosGenerales.value.refpers[0],
-        /*  estado: this.form1.value.estado, */
-        causa_fallecimiento: this.form1.value.causa_fallecimiento,
-        fecha_defuncion: convertirFechaInputs(this.form1.value.fecha_defuncion!),
-        id_departamento_defuncion: this.form1.value.id_departamento_defuncion,
-        id_municipio_defuncion: this.form1.value.id_municipio_defuncion,
-        certificado_defuncion: this.formDatosGenerales.value.archivoCertDef,
-        /* tipo_persona: this.form1.value.tipo_persona, */
-        //certificado_defuncion: this.form1.value.certificado_defuncion
-        //observaciones: this.form1.value.observaciones,
-      };
-    } else {
-      a = {
-        dato: {
-          ...this.initialData
-        },
-        ...this.formDatosGenerales.value.refpers[0],
-        estado: this.form1.value.estado,
-        causa_fallecimiento: this.form1.value.causa_fallecimiento,
-        fecha_defuncion: convertirFechaInputs(this.form1.value.fecha_defuncion!),
-        id_departamento_defuncion: this.form1.value.id_departamento_defuncion,
-        id_municipio_defuncion: this.form1.value.id_municipio_defuncion,
-        certificado_defuncion: this.formDatosGenerales.value.archivoCertDef,
-        /* tipo_persona: this.form1.value.tipo_persona */
-        //certificado_defuncion: this.form1.value.certificado_defuncion
-        //observaciones: this.form1.value.observaciones,
-      };
+  GuardarInformacion(): void {
+    const datosActualizados: any = {
+      ...this.formDatosGenerales.value.refpers[0],
+      causa_fallecimiento: this.form1.value.causa_fallecimiento,
+      fecha_defuncion: convertirFechaInputs(this.form1.value.fecha_defuncion!),
+      id_departamento_defuncion: this.form1.value.id_departamento_defuncion,
+      id_municipio_defuncion: this.form1.value.id_municipio_defuncion,
+      certificado_defuncion: this.formDatosGenerales.value.archivoCertDef,
+    };
+
+    // Solo actualizar la imagen si se ha capturado una nueva imagen
+    if (this.image) {
+      datosActualizados.FotoPerfil = this.image;
     }
-    this.svcAfiliado.updateDatosGenerales(this.Afiliado.ID_PERSONA, a).subscribe(
+
+    // Llamada al servicio para actualizar los datos
+    this.svcAfiliado.updateDatosGenerales(this.Afiliado.ID_PERSONA, datosActualizados).subscribe(
       async (result) => {
-        this.toastr.success(`Datos generales modificados correctamente`);
+        this.toastr.success(`Datos generales modificados correctamente, incluyendo la fotografía`);
       },
       (error) => {
         this.toastr.error(`Error: ${error.error.message}`);
       }
     );
   }
+
 
   getErrors(fieldName: string): any {
     // Implementar lógica para manejar errores de validación
@@ -444,5 +422,27 @@ export class EditDatosGeneralesComponent implements OnInit {
     }
     // Asignar el archivo al control del formulario
     this.formDatosGenerales.get('archivoCertDef')?.setValue(event);
+  }
+
+  getArchivoFoto(event: File): void {
+    if (!this.formDatosGenerales.contains('foto_empleado')) {
+      this.formDatosGenerales.addControl('foto_empleado', new FormControl('', []));
+    }
+    this.formDatosGenerales.get('foto_empleado')?.setValue(event);
+  }
+
+  dataURItoBlob(dataURI: string | null): Blob | null {
+    if (!dataURI) {
+      console.error('dataURI is null or undefined');
+      return null;
+    }
+    const byteString = atob(dataURI.split(',')[1] || '');
+    const mimeString = dataURI.split(',')[0]?.split(':')[1]?.split(';')[0] || 'image/jpeg';
+    const buffer = new ArrayBuffer(byteString.length);
+    const data = new DataView(buffer);
+    for (let i = 0; i < byteString.length; i++) {
+      data.setUint8(i, byteString.charCodeAt(i));
+    }
+    return new Blob([buffer], { type: mimeString });
   }
 }

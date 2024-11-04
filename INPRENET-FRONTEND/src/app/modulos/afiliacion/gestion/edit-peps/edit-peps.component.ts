@@ -262,8 +262,13 @@ export class EditPepsComponent implements OnInit, OnDestroy, OnChanges {
       }
     ];
 
+    console.log(row.fecha_inicio);
+    console.log(row.fecha_fin);
+
+
     const fechaInicio = this.convertirCadenaAFecha(row.fecha_inicio);
     const fechaFin = this.convertirCadenaAFecha(row.fecha_fin);
+
 
     const valoresIniciales = {
       cargo: row.cargo,
@@ -323,10 +328,10 @@ export class EditPepsComponent implements OnInit, OnDestroy, OnChanges {
     });
   }
 
-
   convertirCadenaAFecha(fecha: string): Date | null {
     const [day, month, year] = fecha.split('/').map(Number);
-    const date = new Date(Date.UTC(year, month - 1, day));
+    const date = new Date(year, month - 1, day);
     return isNaN(date.getTime()) ? null : date;
   }
+
 }

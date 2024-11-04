@@ -96,7 +96,7 @@ export class EditBeneficiariosComponent implements OnInit, OnChanges {
         this.filas = data.map((item: any) => {
           const nombres = [item.primerNombre, item.segundoNombre, item.tercerNombre].filter(part => part).join(' ');
           const apellidos = [item.primerApellido, item.segundoApellido].filter(part => part).join(' ');
-          const fechaNacimiento = this.datePipe.transform(item.fechaNacimiento, 'dd/MM/yyyy') || 'Fecha no disponible';
+          const fechaNacimiento = this.datePipe.transform(item.fechaNacimiento, 'dd/MM/yyyy');
           const discapacidades = Array.isArray(item.discapacidades)
             ? item.discapacidades.map((disc: any) => disc.tipoDiscapacidad).join(', ')
             : '';

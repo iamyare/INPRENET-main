@@ -44,10 +44,10 @@ export class AgregarReferenciasPersonalesComponent implements OnInit {
       tercer_nombre: [datos?.tercer_nombre || '', [Validators.maxLength(50), Validators.pattern(/^[^0-9]*$/)]],
       primer_apellido: [datos?.primer_apellido || '', [Validators.required, Validators.minLength(2), Validators.maxLength(50), Validators.pattern(/^[^0-9]*$/)]],
       segundo_apellido: [datos?.segundo_apellido || '', [Validators.maxLength(50), Validators.pattern(/^[^0-9]*$/)]],
-      direccion: [datos?.direccion || '', [Validators.maxLength(200)]],
+      direccion: [datos?.direccion || '', [Validators.required, Validators.minLength(10), Validators.maxLength(200)]],
       telefono_domicilio: [datos?.telefono_domicilio || '', [Validators.minLength(8), Validators.maxLength(12), Validators.pattern(/^[0-9]*$/)]],
       telefono_trabajo: [datos?.telefono_trabajo || '', [Validators.minLength(8), Validators.maxLength(12), Validators.pattern(/^[0-9]*$/)]],
-      telefono_personal: [datos?.telefono_personal || '', [Validators.minLength(8), Validators.maxLength(12), Validators.pattern(/^[0-9]*$/)]],
+      telefono_personal: [datos?.telefono_personal || '', [Validators.required ,Validators.minLength(8), Validators.maxLength(12), Validators.pattern(/^[0-9]*$/)]],
       parentesco: [datos?.parentesco || '', [Validators.required, Validators.minLength(2), Validators.maxLength(30)]],
       n_identificacion: [datos?.n_identificacion || '', [Validators.pattern(/^[0-9]*$/), Validators.minLength(13), Validators.maxLength(13)]]
     });

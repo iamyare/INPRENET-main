@@ -4,14 +4,12 @@
   </div>
 
   <div *ngIf="datos && !loading">
-    <!-- <app-dat-generales-afiliado [datos]="formDatosGenerales"
-      (newDatosGenerales)="setDatosGenerales($event)"></app-dat-generales-afiliado> -->
-
     <app-datos-generales
       [initialData]="initialData"
       [indicesSeleccionados]="indicesSeleccionados"
       [discapacidadSeleccionada]="true"
-      (newDatosGenerales)="setDatosGenerales($event)">
+      (newDatosGenerales)="setDatosGenerales($event)"
+      (imageCaptured)="onImageCaptured($event)">
     </app-datos-generales>
 
     <form style="margin: 0 0 1.5rem;" [formGroup]="form1">

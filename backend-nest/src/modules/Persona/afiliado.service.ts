@@ -187,31 +187,19 @@ export class AfiliadoService {
         'peps.cargo_publico',
       ],
     });
-
+  
     if (!persona) {
       throw new NotFoundException(`Afiliado con N_IDENTIFICACION ${term} no existe`);
     }
-    const discapacidades = persona.personaDiscapacidades.map(function (discapacidad) {
+  
+    const discapacidades = persona.personaDiscapacidades.map((discapacidad) => {
       return {
         id_discapacidad: discapacidad.discapacidad.id_discapacidad,
         tipo: discapacidad.discapacidad.tipo_discapacidad,
         descripcion: discapacidad.discapacidad.descripcion,
       };
     });
-
-    const peps = []/* persona.peps.map(peps => ({
-        id: peps.id_peps,
-        cargo: peps.cargo,
-        fecha_inicio: peps.fecha_inicio,
-        fecha_fin: peps.fecha_fin,
-        referencias: peps.referencias,
-        socio: {
-            id: peps.socio?.id_socio,
-            nombre: peps.socio?.nombre,
-            // Añadir más campos según la entidad Net_Socio
-        }
-    })); */
-
+  
     const result = {
       N_IDENTIFICACION: persona.n_identificacion,
       ID_PERSONA: persona.id_persona,
@@ -244,24 +232,25 @@ export class AfiliadoService {
       ID_MUNICIPIO_NACIMIENTO: persona.municipio_nacimiento?.id_municipio,
       fecha_defuncion: persona.fecha_defuncion,
       fecha_vencimiento_ident: persona.fecha_vencimiento_ident,
-      certificado_defuncion: persona?.certificado_defuncion,
-      ID_MUNICIPIO_DEFUNCION: persona?.municipio_defuncion?.id_municipio!,
-      MUNICIPIO_DEFUNCION: persona?.municipio_defuncion?.nombre_municipio!,
-      ID_DEPARTAMENTO_DEFUNCION: persona?.municipio_defuncion?.departamento?.id_departamento!,
-      DEPARTAMENTO_DEFUNCION: persona?.municipio_defuncion?.departamento?.nombre_departamento!,
+      certificado_defuncion: persona.certificado_defuncion ? Buffer.from(persona.certificado_defuncion).toString('base64') : null,
+      archivo_identificacion: persona.archivo_identificacion ? Buffer.from(persona.archivo_identificacion).toString('base64') : null,
+      ID_MUNICIPIO_DEFUNCION: persona.municipio_defuncion?.id_municipio!,
+      MUNICIPIO_DEFUNCION: persona.municipio_defuncion?.nombre_municipio!,
+      ID_DEPARTAMENTO_DEFUNCION: persona.municipio_defuncion?.departamento?.id_departamento!,
+      DEPARTAMENTO_DEFUNCION: persona.municipio_defuncion?.departamento?.nombre_departamento!,
       ID_CAUSA_FALLECIMIENTO: persona?.causa_fallecimiento?.id_causa_fallecimiento!,
       CAUSA_FALLECIMIENTO: persona?.causa_fallecimiento?.nombre!,
       fallecido: persona.fallecido,
       estadoAfiliacion: persona.detallePersona[0]?.estadoAfiliacion?.codigo,
       CANTIDAD_DEPENDIENTES: persona.cantidad_dependientes,
       discapacidades: discapacidades,
-      peps: peps,
       ID_TIPO_PERSONA: persona.detallePersona[0]?.tipoPersona?.id_tipo_persona,
       TIPO_PERSONA: persona.detallePersona[0]?.tipoPersona?.tipo_persona,
     };
-
+  
     return result;
   }
+  
 
   async findOnePersonaParaDeduccion(term: string) {
     try {
@@ -872,7 +861,13 @@ export class AfiliadoService {
     await this.netPersonaColegiosRepository.remove(referencia);
   }
 
-  async updateDatosGenerales(idPersona: number, datosGenerales: any, fileIdent: any, arch_cert_def: any): Promise<any> {
+  async updateDatosGenerales(
+    idPersona: number, 
+    datosGenerales: any, 
+    fileIdent: any, 
+    arch_cert_def: any, 
+    fotoPerfil: any
+  ): Promise<any> {
     try {
       if (datosGenerales.dato?.discapacidades) {
         const datosAnt = await this.perDiscapacidadRepository.delete({ persona: { id_persona: idPersona } });
@@ -888,21 +883,21 @@ export class AfiliadoService {
         }));
         await this.perDiscapacidadRepository.save(nuevosRegistros);
       }
-
+  
       const estadoP = await this.estadoAfiliacionRepository.findOne({ where: { nombre_estado: datosGenerales.dato.estado } });
-
+  
       const temp = datosGenerales;
       delete temp.dato.peps;
       delete temp.dato.discapacidades;
-
+  
       temp.dato.direccion_residencia = `BARRIO_COLONIA: ${temp.dato.barrio_colonia},AVENIDA: ${temp.dato.avenida},CALLE: ${temp.dato.calle},SECTOR: ${temp.dato.sector},BLOQUE: ${temp.dato.bloque},N° DE CASA: ${temp.dato.numero_casa},COLOR CASA: ${temp.dato.color_casa},ALDEA: ${temp.dato.aldea},CASERIO: ${temp.dato.caserio}`;
-
+  
       const fechaDefuncion = new Date(temp.dato.fecha_defuncion);
       const fechaFormateada = format(fechaDefuncion, 'yyyy-MM-dd');
-
+  
       delete temp.dato.archivo_identificacion;
       delete temp.dato.fecha_defuncion;
-
+  
       const data = {
         id_persona: idPersona,
         fallecido: temp.causa_fallecimiento ? "SI" : "NO",
@@ -910,14 +905,15 @@ export class AfiliadoService {
         municipio_defuncion: temp.id_municipio_defuncion,
         archivo_identificacion: fileIdent?.buffer ? Buffer.from(fileIdent.buffer) : null,
         certificado_defuncion: arch_cert_def?.buffer ? Buffer.from(arch_cert_def.buffer) : null,
+        foto_perfil: fotoPerfil?.buffer ? Buffer.from(fotoPerfil.buffer) : null,
         fecha_defuncion: fechaFormateada,
         ...temp.dato
       };
-
+  
       const afiliado = await this.personaRepository.preload(data);
-
+  
       if (!afiliado) throw new NotFoundException(`La persona con ID ${idPersona} no se ha encontrado`);
-
+  
       await this.personaRepository.save(afiliado);
       if (datosGenerales.tipo_persona) {
         const result = await this.detallePersonaRepository.update(
@@ -928,13 +924,11 @@ export class AfiliadoService {
           console.warn(`No se encontró un registro en NET_DETALLE_PERSONA para la persona con ID ${idPersona} y padre nulo.`);
         }
       }
-
       return afiliado;
     } catch (error) {
       this.handleException(error);
     }
   }
-
 
   async updatePerfCentroTrabajo(id: number, updateDto: UpdatePerfCentTrabDto): Promise<Net_perf_pers_cent_trab> {
     const existingPerf = await this.perfPersoCentTrabRepository.findOne({ where: { id_perf_pers_centro_trab: id } });

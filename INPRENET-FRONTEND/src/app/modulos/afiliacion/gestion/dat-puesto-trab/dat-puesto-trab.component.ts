@@ -47,7 +47,7 @@ export class DatPuestoTrabComponent implements OnInit {
           label: item.codigo,
           value: String(item.id_centro_trabajo),
           nombreCentro: item.nombre_centro_trabajo,
-          direccion: item.direccion_1 || item.direccion_2 || 'No disponible',
+          direccion: item.direccion_1 || item.direccion_2,
           sector: item.sector_economico,
         }));
       },
@@ -79,7 +79,7 @@ export class DatPuestoTrabComponent implements OnInit {
       direccionCentro: [{ value: '', disabled: true }],
       showNumeroAcuerdo: [true],
       jornada: ['', Validators.required],
-      tipoJornada: ['', Validators.required]
+      tipo_jornada: ['', Validators.required]
     }, { validators: this.fechasValidator });
 
     trabajoFormGroup.get('id_centro_trabajo')?.valueChanges.subscribe(value => {

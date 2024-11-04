@@ -124,10 +124,15 @@ export class AfiliadoService {
   updateDatosGenerales(idPersona: string, datosGenerales: any): Observable<any> {
     const formData: FormData = new FormData();
     formData.append('datosGenerales', JSON.stringify(datosGenerales));
-    formData.append('arch_cert_def', datosGenerales.certificado_defuncion
-    );
-    formData.append('file_ident', datosGenerales.dato.archivo_identificacion);
-
+    if (datosGenerales.certificado_defuncion) {
+      formData.append('arch_cert_def', datosGenerales.certificado_defuncion);
+    }
+    if (datosGenerales.dato && datosGenerales.dato.archivo_identificacion) {
+      formData.append('file_ident', datosGenerales.dato.archivo_identificacion);
+    }
+    if (datosGenerales.FotoPerfil) {
+      formData.append('FotoPerfil', datosGenerales.FotoPerfil);
+    }
     return this.http.put(`${environment.API_URL}/api/Persona/updateDatosGenerales/${idPersona}`, formData);
   }
 

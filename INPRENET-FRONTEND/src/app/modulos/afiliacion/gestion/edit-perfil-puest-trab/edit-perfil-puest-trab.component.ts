@@ -41,6 +41,17 @@ export class EditPerfilPuestTrabComponent implements OnInit, OnDestroy, OnChange
   public mostrarBotonEditar: boolean = false;
   public mostrarBotonEliminar: boolean = false;
 
+  jornadas = [
+    { label: 'MATUTINA', value: 'MATUTINA' },
+    { label: 'DIURNA', value: 'DIURNA' },
+    { label: 'NOCTURNA', value: 'NOCTURNA' }
+  ];
+
+  tiposJornada = [
+    { label: 'COMPLETA', value: 'COMPLETA' },
+    { label: 'PARCIAL', value: 'PARCIAL' }
+  ];
+
   constructor(
     private svcAfiliado: AfiliadoService,
     private toastr: ToastrService,
@@ -115,6 +126,16 @@ export class EditPerfilPuestTrabComponent implements OnInit, OnDestroy, OnChange
         header: 'Cargo',
         col: 'cargo',
         isEditable: true
+      },
+      {
+        header: 'Jornada',
+        col: 'jornada',
+        isEditable: true
+      },
+      {
+        header: 'Tipo de jornada',
+        col: 'tipo_jornada',
+        isEditable: true
       }
     ];
 
@@ -148,7 +169,6 @@ export class EditPerfilPuestTrabComponent implements OnInit, OnDestroy, OnChange
     if (this.Afiliado.n_identificacion) {
       try {
         const data = await this.svcAfiliado.getAllPerfCentroTrabajo(this.Afiliado.n_identificacion).toPromise();
-
         this.filas = data.map((item: any) => ({
           id_perf_pers_centro_trab: item.id_perf_pers_centro_trab,
           codigo: item.centroTrabajo.codigo,
@@ -156,11 +176,13 @@ export class EditPerfilPuestTrabComponent implements OnInit, OnDestroy, OnChange
           direccion_1: item.centroTrabajo.direccion_1,
           direccion_2: item.centroTrabajo.direccion_2,
           nombre_centro_trabajo: item.centroTrabajo.nombre_centro_trabajo,
-          numero_acuerdo: item.numero_acuerdo || 'No disponible',
+          numero_acuerdo: item.numero_acuerdo,
           salarioBase: item.salario_base,
-          fechaIngreso: this.datePipe.transform(item.fecha_ingreso, 'dd/MM/yyyy') || 'Fecha no disponible',
-          fechaEgreso: this.datePipe.transform(item.fecha_egreso, 'dd/MM/yyyy') || 'Fecha no disponible',
+          fechaIngreso: this.datePipe.transform(item.fecha_ingreso, 'dd/MM/yyyy'),
+          fechaEgreso: this.datePipe.transform(item.fecha_egreso, 'dd/MM/yyyy'),
           cargo: item.cargo,
+          jornada: item.jornada,
+          tipo_jornada: item.tipo_jornada,
         }));
       } catch (error) {
         this.toastr.error('Error al cargar los datos de los perfiles de los centros de trabajo');
@@ -182,109 +204,47 @@ export class EditPerfilPuestTrabComponent implements OnInit, OnDestroy, OnChange
   }
 
   async manejarAccionUno(row: any) {
-
     const campos = [
-      {
-        nombre: 'codigo',
-        tipo: 'text',
-        requerido: true,
-        etiqueta: 'Codigo de Centro Trabajo',
-        editable: false,
-        icono: 'business'
-      },
-      {
-        nombre: 'nombre_centro_trabajo',
-        tipo: 'text',
-        requerido: true,
-        etiqueta: 'Nombre Centro Trabajo',
-        editable: false,
-        icono: 'business'
-      },
-      {
-        nombre: 'direccion_1',
-        tipo: 'text',
-        requerido: true,
-        etiqueta: 'Direccion 1',
-        editable: false,
-        icono: 'place'
-      },
-      {
-        nombre: 'direccion_2',
-        tipo: 'text',
-        requerido: true,
-        etiqueta: 'Direccion 2',
-        editable: false,
-        icono: 'place'
-      },
-      {
-        nombre: 'numero_acuerdo',
-        tipo: 'text',
-        requerido: true,
-        etiqueta: 'Número Acuerdo',
-        editable: true,
-        icono: 'description',
-        validaciones: [Validators.required, Validators.maxLength(40)]
-      },
-      {
-        nombre: 'salarioBase',
-        tipo: 'number',
-        requerido: true,
-        etiqueta: 'Salario Base',
-        editable: true,
-        icono: 'attach_money',
-        validaciones: [Validators.required, Validators.min(0)]
-      },
-      {
-        nombre: 'fechaIngreso',
-        tipo: 'date',
-        requerido: false,
-        etiqueta: 'Fecha Ingreso',
-        editable: true,
-        icono: 'event',
-        validaciones: [Validators.required]
-      },
-      {
-        nombre: 'fechaEgreso',
-        tipo: 'date',
-        requerido: false,
-        etiqueta: 'Fecha Egreso',
-        editable: true,
-        icono: 'event_busy'
-      },
-      {
-        nombre: 'cargo',
-        tipo: 'text',
-        requerido: false,
-        etiqueta: 'Cargo',
-        editable: true,
-        icono: 'work_outline',
-        validaciones: [Validators.required, Validators.maxLength(40)]
-      }
+      { nombre: 'codigo', tipo: 'text', requerido: true, etiqueta: 'Codigo de Centro Trabajo', editable: false, icono: 'business' },
+      { nombre: 'nombre_centro_trabajo', tipo: 'text', requerido: true, etiqueta: 'Nombre Centro Trabajo', editable: false, icono: 'business' },
+      { nombre: 'direccion_1', tipo: 'text', requerido: true, etiqueta: 'Direccion 1', editable: false, icono: 'place' },
+      { nombre: 'direccion_2', tipo: 'text', requerido: true, etiqueta: 'Direccion 2', editable: false, icono: 'place' },
+      { nombre: 'numero_acuerdo', tipo: 'text', requerido: true, etiqueta: 'Número Acuerdo', editable: true, icono: 'description', validaciones: [Validators.required, Validators.maxLength(40)] },
+      { nombre: 'salarioBase', tipo: 'number', requerido: true, etiqueta: 'Salario Base', editable: true, icono: 'attach_money', validaciones: [Validators.required, Validators.min(0)] },
+      { nombre: 'fechaRango', tipo: 'daterange', requerido: false, etiqueta: 'Periodo laboral', editable: true, icono: 'event', validaciones: [Validators.required] },
+      { nombre: 'cargo', tipo: 'text', requerido: false, etiqueta: 'Cargo', editable: true, icono: 'work_outline', validaciones: [Validators.required, Validators.maxLength(40)] },
+      { nombre: 'jornada', tipo: 'list', requerido: true, etiqueta: 'Jornada', editable: true, opciones: this.jornadas, icono: 'schedule' },
+      { nombre: 'tipo_jornada', tipo: 'list', requerido: true, etiqueta: 'Tipo de Jornada', editable: true, opciones: this.tiposJornada, icono: 'assignment_turned_in' }
     ];
 
+    const fechaRango = {
+      start: this.convertirCadenaAFecha(row.fechaIngreso),
+      end: this.convertirCadenaAFecha(row.fechaEgreso)
+    };
+
+    const valoresIniciales = {
+      ...row,
+      fechaRango: fechaRango
+    };
 
     const dialogRef = this.dialog.open(EditarDialogComponent, {
       width: '500px',
-      data: { campos: campos, valoresIniciales: row }
+      data: { campos: campos, valoresIniciales: valoresIniciales }
     });
 
     dialogRef.afterClosed().subscribe(async (result: any) => {
-
       if (result) {
-        result.fechaIngreso = this.datePipe.transform(result.fechaIngreso, 'dd/MM/yyyy');
-        result.fechaEgreso = this.datePipe.transform(result.fechaEgreso, 'dd/MM/yyyy');
-
-        const idCentroTrabajo = result.id_centro_trabajo;
-        delete result.nombre_centro_trabajo;
+        result.fechaIngreso = this.datePipe.transform(result.fechaRango.start, 'dd/MM/yyyy');
+        result.fechaEgreso = this.datePipe.transform(result.fechaRango.end, 'dd/MM/yyyy');
+        delete result.fechaRango;
 
         const dataToSend = {
           ...result,
-          idCentroTrabajo: idCentroTrabajo
+          idCentroTrabajo: row.id_centro_trabajo
         };
-        this.svcAfiliado.updatePerfCentroTrabajo(row.id_perf_pers_centro_trab, result).subscribe({
 
-
-          next: (response) => {
+        this.svcAfiliado.updatePerfCentroTrabajo(row.id_perf_pers_centro_trab, dataToSend).subscribe({
+          next: () => {
             const index = this.filas.findIndex(item => item.id === row.id);
             if (index !== -1) {
               this.filas[index] = {
@@ -293,20 +253,17 @@ export class EditPerfilPuestTrabComponent implements OnInit, OnDestroy, OnChange
                 nombre_centro_trabajo: row.nombre_centro_trabajo
               };
             }
-            this.toastr.success("Se actualizó el perfil de trabajo correctamente")
+            this.toastr.success("Se actualizó el perfil de trabajo correctamente");
             this.cargar();
           },
           error: (error) => {
-            this.toastr.error("Error", "No se actualizo el perfil de trabajo")
+            this.toastr.error("Error", "No se actualizó el perfil de trabajo");
             console.error("Error al actualizar:", error);
           }
         });
-      } else {
-        console.log('No se realizaron cambios.');
       }
     });
   }
-
 
   manejarAccionDos(row: any) {
     const dialogRef = this.dialog.open(ConfirmDialogComponent, {
@@ -331,7 +288,6 @@ export class EditPerfilPuestTrabComponent implements OnInit, OnDestroy, OnChange
           }
         });
       } else {
-        console.log('Desactivación cancelada por el usuario.');
       }
     });
   }
@@ -350,4 +306,8 @@ export class EditPerfilPuestTrabComponent implements OnInit, OnDestroy, OnChange
     });
   }
 
+  convertirCadenaAFecha(fecha: string): Date | null {
+    const [day, month, year] = fecha.split('/').map(Number);
+    return new Date(year, month - 1, day);
+  }
 }

@@ -24,24 +24,23 @@
             </mat-select>
           </mat-form-field>
           <mat-error *ngFor="let error of getErrors('tipo_persona')">
-            {{ error }}
+            {{ error }}d
           </mat-error>
         </div> -->
-    <!--
-        <div class="col-md-4" >
-          <mat-form-field style="flex-direction: column-reverse;" class="example-full-width inputs"
-            appearance="outline">
-            <mat-label>Estado de Afiliación de la Persona</mat-label>
-            <mat-select matNativeControl formControlName="estado" (selectionChange)="mostrarCamposFallecido($event)">
-              <mat-option *ngFor="let p of estado" [value]="p.label">
-                {{ p.label }}
+
+        <div class="col-md-4">
+          <mat-form-field style="flex-direction: column-reverse;" class="example-full-width inputs" appearance="outline">
+            <mat-label>Estado de Afiliación</mat-label>
+            <mat-select formControlName="estado">
+              <mat-option *ngFor="let estado of estado" [value]="estado.value">
+                {{ estado.label }}
               </mat-option>
             </mat-select>
           </mat-form-field>
           <mat-error *ngFor="let error of getErrors('estado')">
             {{ error }}
           </mat-error>
-        </div> -->
+        </div>
 
         <!-- <div class="col-md-4">
           <mat-form-field style="flex-direction: column-reverse;" class="example-full-width inputs"

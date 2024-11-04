@@ -153,8 +153,6 @@ export class EditDatosGeneralesComponent implements OnInit {
       label: estado.nombre_estado,
       value: estado.codigo
     }));
-
-    // Suscribirse a los cambios del formulario
     this.form1.valueChanges.subscribe((value) => {
       this.updateDatosGenerales(value);
     });
@@ -270,19 +268,17 @@ export class EditDatosGeneralesComponent implements OnInit {
       this.loading = true;
       await this.svcAfiliado.getAfilByParam(this.Afiliado.n_identificacion).subscribe(
         (result) => {
-          console.log(result);
-
           this.datos = result;
           this.Afiliado = result;
+
+          // Guardar el estado de afiliación
           this.estadoAfiliacion = result.estadoAfiliacion;
           this.fallecido = result.fallecido;
 
-          // Si existe una foto de perfil en el backend, asignarla a this.image
+          // Si hay una imagen de perfil
           if (result.FOTO_PERFIL) {
             this.image = this.dataURItoBlob(`data:image/jpeg;base64,${result.FOTO_PERFIL}`);
           }
-
-          const refpersArray = this.formDatosGenerales.get('refpers') as FormArray;
 
           const jsonObj: any = result.DIRECCION_RESIDENCIA
             ? result.DIRECCION_RESIDENCIA.split(',').reduce((acc: any, curr: any) => {
@@ -290,7 +286,7 @@ export class EditDatosGeneralesComponent implements OnInit {
                 acc[key] = value;
                 return acc;
               }, {} as { [key: string]: string })
-            : {}; // Si no existe DIRECCION_RESIDENCIA, asigna un objeto vacío
+            : {};
 
           this.initialData = {
             n_identificacion: result?.N_IDENTIFICACION,
@@ -328,7 +324,6 @@ export class EditDatosGeneralesComponent implements OnInit {
             bloque: jsonObj?.BLOQUE || "",
             aldea: jsonObj?.ALDEA || "",
             caserio: jsonObj?.CASERIO || "",
-
             barrio_colonia: jsonObj?.["BARRIO_COLONIA"] || "",
             numero_casa: jsonObj?.["N° DE CASA"] || "",
             color_casa: jsonObj?.["COLOR CASA"] || ""
@@ -339,13 +334,16 @@ export class EditDatosGeneralesComponent implements OnInit {
             this.indicesSeleccionados = result?.discapacidades;
           }
 
+          // Establecer los valores preseleccionados
           this.form1.controls.fecha_defuncion.setValue(result?.fecha_defuncion);
           this.form1.controls.causa_fallecimiento.setValue(result?.ID_CAUSA_FALLECIMIENTO);
           this.form1.controls.id_departamento_defuncion.setValue(result?.ID_DEPARTAMENTO_DEFUNCION);
           this.form1.controls.id_municipio_defuncion.setValue(result?.ID_MUNICIPIO_DEFUNCION);
           this.form1.controls.tipo_persona.setValue(result?.ID_TIPO_PERSONA);
 
-          // Indicar que los datos han sido cargados
+          // Aquí seleccionamos el estado de afiliación actual del afiliado
+          this.form1.controls.estado.setValue(result?.estadoAfiliacion?.codigo);
+
           this.cargada = true;
           this.loading = false;
         },
@@ -356,6 +354,7 @@ export class EditDatosGeneralesComponent implements OnInit {
       );
     }
   }
+
 
   updateDiscapacidades() {
     const refpersArray = this.formDatosGenerales.get('refpers') as FormArray;
@@ -387,15 +386,12 @@ export class EditDatosGeneralesComponent implements OnInit {
       fecha_defuncion: convertirFechaInputs(this.form1.value.fecha_defuncion!),
       id_departamento_defuncion: this.form1.value.id_departamento_defuncion,
       id_municipio_defuncion: this.form1.value.id_municipio_defuncion,
+      estado: this.form1.value.estado,
       certificado_defuncion: this.formDatosGenerales.value.archivoCertDef,
     };
-
-    // Solo actualizar la imagen si se ha capturado una nueva imagen
     if (this.image) {
       datosActualizados.FotoPerfil = this.image;
     }
-
-    // Llamada al servicio para actualizar los datos
     this.svcAfiliado.updateDatosGenerales(this.Afiliado.ID_PERSONA, datosActualizados).subscribe(
       async (result) => {
         this.toastr.success(`Datos generales modificados correctamente, incluyendo la fotografía`);
@@ -405,6 +401,7 @@ export class EditDatosGeneralesComponent implements OnInit {
       }
     );
   }
+
 
 
   getErrors(fieldName: string): any {

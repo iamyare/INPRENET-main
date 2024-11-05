@@ -32,10 +32,10 @@ export class EditDatosGeneralesComponent implements OnInit {
   initialData = {}
   indicesSeleccionados: any[] = []
   discapacidadSeleccionada!: boolean
-  /* tiposPersona: any[] = [
+  tiposPersona: any[] = [
     { ID_TIPO_PERSONA: 1, TIPO_PERSONA: 'AFILIADO' },
     { ID_TIPO_PERSONA: 5, TIPO_PERSONA: 'VOLUNTARIO' }
-  ]; */
+  ];
 
   form1 = this.fb.group({
     causa_fallecimiento: ["", [Validators.required]],
@@ -215,12 +215,8 @@ export class EditDatosGeneralesComponent implements OnInit {
         (result) => {
           this.datos = result;
           this.Afiliado = result;
-
-          // Guardar el estado de afiliación
           this.estadoAfiliacion = result.estadoAfiliacion;
           this.fallecido = result.fallecido;
-
-          // Si hay una imagen de perfil
           if (result.FOTO_PERFIL) {
             this.image = this.dataURItoBlob(`data:image/jpeg;base64,${result.FOTO_PERFIL}`);
           }
@@ -279,14 +275,11 @@ export class EditDatosGeneralesComponent implements OnInit {
             this.indicesSeleccionados = result?.discapacidades;
           }
 
-          // Establecer los valores preseleccionados
           this.form1.controls.fecha_defuncion.setValue(result?.fecha_defuncion);
           this.form1.controls.causa_fallecimiento.setValue(result?.ID_CAUSA_FALLECIMIENTO);
           this.form1.controls.id_departamento_defuncion.setValue(result?.ID_DEPARTAMENTO_DEFUNCION);
           this.form1.controls.id_municipio_defuncion.setValue(result?.ID_MUNICIPIO_DEFUNCION);
           this.form1.controls.tipo_persona.setValue(result?.ID_TIPO_PERSONA);
-
-          // Aquí seleccionamos el estado de afiliación actual del afiliado
           this.form1.controls.estado.setValue(result?.estadoAfiliacion?.codigo);
           this.loading = false;
         },
@@ -327,12 +320,10 @@ export class EditDatosGeneralesComponent implements OnInit {
     id_departamento_defuncion: this.form1.value.id_departamento_defuncion,
     id_municipio_defuncion: this.form1.value.id_municipio_defuncion,
     estado: this.form1.value.estado,
+    tipo_persona: this.form1.value.tipo_persona,
     certificado_defuncion: this.formDatosGenerales.value.archivoCertDef,
   };
 
-  console.log(datosActualizados);
-
-  // Si se capturó una imagen, incluirla
   if (this.image) {
     datosActualizados.FotoPerfil = this.image;
   }

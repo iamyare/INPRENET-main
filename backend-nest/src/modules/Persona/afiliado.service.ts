@@ -15,8 +15,8 @@ import { UpdateBeneficiarioDto } from './dto/update-beneficiario.dto';
 import { net_estado_afiliacion } from './entities/net_estado_afiliacion.entity';
 import { Net_Discapacidad } from './entities/net_discapacidad.entity';
 import { Net_Persona_Discapacidad } from './entities/net_persona_discapacidad.entity';
-import { format } from 'date-fns';
 import { NET_MOVIMIENTO_CUENTA } from '../transacciones/entities/net_movimiento_cuenta.entity';
+import { net_causas_fallecimientos } from './entities/net_causas_fallecimientos.entity';
 
 @Injectable()
 export class AfiliadoService {
@@ -45,6 +45,8 @@ export class AfiliadoService {
     private readonly perDiscapacidadRepository: Repository<Net_Persona_Discapacidad>,
     @InjectRepository(NET_MOVIMIENTO_CUENTA)
     private readonly movimientoCuentaRepository: Repository<NET_MOVIMIENTO_CUENTA>,
+    @InjectRepository(net_causas_fallecimientos) // Inyectamos el repositorio
+    private readonly causasFallecimientoRepository: Repository<net_causas_fallecimientos>,
   ) { }
 
   async getMovimientosOrdenados(id_persona: number, id_tipo_cuenta: number): Promise<any> {
@@ -880,33 +882,56 @@ export class AfiliadoService {
     fotoPerfil: any
   ): Promise<any> {
     try {
+      // Verificar si existen discapacidades seleccionadas
       if (datosGenerales.dato?.discapacidades) {
         const keysWithTrueValues = Object.entries(datosGenerales.dato.discapacidades)
           .filter(([key, value]) => value === true)
           .map(([key]) => key);
-        const discapacidades = await this.discapacidadRepository.find({
-          where: { tipo_discapacidad: In(keysWithTrueValues) }
-        });
-        const nuevosRegistros = discapacidades.map(discapacidad => ({
-          persona: { id_persona: idPersona },
-          discapacidad: discapacidad
-        }));
-        await this.perDiscapacidadRepository.save(nuevosRegistros);
+  
+        // **Eliminar discapacidades previas de la persona**
+        await this.perDiscapacidadRepository.delete({ persona: { id_persona: idPersona } });
+  
+        if (keysWithTrueValues.length > 0) {
+          // Guardar las nuevas discapacidades seleccionadas
+          const discapacidades = await this.discapacidadRepository.find({
+            where: { tipo_discapacidad: In(keysWithTrueValues) }
+          });
+  
+          const nuevosRegistros = discapacidades.map(discapacidad => ({
+            persona: { id_persona: idPersona },
+            discapacidad: discapacidad
+          }));
+  
+          await this.perDiscapacidadRepository.save(nuevosRegistros);
+        }
       }
-      const estadoP = await this.estadoAfiliacionRepository.findOne({ where: { codigo: datosGenerales.estado } });
+  
+      const estadoP = await this.estadoAfiliacionRepository.findOne({
+        where: { codigo: datosGenerales.estado }
+      });
       if (!estadoP) {
         throw new NotFoundException(`No se ha encontrado el estado de afiliación con el código ${datosGenerales.estado}`);
       }
+  
+      const causaFallecimiento = await this.causasFallecimientoRepository.findOne({
+        where: { id_causa_fallecimiento: datosGenerales.causa_fallecimiento }
+      });
+      if (!causaFallecimiento) {
+        throw new NotFoundException(`No se encontró la causa de fallecimiento con el ID ${datosGenerales.causa_fallecimiento}`);
+      }
+  
       const temp = datosGenerales.dato || {};
       temp.direccion_residencia = `BARRIO_COLONIA: ${temp.barrio_colonia || ""},AVENIDA: ${temp.avenida || ""},CALLE: ${temp.calle || ""},SECTOR: ${temp.sector || ""},BLOQUE: ${temp.bloque || ""},N° DE CASA: ${temp.numero_casa || ""},COLOR CASA: ${temp.color_casa || ""},ALDEA: ${temp.aldea || ""},CASERIO: ${temp.caserio || ""}`;
+  
       const data: any = {
+        ...temp,
         id_persona: idPersona,
         fallecido: datosGenerales.causa_fallecimiento ? "SI" : "NO",
-        causa_fallecimiento: datosGenerales.causa_fallecimiento,
         municipio_defuncion: datosGenerales.id_municipio_defuncion,
-        ...temp,
+        causa_fallecimiento: causaFallecimiento,
         fecha_defuncion: datosGenerales.fecha_defuncion ?? temp.fecha_defuncion,
       };
+  
       if (fileIdent?.buffer) {
         data.archivo_identificacion = Buffer.from(fileIdent.buffer);
       }
@@ -916,9 +941,11 @@ export class AfiliadoService {
       if (fotoPerfil?.buffer) {
         data.foto_perfil = Buffer.from(fotoPerfil.buffer);
       }
+  
       const afiliado = await this.personaRepository.preload(data);
       if (!afiliado) throw new NotFoundException(`La persona con ID ${idPersona} no se ha encontrado`);
       await this.personaRepository.save(afiliado);
+  
       const resultEstado = await this.detallePersonaRepository.update(
         { ID_PERSONA: idPersona, ID_CAUSANTE: idPersona },
         { ID_ESTADO_AFILIACION: estadoP.codigo }
@@ -926,6 +953,7 @@ export class AfiliadoService {
       if (resultEstado.affected === 0) {
         console.warn(`No se encontró un registro en NET_DETALLE_PERSONA para la persona con ID ${idPersona}.`);
       }
+  
       if (datosGenerales.tipo_persona) {
         const resultTipoPersona = await this.detallePersonaRepository.update(
           { ID_PERSONA: idPersona, ID_CAUSANTE: idPersona },
@@ -935,12 +963,13 @@ export class AfiliadoService {
           console.warn(`No se encontró un registro en NET_DETALLE_PERSONA para la persona con ID ${idPersona}.`);
         }
       }
+  
       return afiliado;
     } catch (error) {
       this.handleException(error);
     }
   }
-
+  
   async updatePerfCentroTrabajo(id: number, updateDto: UpdatePerfCentTrabDto): Promise<Net_perf_pers_cent_trab> {
     const existingPerf = await this.perfPersoCentTrabRepository.findOne({ where: { id_perf_pers_centro_trab: id } });
     if (!existingPerf) {

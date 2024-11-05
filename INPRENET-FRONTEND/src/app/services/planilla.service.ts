@@ -137,8 +137,6 @@ export class PlanillaService {
 
   generarPlanillaComplementaria(tiposPersona: string): Observable<void> {
     const accessToken = sessionStorage.getItem('token');
-    console.log(accessToken);
-
     const url = `${environment.API_URL}/api/planilla/generar-complementaria/${accessToken}`;
 
 
@@ -154,7 +152,6 @@ export class PlanillaService {
 
   generarPlanillaOrdinaria(tiposPersona: string): Observable<void> {
     const accessToken = sessionStorage.getItem('token');
-    console.log(accessToken);
 
     const url = `${environment.API_URL}/api/planilla/generar-ordinaria/${accessToken}`;
 

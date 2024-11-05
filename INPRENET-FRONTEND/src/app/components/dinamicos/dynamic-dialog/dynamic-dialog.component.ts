@@ -61,9 +61,6 @@ export class DynamicDialogComponent implements OnInit {
       cod_planilla: this.data.cod_planilla
     };
 
-    console.log(data);
-
-
     this.detBenSVC.eliminarBenPlan(data).subscribe(
       (response) => {
         this.toastr.success('Beneficio eliminado con éxito', 'Éxito', { closeButton: true });

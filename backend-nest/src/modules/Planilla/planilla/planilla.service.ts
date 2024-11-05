@@ -1929,10 +1929,6 @@ export class PlanillaService {
     const estadoPP = await this.usuarioEmpRepository.findOne({ where: { empleadoCentroTrabajo: { correo_1: decoded?.correo } } });
     const id_usuario_empresa_in = estadoPP.id_usuario_empresa;
 
-    console.log(token);
-    console.log(decoded);
-    console.log(id_usuario_empresa_in);
-
     try {
       await this.entityManager.query(
         `BEGIN

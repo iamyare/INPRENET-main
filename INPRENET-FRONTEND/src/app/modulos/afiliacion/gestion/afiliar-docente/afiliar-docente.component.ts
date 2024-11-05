@@ -164,8 +164,6 @@ export class AfiliarDocenteComponent implements OnInit {
 
       let fileIdent = datosGenerales?.archivo_identificacion
 
-      console.log(formattedData);
-
       this.afiliacionService.crearAfiliacion(formattedData, fileFoto, fileIdent).subscribe(
         response => {
           console.log('Datos enviados con éxito:', response);

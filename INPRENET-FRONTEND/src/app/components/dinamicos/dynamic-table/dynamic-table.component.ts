@@ -89,8 +89,8 @@ export class DynamicTableComponent implements OnInit, OnDestroy {
     this.destroy$.complete();
   }
 
-  public async ejecutarFuncionAsincrona(data: any): Promise<boolean> {
-    if (data) {
+  public async ejecutarFuncionAsincrona(data: Array<any> = []): Promise<boolean> {
+    if (data && data.length > 0) {
       this.filas = data;
       this.filas?.map((objeto: any) => ({ ...objeto, isSelected: false }));
       this.filtrarUsuarios().subscribe();

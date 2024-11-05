@@ -129,6 +129,7 @@ export class NuevoBeneficioAfilComponent implements OnInit {
               estado_civil: res.ESTADO_CIVIL,
               nombreCompleto: unirNombres(res.PRIMER_NOMBRE, res.SEGUNDO_NOMBRE, res.PRIMER_APELLIDO, res.SEGUNDO_APELLIDO),
               genero: res.GENERO,
+              sexo: res.SEXO,
               profesion: res.PROFESION,
               telefono_1: res.TELEFONO_1,
               colegio_magisterial: res.COLEGIO_MAGISTERIAL,
@@ -421,7 +422,7 @@ export class NuevoBeneficioAfilComponent implements OnInit {
               col: 'nombre_completo',
 
             },
-            { header: 'Genero', col: 'genero', },
+            { header: 'Género', col: 'genero', },
             {
               header: 'Tipo Afiliado',
               col: 'tipo_afiliado',
@@ -583,8 +584,6 @@ export class NuevoBeneficioAfilComponent implements OnInit {
     };
     this.datosFormateados = datosFormateados;
 
-    console.log(this.datosFormateados);
-
     if (this.datosFormateados.monto_por_periodo && this.datosFormateados.num_rentas_aplicadas) {
       const result = parseFloat(this.datosFormateados.monto_por_periodo) * parseFloat(this.datosFormateados.num_rentas_aplicadas)
       console.log(result);
@@ -596,34 +595,40 @@ export class NuevoBeneficioAfilComponent implements OnInit {
 
     /*  const residuo = parseFloat(this.datosFormateados.monto_por_periodo) % parseFloat(this.datosFormateados.num_rentas_aplicadas)  */
 
-    const fechaActual = new Date();
     let fechaFormateada
 
-    //CALCULO DE FECHAS
-    const startDateFormatted = format(fechaActual, 'dd-MM-yyyy');
     if (this.datosFormateados.periodicidad_beneficio == "V") {
       fechaFormateada = '01/01/2500';
     } else if (this.datosFormateados.periodicidad_beneficio == "P") {
-      if (this.datosFormateados?.num_rentas_aplicadas && this.datosFormateados?.ultimo_dia_ultima_renta) {
-        const endDateFormatted = addDays(
-          addMonths(fechaActual, parseInt(this.datosFormateados?.num_rentas_aplicadas, 10) + 1),
-          parseInt(this.datosFormateados?.ultimo_dia_ultima_renta, 10) - 1
-        );
-        fechaFormateada = format(endDateFormatted, 'dd/MM/yyyy');
-      } else if (parseInt(this.datosFormateados?.num_rentas_aplicadas, 10) == 1) {
-        console.log("ENTRO");
 
-        const endDateFormatted = addDays(
-          addMonths(fechaActual, parseInt(this.datosFormateados?.num_rentas_aplicadas, 10)), 0
-        );
-        fechaFormateada = format(endDateFormatted, 'dd/MM/yyyy');
+      //CALCULO DE FECHAS
+      if (this.datosFormateados.fecha_calculo) {
+        if (this.datosFormateados?.num_rentas_aplicadas && this.datosFormateados?.ultimo_dia_ultima_renta) {
+
+          // Convertimos `fecha_calculo` a `Date` para hacer los cálculos
+          const startDate = new Date(this.datosFormateados.fecha_calculo);
+          // Sumamos los meses especificados en `num_rentas_aplicadas`
+          const endDateWithMonths = addMonths(startDate, parseInt(this.datosFormateados?.num_rentas_aplicadas, 10));
+          // Configuramos la fecha al próximo mes y asignamos el día de `ultimo_dia_ultima_renta`
+          const endDateAdjusted = new Date(endDateWithMonths.getFullYear(), endDateWithMonths.getMonth() + 1, parseInt(this.datosFormateados?.ultimo_dia_ultima_renta, 10));
+          // Formateamos la fecha final
+          fechaFormateada = format(endDateAdjusted, 'dd/MM/yyyy');
+
+        } else if (parseInt(this.datosFormateados?.num_rentas_aplicadas, 10) == 1) {
+          // Obtenemos la fecha en formato `Date` para sumar días y meses correctamente
+          const startDate = new Date(this.datosFormateados.fecha_calculo);
+          // Primero, sumamos los meses
+          const endDateWithMonths = addMonths(startDate, parseInt(this.datosFormateados?.num_rentas_aplicadas, 10));
+          // Luego, sumamos los días (en este caso, 0 días, pero puedes ajustar si necesitas)
+          const endDateWithDays = addDays(endDateWithMonths, 0);
+          // Formateamos la fecha final
+          fechaFormateada = format(endDateWithDays, 'dd/MM/yyyy');
+        }
       }
     }
 
     // this.datosFormateados["periodo_inicio"] = startDateFormatted;
     // this.datosFormateados["periodo_finalizacion"] = fechaFormateada;
-    console.log(fechaFormateada);
-
     if (fechaFormateada != undefined) {
       this.form1?.get("periodo_finalizacion")?.setValue(fechaFormateada);
     }
@@ -637,11 +642,8 @@ export class NuevoBeneficioAfilComponent implements OnInit {
     };
     this.datosFormateados = datosFormateados;
 
-    console.log(this.datosFormateados);
-
     if (this.datosFormateados.monto_por_periodo && this.datosFormateados.num_rentas_aplicadas) {
       const result = parseFloat(this.datosFormateados.monto_por_periodo) * parseFloat(this.datosFormateados.num_rentas_aplicadas)
-      console.log(result);
       this.FormBen?.get("monto_total")?.setValue(result);
       this.FormBen?.get("monto_total")?.setValue(result);
 
@@ -649,27 +651,37 @@ export class NuevoBeneficioAfilComponent implements OnInit {
 
     /*  const residuo = parseFloat(this.datosFormateados.monto_por_periodo) % parseFloat(this.datosFormateados.num_rentas_aplicadas)  */
 
-    const fechaActual = new Date();
     let fechaFormateada
 
     //CALCULO DE FECHAS
-    const startDateFormatted = format(fechaActual, 'dd-MM-yyyy');
+    const startDateFormatted = format(this.datosFormateados.fecha_calculo, 'dd/MM/yyyy');
+
     if (this.datosFormateados.periodicidad_beneficio == "V") {
       fechaFormateada = '01/01/2500';
     } else if (this.datosFormateados.periodicidad_beneficio == "P") {
-      if (this.datosFormateados?.num_rentas_aplicadas && this.datosFormateados?.ultimo_dia_ultima_renta) {
-        const endDateFormatted = addDays(
-          addMonths(fechaActual, parseInt(this.datosFormateados?.num_rentas_aplicadas, 10) + 1),
-          parseInt(this.datosFormateados?.ultimo_dia_ultima_renta, 10) - 1
-        );
-        fechaFormateada = format(endDateFormatted, 'dd/MM/yyyy');
-      } else if (parseInt(this.datosFormateados?.num_rentas_aplicadas, 10) == 1) {
-        console.log("ENTRO");
+      //CALCULO DE FECHAS
+      if (this.datosFormateados.fecha_calculo) {
+        if (this.datosFormateados?.num_rentas_aplicadas && this.datosFormateados?.ultimo_dia_ultima_renta) {
 
-        const endDateFormatted = addDays(
-          addMonths(fechaActual, parseInt(this.datosFormateados?.num_rentas_aplicadas, 10)), 0
-        );
-        fechaFormateada = format(endDateFormatted, 'dd/MM/yyyy');
+          // Convertimos `fecha_calculo` a `Date` para hacer los cálculos
+          const startDate = new Date(this.datosFormateados.fecha_calculo);
+          // Sumamos los meses especificados en `num_rentas_aplicadas`
+          const endDateWithMonths = addMonths(startDate, parseInt(this.datosFormateados?.num_rentas_aplicadas, 10));
+          // Configuramos la fecha al próximo mes y asignamos el día de `ultimo_dia_ultima_renta`
+          const endDateAdjusted = new Date(endDateWithMonths.getFullYear(), endDateWithMonths.getMonth() + 1, parseInt(this.datosFormateados?.ultimo_dia_ultima_renta, 10));
+          // Formateamos la fecha final
+          fechaFormateada = format(endDateAdjusted, 'dd/MM/yyyy');
+
+        } else if (parseInt(this.datosFormateados?.num_rentas_aplicadas, 10) == 1) {
+          // Obtenemos la fecha en formato `Date` para sumar días y meses correctamente
+          const startDate = new Date(this.datosFormateados.fecha_calculo);
+          // Primero, sumamos los meses
+          const endDateWithMonths = addMonths(startDate, parseInt(this.datosFormateados?.num_rentas_aplicadas, 10));
+          // Luego, sumamos los días (en este caso, 0 días, pero puedes ajustar si necesitas)
+          const endDateWithDays = addDays(endDateWithMonths, 0);
+          // Formateamos la fecha final
+          fechaFormateada = format(endDateWithDays, 'dd/MM/yyyy');
+        }
       }
     }
 

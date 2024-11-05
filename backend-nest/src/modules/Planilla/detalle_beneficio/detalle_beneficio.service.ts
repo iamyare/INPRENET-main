@@ -379,7 +379,7 @@ export class DetalleBeneficioService {
                      ${detPer.ID_PERSONA},
                      ${beneficio.id_beneficio},
                      '${this.convertirCadenaAFecha(datos.fecha_calculo)}',
-                     '${startDateFormatted}',
+                     '${this.convertirCadenaAFecha(datos.fecha_calculo)}',
                      ${datos.periodo_finalizacion ? `'${datos.periodo_finalizacion}'` : null},
                      ${parseFloat(datos.monto_total) ? parseFloat(datos.monto_total) : null},
                      'TRANSFERENCIA',
@@ -482,7 +482,7 @@ export class DetalleBeneficioService {
                        ${detPer.ID_PERSONA},
                        ${beneficio.id_beneficio},
                        '${this.convertirCadenaAFecha(datos.fecha_calculo)}',
-                       '${startDateFormatted}',
+                       '${this.convertirCadenaAFecha(datos.fecha_calculo)}',
                        ${datos.periodo_finalizacion ? `'${datos.periodo_finalizacion}'` : null},
                        ${parseFloat(datos.monto_total) ? parseFloat(datos.monto_total) : null},
                        'TRANSFERENCIA',
@@ -1036,10 +1036,6 @@ export class DetalleBeneficioService {
 
     const estadoPP = await this.usuarioEmpRepository.findOne({ where: { empleadoCentroTrabajo: { correo_1: decoded?.correo } } });
     const id_usuario_empresa_in = estadoPP.id_usuario_empresa
-    console.log(token);
-    console.log(decoded);
-    console.log(id_usuario_empresa_in);
-
 
     try {
       const dataEnv = {
@@ -1059,10 +1055,8 @@ export class DetalleBeneficioService {
         prestamo: data.prestamo === undefined || data.prestamo === '' ? null : data.prestamo,
       };
 
-      console.log(dataEnv);
-
-      //const detBenAfil = await this.detalleBeneficioAfiliadoRepository.preload(dataEnv);
-      //await this.detalleBeneficioAfiliadoRepository.save(detBenAfil);
+      const detBenAfil = await this.detalleBeneficioAfiliadoRepository.preload(dataEnv);
+      await this.detalleBeneficioAfiliadoRepository.save(detBenAfil);
 
     } catch (error) {
       this.logger.error(`Error al actualizar beneficios: ${error.message}`, error.stack);

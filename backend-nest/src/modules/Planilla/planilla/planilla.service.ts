@@ -1589,16 +1589,18 @@ export class PlanillaService {
     interface Persona {
       DNI: string;
       ID_PERSONA: number;
-      'TOTAL_BENEFICIO': number;
+      NUM_CUENTA: string;
+      NOMBRE_BANCO: string;
+      TOTAL_BENEFICIO: number;
       NOMBRE_COMPLETO: string;
-      'DEDUCCIONES_INPREMA'?: number;
-      'DEDUCCIONES_TERCEROS'?: number;
+      DEDUCCIONES_INPREMA?: number;
+      DEDUCCIONES_TERCEROS?: number;
     }
 
     interface Deduccion {
       ID_PERSONA: number;
-      'DEDUCCIONES_INPREMA'?: number;
-      'DEDUCCIONES_TERCEROS'?: number;
+      DEDUCCIONES_INPREMA?: number;
+      DEDUCCIONES_TERCEROS?: number;
     }
 
     try {

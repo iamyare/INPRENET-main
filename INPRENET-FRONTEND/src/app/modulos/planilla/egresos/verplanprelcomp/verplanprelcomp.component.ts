@@ -65,7 +65,7 @@ export class VerplanprelcompComponent implements OnInit {
         isEditable: true
       },
       {
-        header: 'Numero de cuenta',
+        header: 'Número de cuenta',
         col: 'num_cuenta',
         isEditable: true
       },

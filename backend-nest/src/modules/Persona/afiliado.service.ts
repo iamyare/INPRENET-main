@@ -187,28 +187,28 @@ export class AfiliadoService {
         'peps.cargo_publico',
       ],
     });
-  
+
     if (!persona) {
       throw new NotFoundException(`Afiliado con N_IDENTIFICACION ${term} no existe`);
     }
-  
+
     // Verifica el detalle de la persona donde coincida ID_PERSONA e ID_CAUSANTE
-    const detalleRelevante = persona.detallePersona.find((detalle) => 
+    const detalleRelevante = persona.detallePersona.find((detalle) =>
       detalle.ID_PERSONA === persona.id_persona && detalle.ID_CAUSANTE === persona.id_persona // Aquí ajusta la lógica según lo que es `id_causante`
     );
-  
+
     // Si no se encuentra un detalle relevante, puedes manejar el error o continuar con la lógica
     if (!detalleRelevante) {
       throw new NotFoundException(`No se encontró un detalle relevante para la persona con ID_PERSONA ${persona.id_persona}`);
     }
-  
+
     // Mapeo de discapacidades
     const discapacidades = persona.personaDiscapacidades.map((discapacidad) => ({
       id_discapacidad: discapacidad.discapacidad.id_discapacidad,
       tipo: discapacidad.discapacidad.tipo_discapacidad,
       descripcion: discapacidad.discapacidad.descripcion,
     }));
-  
+
     // Construye el resultado filtrado con el estado de afiliación relevante
     const result = {
       N_IDENTIFICACION: persona.n_identificacion,
@@ -261,7 +261,7 @@ export class AfiliadoService {
     };
     return result;
   }
-  
+
   async findOnePersonaParaDeduccion(term: string) {
     try {
       const detallePer = await this.detallePersonaRepository.findOne({
@@ -570,8 +570,9 @@ export class AfiliadoService {
         "Afil"."ID_PERSONA",
         "Afil"."N_IDENTIFICACION",
         "Afil"."PRIMER_NOMBRE",
-        "Afil"."SEGUNDO_APELLIDO",
+        "Afil"."SEGUNDO_NOMBRE",
         "Afil"."TERCER_NOMBRE",
+        "Afil"."SEGUNDO_APELLIDO",
         "Afil"."PRIMER_APELLIDO",
         "Afil"."SEGUNDO_APELLIDO",
         "Afil"."GENERO",
@@ -872,10 +873,10 @@ export class AfiliadoService {
   }
 
   async updateDatosGenerales(
-    idPersona: number, 
-    datosGenerales: any, 
-    fileIdent: any, 
-    arch_cert_def: any, 
+    idPersona: number,
+    datosGenerales: any,
+    fileIdent: any,
+    arch_cert_def: any,
     fotoPerfil: any
   ): Promise<any> {
     try {
@@ -904,7 +905,7 @@ export class AfiliadoService {
         causa_fallecimiento: datosGenerales.causa_fallecimiento,
         municipio_defuncion: datosGenerales.id_municipio_defuncion,
         ...temp,
-        fecha_defuncion: datosGenerales.fecha_defuncion ?? temp.fecha_defuncion,  
+        fecha_defuncion: datosGenerales.fecha_defuncion ?? temp.fecha_defuncion,
       };
       if (fileIdent?.buffer) {
         data.archivo_identificacion = Buffer.from(fileIdent.buffer);
@@ -939,7 +940,7 @@ export class AfiliadoService {
       this.handleException(error);
     }
   }
-  
+
   async updatePerfCentroTrabajo(id: number, updateDto: UpdatePerfCentTrabDto): Promise<Net_perf_pers_cent_trab> {
     const existingPerf = await this.perfPersoCentTrabRepository.findOne({ where: { id_perf_pers_centro_trab: id } });
     if (!existingPerf) {

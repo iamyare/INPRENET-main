@@ -248,12 +248,6 @@ export class NuevoBeneficioAfilComponent implements OnInit {
 
       ];
 
-
-      // Oculta ciertos campos adicionales si es necesario
-      // this.myFormFields1[this.myFormFields1.length - 1].display = false;
-      // this.myFormFields1[this.myFormFields1.length - 2].display = false;
-      // Muestra el formulario después de configurar los campos
-
       this.mostrarDB = true;
 
       // Retorna la lista de beneficios mapeados
@@ -332,9 +326,6 @@ export class NuevoBeneficioAfilComponent implements OnInit {
 
       ];
 
-      //this.myFormFields2[this.myFormFields2.length - 1].display = false;
-      //this.myFormFields2[this.myFormFields2.length - 2].display = false;
-
       // Muestra el formulario después de configurar los campos
       this.mostrarDB = true;
 
@@ -373,9 +364,11 @@ export class NuevoBeneficioAfilComponent implements OnInit {
         await this.getColumns();
         const data = await this.svcAfilServ.obtenerBenDeAfil(this.form.value.dni).toPromise();
 
+        console.log(data);
+
         this.filas = data.map((item: any) => ({
           dni: item.n_identificacion,
-          nombre_completo: this.unirNombres(item.primer_nombre, item.segundo_nombre, item.tercer_nombre, item.primer_apellido, item.segundo_apellido),
+          nombre_completo: this.unirNombres(item.primer_apellido, item.segundo_apellido, item.primer_nombre, item.segundo_nombre, item.tercer_nombre),
           genero: item.genero,
           tipo_afiliado: item.tipo_persona,
           porcentaje: item.porcentaje,
@@ -416,7 +409,7 @@ export class NuevoBeneficioAfilComponent implements OnInit {
         async (response) => {
           const primerObjetoTransformado = this.transformarObjeto(response[0]);
           this.myColumns = [
-            { header: 'N_Identificacion', col: 'dni', },
+            { header: 'N° Identificación', col: 'dni', },
             {
               header: 'Nombre Completo',
               col: 'nombre_completo',
@@ -460,16 +453,12 @@ export class NuevoBeneficioAfilComponent implements OnInit {
       const temp = await this.getTipoBenBeneficiarios(row.tipo_afiliado);
       if (!temp || temp.length === 0) {
         this.mostrarB = false;  // No mostrar el formulario de beneficios
-        //this.form1.reset();     // Opcionalmente, reinicia el formulario
-        //this.FormBen.reset();   // Opcionalmente, reinicia el formulario
         return;  // Detener la ejecución
       } else {
         this.desOBenSeleccionado = row;
         // Si hay beneficios, proceder con la lógica y mostrar el formulario
         this.myFormFields2[0].value = row.dni;
         this.mostrarB = true;
-        // Actualizar el formulario con los beneficios obtenidos
-        //this.form1.patchValue(temp);  // O cualquier lógica para manejar los beneficios
       }
 
 
@@ -527,7 +516,6 @@ export class NuevoBeneficioAfilComponent implements OnInit {
     } else if (event.fieldName == "nombre_beneficio") {
       this.tipoBenefSelected = event.value;
 
-      //this.form1?.get("regimen")?.setValue(null)
       this.form1?.get("estado_solicitud")?.setValue(null)
       this.form1?.get("num_rentas_aplicadas")?.setValue(null)
       this.form1?.get("ultimo_dia_ultima_renta")?.setValue(null)
@@ -539,7 +527,6 @@ export class NuevoBeneficioAfilComponent implements OnInit {
       this.form1?.get("periodo_finalizacion")?.setValue(null)
       this.form1?.get("observacion")?.setValue(null)
 
-      //this.FormBen?.get("regimen")?.setValue(null)
       this.FormBen?.get("estado_solicitud")?.setValue(null)
       this.FormBen?.get("num_rentas_aplicadas")?.setValue(null)
       this.FormBen?.get("ultimo_dia_ultima_renta")?.setValue(null)
@@ -593,8 +580,6 @@ export class NuevoBeneficioAfilComponent implements OnInit {
       this.form1?.get("monto_total")?.setValue(result);
     }
 
-    /*  const residuo = parseFloat(this.datosFormateados.monto_por_periodo) % parseFloat(this.datosFormateados.num_rentas_aplicadas)  */
-
     let fechaFormateada
 
     if (this.datosFormateados.periodicidad_beneficio == "V") {
@@ -627,8 +612,6 @@ export class NuevoBeneficioAfilComponent implements OnInit {
       }
     }
 
-    // this.datosFormateados["periodo_inicio"] = startDateFormatted;
-    // this.datosFormateados["periodo_finalizacion"] = fechaFormateada;
     if (fechaFormateada != undefined) {
       this.form1?.get("periodo_finalizacion")?.setValue(fechaFormateada);
     }
@@ -646,10 +629,7 @@ export class NuevoBeneficioAfilComponent implements OnInit {
       const result = parseFloat(this.datosFormateados.monto_por_periodo) * parseFloat(this.datosFormateados.num_rentas_aplicadas)
       this.FormBen?.get("monto_total")?.setValue(result);
       this.FormBen?.get("monto_total")?.setValue(result);
-
     }
-
-    /*  const residuo = parseFloat(this.datosFormateados.monto_por_periodo) % parseFloat(this.datosFormateados.num_rentas_aplicadas)  */
 
     let fechaFormateada
 
@@ -684,10 +664,6 @@ export class NuevoBeneficioAfilComponent implements OnInit {
         }
       }
     }
-
-    // this.datosFormateados["periodo_inicio"] = startDateFormatted;
-    // this.datosFormateados["periodo_finalizacion"] = fechaFormateada;
-    //console.log(fechaFormateada);
 
     if (fechaFormateada != undefined) {
       this.FormBen?.get("periodo_finalizacion")?.setValue(fechaFormateada);
@@ -799,7 +775,6 @@ export class NuevoBeneficioAfilComponent implements OnInit {
   async guardarNTBenef() {
     /* Asignar al afiliado si no ha fallecido */
     /* Asignar a los beneficiarios si el afiliado ya falleció */
-    //console.log(this.datosFormateados);
 
     //AFILIADOS O BENEFICIARIOS
     if (this.Afiliado.fallecido != "SI") {
@@ -824,8 +799,6 @@ export class NuevoBeneficioAfilComponent implements OnInit {
     } else {
       this.datosFormateados["dni"] = this.FormBen.value.dni;
 
-      //console.log(this.datosFormateados);
-      //console.log(this.desOBenSeleccionado);
       this.svcBeneficioServ.asigBeneficioAfil(this.datosFormateados, this.desOBenSeleccionado, this.Afiliado.id_persona).subscribe(
         {
           next: (response) => {

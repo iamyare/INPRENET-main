@@ -76,6 +76,16 @@ export class VerplancerradaComponent {
         isEditable: true
       },
       {
+        header: 'Banco',
+        col: 'NOMBRE_BANCO',
+        isEditable: true
+      },
+      {
+        header: 'Número de Cuenta',
+        col: 'NUM_CUENTA',
+        isEditable: true
+      },
+      {
         header: 'Total de Ingresos',
         col: 'TOTAL_BENEFICIO',
         moneda: true,
@@ -133,6 +143,8 @@ export class VerplancerradaComponent {
                 id_afiliado: item.ID_PERSONA,
                 dni: item.DNI,
                 NOMBRE_COMPLETO: item.NOMBRE_COMPLETO,
+                NUM_CUENTA: item.NUM_CUENTA,
+                NOMBRE_BANCO: item.NOMBRE_BANCO,
                 TOTAL_BENEFICIO: item.TOTAL_BENEFICIO,
                 DEDUCCIONES_INPREMA: item.DEDUCCIONES_INPREMA || 0,
                 DEDUCCIONES_TERCEROS: item.DEDUCCIONES_TERCEROS || 0,
@@ -231,6 +243,8 @@ export class VerplancerradaComponent {
             id_afiliado: item.ID_PERSONA,
             dni: item.DNI,
             NOMBRE_COMPLETO: item.NOMBRE_COMPLETO,
+            NUM_CUENTA: item.NUM_CUENTA,
+            NOMBRE_BANCO: item.NOMBRE_BANCO,
             TIPO_PERSONA: item.TIPO_PERSONA,
             //correo_1: item.correo_1,
             TOTAL_BENEFICIO: item.TOTAL_BENEFICIO,

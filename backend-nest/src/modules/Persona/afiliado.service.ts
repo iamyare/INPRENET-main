@@ -879,9 +879,7 @@ export class AfiliadoService {
     fotoPerfil: any
   ): Promise<any> {
     try {
-      // Procesar discapacidades si existen
       if (datosGenerales.dato?.discapacidades) {
-        const datosAnt = await this.perDiscapacidadRepository.delete({ persona: { id_persona: idPersona } });
         const keysWithTrueValues = Object.entries(datosGenerales.dato.discapacidades)
           .filter(([key, value]) => value === true)
           .map(([key]) => key);
@@ -894,62 +892,39 @@ export class AfiliadoService {
         }));
         await this.perDiscapacidadRepository.save(nuevosRegistros);
       }
-  
-      // Obtener el estado de afiliación basado en el código
       const estadoP = await this.estadoAfiliacionRepository.findOne({ where: { codigo: datosGenerales.estado } });
       if (!estadoP) {
         throw new NotFoundException(`No se ha encontrado el estado de afiliación con el código ${datosGenerales.estado}`);
       }
-  
-      // Preparar los datos de dirección y otros datos
       const temp = datosGenerales.dato || {};
       temp.direccion_residencia = `BARRIO_COLONIA: ${temp.barrio_colonia || ""},AVENIDA: ${temp.avenida || ""},CALLE: ${temp.calle || ""},SECTOR: ${temp.sector || ""},BLOQUE: ${temp.bloque || ""},N° DE CASA: ${temp.numero_casa || ""},COLOR CASA: ${temp.color_casa || ""},ALDEA: ${temp.aldea || ""},CASERIO: ${temp.caserio || ""}`;
-  
-      const fechaDefuncion = temp.fecha_defuncion ? new Date(temp.fecha_defuncion) : null;
-      const fechaFormateada = fechaDefuncion ? format(fechaDefuncion, 'yyyy-MM-dd') : null;
-  
-      // Preparar el objeto para la actualización
       const data: any = {
         id_persona: idPersona,
         fallecido: datosGenerales.causa_fallecimiento ? "SI" : "NO",
         causa_fallecimiento: datosGenerales.causa_fallecimiento,
         municipio_defuncion: datosGenerales.id_municipio_defuncion,
-        fecha_defuncion: fechaFormateada,
-        ...temp
+        ...temp,
+        fecha_defuncion: datosGenerales.fecha_defuncion ?? temp.fecha_defuncion,  
       };
-  
-      // Agregar archivo_identificacion solo si fue enviado
       if (fileIdent?.buffer) {
         data.archivo_identificacion = Buffer.from(fileIdent.buffer);
       }
-  
-      // Agregar certificado_defuncion solo si fue enviado
       if (arch_cert_def?.buffer) {
         data.certificado_defuncion = Buffer.from(arch_cert_def.buffer);
       }
-  
-      // Agregar foto_perfil solo si fue enviado
       if (fotoPerfil?.buffer) {
         data.foto_perfil = Buffer.from(fotoPerfil.buffer);
       }
-  
       const afiliado = await this.personaRepository.preload(data);
       if (!afiliado) throw new NotFoundException(`La persona con ID ${idPersona} no se ha encontrado`);
-  
-      // Guardar los cambios en NET_PERSONA
       await this.personaRepository.save(afiliado);
-  
-      // Actualizar el estado de afiliación en la tabla net_detalle_persona
       const resultEstado = await this.detallePersonaRepository.update(
         { ID_PERSONA: idPersona, ID_CAUSANTE: idPersona },
         { ID_ESTADO_AFILIACION: estadoP.codigo }
       );
-  
       if (resultEstado.affected === 0) {
         console.warn(`No se encontró un registro en NET_DETALLE_PERSONA para la persona con ID ${idPersona}.`);
       }
-  
-      // Actualizar el tipo de persona si se envía
       if (datosGenerales.tipo_persona) {
         const resultTipoPersona = await this.detallePersonaRepository.update(
           { ID_PERSONA: idPersona, ID_CAUSANTE: idPersona },
@@ -959,7 +934,6 @@ export class AfiliadoService {
           console.warn(`No se encontró un registro en NET_DETALLE_PERSONA para la persona con ID ${idPersona}.`);
         }
       }
-  
       return afiliado;
     } catch (error) {
       this.handleException(error);

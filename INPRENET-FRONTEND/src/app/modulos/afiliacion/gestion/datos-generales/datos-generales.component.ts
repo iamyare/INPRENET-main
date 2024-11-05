@@ -1,5 +1,6 @@
 import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
 import { FormGroup, FormBuilder, Validators, FormControl, FormArray } from '@angular/forms';
+import { format } from 'date-fns';
 import { CentroTrabajoService } from 'src/app/services/centro-trabajo.service';
 import { DatosEstaticosService } from 'src/app/services/datos-estaticos.service';
 import { DireccionService } from 'src/app/services/direccion.service';
@@ -40,21 +41,17 @@ export class DatosGeneralesComponent implements OnInit {
     const noSpecialCharsPattern = '^[a-zA-Z0-9\\s]*$';
 
     if (!this.formGroup) {
-      //para mostrar los datos y poder editarlos
       if (this.initialData) {
         this.formGroup = this.fb.group({
-          peps: this.fb.array([]),
           discapacidades: this.fb.array([]),
           ...this.initialData
         });
         this.cargarDiscapacidades();
       } else {
         this.formGroup = this.fb.group({
-          peps: this.fb.array([]),
           discapacidades: this.fb.array([]),
           FotoPerfil: new FormControl(null, Validators.required)
         });
-
       }
     } else {
       this.formGroup.addControl('FotoPerfil', new FormControl(null, Validators.required));
@@ -164,6 +161,13 @@ export class DatosGeneralesComponent implements OnInit {
     ]));
 
     this.cargarDatosIniciales();
+    this.newDatosGenerales.emit(this.formGroup.value);
+
+  // Escuchar los cambios en los valores del formulario
+    this.formGroup.valueChanges.subscribe(() => {
+      this.onDatosGeneralesChange();
+    });
+
   }
 
   async cargarDatosIniciales() {
@@ -177,7 +181,16 @@ export class DatosGeneralesComponent implements OnInit {
   }
 
   onDatosGeneralesChange() {
-    const data = this.formGroup;
+    const data = { ...this.formGroup.value };
+
+    // Verifica y formatea las fechas si existen
+    if (data.fecha_nacimiento) {
+      data.fecha_nacimiento = format(new Date(data.fecha_nacimiento), 'yyyy-MM-dd');
+    }
+    if (data.fecha_vencimiento_ident) {
+      data.fecha_vencimiento_ident = format(new Date(data.fecha_vencimiento_ident), 'yyyy-MM-dd');
+    }
+
     this.newDatosGenerales.emit(data);
   }
 
@@ -222,7 +235,7 @@ export class DatosGeneralesComponent implements OnInit {
           };
         });
         this.departamentos = transformedJson;
-        this.departamentosNacimiento = transformedJson; // Cargar en ambos select
+        this.departamentosNacimiento = transformedJson;
       },
       error: (error) => {
         console.error('Error al cargar departamentos:', error);
@@ -326,12 +339,16 @@ export class DatosGeneralesComponent implements OnInit {
     this.discapacidadSeleccionada = event.value;
     if (this.discapacidadSeleccionada) {
       this.resetDiscapacidadesFormArray();
+      this.formGroup.markAsDirty();
     } else {
       this.formGroup.get('discapacidades')?.clearValidators();
       this.formGroup.get('discapacidades')?.updateValueAndValidity();
       this.formGroup.setControl('discapacidades', this.fb.array([]));
+      this.formGroup.markAsDirty();
     }
   }
+
+
 
   resetDiscapacidadesFormArray() {
     const discapacidadesGroup = this.fb.group({});

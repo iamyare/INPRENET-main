@@ -25,11 +25,13 @@ export class PermisosService {
         'gestion/usuarios/editar-usuarios': {
           title: 'Gestión de Usuarios',
           permisos: [
+            { role: 'ADMINISTRADOR', module: 'ESCALAFON' }
           ]
         },
         'gestion/usuarios/nuevo-usuario': {
           title: 'Nuevo Usuario',
           permisos: [
+            { role: 'ADMINISTRADOR', module: 'ESCALAFON' }
           ]
         }
       }

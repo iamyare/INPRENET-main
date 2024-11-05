@@ -4,8 +4,6 @@ import { ToastrService } from 'ngx-toastr';
 import { AfiliadoService } from 'src/app/services/afiliado.service';
 import { DireccionService } from 'src/app/services/direccion.service';
 import { DatosEstaticosService } from 'src/app/services/datos-estaticos.service';
-import { FieldConfig } from 'src/app/shared/Interfaces/field-config';
-import { TableColumn } from 'src/app/shared/Interfaces/table-column';
 import { convertirFechaInputs } from 'src/app/shared/functions/formatoFecha';
 import { unirNombres } from 'src/app/shared/functions/formatoNombresP';
 import { PermisosService } from 'src/app/services/permisos.service';
@@ -17,32 +15,27 @@ import { PermisosService } from 'src/app/services/permisos.service';
 })
 export class EditDatosGeneralesComponent implements OnInit {
   datosGen: any;
-  public myFormFields: FieldConfig[] = [];
   municipios: any = [];
   departamentos: any = [];
   unirNombres: any = unirNombres;
-  datosTabl: any[] = [];
   CausaFallecimiento: any[] = [];
   estado: any[] = [];
   public mostrarBotonGuardar: boolean = false;
   image:any;
-
+  datos!: any;
+  estadoAfiliacion: any;
+  fallecido: any;
+  minDate: Date;
+  public loading: boolean = false;
+  form: any;
+  @Input() Afiliado!: any;
+  initialData = {}
+  indicesSeleccionados: any[] = []
+  discapacidadSeleccionada!: boolean
   /* tiposPersona: any[] = [
     { ID_TIPO_PERSONA: 1, TIPO_PERSONA: 'AFILIADO' },
     { ID_TIPO_PERSONA: 5, TIPO_PERSONA: 'VOLUNTARIO' }
   ]; */
-
-  estadoAfiliacion: any;
-  fallecido: any;
-
-  minDate: Date;
-
-  public myColumns: TableColumn[] = [];
-  public filas: any[] = [];
-  ejecF: any;
-  public loading: boolean = false;
-
-  datos!: any;
 
   form1 = this.fb.group({
     causa_fallecimiento: ["", [Validators.required]],
@@ -55,16 +48,9 @@ export class EditDatosGeneralesComponent implements OnInit {
     //observaciones: ["", [Validators.required]],
   });
 
-  form: any;
   formDatosGenerales: any = new FormGroup({
     refpers: new FormArray([], [Validators.required]),
   });
-
-  @Input() Afiliado!: any;
-  cargada: any = false;
-  initialData = {}
-  indicesSeleccionados: any[] = []
-  discapacidadSeleccionada!: boolean
 
   constructor(
     private fb: FormBuilder,
@@ -84,39 +70,6 @@ export class EditDatosGeneralesComponent implements OnInit {
       'afiliacion/buscar-persona',
       'editar'
     );
-
-    this.myFormFields = [
-      { type: 'text', label: 'N_IDENTIFICACION del afiliado', name: 'n_identificacion', validations: [Validators.required, Validators.minLength(13), Validators.maxLength(14)], display: true },
-    ];
-
-    this.myColumns = [
-      {
-        header: 'Nombre del Centro Trabajo',
-        col: 'nombre_centro_trabajo',
-        isEditable: true,
-        validationRules: [Validators.required, Validators.minLength(3)]
-      },
-      {
-        header: 'Número Acuerdo',
-        col: 'numero_acuerdo',
-        isEditable: true
-      },
-      {
-        header: 'Salario Base',
-        col: 'salario_base',
-        isEditable: true
-      },
-      {
-        header: 'Fecha Ingreso',
-        col: 'fecha_ingreso',
-        isEditable: true
-      },
-      {
-        header: 'Actividad Económica',
-        col: 'nacionalidad',
-        isEditable: true
-      }
-    ];
 
     this.cargarCausasFallecimiento();
     this.cargarEstadosAfiliado();
@@ -159,8 +112,7 @@ export class EditDatosGeneralesComponent implements OnInit {
   }
 
   updateDatosGenerales(value: any) {
-    // Aquí puedes procesar los datos y actualizarlos en `initialData`
-    this.initialData = { ...this.initialData, ...value }; // O ajusta según sea necesario
+    this.initialData = { ...this.initialData, ...value };
   }
 
   cargarDepartamentos() {
@@ -195,12 +147,7 @@ export class EditDatosGeneralesComponent implements OnInit {
     this.cargarMunicipios(departamentoId);
   }
 
-  async obtenerDatos(event: any): Promise<any> {
-    this.form = event;
-  }
-
   setDatosGenerales(datosGenerales: any) {
-    // Verifica que `datosGenerales` es un objeto válido
     if (!datosGenerales || typeof datosGenerales !== 'object') {
       console.error('datosGenerales no es un objeto válido:', datosGenerales);
       return;
@@ -214,8 +161,6 @@ export class EditDatosGeneralesComponent implements OnInit {
 
     const refpersArray = this.formDatosGenerales.get('refpers') as FormArray;
     refpersArray.clear();
-
-    // Supongamos que `datosGenerales` es un objeto, no un arreglo
     const dato = datosGenerales;
 
     const newGroup = this.fb.group({
@@ -343,8 +288,6 @@ export class EditDatosGeneralesComponent implements OnInit {
 
           // Aquí seleccionamos el estado de afiliación actual del afiliado
           this.form1.controls.estado.setValue(result?.estadoAfiliacion?.codigo);
-
-          this.cargada = true;
           this.loading = false;
         },
         (error) => {
@@ -355,20 +298,15 @@ export class EditDatosGeneralesComponent implements OnInit {
     }
   }
 
-
-  updateDiscapacidades() {
+  updateDiscapacidades(discapacidadesSeleccionadas: any[]) {
     const refpersArray = this.formDatosGenerales.get('refpers') as FormArray;
     if (refpersArray.length > 0) {
       const firstRefpersGroup = refpersArray.controls[0] as FormGroup;
       const discapacidadesArray = firstRefpersGroup.get('discapacidades') as FormArray;
-
-      if (discapacidadesArray) {
-        const selectedDiscapacidades = discapacidadesArray.value;
-        discapacidadesArray.clear();
-        selectedDiscapacidades.forEach((id: number) => {
-          discapacidadesArray.push(new FormControl(id));
-        });
-      }
+      discapacidadesArray.clear();
+      discapacidadesSeleccionadas.forEach((id: number) => {
+        discapacidadesArray.push(new FormControl(id));
+      });
     }
   }
 
@@ -380,21 +318,27 @@ export class EditDatosGeneralesComponent implements OnInit {
   }
 
   GuardarInformacion(): void {
+    const refpersData = this.formDatosGenerales.get('refpers')?.value?.[0] || {};
+
     const datosActualizados: any = {
-      ...this.formDatosGenerales.value.refpers[0],
-      causa_fallecimiento: this.form1.value.causa_fallecimiento,
-      fecha_defuncion: convertirFechaInputs(this.form1.value.fecha_defuncion!),
-      id_departamento_defuncion: this.form1.value.id_departamento_defuncion,
-      id_municipio_defuncion: this.form1.value.id_municipio_defuncion,
-      estado: this.form1.value.estado,
-      certificado_defuncion: this.formDatosGenerales.value.archivoCertDef,
-    };
-    if (this.image) {
-      datosActualizados.FotoPerfil = this.image;
-    }
+    ...refpersData,
+    causa_fallecimiento: this.form1.value.causa_fallecimiento,
+    fecha_defuncion: convertirFechaInputs(this.form1.value.fecha_defuncion!),
+    id_departamento_defuncion: this.form1.value.id_departamento_defuncion,
+    id_municipio_defuncion: this.form1.value.id_municipio_defuncion,
+    estado: this.form1.value.estado,
+    certificado_defuncion: this.formDatosGenerales.value.archivoCertDef,
+  };
+
+  console.log(datosActualizados);
+
+  // Si se capturó una imagen, incluirla
+  if (this.image) {
+    datosActualizados.FotoPerfil = this.image;
+  }
     this.svcAfiliado.updateDatosGenerales(this.Afiliado.ID_PERSONA, datosActualizados).subscribe(
       async (result) => {
-        this.toastr.success(`Datos generales modificados correctamente, incluyendo la fotografía`);
+        this.toastr.success(`Datos generales modificados correctamente`);
       },
       (error) => {
         this.toastr.error(`Error: ${error.error.message}`);
@@ -402,22 +346,29 @@ export class EditDatosGeneralesComponent implements OnInit {
     );
   }
 
-
-
-  getErrors(fieldName: string): any {
-    // Implementar lógica para manejar errores de validación
+  getErrors(fieldName: string): string[] {
+    const control = this.form1.get(fieldName);
+    if (control && control.errors && (control.dirty || control.touched)) {
+      const errors: string[] = [];
+      if (control.hasError('required')) {
+        errors.push('Este campo es obligatorio.');
+      }
+      if (control.hasError('maxlength')) {
+        errors.push('El campo excede el máximo de caracteres permitidos.');
+      }
+      if (control.hasError('pattern')) {
+        errors.push('Formato inválido.');
+      }
+      return errors;
+    }
+    return [];
   }
 
-  mostrarCamposFallecido(e: any) {
-    //this.estadoAfiliacion = e.value;
-  }
 
   getArchivoDef(event: File): any {
-    // Si no lo has agregado aún, puedes agregar el control aquí
     if (!this.formDatosGenerales?.contains('archivoCertDef')) {
       this.formDatosGenerales.addControl('archivoCertDef', new FormControl('', []));
     }
-    // Asignar el archivo al control del formulario
     this.formDatosGenerales.get('archivoCertDef')?.setValue(event);
   }
 

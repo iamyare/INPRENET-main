@@ -36,11 +36,11 @@ export class Net_Planilla {
     @Column('varchar2', { nullable: true, name: 'NUMERO_LOTE' })
     numero_lote: number;
 
-    @Column('varchar2', { nullable: false, name: 'PERIODO_INICIO' })
-    periodoInicio: string;
+    @Column('date', { nullable: false, name: 'PERIODO_INICIO' })
+    periodoInicio: Date;
 
-    @Column('varchar2', { nullable: false, name: 'PERIODO_FINALIZACION' })
-    periodoFinalizacion: string;
+    @Column('date', { nullable: false, name: 'PERIODO_FINALIZACION' })
+    periodoFinalizacion: Date;
 
     @ManyToOne(() => Net_TipoPlanilla, tipoPlanilla => tipoPlanilla.planilla, { cascade: true })
     @JoinColumn({ name: 'ID_TIPO_PLANILLA', foreignKeyConstraintName: "FK_ID_TIPO_PLANILLA_PLAN" })

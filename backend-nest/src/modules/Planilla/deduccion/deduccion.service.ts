@@ -182,10 +182,14 @@ export class DeduccionService {
             const fechaDeduccion = new Date(parsedAnio, parsedMes - 1);
 
             return (
-                fechaDeduccion >= periodoInicio &&
+               ( fechaDeduccion >= periodoInicio &&
                 fechaDeduccion <= periodoFinalizacion &&
-                (['JUBILADO', 'PENSIONADO'].includes(tipoPersonaJUPE) && p.tipoPlanilla.nombre_planilla === 'ORDINARIA JUBILADOS Y PENSIONADOS')
-            );
+                (['JUBILADO', 'PENSIONADO'].includes(tipoPersonaJUPE) && p.tipoPlanilla.nombre_planilla === 'ORDINARIA JUBILADOS Y PENSIONADOS'))
+                ||(fechaDeduccion >= periodoInicio &&
+                  fechaDeduccion <= periodoFinalizacion &&
+                  (['JUBILADO', 'PENSIONADO'].includes(tipoPersonaJUPE) && p.tipoPlanilla.nombre_planilla === 'COMPLEMENTARIA JUBILADO Y PENSIONADO') && isComplementaria)
+            
+              );
         });
 
         if (!planilla) {

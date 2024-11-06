@@ -166,16 +166,11 @@ export class AfiliadoController {
 
   @Patch('updatePerfCentroTrabajo/:id')
   async updatePerfCentroTrabajo(@Param('id') id: string, @Body() updateDto: UpdatePerfCentTrabDto) {
-    // Convertir el ID a número para evitar errores de tipo
     const idNum = parseInt(id, 10);
     if (isNaN(idNum)) {
       throw new NotFoundException(`El ID proporcionado (${id}) no es válido`);
     }
-
-    // Llamar al servicio para actualizar el perfil
     const updatedProfile = await this.afiliadoService.updatePerfCentroTrabajo(idNum, updateDto);
-
-    // Devolver el perfil actualizado
     return {
       mensaje: `Perfil de centro de trabajo con ID ${idNum} actualizado con éxito.`,
       data: updatedProfile,

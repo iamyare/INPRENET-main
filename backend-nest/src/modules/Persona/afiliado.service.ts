@@ -882,26 +882,20 @@ export class AfiliadoService {
     fotoPerfil: any
   ): Promise<any> {
     try {
-      // Verificar si existen discapacidades seleccionadas
       if (datosGenerales.dato?.discapacidades) {
         const keysWithTrueValues = Object.entries(datosGenerales.dato.discapacidades)
-          .filter(([key, value]) => value === true)
+          .filter(([_, value]) => value === true)
           .map(([key]) => key);
   
-        // **Eliminar discapacidades previas de la persona**
         await this.perDiscapacidadRepository.delete({ persona: { id_persona: idPersona } });
-  
         if (keysWithTrueValues.length > 0) {
-          // Guardar las nuevas discapacidades seleccionadas
           const discapacidades = await this.discapacidadRepository.find({
             where: { tipo_discapacidad: In(keysWithTrueValues) }
           });
-  
           const nuevosRegistros = discapacidades.map(discapacidad => ({
             persona: { id_persona: idPersona },
             discapacidad: discapacidad
           }));
-  
           await this.perDiscapacidadRepository.save(nuevosRegistros);
         }
       }
@@ -921,7 +915,23 @@ export class AfiliadoService {
       }
   
       const temp = datosGenerales.dato || {};
-      temp.direccion_residencia = `BARRIO_COLONIA: ${temp.barrio_colonia || ""},AVENIDA: ${temp.avenida || ""},CALLE: ${temp.calle || ""},SECTOR: ${temp.sector || ""},BLOQUE: ${temp.bloque || ""},N° DE CASA: ${temp.numero_casa || ""},COLOR CASA: ${temp.color_casa || ""},ALDEA: ${temp.aldea || ""},CASERIO: ${temp.caserio || ""}`;
+  
+      const direccionParts = {
+        "BARRIO_COLONIA": temp.barrio_colonia,
+        "AVENIDA": temp.avenida,
+        "CALLE": temp.calle,
+        "SECTOR": temp.sector,
+        "BLOQUE": temp.bloque,
+        "N° DE CASA": temp.numero_casa,
+        "COLOR CASA": temp.color_casa,
+        "ALDEA": temp.aldea,
+        "CASERIO": temp.caserio
+      };
+  
+      temp.direccion_residencia = Object.entries(direccionParts)
+        .filter(([_, value]) => value)
+        .map(([key, value]) => `${key}: ${value}`)
+        .join(',');
   
       const data: any = {
         ...temp,

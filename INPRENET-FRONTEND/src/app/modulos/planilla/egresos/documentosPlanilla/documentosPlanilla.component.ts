@@ -210,7 +210,7 @@ export class DocumentosPlanillaComponent implements OnInit {
           }),
           pageMargins: [40, 130, 40, 100],
           header: {
-            text: `RESUMEN DE PLANILLA ${nombrePlanilla} LOTE 2.2`,
+            text: `RESUMEN DE PLANILLA ${nombrePlanilla}`,
             style: 'header',
             alignment: 'center',
             margin: [50, 90, 50, 0]
@@ -513,29 +513,40 @@ export class DocumentosPlanillaComponent implements OnInit {
 
 
   crearTablaPDF(data: any[], titulo: string, totalTexto: string) {
+
     const headers = [
       { text: 'Nombre', style: 'tableHeader' },
+      { text: 'Número de pago:', style: 'tableHeader', alignment: 'center' },
+      { text: 'Lote:', style: 'tableHeader', alignment: 'center' },
       { text: 'Total', style: 'tableHeader', alignment: 'right' }
     ];
 
     const body = data.map(item => {
       const nombre = item?.NOMBRE_BENEFICIO ?? item?.NOMBRE_DEDUCCION ?? 'N/A';
+      const numPago = item?.NUMERO_PAGOS ?? item?.NUMERO_PAGOS ?? 'N/A';
+      const numLote = item?.NUMERO_LOTE ?? item?.NUMERO_LOTE ?? 'N/A';
       const total = item?.TOTAL_MONTO_BENEFICIO ?? item?.TOTAL_MONTO_DEDUCCION ? `L${Number(item.TOTAL_MONTO_BENEFICIO ?? item.TOTAL_MONTO_DEDUCCION).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",")}` : 'L0.00';
+
       return [
         nombre,
+        { text: numPago, alignment: 'center' },
+        { text: numLote, alignment: 'center' },
         { text: total, alignment: 'right' }
       ];
     });
 
     if (totalTexto) {
       body.push([
-        { text: totalTexto, style: 'tableTotal', colSpan: 2, alignment: 'right' }
+        { text: totalTexto, style: 'tableTotal', colSpan: 4, alignment: 'right' }
+      ]);
+      body.push([
+        { text: totalTexto, style: 'tableTotal', colSpan: 4, alignment: 'right' }
       ]);
     }
 
     if (body.length === 0) {
       body.push([
-        { text: 'No hay datos disponibles', colSpan: 2, alignment: 'center' }
+        { text: 'No hay datos disponibles', colSpan: 4, alignment: 'center' }
       ]);
     }
 
@@ -543,7 +554,7 @@ export class DocumentosPlanillaComponent implements OnInit {
       style: 'tableExample',
       table: {
         headerRows: 1,
-        widths: ['*', 'auto'],
+        widths: ['*', '*', '*', '*'],
         body: [headers, ...body]
       },
       layout: 'lightHorizontalLines'

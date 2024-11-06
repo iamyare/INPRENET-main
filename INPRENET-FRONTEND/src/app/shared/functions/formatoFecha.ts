@@ -23,24 +23,21 @@ function convertirFechaInputs(fecha: string): string {
 
 function obtenerNombreMes(fecha: string): string {
   if (fecha) {
-    const partesFecha: string[] = fecha?.split('/');
+    const fechaObjeto = new Date(fecha);
 
-    if (partesFecha.length !== 3) {
+    if (isNaN(fechaObjeto.getTime())) {
       return 'Formato de fecha inválido';
     }
 
-    const numMes: number = parseInt(partesFecha[1], 10);
-    const anio: number = parseInt(partesFecha[2], 10);
+    const numMes: number = fechaObjeto.getUTCMonth(); // Obtener el mes (0-11)
+    const anio: number = fechaObjeto.getUTCFullYear(); // Obtener el año
 
     const meses: string[] = ['ENERO', 'FEBRERO', 'MARZO', 'ABRIL', 'MAYO', 'JUNIO', 'JULIO', 'AGOSTO', 'SEPTIEMBRE', 'OCTUBRE', 'NOVIEMBRE', 'DICIEMBRE'];
 
-    if (numMes >= 1 && numMes <= 12) {
-      const nombreMes: string = meses[numMes - 1];
-      return `${nombreMes} ${anio}`;
-    } else {
-      return '';
-    }
+    const nombreMes: string = meses[numMes];
+    return `${nombreMes} ${anio}`;
   }
+
   return '';
 }
 

@@ -389,7 +389,8 @@ export class VerplancerradaComponent {
 
       let data = detallePersona.flatMap((detalle: { detalleBeneficio: any[]; ID_DETALLE_PERSONA: number; }) => {
         return detalle.detalleBeneficio.map((beneficio: any) => {
-          const montoPorPeriodo = beneficio.monto_por_periodo;
+
+          const montoPorPeriodo = beneficio.detallePagBeneficio[0].monto_a_pagar;
           sumaBeneficios += montoPorPeriodo;
           console.log(beneficio);
 
@@ -400,8 +401,8 @@ export class VerplancerradaComponent {
             METODO_PAGO: beneficio.metodo_pago,
             NOMBRE_BANCO: beneficio.detallePagBeneficio[0]?.personaporbanco?.banco?.nombre_banco || 'NO PROPORCIONADO',
             NUM_CUENTA: beneficio.detallePagBeneficio[0]?.personaporbanco?.num_cuenta || 'NO PROPORCIONADO',
-            NUMERO_PAGOS: beneficio.detallePagBeneficio[0]?.planilla?.numero_pagos || 'NO PROPORCIONADO',
-            NUMERO_LOTE: beneficio.detallePagBeneficio[0]?.planilla?.numero_lote || 'NO PROPORCIONADO'
+            NUMERO_PAGOS: beneficio.detallePagBeneficio[0]?.planilla?.numero_pagos || 'N/A',
+            NUMERO_LOTE: beneficio.detallePagBeneficio[0]?.planilla?.numero_lote || 'N/A'
           };
         });
       });
@@ -613,7 +614,7 @@ export class VerplancerradaComponent {
       let data: any[] = [];
       detallePersona.forEach((detalle: { detalleBeneficio: any[]; ID_DETALLE_PERSONA: number; }) => {
         detalle.detalleBeneficio.forEach((beneficio: any) => {
-          const montoPorPeriodo = beneficio.monto_por_periodo;
+          const montoPorPeriodo = beneficio.detallePagBeneficio[0].monto_a_pagar;
           sumaBeneficios += montoPorPeriodo;
 
           data.push({

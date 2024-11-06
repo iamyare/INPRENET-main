@@ -220,7 +220,7 @@ export class NuevoBeneficioAfilComponent implements OnInit {
         },
         { type: 'number', label: 'Número de rentas aprobadas', name: 'num_rentas_aplicadas', validations: [Validators.min(1)], display: false },
         { type: 'number', label: 'Monto mensual', name: 'monto_por_periodo', validations: [Validators.min(0), montoTotalValidator()], display: false, },
-        { type: 'number', label: 'Monto total rentas aprobadas', name: 'monto_total', validations: [Validators.min(0), montoTotalValidator()], display: false, },
+        { type: 'number', label: 'Monto total', name: 'monto_total', validations: [Validators.min(0), montoTotalValidator()], display: false, },
         {
           type: 'number', label: 'Dias de la última renta', name: 'ultimo_dia_ultima_renta', validations: [
             Validators.min(1),
@@ -298,7 +298,7 @@ export class NuevoBeneficioAfilComponent implements OnInit {
         },
         { type: 'number', label: 'Número de rentas aprobadas', name: 'num_rentas_aplicadas', validations: [Validators.min(1)], display: false },
         { type: 'number', label: 'Monto mensual', name: 'monto_por_periodo', validations: [Validators.min(0), montoTotalValidator()], display: false, },
-        { type: 'number', label: 'Monto total rentas aprobadas', name: 'monto_total', validations: [Validators.min(0), montoTotalValidator()], display: false, },
+        { type: 'number', label: 'Monto total', name: 'monto_total', validations: [Validators.min(0), montoTotalValidator()], display: false, },
         {
           type: 'number', label: 'Dias de la última renta', name: 'ultimo_dia_ultima_renta', validations: [
             Validators.min(1),

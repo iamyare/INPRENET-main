@@ -2563,7 +2563,8 @@ GROUP BY
 
     const queryUpdatePlanilla = `
     UPDATE NET_PLANILLA pl
-    SET pl.ESTADO = 'CERRADA'
+    SET pl.ESTADO = 'CERRADA',
+    pl.FECHA_CIERRE = SYSDATE
     WHERE pl.CODIGO_PLANILLA = :codigo_planilla
   `;
 

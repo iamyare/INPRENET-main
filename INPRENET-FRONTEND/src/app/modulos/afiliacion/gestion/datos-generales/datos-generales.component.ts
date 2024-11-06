@@ -161,9 +161,7 @@ export class DatosGeneralesComponent implements OnInit {
     ]));
 
     this.cargarDatosIniciales();
-    this.newDatosGenerales.emit(this.formGroup.value);
-
-  // Escuchar los cambios en los valores del formulario
+    /* this.newDatosGenerales.emit(this.formGroup.value); */
     this.formGroup.valueChanges.subscribe(() => {
       this.onDatosGeneralesChange();
     });
@@ -182,8 +180,6 @@ export class DatosGeneralesComponent implements OnInit {
 
   onDatosGeneralesChange() {
     const data = { ...this.formGroup.value };
-
-    // Verifica y formatea las fechas si existen
     if (data.fecha_nacimiento) {
       data.fecha_nacimiento = format(new Date(data.fecha_nacimiento), 'yyyy-MM-dd');
     }
@@ -347,8 +343,6 @@ export class DatosGeneralesComponent implements OnInit {
       this.formGroup.markAsDirty();
     }
   }
-
-
 
   resetDiscapacidadesFormArray() {
     const discapacidadesGroup = this.fb.group({});

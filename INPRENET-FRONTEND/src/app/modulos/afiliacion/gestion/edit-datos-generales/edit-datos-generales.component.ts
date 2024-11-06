@@ -355,7 +355,6 @@ export class EditDatosGeneralesComponent implements OnInit {
     return [];
   }
 
-
   getArchivoDef(event: File): any {
     if (!this.formDatosGenerales?.contains('archivoCertDef')) {
       this.formDatosGenerales.addControl('archivoCertDef', new FormControl('', []));

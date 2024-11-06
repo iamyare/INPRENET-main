@@ -181,10 +181,14 @@ export class EditReferPersonalesComponent implements OnInit, OnChanges, OnDestro
   }
 
   editarFila(row: any) {
-    const rowParentesco = row.parentesco.toLowerCase();
-    const parentescoSeleccionado = this.listaParentesco.find(
-      (item: any) => item.label.toLowerCase() === rowParentesco
-    );
+    const rowParentesco = row.parentesco ? row.parentesco.toLowerCase() : '';
+    const listaParentesco = row.tipo_referencia === 'REFERENCIA PERSONAL'
+      ? this.datosEstaticosService.parentescoReferenciasPersonales
+      : this.datosEstaticosService.parentesco;
+
+  const parentescoSeleccionado = listaParentesco.find(
+    (item: any) => item.label.toLowerCase() === rowParentesco
+  );
     const campos = [
       {
         nombre: 'primer_nombre',
@@ -242,7 +246,7 @@ export class EditReferPersonalesComponent implements OnInit, OnChanges, OnDestro
         etiqueta: 'Parentesco',
         editable: true,
         icono: 'supervisor_account',
-        opciones: this.listaParentesco,
+        opciones: listaParentesco,
         validadores: [Validators.required]
       },
       {

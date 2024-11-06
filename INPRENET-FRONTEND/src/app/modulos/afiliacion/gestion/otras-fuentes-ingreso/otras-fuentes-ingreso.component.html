@@ -1,69 +1,61 @@
 <div class="card">
-  <div class="card-header card-header-danger tittle">
+  <div class="card-header">
     <h4 class="card-title">Otras Fuentes De Ingreso</h4>
     <p class="card-category">Completa la información correspondiente</p>
   </div>
-  <div class="card-body">
-    <form [formGroup]="formGroup" style="margin: 1%;">
-      <div formArrayName="otrasFuentesIngreso">
-        <div *ngFor="let fuenteIngreso of otrasFuentesIngresoArray.controls; let i = index" [formGroupName]="i" class="row">
-          <h4 class="card-title">Fuente De Ingreso N°: {{ i + 1 }}</h4>
 
-          <div class="col-lg-4 col-md-12">
-            <mat-form-field class="example-full-width inputs" appearance="outline">
+  <div class="card-body">
+    <form [formGroup]="formGroup" class="form-container">
+      <div formArrayName="otrasFuentesIngreso">
+        <div *ngFor="let fuenteIngreso of otrasFuentesIngresoArray.controls; let i = index" [formGroupName]="i" class="reference-group">
+          <h4 class="reference-title">Fuente De Ingreso N°: {{ i + 1 }}</h4>
+
+          <div class="form-row">
+            <!-- Actividad Económica -->
+            <mat-form-field class="half-width" appearance="outline">
               <mat-label>Actividad Económica</mat-label>
               <mat-icon matPrefix>business</mat-icon>
               <input matInput formControlName="actividad_economica">
+              <mat-error *ngFor="let error of getErrors(i, 'actividad_economica')">
+                <mat-icon>error</mat-icon> {{ error }}
+              </mat-error>
             </mat-form-field>
-            <mat-error *ngFor="let error of getErrors(i, 'actividad_economica')">
-              <mat-icon aria-hidden="true" class="error-icon-small">error_outline</mat-icon>
-              {{ error }}
-            </mat-error>
-          </div>
 
-          <div class="col-lg-4 col-md-12">
-            <mat-form-field class="example-full-width inputs" appearance="outline">
+            <!-- Monto de Ingreso -->
+            <mat-form-field class="half-width" appearance="outline">
               <mat-label>Monto De Ingreso</mat-label>
               <mat-icon matPrefix>attach_money</mat-icon>
               <input matInput formControlName="monto_ingreso" type="number">
+              <mat-error *ngFor="let error of getErrors(i, 'monto_ingreso')">
+                <mat-icon>error</mat-icon> {{ error }}
+              </mat-error>
             </mat-form-field>
-            <mat-error *ngFor="let error of getErrors(i, 'monto_ingreso')">
-              <mat-icon aria-hidden="true" class="error-icon-small">error_outline</mat-icon>
-              {{ error }}
-            </mat-error>
           </div>
 
-          <div class="col-lg-4 col-md-12">
-            <mat-form-field class="example-full-width inputs" appearance="outline">
+          <div class="form-row">
+            <!-- Observación -->
+            <mat-form-field class="full-width" appearance="outline">
               <mat-label>Observación</mat-label>
               <mat-icon matPrefix>visibility</mat-icon>
               <input matInput formControlName="observacion">
+              <mat-error *ngFor="let error of getErrors(i, 'observacion')">
+                <mat-icon>error</mat-icon> {{ error }}
+              </mat-error>
             </mat-form-field>
-            <mat-error *ngFor="let error of getErrors(i, 'observacion')">
-              <mat-icon aria-hidden="true" class="error-icon-small">error_outline</mat-icon>
-              {{ error }}
-            </mat-error>
           </div>
 
-          <div class="col-lg-12 col-md-12" style="text-align: right;">
-            <button mat-icon-button color="warn" (click)="eliminarFuenteIngreso(i)">
-              <mat-icon>delete</mat-icon>
+          <div class="action-buttons">
+            <button mat-button color="warn" (click)="eliminarFuenteIngreso(i)">
+              <mat-icon>remove</mat-icon> Eliminar Fuente De Ingreso
             </button>
           </div>
         </div>
       </div>
 
-      <div class="row" style="text-align: center; margin: 1%;">
-        <div class="col-md-6">
-          <button mat-button color="primary" (click)="agregarFuenteIngreso()">
-            <mat-icon matSuffix>exposure_plus_1</mat-icon>Agregar Fuente De Ingreso
-          </button>
-        </div>
-        <div class="col-md-6">
-          <button mat-button color="warn" [disabled]="otrasFuentesIngresoArray.length === 0" (click)="eliminarFuenteIngreso(otrasFuentesIngresoArray.length - 1)">
-            <mat-icon matSuffix>exposure_neg_1</mat-icon>Eliminar Fuente De Ingreso
-          </button>
-        </div>
+      <div class="action-buttons">
+        <button mat-button color="primary" (click)="agregarFuenteIngreso()">
+          <mat-icon>add</mat-icon> Agregar Fuente De Ingreso
+        </button>
       </div>
     </form>
   </div>

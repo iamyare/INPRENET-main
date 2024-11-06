@@ -6,20 +6,6 @@ body {
   padding: 30px;
 }
 
-.version-info {
-  font-size: 8pt;
-  float: right;
-}
-
-.inputs {
-  width: 100%;
-}
-
-.tittle {
-  color: white;
-  background: #628780;
-}
-
 .card {
   margin: 20px;
   border-radius: 8px;
@@ -34,17 +20,106 @@ body {
   border-top-right-radius: 8px;
 }
 
+.card-title {
+  margin: 0;
+}
+
+.card-category {
+  margin: 5px 0 0 0;
+  font-size: 14px;
+}
+
 .card-body {
   padding: 16px;
 }
 
-.row {
+.form-container {
   display: flex;
-  flex-wrap: wrap;
+  flex-direction: column;
 }
 
-.col-md-6 {
-  flex: 0 0 50%;
-  max-width: 50%;
-  padding: 0 8px;
+.form-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.half-width {
+  flex: 1 1 48%;
+}
+
+.full-width {
+  flex: 1 1 100%;
+}
+
+.reference-group {
+  margin-bottom: 24px;
+  padding: 15px;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+}
+
+.reference-title {
+  margin-bottom: 10px;
+  font-weight: bold;
+  color: #229e92;
+}
+
+.action-buttons {
+  display: flex;
+  justify-content: flex-end;
+  gap: 16px;
+  margin-top: 16px;
+}
+
+button {
+  font-size: 14px;
+  padding: 8px 16px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  transition: all 0.3s ease;
+}
+
+button:hover {
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+  transform: translateY(-1px);
+}
+
+button mat-icon {
+  margin-right: 8px;
+}
+
+button[mat-button].mat-warn {
+  background-color: #d32f2f;
+  color: white;
+}
+
+button[mat-button].mat-warn:hover {
+  background-color: #c62828;
+}
+
+button[mat-button].mat-primary {
+  background-color: #26a69a;
+  color: white;
+}
+
+button[mat-button].mat-primary:hover {
+  background-color: #229e92;
+}
+
+button:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.5);
+}
+
+.mat-error {
+  color: #f44336;
+}
+
+.mat-error mat-icon {
+  vertical-align: middle;
+  margin-right: 4px;
+  font-size: 20px;
 }

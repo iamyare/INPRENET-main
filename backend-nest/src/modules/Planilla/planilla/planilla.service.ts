@@ -21,7 +21,22 @@ import * as path from 'path';
 import * as fs from 'fs';
 import { JwtService } from '@nestjs/jwt';
 import { Net_Usuario_Empresa } from 'src/modules/usuario/entities/net_usuario_empresa.entity';
-import { stringify } from 'querystring';
+
+interface Persona {
+  N_IDENTIFICACION: string;
+  ID_PERSONA: number;
+  TOTAL_BENEFICIOS: number;
+  NOMBRE_COMPLETO: string;
+  TOTAL_DEDUCCIONES_INPREMA?: number;
+  TOTAL_DEDUCCIONES_TERCEROS?: number;
+  TOTAL_NETO?: number;
+}
+
+interface Deduccion {
+  ID_PERSONA: number;
+  TOTAL_DEDUCCIONES_INPREMA?: number;
+  TOTAL_DEDUCCIONES_TERCEROS?: number;
+}
 
 @Injectable()
 export class PlanillaService {
@@ -414,67 +429,6 @@ export class PlanillaService {
       return false;
     }
   }
-
-  /* async uploadExcel(file: Express.Multer.File) {
-    try {
-      const workbook = XLSX.read(file.buffer, { type: 'buffer' });
-      const worksheet = workbook.Sheets[workbook.SheetNames[0]];
-      const rows = XLSX.utils.sheet_to_json(worksheet);
-  
-      for (const row of rows) {
-        const dni = row['DNI'];
-        const codigoBeneficio = row['BENEF'];
-        const montoPagar = row['PAGAR'];
-  
-        // Buscar la persona por su número de identificación
-        const persona = await this.personaRepository.findOne({
-          where: { n_identificacion: dni },
-        });
-  
-        if (!persona) {
-          this.logger.warn(`Persona con DNI ${dni} no encontrada.`);
-          continue; // Saltar al siguiente registro
-        }
-  
-        // Buscar el beneficio por su código
-        const beneficio = await this.beneficioRepository.findOne({
-          where: { codigo: codigoBeneficio },
-        });
-  
-        if (!beneficio) {
-          this.logger.warn(`Beneficio con código ${codigoBeneficio} no encontrado.`);
-          continue; // Saltar al siguiente registro
-        }
-  
-        // Verificar si la persona tiene asignado ese beneficio
-        const detalleBeneficioAfiliado = await this.detalleBeneficioAfiliadoRepository
-          .createQueryBuilder('detalleBeneficio')
-          .innerJoinAndSelect('detalleBeneficio.beneficio', 'beneficio')
-          .innerJoinAndSelect('detalleBeneficio.persona', 'persona')
-          .where('persona.n_identificacion = :dni', { dni })
-          .andWhere('beneficio.codigo = :codigoBeneficio', { codigoBeneficio })
-          .getOne();
-  
-        if (detalleBeneficioAfiliado) {
-          // Log de personas que sí tienen el beneficio asignado
-          this.logger.log(`Persona con DNI ${dni} tiene asignado el beneficio con código ${codigoBeneficio}.`);
-          // Aquí podrías realizar la lógica adicional, como registrar el monto a pagar.
-        } else {
-          // Log de personas que no tienen el beneficio asignado
-          this.logger.warn(`Persona con DNI ${dni} no tiene asignado el beneficio con código ${codigoBeneficio}.`);
-        }
-      }
-  
-      return { message: 'Archivo procesado correctamente' };
-    } catch (error) {
-      this.logger.error(`Error procesando el archivo: ${error.message}`);
-      throw new InternalServerErrorException(error.message);
-    }
-  } */
-
-
-
-
 
   async getActivePlanillas(clasePlanilla?: string): Promise<Net_Planilla[]> {
     const query = this.planillaRepository.createQueryBuilder('planilla')
@@ -1657,17 +1611,14 @@ GROUP BY
 
 
     interface Persona {
-      DNI: string;
-      MES: string;
-      ANIO: string;
-      ID_PLANILLA: number;
+      N_IDENTIFICACION: string;
       ID_PERSONA: number;
-      TOTAL_BENEFICIO: number;
+      TOTAL_BENEFICIOS: number;
       NOMBRE_COMPLETO: string;
-      TOTAL_DEDUCCIONES?: number;
-      DEDUCCIONES?: number;
+      TOTAL_DEDUCCIONES_INPREMA?: number;
+      TOTAL_DEDUCCIONES_TERCEROS?: number;
+      TOTAL_NETO?: number;
     }
-
     interface Deduccion {
       ID_PERSONA: number;
       ID_PLANILLA: number;
@@ -2251,187 +2202,135 @@ GROUP BY
     }
   }
 
-  async getPlanillasPreliminares(codigo_planilla: string): Promise<any[]> {
-    /* const query = `
-          SELECT 
-              p.ID_PERSONA,
-              p.N_IDENTIFICACION,
-              p.PRIMER_NOMBRE || ' ' || NVL(p.SEGUNDO_NOMBRE, '') || ' ' || p.PRIMER_APELLIDO || ' ' || NVL(p.SEGUNDO_APELLIDO, '') AS NOMBRE_COMPLETO,
-              COALESCE(SUM(dpb.MONTO_A_PAGAR), 0) AS TOTAL_BENEFICIOS,
-              COALESCE(SUM(CASE WHEN d.ID_CENTRO_TRABAJO = 1 THEN dd.MONTO_APLICADO ELSE 0 END), 0) AS TOTAL_DEDUCCIONES_INPREMA,
-              COALESCE(SUM(CASE WHEN d.ID_CENTRO_TRABAJO IS NULL OR d.ID_CENTRO_TRABAJO != 1 THEN dd.MONTO_APLICADO ELSE 0 END), 0) AS TOTAL_DEDUCCIONES_TERCEROS
-          FROM 
-              NET_PERSONA p
-          LEFT JOIN 
-              NET_DETALLE_PAGO_BENEFICIO dpb ON p.ID_PERSONA = dpb.ID_PERSONA AND dpb.ID_PLANILLA = (SELECT ID_PLANILLA FROM NET_PLANILLA WHERE CODIGO_PLANILLA = :codigo_planilla AND ESTADO = 'ACTIVA')
-          LEFT JOIN 
-              NET_DETALLE_DEDUCCION dd ON p.ID_PERSONA = dd.ID_PERSONA AND dd.ID_PLANILLA = (SELECT ID_PLANILLA FROM NET_PLANILLA WHERE CODIGO_PLANILLA = :codigo_planilla AND ESTADO = 'ACTIVA')
-          LEFT JOIN
-              NET_DEDUCCION d ON dd.ID_DEDUCCION = d.ID_DEDUCCION
-          WHERE 
-              (dpb.ID_PLANILLA = (SELECT ID_PLANILLA FROM NET_PLANILLA WHERE CODIGO_PLANILLA = :codigo_planilla AND ESTADO = 'ACTIVA')
-              OR dd.ID_PLANILLA = (SELECT ID_PLANILLA FROM NET_PLANILLA WHERE CODIGO_PLANILLA = :codigo_planilla AND ESTADO = 'ACTIVA'))
-          GROUP BY 
-              p.ID_PERSONA, p.N_IDENTIFICACION, p.PRIMER_NOMBRE, p.SEGUNDO_NOMBRE, p.PRIMER_APELLIDO, p.SEGUNDO_APELLIDO
-      `;
-
-    const result = await this.entityManager.query(query, [codigo_planilla]);
-    
-    return result; */
-
-    let query = `
-        SELECT DISTINCT
-            per."N_IDENTIFICACION" AS "N_IDENTIFICACION",
-            tipoP."TIPO_PERSONA" AS "TIPO_PERSONA",
-            per."ID_PERSONA",
-            perPorBan."NUM_CUENTA",
-            banco."NOMBRE_BANCO",
-            SUM(detBs."MONTO_A_PAGAR") AS "TOTAL_BENEFICIOS",
-            TRIM(
-                per."PRIMER_NOMBRE" || ' ' ||
-                COALESCE(per."SEGUNDO_NOMBRE", '') || ' ' ||
-                COALESCE(per."TERCER_NOMBRE", '') || ' ' ||
-                per."PRIMER_APELLIDO" || ' ' ||
-                COALESCE(per."SEGUNDO_APELLIDO", '')
-            ) AS "NOMBRE_COMPLETO"
-        FROM 
-            "NET_DETALLE_PAGO_BENEFICIO" detBs
-        
-        JOIN 
-            "NET_PLANILLA" plan
-        ON 
-            plan."ID_PLANILLA" = detBs."ID_PLANILLA"
-        JOIN 
-            "NET_DETALLE_BENEFICIO_AFILIADO" detBA
-        ON 
-            detBs."ID_DETALLE_PERSONA" = detBA."ID_DETALLE_PERSONA" 
-            AND detBs."ID_PERSONA" = detBA."ID_PERSONA"
-            AND detBs."ID_CAUSANTE" = detBA."ID_CAUSANTE"
-            AND detBs."ID_BENEFICIO" = detBA."ID_BENEFICIO"
-        JOIN 
-            "NET_BENEFICIO" ben
-        ON 
-            detBA."ID_BENEFICIO" = ben."ID_BENEFICIO"
-        JOIN 
-            "NET_DETALLE_PERSONA" detP
-        ON 
-            detBA."ID_PERSONA" = detP."ID_PERSONA"
-            AND detBA."ID_DETALLE_PERSONA" = detP."ID_DETALLE_PERSONA"
-            AND detBA."ID_CAUSANTE" = detP."ID_CAUSANTE"
-        JOIN 
-            "NET_TIPO_PERSONA" tipoP
-        ON 
-            detP."ID_TIPO_PERSONA" = tipoP."ID_TIPO_PERSONA"
-        JOIN 
-            "NET_PERSONA" per
-        ON 
-            per."ID_PERSONA" = detP."ID_PERSONA"
-        LEFT JOIN 
-            "NET_PERSONA_POR_BANCO" perPorBan
-        ON 
-            detBs."ID_AF_BANCO" = perPorBan."ID_AF_BANCO"
-        LEFT JOIN 
-            "NET_BANCO" banco
-        ON 
-            banco."ID_BANCO" = perPorBan."ID_BANCO"
-        
-        WHERE
-                detBs."ESTADO" = 'EN PRELIMINAR' AND
-                plan."CODIGO_PLANILLA" = '${codigo_planilla}'
-                
-        GROUP BY 
+  async getPlanillasPreliminares(codigo_planilla: string): Promise<Persona[]> {
+    const query = `
+      SELECT DISTINCT
+        per."N_IDENTIFICACION" AS "N_IDENTIFICACION",
+        tipoP."TIPO_PERSONA" AS "TIPO_PERSONA",
+        per."ID_PERSONA",
+        perPorBan."NUM_CUENTA",
+        banco."NOMBRE_BANCO",
+        SUM(detBs."MONTO_A_PAGAR") AS "TOTAL_BENEFICIOS",
+        TRIM(
+          per."PRIMER_NOMBRE" || ' ' ||
+          COALESCE(per."SEGUNDO_NOMBRE", '') || ' ' ||
+          COALESCE(per."TERCER_NOMBRE", '') || ' ' ||
+          per."PRIMER_APELLIDO" || ' ' ||
+          COALESCE(per."SEGUNDO_APELLIDO", '')
+        ) AS "NOMBRE_COMPLETO"
+      FROM 
+        "NET_DETALLE_PAGO_BENEFICIO" detBs
+      JOIN 
+        "NET_PLANILLA" plan ON plan."ID_PLANILLA" = detBs."ID_PLANILLA"
+      JOIN 
+        "NET_DETALLE_BENEFICIO_AFILIADO" detBA ON detBs."ID_DETALLE_PERSONA" = detBA."ID_DETALLE_PERSONA" 
+        AND detBs."ID_PERSONA" = detBA."ID_PERSONA"
+        AND detBs."ID_CAUSANTE" = detBA."ID_CAUSANTE"
+        AND detBs."ID_BENEFICIO" = detBA."ID_BENEFICIO"
+      JOIN 
+        "NET_BENEFICIO" ben ON detBA."ID_BENEFICIO" = ben."ID_BENEFICIO"
+      JOIN 
+        "NET_DETALLE_PERSONA" detP ON detBA."ID_PERSONA" = detP."ID_PERSONA"
+        AND detBA."ID_DETALLE_PERSONA" = detP."ID_DETALLE_PERSONA"
+        AND detBA."ID_CAUSANTE" = detP."ID_CAUSANTE"
+      JOIN 
+        "NET_TIPO_PERSONA" tipoP ON detP."ID_TIPO_PERSONA" = tipoP."ID_TIPO_PERSONA"
+      JOIN 
+        "NET_PERSONA" per ON per."ID_PERSONA" = detP."ID_PERSONA"
+      LEFT JOIN 
+        "NET_PERSONA_POR_BANCO" perPorBan ON detBs."ID_AF_BANCO" = perPorBan."ID_AF_BANCO"
+      LEFT JOIN 
+        "NET_BANCO" banco ON banco."ID_BANCO" = perPorBan."ID_BANCO"
+      WHERE
+        detBs."ESTADO" = 'EN PRELIMINAR' AND
+        plan."CODIGO_PLANILLA" = :codigo_planilla
+      GROUP BY 
         per."N_IDENTIFICACION",
         per."ID_PERSONA",
         tipoP."TIPO_PERSONA",
         perPorBan."NUM_CUENTA",
         banco."NOMBRE_BANCO",
-            TRIM(
-                per."PRIMER_NOMBRE" || ' ' ||
-                COALESCE(per."SEGUNDO_NOMBRE", '') || ' ' ||
-                COALESCE(per."TERCER_NOMBRE", '') || ' ' ||
-                per."PRIMER_APELLIDO" || ' ' ||
-                COALESCE(per."SEGUNDO_APELLIDO", '')
-            )
+        TRIM(
+          per."PRIMER_NOMBRE" || ' ' ||
+          COALESCE(per."SEGUNDO_NOMBRE", '') || ' ' ||
+          COALESCE(per."TERCER_NOMBRE", '') || ' ' ||
+          per."PRIMER_APELLIDO" || ' ' ||
+          COALESCE(per."SEGUNDO_APELLIDO", '')
+        )
     `;
 
-    let queryI = `
-            SELECT 
-            per."ID_PERSONA",
-                    SUM(dd."MONTO_APLICADO") AS "TOTAL_DEDUCCIONES_INPREMA"
-            FROM "NET_PLANILLA" plan 
-            INNER JOIN "NET_DETALLE_DEDUCCION" dd ON dd."ID_PLANILLA" = plan."ID_PLANILLA"
-            INNER JOIN "NET_DEDUCCION" ded ON ded."ID_DEDUCCION" = dd."ID_DEDUCCION"
-            INNER JOIN "NET_CENTRO_TRABAJO" instFin ON instFin."ID_CENTRO_TRABAJO" = ded."ID_CENTRO_TRABAJO" 
-
-
-            INNER JOIN "NET_PERSONA" per ON per."ID_PERSONA" = dd."ID_PERSONA"
-
-            WHERE
-                dd."ESTADO_APLICACION" = 'EN PRELIMINAR' AND
-                plan."CODIGO_PLANILLA" = '${codigo_planilla}' AND
-                instFin."NOMBRE_CENTRO_TRABAJO" = 'INPREMA'
-            GROUP BY 
-                per."ID_PERSONA"
+    const queryI = `
+      SELECT 
+        per."ID_PERSONA",
+        SUM(dd."MONTO_APLICADO") AS "TOTAL_DEDUCCIONES_INPREMA"
+      FROM 
+        "NET_PLANILLA" plan 
+      INNER JOIN 
+        "NET_DETALLE_DEDUCCION" dd ON dd."ID_PLANILLA" = plan."ID_PLANILLA"
+      INNER JOIN 
+        "NET_DEDUCCION" ded ON ded."ID_DEDUCCION" = dd."ID_DEDUCCION"
+      INNER JOIN 
+        "NET_CENTRO_TRABAJO" instFin ON instFin."ID_CENTRO_TRABAJO" = ded."ID_CENTRO_TRABAJO"
+      INNER JOIN 
+        "NET_PERSONA" per ON per."ID_PERSONA" = dd."ID_PERSONA"
+      WHERE
+        dd."ESTADO_APLICACION" = 'EN PRELIMINAR' AND
+        plan."CODIGO_PLANILLA" = :codigo_planilla AND
+        instFin."NOMBRE_CENTRO_TRABAJO" = 'INPREMA'
+      GROUP BY 
+        per."ID_PERSONA"
     `;
 
-    let queryT = `
-          SELECT 
-          per."ID_PERSONA",
-                  SUM(dd."MONTO_APLICADO") AS "TOTAL_DEDUCCIONES_TERCEROS"
-          FROM "NET_PLANILLA" plan 
-          INNER JOIN "NET_DETALLE_DEDUCCION" dd ON dd."ID_PLANILLA" = plan."ID_PLANILLA"
-          INNER JOIN "NET_DEDUCCION" ded ON ded."ID_DEDUCCION" = dd."ID_DEDUCCION"
-          INNER JOIN "NET_CENTRO_TRABAJO" instFin ON instFin."ID_CENTRO_TRABAJO" = ded."ID_CENTRO_TRABAJO" 
-
-
-          INNER JOIN "NET_PERSONA" per ON per."ID_PERSONA" = dd."ID_PERSONA"
-
-          WHERE
-              dd."ESTADO_APLICACION" = 'EN PRELIMINAR' AND
-              plan."CODIGO_PLANILLA" = '${codigo_planilla}' AND
-              instFin."NOMBRE_CENTRO_TRABAJO" != 'INPREMA'
-          GROUP BY 
-          per."ID_PERSONA"
+    const queryT = `
+      SELECT 
+        per."ID_PERSONA",
+        SUM(dd."MONTO_APLICADO") AS "TOTAL_DEDUCCIONES_TERCEROS"
+      FROM 
+        "NET_PLANILLA" plan 
+      INNER JOIN 
+        "NET_DETALLE_DEDUCCION" dd ON dd."ID_PLANILLA" = plan."ID_PLANILLA"
+      INNER JOIN 
+        "NET_DEDUCCION" ded ON ded."ID_DEDUCCION" = dd."ID_DEDUCCION"
+      INNER JOIN 
+        "NET_CENTRO_TRABAJO" instFin ON instFin."ID_CENTRO_TRABAJO" = ded."ID_CENTRO_TRABAJO"
+      INNER JOIN 
+        "NET_PERSONA" per ON per."ID_PERSONA" = dd."ID_PERSONA"
+      WHERE
+        dd."ESTADO_APLICACION" = 'EN PRELIMINAR' AND
+        plan."CODIGO_PLANILLA" = :codigo_planilla AND
+        instFin."NOMBRE_CENTRO_TRABAJO" != 'INPREMA'
+      GROUP BY 
+        per."ID_PERSONA"
     `;
-
-    interface Persona {
-      N_IDENTIFICACION: string;
-      ID_PERSONA: number;
-      TOTAL_BENEFICIOS: number;
-      NOMBRE_COMPLETO: string;
-      TOTAL_DEDUCCIONES_INPREMA?: number;
-      TOTAL_DEDUCCIONES_TERCEROS?: number;
-    }
-
-    interface Deduccion {
-      ID_PERSONA: number;
-      TOTAL_DEDUCCIONES_INPREMA?: number;
-      DEDUCCIONES_TERCEROS?: number;
-    }
-
     try {
-      const result: Persona[] = await this.entityManager.query(query);
-      const resultI: Deduccion[] = await this.entityManager.query(queryI);
-      const resultT: Deduccion[] = await this.entityManager.query(queryT);
-
+      const result: Persona[] = await this.entityManager.query(query, [codigo_planilla]);
+      const resultI: Deduccion[] = await this.entityManager.query(queryI, [codigo_planilla]);
+      const resultT: Deduccion[] = await this.entityManager.query(queryT, [codigo_planilla]);
+    
+      const deduccionesInpremaMap = new Map(resultI.map(d => [d.ID_PERSONA, d]));
+      const deduccionesTercerosMap = new Map(resultT.map(d => [d.ID_PERSONA, d]));
+    
       const newResult = result.map(persona => {
-        const deduccionI = resultI.find(d => d.ID_PERSONA === persona.ID_PERSONA);
-        const deduccionT = resultT.find(d => d.ID_PERSONA === persona.ID_PERSONA);
-
+        const deduccionI = deduccionesInpremaMap.get(persona.ID_PERSONA);
+        const deduccionT = deduccionesTercerosMap.get(persona.ID_PERSONA);
+    
         return {
           ...persona,
           TOTAL_DEDUCCIONES_INPREMA: deduccionI ? deduccionI['TOTAL_DEDUCCIONES_INPREMA'] : 0,
           TOTAL_DEDUCCIONES_TERCEROS: deduccionT ? deduccionT['TOTAL_DEDUCCIONES_TERCEROS'] : 0,
-          TOTAL_NETO: persona.TOTAL_BENEFICIOS - ((deduccionI ? deduccionI['TOTAL_DEDUCCIONES_INPREMA'] : 0) + (deduccionT ? deduccionT['TOTAL_DEDUCCIONES_TERCEROS'] : 0))
-
+          TOTAL_NETO: persona.TOTAL_BENEFICIOS - (
+            (deduccionI ? deduccionI['TOTAL_DEDUCCIONES_INPREMA'] : 0) +
+            (deduccionT ? deduccionT['TOTAL_DEDUCCIONES_TERCEROS'] : 0)
+          )
         };
       });
-
+    
       return newResult;
     } catch (error) {
       this.logger.error('Error ejecutando la consulta', error.stack);
       throw new InternalServerErrorException('Error ejecutando la consulta');
     }
+    
   }
 
   async getDesglosePorPersonaPlanilla(id_persona: string, codigo_planilla: string): Promise<any> {

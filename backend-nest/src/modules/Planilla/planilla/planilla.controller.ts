@@ -3,7 +3,7 @@ import { PlanillaService } from './planilla.service';
 import { CreatePlanillaDto } from './dto/create-planilla.dto';
 import { UpdatePlanillaDto } from './dto/update-planilla.dto';
 import { PaginationDto } from 'src/common/dtos/pagination.dto';
-import { ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ApiTags } from '@nestjs/swagger';
 import { EntityManager } from 'typeorm';
 import { InjectEntityManager } from '@nestjs/typeorm';
 import { Net_Planilla } from './entities/net_planilla.entity';
@@ -411,9 +411,14 @@ export class PlanillaController {
   }
 
   @Post('get-preliminares')
-  async getPlanillasPreliminares(@Body() getPlanillasPreliminaresDto: GetPlanillasPreliminaresDto): Promise<any[]> {
-    return this.planillaService.getPlanillasPreliminares(getPlanillasPreliminaresDto.codigo_planilla);
+async getPlanillasPreliminares(@Body() getPlanillasPreliminaresDto: GetPlanillasPreliminaresDto): Promise<any[]> {
+  try {
+    return await this.planillaService.getPlanillasPreliminares(getPlanillasPreliminaresDto.codigo_planilla);
+  } catch (error) {
+    throw new BadRequestException('Error en la solicitud: ' + error.message);
   }
+}
+
 
 
 }

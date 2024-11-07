@@ -327,6 +327,8 @@ export class AfiliadoService {
   }
 
   async findOneAFiliado(term: string) {
+    console.log(term);
+    
 
     try {
       const detallePer = await this.detallePersonaRepository.findOne({
@@ -363,6 +365,8 @@ export class AfiliadoService {
 
       //const detallePersona = persona.detallePersona.find(detalle => detalle.tipoPersona.tipo_persona === 'AFILIADO');
 
+      console.log(detallePer);
+      
       const result = {
         N_IDENTIFICACION: detallePer.persona.n_identificacion,
         ID_PERSONA: detallePer.persona.id_persona,
@@ -413,7 +417,7 @@ export class AfiliadoService {
         //ESTADO: detallePersona.eliminado,
       };
 
-      return result /* beneficios */;
+      return result
     } catch (error) {
       console.log(error);
     }

@@ -238,12 +238,12 @@ export class DocumentosPlanillaComponent implements OnInit {
               margin: [40, 5, 40, 10]
             },
             { text: 'BENEFICIOS A PAGAR', style: 'subheader', margin: [0, 10, 0, 5] },
-            this.crearTablaPDF(data.beneficios, 'Beneficios', `TOTAL BENEFICIOS: L${totalBeneficios.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",")}`),
+            this.crearTablaPDF(nombrePlanilla, data.beneficios, 'Beneficios', `TOTAL BENEFICIOS: L${totalBeneficios.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",")}`),
             { text: 'DEDUCCIONES INPREMA', style: 'subheader', margin: [0, 10, 0, 5] },
-            this.crearTablaPDF(data.deduccionesInprema, 'DEDUCCIONES INPREMA', `TOTAL DEDUCCIONES INPREMA: L${totalDeduccionesInprema.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",")}`),
+            this.crearTablaPDF(nombrePlanilla, data.deduccionesInprema, 'DEDUCCIONES INPREMA', `TOTAL DEDUCCIONES INPREMA: L${totalDeduccionesInprema.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",")}`),
 
             { text: 'DEDUCCIONES DE TERCEROS', style: 'subheader', margin: [0, 10, 0, 5] },
-            this.crearTablaPDF(data.deduccionesTerceros, 'DEDUCCIONES TERCEROS', `TOTAL DEDUCCIONES TERCEROS: L${totalDeduccionesTerceros.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",")}`),
+            this.crearTablaPDF(nombrePlanilla, data.deduccionesTerceros, 'DEDUCCIONES TERCEROS', `TOTAL DEDUCCIONES TERCEROS: L${totalDeduccionesTerceros.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",")}`),
 
             {
               columns: [
@@ -402,12 +402,12 @@ export class DocumentosPlanillaComponent implements OnInit {
               margin: [40, 5, 40, 10]
             },
             { text: 'BENEFICIOS A PAGAR', style: 'subheader', margin: [0, 10, 0, 5] },
-            this.crearTablaPDF(data.beneficiosSC, 'Beneficios', `TOTAL BENEFICIOS: L${totalBeneficiosSC.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",")}`),
+            this.crearTablaPDF(nombrePlanilla, data.beneficiosSC, 'Beneficios', `TOTAL BENEFICIOS: L${totalBeneficiosSC.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",")}`),
             { text: 'DEDUCCIONES INPREMA', style: 'subheader', margin: [0, 10, 0, 5] },
-            this.crearTablaPDF(data.deduccionesInpremaSC, 'DEDUCCIONES INPREMA', `TOTAL DEDUCCIONES INPREMA: L${totalDeduccionesInpremaSC.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",")}`),
+            this.crearTablaPDF(nombrePlanilla, data.deduccionesInpremaSC, 'DEDUCCIONES INPREMA', `TOTAL DEDUCCIONES INPREMA: L${totalDeduccionesInpremaSC.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",")}`),
 
             { text: 'DEDUCCIONES DE TERCEROS', style: 'subheader', margin: [0, 10, 0, 5] },
-            this.crearTablaPDF(data.deduccionesTercerosSC, 'DEDUCCIONES TERCEROS', `TOTAL DEDUCCIONES TERCEROS: L${totalDeduccionesTercerosSC.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",")}`),
+            this.crearTablaPDF(nombrePlanilla, data.deduccionesTercerosSC, 'DEDUCCIONES TERCEROS', `TOTAL DEDUCCIONES TERCEROS: L${totalDeduccionesTercerosSC.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",")}`),
 
             {
               columns: [
@@ -512,53 +512,93 @@ export class DocumentosPlanillaComponent implements OnInit {
   }
 
 
-  crearTablaPDF(data: any[], titulo: string, totalTexto: string) {
+  crearTablaPDF(nombrePlanilla: string, data: any[], titulo: string, totalTexto: string) {
 
-    const headers = [
-      { text: 'Nombre', style: 'tableHeader' },
-      { text: 'Número de pago:', style: 'tableHeader', alignment: 'center' },
-      { text: 'Lote:', style: 'tableHeader', alignment: 'center' },
-      { text: 'Total', style: 'tableHeader', alignment: 'right' }
-    ];
+    console.log(nombrePlanilla);
 
-    const body = data.map(item => {
-      const nombre = item?.NOMBRE_BENEFICIO ?? item?.NOMBRE_DEDUCCION ?? 'N/A';
-      const numPago = item?.NUMERO_PAGOS ?? item?.NUMERO_PAGOS ?? 'N/A';
-      const numLote = item?.NUMERO_LOTE ?? item?.NUMERO_LOTE ?? 'N/A';
-      const total = item?.TOTAL_MONTO_BENEFICIO ?? item?.TOTAL_MONTO_DEDUCCION ? `L${Number(item.TOTAL_MONTO_BENEFICIO ?? item.TOTAL_MONTO_DEDUCCION).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",")}` : 'L0.00';
-
-      return [
-        nombre,
-        { text: numPago, alignment: 'center' },
-        { text: numLote, alignment: 'center' },
-        { text: total, alignment: 'right' }
+    console.log(nombrePlanilla);
+    if (nombrePlanilla == "60 RENTAS") {
+      const headers = [
+        { text: 'Nombre', style: 'tableHeader' },
+        { text: 'Número de pago:', style: 'tableHeader', alignment: 'center' },
+        { text: 'Lote:', style: 'tableHeader', alignment: 'center' },
+        { text: 'Total', style: 'tableHeader', alignment: 'right' }
       ];
-    });
 
-    if (totalTexto) {
-      body.push([
-        { text: totalTexto, style: 'tableTotal', colSpan: 4, alignment: 'right' }
-      ]);
-      body.push([
-        { text: totalTexto, style: 'tableTotal', colSpan: 4, alignment: 'right' }
-      ]);
+      const body = data.map(item => {
+        const nombre = item?.NOMBRE_BENEFICIO ?? item?.NOMBRE_DEDUCCION ?? 'N/A';
+        const numPago = item?.NUMERO_PAGOS ?? item?.NUMERO_PAGOS ?? 'N/A';
+        const numLote = item?.NUMERO_LOTE ?? item?.NUMERO_LOTE ?? 'N/A';
+        const total = item?.TOTAL_MONTO_BENEFICIO ?? item?.TOTAL_MONTO_DEDUCCION ? `L${Number(item.TOTAL_MONTO_BENEFICIO ?? item.TOTAL_MONTO_DEDUCCION).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",")}` : 'L0.00';
+
+        return [
+          nombre,
+          { text: numPago, alignment: 'center' },
+          { text: numLote, alignment: 'center' },
+          { text: total, alignment: 'right' }
+        ];
+      });
+
+      if (totalTexto) {
+        body.push([
+          { text: totalTexto, style: 'tableTotal', colSpan: 4, alignment: 'right' }
+        ]);
+      }
+
+      if (body.length === 0) {
+        body.push([
+          { text: 'No hay datos disponibles', colSpan: 4, alignment: 'center' }
+        ]);
+      }
+
+      return {
+        style: 'tableExample',
+        table: {
+          headerRows: 1,
+          widths: ['*', '*', '*', '*'],
+          body: [headers, ...body]
+        },
+        layout: 'lightHorizontalLines'
+      };
+
+    } else {
+      const headers = [
+        { text: 'Nombre', style: 'tableHeader' },
+        { text: 'Total', style: 'tableHeader', alignment: 'right' }
+      ];
+
+      const body = data.map(item => {
+        const nombre = item?.NOMBRE_BENEFICIO ?? item?.NOMBRE_DEDUCCION ?? 'N/A';
+        const total = item?.TOTAL_MONTO_BENEFICIO ?? item?.TOTAL_MONTO_DEDUCCION ? `L${Number(item.TOTAL_MONTO_BENEFICIO ?? item.TOTAL_MONTO_DEDUCCION).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",")}` : 'L0.00';
+
+        return [
+          nombre,
+          { text: total, alignment: 'right' }
+        ];
+      });
+
+      if (totalTexto) {
+        body.push([
+          { text: totalTexto, style: 'tableTotal', colSpan: 2, alignment: 'right' }
+        ]);
+      }
+
+      if (body.length === 0) {
+        body.push([
+          { text: 'No hay datos disponibles', colSpan: 2, alignment: 'center' }
+        ]);
+      }
+
+      return {
+        style: 'tableExample',
+        table: {
+          headerRows: 1,
+          widths: ['*', '*'],
+          body: [headers, ...body]
+        },
+        layout: 'lightHorizontalLines'
+      };
     }
-
-    if (body.length === 0) {
-      body.push([
-        { text: 'No hay datos disponibles', colSpan: 4, alignment: 'center' }
-      ]);
-    }
-
-    return {
-      style: 'tableExample',
-      table: {
-        headerRows: 1,
-        widths: ['*', '*', '*', '*'],
-        body: [headers, ...body]
-      },
-      layout: 'lightHorizontalLines'
-    };
   }
 
   async generarPDFMontosPorBancoPeriodo() {

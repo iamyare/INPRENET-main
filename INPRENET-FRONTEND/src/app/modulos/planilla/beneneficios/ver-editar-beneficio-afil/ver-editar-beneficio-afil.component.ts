@@ -163,6 +163,7 @@ export class VerEditarBeneficioAfilComponent {
   getFilas = async () => {
     try {
       const data = await this.beneficioService.GetAllBeneficios(this.form.value.dni).toPromise();
+      const datas = await this.afiliadoDVC.findTipoPersonaByN_ident(this.form.value.dni).toPromise();
 
       if (data.persona.length > 0) {
         const dataAfil = data.persona.map((item: any) => ({
@@ -179,7 +180,7 @@ export class VerEditarBeneficioAfilComponent {
           voluntario: item.VOLUNTARIO || "NO APLICA"
         }));
         this.Afiliado = dataAfil[0]
-      } else if (data.detBen.length > 0) {
+      } if (data.detBen.length > 0) {
         const temp = data.detBen[0].persona.persona
 
         this.Afiliado = {
@@ -200,7 +201,6 @@ export class VerEditarBeneficioAfilComponent {
         this.monstrarBeneficios = false;
         this.toastr.warning("No existe el registro")
       }
-
 
       this.filasT = data.detBen.map((item: any) => {
         return {
@@ -232,16 +232,6 @@ export class VerEditarBeneficioAfilComponent {
         }
       });
 
-      return this.filasT;
-    } catch (error) {
-      console.error("Error al obtener los detalles completos de deducción", error);
-      throw error;
-    }
-  };
-
-  getFilas2 = async () => {
-    try {
-      const datas = await this.afiliadoDVC.findTipoPersonaByN_ident(this.form.value.dni).toPromise();
 
       if (datas) {
         const dataEstadosAfil = datas.map((item: any) => ({
@@ -252,11 +242,9 @@ export class VerEditarBeneficioAfilComponent {
 
         this.filasEst = dataEstadosAfil;
 
-        return this.filasEst;
-      } else {
-        return []
       }
 
+      return this.filasT;
     } catch (error) {
       console.error("Error al obtener los detalles completos de deducción", error);
       throw error;
@@ -264,7 +252,6 @@ export class VerEditarBeneficioAfilComponent {
   };
 
   previsualizarInfoAfil() {
-    this.getFilas2().then(() => this.cargar2());
     this.getFilas().then(() => this.cargar2());
   }
 

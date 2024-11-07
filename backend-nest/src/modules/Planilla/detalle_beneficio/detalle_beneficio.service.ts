@@ -48,6 +48,9 @@ export class DetalleBeneficioService {
     @InjectRepository(Net_Tipo_Persona)
     private tipoPersonaRepos: Repository<Net_Tipo_Persona>,
 
+    @InjectRepository(Net_Planilla)
+    private planillaRepository: Repository<Net_Planilla>,
+
     @InjectRepository(Net_Persona_Por_Banco)
     private readonly personaPorBancoRepository: Repository<Net_Persona_Por_Banco>,
 
@@ -239,7 +242,11 @@ export class DetalleBeneficioService {
             ID_BENEFICIO: resultado2.ID_BENEFICIO,
 
           },
-          { estado_solicitud: "RECHAZADO", ID_USUARIO_EMPRESA: estadoPP.id_usuario_empresa, observaciones: observacion }
+          {
+            ID_USUARIO_EMPRESA: estadoPP.id_usuario_empresa,
+            estado_solicitud: "RECHAZADO",
+            observaciones: observacion
+          }
         );
 
         const detPagBenRepository = await this.detPagBenRepository.update(
@@ -268,11 +275,16 @@ export class DetalleBeneficioService {
         });
 
         if (!resultado3) {
+          const planillaRespository = await this.planillaRepository.findOne({
+            where: {
+              codigo_planilla: cod_planilla
+            }
+          });
 
           const detDedRepository = await this.detDedRepository.update(
             {
               persona: { id_persona: ID_PERSONA },
-              planilla: { codigo_planilla: cod_planilla }
+              planilla: planillaRespository
             },
             {
               estado_aplicacion: "NO COBRADA",
@@ -282,8 +294,11 @@ export class DetalleBeneficioService {
         }
 
         /*
-          return { mensaje: `Estado actualizado a '${nuevoEstado}' para los detalles de beneficio de la planilla con ID ${idPlanilla}` }; */
+          return { mensaje: `Estado actualizado a '${nuevoEstado}' para los detalles de beneficio de la planilla con ID ${idPlanilla}` }; 
+        */
       } catch (error) {
+        console.log(error);
+
         throw new InternalServerErrorException('Se produjo un error al actualizar los estados de los detalles de beneficio');
       }
 

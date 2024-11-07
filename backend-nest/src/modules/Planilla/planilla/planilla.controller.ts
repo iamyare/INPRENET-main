@@ -174,6 +174,12 @@ export class PlanillaController {
     );
   }
 
+  @Get('cerradas')
+  //@Roles({ rol: 'ADMINISTRADOR DE PLANILLA', modulo: 'PLANILLA' })
+  async getCerradasPlanillas(@Query('clasePlanilla') clasePlanilla?: string) {
+    return this.planillaService.getCerradasPlanillas(clasePlanilla);
+  }
+
   @Get('beneficios-deducciones-periodo')
   async getBeneficiosDeducciones(
     @Query('periodoInicio') periodoInicio: string,

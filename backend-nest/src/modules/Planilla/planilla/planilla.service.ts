@@ -493,6 +493,24 @@ export class PlanillaService {
     }
   }
 
+  async getCerradasPlanillas(clasePlanilla?: string): Promise<Net_Planilla[]> {
+    const query = this.planillaRepository.createQueryBuilder('planilla')
+      .leftJoinAndSelect('planilla.tipoPlanilla', 'tipoPlanilla')
+      .where('planilla.estado = :estado', { estado: 'CERRADA' })
+      .orderBy('planilla.periodoInicio', 'DESC');
+
+    if (clasePlanilla) {
+      query.andWhere('tipoPlanilla.clase_planilla = :clasePlanilla', { clasePlanilla });
+    }
+
+    try {
+      return await query.getMany();
+    } catch (error) {
+      this.logger.error('Error al obtener planillas activas', error);
+      throw new InternalServerErrorException('Error al obtener planillas activas');
+    }
+  }
+
   async getcerradas_fecha(fechaInicio: string, fechaFinalizacion: string): Promise<Net_Planilla[]> {
 
     try {

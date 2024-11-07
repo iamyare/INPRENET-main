@@ -106,6 +106,22 @@ export class PlanillaService {
     );
   }
 
+  getPlanillasCerradas(clasePlanilla?: string): Observable<any> {
+    const url = `${environment.API_URL}/api/planilla/cerradas`;
+    let params = new HttpParams();
+
+    if (clasePlanilla) {
+      params = params.set('clasePlanilla', clasePlanilla);
+    }
+
+    return this.http.get<any>(url, { params }).pipe(
+      catchError(error => {
+        console.error('Error al obtener planillas activas', error);
+        return throwError(error);
+      })
+    );
+  }
+
   getPlanillasCerradaByFechas(fechaInicio: string, fechaFinalizacion: string): Observable<any> {
     const url = `${environment.API_URL}/api/planilla/cerradas_fecha`;
     let params = new HttpParams();

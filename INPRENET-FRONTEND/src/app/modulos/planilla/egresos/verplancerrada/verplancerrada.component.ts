@@ -24,7 +24,7 @@ pdfMake.vfs = pdfFonts.pdfMake.vfs;
 })
 export class VerplancerradaComponent {
   convertirFecha = convertirFecha;
-
+  codigoPlanilla = "";
   dataPlan: any;
   idPlanilla: any = "";
   datosFormateados: any;
@@ -180,20 +180,20 @@ export class VerplancerradaComponent {
 
   getPlanilla = async () => {
     try {
-      this.planillaService.getPlanillaDefin(this.datosFormateados.value.codigo_planilla).subscribe(
+      this.planillaService.getPlanillaDefin(this.codigoPlanilla).subscribe(
         {
           next: async (response) => {
             if (response) {
 
               this.detallePlanilla = response;
               this.getFilas(response.codigo_planilla).then(() => this.cargar());
-              this.calcularTotales(this.datosFormateados.value.codigo_planilla)
+              this.calcularTotales(this.codigoPlanilla)
               this.idPlanilla = response.id_planilla;
               this.verDat = true;
             } else {
               this.detallePlanilla = [];
               this.datosTabl = [];
-              this.toastr.error(`La planilla con el código de planilla:${this.datosFormateados.value.codigo_planilla}  no existe `);
+              this.toastr.error(`La planilla con el código de planilla:${this.codigoPlanilla}  no existe `);
             }
             if (this.ejecF) {
               this.getFilas("").then(async () => {
@@ -1550,6 +1550,12 @@ export class VerplancerradaComponent {
         console.error('Error al descargar el Excel', error);
     });
 } */
+
+
+  getElemSeleccionados(event: any) {
+    this.codigoPlanilla = event.codigo_planilla;
+    this.getPlanilla()
+  }
 
 
 }

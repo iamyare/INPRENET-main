@@ -34,6 +34,7 @@ import { CargarbefDedComponent } from './egresos/cargarbef-ded/cargarbef-ded.com
 import { ProcesoPlanillaComponent } from './egresos/proceso-planilla/proceso-planilla.component';
 import { DialogDesgloseComponent } from './egresos/dialog-desglose/dialog-desglose.component';
 import { VerPlanillasActivasComponent } from './egresos/ver-planillas-activas/ver-planillas-activas.component';
+import { VerPlanillasCerradasComponent } from './egresos/ver-planillas-cerradas/ver-planillas-cerradas.component';
 import { GestionBancoComponent } from './gestion-banco/gestion-banco.component';
 import { CambioEstadoTipoPerComponent } from '../afiliacion/gestion/cambio-estado-tipo-per/cambio-estado-tipo-per.component';
 import { AfiliacionModule } from '../afiliacion/afiliacion.module';
@@ -75,6 +76,7 @@ import { MontoDialogComponent } from './monto-dialog/monto-dialog.component';
     GestionBancoComponent,
     ActualizarFallecidosComponent,
     VerPlanillasActivasComponent,
+    VerPlanillasCerradasComponent,
     MontoDialogComponent,
     CambioEstadoTipoPerComponent
   ],

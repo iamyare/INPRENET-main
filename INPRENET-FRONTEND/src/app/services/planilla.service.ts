@@ -142,6 +142,10 @@ export class PlanillaService {
   }
 
   getPlanillasPreliminares(codigo_planilla: string): Observable<any> {
+    if (!codigo_planilla) {
+      console.error('Error: codigo_planilla está vacío, la solicitud no se enviará.');
+      return throwError(() => new Error('El código de planilla es requerido'));
+    }
     const url = `${environment.API_URL}/api/planilla/get-preliminares`;
     return this.http.post<any>(url, { codigo_planilla }).pipe(
       catchError(error => {
@@ -150,6 +154,7 @@ export class PlanillaService {
       })
     );
   }
+
 
   generarPlanillaComplementaria(tiposPersona: string): Observable<void> {
     const accessToken = sessionStorage.getItem('token');

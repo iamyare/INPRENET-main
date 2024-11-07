@@ -4,7 +4,6 @@ import { ComponentsModule } from 'src/app/components/components.module';
 import { MaterialAngularModule } from 'src/app/material-angular/material-angular.module';
 import { PlanillaRoutingModule } from './planilla-routing.module';
 import { NuevaDeduccionAfilComponent } from './egresos/nueva-deduccion-afil/nueva-deduccion-afil.component';
-import { NuevaPlanillaComponentP } from './egresos/nueva-planilla/nueva-planilla.component';
 import { ProgressplanillComponent } from './egresos/progressplanill/progressplanill.component';
 import { NuevaplanillaComponent } from './egresos/nuevaplanilla/nuevaplanilla.component';
 import { VerplanprelcompComponent } from './egresos/verplanprelcomp/verplanprelcomp.component';
@@ -44,7 +43,6 @@ import { MontoDialogComponent } from './monto-dialog/monto-dialog.component';
 @NgModule({
   declarations: [
     NuevaDeduccionAfilComponent,
-    NuevaPlanillaComponentP,
     ProgressplanillComponent,
     NuevaplanillaComponent,
     VerplanprelcompComponent,

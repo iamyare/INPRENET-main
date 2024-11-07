@@ -1,10 +1,7 @@
-import { ChangeDetectorRef, Component, EventEmitter, Output, ViewChild } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { ToastrService } from 'ngx-toastr';
+import { Component, EventEmitter, Output, ViewChild } from '@angular/core';
+import { FormGroup, Validators } from '@angular/forms';
 import { BehaviorSubject } from 'rxjs';
 import { DynamicFormComponent } from 'src/app/components/dinamicos/dynamic-form/dynamic-form.component';
-import { AfiliadoService } from 'src/app/services/afiliado.service';
-import { BeneficiosService } from 'src/app/services/beneficios.service';
 import { PlanillaService } from 'src/app/services/planilla.service';
 import { unirNombres } from 'src/app/shared/functions/formatoNombresP';
 import { FieldConfig } from 'src/app/shared/Interfaces/field-config';
@@ -52,21 +49,13 @@ export class VerPlanillasActivasComponent {
   ejecF: any;
   desOBenSeleccionado: any
   mostrarB: any;
-  planillasActivas: any[] = []; // Para almacenar las planillas activas
+  planillasActivas: any[] = [];
 
   constructor(
-    private planillaService: PlanillaService,
-    private cdr: ChangeDetectorRef,
-    private svcBeneficioServ: BeneficiosService,
-    private svcAfilServ: AfiliadoService, private fb: FormBuilder,
-    private toastr: ToastrService, private _formBuilder: FormBuilder
+    private planillaService: PlanillaService
   ) { }
 
   ngOnInit(): void {
-
-    this.myFormFields = [
-      { type: 'text', label: 'DNI del afiliado', name: 'dni', validations: [Validators.required, Validators.minLength(13), Validators.maxLength(14)], display: true },
-    ];
     this.getFilas().then(() => this.cargar());
     this.cargar();
   }
@@ -106,12 +95,8 @@ export class VerPlanillasActivasComponent {
   }
 
   manejarRowClick(row: any) {
-    // Ocultamos el formulario temporalmente
     this.mostrarB = false;
-
-    // Asignamos el valor del DNI de la fila seleccionada al campo de DNI del beneficiario
     this.desOBenSeleccionado = row;
     this.getElemSeleccionados.emit(this.desOBenSeleccionado);
-
   }
 }

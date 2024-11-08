@@ -1,0 +1,59 @@
+// Estilos para el título principal
+h1 {
+  text-align: center;
+  font-size: 1.5rem; // Ajusta el tamaño para que sea consistente con el diseño general
+  font-weight: bold;
+  margin-bottom: 20px;
+  color: #178b7e; // Color del título
+}
+
+// Contenedor para la tabla de beneficios
+.editar-beneficio-container {
+  background-color: white; // Fondo blanco para destacar el contenido
+  border-radius: 10px; // Bordes redondeados
+  padding: 20px; // Espaciado interno para separación del contenido
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); // Sombra para profundidad visual
+  margin: 0 auto; // Centra el contenedor
+  max-width: 95%; // Ancho máximo para evitar barras de desplazamiento lateral
+}
+
+// Estilos específicos para la tabla dentro del contenedor
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 10px; // Espacio entre el título y la tabla
+
+  th, td {
+    padding: 10px 15px;
+    border: 1px solid #ddd;
+    text-align: left;
+  }
+
+  th {
+    background-color: #178b7e; // Color del encabezado de la tabla
+    color: white;
+    font-weight: bold;
+  }
+
+  td {
+    color: #333; // Color de texto en las celdas
+  }
+}
+
+// Otros ajustes generales para responsividad y diseño
+@media only screen and (max-width: 768px) {
+  th:nth-child(n+5),
+  td:nth-child(n+5) {
+    display: none; // Oculta columnas adicionales en pantallas pequeñas
+  }
+}
+
+@media only screen and (max-width: 480px) {
+  h1 {
+    font-size: 1.25rem; // Ajusta el tamaño del título en pantallas pequeñas
+  }
+
+  .editar-beneficio-container {
+    padding: 15px; // Reduce el padding en pantallas pequeñas
+  }
+}

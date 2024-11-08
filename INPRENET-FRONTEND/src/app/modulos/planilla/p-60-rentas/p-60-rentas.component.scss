@@ -1,0 +1,82 @@
+.card-container {
+  width: 90%;
+  margin: 20px auto;
+  padding: 20px;
+  border-radius: 10px;
+
+  // Estilos cuando no se ha encontrado a la persona (sin fondo ni sombra)
+  background-color: transparent;
+  box-shadow: none;
+
+  &.has-persona {
+    background-color: #f5f5f5; // Fondo claro solo cuando se encuentra la persona
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); // Sombra solo cuando se encuentra la persona
+  }
+
+  // Estilo específico para el encabezado del perfil
+  app-perfil-header {
+    margin-bottom: 20px;
+  }
+}
+
+.table-container {
+  background-color: white;
+  border-radius: 10px;
+  padding: 20px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  margin-top: 20px;
+
+  h2 {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: #229e92;
+    margin-bottom: 10px;
+    text-align: center;
+  }
+
+  p {
+    font-size: 1rem;
+    color: #666;
+    text-align: center;
+    margin-bottom: 20px;
+  }
+}
+
+app-dynamic-table {
+  width: 100%;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 10px;
+
+  th, td {
+    padding: 10px 15px;
+    border: 1px solid #ddd;
+    text-align: left;
+  }
+
+  th {
+    background-color: #229e92;
+    color: white;
+    font-weight: bold;
+  }
+
+  td {
+    color: #333;
+  }
+}
+
+button {
+  background-color: #229e92;
+  color: white;
+  border-radius: 5px;
+  padding: 10px 20px;
+  margin-top: 20px;
+  font-size: 1rem;
+
+  &:hover {
+    background-color: #1b7a70;
+  }
+}

@@ -1,0 +1,25 @@
+.table-container {
+  background-color: white;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  margin-bottom: 20px;
+  max-width: 1000px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.table-container h3 {
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: #229e92;
+  margin-bottom: 10px;
+  text-align: center;
+}
+
+.table-container p {
+  font-size: 1rem;
+  color: #666;
+  text-align: center;
+  margin-bottom: 20px;
+}

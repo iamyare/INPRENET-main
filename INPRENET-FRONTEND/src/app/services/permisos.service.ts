@@ -103,8 +103,7 @@ export class PermisosService {
         'planilla/Egresos/editar-banco': {
           title: 'Cambiar Cuenta Bancaria',
           permisos: [
-            { role: 'ADMINISTRADOR', module: 'PLANILLA' },
-            { role: 'OFICIAL DE PLANILLA', module: 'PLANILLA' }
+            { role: 'BLOCK', module: 'BLOCK' },
           ]
         },
         'planilla/Egresos/proceso-planilla': {

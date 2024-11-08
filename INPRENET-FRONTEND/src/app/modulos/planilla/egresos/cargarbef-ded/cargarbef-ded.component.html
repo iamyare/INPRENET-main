@@ -1,32 +1,40 @@
 <app-ver-planillas-activas (getElemSeleccionados)="getElemSeleccionados($event)"></app-ver-planillas-activas>
 
 <mat-tab-group>
-  <!-- <mat-tab label="Bajas" *ngIf="tipoPlanilla!='COMPLEMENTARIA BENEFICIARIO' && tipoPlanilla!='ORDINARIA BENEFICIARIO'">
-    <app-actualizar-fallecidos></app-actualizar-fallecidos>
-  </mat-tab> -->
 
   <mat-tab label="Cargar Beneficios">
     <div>
       <!-- Contenido para cargar beneficios -->
-      <button *ngIf="tipoPlanilla === 'ORDINARIA BENEFICIARIO'" mat-raised-button color="primary" (click)="asignarBeneficiosOrdinariaBeneficiariosAfiliados()">
+      <button
+        *ngIf="tipoPlanilla === 'ORDINARIA BENEFICIARIO'"
+        mat-raised-button
+        color="primary"
+        class="asignar-beneficios-btn"
+        (click)="asignarBeneficiosOrdinariaBeneficiariosAfiliados()">
         Asignar beneficios a planilla ordinaria de Beneficiarios y Afiliados
       </button>
-      <button *ngIf="tipoPlanilla === 'ORDINARIA JUBILADOS Y PENSIONADOS'" mat-raised-button color="primary" (click)="asignarBeneficiosOrdinariaJubiladosPensionados()">
+      <button *ngIf="tipoPlanilla === 'ORDINARIA JUBILADOS Y PENSIONADOS'"
+       mat-raised-button (click)="asignarBeneficiosOrdinariaJubiladosPensionados()"
+       color="primary"
+        class="asignar-beneficios-btn">
         Asignar beneficios a planilla ordinaria de Jubilados y Pensionados
       </button>
 
       <div>
-        <!-- *ngIf="tipoPlanilla === 'COMPLEMENTARIA BENEFICIARIO'" -->
-        <button *ngIf="tipoPlanilla === 'COMPLEMENTARIA BENEFICIARIO' "  mat-raised-button color="primary" (click)="asignarBeneficiosComplementariaBeneficiariosAfiliados()">
+        <button *ngIf="tipoPlanilla === 'COMPLEMENTARIA BENEFICIARIO' "
+          mat-raised-button color="primary" (click)="asignarBeneficiosComplementariaBeneficiariosAfiliados()"
+          color="primary"
+          class="asignar-beneficios-btn">
           Asignar beneficios a planilla complementaria de Beneficiarios y Afiliados
         </button>
-        <!-- *ngIf="tipoPlanilla === 'COMPLEMENTARIA JUBILADO Y PENSIONADO'" -->
-        <button *ngIf="tipoPlanilla === 'COMPLEMENTARIA JUBILADO Y PENSIONADO'" mat-raised-button color="primary" (click)="asignarBeneficiosComplementariaJubiladosPensionados()">
+        <button *ngIf="tipoPlanilla === 'COMPLEMENTARIA JUBILADO Y PENSIONADO'"
+        mat-raised-button
+        (click)="asignarBeneficiosComplementariaJubiladosPensionados()"
+        color="primary"
+        class="asignar-beneficios-btn">
           Asignar beneficios a planilla complementaria de Jubilados y Pensionados
         </button>
       </div>
-
-      <!-- Mostrar solo si se ha seleccionado una planilla -->
       <div class="manual-benefits-section" *ngIf="(id_planilla && tipoPlanilla === 'ORDINARIA BENEFICIARIO') || id_planilla && tipoPlanilla === 'ORDINARIA JUBILADOS Y PENSIONADOS'">
         <h3>Asignar Beneficios Manualmente</h3>
         <mat-form-field appearance="outline">

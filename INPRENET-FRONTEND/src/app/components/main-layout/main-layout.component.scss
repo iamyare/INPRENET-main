@@ -52,3 +52,19 @@
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Sombra ligera */
   padding: 0 16px; /* Padding para espaciado */
 }
+
+/* main-layout.component.scss o tu archivo CSS global */
+.responsive-image-container {
+  width: 100%; /* Asegura que ocupe el ancho completo disponible */
+  display: flex;
+  justify-content: center;
+  padding: 16px; /* Añade algo de padding alrededor si lo deseas */
+  box-sizing: border-box;
+}
+
+.responsive-image {
+  max-width: 100%; /* La imagen no excederá el ancho del contenedor */
+  height: auto;    /* Mantiene la proporción de la imagen */
+  border-radius: 8px; /* Opcional: bordes redondeados */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Opcional: sombra para resaltar */
+}

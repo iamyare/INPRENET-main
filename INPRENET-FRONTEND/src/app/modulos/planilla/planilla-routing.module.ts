@@ -14,6 +14,7 @@ import { AsignacionDeduccionesComponent } from './beneneficios/asignacion-deducc
 import { ProcesoPlanillaComponent } from './egresos/proceso-planilla/proceso-planilla.component';
 import { GestionBancoComponent } from './gestion-banco/gestion-banco.component';
 import { ActualizarFallecidosComponent } from './actualizar-fallecidos/actualizar-fallecidos.component';
+import { P60RentasComponent } from './p-60-rentas/p-60-rentas.component';
 
 const routes: Routes = [
   {
@@ -85,6 +86,14 @@ const routes: Routes = [
         //canActivate: [RoleGuard],
         //data: { expectedRolesModules: [{role: 'ADMINISTRADOR'},{ role: 'ADMINISTRADOR DE PLANILLA', module: 'PLANILLA' }, { role: 'OFICIAL DE PLANILLA', module: 'PLANILLA' }] }
       },
+
+      {
+        path: 'ver_estatus_60_rentas',
+        component: P60RentasComponent,
+        //canActivate: [RoleGuard],
+        //data: { expectedRolesModules: [{role: 'ADMINISTRADOR'},{ role: 'ADMINISTRADOR DE PLANILLA', module: 'PLANILLA' }, { role: 'OFICIAL DE PLANILLA', module: 'PLANILLA' }] }
+      },
+
       { path: '**', redirectTo: 'proceso-planilla', pathMatch: 'full' }
     ]
   },
@@ -110,7 +119,7 @@ const routes: Routes = [
 ];
 
 @NgModule({
-  imports: [RouterModule.forChild(routes)],
+  imports: [RouterModule.forChild(routes),],
   exports: [RouterModule]
 })
 export class PlanillaRoutingModule { }

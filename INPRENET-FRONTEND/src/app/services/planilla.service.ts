@@ -3,6 +3,7 @@ import { Injectable } from '@angular/core';
 import { ToastrService } from 'ngx-toastr';
 import { Observable, BehaviorSubject, catchError, throwError, map } from 'rxjs';
 import { environment } from 'src/environments/environment';
+import { Estatus60Rentas} from '../modulos/planilla/p-60-rentas/p_60_rentas.interface';
 
 @Injectable({
   providedIn: 'root'
@@ -410,5 +411,17 @@ export class PlanillaService {
       .set('idPlanilla', idPlanilla)
     return this.http.get(`${environment.API_URL}/api/detalle-deduccion/detallesPreliminar`, { params });
   }
+
+ 
+    // Método para obtener Estatus de Pago 60 Rentas desde la tabla MIG_DETALLE_60_RENTAS
+    obtenerEstatus(dni: string): Observable<Estatus60Rentas[]> {
+      const url = `${environment.API_URL}/api/p-60-rentas/${dni}`; // Ajusta la URL según tu API
+      return this.http.get<Estatus60Rentas[]>(url).pipe(
+        catchError((error) => {
+          console.error(`Error al obtener los préstamos para el DNI ${dni}:`, error);
+          return throwError(() => new Error('No se pudieron obtener los préstamos. Inténtelo más tarde.'));
+        })
+      );
+    }
 
 }

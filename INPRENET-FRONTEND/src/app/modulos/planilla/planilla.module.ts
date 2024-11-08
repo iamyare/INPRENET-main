@@ -39,6 +39,7 @@ import { CambioEstadoTipoPerComponent } from '../afiliacion/gestion/cambio-estad
 import { AfiliacionModule } from '../afiliacion/afiliacion.module';
 import { ActualizarFallecidosComponent } from './actualizar-fallecidos/actualizar-fallecidos.component';
 import { MontoDialogComponent } from './monto-dialog/monto-dialog.component';
+import { P60RentasComponent } from './p-60-rentas/p-60-rentas.component';
 
 @NgModule({
   declarations: [
@@ -76,7 +77,8 @@ import { MontoDialogComponent } from './monto-dialog/monto-dialog.component';
     ActualizarFallecidosComponent,
     VerPlanillasActivasComponent,
     MontoDialogComponent,
-    CambioEstadoTipoPerComponent
+    CambioEstadoTipoPerComponent,
+    P60RentasComponent
   ],
   imports: [
     CommonModule,

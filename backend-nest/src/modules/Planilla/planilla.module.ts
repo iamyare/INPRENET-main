@@ -36,15 +36,19 @@ import { Net_Beneficio_Tipo_Persona } from './beneficio_tipo_persona/entities/ne
 import { Net_Deducciones_Asignadas } from './detalle-deduccion/entities/net-deducciones-asignadas.entity';
 import { AuthModule } from '../auth/auth.module';
 import { CommonModule } from 'src/common/common.module';
+import { P60RentasController } from './p_60_rentas/p_60_rentas.controller';
+import { P60RentasService } from './p_60_rentas/p_60_rentas.service';
+import { P60Renta } from './p_60_rentas/entities/p_60_renta.entity';
 
 @Module({
   controllers: [DetallePlanIngrController, PlanillaController, BeneficioController, DetalleBeneficioController, DeduccionController,
-    DeduccionController, DetalleDeduccionController, TipoPlanillaController, AfiliadoController],
+    DeduccionController, DetalleDeduccionController, TipoPlanillaController, AfiliadoController, P60RentasController],
   providers: [PlanillaService, DetallePlanillaIngresoService, BeneficioService, DetalleBeneficioService, DeduccionService,
-    TipoPlanillaService, DetalleDeduccionService, AfiliadoService],
+    TipoPlanillaService, DetalleDeduccionService, AfiliadoService,P60RentasService],
   imports: [AfiliadoModule, TransaccionesModule, AuthModule, CommonModule,
     TypeOrmModule.forFeature([Net_Beneficio_Tipo_Persona, Net_Regimen, Net_SALARIO_COTIZABLE, Net_Beneficio, Net_Detalle_Pago_Beneficio,
       Net_Planilla, Net_Deduccion, Net_TipoPlanilla, Net_Detalle_Deduccion,
-      Net_Detalle_Beneficio_Afiliado, Net_Detalle_planilla_ingreso, Net_Clasificacion_Beneficios, Net_Deducciones_Asignadas]),]
+      Net_Detalle_Beneficio_Afiliado, Net_Detalle_planilla_ingreso, Net_Clasificacion_Beneficios, Net_Deducciones_Asignadas,P60Renta]),
+    ]
 })
 export class PlanillaModule { }

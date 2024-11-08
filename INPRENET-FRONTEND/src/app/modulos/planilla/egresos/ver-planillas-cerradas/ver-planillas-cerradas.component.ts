@@ -52,29 +52,27 @@ export class VerPlanillasCerradasComponent {
   ejecF: any;
   desOBenSeleccionado: any
   mostrarB: any;
-  planillasActivas: any[] = []; // Para almacenar las planillas activas
+  planillasActivas: any[] = [];
 
   constructor(
     private planillaService: PlanillaService,
-    private cdr: ChangeDetectorRef,
-    private svcBeneficioServ: BeneficiosService,
-    private svcAfilServ: AfiliadoService, private fb: FormBuilder,
-    private toastr: ToastrService, private _formBuilder: FormBuilder
+    private toastr: ToastrService
   ) { }
 
   ngOnInit(): void {
-
-    this.myFormFields = [
-      { type: 'text', label: 'DNI del afiliado', name: 'dni', validations: [Validators.required, Validators.minLength(13), Validators.maxLength(14)], display: true },
-    ];
-    this.getFilas().then(() => this.cargar());
-    this.cargar();
+    this.getFilas().then((data) => {
+      if (!data || data.length === 0) {
+        this.toastr.warning("No se encontraron planillas cerradas.");
+      }
+      this.cargar();
+    }).catch(error => {
+      console.error('Error al cargar planillas cerradas:', error);
+    });
   }
 
   getFilas = async () => {
     try {
       const data = await this.planillaService.getPlanillasCerradas().toPromise();
-
       this.filas = data.map((item: any) => ({
         id_planilla: item.id_planilla,
         codigo_planilla: item.codigo_planilla,
@@ -106,12 +104,13 @@ export class VerPlanillasCerradasComponent {
   }
 
   manejarRowClick(row: any) {
-    // Ocultamos el formulario temporalmente
-    this.mostrarB = false;
+    if (!row || !row.codigo_planilla || row.codigo_planilla.trim() === '') {
+      console.error('Error: El código de planilla no puede estar vacío');
+      this.toastr.error('Debe seleccionar una fila con un código de planilla válido');
+      return;
+    }
 
-    // Asignamos el valor del DNI de la fila seleccionada al campo de DNI del beneficiario
     this.desOBenSeleccionado = row;
     this.getElemSeleccionados.emit(this.desOBenSeleccionado);
-
   }
 }

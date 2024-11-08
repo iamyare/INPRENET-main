@@ -207,7 +207,7 @@ export class EditBeneficiariosComponent implements OnInit, OnChanges {
 
   AgregarBeneficiario() {
     const afiliadoDetalle = this.persona.detallePersona.find(
-      (detalle: any) => detalle.tipoPersona && detalle.tipoPersona.tipo_persona === 'AFILIADO'
+      (detalle: any) => detalle.tipoPersona && detalle.tipoPersona.tipo_persona === 'AFILIADO' || 'JUBILADO' || 'PENSIONADO'
     );
     if (!afiliadoDetalle) {
       this.toastr.error("No se encontró un registro de tipo 'AFILIADO'");

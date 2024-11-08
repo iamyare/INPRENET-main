@@ -295,15 +295,18 @@ export class PlanillaController {
     @Query('page') page?: number,
     @Query('limit') limit?: number
   ) {
-    if (!term) {
-      throw new BadRequestException('Los parámetros idPlanilla son obligatorios');
+    if (!term || term.trim() === '') {
+      console.error('Error: El parámetro term está vacío.');
+      throw new BadRequestException('Debe proporcionar un código de planilla válido');
     }
     try {
       return await this.planillaService.ObtenerPlanDefinPersonas(term, page, limit);
     } catch (error) {
+      console.error('Error en ObtenerPlanDefinPersonas:', error);
       throw new InternalServerErrorException('Error al obtener planilla preliminar');
     }
   }
+
 
   @Get('Definitiva/personas/ord/:perI/:perF')
   async ObtenerPlanDefinPersonasOrd(

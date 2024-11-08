@@ -64,6 +64,7 @@ export class DatPuestoTrabComponent implements OnInit {
   agregarTrabajo(): void {
     const trabajoFormGroup = this.fb.group({
       id_centro_trabajo: ['', Validators.required],
+      nombre_centro_trabajo: ['', Validators.required],
       cargo: ['', [
         Validators.required,
         Validators.maxLength(40),
@@ -84,22 +85,29 @@ export class DatPuestoTrabComponent implements OnInit {
 
     trabajoFormGroup.get('id_centro_trabajo')?.valueChanges.subscribe(value => {
       const selectedCentro = this.centrosTrabajo.find(centro => centro.value === value);
-      if (selectedCentro) {
+      if (selectedCentro && trabajoFormGroup.get('nombre_centro_trabajo')?.value !== selectedCentro.nombreCentro) {
         trabajoFormGroup.patchValue({
+          nombre_centro_trabajo: selectedCentro.nombreCentro,
           nombreCentro: selectedCentro.nombreCentro,
           direccionCentro: selectedCentro.direccion,
           sectorEconomico: selectedCentro.sector,
           showNumeroAcuerdo: selectedCentro.sector === 'PUBLICO' || selectedCentro.sector === 'PROHECO'
         });
+        this.configurarValidacionesNumeroAcuerdo(trabajoFormGroup, selectedCentro.sector);
+      }
+    });
 
-        const numeroAcuerdoControl = trabajoFormGroup.get('numero_acuerdo');
-        if (selectedCentro.sector === 'PUBLICO' || selectedCentro.sector === 'PROHECO') {
-          numeroAcuerdoControl?.setValidators([Validators.required, Validators.maxLength(40)]);
-        } else {
-          numeroAcuerdoControl?.clearValidators();
-          numeroAcuerdoControl?.setValidators([Validators.maxLength(40)]);
-        }
-        numeroAcuerdoControl?.updateValueAndValidity();
+    trabajoFormGroup.get('nombre_centro_trabajo')?.valueChanges.subscribe(value => {
+      const selectedCentro = this.centrosTrabajo.find(centro => centro.nombreCentro === value);
+      if (selectedCentro && trabajoFormGroup.get('id_centro_trabajo')?.value !== selectedCentro.value) {
+        trabajoFormGroup.patchValue({
+          id_centro_trabajo: selectedCentro.value,
+          nombreCentro: selectedCentro.nombreCentro,
+          direccionCentro: selectedCentro.direccion,
+          sectorEconomico: selectedCentro.sector,
+          showNumeroAcuerdo: selectedCentro.sector === 'PUBLICO' || selectedCentro.sector === 'PROHECO'
+        });
+        this.configurarValidacionesNumeroAcuerdo(trabajoFormGroup, selectedCentro.sector);
       }
     });
 
@@ -142,7 +150,16 @@ export class DatPuestoTrabComponent implements OnInit {
     return null;
   }
 
-
+  private configurarValidacionesNumeroAcuerdo(trabajoFormGroup: FormGroup, sector: string) {
+    const numeroAcuerdoControl = trabajoFormGroup.get('numero_acuerdo');
+    if (sector === 'PUBLICO' || sector === 'PROHECO') {
+      numeroAcuerdoControl?.setValidators([Validators.required, Validators.maxLength(40)]);
+    } else {
+      numeroAcuerdoControl?.clearValidators();
+      numeroAcuerdoControl?.setValidators([Validators.maxLength(40)]);
+    }
+    numeroAcuerdoControl?.updateValueAndValidity();
+  }
 }
 
 

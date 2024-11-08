@@ -58,8 +58,12 @@ export const MENU_CONFIG: Section[] = [
         title: 'GESTIÓN DE BENEFICIOS',
         icon: 'money',
         children: [
-          { title: 'Asignar beneficio', route: 'planilla/Beneficios/nuevo-beneficio-afil', icon: 'add_box' },
-          { title: 'Ver Beneficios Asignados', route: 'planilla/Beneficios/Ver-editar-beneficio-afil', icon: 'visibility' },
+          { title: 'Asignar Beneficio', route: 'planilla/Beneficios/nuevo-beneficio-afil', icon: 'assignment_turned_in' },
+          { title: 'Ver Beneficios Asignados', route: 'planilla/Beneficios/Ver-editar-beneficio-afil', icon: 'list_alt' },
+          { title: 'Crear Beneficio', route: 'planilla/Beneficios/nuevo-beneficio', icon: 'add_circle' },
+          { title: 'Editar Beneficio', route: 'planilla/Beneficios/editar-beneficio', icon: 'edit' },
+          { title: 'Crear Tipo Deducción', route: 'planilla/Beneficios/crear-tipo-deduccion', icon: 'post_add' },
+          { title: 'Editar Tipo Deducción', route: 'planilla/Beneficios/editar-tipo-deduccion', icon: 'edit_note' },
         ],
       },
       /* {

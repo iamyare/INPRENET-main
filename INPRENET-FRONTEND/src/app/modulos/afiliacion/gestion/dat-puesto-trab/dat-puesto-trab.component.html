@@ -11,6 +11,7 @@
           <h4 class="reference-title">Centro De Trabajo Número: {{ i + 1 }}</h4>
 
           <div class="form-row">
+            <!-- Código del Centro de Trabajo -->
             <mat-form-field class="half-width" appearance="outline">
               <mat-label>Código del Centro de Trabajo</mat-label>
               <mat-icon matPrefix>business</mat-icon>
@@ -23,14 +24,23 @@
                 <mat-icon>error</mat-icon> {{ error }}
               </mat-error>
             </mat-form-field>
+
             <mat-form-field class="half-width" appearance="outline">
-              <mat-label>Nombre del Centro</mat-label>
+              <mat-label>Nombre del Centro de Trabajo</mat-label>
               <mat-icon matPrefix>business</mat-icon>
-              <input matInput formControlName="nombreCentro" readonly>
+              <mat-select formControlName="nombre_centro_trabajo">
+                <mat-option *ngFor="let centro of centrosTrabajo" [value]="centro.nombreCentro">
+                  {{ centro.nombreCentro }}
+                </mat-option>
+              </mat-select>
+              <mat-error *ngFor="let error of getErrors(i, 'nombre_centro_trabajo')">
+                <mat-icon>error</mat-icon> {{ error }}
+              </mat-error>
             </mat-form-field>
           </div>
 
           <div class="form-row">
+            <!-- Dirección del Centro -->
             <mat-form-field class="half-width" appearance="outline">
               <mat-label>Dirección del Centro</mat-label>
               <mat-icon matPrefix>home</mat-icon>
@@ -83,7 +93,7 @@
                 <mat-icon>error</mat-icon> {{ error }}
               </mat-error>
             </mat-form-field>
-            <mat-form-field class="half-width" appearance="outline">
+            <mat-form-field class="half-width" appearance="outline" *ngIf="trabajo.get('showNumeroAcuerdo')?.value">
               <mat-label>Número De Acuerdo</mat-label>
               <mat-icon matPrefix>assignment</mat-icon>
               <input matInput formControlName="numero_acuerdo">

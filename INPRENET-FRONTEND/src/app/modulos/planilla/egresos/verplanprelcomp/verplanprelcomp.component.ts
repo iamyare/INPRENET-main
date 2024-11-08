@@ -69,23 +69,19 @@ export class VerplanprelcompComponent implements OnInit {
       this.toastr.error('Debe proporcionar un código de planilla válido');
       return;
     }
-
     try {
       const response = await this.planillaService.getPlanillaPrelimiar(this.codigoPlanilla).toPromise();
-
       if (response) {
         this.detallePlanilla = { ...response };
         await this.calcularTotales(this.codigoPlanilla);
-
-        // Aquí actualizamos datosTabl y llamamos a cargar()
         await this.getFilas(response.codigo_planilla);
-        this.cargar(); // Emitimos los datos de datosTabl al componente DynamicTableComponent
+        this.cargar();
 
         this.idPlanilla = response.id_planilla;
         this.verDat = true;
       } else {
         this.toastr.error(`La planilla con el código de planilla: ${this.codigoPlanilla} no existe`);
-        this.datosTabl = []; // Si no hay datos, vaciamos la tabla
+        this.datosTabl = [];
       }
     } catch (error) {
       console.error("Error al obtener la planilla:", error);
@@ -140,28 +136,33 @@ export class VerplanprelcompComponent implements OnInit {
       this.toastr.error('Debe proporcionar un código de planilla válido');
       return;
     }
-
     try {
       this.dataPlan = await this.planillaService.getPlanillasPreliminares(cod_planilla).toPromise();
-      this.datosTabl = this.dataPlan.map((item: any) => ({
-        id_afiliado: item.ID_PERSONA,
-        n_identificacion: item.N_IDENTIFICACION,
-        TIPO_PERSONA: item.TIPO_PERSONA,
-        nombre_completo: item.NOMBRE_COMPLETO,
-        total_beneficios: item.TOTAL_BENEFICIOS,
-        total_deducciones_inprema: item.TOTAL_DEDUCCIONES_INPREMA || 0,
-        total_deducciones_terceros: item.TOTAL_DEDUCCIONES_TERCEROS || 0,
-        total: item.TOTAL_NETO,
-        correo_1: item.correo_1,
-        fecha_cierre: item.fecha_cierre,
-        num_cuenta: item.NUM_CUENTA,
-        nombre_banco: item.NOMBRE_BANCO,
-      }));
+      if (this.dataPlan && this.dataPlan.length > 0) {
+        this.datosTabl = this.dataPlan.map((item: any) => ({
+          id_afiliado: item.ID_PERSONA,
+          n_identificacion: item.N_IDENTIFICACION,
+          TIPO_PERSONA: item.TIPO_PERSONA,
+          nombre_completo: item.NOMBRE_COMPLETO,
+          total_beneficios: item.TOTAL_BENEFICIOS,
+          total_deducciones_inprema: item.TOTAL_DEDUCCIONES_INPREMA || 0,
+          total_deducciones_terceros: item.TOTAL_DEDUCCIONES_TERCEROS || 0,
+          total: item.TOTAL_NETO,
+          correo_1: item.correo_1,
+          fecha_cierre: item.fecha_cierre,
+          num_cuenta: item.NUM_CUENTA,
+          nombre_banco: item.NOMBRE_BANCO,
+        }));
+      } else {
+        this.datosTabl = [];
+        this.toastr.warning('No se encontraron datos para la planilla proporcionada.');
+      }
 
-      this.cdr.detectChanges(); // Forzar detección de cambios
+      this.cdr.detectChanges();
     } catch (error) {
       console.error("Error al obtener datos de deducciones", error);
-      throw error;
+      this.toastr.error('Error al obtener datos de la planilla.');
+      this.datosTabl = [];
     }
   }
 

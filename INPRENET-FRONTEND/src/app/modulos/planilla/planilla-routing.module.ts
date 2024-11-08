@@ -13,6 +13,10 @@ import { GestionBancoComponent } from './gestion-banco/gestion-banco.component';
 import { ActualizarFallecidosComponent } from './actualizar-fallecidos/actualizar-fallecidos.component';
 import { RoleGuard } from 'src/app/guards/role-guard.guard';
 import { PermisosService } from 'src/app/services/permisos.service';
+import { NuevoBeneficioComponent } from './egresos/Mantenimiento/nuevo-beneficio/nuevo-beneficio.component';
+import { EditarBeneficioComponent } from './egresos/Mantenimiento/editar-beneficio/editar-beneficio.component';
+import { NuevoTipoDeduccionComponent } from './egresos/Mantenimiento/nuevo-tipo-deduccion/nuevo-tipo-deduccion.component';
+import { EditarTipoDeduccionComponent } from './egresos/Mantenimiento/editar-tipo-deduccion/editar-tipo-deduccion.component';
 
 const routes: Routes = [
   {
@@ -30,6 +34,31 @@ const routes: Routes = [
         canActivate: [RoleGuard],
         data: { expectedRolesModules: PermisosService.getExpectedRolesForRoute('BENEFICIOS', 'planilla/Beneficios/Ver-editar-beneficio-afil') }
       },
+      {
+        path: 'nuevo-beneficio',
+        component: NuevoBeneficioComponent,
+        canActivate: [RoleGuard],
+        data: { expectedRolesModules: PermisosService.getExpectedRolesForRoute('BENEFICIOS', 'planilla/Beneficios/Ver-editar-beneficio-afil') }
+      },
+      {
+        path: 'editar-beneficio',
+        component: EditarBeneficioComponent,
+        canActivate: [RoleGuard],
+        data: { expectedRolesModules: PermisosService.getExpectedRolesForRoute('BENEFICIOS', 'planilla/Beneficios/Ver-editar-beneficio-afil') }
+      },
+      {
+        path: 'crear-tipo-deduccion',
+        component: NuevoTipoDeduccionComponent,
+        canActivate: [RoleGuard],
+        data: { expectedRolesModules: PermisosService.getExpectedRolesForRoute('BENEFICIOS', 'planilla/Beneficios/Ver-editar-beneficio-afil') }
+      },
+      {
+        path: 'editar-tipo-deduccion',
+        component: EditarTipoDeduccionComponent,
+        canActivate: [RoleGuard],
+        data: { expectedRolesModules: PermisosService.getExpectedRolesForRoute('BENEFICIOS', 'planilla/Beneficios/Ver-editar-beneficio-afil') }
+      },
+
       { path: '**', redirectTo: 'nuevo-beneficio-afil', pathMatch: 'full' }
     ]
   },

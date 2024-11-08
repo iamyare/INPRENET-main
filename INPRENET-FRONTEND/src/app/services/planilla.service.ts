@@ -137,8 +137,6 @@ export class PlanillaService {
         return throwError(error);
       })
     );
-
-    /* } */
   }
 
   getPlanillasPreliminares(codigo_planilla: string): Observable<any> {
@@ -375,7 +373,16 @@ export class PlanillaService {
   }
 
   getPersPlanillaDefin(codigo_planilla: string): Observable<any> {
-    return this.http.get(`${environment.API_URL}/api/planilla/Definitiva/personas/${codigo_planilla}`);
+    if (!codigo_planilla || codigo_planilla.trim() === '') {
+      return throwError(() => new Error('Debe proporcionar un código de planilla válido'));
+    }
+    return this.http.get(`${environment.API_URL}/api/planilla/Definitiva/personas/${codigo_planilla}`)
+      .pipe(
+        catchError(error => {
+          console.error('Error en la llamada de planilla:', error.message);
+          return throwError(() => new Error('Error al obtener los datos de planilla'));
+        })
+      );
   }
 
   updateTipoPlanilla(id: string, tipoPlanillaData: any): Observable<any> {

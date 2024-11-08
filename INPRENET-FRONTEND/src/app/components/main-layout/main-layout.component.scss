@@ -2,33 +2,41 @@
   display: flex;
   flex-direction: column;
   height: 100vh;
-  overflow: hidden; /* Evita la doble barra de desplazamiento */
+  overflow: hidden;
+  /* Evita la doble barra de desplazamiento */
 }
 
 .mat-sidenav-container {
   flex: 1;
   display: flex;
   flex-direction: column;
-  overflow: hidden; /* Evita la doble barra de desplazamiento */
+  overflow: hidden;
+  /* Evita la doble barra de desplazamiento */
 }
 
 .mat-sidenav-content {
   display: flex;
   flex-direction: column;
-  height: 100vh; /* Asegura que el contenido ocupe toda la ventana */
-  overflow: hidden; /* Evita la doble barra de desplazamiento */
+  height: 100vh;
+  /* Asegura que el contenido ocupe toda la ventana */
+  overflow: hidden;
+  /* Evita la doble barra de desplazamiento */
 }
 
 .content {
   flex: 1;
-  overflow: auto; /* Barra de desplazamiento solo aquí */
-  padding-top: 64px; /* Ajusta el espacio superior para que el contenido no quede cubierto */
-  padding-bottom: 64px; /* Ajusta el espacio inferior según sea necesario */
+  overflow: auto;
+  /* Barra de desplazamiento solo aquí */
+  padding-top: 64px;
+  /* Ajusta el espacio superior para que el contenido no quede cubierto */
+  padding-bottom: 64px;
+  /* Ajusta el espacio inferior según sea necesario */
   box-sizing: border-box;
 }
 
 .footer {
-  height: 64px; /* Asegura que el footer tenga la altura correcta */
+  height: 64px;
+  /* Asegura que el footer tenga la altura correcta */
   display: flex;
   align-items: center;
   justify-content: center;
@@ -39,7 +47,8 @@
 }
 
 .mat-toolbar {
-  height: 64px; /* Altura del header */
+  height: 64px;
+  /* Altura del header */
   position: fixed;
   top: 0;
   left: 0;
@@ -47,24 +56,28 @@
   z-index: 2;
   display: flex;
   align-items: center;
-  background-color: #51A7F9; /* Color primario */
-  color: white; /* Texto blanco */
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Sombra ligera */
-  padding: 0 16px; /* Padding para espaciado */
+  background-color: #51A7F9;
+  /* Color primario */
+  color: white;
+  /* Texto blanco */
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  /* Sombra ligera */
+  padding: 0 16px;
+  /* Padding para espaciado */
 }
 
-/* main-layout.component.scss o tu archivo CSS global */
-.responsive-image-container {
-  width: 100%; /* Asegura que ocupe el ancho completo disponible */
+/* main-layout.component.css */
+.sidenav-content {
+  background-image: url('../../../assets/images/Edificio Color Blanco.jpg');
+  background-size: cover;
+  /* La imagen cubrirá todo el área disponible */
+  background-position: center center;
+  /* Centra la imagen */
+  background-repeat: no-repeat;
+  /* Evita que la imagen se repita */
+  min-height: 100vh;
+  /* Asegura que el fondo cubra toda la altura de la pantalla */
   display: flex;
-  justify-content: center;
-  padding: 16px; /* Añade algo de padding alrededor si lo deseas */
-  box-sizing: border-box;
-}
-
-.responsive-image {
-  max-width: 100%; /* La imagen no excederá el ancho del contenedor */
-  height: auto;    /* Mantiene la proporción de la imagen */
-  border-radius: 8px; /* Opcional: bordes redondeados */
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Opcional: sombra para resaltar */
+  flex-direction: column;
+  /* Esto es para que el contenido no se superponga a la imagen */
 }

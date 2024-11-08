@@ -1,19 +1,11 @@
 <!-- main-layout.component.html -->
-
 <app-header (sidenavToggle)="sidenav.toggle()"></app-header>
 <mat-sidenav-container class="sidenav-container">
   <mat-sidenav #sidenav mode="side" opened>
     <app-layout></app-layout>
   </mat-sidenav>
   <mat-sidenav-content class="sidenav-content">
-    <div *ngIf="showImage" class="responsive-image-container">
-      <img 
-        src="assets/images/Edificio Color Blanco.jpg" 
-        alt="Descripción de la imagen" 
-        (error)="handleError()" 
-        class="responsive-image"
-      />
-    </div>
+    <!-- Aquí ya no necesitas la imagen directamente -->
     <div class="content">
       <router-outlet></router-outlet>
     </div>

@@ -1,25 +1,67 @@
-.table-container {
-  background-color: white;
-  padding: 20px;
+.container {
+  max-width: 100vw;
+  /* O el ancho máximo deseado */
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+.preview-button,
+.assign-button {
+  margin: 2% 0;
+  background-color: #628780;
+  color: #ffffff;
+  border-radius: 5px;
+  padding: 10px 20px;
+}
+
+.card-body {
+  background: white;
+}
+
+.card-title {
+  margin-top: 20px;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 20px;
+}
+
+th,
+td {
+  padding: 8px;
+  border-bottom: 1px solid #ddd;
+  text-align: left;
+}
+
+@media only screen and (max-width: 768px) {
+
+  th:nth-child(n+5),
+  td:nth-child(n+6) {
+    display: none;
+  }
+}
+
+@media only screen and (max-width: 480px) {
+
+  .preview-button,
+  .assign-button {
+    background-color: #628780;
+    color: #ffffff;
+    border-radius: 5px;
+    width: 100%;
+  }
+}
+
+.card {
   border-radius: 10px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  padding: 20px;
+  background-color: white;
   margin-bottom: 20px;
-  max-width: 1000px;
-  margin-left: auto;
-  margin-right: auto;
 }
 
-.table-container h3 {
-  font-size: 1.5rem;
-  font-weight: bold;
-  color: #229e92;
-  margin-bottom: 10px;
-  text-align: center;
-}
-
-.table-container p {
-  font-size: 1rem;
-  color: #666;
-  text-align: center;
-  margin-bottom: 20px;
+.basic-container {
+  padding: 30px;
 }

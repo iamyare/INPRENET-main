@@ -12,15 +12,18 @@ $grey-light: White;
     font-family: inherit;
     font-weight: 700;
   }
+
   &:after {
     background-color: $grey-light;
   }
 }
+
 .multi-steps {
   display: table;
   table-layout: fixed;
   width: 100%;
-  > li {
+
+  >li {
     counter-increment: stepNum;
     text-align: center;
     display: table-cell;
@@ -41,6 +44,7 @@ $grey-light: White;
       line-height: 32px;
       text-align: center;
       font-weight: bold;
+
       border: {
         width: 2px;
         style: solid;
@@ -48,6 +52,7 @@ $grey-light: White;
         radius: 50%;
       }
     }
+
     &:after {
       content: "";
       height: 2px;
@@ -58,6 +63,7 @@ $grey-light: White;
       left: 50%;
       z-index: -1;
     }
+
     &:last-child {
       &:after {
         display: none;
@@ -66,14 +72,16 @@ $grey-light: White;
 
     &.is-active {
       @extend %remain-steps;
+
       &:before {
         background-color: $white;
         border-color: $brand-primary;
       }
 
-      ~ li {
+      ~li {
         color: #808080;
         @extend %remain-steps;
+
         &:before {
           background-color: $grey-light;
           border-color: $grey-light;

@@ -46,14 +46,33 @@ button:hover {
 }
 
 button.asignar-beneficios-btn {
-  display: block; /* Hace que el botón ocupe una fila completa */
-  margin: 20px auto; /* Centrado horizontalmente y con espacio alrededor */
-  background-color: #229e92; /* Color de fondo */
-  color: white; /* Color de texto */
-  border-radius: 5px; /* Bordes redondeados */
-  padding: 10px 20px; /* Espacio interno del botón */
+  display: block;
+  /* Hace que el botón ocupe una fila completa */
+  margin: 20px auto;
+  /* Centrado horizontalmente y con espacio alrededor */
+  background-color: #229e92;
+  /* Color de fondo */
+  color: white;
+  /* Color de texto */
+  border-radius: 5px;
+  /* Bordes redondeados */
+  padding: 10px 20px;
+  /* Espacio interno del botón */
 }
 
 button.asignar-beneficios-btn:hover {
-  background-color: #1b7a70; /* Color de hover */
+  background-color: #1b7a70;
+  /* Color de hover */
+}
+
+.card {
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  padding: 20px;
+  background-color: white;
+  margin-bottom: 20px;
+}
+
+.basic-container {
+  padding: 30px;
 }

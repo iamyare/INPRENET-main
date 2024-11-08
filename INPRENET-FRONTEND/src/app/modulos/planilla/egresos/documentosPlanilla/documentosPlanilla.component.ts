@@ -186,7 +186,7 @@ export class DocumentosPlanillaComponent implements OnInit {
 
     this.planillaService.getTotalBeneficiosYDeduccionesPorPeriodo(fechaInicioFormateada, fechaFinFormateada, idTiposPlanilla).subscribe({
       next: async (data) => {
-        console.log(data);
+        //console.log(data);
 
         const base64Image = await this.convertirImagenABase64('../assets/images/membratadoFinal.jpg');
 
@@ -514,9 +514,9 @@ export class DocumentosPlanillaComponent implements OnInit {
 
   crearTablaPDF(nombrePlanilla: string, data: any[], titulo: string, totalTexto: string) {
 
-    console.log(nombrePlanilla);
+    //console.log(nombrePlanilla);
+    //console.log(nombrePlanilla);
 
-    console.log(nombrePlanilla);
     if (nombrePlanilla == "60 RENTAS") {
       const headers = [
         { text: 'Nombre', style: 'tableHeader' },

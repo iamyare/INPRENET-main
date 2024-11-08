@@ -68,10 +68,9 @@
 
 <!-- PARA DESIGNADOS BENEFICIARIOS -->
 <div *ngIf="mostrarB && Afiliado.fallecido == 'SI' && (
-  Afiliado.tipo_persona == 'AFILIADO' && (Afiliado.estado_persona == 'ACTIVO' || Afiliado.estado_persona == 'SUSPENDIDO') ||
+  (Afiliado.tipo_persona == 'AFILIADO' && (Afiliado.estado_persona == 'ACTIVO' || Afiliado.estado_persona == 'SUSPENDIDO')) ||
   Afiliado.tipo_persona == 'JUBILADO' ||
-  Afiliado.tipo_persona == 'PENSIONADO' ||
-  Afiliado.tipo_persona == 'VOLUNTARIO' )"
+  Afiliado.tipo_persona == 'PENSIONADO')"
   style="margin: 1% 0% 1% 0%; text-align: center; background-color: white">
   <app-dynamic-form
     [fields]="myFormFields2"
@@ -91,7 +90,7 @@
 
 <div *ngIf="mostrarDB && Afiliado.fallecido == 'NO'  && (
   (Afiliado.tipo_persona == 'AFILIADO' && Afiliado.estado_persona == 'ACTIVO') ||
-  Afiliado.tipo_persona == 'VOLUNTARIO'
+  (Afiliado.tipo_persona == 'AFILIADO' && Afiliado.estado_persona == 'SUSPENDIDO')
   )" style="margin: 1% 0% 1% 0%; text-align: center; background-color: white">
   <app-dynamic-form [fields]="myFormFields1" titulo="Datos sobre el beneficio"
     subtitulo="Completa la información correspondiente" (selectChange)="prueba($event)" (newDatBenChange)="obtenerDatos1($event)"></app-dynamic-form>

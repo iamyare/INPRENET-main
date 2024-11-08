@@ -59,8 +59,12 @@ export class Net_Detalle_Beneficio_Afiliado {
     @Column({ nullable: true, default: 0, name: 'NUM_RENTAS_APLICADAS' })
     num_rentas_aplicadas: number;
 
-    @Column({ nullable: true, default: 0, name: 'ULTIMO_DIA_ULTIMA_RENTA' })
+    @Column({ nullable: true, default: 0, name: 'NUM_RENTAS_PAGAR_PRIMER_PAGO' })
+    num_rentas_pagar_primer_pago: number;
+
+    @Column({ nullable: true, name: 'ULTIMO_DIA_ULTIMA_RENTA' })
     ultimo_dia_ultima_renta: number;
+
 
     @ManyToOne(() => Net_Beneficio, beneficio => beneficio.detalleBeneficioAfiliado)
     @JoinColumn({ name: 'ID_BENEFICIO', foreignKeyConstraintName: "FK_ID_BENEFICIO_DETBENAFIL" })
@@ -78,7 +82,7 @@ export class Net_Detalle_Beneficio_Afiliado {
     @ManyToOne(() => Net_Usuario_Empresa, { nullable: true })
     @JoinColumn({ name: 'ID_USUARIO_EMPRESA', referencedColumnName: 'id_usuario_empresa', foreignKeyConstraintName: 'FK_ID_USUARIO_EMPRESA_DET_BEN_AFILIADO' })
     usuarioEmpresa: Net_Usuario_Empresa;
-    
+
     @Column({ type: 'int', nullable: true, name: 'ID_USUARIO_EMPRESA' })
     ID_USUARIO_EMPRESA: number;
 }

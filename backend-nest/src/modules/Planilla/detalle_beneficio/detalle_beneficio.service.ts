@@ -387,7 +387,8 @@ export class DetalleBeneficioService {
                      ESTADO_SOLICITUD,
                      OBSERVACIONES,
                      ULTIMO_DIA_ULTIMA_RENTA,
-                     ID_USUARIO_EMPRESA
+                     ID_USUARIO_EMPRESA,
+                     NUM_RENTAS_PAGAR_PRIMER_PAGO
                    ) VALUES (
                      ${detPer.ID_DETALLE_PERSONA},
                      ${detPer.ID_CAUSANTE},
@@ -405,7 +406,9 @@ export class DetalleBeneficioService {
                      '${datos.estado_solicitud}',
                      '${datos.observacion}',
                       ${datos.ultimo_dia_ultima_renta ? parseFloat(datos.ultimo_dia_ultima_renta) : null},
-                     ${estadoPP.id_usuario_empresa}
+                      ${estadoPP.id_usuario_empresa},
+                      ${datos.num_rentas_pagar_primer_pago ? parseInt(datos.num_rentas_pagar_primer_pago) : null}
+
                )`;
 
               const detBeneBeneficia = await this.entityManager.query(queryInsDeBBenf);
@@ -490,7 +493,8 @@ export class DetalleBeneficioService {
                        ESTADO_SOLICITUD,
                        OBSERVACIONES,
                        ID_USUARIO_EMPRESA,
-                       ULTIMO_DIA_ULTIMA_RENTA
+                       ULTIMO_DIA_ULTIMA_RENTA,
+                       NUM_RENTAS_PAGAR_PRIMER_PAGO
                      ) VALUES (
                        ${detPer.ID_DETALLE_PERSONA},
                        ${detPer.ID_CAUSANTE},
@@ -508,7 +512,8 @@ export class DetalleBeneficioService {
                        '${datos.estado_solicitud}',
                        '${datos.observacion}',
                        ${estadoPP.id_usuario_empresa},
-                      ${datos.ultimo_dia_ultima_renta ? parseFloat(datos.ultimo_dia_ultima_renta) : null}
+                       ${datos.ultimo_dia_ultima_renta ? parseFloat(datos.ultimo_dia_ultima_renta) : null},
+                       ${datos.num_rentas_pagar_primer_pago ? parseInt(datos.num_rentas_pagar_primer_pago) : null}
                )`;
 
               const detBeneBeneficia = await this.entityManager.query(queryInsDeBBenf);

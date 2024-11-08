@@ -328,7 +328,7 @@ export class AfiliadoService {
 
   async findOneAFiliado(term: string) {
     console.log(term);
-    
+
 
     try {
       const detallePer = await this.detallePersonaRepository.findOne({
@@ -365,8 +365,8 @@ export class AfiliadoService {
 
       //const detallePersona = persona.detallePersona.find(detalle => detalle.tipoPersona.tipo_persona === 'AFILIADO');
 
-      console.log(detallePer);
-      
+      //console.log(detallePer);
+
       const result = {
         N_IDENTIFICACION: detallePer.persona.n_identificacion,
         ID_PERSONA: detallePer.persona.id_persona,
@@ -890,7 +890,7 @@ export class AfiliadoService {
         const keysWithTrueValues = Object.entries(datosGenerales.dato.discapacidades)
           .filter(([_, value]) => value === true)
           .map(([key]) => key);
-  
+
         await this.perDiscapacidadRepository.delete({ persona: { id_persona: idPersona } });
         if (keysWithTrueValues.length > 0) {
           const discapacidades = await this.discapacidadRepository.find({
@@ -903,23 +903,23 @@ export class AfiliadoService {
           await this.perDiscapacidadRepository.save(nuevosRegistros);
         }
       }
-  
+
       const estadoP = await this.estadoAfiliacionRepository.findOne({
         where: { codigo: datosGenerales.estado }
       });
       if (!estadoP) {
         throw new NotFoundException(`No se ha encontrado el estado de afiliación con el código ${datosGenerales.estado}`);
       }
-  
+
       const causaFallecimiento = await this.causasFallecimientoRepository.findOne({
         where: { id_causa_fallecimiento: datosGenerales.causa_fallecimiento }
       });
       if (!causaFallecimiento) {
         throw new NotFoundException(`No se encontró la causa de fallecimiento con el ID ${datosGenerales.causa_fallecimiento}`);
       }
-  
+
       const temp = datosGenerales.dato || {};
-  
+
       const direccionParts = {
         "BARRIO_COLONIA": temp.barrio_colonia,
         "AVENIDA": temp.avenida,
@@ -931,12 +931,12 @@ export class AfiliadoService {
         "ALDEA": temp.aldea,
         "CASERIO": temp.caserio
       };
-  
+
       temp.direccion_residencia = Object.entries(direccionParts)
         .filter(([_, value]) => value)
         .map(([key, value]) => `${key}: ${value}`)
         .join(',');
-  
+
       const data: any = {
         ...temp,
         id_persona: idPersona,
@@ -945,7 +945,7 @@ export class AfiliadoService {
         causa_fallecimiento: causaFallecimiento,
         fecha_defuncion: datosGenerales.fecha_defuncion ?? temp.fecha_defuncion,
       };
-  
+
       if (fileIdent?.buffer) {
         data.archivo_identificacion = Buffer.from(fileIdent.buffer);
       }
@@ -955,11 +955,11 @@ export class AfiliadoService {
       if (fotoPerfil?.buffer) {
         data.foto_perfil = Buffer.from(fotoPerfil.buffer);
       }
-  
+
       const afiliado = await this.personaRepository.preload(data);
       if (!afiliado) throw new NotFoundException(`La persona con ID ${idPersona} no se ha encontrado`);
       await this.personaRepository.save(afiliado);
-  
+
       const resultEstado = await this.detallePersonaRepository.update(
         { ID_PERSONA: idPersona, ID_CAUSANTE: idPersona },
         { ID_ESTADO_AFILIACION: estadoP.codigo }
@@ -967,7 +967,7 @@ export class AfiliadoService {
       if (resultEstado.affected === 0) {
         console.warn(`No se encontró un registro en NET_DETALLE_PERSONA para la persona con ID ${idPersona}.`);
       }
-  
+
       if (datosGenerales.tipo_persona) {
         const resultTipoPersona = await this.detallePersonaRepository.update(
           { ID_PERSONA: idPersona, ID_CAUSANTE: idPersona },
@@ -977,13 +977,13 @@ export class AfiliadoService {
           console.warn(`No se encontró un registro en NET_DETALLE_PERSONA para la persona con ID ${idPersona}.`);
         }
       }
-  
+
       return afiliado;
     } catch (error) {
       this.handleException(error);
     }
   }
-  
+
   async updatePerfCentroTrabajo(id: number, updateDto: UpdatePerfCentTrabDto): Promise<Net_perf_pers_cent_trab> {
     const existingPerf = await this.perfPersoCentTrabRepository.findOne({ where: { id_perf_pers_centro_trab: id } });
     if (!existingPerf) {

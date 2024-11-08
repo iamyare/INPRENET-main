@@ -377,7 +377,7 @@ export class VerplancerradaComponent {
 
           const montoPorPeriodo = beneficio.detallePagBeneficio[0].monto_a_pagar;
           sumaBeneficios += montoPorPeriodo;
-          console.log(beneficio);
+          //console.log(beneficio);
 
           return {
             CAUSANTE: causantesMap.get(detalle.ID_DETALLE_PERSONA) || 'NO APLICA',
@@ -392,7 +392,7 @@ export class VerplancerradaComponent {
         });
       });
 
-      console.log(data);
+      //console.log(data);
 
 
       let tablaDed: any = {};

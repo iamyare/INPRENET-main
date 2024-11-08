@@ -43,7 +43,8 @@ export class PermisosService {
           permisos: [
             { role: 'MODIFICACION AFILIACION', module: 'AFILIACION', permiso: 'editar' },
             { role: 'CONSULTA AFILIACION', module: 'AFILIACION', permiso: 'ver' },
-            { role: 'ADMINISTRADOR', module: 'AFILIACION', permiso: 'editar' }
+            { role: 'ADMINISTRADOR', module: 'AFILIACION', permiso: 'editar' },
+            { role: 'OFICIAL DE PLANILLA', module: 'PLANILLA', permiso: 'editar' }
           ]
         },
         'afiliacion/buscar-persona': {
@@ -51,6 +52,7 @@ export class PermisosService {
           permisos: [
             { role: 'CONSULTA AFILIACION', module: 'AFILIACION' },
             { role: 'MODIFICACION AFILIACION', module: 'AFILIACION', permiso: 'editar' },
+            { role: 'OFICIAL DE PLANILLA', module: 'PLANILLA', permiso: 'editar' },
             { role: 'ADMINISTRADOR', module: 'AFILIACION' }
           ]
         },
@@ -82,6 +84,7 @@ export class PermisosService {
         'planilla/Beneficios/Ver-editar-beneficio-afil': {
           title: 'Ver Beneficios Asignados',
           permisos: [
+            { role: 'OFICIAL DE PLANILLA', module: 'PLANILLA' },
             { role: 'ADMINISTRADOR', module: 'PLANILLA' },
             { role: 'CONSULTA PLANILLA', module: 'PLANILLA' }
           ]

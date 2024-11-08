@@ -117,6 +117,7 @@ export class PermisosService {
           title: 'Ver Todas Las Planillas',
           permisos: [
             { role: 'ADMINISTRADOR', module: 'PLANILLA' },
+            { role: 'OFICIAL DE PLANILLA', module: 'PLANILLA' },
             { role: 'CONSULTA PLANILLA', module: 'PLANILLA' },
           ]
         },

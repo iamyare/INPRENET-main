@@ -83,11 +83,13 @@ export const MENU_CONFIG: Section[] = [
         title: 'EGRESOS',
         icon: 'money_off',
         children: [
-          { title: 'Cargar Bajas (FALLECIDOS)', route: 'planilla/Egresos/cargar-fallecidos', icon: 'description' },
-          { title: 'Cambiar Cuenta Bancaria', route: 'planilla/Egresos/editar-banco', icon: 'description' },
-          { title: 'Proceso de Planilla', route: 'planilla/Egresos/proceso-planilla', icon: 'post_add' },
-          { title: 'Ver Todas Las Planillas', route: 'planilla/Egresos/ver-planillas', icon: 'receipt' },
-          { title: 'Generación de documentos', route: 'planilla/Egresos/documentos-planilla', icon: 'description' },
+          { title: 'Cargar Bajas (FALLECIDOS)', route: 'planilla/Egresos/cargar-fallecidos', icon: 'person_remove' },
+          { title: 'Cambiar Cuenta Bancaria', route: 'planilla/Egresos/editar-banco', icon: 'account_balance' },
+          { title: 'Proceso de Planilla', route: 'planilla/Egresos/proceso-planilla', icon: 'work' },
+          { title: 'Ver Todas Las Planillas', route: 'planilla/Egresos/ver-planillas', icon: 'list_alt' },
+          { title: 'Generación de documentos', route: 'planilla/Egresos/documentos-planilla', icon: 'picture_as_pdf' },
+          { title: '60 Rentas', route: 'planilla/Egresos/ver_estatus_60_rentas', icon: 'history' },
+
         ],
       },
       /* {

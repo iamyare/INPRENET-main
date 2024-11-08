@@ -127,6 +127,13 @@ export class PermisosService {
             { role: 'ADMINISTRADOR', module: 'PLANILLA' },
             { role: 'OFICIAL DE PLANILLA', module: 'PLANILLA' },
           ]
+        },
+        'planilla/Egresos/ver_estatus_60_rentas': {
+          title: '60 Rentas',
+          permisos: [
+            { role: 'ADMINISTRADOR', module: 'PLANILLA' },
+            { role: 'OFICIAL DE PLANILLA', module: 'PLANILLA' },
+          ]
         }
       }
     },

@@ -10,16 +10,24 @@ import { Section } from '../layout/menu-config';
 })
 export class MainLayoutComponent implements OnInit {
   menuConfig: Section[] = [];
-  isContentVisible = true;
+  showImage: boolean = true;
 
-  constructor(private sidenavService: SidenavService, private router: Router) {}
+  constructor(
+    private sidenavService: SidenavService,
+    private router: Router
+  ) {}
 
   ngOnInit(): void {
     this.menuConfig = this.sidenavService.getMenuConfig();
+
     this.router.events.subscribe(event => {
       if (event instanceof NavigationEnd) {
-        this.isContentVisible = this.router.url === '/home';
+        this.showImage = this.router.url === '/home';
       }
     });
+  }
+
+  handleError() {
+    console.error('Error al cargar la imagen.');
   }
 }

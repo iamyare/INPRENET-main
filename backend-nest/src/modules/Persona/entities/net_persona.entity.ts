@@ -207,4 +207,7 @@ export class net_persona {
     
     @Column({ type: 'int', nullable: true, name: 'ID_USUARIO_EMPRESA' })
     ID_USUARIO_EMPRESA: number;
+
+    @Column('date', { nullable: true, name: 'FECHA_AFILIACION' })
+    fecha_afiliacion: string;
 }

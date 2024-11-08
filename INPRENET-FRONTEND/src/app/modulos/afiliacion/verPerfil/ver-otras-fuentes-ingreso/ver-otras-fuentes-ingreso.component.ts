@@ -54,9 +54,9 @@ export class VerOtrasFuentesIngresoComponent implements OnInit, OnDestroy, OnCha
   ) { }
   ngOnInit(): void {
     this.initializeComponent();
-    this.mostrarBotonFuente = this.permisosService.tieneAccesoCompletoAfiliacion();
-    this.mostrarBotonEditar = this.permisosService.tieneAccesoCompletoAfiliacion();
-    this.mostrarBotonEliminar = this.permisosService.tieneAccesoCompletoAfiliacion();
+    this.mostrarBotonFuente = this.permisosService.userHasPermission('AFILIACIÓN', 'afiliacion/nueva-afiliacion', 'editar');
+    this.mostrarBotonEditar = this.permisosService.userHasPermission('AFILIACIÓN', 'afiliacion/nueva-afiliacion', 'editar');
+    this.mostrarBotonEliminar = this.permisosService.userHasPermission('AFILIACIÓN', 'afiliacion/nueva-afiliacion', 'editar');
   }
 
   ngOnChanges(changes: SimpleChanges): void {
@@ -149,8 +149,6 @@ export class VerOtrasFuentesIngresoComponent implements OnInit, OnDestroy, OnCha
 
   ejecutarFuncionAsincronaDesdeOtroComponente(funcion: (data: any) => Promise<boolean>) {
     this.ejecF = funcion;
-
-
   }
 
   cargar() {
@@ -168,7 +166,7 @@ export class VerOtrasFuentesIngresoComponent implements OnInit, OnDestroy, OnCha
         etiqueta: 'Actividad Económica',
         editable: true,
         icono: 'work',
-        validaciones: [Validators.required, Validators.min(0)]
+        validaciones: [Validators.required, Validators.min(5), Validators.max(100)]
       },
       {
         nombre: 'monto_ingreso',
@@ -221,7 +219,6 @@ export class VerOtrasFuentesIngresoComponent implements OnInit, OnDestroy, OnCha
           }
         });
       } else {
-        console.log('No se realizaron cambios.');
       }
     });
   }
@@ -261,7 +258,6 @@ export class VerOtrasFuentesIngresoComponent implements OnInit, OnDestroy, OnCha
         idPersona: this.Afiliado.id_persona
       }
     });
-
     dialogRef.afterClosed().subscribe((result: any) => {
       this.ngOnInit();
     });

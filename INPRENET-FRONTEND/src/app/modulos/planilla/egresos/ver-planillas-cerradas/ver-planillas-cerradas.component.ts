@@ -1,17 +1,20 @@
-import { Component, EventEmitter, Output, ViewChild } from '@angular/core';
-import { FormGroup, Validators } from '@angular/forms';
+import { ChangeDetectorRef, Component, EventEmitter, Output, ViewChild } from '@angular/core';
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { ToastrService } from 'ngx-toastr';
 import { BehaviorSubject } from 'rxjs';
 import { DynamicFormComponent } from 'src/app/components/dinamicos/dynamic-form/dynamic-form.component';
+import { AfiliadoService } from 'src/app/services/afiliado.service';
+import { BeneficiosService } from 'src/app/services/beneficios.service';
 import { PlanillaService } from 'src/app/services/planilla.service';
-import { unirNombres } from 'src/app/shared/functions/formatoNombresP';
 import { FieldConfig } from 'src/app/shared/Interfaces/field-config';
+import { unirNombres } from 'src/app/shared/functions/formatoNombresP';
 
 @Component({
-  selector: 'app-ver-planillas-activas',
-  templateUrl: './ver-planillas-activas.component.html',
-  styleUrl: './ver-planillas-activas.component.scss'
+  selector: 'app-ver-planillas-cerradas',
+  templateUrl: './ver-planillas-cerradas.component.html',
+  styleUrl: './ver-planillas-cerradas.component.scss'
 })
-export class VerPlanillasActivasComponent {
+export class VerPlanillasCerradasComponent {
   @ViewChild(DynamicFormComponent) dynamicForm!: DynamicFormComponent;
   @Output() getElemSeleccionados = new EventEmitter<any>()
   form!: FormGroup;
@@ -52,18 +55,24 @@ export class VerPlanillasActivasComponent {
   planillasActivas: any[] = [];
 
   constructor(
-    private planillaService: PlanillaService
+    private planillaService: PlanillaService,
+    private toastr: ToastrService
   ) { }
 
   ngOnInit(): void {
-    this.getFilas().then(() => this.cargar());
-    this.cargar();
+    this.getFilas().then((data) => {
+      if (!data || data.length === 0) {
+        this.toastr.warning("No se encontraron planillas cerradas.");
+      }
+      this.cargar();
+    }).catch(error => {
+      console.error('Error al cargar planillas cerradas:', error);
+    });
   }
 
   getFilas = async () => {
     try {
-      const data = await this.planillaService.getPlanillasActivas().toPromise();
-
+      const data = await this.planillaService.getPlanillasCerradas().toPromise();
       this.filas = data.map((item: any) => ({
         id_planilla: item.id_planilla,
         codigo_planilla: item.codigo_planilla,
@@ -95,7 +104,12 @@ export class VerPlanillasActivasComponent {
   }
 
   manejarRowClick(row: any) {
-    this.mostrarB = false;
+    if (!row || !row.codigo_planilla || row.codigo_planilla.trim() === '') {
+      console.error('Error: El código de planilla no puede estar vacío');
+      this.toastr.error('Debe seleccionar una fila con un código de planilla válido');
+      return;
+    }
+
     this.desOBenSeleccionado = row;
     this.getElemSeleccionados.emit(this.desOBenSeleccionado);
   }

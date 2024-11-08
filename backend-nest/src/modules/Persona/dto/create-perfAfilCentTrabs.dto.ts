@@ -34,4 +34,14 @@ export class CentroTrabajoDTO {
     @MaxLength(40)
     @IsOptional()
     estado?:string
+
+    @IsString()
+    @MaxLength(50)
+    @IsOptional()
+    tipo_jornada?: string;
+
+    @IsString()
+    @MaxLength(50)
+    @IsOptional()
+    jornada?: string;
 }

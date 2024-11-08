@@ -6,20 +6,6 @@ body {
   padding: 30px;
 }
 
-.version-info {
-  font-size: 8pt;
-  float: right;
-}
-
-.inputs {
-  width: 100%;
-}
-
-.tittle {
-  color: white;
-  background: #628780;
-}
-
 .card {
   margin: 20px;
   border-radius: 8px;
@@ -34,60 +20,106 @@ body {
   border-top-right-radius: 8px;
 }
 
+.card-title {
+  margin: 0;
+}
+
+.card-category {
+  margin: 5px 0 0 0;
+  font-size: 14px;
+}
+
 .card-body {
   padding: 16px;
 }
 
-.row {
+.form-container {
   display: flex;
-  flex-wrap: wrap;
+  flex-direction: column;
 }
 
-.col-md-6 {
-  flex: 0 0 50%;
-  max-width: 50%;
-  padding: 0 8px;
+.form-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
 }
 
-.discapacidad-container {
-  background: #f1f1f1;
+.half-width {
+  flex: 1 1 48%;
+}
+
+.full-width {
+  flex: 1 1 100%;
+}
+
+.reference-group {
+  margin-bottom: 24px;
+  padding: 15px;
+  border: 1px solid #e0e0e0;
   border-radius: 8px;
-  padding: 16px;
-  margin-top: 16px;
-  width: 100%;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
 }
 
-.discapacidad-title {
-  font-size: 1.2em;
+.reference-title {
+  margin-bottom: 10px;
   font-weight: bold;
-  margin-bottom: 8px;
+  color: #229e92;
 }
 
-.discapacidad-item {
+.action-buttons {
+  display: flex;
+  justify-content: flex-end;
+  gap: 16px;
+  margin-top: 16px;
+}
+
+button {
+  font-size: 14px;
+  padding: 8px 16px;
+  border-radius: 4px;
   display: flex;
   align-items: center;
-  margin-bottom: 8px;
+  transition: all 0.3s ease;
 }
 
-.discapacidad-field {
-  flex: 1;
+button:hover {
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+  transform: translateY(-1px);
+}
+
+button mat-icon {
   margin-right: 8px;
 }
 
-.discapacidad-remove-btn {
-  margin-top: 16px;
+button[mat-button].mat-warn {
+  background-color: #d32f2f;
+  color: white;
 }
 
-.discapacidad-add-btn {
-  margin-top: 16px;
+button[mat-button].mat-warn:hover {
+  background-color: #c62828;
 }
 
-.error-text-small {
-  font-size: 14px; /* Ajusta el tamaño según tus necesidades */
+button[mat-button].mat-primary {
+  background-color: #26a69a;
+  color: white;
 }
 
-.error-icon-small {
-  font-size: 20px; /* Ajusta el tamaño del ícono */
+button[mat-button].mat-primary:hover {
+  background-color: #229e92;
+}
+
+button:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.5);
+}
+
+.mat-error {
+  color: #f44336;
+}
+
+.mat-error mat-icon {
   vertical-align: middle;
   margin-right: 4px;
+  font-size: 20px;
 }

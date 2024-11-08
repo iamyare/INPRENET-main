@@ -10,7 +10,6 @@ import { DynamicFormComponent } from 'src/app/components/dinamicos/dynamic-form/
 import { convertirFecha } from 'src/app/shared/functions/formatoFecha';
 import { BehaviorSubject } from 'rxjs';
 
-
 // Función de validación personalizada que retorna un mensaje de error
 export function montoTotalValidator(): ValidatorFn {
   return (control: AbstractControl): { [key: string]: any } | null => {
@@ -52,7 +51,7 @@ export class NuevoBeneficioAfilComponent implements OnInit {
   form1!: FormGroup;
 
   FormBen: any
-  datosFormateados: any;
+  datosFormateados: any = {};
   unirNombres: any = unirNombres;
   tiposBeneficios: any = [];
   tiposBeneficiosLoaded: BehaviorSubject<boolean> = new BehaviorSubject(false);
@@ -90,8 +89,7 @@ export class NuevoBeneficioAfilComponent implements OnInit {
   tiposPersona: any[] = [
     { label: "AFILIADO", value: 'AFILIADO' },
     { label: "JUBILADO", value: 'JUBILADO' },
-    { label: "PENSIONADO", value: 'PENSIONADO' },
-    { label: "VOLUNTARIO", value: 'VOLUNTARIO' }
+    { label: "PENSIONADO", value: 'PENSIONADO' }
   ];
   tipoPersonaSelected: any;
   tipoBenefSelected: any;
@@ -103,8 +101,6 @@ export class NuevoBeneficioAfilComponent implements OnInit {
     private svcAfilServ: AfiliadoService, private fb: FormBuilder,
     private toastr: ToastrService, private _formBuilder: FormBuilder
   ) { }
-
-
 
   ngOnInit(): void {
     this.myFormFields = [
@@ -133,6 +129,7 @@ export class NuevoBeneficioAfilComponent implements OnInit {
               estado_civil: res.ESTADO_CIVIL,
               nombreCompleto: unirNombres(res.PRIMER_NOMBRE, res.SEGUNDO_NOMBRE, res.PRIMER_APELLIDO, res.SEGUNDO_APELLIDO),
               genero: res.GENERO,
+              sexo: res.SEXO,
               profesion: res.PROFESION,
               telefono_1: res.TELEFONO_1,
               colegio_magisterial: res.COLEGIO_MAGISTERIAL,
@@ -147,9 +144,9 @@ export class NuevoBeneficioAfilComponent implements OnInit {
             //const tipoPersona = item.fallecido === "SI" ? "BENEFICIARIO" : item.tipo_persona;
 
             if (item.fallecido === "NO") {
-              if (item.estado_persona == 'ACTIVO') {
+              if (item.estado_persona == 'ACTIVO' || item.estado_persona == 'SUSPENDIDO') {
                 this.getTipoBen(item.tipo_persona);
-              } if (item.estado_persona == 'INACTIVO' || item.estado_persona == 'SUSPENDIDA' || item.estado_persona == 'NO REGISTRADO') {
+              } if (item.estado_persona == 'INACTIVO' || item.estado_persona == 'NO REGISTRADO') {
                 this.toastr.warning(`La persona se encuentra ${item.estado_persona}. No se puede asignar beneficios a los Afiliados ${item.estado_persona}`, "Advertencia");
               } if (item.tipo_persona == 'JUBILADO' || item.tipo_persona == 'PENSIONADO') {
                 this.toastr.warning(`La persona se encuentra: ${item.tipo_persona}. No se puede asignar beneficios a la persona porque se encuentra: ${item.tipo_persona}`, "Advertencia");
@@ -207,6 +204,10 @@ export class NuevoBeneficioAfilComponent implements OnInit {
           validations: [Validators.required], display: true
         },
         {
+          type: 'text', label: 'Periodicidad del beneficio', name: 'periodicidad_beneficio',
+          validations: [], display: true
+        },
+        {
           type: 'text', label: 'regimen', name: 'regimen',
           readOnly: true,
           value: "",
@@ -217,10 +218,18 @@ export class NuevoBeneficioAfilComponent implements OnInit {
           options: [{ label: 'APROBADO', value: 'APROBADO' }, { label: 'RECHAZADO', value: 'RECHAZADO' }],
           validations: [Validators.required], display: true
         },
-        { type: 'number', label: 'Monto total', name: 'monto_total', validations: [Validators.required, Validators.min(0), montoTotalValidator()], display: true, },
-        { type: 'number', label: 'Monto por periodo', name: 'monto_por_periodo', validations: [Validators.required, Validators.min(0), montoTotalValidator()], display: true, },
-        { type: 'number', label: 'Monto primera cuota', name: 'monto_primera_cuota', validations: [Validators.required, Validators.min(0), montoTotalValidator()], display: true, },
-        { type: 'number', label: 'Monto útima cuota', name: 'monto_ultima_cuota', validations: [Validators.required, Validators.required, Validators.min(0), montoTotalValidator()], display: true },
+        { type: 'number', label: 'Número de rentas aprobadas', name: 'num_rentas_aplicadas', validations: [Validators.min(1)], display: false },
+        { type: 'number', label: 'Número de rentas a pagar en el primer pago', name: 'num_rentas_pagar_primer_pago', validations: [Validators.min(1)], display: false },
+        { type: 'number', label: 'Monto mensual', name: 'monto_por_periodo', validations: [Validators.min(0), montoTotalValidator()], display: false, },
+        { type: 'number', label: 'Monto total', name: 'monto_total', validations: [Validators.min(0), montoTotalValidator()], display: false, },
+        {
+          type: 'number', label: 'Dias de la última renta', name: 'ultimo_dia_ultima_renta', validations: [
+            Validators.min(1),
+            Validators.max(31),
+          ], display: false
+        },
+        { type: 'number', label: 'Monto correspondiente a los dias restantes', name: 'monto_ultima_cuota', validations: [Validators.min(0), montoTotalValidator()], display: false },
+        { type: 'number', label: 'Monto primera cuota', name: 'monto_primera_cuota', validations: [Validators.min(0), montoTotalValidator()], display: false, },
         {
           type: 'date',
           label: 'Fecha de efectividad',
@@ -229,22 +238,17 @@ export class NuevoBeneficioAfilComponent implements OnInit {
           validations: [Validators.required, noFutureDateValidator],
           display: true
         },
-        { type: 'text', label: 'Observación', name: 'observacion', validations: [], display: true },
-        { type: 'number', label: 'Número de rentas aprobadas', name: 'num_rentas_aplicadas', validations: [Validators.min(1)], display: false },
         {
-          type: 'number', label: 'último día de última renta', name: 'ultimo_dia_ultima_renta', validations: [
-            Validators.min(1),
-            Validators.max(31),
-          ], display: false
+          type: 'text',
+          label: 'Última Fecha de pago',
+          name: 'periodo_finalizacion',
+          validations: [],
+          display: false
         },
+        { type: 'text', label: 'Observación', name: 'observacion', validations: [], display: true },
+
       ];
 
-
-      // Oculta ciertos campos adicionales si es necesario
-      this.myFormFields1[this.myFormFields1.length - 1].display = false;
-      this.myFormFields1[this.myFormFields1.length - 2].display = false;
-
-      // Muestra el formulario después de configurar los campos
       this.mostrarDB = true;
 
       // Retorna la lista de beneficios mapeados
@@ -255,6 +259,7 @@ export class NuevoBeneficioAfilComponent implements OnInit {
       return null;  // En caso de error, retornar null o manejar el error como sea necesario
     }
   };
+
   getTipoBenBeneficiarios = async (tipoPers: any) => {
     try {
 
@@ -279,6 +284,10 @@ export class NuevoBeneficioAfilComponent implements OnInit {
           validations: [Validators.required], display: true
         },
         {
+          type: 'text', label: 'Periodicidad del beneficio', name: 'periodicidad_beneficio',
+          validations: [], display: true
+        },
+        {
           type: 'text', label: 'regimen', name: 'regimen',
           readOnly: true,
           value: "",
@@ -288,10 +297,18 @@ export class NuevoBeneficioAfilComponent implements OnInit {
           type: 'dropdown', label: 'Estado Solicitud', name: 'estado_solicitud',
           options: [{ label: 'APROBADO', value: 'APROBADO' }, { label: 'RECHAZADO', value: 'RECHAZADO' }], validations: [Validators.required], display: true
         },
-        { type: 'number', label: 'Monto total', name: 'monto_total', validations: [Validators.required, Validators.min(0), montoTotalValidator()], display: true, },
-        { type: 'number', label: 'Monto por periodo', name: 'monto_por_periodo', validations: [Validators.required, Validators.min(0), montoTotalValidator()], display: true, },
-        { type: 'number', label: 'Monto primera cuota', name: 'monto_primera_cuota', validations: [Validators.required, Validators.min(0), montoTotalValidator()], display: true, },
-        { type: 'number', label: 'Monto ultima cuota', name: 'monto_ultima_cuota', validations: [Validators.required, Validators.min(0), montoTotalValidator()], display: true },
+        { type: 'number', label: 'Número de rentas aprobadas', name: 'num_rentas_aplicadas', validations: [Validators.min(1)], display: false },
+        { type: 'number', label: 'Número de rentas a pagar en el primer pago', name: 'num_rentas_pagar_primer_pago', validations: [Validators.min(1)], display: false },
+        { type: 'number', label: 'Monto mensual', name: 'monto_por_periodo', validations: [Validators.min(0), montoTotalValidator()], display: false, },
+        { type: 'number', label: 'Monto total', name: 'monto_total', validations: [Validators.min(0), montoTotalValidator()], display: false, },
+        {
+          type: 'number', label: 'Dias de la última renta', name: 'ultimo_dia_ultima_renta', validations: [
+            Validators.min(1),
+            Validators.max(31),
+          ], display: false
+        },
+        { type: 'number', label: 'Monto correspondiente a los dias restantes', name: 'monto_ultima_cuota', validations: [Validators.min(0), montoTotalValidator()], display: false },
+        { type: 'number', label: 'Monto primera cuota', name: 'monto_primera_cuota', validations: [Validators.min(0), montoTotalValidator()], display: false, },
         {
           type: 'date',
           label: 'Fecha de efectividad',
@@ -300,18 +317,16 @@ export class NuevoBeneficioAfilComponent implements OnInit {
           validations: [Validators.required, noFutureDateValidator],
           display: true
         },
-        { type: 'text', label: 'Observación', name: 'observacion', validations: [], display: true },
-        { type: 'number', label: 'Número de rentas aprobadas', name: 'num_rentas_aplicadas', validations: [Validators.min(1)], display: false },
         {
-          type: 'number', label: 'último día de última renta', name: 'ultimo_dia_ultima_renta', validations: [
-            Validators.min(1),
-            Validators.max(31),
-          ], display: false
+          type: 'text',
+          label: 'Última Fecha de pago',
+          name: 'periodo_finalizacion',
+          validations: [],
+          display: false
         },
-      ];
+        { type: 'text', label: 'Observación', name: 'observacion', validations: [], display: true },
 
-      this.myFormFields2[this.myFormFields2.length - 1].display = false;
-      this.myFormFields2[this.myFormFields2.length - 2].display = false;
+      ];
 
       // Muestra el formulario después de configurar los campos
       this.mostrarDB = true;
@@ -344,6 +359,8 @@ export class NuevoBeneficioAfilComponent implements OnInit {
   }
 
   getFilas = async () => {
+    //console.log("ENTRO");
+
     if (this.Afiliado.fallecido == "SI" && (this.Afiliado.tipo_persona == 'AFILIADO' ||
       this.Afiliado.tipo_persona == 'JUBILADO' ||
       this.Afiliado.tipo_persona == 'PENSIONADO')) {
@@ -351,9 +368,11 @@ export class NuevoBeneficioAfilComponent implements OnInit {
         await this.getColumns();
         const data = await this.svcAfilServ.obtenerBenDeAfil(this.form.value.dni).toPromise();
 
+        //console.log(data);
+
         this.filas = data.map((item: any) => ({
           dni: item.n_identificacion,
-          nombre_completo: this.unirNombres(item.primer_nombre, item.segundo_nombre, item.tercer_nombre, item.primer_apellido, item.segundo_apellido),
+          nombre_completo: this.unirNombres(item.primer_apellido, item.segundo_apellido, item.primer_nombre, item.segundo_nombre, item.tercer_nombre),
           genero: item.genero,
           tipo_afiliado: item.tipo_persona,
           porcentaje: item.porcentaje,
@@ -376,19 +395,31 @@ export class NuevoBeneficioAfilComponent implements OnInit {
     }
   };
 
+  transformarObjeto(objeto: any): any {
+    if (objeto) {
+      return Object?.keys(objeto).map(key => {
+        return {
+          header: key,
+          col: key,
+          isEditable: false,
+        };
+      });
+    }
+  }
+
   getColumns = async () => {
     try {
       this.svcAfilServ.obtenerBenDeAfil(this.form.value.dni).subscribe(
         async (response) => {
           const primerObjetoTransformado = this.transformarObjeto(response[0]);
           this.myColumns = [
-            { header: 'N_Identificacion', col: 'dni', },
+            { header: 'N° Identificación', col: 'dni', },
             {
               header: 'Nombre Completo',
               col: 'nombre_completo',
 
             },
-            { header: 'Genero', col: 'genero', },
+            { header: 'Género', col: 'genero', },
             {
               header: 'Tipo Afiliado',
               col: 'tipo_afiliado',
@@ -426,16 +457,12 @@ export class NuevoBeneficioAfilComponent implements OnInit {
       const temp = await this.getTipoBenBeneficiarios(row.tipo_afiliado);
       if (!temp || temp.length === 0) {
         this.mostrarB = false;  // No mostrar el formulario de beneficios
-        //this.form1.reset();     // Opcionalmente, reinicia el formulario
-        //this.FormBen.reset();   // Opcionalmente, reinicia el formulario
         return;  // Detener la ejecución
       } else {
         this.desOBenSeleccionado = row;
         // Si hay beneficios, proceder con la lógica y mostrar el formulario
         this.myFormFields2[0].value = row.dni;
         this.mostrarB = true;
-        // Actualizar el formulario con los beneficios obtenidos
-        //this.form1.patchValue(temp);  // O cualquier lógica para manejar los beneficios
       }
 
 
@@ -462,11 +489,60 @@ export class NuevoBeneficioAfilComponent implements OnInit {
 
       this.myFormFields1[1].options = this.beneficios;
       this.form1.get("nombre_beneficio")?.setValue(null)
+      this.form1.get("num_rentas_pagar_primer_pago")?.setValue(null)
+      this.form1.get("periodicidad_beneficio")?.setValue(null)
       this.form1.get("regimen")?.setValue(null)
+      this.form1?.get("estado_solicitud")?.setValue(null)
+      this.form1?.get("num_rentas_aplicadas")?.setValue(null)
+      this.form1?.get("ultimo_dia_ultima_renta")?.setValue(null)
+      this.form1?.get("monto_total")?.setValue(null)
+      this.form1?.get("monto_por_periodo")?.setValue(null)
+      this.form1?.get("monto_primera_cuota")?.setValue(null)
+      this.form1?.get("monto_ultima_cuota")?.setValue(null)
+      this.form1?.get("fecha_calculo")?.setValue(null)
+      this.form1?.get("periodo_finalizacion")?.setValue(null)
+      this.form1?.get("observacion")?.setValue(null)
+
+      this.FormBen?.get("nombre_beneficio")?.setValue(null)
+      this.FormBen?.get("num_rentas_pagar_primer_pago")?.setValue(null)
+      this.FormBen?.get("periodicidad_beneficio")?.setValue(null)
+      this.FormBen?.get("regimen")?.setValue(null)
+      this.FormBen?.get("estado_solicitud")?.setValue(null)
+      this.FormBen?.get("num_rentas_aplicadas")?.setValue(null)
+      this.FormBen?.get("ultimo_dia_ultima_renta")?.setValue(null)
+      this.FormBen?.get("monto_total")?.setValue(null)
+      this.FormBen?.get("monto_por_periodo")?.setValue(null)
+      this.FormBen?.get("monto_primera_cuota")?.setValue(null)
+      this.FormBen?.get("monto_ultima_cuota")?.setValue(null)
+      this.FormBen?.get("fecha_calculo")?.setValue(null)
+      this.FormBen?.get("periodo_finalizacion")?.setValue(null)
+      this.FormBen?.get("observacion")?.setValue(null)
 
 
     } else if (event.fieldName == "nombre_beneficio") {
       this.tipoBenefSelected = event.value;
+
+      this.form1?.get("estado_solicitud")?.setValue(null)
+      this.form1?.get("num_rentas_aplicadas")?.setValue(null)
+      this.form1?.get("ultimo_dia_ultima_renta")?.setValue(null)
+      this.form1?.get("monto_total")?.setValue(null)
+      this.form1?.get("monto_por_periodo")?.setValue(null)
+      this.form1?.get("monto_primera_cuota")?.setValue(null)
+      this.form1?.get("monto_ultima_cuota")?.setValue(null)
+      this.form1?.get("fecha_calculo")?.setValue(null)
+      this.form1?.get("periodo_finalizacion")?.setValue(null)
+      this.form1?.get("observacion")?.setValue(null)
+
+      this.FormBen?.get("estado_solicitud")?.setValue(null)
+      this.FormBen?.get("num_rentas_aplicadas")?.setValue(null)
+      this.FormBen?.get("ultimo_dia_ultima_renta")?.setValue(null)
+      this.FormBen?.get("monto_total")?.setValue(null)
+      this.FormBen?.get("monto_por_periodo")?.setValue(null)
+      this.FormBen?.get("monto_primera_cuota")?.setValue(null)
+      this.FormBen?.get("monto_ultima_cuota")?.setValue(null)
+      this.FormBen?.get("fecha_calculo")?.setValue(null)
+      this.FormBen?.get("periodo_finalizacion")?.setValue(null)
+      this.FormBen?.get("observacion")?.setValue(null)
 
       this.temp(event, this.beneficios, this.tipoBenefSelected);
     }
@@ -494,65 +570,6 @@ export class NuevoBeneficioAfilComponent implements OnInit {
 
   }
 
-  temp(data: any, beneficios: any, tipoBenefSelected?: any) {
-    let startDateFormatted;
-    let endDateFormatted;
-
-    if (tipoBenefSelected) {
-      for (let i of beneficios) {
-        if (i.value == tipoBenefSelected) {
-          if (this.myFormFields1.length > 0) {
-            this.myFormFields1[2].value = i.regimen.ley;
-          } else if (this.myFormFields2.length > 0) {
-            this.myFormFields2[2].value = i.regimen.ley;
-          }
-        }
-      }
-
-      const temp = this.buscarPeriodicidad(beneficios, tipoBenefSelected)
-      if (temp == "V") {
-        if (this.myFormFields1.length > 0) {
-          this.myFormFields1[this.myFormFields1.length - 1].display = false;
-          this.myFormFields1[this.myFormFields1.length - 2].display = false;
-        } else if (this.myFormFields2.length > 0) {
-          this.myFormFields2[this.myFormFields2.length - 1].display = false;
-          this.myFormFields2[this.myFormFields2.length - 2].display = false;
-        }
-        const fechaActual = new Date();
-        startDateFormatted = format(fechaActual, 'dd-MM-yyyy');
-        endDateFormatted = '01-01-2500';
-
-      } else if (!temp) {
-        if (this.myFormFields1.length > 0) {
-          this.myFormFields1[this.myFormFields1.length - 1].display = true;
-          this.myFormFields1[this.myFormFields1.length - 2].display = true;
-        } else if (this.myFormFields2.length > 0) {
-          this.myFormFields2[this.myFormFields2.length - 1].display = true;
-          this.myFormFields2[this.myFormFields2.length - 2].display = true;
-        }
-
-        /* const startDate = new Date(event.value.periodo.start);
-        const endDate = new Date(event.value.periodo.end); */
-
-        const opciones: Intl.DateTimeFormatOptions = {
-          year: 'numeric',
-          month: '2-digit',
-          day: '2-digit'
-        };
-
-        /* startDateFormatted = startDate.toLocaleDateString('es', opciones).replace(/\//g, '-');
-        endDateFormatted = endDate.toLocaleDateString('es', opciones).replace(/\//g, '-'); */
-      }
-    }
-
-    if (startDateFormatted != 'Invalid Date' && endDateFormatted != 'Invalid Date') {
-      const datosFormateados = {
-        ...data.value,
-      };
-      this.datosFormateados = datosFormateados;
-    }
-  }
-
   async obtenerDatos1(event: any): Promise<any> {
     this.form1 = event;
     const datosFormateados = {
@@ -560,61 +577,224 @@ export class NuevoBeneficioAfilComponent implements OnInit {
     };
     this.datosFormateados = datosFormateados;
 
+    if (this.datosFormateados.monto_por_periodo && this.datosFormateados.num_rentas_aplicadas) {
+      const result = parseFloat(this.datosFormateados.monto_por_periodo) * parseFloat(this.datosFormateados.num_rentas_aplicadas)
+      //console.log(result);
+      this.FormBen?.get("monto_total")?.setValue(result);
+      this.FormBen?.get("monto_total")?.setValue(result);
+      this.form1?.get("monto_total")?.setValue(result);
+      this.form1?.get("monto_total")?.setValue(result);
+    }
+
+    let fechaFormateada
+
+    if (this.datosFormateados.periodicidad_beneficio == "V") {
+      fechaFormateada = '01/01/2500';
+    } else if (this.datosFormateados.periodicidad_beneficio == "P") {
+
+      //CALCULO DE FECHAS
+      if (this.datosFormateados.fecha_calculo) {
+        if (this.datosFormateados?.num_rentas_aplicadas && this.datosFormateados?.ultimo_dia_ultima_renta && parseInt(this.datosFormateados?.num_rentas_aplicadas, 10) > 1) {
+
+          // Convertimos `fecha_calculo` a `Date` para hacer los cálculos
+          const startDate = new Date(this.datosFormateados.fecha_calculo);
+          // Sumamos los meses especificados en `num_rentas_aplicadas`
+          const endDateWithMonths = addMonths(startDate, parseInt(this.datosFormateados?.num_rentas_aplicadas, 10));
+          // Configuramos la fecha al próximo mes y asignamos el día de `ultimo_dia_ultima_renta`
+          const endDateAdjusted = new Date(endDateWithMonths.getFullYear(), endDateWithMonths.getMonth() + 1, parseInt(this.datosFormateados?.ultimo_dia_ultima_renta, 10));
+          // Formateamos la fecha final
+          fechaFormateada = format(endDateAdjusted, 'dd/MM/yyyy');
+
+        } else if (parseInt(this.datosFormateados?.num_rentas_aplicadas, 10) == 1) {
+
+          // Obtenemos la fecha en formato `Date` para sumar días y meses correctamente
+          //const startDate = new Date(this.datosFormateados.fecha_calculo);
+          // Primero, sumamos los meses
+          //const endDateWithMonths = addMonths(startDate, parseInt(this.datosFormateados?.num_rentas_aplicadas, 10));
+          // Luego, sumamos los días (en este caso, 0 días, pero puedes ajustar si necesitas)
+          //const endDateWithDays = addDays(endDateWithMonths, 0);
+          // Formateamos la fecha final
+          //fechaFormateada = format(endDateWithDays, 'dd/MM/yyyy');
+        }
+      }
+    }
+
+    if (fechaFormateada != undefined) {
+      this.form1?.get("periodo_finalizacion")?.setValue(fechaFormateada);
+    }
+
   }
 
   async obtenerDatosFormBen(event: any): Promise<any> {
     this.FormBen = event;
-    const temp = this.buscarPeriodicidad(this.tiposBeneficios, this.FormBen.value.nombre_beneficio);
-
-    let startDateFormatted
-    let endDateFormatted
-
-    const fechaActual = new Date();
-
-    if (temp == "VITALICIO") {
-      this.myFormFields2[8].display = false
-
-      startDateFormatted = format(fechaActual, 'dd-MM-yyyy');
-      endDateFormatted = '01-01-2500';
-
-    } else if (!temp) {
-      this.myFormFields2[8].display = true
-    }
-
     const datosFormateados = {
       ...event.value
     };
     this.datosFormateados = datosFormateados;
 
+    if (this.datosFormateados.monto_por_periodo && this.datosFormateados.num_rentas_aplicadas) {
+      const result = parseFloat(this.datosFormateados.monto_por_periodo) * parseFloat(this.datosFormateados.num_rentas_aplicadas)
+      this.FormBen?.get("monto_total")?.setValue(result);
+      this.FormBen?.get("monto_total")?.setValue(result);
+    }
+
+    let fechaFormateada
+
+    //CALCULO DE FECHAS
+    const startDateFormatted = format(this.datosFormateados.fecha_calculo, 'dd/MM/yyyy');
+
+    if (this.datosFormateados.periodicidad_beneficio == "V") {
+      fechaFormateada = '01/01/2500';
+    } else if (this.datosFormateados.periodicidad_beneficio == "P") {
+      //CALCULO DE FECHAS
+      if (this.datosFormateados.fecha_calculo && parseInt(this.datosFormateados?.num_rentas_aplicadas, 10) > 1) {
+        if (this.datosFormateados?.num_rentas_aplicadas && this.datosFormateados?.ultimo_dia_ultima_renta) {
+
+          // Convertimos `fecha_calculo` a `Date` para hacer los cálculos
+          const startDate = new Date(this.datosFormateados.fecha_calculo);
+          // Sumamos los meses especificados en `num_rentas_aplicadas`
+          const endDateWithMonths = addMonths(startDate, parseInt(this.datosFormateados?.num_rentas_aplicadas, 10));
+          // Configuramos la fecha al próximo mes y asignamos el día de `ultimo_dia_ultima_renta`
+          const endDateAdjusted = new Date(endDateWithMonths.getFullYear(), endDateWithMonths.getMonth() + 1, parseInt(this.datosFormateados?.ultimo_dia_ultima_renta, 10));
+          // Formateamos la fecha final
+          fechaFormateada = format(endDateAdjusted, 'dd/MM/yyyy');
+
+        } else if (parseInt(this.datosFormateados?.num_rentas_aplicadas, 10) == 1) {
+          // Obtenemos la fecha en formato `Date` para sumar días y meses correctamente
+          /* const startDate = new Date(this.datosFormateados.fecha_calculo); */
+          // Primero, sumamos los meses
+          /* const endDateWithMonths = addMonths(startDate, parseInt(this.datosFormateados?.num_rentas_aplicadas, 10)); */
+          // Luego, sumamos los días (en este caso, 0 días, pero puedes ajustar si necesitas)
+          /* const endDateWithDays = addDays(endDateWithMonths, 0); */
+          // Formateamos la fecha final
+          /* fechaFormateada = format(endDateWithDays, 'dd/MM/yyyy'); */
+        }
+      }
+    }
+
+    if (fechaFormateada != undefined) {
+      this.FormBen?.get("periodo_finalizacion")?.setValue(fechaFormateada);
+    }
   }
 
-  transformarObjeto(objeto: any) {
-    return Object.keys(objeto).map(key => {
-      return {
-        header: key,
-        col: key,
-        isEditable: false,
-      };
-
-    });
+  setFieldValue(formFields: any[], fieldName: string, property: string, value: any) {
+    const field = formFields.find(f => f.name === fieldName);
+    if (field) {
+      field[property] = value;
+    }
   }
 
-  guardarNTBenef() {
+  temp(data: any, beneficios: any, tipoBenefSelected?: any) {
+    if (tipoBenefSelected) {
+      for (let i of beneficios) {
+        if (i.value == tipoBenefSelected) {
+          if (this.myFormFields1.length > 0) {
+
+            this.form1?.get("periodicidad_beneficio")?.setValue(i.periodicidad);
+            this.setFieldValue(this.myFormFields1, 'periodicidad_beneficio', 'readOnly', true);
+            this.form1?.get("regimen")?.setValue(i.regimen.ley);
+
+            if (i.periodicidad == "P") {
+              this.setFieldValue(this.myFormFields1, 'num_rentas_pagar_primer_pago', 'display', true);
+              this.setFieldValue(this.myFormFields1, 'periodo_finalizacion', 'display', true);
+              this.setFieldValue(this.myFormFields1, 'periodo_finalizacion', 'readOnly', true);
+              this.setFieldValue(this.myFormFields1, 'num_rentas_aplicadas', 'display', true);
+              this.setFieldValue(this.myFormFields1, 'monto_total', 'display', true);
+
+              if (i.numero_rentas_max == 1) {
+                this.form1.get("num_rentas_aplicadas")?.setValue(1);
+                this.setFieldValue(this.myFormFields1, 'num_rentas_pagar_primer_pago', 'display', false);
+                this.setFieldValue(this.myFormFields1, 'num_rentas_aplicadas', 'readOnly', true);
+                this.setFieldValue(this.myFormFields1, 'ultimo_dia_ultima_renta', 'display', false);
+                this.setFieldValue(this.myFormFields1, 'periodo_finalizacion', 'display', false);
+                this.setFieldValue(this.myFormFields1, 'monto_total', 'readOnly', false);
+                this.setFieldValue(this.myFormFields1, 'monto_por_periodo', 'display', false);
+                this.setFieldValue(this.myFormFields1, 'monto_primera_cuota', 'display', false);
+                this.setFieldValue(this.myFormFields1, 'monto_ultima_cuota', 'display', false);
+
+              } else if (i.numero_rentas_max > 1 || i.numero_rentas_max == 0) {
+                this.setFieldValue(this.myFormFields1, 'num_rentas_pagar_primer_pago', 'display', true);
+                this.setFieldValue(this.myFormFields1, 'num_rentas_aplicadas', 'readOnly', false);
+                this.setFieldValue(this.myFormFields1, 'ultimo_dia_ultima_renta', 'display', true);
+                this.setFieldValue(this.myFormFields1, 'monto_total', 'readOnly', true);
+                this.setFieldValue(this.myFormFields1, 'monto_por_periodo', 'display', true);
+                this.setFieldValue(this.myFormFields1, 'monto_primera_cuota', 'display', true);
+                this.setFieldValue(this.myFormFields1, 'monto_ultima_cuota', 'display', true);
+              }
+
+            } else if (i.periodicidad == "V") {
+              this.setFieldValue(this.myFormFields1, 'num_rentas_pagar_primer_pago', 'display', true);
+              this.setFieldValue(this.myFormFields1, 'num_rentas_aplicadas', 'display', false);
+              this.setFieldValue(this.myFormFields1, 'ultimo_dia_ultima_renta', 'display', false);
+              this.setFieldValue(this.myFormFields1, 'monto_total', 'display', false);
+              this.setFieldValue(this.myFormFields1, 'monto_total', 'readOnly', false);
+              this.setFieldValue(this.myFormFields1, 'monto_por_periodo', 'display', true);
+              this.setFieldValue(this.myFormFields1, 'monto_primera_cuota', 'display', true);
+              this.setFieldValue(this.myFormFields1, 'monto_ultima_cuota', 'display', false);
+              this.setFieldValue(this.myFormFields1, 'periodo_finalizacion', 'display', false);
+              this.setFieldValue(this.myFormFields1, 'periodo_finalizacion', 'readOnly', false);
+            }
+
+          } else if (this.myFormFields2.length > 0) {
+
+            this.FormBen.get("periodicidad_beneficio")?.setValue(i.periodicidad);
+            this.setFieldValue(this.myFormFields2, 'periodicidad_beneficio', 'readOnly', true);
+            this.FormBen.get("regimen")?.setValue(i.regimen.ley);
+
+            if (i.periodicidad == "P") {
+              this.setFieldValue(this.myFormFields2, 'num_rentas_aplicadas', 'display', true);
+              this.setFieldValue(this.myFormFields2, 'monto_total', 'display', true);
+              this.setFieldValue(this.myFormFields2, 'periodo_finalizacion', 'display', true);
+              this.setFieldValue(this.myFormFields2, 'periodo_finalizacion', 'readOnly', true);
+
+              if (i.numero_rentas_max == 1) {
+                this.FormBen.get("num_rentas_aplicadas")?.setValue(1);
+                this.setFieldValue(this.myFormFields2, 'num_rentas_pagar_primer_pago', 'display', false);
+                this.setFieldValue(this.myFormFields2, 'num_rentas_aplicadas', 'readOnly', true);
+                this.setFieldValue(this.myFormFields2, 'ultimo_dia_ultima_renta', 'display', false);
+                this.setFieldValue(this.myFormFields2, 'monto_total', 'readOnly', false);
+                this.setFieldValue(this.myFormFields2, 'monto_por_periodo', 'display', false);
+                this.setFieldValue(this.myFormFields2, 'monto_primera_cuota', 'display', false);
+                this.setFieldValue(this.myFormFields2, 'monto_ultima_cuota', 'display', false);
+                this.setFieldValue(this.myFormFields2, 'periodo_finalizacion', 'display', false);
+
+              } else if (i.numero_rentas_max > 1 || i.numero_rentas_max == 0) {
+                this.setFieldValue(this.myFormFields2, 'num_rentas_pagar_primer_pago', 'display', true);
+                this.setFieldValue(this.myFormFields2, 'num_rentas_aplicadas', 'readOnly', false);
+                this.setFieldValue(this.myFormFields2, 'ultimo_dia_ultima_renta', 'display', true);
+                this.setFieldValue(this.myFormFields2, 'monto_total', 'readOnly', true);
+                this.setFieldValue(this.myFormFields2, 'monto_por_periodo', 'display', true);
+                this.setFieldValue(this.myFormFields2, 'monto_primera_cuota', 'display', true);
+                this.setFieldValue(this.myFormFields2, 'monto_ultima_cuota', 'display', true);
+              }
+
+            } else if (i.periodicidad == "V") {
+              this.setFieldValue(this.myFormFields2, 'num_rentas_pagar_primer_pago', 'display', true);
+              this.setFieldValue(this.myFormFields2, 'num_rentas_aplicadas', 'display', false);
+              this.setFieldValue(this.myFormFields2, 'ultimo_dia_ultima_renta', 'display', false);
+              this.setFieldValue(this.myFormFields2, 'monto_total', 'display', false);
+              this.setFieldValue(this.myFormFields2, 'monto_total', 'readOnly', false);
+              this.setFieldValue(this.myFormFields2, 'monto_por_periodo', 'display', true);
+              this.setFieldValue(this.myFormFields2, 'monto_primera_cuota', 'display', true);
+              this.setFieldValue(this.myFormFields2, 'monto_ultima_cuota', 'display', false);
+              this.setFieldValue(this.myFormFields2, 'periodo_finalizacion', 'display', false);
+              this.setFieldValue(this.myFormFields2, 'periodo_finalizacion', 'readOnly', false);
+            }
+          }
+        }
+      }
+    }
+  }
+
+
+  async guardarNTBenef() {
     /* Asignar al afiliado si no ha fallecido */
     /* Asignar a los beneficiarios si el afiliado ya falleció */
-    const fechaActual = new Date();
+    // console.log(this.datosFormateados);
+
+    //AFILIADOS O BENEFICIARIOS
     if (this.Afiliado.fallecido != "SI") {
       this.datosFormateados["dni"] = this.form.value.dni;
-      const startDateFormatted = format(fechaActual, 'dd-MM-yyyy');
-      let fechaFormateada = '01-01-2500';
-
-      if (this.datosFormateados?.num_rentas_aplicadas && this.datosFormateados?.dia) {
-        const endDateFormatted = addDays(addMonths(fechaActual, parseInt(this.datosFormateados?.num_rentas_aplicadas, 10)), parseInt(this.datosFormateados?.dia, 10));
-        fechaFormateada = format(endDateFormatted, 'dd-MM-yyyy');
-      }
-
-      this.datosFormateados["periodo_inicio"] = startDateFormatted;
-      this.datosFormateados["periodo_finalizacion"] = fechaFormateada;
 
       this.svcBeneficioServ.asigBeneficioAfil(this.datosFormateados, this.desOBenSeleccionado).subscribe(
         {
@@ -624,17 +804,17 @@ export class NuevoBeneficioAfilComponent implements OnInit {
           },
           error: (error) => {
             console.log(error);
-
             let mensajeError = '';
             // Verifica si el error tiene una estructura específica
             if (error.error.mensaje) {
-              mensajeError = error.error.mensaje;
+              mensajeError = 'Su sesión expiró';
             }
             this.toastr.error(mensajeError);
           }
         })
     } else {
       this.datosFormateados["dni"] = this.FormBen.value.dni;
+
       this.svcBeneficioServ.asigBeneficioAfil(this.datosFormateados, this.desOBenSeleccionado, this.Afiliado.id_persona).subscribe(
         {
           next: (response) => {
@@ -652,7 +832,6 @@ export class NuevoBeneficioAfilComponent implements OnInit {
             this.toastr.error(mensajeError);
           }
         })
-
     }
   }
 
@@ -669,5 +848,6 @@ export class NuevoBeneficioAfilComponent implements OnInit {
       this.dynamicForm.form.reset();
     }
   }
+
 
 }

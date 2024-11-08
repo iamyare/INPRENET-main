@@ -31,7 +31,7 @@
 
       </tr>
       <tr>
-        <th>Genero</th>
+        <th>Género</th>
         <td>{{ Afiliado.genero }}</td>
         <th>Fecha nacimiento</th>
         <td>{{ Afiliado.fecha_nacimiento }}</td>
@@ -48,7 +48,7 @@
 </div>
 
 <div [hidden]="!monstrarBeneficiarios" style="background-color: white; border-radius: 10px; padding: 20px">
-  <app-dynamic-table titulo="" subtitulo="" [columns]="myColumns1" [data]="filasEst" [getData]="getFilas2"
+  <app-dynamic-table titulo="" subtitulo="" [columns]="myColumns1" [data]="filasEst" [getData]="getFilas"
     (ejecutarFuncionAsincronaEvent)="
     ejecutarFuncionAsincronaDesdeOtroComponente2($event)
   ">

@@ -36,6 +36,9 @@ export class Net_Usuario_Empresa {
   @OneToMany(() => Net_Seguridad, seguridad => seguridad.usuarioEmpresa)
   seguridad: Net_Seguridad[];
 
+  @Column('varchar2', { length: 500, nullable: true, name: 'REFRESH_TOKEN' })
+  refreshToken: string;
+
   @OneToMany(() => net_usuario_modulo, usuarioModulo => usuarioModulo.usuarioEmpresa)
   usuarioModulos: net_usuario_modulo[];
 

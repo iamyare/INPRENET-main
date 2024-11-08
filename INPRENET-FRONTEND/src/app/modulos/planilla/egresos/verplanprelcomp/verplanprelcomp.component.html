@@ -1,17 +1,5 @@
 <app-ver-planillas-activas (getElemSeleccionados)="getElemSeleccionados($event)"></app-ver-planillas-activas>
 
-<!-- <div style="background-color: white; margin-bottom: 1%">
-  <app-dynamic-form [fields]="myFormFields" titulo="Detalles De Planilla Preliminar"
-    subtitulo="Completa la información correspondiente" (newDatBenChange)="obtenerDatosForm($event)">
-  </app-dynamic-form>
-  <div style="text-align: center">
-    <button mat-raised-button color="primary" (click)="getPlanilla()" [disabled]="datosFormateados?.invalid"
-      style="margin: 2% 0; color: white; border-radius: 5px; padding: 10px 20px">
-      Ver Planilla preliminar
-    </button>
-  </div>
-</div> -->
-
 <div class="card-header card-header-danger title" *ngIf="detallePlanilla">
   <div class="card-body" style="padding: 1%">
     <h4 class="card-title">Datos Generales De La Planilla {{detallePlanilla?.tipoPlanilla?.nombre_planilla}} (CON Y SIN CUENTA BANCARIA)
@@ -59,29 +47,20 @@
   </h4>
 
   <div style="padding: 1% 1% 1% 1%">
-    <app-dynamic-table
-      titulo="Datos de personas en planilla"
-      subtitulo="Completa la información correspondiente"
-      style="width: 100%"
+      <app-dynamic-table
+      [titulo]="'Datos de personas en planilla'"
+      [subtitulo]="'Completa la información correspondiente'"
+      [data]="datosTabl"
+      [columns]="myColumnsDed"
       [nombreEncabezadoUno]="'Desglose'"
-      [verOpcEditar]="false"
-
       [mostrarBotonUno]="true"
       [etiquetaBotonUno]="'Ingresos'"
-      [nombreEncabezadoUno]="'Detalle Ingresos'"
-      (ejecutarFuncionAsincronaEvent)="ejecutarFuncionAsincronaDesdeOtroComponente($event)"
       (accionBotonUno)="manejarAccionUno($event)"
-
       [nombreEncabezadoDos]="'Detalle Deducciones'"
-      [etiquetaBotonDos]="'Deducciones'"
       [mostrarBotonDos]="true"
-      (ejecutarFuncionAsincronaEvent)="ejecutarFuncionAsincronaDesdeOtroComponente($event)"
+      [etiquetaBotonDos]="'Deducciones'"
       (accionBotonDos)="manejarAccionDos($event)"
-
-      [columns]="myColumnsDed"
-      [data]="datosTabl"
-      [getData]="getFilas">
-
+      (ejecutarFuncionAsincronaEvent)="ejecutarFuncionAsincronaDesdeOtroComponente($event)">
     </app-dynamic-table>
 
     <div style="background-color: white; margin-bottom: 1%; text-align: center">

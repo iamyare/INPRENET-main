@@ -52,7 +52,10 @@ export class AgregarFamiliarComponent implements OnInit {
       label: 'Número de Identificación',
       type: 'text',
       icon: 'badge',
-      validations: [Validators.required],
+      validations: [
+        Validators.required,
+        Validators.pattern('^[0-9]{13}$|^[0-9]{15}$')
+      ],
       layout: { row: 1, col: 6 }
     },
     {
@@ -93,7 +96,10 @@ export class AgregarFamiliarComponent implements OnInit {
       segundo_nombre: new FormControl(''),
       primer_apellido: new FormControl('', Validators.required),
       segundo_apellido: new FormControl('', Validators.required),
-      n_identificacion: new FormControl('', Validators.required),
+      n_identificacion: new FormControl('', [
+        Validators.required,
+        Validators.pattern('^[0-9]{13}$|^[0-9]{15}$')
+      ]),
       parentesco: new FormControl('', Validators.required)
     });
     this.familiares.push(familiarGroup);

@@ -1,6 +1,8 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 import { MovimientosComponent } from './movimientos/movimientos.component';
+import { RoleGuard } from 'src/app/guards/role-guard.guard';
+import { PermisosService } from 'src/app/services/permisos.service';
 
 const routes: Routes = [
   {
@@ -8,7 +10,9 @@ const routes: Routes = [
     children: [
       {
         path: 'Ver-movimientos',
-        component: MovimientosComponent
+        component: MovimientosComponent,
+        canActivate: [RoleGuard],
+        data: { expectedRolesModules: PermisosService.getExpectedRolesForRoute('CUENTAS INPREMA', 'cuentas/Movimientos/Ver-movimientos') }
       },
       { path: '**', redirectTo: 'Ver-movimientos', pathMatch: 'full' }
     ]

@@ -30,7 +30,11 @@ export class CrearPersonaDto {
   @IsOptional()
   @IsString()
   estado_civil?: string;
-
+  
+  @IsOptional()
+  @IsDateString()
+  fecha_afiliacion?: string;
+  
   @IsNotEmpty()
   @IsString()
   primer_nombre: string;

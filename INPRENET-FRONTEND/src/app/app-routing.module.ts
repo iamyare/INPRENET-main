@@ -6,7 +6,6 @@ import { UserManagementComponent } from './modulos/admin/user-management/user-ma
 import { AddAdminComponent } from './modulos/admin/add-admin/add-admin.component';
 import { MainLayoutComponent } from './components/main-layout/main-layout.component';
 import { EditarPerfilComponent } from './modulos/auth/editar-perfil/editar-perfil.component';
-import { RoleGuard } from './guards/role-guard.guard';
 import { LoginComponent } from './modulos/auth/login/login.component';
 import { LoginPrivadosComponent } from './modulos/auth/login-privados/login-privados.component';
 import { OlvidoContrasenaComponent } from './modulos/auth/olvido-contrasena/olvido-contrasena.component';
@@ -30,9 +29,7 @@ const routes: Routes = [
       { path: 'user-management', component: UserManagementComponent },
       { path: 'add-admin', component: AddAdminComponent },
       //{ path: '', redirectTo: 'dashboard-admin', pathMatch: 'full' }
-    ],
-    canActivate: [RoleGuard],
-    data: { expectedRolesModules: [{ role: 'TODO' }, { role: 'ADMINISTRADOR', module: 'PLANILLA' }, { role: 'OFICIAL DE PLANILLA', module: 'PLANILLA' }] }
+    ]
   },
   {
     path: 'home',
@@ -41,20 +38,14 @@ const routes: Routes = [
       {
         path: 'afiliacion',
         loadChildren: () => import('./modulos/afiliacion/afiliacion.module').then(m => m.AfiliacionModule),
-        canActivate: [RoleGuard],
-        data: { expectedRolesModules: [{ role: 'TODO' },{ role: 'OFICIAL DE PLANILLA', module: 'PLANILLA' }, { role: 'ADMINISTRADOR', module: 'AFILIACION' }, { role: 'MODIFICACION AFILIACION', module: 'AFILIACION' }, { role: 'CONSULTA AFILIACION', module: 'AFILIACION' }] }
       },
       {
         path: 'planilla',
         loadChildren: () => import('./modulos/planilla/planilla.module').then(m => m.PlanillaModule),
-        canActivate: [RoleGuard],
-        data: { expectedRolesModules: [{ role: 'TODO' }, { role: 'ADMINISTRADOR', module: 'PLANILLA' }, { role: 'OFICIAL DE PLANILLA', module: 'PLANILLA' }] }
       },
       {
         path: 'gestion',
         loadChildren: () => import('./modulos/admin/admin.module').then(m => m.AdminModule),
-        /* canActivate: [RoleGuard],
-        data: { expectedRolesModules: [{ role: 'TODO' }, { role: 'ADMINISTRADOR' }, { role: 'OFICIAL DE PLANILLA', module: 'PLANILLA' }] } */
       },
       {
         path: 'menu',
@@ -67,8 +58,6 @@ const routes: Routes = [
       {
         path: 'escalafon',
         loadChildren: () => import('./modulos/escalafon/escalafon.module').then(m => m.EscalafonModule),
-        canActivate: [RoleGuard],
-        data: { expectedRolesModules: [{ role: 'TODO' },{ role: 'ADMINISTRADOR', module: 'ESCALAFON' }, { role: 'CONSULTA PRESTAMOS', module: 'ESCALAFON' }] }
       },
 
       { path: 'usuario/editar', component: EditarPerfilComponent },
@@ -82,4 +71,3 @@ const routes: Routes = [
   exports: [RouterModule]
 })
 export class AppRoutingModule { }
-

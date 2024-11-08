@@ -4,7 +4,6 @@ import { ComponentsModule } from 'src/app/components/components.module';
 import { MaterialAngularModule } from 'src/app/material-angular/material-angular.module';
 import { PlanillaRoutingModule } from './planilla-routing.module';
 import { NuevaDeduccionAfilComponent } from './egresos/nueva-deduccion-afil/nueva-deduccion-afil.component';
-import { NuevaPlanillaComponentP } from './egresos/nueva-planilla/nueva-planilla.component';
 import { ProgressplanillComponent } from './egresos/progressplanill/progressplanill.component';
 import { NuevaplanillaComponent } from './egresos/nuevaplanilla/nuevaplanilla.component';
 import { VerplanprelcompComponent } from './egresos/verplanprelcomp/verplanprelcomp.component';
@@ -34,6 +33,7 @@ import { CargarbefDedComponent } from './egresos/cargarbef-ded/cargarbef-ded.com
 import { ProcesoPlanillaComponent } from './egresos/proceso-planilla/proceso-planilla.component';
 import { DialogDesgloseComponent } from './egresos/dialog-desglose/dialog-desglose.component';
 import { VerPlanillasActivasComponent } from './egresos/ver-planillas-activas/ver-planillas-activas.component';
+import { VerPlanillasCerradasComponent } from './egresos/ver-planillas-cerradas/ver-planillas-cerradas.component';
 import { GestionBancoComponent } from './gestion-banco/gestion-banco.component';
 import { CambioEstadoTipoPerComponent } from '../afiliacion/gestion/cambio-estado-tipo-per/cambio-estado-tipo-per.component';
 import { AfiliacionModule } from '../afiliacion/afiliacion.module';
@@ -44,7 +44,6 @@ import { P60RentasComponent } from './p-60-rentas/p-60-rentas.component';
 @NgModule({
   declarations: [
     NuevaDeduccionAfilComponent,
-    NuevaPlanillaComponentP,
     ProgressplanillComponent,
     NuevaplanillaComponent,
     VerplanprelcompComponent,
@@ -76,6 +75,7 @@ import { P60RentasComponent } from './p-60-rentas/p-60-rentas.component';
     GestionBancoComponent,
     ActualizarFallecidosComponent,
     VerPlanillasActivasComponent,
+    VerPlanillasCerradasComponent,
     MontoDialogComponent,
     CambioEstadoTipoPerComponent,
     P60RentasComponent

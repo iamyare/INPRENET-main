@@ -5,16 +5,15 @@ import { UpdateEscalafonDto } from './dto/update-escalafon.dto';
 
 @Controller('escalafon')
 export class EscalafonController {
-  constructor(private readonly escalafonService: EscalafonService) {}
+  constructor(private readonly escalafonService: EscalafonService) { }
 
   @Post()
   create(@Body() createEscalafonDto: CreateEscalafonDto) {
     return this.escalafonService.create(createEscalafonDto);
   }
-/**/
+  /**/
   @Get('prestamos/:dni')
   findOne(@Param('dni') dni: string) {
-    console.log('probar ruta')
     return this.escalafonService.findOne(dni);
   }
 

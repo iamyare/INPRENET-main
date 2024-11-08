@@ -14,10 +14,6 @@ const routes: Routes = [
   { path: 'restablecer-contrasena/:token', component: RestablecerContrasenaComponent },
   { path: 'register', component: RegisterComponent },
   { path: 'landing-page', component: LandingPageComponent },
-
-
-  /* { path: 'pre-register', component: PreRegisterComponent }, */
-  /* { path: 'editar', component: EditarPerfilComponent }, */
 ];
 
 @NgModule({

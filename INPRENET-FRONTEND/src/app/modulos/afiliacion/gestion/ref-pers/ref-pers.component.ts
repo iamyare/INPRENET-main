@@ -1,6 +1,5 @@
 import { Component, Input, OnInit } from '@angular/core';
-import { AbstractControl, FormArray, FormBuilder, FormControl, FormGroup, ValidationErrors, ValidatorFn, Validators } from '@angular/forms';
-import { debounceTime, distinctUntilChanged } from 'rxjs';
+import { AbstractControl, FormArray, FormBuilder, FormGroup, ValidationErrors, ValidatorFn, Validators } from '@angular/forms';
 import { BeneficiosService } from 'src/app/services/beneficios.service';
 import { DatosEstaticosService } from 'src/app/services/datos-estaticos.service';
 
@@ -27,13 +26,11 @@ export class RefPersComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    if (!this.formGroup.get('refpers')) {
+      this.formGroup.addControl('refpers', this.fb.array([]));
+    }
     if (!this.formGroup.get('conyuge')) {
       this.formGroup.addControl('conyuge', this.initFormConyuge());
-    }
-    if (!this.formGroup.get('refpers')) {
-      const referenciasArray = this.fb.array([]);
-      referenciasArray.setValidators(this.identidadUnicaValidator.bind(this));
-      this.formGroup.addControl('refpers', referenciasArray);
     }
     this.cargarDatosEstaticos();
   }
@@ -53,7 +50,6 @@ export class RefPersComponent implements OnInit {
     return this.formGroup.get('refpers') as FormArray;
   }
 
-  // Función para inicializar el FormGroup de cónyuge
   private initFormConyuge(): FormGroup {
     return this.fb.group({
       primer_nombre: ['', []],
@@ -97,7 +93,6 @@ export class RefPersComponent implements OnInit {
     });
   }
 
-  // Función para agregar una nueva referencia personal
   agregarReferencia(datos?: any): void {
     const referenciaForm = this.fb.group({
       tipo_referencia: [datos?.tipo_referencia || '', [Validators.required]],
@@ -106,7 +101,7 @@ export class RefPersComponent implements OnInit {
       tercer_nombre: [datos?.tercer_nombre || '', [Validators.maxLength(50), Validators.pattern(/^[^0-9]*$/)]],
       primer_apellido: [datos?.primer_apellido || '', [Validators.required, Validators.minLength(2), Validators.maxLength(50), Validators.pattern(/^[^0-9]*$/)]],
       segundo_apellido: [datos?.segundo_apellido || '', [Validators.maxLength(50), Validators.pattern(/^[^0-9]*$/)]],
-      direccion: [datos?.direccion || '', [Validators.maxLength(200)]],
+      direccion: [datos?.direccion || '', [Validators.required, Validators.minLength(10), Validators.maxLength(200)]],
       telefono_domicilio: [datos?.telefono_domicilio || '', [Validators.minLength(8), Validators.maxLength(12), Validators.pattern(/^[0-9]*$/)]],
       telefono_trabajo: [datos?.telefono_trabajo || '', [Validators.minLength(8), Validators.maxLength(12), Validators.pattern(/^[0-9]*$/)]],
       telefono_personal: [datos?.telefono_personal || '', [Validators.minLength(8), Validators.maxLength(12), Validators.pattern(/^[0-9]*$/)]],
@@ -115,7 +110,7 @@ export class RefPersComponent implements OnInit {
         Validators.pattern(/^[0-9]*$/),
         Validators.minLength(13),
         Validators.maxLength(13),
-        this.validarIdentificacionUnica()
+        this.validarIdentificacionUnicaReferencia()
       ]],
     });
     this.referencias.push(referenciaForm);
@@ -133,17 +128,15 @@ export class RefPersComponent implements OnInit {
       this.parentesco = this.datosEstaticosService.parentescoReferenciasPersonales;
     }
 
-    referenciaForm.get('parentesco')?.setValue(''); // Resetear el parentesco cuando cambia el tipo de referencia
+    referenciaForm.get('parentesco')?.setValue('');
   }
 
-  // Función para eliminar una referencia personal
   eliminarReferencia(index: number): void {
     if (this.referencias.length > 0) {
       this.referencias.removeAt(index);
     }
   }
 
-  // Cargar datos estáticos (parentesco, sexo, tipo_referencia, tipo_identificacion)
   private cargarDatosEstaticos(): void {
     this.parentesco = this.datosEstaticosService.parentesco;
     this.tipo_referencia = [
@@ -152,7 +145,6 @@ export class RefPersComponent implements OnInit {
     ];
   }
 
-  // Función para marcar todos los controles como "tocados"
   markAllAsTouched(control: FormGroup | FormArray): void {
     if (control instanceof FormGroup || control instanceof FormArray) {
       Object.values(control.controls).forEach(ctrl => {
@@ -164,7 +156,26 @@ export class RefPersComponent implements OnInit {
     }
   }
 
-  // Obtener errores para un control específico
+  getErrorMessageForIdentificacion(index: number): string {
+    const control = (this.referencias.at(index) as FormGroup).get('n_identificacion');
+    if (control?.hasError('identificacionDuplicadaReferencia')) {
+      return 'El número de identificación ya existe en otra referencia.';
+    }
+    if (control?.hasError('identificacionDuplicada')) {
+      return 'No puede ser igual al del Afiliado.';
+    }
+    if (control?.hasError('pattern')) {
+      return 'Solo se permiten números.';
+    }
+    if (control?.hasError('minlength')) {
+      return 'Debe tener exactamente 13 dígitos.';
+    }
+    if (control?.hasError('maxlength')) {
+      return 'No puede tener más de 13 dígitos.';
+    }
+    return '';
+  }
+
   getErrors(index: number, controlName: string): string[] {
     const control = (this.referencias.at(index) as FormGroup).get(controlName);
     const errors: string[] = [];
@@ -187,7 +198,24 @@ export class RefPersComponent implements OnInit {
     return errors;
   }
 
-  // Método para manejar cambios en el formulario
+  getErrorMessageForConyugeIdentificacion(): string {
+    const control = this.formGroup.get('conyuge')?.get('n_identificacion');
+    if (control?.hasError('identificacionDuplicada')) {
+      return 'No puede ser igual al del Afiliado.';
+    }
+    if (control?.hasError('pattern')) {
+      return 'Solo se permiten números.';
+    }
+    if (control?.hasError('minlength')) {
+      return 'Debe tener exactamente 13 dígitos.';
+    }
+    if (control?.hasError('maxlength')) {
+      return 'No puede tener más de 13 dígitos.';
+    }
+    return '';
+  }
+
+
   onDatosRefPerChange(): void {
     const data = this.formGroup.value;
 
@@ -233,19 +261,10 @@ export class RefPersComponent implements OnInit {
     }));
   }
 
-  identidadUnicaValidator(control: AbstractControl): { [key: string]: any } | null {
-    const formArray = control as FormArray;
-    const identificaciones = formArray.controls
-      .map(ref => ref.get('n_identificacion')?.value)
-      .filter(value => value !== null && value !== '');
-    const duplicados = identificaciones.filter((item, index) => identificaciones.indexOf(item) !== index);
-    return duplicados.length > 0 ? { identidadDuplicada: true } : null;
-  }
-
   validarIdentificacionUnica(): ValidatorFn {
     return (control: AbstractControl): ValidationErrors | null => {
-      const formGroup = control?.parent?.parent as FormGroup; // Acceder al grupo de la referencia personal
-      const afiliadoIdentificacion = formGroup?.root?.get('datosGenerales')?.get('n_identificacion')?.value; // Obtener identificación del afiliado
+      const formGroup = control?.parent?.parent as FormGroup;
+      const afiliadoIdentificacion = formGroup?.root?.get('datosGenerales')?.get('n_identificacion')?.value;
 
       const nIdentificacionReferencia = control.value;
       if (!nIdentificacionReferencia || nIdentificacionReferencia !== afiliadoIdentificacion) {
@@ -255,5 +274,24 @@ export class RefPersComponent implements OnInit {
     };
   }
 
+  private validarIdentificacionUnicaReferencia(): ValidatorFn {
+    return (control: AbstractControl): ValidationErrors | null => {
+      const formGroup = control?.parent?.parent as FormGroup;
+      const afiliadoIdentificacion = formGroup?.root?.get('datosGenerales')?.get('n_identificacion')?.value;
 
+      const nIdentificacionReferencia = control.value;
+      const referencias = this.referencias.controls.map(ref => ref.get('n_identificacion')?.value);
+      const isDuplicated = referencias.filter(id => id === nIdentificacionReferencia).length > 1;
+      const isSameAsAfiliado = nIdentificacionReferencia && nIdentificacionReferencia === afiliadoIdentificacion;
+
+      if (isDuplicated) {
+        return { identificacionDuplicadaReferencia: true };
+      }
+      if (isSameAsAfiliado) {
+        return { identificacionDuplicada: true };
+      }
+
+      return null;
+    };
+  }
 }

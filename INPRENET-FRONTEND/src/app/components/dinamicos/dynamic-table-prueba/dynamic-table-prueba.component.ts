@@ -22,6 +22,7 @@ export class DynamicTablePruebaComponent implements OnInit, OnDestroy {
   @Output() ejecutarFuncionAsincronaEvent: EventEmitter<(param: any) => Promise<boolean>> = new EventEmitter<(param: any) => Promise<boolean>>();
 
   @Input() columns: TableColumn[] = [];
+  @Input() itemsPerPages: any;
   @Input() editarFunc: any;
 
   @Input() nombreEncabezadoUno: string = '';
@@ -59,9 +60,8 @@ export class DynamicTablePruebaComponent implements OnInit, OnDestroy {
   formsearch = new FormControl('');
   searchResults: any = [];
 
-  itemsPerPage = 20;
   desde = 0;
-  hasta: number = this.itemsPerPage;
+
   currentPage = 0;
 
   editingRow: any | null = null;
@@ -71,20 +71,11 @@ export class DynamicTablePruebaComponent implements OnInit, OnDestroy {
   columnDefs: string[] = [];
 
   selectedItem: any; // Agregamos selectedItem
+  itemsPerPage!: number;
+  hasta!: number;
 
   constructor(private selectionService: SelectionserviceService) {
-    this.formsearch.valueChanges
-      .pipe(
-        debounceTime(300),
-        distinctUntilChanged(),
-        switchMap(query => this.filtrarUsuarios(query)),
-        takeUntil(this.destroy$)
-      )
-      .subscribe(results => {
-        this.searchResults = results;
-        this.currentPage = 0;
-        this.paginator?.firstPage();
-      });
+
   }
 
   ngOnDestroy(): void {
@@ -106,6 +97,27 @@ export class DynamicTablePruebaComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
+    this.formsearch.valueChanges
+      .pipe(
+        debounceTime(300),
+        distinctUntilChanged(),
+        switchMap(query => this.filtrarUsuarios(query)),
+        takeUntil(this.destroy$)
+      )
+      .subscribe(results => {
+        this.searchResults = results;
+        this.currentPage = 0;
+        this.paginator?.firstPage();
+      });
+
+    if (this.itemsPerPages) {
+      this.itemsPerPage = parseInt(this.itemsPerPages);
+    } else {
+      this.itemsPerPage = 20;
+    }
+
+    this.hasta = this.itemsPerPage;
+
     this.ejecutarFuncionAsincronaEvent.emit(this.ejecutarFuncionAsincrona.bind(this));
     this.columnDefs = [
       ...this.columns.map(col => col.col),

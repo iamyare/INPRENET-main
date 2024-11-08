@@ -44,7 +44,7 @@ export class RegisterComponent implements OnInit {
       preguntaseguridad3: ['', [Validators.required]],
       respuestaSeguridad3: ['', [Validators.required]],
       telefonoEmpleado: ['', [Validators.required]],
-      telefonoEmpleado2: [''], // Nuevo campo para el segundo teléfono
+      telefonoEmpleado2: [''],
       numero_identificacion: ['', [Validators.required]]
     }, { validator: this.confirmarContrasenaValidator('contrasena', 'confirmarContrasenia') });
   }

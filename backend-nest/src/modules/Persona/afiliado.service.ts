@@ -15,11 +15,8 @@ import { UpdateBeneficiarioDto } from './dto/update-beneficiario.dto';
 import { net_estado_afiliacion } from './entities/net_estado_afiliacion.entity';
 import { Net_Discapacidad } from './entities/net_discapacidad.entity';
 import { Net_Persona_Discapacidad } from './entities/net_persona_discapacidad.entity';
-import { format } from 'date-fns';
 import { NET_MOVIMIENTO_CUENTA } from '../transacciones/entities/net_movimiento_cuenta.entity';
-import { DetalleBenef } from './dto/pruebaBeneficiario.dto';
-import { DetalleBeneficioService } from '../Planilla/detalle_beneficio/detalle_beneficio.service';
-import { Net_Detalle_Beneficio_Afiliado } from '../Planilla/detalle_beneficio/entities/net_detalle_beneficio_afiliado.entity';
+import { net_causas_fallecimientos } from './entities/net_causas_fallecimientos.entity';
 
 @Injectable()
 export class AfiliadoService {
@@ -44,15 +41,12 @@ export class AfiliadoService {
     private readonly BancosToPersonaRepository: Repository<Net_Persona_Por_Banco>,
     @InjectRepository(Net_Discapacidad)
     private readonly discapacidadRepository: Repository<Net_Discapacidad>,
-
     @InjectRepository(Net_Persona_Discapacidad)
     private readonly perDiscapacidadRepository: Repository<Net_Persona_Discapacidad>,
-
     @InjectRepository(NET_MOVIMIENTO_CUENTA)
     private readonly movimientoCuentaRepository: Repository<NET_MOVIMIENTO_CUENTA>,
-
-    /*     @InjectRepository(Net_Detalle_Beneficio_Afiliado)
-        private readonly detBenAfilRepository: Repository<Net_Detalle_Beneficio_Afiliado> */
+    @InjectRepository(net_causas_fallecimientos) // Inyectamos el repositorio
+    private readonly causasFallecimientoRepository: Repository<net_causas_fallecimientos>,
   ) { }
 
   async getMovimientosOrdenados(id_persona: number, id_tipo_cuenta: number): Promise<any> {
@@ -90,7 +84,7 @@ export class AfiliadoService {
           FECHA_MOVIMIENTO: movimiento.FECHA_MOVIMIENTO,
           DESCRIPCION: movimiento.DESCRIPCION,
           CREADA_POR: movimiento.CREADA_POR,
-          tipoMovimiento: movimiento.tipoMovimiento.DESCRIPCION, // Se asume que tiene una descripción
+          tipoMovimiento: movimiento.tipoMovimiento.DESCRIPCION,
           ANO: movimiento.ANO,
           MES: movimiento.MES,
         });
@@ -199,27 +193,25 @@ export class AfiliadoService {
     if (!persona) {
       throw new NotFoundException(`Afiliado con N_IDENTIFICACION ${term} no existe`);
     }
-    const discapacidades = persona.personaDiscapacidades.map(function (discapacidad) {
-      return {
-        id_discapacidad: discapacidad.discapacidad.id_discapacidad,
-        tipo: discapacidad.discapacidad.tipo_discapacidad,
-        descripcion: discapacidad.discapacidad.descripcion,
-      };
-    });
 
-    const peps = []/* persona.peps.map(peps => ({
-        id: peps.id_peps,
-        cargo: peps.cargo,
-        fecha_inicio: peps.fecha_inicio,
-        fecha_fin: peps.fecha_fin,
-        referencias: peps.referencias,
-        socio: {
-            id: peps.socio?.id_socio,
-            nombre: peps.socio?.nombre,
-            // Añadir más campos según la entidad Net_Socio
-        }
-    })); */
+    // Verifica el detalle de la persona donde coincida ID_PERSONA e ID_CAUSANTE
+    const detalleRelevante = persona.detallePersona.find((detalle) =>
+      detalle.ID_PERSONA === persona.id_persona && detalle.ID_CAUSANTE === persona.id_persona // Aquí ajusta la lógica según lo que es `id_causante`
+    );
 
+    // Si no se encuentra un detalle relevante, puedes manejar el error o continuar con la lógica
+    if (!detalleRelevante) {
+      throw new NotFoundException(`No se encontró un detalle relevante para la persona con ID_PERSONA ${persona.id_persona}`);
+    }
+
+    // Mapeo de discapacidades
+    const discapacidades = persona.personaDiscapacidades.map((discapacidad) => ({
+      id_discapacidad: discapacidad.discapacidad.id_discapacidad,
+      tipo: discapacidad.discapacidad.tipo_discapacidad,
+      descripcion: discapacidad.discapacidad.descripcion,
+    }));
+
+    // Construye el resultado filtrado con el estado de afiliación relevante
     const result = {
       N_IDENTIFICACION: persona.n_identificacion,
       ID_PERSONA: persona.id_persona,
@@ -260,14 +252,15 @@ export class AfiliadoService {
       ID_CAUSA_FALLECIMIENTO: persona?.causa_fallecimiento?.id_causa_fallecimiento!,
       CAUSA_FALLECIMIENTO: persona?.causa_fallecimiento?.nombre!,
       fallecido: persona.fallecido,
-      estadoAfiliacion: persona.detallePersona[0]?.estadoAfiliacion?.codigo,
+      estadoAfiliacion: {
+        codigo: detalleRelevante?.estadoAfiliacion?.codigo || null,
+        nombre_estado: detalleRelevante?.estadoAfiliacion?.nombre_estado || null,
+      },
       CANTIDAD_DEPENDIENTES: persona.cantidad_dependientes,
       discapacidades: discapacidades,
-      peps: peps,
-      ID_TIPO_PERSONA: persona.detallePersona[0]?.tipoPersona?.id_tipo_persona,
-      TIPO_PERSONA: persona.detallePersona[0]?.tipoPersona?.tipo_persona,
+      ID_TIPO_PERSONA: detalleRelevante?.tipoPersona?.id_tipo_persona,
+      TIPO_PERSONA: detalleRelevante?.tipoPersona?.tipo_persona,
     };
-
     return result;
   }
 
@@ -334,6 +327,8 @@ export class AfiliadoService {
   }
 
   async findOneAFiliado(term: string) {
+    console.log(term);
+
 
     try {
       const detallePer = await this.detallePersonaRepository.findOne({
@@ -369,6 +364,8 @@ export class AfiliadoService {
       }); */
 
       //const detallePersona = persona.detallePersona.find(detalle => detalle.tipoPersona.tipo_persona === 'AFILIADO');
+
+      //console.log(detallePer);
 
       const result = {
         N_IDENTIFICACION: detallePer.persona.n_identificacion,
@@ -420,7 +417,7 @@ export class AfiliadoService {
         //ESTADO: detallePersona.eliminado,
       };
 
-      return result /* beneficios */;
+      return result
     } catch (error) {
       console.log(error);
     }
@@ -579,8 +576,9 @@ export class AfiliadoService {
         "Afil"."ID_PERSONA",
         "Afil"."N_IDENTIFICACION",
         "Afil"."PRIMER_NOMBRE",
-        "Afil"."SEGUNDO_APELLIDO",
+        "Afil"."SEGUNDO_NOMBRE",
         "Afil"."TERCER_NOMBRE",
+        "Afil"."SEGUNDO_APELLIDO",
         "Afil"."PRIMER_APELLIDO",
         "Afil"."SEGUNDO_APELLIDO",
         "Afil"."GENERO",
@@ -880,60 +878,103 @@ export class AfiliadoService {
     await this.netPersonaColegiosRepository.remove(referencia);
   }
 
-  async updateDatosGenerales(idPersona: number, datosGenerales: any, fileIdent: any, arch_cert_def: any): Promise<any> {
+  async updateDatosGenerales(
+    idPersona: number,
+    datosGenerales: any,
+    fileIdent: any,
+    arch_cert_def: any,
+    fotoPerfil: any
+  ): Promise<any> {
     try {
       if (datosGenerales.dato?.discapacidades) {
-        const datosAnt = await this.perDiscapacidadRepository.delete({ persona: { id_persona: idPersona } });
         const keysWithTrueValues = Object.entries(datosGenerales.dato.discapacidades)
-          .filter(([key, value]) => value === true)
+          .filter(([_, value]) => value === true)
           .map(([key]) => key);
-        const discapacidades = await this.discapacidadRepository.find({
-          where: { tipo_discapacidad: In(keysWithTrueValues) }
-        });
-        const nuevosRegistros = discapacidades.map(discapacidad => ({
-          persona: { id_persona: idPersona },
-          discapacidad: discapacidad
-        }));
-        await this.perDiscapacidadRepository.save(nuevosRegistros);
+
+        await this.perDiscapacidadRepository.delete({ persona: { id_persona: idPersona } });
+        if (keysWithTrueValues.length > 0) {
+          const discapacidades = await this.discapacidadRepository.find({
+            where: { tipo_discapacidad: In(keysWithTrueValues) }
+          });
+          const nuevosRegistros = discapacidades.map(discapacidad => ({
+            persona: { id_persona: idPersona },
+            discapacidad: discapacidad
+          }));
+          await this.perDiscapacidadRepository.save(nuevosRegistros);
+        }
       }
 
-      const estadoP = await this.estadoAfiliacionRepository.findOne({ where: { nombre_estado: datosGenerales.dato.estado } });
+      const estadoP = await this.estadoAfiliacionRepository.findOne({
+        where: { codigo: datosGenerales.estado }
+      });
+      if (!estadoP) {
+        throw new NotFoundException(`No se ha encontrado el estado de afiliación con el código ${datosGenerales.estado}`);
+      }
 
-      const temp = datosGenerales;
-      delete temp.dato.peps;
-      delete temp.dato.discapacidades;
+      const causaFallecimiento = await this.causasFallecimientoRepository.findOne({
+        where: { id_causa_fallecimiento: datosGenerales.causa_fallecimiento }
+      });
+      if (!causaFallecimiento) {
+        throw new NotFoundException(`No se encontró la causa de fallecimiento con el ID ${datosGenerales.causa_fallecimiento}`);
+      }
 
-      temp.dato.direccion_residencia = `BARRIO_COLONIA: ${temp.dato.barrio_colonia},AVENIDA: ${temp.dato.avenida},CALLE: ${temp.dato.calle},SECTOR: ${temp.dato.sector},BLOQUE: ${temp.dato.bloque},N° DE CASA: ${temp.dato.numero_casa},COLOR CASA: ${temp.dato.color_casa},ALDEA: ${temp.dato.aldea},CASERIO: ${temp.dato.caserio}`;
+      const temp = datosGenerales.dato || {};
 
-      const fechaDefuncion = new Date(temp.dato.fecha_defuncion);
-      const fechaFormateada = format(fechaDefuncion, 'yyyy-MM-dd');
-
-      delete temp.dato.archivo_identificacion;
-      delete temp.dato.fecha_defuncion;
-
-      const data = {
-        id_persona: idPersona,
-        fallecido: temp.causa_fallecimiento ? "SI" : "NO",
-        causa_fallecimiento: temp.causa_fallecimiento,
-        municipio_defuncion: temp.id_municipio_defuncion,
-        archivo_identificacion: fileIdent?.buffer ? Buffer.from(fileIdent.buffer) : null,
-        certificado_defuncion: arch_cert_def?.buffer ? Buffer.from(arch_cert_def.buffer) : null,
-        fecha_defuncion: fechaFormateada,
-        ...temp.dato
+      const direccionParts = {
+        "BARRIO_COLONIA": temp.barrio_colonia,
+        "AVENIDA": temp.avenida,
+        "CALLE": temp.calle,
+        "SECTOR": temp.sector,
+        "BLOQUE": temp.bloque,
+        "N° DE CASA": temp.numero_casa,
+        "COLOR CASA": temp.color_casa,
+        "ALDEA": temp.aldea,
+        "CASERIO": temp.caserio
       };
 
+      temp.direccion_residencia = Object.entries(direccionParts)
+        .filter(([_, value]) => value)
+        .map(([key, value]) => `${key}: ${value}`)
+        .join(',');
+
+      const data: any = {
+        ...temp,
+        id_persona: idPersona,
+        fallecido: datosGenerales.causa_fallecimiento ? "SI" : "NO",
+        municipio_defuncion: datosGenerales.id_municipio_defuncion,
+        causa_fallecimiento: causaFallecimiento,
+        fecha_defuncion: datosGenerales.fecha_defuncion ?? temp.fecha_defuncion,
+      };
+
+      if (fileIdent?.buffer) {
+        data.archivo_identificacion = Buffer.from(fileIdent.buffer);
+      }
+      if (arch_cert_def?.buffer) {
+        data.certificado_defuncion = Buffer.from(arch_cert_def.buffer);
+      }
+      if (fotoPerfil?.buffer) {
+        data.foto_perfil = Buffer.from(fotoPerfil.buffer);
+      }
+
       const afiliado = await this.personaRepository.preload(data);
-
       if (!afiliado) throw new NotFoundException(`La persona con ID ${idPersona} no se ha encontrado`);
-
       await this.personaRepository.save(afiliado);
+
+      const resultEstado = await this.detallePersonaRepository.update(
+        { ID_PERSONA: idPersona, ID_CAUSANTE: idPersona },
+        { ID_ESTADO_AFILIACION: estadoP.codigo }
+      );
+      if (resultEstado.affected === 0) {
+        console.warn(`No se encontró un registro en NET_DETALLE_PERSONA para la persona con ID ${idPersona}.`);
+      }
+
       if (datosGenerales.tipo_persona) {
-        const result = await this.detallePersonaRepository.update(
+        const resultTipoPersona = await this.detallePersonaRepository.update(
           { ID_PERSONA: idPersona, ID_CAUSANTE: idPersona },
           { ID_TIPO_PERSONA: datosGenerales.tipo_persona }
         );
-        if (result.affected === 0) {
-          console.warn(`No se encontró un registro en NET_DETALLE_PERSONA para la persona con ID ${idPersona} y padre nulo.`);
+        if (resultTipoPersona.affected === 0) {
+          console.warn(`No se encontró un registro en NET_DETALLE_PERSONA para la persona con ID ${idPersona}.`);
         }
       }
 
@@ -942,7 +983,6 @@ export class AfiliadoService {
       this.handleException(error);
     }
   }
-
 
   async updatePerfCentroTrabajo(id: number, updateDto: UpdatePerfCentTrabDto): Promise<Net_perf_pers_cent_trab> {
     const existingPerf = await this.perfPersoCentTrabRepository.findOne({ where: { id_perf_pers_centro_trab: id } });
@@ -960,7 +1000,6 @@ export class AfiliadoService {
     const updatedPerf = { ...existingPerf, ...updateDto };
     return this.perfPersoCentTrabRepository.save(updatedPerf);
   }
-
 
   async desactivarPerfCentroTrabajo(id: number): Promise<void> {
     const perfil = await this.perfPersoCentTrabRepository.findOne({ where: { id_perf_pers_centro_trab: id } });

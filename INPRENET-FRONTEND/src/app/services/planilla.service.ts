@@ -107,6 +107,22 @@ export class PlanillaService {
     );
   }
 
+  getPlanillasCerradas(clasePlanilla?: string): Observable<any> {
+    const url = `${environment.API_URL}/api/planilla/cerradas`;
+    let params = new HttpParams();
+
+    if (clasePlanilla) {
+      params = params.set('clasePlanilla', clasePlanilla);
+    }
+
+    return this.http.get<any>(url, { params }).pipe(
+      catchError(error => {
+        console.error('Error al obtener planillas activas', error);
+        return throwError(error);
+      })
+    );
+  }
+
   getPlanillasCerradaByFechas(fechaInicio: string, fechaFinalizacion: string): Observable<any> {
     const url = `${environment.API_URL}/api/planilla/cerradas_fecha`;
     let params = new HttpParams();
@@ -122,11 +138,13 @@ export class PlanillaService {
         return throwError(error);
       })
     );
-
-    /* } */
   }
 
   getPlanillasPreliminares(codigo_planilla: string): Observable<any> {
+    if (!codigo_planilla) {
+      console.error('Error: codigo_planilla está vacío, la solicitud no se enviará.');
+      return throwError(() => new Error('El código de planilla es requerido'));
+    }
     const url = `${environment.API_URL}/api/planilla/get-preliminares`;
     return this.http.post<any>(url, { codigo_planilla }).pipe(
       catchError(error => {
@@ -136,8 +154,12 @@ export class PlanillaService {
     );
   }
 
+
   generarPlanillaComplementaria(tiposPersona: string): Observable<void> {
-    const url = `${environment.API_URL}/api/planilla/generar-complementaria`;
+    const accessToken = sessionStorage.getItem('token');
+    const url = `${environment.API_URL}/api/planilla/generar-complementaria/${accessToken}`;
+
+
     return this.http.post<void>(url, { tipos_persona: tiposPersona }).pipe(
       catchError(error => {
         const errorMessage = error.error.message || 'Error al generar planilla complementaria';
@@ -149,7 +171,10 @@ export class PlanillaService {
   }
 
   generarPlanillaOrdinaria(tiposPersona: string): Observable<void> {
-    const url = `${environment.API_URL}/api/planilla/generar-ordinaria`;
+    const accessToken = sessionStorage.getItem('token');
+
+    const url = `${environment.API_URL}/api/planilla/generar-ordinaria/${accessToken}`;
+
     return this.http.post<void>(url, { tipos_persona: tiposPersona }).pipe(
       catchError(error => {
         const errorMessage = error.error.message || 'Error al generar planilla ordinaria';
@@ -349,7 +374,16 @@ export class PlanillaService {
   }
 
   getPersPlanillaDefin(codigo_planilla: string): Observable<any> {
-    return this.http.get(`${environment.API_URL}/api/planilla/Definitiva/personas/${codigo_planilla}`);
+    if (!codigo_planilla || codigo_planilla.trim() === '') {
+      return throwError(() => new Error('Debe proporcionar un código de planilla válido'));
+    }
+    return this.http.get(`${environment.API_URL}/api/planilla/Definitiva/personas/${codigo_planilla}`)
+      .pipe(
+        catchError(error => {
+          console.error('Error en la llamada de planilla:', error.message);
+          return throwError(() => new Error('Error al obtener los datos de planilla'));
+        })
+      );
   }
 
   updateTipoPlanilla(id: string, tipoPlanillaData: any): Observable<any> {

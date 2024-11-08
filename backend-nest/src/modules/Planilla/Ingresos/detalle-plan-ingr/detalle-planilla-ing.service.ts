@@ -651,7 +651,7 @@ export class DetallePlanillaIngresoService {
     /* traer los registros siguientes a la planilla pagada */
 
 
-    console.log(detallePlanilla);
+    //console.log(detallePlanilla);
 
     return detallePlanilla;
   }

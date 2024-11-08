@@ -4,7 +4,7 @@ import { MatPaginator } from '@angular/material/paginator';
 import { MatSort } from '@angular/material/sort';
 import { MatTableDataSource } from '@angular/material/table';
 import { ToastrService } from 'ngx-toastr';
-import { PlanillaIngresosService } from 'src/app/services/planillaIngresos.service';import * as XLSX from 'xlsx';
+import { PlanillaIngresosService } from 'src/app/services/planillaIngresos.service'; import * as XLSX from 'xlsx';
 import { Item, UserData } from '../planilla-colegios-privados/planilla-colegios-privados.component';
 import { EditarDialogComponent } from 'src/app/components/dinamicos/editar-dialog/editar-dialog.component';
 import { ConfirmDialogComponent } from 'src/app/components/dinamicos/confirm-dialog/confirm-dialog.component';
@@ -389,24 +389,21 @@ export class VerDatPlanIngComponent implements OnInit {
 
   obtenerNombreMes(fecha: any): string {
     if (fecha) {
-      const partesFecha: string[] = fecha?.periodoInicio.split('/');
+      const fechaObjeto = new Date(fecha);
 
-      if (partesFecha.length !== 3) {
+      if (isNaN(fechaObjeto.getTime())) {
         return 'Formato de fecha inválido';
       }
 
-      const numMes: number = parseInt(partesFecha[1], 10);
-      const anio: number = parseInt(partesFecha[2], 10);
+      const numMes: number = fechaObjeto.getUTCMonth(); // Obtener el mes (0-11)
+      const anio: number = fechaObjeto.getUTCFullYear(); // Obtener el año
 
-      const meses: string[] = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
+      const meses: string[] = ['ENERO', 'FEBRERO', 'MARZO', 'ABRIL', 'MAYO', 'JUNIO', 'JULIO', 'AGOSTO', 'SEPTIEMBRE', 'OCTUBRE', 'NOVIEMBRE', 'DICIEMBRE'];
 
-      if (numMes >= 1 && numMes <= 12) {
-        const nombreMes: string = meses[numMes - 1];
-        return `${nombreMes} ${anio}`;
-      } else {
-        return '';
-      }
+      const nombreMes: string = meses[numMes];
+      return `${nombreMes} ${anio}`;
     }
+
     return '';
   }
 
@@ -487,7 +484,7 @@ export class VerDatPlanIngComponent implements OnInit {
   }
 
   generarPDF() {
-    const docDefinition:any = {
+    const docDefinition: any = {
       pageOrientation: 'landscape',
       content: [
         { text: 'Resumen De Colegio', style: 'header' },

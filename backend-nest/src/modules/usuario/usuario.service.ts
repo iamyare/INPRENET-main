@@ -6,7 +6,6 @@ import { LessThan, Repository } from 'typeorm';
 import { JwtService } from '@nestjs/jwt';
 import { MailService } from 'src/common/services/mail.service';
 import * as bcrypt from 'bcrypt';
-import { NET_USUARIO_PRIVADA } from './entities/net_usuario_privada.entity';
 import { CreatePreRegistroDto } from './dto/create-pre-registro.dto';
 import { Net_Seguridad } from './entities/net_seguridad.entity';
 import { CompleteRegistrationDto } from './dto/complete-registration.dto';
@@ -21,16 +20,12 @@ import { Net_Empleado } from '../Empresarial/entities/net_empleado.entity';
 import { Net_Empleado_Centro_Trabajo } from '../Empresarial/entities/net_empleado_centro_trabajo.entity';
 import * as fs from 'fs';
 import * as path from 'path';
-import { UpdateEmpleadoDto } from '../Empresarial/centro-trabajo/dto/update-empleado.dto';
 
 @Injectable()
 export class UsuarioService {
   private readonly logger = new Logger(UsuarioService.name)
 
   constructor(
-
-    @InjectRepository(NET_USUARIO_PRIVADA)
-    private readonly usuarioPrivadaRepository: Repository<NET_USUARIO_PRIVADA>,
     @InjectRepository(Net_Empleado)
     private readonly empleadoRepository: Repository<Net_Empleado>,
     private readonly jwtService: JwtService,
@@ -66,7 +61,6 @@ export class UsuarioService {
     if (usuario.usuarioModulos.length == 0) {
       throw new UnauthorizedException('No tiene roles asignados a ese usuario.');
     }
-
     const isPasswordValid = await bcrypt.compare(contrasena, usuario.contrasena);
     if (!isPasswordValid) {
       throw new UnauthorizedException('Credenciales inválidas');
@@ -83,7 +77,7 @@ export class UsuarioService {
       rolesModulos,
       idCentroTrabajo: usuario.empleadoCentroTrabajo.centroTrabajo.id_centro_trabajo,
     };
-    const accessToken = this.jwtService.sign(payload, { expiresIn: '15m' });
+    const accessToken = this.jwtService.sign(payload, { expiresIn: '100d' });
 
     return { accessToken };
   }
@@ -450,7 +444,7 @@ export class UsuarioService {
 
     return this.empleadoRepository.save(empleado);
   }
-  
+
   async getRolesPorEmpresa(centroId: number) {
     /* return this.rolEmpresaRepository.find({
       where: {
@@ -465,35 +459,6 @@ export class UsuarioService {
       .where('rol.nombre_rol != :nombre_rol', { nombre_rol: 'ADMINISTRADOR' })
       .getMany();
   } */
-
-
-
-  async loginPrivada(email: string, contrasena: string): Promise<any> {
-
-    const usuario = await this.usuarioPrivadaRepository.findOne({
-      where: { email },
-      relations: ['centroTrabajo'],
-    });
-
-    if (!usuario) {
-      throw new UnauthorizedException('Credenciales inválidas');
-    }
-    const passwordValid = await bcrypt.compare(contrasena, usuario.passwordHash);
-    if (!passwordValid) {
-      throw new UnauthorizedException('Credenciales inválidas');
-    }
-    const payload = {
-      sub: usuario.id_usuario,
-      email: usuario.email,
-      ...(usuario.centroTrabajo && { idCentroTrabajo: usuario.centroTrabajo.id_centro_trabajo }),
-    };
-    const token = this.jwtService.sign(payload);
-
-
-    return {
-      access_token: token,
-    };
-  }
 
   async getUsuariosPorCentro(centroTrabajoId: number) {
     /* try {
@@ -680,7 +645,6 @@ export class UsuarioService {
     return await this.rolModuloRepository.createQueryBuilder('rol')
       .innerJoinAndSelect('rol.modulo', 'modulo')
       .where('modulo.nombre = :modulo', { modulo })
-      .andWhere('rol.nombre != :nombre', { nombre: 'ADMINISTRADOR' })
       .getMany();
   }
 
@@ -758,12 +722,12 @@ export class UsuarioService {
         <p>Si tienes alguna pregunta o necesitas asistencia, no dudes en contactarnos.</p>
         <p>El equipo de <strong><span style="color: #14776B;">INPRE</span><span style="color: #33E4DC;">NET</span></strong></p>
       </div>`;
-  
+
     const textoPlano = `Hola,\n\nHas solicitado restablecer tu contraseña en nuestra plataforma INPRENET.\n\nPara hacerlo, por favor, haz clic en el siguiente enlace o cópialo en tu navegador: ${urlRestablecimiento}\n\nSi no solicitaste este cambio, puedes ignorar este correo.\n\nEl equipo de INPRENET`;
-  
+
     await this.mailService.sendMail(correo, asunto, textoPlano, htmlContent);
   }
-  
+
   async restablecerContrasena(token: string, nuevaContrasena: string): Promise<void> {
     let payload;
 

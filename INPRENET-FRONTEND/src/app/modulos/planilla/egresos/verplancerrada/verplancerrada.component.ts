@@ -24,7 +24,7 @@ pdfMake.vfs = pdfFonts.pdfMake.vfs;
 })
 export class VerplancerradaComponent {
   convertirFecha = convertirFecha;
-
+  codigoPlanilla = "";
   dataPlan: any;
   idPlanilla: any = "";
   datosFormateados: any;
@@ -73,6 +73,16 @@ export class VerplancerradaComponent {
       {
         header: 'Nombre Completo',
         col: 'NOMBRE_COMPLETO',
+        isEditable: true
+      },
+      {
+        header: 'Banco',
+        col: 'NOMBRE_BANCO',
+        isEditable: true
+      },
+      {
+        header: 'Número de Cuenta',
+        col: 'NUM_CUENTA',
         isEditable: true
       },
       {
@@ -133,6 +143,8 @@ export class VerplancerradaComponent {
                 id_afiliado: item.ID_PERSONA,
                 dni: item.DNI,
                 NOMBRE_COMPLETO: item.NOMBRE_COMPLETO,
+                NUM_CUENTA: item.NUM_CUENTA,
+                NOMBRE_BANCO: item.NOMBRE_BANCO,
                 TOTAL_BENEFICIO: item.TOTAL_BENEFICIO,
                 DEDUCCIONES_INPREMA: item.DEDUCCIONES_INPREMA || 0,
                 DEDUCCIONES_TERCEROS: item.DEDUCCIONES_TERCEROS || 0,
@@ -167,43 +179,46 @@ export class VerplancerradaComponent {
   };
 
   getPlanilla = async () => {
+    if (!this.codigoPlanilla || this.codigoPlanilla.trim() === '') {
+      this.toastr.error('Debe proporcionar un código de planilla válido');
+      return;
+    }
     try {
-      this.planillaService.getPlanillaDefin(this.datosFormateados.value.codigo_planilla).subscribe(
-        {
-          next: async (response) => {
-            if (response) {
-
-              this.detallePlanilla = response;
-              this.getFilas(response.codigo_planilla).then(() => this.cargar());
-              this.calcularTotales(this.datosFormateados.value.codigo_planilla)
-              this.idPlanilla = response.id_planilla;
-              this.verDat = true;
+      this.planillaService.getPlanillaDefin(this.codigoPlanilla).subscribe({
+        next: async (response) => {
+          if (response) {
+            this.detallePlanilla = response;
+            this.idPlanilla = response.id_planilla;
+            this.verDat = true;
+            if (response.codigo_planilla) {
+              await this.getFilas(response.codigo_planilla);
             } else {
-              this.detallePlanilla = [];
-              this.datosTabl = [];
-              this.toastr.error(`La planilla con el código de planilla:${this.datosFormateados.value.codigo_planilla}  no existe `);
+              console.warn("El código de planilla en la respuesta está vacío");
+            }
+            if (this.codigoPlanilla) {
+              this.calcularTotales(this.codigoPlanilla);
             }
             if (this.ejecF) {
-              this.getFilas("").then(async () => {
-                const temp = await this.cargar();
-                this.verDat = true;
-                return temp;
-              });
+              await this.cargar();
             }
-          },
-          error: (error) => {
-            let mensajeError = 'Error desconocido al buscar la planilla';
-
-            if (error.error && error.error.message) {
-              mensajeError = error.error.message;
-            } else if (typeof error.error === 'string') {
-              mensajeError = error.error;
-            }
-
-            this.toastr.error(mensajeError);
+          } else {
+            this.detallePlanilla = [];
+            this.datosTabl = [];
+            this.toastr.error(`La planilla con el código de planilla: ${this.codigoPlanilla} no existe`);
           }
+        },
+        error: (error) => {
+          let mensajeError = 'Error desconocido al buscar la planilla';
+
+          if (error.error && error.error.message) {
+            mensajeError = error.error.message;
+          } else if (typeof error.error === 'string') {
+            mensajeError = error.error;
+          }
+
+          this.toastr.error(mensajeError);
         }
-      );
+      });
     } catch (error) {
       console.error("Error al obtener datos de Tipo Planilla", error);
     }
@@ -219,8 +234,6 @@ export class VerplancerradaComponent {
     try {
       this.dataPlan = [];
       this.data = await this.planillaService.getPersPlanillaDefin(cod_planilla).toPromise();
-
-
       if (this.data) {
         this.dataPlan = this.data.map((item: any) => {
           const deduccionesI: number = parseFloat(item.DEDUCCIONES_INPREMA) || 0
@@ -231,6 +244,8 @@ export class VerplancerradaComponent {
             id_afiliado: item.ID_PERSONA,
             dni: item.DNI,
             NOMBRE_COMPLETO: item.NOMBRE_COMPLETO,
+            NUM_CUENTA: item.NUM_CUENTA,
+            NOMBRE_BANCO: item.NOMBRE_BANCO,
             TIPO_PERSONA: item.TIPO_PERSONA,
             //correo_1: item.correo_1,
             TOTAL_BENEFICIO: item.TOTAL_BENEFICIO,
@@ -247,7 +262,6 @@ export class VerplancerradaComponent {
       }
 
     } catch (error) {
-      console.error("Error al obtener datos de deducciones", error);
       throw error;
     }
   }
@@ -255,6 +269,16 @@ export class VerplancerradaComponent {
   ejecutarFuncionAsincronaDesdeOtroComponente(funcion: (data: any) => Promise<boolean>) {
     this.ejecF = funcion;
   }
+
+  getElemSeleccionados(event: any) {
+      this.codigoPlanilla = event.codigo_planilla;
+      if (this.codigoPlanilla) {
+        this.getPlanilla();
+      } else {
+        console.error("Código de planilla no válido");
+        this.toastr.error("Debe seleccionar un código de planilla válido.");
+      }
+    }
 
   manejarAccionUno(row: any) {
     let logs: any[] = [];
@@ -300,36 +324,11 @@ export class VerplancerradaComponent {
         }
       },
     });
-
-
-    /* this.planillaService.getDeduccionesDefinitiva(this.idPlanilla, row.id_afiliado).subscribe({
-      next: (response) => {
-        logs.push({ message: 'Datos De Deducciones:', detail: response });
-      },
-      error: (error) => {
-        logs.push({ message: 'Error al obtener las deducciones inconsistentes:', detail: error });
-      }
-    }); */
   }
 
   manejarAccionTres(row: any) {
     const idPlanilla = this.idPlanilla;
     const dni = row.dni;
-
-    // Llama al servicio para obtener los totales de beneficios y deducciones
-
-    /*  const beneficios = [{
-       ID_BENEFICIO: 1,
-       NOMBRE_BENEFICIO: "Pensión por Jubilación",
-       "Total Monto Beneficio": row["Total Beneficio"]
-     }]
-     const deducciones = [{
-       ID_DEDUCCION: 1,
-       NOMBRE_DEDUCCION: "Préstamo",
-       "Total Monto Aplicado": row["Total Deducciones"],
-     }] */
-
-    //this.construirPDF(row, beneficios, deducciones);
 
     this.afiliadoService.generarVoucher(idPlanilla, dni).subscribe({
       next: (resultados) => {
@@ -372,10 +371,13 @@ export class VerplancerradaComponent {
         }
       });
 
+
       let data = detallePersona.flatMap((detalle: { detalleBeneficio: any[]; ID_DETALLE_PERSONA: number; }) => {
         return detalle.detalleBeneficio.map((beneficio: any) => {
-          const montoPorPeriodo = beneficio.monto_por_periodo;
+
+          const montoPorPeriodo = beneficio.detallePagBeneficio[0].monto_a_pagar;
           sumaBeneficios += montoPorPeriodo;
+          //console.log(beneficio);
 
           return {
             CAUSANTE: causantesMap.get(detalle.ID_DETALLE_PERSONA) || 'NO APLICA',
@@ -383,10 +385,15 @@ export class VerplancerradaComponent {
             MontoAPagar: montoPorPeriodo,
             METODO_PAGO: beneficio.metodo_pago,
             NOMBRE_BANCO: beneficio.detallePagBeneficio[0]?.personaporbanco?.banco?.nombre_banco || 'NO PROPORCIONADO',
-            NUM_CUENTA: beneficio.detallePagBeneficio[0]?.personaporbanco?.num_cuenta || 'NO PROPORCIONADO'
+            NUM_CUENTA: beneficio.detallePagBeneficio[0]?.personaporbanco?.num_cuenta || 'NO PROPORCIONADO',
+            NUMERO_PAGOS: beneficio.detallePagBeneficio[0]?.planilla?.numero_pagos || 'N/A',
+            NUMERO_LOTE: beneficio.detallePagBeneficio[0]?.planilla?.numero_lote || 'N/A'
           };
         });
       });
+
+      //console.log(data);
+
 
       let tablaDed: any = {};
 
@@ -463,12 +470,14 @@ export class VerplancerradaComponent {
               },
               {
                 table: {
-                  widths: ['*', '*'],
+                  widths: ['*', '*', '*', '*'],
                   body: [
-                    [{ text: 'INGRESO', style: 'tableHeader' }, { text: 'MONTO INGRESO', style: ['tableHeader', 'alignRight'] }],
+                    [{ text: 'INGRESO', style: 'tableHeader' }, { text: 'NÚMERO DE PAGO', style: 'tableHeader' }, { text: 'LOTE', style: 'tableHeader' }, { text: 'MONTO INGRESO', style: ['tableHeader', 'alignRight'] }],
                     ...data.map((b: any) => {
                       return [
                         { text: b.NOMBRE_BENEFICIO },
+                        { text: b.NUMERO_PAGOS },
+                        { text: b.NUMERO_LOTE },
                         { text: formatCurrency(b.MontoAPagar), style: 'alignRight' },
                       ];
                     })
@@ -590,7 +599,7 @@ export class VerplancerradaComponent {
       let data: any[] = [];
       detallePersona.forEach((detalle: { detalleBeneficio: any[]; ID_DETALLE_PERSONA: number; }) => {
         detalle.detalleBeneficio.forEach((beneficio: any) => {
-          const montoPorPeriodo = beneficio.monto_por_periodo;
+          const montoPorPeriodo = beneficio.detallePagBeneficio[0].monto_a_pagar;
           sumaBeneficios += montoPorPeriodo;
 
           data.push({
@@ -780,205 +789,6 @@ export class VerplancerradaComponent {
       console.log("ERROR. FALTA INFORMACIÓN");
     }
   }
-
-  /* construirPDFBen(row: { Total: any; NOMBRE_COMPLETO: any; dni: any; correo_1: any; fecha_cierre: any; }, resultados: any, backgroundImageBase64: string) {
-    const formatCurrency = (value: number) => new Intl.NumberFormat('es-HN', { style: 'currency', currency: 'HNL' }).format(value);
-    if (resultados) {
-      const persona = resultados.persona;
-      const detallePersona = persona.detallePersona || [];
-      const nombreCompleto = `${persona.primer_apellido} ${persona.segundo_apellido || ''} ${persona.primer_nombre} ${persona.segundo_nombre || ''}`.trim();
-      const dni = persona.n_identificacion || 'NO PROPORCIONADO';
-      const correo = persona.correo_1 || 'NO PROPORCIONADO';
-      let sumaBeneficios = 0;
-      let sumaDeducciones = 0;
-
-      // Mapeo de ID_DETALLE_PERSONA a n_identificacion del padre
-      const causantesMap = new Map();
-      detallePersona.forEach((detalle: { ID_DETALLE_PERSONA: number; padreIdPersona: { persona: { n_identificacion: string; } }; }) => {
-        if (detalle.padreIdPersona && detalle.padreIdPersona.persona && detalle.padreIdPersona.persona.n_identificacion) {
-          causantesMap.set(detalle.ID_DETALLE_PERSONA, detalle.padreIdPersona.persona.n_identificacion);
-        }
-      });
-
-      const data = detallePersona.map((detalle: { detalleBeneficio: any[]; ID_DETALLE_PERSONA: number; }) => {
-        const beneficio = detalle.detalleBeneficio[0];
-        const deducciones = beneficio.detallePagBeneficio.flatMap((pagBeneficio: { detalleDeduccion: any[]; }) => {
-          return pagBeneficio.detalleDeduccion.map((deduccion) => {
-            const montoDeduccion = deduccion.monto_aplicado;
-            sumaDeducciones += montoDeduccion;
-            return {
-              NOMBRE_INSTITUCION: deduccion.deduccion.centroTrabajo.nombre_centro_trabajo,
-              NOMBRE_DEDUCCION: deduccion.deduccion.nombre_deduccion,
-              TotalMontoAplicado: montoDeduccion
-            };
-          });
-        });
-
-        const montoPorPeriodo = beneficio.monto_por_periodo;
-        sumaBeneficios += montoPorPeriodo;
-
-        return {
-          CAUSANTE: causantesMap.get(detalle.ID_DETALLE_PERSONA) || 'NO APLICA',
-          NOMBRE_BENEFICIO: beneficio.beneficio.nombre_beneficio,
-          MontoAPagar: montoPorPeriodo,
-          DEDUCCIONES: deducciones,
-          INSTITUCION: deducciones.centroTrabajo,
-          METODO_PAGO: beneficio.metodo_pago,
-          NOMBRE_BANCO: beneficio.detallePagBeneficio[0].personaporbanco ? beneficio.detallePagBeneficio[0].personaporbanco.banco.nombre_banco : 'NO PROPORCIONADO',
-          NUM_CUENTA: beneficio.detallePagBeneficio[0].personaporbanco ? beneficio.detallePagBeneficio[0].personaporbanco.num_cuenta : 'NO PROPORCIONADO'
-        };
-      });
-
-      const neto = sumaBeneficios - sumaDeducciones;
-
-      const docDefinition: TDocumentDefinitions = {
-        background: function (currentPage, pageSize) {
-          return {
-            image: backgroundImageBase64,
-            width: pageSize.width,
-            height: pageSize.height,
-            absolutePosition: { x: 0, y: 2 }
-          };
-        },
-        content: [
-          {
-            stack: [
-              { text: 'VOUCHER DEL MES DE: ' + obtenerNombreMes(resultados.persona.detallePersona[0].detalleBeneficio[0].detallePagBeneficio[0].planilla.periodoInicio), style: 'subheader', alignment: 'center' },
-              {
-                columns: [
-                  [
-                    { text: 'BENEFICIARIO', style: 'subheader' },
-                    { text: 'NOMBRE: ' + nombreCompleto },
-                    { text: 'DNI: ' + dni },
-                  ],
-                  [
-                    { text: 'DETALLE DE PAGO', style: 'subheader' },
-                    { text: 'PAGO TOTAL: ' + formatCurrency(neto) },
-                    { text: 'MÉTODO DE PAGO: ' + (data[0]?.METODO_PAGO || 'NO PROPORCIONADO') },
-                    { text: 'BANCO: ' + (data[0]?.NOMBRE_BANCO || 'NO PROPORCIONADO') },
-                  ]
-                ],
-                margin: [0, 10, 0, 0]  // Añade 5px de margen superior
-              },
-              {
-                table: {
-                  widths: ['*', '*', '*', '*', '*', '*'],
-                  body: [
-                    [{ text: 'CAUSANTE', style: 'tableHeader' }, { text: 'INGRESO', style: 'tableHeader' }, { text: 'MONTO INGRESO', style: ['tableHeader', 'alignRight'] }, { text: 'INSTITUCIÓN', style: 'tableHeader' }, { text: 'DEDUCCIÓN', style: 'tableHeader' }, { text: 'MONTO DEDUCCIÓN', style: ['tableHeader', 'alignRight'] }],
-                    ...data.flatMap((b: any) => {
-                      if (b.DEDUCCIONES.length === 0) {
-                        return [[
-                          { text: b.CAUSANTE },
-                          { text: b.NOMBRE_BENEFICIO },
-                          { text: formatCurrency(b.MontoAPagar), style: 'alignRight' },
-                          { text: '---------------', alignment: 'center' },
-                          { text: '---------------', alignment: 'center' },
-                          { text: formatCurrency(0), style: 'alignRight' },
-                        ]];
-                      } else {
-                        return b.DEDUCCIONES.map((d: { NOMBRE_INSTITUCION: any; NOMBRE_DEDUCCION: any; TotalMontoAplicado: number; }, index: number) => [
-                          index === 0 ? { text: b.CAUSANTE, rowSpan: b.DEDUCCIONES.length } : {},
-                          index === 0 ? { text: b.NOMBRE_BENEFICIO, rowSpan: b.DEDUCCIONES.length } : {},
-                          index === 0 ? { text: formatCurrency(b.MontoAPagar), rowSpan: b.DEDUCCIONES.length, style: 'alignRight' } : { text: formatCurrency(0), style: 'alignRight' },
-                          { text: d.NOMBRE_INSTITUCION },
-                          { text: d.NOMBRE_DEDUCCION },
-                          { text: formatCurrency(d.TotalMontoAplicado), style: 'alignRight' }
-                        ]);
-                      }
-                    })
-                  ]
-                },
-                margin: [0, 5, 0, 0],
-                style: 'tableExample'
-              },
-              {
-                table: {
-                  widths: ['*', '*'],
-                  body: [
-                    [{ text: 'TOTAL INGRESOS', style: 'tableHeader' }, { text: formatCurrency(sumaBeneficios), style: ['tableHeader', 'alignRight'] }]
-                  ]
-                },
-                style: 'tableExample'
-              },
-              {
-                table: {
-                  widths: ['*', '*'],
-                  body: [
-                    [{ text: 'TOTAL DEDUCCIONES', style: 'tableHeader' }, { text: formatCurrency(sumaDeducciones), style: ['tableHeader', 'alignRight'] }]
-                  ]
-                },
-                style: 'tableExample'
-              },
-              {
-                table: {
-                  widths: ['*', '*'],
-                  body: [
-                    [{ text: 'NETO A PAGAR', style: 'tableHeader' }, { text: formatCurrency(neto), style: ['tableHeader', 'alignRight'] }]
-                  ]
-                },
-                style: 'tableExample'
-              },
-              { canvas: [{ type: 'line', x1: 0, y1: 0, x2: 250, y2: 0, lineWidth: 1 }], margin: [127, 70, 0, 10] }, // Aumenta el margen inferior en 10px
-              { text: 'FIRMA UNIDAD DE PLANILLAS', style: 'signatureTitle', margin: [0, 5, 0, 0] } // Aumenta el margen superior en 10px
-            ],
-            margin: [0, 0, 0, 0]  // Establece el margen superior a 40px
-          }
-        ],
-        footer: function (currentPage, pageCount) {
-          return {
-            table: {
-              widths: ['*', '*', '*'],
-              body: [
-                [
-                  { text: 'Fecha y Hora: ' + new Date().toLocaleString(), alignment: 'left', border: [false, false, false, false] },
-                  { text: 'Generó: ', alignment: 'left', border: [false, false, false, false] },
-                  { text: 'Página ' + currentPage.toString() + ' de ' + pageCount, alignment: 'right', border: [false, false, false, false] }
-                ]
-              ]
-            },
-            margin: [20, 0, 20, 20]
-          };
-        },
-        pageMargins: [50, 80, 50, 85],
-        styles: {
-          header: {
-            fontSize: 16,
-            bold: true,
-            margin: [0, 0, 0, 0]
-          },
-          subheader: {
-            fontSize: 12,
-            bold: true
-          },
-          tableHeader: {
-            bold: true,
-            fontSize: 13,
-            color: 'black'
-          },
-          tableExample: {
-            margin: [0, 5, 0, 15]
-          },
-          alignRight: {
-            alignment: 'right'
-          },
-          signatureTitle: {
-            alignment: 'center',
-            bold: true,
-            fontSize: 12,
-          }
-        },
-        defaultStyle: {
-          fontSize: 10
-        },
-        pageSize: 'LETTER',
-        pageOrientation: 'portrait'
-      };
-
-      pdfMake.createPdf(docDefinition).open();
-    } else {
-      console.log("ERROR. FALTA INFORMACIÓN");
-    }
-  } */
 
   convertirImagenABase64(url: string): Promise<string> {
     return this.http.get(url, { responseType: 'blob' }).toPromise().then(blob => {
@@ -1501,31 +1311,4 @@ export class VerplancerradaComponent {
       margin: margin
     };
   }
-
-  sendEmail() {
-
-  }
-
-  /* descargarExcelparaBanco(): void {
-    const codigoPlanillaNumber = this.idPlanilla;
-
-    if (isNaN(codigoPlanillaNumber)) {
-        console.error('El código de planilla no es un número válido');
-        this.toastr.error('El código de planilla no es un número válido');
-        return;
-    }
-
-    this.planillaService.descargarPlanillaExcel(codigoPlanillaNumber).subscribe(blob => {
-        const a = document.createElement('a');
-        const objectUrl = URL.createObjectURL(blob);
-        a.href = objectUrl;
-        a.download = 'planilla.xlsx';
-        a.click();
-        URL.revokeObjectURL(objectUrl);
-    }, error => {
-        console.error('Error al descargar el Excel', error);
-    });
-} */
-
-
 }

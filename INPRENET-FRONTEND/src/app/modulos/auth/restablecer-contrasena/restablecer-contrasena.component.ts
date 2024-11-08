@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { AuthService } from 'src/app/services/auth.service';
 
@@ -15,6 +15,7 @@ export class RestablecerContrasenaComponent {
 
   constructor(
     private fb: FormBuilder,
+    private router: Router,
     private authService: AuthService,
     private route: ActivatedRoute,
     private snackBar: MatSnackBar
@@ -47,6 +48,7 @@ export class RestablecerContrasenaComponent {
         this.snackBar.open(response.message, 'Cerrar', {
           duration: 3000,
         });
+        this.router.navigate(['/']);
       },
       error: (error) => {
         this.snackBar.open('Error al restablecer la contraseña', 'Cerrar', {

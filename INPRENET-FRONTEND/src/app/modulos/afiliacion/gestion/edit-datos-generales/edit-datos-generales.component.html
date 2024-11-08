@@ -4,19 +4,17 @@
   </div>
 
   <div *ngIf="datos && !loading">
-    <!-- <app-dat-generales-afiliado [datos]="formDatosGenerales"
-      (newDatosGenerales)="setDatosGenerales($event)"></app-dat-generales-afiliado> -->
-
     <app-datos-generales
       [initialData]="initialData"
       [indicesSeleccionados]="indicesSeleccionados"
       [discapacidadSeleccionada]="true"
-      (newDatosGenerales)="setDatosGenerales($event)">
+      (newDatosGenerales)="setDatosGenerales($event)"
+      (imageCaptured)="onImageCaptured($event)">
     </app-datos-generales>
 
     <form style="margin: 0 0 1.5rem;" [formGroup]="form1">
       <div class="row" style="margin: 0px 20px 0 20px;">
-         <div class="col-md-4">
+        <div class="col-md-4">
           <mat-form-field style="flex-direction: column-reverse;" class="example-full-width inputs" appearance="outline">
             <mat-label>Tipo de Persona</mat-label>
             <mat-select formControlName="tipo_persona">
@@ -29,21 +27,20 @@
             {{ error }}
           </mat-error>
         </div>
-    <!--
-        <div class="col-md-4" >
-          <mat-form-field style="flex-direction: column-reverse;" class="example-full-width inputs"
-            appearance="outline">
-            <mat-label>Estado de Afiliación de la Persona</mat-label>
-            <mat-select matNativeControl formControlName="estado" (selectionChange)="mostrarCamposFallecido($event)">
-              <mat-option *ngFor="let p of estado" [value]="p.label">
-                {{ p.label }}
+
+        <div class="col-md-4">
+          <mat-form-field style="flex-direction: column-reverse;" class="example-full-width inputs" appearance="outline">
+            <mat-label>Estado de Afiliación</mat-label>
+            <mat-select formControlName="estado">
+              <mat-option *ngFor="let estado of estado" [value]="estado.value">
+                {{ estado.label }}
               </mat-option>
             </mat-select>
           </mat-form-field>
           <mat-error *ngFor="let error of getErrors('estado')">
             {{ error }}
           </mat-error>
-        </div> -->
+        </div>
 
         <!-- <div class="col-md-4">
           <mat-form-field style="flex-direction: column-reverse;" class="example-full-width inputs"
@@ -130,8 +127,13 @@
 
     <!-- <app-maps></app-maps> -->
 
-    <button mat-raised-button color="primary" style="color: white; margin: 1% 0 1% 0" (click)="GuardarInformacion()">
-      Guardar
-    </button>
+    <button
+    mat-raised-button
+    color="primary"
+    style="color: white; margin: 1% 0 1% 0"
+    (click)="GuardarInformacion()"
+    *ngIf="mostrarBotonGuardar">
+    Guardar
+  </button>
   </div>
 </div>

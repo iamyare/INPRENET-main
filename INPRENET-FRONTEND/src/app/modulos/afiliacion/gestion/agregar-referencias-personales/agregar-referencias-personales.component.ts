@@ -39,21 +39,23 @@ export class AgregarReferenciasPersonalesComponent implements OnInit {
   agregarReferencia(datos?: any): void {
     const referenciaForm = this.fb.group({
       tipo_referencia: [datos?.tipo_referencia || '', [Validators.required]],
-      primer_nombre: [datos?.primer_nombre || '', [Validators.required]],
-      segundo_nombre: [datos?.segundo_nombre || ''],
-      tercer_nombre: [datos?.tercer_nombre || ''],
-      primer_apellido: [datos?.primer_apellido || '', [Validators.required]],
-      segundo_apellido: [datos?.segundo_apellido || ''],
-      direccion: [datos?.direccion || ''],
-      telefono_domicilio: [datos?.telefono_domicilio || ''],
-      telefono_trabajo: [datos?.telefono_trabajo || ''],
-      telefono_personal: [datos?.telefono_personal || ''],
-      parentesco: [datos?.parentesco || '', [Validators.required]],
-      n_identificacion: [datos?.n_identificacion || '', [
-        Validators.required,
-        Validators.pattern(/^\d{13}$/)
-      ]]
+      primer_nombre: [datos?.primer_nombre || '', [Validators.required, Validators.minLength(2), Validators.maxLength(50), Validators.pattern(/^[^0-9]*$/)]],
+      segundo_nombre: [datos?.segundo_nombre || '', [Validators.maxLength(50), Validators.pattern(/^[^0-9]*$/)]],
+      tercer_nombre: [datos?.tercer_nombre || '', [Validators.maxLength(50), Validators.pattern(/^[^0-9]*$/)]],
+      primer_apellido: [datos?.primer_apellido || '', [Validators.required, Validators.minLength(2), Validators.maxLength(50), Validators.pattern(/^[^0-9]*$/)]],
+      segundo_apellido: [datos?.segundo_apellido || '', [Validators.maxLength(50), Validators.pattern(/^[^0-9]*$/)]],
+      direccion: [datos?.direccion || '', [Validators.required, Validators.minLength(10), Validators.maxLength(200)]],
+      telefono_domicilio: [datos?.telefono_domicilio || '', [Validators.minLength(8), Validators.maxLength(12), Validators.pattern(/^[0-9]*$/)]],
+      telefono_trabajo: [datos?.telefono_trabajo || '', [Validators.minLength(8), Validators.maxLength(12), Validators.pattern(/^[0-9]*$/)]],
+      telefono_personal: [datos?.telefono_personal || '', [Validators.required ,Validators.minLength(8), Validators.maxLength(12), Validators.pattern(/^[0-9]*$/)]],
+      parentesco: [datos?.parentesco || '', [Validators.required, Validators.minLength(2), Validators.maxLength(30)]],
+      n_identificacion: [datos?.n_identificacion || '', [Validators.pattern(/^[0-9]*$/), Validators.minLength(13), Validators.maxLength(13)]]
     });
+
+    referenciaForm.get('tipo_referencia')?.valueChanges.subscribe(value => {
+      this.cambiarListadoParentesco(value, referenciaForm);
+    });
+
     this.referencias.push(referenciaForm);
   }
 
@@ -73,11 +75,23 @@ export class AgregarReferenciasPersonalesComponent implements OnInit {
     this.parentesco = this.datosEstaticosService.parentesco;
   }
 
+  cambiarListadoParentesco(tipoReferencia: string, referenciaForm: FormGroup): void {
+    if (tipoReferencia === 'REFERENCIA FAMILIAR') {
+      this.parentesco = this.datosEstaticosService.parentesco;
+    } else if (tipoReferencia === 'REFERENCIA PERSONAL') {
+      this.parentesco = this.datosEstaticosService.parentescoReferenciasPersonales;
+    }
+
+    // Resetear el valor del parentesco cuando cambia el tipo de referencia
+    referenciaForm.get('parentesco')?.setValue('');
+  }
+
   guardarReferencias() {
     if (!this.formReferencias.get('refpers')) {
       this.toastr.error('No hay referencias para guardar');
       return;
     }
+
     const referencias = this.formatReferencias(this.formReferencias.value.refpers);
     this.afilService.agregarReferencias(this.data.idPersona, referencias).subscribe(
       (res: any) => {

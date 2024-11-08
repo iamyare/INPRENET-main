@@ -110,12 +110,6 @@ export class UsuarioController {
     return this.usuarioService.getRolesPorEmpresa(query.idEmpresa);
   }
 
-  @Post('/loginPrivada')
-  @HttpCode(HttpStatus.OK)
-  async loginPrivada(@Body('email') email: string, @Body('contrasena') contrasena: string) {
-    return this.usuarioService.loginPrivada(email, contrasena);
-  }
-
   @Get('modulo-centro-trabajo')
   async obtenerUsuariosPorModuloYCentroTrabajo(
     @Query('modulos') modulos: string[],

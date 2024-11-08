@@ -136,7 +136,8 @@ export class AfiliarDocenteComponent implements OnInit {
           id_municipio_residencia: datosGenerales.id_municipio_residencia,
           id_municipio_nacimiento: datosGenerales.id_municipio_nacimiento,
           id_profesion: datosGenerales.id_profesion,
-          discapacidades: this.formatDiscapacidades(datosGenerales.discapacidades) || []
+          discapacidades: this.formatDiscapacidades(datosGenerales.discapacidades) || [],
+          fecha_afiliacion: new Date().toISOString()
         },
         familiares: this.formatFamiliares(datosGenerales, referenciasPersonales),
         peps: this.formatPeps(datosGenerales.peps || []),
@@ -162,8 +163,6 @@ export class AfiliarDocenteComponent implements OnInit {
       }
 
       let fileIdent = datosGenerales?.archivo_identificacion
-
-      console.log(formattedData);
 
       this.afiliacionService.crearAfiliacion(formattedData, fileFoto, fileIdent).subscribe(
         response => {

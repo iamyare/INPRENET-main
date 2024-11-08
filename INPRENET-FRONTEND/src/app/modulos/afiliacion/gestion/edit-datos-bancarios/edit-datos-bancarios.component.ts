@@ -36,9 +36,9 @@ export class EditDatosBancariosComponent implements OnInit, OnChanges {
 
   ngOnInit(): void {
     this.initializeComponent();
-    this.mostrarBotonAgregar = this.permisosService.tieneAccesoAChildAfiliacion("Cambiar Cuenta Bancaria");
-    this.mostrarBotonActivar = this.permisosService.tieneAccesoAChildAfiliacion("Cambiar Cuenta Bancaria");
-    this.mostrarBotonDesactivar = this.permisosService.tieneAccesoAChildAfiliacion("Cambiar Cuenta Bancaria");
+    this.mostrarBotonAgregar = this.permisosService.userHasPermission('AFILIACIÓN', 'afiliacion/buscar-persona', 'editar');
+    this.mostrarBotonActivar = this.permisosService.userHasPermission('AFILIACIÓN', 'afiliacion/buscar-persona', 'editar');
+    this.mostrarBotonDesactivar = this.permisosService.userHasPermission('AFILIACIÓN', 'afiliacion/buscar-persona', 'editar');
   }
 
   ngOnChanges(changes: SimpleChanges): void {

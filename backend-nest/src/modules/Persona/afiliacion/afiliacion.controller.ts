@@ -26,41 +26,41 @@ export class AfiliacionController {
   constructor(private readonly afiliacionService: AfiliacionService, private readonly connection: Connection, private readonly entityManager: EntityManager,) {
   }
 
-    @Delete('cargos-publicos/:idCargoPublico')
-    async eliminarCargoPublico(
-      @Param('idCargoPublico', ParseIntPipe) idCargoPublico: number
-    ): Promise<void> {
-      await this.afiliacionService.eliminarCargoPublico(idCargoPublico);
-    }
+  @Delete('cargos-publicos/:idCargoPublico')
+  async eliminarCargoPublico(
+    @Param('idCargoPublico', ParseIntPipe) idCargoPublico: number
+  ): Promise<void> {
+    await this.afiliacionService.eliminarCargoPublico(idCargoPublico);
+  }
 
-    @Delete(':idPersona/discapacidades/:tipoDiscapacidad')
-    async eliminarDiscapacidad(
-      @Param('idPersona', ParseIntPipe) idPersona: number,
-      @Param('tipoDiscapacidad') tipoDiscapacidad: string,
-    ): Promise<void> {
-      await this.afiliacionService.eliminarDiscapacidad(idPersona, tipoDiscapacidad);
-    }
+  @Delete(':idPersona/discapacidades/:tipoDiscapacidad')
+  async eliminarDiscapacidad(
+    @Param('idPersona', ParseIntPipe) idPersona: number,
+    @Param('tipoDiscapacidad') tipoDiscapacidad: string,
+  ): Promise<void> {
+    await this.afiliacionService.eliminarDiscapacidad(idPersona, tipoDiscapacidad);
+  }
 
-    @Post(':idPersona/discapacidades')
-    async crearDiscapacidades(
-      @Param('idPersona', ParseIntPipe) idPersona: number,
-      @Body() discapacidadesDto: CrearDiscapacidadDto[],
-    ): Promise<void> {
-      const persona = await this.entityManager.findOne('net_persona', { where: { id_persona: idPersona } });
-      if (!persona) {
-        throw new NotFoundException(`Persona con ID ${idPersona} no encontrada`);
-      }
-      await this.connection.transaction(async (entityManager) => {
-        await this.afiliacionService.crearDiscapacidades(discapacidadesDto, idPersona, entityManager);
-      });
+  @Post(':idPersona/discapacidades')
+  async crearDiscapacidades(
+    @Param('idPersona', ParseIntPipe) idPersona: number,
+    @Body() discapacidadesDto: CrearDiscapacidadDto[],
+  ): Promise<void> {
+    const persona = await this.entityManager.findOne('net_persona', { where: { id_persona: idPersona } });
+    if (!persona) {
+      throw new NotFoundException(`Persona con ID ${idPersona} no encontrada`);
     }
+    await this.connection.transaction(async (entityManager) => {
+      await this.afiliacionService.crearDiscapacidades(discapacidadesDto, idPersona, entityManager);
+    });
+  }
 
-   @Put('actualizar-peps')
-    async actualizarPeps(@Body() pepsData: any) {
-      return this.entityManager.transaction(async (transactionalEntityManager) => {
-        return this.afiliacionService.actualizarPeps(pepsData, transactionalEntityManager);
-      });
-    } 
+  @Put('actualizar-peps')
+  async actualizarPeps(@Body() pepsData: any) {
+    return this.entityManager.transaction(async (transactionalEntityManager) => {
+      return this.afiliacionService.actualizarPeps(pepsData, transactionalEntityManager);
+    });
+  }
 
   @Delete(':idPersona/familiares/:idFamiliar')
   async eliminarFamiliar(
@@ -240,8 +240,6 @@ export class AfiliacionController {
     @UploadedFiles() files?: Express.Multer.File[],  // Todos los archivos serán capturados aquí
   ): Promise<any> {
     try {
-      console.log(files);
-
       const crearDatosDto: CrearDatosDto = JSON.parse(datos);
 
       // Filtrar cada archivo por su campo de entrada (fieldname)

@@ -73,16 +73,14 @@ export class DeduccionService {
 
 
   private async processRow(id_planilla: any, row: any, repositories: any): Promise<any> {
-    // Acceder directamente a las propiedades del objeto
     const { anio, mes, dni, codigoDeduccion, montoTotal } = row;
 
-
     if (!anio && !mes && !dni && !codigoDeduccion && !montoTotal) {
-      return { error: `Fila vacía: ${JSON.stringify(row)}`, processed: false };
+        return { error: `Fila vacía: ${JSON.stringify(row)}`, processed: false };
     }
 
     if (!anio || !mes || !dni || !codigoDeduccion || !montoTotal) {
-      return { error: 'Faltan columnas obligatorias', processed: false };
+        return { error: 'Faltan columnas obligatorias', processed: false };
     }
 
     const parsedAnio = Number(anio);
@@ -92,192 +90,198 @@ export class DeduccionService {
     const parsedMontoTotal = Number(montoTotal);
 
     if (isNaN(parsedAnio) || isNaN(parsedMes) || parsedDni === '' || isNaN(parsedCodigoDeduccion) || isNaN(parsedMontoTotal)) {
-      return { error: 'Error en la conversión de datos', processed: false };
+        return { error: 'Error en la conversión de datos', processed: false };
     }
 
     const persona = await repositories.personaRepository.findOne({
-      where: {
-        n_identificacion: parsedDni,
-      },
+        where: { n_identificacion: parsedDni },
     });
 
     if (!persona) {
-      return { error: `No se encontró persona con DNI: ${parsedDni}`, processed: false };
-    }
-
-    if (persona.fallecido === 'SI') {
-      return { error: `La persona está marcada como fallecida`, processed: false };
+        return { error: `No se encontró persona con DNI: ${parsedDni}`, processed: false };
     }
 
     const dedPermitidasPlan = 44;
     if (dedPermitidasPlan == parsedCodigoDeduccion) {
-      return { error: `La deduccion con codigo 44 no van en la ordinaria`, processed: false };
+        return { error: `La deducción con código 44 no va en la ordinaria`, processed: false };
     }
 
     const deduccion = await repositories.deduccionRepository.findOne({
-      where: { codigo_deduccion: parsedCodigoDeduccion },
+        where: { codigo_deduccion: parsedCodigoDeduccion },
     });
 
     if (!deduccion) {
-      return { error: `No se encontró deducción con código: ${parsedCodigoDeduccion}`, processed: false };
+        return { error: `No se encontró deducción con código: ${parsedCodigoDeduccion}`, processed: false };
     }
 
     const bancoActivo = await repositories.personaPorBancoRepository.findOne({
-      where: {
-        persona: { id_persona: persona.id_persona },
-        estado: 'ACTIVO',
-      },
+        where: {
+            persona: { id_persona: persona.id_persona },
+            estado: 'ACTIVO',
+        },
     });
 
-
     if (!bancoActivo) {
-      return { error: `No se encontró un banco activo para la persona`, processed: false };
+        return { error: `No se encontró un banco activo para la persona`, processed: false };
     }
 
     let planillas;
     try {
-      planillas = await repositories.planillaRepository.find({
-        where: {
-          id_planilla: id_planilla,
-          estado: 'ACTIVA',
-          secuencia: 1,
-        },
-        relations: ['tipoPlanilla'],
-      });
-
+        planillas = await repositories.planillaRepository.find({
+            where: {
+                id_planilla: id_planilla,
+                estado: 'ACTIVA',
+                secuencia: 1,
+            },
+            relations: ['tipoPlanilla'],
+        });
     } catch (err) {
-      return { error: `Error en la consulta de planillas: ${err.message}`, processed: false };
+        return { error: `Error en la consulta de planillas: ${err.message}`, processed: false };
     }
 
     if (!planillas || planillas.length === 0) {
-      return { error: `No se encontró planilla activa para el mes: ${parsedMes}-${parsedAnio}`, processed: false };
+        return { error: `No se encontró planilla activa para el mes: ${parsedMes}-${parsedAnio}`, processed: false };
+    }
+
+    const isComplementaria = planillas.some(
+        (p) =>
+            p.tipoPlanilla.nombre_planilla === 'COMPLEMENTARIA JUBILADO Y PENSIONADO' ||
+            p.tipoPlanilla.nombre_planilla === 'COMPLEMENTARIA BENEFICIARIO'
+    );
+
+    if (persona.fallecido === 'SI' && !isComplementaria) {
+        return { error: `La persona está marcada como fallecida`, processed: false };
     }
 
     const detpersonaJU_PE = await repositories.personaRepository.findOne({
-      where: {
-        n_identificacion: persona.n_identificacion,
-        detallePersona: {
-          tipoPersona: { tipo_persona: In(["JUBILADO", "PENSIONADO"]) }
-        }
-      },
-      relations: ['detallePersona', 'detallePersona.tipoPersona'],
+        where: {
+            n_identificacion: persona.n_identificacion,
+            detallePersona: {
+                tipoPersona: { tipo_persona: In(["JUBILADO", "PENSIONADO"]) }
+            }
+        },
+        relations: ['detallePersona', 'detallePersona.tipoPersona'],
     });
 
     const detpersonaB = await repositories.personaRepository.findOne({
-      where: {
-        n_identificacion: persona.n_identificacion,
-        detallePersona: {
-          tipoPersona: { tipo_persona: In(["BENEFICIARIO SIN CAUSANTE", "BENEFICIARIO", "DESIGNADO"]) }
-        }
-      },
-      relations: ['detallePersona', 'detallePersona.tipoPersona'],
+        where: {
+            n_identificacion: persona.n_identificacion,
+            detallePersona: {
+                tipoPersona: { tipo_persona: In(["BENEFICIARIO SIN CAUSANTE", "BENEFICIARIO", "DESIGNADO"]) }
+            }
+        },
+        relations: ['detallePersona', 'detallePersona.tipoPersona'],
     });
 
     if (detpersonaJU_PE) {
-      const tipoPersonaJUPE = detpersonaJU_PE.detallePersona[0]?.tipoPersona?.tipo_persona;
+        const tipoPersonaJUPE = detpersonaJU_PE.detallePersona[0]?.tipoPersona?.tipo_persona;
 
-      const planilla = planillas.find(p => {
-        const periodoInicio = new Date(p.periodoInicio.split('/').reverse().join('-'));
-        const periodoFinalizacion = new Date(p.periodoFinalizacion.split('/').reverse().join('-'));
-        const fechaDeduccion = new Date(parsedAnio, parsedMes - 1);
+        const planilla = planillas.find(p => {
+            const periodoInicio = new Date(p.periodoInicio.split('/').reverse().join('-'));
+            const periodoFinalizacion = new Date(p.periodoFinalizacion.split('/').reverse().join('-'));
+            const fechaDeduccion = new Date(parsedAnio, parsedMes - 1);
 
-        return (
-          fechaDeduccion >= periodoInicio &&
-          fechaDeduccion <= periodoFinalizacion &&
-          (
-            (['JUBILADO', 'PENSIONADO'].includes(tipoPersonaJUPE) && p.tipoPlanilla.nombre_planilla === 'ORDINARIA JUBILADOS Y PENSIONADOS'))
-        );
-      });
-
-      if (!planilla) {
-        return { error: `No se encontró la planilla adecuada para el mes y año proporcionado o para el tipo de persona: ${tipoPersonaJUPE}`, processed: false };
-      } else {
-        const deduccionExistente = await repositories.detalleDeduccionRepository.findOne({
-          where: {
-            anio: parsedAnio,
-            mes: parsedMes,
-            monto_total: parsedMontoTotal,
-            persona: { id_persona: persona.id_persona },
-            deduccion: { id_deduccion: deduccion.id_deduccion },
-            planilla: { id_planilla: planilla.id_planilla },
-          },
+            return (
+               ( fechaDeduccion >= periodoInicio &&
+                fechaDeduccion <= periodoFinalizacion &&
+                (['JUBILADO', 'PENSIONADO'].includes(tipoPersonaJUPE) && p.tipoPlanilla.nombre_planilla === 'ORDINARIA JUBILADOS Y PENSIONADOS'))
+                ||(fechaDeduccion >= periodoInicio &&
+                  fechaDeduccion <= periodoFinalizacion &&
+                  (['JUBILADO', 'PENSIONADO'].includes(tipoPersonaJUPE) && p.tipoPlanilla.nombre_planilla === 'COMPLEMENTARIA JUBILADO Y PENSIONADO') && isComplementaria)
+            
+              );
         });
 
-        if (deduccionExistente) {
-          return { error: `Deducción duplicada detectada`, processed: false };
+        if (!planilla) {
+            return { error: `No se encontró la planilla adecuada para el mes y año proporcionado o para el tipo de persona: ${tipoPersonaJUPE}`, processed: false };
+        } else {
+            const deduccionExistente = await repositories.detalleDeduccionRepository.findOne({
+                where: {
+                    anio: parsedAnio,
+                    mes: parsedMes,
+                    monto_total: parsedMontoTotal,
+                    persona: { id_persona: persona.id_persona },
+                    deduccion: { id_deduccion: deduccion.id_deduccion },
+                    planilla: { id_planilla: planilla.id_planilla },
+                },
+            });
+
+            if (deduccionExistente) {
+                return { error: `Deducción duplicada detectada`, processed: false };
+            }
+
+            const detalleDeduccion = repositories.detalleDeduccionRepository.create({
+                anio: parsedAnio,
+                mes: parsedMes,
+                monto_total: parsedMontoTotal,
+                monto_aplicado: parsedMontoTotal,
+                estado_aplicacion: 'EN PRELIMINAR',
+                persona: persona.id_persona,
+                deduccion,
+                planilla,
+                personaPorBanco: bancoActivo,
+            });
+
+            await repositories.detalleDeduccionRepository.save(detalleDeduccion);
+            return { processed: true };
         }
-        const detalleDeduccion = repositories.detalleDeduccionRepository.create({
-          anio: parsedAnio,
-          mes: parsedMes,
-          monto_total: parsedMontoTotal,
-          monto_aplicado: parsedMontoTotal,
-          estado_aplicacion: 'EN PRELIMINAR',
-          persona: persona.id_persona,
-          deduccion,
-          planilla,
-          personaPorBanco: bancoActivo,
-        });
-
-        await repositories.detalleDeduccionRepository.save(detalleDeduccion);
-        return { processed: true };
-      }
 
     } else if (detpersonaB) {
-      const tipoPersonaBE = detpersonaB.detallePersona[0]?.tipoPersona?.tipo_persona;
+        const tipoPersonaBE = detpersonaB.detallePersona[0]?.tipoPersona?.tipo_persona;
 
-      const planilla = planillas.find(p => {
-        const periodoInicio = new Date(p.periodoInicio.split('/').reverse().join('-'));
-        const periodoFinalizacion = new Date(p.periodoFinalizacion.split('/').reverse().join('-'));
-        const fechaDeduccion = new Date(parsedAnio, parsedMes - 1);
+        const planilla = planillas.find(p => {
+            const periodoInicio = new Date(p.periodoInicio.split('/').reverse().join('-'));
+            const periodoFinalizacion = new Date(p.periodoFinalizacion.split('/').reverse().join('-'));
+            const fechaDeduccion = new Date(parsedAnio, parsedMes - 1);
 
-        return (
-          fechaDeduccion >= periodoInicio &&
-          fechaDeduccion <= periodoFinalizacion &&
-          (
-            (['BENEFICIARIO', 'BENEFICIARIO SIN CAUSANTE', 'DESIGNADO'].includes(tipoPersonaBE) && p.tipoPlanilla.nombre_planilla === 'ORDINARIA BENEFICIARIO'))
-        );
-      });
-
-      if (!planilla) {
-        return { error: `No se encontró la planilla adecuada para el mes y año proporcionado o para el tipo de persona: ${tipoPersonaBE}`, processed: false };
-      } else {
-        const deduccionExistente = await repositories.detalleDeduccionRepository.findOne({
-          where: {
-            anio: parsedAnio,
-            mes: parsedMes,
-            monto_total: parsedMontoTotal,
-            persona: { id_persona: persona.id_persona },
-            deduccion: { id_deduccion: deduccion.id_deduccion },
-            planilla: { id_planilla: planilla.id_planilla },
-          },
+            return (
+                fechaDeduccion >= periodoInicio &&
+                fechaDeduccion <= periodoFinalizacion &&
+                (['BENEFICIARIO', 'BENEFICIARIO SIN CAUSANTE', 'DESIGNADO'].includes(tipoPersonaBE) && p.tipoPlanilla.nombre_planilla === 'ORDINARIA BENEFICIARIO')
+            );
         });
 
-        if (deduccionExistente) {
-          return { error: `Deducción duplicada detectada`, processed: false };
+        if (!planilla) {
+            return { error: `No se encontró la planilla adecuada para el mes y año proporcionado o para el tipo de persona: ${tipoPersonaBE}`, processed: false };
+        } else {
+            const deduccionExistente = await repositories.detalleDeduccionRepository.findOne({
+                where: {
+                    anio: parsedAnio,
+                    mes: parsedMes,
+                    monto_total: parsedMontoTotal,
+                    persona: { id_persona: persona.id_persona },
+                    deduccion: { id_deduccion: deduccion.id_deduccion },
+                    planilla: { id_planilla: planilla.id_planilla },
+                },
+            });
+
+            if (deduccionExistente) {
+                return { error: `Deducción duplicada detectada`, processed: false };
+            }
+
+            const detalleDeduccion = repositories.detalleDeduccionRepository.create({
+                anio: parsedAnio,
+                mes: parsedMes,
+                monto_total: parsedMontoTotal,
+                monto_aplicado: parsedMontoTotal,
+                estado_aplicacion: 'EN PRELIMINAR',
+                persona: persona.id_persona,
+                deduccion,
+                planilla,
+                personaPorBanco: bancoActivo,
+            });
+
+            await repositories.detalleDeduccionRepository.save(detalleDeduccion);
+            return { processed: true };
         }
-        const detalleDeduccion = repositories.detalleDeduccionRepository.create({
-          anio: parsedAnio,
-          mes: parsedMes,
-          monto_total: parsedMontoTotal,
-          monto_aplicado: parsedMontoTotal,
-          estado_aplicacion: 'EN PRELIMINAR',
-          persona: persona.id_persona,
-          deduccion,
-          planilla,
-          personaPorBanco: bancoActivo,
-        });
-
-        await repositories.detalleDeduccionRepository.save(detalleDeduccion);
-        return { processed: true };
-      }
 
     } else if (!detpersonaJU_PE) {
-      return { error: `No se encontró persona con DNI: ${persona.n_identificacion} en detalle_persona, probablemente la persona no es JUBILADO NI PENSIONADO`, processed: false };
+        return { error: `No se encontró persona con DNI: ${persona.n_identificacion} en detalle_persona, probablemente la persona no es JUBILADO NI PENSIONADO`, processed: false };
     } else if (!detpersonaB) {
-      return { error: `No se encontró persona con DNI: ${persona.n_identificacion} en detalle_persona, probablemente la persona no es BENEFICIARIO`, processed: false };
+        return { error: `No se encontró persona con DNI: ${persona.n_identificacion} en detalle_persona, probablemente la persona no es BENEFICIARIO`, processed: false };
     }
+}
 
-  }
 
   async uploadDeducciones(id_planilla: any, file: Express.Multer.File): Promise<{ message: string; failedRows: any[] }> {
     const failedRows: any[] = [];
@@ -332,18 +336,6 @@ export class DeduccionService {
         });
     });
   }
-
-
-
-
-
-
-
-
-
-
-
-
 
   async obtenerDeduccionesPorAnioMes(dni: string, anio: number, mes: number): Promise<any> {
     try {

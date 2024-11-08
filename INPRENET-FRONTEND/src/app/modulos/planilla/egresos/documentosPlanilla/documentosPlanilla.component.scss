@@ -68,3 +68,17 @@ button.selected {
   transform: scale(1.05);
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 }
+
+.center-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 80vh;
+  /* Ajusta esto si deseas centrarlo en toda la pantalla */
+}
+
+.container {
+  max-width: 800px;
+  /* Ajusta el ancho según necesites */
+  width: 100%;
+}

@@ -53,12 +53,11 @@ export class EditPepsComponent implements OnInit, OnDestroy, OnChanges {
 
   ngOnInit(): void {
     this.initializeComponent();
-    this.mostrarBotonAgregarFamiliar = this.permisosService.tieneAccesoCompletoAfiliacion();
-    this.mostrarBotonAgregarPEP = this.permisosService.tieneAccesoCompletoAfiliacion();
-    this.mostrarBotonEditar = this.permisosService.tieneAccesoCompletoAfiliacion();
-    this.mostrarBotonEliminar = this.permisosService.tieneAccesoCompletoAfiliacion();
+    this.mostrarBotonAgregarFamiliar = this.permisosService.userHasPermission('AFILIACIÓN', 'afiliacion/buscar-persona', 'editar');
+    this.mostrarBotonAgregarPEP = this.permisosService.userHasPermission('AFILIACIÓN', 'afiliacion/buscar-persona', 'editar');
+    this.mostrarBotonEditar = this.permisosService.userHasPermission('AFILIACIÓN', 'afiliacion/buscar-persona', 'editar');
+    this.mostrarBotonEliminar = this.permisosService.userHasPermission('AFILIACIÓN', 'afiliacion/buscar-persona', 'editar');
   }
-
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['Afiliado'] && this.Afiliado) {
       this.initializeComponent();
@@ -123,7 +122,6 @@ export class EditPepsComponent implements OnInit, OnDestroy, OnChanges {
     if (this.Afiliado.n_identificacion) {
       try {
         const data = await this.svcAfiliado.getAllCargoPublicPeps(this.Afiliado.n_identificacion).toPromise();
-        console.log(data);
         this.filas = data.flatMap((peps: any) =>
           peps.cargo_publico.map((item: any) => ({
             cargo: item.cargo,
@@ -264,8 +262,13 @@ export class EditPepsComponent implements OnInit, OnDestroy, OnChanges {
       }
     ];
 
+    console.log(row.fecha_inicio);
+    console.log(row.fecha_fin);
+
+
     const fechaInicio = this.convertirCadenaAFecha(row.fecha_inicio);
     const fechaFin = this.convertirCadenaAFecha(row.fecha_fin);
+
 
     const valoresIniciales = {
       cargo: row.cargo,
@@ -325,10 +328,10 @@ export class EditPepsComponent implements OnInit, OnDestroy, OnChanges {
     });
   }
 
-
   convertirCadenaAFecha(fecha: string): Date | null {
     const [day, month, year] = fecha.split('/').map(Number);
-    const date = new Date(Date.UTC(year, month - 1, day));
+    const date = new Date(year, month - 1, day);
     return isNaN(date.getTime()) ? null : date;
   }
+
 }

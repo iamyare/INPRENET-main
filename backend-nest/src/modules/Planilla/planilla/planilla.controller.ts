@@ -3,7 +3,7 @@ import { PlanillaService } from './planilla.service';
 import { CreatePlanillaDto } from './dto/create-planilla.dto';
 import { UpdatePlanillaDto } from './dto/update-planilla.dto';
 import { PaginationDto } from 'src/common/dtos/pagination.dto';
-import { ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ApiTags } from '@nestjs/swagger';
 import { EntityManager } from 'typeorm';
 import { InjectEntityManager } from '@nestjs/typeorm';
 import { Net_Planilla } from './entities/net_planilla.entity';
@@ -174,6 +174,12 @@ export class PlanillaController {
     );
   }
 
+  @Get('cerradas')
+  //@Roles({ rol: 'ADMINISTRADOR DE PLANILLA', modulo: 'PLANILLA' })
+  async getCerradasPlanillas(@Query('clasePlanilla') clasePlanilla?: string) {
+    return this.planillaService.getCerradasPlanillas(clasePlanilla);
+  }
+
   @Get('beneficios-deducciones-periodo')
   async getBeneficiosDeducciones(
     @Query('periodoInicio') periodoInicio: string,
@@ -289,15 +295,18 @@ export class PlanillaController {
     @Query('page') page?: number,
     @Query('limit') limit?: number
   ) {
-    if (!term) {
-      throw new BadRequestException('Los parámetros idPlanilla son obligatorios');
+    if (!term || term.trim() === '') {
+      console.error('Error: El parámetro term está vacío.');
+      throw new BadRequestException('Debe proporcionar un código de planilla válido');
     }
     try {
       return await this.planillaService.ObtenerPlanDefinPersonas(term, page, limit);
     } catch (error) {
+      console.error('Error en ObtenerPlanDefinPersonas:', error);
       throw new InternalServerErrorException('Error al obtener planilla preliminar');
     }
   }
+
 
   @Get('Definitiva/personas/ord/:perI/:perF')
   async ObtenerPlanDefinPersonasOrd(
@@ -394,20 +403,25 @@ export class PlanillaController {
     return this.planillaService.remove(+id);
   }
 
-  @Post('generar-complementaria')
-  async generarComplementaria(@Body() generatePlanillaDto: GeneratePlanillaDto): Promise<void> {
-    await this.planillaService.generarPlanillaComplementaria(generatePlanillaDto.tipos_persona);
+  @Post('generar-complementaria/:token')
+  async generarComplementaria(@Param('token') token: string, @Body() generatePlanillaDto: GeneratePlanillaDto): Promise<void> {
+    await this.planillaService.generarPlanillaComplementaria(token, generatePlanillaDto.tipos_persona);
   }
 
-  @Post('generar-ordinaria')
-  async generarOrdinaria(@Body() generatePlanillaDto: GeneratePlanillaDto): Promise<void> {
-    await this.planillaService.generarPlanillaOrdinaria(generatePlanillaDto.tipos_persona);
+  @Post('generar-ordinaria/:token')
+  async generarOrdinaria(@Param('token') token: string, @Body() generatePlanillaDto: GeneratePlanillaDto): Promise<void> {
+    await this.planillaService.generarPlanillaOrdinaria(token, generatePlanillaDto.tipos_persona);
   }
 
   @Post('get-preliminares')
-  async getPlanillasPreliminares(@Body() getPlanillasPreliminaresDto: GetPlanillasPreliminaresDto): Promise<any[]> {
-    return this.planillaService.getPlanillasPreliminares(getPlanillasPreliminaresDto.codigo_planilla);
+async getPlanillasPreliminares(@Body() getPlanillasPreliminaresDto: GetPlanillasPreliminaresDto): Promise<any[]> {
+  try {
+    return await this.planillaService.getPlanillasPreliminares(getPlanillasPreliminaresDto.codigo_planilla);
+  } catch (error) {
+    throw new BadRequestException('Error en la solicitud: ' + error.message);
   }
+}
+
 
 
 }

@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { Section } from './menu-config';
+import { Section, MenuItem } from './menu-config';
 import { SidenavService } from 'src/app/services/sidenav.service';
 import { PermisosService } from 'src/app/services/permisos.service';
 
@@ -18,69 +18,33 @@ export class LayoutComponent implements OnInit {
   ) { }
 
   ngOnInit(): void {
-    this.menuConfig = this.sidenavService.getMenuConfig().filter(section => {
-      let isSectionVisible = false;
+    this.menuConfig = this.getAccessibleMenuConfig();
+  }
 
-      switch (section.name.toLowerCase()) {
-        case 'afiliación':
-          isSectionVisible = this.permisosService.tieneAccesoCompletoAfiliacion() || this.permisosService.tieneAccesoLimitadoPlanilla();
-          if (isSectionVisible) {
-            section.items.forEach(item => {
-              item.children = item.children?.filter(child => {
-                if (['Nuevo Centro Educativo', 'Ver Centro Educativo'].includes(child.title)) {
-                  return false;
-                }
-                return this.permisosService.tieneAccesoAChilPlanilla(child.title);
-              });
-            });
+  getAccessibleMenuConfig(): Section[] {
+    const originalMenuConfig = this.sidenavService.getMenuConfig();
+    const accessibleMenu: Section[] = [];
+    for (const section of originalMenuConfig) {
+      const accessibleItems: MenuItem[] = [];
+      for (const item of section.items) {
+        const accessibleChildren: MenuItem[] = [];
+        if (item.children) {
+          for (const child of item.children) {
+            const hasAccess = this.permisosService.userHasAccess(section.name, child.route!);
+            if (hasAccess) {
+              accessibleChildren.push(child);
+            }
           }
-          break;
-
-        case 'planilla':
-          isSectionVisible = this.permisosService.tieneAccesoCompletoAfiliacion() || this.permisosService.tieneAccesoLimitadoPlanilla();
-          if (isSectionVisible) {
-            section.items.forEach(item => {
-              item.children = item.children?.filter(child => {
-                return this.permisosService.tieneAccesoAChilPlanilla(child.title);
-              });
-            });
-          }
-          break;
-
-        case 'gestión de personal':
-          isSectionVisible = false
-            break;
-
-        case 'beneficios':
-          isSectionVisible = this.permisosService.tieneAccesoCompletoAfiliacion() || this.permisosService.tieneAccesoLimitadoPlanilla();
-          section.items.forEach(item => {
-            item.children = item.children?.filter(child => {
-              return this.permisosService.tieneAccesoAChilPlanilla(child.title);
-            });
-          });
-          break;
-
-        case 'cuentas inprema':
-          isSectionVisible = false
-          break;
-
-          case 'escalafón':
-          isSectionVisible = this.permisosService.tieneAccesoCompletoEscalafon() || this.permisosService.tieneAccesoLimitadoEscalafon();
-          if (isSectionVisible) {
-            section.items.forEach(item => {
-              item.children = item.children?.filter(child => {
-                return this.permisosService.tieneAccesoAChildEscalafon(child.title);
-              });
-            });
-          }
-          break;
-
-        default:
-          isSectionVisible = false;
+        }
+        if (accessibleChildren.length > 0 || !item.children) {
+          accessibleItems.push({ ...item, children: accessibleChildren });
+        }
       }
-
-      return isSectionVisible;
-    });
+      if (accessibleItems.length > 0) {
+        accessibleMenu.push({ ...section, items: accessibleItems });
+      }
+    }
+    return accessibleMenu;
   }
 
   setExpandedPanel(panel: any): void {

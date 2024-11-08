@@ -30,6 +30,7 @@ import { DynamicInputDialogComponent } from './dinamicos/dynamic-input-dialog/dy
 import { DynamicStepsComponent } from './dinamicos/dynamic-steps/dynamic-steps.component';
 import { PerfilHeaderComponent } from './perfil-header/perfil-header.component';
 import { GestionarDiscapacidadDialogComponent } from './dinamicos/gestionar-discapacidad-dialog/gestionar-discapacidad-dialog.component';
+import { HomePageComponent } from './home-page/home-page.component';
 
 @NgModule({
   declarations: [
@@ -60,7 +61,8 @@ import { GestionarDiscapacidadDialogComponent } from './dinamicos/gestionar-disc
     DynamicInputDialogComponent,
     DynamicStepsComponent,
     PerfilHeaderComponent,
-    GestionarDiscapacidadDialogComponent
+    GestionarDiscapacidadDialogComponent,
+    HomePageComponent
   ],
   imports: [
     CommonModule,

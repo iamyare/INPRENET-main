@@ -130,6 +130,10 @@ export class CrearPersonaDto {
   direccion_residencia?: string;
 
   @IsOptional()
+  @IsString()
+  direccion_residencia_estructurada?: string;
+
+  @IsOptional()
   foto_perfil?: Buffer;
 
   @IsNotEmpty()

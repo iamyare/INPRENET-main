@@ -142,6 +142,7 @@ export class PdfService {
 
   public async generateConstanciaAfiliacionTemplate2(data: any, includeQR: boolean) {
     let persona = data?.persona
+  
     let dataCentTrab = persona?.perfPersCentTrabs;
     let dataRef = persona?.referenciasPersonalPersona;
     let dataCuenBan = persona?.personasPorBanco;
@@ -155,9 +156,7 @@ export class PdfService {
         acc[key] = value;
         return acc;
       }, {} as { [key: string]: string })
-      : {}; // Si no existe DIRECCION_RESIDENCIA, asigna un objeto vacío
-
-
+      : {};
     const content: Array<any> = [
       {
         table: {
@@ -184,7 +183,11 @@ export class PdfService {
               }
             ],
             [
-              { borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'], text: 'NOMBRE DEL DOCENTE', alignment: 'left', style: ['subheader'] }, { borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'], text: `${persona?.primer_apellido} ${persona?.segundo_apellido} ${persona?.primer_nombre} ${persona?.segundo_nombre}`, alignment: 'center', colSpan: 5, },
+              { borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'], text: 'NOMBRE DEL DOCENTE', alignment: 'left', style: ['subheader'] },
+              { borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
+              text: `${persona?.primer_apellido} ${persona?.segundo_apellido} ${persona?.primer_nombre} ${persona?.segundo_nombre} ${persona?.tercer_nombre || ''}`, 
+              alignment: 'center',
+              colSpan: 5, },
               {}, {}, {}, {}, {}
             ],
             [
@@ -545,9 +548,6 @@ export class PdfService {
       }
     };
   }
-
-
-
 
   async generateConstanciaAfiliacion(data: any, includeQR: boolean): Promise<Buffer> {
     return this.generateConstancia(data, includeQR, this.generateConstanciaAfiliacionTemplate);

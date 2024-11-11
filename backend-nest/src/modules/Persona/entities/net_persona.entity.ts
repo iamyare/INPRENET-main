@@ -132,6 +132,9 @@ export class net_persona {
 
     @Column('varchar2', { length: 500, nullable: true, name: 'DIRECCION_RESIDENCIA' })
     direccion_residencia: string;
+    
+    @Column('varchar2', { length: 500, nullable: true, name: 'DIRECCION_RESIDENCIA_ESTRUCTURADA' })
+    direccion_residencia_estructurada: string;
 
     @Column('blob', { nullable: true, name: 'FOTO_PERFIL' })
     foto_perfil: any;

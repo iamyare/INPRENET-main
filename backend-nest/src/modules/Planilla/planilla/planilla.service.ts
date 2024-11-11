@@ -1967,25 +1967,25 @@ GROUP BY
 
       do {
         switch (nombre_planilla) {
-          case "ORDINARIA JUBILADOS Y PENSIONADOS":
+          case "ORDINARIA DE JUBILADOS Y PENSIONADOS":
             codPlanilla = `ORD-JUB-PEN-${mes}-${anio}-${secuencia}`;
             break;
-          case "ORDINARIA BENEFICIARIO":
+          case "ORDINARIA DE BENEFICIARIOS":
             codPlanilla = `ORD-BEN-${mes}-${anio}-${secuencia}`;
             break;
-          case "COMPLEMENTARIA JUBILADO Y PENSIONADO":
+          case "COMPLEMENTARIA DE JUBILADOS Y PENSIONADOS":
             codPlanilla = `COMP-JUB-PEN-${mes}-${anio}-${secuencia}`;
             break;
-          case "COMPLEMENTARIA BENEFICIARIO":
+          case "COMPLEMENTARIA DE BENEFICIARIOS":
             codPlanilla = `COMP-BEN-${mes}-${anio}-${secuencia}`;
             break;
           case "COMPLEMENTARIA AFILIADO":
             codPlanilla = `COMP-AFIL-${mes}-${anio}-${secuencia}`;
             break;
-          case "EXTRAORDINARIA JUBILADO Y PENSIONADO":
+          case "EXTRAORDINARIA DE JUBILADOS Y PENSIONADOS":
             codPlanilla = `EXTRA-JUB-PEN-${mes}-${anio}-${secuencia}`;
             break;
-          case "EXTRAORDINARIA BENEFICIARIO":
+          case "EXTRAORDINARIA DE BENEFICIARIOS":
             codPlanilla = `EXTRA-JUB-${mes}-${anio}-${secuencia}`;
             break;
           case "60 RENTAS":

@@ -147,8 +147,8 @@ export class DeduccionService {
 
     const isComplementaria = planillas.some(
       (p) =>
-        p.tipoPlanilla.nombre_planilla === 'COMPLEMENTARIA JUBILADO Y PENSIONADO' ||
-        p.tipoPlanilla.nombre_planilla === 'COMPLEMENTARIA BENEFICIARIO'
+        p.tipoPlanilla.nombre_planilla === 'COMPLEMENTARIA DE JUBILADOS Y PENSIONADOS' ||
+        p.tipoPlanilla.nombre_planilla === 'COMPLEMENTARIA DE BENEFICIARIOS'
     );
 
     if (persona.fallecido === 'SI' && !isComplementaria) {
@@ -186,10 +186,10 @@ export class DeduccionService {
         return (
           (fechaDeduccion >= periodoInicio &&
             fechaDeduccion <= periodoFinalizacion &&
-            (['JUBILADO', 'PENSIONADO'].includes(tipoPersonaJUPE) && p.tipoPlanilla.nombre_planilla === 'ORDINARIA JUBILADOS Y PENSIONADOS'))
+            (['JUBILADO', 'PENSIONADO'].includes(tipoPersonaJUPE) && p.tipoPlanilla.nombre_planilla === 'ORDINARIA DE JUBILADOS Y PENSIONADOS'))
           || (fechaDeduccion >= periodoInicio &&
             fechaDeduccion <= periodoFinalizacion &&
-            (['JUBILADO', 'PENSIONADO'].includes(tipoPersonaJUPE) && p.tipoPlanilla.nombre_planilla === 'COMPLEMENTARIA JUBILADO Y PENSIONADO') && isComplementaria)
+            (['JUBILADO', 'PENSIONADO'].includes(tipoPersonaJUPE) && p.tipoPlanilla.nombre_planilla === 'COMPLEMENTARIA DE JUBILADOS Y PENSIONADOS') && isComplementaria)
 
         );
       });
@@ -239,7 +239,7 @@ export class DeduccionService {
         return (
           fechaDeduccion >= periodoInicio &&
           fechaDeduccion <= periodoFinalizacion &&
-          (['BENEFICIARIO', 'BENEFICIARIO SIN CAUSANTE', 'DESIGNADO'].includes(tipoPersonaBE) && p.tipoPlanilla.nombre_planilla === 'ORDINARIA BENEFICIARIO')
+          (['BENEFICIARIO', 'BENEFICIARIO SIN CAUSANTE', 'DESIGNADO'].includes(tipoPersonaBE) && p.tipoPlanilla.nombre_planilla === 'ORDINARIA DE BENEFICIARIOS')
         );
       });
 

@@ -7,7 +7,7 @@
   </app-dynamic-form>
 
   <div class="button-container">
-    <button mat-raised-button color="primary" [disabled]="form.invalid" (click)="previsualizarInfoAfil()">
+    <button mat-raised-button color="primary" style="padding: 5px;" [disabled]="form.invalid" (click)="previsualizarInfoAfil()">
       Mostrar información del afiliado
     </button>
   </div>
@@ -17,9 +17,11 @@
   <h1 style="text-align: center; font-size: 2rem">Datos Generales Afiliado</h1>
   <div>
     <table>
-      <tr style="background-color: #f2f2f2">
+      <tr>
         <th>DNI</th>
         <td>{{ Afiliado.dni }}</td>
+        <th>Fallecido</th>
+        <td>{{ Afiliado.fallecido }}</td>
         <th>Nombre de afiliado</th>
         <td>{{ Afiliado.nombreCompleto }}</td>
         <th>Género</th>

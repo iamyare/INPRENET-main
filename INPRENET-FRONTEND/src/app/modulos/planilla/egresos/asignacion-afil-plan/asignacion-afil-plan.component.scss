@@ -1,5 +1,6 @@
 .container {
-  max-width: 100vw; /* O el ancho máximo deseado */
+  max-width: 100vw;
+  /* O el ancho máximo deseado */
   margin: 0 auto;
   padding: 0 20px;
 }
@@ -27,13 +28,15 @@ table {
   margin-bottom: 20px;
 }
 
-th, td {
+th,
+td {
   padding: 8px;
   border-bottom: 1px solid #ddd;
   text-align: left;
 }
 
 @media only screen and (max-width: 768px) {
+
   th:nth-child(n+5),
   td:nth-child(n+6) {
     display: none;
@@ -69,4 +72,11 @@ th, td {
   color: #ffffff;
   border-radius: 5px;
   padding: 10px 20px;
+}
+
+
+.custom-header {
+  color: #229e92;
+  padding: 10px;
+  text-align: left;
 }

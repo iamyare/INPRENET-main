@@ -29,7 +29,7 @@
 
       <p>Ítem seleccionado: {{selectedItem?.nombre}}</p>
       <div>
-        <button mat-button matStepperNext [disabled]="!selectedItem">Siguiente</button>
+        <button mat-raised-button  color="primary" matStepperNext [disabled]="!selectedItem">Siguiente</button>
       </div>
     </form>
   </mat-step>
@@ -194,7 +194,7 @@
     </div>
     <div>
 
-      <button mat-button matStepperPrevious>Anterior</button>
+      <button mat-raised-button  color="primary" matStepperPrevious>Anterior</button>
     </div>
   </mat-step>
 </mat-stepper>

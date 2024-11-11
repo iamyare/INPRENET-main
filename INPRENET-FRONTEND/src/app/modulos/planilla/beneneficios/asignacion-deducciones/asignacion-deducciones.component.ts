@@ -8,5 +8,5 @@ import { Component, Input } from '@angular/core';
 export class AsignacionDeduccionesComponent {
   @Input() id_planilla: any;
 
-  mostrarFormularioIndividual: boolean = true;
+  mostrarFormularioIndividual: boolean = false;
 }

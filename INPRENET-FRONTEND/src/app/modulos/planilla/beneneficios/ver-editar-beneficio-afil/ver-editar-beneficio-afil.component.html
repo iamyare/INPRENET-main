@@ -21,53 +21,60 @@
   </div>
 </div>
 
+<div class="basic-container">
+  <div  class="card" *ngIf="Afiliado" style="background-color: white; padding: 1%">
+    <h1 class="custom-header" style="font-size: 2rem">Datos Generales Cliente</h1>
+    <div>
+      <table>
+        <tr style="background-color: #f2f2f2">
+          <th>Fallecido</th>
+          <td>{{ Afiliado.fallecido }}</td>
+          <th>DNI del cliente</th>
+          <td>{{ Afiliado.dni }}</td>
+          <th>Estado civil</th>
+          <td>{{ Afiliado.estado_civil }}</td>
+          <th>Nombre de afiliado</th>
+          <td>{{ Afiliado.nombreCompleto }}</td>
+          <th>Voluntario</th>
+          <td>{{ Afiliado.voluntario }}</td>
 
-<div  class="card" *ngIf="Afiliado" style="background-color: white; padding: 1%">
-  <h1 style="font-size: 2rem">Datos Generales Cliente</h1>
-  <div>
-    <table>
-      <tr style="background-color: #f2f2f2">
-        <th>Fallecido</th>
-        <td>{{ Afiliado.fallecido }}</td>
-        <th>DNI del cliente</th>
-        <td>{{ Afiliado.dni }}</td>
-        <th>Estado civil</th>
-        <td>{{ Afiliado.estado_civil }}</td>
-        <th>Nombre de afiliado</th>
-        <td>{{ Afiliado.nombreCompleto }}</td>
-        <th>Voluntario</th>
-        <td>{{ Afiliado.voluntario }}</td>
+        </tr>
+        <tr>
+          <th>Género</th>
+          <td>{{ Afiliado.genero }}</td>
+          <th>Fecha nacimiento</th>
+          <td>{{ Afiliado.fecha_nacimiento }}</td>
+          <th>Dirección de residencia</th>
+          <td>{{ Afiliado.direccion_residencia }}</td>
+          <th>Teléfono 1</th>
+          <td>{{ Afiliado.telefono_1 }}</td>
 
-      </tr>
-      <tr>
-        <th>Género</th>
-        <td>{{ Afiliado.genero }}</td>
-        <th>Fecha nacimiento</th>
-        <td>{{ Afiliado.fecha_nacimiento }}</td>
-        <th>Dirección de residencia</th>
-        <td>{{ Afiliado.direccion_residencia }}</td>
-        <th>Teléfono 1</th>
-        <td>{{ Afiliado.telefono_1 }}</td>
-
-      </tr>
-    </table>
-    <div >
+        </tr>
+      </table>
+      <div >
+      </div>
     </div>
   </div>
 </div>
 
-<div [hidden]="!monstrarBeneficiarios" style="background-color: white; border-radius: 10px; padding: 20px">
-  <app-dynamic-table titulo="" subtitulo="" [columns]="myColumns1" [data]="filasEst" [getData]="getFilas"
-    (ejecutarFuncionAsincronaEvent)="
-    ejecutarFuncionAsincronaDesdeOtroComponente2($event)
-  ">
-</app-dynamic-table>
-</div>
+  <div class="basic-container">
+    <div [hidden]="!monstrarBeneficiarios" style="background-color: white; border-radius: 10px; padding: 20px">
+      <app-dynamic-table titulo="Tipo de Persona"  subtitulo="" [columns]="myColumns1" [data]="filasEst" [getData]="getFilas"
+        (ejecutarFuncionAsincronaEvent)="
+        ejecutarFuncionAsincronaDesdeOtroComponente2($event)
+      ">
+    </app-dynamic-table>
+    </div>
+  </div>
 
-<div [hidden]="!monstrarBeneficios" style="background-color: white; border-radius: 10px; padding: 20px">
-  <app-dynamic-table titulo="Editar Tipo De Ingreso" subtitulo="Completa la información correspondiente"
-    [columns]="myColumns" [data]="filasT" [getData]="getFilas" (ejecutarFuncionAsincronaEvent)="
-      ejecutarFuncionAsincronaDesdeOtroComponente($event)
-    " [mostrarBotonUno]="true" [etiquetaBotonUno]="'Editar'" (accionBotonUno)="manejarAccionUno($event)">
-  </app-dynamic-table>
-</div>
+  <div class="basic-container">
+    <div [hidden]="!monstrarBeneficios" style="background-color: white; border-radius: 10px; padding: 20px">
+      <app-dynamic-table titulo="Editar Tipo De Ingreso" subtitulo="Completa la información correspondiente"
+        [columns]="myColumns" [data]="filasT" [getData]="getFilas" (ejecutarFuncionAsincronaEvent)="
+          ejecutarFuncionAsincronaDesdeOtroComponente($event)
+        " [mostrarBotonUno]="true" [etiquetaBotonUno]="'Editar'" (accionBotonUno)="manejarAccionUno($event)">
+      </app-dynamic-table>
+    </div>
+
+  </div>
+

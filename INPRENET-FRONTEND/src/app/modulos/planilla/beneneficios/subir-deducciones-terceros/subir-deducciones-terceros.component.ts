@@ -196,16 +196,23 @@ export class SubirDeduccionesTercerosComponent {
     if (!this.centroSeleccionado || !this.deduccionSeleccionada) {
       this.toastr.error('Debe seleccionar un centro de trabajo y una deducción.', 'Error');
       return;
+    } else if (!this.id_planilla) {
+      this.toastr.error('Debe seleccionar una planilla', 'Error');
+      return;
+    } else {
+      this.deduccionesService.obtenerDetallesDeduccionPorCentro(this.id_planilla, this.centroSeleccionado.id_centro_trabajo, this.deduccionSeleccionada).subscribe({
+        next: (detalles) => {
+          if (detalles.length > 0) {
+            this.detallesDeduccion = detalles;
+          } else {
+            this.toastr.warning('No hay registros para la planilla, centro de trabajo y tipo de decuccion seleccionada', 'Advertencia');
+          }
+        },
+        error: (error) => {
+          console.error('Error al obtener detalles de deducción:', error);
+        }
+      });
     }
-
-    this.deduccionesService.obtenerDetallesDeduccionPorCentro(this.centroSeleccionado.id_centro_trabajo, this.deduccionSeleccionada).subscribe({
-      next: (detalles) => {
-        this.detallesDeduccion = detalles;
-      },
-      error: (error) => {
-        console.error('Error al obtener detalles de deducción:', error);
-      }
-    });
   }
 
   exportarAExcel() {
@@ -249,5 +256,34 @@ export class SubirDeduccionesTercerosComponent {
       }
     });
   }
+
+  downloadExample() {
+    // Define los encabezados del archivo CSV
+    const encabezados = ["anio", "mes", "dni", "codigoDeduccion", "montoTotal"];
+
+    // Convierte los encabezados y los datos en formato CSV con punto y coma como separador
+    const filas = [
+      encabezados.join(";"),
+    ].join("\n");
+
+    // Crea un Blob con el contenido CSV
+    const blob = new Blob([filas], { type: "text/csv;charset=utf-8;" });
+
+    // Crea un enlace de descarga para el archivo CSV
+    const enlace = document.createElement("a");
+    const url = URL.createObjectURL(blob);
+    enlace.href = url;
+    enlace.download = "reporte_deducciones.csv";
+
+    // Simula un clic en el enlace para iniciar la descarga
+    enlace.style.display = "none";
+    document.body.appendChild(enlace);
+    enlace.click();
+
+    // Limpia el DOM
+    document.body.removeChild(enlace);
+    URL.revokeObjectURL(url);
+  }
+
 
 }

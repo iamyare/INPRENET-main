@@ -269,7 +269,7 @@ export class AfiliadoService {
       const detallePer = await this.detallePersonaRepository.findOne({
         where: {
           tipoPersona: {
-            tipo_persona: In(["BENEFICIARIO", "JUBILADO", "PENSIONADO"])
+            tipo_persona: In(["AFILIADO", "BENEFICIARIO", "JUBILADO", "PENSIONADO"])
           },
           persona: {
             n_identificacion: term

@@ -33,7 +33,7 @@
   <app-benef [formGroup]="steps[5].formGroup"></app-benef>
 </ng-template>
 
-<mat-horizontal-stepper [linear]="true" #stepper>
+<mat-horizontal-stepper style="background: transparent;" [linear]="true" #stepper>
   <mat-step>
     <ng-template matStepLabel>
       <div class="step-label">
@@ -48,7 +48,7 @@
     </ng-template>
     <ng-container *ngTemplateOutlet="datosGeneralesTemplate"></ng-container>
     <div>
-      <button mat-button (click)="markAllAsTouched(steps[0].formGroup); stepper.next()">Siguiente</button>
+      <button mat-raised-button  color="primary" (click)="markAllAsTouched(steps[0].formGroup); stepper.next()">Siguiente</button>
     </div>
   </mat-step>
 
@@ -66,8 +66,8 @@
     </ng-template>
     <ng-container *ngTemplateOutlet="referenciasPersonalesTemplate"></ng-container>
     <div>
-      <button mat-button (click)="stepper.previous()">Anterior</button>
-      <button mat-button (click)="markAllAsTouched(steps[1].formGroup); stepper.next()">Siguiente</button>
+      <button  mat-raised-button  color="primary" (click)="stepper.previous()">Anterior</button>
+      <button  mat-raised-button  color="primary" (click)="markAllAsTouched(steps[1].formGroup); stepper.next()">Siguiente</button>
     </div>
   </mat-step>
 
@@ -85,8 +85,8 @@
     </ng-template>
     <ng-container *ngTemplateOutlet="colegiosMagisterialesTemplate"></ng-container>
     <div>
-      <button mat-button (click)="stepper.previous()">Anterior</button>
-      <button mat-button (click)="markAllAsTouched(steps[2].formGroup); stepper.next()">Siguiente</button>
+      <button mat-raised-button  color="primary" (click)="stepper.previous()">Anterior</button>
+      <button mat-raised-button  color="primary" (click)="markAllAsTouched(steps[2].formGroup); stepper.next()">Siguiente</button>
     </div>
   </mat-step>
 
@@ -104,8 +104,8 @@
     </ng-template>
     <ng-container *ngTemplateOutlet="bancosTemplate"></ng-container>
     <div>
-      <button mat-button (click)="stepper.previous()">Anterior</button>
-      <button mat-button (click)="markAllAsTouched(steps[3].formGroup); stepper.next()">Siguiente</button>
+      <button mat-raised-button  color="primary" (click)="stepper.previous()">Anterior</button>
+      <button mat-raised-button  color="primary" (click)="markAllAsTouched(steps[3].formGroup); stepper.next()">Siguiente</button>
     </div>
   </mat-step>
 
@@ -123,8 +123,8 @@
     </ng-template>
     <ng-container *ngTemplateOutlet="centrosTrabajoTemplate"></ng-container>
     <div>
-      <button mat-button (click)="stepper.previous()">Anterior</button>
-      <button mat-button (click)="markAllAsTouched(steps[4].formGroup); stepper.next()">Siguiente</button>
+      <button mat-raised-button  color="primary" (click)="stepper.previous()">Anterior</button>
+      <button mat-raised-button  color="primary" (click)="markAllAsTouched(steps[4].formGroup); stepper.next()">Siguiente</button>
     </div>
   </mat-step>
 
@@ -142,8 +142,8 @@
     </ng-template>
     <ng-container *ngTemplateOutlet="beneficiariosTemplate"></ng-container>
     <div>
-      <button mat-button (click)="stepper.previous()">Anterior</button>
-      <button mat-button color="primary" (click)="onSubmit()">Enviar</button>
+      <button mat-raised-button  color="primary" (click)="stepper.previous()">Anterior</button>
+      <button mat-raised-button  color="primary"  (click)="onSubmit()">Enviar</button>
     </div>
   </mat-step>
 </mat-horizontal-stepper>

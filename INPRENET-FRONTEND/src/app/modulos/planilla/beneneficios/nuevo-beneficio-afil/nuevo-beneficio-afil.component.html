@@ -8,7 +8,7 @@
       subtitulo="Completa la información correspondiente" (newDatBenChange)="obtenerDatos($event)"></app-dynamic-form>
 
       <div class="button-container" style="display: flex; justify-content: center; margin: 1% 0;">
-        <button mat-raised-button color="primary" style="width: 15%; color: white;" [disabled]="form.invalid" (click)="previsualizarInfoAfil()">
+        <button mat-raised-button color="primary" style="padding: 0rem; width: 15%; color: white;" [disabled]="form.invalid" (click)="previsualizarInfoAfil()">
           Mostrar información del afiliado
         </button>
       </div>
@@ -16,7 +16,7 @@
 
   <!-- Asignación de beneficios uno por uno -->
   <div  class="card" *ngIf="Afiliado" style="background-color: white; margin: 1% 0% 1% 0%; padding: 1% 0% 1% 0%">
-    <h1 style="font-size: 2rem">Datos Generales Cliente</h1>
+    <h1 class="custom-header"  style="font-size: 2rem">Datos Generales Cliente</h1>
     <div>
       <table>
         <tr style="background-color: #f2f2f2">

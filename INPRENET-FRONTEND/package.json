@@ -7,7 +7,7 @@
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
-    "build-prod": "ng build --base-href /INPRENET/",
+    "build-prod": "ng build --base-href /INPRENET/ && gulp",
     "postbuild": "gulp",
     "build": "ng build --base-href /INPRENET/",
     "watch": "ng build --watch --configuration development",

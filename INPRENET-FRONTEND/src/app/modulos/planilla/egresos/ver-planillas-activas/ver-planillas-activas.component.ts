@@ -32,17 +32,17 @@ export class VerPlanillasActivasComponent {
 
   myColumns: any = [
     {
-      header: 'codigo_planilla',
+      header: 'Código Planilla',
       col: 'codigo_planilla',
 
     },
-    { header: 'secuencia', col: 'secuencia', },
+    { header: 'Secuencia', col: 'secuencia', },
     {
-      header: 'estado',
+      header: 'Estado',
       col: 'estado',
     },
-    { header: 'periodoInicio', col: 'periodoInicio', },
-    { header: 'periodoFinalizacion', col: 'periodoFinalizacion', },
+    { header: 'Fecha Inicio', col: 'periodoInicio', },
+    { header: 'Fecha Finalización', col: 'periodoFinalizacion', },
   ];
   datosTabl: any[] = [];
   filas: any

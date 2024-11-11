@@ -14,10 +14,11 @@ export class DeduccionController {
   async obtenerDetallesDeduccionPorCentro(
     @Param('idCentroTrabajo') idCentroTrabajo: number,
     @Query('codigoDeduccion') codigoDeduccion: number,
+    @Query('id_planilla') id_planilla: number,
     @Res() res
   ) {
     try {
-      const detallesDeduccion = await this.deduccionService.obtenerDetallesDeduccionPorCentro(idCentroTrabajo, codigoDeduccion);
+      const detallesDeduccion = await this.deduccionService.obtenerDetallesDeduccionPorCentro(id_planilla, idCentroTrabajo, codigoDeduccion);
       return res.status(HttpStatus.OK).json(detallesDeduccion);
     } catch (error) {
       console.error('Error al obtener los detalles de deducción:', error);

@@ -25,11 +25,11 @@ export class DeduccionesService {
     );
   }
 
-  obtenerDetallesDeduccionPorCentro(idCentroTrabajo: number, codigoDeduccion: number): Observable<any[]> {
+  obtenerDetallesDeduccionPorCentro(id_planilla: number, idCentroTrabajo: number, codigoDeduccion: number): Observable<any[]> {
     return this.http.get<any[]>(
       `${environment.API_URL}/api/deduccion/${idCentroTrabajo}/detalles-deduccion`,
       {
-        params: { codigoDeduccion: codigoDeduccion.toString() },
+        params: { codigoDeduccion: codigoDeduccion.toString(), id_planilla: id_planilla },
       }
     ).pipe(
       catchError((error: HttpErrorResponse) => {

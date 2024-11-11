@@ -8,14 +8,14 @@
         <div>
           <!-- Contenido para cargar beneficios -->
           <button
-            *ngIf="tipoPlanilla === 'ORDINARIA BENEFICIARIO'"
+            *ngIf="tipoPlanilla === 'ORDINARIA DE BENEFICIARIOS'"
             mat-raised-button
             color="primary"
             class="asignar-beneficios-btn"
             (click)="asignarBeneficiosOrdinariaBeneficiariosAfiliados()">
             Asignar beneficios a planilla ordinaria de Beneficiarios y Afiliados
           </button>
-          <button *ngIf="tipoPlanilla === 'ORDINARIA JUBILADOS Y PENSIONADOS'"
+          <button *ngIf="tipoPlanilla === 'ORDINARIA DE JUBILADOS Y PENSIONADOS'"
            mat-raised-button (click)="asignarBeneficiosOrdinariaJubiladosPensionados()"
            color="primary"
             class="asignar-beneficios-btn">
@@ -23,13 +23,13 @@
           </button>
 
           <div>
-            <button *ngIf="tipoPlanilla === 'COMPLEMENTARIA BENEFICIARIO' "
+            <button *ngIf="tipoPlanilla === 'COMPLEMENTARIA DE BENEFICIARIOS' "
               mat-raised-button color="primary" (click)="asignarBeneficiosComplementariaBeneficiariosAfiliados()"
               color="primary"
               class="asignar-beneficios-btn">
               Asignar beneficios a planilla complementaria de Beneficiarios y Afiliados
             </button>
-            <button *ngIf="tipoPlanilla === 'COMPLEMENTARIA JUBILADO Y PENSIONADO'"
+            <button *ngIf="tipoPlanilla === 'COMPLEMENTARIA DE JUBILADOS Y PENSIONADOS'"
             mat-raised-button
             (click)="asignarBeneficiosComplementariaJubiladosPensionados()"
             color="primary"
@@ -41,7 +41,7 @@
         </div>
       </mat-tab>
 
-      <mat-tab label="Cargar Deducciones de Terceros" *ngIf="(id_planilla && tipoPlanilla === 'ORDINARIA BENEFICIARIO') || ( id_planilla && tipoPlanilla === 'ORDINARIA JUBILADOS Y PENSIONADOS') || ( id_planilla && tipoPlanilla === 'COMPLEMENTARIA JUBILADO Y PENSIONADO') || ( id_planilla && tipoPlanilla === 'COMPLEMENTARIA BENEFICIARIO')">
+      <mat-tab label="Cargar Deducciones de Terceros" *ngIf="(id_planilla && tipoPlanilla === 'ORDINARIA DE BENEFICIARIOS') || ( id_planilla && tipoPlanilla === 'ORDINARIA DE JUBILADOS Y PENSIONADOS') || ( id_planilla && tipoPlanilla === 'COMPLEMENTARIA DE JUBILADOS Y PENSIONADOS') || ( id_planilla && tipoPlanilla === 'COMPLEMENTARIA DE BENEFICIARIOS')">
         <div>
           <app-asignacion-deducciones [id_planilla]="id_planilla"></app-asignacion-deducciones>
         </div>
@@ -55,7 +55,7 @@
 </div>
 
 
-<!-- <div class="manual-benefits-section" *ngIf="(id_planilla && tipoPlanilla === 'ORDINARIA BENEFICIARIO') || id_planilla && tipoPlanilla === 'ORDINARIA JUBILADOS Y PENSIONADOS'">
+<!-- <div class="manual-benefits-section" *ngIf="(id_planilla && tipoPlanilla === 'ORDINARIA DE BENEFICIARIOS') || id_planilla && tipoPlanilla === 'ORDINARIA DE JUBILADOS Y PENSIONADOS'">
   <h3>Asignar Beneficios Manualmente</h3>
   <mat-form-field appearance="outline">
     <mat-label>Buscar por DNI</mat-label>

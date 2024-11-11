@@ -12,6 +12,12 @@
       (imageCaptured)="onImageCaptured($event)">
     </app-datos-generales>
 
+    <br>
+    <mat-form-field class="example-full-width inputs" appearance="outline">
+      <mat-label>Dirección Completa</mat-label>
+      <textarea matInput [(ngModel)]="direccionCompleta" readonly></textarea>
+    </mat-form-field>
+
     <form style="margin: 0 0 1.5rem;" [formGroup]="form1">
       <div class="row" style="margin: 0px 20px 0 20px;">
         <div class="col-md-4">

@@ -132,7 +132,7 @@ export class AfiliarDocenteComponent implements OnInit {
           correo_1: datosGenerales.correo_1,
           correo_2: datosGenerales.correo_2,
           fecha_nacimiento: datosGenerales.fecha_nacimiento,
-          direccion_residencia: this.formatDireccion(datosGenerales).toUpperCase(),
+          direccion_residencia_estructurada: this.formatDireccion(datosGenerales).toUpperCase(),
           id_municipio_residencia: datosGenerales.id_municipio_residencia,
           id_municipio_nacimiento: datosGenerales.id_municipio_nacimiento,
           id_profesion: datosGenerales.id_profesion,
@@ -604,7 +604,6 @@ export class AfiliarDocenteComponent implements OnInit {
         }
       }
     };
-
   }
 
   convertirImagenABase64(url: string): Promise<string> {

@@ -13,6 +13,7 @@ import { RestablecerContrasenaComponent } from './modulos/auth/restablecer-contr
 import { RegisterComponent } from './modulos/auth/register/register.component';
 import { LandingPageComponent } from './components/landing-page/landing-page.component';
 import { PagenotfoundComponent } from './components/pagenotfound/pagenotfound.component';
+import { AuthGuard } from './guards/auth.guard';
 
 const routes: Routes = [
   { path: 'login', component: LoginComponent, pathMatch: 'full' },
@@ -34,6 +35,7 @@ const routes: Routes = [
   {
     path: 'home',
     component: MainLayoutComponent,
+    canActivate: [AuthGuard],
     children: [
       {
         path: 'afiliacion',

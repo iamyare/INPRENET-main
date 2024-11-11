@@ -36,6 +36,8 @@ export class EditDatosGeneralesComponent implements OnInit {
     { ID_TIPO_PERSONA: 1, TIPO_PERSONA: 'AFILIADO' },
     { ID_TIPO_PERSONA: 5, TIPO_PERSONA: 'VOLUNTARIO' }
   ];
+  direccionValida: boolean = true;
+  direccionCompleta: string = '';
 
   form1 = this.fb.group({
     causa_fallecimiento: ["", [Validators.required]],
@@ -210,86 +212,93 @@ export class EditDatosGeneralesComponent implements OnInit {
 
   async previsualizarInfoAfil() {
     if (this.Afiliado) {
-      this.loading = true;
-      await this.svcAfiliado.getAfilByParam(this.Afiliado.n_identificacion).subscribe(
-        (result) => {
-          this.datos = result;
-          this.Afiliado = result;
-          this.estadoAfiliacion = result.estadoAfiliacion;
-          this.fallecido = result.fallecido;
-          if (result.FOTO_PERFIL) {
-            this.image = this.dataURItoBlob(`data:image/jpeg;base64,${result.FOTO_PERFIL}`);
-          }
+        this.loading = true;
+        await this.svcAfiliado.getAfilByParam(this.Afiliado.n_identificacion).subscribe(
+            (result) => {
+                this.datos = result;
+                this.Afiliado = result;
+                this.estadoAfiliacion = result.estadoAfiliacion;
+                this.fallecido = result.fallecido;
 
-          const jsonObj: any = result.DIRECCION_RESIDENCIA
-            ? result.DIRECCION_RESIDENCIA.split(',').reduce((acc: any, curr: any) => {
-                const [key, value] = curr.split(':').map((s: string) => s.trim());
-                acc[key] = value;
-                return acc;
-              }, {} as { [key: string]: string })
-            : {};
+                if (result.FOTO_PERFIL) {
+                    this.image = this.dataURItoBlob(`data:image/jpeg;base64,${result.FOTO_PERFIL}`);
+                }
+                if (result.DIRECCION_RESIDENCIA_ESTRUCTURADA) {
+                    const jsonObj = result.DIRECCION_RESIDENCIA_ESTRUCTURADA.split(',').reduce((acc: any, curr: any) => {
+                        const [key, value] = curr.split(':').map((s: string) => s.trim());
+                        acc[key] = value;
+                        return acc;
+                    }, {});
 
-          this.initialData = {
-            n_identificacion: result?.N_IDENTIFICACION,
-            primer_nombre: result?.PRIMER_NOMBRE,
-            segundo_nombre: result?.SEGUNDO_NOMBRE,
-            tercer_nombre: result?.TERCER_NOMBRE,
-            primer_apellido: result?.PRIMER_APELLIDO,
-            segundo_apellido: result?.SEGUNDO_APELLIDO,
-            fecha_nacimiento: result?.FECHA_NACIMIENTO,
-            fecha_vencimiento_ident: result?.fecha_vencimiento_ident,
-            cantidad_dependientes: result?.CANTIDAD_DEPENDIENTES,
-            representacion: result?.REPRESENTACION,
-            telefono_1: result?.TELEFONO_1,
-            telefono_2: result?.TELEFONO_2,
-            correo_1: result?.CORREO_1,
-            correo_2: result?.CORREO_2,
-            rtn: result?.RTN,
-            genero: result?.GENERO,
-            grupo_etnico: result?.GRUPO_ETNICO,
-            grado_academico: result?.GRADO_ACADEMICO,
-            estado_civil: result?.ESTADO_CIVIL,
-            cantidad_hijos: result?.CANTIDAD_HIJOS,
-            id_profesion: result?.ID_PROFESION,
-            id_pais: result?.ID_PAIS,
-            id_departamento_residencia: result?.id_departamento_residencia,
-            id_municipio_residencia: result?.ID_MUNICIPIO,
-            id_departamento_nacimiento: result?.id_departamento_nacimiento,
-            id_municipio_nacimiento: result?.ID_MUNICIPIO_NACIMIENTO,
-            discapacidad: result?.discapacidades.length > 0 ? true : false,
-            id_tipo_identificacion: result?.ID_PROFESION,
+                    this.initialData = {
+                        ...this.initialData,
+                        avenida: jsonObj.AVENIDA || '',
+                        calle: jsonObj.CALLE || '',
+                        sector: jsonObj.SECTOR || '',
+                        bloque: jsonObj.BLOQUE || '',
+                        aldea: jsonObj.ALDEA || '',
+                        caserio: jsonObj.CASERIO || '',
+                        barrio_colonia: jsonObj["BARRIO_COLONIA"] || '',
+                        numero_casa: jsonObj["N° DE CASA"] || '',
+                        color_casa: jsonObj["COLOR CASA"] || ''
+                    };
+                } else {
+                    this.direccionCompleta = result.DIRECCION_RESIDENCIA?.trim();
+                }
+                this.initialData = {
+                    ...this.initialData,
+                    n_identificacion: result?.N_IDENTIFICACION,
+                    primer_nombre: result?.PRIMER_NOMBRE,
+                    segundo_nombre: result?.SEGUNDO_NOMBRE,
+                    tercer_nombre: result?.TERCER_NOMBRE,
+                    primer_apellido: result?.PRIMER_APELLIDO,
+                    segundo_apellido: result?.SEGUNDO_APELLIDO,
+                    fecha_nacimiento: result?.FECHA_NACIMIENTO,
+                    fecha_vencimiento_ident: result?.fecha_vencimiento_ident,
+                    cantidad_dependientes: result?.CANTIDAD_DEPENDIENTES,
+                    representacion: result?.REPRESENTACION,
+                    telefono_1: result?.TELEFONO_1,
+                    telefono_2: result?.TELEFONO_2,
+                    correo_1: result?.CORREO_1,
+                    correo_2: result?.CORREO_2,
+                    rtn: result?.RTN,
+                    genero: result?.GENERO,
+                    grupo_etnico: result?.GRUPO_ETNICO,
+                    grado_academico: result?.GRADO_ACADEMICO,
+                    estado_civil: result?.ESTADO_CIVIL,
+                    cantidad_hijos: result?.CANTIDAD_HIJOS,
+                    id_profesion: result?.ID_PROFESION,
+                    id_pais: result?.ID_PAIS,
+                    id_departamento_residencia: result?.id_departamento_residencia,
+                    id_municipio_residencia: result?.ID_MUNICIPIO,
+                    id_departamento_nacimiento: result?.id_departamento_nacimiento,
+                    id_municipio_nacimiento: result?.ID_MUNICIPIO_NACIMIENTO,
+                    discapacidad: result?.discapacidades?.length > 0 ? true : false,
+                    id_tipo_identificacion: result?.ID_PROFESION
+                };
 
-            avenida: jsonObj?.AVENIDA || "",
-            calle: jsonObj?.CALLE || "",
-            sector: jsonObj?.SECTOR || "",
-            bloque: jsonObj?.BLOQUE || "",
-            aldea: jsonObj?.ALDEA || "",
-            caserio: jsonObj?.CASERIO || "",
-            barrio_colonia: jsonObj?.["BARRIO_COLONIA"] || "",
-            numero_casa: jsonObj?.["N° DE CASA"] || "",
-            color_casa: jsonObj?.["COLOR CASA"] || ""
-          };
+                if (result?.discapacidades?.length > 0) {
+                    this.discapacidadSeleccionada = true;
+                    this.indicesSeleccionados = result?.discapacidades;
+                }
 
-          if (result?.discapacidades.length > 0) {
-            this.discapacidadSeleccionada = true;
-            this.indicesSeleccionados = result?.discapacidades;
-          }
+                // Establece valores en el formulario reactivo
+                this.form1.controls.fecha_defuncion.setValue(result?.fecha_defuncion);
+                this.form1.controls.causa_fallecimiento.setValue(result?.ID_CAUSA_FALLECIMIENTO);
+                this.form1.controls.id_departamento_defuncion.setValue(result?.ID_DEPARTAMENTO_DEFUNCION);
+                this.form1.controls.id_municipio_defuncion.setValue(result?.ID_MUNICIPIO_DEFUNCION);
+                this.form1.controls.tipo_persona.setValue(result?.ID_TIPO_PERSONA);
+                this.form1.controls.estado.setValue(result?.estadoAfiliacion?.codigo);
 
-          this.form1.controls.fecha_defuncion.setValue(result?.fecha_defuncion);
-          this.form1.controls.causa_fallecimiento.setValue(result?.ID_CAUSA_FALLECIMIENTO);
-          this.form1.controls.id_departamento_defuncion.setValue(result?.ID_DEPARTAMENTO_DEFUNCION);
-          this.form1.controls.id_municipio_defuncion.setValue(result?.ID_MUNICIPIO_DEFUNCION);
-          this.form1.controls.tipo_persona.setValue(result?.ID_TIPO_PERSONA);
-          this.form1.controls.estado.setValue(result?.estadoAfiliacion?.codigo);
-          this.loading = false;
-        },
-        (error) => {
-          this.toastr.error(`Error: ${error.error.message}`);
-          this.loading = false;
-        }
-      );
+                this.loading = false;
+            },
+            (error) => {
+                this.toastr.error(`Error: ${error.error.message}`);
+                this.loading = false;
+            }
+        );
     }
-  }
+}
 
   updateDiscapacidades(discapacidadesSeleccionadas: any[]) {
     const refpersArray = this.formDatosGenerales.get('refpers') as FormArray;

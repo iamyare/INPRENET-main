@@ -67,19 +67,6 @@ export class AuthService {
     }
   }
 
-  /* private handleIdleTimeout(): void {
-    if (this.apiRequestsCount === 0) {
-      // Aquí cierras la sesión o realizas cualquier acción para manejar la inactividad
-      console.log('Sesión cerrada por inactividad');
-      // Cerrar sesión o redirigir
-    }
-  } */
-
-  /* private resetIdleTimer(): void {
-    clearTimeout(this.timeout);
-    this.timeout = setTimeout(() => this.handleIdleTimeout(), this.idleTime);
-  } */
-
   private handleIdleTimeout(): void {
     this.ngZone.run(() => {
       const token = sessionStorage.getItem('token');

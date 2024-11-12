@@ -18,7 +18,7 @@ export const MENU_CONFIG: Section[] = [
         title: 'MANTENIMIENTO',
         icon: 'build',
         children: [
-          { title: 'Mantenimiento', route: 'afiliacion/mantenimiento', icon: 'build' },
+          { title: 'AFILIACIÓN', route: 'afiliacion/mantenimiento', icon: 'build' },
         ],
       },
     ],

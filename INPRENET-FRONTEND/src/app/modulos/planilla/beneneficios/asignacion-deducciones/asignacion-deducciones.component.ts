@@ -7,6 +7,7 @@ import { Component, Input } from '@angular/core';
 })
 export class AsignacionDeduccionesComponent {
   @Input() id_planilla: any;
+  @Input() idTipoPlanilla: any;
 
   mostrarFormularioIndividual: boolean = false;
 }

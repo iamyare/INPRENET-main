@@ -45,9 +45,9 @@
         </tr>
         <tr style="background-color: #f2f2f2">
           <th>Fecha Inicio</th>
-          <td>{{ detallePlanilla?.periodoInicio }}</td>
+          <td>{{ convertirFecha(detallePlanilla?.periodoInicio, false) }}</td>
           <th>Fecha Finalización</th>
-          <td>{{ detallePlanilla?.periodoFinalizacion }}</td>
+          <td>{{ convertirFecha(detallePlanilla?.periodoFinalizacion, false) }}</td>
         </tr>
       </table>
 

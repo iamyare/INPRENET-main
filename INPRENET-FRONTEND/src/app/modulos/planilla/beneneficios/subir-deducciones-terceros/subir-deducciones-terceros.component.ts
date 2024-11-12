@@ -26,6 +26,7 @@ export class SubirDeduccionesTercerosComponent {
 
   @ViewChild('fileInput') fileInput!: ElementRef;
   @Input() id_planilla: any;
+  @Input() idTipoPlanilla: any;
 
   constructor(
     private deduccionesService: DeduccionesService,
@@ -74,7 +75,7 @@ export class SubirDeduccionesTercerosComponent {
       let data: any[] = XLSX.utils.sheet_to_json(ws, { raw: false, defval: null });
       data = data.filter(row => Object.values(row).some(cell => cell != null && cell.toString().trim() !== ''));
       this.AuthService.onApiRequestStart();
-      this.deduccionesService.subirArchivoDeducciones(this.id_planilla, this.file!).subscribe({
+      this.deduccionesService.subirArchivoDeducciones(this.idTipoPlanilla, this.id_planilla, this.file!).subscribe({
         next: (event) => {
           if (event.type === HttpEventType.UploadProgress && event.total) {
             const progress = Math.round(100 * (event.loaded / (event.total || 1)));

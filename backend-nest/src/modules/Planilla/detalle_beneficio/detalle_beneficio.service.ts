@@ -889,7 +889,7 @@ export class DetalleBeneficioService {
       const tipoBen = await this.benTipoPerRepository.find({
         where: {
           tipPersona: { tipo_persona: tipoPersona },
-          beneficio: { nombre_beneficio: Not('PENSION POR VIUDEZ Y ORFANDAD') }
+          beneficio: { estado: 'HABILITADO' }
         },
         relations: [
           'beneficio',

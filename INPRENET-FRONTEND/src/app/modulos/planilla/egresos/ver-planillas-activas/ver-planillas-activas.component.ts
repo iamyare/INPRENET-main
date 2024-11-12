@@ -3,6 +3,7 @@ import { FormGroup, Validators } from '@angular/forms';
 import { BehaviorSubject } from 'rxjs';
 import { DynamicFormComponent } from 'src/app/components/dinamicos/dynamic-form/dynamic-form.component';
 import { PlanillaService } from 'src/app/services/planilla.service';
+import { convertirFecha } from 'src/app/shared/functions/formatoFecha';
 import { unirNombres } from 'src/app/shared/functions/formatoNombresP';
 import { FieldConfig } from 'src/app/shared/Interfaces/field-config';
 
@@ -63,7 +64,6 @@ export class VerPlanillasActivasComponent {
   getFilas = async () => {
     try {
       const data = await this.planillaService.getPlanillasActivas().toPromise();
-
       this.filas = data.map((item: any) => ({
         id_planilla: item.id_planilla,
         codigo_planilla: item.codigo_planilla,
@@ -71,9 +71,10 @@ export class VerPlanillasActivasComponent {
         fecha_cierre: item.fecha_cierre,
         secuencia: item.secuencia,
         estado: item.estado,
-        periodoInicio: item.periodoInicio,
-        periodoFinalizacion: item.periodoFinalizacion,
-        tipoPlanilla: item.tipoPlanilla.nombre_planilla
+        periodoInicio: convertirFecha(item.periodoInicio, false),
+        periodoFinalizacion: convertirFecha(item.periodoFinalizacion, false),
+        tipoPlanilla: item.tipoPlanilla.nombre_planilla,
+        idTipoPlanilla: item.tipoPlanilla.id_tipo_planilla
       }));
 
       return data;

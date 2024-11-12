@@ -5,6 +5,7 @@ import { ToastrService } from 'ngx-toastr';
 import { DynamicFormComponent } from 'src/app/components/dinamicos/dynamic-form/dynamic-form.component';
 import { FieldConfig } from 'src/app/shared/Interfaces/field-config';
 import { format } from 'date-fns';
+import { convertirFecha } from 'src/app/shared/functions/formatoFecha';
 
 @Component({
   selector: 'app-nuevaplanilla',
@@ -13,7 +14,7 @@ import { format } from 'date-fns';
 })
 export class NuevaplanillaComponent implements OnInit {
   @ViewChild(DynamicFormComponent) dynamicForm!: DynamicFormComponent;
-
+  convertirFecha = convertirFecha;
   myFormFields: FieldConfig[] = [];
   tiposPlanilla: any[] = [];
   datosFormateados: any;

@@ -15,6 +15,7 @@ import { Worker } from 'worker_threads';
 import * as pLimit from 'p-limit';
 import * as fs from 'fs';
 import * as csv from 'fast-csv';
+import { Net_Deduccion_Tipo_Planilla } from './entities/net_deduccion_tipo_planilla.entity';
 
 @Injectable()
 export class DeduccionService {
@@ -24,6 +25,8 @@ export class DeduccionService {
   constructor(
     @InjectRepository(Net_Deduccion)
     public deduccionRepository: Repository<Net_Deduccion>,
+    @InjectRepository(Net_Deduccion_Tipo_Planilla)
+    public deduccionTipoPlanRepository: Repository<Net_Deduccion_Tipo_Planilla>,
     @InjectRepository(Net_Centro_Trabajo)
     private centroTrabajoRepository: Repository<Net_Centro_Trabajo>,
     @InjectRepository(Net_Detalle_Deduccion)
@@ -74,7 +77,7 @@ export class DeduccionService {
   }
 
 
-  private async processRow(id_planilla: any, row: any, repositories: any): Promise<any> {
+  private async processRow(idTipoPlanilla: number, id_planilla: number, row: any, repositories: any): Promise<any> {
     const { anio, mes, dni, codigoDeduccion, montoTotal } = row;
 
     if (!anio && !mes && !dni && !codigoDeduccion && !montoTotal) {
@@ -103,10 +106,10 @@ export class DeduccionService {
       return { error: `No se encontró persona con DNI: ${parsedDni}`, processed: false };
     }
 
-    const dedPermitidasPlan = 44;
+    /* const dedPermitidasPlan = 44;
     if (dedPermitidasPlan == parsedCodigoDeduccion) {
       return { error: `La deducción con código 44 no va en la ordinaria`, processed: false };
-    }
+    } */
 
     const deduccion = await repositories.deduccionRepository.findOne({
       where: { codigo_deduccion: parsedCodigoDeduccion },
@@ -114,6 +117,16 @@ export class DeduccionService {
 
     if (!deduccion) {
       return { error: `No se encontró deducción con código: ${parsedCodigoDeduccion}`, processed: false };
+    }
+
+    const dedTipoPlanilla = await repositories.deduccionTipoPlanRepository.find({
+      where: { deduccion: { codigoDeduccion: parsedCodigoDeduccion }, tipo_planilla: { id_tipo_planilla: idTipoPlanilla } },
+    });
+
+    console.log(dedTipoPlanilla);
+
+    if (!dedTipoPlanilla) {
+      return { error: `La deducción con código ${parsedCodigoDeduccion} no puede ir en este tipo de planilla `, processed: false };
     }
 
     const bancoActivo = await repositories.personaPorBancoRepository.findOne({
@@ -133,7 +146,7 @@ export class DeduccionService {
         where: {
           id_planilla: id_planilla,
           estado: 'ACTIVA',
-          secuencia: 1,
+          //secuencia: 1,
         },
         relations: ['tipoPlanilla'],
       });
@@ -212,7 +225,7 @@ export class DeduccionService {
           return { error: `Deducción duplicada detectada`, processed: false };
         }
 
-        const detalleDeduccion = repositories.detalleDeduccionRepository.create({
+        /* const detalleDeduccion = repositories.detalleDeduccionRepository.create({
           anio: parsedAnio,
           mes: parsedMes,
           monto_total: parsedMontoTotal,
@@ -222,9 +235,9 @@ export class DeduccionService {
           deduccion,
           planilla,
           personaPorBanco: bancoActivo,
-        });
+        }); */
 
-        await repositories.detalleDeduccionRepository.save(detalleDeduccion);
+        //await repositories.detalleDeduccionRepository.save(detalleDeduccion);
         return { processed: true };
       }
 
@@ -285,7 +298,7 @@ export class DeduccionService {
   }
 
 
-  async uploadDeducciones(id_planilla: any, file: Express.Multer.File): Promise<{ message: string; failedRows: any[] }> {
+  async uploadDeducciones(idTipoPlanilla: number, id_planilla: number, file: Express.Multer.File): Promise<{ message: string; failedRows: any[] }> {
     const failedRows: any[] = [];
     const rows: any[] = [];
 
@@ -315,7 +328,7 @@ export class DeduccionService {
 
           const limit = pLimit(10); // Limitar a 10 conexiones concurrentes
           const workerPromises = rows.map(row =>
-            limit(() => this.processRow(id_planilla, row, repositories).then(result => {
+            limit(() => this.processRow(idTipoPlanilla, id_planilla, row, repositories).then(result => {
               if (result.error) {
                 failedRows.push({ ...row, error: result.error });
                 this.logger.warn(`${result.error}`);

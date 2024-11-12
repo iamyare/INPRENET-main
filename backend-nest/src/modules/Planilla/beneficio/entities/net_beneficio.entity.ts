@@ -1,10 +1,10 @@
-import { Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn } from "typeorm";
+import { Check, Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 import { Net_Detalle_Beneficio_Afiliado } from "../../detalle_beneficio/entities/net_detalle_beneficio_afiliado.entity";
 import { Net_Clasificacion_Beneficios } from "../../planilla/entities/net_clasificacion_beneficios.entity";
 import { Net_Regimen } from "./net_regimen.entity";
 import { Net_Beneficio_Tipo_Persona } from "../../beneficio_tipo_persona/entities/net_beneficio_tipo_persona.entity";
 
-
+@Check("CK_ESTADO_NET_BENEFICIO", `estado IN ('HABILITADO', 'INHABILITADO')`)
 @Entity({ name: 'NET_BENEFICIO' })
 export class Net_Beneficio {
 
@@ -13,6 +13,9 @@ export class Net_Beneficio {
 
     @Column('varchar2', { length: 60, nullable: false, name: 'NOMBRE_BENEFICIO' })
     nombre_beneficio: string;
+
+    @Column('varchar2', { length: 60, default: "HABILITADO", nullable: false, name: 'ESTADO' })
+    estado: string;
 
     @Column('varchar2', { length: 20, nullable: false, name: 'CODIGO' })
     codigo: string;

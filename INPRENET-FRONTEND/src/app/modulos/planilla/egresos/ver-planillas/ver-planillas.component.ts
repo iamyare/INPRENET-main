@@ -7,6 +7,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { MatPaginator } from '@angular/material/paginator';
 import { MatTableDataSource } from '@angular/material/table';
 import { DetallePlanillaDialogComponent } from '../detalle-planilla-dialog/detalle-planilla-dialog.component';
+import { convertirFecha } from 'src/app/shared/functions/formatoFecha';
 
 @Component({
   selector: 'app-ver-planillas',
@@ -50,12 +51,12 @@ export class VerPlanillasComponent implements OnInit {
         isEditable: true
       },
       {
-        header: 'Período de inicio',
+        header: 'Fecha de inicio',
         col: 'periodoInicio',
         isEditable: false
       },
       {
-        header: 'Período de finalización',
+        header: 'Fecha de finalización',
         col: 'periodoFinalizacion',
         isEditable: false
       },
@@ -106,8 +107,8 @@ export class VerPlanillasComponent implements OnInit {
           codigo_planilla: item.codigo_planilla,
           estado: item.estado,
           secuencia: item.secuencia,
-          periodoFinalizacion: item.periodoFinalizacion,
-          periodoInicio: item.periodoInicio,
+          periodoFinalizacion: convertirFecha(item.periodoFinalizacion, false),
+          periodoInicio: convertirFecha(item.periodoInicio, false),
           totalBeneficio: totalResponse.totalBeneficios,
           totalDeducciones: totalResponse.totalDeducciones,
           totalPlanilla: totalResponse.totalPlanilla, // Añade el total de la planilla

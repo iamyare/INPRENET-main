@@ -7,6 +7,7 @@ import { AfiliadoService } from 'src/app/services/afiliado.service';
 import { BeneficiosService } from 'src/app/services/beneficios.service';
 import { PlanillaService } from 'src/app/services/planilla.service';
 import { FieldConfig } from 'src/app/shared/Interfaces/field-config';
+import { convertirFecha } from 'src/app/shared/functions/formatoFecha';
 import { unirNombres } from 'src/app/shared/functions/formatoNombresP';
 
 @Component({
@@ -80,8 +81,8 @@ export class VerPlanillasCerradasComponent {
         fecha_cierre: item.fecha_cierre,
         secuencia: item.secuencia,
         estado: item.estado,
-        periodoInicio: item.periodoInicio,
-        periodoFinalizacion: item.periodoFinalizacion,
+        periodoInicio: convertirFecha(item.periodoInicio, false),
+        periodoFinalizacion: convertirFecha(item.periodoFinalizacion, false),
         tipoPlanilla: item.tipoPlanilla.nombre_planilla
       }));
 

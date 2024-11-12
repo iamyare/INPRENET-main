@@ -16,6 +16,7 @@ export class CargarbefDedComponent {
   beneficios: any[] = [];
   loading: boolean = false;
   id_planilla: any
+  idTipoPlanilla: any
 
   displayedColumns: string[] = ['causante', 'beneficio', 'select'];
 
@@ -66,6 +67,7 @@ export class CargarbefDedComponent {
   }
 
   getElemSeleccionados(event: any) {
+    this.idTipoPlanilla = event.idTipoPlanilla;
     this.tipoPlanilla = event.tipoPlanilla;
     this.id_planilla = event.id_planilla;
   }

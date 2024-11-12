@@ -43,7 +43,7 @@
 
       <mat-tab label="Cargar Deducciones de Terceros" *ngIf="(id_planilla && tipoPlanilla === 'ORDINARIA DE BENEFICIARIOS') || ( id_planilla && tipoPlanilla === 'ORDINARIA DE JUBILADOS Y PENSIONADOS') || ( id_planilla && tipoPlanilla === 'COMPLEMENTARIA DE JUBILADOS Y PENSIONADOS') || ( id_planilla && tipoPlanilla === 'COMPLEMENTARIA DE BENEFICIARIOS')">
         <div>
-          <app-asignacion-deducciones [id_planilla]="id_planilla"></app-asignacion-deducciones>
+          <app-asignacion-deducciones [id_planilla]="id_planilla" [idTipoPlanilla]="idTipoPlanilla"></app-asignacion-deducciones>
         </div>
       </mat-tab>
 

@@ -45,7 +45,7 @@ import { BitacoraModule } from './modules/bitacora/bitacora.module';
           entities: [__dirname + '/../**/*.entity{.ts,.js}'],
           migrations: [__dirname + '/../migrations/*{.ts,.js}'],
           dataSource: AppDataSource,
-          //autoLoadEntities: true,
+          autoLoadEntities: true,
           //synchronize: true,
           //migrations: ['src/database/migrations/*{.ts,.js}'],
           //logging: ["query", "schema", "error", "warn", "info", "log", "migration"]

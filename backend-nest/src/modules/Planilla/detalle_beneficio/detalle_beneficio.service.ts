@@ -164,21 +164,27 @@ export class DetalleBeneficioService {
     if (!beneficiario) {
       throw new Error('Beneficiario no encontrado');
     }
-    const tipoPersona = await this.tipoPersonaRepos.findOne({ where: { tipo_persona: 'BENEFICIARIO' } });
-    if (!tipoPersona) {
-      throw new Error('Tipo de persona "BENEFICIARIO" no encontrado');
+    const tiposPersona = await this.tipoPersonaRepos.find({
+      where: { tipo_persona: In(['BENEFICIARIO', 'BENEFICIARIO SIN CAUSANTE', 'DESIGNADO']) }
+    });
+
+    if (tiposPersona.length === 0) {
+      throw new Error('Tipos de persona "BENEFICIARIO", "BENEFICIARIO SIN CAUSANTE" o "DESIGNADO" no encontrados');
     }
-    const detalles = beneficiario.detallePersona.filter(d => d.ID_TIPO_PERSONA === tipoPersona.id_tipo_persona);
+
+    const detalles = beneficiario.detallePersona.filter(d => tiposPersona.some(tp => tp.id_tipo_persona === d.ID_TIPO_PERSONA));
 
     if (detalles.length === 0) {
       throw new Error('Detalle de beneficiario no encontrado');
     }
+
     const beneficiosPorCausante = await Promise.all(detalles.map(async (detalle) => {
       const causante = await this.personaRepository.findOne({ where: { id_persona: detalle.ID_CAUSANTE } });
 
       if (!causante) {
         throw new Error(`Causante con ID ${detalle.ID_CAUSANTE} no encontrado`);
       }
+
       const beneficios = await this.detalleBeneficioAfiliadoRepository.find({
         where: { ID_CAUSANTE: causante.id_persona },
         relations: ['beneficio']
@@ -196,6 +202,7 @@ export class DetalleBeneficioService {
 
     return beneficiosPorCausante;
   }
+
 
   async actualizarEstadoPorPlanilla(idPlanilla: string, nuevoEstado: string): Promise<{ mensaje: string }> {
     try {

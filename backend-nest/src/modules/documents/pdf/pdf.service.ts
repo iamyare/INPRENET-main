@@ -141,13 +141,12 @@ export class PdfService {
   }
 
   public async generateConstanciaAfiliacionTemplate2(data: any, includeQR: boolean) {
-    let persona = data?.persona
-  
+    
+    let persona = data?.persona    
     let dataCentTrab = persona?.perfPersCentTrabs;
-    let dataRef = persona?.referenciasPersonalPersona;
+    let dataRef = persona?.referencias;
     let dataCuenBan = persona?.personasPorBanco;
-
-    let cargos_publicos = persona.peps[0]?.cargo_publico;
+    let cargos_publicos = persona.peps?.flatMap((peps: any) => peps.cargo_publico) || [];
     let conyuge = data?.conyuge
 
     const jsonObj: any = data.persona.direccion_residencia
@@ -215,10 +214,10 @@ export class PdfService {
             ],
             [
               { borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'], text: 'PAÍS', alignment: 'left', style: ['subheader'] }, { borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'], text: persona?.pais?.nombre_pais, alignment: 'left', colSpan: 2 }, {},
-              { borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'], text: 'DEPARTAMENTO', alignment: 'left', style: ['subheader'] }, { borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'], text: ``, alignment: 'left', colSpan: 3 }, {}, {}
+              { borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'], text: 'DEPARTAMENTO', alignment: 'left', style: ['subheader'] }, { borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'], text: persona?.municipio_nacimiento?.departamento?.nombre_departamento, alignment: 'left', colSpan: 3 }, {}, {}
             ],
             [
-              { borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'], text: 'CIUDAD', alignment: 'left', style: ['subheader'] }, { borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'], text: ``, alignment: 'left', colSpan: 2 }, {},
+              { borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'], text: 'CIUDAD', alignment: 'left', style: ['subheader'] }, { borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'], text: persona?.municipio_nacimiento.nombre_municipio, alignment: 'left', colSpan: 2 }, {},
               { borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'], text: 'FECHA DE NACIMIENTO', alignment: 'left', style: ['subheader'] }, { borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'], text: persona?.fecha_nacimiento, alignment: 'left' },
               { borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'], text: 'Edad', alignment: 'left', style: ['subheader'] },
               { borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'], text: `${calcularEdad(persona?.fecha_nacimiento)} Años`, alignment: 'left' }
@@ -248,11 +247,12 @@ export class PdfService {
               {}, {}, {}, {}, {}
             ],
 
-            ...cargos_publicos?.length > 0 ? cargos_publicos.flatMap((b: any) => {
+            ...cargos_publicos.length > 0 ? cargos_publicos.flatMap((cargo: any, index: number) => {
+              
               return [
                 [
-                  { borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'], text: 'CARGO DESEMPEÑADO', alignment: 'center', colSpan: 2, style: ['subheader'] }, {}, { borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'], text: `${b?.cargo}`, alignment: 'left' },
-                  { borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'], text: 'PERÍODO', alignment: 'left', style: ['subheader'] }, { borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'], text: `${b?.fecha_inicio} / ${b?.fecha_fin}`, alignment: 'left', colSpan: 3 }, {}, {}
+                  { borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'], text: `CARGO DESEMPEÑADO #${index + 1}`, alignment: 'center', colSpan: 2, style: ['subheader'] }, {}, { borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'], text: `${cargo?.cargo}`, alignment: 'left' },
+                  { borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'], text: 'PERÍODO', alignment: 'left', style: ['subheader'] }, { borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'], text: `${cargo?.fecha_inicio || ''} / ${cargo?.fecha_fin || ''}`, alignment: 'left', colSpan: 3 }, {}, {}
                 ],
               ]
             }) : [],
@@ -325,11 +325,19 @@ export class PdfService {
               { borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'], text: 'INSTITUCIONES EDUCATIVAS', alignment: 'center', colSpan: 7, style: ['header'] },
               {}, {}, {}, {}, {}, {}
             ],
-            ...dataCentTrab?.length > 0 ? dataCentTrab.flatMap((b: any) => {
+            ...dataCentTrab?.length > 0 ? dataCentTrab.flatMap((b: any, index: number) => {
+              const direccionCentro = b.centroTrabajo.direccion_1
+                ? b.centroTrabajo.direccion_1.split(',').reduce((acc: any, curr: any) => {
+                    const [key, value] = curr.split(':').map((s: string) => s.trim());
+                    acc[key] = value;
+                    return acc;
+                  }, {} as { [key: string]: string })
+                : {};
+
               return [
                 [
 
-                  { borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'], text: 'CENTRO EDUCATIVO #', alignment: 'center', colSpan: 7, style: ['subheader'] }, {},
+                  { borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'], text: `CENTRO EDUCATIVO #${index + 1}`, alignment: 'center', colSpan: 7, style: ['subheader'] }, {},
                   {}, {},
                   {}, {}, {}
                 ],
@@ -382,16 +390,16 @@ export class PdfService {
                 ],
                 [
                   { borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'], text: 'TELÉFONO 1', alignment: 'center', style: ['subheader'] },
-                  { borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'], text: b?.centroTrabajo?.telefono_1, alignment: 'center', colSpan: 2 },
+                  { borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'], text: b?.centroTrabajo?.celular_1, alignment: 'center', colSpan: 2 },
                   {},
                   { borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'], text: 'TELÉFONO 2', alignment: 'center', style: ['subheader'] },
-                  { borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'], text: b?.centroTrabajo?.telefono_2, alignment: 'center', colSpan: 3 },
+                  { borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'], text: b?.centroTrabajo?.celular_2, alignment: 'center', colSpan: 3 },
                   {},
                   {},
                 ],
                 [
                   { borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'], text: 'OTROS PUNTOS DE REFERENCIA', alignment: 'left', style: ['subheader'] },
-                  { borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'], text: '', alignment: 'left', colSpan: 6 }, {}, {}, {}, {}, {}
+                  { borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'], text: b?.centroTrabajo?.direccion_2, alignment: 'left', colSpan: 6 }, {}, {}, {}, {}, {}
                 ],
 
               ];
@@ -447,36 +455,42 @@ export class PdfService {
               {}, {}, {}, {}, {}, {}
             ],
 
-            ...dataRef?.length > 0 ? dataRef.flatMap((b: any) => {
+            ...dataRef?.length > 0 ? dataRef.flatMap((b: any, index: number) => {
+              const formatText = (text: any) => text || '';
               return [
                 [
-
-                  { borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'], text: 'REFERENCIA #', alignment: 'center', colSpan: 7, style: ['subheader'] }, {},
-                  {}, {},
-                  {}, {}, {}
+                  { borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'], text: `REFERENCIA #${index + 1}`, alignment: 'center', colSpan: 7, style: ['subheader'] },
+                  {}, {}, {}, {}, {}, {}
                 ],
                 [
                   { borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'], text: 'NOMBRE COMPLETO', alignment: 'center', style: ['subheader'] },
-                  { borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'], text: `${b?.referenciada?.primer_apellido || ''}  ${b?.referenciada?.segundo_apellido || ''} ${b?.referenciada?.primer_nombre || ''} ${b?.referenciada?.segundo_nombre || ''}`, alignment: 'center', colSpan: 6 }, {}, {}, {}, {}, {}
+                  { borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'], text: `${formatText(b?.primer_apellido)} ${formatText(b?.segundo_apellido)} ${formatText(b?.primer_nombre)} ${formatText(b?.segundo_nombre)}`, alignment: 'center', colSpan: 6 },
+                  {}, {}, {}, {}, {}
                 ],
                 [
                   { borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'], text: 'DIRECCIÓN', alignment: 'center', style: ['subheader'] },
-                  { borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'], text: `${b?.referenciada?.direccion_residencia}`, alignment: 'center', colSpan: 6 }, {}, {}, {}, {}, {}
+                  { borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'], text: formatText(b?.direccion), alignment: 'center', colSpan: 6 },
+                  {}, {}, {}, {}, {}
                 ],
                 [
                   { borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'], text: 'PARENTESCO', alignment: 'center', rowSpan: 2, style: ['subheader'] },
                   { borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'], text: 'NÚMEROS TELEFÓNICOS', alignment: 'center', rowSpan: 3, style: ['subheader'] },
-                  { borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'], text: 'CASA', alignment: 'center', style: ['subheader'] }, { borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'], text: `${b?.referenciada?.telefono_1}`, alignment: 'center', colSpan: 4 }, {}, {}, {}
+                  { borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'], text: 'CASA', alignment: 'center', style: ['subheader'] },
+                  { borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'], text: formatText(b?.telefono_domicilio), alignment: 'center', colSpan: 4 },
+                  {}, {}, {}
                 ],
                 [
-                  {},
-                  {},
-                  { borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'], text: 'CELULAR', alignment: 'center', style: ['subheader'] }, { borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'], text: `${b?.referenciada?.telefono_2}`, alignment: 'center', colSpan: 4 }, {}, {}, {}
+                  {}, {},
+                  { borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'], text: 'CELULAR', alignment: 'center', style: ['subheader'] },
+                  { borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'], text: formatText(b?.telefono_personal), alignment: 'center', colSpan: 4 },
+                  {}, {}, {}
                 ],
                 [
-                  { borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'], text: `${b?.parentesco}`, alignment: 'center' },
+                  { borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'], text: formatText(b?.parentesco), alignment: 'center' },
                   {},
-                  { borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'], text: 'TRABAJO', alignment: 'center', style: ['subheader'] }, { borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'], text: `${b?.referenciada?.telefono_3}`, alignment: 'center', colSpan: 4 }, {}, {}, {}
+                  { borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'], text: 'TRABAJO', alignment: 'center', style: ['subheader'] },
+                  { borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'], text: formatText(b?.telefono_trabajo), alignment: 'center', colSpan: 4 },
+                  {}, {}, {}
                 ],
               ];
             }) : [],

@@ -232,7 +232,7 @@ export class AfiliadoController {
     @UploadedFiles() files?: Express.Multer.File[],
   ) {
     const crearDatosDto: any = JSON.parse(datosGenerales);
-    const fileIdent = files?.find(file => file.fieldname === 'file_ident');
+    const fileIdent = files?.find(file => file.fieldname === 'archivo_identificacion');
     const arch_cert_def = files?.find(file => file.fieldname === 'arch_cert_def');
     const fotoPerfil = files?.find(file => file.fieldname === 'FotoPerfil');
   

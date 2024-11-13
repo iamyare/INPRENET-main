@@ -29,6 +29,8 @@ import { MantenimientoAfiliacionController } from './afiliacion/mantenimiento-af
 import { Net_Jornada } from '../Empresarial/entities/net_jornada.entity';
 import { Net_Nivel_Educativo } from '../Empresarial/entities/net_nivel_educativo.entity';
 import { Net_Referencias } from './entities/net_referencias.entity';
+import { NET_PROFESIONES } from '../transacciones/entities/net_profesiones.entity';
+import { Net_Colegios_Magisteriales } from '../transacciones/entities/net_colegios_magisteriales.entity';
 
 @Module({
   controllers: [AfiliadoController, AfiliacionController, MantenimientoAfiliacionController],
@@ -39,7 +41,8 @@ import { Net_Referencias } from './entities/net_referencias.entity';
       Net_Persona_Por_Banco, Net_Departamento, Net_Familia,
       Net_Pais, Net_Tipo_Identificacion, net_causas_fallecimientos,
       Net_Centro_Trabajo, Net_Banco, Net_Tipo_Persona, Net_Municipio,
-      Net_Jornada, Net_Nivel_Educativo, Net_Referencias])
+      Net_Jornada, Net_Nivel_Educativo, Net_Referencias, NET_PROFESIONES,
+    Net_Colegios_Magisteriales])
   ],
   exports: [TypeOrmModule, AfiliadoService],
 })

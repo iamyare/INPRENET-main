@@ -63,12 +63,9 @@ export class DocumentsController {
     res.json({ fileId });
   }
 
-
   @Post('constancia-qr')
   async postConstanciaQR(@Body() data: any, @Res() res: Response) {
-
     const { type, ...payload } = data;
-
     const pdfBuffer = await this.pdfService.generateConstanciaWithQR(payload, type);
     res.set({
       'Content-Type': 'application/pdf',

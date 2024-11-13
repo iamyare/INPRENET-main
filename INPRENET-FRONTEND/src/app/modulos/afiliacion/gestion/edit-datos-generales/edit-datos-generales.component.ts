@@ -7,6 +7,7 @@ import { DatosEstaticosService } from 'src/app/services/datos-estaticos.service'
 import { convertirFechaInputs } from 'src/app/shared/functions/formatoFecha';
 import { unirNombres } from 'src/app/shared/functions/formatoNombresP';
 import { PermisosService } from 'src/app/services/permisos.service';
+import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 
 @Component({
   selector: 'app-edit-datos-generales',
@@ -29,6 +30,8 @@ export class EditDatosGeneralesComponent implements OnInit {
   public loading: boolean = false;
   form: any;
   @Input() Afiliado!: any;
+  certificadoDefuncionUrl: SafeResourceUrl | null = null;
+  archivoIdentificacionUrl: SafeResourceUrl | null = null;
   initialData = {}
   indicesSeleccionados: any[] = []
   discapacidadSeleccionada!: boolean
@@ -45,7 +48,8 @@ export class EditDatosGeneralesComponent implements OnInit {
     fecha_defuncion: ["", [Validators.required]],
     id_departamento_defuncion: ["", [Validators.required]],
     id_municipio_defuncion: ["", [Validators.required]],
-    tipo_persona: ["", [Validators.required]]
+    tipo_persona: ["", [Validators.required]],
+    fallecido: ["NO", [Validators.required]]
     //certificado_defuncion: ["", [Validators.required]],
     //observaciones: ["", [Validators.required]],
   });
@@ -61,6 +65,7 @@ export class EditDatosGeneralesComponent implements OnInit {
     public direccionSer: DireccionService,
     private datosEstaticosService: DatosEstaticosService,
     private permisosService: PermisosService,
+    private sanitizer: DomSanitizer
   ) {
     const currentYear = new Date();
     this.minDate = new Date(currentYear.getFullYear(), currentYear.getMonth(), currentYear.getDate(), currentYear.getHours(), currentYear.getMinutes(), currentYear.getSeconds());
@@ -217,6 +222,15 @@ export class EditDatosGeneralesComponent implements OnInit {
             (result) => {
                 this.datos = result;
                 this.Afiliado = result;
+
+                this.certificadoDefuncionUrl = this.datos?.certificado_defuncion
+                ? this.sanitizer.bypassSecurityTrustResourceUrl(`data:application/pdf;base64,${this.datos.certificado_defuncion}`)
+                : null;
+
+              this.archivoIdentificacionUrl = this.datos?.archivo_identificacion
+                ? this.sanitizer.bypassSecurityTrustResourceUrl(`data:application/pdf;base64,${this.datos.archivo_identificacion}`)
+                : null;
+
                 this.estadoAfiliacion = result.estadoAfiliacion;
                 this.fallecido = result.fallecido;
 
@@ -282,7 +296,6 @@ export class EditDatosGeneralesComponent implements OnInit {
                     this.indicesSeleccionados = result?.discapacidades;
                 }
 
-                // Establece valores en el formulario reactivo
                 this.form1.controls.fecha_defuncion.setValue(result?.fecha_defuncion);
                 this.form1.controls.causa_fallecimiento.setValue(result?.ID_CAUSA_FALLECIMIENTO);
                 this.form1.controls.id_departamento_defuncion.setValue(result?.ID_DEPARTAMENTO_DEFUNCION);
@@ -331,8 +344,8 @@ export class EditDatosGeneralesComponent implements OnInit {
     estado: this.form1.value.estado,
     tipo_persona: this.form1.value.tipo_persona,
     certificado_defuncion: this.formDatosGenerales.value.archivoCertDef,
+    archivo_identificacion: this.formDatosGenerales.value.archivo_identificacion,
   };
-
   if (this.image) {
     datosActualizados.FotoPerfil = this.image;
   }
@@ -369,6 +382,13 @@ export class EditDatosGeneralesComponent implements OnInit {
       this.formDatosGenerales.addControl('archivoCertDef', new FormControl('', []));
     }
     this.formDatosGenerales.get('archivoCertDef')?.setValue(event);
+  }
+
+  getArchivoIdentificacion(event: File): void {
+    if (!this.formDatosGenerales.contains('archivo_identificacion')) {
+      this.formDatosGenerales.addControl('archivo_identificacion', new FormControl('', []));
+    }
+    this.formDatosGenerales.get('archivo_identificacion')?.setValue(event);
   }
 
   getArchivoFoto(event: File): void {

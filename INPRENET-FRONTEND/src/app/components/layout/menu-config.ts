@@ -12,18 +12,6 @@ export interface Section {
 
 export const MENU_CONFIG: Section[] = [
   {
-    name: 'MANTENIMIENTO',
-    items: [
-      {
-        title: 'MANTENIMIENTO',
-        icon: 'build',
-        children: [
-          { title: 'AFILIACIÓN', route: 'afiliacion/mantenimiento', icon: 'build' },
-        ],
-      },
-    ],
-  },
-  {
     name: 'GESTIÓN DE PERSONAL',
     items: [
       {
@@ -123,5 +111,17 @@ export const MENU_CONFIG: Section[] = [
         ],
       },
     ],
-  }
+  },
+  {
+    name: 'MANTENIMIENTO',
+    items: [
+      {
+        title: 'MANTENIMIENTO',
+        icon: 'build',
+        children: [
+          { title: 'AFILIACIÓN', route: 'afiliacion/mantenimiento', icon: 'build' },
+        ],
+      },
+    ],
+  },
 ];

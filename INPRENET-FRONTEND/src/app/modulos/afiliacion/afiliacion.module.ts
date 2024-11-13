@@ -75,6 +75,8 @@ import { EditConyugueComponent } from './gestion/edit-conyugue/edit-conyugue.com
 import { AgregarPepsComponent } from './gestion/agregar-peps/agregar-peps.component';
 import { AgregarFamiliarComponent } from './gestion/agregar-familiar/agregar-familiar.component';
 import { DatosGeneralesTemporalComponent } from './gestion/datos-generales-temporal/datos-generales-temporal.component';
+import { BeneficiarioSinCausanteComponent } from './verPerfil/beneficiario-sin-causante/beneficiario-sin-causante.component';
+import { DesignadoComponent } from './verPerfil/designado/designado.component';
 
 @NgModule({
   declarations: [
@@ -146,7 +148,9 @@ import { DatosGeneralesTemporalComponent } from './gestion/datos-generales-tempo
     EditConyugueComponent,
     AgregarPepsComponent,
     AgregarFamiliarComponent,
-    DatosGeneralesTemporalComponent
+    DatosGeneralesTemporalComponent,
+    BeneficiarioSinCausanteComponent,
+    DesignadoComponent
   ],
   imports: [
     CommonModule,

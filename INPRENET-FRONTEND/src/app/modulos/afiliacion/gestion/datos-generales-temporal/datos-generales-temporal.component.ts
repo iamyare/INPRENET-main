@@ -120,7 +120,7 @@ export class DatosGeneralesTemporalComponent implements OnInit {
     this.formGroup.addControl('correo_2', new FormControl('', [Validators.maxLength(40), Validators.email]));
     this.formGroup.addControl('rtn', new FormControl('', [Validators.required, Validators.maxLength(14), Validators.pattern(/^[0-9]{14}$/)]));
     this.formGroup.addControl('genero', new FormControl('', [Validators.required, Validators.maxLength(30)]));
-    this.formGroup.addControl('id_profesion', new FormControl('', Validators.required));
+    this.formGroup.addControl('id_profesion', new FormControl(''));
     this.formGroup.addControl('id_departamento_residencia', new FormControl('', Validators.required));
     this.formGroup.addControl('id_municipio_residencia', new FormControl('', Validators.required));
     this.formGroup.addControl('id_departamento_nacimiento', new FormControl('', Validators.required));

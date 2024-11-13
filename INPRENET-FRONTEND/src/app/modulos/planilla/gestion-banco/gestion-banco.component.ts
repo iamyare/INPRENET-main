@@ -9,18 +9,16 @@ import { PersonaService } from 'src/app/services/persona.service';
   styleUrls: ['./gestion-banco.component.scss']
 })
 export class GestionBancoComponent {
-  public dniAfiliado: string = ''; // El DNI que será pasado al componente EditDatosBancariosComponent
-  public afiliado: any = null;     // Esto solo almacenará el DNI
-  public errorMessage: string | null = null; // Para mostrar mensajes de error
+  public dniAfiliado: string = '';
+  public afiliado: any = null;
+  public errorMessage: string | null = null;
 
-  constructor(
-    private toastr: ToastrService, private personaService: PersonaService
-  ) { }
+  constructor( private personaService: PersonaService) { }
 
   buscarAfiliado() {
     this.personaService.getPersonaByDni(this.dniAfiliado).pipe(
       catchError(error => {
-        this.errorMessage = 'Persona no encontrada o ocurrió un error.';
+        this.errorMessage = 'Persona no encontrada.';
         return of(null);
       })
     ).subscribe(persona => {

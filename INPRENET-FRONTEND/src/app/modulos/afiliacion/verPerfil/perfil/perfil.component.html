@@ -28,10 +28,13 @@
       <ng-container [ngSwitch]="detalle.tipoPersona.tipo_persona">
         <app-afiliado *ngSwitchCase="'AFILIADO'" [persona]="persona"></app-afiliado>
         <app-beneficiario *ngSwitchCase="'BENEFICIARIO'" [persona]="persona.persona"></app-beneficiario>
-        <app-pensionado *ngSwitchCase="'PENSIONADO'" [persona]="persona"></app-pensionado>
-        <app-voluntario *ngSwitchCase="'VOLUNTARIO'" [persona]="persona"></app-voluntario>
+        <app-beneficiario-sin-causante *ngSwitchCase="'BENEFICIARIO SIN CAUSANTE'" [persona]="persona.persona"></app-beneficiario-sin-causante>
+        <app-designado *ngSwitchCase="'DESIGNADO'" [persona]="persona.persona"></app-designado>
         <app-jubilado *ngSwitchCase="'JUBILADO'" [persona]="persona"></app-jubilado>
       </ng-container>
+    </mat-tab>
+    <mat-tab *ngIf="isPensionado()" label="PENSIONADO">
+      <app-pensionado [persona]="persona"></app-pensionado>
     </mat-tab>
   </mat-tab-group>
 </div>

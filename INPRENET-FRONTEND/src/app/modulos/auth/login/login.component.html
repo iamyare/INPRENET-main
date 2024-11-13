@@ -8,18 +8,27 @@
     <form [formGroup]="loginForm" (ngSubmit)="onLogin()">
       <h1 style="color:grey; text-align: center;">Inicio de sesión</h1>
       <p class="text-medium-emphasis">Para ingresar a tu cuenta</p>
+
       <mat-form-field appearance="fill" class="full-width">
         <mat-label>Correo Electrónico</mat-label>
         <input matInput formControlName="email" placeholder="Correo Electrónico" />
       </mat-form-field>
+
       <mat-form-field appearance="fill" class="full-width">
         <mat-label>Contraseña</mat-label>
-        <input matInput type="password" formControlName="password" placeholder="Contraseña" />
+        <input [type]="passwordVisible ? 'text' : 'password'" matInput formControlName="password" placeholder="Contraseña" />
+        <button mat-icon-button matSuffix type="button" (click)="togglePasswordVisibility()" tabindex="-1">
+          <mat-icon>{{ passwordVisible ? 'visibility' : 'visibility_off' }}</mat-icon>
+        </button>
       </mat-form-field>
+
+      <mat-checkbox formControlName="rememberMe">Recordar mis datos</mat-checkbox>
+
       <div *ngIf="!loading; else loadingTemplate" class="button-row">
         <button mat-raised-button color="primary" type="submit" class="general">Ingresar</button>
         <button mat-button color="warn" (click)="redirectOlvidoContrasena()">¿Olvidaste tu contraseña?</button>
       </div>
+
       <ng-template #loadingTemplate>
         <div class="spinner-container">
           <mat-progress-spinner mode="indeterminate"></mat-progress-spinner>

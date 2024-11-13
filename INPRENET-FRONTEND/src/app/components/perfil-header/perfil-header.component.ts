@@ -21,7 +21,7 @@ export class PerfilHeaderComponent {
   buscarPersona(): void {
     this.afiliadoService.getAfilByParam(this.n_identificacion).pipe(
       catchError(error => {
-        this.errorMessage = 'Persona no encontrada u ocurrió un error.';
+        this.errorMessage = 'Persona no encontrada.';
         return of(null);
       })
     ).subscribe(response => {

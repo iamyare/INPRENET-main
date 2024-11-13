@@ -25,6 +25,8 @@ export class RegisterComponent implements OnInit {
     "¿Cuál fue el nombre de tu primera mascota?",
     "¿Cuál es tu libro favorito?"
   ];
+  passwordVisible: boolean = false;
+  confirmPasswordVisible: boolean = false;
 
   constructor(
     private fb: FormBuilder,
@@ -35,7 +37,10 @@ export class RegisterComponent implements OnInit {
   ) {
     this.form = this.fb.group({
       correo: [{ value: '', disabled: true }, [Validators.required, Validators.email]],
-      contrasena: ['', [Validators.required]],
+      contrasena: ['', [
+        Validators.required,
+        Validators.pattern(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/)
+      ]],
       confirmarContrasenia: ['', [Validators.required]],
       preguntaseguridad1: ['', [Validators.required]],
       respuestaSeguridad1: ['', [Validators.required]],
@@ -80,6 +85,14 @@ export class RegisterComponent implements OnInit {
         matchingControl.setErrors(null);
       }
     }
+  }
+
+  toggleConfirmPasswordVisibility(): void {
+    this.confirmPasswordVisible = !this.confirmPasswordVisible;
+  }
+
+  togglePasswordVisibility(): void {
+    this.passwordVisible = !this.passwordVisible;
   }
 
   onFileChange(event: any, type: string) {
@@ -130,7 +143,6 @@ export class RegisterComponent implements OnInit {
         numero_identificacion: this.form.get('numero_identificacion')!.value
       };
 
-      // Convierte null a undefined si el archivo no está presente
       this.authService.completarRegistro(
         this.token,
         datos,
@@ -150,7 +162,4 @@ export class RegisterComponent implements OnInit {
       this.toastr.error('Por favor, completa todos los campos requeridos.', 'Error');
     }
   }
-
-
-
 }

@@ -69,4 +69,8 @@ export class PerfilComponent implements OnInit {
   resetBusqueda2() {
     this.resetBusqueda.emit();
   }
+
+  isPensionado(): boolean {
+    return this.persona?.persona?.detallePersona?.some((detalle: any) => detalle.voluntario === 'SI');
+  }
 }

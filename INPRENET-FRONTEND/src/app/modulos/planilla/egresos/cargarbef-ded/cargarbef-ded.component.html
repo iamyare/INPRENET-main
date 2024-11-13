@@ -6,7 +6,6 @@
 
       <mat-tab label="Cargar Beneficios">
         <div>
-          <!-- Contenido para cargar beneficios -->
           <button
             *ngIf="tipoPlanilla === 'ORDINARIA DE BENEFICIARIOS'"
             mat-raised-button
@@ -43,7 +42,7 @@
 
       <mat-tab label="Cargar Deducciones de Terceros" *ngIf="(id_planilla && tipoPlanilla === 'ORDINARIA DE BENEFICIARIOS') || ( id_planilla && tipoPlanilla === 'ORDINARIA DE JUBILADOS Y PENSIONADOS') || ( id_planilla && tipoPlanilla === 'COMPLEMENTARIA DE JUBILADOS Y PENSIONADOS') || ( id_planilla && tipoPlanilla === 'COMPLEMENTARIA DE BENEFICIARIOS')">
         <div>
-          <app-asignacion-deducciones [id_planilla]="id_planilla" [idTipoPlanilla]="idTipoPlanilla"></app-asignacion-deducciones>
+          <app-asignacion-deducciones [id_planilla]="id_planilla" [idTipoPlanilla]="idTipoPlanilla" [tipo_planilla]="tipoPlanilla"></app-asignacion-deducciones>
         </div>
       </mat-tab>
 

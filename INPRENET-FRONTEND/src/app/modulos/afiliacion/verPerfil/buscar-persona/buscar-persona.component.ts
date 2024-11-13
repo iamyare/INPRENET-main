@@ -18,7 +18,7 @@ export class BuscarPersonaComponent {
   buscarPersona() {
     this.personaService.getPersonaByDni(this.n_identifiacion).pipe(
       catchError(error => {
-        this.errorMessage = 'Persona no encontrada o ocurrió un error.';
+        this.errorMessage = 'Persona no encontrada.';
         return of(null);
       })
     ).subscribe(persona => {

@@ -32,11 +32,18 @@
         <div class="form-row">
           <mat-form-field appearance="fill" class="form-field col-6">
             <mat-label>Contraseña</mat-label>
-            <input matInput type="password" formControlName="contrasena">
+            <input matInput [type]="passwordVisible ? 'text' : 'password'" formControlName="contrasena">
+            <button mat-icon-button matSuffix type="button" (click)="togglePasswordVisibility()" tabindex="-1">
+              <mat-icon>{{ passwordVisible ? 'visibility' : 'visibility_off' }}</mat-icon>
+            </button>
           </mat-form-field>
+
           <mat-form-field appearance="fill" class="form-field col-6">
             <mat-label>Confirmar Contraseña</mat-label>
-            <input matInput type="password" formControlName="confirmarContrasenia">
+            <input matInput [type]="confirmPasswordVisible ? 'text' : 'password'" formControlName="confirmarContrasenia">
+            <button mat-icon-button matSuffix type="button" (click)="toggleConfirmPasswordVisibility()" tabindex="-1">
+              <mat-icon>{{ confirmPasswordVisible ? 'visibility' : 'visibility_off' }}</mat-icon>
+            </button>
             <mat-error *ngIf="form.controls['confirmarContrasenia'].hasError('confirmarContrasena')">
               Las contraseñas no coinciden
             </mat-error>

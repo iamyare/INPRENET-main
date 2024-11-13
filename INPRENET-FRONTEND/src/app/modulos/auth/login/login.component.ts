@@ -12,6 +12,7 @@ import { AuthService } from 'src/app/services/auth.service';
 export class LoginComponent {
   loginForm: FormGroup;
   loading: boolean = false;
+  passwordVisible: boolean = false; // Variable para controlar la visibilidad de la contraseña
 
   constructor(
     private fb: FormBuilder,
@@ -21,14 +22,35 @@ export class LoginComponent {
   ) {
     this.loginForm = this.fb.group({
       email: ['', [Validators.required, Validators.email]],
-      password: ['', Validators.required]
+      password: ['', Validators.required],
+      rememberMe: [false]
     });
+
+    this.loadStoredEmail();
+  }
+
+  loadStoredEmail(): void {
+    const storedEmail = localStorage.getItem('email');
+    if (storedEmail) {
+      this.loginForm.patchValue({
+        email: storedEmail,
+        rememberMe: true
+      });
+    }
   }
 
   onLogin() {
     this.loading = true;
-    this.authService.login(this.loginForm.value.email, this.loginForm.value.password).subscribe({
+    const { email, password, rememberMe } = this.loginForm.value;
+
+    this.authService.login(email, password).subscribe({
       next: (response) => {
+        if (rememberMe) {
+          localStorage.setItem('email', email);
+        } else {
+          localStorage.removeItem('email');
+        }
+
         setTimeout(() => {
           this.loading = false;
           this.router.navigate(['/home']);
@@ -52,6 +74,9 @@ export class LoginComponent {
     });
   }
 
+  togglePasswordVisibility(): void {
+    this.passwordVisible = !this.passwordVisible; // Cambia el estado de visibilidad de la contraseña
+  }
 
   redirectOlvidoContrasena() {
     this.router.navigate(['/solicitud-restablecimiento']);

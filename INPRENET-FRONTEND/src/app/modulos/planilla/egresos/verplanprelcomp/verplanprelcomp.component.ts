@@ -1,4 +1,4 @@
-import { ChangeDetectorRef, Component, OnInit, SimpleChanges } from '@angular/core';
+import { ChangeDetectorRef, Component, OnChanges, OnInit, SimpleChanges } from '@angular/core';
 import { Validators } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
 import { ToastrService } from 'ngx-toastr';
@@ -15,7 +15,7 @@ import { DynamicDialogComponent } from 'src/app/components/dinamicos/dynamic-dia
   templateUrl: './verplanprelcomp.component.html',
   styleUrls: ['./verplanprelcomp.component.scss']
 })
-export class VerplanprelcompComponent implements OnInit {
+export class VerplanprelcompComponent implements OnInit, OnChanges {
   convertirFecha = convertirFecha;
   idPlanilla: any = "";
   dataPlan: any;
@@ -268,4 +268,6 @@ export class VerplanprelcompComponent implements OnInit {
       this.toastr.error('Debe seleccionar un código de planilla válido');
     }
   }
+
+
 }

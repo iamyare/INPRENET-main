@@ -1,12 +1,12 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, Input } from '@angular/core';
 import { PersonaService } from 'src/app/services/persona.service';
 
 @Component({
-  selector: 'app-beneficiario',
-  templateUrl: './beneficiario.component.html',
-  styleUrls: ['./beneficiario.component.scss']
+  selector: 'app-beneficiario-sin-causante',
+  templateUrl: './beneficiario-sin-causante.component.html',
+  styleUrl: './beneficiario-sin-causante.component.scss'
 })
-export class BeneficiarioComponent implements OnInit {
+export class BeneficiarioSinCausanteComponent {
   @Input() persona: any;
   causantes: any[] = [];
 

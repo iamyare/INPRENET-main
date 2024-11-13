@@ -27,6 +27,7 @@ export class SubirDeduccionesTercerosComponent {
   @ViewChild('fileInput') fileInput!: ElementRef;
   @Input() id_planilla: any;
   @Input() idTipoPlanilla: any;
+  @Input() tipo_planilla: any;
 
   constructor(
     private deduccionesService: DeduccionesService,

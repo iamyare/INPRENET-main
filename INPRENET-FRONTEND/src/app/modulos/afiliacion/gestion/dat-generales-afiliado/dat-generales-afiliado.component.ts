@@ -50,7 +50,7 @@ export function generateAddressFormGroup(datos?: any): FormGroup {
     correo_2: new FormControl(datos?.correo_2, [Validators.maxLength(40), Validators.email]),
     rtn: new FormControl(datos?.rtn, [Validators.required, Validators.maxLength(14), Validators.pattern(/^[0-9]{14}$/)]),
     genero: new FormControl(datos?.genero, [Validators.required, Validators.maxLength(30)]),
-    id_profesion: new FormControl(datos?.id_profesion, Validators.required),
+    id_profesion: new FormControl(datos?.id_profesion),
     id_departamento_residencia: new FormControl(datos?.id_departamento_residencia, Validators.required),
     id_municipio_residencia: new FormControl(datos?.id_municipio_residencia, Validators.required),
     id_departamento_nacimiento: new FormControl(datos?.id_departamento_nacimiento, Validators.required),

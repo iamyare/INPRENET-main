@@ -52,7 +52,7 @@ export class ConstanciasAfiliadoComponent {
       link.href = downloadURL;
       link.download = this.generarNombreArchivo('afiliacion');
       link.click();
-      window.URL.revokeObjectURL(downloadURL); // Liberar el objeto URL
+      window.URL.revokeObjectURL(downloadURL);
     });
   }
 

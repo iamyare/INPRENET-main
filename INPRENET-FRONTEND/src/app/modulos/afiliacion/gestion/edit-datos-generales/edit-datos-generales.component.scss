@@ -60,3 +60,26 @@ td {
   height: 200px;
 }
 
+
+.pdf-container {
+  display: flex;
+  justify-content: space-between;
+  gap: 20px; /* Espacio entre los cuadros PDF */
+  margin-bottom: 1.5rem;
+}
+
+.pdf-preview {
+  width: 48%; /* Ajuste del ancho para cada cuadro */
+  text-align: center;
+}
+
+@media only screen and (max-width: 768px) {
+  .pdf-container {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .pdf-preview {
+    width: 100%;
+  }
+}

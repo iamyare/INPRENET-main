@@ -1,4 +1,4 @@
-import { HttpClient, HttpErrorResponse, HttpParams } from '@angular/common/http';
+import { HttpClient, HttpErrorResponse, HttpHeaders, HttpParams } from '@angular/common/http';
 import { EventEmitter, Injectable, Output } from '@angular/core';
 import { Router } from '@angular/router';
 import { Observable, catchError, map, throwError } from 'rxjs';
@@ -10,6 +10,28 @@ import { environment } from 'src/environments/environment';
 export class AfiliadoService {
   @Output() PersonasEdit: EventEmitter<any> = new EventEmitter();
   constructor(private http: HttpClient, private router: Router) { }
+
+
+  generarConstancia(data: any): void {
+    const url = `${environment.API_URL}/api/documents/constancia-pdf`;
+    const headers = new HttpHeaders({ 'Content-Type': 'application/json' });
+
+    this.http
+      .post(url, data, { headers, responseType: 'blob' })
+      .subscribe(
+        (blob) => {
+          const url = window.URL.createObjectURL(blob);
+          const link = document.createElement('a');
+          link.href = url;
+          link.download = `constancia_${data.type}.pdf`; // Nombre del archivo PDF descargado
+          link.click();
+          window.URL.revokeObjectURL(url);
+        },
+        (error) => {
+          console.error('Error al descargar el PDF', error);
+        }
+      );
+  }
 
   generarConstanciaAfiliacion(data: any): Observable<any> {
     const url = `${environment.API_URL}/api/documents/constancia-afiliacion`;
@@ -127,8 +149,8 @@ export class AfiliadoService {
     if (datosGenerales.certificado_defuncion) {
       formData.append('arch_cert_def', datosGenerales.certificado_defuncion);
     }
-    if (datosGenerales.dato && datosGenerales.dato.archivo_identificacion) {
-      formData.append('file_ident', datosGenerales.dato.archivo_identificacion);
+    if (datosGenerales.dato && datosGenerales.archivo_identificacion) {
+      formData.append('archivo_identificacion', datosGenerales.archivo_identificacion);
     }
     if (datosGenerales.FotoPerfil) {
       formData.append('FotoPerfil', datosGenerales.FotoPerfil);

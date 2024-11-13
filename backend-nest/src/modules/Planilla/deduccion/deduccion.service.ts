@@ -225,7 +225,7 @@ export class DeduccionService {
           return { error: `Deducción duplicada detectada`, processed: false };
         }
 
-        /* const detalleDeduccion = repositories.detalleDeduccionRepository.create({
+        const detalleDeduccion = repositories.detalleDeduccionRepository.create({
           anio: parsedAnio,
           mes: parsedMes,
           monto_total: parsedMontoTotal,
@@ -235,9 +235,9 @@ export class DeduccionService {
           deduccion,
           planilla,
           personaPorBanco: bancoActivo,
-        }); */
+        });
 
-        //await repositories.detalleDeduccionRepository.save(detalleDeduccion);
+        await repositories.detalleDeduccionRepository.save(detalleDeduccion);
         return { processed: true };
       }
 

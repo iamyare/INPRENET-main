@@ -1,4 +1,4 @@
-import { Component, Input, OnInit, OnChanges, SimpleChanges } from '@angular/core';
+import { Component, Input, OnInit, OnChanges, SimpleChanges, ChangeDetectorRef } from '@angular/core';
 import { Validators } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
 import { ToastrService } from 'ngx-toastr';
@@ -46,7 +46,8 @@ export class EditBeneficiariosComponent implements OnInit, OnChanges {
     private datePipe: DatePipe,
     private permisosService: PermisosService,
     private afiliacionServicio: AfiliacionService,
-    private datosEstaticosService: DatosEstaticosService
+    private datosEstaticosService: DatosEstaticosService,
+    private cdr: ChangeDetectorRef
   ) { }
 
   ngOnInit(): void {
@@ -122,6 +123,7 @@ export class EditBeneficiariosComponent implements OnInit, OnChanges {
           };
           return respData;
         });
+        this.cdr.detectChanges();
       } catch (error) {
         this.toastr.error('Error al cargar los datos de los beneficiarios');
         console.error('Error al obtener datos de los beneficiarios', error);
@@ -222,7 +224,7 @@ export class EditBeneficiariosComponent implements OnInit, OnChanges {
       }
     });
     dialogRef.afterClosed().subscribe((result: any) => {
-      this.ngOnInit();
+      this.getFilas().then(() => this.cargar());
     });
   }
 

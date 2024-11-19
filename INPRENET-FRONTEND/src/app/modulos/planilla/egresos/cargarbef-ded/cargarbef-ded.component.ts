@@ -23,7 +23,7 @@ export class CargarbefDedComponent {
   constructor(private planillaService: PlanillaService, private toastr: ToastrService, private SVCBeneficios: BeneficiosService, private dialog: MatDialog) { }
 
   asignarBeneficiosOrdinariaBeneficiariosAfiliados() {
-    this.planillaService.generarPlanillaOrdinaria('BENEFICIARIO,AFILIADO,BENEFICIARIO SIN CAUSANTE').subscribe({
+    this.planillaService.generarPlanillaOrdinaria('BENEFICIARIO SIN CAUSANTE,BENEFICIARIO,DESIGNADO').subscribe({
       next: () => {
         this.toastr.success('Planilla ordinaria generada para Beneficiarios y Afiliados', 'Éxito');
       },
@@ -34,7 +34,7 @@ export class CargarbefDedComponent {
   }
 
   asignarBeneficiosOrdinariaJubiladosPensionados() {
-    this.planillaService.generarPlanillaOrdinaria('JUBILADO,VOLUNTARIO,PENSIONADO').subscribe({
+    this.planillaService.generarPlanillaOrdinaria('JUBILADO,VOLUNTARIO,PENSIONADO,AFILIADO').subscribe({
       next: () => {
         this.toastr.success('Planilla ordinaria generada para Jubilados y Pensionados', 'Éxito');
       },
@@ -45,7 +45,7 @@ export class CargarbefDedComponent {
   }
 
   asignarBeneficiosComplementariaBeneficiariosAfiliados() {
-    this.planillaService.generarPlanillaComplementaria('BENEFICIARIO,AFILIADO,BENEFICIARIO SIN CAUSANTE').subscribe({
+    this.planillaService.generarPlanillaComplementaria('BENEFICIARIO SIN CAUSANTE,BENEFICIARIO,DESIGNADO').subscribe({
       next: () => {
         this.toastr.success('Planilla complementaria generada para Beneficiarios y Afiliados', 'Éxito');
       },
@@ -56,7 +56,7 @@ export class CargarbefDedComponent {
   }
 
   asignarBeneficiosComplementariaJubiladosPensionados() {
-    this.planillaService.generarPlanillaComplementaria('JUBILADO,VOLUNTARIO,PENSIONADO').subscribe({
+    this.planillaService.generarPlanillaComplementaria('VOLUNTARIO,PENSIONADO,JUBILADO,AFILIADO').subscribe({
       next: () => {
         this.toastr.success('Planilla complementaria generada para Jubilados y Pensionados', 'Éxito');
       },
@@ -77,7 +77,7 @@ export class CargarbefDedComponent {
       this.loading = true;
       this.SVCBeneficios.obtenerCausantesYBeneficios(this.dni).subscribe({
         next: (response) => {
-          this.beneficios = this.flattenBeneficios(response); // Llama a la función para aplanar los datos
+          this.beneficios = this.flattenBeneficios(response);
           this.loading = false;
         },
         error: (err) => {
@@ -98,7 +98,7 @@ export class CargarbefDedComponent {
         beneficiosAplanados.push({
           causante: causante.causante,
           beneficio: beneficio.beneficio,
-          detalleBeneficio: beneficio // Almacena toda la información relacionada con el beneficio
+          detalleBeneficio: beneficio
         });
       });
     });

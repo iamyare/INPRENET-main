@@ -20,13 +20,9 @@
     [data]="filas"
     [getData]="getFilas"
     (ejecutarFuncionAsincronaEvent)="ejecutarFuncionAsincronaDesdeOtroComponente($event)"
-    [nombreEncabezadoUno]="'Editar'"
-    [mostrarBotonUno]="mostrarBotonEditar"
-    [etiquetaBotonUno]="'Editar'"
-    (accionBotonUno)="manejarAccionUno($event)"
-    [nombreEncabezadoDos]="'Eliminar'"
-    [mostrarBotonDos]="mostrarBotonEliminar"
-    [etiquetaBotonDos]="'Eliminar'"
-    (accionBotonDos)="manejarAccionDos($event)">
+    [mostrarBotonEditar]="mostrarBotonEditar"
+    (editar)="manejarAccionUno($event)"
+    [mostrarBotonEliminar]="mostrarBotonEliminar"
+    (eliminar)="manejarAccionDos($event)">
   </app-dynamic-table>
 </div>

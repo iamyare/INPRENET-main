@@ -1,5 +1,5 @@
 import { DatePipe } from '@angular/common';
-import { Component, Input, OnChanges, OnDestroy, OnInit, SimpleChanges } from '@angular/core';
+import { ChangeDetectorRef, Component, Input, OnChanges, OnDestroy, OnInit, SimpleChanges } from '@angular/core';
 import { Validators } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
 import { ToastrService } from 'ngx-toastr';
@@ -49,6 +49,7 @@ export class EditPepsComponent implements OnInit, OnDestroy, OnChanges {
     private dialog: MatDialog,
     private datePipe: DatePipe,
     private permisosService: PermisosService,
+    private cdr: ChangeDetectorRef
   ) { }
 
   ngOnInit(): void {
@@ -147,6 +148,7 @@ export class EditPepsComponent implements OnInit, OnDestroy, OnChanges {
           id_persona: familiar.referenciada.id_persona,
           id_familia: familiar.id_familia
         }));
+        this.cdr.detectChanges();
       } catch (error) {
         this.toastr.error('Error al cargar los familiares');
         console.error('Error al obtener familiares:', error);

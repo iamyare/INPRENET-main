@@ -1,4 +1,4 @@
-import { Component, Input, OnInit, OnChanges, SimpleChanges, EventEmitter, Output } from '@angular/core';
+import { Component, Input, OnInit, OnChanges, SimpleChanges, EventEmitter, Output, ChangeDetectorRef } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { ToastrService } from 'ngx-toastr';
 import { AfiliadoService } from 'src/app/services/afiliado.service';
@@ -31,7 +31,8 @@ export class EditDatosBancariosComponent implements OnInit, OnChanges {
     private svcAfiliado: AfiliadoService,
     private toastr: ToastrService,
     private dialog: MatDialog,
-    private permisosService: PermisosService
+    private permisosService: PermisosService,
+    private cdr: ChangeDetectorRef
   ) { }
 
   ngOnInit(): void {
@@ -105,6 +106,7 @@ export class EditDatosBancariosComponent implements OnInit, OnChanges {
           fecha_activacion: item.fecha_activacion ? this.formatDate(item.fecha_activacion) : 'N/A',
           fecha_inactivacion: item.fecha_inactivacion ? this.formatDate(item.fecha_inactivacion) : 'N/A'
         }));
+        this.cdr.detectChanges();
       } catch (error) {
         this.toastr.error('Error al cargar los datos bancarios');
       }
@@ -162,9 +164,8 @@ export class EditDatosBancariosComponent implements OnInit, OnChanges {
           idPersona: this.Afiliado.id_persona
         }
       });
-
       dialogRef.afterClosed().subscribe((result: any) => {
-        this.ngOnInit();
+        this.getFilas().then(() => this.cargar());
       });
     }
   }

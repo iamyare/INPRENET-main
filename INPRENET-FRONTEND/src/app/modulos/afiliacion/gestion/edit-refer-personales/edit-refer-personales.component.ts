@@ -156,6 +156,7 @@ export class EditReferPersonalesComponent implements OnInit, OnChanges, OnDestro
           });
 
         this.mostrarMensaje = this.filas.length === 0;
+        this.cdr.detectChanges();
       } catch (error) {
         console.error('Error al obtener datos de las referencias personales:', error);
         this.filas = [];
@@ -163,12 +164,14 @@ export class EditReferPersonalesComponent implements OnInit, OnChanges, OnDestro
       } finally {
         this.cargar();
         this.filas = this.filas.slice();
-        this.cdr.detectChanges()
+        this.cdr.detectChanges();
       }
     } else {
+      console.log("Afiliado no está definido. Reseteando datos.");
       this.resetDatos();
     }
   }
+
 
   ejecutarFuncionAsincronaDesdeOtroComponente(funcion: (data: any) => Promise<boolean>) {
     this.ejecF = funcion;
@@ -309,7 +312,7 @@ export class EditReferPersonalesComponent implements OnInit, OnChanges, OnDestro
       width: '350px',
       data: {
         title: 'Confirmación de inhabilitación',
-        message: '¿Estás seguro de querer inhabilitar esta referencia personal?'
+        message: '¿Estás seguro de querer eliminar esta referencia?'
       }
     });
     dialogRef.afterClosed().subscribe((result: boolean) => {

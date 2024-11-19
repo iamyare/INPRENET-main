@@ -1,5 +1,5 @@
 import { DatePipe } from '@angular/common';
-import { Component, Input, OnChanges, OnDestroy, OnInit, SimpleChanges } from '@angular/core';
+import { ChangeDetectorRef, Component, Input, OnChanges, OnDestroy, OnInit, SimpleChanges } from '@angular/core';
 import { Validators } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
 import { ToastrService } from 'ngx-toastr';
@@ -50,7 +50,8 @@ export class VerOtrasFuentesIngresoComponent implements OnInit, OnDestroy, OnCha
     private toastr: ToastrService,
     private dialog: MatDialog,
     private centrosTrabSVC: CentroTrabajoService,
-    private permisosService: PermisosService
+    private permisosService: PermisosService,
+    private cdr: ChangeDetectorRef
   ) { }
   ngOnInit(): void {
     this.initializeComponent();
@@ -138,6 +139,7 @@ export class VerOtrasFuentesIngresoComponent implements OnInit, OnDestroy, OnCha
           monto_ingreso: item.monto_ingreso,
           observacion: item.observacion
         }));
+        this.cdr.detectChanges();
       } catch (error) {
         this.toastr.error('Error al cargar los datos de los perfiles de los centros de trabajo');
         console.error('Error al obtener datos de los perfiles de los centros de trabajo', error);
@@ -259,7 +261,7 @@ export class VerOtrasFuentesIngresoComponent implements OnInit, OnDestroy, OnCha
       }
     });
     dialogRef.afterClosed().subscribe((result: any) => {
-      this.ngOnInit();
+      this.getFilas().then(() => this.cargar());
     });
   }
 

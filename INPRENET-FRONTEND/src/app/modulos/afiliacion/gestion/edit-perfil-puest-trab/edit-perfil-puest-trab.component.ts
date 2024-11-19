@@ -1,5 +1,5 @@
 import { DatePipe } from '@angular/common';
-import { Component, Input, OnChanges, OnDestroy, OnInit, SimpleChanges } from '@angular/core';
+import { ChangeDetectorRef, Component, Input, OnChanges, OnDestroy, OnInit, SimpleChanges } from '@angular/core';
 import { Validators } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
 import { ToastrService } from 'ngx-toastr';
@@ -58,7 +58,8 @@ export class EditPerfilPuestTrabComponent implements OnInit, OnDestroy, OnChange
     private dialog: MatDialog,
     private datePipe: DatePipe,
     private centrosTrabSVC: CentroTrabajoService,
-    private permisosService: PermisosService
+    private permisosService: PermisosService,
+    private cdr: ChangeDetectorRef
   ) { }
 
 
@@ -184,6 +185,7 @@ export class EditPerfilPuestTrabComponent implements OnInit, OnDestroy, OnChange
           jornada: item.jornada,
           tipo_jornada: item.tipo_jornada,
         }));
+        this.cdr.detectChanges();
       } catch (error) {
         this.toastr.error('Error al cargar los datos de los perfiles de los centros de trabajo');
         console.error('Error al obtener datos de los perfiles de los centros de trabajo', error);
@@ -302,7 +304,7 @@ export class EditPerfilPuestTrabComponent implements OnInit, OnDestroy, OnChange
     });
 
     dialogRef.afterClosed().subscribe((result: any) => {
-      this.ngOnInit();
+      this.getFilas().then(() => this.cargar());
     });
   }
 

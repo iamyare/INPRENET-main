@@ -97,8 +97,8 @@ export class DeduccionesService {
 
   subirArchivoDeducciones(idTipoPlanilla: number, id_planilla: number, archivo: File): Observable<HttpEvent<any>> {
     const formData = new FormData();
-    formData.append('id_planilla', String(id_planilla));
     formData.append('idTipoPlanilla', String(idTipoPlanilla));
+    formData.append('id_planilla', String(id_planilla));
     formData.append('file', archivo, archivo.name);
 
     return this.http.post(`${environment.API_URL}/api/deduccion/upload-excel-deducciones`, formData, {

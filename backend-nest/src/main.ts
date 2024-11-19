@@ -4,9 +4,21 @@ import { BadRequestException, ValidationPipe } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { HttpExceptionFilter } from './filters/http-exception.filter';
 import * as cookieParser from 'cookie-parser';
+import * as fs from 'fs';
 const express = require('express');
+
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  // Lee los archivos del certificado y la clave privada
+  const httpsOptions = {
+    key: fs.readFileSync(process.env.PRIVATE_KEY), // Ruta al archivo de clave privada
+    cert: fs.readFileSync(process.env.CERTIFICATE), // Ruta al archivo de certificado
+  };
+
+  // Crea la aplicación con HTTPS
+  const app = await NestFactory.create(AppModule, {
+    httpsOptions,
+  });
+
   app.enableCors({
     origin: process.env.BACKEND_HOST,
     credentials: true,
@@ -35,6 +47,8 @@ async function bootstrap() {
 
   app.use(cookieParser());
   app.use(express.json({ limit: '8mb' }));
-  await app.listen(process.env.PORT);
+
+  // Cambia el puerto si es necesario
+  await app.listen(process.env.PORT || 3000);
 }
 bootstrap();

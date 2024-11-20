@@ -18,6 +18,7 @@ import { NuevoBeneficioComponent } from './egresos/Mantenimiento/nuevo-beneficio
 import { EditarBeneficioComponent } from './egresos/Mantenimiento/editar-beneficio/editar-beneficio.component';
 import { NuevoTipoDeduccionComponent } from './egresos/Mantenimiento/nuevo-tipo-deduccion/nuevo-tipo-deduccion.component';
 import { EditarTipoDeduccionComponent } from './egresos/Mantenimiento/editar-tipo-deduccion/editar-tipo-deduccion.component';
+import { VoucherGeneralMensComponent } from './voucher-general-mens/voucher-general-mens.component';
 
 const routes: Routes = [
   {
@@ -118,6 +119,12 @@ const routes: Routes = [
       {
         path: 'ver_estatus_60_rentas',
         component: P60RentasComponent,
+        canActivate: [RoleGuard],
+        data: { expectedRolesModules: PermisosService.getExpectedRolesForRoute('PLANILLA', 'planilla/Egresos/ver_estatus_60_rentas') }
+      },
+      {
+        path: 'voucher-general-mens',
+        component: VoucherGeneralMensComponent,
         canActivate: [RoleGuard],
         data: { expectedRolesModules: PermisosService.getExpectedRolesForRoute('PLANILLA', 'planilla/Egresos/ver_estatus_60_rentas') }
       },

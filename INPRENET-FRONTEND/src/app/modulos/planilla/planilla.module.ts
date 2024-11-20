@@ -40,6 +40,7 @@ import { AfiliacionModule } from '../afiliacion/afiliacion.module';
 import { ActualizarFallecidosComponent } from './actualizar-fallecidos/actualizar-fallecidos.component';
 import { MontoDialogComponent } from './monto-dialog/monto-dialog.component';
 import { P60RentasComponent } from './p-60-rentas/p-60-rentas.component';
+import { VoucherGeneralMensComponent } from './voucher-general-mens/voucher-general-mens.component';
 
 @NgModule({
   declarations: [
@@ -78,7 +79,8 @@ import { P60RentasComponent } from './p-60-rentas/p-60-rentas.component';
     VerPlanillasCerradasComponent,
     MontoDialogComponent,
     CambioEstadoTipoPerComponent,
-    P60RentasComponent
+    P60RentasComponent,
+    VoucherGeneralMensComponent
   ],
   imports: [
     CommonModule,

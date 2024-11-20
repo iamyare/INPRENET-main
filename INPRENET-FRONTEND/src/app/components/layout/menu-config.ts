@@ -76,6 +76,7 @@ export const MENU_CONFIG: Section[] = [
           { title: 'Ver Todas Las Planillas', route: 'planilla/Egresos/ver-planillas', icon: 'list_alt' },
           { title: 'Generación de documentos', route: 'planilla/Egresos/documentos-planilla', icon: 'picture_as_pdf' },
           { title: '60 Rentas', route: 'planilla/Egresos/ver_estatus_60_rentas', icon: 'history' },
+          { title: 'voucher mensual', route: 'planilla/Egresos/voucher-general-mens', icon: 'history' },
 
         ],
       },

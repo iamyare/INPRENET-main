@@ -3,7 +3,7 @@ import { CreatePlanillaDto } from './dto/create-planilla.dto';
 import { UpdatePlanillaDto } from './dto/update-planilla.dto';
 import { InjectEntityManager, InjectRepository } from '@nestjs/typeorm';
 import { Net_Detalle_Deduccion } from '../detalle-deduccion/entities/detalle-deduccion.entity';
-import { EntityManager, QueryFailedError, Repository } from 'typeorm';
+import { EntityManager, QueryFailedError, Raw, Repository } from 'typeorm';
 import { net_persona } from '../../Persona/entities/net_persona.entity';
 import { Net_Persona_Por_Banco } from '../../banco/entities/net_persona-banco.entity';
 import { Net_Planilla } from './entities/net_planilla.entity';
@@ -1336,6 +1336,64 @@ GROUP BY
     }
   }
 
+  async generarVoucherByMes(dni: string, mes: number): Promise<any> {
+    try {
+      const persona = await this.personaRepository.findOne({
+        where: {
+          n_identificacion: dni,
+          detallePersona: {
+            detalleBeneficio: {
+              detallePagBeneficio: {
+                estado: 'PAGADA',
+                planilla: {
+                  periodoInicio: Raw(alias => `TO_CHAR(${alias}, 'MM') = :mes`, { mes: mes.toString().padStart(2, '0') })
+                },
+              },
+            }
+          }
+        },
+        relations: [
+          'detallePersona',
+          'detallePersona.detalleBeneficio',
+          'detallePersona.padreIdPersona',
+          'detallePersona.padreIdPersona.persona',
+          'detallePersona.detalleBeneficio.beneficio',
+          'detallePersona.detalleBeneficio.detallePagBeneficio',
+          'detallePersona.detalleBeneficio.detallePagBeneficio.personaporbanco',
+          'detallePersona.detalleBeneficio.detallePagBeneficio.personaporbanco.banco',
+          'detallePersona.detalleBeneficio.detallePagBeneficio.planilla',
+        ]
+      });
+
+      const deduccion = await this.personaRepository.findOne({
+        where: {
+          n_identificacion: dni,
+          detalleDeduccion: {
+            estado_aplicacion: 'COBRADA',
+            planilla: {
+              periodoInicio: Raw(alias => `TO_CHAR(${alias}, 'MM') = :mes`, { mes: mes.toString().padStart(2, '0') })
+            }
+          }
+        },
+        relations: [
+          'detalleDeduccion.deduccion',
+          'detalleDeduccion.deduccion.centroTrabajo',
+          'detalleDeduccion.planilla',
+        ]
+      });
+
+      return { persona, deduccion };
+
+    } catch (error) {
+      console.log(error);
+
+      this.logger.error('Error al obtener los totales por DNI y planilla', error.stack);
+      throw new InternalServerErrorException();
+    }
+  }
+
+
+
   async getPlanillaById(id_planilla: number) {
     const planilla = await this.planillaRepository.findOne({ where: { id_planilla } });
 
@@ -2306,14 +2364,14 @@ GROUP BY
       const result: Persona[] = await this.entityManager.query(query, [codigo_planilla]);
       const resultI: Deduccion[] = await this.entityManager.query(queryI, [codigo_planilla]);
       const resultT: Deduccion[] = await this.entityManager.query(queryT, [codigo_planilla]);
-    
+
       const deduccionesInpremaMap = new Map(resultI.map(d => [d.ID_PERSONA, d]));
       const deduccionesTercerosMap = new Map(resultT.map(d => [d.ID_PERSONA, d]));
-    
+
       const newResult = result.map(persona => {
         const deduccionI = deduccionesInpremaMap.get(persona.ID_PERSONA);
         const deduccionT = deduccionesTercerosMap.get(persona.ID_PERSONA);
-    
+
         return {
           ...persona,
           TOTAL_DEDUCCIONES_INPREMA: deduccionI ? deduccionI['TOTAL_DEDUCCIONES_INPREMA'] : 0,
@@ -2324,13 +2382,13 @@ GROUP BY
           )
         };
       });
-    
+
       return newResult;
     } catch (error) {
       this.logger.error('Error ejecutando la consulta', error.stack);
       throw new InternalServerErrorException('Error ejecutando la consulta');
     }
-    
+
   }
 
   async getDesglosePorPersonaPlanilla(id_persona: string, codigo_planilla: string): Promise<any> {

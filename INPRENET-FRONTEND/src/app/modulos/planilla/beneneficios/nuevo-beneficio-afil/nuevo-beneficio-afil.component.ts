@@ -146,12 +146,12 @@ export class NuevoBeneficioAfilComponent implements OnInit {
             if (item.fallecido === "NO") {
               if (item.estado_persona == 'ACTIVO' || item.estado_persona == 'SUSPENDIDO') {
                 this.getTipoBen(item.tipo_persona);
-              } if (item.estado_persona == 'INACTIVO' || item.estado_persona == 'NO REGISTRADO') {
+              } if (item.estado_persona == 'INACTIVO') {
                 this.toastr.warning(`La persona se encuentra ${item.estado_persona}. No se puede asignar beneficios a los Afiliados ${item.estado_persona}`, "Advertencia");
               } if (item.tipo_persona == 'JUBILADO' || item.tipo_persona == 'PENSIONADO') {
                 this.toastr.warning(`La persona se encuentra: ${item.tipo_persona}. No se puede asignar beneficios a la persona porque se encuentra: ${item.tipo_persona}`, "Advertencia");
-              } if (item.tipo_persona == 'VOULUNTARIO') {
-                this.toastr.warning(`Este tipo de persona todavia no esta en funcionamiento: ${item.tipo_persona}`, "Advertencia");
+              } if (item.tipo_persona == 'VOLUNTARIO') {
+                this.toastr.warning(`La persona se encuentra: ${item.tipo_persona}. No se puede asignar beneficios a la persona porque se encuentra: ${item.tipo_persona}`, "Advertencia");
               } /* if (this.hasBeneficios.length > 0) {
 
               } */

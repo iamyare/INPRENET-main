@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Query, UseGuards, BadRequestException, HttpCode, HttpStatus, Req, UseInterceptors, ParseIntPipe, Res, Put, UploadedFiles } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Query, UseGuards, BadRequestException, HttpCode, HttpStatus, Req, UseInterceptors, ParseIntPipe, Res, Put, UploadedFiles, NotFoundException, Logger } from '@nestjs/common';
 import { UsuarioService } from './usuario.service';
 import { UpdateUsuarioDto } from './dto/update-usuario.dto';
 import { PaginationDto } from 'src/common/dtos/pagination.dto';
@@ -11,11 +11,12 @@ import { Net_Usuario_Empresa } from './entities/net_usuario_empresa.entity';
 import { net_rol_modulo } from './entities/net_rol_modulo.entity';
 import { net_modulo } from './entities/net_modulo.entity';
 import { ForgotPasswordDto } from './dto/forgot-password.dto';
-import { UpdateEmpleadoDto } from '../Empresarial/centro-trabajo/dto/update-empleado.dto';
+import { ResetPasswordDto } from './dto/reset-password.dto';
 
 @ApiTags('usuario')
 @Controller('usuario')
 export class UsuarioController {
+  private readonly logger = new Logger(UsuarioController.name);
   constructor(private readonly usuarioService: UsuarioService) { }
 
   @Post('login')
@@ -41,11 +42,6 @@ export class UsuarioController {
   async reactivarUsuario(@Param('id') idUsuario: number) {
     await this.usuarioService.reactivarUsuario(idUsuario);
     return { message: 'Usuario reactivado correctamente' };
-  }
-
-  @Get('preguntas-seguridad')
-  async obtenerPreguntasSeguridad(@Query('correo') correo: string): Promise<string[]> {
-    return this.usuarioService.obtenerPreguntasSeguridad(correo);
   }
 
   @Post('preregistro')
@@ -202,18 +198,21 @@ export class UsuarioController {
   }
 
   @Post('olvido-contrasena')
-  async olvidoContrasena(@Body() dto: ForgotPasswordDto): Promise<{ message: string }> {
-    const usuario = await this.usuarioService.validarPreguntasSeguridad(dto.email, dto);
+  async olvidoContrasena(@Body() dto: any): Promise<void> {
+    const usuario = await this.usuarioService.buscarUsuarioPorCorreo(dto.email);
+    if (!usuario) {
+      throw new NotFoundException('Usuario no encontrado');
+    }
     const token = await this.usuarioService.crearTokenRestablecimiento(usuario);
     await this.usuarioService.enviarCorreoRestablecimiento(usuario.empleadoCentroTrabajo.correo_1, token);
-    return { message: 'Se ha enviado un enlace para restablecer la contraseña a su correo' };
   }
 
   @Post('restablecer-contrasena/:token')
-  async restablecerContrasena(@Param('token') token: string, @Body('nuevaContrasena') nuevaContrasena: string): Promise<{ message: string }> {
-    await this.usuarioService.restablecerContrasena(token, nuevaContrasena);
+  async restablecerContrasena(
+    @Param('token') token: string,
+    @Body() dto: ResetPasswordDto,
+  ): Promise<{ message: string }> {
+    await this.usuarioService.restablecerContrasena(token, dto.nuevaContrasena);
     return { message: 'Contraseña restablecida correctamente' };
   }
-
-  
 }

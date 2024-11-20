@@ -30,30 +30,6 @@ export class CreateUsuarioDto {
 
     @IsOptional()
     @IsString()
-    pregunta_de_usuario_1?
-
-    @IsOptional()
-    @IsString()
-    respuesta_de_usuario_1?
-
-    @IsOptional()
-    @IsString()
-    pregunta_de_usuario_2?
-
-    @IsOptional()
-    @IsString()
-    respuesta_de_usuario_2?
-
-    @IsOptional()
-    @IsString()
-    pregunta_de_usuario_3?
-
-    @IsOptional()
-    @IsString()
-    respuesta_de_usuario_3?
-
-    @IsOptional()
-    @IsString()
     token?
 
     @IsString()

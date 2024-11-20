@@ -25,8 +25,6 @@ export class DetalleDeduccionController {
       tiposPlanillaArray,
       codDeduccion
     );
-
-    // Configurar respuesta para descargar el archivo Excel
     res.set({
       'Content-Type': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
       'Content-Disposition': `attachment; filename="Deducciones_${codDeduccion}.xlsx"`,

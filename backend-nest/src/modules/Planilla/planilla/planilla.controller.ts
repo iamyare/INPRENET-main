@@ -180,6 +180,34 @@ export class PlanillaController {
     return this.planillaService.getCerradasPlanillas(clasePlanilla);
   }
 
+  @Get('obtener-totales-deduccion-por-periodo')
+  async obtenerTotalesDeduccionesPorPeriodo(
+    @Query('periodoInicio') periodoInicio: string,
+    @Query('periodoFinalizacion') periodoFinalizacion: string,
+    @Query('idTiposPlanilla') idTiposPlanilla: string
+  ) {
+    if (!periodoInicio || !periodoFinalizacion || !idTiposPlanilla) {
+      throw new BadRequestException(
+        'Debe proporcionar los parámetros periodoInicio, periodoFinalizacion e idTiposPlanilla.'
+      );
+    }
+    try {
+      const idTiposPlanillaArray = idTiposPlanilla.split(',').map((id) => parseInt(id.trim(), 10));
+      const deduccionesTotales = await this.planillaService.getDeduccionesTotalesPorPeriodo(
+        periodoInicio,
+        periodoFinalizacion,
+        idTiposPlanillaArray
+      );
+      return {
+        message: 'Totales de deducciones obtenidos con éxito',
+        data: deduccionesTotales,
+      };
+    } catch (error) {
+      console.error('Error al obtener los totales de deducciones por periodo:', error);
+      throw new BadRequestException('Error al obtener los totales de deducciones por periodo');
+    }
+  }
+
   @Get('beneficios-deducciones-periodo')
   async getBeneficiosDeducciones(
     @Query('periodoInicio') periodoInicio: string,

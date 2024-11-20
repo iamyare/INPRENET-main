@@ -277,8 +277,8 @@ export class NuevoBeneficioAfilComponent implements OnInit {
 
       // Actualiza las configuraciones de los campos del formulario (myFormFields2)
       this.myFormFields2 = [
-        { type: 'text', label: 'DNI del beneficiario', name: 'dni', value: "", validations: [Validators.required, Validators.minLength(13), Validators.maxLength(14)], display: true, readOnly: true },
-        {
+        /* { type: 'text', label: 'DNI del beneficiario', name: 'dni', value: "", validations: [Validators.required, Validators.minLength(13), Validators.maxLength(14)], display: true, readOnly: true },
+         */{
           type: 'dropdown', label: 'Tipo de beneficio', name: 'nombre_beneficio',
           options: temp,
           validations: [Validators.required], display: true

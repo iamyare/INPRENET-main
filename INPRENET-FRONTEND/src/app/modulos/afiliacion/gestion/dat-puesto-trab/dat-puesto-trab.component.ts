@@ -1,5 +1,6 @@
 import { ChangeDetectionStrategy, Component, Input, OnInit } from '@angular/core';
 import { AbstractControl, FormArray, FormBuilder, FormGroup, ValidationErrors, Validators } from '@angular/forms';
+import { startWith } from 'rxjs/operators';
 import { CentroTrabajoService } from 'src/app/services/centro-trabajo.service';
 
 @Component({
@@ -15,6 +16,7 @@ export class DatPuestoTrabComponent implements OnInit {
   jornadas: any[];
   tiposJornada: any[];
   minDate: Date;
+  filteredCentrosTrabajo: any[] = [];
 
   constructor(
     private fb: FormBuilder,
@@ -38,23 +40,66 @@ export class DatPuestoTrabComponent implements OnInit {
       this.formGroup.addControl('trabajo', this.fb.array([]));
     }
     this.loadCentrosTrabajo();
+    this.setupFilterListener();
   }
 
   private loadCentrosTrabajo() {
     this.centrosTrabSVC.obtenerTodosLosCentrosTrabajo().subscribe({
       next: (data) => {
-        this.centrosTrabajo = data.map(item => ({
+        this.centrosTrabajo = data.map((item) => ({
           label: item.codigo,
           value: String(item.id_centro_trabajo),
           nombreCentro: item.nombre_centro_trabajo,
           direccion: item.direccion_1 || item.direccion_2,
           sector: item.sector_economico,
         }));
+        this.filteredCentrosTrabajo = [...this.centrosTrabajo];
       },
       error: (error) => {
         console.error('Error al cargar centros de trabajo:', error);
+      },
+    });
+  }
+
+  private setupFilterListener() {
+    this.trabajosArray.controls.forEach((control, index) => {
+      const nombreCentroControl = control.get('nombre_centro_trabajo');
+      if (nombreCentroControl) {
+        nombreCentroControl.valueChanges.pipe(startWith('')).subscribe((value) => {
+          // Filtro específico para este control
+          (control as FormGroup).patchValue({
+            filteredCentrosTrabajo: this.centrosTrabajo.filter((centro) =>
+              centro.nombreCentro.toLowerCase().includes(value.toLowerCase())
+            ),
+          });
+        });
       }
     });
+  }
+
+  getFilteredCentrosTrabajo(index: number): any[] {
+    const trabajoControl = this.trabajosArray.at(index);
+    const filterValue = trabajoControl.get('nombre_centro_trabajo')?.value?.nombreCentro?.toLowerCase() ||
+                        trabajoControl.get('nombre_centro_trabajo')?.value?.toLowerCase() ||
+                        '';
+    const selectedCentro = this.centrosTrabajo.find(
+      (centro) => centro.nombreCentro.toLowerCase() === filterValue
+    );
+
+    // Si el valor actual coincide exactamente con un centro, muestra todos
+    if (selectedCentro) {
+      return this.centrosTrabajo;
+    }
+
+    // De lo contrario, aplica el filtro normalmente
+    return this.centrosTrabajo.filter((centro) =>
+      centro.nombreCentro.toLowerCase().includes(filterValue)
+    );
+  }
+
+
+  displayFn(centro: any): string {
+    return centro ? centro.nombreCentro : '';
   }
 
   get trabajosArray(): FormArray {
@@ -83,9 +128,10 @@ export class DatPuestoTrabComponent implements OnInit {
       tipo_jornada: ['', Validators.required]
     }, { validators: this.fechasValidator });
 
-    trabajoFormGroup.get('id_centro_trabajo')?.valueChanges.subscribe(value => {
-      const selectedCentro = this.centrosTrabajo.find(centro => centro.value === value);
-      if (selectedCentro && trabajoFormGroup.get('nombre_centro_trabajo')?.value !== selectedCentro.nombreCentro) {
+    // Actualizar campos relacionados cuando se cambia `id_centro_trabajo`
+    trabajoFormGroup.get('id_centro_trabajo')?.valueChanges.subscribe((value: any) => {
+      const selectedCentro = this.centrosTrabajo.find((centro: any) => centro.value === value);
+      if (selectedCentro) {
         trabajoFormGroup.patchValue({
           nombre_centro_trabajo: selectedCentro.nombreCentro,
           nombreCentro: selectedCentro.nombreCentro,
@@ -97,17 +143,27 @@ export class DatPuestoTrabComponent implements OnInit {
       }
     });
 
-    trabajoFormGroup.get('nombre_centro_trabajo')?.valueChanges.subscribe(value => {
-      const selectedCentro = this.centrosTrabajo.find(centro => centro.nombreCentro === value);
-      if (selectedCentro && trabajoFormGroup.get('id_centro_trabajo')?.value !== selectedCentro.value) {
+    // Actualizar campos relacionados cuando se cambia `nombre_centro_trabajo`
+    trabajoFormGroup.get('nombre_centro_trabajo')?.valueChanges.subscribe((value: any) => {
+      const selectedCentro = this.centrosTrabajo.find((centro: any) => centro.nombreCentro === value);
+      if (selectedCentro) {
         trabajoFormGroup.patchValue({
-          id_centro_trabajo: selectedCentro.value,
+          id_centro_trabajo: selectedCentro.value, // Actualiza automáticamente el código
           nombreCentro: selectedCentro.nombreCentro,
           direccionCentro: selectedCentro.direccion,
           sectorEconomico: selectedCentro.sector,
           showNumeroAcuerdo: selectedCentro.sector === 'PUBLICO' || selectedCentro.sector === 'PROHECO'
         });
         this.configurarValidacionesNumeroAcuerdo(trabajoFormGroup, selectedCentro.sector);
+      } else {
+        // Limpia los campos si el valor no es válido
+        trabajoFormGroup.patchValue({
+          id_centro_trabajo: '',
+          nombreCentro: '',
+          direccionCentro: '',
+          sectorEconomico: '',
+          showNumeroAcuerdo: false
+        });
       }
     });
 

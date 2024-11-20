@@ -37,11 +37,14 @@
         <button mat-raised-button color="primary" [disabled]="!planillaForm.valid " (click)="generarDocumento()">Generar Reporte de Planilla</button>
         <button mat-raised-button color="accent" [disabled]="!planillaForm.valid " (click)="generarDocumentoSinCuenta()">Generar Reporte Sin Cuenta</button>
         <button mat-raised-button color="accent" [disabled]="!planillaForm.valid " (click)="generarPDFMontosPorBancoPeriodo()">Generar Reporte de Montos por Banco</button>
-        <button mat-raised-button color="warn" (click)="openDynamicDialog([{ name: 'codDeduccion', label: 'Código de Deducción', type: 'number' }])">
+        <button mat-raised-button color="warn" [disabled]="!planillaForm.valid" (click)="openDynamicDialog([{ name: 'codDeduccion', label: 'Código de Deducción', type: 'number' }])">
           Descargar Excel de Deducciones
         </button>
         <button mat-raised-button color="warn" [disabled]="!planillaForm.valid " (click)="descargarReporte()">Descargar Archivos De Pago</button>
         <button mat-raised-button color="accent" [disabled]="!planillaForm.valid" (click)="descargarExcelInv()">Generar Excel Para Inversiones</button>
+        <button mat-raised-button color="primary" [disabled]="!planillaForm.valid" (click)="generarReporteTotalesDeducciones()">
+          Generar Reporte de Totales de Deducciones
+        </button>
         <!-- Puedes añadir más botones aquí -->
       </div>
     </form>

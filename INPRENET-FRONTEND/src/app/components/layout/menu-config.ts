@@ -79,13 +79,13 @@ export const MENU_CONFIG: Section[] = [
 
         ],
       },
-      /* {
+      {
         title: 'INGRESOS',
         icon: 'money',
         children: [
           { title: 'Privados', route: 'planilla/Ingresos/planilla-colegios-privados', icon: 'business' },
         ],
-      }, */
+      },
     ],
   },
   {

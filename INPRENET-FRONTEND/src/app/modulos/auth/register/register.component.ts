@@ -17,14 +17,6 @@ export class RegisterComponent implements OnInit {
   fotografia: File | null = null;
   token: string = '';
   correo: string = '';
-  availableQuestions: string[] = [
-    "¿Cuál es tu animal favorito?",
-    "¿Cuál es tu pasatiempo favorito?",
-    "¿En qué ciudad te gustaría vivir?",
-    "¿Cuál es tu comida favorita?",
-    "¿Cuál fue el nombre de tu primera mascota?",
-    "¿Cuál es tu libro favorito?"
-  ];
   passwordVisible: boolean = false;
   confirmPasswordVisible: boolean = false;
 
@@ -42,12 +34,6 @@ export class RegisterComponent implements OnInit {
         Validators.pattern(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/)
       ]],
       confirmarContrasenia: ['', [Validators.required]],
-      preguntaseguridad1: ['', [Validators.required]],
-      respuestaSeguridad1: ['', [Validators.required]],
-      preguntaseguridad2: ['', [Validators.required]],
-      respuestaSeguridad2: ['', [Validators.required]],
-      preguntaseguridad3: ['', [Validators.required]],
-      respuestaSeguridad3: ['', [Validators.required]],
       telefonoEmpleado: ['', [Validators.required]],
       telefonoEmpleado2: [''],
       numero_identificacion: ['', [Validators.required]]
@@ -64,11 +50,6 @@ export class RegisterComponent implements OnInit {
       this.toastr.error('Token no encontrado', 'Error');
       this.router.navigate(['/']);
     }
-
-    // Suscribirse a los cambios en las preguntas de seguridad
-    this.form.get('preguntaseguridad1')!.valueChanges.subscribe(() => this.updateQuestions());
-    this.form.get('preguntaseguridad2')!.valueChanges.subscribe(() => this.updateQuestions());
-    this.form.get('preguntaseguridad3')!.valueChanges.subscribe(() => this.updateQuestions());
   }
 
   confirmarContrasenaValidator(controlName: string, matchingControlName: string) {
@@ -112,32 +93,11 @@ export class RegisterComponent implements OnInit {
     return this.form.valid;
   }
 
-  getAvailableQuestions(currentIndex: number): string[] {
-    const selectedQuestions = [
-      this.form.get('preguntaseguridad1')!.value,
-      this.form.get('preguntaseguridad2')!.value,
-      this.form.get('preguntaseguridad3')!.value
-    ];
-    return this.availableQuestions.filter(question => !selectedQuestions.includes(question) || selectedQuestions[currentIndex] === question);
-  }
-
-  updateQuestions() {
-    this.form.get('preguntaseguridad1')!.updateValueAndValidity({ emitEvent: false });
-    this.form.get('preguntaseguridad2')!.updateValueAndValidity({ emitEvent: false });
-    this.form.get('preguntaseguridad3')!.updateValueAndValidity({ emitEvent: false });
-  }
-
   enviarInformacionDeSeguridad() {
     if (this.form.valid) {
       const datos = {
         correo: this.form.get('correo')!.value,
         contrasena: this.form.get('contrasena')!.value,
-        pregunta_de_usuario_1: this.form.get('preguntaseguridad1')!.value,
-        respuesta_de_usuario_1: this.form.get('respuestaSeguridad1')!.value,
-        pregunta_de_usuario_2: this.form.get('preguntaseguridad2')!.value,
-        respuesta_de_usuario_2: this.form.get('respuestaSeguridad2')!.value,
-        pregunta_de_usuario_3: this.form.get('preguntaseguridad3')!.value,
-        respuesta_de_usuario_3: this.form.get('respuestaSeguridad3')!.value,
         telefonoEmpleado: this.form.get('telefonoEmpleado')!.value,
         telefonoEmpleado2: this.form.get('telefonoEmpleado2')!.value,
         numero_identificacion: this.form.get('numero_identificacion')!.value

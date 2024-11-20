@@ -134,6 +134,13 @@ export class PermisosService {
             { role: 'ADMINISTRADOR', module: 'PLANILLA' },
             { role: 'CONSULTA A 60 RENTAS', module: 'PLANILLA' },
           ]
+        },
+        'planilla/Ingresos/planilla-colegios-privados': {
+          title: 'Privados',
+          permisos: [
+            /* { role: 'ADMINISTRADOR', module: 'PLANILLA' },
+            { role: 'OFICIAL DE PLANILLA', module: 'PLANILLA' }, */
+          ]
         }
       }
     },

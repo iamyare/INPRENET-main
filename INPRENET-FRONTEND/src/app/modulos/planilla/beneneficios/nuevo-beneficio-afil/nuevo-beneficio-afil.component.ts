@@ -146,12 +146,12 @@ export class NuevoBeneficioAfilComponent implements OnInit {
             if (item.fallecido === "NO") {
               if (item.estado_persona == 'ACTIVO' || item.estado_persona == 'SUSPENDIDO') {
                 this.getTipoBen(item.tipo_persona);
-              } if (item.estado_persona == 'INACTIVO' || item.estado_persona == 'NO REGISTRADO') {
+              } if (item.estado_persona == 'INACTIVO') {
                 this.toastr.warning(`La persona se encuentra ${item.estado_persona}. No se puede asignar beneficios a los Afiliados ${item.estado_persona}`, "Advertencia");
               } if (item.tipo_persona == 'JUBILADO' || item.tipo_persona == 'PENSIONADO') {
                 this.toastr.warning(`La persona se encuentra: ${item.tipo_persona}. No se puede asignar beneficios a la persona porque se encuentra: ${item.tipo_persona}`, "Advertencia");
-              } if (item.tipo_persona == 'VOULUNTARIO') {
-                this.toastr.warning(`Este tipo de persona todavia no esta en funcionamiento: ${item.tipo_persona}`, "Advertencia");
+              } if (item.tipo_persona == 'VOLUNTARIO') {
+                this.toastr.warning(`La persona se encuentra: ${item.tipo_persona}. No se puede asignar beneficios a la persona porque se encuentra: ${item.tipo_persona}`, "Advertencia");
               } /* if (this.hasBeneficios.length > 0) {
 
               } */
@@ -277,8 +277,8 @@ export class NuevoBeneficioAfilComponent implements OnInit {
 
       // Actualiza las configuraciones de los campos del formulario (myFormFields2)
       this.myFormFields2 = [
-        /* { type: 'text', label: 'DNI del beneficiario', name: 'dni', value: "", validations: [Validators.required, Validators.minLength(13), Validators.maxLength(14)], display: true, readOnly: true },
-         */{
+       /*  { type: 'text', label: 'DNI del beneficiario', name: 'dni', value: "", validations: [Validators.required, Validators.minLength(13), Validators.maxLength(14)], display: true, readOnly: true },
+        */ {
           type: 'dropdown', label: 'Tipo de beneficio', name: 'nombre_beneficio',
           options: temp,
           validations: [Validators.required], display: true
@@ -655,7 +655,7 @@ export class NuevoBeneficioAfilComponent implements OnInit {
           // Sumamos los meses especificados en `num_rentas_aplicadas`
           const endDateWithMonths = addMonths(startDate, parseInt(this.datosFormateados?.num_rentas_aplicadas, 10));
           // Configuramos la fecha al próximo mes y asignamos el día de `ultimo_dia_ultima_renta`
-          const endDateAdjusted = new Date(endDateWithMonths.getFullYear(), endDateWithMonths.getMonth() + 1, parseInt(this.datosFormateados?.ultimo_dia_ultima_renta, 10));
+          const endDateAdjusted = new Date(endDateWithMonths.getFullYear(), endDateWithMonths.getMonth(), parseInt(this.datosFormateados?.ultimo_dia_ultima_renta, 10));
           // Formateamos la fecha final
           fechaFormateada = format(endDateAdjusted, 'dd/MM/yyyy');
 

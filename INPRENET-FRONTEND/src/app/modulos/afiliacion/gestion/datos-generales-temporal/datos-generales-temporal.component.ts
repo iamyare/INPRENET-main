@@ -38,6 +38,7 @@ export class DatosGeneralesTemporalComponent implements OnInit {
 
   ngOnInit(): void {
     const noSpecialCharsPattern = '^[a-zA-Z0-9\\s]*$';
+    const addressPattern = /^[a-zA-Z0-9\s.]*$/;
 
     this.formGroup.addControl('id_tipo_identificacion', new FormControl('', Validators.required));
 
@@ -131,39 +132,39 @@ export class DatosGeneralesTemporalComponent implements OnInit {
     this.formGroup.addControl('cantidad_hijos', new FormControl('', [Validators.pattern("^[0-9]+$"), Validators.required]));
     this.formGroup.addControl('barrio_colonia', new FormControl('', [
       Validators.maxLength(75),
-      Validators.pattern(noSpecialCharsPattern)
+      Validators.pattern(addressPattern)
     ]));
     this.formGroup.addControl('avenida', new FormControl('', [
       Validators.maxLength(75),
-      Validators.pattern(noSpecialCharsPattern)
+      Validators.pattern(addressPattern)
     ]));
     this.formGroup.addControl('calle', new FormControl('', [
       Validators.maxLength(75),
-      Validators.pattern(noSpecialCharsPattern)
+      Validators.pattern(addressPattern)
     ]));
     this.formGroup.addControl('sector', new FormControl('', [
       Validators.maxLength(75),
-      Validators.pattern(noSpecialCharsPattern)
+      Validators.pattern(addressPattern)
     ]));
     this.formGroup.addControl('bloque', new FormControl('', [
       Validators.maxLength(25),
-      Validators.pattern(noSpecialCharsPattern)
+      Validators.pattern(addressPattern)
     ]));
     this.formGroup.addControl('numero_casa', new FormControl('', [
       Validators.maxLength(25),
-      Validators.pattern(noSpecialCharsPattern)
+      Validators.pattern(addressPattern)
     ]));
     this.formGroup.addControl('color_casa', new FormControl('', [
       Validators.maxLength(40),
-      Validators.pattern(noSpecialCharsPattern)
+      Validators.pattern(addressPattern)
     ]));
     this.formGroup.addControl('aldea', new FormControl('', [
       Validators.maxLength(75),
-      Validators.pattern(noSpecialCharsPattern)
+      Validators.pattern(addressPattern)
     ]));
     this.formGroup.addControl('caserio', new FormControl('', [
       Validators.maxLength(75),
-      Validators.pattern(noSpecialCharsPattern)
+      Validators.pattern(addressPattern)
     ]));
     this.formGroup.addControl('grado_academico', new FormControl('', [
       Validators.maxLength(75)

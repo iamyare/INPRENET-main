@@ -837,6 +837,7 @@ GROUP BY
         ded."ID_DEDUCCION" AS "ID_DEDUCCION",
         ded."NOMBRE_DEDUCCION" AS "NOMBRE_DEDUCCION",
         plan."ID_PLANILLA" AS "ID_PLANILLA",
+        COUNT(DISTINCT dedd."ID_PERSONA") AS "CANTIDAD_DOCENTES",
         SUM(dedd."MONTO_APLICADO") AS "TOTAL_MONTO_DEDUCCION"
       FROM 
         "NET_DETALLE_DEDUCCION" dedd
@@ -857,7 +858,7 @@ GROUP BY
         ded."ID_DEDUCCION", 
         ded."NOMBRE_DEDUCCION", 
         plan."ID_PLANILLA"
-      ORDER BY ded."NOMBRE_DEDUCCION" ASC
+      ORDER BY ded."ID_DEDUCCION" ASC
     `;
     try {
       const result = await this.entityManager.query(query, [periodoInicio, periodoFinalizacion]);
@@ -867,7 +868,7 @@ GROUP BY
       throw new InternalServerErrorException('Error al obtener deducciones INPREMA');
     }
   }
-
+  
   async getDeduccionesTercerosPorPeriodo(
     periodoInicio: string,
     periodoFinalizacion: string,
@@ -878,6 +879,7 @@ GROUP BY
         ded."ID_DEDUCCION" AS "ID_DEDUCCION",
         ded."NOMBRE_DEDUCCION" AS "NOMBRE_DEDUCCION",
         plan."ID_PLANILLA" AS "ID_PLANILLA",
+        COUNT(DISTINCT dedd."ID_PERSONA") AS "CANTIDAD_DOCENTES",
         SUM(dedd."MONTO_APLICADO") AS "TOTAL_MONTO_DEDUCCION"
       FROM 
         "NET_DETALLE_DEDUCCION" dedd
@@ -896,9 +898,9 @@ GROUP BY
         AND dedd."ESTADO_APLICACION" != 'RECHAZADO'
       GROUP BY 
         ded."ID_DEDUCCION", 
-        ded."NOMBRE_DEDUCCION",
+        ded."NOMBRE_DEDUCCION", 
         plan."ID_PLANILLA"
-      ORDER BY ded."NOMBRE_DEDUCCION" ASC
+      ORDER BY ded."ID_DEDUCCION" ASC
     `;
     try {
       const result = await this.entityManager.query(query, [periodoInicio, periodoFinalizacion]);
@@ -908,7 +910,7 @@ GROUP BY
       throw new InternalServerErrorException('Error al obtener deducciones de terceros');
     }
   }
-
+  
   async getBeneficiosPorPeriodoSC(
     periodoInicio: string,
     periodoFinalizacion: string,

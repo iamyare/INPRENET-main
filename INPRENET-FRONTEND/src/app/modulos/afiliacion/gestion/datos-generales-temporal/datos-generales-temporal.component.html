@@ -430,10 +430,13 @@
             <mat-label>Barrio/Colonia</mat-label>
             <mat-icon matPrefix>home</mat-icon>
             <input matInput formControlName="barrio_colonia">
-            <mat-error *ngIf="formGroup.get('barrio_colonia')?.invalid && formGroup.get('barrio_colonia')?.touched">
+            <mat-error *ngIf="formGroup.get('barrio_colonia')?.hasError('pattern') && formGroup.get('barrio_colonia')?.touched">
+              Solo puede contener letras, números, espacios y puntos.
+            </mat-error>
+            <!-- <mat-error *ngIf="formGroup.get('barrio_colonia')?.invalid && formGroup.get('barrio_colonia')?.touched">
               <mat-icon aria-hidden="true" class="error-icon-small">error_outline</mat-icon>
               Barrio/Colonia no puede tener más de 75 caracteres.
-            </mat-error>
+            </mat-error> -->
           </mat-form-field>
         </div>
         <div class="col-lg-4 col-md-12">
@@ -441,10 +444,13 @@
             <mat-label>Avenida</mat-label>
             <mat-icon matPrefix>location_on</mat-icon>
             <input matInput formControlName="avenida">
-            <mat-error *ngIf="formGroup.get('avenida')?.invalid && formGroup.get('avenida')?.touched">
+            <mat-error *ngIf="formGroup.get('avenida')?.hasError('pattern') && formGroup.get('avenida')?.touched">
+              Solo puede contener letras, números, espacios y puntos.
+            </mat-error>
+            <!-- <mat-error *ngIf="formGroup.get('avenida')?.invalid && formGroup.get('avenida')?.touched">
               <mat-icon aria-hidden="true" class="error-icon-small">error_outline</mat-icon>
               Avenida no puede tener más de 75 caracteres.
-            </mat-error>
+            </mat-error> -->
           </mat-form-field>
         </div>
         <div class="col-lg-4 col-md-12">
@@ -452,9 +458,8 @@
             <mat-label>Calle</mat-label>
             <mat-icon matPrefix>location_on</mat-icon>
             <input matInput formControlName="calle">
-            <mat-error *ngIf="formGroup.get('calle')?.invalid && formGroup.get('calle')?.touched">
-              <mat-icon aria-hidden="true" class="error-icon-small">error_outline</mat-icon>
-              Calle no puede tener más de 75 caracteres.
+            <mat-error *ngIf="formGroup.get('calle')?.hasError('pattern') && formGroup.get('calle')?.touched">
+              Solo puede contener letras, números, espacios y puntos.
             </mat-error>
           </mat-form-field>
         </div>
@@ -466,10 +471,13 @@
             <mat-label>Sector</mat-label>
             <mat-icon matPrefix>domain</mat-icon>
             <input matInput formControlName="sector">
-            <mat-error *ngIf="formGroup.get('sector')?.invalid && formGroup.get('sector')?.touched">
+            <mat-error *ngIf="formGroup.get('sector')?.hasError('pattern') && formGroup.get('sector')?.touched">
+              Solo puede contener letras, números, espacios y puntos.
+            </mat-error>
+           <!--  <mat-error *ngIf="formGroup.get('sector')?.invalid && formGroup.get('sector')?.touched">
               <mat-icon aria-hidden="true" class="error-icon-small">error_outline</mat-icon>
               Sector no puede tener más de 75 caracteres.
-            </mat-error>
+            </mat-error> -->
           </mat-form-field>
         </div>
         <div class="col-lg-4 col-md-12">
@@ -477,10 +485,13 @@
             <mat-label>Bloque</mat-label>
             <mat-icon matPrefix>home_work</mat-icon>
             <input matInput formControlName="bloque">
-            <mat-error *ngIf="formGroup.get('bloque')?.invalid && formGroup.get('bloque')?.touched">
+            <mat-error *ngIf="formGroup.get('bloque')?.hasError('pattern') && formGroup.get('bloque')?.touched">
+              Solo puede contener letras, números, espacios y puntos.
+            </mat-error>
+            <!-- <mat-error *ngIf="formGroup.get('bloque')?.invalid && formGroup.get('bloque')?.touched">
               <mat-icon aria-hidden="true" class="error-icon-small">error_outline</mat-icon>
               Bloque no puede tener más de 25 caracteres.
-            </mat-error>
+            </mat-error> -->
           </mat-form-field>
         </div>
         <div class="col-lg-4 col-md-12">
@@ -488,10 +499,13 @@
             <mat-label>Número de Casa</mat-label>
             <mat-icon matPrefix>home</mat-icon>
             <input matInput formControlName="numero_casa">
-            <mat-error *ngIf="formGroup.get('numero_casa')?.invalid && formGroup.get('numero_casa')?.touched">
+            <mat-error *ngIf="formGroup.get('numero_casa')?.hasError('pattern') && formGroup.get('numero_casa')?.touched">
+              Solo puede contener letras, números, espacios y puntos.
+            </mat-error>
+           <!--  <mat-error *ngIf="formGroup.get('numero_casa')?.invalid && formGroup.get('numero_casa')?.touched">
               <mat-icon aria-hidden="true" class="error-icon-small">error_outline</mat-icon>
               Número de Casa no puede tener más de 25 caracteres.
-            </mat-error>
+            </mat-error> -->
           </mat-form-field>
         </div>
       </div>
@@ -502,10 +516,13 @@
             <mat-label>Color de Casa</mat-label>
             <mat-icon matPrefix>palette</mat-icon>
             <input matInput formControlName="color_casa">
-            <mat-error *ngIf="formGroup.get('color_casa')?.invalid && formGroup.get('color_casa')?.touched">
+            <mat-error *ngIf="formGroup.get('color_casa')?.hasError('pattern') && formGroup.get('color_casa')?.touched">
+              Solo puede contener letras, números, espacios y puntos.
+            </mat-error>
+           <!--  <mat-error *ngIf="formGroup.get('color_casa')?.invalid && formGroup.get('color_casa')?.touched">
               <mat-icon aria-hidden="true" class="error-icon-small">error_outline</mat-icon>
               Color de Casa no puede tener más de 40 caracteres.
-            </mat-error>
+            </mat-error> -->
           </mat-form-field>
         </div>
         <div class="col-lg-4 col-md-12">
@@ -513,10 +530,13 @@
             <mat-label>Aldea</mat-label>
             <mat-icon matPrefix>map</mat-icon>
             <input matInput formControlName="aldea">
-            <mat-error *ngIf="formGroup.get('aldea')?.invalid && formGroup.get('aldea')?.touched">
+            <mat-error *ngIf="formGroup.get('aldea')?.hasError('pattern') && formGroup.get('aldea')?.touched">
+              Solo puede contener letras, números, espacios y puntos.
+            </mat-error>
+            <!-- <mat-error *ngIf="formGroup.get('aldea')?.invalid && formGroup.get('aldea')?.touched">
               <mat-icon aria-hidden="true" class="error-icon-small">error_outline</mat-icon>
               Aldea no puede tener más de 75 caracteres.
-            </mat-error>
+            </mat-error> -->
           </mat-form-field>
         </div>
         <div class="col-lg-4 col-md-12">
@@ -524,10 +544,13 @@
             <mat-label>Caserío</mat-label>
             <mat-icon matPrefix>map</mat-icon>
             <input matInput formControlName="caserio">
-            <mat-error *ngIf="formGroup.get('caserio')?.invalid && formGroup.get('caserio')?.touched">
+            <mat-error *ngIf="formGroup.get('caserio')?.hasError('pattern') && formGroup.get('caserio')?.touched">
+              Solo puede contener letras, números, espacios y puntos.
+            </mat-error>
+           <!--  <mat-error *ngIf="formGroup.get('caserio')?.invalid && formGroup.get('caserio')?.touched">
               <mat-icon aria-hidden="true" class="error-icon-small">error_outline</mat-icon>
               Caserío no puede tener más de 75 caracteres.
-            </mat-error>
+            </mat-error> -->
           </mat-form-field>
         </div>
       </div>

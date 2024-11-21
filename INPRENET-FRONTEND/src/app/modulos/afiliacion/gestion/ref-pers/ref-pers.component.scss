@@ -123,3 +123,21 @@ button:focus {
   margin-right: 4px;
   font-size: 20px;
 }
+
+.afiliado-container {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.afiliado-label {
+  font-weight: bold;
+  margin-right: 8px;
+  font-size: 16px;
+  color: #000;
+}
+
+.informative-text {
+  font-size: 14px;
+  color: #666;
+}

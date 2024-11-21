@@ -982,174 +982,474 @@ export class DocumentosPlanillaComponent implements OnInit {
   }
 
   async generarReporteTotalesDeducciones() {
-    console.log(this.obtenerIdYNombrePlanilla());
-
     const { idTiposPlanilla, nombrePlanilla } = this.obtenerIdYNombrePlanilla();
     const { fechaInicioFormateada, fechaFinFormateada } = this.obtenerFechasFormateadas();
 
     if (idTiposPlanilla.length === 0) return;
 
     this.planillaService.obtenerTotalesDeDeduccionPorPeriodo(fechaInicioFormateada, fechaFinFormateada, idTiposPlanilla)
-      .subscribe({
-        next: async (data) => {
-          console.log('Respuesta del servicio:', data);
+        .subscribe({
+            next: async (data) => {
+                if (!data || (!data.deduccionesInprema && !data.deduccionesTerceros)) {
+                    console.error('Datos no válidos para crear el reporte:', data);
+                    return;
+                }
 
-          if (!data || (!data.deduccionesInprema && !data.deduccionesTerceros)) {
-            console.error('Datos no válidos para crear el reporte:', data);
-            //this.toastr.error('No se encontraron datos para generar el reporte');
-            return;
-          }
+                const base64Image = await this.convertirImagenABase64('../assets/images/membratadoFinal.jpg');
 
-          const base64Image = await this.convertirImagenABase64('../assets/images/membratadoFinal.jpg');
+                const agruparPorNombre = (deducciones: any[]) => {
+                    return deducciones.reduce((acc: any, item: any) => {
+                        const existing = acc.find((ded: any) => ded.NOMBRE_DEDUCCION === item.NOMBRE_DEDUCCION);
+                        if (existing) {
+                            existing.TOTAL_MONTO_DEDUCCION += item.TOTAL_MONTO_DEDUCCION || 0;
+                            existing.CANTIDAD_DOCENTES += item.CANTIDAD_DOCENTES || 0;
+                        } else {
+                            acc.push({ ...item });
+                        }
+                        return acc;
+                    }, []);
+                };
 
-          const agruparPorNombre = (deducciones: any[]) => {
-            return deducciones.reduce((acc: any, item: any) => {
-              const existing = acc.find((ded: any) => ded.NOMBRE_DEDUCCION === item.NOMBRE_DEDUCCION);
-              if (existing) {
-                existing.TOTAL_MONTO_DEDUCCION += item.TOTAL_MONTO_DEDUCCION || 0;
-              } else {
-                acc.push({ ...item });
-              }
-              return acc;
-            }, []);
-          };
+                const deduccionesInpremaAgrupadas = agruparPorNombre(data.deduccionesInprema);
+                const deduccionesTercerosAgrupadas = agruparPorNombre(data.deduccionesTerceros);
 
-          const deduccionesInpremaAgrupadas = agruparPorNombre(data.deduccionesInprema);
-          const deduccionesTercerosAgrupadas = agruparPorNombre(data.deduccionesTerceros);
+                const ordenarPorCodigo = (deducciones: any[]) => {
+                    return deducciones.sort((a, b) => a.ID_DEDUCCION - b.ID_DEDUCCION);
+                };
 
-          const ordenarPorCodigo = (deducciones: any[]) => {
-            return deducciones.sort((a, b) => a.ID_DEDUCCION - b.ID_DEDUCCION);
-          };
+                const deduccionesInpremaOrdenadas = ordenarPorCodigo(deduccionesInpremaAgrupadas);
+                const deduccionesTercerosOrdenadas = ordenarPorCodigo(deduccionesTercerosAgrupadas);
 
-          const deduccionesInpremaOrdenadas = ordenarPorCodigo(deduccionesInpremaAgrupadas);
-          const deduccionesTercerosOrdenadas = ordenarPorCodigo(deduccionesTercerosAgrupadas);
+                const totalDeduccionesInprema = deduccionesInpremaOrdenadas.reduce((sum: number, item: any) => sum + (item.TOTAL_MONTO_DEDUCCION || 0), 0);
+                const totalDocentesInprema = deduccionesInpremaOrdenadas.reduce((sum: number, item: any) => sum + (item.CANTIDAD_DOCENTES || 0), 0);
 
-          const totalDeduccionesInprema = deduccionesInpremaOrdenadas.reduce((sum: number, item: any) => sum + (item.TOTAL_MONTO_DEDUCCION || 0), 0);
-          const totalDeduccionesTerceros = deduccionesTercerosOrdenadas.reduce((sum: number, item: any) => sum + (item.TOTAL_MONTO_DEDUCCION || 0), 0);
-          const totalGeneral = totalDeduccionesInprema + totalDeduccionesTerceros;
+                const totalDeduccionesTerceros = deduccionesTercerosOrdenadas.reduce((sum: number, item: any) => sum + (item.TOTAL_MONTO_DEDUCCION || 0), 0);
+                const totalDocentesTerceros = deduccionesTercerosOrdenadas.reduce((sum: number, item: any) => sum + (item.CANTIDAD_DOCENTES || 0), 0);
 
-          const docDefinition: TDocumentDefinitions = {
-            pageSize: 'LETTER',
-            pageOrientation: 'landscape',
-            background: (currentPage, pageSize) => ({
-              image: base64Image,
-              width: pageSize.width,
-              height: pageSize.height,
-              absolutePosition: { x: 0, y: 0 }
-            }),
-            pageMargins: [40, 130, 40, 100],
-            header: {
-              text: `REPORTE DE TOTALES DE DEDUCCIONES (PLANILLA ${nombrePlanilla})`,
-              style: 'header',
-              alignment: 'center',
-              margin: [50, 90, 50, 0]
+                const totalGeneral = totalDeduccionesInprema + totalDeduccionesTerceros;
+
+                const docDefinition: TDocumentDefinitions = {
+                    pageSize: 'LETTER',
+                    pageOrientation: 'landscape',
+                    background: (currentPage, pageSize) => ({
+                        image: base64Image,
+                        width: pageSize.width,
+                        height: pageSize.height,
+                        absolutePosition: { x: 0, y: 0 }
+                    }),
+                    pageMargins: [40, 100, 40, 60],
+                    header: {
+                        text: `REPORTE DE TOTALES DE DEDUCCIONES (PLANILLA ${nombrePlanilla})`,
+                        style: 'header',
+                        alignment: 'center',
+                        margin: [50, 70, 50, 0]
+                    },
+                    content: [
+                      {
+                          columns: [
+                              {
+                                  width: '50%',
+                                  text: [
+                                      { text: 'PERIODO DE LA PLANILLA: ', bold: true },
+                                      `${fechaInicioFormateada} - ${fechaFinFormateada}`
+                                  ],
+                                  alignment: 'left',
+                                  fontSize: 7
+                              },
+                              {
+                                  width: '50%',
+                                  text: [
+                                      { text: 'NOMBRE DE LA PLANILLA: ', bold: true },
+                                      `PLANILLA ${nombrePlanilla}`
+                                  ],
+                                  alignment: 'right',
+                                  fontSize: 7
+                              }
+                          ],
+                          margin: [40, 0, 40, 5] // Ajustado para subir la posición
+                      },
+                      { text: 'DEDUCCIONES INPREMA', style: 'subheader', margin: [0, 0, 0, 3] },
+                      this.crearTablaTotalesDeducciones(deduccionesInpremaOrdenadas, 'DEDUCCIONES INPREMA', totalDocentesInprema, totalDeduccionesInprema),
+                      { text: 'DEDUCCIONES TERCEROS', style: 'subheader', margin: [0, 0, 0, 3] },
+                      this.crearTablaTotalesDeducciones(deduccionesTercerosOrdenadas, 'DEDUCCIONES TERCEROS', totalDocentesTerceros, totalDeduccionesTerceros),
+                      {
+                          text: `TOTAL GENERAL DE DEDUCCIONES: L ${totalGeneral.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",")}`,
+                          style: 'tableTotal',
+                          alignment: 'right',
+                          margin: [0, 10, 0, 0]
+                      }
+                  ],
+
+                    styles: {
+                        header: { fontSize: 9, bold: true },
+                        subheader: { fontSize: 7, bold: true },
+                        tableHeader: { bold: true, fontSize: 6, color: 'black' },
+                        tableBody: { fontSize: 6, color: 'black' },
+                        tableTotal: { bold: true, fontSize: 6, color: 'black', alignment: 'right' }
+                    },
+                    footer: (currentPage, pageCount) => ({
+                        table: {
+                            widths: ['*', '*', '*'],
+                            body: [
+                                [
+                                    { text: 'FECHA Y HORA: ' + new Date().toLocaleString(), alignment: 'left', border: [false, false, false, false], fontSize: 6 },
+                                    { text: 'GENERÓ: INPRENET', alignment: 'left', border: [false, false, false, false], fontSize: 6 },
+                                    { text: 'PÁGINA ' + currentPage.toString() + ' DE ' + pageCount, alignment: 'right', border: [false, false, false, false], fontSize: 6 }
+                                ]
+                            ]
+                        },
+                        margin: [20, 0, 20, 10]
+                    }),
+                    defaultStyle: { fontSize: 6 },
+                };
+
+                pdfMake.createPdf(docDefinition).download(`Reporte_Totales_Deducciones_${nombrePlanilla}.pdf`);
             },
-            content: [
-              {
-                columns: [
-                  {
-                    width: '50%',
-                    text: [
-                      { text: 'PERIODO DE LA PLANILLA: ', bold: true },
-                      `${fechaInicioFormateada} - ${fechaFinFormateada}`
-                    ],
-                    alignment: 'left'
-                  },
-                  {
-                    width: '50%',
-                    text: [
-                      { text: 'NOMBRE DE LA PLANILLA: ', bold: true },
-                      `PLANILLA ${nombrePlanilla}`
-                    ],
-                    alignment: 'right'
-                  }
-                ],
-                margin: [40, 5, 40, 10]
-              },
-              { text: 'DEDUCCIONES INPREMA', style: 'subheader', margin: [0, 10, 0, 5] },
-              this.crearTablaTotalesDeducciones(deduccionesInpremaOrdenadas, 'DEDUCCIONES INPREMA'),
-              { text: 'DEDUCCIONES TERCEROS', style: 'subheader', margin: [0, 10, 0, 5] },
-              this.crearTablaTotalesDeducciones(deduccionesTercerosOrdenadas, 'DEDUCCIONES TERCEROS'),
-              {
-                text: `TOTAL GENERAL DE DEDUCCIONES: L ${totalGeneral.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",")}`,
-                style: 'tableTotal',
-                alignment: 'right',
-                margin: [0, 20, 0, 0]
-              }
-            ],
-            styles: {
-              header: { fontSize: 16, bold: true },
-              subheader: { fontSize: 14, bold: false, margin: [0, 5, 0, 10] },
-              tableHeader: { bold: true, fontSize: 13, color: 'black' },
-              tableBody: { fontSize: 10, color: 'black' },
-              tableTotal: { bold: true, fontSize: 12, color: 'black', alignment: 'right' }
-            },
-            footer: (currentPage, pageCount) => ({
+            error: (error) => {
+                console.error('Error al generar el reporte de deducciones:', error);
+            }
+        });
+}
+
+  crearTablaTotalesDeducciones(data: any[], titulo: string, totalDocentes: number, totalMonto: number) {
+      if (!Array.isArray(data) || data.length === 0) {
+          console.error(`No se encontraron datos para ${titulo}`);
+          return {
               table: {
-                widths: ['*', '*', '*'],
-                body: [
-                  [
-                    { text: 'FECHA Y HORA: ' + new Date().toLocaleString(), alignment: 'left', border: [false, false, false, false], fontSize: 8 },
-                    { text: 'GENERÓ: INPRENET', alignment: 'left', border: [false, false, false, false] },
-                    { text: 'PÁGINA ' + currentPage.toString() + ' DE ' + pageCount, alignment: 'right', border: [false, false, false, false], fontSize: 8 }
-                  ]
-                ]
-              },
-              margin: [20, 0, 20, 20]
-            }),
-            defaultStyle: { fontSize: 10 },
+                  body: [[{ text: `No se encontraron datos para ${titulo}`, alignment: 'center', colSpan: 4 }]]
+              }
           };
+      }
 
-          pdfMake.createPdf(docDefinition).download(`Reporte_Totales_Deducciones_${nombrePlanilla}.pdf`);
-        },
-        error: (error) => {
-          console.error('Error al generar el reporte de deducciones:', error);
-          //this.toastr.error('Error al generar el reporte de deducciones');
-        }
-      });
+      const headers = [
+          { text: 'Código', style: 'tableHeader' },
+          { text: 'Nombre Deducción', style: 'tableHeader' },
+          { text: 'Cantidad Docentes', style: 'tableHeader', alignment: 'right' },
+          { text: 'Total Deducción', style: 'tableHeader', alignment: 'right' }
+      ];
+
+      const body: any = data.map(item => [
+          { text: item.ID_DEDUCCION || 'N/A', style: 'tableBody' },
+          { text: item.NOMBRE_DEDUCCION || 'N/A', style: 'tableBody' },
+          { text: item.CANTIDAD_DOCENTES || 0, style: 'tableBody', alignment: 'right' },
+          { text: `L ${Number(item.TOTAL_MONTO_DEDUCCION || 0).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",")}`, style: 'tableBody', alignment: 'right' }
+      ]);
+
+      body.push([
+          { text: 'TOTALES', style: 'tableTotal', colSpan: 2, alignment: 'right' },
+          {},
+          { text: totalDocentes, style: 'tableTotal', alignment: 'right' },
+          { text: `L ${totalMonto.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",")}`, style: 'tableTotal', alignment: 'right' }
+      ]);
+
+      return {
+          style: 'tableExample',
+          table: {
+              headerRows: 1,
+              widths: ['10%', '50%', '20%', '20%'],
+              body: [headers, ...body]
+          },
+          layout: 'noBorders'
+      };
   }
 
-  // Función para crear la tabla del PDF
-  crearTablaTotalesDeducciones(data: any[], titulo: string) {
-    if (!Array.isArray(data) || data.length === 0) {
-      console.error(`No se encontraron datos para ${titulo}`);
-      return {
-        table: {
-          body: [[{ text: `No se encontraron datos para ${titulo}`, alignment: 'center', colSpan: 3 }]]
-        }
-      };
-    }
-
+  crearTablaPartidaDiario(data: any[], deduccionesInprema: number, deduccionesTerceros: number) {
     const headers = [
-      { text: 'Código Deducción', style: 'tableHeader' },
-      { text: 'Nombre Deducción', style: 'tableHeader' },
-      { text: 'Total Monto Deducción', style: 'tableHeader', alignment: 'right' }
+        { text: 'Cuenta Contable', style: 'tableHeader' },
+        { text: 'No. Comprobante', style: 'tableHeader' },
+        { text: 'Descripción', style: 'tableHeader' },
+        { text: 'Débito (L)', style: 'tableHeader', alignment: 'right' },
+        { text: 'Crédito (L)', style: 'tableHeader', alignment: 'right' }
     ];
 
-    const body:any = data.map(item => [
-      { text: item.ID_DEDUCCION || 'N/A', style: 'tableBody' },
-      { text: item.NOMBRE_DEDUCCION || 'N/A', style: 'tableBody' },
-      { text: `L ${Number(item.TOTAL_MONTO_DEDUCCION || 0).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",")}`, style: 'tableBody', alignment: 'right' }
+    // Agrupamos los datos por cuenta contable
+    const gruposPorCuenta = data.reduce((acc: any, beneficio: any) => {
+        const cuenta = beneficio.cuentaContable;
+        if (!acc[cuenta]) {
+            acc[cuenta] = [];
+        }
+        acc[cuenta].push(beneficio);
+        return acc;
+    }, {});
+
+    const body: any = [];
+
+    // Construimos secciones por cuenta contable
+    Object.keys(gruposPorCuenta).forEach((cuenta) => {
+        const beneficios = gruposPorCuenta[cuenta];
+        const totalDebito = beneficios.reduce((acc: number, item: any) => acc + (item.debito || 0), 0);
+        const totalCredito = beneficios.reduce((acc: number, item: any) => acc + (item.credito || 0), 0);
+
+        const nombreCuenta: Record<string, string> = {
+            "611.01.04": "JUBILACION VOLUNTARIA",
+            "611.02.01": "PENSION POR INVALIDEZ",
+            "612.01.04.01": "CONTINUACION DE JUBILACION",
+            "148.99.04.01": "JUBILACIONES Y PENSIONES DEL GOBIERNO",
+            "611.02.02": "PENSION POR SOBREVIVENCIA Y ORFANDAD",
+        };
+
+        const descripcionCuenta = nombreCuenta[cuenta] || "Cuenta Desconocida";
+
+        // Título de la cuenta contable desglosado por columnas
+        body.push([
+            { text: cuenta, style: 'tableHeader' }, // Cuenta Contable
+            { text: 'N/A', style: 'tableHeader' }, // No. Comprobante
+            { text: descripcionCuenta, style: 'tableHeader' }, // Descripción
+            { text: `L ${totalDebito.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",")}`, style: 'tableHeader', alignment: 'right' }, // Débito (L)
+            { text: `L ${totalCredito.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",")}`, style: 'tableHeader', alignment: 'right' } // Crédito (L)
+        ]);
+
+        // Beneficios de la cuenta
+        beneficios.forEach((item: any) => {
+            body.push([
+                { text: cuenta, style: 'tableBody' },
+                { text: item.noComprobante || 'N/A', style: 'tableBody' },
+                { text: item.descripcion || 'N/A', style: 'tableBody' },
+                { text: item.debito?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") || '0.00', style: 'tableBody', alignment: 'right' },
+                { text: item.credito?.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",") || '0.00', style: 'tableBody', alignment: 'right' }
+            ]);
+        });
+
+        // Separador visual entre cuentas
+        body.push([
+            { text: '', colSpan: 5 },
+            {},
+            {},
+            {},
+            {}
+        ]);
+    });
+
+    // Espacio antes de las deducciones
+    body.push([
+        { text: '', colSpan: 5 },
+        {},
+        {},
+        {},
+        {}
     ]);
 
-    if (body.length === 0) {
-      body.push([
-        { text: `No hay datos disponibles para ${titulo}`, colSpan: 3, alignment: 'center' }
-      ]);
-    }
+    // Totales generales
+const totalDebitos = data.reduce((acc: number, item: any) => acc + (item.debito || 0), 0);
+const totalCreditos = deduccionesInprema + deduccionesTerceros;
+
+// Ajuste para balancear los débitos y créditos (colocado antes de las deducciones)
+const diferencia = Math.abs(totalDebitos - totalCreditos);
+if (totalDebitos > totalCreditos) {
+    body.push([
+        { text: '211.01.01', style: 'tableHeaderBold' }, // Cuenta Contable
+        { text: 'N/A', style: 'tableHeaderBold' }, // No. Comprobante
+        { text: 'PENSION POR VEJEZ', style: 'tableHeaderBold' }, // Descripción
+        { text: '0.00', style: 'tableHeaderBold', alignment: 'right' }, // Débito (L)
+        { text: `L ${diferencia.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",")}`, style: 'tableHeaderBold', alignment: 'right' } // Crédito (L)
+    ]);
+} else if (totalCreditos > totalDebitos) {
+    body.push([
+        { text: '211.01.01', style: 'tableHeaderBold' }, // Cuenta Contable
+        { text: 'N/A', style: 'tableHeaderBold' }, // No. Comprobante
+        { text: 'PENSION POR VEJEZ', style: 'tableHeaderBold' }, // Descripción
+        { text: `L ${diferencia.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",")}`, style: 'tableHeaderBold', alignment: 'right' }, // Débito (L)
+        { text: '0.00', style: 'tableHeaderBold', alignment: 'right' } // Crédito (L)
+    ]);
+}
+
+// Espacio antes de las deducciones
+body.push([
+    { text: '', colSpan: 5 },
+    {},
+    {},
+    {},
+    {}
+]);
+
+// Deducciones INPREMA (en negrita)
+body.push([
+    { text: '297.01.04', style: 'tableHeaderBold' },
+    { text: 'N/A', style: 'tableHeaderBold' },
+    { text: 'RETENCIONES POR APLICAR JUBILADOS', style: 'tableHeaderBold' },
+    { text: '0.00', style: 'tableHeaderBold', alignment: 'right' },
+    { text: `L ${deduccionesInprema.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",")}`, style: 'tableHeaderBold', alignment: 'right' }
+]);
+
+// Deducciones Terceros (en negrita)
+body.push([
+    { text: '212.01.01', style: 'tableHeaderBold' },
+    { text: 'N/A', style: 'tableHeaderBold' },
+    { text: 'PAGOS A TERCEROS POR DEDUCCION JUBILADOS', style: 'tableHeaderBold' },
+    { text: '0.00', style: 'tableHeaderBold', alignment: 'right' },
+    { text: `L ${deduccionesTerceros.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",")}`, style: 'tableHeaderBold', alignment: 'right' }
+]);
+
+    // Totales finales después del ajuste
+    body.push([
+      { text: 'TOTAL DEBITOS Y CREDITOS', style: 'tableTotal', colSpan: 3, alignment: 'left' },
+      {}, // Estas celdas vacías corresponden al colSpan
+      {},
+      { text: `L ${Math.max(totalDebitos, totalCreditos).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",")}`, style: 'tableTotal', alignment: 'right' },
+      { text: `L ${Math.max(totalDebitos, totalCreditos).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",")}`, style: 'tableTotal', alignment: 'right' }
+  ]);
 
     return {
-      style: 'tableExample',
-      table: {
-        headerRows: 1,
-        widths: ['auto', '*', 'auto'],
-        body: [headers, ...body]
-      },
-      layout: 'lightHorizontalLines'
+        style: 'tableExample',
+        table: {
+            headerRows: 1,
+            widths: ['15%', '20%', '30%', '20%', '15%'], // Ajuste de anchos
+            body: [headers, ...body]
+        },
+        layout: 'lightHorizontalLines'
     };
   }
 
+  async generarReportePartidaDiario() {
+    const { idTiposPlanilla, nombrePlanilla } = this.obtenerIdYNombrePlanilla();
+    const { fechaInicioFormateada, fechaFinFormateada } = this.obtenerFechasFormateadas();
 
+    if (idTiposPlanilla.length === 0) return;
 
+    this.planillaService.getTotalBeneficiosYDeduccionesPorPeriodo(fechaInicioFormateada, fechaFinFormateada, idTiposPlanilla).subscribe({
+        next: async (data) => {
+            if (!data || (!data.beneficios && !data.deduccionesInprema && !data.deduccionesTerceros)) {
+                console.error('No se encontraron datos para generar el reporte.');
+                return;
+            }
+
+            const base64Image = await this.convertirImagenABase64('../assets/images/membratadoFinal.jpg');
+
+            // Mapeo de cuentas contables
+            const cuentaContableMap: Record<string, string> = {
+              "JUBILACION VOLUNTARIA": "611.01.04",
+              "PENSION POR VEJEZ": "611.01.04",
+              "PENSION POR VEJEZ COMPLEMENTARIA": "611.01.04",
+              "PENSION POR INVALIDEZ": "611.02.01",
+              "PENSION POR INVALIDEZ 2": "611.02.01",
+              "CONTINUACION JUBILACION": "612.01.04.01",
+              "JUBILACION VOLUNTARIA GOBIERNO": "148.99.04.01",
+              "PENSION POR INVALIDEZ GOBIERNO": "148.99.04.01",
+              "CONTINUACION DE JUBILACION GOBIERNO": "148.99.04.01",
+              "PENSION POR VIUDEZ Y ORFANDAD": "611.02.02",
+              "PENSION POR ORFANDAD": "611.02.02"
+          };
+            const partidaDiarioData = data.beneficios.map((beneficio: any) => ({
+                cuentaContable: cuentaContableMap[beneficio.NOMBRE_BENEFICIO] || 'N/A',
+                noComprobante: beneficio.ID_BENEFICIO || 'N/A',
+                descripcion: beneficio.NOMBRE_BENEFICIO,
+                debito: beneficio.TOTAL_MONTO_BENEFICIO || 0,
+                credito: 0
+            }));
+
+            const totalDeduccionesInprema = data.deduccionesInprema.reduce((acc: number, cur: any) => acc + (cur.TOTAL_MONTO_DEDUCCION || 0), 0);
+            const totalDeduccionesTerceros = data.deduccionesTerceros.reduce((acc: number, cur: any) => acc + (cur.TOTAL_MONTO_DEDUCCION || 0), 0);
+
+            const docDefinition: TDocumentDefinitions = {
+                pageSize: 'LETTER',
+                pageOrientation: 'landscape',
+                background: (currentPage, pageSize) => ({
+                    image: base64Image,
+                    width: pageSize.width,
+                    height: pageSize.height,
+                    absolutePosition: { x: 0, y: 0 }
+                }),
+                pageMargins: [40, 130, 40, 100],
+                header: {
+                    text: `PARTIDA DE DIARIO - PLANILLA ${nombrePlanilla}`,
+                    style: 'header',
+                    alignment: 'center',
+                    margin: [50, 90, 50, 0]
+                },
+                content: [
+                    {
+                        columns: [
+                            {
+                                width: '50%',
+                                text: [
+                                    { text: 'PERIODO DE LA PLANILLA: ', bold: true },
+                                    `${fechaInicioFormateada} - ${fechaFinFormateada}`
+                                ],
+                                alignment: 'left'
+                            }
+                        ],
+                        margin: [40, 5, 40, 10]
+                    },
+                    this.crearTablaPartidaDiario(partidaDiarioData, totalDeduccionesInprema, totalDeduccionesTerceros),
+                    {
+                      columns: [
+                          {
+                              width: '50%',
+                              canvas: [
+                                  {
+                                      type: 'line',
+                                      x1: 0, y1: 0,
+                                      x2: 150, y2: 0,
+                                      lineWidth: 1.5
+                                  }
+                              ],
+                              alignment: 'center',
+                              margin: [0, 80, 0, 5] // Ajustar margen superior
+                          },
+                          {
+                              width: '50%',
+                              canvas: [
+                                  {
+                                      type: 'line',
+                                      x1: 0, y1: 0,
+                                      x2: 150, y2: 0,
+                                      lineWidth: 1.5
+                                  }
+                              ],
+                              alignment: 'center',
+                              margin: [0, 80, 0, 5] // Ajustar margen superior
+                          }
+                      ]
+                  },
+                  {
+                      columns: [
+                          {
+                              width: '50%',
+                              text: 'ELABORADO POR',
+                              style: 'signature',
+                              alignment: 'center',
+                              margin: [0, 5, 0, 40] // Espaciado entre línea y texto
+                          },
+                          {
+                              width: '50%',
+                              text: 'VERIFICADO POR',
+                              style: 'signature',
+                              alignment: 'center',
+                              margin: [0, 5, 0, 40] // Espaciado entre línea y texto
+                          }
+                      ]
+                  }
+
+                  ],
+                  styles: {
+                      header: { fontSize: 16, bold: true },
+                      tableHeader: { bold: true, fontSize: 12, color: 'black' },
+                      tableBody: { fontSize: 10, color: 'black' },
+                      tableTotal: { bold: true, fontSize: 12, color: 'black', alignment: 'right' },
+                      tableHeaderBold: { bold: true, fontSize: 12, color: 'black' }
+                  },
+                  footer: (currentPage, pageCount) => ({
+                      table: {
+                          widths: ['*', '*', '*'],
+                          body: [
+                              [
+                                  { text: 'FECHA Y HORA: ' + new Date().toLocaleString(), alignment: 'left', border: [false, false, false, false], fontSize: 8 },
+                                  { text: 'GENERÓ: INPRENET', alignment: 'center', border: [false, false, false, false], fontSize: 8 },
+                                  { text: 'PÁGINA ' + currentPage.toString() + ' DE ' + pageCount, alignment: 'right', border: [false, false, false, false], fontSize: 8 }
+                              ]
+                          ]
+                      },
+                      margin: [20, 0, 20, 20]
+                  }),
+                  defaultStyle: { fontSize: 10 }
+              };
+
+              pdfMake.createPdf(docDefinition).download(`Partida_Diario_Planilla_${nombrePlanilla}.pdf`);
+          },
+          error: (error) => {
+              console.error('Error al generar el reporte de partida de diario:', error);
+          }
+      });
+  }
 
 }

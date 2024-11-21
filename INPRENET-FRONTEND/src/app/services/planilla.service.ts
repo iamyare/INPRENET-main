@@ -11,6 +11,26 @@ import { Estatus60Rentas} from '../modulos/planilla/p-60-rentas/p_60_rentas.inte
 export class PlanillaService {
   constructor(private http: HttpClient, private toastr: ToastrService) { }
 
+  obtenerTotalesDeDeduccionPorPeriodo(
+    periodoInicio: string,
+    periodoFinalizacion: string,
+    idTiposPlanilla: number[]
+  ): Observable<any> {
+    const url = `${environment.API_URL}/api/planilla/obtener-totales-deduccion-por-periodo`;
+    const params = new HttpParams()
+      .set('periodoInicio', periodoInicio)
+      .set('periodoFinalizacion', periodoFinalizacion)
+      .set('idTiposPlanilla', idTiposPlanilla.join(','));
+    return this.http.get(url, { params }).pipe(
+      map((response: any) => response.data),
+      catchError((error: HttpErrorResponse) => {
+        console.error('Error al obtener los totales por periodo', error);
+        this.toastr.error('Error al obtener los totales por periodo');
+        return throwError(error);
+      })
+    );
+  }
+
   obtenerPagosYBeneficiosPorPersona(idPlanilla: number, dni: string): Observable<any> {
     const url = `${environment.API_URL}/api/planilla/pagos-beneficios`;
     const params = { idPlanilla: idPlanilla.toString(), dni: dni };
@@ -446,7 +466,7 @@ export class PlanillaService {
     return this.http.get(`${environment.API_URL}/api/detalle-deduccion/detallesPreliminar`, { params });
   }
 
- 
+
     // Método para obtener Estatus de Pago 60 Rentas desde la tabla MIG_DETALLE_60_RENTAS
     obtenerEstatus(dni: string): Observable<Estatus60Rentas[]> {
       const url = `${environment.API_URL}/api/p-60-rentas/${dni}`; // Ajusta la URL según tu API

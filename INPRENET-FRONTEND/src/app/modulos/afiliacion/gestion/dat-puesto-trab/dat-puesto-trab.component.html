@@ -28,15 +28,27 @@
             <mat-form-field class="half-width" appearance="outline">
               <mat-label>Nombre del Centro de Trabajo</mat-label>
               <mat-icon matPrefix>business</mat-icon>
-              <mat-select formControlName="nombre_centro_trabajo">
-                <mat-option *ngFor="let centro of centrosTrabajo" [value]="centro.nombreCentro">
+              <input
+                type="text"
+                matInput
+                [formControlName]="'nombre_centro_trabajo'"
+                [matAutocomplete]="auto"
+                placeholder="Buscar centro de trabajo"
+              />
+              <mat-autocomplete #auto="matAutocomplete" [displayWith]="displayFn">
+                <mat-option
+                  *ngFor="let centro of getFilteredCentrosTrabajo(i)"
+                  [value]="centro"
+                >
                   {{ centro.nombreCentro }}
                 </mat-option>
-              </mat-select>
+              </mat-autocomplete>
               <mat-error *ngFor="let error of getErrors(i, 'nombre_centro_trabajo')">
                 <mat-icon>error</mat-icon> {{ error }}
               </mat-error>
             </mat-form-field>
+
+
           </div>
 
           <div class="form-row">

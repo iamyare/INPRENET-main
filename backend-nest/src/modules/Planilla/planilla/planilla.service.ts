@@ -651,6 +651,7 @@ export class PlanillaService {
       throw new InternalServerErrorException('Error al obtener los totales por planilla');
     }
   }
+
   async getBeneficiosPorPeriodo(
     periodoInicio: string,
     periodoFinalizacion: string,
@@ -1159,6 +1160,31 @@ GROUP BY
     }
   }
 
+  async getDeduccionesTotalesPorPeriodo(
+    periodoInicio: string,
+    periodoFinalizacion: string,
+    idTiposPlanilla: number[],
+  ): Promise<any> {
+    try {
+      const deduccionesInprema = await this.getDeduccionesInpremaPorPeriodo(
+        periodoInicio,
+        periodoFinalizacion,
+        idTiposPlanilla
+      );
+  
+      const deduccionesTerceros = await this.getDeduccionesTercerosPorPeriodo(
+        periodoInicio,
+        periodoFinalizacion,
+        idTiposPlanilla
+      );
+  
+      return { deduccionesInprema, deduccionesTerceros };
+    } catch (error) {
+      console.error('Error al obtener deducciones totales por periodo:', error);
+      throw new InternalServerErrorException('Error al obtener deducciones totales por periodo');
+    }
+  }
+  
   async getTotalPorBeneficiosYDeduccionesPorPeriodo(
     periodoInicio: string,
     periodoFinalizacion: string,

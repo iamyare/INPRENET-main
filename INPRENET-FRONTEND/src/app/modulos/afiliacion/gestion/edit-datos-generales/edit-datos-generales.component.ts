@@ -36,8 +36,7 @@ export class EditDatosGeneralesComponent implements OnInit {
   indicesSeleccionados: any[] = []
   discapacidadSeleccionada!: boolean
   tiposPersona: any[] = [
-    { ID_TIPO_PERSONA: 1, TIPO_PERSONA: 'AFILIADO' },
-    { ID_TIPO_PERSONA: 5, TIPO_PERSONA: 'VOLUNTARIO' }
+    { ID_TIPO_PERSONA: 1, TIPO_PERSONA: 'AFILIADO' }
   ];
   direccionValida: boolean = true;
   direccionCompleta: string = '';
@@ -49,7 +48,8 @@ export class EditDatosGeneralesComponent implements OnInit {
     id_departamento_defuncion: ["", [Validators.required]],
     id_municipio_defuncion: ["", [Validators.required]],
     tipo_persona: ["", [Validators.required]],
-    fallecido: ["NO", [Validators.required]]
+    fallecido: ["NO", [Validators.required]],
+    voluntario: ["NO", [Validators.required]]
     //certificado_defuncion: ["", [Validators.required]],
     //observaciones: ["", [Validators.required]],
   });
@@ -220,6 +220,8 @@ export class EditDatosGeneralesComponent implements OnInit {
         this.loading = true;
         await this.svcAfiliado.getAfilByParam(this.Afiliado.n_identificacion).subscribe(
             (result) => {
+              console.log(result);
+
                 this.datos = result;
                 this.Afiliado = result;
 
@@ -302,6 +304,7 @@ export class EditDatosGeneralesComponent implements OnInit {
                 this.form1.controls.id_municipio_defuncion.setValue(result?.ID_MUNICIPIO_DEFUNCION);
                 this.form1.controls.tipo_persona.setValue(result?.ID_TIPO_PERSONA);
                 this.form1.controls.estado.setValue(result?.estadoAfiliacion?.codigo);
+                this.form1.controls.voluntario.setValue(result?.VOLUNTARIO || "NO");
 
                 this.loading = false;
             },
@@ -344,8 +347,11 @@ export class EditDatosGeneralesComponent implements OnInit {
     estado: this.form1.value.estado,
     tipo_persona: this.form1.value.tipo_persona,
     certificado_defuncion: this.formDatosGenerales.value.archivoCertDef,
+    voluntario: this.form1.value.voluntario,
     archivo_identificacion: this.formDatosGenerales.value.archivo_identificacion,
   };
+  console.log(datosActualizados);
+
   if (this.image) {
     datosActualizados.FotoPerfil = this.image;
   }

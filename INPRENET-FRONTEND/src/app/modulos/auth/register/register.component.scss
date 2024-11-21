@@ -173,3 +173,30 @@ mat-form-field {
   right: 20px;
   z-index: 10000;
 }
+
+
+mat-error {
+  color: red;
+  font-size: 12px; /* Tamaño más pequeño para que no rompa el diseño */
+  line-height: 1.5; /* Mejor separación entre líneas si el mensaje es largo */
+  margin-top: 5px; /* Separación del campo */
+  white-space: normal; /* Permitir que el texto se ajuste automáticamente */
+  word-wrap: break-word; /* Ajustar palabras largas */
+}
+
+.register-container {
+  max-width: 600px;
+  padding: 20px;
+  box-sizing: border-box; /* Asegúrate de que el padding no rompa el diseño */
+}
+
+@media (max-width: 768px) {
+  .register-container {
+    max-width: 100%;
+    padding: 15px;
+  }
+
+  mat-error {
+    font-size: 10px; /* Ajustar tamaño para pantallas pequeñas */
+  }
+}

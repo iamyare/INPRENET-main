@@ -14,7 +14,6 @@ import { net_rol_modulo } from './entities/net_rol_modulo.entity';
 import { Net_Usuario_Empresa } from './entities/net_usuario_empresa.entity';
 import { net_usuario_modulo } from './entities/net_usuario_modulo.entity';
 import { net_modulo } from './entities/net_modulo.entity';
-import { ForgotPasswordDto } from './dto/forgot-password.dto';
 import { Cron } from '@nestjs/schedule';
 import { Net_Empleado } from '../Empresarial/entities/net_empleado.entity';
 import { Net_Empleado_Centro_Trabajo } from '../Empresarial/entities/net_empleado_centro_trabajo.entity';
@@ -30,8 +29,6 @@ export class UsuarioService {
     private readonly empleadoRepository: Repository<Net_Empleado>,
     private readonly jwtService: JwtService,
     private readonly mailService: MailService,
-    @InjectRepository(Net_Seguridad)
-    private readonly seguridadRepository: Repository<Net_Seguridad>,
     @InjectRepository(Net_Empleado_Centro_Trabajo)
     private readonly empleadoCentroTrabajoRepository: Repository<Net_Empleado_Centro_Trabajo>,
     @InjectRepository(Net_Usuario_Empresa)
@@ -352,9 +349,20 @@ export class UsuarioService {
 
   }
 
-  async completarRegistro(token: string, completeRegistrationDto: CompleteRegistrationDto, archivoIdentificacionBuffer: Buffer | null, fotoEmpleadoBuffer: Buffer | null): Promise<void> {
-    const { correo, contrasena, pregunta_de_usuario_1, respuesta_de_usuario_1, pregunta_de_usuario_2, respuesta_de_usuario_2, pregunta_de_usuario_3, respuesta_de_usuario_3, telefonoEmpleado, telefonoEmpleado2, numero_identificacion } = completeRegistrationDto;
-
+  async completarRegistro(
+    token: string,
+    completeRegistrationDto: CompleteRegistrationDto,
+    archivoIdentificacionBuffer: Buffer | null,
+    fotoEmpleadoBuffer: Buffer | null,
+  ): Promise<void> {
+    const {
+      correo,
+      contrasena,
+      telefonoEmpleado,
+      telefonoEmpleado2,
+      numero_identificacion,
+    } = completeRegistrationDto;
+  
     try {
       const decoded = this.jwtService.verify(token);
       if (decoded.correo !== correo) {
@@ -363,7 +371,7 @@ export class UsuarioService {
     } catch (error) {
       throw new BadRequestException('Token inválido o expirado');
     }
-
+  
     const usuario = await this.usuarioEmpresaRepository.findOne({
       where: {
         estado: 'PENDIENTE',
@@ -373,18 +381,18 @@ export class UsuarioService {
       },
       relations: ['empleadoCentroTrabajo', 'empleadoCentroTrabajo.empleado'],
     });
-
+  
     if (!usuario) {
       throw new BadRequestException('Usuario no encontrado o ya registrado');
     }
-
+  
     usuario.contrasena = await bcrypt.hash(contrasena, 10);
     usuario.estado = 'ACTIVO';
     usuario.fecha_verificacion = new Date();
     usuario.empleadoCentroTrabajo.empleado.telefono_1 = telefonoEmpleado;
     usuario.empleadoCentroTrabajo.empleado.telefono_2 = telefonoEmpleado2;
     usuario.empleadoCentroTrabajo.empleado.numero_identificacion = numero_identificacion;
-
+  
     // Solo asigna los archivos si están definidos
     if (archivoIdentificacionBuffer) {
       usuario.empleadoCentroTrabajo.empleado.archivo_identificacion = archivoIdentificacionBuffer;
@@ -392,31 +400,11 @@ export class UsuarioService {
     if (fotoEmpleadoBuffer) {
       usuario.empleadoCentroTrabajo.empleado.foto_empleado = fotoEmpleadoBuffer;
     }
-
+  
     await this.empleadoRepository.save(usuario.empleadoCentroTrabajo.empleado);
     await this.usuarioEmpresaRepository.save(usuario);
-
-    const seguridad1 = this.seguridadRepository.create({
-      pregunta: pregunta_de_usuario_1,
-      respuesta: respuesta_de_usuario_1,
-      usuarioEmpresa: usuario,
-    });
-
-    const seguridad2 = this.seguridadRepository.create({
-      pregunta: pregunta_de_usuario_2,
-      respuesta: respuesta_de_usuario_2,
-      usuarioEmpresa: usuario,
-    });
-
-    const seguridad3 = this.seguridadRepository.create({
-      pregunta: pregunta_de_usuario_3,
-      respuesta: respuesta_de_usuario_3,
-      usuarioEmpresa: usuario,
-    });
-
-    await this.seguridadRepository.save([seguridad1, seguridad2, seguridad3]);
   }
-
+  
   async actualizarEmpleado(
     id: number,
     updateEmpleadoParcialDto: any,
@@ -482,7 +470,7 @@ export class UsuarioService {
       throw new BadRequestException('El correo electrónico ya está en uso.');
     }
   
-    const rolPrivados = await this.rolRepository.findOneBy({ id_rol: 1 });
+    const rolPrivados = await this.rolRepository.findOneBy({ id_rol: 1 });f
     if (!rolPrivados) {
       throw new BadRequestException('El rol "PRIVADOS" no existe.');
     }
@@ -659,48 +647,16 @@ export class UsuarioService {
     });
   }
 
-  private handleException(error: any): void {
-    this.logger.error(error);
-    if (error.driverError && error.driverError.errorNum === 1) {
-      throw new BadRequestException('El Correo o Numero de ID ya esta registrado');
-    } else {
-      throw new InternalServerErrorException('Ocurrió un error al procesar su solicitud');
-    }
-  }
-
-  async validarPreguntasSeguridad(correo: string, dto: ForgotPasswordDto): Promise<Net_Usuario_Empresa> {
-    const usuario = await this.usuarioEmpresaRepository.findOne({
-      where: { empleadoCentroTrabajo: { correo_1: correo } },
-      relations: ['seguridad', 'empleadoCentroTrabajo'],
-    });
-
-    if (!usuario) {
-      throw new NotFoundException('Usuario no encontrado');
-    }
-
-    const preguntasSeguridad = usuario.seguridad;
-
-    let respuestasCorrectas = 0;
-
-    preguntasSeguridad.forEach((pregunta, index) => {
-      const respuestaUsuario = dto[`question${index + 1}Answer`].trim().toLowerCase();
-      const respuestaCorrecta = pregunta.respuesta.trim().toLowerCase();
-      if (respuestaUsuario === respuestaCorrecta) {
-        respuestasCorrectas += 1;
-      }
-    });
-
-    if (respuestasCorrectas < 2) {
-      throw new BadRequestException('Respuestas incorrectas');
-    }
-
-    return usuario;
-  }
-
   async crearTokenRestablecimiento(usuario: Net_Usuario_Empresa): Promise<string> {
     const payload = { id: usuario.id_usuario_empresa, email: usuario.empleadoCentroTrabajo.correo_1 };
-    const token = this.jwtService.sign(payload);
-    return token;
+    return this.jwtService.sign(payload, { expiresIn: '1h' });
+  }
+  
+  async buscarUsuarioPorCorreo(correo: string): Promise<Net_Usuario_Empresa | null> {
+    return this.usuarioEmpresaRepository.findOne({
+      where: { empleadoCentroTrabajo: { correo_1: correo } },
+      relations: ['empleadoCentroTrabajo'],
+    });
   }
 
   async enviarCorreoRestablecimiento(correo: string, token: string): Promise<void> {
@@ -722,46 +678,43 @@ export class UsuarioService {
         <p>Si tienes alguna pregunta o necesitas asistencia, no dudes en contactarnos.</p>
         <p>El equipo de <strong><span style="color: #14776B;">INPRE</span><span style="color: #33E4DC;">NET</span></strong></p>
       </div>`;
-
+    
     const textoPlano = `Hola,\n\nHas solicitado restablecer tu contraseña en nuestra plataforma INPRENET.\n\nPara hacerlo, por favor, haz clic en el siguiente enlace o cópialo en tu navegador: ${urlRestablecimiento}\n\nSi no solicitaste este cambio, puedes ignorar este correo.\n\nEl equipo de INPRENET`;
-
-    await this.mailService.sendMail(correo, asunto, textoPlano, htmlContent);
+  
+    try {
+      await this.mailService.sendMail(correo, asunto, textoPlano, htmlContent);
+    } catch (error) {
+      console.error('Error al enviar el correo de restablecimiento:', error.message);
+      throw new InternalServerErrorException('No se pudo enviar el correo de restablecimiento. Por favor, inténtelo más tarde.');
+    }
   }
-
+  
   async restablecerContrasena(token: string, nuevaContrasena: string): Promise<void> {
     let payload;
-
     try {
       payload = this.jwtService.verify(token);
-    } catch (e) {
-      console.log('Token no válido o ha expirado:', token);
+    } catch (error) {
+      if (error.name === 'TokenExpiredError') {
+        throw new BadRequestException('El enlace para restablecer la contraseña ha expirado');
+      }
       throw new NotFoundException('Token no válido o ha expirado');
     }
-
-    const usuario = await this.usuarioEmpresaRepository.findOne({ where: { id_usuario_empresa: payload.id } });
-
-    if (!usuario) {
-      throw new NotFoundException('Usuario no encontrado');
-    }
-
-    usuario.contrasena = await bcrypt.hash(nuevaContrasena, 10);
-
-    await this.usuarioEmpresaRepository.save(usuario);
-
-    console.log('Contraseña restablecida correctamente para el usuario:', usuario.id_usuario_empresa);
-  }
-
-  async obtenerPreguntasSeguridad(correo: string): Promise<string[]> {
+  
     const usuario = await this.usuarioEmpresaRepository.findOne({
-      where: { empleadoCentroTrabajo: { correo_1: correo } },
-      relations: ['seguridad'],
+      where: { id_usuario_empresa: payload.id },
     });
-
+  
     if (!usuario) {
       throw new NotFoundException('Usuario no encontrado');
     }
-
-    return usuario.seguridad.map(pregunta => pregunta.pregunta);
+  
+    usuario.contrasena = await bcrypt.hash(nuevaContrasena, 10);
+  
+    await this.usuarioEmpresaRepository.save(usuario);
+  
+    console.info(
+      `Contraseña restablecida correctamente para el usuario: ${usuario.id_usuario_empresa}`,
+    );
   }
 
 }

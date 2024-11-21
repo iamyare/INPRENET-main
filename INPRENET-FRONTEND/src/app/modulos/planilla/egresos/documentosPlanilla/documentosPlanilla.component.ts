@@ -935,7 +935,6 @@ export class DocumentosPlanillaComponent implements OnInit {
       });
   }
 
-
   descargarExcelInv(): void {
     const fechaInicio = this.planillaForm.get('rangoFechas.fechaInicio')?.value;
     const fechaFin = this.planillaForm.get('rangoFechas.fechaFin')?.value;
@@ -981,4 +980,176 @@ export class DocumentosPlanillaComponent implements OnInit {
     }
     // Puedes manejar otros resultados según los inputs
   }
+
+  async generarReporteTotalesDeducciones() {
+    console.log(this.obtenerIdYNombrePlanilla());
+
+    const { idTiposPlanilla, nombrePlanilla } = this.obtenerIdYNombrePlanilla();
+    const { fechaInicioFormateada, fechaFinFormateada } = this.obtenerFechasFormateadas();
+
+    if (idTiposPlanilla.length === 0) return;
+
+    this.planillaService.obtenerTotalesDeDeduccionPorPeriodo(fechaInicioFormateada, fechaFinFormateada, idTiposPlanilla)
+      .subscribe({
+        next: async (data) => {
+          console.log('Respuesta del servicio:', data);
+
+          if (!data || (!data.deduccionesInprema && !data.deduccionesTerceros)) {
+            console.error('Datos no válidos para crear el reporte:', data);
+            //this.toastr.error('No se encontraron datos para generar el reporte');
+            return;
+          }
+
+          const base64Image = await this.convertirImagenABase64('../assets/images/membratadoFinal.jpg');
+
+          const agruparPorNombre = (deducciones: any[]) => {
+            return deducciones.reduce((acc: any, item: any) => {
+              const existing = acc.find((ded: any) => ded.NOMBRE_DEDUCCION === item.NOMBRE_DEDUCCION);
+              if (existing) {
+                existing.TOTAL_MONTO_DEDUCCION += item.TOTAL_MONTO_DEDUCCION || 0;
+              } else {
+                acc.push({ ...item });
+              }
+              return acc;
+            }, []);
+          };
+
+          const deduccionesInpremaAgrupadas = agruparPorNombre(data.deduccionesInprema);
+          const deduccionesTercerosAgrupadas = agruparPorNombre(data.deduccionesTerceros);
+
+          const ordenarPorCodigo = (deducciones: any[]) => {
+            return deducciones.sort((a, b) => a.ID_DEDUCCION - b.ID_DEDUCCION);
+          };
+
+          const deduccionesInpremaOrdenadas = ordenarPorCodigo(deduccionesInpremaAgrupadas);
+          const deduccionesTercerosOrdenadas = ordenarPorCodigo(deduccionesTercerosAgrupadas);
+
+          const totalDeduccionesInprema = deduccionesInpremaOrdenadas.reduce((sum: number, item: any) => sum + (item.TOTAL_MONTO_DEDUCCION || 0), 0);
+          const totalDeduccionesTerceros = deduccionesTercerosOrdenadas.reduce((sum: number, item: any) => sum + (item.TOTAL_MONTO_DEDUCCION || 0), 0);
+          const totalGeneral = totalDeduccionesInprema + totalDeduccionesTerceros;
+
+          const docDefinition: TDocumentDefinitions = {
+            pageSize: 'LETTER',
+            pageOrientation: 'landscape',
+            background: (currentPage, pageSize) => ({
+              image: base64Image,
+              width: pageSize.width,
+              height: pageSize.height,
+              absolutePosition: { x: 0, y: 0 }
+            }),
+            pageMargins: [40, 130, 40, 100],
+            header: {
+              text: `REPORTE DE TOTALES DE DEDUCCIONES (PLANILLA ${nombrePlanilla})`,
+              style: 'header',
+              alignment: 'center',
+              margin: [50, 90, 50, 0]
+            },
+            content: [
+              {
+                columns: [
+                  {
+                    width: '50%',
+                    text: [
+                      { text: 'PERIODO DE LA PLANILLA: ', bold: true },
+                      `${fechaInicioFormateada} - ${fechaFinFormateada}`
+                    ],
+                    alignment: 'left'
+                  },
+                  {
+                    width: '50%',
+                    text: [
+                      { text: 'NOMBRE DE LA PLANILLA: ', bold: true },
+                      `PLANILLA ${nombrePlanilla}`
+                    ],
+                    alignment: 'right'
+                  }
+                ],
+                margin: [40, 5, 40, 10]
+              },
+              { text: 'DEDUCCIONES INPREMA', style: 'subheader', margin: [0, 10, 0, 5] },
+              this.crearTablaTotalesDeducciones(deduccionesInpremaOrdenadas, 'DEDUCCIONES INPREMA'),
+              { text: 'DEDUCCIONES TERCEROS', style: 'subheader', margin: [0, 10, 0, 5] },
+              this.crearTablaTotalesDeducciones(deduccionesTercerosOrdenadas, 'DEDUCCIONES TERCEROS'),
+              {
+                text: `TOTAL GENERAL DE DEDUCCIONES: L ${totalGeneral.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",")}`,
+                style: 'tableTotal',
+                alignment: 'right',
+                margin: [0, 20, 0, 0]
+              }
+            ],
+            styles: {
+              header: { fontSize: 16, bold: true },
+              subheader: { fontSize: 14, bold: false, margin: [0, 5, 0, 10] },
+              tableHeader: { bold: true, fontSize: 13, color: 'black' },
+              tableBody: { fontSize: 10, color: 'black' },
+              tableTotal: { bold: true, fontSize: 12, color: 'black', alignment: 'right' }
+            },
+            footer: (currentPage, pageCount) => ({
+              table: {
+                widths: ['*', '*', '*'],
+                body: [
+                  [
+                    { text: 'FECHA Y HORA: ' + new Date().toLocaleString(), alignment: 'left', border: [false, false, false, false], fontSize: 8 },
+                    { text: 'GENERÓ: INPRENET', alignment: 'left', border: [false, false, false, false] },
+                    { text: 'PÁGINA ' + currentPage.toString() + ' DE ' + pageCount, alignment: 'right', border: [false, false, false, false], fontSize: 8 }
+                  ]
+                ]
+              },
+              margin: [20, 0, 20, 20]
+            }),
+            defaultStyle: { fontSize: 10 },
+          };
+
+          pdfMake.createPdf(docDefinition).download(`Reporte_Totales_Deducciones_${nombrePlanilla}.pdf`);
+        },
+        error: (error) => {
+          console.error('Error al generar el reporte de deducciones:', error);
+          //this.toastr.error('Error al generar el reporte de deducciones');
+        }
+      });
+  }
+
+  // Función para crear la tabla del PDF
+  crearTablaTotalesDeducciones(data: any[], titulo: string) {
+    if (!Array.isArray(data) || data.length === 0) {
+      console.error(`No se encontraron datos para ${titulo}`);
+      return {
+        table: {
+          body: [[{ text: `No se encontraron datos para ${titulo}`, alignment: 'center', colSpan: 3 }]]
+        }
+      };
+    }
+
+    const headers = [
+      { text: 'Código Deducción', style: 'tableHeader' },
+      { text: 'Nombre Deducción', style: 'tableHeader' },
+      { text: 'Total Monto Deducción', style: 'tableHeader', alignment: 'right' }
+    ];
+
+    const body:any = data.map(item => [
+      { text: item.ID_DEDUCCION || 'N/A', style: 'tableBody' },
+      { text: item.NOMBRE_DEDUCCION || 'N/A', style: 'tableBody' },
+      { text: `L ${Number(item.TOTAL_MONTO_DEDUCCION || 0).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",")}`, style: 'tableBody', alignment: 'right' }
+    ]);
+
+    if (body.length === 0) {
+      body.push([
+        { text: `No hay datos disponibles para ${titulo}`, colSpan: 3, alignment: 'center' }
+      ]);
+    }
+
+    return {
+      style: 'tableExample',
+      table: {
+        headerRows: 1,
+        widths: ['auto', '*', 'auto'],
+        body: [headers, ...body]
+      },
+      layout: 'lightHorizontalLines'
+    };
+  }
+
+
+
+
 }

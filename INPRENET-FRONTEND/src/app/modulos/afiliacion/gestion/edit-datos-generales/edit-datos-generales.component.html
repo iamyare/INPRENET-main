@@ -50,6 +50,17 @@
                 {{ error }}
               </mat-error>
             </div>
+            <div class="col-md-6">
+              <mat-label>Voluntario</mat-label>
+              <mat-radio-group formControlName="voluntario" style="display: flex; flex-direction: row;">
+                <mat-radio-button value="SI" style="margin-right: 15px;">Sí</mat-radio-button>
+                <mat-radio-button value="NO">No</mat-radio-button>
+              </mat-radio-group>
+              <mat-error *ngFor="let error of getErrors('voluntario')">
+                {{ error }}
+              </mat-error>
+            </div>
+
           </div>
         </mat-card-content>
       </mat-card>

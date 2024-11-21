@@ -20,7 +20,7 @@ export class LoginPrivadosComponent {
     private router: Router) { }
 
     login() {
-      this.authService.loginPrivada(this.loginData.email, this.loginData.password).subscribe({
+      /* this.authService.loginPrivada(this.loginData.email, this.loginData.password).subscribe({
         next: (response) => {
           //console.log('Inicio de sesión exitoso:', response.access_token);
           this.authService.saveToken(response.access_token);
@@ -30,7 +30,7 @@ export class LoginPrivadosComponent {
           console.error('Error en el inicio de sesión:', error);
           this.toastr.error('Credenciales inválidas o error en el servidor.');
         }
-      });
+      }); */
     }
 
 

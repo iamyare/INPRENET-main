@@ -20,7 +20,7 @@
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   background-color: white;
   width: 100%;
-  max-width: 1800px;
+  max-width: 600px;
 }
 
 .full-width {
@@ -31,7 +31,8 @@ mat-form-field {
   margin-bottom: 1.5rem;
 }
 
-mat-error {
-  display: block;
-  margin-top: 0.25rem;
+.loading-spinner {
+  display: flex;
+  justify-content: center;
+  margin-top: 1rem;
 }

@@ -19,6 +19,7 @@ import { EditarBeneficioComponent } from './egresos/Mantenimiento/editar-benefic
 import { NuevoTipoDeduccionComponent } from './egresos/Mantenimiento/nuevo-tipo-deduccion/nuevo-tipo-deduccion.component';
 import { EditarTipoDeduccionComponent } from './egresos/Mantenimiento/editar-tipo-deduccion/editar-tipo-deduccion.component';
 import { VoucherGeneralMensComponent } from './voucher-general-mens/voucher-general-mens.component';
+import { AportacionCotizacionComponent } from './ingresos/aportacion-cotizacion/aportacion-cotizacion.component';
 
 const routes: Routes = [
   {
@@ -139,6 +140,12 @@ const routes: Routes = [
         component: PlanillaColegiosPrivadosComponent,
         canActivate: [RoleGuard],
         data: { expectedRolesModules: PermisosService.getExpectedRolesForRoute('PLANILLA', 'planilla/Ingresos/planilla-colegios-privados') }
+      },
+      {
+        path: 'cotizacion-aportacion',
+        component: AportacionCotizacionComponent,
+        canActivate: [RoleGuard],
+        data: { expectedRolesModules: PermisosService.getExpectedRolesForRoute('PLANILLA', 'planilla/Ingresos/cotizacion-aportacion') }
       },
       {
         path: 'cargar-planilla-privados',

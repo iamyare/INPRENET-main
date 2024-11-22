@@ -85,6 +85,7 @@ export const MENU_CONFIG: Section[] = [
         icon: 'money',
         children: [
           { title: 'Privados', route: 'planilla/Ingresos/planilla-colegios-privados', icon: 'business' },
+          { title: 'Cotizaciones/Aportaciones', route: 'planilla/Ingresos/cotizacion-aportacion', icon: 'business' },
         ],
       },
     ],

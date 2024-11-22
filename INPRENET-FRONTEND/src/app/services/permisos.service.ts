@@ -141,6 +141,13 @@ export class PermisosService {
             /* { role: 'ADMINISTRADOR', module: 'PLANILLA' },
             { role: 'OFICIAL DE PLANILLA', module: 'PLANILLA' }, */
           ]
+        },
+        'planilla/Ingresos/cotizacion-aportacion': {
+          title: 'Privados',
+          permisos: [
+            /* { role: 'ADMINISTRADOR', module: 'PLANILLA' },
+            { role: 'OFICIAL DE PLANILLA', module: 'PLANILLA' }, */
+          ]
         }
       }
     },

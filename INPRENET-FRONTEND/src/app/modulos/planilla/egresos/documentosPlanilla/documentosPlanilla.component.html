@@ -48,6 +48,11 @@
         <button mat-raised-button color="primary" [disabled]="!planillaForm.valid" (click)="generarReportePartidaDiario()">
           Generar Reporte de Partida de Diario
         </button>
+        <button mat-raised-button color="primary" [disabled]="!planillaForm.valid" (click)="exportarExcelDetallePorPeriodo()">
+          Exportar Detalle a Excel
+        </button>
+
+
 
         <!-- Puedes añadir más botones aquí -->
       </div>

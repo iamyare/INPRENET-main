@@ -41,6 +41,7 @@ import { ActualizarFallecidosComponent } from './actualizar-fallecidos/actualiza
 import { MontoDialogComponent } from './monto-dialog/monto-dialog.component';
 import { P60RentasComponent } from './p-60-rentas/p-60-rentas.component';
 import { VoucherGeneralMensComponent } from './voucher-general-mens/voucher-general-mens.component';
+import { AportacionCotizacionComponent } from './ingresos/aportacion-cotizacion/aportacion-cotizacion.component';
 
 @NgModule({
   declarations: [
@@ -80,7 +81,8 @@ import { VoucherGeneralMensComponent } from './voucher-general-mens/voucher-gene
     MontoDialogComponent,
     CambioEstadoTipoPerComponent,
     P60RentasComponent,
-    VoucherGeneralMensComponent
+    VoucherGeneralMensComponent,
+    AportacionCotizacionComponent
   ],
   imports: [
     CommonModule,

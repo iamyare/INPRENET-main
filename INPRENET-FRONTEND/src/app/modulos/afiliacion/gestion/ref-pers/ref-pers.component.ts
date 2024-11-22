@@ -2,6 +2,8 @@ import { Component, Input, OnInit } from '@angular/core';
 import { AbstractControl, FormArray, FormBuilder, FormGroup, ValidationErrors, ValidatorFn, Validators } from '@angular/forms';
 import { BeneficiosService } from 'src/app/services/beneficios.service';
 import { DatosEstaticosService } from 'src/app/services/datos-estaticos.service';
+import { blockManualInput, clearManualInput } from '../../../../shared/functions/input-utils'
+
 
 @Component({
   selector: 'app-ref-pers',

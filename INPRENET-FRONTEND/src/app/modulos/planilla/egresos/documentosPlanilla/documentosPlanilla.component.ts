@@ -9,6 +9,8 @@ import { DeduccionesService } from 'src/app/services/deducciones.service';
 import { format } from 'date-fns';
 import { MatDialog } from '@angular/material/dialog';
 import { DynamicInputDialogComponent } from 'src/app/components/dinamicos/dynamic-input-dialog/dynamic-input-dialog.component';
+import * as XLSX from 'xlsx';
+import saveAs from 'file-saver';
 pdfMake.vfs = pdfFonts.pdfMake.vfs;
 
 @Component({
@@ -1451,5 +1453,75 @@ body.push([
           }
       });
   }
+
+
+  async exportarExcelDetallePorPeriodo() {
+    const { idTiposPlanilla, nombrePlanilla } = this.obtenerIdYNombrePlanilla();
+    const { fechaInicioFormateada, fechaFinFormateada } = this.obtenerFechasFormateadas();
+
+    if (idTiposPlanilla.length === 0) {
+      console.error('Seleccione un tipo de planilla válido.');
+      return;
+    }
+
+    // Llamar al servicio para obtener los datos detallados
+    this.planillaService.getDetalleBeneficiosYDeduccionesPorPeriodo(fechaInicioFormateada, fechaFinFormateada, idTiposPlanilla)
+      .subscribe({
+        next: (data) => {
+          if (!data) {
+            console.error('No se obtuvieron datos del servicio.');
+            return;
+          }
+
+          // Mapeo de datos para las hojas
+          const beneficiosDetalle = data.beneficiosDetallados.map((item: any) => ({
+            'Identificación': item.IDENTIFICACION,
+            'Nombre Completo': item.NOMBRE_COMPLETO,
+            'Nombre Beneficio': item.NOMBRE_BENEFICIO,
+            'Monto Beneficio': item.MONTO ? parseFloat(item.MONTO).toFixed(2) : '0.00',
+          }));
+
+          const deduccionesInpremaDetalle = data.deduccionesInpremaDetalladas.map((item: any) => ({
+            'Identificación': item.IDENTIFICACION,
+            'Nombre Completo': item.NOMBRE_COMPLETO,
+            'Nombre Deducción (INPREMA)': item.NOMBRE_DEDUCCION,
+            'Monto Deducción': item.MONTO ? parseFloat(item.MONTO).toFixed(2) : '0.00',
+          }));
+
+          const deduccionesTercerosDetalle = data.deduccionesTercerosDetalladas.map((item: any) => ({
+            'Identificación': item.IDENTIFICACION,
+            'Nombre Completo': item.NOMBRE_COMPLETO,
+            'Nombre Deducción (Terceros)': item.NOMBRE_DEDUCCION,
+            'Monto Deducción': item.MONTO ? parseFloat(item.MONTO).toFixed(2) : '0.00',
+          }));
+
+          // Crear libro de Excel
+          const workbook = XLSX.utils.book_new();
+
+          // Crear hojas
+          const beneficiosSheet = XLSX.utils.json_to_sheet(beneficiosDetalle);
+          XLSX.utils.book_append_sheet(workbook, beneficiosSheet, 'Detalle Beneficios');
+
+          const deduccionesInpremaSheet = XLSX.utils.json_to_sheet(deduccionesInpremaDetalle);
+          XLSX.utils.book_append_sheet(workbook, deduccionesInpremaSheet, 'Deducciones INPREMA');
+
+          const deduccionesTercerosSheet = XLSX.utils.json_to_sheet(deduccionesTercerosDetalle);
+          XLSX.utils.book_append_sheet(workbook, deduccionesTercerosSheet, 'Deducciones Terceros');
+
+          // Generar archivo Excel
+          const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
+          const blob = new Blob([excelBuffer], { type: 'application/octet-stream' });
+
+          // Descargar archivo
+          const nombreArchivo = `Detalle_Beneficios_Deducciones_${nombrePlanilla}_${fechaInicioFormateada}_to_${fechaFinFormateada}.xlsx`;
+          saveAs(blob, nombreArchivo);
+        },
+        error: (error) => {
+          console.error('Error al obtener datos del servicio:', error);
+        }
+      });
+  }
+
+
 
 }

@@ -11,6 +11,21 @@ import { Estatus60Rentas} from '../modulos/planilla/p-60-rentas/p_60_rentas.inte
 export class PlanillaService {
   constructor(private http: HttpClient, private toastr: ToastrService) { }
 
+  getDetalleBeneficiosYDeduccionesPorPeriodo(periodoInicio: string, periodoFinalizacion: string, idTiposPlanilla: number[]): Observable<any> {
+    const params = new HttpParams()
+      .set('periodoInicio', periodoInicio)
+      .set('periodoFinalizacion', periodoFinalizacion)
+      .set('idTiposPlanilla', idTiposPlanilla.join(','));
+
+    return this.http.get<any>(`${environment.API_URL}/api/planilla/detalle-beneficios-deducciones-periodo`, { params }).pipe(
+      catchError(error => {
+        console.error('Error al obtener el detalle de beneficios y deducciones', error);
+        this.toastr.error('Error al obtener el detalle de beneficios y deducciones', 'Error');
+        return throwError(error);
+      })
+    );
+  }
+
   obtenerTotalesDeDeduccionPorPeriodo(
     periodoInicio: string,
     periodoFinalizacion: string,

@@ -1,0 +1,110 @@
+// Paleta de colores
+$color-primary: #26a69a; // Principal
+$color-primary-dark: #178b7e; // Oscuro
+$color-primary-light: #e5f4f3; // Claro
+$color-secondary: #47b3a9; // Secundario
+$color-accent: #adfff3; // Acento
+$color-text: #0d7b6c; // Texto destacado
+$color-border: #bee4e1; // Bordes
+
+.container {
+  margin: 20px auto;
+  max-width: 800px;
+  font-family: Arial, sans-serif;
+  color: $color-text;
+
+  .title {
+    font-size: 2.5rem;
+    margin-bottom: 20px;
+    color: $color-primary;
+    text-align: center;
+  }
+
+  section {
+    margin-bottom: 30px;
+
+    h2 {
+      font-size: 1.8rem;
+      margin-bottom: 15px;
+      color: $color-secondary;
+      text-align: center;
+    }
+
+    .card {
+      background-color: $color-primary-light;
+      border: 1px solid $color-border;
+      border-radius: 8px;
+      padding: 15px;
+      margin-bottom: 10px;
+      box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+      position: relative;
+
+      h3 {
+        margin-top: 0;
+        font-size: 1.5rem;
+        color: $color-primary-dark;
+      }
+
+      p {
+        margin: 5px 0;
+        font-size: 1rem;
+      }
+
+      strong {
+        color: $color-primary;
+      }
+
+      button {
+        background-color: $color-primary-dark;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        padding: 8px 12px;
+        font-size: 0.9rem;
+        cursor: pointer;
+        position: absolute;
+        top: 10px;
+        right: 10px;
+
+        &:hover {
+          background-color: $color-secondary;
+        }
+      }
+    }
+
+    form {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 15px;
+      justify-content: center;
+
+      input {
+        padding: 10px;
+        border: 1px solid $color-border;
+        border-radius: 5px;
+        font-size: 1rem;
+        width: 200px;
+
+        &:focus {
+          border-color: $color-primary;
+          outline: none;
+        }
+      }
+
+      button {
+        background-color: $color-primary;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        padding: 10px 15px;
+        font-size: 1rem;
+        cursor: pointer;
+
+        &:hover {
+          background-color: $color-secondary;
+        }
+      }
+    }
+  }
+}

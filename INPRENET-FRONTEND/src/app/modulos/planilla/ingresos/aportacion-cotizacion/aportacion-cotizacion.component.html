@@ -1,0 +1,48 @@
+<div class="container">
+  <h1 class="title">Aportaciones y Cotizaciones para {{ currentYear }}</h1>
+
+  <!-- Selector de año -->
+  <div class="year-selector">
+    <label for="year">Seleccionar Año:</label>
+    <input
+      id="year"
+      type="number"
+      [(ngModel)]="currentYear"
+      (change)="setYear(currentYear)"
+      min="2000"
+      max="2100"
+    />
+  </div>
+
+  <!-- Sección de Aportaciones -->
+  <section>
+    <h2>Aportaciones</h2>
+    <div class="card" *ngFor="let aportacion of getYearData(currentYear)?.aportaciones; let i = index">
+      <h3>{{ aportacion.tipo }}</h3>
+      <p><strong>Porcentaje:</strong> {{ aportacion.porcentaje }}%</p>
+      <p>{{ aportacion.descripcion }}</p>
+    </div>
+    <form (submit)="addAportacion(currentYear, aportacionTipo.value, aportacionPorcentaje.value, aportacionDescripcion.value); aportacionTipo.value=''; aportacionPorcentaje.value=''; aportacionDescripcion.value=''; $event.preventDefault()">
+      <input #aportacionTipo type="text" placeholder="Tipo de Aportación" required />
+      <input #aportacionPorcentaje type="text" placeholder="Porcentaje" required />
+      <input #aportacionDescripcion type="text" placeholder="Descripción" required />
+      <button type="submit">Agregar Aportación</button>
+    </form>
+  </section>
+
+  <!-- Sección de Cotizaciones -->
+  <section>
+    <h2>Cotizaciones</h2>
+    <div class="card" *ngFor="let cotizacion of getYearData(currentYear)?.cotizaciones; let i = index">
+      <h3>{{ cotizacion.tipo }}</h3>
+      <p><strong>Porcentaje:</strong> {{ cotizacion.porcentaje }}%</p>
+      <p>{{ cotizacion.descripcion }}</p>
+    </div>
+    <form (submit)="addCotizacion(currentYear, cotizacionTipo.value, cotizacionPorcentaje.value, cotizacionDescripcion.value); cotizacionTipo.value=''; cotizacionPorcentaje.value=''; cotizacionDescripcion.value=''; $event.preventDefault()">
+      <input #cotizacionTipo type="text" placeholder="Tipo de Cotización" required />
+      <input #cotizacionPorcentaje type="text" placeholder="Porcentaje" required />
+      <input #cotizacionDescripcion type="text" placeholder="Descripción" required />
+      <button type="submit">Agregar Cotización</button>
+    </form>
+  </section>
+</div>

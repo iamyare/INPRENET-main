@@ -416,4 +416,14 @@ export class DatosGeneralesTemporalComponent implements OnInit {
     control?.updateValueAndValidity();
   }
 
+  blockManualInput(event: KeyboardEvent): void {
+    event.preventDefault();
+  }
+
+  clearManualInput(event: Event): void {
+    const inputElement = event.target as HTMLInputElement;
+    inputElement.value = '';
+  }
+
+
 }

@@ -301,6 +301,29 @@ export class PlanillaController {
     }
   }
 
+  @Get('generar-voucher-by-mes')
+  async generarVoucherByMes(
+    @Query('dni') dni: string,
+    @Query('mes') mes: number
+  ) {
+
+    // Verifica si los parámetros de consulta están presentes
+    if (!mes) {
+      throw new BadRequestException('El ID de la planilla es obligatorio.');
+    }
+    if (!dni) {
+      throw new BadRequestException('El DNI del afiliado es obligatorio.');
+    }
+
+    try {
+      const resultados = await this.planillaService.generarVoucherByMes(dni, mes);
+      return resultados;
+    } catch (error) {
+      // Aquí deberías manejar diferentes tipos de errores de acuerdo a lo que tu lógica de negocio requiera
+      throw new InternalServerErrorException('Ocurrió un error al generar el voucher.');
+    }
+  }
+
 
 
   @Get('Definitiva/:term')
@@ -442,13 +465,13 @@ export class PlanillaController {
   }
 
   @Post('get-preliminares')
-async getPlanillasPreliminares(@Body() getPlanillasPreliminaresDto: GetPlanillasPreliminaresDto): Promise<any[]> {
-  try {
-    return await this.planillaService.getPlanillasPreliminares(getPlanillasPreliminaresDto.codigo_planilla);
-  } catch (error) {
-    throw new BadRequestException('Error en la solicitud: ' + error.message);
+  async getPlanillasPreliminares(@Body() getPlanillasPreliminaresDto: GetPlanillasPreliminaresDto): Promise<any[]> {
+    try {
+      return await this.planillaService.getPlanillasPreliminares(getPlanillasPreliminaresDto.codigo_planilla);
+    } catch (error) {
+      throw new BadRequestException('Error en la solicitud: ' + error.message);
+    }
   }
-}
 
 
 

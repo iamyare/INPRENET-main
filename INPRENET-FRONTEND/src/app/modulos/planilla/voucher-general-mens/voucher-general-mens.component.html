@@ -1,0 +1,18 @@
+<div class="card" style="background-color: white; margin: 1% 0% 1% 0%; padding: 0% 0% 1% 0%; text-align: center;">
+  <app-dynamic-form
+    [fields]="myFormFields"
+    titulo="Voucher Mensual"
+    subtitulo="Completa la información correspondiente"
+    (newDatBenChange)="obtenerDatos($event)">
+  </app-dynamic-form>
+
+  <div style="padding: 20px; text-align: center">
+    <button
+      color="primary"
+      [disabled]="datosForm.invalid"
+      (click)="obtenerInformacion()"
+      mat-raised-button>
+      obtener Información
+    </button>
+  </div>
+</div>

@@ -99,6 +99,11 @@ export class VerEditarBeneficioAfilComponent {
         isEditable: false
       },
       {
+        header: 'Número de rentas a pagar primer pago',
+        col: 'num_rentas_pagar_primer_pago',
+        isEditable: false
+      },
+      {
         header: 'Fecha de inicio',
         col: 'periodoInicio',
         isEditable: true
@@ -203,6 +208,8 @@ export class VerEditarBeneficioAfilComponent {
       }
 
       this.filasT = data.detBen.map((item: any) => {
+        console.log(item);
+
         return {
           prestamo: item.prestamo || "NO",
           tipoPersona: item.persona.tipoPersona.tipo_persona,
@@ -228,7 +235,10 @@ export class VerEditarBeneficioAfilComponent {
           monto_primera_cuota: item.monto_primera_cuota,
           monto_ultima_cuota: item.monto_ultima_cuota,
           observaciones: item.observaciones || "NO TIENE",
-          voluntario: item.persona.voluntario || "NO TIENE"
+          voluntario: item.persona.voluntario || "NO TIENE",
+          numero_rentas_max: item.beneficio.numero_rentas_max,
+          fecha_calculo: item.fecha_calculo,
+          num_rentas_pagar_primer_pago: item.num_rentas_pagar_primer_pago
         }
       });
 
@@ -311,31 +321,41 @@ export class VerEditarBeneficioAfilComponent {
     let campos: any = [];
 
     if (row.periodicidad == "P") {
-      campos = [
-        /* { nombre: 'periodoInicio', tipo: 'date', requerido: true, etiqueta: 'Periodo de inicio' },
-        { nombre: 'periodoFinalizacion', tipo: 'date', requerido: true, etiqueta: 'Periodo de finalización', editable: false }, */
-        { nombre: 'num_rentas_aplicadas', tipo: 'number', requerido: false, etiqueta: 'Número de rentas aprobadas', editable: true, validadores: [Validators.min(0)] },
-        {
-          nombre: 'ultimo_dia_ultima_renta', tipo: 'number', requerido: false, etiqueta: 'ultimo dia ultima renta', editable: true, validadores: [Validators.min(0), Validators.min(1),
-          Validators.max(31),]
-        },
-        { nombre: 'monto_total', tipo: 'number', requerido: false, etiqueta: 'Monto Total', editable: true, validadores: [Validators.min(0)] },
-        { nombre: 'monto_por_periodo', tipo: 'text', requerido: false, etiqueta: 'Monto por periodo', editable: true, validadores: [Validators.min(0)] },
-        { nombre: 'monto_ultima_cuota', tipo: 'number', requerido: false, etiqueta: 'monto_ultima_cuota', editable: true, validadores: [Validators.min(0)] },
-        { nombre: 'monto_primera_cuota', tipo: 'number', requerido: false, etiqueta: 'monto_primera_cuota', editable: true, validadores: [Validators.min(0)] },
-        { nombre: 'estado_solicitud', tipo: 'list', requerido: false, opciones: [{ label: "APROBADO", value: "APROBADO" }, { label: "RECHAZADO", value: "RECHAZADO" }], etiqueta: 'Estado Solicitud', editable: true },
-        { nombre: 'observaciones', tipo: 'text', requerido: false, etiqueta: 'observaciones', editable: true },
-        { nombre: 'prestamo', tipo: 'list', requerido: false, opciones: [{ label: "SI", value: "SI" }, { label: "NO", value: "NO" }], etiqueta: '¿Tiene algún préstamo pendiente con INPREMA?', editable: true },
-      ];
-    } else {
+      campos = [{ nombre: 'fecha_calculo', tipo: 'date', requerido: false, etiqueta: 'fecha_calculo', editable: false, validadores: [] }];
+
+      if (row.numero_rentas_max == 1) {
+        campos.push(
+          { nombre: 'monto_primera_cuota', tipo: 'number', requerido: false, etiqueta: 'monto_primera_cuota', editable: true },
+          { nombre: 'estado_solicitud', tipo: 'list', requerido: false, opciones: [{ label: "APROBADO", value: "APROBADO" }, { label: "RECHAZADO", value: "RECHAZADO" }], etiqueta: 'Estado Solicitud', editable: true },
+          { nombre: 'observaciones', tipo: 'text', requerido: false, etiqueta: 'observaciones', editable: true },
+          { nombre: 'prestamo', tipo: 'list', requerido: false, opciones: [{ label: "SI", value: "SI" }, { label: "NO", value: "NO" }], etiqueta: '¿Tiene algún préstamo pendiente con INPREMA?', editable: true },)
+      } else if (row.numero_rentas_max > 1 || row.numero_rentas_max == 0) {
+        campos.push(
+          { nombre: 'num_rentas_aplicadas', tipo: 'text', requerido: false, etiqueta: 'Número de rentas aprobadas', editable: false },
+          { nombre: 'ultimo_dia_ultima_renta', tipo: 'number', requerido: false, etiqueta: 'Dias de la última renta', editable: true },
+
+          { nombre: 'num_rentas_pagar_primer_pago', tipo: 'number', requerido: false, etiqueta: 'Número de rentas a pagar en el primer pago', editable: true, },
+          { nombre: 'monto_ultima_cuota', tipo: 'number', requerido: false, etiqueta: 'Monto correspondiente a los dias restantes', editable: true },
+          { nombre: 'monto_por_periodo', tipo: 'number', requerido: false, etiqueta: 'Monto mensual', editable: true },
+          { nombre: 'monto_primera_cuota', tipo: 'number', requerido: false, etiqueta: 'Monto primera cuota', editable: true },
+          { nombre: 'monto_total', tipo: 'number', requerido: false, etiqueta: 'Monto total', editable: false },
+          { nombre: 'estado_solicitud', tipo: 'list', requerido: false, opciones: [{ label: "APROBADO", value: "APROBADO" }, { label: "RECHAZADO", value: "RECHAZADO" }], etiqueta: 'Estado Solicitud', editable: true },
+          { nombre: 'observaciones', tipo: 'text', requerido: false, etiqueta: 'observaciones', editable: true },
+          { nombre: 'prestamo', tipo: 'list', requerido: false, opciones: [{ label: "SI", value: "SI" }, { label: "NO", value: "NO" }], etiqueta: '¿Tiene algún préstamo pendiente con INPREMA?', editable: true },
+        )
+      }
+
+    } else if (row.periodicidad == "V") {
       campos = [
         /* { nombre: 'periodoInicio', tipo: 'date', requerido: false, etiqueta: 'Periodo de inicio' },
         { nombre: 'periodoFinalizacion', tipo: 'date', requerido: false, etiqueta: 'Periodo de finalización', editable: false },
         { nombre: 'num_rentas_aplicadas', tipo: 'number', requerido: false, etiqueta: 'Número de rentas aprobadas', editable: true },*/
-        { nombre: 'monto_total', tipo: 'number', requerido: false, etiqueta: 'Monto Total', editable: true, },
+        /* { nombre: 'monto_total', tipo: 'number', requerido: false, etiqueta: 'Monto Total', editable: true, }, */
+        { nombre: 'num_rentas_pagar_primer_pago', tipo: 'number', requerido: false, etiqueta: 'Número de rentas a pagar en el primer pago', editable: true, },
+        { nombre: 'monto_primera_cuota', tipo: 'number', requerido: false, etiqueta: 'Monto primera cuota', editable: true },
+
         { nombre: 'monto_por_periodo', tipo: 'text', requerido: false, etiqueta: 'Monto por periodo', editable: true },
-        { nombre: 'monto_ultima_cuota', tipo: 'number', requerido: false, etiqueta: 'monto_ultima_cuota', editable: true },
-        { nombre: 'monto_primera_cuota', tipo: 'number', requerido: false, etiqueta: 'monto_primera_cuota', editable: true },
+
         { nombre: 'estado_solicitud', tipo: 'list', requerido: false, opciones: [{ label: "APROBADO", value: "APROBADO" }, { label: "RECHAZADO", value: "RECHAZADO" }], etiqueta: 'Estado Solicitud', editable: true },
         { nombre: 'observaciones', tipo: 'text', requerido: false, etiqueta: 'observaciones', editable: true },
         { nombre: 'prestamo', tipo: 'list', requerido: false, opciones: [{ label: "SI", value: "SI" }, { label: "NO", value: "NO" }], etiqueta: '¿Tiene algún préstamo pendiente con INPREMA?', editable: true },
@@ -352,14 +372,36 @@ export class VerEditarBeneficioAfilComponent {
       data: { campos: campos, valoresIniciales: row }
     });
 
+    dialogRef.componentInstance.formUpdated.subscribe((formValues: any) => {
+      console.log('Formulario actualizado:', formValues);
+      const campoActualizar = campos.find((c: any) => c.nombre === 'num_rentas_aplicadas');
+      console.log(campoActualizar);
+
+      if (campoActualizar) {
+        campoActualizar.value = 88; // Actualizar valor dinámicamente.
+        this.cdr.detectChanges();
+      }
+    });
+
     dialogRef.afterClosed().subscribe((result: any) => {
       if (result) {
+        this.cdr.detectChanges();
+        console.log('Resultado del diálogo:', result);
+      }
+
+      /* if (result) {
+        this.cdr.detectChanges();
+        campos[1].num_rentas_aplicadas = 88
+        this.cdr.detectChanges();
+
+        console.log(result);
+
         result["ID_DETALLE_PERSONA"] = row.ID_DETALLE_PERSONA;
         result["ID_PERSONA"] = row.ID_PERSONA;
         result["ID_CAUSANTE"] = row.ID_CAUSANTE;
         result["ID_BENEFICIO"] = row.ID_BENEFICIO;
 
-        this.beneficioService.updateBeneficioPersona(result).subscribe(
+         this.beneficioService.updateBeneficioPersona(result).subscribe(
           () => {
             // Después de actualizar el beneficio, recargar los datos
             this.toastr.success("Registro actualizado con éxito");
@@ -373,7 +415,7 @@ export class VerEditarBeneficioAfilComponent {
             console.error('Error al actualizar el beneficio', error);
           }
         );
-      }
+      } */
     });
   }
 

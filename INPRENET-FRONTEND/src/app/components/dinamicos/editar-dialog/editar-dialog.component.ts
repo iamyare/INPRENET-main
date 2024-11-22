@@ -27,6 +27,7 @@ export class EditarDialogComponent implements OnInit {
   datePickers!: MatDatepicker<Date>[];
 
   @Output() saved = new EventEmitter<any>();
+  @Output() formUpdated = new EventEmitter<any>(); // Nuevo evento para cambios en el formulario.
 
   constructor(
     private fb: FormBuilder,
@@ -44,6 +45,7 @@ export class EditarDialogComponent implements OnInit {
 
   ngOnInit(): void {
     this.crearFormulario();
+    this.escucharCambiosFormulario(); // Escuchar cambios en el formulario.
     this.cdr.detectChanges();
   }
 
@@ -71,10 +73,10 @@ export class EditarDialogComponent implements OnInit {
     this.cdr.detectChanges();
   }
 
-  convertToDate(dateString: string): Date | null {
-    const [day, month, year] = dateString.split('/').map(Number);
-    const date = new Date(year, month - 1, day);
-    return isNaN(date.getTime()) ? null : date;
+  escucharCambiosFormulario() {
+    this.formGroup.valueChanges.subscribe(values => {
+      this.formUpdated.emit(values); // Emitir cambios del formulario.
+    });
   }
 
   guardar() {

@@ -9,14 +9,14 @@ const express = require('express');
 
 async function bootstrap() {
   // Lee los archivos del certificado y la clave privada
-  const httpsOptions = {
+  /* const httpsOptions = {
     key: fs.readFileSync(process.env.PRIVATE_KEY), // Ruta al archivo de clave privada
     cert: fs.readFileSync(process.env.CERTIFICATE), // Ruta al archivo de certificado
-  };
+  }; */
 
   // Crea la aplicación con HTTPS
   const app = await NestFactory.create(AppModule, {
-    httpsOptions,
+    //httpsOptions,
   });
 
   app.enableCors({
@@ -31,7 +31,13 @@ async function bootstrap() {
       whitelist: true,
       forbidNonWhitelisted: true,
       transform: true,
-      exceptionFactory: (errors) => new BadRequestException(errors),
+      exceptionFactory: (errors) => {
+        const errorMessages = errors.map(
+          (err) =>
+            `${err.property} - ${Object.values(err.constraints).join(', ')}`
+        );
+        return new BadRequestException(errorMessages);
+      }
     }),
   );
 

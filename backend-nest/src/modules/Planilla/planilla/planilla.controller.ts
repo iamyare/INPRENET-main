@@ -222,6 +222,26 @@ export class PlanillaController {
     );
   }
 
+  
+  @Get('detalle-beneficios-deducciones-periodo')
+  async getDetalleBeneficiosDeducciones(
+    @Query('periodoInicio') periodoInicio: string,
+    @Query('periodoFinalizacion') periodoFinalizacion: string,
+    @Query('idTiposPlanilla') idTiposPlanilla: string,
+  ): Promise<any> {
+    try {
+      const tiposPlanillaArray = idTiposPlanilla.split(',').map(Number);
+      return await this.planillaService.getDetallePorBeneficiosYDeduccionesPorPeriodo(
+        periodoInicio,
+        periodoFinalizacion,
+        tiposPlanillaArray,
+      );
+    } catch (error) {
+      console.error('Error al obtener el detalle de beneficios y deducciones:', error);
+      throw new InternalServerErrorException('Error al obtener el detalle de beneficios y deducciones');
+    }
+  }
+
   @Get('totales-beneficios-deducciones/:idPlanilla')
   async getTotalesBeneficiosDeducciones(@Param('idPlanilla', ParseIntPipe) idPlanilla: number) {
     return this.planillaService.getTotalesBeneficiosDeducciones(idPlanilla);

@@ -921,7 +921,7 @@ GROUP BY
 
     if (JSON.stringify(idTiposPlanilla) == '[1,2]') {
       query = `
-                    SELECT
+        SELECT
         BENEFICIOS,
         NOMBRE_BENEFICIO,
         NUMERO_PAGOS,
@@ -1071,8 +1071,6 @@ GROUP BY
           ORDER BY ben."NOMBRE_BENEFICIO" ASC
         `;
     }
-
-
     try {
       const result = await this.entityManager.query(query, [periodoInicio, periodoFinalizacion]);
       return result;
@@ -1208,6 +1206,177 @@ GROUP BY
     }
   }
 
+  async getBeneficiosPorPeriodoDetallado(
+    periodoInicio: string,
+    periodoFinalizacion: string,
+    idTiposPlanilla: number[],
+  ): Promise<any[]> {
+    const idTiposPlanillaStr = idTiposPlanilla.join(', '); // Convertimos el array a un string separado por comas
+  
+    const query = `
+      SELECT 
+        per."N_IDENTIFICACION" AS "IDENTIFICACION",
+        per."PRIMER_NOMBRE" || ' ' || per."SEGUNDO_NOMBRE" || ' ' || per."PRIMER_APELLIDO" || ' ' || per."SEGUNDO_APELLIDO" AS "NOMBRE_COMPLETO",
+        ben."NOMBRE_BENEFICIO" AS "NOMBRE_BENEFICIO",
+        detBs."MONTO_A_PAGAR" AS "MONTO"
+      FROM 
+        "NET_DETALLE_PAGO_BENEFICIO" detBs
+      INNER JOIN 
+        "NET_BENEFICIO" ben 
+        ON detBs."ID_BENEFICIO" = ben."ID_BENEFICIO"
+      INNER JOIN 
+        "NET_PLANILLA" plan 
+        ON detBs."ID_PLANILLA" = plan."ID_PLANILLA"
+      INNER JOIN 
+        "NET_PERSONA" per 
+        ON detBs."ID_PERSONA" = per."ID_PERSONA"
+      WHERE 
+        plan."PERIODO_INICIO" >= TO_DATE(:periodoInicio, 'DD/MM/YYYY') AND
+        plan."PERIODO_FINALIZACION" <= TO_DATE(:periodoFinalizacion, 'DD/MM/YYYY') AND
+        plan."ID_TIPO_PLANILLA" IN (${idTiposPlanillaStr})
+        AND detBs."ID_AF_BANCO" IS NULL
+        AND detBs."ESTADO" != 'RECHAZADO'
+      ORDER BY 
+        per."PRIMER_NOMBRE" || ' ' || per."SEGUNDO_NOMBRE" || ' ' || per."PRIMER_APELLIDO" || ' ' || per."SEGUNDO_APELLIDO" ASC, 
+        ben."NOMBRE_BENEFICIO" ASC
+    `;
+  
+    try {
+      const result = await this.entityManager.query(query, [periodoInicio, periodoFinalizacion]);
+      return result;
+    } catch (error) {
+      console.error('Error al obtener beneficios detallados:', error);
+      throw new InternalServerErrorException('Error al obtener beneficios detallados');
+    }
+  }
+  
+  async getDeduccionesInpremaPorPeriodoDetallado(
+    periodoInicio: string,
+    periodoFinalizacion: string,
+    idTiposPlanilla: number[],
+  ): Promise<any[]> {
+    const idTiposPlanillaStr = idTiposPlanilla.join(', ');
+  
+    const query = `
+      SELECT 
+        per."N_IDENTIFICACION" AS "IDENTIFICACION",
+        per."PRIMER_NOMBRE" || ' ' || per."SEGUNDO_NOMBRE" || ' ' || per."PRIMER_APELLIDO" || ' ' || per."SEGUNDO_APELLIDO" AS "NOMBRE_COMPLETO",
+        ded."NOMBRE_DEDUCCION" AS "NOMBRE_DEDUCCION",
+        dedd."MONTO_APLICADO" AS "MONTO"
+      FROM 
+        "NET_DETALLE_DEDUCCION" dedd
+      INNER JOIN 
+        "NET_DEDUCCION" ded 
+        ON dedd."ID_DEDUCCION" = ded."ID_DEDUCCION"
+      INNER JOIN 
+        "NET_PLANILLA" plan 
+        ON dedd."ID_PLANILLA" = plan."ID_PLANILLA"
+      INNER JOIN 
+        "NET_PERSONA" per 
+        ON dedd."ID_PERSONA" = per."ID_PERSONA"
+      WHERE 
+        plan."PERIODO_INICIO" >= TO_DATE(:periodoInicio, 'DD/MM/YYYY') AND
+        plan."PERIODO_FINALIZACION" <= TO_DATE(:periodoFinalizacion, 'DD/MM/YYYY') AND
+        plan."ID_TIPO_PLANILLA" IN (${idTiposPlanillaStr})
+        AND ded."ID_CENTRO_TRABAJO" = 1
+        AND dedd."ID_AF_BANCO" IS NULL
+      ORDER BY 
+        per."PRIMER_NOMBRE" || ' ' || per."SEGUNDO_NOMBRE" || ' ' || per."PRIMER_APELLIDO" || ' ' || per."SEGUNDO_APELLIDO" ASC, 
+        ded."NOMBRE_DEDUCCION" ASC
+    `;
+  
+    try {
+      const result = await this.entityManager.query(query, [periodoInicio, periodoFinalizacion]);
+      return result;
+    } catch (error) {
+      console.error('Error al obtener deducciones INPREMA detalladas:', error);
+      throw new InternalServerErrorException('Error al obtener deducciones INPREMA detalladas');
+    }
+  }
+  
+  async getDeduccionesTercerosPorPeriodoDetallado(
+    periodoInicio: string,
+    periodoFinalizacion: string,
+    idTiposPlanilla: number[],
+  ): Promise<any[]> {
+    // Convertir el array en un string separado por comas
+    const idTiposPlanillaList = idTiposPlanilla.join(',');
+  
+    const query = `
+      SELECT 
+        per."N_IDENTIFICACION" AS "IDENTIFICACION",
+        per."PRIMER_NOMBRE" || ' ' || per."SEGUNDO_NOMBRE" || ' ' || per."PRIMER_APELLIDO" || ' ' || per."SEGUNDO_APELLIDO" AS "NOMBRE_COMPLETO",
+        ded."NOMBRE_DEDUCCION" AS "NOMBRE_DEDUCCION",
+        dedd."MONTO_APLICADO" AS "MONTO"
+      FROM 
+        "NET_DETALLE_DEDUCCION" dedd
+      INNER JOIN 
+        "NET_DEDUCCION" ded 
+        ON dedd."ID_DEDUCCION" = ded."ID_DEDUCCION"
+      INNER JOIN 
+        "NET_PLANILLA" plan 
+        ON dedd."ID_PLANILLA" = plan."ID_PLANILLA"
+      INNER JOIN 
+        "NET_PERSONA" per 
+        ON dedd."ID_PERSONA" = per."ID_PERSONA"
+      WHERE 
+        plan."PERIODO_INICIO" >= TO_DATE(:periodoInicio, 'DD/MM/YYYY') AND
+        plan."PERIODO_FINALIZACION" <= TO_DATE(:periodoFinalizacion, 'DD/MM/YYYY') AND
+        plan."ID_TIPO_PLANILLA" IN (${idTiposPlanillaList}) -- Lista de valores
+        AND dedd."ID_AF_BANCO" IS NULL
+        AND ded."ID_DEDUCCION" NOT IN (1, 2, 3, 44, 51)
+      ORDER BY 
+        per."PRIMER_NOMBRE" || ' ' || per."SEGUNDO_NOMBRE" || ' ' || per."PRIMER_APELLIDO" || ' ' || per."SEGUNDO_APELLIDO" ASC, 
+        ded."NOMBRE_DEDUCCION" ASC
+    `;
+  
+    try {
+      const result = await this.entityManager.query(query, [periodoInicio, periodoFinalizacion]);
+      return result;
+    } catch (error) {
+      console.error('Error al obtener deducciones de terceros detalladas:', error);
+      throw new InternalServerErrorException('Error al obtener deducciones de terceros detalladas');
+    }
+  }
+  
+  async getDetallePorBeneficiosYDeduccionesPorPeriodo(
+    periodoInicio: string,
+    periodoFinalizacion: string,
+    idTiposPlanilla: number[],
+  ): Promise<any> {
+    try {
+      // Obtener detalles de beneficios
+      const beneficiosDetallados = await this.getBeneficiosPorPeriodoDetallado(
+        periodoInicio,
+        periodoFinalizacion,
+        idTiposPlanilla,
+      );
+  
+      // Obtener detalles de deducciones INPREMA
+      const deduccionesInpremaDetalladas = await this.getDeduccionesInpremaPorPeriodoDetallado(
+        periodoInicio,
+        periodoFinalizacion,
+        idTiposPlanilla,
+      );
+  
+      // Obtener detalles de deducciones de terceros
+      const deduccionesTercerosDetalladas = await this.getDeduccionesTercerosPorPeriodoDetallado(
+        periodoInicio,
+        periodoFinalizacion,
+        idTiposPlanilla,
+      );
+  
+      return {
+        beneficiosDetallados,
+        deduccionesInpremaDetalladas,
+        deduccionesTercerosDetalladas,
+      };
+    } catch (error) {
+      console.error('Error al obtener los detalles por periodo:', error);
+      throw new InternalServerErrorException('Error al obtener los detalles por periodo');
+    }
+  }
+  
   async getTotalPorBancoYPeriodo(
     periodoInicio: string,
     periodoFinalizacion: string,

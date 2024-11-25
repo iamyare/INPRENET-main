@@ -1,0 +1,41 @@
+.submit-button-container {
+    display: flex;
+    justify-content: center; /* Centra el botón horizontalmente */
+    margin-top: 40px; /* Aumenta el margen superior para dar espacio */
+  }
+  
+  .submit-button {
+    background-color: #1C9487; /* Color azul vibrante */
+    color: white;
+    padding: 12px 30px; /* Aumenta el padding para hacerlo más grande */
+    font-size: 18px; /* Aumenta el tamaño de la fuente */
+    font-weight: bold;
+    border-radius: 8px; /* Bordes redondeados */
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2); /* Sombra para resaltar */
+    transition: background-color 0.3s, transform 0.3s; /* Efectos de transición */
+    display: flex;
+    align-items: center;
+  }
+  
+  .submit-button:hover {
+    background-color: #6d98c7; /* Color más oscuro en hover */
+    transform: scale(1.05); /* Aumenta ligeramente el tamaño en hover */
+  }
+  
+  .submit-button mat-icon {
+    margin-right: 10px; /* Espacio entre el icono y el texto */
+    font-size: 15px; /* Aumenta el tamaño del icono */
+  }
+
+  .navigation-buttons {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 20px;
+  }
+  
+  .btn {
+    padding: 10px 20px;
+    font-size: 16px;
+  }
+  
+  

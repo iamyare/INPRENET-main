@@ -18,7 +18,7 @@ export class MunicipioController {
   findAll() {
     return this.municipioService.findAll();
   }
-
+  
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.municipioService.findOne(+id);

@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Observable, map } from 'rxjs';
+import { Observable, catchError, map } from 'rxjs';
 import { environment } from 'src/environments/environment';
 
 @Injectable({
@@ -30,6 +30,7 @@ export class DireccionService {
         })
       );
   }
+
   getAllMunicipios(): Observable<any | void> {
     const url = `${environment.API_URL}/api/municipio`;
     return this.http.get<any>(

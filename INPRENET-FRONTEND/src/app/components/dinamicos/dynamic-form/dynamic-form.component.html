@@ -1,4 +1,4 @@
-<div class="card dados-generales-centro-card">
+<div class="card datos-generales-centro-card">
   <div class="card-header card-header-danger title" style="background: #229e92; color: white">
     <h4 class="card-title">{{ titulo }}</h4>
     <p class="card-category">{{ subtitulo }}</p>
@@ -16,14 +16,11 @@
                   <mat-label>{{ field.label }}</mat-label>
                   <input matInput [type]="field.type" [value]="field.value" [formControlName]="field.name" [readonly]="field.readOnly" />
                   <mat-icon *ngIf="field.icon" matSuffix>{{ field.icon }}</mat-icon>
-                  <mat-error
-                    *ngIf="form.get(field.name)?.invalid && (form.get(field.name)?.dirty || form.get(field.name)?.touched)">
-                    <ng-container *ngIf="form.get(field.name)?.errors?.['required']">Este campo es requerido</ng-container>
-                    <ng-container *ngIf="form.get(field.name)?.errors?.['maxlength']">Ha excedido el número máximo de caracteres</ng-container>
-                    <ng-container *ngIf="form.get(field.name)?.errors?.['email']">Correo electrónico inválido</ng-container>
-                    <ng-container *ngIf="form.get(field.name)?.errors?.['min']">El valor debe ser mayor o igual a {{ form.get(field.name)?.errors?.['min']?.min }}</ng-container>
-                    <ng-container *ngIf="form.get(field.name)?.errors?.['pattern']">Formato incorrecto</ng-container>
-                  </mat-error>
+
+                  <!-- MENSAJES DE ERROR -->
+                  <app-error-messages *ngIf="form.get(field.name) && (form.get(field.name)?.touched || form.get(field.name)?.dirty)"
+                  [control]="form.get(field.name)!"></app-error-messages>
+
                 </mat-form-field>
               </ng-container>
             </div>

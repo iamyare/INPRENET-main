@@ -11,12 +11,9 @@
     </div>
 
     <div *ngIf="mostrar && activeStep == 1">
-        <app-datos-propietario [parentForm]="datosPropietario"
-            (formUpdated)="onDatosGeneralesFormUpdate1($event)"></app-datos-propietario>
-        <app-datos-administrador [parentForm]="datosAdministrador"
-            (formUpdated)="onDatosGeneralesFormUpdate2($event)"></app-datos-administrador>
-        <app-datos-contador [parentForm]="datosContador"
-            (formUpdated)="onDatosGeneralesFormUpdate3($event)"></app-datos-contador>
+        <app-datos-propietario></app-datos-propietario>
+        <app-datos-administrador></app-datos-administrador>
+        <app-datos-contador></app-datos-contador>
     </div>
 
     <div *ngIf="mostrar && activeStep === 2">

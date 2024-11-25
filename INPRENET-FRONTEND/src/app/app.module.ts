@@ -16,6 +16,7 @@ import { SidenavService } from './services/sidenav.service';
 import { TokenInterceptor } from './interceptors/token.interceptor';
 import { MovimientosInpremaModule } from './modulos/movimientos-inprema/movimientos-inprema.module';
 import { EscalafonModule } from './modulos/escalafon/escalafon.module';
+
 @NgModule({
   declarations: [
     AppComponent,

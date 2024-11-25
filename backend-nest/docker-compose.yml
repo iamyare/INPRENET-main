@@ -5,7 +5,7 @@ services:
       ports:
         - 1523:1521
       environment:
-        ORACLE_PWD: ${DB_PASSWORD_SYS}
+        ORACLE_PWD: 123456789
       volumes:
         - oracle_data:/opt/oracle/oradata
         - ./init-user.sql:/container-entrypoint-initdb.d/init-user.sql:ro

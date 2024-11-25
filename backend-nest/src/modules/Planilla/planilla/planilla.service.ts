@@ -827,7 +827,7 @@ GROUP BY
     }
   }
 
-  async getDeduccionesInpremaPorPeriodo(
+  async getDeduccionesInpremaPorPeriodoCCB(
     periodoInicio: string,
     periodoFinalizacion: string,
     idTiposPlanilla: number[],
@@ -868,8 +868,8 @@ GROUP BY
       throw new InternalServerErrorException('Error al obtener deducciones INPREMA');
     }
   }
-  
-  async getDeduccionesTercerosPorPeriodo(
+
+  async getDeduccionesTercerosPorPeriodoCCB(
     periodoInicio: string,
     periodoFinalizacion: string,
     idTiposPlanilla: number[],
@@ -910,7 +910,7 @@ GROUP BY
       throw new InternalServerErrorException('Error al obtener deducciones de terceros');
     }
   }
-  
+
   async getBeneficiosPorPeriodoSC(
     periodoInicio: string,
     periodoFinalizacion: string,
@@ -1166,25 +1166,25 @@ GROUP BY
     idTiposPlanilla: number[],
   ): Promise<any> {
     try {
-      const deduccionesInprema = await this.getDeduccionesInpremaPorPeriodo(
+      const deduccionesInprema = await this.getDeduccionesInpremaPorPeriodoCCB(
         periodoInicio,
         periodoFinalizacion,
         idTiposPlanilla
       );
-  
-      const deduccionesTerceros = await this.getDeduccionesTercerosPorPeriodo(
+
+      const deduccionesTerceros = await this.getDeduccionesTercerosPorPeriodoCCB(
         periodoInicio,
         periodoFinalizacion,
         idTiposPlanilla
       );
-  
+
       return { deduccionesInprema, deduccionesTerceros };
     } catch (error) {
       console.error('Error al obtener deducciones totales por periodo:', error);
       throw new InternalServerErrorException('Error al obtener deducciones totales por periodo');
     }
   }
-  
+
   async getTotalPorBeneficiosYDeduccionesPorPeriodo(
     periodoInicio: string,
     periodoFinalizacion: string,
@@ -1192,8 +1192,8 @@ GROUP BY
   ): Promise<any> {
     try {
       const beneficios = await this.getBeneficiosPorPeriodo(periodoInicio, periodoFinalizacion, idTiposPlanilla);
-      const deduccionesInprema = await this.getDeduccionesInpremaPorPeriodo(periodoInicio, periodoFinalizacion, idTiposPlanilla);
-      const deduccionesTerceros = await this.getDeduccionesTercerosPorPeriodo(periodoInicio, periodoFinalizacion, idTiposPlanilla);
+      const deduccionesInprema = await this.getDeduccionesInpremaPorPeriodoCCB(periodoInicio, periodoFinalizacion, idTiposPlanilla);
+      const deduccionesTerceros = await this.getDeduccionesTercerosPorPeriodoCCB(periodoInicio, periodoFinalizacion, idTiposPlanilla);
 
       const beneficiosSC = await this.getBeneficiosPorPeriodoSC(periodoInicio, periodoFinalizacion, idTiposPlanilla);
       const deduccionesInpremaSC = await this.getDeduccionesInpremaPorPeriodoSC(periodoInicio, periodoFinalizacion, idTiposPlanilla);

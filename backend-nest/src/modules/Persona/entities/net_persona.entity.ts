@@ -132,9 +132,15 @@ export class net_persona {
 
     @Column('varchar2', { length: 500, nullable: true, name: 'DIRECCION_RESIDENCIA' })
     direccion_residencia: string;
-    
+
     @Column('varchar2', { length: 500, nullable: true, name: 'DIRECCION_RESIDENCIA_ESTRUCTURADA' })
     direccion_residencia_estructurada: string;
+
+    @Column('varchar2', { length: 500, nullable: true, name: 'OBSERVACION' })
+    observacion: string;
+
+    @Column('date', { nullable: true, name: 'ULTIMA_FECHA_ACTUALIZACION' })
+    ultima_fecha_actualizacion: Date;
 
     @Column('blob', { nullable: true, name: 'FOTO_PERFIL' })
     foto_perfil: any;
@@ -207,7 +213,7 @@ export class net_persona {
     @ManyToOne(() => Net_Usuario_Empresa, { nullable: true })
     @JoinColumn({ name: 'ID_USUARIO_EMPRESA', referencedColumnName: 'id_usuario_empresa', foreignKeyConstraintName: 'FK_ID_USUARIO_EMPRESA_PERSONA' })
     usuarioEmpresa: Net_Usuario_Empresa;
-    
+
     @Column({ type: 'int', nullable: true, name: 'ID_USUARIO_EMPRESA' })
     ID_USUARIO_EMPRESA: number;
 

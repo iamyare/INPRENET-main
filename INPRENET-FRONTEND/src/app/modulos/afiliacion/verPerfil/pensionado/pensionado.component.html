@@ -13,7 +13,7 @@
     </mat-tab-group>
 
   </div>
-  <div *ngIf="currentStepIndex === 4">
+  <div *ngIf="currentStepIndex === 6">
     <app-constancias-afiliado [persona]="persona"></app-constancias-afiliado>
   </div>
   <div *ngIf="currentStepIndex === 1">
@@ -24,6 +24,12 @@
   </div>
   <div *ngIf="currentStepIndex === 3">
     <app-edit-refer-personales [Afiliado]="persona.persona"></app-edit-refer-personales>
+  </div>
+  <div *ngIf="currentStepIndex === 4">
+    <app-detalle-pagos  [datos]="persona.persona"></app-detalle-pagos>
+  </div>
+  <div *ngIf="currentStepIndex === 5">
+    <app-todos-pagos  [datos]="persona.persona"></app-todos-pagos>
   </div>
 
 </div>

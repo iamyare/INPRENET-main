@@ -10,11 +10,18 @@ export class PensionadoComponent {
 
   currentStepIndex = 0;
 
+  constructor(){
+    console.log(this,this.persona);
+    
+  }
+
   steps = [
     { label: 'Fuentes De Ingreso', isActive: true },
     { label: 'Beneficiarios', isActive: true },
     { label: 'Colegios Magisteriales', isActive: true },
     { label: 'Referencias Personales', isActive: true },
+    { label: 'Detalles de pagos', isActive: false },
+    { label: 'Todos los pagos', isActive: false },
     { label: 'Constancias', isActive: true },
   ];
 

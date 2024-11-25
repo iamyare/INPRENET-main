@@ -15,6 +15,8 @@ export class AfiliadoComponent {
     { label: 'Beneficiarios', isActive: true },
     { label: 'Colegios Magisteriales', isActive: true },
     { label: 'Referencias Personales', isActive: true },
+    { label: 'Detalles de pagos', isActive: false },
+    { label: 'Todos los pagos', isActive: false },
     { label: 'Constancias', isActive: true },
   ];
 

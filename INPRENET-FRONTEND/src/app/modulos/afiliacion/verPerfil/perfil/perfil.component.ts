@@ -70,7 +70,7 @@ export class PerfilComponent implements OnInit {
     this.resetBusqueda.emit();
   }
 
-  isPensionado(): boolean {
+  isVoluntario(): boolean {
     return this.persona?.persona?.detallePersona?.some((detalle: any) => detalle.voluntario === 'SI');
   }
 }

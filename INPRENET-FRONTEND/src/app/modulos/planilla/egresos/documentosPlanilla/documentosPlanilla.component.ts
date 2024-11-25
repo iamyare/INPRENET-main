@@ -1061,7 +1061,7 @@ export class DocumentosPlanillaComponent implements OnInit {
                       `${fechaInicioFormateada} - ${fechaFinFormateada}`
                     ],
                     alignment: 'left',
-                    fontSize: 7
+                    fontSize: 12
                   },
                   {
                     width: '50%',
@@ -1070,7 +1070,7 @@ export class DocumentosPlanillaComponent implements OnInit {
                       `PLANILLA ${nombrePlanilla}`
                     ],
                     alignment: 'right',
-                    fontSize: 7
+                    fontSize: 12
                   }
                 ],
                 margin: [40, 0, 40, 5] // Ajustado para subir la posición
@@ -1088,26 +1088,31 @@ export class DocumentosPlanillaComponent implements OnInit {
             ],
 
             styles: {
-              header: { fontSize: 9, bold: true },
-              subheader: { fontSize: 7, bold: true },
-              tableHeader: { bold: true, fontSize: 6, color: 'black' },
-              tableBody: { fontSize: 6, color: 'black' },
-              tableTotal: { bold: true, fontSize: 6, color: 'black', alignment: 'right' }
+              header: { fontSize: 12, bold: true },
+              subheader: { fontSize: 10, bold: true },
+              tableHeader: { bold: true, fontSize: 10, color: 'black' },
+              tableBody: { fontSize: 10, color: 'black' },
+              tableTotal: { bold: true, fontSize: 10, color: 'black', alignment: 'right' }
             },
             footer: (currentPage, pageCount) => ({
               table: {
                 widths: ['*', '*', '*'],
                 body: [
                   [
-                    { text: 'FECHA Y HORA: ' + new Date().toLocaleString(), alignment: 'left', border: [false, false, false, false], fontSize: 6 },
-                    { text: 'GENERÓ: INPRENET', alignment: 'left', border: [false, false, false, false], fontSize: 6 },
-                    { text: 'PÁGINA ' + currentPage.toString() + ' DE ' + pageCount, alignment: 'right', border: [false, false, false, false], fontSize: 6 }
+                    { text: 'FECHA Y HORA: ' + new Date().toLocaleString(), alignment: 'left', border: [false, false, false, false], fontSize: 7 },
+                    { text: 'GENERÓ: INPRENET', alignment: 'left', border: [false, false, false, false], fontSize: 7 },
+                    { text: 'PÁGINA ' + currentPage.toString() + ' DE ' + pageCount, alignment: 'right', border: [false, false, false, false], fontSize: 7 }
                   ]
                 ]
               },
+              layout: {
+                hLineWidth: (i, node) => (i === 0 || i === node.table.body.length ? 0 : 0.5), // Controla el ancho de las líneas horizontales
+                vLineWidth: () => 0, // Elimina las líneas verticales
+                hLineColor: () => '#FFF0089' // Color de las líneas horizontales
+              },
               margin: [20, 0, 20, 10]
             }),
-            defaultStyle: { fontSize: 6 },
+            defaultStyle: { fontSize: 10 },
           };
 
           pdfMake.createPdf(docDefinition).download(`Reporte_Totales_Deducciones_CCB${nombrePlanilla}.pdf`);
@@ -1121,24 +1126,24 @@ export class DocumentosPlanillaComponent implements OnInit {
   /*   async generarReporteTotalesDeduccionesSinCuentBanc() {
       const { idTiposPlanilla, nombrePlanilla } = this.obtenerIdYNombrePlanilla();
       const { fechaInicioFormateada, fechaFinFormateada } = this.obtenerFechasFormateadas();
-  
+
       if (idTiposPlanilla.length === 0) return;
-  
+
       this.planillaService.obtenerTotalesDedPorPerSinCuenBan(fechaInicioFormateada, fechaFinFormateada, idTiposPlanilla)
         .subscribe({
           next: async (data) => {
             let deduccionesInprema = data.deduccionesInprema || []
             let deduccionesTerceros = data.deduccionesTerceros || []
-  
-  
-  
+
+
+
             if (!data || (!deduccionesInprema && !deduccionesTerceros)) {
               console.error('Datos no válidos para crear el reporte:', data);
               return;
             }
-  
+
             const base64Image = await this.convertirImagenABase64('../assets/images/membratadoFinal.jpg');
-  
+
             const agruparPorNombre = (deducciones: any[]) => {
               return deducciones.reduce((acc: any, item: any) => {
                 const existing = acc.find((ded: any) => ded.NOMBRE_DEDUCCION === item.NOMBRE_DEDUCCION);
@@ -1151,10 +1156,10 @@ export class DocumentosPlanillaComponent implements OnInit {
                 return acc;
               }, []);
             };
-  
+
             const deduccionesInpremaAgrupadas = agruparPorNombre(deduccionesInprema);
             const deduccionesTercerosAgrupadas = agruparPorNombre(deduccionesTerceros);
-  
+
             const ordenarPorCodigo = (deducciones: any[]) => {
               return deducciones.sort((a, b) => a.ID_DEDUCCION - b.ID_DEDUCCION);
             };
@@ -1162,15 +1167,15 @@ export class DocumentosPlanillaComponent implements OnInit {
             console.log(deduccionesTerceros);
             const deduccionesInpremaOrdenadas = ordenarPorCodigo(deduccionesInpremaAgrupadas);
             const deduccionesTercerosOrdenadas = ordenarPorCodigo(deduccionesTercerosAgrupadas);
-  
+
             const totalDeduccionesInprema = deduccionesInpremaOrdenadas.reduce((sum: number, item: any) => sum + (item.TOTAL_MONTO_DEDUCCION || 0), 0);
             const totalDocentesInprema = deduccionesInpremaOrdenadas.reduce((sum: number, item: any) => sum + (item.CANTIDAD_DOCENTES || 0), 0);
-  
+
             const totalDeduccionesTerceros = deduccionesTercerosOrdenadas.reduce((sum: number, item: any) => sum + (item.TOTAL_MONTO_DEDUCCION || 0), 0);
             const totalDocentesTerceros = deduccionesTercerosOrdenadas.reduce((sum: number, item: any) => sum + (item.CANTIDAD_DOCENTES || 0), 0);
-  
+
             const totalGeneral = totalDeduccionesInprema + totalDeduccionesTerceros;
-  
+
             const docDefinition: TDocumentDefinitions = {
               pageSize: 'LETTER',
               pageOrientation: 'landscape',
@@ -1222,7 +1227,7 @@ export class DocumentosPlanillaComponent implements OnInit {
                   margin: [0, 10, 0, 0]
                 }
               ],
-  
+
               styles: {
                 header: { fontSize: 9, bold: true },
                 subheader: { fontSize: 7, bold: true },
@@ -1245,7 +1250,7 @@ export class DocumentosPlanillaComponent implements OnInit {
               }),
               defaultStyle: { fontSize: 6 },
             };
-  
+
             pdfMake.createPdf(docDefinition).download(`Reporte_Totales_Deducciones_SCB${nombrePlanilla}.pdf`);
           },
           error: (error) => {
@@ -1292,7 +1297,11 @@ export class DocumentosPlanillaComponent implements OnInit {
         widths: ['10%', '50%', '20%', '20%'],
         body: [headers, ...body]
       },
-      layout: 'noBorders'
+      layout: {
+        hLineWidth: (i: number, node: { table: { body: string | any[]; }; }) => (i === 0 || i === node.table.body.length ? 0 : 0.5), // Grosor de las líneas horizontales
+        vLineWidth: () => 0, // Sin líneas verticales
+        hLineColor: () => '#000000' // Color de las líneas horizontales
+      }
     };
   }
 

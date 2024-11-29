@@ -19,6 +19,7 @@ import { NET_MOVIMIENTO_CUENTA } from '../transacciones/entities/net_movimiento_
 import { net_causas_fallecimientos } from './entities/net_causas_fallecimientos.entity';
 import { NET_PROFESIONES } from '../transacciones/entities/net_profesiones.entity';
 import { Net_Municipio } from '../Regional/municipio/entities/net_municipio.entity';
+import { format } from 'date-fns';
 
 @Injectable()
 export class AfiliadoService {
@@ -68,37 +69,35 @@ export class AfiliadoService {
         order: { ANO: 'ASC', MES: 'ASC' },
         relations: ['cuentaPersona', 'cuentaPersona.tipoCuenta', 'tipoMovimiento'],
       });
-
-      // Extraer información del tipo de cuenta y número de cuenta
+  
       const tipoCuenta = movimientos.length > 0 ? movimientos[0].cuentaPersona.tipoCuenta.DESCRIPCION : null;
       const numeroCuenta = movimientos.length > 0 ? movimientos[0].cuentaPersona.NUMERO_CUENTA : null;
-
-      // Organizar movimientos por año y mes
+  
       const movimientosOrdenados = movimientos.reduce((acc, movimiento) => {
         const { ANO: year, MES: month } = movimiento;
-
+  
         if (!acc[year]) {
           acc[year] = {};
         }
-
+  
         if (!acc[year][month]) {
           acc[year][month] = [];
         }
-
+  
         acc[year][month].push({
           ID_MOVIMIENTO_CUENTA: movimiento.ID_MOVIMIENTO_CUENTA,
           MONTO: movimiento.MONTO,
-          FECHA_MOVIMIENTO: movimiento.FECHA_MOVIMIENTO,
+          FECHA_MOVIMIENTO: format(new Date(movimiento.FECHA_MOVIMIENTO), 'dd/MM/yyyy'),
           DESCRIPCION: movimiento.DESCRIPCION,
           CREADA_POR: movimiento.CREADA_POR,
           tipoMovimiento: movimiento.tipoMovimiento.DESCRIPCION,
           ANO: movimiento.ANO,
           MES: movimiento.MES,
         });
-
+  
         return acc;
       }, {});
-
+  
       return {
         tipoCuenta,
         numeroCuenta,

@@ -25,6 +25,24 @@ import { CrearDiscapacidadDto } from './dtos/crear-discapacidad.dto';
 export class AfiliacionController {
   constructor(private readonly afiliacionService: AfiliacionService, private readonly connection: Connection, private readonly entityManager: EntityManager,) {
   }
+  
+  @Patch('persona/:id/foto')
+  @UseInterceptors(FileInterceptor('foto'))
+  async actualizarFotoPersona(
+    @Param('id', ParseIntPipe) idPersona: number,
+    @UploadedFile() foto: Express.Multer.File,
+  ) {
+    if (!foto) {
+      throw new HttpException('No se ha proporcionado un archivo válido.', HttpStatus.BAD_REQUEST);
+    }
+
+    const persona = await this.afiliacionService.actualizarFotoPersona(idPersona, foto.buffer);
+
+    return {
+      message: 'Foto actualizada exitosamente',
+      persona,
+    };
+  }
 
   @Delete('cargos-publicos/:idCargoPublico')
   async eliminarCargoPublico(

@@ -33,6 +33,78 @@ export class TransaccionesService {
   ) {
   }
 
+  async obtenerCuentasPorIdentificacion(n_identificacion: string): Promise<any[]> {
+    const persona = await this.personaRepository.findOne({
+      where: { n_identificacion },
+      relations: ['cuentas', 'cuentas.tipoCuenta'], // Incluye el tipo de cuenta
+    });
+  
+    if (!persona) {
+      throw new NotFoundException(`Persona con identificación ${n_identificacion} no encontrada.`);
+    }
+  
+    if (!persona.cuentas || persona.cuentas.length === 0) {
+      throw new NotFoundException(`La persona con identificación ${n_identificacion} no tiene cuentas asociadas.`);
+    }
+  
+    // Mapear los datos para incluir información del tipo de cuenta
+    return persona.cuentas.map(cuenta => ({
+      numeroCuenta: cuenta.NUMERO_CUENTA,
+      activa: cuenta.ACTIVA_B,
+      fechaCreacion: cuenta.FECHA_CREACION,
+      creadaPor: cuenta.CREADA_POR,
+      tipoCuenta: {
+        id: cuenta.tipoCuenta?.ID_TIPO_CUENTA,
+        descripcion: cuenta.tipoCuenta?.DESCRIPCION,
+      },
+    }));
+  }
+  
+  private generarNumeroCuenta(idPersona: number): string {
+    const timestamp = Date.now().toString(); // Marca de tiempo única
+    const randomDigits = Math.floor(1000 + Math.random() * 9000).toString(); // 4 dígitos aleatorios
+    return `${idPersona}${timestamp.substring(timestamp.length - 6)}${randomDigits}`;
+  }
+
+  async crearCuenta(idPersona: number, dto: crearCuentaDTO): Promise<any> {
+    const persona = await this.personaRepository.findOne({
+        where: { id_persona: idPersona },
+    });
+
+    if (!persona) {
+        throw new NotFoundException(`No se encontró la persona con ID: ${idPersona}`);
+    }
+
+    const tipoCuenta = await this.tipoCuentaRepository.findOne({
+        where: { DESCRIPCION: dto.tipo_cuenta },
+    });
+
+    if (!tipoCuenta) {
+        throw new NotFoundException(
+            `No se encontró un tipo de cuenta con la descripción: ${dto.tipo_cuenta}`
+        );
+    }
+
+    const numeroCuenta = this.generarNumeroCuenta(persona.id_persona);
+
+    const nuevaCuenta = this.cuentaPersonaRepository.create({
+        persona: persona,
+        tipoCuenta: tipoCuenta,
+        CREADA_POR: dto.creado_por,
+        NUMERO_CUENTA: numeroCuenta,
+    });
+
+    const cuentaGuardada = await this.cuentaPersonaRepository.save(nuevaCuenta);
+
+    // Retorna un objeto con el formato esperado por el frontend
+    return {
+        numero_cuenta: cuentaGuardada.NUMERO_CUENTA,
+        tipo_cuenta: {
+            descripcion: cuentaGuardada.tipoCuenta.DESCRIPCION,
+        },
+    };
+  }
+
   async eliminarMovimiento(id: number): Promise<boolean> {
     const movimiento = await this.movimientoCuentaRepository.findOne({ where: { ID_MOVIMIENTO_CUENTA: id } });
     if (!movimiento) {
@@ -143,7 +215,7 @@ export class TransaccionesService {
 
   async crearMovimiento(dto: CrearMovimientoDTO): Promise<NET_MOVIMIENTO_CUENTA> {
     const cuentaExistente = await this.cuentaPersonaRepository.findOne({
-      where: { NUMERO_CUENTA: dto.numeroCuenta }
+      where: { NUMERO_CUENTA: dto.numeroCuenta },
     });
   
     if (!cuentaExistente) {
@@ -151,7 +223,7 @@ export class TransaccionesService {
     }
   
     const tipoMovimiento = await this.tipoMovimientoRepository.findOne({
-      where: { DESCRIPCION: dto.tipoMovimientoDescripcion }
+      where: { DESCRIPCION: dto.tipoMovimientoDescripcion },
     });
   
     if (!tipoMovimiento) {
@@ -164,45 +236,14 @@ export class TransaccionesService {
       MONTO: dto.monto,
       DESCRIPCION: dto.descripcion,
       FECHA_MOVIMIENTO: new Date(),
-      CREADA_POR: "OFICIAL",
+      CREADA_POR: 'INPRENET',
       ANO: dto.ANO,
-      MES: dto.MES
+      MES: dto.MES,
     });
   
     return this.movimientoCuentaRepository.save(nuevoMovimiento);
   }
   
-
-  async crearCuenta(idPersona: number, dto: [crearCuentaDTO]): Promise<any> {
-    const persona = await this.personaRepository.findOne({
-      where: { id_persona: idPersona }
-    });
-    if (!persona) {
-      throw new NotFoundException(`No se encontró la persona: ${idPersona}`);
-    }
-
-    const nuevasCuentas = await Promise.all(dto.map(async (element) => {
-      const tipoCuenta = await this.tipoCuentaRepository.findOne({
-        where: { DESCRIPCION: element.tipo_cuenta }
-      });
-
-      if (!tipoCuenta) {
-        throw new NotFoundException(`No se encontró una cuenta con el número`);
-      }
-
-      return this.cuentaPersonaRepository.create({
-        persona: persona,
-        tipoCuenta: tipoCuenta,
-        CREADA_POR: element.creado_por,
-        NUMERO_CUENTA: element.numero_cuenta
-      });
-    }));
-
-    return this.cuentaPersonaRepository.save(nuevasCuentas);
-  }
-
-
-
   async obtenerTiposDeCuentaPorDNI(n_identificacion: string): Promise<any[]> {
     const persona = await this.personaRepository.findOne({
       where: { n_identificacion }
@@ -216,12 +257,10 @@ export class TransaccionesService {
       relations: ['tipoCuenta']
     });
 
-    // Verifica si la persona tiene cuentas
     if (cuentasPersona.length === 0) {
       throw new Error('La persona no tiene cuentas asociadas');
     }
 
-    // Extrae y devuelve los números de cuenta y las descripciones de los tipos de cuenta
     const cuentasConDescripcion = cuentasPersona.map(cuenta => ({
       NUMERO_CUENTA: cuenta.NUMERO_CUENTA,
       DESCRIPCION: cuenta.tipoCuenta.DESCRIPCION

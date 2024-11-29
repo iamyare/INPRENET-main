@@ -75,6 +75,18 @@ export class AfiliacionService {
     private readonly entityManager: EntityManager,
   ) { }
 
+  async actualizarFotoPersona(idPersona: number, fotoPerfil: Buffer): Promise<net_persona> {
+    const persona = await this.personaRepository.findOne({ where: { id_persona: idPersona } });
+
+    if (!persona) {
+      throw new NotFoundException(`Persona con ID ${idPersona} no encontrada.`);
+    }
+
+    persona.foto_perfil = fotoPerfil;
+
+    return await this.personaRepository.save(persona);
+  }
+
   async getPersonaByn_identificacioni(n_identificacion: string): Promise<any> {
     const persona = await this.personaRepository.findOne({
         where: { n_identificacion },
@@ -494,8 +506,6 @@ export class AfiliacionService {
     return resultados;
   }
 
-
-
   async crearDatos(
     crearDatosDto: CrearDatosDto,
     fotoPerfil: Express.Multer.File,
@@ -504,6 +514,8 @@ export class AfiliacionService {
   ): Promise<any> {
     return await this.personaRepository.manager.transaction(async (transactionalEntityManager) => {
       try {
+        console.log(crearDatosDto);
+        
         const resultados = [];
         const personasCreadasMap = new Map<string, net_persona>();
 

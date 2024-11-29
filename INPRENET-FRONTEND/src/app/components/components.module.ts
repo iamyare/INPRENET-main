@@ -28,6 +28,7 @@ import { MainLayoutComponent } from './main-layout/main-layout.component';
 import { LandingPageComponent } from './landing-page/landing-page.component';
 import { DynamicInputDialogComponent } from './dinamicos/dynamic-input-dialog/dynamic-input-dialog.component';
 import { DynamicStepsComponent } from './dinamicos/dynamic-steps/dynamic-steps.component';
+import { CustomTableComponent } from './dinamicos/custom-table/custom-table.component';
 import { PerfilHeaderComponent } from './perfil-header/perfil-header.component';
 import { GestionarDiscapacidadDialogComponent } from './dinamicos/gestionar-discapacidad-dialog/gestionar-discapacidad-dialog.component';
 import { HomePageComponent } from './home-page/home-page.component';
@@ -38,6 +39,7 @@ import { HomePageComponent } from './home-page/home-page.component';
     DynamicDialogComponent,
     DynamicFormComponent,
     DynamicFormDialogComponent,
+    CustomTableComponent,
     DynamicMenuConstanciasComponent,
     DynamicTableComponent,
     DynamicTablePruebaComponent,
@@ -62,7 +64,8 @@ import { HomePageComponent } from './home-page/home-page.component';
     DynamicStepsComponent,
     PerfilHeaderComponent,
     GestionarDiscapacidadDialogComponent,
-    HomePageComponent
+    HomePageComponent,
+    CustomTableComponent
   ],
   imports: [
     CommonModule,
@@ -70,10 +73,12 @@ import { HomePageComponent } from './home-page/home-page.component';
     GoogleMapsModule
   ],
   exports:[
+    PerfilHeaderComponent,
     ConfirmDialogComponent,
     DynamicDialogComponent,
     DynamicFormComponent,
     DynamicFormDialogComponent,
+    CustomTableComponent,
     DynamicMenuConstanciasComponent,
     DynamicTableComponent,
     DynamicTablePruebaComponent,
@@ -96,7 +101,6 @@ import { HomePageComponent } from './home-page/home-page.component';
     LandingPageComponent,
     DynamicInputDialogComponent,
     DynamicStepsComponent,
-    PerfilHeaderComponent,
     GestionarDiscapacidadDialogComponent
   ]
 })

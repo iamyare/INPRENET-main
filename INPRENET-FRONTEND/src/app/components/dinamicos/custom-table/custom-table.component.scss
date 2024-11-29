@@ -1,0 +1,122 @@
+.table-wrapper {
+  margin: 20px;
+  font-family: 'Roboto', Arial, sans-serif;
+  color: #333;
+}
+
+.loading-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 200px;
+}
+
+.header-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.table-container {
+  overflow-x: auto; /* Scroll horizontal para tablas */
+  margin-top: 10px;
+  border: 1px solid #e0e0e0; /* Borde alrededor del scroll */
+  border-radius: 8px;
+  background-color: #ffffff;
+}
+
+.custom-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.custom-table th {
+  background-color: transparent;
+  color: #26a69a; /* Verde 500 */
+  border-bottom: 2px solid #26a69a;
+  padding: 8px; /* Reducido para hacer más compacto */
+  text-align: left;
+  text-transform: uppercase;
+  font-weight: bold;
+  font-size: 12px; /* Más pequeño para ajustar más columnas */
+}
+
+.custom-table td {
+  padding: 8px; /* Compacto */
+  border-bottom: 1px solid #e0e0e0; /* Gris claro */
+  font-size: 12px; /* Tamaño ajustado */
+}
+
+.custom-table tr:hover {
+  background-color: #f9f9f9;
+  transition: background-color 0.3s ease;
+}
+
+.column-filter {
+  width: 90%;
+  margin-top: 6px;
+}
+
+.column-filter input {
+  background-color: #ffffff; /* Blanco */
+  border: 1px solid #ccc; /* Gris claro */
+  border-radius: 4px;
+  padding: 4px 8px; /* Más compacto */
+  font-size: 12px; /* Tamaño más pequeño */
+  transition: all 0.3s ease;
+}
+
+.column-filter input:focus {
+  background-color: #f9f9f9; 
+  border-color: #26a69a; 
+  outline: none;
+  box-shadow: 0 0 5px rgba(38, 166, 154, 0.5);
+}
+
+.no-data-row {
+  text-align: center;
+  color: #1c9588;
+  padding: 15px;
+  font-size: 14px;
+}
+
+.mat-paginator {
+  background: #ffffff;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+}
+
+.mat-paginator .mat-paginator-range-label {
+  font-size: 12px;
+  color: #229e92;
+}
+
+.mat-paginator .mat-paginator-navigation-button {
+  color: #26a69a; 
+}
+
+.header-title {
+  font-size: 24px;
+  font-weight: bold;
+  color: #1c9588;
+  margin: 0;
+}
+
+.header-subtitle {
+  font-size: 16px;
+  color: #26a69a;
+  margin: 5px 0 0;
+}
+
+.moneda-left {
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+}
+
+.moneda-left::before {
+  content: 'L';
+  margin-right: 4px; /* Espacio entre el símbolo y el valor */
+}
+

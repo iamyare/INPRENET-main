@@ -85,23 +85,24 @@ export const MENU_CONFIG: Section[] = [
         icon: 'money',
         children: [
           { title: 'Privados', route: 'planilla/Ingresos/planilla-colegios-privados', icon: 'business' },
+          { title: 'Privados', route: 'planilla/Ingresos/cargar-planilla-privados', icon: 'business' },
           { title: 'Cotizaciones/Aportaciones', route: 'planilla/Ingresos/cotizacion-aportacion', icon: 'business' },
         ],
       },
     ],
   },
   {
-    name: 'CUENTAS INPREMA',
+    name: 'CONASA',
     items: [
       {
-        title: 'Movimientos de cuentas',
-        icon: 'money',
+        title: 'GESTION CONASA',
+        icon: 'search', // Ícono de búsqueda
         children: [
-          { title: 'Ver movimiento', route: 'cuentas/Movimientos/Ver-movimientos', icon: 'business' },
+          { title: 'Buscar Afiliado', route: 'conasa/ver-afiliado', icon: 'person_search' }, // Ícono de búsqueda de persona
         ],
       },
     ],
-  },
+  },  
   {
     name: 'ESCALAFÓN',
     items: [
@@ -110,6 +111,13 @@ export const MENU_CONFIG: Section[] = [
         icon: 'grading',
         children: [
           { title: 'Detalle Envío', route: 'escalafon/detalle-envio', icon: 'description' },
+        ],
+      },
+      {
+        title: 'Movimientos de cuentas',
+        icon: 'money',
+        children: [
+          { title: 'Ver movimiento', route: 'escalafon/Ver-movimientos', icon: 'business' },
         ],
       },
     ],

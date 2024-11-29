@@ -142,6 +142,13 @@ export class PermisosService {
             { role: 'OFICIAL DE PLANILLA', module: 'PLANILLA' }, */
           ]
         },
+        'planilla/Ingresos/cargar-planilla-privados': {
+          title: 'Privados',
+          permisos: [
+            /* { role: 'ADMINISTRADOR', module: 'PLANILLA' },
+            { role: 'OFICIAL DE PLANILLA', module: 'PLANILLA' }, */
+          ]
+        },
         'planilla/Ingresos/cotizacion-aportacion': {
           title: 'Privados',
           permisos: [
@@ -151,9 +158,16 @@ export class PermisosService {
         }
       }
     },
-    'CUENTAS INPREMA': {
+    ESCALAFÓN: {
       rutas: {
-        'cuentas/Movimientos/Ver-movimientos': {
+        'escalafon/detalle-envio': {
+          title: 'Detalle Envío',
+          permisos: [
+            { role: 'CONSULTA PRESTAMOS', module: 'ESCALAFON' },
+            { role: 'ADMINISTRADOR', module: 'ESCALAFON' }
+          ]
+        },
+        'escalafon/Ver-movimientos': {
           title: 'Ver Movimiento',
           permisos: [
             { role: 'ADMINISTRADOR', module: 'CUENTAS INPREMA' },
@@ -162,10 +176,10 @@ export class PermisosService {
         }
       }
     },
-    ESCALAFÓN: {
+    CONASA: {
       rutas: {
-        'escalafon/detalle-envio': {
-          title: 'Detalle Envío',
+        'conasa/ver-afiliado': {
+          title: 'Buscar Afiliado',
           permisos: [
             { role: 'CONSULTA PRESTAMOS', module: 'ESCALAFON' },
             { role: 'ADMINISTRADOR', module: 'ESCALAFON' }

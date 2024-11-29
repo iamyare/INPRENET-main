@@ -296,4 +296,25 @@ export class RefPersComponent implements OnInit {
       return null;
     };
   }
+
+  reset(): void {
+    this.referencias.clear();
+    this.formGroup.get('conyuge')?.reset();
+    this.formGroup.get('conyuge')?.patchValue({
+      primer_nombre: '',
+      segundo_nombre: '',
+      tercer_nombre: '',
+      primer_apellido: '',
+      segundo_apellido: '',
+      n_identificacion: '',
+      fecha_nacimiento: '',
+      telefono_domicilio: '',
+      telefono_celular: '',
+      telefono_trabajo: '',
+      trabaja: '',
+      es_afiliado: ''
+    });
+    this.formGroup.reset();
+  }
+  
 }

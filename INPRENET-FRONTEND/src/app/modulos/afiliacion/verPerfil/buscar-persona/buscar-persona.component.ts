@@ -23,6 +23,8 @@ export class BuscarPersonaComponent {
       })
     ).subscribe(persona => {
       if (persona) {
+        console.log(persona);
+        
         this.persona = persona;
         this.personaService.changePersona(persona);
         this.errorMessage = null;

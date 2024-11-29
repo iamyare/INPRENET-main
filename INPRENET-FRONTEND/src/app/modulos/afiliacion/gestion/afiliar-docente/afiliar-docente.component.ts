@@ -1,11 +1,19 @@
 import { Component, ViewChild, TemplateRef, OnInit } from '@angular/core';
-import { FormArray, FormBuilder, FormGroup } from '@angular/forms';
+import { FormArray, FormBuilder, FormGroup, ValidationErrors } from '@angular/forms';
 import { MatStepper } from '@angular/material/stepper';
 import { AfiliacionService } from 'src/app/services/afiliacion.service';
 import { ToastrService } from 'ngx-toastr';
 import pdfMake from 'pdfmake/build/pdfmake';
 import { HttpClient } from '@angular/common/http';
 import { DatosEstaticosService } from 'src/app/services/datos-estaticos.service';
+import { DatosGeneralesTemporalComponent } from '../datos-generales-temporal/datos-generales-temporal.component';
+import { PepsComponent } from '../peps/peps.component';
+import { BancosComponent } from '../bancos/bancos.component';
+import { RefPersComponent } from '../ref-pers/ref-pers.component';
+import { ColMagisterialesComponent } from '../col-magisteriales/col-magisteriales.component';
+import { DatPuestoTrabComponent } from '../dat-puesto-trab/dat-puesto-trab.component';
+import { BenefComponent } from '../benef/benef.component';
+import { OtrasFuentesIngresoComponent } from '../otras-fuentes-ingreso/otras-fuentes-ingreso.component';
 
 @Component({
   selector: 'app-afiliar-docente',
@@ -20,11 +28,24 @@ export class AfiliarDocenteComponent implements OnInit {
   @ViewChild('bancosTemplate', { static: true }) bancosTemplate!: TemplateRef<any>;
   @ViewChild('centrosTrabajoTemplate', { static: true }) centrosTrabajoTemplate!: TemplateRef<any>;
   @ViewChild('beneficiariosTemplate', { static: true }) beneficiariosTemplate!: TemplateRef<any>;
+  
+  @ViewChild('datosGeneralesComponent', { static: false }) datosGeneralesComponent!: DatosGeneralesTemporalComponent;
+  @ViewChild('pepsComponent', { static: false }) pepsComponent!: PepsComponent;
+  @ViewChild('bancosComponent', { static: false }) bancosComponent!: BancosComponent;
+  @ViewChild('refPersComponent', { static: false }) refPersComponent!: RefPersComponent;
+  @ViewChild('colMagisterialesComponent', { static: false }) colMagisterialesComponent!: ColMagisterialesComponent;
+  @ViewChild('centrosTrabajoComponent', { static: false }) centrosTrabajoComponent!: DatPuestoTrabComponent;
+  @ViewChild('beneficiariosComponent', { static: false }) beneficiariosComponent!: BenefComponent;
+  @ViewChild('datPuestoTrabComponent', { static: false }) datPuestoTrabComponent!: DatPuestoTrabComponent;
+  @ViewChild('otrasFuentesIngresoComponent', { static: false }) otrasFuentesIngresoComponent!: OtrasFuentesIngresoComponent;
+  @ViewChild('benefComponent', { static: false }) benefComponent!: BenefComponent;
+  
   @ViewChild(MatStepper) stepper!: MatStepper;
 
   steps: any[] = [];
   formGroup!: FormGroup;
   fotoPerfil: string = '';
+  formErrors: any = null;
 
   constructor(private fb: FormBuilder, private afiliacionService: AfiliacionService, private datosEstaticosService: DatosEstaticosService,
     private toastr: ToastrService, private http: HttpClient) {
@@ -162,6 +183,9 @@ export class AfiliarDocenteComponent implements OnInit {
         fileFoto = new File([fotoBlob], 'perfil.jpg', { type: 'image/jpeg' });
       }
 
+      console.log(formattedData);
+      
+
       let fileIdent = datosGenerales?.archivo_identificacion
 
       this.afiliacionService.crearAfiliacion(formattedData, fileFoto, fileIdent).subscribe(
@@ -177,6 +201,8 @@ export class AfiliarDocenteComponent implements OnInit {
         }
       );
     } else {
+      this.formErrors = this.generateFormErrors(this.formGroup);
+      console.error('Errores del formulario:', this.formErrors);
       this.markAllAsTouched(this.formGroup);
       this.toastr.warning('El formulario contiene información inválida', 'Advertencia');
     }
@@ -226,8 +252,10 @@ export class AfiliarDocenteComponent implements OnInit {
   }
 
   private formatCentrosTrabajo(trabajos: any[]): any[] {
+    console.log(trabajos);
+    
     return trabajos.map(trabajo => ({
-      id_centro_trabajo: trabajo.id_centro_trabajo,
+      id_centro_trabajo: trabajo.id_centro_trabajo?.value || trabajo.id_centro_trabajo,
       cargo: trabajo.cargo.toUpperCase(),
       numero_acuerdo: trabajo.numero_acuerdo,
       salario_base: trabajo.salario_base,
@@ -238,7 +266,7 @@ export class AfiliarDocenteComponent implements OnInit {
       tipo_jornada: trabajo.tipo_jornada
     }));
   }
-
+  
   private formatOtrasFuentesIngreso(otrasFuentesIngreso: any[]): any[] {
     return otrasFuentesIngreso.map(fuente => ({
       actividad_economica: fuente.actividad_economica.toUpperCase(),
@@ -343,13 +371,69 @@ export class AfiliarDocenteComponent implements OnInit {
   }
 
   resetForm(): void {
+    // Resetear el formulario principal
     this.formGroup.reset();
-    this.steps.forEach(step => {
+  
+    // Resetear los formularios de cada paso
+    this.steps.forEach((step) => {
       step.formGroup.reset();
     });
+  
+    // Llama al método `reset` de cada componente hijo si están presentes
+    /* if (this.datosGeneralesComponent) {
+      this.datosGeneralesComponent.reset();
+    } */
+  
+    if (this.pepsComponent) {
+      this.pepsComponent.reset();
+    }
+  
+    if (this.bancosComponent) {
+      this.bancosComponent.reset();
+    }
+  
+    if (this.refPersComponent) {
+      this.refPersComponent.reset();
+    }
+  
+    if (this.colMagisterialesComponent) {
+      this.colMagisterialesComponent.reset();
+    }
+  
+    if (this.centrosTrabajoComponent) {
+      this.centrosTrabajoComponent.reset();
+    }
+  
+    if (this.beneficiariosComponent) {
+      this.beneficiariosComponent.reset();
+    }
+  
+    if (this.datPuestoTrabComponent) {
+      this.datPuestoTrabComponent.reset();
+    }
+  
+    if (this.otrasFuentesIngresoComponent) {
+      this.otrasFuentesIngresoComponent.reset();
+    }
+  
+    // Reinicia la foto de perfil
     this.fotoPerfil = '';
+  
+    // Reinicia el stepper
     this.stepper.reset();
+  
+    // Reinicia cualquier error del formulario
+    this.formErrors = null;
+  
+    // Otras configuraciones adicionales si son necesarias
+    console.log('Formulario y componentes hijos reiniciados con éxito');
   }
+  
+  onPepsChange(event: any): void {
+    console.log('Cambios en PEPs detectados:', event);
+    // Realiza cualquier acción adicional según el evento
+  }
+  
 
   formatDiscapacidades(discapacidades: any): any[] {
     return Object.keys(discapacidades)
@@ -620,6 +704,42 @@ export class AfiliarDocenteComponent implements OnInit {
       });
     });
   }
+
+  generateFormErrors(control: FormGroup | FormArray): any {
+    const errors: any = {};
+  
+    Object.keys(control.controls).forEach((key) => {
+      const childControl = control.get(key);
+  
+      if (childControl instanceof FormGroup || childControl instanceof FormArray) {
+        // Si el control es un FormGroup o FormArray, procesarlo recursivamente
+        errors[key] = this.generateFormErrors(childControl);
+      } else if (childControl?.errors) {
+        // Si el control tiene errores, agregarlos al resultado
+        errors[key] = this.getErrorMessages(childControl.errors);
+      }
+    });
+  
+    return errors;
+  }
+  
+  private getErrorMessages(errors: ValidationErrors): string[] {
+    const errorMessages: any = {
+      required: 'Este campo es requerido.',
+      minlength: (error: any) => `Debe tener al menos ${error.requiredLength} caracteres.`,
+      maxlength: (error: any) => `No puede tener más de ${error.requiredLength} caracteres.`,
+      pattern: 'El formato no es válido.',
+      fechaIncorrecta: 'La fecha de ingreso no puede ser mayor a la fecha de egreso.',
+    };
+  
+    return Object.keys(errors).map((key) => {
+      const error = errors[key];
+      return typeof errorMessages[key] === 'function'
+        ? errorMessages[key](error)
+        : errorMessages[key] || 'Error desconocido.';
+    });
+  }
+  
 
 
 }

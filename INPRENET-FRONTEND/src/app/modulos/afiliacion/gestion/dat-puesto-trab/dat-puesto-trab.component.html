@@ -15,27 +15,40 @@
             <mat-form-field class="half-width" appearance="outline">
               <mat-label>Código del Centro de Trabajo</mat-label>
               <mat-icon matPrefix>business</mat-icon>
-              <mat-select formControlName="id_centro_trabajo">
-                <mat-option *ngFor="let centro of centrosTrabajo" [value]="centro.value">
+              <input
+                type="text"
+                matInput
+                formControlName="id_centro_trabajo"
+                [matAutocomplete]="autoCodigo"
+                placeholder="Buscar código del centro"
+              />
+              <mat-autocomplete #autoCodigo="matAutocomplete" [displayWith]="displayCodigo">
+                <mat-option
+                  *ngFor="let centro of getFilteredCodigosTrabajo(i)"
+                  [value]="centro"
+                >
                   {{ centro.label }}
                 </mat-option>
-              </mat-select>
+              </mat-autocomplete>
               <mat-error *ngFor="let error of getErrors(i, 'id_centro_trabajo')">
                 <mat-icon>error</mat-icon> {{ error }}
               </mat-error>
             </mat-form-field>
-
+            
+            
+            
+            
             <mat-form-field class="half-width" appearance="outline">
               <mat-label>Nombre del Centro de Trabajo</mat-label>
               <mat-icon matPrefix>business</mat-icon>
               <input
                 type="text"
                 matInput
-                [formControlName]="'nombre_centro_trabajo'"
-                [matAutocomplete]="auto"
+                formControlName="nombre_centro_trabajo"
+                [matAutocomplete]="autoNombre"
                 placeholder="Buscar centro de trabajo"
               />
-              <mat-autocomplete #auto="matAutocomplete" [displayWith]="displayFn">
+              <mat-autocomplete #autoNombre="matAutocomplete" [displayWith]="displayNombre">
                 <mat-option
                   *ngFor="let centro of getFilteredCentrosTrabajo(i)"
                   [value]="centro"
@@ -47,6 +60,7 @@
                 <mat-icon>error</mat-icon> {{ error }}
               </mat-error>
             </mat-form-field>
+            
 
 
           </div>
@@ -84,6 +98,7 @@
                 <mat-icon>error</mat-icon> {{ error }}
               </mat-error>
             </mat-form-field>
+            
             <mat-form-field class="half-width" appearance="outline">
               <mat-label>Fecha de Egreso</mat-label>
               <mat-icon matPrefix>calendar_today</mat-icon>
@@ -112,7 +127,7 @@
               <mat-error *ngFor="let error of getErrors(i, 'numero_acuerdo')">
                 <mat-icon>error</mat-icon> {{ error }}
               </mat-error>
-            </mat-form-field>
+            </mat-form-field>            
             <mat-form-field class="half-width" appearance="outline">
               <mat-label>Jornada</mat-label>
               <mat-icon matPrefix>schedule</mat-icon>

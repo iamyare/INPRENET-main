@@ -1,4 +1,4 @@
-import { NgModule } from '@angular/core';
+import { LOCALE_ID, NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { AppRoutingModule } from './app-routing.module';
@@ -14,8 +14,12 @@ import { ComponentsModule } from './components/components.module';
 import { AdminModule } from './modulos/admin/admin.module';
 import { SidenavService } from './services/sidenav.service';
 import { TokenInterceptor } from './interceptors/token.interceptor';
-import { MovimientosInpremaModule } from './modulos/movimientos-inprema/movimientos-inprema.module';
 import { EscalafonModule } from './modulos/escalafon/escalafon.module';
+import { ConasaModule } from './modulos/conasa/conasa.module';
+import { registerLocaleData } from '@angular/common';
+import localeEs from '@angular/common/locales/es';
+
+registerLocaleData(localeEs, 'es');
 @NgModule({
   declarations: [
     AppComponent,
@@ -27,7 +31,6 @@ import { EscalafonModule } from './modulos/escalafon/escalafon.module';
     BrowserAnimationsModule,
     MaterialAngularModule,
     AfiliacionModule,
-    MovimientosInpremaModule,
     PlanillaModule,
     AuthModule,
     EscalafonModule,
@@ -35,6 +38,7 @@ import { EscalafonModule } from './modulos/escalafon/escalafon.module';
     ReactiveFormsModule,
     AdminModule,
     FormsModule,
+    ConasaModule,
     ToastrModule.forRoot({
       timeOut: 10000,
       positionClass: 'toast-bottom-right',
@@ -42,7 +46,8 @@ import { EscalafonModule } from './modulos/escalafon/escalafon.module';
     }),
   ],
   providers: [SidenavService,
-    { provide: HTTP_INTERCEPTORS, useClass: TokenInterceptor, multi: true }
+    { provide: HTTP_INTERCEPTORS, useClass: TokenInterceptor, multi: true },
+    { provide: LOCALE_ID, useValue: 'es' }
   ],
   bootstrap: [AppComponent]
 })

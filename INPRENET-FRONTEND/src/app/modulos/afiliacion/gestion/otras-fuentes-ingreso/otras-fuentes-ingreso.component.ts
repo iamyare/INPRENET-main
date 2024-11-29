@@ -59,4 +59,10 @@ export class OtrasFuentesIngresoComponent implements OnInit {
     };
     return errorMessages[errorType] || 'Error desconocido.';
   }
+
+  reset(): void {
+    this.otrasFuentesIngresoArray.clear();
+    this.formGroup.reset();
+  }
+  
 }

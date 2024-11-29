@@ -193,4 +193,17 @@ export class PepsComponent implements OnInit {
       return count > 1 ? { fieldNotUnique: true } : null;
     };
   }
+
+  reset(): void {
+    const pepsArray = this.peps;
+    while (pepsArray.length > 0) {
+      pepsArray.removeAt(0);
+    }
+    const familiaresArray = this.familiares;
+    while (familiaresArray.length > 0) {
+      familiaresArray.removeAt(0);
+    }
+  }
+  
+  
 }

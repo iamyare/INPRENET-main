@@ -167,7 +167,8 @@ export class DatosGeneralesTemporalComponent implements OnInit {
       Validators.pattern(addressPattern)
     ]));
     this.formGroup.addControl('grado_academico', new FormControl('', [
-      Validators.maxLength(75)
+      Validators.maxLength(75),
+      Validators.required
     ]));
     this.formGroup.addControl('voluntario', new FormControl(false, Validators.required));
 

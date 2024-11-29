@@ -25,22 +25,25 @@ export class AgregarPuestTrabComponent{
   }
 
   guardar() {
-    const datosParseados = this.formPuestTrab.value.trabajo;
-
+    const datosParseados = this.formPuestTrab.value.trabajo.map((trabajo: any) => ({
+        ...trabajo,
+        id_centro_trabajo: trabajo.id_centro_trabajo?.value || trabajo.id_centro_trabajo,
+        nombre_centro_trabajo: trabajo.nombre_centro_trabajo?.nombreCentro || trabajo.nombre_centro_trabajo,
+    }));
     this.afiliacionService.asignarCentrosTrabajoAPersona(Number(this.data.idPersona), datosParseados).subscribe(
-
-      (res: any) => {
-        if (res.length > 0) {
-          this.toastr.success("Centro de trabajo agregado con éxito");
-          this.cerrar();
+        (res: any) => {
+            if (res.length > 0) {
+                this.toastr.success("Centro de trabajo agregado con éxito");
+                this.cerrar();
+            }
+        },
+        (error) => {
+            this.toastr.error("Error al crear el centro de trabajo");
+            console.error('Error al crear centros de trabajo pertenecientes al afiliado', error);
         }
-      },
-      (error) => {
-        this.toastr.error("Error al crear el centro de trabajo");
-        console.error('Error al crear centros de trabajo pertenecientes al afiliado', error);
-      }
     );
-  }
+}
+
 
   cerrar() {
     this.dialogRef.close();

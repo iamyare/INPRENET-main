@@ -65,4 +65,9 @@ export class ColMagisterialesComponent implements OnInit {
       });
     }
   }
+
+  reset(): void {
+    this.colMags.clear();
+    this.formGroup.reset();
+  }
 }

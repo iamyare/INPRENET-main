@@ -66,7 +66,6 @@ export class DatPuestoTrabComponent implements OnInit {
       const nombreCentroControl = control.get('nombre_centro_trabajo');
       if (nombreCentroControl) {
         nombreCentroControl.valueChanges.pipe(startWith('')).subscribe((value) => {
-          // Filtro específico para este control
           (control as FormGroup).patchValue({
             filteredCentrosTrabajo: this.centrosTrabajo.filter((centro) =>
               centro.nombreCentro.toLowerCase().includes(value.toLowerCase())
@@ -76,28 +75,7 @@ export class DatPuestoTrabComponent implements OnInit {
       }
     });
   }
-
-  getFilteredCentrosTrabajo(index: number): any[] {
-    const trabajoControl = this.trabajosArray.at(index);
-    const filterValue = trabajoControl.get('nombre_centro_trabajo')?.value?.nombreCentro?.toLowerCase() ||
-                        trabajoControl.get('nombre_centro_trabajo')?.value?.toLowerCase() ||
-                        '';
-    const selectedCentro = this.centrosTrabajo.find(
-      (centro) => centro.nombreCentro.toLowerCase() === filterValue
-    );
-
-    // Si el valor actual coincide exactamente con un centro, muestra todos
-    if (selectedCentro) {
-      return this.centrosTrabajo;
-    }
-
-    // De lo contrario, aplica el filtro normalmente
-    return this.centrosTrabajo.filter((centro) =>
-      centro.nombreCentro.toLowerCase().includes(filterValue)
-    );
-  }
-
-
+  
   displayFn(centro: any): string {
     return centro ? centro.nombreCentro : '';
   }
@@ -127,51 +105,36 @@ export class DatPuestoTrabComponent implements OnInit {
       jornada: ['', Validators.required],
       tipo_jornada: ['', Validators.required]
     }, { validators: this.fechasValidator });
-
-    // Actualizar campos relacionados cuando se cambia `id_centro_trabajo`
     trabajoFormGroup.get('id_centro_trabajo')?.valueChanges.subscribe((value: any) => {
-      const selectedCentro = this.centrosTrabajo.find((centro: any) => centro.value === value);
+      const selectedCentro = this.centrosTrabajo.find((centro) => centro.label === value || centro.label === value?.label);
       if (selectedCentro) {
         trabajoFormGroup.patchValue({
-          nombre_centro_trabajo: selectedCentro.nombreCentro,
+          nombre_centro_trabajo: selectedCentro,
           nombreCentro: selectedCentro.nombreCentro,
           direccionCentro: selectedCentro.direccion,
           sectorEconomico: selectedCentro.sector,
           showNumeroAcuerdo: selectedCentro.sector === 'PUBLICO' || selectedCentro.sector === 'PROHECO'
-        });
+        }, { emitEvent: false });
         this.configurarValidacionesNumeroAcuerdo(trabajoFormGroup, selectedCentro.sector);
       }
     });
-
-    // Actualizar campos relacionados cuando se cambia `nombre_centro_trabajo`
     trabajoFormGroup.get('nombre_centro_trabajo')?.valueChanges.subscribe((value: any) => {
-      const selectedCentro = this.centrosTrabajo.find((centro: any) => centro.nombreCentro === value);
+      const selectedCentro = this.centrosTrabajo.find((centro) => centro.nombreCentro === value || centro.nombreCentro === value?.nombreCentro);
       if (selectedCentro) {
         trabajoFormGroup.patchValue({
-          id_centro_trabajo: selectedCentro.value, // Actualiza automáticamente el código
+          id_centro_trabajo: selectedCentro,
           nombreCentro: selectedCentro.nombreCentro,
           direccionCentro: selectedCentro.direccion,
           sectorEconomico: selectedCentro.sector,
           showNumeroAcuerdo: selectedCentro.sector === 'PUBLICO' || selectedCentro.sector === 'PROHECO'
-        });
-        this.configurarValidacionesNumeroAcuerdo(trabajoFormGroup, selectedCentro.sector);
-      } else {
-        // Limpia los campos si el valor no es válido
-        trabajoFormGroup.patchValue({
-          id_centro_trabajo: '',
-          nombreCentro: '',
-          direccionCentro: '',
-          sectorEconomico: '',
-          showNumeroAcuerdo: false
-        });
+        }, { emitEvent: false });
       }
     });
-
+  
     this.trabajosArray.push(trabajoFormGroup);
-    trabajoFormGroup.markAllAsTouched();
-    this.formGroup.markAsTouched();
   }
-
+  
+  
   eliminarTrabajo(index: number): void {
     if (this.trabajosArray.length > 0) {
       this.trabajosArray.removeAt(index);
@@ -186,27 +149,31 @@ export class DatPuestoTrabComponent implements OnInit {
     return [];
   }
 
-  private getErrorMessage(errorType: string, errorValue: any): string {
-    const errorMessages: any = {
-      required: 'Este campo es requerido.',
-      minlength: `Debe tener al menos ${errorValue.requiredLength} caracteres.`,
-      maxlength: `No puede tener más de ${errorValue.requiredLength} caracteres.`,
-      pattern: 'El formato no es válido.'
-    };
-    return errorMessages[errorType] || 'Error desconocido.';
-  }
-
   fechasValidator(control: AbstractControl): ValidationErrors | null {
     const fechaIngreso = control.get('fecha_ingreso')?.value;
     const fechaEgreso = control.get('fecha_egreso')?.value;
-
+  
     if (fechaIngreso && fechaEgreso && new Date(fechaIngreso) > new Date(fechaEgreso)) {
-      return { fechaIncorrecta: 'La fecha de ingreso no puede ser mayor a la fecha de egreso.' };
+      control.get('fecha_egreso')?.setErrors({ fechaIncorrecta: true });
+      return { fechaIncorrecta: 'La fecha de ingreso no puede ser menor a la fecha de egreso.' };
     }
+  
+    control.get('fecha_egreso')?.setErrors(null);
     return null;
   }
-
-  private configurarValidacionesNumeroAcuerdo(trabajoFormGroup: FormGroup, sector: string) {
+  
+  public getErrorMessage(errorType: string, errorValue: any): string {
+    const errorMessages: any = {
+      required: 'Este campo es requerido.',
+      minlength: `Debe tener al menos ${errorValue?.requiredLength} caracteres.`,
+      maxlength: `No puede tener más de ${errorValue?.requiredLength} caracteres.`,
+      pattern: 'El formato no es válido.',
+      fechaIncorrecta: 'La fecha de egreso no debe ser menor a la fecha de ingreso.',
+    };
+    return errorMessages[errorType] || 'Error desconocido.';
+  }
+  
+  private configurarValidacionesNumeroAcuerdo(trabajoFormGroup: FormGroup, sector: string): void {
     const numeroAcuerdoControl = trabajoFormGroup.get('numero_acuerdo');
     if (sector === 'PUBLICO' || sector === 'PROHECO') {
       numeroAcuerdoControl?.setValidators([Validators.required, Validators.maxLength(40)]);
@@ -216,6 +183,56 @@ export class DatPuestoTrabComponent implements OnInit {
     }
     numeroAcuerdoControl?.updateValueAndValidity();
   }
+  
+  getFilteredCentrosTrabajo(index: number): any[] {
+    const trabajoControl = this.trabajosArray.at(index);
+    const value = trabajoControl.get('nombre_centro_trabajo')?.value;
+  
+    const filterValue = typeof value === 'string' ? value.toLowerCase() : '';
+    return this.centrosTrabajo.filter((centro) =>
+      centro.nombreCentro.toLowerCase().includes(filterValue)
+    );
+  }
+
+  getFilteredCodigosTrabajo(index: number): any[] {
+    const trabajoControl = this.trabajosArray.at(index);
+    const value = trabajoControl.get('id_centro_trabajo')?.value;
+  
+    const filterValue = typeof value === 'string' ? value.toLowerCase() : '';
+    return this.centrosTrabajo.filter((centro) =>
+      centro.label.toLowerCase().includes(filterValue)
+    );
+  }
+  
+  
+  displayNombre(value: any): string {
+    if (!value) {
+      return '';
+    }
+  
+    if (typeof value === 'string') {
+      return value; 
+    }
+    return value.nombreCentro || '';
+  }
+  
+  displayCodigo(value: any): string {
+    if (!value) {
+      return '';
+    }
+  
+    if (typeof value === 'string') {
+      return value; 
+    }
+  
+    return value.label || '';
+  }
+  
+  reset(): void {
+    this.trabajosArray.clear();
+    this.formGroup.reset();
+  }
+  
 }
 
 

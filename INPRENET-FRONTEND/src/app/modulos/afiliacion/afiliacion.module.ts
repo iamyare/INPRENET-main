@@ -35,8 +35,6 @@ import { EditDatosGeneralesComponent } from './gestion/edit-datos-generales/edit
 import { AgregarPuestTrabComponent } from './gestion/agregar-puest-trab/agregar-puest-trab.component';
 import { EditReferPersonalesComponent } from './gestion/edit-refer-personales/edit-refer-personales.component';
 import { AgregarReferenciasPersonalesComponent } from './gestion/agregar-referencias-personales/agregar-referencias-personales.component';
-import { VerCuentasPersonasComponent } from './gestion/ver-cuentas-personas/ver-cuentas-personas.component';
-import { AgregarCuentasComponent } from './gestion/agregar-cuentas/agregar-cuentas.component';
 import { VerDatosAfiliadosComponent } from './gestion/ver-datos-afiliados/ver-datos-afiliados.component';
 import { AfilBancoComponent } from './gestion/afil-banco/afil-banco.component';
 import { DatGeneralesAfiliadoComponent } from './gestion/dat-generales-afiliado/dat-generales-afiliado.component';
@@ -111,8 +109,6 @@ import { DesignadoComponent } from './verPerfil/designado/designado.component';
     AgregarPuestTrabComponent,
     EditReferPersonalesComponent,
     AgregarReferenciasPersonalesComponent,
-    VerCuentasPersonasComponent,
-    AgregarCuentasComponent,
     VerDatosAfiliadosComponent,
     AfilBancoComponent,
     DatGeneralesAfiliadoComponent,

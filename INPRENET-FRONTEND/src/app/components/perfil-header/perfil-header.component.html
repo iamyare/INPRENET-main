@@ -1,5 +1,5 @@
 <div class="buscar-persona-container" *ngIf="!persona">
-  <h1>Buscar Persona</h1>
+  <h1>Buscar Afiliado</h1>
   <mat-form-field appearance="outline">
     <mat-label>Número De Identificación</mat-label>
     <input matInput type="text" [(ngModel)]="n_identificacion" placeholder="Ingrese El Número De Identificación">
@@ -13,7 +13,7 @@
     <button mat-icon-button (click)="resetBusqueda()" class="search-again">
       <mat-icon>search</mat-icon>
     </button>
-    <span class="search-text">Buscar otra persona</span>
+    <span class="search-text">Buscar otro Afiliado</span>
   </div>
   <div class="perfil-header">
     <div class="perfil-foto">

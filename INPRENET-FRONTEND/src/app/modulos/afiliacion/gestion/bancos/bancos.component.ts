@@ -88,4 +88,11 @@ export class BancosComponent implements OnInit {
       });
     }
   }
+  
+  reset(): void {
+    // Limpia todos los bancos del FormArray
+    this.bancosArray.clear();
+    // Reinicia el formulario padre
+    this.formGroup.reset();
+  }
 }

@@ -9,6 +9,27 @@ import { environment } from 'src/environments/environment';
 export class TransaccionesService {
 
   constructor(private http: HttpClient) { }
+  crearMovimiento(movimientoData: any): Observable<any> {
+    const url = `${environment.API_URL}/api/transacciones/crear-movimiento`;
+    return this.http.post(url, movimientoData).pipe(
+      catchError(error => {
+        console.error('Error al crear movimiento:', error);
+        return throwError(() => new Error('Error al crear movimiento: ' + error.message));
+      })
+    );
+  }
+  
+
+  crearCuenta(idPersona: number, cuentaData: any): Observable<any> {
+    return this.http.post(`${environment.API_URL}/api/transacciones/crear-cuenta/${idPersona}`, cuentaData);
+  }
+
+  obtenerCuentasPorIdentificacion(nIdentificacion: string): Observable<any> {
+    const url = `${environment.API_URL}/api/transacciones/cuentas/${nIdentificacion}`;
+    return this.http.get<any>(url).pipe(
+      catchError(error => throwError(() => new Error('Error al obtener cuentas: ' + error.message)))
+    );
+  }
 
   eliminarMovimiento(idMovimiento: number): Observable<any> {
     const url = `${environment.API_URL}/api/transacciones/eliminar-movimiento/${idMovimiento}`;
@@ -50,18 +71,8 @@ export class TransaccionesService {
     );
   }
 
-  crearMovimiento(datosMovimiento: any): Observable<any> {
-    return this.http.post(`${environment.API_URL}/api/transacciones/crear-movimiento`, datosMovimiento).pipe(
-      catchError(error => throwError(() => new Error('Error al crear el movimiento: ' + error.message)))
-    );
-  }
-
   obtenerTiposDeCuentaPorDNI(dni: string): Observable<any> {
     return this.http.get(`${environment.API_URL}/api/transacciones/tipos-de-cuenta/${dni}`);
-  }
-
-  crearCuenta(idPersona: number, datos: any): Observable<any> {
-    return this.http.post(`${environment.API_URL}/api/transacciones/crear-cuenta/${idPersona}`, datos);
   }
 
   desactivarCuenta(numCuenta: string, datosGenerales: any): Observable<any> {

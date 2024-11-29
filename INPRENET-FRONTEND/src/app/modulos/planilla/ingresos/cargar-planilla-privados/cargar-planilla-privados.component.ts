@@ -72,9 +72,9 @@ export class CargarPlanillaPrivadosComponent implements AfterViewInit {
     });
 
     const ITEMS: Item[] = [
-      {id: 1, nombre: 'Item 1'},
-      {id: 2, nombre: 'Item 2'},
-      {id: 3, nombre: 'Item 3'},
+      {id: 1, nombre: 'Colegio 1'},
+      {id: 2, nombre: 'Colegio 2'},
+      {id: 3, nombre: 'Colegio 3'},
     ];
     this.dataSource = new MatTableDataSource(ITEMS);
   }

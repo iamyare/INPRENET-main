@@ -54,12 +54,12 @@ const routes: Routes = [
         loadChildren: () => import('./views/views.module').then(m => m.ViewsModule),
       },
       {
-        path: 'cuentas',
-        loadChildren: () => import('./modulos/movimientos-inprema/movimientos-inprema.module').then(m => m.MovimientosInpremaModule),
-      },
-      {
         path: 'escalafon',
         loadChildren: () => import('./modulos/escalafon/escalafon.module').then(m => m.EscalafonModule),
+      },
+      {
+        path: 'conasa',
+        loadChildren: () => import('./modulos/conasa/conasa.module').then(m => m.ConasaModule),
       },
 
       { path: 'usuario/editar', component: EditarPerfilComponent },

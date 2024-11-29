@@ -1,4 +1,4 @@
-import { Component, Output, EventEmitter } from '@angular/core';
+import { Component, Output, EventEmitter, Input } from '@angular/core';
 import { catchError } from 'rxjs/operators';
 import { of } from 'rxjs';
 import { AfiliadoService } from 'src/app/services/afiliado.service';
@@ -9,12 +9,13 @@ import { AfiliadoService } from 'src/app/services/afiliado.service';
   styleUrls: ['./perfil-header.component.scss']
 })
 export class PerfilHeaderComponent {
+  @Input() personaInput: any; // Cambiamos el nombre de la propiedad de entrada
+  @Output() personaEncontrada = new EventEmitter<any>();
+
   n_identificacion: string = '';
   errorMessage: string | null = null;
-  persona: any = null;
-  defaultFotoUrl = '../../../../../assets/images/AvatarDefecto.png';
-
-  @Output() personaEncontrada = new EventEmitter<any>();
+  persona: any = null; // Esta propiedad se usa internamente
+  defaultFotoUrl = '../../../../../assets/images/default.jpg';
 
   constructor(private afiliadoService: AfiliadoService) { }
 

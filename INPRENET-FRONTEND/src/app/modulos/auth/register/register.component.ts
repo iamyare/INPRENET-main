@@ -31,7 +31,6 @@ export class RegisterComponent implements OnInit {
       correo: [{ value: '', disabled: true }, [Validators.required, Validators.email]],
       contrasena: ['', [
         Validators.required,
-        Validators.pattern(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/)
       ]],
       confirmarContrasenia: ['', [Validators.required]],
       telefonoEmpleado: ['', [Validators.required]],

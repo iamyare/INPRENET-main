@@ -3,34 +3,37 @@
     [formGroup]="steps[0].formGroup"
     (imageCaptured)="handleImageCaptured($event)">
   </app-datos-generales-temporal>
-  <app-peps [parentForm]="steps[0].formGroup"></app-peps>
+  <app-peps
+  [parentForm]="steps[0].formGroup"
+  (pepsChange)="onPepsChange($event)">
+</app-peps>
 </ng-template>
 
 <ng-template #referenciasPersonalesTemplate>
-  <app-ref-pers [formGroup]="steps[1].formGroup"></app-ref-pers>
+  <app-ref-pers #refPersComponent [formGroup]="steps[1].formGroup"></app-ref-pers>
 </ng-template>
 
 <ng-template #colegiosMagisterialesTemplate>
-  <app-col-magisteriales [formGroup]="steps[2].formGroup"></app-col-magisteriales>
+  <app-col-magisteriales #colMagisterialesComponent [formGroup]="steps[2].formGroup"></app-col-magisteriales>
 </ng-template>
 
 <ng-template #bancosTemplate>
-  <app-bancos [formGroup]="steps[3].formGroup"></app-bancos>
+  <app-bancos #bancosComponent [formGroup]="steps[3].formGroup"></app-bancos>
 </ng-template>
 
 <ng-template #centrosTrabajoTemplate>
   <mat-tab-group>
     <mat-tab label="Puestos de Trabajo">
-      <app-dat-puesto-trab [formGroup]="steps[4].formGroup"></app-dat-puesto-trab>
+      <app-dat-puesto-trab #datPuestoTrabComponent [formGroup]="steps[4].formGroup"></app-dat-puesto-trab>
     </mat-tab>
     <mat-tab label="Otras Fuentes de Ingreso">
-      <app-otras-fuentes-ingreso [formGroup]="steps[4].formGroup"></app-otras-fuentes-ingreso>
+      <app-otras-fuentes-ingreso #otrasFuentesIngresoComponent [formGroup]="steps[4].formGroup"></app-otras-fuentes-ingreso>
     </mat-tab>
   </mat-tab-group>
 </ng-template>
 
 <ng-template #beneficiariosTemplate>
-  <app-benef [formGroup]="steps[5].formGroup"></app-benef>
+  <app-benef #benefComponent [formGroup]="steps[5].formGroup"></app-benef>
 </ng-template>
 
 <mat-horizontal-stepper style="background: transparent;" [linear]="true" #stepper>
@@ -147,3 +150,5 @@
     </div>
   </mat-step>
 </mat-horizontal-stepper>
+
+<pre *ngIf="formErrors" class="error-display">{{ formErrors | json }}</pre>

@@ -108,24 +108,34 @@
 }
 
 .boton-inhabilitar mat-icon {
-  color: #ff5252; /* Color del ícono de inhabilitar */
+  color: #ff5252;
   display: flex;
   justify-content: center;
   align-items: center;
 }
 
 .boton-inhabilitar {
-  background-color: transparent; /* Fondo transparente */
-  border: none; /* Sin borde */
-  cursor: pointer; /* Cursor de mano */
+  background-color: transparent; 
+  border: none;
+  cursor: pointer;
   display: flex;
   justify-content: center;
   align-items: center;
 }
 
 .boton-inhabilitar:hover mat-icon {
-  color: #e04848; /* Color del ícono al pasar el ratón por encima */
+  color: #e04848;
 }
 
+.moneda-left {
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+}
+
+.moneda-left::before {
+  content: 'L';
+  margin-right: 4px; 
+}
 
 

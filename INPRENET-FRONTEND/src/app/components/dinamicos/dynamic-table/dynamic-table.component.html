@@ -1,5 +1,4 @@
-<div  >
-
+<div>
   <div class="container-fluid">
     <div class="row">
       <div class="col-md-6">
@@ -24,7 +23,7 @@
 
   <!-- DATOS -->
   <div style="overflow-x: auto">
-    <table class="custom-table" >
+    <table class="custom-table">
       <thead>
         <tr>
           <th class="custom-header" *ngIf="verOpcEditar"></th>
@@ -32,15 +31,9 @@
             {{ col.header }}
           </th>
           <th *ngIf="verBotEditar" class="custom-header">Acciones</th>
-          <th *ngIf="mostrarBotonUno" class="custom-header">
-            {{ nombreEncabezadoUno }}
-          </th>
-          <th *ngIf="mostrarBotonDos" class="custom-header">
-            {{ nombreEncabezadoDos }}
-          </th>
-          <th *ngIf="mostrarBotonTres" class="custom-header">
-            {{ nombreEncabezadoTres }}
-          </th>
+          <th *ngIf="mostrarBotonUno" class="custom-header">{{ nombreEncabezadoUno }}</th>
+          <th *ngIf="mostrarBotonDos" class="custom-header">{{ nombreEncabezadoDos }}</th>
+          <th *ngIf="mostrarBotonTres" class="custom-header">{{ nombreEncabezadoTres }}</th>
           <th *ngIf="mostrarBotonEditar" class="custom-header">Editar</th>
           <th *ngIf="mostrarBotonEliminar" class="custom-header">Eliminar</th>
           <th *ngIf="mostrarBotonInhabilitar" class="custom-header">Inhabilitar</th>
@@ -52,15 +45,18 @@
             <input type="checkbox" (change)="onSelectionChange(row)" />
           </td>
           <td *ngFor="let col of columns">
-            <div [ngStyle]="{ 'text-align': col.moneda ? 'end' : 'left', 'padding': '1rem' }">
+            <div [ngStyle]="{ 'text-align': col.moneda ? 'start' : 'left', 'padding': '1rem' }">
+              <!-- Celdas normales -->
               <ng-container *ngIf="!row.isEditing && !col.moneda">
                 {{ getCellValue(row, col) }}
               </ng-container>
 
+              <!-- Celdas de tipo moneda -->
               <ng-container *ngIf="!row.isEditing && col.moneda">
-                {{ getCellValue(row, col) | currency : "L" : "symbol" : "1.2-2" }}
+                <span class="moneda-left">{{ getCellValue(row, col) | number : '1.2-2' }}</span>
               </ng-container>
 
+              <!-- Edición -->
               <ng-container *ngIf="row.isEditing">
                 <ng-container *ngIf="col.isEditable">
                   <mat-form-field class="example-full-width; inputs" style="background-color: white" appearance="outline">
@@ -88,34 +84,28 @@
             <button style="height: auto" color="warn" mat-raised-button *ngIf="row.isEditing" (click)="stopEditing(row)"
               class="boton-estetico">Cancelar</button>
           </td>
-
           <td *ngIf="mostrarBotonUno">
             <button mat-raised-button style="height: auto" *ngIf="mostrarBotonUno" mat-raised-button
               (click)="ejecutarAccionUno(row)">{{ etiquetaBotonUno }}</button>
           </td>
-
           <td *ngIf="mostrarBotonDos">
             <button mat-raised-button style="height: auto" *ngIf="mostrarBotonDos" mat-raised-button
               (click)="ejecutarAccionDos(row)">{{ etiquetaBotonDos }}</button>
           </td>
-
           <td *ngIf="mostrarBotonTres">
             <button mat-raised-button style="height: auto" *ngIf="mostrarBotonTres" mat-raised-button
               (click)="ejecutarAccionTres(row)">{{ etiquetaBotonTres }}</button>
           </td>
-
           <td *ngIf="mostrarBotonEditar">
             <button style="height: auto" mat-icon-button (click)="editarFila(row)" class="boton-editar">
               <mat-icon class="icono-editar">edit</mat-icon>
             </button>
           </td>
-
           <td *ngIf="mostrarBotonEliminar">
             <button style="height: auto" mat-icon-button (click)="eliminarFila(row)" class="boton-eliminar">
               <mat-icon class="icono-eliminar">delete</mat-icon>
             </button>
           </td>
-
           <td *ngIf="mostrarBotonInhabilitar" class="custom-actions">
             <button mat-icon-button (click)="inhabilitarFila(row)" class="boton-inhabilitar">
               <mat-icon>remove_circle_outline</mat-icon>

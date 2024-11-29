@@ -143,6 +143,8 @@ export class VerplanprelcompComponent implements OnInit, OnChanges {
     }
     try {
       this.dataPlan = await this.planillaService.getPlanillasPreliminares(cod_planilla).toPromise();
+      console.log(this.dataPlan);
+      
       if (this.dataPlan && this.dataPlan.length > 0) {
         this.datosTabl = this.dataPlan.map((item: any) => ({
           id_afiliado: item.ID_PERSONA,
@@ -186,6 +188,8 @@ export class VerplanprelcompComponent implements OnInit, OnChanges {
     let logs: any[] = [];
     this.planillaService.getDesglosePorPersonaPlanilla(row.id_afiliado, this.codigoPlanilla).subscribe({
       next: (response) => {
+        console.log(response);
+        
         const { beneficios } = response;
 
         const data = beneficios;
@@ -217,6 +221,8 @@ export class VerplanprelcompComponent implements OnInit, OnChanges {
       next: (response1) => {
         if (response1) {
           const data = response1;
+          console.log(response1);
+          
 
           logs.push({ message: 'Datos De Deducciones:', detail: data || [], type: 'deducciones' });
 
@@ -274,27 +280,81 @@ export class VerplanprelcompComponent implements OnInit, OnChanges {
     }
   }
   
-  descargarExcel(): void {
+  async descargarExcelCompleto(): Promise<void> {
     if (!this.datosTabl || this.datosTabl.length === 0) {
-      this.toastr.warning('No hay datos para exportar');
+      this.toastr.warning('No hay datos disponibles para exportar');
       return;
     }
-    const datosSinIdAfiliado = this.datosTabl.map(({ id_afiliado, ...rest }) => rest);
   
-    const worksheet: XLSX.WorkSheet = XLSX.utils.json_to_sheet(datosSinIdAfiliado);
-    const workbook: XLSX.WorkBook = {
-      Sheets: { 'Datos de Planilla': worksheet },
-      SheetNames: ['Datos de Planilla']
-    };
+    try {
+      const beneficios = [];
+      const deduccionesTerceros:any = [];
+      const deduccionesInprema:any = [];
   
-    const excelBuffer: any = XLSX.write(workbook, {
-      bookType: 'xlsx',
-      type: 'array'
-    });
+      // Iterar sobre cada afiliado y obtener los datos
+      for (const row of this.datosTabl) {
+        // Obtener beneficios
+        const responseBeneficios = await this.planillaService.getDesglosePorPersonaPlanilla(row.id_afiliado, this.codigoPlanilla).toPromise();
+        if (responseBeneficios && responseBeneficios.beneficios && responseBeneficios.beneficios.length > 0) {
+          beneficios.push(
+            ...responseBeneficios.beneficios.map((beneficio: any) => ({
+              n_identificacion: row.n_identificacion, // Identificación de la persona
+              CODIGO_BENEFICIO: beneficio.ID_BENEFICIO, // Renombrar ID_BENEFICIO
+              MontoAPagar: beneficio.MontoAPagar,
+              NOMBRE_BENEFICIO: beneficio.NOMBRE_BENEFICIO,
+            }))
+          );
+        }
   
-    const data: Blob = new Blob([excelBuffer], { type: 'application/octet-stream' });
-    saveAs(data, `Planilla_${this.codigoPlanilla}.xlsx`);
-    this.toastr.success('Archivo Excel generado con éxito');
+        // Obtener deducciones
+        const responseDeducciones = await this.deduccionSVC.getDeduccionesByPersonaAndBenef(row.id_afiliado, row.ID_BENEFICIO, this.idPlanilla).toPromise();
+        if (responseDeducciones && responseDeducciones.length > 0) {
+          responseDeducciones.forEach((deduccion: any) => {
+            const deduccionData = {
+              n_identificacion: row.n_identificacion, // Identificación de la persona
+              MontoAplicado: deduccion.MontoAplicado,
+              NOMBRE_DEDUCCION: deduccion.NOMBRE_DEDUCCION,
+              NOMBRE_INSTITUCION: deduccion.NOMBRE_INSTITUCION,
+            };
+  
+            if (deduccion.NOMBRE_INSTITUCION === 'INPREMA') {
+              deduccionesInprema.push(deduccionData);
+            } else {
+              deduccionesTerceros.push(deduccionData);
+            }
+          });
+        }
+      }
+  
+      // Verificar si hay datos para exportar
+      if (beneficios.length === 0 && deduccionesTerceros.length === 0 && deduccionesInprema.length === 0) {
+        this.toastr.warning('No se encontraron datos para exportar');
+        return;
+      }
+  
+      // Crear las hojas del Excel
+      const workbook: XLSX.WorkBook = {
+        Sheets: {
+          'Beneficios': XLSX.utils.json_to_sheet(beneficios),
+          'Deducciones Terceros': XLSX.utils.json_to_sheet(deduccionesTerceros),
+          'Deducciones INPREMA': XLSX.utils.json_to_sheet(deduccionesInprema),
+        },
+        SheetNames: ['Beneficios', 'Deducciones Terceros', 'Deducciones INPREMA'],
+      };
+  
+      // Generar el archivo Excel
+      const excelBuffer: any = XLSX.write(workbook, {
+        bookType: 'xlsx',
+        type: 'array'
+      });
+  
+      const data: Blob = new Blob([excelBuffer], { type: 'application/octet-stream' });
+      saveAs(data, `PlanillaCompleta_${this.codigoPlanilla}.xlsx`);
+      this.toastr.success('Archivo Excel completo generado con éxito');
+    } catch (error) {
+      console.error('Error al generar el archivo Excel completo:', error);
+      this.toastr.error('Ocurrió un error al generar el archivo Excel');
+    }
   }
   
 

@@ -18,6 +18,7 @@ export class DynamicFormComponent implements OnInit {
 
   @Output() newDatBenChange = new EventEmitter<any>()
   @Output() selectChange = new EventEmitter<{ fieldName: string, value: any }>();
+  @Output() formChange = new EventEmitter<any>();
 
   selectedOption: string | null = null;
 
@@ -38,6 +39,13 @@ export class DynamicFormComponent implements OnInit {
 
   onDatosBenChange() {
     this.newDatBenChange.emit(this.form);
+  }
+
+  onDatosBenChangeAdmin() {
+    this.formChange.emit(this.form.value);
+  }
+  onSelectChangeAdmin(fieldName: string, event: any) {
+    this.formChange.emit({ ...this.form.value, [fieldName]: event.value });
   }
 
   onDatosBenChange1(e: any) {
@@ -212,8 +220,6 @@ export class DynamicFormComponent implements OnInit {
     });
   }
 
-
-
   updateDependentFields() {
     const selectedField = this.fields.find(field => field.name === 'showCheckboxes');
     if (selectedField && selectedField.dependentFields) {
@@ -250,11 +256,9 @@ export class DynamicFormComponent implements OnInit {
     }
   }
 
-
   recreateForm() {
     this.form = this.createControl();
     this.newDatBenChange.emit(this.form);
   }
-
 
 }

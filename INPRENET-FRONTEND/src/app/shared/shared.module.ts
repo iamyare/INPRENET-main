@@ -1,5 +1,5 @@
 import { NgModule } from '@angular/core';
-
+import { CommonModule } from '@angular/common';  // Asegúrate de importar esto
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
@@ -28,15 +28,17 @@ import { MatNativeDateModule } from '@angular/material/core';
 import { MatTabsModule } from '@angular/material/tabs';
 import { GoogleMapsModule } from '@angular/google-maps';
 
+// Importa el componente de mensajes de error
+import { ErrorMessagesComponent } from './error-messages/error-messages.component';
+
 @NgModule({
   declarations: [
+    ErrorMessagesComponent,  // Declara el componente
   ],
   imports: [
+    CommonModule,  // Importa CommonModule aquí para usar *ngIf
     MatNativeDateModule,
-    ButtonModule,
-    CardModule,
-    FormModule,
-    GridModule,
+    MatButtonModule,
     FormsModule,
     ReactiveFormsModule,
     MatFormFieldModule,
@@ -59,34 +61,14 @@ import { GoogleMapsModule } from '@angular/google-maps';
     MatRadioModule,
     MatDialogModule,
     MatSelectModule,
-    AvatarModule,
-    BreadcrumbModule,
-    FooterModule,
-    DropdownModule,
-    HeaderModule,
-    SidebarModule,
-    IconModule,
-    NavModule,
-    UtilitiesModule,
-    ButtonGroupModule,
-    TabsModule,
-    ProgressModule,
-    BadgeModule,
-    ListGroupModule,
     NgScrollbarModule,
     MatTableModule,
-    MatPaginatorModule,
     MatStepperModule,
     MatTabsModule,
-
   ],
   exports: [
-    DocsComponentsModule,
-    MatNativeDateModule,
-    ButtonModule,
-    CardModule,
-    FormModule,
-    GridModule,
+    ErrorMessagesComponent,  
+    CommonModule,  // Exporta CommonModule si es necesario
     FormsModule,
     ReactiveFormsModule,
     MatFormFieldModule,
@@ -109,23 +91,10 @@ import { GoogleMapsModule } from '@angular/google-maps';
     MatRadioModule,
     MatDialogModule,
     MatSelectModule,
-    AvatarModule,
-    BreadcrumbModule,
-    FooterModule,
-    DropdownModule,
-    HeaderModule,
-    SidebarModule,
-    IconModule,
-    NavModule,
-    UtilitiesModule,
-    ButtonGroupModule,
-    TabsModule,
-    ProgressModule,
-    BadgeModule,
-    ListGroupModule,
     NgScrollbarModule,
-    MatTabsModule,
     MatTableModule,
+    MatStepperModule,
+    MatTabsModule,
   ]
 })
 export class SharedModule { }

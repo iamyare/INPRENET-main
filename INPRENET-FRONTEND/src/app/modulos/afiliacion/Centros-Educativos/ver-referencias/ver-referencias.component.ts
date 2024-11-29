@@ -13,7 +13,7 @@ import { ControlContainer } from '@angular/forms';
   viewProviders: [
     {
       provide: ControlContainer,
-      useFactory: () =>
+       useFactory: () =>
         inject(ControlContainer, { skipSelf: true, host: true }),
     },
   ]
@@ -96,7 +96,6 @@ export class VerReferenciasComponent {
           this.Afiliado.estado = ""
           this.toastr.error(`Error: ${error.error.message}`);
       }) */
-
     }
   }
 

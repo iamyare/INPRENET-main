@@ -32,6 +32,9 @@ import { CustomTableComponent } from './dinamicos/custom-table/custom-table.comp
 import { PerfilHeaderComponent } from './perfil-header/perfil-header.component';
 import { GestionarDiscapacidadDialogComponent } from './dinamicos/gestionar-discapacidad-dialog/gestionar-discapacidad-dialog.component';
 import { HomePageComponent } from './home-page/home-page.component';
+import { ReactiveFormsModule } from '@angular/forms';
+import { SharedModule } from 'src/app/shared/shared.module';
+
 
 @NgModule({
   declarations: [
@@ -70,7 +73,8 @@ import { HomePageComponent } from './home-page/home-page.component';
   imports: [
     CommonModule,
     MaterialAngularModule,
-    GoogleMapsModule
+    GoogleMapsModule,
+    SharedModule
   ],
   exports:[
     PerfilHeaderComponent,

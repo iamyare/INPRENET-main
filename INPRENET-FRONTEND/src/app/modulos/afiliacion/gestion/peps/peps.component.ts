@@ -2,6 +2,7 @@ import { Component, EventEmitter, Input, Output, OnInit } from '@angular/core';
 import { AbstractControl, FormArray, FormBuilder, FormControl, FormGroup, Validators, ValidationErrors, ValidatorFn } from '@angular/forms';
 import { FieldArrays } from 'src/app/shared/Interfaces/field-arrays';
 import { DatosEstaticosService } from 'src/app/services/datos-estaticos.service';
+import { ValidationService } from 'src/app/shared/services/validation.service'; // Importa el servicio
 
 @Component({
   selector: 'app-peps',
@@ -15,7 +16,6 @@ export class PepsComponent implements OnInit {
 
   departamentos: any = [];
   municipios: any = [];
-
   currentYear = new Date();
   maxDate: Date = new Date(this.currentYear.getFullYear(), this.currentYear.getMonth(), this.currentYear.getDate(), this.currentYear.getHours(), this.currentYear.getMinutes(), this.currentYear.getSeconds());
 
@@ -26,7 +26,7 @@ export class PepsComponent implements OnInit {
       type: 'text',
       icon: 'work',
       value: '',
-      validations: [Validators.required],
+      validations: [Validators.required, this.validationService.noSpecialCharactersOrSequencesValidator()],
       layout: { row: 1, col: 6 }
     },
     {
@@ -44,7 +44,8 @@ export class PepsComponent implements OnInit {
 
   constructor(
     private fb: FormBuilder,
-    private datosEstaticosService: DatosEstaticosService
+    private datosEstaticosService: DatosEstaticosService, 
+    private validationService: ValidationService
   ) {}
 
   ngOnInit(): void {
@@ -53,51 +54,47 @@ export class PepsComponent implements OnInit {
         name: 'primer_nombre',
         label: 'Primer Nombre',
         type: 'text',
-        icon: 'person',
-        validations: [Validators.required],
+        icon: 'person', 
+        validations: [Validators.required, this.validationService.namesValidator()],
         layout: { row: 1, col: 6 }
       },
       {
         name: 'segundo_nombre',
         label: 'Segundo Nombre',
         type: 'text',
-        icon: 'person',
+        icon: 'person', 
+        validations: [Validators.required, this.validationService.namesValidator()],
         layout: { row: 1, col: 6 }
       },
       {
         name: 'primer_apellido',
         label: 'Primer Apellido',
         type: 'text',
-        icon: 'person',
-        validations: [Validators.required],
+        icon: 'person', 
+        validations: [Validators.required, this.validationService.namesValidator()],
         layout: { row: 1, col: 6 }
       },
       {
         name: 'segundo_apellido',
         label: 'Segundo Apellido',
         type: 'text',
-        icon: 'person',
-        validations: [Validators.required],
+        icon: 'person', 
+        validations: [Validators.required, this.validationService.namesValidator()],
         layout: { row: 1, col: 6 }
       },
       {
         name: 'n_identificacion',
         label: 'Número de Identificación',
         type: 'text',
-        icon: 'badge',
-        validations: [
-          Validators.required,
-          Validators.maxLength(15),
-          Validators.pattern(/^[0-9]+$/),
-          this.uniqueIdentificacionValidator()
-        ],
+        icon: 'badge', 
+        validations: [Validators.required, this.validationService.dniValidator()],
         layout: { row: 1, col: 6 }
       },
       {
         name: 'parentesco',
         label: 'Parentesco',
         type: 'select',
-        icon: 'family_restroom',
+        icon: 'family_restroom', 
         options: this.datosEstaticosService.parentesco,
         validations: [Validators.required],
         layout: { row: 1, col: 6 }
@@ -139,7 +136,10 @@ export class PepsComponent implements OnInit {
     const referenciaGroup = this.fb.group({
       startDate: new FormControl(null, Validators.required),
       endDate: new FormControl(null, Validators.required),
-      pep_cargo_desempenado: new FormControl('', Validators.required),
+      pep_cargo_desempenado: new FormControl('', [
+        Validators.required, 
+        this.validationService.noSpecialCharactersOrSequencesValidator()
+      ]),
     });
 
     this.peps.push(referenciaGroup);
@@ -150,7 +150,7 @@ export class PepsComponent implements OnInit {
   }
 
   addFamiliar(): void {
-    const familiarGroup = this.fb.group({
+    /* const familiarGroup = this.fb.group({
       primer_nombre: new FormControl('', Validators.required),
       segundo_nombre: new FormControl(''),
       primer_apellido: new FormControl('', Validators.required),
@@ -163,9 +163,19 @@ export class PepsComponent implements OnInit {
         this.uniqueIdentificacionValidator()
       ]),
       parentesco: new FormControl('', Validators.required),
-    });
+    }); */
+
+    const familiarGroup = this.fb.group({});
+  
+    this.familiaresFields.forEach(field => {
+      familiarGroup.addControl(
+        field.name,
+        new FormControl(field.value, field.validations)
+      );
+  
 
     this.familiares.push(familiarGroup);
+    });
   }
 
   removeFamiliar(index: number): void {

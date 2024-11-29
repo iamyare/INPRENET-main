@@ -24,7 +24,7 @@ export class Net_Detalle_Beneficio_Afiliado {
     @Column({ nullable: true, name: 'ESTADO_SOLICITUD' })
     estado_solicitud: string;
 
-    @Column({ nullable: true, name: 'LISTO_COMPLEMENTARIA' })
+    @Column({ nullable: true, default: 'SI', name: 'LISTO_COMPLEMENTARIA' })
     listo_complementaria: string;
 
     @Column({ type: 'date', nullable: true, name: 'FECHA_CALCULO' })

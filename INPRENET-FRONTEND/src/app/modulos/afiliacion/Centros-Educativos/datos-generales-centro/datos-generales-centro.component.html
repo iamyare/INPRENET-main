@@ -1,6 +1,10 @@
 <div *ngIf="parentFormIsExist">
-  <app-dynamic-form (selectChange)="handleSelectChange($event)" (newDatBenChange)="onDatosBenChange($event)"
-    [titulo]="'Datos Generales'" [subtitulo]="'Completa la información correspondiente'" [fields]="fields"
+  <app-dynamic-form 
+    (selectChange)="handleSelectChange($event)" 
+    (newDatBenChange)="onDatosBenChange($event)"
+    [titulo]="'Datos Generales'" 
+    [subtitulo]="'Completa la información correspondiente'" 
+    [fields]="fields"
     [incomingForm]="parentForm">
   </app-dynamic-form>
 </div>

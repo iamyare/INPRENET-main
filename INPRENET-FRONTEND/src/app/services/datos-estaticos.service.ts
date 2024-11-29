@@ -8,7 +8,7 @@ import { CentroTrabajoService } from './centro-trabajo.service';
 import { HttpClient } from '@angular/common/http';
 import { TransaccionesService } from './transacciones.service';
 import { AuthService } from './auth.service';
-import { map, Observable } from 'rxjs';
+import { catchError, firstValueFrom, map, Observable } from 'rxjs';
 import { AfiliacionService } from './afiliacion.service';
 import { MantenimientoAfiliacionService } from './mantenimiento-afiliacion.service';
 
@@ -157,9 +157,22 @@ export class DatosEstaticosService {
       return this.departamentos;
     }
   }
-
-
-
+  
+  async getDepartamentosPropietario(): Promise<any[]> {
+    try {
+      const response = await firstValueFrom(this.direccionSer.getAllDepartments());
+      this.departamentos = response.map((item: { id_departamento: any; nombre_departamento: any }) => ({
+        label: item.nombre_departamento,
+        value: item.id_departamento,
+      }));
+      return this.departamentos;
+    } catch (error) {
+      console.error('Error al obtener los departamentos:', error);
+      this.departamentos = [];
+      return this.departamentos;
+    }
+  }
+   
   gettipoIdent = async () => {
     const response = await this.tipoIdentificacionService.obtenerTiposIdentificacion().toPromise();
     const mappedResponse = response.map((item: { id_identificacion: any; tipo_identificacion: any; }) => ({
@@ -280,91 +293,64 @@ export class DatosEstaticosService {
 
   tipoPersona = [
     {
-      "value": 1,
-      "label": "AFILIADO"
+      "value": 1, "label": "AFILIADO"
     },
     {
-      "value": 2,
-      "label": "BENEFICIARIO"
+      "value": 2, "label": "BENEFICIARIO"
     }
   ]
-
   estadoCivil = [
     {
-      "label": "CASADO/A",
-      "value": "CASADO/A"
+      "label": "CASADO/A", "value": "CASADO/A"
     },
     {
-      "label": "DIVORCIADO/A",
-      "value": "DIVORCIADO/A"
+      "label": "DIVORCIADO/A", "value": "DIVORCIADO/A"
     },
     {
-      "label": "SEPARADO/A",
-      "value": "SEPARADO/A"
+      "label": "SEPARADO/A", "value": "SEPARADO/A"
     },
     {
-      "label": "SOLTERO/A",
-      "value": "SOLTERO/A"
+      "label": "SOLTERO/A", "value": "SOLTERO/A"
     },
     {
-      "label": "UNION LIBRE",
-      "value": "UNION LIBRE"
+      "label": "UNION LIBRE", "value": "UNION LIBRE"
     },
     {
-      "label": "VIUDO/A",
-      "value": "VIUDO/A"
+      "label": "VIUDO/A", "value": "VIUDO/A"
     }
   ];
 
   tiposPlanilla = [
     {
-      "idTipoPlanilla": 1,
-      "value": "EGRESO"
+      "idTipoPlanilla": 1, "value": "EGRESO"
     },
     {
-      "idTipoPlanilla": 2,
-      "value": "INGRESO"
+      "idTipoPlanilla": 2, "value": "INGRESO"
     },
   ];
 
   representacion = [
-    {
-      "value": 'POR CUENTA PROPIA',
-      "label": "POR CUENTA PROPIA"
+    { "value": 'POR CUENTA PROPIA', "label": "POR CUENTA PROPIA"
     },
-    {
-      "value": "POR TERCEROS",
-      "label": "POR TERCEROS"
+    { "value": "POR TERCEROS", "label": "POR TERCEROS"
     }
   ];
 
   genero = [
-    {
-      "value": "MASCULINO",
-      "label": "MASCULINO"
+    { "value": "MASCULINO", "label": "MASCULINO"
     },
-    {
-      "value": "FEMENINO",
-      "label": "FEMENINO"
+    { "value": "FEMENINO", "label": "FEMENINO"
     },
-    {
-      "value": "OTRO",
-      "label": "OTRO"
+    { "value": "OTRO", "label": "OTRO"
     },
   ];
 
   sexo = [
-    {
-      "value": "M",
-      "label": "MASCULINO"
+    { "value": "M", "label": "MASCULINO"
     },
-    {
-      "value": "F",
-      "label": "FEMENINO"
+    { "value": "F", "label": "FEMENINO"
     },
-    {
-      "value": "OTRO",
-      "label": "OTRO"
+    { "value": "OTRO", "label": "OTRO"
     }
   ];
 

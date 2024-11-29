@@ -9,12 +9,12 @@ import { AfiliadoService } from 'src/app/services/afiliado.service';
   styleUrls: ['./perfil-header.component.scss']
 })
 export class PerfilHeaderComponent {
-  @Input() personaInput: any; // Cambiamos el nombre de la propiedad de entrada
+  @Input() personaInput: any; 
   @Output() personaEncontrada = new EventEmitter<any>();
 
   n_identificacion: string = '';
   errorMessage: string | null = null;
-  persona: any = null; // Esta propiedad se usa internamente
+  persona: any = null; 
   defaultFotoUrl = '../../../../../assets/images/default.jpg';
 
   constructor(private afiliadoService: AfiliadoService) { }

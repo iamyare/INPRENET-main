@@ -16,10 +16,7 @@ import { SidenavService } from './services/sidenav.service';
 import { TokenInterceptor } from './interceptors/token.interceptor';
 import { EscalafonModule } from './modulos/escalafon/escalafon.module';
 import { ConasaModule } from './modulos/conasa/conasa.module';
-import { registerLocaleData } from '@angular/common';
-import localeEs from '@angular/common/locales/es';
 
-registerLocaleData(localeEs, 'es');
 @NgModule({
   declarations: [
     AppComponent,
@@ -47,7 +44,6 @@ registerLocaleData(localeEs, 'es');
   ],
   providers: [SidenavService,
     { provide: HTTP_INTERCEPTORS, useClass: TokenInterceptor, multi: true },
-    { provide: LOCALE_ID, useValue: 'es' }
   ],
   bootstrap: [AppComponent]
 })

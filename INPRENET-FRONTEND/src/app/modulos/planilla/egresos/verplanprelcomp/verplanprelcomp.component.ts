@@ -9,6 +9,8 @@ import { convertirFecha } from 'src/app/shared/functions/formatoFecha';
 import { DialogDesgloseComponent } from '../dialog-desglose/dialog-desglose.component';
 import { DeduccionesService } from 'src/app/services/deducciones.service';
 import { DynamicDialogComponent } from 'src/app/components/dinamicos/dynamic-dialog/dynamic-dialog.component';
+import * as XLSX from 'xlsx';
+import { saveAs } from 'file-saver';
 
 @Component({
   selector: 'app-verplanprelcomp',
@@ -71,6 +73,7 @@ export class VerplanprelcompComponent implements OnInit, OnChanges {
     }
     try {
       const response = await this.planillaService.getPlanillaPrelimiar(this.codigoPlanilla).toPromise();
+      
       if (response) {
         this.detallePlanilla = { ...response };
         await this.calcularTotales(this.codigoPlanilla);
@@ -97,6 +100,8 @@ export class VerplanprelcompComponent implements OnInit, OnChanges {
 
     try {
       const response = await this.planillaService.getPlanillasPreliminares(cod_planilla).toPromise();
+      console.log(response);
+      
       let totalBeneficios = 0;
       let deduccionesI = 0;
       let deduccionesT = 0;
@@ -268,6 +273,29 @@ export class VerplanprelcompComponent implements OnInit, OnChanges {
       this.toastr.error('Debe seleccionar un código de planilla válido');
     }
   }
-
+  
+  descargarExcel(): void {
+    if (!this.datosTabl || this.datosTabl.length === 0) {
+      this.toastr.warning('No hay datos para exportar');
+      return;
+    }
+    const datosSinIdAfiliado = this.datosTabl.map(({ id_afiliado, ...rest }) => rest);
+  
+    const worksheet: XLSX.WorkSheet = XLSX.utils.json_to_sheet(datosSinIdAfiliado);
+    const workbook: XLSX.WorkBook = {
+      Sheets: { 'Datos de Planilla': worksheet },
+      SheetNames: ['Datos de Planilla']
+    };
+  
+    const excelBuffer: any = XLSX.write(workbook, {
+      bookType: 'xlsx',
+      type: 'array'
+    });
+  
+    const data: Blob = new Blob([excelBuffer], { type: 'application/octet-stream' });
+    saveAs(data, `Planilla_${this.codigoPlanilla}.xlsx`);
+    this.toastr.success('Archivo Excel generado con éxito');
+  }
+  
 
 }

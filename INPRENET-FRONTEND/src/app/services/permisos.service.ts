@@ -181,8 +181,8 @@ export class PermisosService {
         'conasa/ver-afiliado': {
           title: 'Buscar Afiliado',
           permisos: [
-            { role: 'CONSULTA PRESTAMOS', module: 'ESCALAFON' },
-            { role: 'ADMINISTRADOR', module: 'ESCALAFON' }
+            { role: 'CONSULTA', module: 'CONASA' },
+            { role: 'ADMINISTRADOR', module: 'CONASA' }
           ]
         }
       }

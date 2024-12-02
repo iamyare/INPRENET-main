@@ -33,9 +33,20 @@ export class RegisterComponent implements OnInit {
         Validators.required,
       ]],
       confirmarContrasenia: ['', [Validators.required]],
-      telefonoEmpleado: ['', [Validators.required]],
-      telefonoEmpleado2: [''],
-      numero_identificacion: ['', [Validators.required]]
+      telefonoEmpleado: [
+        '',
+        [
+          Validators.required,
+          Validators.pattern('^[0-9]{8,}$'), // Acepta solo números y mínimo 8 dígitos
+        ],
+      ],
+      telefonoEmpleado2: [
+        '',
+        [
+          Validators.pattern('^[0-9]{8,}$'), // Acepta solo números y mínimo 8 dígitos
+        ],
+      ],
+      numero_identificacion: ['', []]
     }, { validator: this.confirmarContrasenaValidator('contrasena', 'confirmarContrasenia') });
   }
 

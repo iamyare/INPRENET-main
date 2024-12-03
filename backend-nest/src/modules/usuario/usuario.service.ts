@@ -464,37 +464,6 @@ export class UsuarioService {
     } */
   }
 
-  async createPrivada(email: string, contrasena: string, nombre_usuario: string, idCentroTrabajo?: number) {
-    /* const usuarioExistente = await this.usuarioPrivadaRepository.findOne({ where: { email } });
-    if (usuarioExistente) {
-      throw new BadRequestException('El correo electrónico ya está en uso.');
-    }
-  
-    const rolPrivados = await this.rolRepository.findOneBy({ id_rol: 1 });f
-    if (!rolPrivados) {
-      throw new BadRequestException('El rol "PRIVADOS" no existe.');
-    }
-  
-    const hashedPassword = await bcrypt.hash(contrasena, 10);
-  
-    const nuevoUsuario = new NET_USUARIO_PRIVADA();
-    nuevoUsuario.email = email;
-    nuevoUsuario.passwordHash = hashedPassword;
-    nuevoUsuario.nombre_usuario = nombre_usuario;
-    nuevoUsuario.rol = rolPrivados;
-  
-    if (idCentroTrabajo) {
-      const centroTrabajo = await this.centroTrabajoRepository.findOneBy({ id_centro_trabajo: idCentroTrabajo });
-      if (!centroTrabajo) {
-        throw new BadRequestException('El centro de trabajo proporcionado no existe.');
-      }
-      nuevoUsuario.centroTrabajo = centroTrabajo;
-    }
-  
-    return this.usuarioPrivadaRepository.save(nuevoUsuario); */
-  }
-
-
   findAll(paginationDto: PaginationDto) {
     /* const { limit = 10, offset = 0 } = paginationDto
     return this.usuarioRepository.find({

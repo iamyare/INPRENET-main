@@ -18,6 +18,7 @@ import { Net_Familia } from "./net_familia.entity";
 import { Net_Deducciones_Asignadas } from "src/modules/Planilla/detalle-deduccion/entities/net-deducciones-asignadas.entity";
 import { Net_Referencias } from "./net_referencias.entity";
 import { Net_Usuario_Empresa } from "src/modules/usuario/entities/net_usuario_empresa.entity";
+import { Net_Detalle_Prestamo } from "src/modules/prestamos/entities/net_detalle_prestamo.entity";
 @Entity({
     name: 'NET_PERSONA',
 })
@@ -219,4 +220,8 @@ export class net_persona {
 
     @Column('date', { nullable: true, name: 'FECHA_AFILIACION' })
     fecha_afiliacion: string;
+
+    @OneToMany(() => Net_Detalle_Prestamo, prestamo => prestamo.deduccion)
+    detallePrestamos: Net_Detalle_Prestamo[];
+
 }

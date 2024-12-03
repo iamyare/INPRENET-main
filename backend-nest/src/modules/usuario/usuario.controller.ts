@@ -10,7 +10,6 @@ import { LoginDto } from './dto/login.dto';
 import { Net_Usuario_Empresa } from './entities/net_usuario_empresa.entity';
 import { net_rol_modulo } from './entities/net_rol_modulo.entity';
 import { net_modulo } from './entities/net_modulo.entity';
-import { ForgotPasswordDto } from './dto/forgot-password.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
 
 @ApiTags('usuario')
@@ -154,21 +153,6 @@ export class UsuarioController {
         message: 'Error fetching users for the specified center',
         error: error.message,
       });
-    }
-  }
-
-  @Post('/crear')
-  async createPrivada(
-    @Body('email') email: string,
-    @Body('contrasena') contrasena: string,
-    @Body('nombre_usuario') nombre_usuario: string,
-    @Body('idCentroTrabajo') idCentroTrabajo?: number
-    ) {
-      try {
-        const nuevoUsuario = await this.usuarioService.createPrivada(email, contrasena, nombre_usuario, idCentroTrabajo);
-      return nuevoUsuario;
-    } catch (error) {
-      throw new BadRequestException(error.message);
     }
   }
   

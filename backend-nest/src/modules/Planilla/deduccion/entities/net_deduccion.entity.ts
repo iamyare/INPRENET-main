@@ -3,6 +3,7 @@ import { Net_Detalle_Deduccion } from '../../detalle-deduccion/entities/detalle-
     from 'src/modules/Empresarial/entities/net_centro_trabajo.entity';
 import { Net_Deducciones_Asignadas } from '../../detalle-deduccion/entities/net-deducciones-asignadas.entity';
 import { Net_Deduccion_Tipo_Planilla } from './net_deduccion_tipo_planilla.entity';
+import { Net_Detalle_Prestamo } from 'src/modules/prestamos/entities/net_detalle_prestamo.entity';
 
 @Entity({ name: 'NET_DEDUCCION' })
 export class Net_Deduccion {
@@ -35,6 +36,10 @@ export class Net_Deduccion {
 
     @OneToMany(() => Net_Deduccion_Tipo_Planilla, dedTipoPlanilla => dedTipoPlanilla.deduccion)
     dedTipoPlanilla: Net_Deduccion_Tipo_Planilla[];
+
+    @OneToMany(() => Net_Detalle_Prestamo, prestamo => prestamo.deduccion)
+    detallePrestamos: Net_Detalle_Prestamo[];
+
 
 
 }

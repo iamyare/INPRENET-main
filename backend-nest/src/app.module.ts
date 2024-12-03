@@ -17,6 +17,7 @@ import { AuthModule } from './modules/auth/auth.module';
 import { DocumentsModule } from './modules/documents/documents.module';
 import { EscalafonModule } from './modules/escalafon/escalafon.module';
 import { BitacoraModule } from './modules/bitacora/bitacora.module';
+import { PrestamosModule } from './modules/prestamos/prestamos.module';
 
 @Module({
   imports: [
@@ -66,6 +67,7 @@ import { BitacoraModule } from './modules/bitacora/bitacora.module';
     TransaccionesModule,
     AuthModule,
     EscalafonModule,
+    PrestamosModule
   ],
   providers: [MantenimientoAfiliacionService],
 })

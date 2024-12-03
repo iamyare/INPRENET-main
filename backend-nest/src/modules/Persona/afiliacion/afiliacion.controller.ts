@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, HttpException, HttpStatus, NotFoundException, Param, ParseIntPipe, Patch, Post, Put, UploadedFile, UploadedFiles, UseInterceptors } from '@nestjs/common';
+import { Body, Controller, Delete, Get, HttpException, HttpStatus, NotFoundException, Param, ParseIntPipe, Patch, Post, Put, Query, UploadedFile, UploadedFiles, UseInterceptors } from '@nestjs/common';
 import { AfiliacionService } from './afiliacion.service';
 import { net_persona } from '../entities/net_persona.entity';
 import { AnyFilesInterceptor, FileInterceptor, FilesInterceptor } from '@nestjs/platform-express';
@@ -25,7 +25,16 @@ import { CrearDiscapacidadDto } from './dtos/crear-discapacidad.dto';
 export class AfiliacionController {
   constructor(private readonly afiliacionService: AfiliacionService, private readonly connection: Connection, private readonly entityManager: EntityManager,) {
   }
-  
+
+  @Get('buscar-por-nombres-apellidos')
+async buscarPersona(@Query('terminos') terminos: string) {
+  const personas = await this.afiliacionService.buscarPersonaPorNombresYApellidos(terminos);
+  return {
+    message: 'Personas encontradas',
+    personas,
+  };
+}
+
   @Patch('persona/:id/foto')
   @UseInterceptors(FileInterceptor('foto'))
   async actualizarFotoPersona(

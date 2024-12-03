@@ -2,7 +2,7 @@ import { BadRequestException, ConflictException, Injectable, NotFoundException }
 import { Net_Tipo_Persona } from '../entities/net_tipo_persona.entity';
 import { net_persona } from '../entities/net_persona.entity';
 import { InjectRepository } from '@nestjs/typeorm';
-import { EntityManager, Repository } from 'typeorm';
+import { EntityManager, Like, Repository } from 'typeorm';
 import { CrearPersonaDto } from './dtos/crear-persona.dto';
 import { CrearDatosDto } from './dtos/crear-datos.dto';
 import { Net_Tipo_Identificacion } from 'src/modules/tipo_identificacion/entities/net_tipo_identificacion.entity';
@@ -75,6 +75,79 @@ export class AfiliacionService {
     private readonly entityManager: EntityManager,
   ) { }
 
+  async buscarPersonaPorNombresYApellidos(terminos: string): Promise<{ nombre_completo: string; dni: string }[]> {
+    if (!terminos) {
+      throw new NotFoundException('El término de búsqueda no puede estar vacío.');
+    }
+  
+    // Divide los términos en palabras clave
+    const palabras = terminos.split(' ').map(palabra => palabra.trim().toLowerCase());
+  
+    if (palabras.length === 0) {
+      throw new NotFoundException('No se proporcionaron palabras válidas para buscar.');
+    }
+  
+    const query = this.personaRepository.createQueryBuilder('persona')
+      .select([
+        'persona.primer_nombre',
+        'persona.segundo_nombre',
+        'persona.tercer_nombre',
+        'persona.primer_apellido',
+        'persona.segundo_apellido',
+        'persona.n_identificacion',
+      ]);
+  
+    const parametros: Record<string, string> = {};
+    let whereClause = '';
+  
+    palabras.forEach((palabra, palabraIndex) => {
+      const marcadorBase = `palabra${palabraIndex}`;
+  
+      // Construimos las condiciones para cada palabra
+      const condiciones = [
+        `LOWER(persona.primer_nombre) LIKE :${marcadorBase}_primer_nombre`,
+        `LOWER(persona.segundo_nombre) LIKE :${marcadorBase}_segundo_nombre`,
+        `LOWER(persona.tercer_nombre) LIKE :${marcadorBase}_tercer_nombre`,
+        `LOWER(persona.primer_apellido) LIKE :${marcadorBase}_primer_apellido`,
+        `LOWER(persona.segundo_apellido) LIKE :${marcadorBase}_segundo_apellido`,
+      ];
+  
+      // Unimos las condiciones de este término con `OR`
+      if (whereClause) {
+        whereClause += ' AND ';
+      }
+      whereClause += `(${condiciones.join(' OR ')})`;
+  
+      // Enlazar parámetros para cada condición
+      parametros[`${marcadorBase}_primer_nombre`] = `%${palabra}%`;
+      parametros[`${marcadorBase}_segundo_nombre`] = `%${palabra}%`;
+      parametros[`${marcadorBase}_tercer_nombre`] = `%${palabra}%`;
+      parametros[`${marcadorBase}_primer_apellido`] = `%${palabra}%`;
+      parametros[`${marcadorBase}_segundo_apellido`] = `%${palabra}%`;
+    });
+  
+    // Ejecutar la consulta
+    try {
+      const personas = await query
+        .where(whereClause)
+        .setParameters(parametros)
+        .getMany();
+  
+      if (personas.length === 0) {
+        throw new NotFoundException(`No se encontraron personas con los términos: ${terminos}`);
+      }
+  
+      return personas.map(persona => ({
+        nombre_completo: `${persona.primer_nombre || ''} ${persona.segundo_nombre || ''} ${persona.tercer_nombre || ''} ${persona.primer_apellido || ''} ${persona.segundo_apellido || ''}`.trim(),
+        dni: persona.n_identificacion,
+      }));
+    } catch (error) {
+      console.error('Error en la consulta:', error);
+      throw new Error('Ocurrió un error inesperado. Inténtelo de nuevo más tarde.');
+    }
+  }
+  
+  
   async actualizarFotoPersona(idPersona: number, fotoPerfil: Buffer): Promise<net_persona> {
     const persona = await this.personaRepository.findOne({ where: { id_persona: idPersona } });
 

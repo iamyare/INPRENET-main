@@ -332,32 +332,10 @@ export class BenefComponent implements OnInit {
   }
 
   reset(): void {
-    // Limpiar el FormArray de beneficiarios
-    this.beneficiarios.clear();
-  
-    // Resetear el formulario principal
+    this.beneficiarios.clear(); 
     this.formGroup.reset();
-  
-    // Reiniciar los arrays de municipios, departamentos, y discapacidades
-    this.municipios = [];
-    this.municipiosNacimiento = [];
-    this.departamentos = [];
-    this.departamentosNacimiento = [];
-    this.tipo_discapacidad = [];
-  
-    // Volver a cargar datos estáticos y restablecer lógica inicial
     this.cargarDepartamentos();
     this.cargarDepartamentosNacimiento();
     this.loadDiscapacidades();
-  
-    // Reiniciar el campo de parentesco
-    this.parentesco = this.datosEstaticosService.parentesco;
-    const nuevoParentesco = { value: "OTRO", label: "OTRO" };
-    if (!this.parentesco.some((item: { value: string }) => item.value === nuevoParentesco.value)) {
-      this.parentesco.push(nuevoParentesco);
-    }
   }
-  
-  
-
 }

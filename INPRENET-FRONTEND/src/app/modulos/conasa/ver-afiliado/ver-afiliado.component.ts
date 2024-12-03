@@ -30,6 +30,8 @@ export class VerAfiliadoComponent implements OnInit {
 
   handlePersonaEncontrada(persona: any): void {
     if (!persona) {
+      console.log(persona);
+      
       this.tipoAfiliado = null;
       return;
     }

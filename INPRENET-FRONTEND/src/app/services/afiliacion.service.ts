@@ -10,6 +10,16 @@ export class AfiliacionService {
 
   constructor(private http: HttpClient) { }
 
+  buscarPersonaPorNombresYApellidos(terminos: string): Observable<any> {
+    const url = `${environment.API_URL}/api/afiliacion/buscar-por-nombres-apellidos`;
+    return this.http.get<any>(url, { params: { terminos } }).pipe(
+      catchError((error) => {
+        console.error('Error al buscar personas por nombres y apellidos', error);
+        return throwError(error);
+      })
+    );
+  }
+  
   eliminarCargoPublico(idCargoPublico: number): Observable<void> {
     const url = `${environment.API_URL}/api/afiliacion/cargos-publicos/${idCargoPublico}`;
     return this.http.delete<void>(url).pipe(

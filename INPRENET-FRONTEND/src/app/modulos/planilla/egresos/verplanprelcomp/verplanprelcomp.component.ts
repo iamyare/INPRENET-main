@@ -100,8 +100,6 @@ export class VerplanprelcompComponent implements OnInit, OnChanges {
 
     try {
       const response = await this.planillaService.getPlanillasPreliminares(cod_planilla).toPromise();
-      console.log(response);
-      
       let totalBeneficios = 0;
       let deduccionesI = 0;
       let deduccionesT = 0;
@@ -143,7 +141,6 @@ export class VerplanprelcompComponent implements OnInit, OnChanges {
     }
     try {
       this.dataPlan = await this.planillaService.getPlanillasPreliminares(cod_planilla).toPromise();
-      console.log(this.dataPlan);
       
       if (this.dataPlan && this.dataPlan.length > 0) {
         this.datosTabl = this.dataPlan.map((item: any) => ({
@@ -221,9 +218,6 @@ export class VerplanprelcompComponent implements OnInit, OnChanges {
       next: (response1) => {
         if (response1) {
           const data = response1;
-          console.log(response1);
-          
-
           logs.push({ message: 'Datos De Deducciones:', detail: data || [], type: 'deducciones' });
 
           const dialogRef = this.dialog.open(DynamicDialogComponent, {
@@ -289,7 +283,7 @@ export class VerplanprelcompComponent implements OnInit, OnChanges {
     try {
       const beneficios = [];
       const deduccionesTerceros:any = [];
-      const deduccionesInprema:any = [];
+      const deduccionesInprema :any= [];
   
       // Iterar sobre cada afiliado y obtener los datos
       for (const row of this.datosTabl) {
@@ -302,6 +296,8 @@ export class VerplanprelcompComponent implements OnInit, OnChanges {
               CODIGO_BENEFICIO: beneficio.ID_BENEFICIO, // Renombrar ID_BENEFICIO
               MontoAPagar: beneficio.MontoAPagar,
               NOMBRE_BENEFICIO: beneficio.NOMBRE_BENEFICIO,
+              NOMBRE_BANCO: row.nombre_banco, // Banco de la persona
+              NUM_CUENTA: row.num_cuenta, // Número de cuenta de la persona
             }))
           );
         }
@@ -356,6 +352,7 @@ export class VerplanprelcompComponent implements OnInit, OnChanges {
       this.toastr.error('Ocurrió un error al generar el archivo Excel');
     }
   }
+  
   
 
 }

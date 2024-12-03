@@ -1,5 +1,4 @@
 <div class="card-container">
-    <!-- Componente buscador -->
     <div class="search-card">
       <app-perfil-header (personaEncontrada)="handlePersonaEncontrada($event)"></app-perfil-header>
     </div>
@@ -11,7 +10,6 @@
             <h3>Información Adicional</h3>
             <p><strong>Dirección:</strong> {{ tipoAfiliado.DIRECCION_RESIDENCIA }}</p>
             <p><strong>Departamento de Residencia:</strong> {{ tipoAfiliado.departamentoResidencia }}</p>
-            <p><strong>Estatus de Afiliado:</strong> {{ tipoAfiliado.estatusAfiliado }}</p>
             <p><strong>Tipo de Afiliado:</strong> {{ tipoAfiliado.tipoPersona }}</p>
             <p><strong>Estado de Afiliado:</strong> {{ tipoAfiliado.estadoFallecido }}</p>
           </div>

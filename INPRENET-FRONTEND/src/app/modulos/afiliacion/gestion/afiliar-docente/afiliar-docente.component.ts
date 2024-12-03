@@ -64,7 +64,8 @@ export class AfiliarDocenteComponent implements OnInit {
         label: 'Datos Generales',
         formGroup: this.fb.group({
           peps: this.fb.array([]),
-          familiares: this.fb.array([])
+          familiares: this.fb.array([]),
+          colMags: this.fb.array([]),
         }),
         template: this.datosGeneralesTemplate
       },
@@ -72,11 +73,6 @@ export class AfiliarDocenteComponent implements OnInit {
         label: 'Referencias Personales',
         formGroup: this.fb.group({}),
         template: this.referenciasPersonalesTemplate
-      },
-      {
-        label: 'Colegios Magisteriales',
-        formGroup: this.fb.group({}),
-        template: this.colegiosMagisterialesTemplate
       },
       {
         label: 'Cuentas Bancarias',
@@ -97,10 +93,9 @@ export class AfiliarDocenteComponent implements OnInit {
 
     this.formGroup.addControl('datosGenerales', this.steps[0].formGroup);
     this.formGroup.addControl('referenciasPersonales', this.steps[1].formGroup);
-    this.formGroup.addControl('colegiosMagisteriales', this.steps[2].formGroup);
-    this.formGroup.addControl('bancos', this.steps[3].formGroup);
-    this.formGroup.addControl('centrosTrabajo', this.steps[4].formGroup);
-    this.formGroup.addControl('beneficiarios', this.steps[5].formGroup);
+    this.formGroup.addControl('bancos', this.steps[2].formGroup);
+    this.formGroup.addControl('centrosTrabajo', this.steps[3].formGroup);
+    this.formGroup.addControl('beneficiarios', this.steps[4].formGroup);
   }
 
   markAllAsTouched(control: FormGroup | FormArray): void {
@@ -122,9 +117,9 @@ export class AfiliarDocenteComponent implements OnInit {
     if (this.formGroup.valid) {
       const datosGenerales = this.formGroup.get('datosGenerales')?.value;
       const referenciasPersonales = this.formGroup.get('referenciasPersonales')?.value;
-      const colegiosMagisteriales = this.formGroup.get('colegiosMagisteriales')?.value;
       const bancos = this.formGroup.get('bancos')?.value;
       const centrosTrabajo = this.formGroup.get('centrosTrabajo')?.value;
+      const colegiosMagisteriales = datosGenerales.ColMags || [];
       const beneficiarios = this.formGroup.get('beneficiarios')?.value.beneficiario || [];
       if (beneficiarios && beneficiarios.length > 0) {
         const documentDefinition = this.getDocumentDefinition(beneficiarios, datosGenerales, this.backgroundImageBase64);
@@ -168,7 +163,9 @@ export class AfiliarDocenteComponent implements OnInit {
           nombre_estado: "ACTIVO",
           voluntario: datosGenerales.voluntario ? 'SI' : 'NO'
         },
-        colegiosMagisteriales: this.formatColegiosMagisteriales(colegiosMagisteriales.ColMags || []),
+        colegiosMagisteriales: colegiosMagisteriales.map((col: any) => ({
+          id_colegio: col.id_colegio
+        })),
         bancos: this.formatBancos(bancos.bancos || []),
         centrosTrabajo: this.formatCentrosTrabajo(centrosTrabajo.trabajo || []),
         otrasFuentesIngreso: this.formatOtrasFuentesIngreso(centrosTrabajo.otrasFuentesIngreso || []),
@@ -252,8 +249,6 @@ export class AfiliarDocenteComponent implements OnInit {
   }
 
   private formatCentrosTrabajo(trabajos: any[]): any[] {
-    console.log(trabajos);
-    
     return trabajos.map(trabajo => ({
       id_centro_trabajo: trabajo.id_centro_trabajo?.value || trabajo.id_centro_trabajo,
       cargo: trabajo.cargo.toUpperCase(),
@@ -371,18 +366,15 @@ export class AfiliarDocenteComponent implements OnInit {
   }
 
   resetForm(): void {
-    // Resetear el formulario principal
     this.formGroup.reset();
   
-    // Resetear los formularios de cada paso
     this.steps.forEach((step) => {
       step.formGroup.reset();
     });
-  
-    // Llama al método `reset` de cada componente hijo si están presentes
-    /* if (this.datosGeneralesComponent) {
-      this.datosGeneralesComponent.reset();
-    } */
+
+    if (this.benefComponent) {
+      this.benefComponent.reset();
+    }
   
     if (this.pepsComponent) {
       this.pepsComponent.reset();
@@ -416,9 +408,6 @@ export class AfiliarDocenteComponent implements OnInit {
       this.otrasFuentesIngresoComponent.reset();
     }
   
-    // Reinicia la foto de perfil
-    this.fotoPerfil = '';
-  
     // Reinicia el stepper
     this.stepper.reset();
   
@@ -429,12 +418,6 @@ export class AfiliarDocenteComponent implements OnInit {
     console.log('Formulario y componentes hijos reiniciados con éxito');
   }
   
-  onPepsChange(event: any): void {
-    console.log('Cambios en PEPs detectados:', event);
-    // Realiza cualquier acción adicional según el evento
-  }
-  
-
   formatDiscapacidades(discapacidades: any): any[] {
     return Object.keys(discapacidades)
       .filter(key => discapacidades[key])

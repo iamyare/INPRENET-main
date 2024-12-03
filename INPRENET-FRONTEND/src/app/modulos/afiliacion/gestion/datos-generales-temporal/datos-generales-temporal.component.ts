@@ -367,12 +367,9 @@ export class DatosGeneralesTemporalComponent implements OnInit {
   }
 
   getArchivo(event: File): any {
-    // Si no lo has agregado aún, puedes agregar el control aquí
-
     if (!this.formGroup?.contains('archivo_identificacion')) {
       this.formGroup.addControl('archivo_identificacion', new FormControl('', []));
     }
-    // Asignar el archivo al control del formulario
     this.formGroup.get('archivo_identificacion')?.setValue(event);
   }
 
@@ -425,6 +422,4 @@ export class DatosGeneralesTemporalComponent implements OnInit {
     const inputElement = event.target as HTMLInputElement;
     inputElement.value = '';
   }
-
-
 }

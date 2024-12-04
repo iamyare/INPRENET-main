@@ -290,7 +290,7 @@ export class AfiliadoService {
       where: {
         correo_1: email, usuarioEmpresas: {
           usuarioModulos: {
-            rolModulo: { nombre: In(["CONASA", "TODO"]) }
+            rolModulo: { nombre: In(["CONSULTA", "TODO"]) }
           }
         }
       },
@@ -300,6 +300,8 @@ export class AfiliadoService {
         'usuarioEmpresas.usuarioModulos.rolModulo',
       ],
     });
+    console.log(empCentTrabajoRepository);
+    
 
     if (!empCentTrabajoRepository) {
       throw new UnauthorizedException('User not found');
@@ -371,7 +373,6 @@ export class AfiliadoService {
     };
     return result;
   }
-
 
   async findOnePersonaParaDeduccion(term: string) {
     try {

@@ -460,7 +460,12 @@ export class DetalleBeneficioService {
             Net_Detalle_Beneficio_Afiliado,
             {
               where: {
-                persona: { ID_CAUSANTE_PADRE: idPersonaPadre, persona: { n_identificacion: itemSeleccionado.dni } },
+                persona: {
+                  ID_CAUSANTE: itemSeleccionado.id_causante,
+                  ID_PERSONA: itemSeleccionado.id_persona,
+                  ID_DETALLE_PERSONA: itemSeleccionado.id_detalle_persona,
+                  persona: { n_identificacion: itemSeleccionado.dni }
+                },
                 beneficio: { id_beneficio: beneficio.id_beneficio }
               },
               relations: ['persona', 'persona.persona', 'beneficio']
@@ -472,7 +477,9 @@ export class DetalleBeneficioService {
               net_detalle_persona,
               {
                 where: {
-                  ID_CAUSANTE: idPersonaPadre,
+                  ID_CAUSANTE: itemSeleccionado.id_causante,
+                  ID_PERSONA: itemSeleccionado.id_persona,
+                  ID_DETALLE_PERSONA: itemSeleccionado.id_detalle_persona,
                   tipoPersona: {
                     tipo_persona: itemSeleccionado.tipo_afiliado,
                   },
@@ -524,7 +531,7 @@ export class DetalleBeneficioService {
                          ${estadoPP.id_usuario_empresa},
                          ${datos.ultimo_dia_ultima_renta ? parseFloat(datos.ultimo_dia_ultima_renta) : null},
                          ${datos.num_rentas_pagar_primer_pago ? parseInt(datos.num_rentas_pagar_primer_pago) : null}
-                 )`;
+              )`;
 
               const detBeneBeneficia = await this.entityManager.query(queryInsDeBBenf);
               const detPers = await this.detPersonaRepository.preload({

@@ -21,6 +21,12 @@ export class Net_Detalle_Beneficio_Afiliado {
     @PrimaryColumn({ name: 'ID_BENEFICIO', primaryKeyConstraintName: 'PK_ID_DET_BEN_AFIL' })
     ID_BENEFICIO: number;
 
+    @Column({ nullable: true, name: 'N_EXPEDIENTE' })
+    n_expediente: string;
+
+    @Column({ type: 'date', nullable: true, name: 'FECHA_PRESENTACION' })
+    fecha_presentacion: Date;
+
     @Column({ nullable: true, name: 'ESTADO_SOLICITUD' })
     estado_solicitud: string;
 

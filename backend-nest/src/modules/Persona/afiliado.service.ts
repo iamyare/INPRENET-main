@@ -1,4 +1,5 @@
-import { BadRequestException, HttpException, HttpStatus, Injectable, InternalServerErrorException, Logger, NotFoundException } from '@nestjs/common';
+import { BadRequestException, HttpException, HttpStatus, Injectable, InternalServerErrorException, Logger, NotFoundException, UnauthorizedException } from '@nestjs/common';
+const bcrypt = require('bcrypt');
 import { PersonaResponse } from './dto/create-persona.dto';
 import { UpdatePersonaDto } from './dto/update-persona.dto';
 import { EntityManager, In, Repository } from 'typeorm';
@@ -20,6 +21,8 @@ import { net_causas_fallecimientos } from './entities/net_causas_fallecimientos.
 import { NET_PROFESIONES } from '../transacciones/entities/net_profesiones.entity';
 import { Net_Municipio } from '../Regional/municipio/entities/net_municipio.entity';
 import { format } from 'date-fns';
+import { Net_Empleado_Centro_Trabajo } from '../Empresarial/entities/net_empleado_centro_trabajo.entity';
+import { log } from 'console';
 
 @Injectable()
 export class AfiliadoService {
@@ -38,6 +41,10 @@ export class AfiliadoService {
     private estadoAfiliacionRepository: Repository<net_estado_afiliacion>,
     @InjectRepository(Net_Centro_Trabajo)
     private centroTrabajoRepository: Repository<Net_Centro_Trabajo>,
+
+    @InjectRepository(Net_Empleado_Centro_Trabajo)
+    private empCentTrabajoRepository: Repository<Net_Empleado_Centro_Trabajo>,
+
     @InjectRepository(Net_Persona_Colegios)
     private readonly netPersonaColegiosRepository: Repository<Net_Persona_Colegios>,
     @InjectRepository(Net_Persona_Por_Banco)
@@ -69,21 +76,21 @@ export class AfiliadoService {
         order: { ANO: 'ASC', MES: 'ASC' },
         relations: ['cuentaPersona', 'cuentaPersona.tipoCuenta', 'tipoMovimiento'],
       });
-  
+
       const tipoCuenta = movimientos.length > 0 ? movimientos[0].cuentaPersona.tipoCuenta.DESCRIPCION : null;
       const numeroCuenta = movimientos.length > 0 ? movimientos[0].cuentaPersona.NUMERO_CUENTA : null;
-  
+
       const movimientosOrdenados = movimientos.reduce((acc, movimiento) => {
         const { ANO: year, MES: month } = movimiento;
-  
+
         if (!acc[year]) {
           acc[year] = {};
         }
-  
+
         if (!acc[year][month]) {
           acc[year][month] = [];
         }
-  
+
         acc[year][month].push({
           ID_MOVIMIENTO_CUENTA: movimiento.ID_MOVIMIENTO_CUENTA,
           MONTO: movimiento.MONTO,
@@ -94,10 +101,10 @@ export class AfiliadoService {
           ANO: movimiento.ANO,
           MES: movimiento.MES,
         });
-  
+
         return acc;
       }, {});
-  
+
       return {
         tipoCuenta,
         numeroCuenta,
@@ -274,6 +281,94 @@ export class AfiliadoService {
       ID_TIPO_PERSONA: detalleRelevante?.tipoPersona?.id_tipo_persona || null,
       TIPO_PERSONA: detalleRelevante?.tipoPersona?.tipo_persona || null,
       VOLUNTARIO: detalleRelevante?.voluntario || 'NO',
+    };
+    return result;
+  }
+
+  async findOneConasa(term: string, email: string, password: string) {
+    const empCentTrabajoRepository = await this.empCentTrabajoRepository.findOne({
+      where: {
+        correo_1: email, usuarioEmpresas: {
+          usuarioModulos: {
+            rolModulo: { nombre: In(["CONASA", "TODO"]) }
+          }
+        }
+      },
+      relations: [
+        'usuarioEmpresas',
+        'usuarioEmpresas.usuarioModulos',
+        'usuarioEmpresas.usuarioModulos.rolModulo',
+      ],
+    });
+
+    if (!empCentTrabajoRepository) {
+      throw new UnauthorizedException('User not found');
+    }
+
+    // Verifica la contraseña usando bcrypt
+    const isPasswordValid = await bcrypt.compare(password, empCentTrabajoRepository.usuarioEmpresas[0].contrasena); // 'user.password' es la contraseña encriptada en tu base de datos
+
+    if (!isPasswordValid) {
+      throw new UnauthorizedException('Invalid password');
+    }
+
+    const persona = await this.personaRepository.findOne({
+      where: {
+        n_identificacion: term, detallePersona: {
+          tipoPersona: { tipo_persona: In(["JUBILADO", "PENSIONADO", "AFILIADO"]) }
+        }
+      },
+      relations: [
+        'detallePersona',
+        'detallePersona.tipoPersona',
+        'pais',
+        'municipio.departamento',
+        'tipoIdentificacion',
+        'municipio',
+        'municipio_nacimiento',
+        'municipio_nacimiento.departamento',
+      ],
+    });
+
+    console.log(persona);
+    if (!persona) {
+      throw new NotFoundException(`Afiliado con N_IDENTIFICACION ${term} no existe`);
+    }
+
+
+    // Verifica el detalle de la persona donde coincida ID_PERSONA e ID_CAUSANTE, si existe `detallePersona`
+    const detalleRelevante = persona.detallePersona
+      ? persona.detallePersona.find((detalle) =>
+        detalle.ID_PERSONA === persona.id_persona && detalle.ID_CAUSANTE === persona.id_persona
+      )
+      : null;
+
+    // Construye el resultado con valores por defecto en caso de que no haya `detallePersona`
+    const result = {
+      N_IDENTIFICACION: persona.n_identificacion,
+      PRIMER_NOMBRE: persona.primer_nombre,
+      SEGUNDO_NOMBRE: persona.segundo_nombre,
+      TERCER_NOMBRE: persona.tercer_nombre,
+      PRIMER_APELLIDO: persona.primer_apellido,
+      SEGUNDO_APELLIDO: persona.segundo_apellido,
+      GENERO: persona.genero,
+      SEXO: persona.sexo,
+      DIRECCION_RESIDENCIA: persona.direccion_residencia,
+      FECHA_NACIMIENTO: persona.fecha_nacimiento,
+
+      ID_PROFESION: persona.profesion?.id_profesion,
+      TELEFONO_1: persona.telefono_1,
+      TELEFONO_2: persona.telefono_2,
+      CORREO_1: persona.correo_1,
+      ID_PAIS: persona.pais?.id_pais,
+      id_departamento_residencia: persona.municipio?.departamento.id_departamento,
+      ID_MUNICIPIO: persona.municipio?.id_municipio,
+      id_departamento_nacimiento: persona.municipio_nacimiento?.departamento.id_departamento,
+      ID_MUNICIPIO_NACIMIENTO: persona.municipio_nacimiento?.id_municipio,
+      fallecido: persona.fallecido,
+
+      ID_TIPO_PERSONA: detalleRelevante?.tipoPersona?.id_tipo_persona || null,
+      TIPO_PERSONA: detalleRelevante?.tipoPersona?.tipo_persona || null,
     };
     return result;
   }
@@ -595,6 +690,9 @@ export class AfiliadoService {
         "Afil"."PRIMER_APELLIDO",
         "Afil"."SEGUNDO_APELLIDO",
         "Afil"."GENERO",
+        "detA"."ID_CAUSANTE",
+        "detA"."ID_DETALLE_PERSONA",
+        "detA"."PORCENTAJE",
         "detA"."PORCENTAJE",
         "tipoP"."TIPO_PERSONA"
         FROM
@@ -683,8 +781,10 @@ export class AfiliadoService {
   normalizarDatos(data: any): PersonaResponse[] {
     const newList: PersonaResponse[] = []
     data.map((el: any) => {
-      const newPersona: PersonaResponse = {
+      const newPersona: any = {
         id_persona: el.ID_PERSONA,
+        id_causante: el.ID_CAUSANTE,
+        id_detalle_persona: el.ID_DETALLE_PERSONA,
         porcentaje: el.PORCENTAJE,
         tipo_persona: el.TIPO_PERSONA,
         n_identificacion: el.N_IDENTIFICACION,

@@ -328,38 +328,40 @@ export class VerEditarBeneficioAfilComponent {
           { nombre: 'monto_primera_cuota', tipo: 'number', requerido: false, etiqueta: 'monto_primera_cuota', editable: true },
           { nombre: 'estado_solicitud', tipo: 'list', requerido: false, opciones: [{ label: "APROBADO", value: "APROBADO" }, { label: "RECHAZADO", value: "RECHAZADO" }], etiqueta: 'Estado Solicitud', editable: true },
           { nombre: 'observaciones', tipo: 'text', requerido: false, etiqueta: 'observaciones', editable: true },
+          { nombre: 'complementaria', tipo: 'list', requerido: false, opciones: [{ label: "SI", value: "SI" }, { label: "NO", value: "NO" }], etiqueta: '¿Este beneficio va en complementaria?', editable: true },
           { nombre: 'prestamo', tipo: 'list', requerido: false, opciones: [{ label: "SI", value: "SI" }, { label: "NO", value: "NO" }], etiqueta: '¿Tiene algún préstamo pendiente con INPREMA?', editable: true },)
       } else if (row.numero_rentas_max > 1 || row.numero_rentas_max == 0) {
         campos.push(
-          { nombre: 'num_rentas_aplicadas', tipo: 'text', requerido: false, etiqueta: 'Número de rentas aprobadas', editable: false },
+          { nombre: 'num_rentas_aplicadas', tipo: 'text', requerido: false, etiqueta: 'Número de rentas aprobadas', editable: true },
           { nombre: 'ultimo_dia_ultima_renta', tipo: 'number', requerido: false, etiqueta: 'Dias de la última renta', editable: true },
+          { nombre: 'periodo_finalizacion', tipo: 'date', requerido: false, etiqueta: 'periodo_finalizacion', editable: false, validadores: [] },
 
           { nombre: 'num_rentas_pagar_primer_pago', tipo: 'number', requerido: false, etiqueta: 'Número de rentas a pagar en el primer pago', editable: true, },
           { nombre: 'monto_ultima_cuota', tipo: 'number', requerido: false, etiqueta: 'Monto correspondiente a los dias restantes', editable: true },
           { nombre: 'monto_por_periodo', tipo: 'number', requerido: false, etiqueta: 'Monto mensual', editable: true },
-          { nombre: 'monto_primera_cuota', tipo: 'number', requerido: false, etiqueta: 'Monto primera cuota', editable: true },
+          { nombre: 'monto_primera_cuota', tipo: 'number', requerido: false, etiqueta: 'Monto primera cuota', editable: false },
           { nombre: 'monto_total', tipo: 'number', requerido: false, etiqueta: 'Monto total', editable: false },
           { nombre: 'estado_solicitud', tipo: 'list', requerido: false, opciones: [{ label: "APROBADO", value: "APROBADO" }, { label: "RECHAZADO", value: "RECHAZADO" }], etiqueta: 'Estado Solicitud', editable: true },
           { nombre: 'observaciones', tipo: 'text', requerido: false, etiqueta: 'observaciones', editable: true },
+          { nombre: 'complementaria', tipo: 'list', requerido: false, opciones: [{ label: "SI", value: "SI" }, { label: "NO", value: "NO" }], etiqueta: '¿Este beneficio va en complementaria?', editable: true },
           { nombre: 'prestamo', tipo: 'list', requerido: false, opciones: [{ label: "SI", value: "SI" }, { label: "NO", value: "NO" }], etiqueta: '¿Tiene algún préstamo pendiente con INPREMA?', editable: true },
         )
       }
 
     } else if (row.periodicidad == "V") {
-      campos = [
+      campos.push(
         /* { nombre: 'periodoInicio', tipo: 'date', requerido: false, etiqueta: 'Periodo de inicio' },
         { nombre: 'periodoFinalizacion', tipo: 'date', requerido: false, etiqueta: 'Periodo de finalización', editable: false },
         { nombre: 'num_rentas_aplicadas', tipo: 'number', requerido: false, etiqueta: 'Número de rentas aprobadas', editable: true },*/
         /* { nombre: 'monto_total', tipo: 'number', requerido: false, etiqueta: 'Monto Total', editable: true, }, */
         { nombre: 'num_rentas_pagar_primer_pago', tipo: 'number', requerido: false, etiqueta: 'Número de rentas a pagar en el primer pago', editable: true, },
-        { nombre: 'monto_primera_cuota', tipo: 'number', requerido: false, etiqueta: 'Monto primera cuota', editable: true },
-
         { nombre: 'monto_por_periodo', tipo: 'text', requerido: false, etiqueta: 'Monto por periodo', editable: true },
-
+        { nombre: 'monto_primera_cuota', tipo: 'number', requerido: false, etiqueta: 'Monto primera cuota', editable: false },
         { nombre: 'estado_solicitud', tipo: 'list', requerido: false, opciones: [{ label: "APROBADO", value: "APROBADO" }, { label: "RECHAZADO", value: "RECHAZADO" }], etiqueta: 'Estado Solicitud', editable: true },
         { nombre: 'observaciones', tipo: 'text', requerido: false, etiqueta: 'observaciones', editable: true },
+        { nombre: 'complementaria', tipo: 'list', requerido: false, opciones: [{ label: "SI", value: "SI" }, { label: "NO", value: "NO" }], etiqueta: '¿Este beneficio va en complementaria?', editable: true },
         { nombre: 'prestamo', tipo: 'list', requerido: false, opciones: [{ label: "SI", value: "SI" }, { label: "NO", value: "NO" }], etiqueta: '¿Tiene algún préstamo pendiente con INPREMA?', editable: true },
-      ];
+      );
 
     }
 
@@ -367,19 +369,23 @@ export class VerEditarBeneficioAfilComponent {
       campos.pop()
     }
 
+
+    console.log(row);
+    row.monto_por_periodo = parseFloat(row.monto_por_periodo?.toFixed(2));
+    row.monto_primera_cuota = parseFloat(row.monto_primera_cuota?.toFixed(2));
+    row.monto_ultima_cuota = parseFloat(row.monto_ultima_cuota?.toFixed(2));
+
     const dialogRef = this.dialog.open(EditarDialogComponent, {
       width: '500px',
       data: { campos: campos, valoresIniciales: row }
     });
 
     dialogRef.componentInstance.formUpdated.subscribe((formValues: any) => {
-      console.log('Formulario actualizado:', formValues);
-      const campoActualizar = campos.find((c: any) => c.nombre === 'num_rentas_aplicadas');
-      console.log(campoActualizar);
-
+      const campoActualizar = campos.find((c: any) => c.nombre === 'num_rentas_pagar_primer_pago');
       if (campoActualizar) {
-        campoActualizar.value = 88; // Actualizar valor dinámicamente.
         this.cdr.detectChanges();
+        //campoActualizar.value = 88; // Actualizar valor dinámicamente.
+        //this.cdr.detectChanges();
       }
     });
 

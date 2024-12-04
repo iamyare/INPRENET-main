@@ -19,7 +19,7 @@ export class TodosPagosComponent implements OnInit {
 
   displayedColumns: string[] = ['planilla', 'bancos', 'montoPagado', 'deducciones', 'total'];
 
-  constructor(private planillaService: PlanillaService) {}
+  constructor(private planillaService: PlanillaService) { }
 
   ngOnInit(): void {
     if (this.datos && this.datos.n_identificacion) {
@@ -37,7 +37,7 @@ export class TodosPagosComponent implements OnInit {
         forkJoin(observables).subscribe({
           next: (pagosResponses) => {
             this.allPagosData = pagosResponses.map(response => {
-              response.beneficios.forEach((beneficio:any) => {
+              response.beneficios.forEach((beneficio: any) => {
                 beneficio.totalPagado = beneficio.pagos.reduce((acc: number, curr: any) => acc + curr.monto_a_pagar, 0);
               });
               return response;
@@ -71,7 +71,7 @@ export class TodosPagosComponent implements OnInit {
 
   // Función para generar el PDF
   generarPDF() {
-    const documentDefinition:any = this.getDocumentDefinition();
+    const documentDefinition: any = this.getDocumentDefinition();
     pdfMake.createPdf(documentDefinition).download('pagos-beneficios.pdf');
   }
 
@@ -84,7 +84,7 @@ export class TodosPagosComponent implements OnInit {
     this.allPagosData.forEach(pago => {
       // Aquí se acceden a los bancos a nivel de beneficios y no a nivel global
       const bancos = pago.beneficios.map((beneficio: any) =>
-        beneficio.pagos.map((pago: any) => `${pago.banco} - ${pago.num_cuenta}`).join('\n')
+        beneficio.pagos.map((pago: any) => `${pago.banco || ""}  - ${pago.num_cuenta || ""}`).join('\n')
       ).join('\n') || 'Sin información de bancos';
 
       const beneficios = pago.beneficios.map((beneficio: any) => `${beneficio.beneficio}: ${beneficio.totalPagado}`).join('\n');

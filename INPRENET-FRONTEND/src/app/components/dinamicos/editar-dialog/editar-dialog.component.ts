@@ -2,6 +2,7 @@ import { ChangeDetectorRef, Component, Inject, OnInit, QueryList, ViewChild, Vie
 import { AbstractControl, FormBuilder, FormControl, FormGroup, ValidatorFn, Validators } from '@angular/forms';
 import { MatDatepicker } from '@angular/material/datepicker';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
+import { addMonths } from 'date-fns';
 
 interface Campo {
   nombre: string;
@@ -76,8 +77,61 @@ export class EditarDialogComponent implements OnInit {
   escucharCambiosFormulario() {
     this.formGroup.valueChanges.subscribe(values => {
       this.formUpdated.emit(values); // Emitir cambios del formulario.
+
+      // Suponiendo que el campo que modifica es 'input1' y el que quieres cambiar es 'input2'.
+      const num_rentas_pagar_primer_pago = this.formGroup.get("num_rentas_pagar_primer_pago")?.value;
+      const monto_por_periodo = this.formGroup.get("monto_por_periodo")?.value;
+
+      const num_rentas_aplicadas = this.formGroup.get("num_rentas_aplicadas")?.value;
+      //const valorInput4 = values.num_rentas_aplicadas;
+      const ultimo_dia_ultima_renta = values?.ultimo_dia_ultima_renta;
+      const fecha_calculo = this.formGroup.get("fecha_calculo")?.value;
+
+      const monto_total = this.formGroup.get("monto_total")?.value;
+      const monto_ultima_cuota = this.formGroup.get("monto_ultima_cuota")?.value;
+
+      /* if (num_rentas_pagar_primer_pago !== undefined) {
+        // Aplica lógica para calcular el nuevo valor
+        const nuevomonto_por_periodo = num_rentas_pagar_primer_pago * monto_por_periodo; // Ejemplo: duplicar el valor
+
+        // Actualiza el valor de 'input2' sin emitir eventos
+        this.formGroup.get('monto_primera_cuota')?.patchValue(nuevomonto_por_periodo, { emitEvent: false });
+      } */
+
+      if (monto_total !== undefined) {
+        // Aplica lógica para calcular el nuevo valor
+        const nuevomonto_por_periodo = (monto_por_periodo * num_rentas_aplicadas) + monto_ultima_cuota; // Ejemplo: duplicar el valor
+
+        // Actualiza el valor de 'input2' sin emitir eventos
+        this.formGroup.get('monto_total')?.patchValue(nuevomonto_por_periodo.toFixed(2), { emitEvent: false });
+      }
+
+      if (num_rentas_aplicadas !== undefined) {
+        let startDate: any
+        if (fecha_calculo) {
+
+          if (typeof fecha_calculo === 'string' && fecha_calculo.includes('T')) {
+            // Si el valor tiene formato ISO con 'T', convertirlo a 'yyyy-mm-dd'
+            startDate = new Date(fecha_calculo).toISOString().split('T')[0];
+          } else {
+            // Si ya tiene formato 'yyyy-mm-dd', dejarlo tal cual
+            startDate = new Date().toISOString().split('T')[0];
+          }
+        } else {
+          startDate = new Date().toISOString().split('T')[0];
+        }
+
+        // Sumamos los meses especificados en `num_rentas_aplicadas`
+        const endDateWithMonths = addMonths(startDate, parseInt(num_rentas_aplicadas, 10));
+        //const endDateWithMonths = addMonths(startDate, parseInt(valorInput3, 10));
+        // Configuramos la fecha al próximo mes y asignamos el día de `ultimo_dia_ultima_renta`
+        const endDateAdjusted = new Date(endDateWithMonths.getFullYear(), endDateWithMonths.getMonth() + 1, parseInt(ultimo_dia_ultima_renta, 10));
+
+        this.formGroup.get('periodo_finalizacion')?.patchValue(endDateAdjusted, { emitEvent: false });
+      }
     });
   }
+
 
   guardar() {
     const formValues = this.formGroup.value;

@@ -23,7 +23,7 @@ export class CargarbefDedComponent {
   constructor(private planillaService: PlanillaService, private toastr: ToastrService, private SVCBeneficios: BeneficiosService, private dialog: MatDialog) { }
 
   asignarBeneficiosOrdinariaBeneficiariosAfiliados() {
-    this.planillaService.generarPlanillaOrdinaria('BENEFICIARIO SIN CAUSANTE,BENEFICIARIO,DESIGNADO').subscribe({
+    this.planillaService.generarPlanillaOrdinaria('BENEFICIARIO SIN CAUSANTE,BENEFICIARIO').subscribe({
       next: () => {
         this.toastr.success('Planilla ordinaria generada para Beneficiarios y Afiliados', 'Éxito');
       },
@@ -34,7 +34,7 @@ export class CargarbefDedComponent {
   }
 
   asignarBeneficiosOrdinariaJubiladosPensionados() {
-    this.planillaService.generarPlanillaOrdinaria('JUBILADO,VOLUNTARIO,PENSIONADO,AFILIADO').subscribe({
+    this.planillaService.generarPlanillaOrdinaria('JUBILADO,PENSIONADO').subscribe({
       next: () => {
         this.toastr.success('Planilla ordinaria generada para Jubilados y Pensionados', 'Éxito');
       },
@@ -45,7 +45,7 @@ export class CargarbefDedComponent {
   }
 
   asignarBeneficiosComplementariaBeneficiariosAfiliados() {
-    this.planillaService.generarPlanillaComplementaria('BENEFICIARIO SIN CAUSANTE,BENEFICIARIO,DESIGNADO').subscribe({
+    this.planillaService.generarPlanillaComplementaria('BENEFICIARIO').subscribe({
       next: () => {
         this.toastr.success('Planilla complementaria generada para Beneficiarios y Afiliados', 'Éxito');
       },
@@ -56,7 +56,7 @@ export class CargarbefDedComponent {
   }
 
   asignarBeneficiosComplementariaJubiladosPensionados() {
-    this.planillaService.generarPlanillaComplementaria('VOLUNTARIO,PENSIONADO,JUBILADO,AFILIADO').subscribe({
+    this.planillaService.generarPlanillaComplementaria('PENSIONADO,JUBILADO,AFILIADO').subscribe({
       next: () => {
         this.toastr.success('Planilla complementaria generada para Jubilados y Pensionados', 'Éxito');
       },

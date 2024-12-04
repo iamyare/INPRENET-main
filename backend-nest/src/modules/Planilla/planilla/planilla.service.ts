@@ -12,7 +12,7 @@ import { Net_Detalle_Pago_Beneficio } from '../detalle_beneficio/entities/net_de
 import { PaginationDto } from 'src/common/dtos/pagination.dto';
 import { Workbook } from 'exceljs';
 import { Response } from 'express';
-import { startOfMonth, endOfMonth, getMonth, getYear, format } from 'date-fns';
+import { startOfMonth, endOfMonth, getMonth, getYear, format, parse } from 'date-fns';
 import { Net_Detalle_Beneficio_Afiliado } from '../detalle_beneficio/entities/net_detalle_beneficio_afiliado.entity';
 import * as ExcelJS from 'exceljs';
 import * as XLSX from 'xlsx';
@@ -1212,7 +1212,7 @@ GROUP BY
     idTiposPlanilla: number[],
   ): Promise<any[]> {
     const idTiposPlanillaStr = idTiposPlanilla.join(', '); // Convertimos el array a un string separado por comas
-  
+
     const query = `
       SELECT 
         per."N_IDENTIFICACION" AS "IDENTIFICACION",
@@ -1240,7 +1240,7 @@ GROUP BY
         per."PRIMER_NOMBRE" || ' ' || per."SEGUNDO_NOMBRE" || ' ' || per."PRIMER_APELLIDO" || ' ' || per."SEGUNDO_APELLIDO" ASC, 
         ben."NOMBRE_BENEFICIO" ASC
     `;
-  
+
     try {
       const result = await this.entityManager.query(query, [periodoInicio, periodoFinalizacion]);
       return result;
@@ -1249,14 +1249,14 @@ GROUP BY
       throw new InternalServerErrorException('Error al obtener beneficios detallados');
     }
   }
-  
+
   async getDeduccionesInpremaPorPeriodoDetallado(
     periodoInicio: string,
     periodoFinalizacion: string,
     idTiposPlanilla: number[],
   ): Promise<any[]> {
     const idTiposPlanillaStr = idTiposPlanilla.join(', ');
-  
+
     const query = `
       SELECT 
         per."N_IDENTIFICACION" AS "IDENTIFICACION",
@@ -1284,7 +1284,7 @@ GROUP BY
         per."PRIMER_NOMBRE" || ' ' || per."SEGUNDO_NOMBRE" || ' ' || per."PRIMER_APELLIDO" || ' ' || per."SEGUNDO_APELLIDO" ASC, 
         ded."NOMBRE_DEDUCCION" ASC
     `;
-  
+
     try {
       const result = await this.entityManager.query(query, [periodoInicio, periodoFinalizacion]);
       return result;
@@ -1293,7 +1293,7 @@ GROUP BY
       throw new InternalServerErrorException('Error al obtener deducciones INPREMA detalladas');
     }
   }
-  
+
   async getDeduccionesTercerosPorPeriodoDetallado(
     periodoInicio: string,
     periodoFinalizacion: string,
@@ -1301,7 +1301,7 @@ GROUP BY
   ): Promise<any[]> {
     // Convertir el array en un string separado por comas
     const idTiposPlanillaList = idTiposPlanilla.join(',');
-  
+
     const query = `
       SELECT 
         per."N_IDENTIFICACION" AS "IDENTIFICACION",
@@ -1329,7 +1329,7 @@ GROUP BY
         per."PRIMER_NOMBRE" || ' ' || per."SEGUNDO_NOMBRE" || ' ' || per."PRIMER_APELLIDO" || ' ' || per."SEGUNDO_APELLIDO" ASC, 
         ded."NOMBRE_DEDUCCION" ASC
     `;
-  
+
     try {
       const result = await this.entityManager.query(query, [periodoInicio, periodoFinalizacion]);
       return result;
@@ -1338,7 +1338,7 @@ GROUP BY
       throw new InternalServerErrorException('Error al obtener deducciones de terceros detalladas');
     }
   }
-  
+
   async getDetallePorBeneficiosYDeduccionesPorPeriodo(
     periodoInicio: string,
     periodoFinalizacion: string,
@@ -1351,21 +1351,21 @@ GROUP BY
         periodoFinalizacion,
         idTiposPlanilla,
       );
-  
+
       // Obtener detalles de deducciones INPREMA
       const deduccionesInpremaDetalladas = await this.getDeduccionesInpremaPorPeriodoDetallado(
         periodoInicio,
         periodoFinalizacion,
         idTiposPlanilla,
       );
-  
+
       // Obtener detalles de deducciones de terceros
       const deduccionesTercerosDetalladas = await this.getDeduccionesTercerosPorPeriodoDetallado(
         periodoInicio,
         periodoFinalizacion,
         idTiposPlanilla,
       );
-  
+
       return {
         beneficiosDetallados,
         deduccionesInpremaDetalladas,
@@ -1376,7 +1376,7 @@ GROUP BY
       throw new InternalServerErrorException('Error al obtener los detalles por periodo');
     }
   }
-  
+
   async getTotalPorBancoYPeriodo(
     periodoInicio: string,
     periodoFinalizacion: string,
@@ -2195,12 +2195,16 @@ GROUP BY
 
   async create(createPlanillaDto: CreatePlanillaDto) {
     const { nombre_planilla, periodo_inicio, periodo_finalizacion } = createPlanillaDto;
+
     try {
       const tipoPlanilla = await this.tipoPlanillaRepository.findOneBy({ nombre_planilla });
 
       if (!tipoPlanilla) {
-        throw new BadRequestException(`No se encontró ningún tipo de planilla con el nombre '${nombre_planilla}'.`);
+        throw new BadRequestException(
+          `No se encontró ningún tipo de planilla con el nombre '${nombre_planilla}'.`
+        );
       }
+
       const planillaActiva = await this.planillaRepository.findOne({
         where: {
           tipoPlanilla: { id_tipo_planilla: tipoPlanilla.id_tipo_planilla },
@@ -2209,47 +2213,52 @@ GROUP BY
       });
 
       if (planillaActiva) {
-        throw new ConflictException(`Ya existe una planilla activa para el tipo de planilla '${nombre_planilla}'.`);
+        throw new ConflictException(
+          `Ya existe una planilla activa para el tipo de planilla '${nombre_planilla}'.`
+        );
       }
-      let codPlanilla = "";
+
+      let codPlanilla = '';
       const fechaActual: Date = new Date();
       const mes: number = getMonth(fechaActual) + 1;
       const anio: number = getYear(fechaActual);
-      const primerDia: string = format(startOfMonth(fechaActual), 'dd/MM/yyyy');
-      const ultimoDia: string = format(endOfMonth(fechaActual), 'dd/MM/yyyy');
+      const primerDia: Date = startOfMonth(fechaActual);
+      const ultimoDia: Date = endOfMonth(fechaActual);
       let secuencia = 1;
       let planillaExistente;
 
       do {
         switch (nombre_planilla) {
-          case "ORDINARIA DE JUBILADOS Y PENSIONADOS":
+          case 'ORDINARIA DE JUBILADOS Y PENSIONADOS':
             codPlanilla = `ORD-JUB-PEN-${mes}-${anio}-${secuencia}`;
             break;
-          case "ORDINARIA DE BENEFICIARIOS":
+          case 'ORDINARIA DE BENEFICIARIOS':
             codPlanilla = `ORD-BEN-${mes}-${anio}-${secuencia}`;
             break;
-          case "COMPLEMENTARIA DE JUBILADOS Y PENSIONADOS":
+          case 'COMPLEMENTARIA DE JUBILADOS Y PENSIONADOS':
             codPlanilla = `COMP-JUB-PEN-${mes}-${anio}-${secuencia}`;
             break;
-          case "COMPLEMENTARIA DE BENEFICIARIOS":
+          case 'COMPLEMENTARIA DE BENEFICIARIOS':
             codPlanilla = `COMP-BEN-${mes}-${anio}-${secuencia}`;
             break;
-          case "COMPLEMENTARIA AFILIADO":
+          case 'COMPLEMENTARIA AFILIADO':
             codPlanilla = `COMP-AFIL-${mes}-${anio}-${secuencia}`;
             break;
-          case "EXTRAORDINARIA DE JUBILADOS Y PENSIONADOS":
+          case 'EXTRAORDINARIA DE JUBILADOS Y PENSIONADOS':
             codPlanilla = `EXTRA-JUB-PEN-${mes}-${anio}-${secuencia}`;
             break;
-          case "EXTRAORDINARIA DE BENEFICIARIOS":
+          case 'EXTRAORDINARIA DE BENEFICIARIOS':
             codPlanilla = `EXTRA-JUB-${mes}-${anio}-${secuencia}`;
             break;
-          case "60 RENTAS":
+          case '60 RENTAS':
             codPlanilla = `60-RENTAS-${mes}-${anio}-${secuencia}`;
             break;
           default:
             throw new BadRequestException('Tipo de planilla no reconocido');
         }
-        planillaExistente = await this.planillaRepository.findOneBy({ codigo_planilla: codPlanilla });
+        planillaExistente = await this.planillaRepository.findOneBy({
+          codigo_planilla: codPlanilla,
+        });
         if (planillaExistente) {
           secuencia++;
         }
@@ -2257,21 +2266,36 @@ GROUP BY
 
       const tipoPlanillaInstance = new Net_TipoPlanilla();
       tipoPlanillaInstance.id_tipo_planilla = tipoPlanilla.id_tipo_planilla;
-      const newPlanilla = this.planillaRepository.create({
+
+      // Convertir las fechas al formato adecuado
+      const formato = 'dd/MM/yyyy';
+      const periodoInicio: Date = periodo_inicio
+        ? parse(periodo_inicio, formato, new Date())
+        : primerDia;
+
+      const periodoFinalizacion: Date = periodo_finalizacion
+        ? parse(periodo_finalizacion, formato, new Date())
+        : ultimoDia;
+
+      const data = {
         codigo_planilla: codPlanilla,
         secuencia,
-        periodoInicio: periodo_inicio ? periodo_inicio : primerDia,
-        periodoFinalizacion: periodo_finalizacion ? periodo_finalizacion : ultimoDia,
+        periodoInicio,
+        periodoFinalizacion,
         tipoPlanilla: tipoPlanillaInstance,
         estado: 'ACTIVA',
-      });
+      };
+      console.log(data);
+
+      const newPlanilla = this.planillaRepository.create(data);
 
       await this.planillaRepository.save(newPlanilla);
       return newPlanilla;
-
     } catch (error) {
       if (error instanceof QueryFailedError && error.message.includes('ORA-00001')) {
-        throw new ConflictException(`La planilla con la secuencia ya existe, por favor cambie la secuencia o revise los datos.`);
+        throw new ConflictException(
+          `La planilla con la secuencia ya existe, por favor cambie la secuencia o revise los datos.`
+        );
       }
       throw error;
     }
@@ -2414,6 +2438,9 @@ GROUP BY
     const decoded = this.jwtService.verify(token);
     const estadoPP = await this.usuarioEmpRepository.findOne({ where: { empleadoCentroTrabajo: { correo_1: decoded?.correo } } });
     const id_usuario_empresa_in = estadoPP.id_usuario_empresa;
+
+    console.log(token);
+    console.log(tipos_persona);
 
     try {
       await this.entityManager.query(

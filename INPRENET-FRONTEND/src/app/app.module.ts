@@ -19,7 +19,17 @@ import { ConasaModule } from './modulos/conasa/conasa.module';
 import { registerLocaleData } from '@angular/common';
 import localeEs from '@angular/common/locales/es';
 
-registerLocaleData(localeEs, 'es');
+const hondurasLocale = { ...localeEs } as any;
+
+// Ajusta el formato de números (índice 3)
+hondurasLocale[3] = [
+  ',',  // Separador de miles
+  '.',  // Separador decimal
+  ';',  // Separador de listas (opcional, puedes dejarlo igual)
+];
+
+// Registra la configuración personalizada
+registerLocaleData(hondurasLocale, 'es-HN');
 @NgModule({
   declarations: [
     AppComponent,
@@ -47,7 +57,7 @@ registerLocaleData(localeEs, 'es');
   ],
   providers: [SidenavService,
     { provide: HTTP_INTERCEPTORS, useClass: TokenInterceptor, multi: true },
-    { provide: LOCALE_ID, useValue: 'es' }
+    { provide: LOCALE_ID, useValue: 'es-HN' }
   ],
   bootstrap: [AppComponent]
 })

@@ -49,8 +49,8 @@ export class NuevoBeneficioAfilComponent implements OnInit {
   @ViewChild(DynamicFormComponent) dynamicForm!: DynamicFormComponent;
   form!: FormGroup;
   form1!: FormGroup;
-
   FormBen: any
+
   datosFormateados: any = {};
   unirNombres: any = unirNombres;
   tiposBeneficios: any = [];
@@ -91,6 +91,7 @@ export class NuevoBeneficioAfilComponent implements OnInit {
     { label: "JUBILADO", value: 'JUBILADO' },
     { label: "PENSIONADO", value: 'PENSIONADO' }
   ];
+
   tipoPersonaSelected: any;
   tipoBenefSelected: any;
   beneficios: any;
@@ -118,7 +119,7 @@ export class NuevoBeneficioAfilComponent implements OnInit {
       this.svcAfilServ.getAfilByDni(this.form.value.dni).subscribe(
         async (res) => {
           this.hasBeneficios = res?.BENEFICIOS;
-          console.log(res);
+          //console.log(res);
 
           if (res) {
             const item = {
@@ -188,6 +189,20 @@ export class NuevoBeneficioAfilComponent implements OnInit {
           validations: [], display: false
         },
         {
+          type: 'date',
+          label: 'Fecha de presentacion',
+          name: 'fecha_presentacion',
+          max: new Date().toISOString().split('T')[0],
+          validations: [Validators.required, noFutureDateValidator],
+          display: true
+        },
+        {
+          type: 'text', label: 'Número de expediente', name: 'n_expediente',
+          readOnly: true,
+          value: "",
+          validations: [], display: true,
+        },
+        {
           type: 'dropdown', label: 'Tipo de beneficio', name: 'nombre_beneficio',
           options: [],
           validations: [Validators.required], display: true
@@ -210,7 +225,7 @@ export class NuevoBeneficioAfilComponent implements OnInit {
         { type: 'number', label: 'Número de rentas aprobadas', name: 'num_rentas_aplicadas', validations: [Validators.min(1)], display: false },
         {
           type: 'number', label: 'Dias de la última renta', name: 'ultimo_dia_ultima_renta', validations: [
-            Validators.min(1),
+            Validators.min(0),
             Validators.max(31),
           ], display: false
         },
@@ -332,7 +347,7 @@ export class NuevoBeneficioAfilComponent implements OnInit {
         { type: 'number', label: 'Número de rentas aprobadas', name: 'num_rentas_aplicadas', validations: [Validators.min(1)], display: false },
         {
           type: 'number', label: 'Dias de la última renta', name: 'ultimo_dia_ultima_renta', validations: [
-            Validators.min(1),
+            Validators.min(0),
             Validators.max(31),
           ], display: false
         },
@@ -391,7 +406,6 @@ export class NuevoBeneficioAfilComponent implements OnInit {
 
   getFilas = async () => {
     //console.log("ENTRO");
-
     if (this.Afiliado.fallecido == "SI" && (this.Afiliado.tipo_persona == 'AFILIADO' ||
       this.Afiliado.tipo_persona == 'JUBILADO' ||
       this.Afiliado.tipo_persona == 'PENSIONADO')) {
@@ -399,9 +413,12 @@ export class NuevoBeneficioAfilComponent implements OnInit {
         await this.getColumns();
         const data = await this.svcAfilServ.obtenerBenDeAfil(this.form.value.dni).toPromise();
 
-        //console.log(data);
+        console.log(data);
 
         this.filas = data.map((item: any) => ({
+          id_persona: item.id_persona,
+          id_causante: item.id_causante,
+          id_detalle_persona: item.id_detalle_persona,
           dni: item.n_identificacion,
           nombre_completo: this.unirNombres(item.primer_apellido, item.segundo_apellido, item.primer_nombre, item.segundo_nombre, item.tercer_nombre),
           genero: item.genero,
@@ -478,6 +495,7 @@ export class NuevoBeneficioAfilComponent implements OnInit {
   }
 
   async manejarRowClick(row: any) {
+    this.limpiarFormulario()
     try {
 
       // Obtiene los beneficios basados en el tipo de afiliado seleccionado
@@ -622,7 +640,6 @@ export class NuevoBeneficioAfilComponent implements OnInit {
 
       this.temp(event, this.beneficios, this.tipoBenefSelected);
     }
-
   }
 
   async obtenerDatos1(event: any): Promise<any> {
@@ -631,17 +648,17 @@ export class NuevoBeneficioAfilComponent implements OnInit {
       ...event.value
     };
     this.datosFormateados = datosFormateados;
-    let montoPrimeraCuota = 0
+    /* let montoPrimeraCuota = 0
     if (this.datosFormateados.num_rentas_pagar_primer_pago && this.datosFormateados.monto_por_periodo) {
       montoPrimeraCuota = this.datosFormateados.num_rentas_pagar_primer_pago * this.datosFormateados.monto_por_periodo
-      this.form1?.get("monto_primera_cuota")?.setValue(montoPrimeraCuota);
-      this.FormBen?.get("monto_primera_cuota")?.setValue(montoPrimeraCuota);
-    }
+      this.form1?.get("monto_primera_cuota")?.setValue(montoPrimeraCuota.toFixed(2));
+      this.FormBen?.get("monto_primera_cuota")?.setValue(montoPrimeraCuota.toFixed(2));
+    } */
 
     if (this.datosFormateados.monto_por_periodo && this.datosFormateados.num_rentas_aplicadas) {
       const result = (parseFloat(this.datosFormateados.monto_por_periodo) * parseFloat(this.datosFormateados.num_rentas_aplicadas)) + parseFloat(this.datosFormateados.monto_ultima_cuota)
-      this.FormBen?.get("monto_total")?.setValue(result);
-      this.form1?.get("monto_total")?.setValue(result);
+      this.FormBen?.get("monto_total")?.setValue(result.toFixed(2));
+      this.form1?.get("monto_total")?.setValue(result.toFixed(2));
     }
 
     let fechaFormateada
@@ -689,12 +706,12 @@ export class NuevoBeneficioAfilComponent implements OnInit {
       ...event.value
     };
     this.datosFormateados = datosFormateados;
-    let montoPrimeraCuota = 0
+    //let montoPrimeraCuota = 0
 
     if (this.datosFormateados.num_rentas_pagar_primer_pago && this.datosFormateados.monto_por_periodo) {
-      montoPrimeraCuota = this.datosFormateados.num_rentas_pagar_primer_pago * this.datosFormateados.monto_por_periodo
-      this.form1?.get("monto_primera_cuota")?.setValue(montoPrimeraCuota);
-      this.FormBen?.get("monto_primera_cuota")?.setValue(montoPrimeraCuota);
+      //montoPrimeraCuota = this.datosFormateados.num_rentas_pagar_primer_pago * this.datosFormateados.monto_por_periodo
+      //this.form1?.get("monto_primera_cuota")?.setValue(montoPrimeraCuota.toFixed(2));
+      //this.FormBen?.get("monto_primera_cuota")?.setValue(montoPrimeraCuota.toFixed(2));
     }
 
     if (this.datosFormateados.monto_por_periodo && this.datosFormateados.num_rentas_aplicadas) {
@@ -702,14 +719,14 @@ export class NuevoBeneficioAfilComponent implements OnInit {
 
       //const result = parseFloat(this.datosFormateados.monto_por_periodo) * parseFloat(this.datosFormateados.num_rentas_aplicadas)
 
-      this.FormBen?.get("monto_total")?.setValue(result);
+      this.FormBen?.get("monto_total")?.setValue(result.toFixed(2));
     }
 
     let fechaFormateada
 
 
     //CALCULO DE FECHAS
-    const startDateFormatted = format(this.datosFormateados.fecha_calculo, 'dd/MM/yyyy');
+    //const startDateFormatted = format(this.datosFormateados?.fecha_calculo, 'dd/MM/yyyy');
 
     if (this.datosFormateados.periodicidad_beneficio == "V") {
       fechaFormateada = '01/01/2500';
@@ -742,6 +759,7 @@ export class NuevoBeneficioAfilComponent implements OnInit {
 
     if (fechaFormateada != undefined) {
       this.FormBen?.get("periodo_finalizacion")?.setValue(fechaFormateada);
+      this.FormBen?.get("periodo_finalizacion")?.setValue(fechaFormateada);
     }
   }
 
@@ -760,8 +778,6 @@ export class NuevoBeneficioAfilComponent implements OnInit {
 
             this.form1?.get("periodicidad_beneficio")?.setValue(i.periodicidad);
             this.setFieldValue(this.myFormFields1, 'periodicidad_beneficio', 'readOnly', true);
-            console.log(i);
-
             this.form1?.get("regimen")?.setValue(i?.regimen?.ley);
 
             if (i?.periodicidad == "P") {
@@ -789,7 +805,7 @@ export class NuevoBeneficioAfilComponent implements OnInit {
                 this.setFieldValue(this.myFormFields1, 'monto_total', 'readOnly', true);
                 this.setFieldValue(this.myFormFields1, 'monto_por_periodo', 'display', true);
                 this.setFieldValue(this.myFormFields1, 'monto_primera_cuota', 'display', true);
-                this.setFieldValue(this.myFormFields1, 'monto_primera_cuota', 'readOnly', true);
+                this.setFieldValue(this.myFormFields1, 'monto_primera_cuota', 'readOnly', false);
                 this.setFieldValue(this.myFormFields1, 'monto_ultima_cuota', 'display', true);
               }
 
@@ -801,7 +817,7 @@ export class NuevoBeneficioAfilComponent implements OnInit {
               this.setFieldValue(this.myFormFields1, 'monto_total', 'readOnly', false);
               this.setFieldValue(this.myFormFields1, 'monto_por_periodo', 'display', true);
               this.setFieldValue(this.myFormFields1, 'monto_primera_cuota', 'display', true);
-              this.setFieldValue(this.myFormFields1, 'monto_primera_cuota', 'readOnly', true);
+              this.setFieldValue(this.myFormFields1, 'monto_primera_cuota', 'readOnly', false);
               this.setFieldValue(this.myFormFields1, 'monto_ultima_cuota', 'display', false);
               this.setFieldValue(this.myFormFields1, 'periodo_finalizacion', 'display', false);
               this.setFieldValue(this.myFormFields1, 'periodo_finalizacion', 'readOnly', false);
@@ -837,7 +853,7 @@ export class NuevoBeneficioAfilComponent implements OnInit {
                 this.setFieldValue(this.myFormFields2, 'monto_total', 'readOnly', true);
                 this.setFieldValue(this.myFormFields2, 'monto_por_periodo', 'display', true);
                 this.setFieldValue(this.myFormFields2, 'monto_primera_cuota', 'display', true);
-                this.setFieldValue(this.myFormFields2, 'monto_primera_cuota', 'readOnly', true);
+                this.setFieldValue(this.myFormFields2, 'monto_primera_cuota', 'readOnly', false);
                 this.setFieldValue(this.myFormFields2, 'monto_ultima_cuota', 'display', true);
               }
 
@@ -849,7 +865,7 @@ export class NuevoBeneficioAfilComponent implements OnInit {
               this.setFieldValue(this.myFormFields2, 'monto_total', 'readOnly', false);
               this.setFieldValue(this.myFormFields2, 'monto_por_periodo', 'display', true);
               this.setFieldValue(this.myFormFields2, 'monto_primera_cuota', 'display', true);
-              this.setFieldValue(this.myFormFields2, 'monto_primera_cuota', 'readOnly', true);
+              this.setFieldValue(this.myFormFields2, 'monto_primera_cuota', 'readOnly', false);
               this.setFieldValue(this.myFormFields2, 'monto_ultima_cuota', 'display', false);
               this.setFieldValue(this.myFormFields2, 'periodo_finalizacion', 'display', false);
               this.setFieldValue(this.myFormFields2, 'periodo_finalizacion', 'readOnly', false);
@@ -860,7 +876,6 @@ export class NuevoBeneficioAfilComponent implements OnInit {
     }
   }
 
-
   async guardarNTBenef() {
     /* Asignar al afiliado si no ha fallecido */
     /* Asignar a los beneficiarios si el afiliado ya falleció */
@@ -868,7 +883,8 @@ export class NuevoBeneficioAfilComponent implements OnInit {
 
     //AFILIADOS O BENEFICIARIOS
     if (this.Afiliado.fallecido != "SI") {
-      this.datosFormateados["dni"] = this.form.value.dni;
+      this.datosFormateados["dni"] = this.form?.value.dni;
+      this.datosFormateados["periodo_finalizacion"] = this.form?.value.periodo_finalizacion;
 
       this.svcBeneficioServ.asigBeneficioAfil(this.datosFormateados, this.desOBenSeleccionado).subscribe(
         {
@@ -878,23 +894,27 @@ export class NuevoBeneficioAfilComponent implements OnInit {
           },
           error: (error) => {
             let mensajeError = '';
+            this.limpiarFormulario()
             // Verifica si el error tiene una estructura específica
             if (error.error.message) {
-              mensajeError = 'Su sesión expiró';
+              mensajeError = error.error.message;
             }
             this.toastr.error(mensajeError);
           }
         })
     } else {
       this.datosFormateados["dni"] = this.FormBen.value.dni;
+      this.datosFormateados["periodo_finalizacion"] = this.FormBen.value.periodo_finalizacion;
 
       this.svcBeneficioServ.asigBeneficioAfil(this.datosFormateados, this.desOBenSeleccionado, this.Afiliado.id_persona).subscribe(
         {
           next: (response) => {
             this.toastr.success("se asignó correctamente el beneficio");
-            this.limpiarFormulario()
+            this.getFilas().then(() => this.cargar());
+            this.limpiarFormulario();
           },
           error: (error) => {
+            this.limpiarFormulario();
             let mensajeError = '';
             // Verifica si el error tiene una estructura específica
             if (error.error.message) {
@@ -908,7 +928,11 @@ export class NuevoBeneficioAfilComponent implements OnInit {
 
   limpiarFormulario(): void {
     // Utiliza la referencia al componente DynamicFormComponent para resetear el formulario
-    this.Afiliado = []
+    //this.Afiliado = [];
+    this.tipoPersonaSelected = []
+    this.tipoBenefSelected = []
+    this.desOBenSeleccionado = []
+
     if (this.form1) {
       this.form1.reset();
     }
@@ -916,9 +940,8 @@ export class NuevoBeneficioAfilComponent implements OnInit {
       this.FormBen.reset();
     }
     if (this.dynamicForm) {
-      this.dynamicForm.form.reset();
+      //this.dynamicForm.form.reset();
     }
   }
-
 
 }

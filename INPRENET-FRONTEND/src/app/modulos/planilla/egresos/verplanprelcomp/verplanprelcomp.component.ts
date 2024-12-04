@@ -73,7 +73,7 @@ export class VerplanprelcompComponent implements OnInit, OnChanges {
     }
     try {
       const response = await this.planillaService.getPlanillaPrelimiar(this.codigoPlanilla).toPromise();
-      
+
       if (response) {
         this.detallePlanilla = { ...response };
         await this.calcularTotales(this.codigoPlanilla);
@@ -141,7 +141,7 @@ export class VerplanprelcompComponent implements OnInit, OnChanges {
     }
     try {
       this.dataPlan = await this.planillaService.getPlanillasPreliminares(cod_planilla).toPromise();
-      
+
       if (this.dataPlan && this.dataPlan.length > 0) {
         this.datosTabl = this.dataPlan.map((item: any) => ({
           id_afiliado: item.ID_PERSONA,
@@ -186,7 +186,7 @@ export class VerplanprelcompComponent implements OnInit, OnChanges {
     this.planillaService.getDesglosePorPersonaPlanilla(row.id_afiliado, this.codigoPlanilla).subscribe({
       next: (response) => {
         console.log(response);
-        
+
         const { beneficios } = response;
 
         const data = beneficios;
@@ -273,18 +273,18 @@ export class VerplanprelcompComponent implements OnInit, OnChanges {
       this.toastr.error('Debe seleccionar un código de planilla válido');
     }
   }
-  
+
   async descargarExcelCompleto(): Promise<void> {
     if (!this.datosTabl || this.datosTabl.length === 0) {
       this.toastr.warning('No hay datos disponibles para exportar');
       return;
     }
-  
+
     try {
       const beneficios = [];
-      const deduccionesTerceros:any = [];
-      const deduccionesInprema :any= [];
-  
+      const deduccionesTerceros: any = [];
+      const deduccionesInprema: any = [];
+
       // Iterar sobre cada afiliado y obtener los datos
       for (const row of this.datosTabl) {
         // Obtener beneficios
@@ -301,7 +301,7 @@ export class VerplanprelcompComponent implements OnInit, OnChanges {
             }))
           );
         }
-  
+
         // Obtener deducciones
         const responseDeducciones = await this.deduccionSVC.getDeduccionesByPersonaAndBenef(row.id_afiliado, row.ID_BENEFICIO, this.idPlanilla).toPromise();
         if (responseDeducciones && responseDeducciones.length > 0) {
@@ -312,7 +312,7 @@ export class VerplanprelcompComponent implements OnInit, OnChanges {
               NOMBRE_DEDUCCION: deduccion.NOMBRE_DEDUCCION,
               NOMBRE_INSTITUCION: deduccion.NOMBRE_INSTITUCION,
             };
-  
+
             if (deduccion.NOMBRE_INSTITUCION === 'INPREMA') {
               deduccionesInprema.push(deduccionData);
             } else {
@@ -321,13 +321,13 @@ export class VerplanprelcompComponent implements OnInit, OnChanges {
           });
         }
       }
-  
+
       // Verificar si hay datos para exportar
       if (beneficios.length === 0 && deduccionesTerceros.length === 0 && deduccionesInprema.length === 0) {
         this.toastr.warning('No se encontraron datos para exportar');
         return;
       }
-  
+
       // Crear las hojas del Excel
       const workbook: XLSX.WorkBook = {
         Sheets: {
@@ -337,13 +337,13 @@ export class VerplanprelcompComponent implements OnInit, OnChanges {
         },
         SheetNames: ['Beneficios', 'Deducciones Terceros', 'Deducciones INPREMA'],
       };
-  
+
       // Generar el archivo Excel
       const excelBuffer: any = XLSX.write(workbook, {
         bookType: 'xlsx',
         type: 'array'
       });
-  
+
       const data: Blob = new Blob([excelBuffer], { type: 'application/octet-stream' });
       saveAs(data, `PlanillaCompleta_${this.codigoPlanilla}.xlsx`);
       this.toastr.success('Archivo Excel completo generado con éxito');
@@ -352,7 +352,7 @@ export class VerplanprelcompComponent implements OnInit, OnChanges {
       this.toastr.error('Ocurrió un error al generar el archivo Excel');
     }
   }
-  
-  
+
+
 
 }

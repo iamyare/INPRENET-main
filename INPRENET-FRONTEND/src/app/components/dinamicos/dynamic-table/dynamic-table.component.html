@@ -53,7 +53,7 @@
 
               <!-- Celdas de tipo moneda -->
               <ng-container *ngIf="!row.isEditing && col.moneda">
-                <span class="moneda-left">{{ getCellValue(row, col) | number : '1.2-2' }}</span>
+                <span class="moneda-left">{{ getCellValue(row, col) | number: '1.2-2':'en-HN' }}</span>
               </ng-container>
 
               <!-- Edición -->

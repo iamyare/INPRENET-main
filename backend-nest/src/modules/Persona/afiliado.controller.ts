@@ -12,7 +12,9 @@ import {
   ParseIntPipe,
   UseInterceptors,
   UploadedFiles,
-  HttpException
+  HttpException,
+  Req,
+  UnauthorizedException
 } from '@nestjs/common';
 import { AfiliadoService } from './afiliado.service';
 import { UpdatePersonaDto } from './dto/update-persona.dto';
@@ -235,7 +237,7 @@ export class AfiliadoController {
     const fileIdent = files?.find(file => file.fieldname === 'archivo_identificacion');
     const arch_cert_def = files?.find(file => file.fieldname === 'arch_cert_def');
     const fotoPerfil = files?.find(file => file.fieldname === 'FotoPerfil');
-  
+
     return this.afiliadoService.updateDatosGenerales(idPersona, crearDatosDto, fileIdent, arch_cert_def, fotoPerfil);
   }
 
@@ -279,9 +281,44 @@ export class AfiliadoController {
 
   @Get('Afiliado/:term')
   findOne(@Param('term') term: string) {
-    return this.afiliadoService.findOne(term); 
+    return this.afiliadoService.findOne(term);
   }
-  
+
+  @Get('AfiliadoConasa/:term')
+  findOneConasa(
+    @Param('term') term: string,
+    @Req() req: Request
+  ) {
+    const authorization = req.headers['authorization'];
+
+    if (!authorization) {
+      throw new UnauthorizedException('No authorization header present');
+    }
+
+    // Verifica que el esquema sea 'Basic' y extrae el token base64
+    const [scheme, base64Credentials] = authorization.split(' ');
+
+    if (scheme !== 'Basic' || !base64Credentials) {
+      throw new UnauthorizedException('Invalid authorization format');
+    }
+
+    try {
+      // Decodifica las credenciales base64
+      const decoded = atob(base64Credentials);
+      const [email, password] = decoded.split(':'); // Asumiendo que las credenciales tienen el formato email:password
+
+      // Aquí deberías buscar al usuario por email en tu base de datos
+
+      // Llama al servicio con el email después de la validación
+      return this.afiliadoService.findOneConasa(term, email, password);
+
+    } catch (error) {
+      throw new UnauthorizedException('Failed to decode or validate authorization');
+    }
+  }
+
+
+
   @Get('/getAllPersonaPBanco/:dni')
   getAllPersonaPBanco(@Param('dni') dni: string) {
     return this.afiliadoService.getAllPersonaPBanco(dni);

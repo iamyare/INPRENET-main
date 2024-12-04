@@ -361,13 +361,12 @@ export class AfiliadoService {
       TELEFONO_2: persona.telefono_2,
       CORREO_1: persona.correo_1,
       ID_PAIS: persona.pais?.id_pais,
-      id_departamento_residencia: persona.municipio?.departamento.id_departamento,
-      ID_MUNICIPIO: persona.municipio?.id_municipio,
-      id_departamento_nacimiento: persona.municipio_nacimiento?.departamento.id_departamento,
-      ID_MUNICIPIO_NACIMIENTO: persona.municipio_nacimiento?.id_municipio,
-      fallecido: persona.fallecido,
+      DEPARTAMENTO_RESIDENCIA: persona.municipio?.departamento.nombre_departamento,
+      MUNICIPIO_RESIDENCIA: persona.municipio?.nombre_municipio,
+      DEPARTAMENTO_NACIMIENTO: persona.municipio_nacimiento?.departamento.nombre_departamento,
+      MUNICIPIO_NACIMIENTO: persona.municipio_nacimiento?.nombre_municipio,
+      ESTADO: persona.fallecido === 'SI' ? 'FALLECIDO' : 'VIVO',
 
-      ID_TIPO_PERSONA: detalleRelevante?.tipoPersona?.id_tipo_persona || null,
       TIPO_PERSONA: detalleRelevante?.tipoPersona?.tipo_persona || null,
     };
     return result;

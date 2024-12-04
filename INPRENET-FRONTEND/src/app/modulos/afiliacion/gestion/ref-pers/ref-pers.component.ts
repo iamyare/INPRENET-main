@@ -1,10 +1,7 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, Input, OnInit } from '@angular/core';
 import { AbstractControl, FormArray, FormBuilder, FormGroup, ValidationErrors, ValidatorFn, Validators } from '@angular/forms';
 import { BeneficiosService } from 'src/app/services/beneficios.service';
 import { DatosEstaticosService } from 'src/app/services/datos-estaticos.service';
-import { blockManualInput, clearManualInput } from '../../../../shared/functions/input-utils'
-
-
 @Component({
   selector: 'app-ref-pers',
   templateUrl: './ref-pers.component.html',
@@ -22,7 +19,8 @@ export class RefPersComponent implements OnInit {
   constructor(
     private fb: FormBuilder,
     private datosEstaticosService: DatosEstaticosService,
-    private beneficiosService: BeneficiosService
+    private beneficiosService: BeneficiosService,
+    private cdr: ChangeDetectorRef
   ) {
     this.maxDate = new Date();
   }
@@ -84,17 +82,62 @@ export class RefPersComponent implements OnInit {
   }
 
   verificarAfiliado(n_identificacion: string): void {
+    const conyugeControl = this.formGroup.get('conyuge') as FormGroup;
+    conyugeControl?.reset({
+      primer_nombre: '',
+      segundo_nombre: '',
+      tercer_nombre: '',
+      primer_apellido: '',
+      segundo_apellido: '',
+      n_identificacion: n_identificacion, 
+      fecha_nacimiento: '',
+      telefono_domicilio: '',
+      telefono_celular: '',
+      telefono_trabajo: '',
+      trabaja: '',
+      es_afiliado: ''
+    });
     this.beneficiosService.verificarSiEsAfiliado(n_identificacion).subscribe({
-      next: (esAfiliado) => {
-        this.esAfiliadoText = esAfiliado ? 'SÍ' : 'NO';
+      next: (response: any) => {
+        if (response && response.esAfiliado?.esAfiliado === true && response.esAfiliado?.datosPersona) {
+          this.esAfiliadoText = 'SÍ'; 
+          conyugeControl?.patchValue({
+            primer_nombre: response.esAfiliado.datosPersona.primer_nombre,
+            segundo_nombre: response.esAfiliado.datosPersona.segundo_nombre,
+            tercer_nombre: response.esAfiliado.datosPersona.tercer_nombre,
+            primer_apellido: response.esAfiliado.datosPersona.primer_apellido,
+            segundo_apellido: response.esAfiliado.datosPersona.segundo_apellido,
+            fecha_nacimiento: response.esAfiliado.datosPersona.fecha_nacimiento,
+            telefono_domicilio: response.esAfiliado.datosPersona.telefono_domicilio,
+            telefono_celular: response.esAfiliado.datosPersona.telefono_celular,
+            telefono_trabajo: response.esAfiliado.datosPersona.telefono_trabajo,
+            trabaja: response.esAfiliado.datosPersona.trabaja,
+          });
+          Object.keys(conyugeControl.controls).forEach(key => {
+            if (key !== 'n_identificacion') {
+              conyugeControl.get(key)?.disable();
+            }
+          });
+        } else {
+          this.esAfiliadoText = 'NO'; 
+          Object.keys(conyugeControl.controls).forEach(key => {
+            conyugeControl.get(key)?.enable();
+          });
+        }
+        this.cdr.detectChanges();
       },
       error: (error) => {
+        console.error('Error al verificar afiliado:', error);
         this.esAfiliadoText = 'NO';
-        console.error('Error al verificar si es afiliado', error);
+        Object.keys(conyugeControl.controls).forEach(key => {
+          conyugeControl.get(key)?.enable();
+        });
       }
     });
   }
-
+  
+  
+  
   agregarReferencia(datos?: any): void {
     const referenciaForm = this.fb.group({
       tipo_referencia: [datos?.tipo_referencia || '', [Validators.required]],

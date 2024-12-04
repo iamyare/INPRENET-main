@@ -20,11 +20,12 @@
 
           <mat-form-field class="half-width" appearance="outline">
             <mat-label>Primer Nombre</mat-label>
-            <input matInput type="text" formControlName="primer_nombre">
+            <input matInput type="text" formControlName="primer_nombre" [readonly]="formGroup.get('conyuge')?.disabled">
             <mat-error *ngIf="formGroup.get('conyuge')?.get('primer_nombre')?.hasError('required') && formGroup.get('conyuge')?.get('primer_nombre')?.touched">
               <mat-icon>error</mat-icon> Este campo es obligatorio.
             </mat-error>
           </mat-form-field>
+          
         </div>
         <div class="form-row">
           <mat-form-field class="half-width" appearance="outline">
@@ -97,14 +98,13 @@
 
           <div class="half-width afiliado-container">
             <label class="afiliado-label">¿ES AFILIADO?</label>
-            <div class="informative-text">{{ esAfiliadoText }}</div>
+            <div [ngClass]="{'text-success': esAfiliadoText === 'SÍ', 'text-danger': esAfiliadoText === 'NO'}">
+              {{ esAfiliadoText }}
+            </div>
           </div>
-
         </div>
       </div>
-
       <br>
-
       <div formArrayName="refpers">
         <div *ngFor="let ref of referencias.controls; index as i" [formGroupName]="i" class="reference-group">
           <h4 class="reference-title">Referencia Número: {{ i + 1 }}</h4>
@@ -112,11 +112,11 @@
           <div class="form-row">
             <mat-form-field class="half-width" appearance="outline">
               <mat-label>Número de Identificación</mat-label>
-              <input matInput type="text" formControlName="n_identificacion">
-              <mat-error *ngIf="ref.get('n_identificacion')?.invalid && ref.get('n_identificacion')?.touched">
-                <mat-icon>error</mat-icon> {{ getErrorMessageForIdentificacion(i) }}
+              <input matInput type="text" formControlName="n_identificacion" (blur)="verificarAfiliadoBlur()">
+              <mat-error *ngIf="formGroup.get('conyuge')?.get('n_identificacion')?.invalid && formGroup.get('conyuge')?.get('n_identificacion')?.touched">
+                <mat-icon>error</mat-icon> {{ getErrorMessageForConyugeIdentificacion() }}
               </mat-error>
-            </mat-form-field>
+            </mat-form-field>            
 
             <mat-form-field class="half-width" appearance="outline">
               <mat-label>Tipo de Referencia</mat-label>

@@ -12,6 +12,7 @@ import { MatPaginator } from '@angular/material/paginator';
 })
 export class PerfilHeaderComponent {
   @Input() personaInput: any;
+  @Input() consultaAlternativa: ((dni: string) => any) | null = null; // Función opcional
   @Output() personaEncontrada = new EventEmitter<any>();
   @ViewChild(MatPaginator) paginator: MatPaginator | null = null;
 
@@ -53,7 +54,7 @@ export class PerfilHeaderComponent {
           if (this.paginator) {
             this.paginator.firstPage();
           }
-          this.actualizarPaginacion(); 
+          this.actualizarPaginacion();
           this.errorMessage = null;
         }
       });
@@ -63,17 +64,18 @@ export class PerfilHeaderComponent {
   }
 
   realizarBusquedaPorIdentificacion(dni: string): void {
-    this.afiliadoService.getAfilByParam(dni).pipe(
+    const consulta = this.consultaAlternativa || this.afiliadoService.getAfilByParam.bind(this.afiliadoService);
+
+    consulta(dni).pipe(
       catchError(error => {
         this.errorMessage = 'Persona no encontrada.';
         this.personaEncontrada.emit(null);
         return of(null);
       })
-    ).subscribe(response => {
+    ).subscribe((response:any) => {
       if (response) {
         this.persona = response;
-        console.log(response);
-        
+
         this.errorMessage = null;
         this.personaEncontrada.emit(this.persona);
       }

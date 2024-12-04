@@ -59,23 +59,41 @@ export class DetalleBeneficioService {
     @InjectEntityManager() private readonly entityManager: EntityManager
   ) { }
 
-  async verificarSiEsAfiliado(dni: string): Promise<boolean> {
-    const persona = await this.personaRepository.findOne({
-      where: { n_identificacion: dni },
-    });
+  async verificarSiEsAfiliado(n_identificacion: string): Promise<any> {
+    const persona = await this.personaRepository
+        .createQueryBuilder('persona')
+        .leftJoinAndSelect('persona.detallePersona', 'detallePersona')
+        .leftJoinAndSelect('detallePersona.tipoPersona', 'tipoPersona')
+        .leftJoinAndSelect('persona.familiares', 'familiares') // Incluimos la relación con Net_Familia
+        .where('persona.n_identificacion = :n_identificacion', { n_identificacion })
+        .andWhere('tipoPersona.tipo_persona IN (:...tipos)', { tipos: ['AFILIADO', 'JUBILADO', 'PENSIONADO'] })
+        .getOne();
 
     if (!persona) {
-      throw new NotFoundException(`Persona con DNI ${dni} no encontrada`);
+        return { esAfiliado: false, datosPersona: null };
     }
-    const detallePersona = await this.detPersonaRepository.findOne({
-      where: {
-        persona: { id_persona: persona.id_persona },
-        tipoPersona: { tipo_persona: 'AFILIADO' },
-      },
-      relations: ['tipoPersona'],
-    });
-    return !!detallePersona;
-  }
+
+    const trabaja = persona.familiares.some(familia => familia.trabaja === 'SÍ') ? 'SÍ' : 'NO';
+
+    return {
+        esAfiliado: true,
+        datosPersona: {
+            primer_nombre: persona.primer_nombre,
+            segundo_nombre: persona.segundo_nombre,
+            tercer_nombre: persona.tercer_nombre,
+            primer_apellido: persona.primer_apellido,
+            segundo_apellido: persona.segundo_apellido,
+            n_identificacion: persona.n_identificacion,
+            fecha_nacimiento: persona.fecha_nacimiento,
+            telefono_domicilio: persona.telefono_1,
+            telefono_celular: persona.telefono_2,
+            telefono_trabajo: persona.telefono_3,
+            trabaja: trabaja
+        }
+    };
+}
+
+
 
   async insertarDetallePagoBeneficio(
     id_persona: number,

@@ -1,6 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { trigger, transition, style, animate } from '@angular/animations';
 import { DatosEstaticosService } from 'src/app/services/datos-estaticos.service';
+import { AfiliadoService } from 'src/app/services/afiliado.service';
+import { catchError, of } from 'rxjs';
 
 @Component({
   selector: 'app-ver-afiliado',
@@ -22,7 +24,7 @@ export class VerAfiliadoComponent implements OnInit {
   tipoAfiliado: any = null;
   departamentos: any[] = [];
 
-  constructor(private datosEstaticosService: DatosEstaticosService) {}
+  constructor(private datosEstaticosService: DatosEstaticosService,private afiliadoService: AfiliadoService) {}
 
   ngOnInit(): void {
     this.cargarDepartamentos();
@@ -54,4 +56,13 @@ export class VerAfiliadoComponent implements OnInit {
   private async cargarDepartamentos(): Promise<void> {
     this.departamentos = await this.datosEstaticosService.getDepartamentos();
   }
+
+  otraConsultaOpcional = (dni: string) => {
+    /* return this.afiliadoService.getAfilPorConsultaAlternativa(dni).pipe(
+      catchError((error) => {
+        console.error('Error en consulta alternativa', error);
+        return of(null);
+      })
+    ); */
+  };
 }

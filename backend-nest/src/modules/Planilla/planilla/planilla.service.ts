@@ -1211,7 +1211,7 @@ GROUP BY
     periodoFinalizacion: string,
     idTiposPlanilla: number[],
   ): Promise<any[]> {
-    const idTiposPlanillaStr = idTiposPlanilla.join(', '); // Convertimos el array a un string separado por comas
+    const idTiposPlanillaStr = idTiposPlanilla.join(', '); 
 
     const query = `
       SELECT 
@@ -1234,13 +1234,11 @@ GROUP BY
         plan."PERIODO_INICIO" >= TO_DATE(:periodoInicio, 'DD/MM/YYYY') AND
         plan."PERIODO_FINALIZACION" <= TO_DATE(:periodoFinalizacion, 'DD/MM/YYYY') AND
         plan."ID_TIPO_PLANILLA" IN (${idTiposPlanillaStr})
-        AND detBs."ID_AF_BANCO" IS NULL
         AND detBs."ESTADO" != 'RECHAZADO'
       ORDER BY 
         per."PRIMER_NOMBRE" || ' ' || per."SEGUNDO_NOMBRE" || ' ' || per."PRIMER_APELLIDO" || ' ' || per."SEGUNDO_APELLIDO" ASC, 
         ben."NOMBRE_BENEFICIO" ASC
     `;
-
     try {
       const result = await this.entityManager.query(query, [periodoInicio, periodoFinalizacion]);
       return result;
@@ -1279,7 +1277,6 @@ GROUP BY
         plan."PERIODO_FINALIZACION" <= TO_DATE(:periodoFinalizacion, 'DD/MM/YYYY') AND
         plan."ID_TIPO_PLANILLA" IN (${idTiposPlanillaStr})
         AND ded."ID_CENTRO_TRABAJO" = 1
-        AND dedd."ID_AF_BANCO" IS NULL
       ORDER BY 
         per."PRIMER_NOMBRE" || ' ' || per."SEGUNDO_NOMBRE" || ' ' || per."PRIMER_APELLIDO" || ' ' || per."SEGUNDO_APELLIDO" ASC, 
         ded."NOMBRE_DEDUCCION" ASC
@@ -1322,8 +1319,7 @@ GROUP BY
       WHERE 
         plan."PERIODO_INICIO" >= TO_DATE(:periodoInicio, 'DD/MM/YYYY') AND
         plan."PERIODO_FINALIZACION" <= TO_DATE(:periodoFinalizacion, 'DD/MM/YYYY') AND
-        plan."ID_TIPO_PLANILLA" IN (${idTiposPlanillaList}) -- Lista de valores
-        AND dedd."ID_AF_BANCO" IS NULL
+        plan."ID_TIPO_PLANILLA" IN (${idTiposPlanillaList})
         AND ded."ID_DEDUCCION" NOT IN (1, 2, 3, 44, 51)
       ORDER BY 
         per."PRIMER_NOMBRE" || ' ' || per."SEGUNDO_NOMBRE" || ' ' || per."PRIMER_APELLIDO" || ' ' || per."SEGUNDO_APELLIDO" ASC, 

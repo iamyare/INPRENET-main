@@ -1618,6 +1618,8 @@ export class DocumentosPlanillaComponent implements OnInit {
     this.planillaService.getDetalleBeneficiosYDeduccionesPorPeriodo(fechaInicioFormateada, fechaFinFormateada, idTiposPlanilla)
       .subscribe({
         next: (data) => {
+          console.log(data);
+          
           if (!data) {
             console.error('No se obtuvieron datos del servicio.');
             return;

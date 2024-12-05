@@ -12,7 +12,7 @@ import { MatPaginator } from '@angular/material/paginator';
 })
 export class PerfilHeaderComponent {
   @Input() personaInput: any;
-  @Input() consultaAlternativa: ((dni: string) => any) | null = null; // Función opcional
+  @Input() consultaAlternativa: ((dni: string) => any) | null = null;
   @Output() personaEncontrada = new EventEmitter<any>();
   @ViewChild(MatPaginator) paginator: MatPaginator | null = null;
 
@@ -21,11 +21,11 @@ export class PerfilHeaderComponent {
   errorMessage: string | null = null;
   persona: any = null;
   personas: any[] = [];
-  personasPaginadas: any[] = []; // Para mostrar solo los resultados de la página actual
+  personasPaginadas: any[] = []; 
   defaultFotoUrl = '../../../../../assets/images/default.jpg';
 
-  pageSize: number = 10; // Número de filas por página
-  currentPage: number = 0; // Página actual
+  pageSize: number = 10;
+  currentPage: number = 0;
 
   constructor(private afiliadoService: AfiliadoService, private afiliacionService: AfiliacionService) {}
 
@@ -38,19 +38,19 @@ export class PerfilHeaderComponent {
     }
 
     if (this.n_identificacion.trim()) {
-      // Buscar por número de identificación
       this.realizarBusquedaPorIdentificacion(this.n_identificacion);
     } else if (this.terminosBusqueda.trim()) {
       this.afiliacionService.buscarPersonaPorNombresYApellidos(this.terminosBusqueda).pipe(
         catchError(error => {
           this.errorMessage = 'No se encontraron personas con el término proporcionado.';
-          this.personaEncontrada.emit(null); // Emitir null si no se encuentran personas
+          this.personaEncontrada.emit(null);
           return of([]);
         })
       ).subscribe(response => {
+        
         if (response && response.personas) {
           this.personas = response.personas;
-          this.currentPage = 0; // Reiniciar a la página 0
+          this.currentPage = 0;
           if (this.paginator) {
             this.paginator.firstPage();
           }
@@ -73,6 +73,7 @@ export class PerfilHeaderComponent {
         return of(null);
       })
     ).subscribe((response:any) => {
+      
       if (response) {
         this.persona = response;
 

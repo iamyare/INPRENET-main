@@ -221,7 +221,6 @@ export class AfiliarDocenteComponent implements OnInit {
       .join(', ');
   }
 
-
   private formatPeps(peps: any[]): any[] {
     return peps.map(pep => ({
       cargosPublicos: [
@@ -408,13 +407,10 @@ export class AfiliarDocenteComponent implements OnInit {
       this.otrasFuentesIngresoComponent.reset();
     }
   
-    // Reinicia el stepper
     this.stepper.reset();
   
-    // Reinicia cualquier error del formulario
     this.formErrors = null;
   
-    // Otras configuraciones adicionales si son necesarias
     console.log('Formulario y componentes hijos reiniciados con éxito');
   }
   
@@ -484,7 +480,7 @@ export class AfiliarDocenteComponent implements OnInit {
         [
           { text: (index + 1).toString(), rowSpan: 2, style: 'tableRowLarge', fillColor: '#CCCCCC', alignment: 'center' },
           { text: item.nombre, style: 'tableRowLarge', alignment: 'center' },
-          { text: fechaNacimiento, style: 'tableRowLarge', alignment: 'center' }, // Usar la fecha formateada
+          { text: fechaNacimiento, style: 'tableRowLarge', alignment: 'center' }, 
           { text: item.identidad, style: 'tableRowLarge', alignment: 'center' },
           { text: item.parentesco, style: 'tableRowLarge', alignment: 'center' },
           { text: item.porcentaje, style: 'tableRowLarge', alignment: 'center' },

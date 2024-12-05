@@ -184,7 +184,49 @@ export class PermisosService {
             { role: 'CONSULTA', module: 'CONASA' },
             { role: 'ADMINISTRADOR', module: 'CONASA' }
           ]
-        }
+        },
+        'conasa/menu-conasa': {
+          title: 'Detalle Envío',
+          permisos: [
+            { role: 'CONSULTA PRESTAMOS', module: 'ESCALAFON' },
+            { role: 'ADMINISTRADOR', module: 'ESCALAFON' }
+          ]
+        },
+        'conasa/menu-conasa/ingresar-asistencia': {
+        title: 'Ingresar Asistencia',
+        permisos: [
+          { role: 'ASISTENTE', module: 'CONASA' },
+          { role: 'ADMINISTRADOR', module: 'CONASA' }
+        ]
+      },
+      'conasa/menu-conasa/reporte-asistencias': {
+        title: 'Reporte de Asistencias',
+        permisos: [
+          { role: 'CONSULTA', module: 'CONASA' },
+          { role: 'ADMINISTRADOR', module: 'CONASA' }
+        ]
+      },
+      'conasa/menu-conasa/anular-asistencias': {
+        title: 'Anular Asistencias',
+        permisos: [
+          { role: 'SUPERVISOR', module: 'CONASA' },
+          { role: 'ADMINISTRADOR', module: 'CONASA' }
+        ]
+      },
+      'conasa/menu-conasa/modificar-asistencias': {
+        title: 'Modificar Asistencias',
+        permisos: [
+          { role: 'EDITOR', module: 'CONASA' },
+          { role: 'ADMINISTRADOR', module: 'CONASA' }
+        ]
+      },
+      'conasa/menu-conasa/cancelar-asistencias': {
+        title: 'Cancelar Asistencias',
+        permisos: [
+          { role: 'GESTOR', module: 'CONASA' },
+          { role: 'ADMINISTRADOR', module: 'CONASA' }
+        ]
+      }
       }
     }
   };

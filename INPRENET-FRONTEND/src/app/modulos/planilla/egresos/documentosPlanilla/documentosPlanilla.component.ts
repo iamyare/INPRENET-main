@@ -188,7 +188,7 @@ export class DocumentosPlanillaComponent implements OnInit {
 
     this.planillaService.getTotalBeneficiosYDeduccionesPorPeriodo(fechaInicioFormateada, fechaFinFormateada, idTiposPlanilla).subscribe({
       next: async (data) => {
-        //console.log(data);
+        console.log(data);
 
         const base64Image = await this.convertirImagenABase64('../assets/images/membratadoFinal.jpg');
 
@@ -1604,7 +1604,6 @@ export class DocumentosPlanillaComponent implements OnInit {
     });
   }
 
-
   async exportarExcelDetallePorPeriodo() {
     const { idTiposPlanilla, nombrePlanilla } = this.obtenerIdYNombrePlanilla();
     const { fechaInicioFormateada, fechaFinFormateada } = this.obtenerFechasFormateadas();
@@ -1614,57 +1613,67 @@ export class DocumentosPlanillaComponent implements OnInit {
       return;
     }
 
-    // Llamar al servicio para obtener los datos detallados
     this.planillaService.getDetalleBeneficiosYDeduccionesPorPeriodo(fechaInicioFormateada, fechaFinFormateada, idTiposPlanilla)
       .subscribe({
         next: (data) => {
           console.log(data);
-          
+
           if (!data) {
             console.error('No se obtuvieron datos del servicio.');
             return;
           }
 
-          // Mapeo de datos para las hojas
           const beneficiosDetalle = data.beneficiosDetallados.map((item: any) => ({
             'Identificación': item.IDENTIFICACION,
             'Nombre Completo': item.NOMBRE_COMPLETO,
             'Nombre Beneficio': item.NOMBRE_BENEFICIO,
-            'Monto Beneficio': item.MONTO ? parseFloat(item.MONTO).toFixed(2) : '0.00',
+            'Monto Beneficio': item.MONTO ? parseFloat(item.MONTO) : 0,
           }));
 
           const deduccionesInpremaDetalle = data.deduccionesInpremaDetalladas.map((item: any) => ({
             'Identificación': item.IDENTIFICACION,
             'Nombre Completo': item.NOMBRE_COMPLETO,
             'Nombre Deducción (INPREMA)': item.NOMBRE_DEDUCCION,
-            'Monto Deducción': item.MONTO ? parseFloat(item.MONTO).toFixed(2) : '0.00',
+            'Monto Deducción': item.MONTO ? parseFloat(item.MONTO) : 0,
           }));
 
           const deduccionesTercerosDetalle = data.deduccionesTercerosDetalladas.map((item: any) => ({
             'Identificación': item.IDENTIFICACION,
             'Nombre Completo': item.NOMBRE_COMPLETO,
             'Nombre Deducción (Terceros)': item.NOMBRE_DEDUCCION,
-            'Monto Deducción': item.MONTO ? parseFloat(item.MONTO).toFixed(2) : '0.00',
+            'Monto Deducción': item.MONTO ? parseFloat(item.MONTO) : 0,
           }));
 
-          // Crear libro de Excel
           const workbook = XLSX.utils.book_new();
 
-          // Crear hojas
           const beneficiosSheet = XLSX.utils.json_to_sheet(beneficiosDetalle);
-          XLSX.utils.book_append_sheet(workbook, beneficiosSheet, 'Detalle Beneficios');
-
           const deduccionesInpremaSheet = XLSX.utils.json_to_sheet(deduccionesInpremaDetalle);
-          XLSX.utils.book_append_sheet(workbook, deduccionesInpremaSheet, 'Deducciones INPREMA');
-
           const deduccionesTercerosSheet = XLSX.utils.json_to_sheet(deduccionesTercerosDetalle);
+
+          // Aplica formato numérico a las celdas de montos
+          const applyNumberFormat = (sheet: XLSX.WorkSheet, column: string) => {
+            const range = XLSX.utils.decode_range(sheet['!ref'] || '');
+            for (let row = range.s.r + 1; row <= range.e.r; row++) {
+              const cellAddress = XLSX.utils.encode_cell({ r: row, c: XLSX.utils.decode_col(column) });
+              const cell = sheet[cellAddress];
+              if (cell && typeof cell.v === 'number') {
+                cell.t = 'n'; // Tipo numérico
+                cell.z = '#,##0.00'; // Formato numérico
+              }
+            }
+          };
+
+          applyNumberFormat(beneficiosSheet, 'D'); // Columna D es "Monto Beneficio"
+          applyNumberFormat(deduccionesInpremaSheet, 'D'); // Columna D es "Monto Deducción (INPREMA)"
+          applyNumberFormat(deduccionesTercerosSheet, 'D'); // Columna D es "Monto Deducción (Terceros)"
+
+          XLSX.utils.book_append_sheet(workbook, beneficiosSheet, 'Detalle Beneficios');
+          XLSX.utils.book_append_sheet(workbook, deduccionesInpremaSheet, 'Deducciones INPREMA');
           XLSX.utils.book_append_sheet(workbook, deduccionesTercerosSheet, 'Deducciones Terceros');
 
-          // Generar archivo Excel
           const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
           const blob = new Blob([excelBuffer], { type: 'application/octet-stream' });
 
-          // Descargar archivo
           const nombreArchivo = `Detalle_Beneficios_Deducciones_${nombrePlanilla}_${fechaInicioFormateada}_to_${fechaFinFormateada}.xlsx`;
           saveAs(blob, nombreArchivo);
         },

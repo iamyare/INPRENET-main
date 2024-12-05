@@ -3,12 +3,53 @@ import { RouterModule, Routes } from '@angular/router';
 import { VerAfiliadoComponent } from './ver-afiliado/ver-afiliado.component';
 import { RoleGuard } from '../../../app/guards/role-guard.guard';
 import { PermisosService } from '../../../app/services/permisos.service';
+import { ConasaMenuComponent } from './conasa-menu/conasa-menu.component';
+import { IngresarAsistenciaComponent } from './ingresar-asistencia/ingresar-asistencia.component';
+import { ReporteAsistenciasComponent } from './reporte-asistencias/reporte-asistencias.component';
+import { AnularAsistenciasComponent } from './anular-asistencias/anular-asistencias.component';
+import { ModificarAsistenciasComponent } from './modificar-asistencias/modificar-asistencias.component';
+import { CancelarAsistenciasComponent } from './cancelar-asistencias/cancelar-asistencias.component';
 
 const routes: Routes = [
   { path: 'ver-afiliado',
     component: VerAfiliadoComponent,
     canActivate: [RoleGuard],
     data: { expectedRolesModules: PermisosService.getExpectedRolesForRoute('CONASA', 'conasa/ver-afiliado') }
+  },
+  { path: 'menu-conasa',
+    component: ConasaMenuComponent,
+    canActivate: [RoleGuard],
+    data: { expectedRolesModules: PermisosService.getExpectedRolesForRoute('CONASA', 'conasa/menu-conasa') }
+  },
+  { 
+    path: 'menu-conasa/ingresar-asistencia',
+    component: IngresarAsistenciaComponent,
+    canActivate: [RoleGuard],
+    data: { expectedRolesModules: PermisosService.getExpectedRolesForRoute('CONASA', 'conasa/ingresar-asistencia') }
+  },
+  { 
+    path: 'menu-conasa/reporte-asistencias',
+    component: ReporteAsistenciasComponent,
+    canActivate: [RoleGuard],
+    data: { expectedRolesModules: PermisosService.getExpectedRolesForRoute('CONASA', 'conasa/reporte-asistencias') }
+  },
+  { 
+    path: 'menu-conasa/anular-asistencias',
+    component: AnularAsistenciasComponent,
+    canActivate: [RoleGuard],
+    data: { expectedRolesModules: PermisosService.getExpectedRolesForRoute('CONASA', 'conasa/anular-asistencias') }
+  },
+  { 
+    path: 'menu-conasa/modificar-asistencias',
+    component: ModificarAsistenciasComponent,
+    canActivate: [RoleGuard],
+    data: { expectedRolesModules: PermisosService.getExpectedRolesForRoute('CONASA', 'conasa/modificar-asistencias') }
+  },
+  { 
+    path: 'menu-conasa/cancelar-asistencias',
+    component: CancelarAsistenciasComponent,
+    canActivate: [RoleGuard],
+    data: { expectedRolesModules: PermisosService.getExpectedRolesForRoute('CONASA', 'conasa/cancelar-asistencias') }
   },
 ];
 

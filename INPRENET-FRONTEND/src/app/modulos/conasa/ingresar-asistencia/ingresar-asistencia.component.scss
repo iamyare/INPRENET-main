@@ -1,0 +1,51 @@
+.container {
+  max-width: 1600px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.form-card,
+.info-card {
+  margin-bottom: 20px;
+}
+
+.spaced-card {
+  margin: 20px 10px; /* Espaciado adicional para los lados */
+  border: 1px solid #ddd;
+  border-radius: 8px;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 20px;
+}
+
+.info-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  align-items: center;
+  gap: 20px;
+}
+
+.calculated-amount-field {
+  display: flex;
+  flex-direction: column;
+  padding: 16px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+}
+
+.calculated-amount-field .label {
+  font-weight: bold;
+  margin-bottom: 8px;
+}
+
+.calculated-amount-field .value {
+  font-size: 1.2rem;
+}
+
+.actions {
+  text-align: right;
+  margin-top: 20px;
+}

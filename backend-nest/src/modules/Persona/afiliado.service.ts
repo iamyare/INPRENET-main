@@ -202,25 +202,25 @@ export class AfiliadoService {
         'peps.cargo_publico',
       ],
     });
-
+  
     if (!persona) {
       throw new NotFoundException(`Afiliado con N_IDENTIFICACION ${term} no existe`);
     }
-
+  
     // Verifica el detalle de la persona donde coincida ID_PERSONA e ID_CAUSANTE, si existe `detallePersona`
     const detalleRelevante = persona.detallePersona
       ? persona.detallePersona.find((detalle) =>
-        detalle.ID_PERSONA === persona.id_persona && detalle.ID_CAUSANTE === persona.id_persona
-      )
+          detalle.ID_PERSONA === persona.id_persona && detalle.ID_CAUSANTE === persona.id_persona
+        )
       : null;
-
+  
     // Mapeo de discapacidades
     const discapacidades = persona.personaDiscapacidades.map((discapacidad) => ({
       id_discapacidad: discapacidad.discapacidad.id_discapacidad,
       tipo: discapacidad.discapacidad.tipo_discapacidad,
       descripcion: discapacidad.discapacidad.descripcion,
     }));
-
+  
     // Convierte archivos de identificación y defunción a base64 si existen
     const archivoIdentificacionBase64 = persona.archivo_identificacion
       ? Buffer.from(persona.archivo_identificacion).toString('base64')
@@ -228,7 +228,12 @@ export class AfiliadoService {
     const certificadoDefuncionBase64 = persona.certificado_defuncion
       ? Buffer.from(persona.certificado_defuncion).toString('base64')
       : null;
-
+  
+    // Mapeo de tipos de persona
+    const tiposPersona = persona.detallePersona
+      ? persona.detallePersona.map((detalle) => detalle.tipoPersona?.tipo_persona).filter(Boolean)
+      : [];
+  
     // Construye el resultado con valores por defecto en caso de que no haya `detallePersona`
     const result = {
       N_IDENTIFICACION: persona.n_identificacion,
@@ -281,14 +286,17 @@ export class AfiliadoService {
       ID_TIPO_PERSONA: detalleRelevante?.tipoPersona?.id_tipo_persona || null,
       TIPO_PERSONA: detalleRelevante?.tipoPersona?.tipo_persona || null,
       VOLUNTARIO: detalleRelevante?.voluntario || 'NO',
+      TIPOS_PERSONA: tiposPersona, // Nueva propiedad
     };
+  
     return result;
   }
 
   async findOneConasa(term: string, email: string, password: string) {
     const empCentTrabajoRepository = await this.empCentTrabajoRepository.findOne({
       where: {
-        correo_1: email, usuarioEmpresas: {
+        correo_1: email,
+        usuarioEmpresas: {
           usuarioModulos: {
             rolModulo: { nombre: In(["CONSULTA", "TODO"]) }
           }
@@ -300,25 +308,22 @@ export class AfiliadoService {
         'usuarioEmpresas.usuarioModulos.rolModulo',
       ],
     });
-    console.log(empCentTrabajoRepository);
-    
-
+  
     if (!empCentTrabajoRepository) {
       throw new UnauthorizedException('User not found');
     }
-
-    // Verifica la contraseña usando bcrypt
-    const isPasswordValid = await bcrypt.compare(password, empCentTrabajoRepository.usuarioEmpresas[0].contrasena); // 'user.password' es la contraseña encriptada en tu base de datos
-
+    const isPasswordValid = await bcrypt.compare(
+      password,
+      empCentTrabajoRepository.usuarioEmpresas[0].contrasena
+    );
+  
     if (!isPasswordValid) {
       throw new UnauthorizedException('Invalid password');
     }
-
+  
     const persona = await this.personaRepository.findOne({
       where: {
-        n_identificacion: term, detallePersona: {
-          tipoPersona: { tipo_persona: In(["JUBILADO", "PENSIONADO", "AFILIADO"]) }
-        }
+        n_identificacion: term,
       },
       relations: [
         'detallePersona',
@@ -331,21 +336,11 @@ export class AfiliadoService {
         'municipio_nacimiento.departamento',
       ],
     });
-
-    console.log(persona);
+  
     if (!persona) {
       throw new NotFoundException(`Afiliado con N_IDENTIFICACION ${term} no existe`);
     }
-
-
-    // Verifica el detalle de la persona donde coincida ID_PERSONA e ID_CAUSANTE, si existe `detallePersona`
-    const detalleRelevante = persona.detallePersona
-      ? persona.detallePersona.find((detalle) =>
-        detalle.ID_PERSONA === persona.id_persona && detalle.ID_CAUSANTE === persona.id_persona
-      )
-      : null;
-
-    // Construye el resultado con valores por defecto en caso de que no haya `detallePersona`
+    const tiposPersona = persona.detallePersona.map(detalle => detalle.tipoPersona?.tipo_persona).filter(Boolean);
     const result = {
       N_IDENTIFICACION: persona.n_identificacion,
       PRIMER_NOMBRE: persona.primer_nombre,
@@ -353,26 +348,22 @@ export class AfiliadoService {
       TERCER_NOMBRE: persona.tercer_nombre,
       PRIMER_APELLIDO: persona.primer_apellido,
       SEGUNDO_APELLIDO: persona.segundo_apellido,
-      GENERO: persona.genero,
       SEXO: persona.sexo,
       DIRECCION_RESIDENCIA: persona.direccion_residencia,
       FECHA_NACIMIENTO: persona.fecha_nacimiento,
-
-      ID_PROFESION: persona.profesion?.id_profesion,
       TELEFONO_1: persona.telefono_1,
       TELEFONO_2: persona.telefono_2,
       CORREO_1: persona.correo_1,
-      ID_PAIS: persona.pais?.id_pais,
       DEPARTAMENTO_RESIDENCIA: persona.municipio?.departamento.nombre_departamento,
       MUNICIPIO_RESIDENCIA: persona.municipio?.nombre_municipio,
-      DEPARTAMENTO_NACIMIENTO: persona.municipio_nacimiento?.departamento.nombre_departamento,
-      MUNICIPIO_NACIMIENTO: persona.municipio_nacimiento?.nombre_municipio,
       ESTADO: persona.fallecido === 'SI' ? 'FALLECIDO' : 'VIVO',
-
-      TIPO_PERSONA: detalleRelevante?.tipoPersona?.tipo_persona || null,
+      TIPOS_PERSONA: tiposPersona,
     };
+  
     return result;
   }
+  
+  
 
   async findOnePersonaParaDeduccion(term: string) {
     try {

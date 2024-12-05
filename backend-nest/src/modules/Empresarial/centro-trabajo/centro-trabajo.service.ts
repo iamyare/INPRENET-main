@@ -170,7 +170,7 @@ export class CentroTrabajoService {
 
 
   async create(createCentroTrabajoDto: CreateCentroTrabajoDto) {
-    try {
+    /* try {
       const departamento = await this.departamentoRepository.findOneBy({ nombre_departamento: createCentroTrabajoDto.nombre_departamento });
       if (!departamento) {
         throw new BadRequestException('departamento not found');
@@ -182,7 +182,7 @@ export class CentroTrabajoService {
       })
     } catch (error) {
       this.handleException(error);
-    }
+    } */
   }
 
   async findAll(): Promise<Net_Centro_Trabajo[]> {

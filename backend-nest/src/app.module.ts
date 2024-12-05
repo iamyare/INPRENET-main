@@ -18,6 +18,7 @@ import { DocumentsModule } from './modules/documents/documents.module';
 import { EscalafonModule } from './modules/escalafon/escalafon.module';
 import { BitacoraModule } from './modules/bitacora/bitacora.module';
 import { PrestamosModule } from './modules/prestamos/prestamos.module';
+import { ConasaModule } from './modules/conasa/conasa.module';
 
 @Module({
   imports: [
@@ -67,7 +68,8 @@ import { PrestamosModule } from './modules/prestamos/prestamos.module';
     TransaccionesModule,
     AuthModule,
     EscalafonModule,
-    PrestamosModule
+    PrestamosModule,
+    ConasaModule
   ],
   providers: [MantenimientoAfiliacionService],
 })

@@ -89,6 +89,18 @@ export class Net_Centro_Trabajo {
     @Column('nvarchar2', { length: 20, nullable: true, name: 'CODIGO' })
     codigo: string;
 
+    @Column('number', { precision: 2, scale: 0, nullable: true, name: 'DEPARTAMENTO' })
+    departamento: number;
+
+    @Column('varchar2', { length: 100, nullable: true, name: 'CIUDAD' })
+    ciudad: string;
+
+    @Column('number', { precision: 2, scale: 0, nullable: true, name: 'PAIS' })
+    pais: number;
+
+    @Column('nvarchar2', { length: 200, nullable: true, name: 'DIRECCION_3' })
+    direccion_3: string;
+
     @ManyToOne(() => Net_Municipio, municipio => municipio.centrosTrabajo)
     @JoinColumn({ name: 'ID_MUNICIPIO', foreignKeyConstraintName: 'FK_ID_MUNICIPIO_CENT_TRAB' })
     municipio: Net_Municipio;

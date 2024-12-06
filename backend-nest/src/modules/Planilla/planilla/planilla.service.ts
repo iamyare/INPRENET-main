@@ -2783,6 +2783,109 @@ GROUP BY
     }
   }
 
+  async obtenerDetallePagoBeneficioPorPlanillaPreliminar(idPlanilla: number): Promise<any[]> {
+    const beneficiosQuery = `
+        SELECT
+            banco.codigo_ach AS "codigo_banco", 
+            personaPorBanco.num_cuenta AS "numero_cuenta",
+            SUM(detallePago.monto_a_pagar) AS "monto_a_pagar",
+            TRIM(
+              persona.primer_apellido ||
+              CASE 
+                  WHEN persona.segundo_apellido IS NOT NULL THEN ' ' || persona.segundo_apellido 
+                  ELSE '' 
+              END || 
+              ' ' || persona.primer_nombre ||
+              CASE 
+                  WHEN persona.segundo_nombre IS NOT NULL THEN ' ' || persona.segundo_nombre 
+                  ELSE '' 
+              END ||
+              CASE
+                  WHEN persona.tercer_nombre IS NOT NULL THEN ' ' || persona.tercer_nombre
+                  ELSE ''
+              END
+          ) AS "nombre_completo",
+            persona.n_identificacion AS "n_identificacion",
+            persona.ID_PERSONA AS "ID_PERSONA" 
+        FROM
+            "NET_PLANILLA" planilla
+        JOIN
+            "NET_DETALLE_PAGO_BENEFICIO" detallePago ON planilla."ID_PLANILLA" = detallePago."ID_PLANILLA"
+        LEFT JOIN
+            "NET_PERSONA_POR_BANCO" personaPorBanco ON detallePago."ID_AF_BANCO" = personaPorBanco."ID_AF_BANCO"
+        LEFT JOIN
+            "NET_BANCO" banco ON personaPorBanco."ID_BANCO" = banco."ID_BANCO"
+        JOIN
+            "NET_PERSONA" persona ON personaPorBanco."ID_PERSONA" = persona."ID_PERSONA"
+        WHERE
+            planilla."ID_PLANILLA" = :1
+            AND detallePago."ESTADO" = 'EN PRELIMINAR'
+        GROUP BY
+            banco.codigo_ach, personaPorBanco.num_cuenta, persona.primer_apellido, persona.segundo_apellido, persona.primer_nombre, persona.segundo_nombre, persona.tercer_nombre, persona.n_identificacion, persona.ID_PERSONA
+    `;
+    const deduccionesInpremaQuery = `
+        SELECT 
+            dd."ID_PERSONA",
+            SUM(dd.MONTO_APLICADO) AS "deducciones_inprema"
+        FROM 
+            "NET_PLANILLA" planilla
+        LEFT JOIN 
+            "NET_DETALLE_DEDUCCION" dd ON planilla."ID_PLANILLA" = dd."ID_PLANILLA"
+        LEFT JOIN 
+            "NET_DEDUCCION" ded ON dd."ID_DEDUCCION" = ded."ID_DEDUCCION"
+        WHERE 
+            planilla."ID_PLANILLA" = :idPlanilla
+            AND dd."ESTADO_APLICACION" = 'EN PRELIMINAR'
+            AND ded."ID_CENTRO_TRABAJO" = 1
+        GROUP BY 
+            dd."ID_PERSONA"
+    `;
+    const deduccionesTercerosQuery = `
+        SELECT 
+            dd."ID_PERSONA",
+            SUM(dd.MONTO_APLICADO) AS "deducciones_terceros"
+        FROM 
+            "NET_PLANILLA" planilla
+        LEFT JOIN 
+            "NET_DETALLE_DEDUCCION" dd ON planilla."ID_PLANILLA" = dd."ID_PLANILLA"
+        LEFT JOIN 
+            "NET_DEDUCCION" ded ON dd."ID_DEDUCCION" = ded."ID_DEDUCCION"
+        WHERE 
+            planilla."ID_PLANILLA" = :idPlanilla
+            AND dd."ESTADO_APLICACION" = 'EN PRELIMINAR'
+            AND ded."ID_DEDUCCION" NOT IN (1, 2, 3, 44, 51)
+        GROUP BY 
+            dd."ID_PERSONA"
+    `;
+    try {
+      const beneficios = await this.entityManager.query(beneficiosQuery, [idPlanilla]);
+      const deduccionesInprema = await this.entityManager.query(deduccionesInpremaQuery, [idPlanilla]);
+      const deduccionesTerceros = await this.entityManager.query(deduccionesTercerosQuery, [idPlanilla]);
+      const result = beneficios.map(beneficio => {
+        const personaID = beneficio.ID_PERSONA;
+        const totalDeduccionInprema = deduccionesInprema
+          .filter(d => d.ID_PERSONA === personaID)
+          .reduce((acc, curr) => acc + curr.deducciones_inprema, 0);
+        const totalDeduccionTerceros = deduccionesTerceros
+          .filter(d => d.ID_PERSONA === personaID)
+          .reduce((acc, curr) => acc + curr.deducciones_terceros, 0);
+        const totalDeducciones = totalDeduccionInprema + totalDeduccionTerceros;
+        return {
+          codigo_banco: beneficio.codigo_banco,
+          numero_cuenta: beneficio.numero_cuenta,
+          neto: parseFloat((beneficio.monto_a_pagar - totalDeducciones).toFixed(2)),
+          nombre_completo: beneficio.nombre_completo,
+          id_tipo_planilla: 1,
+          n_identificacion: beneficio.n_identificacion,
+        };
+      });
+      return result;
+    } catch (error) {
+      console.error('Error al obtener los detalles preliminares de pago por planilla:', error);
+      throw new InternalServerErrorException('Error al obtener los detalles preliminares de pago por planilla.');
+    }
+  }
+  
   async obtenerDetallePagoBeneficioPorPlanillaPrueba(
     periodoInicio: string,
     periodoFinalizacion: string,

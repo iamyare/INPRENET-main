@@ -104,6 +104,18 @@ export class PlanillaService {
     );
   }
 
+  descargarReporteDetallePagoPreliminar(idPlanilla: number): Observable<Blob> {
+    const url = `${environment.API_URL}/api/planilla/generar-reporte-detalle-pago-preliminar`;
+    let params = new HttpParams().set('idPlanilla', idPlanilla.toString());
+    return this.http.get<Blob>(url, { params, responseType: 'blob' as 'json' }).pipe(
+      catchError(error => {
+        console.error('Error al descargar el archivo Excel preliminar', error);
+        this.toastr.error('Error al descargar el archivo Excel preliminar');
+        return throwError(() => new Error('Error al descargar el archivo Excel preliminar'));
+      })
+    );
+}
+  
   descargarReporteDetallePago(
     periodoInicio: string,
     periodoFinalizacion: string,

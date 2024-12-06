@@ -377,6 +377,22 @@ export class VerplanprelcompComponent implements OnInit, OnChanges {
 }
 
 
+async descargarExcelPorPlanilla() {
+  if (!this.idPlanilla) {
+      this.toastr.warning('Debe seleccionar una planilla válida antes de descargar el reporte.');
+      return;
+  }
+
+  try {
+      const response:any = await this.planillaService.descargarReporteDetallePagoPreliminar(this.idPlanilla).toPromise();
+      const blob = new Blob([response], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+      saveAs(blob, `Detalle_Pago_Planilla_${this.idPlanilla}.xlsx`);
+      this.toastr.success('Archivo Excel descargado con éxito');
+  } catch (error) {
+      console.error('Error al descargar el Excel:', error);
+      this.toastr.error('Error al descargar el archivo Excel');
+  }
+}
 
 
 }

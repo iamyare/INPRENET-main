@@ -87,6 +87,15 @@ export class PlanillaController {
     await this.planillaService.generarReporteDetallePago(data, res);
   }
 
+  @Get('generar-reporte-detalle-pago-preliminar')
+  async generarReportePreliminar(
+    @Query('idPlanilla') idPlanilla: number,
+    @Res() res,
+  ) {
+    const data = await this.planillaService.obtenerDetallePagoBeneficioPorPlanillaPreliminar(idPlanilla);
+    await this.planillaService.generarReporteDetallePago(data, res);
+  }
+  
   @Get('detalle-pago-beneficio')
   async obtenerDetallePagoBeneficioPorPlanilla(
     @Query('periodoInicio') periodoInicio: string,

@@ -91,18 +91,29 @@
             <mat-form-field class="half-width" appearance="outline">
               <mat-label>Fecha de Ingreso</mat-label>
               <mat-icon matPrefix>calendar_today</mat-icon>
-              <input matInput formControlName="fecha_ingreso" [matDatepicker]="pickerIngreso" placeholder="d/m/aaaa">
+              <input 
+                matInput 
+                formControlName="fecha_ingreso" 
+                [matDatepicker]="pickerIngreso" 
+                placeholder="d/m/aaaa" 
+                readonly
+              >
               <mat-datepicker-toggle matSuffix [for]="pickerIngreso"></mat-datepicker-toggle>
               <mat-datepicker #pickerIngreso></mat-datepicker>
               <mat-error *ngFor="let error of getErrors(i, 'fecha_ingreso')">
                 <mat-icon>error</mat-icon> {{ error }}
               </mat-error>
             </mat-form-field>
-            
             <mat-form-field class="half-width" appearance="outline">
               <mat-label>Fecha de Egreso</mat-label>
               <mat-icon matPrefix>calendar_today</mat-icon>
-              <input matInput formControlName="fecha_egreso" [matDatepicker]="pickerEgreso" placeholder="d/m/aaaa">
+              <input 
+                matInput 
+                formControlName="fecha_egreso" 
+                [matDatepicker]="pickerEgreso" 
+                placeholder="d/m/aaaa" 
+                readonly
+              >
               <mat-datepicker-toggle matSuffix [for]="pickerEgreso"></mat-datepicker-toggle>
               <mat-datepicker #pickerEgreso></mat-datepicker>
               <mat-error *ngFor="let error of getErrors(i, 'fecha_egreso')">

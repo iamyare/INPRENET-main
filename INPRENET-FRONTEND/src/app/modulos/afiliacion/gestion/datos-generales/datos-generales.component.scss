@@ -58,3 +58,28 @@ body {
   font-size: 14px; /* Ajusta el tamaño del ícono para ser más pequeño */
   margin-right: 6px; /* Ajusta el espacio */
 }
+
+/* Contenedor principal con grid */
+.grid-container {
+  display: grid; /* Cambia a grid */
+  grid-template-columns: repeat(2, 1fr); /* Fuerza 2 columnas de igual ancho */
+  gap: 10px; /* Espaciado entre filas y columnas */
+}
+
+/* Contenedor con borde y estilo */
+.discapacidades-container {
+  border: 1px solid #ccc; /* Borde para el contenedor */
+  padding: 15px; /* Espaciado interno */
+  border-radius: 8px; /* Bordes redondeados */
+  background-color: #f9f9f9; /* Fondo claro */
+}
+
+/* Elementos de cada discapacidad */
+.discapacidad-item {
+  display: flex;
+  align-items: center; /* Alineación vertical centrada */
+}
+
+
+
+

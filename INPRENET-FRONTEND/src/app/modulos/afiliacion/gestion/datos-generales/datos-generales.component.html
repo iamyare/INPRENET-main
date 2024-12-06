@@ -516,12 +516,16 @@
         </div>
 
         <div class="col-lg-12 col-md-12" *ngIf="discapacidadSeleccionada">
-          <div formGroupName="discapacidades">
-            <div *ngFor="let tipo of discapacidades; let i = index">
-              <mat-checkbox [formControlName]="tipo.label">{{ tipo.label }}</mat-checkbox>
+          <div class="discapacidades-container">
+            <div formGroupName="discapacidades" class="grid-container">
+              <div *ngFor="let tipo of discapacidades; let i = index" class="discapacidad-item">
+                <mat-checkbox [formControlName]="tipo.label">{{ tipo.label }}</mat-checkbox>
+              </div>
             </div>
           </div>
         </div>
+        
+              
       </div>
 
       <!-- <app-botonarchivos labelBoton="Archivo de Identificación"  (setArchivo)="getArchivo($event)"></app-botonarchivos> -->

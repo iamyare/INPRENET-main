@@ -220,8 +220,6 @@ export class EditDatosGeneralesComponent implements OnInit {
         this.loading = true;
         await this.svcAfiliado.getAfilByParam(this.Afiliado.n_identificacion).subscribe(
             (result) => {
-              console.log(result);
-
                 this.datos = result;
                 this.Afiliado = result;
 

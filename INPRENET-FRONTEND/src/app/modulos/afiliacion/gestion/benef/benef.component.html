@@ -10,29 +10,82 @@
         <div *ngFor="let group of beneficiarios.controls; let i = index" [formGroupName]="i" class="reference-group">
           <h4 class="reference-title">Beneficiario Número: {{ i + 1 }}</h4>
 
-          <mat-form-field class="half-width" appearance="outline">
-            <mat-label>Número De Identificación</mat-label>
-            <mat-icon matPrefix>badge</mat-icon>
-            <input matInput formControlName="n_identificacion">
+          <div class="form-row">
+            <mat-form-field class="half-width" appearance="outline">
+              <mat-label>Número De Identificación</mat-label>
+              <mat-icon matPrefix>badge</mat-icon>
+              <input matInput formControlName="n_identificacion">
+              <mat-error *ngIf="group.get('n_identificacion')?.hasError('identificacionDuplicada') && group.get('n_identificacion')?.touched">
+                <mat-icon>error</mat-icon> No puede ser igual al del Afiliado.
+              </mat-error>
+              <mat-error *ngIf="group.get('n_identificacion')?.hasError('identidadDuplicada')">
+                <mat-icon>error</mat-icon> Este número de identificación ya ha sido registrado.
+              </mat-error>
+              <mat-error *ngIf="group.get('n_identificacion')?.hasError('pattern')">
+                <mat-icon>error</mat-icon> Solo puede contener números.
+              </mat-error>
+              <mat-error *ngFor="let error of getErrors(i, 'n_identificacion')">
+                <mat-icon>error</mat-icon> {{ error }}
+              </mat-error>
+            </mat-form-field>
 
-            <!-- Mostrar solo el primer error encontrado -->
-            <mat-error *ngIf="group.get('n_identificacion')?.hasError('identificacionDuplicada') && group.get('n_identificacion')?.touched">
-              <mat-icon>error</mat-icon> No puede ser igual al del Afiliado.
-            </mat-error>
+            <mat-form-field class="half-width" appearance="outline">
+              <mat-label>Parentesco</mat-label>
+              <mat-icon matPrefix>people</mat-icon>
+              <mat-select formControlName="parentesco">
+                <mat-option *ngFor="let item of parentesco" [value]="item.value">{{ item.label }}</mat-option>
+              </mat-select>
+              <mat-error *ngFor="let error of getErrors(i, 'parentesco')">
+                <mat-icon>error</mat-icon> {{ error }}
+              </mat-error>
+            </mat-form-field>
+          </div>
 
-            <mat-error *ngIf="group.get('n_identificacion')?.hasError('identidadDuplicada') && !group.get('n_identificacion')?.hasError('identificacionDuplicada')">
-              <mat-icon>error</mat-icon> Este número de identificación ya ha sido registrado.
-            </mat-error>
+          <!-- Datos de Nacimiento -->
+          <div class="form-row">
+            <mat-form-field class="half-width" appearance="outline">
+              <mat-label>Departamento De Nacimiento</mat-label>
+              <mat-icon matPrefix>location_city</mat-icon>
+              <mat-select formControlName="id_departamento_nacimiento" (selectionChange)="onDepartamentoNacimientoChange($event)">
+                <mat-option *ngFor="let departamento of departamentosNacimiento" [value]="departamento.value">
+                  {{ departamento.label }}
+                </mat-option>
+              </mat-select>
+              <mat-error *ngFor="let error of getErrors(i, 'id_departamento_nacimiento')">
+                <mat-icon>error</mat-icon> {{ error }}
+              </mat-error>
+            </mat-form-field>
 
-            <mat-error *ngIf="group.get('n_identificacion')?.hasError('pattern') && !group.get('n_identificacion')?.hasError('identificacionDuplicada') && !group.get('n_identificacion')?.hasError('identidadDuplicada')">
-              <mat-icon>error</mat-icon> Solo puede contener números.
-            </mat-error>
+            <mat-form-field class="half-width" appearance="outline">
+              <mat-label>Municipio De Nacimiento</mat-label>
+              <mat-icon matPrefix>location_city</mat-icon>
+              <mat-select formControlName="id_municipio_nacimiento">
+                <mat-option *ngFor="let municipio of municipiosNacimiento" [value]="municipio.value">
+                  {{ municipio.label }}
+                </mat-option>
+              </mat-select>
+              <mat-error *ngFor="let error of getErrors(i, 'id_municipio_nacimiento')">
+                <mat-icon>error</mat-icon> {{ error }}
+              </mat-error>
+            </mat-form-field>
 
-            <!-- Mostrar errores genéricos restantes -->
-            <mat-error *ngIf="!group.get('n_identificacion')?.hasError('identificacionDuplicada') && !group.get('n_identificacion')?.hasError('identidadDuplicada') && !group.get('n_identificacion')?.hasError('pattern') && getErrors(i, 'n_identificacion').length > 0">
-              <mat-icon>error</mat-icon> {{ getErrors(i, 'n_identificacion')[0] }}
-            </mat-error>
-          </mat-form-field>
+            <mat-form-field class="half-width" appearance="outline">
+              <mat-label>Fecha De Nacimiento</mat-label>
+              <mat-datepicker-toggle matSuffix [for]="fechaNac"></mat-datepicker-toggle>
+              <mat-datepicker #fechaNac></mat-datepicker>
+              <input 
+                matInput 
+                formControlName="fecha_nacimiento" 
+                [matDatepicker]="fechaNac" 
+                [max]="minDate"
+                readonly
+              >
+              <mat-hint>DD/MM/YYYY</mat-hint>
+              <mat-error *ngFor="let error of getErrors(i, 'fecha_nacimiento')">
+                <mat-icon>error</mat-icon> {{ error }}
+              </mat-error>
+            </mat-form-field>
+          </div>
 
           <!-- Nombres -->
           <div class="form-row">
@@ -64,7 +117,7 @@
             </mat-form-field>
           </div>
 
-          <!-- Apellidos y DNI -->
+          <!-- Apellidos -->
           <div class="form-row">
             <mat-form-field class="half-width" appearance="outline">
               <mat-label>Primer Apellido</mat-label>
@@ -83,10 +136,9 @@
                 <mat-icon>error</mat-icon> {{ error }}
               </mat-error>
             </mat-form-field>
-
           </div>
 
-          <!-- Dirección y Residencia -->
+          <!-- Datos de Residencia -->
           <div class="form-row">
             <mat-form-field class="half-width" appearance="outline">
               <mat-label>Departamento de Residencia</mat-label>
@@ -124,7 +176,6 @@
             </mat-form-field>
           </div>
 
-          <!-- Contacto -->
           <div class="form-row">
             <mat-form-field class="half-width" appearance="outline">
               <mat-label>Teléfono</mat-label>
@@ -134,50 +185,7 @@
                 <mat-icon>error</mat-icon> {{ error }}
               </mat-error>
             </mat-form-field>
-          </div>
 
-          <!-- Fecha de Nacimiento y Ubicación -->
-          <div class="form-row">
-            <mat-form-field class="half-width" appearance="outline">
-              <mat-label>Departamento De Nacimiento</mat-label>
-              <mat-icon matPrefix>location_city</mat-icon>
-              <mat-select formControlName="id_departamento_nacimiento" (selectionChange)="onDepartamentoNacimientoChange($event)">
-                <mat-option *ngFor="let departamento of departamentosNacimiento" [value]="departamento.value">
-                  {{ departamento.label }}
-                </mat-option>
-              </mat-select>
-              <mat-error *ngFor="let error of getErrors(i, 'id_departamento_nacimiento')">
-                <mat-icon>error</mat-icon> {{ error }}
-              </mat-error>
-            </mat-form-field>
-
-            <mat-form-field class="half-width" appearance="outline">
-              <mat-label>Municipio De Nacimiento</mat-label>
-              <mat-icon matPrefix>location_city</mat-icon>
-              <mat-select formControlName="id_municipio_nacimiento">
-                <mat-option *ngFor="let municipio of municipiosNacimiento" [value]="municipio.value">
-                  {{ municipio.label }}
-                </mat-option>
-              </mat-select>
-              <mat-error *ngFor="let error of getErrors(i, 'id_municipio_nacimiento')">
-                <mat-icon>error</mat-icon> {{ error }}
-              </mat-error>
-            </mat-form-field>
-
-            <mat-form-field class="half-width" appearance="outline">
-              <mat-label>Fecha De Nacimiento</mat-label>
-              <mat-datepicker-toggle matSuffix [for]="fechaNac"></mat-datepicker-toggle>
-              <mat-datepicker #fechaNac></mat-datepicker>
-              <input matInput formControlName="fecha_nacimiento" [matDatepicker]="fechaNac" [max]="minDate">
-              <mat-hint>DD/MM/YYYY</mat-hint>
-              <mat-error *ngFor="let error of getErrors(i, 'fecha_nacimiento')">
-                <mat-icon>error</mat-icon> {{ error }}
-              </mat-error>
-            </mat-form-field>
-          </div>
-
-          <!-- Parentesco y Porcentaje -->
-          <div class="form-row">
             <mat-form-field class="half-width" appearance="outline">
               <mat-label>Porcentaje De Beneficio</mat-label>
               <mat-icon matPrefix>percent</mat-icon>
@@ -186,19 +194,9 @@
                 <mat-icon>error</mat-icon> {{ error }}
               </mat-error>
             </mat-form-field>
-
-            <mat-form-field class="half-width" appearance="outline">
-              <mat-label>Parentesco</mat-label>
-              <mat-icon matPrefix>people</mat-icon>
-              <mat-select formControlName="parentesco">
-                <mat-option *ngFor="let item of parentesco" [value]="item.value">{{ item.label }}</mat-option>
-              </mat-select>
-              <mat-error *ngFor="let error of getErrors(i, 'parentesco')">
-                <mat-icon>error</mat-icon> {{ error }}
-              </mat-error>
-            </mat-form-field>
           </div>
 
+          <!-- Botón para eliminar beneficiario -->
           <div class="action-buttons">
             <button mat-button color="warn" (click)="eliminarBeneficiario(i)">
               <mat-icon>remove</mat-icon> Eliminar Beneficiario
@@ -207,10 +205,12 @@
         </div>
       </div>
     </form>
+
+    <!-- Botón para agregar beneficiario -->
     <div class="action-buttons">
       <button mat-button color="primary" (click)="agregarBeneficiario()">
         <mat-icon>add</mat-icon> Agregar Beneficiario
       </button>
     </div>
   </div>
-  </div>
+</div>

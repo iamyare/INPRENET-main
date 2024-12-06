@@ -28,13 +28,19 @@ export const MENU_CONFIG: Section[] = [
     name: 'AFILIACIÓN',
     items: [
       {
-        title: 'AFILIACIÓN',
+        title: 'AFILIACIÓN DE DOCENTES',
         icon: 'person',
         children: [
           { title: 'Nueva Afiliación', route: 'afiliacion/nueva-afiliacion', icon: 'person_add' },
-          { title: 'Buscar Persona', route: 'afiliacion/buscar-persona', icon: 'search' },
-          { title: 'Nuevo Centro Educativo', route: 'afiliacion/nuevo-centro', icon: 'school' },
-          { title: 'Ver Centro Educativo', route: 'afiliacion/ver-datos-centro', icon: 'visibility' },
+          { title: 'Buscar Persona', route: 'afiliacion/buscar-persona', icon: 'person_search' },
+        ],
+      },
+      {
+        title: 'AFILIACIÓN DE CENTROS EDUCATIVOS',
+        icon: 'school',
+        children: [
+          { title: 'Nuevo Centro Educativo', route: 'afiliacion/nuevo-centro', icon: 'add_business' },
+          { title: 'Ver Centro Educativo', route: 'afiliacion/ver-datos-centro', icon: 'domain' },
         ],
       },
     ],
@@ -96,10 +102,10 @@ export const MENU_CONFIG: Section[] = [
     items: [
       {
         title: 'GESTION CONASA',
-        icon: 'search',
+        icon: 'engineering',
         children: [
           { title: 'Buscar Afiliado', route: 'conasa/ver-afiliado', icon: 'person_search' },
-          { title: 'Gestion De Contratos', route: 'conasa/menu-conasa', icon: 'person_search' },
+          { title: 'Gestion De Contratos', route: 'conasa/menu-conasa', icon: 'description' },
         ],
       },
     ],

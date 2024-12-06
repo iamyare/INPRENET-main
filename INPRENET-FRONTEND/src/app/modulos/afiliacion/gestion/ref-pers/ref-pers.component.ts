@@ -83,60 +83,75 @@ export class RefPersComponent implements OnInit {
 
   verificarAfiliado(n_identificacion: string): void {
     const conyugeControl = this.formGroup.get('conyuge') as FormGroup;
+
+    // Restablecer los valores del formulario de cónyuge
     conyugeControl?.reset({
-      primer_nombre: '',
-      segundo_nombre: '',
-      tercer_nombre: '',
-      primer_apellido: '',
-      segundo_apellido: '',
-      n_identificacion: n_identificacion, 
-      fecha_nacimiento: '',
-      telefono_domicilio: '',
-      telefono_celular: '',
-      telefono_trabajo: '',
-      trabaja: '',
-      es_afiliado: ''
+        primer_nombre: '',
+        segundo_nombre: '',
+        tercer_nombre: '',
+        primer_apellido: '',
+        segundo_apellido: '',
+        n_identificacion: n_identificacion,
+        fecha_nacimiento: '',
+        telefono_domicilio: '',
+        telefono_celular: '',
+        telefono_trabajo: '',
+        trabaja: '',
+        es_afiliado: ''
     });
+
     this.beneficiosService.verificarSiEsAfiliado(n_identificacion).subscribe({
-      next: (response: any) => {
-        if (response && response.esAfiliado?.esAfiliado === true && response.esAfiliado?.datosPersona) {
-          this.esAfiliadoText = 'SÍ'; 
-          conyugeControl?.patchValue({
-            primer_nombre: response.esAfiliado.datosPersona.primer_nombre,
-            segundo_nombre: response.esAfiliado.datosPersona.segundo_nombre,
-            tercer_nombre: response.esAfiliado.datosPersona.tercer_nombre,
-            primer_apellido: response.esAfiliado.datosPersona.primer_apellido,
-            segundo_apellido: response.esAfiliado.datosPersona.segundo_apellido,
-            fecha_nacimiento: response.esAfiliado.datosPersona.fecha_nacimiento,
-            telefono_domicilio: response.esAfiliado.datosPersona.telefono_domicilio,
-            telefono_celular: response.esAfiliado.datosPersona.telefono_celular,
-            telefono_trabajo: response.esAfiliado.datosPersona.telefono_trabajo,
-            trabaja: response.esAfiliado.datosPersona.trabaja,
-          });
-          Object.keys(conyugeControl.controls).forEach(key => {
-            if (key !== 'n_identificacion') {
-              conyugeControl.get(key)?.disable();
+        next: (response: any) => {
+            if (response && response.datosPersona) {
+                // Llenar los datos independientemente de `esAfiliado`
+                conyugeControl?.patchValue({
+                    primer_nombre: response.datosPersona.primer_nombre,
+                    segundo_nombre: response.datosPersona.segundo_nombre,
+                    tercer_nombre: response.datosPersona.tercer_nombre,
+                    primer_apellido: response.datosPersona.primer_apellido,
+                    segundo_apellido: response.datosPersona.segundo_apellido,
+                    fecha_nacimiento: response.datosPersona.fecha_nacimiento,
+                    telefono_domicilio: response.datosPersona.telefono_domicilio,
+                    telefono_celular: response.datosPersona.telefono_celular,
+                    telefono_trabajo: response.datosPersona.telefono_trabajo,
+                    trabaja: response.datosPersona.trabaja,
+                    es_afiliado: response.esAfiliado ? 'SÍ' : 'NO'
+                });
+
+                // Manejo de habilitación/deshabilitación de campos
+                if (response.esAfiliado) {
+                    this.esAfiliadoText = 'SÍ';
+                    Object.keys(conyugeControl.controls).forEach(key => {
+                        if (key !== 'n_identificacion') {
+                            conyugeControl.get(key)?.disable();
+                        }
+                    });
+                } else {
+                    this.esAfiliadoText = 'NO';
+                    // Los campos permanecen habilitados para edición si no es afiliado
+                    Object.keys(conyugeControl.controls).forEach(key => {
+                        conyugeControl.get(key)?.enable();
+                    });
+                }
+            } else {
+                // Si no hay datos de la persona, habilitar todos los campos
+                this.esAfiliadoText = 'NO';
+                Object.keys(conyugeControl.controls).forEach(key => {
+                    conyugeControl.get(key)?.enable();
+                });
             }
-          });
-        } else {
-          this.esAfiliadoText = 'NO'; 
-          Object.keys(conyugeControl.controls).forEach(key => {
-            conyugeControl.get(key)?.enable();
-          });
+            this.cdr.detectChanges();
+        },
+        error: (error) => {
+            console.error('Error al verificar afiliado:', error);
+            this.esAfiliadoText = 'NO';
+            Object.keys(conyugeControl.controls).forEach(key => {
+                conyugeControl.get(key)?.enable();
+            });
         }
-        this.cdr.detectChanges();
-      },
-      error: (error) => {
-        console.error('Error al verificar afiliado:', error);
-        this.esAfiliadoText = 'NO';
-        Object.keys(conyugeControl.controls).forEach(key => {
-          conyugeControl.get(key)?.enable();
-        });
-      }
     });
   }
-  
-  
+
   
   agregarReferencia(datos?: any): void {
     const referenciaForm = this.fb.group({
@@ -358,6 +373,10 @@ export class RefPersComponent implements OnInit {
       es_afiliado: ''
     });
     this.formGroup.reset();
+  }
+  
+  blockManualInput(event: KeyboardEvent): void {
+    event.preventDefault();
   }
   
 }

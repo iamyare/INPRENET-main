@@ -336,12 +336,21 @@ export class DatosGeneralesComponent implements OnInit {
   cargarDiscapacidades() {
     this.datosEstaticos.getDiscapacidades().subscribe(discapacidades => {
       this.discapacidades = discapacidades;
-      this.resetDiscapacidadesFormArray();
+  
+      // Si ya está seleccionada una discapacidad, reinicia el formulario
+      if (this.formGroup.get('discapacidad')?.value === true && this.discapacidades.length > 0) {
+        this.discapacidadSeleccionada = true;
+        this.resetDiscapacidadesFormArray();
+      } else {
+        this.discapacidadSeleccionada = false;
+      }
     });
   }
+  
 
   onDiscapacidadChange(event: any) {
-    this.discapacidadSeleccionada = event.value;
+    this.discapacidadSeleccionada = event.value === true && this.discapacidades.length > 0;
+  
     if (this.discapacidadSeleccionada) {
       this.resetDiscapacidadesFormArray();
       this.formGroup.markAsDirty();

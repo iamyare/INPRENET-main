@@ -2,7 +2,6 @@ import { Controller, Get, Post, Body, Patch, Param, Delete, Query, Response, Bad
 import { DetalleBeneficioService } from './detalle_beneficio.service';
 import { UpdateDetalleBeneficioDto } from './dto/update-detalle_beneficio_planilla.dto';
 import { ApiTags } from '@nestjs/swagger';
-import { net_persona } from 'src/modules/Persona/entities/net_persona.entity';
 import { Net_Detalle_Beneficio_Afiliado } from './entities/net_detalle_beneficio_afiliado.entity';
 
 @ApiTags('beneficio-planilla')
@@ -21,7 +20,6 @@ export class DetalleBeneficioController {
     @Body() body: { id_persona: number, id_causante: number, id_detalle_persona: number, id_beneficio: number, id_planilla: number, monto_a_pagar: number }
   ) {
     try {
-      // Insertamos el detalle del pago de beneficio
       const nuevoDetallePagoBeneficio = await this.detallebeneficioService.insertarDetallePagoBeneficio(
         body.id_persona,
         body.id_causante,
@@ -30,7 +28,6 @@ export class DetalleBeneficioController {
         body.id_planilla,
         body.monto_a_pagar
       );
-
       return {
         message: 'Detalle de pago de beneficio insertado correctamente.',
         data: nuevoDetallePagoBeneficio,

@@ -58,3 +58,18 @@ body {
   font-size: 14px; /* Ajusta el tamaño del ícono para ser más pequeño */
   margin-right: 6px; /* Ajusta el espacio */
 }
+
+.discapacidad-container {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr); /* Dos columnas */
+  gap: 10px; /* Espaciado entre elementos */
+  padding: 15px;
+  border: 1px solid #ccc; /* Marco */
+  border-radius: 8px; /* Bordes redondeados */
+  background-color: #f9f9f9; /* Fondo suave */
+}
+
+.discapacidad-item {
+  display: flex;
+  align-items: center;
+}

@@ -3,6 +3,7 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { AfiliacionService } from 'src/app/services/afiliacion.service';
 import { ToastrService } from 'ngx-toastr';
 import { PermisosService } from 'src/app/services/permisos.service';
+import { blockManualInput } from '../../../../shared/functions/form-utils';
 
 @Component({
   selector: 'app-edit-conyugue',
@@ -16,6 +17,7 @@ export class EditConyugueComponent implements OnChanges {
   mostrandoFormularioAgregar: boolean = false;
   mostrarBotonAgregar: boolean = false;
   idFamilia!: number;
+  blockManualInput = blockManualInput;
 
   constructor(
     private fb: FormBuilder,

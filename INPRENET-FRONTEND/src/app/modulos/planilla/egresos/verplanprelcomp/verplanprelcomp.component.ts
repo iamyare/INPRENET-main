@@ -185,14 +185,9 @@ export class VerplanprelcompComponent implements OnInit, OnChanges {
     let logs: any[] = [];
     this.planillaService.getDesglosePorPersonaPlanilla(row.id_afiliado, this.codigoPlanilla).subscribe({
       next: (response) => {
-        console.log(response);
-
         const { beneficios } = response;
-
         const data = beneficios;
-
         logs.push({ message: 'Datos De Beneficios:', detail: data || [], type: 'beneficios' });
-
         const dialogRef = this.dialog.open(DynamicDialogComponent, {
           width: '50%',
           data: { cod_planilla: this.codigoPlanilla, logs: logs, type: 'beneficios', mostrarAccion: true, }
@@ -200,7 +195,6 @@ export class VerplanprelcompComponent implements OnInit, OnChanges {
         dialogRef.componentInstance.deduccionEliminada.subscribe(() => {
           this.getFilas(this.codigoPlanilla).then(() => this.cargar());
         });
-
       },
       error: (error) => {
         console.error('Error al obtener desglose por persona', error);
@@ -375,7 +369,6 @@ export class VerplanprelcompComponent implements OnInit, OnChanges {
         this.toastr.error('Ocurrió un error al generar el archivo Excel');
     }
 }
-
 
 async descargarExcelPorPlanilla() {
   if (!this.idPlanilla) {

@@ -146,8 +146,7 @@ export class AfiliacionService {
       throw new Error('Ocurrió un error inesperado. Inténtelo de nuevo más tarde.');
     }
   }
-  
-  
+   
   async actualizarFotoPersona(idPersona: number, fotoPerfil: Buffer): Promise<net_persona> {
     const persona = await this.personaRepository.findOne({ where: { id_persona: idPersona } });
 
@@ -200,7 +199,7 @@ export class AfiliacionService {
         relations: ['persona'],
     });
     return { persona, conyuge };
-}
+  }
   
   async updateFotoPerfil(id: number, fotoPerfil: Buffer): Promise<net_persona> {
     const persona = await this.personaRepository.findOneBy({ id_persona: id });
@@ -243,7 +242,6 @@ export class AfiliacionService {
 
     return causantes;
   }
-
 
   async getAllDiscapacidades(): Promise<Net_Discapacidad[]> {
     return this.discapacidadRepository.find();
@@ -511,29 +509,56 @@ export class AfiliacionService {
     entityManager: EntityManager,
     personasCreadasMap?: Map<string, net_persona>
   ): Promise<void> {
-    //console.log(familiaresDto);
-
     const personasMap = personasCreadasMap || new Map<string, net_persona>();
+  
+    // Filtrar duplicados de parentesco 'CÓNYUGE'
     const familiaSinDuplicados = familiaresDto.filter((familia, index, self) => {
       return (
         familia.parentesco !== 'CÓNYUGE' ||
         index === self.findIndex(f => f.parentesco === 'CÓNYUGE')
       );
     });
-
+  
     for (const familiaDto of familiaSinDuplicados) {
-      const personaReferencia = await this.crearOObtenerPersona(familiaDto.persona_referencia, null, entityManager, personasMap);
-
-      const familia = entityManager.create(Net_Familia, {
-        parentesco: familiaDto.parentesco,
-        persona: { id_persona: idPersona },
-        referenciada: { id_persona: personaReferencia.id_persona },
+      // Crear o actualizar persona referenciada
+      const personaReferencia = await this.crearOActualizarPersona(
+        familiaDto.persona_referencia,
+        null, // No se utiliza archivo en este caso
+        entityManager,
+        personasMap
+      );
+  
+      // Verificar si ya existe la relación familiar
+      const relacionExistente = await this.familiaRepository.findOne({
+        where: {
+          persona: { id_persona: idPersona },
+          referenciada: { id_persona: personaReferencia.id_persona },
+          parentesco: familiaDto.parentesco,
+        },
       });
-
-      await entityManager.save(Net_Familia, familia);
+  
+      if (!relacionExistente) {
+        // Crear la relación familiar si no existe
+        const familia = entityManager.create(Net_Familia, {
+          parentesco: familiaDto.parentesco,
+          persona: { id_persona: idPersona },
+          referenciada: { id_persona: personaReferencia.id_persona },
+        });
+  
+        await entityManager.save(Net_Familia, familia);
+      } else {
+        // Actualizar la relación familiar si se requiere
+        await entityManager.update(
+          Net_Familia,
+          { id_familia: relacionExistente.id_familia },
+          {
+            parentesco: familiaDto.parentesco, // Actualiza campos relevantes
+          }
+        );
+      }
     }
   }
-
+  
   async crearDiscapacidades(
     discapacidadesDto: CrearDiscapacidadDto[],
     idPersona: number,
@@ -648,34 +673,71 @@ export class AfiliacionService {
     });
   }
 
-
   async crearOObtenerPersona(
     crearPersonaDto: CrearPersonaDto,
     fileIdent: Express.Multer.File,
     entityManager: EntityManager,
     personasCreadasMap: Map<string, net_persona>
   ): Promise<net_persona> {
-    // Verificar si ya hemos creado a esta persona en esta transacción
     if (personasCreadasMap.has(crearPersonaDto.n_identificacion)) {
       return personasCreadasMap.get(crearPersonaDto.n_identificacion);
     }
-
-    // Verificar si la persona ya existe en la base de datos
     let persona = await this.personaRepository.findOne({
       where: { n_identificacion: crearPersonaDto.n_identificacion }
     });
-
     if (!persona) {
-      // Crear la persona si no existe
       persona = await this.crearPersona(crearPersonaDto, null, fileIdent, entityManager);
     }
-
-    // Guardar la persona en el mapa para futuras referencias
     personasCreadasMap.set(crearPersonaDto.n_identificacion, persona);
-
     return persona;
   }
 
+  async crearOActualizarPersona(
+    crearPersonaDto: CrearPersonaDto,
+    fileIdent: Express.Multer.File,
+    entityManager: EntityManager,
+    personasCreadasMap: Map<string, net_persona>
+  ): Promise<net_persona> {
+    // Verificar si la persona ya fue procesada en esta transacción
+    if (personasCreadasMap.has(crearPersonaDto.n_identificacion)) {
+      return personasCreadasMap.get(crearPersonaDto.n_identificacion);
+    }
+  
+    // Buscar si la persona ya existe en la base de datos
+    let persona = await this.personaRepository.findOne({
+      where: { n_identificacion: crearPersonaDto.n_identificacion }
+    });
+  
+    if (!persona) {
+      // Crear la persona si no existe
+      persona = await this.crearPersona(crearPersonaDto, null, fileIdent, entityManager);
+    } else {
+      // Actualizar los datos de la persona si ya existe
+      const camposActualizables = {
+        primer_nombre: crearPersonaDto.primer_nombre,
+        segundo_nombre: crearPersonaDto.segundo_nombre,
+        tercer_nombre: crearPersonaDto.tercer_nombre,
+        primer_apellido: crearPersonaDto.primer_apellido,
+        segundo_apellido: crearPersonaDto.segundo_apellido,
+        telefono_1: crearPersonaDto.telefono_1,
+        telefono_2: crearPersonaDto.telefono_2,
+        telefono_3: crearPersonaDto.telefono_3,
+        direccion_residencia: crearPersonaDto.direccion_residencia,
+        fecha_nacimiento: this.formatDateToYYYYMMDD(crearPersonaDto.fecha_nacimiento),
+        genero: crearPersonaDto.genero,
+        estado_civil: crearPersonaDto.estado_civil,
+        correo_1: crearPersonaDto.correo_1,
+        correo_2: crearPersonaDto.correo_2,
+      };
+  
+      await entityManager.update(net_persona, { id_persona: persona.id_persona }, camposActualizables);
+      persona = { ...persona, ...camposActualizables };
+    }
+    personasCreadasMap.set(crearPersonaDto.n_identificacion, persona);
+  
+    return persona;
+  }
+  
 
   formatDateToYYYYMMDD(dateString: string): string {
     if (!dateString) return null;

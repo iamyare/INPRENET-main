@@ -12,6 +12,7 @@
           <h3 class="title">Información Adicional</h3>
           <p class="info-item"><strong>Dirección:</strong> {{ tipoAfiliado.DIRECCION_RESIDENCIA }}</p>
           <p class="info-item"><strong>Departamento de Residencia:</strong> {{ tipoAfiliado.departamentoResidencia }}</p>
+          <p class="info-item"><strong>Municipio de Residencia:</strong> {{ tipoAfiliado.municipioResidencia }}</p>
           <p class="info-item"><strong>Tipos de Afiliado:</strong></p>
           <ul class="tipo-list">
             <li *ngFor="let tipo of tipoAfiliado.tiposPersona">{{ tipo }}</li>

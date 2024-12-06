@@ -55,7 +55,6 @@ export class DocumentosPlanillaComponent implements OnInit {
   ngOnInit() {
     this.planillaForm.get('rangoFechas.fechaInicio')?.valueChanges.subscribe(() => this.checkFechasCompletas());
     this.planillaForm.get('rangoFechas.fechaFin')?.valueChanges.subscribe(() => this.checkFechasCompletas());
-    // Escuchar los cambios en el rango de fechas
     this.planillaForm.get('rangoFechas')?.valueChanges.subscribe((value) => {
       this.getFilas().then(() => this.cargar());
     });

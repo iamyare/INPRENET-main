@@ -94,7 +94,6 @@ export class PlanillaService {
     const url = `${environment.API_URL}/api/planilla/update-fallecidos-from-excel`;
     const formData: FormData = new FormData();
     formData.append('file', file, file.name);
-
     return this.http.post(url, formData).pipe(
       catchError(error => {
         console.error('Error al subir el archivo Excel', error);

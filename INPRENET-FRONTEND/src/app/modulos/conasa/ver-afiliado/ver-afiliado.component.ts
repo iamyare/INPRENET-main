@@ -21,11 +21,13 @@ import { DatosEstaticosService } from 'src/app/services/datos-estaticos.service'
 export class VerAfiliadoComponent implements OnInit {
   tipoAfiliado: any = null;
   departamentos: any[] = [];
+  municipios: any[] = [];
 
   constructor(private datosEstaticosService: DatosEstaticosService) {}
 
   ngOnInit(): void {
     this.cargarDepartamentos();
+    this.cargarMunicipios();
   }
 
   handlePersonaEncontrada(persona: any): void {
@@ -39,18 +41,27 @@ export class VerAfiliadoComponent implements OnInit {
       (d) => d.value === persona.id_departamento_residencia
     )?.label || 'No especificado';
 
+    const municipioResidencia = this.municipios.find(
+      (m) => m.value === persona.id_municipio_residencia
+    )?.label || 'No especificado';
+
     const fallecido = (persona.fallecido || '').trim().toUpperCase();
 
     this.tipoAfiliado = {
       ...persona,
       departamentoResidencia,
+      municipioResidencia,
       estatusAfiliado: persona.estadoAfiliacion?.nombre_estado || 'No especificado',
-      tiposPersona: persona.TIPOS_PERSONA || [], // Ahora toma todos los tipos de persona
+      tiposPersona: persona.TIPOS_PERSONA || [],
       estadoFallecido: fallecido === 'SI' ? 'FALLECIDO' : 'VIVO',
     };
   }
 
   private async cargarDepartamentos(): Promise<void> {
     this.departamentos = await this.datosEstaticosService.getDepartamentos();
+  }
+
+  private async cargarMunicipios(): Promise<void> {
+    this.municipios = await this.datosEstaticosService.getMunicipios(); // Cargar municipios del servicio
   }
 }

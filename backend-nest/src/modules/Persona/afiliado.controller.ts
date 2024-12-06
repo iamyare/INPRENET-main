@@ -290,28 +290,17 @@ export class AfiliadoController {
     @Req() req: Request
   ) {
     const authorization = req.headers['authorization'];
-
     if (!authorization) {
       throw new UnauthorizedException('No authorization header present');
     }
-
-    // Verifica que el esquema sea 'Basic' y extrae el token base64
     const [scheme, base64Credentials] = authorization.split(' ');
-
     if (scheme !== 'Basic' || !base64Credentials) {
       throw new UnauthorizedException('Invalid authorization format');
     }
-
     try {
-      // Decodifica las credenciales base64
       const decoded = atob(base64Credentials);
-      const [email, password] = decoded.split(':'); // Asumiendo que las credenciales tienen el formato email:password
-
-      // Aquí deberías buscar al usuario por email en tu base de datos
-
-      // Llama al servicio con el email después de la validación
+      const [email, password] = decoded.split(':');
       return this.afiliadoService.findOneConasa(term, email, password);
-
     } catch (error) {
       throw new UnauthorizedException('Failed to decode or validate authorization');
     }

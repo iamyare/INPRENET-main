@@ -22,7 +22,6 @@ import { NET_PROFESIONES } from '../transacciones/entities/net_profesiones.entit
 import { Net_Municipio } from '../Regional/municipio/entities/net_municipio.entity';
 import { format } from 'date-fns';
 import { Net_Empleado_Centro_Trabajo } from '../Empresarial/entities/net_empleado_centro_trabajo.entity';
-import { log } from 'console';
 
 @Injectable()
 export class AfiliadoService {

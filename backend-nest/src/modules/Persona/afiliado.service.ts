@@ -298,9 +298,9 @@ export class AfiliadoService {
         correo_1: email,
         usuarioEmpresas: {
           usuarioModulos: {
-            rolModulo: { nombre: In(["CONSULTA", "TODO"]) }
-          }
-        }
+            rolModulo: { nombre: In(["CONSULTA", "TODO"]) },
+          },
+        },
       },
       relations: [
         'usuarioEmpresas',
@@ -310,8 +310,9 @@ export class AfiliadoService {
     });
   
     if (!empCentTrabajoRepository) {
-      throw new UnauthorizedException('User not found');
+      throw new UnauthorizedException('User not found or unauthorized');
     }
+  
     const isPasswordValid = await bcrypt.compare(
       password,
       empCentTrabajoRepository.usuarioEmpresas[0].contrasena
@@ -322,9 +323,7 @@ export class AfiliadoService {
     }
   
     const persona = await this.personaRepository.findOne({
-      where: {
-        n_identificacion: term,
-      },
+      where: { n_identificacion: term },
       relations: [
         'detallePersona',
         'detallePersona.tipoPersona',
@@ -340,8 +339,12 @@ export class AfiliadoService {
     if (!persona) {
       throw new NotFoundException(`Afiliado con N_IDENTIFICACION ${term} no existe`);
     }
-    const tiposPersona = persona.detallePersona.map(detalle => detalle.tipoPersona?.tipo_persona).filter(Boolean);
-    const result = {
+  
+    const tiposPersona = persona.detallePersona
+      .map(detalle => detalle.tipoPersona?.tipo_persona)
+      .filter(Boolean); 
+      
+    return {
       N_IDENTIFICACION: persona.n_identificacion,
       PRIMER_NOMBRE: persona.primer_nombre,
       SEGUNDO_NOMBRE: persona.segundo_nombre,
@@ -354,17 +357,13 @@ export class AfiliadoService {
       TELEFONO_1: persona.telefono_1,
       TELEFONO_2: persona.telefono_2,
       CORREO_1: persona.correo_1,
-      DEPARTAMENTO_RESIDENCIA: persona.municipio?.departamento.nombre_departamento,
-      MUNICIPIO_RESIDENCIA: persona.municipio?.nombre_municipio,
+      DEPARTAMENTO_RESIDENCIA: persona.municipio?.departamento?.nombre_departamento || null,
+      MUNICIPIO_RESIDENCIA: persona.municipio?.nombre_municipio || null,
       ESTADO: persona.fallecido === 'SI' ? 'FALLECIDO' : 'VIVO',
       TIPOS_PERSONA: tiposPersona,
     };
-  
-    return result;
   }
   
-  
-
   async findOnePersonaParaDeduccion(term: string) {
     try {
       const detallePer = await this.detallePersonaRepository.findOne({

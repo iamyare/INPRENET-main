@@ -11,7 +11,7 @@ export class EscalafonController {
   create(@Body() createEscalafonDto: CreateEscalafonDto) {
     return this.escalafonService.create(createEscalafonDto);
   }
-  /**/
+  
   @Get('prestamos/:dni')
   findOne(@Param('dni') dni: string) {
     return this.escalafonService.findOne(dni);
@@ -25,5 +25,10 @@ export class EscalafonController {
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.escalafonService.remove(+id);
+  }
+
+  @Get(':mes')
+  async obtenerRegistros(@Param('mes') mes: number): Promise<string[]> {
+    return this.escalafonService.obtenerRegistrosPorMes(mes);
   }
 }

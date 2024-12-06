@@ -317,8 +317,6 @@ export class AfiliadoController {
     }
   }
 
-
-
   @Get('/getAllPersonaPBanco/:dni')
   getAllPersonaPBanco(@Param('dni') dni: string) {
     return this.afiliadoService.getAllPersonaPBanco(dni);

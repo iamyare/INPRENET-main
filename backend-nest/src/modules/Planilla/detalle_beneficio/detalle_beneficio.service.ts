@@ -15,8 +15,6 @@ import { Net_Tipo_Persona } from 'src/modules/Persona/entities/net_tipo_persona.
 import { net_estado_afiliacion } from 'src/modules/Persona/entities/net_estado_afiliacion.entity';
 import { NET_PROFESIONES } from 'src/modules/transacciones/entities/net_profesiones.entity';
 import { Net_Beneficio_Tipo_Persona } from '../beneficio_tipo_persona/entities/net_beneficio_tipo_persona.entity';
-
-import { addMonths } from 'date-fns';
 import { Net_Persona_Por_Banco } from 'src/modules/banco/entities/net_persona-banco.entity';
 import { Net_Detalle_Deduccion } from '../detalle-deduccion/entities/detalle-deduccion.entity';
 import { Net_Usuario_Empresa } from 'src/modules/usuario/entities/net_usuario_empresa.entity';
@@ -64,36 +62,42 @@ export class DetalleBeneficioService {
         .createQueryBuilder('persona')
         .leftJoinAndSelect('persona.detallePersona', 'detallePersona')
         .leftJoinAndSelect('detallePersona.tipoPersona', 'tipoPersona')
-        .leftJoinAndSelect('persona.familiares', 'familiares') // Incluimos la relación con Net_Familia
+        .leftJoinAndSelect('persona.familiares', 'familiares')
+        .leftJoinAndSelect('persona.municipio', 'municipio')
+        .leftJoinAndSelect('persona.municipio_nacimiento', 'municipioNacimiento')
         .where('persona.n_identificacion = :n_identificacion', { n_identificacion })
-        .andWhere('tipoPersona.tipo_persona IN (:...tipos)', { tipos: ['AFILIADO', 'JUBILADO', 'PENSIONADO'] })
         .getOne();
 
     if (!persona) {
         return { esAfiliado: false, datosPersona: null };
     }
 
-    const trabaja = persona.familiares.some(familia => familia.trabaja === 'SÍ') ? 'SÍ' : 'NO';
+    const tiposPermitidos = ['AFILIADO', 'JUBILADO', 'PENSIONADO'];
+    const esAfiliado = persona.detallePersona?.some(detalle =>
+        tiposPermitidos.includes(detalle.tipoPersona?.tipo_persona || '')
+    );
+
+    const trabaja = persona.familiares?.some(familia => familia.trabaja === 'SÍ') ? 'SÍ' : 'NO';
 
     return {
-        esAfiliado: true,
+        esAfiliado: !!esAfiliado,
         datosPersona: {
-            primer_nombre: persona.primer_nombre,
-            segundo_nombre: persona.segundo_nombre,
-            tercer_nombre: persona.tercer_nombre,
-            primer_apellido: persona.primer_apellido,
-            segundo_apellido: persona.segundo_apellido,
-            n_identificacion: persona.n_identificacion,
-            fecha_nacimiento: persona.fecha_nacimiento,
-            telefono_domicilio: persona.telefono_1,
-            telefono_celular: persona.telefono_2,
-            telefono_trabajo: persona.telefono_3,
-            trabaja: trabaja
+            primer_nombre: persona.primer_nombre || null,
+            segundo_nombre: persona.segundo_nombre || null,
+            tercer_nombre: persona.tercer_nombre || null,
+            primer_apellido: persona.primer_apellido || null,
+            segundo_apellido: persona.segundo_apellido || null,
+            n_identificacion: persona.n_identificacion || null,
+            fecha_nacimiento: persona.fecha_nacimiento || null,
+            telefono_domicilio: persona.telefono_1 || null,
+            telefono_celular: persona.telefono_2 || null,
+            telefono_trabajo: persona.telefono_3 || null,
+            trabaja: trabaja,
+            id_municipio_residencia: persona.municipio?.id_municipio || null,
+            id_municipio_nacimiento: persona.municipio_nacimiento?.id_municipio || null
         }
     };
 }
-
-
 
   async insertarDetallePagoBeneficio(
     id_persona: number,

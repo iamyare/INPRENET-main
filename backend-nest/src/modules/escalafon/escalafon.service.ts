@@ -16,7 +16,27 @@ export class EscalafonService {
     return 'This action adds a new escalafon';
   }
 
-  /*Poner más parámetros según lo que quiera*/
+  async obtenerRegistrosPorMes(mes: number): Promise<string[]> {
+    const registros = await this.detalleEnvEscalafonRepository.createQueryBuilder('detalle')
+      .select('detalle.anio', 'anio')
+      .addSelect('detalle.mes', 'mes')
+      .addSelect('detalle.dni', 'dni')
+      .addSelect('SUM(detalle.cuota)', 'cuota')
+      .where('detalle.mes = :mes', { mes })
+      .groupBy('detalle.anio, detalle.mes, detalle.dni')
+      .getRawMany();
+    const resultado = registros.map((registro) => {
+      const anio = registro.anio?.toString().padStart(4, '0') || '0000';
+      const dni = registro.dni;
+      const numeroFijo = '0038';
+      const cuotaEntera = Math.floor(registro.cuota || 0).toString().padStart(16, '0');
+      const cuotaDecimal = ((registro.cuota || 0) % 1).toFixed(2).split('.')[1] || '00';
+      const numero44Digitos = `${anio}${registro.mes?.toString().padStart(2, '0')}${dni}${numeroFijo}${cuotaEntera}${cuotaDecimal}`;
+      return numero44Digitos;
+    });
+    return resultado;
+  }
+  
   async findOne(dni:string) {
     const identidad = await this.detalleEnvEscalafonRepository.find({ where: { dni:dni } });
     return identidad;

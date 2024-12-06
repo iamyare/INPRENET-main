@@ -14,8 +14,6 @@ export class net_detalle_envio_escalafon {
     @Column('decimal', { precision: 10, scale: 2, nullable: true, name: 'CUOTA' })
     cuota: number;
 
-    
-
     @Column('number', { nullable: true, name: 'ANIO' })
     anio: number;
 

@@ -611,6 +611,8 @@ export class DocumentosPlanillaComponent implements OnInit {
 
     this.planillaService.getTotalMontosPorBancoYPeriodo(fechaInicioFormateada, fechaFinFormateada, idTiposPlanilla).subscribe({
       next: async (data) => {
+        console.log(data);
+
         const base64Image = await this.convertirImagenABase64('../assets/images/membratadoFinal.jpg');
 
         // Calcular solo el monto de "CON CUENTA"

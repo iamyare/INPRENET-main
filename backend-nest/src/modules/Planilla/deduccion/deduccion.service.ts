@@ -161,7 +161,8 @@ export class DeduccionService {
       return { error: `La persona está marcada como fallecida`, processed: false };
     }
 
-    if (detpersonaJU_PE) {
+
+    if (detpersonaJU_PE && planilla) {
       const tipoPersonaJUPE = detpersonaJU_PE.detallePersona[0]?.tipoPersona?.tipo_persona;
 
       const plan = planilla.find(p => {
@@ -183,6 +184,7 @@ export class DeduccionService {
       if (!plan) {
         return { error: `No se encontró la planilla adecuada para el mes y año proporcionado o para el tipo de persona: ${tipoPersonaJUPE}`, processed: false };
       } else {
+
         const deduccionExistente = await repositories.detalleDeduccionRepository.findOne({
           where: {
             anio: parsedAnio,
@@ -213,7 +215,8 @@ export class DeduccionService {
         return { processed: true };
       }
 
-    } else if (detpersonaB) {
+    } else if (detpersonaB && planilla) {
+
       const tipoPersonaBE = detpersonaB.detallePersona[0]?.tipoPersona?.tipo_persona;
 
       const plan = planilla.find(p => {
@@ -228,7 +231,8 @@ export class DeduccionService {
         );
       });
 
-      if (!planilla) {
+
+      if (!plan) {
         return { error: `No se encontró la planilla adecuada para el mes y año proporcionado o para el tipo de persona: ${tipoPersonaBE}`, processed: false };
       } else {
         const deduccionExistente = await repositories.detalleDeduccionRepository.findOne({

@@ -202,25 +202,25 @@ export class AfiliadoService {
         'peps.cargo_publico',
       ],
     });
-  
+
     if (!persona) {
       throw new NotFoundException(`Afiliado con N_IDENTIFICACION ${term} no existe`);
     }
-  
+
     // Verifica el detalle de la persona donde coincida ID_PERSONA e ID_CAUSANTE, si existe `detallePersona`
     const detalleRelevante = persona.detallePersona
       ? persona.detallePersona.find((detalle) =>
-          detalle.ID_PERSONA === persona.id_persona && detalle.ID_CAUSANTE === persona.id_persona
-        )
+        detalle.ID_PERSONA === persona.id_persona && detalle.ID_CAUSANTE === persona.id_persona
+      )
       : null;
-  
+
     // Mapeo de discapacidades
     const discapacidades = persona.personaDiscapacidades.map((discapacidad) => ({
       id_discapacidad: discapacidad.discapacidad.id_discapacidad,
       tipo: discapacidad.discapacidad.tipo_discapacidad,
       descripcion: discapacidad.discapacidad.descripcion,
     }));
-  
+
     // Convierte archivos de identificación y defunción a base64 si existen
     const archivoIdentificacionBase64 = persona.archivo_identificacion
       ? Buffer.from(persona.archivo_identificacion).toString('base64')
@@ -228,12 +228,12 @@ export class AfiliadoService {
     const certificadoDefuncionBase64 = persona.certificado_defuncion
       ? Buffer.from(persona.certificado_defuncion).toString('base64')
       : null;
-  
+
     // Mapeo de tipos de persona
     const tiposPersona = persona.detallePersona
       ? persona.detallePersona.map((detalle) => detalle.tipoPersona?.tipo_persona).filter(Boolean)
       : [];
-  
+
     // Construye el resultado con valores por defecto en caso de que no haya `detallePersona`
     const result = {
       N_IDENTIFICACION: persona.n_identificacion,
@@ -288,7 +288,7 @@ export class AfiliadoService {
       VOLUNTARIO: detalleRelevante?.voluntario || 'NO',
       TIPOS_PERSONA: tiposPersona, // Nueva propiedad
     };
-  
+
     return result;
   }
 
@@ -308,20 +308,20 @@ export class AfiliadoService {
         'usuarioEmpresas.usuarioModulos.rolModulo',
       ],
     });
-  
+
     if (!empCentTrabajoRepository) {
       throw new UnauthorizedException('User not found or unauthorized');
     }
-  
+
     const isPasswordValid = await bcrypt.compare(
       password,
       empCentTrabajoRepository.usuarioEmpresas[0].contrasena
     );
-  
+
     if (!isPasswordValid) {
       throw new UnauthorizedException('Invalid password');
     }
-  
+
     const persona = await this.personaRepository.findOne({
       where: { n_identificacion: term },
       relations: [
@@ -335,15 +335,15 @@ export class AfiliadoService {
         'municipio_nacimiento.departamento',
       ],
     });
-  
+
     if (!persona) {
       throw new NotFoundException(`Afiliado con N_IDENTIFICACION ${term} no existe`);
     }
-  
+
     const tiposPersona = persona.detallePersona
       .map(detalle => detalle.tipoPersona?.tipo_persona)
-      .filter(Boolean); 
-      
+      .filter(Boolean);
+
     return {
       N_IDENTIFICACION: persona.n_identificacion,
       PRIMER_NOMBRE: persona.primer_nombre,
@@ -363,7 +363,7 @@ export class AfiliadoService {
       TIPOS_PERSONA: tiposPersona,
     };
   }
-  
+
   async findOnePersonaParaDeduccion(term: string) {
     try {
       const detallePer = await this.detallePersonaRepository.findOne({

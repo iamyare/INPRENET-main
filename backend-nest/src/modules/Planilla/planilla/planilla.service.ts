@@ -1211,7 +1211,7 @@ GROUP BY
     periodoFinalizacion: string,
     idTiposPlanilla: number[],
   ): Promise<any[]> {
-    const idTiposPlanillaStr = idTiposPlanilla.join(', '); 
+    const idTiposPlanillaStr = idTiposPlanilla.join(', ');
 
     const query = `
       SELECT 
@@ -1402,6 +1402,7 @@ GROUP BY
       FROM "NET_PLANILLA" p
       JOIN "NET_DETALLE_DEDUCCION" ddp ON p."ID_PLANILLA" = ddp."ID_PLANILLA"
       JOIN "NET_DEDUCCION" d ON ddp."ID_DEDUCCION" = d."ID_DEDUCCION"
+      LEFT JOIN  "NET_CENTRO_TRABAJO" ct ON ct."ID_CENTRO_TRABAJO" = d."ID_CENTRO_TRABAJO"
       LEFT JOIN "NET_PERSONA_POR_BANCO" pb ON ddp."ID_AF_BANCO" = pb."ID_AF_BANCO"
       LEFT JOIN "NET_BANCO" b ON pb."ID_BANCO" = b."ID_BANCO"
       WHERE
@@ -1409,30 +1410,34 @@ GROUP BY
         AND p."ID_TIPO_PLANILLA" IN (${idTiposPlanilla.join(', ')})
         AND ddp."ESTADO_APLICACION" = 'COBRADA'
         AND ddp."ESTADO_APLICACION" != 'RECHAZADO'
+        AND ct.NOMBRE_CENTRO_TRABAJO = 'INPREMA'
         AND d."ID_CENTRO_TRABAJO" = 1
       GROUP BY 
         COALESCE(b."NOMBRE_BANCO", 'SIN BANCO')
   `;
 
     const deduccionesTercerosQuery = `
-      SELECT
+     SELECT
         COALESCE(b."NOMBRE_BANCO", 'SIN BANCO') AS NOMBRE_BANCO,
         SUM(ddp."MONTO_APLICADO") AS SUMA_DEDUCCIONES_TERCEROS
       FROM  "NET_PLANILLA" p
       JOIN "NET_DETALLE_DEDUCCION" ddp ON p."ID_PLANILLA" = ddp."ID_PLANILLA"
       JOIN "NET_DEDUCCION" d ON ddp."ID_DEDUCCION" = d."ID_DEDUCCION"
+      LEFT JOIN  "NET_CENTRO_TRABAJO" ct ON ct."ID_CENTRO_TRABAJO" = d."ID_CENTRO_TRABAJO"
       LEFT JOIN  "NET_PERSONA_POR_BANCO" pb ON ddp."ID_AF_BANCO" = pb."ID_AF_BANCO"
       LEFT JOIN "NET_BANCO" b ON pb."ID_BANCO" = b."ID_BANCO"
       WHERE
         p."PERIODO_INICIO" BETWEEN TO_DATE(:periodoInicio, 'DD/MM/YYYY') AND TO_DATE(:periodoFinalizacion, 'DD/MM/YYYY')
         AND p."ID_TIPO_PLANILLA" IN (${idTiposPlanilla.join(', ')})
         AND ddp."ESTADO_APLICACION" = 'COBRADA'
+        AND ct.NOMBRE_CENTRO_TRABAJO != 'INPREMA'
         AND ddp."ESTADO_APLICACION" != 'RECHAZADO'
         AND d."ID_DEDUCCION" NOT IN (1,2,3,44,51)
       GROUP BY
-        COALESCE(b."NOMBRE_BANCO", 'SIN BANCO')
+      COALESCE(b."NOMBRE_BANCO", 'SIN BANCO')
       ORDER BY  COALESCE(b."NOMBRE_BANCO", 'SIN BANCO') ASC
       `;
+
     try {
       const beneficios = await this.entityManager.query(beneficiosQuery, [periodoInicio, periodoFinalizacion]);
       const deduccionesInprema = await this.entityManager.query(deduccionesInpremaQuery, [periodoInicio, periodoFinalizacion]);
@@ -2829,6 +2834,7 @@ GROUP BY
         GROUP BY
             banco.codigo_ach, personaPorBanco.num_cuenta, persona.primer_apellido, persona.segundo_apellido, persona.primer_nombre, persona.segundo_nombre, persona.tercer_nombre, persona.n_identificacion, persona.ID_PERSONA
     `;
+
     const deduccionesInpremaQuery = `
         SELECT 
             dd."ID_PERSONA",
@@ -2839,15 +2845,19 @@ GROUP BY
             "NET_DETALLE_DEDUCCION" dd ON planilla."ID_PLANILLA" = dd."ID_PLANILLA"
         LEFT JOIN 
             "NET_DEDUCCION" ded ON dd."ID_DEDUCCION" = ded."ID_DEDUCCION"
+        LEFT JOIN  
+            "NET_CENTRO_TRABAJO" ct ON ct."ID_CENTRO_TRABAJO" = ded."ID_CENTRO_TRABAJO"
         WHERE 
             planilla."PERIODO_INICIO" >= :periodoInicio
             AND planilla."PERIODO_FINALIZACION" <= :periodoFinalizacion
             AND planilla."ID_TIPO_PLANILLA" IN (${idTiposPlanilla.join(', ')})
             AND dd."ESTADO_APLICACION" = 'COBRADA'
+            AND ct.NOMBRE_CENTRO_TRABAJO = 'INPREMA'
             AND ded."ID_CENTRO_TRABAJO" = 1
         GROUP BY 
             dd."ID_PERSONA"
     `;
+
     const deduccionesTercerosQuery = `
         SELECT 
             dd."ID_PERSONA",
@@ -2858,15 +2868,19 @@ GROUP BY
             "NET_DETALLE_DEDUCCION" dd ON planilla."ID_PLANILLA" = dd."ID_PLANILLA"
         LEFT JOIN 
             "NET_DEDUCCION" ded ON dd."ID_DEDUCCION" = ded."ID_DEDUCCION"
+        LEFT JOIN  
+            "NET_CENTRO_TRABAJO" ct ON ct."ID_CENTRO_TRABAJO" = ded."ID_CENTRO_TRABAJO"
         WHERE 
             planilla."PERIODO_INICIO" >= :periodoInicio
             AND planilla."PERIODO_FINALIZACION" <= :periodoFinalizacion
             AND planilla."ID_TIPO_PLANILLA" IN (${idTiposPlanilla.join(', ')})
             AND dd."ESTADO_APLICACION" = 'COBRADA'
             AND ded."ID_DEDUCCION" NOT IN (1, 2, 3, 44, 51)
+            AND ct.NOMBRE_CENTRO_TRABAJO != 'INPREMA'
         GROUP BY 
             dd."ID_PERSONA"
     `;
+
     try {
       const beneficios = await this.entityManager.query(beneficiosQuery, [periodoInicio, periodoFinalizacion]);
       const deduccionesInprema = await this.entityManager.query(deduccionesInpremaQuery, [periodoInicio, periodoFinalizacion]);
@@ -2881,12 +2895,12 @@ GROUP BY
           .reduce((acc, curr) => acc + curr.deducciones_terceros, 0);
         const totalDeducciones = totalDeduccionInprema + totalDeduccionTerceros;
         return {
-          codigo_banco: beneficio.codigo_banco,
-          numero_cuenta: beneficio.numero_cuenta,
+          codigo_banco: beneficio.codigo_banco.trim(),
+          numero_cuenta: beneficio.numero_cuenta.trim(),
           neto: parseFloat((beneficio.monto_a_pagar - totalDeducciones).toFixed(2)),
-          nombre_completo: beneficio.nombre_completo,
+          nombre_completo: beneficio.nombre_completo.trim(),
           id_tipo_planilla: 1,
-          n_identificacion: beneficio.n_identificacion,
+          n_identificacion: beneficio.n_identificacion.trim(),
         };
       });
       return result;

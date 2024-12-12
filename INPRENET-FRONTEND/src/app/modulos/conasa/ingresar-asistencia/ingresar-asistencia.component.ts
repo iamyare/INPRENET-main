@@ -80,8 +80,6 @@ export class IngresarAsistenciaComponent implements OnInit {
 
     if (idCategoria) {
       this.planesFiltrados = this.planes.filter(plan => plan.categoria?.id_categoria === +idCategoria);
-      console.log(this.planesFiltrados);
-      
       this.contratoData.get('plan')?.reset();
       this.montoCalculado = null;
     }

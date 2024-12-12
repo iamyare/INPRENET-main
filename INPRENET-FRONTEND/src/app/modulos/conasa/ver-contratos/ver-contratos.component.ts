@@ -29,8 +29,6 @@ export class VerContratosComponent {
     if (dni) {
       this.conasaService.obtenerContratoYBeneficiariosPorDNI(dni).subscribe({
         next: (data) => {
-          console.log(data);
-          
           this.contratos = data;
           console.log('Contratos y Beneficiarios:', data);
         },

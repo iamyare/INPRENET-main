@@ -725,7 +725,6 @@ export class AfiliacionService {
     return persona;
   }
   
-
   formatDateToYYYYMMDD(dateString: string): string {
     if (!dateString) return null;
     const date = new Date(dateString);

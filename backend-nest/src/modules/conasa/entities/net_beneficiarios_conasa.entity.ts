@@ -22,7 +22,7 @@ export class Net_Beneficiarios_Conasa {
   @Column({ name: 'SEGUNDO_NOMBRE', type: 'varchar2', length: 40, nullable: true })
   segundo_nombre: string;
 
-  @Column({ name: 'PRIMER_APELLIDO', type: 'varchar2', length: 40 })
+  @Column({ name: 'PRIMER_APELLIDO', type: 'varchar2', length: 40, nullable: true })
   primer_apellido: string;
 
   @Column({ name: 'SEGUNDO_APELLIDO', type: 'varchar2', length: 40, nullable: true })

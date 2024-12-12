@@ -31,5 +31,35 @@ export class ConasaService {
       })
     );
   }
+
+  manejarTransaccion(
+    contratoData: {
+      idPersona: number;
+      idPlan: number;
+      lugarCobro: string;
+      fechaInicioContrato: string;
+      fechaCancelacionContrato?: string;
+    },
+    beneficiariosData?: any[]
+  ): Observable<string> {
+    const url = `${this.baseUrl}/manejar-transaccion`;
+    const payload = { contratoData, beneficiariosData };
+    return this.http.post<string>(url, payload).pipe(
+      catchError((error) => {
+        console.error('Error al manejar la transacción', error);
+        return throwError(error);
+      })
+    );
+  }
+
+  obtenerContratoYBeneficiariosPorDNI(dni: string): Observable<any> {
+    const url = `${this.baseUrl}/titular/${dni}`;
+    return this.http.get<any>(url).pipe(
+      catchError((error) => {
+        console.error(`Error al obtener contrato y beneficiarios para el DNI: ${dni}`, error);
+        return throwError(error);
+      })
+    );
+  }
   
 }

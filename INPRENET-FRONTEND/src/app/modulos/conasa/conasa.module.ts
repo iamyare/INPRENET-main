@@ -11,6 +11,8 @@ import { ReporteAsistenciasComponent } from '../conasa/reporte-asistencias/repor
 import { AnularAsistenciasComponent } from '../conasa/anular-asistencias/anular-asistencias.component';
 import { ModificarAsistenciasComponent } from '../conasa/modificar-asistencias/modificar-asistencias.component';
 import { CancelarAsistenciasComponent } from '../conasa/cancelar-asistencias/cancelar-asistencias.component';
+import { AgregarBeneficiariosComponent } from '../conasa/agregar-beneficiarios/agregar-beneficiarios.component';
+import { VerContratosComponent } from '../conasa/ver-contratos/ver-contratos.component';
 
 
 @NgModule({
@@ -22,6 +24,8 @@ import { CancelarAsistenciasComponent } from '../conasa/cancelar-asistencias/can
     AnularAsistenciasComponent,
     ModificarAsistenciasComponent,
     CancelarAsistenciasComponent,
+    AgregarBeneficiariosComponent,
+    VerContratosComponent
   ],
   imports: [
     CommonModule,

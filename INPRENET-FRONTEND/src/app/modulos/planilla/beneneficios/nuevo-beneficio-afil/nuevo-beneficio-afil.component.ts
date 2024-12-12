@@ -30,6 +30,15 @@ export function montoTotalValidator(): ValidatorFn {
     return null;
   };
 }
+export function noDecimalValidator(): ValidatorFn {
+  return (control: AbstractControl): ValidationErrors | null => {
+    const value = control.value;
+    if (value && /\.\d+$/.test(value)) {
+      return { noDecimal: true };
+    }
+    return null;
+  };
+}
 
 
 function noFutureDateValidator(control: AbstractControl): ValidationErrors | null {
@@ -198,9 +207,9 @@ export class NuevoBeneficioAfilComponent implements OnInit {
         },
         {
           type: 'text', label: 'Número de expediente', name: 'n_expediente',
-          readOnly: true,
+          readOnly: false,
           value: "",
-          validations: [], display: true,
+          validations: [Validators.required,], display: true,
         },
         {
           type: 'dropdown', label: 'Tipo de beneficio', name: 'nombre_beneficio',
@@ -322,6 +331,20 @@ export class NuevoBeneficioAfilComponent implements OnInit {
         /* { type: 'text', label: 'DNI del beneficiario', name: 'dni', value: "", validations: [Validators.required, Validators.minLength(13), Validators.maxLength(14)], display: true, readOnly: true },
          */
         {
+          type: 'date',
+          label: 'Fecha de presentacion',
+          name: 'fecha_presentacion',
+          max: new Date().toISOString().split('T')[0],
+          validations: [Validators.required, noFutureDateValidator],
+          display: true
+        },
+        {
+          type: 'text', label: 'Número de expediente', name: 'n_expediente',
+          readOnly: false,
+          value: "",
+          validations: [Validators.required,], display: true,
+        },
+        {
           type: 'dropdown', label: 'Tipo persona', name: 'tipo_persona',
           options: [{ label: "DESIGNADO", value: "DESIGNADO" }],
           validations: [Validators.required], display: true
@@ -344,7 +367,7 @@ export class NuevoBeneficioAfilComponent implements OnInit {
           type: 'dropdown', label: 'Estado Solicitud', name: 'estado_solicitud',
           options: [{ label: 'APROBADO', value: 'APROBADO' }, { label: 'RECHAZADO', value: 'RECHAZADO' }], validations: [Validators.required], display: true
         },
-        { type: 'number', label: 'Número de rentas aprobadas', name: 'num_rentas_aplicadas', validations: [Validators.min(1)], display: false },
+        { type: 'number', label: 'Número de rentas aprobadas', name: 'num_rentas_aplicadas', validations: [Validators.min(1), noDecimalValidator()], display: false },
         {
           type: 'number', label: 'Dias de la última renta', name: 'ultimo_dia_ultima_renta', validations: [
             Validators.min(0),
@@ -521,6 +544,8 @@ export class NuevoBeneficioAfilComponent implements OnInit {
   }
 
   async prueba(event: any): Promise<any> {
+
+
     if (event.fieldName == "tipo_persona") {
       this.tipoPersonaSelected = event.value;
       //this.tiposPersona = event.value;
@@ -545,7 +570,9 @@ export class NuevoBeneficioAfilComponent implements OnInit {
 
         this.beneficios = temp
       } else if (this.Afiliado.tipo_persona == "AFILIADO") {
-        let ben = await this.svcBeneficioServ.obtenerTipoBeneficioByTipoPersona(event.value).toPromise();
+        let ben = await this.svcBeneficioServ.
+
+          obtenerTipoBeneficioByTipoPersona(event.value).toPromise();
         this.beneficios = ben
           .filter((item: any) => item.beneficio.nombre_beneficio !== "COSTO DE VIDA")
           .map((item: any) => {
@@ -558,9 +585,11 @@ export class NuevoBeneficioAfilComponent implements OnInit {
             };
           });
 
+        console.log(this.beneficios);
+
       }
 
-      this.myFormFields1[1].options = this.beneficios;
+      this.myFormFields1[3].options = this.beneficios;
       this.form1.get("nombre_beneficio")?.setValue(null)
       this.form1.get("num_rentas_pagar_primer_pago")?.setValue(null)
       this.form1.get("periodicidad_beneficio")?.setValue(null)
@@ -903,18 +932,20 @@ export class NuevoBeneficioAfilComponent implements OnInit {
           }
         })
     } else {
+      // PARA LOS DESIGNADOS BENEFICIARIOS
       this.datosFormateados["dni"] = this.FormBen.value.dni;
       this.datosFormateados["periodo_finalizacion"] = this.FormBen.value.periodo_finalizacion;
+      console.log(this.datosFormateados);
 
       this.svcBeneficioServ.asigBeneficioAfil(this.datosFormateados, this.desOBenSeleccionado, this.Afiliado.id_persona).subscribe(
         {
           next: (response) => {
             this.toastr.success("se asignó correctamente el beneficio");
             this.getFilas().then(() => this.cargar());
-            this.limpiarFormulario();
+            //this.limpiarFormulario();
           },
           error: (error) => {
-            this.limpiarFormulario();
+            //this.limpiarFormulario();
             let mensajeError = '';
             // Verifica si el error tiene una estructura específica
             if (error.error.message) {

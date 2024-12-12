@@ -113,6 +113,8 @@ export class VerplanprelcompComponent implements OnInit, OnChanges {
           id_afiliado: item.ID_PERSONA,
           dni: item.DNI,
           NOMBRE_COMPLETO: item.NOMBRE_COMPLETO,
+          COD_BANCO: item.COD_BANCO,
+          //ID_BANCO: item.ID_BANCO,
           TOTAL_BENEFICIOS: item.TOTAL_BENEFICIOS,
           TOTAL_DEDUCCIONES_INPREMA: item.TOTAL_DEDUCCIONES_INPREMA || 0,
           TOTAL_DEDUCCIONES_TERCEROS: item.TOTAL_DEDUCCIONES_TERCEROS || 0,
@@ -154,6 +156,8 @@ export class VerplanprelcompComponent implements OnInit, OnChanges {
           total: item.TOTAL_NETO,
           correo_1: item.correo_1,
           fecha_cierre: item.fecha_cierre,
+          COD_BANCO: item.COD_BANCO,
+          //ID_BANCO: item.ID_BANCO,
           num_cuenta: item.NUM_CUENTA,
           nombre_banco: item.NOMBRE_BANCO,
         }));
@@ -261,6 +265,8 @@ export class VerplanprelcompComponent implements OnInit, OnChanges {
 
   getElemSeleccionados(event: any) {
     this.codigoPlanilla = event.codigo_planilla;
+
+
     if (this.codigoPlanilla) {
       this.getPlanilla();
     } else {
@@ -270,122 +276,108 @@ export class VerplanprelcompComponent implements OnInit, OnChanges {
 
   async descargarExcelCompleto(): Promise<void> {
     if (!this.datosTabl || this.datosTabl.length === 0) {
-        this.toastr.warning('No hay datos disponibles para exportar');
-        return;
+      this.toastr.warning('No hay datos disponibles para exportar');
+      return;
     }
 
     try {
-        const beneficios = [];
-        const deduccionesTerceros: any = [];
-        const deduccionesInprema: any = [];
+      // Transformar datos para cada hoja
+      const beneficios = this.datosTabl.map((dato) => ({
+        ID_Afiliado: dato.id_afiliado,
+        Identificación: dato.n_identificacion,
+        Nombre: dato.nombre_completo,
+        Monto_Beneficios: dato.total_beneficios,
+        num_cuenta: dato.num_cuenta,
+        //ID_BANCO: dato.ID_BANCO,
+        COD_BANCO: dato.COD_BANCO,
+        nombre_banco: dato.nombre_banco,
+      }));
 
-        // Iterar sobre cada afiliado y obtener los datos
-        for (const row of this.datosTabl) {
-            // Obtener beneficios
-            const responseBeneficios = await this.planillaService.getDesglosePorPersonaPlanilla(row.id_afiliado, this.codigoPlanilla).toPromise();
-            if (responseBeneficios && responseBeneficios.beneficios && responseBeneficios.beneficios.length > 0) {
-                beneficios.push(
-                    ...responseBeneficios.beneficios.map((beneficio: any) => ({
-                        n_identificacion: row.n_identificacion, // Identificación de la persona
-                        CODIGO_BENEFICIO: beneficio.ID_BENEFICIO, // Renombrar ID_BENEFICIO
-                        MontoAPagar: beneficio.MontoAPagar ? parseFloat(beneficio.MontoAPagar) : 0,
-                        NOMBRE_BENEFICIO: beneficio.NOMBRE_BENEFICIO,
-                        NOMBRE_BANCO: row.nombre_banco, // Banco de la persona
-                        NUM_CUENTA: row.num_cuenta, // Número de cuenta de la persona
-                    }))
-                );
+
+      const deduccionesInprema = this.datosTabl.map((dato) => ({
+        ID_Afiliado: dato.id_afiliado,
+        Identificación: dato.n_identificacion,
+        Nombre: dato.nombre_completo,
+        Monto_Deducciones_INPREMA: dato.total_deducciones_inprema,
+        num_cuenta: dato.num_cuenta,
+        nombre_banco: dato.nombre_banco,
+      }));
+
+      const deduccionesTerceros = this.datosTabl.map((dato) => ({
+        ID_Afiliado: dato.id_afiliado,
+        Identificación: dato.n_identificacion,
+        Nombre: dato.nombre_completo,
+        Monto_Deducciones_Terceros: dato.total_deducciones_terceros,
+        num_cuenta: dato.num_cuenta,
+        nombre_banco: dato.nombre_banco,
+      }));
+
+      // Crear las hojas del Excel
+      const beneficiosSheet = XLSX.utils.json_to_sheet(beneficios);
+      const deduccionesInpremaSheet = XLSX.utils.json_to_sheet(deduccionesInprema);
+      const deduccionesTercerosSheet = XLSX.utils.json_to_sheet(deduccionesTerceros);
+
+      // Aplica formato numérico a las columnas de montos
+      const applyNumberFormat = (sheet: XLSX.WorkSheet, columns: string[]) => {
+        const range = XLSX.utils.decode_range(sheet['!ref'] || '');
+        columns.forEach((column) => {
+          for (let row = range.s.r + 1; row <= range.e.r; row++) {
+            const cellAddress = XLSX.utils.encode_cell({ r: row, c: XLSX.utils.decode_col(column) });
+            const cell = sheet[cellAddress];
+            if (cell && typeof cell.v === 'number') {
+              cell.t = 'n'; // Tipo numérico
+              cell.z = '#,##0.00'; // Formato numérico
             }
-
-            // Obtener deducciones
-            const responseDeducciones = await this.deduccionSVC.getDeduccionesByPersonaAndBenef(row.id_afiliado, row.ID_BENEFICIO, this.idPlanilla).toPromise();
-            if (responseDeducciones && responseDeducciones.length > 0) {
-                responseDeducciones.forEach((deduccion: any) => {
-                    const deduccionData = {
-                        n_identificacion: row.n_identificacion, // Identificación de la persona
-                        MontoAplicado: deduccion.MontoAplicado ? parseFloat(deduccion.MontoAplicado) : 0,
-                        NOMBRE_DEDUCCION: deduccion.NOMBRE_DEDUCCION,
-                        NOMBRE_INSTITUCION: deduccion.NOMBRE_INSTITUCION,
-                    };
-
-                    if (deduccion.NOMBRE_INSTITUCION === 'INPREMA') {
-                        deduccionesInprema.push(deduccionData);
-                    } else {
-                        deduccionesTerceros.push(deduccionData);
-                    }
-                });
-            }
-        }
-
-        // Verificar si hay datos para exportar
-        if (beneficios.length === 0 && deduccionesTerceros.length === 0 && deduccionesInprema.length === 0) {
-            this.toastr.warning('No se encontraron datos para exportar');
-            return;
-        }
-
-        // Crear las hojas del Excel
-        const beneficiosSheet = XLSX.utils.json_to_sheet(beneficios);
-        const deduccionesTercerosSheet = XLSX.utils.json_to_sheet(deduccionesTerceros);
-        const deduccionesInpremaSheet = XLSX.utils.json_to_sheet(deduccionesInprema);
-
-        // Aplica formato numérico a las columnas de montos
-        const applyNumberFormat = (sheet: XLSX.WorkSheet, columns: string[]) => {
-            const range = XLSX.utils.decode_range(sheet['!ref'] || '');
-            columns.forEach((column) => {
-                for (let row = range.s.r + 1; row <= range.e.r; row++) {
-                    const cellAddress = XLSX.utils.encode_cell({ r: row, c: XLSX.utils.decode_col(column) });
-                    const cell = sheet[cellAddress];
-                    if (cell && typeof cell.v === 'number') {
-                        cell.t = 'n'; // Tipo numérico
-                        cell.z = '#,##0.00'; // Formato numérico
-                    }
-                }
-            });
-        };
-
-        applyNumberFormat(beneficiosSheet, ['C']); // Columna C es "MontoAPagar" en beneficios
-        applyNumberFormat(deduccionesTercerosSheet, ['B']); // Columna B es "MontoAplicado" en deducciones terceros
-        applyNumberFormat(deduccionesInpremaSheet, ['B']); // Columna B es "MontoAplicado" en deducciones INPREMA
-
-        const workbook: XLSX.WorkBook = {
-            Sheets: {
-                'Beneficios': beneficiosSheet,
-                'Deducciones Terceros': deduccionesTercerosSheet,
-                'Deducciones INPREMA': deduccionesInpremaSheet,
-            },
-            SheetNames: ['Beneficios', 'Deducciones Terceros', 'Deducciones INPREMA'],
-        };
-
-        // Generar el archivo Excel
-        const excelBuffer: any = XLSX.write(workbook, {
-            bookType: 'xlsx',
-            type: 'array',
+          }
         });
+      };
 
-        const data: Blob = new Blob([excelBuffer], { type: 'application/octet-stream' });
-        saveAs(data, `PlanillaCompleta_${this.codigoPlanilla}.xlsx`);
-        this.toastr.success('Archivo Excel completo generado con éxito');
+      applyNumberFormat(beneficiosSheet, ['E']); // Columna E: Monto_Beneficios
+      applyNumberFormat(deduccionesInpremaSheet, ['E']); // Columna E: Monto_Deducciones_INPREMA
+      applyNumberFormat(deduccionesTercerosSheet, ['E']); // Columna E: Monto_Deducciones_Terceros
+
+      // Crear el libro de trabajo
+      const workbook: XLSX.WorkBook = {
+        Sheets: {
+          Beneficios: beneficiosSheet,
+          'Deducciones INPREMA': deduccionesInpremaSheet,
+          'Deducciones Terceros': deduccionesTercerosSheet,
+        },
+        SheetNames: ['Beneficios', 'Deducciones INPREMA', 'Deducciones Terceros'],
+      };
+
+      // Generar el archivo Excel
+      const excelBuffer: any = XLSX.write(workbook, {
+        bookType: 'xlsx',
+        type: 'array',
+      });
+
+      const data: Blob = new Blob([excelBuffer], { type: 'application/octet-stream' });
+      saveAs(data, `PlanillaCompleta_${this.codigoPlanilla}.xlsx`);
+      this.toastr.success('Archivo Excel completo generado con éxito');
     } catch (error) {
-        console.error('Error al generar el archivo Excel completo:', error);
-        this.toastr.error('Ocurrió un error al generar el archivo Excel');
+      console.error('Error al generar el archivo Excel completo:', error);
+      this.toastr.error('Ocurrió un error al generar el archivo Excel');
     }
-}
-
-async descargarExcelPorPlanilla() {
-  if (!this.idPlanilla) {
-      this.toastr.warning('Debe seleccionar una planilla válida antes de descargar el reporte.');
-      return;
   }
 
-  try {
-      const response:any = await this.planillaService.descargarReporteDetallePagoPreliminar(this.idPlanilla).toPromise();
+
+  async descargarExcelPorPlanilla() {
+    if (!this.idPlanilla) {
+      this.toastr.warning('Debe seleccionar una planilla válida antes de descargar el reporte.');
+      return;
+    }
+
+    try {
+      const response: any = await this.planillaService.descargarReporteDetallePagoPreliminar(this.idPlanilla).toPromise();
       const blob = new Blob([response], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
       saveAs(blob, `Detalle_Pago_Planilla_${this.idPlanilla}.xlsx`);
       this.toastr.success('Archivo Excel descargado con éxito');
-  } catch (error) {
+    } catch (error) {
       console.error('Error al descargar el Excel:', error);
       this.toastr.error('Error al descargar el archivo Excel');
+    }
   }
-}
 
 
 }

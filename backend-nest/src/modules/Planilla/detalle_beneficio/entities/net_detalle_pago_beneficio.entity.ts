@@ -5,7 +5,7 @@ import { Net_Persona_Por_Banco } from "src/modules/banco/entities/net_persona-ba
 import { Net_Usuario_Empresa } from "src/modules/usuario/entities/net_usuario_empresa.entity";
 
 @Entity({ name: 'NET_DETALLE_PAGO_BENEFICIO' })
-@Check("CK_ESTADO_DETBEN", `ESTADO IN ('PAGADA', 'NO PAGADA', 'EN PRELIMINAR', 'EN PLANILLA', 'RECHAZADO')`)
+@Check("CK_ESTADO_DETBEN", `ESTADO IN ('PAGADA', 'NO PAGADA', 'EN PRELIMINAR', 'RECHAZADO')`)
 export class Net_Detalle_Pago_Beneficio {
     @PrimaryGeneratedColumn({ type: 'int', name: 'ID_BENEFICIO_PLANILLA', primaryKeyConstraintName: 'PK_BENPLAN_DETPLANB' })
     id_beneficio_planilla: number;
@@ -40,7 +40,7 @@ export class Net_Detalle_Pago_Beneficio {
     @ManyToOne(() => Net_Usuario_Empresa, { nullable: true })
     @JoinColumn({ name: 'ID_USUARIO_EMPRESA', referencedColumnName: 'id_usuario_empresa', foreignKeyConstraintName: 'FK_ID_USUARIO_EMPRESA_DET_PAG_BENEFICIO' })
     usuarioEmpresa: Net_Usuario_Empresa;
-    
+
     @Column({ type: 'int', nullable: true, name: 'ID_USUARIO_EMPRESA' })
     ID_USUARIO_EMPRESA: number;
 }

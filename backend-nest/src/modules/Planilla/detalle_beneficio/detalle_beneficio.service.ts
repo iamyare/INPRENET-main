@@ -59,45 +59,45 @@ export class DetalleBeneficioService {
 
   async verificarSiEsAfiliado(n_identificacion: string): Promise<any> {
     const persona = await this.personaRepository
-        .createQueryBuilder('persona')
-        .leftJoinAndSelect('persona.detallePersona', 'detallePersona')
-        .leftJoinAndSelect('detallePersona.tipoPersona', 'tipoPersona')
-        .leftJoinAndSelect('persona.familiares', 'familiares')
-        .leftJoinAndSelect('persona.municipio', 'municipio')
-        .leftJoinAndSelect('persona.municipio_nacimiento', 'municipioNacimiento')
-        .where('persona.n_identificacion = :n_identificacion', { n_identificacion })
-        .getOne();
+      .createQueryBuilder('persona')
+      .leftJoinAndSelect('persona.detallePersona', 'detallePersona')
+      .leftJoinAndSelect('detallePersona.tipoPersona', 'tipoPersona')
+      .leftJoinAndSelect('persona.familiares', 'familiares')
+      .leftJoinAndSelect('persona.municipio', 'municipio')
+      .leftJoinAndSelect('persona.municipio_nacimiento', 'municipioNacimiento')
+      .where('persona.n_identificacion = :n_identificacion', { n_identificacion })
+      .getOne();
 
     if (!persona) {
-        return { esAfiliado: false, datosPersona: null };
+      return { esAfiliado: false, datosPersona: null };
     }
 
     const tiposPermitidos = ['AFILIADO', 'JUBILADO', 'PENSIONADO'];
     const esAfiliado = persona.detallePersona?.some(detalle =>
-        tiposPermitidos.includes(detalle.tipoPersona?.tipo_persona || '')
+      tiposPermitidos.includes(detalle.tipoPersona?.tipo_persona || '')
     );
 
     const trabaja = persona.familiares?.some(familia => familia.trabaja === 'SÍ') ? 'SÍ' : 'NO';
 
     return {
-        esAfiliado: !!esAfiliado,
-        datosPersona: {
-            primer_nombre: persona.primer_nombre || null,
-            segundo_nombre: persona.segundo_nombre || null,
-            tercer_nombre: persona.tercer_nombre || null,
-            primer_apellido: persona.primer_apellido || null,
-            segundo_apellido: persona.segundo_apellido || null,
-            n_identificacion: persona.n_identificacion || null,
-            fecha_nacimiento: persona.fecha_nacimiento || null,
-            telefono_domicilio: persona.telefono_1 || null,
-            telefono_celular: persona.telefono_2 || null,
-            telefono_trabajo: persona.telefono_3 || null,
-            trabaja: trabaja,
-            id_municipio_residencia: persona.municipio?.id_municipio || null,
-            id_municipio_nacimiento: persona.municipio_nacimiento?.id_municipio || null
-        }
+      esAfiliado: !!esAfiliado,
+      datosPersona: {
+        primer_nombre: persona.primer_nombre || null,
+        segundo_nombre: persona.segundo_nombre || null,
+        tercer_nombre: persona.tercer_nombre || null,
+        primer_apellido: persona.primer_apellido || null,
+        segundo_apellido: persona.segundo_apellido || null,
+        n_identificacion: persona.n_identificacion || null,
+        fecha_nacimiento: persona.fecha_nacimiento || null,
+        telefono_domicilio: persona.telefono_1 || null,
+        telefono_celular: persona.telefono_2 || null,
+        telefono_trabajo: persona.telefono_3 || null,
+        trabaja: trabaja,
+        id_municipio_residencia: persona.municipio?.id_municipio || null,
+        id_municipio_nacimiento: persona.municipio_nacimiento?.id_municipio || null
+      }
     };
-}
+  }
 
   async insertarDetallePagoBeneficio(
     id_persona: number,
@@ -343,6 +343,7 @@ export class DetalleBeneficioService {
 
   async createDetalleBeneficioAfiliado(token: string, data: any, idPersonaPadre?: number): Promise<any> {
     const { datos, itemSeleccionado } = data
+    console.log(data);
 
     //CALCULO DE MONTO_TOTAL
     if (!datos.monto_por_periodo && !datos.monto_primera_cuota && !datos.monto_ultima_cuota) {
@@ -382,6 +383,7 @@ export class DetalleBeneficioService {
               relations: ['persona', 'persona.persona', 'beneficio']
             }
           );
+
           if (!detben) {
             const detPer = await manager.findOne(
               net_detalle_persona,
@@ -416,7 +418,9 @@ export class DetalleBeneficioService {
                        OBSERVACIONES,
                        ULTIMO_DIA_ULTIMA_RENTA,
                        ID_USUARIO_EMPRESA,
-                       NUM_RENTAS_PAGAR_PRIMER_PAGO
+                       NUM_RENTAS_PAGAR_PRIMER_PAGO,
+                       FECHA_PRESENTACION,
+                       N_EXPEDIENTE
                      ) VALUES (
                        ${detPer.ID_DETALLE_PERSONA},
                        ${detPer.ID_CAUSANTE},
@@ -435,9 +439,11 @@ export class DetalleBeneficioService {
                        '${datos.observacion}',
                         ${datos.ultimo_dia_ultima_renta ? parseFloat(datos.ultimo_dia_ultima_renta) : null},
                         ${estadoPP.id_usuario_empresa},
-                        ${datos.num_rentas_pagar_primer_pago ? parseInt(datos.num_rentas_pagar_primer_pago) : null}
-  
+                        ${datos.num_rentas_pagar_primer_pago ? parseInt(datos.num_rentas_pagar_primer_pago) : null},
+                         ${datos.fecha_presentacion ? `'${this.convertirCadenaAFecha(datos.fecha_presentacion)}'` : null},
+                         ${datos.n_expediente ? datos.n_expediente : null}
                  )`;
+
 
               const detBeneBeneficia = await this.entityManager.query(queryInsDeBBenf);
 
@@ -533,7 +539,9 @@ export class DetalleBeneficioService {
                          OBSERVACIONES,
                          ID_USUARIO_EMPRESA,
                          ULTIMO_DIA_ULTIMA_RENTA,
-                         NUM_RENTAS_PAGAR_PRIMER_PAGO
+                         NUM_RENTAS_PAGAR_PRIMER_PAGO,
+                         FECHA_PRESENTACION,
+                         N_EXPEDIENTE
                        ) VALUES (
                          ${detPer.ID_DETALLE_PERSONA},
                          ${detPer.ID_CAUSANTE},
@@ -552,7 +560,9 @@ export class DetalleBeneficioService {
                          '${datos.observacion}',
                          ${estadoPP.id_usuario_empresa},
                          ${datos.ultimo_dia_ultima_renta ? parseFloat(datos.ultimo_dia_ultima_renta) : null},
-                         ${datos.num_rentas_pagar_primer_pago ? parseInt(datos.num_rentas_pagar_primer_pago) : null}
+                         ${datos.num_rentas_pagar_primer_pago ? parseInt(datos.num_rentas_pagar_primer_pago) : null},
+                         ${datos.fecha_presentacion ? `'${this.convertirCadenaAFecha(datos.fecha_presentacion)}'` : null},
+                         ${datos.n_expediente ? datos.n_expediente : null}
               )`;
 
               const detBeneBeneficia = await this.entityManager.query(queryInsDeBBenf);

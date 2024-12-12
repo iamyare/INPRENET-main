@@ -8,7 +8,7 @@ import { Net_Persona_Por_Banco } from 'src/modules/banco/entities/net_persona-ba
 import { Net_Usuario_Empresa } from 'src/modules/usuario/entities/net_usuario_empresa.entity';
 
 @Entity({ name: 'NET_DETALLE_DEDUCCION' })
-@Check("CK_ESTADO_DED", `estado_aplicacion IN ('COBRADA', 'NO COBRADA', 'EN PRELIMINAR', 'EN PLANILLA', 'RECHAZADO')`)
+@Check("CK_ESTADO_DED", `estado_aplicacion IN ('COBRADA', 'NO COBRADA', 'EN PRELIMINAR', 'RECHAZADO')`)
 export class Net_Detalle_Deduccion {
     @PrimaryGeneratedColumn({ type: 'int', name: 'ID_DED_DEDUCCION', primaryKeyConstraintName: 'PK_id_detD' })
     id_ded_deduccion: number;
@@ -55,7 +55,7 @@ export class Net_Detalle_Deduccion {
     @ManyToOne(() => Net_Usuario_Empresa, { nullable: true })
     @JoinColumn({ name: 'ID_USUARIO_EMPRESA', referencedColumnName: 'id_usuario_empresa', foreignKeyConstraintName: 'FK_ID_USUARIO_EMPRESA_DET_DEDUCCION' })
     usuarioEmpresa: Net_Usuario_Empresa;
-    
+
     @Column({ type: 'int', nullable: true, name: 'ID_USUARIO_EMPRESA' })
     ID_USUARIO_EMPRESA: number;
 }

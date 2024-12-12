@@ -697,6 +697,7 @@ FROM
           NET_PERSONA_POR_BANCO ppb 
           ON PB.ID_AF_BANCO = ppb.ID_AF_BANCO
         WHERE
+            PB.ESTADO = 'PAGADA' AND
             PER.PERIODO_INICIO >= TO_DATE(:periodoInicio, 'DD/MM/YYYY')
             AND PER.PERIODO_FINALIZACION <= TO_DATE(:periodoFinalizacion, 'DD/MM/YYYY')
             AND PER.ID_TIPO_PLANILLA = 1
@@ -763,6 +764,7 @@ FROM
           NET_PERSONA_POR_BANCO ppb 
           ON PB.ID_AF_BANCO = ppb.ID_AF_BANCO
         WHERE
+            PB.ESTADO != 'NO PAGADA' AND PB.ESTADO != 'RECHAZADO' 
             PER.PERIODO_INICIO >= TO_DATE(:periodoInicio, 'DD/MM/YYYY')
             AND PER.PERIODO_FINALIZACION <= TO_DATE(:periodoFinalizacion, 'DD/MM/YYYY')
             AND PER.ID_TIPO_PLANILLA = 2
@@ -853,7 +855,7 @@ GROUP BY
         plan."ID_TIPO_PLANILLA" IN (${idTiposPlanilla.join(', ')})
         AND ded."ID_CENTRO_TRABAJO" = 1
         AND dedd."ID_AF_BANCO" IS NOT NULL
-        AND dedd."ESTADO_APLICACION" != 'RECHAZADO'
+        AND dedd."ESTADO_APLICACION" = 'COBRADA'
       GROUP BY 
         ded."ID_DEDUCCION", 
         ded."NOMBRE_DEDUCCION", 
@@ -895,7 +897,7 @@ GROUP BY
         plan."ID_TIPO_PLANILLA" IN (${idTiposPlanilla.join(', ')})
         AND ded."ID_CENTRO_TRABAJO" != 1
         AND dedd."ID_AF_BANCO" IS NOT NULL
-        AND dedd."ESTADO_APLICACION" != 'RECHAZADO'
+        AND dedd."ESTADO_APLICACION" = 'COBRADA'
       GROUP BY 
         ded."ID_DEDUCCION", 
         ded."NOMBRE_DEDUCCION", 
@@ -1060,7 +1062,7 @@ GROUP BY
             plan."PERIODO_FINALIZACION" <= :periodoFinalizacion AND
             plan."ID_TIPO_PLANILLA" IN (${idTiposPlanilla.join(', ')})
             AND detBs."ID_AF_BANCO" IS NULL
-            AND detBs."ESTADO" != 'RECHAZADO'
+            AND detBs."ESTADO" = 'PAGADA'
           GROUP BY 
             ben."ID_BENEFICIO", 
             ben."NOMBRE_BENEFICIO", 
@@ -1105,6 +1107,7 @@ GROUP BY
         plan."ID_TIPO_PLANILLA" IN (${idTiposPlanilla.join(', ')})
         AND ded."ID_CENTRO_TRABAJO" = 1
         AND dedd."ID_AF_BANCO" IS NULL
+        AND dedd."ESTADO_APLICACION" = 'COBRADA'
       GROUP BY 
         ded."ID_DEDUCCION", 
         ded."NOMBRE_DEDUCCION",
@@ -1145,6 +1148,7 @@ GROUP BY
         plan."ID_TIPO_PLANILLA" IN (${idTiposPlanilla.join(', ')})
         AND dedd."ID_AF_BANCO" IS NULL
         AND ded."ID_DEDUCCION" NOT IN (1, 2, 3, 44, 51)
+        AND dedd."ESTADO_APLICACION" = 'COBRADA'
       GROUP BY 
         ded."ID_DEDUCCION",
         ded."NOMBRE_DEDUCCION",
@@ -1234,7 +1238,7 @@ GROUP BY
         plan."PERIODO_INICIO" >= TO_DATE(:periodoInicio, 'DD/MM/YYYY') AND
         plan."PERIODO_FINALIZACION" <= TO_DATE(:periodoFinalizacion, 'DD/MM/YYYY') AND
         plan."ID_TIPO_PLANILLA" IN (${idTiposPlanillaStr})
-        AND detBs."ESTADO" != 'RECHAZADO'
+        AND detBs."ESTADO" = 'PAGADA'
       ORDER BY 
         per."PRIMER_NOMBRE" || ' ' || per."SEGUNDO_NOMBRE" || ' ' || per."PRIMER_APELLIDO" || ' ' || per."SEGUNDO_APELLIDO" ASC, 
         ben."NOMBRE_BENEFICIO" ASC
@@ -1273,6 +1277,7 @@ GROUP BY
         "NET_PERSONA" per 
         ON dedd."ID_PERSONA" = per."ID_PERSONA"
       WHERE 
+        dedd.ESTADO_APLICACION = 'COBRADA' AND
         plan."PERIODO_INICIO" >= TO_DATE(:periodoInicio, 'DD/MM/YYYY') AND
         plan."PERIODO_FINALIZACION" <= TO_DATE(:periodoFinalizacion, 'DD/MM/YYYY') AND
         plan."ID_TIPO_PLANILLA" IN (${idTiposPlanillaStr})
@@ -1317,6 +1322,7 @@ GROUP BY
         "NET_PERSONA" per 
         ON dedd."ID_PERSONA" = per."ID_PERSONA"
       WHERE 
+        dedd.ESTADO_APLICACION = 'COBRADA' AND
         plan."PERIODO_INICIO" >= TO_DATE(:periodoInicio, 'DD/MM/YYYY') AND
         plan."PERIODO_FINALIZACION" <= TO_DATE(:periodoFinalizacion, 'DD/MM/YYYY') AND
         plan."ID_TIPO_PLANILLA" IN (${idTiposPlanillaList})
@@ -2492,6 +2498,8 @@ GROUP BY
         tipoP."TIPO_PERSONA" AS "TIPO_PERSONA",
         per."ID_PERSONA",
         perPorBan."NUM_CUENTA",
+        banco."ID_BANCO",
+        banco."COD_BANCO",
         banco."NOMBRE_BANCO",
         SUM(detBs."MONTO_A_PAGAR") AS "TOTAL_BENEFICIOS",
         TRIM(
@@ -2533,6 +2541,8 @@ GROUP BY
         tipoP."TIPO_PERSONA",
         perPorBan."NUM_CUENTA",
         banco."NOMBRE_BANCO",
+        banco."ID_BANCO",
+        banco."COD_BANCO",
         TRIM(
           per."PRIMER_NOMBRE" || ' ' ||
           COALESCE(per."SEGUNDO_NOMBRE", '') || ' ' ||
@@ -2746,7 +2756,7 @@ GROUP BY
       SELECT pl.ID_PLANILLA
       FROM NET_PLANILLA pl
       WHERE pl.CODIGO_PLANILLA = :codigo_planilla AND
-      dpb.ESTADO != 'NO PAGADA'
+      dpb.ESTADO = 'EN PRELIMINAR'
     )
   `;
 
@@ -2757,7 +2767,7 @@ GROUP BY
       SELECT pl.ID_PLANILLA
       FROM NET_PLANILLA pl
       WHERE pl.CODIGO_PLANILLA = :codigo_planilla AND
-      dd.ESTADO_APLICACION != 'NO COBRADA'
+      dd.ESTADO_APLICACION = 'EN PRELIMINAR'
     )
   `;
 
@@ -2890,7 +2900,7 @@ GROUP BY
       throw new InternalServerErrorException('Error al obtener los detalles preliminares de pago por planilla.');
     }
   }
-  
+
   async obtenerDetallePagoBeneficioPorPlanillaPrueba(
     periodoInicio: string,
     periodoFinalizacion: string,

@@ -113,10 +113,10 @@ export class net_persona {
     @Column('varchar2', { length: 12, nullable: true, name: 'TELEFONO_3' })
     telefono_3: string;
 
-    @Column('varchar2', { length: 40, nullable: true, name: 'CORREO_1' })
+    @Column('varchar2', { length: 60, nullable: true, name: 'CORREO_1' })
     correo_1: string;
 
-    @Column('varchar2', { length: 40, nullable: true, name: 'CORREO_2' })
+    @Column('varchar2', { length: 60, nullable: true, name: 'CORREO_2' })
     correo_2: string;
 
     @Column('date', { nullable: true, name: 'FECHA_NACIMIENTO' })

@@ -18,6 +18,14 @@ import * as fs from 'fs';
 export class PlanillaController {
   constructor(private readonly planillaService: PlanillaService, @InjectEntityManager() private readonly entityManager: EntityManager) { }
 
+  @Get('exportar-detalles-completos-excel/:idPlanilla')
+  async exportarExcelDetalles(
+    @Param('idPlanilla') idPlanilla: number,
+    @Res() res,
+  ): Promise<void> {
+    await this.planillaService.generarExcelDetallesCompletos(idPlanilla, res);
+  }
+
   @Post('pago-beneficio')
   @HttpCode(HttpStatus.OK)
   async realizarPagoBeneficio(): Promise<void> {

@@ -510,8 +510,6 @@ export class AfiliacionService {
     personasCreadasMap?: Map<string, net_persona>
   ): Promise<void> {
     const personasMap = personasCreadasMap || new Map<string, net_persona>();
-  
-    // Filtrar duplicados de parentesco 'CÓNYUGE'
     const familiaSinDuplicados = familiaresDto.filter((familia, index, self) => {
       return (
         familia.parentesco !== 'CÓNYUGE' ||
@@ -520,15 +518,13 @@ export class AfiliacionService {
     });
   
     for (const familiaDto of familiaSinDuplicados) {
-      // Crear o actualizar persona referenciada
       const personaReferencia = await this.crearOActualizarPersona(
         familiaDto.persona_referencia,
-        null, // No se utiliza archivo en este caso
+        null,
         entityManager,
         personasMap
       );
   
-      // Verificar si ya existe la relación familiar
       const relacionExistente = await this.familiaRepository.findOne({
         where: {
           persona: { id_persona: idPersona },
@@ -538,7 +534,6 @@ export class AfiliacionService {
       });
   
       if (!relacionExistente) {
-        // Crear la relación familiar si no existe
         const familia = entityManager.create(Net_Familia, {
           parentesco: familiaDto.parentesco,
           persona: { id_persona: idPersona },
@@ -547,12 +542,11 @@ export class AfiliacionService {
   
         await entityManager.save(Net_Familia, familia);
       } else {
-        // Actualizar la relación familiar si se requiere
         await entityManager.update(
           Net_Familia,
           { id_familia: relacionExistente.id_familia },
           {
-            parentesco: familiaDto.parentesco, // Actualiza campos relevantes
+            parentesco: familiaDto.parentesco,
           }
         );
       }
@@ -698,21 +692,15 @@ export class AfiliacionService {
     entityManager: EntityManager,
     personasCreadasMap: Map<string, net_persona>
   ): Promise<net_persona> {
-    // Verificar si la persona ya fue procesada en esta transacción
     if (personasCreadasMap.has(crearPersonaDto.n_identificacion)) {
       return personasCreadasMap.get(crearPersonaDto.n_identificacion);
     }
-  
-    // Buscar si la persona ya existe en la base de datos
     let persona = await this.personaRepository.findOne({
       where: { n_identificacion: crearPersonaDto.n_identificacion }
     });
-  
     if (!persona) {
-      // Crear la persona si no existe
       persona = await this.crearPersona(crearPersonaDto, null, fileIdent, entityManager);
     } else {
-      // Actualizar los datos de la persona si ya existe
       const camposActualizables = {
         primer_nombre: crearPersonaDto.primer_nombre,
         segundo_nombre: crearPersonaDto.segundo_nombre,
@@ -729,12 +717,11 @@ export class AfiliacionService {
         correo_1: crearPersonaDto.correo_1,
         correo_2: crearPersonaDto.correo_2,
       };
-  
       await entityManager.update(net_persona, { id_persona: persona.id_persona }, camposActualizables);
       persona = { ...persona, ...camposActualizables };
     }
     personasCreadasMap.set(crearPersonaDto.n_identificacion, persona);
-  
+
     return persona;
   }
   

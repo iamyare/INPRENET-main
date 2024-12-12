@@ -38,4 +38,9 @@ export class MunicipioController {
   findByDepartamento(@Param('id') id: number) {
     return this.municipioService.getMunicipiosByDepartamento(id);
   }
+
+  @Get(':id/departamento')
+  async getDepartamentoByMunicipio(@Param('id') municipioId: number) {
+    return this.municipioService.getDepartamentoByMunicipio(municipioId);
+  }
 }

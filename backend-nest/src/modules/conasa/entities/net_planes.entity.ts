@@ -10,6 +10,9 @@ export class Net_Plan {
   @JoinColumn({ name: 'ID_CATEGORIA', foreignKeyConstraintName: 'FK_NET_CATEGORIA' })
   categoria: Net_Categoria;
 
+  @Column({ name: 'TIPO_AFILIACION', type: 'number', nullable: true })
+  tipo_afiliacion: number;
+  
   @Column({ name: 'NOMBRE_PLAN', type: 'varchar2', length: 100 })
   nombre_plan: string;
 

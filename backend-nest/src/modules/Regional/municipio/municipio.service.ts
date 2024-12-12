@@ -45,4 +45,18 @@ export class MunicipioService {
       relations: ['departamento'] 
     });
   }
+
+  async getDepartamentoByMunicipio(municipioId: number): Promise<Net_Departamento> {
+    const municipio = await this.municipioRepository.findOne({
+      where: { id_municipio: municipioId },
+      relations: ['departamento'] // Incluye el departamento relacionado
+    });
+  
+    if (!municipio) {
+      throw new Error(`Municipio con id ${municipioId} no encontrado`);
+    }
+  
+    return municipio.departamento;
+  }
+  
 }

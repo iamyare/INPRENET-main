@@ -39,15 +39,10 @@ export class CentroTrabajoService {
 
     @InjectRepository(Net_Referencia_Centro_Trabajo)
     private readonly refcentroTrabajoRepository: Repository<Net_Referencia_Centro_Trabajo>,
-
-    @InjectRepository(Net_Departamento)
-    private readonly departamentoRepository: Repository<Net_Departamento>,
     @InjectRepository(Net_Nivel_Educativo)
     private readonly nivelEducativoRepository: Repository<Net_Nivel_Educativo>,
     @InjectRepository(Net_Jornada)
     private readonly jornadaRepository: Repository<Net_Jornada>,
-    @InjectRepository(Net_Centro_Trabajo_Nivel)
-    private readonly centroTrabajoNivelRepository: Repository<Net_Centro_Trabajo_Nivel>,
     @InjectRepository(Net_Centro_Trabajo_Jornada)
     private readonly centroTrabajoJornadaRepository: Repository<Net_Centro_Trabajo_Jornada>,
     @InjectRepository(Net_Municipio)
@@ -78,11 +73,7 @@ export class CentroTrabajoService {
     if (!empleado) {
       throw new NotFoundException(`Empleado con ID ${id_empleado} no encontrado.`);
     }
-
-    // Actualizar el archivo de identificación
     empleado.archivo_identificacion = archivoBuffer;
-
-    // Guardar los cambios en la base de datos
     await this.empleadoRepository.save(empleado);
 
     return empleado;

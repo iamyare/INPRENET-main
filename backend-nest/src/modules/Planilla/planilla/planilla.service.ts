@@ -65,6 +65,100 @@ export class PlanillaService {
   ) {
   };
 
+  async generarExcelDetallesCompletos(idPlanilla: number, @Res() res: Response): Promise<void> {
+    if (!idPlanilla || typeof idPlanilla !== 'number') {
+      throw new BadRequestException('idPlanilla debe ser un número válido');
+    }
+    try {
+      const beneficiosQuery = `
+        SELECT DISTINCT
+          np.n_identificacion AS "DNI",
+          pb.num_cuenta AS "NUMERO_CUENTA",
+          nb.nombre_banco AS "NOMBRE_BANCO",
+          b.id_beneficio AS "CODIGO_BENEFICIO",
+          b.nombre_beneficio AS "NOMBRE_BENEFICIO",
+          dpb.monto_a_pagar AS "MONTO_A_PAGAR",
+          dpb.estado AS "ESTADO"
+        FROM net_detalle_pago_beneficio dpb
+        INNER JOIN net_persona np ON dpb.id_persona = np.id_persona
+        LEFT JOIN net_persona_por_banco pb ON dpb.id_af_banco = pb.id_af_banco
+        LEFT JOIN net_banco nb ON pb.id_banco = nb.id_banco
+        INNER JOIN net_beneficio b ON dpb.id_beneficio = b.id_beneficio
+        WHERE dpb.id_planilla = ${idPlanilla}
+      `;
+  
+      const deduccionesQuery = `
+        SELECT DISTINCT
+          np.n_identificacion AS "DNI",
+          pb.num_cuenta AS "NUMERO_CUENTA",
+          nb.nombre_banco AS "NOMBRE_BANCO",
+          d.id_deduccion,
+          d.nombre_deduccion AS "NOMBRE_DEDUCCION",
+          d.cod_deduccion AS "COD_DEDUCCION",
+          dd.monto_aplicado AS "MONTO_APLICADO",
+          dd.estado_aplicacion AS "ESTADO_APLICACION",
+          d.id_centro_trabajo AS "ID_CENTRO_TRABAJO"
+        FROM net_detalle_deduccion dd
+        INNER JOIN net_persona np ON dd.id_persona = np.id_persona
+        LEFT JOIN net_persona_por_banco pb ON dd.id_af_banco = pb.id_af_banco
+        LEFT JOIN net_banco nb ON pb.id_banco = nb.id_banco
+        INNER JOIN net_deduccion d ON dd.id_deduccion = d.id_deduccion
+        WHERE dd.id_planilla = ${idPlanilla}
+      `;
+  
+      const beneficios = await this.entityManager.query(beneficiosQuery);
+      const deducciones = await this.entityManager.query(deduccionesQuery);
+      const deduccionesInprema = deducciones.filter((item: any) => item.ID_CENTRO_TRABAJO === 1);
+      const deduccionesTerceros = deducciones.filter((item: any) => item.ID_CENTRO_TRABAJO !== 1);
+  
+      const workbook = new ExcelJS.Workbook();
+      const beneficiosSheet = workbook.addWorksheet('Beneficios');
+      beneficiosSheet.columns = [
+        { header: 'DNI', key: 'DNI', width: 15 },
+        { header: 'Número de Cuenta', key: 'NUMERO_CUENTA', width: 20 },
+        { header: 'Nombre del Banco', key: 'NOMBRE_BANCO', width: 25 },
+        { header: 'Código Beneficio', key: 'CODIGO_BENEFICIO', width: 15 },
+        { header: 'Nombre Beneficio', key: 'NOMBRE_BENEFICIO', width: 30 },
+        { header: 'Monto a Pagar', key: 'MONTO_A_PAGAR', width: 15 },
+        { header: 'Estado', key: 'ESTADO', width: 15 },
+      ];
+      beneficiosSheet.addRows(beneficios);
+  
+      // Hoja de Deducciones INPREMA
+      const deduccionesInpremaSheet = workbook.addWorksheet('Deducciones INPREMA');
+      deduccionesInpremaSheet.columns = [
+        { header: 'DNI', key: 'DNI', width: 15 },
+        { header: 'Código Deducción', key: 'COD_DEDUCCION', width: 15 },
+        { header: 'Nombre Deducción', key: 'NOMBRE_DEDUCCION', width: 30 },
+        { header: 'Monto Aplicado', key: 'MONTO_APLICADO', width: 15 },
+        { header: 'Estado Aplicación', key: 'ESTADO_APLICACION', width: 20 },
+      ];
+      deduccionesInpremaSheet.addRows(deduccionesInprema);
+  
+      // Hoja de Deducciones Terceros
+      const deduccionesTercerosSheet = workbook.addWorksheet('Deducciones Terceros');
+      deduccionesTercerosSheet.columns = [
+        { header: 'DNI', key: 'DNI', width: 15 },
+        { header: 'Código Deducción', key: 'COD_DEDUCCION', width: 15 },
+        { header: 'Nombre Deducción', key: 'NOMBRE_DEDUCCION', width: 30 },
+        { header: 'Monto Aplicado', key: 'MONTO_APLICADO', width: 15 },
+        { header: 'Estado Aplicación', key: 'ESTADO_APLICACION', width: 20 },
+      ];
+      deduccionesTercerosSheet.addRows(deduccionesTerceros);
+  
+      res.setHeader(
+        'Content-Disposition',
+        `attachment; filename="Detalles_Planilla_${idPlanilla}.xlsx"`
+      );
+  
+      await workbook.xlsx.write(res);
+      res.end();
+    } catch (error) {
+      this.logger.error(`Error al generar el archivo Excel: ${error.message}`, error.stack);
+      throw new InternalServerErrorException('Error al generar el archivo Excel.');
+    }
+  }
+  
   async procesarPagoBeneficio(): Promise<void> {
     try {
       // Rutas de las imágenes para el contenido del correo
@@ -662,126 +756,130 @@ export class PlanillaService {
 
     if (JSON.stringify(idTiposPlanilla) == '[1,2]') {
       query = `
-                SELECT
-    BENEFICIOS,
-    NOMBRE_BENEFICIO,
-    NUMERO_PAGOS,
-    NUMERO_LOTE,
-    ID_PLANILLA,
+                SELECT 
+    BENEFICIOS, 
+    NOMBRE_BENEFICIO, 
+    NUMERO_PAGOS, 
+    NUMERO_LOTE, 
+    ID_PLANILLA, 
     SUM(TOTAL_MONTO_A_PAGAR) AS TOTAL_MONTO_BENEFICIO
-FROM
+FROM 
     (
-        SELECT
-            LISTAGG(CASE WHEN PB.ID_BENEFICIO <> 6 THEN PB.ID_BENEFICIO END, ', ')
-                WITHIN GROUP (ORDER BY PB.ID_BENEFICIO) AS BENEFICIOS,
-            MAX(B.NOMBRE_BENEFICIO) AS NOMBRE_BENEFICIO,
-            PER.NUMERO_PAGOS,
-            PER.NUMERO_LOTE,
-            PER.ID_PLANILLA,
-            (SELECT SUM(SUB.MONTO_A_PAGAR)
-             FROM NET_DETALLE_PAGO_BENEFICIO SUB
-             JOIN NET_PLANILLA PER ON SUB.ID_PLANILLA = PER.ID_PLANILLA
-             WHERE SUB.ID_PERSONA = PB.ID_PERSONA
-               AND SUB.ID_DETALLE_PERSONA = PB.ID_DETALLE_PERSONA
-               AND SUB.ID_CAUSANTE = PB.ID_CAUSANTE
-               AND PER.PERIODO_INICIO >= TO_DATE(:periodoInicio, 'DD/MM/YYYY')
-               AND PER.PERIODO_FINALIZACION <= TO_DATE(:periodoFinalizacion, 'DD/MM/YYYY')
-               AND PER.ID_TIPO_PLANILLA = 1) AS TOTAL_MONTO_A_PAGAR
-        FROM
-            NET_DETALLE_PAGO_BENEFICIO PB
-        JOIN
-            NET_BENEFICIO B ON PB.ID_BENEFICIO = B.ID_BENEFICIO
-        JOIN
-            NET_PLANILLA PER ON PB.ID_PLANILLA = PER.ID_PLANILLA
+        SELECT 
+            LISTAGG(CASE WHEN PB.ID_BENEFICIO <> 6 THEN PB.ID_BENEFICIO END, ', ') 
+                WITHIN GROUP (ORDER BY PB.ID_BENEFICIO) AS BENEFICIOS, 
+            MAX(B.NOMBRE_BENEFICIO) AS NOMBRE_BENEFICIO, 
+            PER.NUMERO_PAGOS, 
+            PER.NUMERO_LOTE, 
+            PER.ID_PLANILLA, 
+            (
+                SELECT SUM(SUB.MONTO_A_PAGAR) 
+                FROM NET_DETALLE_PAGO_BENEFICIO SUB 
+                JOIN NET_PLANILLA PER ON SUB.ID_PLANILLA = PER.ID_PLANILLA 
+                WHERE SUB.ID_PERSONA = PB.ID_PERSONA 
+                  AND SUB.ID_DETALLE_PERSONA = PB.ID_DETALLE_PERSONA 
+                  AND SUB.ID_CAUSANTE = PB.ID_CAUSANTE 
+                  AND PER.PERIODO_INICIO >= TO_DATE(:periodoInicio, 'DD/MM/YYYY') 
+                  AND PER.PERIODO_FINALIZACION <= TO_DATE(:periodoFinalizacion, 'DD/MM/YYYY') 
+                  AND PER.ID_TIPO_PLANILLA = 1
+            ) AS TOTAL_MONTO_A_PAGAR 
+        FROM 
+            NET_DETALLE_PAGO_BENEFICIO PB 
+        JOIN 
+            NET_BENEFICIO B ON PB.ID_BENEFICIO = B.ID_BENEFICIO 
+        JOIN 
+            NET_PLANILLA PER ON PB.ID_PLANILLA = PER.ID_PLANILLA 
         LEFT JOIN 
-          NET_PERSONA_POR_BANCO ppb 
-          ON PB.ID_AF_BANCO = ppb.ID_AF_BANCO
-        WHERE
-            PB.ESTADO = 'PAGADA' AND
-            PER.PERIODO_INICIO >= TO_DATE(:periodoInicio, 'DD/MM/YYYY')
-            AND PER.PERIODO_FINALIZACION <= TO_DATE(:periodoFinalizacion, 'DD/MM/YYYY')
-            AND PER.ID_TIPO_PLANILLA = 1
-        GROUP BY
-            PB.ID_PERSONA,
-            PB.ID_DETALLE_PERSONA,
-            PB.ID_CAUSANTE,
-            PER.NUMERO_PAGOS,
-            PER.NUMERO_LOTE,
-            PER.ID_PLANILLA
-    )
-GROUP BY
-    BENEFICIOS,
-    NOMBRE_BENEFICIO,
-    NUMERO_PAGOS,
-    NUMERO_LOTE,
-    ID_PLANILLA
-UNION ALL
+            NET_PERSONA_POR_BANCO ppb ON PB.ID_AF_BANCO = ppb.ID_AF_BANCO 
+        WHERE 
+            PB.ESTADO = 'PAGADA' 
+            AND PER.PERIODO_INICIO >= TO_DATE(:periodoInicio, 'DD/MM/YYYY') 
+            AND PER.PERIODO_FINALIZACION <= TO_DATE(:periodoFinalizacion, 'DD/MM/YYYY') 
+            AND PER.ID_TIPO_PLANILLA = 1 
+        GROUP BY 
+            PB.ID_PERSONA, 
+            PB.ID_DETALLE_PERSONA, 
+            PB.ID_CAUSANTE, 
+            PER.NUMERO_PAGOS, 
+            PER.NUMERO_LOTE, 
+            PER.ID_PLANILLA 
+    ) 
+GROUP BY 
+    BENEFICIOS, 
+    NOMBRE_BENEFICIO, 
+    NUMERO_PAGOS, 
+    NUMERO_LOTE, 
+    ID_PLANILLA 
 
-SELECT
-    BENEFICIOS,
-    NOMBRE_BENEFICIO,
-    NUMERO_PAGOS,
-    NUMERO_LOTE,
-    ID_PLANILLA,
-    SUM(TOTAL_MONTO_A_PAGAR) AS TOTAL_MONTO_BENEFICIO
-FROM
+UNION ALL 
+
+SELECT 
+    BENEFICIOS, 
+    NOMBRE_BENEFICIO, 
+    NUMERO_PAGOS, 
+    NUMERO_LOTE, 
+    ID_PLANILLA, 
+    SUM(TOTAL_MONTO_A_PAGAR) AS TOTAL_MONTO_BENEFICIO 
+FROM 
     (
-        SELECT
-            CASE
-                WHEN LISTAGG(PB.ID_BENEFICIO, ', ') WITHIN GROUP (ORDER BY PB.ID_BENEFICIO) LIKE '%10%'
-                     AND LISTAGG(PB.ID_BENEFICIO, ', ') WITHIN GROUP (ORDER BY PB.ID_BENEFICIO) LIKE '%101%'
-                     THEN '10, 101'
-                WHEN LISTAGG(PB.ID_BENEFICIO, ', ') WITHIN GROUP (ORDER BY PB.ID_BENEFICIO) LIKE '%10%'
-                     OR LISTAGG(PB.ID_BENEFICIO, ', ') WITHIN GROUP (ORDER BY PB.ID_BENEFICIO) LIKE '%101%'
-                     THEN '10, 101'
-                ELSE LISTAGG(PB.ID_BENEFICIO, ', ') WITHIN GROUP (ORDER BY PB.ID_BENEFICIO)
-            END AS BENEFICIOS,
-            CASE
-                WHEN LISTAGG(PB.ID_BENEFICIO, ', ') WITHIN GROUP (ORDER BY PB.ID_BENEFICIO) LIKE '%10%'
-                     OR LISTAGG(PB.ID_BENEFICIO, ', ') WITHIN GROUP (ORDER BY PB.ID_BENEFICIO) LIKE '%101%'
-                     THEN 'CONTINUACION JUBILACION'
-                ELSE MAX(B.NOMBRE_BENEFICIO)
-            END AS NOMBRE_BENEFICIO,
-            PER.NUMERO_PAGOS,
-            PER.NUMERO_LOTE,
-            PER.ID_PLANILLA,
-            (SELECT SUM(SUB.MONTO_A_PAGAR)
-             FROM NET_DETALLE_PAGO_BENEFICIO SUB
-             JOIN NET_PLANILLA PER ON SUB.ID_PLANILLA = PER.ID_PLANILLA
-             WHERE SUB.ID_PERSONA = PB.ID_PERSONA
-               AND SUB.ID_DETALLE_PERSONA = PB.ID_DETALLE_PERSONA
-               AND SUB.ID_CAUSANTE = PB.ID_CAUSANTE
-               AND PER.PERIODO_INICIO >= TO_DATE(:periodoInicio, 'DD/MM/YYYY')
-               AND PER.PERIODO_FINALIZACION <= TO_DATE(:periodoFinalizacion, 'DD/MM/YYYY')
-               AND PER.ID_TIPO_PLANILLA = 2) AS TOTAL_MONTO_A_PAGAR
-        FROM
-            NET_DETALLE_PAGO_BENEFICIO PB
-        JOIN
-            NET_BENEFICIO B ON PB.ID_BENEFICIO = B.ID_BENEFICIO
-        JOIN
-            NET_PLANILLA PER ON PB.ID_PLANILLA = PER.ID_PLANILLA
+        SELECT 
+            CASE 
+                WHEN LISTAGG(PB.ID_BENEFICIO, ', ') WITHIN GROUP (ORDER BY PB.ID_BENEFICIO) LIKE '%10%' 
+                     AND LISTAGG(PB.ID_BENEFICIO, ', ') WITHIN GROUP (ORDER BY PB.ID_BENEFICIO) LIKE '%101%' 
+                     THEN '10, 101' 
+                WHEN LISTAGG(PB.ID_BENEFICIO, ', ') WITHIN GROUP (ORDER BY PB.ID_BENEFICIO) LIKE '%10%' 
+                     OR LISTAGG(PB.ID_BENEFICIO, ', ') WITHIN GROUP (ORDER BY PB.ID_BENEFICIO) LIKE '%101%' 
+                     THEN '10, 101' 
+                ELSE LISTAGG(PB.ID_BENEFICIO, ', ') WITHIN GROUP (ORDER BY PB.ID_BENEFICIO) 
+            END AS BENEFICIOS, 
+            CASE 
+                WHEN LISTAGG(PB.ID_BENEFICIO, ', ') WITHIN GROUP (ORDER BY PB.ID_BENEFICIO) LIKE '%10%' 
+                     OR LISTAGG(PB.ID_BENEFICIO, ', ') WITHIN GROUP (ORDER BY PB.ID_BENEFICIO) LIKE '%101%' 
+                     THEN 'CONTINUACION JUBILACION' 
+                ELSE MAX(B.NOMBRE_BENEFICIO) 
+            END AS NOMBRE_BENEFICIO, 
+            PER.NUMERO_PAGOS, 
+            PER.NUMERO_LOTE, 
+            PER.ID_PLANILLA, 
+            (
+                SELECT SUM(SUB.MONTO_A_PAGAR) 
+                FROM NET_DETALLE_PAGO_BENEFICIO SUB 
+                JOIN NET_PLANILLA PER ON SUB.ID_PLANILLA = PER.ID_PLANILLA 
+                WHERE SUB.ID_PERSONA = PB.ID_PERSONA 
+                  AND SUB.ID_DETALLE_PERSONA = PB.ID_DETALLE_PERSONA 
+                  AND SUB.ID_CAUSANTE = PB.ID_CAUSANTE 
+                  AND PER.PERIODO_INICIO >= TO_DATE(:periodoInicio, 'DD/MM/YYYY') 
+                  AND PER.PERIODO_FINALIZACION <= TO_DATE(:periodoFinalizacion, 'DD/MM/YYYY') 
+                  AND PER.ID_TIPO_PLANILLA = 2
+            ) AS TOTAL_MONTO_A_PAGAR 
+        FROM 
+            NET_DETALLE_PAGO_BENEFICIO PB 
+        JOIN 
+            NET_BENEFICIO B ON PB.ID_BENEFICIO = B.ID_BENEFICIO 
+        JOIN 
+            NET_PLANILLA PER ON PB.ID_PLANILLA = PER.ID_PLANILLA 
         LEFT JOIN 
-          NET_PERSONA_POR_BANCO ppb 
-          ON PB.ID_AF_BANCO = ppb.ID_AF_BANCO
-        WHERE
+            NET_PERSONA_POR_BANCO ppb ON PB.ID_AF_BANCO = ppb.ID_AF_BANCO 
+        WHERE 
             PB.ESTADO != 'NO PAGADA' AND PB.ESTADO != 'RECHAZADO' 
-            PER.PERIODO_INICIO >= TO_DATE(:periodoInicio, 'DD/MM/YYYY')
-            AND PER.PERIODO_FINALIZACION <= TO_DATE(:periodoFinalizacion, 'DD/MM/YYYY')
-            AND PER.ID_TIPO_PLANILLA = 2
-        GROUP BY
-            PB.ID_PERSONA,
-            PB.ID_DETALLE_PERSONA,
-            PB.ID_CAUSANTE,
-            PER.NUMERO_PAGOS,
-            PER.NUMERO_LOTE,
-            PER.ID_PLANILLA
-    )
-GROUP BY
-    BENEFICIOS,
-    NOMBRE_BENEFICIO,
-    NUMERO_PAGOS,
-    NUMERO_LOTE,
+            AND PER.PERIODO_INICIO >= TO_DATE(:periodoInicio, 'DD/MM/YYYY') 
+            AND PER.PERIODO_FINALIZACION <= TO_DATE(:periodoFinalizacion, 'DD/MM/YYYY') 
+            AND PER.ID_TIPO_PLANILLA = 2 
+        GROUP BY 
+            PB.ID_PERSONA, 
+            PB.ID_DETALLE_PERSONA, 
+            PB.ID_CAUSANTE, 
+            PER.NUMERO_PAGOS, 
+            PER.NUMERO_LOTE, 
+            PER.ID_PLANILLA 
+    ) 
+GROUP BY 
+    BENEFICIOS, 
+    NOMBRE_BENEFICIO, 
+    NUMERO_PAGOS, 
+    NUMERO_LOTE, 
     ID_PLANILLA
+
       `;
     } else {
       query = `
@@ -895,8 +993,7 @@ GROUP BY
         plan."PERIODO_INICIO" >= :periodoInicio AND
         plan."PERIODO_FINALIZACION" <= :periodoFinalizacion AND
         plan."ID_TIPO_PLANILLA" IN (${idTiposPlanilla.join(', ')})
-        AND ded."ID_CENTRO_TRABAJO" != 1
-        AND dedd."ID_AF_BANCO" IS NOT NULL
+        AND ded."ID_DEDUCCION" NOT IN (1, 2, 3, 44, 51)
         AND dedd."ESTADO_APLICACION" = 'COBRADA'
       GROUP BY 
         ded."ID_DEDUCCION", 
@@ -1216,11 +1313,11 @@ GROUP BY
     idTiposPlanilla: number[],
   ): Promise<any[]> {
     const idTiposPlanillaStr = idTiposPlanilla.join(', ');
-
     const query = `
       SELECT 
         per."N_IDENTIFICACION" AS "IDENTIFICACION",
         per."PRIMER_NOMBRE" || ' ' || per."SEGUNDO_NOMBRE" || ' ' || per."PRIMER_APELLIDO" || ' ' || per."SEGUNDO_APELLIDO" AS "NOMBRE_COMPLETO",
+        ben."ID_BENEFICIO" AS "ID_BENEFICIO",
         ben."NOMBRE_BENEFICIO" AS "NOMBRE_BENEFICIO",
         detBs."MONTO_A_PAGAR" AS "MONTO"
       FROM 
@@ -1251,18 +1348,19 @@ GROUP BY
       throw new InternalServerErrorException('Error al obtener beneficios detallados');
     }
   }
-
+  
   async getDeduccionesInpremaPorPeriodoDetallado(
     periodoInicio: string,
     periodoFinalizacion: string,
     idTiposPlanilla: number[],
   ): Promise<any[]> {
     const idTiposPlanillaStr = idTiposPlanilla.join(', ');
-
+  
     const query = `
       SELECT 
         per."N_IDENTIFICACION" AS "IDENTIFICACION",
         per."PRIMER_NOMBRE" || ' ' || per."SEGUNDO_NOMBRE" || ' ' || per."PRIMER_APELLIDO" || ' ' || per."SEGUNDO_APELLIDO" AS "NOMBRE_COMPLETO",
+        ded."COD_DEDUCCION" AS "COD_DEDUCCION",
         ded."NOMBRE_DEDUCCION" AS "NOMBRE_DEDUCCION",
         dedd."MONTO_APLICADO" AS "MONTO"
       FROM 
@@ -1286,7 +1384,7 @@ GROUP BY
         per."PRIMER_NOMBRE" || ' ' || per."SEGUNDO_NOMBRE" || ' ' || per."PRIMER_APELLIDO" || ' ' || per."SEGUNDO_APELLIDO" ASC, 
         ded."NOMBRE_DEDUCCION" ASC
     `;
-
+  
     try {
       const result = await this.entityManager.query(query, [periodoInicio, periodoFinalizacion]);
       return result;
@@ -1295,19 +1393,19 @@ GROUP BY
       throw new InternalServerErrorException('Error al obtener deducciones INPREMA detalladas');
     }
   }
-
+  
   async getDeduccionesTercerosPorPeriodoDetallado(
     periodoInicio: string,
     periodoFinalizacion: string,
     idTiposPlanilla: number[],
   ): Promise<any[]> {
-    // Convertir el array en un string separado por comas
     const idTiposPlanillaList = idTiposPlanilla.join(',');
-
+  
     const query = `
       SELECT 
         per."N_IDENTIFICACION" AS "IDENTIFICACION",
         per."PRIMER_NOMBRE" || ' ' || per."SEGUNDO_NOMBRE" || ' ' || per."PRIMER_APELLIDO" || ' ' || per."SEGUNDO_APELLIDO" AS "NOMBRE_COMPLETO",
+        ded."COD_DEDUCCION" AS "COD_DEDUCCION",
         ded."NOMBRE_DEDUCCION" AS "NOMBRE_DEDUCCION",
         dedd."MONTO_APLICADO" AS "MONTO"
       FROM 
@@ -1331,7 +1429,7 @@ GROUP BY
         per."PRIMER_NOMBRE" || ' ' || per."SEGUNDO_NOMBRE" || ' ' || per."PRIMER_APELLIDO" || ' ' || per."SEGUNDO_APELLIDO" ASC, 
         ded."NOMBRE_DEDUCCION" ASC
     `;
-
+  
     try {
       const result = await this.entityManager.query(query, [periodoInicio, periodoFinalizacion]);
       return result;
@@ -1340,7 +1438,7 @@ GROUP BY
       throw new InternalServerErrorException('Error al obtener deducciones de terceros detalladas');
     }
   }
-
+  
   async getDetallePorBeneficiosYDeduccionesPorPeriodo(
     periodoInicio: string,
     periodoFinalizacion: string,
@@ -1415,7 +1513,6 @@ GROUP BY
         p."PERIODO_INICIO" BETWEEN TO_DATE(:periodoInicio, 'DD/MM/YYYY') AND TO_DATE(:periodoFinalizacion, 'DD/MM/YYYY')
         AND p."ID_TIPO_PLANILLA" IN (${idTiposPlanilla.join(', ')})
         AND ddp."ESTADO_APLICACION" = 'COBRADA'
-        AND ddp."ESTADO_APLICACION" != 'RECHAZADO'
         AND ct.NOMBRE_CENTRO_TRABAJO = 'INPREMA'
         AND d."ID_CENTRO_TRABAJO" = 1
       GROUP BY 
@@ -1436,8 +1533,6 @@ GROUP BY
         p."PERIODO_INICIO" BETWEEN TO_DATE(:periodoInicio, 'DD/MM/YYYY') AND TO_DATE(:periodoFinalizacion, 'DD/MM/YYYY')
         AND p."ID_TIPO_PLANILLA" IN (${idTiposPlanilla.join(', ')})
         AND ddp."ESTADO_APLICACION" = 'COBRADA'
-        AND ct.NOMBRE_CENTRO_TRABAJO != 'INPREMA'
-        AND ddp."ESTADO_APLICACION" != 'RECHAZADO'
         AND d."ID_DEDUCCION" NOT IN (1,2,3,44,51)
       GROUP BY
       COALESCE(b."NOMBRE_BANCO", 'SIN BANCO')

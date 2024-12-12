@@ -228,6 +228,7 @@ export class DetalleDeduccionService {
     }
   }
 
+  /* --perdienteparamtro */
   async getDeduccionesByPersonaAndBenef(idPersona: number, idPlanilla: number): Promise<any> {
     const query = `
       SELECT
@@ -241,7 +242,6 @@ export class DetalleDeduccionService {
       INNER JOIN "NET_PLANILLA" plan ON plan.ID_PLANILLA = dedd."ID_PLANILLA"
       INNER JOIN "NET_CENTRO_TRABAJO" inst ON inst."ID_CENTRO_TRABAJO" = dd."ID_CENTRO_TRABAJO"
       WHERE
-        dedd.ESTADO_APLICACION != 'NO COBRADA' AND
         dedd."ID_PERSONA" = ${idPersona} AND
         plan."ID_PLANILLA" = ${idPlanilla}
       ORDER BY dedd."MONTO_APLICADO" DESC

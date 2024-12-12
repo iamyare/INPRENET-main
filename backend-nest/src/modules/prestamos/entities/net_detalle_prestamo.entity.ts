@@ -23,7 +23,7 @@ export class Net_Detalle_Prestamo {
     @Column({ type: "int", name: "MES", nullable: false })
     mes: number;
 
-    @Column({ type: "varchar", name: "N_PRESTAMO", length: 50, nullable: false }) // Cambié 'varchar2' a 'varchar' para mayor compatibilidad
+    @Column({ type: "varchar", name: "N_PRESTAMO", length: 50, nullable: false })
     n_prestamo: string;
 
     @Column({ type: "decimal", name: "VALOR", precision: 10, scale: 2, nullable: false })

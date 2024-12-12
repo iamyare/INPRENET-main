@@ -86,7 +86,7 @@ export class PlanillaService {
         INNER JOIN net_beneficio b ON dpb.id_beneficio = b.id_beneficio
         WHERE dpb.id_planilla = ${idPlanilla}
       `;
-  
+
       const deduccionesQuery = `
         SELECT DISTINCT
           np.n_identificacion AS "DNI",
@@ -105,12 +105,12 @@ export class PlanillaService {
         INNER JOIN net_deduccion d ON dd.id_deduccion = d.id_deduccion
         WHERE dd.id_planilla = ${idPlanilla}
       `;
-  
+
       const beneficios = await this.entityManager.query(beneficiosQuery);
       const deducciones = await this.entityManager.query(deduccionesQuery);
       const deduccionesInprema = deducciones.filter((item: any) => item.ID_CENTRO_TRABAJO === 1);
       const deduccionesTerceros = deducciones.filter((item: any) => item.ID_CENTRO_TRABAJO !== 1);
-  
+
       const workbook = new ExcelJS.Workbook();
       const beneficiosSheet = workbook.addWorksheet('Beneficios');
       beneficiosSheet.columns = [
@@ -123,7 +123,7 @@ export class PlanillaService {
         { header: 'Estado', key: 'ESTADO', width: 15 },
       ];
       beneficiosSheet.addRows(beneficios);
-  
+
       // Hoja de Deducciones INPREMA
       const deduccionesInpremaSheet = workbook.addWorksheet('Deducciones INPREMA');
       deduccionesInpremaSheet.columns = [
@@ -134,7 +134,7 @@ export class PlanillaService {
         { header: 'Estado Aplicación', key: 'ESTADO_APLICACION', width: 20 },
       ];
       deduccionesInpremaSheet.addRows(deduccionesInprema);
-  
+
       // Hoja de Deducciones Terceros
       const deduccionesTercerosSheet = workbook.addWorksheet('Deducciones Terceros');
       deduccionesTercerosSheet.columns = [
@@ -145,12 +145,12 @@ export class PlanillaService {
         { header: 'Estado Aplicación', key: 'ESTADO_APLICACION', width: 20 },
       ];
       deduccionesTercerosSheet.addRows(deduccionesTerceros);
-  
+
       res.setHeader(
         'Content-Disposition',
         `attachment; filename="Detalles_Planilla_${idPlanilla}.xlsx"`
       );
-  
+
       await workbook.xlsx.write(res);
       res.end();
     } catch (error) {
@@ -158,7 +158,7 @@ export class PlanillaService {
       throw new InternalServerErrorException('Error al generar el archivo Excel.');
     }
   }
-  
+
   async procesarPagoBeneficio(): Promise<void> {
     try {
       // Rutas de las imágenes para el contenido del correo
@@ -944,6 +944,7 @@ GROUP BY
       INNER JOIN 
         "NET_DEDUCCION" ded 
         ON dedd."ID_DEDUCCION" = ded."ID_DEDUCCION"
+      LEFT JOIN "NET_CENTRO_TRABAJO" ct ON ct."ID_CENTRO_TRABAJO" = ded."ID_CENTRO_TRABAJO"
       INNER JOIN 
         "NET_PLANILLA" plan 
         ON dedd."ID_PLANILLA" = plan."ID_PLANILLA"
@@ -952,6 +953,7 @@ GROUP BY
         plan."PERIODO_FINALIZACION" <= :periodoFinalizacion AND
         plan."ID_TIPO_PLANILLA" IN (${idTiposPlanilla.join(', ')})
         AND ded."ID_CENTRO_TRABAJO" = 1
+        AND ct.NOMBRE_CENTRO_TRABAJO = 'INPREMA'
         AND dedd."ID_AF_BANCO" IS NOT NULL
         AND dedd."ESTADO_APLICACION" = 'COBRADA'
       GROUP BY 
@@ -989,11 +991,13 @@ GROUP BY
       INNER JOIN 
         "NET_PLANILLA" plan 
         ON dedd."ID_PLANILLA" = plan."ID_PLANILLA"
+      LEFT JOIN  "NET_CENTRO_TRABAJO" ct ON ct."ID_CENTRO_TRABAJO" = ded."ID_CENTRO_TRABAJO"
       WHERE 
         plan."PERIODO_INICIO" >= :periodoInicio AND
         plan."PERIODO_FINALIZACION" <= :periodoFinalizacion AND
         plan."ID_TIPO_PLANILLA" IN (${idTiposPlanilla.join(', ')})
         AND ded."ID_DEDUCCION" NOT IN (1, 2, 3, 44, 51)
+        AND ct.NOMBRE_CENTRO_TRABAJO != 'INPREMA'
         AND dedd."ESTADO_APLICACION" = 'COBRADA'
       GROUP BY 
         ded."ID_DEDUCCION", 
@@ -1195,6 +1199,7 @@ GROUP BY
       INNER JOIN 
         "NET_DEDUCCION" ded 
         ON dedd."ID_DEDUCCION" = ded."ID_DEDUCCION"
+      LEFT JOIN  "NET_CENTRO_TRABAJO" ct ON ct."ID_CENTRO_TRABAJO" = ded."ID_CENTRO_TRABAJO"
       INNER JOIN 
         "NET_PLANILLA" plan 
         ON dedd."ID_PLANILLA" = plan."ID_PLANILLA"
@@ -1203,6 +1208,7 @@ GROUP BY
           plan."PERIODO_FINALIZACION" <= :periodoFinalizacion AND
         plan."ID_TIPO_PLANILLA" IN (${idTiposPlanilla.join(', ')})
         AND ded."ID_CENTRO_TRABAJO" = 1
+        AND ct.NOMBRE_CENTRO_TRABAJO = 'INPREMA'
         AND dedd."ID_AF_BANCO" IS NULL
         AND dedd."ESTADO_APLICACION" = 'COBRADA'
       GROUP BY 
@@ -1236,6 +1242,7 @@ GROUP BY
       INNER JOIN 
         "NET_DEDUCCION" ded 
         ON dedd."ID_DEDUCCION" = ded."ID_DEDUCCION"
+      LEFT JOIN  "NET_CENTRO_TRABAJO" ct ON ct."ID_CENTRO_TRABAJO" = ded."ID_CENTRO_TRABAJO"
       INNER JOIN 
         "NET_PLANILLA" plan 
         ON dedd."ID_PLANILLA" = plan."ID_PLANILLA"
@@ -1245,6 +1252,7 @@ GROUP BY
         plan."ID_TIPO_PLANILLA" IN (${idTiposPlanilla.join(', ')})
         AND dedd."ID_AF_BANCO" IS NULL
         AND ded."ID_DEDUCCION" NOT IN (1, 2, 3, 44, 51)
+        AND ct.NOMBRE_CENTRO_TRABAJO != 'INPREMA'
         AND dedd."ESTADO_APLICACION" = 'COBRADA'
       GROUP BY 
         ded."ID_DEDUCCION",
@@ -1348,14 +1356,14 @@ GROUP BY
       throw new InternalServerErrorException('Error al obtener beneficios detallados');
     }
   }
-  
+
   async getDeduccionesInpremaPorPeriodoDetallado(
     periodoInicio: string,
     periodoFinalizacion: string,
     idTiposPlanilla: number[],
   ): Promise<any[]> {
     const idTiposPlanillaStr = idTiposPlanilla.join(', ');
-  
+
     const query = `
       SELECT 
         per."N_IDENTIFICACION" AS "IDENTIFICACION",
@@ -1384,7 +1392,7 @@ GROUP BY
         per."PRIMER_NOMBRE" || ' ' || per."SEGUNDO_NOMBRE" || ' ' || per."PRIMER_APELLIDO" || ' ' || per."SEGUNDO_APELLIDO" ASC, 
         ded."NOMBRE_DEDUCCION" ASC
     `;
-  
+
     try {
       const result = await this.entityManager.query(query, [periodoInicio, periodoFinalizacion]);
       return result;
@@ -1393,14 +1401,14 @@ GROUP BY
       throw new InternalServerErrorException('Error al obtener deducciones INPREMA detalladas');
     }
   }
-  
+
   async getDeduccionesTercerosPorPeriodoDetallado(
     periodoInicio: string,
     periodoFinalizacion: string,
     idTiposPlanilla: number[],
   ): Promise<any[]> {
     const idTiposPlanillaList = idTiposPlanilla.join(',');
-  
+
     const query = `
       SELECT 
         per."N_IDENTIFICACION" AS "IDENTIFICACION",
@@ -1429,7 +1437,7 @@ GROUP BY
         per."PRIMER_NOMBRE" || ' ' || per."SEGUNDO_NOMBRE" || ' ' || per."PRIMER_APELLIDO" || ' ' || per."SEGUNDO_APELLIDO" ASC, 
         ded."NOMBRE_DEDUCCION" ASC
     `;
-  
+
     try {
       const result = await this.entityManager.query(query, [periodoInicio, periodoFinalizacion]);
       return result;
@@ -1438,7 +1446,7 @@ GROUP BY
       throw new InternalServerErrorException('Error al obtener deducciones de terceros detalladas');
     }
   }
-  
+
   async getDetallePorBeneficiosYDeduccionesPorPeriodo(
     periodoInicio: string,
     periodoFinalizacion: string,
@@ -1534,6 +1542,7 @@ GROUP BY
         AND p."ID_TIPO_PLANILLA" IN (${idTiposPlanilla.join(', ')})
         AND ddp."ESTADO_APLICACION" = 'COBRADA'
         AND d."ID_DEDUCCION" NOT IN (1,2,3,44,51)
+        AND ct.NOMBRE_CENTRO_TRABAJO != 'INPREMA'
       GROUP BY
       COALESCE(b."NOMBRE_BANCO", 'SIN BANCO')
       ORDER BY  COALESCE(b."NOMBRE_BANCO", 'SIN BANCO') ASC
@@ -2981,12 +2990,12 @@ GROUP BY
           .reduce((acc, curr) => acc + curr.deducciones_terceros, 0);
         const totalDeducciones = totalDeduccionInprema + totalDeduccionTerceros;
         return {
-          codigo_banco: beneficio.codigo_banco,
-          numero_cuenta: beneficio.numero_cuenta,
+          codigo_banco: beneficio.codigo_banco.trim(),
+          numero_cuenta: beneficio.numero_cuenta.trim(),
           neto: parseFloat((beneficio.monto_a_pagar - totalDeducciones).toFixed(2)),
-          nombre_completo: beneficio.nombre_completo,
+          nombre_completo: beneficio.nombre_completo.trim(),
           id_tipo_planilla: 1,
-          n_identificacion: beneficio.n_identificacion,
+          n_identificacion: beneficio.n_identificacion.trim(),
         };
       });
       return result;

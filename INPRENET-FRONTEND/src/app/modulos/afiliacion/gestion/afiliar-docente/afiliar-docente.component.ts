@@ -314,37 +314,43 @@ export class AfiliarDocenteComponent implements OnInit {
     const familiares = datosGenerales.familiares || [];
     return [
       ...familiares.map((familiar: any) => ({
-        parentesco: familiar.parentesco,
+        parentesco: this.safeToUpperCase(familiar.parentesco),
         persona_referencia: {
-          primer_nombre: familiar.primer_nombre?.toUpperCase() || '',
-          segundo_nombre: familiar.segundo_nombre?.toUpperCase() || '',
-          tercer_nombre: familiar.tercer_nombre?.toUpperCase() || '',
-          primer_apellido: familiar.primer_apellido?.toUpperCase() || '',
-          segundo_apellido: familiar.segundo_apellido?.toUpperCase() || '',
-          telefono_domicilio: familiar.telefono_domicilio,
-          telefono_trabajo: familiar.telefono_trabajo,
-          telefono_personal: familiar.telefono_personal,
-          n_identificacion: familiar.n_identificacion,
-          fecha_nacimiento: familiar.fecha_nacimiento
+          primer_nombre: this.safeToUpperCase(familiar.primer_nombre),
+          segundo_nombre: this.safeToUpperCase(familiar.segundo_nombre),
+          tercer_nombre: this.safeToUpperCase(familiar.tercer_nombre),
+          primer_apellido: this.safeToUpperCase(familiar.primer_apellido),
+          segundo_apellido: this.safeToUpperCase(familiar.segundo_apellido),
+          telefono_domicilio: familiar.telefono_domicilio || '',
+          telefono_trabajo: familiar.telefono_trabajo || '',
+          telefono_personal: familiar.telefono_personal || '',
+          n_identificacion: familiar.n_identificacion || '',
+          fecha_nacimiento: familiar.fecha_nacimiento || ''
         }
       })),
-      ...(referenciasPersonales.conyuge && referenciasPersonales.conyuge.primer_nombre ? [{
-        parentesco: "CÓNYUGE",
-        persona_referencia: {
-          primer_nombre: referenciasPersonales.conyuge.primer_nombre.toUpperCase(),
-          segundo_nombre: referenciasPersonales.conyuge.segundo_nombre.toUpperCase(),
-          tercer_nombre: referenciasPersonales.conyuge.tercer_nombre.toUpperCase(),
-          primer_apellido: referenciasPersonales.conyuge.primer_apellido.toUpperCase(),
-          segundo_apellido: referenciasPersonales.conyuge.segundo_apellido.toUpperCase(),
-          telefono_domicilio: referenciasPersonales.conyuge.telefono_domicilio,
-          telefono_trabajo: referenciasPersonales.conyuge.telefono_trabajo,
-          telefono_personal: referenciasPersonales.conyuge.telefono_celular,
-          n_identificacion: referenciasPersonales.conyuge.n_identificacion,
-          fecha_nacimiento: referenciasPersonales.conyuge.fecha_nacimiento
-        }
-      }] : [])
+      ...(referenciasPersonales.conyuge?.primer_nombre
+        ? [{
+            parentesco: "CÓNYUGE",
+            persona_referencia: {
+              primer_nombre: this.safeToUpperCase(referenciasPersonales.conyuge.primer_nombre),
+              segundo_nombre: this.safeToUpperCase(referenciasPersonales.conyuge.segundo_nombre),
+              tercer_nombre: this.safeToUpperCase(referenciasPersonales.conyuge.tercer_nombre),
+              primer_apellido: this.safeToUpperCase(referenciasPersonales.conyuge.primer_apellido),
+              segundo_apellido: this.safeToUpperCase(referenciasPersonales.conyuge.segundo_apellido),
+              telefono_domicilio: referenciasPersonales.conyuge.telefono_domicilio || '',
+              telefono_trabajo: referenciasPersonales.conyuge.telefono_trabajo || '',
+              telefono_personal: referenciasPersonales.conyuge.telefono_celular || '',
+              n_identificacion: referenciasPersonales.conyuge.n_identificacion || '',
+              fecha_nacimiento: referenciasPersonales.conyuge.fecha_nacimiento || ''
+            }
+          }]
+        : [])
     ];
   }
+  
+  private safeToUpperCase(value: string | null | undefined): string {
+    return value?.toUpperCase() || '';
+}
 
   dataURItoBlob(dataURI: string): Blob {
     const byteString = atob(dataURI.split(',')[1]);

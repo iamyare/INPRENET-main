@@ -11,6 +11,7 @@ import { DeduccionesService } from 'src/app/services/deducciones.service';
 import { DynamicDialogComponent } from 'src/app/components/dinamicos/dynamic-dialog/dynamic-dialog.component';
 import * as XLSX from 'xlsx';
 import { saveAs } from 'file-saver';
+import { firstValueFrom } from 'rxjs';
 
 @Component({
   selector: 'app-verplanprelcomp',
@@ -24,6 +25,7 @@ export class VerplanprelcompComponent implements OnInit, OnChanges {
   codigoPlanilla = "";
   datosFormateados: any;
   myFormFields: FieldConfig[] = [];
+  isLoading: boolean = false;
 
   datosTabl: any[] = [];
   myColumnsDed: TableColumn[] = [];
@@ -275,101 +277,44 @@ export class VerplanprelcompComponent implements OnInit, OnChanges {
   }
 
   async descargarExcelCompleto(): Promise<void> {
-    if (!this.datosTabl || this.datosTabl.length === 0) {
-      this.toastr.warning('No hay datos disponibles para exportar');
-      return;
-    }
-
-    try {
-      // Transformar datos para cada hoja
-      const beneficios = this.datosTabl.map((dato) => ({
-        ID_Afiliado: dato.id_afiliado,
-        Identificación: dato.n_identificacion,
-        Nombre: dato.nombre_completo,
-        Monto_Beneficios: dato.total_beneficios,
-        num_cuenta: dato.num_cuenta,
-        //ID_BANCO: dato.ID_BANCO,
-        COD_BANCO: dato.COD_BANCO,
-        nombre_banco: dato.nombre_banco,
-      }));
-
-
-      const deduccionesInprema = this.datosTabl.map((dato) => ({
-        ID_Afiliado: dato.id_afiliado,
-        Identificación: dato.n_identificacion,
-        Nombre: dato.nombre_completo,
-        Monto_Deducciones_INPREMA: dato.total_deducciones_inprema,
-        num_cuenta: dato.num_cuenta,
-        nombre_banco: dato.nombre_banco,
-      }));
-
-      const deduccionesTerceros = this.datosTabl.map((dato) => ({
-        ID_Afiliado: dato.id_afiliado,
-        Identificación: dato.n_identificacion,
-        Nombre: dato.nombre_completo,
-        Monto_Deducciones_Terceros: dato.total_deducciones_terceros,
-        num_cuenta: dato.num_cuenta,
-        nombre_banco: dato.nombre_banco,
-      }));
-
-      // Crear las hojas del Excel
-      const beneficiosSheet = XLSX.utils.json_to_sheet(beneficios);
-      const deduccionesInpremaSheet = XLSX.utils.json_to_sheet(deduccionesInprema);
-      const deduccionesTercerosSheet = XLSX.utils.json_to_sheet(deduccionesTerceros);
-
-      // Aplica formato numérico a las columnas de montos
-      const applyNumberFormat = (sheet: XLSX.WorkSheet, columns: string[]) => {
-        const range = XLSX.utils.decode_range(sheet['!ref'] || '');
-        columns.forEach((column) => {
-          for (let row = range.s.r + 1; row <= range.e.r; row++) {
-            const cellAddress = XLSX.utils.encode_cell({ r: row, c: XLSX.utils.decode_col(column) });
-            const cell = sheet[cellAddress];
-            if (cell && typeof cell.v === 'number') {
-              cell.t = 'n'; // Tipo numérico
-              cell.z = '#,##0.00'; // Formato numérico
-            }
-          }
-        });
-      };
-
-      applyNumberFormat(beneficiosSheet, ['E']); // Columna E: Monto_Beneficios
-      applyNumberFormat(deduccionesInpremaSheet, ['E']); // Columna E: Monto_Deducciones_INPREMA
-      applyNumberFormat(deduccionesTercerosSheet, ['E']); // Columna E: Monto_Deducciones_Terceros
-
-      // Crear el libro de trabajo
-      const workbook: XLSX.WorkBook = {
-        Sheets: {
-          Beneficios: beneficiosSheet,
-          'Deducciones INPREMA': deduccionesInpremaSheet,
-          'Deducciones Terceros': deduccionesTercerosSheet,
-        },
-        SheetNames: ['Beneficios', 'Deducciones INPREMA', 'Deducciones Terceros'],
-      };
-
-      // Generar el archivo Excel
-      const excelBuffer: any = XLSX.write(workbook, {
-        bookType: 'xlsx',
-        type: 'array',
-      });
-
-      const data: Blob = new Blob([excelBuffer], { type: 'application/octet-stream' });
-      saveAs(data, `PlanillaCompleta_${this.codigoPlanilla}.xlsx`);
-      this.toastr.success('Archivo Excel completo generado con éxito');
-    } catch (error) {
-      console.error('Error al generar el archivo Excel completo:', error);
-      this.toastr.error('Ocurrió un error al generar el archivo Excel');
-    }
-  }
-
-
-  async descargarExcelPorPlanilla() {
     if (!this.idPlanilla) {
       this.toastr.warning('Debe seleccionar una planilla válida antes de descargar el reporte.');
       return;
     }
-
+  
+    this.isLoading = true;
+  
     try {
-      const response: any = await this.planillaService.descargarReporteDetallePagoPreliminar(this.idPlanilla).toPromise();
+      const response: any = await firstValueFrom(
+        this.planillaService.exportarDetallesCompletosExcel(this.idPlanilla)
+      );
+  
+      const blob = new Blob([response], {
+        type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      });
+  
+      const nombreArchivo = `PlanillaCompleta_${this.idPlanilla}.xlsx`;
+      saveAs(blob, nombreArchivo);
+  
+      this.toastr.success('Archivo Excel completo generado y descargado con éxito');
+    } catch (error) {
+      console.error('Error al descargar el Excel completo:', error);
+      this.toastr.error('Ocurrió un error al descargar el archivo Excel');
+    } finally {
+      this.isLoading = false;
+    }
+  }
+  
+  
+
+async descargarExcelPorPlanilla() {
+  if (!this.idPlanilla) {
+      this.toastr.warning('Debe seleccionar una planilla válida antes de descargar el reporte.');
+      return;
+  }
+  this.isLoading = true;
+  try {
+      const response:any = await this.planillaService.descargarReporteDetallePagoPreliminar(this.idPlanilla).toPromise();
       const blob = new Blob([response], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
       saveAs(blob, `Detalle_Pago_Planilla_${this.idPlanilla}.xlsx`);
       this.toastr.success('Archivo Excel descargado con éxito');
@@ -377,7 +322,10 @@ export class VerplanprelcompComponent implements OnInit, OnChanges {
       console.error('Error al descargar el Excel:', error);
       this.toastr.error('Error al descargar el archivo Excel');
     }
+    finally {
+      this.isLoading = false;
+    }
   }
-
-
+  
 }
+

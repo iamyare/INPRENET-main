@@ -14,7 +14,7 @@
             <mat-form-field class="half-width" appearance="outline">
               <mat-label>Número De Identificación</mat-label>
               <mat-icon matPrefix>badge</mat-icon>
-              <input matInput formControlName="n_identificacion">
+              <input matInput formControlName="n_identificacion" (blur)="verificarAfiliadoBeneficiario(group.get('n_identificacion')?.value, getGroup(group))">
               <mat-error *ngIf="group.get('n_identificacion')?.hasError('identificacionDuplicada') && group.get('n_identificacion')?.touched">
                 <mat-icon>error</mat-icon> No puede ser igual al del Afiliado.
               </mat-error>

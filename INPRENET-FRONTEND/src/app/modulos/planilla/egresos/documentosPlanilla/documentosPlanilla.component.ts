@@ -1339,6 +1339,8 @@ export class DocumentosPlanillaComponent implements OnInit {
         "612.01.04.01": "CONTINUACION DE JUBILACION",
         "148.99.04.01": "JUBILACIONES Y PENSIONES DEL GOBIERNO",
         "611.02.02": "PENSION POR SOBREVIVENCIA Y ORFANDAD",
+        "613.99.03" : "SEPARACION POR MUERTE",
+        "613.99.02" : "SEPARACION DEL SISTEMA"
       };
 
       const descripcionCuenta = nombreCuenta[cuenta] || "Cuenta Desconocida";
@@ -1467,24 +1469,30 @@ export class DocumentosPlanillaComponent implements OnInit {
         }
 
         const base64Image = await this.convertirImagenABase64('../assets/images/membratadoFinal.jpg');
-
-        // Mapeo de cuentas contables
         const cuentaContableMap: Record<string, string> = {
           "JUBILACION VOLUNTARIA": "611.01.04",
           "PENSION POR VEJEZ": "611.01.04",
           "PENSION POR VEJEZ COMPLEMENTARIA": "611.01.04",
           "PENSION POR INVALIDEZ": "611.02.01",
           "PENSION POR INVALIDEZ 2": "611.02.01",
-          "CONTINUACION JUBILACION": "612.01.04.01",
+          "CONTINUACION PENSION POR INVALIDEZ" : "612.01.04.01",
+          "CONTINUACION DE JUBILACION": "612.01.04.01",
           "JUBILACION VOLUNTARIA GOBIERNO": "148.99.04.01",
           "PENSION POR INVALIDEZ GOBIERNO": "148.99.04.01",
           "CONTINUACION DE JUBILACION GOBIERNO": "148.99.04.01",
           "PENSION POR VIUDEZ Y ORFANDAD": "611.02.02",
-          "PENSION POR ORFANDAD": "611.02.02"
+          "PENSION POR ORFANDAD": "611.02.02",
+          "SEPARACION POR MUERTE" : "613.99.03",
+          "COMPLEMENTO DE SEPARACION POR MUERTE" : "613.99.03",
+          "PENSION POR VIUDEZ (VITALICIO)" : "611.02.02",
+          "PENSION POR VIUDEZ (TEMPORAL)" : "611.02.02",
+          "AUXILIO POR INVALIDEZ (PAGO UNICO)" : "611.02.01",
+          "SEPARACION DEL SISTEMA VOLUNTARIO" : "613.99.02",
+
         };
         const partidaDiarioData = data.beneficios.map((beneficio: any) => ({
           cuentaContable: cuentaContableMap[beneficio.NOMBRE_BENEFICIO] || 'N/A',
-          noComprobante: beneficio.ID_BENEFICIO || 'N/A',
+          noComprobante: 'N/A',
           descripcion: beneficio.NOMBRE_BENEFICIO,
           debito: beneficio.TOTAL_MONTO_BENEFICIO || 0,
           credito: 0
@@ -1515,7 +1523,7 @@ export class DocumentosPlanillaComponent implements OnInit {
                 {
                   width: '50%',
                   text: [
-                    { text: 'PERIODO DE LA PLANILLA: ', bold: true },
+                    { text: 'PERIODO: ', bold: true },
                     `${fechaInicioFormateada} - ${fechaFinFormateada}`
                   ],
                   alignment: 'left'
@@ -1524,6 +1532,11 @@ export class DocumentosPlanillaComponent implements OnInit {
               margin: [40, 5, 40, 10]
             },
             this.crearTablaPartidaDiario(partidaDiarioData, totalDeduccionesInprema, totalDeduccionesTerceros),
+            {
+              text: '',
+              pageBreak: 'before',  // Fuerza que la siguiente sección inicie en una página nueva
+              margin: [0, 10, 0, 0] // Añade un margen superior amplio en la nueva página
+            },
             {
               columns: [
                 {
@@ -1608,73 +1621,75 @@ export class DocumentosPlanillaComponent implements OnInit {
   async exportarExcelDetallePorPeriodo() {
     const { idTiposPlanilla, nombrePlanilla } = this.obtenerIdYNombrePlanilla();
     const { fechaInicioFormateada, fechaFinFormateada } = this.obtenerFechasFormateadas();
-
+  
     if (idTiposPlanilla.length === 0) {
       console.error('Seleccione un tipo de planilla válido.');
       return;
     }
-
+  
     this.planillaService.getDetalleBeneficiosYDeduccionesPorPeriodo(fechaInicioFormateada, fechaFinFormateada, idTiposPlanilla)
       .subscribe({
         next: (data) => {
-          console.log(data);
 
           if (!data) {
             console.error('No se obtuvieron datos del servicio.');
             return;
           }
-
           const beneficiosDetalle = data.beneficiosDetallados.map((item: any) => ({
             'Identificación': item.IDENTIFICACION,
             'Nombre Completo': item.NOMBRE_COMPLETO,
+            'Código Beneficio': item.ID_BENEFICIO, // Cambiado ID_BENEFICIO por CODIGO_BENEFICIO
             'Nombre Beneficio': item.NOMBRE_BENEFICIO,
             'Monto Beneficio': item.MONTO ? parseFloat(item.MONTO) : 0,
           }));
-
+  
+          // Mapeo de deducciones INPREMA con código de deducción
           const deduccionesInpremaDetalle = data.deduccionesInpremaDetalladas.map((item: any) => ({
             'Identificación': item.IDENTIFICACION,
             'Nombre Completo': item.NOMBRE_COMPLETO,
+            'Código Deducción': item.COD_DEDUCCION, // Incluye código de deducción
             'Nombre Deducción (INPREMA)': item.NOMBRE_DEDUCCION,
             'Monto Deducción': item.MONTO ? parseFloat(item.MONTO) : 0,
           }));
-
+  
+          // Mapeo de deducciones de terceros con código de deducción
           const deduccionesTercerosDetalle = data.deduccionesTercerosDetalladas.map((item: any) => ({
             'Identificación': item.IDENTIFICACION,
             'Nombre Completo': item.NOMBRE_COMPLETO,
+            'Código Deducción': item.COD_DEDUCCION, // Incluye código de deducción
             'Nombre Deducción (Terceros)': item.NOMBRE_DEDUCCION,
             'Monto Deducción': item.MONTO ? parseFloat(item.MONTO) : 0,
           }));
-
+  
           const workbook = XLSX.utils.book_new();
-
+  
           const beneficiosSheet = XLSX.utils.json_to_sheet(beneficiosDetalle);
           const deduccionesInpremaSheet = XLSX.utils.json_to_sheet(deduccionesInpremaDetalle);
           const deduccionesTercerosSheet = XLSX.utils.json_to_sheet(deduccionesTercerosDetalle);
 
-          // Aplica formato numérico a las celdas de montos
           const applyNumberFormat = (sheet: XLSX.WorkSheet, column: string) => {
             const range = XLSX.utils.decode_range(sheet['!ref'] || '');
             for (let row = range.s.r + 1; row <= range.e.r; row++) {
               const cellAddress = XLSX.utils.encode_cell({ r: row, c: XLSX.utils.decode_col(column) });
               const cell = sheet[cellAddress];
               if (cell && typeof cell.v === 'number') {
-                cell.t = 'n'; // Tipo numérico
-                cell.z = '#,##0.00'; // Formato numérico
+                cell.t = 'n';
+                cell.z = '#,##0.00'; 
               }
             }
           };
-
-          applyNumberFormat(beneficiosSheet, 'D'); // Columna D es "Monto Beneficio"
-          applyNumberFormat(deduccionesInpremaSheet, 'D'); // Columna D es "Monto Deducción (INPREMA)"
-          applyNumberFormat(deduccionesTercerosSheet, 'D'); // Columna D es "Monto Deducción (Terceros)"
-
+  
+          applyNumberFormat(beneficiosSheet, 'E'); 
+          applyNumberFormat(deduccionesInpremaSheet, 'E'); 
+          applyNumberFormat(deduccionesTercerosSheet, 'E');
+  
           XLSX.utils.book_append_sheet(workbook, beneficiosSheet, 'Detalle Beneficios');
           XLSX.utils.book_append_sheet(workbook, deduccionesInpremaSheet, 'Deducciones INPREMA');
           XLSX.utils.book_append_sheet(workbook, deduccionesTercerosSheet, 'Deducciones Terceros');
-
+  
           const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
           const blob = new Blob([excelBuffer], { type: 'application/octet-stream' });
-
+  
           const nombreArchivo = `Detalle_Beneficios_Deducciones_${nombrePlanilla}_${fechaInicioFormateada}_to_${fechaFinFormateada}.xlsx`;
           saveAs(blob, nombreArchivo);
         },
@@ -1683,7 +1698,6 @@ export class DocumentosPlanillaComponent implements OnInit {
         }
       });
   }
-
-
+  
 
 }

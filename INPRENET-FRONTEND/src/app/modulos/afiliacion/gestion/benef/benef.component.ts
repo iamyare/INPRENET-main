@@ -1,7 +1,8 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, Input, OnInit } from '@angular/core';
 import { FormArray, FormBuilder, FormControl, FormGroup, Validators, AbstractControl, ValidationErrors, ValidatorFn } from '@angular/forms';
 import { DireccionService } from 'src/app/services/direccion.service';
 import { DatosEstaticosService } from 'src/app/services/datos-estaticos.service';
+import { BeneficiosService } from 'src/app/services/beneficios.service';
 
 @Component({
   selector: 'app-benef',
@@ -27,7 +28,9 @@ export class BenefComponent implements OnInit {
   constructor(
     private fb: FormBuilder,
     private direccionService: DireccionService,
-    private datosEstaticosService: DatosEstaticosService
+    private datosEstaticosService: DatosEstaticosService,
+    private beneficiosService: BeneficiosService,
+    private cdr: ChangeDetectorRef
   ) {
     const currentYear = new Date();
     this.minDate = new Date(currentYear.getFullYear(), currentYear.getMonth(), currentYear.getDate());
@@ -68,47 +71,77 @@ export class BenefComponent implements OnInit {
         Validators.maxLength(13),
         this.validarIdentificacionUnica()
       ]),
-      primer_nombre: new FormControl(datosBeneficiario?.primer_nombre || '', [Validators.required, Validators.maxLength(40)]),
+      primer_nombre: new FormControl(datosBeneficiario?.primer_nombre || '', [Validators.maxLength(40)]),
       segundo_nombre: new FormControl(datosBeneficiario?.segundo_nombre || '', [Validators.maxLength(40)]),
       tercer_nombre: new FormControl(datosBeneficiario?.tercer_nombre || ''),
-      primer_apellido: new FormControl(datosBeneficiario?.primer_apellido || '', [Validators.required, Validators.maxLength(40)]),
+      primer_apellido: new FormControl(datosBeneficiario?.primer_apellido || '', [Validators.maxLength(40)]),
       segundo_apellido: new FormControl(datosBeneficiario?.segundo_apellido || ''),
       genero: new FormControl(datosBeneficiario?.genero || ''),
-      telefono_1: new FormControl('', [
+      telefono_1: new FormControl(''),
+      correo_1: new FormControl(''),
+      correo_2: new FormControl(''),
+      fecha_nacimiento: new FormControl(''),
+      direccion_residencia: new FormControl(''),
+      id_municipio_residencia: new FormControl(null),
+      id_departamento_residencia: new FormControl(null),
+      id_departamento_nacimiento: new FormControl(null),
+      id_municipio_nacimiento: new FormControl(null),
+      porcentaje: new FormControl('', [
         Validators.required,
-        Validators.minLength(8),
-        Validators.maxLength(12),
-        Validators.pattern('^[0-9]*$')
-      ]),
-      correo_1: new FormControl(datosBeneficiario?.correo_1 || ''),
-      correo_2: new FormControl(datosBeneficiario?.correo_2 || ''),
-      fecha_nacimiento: new FormControl(datosBeneficiario?.fecha_nacimiento || '', Validators.required),
-      direccion_residencia: new FormControl(datosBeneficiario?.direccion_residencia || ''),
-      id_municipio_residencia: new FormControl(datosBeneficiario?.id_municipio_residencia || null, Validators.required),
-      id_departamento_residencia: new FormControl(datosBeneficiario?.id_departamento_residencia || null, Validators.required),
-      id_departamento_nacimiento: new FormControl(datosBeneficiario?.id_departamento_nacimiento || null, Validators.required),
-      id_municipio_nacimiento: new FormControl(datosBeneficiario?.id_municipio_nacimiento || null, Validators.required),
-      porcentaje: new FormControl(datosBeneficiario?.porcentaje, [
-        Validators.required,
-        Validators.maxLength(5),
         Validators.min(1),
-        //this.validarSumaPorcentajes.bind(this)
+        Validators.max(100)
       ]),
-      parentesco: new FormControl(datosBeneficiario?.parentesco, [
+      parentesco: new FormControl(datosBeneficiario?.parentesco || '', [
         Validators.required,
         Validators.minLength(2),
-        Validators.maxLength(30),
+        Validators.maxLength(30)
       ]),
-      discapacidad: new FormControl(datosBeneficiario?.discapacidad || 'no', [Validators.required]),
+      discapacidad: new FormControl('no', [Validators.required]),
       discapacidades: discapacidadesFormArray,
       archivo_identificacion: [null]
     });
-
+  
+    // Escuchar cambios en `n_identificacion`
+    beneficiarioForm.get('n_identificacion')?.valueChanges.subscribe(value => {
+      if (value) {
+        this.verificarAfiliadoBeneficiario(value, beneficiarioForm);
+      } else {
+        this.limpiarCamposBeneficiario(beneficiarioForm);
+      }
+    });
+  
     this.beneficiarios.push(beneficiarioForm);
     this.markAllAsTouched(beneficiarioForm);
   }
-
-
+  
+  limpiarCamposBeneficiario(beneficiarioForm: FormGroup): void {
+    beneficiarioForm.patchValue({
+      primer_nombre: '',
+      segundo_nombre: '',
+      tercer_nombre: '',
+      primer_apellido: '',
+      segundo_apellido: '',
+      genero: '',
+      telefono_1: '',
+      correo_1: '',
+      correo_2: '',
+      fecha_nacimiento: '',
+      direccion_residencia: '',
+      id_municipio_residencia: null,
+      id_departamento_residencia: null,
+      id_departamento_nacimiento: null,
+      id_municipio_nacimiento: null,
+      porcentaje: '',
+      parentesco: '',
+      discapacidad: 'no'
+    });
+  
+    // Limpiar FormArray de discapacidades
+    const discapacidadesArray = beneficiarioForm.get('discapacidades') as FormArray;
+    discapacidadesArray.clear();
+    this.tipo_discapacidad.forEach(() => discapacidadesArray.push(new FormControl(false)));
+  }
+  
 
   // Función para marcar todos los controles como "tocados"
   markAllAsTouched(control: FormGroup | FormArray): void {
@@ -180,7 +213,6 @@ export class BenefComponent implements OnInit {
     });
   }
 
-  // Cargar discapacidades
   loadDiscapacidades() {
     this.datosEstaticosService.getDiscapacidades().subscribe({
       next: (data) => {
@@ -200,7 +232,6 @@ export class BenefComponent implements OnInit {
     });
   }
 
-  // Método para manejar el cambio de discapacidad
   onDiscapacidadChange(index: number, event: any) {
     const beneficiariosArray = this.beneficiarios;
     const beneficiarioGroup = beneficiariosArray.controls[index] as FormGroup;
@@ -338,4 +369,44 @@ export class BenefComponent implements OnInit {
     this.cargarDepartamentosNacimiento();
     this.loadDiscapacidades();
   }
+
+  verificarAfiliadoBeneficiario(n_identificacion: string, beneficiarioForm: FormGroup): void {
+  if (!n_identificacion) return;
+
+  this.beneficiosService.verificarSiEsAfiliado(n_identificacion).subscribe({
+    next: (response: any) => {
+      const datosPersona = response?.esAfiliado?.datosPersona;
+      if (datosPersona) {
+        const fechaAjustada = datosPersona.fecha_nacimiento
+          ? new Date(datosPersona.fecha_nacimiento + 'T00:00:00')
+          : null;
+
+        beneficiarioForm.patchValue({
+          primer_nombre: datosPersona.primer_nombre,
+          segundo_nombre: datosPersona.segundo_nombre,
+          tercer_nombre: datosPersona.tercer_nombre,
+          primer_apellido: datosPersona.primer_apellido,
+          segundo_apellido: datosPersona.segundo_apellido,
+          fecha_nacimiento: fechaAjustada,
+          telefono_1: datosPersona.telefono_domicilio,
+        });
+      } else {
+        this.limpiarCamposBeneficiario(beneficiarioForm);
+      }
+    },
+    error: (error) => {
+      console.error('Error al verificar afiliado:', error);
+      this.limpiarCamposBeneficiario(beneficiarioForm);
+    }
+  });
+}
+
+  getGroup(control: AbstractControl): FormGroup {
+    return control as FormGroup;
+  }
+
+  get beneficiariosControls(): FormGroup[] {
+    return this.beneficiarios.controls as FormGroup[];
+  }
+  
 }

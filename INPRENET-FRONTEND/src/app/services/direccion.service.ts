@@ -56,4 +56,15 @@ export class DireccionService {
     const url = `${environment.API_URL}/api/departamento/pais/${paisId}`;
     return this.http.get<any>(url);
   }
+
+  getDepartamentoPorMunicipioId(municipioId: number): Observable<{ id_departamento: number, nombre_departamento: string }> {
+    const url = `${environment.API_URL}/api/municipio/${municipioId}/departamento`;
+    return this.http.get<{ id_departamento: number, nombre_departamento: string }>(url).pipe(
+      map(departamento => ({
+        id_departamento: departamento.id_departamento,
+        nombre_departamento: departamento.nombre_departamento
+      }))
+    );
+  }
+  
 }

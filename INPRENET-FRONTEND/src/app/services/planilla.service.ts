@@ -11,6 +11,14 @@ import { Estatus60Rentas } from '../modulos/planilla/p-60-rentas/p_60_rentas.int
 export class PlanillaService {
   constructor(private http: HttpClient, private toastr: ToastrService) { }
 
+  exportarDetallesCompletosExcel(idPlanilla: number): Observable<Blob> {
+    const url = `${environment.API_URL}/api/planilla/exportar-detalles-completos-excel/${idPlanilla}`;
+    return this.http.get(url, {
+      responseType: 'blob' as 'json'
+    }) as Observable<Blob>;
+  }
+  
+
   getDetalleBeneficiosYDeduccionesPorPeriodo(periodoInicio: string, periodoFinalizacion: string, idTiposPlanilla: number[]): Observable<any> {
     const params = new HttpParams()
       .set('periodoInicio', periodoInicio)

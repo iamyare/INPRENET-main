@@ -72,7 +72,7 @@
           Cerrar planilla
         </button>
       </div>
-      <div style="text-align: right; margin: 10px;">
+      <!-- <div style="text-align: right; margin: 10px;">
         <button mat-raised-button color="accent" (click)="descargarExcelCompleto()">
           Descargar detalles en Excel
         </button>
@@ -82,9 +82,11 @@
             Descargar Reporte de Pago Preliminar
         </button>
     </div>
-    
-
+    <div class="spinner-container" *ngIf="isLoading" style="text-align: center; margin: 20px;">
+      <mat-progress-spinner mode="indeterminate"></mat-progress-spinner>
+      <p>Generando reporte, por favor espere...</p>
     </div>
+    </div> -->
   </div>
 
 

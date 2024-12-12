@@ -102,9 +102,7 @@ export class RefPersComponent implements OnInit {
       next: (response: any) => {
         const esAfiliadoResponse = response?.esAfiliado;
         const datosPersona = esAfiliadoResponse?.datosPersona;
-  
         if (datosPersona) {
-          // Si hay datosPersona, llenar los inputs
           this.esAfiliadoText = esAfiliadoResponse.esAfiliado ? 'SÍ' : 'NO';
           conyugeControl?.patchValue({
             primer_nombre: datosPersona.primer_nombre,
@@ -119,10 +117,8 @@ export class RefPersComponent implements OnInit {
             trabaja: datosPersona.trabaja,
           });
         } else {
-          // Si no hay datosPersona, establecer el texto como "NO"
           this.esAfiliadoText = 'NO';
         }
-  
         this.cdr.detectChanges();
       },
       error: (error) => {
@@ -197,7 +193,7 @@ export class RefPersComponent implements OnInit {
   }
 
   getErrorMessageForIdentificacion(index: number): string {
-    const control = (this.referencias.at(index) as FormGroup).get('n_identificacion');
+    const control = this.referencias.at(index).get('n_identificacion');
     if (control?.hasError('identificacionDuplicadaReferencia')) {
       return 'El número de identificación ya existe en otra referencia.';
     }
@@ -214,7 +210,7 @@ export class RefPersComponent implements OnInit {
       return 'No puede tener más de 13 dígitos.';
     }
     return '';
-  }
+  }  
 
   getErrors(index: number, controlName: string): string[] {
     const control = (this.referencias.at(index) as FormGroup).get(controlName);
@@ -234,7 +230,6 @@ export class RefPersComponent implements OnInit {
         errors.push('El formato no es válido.');
       }
     }
-
     return errors;
   }
 
@@ -253,9 +248,8 @@ export class RefPersComponent implements OnInit {
       return 'No puede tener más de 13 dígitos.';
     }
     return '';
-  }
-
-
+  }  
+    
   onDatosRefPerChange(): void {
     const data = this.formGroup.value;
 
@@ -305,15 +299,15 @@ export class RefPersComponent implements OnInit {
     return (control: AbstractControl): ValidationErrors | null => {
       const formGroup = control?.parent?.parent as FormGroup;
       const afiliadoIdentificacion = formGroup?.root?.get('datosGenerales')?.get('n_identificacion')?.value;
-
-      const nIdentificacionReferencia = control.value;
-      if (!nIdentificacionReferencia || nIdentificacionReferencia !== afiliadoIdentificacion) {
-        return null;
-      }
-      return { identificacionDuplicada: true };
+      const nIdentificacionConyuge = control.value;
+      if (nIdentificacionConyuge && nIdentificacionConyuge === afiliadoIdentificacion) {
+        console.log('Error: Identificación duplicada del cónyuge.');
+        return { identificacionDuplicada: true };
+      }      
+      return null;
     };
   }
-
+  
   private validarIdentificacionUnicaReferencia(): ValidatorFn {
     return (control: AbstractControl): ValidationErrors | null => {
       const formGroup = control?.parent?.parent as FormGroup;

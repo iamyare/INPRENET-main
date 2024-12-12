@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { FormArray, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ConasaService } from 'src/app/services/conasa.service';
 
 @Component({
@@ -8,35 +8,54 @@ import { ConasaService } from 'src/app/services/conasa.service';
   styleUrls: ['./ingresar-asistencia.component.scss'],
 })
 export class IngresarAsistenciaComponent implements OnInit {
-  persona: any = null; // Almacena la persona encontrada
+  persona: any = null;
   asistenciaForm: FormGroup;
   categorias: any[] = [];
   planes: any[] = [];
   planesFiltrados: any[] = [];
   montoCalculado: number | null = null;
+  menuTitle: string = 'Ingresar Asistencias';
 
   constructor(private fb: FormBuilder, private conasaService: ConasaService) {
-    // Inicializar el formulario
     this.asistenciaForm = this.fb.group({
-      fechaContrato: ['', Validators.required],
-      telCelular: ['', [Validators.required, Validators.pattern(/^\d{8,12}$/)]],
-      telCasa: ['', [Validators.pattern(/^\d{8,12}$/)]],
-      empresa: ['', Validators.required],
-      direccionTrabajo: ['', Validators.required],
-      correoElectronico: ['', [Validators.required, Validators.email]],
-      telTrabajo: ['', [Validators.pattern(/^\d{8,12}$/)]],
-      lugarCobro: ['', Validators.required],
-      categoria: ['', Validators.required], // Asegúrate de agregarlo
-      plan: ['', Validators.required]       // Asegúrate de agregarlo
-    });    
+      contratoData: this.fb.group({
+        fechaContrato: ['', Validators.required],
+        telCelular: ['', [Validators.required, Validators.pattern(/^\d{8,12}$/)]],
+        telCasa: ['', [Validators.pattern(/^\d{8,12}$/)]],
+        empresa: ['', Validators.required],
+        direccionTrabajo: ['', Validators.required],
+        correoElectronico: ['', [Validators.required, Validators.email]],
+        telTrabajo: ['', [Validators.pattern(/^\d{8,12}$/)]],
+        lugarCobro: ['', Validators.required],
+        categoria: ['', Validators.required],
+        plan: ['', Validators.required],
+      }),
+      beneficiarios: this.fb.array([]), // Correctamente inicializado
+    });
   }
+
+  formatDateToDDMMYYYY(date: string): string {
+    const [year, month, day] = date.split('-');
+    return `${day}/${month}/${year}`;
+  }
+  
 
   ngOnInit(): void {
     this.cargarCategoriasYPlanes();
+    const today = new Date();
+    const formattedDate = this.formatDateToDDMMYYYY(today.toISOString().split('T')[0]);
+    this.asistenciaForm.get('contratoData.fechaContrato')?.setValue(formattedDate);
   }
 
+  get contratoData(): FormGroup {
+    return this.asistenciaForm.get('contratoData') as FormGroup;
+  }
+
+  get beneficiariosForm(): FormArray {
+    return this.asistenciaForm.get('beneficiarios') as FormArray;
+  }  
+
   cargarCategoriasYPlanes(): void {
-    // Cargar las categorías
     this.conasaService.obtenerCategorias().subscribe({
       next: (categorias) => {
         this.categorias = categorias;
@@ -46,7 +65,6 @@ export class IngresarAsistenciaComponent implements OnInit {
       },
     });
 
-    // Cargar los planes
     this.conasaService.obtenerPlanes().subscribe({
       next: (planes) => {
         this.planes = planes;
@@ -58,34 +76,65 @@ export class IngresarAsistenciaComponent implements OnInit {
   }
 
   onCategoriaChange(): void {
-    const idCategoria = this.asistenciaForm.get('categoria')?.value;
-  
+    const idCategoria = this.contratoData.get('categoria')?.value; 
+
     if (idCategoria) {
-      this.planesFiltrados = this.planes.filter(plan => {
-        return plan.categoria?.id_categoria === +idCategoria; 
-      });
-  
-      this.asistenciaForm.get('plan')?.reset();
+      this.planesFiltrados = this.planes.filter(plan => plan.categoria?.id_categoria === +idCategoria);
+      console.log(this.planesFiltrados);
+      
+      this.contratoData.get('plan')?.reset();
       this.montoCalculado = null;
     }
   }
   
-  
-
   onPlanChange(): void {
-    const idPlan = this.asistenciaForm.get('plan')?.value;
+    const idPlan = this.contratoData.get('plan')?.value;
     if (idPlan) {
-      const planSeleccionado = this.planes.find(plan => plan.id_plan === idPlan);
+      const planSeleccionado = this.planesFiltrados.find(plan => plan.id_plan === idPlan);
       if (planSeleccionado) {
-        this.montoCalculado = planSeleccionado.precio; // Actualizar el monto calculado
+        this.montoCalculado = planSeleccionado.precio;
+  
+        // Ajustar el número de beneficiarios
+        this.adjustBeneficiariosForm(planSeleccionado.proteccion_para);
+      } else {
+        this.montoCalculado = null;
+        this.beneficiariosForm.clear(); // Limpiar beneficiarios si no hay plan
       }
+    } else {
+      this.montoCalculado = null;
+      this.beneficiariosForm.clear();
     }
   }
+
+  adjustBeneficiariosForm(requiredBeneficiarios: number): void {
+    const beneficiariosForm = this.beneficiariosForm;
+  
+    // Ajustar el tamaño del FormArray
+    while (beneficiariosForm.length < requiredBeneficiarios) {
+      beneficiariosForm.push(
+        this.fb.group({
+          primer_nombre: ['', Validators.required],
+          segundo_nombre: [''],
+          primer_apellido: ['', Validators.required],
+          segundo_apellido: ['', Validators.required],
+          parentesco: ['', Validators.required],
+          fecha_nacimiento: ['', Validators.required],
+          observaciones: [''],
+        }),
+      );
+    }
+  
+    while (beneficiariosForm.length > requiredBeneficiarios) {
+      beneficiariosForm.removeAt(beneficiariosForm.length - 1);
+    }
+  }  
+  
 
   handlePersonaEncontrada(persona: any): void {
     if (!persona) {
       this.persona = null;
       this.asistenciaForm.reset();
+      this.beneficiariosForm.clear(); 
     } else {
       this.persona = persona;
       this.asistenciaForm.patchValue({
@@ -94,7 +143,7 @@ export class IngresarAsistenciaComponent implements OnInit {
       });
     }
   }
-
+  
   onSubmit(): void {
     if (this.asistenciaForm.valid) {
       console.log('Asistencia registrada:', this.asistenciaForm.value);
@@ -102,4 +151,6 @@ export class IngresarAsistenciaComponent implements OnInit {
       console.log('Formulario inválido.');
     }
   }
+
+
 }

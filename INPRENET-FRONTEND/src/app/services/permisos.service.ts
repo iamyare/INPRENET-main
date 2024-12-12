@@ -155,6 +155,13 @@ export class PermisosService {
             /* { role: 'ADMINISTRADOR', module: 'PLANILLA' },
             { role: 'OFICIAL DE PLANILLA', module: 'PLANILLA' }, */
           ]
+        },
+        'planilla/Egresos/voucher-general-mens': {
+          title: 'Privados',
+          permisos: [
+            { role: 'ADMINISTRADOR', module: 'PLANILLA' },
+            { role: 'OFICIAL DE PLANILLA', module: 'PLANILLA' },
+          ]
         }
       }
     },
@@ -188,8 +195,8 @@ export class PermisosService {
         'conasa/menu-conasa': {
           title: 'Detalle Envío',
           permisos: [
-            { role: 'CONSULTA PRESTAMOS', module: 'ESCALAFON' },
-            { role: 'ADMINISTRADOR', module: 'ESCALAFON' }
+            { role: 'CONSULTA PRESTAMOS', module: 'CONASA' },
+            { role: 'ADMINISTRADOR', module: 'CONASA' }
           ]
         },
         'conasa/menu-conasa/ingresar-asistencia': {

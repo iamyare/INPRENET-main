@@ -122,7 +122,6 @@ export class PlanillaColegiosPrivadosComponent
   }
 
   async reiniciarFormularios() {
-    // Restablecer el estado de los formularios y los pasos
     this.firstFormGroup.reset();
     this.mostrarPrimerPaso = true;
     this.mostrarSegundoPaso = false;

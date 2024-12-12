@@ -6,5 +6,5 @@ import { Component } from '@angular/core';
   styleUrl: './anular-asistencias.component.scss'
 })
 export class AnularAsistenciasComponent {
-
+  menuTitle: string = 'Anular Asistencias';
 }

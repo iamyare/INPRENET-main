@@ -6,5 +6,5 @@ import { Component } from '@angular/core';
   styleUrl: './reporte-asistencias.component.scss'
 })
 export class ReporteAsistenciasComponent {
-
+  menuTitle: string = 'Reporte De Asistencias';
 }

@@ -6,5 +6,5 @@ import { Component } from '@angular/core';
   styleUrl: './cancelar-asistencias.component.scss'
 })
 export class CancelarAsistenciasComponent {
-
+  menuTitle: string = 'Cancelar Asistencias';
 }

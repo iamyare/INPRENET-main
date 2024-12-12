@@ -1,97 +1,99 @@
+<div class="back-button-container">
+  <button mat-raised-button color="primary" class="back-button" routerLink="/home/conasa/menu-conasa">
+    <mat-icon>arrow_back</mat-icon> Regresar al Menú
+  </button>
+</div>
+
 <div class="container">
+  <div class="menu-title">
+    <h1>{{ menuTitle }}</h1>
+  </div>
   <!-- Componente de búsqueda -->
   <app-perfil-header (personaEncontrada)="handlePersonaEncontrada($event)"></app-perfil-header>
 
   <!-- Formulario principal -->
   <form [formGroup]="asistenciaForm" (ngSubmit)="onSubmit()">
-    <!-- Información del formulario principal -->
+    <!-- Información del contrato -->
     <mat-card *ngIf="persona" class="form-card">
-      <mat-card-header>
-        <mat-card-title>Registrar Asistencia</mat-card-title>
-      </mat-card-header>
-      <mat-card-content>
-        <div class="form-grid">
-          <!-- Fecha de Contrato -->
-          <mat-form-field appearance="outline" class="form-field">
+      <div class="card-header">
+        <h4 class="card-title">Información del Contrato</h4>
+        <p class="card-category">Complete los datos del contrato</p>
+      </div>
+      <div formGroupName="contratoData" class="card-body">
+        <div class="form-row">
+          <mat-form-field class="half-width" appearance="outline">
             <mat-label>Fecha de Contrato</mat-label>
-            <input matInput type="date" formControlName="fechaContrato" />
-            <mat-error *ngIf="asistenciaForm.get('fechaContrato')?.invalid && asistenciaForm.get('fechaContrato')?.touched">
+            <input matInput type="text" formControlName="fechaContrato" readonly />
+            <mat-error *ngIf="contratoData.get('fechaContrato')?.invalid && contratoData.get('fechaContrato')?.touched">
               Este campo es obligatorio.
             </mat-error>
           </mat-form-field>
 
-          <!-- Teléfono Celular -->
-          <mat-form-field appearance="outline" class="form-field">
+          <mat-form-field class="half-width" appearance="outline">
             <mat-label>Teléfono Celular</mat-label>
             <input matInput type="text" formControlName="telCelular" />
-            <mat-error *ngIf="asistenciaForm.get('telCelular')?.invalid && asistenciaForm.get('telCelular')?.touched">
+            <mat-error *ngIf="contratoData.get('telCelular')?.invalid && contratoData.get('telCelular')?.touched">
               Este campo es obligatorio o no es válido.
             </mat-error>
           </mat-form-field>
+        </div>
 
-          <!-- Teléfono de Casa -->
-          <mat-form-field appearance="outline" class="form-field">
+        <div class="form-row">
+          <mat-form-field class="half-width" appearance="outline">
             <mat-label>Teléfono de Casa</mat-label>
             <input matInput type="text" formControlName="telCasa" />
-            <mat-error *ngIf="asistenciaForm.get('telCasa')?.invalid && asistenciaForm.get('telCasa')?.touched">
+            <mat-error *ngIf="contratoData.get('telCasa')?.invalid && contratoData.get('telCasa')?.touched">
               El número debe ser válido.
             </mat-error>
           </mat-form-field>
 
-          <!-- Empresa -->
-          <mat-form-field appearance="outline" class="form-field">
+          <mat-form-field class="half-width" appearance="outline">
             <mat-label>Empresa</mat-label>
             <input matInput type="text" formControlName="empresa" />
-            <mat-error *ngIf="asistenciaForm.get('empresa')?.invalid && asistenciaForm.get('empresa')?.touched">
-              Este campo es obligatorio.
-            </mat-error>
-          </mat-form-field>
-
-          <!-- Dirección de Trabajo -->
-          <mat-form-field appearance="outline" class="form-field full-width">
-            <mat-label>Dirección de Trabajo</mat-label>
-            <textarea matInput rows="2" formControlName="direccionTrabajo"></textarea>
-            <mat-error *ngIf="asistenciaForm.get('direccionTrabajo')?.invalid && asistenciaForm.get('direccionTrabajo')?.touched">
-              Este campo es obligatorio.
-            </mat-error>
-          </mat-form-field>
-
-          <!-- Correo Electrónico -->
-          <mat-form-field appearance="outline" class="form-field">
-            <mat-label>Correo Electrónico</mat-label>
-            <input matInput type="email" formControlName="correoElectronico" />
-            <mat-error *ngIf="asistenciaForm.get('correoElectronico')?.invalid && asistenciaForm.get('correoElectronico')?.touched">
-              Este campo es obligatorio o el correo no es válido.
-            </mat-error>
-          </mat-form-field>
-
-          <!-- Teléfono de Trabajo -->
-          <mat-form-field appearance="outline" class="form-field">
-            <mat-label>Teléfono de Trabajo</mat-label>
-            <input matInput type="text" formControlName="telTrabajo" />
-            <mat-error *ngIf="asistenciaForm.get('telTrabajo')?.invalid && asistenciaForm.get('telTrabajo')?.touched">
-              El número debe ser válido.
-            </mat-error>
-          </mat-form-field>
-
-          <!-- Lugar de Cobro -->
-          <mat-form-field appearance="outline" class="form-field">
-            <mat-label>Lugar de Cobro</mat-label>
-            <input matInput type="text" formControlName="lugarCobro" />
-            <mat-error *ngIf="asistenciaForm.get('lugarCobro')?.invalid && asistenciaForm.get('lugarCobro')?.touched">
+            <mat-error *ngIf="contratoData.get('empresa')?.invalid && contratoData.get('empresa')?.touched">
               Este campo es obligatorio.
             </mat-error>
           </mat-form-field>
         </div>
-      </mat-card-content>
-    </mat-card>
 
-    <!-- Información adicional (Categoría, Plan y Monto Calculado) -->
-    <mat-card *ngIf="persona" class="info-card spaced-card">
-      <mat-card-content>
-        <div class="info-grid">
-          <!-- Categoría -->
-          <mat-form-field appearance="outline" class="form-field">
+        <div class="form-row">
+          <mat-form-field class="full-width" appearance="outline">
+            <mat-label>Dirección de Trabajo</mat-label>
+            <textarea matInput rows="2" formControlName="direccionTrabajo"></textarea>
+            <mat-error *ngIf="contratoData.get('direccionTrabajo')?.invalid && contratoData.get('direccionTrabajo')?.touched">
+              Este campo es obligatorio.
+            </mat-error>
+          </mat-form-field>
+        </div>
+
+        <div class="form-row">
+          <mat-form-field class="half-width" appearance="outline">
+            <mat-label>Correo Electrónico</mat-label>
+            <input matInput type="email" formControlName="correoElectronico" />
+            <mat-error *ngIf="contratoData.get('correoElectronico')?.invalid && contratoData.get('correoElectronico')?.touched">
+              Este campo es obligatorio o el correo no es válido.
+            </mat-error>
+          </mat-form-field>
+
+          <mat-form-field class="half-width" appearance="outline">
+            <mat-label>Teléfono de Trabajo</mat-label>
+            <input matInput type="text" formControlName="telTrabajo" />
+            <mat-error *ngIf="contratoData.get('telTrabajo')?.invalid && contratoData.get('telTrabajo')?.touched">
+              El número debe ser válido.
+            </mat-error>
+          </mat-form-field>
+        </div>
+
+        <div class="form-row">
+          <mat-form-field class="half-width" appearance="outline">
+            <mat-label>Lugar de Cobro</mat-label>
+            <input matInput type="text" formControlName="lugarCobro" />
+            <mat-error *ngIf="contratoData.get('lugarCobro')?.invalid && contratoData.get('lugarCobro')?.touched">
+              Este campo es obligatorio.
+            </mat-error>
+          </mat-form-field>
+
+          <mat-form-field class="half-width" appearance="outline">
             <mat-label>Categoría</mat-label>
             <mat-select formControlName="categoria" (selectionChange)="onCategoriaChange()">
               <mat-option *ngFor="let categoria of categorias" [value]="categoria.id_categoria">
@@ -99,32 +101,44 @@
               </mat-option>
             </mat-select>
           </mat-form-field>
+        </div>
 
-          <!-- Plan -->
-          <mat-form-field appearance="outline" class="form-field">
+        <div class="form-row">
+          <!-- Campo de Plan -->
+          <mat-form-field class="half-width" appearance="outline">
             <mat-label>Plan</mat-label>
             <mat-select formControlName="plan" (selectionChange)="onPlanChange()">
               <mat-option *ngFor="let plan of planesFiltrados" [value]="plan.id_plan">
-                {{ plan.nombre_plan }} - L{{ plan.precio }}
+                {{ plan.nombre_plan }}
               </mat-option>
             </mat-select>
+            <mat-error *ngIf="contratoData.get('plan')?.invalid && contratoData.get('plan')?.touched">
+              Seleccione un plan.
+            </mat-error>
           </mat-form-field>
-
-          <!-- Monto Calculado -->
-          <div class="calculated-amount-field">
-            <span class="label">Monto Calculado:</span>
-            <span class="value">{{ montoCalculado !== null ? 'L' + montoCalculado : '-' }}</span>
-          </div>
+        
+          <!-- Campo de Monto Calculado -->
+          <mat-form-field class="half-width" appearance="outline">
+            <mat-label>Monto Calculado</mat-label>
+            <input matInput type="text" [value]="'L ' + (montoCalculado !== null ? montoCalculado : '-')" readonly />
+          </mat-form-field>
         </div>
-      </mat-card-content>
+        
+        
+      </div>
     </mat-card>
 
+    <!-- Componente de Beneficiarios -->
+    <app-agregar-beneficiarios
+      *ngIf="persona"
+      [beneficiariosForm]="beneficiariosForm">
+    </app-agregar-beneficiarios>
+
     <!-- Botón de registro -->
-    <div class="actions">
-      <button mat-raised-button color="primary" type="submit" [disabled]="!asistenciaForm.valid">
+    <div *ngIf="persona" class="actions">
+      <button  mat-raised-button color="primary"  [disabled]="!asistenciaForm.valid"><!--  type="submit" -->
         Registrar Asistencia
       </button>
     </div>
   </form>
 </div>
-

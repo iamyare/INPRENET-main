@@ -18,7 +18,7 @@ export class Net_Centro_Trabajo {
     @PrimaryGeneratedColumn({ type: 'int', name: 'ID_CENTRO_TRABAJO', primaryKeyConstraintName: 'PK_id_centro_trabajo' })
     id_centro_trabajo: number;
 
-    @Column('nvarchar2', { length: 14, nullable: true, name: 'RTN' })
+    @Column('nvarchar2', { length: 20, nullable: true, name: 'RTN' })
     @Index("UQ_rtn_netCenTrab")
     rtn: string;
 

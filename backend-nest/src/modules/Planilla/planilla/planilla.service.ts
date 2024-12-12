@@ -3,7 +3,7 @@ import { CreatePlanillaDto } from './dto/create-planilla.dto';
 import { UpdatePlanillaDto } from './dto/update-planilla.dto';
 import { InjectEntityManager, InjectRepository } from '@nestjs/typeorm';
 import { Net_Detalle_Deduccion } from '../detalle-deduccion/entities/detalle-deduccion.entity';
-import { EntityManager, QueryFailedError, Raw, Repository } from 'typeorm';
+import { EntityManager, Not, QueryFailedError, Raw, Repository } from 'typeorm';
 import { net_persona } from '../../Persona/entities/net_persona.entity';
 import { Net_Persona_Por_Banco } from '../../banco/entities/net_persona-banco.entity';
 import { Net_Planilla } from './entities/net_planilla.entity';
@@ -1644,7 +1644,10 @@ GROUP BY
     }
   }
 
-  async generarVoucherByMes(dni: string, mes: number): Promise<any> {
+  async generarVoucherByMes(dni: string, mes: number, anio: number): Promise<any> {
+    console.log(anio);
+    console.log(mes);
+
     try {
       const persona = await this.personaRepository.findOne({
         where: {
@@ -1654,13 +1657,20 @@ GROUP BY
               detallePagBeneficio: {
                 estado: 'PAGADA',
                 planilla: {
-                  periodoInicio: Raw(alias => `TO_CHAR(${alias}, 'MM') = :mes`, { mes: mes.toString().padStart(2, '0') })
+                  periodoInicio: Raw(
+                    alias => `EXTRACT(MONTH FROM ${alias}) = :mes AND EXTRACT(YEAR FROM ${alias}) = :anio`,
+                    { mes, anio }
+                  )
                 },
-              },
+                /* personaporbanco: {
+                  // id_af_banco: Not(null) // Asegura que id_af_banco no sea null
+                } */
+              }
             }
           }
         },
         relations: [
+          'personasPorBanco',
           'detallePersona',
           'detallePersona.detalleBeneficio',
           'detallePersona.padreIdPersona',
@@ -1679,11 +1689,18 @@ GROUP BY
           detalleDeduccion: {
             estado_aplicacion: 'COBRADA',
             planilla: {
-              periodoInicio: Raw(alias => `TO_CHAR(${alias}, 'MM') = :mes`, { mes: mes.toString().padStart(2, '0') })
-            }
+              periodoInicio: Raw(alias => `EXTRACT(MONTH FROM ${alias}) = :mes AND EXTRACT(YEAR FROM ${alias}) = :anio`, {
+                mes,
+                anio
+              })
+            },
+            /* personaPorBanco: {
+              //id_af_banco: Not(null) // Asegura que id_af_banco no sea null
+            } */
           }
         },
         relations: [
+          'detalleDeduccion.personaPorBanco',
           'detalleDeduccion.deduccion',
           'detalleDeduccion.deduccion.centroTrabajo',
           'detalleDeduccion.planilla',

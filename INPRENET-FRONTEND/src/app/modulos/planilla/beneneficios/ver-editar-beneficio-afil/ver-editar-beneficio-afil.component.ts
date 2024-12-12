@@ -114,12 +114,12 @@ export class VerEditarBeneficioAfilComponent {
       },
       {
         header: 'Fecha de inicio',
-        col: 'periodoInicio',
+        col: 'periodo_inicio',
         isEditable: true
       },
       {
         header: 'Fecha de finalización',
-        col: 'periodoFinalizacion',
+        col: 'periodo_finalizacion',
         isEditable: true
       },
       {
@@ -239,10 +239,10 @@ export class VerEditarBeneficioAfilComponent {
           monto_ultima_cuota: item.monto_ultima_cuota,
           monto_primera_cuota: item.monto_primera_cuota,
           monto_total: item.monto_total,
-          periodoInicio: convertirFecha(item.periodo_inicio, false),
-          periodoFinalizacion: item.beneficio.periodicidad === "V"
+          periodo_inicio: convertirFecha(item.periodo_inicio, false),
+          periodo_finalizacion: item.beneficio.periodicidad === "V"
             ? "NO APLICA"
-            : convertirFecha(item.periodo_finalizacion, false),
+            : item.periodo_finalizacion,
           recibiendo_beneficio: item.recibiendo_beneficio,
           observaciones: item.observaciones || "NO TIENE",
           voluntario: item.persona.voluntario || "NO TIENE",
@@ -327,7 +327,7 @@ export class VerEditarBeneficioAfilComponent {
   };
 
   manejarAccionUno(row: any) {
-    let campos: any = [{ nombre: 'n_expediente', tipo: 'text', requerido: false, etiqueta: 'N Expediente', editable: false, validadores: [] },
+    let campos: any = [{ nombre: 'n_expediente', tipo: 'text', requerido: false, etiqueta: 'N Expediente', editable: true, validadores: [] },
     { nombre: 'fecha_presentacion', tipo: 'date', requerido: false, etiqueta: 'Fecha Presentación', editable: true, validadores: [] },
     { nombre: 'fecha_calculo', tipo: 'date', requerido: false, etiqueta: 'Fecha Efectividad', editable: true, validadores: [] }];
 
@@ -336,7 +336,7 @@ export class VerEditarBeneficioAfilComponent {
       if (row.numero_rentas_max == 1) {
         campos.push(
           { nombre: 'monto_primera_cuota', tipo: 'number', requerido: false, etiqueta: 'Monto Primera Cuota', editable: true, validadores: [Validators.min(0), montoTotalValidator()] },
-          { nombre: 'estado_solicitud', tipo: 'list', requerido: false, opciones: [{ label: "APROBADO", value: "APROBADO" }, { label: "RECHAZADO", value: "RECHAZADO" }], etiqueta: 'Estado Solicitud', editable: true },
+          { nombre: 'estado_solicitud', tipo: 'list', requerido: false, opciones: [{ label: "APROBADO", value: "APROBADO" }, { label: "RECHAZADO", value: "RECHAZADO" }, { label: "SUSPENDIDO", value: "SUSPENDIDO" }], etiqueta: 'Estado Solicitud', editable: true },
           { nombre: 'observaciones', tipo: 'text', requerido: false, etiqueta: 'Observaciones', editable: true },
           { nombre: 'complementaria', tipo: 'list', requerido: false, opciones: [{ label: "SI", value: "SI" }, { label: "NO", value: "NO" }], etiqueta: '¿Este beneficio va en complementaria?', editable: true },
         )
@@ -354,9 +354,9 @@ export class VerEditarBeneficioAfilComponent {
           { nombre: 'num_rentas_pagar_primer_pago', tipo: 'number', requerido: false, etiqueta: 'Número de rentas a pagar en el primer pago', editable: true, validadores: [Validators.min(1), noDecimalValidator()] },
           { nombre: 'monto_ultima_cuota', tipo: 'number', requerido: false, etiqueta: 'Monto correspondiente a los dias restantes', editable: true, validadores: [Validators.min(0), montoTotalValidator()] },
           { nombre: 'monto_por_periodo', tipo: 'number', requerido: false, etiqueta: 'Monto mensual', editable: true, validadores: [Validators.min(0), montoTotalValidator()] },
-          { nombre: 'monto_primera_cuota', tipo: 'number', requerido: false, etiqueta: 'Monto primera cuota', editable: false, validadores: [Validators.min(0), montoTotalValidator()] },
+          { nombre: 'monto_primera_cuota', tipo: 'number', requerido: false, etiqueta: 'Monto primera cuota', editable: true, validadores: [Validators.min(0), montoTotalValidator()] },
           { nombre: 'monto_total', tipo: 'number', requerido: false, etiqueta: 'Monto total', editable: false, validadores: [Validators.min(0), montoTotalValidator()] },
-          { nombre: 'estado_solicitud', tipo: 'list', requerido: false, opciones: [{ label: "APROBADO", value: "APROBADO" }, { label: "RECHAZADO", value: "RECHAZADO" }], etiqueta: 'Estado Solicitud', editable: true },
+          { nombre: 'estado_solicitud', tipo: 'list', requerido: false, opciones: [{ label: "APROBADO", value: "APROBADO" }, { label: "RECHAZADO", value: "RECHAZADO" }, { label: "SUSPENDIDO", value: "SUSPENDIDO" }], etiqueta: 'Estado Solicitud', editable: true },
           { nombre: 'observaciones', tipo: 'text', requerido: false, etiqueta: 'Observaciones', editable: true },
           { nombre: 'complementaria', tipo: 'list', requerido: false, opciones: [{ label: "SI", value: "SI" }, { label: "NO", value: "NO" }], etiqueta: '¿Este beneficio va en complementaria?', editable: true },
         )
@@ -370,20 +370,17 @@ export class VerEditarBeneficioAfilComponent {
         /* { nombre: 'monto_total', tipo: 'number', requerido: false, etiqueta: 'Monto Total', editable: true, }, */
         { nombre: 'num_rentas_pagar_primer_pago', tipo: 'number', requerido: false, etiqueta: 'Número de rentas a pagar en el primer pago', editable: true, validadores: [Validators.min(1), noDecimalValidator()] },
         { nombre: 'monto_por_periodo', tipo: 'text', requerido: false, etiqueta: 'Monto por periodo', editable: true, validadores: [Validators.min(0), montoTotalValidator()] },
-        { nombre: 'monto_primera_cuota', tipo: 'number', requerido: false, etiqueta: 'Monto primera cuota', editable: false, validadores: [Validators.min(0), montoTotalValidator()] },
-        { nombre: 'estado_solicitud', tipo: 'list', requerido: false, opciones: [{ label: "APROBADO", value: "APROBADO" }, { label: "RECHAZADO", value: "RECHAZADO" }], etiqueta: 'Estado Solicitud', editable: true },
+        { nombre: 'monto_primera_cuota', tipo: 'number', requerido: false, etiqueta: 'Monto primera cuota', editable: true, validadores: [Validators.min(0), montoTotalValidator()] },
+        { nombre: 'estado_solicitud', tipo: 'list', requerido: false, opciones: [{ label: "APROBADO", value: "APROBADO" }, { label: "RECHAZADO", value: "RECHAZADO" }, { label: "SUSPENDIDO", value: "SUSPENDIDO" }], etiqueta: 'Estado Solicitud', editable: true },
         { nombre: 'observaciones', tipo: 'text', requerido: false, etiqueta: 'Observaciones', editable: true },
         { nombre: 'complementaria', tipo: 'list', requerido: false, opciones: [{ label: "SI", value: "SI" }, { label: "NO", value: "NO" }], etiqueta: '¿Este beneficio va en complementaria?', editable: true },
       );
-
     }
 
     if (row.tipoPersona == "BENEFICIARIO" || row.tipoPersona == "DESIGNADO") {
       //campos.pop()
     }
 
-
-    console.log(row);
     row.monto_por_periodo = parseFloat(row.monto_por_periodo?.toFixed(2));
     row.monto_primera_cuota = parseFloat(row.monto_primera_cuota?.toFixed(2));
     row.monto_ultima_cuota = parseFloat(row.monto_ultima_cuota?.toFixed(2));

@@ -30,6 +30,7 @@ export class VoucherGeneralMensComponent {
 
   backgroundImageBase64: string = '';
   detallePlanilla: any;
+  cuentaB: any;
 
   constructor(
     private planillaService: PlanillaService,
@@ -112,7 +113,7 @@ export class VoucherGeneralMensComponent {
   }
 
   obtenerInformacion() {
-    this.getFilas(this.datosForm.value.n_identificacion, this.datosForm.value.mes).then(() =>
+    this.getFilas(this.datosForm.value.n_identificacion, this.datosForm.value.mes, this.datosForm.value.anio).then(() =>
       this.cargar()
     );
   }
@@ -158,6 +159,13 @@ export class VoucherGeneralMensComponent {
         name: 'mes',
         validations: [Validators.required],
         display: true
+      },
+      {
+        type: 'number',
+        label: 'Año',
+        name: 'anio',
+        validations: [Validators.required],
+        display: true
       }
     ];
 
@@ -177,12 +185,16 @@ export class VoucherGeneralMensComponent {
     }
   }
 
-  getFilas = async (dni: string, mes: number) => {
+  getFilas = async (dni: string, mes: number, anio: number) => {
     this.filas = [];
     try {
-      await this.afiliacionService.generar_voucher_by_mes(dni, mes).subscribe({
+      await this.afiliacionService.generar_voucher_by_mes(dni, mes, anio).subscribe({
         next: (resultados) => {
-          this.construirPDFBen(resultados, this.backgroundImageBase64);
+          if (resultados.persona.detallePersona[0].detalleBeneficio[0].detallePagBeneficio[0].personaporbanco) {
+            this.construirPDFBen(resultados, this.backgroundImageBase64);
+          } else {
+            this.cuentaB = true;
+          }
 
         },
         error: (error) => {

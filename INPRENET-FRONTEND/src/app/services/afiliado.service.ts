@@ -269,11 +269,12 @@ export class AfiliadoService {
     return this.http.get<any>(`${environment.API_URL}/api/planilla/generar-voucher`, { params });
   }
 
-  generar_voucher_by_mes(dni: string, mes: number): Observable<any> {
+  generar_voucher_by_mes(dni: string, mes: number, anio: number): Observable<any> {
     // Definir los parámetros de la consulta
     const params = new HttpParams()
       .set('dni', dni)
-      .set('mes', mes);
+      .set('mes', mes)
+      .set('anio', anio);
     console.log(params);
 
     return this.http.get<any>(`${environment.API_URL}/api/planilla/generar-voucher-by-mes`, { params });

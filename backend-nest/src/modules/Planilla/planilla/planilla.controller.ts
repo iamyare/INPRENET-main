@@ -103,7 +103,7 @@ export class PlanillaController {
     const data = await this.planillaService.obtenerDetallePagoBeneficioPorPlanillaPreliminar(idPlanilla);
     await this.planillaService.generarReporteDetallePago(data, res);
   }
-  
+
   @Get('detalle-pago-beneficio')
   async obtenerDetallePagoBeneficioPorPlanilla(
     @Query('periodoInicio') periodoInicio: string,
@@ -239,7 +239,7 @@ export class PlanillaController {
     );
   }
 
-  
+
   @Get('detalle-beneficios-deducciones-periodo')
   async getDetalleBeneficiosDeducciones(
     @Query('periodoInicio') periodoInicio: string,
@@ -341,19 +341,23 @@ export class PlanillaController {
   @Get('generar-voucher-by-mes')
   async generarVoucherByMes(
     @Query('dni') dni: string,
-    @Query('mes') mes: number
+    @Query('mes') mes: number,
+    @Query('anio') anio: number
   ) {
 
     // Verifica si los parámetros de consulta están presentes
     if (!mes) {
-      throw new BadRequestException('El ID de la planilla es obligatorio.');
+      throw new BadRequestException('El mes es obligatorio.');
+    }
+    if (!anio) {
+      throw new BadRequestException('El año es obligatorio.');
     }
     if (!dni) {
       throw new BadRequestException('El DNI del afiliado es obligatorio.');
     }
 
     try {
-      const resultados = await this.planillaService.generarVoucherByMes(dni, mes);
+      const resultados = await this.planillaService.generarVoucherByMes(dni, mes, anio);
       return resultados;
     } catch (error) {
       // Aquí deberías manejar diferentes tipos de errores de acuerdo a lo que tu lógica de negocio requiera

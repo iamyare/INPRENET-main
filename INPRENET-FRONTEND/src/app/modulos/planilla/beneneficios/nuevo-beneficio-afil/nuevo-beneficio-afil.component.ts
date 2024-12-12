@@ -545,7 +545,6 @@ export class NuevoBeneficioAfilComponent implements OnInit {
 
   async prueba(event: any): Promise<any> {
 
-
     if (event.fieldName == "tipo_persona") {
       this.tipoPersonaSelected = event.value;
       //this.tiposPersona = event.value;
@@ -584,16 +583,13 @@ export class NuevoBeneficioAfilComponent implements OnInit {
               regimen: item.beneficio?.regimen
             };
           });
-
-        console.log(this.beneficios);
-
       }
 
       this.myFormFields1[3].options = this.beneficios;
       this.form1.get("nombre_beneficio")?.setValue(null)
       this.form1.get("num_rentas_pagar_primer_pago")?.setValue(null)
       this.form1.get("periodicidad_beneficio")?.setValue(null)
-      //this.form1.get("regimen")?.setValue(null)
+      this.form1.get("regimen")?.setValue(null)
       this.form1?.get("estado_solicitud")?.setValue(null)
       this.form1?.get("num_rentas_aplicadas")?.setValue(null)
       this.form1?.get("ultimo_dia_ultima_renta")?.setValue(null)
@@ -608,7 +604,7 @@ export class NuevoBeneficioAfilComponent implements OnInit {
       this.FormBen?.get("nombre_beneficio")?.setValue(null)
       this.FormBen?.get("num_rentas_pagar_primer_pago")?.setValue(null)
       this.FormBen?.get("periodicidad_beneficio")?.setValue(null)
-      //this.FormBen?.get("regimen")?.setValue(null)
+      this.FormBen?.get("regimen")?.setValue(null)
       this.FormBen?.get("estado_solicitud")?.setValue(null)
       this.FormBen?.get("num_rentas_aplicadas")?.setValue(null)
       this.FormBen?.get("ultimo_dia_ultima_renta")?.setValue(null)
@@ -942,7 +938,7 @@ export class NuevoBeneficioAfilComponent implements OnInit {
           next: (response) => {
             this.toastr.success("se asignó correctamente el beneficio");
             this.getFilas().then(() => this.cargar());
-            //this.limpiarFormulario();
+            this.limpiarFormulario();
           },
           error: (error) => {
             //this.limpiarFormulario();

@@ -1645,8 +1645,6 @@ GROUP BY
   }
 
   async generarVoucherByMes(dni: string, mes: number, anio: number): Promise<any> {
-    console.log(anio);
-    console.log(mes);
 
     try {
       const persona = await this.personaRepository.findOne({

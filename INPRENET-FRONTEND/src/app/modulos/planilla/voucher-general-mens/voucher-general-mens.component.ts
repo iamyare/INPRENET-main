@@ -31,6 +31,7 @@ export class VoucherGeneralMensComponent {
   backgroundImageBase64: string = '';
   detallePlanilla: any;
   cuentaB: any;
+  existB: any;
 
   constructor(
     private planillaService: PlanillaService,
@@ -148,23 +149,27 @@ export class VoucherGeneralMensComponent {
     this.myFormFields = [
       {
         type: 'text',
-        label: 'Dni',
+        label: 'N° DE IDENTIFICACIÓN',
         name: 'n_identificacion',
         validations: [Validators.required],
         display: true
       },
       {
         type: 'number',
-        label: 'Número de mes',
+        label: 'NÚMERO DE MES',
         name: 'mes',
-        validations: [Validators.required],
+        validations: [
+          Validators.required,
+          Validators.min(1),
+          Validators.max(12)
+        ],
         display: true
       },
       {
         type: 'number',
-        label: 'Año',
+        label: 'AÑO',
         name: 'anio',
-        validations: [Validators.required],
+        validations: [Validators.required, Validators.min(1)],
         display: true
       }
     ];
@@ -190,12 +195,17 @@ export class VoucherGeneralMensComponent {
     try {
       await this.afiliacionService.generar_voucher_by_mes(dni, mes, anio).subscribe({
         next: (resultados) => {
-          if (resultados.persona.detallePersona[0].detalleBeneficio[0].detallePagBeneficio[0].personaporbanco) {
-            this.construirPDFBen(resultados, this.backgroundImageBase64);
-          } else {
+          if (!resultados.persona) {
+            this.existB = true;
+            this.cuentaB = false;
+          } else if (!resultados.persona?.detallePersona[0]?.detalleBeneficio[0]?.detallePagBeneficio[0]?.personaporbanco) {
             this.cuentaB = true;
+            this.existB = false;
+          } else if (resultados.persona?.detallePersona[0]?.detalleBeneficio[0]?.detallePagBeneficio[0]?.personaporbanco) {
+            this.construirPDFBen(resultados, this.backgroundImageBase64);
+            this.existB = false;
+            this.cuentaB = false;
           }
-
         },
         error: (error) => {
           console.error('Error al obtener los totales:', error);

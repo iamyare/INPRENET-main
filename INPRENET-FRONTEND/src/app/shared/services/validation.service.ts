@@ -344,6 +344,31 @@ export class ValidationService {
     };
   }
 
+  //--------------------------------------------
+  yearValidator(): ValidatorFn {
+    return (control: AbstractControl): { [key: string]: any } | null => {
+      const value = control.value || '';
+
+      // Validación: Solo números
+      if (!/^\d+$/.test(value)) {
+        return { invalidCharactersYear: 'El año solo puede contener números.' };
+      }
+
+      // Validación: No más de 4 dígitos
+      if (value.length > 4) {
+        return { maxLengthExceededYear: 'El año no puede tener más de 4 dígitos.' };
+      }
+
+      // Validación: No permitir años mayores al actual
+      const currentYear = new Date().getFullYear();
+      if (Number(value) > currentYear) {
+        return { yearTooNew: `El año no puede ser mayor al ${currentYear}.` };
+      }
+
+      return null; // Sin errores
+    };
+  }
+
   /*|---------------------------------------------------------------|
     |---- FUNCIÓN: Obtener mensajes de error para los controles ----|
     |---------------------------------------------------------------|*/
@@ -456,6 +481,15 @@ export class ValidationService {
     }
     if (control.hasError('invalidMonth')) {
       messages.push('El número ingresado no corresponde a un mes válido (1-12).');
+    }
+    if (control.hasError('invalidCharactersYear')) {
+      messages.push('El año solo puede contener números.');
+    }
+    if (control.hasError('maxLengthExceededYear')) {
+      messages.push('El año no puede tener más de 4 dígitos.');
+    }
+    if (control.hasError('yearTooNew')) {
+      messages.push('El año no puede ser mayor al actual.');
     }
     return messages;
   }

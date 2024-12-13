@@ -167,7 +167,7 @@ export class VoucherGeneralMensComponent {
         type: 'number',
         label: 'AÑO',
         name: 'anio',
-        validations: [Validators.required, Validators.min(1)],
+        validations: [Validators.required, this.validationService.yearValidator()],
         display: true
       }
     ];

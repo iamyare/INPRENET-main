@@ -1113,7 +1113,7 @@ export class DetalleBeneficioService {
     const decoded = this.jwtService.verify(token);
 
     const estadoPP = await this.usuarioEmpRepository.findOne({ where: { empleadoCentroTrabajo: { correo_1: decoded?.correo } } });
-    const id_usuario_empresa_in = estadoPP.id_usuario_empresa
+    const id_usuario_empresa_in = estadoPP.id_usuario_empresa;
 
     try {
       const dataEnv = {
@@ -1133,9 +1133,11 @@ export class DetalleBeneficioService {
         prestamo: data.prestamo === undefined || data.prestamo === '' ? null : data.prestamo,
       };
 
-      const detBenAfil = await this.detalleBeneficioAfiliadoRepository.preload(dataEnv);
-      await this.detalleBeneficioAfiliadoRepository.save(detBenAfil);
+      console.log(data);
+      console.log(dataEnv);
 
+      //const detBenAfil = await this.detalleBeneficioAfiliadoRepository.preload(dataEnv);
+      //await this.detalleBeneficioAfiliadoRepository.save(detBenAfil);
     } catch (error) {
       this.logger.error(`Error al actualizar beneficios: ${error.message}`, error.stack);
       throw new InternalServerErrorException(`Error al actualizar beneficios. ${error}}`);

@@ -76,7 +76,6 @@ export class EditarDialogComponent implements OnInit {
 
   escucharCambiosFormulario() {
     this.formGroup.valueChanges.subscribe(values => {
-      this.formUpdated.emit(values); // Emitir cambios del formulario.
 
       // Suponiendo que el campo que modifica es 'input1' y el que quieres cambiar es 'input2'.
       const num_rentas_pagar_primer_pago = this.formGroup.get("num_rentas_pagar_primer_pago")?.value;
@@ -85,7 +84,7 @@ export class EditarDialogComponent implements OnInit {
       const num_rentas_aplicadas = this.formGroup.get("num_rentas_aplicadas")?.value;
       //const valorInput4 = values.num_rentas_aplicadas;
       const ultimo_dia_ultima_renta = values?.ultimo_dia_ultima_renta;
-      const fecha_calculo = this.formGroup.get("fecha_calculo")?.value;
+      const fecha_calculo = values.fecha_calculo;
 
       const monto_total = this.formGroup.get("monto_total")?.value;
       const monto_ultima_cuota = this.formGroup.get("monto_ultima_cuota")?.value;
@@ -108,14 +107,13 @@ export class EditarDialogComponent implements OnInit {
 
       if (num_rentas_aplicadas !== undefined) {
         let startDate: any
-        if (fecha_calculo) {
 
+        if (fecha_calculo) {
           if (typeof fecha_calculo === 'string' && fecha_calculo.includes('T')) {
             // Si el valor tiene formato ISO con 'T', convertirlo a 'yyyy-mm-dd'
-            startDate = new Date(fecha_calculo).toISOString().split('T')[0];
+            startDate = fecha_calculo.split('T')[0];
           } else {
-            // Si ya tiene formato 'yyyy-mm-dd', dejarlo tal cual
-            startDate = new Date().toISOString().split('T')[0];
+            startDate = fecha_calculo.toISOString().split('T')[0];
           }
         } else {
           startDate = new Date().toISOString().split('T')[0];
@@ -125,10 +123,11 @@ export class EditarDialogComponent implements OnInit {
         const endDateWithMonths = addMonths(startDate, parseInt(num_rentas_aplicadas, 10));
         //const endDateWithMonths = addMonths(startDate, parseInt(valorInput3, 10));
         // Configuramos la fecha al próximo mes y asignamos el día de `ultimo_dia_ultima_renta`
-        const endDateAdjusted = new Date(endDateWithMonths.getFullYear(), endDateWithMonths.getMonth(), parseInt(ultimo_dia_ultima_renta, 10));
+        const endDateAdjusted = new Date(endDateWithMonths.getFullYear(), endDateWithMonths.getMonth() + 1, parseInt(ultimo_dia_ultima_renta, 10));
 
         this.formGroup.get('periodo_finalizacion')?.patchValue(endDateAdjusted, { emitEvent: false });
       }
+      this.formUpdated.emit(values); // Emitir cambios del formulario.
     });
   }
 

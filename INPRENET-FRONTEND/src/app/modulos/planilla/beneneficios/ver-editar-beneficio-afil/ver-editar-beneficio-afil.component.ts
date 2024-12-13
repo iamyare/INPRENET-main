@@ -103,15 +103,15 @@ export class VerEditarBeneficioAfilComponent {
         isEditable: false
       },
       {
+        header: 'Número de rentas aprobadas',
+        col: 'num_rentas_aplicadas',
+        isEditable: false
+      },
+      {
         header: 'Monto por periodo',
         col: 'monto_por_periodo',
         moneda: true,
         isEditable: true
-      },
-      {
-        header: 'Número de rentas aprobadas',
-        col: 'num_rentas_aplicadas',
-        isEditable: false
       },
       {
         header: 'Fecha de inicio',
@@ -124,7 +124,7 @@ export class VerEditarBeneficioAfilComponent {
         isEditable: true
       },
       {
-        header: 'Número de rentas a pagar primer pago',
+        header: 'Número de rentas a pagar en la primera cuota',
         col: 'num_rentas_pagar_primer_pago',
         isEditable: false
       },
@@ -135,7 +135,12 @@ export class VerEditarBeneficioAfilComponent {
         isEditable: true
       },
       {
-        header: 'Monto última cuota',
+        header: 'Dias de la ultima renta',
+        col: 'ultimo_dia_ultima_renta',
+        isEditable: true
+      },
+      {
+        header: 'Monto última renta',
         col: 'monto_ultima_cuota',
         moneda: true,
         isEditable: true
@@ -345,7 +350,7 @@ export class VerEditarBeneficioAfilComponent {
         )
       } else if (row.numero_rentas_max > 1 || row.numero_rentas_max == 0) {
         campos.push(
-          { nombre: 'monto_por_periodo', tipo: 'number', requerido: false, etiqueta: 'Monto mensual', editable: true, validadores: [Validators.min(0), montoTotalValidator()] },
+          { nombre: 'monto_por_periodo', tipo: 'number', requerido: false, etiqueta: 'Monto mensual del beneficio', editable: true, validadores: [Validators.min(0), montoTotalValidator()] },
 
           { nombre: 'num_rentas_aplicadas', tipo: 'text', requerido: false, etiqueta: 'Número de rentas aprobadas', editable: true, validadores: [Validators.min(1)] },
 
@@ -378,10 +383,6 @@ export class VerEditarBeneficioAfilComponent {
 
     } else if (row.periodicidad == "V") {
       campos.push(
-        /* { nombre: 'periodoInicio', tipo: 'date', requerido: false, etiqueta: 'Periodo de inicio' },
-        { nombre: 'periodoFinalizacion', tipo: 'date', requerido: false, etiqueta: 'Periodo de finalización', editable: false },
-        { nombre: 'num_rentas_aplicadas', tipo: 'number', requerido: false, etiqueta: 'Número de rentas aprobadas', editable: true },*/
-        /* { nombre: 'monto_total', tipo: 'number', requerido: false, etiqueta: 'Monto Total', editable: true, }, */
         { nombre: 'fecha_calculo', tipo: 'date', requerido: false, etiqueta: 'Fecha Efectividad', editable: true, validadores: [] },
 
         { nombre: 'monto_por_periodo', tipo: 'text', requerido: false, etiqueta: 'Monto por periodo', editable: true, validadores: [Validators.min(0), montoTotalValidator()] },
@@ -415,22 +416,11 @@ export class VerEditarBeneficioAfilComponent {
       const campoActualizar = campos.find((c: any) => c.nombre === 'num_rentas_pagar_primer_pago');
       if (campoActualizar) {
         this.cdr.detectChanges();
-        //campoActualizar.value = 88; // Actualizar valor dinámicamente.
-        //this.cdr.detectChanges();
       }
     });
 
     dialogRef.afterClosed().subscribe((result: any) => {
       if (result) {
-        this.cdr.detectChanges();
-        console.log('Resultado del diálogo:', result);
-      }
-
-      /* if (result) {
-        this.cdr.detectChanges();
-        campos[1].num_rentas_aplicadas = 88
-        this.cdr.detectChanges();
-
         console.log(result);
 
         result["ID_DETALLE_PERSONA"] = row.ID_DETALLE_PERSONA;
@@ -438,7 +428,7 @@ export class VerEditarBeneficioAfilComponent {
         result["ID_CAUSANTE"] = row.ID_CAUSANTE;
         result["ID_BENEFICIO"] = row.ID_BENEFICIO;
 
-         this.beneficioService.updateBeneficioPersona(result).subscribe(
+        this.beneficioService.updateBeneficioPersona(result).subscribe(
           () => {
             // Después de actualizar el beneficio, recargar los datos
             this.toastr.success("Registro actualizado con éxito");
@@ -452,8 +442,9 @@ export class VerEditarBeneficioAfilComponent {
             console.error('Error al actualizar el beneficio', error);
           }
         );
-      } */
+      }
     });
+
   }
 
   cargarDatosActualizados() {

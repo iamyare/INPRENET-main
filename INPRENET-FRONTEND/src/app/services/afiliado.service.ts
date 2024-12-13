@@ -275,7 +275,6 @@ export class AfiliadoService {
       .set('dni', dni)
       .set('mes', mes)
       .set('anio', anio);
-    console.log(params);
 
     return this.http.get<any>(`${environment.API_URL}/api/planilla/generar-voucher-by-mes`, { params });
   }

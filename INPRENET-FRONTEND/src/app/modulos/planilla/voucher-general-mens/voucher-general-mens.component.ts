@@ -7,6 +7,7 @@ import pdfMake from 'pdfmake/build/pdfmake';
 import { TDocumentDefinitions } from 'pdfmake/interfaces';
 import { DynamicFormComponent } from 'src/app/components/dinamicos/dynamic-form/dynamic-form.component';
 import { AfiliadoService } from 'src/app/services/afiliado.service';
+import { AuthService } from 'src/app/services/auth.service';
 import { obtenerNombreMes } from 'src/app/shared/functions/formatoFecha';
 import { FieldConfig } from 'src/app/shared/Interfaces/field-config';
 import { TableColumn } from 'src/app/shared/Interfaces/table-column';
@@ -36,6 +37,7 @@ export class VoucherGeneralMensComponent {
     private toastr: ToastrService,
     public dialog: MatDialog,
     private http: HttpClient,
+    private authService: AuthService,
   ) {
     this.convertirImagenABase64('../assets/images/membratadoFinal.jpg').then(base64 => {
       this.backgroundImageBase64 = base64;
@@ -214,9 +216,15 @@ export class VoucherGeneralMensComponent {
   };
 
   construirPDFBen(resultados: any, backgroundImageBase64: string) {
-    const formatCurrency = (value: number) => new Intl.NumberFormat('es-HN', { style: 'currency', currency: 'HNL' }).format(value);
+    const token = sessionStorage.getItem('token');
+    let dataToken
+    if (token) {
+      dataToken = this.authService.decodeToken(token);
+    }
 
-    console.log(resultados);
+    const user = dataToken.correo.split("@")[0];
+
+    const formatCurrency = (value: number) => new Intl.NumberFormat('es-HN', { style: 'currency', currency: 'HNL' }).format(value);
 
     if (resultados) {
       const persona = resultados.persona;
@@ -306,7 +314,7 @@ export class VoucherGeneralMensComponent {
           content: [
             {
               stack: [
-                { text: 'VOUCHER DEL MES DE: ' + obtenerNombreMes(resultados.persona.detallePersona[0].detalleBeneficio[0].detallePagBeneficio[0].planilla.periodoInicio), style: 'subheader', alignment: 'center' },
+                { text: 'VOUCHER DEL MES DE: ' + obtenerNombreMes(resultados.persona.detallePersona[0].detalleBeneficio[0].detallePagBeneficio[0].planilla.periodoInicio), style: 'subheader', alignment: 'center', margin: [0, 10, 0, 0] },
                 {
                   columns: [
                     [
@@ -380,9 +388,9 @@ export class VoucherGeneralMensComponent {
                 widths: ['*', '*', '*'],
                 body: [
                   [
-                    { text: 'Fecha y Hora: ' + new Date().toLocaleString(), alignment: 'left', border: [false, false, false, false] },
-                    { text: 'Generó: ', alignment: 'left', border: [false, false, false, false] },
-                    { text: 'Página ' + currentPage.toString() + ' de ' + pageCount, alignment: 'right', border: [false, false, false, false] }
+                    { text: 'Fecha y Hora:' + new Date().toLocaleString(), alignment: 'left', border: [false, false, false, false], style: { fontSize: 8 }, },
+                    { text: `Generó: ${user}`, alignment: 'left', border: [false, false, false, false], style: { fontSize: 8 }, },
+                    { text: 'Página:' + currentPage.toString() + ' de ' + pageCount, alignment: 'right', border: [false, false, false, false], style: { fontSize: 8 }, }
                   ]
                 ]
               },

@@ -7,8 +7,6 @@ import pdfMake from 'pdfmake/build/pdfmake';
 import { TDocumentDefinitions } from 'pdfmake/interfaces';
 import { DynamicFormComponent } from 'src/app/components/dinamicos/dynamic-form/dynamic-form.component';
 import { AfiliadoService } from 'src/app/services/afiliado.service';
-import { DeduccionesService } from 'src/app/services/deducciones.service';
-import { PlanillaService } from 'src/app/services/planilla.service';
 import { obtenerNombreMes } from 'src/app/shared/functions/formatoFecha';
 import { FieldConfig } from 'src/app/shared/Interfaces/field-config';
 import { TableColumn } from 'src/app/shared/Interfaces/table-column';
@@ -34,13 +32,10 @@ export class VoucherGeneralMensComponent {
   existB: any;
 
   constructor(
-    private planillaService: PlanillaService,
     private afiliacionService: AfiliadoService,
     private toastr: ToastrService,
     public dialog: MatDialog,
     private http: HttpClient,
-    private afiliadoService: AfiliadoService,
-    private deduccionSVC: DeduccionesService
   ) {
     this.convertirImagenABase64('../assets/images/membratadoFinal.jpg').then(base64 => {
       this.backgroundImageBase64 = base64;

@@ -11,6 +11,7 @@ import { AuthService } from 'src/app/services/auth.service';
 import { obtenerNombreMes } from 'src/app/shared/functions/formatoFecha';
 import { FieldConfig } from 'src/app/shared/Interfaces/field-config';
 import { TableColumn } from 'src/app/shared/Interfaces/table-column';
+import { ValidationService } from 'src/app/shared/services/validation.service';
 
 @Component({
   selector: 'app-voucher-general-mens',
@@ -36,6 +37,7 @@ export class VoucherGeneralMensComponent {
     private afiliacionService: AfiliadoService,
     private toastr: ToastrService,
     public dialog: MatDialog,
+    private validationService: ValidationService,
     private http: HttpClient,
     private authService: AuthService,
   ) {
@@ -157,8 +159,7 @@ export class VoucherGeneralMensComponent {
         name: 'mes',
         validations: [
           Validators.required,
-          Validators.min(1),
-          Validators.max(12)
+          this.validationService.monthValidator() // Agregamos la validaciÃ³n personalizada
         ],
         display: true
       },

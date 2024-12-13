@@ -40,12 +40,14 @@ import { P60RentasController } from './p_60_rentas/p_60_rentas.controller';
 import { P60RentasService } from './p_60_rentas/p_60_rentas.service';
 import { P60Renta } from './p_60_rentas/entities/p_60_renta.entity';
 import { Net_Deduccion_Tipo_Planilla } from './deduccion/entities/net_deduccion_tipo_planilla.entity';
+import { VoucherController } from './planilla/voucher.controller';
+import { VoucherService } from './planilla/voucher.service';
 
 @Module({
-  controllers: [DetallePlanIngrController, PlanillaController, BeneficioController, DetalleBeneficioController, DeduccionController,
+  controllers: [DetallePlanIngrController, PlanillaController, BeneficioController, DetalleBeneficioController, DeduccionController,VoucherController,
     DeduccionController, DetalleDeduccionController, TipoPlanillaController, AfiliadoController, P60RentasController],
   providers: [PlanillaService, DetallePlanillaIngresoService, BeneficioService, DetalleBeneficioService, DeduccionService,
-    TipoPlanillaService, DetalleDeduccionService, AfiliadoService, P60RentasService],
+    TipoPlanillaService, DetalleDeduccionService, AfiliadoService, P60RentasService, VoucherService],
   imports: [AfiliadoModule, TransaccionesModule, AuthModule, CommonModule,
     TypeOrmModule.forFeature([Net_Deduccion_Tipo_Planilla, Net_Beneficio_Tipo_Persona, Net_Regimen, Net_SALARIO_COTIZABLE, Net_Beneficio, Net_Detalle_Pago_Beneficio,
       Net_Planilla, Net_Deduccion, Net_TipoPlanilla, Net_Detalle_Deduccion,

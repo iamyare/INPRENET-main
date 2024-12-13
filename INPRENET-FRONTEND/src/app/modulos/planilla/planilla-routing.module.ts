@@ -125,9 +125,7 @@ const routes: Routes = [
       },
       {
         path: 'voucher-general-mens',
-        component: VoucherGeneralMensComponent,
-        canActivate: [RoleGuard],
-        data: { expectedRolesModules: PermisosService.getExpectedRolesForRoute('PLANILLA', 'planilla/Egresos/ver_estatus_60_rentas') }
+        component: VoucherGeneralMensComponent
       },
       { path: '**', redirectTo: 'proceso-planilla', pathMatch: 'full' }
     ]

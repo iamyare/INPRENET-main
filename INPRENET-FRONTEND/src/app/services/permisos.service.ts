@@ -161,7 +161,7 @@ export class PermisosService {
           permisos: [
             { role: 'ADMINISTRADOR', module: 'PLANILLA' },
             { role: 'OFICIAL DE PLANILLA', module: 'PLANILLA' },
-            { role: 'OFICIAL DE PLANILLA', module: 'PLANILLA' },
+            { role: 'CONSULTA PRESTAMOS', module: 'ESCALAFON' },
           ]
         }
       }

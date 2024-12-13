@@ -125,7 +125,7 @@ export class EditarDialogComponent implements OnInit {
         const endDateWithMonths = addMonths(startDate, parseInt(num_rentas_aplicadas, 10));
         //const endDateWithMonths = addMonths(startDate, parseInt(valorInput3, 10));
         // Configuramos la fecha al próximo mes y asignamos el día de `ultimo_dia_ultima_renta`
-        const endDateAdjusted = new Date(endDateWithMonths.getFullYear(), endDateWithMonths.getMonth() + 1, parseInt(ultimo_dia_ultima_renta, 10));
+        const endDateAdjusted = new Date(endDateWithMonths.getFullYear(), endDateWithMonths.getMonth(), parseInt(ultimo_dia_ultima_renta, 10));
 
         this.formGroup.get('periodo_finalizacion')?.patchValue(endDateAdjusted, { emitEvent: false });
       }

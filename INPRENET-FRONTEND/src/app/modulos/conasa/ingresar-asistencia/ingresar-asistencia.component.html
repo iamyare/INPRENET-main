@@ -124,8 +124,18 @@
           </mat-form-field>
         </div>
         
-        
+        <div class="form-row">
+          <mat-form-field class="full-width" appearance="outline">
+            <mat-label>Observación</mat-label>
+            <textarea matInput rows="2" formControlName="observacion"></textarea>
+            <mat-error *ngIf="contratoData.get('observacion')?.invalid && contratoData.get('observacion')?.touched">
+              Este campo no puede exceder los 500 caracteres.
+            </mat-error>
+          </mat-form-field>
+        </div>
+
       </div>
+      
     </mat-card>
 
     <!-- Componente de Beneficiarios -->
@@ -136,7 +146,7 @@
 
     <!-- Botón de registro -->
     <div *ngIf="persona" class="actions">
-      <button  mat-raised-button color="primary"  [disabled]="!asistenciaForm.valid"><!--  type="submit" -->
+      <button mat-raised-button color="primary" (click)="onSubmit()" [disabled]="!asistenciaForm.valid">
         Registrar Asistencia
       </button>
     </div>

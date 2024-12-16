@@ -26,7 +26,6 @@ export class AgregarBeneficiariosComponent implements OnInit {
       segundo_apellido: ['', Validators.required],
       parentesco: ['', Validators.required],
       fecha_nacimiento: ['', Validators.required],
-      observaciones: [''],
     });
     this.beneficiariosForm.push(nuevoBeneficiario);
   }
@@ -42,5 +41,14 @@ export class AgregarBeneficiariosComponent implements OnInit {
   onDateChange(event: any, index: number): void {
     const formattedDate = moment(event.value).format('DD/MM/YYYY');
     this.beneficiariosForm.at(index).get('fecha_nacimiento')?.setValue(formattedDate);
+  }
+
+  blockManualInput(event: KeyboardEvent): void {
+    event.preventDefault();
+  }
+
+  clearManualInput(event: Event): void {
+    const inputElement = event.target as HTMLInputElement;
+    inputElement.value = '';
   }
 }

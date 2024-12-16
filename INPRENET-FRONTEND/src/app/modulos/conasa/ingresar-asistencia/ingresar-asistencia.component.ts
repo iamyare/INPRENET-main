@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { FormArray, FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { ConasaService } from 'src/app/services/conasa.service';
+import { ConasaService } from '../../../services/conasa.service';
 
 @Component({
   selector: 'app-ingresar-asistencia',
@@ -29,6 +29,7 @@ export class IngresarAsistenciaComponent implements OnInit {
         lugarCobro: ['', Validators.required],
         categoria: ['', Validators.required],
         plan: ['', Validators.required],
+        observacion: ['', [Validators.maxLength(500)]],
       }),
       beneficiarios: this.fb.array([]), // Correctamente inicializado
     });
@@ -117,7 +118,6 @@ export class IngresarAsistenciaComponent implements OnInit {
           segundo_apellido: ['', Validators.required],
           parentesco: ['', Validators.required],
           fecha_nacimiento: ['', Validators.required],
-          observaciones: [''],
         }),
       );
     }
@@ -134,21 +134,46 @@ export class IngresarAsistenciaComponent implements OnInit {
       this.asistenciaForm.reset();
       this.beneficiariosForm.clear(); 
     } else {
+      console.log(persona);
       this.persona = persona;
       this.asistenciaForm.patchValue({
-        telCelular: persona?.TELEFONO_CELULAR || '',
+        telCelular: persona?.TELEFONO_1 || '',
         correoElectronico: persona?.CORREO_1 || '',
       });
     }
   }
   
   onSubmit(): void {
-    if (this.asistenciaForm.valid) {
-      console.log('Asistencia registrada:', this.asistenciaForm.value);
-    } else {
-      console.log('Formulario inválido.');
+    if (this.asistenciaForm.invalid) {
+      console.error('El formulario es inválido.');
+      return;
     }
+    const contratoData = this.contratoData.value;
+    const beneficiariosData = this.beneficiariosForm.value;
+    const payloadContrato = {
+      idPersona: this.persona.id_persona,
+      idPlan: contratoData.plan,
+      lugarCobro: contratoData.lugarCobro,
+      fechaInicioContrato: contratoData.fechaContrato,
+      fechaCancelacionContrato: contratoData.fechaCancelacion || null,
+      observacion: contratoData.observacion,
+    };
+    const payloadBeneficiarios = beneficiariosData;
+    console.log(payloadBeneficiarios);
+    
+    /* this.conasaService
+      .manejarTransaccion(payloadContrato, payloadBeneficiarios)
+      .subscribe({
+        next: (mensaje) => {
+          console.log(mensaje);
+          alert('Contrato y beneficiarios registrados exitosamente.');
+        },
+        error: (err) => {
+          console.error('Error al manejar la transacción:', err);
+          alert('Ocurrió un error al registrar el contrato y los beneficiarios.');
+        },
+      }); */
   }
-
-
+  
+  
 }

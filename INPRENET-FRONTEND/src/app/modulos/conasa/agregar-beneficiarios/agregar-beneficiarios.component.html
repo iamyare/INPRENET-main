@@ -57,7 +57,8 @@
               matInput
               [matDatepicker]="picker"
               formControlName="fecha_nacimiento"
-              (dateChange)="onDateChange($event, i)"
+              (keydown)="blockManualInput($event)"
+              (input)="clearManualInput($event)"
             />
             <mat-error
               *ngIf="
@@ -69,13 +70,6 @@
             </mat-error>
           </mat-form-field>
           
-        </div>
-  
-        <div class="form-row">
-          <mat-form-field class="full-width" appearance="outline">
-            <mat-label>Observaciones</mat-label>
-            <textarea matInput formControlName="observaciones"></textarea>
-          </mat-form-field>
         </div>
   
         <!-- <div class="action-buttons">

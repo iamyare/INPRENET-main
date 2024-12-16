@@ -5,6 +5,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { MailService } from 'src/common/services/mail.service';
 import { net_persona } from 'src/modules/Persona/entities/net_persona.entity';
+import * as QRCode from 'qrcode';
 
 // Importamos pdfmake como en el frontend
 import * as pdfMake from 'pdfmake/build/pdfmake';
@@ -17,7 +18,6 @@ export class VoucherService {
     private personaRepository: Repository<net_persona>,
     private readonly mailService: MailService,
   ) {
-    // Asignar las fuentes vfs, esto incluye Roboto por defecto
     (pdfMake as any).vfs = pdfFonts.pdfMake.vfs;
   }
 
@@ -175,136 +175,161 @@ export class VoucherService {
       }
     }
   
+    console.log();
+    
     const neto = sumaBeneficios - sumaDeducciones;
-  
-    const docDefinition: any = {
-      background: (currentPage, pageSize) => ({
-        image: backgroundImageBase64,
-        width: pageSize.width,
-        height: pageSize.height,
-        absolutePosition: { x: 0, y: 2 }
-      }),
-      content: [
-        {
-          stack: [
-            { 
-              text: 'VOUCHER DEL MES DE: ' + this.obtenerNombreMes(fecha),
-              style: 'subheader', 
-              alignment: 'center' 
-            },
-            {
-              columns: [
-                [
-                  { text: 'BENEFICIARIO', style: 'subheader' },
-                  { text: 'NOMBRE: ' + nombreCompleto },
-                  { text: 'DNI: ' + dniPersona },
-                ],
-                [
-                  { text: 'DETALLE DE PAGO', style: 'subheader' },
-                  { text: 'PAGO TOTAL: ' + this.formatCurrency(neto) },
-                  { text: 'MÉTODO DE PAGO: ' + (data[0]?.METODO_PAGO || 'NO PROPORCIONADO') },
-                  { text: 'BANCO: ' + (data[0]?.NOMBRE_BANCO || 'NO PROPORCIONADO') },
-                ]
+    const qrData = `https://script.google.com/macros/s/AKfycbwkPhOJeCFvI2dvsU_o6m3d5pn_1XJoJzGhMoom7FeORLeIU_LovB-2fNeHwf1Hgl6wzQ/exec?name=${encodeURIComponent(
+      nombreCompleto,
+    )}&dni=${encodeURIComponent(dniPersona)}`;
+
+    const qrImage = await QRCode.toDataURL(qrData);
+
+  const docDefinition: any = {
+    background: (currentPage, pageSize) => ({
+      image: backgroundImageBase64,
+      width: pageSize.width,
+      height: pageSize.height,
+      absolutePosition: { x: 0, y: 2 },
+    }),
+    content: [
+      {
+        stack: [
+          {
+            text: 'VOUCHER DEL MES DE: ' + this.obtenerNombreMes(new Date(anio, mes - 1)),
+            style: 'subheader',
+            alignment: 'center',
+          },
+          {
+            columns: [
+              [
+                { text: 'BENEFICIARIO', style: 'subheader' },
+                { text: 'NOMBRE: ' + nombreCompleto },
+                { text: 'DNI: ' + dniPersona },
               ],
-              margin: [0, 10, 0, 0]
+              [
+                { text: 'DETALLE DE PAGO', style: 'subheader' },
+                { text: 'PAGO TOTAL: ' + this.formatCurrency(neto) },
+                { text: 'MÉTODO DE PAGO: ' + (data[0]?.METODO_PAGO || 'NO PROPORCIONADO') },
+                { text: 'BANCO: ' + (data[0]?.NOMBRE_BANCO || 'NO PROPORCIONADO') },
+              ],
+            ],
+            margin: [0, 10, 0, 0],
+          },
+          {
+            table: {
+              widths: ['*', '*', '*'],
+              body: [
+                [
+                  { text: 'CAUSANTE', style: 'tableHeader' },
+                  { text: 'INGRESO', style: 'tableHeader' },
+                  { text: 'MONTO INGRESO', style: ['tableHeader', 'alignRight'] },
+                ],
+                ...data.map((b: any) => [
+                  { text: b.CAUSANTE },
+                  { text: b.NOMBRE_BENEFICIO },
+                  { text: this.formatCurrency(b.MontoAPagar), style: 'alignRight' },
+                ]),
+              ],
             },
-            {
-              table: {
-                widths: ['*', '*', '*'],
-                body: [
-                  [{ text: 'CAUSANTE', style: 'tableHeader' }, { text: 'INGRESO', style: 'tableHeader' }, { text: 'MONTO INGRESO', style: ['tableHeader', 'alignRight'] }],
-                  ...data.map((b: any) => ([
-                    { text: b.CAUSANTE },
-                    { text: b.NOMBRE_BENEFICIO },
-                    { text: this.formatCurrency(b.MontoAPagar), style: 'alignRight' },
-                  ]))
-                ]
-              },
-              margin: [0, 5, 0, 0],
-              style: 'tableExample'
+            margin: [0, 5, 0, 0],
+            style: 'tableExample',
+          },
+          tablaDed,
+          {
+            table: {
+              widths: ['*', '*'],
+              body: [
+                [
+                  { text: 'TOTAL INGRESOS', style: 'tableHeader' },
+                  { text: this.formatCurrency(sumaBeneficios), style: ['tableHeader', 'alignRight'] },
+                ],
+              ],
             },
-            tablaDed,
-            {
-              table: {
-                widths: ['*', '*'],
-                body: [
-                  [{ text: 'TOTAL INGRESOS', style: 'tableHeader' }, { text: this.formatCurrency(sumaBeneficios), style: ['tableHeader', 'alignRight'] }]
-                ]
-              },
-              style: 'tableExample'
+            style: 'tableExample',
+          },
+          {
+            table: {
+              widths: ['*', '*'],
+              body: [
+                [
+                  { text: 'TOTAL DEDUCCIONES', style: 'tableHeader' },
+                  { text: this.formatCurrency(sumaDeducciones), style: ['tableHeader', 'alignRight'] },
+                ],
+              ],
             },
-            {
-              table: {
-                widths: ['*', '*'],
-                body: [
-                  [{ text: 'TOTAL DEDUCCIONES', style: 'tableHeader' }, { text: this.formatCurrency(sumaDeducciones), style: ['tableHeader', 'alignRight'] }]
-                ]
-              },
-              style: 'tableExample'
+            style: 'tableExample',
+          },
+          {
+            table: {
+              widths: ['*', '*'],
+              body: [
+                [
+                  { text: 'NETO A PAGAR', style: 'tableHeader' },
+                  { text: this.formatCurrency(neto), style: ['tableHeader', 'alignRight'] },
+                ],
+              ],
             },
-            {
-              table: {
-                widths: ['*', '*'],
-                body: [
-                  [{ text: 'NETO A PAGAR', style: 'tableHeader' }, { text: this.formatCurrency(neto), style: ['tableHeader', 'alignRight'] }]
-                ]
-              },
-              style: 'tableExample'
-            },
-            { canvas: [{ type: 'line', x1: 0, y1: 0, x2: 250, y2: 0, lineWidth: 1 }], margin: [127, 70, 0, 10] },
-            { text: 'FIRMA UNIDAD DE PLANILLAS', style: 'signatureTitle', margin: [0, 5, 0, 0] }
+            style: 'tableExample',
+          },
+          {
+            text: 'CÓDIGO QR DE VALIDACIÓN',
+            style: 'subheader',
+            alignment: 'center',
+            margin: [0, 20, 0, 10],
+          },
+          {
+            image: qrImage,
+            width: 80, // Reducir el tamaño del QR
+            alignment: 'center',
+          },
+        ],
+        margin: [0, 0, 0, 0],
+      },
+    ],
+    footer: (currentPage, pageCount) => ({
+      table: {
+        widths: ['*', '*', '*'],
+        body: [
+          [
+            { text: 'Fecha y Hora: ' + new Date().toLocaleString(), alignment: 'left', border: [false, false, false, false] },
+            { text: 'Generó: INPRENET', alignment: 'center', border: [false, false, false, false] },
+            { text: 'Página ' + currentPage.toString() + ' de ' + pageCount, alignment: 'right', border: [false, false, false, false] },
           ],
-          margin: [0, 0, 0, 0]
-        }
-      ],
-      footer: (currentPage, pageCount) => ({
-        table: {
-          widths: ['*', '*', '*'],
-          body: [
-            [
-              { text: 'Fecha y Hora: ' + new Date().toLocaleString(), alignment: 'left', border: [false, false, false, false] },
-              { text: 'Generó: ', alignment: 'left', border: [false, false, false, false] },
-              { text: 'Página ' + currentPage.toString() + ' de ' + pageCount, alignment: 'right', border: [false, false, false, false] }
-            ]
-          ]
-        },
-        margin: [20, 0, 20, 20]
-      }),
-      pageMargins: [50, 80, 50, 85],
-      styles: {
-        header: {
-          fontSize: 16,
-          bold: true,
-          margin: [0, 0, 0, 0]
-        },
-        subheader: {
-          fontSize: 12,
-          bold: true
-        },
-        tableHeader: {
-          bold: true,
-          fontSize: 13,
-          color: 'black'
-        },
-        tableExample: {
-          margin: [0, 5, 0, 15]
-        },
-        alignRight: {
-          alignment: 'right'
-        },
-        signatureTitle: {
-          alignment: 'center',
-          bold: true,
-          fontSize: 12,
-        }
+        ],
       },
-      defaultStyle: {
-        fontSize: 10,
-        font: 'Roboto' // Usa Roboto tal como en el front
+      margin: [20, 0, 20, 20],
+    }),
+    pageMargins: [50, 80, 50, 85],
+    styles: {
+      header: {
+        fontSize: 16,
+        bold: true,
+        margin: [0, 0, 0, 0],
       },
-      pageSize: 'LETTER',
-      pageOrientation: 'portrait'
-    };
+      subheader: {
+        fontSize: 12,
+        bold: true,
+      },
+      tableHeader: {
+        bold: true,
+        fontSize: 13,
+        color: 'black',
+      },
+      tableExample: {
+        margin: [0, 5, 0, 15],
+      },
+      alignRight: {
+        alignment: 'right',
+      },
+    },
+    defaultStyle: {
+      fontSize: 10,
+      font: 'Roboto',
+    },
+    pageSize: 'LETTER',
+    pageOrientation: 'portrait',
+  };
+
 
     // Aquí usamos la misma lógica del frontend:
     const pdfBuffer: Buffer = await new Promise((resolve, reject) => {
@@ -319,21 +344,58 @@ export class VoucherService {
     
     await this.mailService.sendMail(
       correo,
-      'Voucher de pago',
-      `Adjunto encontrará su voucher de pago correspondiente al mes de ${mesNombre.toUpperCase()}. Este documento incluye el detalle de sus beneficios, deducciones e información relevante a sus transacciones del periodo.
-    
-    El comprobante ha sido generado automáticamente y enviado desde el nuevo sistema INPRENET. Le invitamos a revisarlo detenidamente y conservarlo para su referencia.
-    
-    Saludos cordiales,
-    
-    INPRENET`,
-      `<p>Adjunto encontrará su voucher de pago correspondiente al mes de <strong>${mesNombre.toUpperCase()}</strong>. Este documento incluye el detalle de sus beneficios, deducciones e información relevante a sus transacciones del periodo.</p>
-       <p>El comprobante ha sido generado automáticamente y enviado desde el nuevo sistema <strong>INPRENET</strong>. Le invitamos a revisarlo detenidamente y conservarlo para su referencia.</p>
-       <p>Saludos cordiales,<br><strong>INPRENET</strong></p>`,
+      'Voucher de pago correspondiente al mes de ' + mesNombre.toUpperCase(),
+      `Estimado(a) ${nombreCompleto},
+      
+      Adjunto encontrará su voucher de pago correspondiente al mes de ${mesNombre.toUpperCase()}. Este documento incluye información detallada sobre sus beneficios, deducciones y otras transacciones relacionadas con el periodo mencionado.
+      
+      Este comprobante ha sido generado automáticamente y enviado desde el nuevo sistema INPRENET. Por favor, revise cuidadosamente los datos y conserve este comprobante como referencia.
+      
+      Saludos cordiales,
+      
+      INPRENET`,
+      `<div style="font-family: Arial, sans-serif; color: #333; line-height: 1.5; text-align: center;">
+          <h2 style="color: #0D7665;">Voucher de Pago</h2>
+          <p>Estimado(a) <strong>${nombreCompleto}</strong>,</p>
+          <p>Adjunto encontrará su <strong>voucher de pago</strong> correspondiente al mes de <strong>${mesNombre.toUpperCase()}</strong>.</p>
+          <p>Este documento incluye información detallada sobre:</p>
+          <ul style="list-style-type: circle; padding-left: 0; display: inline-block; text-align: left;">
+              <li>Sus beneficios otorgados durante el periodo.</li>
+              <li>Las deducciones aplicadas.</li>
+              <li>Otros detalles relevantes a sus transacciones.</li>
+          </ul>
+          <p>Este comprobante ha sido generado automáticamente y enviado desde el nuevo sistema <strong>INPRENET</strong>.</p>
+          <p>Por favor, revise cuidadosamente los datos y conserve este comprobante como referencia.</p>
+          <div style="margin-top: 20px;">
+              <p>Saludos cordiales,</p>
+              <p><strong>INPRENET</strong></p>
+          </div>
+          <table style="margin-top: 20px; width: 100%; text-align: center; border-spacing: 20px;">
+              <tr>
+                  <td style="vertical-align: middle;">
+                      <img src="cid:logoInprenet" alt="Logo INPRENET" style="width: 150px; height: auto;" />
+                  </td>
+                  <td style="vertical-align: middle;">
+                      <img src="cid:logoInprema" alt="Logo INPREMA" style="width: 200px; height: auto;" />
+                  </td>
+              </tr>
+          </table>
+      </div>`,
       [
+        {
+          filename: 'LOGO-INPRENET.png',
+          path: path.join(process.cwd(), 'assets', 'images', 'LOGO-INPRENET.png'),
+          cid: 'logoInprenet',
+        },
+        {
+          filename: 'logo-INPREMA-H-Transparente.png',
+          path: path.join(process.cwd(), 'assets', 'images', 'logo-INPREMA-H-Transparente.png'),
+          cid: 'logoInprema',
+        },
         {
           filename: `voucher_${dni}_${mes}_${anio}.pdf`,
           content: pdfBuffer,
+          contentType: 'application/pdf',
         },
       ],
     );
@@ -344,4 +406,41 @@ export class VoucherService {
     return new Intl.NumberFormat('es-HN', { style: 'currency', currency: 'HNL' }).format(value);
   }
 
+  async enviarVouchersMasivos(
+    personas: { dni: string; correo: string }[],
+    mes: number,
+    anio: number,
+    batchSize: number = 500,
+  ): Promise<void> {
+    const batches = this.splitIntoBatches(personas, batchSize);
+
+    for (const batch of batches) {
+      const mailPromises = batch.map(async (persona) => {
+        try {
+          await this.generarYEnviarVoucher(persona.dni, mes, anio, persona.correo);
+          console.log(`Voucher enviado a ${persona.correo}`);
+        } catch (error) {
+          console.error(`Error enviando voucher a ${persona.correo}:`, error.message);
+        }
+      });
+
+      // Esperar que todos los envíos del lote actual finalicen
+      await Promise.all(mailPromises);
+
+      // Pausar entre lotes
+      await this.delay(5000); // Espera 5 segundos entre lotes
+    }
+  }
+
+  private splitIntoBatches<T>(items: T[], batchSize: number): T[][] {
+    const batches: T[][] = [];
+    for (let i = 0; i < items.length; i += batchSize) {
+      batches.push(items.slice(i, i + batchSize));
+    }
+    return batches;
+  }
+
+  private delay(ms: number): Promise<void> {
+    return new Promise((resolve) => setTimeout(resolve, ms));
+  }
 }

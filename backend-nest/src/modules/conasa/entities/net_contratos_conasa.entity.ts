@@ -31,6 +31,9 @@ export class Net_Contratos_Conasa {
   @Column({ name: 'STATUS', type: 'varchar2', length: 10, default: 'ACTIVO' })
   status: string;
 
+  @Column({ name: 'OBSERVACION', type: 'varchar2', length: 500, nullable: true })
+  observacion: string;
+
   @OneToMany(() => Net_Beneficiarios_Conasa, (beneficiario) => beneficiario.contrato)
   beneficiarios: Net_Beneficiarios_Conasa[];
 }

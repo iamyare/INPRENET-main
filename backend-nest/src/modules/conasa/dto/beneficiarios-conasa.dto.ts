@@ -19,9 +19,6 @@ export class CrearBeneficiarioDto {
   @IsNotEmpty()
   parentesco: string;
 
-  @IsString()
-  observaciones?: string;
-
   @IsDateString()
   @IsNotEmpty()
   fecha_nacimiento: string;

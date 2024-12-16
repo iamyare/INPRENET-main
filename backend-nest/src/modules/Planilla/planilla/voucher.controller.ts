@@ -1,4 +1,4 @@
-import { Controller, Post, Body, HttpException, HttpStatus } from '@nestjs/common';
+import { Controller, Post, Body, HttpException, HttpStatus, BadRequestException } from '@nestjs/common';
 import { VoucherService } from './voucher.service';
 
 @Controller('voucher')
@@ -25,6 +25,20 @@ export class VoucherController {
           HttpStatus.INTERNAL_SERVER_ERROR,
         );
       }
-      
+  }
+
+  @Post('enviar-masivo')
+  async enviarVouchersMasivos(
+    @Body() body: { personas: { dni: string; correo: string }[]; mes: number; anio: number },
+  ): Promise<{ message: string }> {
+    const { personas, mes, anio } = body;
+    if (!Array.isArray(personas) || !personas.length || !mes || !anio) {
+      throw new BadRequestException(
+        'Debe proporcionar un arreglo de personas con DNI y correo, además del mes y año.',
+      );
+    }
+    await this.voucherService.enviarVouchersMasivos(personas, mes, anio);
+
+    return { message: 'El envío masivo de vouchers se inició correctamente.' };
   }
 }

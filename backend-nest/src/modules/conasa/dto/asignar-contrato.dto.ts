@@ -20,4 +20,8 @@ export class AsignarContratoDto {
   @IsOptional()
   @IsDateString()
   fechaCancelacionContrato?: string;
+
+  @IsString()
+  @IsNotEmpty()
+  observacion: string;
 }

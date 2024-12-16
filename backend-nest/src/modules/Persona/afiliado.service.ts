@@ -22,6 +22,8 @@ import { NET_PROFESIONES } from '../transacciones/entities/net_profesiones.entit
 import { Net_Municipio } from '../Regional/municipio/entities/net_municipio.entity';
 import { format } from 'date-fns';
 import { Net_Empleado_Centro_Trabajo } from '../Empresarial/entities/net_empleado_centro_trabajo.entity';
+import { Net_Pais } from '../Regional/pais/entities/pais.entity';
+import { Net_Tipo_Identificacion } from '../tipo_identificacion/entities/net_tipo_identificacion.entity';
 
 @Injectable()
 export class AfiliadoService {
@@ -40,10 +42,8 @@ export class AfiliadoService {
     private estadoAfiliacionRepository: Repository<net_estado_afiliacion>,
     @InjectRepository(Net_Centro_Trabajo)
     private centroTrabajoRepository: Repository<Net_Centro_Trabajo>,
-
     @InjectRepository(Net_Empleado_Centro_Trabajo)
     private empCentTrabajoRepository: Repository<Net_Empleado_Centro_Trabajo>,
-
     @InjectRepository(Net_Persona_Colegios)
     private readonly netPersonaColegiosRepository: Repository<Net_Persona_Colegios>,
     @InjectRepository(Net_Persona_Por_Banco)
@@ -60,6 +60,10 @@ export class AfiliadoService {
     private readonly profesionRepository: Repository<NET_PROFESIONES>,
     @InjectRepository(Net_Municipio)
     private readonly municipioRepository: Repository<Net_Municipio>,
+    @InjectRepository(Net_Tipo_Identificacion)
+    private readonly TipoIdentificacionRepository: Repository<Net_Tipo_Identificacion>,
+    @InjectRepository(Net_Pais)
+    private readonly paisRepository: Repository<Net_Pais>
 
   ) { }
 
@@ -285,82 +289,10 @@ export class AfiliadoService {
       ID_TIPO_PERSONA: detalleRelevante?.tipoPersona?.id_tipo_persona || null,
       TIPO_PERSONA: detalleRelevante?.tipoPersona?.tipo_persona || null,
       VOLUNTARIO: detalleRelevante?.voluntario || 'NO',
-      TIPOS_PERSONA: tiposPersona, // Nueva propiedad
+      TIPOS_PERSONA: tiposPersona,
     };
 
     return result;
-  }
-
-  async findOneConasa(term: string, email: string, password: string) {
-    const empCentTrabajoRepository = await this.empCentTrabajoRepository.findOne({
-      where: {
-        correo_1: email,
-        usuarioEmpresas: {
-          usuarioModulos: {
-            rolModulo: { nombre: In(["CONSULTA", "TODO"]) },
-          },
-        },
-      },
-      relations: [
-        'usuarioEmpresas',
-        'usuarioEmpresas.usuarioModulos',
-        'usuarioEmpresas.usuarioModulos.rolModulo',
-      ],
-    });
-
-    if (!empCentTrabajoRepository) {
-      throw new UnauthorizedException('User not found or unauthorized');
-    }
-
-    const isPasswordValid = await bcrypt.compare(
-      password,
-      empCentTrabajoRepository.usuarioEmpresas[0].contrasena
-    );
-
-    if (!isPasswordValid) {
-      throw new UnauthorizedException('Invalid password');
-    }
-
-    const persona = await this.personaRepository.findOne({
-      where: { n_identificacion: term },
-      relations: [
-        'detallePersona',
-        'detallePersona.tipoPersona',
-        'pais',
-        'municipio.departamento',
-        'tipoIdentificacion',
-        'municipio',
-        'municipio_nacimiento',
-        'municipio_nacimiento.departamento',
-      ],
-    });
-
-    if (!persona) {
-      throw new NotFoundException(`Afiliado con N_IDENTIFICACION ${term} no existe`);
-    }
-
-    const tiposPersona = persona.detallePersona
-      .map(detalle => detalle.tipoPersona?.tipo_persona)
-      .filter(Boolean);
-
-    return {
-      N_IDENTIFICACION: persona.n_identificacion,
-      PRIMER_NOMBRE: persona.primer_nombre,
-      SEGUNDO_NOMBRE: persona.segundo_nombre,
-      TERCER_NOMBRE: persona.tercer_nombre,
-      PRIMER_APELLIDO: persona.primer_apellido,
-      SEGUNDO_APELLIDO: persona.segundo_apellido,
-      SEXO: persona.sexo,
-      DIRECCION_RESIDENCIA: persona.direccion_residencia,
-      FECHA_NACIMIENTO: persona.fecha_nacimiento,
-      TELEFONO_1: persona.telefono_1,
-      TELEFONO_2: persona.telefono_2,
-      CORREO_1: persona.correo_1,
-      DEPARTAMENTO_RESIDENCIA: persona.municipio?.departamento?.nombre_departamento || null,
-      MUNICIPIO_RESIDENCIA: persona.municipio?.nombre_municipio || null,
-      ESTADO: persona.fallecido === 'SI' ? 'FALLECIDO' : 'VIVO',
-      TIPOS_PERSONA: tiposPersona,
-    };
   }
 
   async findOnePersonaParaDeduccion(term: string) {
@@ -987,66 +919,74 @@ export class AfiliadoService {
     arch_cert_def: any,
     fotoPerfil: any
   ): Promise<any> {
+  
     try {
+      // Manejo de discapacidades
       if (datosGenerales.dato?.discapacidades) {
         const keysWithTrueValues = Object.entries(datosGenerales.dato.discapacidades)
           .filter(([_, value]) => value === true)
           .map(([key]) => key);
-
+  
         await this.perDiscapacidadRepository.delete({ persona: { id_persona: idPersona } });
         if (keysWithTrueValues.length > 0) {
           const discapacidades = await this.discapacidadRepository.find({
-            where: { tipo_discapacidad: In(keysWithTrueValues) }
+            where: { tipo_discapacidad: In(keysWithTrueValues) },
           });
-          const nuevosRegistros = discapacidades.map(discapacidad => ({
+          const nuevosRegistros = discapacidades.map((discapacidad) => ({
             persona: { id_persona: idPersona },
-            discapacidad: discapacidad
+            discapacidad: discapacidad,
           }));
           await this.perDiscapacidadRepository.save(nuevosRegistros);
         }
       }
-
+  
       // Obtención del estado de afiliación
       const estadoP = await this.estadoAfiliacionRepository.findOne({
-        where: { codigo: datosGenerales.estado }
+        where: { codigo: datosGenerales.estado },
       });
       if (!estadoP) {
         throw new NotFoundException(`No se ha encontrado el estado de afiliación con el código ${datosGenerales.estado}`);
       }
-
-      // Obtención de la causa de fallecimiento
-      const causaFallecimiento = await this.causasFallecimientoRepository.findOne({
-        where: { id_causa_fallecimiento: datosGenerales.causa_fallecimiento }
-      });
-      if (!causaFallecimiento) {
-        throw new NotFoundException(`No se encontró la causa de fallecimiento con el ID ${datosGenerales.causa_fallecimiento}`);
+  
+      // Obtención de la causa de fallecimiento (solo si no es null)
+      const causaFallecimiento = datosGenerales.causa_fallecimiento
+        ? await this.causasFallecimientoRepository.findOne({
+            where: { id_causa_fallecimiento: datosGenerales.causa_fallecimiento },
+          })
+        : null;
+  
+      if (datosGenerales.causa_fallecimiento && !causaFallecimiento) {
+        throw new NotFoundException(
+          `No se encontró la causa de fallecimiento con el ID ${datosGenerales.causa_fallecimiento}`
+        );
       }
-
-      // Obtención de la profesión
-      const profesion = await this.profesionRepository.findOne({
-        where: { id_profesion: datosGenerales.dato.id_profesion }
-      });
-      if (!profesion) {
+  
+      // Obtención de la profesión (solo si no es null)
+      const profesion = datosGenerales.dato.id_profesion
+        ? await this.profesionRepository.findOne({
+            where: { id_profesion: datosGenerales.dato.id_profesion },
+          })
+        : null;
+  
+      if (datosGenerales.dato.id_profesion && !profesion) {
         throw new NotFoundException(`No se encontró la profesión con el ID ${datosGenerales.dato.id_profesion}`);
       }
-
+  
       // Obtención de municipios de residencia y nacimiento
-      const municipioResidencia = await this.municipioRepository.findOne({
-        where: { id_municipio: datosGenerales.dato?.id_municipio_residencia },
-      });
-      if (!municipioResidencia) {
-        throw new NotFoundException(`No se encontró el municipio de residencia con el ID ${datosGenerales.dato?.id_municipio_residencia}`);
-      }
-
-      const municipioNacimiento = await this.municipioRepository.findOne({
-        where: { id_municipio: datosGenerales.dato?.id_municipio_nacimiento },
-      });
-      if (!municipioNacimiento) {
-        throw new NotFoundException(`No se encontró el municipio de nacimiento con el ID ${datosGenerales.dato?.id_municipio_nacimiento}`);
-      }
-
+      const municipioResidencia = datosGenerales.dato?.id_municipio_residencia
+        ? await this.municipioRepository.findOne({
+            where: { id_municipio: datosGenerales.dato?.id_municipio_residencia },
+          })
+        : null;
+  
+      const municipioNacimiento = datosGenerales.dato?.id_municipio_nacimiento
+        ? await this.municipioRepository.findOne({
+            where: { id_municipio: datosGenerales.dato?.id_municipio_nacimiento },
+          })
+        : null;
+  
       const temp = datosGenerales.dato || {};
-
+  
       const direccionParts = {
         "BARRIO_COLONIA": temp.barrio_colonia,
         "AVENIDA": temp.avenida,
@@ -1056,26 +996,48 @@ export class AfiliadoService {
         "N° DE CASA": temp.numero_casa,
         "COLOR CASA": temp.color_casa,
         "ALDEA": temp.aldea,
-        "CASERIO": temp.caserio
+        "CASERIO": temp.caserio,
       };
-
+  
       temp.direccion_residencia_estructurada = Object.entries(direccionParts)
         .filter(([_, value]) => value)
         .map(([key, value]) => `${key}: ${value}`)
         .join(',');
 
+        const pais = datosGenerales.dato.id_pais
+        
+        ? await this.paisRepository.findOne({ where: { id_pais: datosGenerales.dato.id_pais } })
+        : null;
+
+      const tipoIdentificacion = datosGenerales.dato.id_tipo_identificacion
+        ? await this.TipoIdentificacionRepository.findOne({
+            where: { id_identificacion: datosGenerales.dato.id_tipo_identificacion },
+          })
+        : null;
+
+      if (datosGenerales.dato.id_pais && !pais) {
+        throw new NotFoundException(`No se encontró el país con el ID ${datosGenerales.dato.id_pais}`);
+      }
+
+      if (datosGenerales.dato.id_tipo_identificacion && !tipoIdentificacion) {
+        throw new NotFoundException(
+          `No se encontró el tipo de identificación con el ID ${datosGenerales.dato.id_tipo_identificacion}`
+        );
+      }
+  
       const data: any = {
         ...temp,
         id_persona: idPersona,
-        fallecido: datosGenerales.causa_fallecimiento ? "SI" : "NO",
+        fallecido: datosGenerales.causa_fallecimiento ? 'SI' : 'NO',
         municipio: municipioResidencia,
         municipio_nacimiento: municipioNacimiento,
-        municipio_defuncion: datosGenerales.id_municipio_defuncion,
+        municipio_defuncion: datosGenerales.id_municipio_defuncion || null,
         causa_fallecimiento: causaFallecimiento,
         profesion: profesion,
-        fecha_defuncion: datosGenerales.fecha_defuncion ?? temp.fecha_defuncion,
+        fecha_defuncion: datosGenerales.fecha_defuncion ?? temp.fecha_defuncion,pais: pais, // Relación ManyToOne con Net_Pais
+        tipoIdentificacion: tipoIdentificacion,
       };
-
+  
       if (fileIdent?.buffer) {
         data.archivo_identificacion = Buffer.from(fileIdent.buffer);
       }
@@ -1085,25 +1047,25 @@ export class AfiliadoService {
       if (fotoPerfil?.buffer) {
         data.foto_perfil = Buffer.from(fotoPerfil.buffer);
       }
-
+  
       const afiliado = await this.personaRepository.preload(data);
       if (!afiliado) throw new NotFoundException(`La persona con ID ${idPersona} no se ha encontrado`);
       await this.personaRepository.save(afiliado);
-
+  
       // Actualización o inserción en NET_DETALLE_PERSONA
       const existingDetalle = await this.detallePersonaRepository.findOne({
-        where: { ID_PERSONA: idPersona, ID_CAUSANTE: idPersona }
+        where: { ID_PERSONA: idPersona, ID_CAUSANTE: idPersona },
       });
-
-      const voluntario = datosGenerales?.voluntario ?? "NO";
-
+  
+      const voluntario = datosGenerales?.voluntario ?? 'NO';
+  
       if (existingDetalle) {
         await this.detallePersonaRepository.update(
           { ID_PERSONA: idPersona, ID_CAUSANTE: idPersona },
           {
             ID_ESTADO_AFILIACION: estadoP.codigo,
             ID_TIPO_PERSONA: datosGenerales.tipo_persona || null,
-            voluntario: voluntario
+            voluntario: voluntario,
           }
         );
       } else {
@@ -1112,7 +1074,7 @@ export class AfiliadoService {
           ID_CAUSANTE: idPersona,
           ID_ESTADO_AFILIACION: estadoP.codigo,
           ID_TIPO_PERSONA: datosGenerales.tipo_persona || null,
-          VOLUNTARIO: voluntario
+          VOLUNTARIO: voluntario,
         });
       }
       return afiliado;
@@ -1120,6 +1082,7 @@ export class AfiliadoService {
       this.handleException(error);
     }
   }
+  
 
   async updatePerfCentroTrabajo(id: number, updateDto: UpdatePerfCentTrabDto): Promise<Net_perf_pers_cent_trab> {
     const existingPerf = await this.perfPersoCentTrabRepository.findOne({ where: { id_perf_pers_centro_trab: id } });

@@ -31,9 +31,6 @@ export class Net_Beneficiarios_Conasa {
   @Column({ name: 'PARENTESCO', type: 'varchar2', length: 50, nullable: true })
   parentesco: string;
 
-  @Column({ name: 'OBSERVACIONES', type: 'varchar2', length: 500, nullable: true })
-  observaciones: string; 
-
   @Column({ name: 'FECHA_NACIMIENTO', nullable: true })
   fecha_nacimiento: string;
 }

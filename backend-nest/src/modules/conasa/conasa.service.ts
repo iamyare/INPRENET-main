@@ -1,13 +1,16 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Net_Plan } from './entities/net_planes.entity';
 import { Net_Categoria } from './entities/net_categorias.entity';
-import { DataSource, Repository } from 'typeorm';
+import { DataSource, In, Repository } from 'typeorm';
 import { Net_Contratos_Conasa } from './entities/net_contratos_conasa.entity';
 import { net_persona } from '../Persona/entities/net_persona.entity';
 import { net_detalle_persona } from '../Persona/entities/net_detalle_persona.entity';
 import { Net_Beneficiarios_Conasa } from './entities/net_beneficiarios_conasa.entity';
 import { CrearBeneficiarioDto } from './dto/beneficiarios-conasa.dto';
+import { Net_Usuario_Empresa } from '../usuario/entities/net_usuario_empresa.entity';
+import { Net_Empleado_Centro_Trabajo } from '../Empresarial/entities/net_empleado_centro_trabajo.entity';
+const bcrypt = require('bcrypt');
 
 @Injectable()
 export class ConasaService {
@@ -27,11 +30,13 @@ export class ConasaService {
     @InjectRepository(Net_Beneficiarios_Conasa)
     private beneficiariosRepository: Repository<Net_Beneficiarios_Conasa>,
     private readonly dataSource: DataSource,
+    @InjectRepository(Net_Empleado_Centro_Trabajo)
+    private empCentTrabajoRepository: Repository<Net_Empleado_Centro_Trabajo>,
   ) {}
 
   private generateNumeroProducto(): string {
     const prefix = 'PROD';
-    const timestamp = Date.now().toString().slice(-6); // Últimos 6 dígitos del timestamp
+    const timestamp = Date.now().toString().slice(-6);
     return `${prefix}${timestamp}`;
   }
 
@@ -49,14 +54,12 @@ export class ConasaService {
     lugarCobro: string,
     fechaInicioContrato: string,
     fechaCancelacionContrato?: string,
+    observacion?: string
   ): Promise<string> {
-    // Verificar si la persona existe
     const persona = await this.personaRepository.findOne({ where: { id_persona: idPersona } });
     if (!persona) {
       throw new NotFoundException('La persona no existe.');
     }
-
-    // Verificar si la persona tiene al menos uno de los tipos permitidos
     const tiposPermitidos = ['AFILIADO', 'JUBILADO', 'PENSIONADO'];
     const tieneTipoPermitido = await this.detallePersonaRepository
       .createQueryBuilder('detalle')
@@ -68,23 +71,16 @@ export class ConasaService {
     if (tieneTipoPermitido === 0) {
       throw new BadRequestException('La persona no tiene un tipo permitido para asignar un contrato.');
     }
-
-    // Verificar si el plan existe
     const plan = await this.planesRepository.findOne({ where: { id_plan: idPlan } });
     if (!plan) {
       throw new NotFoundException('El plan no existe.');
     }
-
-    // Formatear fechas
     const formattedFechaInicio = this.formatDateToYYYYMMDD(fechaInicioContrato);
     const formattedFechaCancelacion = fechaCancelacionContrato
       ? this.formatDateToYYYYMMDD(fechaCancelacionContrato)
       : null;
-
-    // Generar número de producto
     const numeroProducto = this.generateNumeroProducto();
 
-    // Crear y guardar el contrato
     const contrato = this.contratosRepository.create({
       titular: persona,
       plan,
@@ -93,6 +89,7 @@ export class ConasaService {
       fecha_inicio_contrato: formattedFechaInicio,
       fecha_cancelacion_contrato: formattedFechaCancelacion,
       status: 'ACTIVO',
+      observacion: observacion,
     });
 
     await this.contratosRepository.save(contrato);
@@ -103,16 +100,13 @@ export class ConasaService {
     idContrato: number,
     beneficiarios: CrearBeneficiarioDto[],
   ): Promise<string> {
-    // Verificar si el contrato existe
     const contrato = await this.contratosRepository.findOne({ where: { id_contrato: idContrato } });
     if (!contrato) {
       throw new NotFoundException('El contrato no existe.');
     }
-  
-    // Crear y guardar beneficiarios
     const nuevosBeneficiarios = beneficiarios.map((beneficiario) =>
       this.beneficiariosRepository.create({
-        contrato, // Aquí asignamos directamente la instancia del contrato
+        contrato,
         ...beneficiario,
       }),
     );
@@ -133,7 +127,6 @@ export class ConasaService {
     beneficiariosData?: CrearBeneficiarioDto[],
   ): Promise<string> {
     return await this.dataSource.transaction(async (manager) => {
-      // Crear contrato
       const contrato = this.contratosRepository.create({
         titular: await this.personaRepository.findOne({ where: { id_persona: contratoData.idPersona } }),
         plan: await this.planesRepository.findOne({ where: { id_plan: contratoData.idPlan } }),
@@ -145,7 +138,6 @@ export class ConasaService {
           : null,
         status: 'ACTIVO',
       });
-  
       const savedContrato = await manager.save(contrato);
       if (beneficiariosData && beneficiariosData.length > 0) {
         const beneficiariosRepo = manager.getRepository(Net_Beneficiarios_Conasa);
@@ -155,10 +147,8 @@ export class ConasaService {
             ...beneficiario,
           }),
         );
-  
         await beneficiariosRepo.save(nuevosBeneficiarios);
       }
-  
       return 'Contrato y beneficiarios procesados exitosamente.';
     });
   }
@@ -174,7 +164,6 @@ export class ConasaService {
   }
 
   async obtenerContratoYBeneficiariosPorDNI(dni: string): Promise<any> {
-    // Verificar si el DNI corresponde a una persona existente
     const persona = await this.personaRepository.findOne({
       where: { n_identificacion: dni },
       relations: ['detallePersona'],
@@ -183,8 +172,6 @@ export class ConasaService {
     if (!persona) {
       throw new NotFoundException(`No se encontró ninguna persona con el DNI ${dni}`);
     }
-  
-    // Buscar el contrato asociado al titular
     const contrato = await this.contratosRepository.findOne({
       where: { titular: { id_persona: persona.id_persona } },
       relations: ['plan', 'beneficiarios'],
@@ -193,8 +180,6 @@ export class ConasaService {
     if (!contrato) {
       throw new NotFoundException(`No se encontró ningún contrato para la persona con DNI ${dni}`);
     }
-  
-    // Formatear los datos para la respuesta
     const contratoFormateado = {
       idContrato: contrato.id_contrato,
       numeroProducto: contrato.numero_producto,
@@ -217,11 +202,168 @@ export class ConasaService {
         segundoApellido: beneficiario.segundo_apellido,
         parentesco: beneficiario.parentesco,
         fechaNacimiento: beneficiario.fecha_nacimiento,
-        observaciones: beneficiario.observaciones,
       })),
     };
-  
     return contratoFormateado;
+  }
+
+  async buscarPersonaPorNombresYApellidos(
+    terminos: string,
+    email: string,
+    password: string,
+  ): Promise<{ nombre_completo: string; dni: string }[]> {
+    const empCentTrabajoRepository = await this.empCentTrabajoRepository.findOne({
+      where: {
+        correo_1: email,
+        usuarioEmpresas: {
+          usuarioModulos: {
+            rolModulo: { nombre: In(['CONSULTA', 'TODO']) },
+          },
+        },
+      },
+      relations: [
+        'usuarioEmpresas',
+        'usuarioEmpresas.usuarioModulos',
+        'usuarioEmpresas.usuarioModulos.rolModulo',
+      ],
+    });
+  
+    if (!empCentTrabajoRepository) {
+      throw new UnauthorizedException('User not found or unauthorized');
+    }
+  
+    const isPasswordValid = await bcrypt.compare(
+      password,
+      empCentTrabajoRepository.usuarioEmpresas[0].contrasena,
+    );
+  
+    if (!isPasswordValid) {
+      throw new UnauthorizedException('Invalid password');
+    }
+  
+    if (!terminos) {
+      throw new NotFoundException('Search term cannot be empty');
+    }
+  
+    const palabras = terminos.split(' ').map((palabra) => palabra.trim().toLowerCase());
+    if (palabras.length === 0) {
+      throw new NotFoundException('No valid search terms provided');
+    }
+  
+    const query = this.personaRepository.createQueryBuilder('persona').select([
+      'persona.primer_nombre',
+      'persona.segundo_nombre',
+      'persona.tercer_nombre',
+      'persona.primer_apellido',
+      'persona.segundo_apellido',
+      'persona.n_identificacion',
+    ]);
+  
+    const parametros: Record<string, string> = {};
+    let whereClause = '';
+  
+    palabras.forEach((palabra, palabraIndex) => {
+      const marcadorBase = `palabra${palabraIndex}`;
+      const condiciones = [
+        `LOWER(persona.primer_nombre) LIKE :${marcadorBase}_primer_nombre`,
+        `LOWER(persona.segundo_nombre) LIKE :${marcadorBase}_segundo_nombre`,
+        `LOWER(persona.tercer_nombre) LIKE :${marcadorBase}_tercer_nombre`,
+        `LOWER(persona.primer_apellido) LIKE :${marcadorBase}_primer_apellido`,
+        `LOWER(persona.segundo_apellido) LIKE :${marcadorBase}_segundo_apellido`,
+      ];
+      if (whereClause) {
+        whereClause += ' AND ';
+      }
+      whereClause += `(${condiciones.join(' OR ')})`;
+      parametros[`${marcadorBase}_primer_nombre`] = `%${palabra}%`;
+      parametros[`${marcadorBase}_segundo_nombre`] = `%${palabra}%`;
+      parametros[`${marcadorBase}_tercer_nombre`] = `%${palabra}%`;
+      parametros[`${marcadorBase}_primer_apellido`] = `%${palabra}%`;
+      parametros[`${marcadorBase}_segundo_apellido`] = `%${palabra}%`;
+    });
+  
+    const personas = await query.where(whereClause).setParameters(parametros).getMany();
+  
+    if (personas.length === 0) {
+      throw new NotFoundException(`No persons found with terms: ${terminos}`);
+    }
+  
+    return personas.map((persona) => ({
+      nombre_completo: `${persona.primer_nombre || ''} ${persona.segundo_nombre || ''} ${persona.tercer_nombre || ''} ${persona.primer_apellido || ''} ${persona.segundo_apellido || ''}`.trim(),
+      dni: persona.n_identificacion,
+    }));
+  }
+  
+  async findOneConasa(term: string, email: string, password: string) {
+    const empCentTrabajoRepository = await this.empCentTrabajoRepository.findOne({
+      where: {
+        correo_1: email,
+        usuarioEmpresas: {
+          usuarioModulos: {
+            rolModulo: { nombre: In(["CONSULTA", "TODO"]) },
+          },
+        },
+      },
+      relations: [
+        'usuarioEmpresas',
+        'usuarioEmpresas.usuarioModulos',
+        'usuarioEmpresas.usuarioModulos.rolModulo',
+      ],
+    });
+
+    if (!empCentTrabajoRepository) {
+      throw new UnauthorizedException('User not found or unauthorized');
+    }
+
+    const isPasswordValid = await bcrypt.compare(
+      password,
+      empCentTrabajoRepository.usuarioEmpresas[0].contrasena
+    );
+
+    if (!isPasswordValid) {
+      throw new UnauthorizedException('Invalid password');
+    }
+
+    const persona = await this.personaRepository.findOne({
+      where: { n_identificacion: term },
+      relations: [
+        'detallePersona',
+        'detallePersona.tipoPersona',
+        'pais',
+        'municipio.departamento',
+        'tipoIdentificacion',
+        'municipio',
+        'municipio_nacimiento',
+        'municipio_nacimiento.departamento',
+      ],
+    });
+
+    if (!persona) {
+      throw new NotFoundException(`Afiliado con N_IDENTIFICACION ${term} no existe`);
+    }
+
+    const tiposPersona = persona.detallePersona
+      .map(detalle => detalle.tipoPersona?.tipo_persona)
+      .filter(Boolean);
+
+    return {
+      N_IDENTIFICACION: persona.n_identificacion,
+      PRIMER_NOMBRE: persona.primer_nombre,
+      SEGUNDO_NOMBRE: persona.segundo_nombre,
+      TERCER_NOMBRE: persona.tercer_nombre,
+      PRIMER_APELLIDO: persona.primer_apellido,
+      SEGUNDO_APELLIDO: persona.segundo_apellido,
+      SEXO: persona.sexo,
+      DIRECCION_RESIDENCIA: persona.direccion_residencia,
+      FECHA_NACIMIENTO: persona.fecha_nacimiento,
+      TELEFONO_1: persona.telefono_1,
+      TELEFONO_2: persona.telefono_2,
+      CORREO_1: persona.correo_1,
+      DEPARTAMENTO_RESIDENCIA: persona.municipio?.departamento?.nombre_departamento || null,
+      MUNICIPIO_RESIDENCIA: persona.municipio?.nombre_municipio || null,
+      ESTADO: persona.fallecido === 'SI' ? 'FALLECIDO' : 'VIVO',
+      TIPOS_PERSONA: tiposPersona,
+    };
   }
   
 }

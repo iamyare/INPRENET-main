@@ -284,28 +284,6 @@ export class AfiliadoController {
     return this.afiliadoService.findOne(term);
   }
 
-  @Get('AfiliadoConasa/:term')
-  findOneConasa(
-    @Param('term') term: string,
-    @Req() req: Request
-  ) {
-    const authorization = req.headers['authorization'];
-    if (!authorization) {
-      throw new UnauthorizedException('No authorization header present');
-    }
-    const [scheme, base64Credentials] = authorization.split(' ');
-    if (scheme !== 'Basic' || !base64Credentials) {
-      throw new UnauthorizedException('Invalid authorization format');
-    }
-    try {
-      const decoded = atob(base64Credentials);
-      const [email, password] = decoded.split(':');
-      return this.afiliadoService.findOneConasa(term, email, password);
-    } catch (error) {
-      throw new UnauthorizedException('Failed to decode or validate authorization');
-    }
-  }
-
   @Get('/getAllPersonaPBanco/:dni')
   getAllPersonaPBanco(@Param('dni') dni: string) {
     return this.afiliadoService.getAllPersonaPBanco(dni);

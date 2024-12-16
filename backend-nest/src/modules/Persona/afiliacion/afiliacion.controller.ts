@@ -27,13 +27,13 @@ export class AfiliacionController {
   }
 
   @Get('buscar-por-nombres-apellidos')
-async buscarPersona(@Query('terminos') terminos: string) {
-  const personas = await this.afiliacionService.buscarPersonaPorNombresYApellidos(terminos);
-  return {
-    message: 'Personas encontradas',
-    personas,
-  };
-}
+  async buscarPersona(@Query('terminos') terminos: string) {
+    const personas = await this.afiliacionService.buscarPersonaPorNombresYApellidos(terminos);
+    return {
+      message: 'Personas encontradas',
+      personas,
+    };
+  }
 
   @Patch('persona/:id/foto')
   @UseInterceptors(FileInterceptor('foto'))

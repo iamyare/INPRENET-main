@@ -25,31 +25,31 @@ const routes: Routes = [
     path: 'menu-conasa/ingresar-asistencia',
     component: IngresarAsistenciaComponent,
     canActivate: [RoleGuard],
-    data: { expectedRolesModules: PermisosService.getExpectedRolesForRoute('CONASA', 'conasa/ingresar-asistencia') }
+    data: { expectedRolesModules: PermisosService.getExpectedRolesForRoute('CONASA', 'conasa/menu-conasa/ingresar-asistencia') }
   },
   { 
     path: 'menu-conasa/reporte-asistencias',
     component: ReporteAsistenciasComponent,
     canActivate: [RoleGuard],
-    data: { expectedRolesModules: PermisosService.getExpectedRolesForRoute('CONASA', 'conasa/reporte-asistencias') }
+    data: { expectedRolesModules: PermisosService.getExpectedRolesForRoute('CONASA', 'conasa/menu-conasa/reporte-asistencias') }
   },
   { 
     path: 'menu-conasa/anular-asistencias',
     component: AnularAsistenciasComponent,
     canActivate: [RoleGuard],
-    data: { expectedRolesModules: PermisosService.getExpectedRolesForRoute('CONASA', 'conasa/anular-asistencias') }
+    data: { expectedRolesModules: PermisosService.getExpectedRolesForRoute('CONASA', 'conasa/menu-conasa/anular-asistencias') }
   },
   { 
     path: 'menu-conasa/modificar-asistencias',
     component: ModificarAsistenciasComponent,
     canActivate: [RoleGuard],
-    data: { expectedRolesModules: PermisosService.getExpectedRolesForRoute('CONASA', 'conasa/modificar-asistencias') }
+    data: { expectedRolesModules: PermisosService.getExpectedRolesForRoute('CONASA', 'conasa/menu-conasa/modificar-asistencias') }
   },
   { 
     path: 'menu-conasa/cancelar-asistencias',
     component: CancelarAsistenciasComponent,
     canActivate: [RoleGuard],
-    data: { expectedRolesModules: PermisosService.getExpectedRolesForRoute('CONASA', 'conasa/cancelar-asistencias') }
+    data: { expectedRolesModules: PermisosService.getExpectedRolesForRoute('CONASA', 'conasa/menu-conasa/cancelar-asistencias') }
   },
 ];
 

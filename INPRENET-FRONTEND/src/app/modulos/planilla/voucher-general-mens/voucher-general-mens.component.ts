@@ -12,6 +12,7 @@ import { obtenerNombreMes } from 'src/app/shared/functions/formatoFecha';
 import { FieldConfig } from 'src/app/shared/Interfaces/field-config';
 import { TableColumn } from 'src/app/shared/Interfaces/table-column';
 import { ValidationService } from 'src/app/shared/services/validation.service';
+import * as QRCode from 'qrcode';
 
 @Component({
   selector: 'app-voucher-general-mens',
@@ -216,7 +217,7 @@ export class VoucherGeneralMensComponent {
     }
   };
 
-  construirPDFBen(resultados: any, backgroundImageBase64: string) {
+  async construirPDFBen(resultados: any, backgroundImageBase64: string) {
     const token = sessionStorage.getItem('token');
     let dataToken
     if (token) {
@@ -234,6 +235,8 @@ export class VoucherGeneralMensComponent {
         const nombreCompleto = `${persona.primer_apellido} ${persona.segundo_apellido || ''} ${persona.primer_nombre} ${persona.segundo_nombre || ''}`.trim();
         const dni = persona.n_identificacion || 'NO PROPORCIONADO';
         const correo = persona.correo_1 || 'NO PROPORCIONADO';
+        const dniPersona = persona.n_identificacion || 'NO PROPORCIONADO';
+
         let sumaBeneficios = 0;
         let sumaDeducciones = 0;
 
@@ -300,8 +303,14 @@ export class VoucherGeneralMensComponent {
             style: 'tableExample'
           }
         }
+        const mesAnio = obtenerNombreMes(resultados.persona.detallePersona[0].detalleBeneficio[0].detallePagBeneficio[0].planilla.periodoInicio)
 
         const neto = sumaBeneficios - sumaDeducciones;
+        const qrData = `https://script.google.com/macros/s/AKfycbwkPhOJeCFvI2dvsU_o6m3d5pn_1XJoJzGhMoom7FeORLeIU_LovB-2fNeHwf1Hgl6wzQ/exec?name=${encodeURIComponent(
+          nombreCompleto,
+        )}&dni=${encodeURIComponent(dniPersona)}&mesAnio=${encodeURIComponent(mesAnio)}`;
+
+        const qrImage = await QRCode.toDataURL(qrData);
 
         const docDefinition: TDocumentDefinitions = {
           background: function (currentPage, pageSize) {
@@ -315,7 +324,7 @@ export class VoucherGeneralMensComponent {
           content: [
             {
               stack: [
-                { text: 'VOUCHER DEL MES DE: ' + obtenerNombreMes(resultados.persona.detallePersona[0].detalleBeneficio[0].detallePagBeneficio[0].planilla.periodoInicio), style: 'subheader', alignment: 'center', margin: [0, 10, 0, 0] },
+                { text: 'VOUCHER DEL MES DE ' + mesAnio, style: 'subheader', alignment: 'center', margin: [0, 10, 0, 0] },
                 {
                   columns: [
                     [
@@ -377,8 +386,17 @@ export class VoucherGeneralMensComponent {
                   },
                   style: 'tableExample'
                 },
-                { canvas: [{ type: 'line', x1: 0, y1: 0, x2: 250, y2: 0, lineWidth: 1 }], margin: [127, 70, 0, 10] },
-                { text: 'FIRMA UNIDAD DE PLANILLAS', style: 'signatureTitle', margin: [0, 5, 0, 0] }
+                {
+                  text: 'CÓDIGO QR DE VALIDACIÓN',
+                  style: 'subheader',
+                  alignment: 'center',
+                  margin: [0, 20, 0, 10],
+                },
+                {
+                  image: qrImage,
+                  width: 80, // Reducir el tamaño del QR
+                  alignment: 'center',
+                },
               ],
               margin: [0, 0, 0, 0]
             }

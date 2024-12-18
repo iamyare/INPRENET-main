@@ -140,38 +140,6 @@ async manejarTransaccion(@Body() payload: ManejarTransaccionDto, @Res() res) {
     };
   }
 
-  @Get('buscar-afiliado-nombre-apellido')
-  async buscarInformacionCompleta(
-    @Query('terminos') terminos: string,
-    @Req() req: Request
-  ) {
-    const authorization = req.headers['authorization'];
-    if (!authorization) {
-      throw new UnauthorizedException('No authorization header present');
-    }
-    const [scheme, base64Credentials] = authorization.split(' ');
-    if (scheme !== 'Basic' || !base64Credentials) {
-      throw new UnauthorizedException('Invalid authorization format');
-    }
-    let email: string;
-    let password: string;
-    try {
-      const decoded = Buffer.from(base64Credentials, 'base64').toString('utf-8');
-      [email, password] = decoded.split(':');
-      if (!email || !password) throw new Error();
-    } catch (error) {
-      throw new UnauthorizedException('Failed to decode or validate authorization');
-    }
-    return {
-      message: 'Información detallada obtenida exitosamente.',
-      data: await this.conasaService.buscarInformacionCompletaPorNombres(
-        terminos,
-        email,
-        password,
-      ),
-    };
-  }
-
   @Post('/registrar-consulta-medica')
   @UsePipes(ValidationPipe)
   @ApiResponse({ status: 201, description: 'Proceso de registro completado.' })

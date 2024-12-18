@@ -298,20 +298,20 @@ export class ConasaService {
         'usuarioEmpresas.usuarioModulos.rolModulo',
       ],
     });
-  
+
     if (!empCentTrabajoRepository) {
       throw new UnauthorizedException('User not found or unauthorized');
     }
-  
+
     const isPasswordValid = await bcrypt.compare(
       password,
       empCentTrabajoRepository.usuarioEmpresas[0].contrasena,
     );
-  
+
     if (!isPasswordValid) {
       throw new UnauthorizedException('Invalid password');
     }
-  
+
     // Consulta por tipo
     if (tipo === 1) {
       // Consulta por DNI
@@ -328,15 +328,15 @@ export class ConasaService {
           'municipio_nacimiento.departamento',
         ],
       });
-  
+
       if (!persona) {
         throw new NotFoundException(`Afiliado con N_IDENTIFICACION ${terminos} no existe`);
       }
-  
+
       const tiposPersona = persona.detallePersona
         .map(detalle => detalle.tipoPersona?.tipo_persona)
         .filter(Boolean);
-  
+
       return {
         N_IDENTIFICACION: persona.n_identificacion,
         PRIMER_NOMBRE: persona.primer_nombre,
@@ -356,50 +356,78 @@ export class ConasaService {
         TIPOS_PERSONA: tiposPersona,
       };
     } else if (tipo === 2) {
-      // Consulta por nombres y apellidos
-      const palabras = terminos.split(' ').map((palabra) => palabra.trim().toLowerCase());
-      if (palabras.length === 0) {
-        throw new NotFoundException('No valid search terms provided');
+      // Validar términos
+      const palabras = terminos.split(' ').filter((palabra) => palabra.trim().length > 0);
+      if (palabras.length !== 2) {
+        throw new BadRequestException('Debe proporcionar exactamente dos términos de búsqueda.');
       }
-  
-      const query = this.personaRepository.createQueryBuilder('persona').select([
-        'persona.n_identificacion',
-        'persona.primer_nombre',
-        'persona.segundo_nombre',
-        'persona.primer_apellido',
-        'persona.segundo_apellido',
-      ]);
-  
-      const parametros: Record<string, string> = {};
+
+      // Construir consulta por nombres o apellidos
+      const query = this.personaRepository.createQueryBuilder('persona')
+        .leftJoinAndSelect('persona.detallePersona', 'detallePersona')
+        .leftJoinAndSelect('detallePersona.tipoPersona', 'tipoPersona')
+        .leftJoinAndSelect('persona.pais', 'pais')
+        .leftJoinAndSelect('persona.municipio', 'municipio')
+        .leftJoinAndSelect('municipio.departamento', 'departamento')
+        .leftJoinAndSelect('persona.municipio_nacimiento', 'municipio_nacimiento')
+        .leftJoinAndSelect('municipio_nacimiento.departamento', 'departamento_nacimiento')
+        .leftJoinAndSelect('persona.tipoIdentificacion', 'tipoIdentificacion');
+
       let whereClause = '';
-  
-      palabras.forEach((palabra, palabraIndex) => {
-        const marcadorBase = `palabra${palabraIndex}`;
+      const parametros: Record<string, string> = {};
+
+      palabras.forEach((palabra, index) => {
+        const marcador = `palabra${index}`;
         const condiciones = [
-          `LOWER(persona.primer_nombre) LIKE :${marcadorBase}_primer_nombre`,
-          `LOWER(persona.segundo_nombre) LIKE :${marcadorBase}_segundo_nombre`,
-          `LOWER(persona.primer_apellido) LIKE :${marcadorBase}_primer_apellido`,
-          `LOWER(persona.segundo_apellido) LIKE :${marcadorBase}_segundo_apellido`,
+          `LOWER(persona.primer_nombre) LIKE :${marcador}_primer_nombre`,
+          `LOWER(persona.segundo_nombre) LIKE :${marcador}_segundo_nombre`,
+          `LOWER(persona.tercer_nombre) LIKE :${marcador}_tercer_nombre`,
+          `LOWER(persona.primer_apellido) LIKE :${marcador}_primer_apellido`,
+          `LOWER(persona.segundo_apellido) LIKE :${marcador}_segundo_apellido`,
         ];
         whereClause += whereClause ? ' AND ' : '';
         whereClause += `(${condiciones.join(' OR ')})`;
-  
-        parametros[`${marcadorBase}_primer_nombre`] = `%${palabra}%`;
-        parametros[`${marcadorBase}_segundo_nombre`] = `%${palabra}%`;
-        parametros[`${marcadorBase}_primer_apellido`] = `%${palabra}%`;
-        parametros[`${marcadorBase}_segundo_apellido`] = `%${palabra}%`;
+
+        parametros[`${marcador}_primer_nombre`] = `%${palabra}%`;
+        parametros[`${marcador}_segundo_nombre`] = `%${palabra}%`;
+        parametros[`${marcador}_tercer_nombre`] = `%${palabra}%`;
+        parametros[`${marcador}_primer_apellido`] = `%${palabra}%`;
+        parametros[`${marcador}_segundo_apellido`] = `%${palabra}%`;
       });
-  
+
       const personas = await query.where(whereClause).setParameters(parametros).getMany();
-  
+
       if (personas.length === 0) {
         throw new NotFoundException(`No persons found with terms: ${terminos}`);
       }
-  
-      return personas.map((persona) => ({
-        nombre_completo: `${persona.primer_nombre || ''} ${persona.segundo_nombre || ''} ${persona.primer_apellido || ''} ${persona.segundo_apellido || ''}`.trim(),
-        dni: persona.n_identificacion,
-      }));
+
+      // Mapear y devolver la información completa
+      return personas.map((persona) => {
+        const tiposPersona = persona.detallePersona
+          .map((detalle) => detalle.tipoPersona?.tipo_persona)
+          .filter(Boolean);
+
+        return {
+          N_IDENTIFICACION: persona.n_identificacion,
+          PRIMER_NOMBRE: persona.primer_nombre,
+          SEGUNDO_NOMBRE: persona.segundo_nombre,
+          TERCER_NOMBRE: persona.tercer_nombre,
+          PRIMER_APELLIDO: persona.primer_apellido,
+          SEGUNDO_APELLIDO: persona.segundo_apellido,
+          SEXO: persona.sexo,
+          DIRECCION_RESIDENCIA: persona.direccion_residencia,
+          FECHA_NACIMIENTO: persona.fecha_nacimiento,
+          TELEFONO_1: persona.telefono_1,
+          TELEFONO_2: persona.telefono_2,
+          CORREO_1: persona.correo_1,
+          DEPARTAMENTO_RESIDENCIA: persona.municipio?.departamento?.nombre_departamento || null,
+          MUNICIPIO_RESIDENCIA: persona.municipio?.nombre_municipio || null,
+          MUNICIPIO_NACIMIENTO: persona.municipio_nacimiento?.nombre_municipio || null,
+          DEPARTAMENTO_NACIMIENTO: persona.municipio_nacimiento?.departamento?.nombre_departamento || null,
+          ESTADO: persona.fallecido === 'SI' ? 'FALLECIDO' : 'VIVO',
+          TIPOS_PERSONA: tiposPersona,
+        };
+      });
     } else {
       throw new BadRequestException('Tipo de consulta no válido. Debe ser 1 (DNI) o 2 (Nombres/Apellidos).');
     }

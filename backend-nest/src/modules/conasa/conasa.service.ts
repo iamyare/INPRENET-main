@@ -437,85 +437,71 @@ export class ConasaService {
     crearConsultasDto: CrearConsultaDto[],
     email: string,
     password: string
-  ): Promise<object> {
+): Promise<object> {
     const empCentTrabajoRepository = await this.empCentTrabajoRepository.findOne({
-      where: {
-        correo_1: email,
-        usuarioEmpresas: {
-          usuarioModulos: {
-            rolModulo: { nombre: In(['CONSULTA', 'TODO']) },
-          },
+        where: {
+            correo_1: email,
+            usuarioEmpresas: {
+                usuarioModulos: {
+                    rolModulo: { nombre: In(['CONSULTA', 'TODO']) },
+                },
+            },
         },
-      },
-      relations: [
-        'usuarioEmpresas',
-        'usuarioEmpresas.usuarioModulos',
-        'usuarioEmpresas.usuarioModulos.rolModulo',
-      ],
+        relations: [
+            'usuarioEmpresas',
+            'usuarioEmpresas.usuarioModulos',
+            'usuarioEmpresas.usuarioModulos.rolModulo',
+        ],
     });
-  
+
     if (!empCentTrabajoRepository) {
-      throw new UnauthorizedException('User not found or unauthorized');
+        throw new UnauthorizedException('User not found or unauthorized');
     }
-  
+
     const isPasswordValid = await bcrypt.compare(
-      password,
-      empCentTrabajoRepository.usuarioEmpresas[0].contrasena
+        password,
+        empCentTrabajoRepository.usuarioEmpresas[0].contrasena
     );
-  
+
     if (!isPasswordValid) {
-      throw new UnauthorizedException('Invalid password');
+        throw new UnauthorizedException('Invalid password');
     }
+
     const resultados = {
-      totalExitosos: 0,
-      fallidos: [],
+        totalExitosos: 0,
+        fallidos: [],
     };
-  
+
     for (const consultaDto of crearConsultasDto) {
-      const { n_identificacion } = consultaDto;
-      try {
-        const persona = await this.personaRepository.findOne({
-          where: { n_identificacion },
-        });
-  
-        if (!persona) {
-          throw new NotFoundException(`Persona con identificación ${n_identificacion} no encontrada.`);
+        const { n_identificacion } = consultaDto;
+        try {
+            const persona = await this.personaRepository.findOne({
+                where: { n_identificacion },
+            });
+
+            if (!persona) {
+                throw new NotFoundException(`Persona con identificación ${n_identificacion} no encontrada.`);
+            }
+
+            const nuevaConsulta = this.consultaRepository.create({
+                ...consultaDto,
+                persona,
+            });
+
+            await this.consultaRepository.save(nuevaConsulta);
+            resultados.totalExitosos += 1;
+        } catch (error) {
+            resultados.fallidos.push({
+                n_identificacion,
+                error: error.message,
+            });
         }
-  
-        const contrato = await this.contratosRepository
-          .createQueryBuilder('contrato')
-          .leftJoinAndSelect('contrato.plan', 'plan')
-          .leftJoinAndSelect('plan.categoria', 'categoria')
-          .where('contrato.titular = :personaId', { personaId: persona.id_persona })
-          .andWhere('contrato.status = :status', { status: 'ACTIVO' })
-          .andWhere('categoria.nombre = :categoria', { categoria: 'ASISTENCIA MÉDICA' })
-          .getOne();
-  
-        if (!contrato) {
-          throw new NotFoundException(
-            `La persona con identificación ${n_identificacion} no tiene un contrato activo en la categoría ASISTENCIA MÉDICA.`,
-          );
-        }
-  
-        const nuevaConsulta = this.consultaRepository.create({
-          ...consultaDto,
-          contrato,
-        });
-  
-        await this.consultaRepository.save(nuevaConsulta);
-        resultados.totalExitosos += 1;
-      } catch (error) {
-        resultados.fallidos.push({
-          n_identificacion,
-          error: error.message,
-        });
-      }
     }
-  
+
     return {
-      message: 'Proceso de registro de asistencias médicas completado.',
-      totalExitosos: resultados.totalExitosos,
-      fallidos: resultados.fallidos,
+        message: 'Proceso de registro de asistencias médicas completado.',
+        totalExitosos: resultados.totalExitosos,
+        fallidos: resultados.fallidos,
     };
   }
   

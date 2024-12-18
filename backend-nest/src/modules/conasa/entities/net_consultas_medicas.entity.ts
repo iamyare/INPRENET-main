@@ -1,14 +1,14 @@
 import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn } from 'typeorm';
-import { Net_Contratos_Conasa } from './net_contratos_conasa.entity';
+import { net_persona } from 'src/modules/Persona/entities/net_persona.entity';
 
 @Entity({ name: 'NET_CONSULTAS_MEDICAS' })
 export class Net_Consultas_Medicas {
   @PrimaryGeneratedColumn({ name: 'ID_CONSULTA' })
   id_consulta: number;
 
-  @ManyToOne(() => Net_Contratos_Conasa)
-  @JoinColumn({ name: 'ID_CONTRATO', foreignKeyConstraintName: 'FK_NET_CONSULTA_CONTRATO' })
-  contrato: Net_Contratos_Conasa;
+  @ManyToOne(() => net_persona)
+  @JoinColumn({ name: 'ID_PERSONA', foreignKeyConstraintName: 'FK_NET_CONSULTA_PERSONA' })
+  persona: net_persona;
 
   @Column({ name: 'FECHA_CONSULTA', type: 'date' })
   fecha_consulta: string;

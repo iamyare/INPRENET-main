@@ -31,19 +31,21 @@ export class VerAfiliadoComponent implements OnInit {
   }
 
   handlePersonaEncontrada(persona: any): void {
-    console.log(persona);
     if (!persona) {
       this.tipoAfiliado = null;
       return;
     }
-
+    
     const departamentoResidencia = this.departamentos.find(
       (d) => d.value === persona.id_departamento_residencia
     )?.label || 'No especificado';
 
     const municipioResidencia = this.municipios.find(
-      (m) => m.value === persona.id_municipio_residencia
+      (m) => m.value === persona.ID_MUNICIPIO
     )?.label || 'No especificado';
+
+    console.log(municipioResidencia);
+    
 
     const fallecido = (persona.fallecido || '').trim().toUpperCase();
 
@@ -62,6 +64,6 @@ export class VerAfiliadoComponent implements OnInit {
   }
 
   private async cargarMunicipios(): Promise<void> {
-    this.municipios = await this.datosEstaticosService.getMunicipios(); // Cargar municipios del servicio
+    this.municipios = await this.datosEstaticosService.getMunicipios();
   }
 }

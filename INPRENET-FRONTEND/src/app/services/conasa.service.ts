@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { catchError, Observable, throwError } from 'rxjs';
+import { catchError, map, Observable, throwError } from 'rxjs';
 import { environment } from 'src/environments/environment';
 
 @Injectable({
@@ -32,22 +32,12 @@ export class ConasaService {
     );
   }
 
-  manejarTransaccion(
-    contratoData: {
-      idPersona: number;
-      idPlan: number;
-      lugarCobro: string;
-      fechaInicioContrato: string;
-      fechaCancelacionContrato?: string;
-    },
-    beneficiariosData?: any[]
-  ): Observable<string> {
-    const url = `${this.baseUrl}/manejar-transaccion`;
-    const payload = { contratoData, beneficiariosData };
-    return this.http.post<string>(url, payload).pipe(
+  crearContrato(payload: any): Observable<any> {
+    const url = `${this.baseUrl}/crear-contrato`;
+    return this.http.post<any>(url, payload).pipe(
       catchError((error) => {
-        console.error('Error al manejar la transacción', error);
-        return throwError(error);
+        console.error('Error al crear contrato', error);
+        return throwError(() => error);
       })
     );
   }
@@ -61,5 +51,26 @@ export class ConasaService {
       })
     );
   }
+
+  verificarContrato(idPersona: number): Observable<any> {
+    const url = `${this.baseUrl}/verificar-contrato/${idPersona}`;
+    return this.http.get<any>(url).pipe(
+      catchError((error) => {
+        console.error('Error al verificar contrato', error);
+        return throwError(() => error);
+      })
+    );
+  }
+  
+  cancelarContrato(payload: { n_identificacion?: string; id_contrato?: number; motivo_cancelacion: string }): Observable<any> {
+    const url = `${this.baseUrl}/cancelar-contrato`;
+    return this.http.post<any>(url, payload).pipe(
+      catchError((error) => {
+        console.error('Error al cancelar contrato', error);
+        return throwError(() => error);
+      })
+    );
+  }
+  
   
 }

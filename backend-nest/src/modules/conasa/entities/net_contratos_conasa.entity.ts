@@ -19,11 +19,11 @@ export class Net_Contratos_Conasa {
   @Column({ name: 'NUMERO_PRODUCTO', type: 'varchar2', length: 50, unique: true, nullable: true })
   numero_producto: string;
 
-  @Column({ name: 'FECHA_INICIO_CONTRATO', nullable: true })
-  fecha_inicio_contrato: string;
+  @Column('date', { name: 'FECHA_INICIO_CONTRATO', nullable: true })
+  fecha_inicio_contrato: Date;
 
-  @Column({ name: 'FECHA_CANCELACION_CONTRATO', nullable: true })
-  fecha_cancelacion_contrato: string;
+  @Column('date', { name: 'FECHA_CANCELACION_CONTRATO', nullable: true })
+  fecha_cancelacion_contrato: Date;
 
   @Column({ name: 'LUGAR_COBRO', type: 'varchar2', length: 100 })
   lugar_cobro: string;

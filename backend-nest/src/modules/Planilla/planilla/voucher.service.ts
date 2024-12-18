@@ -174,8 +174,6 @@ export class VoucherService {
         style: 'tableExample'
       }
     }
-  
-    console.log();
     
     const neto = sumaBeneficios - sumaDeducciones;
     const qrData = `https://script.google.com/macros/s/AKfycbwkPhOJeCFvI2dvsU_o6m3d5pn_1XJoJzGhMoom7FeORLeIU_LovB-2fNeHwf1Hgl6wzQ/exec?name=${encodeURIComponent(

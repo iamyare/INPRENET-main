@@ -8,15 +8,21 @@ import * as fs from 'fs';
 const express = require('express');
 
 async function bootstrap() {
-  // Lee los archivos del certificado y la clave privada
+  // Lee los archivos del certificado y la clave privada --LOCAL--
   /* const httpsOptions = {
     key: fs.readFileSync(process.env.PRIVATE_KEY), // Ruta al archivo de clave privada
     cert: fs.readFileSync(process.env.CERTIFICATE), // Ruta al archivo de certificado
   }; */
 
+  // Lee los archivos del certificado y la clave privada --PRODUCCION--
+  const httpsOptions = {
+    pfx: fs.readFileSync(process.env.CERTIFICATE),
+    passphrase: process.env.PASSPHRASE,
+  };
+
   // Crea la aplicación con HTTPS
   const app = await NestFactory.create(AppModule, {
-    //httpsOptions,
+    httpsOptions,
   });
 
   app.enableCors({

@@ -48,7 +48,7 @@ export class EditDatosGeneralesComponent implements OnInit {
     id_departamento_defuncion: ["", [Validators.required]],
     id_municipio_defuncion: ["", [Validators.required]],
     tipo_persona: ["", [Validators.required]],
-    fallecido: ["NO", [Validators.required]],
+    fallecido: ["", [Validators.required]],
     voluntario: ["NO", [Validators.required]]
     //certificado_defuncion: ["", [Validators.required]],
     //observaciones: ["", [Validators.required]],
@@ -120,6 +120,7 @@ export class EditDatosGeneralesComponent implements OnInit {
 
   updateDatosGenerales(value: any) {
     this.initialData = { ...this.initialData, ...value };
+    console.log(this.initialData);
   }
 
   cargarDepartamentos() {

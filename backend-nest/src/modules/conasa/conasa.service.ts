@@ -270,7 +270,7 @@ export class ConasaService {
       .innerJoin('contrato.titular', 'persona')
       .innerJoin('contrato.plan', 'plan')
       .innerJoin('plan.categoria', 'categoria')
-      .where('contrato.status = :status', { status: 'A' });
+      .where('contrato.status = :status', { status: 'ACTIVO' });
   
     const result = await query.getRawMany();
     return result;

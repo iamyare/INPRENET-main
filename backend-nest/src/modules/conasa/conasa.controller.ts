@@ -141,13 +141,11 @@ async manejarTransaccion(@Body() payload: ManejarTransaccionDto, @Res() res) {
   }
 
   @Post('/registrar-consulta-medica')
-  @UsePipes(ValidationPipe)
   @ApiResponse({ status: 201, description: 'Proceso de registro completado.' })
   @ApiResponse({ status: 401, description: 'Error de autorización.' })
   @ApiResponse({ status: 500, description: 'Error en el proceso de registro.' })
   async crearConsultas(
-    @Body(new ParseArrayPipe({ items: CrearConsultaDto, whitelist: true }))
-    crearConsultasDto: CrearConsultaDto[],
+    @Body() crearConsultasDto: CrearConsultaDto[], // Sin ParseArrayPipe
     @Req() req: Request,
   ) {
     const authorization = req.headers['authorization'];
@@ -177,6 +175,14 @@ async manejarTransaccion(@Body() payload: ManejarTransaccionDto, @Res() res) {
   @UsePipes(ValidationPipe)
   async obtenerAfiliadosPorPeriodo(@Query() params: ObtenerAfiliadosPorPeriodoDto) {
     return await this.conasaService.obtenerAfiliadosPorPeriodo(params.fechaInicio, params.fechaFin);
+  }
+
+  @Get('beneficiarios')
+  @ApiResponse({ status: 200, description: 'Lista de beneficiarios obtenida correctamente.' })
+  @ApiResponse({ status: 400, description: 'Error en la solicitud.' })
+  @ApiResponse({ status: 500, description: 'Error al obtener los beneficiarios.' })
+  async obtenerBeneficiarios() {
+    return await this.conasaService.obtenerBeneficiarios();
   }
 
 }

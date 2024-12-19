@@ -1,9 +1,10 @@
-import { IsDateString, IsNotEmpty, IsOptional, IsString, MaxLength } from 'class-validator';
+import { IsDateString, IsNotEmpty, IsOptional, IsString, Length, MaxLength } from 'class-validator';
 
 export class CrearConsultaDto {
   @IsString()
   @IsNotEmpty()
-  n_identificacion: string;
+  @Length(13, 13, { message: 'El DNI debe tener exactamente 13 caracteres.' })
+  dni: string;
 
   @IsDateString()
   @IsNotEmpty()

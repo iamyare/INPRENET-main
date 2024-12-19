@@ -835,7 +835,7 @@ FROM
             CASE 
                 WHEN LISTAGG(PB.ID_BENEFICIO, ', ') WITHIN GROUP (ORDER BY PB.ID_BENEFICIO) LIKE '%10%' 
                      OR LISTAGG(PB.ID_BENEFICIO, ', ') WITHIN GROUP (ORDER BY PB.ID_BENEFICIO) LIKE '%101%' 
-                     THEN 'CONTINUACION JUBILACION' 
+                     THEN 'CONTINUACION DE JUBILACION' 
                 ELSE MAX(B.NOMBRE_BENEFICIO) 
             END AS NOMBRE_BENEFICIO, 
             PER.NUMERO_PAGOS, 
@@ -1098,7 +1098,7 @@ GROUP BY
                 CASE
                     WHEN LISTAGG(PB.ID_BENEFICIO, ', ') WITHIN GROUP (ORDER BY PB.ID_BENEFICIO) LIKE '%10%'
                          OR LISTAGG(PB.ID_BENEFICIO, ', ') WITHIN GROUP (ORDER BY PB.ID_BENEFICIO) LIKE '%101%'
-                         THEN 'CONTINUACION JUBILACION'
+                         THEN 'CONTINUACION DE JUBILACION'
                     ELSE MAX(B.NOMBRE_BENEFICIO)
                 END AS NOMBRE_BENEFICIO,
                 PER.NUMERO_PAGOS,

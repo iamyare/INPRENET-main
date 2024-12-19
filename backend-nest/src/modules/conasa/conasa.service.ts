@@ -225,7 +225,6 @@ export class ConasaService {
   }
 
   async obtenerPlanillaContratosActivos(email: string, password: string): Promise<any[]> {
-    // Validar credenciales
     const empCentTrabajoRepository = await this.empCentTrabajoRepository.findOne({
       where: {
         correo_1: email,
@@ -357,12 +356,14 @@ export class ConasaService {
       };
     } else if (tipo === 2) {
       // Validar términos
-      const palabras = terminos.split(' ').filter((palabra) => palabra.trim().length > 0);
+      const palabras = terminos
+      .split(' ')
+      .filter((palabra) => palabra.trim().length > 0)
+      .map((palabra) => palabra.trim().toLowerCase());
+
       if (palabras.length !== 2) {
         throw new BadRequestException('Debe proporcionar exactamente dos términos de búsqueda.');
       }
-
-      // Construir consulta por nombres o apellidos
       const query = this.personaRepository.createQueryBuilder('persona')
         .leftJoinAndSelect('persona.detallePersona', 'detallePersona')
         .leftJoinAndSelect('detallePersona.tipoPersona', 'tipoPersona')
@@ -422,8 +423,6 @@ export class ConasaService {
           CORREO_1: persona.correo_1,
           DEPARTAMENTO_RESIDENCIA: persona.municipio?.departamento?.nombre_departamento || null,
           MUNICIPIO_RESIDENCIA: persona.municipio?.nombre_municipio || null,
-          MUNICIPIO_NACIMIENTO: persona.municipio_nacimiento?.nombre_municipio || null,
-          DEPARTAMENTO_NACIMIENTO: persona.municipio_nacimiento?.departamento?.nombre_departamento || null,
           ESTADO: persona.fallecido === 'SI' ? 'FALLECIDO' : 'VIVO',
           TIPOS_PERSONA: tiposPersona,
         };
@@ -437,71 +436,71 @@ export class ConasaService {
     crearConsultasDto: CrearConsultaDto[],
     email: string,
     password: string
-): Promise<object> {
+  ): Promise<object> {
+    // Validar credenciales del usuario
     const empCentTrabajoRepository = await this.empCentTrabajoRepository.findOne({
-        where: {
-            correo_1: email,
-            usuarioEmpresas: {
-                usuarioModulos: {
-                    rolModulo: { nombre: In(['CONSULTA', 'TODO']) },
-                },
-            },
+      where: {
+        correo_1: email,
+        usuarioEmpresas: {
+          usuarioModulos: {
+            rolModulo: { nombre: In(['CONSULTA', 'TODO']) },
+          },
         },
-        relations: [
-            'usuarioEmpresas',
-            'usuarioEmpresas.usuarioModulos',
-            'usuarioEmpresas.usuarioModulos.rolModulo',
-        ],
+      },
+      relations: [
+        'usuarioEmpresas',
+        'usuarioEmpresas.usuarioModulos',
+        'usuarioEmpresas.usuarioModulos.rolModulo',
+      ],
     });
-
+  
     if (!empCentTrabajoRepository) {
-        throw new UnauthorizedException('User not found or unauthorized');
+      throw new UnauthorizedException('User not found or unauthorized');
     }
-
+  
     const isPasswordValid = await bcrypt.compare(
-        password,
-        empCentTrabajoRepository.usuarioEmpresas[0].contrasena
+      password,
+      empCentTrabajoRepository.usuarioEmpresas[0].contrasena
     );
-
+  
     if (!isPasswordValid) {
-        throw new UnauthorizedException('Invalid password');
+      throw new UnauthorizedException('Invalid password');
     }
-
+  
     const resultados = {
-        totalExitosos: 0,
-        fallidos: [],
+      totalExitosos: 0,
+      fallidos: [],
     };
-
+  
     for (const consultaDto of crearConsultasDto) {
-        const { n_identificacion } = consultaDto;
-        try {
-            const persona = await this.personaRepository.findOne({
-                where: { n_identificacion },
-            });
-
-            if (!persona) {
-                throw new NotFoundException(`Persona con identificación ${n_identificacion} no encontrada.`);
-            }
-
-            const nuevaConsulta = this.consultaRepository.create({
-                ...consultaDto,
-                persona,
-            });
-
-            await this.consultaRepository.save(nuevaConsulta);
-            resultados.totalExitosos += 1;
-        } catch (error) {
-            resultados.fallidos.push({
-                n_identificacion,
-                error: error.message,
-            });
+      const { dni } = consultaDto;
+  
+      try {
+        // Validar longitud del DNI
+        if (!dni || dni.length !== 13) {
+          throw new Error('El DNI debe tener exactamente 13 caracteres.');
         }
+  
+        // Crear y guardar la consulta directamente
+        const nuevaConsulta = this.consultaRepository.create({
+          ...consultaDto,
+        });
+  
+        await this.consultaRepository.save(nuevaConsulta);
+        resultados.totalExitosos += 1;
+      } catch (error) {
+        resultados.fallidos.push({
+          dni,
+          error: error.message,
+        });
+      }
     }
-
+  
+    // Retornar resultados
     return {
-        message: 'Proceso de registro de asistencias médicas completado.',
-        totalExitosos: resultados.totalExitosos,
-        fallidos: resultados.fallidos,
+      message: 'Proceso de registro de asistencias médicas completado.',
+      totalExitosos: resultados.totalExitosos,
+      fallidos: resultados.fallidos,
     };
   }
   
@@ -541,43 +540,101 @@ export class ConasaService {
     await this.contratosRepository.save(contrato);
 
     return `Contrato con ID ${contrato.id_contrato} ha sido cancelado exitosamente.`;
-}
+  }
   
   async obtenerAfiliadosPorPeriodo(fechaInicio: string, fechaFin: string) {
     try {
-      // Convertir fechas del formato dd/MM/yy al formato ISO
       const [diaInicio, mesInicio, anoInicio] = fechaInicio.split('/');
       const [diaFin, mesFin, anoFin] = fechaFin.split('/');
 
-      const fechaInicioISO = new Date(`20${anoInicio}-${mesInicio}-${diaInicio}`);
-      const fechaFinISO = new Date(`20${anoFin}-${mesFin}-${diaFin}`);
+      const fechaInicioISO = `${anoInicio}-${mesInicio}-${diaInicio}`;
+      const fechaFinISO = `${anoFin}-${mesFin}-${diaFin}`;
 
-      if (isNaN(fechaInicioISO.getTime()) || isNaN(fechaFinISO.getTime())) {
+      if (isNaN(new Date(fechaInicioISO).getTime()) || isNaN(new Date(fechaFinISO).getTime())) {
         throw new BadRequestException('Las fechas no son válidas.');
       }
 
-      // Consulta a la base de datos
       const afiliados = await this.contratosRepository
         .createQueryBuilder('contrato')
         .leftJoinAndSelect('contrato.titular', 'titular')
-        .where('contrato.fecha_inicio_contrato BETWEEN :inicio AND :fin', {
-          inicio: fechaInicioISO.toISOString().split('T')[0],
-          fin: fechaFinISO.toISOString().split('T')[0],
-        })
+        .leftJoinAndSelect('contrato.plan', 'plan')
+        .leftJoinAndSelect('plan.categoria', 'categoria')
+        .where(
+          `contrato.fecha_inicio_contrato BETWEEN TO_DATE(:inicio, 'YYYY-MM-DD') AND TO_DATE(:fin, 'YYYY-MM-DD')`,
+          {
+            inicio: fechaInicioISO,
+            fin: fechaFinISO,
+          },
+        )
         .select([
-          'contrato.id_contrato',
           'contrato.fecha_inicio_contrato',
+          'contrato.fecha_cancelacion_contrato',
+          'contrato.observacion',
+          'contrato.numero_producto',
+          'contrato.status',
+          'titular.n_identificacion',
           'titular.primer_nombre',
           'titular.segundo_nombre',
           'titular.primer_apellido',
           'titular.segundo_apellido',
-          'titular.n_identificacion',
+          'titular.fecha_nacimiento',
+          'titular.telefono_1',
+          'titular.telefono_2',
+          'titular.telefono_3',
+          'titular.correo_1',
+          'titular.direccion_residencia',
+          'plan.nombre_plan',
+          'categoria.nombre',
         ])
         .getMany();
+      const afiliadosConFormato = afiliados.map((afiliado) => ({
+        ...afiliado,
+        fecha_inicio_contrato: afiliado.fecha_inicio_contrato
+          ? new Date(afiliado.fecha_inicio_contrato).toLocaleDateString('es-ES')
+          : null,
+        fecha_cancelacion_contrato: afiliado.fecha_cancelacion_contrato
+          ? new Date(afiliado.fecha_cancelacion_contrato).toLocaleDateString('es-ES')
+          : null,
+        titular: {
+          ...afiliado.titular,
+          fecha_nacimiento: afiliado.titular.fecha_nacimiento
+            ? new Date(afiliado.titular.fecha_nacimiento).toLocaleDateString('es-ES')
+            : null,
+        },
+      }));
 
-      return { total: afiliados.length, afiliados };
+      return {
+        total: afiliadosConFormato.length,
+        afiliados: afiliadosConFormato,
+      };
     } catch (error) {
       throw new BadRequestException(error.message || 'Error al procesar la solicitud.');
+    }
+  }
+
+  async obtenerBeneficiarios(): Promise<any[]> {
+    try {
+      const beneficiarios = await this.beneficiariosRepository
+        .createQueryBuilder('beneficiario')
+        .leftJoinAndSelect('beneficiario.contrato', 'contrato')
+        .leftJoinAndSelect('contrato.titular', 'titular')
+        .select([
+          'titular.n_identificacion AS n_identificacion_titular', // DNI del titular
+          'beneficiario.primer_nombre AS primer_nombre',
+          'beneficiario.segundo_nombre AS segundo_nombre',
+          'beneficiario.primer_apellido AS primer_apellido',
+          'beneficiario.segundo_apellido AS segundo_apellido',
+          'beneficiario.parentesco AS parentesco',
+          `TO_CHAR(beneficiario.fecha_nacimiento, 'DD/MM/YYYY') AS fecha_nacimiento`, // Fecha formateada
+          `TRUNC(MONTHS_BETWEEN(SYSDATE, beneficiario.fecha_nacimiento) / 12) AS edad`, // Edad calculada
+        ])
+        .getRawMany();
+  
+      return beneficiarios;
+    } catch (error) {
+      throw new BadRequestException(
+        error.message || 'Error al obtener los beneficiarios.',
+      );
     }
   }
   

@@ -1,14 +1,12 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn } from 'typeorm';
-import { net_persona } from 'src/modules/Persona/entities/net_persona.entity';
+import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
 
 @Entity({ name: 'NET_CONSULTAS_MEDICAS' })
 export class Net_Consultas_Medicas {
   @PrimaryGeneratedColumn({ name: 'ID_CONSULTA' })
   id_consulta: number;
 
-  @ManyToOne(() => net_persona)
-  @JoinColumn({ name: 'ID_PERSONA', foreignKeyConstraintName: 'FK_NET_CONSULTA_PERSONA' })
-  persona: net_persona;
+  @Column({ name: 'DNI', type: 'varchar2', length: 13 })
+  dni: string;
 
   @Column({ name: 'FECHA_CONSULTA', type: 'date' })
   fecha_consulta: string;
@@ -28,7 +26,7 @@ export class Net_Consultas_Medicas {
   @Column({ name: 'DIAGNOSTICO_PRESUNTIVO', type: 'varchar2', length: 255 })
   diagnostico_presuntivo: string;
 
-  @Column({ name: 'DETALLE_ATENCION', type: 'varchar2', length: 500 })
+  @Column({ name: 'DETALLE_ATENCION', type: 'varchar2', length: 500, nullable: true })
   detalle_atencion: string;
 
   @Column({ name: 'FECHA_CIERRE', type: 'date', nullable: true })

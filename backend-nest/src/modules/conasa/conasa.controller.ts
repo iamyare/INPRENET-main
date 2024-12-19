@@ -185,4 +185,22 @@ async manejarTransaccion(@Body() payload: ManejarTransaccionDto, @Res() res) {
     return await this.conasaService.obtenerBeneficiarios();
   }
 
+  @Get('afiliados-por-periodo-excel')
+  @UsePipes(ValidationPipe)
+  async obtenerAfiliadosPorPeriodoExcel(
+    @Query() params: ObtenerAfiliadosPorPeriodoDto,
+    @Res() res,
+  ) {
+    await this.conasaService.obtenerAfiliadosPorPeriodoExcel(params.fechaInicio, params.fechaFin, res);
+  }
+
+  @Get('beneficiarios/excel')
+  @ApiResponse({ status: 200, description: 'Archivo Excel generado correctamente.' })
+  @ApiResponse({ status: 400, description: 'Error en la solicitud.' })
+  @ApiResponse({ status: 500, description: 'Error al generar el archivo Excel.' })
+  async generarExcelBeneficiarios(@Res() res) {
+    return await this.conasaService.generarExcelBeneficiarios(res);
+  }
+
+
 }

@@ -1,9 +1,64 @@
-<div class="back-button-container">
-    <button mat-raised-button color="primary" class="back-button" routerLink="/home/conasa/menu-conasa">
-      <mat-icon>arrow_back</mat-icon> Regresar al Menú
-    </button>
-  </div>
 
-  <div class="menu-title">
-    <h1>{{ menuTitle }}</h1>
-  </div>
+<div class="back-button-container">
+  <button mat-raised-button color="primary" class="back-button" routerLink="/home/conasa/menu-conasa">
+    <mat-icon>arrow_back</mat-icon> Regresar al Menú
+  </button>
+</div>
+
+<div class="menu-title">
+  <h1>{{ menuTitle }}</h1>
+</div>
+<div class="card-container">
+  <!-- Descargar afiliados por periodo -->
+  <mat-card class="action-card">
+    <mat-card-header>
+      <mat-card-title>Afiliados por Periodo</mat-card-title>
+      <mat-card-subtitle>Descargar reporte de afiliados en Excel</mat-card-subtitle>
+    </mat-card-header>
+    <mat-card-content>
+      <mat-form-field appearance="outline">
+        <mat-label>Fecha Inicio</mat-label>
+        <input
+          matInput
+          [matDatepicker]="pickerInicio"
+          (dateChange)="fechaInicio = $event.value; validarFechas()"
+          [max]="fechaFin"
+          readonly
+        />
+        <mat-datepicker-toggle matSuffix [for]="pickerInicio"></mat-datepicker-toggle>
+        <mat-datepicker #pickerInicio></mat-datepicker>
+      </mat-form-field>
+    
+      <mat-form-field appearance="outline">
+        <mat-label>Fecha Fin</mat-label>
+        <input
+          matInput
+          [matDatepicker]="pickerFin"
+          (dateChange)="fechaFin = $event.value; validarFechas()"
+          [min]="fechaInicio"
+          readonly
+        />
+        <mat-datepicker-toggle matSuffix [for]="pickerFin"></mat-datepicker-toggle>
+        <mat-datepicker #pickerFin></mat-datepicker>
+      </mat-form-field>
+    </mat-card-content>
+    <mat-card-actions>
+      <button mat-raised-button color="primary" (click)="descargarAfiliadosPorPeriodo()" [disabled]="botonDeshabilitado">
+        Descargar Afiliados
+      </button>
+    </mat-card-actions>    
+  </mat-card>
+
+  <!-- Descargar beneficiarios -->
+  <mat-card class="action-card">
+    <mat-card-header>
+      <mat-card-title>Beneficiarios</mat-card-title>
+      <mat-card-subtitle>Descargar reporte de beneficiarios en Excel</mat-card-subtitle>
+    </mat-card-header>
+    <mat-card-actions>
+      <button mat-raised-button color="accent" (click)="descargarBeneficiarios()">Descargar Beneficiarios</button>
+    </mat-card-actions>
+  </mat-card>
+</div>
+
+

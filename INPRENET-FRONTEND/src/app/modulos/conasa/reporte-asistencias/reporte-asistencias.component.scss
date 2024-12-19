@@ -22,3 +22,15 @@
       font-weight: bold;
     }
   }
+
+  .card-container {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    align-items: center;
+  }
+  
+  .action-card {
+    width: 80%;
+    max-width: 600px;
+  }

@@ -14,6 +14,9 @@ import { Net_Consultas_Medicas } from './entities/net_consultas_medicas.entity';
 import { CrearConsultaDto } from './dto/create-consulta-medica.dto';
 import { CancelarContratoDto } from './dto/cancelar-contrato.dto';
 const bcrypt = require('bcrypt');
+import * as ExcelJS from 'exceljs';
+import { Response } from 'express';
+import * as XLSX from 'xlsx';
 
 @Injectable()
 export class ConasaService {
@@ -297,20 +300,20 @@ export class ConasaService {
         'usuarioEmpresas.usuarioModulos.rolModulo',
       ],
     });
-
+  
     if (!empCentTrabajoRepository) {
       throw new UnauthorizedException('User not found or unauthorized');
     }
-
+  
     const isPasswordValid = await bcrypt.compare(
       password,
-      empCentTrabajoRepository.usuarioEmpresas[0].contrasena,
+      empCentTrabajoRepository.usuarioEmpresas[0].contrasena
     );
-
+  
     if (!isPasswordValid) {
       throw new UnauthorizedException('Invalid password');
     }
-
+  
     // Consulta por tipo
     if (tipo === 1) {
       // Consulta por DNI
@@ -327,15 +330,15 @@ export class ConasaService {
           'municipio_nacimiento.departamento',
         ],
       });
-
+  
       if (!persona) {
         throw new NotFoundException(`Afiliado con N_IDENTIFICACION ${terminos} no existe`);
       }
-
+  
       const tiposPersona = persona.detallePersona
         .map(detalle => detalle.tipoPersona?.tipo_persona)
         .filter(Boolean);
-
+  
       return {
         N_IDENTIFICACION: persona.n_identificacion,
         PRIMER_NOMBRE: persona.primer_nombre,
@@ -355,15 +358,19 @@ export class ConasaService {
         TIPOS_PERSONA: tiposPersona,
       };
     } else if (tipo === 2) {
-      // Validar términos
       const palabras = terminos
-      .split(' ')
-      .filter((palabra) => palabra.trim().length > 0)
-      .map((palabra) => palabra.trim().toLowerCase());
-
+        .split(' ')
+        .filter((palabra) => palabra.trim().length > 0)
+        .map((palabra) => palabra.trim().toLowerCase());
+  
       if (palabras.length !== 2) {
         throw new BadRequestException('Debe proporcionar exactamente dos términos de búsqueda.');
       }
+  
+      if (palabras.some((palabra) => palabra.length < 3)) {
+        throw new BadRequestException('Ambos términos deben tener al menos 3 caracteres.');
+      }
+  
       const query = this.personaRepository.createQueryBuilder('persona')
         .leftJoinAndSelect('persona.detallePersona', 'detallePersona')
         .leftJoinAndSelect('detallePersona.tipoPersona', 'tipoPersona')
@@ -373,10 +380,10 @@ export class ConasaService {
         .leftJoinAndSelect('persona.municipio_nacimiento', 'municipio_nacimiento')
         .leftJoinAndSelect('municipio_nacimiento.departamento', 'departamento_nacimiento')
         .leftJoinAndSelect('persona.tipoIdentificacion', 'tipoIdentificacion');
-
+  
       let whereClause = '';
       const parametros: Record<string, string> = {};
-
+  
       palabras.forEach((palabra, index) => {
         const marcador = `palabra${index}`;
         const condiciones = [
@@ -388,26 +395,26 @@ export class ConasaService {
         ];
         whereClause += whereClause ? ' AND ' : '';
         whereClause += `(${condiciones.join(' OR ')})`;
-
+  
         parametros[`${marcador}_primer_nombre`] = `%${palabra}%`;
         parametros[`${marcador}_segundo_nombre`] = `%${palabra}%`;
         parametros[`${marcador}_tercer_nombre`] = `%${palabra}%`;
         parametros[`${marcador}_primer_apellido`] = `%${palabra}%`;
         parametros[`${marcador}_segundo_apellido`] = `%${palabra}%`;
       });
-
+  
       const personas = await query.where(whereClause).setParameters(parametros).getMany();
-
+  
       if (personas.length === 0) {
         throw new NotFoundException(`No persons found with terms: ${terminos}`);
       }
-
+  
       // Mapear y devolver la información completa
       return personas.map((persona) => {
         const tiposPersona = persona.detallePersona
           .map((detalle) => detalle.tipoPersona?.tipo_persona)
           .filter(Boolean);
-
+  
         return {
           N_IDENTIFICACION: persona.n_identificacion,
           PRIMER_NOMBRE: persona.primer_nombre,
@@ -638,4 +645,153 @@ export class ConasaService {
     }
   }
   
+  async obtenerAfiliadosPorPeriodoExcel(
+    fechaInicio: string,
+    fechaFin: string,
+    res: Response,
+  ): Promise<void> {
+    try {
+      // Parsear las fechas en formato dd/MM/yyyy
+      const [diaInicio, mesInicio, anoInicio] = fechaInicio.split('/');
+      const [diaFin, mesFin, anoFin] = fechaFin.split('/');
+  
+      const fechaInicioISO = `${anoInicio}-${mesInicio}-${diaInicio}`;
+      const fechaFinISO = `${anoFin}-${mesFin}-${diaFin}`;
+  
+      if (isNaN(new Date(fechaInicioISO).getTime()) || isNaN(new Date(fechaFinISO).getTime())) {
+        throw new BadRequestException('Las fechas no son válidas.');
+      }
+  
+      // Consultar los afiliados
+      const afiliados = await this.contratosRepository
+        .createQueryBuilder('contrato')
+        .leftJoinAndSelect('contrato.titular', 'titular')
+        .leftJoinAndSelect('contrato.plan', 'plan')
+        .leftJoinAndSelect('plan.categoria', 'categoria')
+        .where(
+          `contrato.fecha_inicio_contrato BETWEEN TO_DATE(:inicio, 'YYYY-MM-DD') AND TO_DATE(:fin, 'YYYY-MM-DD')`,
+          {
+            inicio: fechaInicioISO,
+            fin: fechaFinISO,
+          },
+        )
+        .select([
+          'contrato.fecha_inicio_contrato',
+          'contrato.fecha_cancelacion_contrato',
+          'contrato.observacion',
+          'contrato.numero_producto',
+          'contrato.status',
+          'titular.n_identificacion',
+          'titular.primer_nombre',
+          'titular.segundo_nombre',
+          'titular.primer_apellido',
+          'titular.segundo_apellido',
+          'titular.fecha_nacimiento',
+          'titular.telefono_1',
+          'titular.telefono_2',
+          'titular.telefono_3',
+          'titular.correo_1',
+          'titular.direccion_residencia',
+          'plan.nombre_plan',
+          'categoria.nombre',
+        ])
+        .getMany();
+  
+      // Formatear los datos para el Excel
+      const afiliadosConFormato = afiliados.map((afiliado) => ({
+        'Número de Producto': afiliado.numero_producto,
+        'Fecha de Inicio': afiliado.fecha_inicio_contrato
+          ? new Date(afiliado.fecha_inicio_contrato).toLocaleDateString('es-ES')
+          : null,
+        'Fecha de Cancelación': afiliado.fecha_cancelacion_contrato
+          ? new Date(afiliado.fecha_cancelacion_contrato).toLocaleDateString('es-ES')
+          : null,
+        Estado: afiliado.status,
+        Observación: afiliado.observacion || '',
+        'Identificación del Titular': afiliado.titular.n_identificacion,
+        'Primer Nombre': afiliado.titular.primer_nombre,
+        'Segundo Nombre': afiliado.titular.segundo_nombre || '',
+        'Primer Apellido': afiliado.titular.primer_apellido,
+        'Segundo Apellido': afiliado.titular.segundo_apellido || '',
+        'Teléfono 1': afiliado.titular.telefono_1 || '',
+        'Teléfono 2': afiliado.titular.telefono_2 || '',
+        'Teléfono 3': afiliado.titular.telefono_3 || '',
+        Correo: afiliado.titular.correo_1 || '',
+        'Fecha de Nacimiento': afiliado.titular.fecha_nacimiento
+          ? new Date(afiliado.titular.fecha_nacimiento).toLocaleDateString('es-ES')
+          : null,
+        Dirección: afiliado.titular.direccion_residencia || '',
+        'Nombre del Plan': afiliado.plan.nombre_plan,
+        Categoría: afiliado.plan.categoria.nombre,
+      }));
+  
+      // Crear el archivo Excel
+      const workbook = new ExcelJS.Workbook();
+      const worksheet = workbook.addWorksheet('Afiliados');
+  
+      // Definir las columnas del archivo
+      worksheet.columns = Object.keys(afiliadosConFormato[0]).map((key) => ({
+        header: key,
+        key,
+      }));
+  
+      // Agregar las filas al archivo
+      worksheet.addRows(afiliadosConFormato);
+  
+      // Configurar la respuesta HTTP
+      res.setHeader(
+        'Content-Disposition',
+        'attachment; filename="Afiliados_Por_Periodo.xlsx"',
+      );
+      res.setHeader(
+        'Content-Type',
+        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      );
+  
+      // Enviar el archivo al cliente
+      await workbook.xlsx.write(res);
+      res.end();
+    } catch (error) {
+      throw new BadRequestException(error.message || 'Error al generar el archivo Excel.');
+    }
+  }
+  
+  async generarExcelBeneficiarios(res: Response): Promise<void> {
+    try {
+      // Ejecutar la consulta existente
+      const beneficiarios = await this.beneficiariosRepository
+        .createQueryBuilder('beneficiario')
+        .leftJoinAndSelect('beneficiario.contrato', 'contrato')
+        .leftJoinAndSelect('contrato.titular', 'titular')
+        .select([
+          'titular.n_identificacion AS n_identificacion_titular', // DNI del titular
+          'beneficiario.primer_nombre AS primer_nombre',
+          'beneficiario.segundo_nombre AS segundo_nombre',
+          'beneficiario.primer_apellido AS primer_apellido',
+          'beneficiario.segundo_apellido AS segundo_apellido',
+          'beneficiario.parentesco AS parentesco',
+          `TO_CHAR(beneficiario.fecha_nacimiento, 'DD/MM/YYYY') AS fecha_nacimiento`, // Fecha formateada
+          `TRUNC(MONTHS_BETWEEN(SYSDATE, beneficiario.fecha_nacimiento) / 12) AS edad`, // Edad calculada
+        ])
+        .getRawMany();
+  
+      // Crear la hoja de trabajo
+      const worksheet = XLSX.utils.json_to_sheet(beneficiarios);
+      const workbook = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(workbook, worksheet, 'Beneficiarios');
+  
+      // Configurar el archivo en formato Excel
+      const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'buffer' });
+      const excelFilename = `Beneficiarios_${new Date().toISOString().split('T')[0]}.xlsx`;
+  
+      // Enviar el archivo como respuesta
+      res.setHeader('Content-Disposition', `attachment; filename=${excelFilename}`);
+      res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+      res.send(excelBuffer);
+    } catch (error) {
+      throw new BadRequestException(
+        error.message || 'Error al generar el archivo Excel.',
+      );
+    }
+  }
 }

@@ -71,6 +71,25 @@ export class ConasaService {
       })
     );
   }
-  
+
+  descargarAfiliadosPorPeriodoExcel(fechaInicio: string, fechaFin: string) {
+    const url = `${this.baseUrl}/afiliados-por-periodo-excel?fechaInicio=${fechaInicio}&fechaFin=${fechaFin}`;
+    return this.http.get(url, { responseType: 'blob' }).pipe(
+      catchError((error) => {
+        console.error('Error al descargar el Excel de afiliados por periodo', error);
+        throw error;
+      })
+    );
+  }
+
+  descargarBeneficiariosExcel() {
+    const url = `${this.baseUrl}/beneficiarios/excel`;
+    return this.http.get(url, { responseType: 'blob' }).pipe(
+      catchError((error) => {
+        console.error('Error al descargar el Excel de beneficiarios', error);
+        throw error;
+      })
+    );
+  }
   
 }

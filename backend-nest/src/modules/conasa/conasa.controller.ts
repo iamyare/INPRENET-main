@@ -224,7 +224,7 @@ async manejarTransaccion(@Body() payload: ManejarTransaccionDto, @Res() res) {
     return await this.conasaService.crearConsultasMedicas(crearConsultasDto, email, password);
   }
 
-  @Get('obtener-altas-bajas')
+  @Get('cuadres')
   async obtenerDatos(
     @Req() req: Request,
     @Query('tipo') tipo: number,

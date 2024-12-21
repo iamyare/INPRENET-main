@@ -106,10 +106,11 @@ export const MENU_CONFIG: Section[] = [
         children: [
           { title: 'Buscar Afiliado', route: 'conasa/ver-afiliado', icon: 'person_search' },
           { title: 'Gestion De Contratos', route: 'conasa/menu-conasa', icon: 'description' },
+          { title: 'Subir Factura', route: 'conasa/subir-factura', icon: 'description' },
         ],
       },
     ],
-  },  
+  },
   {
     name: 'ESCALAFÓN',
     items: [

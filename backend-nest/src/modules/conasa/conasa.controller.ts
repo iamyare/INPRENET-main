@@ -1,16 +1,69 @@
-import { Controller, Get, Post, Body, Param, Req, Query, UnauthorizedException, NotFoundException, Res, BadRequestException, UsePipes, ValidationPipe, ParseArrayPipe} from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Req, Query, UnauthorizedException, Res, BadRequestException, UsePipes, ValidationPipe, UseInterceptors, UploadedFile} from '@nestjs/common';
 import { ConasaService } from './conasa.service';
-import { AsignarContratoDto } from './dto/asignar-contrato.dto';
-import { CrearBeneficiarioDto } from './dto/beneficiarios-conasa.dto';
 import { ManejarTransaccionDto } from './dto/crear-contrato.dto';
 import { ApiResponse } from '@nestjs/swagger';
 import { CrearConsultaDto } from './dto/create-consulta-medica.dto';
 import { CancelarContratoDto } from './dto/cancelar-contrato.dto';
 import { ObtenerAfiliadosPorPeriodoDto } from './dto/afiliados-periodo.dto';
+import { FileInterceptor } from '@nestjs/platform-express';
 
 @Controller('conasa')
 export class ConasaController {
   constructor(private readonly conasaService: ConasaService) {}
+
+  @Post('subir-factura')
+  @UseInterceptors(FileInterceptor('archivo_pdf'))
+  async subirFactura(
+    @Body() body: { tipo_factura: number; periodo_factura: string },
+    @UploadedFile() archivo_pdf: Express.Multer.File,
+    @Res() res,
+  ) {
+    const tipoFactura = parseInt(body.tipo_factura as any, 10);
+  
+    if (![1, 2].includes(tipoFactura)) {
+      return res.status(400).json({
+        statusCode: 400,
+        message: 'El tipo de factura debe ser 1 o 2 (Asistencia Médica o Contratos Funerarios).',
+      });
+    }
+  
+    // Continuar con el resto de la lógica
+    if (!archivo_pdf) {
+      return res.status(400).json({
+        statusCode: 400,
+        message: 'El archivo PDF es requerido.',
+      });
+    }
+  
+    if (!body.periodo_factura || !/^\d{4}-\d{2}$/.test(body.periodo_factura)) {
+      return res.status(400).json({
+        statusCode: 400,
+        message: 'El periodo de factura debe estar en el formato AAAA-MM.',
+      });
+    }
+  
+    try {
+      const resultado = await this.conasaService.guardarFactura({
+        tipo_factura: tipoFactura,
+        periodo_factura: body.periodo_factura,
+        archivo_pdf: archivo_pdf.buffer,
+      });
+  
+      return res.status(201).json({
+        statusCode: 201,
+        message: 'Factura subida exitosamente.',
+        data: resultado,
+      });
+    } catch (error) {
+      console.error('Error al guardar la factura:', error.message);
+      return res.status(500).json({
+        statusCode: 500,
+        message: 'Error al guardar la factura.',
+        error: error.message,
+      });
+    }
+  }
+  
 
   @Post('crear-contrato')
 async manejarTransaccion(@Body() payload: ManejarTransaccionDto, @Res() res) {
@@ -169,6 +222,36 @@ async manejarTransaccion(@Body() payload: ManejarTransaccionDto, @Res() res) {
     }
 
     return await this.conasaService.crearConsultasMedicas(crearConsultasDto, email, password);
+  }
+
+  @Get('obtener-altas-bajas')
+  async obtenerDatos(
+    @Req() req: Request,
+    @Query('tipo') tipo: number,
+  ): Promise<any> {
+    // Validar credenciales del usuario
+    const authorization = req.headers['authorization'];
+    if (!authorization) {
+      throw new UnauthorizedException('No authorization header present');
+    }
+
+    const [scheme, base64Credentials] = authorization.split(' ');
+    if (scheme !== 'Basic' || !base64Credentials) {
+      throw new UnauthorizedException('Invalid authorization format');
+    }
+
+    let email: string;
+    let password: string;
+    try {
+      const decoded = Buffer.from(base64Credentials, 'base64').toString('utf-8');
+      [email, password] = decoded.split(':');
+      if (!email || !password) throw new Error();
+    } catch (error) {
+      throw new UnauthorizedException('Failed to decode or validate authorization');
+    }
+
+    // Delegar al servicio según el tipo de consulta
+    return await this.conasaService.obtenerDatos(email, password, tipo);
   }
 
   @Get('afiliados-por-periodo')

@@ -9,10 +9,11 @@ import { Net_Beneficiarios_Conasa } from './entities/net_beneficiarios_conasa.en
 import { AfiliadoModule } from '../Persona/afiliado.module';
 import { EmpresarialModule } from '../Empresarial/empresarial.module';
 import { Net_Consultas_Medicas } from './entities/net_consultas_medicas.entity';
+import { Net_Facturas_Conasa } from './entities/net_facturas_conasa.entity';
 
 @Module({
   controllers: [ConasaController],
   providers: [ConasaService],
-  imports: [TypeOrmModule.forFeature([Net_Categoria, Net_Plan,Net_Contratos_Conasa, Net_Beneficiarios_Conasa,Net_Consultas_Medicas]), AfiliadoModule, EmpresarialModule],
+  imports: [TypeOrmModule.forFeature([Net_Categoria, Net_Plan,Net_Contratos_Conasa, Net_Beneficiarios_Conasa,Net_Consultas_Medicas,Net_Facturas_Conasa]), AfiliadoModule, EmpresarialModule],
 })
 export class ConasaModule {}

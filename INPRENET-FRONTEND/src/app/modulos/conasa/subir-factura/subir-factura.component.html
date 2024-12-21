@@ -1,0 +1,66 @@
+<div class="form-container">
+  <mat-card>
+    <mat-card-header>
+      <mat-card-title class="card-title">Subir Factura</mat-card-title>
+    </mat-card-header>
+    <mat-card-content class="card-content">
+      <div class="form-preview-container">
+        <!-- Formulario a la izquierda -->
+        <form (ngSubmit)="onSubmit()" #facturaForm="ngForm" class="form-section">
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Tipo de Factura</mat-label>
+            <mat-select [(ngModel)]="tipoFactura" name="tipoFactura" required>
+              <mat-option [value]="1">Asistencia Médica</mat-option>
+              <mat-option [value]="2">Contratos Funerarios</mat-option>
+            </mat-select>
+            <mat-error *ngIf="!tipoFactura">Selecciona un tipo de factura.</mat-error>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Periodo de Factura (AAAA-MM)</mat-label>
+            <input
+              matInput
+              type="text"
+              [(ngModel)]="periodoFactura"
+              name="periodoFactura"
+              required
+              #periodoInput="ngModel"
+              [pattern]="regexPeriodo"
+            />
+            <mat-error *ngIf="periodoInput.errors?.['pattern']">El periodo debe tener el formato AAAA-MM.</mat-error>
+            <mat-error *ngIf="!periodoFactura">El periodo es obligatorio.</mat-error>
+          </mat-form-field>
+
+          <div class="custom-file-input full-width">
+            <label for="archivoPdf">Seleccione un archivo PDF</label>
+            <input
+              type="file"
+              id="archivoPdf"
+              (change)="onFileSelected($event)"
+              accept="application/pdf"
+              required
+            />
+            <div *ngIf="archivoInvalido" class="error-text">Solo se permiten archivos PDF.</div>
+          </div>
+
+          <div class="action-buttons">
+            <button
+              mat-raised-button
+              color="primary"
+              type="submit"
+              [disabled]="!tipoFactura || !isPeriodoValido() || archivoInvalido || !archivoPdf"
+            >
+              Subir Factura
+            </button>
+          </div>
+        </form>
+
+        <!-- Previsualización del PDF a la derecha -->
+        <div class="pdf-preview" *ngIf="previewUrl">
+          <label>Previsualización del PDF:</label>
+          <iframe [src]="previewUrl" width="100%" height="300px"></iframe>
+        </div>
+      </div>
+    </mat-card-content>
+  </mat-card>
+</div>

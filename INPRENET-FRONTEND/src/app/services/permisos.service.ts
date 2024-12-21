@@ -193,6 +193,13 @@ export class PermisosService {
             { role: 'ADMINISTRADOR', module: 'CONASA' }
           ]
         },
+        'conasa/subir-factura': {
+          title: 'Subir Factura',
+          permisos: [
+            { role: 'CONSULTA', module: 'CONASA' },
+            { role: 'ADMINISTRADOR', module: 'CONASA' }
+          ]
+        },
         'conasa/menu-conasa': {
           title: 'Detalle Envío',
           permisos: [

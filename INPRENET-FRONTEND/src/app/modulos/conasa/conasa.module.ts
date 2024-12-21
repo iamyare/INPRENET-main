@@ -13,6 +13,7 @@ import { ModificarAsistenciasComponent } from '../conasa/modificar-asistencias/m
 import { CancelarAsistenciasComponent } from '../conasa/cancelar-asistencias/cancelar-asistencias.component';
 import { AgregarBeneficiariosComponent } from '../conasa/agregar-beneficiarios/agregar-beneficiarios.component';
 import { VerContratosComponent } from '../conasa/ver-contratos/ver-contratos.component';
+import { SubirFacturaComponent } from './subir-factura/subir-factura.component';
 
 
 @NgModule({
@@ -25,7 +26,8 @@ import { VerContratosComponent } from '../conasa/ver-contratos/ver-contratos.com
     ModificarAsistenciasComponent,
     CancelarAsistenciasComponent,
     AgregarBeneficiariosComponent,
-    VerContratosComponent
+    VerContratosComponent,
+    SubirFacturaComponent
   ],
   imports: [
     CommonModule,

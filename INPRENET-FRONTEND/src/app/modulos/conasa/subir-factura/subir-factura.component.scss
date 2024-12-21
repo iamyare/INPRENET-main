@@ -1,0 +1,98 @@
+// Contenedor principal centrado
+.form-container {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  margin-top: 50px;
+  height: 100vh;
+}
+
+// Card para formulario
+mat-card {
+  width: 800px; // Aumentado para acomodar el formulario y la previsualización
+  padding: 16px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+  background-color: #ffffff;
+}
+
+// Estilo del título
+.card-title {
+  font-size: 1.5rem;
+  font-weight: bold;
+  text-align: center;
+  color: #1c9588; // Verde Material Design
+  margin-bottom: 8px;
+}
+
+// Contenedor para el formulario y la previsualización
+.form-preview-container {
+  display: flex;
+  flex-direction: row; // Pone el formulario y la previsualización lado a lado
+  gap: 16px; // Espacio entre las columnas
+}
+
+// Sección del formulario (izquierda)
+.form-section {
+  flex: 2; // Ocupa más espacio que la previsualización
+}
+
+// Previsualización del PDF (derecha)
+.pdf-preview {
+  flex: 1; // Ocupa menos espacio
+  display: flex;
+  flex-direction: column;
+
+  label {
+    font-size: 14px;
+    font-weight: 500;
+    color: rgba(0, 0, 0, 0.6);
+    margin-bottom: 8px;
+    display: block;
+  }
+
+  iframe {
+    border: 1px solid rgba(0, 0, 0, 0.23);
+    border-radius: 4px;
+  }
+}
+
+// Hacer que los inputs ocupen el ancho completo
+.full-width {
+  width: 100%;
+}
+
+// Botones de acción
+.action-buttons {
+  margin-top: 16px;
+  display: flex;
+  justify-content: center;
+}
+
+// Campo personalizado para archivo
+.custom-file-input {
+  display: flex;
+  flex-direction: column;
+  margin-top: 16px;
+
+  label {
+    font-size: 14px;
+    font-weight: 500;
+    color: rgba(0, 0, 0, 0.6);
+    margin-bottom: 8px;
+  }
+
+  input[type='file'] {
+    border: 1px solid rgba(0, 0, 0, 0.23);
+    padding: 8px;
+    border-radius: 4px;
+    font-size: 14px;
+    cursor: pointer;
+    outline: none;
+
+    &:focus {
+      border-color: #1c9588;
+      box-shadow: 0 0 0 1px #1c9588;
+    }
+  }
+}

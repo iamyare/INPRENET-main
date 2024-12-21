@@ -2,7 +2,7 @@ import { BadRequestException, Injectable, InternalServerErrorException, NotFound
 import { InjectRepository } from '@nestjs/typeorm';
 import { Net_Plan } from './entities/net_planes.entity';
 import { Net_Categoria } from './entities/net_categorias.entity';
-import { DataSource, In, Repository } from 'typeorm';
+import { Between, DataSource, In, Repository } from 'typeorm';
 import { Net_Contratos_Conasa } from './entities/net_contratos_conasa.entity';
 import { net_persona } from '../Persona/entities/net_persona.entity';
 import { Net_Beneficiarios_Conasa } from './entities/net_beneficiarios_conasa.entity';
@@ -17,6 +17,7 @@ const bcrypt = require('bcrypt');
 import * as ExcelJS from 'exceljs';
 import { Response } from 'express';
 import * as XLSX from 'xlsx';
+import { Net_Facturas_Conasa } from './entities/net_facturas_conasa.entity';
 
 @Injectable()
 export class ConasaService {
@@ -38,7 +39,31 @@ export class ConasaService {
     private empCentTrabajoRepository: Repository<Net_Empleado_Centro_Trabajo>,
     @InjectRepository(Net_Consultas_Medicas)
     private readonly consultaRepository: Repository<Net_Consultas_Medicas>,
+    @InjectRepository(Net_Facturas_Conasa)
+    private readonly facturasRepository: Repository<Net_Facturas_Conasa>,
   ) {}
+
+  async guardarFactura(data: {
+    tipo_factura: number;
+    periodo_factura: string;
+    archivo_pdf: Buffer;
+  }): Promise<Net_Facturas_Conasa> {
+    // Validaciones adicionales si son necesarias
+    if (data.tipo_factura !== 1 && data.tipo_factura !== 2) {
+      throw new BadRequestException(
+        'El tipo de factura debe ser 1 o 2 (Asistencia Médica o Contratos Funerarios).',
+      );
+    }
+
+    // Crear y guardar la nueva factura
+    const nuevaFactura = this.facturasRepository.create({
+      tipo_factura: data.tipo_factura,
+      periodo_factura: data.periodo_factura,
+      archivo_pdf: data.archivo_pdf,
+    });
+
+    return this.facturasRepository.save(nuevaFactura);
+  }
 
   private generateNumeroProducto(): string {
     const prefix = 'PROD';
@@ -510,7 +535,204 @@ export class ConasaService {
       fallidos: resultados.fallidos,
     };
   }
+
+  async obtenerDatos(email: string, password: string, tipo: number): Promise<any> {
+    // Validar credenciales del usuario
+    const empCentTrabajoRepository = await this.empCentTrabajoRepository.findOne({
+      where: {
+        correo_1: email,
+        usuarioEmpresas: {
+          usuarioModulos: {
+            rolModulo: { nombre: In(['CONSULTA', 'TODO']) },
+          },
+        },
+      },
+      relations: [
+        'usuarioEmpresas',
+        'usuarioEmpresas.usuarioModulos',
+        'usuarioEmpresas.usuarioModulos.rolModulo',
+      ],
+    });
   
+    if (!empCentTrabajoRepository) {
+      throw new UnauthorizedException('User not found or unauthorized');
+    }
+  
+    const isPasswordValid = await bcrypt.compare(
+      password,
+      empCentTrabajoRepository.usuarioEmpresas[0].contrasena,
+    );
+  
+    if (!isPasswordValid) {
+      throw new UnauthorizedException('Invalid password');
+    }
+  
+    const currentDate = new Date();
+    const formattedDate = `${currentDate.getFullYear()}-${String(currentDate.getMonth() + 1).padStart(2, '0')}`;
+  
+    if (tipo === 1) {
+      const query = `
+        WITH planillas_filtradas AS (
+            SELECT
+                dpb.id_persona,
+                p.id_planilla,
+                tp.nombre_planilla,
+                p.periodo_inicio,
+                p.periodo_finalizacion
+            FROM
+                net_detalle_pago_beneficio dpb
+            INNER JOIN
+                net_planilla p ON dpb.id_planilla = p.id_planilla
+            INNER JOIN
+                net_tipo_planilla tp ON p.id_tipo_planilla = tp.id_tipo_planilla
+            WHERE
+                tp.nombre_planilla IN ('ORDINARIA DE JUBILADOS Y PENSIONADOS', 'COMPLEMENTARIA DE JUBILADOS Y PENSIONADOS')
+        ),
+        mes_actual AS (
+            SELECT DISTINCT id_persona
+            FROM planillas_filtradas
+            WHERE TRUNC(periodo_inicio, 'MM') = TRUNC(SYSDATE, 'MM')
+        ),
+        mes_anterior AS (
+            SELECT DISTINCT id_persona
+            FROM planillas_filtradas
+            WHERE TRUNC(periodo_inicio, 'MM') = ADD_MONTHS(TRUNC(SYSDATE, 'MM'), -1)
+        )
+        SELECT
+            (SELECT COUNT(*) FROM mes_actual) AS total_mes_actual,
+            (SELECT COUNT(*) FROM mes_anterior) AS total_mes_anterior,
+            (SELECT COUNT(*) FROM mes_actual WHERE id_persona NOT IN (SELECT id_persona FROM mes_anterior)) AS altas_mes_actual,
+            (SELECT COUNT(*) FROM mes_anterior WHERE id_persona NOT IN (SELECT id_persona FROM mes_actual)) AS bajas_mes_actual
+        FROM DUAL
+      `;
+    
+      const result = await this.dataSource.query(query);
+    
+      if (!result || result.length === 0) {
+        return [];
+      }
+    
+      const { TOTAL_MES_ACTUAL, TOTAL_MES_ANTERIOR, ALTAS_MES_ACTUAL, BAJAS_MES_ACTUAL } = result[0];
+    
+      const currentDate = new Date();
+      const formattedCurrentDate = `${currentDate.getFullYear()}-${String(currentDate.getMonth() + 1).padStart(2, '0')}`;
+    
+      const previousDate = new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 1);
+      const formattedPreviousDate = `${previousDate.getFullYear()}-${String(previousDate.getMonth() + 1).padStart(2, '0')}`;
+    
+      return [
+        {
+          mes: formattedCurrentDate,
+          tot_no_pensionados_activos: TOTAL_MES_ACTUAL ? Number(TOTAL_MES_ACTUAL) : 0,
+          altas: ALTAS_MES_ACTUAL ? Number(ALTAS_MES_ACTUAL) : 0,
+          bajas: BAJAS_MES_ACTUAL ? Number(BAJAS_MES_ACTUAL) : 0,
+        },
+        {
+          mes: formattedPreviousDate,
+          tot_no_pensionados_activos: TOTAL_MES_ANTERIOR ? Number(TOTAL_MES_ANTERIOR) : 0,
+          altas: 0, // Altas no se calculan para el mes anterior
+          bajas: 0, // Bajas no se calculan para el mes anterior
+        },
+      ];
+    }
+    
+     else if (tipo === 2) {
+      const contratosActivos = await this.contratosRepository.find({
+        where: { status: 'ACTIVO' },
+        relations: ['plan', 'plan.categoria'],
+      });
+  
+      const contratosCancelados = await this.contratosRepository.find({
+        where: { status: 'CANCELADO' },
+        relations: ['plan', 'plan.categoria'],
+      });
+  
+      const categoriaMap = new Map<
+        string,
+        {
+          nombre_categoria: string;
+          tot_no_contratos_activos: number;
+          total_valor_contratos: number;
+          altas: number;
+          cancelaciones: number;
+          planes: Map<
+            string,
+            {
+              tot_no_contratos_activos: number;
+              total_valor_contratos: number;
+            }
+          >;
+        }
+      >();
+  
+      contratosActivos.forEach((contrato) => {
+        const categoria = contrato.plan.categoria.nombre;
+        const plan = contrato.plan.nombre_plan;
+        const valorContrato = contrato.plan.precio;
+  
+        if (!categoriaMap.has(categoria)) {
+          categoriaMap.set(categoria, {
+            nombre_categoria: categoria,
+            tot_no_contratos_activos: 0,
+            total_valor_contratos: 0,
+            altas: 0,
+            cancelaciones: 0,
+            planes: new Map(),
+          });
+        }
+  
+        const categoriaData = categoriaMap.get(categoria)!;
+        categoriaData.tot_no_contratos_activos++;
+        categoriaData.total_valor_contratos += valorContrato;
+  
+        if (!categoriaData.planes.has(plan)) {
+          categoriaData.planes.set(plan, {
+            tot_no_contratos_activos: 0,
+            total_valor_contratos: 0,
+          });
+        }
+  
+        const planData = categoriaData.planes.get(plan)!;
+        planData.tot_no_contratos_activos++;
+        planData.total_valor_contratos += valorContrato;
+      });
+  
+      contratosActivos.forEach((contrato) => {
+        const categoria = contrato.plan.categoria.nombre;
+        if (new Date(contrato.fecha_inicio_contrato).getMonth() === currentDate.getMonth()) {
+          const categoriaData = categoriaMap.get(categoria)!;
+          categoriaData.altas++;
+        }
+      });
+  
+      contratosCancelados.forEach((contrato) => {
+        const categoria = contrato.plan.categoria.nombre;
+        if (new Date(contrato.fecha_cancelacion_contrato).getMonth() === currentDate.getMonth()) {
+          const categoriaData = categoriaMap.get(categoria)!;
+          categoriaData.cancelaciones++;
+        }
+      });
+  
+      return Array.from(categoriaMap.entries()).map(([categoria, data]) => ({
+        mes: formattedDate,
+        nombre_categoria: data.nombre_categoria,
+        tot_no_general_contratos_activos: data.tot_no_contratos_activos,
+        altas: data.altas,
+        cancelaciones: data.cancelaciones,
+        total_valor_general_contratos: data.total_valor_contratos,
+        planes: Array.from(data.planes.entries()).map(([nombre_plan, planData]) => ({
+          nombre_plan,
+          tot_no_contratos_activos: planData.tot_no_contratos_activos,
+          total_valor_contratos: planData.total_valor_contratos,
+        })),
+      }));
+    } else {
+      throw new BadRequestException('Tipo de consulta no válido. Debe ser 1 o 2.');
+    }
+  }
+  
+
+    
   async cancelarContrato(dto: CancelarContratoDto): Promise<string> {
     let contrato: Net_Contratos_Conasa | undefined;
 

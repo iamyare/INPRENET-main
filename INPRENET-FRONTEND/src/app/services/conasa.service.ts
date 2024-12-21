@@ -12,6 +12,24 @@ export class ConasaService {
 
   constructor(private http: HttpClient) { }
 
+  subirFactura(tipoFactura: number, periodoFactura: string, archivoPdf: File): Observable<any> {
+    const url = `${this.baseUrl}/subir-factura`;
+
+    const formData = new FormData();
+    formData.append('tipo_factura', tipoFactura.toString()); // Convertir explícitamente a string
+    formData.append('periodo_factura', periodoFactura);
+    formData.append('archivo_pdf', archivoPdf);
+
+    return this.http.post<any>(url, formData).pipe(
+      catchError((error) => {
+        console.error('Error al subir la factura', error);
+        return throwError(() => error);
+      })
+    );
+  }
+
+
+
   obtenerCategorias(): Observable<any> {
     const url = `${this.baseUrl}/categorias`;
     return this.http.get<any>(url).pipe(
@@ -61,7 +79,7 @@ export class ConasaService {
       })
     );
   }
-  
+
   cancelarContrato(payload: { n_identificacion?: string; id_contrato?: number; motivo_cancelacion: string }): Observable<any> {
     const url = `${this.baseUrl}/cancelar-contrato`;
     return this.http.post<any>(url, payload).pipe(
@@ -91,5 +109,5 @@ export class ConasaService {
       })
     );
   }
-  
+
 }

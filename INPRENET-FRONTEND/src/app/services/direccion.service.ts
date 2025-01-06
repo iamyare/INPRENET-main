@@ -14,32 +14,32 @@ export class DireccionService {
     const url = `${environment.API_URL}/api/departamento`;
     return this.http.get<any>(
       url,
-      ).pipe(
-        map((res:any) => {
-          return res;
-        })
-      );
+    ).pipe(
+      map((res: any) => {
+        return res;
+      })
+    );
   }
   getAllPaises(): Observable<any | void> {
     const url = `${environment.API_URL}/api/pais`;
     return this.http.get<any>(
       url,
-      ).pipe(
-        map((res:any) => {
-          return res;
-        })
-      );
+    ).pipe(
+      map((res: any) => {
+        return res;
+      })
+    );
   }
 
   getAllMunicipios(): Observable<any | void> {
     const url = `${environment.API_URL}/api/municipio`;
     return this.http.get<any>(
       url,
-      ).pipe(
-        map((res:any) => {
-          return res;
-        })
-      );
+    ).pipe(
+      map((res: any) => {
+        return res;
+      })
+    );
   }
 
   getMunicipiosPorDepartamentoId(departamentoId: number): Observable<{ value: number, label: string }[]> {
@@ -66,5 +66,5 @@ export class DireccionService {
       }))
     );
   }
-  
+
 }

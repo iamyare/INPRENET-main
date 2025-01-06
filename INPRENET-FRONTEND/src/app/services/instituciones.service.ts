@@ -10,14 +10,14 @@ export class InstitucionesService {
 
   constructor(private http: HttpClient) { }
 
-  getInstituciones(): Observable<any>{
-    var url= `${environment.API_URL}/api/centro-trabajo`;
+  getInstituciones(): Observable<any> {
+    var url = `${environment.API_URL}/api/centro-trabajo`;
 
     return this.http.get(url,
-      ).pipe(
-        map((res:any) => {
-          return res;
-        }),
-      );
+    ).pipe(
+      map((res: any) => {
+        return res;
+      }),
+    );
   }
 }

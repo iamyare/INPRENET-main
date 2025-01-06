@@ -19,7 +19,7 @@ export class AfiliacionService {
       })
     );
   }
-  
+
   eliminarCargoPublico(idCargoPublico: number): Observable<void> {
     const url = `${environment.API_URL}/api/afiliacion/cargos-publicos/${idCargoPublico}`;
     return this.http.delete<void>(url).pipe(
@@ -57,7 +57,7 @@ export class AfiliacionService {
         console.error('Error al actualizar los PEPs', error);
         return throwError(error);
       })
-      );
+    );
   }
 
   eliminarFamiliar(idPersona: number, idFamiliar: number): Observable<any> {

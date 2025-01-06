@@ -2,7 +2,7 @@ import { ChangeDetectorRef, Component, Inject, OnInit, QueryList, ViewChild, Vie
 import { AbstractControl, FormBuilder, FormControl, FormGroup, ValidatorFn, Validators } from '@angular/forms';
 import { MatDatepicker } from '@angular/material/datepicker';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
-import { addMonths } from 'date-fns';
+import { addMonths, format, parseISO } from 'date-fns';
 
 interface Campo {
   nombre: string;
@@ -59,12 +59,15 @@ export class EditarDialogComponent implements OnInit {
 
       if (campo.tipo === 'daterange') {
         const dateRangeGroup = this.fb.group({
-          start: [valorInicial?.start || '', validadores],
-          end: [valorInicial?.end || '', validadores]
+          start: [this.convertToDate(valorInicial?.start), validadores],
+          end: [this.convertToDate(valorInicial?.end), validadores]
         });
         group[campo.nombre] = dateRangeGroup;
       } else if (campo.tipo === 'date') {
-        group[campo.nombre] = new FormControl({ value: valorInicial, disabled: !campo.editable }, validadores);
+        group[campo.nombre] = new FormControl(
+          { value: this.convertToDate(valorInicial), disabled: !campo.editable },
+          validadores
+        );
       } else {
         group[campo.nombre] = new FormControl({ value: valorInicial, disabled: !campo.editable }, validadores);
       }
@@ -74,63 +77,86 @@ export class EditarDialogComponent implements OnInit {
     this.cdr.detectChanges();
   }
 
-  escucharCambiosFormulario() {
-    this.formGroup.valueChanges.subscribe(values => {
+  convertToDate(value: string | Date): Date {
+    if (value instanceof Date) {
+      return value;
+    }
 
-      // Suponiendo que el campo que modifica es 'input1' y el que quieres cambiar es 'input2'.
-      const num_rentas_pagar_primer_pago = this.formGroup.get("num_rentas_pagar_primer_pago")?.value;
-      const monto_por_periodo = this.formGroup.get("monto_por_periodo")?.value;
+    if (typeof value === 'string') {
+      // Extraemos los componentes de la fecha
+      const [year, month, day] = value.split('-').map(Number);
 
-      const num_rentas_aplicadas = this.formGroup.get("num_rentas_aplicadas")?.value;
-      //const valorInput4 = values.num_rentas_aplicadas;
-      const ultimo_dia_ultima_renta = values?.ultimo_dia_ultima_renta;
-      const fecha_calculo = values.fecha_calculo;
+      // Creamos la fecha ajustándola directamente como local sin desfase
+      return new Date(year, month - 1, day); // `month - 1` porque los meses empiezan desde 0 en JavaScript
+    }
 
-      const monto_total = this.formGroup.get("monto_total")?.value;
-      const monto_ultima_cuota = this.formGroup.get("monto_ultima_cuota")?.value;
-
-      /* if (num_rentas_pagar_primer_pago !== undefined) {
-        // Aplica lógica para calcular el nuevo valor
-        const nuevomonto_por_periodo = num_rentas_pagar_primer_pago * monto_por_periodo; // Ejemplo: duplicar el valor
-
-        // Actualiza el valor de 'input2' sin emitir eventos
-        this.formGroup.get('monto_primera_cuota')?.patchValue(nuevomonto_por_periodo, { emitEvent: false });
-      } */
-
-      if (monto_total !== undefined) {
-        // Aplica lógica para calcular el nuevo valor
-        const nuevomonto_por_periodo = (monto_por_periodo * num_rentas_aplicadas) + monto_ultima_cuota; // Ejemplo: duplicar el valor
-
-        // Actualiza el valor de 'input2' sin emitir eventos
-        this.formGroup.get('monto_total')?.patchValue(nuevomonto_por_periodo.toFixed(2), { emitEvent: false });
-      }
-
-      if (num_rentas_aplicadas !== undefined) {
-        let startDate: any
-
-        if (fecha_calculo) {
-          if (typeof fecha_calculo === 'string' && fecha_calculo.includes('T')) {
-            // Si el valor tiene formato ISO con 'T', convertirlo a 'yyyy-mm-dd'
-            startDate = fecha_calculo.split('T')[0];
-          } else {
-            startDate = fecha_calculo.toISOString().split('T')[0];
-          }
-        } else {
-          startDate = new Date().toISOString().split('T')[0];
-        }
-
-        // Sumamos los meses especificados en `num_rentas_aplicadas`
-        const endDateWithMonths = addMonths(startDate, parseInt(num_rentas_aplicadas, 10));
-        //const endDateWithMonths = addMonths(startDate, parseInt(valorInput3, 10));
-        // Configuramos la fecha al próximo mes y asignamos el día de `ultimo_dia_ultima_renta`
-        const endDateAdjusted = new Date(endDateWithMonths.getFullYear(), endDateWithMonths.getMonth() + 1, parseInt(ultimo_dia_ultima_renta, 10));
-
-        this.formGroup.get('periodo_finalizacion')?.patchValue(endDateAdjusted, { emitEvent: false });
-      }
-      this.formUpdated.emit(values); // Emitir cambios del formulario.
-    });
+    // Retornamos una fecha por defecto si el valor no es válido
+    return new Date();
   }
 
+
+
+  escucharCambiosFormulario() {
+    this.formGroup.valueChanges.subscribe(() => {
+      const values = this.formGroup.getRawValue();
+
+      const {
+        num_rentas_pagar_primer_pago,
+        monto_por_periodo,
+        num_rentas_aplicadas,
+        ultimo_dia_ultima_renta,
+        fecha_calculo,
+        monto_total,
+        monto_ultima_cuota
+      } = values;
+
+      // Actualizar `monto_total` si se cumple la condición
+      if (monto_total !== undefined && monto_por_periodo && monto_ultima_cuota) {
+        const nuevomonto_por_periodo =
+          monto_por_periodo * (num_rentas_aplicadas || 0) + monto_ultima_cuota;
+
+        this.formGroup
+          .get('monto_total')
+          ?.patchValue(nuevomonto_por_periodo.toFixed(2), { emitEvent: false });
+        values.monto_total = nuevomonto_por_periodo.toFixed(2)
+      }
+
+      // Calcular `periodo_finalizacion` basado en `fecha_calculo`
+      if (num_rentas_aplicadas !== undefined && ultimo_dia_ultima_renta) {
+        let startDate: Date;
+
+        if (fecha_calculo) {
+          if (typeof fecha_calculo === 'string') {
+            startDate = parseISO(fecha_calculo);
+          } else if (fecha_calculo instanceof Date) {
+            startDate = fecha_calculo;
+          } else {
+            console.error('El formato de fecha no es válido.');
+            return;
+          }
+        } else {
+          startDate = new Date();
+        }
+
+        // Sumar meses a la fecha inicial
+        const endDateWithMonths = addMonths(startDate, parseInt(num_rentas_aplicadas, 10));
+
+        // Ajustar la fecha al próximo mes y día especificado
+        const endDateAdjusted = new Date(
+          endDateWithMonths.getFullYear(),
+          endDateWithMonths.getMonth(),
+          parseInt(ultimo_dia_ultima_renta + 1, 10)
+        );
+
+        this.formGroup
+          .get('periodo_finalizacion')
+          ?.patchValue(format(endDateAdjusted, 'yyyy-MM-dd'), { emitEvent: false });
+        values.periodo_finalizacion = endDateAdjusted
+      }
+
+      this.formUpdated.emit(values); // Emitir cambios del formulario
+    });
+  }
 
   guardar() {
     const formValues = this.formGroup.value;
@@ -158,7 +184,7 @@ export class EditarDialogComponent implements OnInit {
       return [];
     }
 
-    const errors = [];
+    const errors: any = [];
     if (control.errors['required']) {
       errors.push('Este campo es requerido.');
     }

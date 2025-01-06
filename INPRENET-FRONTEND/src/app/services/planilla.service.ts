@@ -17,7 +17,7 @@ export class PlanillaService {
       responseType: 'blob' as 'json'
     }) as Observable<Blob>;
   }
-  
+
 
   getDetalleBeneficiosYDeduccionesPorPeriodo(periodoInicio: string, periodoFinalizacion: string, idTiposPlanilla: number[]): Observable<any> {
     const params = new HttpParams()
@@ -121,14 +121,35 @@ export class PlanillaService {
         return throwError(() => new Error('Error al descargar el archivo Excel preliminar'));
       })
     );
-}
-  
+  }
+
   descargarReporteDetallePago(
     periodoInicio: string,
     periodoFinalizacion: string,
     idTiposPlanilla: number[]
   ): Observable<Blob> {
     const url = `${environment.API_URL}/api/planilla/generar-reporte-detalle-pago`;
+
+    let params = new HttpParams()
+      .set('periodoInicio', periodoInicio)
+      .set('periodoFinalizacion', periodoFinalizacion)
+      .set('idTiposPlanilla', idTiposPlanilla.join(','));
+
+    return this.http.get(url, { params, responseType: 'blob' }).pipe(
+      catchError(error => {
+        console.error('Error al descargar el archivo Excel', error);
+        this.toastr.error('Error al descargar el archivo Excel');
+        return throwError(error);
+      })
+    );
+  }
+
+  descargarReporteDetallePagoSCB(
+    periodoInicio: string,
+    periodoFinalizacion: string,
+    idTiposPlanilla: number[]
+  ): Observable<Blob> {
+    const url = `${environment.API_URL}/api/planilla/generar-reporte-detalle-pago-sin-cuenta`;
 
     let params = new HttpParams()
       .set('periodoInicio', periodoInicio)

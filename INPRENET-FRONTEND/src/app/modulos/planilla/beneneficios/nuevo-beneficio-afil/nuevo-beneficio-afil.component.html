@@ -69,23 +69,35 @@
     </div>
 
   <!-- PARA DESIGNADOS BENEFICIARIOS -->
-  <div *ngIf="mostrarB && Afiliado.fallecido == 'SI' && (
-    (Afiliado.tipo_persona == 'AFILIADO' && (Afiliado.estado_persona == 'ACTIVO' || Afiliado.estado_persona == 'SUSPENDIDO')) ||
-    Afiliado.tipo_persona == 'JUBILADO'  && (Afiliado.estado_persona != 'ERROR')||
-    Afiliado.tipo_persona == 'PENSIONADO'  && (Afiliado.estado_persona != 'ERROR'))"
-    style="margin: 1% 0% 1% 0%; text-align: center; background-color: white">
-    <app-dynamic-form
-      [fields]="myFormFields2"
-      titulo="Datos sobre el beneficio"
-      subtitulo="Completa la información correspondiente"
-      (selectChange)="prueba1($event)"
-      (newDatBenChange)="obtenerDatosFormBen($event)"
-    ></app-dynamic-form>
-    <button [disabled]="FormBen.invalid" mat-raised-button color="primary" style="color: white; margin: 1% 0 1% 0"
-      (click)="guardarNTBenef()">
-      Asignar beneficio
-    </button>
-  </div>
+   <div *ngIf="filas.length > 0">
+    <div *ngIf="filas[0]?.estado_afil_detalle_persona != 'ERROR' && mostrarB && Afiliado.fallecido == 'SI' && (
+      (Afiliado.tipo_persona == 'AFILIADO' && (Afiliado.estado_persona == 'ACTIVO' || Afiliado.estado_persona == 'SUSPENDIDO')) ||
+      Afiliado.tipo_persona == 'JUBILADO'  && (Afiliado.estado_persona != 'ERROR')||
+      Afiliado.tipo_persona == 'PENSIONADO'  && (Afiliado.estado_persona != 'ERROR'))"
+      style="margin: 1% 0% 1% 0%; text-align: center; background-color: white">
+      <div *ngIf="filas[0].estado_afil_detalle_persona != 'ERROR'">
+        <app-dynamic-form
+          [fields]="myFormFields2"
+          titulo="Datos sobre el beneficio"
+          subtitulo="Completa la información correspondiente"
+          (selectChange)="prueba1($event)"
+          (newDatBenChange)="obtenerDatosFormBen($event)"
+        ></app-dynamic-form>
+        <button [disabled]="FormBen.invalid" mat-raised-button color="primary" style="color: white; margin: 1% 0 1% 0"
+          (click)="guardarNTBenef()">
+          Asignar beneficio
+        </button>
+      </div>
+    </div>
+
+    <div class="anaranjado desapareciendo" *ngIf="filas[0]?.estado_afil_detalle_persona == 'ERROR' && mostrarB">
+      NO SE PUEDE ASIGNAR BENEFICIOS, DEBIDO A QUE LA PERSONA TIENE ESTADO {{filas[0].estado_afil_detalle_persona}}
+      MOTIVO: {{filas[0].observacion_detalle_persona}}
+    </div>
+   </div>
+
+
+
 
   <!-- [disabled]="FormBen.invalid" -->
   <!-- && hasBeneficios.length == 0 -->

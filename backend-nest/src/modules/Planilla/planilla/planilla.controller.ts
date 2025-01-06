@@ -95,6 +95,22 @@ export class PlanillaController {
     await this.planillaService.generarReporteDetallePago(data, res);
   }
 
+  @Get('generar-reporte-detalle-pago-sin-cuenta')
+  async generarReporteSinCuenta(
+    @Query('periodoInicio') periodoInicio: string,
+    @Query('periodoFinalizacion') periodoFinalizacion: string,
+    @Query('idTiposPlanilla') idTiposPlanilla: string,
+    @Res() res,
+  ) {
+    const idTiposPlanillaArray = idTiposPlanilla.split(',').map(Number);
+    const data = await this.planillaService.generarReporteSinCuenta(
+      periodoInicio,
+      periodoFinalizacion,
+      idTiposPlanillaArray
+    );
+    await this.planillaService.generarReporteDetallePago(data, res);
+  }
+
   @Get('generar-reporte-detalle-pago-preliminar')
   async generarReportePreliminar(
     @Query('idPlanilla') idPlanilla: number,

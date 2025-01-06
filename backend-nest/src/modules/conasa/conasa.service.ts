@@ -536,7 +536,6 @@ export class ConasaService {
   }
 
   async obtenerDatos(email: string, password: string, tipo: number): Promise<any> {
-    // Validar credenciales del usuario
     const empCentTrabajoRepository = await this.empCentTrabajoRepository.findOne({
       where: {
         correo_1: email,
@@ -655,8 +654,6 @@ export class ConasaService {
       } = result[0] || {};
     
       const response = [];
-    
-      // Si no se ha pagado la planilla en el mes actual
       if (planillasPagadas === 0) {
         response.push({
           mes: formattedCurrentDate,
@@ -672,8 +669,6 @@ export class ConasaService {
           bajas: BAJAS_MES_ACTUAL ? Number(BAJAS_MES_ACTUAL) : 0,
         });
       }
-    
-      // Meses anteriores siempre muestran valores
       response.push(
         {
           mes: formattedPreviousDate1,
@@ -688,12 +683,8 @@ export class ConasaService {
           bajas: BAJAS_MES_ANTERIOR_2 ? Number(BAJAS_MES_ANTERIOR_2) : 0,
         }
       );
-    
       return response;
     }
-    
-    
-    
      else if (tipo === 2) {
       const contratosActivos = await this.contratosRepository.find({
         where: { status: 'ACTIVO' },

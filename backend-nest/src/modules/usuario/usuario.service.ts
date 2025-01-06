@@ -364,12 +364,13 @@ export class UsuarioService {
     } = completeRegistrationDto;
   
     try {
-      const decoded = this.jwtService.verify(token);
+      // Verificar el token ignorando su expiración
+      const decoded = this.jwtService.verify(token, { ignoreExpiration: true });
       if (decoded.correo !== correo) {
         throw new BadRequestException('El correo no coincide');
       }
     } catch (error) {
-      throw new BadRequestException('Token inválido o expirado');
+      throw new BadRequestException('Token inválido');
     }
   
     const usuario = await this.usuarioEmpresaRepository.findOne({
@@ -404,6 +405,7 @@ export class UsuarioService {
     await this.empleadoRepository.save(usuario.empleadoCentroTrabajo.empleado);
     await this.usuarioEmpresaRepository.save(usuario);
   }
+  
   
   async actualizarEmpleado(
     id: number,

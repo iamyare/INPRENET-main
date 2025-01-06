@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Param, Req, Query, UnauthorizedException, Res, BadRequestException, UsePipes, ValidationPipe, UseInterceptors, UploadedFile} from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Req, Query, UnauthorizedException, Res, BadRequestException, UsePipes, ValidationPipe, UseInterceptors, UploadedFile, HttpException, HttpStatus, Delete, NotFoundException} from '@nestjs/common';
 import { ConasaService } from './conasa.service';
 import { ManejarTransaccionDto } from './dto/crear-contrato.dto';
 import { ApiResponse } from '@nestjs/swagger';
@@ -62,29 +62,28 @@ export class ConasaController {
         error: error.message,
       });
     }
-  }
-  
+  } 
 
   @Post('crear-contrato')
-async manejarTransaccion(@Body() payload: ManejarTransaccionDto, @Res() res) {
-  try {
-    const resultado = await this.conasaService.manejarTransaccion(payload);
-    // Devuelve una respuesta clara y el status 201
-    return res.status(201).json({
-      statusCode: 201,
-      message: 'Contrato y beneficiarios creados exitosamente.',
-      data: resultado,
-    });
-  } catch (error) {
-    console.error('Error en la creación del contrato:', error.message);
-    // Si hay un error, devuelve el estado 500 con un mensaje claro
-    return res.status(500).json({
-      statusCode: 500,
-      message: 'Error al crear el contrato.',
-      error: error.message,
-    });
+  async manejarTransaccion(@Body() payload: ManejarTransaccionDto, @Res() res) {
+    try {
+      const resultado = await this.conasaService.manejarTransaccion(payload);
+      // Devuelve una respuesta clara y el status 201
+      return res.status(201).json({
+        statusCode: 201,
+        message: 'Contrato y beneficiarios creados exitosamente.',
+        data: resultado,
+      });
+    } catch (error) {
+      console.error('Error en la creación del contrato:', error.message);
+      // Si hay un error, devuelve el estado 500 con un mensaje claro
+      return res.status(500).json({
+        statusCode: 500,
+        message: 'Error al crear el contrato.',
+        error: error.message,
+      });
+    }
   }
-}
 
   @Get('verificar-contrato/:idPersona')
   async verificarContrato(@Param('idPersona') idPersona: number) {
@@ -95,8 +94,6 @@ async manejarTransaccion(@Body() payload: ManejarTransaccionDto, @Res() res) {
     }
     return { tieneContrato: false, message: 'La persona no tiene un contrato activo.' };
   }
-
-
 
   @Get('categorias')
   getCategorias() {
@@ -125,7 +122,6 @@ async manejarTransaccion(@Body() payload: ManejarTransaccionDto, @Res() res) {
     @Query('terminos') terminos: string,
     @Req() req: Request
   ) {
-    // Validación del header Authorization
     const authorization = req.headers['authorization'];
     if (!authorization) {
       throw new UnauthorizedException('No authorization header present');
@@ -283,6 +279,49 @@ async manejarTransaccion(@Body() payload: ManejarTransaccionDto, @Res() res) {
   @ApiResponse({ status: 500, description: 'Error al generar el archivo Excel.' })
   async generarExcelBeneficiarios(@Res() res) {
     return await this.conasaService.generarExcelBeneficiarios(res);
+  }
+
+  @Get('listar-facturas')
+  async listarFacturas(@Query('tipo') tipo: number) {
+    if (![0, 1, 2].includes(tipo)) {
+      throw new BadRequestException('El tipo de factura debe ser 0, 1 o 2.');
+    }
+    return await this.conasaService.listarFacturas(tipo === 0 ? null : tipo);
+  }
+  
+  @Get('visualizar-factura/:id')
+  async visualizarFactura(@Param('id') id: number, @Res() res) {
+    const factura = await this.conasaService.obtenerFactura(id);
+    if (!factura) {
+      throw new NotFoundException('Factura no encontrada.');
+    }
+    res.setHeader('Content-Type', 'application/pdf');
+    res.send(factura.archivo_pdf);
+  }
+
+  @Get('descargar-factura/:id')
+  async descargarFactura(@Param('id') id: number, @Res() res) {
+    const factura = await this.conasaService.obtenerFactura(id);
+    if (!factura) {
+      throw new NotFoundException('Factura no encontrada.');
+    }
+    res.setHeader(
+      'Content-Disposition',
+      `attachment; filename=factura-${factura.id_factura}.pdf`,
+    );
+    res.setHeader('Content-Type', 'application/pdf');
+    res.send(factura.archivo_pdf);
+  }
+
+  @Delete('eliminar-factura/:id')
+  async eliminarFactura(@Param('id') id: number) {
+    const eliminado = await this.conasaService.eliminarFactura(id);
+    if (!eliminado) {
+      throw new BadRequestException(
+        'La factura no puede ser eliminada. Solo puede eliminarse dentro de las primeras 24 horas.',
+      );
+    }
+    return { message: 'Factura eliminada exitosamente.' };
   }
 
 

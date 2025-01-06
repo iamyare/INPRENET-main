@@ -1,8 +1,8 @@
-import { BadRequestException, Injectable, InternalServerErrorException, NotFoundException, UnauthorizedException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Net_Plan } from './entities/net_planes.entity';
 import { Net_Categoria } from './entities/net_categorias.entity';
-import { Between, DataSource, In, Repository } from 'typeorm';
+import { DataSource, In, Repository } from 'typeorm';
 import { Net_Contratos_Conasa } from './entities/net_contratos_conasa.entity';
 import { net_persona } from '../Persona/entities/net_persona.entity';
 import { Net_Beneficiarios_Conasa } from './entities/net_beneficiarios_conasa.entity';
@@ -258,7 +258,7 @@ export class ConasaService {
         correo_1: email,
         usuarioEmpresas: {
           usuarioModulos: {
-            rolModulo: { nombre: In(['CONSULTA', 'TODO']) },
+            rolModulo: { nombre: In(['ADMINISTRADOR' ,'CONSULTA', 'TODO']) },
           },
         },
       },
@@ -309,13 +309,12 @@ export class ConasaService {
     email: string,
     password: string
   ): Promise<any> {
-    // Validar credenciales
     const empCentTrabajoRepository = await this.empCentTrabajoRepository.findOne({
       where: {
         correo_1: email,
         usuarioEmpresas: {
           usuarioModulos: {
-            rolModulo: { nombre: In(['CONSULTA', 'TODO']) },
+            rolModulo: { nombre: In(['ADMINISTRADOR' ,'CONSULTA', 'TODO']) },
           },
         },
       },
@@ -475,7 +474,7 @@ export class ConasaService {
         correo_1: email,
         usuarioEmpresas: {
           usuarioModulos: {
-            rolModulo: { nombre: In(['CONSULTA', 'TODO']) },
+            rolModulo: { nombre: In(['ADMINISTRADOR' ,'CONSULTA', 'TODO']) },
           },
         },
       },
@@ -543,7 +542,7 @@ export class ConasaService {
         correo_1: email,
         usuarioEmpresas: {
           usuarioModulos: {
-            rolModulo: { nombre: In(['CONSULTA', 'TODO']) },
+            rolModulo: { nombre: In(['ADMINISTRADOR' ,'CONSULTA', 'TODO']) },
           },
         },
       },
@@ -571,6 +570,25 @@ export class ConasaService {
     const formattedDate = `${currentDate.getFullYear()}-${String(currentDate.getMonth() + 1).padStart(2, '0')}`;
   
     if (tipo === 1) {
+      const currentDate = new Date();
+      const formattedCurrentDate = `${currentDate.getFullYear()}-${String(currentDate.getMonth() + 1).padStart(2, '0')}`;
+      const previousDate1 = new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 1);
+      const formattedPreviousDate1 = `${previousDate1.getFullYear()}-${String(previousDate1.getMonth() + 1).padStart(2, '0')}`;
+      const previousDate2 = new Date(currentDate.getFullYear(), currentDate.getMonth() - 2, 1);
+      const formattedPreviousDate2 = `${previousDate2.getFullYear()}-${String(previousDate2.getMonth() + 1).padStart(2, '0')}`;
+    
+      // Validar si alguna planilla se ha pagado en el mes actual
+      const planillaPagadaQuery = `
+        SELECT COUNT(*) AS pagadas
+        FROM net_planilla p
+        INNER JOIN net_tipo_planilla tp ON p.id_tipo_planilla = tp.id_tipo_planilla
+        WHERE tp.nombre_planilla IN ('ORDINARIA DE JUBILADOS Y PENSIONADOS', 'COMPLEMENTARIA DE JUBILADOS Y PENSIONADOS')
+          AND TRUNC(p.periodo_inicio, 'MM') = TRUNC(SYSDATE, 'MM')
+          AND p.estado = 'PAGADA'
+      `;
+      const planillaPagadaResult = await this.dataSource.query(planillaPagadaQuery);
+      const planillasPagadas = planillaPagadaResult[0]?.PAGADAS || 0;
+    
       const query = `
         WITH planillas_filtradas AS (
             SELECT
@@ -593,48 +611,88 @@ export class ConasaService {
             FROM planillas_filtradas
             WHERE TRUNC(periodo_inicio, 'MM') = TRUNC(SYSDATE, 'MM')
         ),
-        mes_anterior AS (
+        mes_anterior_1 AS (
             SELECT DISTINCT id_persona
             FROM planillas_filtradas
             WHERE TRUNC(periodo_inicio, 'MM') = ADD_MONTHS(TRUNC(SYSDATE, 'MM'), -1)
+        ),
+        mes_anterior_2 AS (
+            SELECT DISTINCT id_persona
+            FROM planillas_filtradas
+            WHERE TRUNC(periodo_inicio, 'MM') = ADD_MONTHS(TRUNC(SYSDATE, 'MM'), -2)
+        ),
+        mes_anterior_3 AS (
+            SELECT DISTINCT id_persona
+            FROM planillas_filtradas
+            WHERE TRUNC(periodo_inicio, 'MM') = ADD_MONTHS(TRUNC(SYSDATE, 'MM'), -3)
         )
         SELECT
             (SELECT COUNT(*) FROM mes_actual) AS total_mes_actual,
-            (SELECT COUNT(*) FROM mes_anterior) AS total_mes_anterior,
-            (SELECT COUNT(*) FROM mes_actual WHERE id_persona NOT IN (SELECT id_persona FROM mes_anterior)) AS altas_mes_actual,
-            (SELECT COUNT(*) FROM mes_anterior WHERE id_persona NOT IN (SELECT id_persona FROM mes_actual)) AS bajas_mes_actual
+            (SELECT COUNT(*) FROM mes_anterior_1) AS total_mes_anterior_1,
+            (SELECT COUNT(*) FROM mes_anterior_2) AS total_mes_anterior_2,
+            (SELECT COUNT(*) FROM mes_anterior_3) AS total_mes_anterior_3,
+            (SELECT COUNT(*) FROM mes_actual WHERE id_persona NOT IN (SELECT id_persona FROM mes_anterior_1)) AS altas_mes_actual,
+            (SELECT COUNT(*) FROM mes_anterior_1 WHERE id_persona NOT IN (SELECT id_persona FROM mes_actual)) AS bajas_mes_actual,
+            (SELECT COUNT(*) FROM mes_anterior_1 WHERE id_persona NOT IN (SELECT id_persona FROM mes_anterior_2)) AS altas_mes_anterior_1,
+            (SELECT COUNT(*) FROM mes_anterior_2 WHERE id_persona NOT IN (SELECT id_persona FROM mes_anterior_1)) AS bajas_mes_anterior_1,
+            (SELECT COUNT(*) FROM mes_anterior_2 WHERE id_persona NOT IN (SELECT id_persona FROM mes_anterior_3)) AS altas_mes_anterior_2,
+            (SELECT COUNT(*) FROM mes_anterior_3 WHERE id_persona NOT IN (SELECT id_persona FROM mes_anterior_2)) AS bajas_mes_anterior_2
         FROM DUAL
       `;
     
       const result = await this.dataSource.query(query);
     
-      if (!result || result.length === 0) {
-        return [];
-      }
+      const {
+        TOTAL_MES_ACTUAL,
+        TOTAL_MES_ANTERIOR_1,
+        TOTAL_MES_ANTERIOR_2,
+        ALTAS_MES_ACTUAL,
+        BAJAS_MES_ACTUAL,
+        ALTAS_MES_ANTERIOR_1,
+        BAJAS_MES_ANTERIOR_1,
+        ALTAS_MES_ANTERIOR_2,
+        BAJAS_MES_ANTERIOR_2,
+      } = result[0] || {};
     
-      const { TOTAL_MES_ACTUAL, TOTAL_MES_ANTERIOR, ALTAS_MES_ACTUAL, BAJAS_MES_ACTUAL } = result[0];
+      const response = [];
     
-      const currentDate = new Date();
-      const formattedCurrentDate = `${currentDate.getFullYear()}-${String(currentDate.getMonth() + 1).padStart(2, '0')}`;
-    
-      const previousDate = new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 1);
-      const formattedPreviousDate = `${previousDate.getFullYear()}-${String(previousDate.getMonth() + 1).padStart(2, '0')}`;
-    
-      return [
-        {
+      // Si no se ha pagado la planilla en el mes actual
+      if (planillasPagadas === 0) {
+        response.push({
+          mes: formattedCurrentDate,
+          tot_no_pensionados_activos: 0,
+          altas: 0,
+          bajas: 0,
+        });
+      } else {
+        response.push({
           mes: formattedCurrentDate,
           tot_no_pensionados_activos: TOTAL_MES_ACTUAL ? Number(TOTAL_MES_ACTUAL) : 0,
           altas: ALTAS_MES_ACTUAL ? Number(ALTAS_MES_ACTUAL) : 0,
           bajas: BAJAS_MES_ACTUAL ? Number(BAJAS_MES_ACTUAL) : 0,
+        });
+      }
+    
+      // Meses anteriores siempre muestran valores
+      response.push(
+        {
+          mes: formattedPreviousDate1,
+          tot_no_pensionados_activos: TOTAL_MES_ANTERIOR_1 ? Number(TOTAL_MES_ANTERIOR_1) : 0,
+          altas: ALTAS_MES_ANTERIOR_1 ? Number(ALTAS_MES_ANTERIOR_1) : 0,
+          bajas: BAJAS_MES_ANTERIOR_1 ? Number(BAJAS_MES_ANTERIOR_1) : 0,
         },
         {
-          mes: formattedPreviousDate,
-          tot_no_pensionados_activos: TOTAL_MES_ANTERIOR ? Number(TOTAL_MES_ANTERIOR) : 0,
-          altas: 0, // Altas no se calculan para el mes anterior
-          bajas: 0, // Bajas no se calculan para el mes anterior
-        },
-      ];
+          mes: formattedPreviousDate2,
+          tot_no_pensionados_activos: TOTAL_MES_ANTERIOR_2 ? Number(TOTAL_MES_ANTERIOR_2) : 0,
+          altas: ALTAS_MES_ANTERIOR_2 ? Number(ALTAS_MES_ANTERIOR_2) : 0,
+          bajas: BAJAS_MES_ANTERIOR_2 ? Number(BAJAS_MES_ANTERIOR_2) : 0,
+        }
+      );
+    
+      return response;
     }
+    
+    
     
      else if (tipo === 2) {
       const contratosActivos = await this.contratosRepository.find({
@@ -731,8 +789,6 @@ export class ConasaService {
     }
   }
   
-
-    
   async cancelarContrato(dto: CancelarContratoDto): Promise<string> {
     let contrato: Net_Contratos_Conasa | undefined;
 
@@ -1015,5 +1071,37 @@ export class ConasaService {
         error.message || 'Error al generar el archivo Excel.',
       );
     }
+  }
+
+  async listarFacturas(tipo: number | null): Promise<Net_Facturas_Conasa[]> {
+    const whereCondition = tipo !== null ? { tipo_factura: tipo } : {};
+    return await this.facturasRepository.find({
+      where: whereCondition,
+      order: { fecha_subida: 'DESC' },
+    });
+  }
+  
+
+  async obtenerFactura(id: number): Promise<Net_Facturas_Conasa | null> {
+    return await this.facturasRepository.findOne({ where: { id_factura: id } });
+  }
+
+  async eliminarFactura(id: number): Promise<boolean> {
+    const factura = await this.obtenerFactura(id);
+
+    if (!factura) {
+      throw new NotFoundException('Factura no encontrada.');
+    }
+
+    const ahora = new Date();
+    const limiteEliminacion = new Date(factura.fecha_subida);
+    limiteEliminacion.setHours(limiteEliminacion.getHours() + 24);
+
+    if (ahora > limiteEliminacion) {
+      return false;
+    }
+
+    await this.facturasRepository.delete(id);
+    return true;
   }
 }

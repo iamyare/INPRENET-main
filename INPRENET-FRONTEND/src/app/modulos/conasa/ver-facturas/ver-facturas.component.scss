@@ -1,0 +1,104 @@
+.facturas-container {
+    padding: 20px;
+    max-width: 900px;
+    margin: 0 auto; // Centrar el contenido
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+  
+  .back-button-container {
+    display: flex;
+    justify-content: flex-start;
+    margin-bottom: 10px;
+  
+    .back-button {
+      font-size: 14px;
+      text-transform: uppercase;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+  }
+  
+  .filter-container {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 20px;
+  
+    mat-form-field {
+      width: 300px;
+    }
+  }
+  
+  .facturas-list-container {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  
+    .empty-state {
+      text-align: center;
+      color: #757575;
+      font-size: 16px;
+    }
+  
+    .factura-card {
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      width: 100%;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 16px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      border-radius: 8px;
+      transition: transform 0.3s, box-shadow 0.3s;
+      background-color: #ffffff;
+  
+      &:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+      }
+  
+      mat-card-header {
+        display: flex;
+        justify-content: space-between;
+  
+        mat-card-title {
+          font-size: 18px;
+          font-weight: bold;
+          color: #1c9588;
+        }
+  
+        mat-card-subtitle {
+          font-size: 14px;
+          color: #757575;
+        }
+      }
+  
+      mat-card-actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 10px;
+  
+        button {
+          font-size: 14px;
+          font-weight: bold;
+          text-transform: uppercase;
+  
+          &.mat-button-primary {
+            color: #1c9588;
+          }
+  
+          &.mat-button-warn {
+            color: #d32f2f;
+          }
+  
+          &.mat-button-accent {
+            color: #1976d2;
+          }
+        }
+      }
+    }
+  }
+  

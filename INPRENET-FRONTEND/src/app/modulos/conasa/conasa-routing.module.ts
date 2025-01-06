@@ -10,17 +10,14 @@ import { AnularAsistenciasComponent } from './anular-asistencias/anular-asistenc
 import { ModificarAsistenciasComponent } from './modificar-asistencias/modificar-asistencias.component';
 import { CancelarAsistenciasComponent } from './cancelar-asistencias/cancelar-asistencias.component';
 import { SubirFacturaComponent } from './subir-factura/subir-factura.component';
+import { VerFacturasComponent } from './ver-facturas/ver-facturas.component';
+import { FacturasMenuComponent } from './facturas-menu/facturas-menu.component';
 
 const routes: Routes = [
   { path: 'ver-afiliado',
     component: VerAfiliadoComponent,
     canActivate: [RoleGuard],
     data: { expectedRolesModules: PermisosService.getExpectedRolesForRoute('CONASA', 'conasa/ver-afiliado') }
-  },
-  { path: 'subir-factura',
-    component: SubirFacturaComponent,
-    canActivate: [RoleGuard],
-    data: { expectedRolesModules: PermisosService.getExpectedRolesForRoute('CONASA', 'conasa/subir-factura') }
   },
   { path: 'menu-conasa',
     component: ConasaMenuComponent,
@@ -56,6 +53,22 @@ const routes: Routes = [
     component: CancelarAsistenciasComponent,
     canActivate: [RoleGuard],
     data: { expectedRolesModules: PermisosService.getExpectedRolesForRoute('CONASA', 'conasa/menu-conasa/cancelar-asistencias') }
+  },
+  {
+    path: 'menu-facturas-conasa',
+    component: FacturasMenuComponent,
+    canActivate: [RoleGuard],
+    data: { expectedRolesModules: PermisosService.getExpectedRolesForRoute('CONASA', 'conasa/menu-facturas-conasa') }
+  },
+  { path: 'menu-facturas-conasa/subir-factura',
+    component: SubirFacturaComponent,
+    canActivate: [RoleGuard],
+    data: { expectedRolesModules: PermisosService.getExpectedRolesForRoute('CONASA', 'conasa/menu-facturas-conasa/subir-factura') }
+  },
+  { path: 'menu-facturas-conasa/ver-facturas',
+    component: VerFacturasComponent,
+    canActivate: [RoleGuard],
+    data: { expectedRolesModules: PermisosService.getExpectedRolesForRoute('CONASA', 'conasa/menu-facturas-conasa/ver-facturas') }
   },
 ];
 

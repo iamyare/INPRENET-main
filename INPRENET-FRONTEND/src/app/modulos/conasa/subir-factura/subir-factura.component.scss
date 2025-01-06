@@ -1,15 +1,30 @@
 // Contenedor principal centrado
 .form-container {
   display: flex;
-  justify-content: center;
-  align-items: flex-start;
-  margin-top: 50px;
-  height: 100vh;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 20px;
+}
+
+// Botón de regresar
+.back-button-container {
+  width: 100%;
+  display: flex;
+  justify-content: flex-start;
+  margin-bottom: 20px;
+}
+
+.back-button {
+  font-size: 14px;
+  text-transform: uppercase;
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 // Card para formulario
 mat-card {
-  width: 800px; // Aumentado para acomodar el formulario y la previsualización
+  width: 800px;
   padding: 16px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   border-radius: 8px;
@@ -21,25 +36,25 @@ mat-card {
   font-size: 1.5rem;
   font-weight: bold;
   text-align: center;
-  color: #1c9588; // Verde Material Design
+  color: #1c9588;
   margin-bottom: 8px;
 }
 
 // Contenedor para el formulario y la previsualización
 .form-preview-container {
   display: flex;
-  flex-direction: row; // Pone el formulario y la previsualización lado a lado
-  gap: 16px; // Espacio entre las columnas
+  flex-direction: row;
+  gap: 16px;
 }
 
 // Sección del formulario (izquierda)
 .form-section {
-  flex: 2; // Ocupa más espacio que la previsualización
+  flex: 2;
 }
 
 // Previsualización del PDF (derecha)
 .pdf-preview {
-  flex: 1; // Ocupa menos espacio
+  flex: 1;
   display: flex;
   flex-direction: column;
 
@@ -48,7 +63,6 @@ mat-card {
     font-weight: 500;
     color: rgba(0, 0, 0, 0.6);
     margin-bottom: 8px;
-    display: block;
   }
 
   iframe {

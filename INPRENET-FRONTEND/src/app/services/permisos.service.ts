@@ -196,52 +196,63 @@ export class PermisosService {
         'conasa/subir-factura': {
           title: 'Subir Factura',
           permisos: [
-            { role: 'CONSULTA', module: 'CONASA' },
             { role: 'ADMINISTRADOR', module: 'CONASA' }
           ]
         },
         'conasa/menu-conasa': {
           title: 'Detalle Envío',
           permisos: [
-            { role: 'CONSULTA', module: 'CONASA' },
             { role: 'ADMINISTRADOR', module: 'CONASA' }
           ]
         },
         'conasa/menu-conasa/ingresar-asistencia': {
         title: 'Ingresar Asistencia',
         permisos: [
-          { role: 'CONSULTA', module: 'CONASA' },
           { role: 'ADMINISTRADOR', module: 'CONASA' }
         ]
       },
       'conasa/menu-conasa/reporte-asistencias': {
         title: 'Reporte de Asistencias',
         permisos: [
-          { role: 'CONSULTA', module: 'CONASA' },
           { role: 'ADMINISTRADOR', module: 'CONASA' }
         ]
       },
       'conasa/menu-conasa/anular-asistencias': {
         title: 'Anular Asistencias',
         permisos: [
-          { role: 'CONSULTA', module: 'CONASA' },
           { role: 'ADMINISTRADOR', module: 'CONASA' }
         ]
       },
       'conasa/menu-conasa/modificar-asistencias': {
         title: 'Modificar Asistencias',
         permisos: [
-          { role: 'CONSULTA', module: 'CONASA' },
           { role: 'ADMINISTRADOR', module: 'CONASA' }
         ]
       },
       'conasa/menu-conasa/cancelar-asistencias': {
         title: 'Cancelar Asistencias',
         permisos: [
-          { role: 'CONSULTA', module: 'CONASA' },
           { role: 'ADMINISTRADOR', module: 'CONASA' }
         ]
-      }
+      },
+      'conasa/menu-facturas-conasa': {
+          title: 'Menu de Facturas',
+          permisos: [
+            { role: 'ADMINISTRADOR', module: 'CONASA' }
+          ]
+        },
+        'conasa/menu-facturas-conasa/subir-factura': {
+          title: 'Subir Facturas',
+          permisos: [
+            { role: 'ADMINISTRADOR', module: 'CONASA' }
+          ]
+        },
+        'conasa/menu-facturas-conasa/ver-facturas': {
+          title: 'Ver Facturas',
+          permisos: [
+            { role: 'ADMINISTRADOR', module: 'CONASA' }
+          ]
+        }
       }
     }
   };

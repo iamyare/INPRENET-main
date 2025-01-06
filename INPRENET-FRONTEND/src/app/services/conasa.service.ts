@@ -14,12 +14,10 @@ export class ConasaService {
 
   subirFactura(tipoFactura: number, periodoFactura: string, archivoPdf: File): Observable<any> {
     const url = `${this.baseUrl}/subir-factura`;
-
     const formData = new FormData();
-    formData.append('tipo_factura', tipoFactura.toString()); // Convertir explícitamente a string
+    formData.append('tipo_factura', tipoFactura.toString());
     formData.append('periodo_factura', periodoFactura);
     formData.append('archivo_pdf', archivoPdf);
-
     return this.http.post<any>(url, formData).pipe(
       catchError((error) => {
         console.error('Error al subir la factura', error);
@@ -28,8 +26,46 @@ export class ConasaService {
     );
   }
 
-
-
+  listarFacturas(tipoFactura: number): Observable<any[]> {
+    const url = `${this.baseUrl}/listar-facturas?tipo=${tipoFactura}`;
+    return this.http.get<any[]>(url).pipe(
+      catchError((error) => {
+        console.error('Error al listar facturas', error);
+        return throwError(() => error);
+      }),
+    );
+  }
+  
+  visualizarFactura(id: number): Observable<Blob> {
+    const url = `${this.baseUrl}/visualizar-factura/${id}`;
+    return this.http.get(url, { responseType: 'blob' }).pipe(
+      catchError((error) => {
+        console.error('Error al visualizar la factura', error);
+        return throwError(() => error);
+      }),
+    );
+  }
+  
+  descargarFactura(id: number): Observable<Blob> {
+    const url = `${this.baseUrl}/descargar-factura/${id}`;
+    return this.http.get(url, { responseType: 'blob' }).pipe(
+      catchError((error) => {
+        console.error('Error al descargar la factura', error);
+        return throwError(() => error);
+      }),
+    );
+  }
+  
+  eliminarFactura(id: number): Observable<any> {
+    const url = `${this.baseUrl}/eliminar-factura/${id}`;
+    return this.http.delete<any>(url).pipe(
+      catchError((error) => {
+        const mensajeError = error?.error?.message || 'Error al eliminar la factura.';
+        return throwError(() => new Error(mensajeError));
+      })
+    );
+  }
+  
   obtenerCategorias(): Observable<any> {
     const url = `${this.baseUrl}/categorias`;
     return this.http.get<any>(url).pipe(

@@ -1,17 +1,23 @@
 <div class="form-container">
+  <!-- Botón de Volver Atrás -->
+  <div class="back-button-container">
+    <button mat-raised-button color="primary" class="back-button" routerLink="/home/conasa/menu-facturas-conasa">
+      <mat-icon>arrow_back</mat-icon> Regresar al Menú
+    </button>
+  </div>
+
   <mat-card>
     <mat-card-header>
       <mat-card-title class="card-title">Subir Factura</mat-card-title>
     </mat-card-header>
     <mat-card-content class="card-content">
       <div class="form-preview-container">
-        <!-- Formulario a la izquierda -->
         <form (ngSubmit)="onSubmit()" #facturaForm="ngForm" class="form-section">
           <mat-form-field appearance="outline" class="full-width">
             <mat-label>Tipo de Factura</mat-label>
             <mat-select [(ngModel)]="tipoFactura" name="tipoFactura" required>
-              <mat-option [value]="1">Asistencia Médica</mat-option>
-              <mat-option [value]="2">Contratos Funerarios</mat-option>
+              <mat-option [value]="1">ASISTENCIA MEDICA DOCENTES PENSIONADOS</mat-option>
+              <mat-option [value]="2">CONTRATOS ASISTENCIAS FUNERARIA</mat-option>
             </mat-select>
             <mat-error *ngIf="!tipoFactura">Selecciona un tipo de factura.</mat-error>
           </mat-form-field>

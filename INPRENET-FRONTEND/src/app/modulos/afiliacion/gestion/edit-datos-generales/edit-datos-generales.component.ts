@@ -22,7 +22,7 @@ export class EditDatosGeneralesComponent implements OnInit {
   CausaFallecimiento: any[] = [];
   estado: any[] = [];
   public mostrarBotonGuardar: boolean = false;
-  image:any;
+  image: any;
   datos!: any;
   estadoAfiliacion: any;
   fallecido: any;
@@ -49,9 +49,9 @@ export class EditDatosGeneralesComponent implements OnInit {
     id_municipio_defuncion: ["", [Validators.required]],
     tipo_persona: ["", [Validators.required]],
     fallecido: ["", [Validators.required]],
+    observacion: ["", [Validators.required]],
     voluntario: ["NO", [Validators.required]]
     //certificado_defuncion: ["", [Validators.required]],
-    //observaciones: ["", [Validators.required]],
   });
 
   formDatosGenerales: any = new FormGroup({
@@ -216,32 +216,32 @@ export class EditDatosGeneralesComponent implements OnInit {
 
   async previsualizarInfoAfil() {
     if (this.Afiliado) {
-        this.loading = true;
-        await this.svcAfiliado.getAfilByParam(this.Afiliado.n_identificacion).subscribe(
-            (result) => {
-                this.datos = result;
-                this.Afiliado = result;
+      this.loading = true;
+      await this.svcAfiliado.getAfilByParam(this.Afiliado.n_identificacion).subscribe(
+        (result) => {
+          this.datos = result;
+          this.Afiliado = result;
 
-                this.certificadoDefuncionUrl = this.datos?.certificado_defuncion
-                ? this.sanitizer.bypassSecurityTrustResourceUrl(`data:application/pdf;base64,${this.datos.certificado_defuncion}`)
-                : null;
+          this.certificadoDefuncionUrl = this.datos?.certificado_defuncion
+            ? this.sanitizer.bypassSecurityTrustResourceUrl(`data:application/pdf;base64,${this.datos.certificado_defuncion}`)
+            : null;
 
-              this.archivoIdentificacionUrl = this.datos?.archivo_identificacion
-                ? this.sanitizer.bypassSecurityTrustResourceUrl(`data:application/pdf;base64,${this.datos.archivo_identificacion}`)
-                : null;
+          this.archivoIdentificacionUrl = this.datos?.archivo_identificacion
+            ? this.sanitizer.bypassSecurityTrustResourceUrl(`data:application/pdf;base64,${this.datos.archivo_identificacion}`)
+            : null;
 
-                this.estadoAfiliacion = result.estadoAfiliacion;
-                this.fallecido = result.fallecido;
+          this.estadoAfiliacion = result.estadoAfiliacion;
+          this.fallecido = result.fallecido;
 
-                if (result.FOTO_PERFIL) {
-                    this.image = this.dataURItoBlob(`data:image/jpeg;base64,${result.FOTO_PERFIL}`);
-                }
-                if (result.DIRECCION_RESIDENCIA_ESTRUCTURADA) {
-                    const jsonObj = result.DIRECCION_RESIDENCIA_ESTRUCTURADA.split(',').reduce((acc: any, curr: any) => {
-                        const [key, value] = curr.split(':').map((s: string) => s.trim());
-                        acc[key] = value;
-                        return acc;
-                    }, {});
+          if (result.FOTO_PERFIL) {
+            this.image = this.dataURItoBlob(`data:image/jpeg;base64,${result.FOTO_PERFIL}`);
+          }
+          if (result.DIRECCION_RESIDENCIA_ESTRUCTURADA) {
+            const jsonObj = result.DIRECCION_RESIDENCIA_ESTRUCTURADA.split(',').reduce((acc: any, curr: any) => {
+              const [key, value] = curr.split(':').map((s: string) => s.trim());
+              acc[key] = value;
+              return acc;
+            }, {});
 
                     this.initialData = {
                         ...this.initialData,
@@ -289,28 +289,32 @@ export class EditDatosGeneralesComponent implements OnInit {
                     id_tipo_identificacion: result?.ID_PROFESION
                 };
 
-                if (result?.discapacidades?.length > 0) {
-                    this.discapacidadSeleccionada = true;
-                    this.indicesSeleccionados = result?.discapacidades;
-                }
+          if (result?.discapacidades?.length > 0) {
+            this.discapacidadSeleccionada = true;
+            this.indicesSeleccionados = result?.discapacidades;
+          }
 
-                this.form1.controls.fecha_defuncion.setValue(result?.fecha_defuncion);
-                this.form1.controls.causa_fallecimiento.setValue(result?.ID_CAUSA_FALLECIMIENTO);
-                this.form1.controls.id_departamento_defuncion.setValue(result?.ID_DEPARTAMENTO_DEFUNCION);
-                this.form1.controls.id_municipio_defuncion.setValue(result?.ID_MUNICIPIO_DEFUNCION);
-                this.form1.controls.tipo_persona.setValue(result?.ID_TIPO_PERSONA);
-                this.form1.controls.estado.setValue(result?.estadoAfiliacion?.codigo);
-                this.form1.controls.voluntario.setValue(result?.VOLUNTARIO || "NO");
+          this.form1.controls.fallecido.setValue(result?.fallecido);
+          this.form1.controls.fecha_defuncion.setValue(result?.fecha_defuncion);
+          this.form1.controls.causa_fallecimiento.setValue(result?.ID_CAUSA_FALLECIMIENTO);
+          this.form1.controls.id_departamento_defuncion.setValue(result?.ID_DEPARTAMENTO_DEFUNCION);
+          this.form1.controls.id_municipio_defuncion.setValue(result?.ID_MUNICIPIO_DEFUNCION);
 
-                this.loading = false;
-            },
-            (error) => {
-                this.toastr.error(`Error: ${error.error.message}`);
-                this.loading = false;
-            }
-        );
+          this.form1.controls.tipo_persona.setValue(result?.ID_TIPO_PERSONA);
+          this.form1.controls.observacion.setValue(result?.OBSERVACION);
+          this.form1.controls.estado.setValue(result?.estadoAfiliacion?.codigo);
+
+          this.form1.controls.voluntario.setValue(result?.VOLUNTARIO || "NO");
+
+          this.loading = false;
+        },
+        (error) => {
+          this.toastr.error(`Error: ${error.error.message}`);
+          this.loading = false;
+        }
+      );
     }
-}
+  }
 
   updateDiscapacidades(discapacidadesSeleccionadas: any[]) {
     const refpersArray = this.formDatosGenerales.get('refpers') as FormArray;
@@ -335,22 +339,23 @@ export class EditDatosGeneralesComponent implements OnInit {
     const refpersData = this.formDatosGenerales.get('refpers')?.value?.[0] || {};
 
     const datosActualizados: any = {
-    ...refpersData,
-    causa_fallecimiento: this.form1.value.causa_fallecimiento,
-    fecha_defuncion: convertirFechaInputs(this.form1.value.fecha_defuncion!),
-    id_departamento_defuncion: this.form1.value.id_departamento_defuncion,
-    id_municipio_defuncion: this.form1.value.id_municipio_defuncion,
-    estado: this.form1.value.estado,
-    tipo_persona: this.form1.value.tipo_persona,
-    certificado_defuncion: this.formDatosGenerales.value.archivoCertDef,
-    voluntario: this.form1.value.voluntario,
-    archivo_identificacion: this.formDatosGenerales.value.archivo_identificacion,
-  };
-  console.log(datosActualizados);
+      ...refpersData,
+      fallecido: this.form1.controls.fallecido.value,
+      causa_fallecimiento: this.form1.value.causa_fallecimiento,
+      fecha_defuncion: convertirFechaInputs(this.form1.value.fecha_defuncion!),
+      id_departamento_defuncion: this.form1.value.id_departamento_defuncion,
+      id_municipio_defuncion: this.form1.value.id_municipio_defuncion,
+      certificado_defuncion: this.formDatosGenerales.value.archivoCertDef,
 
-  if (this.image) {
-    datosActualizados.FotoPerfil = this.image;
-  }
+      archivo_identificacion: this.formDatosGenerales.value.archivo_identificacion,
+      tipo_persona: this.form1.value.tipo_persona,
+      estado: this.form1.value.estado,
+      voluntario: this.form1.value.voluntario,
+    };
+
+    if (this.image) {
+      datosActualizados.FotoPerfil = this.image;
+    }
     this.svcAfiliado.updateDatosGenerales(this.Afiliado.ID_PERSONA, datosActualizados).subscribe(
       async (result) => {
         this.toastr.success(`Datos generales modificados correctamente`);

@@ -222,6 +222,7 @@ export class VerEditarBeneficioAfilComponent {
       }
 
       this.filasT = data.detBen.map((item: any) => {
+        console.log(item);
 
         return {
           tipoPersona: item.persona.tipoPersona.tipo_persona,
@@ -230,12 +231,20 @@ export class VerEditarBeneficioAfilComponent {
           ID_CAUSANTE: item.ID_CAUSANTE,
           ID_BENEFICIO: item.ID_BENEFICIO,
           estado_solicitud: item.estado_solicitud,
+          listo_complementaria: item.listo_complementaria,
           dni: item.persona.n_identificacion,
           dni_causante: item.persona?.padreIdPersona?.persona?.n_identificacion || "NO APLICA",
           n_expediente: item.n_expediente,
+
           fecha_aplicado: this.datePipe.transform(item.fecha_aplicado, 'dd/MM/yyyy HH:mm'),
           fecha_calculo: item.fecha_calculo,
           fecha_presentacion: item.fecha_presentacion,
+
+          periodo_inicio: convertirFecha(item.periodo_inicio, false),
+          periodo_finalizacion: item.beneficio.periodicidad === "V"
+            ? "NO APLICA"
+            : item.periodo_finalizacion,
+
           nombre_beneficio: item.beneficio.nombre_beneficio,
           num_rentas_aplicadas: item.num_rentas_aplicadas || "NO APLICA",
           ultimo_dia_ultima_renta: item.ultimo_dia_ultima_renta,
@@ -244,10 +253,7 @@ export class VerEditarBeneficioAfilComponent {
           monto_ultima_cuota: item.monto_ultima_cuota,
           monto_primera_cuota: item.monto_primera_cuota,
           monto_total: item.monto_total,
-          periodo_inicio: convertirFecha(item.periodo_inicio, false),
-          periodo_finalizacion: item.beneficio.periodicidad === "V"
-            ? "NO APLICA"
-            : item.periodo_finalizacion,
+
           recibiendo_beneficio: item.recibiendo_beneficio,
           observaciones: item.observaciones || "NO TIENE",
           voluntario: item.persona.voluntario || "NO TIENE",
@@ -346,7 +352,7 @@ export class VerEditarBeneficioAfilComponent {
 
           { nombre: 'observaciones', tipo: 'text', requerido: false, etiqueta: 'Observaciones', editable: true },
 
-          { nombre: 'complementaria', tipo: 'list', requerido: false, opciones: [{ label: "SI", value: "SI" }, { label: "NO", value: "NO" }], etiqueta: '¿El monto de primera cuota se paga en planilla complementaria?', editable: true },
+          { nombre: 'listo_complementaria', tipo: 'list', requerido: false, opciones: [{ label: "SI", value: "SI" }, { label: "NO", value: "NO" }], etiqueta: '¿El monto de primera cuota se paga en planilla complementaria?', editable: true },
         )
       } else if (row.numero_rentas_max > 1 || row.numero_rentas_max == 0) {
         campos.push(
@@ -363,9 +369,9 @@ export class VerEditarBeneficioAfilComponent {
 
           { nombre: 'monto_ultima_cuota', tipo: 'number', requerido: false, etiqueta: 'Monto última renta', editable: true, validadores: [Validators.min(0), montoTotalValidator()] },
 
-          { nombre: 'fecha_calculo', tipo: 'date', requerido: false, etiqueta: 'Fecha Efectividad', editable: true, validadores: [] },
+          { nombre: 'fecha_calculo', tipo: 'date', requerido: false, etiqueta: 'Fecha de Efectividad', editable: true, validadores: [] },
 
-          { nombre: 'periodo_finalizacion', tipo: 'date', requerido: false, etiqueta: 'Fecha Finalizacion', editable: false, validadores: [] },
+          { nombre: 'periodo_finalizacion', tipo: 'date', requerido: false, etiqueta: 'Última Fecha de pago', editable: false, validadores: [] },
 
           { nombre: 'num_rentas_pagar_primer_pago', tipo: 'number', requerido: false, etiqueta: 'Número de rentas a pagar en la primera cuota', editable: true, validadores: [Validators.min(1), noDecimalValidator()] },
 
@@ -377,7 +383,7 @@ export class VerEditarBeneficioAfilComponent {
 
           { nombre: 'observaciones', tipo: 'text', requerido: false, etiqueta: 'Observaciones', editable: true },
 
-          { nombre: 'complementaria', tipo: 'list', requerido: false, opciones: [{ label: "SI", value: "SI" }, { label: "NO", value: "NO" }], etiqueta: '¿El monto de primera cuota se paga en planilla complementaria?', editable: true },
+          { nombre: 'listo_complementaria', tipo: 'list', requerido: false, opciones: [{ label: "SI", value: "SI" }, { label: "NO", value: "NO" }], etiqueta: '¿El monto de primera cuota se paga en planilla complementaria?', editable: true },
         )
       }
 
@@ -385,7 +391,7 @@ export class VerEditarBeneficioAfilComponent {
       campos.push(
         { nombre: 'fecha_calculo', tipo: 'date', requerido: false, etiqueta: 'Fecha Efectividad', editable: true, validadores: [] },
 
-        { nombre: 'monto_por_periodo', tipo: 'text', requerido: false, etiqueta: 'Monto por periodo', editable: true, validadores: [Validators.min(0), montoTotalValidator()] },
+        { nombre: 'monto_por_periodo', tipo: 'number', requerido: false, etiqueta: 'Monto por periodo', editable: true, validadores: [Validators.min(0), montoTotalValidator()] },
 
         { nombre: 'num_rentas_pagar_primer_pago', tipo: 'number', requerido: false, etiqueta: 'Número de rentas a pagar en la primera cuota', editable: true, validadores: [Validators.min(1), noDecimalValidator()] },
 
@@ -395,7 +401,7 @@ export class VerEditarBeneficioAfilComponent {
 
         { nombre: 'observaciones', tipo: 'text', requerido: false, etiqueta: 'Observaciones', editable: true },
 
-        { nombre: 'complementaria', tipo: 'list', requerido: false, opciones: [{ label: "SI", value: "SI" }, { label: "NO", value: "NO" }], etiqueta: '¿Este beneficio va en complementaria?', editable: true },
+        { nombre: 'listo_complementaria', tipo: 'list', requerido: false, opciones: [{ label: "SI", value: "SI" }, { label: "NO", value: "NO" }], etiqueta: '¿Este beneficio va en complementaria?', editable: true },
       );
     }
 
@@ -412,23 +418,28 @@ export class VerEditarBeneficioAfilComponent {
       data: { campos: campos, valoresIniciales: row }
     });
 
+    let dataActu: any;
+
     dialogRef.componentInstance.formUpdated.subscribe((formValues: any) => {
+
       const campoActualizar = campos.find((c: any) => c.nombre === 'num_rentas_pagar_primer_pago');
+
+      dataActu = formValues;
+
       if (campoActualizar) {
         this.cdr.detectChanges();
       }
+
     });
 
     dialogRef.afterClosed().subscribe((result: any) => {
       if (result) {
-        console.log(result);
+        dataActu["ID_DETALLE_PERSONA"] = row.ID_DETALLE_PERSONA;
+        dataActu["ID_PERSONA"] = row.ID_PERSONA;
+        dataActu["ID_CAUSANTE"] = row.ID_CAUSANTE;
+        dataActu["ID_BENEFICIO"] = row.ID_BENEFICIO;
 
-        result["ID_DETALLE_PERSONA"] = row.ID_DETALLE_PERSONA;
-        result["ID_PERSONA"] = row.ID_PERSONA;
-        result["ID_CAUSANTE"] = row.ID_CAUSANTE;
-        result["ID_BENEFICIO"] = row.ID_BENEFICIO;
-
-        this.beneficioService.updateBeneficioPersona(result).subscribe(
+        this.beneficioService.updateBeneficioPersona(dataActu).subscribe(
           () => {
             // Después de actualizar el beneficio, recargar los datos
             this.toastr.success("Registro actualizado con éxito");

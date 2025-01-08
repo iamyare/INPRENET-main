@@ -11,13 +11,13 @@ export class BancosService {
   constructor(private http: HttpClient,) { }
   getAllBancos(): Observable<any | void> {
     const url = `${environment.API_URL}/api/banco`;
-    
+
     return this.http.get<any>(
       url,
     ).pipe(
-      map((res:any) => {
-          return res;
-        })
-      );
+      map((res: any) => {
+        return res;
+      })
+    );
   }
 }

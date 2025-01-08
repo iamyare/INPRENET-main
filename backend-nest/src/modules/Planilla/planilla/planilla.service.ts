@@ -443,7 +443,7 @@ export class PlanillaService {
       const concatenatedRow = [
         result.codigo_banco,
         result.numero_cuenta,
-        result.monto_a_pagar,
+        Number(parseFloat(result.monto_a_pagar).toFixed(2)),
         result.nombre_completo.replace(/\s+/g, ''),
         currentDate,
         result.id_tipo_planilla,
@@ -861,7 +861,7 @@ FROM
         LEFT JOIN 
             NET_PERSONA_POR_BANCO ppb ON PB.ID_AF_BANCO = ppb.ID_AF_BANCO 
         WHERE 
-            PB.ESTADO != 'NO PAGADA' AND PB.ESTADO != 'RECHAZADO' 
+            PB.ESTADO = 'PAGADA'
             AND PER.PERIODO_INICIO >= TO_DATE(:periodoInicio, 'DD/MM/YYYY') 
             AND PER.PERIODO_FINALIZACION <= TO_DATE(:periodoFinalizacion, 'DD/MM/YYYY') 
             AND PER.ID_TIPO_PLANILLA = 2 
@@ -1057,6 +1057,7 @@ GROUP BY
                 NET_PLANILLA PER ON PB.ID_PLANILLA = PER.ID_PLANILLA
             WHERE
                 PB."ID_AF_BANCO" IS NULL AND
+                PB."ESTADO" = 'PAGADA' AND
                 PER.PERIODO_INICIO >= TO_DATE(:periodoInicio, 'DD/MM/YYYY')
                 AND PER.PERIODO_FINALIZACION <= TO_DATE(:periodoFinalizacion, 'DD/MM/YYYY')
                 AND PER.ID_TIPO_PLANILLA = 1
@@ -1074,6 +1075,7 @@ GROUP BY
         NUMERO_PAGOS,
         NUMERO_LOTE,
         ID_PLANILLA
+    
     UNION ALL
     
     SELECT
@@ -1122,6 +1124,7 @@ GROUP BY
            
             WHERE
                 PB."ID_AF_BANCO" IS NULL AND
+                PB."ESTADO" = 'PAGADA' AND
                 PER.PERIODO_INICIO >= TO_DATE(:periodoInicio, 'DD/MM/YYYY')
                 AND PER.PERIODO_FINALIZACION <= TO_DATE(:periodoFinalizacion, 'DD/MM/YYYY')
                 AND PER.ID_TIPO_PLANILLA = 2
@@ -3142,6 +3145,135 @@ GROUP BY
     }
   }
 
+  async generarReporteSinCuenta(
+    periodoInicio: string,
+    periodoFinalizacion: string,
+    idTiposPlanilla: number[],
+  ): Promise<any[]> {
+    const beneficiosQuery = `
+         SELECT
+            banco.codigo_ach AS "codigo_banco", 
+            personaPorBanco.num_cuenta AS "numero_cuenta",
+            SUM(detallePago.monto_a_pagar) AS "monto_a_pagar",
+            TRIM(
+              persona.primer_apellido ||
+              CASE 
+                  WHEN persona.segundo_apellido IS NOT NULL THEN ' ' || persona.segundo_apellido 
+                  ELSE '' 
+              END || 
+              ' ' || persona.primer_nombre ||
+              CASE 
+                  WHEN persona.segundo_nombre IS NOT NULL THEN ' ' || persona.segundo_nombre 
+                  ELSE '' 
+              END ||
+              CASE
+                  WHEN persona.tercer_nombre IS NOT NULL THEN ' ' || persona.tercer_nombre
+                  ELSE ''
+              END
+          ) AS "nombre_completo",
+            persona.n_identificacion AS "n_identificacion",
+            persona.ID_PERSONA AS "ID_PERSONA" 
+        FROM
+            "NET_PLANILLA" planilla
+        JOIN
+            "NET_DETALLE_PAGO_BENEFICIO" detallePago ON planilla."ID_PLANILLA" = detallePago."ID_PLANILLA"
+        LEFT JOIN
+            "NET_PERSONA_POR_BANCO" personaPorBanco ON detallePago."ID_AF_BANCO" = personaPorBanco."ID_AF_BANCO"
+        LEFT JOIN
+            "NET_BANCO" banco ON personaPorBanco."ID_BANCO" = banco."ID_BANCO"
+        LEFT JOIN
+            "NET_PERSONA" persona ON detallePago."ID_PERSONA" = persona."ID_PERSONA"
+        WHERE
+            planilla."PERIODO_INICIO" >= :1
+            AND planilla."PERIODO_FINALIZACION" <= :2
+            AND planilla."ID_TIPO_PLANILLA" IN (1,2)
+            AND detallePago."ESTADO" = 'PAGADA'
+            AND personaPorBanco."ID_PERSONA" IS NULL 
+            AND personaPorBanco."NUM_CUENTA" IS NULL
+         GROUP BY
+            banco.codigo_ach, personaPorBanco.num_cuenta, persona.primer_apellido,
+            persona.segundo_apellido, persona.primer_nombre,
+            persona.segundo_nombre, persona.tercer_nombre, 
+            persona.n_identificacion, persona.ID_PERSONA
+    `;
+
+    const deduccionesInpremaQuery = `
+        SELECT 
+            dd."ID_PERSONA",
+            SUM(dd.MONTO_APLICADO) AS "deducciones_inprema"
+        FROM 
+            "NET_PLANILLA" planilla
+        LEFT JOIN 
+            "NET_DETALLE_DEDUCCION" dd ON planilla."ID_PLANILLA" = dd."ID_PLANILLA"
+        LEFT JOIN 
+            "NET_DEDUCCION" ded ON dd."ID_DEDUCCION" = ded."ID_DEDUCCION"
+        LEFT JOIN  
+            "NET_CENTRO_TRABAJO" ct ON ct."ID_CENTRO_TRABAJO" = ded."ID_CENTRO_TRABAJO"
+        WHERE 
+            planilla."PERIODO_INICIO" >= :periodoInicio
+            AND planilla."PERIODO_FINALIZACION" <= :periodoFinalizacion
+            AND planilla."ID_TIPO_PLANILLA" IN (1,2)
+            AND dd."ESTADO_APLICACION" = 'COBRADA'
+            AND ct.NOMBRE_CENTRO_TRABAJO = 'INPREMA'
+            AND ded."ID_CENTRO_TRABAJO" = 1
+            AND dd."ID_AF_BANCO" IS NULL        
+            GROUP BY 
+            dd."ID_PERSONA"
+    `;
+
+    const deduccionesTercerosQuery = `
+        SELECT 
+            dd."ID_PERSONA",
+            SUM(dd.MONTO_APLICADO) AS "deducciones_terceros"
+        FROM 
+            "NET_PLANILLA" planilla
+        LEFT JOIN 
+            "NET_DETALLE_DEDUCCION" dd ON planilla."ID_PLANILLA" = dd."ID_PLANILLA"
+        LEFT JOIN 
+            "NET_DEDUCCION" ded ON dd."ID_DEDUCCION" = ded."ID_DEDUCCION"
+        LEFT JOIN  
+            "NET_CENTRO_TRABAJO" ct ON ct."ID_CENTRO_TRABAJO" = ded."ID_CENTRO_TRABAJO"
+        WHERE 
+            planilla."PERIODO_INICIO" >= :periodoInicio
+            AND planilla."PERIODO_FINALIZACION" <= :periodoFinalizacion
+            AND planilla."ID_TIPO_PLANILLA" IN (${idTiposPlanilla.join(', ')})
+            AND dd."ESTADO_APLICACION" = 'COBRADA'
+            AND ded."ID_DEDUCCION" NOT IN (1, 2, 3, 44, 51)
+            AND ct.NOMBRE_CENTRO_TRABAJO != 'INPREMA'
+            AND dd."ID_AF_BANCO" IS NULL
+        GROUP BY 
+            dd."ID_PERSONA"
+    `;
+
+    try {
+      const beneficios = await this.entityManager.query(beneficiosQuery, [periodoInicio, periodoFinalizacion]);
+      const deduccionesInprema = await this.entityManager.query(deduccionesInpremaQuery, [periodoInicio, periodoFinalizacion]);
+      const deduccionesTerceros = await this.entityManager.query(deduccionesTercerosQuery, [periodoInicio, periodoFinalizacion]);
+      const result = beneficios.map(beneficio => {
+        const personaID = beneficio.ID_PERSONA;
+        const totalDeduccionInprema = deduccionesInprema
+          .filter(d => d.ID_PERSONA === personaID)
+          .reduce((acc, curr) => acc + curr.deducciones_inprema, 0);
+        const totalDeduccionTerceros = deduccionesTerceros
+          .filter(d => d.ID_PERSONA === personaID)
+          .reduce((acc, curr) => acc + curr.deducciones_terceros, 0);
+        const totalDeducciones = totalDeduccionInprema + totalDeduccionTerceros;
+        return {
+          codigo_banco: beneficio.codigo_banco?.trim(),
+          numero_cuenta: beneficio.numero_cuenta?.trim(),
+          neto: parseFloat((beneficio.monto_a_pagar - totalDeducciones).toFixed(2)),
+          nombre_completo: beneficio.nombre_completo.trim(),
+          id_tipo_planilla: 1,
+          n_identificacion: beneficio.n_identificacion.trim(),
+        };
+      });
+      return result;
+    } catch (error) {
+      console.error('Error al obtener los detalles de pago por planilla:', error);
+      throw new InternalServerErrorException('Error al obtener los detalles de pago por planilla.');
+    }
+  }
+
   async generarReporteDetallePago(
     data: any[],
     res: Response,
@@ -3164,17 +3296,54 @@ GROUP BY
 
       const currentDate = format(new Date(), 'dd/MM/yyyy');
 
+      // Agregar las filas con los datos
       data.forEach(item => {
         detailedSheet.addRow({
           codigo_banco: item.codigo_banco,
           numero_cuenta: item.numero_cuenta,
-          monto_a_pagar: parseFloat(item.neto).toFixed(2),
+          monto_a_pagar: Number(parseFloat(item.neto).toFixed(2)),
           nombre_completo: item.nombre_completo,
           fecha_actual: currentDate,
           id_tipo_planilla: 1,
           n_identificacion: item.n_identificacion,
         });
       });
+
+      // Calcular la suma de la columna "Monto a Pagar"
+      const total = data.reduce((sum, item) => sum + parseFloat(item.neto), 0);
+
+      // Agregar una fila al final con la suma total
+      const lastRowIndex = detailedSheet.rowCount + 1;
+      detailedSheet.addRow({
+        codigo_banco: '',
+        numero_cuenta: '',
+        monto_a_pagar: '',
+        nombre_completo: '',
+        fecha_actual: '',
+        id_tipo_planilla: '',
+        n_identificacion: '',
+      });
+
+      // Verificar y combinar las celdas para la fila del total
+      const totalRow = detailedSheet.getRow(lastRowIndex);
+
+      if (!detailedSheet.getCell(`A${lastRowIndex}`).isMerged) {
+        detailedSheet.mergeCells(`A${lastRowIndex}:B${lastRowIndex}`);
+      }
+
+      totalRow.getCell(1).value = 'TOTAL';
+      totalRow.getCell(1).alignment = { horizontal: 'center', vertical: 'middle' };
+      totalRow.getCell(1).font = { bold: true };
+
+      if (!detailedSheet.getCell(`C${lastRowIndex}`).isMerged) {
+        detailedSheet.mergeCells(`C${lastRowIndex}:G${lastRowIndex}`);
+      }
+
+      totalRow.getCell(3).value = total.toFixed(2);
+      totalRow.getCell(3).alignment = { horizontal: 'center', vertical: 'middle' };
+      totalRow.getCell(3).font = { bold: true };
+
+      // Agregar las filas concatenadas en la hoja "Concatenado"
       data.forEach(item => {
         const concatenatedRow = [
           item.codigo_banco,
@@ -3188,6 +3357,7 @@ GROUP BY
 
         concatenatedSheet.addRow([concatenatedRow]);
       });
+
       res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
       res.setHeader('Content-Disposition', 'attachment; filename=detalle_pago.xlsx');
       await workbook.xlsx.write(res);

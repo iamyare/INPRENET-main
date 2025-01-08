@@ -142,9 +142,9 @@ export class MantenimientoAfiliacionService {
     return this.http.put<any>(url, datos);
   }
 
-   // Métodos para Causas de Fallecimiento
+  // Métodos para Causas de Fallecimiento
 
-   getAllCausasFallecimiento(): Observable<any[]> {
+  getAllCausasFallecimiento(): Observable<any[]> {
     const url = `${environment.API_URL}/api/mantenimiento-afiliacion/causas-fallecimiento/listar`;
     return this.http.get<any[]>(url);
   }

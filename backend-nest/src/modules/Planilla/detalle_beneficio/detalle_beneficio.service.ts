@@ -343,7 +343,6 @@ export class DetalleBeneficioService {
 
   async createDetalleBeneficioAfiliado(token: string, data: any, idPersonaPadre?: number): Promise<any> {
     const { datos, itemSeleccionado } = data
-    console.log(data);
 
     //CALCULO DE MONTO_TOTAL
     if (!datos.monto_por_periodo && !datos.monto_primera_cuota && !datos.monto_ultima_cuota) {
@@ -353,8 +352,7 @@ export class DetalleBeneficioService {
     } else if (datos.monto_total) {
       if (datos.num_rentas_aplicadas) {
         datos["monto_total"] = (
-          (parseFloat(datos.monto_total || 0) +
-            parseFloat(datos.monto_ultima_cuota || 0))
+          (parseFloat(datos.monto_total || 0))
         )
       }
     }
@@ -420,7 +418,8 @@ export class DetalleBeneficioService {
                        ID_USUARIO_EMPRESA,
                        NUM_RENTAS_PAGAR_PRIMER_PAGO,
                        FECHA_PRESENTACION,
-                       N_EXPEDIENTE
+                       N_EXPEDIENTE,
+                       LISTO_COMPLEMENTARIA
                      ) VALUES (
                        ${detPer.ID_DETALLE_PERSONA},
                        ${detPer.ID_CAUSANTE},
@@ -441,7 +440,8 @@ export class DetalleBeneficioService {
                         ${estadoPP.id_usuario_empresa},
                         ${datos.num_rentas_pagar_primer_pago ? parseInt(datos.num_rentas_pagar_primer_pago) : null},
                          ${datos.fecha_presentacion ? `'${this.convertirCadenaAFecha(datos.fecha_presentacion)}'` : null},
-                         ${datos.n_expediente ? datos.n_expediente : null}
+                         ${datos.n_expediente ? `'${datos.n_expediente}'` : null},
+                         'SI'
                  )`;
 
 
@@ -541,7 +541,8 @@ export class DetalleBeneficioService {
                          ULTIMO_DIA_ULTIMA_RENTA,
                          NUM_RENTAS_PAGAR_PRIMER_PAGO,
                          FECHA_PRESENTACION,
-                         N_EXPEDIENTE
+                         N_EXPEDIENTE,
+                         LISTO_COMPLEMENTARIA
                        ) VALUES (
                          ${detPer.ID_DETALLE_PERSONA},
                          ${detPer.ID_CAUSANTE},
@@ -562,7 +563,8 @@ export class DetalleBeneficioService {
                          ${datos.ultimo_dia_ultima_renta ? parseFloat(datos.ultimo_dia_ultima_renta) : null},
                          ${datos.num_rentas_pagar_primer_pago ? parseInt(datos.num_rentas_pagar_primer_pago) : null},
                          ${datos.fecha_presentacion ? `'${this.convertirCadenaAFecha(datos.fecha_presentacion)}'` : null},
-                         ${datos.n_expediente ? datos.n_expediente : null}
+                         ${datos.n_expediente ? `'${datos.n_expediente}'` : null},
+                         'SI'
               )`;
 
               const detBeneBeneficia = await this.entityManager.query(queryInsDeBBenf);
@@ -1039,6 +1041,16 @@ export class DetalleBeneficioService {
     }
   }
 
+  private convertirCadenaAFechaPleca(cadena: string): string | null {
+    if (cadena) {
+      const fecha = parseISO(cadena);
+      const fechaFormateada = format(fecha, 'yyyy-MM-dd');
+      return fechaFormateada
+    } else {
+      return null
+    }
+  }
+
   findAll() {
     return `This action returns all beneficioPlanilla`;
   }
@@ -1111,33 +1123,75 @@ export class DetalleBeneficioService {
 
   async updateBeneficioPersona(token: string, data: any) {
     const decoded = this.jwtService.verify(token);
-
     const estadoPP = await this.usuarioEmpRepository.findOne({ where: { empleadoCentroTrabajo: { correo_1: decoded?.correo } } });
     const id_usuario_empresa_in = estadoPP.id_usuario_empresa;
 
     try {
+      //let ultimo_dia_ultima_renta = data.ultimo_dia_ultima_renta === '' ? null : parseInt(data.ultimo_dia_ultima_renta);
+      let monto_primera_cuota = data.monto_primera_cuota === '' ? null : parseFloat(data.monto_primera_cuota);
+      let monto_por_periodo = data.monto_por_periodo === '' ? null : parseFloat(data.monto_por_periodo);
+      let monto_ultima_cuota = data.monto_ultima_cuota === '' ? null : parseFloat(data.monto_ultima_cuota);
+      let monto_total = data.monto_total === '' ? null : parseFloat(data.monto_total);
+      let num_rentas_pagar_primer_pago = data.num_rentas_pagar_primer_pago === '' ? null : parseInt(data.num_rentas_pagar_primer_pago)
+      let ultimo_dia_ultima_renta = data.ultimo_dia_ultima_renta === undefined || data.ultimo_dia_ultima_renta === '' ? null : parseInt(data.ultimo_dia_ultima_renta)
+
+      if (monto_primera_cuota && !monto_por_periodo && !ultimo_dia_ultima_renta && !monto_ultima_cuota) {
+        monto_primera_cuota = parseFloat(data.monto_primera_cuota)
+        monto_por_periodo = parseFloat(data.monto_primera_cuota)
+        monto_ultima_cuota = parseFloat(data.monto_primera_cuota)
+        monto_total = parseFloat(data.monto_primera_cuota)
+      } else {
+        monto_primera_cuota = parseFloat(data.monto_primera_cuota)
+        monto_por_periodo = parseFloat(data.monto_por_periodo)
+        monto_ultima_cuota = parseFloat(data.monto_ultima_cuota)
+        monto_total = parseFloat(data.monto_total)
+      }
+
+      if (num_rentas_pagar_primer_pago) {
+        num_rentas_pagar_primer_pago = data.num_rentas_pagar_primer_pago
+      } else {
+        num_rentas_pagar_primer_pago = null
+      }
+
+      if (ultimo_dia_ultima_renta) {
+        ultimo_dia_ultima_renta = data.ultimo_dia_ultima_renta
+      } else {
+        ultimo_dia_ultima_renta = null
+      }
+
       const dataEnv = {
         ID_DETALLE_PERSONA: data.ID_DETALLE_PERSONA,
         ID_PERSONA: data.ID_PERSONA,
         ID_CAUSANTE: data.ID_CAUSANTE,
         ID_BENEFICIO: data.ID_BENEFICIO,
-        estado_solicitud: data.estado_solicitud,
         ID_USUARIO_EMPRESA: id_usuario_empresa_in,
-        monto_total: data.monto_total === '' ? null : parseFloat(data.monto_total),
-        monto_ultima_cuota: data.monto_ultima_cuota === '' ? null : parseFloat(data.monto_ultima_cuota),
-        monto_por_periodo: data.monto_por_periodo === '' ? null : parseFloat(data.monto_por_periodo),
-        monto_primera_cuota: data.monto_primera_cuota === '' ? null : parseFloat(data.monto_primera_cuota),
+
+        n_expediente: data.n_expediente,
+        fecha_presentacion: this.convertirCadenaAFechaPleca(data.fecha_presentacion),
+        estado_solicitud: data.estado_solicitud,
         num_rentas_aplicadas: data.num_rentas_aplicadas === undefined || data.num_rentas_aplicadas === '' ? null : parseInt(data.num_rentas_aplicadas),
-        ultimo_dia_ultima_renta: data.ultimo_dia_ultima_renta === undefined || data.ultimo_dia_ultima_renta === '' ? null : parseInt(data.num_rentas_aplicadas),
-        observaciones: data.observaciones,
-        prestamo: data.prestamo === undefined || data.prestamo === '' ? null : data.prestamo,
+
+        fecha_calculo: this.convertirCadenaAFechaPleca(data.fecha_calculo),
+        periodo_finalizacion: this.convertirCadenaAFechaPleca(data.periodo_finalizacion),
+
+        monto_primera_cuota: monto_primera_cuota,
+        monto_por_periodo: monto_por_periodo,
+        monto_ultima_cuota: monto_ultima_cuota,
+        monto_total: monto_total,
+
+        num_rentas_pagar_primer_pago: num_rentas_pagar_primer_pago,
+        ultimo_dia_ultima_renta: ultimo_dia_ultima_renta,
+
+        observaciones: data.observaciones === '' ? null : data.observaciones,
+        listo_complementaria: data.listo_complementaria
+        //prestamo: data.prestamo === undefined || data.prestamo === '' ? null : data.prestamo,
       };
 
-      console.log(data);
       console.log(dataEnv);
 
-      //const detBenAfil = await this.detalleBeneficioAfiliadoRepository.preload(dataEnv);
-      //await this.detalleBeneficioAfiliadoRepository.save(detBenAfil);
+
+      const detBenAfil = await this.detalleBeneficioAfiliadoRepository.preload(dataEnv);
+      await this.detalleBeneficioAfiliadoRepository.save(detBenAfil);
     } catch (error) {
       this.logger.error(`Error al actualizar beneficios: ${error.message}`, error.stack);
       throw new InternalServerErrorException(`Error al actualizar beneficios. ${error}}`);

@@ -938,6 +938,28 @@ export class DocumentosPlanillaComponent implements OnInit {
       });
   }
 
+  descargarReporteBSC(): void {
+    const { idTiposPlanilla, nombrePlanilla } = this.obtenerIdYNombrePlanilla();
+    const { fechaInicioFormateada, fechaFinFormateada } = this.obtenerFechasFormateadas();
+
+    if (idTiposPlanilla.length === 0) return;
+
+    this.planillaService.descargarReporteDetallePagoSCB(fechaInicioFormateada, fechaFinFormateada, idTiposPlanilla)
+      .subscribe({
+        next: (blob) => {
+          const url = window.URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = 'detalle_pago_sin_cuenta_banc.xlsx';
+          a.click();
+          window.URL.revokeObjectURL(url);
+        },
+        error: (error) => {
+          console.error('Error al descargar el archivo', error);
+        }
+      });
+  }
+
   descargarExcelInv(): void {
     const fechaInicio = this.planillaForm.get('rangoFechas.fechaInicio')?.value;
     const fechaFin = this.planillaForm.get('rangoFechas.fechaFin')?.value;
@@ -1308,7 +1330,7 @@ export class DocumentosPlanillaComponent implements OnInit {
 
   crearTablaPartidaDiario(data: any[], deduccionesInprema: number, deduccionesTerceros: number) {
     console.log(data);
-    
+
     const headers = [
       { text: 'Cuenta Contable', style: 'tableHeader' },
       { text: 'No. Comprobante', style: 'tableHeader' },
@@ -1341,8 +1363,8 @@ export class DocumentosPlanillaComponent implements OnInit {
         "612.01.04.01": "CONTINUACION DE JUBILACION",
         "148.99.04.01": "JUBILACIONES Y PENSIONES DEL GOBIERNO",
         "611.02.02": "PENSION POR SOBREVIVENCIA Y ORFANDAD",
-        "613.99.03" : "SEPARACION POR MUERTE",
-        "613.99.02" : "SEPARACION DEL SISTEMA"
+        "613.99.03": "SEPARACION POR MUERTE",
+        "613.99.02": "SEPARACION DEL SISTEMA"
       };
 
       const descripcionCuenta = nombreCuenta[cuenta] || "Cuenta Desconocida";
@@ -1477,22 +1499,23 @@ export class DocumentosPlanillaComponent implements OnInit {
           "PENSION POR VEJEZ COMPLEMENTARIA": "611.01.04",
           "PENSION POR INVALIDEZ": "611.02.01",
           "PENSION POR INVALIDEZ 2": "611.02.01",
-          "CONTINUACION PENSION POR INVALIDEZ" : "612.01.04.01",
+          "CONTINUACION PENSION POR INVALIDEZ": "612.01.04.01",
           "CONTINUACION DE JUBILACION": "612.01.04.01",
           "JUBILACION VOLUNTARIA GOBIERNO": "148.99.04.01",
           "PENSION POR INVALIDEZ GOBIERNO": "148.99.04.01",
           "CONTINUACION DE JUBILACION GOBIERNO": "148.99.04.01",
           "PENSION POR VIUDEZ Y ORFANDAD": "611.02.02",
           "PENSION POR ORFANDAD": "611.02.02",
-          "SEPARACION POR MUERTE" : "613.99.03",
-          "COMPLEMENTO DE SEPARACION POR MUERTE" : "613.99.03",
-          "PENSION POR VIUDEZ (VITALICIO)" : "611.02.02",
-          "PENSION POR VIUDEZ (TEMPORAL)" : "611.02.02",
-          "AUXILIO POR INVALIDEZ (PAGO UNICO)" : "611.02.01",
-          "SEPARACION DEL SISTEMA VOLUNTARIO" : "613.99.02",
+          "SEPARACION POR MUERTE": "613.99.03",
+          "COMPLEMENTO DE SEPARACION POR MUERTE": "613.99.03",
+          "PENSION POR VIUDEZ (VITALICIO)": "611.02.02",
+          "PENSION POR VIUDEZ (TEMPORAL)": "611.02.02",
+          "AUXILIO POR INVALIDEZ (PAGO UNICO)": "611.02.01",
+          "SEPARACION DEL SISTEMA VOLUNTARIO": "613.99.02",
+
         };
         console.log(cuentaContableMap);
-        
+
         const partidaDiarioData = data.beneficios.map((beneficio: any) => ({
           cuentaContable: cuentaContableMap[beneficio.NOMBRE_BENEFICIO] || 'N/A',
           noComprobante: 'N/A',
@@ -1624,12 +1647,12 @@ export class DocumentosPlanillaComponent implements OnInit {
   async exportarExcelDetallePorPeriodo() {
     const { idTiposPlanilla, nombrePlanilla } = this.obtenerIdYNombrePlanilla();
     const { fechaInicioFormateada, fechaFinFormateada } = this.obtenerFechasFormateadas();
-  
+
     if (idTiposPlanilla.length === 0) {
       console.error('Seleccione un tipo de planilla válido.');
       return;
     }
-  
+
     this.planillaService.getDetalleBeneficiosYDeduccionesPorPeriodo(fechaInicioFormateada, fechaFinFormateada, idTiposPlanilla)
       .subscribe({
         next: (data) => {
@@ -1645,7 +1668,7 @@ export class DocumentosPlanillaComponent implements OnInit {
             'Nombre Beneficio': item.NOMBRE_BENEFICIO,
             'Monto Beneficio': item.MONTO ? parseFloat(item.MONTO) : 0,
           }));
-  
+
           // Mapeo de deducciones INPREMA con código de deducción
           const deduccionesInpremaDetalle = data.deduccionesInpremaDetalladas.map((item: any) => ({
             'Identificación': item.IDENTIFICACION,
@@ -1654,7 +1677,7 @@ export class DocumentosPlanillaComponent implements OnInit {
             'Nombre Deducción (INPREMA)': item.NOMBRE_DEDUCCION,
             'Monto Deducción': item.MONTO ? parseFloat(item.MONTO) : 0,
           }));
-  
+
           // Mapeo de deducciones de terceros con código de deducción
           const deduccionesTercerosDetalle = data.deduccionesTercerosDetalladas.map((item: any) => ({
             'Identificación': item.IDENTIFICACION,
@@ -1663,9 +1686,9 @@ export class DocumentosPlanillaComponent implements OnInit {
             'Nombre Deducción (Terceros)': item.NOMBRE_DEDUCCION,
             'Monto Deducción': item.MONTO ? parseFloat(item.MONTO) : 0,
           }));
-  
+
           const workbook = XLSX.utils.book_new();
-  
+
           const beneficiosSheet = XLSX.utils.json_to_sheet(beneficiosDetalle);
           const deduccionesInpremaSheet = XLSX.utils.json_to_sheet(deduccionesInpremaDetalle);
           const deduccionesTercerosSheet = XLSX.utils.json_to_sheet(deduccionesTercerosDetalle);
@@ -1677,22 +1700,22 @@ export class DocumentosPlanillaComponent implements OnInit {
               const cell = sheet[cellAddress];
               if (cell && typeof cell.v === 'number') {
                 cell.t = 'n';
-                cell.z = '#,##0.00'; 
+                cell.z = '#,##0.00';
               }
             }
           };
-  
-          applyNumberFormat(beneficiosSheet, 'E'); 
-          applyNumberFormat(deduccionesInpremaSheet, 'E'); 
+
+          applyNumberFormat(beneficiosSheet, 'E');
+          applyNumberFormat(deduccionesInpremaSheet, 'E');
           applyNumberFormat(deduccionesTercerosSheet, 'E');
-  
+
           XLSX.utils.book_append_sheet(workbook, beneficiosSheet, 'Detalle Beneficios');
           XLSX.utils.book_append_sheet(workbook, deduccionesInpremaSheet, 'Deducciones INPREMA');
           XLSX.utils.book_append_sheet(workbook, deduccionesTercerosSheet, 'Deducciones Terceros');
-  
+
           const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
           const blob = new Blob([excelBuffer], { type: 'application/octet-stream' });
-  
+
           const nombreArchivo = `Detalle_Beneficios_Deducciones_${nombrePlanilla}_${fechaInicioFormateada}_to_${fechaFinFormateada}.xlsx`;
           saveAs(blob, nombreArchivo);
         },
@@ -1700,147 +1723,6 @@ export class DocumentosPlanillaComponent implements OnInit {
           console.error('Error al obtener datos del servicio:', error);
         }
       });
-  }
-  
-  async generarDocumentoResumen() {
-    const datos = [
-      { 
-        BENEFICIO: 'SEPARACION DEL SISTEMA VOLUNTARIO', 
-        MONTO_BENEFICIO: 3994872.87, 
-        DEDUCCIONES_INPREMA: 0, 
-        DEDUCCIONES_TERCEROS: 0 
-      },
-      { 
-        BENEFICIO: 'PENSION POR INVALIDEZ', 
-        MONTO_BENEFICIO: 88888.73, 
-        DEDUCCIONES_INPREMA: 10697.49, 
-        DEDUCCIONES_TERCEROS: 0 
-      },
-      { 
-        BENEFICIO: 'PENSION POR VEJEZ', 
-        MONTO_BENEFICIO: 87552.57, 
-        DEDUCCIONES_INPREMA: 16749.88, 
-        DEDUCCIONES_TERCEROS: 0 
-      },
-      { 
-        BENEFICIO: 'PENSION POR VEJEZ COMPLEMENTARIA', 
-        MONTO_BENEFICIO: 45876.93, 
-        DEDUCCIONES_INPREMA: 0, 
-        DEDUCCIONES_TERCEROS: 0 
-      },
-      { 
-        BENEFICIO: 'AUXILIO POR INVALIDEZ (PAGO UNICO)', 
-        MONTO_BENEFICIO: 1066664.76, 
-        DEDUCCIONES_INPREMA: 0, 
-        DEDUCCIONES_TERCEROS: 0 
-      },
-    ];
-  
-    // Calcula el total de cada columna
-    const totalBeneficio = datos.reduce((sum, item) => sum + item.MONTO_BENEFICIO, 0);
-    const totalInprema = datos.reduce((sum, item) => sum + item.DEDUCCIONES_INPREMA, 0);
-    const totalTerceros = datos.reduce((sum, item) => sum + item.DEDUCCIONES_TERCEROS, 0);
-    const totalPagado = datos.reduce(
-      (sum, item) => sum + (item.MONTO_BENEFICIO - item.DEDUCCIONES_INPREMA - item.DEDUCCIONES_TERCEROS),
-      0
-    );
-  
-    const base64Image = await this.convertirImagenABase64('../assets/images/membratadoFinal.jpg');
-  
-    const docDefinition:any = {
-      pageSize: 'LETTER',
-      background: {
-        image: base64Image,
-        width: 612, // Ancho de carta
-        height: 792 // Alto de carta
-      },
-      pageMargins: [40, 130, 40, 100],
-      header: {
-        text: 'RESUMEN DE PLANILLA COMPLEMENTARIA',
-        style: 'header',
-        alignment: 'center',
-        margin: [50, 90, 50, 10]
-      },
-      content: [
-        {
-          columns: [
-            {
-              width: '50%',
-              text: [
-                { text: 'PERIODO DE LA PLANILLA: ', bold: true },
-                '01/11/2024 - 14/11/2024'
-              ],
-              alignment: 'left'
-            },
-            {
-              width: '50%',
-              text: [
-                { text: 'MONTO NETO DE LA PLANILLA: ', bold: true },
-                `L ${totalPagado.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",")}`
-              ],
-              alignment: 'right'
-            }
-          ],
-          margin: [0, 10, 0, 10]
-        },
-        {
-          table: {
-            headerRows: 1,
-            widths: ['40%', '15%', '15%', '15%', '15%'],
-            body: [
-              [
-                { text: 'Etiquetas de fila', style: 'tableHeaderSmall', noWrap: true },
-                { text: 'Suma de Pagar', style: 'tableHeaderSmall', alignment: 'right', noWrap: true },
-                { text: 'Suma de Inprema', style: 'tableHeaderSmall', alignment: 'right', noWrap: true },
-                { text: 'Suma de terceros', style: 'tableHeaderSmall', alignment: 'right', noWrap: true },
-                { text: 'Suma de Pagado', style: 'tableHeaderSmall', alignment: 'right', noWrap: true },
-              ],
-              ...datos.map(item => [
-                { text: item.BENEFICIO, fontSize: 8, noWrap: true },
-                { text: item.MONTO_BENEFICIO.toFixed(2), fontSize: 8, alignment: 'right', noWrap: true },
-                { text: item.DEDUCCIONES_INPREMA.toFixed(2), fontSize: 8, alignment: 'right', noWrap: true },
-                { text: item.DEDUCCIONES_TERCEROS.toFixed(2), fontSize: 8, alignment: 'right', noWrap: true },
-                { 
-                  text: (item.MONTO_BENEFICIO - item.DEDUCCIONES_INPREMA - item.DEDUCCIONES_TERCEROS).toFixed(2),
-                  fontSize: 8,
-                  alignment: 'right',
-                  noWrap: true
-                }
-              ]),
-              [
-                { text: 'TOTAL GENERAL', style: 'tableTotalSmall', colSpan: 1, noWrap: true },
-                { text: totalBeneficio.toFixed(2), alignment: 'right', bold: true, fontSize: 8, noWrap: true },
-                { text: totalInprema.toFixed(2), alignment: 'right', bold: true, fontSize: 8, noWrap: true },
-                { text: totalTerceros.toFixed(2), alignment: 'right', bold: true, fontSize: 8, noWrap: true },
-                { text: totalPagado.toFixed(2), alignment: 'right', bold: true, fontSize: 8, noWrap: true }
-              ]
-            ]
-          },
-          layout: {
-            defaultBorder: true,
-          },
-          styles: {
-            tableHeaderSmall: { bold: true, fontSize: 10, fillColor: '#E0E0E0' },
-            tableTotalSmall: { bold: true, fontSize: 10, fillColor: '#D3ECFA' }
-          }
-        }
-        
-        
-      ],
-      styles: {
-        header: { fontSize: 16, bold: true },
-        tableHeader: { bold: true, fontSize: 12, fillColor: '#E0E0E0' },
-        tableTotal: { bold: true, fontSize: 12, fillColor: '#D3ECFA' }
-      },
-      footer: (currentPage: number, pageCount: number) => ({
-        text: `Página ${currentPage} de ${pageCount}`,
-        alignment: 'right',
-        margin: [0, 10, 20, 0]
-      }),
-      
-    };
-  
-    pdfMake.createPdf(docDefinition).download('Resumen_Planilla_Complementaria.pdf');
   }
 
 }

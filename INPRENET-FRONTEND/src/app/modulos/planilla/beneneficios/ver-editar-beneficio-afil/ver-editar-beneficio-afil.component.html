@@ -72,7 +72,7 @@
       <app-dynamic-table titulo="Editar Tipo De Ingreso" subtitulo="Completa la información correspondiente"
         [columns]="myColumns" [data]="filasT" [getData]="getFilas" (ejecutarFuncionAsincronaEvent)="
           ejecutarFuncionAsincronaDesdeOtroComponente($event)
-        " [mostrarBotonUno]="false" [etiquetaBotonUno]="'Editar'" (accionBotonUno)="manejarAccionUno($event)">
+        " [mostrarBotonUno]="true" [etiquetaBotonUno]="'Editar'" (accionBotonUno)="manejarAccionUno($event)">
       </app-dynamic-table>
     </div>
 

@@ -71,3 +71,25 @@ td {
   padding: 10px;
   text-align: left;
 }
+
+.anaranjado {
+  color: #ee6002;
+}
+
+@keyframes desaparecer {
+  0% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0;
+  }
+
+  100% {
+    opacity: 1;
+  }
+}
+
+.desapareciendo {
+  animation: desaparecer 2s infinite;
+}

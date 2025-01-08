@@ -89,7 +89,7 @@ export class NuevoBeneficioAfilComponent implements OnInit {
   ];
 
   datosTabl: any[] = [];
-  filas: any
+  filas: any[] = []; // Initialize as an empty array
   ejecF: any;
   desOBenSeleccionado: any
   mostrarB: any;
@@ -121,6 +121,7 @@ export class NuevoBeneficioAfilComponent implements OnInit {
   previsualizarInfoAfil() {
     this.FormBen?.reset()
     this.form1?.reset()
+    this.mostrarB = false;
 
     this.Afiliado = { nameAfil: "" }
 
@@ -331,12 +332,14 @@ export class NuevoBeneficioAfilComponent implements OnInit {
         /* { type: 'text', label: 'DNI del beneficiario', name: 'dni', value: "", validations: [Validators.required, Validators.minLength(13), Validators.maxLength(14)], display: true, readOnly: true },
          */
         {
-          type: 'date',
-          label: 'Fecha de presentacion',
-          name: 'fecha_presentacion',
-          max: new Date().toISOString().split('T')[0],
-          validations: [Validators.required, noFutureDateValidator],
-          display: true
+          type: 'dropdown', label: 'Tipo persona', name: 'tipo_persona',
+          options: [{ label: "DESIGNADO", value: "DESIGNADO" }],
+          validations: [Validators.required], display: true
+        },
+        {
+          type: 'dropdown', label: 'Tipo de beneficio', name: 'nombre_beneficio',
+          options: temp,
+          validations: [Validators.required], display: true
         },
         {
           type: 'text', label: 'Número de expediente', name: 'n_expediente',
@@ -345,13 +348,12 @@ export class NuevoBeneficioAfilComponent implements OnInit {
           validations: [Validators.required,], display: true,
         },
         {
-          type: 'dropdown', label: 'Tipo persona', name: 'tipo_persona',
-          options: [{ label: "DESIGNADO", value: "DESIGNADO" }],
-          validations: [Validators.required], display: true
-        }, {
-          type: 'dropdown', label: 'Tipo de beneficio', name: 'nombre_beneficio',
-          options: temp,
-          validations: [Validators.required], display: true
+          type: 'date',
+          label: 'Fecha de presentacion',
+          name: 'fecha_presentacion',
+          max: new Date().toISOString().split('T')[0],
+          validations: [Validators.required, noFutureDateValidator],
+          display: true
         },
         {
           type: 'text', label: 'Periodicidad del beneficio', name: 'periodicidad_beneficio',
@@ -363,10 +365,7 @@ export class NuevoBeneficioAfilComponent implements OnInit {
           value: "",
           validations: [], display: true,
         },
-        {
-          type: 'dropdown', label: 'Estado Solicitud', name: 'estado_solicitud',
-          options: [{ label: 'APROBADO', value: 'APROBADO' }, { label: 'RECHAZADO', value: 'RECHAZADO' }], validations: [Validators.required], display: true
-        },
+        { type: 'number', label: 'Monto mensual del beneficio', name: 'monto_por_periodo', validations: [Validators.min(0), montoTotalValidator()], display: false, },
         { type: 'number', label: 'Número de rentas aprobadas', name: 'num_rentas_aplicadas', validations: [Validators.min(1), noDecimalValidator()], display: false },
         {
           type: 'number', label: 'Dias de la última renta', name: 'ultimo_dia_ultima_renta', validations: [
@@ -374,11 +373,8 @@ export class NuevoBeneficioAfilComponent implements OnInit {
             Validators.max(31),
           ], display: false
         },
-        { type: 'number', label: 'Número de rentas a pagar en el primer pago', name: 'num_rentas_pagar_primer_pago', validations: [Validators.min(1)], display: false },
-        { type: 'number', label: 'Monto correspondiente a los dias restantes', name: 'monto_ultima_cuota', validations: [Validators.min(0), montoTotalValidator()], display: false },
-        { type: 'number', label: 'Monto mensual', name: 'monto_por_periodo', validations: [Validators.min(0), montoTotalValidator()], display: false, },
-        { type: 'number', label: 'Monto primera cuota', name: 'monto_primera_cuota', validations: [Validators.min(0), montoTotalValidator()], display: false, },
-        { type: 'number', label: 'Monto total', name: 'monto_total', validations: [Validators.min(0), montoTotalValidator()], display: false, },
+        { type: 'number', label: 'Monto última renta', name: 'monto_ultima_cuota', validations: [Validators.min(0), montoTotalValidator()], display: false },
+
         {
           type: 'date',
           label: 'Fecha de efectividad',
@@ -394,8 +390,19 @@ export class NuevoBeneficioAfilComponent implements OnInit {
           validations: [],
           display: false
         },
-        { type: 'text', label: 'Observación', name: 'observacion', validations: [], display: true },
 
+        { type: 'number', label: 'Número de rentas a pagar en la primera cuota', name: 'num_rentas_pagar_primer_pago', validations: [Validators.min(1)], display: false },
+
+        { type: 'number', label: 'Monto primera cuota', name: 'monto_primera_cuota', validations: [Validators.min(0), montoTotalValidator()], display: false, },
+
+        {
+          type: 'dropdown', label: 'Estado Solicitud', name: 'estado_solicitud',
+          options: [{ label: 'APROBADO', value: 'APROBADO' }, { label: 'RECHAZADO', value: 'RECHAZADO' }], validations: [Validators.required], display: true
+        },
+
+        { type: 'number', label: 'Monto total', name: 'monto_total', validations: [Validators.min(0), montoTotalValidator()], display: false, },
+
+        { type: 'text', label: 'Observación', name: 'observacion', validations: [], display: true },
       ];
 
       // Muestra el formulario después de configurar los campos
@@ -436,8 +443,6 @@ export class NuevoBeneficioAfilComponent implements OnInit {
         await this.getColumns();
         const data = await this.svcAfilServ.obtenerBenDeAfil(this.form.value.dni).toPromise();
 
-        console.log(data);
-
         this.filas = data.map((item: any) => ({
           id_persona: item.id_persona,
           id_causante: item.id_causante,
@@ -447,6 +452,8 @@ export class NuevoBeneficioAfilComponent implements OnInit {
           genero: item.genero,
           tipo_afiliado: item.tipo_persona,
           porcentaje: item.porcentaje,
+          observacion_detalle_persona: item.observacion_detalle_persona,
+          estado_afil_detalle_persona: item.estado_afil_detalle_persona,
         }));
 
         /* const data1 = await this.svcAfilServ.obtenerBeneficiosDeAfil(this.form.value.dni).toPromise();
@@ -669,9 +676,13 @@ export class NuevoBeneficioAfilComponent implements OnInit {
 
   async obtenerDatos1(event: any): Promise<any> {
     this.form1 = event;
+    console.log(event);
+
     const datosFormateados = {
       ...event.value
     };
+    console.log(this.datosFormateados);
+
     this.datosFormateados = datosFormateados;
     /* let montoPrimeraCuota = 0
     if (this.datosFormateados.num_rentas_pagar_primer_pago && this.datosFormateados.monto_por_periodo) {
@@ -681,7 +692,14 @@ export class NuevoBeneficioAfilComponent implements OnInit {
     } */
 
     if (this.datosFormateados.monto_por_periodo && this.datosFormateados.num_rentas_aplicadas) {
-      const result = (parseFloat(this.datosFormateados.monto_por_periodo) * parseFloat(this.datosFormateados.num_rentas_aplicadas)) + parseFloat(this.datosFormateados.monto_ultima_cuota)
+      const result =
+        (
+          parseFloat(this.datosFormateados.monto_por_periodo) *
+          parseFloat(this.datosFormateados.num_rentas_aplicadas)
+        )
+        + parseFloat(this.datosFormateados.monto_ultima_cuota)
+      console.log(result);
+
       this.FormBen?.get("monto_total")?.setValue(result.toFixed(2));
       this.form1?.get("monto_total")?.setValue(result.toFixed(2));
     }
@@ -907,6 +925,9 @@ export class NuevoBeneficioAfilComponent implements OnInit {
     // console.log(this.datosFormateados);
 
     //AFILIADOS O BENEFICIARIOS
+
+    console.log(this.datosFormateados);
+
     if (this.Afiliado.fallecido != "SI") {
       this.datosFormateados["dni"] = this.form?.value.dni;
       this.datosFormateados["periodo_finalizacion"] = this.form?.value.periodo_finalizacion;
@@ -931,8 +952,6 @@ export class NuevoBeneficioAfilComponent implements OnInit {
       // PARA LOS DESIGNADOS BENEFICIARIOS
       this.datosFormateados["dni"] = this.FormBen.value.dni;
       this.datosFormateados["periodo_finalizacion"] = this.FormBen.value.periodo_finalizacion;
-      console.log(this.datosFormateados);
-
       this.svcBeneficioServ.asigBeneficioAfil(this.datosFormateados, this.desOBenSeleccionado, this.Afiliado.id_persona).subscribe(
         {
           next: (response) => {

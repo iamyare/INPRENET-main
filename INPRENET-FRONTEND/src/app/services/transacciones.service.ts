@@ -18,7 +18,7 @@ export class TransaccionesService {
       })
     );
   }
-  
+
 
   crearCuenta(idPersona: number, cuentaData: any): Observable<any> {
     return this.http.post(`${environment.API_URL}/api/transacciones/crear-cuenta/${idPersona}`, cuentaData);
@@ -50,7 +50,7 @@ export class TransaccionesService {
   obtenerMovimientos(idPersona: number, idTipoCuenta: number): Observable<any> {
     const url = `${environment.API_URL}/api/persona/${idPersona}/movimientos-ordenados/${idTipoCuenta}`;
     return this.http.get<any>(url).pipe(
-        catchError(error => throwError(() => new Error('Error al obtener movimientos: ' + error.message)))
+      catchError(error => throwError(() => new Error('Error al obtener movimientos: ' + error.message)))
     );
   }
 

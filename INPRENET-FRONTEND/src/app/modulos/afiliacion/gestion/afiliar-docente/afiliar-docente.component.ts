@@ -1,11 +1,11 @@
 import { Component, ViewChild, TemplateRef, OnInit } from '@angular/core';
 import { FormArray, FormBuilder, FormGroup, ValidationErrors } from '@angular/forms';
 import { MatStepper } from '@angular/material/stepper';
-import { AfiliacionService } from 'src/app/services/afiliacion.service';
+import { AfiliacionService } from '../../../../services/afiliacion.service';
 import { ToastrService } from 'ngx-toastr';
 import pdfMake from 'pdfmake/build/pdfmake';
 import { HttpClient } from '@angular/common/http';
-import { DatosEstaticosService } from 'src/app/services/datos-estaticos.service';
+import { DatosEstaticosService } from '../../../../services/datos-estaticos.service';
 import { DatosGeneralesTemporalComponent } from '../datos-generales-temporal/datos-generales-temporal.component';
 import { PepsComponent } from '../peps/peps.component';
 import { BancosComponent } from '../bancos/bancos.component';
@@ -14,6 +14,9 @@ import { ColMagisterialesComponent } from '../col-magisteriales/col-magisteriale
 import { DatPuestoTrabComponent } from '../dat-puesto-trab/dat-puesto-trab.component';
 import { BenefComponent } from '../benef/benef.component';
 import { OtrasFuentesIngresoComponent } from '../otras-fuentes-ingreso/otras-fuentes-ingreso.component';
+import { FormStateService } from '../../../../services/form-state.service';
+import { CamaraComponent} from '../../../../components/camara/camara.component';
+import { StepperSelectionEvent } from '@angular/cdk/stepper';
 
 @Component({
   selector: 'app-afiliar-docente',
@@ -22,13 +25,14 @@ import { OtrasFuentesIngresoComponent } from '../otras-fuentes-ingreso/otras-fue
 })
 export class AfiliarDocenteComponent implements OnInit {
   backgroundImageBase64: string = '';
+  useCamera: boolean = true; // Propiedad que controla el uso de la cámara
+
   @ViewChild('datosGeneralesTemplate', { static: true }) datosGeneralesTemplate!: TemplateRef<any>;
   @ViewChild('referenciasPersonalesTemplate', { static: true }) referenciasPersonalesTemplate!: TemplateRef<any>;
   @ViewChild('colegiosMagisterialesTemplate', { static: true }) colegiosMagisterialesTemplate!: TemplateRef<any>;
   @ViewChild('bancosTemplate', { static: true }) bancosTemplate!: TemplateRef<any>;
   @ViewChild('centrosTrabajoTemplate', { static: true }) centrosTrabajoTemplate!: TemplateRef<any>;
   @ViewChild('beneficiariosTemplate', { static: true }) beneficiariosTemplate!: TemplateRef<any>;
-  
   @ViewChild('datosGeneralesComponent', { static: false }) datosGeneralesComponent!: DatosGeneralesTemporalComponent;
   @ViewChild('pepsComponent', { static: false }) pepsComponent!: PepsComponent;
   @ViewChild('bancosComponent', { static: false }) bancosComponent!: BancosComponent;
@@ -39,8 +43,8 @@ export class AfiliarDocenteComponent implements OnInit {
   @ViewChild('datPuestoTrabComponent', { static: false }) datPuestoTrabComponent!: DatPuestoTrabComponent;
   @ViewChild('otrasFuentesIngresoComponent', { static: false }) otrasFuentesIngresoComponent!: OtrasFuentesIngresoComponent;
   @ViewChild('benefComponent', { static: false }) benefComponent!: BenefComponent;
-  
   @ViewChild(MatStepper) stepper!: MatStepper;
+  @ViewChild(CamaraComponent) camaraComponent!: CamaraComponent;
 
   steps: any[] = [];
   formGroup!: FormGroup;
@@ -48,12 +52,15 @@ export class AfiliarDocenteComponent implements OnInit {
   formErrors: any = null;
 
   constructor(private fb: FormBuilder, private afiliacionService: AfiliacionService, private datosEstaticosService: DatosEstaticosService,
-    private toastr: ToastrService, private http: HttpClient) {
+    private toastr: ToastrService,  private formStateService: FormStateService, private http: HttpClient) {
     this.convertirImagenABase64('../assets/images/membratadoFinal.jpg').then(base64 => {
       this.backgroundImageBase64 = base64;
     }).catch(error => {
-      console.error('Error al convertir la imagen a Base64', error);
-    });
+      console.error('Error al enviar los datos:', error);
+      const errorMessage = error.error?.mensaje || 'Hubo un error al enviar los datos';
+      this.toastr.error(errorMessage, 'Error');
+    }
+    );
   }
 
   ngOnInit(): void {
@@ -108,331 +115,111 @@ export class AfiliarDocenteComponent implements OnInit {
       });
     }
   }
-
   isStepInvalid(formGroup: FormGroup): boolean {
     return formGroup.invalid && (formGroup.touched || formGroup.dirty);
   }
+//-----------------------------------------------
+onSubmit(): void {
+  const datosGenerales = this.formGroup.get('datosGenerales')?.value;
 
-  onSubmit(): void {
-    if (this.formGroup.valid) {
-      const datosGenerales = this.formGroup.get('datosGenerales')?.value;
+  // Validar que la foto de perfil esté presente
+  if (!datosGenerales?.fotoPerfil) {
+      this.toastr.warning('Por favor, capture una fotografía antes de enviar.', 'Advertencia');
+      return; // Detener el envío si falta la foto
+  }
+
+  if (this.formGroup.valid) {
       const referenciasPersonales = this.formGroup.get('referenciasPersonales')?.value;
       const bancos = this.formGroup.get('bancos')?.value;
       const centrosTrabajo = this.formGroup.get('centrosTrabajo')?.value;
       const colegiosMagisteriales = datosGenerales.ColMags || [];
       const beneficiarios = this.formGroup.get('beneficiarios')?.value.beneficiario || [];
+
       if (beneficiarios && beneficiarios.length > 0) {
-        const documentDefinition = this.getDocumentDefinition(beneficiarios, datosGenerales, this.backgroundImageBase64);
-        pdfMake.createPdf(documentDefinition).download('beneficiarios.pdf');
+          const documentDefinition = this.getDocumentDefinition(beneficiarios, datosGenerales, this.backgroundImageBase64);
+          pdfMake.createPdf(documentDefinition).download('beneficiarios.pdf');
       }
+
       const formattedData = {
-        persona: {
-          id_tipo_identificacion: datosGenerales.id_tipo_identificacion,
-          id_pais_nacionalidad: datosGenerales.id_pais,
-          n_identificacion: datosGenerales.n_identificacion,
-          fecha_vencimiento_ident: datosGenerales.fecha_vencimiento_ident,
-          rtn: datosGenerales.rtn,
-          grupo_etnico: datosGenerales.grupo_etnico,
-          estado_civil: datosGenerales.estado_civil.toUpperCase(),
-          primer_nombre: datosGenerales.primer_nombre.toUpperCase(),
-          segundo_nombre: datosGenerales.segundo_nombre?.toUpperCase(),
-          tercer_nombre: datosGenerales.tercer_nombre?.toUpperCase(),
-          primer_apellido: datosGenerales.primer_apellido.toUpperCase(),
-          segundo_apellido: datosGenerales.segundo_apellido?.toUpperCase(),
-          genero: datosGenerales.genero.toUpperCase(),
-          cantidad_hijos: datosGenerales.cantidad_hijos,
-          representacion: datosGenerales.representacion.toUpperCase(),
-          grado_academico: datosGenerales.grado_academico.toUpperCase(),
-          telefono_1: datosGenerales.telefono_1,
-          telefono_2: datosGenerales.telefono_2,
-          correo_1: datosGenerales.correo_1,
-          correo_2: datosGenerales.correo_2,
-          fecha_nacimiento: datosGenerales.fecha_nacimiento,
-          direccion_residencia_estructurada: this.formatDireccion(datosGenerales).toUpperCase(),
-          id_municipio_residencia: datosGenerales.id_municipio_residencia,
-          id_municipio_nacimiento: datosGenerales.id_municipio_nacimiento,
-          id_profesion: datosGenerales.id_profesion,
-          discapacidades: this.formatDiscapacidades(datosGenerales.discapacidades) || [],
-          fecha_afiliacion: new Date().toISOString()
-        },
-        familiares: this.formatFamiliares(datosGenerales, referenciasPersonales),
-        peps: this.formatPeps(datosGenerales.peps || []),
-        detallePersona: {
-          eliminado: "NO",
-          tipo_persona: "AFILIADO",
-          nombre_estado: "ACTIVO",
-          voluntario: datosGenerales.voluntario ? 'SI' : 'NO'
-        },
-        colegiosMagisteriales: colegiosMagisteriales.map((col: any) => ({
-          id_colegio: col.id_colegio
-        })),
-        bancos: this.formatBancos(bancos.bancos || []),
-        centrosTrabajo: this.formatCentrosTrabajo(centrosTrabajo.trabajo || []),
-        otrasFuentesIngreso: this.formatOtrasFuentesIngreso(centrosTrabajo.otrasFuentesIngreso || []),
-        referencias: this.formatReferencias(referenciasPersonales.refpers || []),
-        beneficiarios: this.formatBeneficiarios(beneficiarios || []),
+          persona: {
+              id_tipo_identificacion: datosGenerales.id_tipo_identificacion,
+              id_pais_nacionalidad: datosGenerales.id_pais,
+              n_identificacion: datosGenerales.n_identificacion,
+              rtn: datosGenerales.rtn,
+              grupo_etnico: datosGenerales.grupo_etnico,
+              estado_civil: datosGenerales.estado_civil.toUpperCase(),
+              primer_nombre: datosGenerales.primer_nombre.toUpperCase(),
+              segundo_nombre: datosGenerales.segundo_nombre?.toUpperCase(),
+              tercer_nombre: datosGenerales.tercer_nombre?.toUpperCase(),
+              primer_apellido: datosGenerales.primer_apellido.toUpperCase(),
+              segundo_apellido: datosGenerales.segundo_apellido?.toUpperCase(),
+              genero: datosGenerales.genero.toUpperCase(),
+              cantidad_hijos: datosGenerales.cantidad_hijos,
+              representacion: datosGenerales.representacion.toUpperCase(),
+              grado_academico: datosGenerales.grado_academico.toUpperCase(),
+              telefono_1: datosGenerales.telefono_1,
+              telefono_2: datosGenerales.telefono_2,
+              correo_1: datosGenerales.correo_1,
+              correo_2: datosGenerales.correo_2,
+              fecha_nacimiento: datosGenerales.fecha_nacimiento,
+              direccion_residencia_estructurada: this.formatDireccion(datosGenerales).toUpperCase(),
+              id_municipio_residencia: datosGenerales.id_municipio_residencia,
+              id_municipio_nacimiento: datosGenerales.id_municipio_nacimiento,
+              id_profesion: datosGenerales.id_profesion,
+              discapacidades: this.formatDiscapacidades(datosGenerales.discapacidades) || [],
+              fecha_afiliacion: new Date().toISOString()
+          },
+          familiares: this.formatFamiliares(datosGenerales, referenciasPersonales),
+          peps: this.formatPeps(datosGenerales.peps || []),
+          detallePersona: {
+              eliminado: "NO",
+              tipo_persona: "AFILIADO",
+              nombre_estado: "ACTIVO",
+              voluntario: datosGenerales.voluntario ? 'SI' : 'NO'
+          },
+          colegiosMagisteriales: colegiosMagisteriales.map((col: any) => ({
+              id_colegio: col.id_colegio
+          })),
+          bancos: this.formatBancos(bancos.bancos || []),
+          centrosTrabajo: this.formatCentrosTrabajo(centrosTrabajo.trabajo || []),
+          otrasFuentesIngreso: this.formatOtrasFuentesIngreso(centrosTrabajo.otrasFuentesIngreso || []),
+          referencias: this.formatReferencias(referenciasPersonales.refpers || []),
+          beneficiarios: this.formatBeneficiarios(beneficiarios || []),
       };
+
       const fotoPerfilBase64 = this.fotoPerfil || '';
       let fileFoto: any;
 
       if (fotoPerfilBase64) {
-        const fotoBlob = this.dataURItoBlob(fotoPerfilBase64);
-        fileFoto = new File([fotoBlob], 'perfil.jpg', { type: 'image/jpeg' });
+          const fotoBlob = this.dataURItoBlob(fotoPerfilBase64);
+          fileFoto = new File([fotoBlob], 'perfil.jpg', { type: 'image/jpeg' });
       }
 
       console.log(formattedData);
-      
 
-      let fileIdent = datosGenerales?.archivo_identificacion
+      let fileIdent = datosGenerales?.archivo_identificacion;
 
       this.afiliacionService.crearAfiliacion(formattedData, fileFoto, fileIdent).subscribe(
-        response => {
-          console.log('Datos enviados con éxito:', response);
-          this.toastr.success('Datos enviados con éxito', 'Éxito');
-          this.resetForm();
-        },
-        error => {
-          console.error('Error al enviar los datos:', error);
-          const errorMessage = error.error?.mensaje || 'Hubo un error al enviar los datos';
-          this.toastr.error(errorMessage, 'Error');
-        }
+          response => {
+              console.log('Datos enviados con éxito:', response);
+              this.toastr.success('Datos enviados con éxito', 'Éxito');
+              this.resetForm(); // Reinicia todo tras el envío
+              this.formStateService.resetFotoPerfil(); // Limpia explícitamente la foto del servicio
+          },
+          error => {
+              console.error('Error al enviar los datos:', error);
+              const errorMessage = error.error?.mensaje || 'Hubo un error al enviar los datos';
+              this.toastr.error(errorMessage, 'Error');
+          }
       );
-    } else {
+  } else {
       this.formErrors = this.generateFormErrors(this.formGroup);
       console.error('Errores del formulario:', this.formErrors);
       this.markAllAsTouched(this.formGroup);
       this.toastr.warning('El formulario contiene información inválida', 'Advertencia');
-    }
   }
-
-  private formatDireccion(datosGenerales: any): string {
-    return [
-      datosGenerales.barrio_colonia ? `BARRIO_COLONIA: ${datosGenerales.barrio_colonia}` : '',
-      datosGenerales.avenida ? `AVENIDA: ${datosGenerales.avenida}` : '',
-      datosGenerales.calle ? `CALLE: ${datosGenerales.calle}` : '',
-      datosGenerales.sector ? `SECTOR: ${datosGenerales.sector}` : '',
-      datosGenerales.bloque ? `BLOQUE: ${datosGenerales.bloque}` : '',
-      datosGenerales.numero_casa ? `N° DE CASA: ${datosGenerales.numero_casa}` : '',
-      datosGenerales.color_casa ? `COLOR CASA: ${datosGenerales.color_casa}` : '',
-      datosGenerales.aldea ? `ALDEA: ${datosGenerales.aldea}` : '',
-      datosGenerales.caserio ? `CASERIO: ${datosGenerales.caserio}` : ''
-    ]
-      .filter(Boolean)
-      .join(', ');
-  }
-
-  private formatPeps(peps: any[]): any[] {
-    return peps.map(pep => ({
-      cargosPublicos: [
-        {
-          cargo: pep.pep_cargo_desempenado.toUpperCase() || '',
-          fecha_inicio: pep.startDate || '',
-          fecha_fin: pep.endDate || ''
-        }
-      ]
-    }));
-  }
-
-  private formatColegiosMagisteriales(colMags: any[]): any[] {
-    return colMags.map(col => ({
-      id_colegio: col.id_colegio
-    }));
-  }
-
-  private formatBancos(bancos: any[]): any[] {
-    return bancos.map(banco => ({
-      id_banco: banco.id_banco,
-      num_cuenta: banco.num_cuenta,
-      estado: banco.estado
-    }));
-  }
-
-  private formatCentrosTrabajo(trabajos: any[]): any[] {
-    return trabajos.map(trabajo => ({
-      id_centro_trabajo: trabajo.id_centro_trabajo?.value || trabajo.id_centro_trabajo,
-      cargo: trabajo.cargo.toUpperCase(),
-      numero_acuerdo: trabajo.numero_acuerdo,
-      salario_base: trabajo.salario_base,
-      fecha_ingreso: trabajo.fecha_ingreso,
-      fecha_egreso: trabajo.fecha_egreso,
-      estado: trabajo.estado,
-      jornada: trabajo.jornada,
-      tipo_jornada: trabajo.tipo_jornada
-    }));
-  }
-  
-  private formatOtrasFuentesIngreso(otrasFuentesIngreso: any[]): any[] {
-    return otrasFuentesIngreso.map(fuente => ({
-      actividad_economica: fuente.actividad_economica.toUpperCase(),
-      monto_ingreso: fuente.monto_ingreso,
-      observacion: fuente.observacion
-    }));
-  }
-
-  private formatReferencias(refpers: any[]): any[] {
-    return refpers.map(referencia => ({
-      tipo_referencia: referencia.tipo_referencia.toUpperCase(),
-      parentesco: referencia.parentesco.toUpperCase(),
-      primer_nombre: referencia.primer_nombre.toUpperCase(),
-      segundo_nombre: referencia.segundo_nombre.toUpperCase(),
-      tercer_nombre: referencia.tercer_nombre.toUpperCase(),
-      primer_apellido: referencia.primer_apellido.toUpperCase(),
-      segundo_apellido: referencia.segundo_apellido.toUpperCase(),
-      telefono_domicilio: referencia.telefono_domicilio,
-      telefono_trabajo: referencia.telefono_trabajo,
-      telefono_personal: referencia.telefono_personal,
-      n_identificacion: referencia.n_identificacion,
-      direccion: referencia.direccion.toUpperCase(),
-    }));
-  }
-
-  private formatBeneficiarios(beneficiarios: any[]): any[] {
-    return beneficiarios.map(beneficiario => {
-      const discapacidades = this.mapDiscapacidades(beneficiario.discapacidades);
-      return {
-        persona: {
-          archivo_identificacion: beneficiario.archivo_identificacion,
-          n_identificacion: beneficiario.n_identificacion,
-          primer_nombre: beneficiario.primer_nombre.toUpperCase(),
-          segundo_nombre: beneficiario.segundo_nombre?.toUpperCase(),
-          tercer_nombre: beneficiario.tercer_nombre?.toUpperCase(),
-          primer_apellido: beneficiario.primer_apellido.toUpperCase(),
-          segundo_apellido: beneficiario.segundo_apellido?.toUpperCase(),
-          telefono_1: beneficiario.telefono_1,
-          fecha_nacimiento: beneficiario.fecha_nacimiento,
-          direccion_residencia: beneficiario.direccion_residencia.toUpperCase(),
-          id_municipio_residencia: beneficiario.id_municipio_residencia,
-          id_municipio_nacimiento: beneficiario.id_municipio_nacimiento
-        },
-        discapacidades: this.formatDiscapacidades(discapacidades),
-        porcentaje: beneficiario.porcentaje || null
-      };
-    });
-  }
-
-  private formatFamiliares(datosGenerales: any, referenciasPersonales: any): any[] {
-    const familiares = datosGenerales.familiares || [];
-    return [
-      ...familiares.map((familiar: any) => ({
-        parentesco: this.safeToUpperCase(familiar.parentesco),
-        persona_referencia: {
-          primer_nombre: this.safeToUpperCase(familiar.primer_nombre),
-          segundo_nombre: this.safeToUpperCase(familiar.segundo_nombre),
-          tercer_nombre: this.safeToUpperCase(familiar.tercer_nombre),
-          primer_apellido: this.safeToUpperCase(familiar.primer_apellido),
-          segundo_apellido: this.safeToUpperCase(familiar.segundo_apellido),
-          telefono_domicilio: familiar.telefono_domicilio || '',
-          telefono_trabajo: familiar.telefono_trabajo || '',
-          telefono_personal: familiar.telefono_personal || '',
-          n_identificacion: familiar.n_identificacion || '',
-          fecha_nacimiento: familiar.fecha_nacimiento || ''
-        }
-      })),
-      ...(referenciasPersonales.conyuge?.primer_nombre
-        ? [{
-            parentesco: "CÓNYUGE",
-            persona_referencia: {
-              primer_nombre: this.safeToUpperCase(referenciasPersonales.conyuge.primer_nombre),
-              segundo_nombre: this.safeToUpperCase(referenciasPersonales.conyuge.segundo_nombre),
-              tercer_nombre: this.safeToUpperCase(referenciasPersonales.conyuge.tercer_nombre),
-              primer_apellido: this.safeToUpperCase(referenciasPersonales.conyuge.primer_apellido),
-              segundo_apellido: this.safeToUpperCase(referenciasPersonales.conyuge.segundo_apellido),
-              telefono_domicilio: referenciasPersonales.conyuge.telefono_domicilio || '',
-              telefono_trabajo: referenciasPersonales.conyuge.telefono_trabajo || '',
-              telefono_personal: referenciasPersonales.conyuge.telefono_celular || '',
-              n_identificacion: referenciasPersonales.conyuge.n_identificacion || '',
-              fecha_nacimiento: referenciasPersonales.conyuge.fecha_nacimiento || ''
-            }
-          }]
-        : [])
-    ];
-  }
-  
-  private safeToUpperCase(value: string | null | undefined): string {
-    return value?.toUpperCase() || '';
 }
-
-  dataURItoBlob(dataURI: string): Blob {
-    const byteString = atob(dataURI.split(',')[1]);
-    const mimeString = dataURI.split(',')[0].split(':')[1].split(';')[0];
-
-    const buffer = new ArrayBuffer(byteString.length);
-    const data = new DataView(buffer);
-
-    for (let i = 0; i < byteString.length; i++) {
-      data.setUint8(i, byteString.charCodeAt(i));
-    }
-
-    return new Blob([buffer], { type: mimeString });
-  }
-
-  handleImageCaptured(image: string): void {
-    this.fotoPerfil = image;
-  }
-
-  resetForm(): void {
-    this.formGroup.reset();
-  
-    this.steps.forEach((step) => {
-      step.formGroup.reset();
-    });
-
-    if (this.benefComponent) {
-      this.benefComponent.reset();
-    }
-  
-    if (this.pepsComponent) {
-      this.pepsComponent.reset();
-    }
-  
-    if (this.bancosComponent) {
-      this.bancosComponent.reset();
-    }
-  
-    if (this.refPersComponent) {
-      this.refPersComponent.reset();
-    }
-  
-    if (this.colMagisterialesComponent) {
-      this.colMagisterialesComponent.reset();
-    }
-  
-    if (this.centrosTrabajoComponent) {
-      this.centrosTrabajoComponent.reset();
-    }
-  
-    if (this.beneficiariosComponent) {
-      this.beneficiariosComponent.reset();
-    }
-  
-    if (this.datPuestoTrabComponent) {
-      this.datPuestoTrabComponent.reset();
-    }
-  
-    if (this.otrasFuentesIngresoComponent) {
-      this.otrasFuentesIngresoComponent.reset();
-    }
-  
-    this.stepper.reset();
-  
-    this.formErrors = null;
-  
-    console.log('Formulario y componentes hijos reiniciados con éxito');
-  }
-  
-  formatDiscapacidades(discapacidades: any): any[] {
-    return Object.keys(discapacidades)
-      .filter(key => discapacidades[key])
-      .map(key => ({ tipo_discapacidad: key }));
-  }
-
-  private mapDiscapacidades(discapacidadesArray: boolean[]): any {
-    return this.datosEstaticosService.discapacidades.reduce((acc: any, discapacidad: any, index: number) => {
-      acc[discapacidad.label] = discapacidadesArray[index];
-      return acc;
-    }, {});
-  }
-
+//-------------------------------------------------------------------
   getDocumentDefinition(userDetails: any[], beneficiarios: any, backgroundImageBase64: string): any {
     userDetails.forEach(item => {
       item.nombre = `${item.primer_nombre || 'N/A'} ${item.segundo_nombre || ''} ${item.primer_apellido || 'N/A'} ${item.segundo_apellido || ''}`;
@@ -443,7 +230,6 @@ export class AfiliarDocenteComponent implements OnInit {
       item.direccion_residencia = item.direccion_residencia || 'N/A';
       item.telefono_1 = item.telefono_1 || 'N/A';
     });
-
     // Detalles del usuario
     beneficiarios.nombre = `${beneficiarios.primer_nombre} ${beneficiarios.segundo_nombre || ''} ${beneficiarios.primer_apellido} ${beneficiarios.segundo_apellido || ''}` || 'N/A';
     beneficiarios.grado_academico = beneficiarios.grado_academico || 'N/A';
@@ -452,7 +238,6 @@ export class AfiliarDocenteComponent implements OnInit {
     beneficiarios.departamentoResidencia = beneficiarios.id_departamento_residencia || 'N/A';
     beneficiarios.n_identificacion = beneficiarios.n_identificacion || 'N/A';
 
-    // Definir el tipo correcto para los objetos de la tabla
     interface TableCell {
       text?: string;
       style?: string;
@@ -486,7 +271,7 @@ export class AfiliarDocenteComponent implements OnInit {
         [
           { text: (index + 1).toString(), rowSpan: 2, style: 'tableRowLarge', fillColor: '#CCCCCC', alignment: 'center' },
           { text: item.nombre, style: 'tableRowLarge', alignment: 'center' },
-          { text: fechaNacimiento, style: 'tableRowLarge', alignment: 'center' }, 
+          { text: fechaNacimiento, style: 'tableRowLarge', alignment: 'center' },
           { text: item.identidad, style: 'tableRowLarge', alignment: 'center' },
           { text: item.parentesco, style: 'tableRowLarge', alignment: 'center' },
           { text: item.porcentaje, style: 'tableRowLarge', alignment: 'center' },
@@ -675,6 +460,215 @@ export class AfiliarDocenteComponent implements OnInit {
     };
   }
 
+  private formatDireccion(datosGenerales: any): string {
+    return [
+      datosGenerales.barrio_colonia ? `BARRIO_COLONIA: ${datosGenerales.barrio_colonia}` : '',
+      datosGenerales.avenida ? `AVENIDA: ${datosGenerales.avenida}` : '',
+      datosGenerales.calle ? `CALLE: ${datosGenerales.calle}` : '',
+      datosGenerales.sector ? `SECTOR: ${datosGenerales.sector}` : '',
+      datosGenerales.bloque ? `BLOQUE: ${datosGenerales.bloque}` : '',
+      datosGenerales.numero_casa ? `N° DE CASA: ${datosGenerales.numero_casa}` : '',
+      datosGenerales.color_casa ? `COLOR CASA: ${datosGenerales.color_casa}` : '',
+      datosGenerales.aldea ? `ALDEA: ${datosGenerales.aldea}` : '',
+      datosGenerales.caserio ? `CASERIO: ${datosGenerales.caserio}` : ''
+    ]
+      .filter(Boolean)
+      .join(', ');
+  }
+
+  private formatPeps(peps: any[]): any[] {
+    return peps.map(pep => ({
+      cargosPublicos: [
+        {
+          cargo: pep.pep_cargo_desempenado.toUpperCase() || '',
+          fecha_inicio: pep.startDate || '',
+          fecha_fin: pep.endDate || ''
+        }
+      ]
+    }));
+  }
+
+  private formatColegiosMagisteriales(colMags: any[]): any[] {
+    return colMags.map(col => ({
+      id_colegio: col.id_colegio
+    }));
+  }
+
+  private formatBancos(bancos: any[]): any[] {
+    return bancos.map(banco => ({
+      id_banco: banco.id_banco,
+      num_cuenta: banco.num_cuenta,
+      estado: banco.estado
+    }));
+  }
+
+  private formatCentrosTrabajo(trabajos: any[]): any[] {
+    return trabajos.map(trabajo => ({
+      id_centro_trabajo: trabajo.id_centro_trabajo?.value || trabajo.id_centro_trabajo,
+      cargo: trabajo.cargo.toUpperCase(),
+      numero_acuerdo: trabajo.numero_acuerdo,
+      salario_base: trabajo.salario_base,
+      fecha_ingreso: trabajo.fecha_ingreso,
+      fecha_egreso: trabajo.fecha_egreso,
+      estado: trabajo.estado,
+      jornada: trabajo.jornada,
+      tipo_jornada: trabajo.tipo_jornada
+    }));
+  }
+  
+  private formatOtrasFuentesIngreso(otrasFuentesIngreso: any[]): any[] {
+    return otrasFuentesIngreso.map(fuente => ({
+      actividad_economica: fuente.actividad_economica.toUpperCase(),
+      monto_ingreso: fuente.monto_ingreso,
+      observacion: fuente.observacion
+    }));
+  }
+
+  private formatReferencias(refpers: any[]): any[] {
+    return refpers.map(referencia => ({
+      tipo_referencia: referencia.tipo_referencia.toUpperCase(),
+      parentesco: referencia.parentesco.toUpperCase(),
+      primer_nombre: referencia.primer_nombre.toUpperCase(),
+      segundo_nombre: referencia.segundo_nombre.toUpperCase(),
+      tercer_nombre: referencia.tercer_nombre.toUpperCase(),
+      primer_apellido: referencia.primer_apellido.toUpperCase(),
+      segundo_apellido: referencia.segundo_apellido.toUpperCase(),
+      telefono_domicilio: referencia.telefono_domicilio,
+      telefono_trabajo: referencia.telefono_trabajo,
+      telefono_personal: referencia.telefono_personal,
+      n_identificacion: referencia.n_identificacion,
+      direccion: referencia.direccion.toUpperCase(),
+    }));
+  }
+
+  private formatBeneficiarios(beneficiarios: any[]): any[] {
+    return beneficiarios.map(beneficiario => {
+      const discapacidades = this.mapDiscapacidades(beneficiario.discapacidades);
+      return {
+        persona: {
+          archivo_identificacion: beneficiario.archivo_identificacion,
+          n_identificacion: beneficiario.n_identificacion,
+          primer_nombre: beneficiario.primer_nombre.toUpperCase(),
+          segundo_nombre: beneficiario.segundo_nombre?.toUpperCase(),
+          tercer_nombre: beneficiario.tercer_nombre?.toUpperCase(),
+          primer_apellido: beneficiario.primer_apellido.toUpperCase(),
+          segundo_apellido: beneficiario.segundo_apellido?.toUpperCase(),
+          telefono_1: beneficiario.telefono_1,
+          fecha_nacimiento: beneficiario.fecha_nacimiento,
+          direccion_residencia: beneficiario.direccion_residencia.toUpperCase(),
+          id_municipio_residencia: beneficiario.id_municipio_residencia,
+          id_municipio_nacimiento: beneficiario.id_municipio_nacimiento
+        },
+        discapacidades: this.formatDiscapacidades(discapacidades),
+        porcentaje: beneficiario.porcentaje || null
+      };
+    });
+  }
+
+  private formatFamiliares(datosGenerales: any, referenciasPersonales: any): any[] {
+    const familiares = datosGenerales.familiares || [];
+    return [
+      ...familiares.map((familiar: any) => ({
+        parentesco: familiar.parentesco,
+        persona_referencia: {
+          primer_nombre: familiar.primer_nombre?.toUpperCase() || '',
+          segundo_nombre: familiar.segundo_nombre?.toUpperCase() || '',
+          tercer_nombre: familiar.tercer_nombre?.toUpperCase() || '',
+          primer_apellido: familiar.primer_apellido?.toUpperCase() || '',
+          segundo_apellido: familiar.segundo_apellido?.toUpperCase() || '',
+          telefono_domicilio: familiar.telefono_domicilio,
+          telefono_trabajo: familiar.telefono_trabajo,
+          telefono_personal: familiar.telefono_personal,
+          n_identificacion: familiar.n_identificacion,
+          fecha_nacimiento: familiar.fecha_nacimiento
+        }
+      })),
+      ...(referenciasPersonales.conyuge && referenciasPersonales.conyuge.primer_nombre ? [{
+        parentesco: "CÓNYUGE",
+        persona_referencia: {
+          primer_nombre: referenciasPersonales.conyuge.primer_nombre.toUpperCase(),
+          segundo_nombre: referenciasPersonales.conyuge.segundo_nombre.toUpperCase(),
+          tercer_nombre: referenciasPersonales.conyuge.tercer_nombre.toUpperCase(),
+          primer_apellido: referenciasPersonales.conyuge.primer_apellido.toUpperCase(),
+          segundo_apellido: referenciasPersonales.conyuge.segundo_apellido.toUpperCase(),
+          telefono_domicilio: referenciasPersonales.conyuge.telefono_domicilio,
+          telefono_trabajo: referenciasPersonales.conyuge.telefono_trabajo,
+          telefono_personal: referenciasPersonales.conyuge.telefono_celular,
+          n_identificacion: referenciasPersonales.conyuge.n_identificacion,
+          fecha_nacimiento: referenciasPersonales.conyuge.fecha_nacimiento
+        }
+      }] : [])
+    ];
+  }
+  dataURItoBlob(dataURI: string): Blob {
+    const byteString = atob(dataURI.split(',')[1]);
+    const mimeString = dataURI.split(',')[0].split(':')[1].split(';')[0];
+
+    const buffer = new ArrayBuffer(byteString.length);
+    const data = new DataView(buffer);
+
+    for (let i = 0; i < byteString.length; i++) {
+      data.setUint8(i, byteString.charCodeAt(i));
+    }
+
+    return new Blob([buffer], { type: mimeString });
+  }
+
+  handleImageCaptured(image: string): void {
+    this.fotoPerfil = image;
+  }
+
+  onStepChange(event: StepperSelectionEvent): void {
+    if (event.selectedIndex !== 0 && this.camaraComponent) {
+      this.camaraComponent.resetCamera();
+    }
+  }
+  
+  resetForm(): void {
+    this.formGroup.reset();
+ 
+    if (this.datosGeneralesComponent) {
+      this.datosGeneralesComponent.formGroup.patchValue({
+        voluntario: false, // NO
+        discapacidad: false, // NO
+      });
+      
+      if (this.datosGeneralesComponent && this.datosGeneralesComponent.camaraComponent) {
+        this.datosGeneralesComponent.camaraComponent.resetCamera();
+      }      
+    }
+
+    this.stepper.reset();
+  
+    this.formErrors = null;
+
+    this.markAllAsTouched(this.steps[0].formGroup);
+
+    console.log('Formulario reiniciado con valores predeterminados.');
+
+    // Reiniciar cámara del componente de datos generales si existe
+    if (this.datosGeneralesComponent) {
+      if (typeof this.datosGeneralesComponent.useCamera === 'function') {
+        if (this.datosGeneralesComponent && typeof this.datosGeneralesComponent.useCamera === 'function') {
+          this.datosGeneralesComponent.useCamera = true; // O false, dependiendo de lo que necesites
+        }
+      }
+    }
+  }
+  
+  formatDiscapacidades(discapacidades: any): any[] {
+    return Object.keys(discapacidades)
+      .filter(key => discapacidades[key])
+      .map(key => ({ tipo_discapacidad: key }));
+  }
+
+  private mapDiscapacidades(discapacidadesArray: boolean[]): any {
+    return this.datosEstaticosService.discapacidades.reduce((acc: any, discapacidad: any, index: number) => {
+      acc[discapacidad.label] = discapacidadesArray[index];
+      return acc;
+    }, {});
+  }
+
   convertirImagenABase64(url: string): Promise<string> {
     return this.http.get(url, { responseType: 'blob' }).toPromise().then(blob => {
       return new Promise<string>((resolve, reject) => {
@@ -692,19 +686,14 @@ export class AfiliarDocenteComponent implements OnInit {
 
   generateFormErrors(control: FormGroup | FormArray): any {
     const errors: any = {};
-  
     Object.keys(control.controls).forEach((key) => {
       const childControl = control.get(key);
-  
       if (childControl instanceof FormGroup || childControl instanceof FormArray) {
-        // Si el control es un FormGroup o FormArray, procesarlo recursivamente
         errors[key] = this.generateFormErrors(childControl);
       } else if (childControl?.errors) {
-        // Si el control tiene errores, agregarlos al resultado
         errors[key] = this.getErrorMessages(childControl.errors);
       }
     });
-  
     return errors;
   }
   
@@ -724,7 +713,4 @@ export class AfiliarDocenteComponent implements OnInit {
         : errorMessages[key] || 'Error desconocido.';
     });
   }
-  
-
-
 }

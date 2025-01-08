@@ -2,13 +2,20 @@
   <!-- Sección de la webcam -->
   <div class="col-md-6" style="text-align: center;">
     <webcam [height]="200" [width]="200" [trigger]="triggerObservable" *ngIf="mostrarWebcam"
-            [switchCamera]="nextWebcamObservable" [imageQuality]="1" (imageCapture)="handleImage($event)"
-            (cameraSwitched)="cameraSwitched($event)" (initError)="handleInitError($event)">
+            [imageQuality]="1" (imageCapture)="handleImage($event)"
+            (initError)="handleInitError($event)">
     </webcam>
-    <div>
-      <button mat-raised-button style="color: white;" color="primary" (click)="triggerCaptura();">Tomar Foto</button>
-      <button mat-raised-button style="color: white;" color="primary" (click)="showNextWebcam(true);"
-              [disabled]="!multiplesCamarasDisponibles">Siguiente Cámara</button>
+    <div *ngIf="!imagenWebcam">
+      <button class="btn-spin" (click)="triggerCaptura();">
+        <mat-icon>photo_camera</mat-icon>
+        Tomar Foto
+      </button>
+    </div>
+    <div *ngIf="imagenWebcam">
+      <button class="btn-spin" (click)="triggerCaptura();">
+        <mat-icon>refresh</mat-icon>
+        Tomar Nueva Foto
+      </button>
     </div>
   </div>
   <div class="col-md-6" style="text-align: center;" *ngIf="imagenWebcam?.imageAsDataUrl">

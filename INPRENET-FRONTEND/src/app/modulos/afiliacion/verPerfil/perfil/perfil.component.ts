@@ -19,15 +19,15 @@ export class PerfilComponent implements OnInit {
 
   ngOnInit() {
     this.personaService.currentPersona.subscribe(persona => {
-
       this.persona = persona;
-      if (persona.persona && persona.persona.detallePersona) {
-        this.detallePersonaUnico = this.filtrarDetallePersona(persona.persona.detallePersona);
+      if (persona && persona.detallePersona) {
+        this.detallePersonaUnico = this.filtrarDetallePersona(persona.detallePersona);
       }
     });
   }
 
   filtrarDetallePersona(detallePersona: any[]): any[] {
+    
     const tiposUnicos = new Set();
     return detallePersona.filter(detalle => {
       if (!tiposUnicos.has(detalle.tipoPersona.tipo_persona)) {

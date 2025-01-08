@@ -13,8 +13,8 @@ export class SubirFacturaComponent {
   periodoFactura!: string;
   archivoPdf!: File;
   archivoInvalido: boolean = false;
-  previewUrl: SafeResourceUrl | null = null; // URL segura para previsualización
-  regexPeriodo = '^\\d{4}-\\d{2}$'; // Expresión regular para validar AAAA-MM
+  previewUrl: SafeResourceUrl | null = null;
+  regexPeriodo = '^\\d{4}-\\d{2}$';
 
   constructor(
     private conasaService: ConasaService,
@@ -28,14 +28,12 @@ export class SubirFacturaComponent {
       const file = input.files[0];
       if (file.type !== 'application/pdf') {
         this.archivoInvalido = true;
-        this.archivoPdf = undefined as unknown as File; // Limpiar el archivo cargado
-        this.previewUrl = null; // Limpiar la previsualización
+        this.archivoPdf = undefined as unknown as File;
+        this.previewUrl = null;
         return;
       }
       this.archivoPdf = file;
       this.archivoInvalido = false;
-
-      // Crear una URL segura para previsualizar el archivo PDF
       const reader = new FileReader();
       reader.onload = () => {
         this.previewUrl = this.sanitizer.bypassSecurityTrustResourceUrl(reader.result as string);
@@ -66,9 +64,6 @@ export class SubirFacturaComponent {
     this.conasaService.subirFactura(this.tipoFactura, this.periodoFactura, this.archivoPdf).subscribe({
       next: (response) => {
         this.toastr.success('Factura subida exitosamente.', 'Éxito');
-        console.log('Respuesta del servidor:', response);
-
-        // Limpiar el formulario después de guardar
         this.limpiarFormulario();
       },
       error: (err) => {

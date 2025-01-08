@@ -10,10 +10,10 @@
         <div *ngFor="let colMag of colMags.controls; let i = index" class="reference-group" [formGroupName]="i">
           <h4 class="reference-title">Colegio Magisterial Número: {{ i + 1 }}</h4>
 
-          <mat-form-field class="half-width" appearance="outline">
+          <mat-form-field appearance="outline" class="full-width">
             <mat-label>Colegio Magisterial</mat-label>
             <mat-select formControlName="id_colegio">
-              <mat-option *ngFor="let item of getAvailableColegios(i)" [value]="item.value">
+              <mat-option *ngFor="let item of getAvailableColegios(i)" [value]="item.value" class="mat-option-text">
                 {{ item.label }}
               </mat-option>
             </mat-select>
@@ -21,6 +21,10 @@
               <mat-icon>error</mat-icon> El colegio es requerido.
             </mat-error>
           </mat-form-field>
+          
+          <p class="descripcion-colegio" *ngIf="colMag.get('id_colegio')?.value">
+            {{ getDescripcionById(colMag.get('id_colegio')?.value) }}
+          </p>
 
           <div class="action-buttons">
             <button mat-button color="warn" (click)="eliminarColMag(i)">

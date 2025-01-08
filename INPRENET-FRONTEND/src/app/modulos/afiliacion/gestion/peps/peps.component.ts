@@ -141,14 +141,16 @@ export class PepsComponent implements OnInit {
       endDate: new FormControl(null, Validators.required),
       pep_cargo_desempenado: new FormControl('', Validators.required),
     });
-
     this.peps.push(referenciaGroup);
   }
 
   removeReferencia(index: number): void {
     this.peps.removeAt(index);
+    if (this.peps.length === 0) {
+      this.familiares.clear();
+    }
   }
-
+  
   addFamiliar(): void {
     const familiarGroup = this.fb.group({
       primer_nombre: new FormControl('', Validators.required),

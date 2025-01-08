@@ -93,7 +93,6 @@ export class DatosGeneralesComponent implements OnInit {
     ]));
     this.formGroup.addControl('segundo_apellido', new FormControl('', [Validators.maxLength(40)]));
     this.formGroup.addControl('fecha_nacimiento', new FormControl('', [Validators.required]));
-    this.formGroup.addControl('fecha_vencimiento_ident', new FormControl('', [Validators.required]));
     this.formGroup.addControl('cantidad_dependientes', new FormControl('', [Validators.pattern("^[0-9]+$"), Validators.required]));
     this.formGroup.addControl('estado_civil', new FormControl('', [Validators.required, Validators.maxLength(40)]));
     this.formGroup.addControl('representacion', new FormControl('', [Validators.required, Validators.maxLength(40)]));
@@ -192,10 +191,6 @@ export class DatosGeneralesComponent implements OnInit {
     if (data.fecha_nacimiento) {
       data.fecha_nacimiento = format(new Date(data.fecha_nacimiento), 'yyyy-MM-dd');
     }
-    if (data.fecha_vencimiento_ident) {
-      data.fecha_vencimiento_ident = format(new Date(data.fecha_vencimiento_ident), 'yyyy-MM-dd');
-    }
-
     this.newDatosGenerales.emit(data);
   }
 

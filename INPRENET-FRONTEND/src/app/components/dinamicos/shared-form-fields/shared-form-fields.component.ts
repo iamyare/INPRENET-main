@@ -19,6 +19,9 @@ export class SharedFormFieldsComponent implements OnInit {
 
     // Aplicamos validadores a los campos configurados
     this.applyUniqueValidators();
+
+    // Marcar todos los controles como "touched" para que se muestren los errores desde el principio
+    this.parentForm.markAllAsTouched();
   }
 
   // Obtiene un control del formulario
@@ -35,7 +38,10 @@ export class SharedFormFieldsComponent implements OnInit {
     this.fields.forEach((field) => {
       if (field.validations?.includes('unique')) {
         const control = this.getControl(field.name);
-        control.setValidators([...control.validator ? [control.validator] : [], this.uniqueFieldValidator(field.name)]);
+        control.setValidators([
+          ...(control.validator ? [control.validator] : []),
+          this.uniqueFieldValidator(field.name),
+        ]);
         control.updateValueAndValidity();
       }
     });
@@ -51,6 +57,7 @@ export class SharedFormFieldsComponent implements OnInit {
 
       Object.keys(controls).forEach((key) => {
         const fieldControl = this.parentForm.get(key);
+        // Verificamos cuántos controles tienen el mismo valor
         if (fieldControl && fieldControl.value === control.value && key !== fieldName) {
           count++;
         }
@@ -91,13 +98,15 @@ export class SharedFormFieldsComponent implements OnInit {
       email: 'Correo electrónico inválido',
       min: `El valor debe ser mayor o igual a ${control.errors?.['min']?.min}`,
       max: `El valor debe ser menor o igual a ${control.errors?.['max']?.max}`,
-      pattern: 'Formato incorrecto'
+      pattern: 'Formato incorrecto',
+      fieldNotUnique: 'El número de identificación ya ha sido ingresado.'
     };
     return errorMessages[errorKey] || 'Error desconocido';
   }
+
+  // Obtiene los "keys" de error de un control
   getErrorKeys(controlName: string): string[] {
     const control = this.getControl(controlName);
     return control.errors ? Object.keys(control.errors) : [];
   }
-
 }

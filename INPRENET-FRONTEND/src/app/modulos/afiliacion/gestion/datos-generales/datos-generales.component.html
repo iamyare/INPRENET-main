@@ -49,18 +49,6 @@
           </mat-form-field>
 
         </div>
-        <div class="col-lg-4 col-md-12">
-          <mat-form-field appearance="outline" class="example-full-width inputs" class="w-100">
-            <mat-label>Fecha de Vencimiento de Identificación</mat-label>
-            <mat-datepicker-toggle matSuffix [for]="picker2"></mat-datepicker-toggle>
-            <mat-datepicker #picker2></mat-datepicker>
-            <input matInput formControlName="fecha_vencimiento_ident" [matDatepicker]="picker2">
-            <mat-error *ngIf="formGroup.get('fecha_vencimiento_ident')?.invalid && formGroup.get('fecha_vencimiento_ident')?.touched">
-              <mat-icon aria-hidden="true" class="error-icon-small">error_outline</mat-icon>
-              Fecha de Vencimiento es requerida.
-            </mat-error>
-          </mat-form-field>
-        </div>
       </div>
 
       <div class="row">

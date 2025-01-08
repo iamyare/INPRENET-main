@@ -120,7 +120,6 @@ export class EditDatosGeneralesComponent implements OnInit {
 
   updateDatosGenerales(value: any) {
     this.initialData = { ...this.initialData, ...value };
-    console.log(this.initialData);
   }
 
   cargarDepartamentos() {
@@ -188,7 +187,6 @@ export class EditDatosGeneralesComponent implements OnInit {
       primer_apellido: [dato?.PRIMER_APELLIDO, Validators.required],
       segundo_apellido: [dato?.SEGUNDO_APELLIDO],
       fecha_nacimiento: [dato?.FECHA_NACIMIENTO, Validators.required],
-      fecha_vencimiento_ident: [dato?.fecha_vencimiento_ident],
       cantidad_dependientes: [dato?.CANTIDAD_DEPENDIENTES],
       cantidad_hijos: [dato?.CANTIDAD_HIJOS],
       telefono_1: [dato?.TELEFONO_1],
@@ -269,7 +267,6 @@ export class EditDatosGeneralesComponent implements OnInit {
                     primer_apellido: result?.PRIMER_APELLIDO,
                     segundo_apellido: result?.SEGUNDO_APELLIDO,
                     fecha_nacimiento: result?.FECHA_NACIMIENTO,
-                    fecha_vencimiento_ident: result?.fecha_vencimiento_ident,
                     cantidad_dependientes: result?.CANTIDAD_DEPENDIENTES,
                     representacion: result?.REPRESENTACION,
                     telefono_1: result?.TELEFONO_1,

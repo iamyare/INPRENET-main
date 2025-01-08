@@ -12,11 +12,18 @@
         <div class="form-row">
           <mat-form-field class="half-width" appearance="outline">
             <mat-label>Número de Identificación</mat-label>
-            <input matInput type="text" formControlName="n_identificacion" (blur)="verificarAfiliadoBlur()">
-            <mat-error *ngIf="formGroup.get('conyuge')?.get('n_identificacion')?.invalid && formGroup.get('conyuge')?.get('n_identificacion')?.touched">
-              <mat-icon>error</mat-icon> {{ getErrorMessageForConyugeIdentificacion() }}
+            <input matInput 
+                   type="text" 
+                   formControlName="n_identificacion" 
+                   (blur)="verificarAfiliadoBlur()">
+            <mat-error
+              *ngIf="formGroup.get('conyuge')?.get('n_identificacion')?.invalid 
+                     && formGroup.get('conyuge')?.get('n_identificacion')?.touched">
+              <mat-icon>error</mat-icon> 
+              {{ getErrorMessageForConyugeIdentificacion() }}
             </mat-error>
-          </mat-form-field>                    
+          </mat-form-field>
+                       
                   
           <mat-form-field class="half-width" appearance="outline">
             <mat-label>Primer Nombre</mat-label>

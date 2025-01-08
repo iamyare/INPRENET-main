@@ -70,4 +70,10 @@ export class ColMagisterialesComponent implements OnInit {
     this.colMags.clear();
     this.formGroup.reset();
   }
+
+  getDescripcionById(value: any): string {
+    const colegio = this.colegio_magisterial.find(item => item.value === value);
+    return colegio ? colegio.abreviatura : '';
+  }
+  
 }

@@ -1,14 +1,19 @@
-import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
+import { Component, OnInit, Input, Output, EventEmitter, ViewChild } from '@angular/core';
 import { FormGroup, FormBuilder, Validators, FormControl, FormArray } from '@angular/forms';
 import { CentroTrabajoService } from 'src/app/services/centro-trabajo.service';
 import { DatosEstaticosService } from 'src/app/services/datos-estaticos.service';
 import { DireccionService } from 'src/app/services/direccion.service';
+import { ValidationService } from 'src/app/shared/services/validation.service';
+import { ChangeDetectorRef } from '@angular/core';
+import { CamaraComponent } from 'src/app/components/camara/camara.component';
+import { FormStateService } from 'src/app/services/form-state.service'; // Importar el servicio
 
 @Component({
   selector: 'app-datos-generales-temporal',
   templateUrl: './datos-generales-temporal.component.html',
   styleUrl: './datos-generales-temporal.component.scss'
 })
+
 export class DatosGeneralesTemporalComponent implements OnInit {
   minDate = new Date();
   @Input() formGroup!: FormGroup;
@@ -17,6 +22,9 @@ export class DatosGeneralesTemporalComponent implements OnInit {
   @Input() initialData!: any;
   @Input() discapacidadSeleccionada!: boolean;
   @Output() newDatosGenerales = new EventEmitter<any>();
+  @ViewChild(CamaraComponent, { static: false }) camaraComponent!: CamaraComponent;
+
+  opcion: string = 'NO';
 
   departamentos: { value: number, label: string }[] = [];
   municipios: { value: number, label: string }[] = [];
@@ -34,147 +42,204 @@ export class DatosGeneralesTemporalComponent implements OnInit {
   constructor(private fb: FormBuilder,
     private direccionSer: DireccionService,
     private datosEstaticos: DatosEstaticosService,
+    private validationService: ValidationService,
+    private formStateService: FormStateService,
+
+    private cdr: ChangeDetectorRef, // -> 'Inyectamos ChangeDetectorRef'
     private centroTrabajoService: CentroTrabajoService) { }
+    
+//-----------------------------------
+ngOnInit(): void {
+  this.opcion = 'NO';
 
-  ngOnInit(): void {
-    const noSpecialCharsPattern = '^[a-zA-Z0-9\\s]*$';
-    const addressPattern = /^[a-zA-Z0-9\s.]*$/;
+  // Asegurar que el formGroup existe
+  if (!this.formGroup) {
+      this.formGroup = this.fb.group({});
+  }
 
-    this.formGroup.addControl('id_tipo_identificacion', new FormControl('', Validators.required));
+  // Agregar campo fotoPerfil
+  this.formGroup.addControl('fotoPerfil', new FormControl(null, Validators.required));
 
-    this.formGroup.get('id_tipo_identificacion')?.valueChanges.subscribe(value => {
-      this.onTipoIdentificacionChange(value);
-    });
+  // Agregar el control de discapacidad
+  this.formGroup.addControl('discapacidad', new FormControl(false, Validators.required));
 
-    this.setValidacionesIdentificacion(false);
+  // Agregar el control de voluntario
+  this.formGroup.addControl('voluntario', new FormControl(false, Validators.required));
 
-    if (!this.formGroup) {
-      if (this.initialData) {
-        this.formGroup = this.fb.group({
-          peps: this.fb.array([]),
-          discapacidades: this.fb.array([]),
-          ...this.initialData
-        });
-        this.cargarDiscapacidades();
-      } else {
-        this.formGroup = this.fb.group({
-          peps: this.fb.array([]),
-          discapacidades: this.fb.array([]),
-          FotoPerfil: new FormControl(null, Validators.required)
-        });
+  // Resetear la cámara si el componente de cámara existe
+  if (this.camaraComponent) {
+      this.camaraComponent.resetCamera();
+  }
 
-      }
-    } else {
-      this.formGroup.addControl('FotoPerfil', new FormControl(null, Validators.required));
-    }
+  // Limpiar la foto de perfil desde el servicio
+  if (this.formStateService) {
+      this.formStateService.resetFotoPerfil();
+      this.formStateService.getFotoPerfil().subscribe((fotoPerfil) => {
+          this.formGroup.patchValue({ fotoPerfil });
+      });
+  }
 
-    this.formGroup.addControl('discapacidad', new FormControl(false, Validators.required));
-    this.cargarDiscapacidades();
-
-    this.formGroup.get('discapacidad')?.valueChanges.subscribe(value => {
+  // Suscripción a los cambios de discapacidad
+  this.formGroup.get('discapacidad')?.valueChanges.subscribe(value => {
       this.onDiscapacidadChange({ value });
-    });
-    this.formGroup.addControl('n_identificacion', new FormControl('', [
+  });
+
+  const noSpecialCharsPattern = '^[a-zA-Z0-9\\s]*$';
+  const addressPattern = /^[a-zA-Z0-9\s.]*$/;
+
+  // Inicializar controles adicionales del formulario
+  this.formGroup.addControl('id_tipo_identificacion', new FormControl('', Validators.required));
+
+  this.formGroup.get('id_tipo_identificacion')?.valueChanges.subscribe(value => {
+      this.onTipoIdentificacionChange(value);
+  });
+
+  this.setValidacionesIdentificacion(false);
+
+  // Cargar datos iniciales o restablecer el formulario
+  if (!this.formGroup) {
+      if (this.initialData) {
+          this.formGroup = this.fb.group({
+              peps: this.fb.array([]),
+              discapacidades: this.fb.array([]),
+              voluntario: [false, Validators.required],
+              discapacidad: [false, Validators.required],
+              ...this.initialData
+          });
+          this.cargarDiscapacidades();
+      } else {
+          this.formGroup = this.fb.group({
+              peps: this.fb.array([]),
+              discapacidades: this.fb.array([]),
+              voluntario: [false, Validators.required],
+              discapacidad: [false, Validators.required],
+              fotoPerfil: new FormControl(null, Validators.required)
+          });
+      }
+  } else {
+      this.formGroup.reset({
+          voluntario: false,
+          discapacidad: false,
+          fotoPerfil: null
+      });
+  }
+
+  // Llamada para cargar discapacidades
+  this.cargarDiscapacidades();
+
+  // Inicialización de controles adicionales
+  this.formGroup.addControl('n_identificacion', new FormControl('', [
       Validators.required,
       Validators.minLength(13),
       Validators.maxLength(15),
       Validators.pattern(/^[0-9]+$/)
-    ]));
-    this.formGroup.addControl('primer_nombre', new FormControl('', [
+  ]));
+
+  this.formGroup.addControl('primer_nombre', new FormControl('', [
       Validators.required,
       Validators.maxLength(40),
       Validators.minLength(1),
       Validators.pattern(noSpecialCharsPattern)
-    ]));
-    this.formGroup.addControl('segundo_nombre', new FormControl('', [
+  ]));
+
+  this.formGroup.addControl('segundo_nombre', new FormControl('', [
       Validators.maxLength(40),
       Validators.pattern(noSpecialCharsPattern)
-    ]));
-    this.formGroup.addControl('tercer_nombre', new FormControl('', [
+  ]));
+
+  this.formGroup.addControl('tercer_nombre', new FormControl('', [
       Validators.maxLength(40),
       Validators.pattern(noSpecialCharsPattern)
-    ]));
-    this.formGroup.addControl('primer_apellido', new FormControl('', [
+  ]));
+
+  this.formGroup.addControl('primer_apellido', new FormControl('', [
       Validators.required,
       Validators.maxLength(40),
       Validators.minLength(1),
       Validators.pattern(noSpecialCharsPattern)
-    ]));
-    this.formGroup.addControl('segundo_apellido', new FormControl('', [Validators.maxLength(40)]));
-    this.formGroup.addControl('fecha_nacimiento', new FormControl('', [Validators.required]));
-    this.formGroup.addControl('fecha_vencimiento_ident', new FormControl('', [Validators.required]));
-    this.formGroup.addControl('cantidad_dependientes', new FormControl('', [Validators.pattern("^[0-9]+$"), Validators.required]));
-    this.formGroup.addControl('estado_civil', new FormControl('', [Validators.required, Validators.maxLength(40)]));
-    this.formGroup.addControl('representacion', new FormControl('', [Validators.required, Validators.maxLength(40)]));
-    this.formGroup.addControl('telefono_1', new FormControl('', [
+  ]));
+
+  this.formGroup.addControl('segundo_apellido', new FormControl('', [Validators.maxLength(40)]));
+  this.formGroup.addControl('fecha_nacimiento', new FormControl('', [Validators.required]));
+  this.formGroup.addControl('cantidad_dependientes', new FormControl('', [Validators.pattern("^[0-9]+$"), Validators.required]));
+  this.formGroup.addControl('estado_civil', new FormControl('', [Validators.required, Validators.maxLength(40)]));
+  this.formGroup.addControl('representacion', new FormControl('', [Validators.required, Validators.maxLength(40)]));
+  this.formGroup.addControl('telefono_1', new FormControl('', [
       Validators.required,
       Validators.minLength(8),
       Validators.maxLength(12),
       Validators.pattern("^[0-9]*$")
-    ]));
-    this.formGroup.addControl('telefono_2', new FormControl('', [
+  ]));
+  this.formGroup.addControl('telefono_2', new FormControl('', [
       Validators.minLength(8),
       Validators.maxLength(12),
       Validators.pattern("^[0-9]*$")
-    ]));
-    this.formGroup.addControl('correo_1', new FormControl('', [Validators.required, Validators.maxLength(40), Validators.email]));
-    this.formGroup.addControl('correo_2', new FormControl('', [Validators.maxLength(40), Validators.email]));
-    this.formGroup.addControl('rtn', new FormControl('', [Validators.required, Validators.maxLength(14), Validators.pattern(/^[0-9]{14}$/)]));
-    this.formGroup.addControl('genero', new FormControl('', [Validators.required, Validators.maxLength(30)]));
-    this.formGroup.addControl('id_profesion', new FormControl(''));
-    this.formGroup.addControl('id_departamento_residencia', new FormControl('', Validators.required));
-    this.formGroup.addControl('id_municipio_residencia', new FormControl('', Validators.required));
-    this.formGroup.addControl('id_departamento_nacimiento', new FormControl('', Validators.required));
-    this.formGroup.addControl('id_municipio_nacimiento', new FormControl('', Validators.required));
-    this.formGroup.addControl('id_tipo_identificacion', new FormControl('', Validators.required));
-    this.formGroup.addControl('id_pais', new FormControl('', Validators.required));
-    this.formGroup.addControl('grupo_etnico', new FormControl('', [Validators.required]));
-    this.formGroup.addControl('cantidad_hijos', new FormControl('', [Validators.pattern("^[0-9]+$"), Validators.required]));
-    this.formGroup.addControl('barrio_colonia', new FormControl('', [
+  ]));
+  this.formGroup.addControl('correo_1', new FormControl('', [Validators.required, Validators.maxLength(40), Validators.email]));
+  this.formGroup.addControl('correo_2', new FormControl('', [Validators.maxLength(40), Validators.email]));
+  this.formGroup.addControl('rtn', new FormControl('', [Validators.required, Validators.maxLength(14), Validators.pattern(/^[0-9]{14}$/)]));
+  this.formGroup.addControl('genero', new FormControl('', [Validators.required, Validators.maxLength(30)]));
+  this.formGroup.addControl('id_profesion', new FormControl(''));
+  this.formGroup.addControl('id_departamento_residencia', new FormControl('', Validators.required));
+  this.formGroup.addControl('id_municipio_residencia', new FormControl('', Validators.required));
+  this.formGroup.addControl('id_departamento_nacimiento', new FormControl('', Validators.required));
+  this.formGroup.addControl('id_municipio_nacimiento', new FormControl('', Validators.required));
+  this.formGroup.addControl('id_tipo_identificacion', new FormControl('', Validators.required));
+  this.formGroup.addControl('id_pais', new FormControl('', Validators.required));
+  this.formGroup.addControl('grupo_etnico', new FormControl('', [Validators.required]));
+  this.formGroup.addControl('cantidad_hijos', new FormControl('', [Validators.pattern("^[0-9]+$"), Validators.required]));
+  this.formGroup.addControl('barrio_colonia', new FormControl('', [
       Validators.maxLength(75),
       Validators.pattern(addressPattern)
-    ]));
-    this.formGroup.addControl('avenida', new FormControl('', [
+  ]));
+  this.formGroup.addControl('avenida', new FormControl('', [
       Validators.maxLength(75),
       Validators.pattern(addressPattern)
-    ]));
-    this.formGroup.addControl('calle', new FormControl('', [
+  ]));
+  this.formGroup.addControl('calle', new FormControl('', [
       Validators.maxLength(75),
       Validators.pattern(addressPattern)
-    ]));
-    this.formGroup.addControl('sector', new FormControl('', [
+  ]));
+  this.formGroup.addControl('sector', new FormControl('', [
       Validators.maxLength(75),
       Validators.pattern(addressPattern)
-    ]));
-    this.formGroup.addControl('bloque', new FormControl('', [
+  ]));
+  this.formGroup.addControl('bloque', new FormControl('', [
       Validators.maxLength(25),
       Validators.pattern(addressPattern)
-    ]));
-    this.formGroup.addControl('numero_casa', new FormControl('', [
+  ]));
+  this.formGroup.addControl('numero_casa', new FormControl('', [
       Validators.maxLength(25),
       Validators.pattern(addressPattern)
-    ]));
-    this.formGroup.addControl('color_casa', new FormControl('', [
+  ]));
+  this.formGroup.addControl('color_casa', new FormControl('', [
       Validators.maxLength(40),
       Validators.pattern(addressPattern)
-    ]));
-    this.formGroup.addControl('aldea', new FormControl('', [
+  ]));
+  this.formGroup.addControl('aldea', new FormControl('', [
       Validators.maxLength(75),
       Validators.pattern(addressPattern)
-    ]));
-    this.formGroup.addControl('caserio', new FormControl('', [
+  ]));
+  this.formGroup.addControl('caserio', new FormControl('', [
       Validators.maxLength(75),
       Validators.pattern(addressPattern)
-    ]));
-    this.formGroup.addControl('grado_academico', new FormControl('', [
+  ]));
+  this.formGroup.addControl('grado_academico', new FormControl('', [
       Validators.maxLength(75),
       Validators.required
-    ]));
-    this.formGroup.addControl('voluntario', new FormControl(false, Validators.required));
+  ]));
+  this.formGroup.addControl('voluntario', new FormControl(false, Validators.required));
 
-    this.cargarDatosIniciales();
-  }
+  // Cargar datos iniciales
+  this.cargarDatosIniciales();
 
+  this.marcarCamposComoTocados();
+
+  // Forzar detección de cambios
+  this.cdr.detectChanges();
+}
+
+//-------------------------
   async cargarDatosIniciales() {
     this.cargarDepartamentos();
     this.cargarEstadoCivil();
@@ -220,7 +285,21 @@ export class DatosGeneralesTemporalComponent implements OnInit {
     const departamentoId = event.value;
     this.cargarMunicipiosNacimiento(departamentoId);
   }
-
+  resetForm(): void {
+    // Reinicia los valores predeterminados de los controles
+    this.formGroup.reset({
+      voluntario: false, // NO
+      discapacidad: false, // NO
+      FotoPerfil: null // Restablecer FotoPerfil si es necesario
+    });
+  
+    // Limpia cualquier lista de discapacidades seleccionadas
+    this.formGroup.setControl('discapacidades', this.fb.array([]));
+  
+    // Opcional: Recarga información estática si es necesario
+    this.cargarDiscapacidades();
+  }
+  
   cargarDepartamentos() {
     this.direccionSer.getAllDepartments().subscribe({
       next: (data) => {
@@ -357,10 +436,15 @@ export class DatosGeneralesTemporalComponent implements OnInit {
   }
 
   handleImageCaptured(image: string): void {
-    this.formGroup.patchValue({ FotoPerfil: image });
-    this.imageCaptured.emit(image);
+    if (this.formGroup.get('fotoPerfil')) {
+      this.formGroup.get('fotoPerfil')?.setValue(image); // Asigna la imagen al campo fotoPerfil
+      this.formGroup.get('fotoPerfil')?.markAsDirty();
+      this.formGroup.get('fotoPerfil')?.markAsTouched(); // Marca el campo como modificado
+    } else {
+      console.error('El formulario no contiene el campo Foto de Perfil');
+    }
   }
-
+  
   get isPhotoInvalid(): boolean {
     const control = this.formGroup.get('FotoPerfil');
     return control ? control.invalid && (control.touched || control.dirty) : false;
@@ -422,4 +506,21 @@ export class DatosGeneralesTemporalComponent implements OnInit {
     const inputElement = event.target as HTMLInputElement;
     inputElement.value = '';
   }
+
+  private marcarCamposComoTocados(): void {
+    Object.keys(this.formGroup.controls).forEach(field => {
+      const control = this.formGroup.get(field);
+      if (control instanceof FormControl) {
+        control.markAsTouched();  // Marca el campo como tocado
+        control.markAsDirty();    // Marca el campo como modificado
+      } else if (control instanceof FormGroup || control instanceof FormArray) {
+        Object.keys(control.controls).forEach(subField => {
+          const subControl = control.get(subField);
+          subControl?.markAsTouched();
+          subControl?.markAsDirty();
+        });
+      }
+    });
+  }
+  
 }

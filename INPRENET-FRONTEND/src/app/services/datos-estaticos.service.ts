@@ -282,8 +282,9 @@ export class DatosEstaticosService {
   getColegiosMagisteriales(): Observable<any[]> {
     return this.colegiosMagSVC.getAllColegiosMagisteriales().pipe(
       map(response => {
-        this.colegiosMagisteriales = response.data.map((item: { id_colegio: any; descripcion: any; }) => ({
-          label: String(item.descripcion),
+        this.colegiosMagisteriales = response.data.map((item: { id_colegio: any; descripcion: any; abreviatura:any }) => ({
+          label: String(item.abreviatura),
+          abreviatura: String(item.descripcion),
           value: item.id_colegio,
         }));
         return this.colegiosMagisteriales;

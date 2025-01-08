@@ -73,3 +73,20 @@ body {
   display: flex;
   align-items: center;
 }
+
+.custom-error {
+  display: flex;
+  align-items: center;
+  background-color: #fdecea;
+  border: 1px solid #f5c2c7;
+  color: #d9534f;
+  border-radius: 8px;
+  padding: 10px;
+  margin-top: 10px;
+}
+
+.error-icon {
+  font-size: 20px;
+  margin-right: 8px;
+  color: #d9534f;
+}

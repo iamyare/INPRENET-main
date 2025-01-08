@@ -36,8 +36,6 @@ import { AgregarPuestTrabComponent } from './gestion/agregar-puest-trab/agregar-
 import { EditReferPersonalesComponent } from './gestion/edit-refer-personales/edit-refer-personales.component';
 import { AgregarReferenciasPersonalesComponent } from './gestion/agregar-referencias-personales/agregar-referencias-personales.component';
 import { VerDatosAfiliadosComponent } from './gestion/ver-datos-afiliados/ver-datos-afiliados.component';
-import { AfilBancoComponent } from './gestion/afil-banco/afil-banco.component';
-import { DatGeneralesAfiliadoComponent } from './gestion/dat-generales-afiliado/dat-generales-afiliado.component';
 import { ReactiveFormsModule } from '@angular/forms';
 import { PepsComponent } from './gestion/peps/peps.component';
 import { ColMagisterialesComponent } from './gestion/col-magisteriales/col-magisteriales.component';
@@ -48,7 +46,6 @@ import { BenefComponent } from './gestion/benef/benef.component';
 import { EditPerfilPuestTrabComponent } from './gestion/edit-perfil-puest-trab/edit-perfil-puest-trab.component';
 import { EditColegiosMagisterialesComponent } from './gestion/edit-colegios-magisteriales/edit-colegios-magisteriales.component';
 import { EditPepsComponent } from './gestion/edit-peps/edit-peps.component';
-import { AfiliacionDocentesComponent } from './gestion/afiliacion-docentes/afiliacion-docentes.component';
 import { DatosPropietarioComponent } from './Centros-Educativos/admin-centro-educativo/datos-propietario/datos-propietario.component';
 import { DatosContadorComponent } from './Centros-Educativos/admin-centro-educativo/datos-contador/datos-contador.component';
 import { DatosAdministradorComponent } from './Centros-Educativos/admin-centro-educativo/datos-administrador/datos-administrador.component';
@@ -110,16 +107,14 @@ import { DesignadoComponent } from './verPerfil/designado/designado.component';
     EditReferPersonalesComponent,
     AgregarReferenciasPersonalesComponent,
     VerDatosAfiliadosComponent,
-    AfilBancoComponent,
-    DatGeneralesAfiliadoComponent,
     PepsComponent,
     ColMagisterialesComponent,
     OtrasFuentesIngresoComponent,
     DatPuestoTrabComponent,
     RefPersComponent,
     BenefComponent,
-    EditPerfilPuestTrabComponent, EditColegiosMagisterialesComponent,
-    AfiliacionDocentesComponent,
+    EditPerfilPuestTrabComponent, 
+    EditColegiosMagisterialesComponent,
     DatosPropietarioComponent,
     DatosContadorComponent,
     DatosAdministradorComponent,

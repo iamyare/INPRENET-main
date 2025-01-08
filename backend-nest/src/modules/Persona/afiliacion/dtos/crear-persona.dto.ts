@@ -16,10 +16,6 @@ export class CrearPersonaDto {
   n_identificacion: string;
 
   @IsOptional()
-  @IsDateString()
-  fecha_vencimiento_ident?: string;
-
-  @IsOptional()
   @IsString()
   rtn?: string;
 

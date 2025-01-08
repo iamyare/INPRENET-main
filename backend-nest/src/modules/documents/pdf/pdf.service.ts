@@ -141,21 +141,23 @@ export class PdfService {
   }
 
   public async generateConstanciaAfiliacionTemplate2(data: any, includeQR: boolean) {
-    
-    let persona = data?.persona    
+    let persona = data    
     let dataCentTrab = persona?.perfPersCentTrabs;
     let dataRef = persona?.referencias;
     let dataCuenBan = persona?.personasPorBanco;
-    let cargos_publicos = persona.peps?.flatMap((peps: any) => peps.cargo_publico) || [];
+    let cargos_publicos = Array.isArray(persona?.peps) 
+  ? persona.peps.flatMap((peps: any) => peps.cargo_publico || []) 
+  : [];
     let conyuge = data?.conyuge
+    
+    const jsonObj: any = typeof persona?.direccion_residencia_estructurada === 'string'
+  ? persona.direccion_residencia_estructurada.split(',').reduce((acc: any, curr: any) => {
+      const [key, value] = curr.split(':').map((s: string) => s.trim());
+      acc[key] = value;
+      return acc;
+    }, {} as { [key: string]: string })
+  : {};
 
-    const jsonObj: any = data.persona.direccion_residencia
-      ? data.persona.direccion_residencia.split(',').reduce((acc: any, curr: any) => {
-        const [key, value] = curr.split(':').map((s: string) => s.trim());
-        acc[key] = value;
-        return acc;
-      }, {} as { [key: string]: string })
-      : {};
     const content: Array<any> = [
       {
         table: {
@@ -163,23 +165,22 @@ export class PdfService {
           body: [
             [
               { borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'], text: 'DATOS GENERALES DEL DOCENTE', colSpan: 6, alignment: 'center', style: ['header'] },
-              {}, {}, {}, {}, {},  // Estas celdas vacías completan la fila para el colSpan
-
+              {}, {}, {}, {}, {},
               {
-                // Aquí está la condición para mostrar la foto o el texto 'SIN FOTO'
-                ...(data.persona.foto_perfil && data.persona.foto_perfil.data.length > 0
+                ...(persona?.foto_perfil?.data?.length > 0
                   ? {
-                    image: `data:image/png;base64,${Buffer.from(data.persona.foto_perfil.data).toString('base64')}`,
-                    fit: [80, 150],  // Ajusta el tamaño según sea necesario
-                    alignment: 'center',
-                    rowSpan: 3
-                  }
+                      image: `data:image/png;base64,${Buffer.from(persona.foto_perfil.data).toString('base64')}`,
+                      fit: [80, 150],
+                      alignment: 'center',
+                      rowSpan: 3,
+                    }
                   : {
-                    borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'], text: 'SIN FOTO',
-                    alignment: 'center',
-                    rowSpan: 3
-                  })
-              }
+                      borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'],
+                      text: 'SIN FOTO',
+                      alignment: 'center',
+                      rowSpan: 3,
+                    })
+              } 
             ],
             [
               { borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'], text: 'NOMBRE DEL DOCENTE', alignment: 'left', style: ['subheader'] },
@@ -214,10 +215,15 @@ export class PdfService {
             ],
             [
               { borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'], text: 'PAÍS', alignment: 'left', style: ['subheader'] }, { borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'], text: persona?.pais?.nombre_pais, alignment: 'left', colSpan: 2 }, {},
-              { borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'], text: 'DEPARTAMENTO', alignment: 'left', style: ['subheader'] }, { borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'], text: persona?.municipio_nacimiento?.departamento?.nombre_departamento, alignment: 'left', colSpan: 3 }, {}, {}
+              { borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'], text: 'DEPARTAMENTO', alignment: 'left', style: ['subheader'] }, { borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'], text: persona?.municipio_nacimiento?.departamento?.nombre_departamento || 'No disponible', alignment: 'left', colSpan: 3 }
             ],
             [
-              { borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'], text: 'CIUDAD', alignment: 'left', style: ['subheader'] }, { borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'], text: persona?.municipio_nacimiento.nombre_municipio, alignment: 'left', colSpan: 2 }, {},
+              { borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'], text: 'CIUDAD', alignment: 'left', style: ['subheader'] }, { 
+                borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'], 
+                text: persona?.municipio_nacimiento?.nombre_municipio || 'No disponible', 
+                alignment: 'left', 
+                colSpan: 2 
+              }, {},
               { borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'], text: 'FECHA DE NACIMIENTO', alignment: 'left', style: ['subheader'] }, { borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'], text: persona?.fecha_nacimiento, alignment: 'left' },
               { borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'], text: 'Edad', alignment: 'left', style: ['subheader'] },
               { borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'], text: `${calcularEdad(persona?.fecha_nacimiento)} Años`, alignment: 'left' }
@@ -289,15 +295,15 @@ export class PdfService {
             [
               { borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'], text: jsonObj?.ALDEA, alignment: 'center' },
               { borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'], text: jsonObj?.CASERIO, alignment: 'center' },
-              { borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'], text: '', alignment: 'center', colSpan: 2 },
+              { borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'], text: persona.municipio.departamento.nombre_departamento, alignment: 'center', colSpan: 2 },
               {},
-              { borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'], text: '', alignment: 'center', colSpan: 2 },
+              { borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'], text: persona.municipio.nombre_municipio, alignment: 'center', colSpan: 2 },
               {},
               { borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'], text: '', alignment: 'center' }
             ],
             [
               { borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'], text: 'OTROS PUNTOS DE REFERENCIA', alignment: 'left', style: ['subheader'] },
-              { borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'], text: '', alignment: 'left', colSpan: 6 }, {}, {}, {}, {}, {}
+              { borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'], text: persona.direccion_residencia, alignment: 'left', colSpan: 6 }, {}, {}, {}, {}, {}
             ],
             [
               { borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'], text: 'NÚMEROS DE TELEFÓNICOS', alignment: 'left', rowSpan: 2, style: ['subheader'] },
@@ -326,14 +332,13 @@ export class PdfService {
               {}, {}, {}, {}, {}, {}
             ],
             ...dataCentTrab?.length > 0 ? dataCentTrab.flatMap((b: any, index: number) => {
-              const direccionCentro = b.centroTrabajo.direccion_1
-                ? b.centroTrabajo.direccion_1.split(',').reduce((acc: any, curr: any) => {
-                    const [key, value] = curr.split(':').map((s: string) => s.trim());
-                    acc[key] = value;
-                    return acc;
-                  }, {} as { [key: string]: string })
-                : {};
-
+              const direccionCentro = typeof b.centroTrabajo?.direccion_1 === 'string'
+              ? b.centroTrabajo.direccion_1.split(',').reduce((acc: any, curr: any) => {
+                  const [key, value] = curr.split(':').map((s: string) => s.trim());
+                  acc[key] = value;
+                  return acc;
+                }, {} as { [key: string]: string })
+              : {};
               return [
                 [
 
@@ -412,9 +417,9 @@ export class PdfService {
             [
               { borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'], text: 'NOMBRE COMPLETO DEL CÓNYUGE', alignment: 'center', style: ['subheader'] },
               {
-                ...(conyuge?.persona?.primer_apellido
+                ...(conyuge?.primer_apellido
                   ? {
-                    borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'], text: `${conyuge?.persona?.primer_apellido} ${conyuge?.persona?.segundo_apellido} ${conyuge?.persona?.primer_nombre} ${conyuge?.persona?.segundo_nombre}`, alignment: 'center', colSpan: 6
+                    borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'], text: `${conyuge?.primer_apellido} ${conyuge?.segundo_apellido} ${conyuge?.primer_nombre} ${conyuge?.segundo_nombre}`, alignment: 'center', colSpan: 6
                   }
                   : {
                     borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'], text: '',
@@ -425,29 +430,29 @@ export class PdfService {
             ],
             [
               { borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'], text: 'No DE IDENTIDAD', alignment: 'center', style: ['subheader'] },
-              { borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'], text: conyuge?.persona?.n_identificacion || '', alignment: 'center', colSpan: 6 },
+              { borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'], text: conyuge?.n_identificacion || '', alignment: 'center', colSpan: 6 },
               {}, {}, {}, {}, {}
             ],
             [
               { borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'], text: 'FECHA DE NACIMIENTO', alignment: 'center', rowSpan: 2, style: ['subheader'] },
               { borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'], text: 'NÚMEROS TELEFÓNICOS', alignment: 'center', rowSpan: 3, style: ['subheader'] },
-              { borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'], text: 'CASA', alignment: 'center', style: ['subheader'] }, { borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'], text: conyuge?.persona?.telefono_1 || '', alignment: 'center', colSpan: 4 }, {}, {}, {}
+              { borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'], text: 'CASA', alignment: 'center', style: ['subheader'] }, { borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'], text: conyuge?.telefono_1 || '', alignment: 'center', colSpan: 4 }, {}, {}, {}
             ],
             [
               {},
               {},
-              { borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'], text: 'CELULAR', alignment: 'center', style: ['subheader'] }, { borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'], text: conyuge?.persona?.telefono_2 || '', alignment: 'center', colSpan: 4 }, {}, {}, {}
+              { borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'], text: 'CELULAR', alignment: 'center', style: ['subheader'] }, { borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'], text: conyuge?.telefono_2 || '', alignment: 'center', colSpan: 4 }, {}, {}, {}
             ],
             [
-              { borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'], text: conyuge?.persona?.fecha_nacimiento || '', alignment: 'center' },
+              { borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'], text: conyuge?.fecha_nacimiento || '', alignment: 'center' },
               {},
-              { borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'], text: 'TRABAJO', alignment: 'center', style: ['subheader'] }, { borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'], text: conyuge?.persona?.telefono_3 || '', alignment: 'center', colSpan: 4 }, {}, {}, {}
+              { borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'], text: 'TRABAJO', alignment: 'center', style: ['subheader'] }, { borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'], text: conyuge?.telefono_3 || '', alignment: 'center', colSpan: 4 }, {}, {}, {}
             ],
             [
               { borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'], text: '¿TRABAJA?', alignment: 'left', style: ['subheader'] },
               { borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'], text: conyuge?.trabaja || '', alignment: 'left', colSpan: 2 }, {},
               { borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'], text: '¿ES AFILIADO?', alignment: 'left', style: ['subheader'] },
-              { borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'], text: '', alignment: 'left', colSpan: 3 }, {}, {}
+              { borderColor: ['#1c9588', '#1c9588', '#1c9588', '#1c9588'], text: conyuge?.esAfiliado, alignment: 'left', colSpan: 3 }, {}, {}
             ],
 
             [
@@ -499,10 +504,10 @@ export class PdfService {
       },
     ];
 
-    if (includeQR) {
+    /* if (includeQR) {
       const qrCode = await QRCode.toDataURL(`https://drive.google.com/file/d/${data.fileId}/view`);
       content.push({ image: qrCode, width: 100, alignment: 'center', margin: [0, 10, 10, 10] });
-    }
+    } */
 
     return {
       pageSize: 'letter',

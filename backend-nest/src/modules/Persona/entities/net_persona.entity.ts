@@ -41,9 +41,6 @@ export class net_persona {
     @Index("UQ_N_IDENTIFICACION_NET_PERSONA", { unique: true })
     n_identificacion: string;
 
-    @Column('date', { nullable: true, name: 'FECHA_VENCIMIENTO_IDENT' })
-    fecha_vencimiento_ident: string;
-
     @Column('varchar2', { length: 14, nullable: true, name: 'RTN' })
     rtn: string;
 

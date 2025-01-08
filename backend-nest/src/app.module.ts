@@ -19,6 +19,7 @@ import { EscalafonModule } from './modules/escalafon/escalafon.module';
 import { BitacoraModule } from './modules/bitacora/bitacora.module';
 import { PrestamosModule } from './modules/prestamos/prestamos.module';
 import { ConasaModule } from './modules/conasa/conasa.module';
+import { WhatsappPruebaModule } from './modules/whatsapp-prueba/whatsapp-prueba.module';
 
 @Module({
   imports: [
@@ -69,7 +70,8 @@ import { ConasaModule } from './modules/conasa/conasa.module';
     AuthModule,
     EscalafonModule,
     PrestamosModule,
-    ConasaModule
+    ConasaModule,
+    WhatsappPruebaModule
   ],
   providers: [MantenimientoAfiliacionService],
 })

@@ -55,12 +55,14 @@
     "passport-jwt": "^4.0.1",
     "pdfmake": "^0.2.10",
     "qrcode": "^1.5.4",
+    "qrcode-terminal": "^0.12.0",
     "reflect-metadata": "^0.1.13",
     "rxjs": "^7.8.1",
     "sequelize": "^6.37.1",
     "sequelize-cli": "^6.6.2",
     "typeorm": "^0.3.20",
     "uuid": "^9.0.1",
+    "whatsapp-web.js": "^1.26.0",
     "xlsx": "^0.18.5"
   },
   "devDependencies": {

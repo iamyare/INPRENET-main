@@ -30,9 +30,16 @@ export class DocumentsController {
 
   @Post('constancia-afiliacion2')
   async postConstanciaAfiliacion2(@Body() data: any, @Res() res: Response) {
-
-    const fileId = await this.pdfService.generateAndUploadConstancia(data, 'afiliacion2');
-    res.json({ fileId });
+    if (!data || !data.primer_nombre || !data.n_identificacion) {
+      return res.status(400).json({ message: 'Datos incompletos en la solicitud.' });
+    }
+    try {
+      const fileId = await this.pdfService.generateAndUploadConstancia(data, 'afiliacion2');
+      res.json({ fileId });
+    } catch (error) {
+      console.error('Error al generar constancia de afiliación 2:', error);
+      res.status(500).json({ message: 'Error interno al generar constancia.' });
+    }
   }
 
   @Post('constancia-renuncia-cap')

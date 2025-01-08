@@ -184,13 +184,49 @@ export class AfiliacionService {
     if (!persona) {
         throw new NotFoundException(`Persona with DNI ${n_identificacion} not found`);
     }
+
+    // Buscar el cónyuge en la tabla Net_Familia
     const conyuge = await this.familiaRepository.findOne({
         where: { persona: { id_persona: persona.id_persona }, parentesco: 'CÓNYUGE' },
-        relations: ['persona'],
+        relations: ['referenciada'], // Relación para obtener los datos del cónyuge
     });
-    return { persona, conyuge };
+
+    // Verificar si el cónyuge es afiliado
+    const esAfiliado = conyuge && conyuge.referenciada
+        ? await this.verificarSiEsAfiliado(conyuge.referenciada.n_identificacion)
+        : "NO";
+
+    // Agregar la información del cónyuge, incluyendo si trabaja y si es afiliado
+    return {
+        ...persona,
+        conyuge: conyuge
+            ? {
+                ...conyuge.referenciada,
+                trabaja: conyuge.trabaja,
+                esAfiliado: esAfiliado
+            }
+            : null,
+    };
+}
+
+  async verificarSiEsAfiliado(n_identificacion: string): Promise<string> {
+      const persona = await this.personaRepository
+          .createQueryBuilder('persona')
+          .leftJoinAndSelect('persona.detallePersona', 'detallePersona')
+          .leftJoinAndSelect('detallePersona.tipoPersona', 'tipoPersona')
+          .where('persona.n_identificacion = :n_identificacion', { n_identificacion })
+          .getOne();
+
+      if (!persona) {
+          return "NO";
+      }
+
+      const tiposPermitidos = ['AFILIADO', 'JUBILADO', 'PENSIONADO'];
+      return persona.detallePersona?.some(detalle =>
+          tiposPermitidos.includes(detalle.tipoPersona?.tipo_persona || '')
+      ) ? "SI" : "NO";
   }
-  
+
   async updateFotoPerfil(id: number, fotoPerfil: Buffer): Promise<net_persona> {
     const persona = await this.personaRepository.findOneBy({ id_persona: id });
     if (!persona) {
@@ -270,7 +306,6 @@ export class AfiliacionService {
 
       persona = entityManager.create(net_persona, {
         ...crearPersonaDto,
-        fecha_vencimiento_ident: this.formatDateToYYYYMMDD(crearPersonaDto.fecha_vencimiento_ident),
         fecha_nacimiento: this.formatDateToYYYYMMDD(crearPersonaDto.fecha_nacimiento),
         fecha_defuncion: this.formatDateToYYYYMMDD(crearPersonaDto.fecha_defuncion),
         fecha_afiliacion: this.formatDateToYYYYMMDD(crearPersonaDto.fecha_afiliacion),
@@ -596,8 +631,6 @@ export class AfiliacionService {
   ): Promise<any> {
     return await this.personaRepository.manager.transaction(async (transactionalEntityManager) => {
       try {
-        console.log(crearDatosDto);
-        
         const resultados = [];
         const personasCreadasMap = new Map<string, net_persona>();
 

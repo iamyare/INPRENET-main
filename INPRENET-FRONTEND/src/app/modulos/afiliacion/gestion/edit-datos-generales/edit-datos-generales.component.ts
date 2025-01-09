@@ -363,6 +363,7 @@ export class EditDatosGeneralesComponent implements OnInit {
           }
 
           // Rellenar valores de form1
+          this.form1.controls.fallecido.setValue(result?.fallecido);
           this.form1.controls.fecha_defuncion.setValue(result?.fecha_defuncion);
           this.form1.controls.causa_fallecimiento.setValue(
             result?.ID_CAUSA_FALLECIMIENTO
@@ -421,6 +422,7 @@ export class EditDatosGeneralesComponent implements OnInit {
     const formValues = this.form1.value;
     const datosActualizados: any = {
       ...refpersData,
+      fallecido: this.form1.controls.fallecido.value,
       causa_fallecimiento: formValues.causa_fallecimiento,
       fecha_defuncion: convertirFechaInputs(formValues.fecha_defuncion!),
       id_departamento_defuncion: formValues.id_departamento_defuncion,
@@ -451,8 +453,6 @@ export class EditDatosGeneralesComponent implements OnInit {
   }
 
   guardarEstadoAfiliacion(element: any) {
-    console.log(element);
-
     const payload = {
       idPersona: element.ID_PERSONA,
       idCausante: element.ID_CAUSANTE,
@@ -463,8 +463,6 @@ export class EditDatosGeneralesComponent implements OnInit {
       estadoAfiliacion: element.estadoAfiliacion.trim(),
       observacion: element.observacion || ''
     };
-
-    console.log('Payload a enviar:', payload); // Añadir esta línea
 
     this.svcAfiliado.updateEstadoAfiliacionPorDni(payload).subscribe(
       (response) => {

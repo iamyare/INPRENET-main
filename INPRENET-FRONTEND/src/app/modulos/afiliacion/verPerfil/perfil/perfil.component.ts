@@ -27,16 +27,16 @@ export class PerfilComponent implements OnInit {
   }
 
   filtrarDetallePersona(detallePersona: any[]): any[] {
-    
     const tiposUnicos = new Set();
     return detallePersona.filter(detalle => {
-      if (!tiposUnicos.has(detalle.tipoPersona.tipo_persona)) {
+      if (detalle.tipoPersona && !tiposUnicos.has(detalle.tipoPersona.tipo_persona)) {
         tiposUnicos.add(detalle.tipoPersona.tipo_persona);
         return true;
       }
       return false;
     });
   }
+
 
   trackByPerfil(index: number, perfil: any): any {
     return perfil.tipoPersona.tipo_persona;

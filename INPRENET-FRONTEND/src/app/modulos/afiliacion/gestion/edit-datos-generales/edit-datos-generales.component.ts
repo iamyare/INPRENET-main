@@ -49,7 +49,7 @@ export class EditDatosGeneralesComponent implements OnInit {
     id_municipio_defuncion: ["", [Validators.required]],
     tipo_persona: ["", [Validators.required]],
     fallecido: ["", [Validators.required]],
-    observacion: ["", [Validators.required]],
+    /* observacion: ["", [Validators.required]], */
     voluntario: ["NO", [Validators.required]]
     //certificado_defuncion: ["", [Validators.required]],
   });
@@ -301,7 +301,7 @@ export class EditDatosGeneralesComponent implements OnInit {
           this.form1.controls.id_municipio_defuncion.setValue(result?.ID_MUNICIPIO_DEFUNCION);
 
           this.form1.controls.tipo_persona.setValue(result?.ID_TIPO_PERSONA);
-          this.form1.controls.observacion.setValue(result?.OBSERVACION);
+          /* this.form1.controls.observacion.setValue(result?.OBSERVACION); */
           this.form1.controls.estado.setValue(result?.estadoAfiliacion?.codigo);
 
           this.form1.controls.voluntario.setValue(result?.VOLUNTARIO || "NO");

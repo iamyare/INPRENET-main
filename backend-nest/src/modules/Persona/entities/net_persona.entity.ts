@@ -125,6 +125,9 @@ export class net_persona {
     @Column('date', { nullable: true, name: 'FECHA_DEFUNCION' })
     fecha_defuncion: string;
 
+    @Column('date', { nullable: true, name: 'FECHA_REPORTE_FALLECIDO' })
+    fechaReporteFallecido: string;
+
     @Column('blob', { nullable: true, name: 'ARCHIVO_IDENTIFICACION' })
     archivo_identificacion: any;
 

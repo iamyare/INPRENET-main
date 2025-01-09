@@ -1,5 +1,7 @@
+/* Estilos generales */
 .container {
-  max-width: 100vw; /* O el ancho máximo deseado */
+  max-width: 100vw;
+  /* O el ancho máximo deseado */
   margin: 0 auto;
   padding: 0 20px;
 }
@@ -20,9 +22,11 @@
 .card-title {
   margin-top: 20px;
 }
+
 .example-full-width {
   width: 100%;
 }
+
 table {
   width: 100%;
   border-collapse: collapse;
@@ -37,6 +41,7 @@ td {
 }
 
 @media only screen and (max-width: 768px) {
+
   th:nth-child(n + 5),
   td:nth-child(n + 6) {
     display: none;
@@ -44,6 +49,7 @@ td {
 }
 
 @media only screen and (max-width: 480px) {
+
   .preview-button,
   .assign-button {
     background-color: #628780;
@@ -60,16 +66,17 @@ td {
   height: 200px;
 }
 
-
 .pdf-container {
   display: flex;
   justify-content: space-between;
-  gap: 20px; /* Espacio entre los cuadros PDF */
+  gap: 20px;
+  /* Espacio entre los cuadros PDF */
   margin-bottom: 1.5rem;
 }
 
 .pdf-preview {
-  width: 48%; /* Ajuste del ancho para cada cuadro */
+  width: 48%;
+  /* Ajuste del ancho para cada cuadro */
   text-align: center;
 }
 
@@ -82,4 +89,144 @@ td {
   .pdf-preview {
     width: 100%;
   }
+}
+
+/* ---------------------------------------------- */
+/* Estilos depurados para la tabla Angular Material */
+
+/* 1) Contenedor para la tabla (scroll horizontal en pantallas pequeñas) */
+.responsive-table-container {
+  width: 100%;
+  overflow-x: auto; // Muestra scroll horizontal cuando no quepa en pantalla
+}
+
+/* 2) Estilos para el card que contiene la tabla */
+.tabla-datos-persona {
+  margin-bottom: 1rem;
+  /* Ajusta según tu gusto */
+
+  mat-card-title {
+    font-size: 1.6rem;
+    font-weight: bold;
+    text-align: center;
+    margin: 0.5rem 0;
+    padding: 0.5rem;
+    background-color: #e0f7fa; // Fondo suave azul claro
+    color: #004d40; // Color de texto
+    border-radius: 10px; // Bordes redondeados
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); // Sombra ligera
+  }
+
+  mat-card-content {
+    padding: 1rem;
+  }
+}
+
+/* 3) Estilos específicos para la tabla */
+.tabla-con-estilo {
+  min-width: 600px;
+  /* Define un ancho mínimo */
+  border-collapse: separate;
+  border-spacing: 0 8px;
+
+  /* Encabezados y celdas */
+  .mat-header-cell,
+  .mat-cell {
+    padding: 12px 16px;
+  }
+
+  .mat-header-row {
+    background-color: #f5f5f5;
+  }
+
+  .mat-row {
+    border-bottom: 1px solid #eaeaea;
+    transition: background-color 0.3s;
+
+    &:hover {
+      background-color: #fafafa;
+    }
+  }
+
+  /* Ajustes para mat-form-field dentro de la tabla */
+  .mat-form-field {
+    display: flex;
+    align-items: center; // Centra verticalmente el contenido
+  }
+
+  .mat-form-field-wrapper {
+    height: 56px; // Misma altura que los select
+  }
+
+  .mat-input-element {
+    height: 100%; // Para que el <textarea> o <input> ocupe toda la altura
+  }
+
+  /* Ajustes específicos para la columna Observacion */
+  .mat-column-Observacion .mat-form-field {
+    margin-top: 0;
+    padding: 0;
+  }
+
+  .mat-column-Observacion textarea {
+    resize: vertical;
+  }
+
+  .voluntario-container {
+    background-color: #f0f8ff; // Fondo claro para destacar la sección
+    padding: 16px; // Espaciado interno
+    border-radius: 8px; // Bordes redondeados
+    margin-top: 16px;
+    box-shadow: 0px 2px 8px rgba(0, 0, 0, 0.1); // Sombra ligera para resaltar
+  }
+
+  mat-card-subtitle {
+    font-size: 1.2rem;
+    font-weight: bold;
+    margin-bottom: 8px;
+    color: #00796b; // Color principal
+  }
+
+  .mat-radio-group {
+    display: flex;
+    justify-content: space-around; // Alinea los botones de manera uniforme
+  }
+
+  .radio-opcion {
+    margin: 0 8px;
+    padding: 8px;
+    background-color: #fff;
+    border: 1px solid #ccc; // Borde de botón
+    border-radius: 20px; // Para que los botones tengan forma de píldora
+    transition: background-color 0.3s ease;
+
+    &:hover {
+      background-color: #e0f2f1; // Fondo al pasar el mouse
+    }
+
+    &:checked {
+      background-color: #00796b; // Fondo cuando está seleccionado
+      color: white;
+    }
+  }
+
+  mat-error {
+    color: #d32f2f;
+    font-size: 0.85rem;
+    margin-top: 8px;
+  }
+}
+
+/* Estilos reutilizables para títulos */
+.custom-title,
+mat-card-title {
+  font-size: 1.6rem;
+  font-weight: bold;
+  text-align: center;
+  margin: 0.5rem 0;
+  padding: 0.5rem;
+  background-color: #e0f7fa; // Fondo suave azul claro
+  color: #004d40; // Color de texto
+  border-radius: 10px; // Bordes redondeados
+  box-shadow: 0px 2px 8px rgba(0, 0, 0, 0.1); // Sombra ligera
 }

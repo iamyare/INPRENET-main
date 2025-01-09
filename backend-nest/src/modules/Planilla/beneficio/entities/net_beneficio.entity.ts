@@ -3,6 +3,7 @@ import { Net_Detalle_Beneficio_Afiliado } from "../../detalle_beneficio/entities
 import { Net_Clasificacion_Beneficios } from "../../planilla/entities/net_clasificacion_beneficios.entity";
 import { Net_Regimen } from "./net_regimen.entity";
 import { Net_Beneficio_Tipo_Persona } from "../../beneficio_tipo_persona/entities/net_beneficio_tipo_persona.entity";
+import { Net_Deduccion_Tipo_Planilla } from "../../deduccion/entities/net_deduccion_tipo_planilla.entity";
 
 @Check("CK_ESTADO_NET_BENEFICIO", `estado IN ('HABILITADO', 'INHABILITADO')`)
 @Entity({ name: 'NET_BENEFICIO' })
@@ -44,6 +45,10 @@ export class Net_Beneficio {
     @ManyToOne(() => Net_Regimen, regimen => regimen.beneficio)
     @JoinColumn({ name: 'ID_REGIMEN' })
     regimen: Net_Regimen;
+
+    @OneToMany(() => Net_Deduccion_Tipo_Planilla, dedTipoPlan => dedTipoPlan.beneficio)
+    dedTipoPlanilla: Net_Deduccion_Tipo_Planilla[];
+
 
     /*     @ManyToOne(() => Net_Tipo_Persona, tipo_persona => tipo_persona.beneficio)
         @JoinColumn({ name: 'ID_TIPO_PERSONA' })

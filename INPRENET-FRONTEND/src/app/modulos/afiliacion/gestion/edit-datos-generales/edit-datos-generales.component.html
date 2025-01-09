@@ -26,7 +26,7 @@
 
     <form style="margin: 0 0 1.5rem;" [formGroup]="form1">
 
-      <mat-card>
+      <mat-card class="tabla-datos-persona">
         <mat-card-title>Datos de Fallecimiento</mat-card-title>
         <mat-card-content>
           <div class="row" style="margin: 0px 20px 0 20px;">
@@ -99,21 +99,16 @@
             </div>
           </div>
         </mat-card-content>
+        <div class="pdf-container">
+          <div class="pdf-preview">
+            <h4>Certificado de Defunción</h4>
+            <iframe *ngIf="certificadoDefuncionUrl" [src]="certificadoDefuncionUrl" width="100%" height="500px"></iframe>
+            <app-botonarchivos labelBoton="Certificado de Defuncion" (setArchivo)="getArchivoDef($event)"></app-botonarchivos>
+          </div>
+        </div>
+      </mat-card >
 
-
-    <div class="pdf-container">
-
-
-      <div class="pdf-preview">
-        <h4>Certificado de Defunción</h4>
-        <iframe *ngIf="certificadoDefuncionUrl" [src]="certificadoDefuncionUrl" width="100%" height="500px"></iframe>
-        <app-botonarchivos labelBoton="Certificado de Defuncion" (setArchivo)="getArchivoDef($event)"></app-botonarchivos>
-      </div>
-    </div>
-
-      </mat-card>
-
-      <mat-card>
+      <mat-card class="tabla-datos-persona">
         <mat-card-title>Estado y Tipo De Persona</mat-card-title>
         <mat-card-content>
           <div class="row" style="margin: 0px 20px 0 20px;">
@@ -129,11 +124,11 @@
               <mat-error *ngFor="let error of getErrors('tipo_persona')">
                 {{ error }}
               </mat-error>
-              <mat-form-field appearance="outline" class="example-full-width inputs" class="w-100">
+              <!-- <mat-form-field appearance="outline" class="example-full-width inputs" class="w-100">
                 <mat-label>Observación</mat-label>
                 <mat-icon matPrefix>person_outline</mat-icon>
                 <input matInput formControlName="observacion">
-              </mat-form-field>
+              </mat-form-field> -->
             </div>
 
             <div class="col-md-6">
@@ -150,8 +145,8 @@
               </mat-error>
             </div>
             <div class="col-md-6">
-              <mat-label>Voluntario</mat-label>
-              <mat-radio-group formControlName="voluntario" style="display: flex; flex-direction: row;">
+              <mat-label style="font-weight: bold;" >Voluntario</mat-label>
+              <mat-radio-group formControlName="voluntario" style="display: flex; flex-direction: column-reverse;">
                 <mat-radio-button value="SI" style="margin-right: 15px;">Sí</mat-radio-button>
                 <mat-radio-button value="NO">No</mat-radio-button>
               </mat-radio-group>
@@ -163,7 +158,6 @@
           </div>
         </mat-card-content>
       </mat-card>
-
 
     </form>
 
